@@ -6,7 +6,7 @@
 #include "fl/stl/cstdlib.h"
 #include "fl/stl/allocator.h"
 #include "crgb.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/draw_mode.h"
 #include "fl/rgb8.h"
 #include "fl/stl/shared_ptr.h"
@@ -25,7 +25,7 @@ namespace {
     }
 }
 
-TEST_CASE("test frame custom allocator") {
+FL_TEST_CASE("test frame custom allocator") {
     // Set our custom allocator
     SetPSRamAllocator(custom_malloc, custom_free);
     
@@ -38,7 +38,7 @@ TEST_CASE("test frame custom allocator") {
 }
 
 
-TEST_CASE("test blend by black") {
+FL_TEST_CASE("test blend by black") {
     SetPSRamAllocator(custom_malloc, custom_free);
     FramePtr frame = fl::make_shared<Frame>(1);  // 1 pixels.
     frame->rgb()[0] = CRGB(255, 0, 0);  // Red

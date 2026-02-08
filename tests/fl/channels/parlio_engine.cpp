@@ -19,7 +19,7 @@
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/vector.h"
@@ -48,7 +48,7 @@ static void resetMock_engine() {
 // Test Suite: DMA Output Capture
 //=============================================================================
 
-TEST_CASE("ParlioEngine - DMA output capture basic functionality") {
+FL_TEST_CASE("ParlioEngine - DMA output capture basic functionality") {
     resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
@@ -81,7 +81,7 @@ TEST_CASE("ParlioEngine - DMA output capture basic functionality") {
     FL_CHECK(first_tx.buffer_copy.size() >= 24);
 }
 
-TEST_CASE("ParlioEngine - verify captured DMA data is non-zero") {
+FL_TEST_CASE("ParlioEngine - verify captured DMA data is non-zero") {
     resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
@@ -121,7 +121,7 @@ TEST_CASE("ParlioEngine - verify captured DMA data is non-zero") {
     FL_CHECK(has_nonzero);
 }
 
-TEST_CASE("ParlioEngine - multi-lane DMA output capture") {
+FL_TEST_CASE("ParlioEngine - multi-lane DMA output capture") {
     resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
@@ -181,7 +181,7 @@ TEST_CASE("ParlioEngine - multi-lane DMA output capture") {
     FL_CHECK(tx.buffer_copy.size() >= total_bytes * 2);
 }
 
-TEST_CASE("ParlioEngine - verify multiple transmissions are captured") {
+FL_TEST_CASE("ParlioEngine - verify multiple transmissions are captured") {
     resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
@@ -214,7 +214,7 @@ TEST_CASE("ParlioEngine - verify multiple transmissions are captured") {
     FL_CHECK(history.size() >= 2);
 }
 
-TEST_CASE("ParlioEngine - verify bit count matches expected") {
+FL_TEST_CASE("ParlioEngine - verify bit count matches expected") {
     resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
@@ -252,7 +252,7 @@ TEST_CASE("ParlioEngine - verify bit count matches expected") {
     FL_CHECK(tx.buffer_copy.size() >= expected_bytes);
 }
 
-TEST_CASE("ParlioEngine - verify idle value is captured") {
+FL_TEST_CASE("ParlioEngine - verify idle value is captured") {
     resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
@@ -278,7 +278,7 @@ TEST_CASE("ParlioEngine - verify idle value is captured") {
     FL_CHECK(tx.idle_value == 0x0000);
 }
 
-TEST_CASE("ParlioEngine - large buffer streaming with capture") {
+FL_TEST_CASE("ParlioEngine - large buffer streaming with capture") {
     resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
@@ -323,7 +323,7 @@ TEST_CASE("ParlioEngine - large buffer streaming with capture") {
 // Test Suite: Waveform Parameter Validation
 //=============================================================================
 
-TEST_CASE("ParlioEngine - verify timing parameters are applied") {
+FL_TEST_CASE("ParlioEngine - verify timing parameters are applied") {
     resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
@@ -353,7 +353,7 @@ TEST_CASE("ParlioEngine - verify timing parameters are applied") {
     FL_CHECK(history[0].buffer_copy.size() > 0);
 }
 
-TEST_CASE("ParlioEngine - zero-length transmission edge case") {
+FL_TEST_CASE("ParlioEngine - zero-length transmission edge case") {
     resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
@@ -376,7 +376,7 @@ TEST_CASE("ParlioEngine - zero-length transmission edge case") {
     FL_CHECK(true);
 }
 
-TEST_CASE("ParlioEngine - single byte transmission") {
+FL_TEST_CASE("ParlioEngine - single byte transmission") {
     resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
@@ -404,7 +404,7 @@ TEST_CASE("ParlioEngine - single byte transmission") {
     FL_CHECK(tx.buffer_copy.size() >= 8);
 }
 
-TEST_CASE("ParlioEngine - max lanes configuration with data capture") {
+FL_TEST_CASE("ParlioEngine - max lanes configuration with data capture") {
     resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
@@ -447,7 +447,7 @@ TEST_CASE("ParlioEngine - max lanes configuration with data capture") {
     FL_CHECK(tx.bit_count > 0);
 }
 
-TEST_CASE("ParlioEngine - two channels with different lengths (padding test)") {
+FL_TEST_CASE("ParlioEngine - two channels with different lengths (padding test)") {
     resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();
@@ -520,7 +520,7 @@ TEST_CASE("ParlioEngine - two channels with different lengths (padding test)") {
     // 4. The DMA buffer size accounts for boundary + reset padding
 }
 
-TEST_CASE("ParlioEngine - verify reset padding is applied for different channel lengths") {
+FL_TEST_CASE("ParlioEngine - verify reset padding is applied for different channel lengths") {
     resetMock_engine();
 
     auto& engine = ParlioEngine::getInstance();

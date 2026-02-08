@@ -1,12 +1,12 @@
-#include "doctest.h"
+#include "test.h"
 #include "fl/log.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/strstream.h"
 
 using namespace fl;
 
-TEST_CASE("fl::fastled_file_offset") {
-    SUBCASE("extracts path after 'src/'") {
+FL_TEST_CASE("fl::fastled_file_offset") {
+    FL_SUBCASE("extracts path after 'src/'") {
         const char* path1 = "some/path/src/fl/dbg.h";
         FL_CHECK_EQ(fl::strcmp(fastled_file_offset(path1), "src/fl/dbg.h"), 0);
 
@@ -17,7 +17,7 @@ TEST_CASE("fl::fastled_file_offset") {
         FL_CHECK_EQ(fl::strcmp(fastled_file_offset(path3), "src/test.cpp"), 0);
     }
 
-    SUBCASE("falls back to last slash when no 'src/' found") {
+    FL_SUBCASE("falls back to last slash when no 'src/' found") {
         const char* path1 = "include/fl/header.h";
         FL_CHECK_EQ(fl::strcmp(fastled_file_offset(path1), "header.h"), 0);
 
@@ -28,7 +28,7 @@ TEST_CASE("fl::fastled_file_offset") {
         FL_CHECK_EQ(fl::strcmp(fastled_file_offset(path3), "e.h"), 0);
     }
 
-    SUBCASE("returns original path when no slashes found") {
+    FL_SUBCASE("returns original path when no slashes found") {
         const char* path1 = "simple.h";
         FL_CHECK_EQ(fl::strcmp(fastled_file_offset(path1), "simple.h"), 0);
 
@@ -36,7 +36,7 @@ TEST_CASE("fl::fastled_file_offset") {
         FL_CHECK_EQ(fl::strcmp(fastled_file_offset(path2), "test.cpp"), 0);
     }
 
-    SUBCASE("handles edge cases") {
+    FL_SUBCASE("handles edge cases") {
         // Empty string
         const char* empty = "";
         FL_CHECK_EQ(fl::strcmp(fastled_file_offset(empty), ""), 0);
@@ -54,7 +54,7 @@ TEST_CASE("fl::fastled_file_offset") {
         FL_CHECK_EQ(fl::strcmp(fastled_file_offset(multi_src), "src/fl/src/test.h"), 0);
     }
 
-    SUBCASE("handles paths with 'src' but not 'src/'") {
+    FL_SUBCASE("handles paths with 'src' but not 'src/'") {
         const char* path1 = "resource/file.h";
         // Should not match "src" within "resource", falls back to last slash
         FL_CHECK_EQ(fl::strcmp(fastled_file_offset(path1), "file.h"), 0);
@@ -65,12 +65,12 @@ TEST_CASE("fl::fastled_file_offset") {
     }
 }
 
-TEST_CASE("FL_DBG macro compilation") {
+FL_TEST_CASE("FL_DBG macro compilation") {
     // Test that FL_DBG macro compiles correctly
     // We can't easily test its runtime behavior since it outputs to println()
     // But we can verify it compiles with various types
 
-    SUBCASE("compiles with various types") {
+    FL_SUBCASE("compiles with various types") {
         // These should compile without errors
         FL_DBG("Simple string");
         FL_DBG("Value: " << 42);
@@ -81,7 +81,7 @@ TEST_CASE("FL_DBG macro compilation") {
         FL_CHECK(true);
     }
 
-    SUBCASE("FL_DBG_IF compiles with conditions") {
+    FL_SUBCASE("FL_DBG_IF compiles with conditions") {
         bool condition = true;
         FL_DBG_IF(condition, "Conditional message");
         FL_DBG_IF(false, "Should not print");
@@ -92,8 +92,8 @@ TEST_CASE("FL_DBG macro compilation") {
     }
 }
 
-TEST_CASE("FASTLED_DBG macro compilation") {
-    SUBCASE("compiles with various types") {
+FL_TEST_CASE("FASTLED_DBG macro compilation") {
+    FL_SUBCASE("compiles with various types") {
         // Test the long-form macro name
         FASTLED_DBG("Simple string");
         FASTLED_DBG("Value: " << 42);
@@ -102,7 +102,7 @@ TEST_CASE("FASTLED_DBG macro compilation") {
         FL_CHECK(true);
     }
 
-    SUBCASE("FASTLED_DBG_IF compiles with conditions") {
+    FL_SUBCASE("FASTLED_DBG_IF compiles with conditions") {
         FASTLED_DBG_IF(true, "Message");
         FASTLED_DBG_IF(false, "Should not print");
 
@@ -111,9 +111,9 @@ TEST_CASE("FASTLED_DBG macro compilation") {
     }
 }
 
-TEST_CASE("FL_DBG_NO_OP macro") {
+FL_TEST_CASE("FL_DBG_NO_OP macro") {
     // Test that the no-op macro compiles and doesn't execute
-    SUBCASE("compiles without errors") {
+    FL_SUBCASE("compiles without errors") {
         // This should compile but not execute the stream operations
         FL_DBG_NO_OP("Test message" << 42 << " more");
 
@@ -122,9 +122,9 @@ TEST_CASE("FL_DBG_NO_OP macro") {
     }
 }
 
-TEST_CASE("debug macro configuration") {
+FL_TEST_CASE("debug macro configuration") {
     // Test that macro configuration constants are defined
-    SUBCASE("FASTLED_HAS_DBG is defined") {
+    FL_SUBCASE("FASTLED_HAS_DBG is defined") {
         #if defined(FASTLED_HAS_DBG)
             // Either 0 or 1, but should be defined
             FL_CHECK((FASTLED_HAS_DBG == 0 || FASTLED_HAS_DBG == 1));
@@ -134,7 +134,7 @@ TEST_CASE("debug macro configuration") {
         #endif
     }
 
-    SUBCASE("FASTLED_FORCE_DBG behavior") {
+    FL_SUBCASE("FASTLED_FORCE_DBG behavior") {
         #if defined(FASTLED_FORCE_DBG)
             // If forced, it should be enabled
             FL_CHECK(FASTLED_FORCE_DBG == 1);

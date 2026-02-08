@@ -2,15 +2,15 @@
 #include "fl/promise_result.h"
 #include "fl/unused.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/function.h"
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
 #include "fl/stl/variant.h"
 
 
-TEST_CASE("fl::promise - Basic Operations") {
-    SUBCASE("Default constructor creates invalid promise") {
+FL_TEST_CASE("fl::promise - Basic Operations") {
+    FL_SUBCASE("Default constructor creates invalid promise") {
         fl::promise<int> p;
         FL_CHECK(!p.valid());
         FL_CHECK(!p.is_completed());
@@ -18,7 +18,7 @@ TEST_CASE("fl::promise - Basic Operations") {
         FL_CHECK(!p.is_rejected());
     }
     
-    SUBCASE("Static create() creates valid, pending promise") {
+    FL_SUBCASE("Static create() creates valid, pending promise") {
         auto p = fl::promise<int>::create();
         FL_CHECK(p.valid());
         FL_CHECK(!p.is_completed());
@@ -26,7 +26,7 @@ TEST_CASE("fl::promise - Basic Operations") {
         FL_CHECK(!p.is_rejected());
     }
     
-    SUBCASE("Clear makes promise invalid") {
+    FL_SUBCASE("Clear makes promise invalid") {
         auto p = fl::promise<int>::create();
         FL_CHECK(p.valid());
         
@@ -35,8 +35,8 @@ TEST_CASE("fl::promise - Basic Operations") {
     }
 }
 
-TEST_CASE("fl::promise - Static Factory Methods") {
-    SUBCASE("resolve() creates resolved promise") {
+FL_TEST_CASE("fl::promise - Static Factory Methods") {
+    FL_SUBCASE("resolve() creates resolved promise") {
         auto p = fl::promise<int>::resolve(42);
         FL_CHECK(p.valid());
         FL_CHECK(p.is_completed());
@@ -45,7 +45,7 @@ TEST_CASE("fl::promise - Static Factory Methods") {
         FL_CHECK_EQ(p.value(), 42);
     }
     
-    SUBCASE("resolve() with move semantics") {
+    FL_SUBCASE("resolve() with move semantics") {
         fl::string test_str = "test string";
         auto p = fl::promise<fl::string>::resolve(fl::move(test_str));
         FL_CHECK(p.valid());
@@ -54,7 +54,7 @@ TEST_CASE("fl::promise - Static Factory Methods") {
         FL_CHECK_EQ(p.value(), "test string");
     }
     
-    SUBCASE("reject() creates rejected promise") {
+    FL_SUBCASE("reject() creates rejected promise") {
         auto p = fl::promise<int>::reject(fl::Error("Test error"));
         FL_CHECK(p.valid());
         FL_CHECK(p.is_completed());
@@ -63,7 +63,7 @@ TEST_CASE("fl::promise - Static Factory Methods") {
         FL_CHECK_EQ(p.error().message, "Test error");
     }
     
-    SUBCASE("reject() with Error object") {
+    FL_SUBCASE("reject() with Error object") {
         fl::Error err("Custom error");
         auto p = fl::promise<int>::reject(err);
         FL_CHECK(p.valid());
@@ -74,8 +74,8 @@ TEST_CASE("fl::promise - Static Factory Methods") {
     }
 }
 
-TEST_CASE("fl::promise - Producer Interface") {
-    SUBCASE("complete_with_value() resolves promise") {
+FL_TEST_CASE("fl::promise - Producer Interface") {
+    FL_SUBCASE("complete_with_value() resolves promise") {
         auto p = fl::promise<int>::create();
         FL_CHECK(!p.is_completed());
         
@@ -87,7 +87,7 @@ TEST_CASE("fl::promise - Producer Interface") {
         FL_CHECK_EQ(p.value(), 123);
     }
     
-    SUBCASE("complete_with_value() with move semantics") {
+    FL_SUBCASE("complete_with_value() with move semantics") {
         auto p = fl::promise<fl::string>::create();
         fl::string test_str = "moved string";
         
@@ -98,7 +98,7 @@ TEST_CASE("fl::promise - Producer Interface") {
         FL_CHECK_EQ(p.value(), "moved string");
     }
     
-    SUBCASE("complete_with_error() rejects promise") {
+    FL_SUBCASE("complete_with_error() rejects promise") {
         auto p = fl::promise<int>::create();
         FL_CHECK(!p.is_completed());
         
@@ -110,7 +110,7 @@ TEST_CASE("fl::promise - Producer Interface") {
         FL_CHECK_EQ(p.error().message, "Test error");
     }
     
-    SUBCASE("complete_with_error() with Error object") {
+    FL_SUBCASE("complete_with_error() with Error object") {
         auto p = fl::promise<int>::create();
         fl::Error err("Custom error");
         
@@ -121,7 +121,7 @@ TEST_CASE("fl::promise - Producer Interface") {
         FL_CHECK_EQ(p.error().message, "Custom error");
     }
     
-    SUBCASE("Cannot complete promise twice") {
+    FL_SUBCASE("Cannot complete promise twice") {
         auto p = fl::promise<int>::create();
         
         // First completion should succeed
@@ -142,8 +142,8 @@ TEST_CASE("fl::promise - Producer Interface") {
     }
 }
 
-TEST_CASE("fl::promise - Callback Interface") {
-    SUBCASE("then() callback called immediately on resolved promise") {
+FL_TEST_CASE("fl::promise - Callback Interface") {
+    FL_SUBCASE("then() callback called immediately on resolved promise") {
         bool callback_called = false;
         int received_value = 0;
         
@@ -157,7 +157,7 @@ TEST_CASE("fl::promise - Callback Interface") {
         FL_CHECK_EQ(received_value, 42);
     }
     
-    SUBCASE("then() callback called after resolution") {
+    FL_SUBCASE("then() callback called after resolution") {
         bool callback_called = false;
         int received_value = 0;
         
@@ -174,7 +174,7 @@ TEST_CASE("fl::promise - Callback Interface") {
         FL_CHECK_EQ(received_value, 123);
     }
     
-    SUBCASE("catch_() callback called immediately on rejected promise") {
+    FL_SUBCASE("catch_() callback called immediately on rejected promise") {
         bool callback_called = false;
         fl::string received_error;
         
@@ -188,7 +188,7 @@ TEST_CASE("fl::promise - Callback Interface") {
         FL_CHECK_EQ(received_error, "Test error");
     }
     
-    SUBCASE("catch_() callback called after rejection") {
+    FL_SUBCASE("catch_() callback called after rejection") {
         bool callback_called = false;
         fl::string received_error;
         
@@ -205,7 +205,7 @@ TEST_CASE("fl::promise - Callback Interface") {
         FL_CHECK_EQ(received_error, "Async error");
     }
     
-    SUBCASE("then() returns reference for chaining") {
+    FL_SUBCASE("then() returns reference for chaining") {
         auto p = fl::promise<int>::create();
         
         // Should be able to chain
@@ -221,7 +221,7 @@ TEST_CASE("fl::promise - Callback Interface") {
         FL_CHECK(&ref == &p);
     }
     
-    SUBCASE("catch_() returns reference for chaining") {
+    FL_SUBCASE("catch_() returns reference for chaining") {
         auto p = fl::promise<int>::create();
         
         // Should be able to chain
@@ -238,8 +238,8 @@ TEST_CASE("fl::promise - Callback Interface") {
     }
 }
 
-TEST_CASE("fl::promise - Update and Callback Processing") {
-    SUBCASE("update() processes callbacks after manual completion") {
+FL_TEST_CASE("fl::promise - Update and Callback Processing") {
+    FL_SUBCASE("update() processes callbacks after manual completion") {
         bool then_called = false;
         bool catch_called = false;
         
@@ -255,14 +255,14 @@ TEST_CASE("fl::promise - Update and Callback Processing") {
         FL_CHECK(!catch_called);
     }
     
-    SUBCASE("update() on invalid promise does nothing") {
+    FL_SUBCASE("update() on invalid promise does nothing") {
         fl::promise<int> invalid_promise;
         // Should not crash
         invalid_promise.update();
         FL_CHECK(!invalid_promise.valid());
     }
     
-    SUBCASE("Callbacks only called once") {
+    FL_SUBCASE("Callbacks only called once") {
         int call_count = 0;
         
         auto p = fl::promise<int>::create();
@@ -278,8 +278,8 @@ TEST_CASE("fl::promise - Update and Callback Processing") {
     }
 }
 
-TEST_CASE("fl::promise - Copy Semantics") {
-    SUBCASE("Promises are copyable") {
+FL_TEST_CASE("fl::promise - Copy Semantics") {
+    FL_SUBCASE("Promises are copyable") {
         auto p1 = fl::promise<int>::create();
         auto p2 = p1; // Copy constructor
         
@@ -294,7 +294,7 @@ TEST_CASE("fl::promise - Copy Semantics") {
         FL_CHECK_EQ(p2.value(), 42);
     }
     
-    SUBCASE("Copy assignment works") {
+    FL_SUBCASE("Copy assignment works") {
         auto p1 = fl::promise<int>::create();
         auto p2 = fl::promise<int>::create();
         
@@ -311,7 +311,7 @@ TEST_CASE("fl::promise - Copy Semantics") {
         FL_CHECK_EQ(p2.value(), 123);
     }
     
-    SUBCASE("Callbacks work on copied promises") {
+    FL_SUBCASE("Callbacks work on copied promises") {
         bool callback1_called = false;
         bool callback2_called = false;
         
@@ -337,8 +337,8 @@ TEST_CASE("fl::promise - Copy Semantics") {
     }
 }
 
-TEST_CASE("fl::promise - Move Semantics") {
-    SUBCASE("Promises are moveable") {
+FL_TEST_CASE("fl::promise - Move Semantics") {
+    FL_SUBCASE("Promises are moveable") {
         auto p1 = fl::promise<int>::create();
         auto p2 = fl::move(p1); // Move constructor
         
@@ -350,7 +350,7 @@ TEST_CASE("fl::promise - Move Semantics") {
         FL_CHECK_EQ(p2.value(), 42);
     }
     
-    SUBCASE("Move assignment works") {
+    FL_SUBCASE("Move assignment works") {
         auto p1 = fl::promise<int>::create();
         auto p2 = fl::promise<int>::create();
         
@@ -365,22 +365,22 @@ TEST_CASE("fl::promise - Move Semantics") {
     }
 }
 
-TEST_CASE("fl::promise - Convenience Functions") {
-    SUBCASE("make_resolved_promise() works") {
+FL_TEST_CASE("fl::promise - Convenience Functions") {
+    FL_SUBCASE("make_resolved_promise() works") {
         auto p = fl::make_resolved_promise(42);
         FL_CHECK(p.valid());
         FL_CHECK(p.is_resolved());
         FL_CHECK_EQ(p.value(), 42);
     }
     
-    SUBCASE("make_rejected_promise() with string works") {
+    FL_SUBCASE("make_rejected_promise() with string works") {
         auto p = fl::make_rejected_promise<int>("Test error");
         FL_CHECK(p.valid());
         FL_CHECK(p.is_rejected());
         FL_CHECK_EQ(p.error().message, "Test error");
     }
     
-    SUBCASE("make_rejected_promise() with const char* works") {
+    FL_SUBCASE("make_rejected_promise() with const char* works") {
         auto p = fl::make_rejected_promise<int>("C string error");
         FL_CHECK(p.valid());
         FL_CHECK(p.is_rejected());
@@ -388,32 +388,32 @@ TEST_CASE("fl::promise - Convenience Functions") {
     }
 }
 
-TEST_CASE("fl::promise - Error Type") {
-    SUBCASE("Error default constructor") {
+FL_TEST_CASE("fl::promise - Error Type") {
+    FL_SUBCASE("Error default constructor") {
         fl::Error err;
         FL_CHECK(err.message.empty());
     }
     
-    SUBCASE("Error with string") {
+    FL_SUBCASE("Error with string") {
         fl::string msg = "Test message";
         fl::Error err(msg);
         FL_CHECK_EQ(err.message, "Test message");
     }
     
-    SUBCASE("Error with const char*") {
+    FL_SUBCASE("Error with const char*") {
         fl::Error err("C string message");
         FL_CHECK_EQ(err.message, "C string message");
     }
     
-    SUBCASE("Error with move string") {
+    FL_SUBCASE("Error with move string") {
         fl::string msg = "Move message";
         fl::Error err(fl::move(msg));
         FL_CHECK_EQ(err.message, "Move message");
     }
 }
 
-TEST_CASE("fl::promise - Edge Cases") {
-    SUBCASE("Invalid promise methods return safe defaults") {
+FL_TEST_CASE("fl::promise - Edge Cases") {
+    FL_SUBCASE("Invalid promise methods return safe defaults") {
         fl::promise<int> invalid;
         
         FL_CHECK(!invalid.valid());
@@ -434,7 +434,7 @@ TEST_CASE("fl::promise - Edge Cases") {
         FL_CHECK(&ref == &invalid);
     }
     
-    SUBCASE("Multiple callbacks on same promise") {
+    FL_SUBCASE("Multiple callbacks on same promise") {
         bool callback1_called = false;
         bool callback2_called = false;
         int value1 = 0, value2 = 0;
@@ -462,8 +462,8 @@ TEST_CASE("fl::promise - Edge Cases") {
     }
 }
 
-TEST_CASE("fl::promise - Complex Types") {
-    SUBCASE("Promise with string type") {
+FL_TEST_CASE("fl::promise - Complex Types") {
+    FL_SUBCASE("Promise with string type") {
         auto p = fl::promise<fl::string>::create();
         bool callback_called = false;
         fl::string received;
@@ -479,7 +479,7 @@ TEST_CASE("fl::promise - Complex Types") {
         FL_CHECK_EQ(received, "test string");
     }
     
-    SUBCASE("Promise with custom struct") {
+    FL_SUBCASE("Promise with custom struct") {
         struct TestData {
             int x;
             fl::string name;
@@ -506,8 +506,8 @@ TEST_CASE("fl::promise - Complex Types") {
     }
 }
 
-TEST_CASE("fl::PromiseResult - Basic Construction") {
-    SUBCASE("construct with success value") {
+FL_TEST_CASE("fl::PromiseResult - Basic Construction") {
+    FL_SUBCASE("construct with success value") {
         fl::PromiseResult<int> result(42);
         
         FL_CHECK(result.ok());
@@ -516,7 +516,7 @@ TEST_CASE("fl::PromiseResult - Basic Construction") {
         FL_CHECK_EQ(result.error_message(), "");
     }
     
-    SUBCASE("construct with error") {
+    FL_SUBCASE("construct with error") {
         fl::Error err("Test error");
         fl::PromiseResult<int> result(err);
         
@@ -526,7 +526,7 @@ TEST_CASE("fl::PromiseResult - Basic Construction") {
         FL_CHECK_EQ(result.error_message(), "Test error");
     }
     
-    SUBCASE("construct with move semantics") {
+    FL_SUBCASE("construct with move semantics") {
         fl::string text = "Hello World";
         fl::PromiseResult<fl::string> result(fl::move(text));
         
@@ -535,8 +535,8 @@ TEST_CASE("fl::PromiseResult - Basic Construction") {
     }
 }
 
-TEST_CASE("fl::PromiseResult - Value Access") {
-    SUBCASE("safe value access on success") {
+FL_TEST_CASE("fl::PromiseResult - Value Access") {
+    FL_SUBCASE("safe value access on success") {
         fl::PromiseResult<int> result(100);
         
         FL_CHECK(result.ok());
@@ -555,7 +555,7 @@ TEST_CASE("fl::PromiseResult - Value Access") {
         FL_CHECK_EQ(result.value(), 200);
     }
     
-    SUBCASE("value access on error in release builds") {
+    FL_SUBCASE("value access on error in release builds") {
         fl::PromiseResult<int> result(fl::Error("Test error"));
         
         FL_CHECK(!result.ok());
@@ -570,7 +570,7 @@ TEST_CASE("fl::PromiseResult - Value Access") {
         #endif
     }
     
-    SUBCASE("string value access") {
+    FL_SUBCASE("string value access") {
         fl::PromiseResult<fl::string> result(fl::string("Test"));
         
         FL_CHECK(result.ok());
@@ -582,8 +582,8 @@ TEST_CASE("fl::PromiseResult - Value Access") {
     }
 }
 
-TEST_CASE("fl::PromiseResult - Error Access") {
-    SUBCASE("safe error access on error") {
+FL_TEST_CASE("fl::PromiseResult - Error Access") {
+    FL_SUBCASE("safe error access on error") {
         fl::Error original_error("Network timeout");
         fl::PromiseResult<int> result(original_error);
         
@@ -593,7 +593,7 @@ TEST_CASE("fl::PromiseResult - Error Access") {
         FL_CHECK_EQ(error.message, "Network timeout");
     }
     
-    SUBCASE("error access on success in release builds") {
+    FL_SUBCASE("error access on success in release builds") {
         fl::PromiseResult<int> result(42);
         
         FL_CHECK(result.ok());
@@ -607,7 +607,7 @@ TEST_CASE("fl::PromiseResult - Error Access") {
         #endif
     }
     
-    SUBCASE("error_message convenience method") {
+    FL_SUBCASE("error_message convenience method") {
         // Test with error
         fl::PromiseResult<int> error_result(fl::Error("Connection failed"));
         FL_CHECK_EQ(error_result.error_message(), "Connection failed");
@@ -618,8 +618,8 @@ TEST_CASE("fl::PromiseResult - Error Access") {
     }
 }
 
-TEST_CASE("fl::PromiseResult - Type Conversions") {
-    SUBCASE("boolean conversion") {
+FL_TEST_CASE("fl::PromiseResult - Type Conversions") {
+    FL_SUBCASE("boolean conversion") {
         fl::PromiseResult<int> success(42);
         fl::PromiseResult<int> failure(fl::Error("Error"));
         
@@ -641,7 +641,7 @@ TEST_CASE("fl::PromiseResult - Type Conversions") {
         }
     }
     
-    SUBCASE("variant access") {
+    FL_SUBCASE("variant access") {
         fl::PromiseResult<int> result(42);
         
         const auto& variant = result.variant();
@@ -650,8 +650,8 @@ TEST_CASE("fl::PromiseResult - Type Conversions") {
     }
 }
 
-TEST_CASE("fl::PromiseResult - Helper Functions") {
-    SUBCASE("make_success") {
+FL_TEST_CASE("fl::PromiseResult - Helper Functions") {
+    FL_SUBCASE("make_success") {
         auto result1 = fl::make_success(42);
         FL_CHECK(result1.ok());
         FL_CHECK_EQ(result1.value(), 42);
@@ -662,7 +662,7 @@ TEST_CASE("fl::PromiseResult - Helper Functions") {
         FL_CHECK_EQ(result2.value(), "Hello");
     }
     
-    SUBCASE("make_error with Error object") {
+    FL_SUBCASE("make_error with Error object") {
         fl::Error err("Custom error");
         auto result = fl::make_error<int>(err);
         
@@ -670,7 +670,7 @@ TEST_CASE("fl::PromiseResult - Helper Functions") {
         FL_CHECK_EQ(result.error().message, "Custom error");
     }
     
-    SUBCASE("make_error with string") {
+    FL_SUBCASE("make_error with string") {
         auto result1 = fl::make_error<int>(fl::string("String error"));
         FL_CHECK(!result1.ok());
         FL_CHECK_EQ(result1.error().message, "String error");
@@ -681,8 +681,8 @@ TEST_CASE("fl::PromiseResult - Helper Functions") {
     }
 }
 
-TEST_CASE("fl::PromiseResult - Complex Types") {
-    SUBCASE("custom struct") {
+FL_TEST_CASE("fl::PromiseResult - Complex Types") {
+    FL_SUBCASE("custom struct") {
         struct TestStruct {
             int x;
             fl::string name;
@@ -712,8 +712,8 @@ TEST_CASE("fl::PromiseResult - Complex Types") {
     }
 }
 
-TEST_CASE("fl::PromiseResult - Copy and Move Semantics") {
-    SUBCASE("copy construction") {
+FL_TEST_CASE("fl::PromiseResult - Copy and Move Semantics") {
+    FL_SUBCASE("copy construction") {
         fl::PromiseResult<int> original(42);
         fl::PromiseResult<int> copy(original);
         
@@ -726,7 +726,7 @@ TEST_CASE("fl::PromiseResult - Copy and Move Semantics") {
         FL_CHECK_EQ(copy.value(), 100);
     }
     
-    SUBCASE("copy assignment") {
+    FL_SUBCASE("copy assignment") {
         fl::PromiseResult<int> original(42);
         fl::PromiseResult<int> copy = fl::make_error<int>("temp");
         
@@ -736,7 +736,7 @@ TEST_CASE("fl::PromiseResult - Copy and Move Semantics") {
         FL_CHECK_EQ(copy.value(), 42);
     }
     
-    SUBCASE("move construction") {
+    FL_SUBCASE("move construction") {
         fl::string text = "Move me";
         fl::PromiseResult<fl::string> original(fl::move(text));
         fl::PromiseResult<fl::string> moved(fl::move(original));

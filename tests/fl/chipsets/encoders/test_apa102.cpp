@@ -1,7 +1,7 @@
 /// @file test_apa102.cpp
 /// @brief Unit tests for APA102/DOTSTAR encoder functions
 
-#include "doctest.h"
+#include "test.h"
 #include "fl/chipsets/encoders/apa102.h"
 #include "fl/stl/array.h"
 #include "fl/stl/iterator.h"
@@ -57,7 +57,7 @@ static size_t expectedSize(size_t num_leds) {
 // encodeAPA102() - Global Brightness Tests
 //=============================================================================
 
-TEST_CASE("encodeAPA102() - empty range") {
+FL_TEST_CASE("encodeAPA102() - empty range") {
     fl::vector<fl::array<fl::u8, 3>> leds;
     fl::vector<fl::u8> output;
 
@@ -69,7 +69,7 @@ TEST_CASE("encodeAPA102() - empty range") {
     verifyEndFrame(output, 4, 0);
 }
 
-TEST_CASE("encodeAPA102() - single LED default brightness") {
+FL_TEST_CASE("encodeAPA102() - single LED default brightness") {
     fl::vector<fl::array<fl::u8, 3>> leds = {
         {128, 64, 32}  // BGR order: B=128, G=64, R=32
     };
@@ -84,7 +84,7 @@ TEST_CASE("encodeAPA102() - single LED default brightness") {
     verifyEndFrame(output, 8, 1);
 }
 
-TEST_CASE("encodeAPA102() - single LED custom brightness") {
+FL_TEST_CASE("encodeAPA102() - single LED custom brightness") {
     fl::vector<fl::array<fl::u8, 3>> leds = {
         {255, 128, 64}
     };
@@ -98,7 +98,7 @@ TEST_CASE("encodeAPA102() - single LED custom brightness") {
     verifyEndFrame(output, 8, 1);
 }
 
-TEST_CASE("encodeAPA102() - brightness clamping") {
+FL_TEST_CASE("encodeAPA102() - brightness clamping") {
     fl::vector<fl::array<fl::u8, 3>> leds = {
         {100, 200, 50}
     };
@@ -113,7 +113,7 @@ TEST_CASE("encodeAPA102() - brightness clamping") {
     verifyEndFrame(output, 8, 1);
 }
 
-TEST_CASE("encodeAPA102() - zero brightness") {
+FL_TEST_CASE("encodeAPA102() - zero brightness") {
     fl::vector<fl::array<fl::u8, 3>> leds = {
         {255, 255, 255}
     };
@@ -127,7 +127,7 @@ TEST_CASE("encodeAPA102() - zero brightness") {
     verifyEndFrame(output, 8, 1);
 }
 
-TEST_CASE("encodeAPA102() - multiple LEDs") {
+FL_TEST_CASE("encodeAPA102() - multiple LEDs") {
     fl::vector<fl::array<fl::u8, 3>> leds = {
         {255, 0, 0},    // Blue
         {0, 255, 0},    // Green
@@ -145,7 +145,7 @@ TEST_CASE("encodeAPA102() - multiple LEDs") {
     verifyEndFrame(output, 16, 3);
 }
 
-TEST_CASE("encodeAPA102() - end frame boundary 31 LEDs") {
+FL_TEST_CASE("encodeAPA102() - end frame boundary 31 LEDs") {
     fl::vector<fl::array<fl::u8, 3>> leds(31, {128, 128, 128});
     fl::vector<fl::u8> output;
 
@@ -158,7 +158,7 @@ TEST_CASE("encodeAPA102() - end frame boundary 31 LEDs") {
     verifyEndFrame(output, 4 + 31 * 4, 31);
 }
 
-TEST_CASE("encodeAPA102() - end frame boundary 32 LEDs") {
+FL_TEST_CASE("encodeAPA102() - end frame boundary 32 LEDs") {
     fl::vector<fl::array<fl::u8, 3>> leds(32, {128, 128, 128});
     fl::vector<fl::u8> output;
 
@@ -171,7 +171,7 @@ TEST_CASE("encodeAPA102() - end frame boundary 32 LEDs") {
     verifyEndFrame(output, 4 + 32 * 4, 32);
 }
 
-TEST_CASE("encodeAPA102() - end frame boundary 33 LEDs") {
+FL_TEST_CASE("encodeAPA102() - end frame boundary 33 LEDs") {
     fl::vector<fl::array<fl::u8, 3>> leds(33, {128, 128, 128});
     fl::vector<fl::u8> output;
 
@@ -184,7 +184,7 @@ TEST_CASE("encodeAPA102() - end frame boundary 33 LEDs") {
     verifyEndFrame(output, 4 + 33 * 4, 33);
 }
 
-TEST_CASE("encodeAPA102() - end frame boundary 40 LEDs") {
+FL_TEST_CASE("encodeAPA102() - end frame boundary 40 LEDs") {
     // Reduced from 64 to 40 LEDs for performance (still tests boundary beyond 32)
     fl::vector<fl::array<fl::u8, 3>> leds(40, {128, 128, 128});
     fl::vector<fl::u8> output;
@@ -201,7 +201,7 @@ TEST_CASE("encodeAPA102() - end frame boundary 40 LEDs") {
 // encodeAPA102_HD() - Per-LED Brightness Tests
 //=============================================================================
 
-TEST_CASE("encodeAPA102_HD() - empty range") {
+FL_TEST_CASE("encodeAPA102_HD() - empty range") {
     fl::vector<fl::array<fl::u8, 3>> leds;
     fl::vector<fl::u8> brightness;
     fl::vector<fl::u8> output;
@@ -214,7 +214,7 @@ TEST_CASE("encodeAPA102_HD() - empty range") {
     verifyEndFrame(output, 4, 0);
 }
 
-TEST_CASE("encodeAPA102_HD() - single LED") {
+FL_TEST_CASE("encodeAPA102_HD() - single LED") {
     fl::vector<fl::array<fl::u8, 3>> leds = {
         {200, 100, 50}
     };
@@ -231,7 +231,7 @@ TEST_CASE("encodeAPA102_HD() - single LED") {
     verifyEndFrame(output, 8, 1);
 }
 
-TEST_CASE("encodeAPA102_HD() - brightness mapping 8bit to 5bit") {
+FL_TEST_CASE("encodeAPA102_HD() - brightness mapping 8bit to 5bit") {
     fl::vector<fl::array<fl::u8, 3>> leds = {
         {255, 255, 255},
         {128, 128, 128},
@@ -262,7 +262,7 @@ TEST_CASE("encodeAPA102_HD() - brightness mapping 8bit to 5bit") {
     verifyEndFrame(output, 20, 4);
 }
 
-TEST_CASE("encodeAPA102_HD() - per-LED brightness variation") {
+FL_TEST_CASE("encodeAPA102_HD() - per-LED brightness variation") {
     fl::vector<fl::array<fl::u8, 3>> leds = {
         {255, 0, 0},
         {0, 255, 0},
@@ -289,7 +289,7 @@ TEST_CASE("encodeAPA102_HD() - per-LED brightness variation") {
     verifyEndFrame(output, 16, 3);
 }
 
-TEST_CASE("encodeAPA102_HD() - end frame boundary 20 LEDs") {
+FL_TEST_CASE("encodeAPA102_HD() - end frame boundary 20 LEDs") {
     // Reduced from 32 to 20 LEDs for performance (still tests end frame calculation)
     fl::vector<fl::array<fl::u8, 3>> leds(20, {128, 128, 128});
     fl::vector<fl::u8> brightness(20, 200);
@@ -308,7 +308,7 @@ TEST_CASE("encodeAPA102_HD() - end frame boundary 20 LEDs") {
 // encodeAPA102_AutoBrightness() - Auto-Detected Brightness Tests
 //=============================================================================
 
-TEST_CASE("encodeAPA102_AutoBrightness() - empty range") {
+FL_TEST_CASE("encodeAPA102_AutoBrightness() - empty range") {
     fl::vector<fl::array<fl::u8, 3>> leds;
     fl::vector<fl::u8> output;
 
@@ -319,7 +319,7 @@ TEST_CASE("encodeAPA102_AutoBrightness() - empty range") {
     verifyStartFrame(output, 0);
 }
 
-TEST_CASE("encodeAPA102_AutoBrightness() - single LED max brightness") {
+FL_TEST_CASE("encodeAPA102_AutoBrightness() - single LED max brightness") {
     fl::vector<fl::array<fl::u8, 3>> leds = {
         {255, 255, 255}  // Max component = 255
     };
@@ -367,7 +367,7 @@ TEST_CASE("encodeAPA102_AutoBrightness() - single LED max brightness") {
     verifyEndFrame(output, 8, 1);
 }
 
-TEST_CASE("encodeAPA102_AutoBrightness() - single LED medium brightness") {
+FL_TEST_CASE("encodeAPA102_AutoBrightness() - single LED medium brightness") {
     fl::vector<fl::array<fl::u8, 3>> leds = {
         {128, 64, 32}  // Max component = 128 (Blue)
     };
@@ -394,7 +394,7 @@ TEST_CASE("encodeAPA102_AutoBrightness() - single LED medium brightness") {
     verifyEndFrame(output, 8, 1);
 }
 
-TEST_CASE("encodeAPA102_AutoBrightness() - multiple LEDs uses first pixel brightness") {
+FL_TEST_CASE("encodeAPA102_AutoBrightness() - multiple LEDs uses first pixel brightness") {
     fl::vector<fl::array<fl::u8, 3>> leds = {
         {64, 32, 16},   // First pixel: max = 64 → brightness
         {255, 0, 0},    // Second pixel: uses global brightness from first
@@ -427,7 +427,7 @@ TEST_CASE("encodeAPA102_AutoBrightness() - multiple LEDs uses first pixel bright
     verifyEndFrame(output, 16, 3);
 }
 
-TEST_CASE("encodeAPA102_AutoBrightness() - low brightness extraction") {
+FL_TEST_CASE("encodeAPA102_AutoBrightness() - low brightness extraction") {
     fl::vector<fl::array<fl::u8, 3>> leds = {
         {8, 4, 2}  // Max component = 8
     };
@@ -454,7 +454,7 @@ TEST_CASE("encodeAPA102_AutoBrightness() - low brightness extraction") {
     verifyEndFrame(output, 8, 1);
 }
 
-TEST_CASE("encodeAPA102_AutoBrightness() - zero components") {
+FL_TEST_CASE("encodeAPA102_AutoBrightness() - zero components") {
     fl::vector<fl::array<fl::u8, 3>> leds = {
         {0, 0, 0}  // All zero
     };
@@ -481,7 +481,7 @@ TEST_CASE("encodeAPA102_AutoBrightness() - zero components") {
     verifyEndFrame(output, 8, 1);
 }
 
-TEST_CASE("encodeAPA102_AutoBrightness() - end frame boundary 20 LEDs") {
+FL_TEST_CASE("encodeAPA102_AutoBrightness() - end frame boundary 20 LEDs") {
     // Reduced from 32 to 20 LEDs for performance (still tests end frame calculation)
     fl::vector<fl::array<fl::u8, 3>> leds(20, {128, 128, 128});
     fl::vector<fl::u8> output;

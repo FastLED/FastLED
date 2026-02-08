@@ -1,6 +1,6 @@
 #include "fl/stl/cstddef.h"
 #include "fl/stl/cstddef.h"
-#include "doctest.h"
+#include "test.h"
 
 using namespace fl;
 
@@ -15,8 +15,8 @@ using namespace fl;
 // - FL_OFFSETOF macro
 ///////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("fl::size_t basic properties") {
-    SUBCASE("size_t is unsigned") {
+FL_TEST_CASE("fl::size_t basic properties") {
+    FL_SUBCASE("size_t is unsigned") {
         fl::size_t zero = 0;
         fl::size_t one = 1;
 
@@ -27,7 +27,7 @@ TEST_CASE("fl::size_t basic properties") {
         FL_CHECK(wrapped > zero);
     }
 
-    SUBCASE("size_t can hold array sizes") {
+    FL_SUBCASE("size_t can hold array sizes") {
         fl::size_t small = 10;
         fl::size_t medium = 1000;
         fl::size_t large = 100000;
@@ -37,7 +37,7 @@ TEST_CASE("fl::size_t basic properties") {
         FL_CHECK_EQ(large, 100000);
     }
 
-    SUBCASE("size_t arithmetic") {
+    FL_SUBCASE("size_t arithmetic") {
         fl::size_t a = 100;
         fl::size_t b = 50;
 
@@ -47,7 +47,7 @@ TEST_CASE("fl::size_t basic properties") {
         FL_CHECK_EQ(a / 2, 50);
     }
 
-    SUBCASE("size_t comparison") {
+    FL_SUBCASE("size_t comparison") {
         fl::size_t a = 100;
         fl::size_t b = 200;
         fl::size_t c = 100;
@@ -61,8 +61,8 @@ TEST_CASE("fl::size_t basic properties") {
     }
 }
 
-TEST_CASE("fl::ptrdiff_t basic properties") {
-    SUBCASE("ptrdiff_t is signed") {
+FL_TEST_CASE("fl::ptrdiff_t basic properties") {
+    FL_SUBCASE("ptrdiff_t is signed") {
         fl::ptrdiff_t zero = 0;
         fl::ptrdiff_t positive = 100;
         fl::ptrdiff_t negative = -100;
@@ -72,14 +72,14 @@ TEST_CASE("fl::ptrdiff_t basic properties") {
         FL_CHECK_EQ(positive + negative, 0);
     }
 
-    SUBCASE("ptrdiff_t can represent pointer differences") {
+    FL_SUBCASE("ptrdiff_t can represent pointer differences") {
         int arr[10];
         fl::ptrdiff_t diff = &arr[9] - &arr[0];
 
         FL_CHECK_EQ(diff, 9);
     }
 
-    SUBCASE("ptrdiff_t arithmetic") {
+    FL_SUBCASE("ptrdiff_t arithmetic") {
         fl::ptrdiff_t a = 100;
         fl::ptrdiff_t b = -50;
 
@@ -90,7 +90,7 @@ TEST_CASE("fl::ptrdiff_t basic properties") {
         FL_CHECK_EQ(b * -1, 50);
     }
 
-    SUBCASE("ptrdiff_t comparison") {
+    FL_SUBCASE("ptrdiff_t comparison") {
         fl::ptrdiff_t a = -100;
         fl::ptrdiff_t b = 100;
         fl::ptrdiff_t c = -100;
@@ -104,8 +104,8 @@ TEST_CASE("fl::ptrdiff_t basic properties") {
     }
 }
 
-TEST_CASE("fl::nullptr_t basic properties") {
-    SUBCASE("nullptr_t can be assigned nullptr") {
+FL_TEST_CASE("fl::nullptr_t basic properties") {
+    FL_SUBCASE("nullptr_t can be assigned nullptr") {
         fl::nullptr_t n = nullptr;
         (void)n;  // Avoid unused variable warning
 
@@ -113,21 +113,21 @@ TEST_CASE("fl::nullptr_t basic properties") {
         FL_CHECK(true);
     }
 
-    SUBCASE("nullptr_t can be compared with nullptr") {
+    FL_SUBCASE("nullptr_t can be compared with nullptr") {
         fl::nullptr_t n = nullptr;
 
         FL_CHECK(n == nullptr);
         FL_CHECK(nullptr == n);
     }
 
-    SUBCASE("nullptr_t can be used to initialize pointers") {
+    FL_SUBCASE("nullptr_t can be used to initialize pointers") {
         fl::nullptr_t n = nullptr;
         int* ptr = n;
 
         FL_CHECK(ptr == nullptr);
     }
 
-    SUBCASE("nullptr_t can be passed to functions expecting pointers") {
+    FL_SUBCASE("nullptr_t can be passed to functions expecting pointers") {
         auto check_null = [](int* p) -> bool {
             return p == nullptr;
         };
@@ -137,8 +137,8 @@ TEST_CASE("fl::nullptr_t basic properties") {
     }
 }
 
-TEST_CASE("fl::max_align_t basic properties") {
-    SUBCASE("max_align_t has sufficient alignment") {
+FL_TEST_CASE("fl::max_align_t basic properties") {
+    FL_SUBCASE("max_align_t has sufficient alignment") {
         // max_align_t should have alignment suitable for any standard type
         fl::max_align_t m;
         (void)m;  // Avoid unused variable warning
@@ -149,21 +149,21 @@ TEST_CASE("fl::max_align_t basic properties") {
         FL_CHECK(sizeof(fl::max_align_t) >= sizeof(void*));
     }
 
-    SUBCASE("max_align_t alignment") {
+    FL_SUBCASE("max_align_t alignment") {
         // Check alignment is at least as strict as long long
         FL_CHECK(alignof(fl::max_align_t) >= alignof(long long));
         FL_CHECK(alignof(fl::max_align_t) >= alignof(long double));
         FL_CHECK(alignof(fl::max_align_t) >= alignof(void*));
     }
 
-    SUBCASE("max_align_t can be used in arrays") {
+    FL_SUBCASE("max_align_t can be used in arrays") {
         fl::max_align_t arr[10];
         (void)arr;  // Avoid unused variable warning
 
         FL_CHECK_EQ(sizeof(arr), 10 * sizeof(fl::max_align_t));
     }
 
-    SUBCASE("max_align_t union members can be accessed") {
+    FL_SUBCASE("max_align_t union members can be accessed") {
         fl::max_align_t m;
         m.ll = 42;
         FL_CHECK_EQ(m.ll, 42);
@@ -176,19 +176,19 @@ TEST_CASE("fl::max_align_t basic properties") {
     }
 }
 
-TEST_CASE("FL_OFFSETOF macro") {
+FL_TEST_CASE("FL_OFFSETOF macro") {
     struct SimpleStruct {
         char a;
         int b;
         double c;
     };
 
-    SUBCASE("FL_OFFSETOF returns zero for first member") {
+    FL_SUBCASE("FL_OFFSETOF returns zero for first member") {
         fl::size_t offset = FL_OFFSETOF(SimpleStruct, a);
         FL_CHECK_EQ(offset, 0);
     }
 
-    SUBCASE("FL_OFFSETOF returns non-zero for subsequent members") {
+    FL_SUBCASE("FL_OFFSETOF returns non-zero for subsequent members") {
         fl::size_t offset_b = FL_OFFSETOF(SimpleStruct, b);
         fl::size_t offset_c = FL_OFFSETOF(SimpleStruct, c);
 
@@ -199,7 +199,7 @@ TEST_CASE("FL_OFFSETOF macro") {
         FL_CHECK(offset_c > offset_b);
     }
 
-    SUBCASE("FL_OFFSETOF correctly computes member offsets") {
+    FL_SUBCASE("FL_OFFSETOF correctly computes member offsets") {
         SimpleStruct s;
 
         // Compute expected offsets using pointer arithmetic
@@ -212,7 +212,7 @@ TEST_CASE("FL_OFFSETOF macro") {
         FL_CHECK_EQ(FL_OFFSETOF(SimpleStruct, c), expected_offset_c);
     }
 
-    SUBCASE("FL_OFFSETOF with nested structs") {
+    FL_SUBCASE("FL_OFFSETOF with nested structs") {
         struct Inner {
             int x;
             int y;
@@ -233,7 +233,7 @@ TEST_CASE("FL_OFFSETOF macro") {
         FL_CHECK(offset_d > offset_inner);
     }
 
-    SUBCASE("FL_OFFSETOF is compile-time constant") {
+    FL_SUBCASE("FL_OFFSETOF is compile-time constant") {
         // This test verifies that FL_OFFSETOF can be used in contexts
         // requiring compile-time constants
         constexpr fl::size_t offset = FL_OFFSETOF(SimpleStruct, b);
@@ -244,8 +244,8 @@ TEST_CASE("FL_OFFSETOF macro") {
     }
 }
 
-TEST_CASE("fl::size_t and global size_t compatibility") {
-    SUBCASE("fl::size_t and ::size_t are the same type") {
+FL_TEST_CASE("fl::size_t and global size_t compatibility") {
+    FL_SUBCASE("fl::size_t and ::size_t are the same type") {
         // Both should refer to the same underlying type
         fl::size_t fl_size = 100;
         ::size_t global_size = fl_size;
@@ -254,7 +254,7 @@ TEST_CASE("fl::size_t and global size_t compatibility") {
         FL_CHECK_EQ(sizeof(fl::size_t), sizeof(::size_t));
     }
 
-    SUBCASE("can convert between fl::size_t and ::size_t") {
+    FL_SUBCASE("can convert between fl::size_t and ::size_t") {
         fl::size_t fl_size = 42;
         ::size_t global_size = 84;
 
@@ -266,8 +266,8 @@ TEST_CASE("fl::size_t and global size_t compatibility") {
     }
 }
 
-TEST_CASE("fl::ptrdiff_t and global ptrdiff_t compatibility") {
-    SUBCASE("fl::ptrdiff_t and ::ptrdiff_t are the same type") {
+FL_TEST_CASE("fl::ptrdiff_t and global ptrdiff_t compatibility") {
+    FL_SUBCASE("fl::ptrdiff_t and ::ptrdiff_t are the same type") {
         // Both should refer to the same underlying type
         fl::ptrdiff_t fl_diff = -100;
         ::ptrdiff_t global_diff = fl_diff;
@@ -276,7 +276,7 @@ TEST_CASE("fl::ptrdiff_t and global ptrdiff_t compatibility") {
         FL_CHECK_EQ(sizeof(fl::ptrdiff_t), sizeof(::ptrdiff_t));
     }
 
-    SUBCASE("can convert between fl::ptrdiff_t and ::ptrdiff_t") {
+    FL_SUBCASE("can convert between fl::ptrdiff_t and ::ptrdiff_t") {
         fl::ptrdiff_t fl_diff = 42;
         ::ptrdiff_t global_diff = -84;
 
@@ -288,13 +288,13 @@ TEST_CASE("fl::ptrdiff_t and global ptrdiff_t compatibility") {
     }
 }
 
-TEST_CASE("type sizes and relationships") {
-    SUBCASE("size_t is large enough to hold any array index") {
+FL_TEST_CASE("type sizes and relationships") {
+    FL_SUBCASE("size_t is large enough to hold any array index") {
         // size_t should be able to represent the size of the largest possible array
         FL_CHECK(sizeof(fl::size_t) >= sizeof(unsigned int));
     }
 
-    SUBCASE("ptrdiff_t is large enough to hold pointer differences") {
+    FL_SUBCASE("ptrdiff_t is large enough to hold pointer differences") {
         // ptrdiff_t should be the signed version of size_t
         // It should be able to represent the difference between any two pointers
         FL_CHECK(sizeof(fl::ptrdiff_t) >= sizeof(int));
@@ -304,7 +304,7 @@ TEST_CASE("type sizes and relationships") {
         FL_CHECK(sizeof(fl::size_t) == sizeof(fl::ptrdiff_t));
     }
 
-    SUBCASE("max_align_t provides strictest alignment") {
+    FL_SUBCASE("max_align_t provides strictest alignment") {
         // max_align_t should have the strictest alignment requirement
         // It should be suitable for any standard scalar type
         FL_CHECK(alignof(fl::max_align_t) >= alignof(char));
@@ -317,8 +317,8 @@ TEST_CASE("type sizes and relationships") {
     }
 }
 
-TEST_CASE("practical usage scenarios") {
-    SUBCASE("size_t for array indexing") {
+FL_TEST_CASE("practical usage scenarios") {
+    FL_SUBCASE("size_t for array indexing") {
         constexpr fl::size_t array_size = 100;
         int arr[array_size];
 
@@ -331,7 +331,7 @@ TEST_CASE("practical usage scenarios") {
         FL_CHECK_EQ(arr[99], 99);
     }
 
-    SUBCASE("ptrdiff_t for pointer arithmetic") {
+    FL_SUBCASE("ptrdiff_t for pointer arithmetic") {
         int arr[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         int* start = arr;
         int* end = arr + 10;
@@ -343,7 +343,7 @@ TEST_CASE("practical usage scenarios") {
         FL_CHECK_EQ(*middle, 5);
     }
 
-    SUBCASE("nullptr_t for null pointer semantics") {
+    FL_SUBCASE("nullptr_t for null pointer semantics") {
         auto find_value = [](int* arr, fl::size_t size, int value) -> int* {
             for (fl::size_t i = 0; i < size; ++i) {
                 if (arr[i] == value) {
@@ -363,7 +363,7 @@ TEST_CASE("practical usage scenarios") {
         FL_CHECK(not_found == nullptr);
     }
 
-    SUBCASE("FL_OFFSETOF for struct introspection") {
+    FL_SUBCASE("FL_OFFSETOF for struct introspection") {
         struct Point {
             int x;
             int y;
@@ -378,7 +378,7 @@ TEST_CASE("practical usage scenarios") {
         FL_CHECK(sizeof(Point) >= expected_min_size);
     }
 
-    SUBCASE("max_align_t for aligned storage") {
+    FL_SUBCASE("max_align_t for aligned storage") {
         // Use max_align_t to create maximally-aligned storage
         fl::max_align_t storage[10];
 
@@ -391,8 +391,8 @@ TEST_CASE("practical usage scenarios") {
     }
 }
 
-TEST_CASE("edge cases and boundary conditions") {
-    SUBCASE("size_t with zero") {
+FL_TEST_CASE("edge cases and boundary conditions") {
+    FL_SUBCASE("size_t with zero") {
         fl::size_t zero = 0;
         FL_CHECK_EQ(zero, 0);
 
@@ -401,13 +401,13 @@ TEST_CASE("edge cases and boundary conditions") {
         FL_CHECK(wrapped > 0);
     }
 
-    SUBCASE("ptrdiff_t with zero") {
+    FL_SUBCASE("ptrdiff_t with zero") {
         fl::ptrdiff_t zero = 0;
         FL_CHECK_EQ(zero, 0);
         FL_CHECK_EQ(-zero, 0);
     }
 
-    SUBCASE("nullptr comparisons") {
+    FL_SUBCASE("nullptr comparisons") {
         int* p1 = nullptr;
         int* p2 = nullptr;
         int value = 42;
@@ -420,7 +420,7 @@ TEST_CASE("edge cases and boundary conditions") {
         FL_CHECK(p3 != p1);
     }
 
-    SUBCASE("FL_OFFSETOF with single-member struct") {
+    FL_SUBCASE("FL_OFFSETOF with single-member struct") {
         struct Single {
             int value;
         };
@@ -430,22 +430,22 @@ TEST_CASE("edge cases and boundary conditions") {
     }
 }
 
-TEST_CASE("type conversions and casts") {
-    SUBCASE("size_t to ptrdiff_t conversion") {
+FL_TEST_CASE("type conversions and casts") {
+    FL_SUBCASE("size_t to ptrdiff_t conversion") {
         fl::size_t s = 100;
         fl::ptrdiff_t d = static_cast<fl::ptrdiff_t>(s);
 
         FL_CHECK_EQ(d, 100);
     }
 
-    SUBCASE("ptrdiff_t to size_t conversion (positive values)") {
+    FL_SUBCASE("ptrdiff_t to size_t conversion (positive values)") {
         fl::ptrdiff_t d = 100;
         fl::size_t s = static_cast<fl::size_t>(d);
 
         FL_CHECK_EQ(s, 100);
     }
 
-    SUBCASE("nullptr_t to pointer conversion") {
+    FL_SUBCASE("nullptr_t to pointer conversion") {
         fl::nullptr_t n = nullptr;
         int* ptr = static_cast<int*>(n);
 

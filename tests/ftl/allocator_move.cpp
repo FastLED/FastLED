@@ -6,7 +6,7 @@
 #include "fl/stl/set.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/vector.h"
@@ -159,10 +159,10 @@ public:
 
 } // anonymous namespace
 
-TEST_CASE("vector - Allocator move constructor") {
+FL_TEST_CASE("vector - Allocator move constructor") {
     TrackingAllocator<int>::Stats stats;
 
-    SUBCASE("Move constructor moves allocator") {
+    FL_SUBCASE("Move constructor moves allocator") {
         stats.reset();
 
         // Create vector with default allocator, then populate
@@ -194,10 +194,10 @@ TEST_CASE("vector - Allocator move constructor") {
     }
 }
 
-TEST_CASE("vector - Allocator move assignment") {
+FL_TEST_CASE("vector - Allocator move assignment") {
     TrackingAllocator<int>::Stats stats;
 
-    SUBCASE("Move assignment moves allocator") {
+    FL_SUBCASE("Move assignment moves allocator") {
         stats.reset();
 
         fl::vector<int, TrackingAllocator<int>> vec1;
@@ -230,8 +230,8 @@ TEST_CASE("vector - Allocator move assignment") {
     }
 }
 
-TEST_CASE("SortedHeapMap - Move constructor transfers data") {
-    SUBCASE("Move constructor transfers map data with default allocator") {
+FL_TEST_CASE("SortedHeapMap - Move constructor transfers data") {
+    FL_SUBCASE("Move constructor transfers map data with default allocator") {
         fl::SortedHeapMap<int, int> map1;
         map1.insert(1, 10);
         map1.insert(2, 20);
@@ -251,7 +251,7 @@ TEST_CASE("SortedHeapMap - Move constructor transfers data") {
         FL_CHECK(map1.empty());
     }
 
-    SUBCASE("Move constructor moves allocator") {
+    FL_SUBCASE("Move constructor moves allocator") {
         TrackingAllocator<fl::pair<int, int>>::Stats stats;
         stats.reset();
 
@@ -281,8 +281,8 @@ TEST_CASE("SortedHeapMap - Move constructor transfers data") {
     }
 }
 
-TEST_CASE("SortedHeapMap - Move assignment transfers data") {
-    SUBCASE("Move assignment transfers map data with default allocator") {
+FL_TEST_CASE("SortedHeapMap - Move assignment transfers data") {
+    FL_SUBCASE("Move assignment transfers map data with default allocator") {
         fl::SortedHeapMap<int, int> map1;
         map1.insert(100, 200);
 
@@ -305,7 +305,7 @@ TEST_CASE("SortedHeapMap - Move assignment transfers data") {
         FL_CHECK(map2.empty());
     }
 
-    SUBCASE("Move assignment moves allocator") {
+    FL_SUBCASE("Move assignment moves allocator") {
         TrackingAllocator<fl::pair<int, int>>::Stats stats;
         stats.reset();
 
@@ -338,10 +338,10 @@ TEST_CASE("SortedHeapMap - Move assignment transfers data") {
     }
 }
 
-TEST_CASE("VectorSet - Allocator move constructor") {
+FL_TEST_CASE("VectorSet - Allocator move constructor") {
     TrackingAllocator<int>::Stats stats;
 
-    SUBCASE("Move constructor moves underlying vector allocator") {
+    FL_SUBCASE("Move constructor moves underlying vector allocator") {
         stats.reset();
 
         fl::VectorSet<int, TrackingAllocator<int>> set1;
@@ -370,10 +370,10 @@ TEST_CASE("VectorSet - Allocator move constructor") {
     }
 }
 
-TEST_CASE("VectorSet - Allocator move assignment") {
+FL_TEST_CASE("VectorSet - Allocator move assignment") {
     TrackingAllocator<int>::Stats stats;
 
-    SUBCASE("Move assignment moves underlying vector allocator") {
+    FL_SUBCASE("Move assignment moves underlying vector allocator") {
         stats.reset();
 
         fl::VectorSet<int, TrackingAllocator<int>> set1;
@@ -405,8 +405,8 @@ TEST_CASE("VectorSet - Allocator move assignment") {
     }
 }
 
-TEST_CASE("InlinedVector - Allocator move operations with heap storage") {
-    SUBCASE("Move constructor transfers heap storage") {
+FL_TEST_CASE("InlinedVector - Allocator move operations with heap storage") {
+    FL_SUBCASE("Move constructor transfers heap storage") {
         fl::InlinedVector<int, 2> vec1;  // Inlined size = 2
 
         // Fill beyond inlined capacity to force heap allocation
@@ -428,7 +428,7 @@ TEST_CASE("InlinedVector - Allocator move operations with heap storage") {
         FL_CHECK(vec1.empty());
     }
 
-    SUBCASE("Move assignment transfers heap storage") {
+    FL_SUBCASE("Move assignment transfers heap storage") {
         fl::InlinedVector<int, 2> vec1;  // Inlined size = 2
         vec1.push_back(100);
 
@@ -453,8 +453,8 @@ TEST_CASE("InlinedVector - Allocator move operations with heap storage") {
     }
 }
 
-TEST_CASE("Allocator move semantics - Stateless allocator optimization") {
-    SUBCASE("Stateless allocator (fl::allocator) moves are lightweight") {
+FL_TEST_CASE("Allocator move semantics - Stateless allocator optimization") {
+    FL_SUBCASE("Stateless allocator (fl::allocator) moves are lightweight") {
         fl::vector<int> vec1;
         vec1.push_back(1);
         vec1.push_back(2);
@@ -471,7 +471,7 @@ TEST_CASE("Allocator move semantics - Stateless allocator optimization") {
         FL_CHECK(vec1.size() == 0);
     }
 
-    SUBCASE("Stateless allocator move assignment") {
+    FL_SUBCASE("Stateless allocator move assignment") {
         fl::vector<int> vec1;
         vec1.push_back(100);
 

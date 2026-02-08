@@ -3,13 +3,13 @@
 #include "fl/stl/iterator.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/vector.h"
 
-TEST_CASE("back_inserter with vector") {
+FL_TEST_CASE("back_inserter with vector") {
     fl::vector<int> vec;
 
-    SUBCASE("Basic insertion") {
+    FL_SUBCASE("Basic insertion") {
         auto inserter = fl::back_inserter(vec);
         *inserter = 10;
         *inserter = 20;
@@ -21,7 +21,7 @@ TEST_CASE("back_inserter with vector") {
         FL_CHECK(vec[2] == 30);
     }
 
-    SUBCASE("Pre-increment") {
+    FL_SUBCASE("Pre-increment") {
         auto inserter = fl::back_inserter(vec);
         ++inserter = 10;
 
@@ -29,7 +29,7 @@ TEST_CASE("back_inserter with vector") {
         FL_CHECK(vec[0] == 10);
     }
 
-    SUBCASE("Post-increment") {
+    FL_SUBCASE("Post-increment") {
         auto inserter = fl::back_inserter(vec);
         inserter++ = 10;
 
@@ -37,7 +37,7 @@ TEST_CASE("back_inserter with vector") {
         FL_CHECK(vec[0] == 10);
     }
 
-    SUBCASE("Dereference") {
+    FL_SUBCASE("Dereference") {
         auto inserter = fl::back_inserter(vec);
         *inserter = 10;
         *inserter = 20;
@@ -48,10 +48,10 @@ TEST_CASE("back_inserter with vector") {
     }
 }
 
-TEST_CASE("back_inserter with FixedVector") {
+FL_TEST_CASE("back_inserter with FixedVector") {
     fl::FixedVector<int, 5> vec;
 
-    SUBCASE("Basic insertion") {
+    FL_SUBCASE("Basic insertion") {
         auto inserter = fl::back_inserter(vec);
         *inserter = 10;
         *inserter = 20;
@@ -64,10 +64,10 @@ TEST_CASE("back_inserter with FixedVector") {
     }
 }
 
-TEST_CASE("back_inserter with InlinedVector") {
+FL_TEST_CASE("back_inserter with InlinedVector") {
     fl::InlinedVector<int, 3> vec;
 
-    SUBCASE("Basic insertion within inline capacity") {
+    FL_SUBCASE("Basic insertion within inline capacity") {
         auto inserter = fl::back_inserter(vec);
         *inserter = 10;
         *inserter = 20;
@@ -77,7 +77,7 @@ TEST_CASE("back_inserter with InlinedVector") {
         FL_CHECK(vec[1] == 20);
     }
 
-    SUBCASE("Insertion beyond inline capacity (heap allocation)") {
+    FL_SUBCASE("Insertion beyond inline capacity (heap allocation)") {
         auto inserter = fl::back_inserter(vec);
         *inserter = 10;
         *inserter = 20;
@@ -92,7 +92,7 @@ TEST_CASE("back_inserter with InlinedVector") {
     }
 }
 
-TEST_CASE("back_inserter with move semantics") {
+FL_TEST_CASE("back_inserter with move semantics") {
     struct MoveOnly {
         int value;
 
@@ -116,7 +116,7 @@ TEST_CASE("back_inserter with move semantics") {
 
     fl::vector<MoveOnly> vec;
 
-    SUBCASE("Move insertion") {
+    FL_SUBCASE("Move insertion") {
         auto inserter = fl::back_inserter(vec);
         *inserter = MoveOnly(42);
 
@@ -126,7 +126,7 @@ TEST_CASE("back_inserter with move semantics") {
 }
 
 // Test integration with algorithms
-TEST_CASE("back_inserter with algorithm integration") {
+FL_TEST_CASE("back_inserter with algorithm integration") {
     fl::vector<int> source;
     source.push_back(1);
     source.push_back(2);
@@ -134,7 +134,7 @@ TEST_CASE("back_inserter with algorithm integration") {
 
     fl::vector<int> dest;
 
-    SUBCASE("Manual copy using back_inserter") {
+    FL_SUBCASE("Manual copy using back_inserter") {
         auto inserter = fl::back_inserter(dest);
         for (auto it = source.begin(); it != source.end(); ++it) {
             *inserter++ = *it;

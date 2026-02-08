@@ -1,7 +1,7 @@
 // Unit tests for XYMap basic functionality and LUT vs user-function compatibility
 
 #include "FastLED.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/xymap.h"
 #include "fl/int.h"
 
@@ -33,7 +33,7 @@ void fill_custom_irregular_lut(fl::u16* out, fl::u16 width, fl::u16 height) {
 }
 } // namespace
 
-TEST_CASE("XYMap - LUT and wrapped user function mappings are identical (serpentine)") {
+FL_TEST_CASE("XYMap - LUT and wrapped user function mappings are identical (serpentine)") {
     constexpr fl::u16 W = 5;
     constexpr fl::u16 H = 4;
 
@@ -67,7 +67,7 @@ TEST_CASE("XYMap - LUT and wrapped user function mappings are identical (serpent
     }
 }
 
-TEST_CASE("XYMap - LUT and wrapped user function mappings are identical (custom irregular)") {
+FL_TEST_CASE("XYMap - LUT and wrapped user function mappings are identical (custom irregular)") {
     constexpr fl::u16 W = 6;
     constexpr fl::u16 H = 5;
 
@@ -90,7 +90,7 @@ TEST_CASE("XYMap - LUT and wrapped user function mappings are identical (custom 
     }
 }
 
-TEST_CASE("XYMap - composing two 4x3 serpentine segments into a 4x6 matrix") {
+FL_TEST_CASE("XYMap - composing two 4x3 serpentine segments into a 4x6 matrix") {
     // Goal: Validate how two serpentine 4x3 segments (offsets 0 and 12) compose
     // into a 4x6 matrix, and whether they match a single 4x6 serpentine map.
     // Observation: With the built-in serpentine mapping, row parity resets per
@@ -116,7 +116,7 @@ TEST_CASE("XYMap - composing two 4x3 serpentine segments into a 4x6 matrix") {
         return segBottom.mapToIndex(x, y);
     };
 
-    SUBCASE("Default serpentine segments: top half matches; rows 3-5 mismatch due to parity reset") {
+    FL_SUBCASE("Default serpentine segments: top half matches; rows 3-5 mismatch due to parity reset") {
         // Rows 0..2 should match the single 4x6 map exactly
         for (fl::u16 y = 0; y < H_SEG; ++y) {
             for (fl::u16 x = 0; x < W; ++x) {
@@ -146,7 +146,7 @@ TEST_CASE("XYMap - composing two 4x3 serpentine segments into a 4x6 matrix") {
         }
     }
 
-    SUBCASE("User-function segments honoring absolute row parity match the 4x6 serpentine") {
+    FL_SUBCASE("User-function segments honoring absolute row parity match the 4x6 serpentine") {
         // Define a mapping that uses absolute y parity, but still indexes within the segment
         // height via y % height. This preserves boustrophedon continuity across segments.
         auto xy_abs_parity_serp = +[](fl::u16 x, fl::u16 y, fl::u16 width, fl::u16 height) -> fl::u16 {

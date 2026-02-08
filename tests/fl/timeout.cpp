@@ -6,7 +6,7 @@
 
 using namespace fl;
 
-TEST_CASE("Timeout - rollover test") {
+FL_TEST_CASE("Timeout - rollover test") {
     // Test critical rollover scenario: timeout starts before rollover (0xFFFFFFFF),
     // ends after rollover (0x00000000+). This verifies unsigned arithmetic works correctly.
 

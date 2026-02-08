@@ -6,7 +6,7 @@ using namespace noise_test_helpers;
 // Temporarily disable all non-critical noise tests for faster test runs
 #if 0
 
-TEST_CASE("[.]noiseCylinderHSV8 temporal smoothness - small time delta") {
+FL_TEST_CASE("[.]noiseCylinderHSV8 temporal smoothness - small time delta") {
     const int NUM_LEDS = 128;
     const float ANGLE_STEP = 2.0f * M_PI / NUM_LEDS;
     const float HEIGHT = 0.5f;
@@ -44,7 +44,7 @@ TEST_CASE("[.]noiseCylinderHSV8 temporal smoothness - small time delta") {
     FL_CHECK_LT(avg_diff_1ms, 5.0f);
 }
 
-TEST_CASE("[.]noiseCylinderHSV8 temporal evolution - large time delta") {
+FL_TEST_CASE("[.]noiseCylinderHSV8 temporal evolution - large time delta") {
     const int NUM_LEDS = 128;
     const float ANGLE_STEP = 2.0f * M_PI / NUM_LEDS;
     const float HEIGHT = 0.5f;
@@ -81,7 +81,7 @@ TEST_CASE("[.]noiseCylinderHSV8 temporal evolution - large time delta") {
     FL_CHECK_GT(avg_diff_1sec, 0.01f);
 }
 
-TEST_CASE("[.]noiseCylinderHSV8 temporal response ratio") {
+FL_TEST_CASE("[.]noiseCylinderHSV8 temporal response ratio") {
     const int NUM_LEDS = 128;
     const float ANGLE_STEP = 2.0f * M_PI / NUM_LEDS;
     const float HEIGHT = 0.5f;
@@ -129,7 +129,7 @@ TEST_CASE("[.]noiseCylinderHSV8 temporal response ratio") {
     FL_CHECK_GT(avg_diff_1sec, avg_diff_1ms);
 }
 
-TEST_CASE("[.]noiseCylinderCRGB temporal test") {
+FL_TEST_CASE("[.]noiseCylinderCRGB temporal test") {
     const int NUM_LEDS = 128;
     const float ANGLE_STEP = 2.0f * M_PI / NUM_LEDS;
     const float HEIGHT = 0.5f;
@@ -173,7 +173,7 @@ TEST_CASE("[.]noiseCylinderCRGB temporal test") {
     FL_CHECK_GT(avg_diff_1sec, avg_diff_1ms);
 }
 
-TEST_CASE("[.]noiseCylinderHSV16 full circumference coverage") {
+FL_TEST_CASE("[.]noiseCylinderHSV16 full circumference coverage") {
     const int NUM_ANGLES = 256;
     const float ANGLE_STEP = 2.0f * M_PI / NUM_ANGLES;
     const float HEIGHT = 0.5f;
@@ -225,7 +225,7 @@ TEST_CASE("[.]noiseCylinderHSV16 full circumference coverage") {
     FL_CHECK_LT(h_avg, 0xD000);
 }
 
-TEST_CASE("[.]noiseCylinderHSV8 radius level of detail") {
+FL_TEST_CASE("[.]noiseCylinderHSV8 radius level of detail") {
     const int NUM_LEDS = 64;
     const float ANGLE_STEP = 2.0f * M_PI / NUM_LEDS;
     const float HEIGHT = 0.5f;
@@ -259,7 +259,7 @@ TEST_CASE("[.]noiseCylinderHSV8 radius level of detail") {
     FL_CHECK_GT(avg_diff, 10.0f);
 }
 
-TEST_CASE("[.]noiseCylinderHSV8 height variation") {
+FL_TEST_CASE("[.]noiseCylinderHSV8 height variation") {
     const int NUM_HEIGHTS = 64;
     const float ANGLE = 0.0f;  // Fixed angle
 
@@ -293,7 +293,7 @@ TEST_CASE("[.]noiseCylinderHSV8 height variation") {
     FL_CHECK_GT(avg_diff, 5.0f);
 }
 
-TEST_CASE("[.]noiseCylinderHSV16 full cylinder coverage (angle + height)") {
+FL_TEST_CASE("[.]noiseCylinderHSV16 full cylinder coverage (angle + height)") {
     const int ANGLE_SAMPLES = 32;
     const int HEIGHT_SAMPLES = 16;
     const float ANGLE_STEP = 2.0f * M_PI / ANGLE_SAMPLES;
@@ -352,7 +352,7 @@ TEST_CASE("[.]noiseCylinderHSV16 full cylinder coverage (angle + height)") {
     FL_CHECK_LT(h_avg, 0xD000);
 }
 
-TEST_CASE("[.]noiseCylinderCRGB full cylinder coverage") {
+FL_TEST_CASE("[.]noiseCylinderCRGB full cylinder coverage") {
     const int ANGLE_SAMPLES = 32;
     const int HEIGHT_SAMPLES = 16;
     const float ANGLE_STEP = 2.0f * M_PI / ANGLE_SAMPLES;

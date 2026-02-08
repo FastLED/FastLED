@@ -4,12 +4,12 @@
 #if FASTLED_USE_THREAD_LOCAL
 #include "fl/stl/thread.h"
 #include <unistd.h>  // for usleep
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/thread.h"
 #endif
 
 
-TEST_CASE("ThreadLocal - basic functionality") {
+FL_TEST_CASE("ThreadLocal - basic functionality") {
     fl::ThreadLocal<int> tls;
     
     // Default constructed value should be 0
@@ -28,7 +28,7 @@ TEST_CASE("ThreadLocal - basic functionality") {
     FL_REQUIRE(value == 100);
 }
 
-TEST_CASE("ThreadLocal - with default value") {
+FL_TEST_CASE("ThreadLocal - with default value") {
     fl::ThreadLocal<int> tls(999);
     
     // Should start with default value
@@ -39,7 +39,7 @@ TEST_CASE("ThreadLocal - with default value") {
     FL_REQUIRE(tls.access() == 123);
 }
 
-TEST_CASE("ThreadLocal - with custom type") {
+FL_TEST_CASE("ThreadLocal - with custom type") {
     struct TestStruct {
         int value = 0;
         fl::string name = "default";
@@ -106,7 +106,7 @@ static void* thread_test_func(void* arg) {
     return nullptr;
 }
 
-TEST_CASE("ThreadLocal - thread isolation") {
+FL_TEST_CASE("ThreadLocal - thread isolation") {
     fl::ThreadLocal<int> tls;
     
     const int num_threads = 4;
@@ -188,7 +188,7 @@ static void* shared_tls_test_func(void* arg) {
     return nullptr;
 }
 
-TEST_CASE("ThreadLocal - multiple instances") {
+FL_TEST_CASE("ThreadLocal - multiple instances") {
     fl::ThreadLocal<int> tls1;
     fl::ThreadLocal<int> tls2;
     
@@ -236,7 +236,7 @@ TEST_CASE("ThreadLocal - multiple instances") {
     FL_REQUIRE(tls2.access() == 0);
 }
 
-TEST_CASE("ThreadLocal - copy constructor") {
+FL_TEST_CASE("ThreadLocal - copy constructor") {
     fl::ThreadLocal<int> tls1(555);
     fl::ThreadLocal<int> tls2(tls1);  // Copy constructor
     
@@ -252,7 +252,7 @@ TEST_CASE("ThreadLocal - copy constructor") {
     FL_REQUIRE(tls2.access() == 222);
 }
 
-TEST_CASE("ThreadLocal - assignment operator") {
+FL_TEST_CASE("ThreadLocal - assignment operator") {
     fl::ThreadLocal<int> tls1(777);
     fl::ThreadLocal<int> tls2;
     
@@ -297,7 +297,7 @@ static void* cleanup_test_func(void* arg) {
     // Thread exits here, triggering cleanup
 }
 
-TEST_CASE("ThreadLocal - thread cleanup") {
+FL_TEST_CASE("ThreadLocal - thread cleanup") {
     fl::ThreadLocal<fl::string> tls("default");
     CleanupTestData data;
     data.tls = &tls;
@@ -325,7 +325,7 @@ TEST_CASE("ThreadLocal - thread cleanup") {
     FL_REQUIRE(tls.access() == "main_value");
 }
 
-TEST_CASE("ThreadLocal - const access") {
+FL_TEST_CASE("ThreadLocal - const access") {
     const fl::ThreadLocal<int> tls(888);
     
     // Should be able to access const ThreadLocal
@@ -336,7 +336,7 @@ TEST_CASE("ThreadLocal - const access") {
     FL_REQUIRE(value == 888);
 }
 
-TEST_CASE("ThreadLocal - RAII behavior") {
+FL_TEST_CASE("ThreadLocal - RAII behavior") {
     // Test that ThreadLocal properly manages its pthread_key
     {
         fl::ThreadLocal<int> tls(123);

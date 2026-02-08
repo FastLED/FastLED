@@ -1,17 +1,17 @@
 // g++ --std=c++11 test.cpp
 
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 #include "platforms/intmap.h"
 using namespace fl;
 
-TEST_CASE("map8_to_16") {
+FL_TEST_CASE("map8_to_16") {
     FL_CHECK_EQ((int_scale<uint8_t, uint16_t>(uint8_t(0))), 0);
     FL_CHECK_EQ((int_scale<uint8_t, uint16_t>(uint8_t(1))), 0x101);
     FL_CHECK_EQ((int_scale<uint8_t, uint16_t>(uint8_t(0xff))), 0xffff);
 }
 
-TEST_CASE("smap8_to_16") {
+FL_TEST_CASE("smap8_to_16") {
     // Zero case
     FL_CHECK_EQ((int_scale<int8_t, int16_t>(int8_t(0))), 0);
 
@@ -25,13 +25,13 @@ TEST_CASE("smap8_to_16") {
 }
 
 
-TEST_CASE("map8_to_32") {
+FL_TEST_CASE("map8_to_32") {
     FL_CHECK_EQ((int_scale<uint8_t, uint32_t>(uint8_t(0))), 0);
     FL_CHECK_EQ((int_scale<uint8_t, uint32_t>(uint8_t(1))), 0x1010101);
     FL_CHECK_EQ((int_scale<uint8_t, uint32_t>(uint8_t(0xff))), 0xffffffff);
 }
 
-TEST_CASE("smap8_to_32") {
+FL_TEST_CASE("smap8_to_32") {
     // Zero case
     FL_CHECK_EQ((int_scale<int8_t, int32_t>(int8_t(0))), 0);
 
@@ -44,13 +44,13 @@ TEST_CASE("smap8_to_32") {
     FL_CHECK_EQ((int_scale<int8_t, int32_t>(int8_t(-128))), int32_t(-2139062144));   // 0x80 -> 0x80808080 = -2139062144
 }
 
-TEST_CASE("map16_to_32") {
+FL_TEST_CASE("map16_to_32") {
     FL_CHECK_EQ((int_scale<uint16_t, uint32_t>(uint16_t(0))), 0);
     FL_CHECK_EQ((int_scale<uint16_t, uint32_t>(uint16_t(1))), 0x10001);
     FL_CHECK_EQ((int_scale<uint16_t, uint32_t>(uint16_t(0xffff))), 0xffffffff);
 }
 
-TEST_CASE("smap16_to_32") {
+FL_TEST_CASE("smap16_to_32") {
     // Zero case
     FL_CHECK_EQ((int_scale<int16_t, int32_t>(int16_t(0))), 0);
 
@@ -63,7 +63,7 @@ TEST_CASE("smap16_to_32") {
     FL_CHECK_EQ((int_scale<int16_t, int32_t>(int16_t(-32768))), int32_t(-2147450880)); // 0x8000 -> 0x80008000 = -2147450880
 }
 
-TEST_CASE("map16_to_8") {
+FL_TEST_CASE("map16_to_8") {
     // Zero case: 0x0000 -> 0x00
     FL_CHECK_EQ((int_scale<uint16_t, uint8_t>(uint16_t(0x0000))), 0x00);
 
@@ -89,7 +89,7 @@ TEST_CASE("map16_to_8") {
     FL_CHECK_EQ((int_scale<uint16_t, uint8_t>(uint16_t(0xFFFF))), 0xFF);
 }
 
-TEST_CASE("smap16_to_8") {
+FL_TEST_CASE("smap16_to_8") {
     // Zero case
     FL_CHECK_EQ((int_scale<int16_t, int8_t>(int16_t(0))), 0);
 
@@ -108,7 +108,7 @@ TEST_CASE("smap16_to_8") {
     FL_CHECK_EQ((int_scale<int16_t, int8_t>(int16_t(-32768))), -128);   // (-32768 + 128) >> 8 = -128
 }
 
-TEST_CASE("map32_to_16") {
+FL_TEST_CASE("map32_to_16") {
     // Zero case: 0x00000000 -> 0x0000
     FL_CHECK_EQ((int_scale<uint32_t, uint16_t>(uint32_t(0x00000000))), 0x0000);
 
@@ -134,7 +134,7 @@ TEST_CASE("map32_to_16") {
     FL_CHECK_EQ((int_scale<uint32_t, uint16_t>(uint32_t(0xFFFFFFFF))), 0xFFFF);
 }
 
-TEST_CASE("smap32_to_16") {
+FL_TEST_CASE("smap32_to_16") {
     // Zero case
     FL_CHECK_EQ((int_scale<int32_t, int16_t>(int32_t(0))), 0);
 
@@ -153,7 +153,7 @@ TEST_CASE("smap32_to_16") {
     FL_CHECK_EQ((int_scale<int32_t, int16_t>(int32_t(-2147483648))), -32768);  // Min negative value
 }
 
-TEST_CASE("map32_to_8") {
+FL_TEST_CASE("map32_to_8") {
     // Zero case: 0x00000000 -> 0x00
     FL_CHECK_EQ((int_scale<uint32_t, uint8_t>(uint32_t(0x00000000))), 0x00);
 
@@ -179,7 +179,7 @@ TEST_CASE("map32_to_8") {
     FL_CHECK_EQ((int_scale<uint32_t, uint8_t>(uint32_t(0xFFFFFFFF))), 0xFF);
 }
 
-TEST_CASE("smap32_to_8") {
+FL_TEST_CASE("smap32_to_8") {
     // Zero case
     FL_CHECK_EQ((int_scale<int32_t, int8_t>(int32_t(0))), 0);
 

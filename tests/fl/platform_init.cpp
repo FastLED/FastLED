@@ -3,12 +3,12 @@
 ///
 /// Tests the fl::platforms::init() trampoline pattern and CFastLED::init() method.
 
-#include "doctest.h"
+#include "test.h"
 #include "FastLED.h"
 #include "platforms/init.h"
 
-TEST_CASE("platform_init") {
-    SUBCASE("fl::platforms::init() can be called") {
+FL_TEST_CASE("platform_init") {
+    FL_SUBCASE("fl::platforms::init() can be called") {
         // Test that the platform init function exists and can be called
         // This should be a no-op on most platforms, but ESP32 will initialize
         // channel engines and SPI bus manager
@@ -18,7 +18,7 @@ TEST_CASE("platform_init") {
         FL_CHECK(true);
     }
 
-    SUBCASE("fl::platforms::init() is safe to call multiple times") {
+    FL_SUBCASE("fl::platforms::init() is safe to call multiple times") {
         // Test that calling init() multiple times is safe (idempotent)
         fl::platforms::init();
         fl::platforms::init();
@@ -28,7 +28,7 @@ TEST_CASE("platform_init") {
         FL_CHECK(true);
     }
 
-    SUBCASE("FastLED.init() can be called") {
+    FL_SUBCASE("FastLED.init() can be called") {
         // Test that the CFastLED::init() method exists and can be called
         FastLED.init();
 
@@ -36,7 +36,7 @@ TEST_CASE("platform_init") {
         FL_CHECK(true);
     }
 
-    SUBCASE("FastLED.init() is safe to call multiple times") {
+    FL_SUBCASE("FastLED.init() is safe to call multiple times") {
         // Test that calling FastLED.init() multiple times is safe (idempotent)
         FastLED.init();
         FastLED.init();
@@ -46,7 +46,7 @@ TEST_CASE("platform_init") {
         FL_CHECK(true);
     }
 
-    SUBCASE("FastLED.init() calls fl::platforms::init()") {
+    FL_SUBCASE("FastLED.init() calls fl::platforms::init()") {
         // This is more of a structural test - we can't directly verify the call chain
         // in a unit test, but we can verify both functions exist and work together
 

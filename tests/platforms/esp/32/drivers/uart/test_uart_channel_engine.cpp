@@ -5,7 +5,7 @@
 /// hardware abstraction. Validates channel management, encoding, transmission,
 /// and state machine behavior.
 
-#include "doctest.h"
+#include "test.h"
 #include "fl/channels/data.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "platforms/esp/32/drivers/uart/channel_engine_uart.h"
@@ -87,26 +87,26 @@ public:
 // Test Cases
 //=============================================================================
 
-TEST_CASE("ChannelEngineUART - Lifecycle") {
+FL_TEST_CASE("ChannelEngineUART - Lifecycle") {
     ChannelEngineUARTFixture fixture;
 
-    SUBCASE("Initial state is READY") {
+    FL_SUBCASE("Initial state is READY") {
         FL_CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::READY);
     }
 
-    SUBCASE("Engine name is UART") {
+    FL_SUBCASE("Engine name is UART") {
         FL_CHECK(fl::string(fixture.mEngine.getName()) == "UART");
     }
 
-    SUBCASE("Peripheral not initialized before first show") {
+    FL_SUBCASE("Peripheral not initialized before first show") {
         FL_CHECK_FALSE(fixture.mMockPeripheral->isInitialized());
     }
 }
 
-TEST_CASE("ChannelEngineUART - Single channel enqueue and show") {
+FL_TEST_CASE("ChannelEngineUART - Single channel enqueue and show") {
     ChannelEngineUARTFixture fixture;
 
-    SUBCASE("Enqueue channel") {
+    FL_SUBCASE("Enqueue channel") {
         auto channel = fixture.createChannel(17, 10); // 10 RGB LEDs
         fixture.mEngine.enqueue(channel);
 
@@ -114,7 +114,7 @@ TEST_CASE("ChannelEngineUART - Single channel enqueue and show") {
         FL_CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::READY);
     }
 
-    SUBCASE("Show triggers initialization") {
+    FL_SUBCASE("Show triggers initialization") {
         auto channel = fixture.createChannel(17, 10);
         fixture.mEngine.enqueue(channel);
         fixture.mEngine.show();
@@ -123,7 +123,7 @@ TEST_CASE("ChannelEngineUART - Single channel enqueue and show") {
         FL_CHECK(fixture.mMockPeripheral->isInitialized());
     }
 
-    SUBCASE("Show transmits encoded data") {
+    FL_SUBCASE("Show transmits encoded data") {
         auto channel = fixture.createChannel(17, 10); // 10 RGB LEDs = 30 bytes
         fixture.mEngine.enqueue(channel);
         fixture.mEngine.show();
@@ -141,7 +141,7 @@ TEST_CASE("ChannelEngineUART - Single channel enqueue and show") {
         FL_CHECK(captured.size() == 120);
     }
 
-    SUBCASE("Encoding correctness - single byte") {
+    FL_SUBCASE("Encoding correctness - single byte") {
         // Create channel with single RGB LED
         auto channel = fixture.createChannel(17, 1);
         auto& buffer = channel->getData();
@@ -178,10 +178,10 @@ TEST_CASE("ChannelEngineUART - Single channel enqueue and show") {
     }
 }
 
-TEST_CASE("ChannelEngineUART - State machine") {
+FL_TEST_CASE("ChannelEngineUART - State machine") {
     ChannelEngineUARTFixture fixture;
 
-    SUBCASE("State progression: READY → DRAINING → READY") {
+    FL_SUBCASE("State progression: READY → DRAINING → READY") {
         // Set a transmission delay so we can observe DRAINING state
         fixture.mMockPeripheral->setTransmissionDelay(1000); // 1ms delay
 
@@ -202,7 +202,7 @@ TEST_CASE("ChannelEngineUART - State machine") {
         FL_CHECK(fixture.pollUntilReady());
     }
 
-    SUBCASE("Multiple show() calls with different data") {
+    FL_SUBCASE("Multiple show() calls with different data") {
         // First transmission
         auto channel1 = fixture.createChannel(17, 5);
         fixture.mEngine.enqueue(channel1);
@@ -228,10 +228,10 @@ TEST_CASE("ChannelEngineUART - State machine") {
     }
 }
 
-TEST_CASE("ChannelEngineUART - Multiple channels sequential transmission") {
+FL_TEST_CASE("ChannelEngineUART - Multiple channels sequential transmission") {
     ChannelEngineUARTFixture fixture;
 
-    SUBCASE("Multiple channels transmitted sequentially") {
+    FL_SUBCASE("Multiple channels transmitted sequentially") {
         auto channel1 = fixture.createChannel(17, 10);
         auto channel2 = fixture.createChannel(18, 10);
 
@@ -251,10 +251,10 @@ TEST_CASE("ChannelEngineUART - Multiple channels sequential transmission") {
     }
 }
 
-TEST_CASE("ChannelEngineUART - Buffer sizing") {
+FL_TEST_CASE("ChannelEngineUART - Buffer sizing") {
     ChannelEngineUARTFixture fixture;
 
-    SUBCASE("Small buffer (10 LEDs)") {
+    FL_SUBCASE("Small buffer (10 LEDs)") {
         auto channel = fixture.createChannel(17, 10);
         fixture.mEngine.enqueue(channel);
         fixture.mEngine.show();
@@ -265,7 +265,7 @@ TEST_CASE("ChannelEngineUART - Buffer sizing") {
         FL_CHECK(captured.size() == 120); // 10 * 3 * 4 = 120
     }
 
-    SUBCASE("Medium buffer (50 LEDs)") {
+    FL_SUBCASE("Medium buffer (50 LEDs)") {
         // Reduced from 100 to 50 LEDs for performance (still provides excellent coverage)
         auto channel = fixture.createChannel(17, 50);
         fixture.mEngine.enqueue(channel);
@@ -277,7 +277,7 @@ TEST_CASE("ChannelEngineUART - Buffer sizing") {
         FL_CHECK(captured.size() == 600); // 50 * 3 * 4 = 600
     }
 
-    SUBCASE("Large buffer (500 LEDs)") {
+    FL_SUBCASE("Large buffer (500 LEDs)") {
         // Reduced from 1000 to 500 LEDs for performance (still provides excellent coverage)
         auto channel = fixture.createChannel(17, 500);
         fixture.mEngine.enqueue(channel);
@@ -290,10 +290,10 @@ TEST_CASE("ChannelEngineUART - Buffer sizing") {
     }
 }
 
-TEST_CASE("ChannelEngineUART - Empty channel handling") {
+FL_TEST_CASE("ChannelEngineUART - Empty channel handling") {
     ChannelEngineUARTFixture fixture;
 
-    SUBCASE("Empty channel (0 LEDs)") {
+    FL_SUBCASE("Empty channel (0 LEDs)") {
         ChipsetTimingConfig timing(WS2812_T0H, WS2812_T0L, WS2812_T1H, WS2812_T1L);
         fl::vector_psram<uint8_t> emptyData;
         auto data = fl::make_shared<ChannelData>(
@@ -309,7 +309,7 @@ TEST_CASE("ChannelEngineUART - Empty channel handling") {
         FL_CHECK_FALSE(fixture.mMockPeripheral->isInitialized());
     }
 
-    SUBCASE("Null channel") {
+    FL_SUBCASE("Null channel") {
         fixture.mEngine.enqueue(nullptr);
         fixture.mEngine.show();
 
@@ -318,10 +318,10 @@ TEST_CASE("ChannelEngineUART - Empty channel handling") {
     }
 }
 
-TEST_CASE("ChannelEngineUART - Chipset grouping") {
+FL_TEST_CASE("ChannelEngineUART - Chipset grouping") {
     ChannelEngineUARTFixture fixture;
 
-    SUBCASE("Single chipset group") {
+    FL_SUBCASE("Single chipset group") {
         // All channels use same timing (WS2812)
         auto channel = fixture.createChannel(17, 10);
         fixture.mEngine.enqueue(channel);
@@ -339,10 +339,10 @@ TEST_CASE("ChannelEngineUART - Chipset grouping") {
     // This will be extended when more LED protocols are supported
 }
 
-TEST_CASE("ChannelEngineUART - Waveform validation") {
+FL_TEST_CASE("ChannelEngineUART - Waveform validation") {
     ChannelEngineUARTFixture fixture;
 
-    SUBCASE("Verify wave8 encoding patterns") {
+    FL_SUBCASE("Verify wave8 encoding patterns") {
         auto channel = fixture.createChannel(17, 1);
         auto& buffer = channel->getData();
 
@@ -377,7 +377,7 @@ TEST_CASE("ChannelEngineUART - Waveform validation") {
         FL_CHECK(captured[11] == 0x91);
     }
 
-    SUBCASE("Extract waveform from mock") {
+    FL_SUBCASE("Extract waveform from mock") {
         auto channel = fixture.createChannel(17, 1);
         auto& buffer = channel->getData();
         buffer[0] = 0xFF; // All 1s
@@ -400,10 +400,10 @@ TEST_CASE("ChannelEngineUART - Waveform validation") {
     }
 }
 
-TEST_CASE("ChannelEngineUART - Stress test") {
+FL_TEST_CASE("ChannelEngineUART - Stress test") {
     ChannelEngineUARTFixture fixture;
 
-    SUBCASE("Rapid show() calls") {
+    FL_SUBCASE("Rapid show() calls") {
         for (int i = 0; i < 10; i++) {
             auto channel = fixture.createChannel(17, 10);
             fixture.mEngine.enqueue(channel);
@@ -414,7 +414,7 @@ TEST_CASE("ChannelEngineUART - Stress test") {
         }
     }
 
-    SUBCASE("Very large LED count (2000 LEDs)") {
+    FL_SUBCASE("Very large LED count (2000 LEDs)") {
         // Reduced from 5000 to 2000 LEDs for performance (still provides excellent stress test coverage)
         auto channel = fixture.createChannel(17, 2000);
         fixture.mEngine.enqueue(channel);
@@ -427,15 +427,15 @@ TEST_CASE("ChannelEngineUART - Stress test") {
     }
 }
 
-TEST_CASE("ChannelEngineUART - Edge cases") {
+FL_TEST_CASE("ChannelEngineUART - Edge cases") {
     ChannelEngineUARTFixture fixture;
 
-    SUBCASE("Show with no enqueued channels") {
+    FL_SUBCASE("Show with no enqueued channels") {
         fixture.mEngine.show();
         FL_CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::READY);
     }
 
-    SUBCASE("Multiple enqueue before show") {
+    FL_SUBCASE("Multiple enqueue before show") {
         auto channel1 = fixture.createChannel(17, 5);
         auto channel2 = fixture.createChannel(17, 10);
 
@@ -458,7 +458,7 @@ TEST_CASE("ChannelEngineUART - Edge cases") {
         FL_CHECK(fixture.pollUntilReady());
     }
 
-    SUBCASE("Poll before initialization") {
+    FL_SUBCASE("Poll before initialization") {
         FL_CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::READY);
     }
 }

@@ -1,6 +1,6 @@
 #include "test.h"
 #include "fl/stl/move.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/type_traits.h"
 
 using namespace fl;
@@ -52,8 +52,8 @@ struct MoveTestTypeMove {
 
 } // anonymous namespace
 
-TEST_CASE("fl::remove_reference trait") {
-    SUBCASE("Non-reference types remain unchanged") {
+FL_TEST_CASE("fl::remove_reference trait") {
+    FL_SUBCASE("Non-reference types remain unchanged") {
         static_assert(fl::is_same<typename remove_reference<int>::type, int>::value,
                      "remove_reference should not change int");
         static_assert(fl::is_same<typename remove_reference<float>::type, float>::value,
@@ -65,7 +65,7 @@ TEST_CASE("fl::remove_reference trait") {
         FL_CHECK(true);  // Dummy runtime check
     }
 
-    SUBCASE("Pointer types remain unchanged") {
+    FL_SUBCASE("Pointer types remain unchanged") {
         static_assert(fl::is_same<typename remove_reference<int*>::type, int*>::value,
                      "remove_reference should not change int*");
         static_assert(fl::is_same<typename remove_reference<const int*>::type, const int*>::value,
@@ -75,7 +75,7 @@ TEST_CASE("fl::remove_reference trait") {
         FL_CHECK(true);  // Dummy runtime check
     }
 
-    SUBCASE("Lvalue references are removed") {
+    FL_SUBCASE("Lvalue references are removed") {
         static_assert(fl::is_same<typename remove_reference<int&>::type, int>::value,
                      "remove_reference should remove lvalue reference from int&");
         static_assert(fl::is_same<typename remove_reference<float&>::type, float>::value,
@@ -85,7 +85,7 @@ TEST_CASE("fl::remove_reference trait") {
         FL_CHECK(true);  // Dummy runtime check
     }
 
-    SUBCASE("Rvalue references are removed") {
+    FL_SUBCASE("Rvalue references are removed") {
         static_assert(fl::is_same<typename remove_reference<int&&>::type, int>::value,
                      "remove_reference should remove rvalue reference from int&&");
         static_assert(fl::is_same<typename remove_reference<float&&>::type, float>::value,
@@ -95,7 +95,7 @@ TEST_CASE("fl::remove_reference trait") {
         FL_CHECK(true);  // Dummy runtime check
     }
 
-    SUBCASE("Const qualification is preserved") {
+    FL_SUBCASE("Const qualification is preserved") {
         static_assert(fl::is_same<typename remove_reference<const int>::type, const int>::value,
                      "remove_reference should preserve const on non-reference");
         static_assert(fl::is_same<typename remove_reference<const int&>::type, const int>::value,
@@ -105,7 +105,7 @@ TEST_CASE("fl::remove_reference trait") {
         FL_CHECK(true);  // Dummy runtime check
     }
 
-    SUBCASE("Volatile qualification is preserved") {
+    FL_SUBCASE("Volatile qualification is preserved") {
         static_assert(fl::is_same<typename remove_reference<volatile int>::type, volatile int>::value,
                      "remove_reference should preserve volatile on non-reference");
         static_assert(fl::is_same<typename remove_reference<volatile int&>::type, volatile int>::value,
@@ -113,7 +113,7 @@ TEST_CASE("fl::remove_reference trait") {
         FL_CHECK(true);  // Dummy runtime check
     }
 
-    SUBCASE("CV qualifications are preserved") {
+    FL_SUBCASE("CV qualifications are preserved") {
         static_assert(fl::is_same<typename remove_reference<const volatile int>::type, const volatile int>::value,
                      "remove_reference should preserve const volatile");
         static_assert(fl::is_same<typename remove_reference<const volatile int&>::type, const volatile int>::value,
@@ -122,8 +122,8 @@ TEST_CASE("fl::remove_reference trait") {
     }
 }
 
-TEST_CASE("fl::remove_reference_t alias") {
-    SUBCASE("Alias works correctly for basic types") {
+FL_TEST_CASE("fl::remove_reference_t alias") {
+    FL_SUBCASE("Alias works correctly for basic types") {
         static_assert(fl::is_same<remove_reference_t<int>, int>::value,
                      "remove_reference_t should work like remove_reference::type");
         static_assert(fl::is_same<remove_reference_t<int&>, int>::value,
@@ -133,7 +133,7 @@ TEST_CASE("fl::remove_reference_t alias") {
         FL_CHECK(true);  // Dummy runtime check
     }
 
-    SUBCASE("Alias preserves qualifiers") {
+    FL_SUBCASE("Alias preserves qualifiers") {
         static_assert(fl::is_same<remove_reference_t<const int&>, const int>::value,
                      "remove_reference_t should preserve const");
         static_assert(fl::is_same<remove_reference_t<volatile int&>, volatile int>::value,
@@ -142,8 +142,8 @@ TEST_CASE("fl::remove_reference_t alias") {
     }
 }
 
-TEST_CASE("fl::move basic functionality") {
-    SUBCASE("move converts lvalue to rvalue") {
+FL_TEST_CASE("fl::move basic functionality") {
+    FL_SUBCASE("move converts lvalue to rvalue") {
         int x = 42;
         // move should convert lvalue to rvalue reference
         // We can't directly test this without decltype, but we can verify it compiles
@@ -153,7 +153,7 @@ TEST_CASE("fl::move basic functionality") {
         FL_CHECK_EQ(x, 42);
     }
 
-    SUBCASE("move with primitive types") {
+    FL_SUBCASE("move with primitive types") {
         int a = 10;
         int b = fl::move(a);
         FL_CHECK_EQ(b, 10);
@@ -166,7 +166,7 @@ TEST_CASE("fl::move basic functionality") {
         FL_CHECK_CLOSE(f, 3.14f, 0.0001f);
     }
 
-    SUBCASE("move with pointers") {
+    FL_SUBCASE("move with pointers") {
         int value = 42;
         int* ptr1 = &value;
         int* ptr2 = fl::move(ptr1);
@@ -177,8 +177,8 @@ TEST_CASE("fl::move basic functionality") {
     }
 }
 
-TEST_CASE("fl::move with move-constructible types") {
-    SUBCASE("move constructor is invoked") {
+FL_TEST_CASE("fl::move with move-constructible types") {
+    FL_SUBCASE("move constructor is invoked") {
         MoveTestTypeMove obj(100);
         FL_CHECK_EQ(obj.value, 100);
         FL_CHECK(!obj.moved_from);
@@ -194,7 +194,7 @@ TEST_CASE("fl::move with move-constructible types") {
         FL_CHECK_EQ(obj.value, 0);
     }
 
-    SUBCASE("move assignment is invoked") {
+    FL_SUBCASE("move assignment is invoked") {
         MoveTestTypeMove obj1(50);
         MoveTestTypeMove obj2(75);
 
@@ -206,15 +206,15 @@ TEST_CASE("fl::move with move-constructible types") {
         FL_CHECK_EQ(obj1.value, 0);
     }
 
-    SUBCASE("move from temporary") {
+    FL_SUBCASE("move from temporary") {
         MoveTestTypeMove obj(fl::move(MoveTestTypeMove(200)));
         FL_CHECK_EQ(obj.value, 200);
         FL_CHECK(obj.moved_to);
     }
 }
 
-TEST_CASE("fl::move preserves const-ness") {
-    SUBCASE("move with const lvalue") {
+FL_TEST_CASE("fl::move preserves const-ness") {
+    FL_SUBCASE("move with const lvalue") {
         const int x = 42;
         // fl::move on const lvalue produces const rvalue reference
         auto&& moved_x = fl::move(x);
@@ -223,7 +223,7 @@ TEST_CASE("fl::move preserves const-ness") {
         FL_CHECK_EQ(x, 42);
     }
 
-    SUBCASE("move with const object") {
+    FL_SUBCASE("move with const object") {
         const MoveTestTypeMove obj(123);
         // Moving from const object still preserves const
         // This will invoke copy constructor, not move constructor
@@ -234,8 +234,8 @@ TEST_CASE("fl::move preserves const-ness") {
     }
 }
 
-TEST_CASE("fl::move with arrays") {
-    SUBCASE("move with array reference") {
+FL_TEST_CASE("fl::move with arrays") {
+    FL_SUBCASE("move with array reference") {
         int arr[3] = {1, 2, 3};
         // Arrays decay to pointers when passed to functions
         // We can verify move compiles with array types
@@ -246,8 +246,8 @@ TEST_CASE("fl::move with arrays") {
     }
 }
 
-TEST_CASE("fl::move with user-defined types") {
-    SUBCASE("move with struct") {
+FL_TEST_CASE("fl::move with user-defined types") {
+    FL_SUBCASE("move with struct") {
         struct Point {
             int x, y;
         };
@@ -261,7 +261,7 @@ TEST_CASE("fl::move with user-defined types") {
         FL_CHECK_EQ(p1.y, 20);
     }
 
-    SUBCASE("move with class") {
+    FL_SUBCASE("move with class") {
         class Data {
         public:
             int value;
@@ -274,29 +274,29 @@ TEST_CASE("fl::move with user-defined types") {
     }
 }
 
-TEST_CASE("fl::move is noexcept") {
-    SUBCASE("move is noexcept for basic types") {
+FL_TEST_CASE("fl::move is noexcept") {
+    FL_SUBCASE("move is noexcept for basic types") {
         // fl::move itself should be noexcept
         int x = 10;
         static_assert(noexcept(fl::move(x)), "fl::move should be noexcept");
         FL_CHECK(true);  // Dummy runtime check
     }
 
-    SUBCASE("move is noexcept for pointer types") {
+    FL_SUBCASE("move is noexcept for pointer types") {
         int* ptr = nullptr;
         static_assert(noexcept(fl::move(ptr)), "fl::move should be noexcept");
         FL_CHECK(true);  // Dummy runtime check
     }
 
-    SUBCASE("move is noexcept for user types") {
+    FL_SUBCASE("move is noexcept for user types") {
         MoveTestTypeMove obj(10);
         static_assert(noexcept(fl::move(obj)), "fl::move should be noexcept");
         FL_CHECK(true);  // Dummy runtime check
     }
 }
 
-TEST_CASE("fl::move with references") {
-    SUBCASE("move with lvalue reference parameter") {
+FL_TEST_CASE("fl::move with references") {
+    FL_SUBCASE("move with lvalue reference parameter") {
         int value = 42;
         int& ref = value;
         auto&& moved_ref = fl::move(ref);
@@ -305,7 +305,7 @@ TEST_CASE("fl::move with references") {
         FL_CHECK_EQ(value, 42);
     }
 
-    SUBCASE("move with rvalue reference parameter") {
+    FL_SUBCASE("move with rvalue reference parameter") {
         int value = 42;
         int&& rref = fl::move(value);
         auto&& moved_rref = fl::move(rref);
@@ -313,8 +313,8 @@ TEST_CASE("fl::move with references") {
     }
 }
 
-TEST_CASE("fl::move in function return") {
-    SUBCASE("move in return statement") {
+FL_TEST_CASE("fl::move in function return") {
+    FL_SUBCASE("move in return statement") {
         auto make_object = []() -> MoveTestTypeMove {
             MoveTestTypeMove obj(100);
             return fl::move(obj);
@@ -326,7 +326,7 @@ TEST_CASE("fl::move in function return") {
         // but the value should be correct
     }
 
-    SUBCASE("move prevents copy in return") {
+    FL_SUBCASE("move prevents copy in return") {
         auto get_value = [](MoveTestTypeMove&& obj) -> MoveTestTypeMove {
             return fl::move(obj);
         };
@@ -337,8 +337,8 @@ TEST_CASE("fl::move in function return") {
     }
 }
 
-TEST_CASE("fl::move with function parameters") {
-    SUBCASE("move to rvalue reference parameter") {
+FL_TEST_CASE("fl::move with function parameters") {
+    FL_SUBCASE("move to rvalue reference parameter") {
         auto take_rvalue = [](MoveTestTypeMove&& obj) -> MoveTestTypeMove {
             // Actually move the object by constructing from it
             return MoveTestTypeMove(fl::move(obj));
@@ -351,7 +351,7 @@ TEST_CASE("fl::move with function parameters") {
         FL_CHECK(obj.moved_from);
     }
 
-    SUBCASE("perfect forwarding scenario") {
+    FL_SUBCASE("perfect forwarding scenario") {
         auto forward_object = [](MoveTestTypeMove&& obj) -> MoveTestTypeMove {
             return MoveTestTypeMove(fl::move(obj));
         };
@@ -363,27 +363,27 @@ TEST_CASE("fl::move with function parameters") {
     }
 }
 
-TEST_CASE("fl::move edge cases") {
-    SUBCASE("move with zero value") {
+FL_TEST_CASE("fl::move edge cases") {
+    FL_SUBCASE("move with zero value") {
         int zero = 0;
         int moved_zero = fl::move(zero);
         FL_CHECK_EQ(moved_zero, 0);
         FL_CHECK_EQ(zero, 0);
     }
 
-    SUBCASE("move with negative values") {
+    FL_SUBCASE("move with negative values") {
         int negative = -42;
         int moved_negative = fl::move(negative);
         FL_CHECK_EQ(moved_negative, -42);
     }
 
-    SUBCASE("move with nullptr") {
+    FL_SUBCASE("move with nullptr") {
         int* null_ptr = nullptr;
         int* moved_null = fl::move(null_ptr);
         FL_CHECK_EQ(moved_null, nullptr);
     }
 
-    SUBCASE("move with boolean") {
+    FL_SUBCASE("move with boolean") {
         bool flag = true;
         bool moved_flag = fl::move(flag);
         FL_CHECK(moved_flag);
@@ -391,8 +391,8 @@ TEST_CASE("fl::move edge cases") {
     }
 }
 
-TEST_CASE("fl::move type deduction") {
-    SUBCASE("Return type is rvalue reference") {
+FL_TEST_CASE("fl::move type deduction") {
+    FL_SUBCASE("Return type is rvalue reference") {
         int x = 10;
         // The return type should be int&&
         static_assert(fl::is_same<decltype(fl::move(x)), int&&>::value,
@@ -400,14 +400,14 @@ TEST_CASE("fl::move type deduction") {
         FL_CHECK(true);  // Dummy runtime check
     }
 
-    SUBCASE("Return type preserves base type") {
+    FL_SUBCASE("Return type preserves base type") {
         float f = 3.14f;
         static_assert(fl::is_same<decltype(fl::move(f)), float&&>::value,
                      "fl::move should return float&&");
         FL_CHECK(true);  // Dummy runtime check
     }
 
-    SUBCASE("Return type removes references from input") {
+    FL_SUBCASE("Return type removes references from input") {
         int x = 10;
         int& ref = x;
         // Input is int&, output should be int&&
@@ -416,7 +416,7 @@ TEST_CASE("fl::move type deduction") {
         FL_CHECK(true);  // Dummy runtime check
     }
 
-    SUBCASE("Return type for const types") {
+    FL_SUBCASE("Return type for const types") {
         const int x = 10;
         static_assert(fl::is_same<decltype(fl::move(x)), const int&&>::value,
                      "fl::move should return const int&&");
@@ -424,8 +424,8 @@ TEST_CASE("fl::move type deduction") {
     }
 }
 
-TEST_CASE("fl::move is constexpr") {
-    SUBCASE("move can be used in constexpr context") {
+FL_TEST_CASE("fl::move is constexpr") {
+    FL_SUBCASE("move can be used in constexpr context") {
         // In C++11, constexpr functions are very limited
         // We can test that move is declared constexpr
         constexpr int y = 42;  // move not usable in constexpr in C++11 due to limitations
@@ -433,16 +433,16 @@ TEST_CASE("fl::move is constexpr") {
     }
 }
 
-TEST_CASE("fl::move with volatile types") {
-    SUBCASE("move with volatile variable") {
+FL_TEST_CASE("fl::move with volatile types") {
+    FL_SUBCASE("move with volatile variable") {
         volatile int vol_value = 100;
         volatile int moved_vol = vol_value;  // move doesn't really apply to volatile
         FL_CHECK_EQ(moved_vol, 100);
     }
 }
 
-TEST_CASE("fl::move multiple times") {
-    SUBCASE("moving same object multiple times") {
+FL_TEST_CASE("fl::move multiple times") {
+    FL_SUBCASE("moving same object multiple times") {
         MoveTestTypeMove obj(200);
 
         MoveTestTypeMove obj2(fl::move(obj));
@@ -456,8 +456,8 @@ TEST_CASE("fl::move multiple times") {
     }
 }
 
-TEST_CASE("fl::move comparison with std semantics") {
-    SUBCASE("fl::move behaves like std::move") {  // okay std namespace - documenting behavior
+FL_TEST_CASE("fl::move comparison with std semantics") {
+    FL_SUBCASE("fl::move behaves like std::move") {  // okay std namespace - documenting behavior
         // Verify that fl::move produces same result as std::move would
         int x = 42;
         auto&& fl_moved = fl::move(x);
@@ -471,8 +471,8 @@ TEST_CASE("fl::move comparison with std semantics") {
     }
 }
 
-TEST_CASE("fl::remove_reference with complex types") {
-    SUBCASE("remove_reference with function pointers") {
+FL_TEST_CASE("fl::remove_reference with complex types") {
+    FL_SUBCASE("remove_reference with function pointers") {
         typedef void (*FuncPtr)(int);
         static_assert(fl::is_same<typename remove_reference<FuncPtr>::type, FuncPtr>::value,
                      "remove_reference should not change function pointer");
@@ -481,7 +481,7 @@ TEST_CASE("fl::remove_reference with complex types") {
         FL_CHECK(true);  // Dummy runtime check
     }
 
-    SUBCASE("remove_reference with array types") {
+    FL_SUBCASE("remove_reference with array types") {
         typedef int ArrayType[10];
         static_assert(fl::is_same<typename remove_reference<ArrayType>::type, ArrayType>::value,
                      "remove_reference should not change array type");

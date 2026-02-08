@@ -13,7 +13,7 @@
 #include "fl/stl/iterator.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/int.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/vector.h"
@@ -74,7 +74,7 @@ void verifyEndFrame(const fl::vector<u8>& output, size_t& offset, size_t num_led
 
 } // anonymous namespace
 
-TEST_CASE("SK9822 - encodeSK9822() basic functionality") {
+FL_TEST_CASE("SK9822 - encodeSK9822() basic functionality") {
     // Test single LED with maximum brightness (31)
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makePixel(255, 128, 64));  // RGB
@@ -91,7 +91,7 @@ TEST_CASE("SK9822 - encodeSK9822() basic functionality") {
     verifyEndFrame(output, offset, 1);
 }
 
-TEST_CASE("SK9822 - encodeSK9822() multiple LEDs") {
+FL_TEST_CASE("SK9822 - encodeSK9822() multiple LEDs") {
     // Test 3 LEDs
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makePixel(255, 0, 0));    // Red
@@ -112,7 +112,7 @@ TEST_CASE("SK9822 - encodeSK9822() multiple LEDs") {
     verifyEndFrame(output, offset, 3);
 }
 
-TEST_CASE("SK9822 - encodeSK9822() zero LEDs") {
+FL_TEST_CASE("SK9822 - encodeSK9822() zero LEDs") {
     // Test empty pixel array
     fl::vector<fl::array<u8, 3>> pixels;
 
@@ -127,7 +127,7 @@ TEST_CASE("SK9822 - encodeSK9822() zero LEDs") {
     verifyEndFrame(output, offset, 0);
 }
 
-TEST_CASE("SK9822 - encodeSK9822() 32 LEDs end frame calculation") {
+FL_TEST_CASE("SK9822 - encodeSK9822() 32 LEDs end frame calculation") {
     // Test end frame calculation: (32 / 32) + 1 = 2 DWords = 8 bytes
     fl::vector<fl::array<u8, 3>> pixels;
     for (int i = 0; i < 32; i++) {
@@ -146,7 +146,7 @@ TEST_CASE("SK9822 - encodeSK9822() 32 LEDs end frame calculation") {
     }
 }
 
-TEST_CASE("SK9822 - encodeSK9822() 33 LEDs end frame calculation") {
+FL_TEST_CASE("SK9822 - encodeSK9822() 33 LEDs end frame calculation") {
     // Test end frame calculation: (33 / 32) + 1 = 2 DWords = 8 bytes
     fl::vector<fl::array<u8, 3>> pixels;
     for (int i = 0; i < 33; i++) {
@@ -160,7 +160,7 @@ TEST_CASE("SK9822 - encodeSK9822() 33 LEDs end frame calculation") {
     FL_CHECK_EQ(output.size(), 144);
 }
 
-TEST_CASE("SK9822 - encodeSK9822() 64 LEDs end frame calculation") {
+FL_TEST_CASE("SK9822 - encodeSK9822() 64 LEDs end frame calculation") {
     // Test end frame calculation: (40 / 32) + 1 = 2 DWords = 8 bytes
     // Reduced from 64 to 40 LEDs for performance (still tests beyond 32 LED boundary)
     fl::vector<fl::array<u8, 3>> pixels;
@@ -180,7 +180,7 @@ TEST_CASE("SK9822 - encodeSK9822() 64 LEDs end frame calculation") {
     }
 }
 
-TEST_CASE("SK9822 - encodeSK9822() BGR color order verification") {
+FL_TEST_CASE("SK9822 - encodeSK9822() BGR color order verification") {
     // Verify BGR wire order is maintained
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makePixel(0xAA, 0xBB, 0xCC));  // R=0xAA, G=0xBB, B=0xCC
@@ -195,7 +195,7 @@ TEST_CASE("SK9822 - encodeSK9822() BGR color order verification") {
     FL_CHECK_EQ(output[7], 0xAA);  // Red
 }
 
-TEST_CASE("SK9822 - encodeSK9822_HD() per-LED brightness") {
+FL_TEST_CASE("SK9822 - encodeSK9822_HD() per-LED brightness") {
     // Test per-LED brightness encoding
     fl::vector<fl::array<u8, 3>> pixels;
     fl::vector<u8> brightness;
@@ -227,7 +227,7 @@ TEST_CASE("SK9822 - encodeSK9822_HD() per-LED brightness") {
     verifyEndFrame(output, offset, 3);
 }
 
-TEST_CASE("SK9822 - encodeSK9822_HD() brightness mapping edge cases") {
+FL_TEST_CASE("SK9822 - encodeSK9822_HD() brightness mapping edge cases") {
     // Test brightness mapping: 8-bit to 5-bit
     fl::vector<fl::array<u8, 3>> pixels;
     fl::vector<u8> brightness;
@@ -261,7 +261,7 @@ TEST_CASE("SK9822 - encodeSK9822_HD() brightness mapping edge cases") {
     FL_CHECK_EQ(output[offset] & 0x1F, 15);
 }
 
-TEST_CASE("SK9822 - encodeSK9822_HD() zero LEDs") {
+FL_TEST_CASE("SK9822 - encodeSK9822_HD() zero LEDs") {
     // Test empty pixel array
     fl::vector<fl::array<u8, 3>> pixels;
     fl::vector<u8> brightness;
@@ -277,7 +277,7 @@ TEST_CASE("SK9822 - encodeSK9822_HD() zero LEDs") {
     verifyEndFrame(output, offset, 0);
 }
 
-TEST_CASE("SK9822 - encodeSK9822_AutoBrightness() empty range") {
+FL_TEST_CASE("SK9822 - encodeSK9822_AutoBrightness() empty range") {
     // Test empty pixel array
     fl::vector<fl::array<u8, 3>> pixels;
 
@@ -291,7 +291,7 @@ TEST_CASE("SK9822 - encodeSK9822_AutoBrightness() empty range") {
     verifyStartFrame(output, offset);
 }
 
-TEST_CASE("SK9822 - encodeSK9822_AutoBrightness() single LED") {
+FL_TEST_CASE("SK9822 - encodeSK9822_AutoBrightness() single LED") {
     // Test auto-brightness extraction from first pixel
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makePixel(255, 0, 0));  // Red at full brightness
@@ -307,7 +307,7 @@ TEST_CASE("SK9822 - encodeSK9822_AutoBrightness() single LED") {
     FL_CHECK_EQ(output[4] & 0x1F, 31);
 }
 
-TEST_CASE("SK9822 - encodeSK9822_AutoBrightness() multiple LEDs") {
+FL_TEST_CASE("SK9822 - encodeSK9822_AutoBrightness() multiple LEDs") {
     // Test that all LEDs use brightness from first pixel
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makePixel(128, 0, 0));    // Red, brightness=128
@@ -330,7 +330,7 @@ TEST_CASE("SK9822 - encodeSK9822_AutoBrightness() multiple LEDs") {
     FL_CHECK_EQ(output[12] & 0x1F, expected_brightness);  // LED 3
 }
 
-TEST_CASE("SK9822 - encodeSK9822_AutoBrightness() low brightness") {
+FL_TEST_CASE("SK9822 - encodeSK9822_AutoBrightness() low brightness") {
     // Test auto-brightness with low value
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makePixel(16, 8, 4));  // Low brightness
@@ -343,7 +343,7 @@ TEST_CASE("SK9822 - encodeSK9822_AutoBrightness() low brightness") {
     FL_CHECK_EQ(output[4] & 0x1F, 3);
 }
 
-TEST_CASE("SK9822 - encodeSK9822_AutoBrightness() first LED color scaling") {
+FL_TEST_CASE("SK9822 - encodeSK9822_AutoBrightness() first LED color scaling") {
     // Test that first LED's colors are scaled based on extracted brightness
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makePixel(128, 64, 32));  // R=128, G=64, B=32
@@ -360,7 +360,7 @@ TEST_CASE("SK9822 - encodeSK9822_AutoBrightness() first LED color scaling") {
     FL_CHECK_EQ(output[4] & 0xE0, 0xE0);  // Top 3 bits should be 111
 }
 
-TEST_CASE("SK9822 - End frame uses 0x00 (differs from APA102)") {
+FL_TEST_CASE("SK9822 - End frame uses 0x00 (differs from APA102)") {
     // Critical test: Verify SK9822 end frame uses 0x00, NOT 0xFF
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makePixel(255, 255, 255));
@@ -376,7 +376,7 @@ TEST_CASE("SK9822 - End frame uses 0x00 (differs from APA102)") {
     }
 }
 
-TEST_CASE("SK9822 - All three encoders use 0x00 end frames") {
+FL_TEST_CASE("SK9822 - All three encoders use 0x00 end frames") {
     // Verify all three encoder functions use 0x00 end frames
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makePixel(255, 0, 0));

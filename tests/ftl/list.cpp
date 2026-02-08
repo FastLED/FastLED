@@ -1,11 +1,11 @@
 #include "fl/stl/list.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/move.h"
 
 using namespace fl;
 
-TEST_CASE("fl::list - default constructor") {
+FL_TEST_CASE("fl::list - default constructor") {
     list<int> lst;
 
     FL_CHECK(lst.empty());
@@ -13,8 +13,8 @@ TEST_CASE("fl::list - default constructor") {
     FL_CHECK(lst.begin() == lst.end());
 }
 
-TEST_CASE("fl::list - constructor with count and value") {
-    SUBCASE("create with count") {
+FL_TEST_CASE("fl::list - constructor with count and value") {
+    FL_SUBCASE("create with count") {
         list<int> lst(5, 42);
 
         FL_CHECK_FALSE(lst.empty());
@@ -25,14 +25,14 @@ TEST_CASE("fl::list - constructor with count and value") {
         }
     }
 
-    SUBCASE("create with zero count") {
+    FL_SUBCASE("create with zero count") {
         list<int> lst(0, 10);
         FL_CHECK(lst.empty());
         FL_CHECK_EQ(lst.size(), 0);
     }
 }
 
-TEST_CASE("fl::list - initializer list constructor") {
+FL_TEST_CASE("fl::list - initializer list constructor") {
     list<int> lst = {1, 2, 3, 4, 5};
 
     FL_CHECK_EQ(lst.size(), 5);
@@ -48,7 +48,7 @@ TEST_CASE("fl::list - initializer list constructor") {
     FL_CHECK(it == lst.end());
 }
 
-TEST_CASE("fl::list - copy constructor") {
+FL_TEST_CASE("fl::list - copy constructor") {
     list<int> original = {10, 20, 30};
     list<int> copy(original);
 
@@ -65,7 +65,7 @@ TEST_CASE("fl::list - copy constructor") {
     }
 }
 
-TEST_CASE("fl::list - move constructor") {
+FL_TEST_CASE("fl::list - move constructor") {
     list<int> original = {10, 20, 30};
     list<int> moved(fl::move(original));
 
@@ -74,7 +74,7 @@ TEST_CASE("fl::list - move constructor") {
     FL_CHECK_EQ(moved.back(), 30);
 }
 
-TEST_CASE("fl::list - copy assignment") {
+FL_TEST_CASE("fl::list - copy assignment") {
     list<int> original = {1, 2, 3};
     list<int> assigned;
 
@@ -90,7 +90,7 @@ TEST_CASE("fl::list - copy assignment") {
     }
 }
 
-TEST_CASE("fl::list - move assignment") {
+FL_TEST_CASE("fl::list - move assignment") {
     list<int> original = {1, 2, 3};
     list<int> assigned;
 
@@ -101,7 +101,7 @@ TEST_CASE("fl::list - move assignment") {
     FL_CHECK_EQ(assigned.back(), 3);
 }
 
-TEST_CASE("fl::list - push_back and push_front") {
+FL_TEST_CASE("fl::list - push_back and push_front") {
     list<int> lst;
 
     lst.push_back(10);
@@ -126,7 +126,7 @@ TEST_CASE("fl::list - push_back and push_front") {
     FL_CHECK_EQ(*it++, 20);
 }
 
-TEST_CASE("fl::list - pop_back and pop_front") {
+FL_TEST_CASE("fl::list - pop_back and pop_front") {
     list<int> lst = {1, 2, 3, 4, 5};
 
     lst.pop_back();
@@ -144,7 +144,7 @@ TEST_CASE("fl::list - pop_back and pop_front") {
     FL_CHECK_EQ(*it++, 4);
 }
 
-TEST_CASE("fl::list - pop on empty list") {
+FL_TEST_CASE("fl::list - pop on empty list") {
     list<int> lst;
 
     lst.pop_back();  // Should not crash
@@ -154,10 +154,10 @@ TEST_CASE("fl::list - pop on empty list") {
     FL_CHECK(lst.empty());
 }
 
-TEST_CASE("fl::list - insert") {
+FL_TEST_CASE("fl::list - insert") {
     list<int> lst = {1, 3, 5};
 
-    SUBCASE("insert in middle") {
+    FL_SUBCASE("insert in middle") {
         auto it = lst.begin();
         ++it;  // Points to 3
         lst.insert(it, 2);
@@ -170,21 +170,21 @@ TEST_CASE("fl::list - insert") {
         FL_CHECK_EQ(*check++, 5);
     }
 
-    SUBCASE("insert at beginning") {
+    FL_SUBCASE("insert at beginning") {
         lst.insert(lst.begin(), 0);
         FL_CHECK_EQ(lst.size(), 4);
         FL_CHECK_EQ(lst.front(), 0);
     }
 
-    SUBCASE("insert at end") {
+    FL_SUBCASE("insert at end") {
         lst.insert(lst.end(), 10);
         FL_CHECK_EQ(lst.size(), 4);
         FL_CHECK_EQ(lst.back(), 10);
     }
 }
 
-TEST_CASE("fl::list - erase") {
-    SUBCASE("erase single element") {
+FL_TEST_CASE("fl::list - erase") {
+    FL_SUBCASE("erase single element") {
         list<int> lst = {1, 2, 3, 4, 5};
         auto it = lst.begin();
         ++it;
@@ -201,7 +201,7 @@ TEST_CASE("fl::list - erase") {
         FL_CHECK_EQ(*check++, 5);
     }
 
-    SUBCASE("erase range") {
+    FL_SUBCASE("erase range") {
         list<int> lst = {1, 2, 3, 4, 5};
         auto first = lst.begin();
         ++first;  // Points to 2
@@ -219,7 +219,7 @@ TEST_CASE("fl::list - erase") {
     }
 }
 
-TEST_CASE("fl::list - clear") {
+FL_TEST_CASE("fl::list - clear") {
     list<int> lst = {1, 2, 3, 4, 5};
 
     lst.clear();
@@ -228,7 +228,7 @@ TEST_CASE("fl::list - clear") {
     FL_CHECK(lst.begin() == lst.end());
 }
 
-TEST_CASE("fl::list - front and back") {
+FL_TEST_CASE("fl::list - front and back") {
     list<int> lst = {10, 20, 30};
 
     FL_CHECK_EQ(lst.front(), 10);
@@ -241,17 +241,17 @@ TEST_CASE("fl::list - front and back") {
     FL_CHECK_EQ(lst.back(), 35);
 }
 
-TEST_CASE("fl::list - iterators") {
+FL_TEST_CASE("fl::list - iterators") {
     list<int> lst = {1, 2, 3, 4, 5};
 
-    SUBCASE("forward iteration") {
+    FL_SUBCASE("forward iteration") {
         int expected = 1;
         for (auto it = lst.begin(); it != lst.end(); ++it) {
             FL_CHECK_EQ(*it, expected++);
         }
     }
 
-    SUBCASE("const forward iteration") {
+    FL_SUBCASE("const forward iteration") {
         const list<int>& const_lst = lst;
         int expected = 1;
         for (auto it = const_lst.begin(); it != const_lst.end(); ++it) {
@@ -259,7 +259,7 @@ TEST_CASE("fl::list - iterators") {
         }
     }
 
-    SUBCASE("iterator increment and decrement") {
+    FL_SUBCASE("iterator increment and decrement") {
         auto it = lst.begin();
         FL_CHECK_EQ(*it, 1);
 
@@ -273,14 +273,14 @@ TEST_CASE("fl::list - iterators") {
         FL_CHECK_EQ(*it, 2);
     }
 
-    SUBCASE("post-increment") {
+    FL_SUBCASE("post-increment") {
         auto it = lst.begin();
         auto old = it++;
         FL_CHECK_EQ(*old, 1);
         FL_CHECK_EQ(*it, 2);
     }
 
-    SUBCASE("post-decrement") {
+    FL_SUBCASE("post-decrement") {
         auto it = lst.end();
         --it;
         auto old = it--;
@@ -289,8 +289,8 @@ TEST_CASE("fl::list - iterators") {
     }
 }
 
-TEST_CASE("fl::list - resize") {
-    SUBCASE("resize larger") {
+FL_TEST_CASE("fl::list - resize") {
+    FL_SUBCASE("resize larger") {
         list<int> lst = {1, 2, 3};
         lst.resize(5);
 
@@ -303,7 +303,7 @@ TEST_CASE("fl::list - resize") {
         FL_CHECK_EQ(*it++, 0);  // Default constructed
     }
 
-    SUBCASE("resize larger with value") {
+    FL_SUBCASE("resize larger with value") {
         list<int> lst = {1, 2, 3};
         lst.resize(5, 42);
 
@@ -316,7 +316,7 @@ TEST_CASE("fl::list - resize") {
         FL_CHECK_EQ(*it++, 42);
     }
 
-    SUBCASE("resize smaller") {
+    FL_SUBCASE("resize smaller") {
         list<int> lst = {1, 2, 3, 4, 5};
         lst.resize(3);
 
@@ -329,7 +329,7 @@ TEST_CASE("fl::list - resize") {
     }
 }
 
-TEST_CASE("fl::list - swap") {
+FL_TEST_CASE("fl::list - swap") {
     list<int> lst1 = {1, 2, 3};
     list<int> lst2 = {10, 20};
 
@@ -344,7 +344,7 @@ TEST_CASE("fl::list - swap") {
     FL_CHECK_EQ(lst2.back(), 3);
 }
 
-TEST_CASE("fl::list - remove") {
+FL_TEST_CASE("fl::list - remove") {
     list<int> lst = {1, 2, 3, 2, 4, 2, 5};
 
     lst.remove(2);
@@ -357,7 +357,7 @@ TEST_CASE("fl::list - remove") {
     FL_CHECK_EQ(*it++, 5);
 }
 
-TEST_CASE("fl::list - remove_if") {
+FL_TEST_CASE("fl::list - remove_if") {
     list<int> lst = {1, 2, 3, 4, 5, 6, 7, 8};
 
     // Remove all even numbers
@@ -371,8 +371,8 @@ TEST_CASE("fl::list - remove_if") {
     FL_CHECK_EQ(*it++, 7);
 }
 
-TEST_CASE("fl::list - reverse") {
-    SUBCASE("reverse multiple elements") {
+FL_TEST_CASE("fl::list - reverse") {
+    FL_SUBCASE("reverse multiple elements") {
         list<int> lst = {1, 2, 3, 4, 5};
         lst.reverse();
 
@@ -385,22 +385,22 @@ TEST_CASE("fl::list - reverse") {
         FL_CHECK_EQ(*it++, 1);
     }
 
-    SUBCASE("reverse single element") {
+    FL_SUBCASE("reverse single element") {
         list<int> lst = {42};
         lst.reverse();
         FL_CHECK_EQ(lst.size(), 1);
         FL_CHECK_EQ(lst.front(), 42);
     }
 
-    SUBCASE("reverse empty list") {
+    FL_SUBCASE("reverse empty list") {
         list<int> lst;
         lst.reverse();
         FL_CHECK(lst.empty());
     }
 }
 
-TEST_CASE("fl::list - unique") {
-    SUBCASE("remove consecutive duplicates") {
+FL_TEST_CASE("fl::list - unique") {
+    FL_SUBCASE("remove consecutive duplicates") {
         list<int> lst = {1, 1, 2, 2, 2, 3, 3, 4, 5, 5};
         lst.unique();
 
@@ -413,13 +413,13 @@ TEST_CASE("fl::list - unique") {
         FL_CHECK_EQ(*it++, 5);
     }
 
-    SUBCASE("no duplicates") {
+    FL_SUBCASE("no duplicates") {
         list<int> lst = {1, 2, 3, 4, 5};
         lst.unique();
         FL_CHECK_EQ(lst.size(), 5);
     }
 
-    SUBCASE("all duplicates") {
+    FL_SUBCASE("all duplicates") {
         list<int> lst = {7, 7, 7, 7};
         lst.unique();
         FL_CHECK_EQ(lst.size(), 1);
@@ -427,8 +427,8 @@ TEST_CASE("fl::list - unique") {
     }
 }
 
-TEST_CASE("fl::list - sort") {
-    SUBCASE("sort unsorted list") {
+FL_TEST_CASE("fl::list - sort") {
+    FL_SUBCASE("sort unsorted list") {
         list<int> lst = {5, 2, 8, 1, 9, 3};
         lst.sort();
 
@@ -442,7 +442,7 @@ TEST_CASE("fl::list - sort") {
         FL_CHECK_EQ(*it++, 9);
     }
 
-    SUBCASE("sort with custom comparator") {
+    FL_SUBCASE("sort with custom comparator") {
         list<int> lst = {1, 5, 3, 9, 2};
         lst.sort([](int a, int b) { return a > b; });  // Descending order
 
@@ -454,7 +454,7 @@ TEST_CASE("fl::list - sort") {
         FL_CHECK_EQ(*it++, 1);
     }
 
-    SUBCASE("sort already sorted") {
+    FL_SUBCASE("sort already sorted") {
         list<int> lst = {1, 2, 3, 4, 5};
         lst.sort();
 
@@ -467,8 +467,8 @@ TEST_CASE("fl::list - sort") {
     }
 }
 
-TEST_CASE("fl::list - splice") {
-    SUBCASE("splice entire list") {
+FL_TEST_CASE("fl::list - splice") {
+    FL_SUBCASE("splice entire list") {
         list<int> lst1 = {1, 2, 3};
         list<int> lst2 = {10, 20, 30};
 
@@ -488,7 +488,7 @@ TEST_CASE("fl::list - splice") {
         FL_CHECK_EQ(*check++, 3);
     }
 
-    SUBCASE("splice single element") {
+    FL_SUBCASE("splice single element") {
         list<int> lst1 = {1, 2, 3};
         list<int> lst2 = {10, 20, 30};
 
@@ -503,7 +503,7 @@ TEST_CASE("fl::list - splice") {
         FL_CHECK_EQ(lst1.back(), 20);
     }
 
-    SUBCASE("splice range") {
+    FL_SUBCASE("splice range") {
         list<int> lst1 = {1, 2, 3};
         list<int> lst2 = {10, 20, 30, 40};
 
@@ -527,35 +527,35 @@ TEST_CASE("fl::list - splice") {
     }
 }
 
-TEST_CASE("fl::list - find") {
+FL_TEST_CASE("fl::list - find") {
     list<int> lst = {10, 20, 30, 40, 50};
 
-    SUBCASE("find existing element") {
+    FL_SUBCASE("find existing element") {
         auto it = lst.find(30);
         FL_CHECK(it != lst.end());
         FL_CHECK_EQ(*it, 30);
     }
 
-    SUBCASE("find non-existing element") {
+    FL_SUBCASE("find non-existing element") {
         auto it = lst.find(99);
         FL_CHECK(it == lst.end());
     }
 
-    SUBCASE("find first element") {
+    FL_SUBCASE("find first element") {
         auto it = lst.find(10);
         FL_CHECK(it != lst.end());
         FL_CHECK_EQ(*it, 10);
         FL_CHECK(it == lst.begin());
     }
 
-    SUBCASE("find last element") {
+    FL_SUBCASE("find last element") {
         auto it = lst.find(50);
         FL_CHECK(it != lst.end());
         FL_CHECK_EQ(*it, 50);
     }
 }
 
-TEST_CASE("fl::list - has") {
+FL_TEST_CASE("fl::list - has") {
     list<int> lst = {10, 20, 30};
 
     FL_CHECK(lst.has(10));
@@ -565,7 +565,7 @@ TEST_CASE("fl::list - has") {
     FL_CHECK_FALSE(lst.has(0));
 }
 
-TEST_CASE("fl::list - with non-POD types") {
+FL_TEST_CASE("fl::list - with non-POD types") {
     struct TestStruct {
         int value;
         TestStruct(int v) : value(v) {}
@@ -589,7 +589,7 @@ TEST_CASE("fl::list - with non-POD types") {
     FL_CHECK_FALSE(lst.has(TestStruct(99)));
 }
 
-TEST_CASE("fl::list - range-based for loop") {
+FL_TEST_CASE("fl::list - range-based for loop") {
     list<int> lst = {1, 2, 3, 4, 5};
 
     int sum = 0;
@@ -611,7 +611,7 @@ TEST_CASE("fl::list - range-based for loop") {
     FL_CHECK_EQ(*it++, 10);
 }
 
-TEST_CASE("fl::list - large list operations") {
+FL_TEST_CASE("fl::list - large list operations") {
     list<int> lst;
     const int count = 1000;
 

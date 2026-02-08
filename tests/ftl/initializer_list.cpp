@@ -1,11 +1,11 @@
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/initializer_list.h"
 #include "fl/int.h"
 
 using namespace fl;
 
-TEST_CASE("fl::initializer_list basic functionality") {
-    SUBCASE("empty initializer_list") {
+FL_TEST_CASE("fl::initializer_list basic functionality") {
+    FL_SUBCASE("empty initializer_list") {
         fl::initializer_list<int> empty;
 
         // Note: std::initializer_list doesn't have empty() method
@@ -13,14 +13,14 @@ TEST_CASE("fl::initializer_list basic functionality") {
         FL_CHECK_EQ(empty.begin(), empty.end());
     }
 
-    SUBCASE("initializer_list with elements") {
+    FL_SUBCASE("initializer_list with elements") {
         fl::initializer_list<int> list = {1, 2, 3, 4, 5};
 
         FL_CHECK_EQ(list.size(), 5);
         FL_CHECK(list.begin() != list.end());
     }
 
-    SUBCASE("access elements via iterators") {
+    FL_SUBCASE("access elements via iterators") {
         fl::initializer_list<int> list = {10, 20, 30};
 
         auto it = list.begin();
@@ -33,7 +33,7 @@ TEST_CASE("fl::initializer_list basic functionality") {
         FL_CHECK(it == list.end());
     }
 
-    SUBCASE("range-based iteration") {
+    FL_SUBCASE("range-based iteration") {
         fl::initializer_list<int> list = {1, 2, 3, 4};
         int sum = 0;
 
@@ -45,8 +45,8 @@ TEST_CASE("fl::initializer_list basic functionality") {
     }
 }
 
-TEST_CASE("fl::initializer_list with different types") {
-    SUBCASE("double values") {
+FL_TEST_CASE("fl::initializer_list with different types") {
+    FL_SUBCASE("double values") {
         fl::initializer_list<double> list = {1.5, 2.5, 3.5};
 
         FL_CHECK_EQ(list.size(), 3);
@@ -59,13 +59,13 @@ TEST_CASE("fl::initializer_list with different types") {
         FL_CHECK(doctest::Approx(*it).epsilon(0.001) == 3.5);
     }
 
-    SUBCASE("const char* strings") {
+    FL_SUBCASE("const char* strings") {
         fl::initializer_list<const char*> list = {"hello", "world"};
 
         FL_CHECK_EQ(list.size(), 2);
     }
 
-    SUBCASE("struct types") {
+    FL_SUBCASE("struct types") {
         struct Point {
             int x, y;
         };
@@ -82,8 +82,8 @@ TEST_CASE("fl::initializer_list with different types") {
     }
 }
 
-TEST_CASE("fl::initializer_list size and empty") {
-    SUBCASE("size of various lists") {
+FL_TEST_CASE("fl::initializer_list size and empty") {
+    FL_SUBCASE("size of various lists") {
         fl::initializer_list<int> empty;
         fl::initializer_list<int> single = {42};
         fl::initializer_list<int> multiple = {1, 2, 3, 4, 5, 6, 7};
@@ -93,7 +93,7 @@ TEST_CASE("fl::initializer_list size and empty") {
         FL_CHECK_EQ(multiple.size(), 7);
     }
 
-    SUBCASE("empty check via size") {
+    FL_SUBCASE("empty check via size") {
         fl::initializer_list<int> empty;
         fl::initializer_list<int> nonempty = {1};
 
@@ -102,8 +102,8 @@ TEST_CASE("fl::initializer_list size and empty") {
     }
 }
 
-TEST_CASE("fl::initializer_list iterators") {
-    SUBCASE("begin and end consistency") {
+FL_TEST_CASE("fl::initializer_list iterators") {
+    FL_SUBCASE("begin and end consistency") {
         fl::initializer_list<int> list = {1, 2, 3};
 
         auto b = list.begin();
@@ -112,7 +112,7 @@ TEST_CASE("fl::initializer_list iterators") {
         FL_CHECK_EQ(e - b, 3);
     }
 
-    SUBCASE("iterator arithmetic") {
+    FL_SUBCASE("iterator arithmetic") {
         fl::initializer_list<int> list = {10, 20, 30, 40};
 
         auto it = list.begin();
@@ -122,15 +122,15 @@ TEST_CASE("fl::initializer_list iterators") {
         FL_CHECK_EQ(*(it + 3), 40);
     }
 
-    SUBCASE("empty list iterators") {
+    FL_SUBCASE("empty list iterators") {
         fl::initializer_list<int> empty;
 
         FL_CHECK_EQ(empty.begin(), empty.end());
     }
 }
 
-TEST_CASE("fl::initializer_list const correctness") {
-    SUBCASE("const reference access") {
+FL_TEST_CASE("fl::initializer_list const correctness") {
+    FL_SUBCASE("const reference access") {
         fl::initializer_list<int> list = {1, 2, 3};
 
         // initializer_list always provides const access
@@ -139,7 +139,7 @@ TEST_CASE("fl::initializer_list const correctness") {
         FL_CHECK_EQ(*it, 1);
     }
 
-    SUBCASE("const initializer_list") {
+    FL_SUBCASE("const initializer_list") {
         const fl::initializer_list<int> list = {5, 10, 15};
 
         FL_CHECK_EQ(list.size(), 3);
@@ -150,8 +150,8 @@ TEST_CASE("fl::initializer_list const correctness") {
     }
 }
 
-TEST_CASE("fl::initializer_list copy and assignment") {
-    SUBCASE("copy constructor") {
+FL_TEST_CASE("fl::initializer_list copy and assignment") {
+    FL_SUBCASE("copy constructor") {
         fl::initializer_list<int> list1 = {1, 2, 3};
         fl::initializer_list<int> list2 = list1;
 
@@ -160,7 +160,7 @@ TEST_CASE("fl::initializer_list copy and assignment") {
         FL_CHECK_EQ(list1.end(), list2.end());
     }
 
-    SUBCASE("assignment") {
+    FL_SUBCASE("assignment") {
         fl::initializer_list<int> list1 = {1, 2, 3};
         fl::initializer_list<int> list2;
 
@@ -171,8 +171,8 @@ TEST_CASE("fl::initializer_list copy and assignment") {
     }
 }
 
-TEST_CASE("fl::initializer_list with containers") {
-    SUBCASE("initialize fl::array from initializer_list") {
+FL_TEST_CASE("fl::initializer_list with containers") {
+    FL_SUBCASE("initialize fl::array from initializer_list") {
         auto init = {1, 2, 3, 4};
 
         // Verify we can iterate over the initializer_list
@@ -183,7 +183,7 @@ TEST_CASE("fl::initializer_list with containers") {
         FL_CHECK_EQ(sum, 10);
     }
 
-    SUBCASE("pass initializer_list to function") {
+    FL_SUBCASE("pass initializer_list to function") {
         auto sum_func = [](fl::initializer_list<int> list) {
             int sum = 0;
             for (auto val : list) {
@@ -198,13 +198,13 @@ TEST_CASE("fl::initializer_list with containers") {
     }
 }
 
-TEST_CASE("fl::initializer_list free functions") {
+FL_TEST_CASE("fl::initializer_list free functions") {
     // Note: fl::begin/fl::end for initializer_list are only defined on AVR
     // On other platforms, fl::initializer_list is just std::initializer_list
     // and we use the member begin()/end() methods
 
 #ifdef __AVR__
-    SUBCASE("fl::begin for initializer_list") {
+    FL_SUBCASE("fl::begin for initializer_list") {
         fl::initializer_list<int> list = {1, 2, 3};
 
         auto b = fl::begin(list);
@@ -212,14 +212,14 @@ TEST_CASE("fl::initializer_list free functions") {
         FL_CHECK_EQ(*b, 1);
     }
 
-    SUBCASE("fl::end for initializer_list") {
+    FL_SUBCASE("fl::end for initializer_list") {
         fl::initializer_list<int> list = {1, 2, 3};
 
         auto e = fl::end(list);
         FL_CHECK_EQ(e, list.end());
     }
 
-    SUBCASE("iterate using free functions") {
+    FL_SUBCASE("iterate using free functions") {
         fl::initializer_list<int> list = {5, 10, 15, 20};
         int sum = 0;
 
@@ -230,7 +230,7 @@ TEST_CASE("fl::initializer_list free functions") {
         FL_CHECK_EQ(sum, 50);
     }
 #else
-    SUBCASE("non-AVR platforms use std::initializer_list") {  // okay std namespace - documenting implementation
+    FL_SUBCASE("non-AVR platforms use std::initializer_list") {  // okay std namespace - documenting implementation
         fl::initializer_list<int> list = {1, 2, 3};
 
         // We can use member functions directly
@@ -244,8 +244,8 @@ TEST_CASE("fl::initializer_list free functions") {
 #endif
 }
 
-TEST_CASE("fl::initializer_list constexpr behavior") {
-    SUBCASE("constexpr construction") {
+FL_TEST_CASE("fl::initializer_list constexpr behavior") {
+    FL_SUBCASE("constexpr construction") {
         // Note: constexpr initializer_list is compiler-dependent
         // but we can test that the class has constexpr members
         fl::initializer_list<int> list = {1, 2, 3};
@@ -256,8 +256,8 @@ TEST_CASE("fl::initializer_list constexpr behavior") {
     }
 }
 
-TEST_CASE("fl::initializer_list single element") {
-    SUBCASE("single int") {
+FL_TEST_CASE("fl::initializer_list single element") {
+    FL_SUBCASE("single int") {
         fl::initializer_list<int> list = {42};
 
         FL_CHECK_EQ(list.size(), 1);
@@ -265,7 +265,7 @@ TEST_CASE("fl::initializer_list single element") {
         FL_CHECK_EQ(*list.begin(), 42);
     }
 
-    SUBCASE("single double") {
+    FL_SUBCASE("single double") {
         fl::initializer_list<double> list = {3.14};
 
         FL_CHECK_EQ(list.size(), 1);

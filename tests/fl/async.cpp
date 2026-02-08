@@ -2,7 +2,7 @@
 #include "fl/task.h"
 #include "fl/promise.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/promise_result.h"
 #include "fl/stl/function.h"
 #include "fl/stl/move.h"
@@ -37,8 +37,8 @@ private:
     size_t task_count;
 };
 
-TEST_CASE("fl::async_runner interface") {
-    SUBCASE("basic implementation") {
+FL_TEST_CASE("fl::async_runner interface") {
+    FL_SUBCASE("basic implementation") {
         TestAsyncRunner runner;
 
         FL_CHECK_EQ(runner.update_count, 0);
@@ -55,14 +55,14 @@ TEST_CASE("fl::async_runner interface") {
     }
 }
 
-TEST_CASE("fl::AsyncManager") {
-    SUBCASE("singleton instance") {
+FL_TEST_CASE("fl::AsyncManager") {
+    FL_SUBCASE("singleton instance") {
         AsyncManager& mgr1 = AsyncManager::instance();
         AsyncManager& mgr2 = AsyncManager::instance();
         FL_CHECK_EQ(&mgr1, &mgr2);
     }
 
-    SUBCASE("register and unregister runners") {
+    FL_SUBCASE("register and unregister runners") {
         AsyncManager& mgr = AsyncManager::instance();
         TestAsyncRunner runner1;
         TestAsyncRunner runner2;
@@ -86,7 +86,7 @@ TEST_CASE("fl::AsyncManager") {
         mgr.unregister_runner(&runner2);
     }
 
-    SUBCASE("duplicate registration") {
+    FL_SUBCASE("duplicate registration") {
         AsyncManager& mgr = AsyncManager::instance();
         TestAsyncRunner runner;
 
@@ -103,7 +103,7 @@ TEST_CASE("fl::AsyncManager") {
         mgr.unregister_runner(&runner);
     }
 
-    SUBCASE("null runner handling") {
+    FL_SUBCASE("null runner handling") {
         AsyncManager& mgr = AsyncManager::instance();
 
         // Should handle null gracefully
@@ -112,7 +112,7 @@ TEST_CASE("fl::AsyncManager") {
         mgr.update_all(); // Should not crash
     }
 
-    SUBCASE("has_active_tasks") {
+    FL_SUBCASE("has_active_tasks") {
         AsyncManager& mgr = AsyncManager::instance();
         TestAsyncRunner runner1;
         TestAsyncRunner runner2;
@@ -136,7 +136,7 @@ TEST_CASE("fl::AsyncManager") {
         mgr.unregister_runner(&runner2);
     }
 
-    SUBCASE("total_active_tasks") {
+    FL_SUBCASE("total_active_tasks") {
         AsyncManager& mgr = AsyncManager::instance();
         TestAsyncRunner runner1;
         TestAsyncRunner runner2;
@@ -158,8 +158,8 @@ TEST_CASE("fl::AsyncManager") {
     }
 }
 
-TEST_CASE("fl::async_run") {
-    SUBCASE("updates all registered runners") {
+FL_TEST_CASE("fl::async_run") {
+    FL_SUBCASE("updates all registered runners") {
         AsyncManager& mgr = AsyncManager::instance();
         TestAsyncRunner runner;
 
@@ -176,8 +176,8 @@ TEST_CASE("fl::async_run") {
     }
 }
 
-TEST_CASE("fl::async_active_tasks") {
-    SUBCASE("returns total active tasks") {
+FL_TEST_CASE("fl::async_active_tasks") {
+    FL_SUBCASE("returns total active tasks") {
         AsyncManager& mgr = AsyncManager::instance();
         TestAsyncRunner runner1;
         TestAsyncRunner runner2;
@@ -196,8 +196,8 @@ TEST_CASE("fl::async_active_tasks") {
     }
 }
 
-TEST_CASE("fl::async_has_tasks") {
-    SUBCASE("checks for any active tasks") {
+FL_TEST_CASE("fl::async_has_tasks") {
+    FL_SUBCASE("checks for any active tasks") {
         AsyncManager& mgr = AsyncManager::instance();
         TestAsyncRunner runner;
 
@@ -214,8 +214,8 @@ TEST_CASE("fl::async_has_tasks") {
     }
 }
 
-TEST_CASE("fl::async_yield") {
-    SUBCASE("pumps async tasks") {
+FL_TEST_CASE("fl::async_yield") {
+    FL_SUBCASE("pumps async tasks") {
         AsyncManager& mgr = AsyncManager::instance();
         TestAsyncRunner runner;
 
@@ -231,8 +231,8 @@ TEST_CASE("fl::async_yield") {
     }
 }
 
-TEST_CASE("fl::await_top_level - Basic Operations") {
-    SUBCASE("await_top_level resolved promise returns value") {
+FL_TEST_CASE("fl::await_top_level - Basic Operations") {
+    FL_SUBCASE("await_top_level resolved promise returns value") {
         auto promise = fl::promise<int>::resolve(42);
         auto result = fl::await_top_level(promise);  // Type automatically deduced!
 
@@ -240,7 +240,7 @@ TEST_CASE("fl::await_top_level - Basic Operations") {
         FL_CHECK_EQ(result.value(), 42);
     }
 
-    SUBCASE("await_top_level rejected promise returns error") {
+    FL_SUBCASE("await_top_level rejected promise returns error") {
         auto promise = fl::promise<int>::reject(fl::Error("Test error"));
         auto result = fl::await_top_level(promise);  // Type automatically deduced!
 
@@ -248,7 +248,7 @@ TEST_CASE("fl::await_top_level - Basic Operations") {
         FL_CHECK_EQ(result.error().message, "Test error");
     }
 
-    SUBCASE("await_top_level invalid promise returns error") {
+    FL_SUBCASE("await_top_level invalid promise returns error") {
         fl::promise<int> invalid_promise; // Default constructor creates invalid promise
         auto result = fl::await_top_level(invalid_promise);  // Type automatically deduced!
 
@@ -256,7 +256,7 @@ TEST_CASE("fl::await_top_level - Basic Operations") {
         FL_CHECK_EQ(result.error().message, "Invalid promise");
     }
 
-    SUBCASE("explicit template parameter still works") {
+    FL_SUBCASE("explicit template parameter still works") {
         auto promise = fl::promise<int>::resolve(42);
         auto result = fl::await_top_level<int>(promise);  // Explicit template parameter
 
@@ -265,8 +265,8 @@ TEST_CASE("fl::await_top_level - Basic Operations") {
     }
 }
 
-TEST_CASE("fl::await_top_level - Asynchronous Completion") {
-    SUBCASE("await_top_level waits for promise to be resolved") {
+FL_TEST_CASE("fl::await_top_level - Asynchronous Completion") {
+    FL_SUBCASE("await_top_level waits for promise to be resolved") {
         auto promise = fl::promise<int>::create();
         bool promise_completed = false;
 
@@ -285,7 +285,7 @@ TEST_CASE("fl::await_top_level - Asynchronous Completion") {
         FL_CHECK_EQ(result.value(), 123);
     }
 
-    SUBCASE("await_top_level waits for promise to be rejected") {
+    FL_SUBCASE("await_top_level waits for promise to be rejected") {
         auto promise = fl::promise<int>::create();
         bool promise_completed = false;
 
@@ -301,8 +301,8 @@ TEST_CASE("fl::await_top_level - Asynchronous Completion") {
     }
 }
 
-TEST_CASE("fl::await_top_level - Different Value Types") {
-    SUBCASE("await_top_level with string type") {
+FL_TEST_CASE("fl::await_top_level - Different Value Types") {
+    FL_SUBCASE("await_top_level with string type") {
         auto promise = fl::promise<fl::string>::resolve(fl::string("Hello, World!"));
         auto result = fl::await_top_level(promise);  // Type automatically deduced!
 
@@ -310,7 +310,7 @@ TEST_CASE("fl::await_top_level - Different Value Types") {
         FL_CHECK_EQ(result.value(), "Hello, World!");
     }
 
-    SUBCASE("await_top_level with custom struct") {
+    FL_SUBCASE("await_top_level with custom struct") {
         struct TestData {
             int x;
             fl::string name;
@@ -329,8 +329,8 @@ TEST_CASE("fl::await_top_level - Different Value Types") {
     }
 }
 
-TEST_CASE("fl::await_top_level - Error Handling") {
-    SUBCASE("await_top_level preserves error message") {
+FL_TEST_CASE("fl::await_top_level - Error Handling") {
+    FL_SUBCASE("await_top_level preserves error message") {
         fl::string error_msg = "Detailed error message";
         auto promise = fl::promise<int>::reject(fl::Error(error_msg));
         auto result = fl::await_top_level(promise);  // Type automatically deduced!
@@ -339,7 +339,7 @@ TEST_CASE("fl::await_top_level - Error Handling") {
         FL_CHECK_EQ(result.error().message, error_msg);
     }
 
-    SUBCASE("await_top_level with custom error") {
+    FL_SUBCASE("await_top_level with custom error") {
         fl::Error custom_error("Custom error with details");
         auto promise = fl::promise<fl::string>::reject(custom_error);
         auto result = fl::await_top_level(promise);  // Type automatically deduced!
@@ -349,8 +349,8 @@ TEST_CASE("fl::await_top_level - Error Handling") {
     }
 }
 
-TEST_CASE("fl::await_top_level - Multiple Awaits") {
-    SUBCASE("multiple awaits on different promises") {
+FL_TEST_CASE("fl::await_top_level - Multiple Awaits") {
+    FL_SUBCASE("multiple awaits on different promises") {
         auto promise1 = fl::promise<int>::resolve(10);
         auto promise2 = fl::promise<int>::resolve(20);
         auto promise3 = fl::promise<int>::reject(fl::Error("Error in promise 3"));
@@ -372,7 +372,7 @@ TEST_CASE("fl::await_top_level - Multiple Awaits") {
         FL_CHECK_EQ(result3.error().message, "Error in promise 3");
     }
 
-    SUBCASE("await_top_level same promise multiple times") {
+    FL_SUBCASE("await_top_level same promise multiple times") {
         auto promise = fl::promise<int>::resolve(999);
 
         auto result1 = fl::await_top_level(promise);  // Type automatically deduced!
@@ -387,8 +387,8 @@ TEST_CASE("fl::await_top_level - Multiple Awaits") {
     }
 }
 
-TEST_CASE("fl::await_top_level - Boolean Conversion and Convenience") {
-    SUBCASE("boolean conversion operator") {
+FL_TEST_CASE("fl::await_top_level - Boolean Conversion and Convenience") {
+    FL_SUBCASE("boolean conversion operator") {
         auto success_promise = fl::promise<int>::resolve(42);
         auto success_result = fl::await_top_level(success_promise);
 
@@ -404,7 +404,7 @@ TEST_CASE("fl::await_top_level - Boolean Conversion and Convenience") {
         FL_CHECK(!error_result.ok());
     }
 
-    SUBCASE("error_message convenience method") {
+    FL_SUBCASE("error_message convenience method") {
         auto success_promise = fl::promise<int>::resolve(42);
         auto success_result = fl::await_top_level(success_promise);
 
@@ -417,14 +417,14 @@ TEST_CASE("fl::await_top_level - Boolean Conversion and Convenience") {
     }
 }
 
-TEST_CASE("fl::Scheduler") {
-    SUBCASE("singleton instance") {
+FL_TEST_CASE("fl::Scheduler") {
+    FL_SUBCASE("singleton instance") {
         Scheduler& sched1 = Scheduler::instance();
         Scheduler& sched2 = Scheduler::instance();
         FL_CHECK_EQ(&sched1, &sched2);
     }
 
-    SUBCASE("add_task returns task id") {
+    FL_SUBCASE("add_task returns task id") {
         Scheduler& sched = Scheduler::instance();
         sched.clear_all_tasks();
 
@@ -439,7 +439,7 @@ TEST_CASE("fl::Scheduler") {
         sched.clear_all_tasks();
     }
 
-    SUBCASE("update executes ready tasks") {
+    FL_SUBCASE("update executes ready tasks") {
         Scheduler& sched = Scheduler::instance();
         sched.clear_all_tasks();
 
@@ -457,7 +457,7 @@ TEST_CASE("fl::Scheduler") {
         sched.clear_all_tasks();
     }
 
-    SUBCASE("clear_all_tasks") {
+    FL_SUBCASE("clear_all_tasks") {
         Scheduler& sched = Scheduler::instance();
         sched.clear_all_tasks();
 
@@ -473,7 +473,7 @@ TEST_CASE("fl::Scheduler") {
         FL_CHECK_EQ(executed, false); // Task was cleared before execution
     }
 
-    SUBCASE("update_before_frame_tasks") {
+    FL_SUBCASE("update_before_frame_tasks") {
         Scheduler& sched = Scheduler::instance();
         sched.clear_all_tasks();
 
@@ -501,7 +501,7 @@ TEST_CASE("fl::Scheduler") {
         sched.clear_all_tasks();
     }
 
-    SUBCASE("update_after_frame_tasks") {
+    FL_SUBCASE("update_after_frame_tasks") {
         Scheduler& sched = Scheduler::instance();
         sched.clear_all_tasks();
 
@@ -520,8 +520,8 @@ TEST_CASE("fl::Scheduler") {
     }
 }
 
-TEST_CASE("fl::async integration") {
-    SUBCASE("scheduler tasks work with async_run") {
+FL_TEST_CASE("fl::async integration") {
+    FL_SUBCASE("scheduler tasks work with async_run") {
         Scheduler& sched = Scheduler::instance();
         sched.clear_all_tasks();
 

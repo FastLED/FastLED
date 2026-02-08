@@ -4,14 +4,14 @@
 
 #include "fl/line_simplification.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/geometry.h"
 #include "fl/math_macros.h"
 #include "fl/slice.h"
 #include "fl/stl/move.h"
 
 
-TEST_CASE("Test Line Simplification") {
+FL_TEST_CASE("Test Line Simplification") {
     // default‐constructed bitset is empty
     fl::LineSimplifier<float> ls;
     ls.setMinimumDistance(0.1f);
@@ -28,7 +28,7 @@ TEST_CASE("Test Line Simplification") {
     FL_REQUIRE_EQ(fl::vec2<float>(4.0f, 4.0f), points[1]);
 }
 
-TEST_CASE("Test simple triangle") {
+FL_TEST_CASE("Test simple triangle") {
     fl::LineSimplifier<float> ls;
 
     fl::vector<fl::vec2<float>> points;
@@ -52,7 +52,7 @@ TEST_CASE("Test simple triangle") {
     FL_REQUIRE_EQ(fl::vec2<float>(0.0f, 1.0f), output[1]);
 }
 
-TEST_CASE("Test Line Simplification with Different Distance Thresholds") {
+FL_TEST_CASE("Test Line Simplification with Different Distance Thresholds") {
     fl::LineSimplifier<float> ls;
 
     // Test with a triangle shape - non-collinear points
@@ -70,8 +70,8 @@ TEST_CASE("Test Line Simplification with Different Distance Thresholds") {
     FL_REQUIRE_EQ(fl::vec2<float>(0.0f, 2.0f), points1[2]);
 }
 
-TEST_CASE("Test Line Simplification with Complex Shape") {
-    // SUBCASE("at threshold") {
+FL_TEST_CASE("Test Line Simplification with Complex Shape") {
+    // FL_SUBCASE("at threshold") {
     //     fl::LineSimplifier<float> ls;
     //     // Test with a more complex shape and smaller threshold
     //     ls.setMinimumDistance(0.1f);
@@ -87,7 +87,7 @@ TEST_CASE("Test Line Simplification with Complex Shape") {
     //     FL_REQUIRE_EQ(vec2<float>(0.0f, 1.0f), points2[2]);
     // };
 
-    SUBCASE("Above threshold") {
+    FL_SUBCASE("Above threshold") {
         fl::LineSimplifier<float> ls;
         // Test with a more complex shape and larger threshold
         ls.setMinimumDistance(0.101f);
@@ -103,7 +103,7 @@ TEST_CASE("Test Line Simplification with Complex Shape") {
     };
 }
 
-TEST_CASE("Iteratively find the closest point") {
+FL_TEST_CASE("Iteratively find the closest point") {
     fl::LineSimplifier<float> ls;
     fl::vector<fl::vec2<float>> points;
     points.push_back({0.0f, 0.0f}); // First point of triangle
@@ -125,7 +125,7 @@ TEST_CASE("Iteratively find the closest point") {
 
 
 
-TEST_CASE("Binary search the the threshold that gives 3 points") {
+FL_TEST_CASE("Binary search the the threshold that gives 3 points") {
     fl::LineSimplifierExact<float> ls;
     fl::vector<fl::vec2<float>> points;
     points.push_back({0.0f, 0.0f}); // First point of triangle
@@ -140,11 +140,11 @@ TEST_CASE("Binary search the the threshold that gives 3 points") {
 
     ls.simplify(points, &out);
     FL_REQUIRE_EQ(3, out.size());
-    MESSAGE("Done");
+    FL_MESSAGE("Done");
 }
 
 
-TEST_CASE("Known bad") {
+FL_TEST_CASE("Known bad") {
     fl::vector<fl::vec2<float>> points;
     points.push_back({-3136.439941f, 2546.339844f});
     points.push_back({4580.994141f, -3516.982422f});
@@ -157,14 +157,14 @@ TEST_CASE("Known bad") {
     fl::vector<fl::vec2<float>> out;
     ls.simplify(points, &out);
 
-    MESSAGE("Output points: " << out.size());
-    MESSAGE("Output points: " << out);
+    FL_MESSAGE("Output points: " << out.size());
+    FL_MESSAGE("Output points: " << out);
 
     FL_REQUIRE_EQ(3, out.size());
 }
 
 
-// TEST_CASE("Binary search reduction to 3 points from 5 random points (1000 runs)") {
+// FL_TEST_CASE("Binary search reduction to 3 points from 5 random points (1000 runs)") {
 //     constexpr int kTrials = 1000;
 //     constexpr int kInputPoints = 5;
 //     constexpr int kTargetPoints = 3;

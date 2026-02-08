@@ -11,7 +11,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/thread.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "platforms/esp/32/drivers/uart/iuart_peripheral.h"
 #include <chrono>  // ok include - for std::chrono::steady_clock
 #include "fl/stl/vector.h"
@@ -35,7 +35,7 @@ UartPeripheralConfig createDefaultConfig() {
 
 } // anonymous namespace
 
-TEST_CASE("UartPeripheralMock - Reset timing behavior") {
+FL_TEST_CASE("UartPeripheralMock - Reset timing behavior") {
     UartPeripheralMock mock;
     UartPeripheralConfig config = createDefaultConfig();
     FL_CHECK(mock.initialize(config));
@@ -43,7 +43,7 @@ TEST_CASE("UartPeripheralMock - Reset timing behavior") {
     // Enable virtual time mode for deterministic testing
     mock.setVirtualTimeMode(true);
 
-    SUBCASE("Peripheral enters reset period after transmission completes") {
+    FL_SUBCASE("Peripheral enters reset period after transmission completes") {
         // Write some data
         uint8_t data[] = {0xAA, 0x55, 0xFF};
         FL_CHECK(mock.writeBytes(data, sizeof(data)));
@@ -63,7 +63,7 @@ TEST_CASE("UartPeripheralMock - Reset timing behavior") {
         FL_CHECK(mock.isBusy());
     }
 
-    SUBCASE("Peripheral accepts new writes after reset period expires") {
+    FL_SUBCASE("Peripheral accepts new writes after reset period expires") {
         // First transmission
         uint8_t data1[] = {0xAA};
         FL_CHECK(mock.writeBytes(data1, sizeof(data1)));
@@ -89,7 +89,7 @@ TEST_CASE("UartPeripheralMock - Reset timing behavior") {
         FL_CHECK(mock.isBusy());
     }
 
-    SUBCASE("Multiple transmissions respect reset gaps") {
+    FL_SUBCASE("Multiple transmissions respect reset gaps") {
         const int num_transmissions = 3;
         fl::vector<uint8_t> all_captured;
 
@@ -130,7 +130,7 @@ TEST_CASE("UartPeripheralMock - Reset timing behavior") {
         }
     }
 
-    SUBCASE("Reset period duration scales with transmission size") {
+    FL_SUBCASE("Reset period duration scales with transmission size") {
         // This test verifies that the reset period after transmission
         // is proportional to the transmission time (or 50us minimum for WS2812).
         //
@@ -178,7 +178,7 @@ TEST_CASE("UartPeripheralMock - Reset timing behavior") {
         FL_CHECK(small_reset_duration >= 50);  // Minimum WS2812 reset period
     }
 
-    SUBCASE("writeBytes() during reset period blocks until reset completes") {
+    FL_SUBCASE("writeBytes() during reset period blocks until reset completes") {
         // First transmission
         uint8_t data1[] = {0xAA};
         FL_CHECK(mock.writeBytes(data1, sizeof(data1)));
@@ -202,7 +202,7 @@ TEST_CASE("UartPeripheralMock - Reset timing behavior") {
     }
 }
 
-TEST_CASE("UartPeripheralMock - Reset timing with real timing simulation") {
+FL_TEST_CASE("UartPeripheralMock - Reset timing with real timing simulation") {
     UartPeripheralMock mock;
     UartPeripheralConfig config = createDefaultConfig();
     FL_CHECK(mock.initialize(config));
@@ -210,7 +210,7 @@ TEST_CASE("UartPeripheralMock - Reset timing with real timing simulation") {
     // Enable virtual time mode for deterministic testing
     mock.setVirtualTimeMode(true);
 
-    SUBCASE("Transmission time calculation is realistic") {
+    FL_SUBCASE("Transmission time calculation is realistic") {
         // At 3.2 Mbps, each bit takes 312.5 ns
         // For 8N1: 10 bits per byte = 3.125 us per byte
         // For 10 bytes: 31.25 us transmission time
@@ -228,7 +228,7 @@ TEST_CASE("UartPeripheralMock - Reset timing with real timing simulation") {
         FL_CHECK(mock.waitTxDone(1000));
     }
 
-    SUBCASE("WS2812 reset requirement (>50us) is satisfied") {
+    FL_SUBCASE("WS2812 reset requirement (>50us) is satisfied") {
         // WS2812 protocol requires >50us low period between frames
         // UART cannot send this as zeros (start/stop bits interfere)
         // So we must wait 50us after transmission completes

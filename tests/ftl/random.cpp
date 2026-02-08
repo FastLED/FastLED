@@ -2,7 +2,7 @@
 #include "fl/stl/algorithm.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/int.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/vector.h"
@@ -11,8 +11,8 @@
 
 using namespace fl;
 
-TEST_CASE("fl::fl_random - Basic construction and seeding") {
-    SUBCASE("Default constructor") {
+FL_TEST_CASE("fl::fl_random - Basic construction and seeding") {
+    FL_SUBCASE("Default constructor") {
         fl_random rng;
         // Should create a valid generator
         u32 val1 = rng();
@@ -21,7 +21,7 @@ TEST_CASE("fl::fl_random - Basic construction and seeding") {
         FL_CHECK(val1 != val2);
     }
 
-    SUBCASE("Constructor with explicit seed") {
+    FL_SUBCASE("Constructor with explicit seed") {
         fl_random rng1(12345);
         fl_random rng2(12345);
 
@@ -31,7 +31,7 @@ TEST_CASE("fl::fl_random - Basic construction and seeding") {
         FL_CHECK_EQ(rng1(), rng2());
     }
 
-    SUBCASE("Different seeds produce different sequences") {
+    FL_SUBCASE("Different seeds produce different sequences") {
         fl_random rng1(111);
         fl_random rng2(222);
 
@@ -43,8 +43,8 @@ TEST_CASE("fl::fl_random - Basic construction and seeding") {
     }
 }
 
-TEST_CASE("fl::fl_random - Seed management") {
-    SUBCASE("set_seed changes state") {
+FL_TEST_CASE("fl::fl_random - Seed management") {
+    FL_SUBCASE("set_seed changes state") {
         fl_random rng1(100);
         fl_random rng2(200);
 
@@ -60,7 +60,7 @@ TEST_CASE("fl::fl_random - Seed management") {
         FL_CHECK(val2_first != val2_reset);
     }
 
-    SUBCASE("get_seed returns current seed") {
+    FL_SUBCASE("get_seed returns current seed") {
         u16 initial_seed = 5555;
         fl_random rng(initial_seed);
 
@@ -74,7 +74,7 @@ TEST_CASE("fl::fl_random - Seed management") {
         FL_CHECK(rng.get_seed() != initial_seed);
     }
 
-    SUBCASE("add_entropy modifies seed") {
+    FL_SUBCASE("add_entropy modifies seed") {
         fl_random rng(1000);
         u16 original_seed = rng.get_seed();
 
@@ -85,8 +85,8 @@ TEST_CASE("fl::fl_random - Seed management") {
     }
 }
 
-TEST_CASE("fl::fl_random - Basic 32-bit generation") {
-    SUBCASE("operator() generates values in valid range") {
+FL_TEST_CASE("fl::fl_random - Basic 32-bit generation") {
+    FL_SUBCASE("operator() generates values in valid range") {
         fl_random rng(9999);
 
         for (int i = 0; i < 100; ++i) {
@@ -97,12 +97,12 @@ TEST_CASE("fl::fl_random - Basic 32-bit generation") {
         }
     }
 
-    SUBCASE("minimum() and maximum() constants") {
+    FL_SUBCASE("minimum() and maximum() constants") {
         FL_CHECK_EQ(fl_random::minimum(), 0U);
         FL_CHECK_EQ(fl_random::maximum(), 4294967295U);
     }
 
-    SUBCASE("Generates well-distributed values") {
+    FL_SUBCASE("Generates well-distributed values") {
         fl_random rng(7777);
 
         // Generate many values and check they're reasonably distributed
@@ -125,8 +125,8 @@ TEST_CASE("fl::fl_random - Basic 32-bit generation") {
     }
 }
 
-TEST_CASE("fl::fl_random - Bounded 32-bit generation") {
-    SUBCASE("operator()(n) generates values in [0, n)") {
+FL_TEST_CASE("fl::fl_random - Bounded 32-bit generation") {
+    FL_SUBCASE("operator()(n) generates values in [0, n)") {
         fl_random rng(4444);
         u32 bound = 100;
 
@@ -136,17 +136,17 @@ TEST_CASE("fl::fl_random - Bounded 32-bit generation") {
         }
     }
 
-    SUBCASE("operator()(n) with n=0 returns 0") {
+    FL_SUBCASE("operator()(n) with n=0 returns 0") {
         fl_random rng(3333);
         FL_CHECK_EQ(rng(0), 0U);
     }
 
-    SUBCASE("operator()(n) with n=1 returns 0") {
+    FL_SUBCASE("operator()(n) with n=1 returns 0") {
         fl_random rng(2222);
         FL_CHECK_EQ(rng(1), 0U);
     }
 
-    SUBCASE("operator()(min, max) generates values in [min, max)") {
+    FL_SUBCASE("operator()(min, max) generates values in [min, max)") {
         fl_random rng(8888);
         u32 min_val = 50;
         u32 max_val = 150;
@@ -158,15 +158,15 @@ TEST_CASE("fl::fl_random - Bounded 32-bit generation") {
         }
     }
 
-    SUBCASE("operator()(min, max) with min=max returns min") {
+    FL_SUBCASE("operator()(min, max) with min=max returns min") {
         fl_random rng(1111);
         u32 val = 42;
         FL_CHECK_EQ(rng(val, val), val);
     }
 }
 
-TEST_CASE("fl::fl_random - 8-bit generation") {
-    SUBCASE("random8() generates values in [0, 255]") {
+FL_TEST_CASE("fl::fl_random - 8-bit generation") {
+    FL_SUBCASE("random8() generates values in [0, 255]") {
         fl_random rng(6666);
 
         for (int i = 0; i < 100; ++i) {
@@ -176,7 +176,7 @@ TEST_CASE("fl::fl_random - 8-bit generation") {
         }
     }
 
-    SUBCASE("random8(n) generates values in [0, n)") {
+    FL_SUBCASE("random8(n) generates values in [0, n)") {
         fl_random rng(5555);
         u8 bound = 50;
 
@@ -186,12 +186,12 @@ TEST_CASE("fl::fl_random - 8-bit generation") {
         }
     }
 
-    SUBCASE("random8(n) with n=0 returns 0") {
+    FL_SUBCASE("random8(n) with n=0 returns 0") {
         fl_random rng(4444);
         FL_CHECK_EQ(rng.random8(0), 0);
     }
 
-    SUBCASE("random8(min, max) generates values in [min, max)") {
+    FL_SUBCASE("random8(min, max) generates values in [min, max)") {
         fl_random rng(3333);
         u8 min_val = 10;
         u8 max_val = 50;
@@ -203,13 +203,13 @@ TEST_CASE("fl::fl_random - 8-bit generation") {
         }
     }
 
-    SUBCASE("random8(min, max) with min=max returns min") {
+    FL_SUBCASE("random8(min, max) with min=max returns min") {
         fl_random rng(2222);
         u8 val = 42;
         FL_CHECK_EQ(rng.random8(val, val), val);
     }
 
-    SUBCASE("random8() distribution") {
+    FL_SUBCASE("random8() distribution") {
         fl_random rng(9999);
 
         // Check distribution
@@ -231,8 +231,8 @@ TEST_CASE("fl::fl_random - 8-bit generation") {
     }
 }
 
-TEST_CASE("fl::fl_random - 16-bit generation") {
-    SUBCASE("random16() generates values in [0, 65535]") {
+FL_TEST_CASE("fl::fl_random - 16-bit generation") {
+    FL_SUBCASE("random16() generates values in [0, 65535]") {
         fl_random rng(7777);
 
         for (int i = 0; i < 100; ++i) {
@@ -242,7 +242,7 @@ TEST_CASE("fl::fl_random - 16-bit generation") {
         }
     }
 
-    SUBCASE("random16(n) generates values in [0, n)") {
+    FL_SUBCASE("random16(n) generates values in [0, n)") {
         fl_random rng(6666);
         u16 bound = 1000;
 
@@ -252,12 +252,12 @@ TEST_CASE("fl::fl_random - 16-bit generation") {
         }
     }
 
-    SUBCASE("random16(n) with n=0 returns 0") {
+    FL_SUBCASE("random16(n) with n=0 returns 0") {
         fl_random rng(5555);
         FL_CHECK_EQ(rng.random16(0), 0);
     }
 
-    SUBCASE("random16(min, max) generates values in [min, max)") {
+    FL_SUBCASE("random16(min, max) generates values in [min, max)") {
         fl_random rng(4444);
         u16 min_val = 100;
         u16 max_val = 500;
@@ -269,13 +269,13 @@ TEST_CASE("fl::fl_random - 16-bit generation") {
         }
     }
 
-    SUBCASE("random16(min, max) with min=max returns min") {
+    FL_SUBCASE("random16(min, max) with min=max returns min") {
         fl_random rng(3333);
         u16 val = 12345;
         FL_CHECK_EQ(rng.random16(val, val), val);
     }
 
-    SUBCASE("random16() distribution") {
+    FL_SUBCASE("random16() distribution") {
         fl_random rng(8888);
 
         // Check distribution
@@ -297,8 +297,8 @@ TEST_CASE("fl::fl_random - 16-bit generation") {
     }
 }
 
-TEST_CASE("fl::fl_random - Reproducibility") {
-    SUBCASE("Same seed produces identical sequences") {
+FL_TEST_CASE("fl::fl_random - Reproducibility") {
+    FL_SUBCASE("Same seed produces identical sequences") {
         fl_random rng1(54321);
         fl_random rng2(54321);
 
@@ -308,7 +308,7 @@ TEST_CASE("fl::fl_random - Reproducibility") {
         }
     }
 
-    SUBCASE("Same seed produces identical random8 sequences") {
+    FL_SUBCASE("Same seed produces identical random8 sequences") {
         fl_random rng1(11111);
         fl_random rng2(11111);
 
@@ -317,7 +317,7 @@ TEST_CASE("fl::fl_random - Reproducibility") {
         }
     }
 
-    SUBCASE("Same seed produces identical random16 sequences") {
+    FL_SUBCASE("Same seed produces identical random16 sequences") {
         fl_random rng1(22222);
         fl_random rng2(22222);
 
@@ -326,7 +326,7 @@ TEST_CASE("fl::fl_random - Reproducibility") {
         }
     }
 
-    SUBCASE("Resetting seed produces identical sequence again") {
+    FL_SUBCASE("Resetting seed produces identical sequence again") {
         fl_random rng(33333);
 
         fl::vector<u32> first_sequence;
@@ -343,8 +343,8 @@ TEST_CASE("fl::fl_random - Reproducibility") {
     }
 }
 
-TEST_CASE("fl::fl_random - Edge cases") {
-    SUBCASE("Maximum bound values") {
+FL_TEST_CASE("fl::fl_random - Edge cases") {
+    FL_SUBCASE("Maximum bound values") {
         fl_random rng(9999);
 
         // Test with maximum u8 bound
@@ -360,7 +360,7 @@ TEST_CASE("fl::fl_random - Edge cases") {
         FL_CHECK(val32 < 4294967295U);
     }
 
-    SUBCASE("Alternating method calls") {
+    FL_SUBCASE("Alternating method calls") {
         fl_random rng(12121);
 
         // Mix different methods to ensure they all work together
@@ -376,8 +376,8 @@ TEST_CASE("fl::fl_random - Edge cases") {
     }
 }
 
-TEST_CASE("fl::fl_random - Integration with algorithms") {
-    SUBCASE("Can be used with fl::shuffle") {
+FL_TEST_CASE("fl::fl_random - Integration with algorithms") {
+    FL_SUBCASE("Can be used with fl::shuffle") {
         fl_random rng(7777);
 
         fl::vector<int> vec;
@@ -401,7 +401,7 @@ TEST_CASE("fl::fl_random - Integration with algorithms") {
         FL_CHECK(vec == original);
     }
 
-    SUBCASE("Multiple independent generators") {
+    FL_SUBCASE("Multiple independent generators") {
         fl_random rng1(100);
         fl_random rng2(200);
         fl_random rng3(100); // Same as rng1
@@ -415,8 +415,8 @@ TEST_CASE("fl::fl_random - Integration with algorithms") {
     }
 }
 
-TEST_CASE("fl::default_random - Global instance") {
-    SUBCASE("default_random() returns valid generator") {
+FL_TEST_CASE("fl::default_random - Global instance") {
+    FL_SUBCASE("default_random() returns valid generator") {
         fl_random& rng = default_random();
 
         u32 val1 = rng();
@@ -426,7 +426,7 @@ TEST_CASE("fl::default_random - Global instance") {
         FL_CHECK(val1 != val2);
     }
 
-    SUBCASE("default_random() returns same instance") {
+    FL_SUBCASE("default_random() returns same instance") {
         fl_random& rng1 = default_random();
         fl_random& rng2 = default_random();
 
@@ -434,7 +434,7 @@ TEST_CASE("fl::default_random - Global instance") {
         FL_CHECK_EQ(&rng1, &rng2);
     }
 
-    SUBCASE("Can use default_random with algorithms") {
+    FL_SUBCASE("Can use default_random with algorithms") {
         fl::vector<int> vec;
         for (int i = 0; i < 5; ++i) {
             vec.push_back(i);
@@ -447,12 +447,12 @@ TEST_CASE("fl::default_random - Global instance") {
     }
 }
 
-TEST_CASE("fl::fl_random - Type traits") {
-    SUBCASE("result_type is u32") {
+FL_TEST_CASE("fl::fl_random - Type traits") {
+    FL_SUBCASE("result_type is u32") {
         FL_CHECK((fl::is_same<fl_random::result_type, u32>::value));
     }
 
-    SUBCASE("Constexpr minimum and maximum") {
+    FL_SUBCASE("Constexpr minimum and maximum") {
         // These should be usable in constant expressions
         static_assert(fl_random::minimum() == 0, "minimum should be 0");
         static_assert(fl_random::maximum() == 4294967295U, "maximum should be u32 max");

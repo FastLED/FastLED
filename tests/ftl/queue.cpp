@@ -3,19 +3,19 @@
 #include "fl/stl/queue.h"
 #include "fl/stl/deque.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/move.h"
 
 
-TEST_CASE("Basic Queue Operations") {
+FL_TEST_CASE("Basic Queue Operations") {
     fl::queue<int> q;
 
-    SUBCASE("Initial state") {
+    FL_SUBCASE("Initial state") {
         FL_CHECK(q.empty());
         FL_CHECK_EQ(q.size(), 0);
     }
 
-    SUBCASE("Push and front/back access") {
+    FL_SUBCASE("Push and front/back access") {
         q.push(10);
         q.push(20);
         q.push(30);
@@ -26,7 +26,7 @@ TEST_CASE("Basic Queue Operations") {
         FL_CHECK_EQ(q.back(), 30);   // Last in
     }
 
-    SUBCASE("FIFO behavior (pop)") {
+    FL_SUBCASE("FIFO behavior (pop)") {
         q.push(10);
         q.push(20);
         q.push(30);
@@ -40,7 +40,7 @@ TEST_CASE("Basic Queue Operations") {
         FL_CHECK(q.empty());
     }
 
-    SUBCASE("Size changes correctly") {
+    FL_SUBCASE("Size changes correctly") {
         FL_CHECK_EQ(q.size(), 0);
         
         q.push(1);
@@ -58,8 +58,8 @@ TEST_CASE("Basic Queue Operations") {
     }
 }
 
-TEST_CASE("Queue Copy and Move Semantics") {
-    SUBCASE("Copy constructor") {
+FL_TEST_CASE("Queue Copy and Move Semantics") {
+    FL_SUBCASE("Copy constructor") {
         fl::queue<int> q1;
         q1.push(1);
         q1.push(2);
@@ -75,7 +75,7 @@ TEST_CASE("Queue Copy and Move Semantics") {
         FL_CHECK_EQ(q1.front(), 1);
     }
 
-    SUBCASE("Copy assignment") {
+    FL_SUBCASE("Copy assignment") {
         fl::queue<int> q1;
         q1.push(1);
         q1.push(2);
@@ -89,7 +89,7 @@ TEST_CASE("Queue Copy and Move Semantics") {
         FL_CHECK_EQ(q2.back(), 2);
     }
 
-    SUBCASE("Move constructor") {
+    FL_SUBCASE("Move constructor") {
         fl::queue<int> q1;
         q1.push(1);
         q1.push(2);
@@ -101,7 +101,7 @@ TEST_CASE("Queue Copy and Move Semantics") {
         FL_CHECK_EQ(q2.back(), 3);
     }
 
-    SUBCASE("Move assignment") {
+    FL_SUBCASE("Move assignment") {
         fl::queue<int> q1;
         q1.push(1);
         q1.push(2);
@@ -114,13 +114,13 @@ TEST_CASE("Queue Copy and Move Semantics") {
     }
 }
 
-TEST_CASE("Queue with Custom Container") {
+FL_TEST_CASE("Queue with Custom Container") {
     // Test that queue can use a different underlying container
     // In this case, we'll test with fl::vector as the underlying container
     // Note: This requires that the underlying container supports:
     // push_back, pop_front, front, back, empty, size, swap
     
-    SUBCASE("Queue with deque container (default)") {
+    FL_SUBCASE("Queue with deque container (default)") {
         fl::queue<int, fl::deque<int>> q;
         q.push(1);
         q.push(2);
@@ -131,7 +131,7 @@ TEST_CASE("Queue with Custom Container") {
     }
 }
 
-TEST_CASE("Queue Swap Functionality") {
+FL_TEST_CASE("Queue Swap Functionality") {
     fl::queue<int> q1;
     fl::queue<int> q2;
 
@@ -153,20 +153,20 @@ TEST_CASE("Queue Swap Functionality") {
     FL_CHECK_EQ(q2.back(), 2);
 }
 
-TEST_CASE("Queue Container Access") {
+FL_TEST_CASE("Queue Container Access") {
     fl::queue<int> q;
     q.push(1);
     q.push(2);
     q.push(3);
 
-    SUBCASE("Const container access") {
+    FL_SUBCASE("Const container access") {
         const auto& container = q.get_container();
         FL_CHECK_EQ(container.size(), 3);
         FL_CHECK_EQ(container.front(), 1);
         FL_CHECK_EQ(container.back(), 3);
     }
 
-    SUBCASE("Non-const container access") {
+    FL_SUBCASE("Non-const container access") {
         auto& container = q.get_container();
         FL_CHECK_EQ(container.size(), 3);
         
@@ -177,7 +177,7 @@ TEST_CASE("Queue Container Access") {
     }
 }
 
-TEST_CASE("Queue with Move-Only Type") {
+FL_TEST_CASE("Queue with Move-Only Type") {
     // Test with a type that can only be moved, not copied
     struct MoveOnly {
         int value;
@@ -221,7 +221,7 @@ TEST_CASE("Queue with Move-Only Type") {
     FL_CHECK_EQ(q.front().value, 99);
 }
 
-TEST_CASE("Queue Stress Test") {
+FL_TEST_CASE("Queue Stress Test") {
     fl::queue<int> q;
     
     // Push a lot of elements

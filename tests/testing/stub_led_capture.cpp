@@ -13,7 +13,7 @@
 using namespace fl;
 
 
-TEST_CASE("ClocklessController - LED Data Capture") {
+FL_TEST_CASE("ClocklessController - LED Data Capture") {
     // Create LED array
     CRGB leds[3] = {CRGB::Red, CRGB::Green, CRGB::Blue};
 

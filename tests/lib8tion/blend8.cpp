@@ -2,12 +2,12 @@
 // Tests proper rounding and accurate color interpolation
 
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 #include "platforms/shared/math8.h"
 
 using namespace fl;
 
-TEST_CASE("blend8_endpoints") {
+FL_TEST_CASE("blend8_endpoints") {
     // Test that blend8 properly handles endpoint values
     // When amountOfB = 0, result should be a
     FL_CHECK_EQ(blend8(100, 200, 0), 100);
@@ -21,7 +21,7 @@ TEST_CASE("blend8_endpoints") {
     FL_CHECK_EQ(blend8(255, 0, 255), 0);
 }
 
-TEST_CASE("blend8_midpoint") {
+FL_TEST_CASE("blend8_midpoint") {
     // Test that blend8 properly handles midpoint blending
     // blend8(a, b, 128) should be approximately (a + b) / 2
     // With proper rounding, we expect correct results
@@ -32,7 +32,7 @@ TEST_CASE("blend8_midpoint") {
     FL_CHECK_EQ(blend8(100, 200, 128), 150);   // Should be 150
 }
 
-TEST_CASE("blend8_low_value_interpolation") {
+FL_TEST_CASE("blend8_low_value_interpolation") {
     // This is the key test case from issue #1633
     // Old implementation: If A=0, B=1, result is mostly 0 due to truncation
     // New implementation: Should properly interpolate with rounding
@@ -52,7 +52,7 @@ TEST_CASE("blend8_low_value_interpolation") {
     FL_CHECK_EQ(blend8(0, 4, 128), 2);  // Should be 2
 }
 
-TEST_CASE("blend8_rounding_accuracy") {
+FL_TEST_CASE("blend8_rounding_accuracy") {
     // Test that rounding works correctly across the range
     // The +0x80 (or +0x8000 for 16-bit) ensures proper rounding
 
@@ -65,7 +65,7 @@ TEST_CASE("blend8_rounding_accuracy") {
     FL_CHECK_EQ(blend8(100, 150, 255), 150);
 }
 
-TEST_CASE("blend8_full_range") {
+FL_TEST_CASE("blend8_full_range") {
     // Test blending across the full range of values
     // Verify that results are within expected bounds
 
@@ -88,7 +88,7 @@ TEST_CASE("blend8_full_range") {
     }
 }
 
-TEST_CASE("blend8_iterative_convergence") {
+FL_TEST_CASE("blend8_iterative_convergence") {
     // Test that iterative blending converges to the target color
     // This was a problem with the old implementation - successive blends
     // failed to reach overlay color
@@ -106,7 +106,7 @@ TEST_CASE("blend8_iterative_convergence") {
     FL_CHECK(color >= 250);  // Should be at least 250 out of 255
 }
 
-TEST_CASE("blend8_symmetry") {
+FL_TEST_CASE("blend8_symmetry") {
     // Test that blend8 exhibits expected symmetry properties
     // blend8(a, b, m) and blend8(b, a, 255-m) should be similar
 
@@ -118,7 +118,7 @@ TEST_CASE("blend8_symmetry") {
     FL_CHECK(diff <= 1);
 }
 
-TEST_CASE("blend8_no_overflow") {
+FL_TEST_CASE("blend8_no_overflow") {
     // Ensure that blend8 doesn't produce values outside [0, 255]
     // Test extreme cases
 
@@ -128,7 +128,7 @@ TEST_CASE("blend8_no_overflow") {
     FL_CHECK_EQ(blend8(0, 255, 128), 128);
 }
 
-TEST_CASE("blend8_8bit_vs_16bit") {
+FL_TEST_CASE("blend8_8bit_vs_16bit") {
     // Test both implementations separately to ensure they're both correct
     // This validates that both Option 1 (8-bit) and Option 2 (16-bit) work
 
@@ -146,7 +146,7 @@ TEST_CASE("blend8_8bit_vs_16bit") {
     // but for most cases they should match
 }
 
-TEST_CASE("blend8_comparison_values") {
+FL_TEST_CASE("blend8_comparison_values") {
     // Additional test cases to verify correct mathematical behavior
 
     // Quarter blends

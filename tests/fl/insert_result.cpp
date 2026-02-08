@@ -1,39 +1,39 @@
 #include "fl/insert_result.h"
-#include "doctest.h"
+#include "test.h"
 
 using namespace fl;
 
-TEST_CASE("fl::InsertResult enum values") {
-    SUBCASE("kInserted value") {
+FL_TEST_CASE("fl::InsertResult enum values") {
+    FL_SUBCASE("kInserted value") {
         FL_CHECK_EQ(static_cast<int>(kInserted), 0);
         FL_CHECK_EQ(static_cast<int>(InsertResult::kInserted), 0);
     }
 
-    SUBCASE("kExists value") {
+    FL_SUBCASE("kExists value") {
         FL_CHECK_EQ(static_cast<int>(kExists), 1);
         FL_CHECK_EQ(static_cast<int>(InsertResult::kExists), 1);
     }
 
-    SUBCASE("kMaxSize value") {
+    FL_SUBCASE("kMaxSize value") {
         FL_CHECK_EQ(static_cast<int>(kMaxSize), 2);
         FL_CHECK_EQ(static_cast<int>(InsertResult::kMaxSize), 2);
     }
 
-    SUBCASE("all values are distinct") {
+    FL_SUBCASE("all values are distinct") {
         FL_CHECK(kInserted != kExists);
         FL_CHECK(kInserted != kMaxSize);
         FL_CHECK(kExists != kMaxSize);
     }
 
-    SUBCASE("values are sequential") {
+    FL_SUBCASE("values are sequential") {
         FL_CHECK_EQ(static_cast<int>(kInserted), 0);
         FL_CHECK_EQ(static_cast<int>(kExists), 1);
         FL_CHECK_EQ(static_cast<int>(kMaxSize), 2);
     }
 }
 
-TEST_CASE("fl::InsertResult usage patterns") {
-    SUBCASE("assignment and comparison") {
+FL_TEST_CASE("fl::InsertResult usage patterns") {
+    FL_SUBCASE("assignment and comparison") {
         InsertResult result1 = kInserted;
         InsertResult result2 = kInserted;
         InsertResult result3 = kExists;
@@ -43,7 +43,7 @@ TEST_CASE("fl::InsertResult usage patterns") {
         FL_CHECK(result2 != result3);
     }
 
-    SUBCASE("switch statement") {
+    FL_SUBCASE("switch statement") {
         InsertResult result = kExists;
         int outcome = 0;
 
@@ -56,7 +56,7 @@ TEST_CASE("fl::InsertResult usage patterns") {
         FL_CHECK_EQ(outcome, 2);
     }
 
-    SUBCASE("conditional checks") {
+    FL_SUBCASE("conditional checks") {
         InsertResult result = kInserted;
         FL_CHECK(result == kInserted);
         FL_CHECK(result != kExists);
@@ -69,22 +69,22 @@ TEST_CASE("fl::InsertResult usage patterns") {
     }
 }
 
-TEST_CASE("fl::InsertResult semantic meaning") {
-    SUBCASE("success case - kInserted") {
+FL_TEST_CASE("fl::InsertResult semantic meaning") {
+    FL_SUBCASE("success case - kInserted") {
         // kInserted means the item was successfully inserted
         InsertResult result = kInserted;
         bool success = (result == kInserted);
         FL_CHECK(success);
     }
 
-    SUBCASE("already exists case - kExists") {
+    FL_SUBCASE("already exists case - kExists") {
         // kExists means the item already existed in the container
         InsertResult result = kExists;
         bool already_present = (result == kExists);
         FL_CHECK(already_present);
     }
 
-    SUBCASE("container full case - kMaxSize") {
+    FL_SUBCASE("container full case - kMaxSize") {
         // kMaxSize means the container was at max capacity
         InsertResult result = kMaxSize;
         bool container_full = (result == kMaxSize);
@@ -92,8 +92,8 @@ TEST_CASE("fl::InsertResult semantic meaning") {
     }
 }
 
-TEST_CASE("fl::InsertResult boolean conversion patterns") {
-    SUBCASE("success check pattern") {
+FL_TEST_CASE("fl::InsertResult boolean conversion patterns") {
+    FL_SUBCASE("success check pattern") {
         auto check_success = [](InsertResult result) -> bool {
             return result == kInserted;
         };
@@ -103,7 +103,7 @@ TEST_CASE("fl::InsertResult boolean conversion patterns") {
         FL_CHECK(check_success(kMaxSize) == false);
     }
 
-    SUBCASE("failure check pattern") {
+    FL_SUBCASE("failure check pattern") {
         auto check_failure = [](InsertResult result) -> bool {
             return result != kInserted;
         };
@@ -113,7 +113,7 @@ TEST_CASE("fl::InsertResult boolean conversion patterns") {
         FL_CHECK(check_failure(kMaxSize) == true);
     }
 
-    SUBCASE("specific failure type checks") {
+    FL_SUBCASE("specific failure type checks") {
         auto is_duplicate = [](InsertResult result) -> bool {
             return result == kExists;
         };
@@ -132,8 +132,8 @@ TEST_CASE("fl::InsertResult boolean conversion patterns") {
     }
 }
 
-TEST_CASE("fl::InsertResult array indexing") {
-    SUBCASE("use as array index") {
+FL_TEST_CASE("fl::InsertResult array indexing") {
+    FL_SUBCASE("use as array index") {
         // The sequential nature allows using as array index
         const char* messages[] = {
             "Inserted successfully",

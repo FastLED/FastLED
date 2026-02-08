@@ -2,12 +2,12 @@
 /// @brief Test for logging utility functions
 
 #include "fl/log.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/cstring.h"
 
 using namespace fl;
 
-TEST_CASE("fastled_file_offset - finds src/ prefix") {
+FL_TEST_CASE("fastled_file_offset - finds src/ prefix") {
     // Test case: Path with ".build/src/fl/dbg.h" should return "src/fl/dbg.h"
     const char* path1 = ".build/src/fl/dbg.h";
     const char* result1 = fastled_file_offset(path1);
@@ -27,7 +27,7 @@ TEST_CASE("fastled_file_offset - finds src/ prefix") {
     FL_CHECK(fl::strcmp(result3, "src/fx/video.cpp") == 0);
 }
 
-TEST_CASE("fastled_file_offset - fallback to last slash") {
+FL_TEST_CASE("fastled_file_offset - fallback to last slash") {
     // Test case: No "src/" but has slashes - return after last slash
     const char* path = "foo/bar/blah.h";
     const char* result = fastled_file_offset(path);
@@ -41,7 +41,7 @@ TEST_CASE("fastled_file_offset - fallback to last slash") {
     FL_CHECK(fl::strcmp(result2, "core.h") == 0);
 }
 
-TEST_CASE("fastled_file_offset - no slashes") {
+FL_TEST_CASE("fastled_file_offset - no slashes") {
     // Test case: No slashes at all - return original path
     const char* path = "simple.h";
     const char* result = fastled_file_offset(path);
@@ -49,7 +49,7 @@ TEST_CASE("fastled_file_offset - no slashes") {
     FL_CHECK(fl::strcmp(result, "simple.h") == 0);
 }
 
-TEST_CASE("fastled_file_offset - edge cases") {
+FL_TEST_CASE("fastled_file_offset - edge cases") {
     // Test case: Empty string
     const char* empty = "";
     const char* result_empty = fastled_file_offset(empty);
@@ -74,7 +74,7 @@ TEST_CASE("fastled_file_offset - edge cases") {
     FL_CHECK(fl::strcmp(result_partial, "bar.h") == 0);
 }
 
-TEST_CASE("fastled_file_offset - Windows backslash paths") {
+FL_TEST_CASE("fastled_file_offset - Windows backslash paths") {
     // Test case: Windows path with backslashes and "src\\"
     const char* win_path1 = "build\\debug\\src\\fx\\video.cpp";
     const char* result1 = fastled_file_offset(win_path1);

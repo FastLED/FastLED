@@ -10,7 +10,7 @@
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/geometry.h"
 #include "fl/log.h"
 #include "fl/rgb8.h"
@@ -25,7 +25,7 @@
 #define NUM_LEDS 288
 
 
-TEST_CASE("Corkscrew Circle10 test") {
+FL_TEST_CASE("Corkscrew Circle10 test") {
     // Test basic dimensional calculations using Corkscrew objects directly
     
     // Test simple case: 1 turn, 10 LEDs
@@ -65,7 +65,7 @@ TEST_CASE("Corkscrew Circle10 test") {
     FL_REQUIRE(max_height <= 18.0f); // height-1 = 18-1 = 17
 }
 
-TEST_CASE("Corkscrew LED distribution test") {
+FL_TEST_CASE("Corkscrew LED distribution test") {
     // Test if LEDs actually reach the top row
     fl::Corkscrew corkscrew(19.0f, 288); // FestivalStick case
     
@@ -84,7 +84,7 @@ TEST_CASE("Corkscrew LED distribution test") {
     FL_REQUIRE(row_counts[0] > 0);  // Bottom row should have LEDs
 }
 
-TEST_CASE("Corkscrew two turns test") {
+FL_TEST_CASE("Corkscrew two turns test") {
     // Test 2 turns with 2 LEDs per turn (4 LEDs total)
     fl::Corkscrew corkscrew_two_turns(2.0f, 4); // 2 turns, 4 LEDs, defaults
     
@@ -140,7 +140,7 @@ TEST_CASE("Corkscrew two turns test") {
     FL_REQUIRE(row_counts[1] > 0);  // Second turn should have LEDs
 }
 
-TEST_CASE("Constexpr corkscrew dimension calculation") {
+FL_TEST_CASE("Constexpr corkscrew dimension calculation") {
     // Test constexpr functions at compile time
     
     // FestivalStick case: 19 turns, 288 LEDs
@@ -171,7 +171,7 @@ TEST_CASE("Constexpr corkscrew dimension calculation") {
     static_assert(simple_height == 10, "Simple height should be 10");
 }
 
-TEST_CASE("TestCorkscrewBufferFunctionality") {
+FL_TEST_CASE("TestCorkscrewBufferFunctionality") {
     // Create a Corkscrew with 16 LEDs and 4 turns for simple testing
     // Create a buffer for testing
     fl::vector<CRGB> led_buffer(16);
@@ -243,7 +243,7 @@ TEST_CASE("TestCorkscrewBufferFunctionality") {
     FL_REQUIRE(non_black_count > 0);
 }
 
-TEST_CASE("Corkscrew readFrom with bilinear interpolation") {
+FL_TEST_CASE("Corkscrew readFrom with bilinear interpolation") {
     // Create a small corkscrew for testing with LED buffer
     fl::vector<CRGB> led_buffer(12);
     fl::span<CRGB> led_span(led_buffer);
@@ -316,7 +316,7 @@ TEST_CASE("Corkscrew readFrom with bilinear interpolation") {
     FL_REQUIRE(pos5.y >= 0.0f);
 }
 
-TEST_CASE("Corkscrew CRGB* data access") {
+FL_TEST_CASE("Corkscrew CRGB* data access") {
     // Create a corkscrew with LED buffer
     fl::vector<CRGB> led_buffer(6);
     fl::span<CRGB> led_span(led_buffer);
@@ -355,7 +355,7 @@ TEST_CASE("Corkscrew CRGB* data access") {
     }
 }
 
-TEST_CASE("Corkscrew ScreenMap functionality") {
+FL_TEST_CASE("Corkscrew ScreenMap functionality") {
     // Create a simple corkscrew for testing
     fl::Corkscrew corkscrew(2.0f, 8, false, fl::Gap()); // 2 turns, 8 LEDs
     
@@ -414,7 +414,7 @@ TEST_CASE("Corkscrew ScreenMap functionality") {
     }
 }
 
-TEST_CASE("Corkscrew Gap struct functionality") {
+FL_TEST_CASE("Corkscrew Gap struct functionality") {
     // Test default Gap construction
     fl::Gap defaultGap;
     FL_REQUIRE_EQ(defaultGap.gap, 0.0f);
@@ -460,7 +460,7 @@ TEST_CASE("Corkscrew Gap struct functionality") {
     FL_REQUIRE(corkscrewWithGap2.cylinderHeight() > 0);
 }
 
-TEST_CASE("Corkscrew Enhanced Gap - Specific user test: 2 LEDs, 1 turn, 1.0f gap every 1 LED") {
+FL_TEST_CASE("Corkscrew Enhanced Gap - Specific user test: 2 LEDs, 1 turn, 1.0f gap every 1 LED") {
     // Test case: 2 LEDs, 1 turn, gap of 1.0f every 1 LED
     fl::Gap gapEvery1(1, 1.0f); // Gap after every 1 LED, adds full 1.0 width unit
     fl::Corkscrew corkscrew(1.0f, 2, false, gapEvery1); // 1 turn, 2 LEDs
@@ -518,7 +518,7 @@ TEST_CASE("Corkscrew Enhanced Gap - Specific user test: 2 LEDs, 1 turn, 1.0f gap
     FL_REQUIRE(x_diff < 0.1f); // LED1 should wrap back to near the starting x position
 }
 
-TEST_CASE("Corkscrew gap test with 3 LEDs") {
+FL_TEST_CASE("Corkscrew gap test with 3 LEDs") {
     // User's specific test case:
     // 3 LEDs, gap of 0.5 every 1 LED, one turn
     // Expected: LED0 at w=0, LED1 at w=3.0, LED2 at w=0 (back to start)
@@ -569,7 +569,7 @@ TEST_CASE("Corkscrew gap test with 3 LEDs") {
     FL_REQUIRE(FL_ALMOST_EQUAL_FLOAT(pos2_unwrap.y, 2.0f)); // LED2 height
 }
 
-TEST_CASE("Corkscrew caching functionality") {
+FL_TEST_CASE("Corkscrew caching functionality") {
     // Create a small corkscrew for testing
     fl::Corkscrew corkscrew(2.0f, 10); // 2 turns, 10 LEDs
     
@@ -589,7 +589,7 @@ TEST_CASE("Corkscrew caching functionality") {
     }
 }
 
-TEST_CASE("Corkscrew caching disable functionality") {
+FL_TEST_CASE("Corkscrew caching disable functionality") {
     // Create a small corkscrew for testing
     fl::Corkscrew corkscrew(2.0f, 10); // 2 turns, 10 LEDs
     
@@ -631,7 +631,7 @@ TEST_CASE("Corkscrew caching disable functionality") {
     }
 }
 
-TEST_CASE("Corkscrew caching with edge cases") {
+FL_TEST_CASE("Corkscrew caching with edge cases") {
     // Create a small corkscrew for testing
     fl::Corkscrew corkscrew(1.5f, 5); // 1.5 turns, 5 LEDs
     

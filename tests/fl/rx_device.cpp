@@ -4,14 +4,14 @@
 #include "fl/rx_device.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/slice.h"
 #include "fl/stl/move.h"
 #include "fl/stl/shared_ptr.h"
 
 using namespace fl;
 
-TEST_CASE("RxDevice - default template returns dummy device") {
+FL_TEST_CASE("RxDevice - default template returns dummy device") {
     // On non-ESP32 platforms, default template returns dummy
     auto device = RxDevice::create<RxDeviceType::RMT>(6);  // GPIO 6
 
@@ -21,7 +21,7 @@ TEST_CASE("RxDevice - default template returns dummy device") {
 #endif
 }
 
-TEST_CASE("RxDevice - dummy device returns failures") {
+FL_TEST_CASE("RxDevice - dummy device returns failures") {
     // On non-ESP32 platforms, create() returns dummy device
     auto device = RxDevice::create<RxDeviceType::RMT>(6);  // GPIO 6
     FL_REQUIRE(device != nullptr);
@@ -50,7 +50,7 @@ TEST_CASE("RxDevice - dummy device returns failures") {
     FL_CHECK(count == 0);
 }
 
-TEST_CASE("RxDevice - template factory creates devices by type") {
+FL_TEST_CASE("RxDevice - template factory creates devices by type") {
     // Template-based factory should work with enum
     auto rmt_device = RxDevice::create<RxDeviceType::RMT>(6);  // GPIO 6
     auto isr_device = RxDevice::create<RxDeviceType::ISR>(7);  // GPIO 7
@@ -70,7 +70,7 @@ TEST_CASE("RxDevice - template factory creates devices by type") {
 #endif
 }
 
-TEST_CASE("RxDevice - createDummy returns shared singleton instance") {
+FL_TEST_CASE("RxDevice - createDummy returns shared singleton instance") {
     // createDummy should return same instance each time (via create template default)
     auto dummy1 = RxDevice::create<RxDeviceType::RMT>(6);  // GPIO 6
     auto dummy2 = RxDevice::create<RxDeviceType::ISR>(7);  // GPIO 7

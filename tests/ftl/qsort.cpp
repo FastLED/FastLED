@@ -1,5 +1,5 @@
 #include "fl/stl/cstdlib.h"
-#include "doctest.h"
+#include "test.h"
 
 // Helper comparison function for integers
 static int compare_ints(const void* a, const void* b) {
@@ -53,34 +53,34 @@ static int compare_points(const void* a, const void* b) {
     return 0;
 }
 
-TEST_CASE("fl::qsort - basic functionality") {
-    SUBCASE("sort empty array") {
+FL_TEST_CASE("fl::qsort - basic functionality") {
+    FL_SUBCASE("sort empty array") {
         int arr[1];
         fl::qsort(arr, 0, sizeof(int), compare_ints);
         // Should not crash
     }
 
-    SUBCASE("sort single element") {
+    FL_SUBCASE("sort single element") {
         int arr[] = {42};
         fl::qsort(arr, 1, sizeof(int), compare_ints);
         FL_CHECK_EQ(arr[0], 42);
     }
 
-    SUBCASE("sort two elements - already sorted") {
+    FL_SUBCASE("sort two elements - already sorted") {
         int arr[] = {1, 2};
         fl::qsort(arr, 2, sizeof(int), compare_ints);
         FL_CHECK_EQ(arr[0], 1);
         FL_CHECK_EQ(arr[1], 2);
     }
 
-    SUBCASE("sort two elements - reverse order") {
+    FL_SUBCASE("sort two elements - reverse order") {
         int arr[] = {2, 1};
         fl::qsort(arr, 2, sizeof(int), compare_ints);
         FL_CHECK_EQ(arr[0], 1);
         FL_CHECK_EQ(arr[1], 2);
     }
 
-    SUBCASE("sort already sorted array") {
+    FL_SUBCASE("sort already sorted array") {
         int arr[] = {1, 2, 3, 4, 5};
         fl::qsort(arr, 5, sizeof(int), compare_ints);
         FL_CHECK_EQ(arr[0], 1);
@@ -90,7 +90,7 @@ TEST_CASE("fl::qsort - basic functionality") {
         FL_CHECK_EQ(arr[4], 5);
     }
 
-    SUBCASE("sort reverse order") {
+    FL_SUBCASE("sort reverse order") {
         int arr[] = {5, 4, 3, 2, 1};
         fl::qsort(arr, 5, sizeof(int), compare_ints);
         FL_CHECK_EQ(arr[0], 1);
@@ -100,7 +100,7 @@ TEST_CASE("fl::qsort - basic functionality") {
         FL_CHECK_EQ(arr[4], 5);
     }
 
-    SUBCASE("sort random order") {
+    FL_SUBCASE("sort random order") {
         int arr[] = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3};
         fl::qsort(arr, 10, sizeof(int), compare_ints);
         FL_CHECK_EQ(arr[0], 1);
@@ -116,8 +116,8 @@ TEST_CASE("fl::qsort - basic functionality") {
     }
 }
 
-TEST_CASE("fl::qsort - with duplicates") {
-    SUBCASE("all same elements") {
+FL_TEST_CASE("fl::qsort - with duplicates") {
+    FL_SUBCASE("all same elements") {
         int arr[] = {5, 5, 5, 5, 5};
         fl::qsort(arr, 5, sizeof(int), compare_ints);
         FL_CHECK_EQ(arr[0], 5);
@@ -127,7 +127,7 @@ TEST_CASE("fl::qsort - with duplicates") {
         FL_CHECK_EQ(arr[4], 5);
     }
 
-    SUBCASE("many duplicates") {
+    FL_SUBCASE("many duplicates") {
         int arr[] = {3, 1, 3, 2, 1, 3, 2, 1};
         fl::qsort(arr, 8, sizeof(int), compare_ints);
         FL_CHECK_EQ(arr[0], 1);
@@ -141,8 +141,8 @@ TEST_CASE("fl::qsort - with duplicates") {
     }
 }
 
-TEST_CASE("fl::qsort - custom comparator") {
-    SUBCASE("reverse sort") {
+FL_TEST_CASE("fl::qsort - custom comparator") {
+    FL_SUBCASE("reverse sort") {
         int arr[] = {1, 2, 3, 4, 5};
         fl::qsort(arr, 5, sizeof(int), compare_ints_reverse);
         FL_CHECK_EQ(arr[0], 5);
@@ -153,8 +153,8 @@ TEST_CASE("fl::qsort - custom comparator") {
     }
 }
 
-TEST_CASE("fl::qsort - different types") {
-    SUBCASE("sort doubles") {
+FL_TEST_CASE("fl::qsort - different types") {
+    FL_SUBCASE("sort doubles") {
         double arr[] = {3.14, 1.41, 2.71, 0.99, 4.20};
         fl::qsort(arr, 5, sizeof(double), compare_doubles);
         FL_CHECK_EQ(arr[0], 0.99);
@@ -164,7 +164,7 @@ TEST_CASE("fl::qsort - different types") {
         FL_CHECK_EQ(arr[4], 4.20);
     }
 
-    SUBCASE("sort struct") {
+    FL_SUBCASE("sort struct") {
         Point arr[] = {
             {3, 5},
             {1, 2},
@@ -183,8 +183,8 @@ TEST_CASE("fl::qsort - different types") {
     }
 }
 
-TEST_CASE("fl::qsort - larger arrays") {
-    SUBCASE("sort 100 elements descending") {
+FL_TEST_CASE("fl::qsort - larger arrays") {
+    FL_SUBCASE("sort 100 elements descending") {
         int arr[100];
         for (int i = 0; i < 100; i++) {
             arr[i] = 100 - i;
@@ -197,7 +197,7 @@ TEST_CASE("fl::qsort - larger arrays") {
         }
     }
 
-    SUBCASE("sort 1000 elements with pattern") {
+    FL_SUBCASE("sort 1000 elements with pattern") {
         int arr[1000];
         // Create pattern: 500, 499, 498, ..., 1, 1000, 999, 998, ..., 501
         for (int i = 0; i < 500; i++) {
@@ -213,27 +213,27 @@ TEST_CASE("fl::qsort - larger arrays") {
     }
 }
 
-TEST_CASE("fl::qsort - edge cases") {
-    SUBCASE("nullptr base") {
+FL_TEST_CASE("fl::qsort - edge cases") {
+    FL_SUBCASE("nullptr base") {
         fl::qsort(nullptr, 10, sizeof(int), compare_ints);
         // Should not crash
     }
 
-    SUBCASE("zero size") {
+    FL_SUBCASE("zero size") {
         int arr[] = {1, 2, 3};
         fl::qsort(arr, 3, 0, compare_ints);
         // Should not crash, but won't sort (undefined behavior, but safe)
     }
 
-    SUBCASE("nullptr comparator") {
+    FL_SUBCASE("nullptr comparator") {
         int arr[] = {1, 2, 3};
         fl::qsort(arr, 3, sizeof(int), nullptr);
         // Should not crash
     }
 }
 
-TEST_CASE("fl::qsort - stress test") {
-    SUBCASE("sort with many swaps needed") {
+FL_TEST_CASE("fl::qsort - stress test") {
+    FL_SUBCASE("sort with many swaps needed") {
         // Create array with alternating high/low values
         int arr[100];
         for (int i = 0; i < 50; i++) {

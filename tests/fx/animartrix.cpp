@@ -1,12 +1,12 @@
 
 #include "fl/fx/2d/animartrix.hpp"
 #include "crgb.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/xymap.h"
 
 using namespace fl;
 
-TEST_CASE("Animartrix determinism") {
+FL_TEST_CASE("Animartrix determinism") {
     const uint16_t W = 32, H = 32;
     const uint16_t N = W * H;
 
@@ -31,7 +31,7 @@ TEST_CASE("Animartrix determinism") {
     for (uint16_t i = 0; i < N; i++) {
         if (leds1[i] != leds2[i]) {
             if (mismatch_count < 10) {
-                MESSAGE("Mismatch at index ", i,
+                FL_MESSAGE("Mismatch at index ", i,
                         ": (", int(leds1[i].r), ",", int(leds1[i].g), ",", int(leds1[i].b), ")"
                         " vs "
                         "(", int(leds2[i].r), ",", int(leds2[i].g), ",", int(leds2[i].b), ")");
@@ -44,7 +44,7 @@ TEST_CASE("Animartrix determinism") {
         total_diff += dr + dg + db;
     }
     double mismatch_pct = (double)total_diff / (double)(N * 3 * 255) * 100.0;
-    MESSAGE("Mismatch percentage: ", mismatch_pct, "%");
-    MESSAGE("Mismatched pixels: ", mismatch_count, " / ", N);
-    CHECK(mismatch_count == 0);
+    FL_MESSAGE("Mismatch percentage: ", mismatch_pct, "%");
+    FL_MESSAGE("Mismatched pixels: ", mismatch_count, " / ", N);
+    FL_CHECK(mismatch_count == 0);
 }

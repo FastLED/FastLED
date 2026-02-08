@@ -11,7 +11,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "fl/stl/vector.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/file_system.h"
 #include "fl/rgb8.h"
 
@@ -60,7 +60,7 @@ class FakeFileHandle : public fl::FileHandle {
     size_t mPos = 0;
 };
 
-TEST_CASE("video with memory stream") {
+FL_TEST_CASE("video with memory stream") {
     // fl::Video video(LEDS_PER_FRAME, FPS);
     fl::Video video(LEDS_PER_FRAME, FPS, 1);
     video.setFade(0, 0);
@@ -89,7 +89,7 @@ TEST_CASE("video with memory stream") {
     }
 }
 
-TEST_CASE("video with memory stream, interpolated") {
+FL_TEST_CASE("video with memory stream, interpolated") {
     // fl::Video video(LEDS_PER_FRAME, FPS);
     fl::Video video(LEDS_PER_FRAME, 1);
     video.setFade(0, 0);
@@ -121,7 +121,7 @@ TEST_CASE("video with memory stream, interpolated") {
     }
 }
 
-TEST_CASE("video with file handle") {
+FL_TEST_CASE("video with file handle") {
     // fl::Video video(LEDS_PER_FRAME, FPS);
     fl::Video video(LEDS_PER_FRAME, FPS);
     video.setFade(0, 0);
@@ -148,7 +148,7 @@ TEST_CASE("video with file handle") {
     }
 }
 
-TEST_CASE("Video duration") {
+FL_TEST_CASE("Video duration") {
     fl::Video video(LEDS_PER_FRAME, FPS);
     FakeFileHandlePtr fileHandle = fl::make_shared<FakeFileHandle>();
     CRGB led_frame[LEDS_PER_FRAME];
@@ -169,7 +169,7 @@ TEST_CASE("Video duration") {
     FL_CHECK_EQ(1000, uint32_t(duration_f + 0.5));
 }
 
-TEST_CASE("video with end frame fadeout") {
+FL_TEST_CASE("video with end frame fadeout") {
     fl::Video video(LEDS_PER_FRAME, FPS);
     video.setFade(0, 1000);
     FakeFileHandlePtr fileHandle = fl::make_shared<FakeFileHandle>();

@@ -1,7 +1,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/compiler_control.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/move.h"
 #include "fl/stl/vector.h"
 
@@ -57,7 +57,7 @@ struct CustomDeleter {
     bool called() const { return *called_flag; }
 };
 
-TEST_CASE("fl::shared_ptr default construction") {
+FL_TEST_CASE("fl::shared_ptr default construction") {
     fl::shared_ptr<TestClass> ptr;
     FL_CHECK(!ptr);
     FL_CHECK_EQ(ptr.get(), nullptr);
@@ -65,14 +65,14 @@ TEST_CASE("fl::shared_ptr default construction") {
     FL_CHECK(!ptr.unique());
 }
 
-TEST_CASE("fl::shared_ptr nullptr construction") {
+FL_TEST_CASE("fl::shared_ptr nullptr construction") {
     fl::shared_ptr<TestClass> ptr(nullptr);
     FL_CHECK(!ptr);
     FL_CHECK_EQ(ptr.get(), nullptr);
     FL_CHECK_EQ(ptr.use_count(), 0);
 }
 
-TEST_CASE("fl::shared_ptr construction from raw pointer") {
+FL_TEST_CASE("fl::shared_ptr construction from raw pointer") {
     bool destructor_called = false;
     {
         fl::shared_ptr<TestClass> ptr = fl::make_shared<TestClass>(42, &destructor_called);
@@ -86,7 +86,7 @@ TEST_CASE("fl::shared_ptr construction from raw pointer") {
     FL_CHECK(destructor_called);
 }
 
-TEST_CASE("fl::shared_ptr construction with custom deleter") {
+FL_TEST_CASE("fl::shared_ptr construction with custom deleter") {
     CustomDeleter deleter;
     {
         //fl::shared_ptr<TestClass> ptr(new TestClass(42), deleter);
@@ -99,7 +99,7 @@ TEST_CASE("fl::shared_ptr construction with custom deleter") {
     FL_CHECK(deleter.called());
 }
 
-TEST_CASE("fl::shared_ptr copy construction") {
+FL_TEST_CASE("fl::shared_ptr copy construction") {
     //fl::shared_ptr<TestClass> ptr1(new TestClass(42));
     fl::shared_ptr<TestClass> ptr1 = fl::make_shared<TestClass>(42);
     FL_CHECK_EQ(ptr1.use_count(), 1);
@@ -111,7 +111,7 @@ TEST_CASE("fl::shared_ptr copy construction") {
     FL_CHECK_EQ(ptr2->getValue(), 42);
 }
 
-TEST_CASE("fl::shared_ptr move construction") {
+FL_TEST_CASE("fl::shared_ptr move construction") {
     //fl::shared_ptr<TestClass> ptr1(new TestClass(42));
     fl::shared_ptr<TestClass> ptr1 = fl::make_shared<TestClass>(42);
     TestClass* raw_ptr = ptr1.get();
@@ -125,7 +125,7 @@ TEST_CASE("fl::shared_ptr move construction") {
     FL_CHECK_EQ(ptr2->getValue(), 42);
 }
 
-TEST_CASE("fl::shared_ptr assignment operator") {
+FL_TEST_CASE("fl::shared_ptr assignment operator") {
     //fl::shared_ptr<TestClass> ptr1(new TestClass(42));
     fl::shared_ptr<TestClass> ptr1 = fl::make_shared<TestClass>(42);
     //fl::shared_ptr<TestClass> ptr2(new TestClass(100));
@@ -142,7 +142,7 @@ TEST_CASE("fl::shared_ptr assignment operator") {
     FL_CHECK_EQ(ptr2->getValue(), 42);
 }
 
-TEST_CASE("fl::shared_ptr move assignment") {
+FL_TEST_CASE("fl::shared_ptr move assignment") {
     //fl::shared_ptr<TestClass> ptr1(new TestClass(42));
     fl::shared_ptr<TestClass> ptr1 = fl::make_shared<TestClass>(42);
     //fl::shared_ptr<TestClass> ptr2(new TestClass(100));
@@ -157,7 +157,7 @@ TEST_CASE("fl::shared_ptr move assignment") {
     FL_CHECK_EQ(ptr2->getValue(), 42);
 }
 
-TEST_CASE("fl::shared_ptr reset functionality") {
+FL_TEST_CASE("fl::shared_ptr reset functionality") {
     bool destructor_called = false;
     //fl::shared_ptr<TestClass> ptr(new TestClass(42, &destructor_called));
     fl::shared_ptr<TestClass> ptr = fl::make_shared<TestClass>(42, &destructor_called);
@@ -171,7 +171,7 @@ TEST_CASE("fl::shared_ptr reset functionality") {
     FL_CHECK(destructor_called);
 }
 
-TEST_CASE("fl::shared_ptr reset with new pointer") {
+FL_TEST_CASE("fl::shared_ptr reset with new pointer") {
     //fl::shared_ptr<TestClass> ptr(new TestClass(42));
     fl::shared_ptr<TestClass> ptr = fl::make_shared<TestClass>(42);
     FL_CHECK_EQ(ptr->getValue(), 42);
@@ -182,7 +182,7 @@ TEST_CASE("fl::shared_ptr reset with new pointer") {
     FL_CHECK_EQ(ptr.use_count(), 1);
 }
 
-TEST_CASE("fl::shared_ptr reset with custom deleter") {
+FL_TEST_CASE("fl::shared_ptr reset with custom deleter") {
     CustomDeleter deleter;
     //fl::shared_ptr<TestClass> ptr(new TestClass(42));
     fl::shared_ptr<TestClass> ptr = fl::make_shared<TestClass>(42);
@@ -196,7 +196,7 @@ TEST_CASE("fl::shared_ptr reset with custom deleter") {
     FL_CHECK(deleter.called());
 }
 
-TEST_CASE("fl::shared_ptr swap functionality") {
+FL_TEST_CASE("fl::shared_ptr swap functionality") {
     //fl::shared_ptr<TestClass> ptr1(new TestClass(42));
     fl::shared_ptr<TestClass> ptr1 = fl::make_shared<TestClass>(42);
     //fl::shared_ptr<TestClass> ptr2(new TestClass(100));
@@ -211,7 +211,7 @@ TEST_CASE("fl::shared_ptr swap functionality") {
     FL_CHECK_EQ(ptr2->getValue(), 42);
 }
 
-TEST_CASE("fl::shared_ptr operator* and operator->") {
+FL_TEST_CASE("fl::shared_ptr operator* and operator->") {
     //fl::shared_ptr<TestClass> ptr(new TestClass(42));
     fl::shared_ptr<TestClass> ptr = fl::make_shared<TestClass>(42);
     
@@ -222,7 +222,7 @@ TEST_CASE("fl::shared_ptr operator* and operator->") {
     FL_CHECK_EQ(ptr->getValue(), 100);
 }
 
-TEST_CASE("fl::shared_ptr bool conversion") {
+FL_TEST_CASE("fl::shared_ptr bool conversion") {
     fl::shared_ptr<TestClass> ptr1;
     //fl::shared_ptr<TestClass> ptr2(new TestClass(42));
     fl::shared_ptr<TestClass> ptr2 = fl::make_shared<TestClass>(42);
@@ -231,15 +231,15 @@ TEST_CASE("fl::shared_ptr bool conversion") {
     FL_CHECK(ptr2);
     
     if (ptr1) {
-        FAIL("Null pointer should be false");
+        FL_FAIL("Null pointer should be false");
     }
     
     if (!ptr2) {
-        FAIL("Valid pointer should be true");
+        FL_FAIL("Valid pointer should be true");
     }
 }
 
-TEST_CASE("fl::shared_ptr comparison operators") {
+FL_TEST_CASE("fl::shared_ptr comparison operators") {
     //fl::shared_ptr<TestClass> ptr1(new TestClass(42));
     fl::shared_ptr<TestClass> ptr1 = fl::make_shared<TestClass>(42);
     fl::shared_ptr<TestClass> ptr2(ptr1);
@@ -261,7 +261,7 @@ TEST_CASE("fl::shared_ptr comparison operators") {
     FL_CHECK_EQ(ptr1 != nullptr, true);
 }
 
-TEST_CASE("fl::shared_ptr polymorphism") {
+FL_TEST_CASE("fl::shared_ptr polymorphism") {
     // Test with derived class
     //fl::shared_ptr<DerivedTestClass> derived_ptr(new DerivedTestClass(42, 100));
     fl::shared_ptr<DerivedTestClass> derived_ptr = fl::make_shared<DerivedTestClass>(42, 100);
@@ -275,7 +275,7 @@ TEST_CASE("fl::shared_ptr polymorphism") {
     FL_CHECK_EQ(base_ptr.get(), derived_ptr.get());
 }
 
-TEST_CASE("fl::make_shared basic functionality") {
+FL_TEST_CASE("fl::make_shared basic functionality") {
     // Test default constructor
     auto ptr1 = fl::make_shared<TestClass>();
     FL_CHECK(ptr1);
@@ -295,7 +295,7 @@ TEST_CASE("fl::make_shared basic functionality") {
     FL_CHECK_EQ(ptr3.use_count(), 1);
 }
 
-TEST_CASE("fl::make_shared memory optimization") {
+FL_TEST_CASE("fl::make_shared memory optimization") {
     // make_shared should use inlined storage for better performance
     auto ptr = fl::make_shared<TestClass>(42);
     FL_CHECK(ptr);
@@ -309,7 +309,7 @@ TEST_CASE("fl::make_shared memory optimization") {
     FL_CHECK_EQ(ptr.get(), ptr2.get());
 }
 
-TEST_CASE("fl::shared_ptr reference counting stress test") {
+FL_TEST_CASE("fl::shared_ptr reference counting stress test") {
     const int NUM_COPIES = 10;
     //fl::shared_ptr<TestClass> original(new TestClass(42));
     fl::shared_ptr<TestClass> original = fl::make_shared<TestClass>(42);
@@ -339,7 +339,7 @@ TEST_CASE("fl::shared_ptr reference counting stress test") {
     FL_CHECK(original.unique());
 }
 
-TEST_CASE("fl::shared_ptr destruction order") {
+FL_TEST_CASE("fl::shared_ptr destruction order") {
     bool destructor_called = false;
     {
         //fl::shared_ptr<TestClass> ptr1(new TestClass(42, &destructor_called));
@@ -355,7 +355,7 @@ TEST_CASE("fl::shared_ptr destruction order") {
     FL_CHECK(destructor_called);
 }
 
-TEST_CASE("fl::shared_ptr self-assignment safety") {
+FL_TEST_CASE("fl::shared_ptr self-assignment safety") {
     //fl::shared_ptr<TestClass> ptr(new TestClass(42));
     fl::shared_ptr<TestClass> ptr = fl::make_shared<TestClass>(42);
     FL_CHECK_EQ(ptr.use_count(), 1);
@@ -398,7 +398,7 @@ private:
     fl::shared_ptr<SharedNode> mNext;
 };
 
-TEST_CASE("fl::shared_ptr self-assignment safety - a = b scenario") {
+FL_TEST_CASE("fl::shared_ptr self-assignment safety - a = b scenario") {
     bool nodeA_destroyed = false;
     bool nodeB_destroyed = false;
     
@@ -459,7 +459,7 @@ TEST_CASE("fl::shared_ptr self-assignment safety - a = b scenario") {
     FL_CHECK(nodeB_destroyed); // Now nodeB should be destroyed
 }
 
-TEST_CASE("fl::make_shared_no_tracking control block cleanup") {
+FL_TEST_CASE("fl::make_shared_no_tracking control block cleanup") {
     // Test that make_shared_no_tracking properly cleans up the control block
     // while NOT deleting the managed object
     bool destructor_called = false;
@@ -492,7 +492,7 @@ TEST_CASE("fl::make_shared_no_tracking control block cleanup") {
     FL_CHECK_EQ(static_object.getValue(), 42);
 }
 
-TEST_CASE("fl::make_shared_no_tracking copy and move semantics") {
+FL_TEST_CASE("fl::make_shared_no_tracking copy and move semantics") {
     TestClass static_object(100);
 
     auto ptr1 = fl::make_shared_no_tracking(static_object);

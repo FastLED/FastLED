@@ -14,7 +14,7 @@
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/vector.h"
@@ -64,7 +64,7 @@ static void resetMock_chipset_grouping() {
 // Test Suite: Chipset Grouping
 //=============================================================================
 
-TEST_CASE("ParlioEngine - single chipset type (all channels same timing)") {
+FL_TEST_CASE("ParlioEngine - single chipset type (all channels same timing)") {
     resetMock_chipset_grouping();
 
     auto& engine = ParlioEngine::getInstance();
@@ -98,7 +98,7 @@ TEST_CASE("ParlioEngine - single chipset type (all channels same timing)") {
     FL_CHECK(history.size() > 0);
 }
 
-TEST_CASE("ParlioEngine - chipset timing equality operator") {
+FL_TEST_CASE("ParlioEngine - chipset timing equality operator") {
     // Test the ChipsetTimingConfig equality operator
     ChipsetTimingConfig ws2812_timing = getWS2812Timing_chipset_grouping();
     ChipsetTimingConfig ws2812_timing2(350, 800, 450, 50, "WS2812B_ALT");
@@ -130,7 +130,7 @@ TEST_CASE("ParlioEngine - chipset timing equality operator") {
 // NOTE: DRAINING state transition tests are commented out due to limitations in
 // the current mock peripheral. See above comment for details.
 //
-// TEST_CASE("ParlioEngine - DRAINING to READY transition is clean") {
+// FL_TEST_CASE("ParlioEngine - DRAINING to READY transition is clean") {
 //     // Test would verify clean state machine transition from DRAINING to READY
 // }
 
@@ -138,7 +138,7 @@ TEST_CASE("ParlioEngine - chipset timing equality operator") {
 // where sequential beginTransmission() calls fail with "already transmitting" error.
 // This is a known issue with the mock and doesn't represent actual hardware behavior.
 //
-// TEST_CASE("ParlioEngine - multiple transmissions with same chipset") {
+// FL_TEST_CASE("ParlioEngine - multiple transmissions with same chipset") {
 //     // Test would verify that multiple sequential transmissions work correctly
 //     // Once the mock peripheral issue is resolved, this test can be re-enabled
 // }
@@ -147,7 +147,7 @@ TEST_CASE("ParlioEngine - chipset timing equality operator") {
 // Test Suite: State Machine Validation
 //=============================================================================
 
-TEST_CASE("ParlioEngine - READY state before transmission") {
+FL_TEST_CASE("ParlioEngine - READY state before transmission") {
     resetMock_chipset_grouping();
 
     auto& engine = ParlioEngine::getInstance();
@@ -165,7 +165,7 @@ TEST_CASE("ParlioEngine - READY state before transmission") {
 
 // NOTE: This test is commented out due to mock peripheral limitations.
 //
-// TEST_CASE("ParlioEngine - cannot start new transmission while DRAINING") {
+// FL_TEST_CASE("ParlioEngine - cannot start new transmission while DRAINING") {
 //     // Test would verify that beginTransmission() fails or blocks when called
 //     // while a transmission is already in progress (DRAINING state)
 // }
@@ -183,7 +183,7 @@ TEST_CASE("ParlioEngine - READY state before transmission") {
 //
 // These tests document the expected behavior for future implementation.
 
-TEST_CASE("ParlioEngine - document current single-timing constraint") {
+FL_TEST_CASE("ParlioEngine - document current single-timing constraint") {
     resetMock_chipset_grouping();
 
     auto& engine = ParlioEngine::getInstance();

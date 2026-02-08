@@ -4,11 +4,11 @@
 #include "fl/stl/algorithm.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/utility.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/move.h"
 #include "mutex_stub_stl.h"
 
-TEST_CASE("fl::thread - basic construction and joinable") {
+FL_TEST_CASE("fl::thread - basic construction and joinable") {
     // Default constructed thread is not joinable
     fl::thread t1;
     FL_REQUIRE(!t1.joinable());
@@ -24,7 +24,7 @@ TEST_CASE("fl::thread - basic construction and joinable") {
     FL_REQUIRE(!t2.joinable()); // After join, not joinable
 }
 
-TEST_CASE("fl::thread - this_thread::get_id") {
+FL_TEST_CASE("fl::thread - this_thread::get_id") {
     auto main_id = fl::this_thread::get_id();
 
     fl::thread::id thread_id;
@@ -39,7 +39,7 @@ TEST_CASE("fl::thread - this_thread::get_id") {
     FL_REQUIRE(ids_are_different);
 }
 
-TEST_CASE("fl::thread - thread with arguments") {
+FL_TEST_CASE("fl::thread - thread with arguments") {
     int result = 0;
     fl::mutex m;
 
@@ -54,7 +54,7 @@ TEST_CASE("fl::thread - thread with arguments") {
     FL_REQUIRE(result == 30);
 }
 
-TEST_CASE("fl::thread - move semantics") {
+FL_TEST_CASE("fl::thread - move semantics") {
     fl::atomic<bool> executed(false);
 
     fl::thread t1([&executed]() {
@@ -72,7 +72,7 @@ TEST_CASE("fl::thread - move semantics") {
     FL_REQUIRE(executed.load());
 }
 
-TEST_CASE("fl::thread - detach") {
+FL_TEST_CASE("fl::thread - detach") {
     fl::atomic<bool> started(false);
 
     fl::thread t([&started]() {
@@ -91,17 +91,17 @@ TEST_CASE("fl::thread - detach") {
     }
 }
 
-TEST_CASE("fl::thread - hardware_concurrency") {
+FL_TEST_CASE("fl::thread - hardware_concurrency") {
     unsigned int cores = fl::thread::hardware_concurrency();
     FL_REQUIRE(cores >= 1);
 }
 
-TEST_CASE("fl::thread - yield") {
+FL_TEST_CASE("fl::thread - yield") {
     // Just verify it compiles and runs without crashing
     fl::this_thread::yield();
 }
 
-TEST_CASE("fl::thread - multiple threads") {
+FL_TEST_CASE("fl::thread - multiple threads") {
     constexpr int num_threads = 4;
     constexpr int iterations = 1000;
 
@@ -123,7 +123,7 @@ TEST_CASE("fl::thread - multiple threads") {
     FL_REQUIRE(counter.load() == num_threads * iterations);
 }
 
-TEST_CASE("fl::thread - thread with mutex synchronization") {
+FL_TEST_CASE("fl::thread - thread with mutex synchronization") {
     fl::mutex m;
     int shared_value = 0;
     constexpr int num_increments = 1000;

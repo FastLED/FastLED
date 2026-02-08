@@ -1,11 +1,11 @@
 #include "fl/clamp.h"
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 
 using namespace fl;
 
-TEST_CASE("fl::clamp") {
-    SUBCASE("integer types") {
+FL_TEST_CASE("fl::clamp") {
+    FL_SUBCASE("integer types") {
         // Basic functionality
         FL_CHECK_EQ(clamp(5, 0, 10), 5);
         FL_CHECK_EQ(clamp(-5, 0, 10), 0);
@@ -25,7 +25,7 @@ TEST_CASE("fl::clamp") {
         FL_CHECK_EQ(clamp(10, 7, 7), 7);
     }
 
-    SUBCASE("uint8_t") {
+    FL_SUBCASE("uint8_t") {
         uint8_t val1 = 128;
         uint8_t val2 = 0;
         uint8_t val3 = 255;
@@ -35,7 +35,7 @@ TEST_CASE("fl::clamp") {
         FL_CHECK_EQ(clamp(val3, uint8_t(50), uint8_t(200)), uint8_t(200));
     }
 
-    SUBCASE("int8_t") {
+    FL_SUBCASE("int8_t") {
         int8_t val1 = 0;
         int8_t val2 = -100;
         int8_t val3 = 100;
@@ -45,7 +45,7 @@ TEST_CASE("fl::clamp") {
         FL_CHECK_EQ(clamp(val3, int8_t(-50), int8_t(50)), int8_t(50));
     }
 
-    SUBCASE("uint16_t") {
+    FL_SUBCASE("uint16_t") {
         uint16_t val1 = 1000;
         uint16_t val2 = 0;
         uint16_t val3 = 65535;
@@ -55,7 +55,7 @@ TEST_CASE("fl::clamp") {
         FL_CHECK_EQ(clamp(val3, uint16_t(100), uint16_t(2000)), uint16_t(2000));
     }
 
-    SUBCASE("int16_t") {
+    FL_SUBCASE("int16_t") {
         int16_t val1 = 0;
         int16_t val2 = -30000;
         int16_t val3 = 30000;
@@ -65,7 +65,7 @@ TEST_CASE("fl::clamp") {
         FL_CHECK_EQ(clamp(val3, int16_t(-1000), int16_t(1000)), int16_t(1000));
     }
 
-    SUBCASE("uint32_t") {
+    FL_SUBCASE("uint32_t") {
         uint32_t val1 = 500000;
         uint32_t val2 = 0;
         uint32_t val3 = 2000000;
@@ -75,7 +75,7 @@ TEST_CASE("fl::clamp") {
         FL_CHECK_EQ(clamp(val3, uint32_t(100000), uint32_t(1000000)), uint32_t(1000000));
     }
 
-    SUBCASE("int32_t") {
+    FL_SUBCASE("int32_t") {
         int32_t val1 = 0;
         int32_t val2 = -2000000;
         int32_t val3 = 2000000;
@@ -85,7 +85,7 @@ TEST_CASE("fl::clamp") {
         FL_CHECK_EQ(clamp(val3, int32_t(-1000000), int32_t(1000000)), int32_t(1000000));
     }
 
-    SUBCASE("float") {
+    FL_SUBCASE("float") {
         // Basic functionality
         FL_CHECK_EQ(clamp(5.5f, 0.0f, 10.0f), 5.5f);
         FL_CHECK_EQ(clamp(-5.5f, 0.0f, 10.0f), 0.0f);
@@ -105,7 +105,7 @@ TEST_CASE("fl::clamp") {
         FL_CHECK_EQ(clamp(0.999f, 0.0f, 1.0f), 0.999f);
     }
 
-    SUBCASE("double") {
+    FL_SUBCASE("double") {
         // Basic functionality
         FL_CHECK_EQ(clamp(5.5, 0.0, 10.0), 5.5);
         FL_CHECK_EQ(clamp(-5.5, 0.0, 10.0), 0.0);
@@ -125,7 +125,7 @@ TEST_CASE("fl::clamp") {
         FL_CHECK_EQ(clamp(0.987654321, 0.0, 1.0), 0.987654321);
     }
 
-    SUBCASE("edge cases") {
+    FL_SUBCASE("edge cases") {
         // Zero range (min == max)
         FL_CHECK_EQ(clamp(5, 7, 7), 7);
         FL_CHECK_EQ(clamp(5.5f, 7.0f, 7.0f), 7.0f);

@@ -15,7 +15,7 @@ static fl::FileSystem setupCodecFilesystem() {
     return fs;
 }
 
-TEST_CASE("JPEG file loading and decoding") {
+FL_TEST_CASE("JPEG file loading and decoding") {
     fl::FileSystem fs = setupCodecFilesystem();
 
     // Test that we can load the JPEG file from filesystem
@@ -50,7 +50,7 @@ TEST_CASE("JPEG file loading and decoding") {
         fl::FramePtr frame = fl::Jpeg::decode(config, data, &error_msg);
 
         if (!frame) {
-            MESSAGE("JPEG decode failed with error: " << error_msg);
+            FL_MESSAGE("JPEG decode failed with error: " << error_msg);
             FL_REQUIRE_MESSAGE(frame, "JPEG decoder returned null frame with error: " << error_msg);
         }
 
@@ -66,7 +66,7 @@ TEST_CASE("JPEG file loading and decoding") {
             FL_REQUIRE(pixels != nullptr);
 
             // Verify we have 4 pixels for a 2x2 image
-            MESSAGE("Decoded pixel values - Red: (" << (int)pixels[0].r << "," << (int)pixels[0].g << "," << (int)pixels[0].b
+            FL_MESSAGE("Decoded pixel values - Red: (" << (int)pixels[0].r << "," << (int)pixels[0].g << "," << (int)pixels[0].b
                     << ") White: (" << (int)pixels[1].r << "," << (int)pixels[1].g << "," << (int)pixels[1].b
                     << ") Blue: (" << (int)pixels[2].r << "," << (int)pixels[2].g << "," << (int)pixels[2].b
                     << ") Black: (" << (int)pixels[3].r << "," << (int)pixels[3].g << "," << (int)pixels[3].b << ")");

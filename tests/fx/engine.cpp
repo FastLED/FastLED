@@ -11,7 +11,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "crgb.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/fx/detail/transition.h"
 #include "fl/rgb8.h"
 #include "fl/stl/move.h"
@@ -43,7 +43,7 @@ private:
     uint32_t mLastDrawTime = 0;
 };
 
-TEST_CASE("test_fx_engine") {
+FL_TEST_CASE("test_fx_engine") {
     constexpr uint16_t NUM_LEDS = 10;
     fl::FxEngine engine(NUM_LEDS, false);
     CRGB leds[NUM_LEDS];
@@ -57,7 +57,7 @@ TEST_CASE("test_fx_engine") {
     FL_REQUIRE_EQ(0, id0);
     FL_REQUIRE_EQ(1, id1);
 
-    SUBCASE("Initial state") {
+    FL_SUBCASE("Initial state") {
         int currId = engine.getCurrentFxId();
         FL_CHECK(currId == id0);
         const bool ok = engine.draw(0, leds);
@@ -74,7 +74,7 @@ TEST_CASE("test_fx_engine") {
     }
 
 
-    SUBCASE("Transition") {
+    FL_SUBCASE("Transition") {
         bool ok = engine.nextFx(1000);
         if (!ok) {
             auto& effects = engine._getEffects();
@@ -82,7 +82,7 @@ TEST_CASE("test_fx_engine") {
                 auto& fx = it->second;
                 printf("fx: %s\n", fx->fxName().c_str());
             }
-            FAIL("Failed to transition to next effect");
+            FL_FAIL("Failed to transition to next effect");
         }
         FL_REQUIRE(ok);
         
@@ -108,7 +108,7 @@ TEST_CASE("test_fx_engine") {
         }
     }
 
-    SUBCASE("Transition with 0 time duration") {
+    FL_SUBCASE("Transition with 0 time duration") {
         engine.nextFx(0);
         engine.draw(0, leds);
         for (uint16_t i = 0; i < NUM_LEDS; ++i) {
@@ -120,15 +120,15 @@ TEST_CASE("test_fx_engine") {
 
 
 
-TEST_CASE("test_transition") {
+FL_TEST_CASE("test_transition") {
 
-    SUBCASE("Initial state") {
+    FL_SUBCASE("Initial state") {
         fl::Transition transition;
         FL_CHECK(transition.getProgress(0) == 0);
         FL_CHECK_FALSE(transition.isTransitioning(0));
     }
 
-    SUBCASE("Start transition") {
+    FL_SUBCASE("Start transition") {
         fl::Transition transition;
         transition.start(100, 1000);
         FL_CHECK(transition.isTransitioning(100));
@@ -136,7 +136,7 @@ TEST_CASE("test_transition") {
         FL_CHECK_FALSE(transition.isTransitioning(1100));
     }
 
-    SUBCASE("Progress calculation") {
+    FL_SUBCASE("Progress calculation") {
         fl::Transition transition;
         transition.start(100, 1000);
         FL_CHECK(transition.getProgress(100) == 0);
@@ -144,19 +144,19 @@ TEST_CASE("test_transition") {
         FL_CHECK(transition.getProgress(1100) == 255);
     }
 
-    SUBCASE("Progress before start time") {
+    FL_SUBCASE("Progress before start time") {
         fl::Transition transition;
         transition.start(100, 1000);
         FL_CHECK(transition.getProgress(50) == 0);
     }
 
-    SUBCASE("Progress after end time") {
+    FL_SUBCASE("Progress after end time") {
         fl::Transition transition;
         transition.start(100, 1000);
         FL_CHECK(transition.getProgress(1200) == 255);
     }
 
-    SUBCASE("Multiple transitions") {
+    FL_SUBCASE("Multiple transitions") {
         fl::Transition transition;
         transition.start(100, 1000);
         FL_CHECK(transition.isTransitioning(600));
@@ -167,7 +167,7 @@ TEST_CASE("test_transition") {
         FL_CHECK(transition.getProgress(2250) == 127);
     }
 
-    SUBCASE("Zero duration transition") {
+    FL_SUBCASE("Zero duration transition") {
         fl::Transition transition;
         transition.start(100, 0);
         FL_CHECK_FALSE(transition.isTransitioning(100));
@@ -203,7 +203,7 @@ class Fake2dEngine : public Fx2d {
 
 } // anonymous namespace
 
-TEST_CASE("test_fixed_fps") {
+FL_TEST_CASE("test_fixed_fps") {
     Fake2dEngine fake;
     fake.mColors.push_back(CRGB(0, 0, 0));
     fake.mColors.push_back(CRGB(255, 0, 0));

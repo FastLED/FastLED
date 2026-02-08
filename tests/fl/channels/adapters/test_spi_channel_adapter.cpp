@@ -155,7 +155,7 @@ ChannelDataPtr createClocklessChannelData(int pin = 5) {
 // Factory Creation Tests
 // ============================================================================
 
-TEST_CASE("SpiChannelEngineAdapter - Create with valid controllers") {
+FL_TEST_CASE("SpiChannelEngineAdapter - Create with valid controllers") {
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
 
     fl::vector<fl::shared_ptr<SpiHwBase>> controllers = {spiHw1};
@@ -164,22 +164,22 @@ TEST_CASE("SpiChannelEngineAdapter - Create with valid controllers") {
 
     auto adapter = SpiChannelEngineAdapter::create(controllers, priorities, names, "SPI_SINGLE");
 
-    CHECK(adapter != nullptr);
-    CHECK_EQ(fl::string(adapter->getName()), fl::string("SPI_SINGLE"));
-    CHECK_EQ(adapter->getPriority(), 5);
+    FL_CHECK(adapter != nullptr);
+    FL_CHECK_EQ(fl::string(adapter->getName()), fl::string("SPI_SINGLE"));
+    FL_CHECK_EQ(adapter->getPriority(), 5);
 }
 
-TEST_CASE("SpiChannelEngineAdapter - Create with empty controllers returns nullptr") {
+FL_TEST_CASE("SpiChannelEngineAdapter - Create with empty controllers returns nullptr") {
     fl::vector<fl::shared_ptr<SpiHwBase>> controllers;
     fl::vector<int> priorities;
     fl::vector<const char*> names;
 
     auto adapter = SpiChannelEngineAdapter::create(controllers, priorities, names, "SPI_UNIFIED");
 
-    CHECK(adapter == nullptr);
+    FL_CHECK(adapter == nullptr);
 }
 
-TEST_CASE("SpiChannelEngineAdapter - Create with mismatched vector sizes returns nullptr") {
+FL_TEST_CASE("SpiChannelEngineAdapter - Create with mismatched vector sizes returns nullptr") {
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
 
     fl::vector<fl::shared_ptr<SpiHwBase>> controllers = {spiHw1};
@@ -188,10 +188,10 @@ TEST_CASE("SpiChannelEngineAdapter - Create with mismatched vector sizes returns
 
     auto adapter = SpiChannelEngineAdapter::create(controllers, priorities, names, "SPI_UNIFIED");
 
-    CHECK(adapter == nullptr);
+    FL_CHECK(adapter == nullptr);
 }
 
-TEST_CASE("SpiChannelEngineAdapter - Create with null adapter name returns nullptr") {
+FL_TEST_CASE("SpiChannelEngineAdapter - Create with null adapter name returns nullptr") {
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
 
     fl::vector<fl::shared_ptr<SpiHwBase>> controllers = {spiHw1};
@@ -200,10 +200,10 @@ TEST_CASE("SpiChannelEngineAdapter - Create with null adapter name returns nullp
 
     auto adapter = SpiChannelEngineAdapter::create(controllers, priorities, names, nullptr);
 
-    CHECK(adapter == nullptr);
+    FL_CHECK(adapter == nullptr);
 }
 
-TEST_CASE("SpiChannelEngineAdapter - Create with empty adapter name returns nullptr") {
+FL_TEST_CASE("SpiChannelEngineAdapter - Create with empty adapter name returns nullptr") {
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
 
     fl::vector<fl::shared_ptr<SpiHwBase>> controllers = {spiHw1};
@@ -212,10 +212,10 @@ TEST_CASE("SpiChannelEngineAdapter - Create with empty adapter name returns null
 
     auto adapter = SpiChannelEngineAdapter::create(controllers, priorities, names, "");
 
-    CHECK(adapter == nullptr);
+    FL_CHECK(adapter == nullptr);
 }
 
-TEST_CASE("SpiChannelEngineAdapter - Create with null controller skips it") {
+FL_TEST_CASE("SpiChannelEngineAdapter - Create with null controller skips it") {
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
 
     fl::vector<fl::shared_ptr<SpiHwBase>> controllers = {nullptr, spiHw1};
@@ -225,25 +225,25 @@ TEST_CASE("SpiChannelEngineAdapter - Create with null controller skips it") {
     auto adapter = SpiChannelEngineAdapter::create(controllers, priorities, names, "SPI_UNIFIED");
 
     // Should create adapter with only the valid controller
-    CHECK(adapter != nullptr);
-    CHECK_EQ(adapter->getPriority(), 5);  // Only SPI2 registered
+    FL_CHECK(adapter != nullptr);
+    FL_CHECK_EQ(adapter->getPriority(), 5);  // Only SPI2 registered
 }
 
-TEST_CASE("SpiChannelEngineAdapter - Create with all null controllers returns nullptr") {
+FL_TEST_CASE("SpiChannelEngineAdapter - Create with all null controllers returns nullptr") {
     fl::vector<fl::shared_ptr<SpiHwBase>> controllers = {nullptr, nullptr};
     fl::vector<int> priorities = {9, 5};
     fl::vector<const char*> names = {"NULL1", "NULL2"};
 
     auto adapter = SpiChannelEngineAdapter::create(controllers, priorities, names, "SPI_UNIFIED");
 
-    CHECK(adapter == nullptr);
+    FL_CHECK(adapter == nullptr);
 }
 
 // ============================================================================
 // Chipset Routing Tests (CRITICAL)
 // ============================================================================
 
-TEST_CASE("SpiChannelEngineAdapter - canHandle accepts APA102 (true SPI)") {
+FL_TEST_CASE("SpiChannelEngineAdapter - canHandle accepts APA102 (true SPI)") {
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
 
     fl::vector<fl::shared_ptr<SpiHwBase>> controllers = {spiHw1};
@@ -255,10 +255,10 @@ TEST_CASE("SpiChannelEngineAdapter - canHandle accepts APA102 (true SPI)") {
     // Create APA102 channel data
     auto data = createSpiChannelData(5, 18);
 
-    CHECK(adapter->canHandle(data));
+    FL_CHECK(adapter->canHandle(data));
 }
 
-TEST_CASE("SpiChannelEngineAdapter - canHandle accepts SK9822 (true SPI)") {
+FL_TEST_CASE("SpiChannelEngineAdapter - canHandle accepts SK9822 (true SPI)") {
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
 
     fl::vector<fl::shared_ptr<SpiHwBase>> controllers = {spiHw1};
@@ -273,10 +273,10 @@ TEST_CASE("SpiChannelEngineAdapter - canHandle accepts SK9822 (true SPI)") {
     fl::vector_psram<uint8_t> channelData = {0x00, 0xFF};
     auto data = ChannelData::create(spiConfig, fl::move(channelData));
 
-    CHECK(adapter->canHandle(data));
+    FL_CHECK(adapter->canHandle(data));
 }
 
-TEST_CASE("SpiChannelEngineAdapter - canHandle rejects WS2812 (clockless)") {
+FL_TEST_CASE("SpiChannelEngineAdapter - canHandle rejects WS2812 (clockless)") {
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
 
     fl::vector<fl::shared_ptr<SpiHwBase>> controllers = {spiHw1};
@@ -288,10 +288,10 @@ TEST_CASE("SpiChannelEngineAdapter - canHandle rejects WS2812 (clockless)") {
     // Create WS2812 channel data
     auto data = createClocklessChannelData(5);
 
-    CHECK_FALSE(adapter->canHandle(data));
+    FL_CHECK_FALSE(adapter->canHandle(data));
 }
 
-TEST_CASE("SpiChannelEngineAdapter - canHandle rejects null channel data") {
+FL_TEST_CASE("SpiChannelEngineAdapter - canHandle rejects null channel data") {
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
 
     fl::vector<fl::shared_ptr<SpiHwBase>> controllers = {spiHw1};
@@ -300,14 +300,14 @@ TEST_CASE("SpiChannelEngineAdapter - canHandle rejects null channel data") {
 
     auto adapter = SpiChannelEngineAdapter::create(controllers, priorities, names, "SPI_SINGLE");
 
-    CHECK_FALSE(adapter->canHandle(nullptr));
+    FL_CHECK_FALSE(adapter->canHandle(nullptr));
 }
 
 // ============================================================================
 // Priority Tests
 // ============================================================================
 
-TEST_CASE("SpiChannelEngineAdapter - getPriority returns highest priority") {
+FL_TEST_CASE("SpiChannelEngineAdapter - getPriority returns highest priority") {
     auto spiHw16 = fl::make_shared<MockSpiHw>(16, "SPI_HEXADECA", 9);
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
 
@@ -317,10 +317,10 @@ TEST_CASE("SpiChannelEngineAdapter - getPriority returns highest priority") {
 
     auto adapter = SpiChannelEngineAdapter::create(controllers, priorities, names, "SPI_UNIFIED");
 
-    CHECK_EQ(adapter->getPriority(), 9);  // Should return highest (SpiHw16)
+    FL_CHECK_EQ(adapter->getPriority(), 9);  // Should return highest (SpiHw16)
 }
 
-TEST_CASE("SpiChannelEngineAdapter - getPriority with single controller") {
+FL_TEST_CASE("SpiChannelEngineAdapter - getPriority with single controller") {
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
 
     fl::vector<fl::shared_ptr<SpiHwBase>> controllers = {spiHw1};
@@ -329,14 +329,14 @@ TEST_CASE("SpiChannelEngineAdapter - getPriority with single controller") {
 
     auto adapter = SpiChannelEngineAdapter::create(controllers, priorities, names, "SPI_SINGLE");
 
-    CHECK_EQ(adapter->getPriority(), 5);
+    FL_CHECK_EQ(adapter->getPriority(), 5);
 }
 
 // ============================================================================
 // Lifecycle Tests
 // ============================================================================
 
-TEST_CASE("SpiChannelEngineAdapter - Initial state is READY") {
+FL_TEST_CASE("SpiChannelEngineAdapter - Initial state is READY") {
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
 
     fl::vector<fl::shared_ptr<SpiHwBase>> controllers = {spiHw1};
@@ -345,10 +345,10 @@ TEST_CASE("SpiChannelEngineAdapter - Initial state is READY") {
 
     auto adapter = SpiChannelEngineAdapter::create(controllers, priorities, names, "SPI_SINGLE");
 
-    CHECK_EQ(adapter->poll(), IChannelEngine::EngineState::READY);
+    FL_CHECK_EQ(adapter->poll(), IChannelEngine::EngineState::READY);
 }
 
-TEST_CASE("SpiChannelEngineAdapter - Enqueue adds to enqueued list") {
+FL_TEST_CASE("SpiChannelEngineAdapter - Enqueue adds to enqueued list") {
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
 
     fl::vector<fl::shared_ptr<SpiHwBase>> controllers = {spiHw1};
@@ -361,10 +361,10 @@ TEST_CASE("SpiChannelEngineAdapter - Enqueue adds to enqueued list") {
     adapter->enqueue(data);
 
     // Should return DRAINING (data enqueued but not transmitted yet)
-    CHECK_EQ(adapter->poll(), IChannelEngine::EngineState::DRAINING);
+    FL_CHECK_EQ(adapter->poll(), IChannelEngine::EngineState::DRAINING);
 }
 
-TEST_CASE("SpiChannelEngineAdapter - Enqueue null data is ignored") {
+FL_TEST_CASE("SpiChannelEngineAdapter - Enqueue null data is ignored") {
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
 
     fl::vector<fl::shared_ptr<SpiHwBase>> controllers = {spiHw1};
@@ -376,10 +376,10 @@ TEST_CASE("SpiChannelEngineAdapter - Enqueue null data is ignored") {
     adapter->enqueue(nullptr);
 
     // Should still be READY
-    CHECK_EQ(adapter->poll(), IChannelEngine::EngineState::READY);
+    FL_CHECK_EQ(adapter->poll(), IChannelEngine::EngineState::READY);
 }
 
-TEST_CASE("SpiChannelEngineAdapter - Enqueue non-SPI data is rejected") {
+FL_TEST_CASE("SpiChannelEngineAdapter - Enqueue non-SPI data is rejected") {
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
 
     fl::vector<fl::shared_ptr<SpiHwBase>> controllers = {spiHw1};
@@ -392,10 +392,10 @@ TEST_CASE("SpiChannelEngineAdapter - Enqueue non-SPI data is rejected") {
     adapter->enqueue(data);
 
     // Should still be READY (data rejected)
-    CHECK_EQ(adapter->poll(), IChannelEngine::EngineState::READY);
+    FL_CHECK_EQ(adapter->poll(), IChannelEngine::EngineState::READY);
 }
 
-TEST_CASE("SpiChannelEngineAdapter - Show triggers transmission") {
+FL_TEST_CASE("SpiChannelEngineAdapter - Show triggers transmission") {
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
     spiHw1->setBusId(2);
 
@@ -410,10 +410,10 @@ TEST_CASE("SpiChannelEngineAdapter - Show triggers transmission") {
     adapter->show();
 
     // Mock SPI controller should have been called
-    CHECK(spiHw1->wasTransmitCalled());
+    FL_CHECK(spiHw1->wasTransmitCalled());
 }
 
-TEST_CASE("SpiChannelEngineAdapter - Transmission completes synchronously") {
+FL_TEST_CASE("SpiChannelEngineAdapter - Transmission completes synchronously") {
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
     spiHw1->setBusId(2);
 
@@ -430,14 +430,14 @@ TEST_CASE("SpiChannelEngineAdapter - Transmission completes synchronously") {
     // Current implementation is synchronous - show() calls waitComplete() before returning
     // Note: transmit() sets mBusy=true, but waitComplete() clears it immediately
     // TODO: When async support is added, this test should verify BUSY state
-    CHECK_EQ(adapter->poll(), IChannelEngine::EngineState::READY);
+    FL_CHECK_EQ(adapter->poll(), IChannelEngine::EngineState::READY);
 
     // Verify transmission machinery was invoked
-    CHECK(spiHw1->wasTransmitCalled());
-    CHECK(spiHw1->wasWaitCompleteCalled());
+    FL_CHECK(spiHw1->wasTransmitCalled());
+    FL_CHECK(spiHw1->wasWaitCompleteCalled());
 }
 
-TEST_CASE("SpiChannelEngineAdapter - Poll returns READY after transmission completes") {
+FL_TEST_CASE("SpiChannelEngineAdapter - Poll returns READY after transmission completes") {
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
     spiHw1->setBusId(2);
 
@@ -455,10 +455,10 @@ TEST_CASE("SpiChannelEngineAdapter - Poll returns READY after transmission compl
     spiHw1->completeTransmission();
 
     // Should return READY
-    CHECK_EQ(adapter->poll(), IChannelEngine::EngineState::READY);
+    FL_CHECK_EQ(adapter->poll(), IChannelEngine::EngineState::READY);
 }
 
-TEST_CASE("SpiChannelEngineAdapter - Poll releases channel after completion") {
+FL_TEST_CASE("SpiChannelEngineAdapter - Poll releases channel after completion") {
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
     spiHw1->setBusId(2);
 
@@ -472,22 +472,22 @@ TEST_CASE("SpiChannelEngineAdapter - Poll releases channel after completion") {
     adapter->enqueue(data);
 
     // Data should not be in use yet
-    CHECK_FALSE(data->isInUse());
+    FL_CHECK_FALSE(data->isInUse());
 
     adapter->show();
 
     // Data should be marked in use during transmission
-    CHECK(data->isInUse());
+    FL_CHECK(data->isInUse());
 
     // Complete transmission
     spiHw1->completeTransmission();
     adapter->poll();
 
     // Data should be released
-    CHECK_FALSE(data->isInUse());
+    FL_CHECK_FALSE(data->isInUse());
 }
 
-TEST_CASE("SpiChannelEngineAdapter - Poll returns DRAINING when enqueued but not transmitting") {
+FL_TEST_CASE("SpiChannelEngineAdapter - Poll returns DRAINING when enqueued but not transmitting") {
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
     spiHw1->setBusId(2);
 
@@ -510,10 +510,10 @@ TEST_CASE("SpiChannelEngineAdapter - Poll returns DRAINING when enqueued but not
     spiHw1->completeTransmission();
 
     // Should return DRAINING (second batch enqueued but not shown)
-    CHECK_EQ(adapter->poll(), IChannelEngine::EngineState::DRAINING);
+    FL_CHECK_EQ(adapter->poll(), IChannelEngine::EngineState::DRAINING);
 }
 
-TEST_CASE("SpiChannelEngineAdapter - Multiple channels same clock pin") {
+FL_TEST_CASE("SpiChannelEngineAdapter - Multiple channels same clock pin") {
     auto spiHw1 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
     spiHw1->setBusId(2);
 
@@ -533,5 +533,5 @@ TEST_CASE("SpiChannelEngineAdapter - Multiple channels same clock pin") {
 
     // Both channels should be transmitted (batched together)
     // Mock transmit called once per channel in batch
-    CHECK_GT(spiHw1->getTransmitCount(), 0);
+    FL_CHECK_GT(spiHw1->getTransmitCount(), 0);
 }

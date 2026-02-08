@@ -1,5 +1,5 @@
 #include "fl/stl/pair.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/move.h"
 #include "fl/stl/type_traits.h"
 
@@ -52,22 +52,22 @@ struct MoveTestTypePair {
 
 } // anonymous namespace
 
-TEST_CASE("fl::pair default constructor") {
-    SUBCASE("pair with default constructible types") {
+FL_TEST_CASE("fl::pair default constructor") {
+    FL_SUBCASE("pair with default constructible types") {
         pair<int, double> p;
         FL_CHECK_EQ(p.first, 0);
         FL_CHECK_EQ(p.second, 0.0);
     }
 
-    SUBCASE("pair with custom types") {
+    FL_SUBCASE("pair with custom types") {
         pair<MoveTestTypePair, MoveTestTypePair> p;
         FL_CHECK_EQ(p.first.value, 0);
         FL_CHECK_EQ(p.second.value, 0);
     }
 }
 
-TEST_CASE("fl::pair value constructor") {
-    SUBCASE("pair from lvalue references") {
+FL_TEST_CASE("fl::pair value constructor") {
+    FL_SUBCASE("pair from lvalue references") {
         int a = 42;
         double b = 3.14;
         pair<int, double> p(a, b);
@@ -75,19 +75,19 @@ TEST_CASE("fl::pair value constructor") {
         FL_CHECK_EQ(p.second, 3.14);
     }
 
-    SUBCASE("pair from literals") {
+    FL_SUBCASE("pair from literals") {
         pair<int, double> p(42, 3.14);
         FL_CHECK_EQ(p.first, 42);
         FL_CHECK_EQ(p.second, 3.14);
     }
 
-    SUBCASE("pair from different types") {
+    FL_SUBCASE("pair from different types") {
         pair<int, float> p(42, 3.14f);
         FL_CHECK_EQ(p.first, 42);
         FL_CHECK_EQ(p.second, 3.14f);
     }
 
-    SUBCASE("pair of custom types") {
+    FL_SUBCASE("pair of custom types") {
         MoveTestTypePair a(10);
         MoveTestTypePair b(20);
         pair<MoveTestTypePair, MoveTestTypePair> p(a, b);
@@ -96,8 +96,8 @@ TEST_CASE("fl::pair value constructor") {
     }
 }
 
-TEST_CASE("fl::pair perfect forwarding constructor") {
-    SUBCASE("forwarding lvalues") {
+FL_TEST_CASE("fl::pair perfect forwarding constructor") {
+    FL_SUBCASE("forwarding lvalues") {
         int a = 10;
         double b = 20.5;
         pair<int, double> p(a, b);
@@ -105,20 +105,20 @@ TEST_CASE("fl::pair perfect forwarding constructor") {
         FL_CHECK_EQ(p.second, 20.5);
     }
 
-    SUBCASE("forwarding rvalues") {
+    FL_SUBCASE("forwarding rvalues") {
         pair<int, double> p(42, 3.14);
         FL_CHECK_EQ(p.first, 42);
         FL_CHECK_EQ(p.second, 3.14);
     }
 
-    SUBCASE("forwarding mixed") {
+    FL_SUBCASE("forwarding mixed") {
         int a = 10;
         pair<int, double> p(a, 20.5);
         FL_CHECK_EQ(p.first, 10);
         FL_CHECK_EQ(p.second, 20.5);
     }
 
-    SUBCASE("forwarding with move") {
+    FL_SUBCASE("forwarding with move") {
         MoveTestTypePair a(100);
         pair<MoveTestTypePair, MoveTestTypePair> p(fl::move(a), MoveTestTypePair(200));
         FL_CHECK_EQ(p.first.value, 100);
@@ -128,15 +128,15 @@ TEST_CASE("fl::pair perfect forwarding constructor") {
     }
 }
 
-TEST_CASE("fl::pair copy constructor from different pair types") {
-    SUBCASE("copy from same types") {
+FL_TEST_CASE("fl::pair copy constructor from different pair types") {
+    FL_SUBCASE("copy from same types") {
         pair<int, double> p1(42, 3.14);
         pair<int, double> p2(p1);
         FL_CHECK_EQ(p2.first, 42);
         FL_CHECK_EQ(p2.second, 3.14);
     }
 
-    SUBCASE("copy from convertible types") {
+    FL_SUBCASE("copy from convertible types") {
         pair<int, float> p1(42, 3.14f);
         pair<long, double> p2(p1);
         FL_CHECK_EQ(p2.first, 42L);
@@ -144,8 +144,8 @@ TEST_CASE("fl::pair copy constructor from different pair types") {
     }
 }
 
-TEST_CASE("fl::pair move constructor from different pair types") {
-    SUBCASE("move from same types") {
+FL_TEST_CASE("fl::pair move constructor from different pair types") {
+    FL_SUBCASE("move from same types") {
         pair<MoveTestTypePair, MoveTestTypePair> p1(MoveTestTypePair(10), MoveTestTypePair(20));
         pair<MoveTestTypePair, MoveTestTypePair> p2(fl::move(p1));
         FL_CHECK_EQ(p2.first.value, 10);
@@ -154,7 +154,7 @@ TEST_CASE("fl::pair move constructor from different pair types") {
         FL_CHECK(p2.second.moved_to);
     }
 
-    SUBCASE("move from convertible types") {
+    FL_SUBCASE("move from convertible types") {
         pair<MoveTestTypePair, int> p1(MoveTestTypePair(10), 20);
         pair<MoveTestTypePair, long> p2(fl::move(p1));
         FL_CHECK_EQ(p2.first.value, 10);
@@ -163,8 +163,8 @@ TEST_CASE("fl::pair move constructor from different pair types") {
     }
 }
 
-TEST_CASE("fl::pair copy constructor") {
-    SUBCASE("default copy constructor") {
+FL_TEST_CASE("fl::pair copy constructor") {
+    FL_SUBCASE("default copy constructor") {
         pair<int, double> p1(42, 3.14);
         pair<int, double> p2(p1);
         FL_CHECK_EQ(p2.first, 42);
@@ -174,8 +174,8 @@ TEST_CASE("fl::pair copy constructor") {
     }
 }
 
-TEST_CASE("fl::pair copy assignment") {
-    SUBCASE("default copy assignment") {
+FL_TEST_CASE("fl::pair copy assignment") {
+    FL_SUBCASE("default copy assignment") {
         pair<int, double> p1(42, 3.14);
         pair<int, double> p2(0, 0.0);
         p2 = p1;
@@ -186,15 +186,15 @@ TEST_CASE("fl::pair copy assignment") {
     }
 }
 
-TEST_CASE("fl::pair move constructor") {
-    SUBCASE("move constructor with primitives") {
+FL_TEST_CASE("fl::pair move constructor") {
+    FL_SUBCASE("move constructor with primitives") {
         pair<int, double> p1(42, 3.14);
         pair<int, double> p2(fl::move(p1));
         FL_CHECK_EQ(p2.first, 42);
         FL_CHECK_EQ(p2.second, 3.14);
     }
 
-    SUBCASE("move constructor with moveable types") {
+    FL_SUBCASE("move constructor with moveable types") {
         pair<MoveTestTypePair, MoveTestTypePair> p1(MoveTestTypePair(10), MoveTestTypePair(20));
         pair<MoveTestTypePair, MoveTestTypePair> p2(fl::move(p1));
         FL_CHECK_EQ(p2.first.value, 10);
@@ -204,8 +204,8 @@ TEST_CASE("fl::pair move constructor") {
     }
 }
 
-TEST_CASE("fl::pair move assignment") {
-    SUBCASE("move assignment with primitives") {
+FL_TEST_CASE("fl::pair move assignment") {
+    FL_SUBCASE("move assignment with primitives") {
         pair<int, double> p1(42, 3.14);
         pair<int, double> p2(0, 0.0);
         p2 = fl::move(p1);
@@ -213,7 +213,7 @@ TEST_CASE("fl::pair move assignment") {
         FL_CHECK_EQ(p2.second, 3.14);
     }
 
-    SUBCASE("move assignment with moveable types") {
+    FL_SUBCASE("move assignment with moveable types") {
         pair<MoveTestTypePair, MoveTestTypePair> p1(MoveTestTypePair(10), MoveTestTypePair(20));
         pair<MoveTestTypePair, MoveTestTypePair> p2;
         p2 = fl::move(p1);
@@ -224,20 +224,20 @@ TEST_CASE("fl::pair move assignment") {
     }
 }
 
-TEST_CASE("fl::pair member typedefs") {
-    SUBCASE("first_type typedef") {
+FL_TEST_CASE("fl::pair member typedefs") {
+    FL_SUBCASE("first_type typedef") {
         static_assert(fl::is_same<pair<int, double>::first_type, int>::value, "first_type should be int");
         static_assert(fl::is_same<pair<float, char>::first_type, float>::value, "first_type should be float");
     }
 
-    SUBCASE("second_type typedef") {
+    FL_SUBCASE("second_type typedef") {
         static_assert(fl::is_same<pair<int, double>::second_type, double>::value, "second_type should be double");
         static_assert(fl::is_same<pair<float, char>::second_type, char>::value, "second_type should be char");
     }
 }
 
-TEST_CASE("fl::pair::swap member function") {
-    SUBCASE("swap with primitives") {
+FL_TEST_CASE("fl::pair::swap member function") {
+    FL_SUBCASE("swap with primitives") {
         pair<int, double> p1(42, 3.14);
         pair<int, double> p2(100, 2.71);
         p1.swap(p2);
@@ -247,7 +247,7 @@ TEST_CASE("fl::pair::swap member function") {
         FL_CHECK_EQ(p2.second, 3.14);
     }
 
-    SUBCASE("swap with custom types") {
+    FL_SUBCASE("swap with custom types") {
         pair<MoveTestTypePair, MoveTestTypePair> p1(MoveTestTypePair(10), MoveTestTypePair(20));
         pair<MoveTestTypePair, MoveTestTypePair> p2(MoveTestTypePair(30), MoveTestTypePair(40));
         p1.swap(p2);
@@ -258,8 +258,8 @@ TEST_CASE("fl::pair::swap member function") {
     }
 }
 
-TEST_CASE("fl::swap non-member function") {
-    SUBCASE("non-member swap with primitives") {
+FL_TEST_CASE("fl::swap non-member function") {
+    FL_SUBCASE("non-member swap with primitives") {
         pair<int, double> p1(42, 3.14);
         pair<int, double> p2(100, 2.71);
         fl::swap(p1, p2);
@@ -269,7 +269,7 @@ TEST_CASE("fl::swap non-member function") {
         FL_CHECK_EQ(p2.second, 3.14);
     }
 
-    SUBCASE("non-member swap with custom types") {
+    FL_SUBCASE("non-member swap with custom types") {
         pair<MoveTestTypePair, MoveTestTypePair> p1(MoveTestTypePair(10), MoveTestTypePair(20));
         pair<MoveTestTypePair, MoveTestTypePair> p2(MoveTestTypePair(30), MoveTestTypePair(40));
         fl::swap(p1, p2);
@@ -280,62 +280,62 @@ TEST_CASE("fl::swap non-member function") {
     }
 }
 
-TEST_CASE("fl::pair equality operator") {
-    SUBCASE("equal pairs") {
+FL_TEST_CASE("fl::pair equality operator") {
+    FL_SUBCASE("equal pairs") {
         pair<int, double> p1(42, 3.14);
         pair<int, double> p2(42, 3.14);
         FL_CHECK(p1 == p2);
     }
 
-    SUBCASE("unequal pairs - first differs") {
+    FL_SUBCASE("unequal pairs - first differs") {
         pair<int, double> p1(42, 3.14);
         pair<int, double> p2(100, 3.14);
         FL_CHECK_FALSE(p1 == p2);
     }
 
-    SUBCASE("unequal pairs - second differs") {
+    FL_SUBCASE("unequal pairs - second differs") {
         pair<int, double> p1(42, 3.14);
         pair<int, double> p2(42, 2.71);
         FL_CHECK_FALSE(p1 == p2);
     }
 
-    SUBCASE("equality with different types") {
+    FL_SUBCASE("equality with different types") {
         pair<int, int> p1(42, 100);
         pair<long, long> p2(42L, 100L);
         FL_CHECK(p1 == p2);
     }
 }
 
-TEST_CASE("fl::pair inequality operator") {
-    SUBCASE("equal pairs") {
+FL_TEST_CASE("fl::pair inequality operator") {
+    FL_SUBCASE("equal pairs") {
         pair<int, double> p1(42, 3.14);
         pair<int, double> p2(42, 3.14);
         FL_CHECK_FALSE(p1 != p2);
     }
 
-    SUBCASE("unequal pairs") {
+    FL_SUBCASE("unequal pairs") {
         pair<int, double> p1(42, 3.14);
         pair<int, double> p2(100, 3.14);
         FL_CHECK(p1 != p2);
     }
 }
 
-TEST_CASE("fl::pair less-than operator") {
-    SUBCASE("less-than by first") {
+FL_TEST_CASE("fl::pair less-than operator") {
+    FL_SUBCASE("less-than by first") {
         pair<int, double> p1(10, 3.14);
         pair<int, double> p2(20, 2.71);
         FL_CHECK(p1 < p2);
         FL_CHECK_FALSE(p2 < p1);
     }
 
-    SUBCASE("less-than by second when first equal") {
+    FL_SUBCASE("less-than by second when first equal") {
         pair<int, double> p1(42, 2.71);
         pair<int, double> p2(42, 3.14);
         FL_CHECK(p1 < p2);
         FL_CHECK_FALSE(p2 < p1);
     }
 
-    SUBCASE("equal pairs") {
+    FL_SUBCASE("equal pairs") {
         pair<int, double> p1(42, 3.14);
         pair<int, double> p2(42, 3.14);
         FL_CHECK_FALSE(p1 < p2);
@@ -343,42 +343,42 @@ TEST_CASE("fl::pair less-than operator") {
     }
 }
 
-TEST_CASE("fl::pair less-than-or-equal operator") {
-    SUBCASE("less-than") {
+FL_TEST_CASE("fl::pair less-than-or-equal operator") {
+    FL_SUBCASE("less-than") {
         pair<int, double> p1(10, 3.14);
         pair<int, double> p2(20, 2.71);
         FL_CHECK(p1 <= p2);
     }
 
-    SUBCASE("equal") {
+    FL_SUBCASE("equal") {
         pair<int, double> p1(42, 3.14);
         pair<int, double> p2(42, 3.14);
         FL_CHECK(p1 <= p2);
     }
 
-    SUBCASE("greater-than") {
+    FL_SUBCASE("greater-than") {
         pair<int, double> p1(20, 3.14);
         pair<int, double> p2(10, 2.71);
         FL_CHECK_FALSE(p1 <= p2);
     }
 }
 
-TEST_CASE("fl::pair greater-than operator") {
-    SUBCASE("greater-than by first") {
+FL_TEST_CASE("fl::pair greater-than operator") {
+    FL_SUBCASE("greater-than by first") {
         pair<int, double> p1(20, 3.14);
         pair<int, double> p2(10, 2.71);
         FL_CHECK(p1 > p2);
         FL_CHECK_FALSE(p2 > p1);
     }
 
-    SUBCASE("greater-than by second when first equal") {
+    FL_SUBCASE("greater-than by second when first equal") {
         pair<int, double> p1(42, 3.14);
         pair<int, double> p2(42, 2.71);
         FL_CHECK(p1 > p2);
         FL_CHECK_FALSE(p2 > p1);
     }
 
-    SUBCASE("equal pairs") {
+    FL_SUBCASE("equal pairs") {
         pair<int, double> p1(42, 3.14);
         pair<int, double> p2(42, 3.14);
         FL_CHECK_FALSE(p1 > p2);
@@ -386,35 +386,35 @@ TEST_CASE("fl::pair greater-than operator") {
     }
 }
 
-TEST_CASE("fl::pair greater-than-or-equal operator") {
-    SUBCASE("greater-than") {
+FL_TEST_CASE("fl::pair greater-than-or-equal operator") {
+    FL_SUBCASE("greater-than") {
         pair<int, double> p1(20, 3.14);
         pair<int, double> p2(10, 2.71);
         FL_CHECK(p1 >= p2);
     }
 
-    SUBCASE("equal") {
+    FL_SUBCASE("equal") {
         pair<int, double> p1(42, 3.14);
         pair<int, double> p2(42, 3.14);
         FL_CHECK(p1 >= p2);
     }
 
-    SUBCASE("less-than") {
+    FL_SUBCASE("less-than") {
         pair<int, double> p1(10, 3.14);
         pair<int, double> p2(20, 2.71);
         FL_CHECK_FALSE(p1 >= p2);
     }
 }
 
-TEST_CASE("fl::make_pair function") {
-    SUBCASE("make_pair with primitives") {
+FL_TEST_CASE("fl::make_pair function") {
+    FL_SUBCASE("make_pair with primitives") {
         auto p = make_pair(42, 3.14);
         static_assert(fl::is_same<decltype(p), pair<int, double>>::value, "make_pair should deduce types");
         FL_CHECK_EQ(p.first, 42);
         FL_CHECK_EQ(p.second, 3.14);
     }
 
-    SUBCASE("make_pair with lvalue references") {
+    FL_SUBCASE("make_pair with lvalue references") {
         int a = 10;
         double b = 20.5;
         auto p = make_pair(a, b);
@@ -422,13 +422,13 @@ TEST_CASE("fl::make_pair function") {
         FL_CHECK_EQ(p.second, 20.5);
     }
 
-    SUBCASE("make_pair with rvalue references") {
+    FL_SUBCASE("make_pair with rvalue references") {
         auto p = make_pair(MoveTestTypePair(100), MoveTestTypePair(200));
         FL_CHECK_EQ(p.first.value, 100);
         FL_CHECK_EQ(p.second.value, 200);
     }
 
-    SUBCASE("make_pair type decay") {
+    FL_SUBCASE("make_pair type decay") {
         int arr[3] = {1, 2, 3};
         auto p = make_pair(arr, 42);
         // Array should decay to pointer
@@ -443,7 +443,7 @@ TEST_CASE("fl::make_pair function") {
 // which causes type mismatch errors. This is a known limitation/bug in the
 // current pair.h implementation.
 //
-// TEST_CASE("fl::pair get by index") {
+// FL_TEST_CASE("fl::pair get by index") {
 //     // These tests would fail to compile due to pair.h implementation issues
 // }
 
@@ -453,71 +453,71 @@ TEST_CASE("fl::make_pair function") {
 // when the pair has different types. This is a known limitation/bug in the
 // current pair.h implementation.
 //
-// TEST_CASE("fl::pair get by type") {
+// FL_TEST_CASE("fl::pair get by type") {
 //     // These tests would fail to compile due to pair.h implementation issues
 // }
 
-TEST_CASE("fl::pair_element type trait") {
-    SUBCASE("pair_element<0>") {
+FL_TEST_CASE("fl::pair_element type trait") {
+    FL_SUBCASE("pair_element<0>") {
         static_assert(fl::is_same<pair_element<0, int, double>::type, int>::value, "pair_element<0> should be int");
     }
 
-    SUBCASE("pair_element<1>") {
+    FL_SUBCASE("pair_element<1>") {
         static_assert(fl::is_same<pair_element<1, int, double>::type, double>::value, "pair_element<1> should be double");
     }
 }
 
-TEST_CASE("fl::tuple_size for pair") {
-    SUBCASE("tuple_size value") {
+FL_TEST_CASE("fl::tuple_size for pair") {
+    FL_SUBCASE("tuple_size value") {
         static_assert(tuple_size<pair<int, double>>::value == 2, "tuple_size should be 2");
         static_assert(tuple_size<pair<float, char>>::value == 2, "tuple_size should be 2");
     }
 }
 
-TEST_CASE("fl::tuple_element for pair") {
-    SUBCASE("tuple_element<0>") {
+FL_TEST_CASE("fl::tuple_element for pair") {
+    FL_SUBCASE("tuple_element<0>") {
         static_assert(fl::is_same<tuple_element<0, pair<int, double>>::type, int>::value, "tuple_element<0> should be int");
     }
 
-    SUBCASE("tuple_element<1>") {
+    FL_SUBCASE("tuple_element<1>") {
         static_assert(fl::is_same<tuple_element<1, pair<int, double>>::type, double>::value, "tuple_element<1> should be double");
     }
 }
 
-TEST_CASE("fl::pair edge cases") {
-    SUBCASE("pair with zero values") {
+FL_TEST_CASE("fl::pair edge cases") {
+    FL_SUBCASE("pair with zero values") {
         pair<int, int> p(0, 0);
         FL_CHECK_EQ(p.first, 0);
         FL_CHECK_EQ(p.second, 0);
     }
 
-    SUBCASE("pair with negative values") {
+    FL_SUBCASE("pair with negative values") {
         pair<int, int> p(-42, -100);
         FL_CHECK_EQ(p.first, -42);
         FL_CHECK_EQ(p.second, -100);
     }
 
-    SUBCASE("pair with nullptr") {
+    FL_SUBCASE("pair with nullptr") {
         pair<int*, double*> p(nullptr, nullptr);
         FL_CHECK_EQ(p.first, nullptr);
         FL_CHECK_EQ(p.second, nullptr);
     }
 
-    SUBCASE("pair with boolean") {
+    FL_SUBCASE("pair with boolean") {
         pair<bool, bool> p(true, false);
         FL_CHECK_EQ(p.first, true);
         FL_CHECK_EQ(p.second, false);
     }
 
-    SUBCASE("pair of same types") {
+    FL_SUBCASE("pair of same types") {
         pair<int, int> p(42, 100);
         FL_CHECK_EQ(p.first, 42);
         FL_CHECK_EQ(p.second, 100);
     }
 }
 
-TEST_CASE("fl::pair with pointers") {
-    SUBCASE("pair of pointers") {
+FL_TEST_CASE("fl::pair with pointers") {
+    FL_SUBCASE("pair of pointers") {
         int a = 42;
         double b = 3.14;
         pair<int*, double*> p(&a, &b);
@@ -525,7 +525,7 @@ TEST_CASE("fl::pair with pointers") {
         FL_CHECK_EQ(*p.second, 3.14);
     }
 
-    SUBCASE("modify through pointers") {
+    FL_SUBCASE("modify through pointers") {
         int a = 42;
         double b = 3.14;
         pair<int*, double*> p(&a, &b);
@@ -536,8 +536,8 @@ TEST_CASE("fl::pair with pointers") {
     }
 }
 
-TEST_CASE("fl::pair nested pairs") {
-    SUBCASE("pair of pairs") {
+FL_TEST_CASE("fl::pair nested pairs") {
+    FL_SUBCASE("pair of pairs") {
         pair<int, int> inner1(10, 20);
         pair<int, int> inner2(30, 40);
         pair<pair<int, int>, pair<int, int>> outer(inner1, inner2);
@@ -547,7 +547,7 @@ TEST_CASE("fl::pair nested pairs") {
         FL_CHECK_EQ(outer.second.second, 40);
     }
 
-    SUBCASE("make_pair with nested pair") {
+    FL_SUBCASE("make_pair with nested pair") {
         auto inner = make_pair(10, 20);
         auto outer = make_pair(inner, 30);
         FL_CHECK_EQ(outer.first.first, 10);
@@ -556,8 +556,8 @@ TEST_CASE("fl::pair nested pairs") {
     }
 }
 
-TEST_CASE("fl::pair comparison comprehensive") {
-    SUBCASE("lexicographic ordering") {
+FL_TEST_CASE("fl::pair comparison comprehensive") {
+    FL_SUBCASE("lexicographic ordering") {
         pair<int, int> p1(1, 100);
         pair<int, int> p2(2, 1);
         // p1 < p2 because first element (1 < 2)
@@ -568,7 +568,7 @@ TEST_CASE("fl::pair comparison comprehensive") {
         FL_CHECK(p1 != p2);
     }
 
-    SUBCASE("lexicographic ordering - equal first") {
+    FL_SUBCASE("lexicographic ordering - equal first") {
         pair<int, int> p1(1, 50);
         pair<int, int> p2(1, 100);
         // p1 < p2 because first equal, second (50 < 100)
@@ -580,8 +580,8 @@ TEST_CASE("fl::pair comparison comprehensive") {
     }
 }
 
-TEST_CASE("fl::Pair backwards compatibility") {
-    SUBCASE("Pair alias") {
+FL_TEST_CASE("fl::Pair backwards compatibility") {
+    FL_SUBCASE("Pair alias") {
         Pair<int, double> p(42, 3.14);
         FL_CHECK_EQ(p.first, 42);
         FL_CHECK_EQ(p.second, 3.14);

@@ -9,7 +9,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "crgb.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/rgb8.h"
 #include "fl/stl/move.h"
 #include "fl/stl/shared_ptr.h"
@@ -46,7 +46,7 @@ class Fake2d : public fl::Fx2d {
 
 
 
-TEST_CASE("test_fixed_fps") {
+FL_TEST_CASE("test_fixed_fps") {
     Fake2dPtr fake = fl::make_shared<Fake2d>();
     fake->mColors.push_back(CRGB(0, 0, 0));
     fake->mColors.push_back(CRGB(255, 0, 0));

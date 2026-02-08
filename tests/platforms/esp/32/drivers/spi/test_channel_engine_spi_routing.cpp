@@ -42,14 +42,14 @@ ChannelDataPtr createClocklessChannelData(int pin = 5) {
 
 } // anonymous namespace
 
-TEST_CASE("ChannelEngineSpi - canHandle accepts WS2812 (clockless)") {
+FL_TEST_CASE("ChannelEngineSpi - canHandle accepts WS2812 (clockless)") {
     ChannelEngineSpi engine;
 
     auto data = createClocklessChannelData(5);
     CHECK_TRUE(engine.canHandle(data));
 }
 
-TEST_CASE("ChannelEngineSpi - canHandle accepts SK6812 (clockless)") {
+FL_TEST_CASE("ChannelEngineSpi - canHandle accepts SK6812 (clockless)") {
     ChannelEngineSpi engine;
 
     auto timing = makeTimingConfig<TIMING_SK6812>();
@@ -59,14 +59,14 @@ TEST_CASE("ChannelEngineSpi - canHandle accepts SK6812 (clockless)") {
     CHECK_TRUE(engine.canHandle(data));
 }
 
-TEST_CASE("ChannelEngineSpi - canHandle rejects APA102 (true SPI)") {
+FL_TEST_CASE("ChannelEngineSpi - canHandle rejects APA102 (true SPI)") {
     ChannelEngineSpi engine;
 
     auto data = createSpiChannelData(5, 18);
-    CHECK_FALSE(engine.canHandle(data));
+    FL_CHECK_FALSE(engine.canHandle(data));
 }
 
-TEST_CASE("ChannelEngineSpi - canHandle rejects SK9822 (true SPI)") {
+FL_TEST_CASE("ChannelEngineSpi - canHandle rejects SK9822 (true SPI)") {
     ChannelEngineSpi engine;
 
     SpiEncoder encoder = SpiEncoder::sk9822();
@@ -74,16 +74,16 @@ TEST_CASE("ChannelEngineSpi - canHandle rejects SK9822 (true SPI)") {
     fl::vector_psram<uint8_t> channelData = {0x00, 0xFF};
     auto data = ChannelData::create(spiConfig, fl::move(channelData));
 
-    CHECK_FALSE(engine.canHandle(data));
+    FL_CHECK_FALSE(engine.canHandle(data));
 }
 
-TEST_CASE("ChannelEngineSpi - canHandle rejects null channel data") {
+FL_TEST_CASE("ChannelEngineSpi - canHandle rejects null channel data") {
     ChannelEngineSpi engine;
 
-    CHECK_FALSE(engine.canHandle(nullptr));
+    FL_CHECK_FALSE(engine.canHandle(nullptr));
 }
 
-TEST_CASE("ChannelEngineSpi - Routing architecture validation") {
+FL_TEST_CASE("ChannelEngineSpi - Routing architecture validation") {
     // This test validates the critical routing distinction:
     //
     // ChannelEngineSpi (this engine):
@@ -107,11 +107,11 @@ TEST_CASE("ChannelEngineSpi - Routing architecture validation") {
     // Clockless data should be accepted
     auto clocklessData = createClocklessChannelData(5);
     CHECK_TRUE(engine.canHandle(clocklessData));
-    CHECK_FALSE(clocklessData->isSpi());
+    FL_CHECK_FALSE(clocklessData->isSpi());
 
     // True SPI data should be rejected
     auto spiData = createSpiChannelData(5, 18);
-    CHECK_FALSE(engine.canHandle(spiData));
+    FL_CHECK_FALSE(engine.canHandle(spiData));
     CHECK_TRUE(spiData->isSpi());
 }
 

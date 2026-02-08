@@ -2,7 +2,7 @@
 /// @brief Test for internal call stack tracking system
 
 #include "fl/trace.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/log.h"
 #include "fl/stl/strstream.h"
 #include "fl/int.h"
@@ -12,7 +12,7 @@
 
 using namespace fl;
 
-TEST_CASE("StackTrace - basic push and pop") {
+FL_TEST_CASE("StackTrace - basic push and pop") {
     // Clear any previous state
     ScopedTrace::clear();
 
@@ -35,7 +35,7 @@ TEST_CASE("StackTrace - basic push and pop") {
     FL_CHECK(ScopedTrace::depth() == 0);
 }
 
-TEST_CASE("StackTrace - RAII scoped trace") {
+FL_TEST_CASE("StackTrace - RAII scoped trace") {
     ScopedTrace::clear();
     FL_CHECK(ScopedTrace::depth() == 0);
 
@@ -54,7 +54,7 @@ TEST_CASE("StackTrace - RAII scoped trace") {
     FL_CHECK(ScopedTrace::depth() == 0);
 }
 
-TEST_CASE("StackTrace - overflow handling") {
+FL_TEST_CASE("StackTrace - overflow handling") {
     ScopedTrace::clear();
 
     // Push exactly at capacity (32 entries)
@@ -84,7 +84,7 @@ TEST_CASE("StackTrace - overflow handling") {
     FL_CHECK(ScopedTrace::depth() == 0);
 }
 
-TEST_CASE("StackTrace - underflow protection") {
+FL_TEST_CASE("StackTrace - underflow protection") {
     ScopedTrace::clear();
     FL_CHECK(ScopedTrace::depth() == 0);
 
@@ -103,7 +103,7 @@ TEST_CASE("StackTrace - underflow protection") {
     FL_CHECK(ScopedTrace::depth() == 0);
 }
 
-TEST_CASE("StackTrace - null function handling") {
+FL_TEST_CASE("StackTrace - null function handling") {
     ScopedTrace::clear();
 
     // Pushing null should be ignored
@@ -118,7 +118,7 @@ TEST_CASE("StackTrace - null function handling") {
     FL_CHECK(ScopedTrace::depth() == 0);
 }
 
-TEST_CASE("StackTrace - macro FL_SCOPED_TRACE_NAMED") {
+FL_TEST_CASE("StackTrace - macro FL_SCOPED_TRACE_NAMED") {
     ScopedTrace::clear();
 
     {
@@ -136,7 +136,7 @@ TEST_CASE("StackTrace - macro FL_SCOPED_TRACE_NAMED") {
     FL_CHECK(ScopedTrace::depth() == 0);
 }
 
-TEST_CASE("StackTrace - dump output") {
+FL_TEST_CASE("StackTrace - dump output") {
     ScopedTrace::clear();
 
     // This test just verifies dump doesn't crash

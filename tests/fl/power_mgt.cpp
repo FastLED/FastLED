@@ -4,10 +4,10 @@
 #include "FastLED.h"
 #include "power_mgt.h"
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 #include "hsv2rgb.h"
 
-TEST_CASE("PowerModelRGB - constructor") {
+FL_TEST_CASE("PowerModelRGB - constructor") {
     PowerModelRGB model(40, 40, 40, 2);
     FL_CHECK(model.red_mW == 40);
     FL_CHECK(model.green_mW == 40);
@@ -15,7 +15,7 @@ TEST_CASE("PowerModelRGB - constructor") {
     FL_CHECK(model.dark_mW == 2);
 }
 
-TEST_CASE("PowerModelRGB - default constructor") {
+FL_TEST_CASE("PowerModelRGB - default constructor") {
     PowerModelRGB model;
     FL_CHECK(model.red_mW == 80);   // WS2812 @ 5V
     FL_CHECK(model.green_mW == 55);
@@ -23,7 +23,7 @@ TEST_CASE("PowerModelRGB - default constructor") {
     FL_CHECK(model.dark_mW == 5);
 }
 
-TEST_CASE("PowerModelRGBW - constructor") {
+FL_TEST_CASE("PowerModelRGBW - constructor") {
     PowerModelRGBW model(90, 70, 90, 100, 5);
     FL_CHECK(model.red_mW == 90);
     FL_CHECK(model.green_mW == 70);
@@ -32,7 +32,7 @@ TEST_CASE("PowerModelRGBW - constructor") {
     FL_CHECK(model.dark_mW == 5);
 }
 
-TEST_CASE("PowerModelRGBWW - constructor") {
+FL_TEST_CASE("PowerModelRGBWW - constructor") {
     PowerModelRGBWW model(85, 65, 85, 95, 95, 5);
     FL_CHECK(model.red_mW == 85);
     FL_CHECK(model.green_mW == 65);
@@ -42,7 +42,7 @@ TEST_CASE("PowerModelRGBWW - constructor") {
     FL_CHECK(model.dark_mW == 5);
 }
 
-TEST_CASE("PowerModelRGBW - toRGB conversion") {
+FL_TEST_CASE("PowerModelRGBW - toRGB conversion") {
     PowerModelRGBW rgbw(90, 70, 90, 100, 5);
     PowerModelRGB rgb = rgbw.toRGB();
 
@@ -53,7 +53,7 @@ TEST_CASE("PowerModelRGBW - toRGB conversion") {
     FL_CHECK(rgb.dark_mW == 5);
 }
 
-TEST_CASE("PowerModelRGBWW - toRGB conversion") {
+FL_TEST_CASE("PowerModelRGBWW - toRGB conversion") {
     PowerModelRGBWW rgbww(85, 65, 85, 95, 95, 5);
     PowerModelRGB rgb = rgbww.toRGB();
 
@@ -64,7 +64,7 @@ TEST_CASE("PowerModelRGBWW - toRGB conversion") {
     FL_CHECK(rgb.dark_mW == 5);
 }
 
-TEST_CASE("set_power_model / get_power_model - RGB") {
+FL_TEST_CASE("set_power_model / get_power_model - RGB") {
     PowerModelRGB custom(50, 50, 50, 3);
     set_power_model(custom);
 
@@ -75,7 +75,7 @@ TEST_CASE("set_power_model / get_power_model - RGB") {
     FL_CHECK(retrieved.dark_mW == 3);
 }
 
-TEST_CASE("set_power_model - RGBW extracts RGB") {
+FL_TEST_CASE("set_power_model - RGBW extracts RGB") {
     PowerModelRGBW rgbw(90, 70, 90, 100, 5);
     set_power_model(rgbw);
 
@@ -87,7 +87,7 @@ TEST_CASE("set_power_model - RGBW extracts RGB") {
     FL_CHECK(retrieved.dark_mW == 5);
 }
 
-TEST_CASE("set_power_model - RGBWW extracts RGB") {
+FL_TEST_CASE("set_power_model - RGBWW extracts RGB") {
     PowerModelRGBWW rgbww(85, 65, 85, 95, 95, 5);
     set_power_model(rgbww);
 
@@ -99,7 +99,7 @@ TEST_CASE("set_power_model - RGBWW extracts RGB") {
     FL_CHECK(retrieved.dark_mW == 5);
 }
 
-TEST_CASE("Power calculation - uses custom model") {
+FL_TEST_CASE("Power calculation - uses custom model") {
     // Set custom model with easy-to-test values
     set_power_model(PowerModelRGB(40, 40, 40, 2));
 
@@ -116,7 +116,7 @@ TEST_CASE("Power calculation - uses custom model") {
     FL_CHECK(power <= 423);
 }
 
-TEST_CASE("Power calculation - all channels") {
+FL_TEST_CASE("Power calculation - all channels") {
     // Set symmetric model for easier testing
     set_power_model(PowerModelRGB(50, 50, 50, 0));
 
@@ -133,7 +133,7 @@ TEST_CASE("Power calculation - all channels") {
     FL_CHECK(power <= 752);
 }
 
-TEST_CASE("FastLED wrapper - RGB") {
+FL_TEST_CASE("FastLED wrapper - RGB") {
     FastLED.setPowerModel(PowerModelRGB(30, 35, 40, 1));
 
     PowerModelRGB retrieved = FastLED.getPowerModel();
@@ -143,7 +143,7 @@ TEST_CASE("FastLED wrapper - RGB") {
     FL_CHECK(retrieved.dark_mW == 1);
 }
 
-TEST_CASE("FastLED wrapper - RGBW") {
+FL_TEST_CASE("FastLED wrapper - RGBW") {
     // Set RGBW model - should extract RGB only
     FastLED.setPowerModel(PowerModelRGBW(90, 70, 90, 100, 5));
 
@@ -154,7 +154,7 @@ TEST_CASE("FastLED wrapper - RGBW") {
     FL_CHECK(retrieved.dark_mW == 5);
 }
 
-TEST_CASE("Default power model - WS2812 @ 5V") {
+FL_TEST_CASE("Default power model - WS2812 @ 5V") {
     // Reset to default by setting it explicitly
     set_power_model(PowerModelRGB());
 

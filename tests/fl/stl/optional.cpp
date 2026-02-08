@@ -2,14 +2,14 @@
 #include "fl/stl/optional.h"
 #include "fl/compiler_control.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
 
 using namespace fl;
 
-TEST_CASE("fl::Optional - default construction") {
-    SUBCASE("default constructor creates empty optional") {
+FL_TEST_CASE("fl::Optional - default construction") {
+    FL_SUBCASE("default constructor creates empty optional") {
         Optional<int> opt;
         FL_CHECK(opt.empty());
         FL_CHECK(!opt.has_value());
@@ -17,7 +17,7 @@ TEST_CASE("fl::Optional - default construction") {
         FL_CHECK(opt == nullopt);
     }
 
-    SUBCASE("nullopt constructor creates empty optional") {
+    FL_SUBCASE("nullopt constructor creates empty optional") {
         Optional<int> opt(nullopt);
         FL_CHECK(opt.empty());
         FL_CHECK(!opt.has_value());
@@ -25,8 +25,8 @@ TEST_CASE("fl::Optional - default construction") {
     }
 }
 
-TEST_CASE("fl::Optional - value construction") {
-    SUBCASE("construct with lvalue") {
+FL_TEST_CASE("fl::Optional - value construction") {
+    FL_SUBCASE("construct with lvalue") {
         int value = 42;
         Optional<int> opt(value);
         FL_CHECK(!opt.empty());
@@ -36,14 +36,14 @@ TEST_CASE("fl::Optional - value construction") {
         FL_CHECK(opt != nullopt);
     }
 
-    SUBCASE("construct with rvalue") {
+    FL_SUBCASE("construct with rvalue") {
         Optional<int> opt(42);
         FL_CHECK(!opt.empty());
         FL_CHECK(opt.has_value());
         FL_CHECK(*opt == 42);
     }
 
-    SUBCASE("construct with string") {
+    FL_SUBCASE("construct with string") {
         // Test with a more complex type
         Optional<int> opt(123);
         FL_CHECK(opt.has_value());
@@ -51,15 +51,15 @@ TEST_CASE("fl::Optional - value construction") {
     }
 }
 
-TEST_CASE("fl::Optional - copy construction") {
-    SUBCASE("copy empty optional") {
+FL_TEST_CASE("fl::Optional - copy construction") {
+    FL_SUBCASE("copy empty optional") {
         Optional<int> opt1;
         Optional<int> opt2(opt1);
         FL_CHECK(opt2.empty());
         FL_CHECK(opt1 == opt2);
     }
 
-    SUBCASE("copy non-empty optional") {
+    FL_SUBCASE("copy non-empty optional") {
         Optional<int> opt1(42);
         Optional<int> opt2(opt1);
         FL_CHECK(opt2.has_value());
@@ -68,14 +68,14 @@ TEST_CASE("fl::Optional - copy construction") {
     }
 }
 
-TEST_CASE("fl::Optional - move construction") {
-    SUBCASE("move empty optional") {
+FL_TEST_CASE("fl::Optional - move construction") {
+    FL_SUBCASE("move empty optional") {
         Optional<int> opt1;
         Optional<int> opt2(fl::move(opt1));
         FL_CHECK(opt2.empty());
     }
 
-    SUBCASE("move non-empty optional") {
+    FL_SUBCASE("move non-empty optional") {
         Optional<int> opt1(42);
         Optional<int> opt2(fl::move(opt1));
         FL_CHECK(opt2.has_value());
@@ -83,15 +83,15 @@ TEST_CASE("fl::Optional - move construction") {
     }
 }
 
-TEST_CASE("fl::Optional - assignment operators") {
-    SUBCASE("copy assign from empty") {
+FL_TEST_CASE("fl::Optional - assignment operators") {
+    FL_SUBCASE("copy assign from empty") {
         Optional<int> opt1;
         Optional<int> opt2(42);
         opt2 = opt1;
         FL_CHECK(opt2.empty());
     }
 
-    SUBCASE("copy assign from non-empty") {
+    FL_SUBCASE("copy assign from non-empty") {
         Optional<int> opt1(42);
         Optional<int> opt2;
         opt2 = opt1;
@@ -99,14 +99,14 @@ TEST_CASE("fl::Optional - assignment operators") {
         FL_CHECK(*opt2 == 42);
     }
 
-    SUBCASE("move assign from empty") {
+    FL_SUBCASE("move assign from empty") {
         Optional<int> opt1;
         Optional<int> opt2(42);
         opt2 = fl::move(opt1);
         FL_CHECK(opt2.empty());
     }
 
-    SUBCASE("move assign from non-empty") {
+    FL_SUBCASE("move assign from non-empty") {
         Optional<int> opt1(42);
         Optional<int> opt2;
         opt2 = fl::move(opt1);
@@ -114,14 +114,14 @@ TEST_CASE("fl::Optional - assignment operators") {
         FL_CHECK(*opt2 == 42);
     }
 
-    SUBCASE("assign nullopt") {
+    FL_SUBCASE("assign nullopt") {
         Optional<int> opt(42);
         opt = nullopt;
         FL_CHECK(opt.empty());
         FL_CHECK(opt == nullopt);
     }
 
-    SUBCASE("assign value lvalue") {
+    FL_SUBCASE("assign value lvalue") {
         Optional<int> opt;
         int value = 42;
         opt = value;
@@ -129,14 +129,14 @@ TEST_CASE("fl::Optional - assignment operators") {
         FL_CHECK(*opt == 42);
     }
 
-    SUBCASE("assign value rvalue") {
+    FL_SUBCASE("assign value rvalue") {
         Optional<int> opt;
         opt = 42;
         FL_CHECK(opt.has_value());
         FL_CHECK(*opt == 42);
     }
 
-    SUBCASE("self-assignment") {
+    FL_SUBCASE("self-assignment") {
         Optional<int> opt(42);
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED
@@ -146,15 +146,15 @@ TEST_CASE("fl::Optional - assignment operators") {
     }
 }
 
-TEST_CASE("fl::Optional - emplace") {
-    SUBCASE("emplace into empty optional") {
+FL_TEST_CASE("fl::Optional - emplace") {
+    FL_SUBCASE("emplace into empty optional") {
         Optional<int> opt;
         opt.emplace(42);
         FL_CHECK(opt.has_value());
         FL_CHECK(*opt == 42);
     }
 
-    SUBCASE("emplace into non-empty optional") {
+    FL_SUBCASE("emplace into non-empty optional") {
         Optional<int> opt(10);
         opt.emplace(42);
         FL_CHECK(opt.has_value());
@@ -162,14 +162,14 @@ TEST_CASE("fl::Optional - emplace") {
     }
 }
 
-TEST_CASE("fl::Optional - reset") {
-    SUBCASE("reset empty optional") {
+FL_TEST_CASE("fl::Optional - reset") {
+    FL_SUBCASE("reset empty optional") {
         Optional<int> opt;
         opt.reset();
         FL_CHECK(opt.empty());
     }
 
-    SUBCASE("reset non-empty optional") {
+    FL_SUBCASE("reset non-empty optional") {
         Optional<int> opt(42);
         opt.reset();
         FL_CHECK(opt.empty());
@@ -177,13 +177,13 @@ TEST_CASE("fl::Optional - reset") {
     }
 }
 
-TEST_CASE("fl::Optional - ptr and const ptr") {
-    SUBCASE("ptr on empty optional") {
+FL_TEST_CASE("fl::Optional - ptr and const ptr") {
+    FL_SUBCASE("ptr on empty optional") {
         Optional<int> opt;
         FL_CHECK(opt.ptr() == nullptr);
     }
 
-    SUBCASE("ptr on non-empty optional") {
+    FL_SUBCASE("ptr on non-empty optional") {
         Optional<int> opt(42);
         int* p = opt.ptr();
         FL_CHECK(p != nullptr);
@@ -192,7 +192,7 @@ TEST_CASE("fl::Optional - ptr and const ptr") {
         FL_CHECK(*opt == 100);
     }
 
-    SUBCASE("const ptr on non-empty optional") {
+    FL_SUBCASE("const ptr on non-empty optional") {
         const Optional<int> opt(42);
         const int* p = opt.ptr();
         FL_CHECK(p != nullptr);
@@ -200,20 +200,20 @@ TEST_CASE("fl::Optional - ptr and const ptr") {
     }
 }
 
-TEST_CASE("fl::Optional - dereference operators") {
-    SUBCASE("operator* lvalue") {
+FL_TEST_CASE("fl::Optional - dereference operators") {
+    FL_SUBCASE("operator* lvalue") {
         Optional<int> opt(42);
         FL_CHECK(*opt == 42);
         *opt = 100;
         FL_CHECK(*opt == 100);
     }
 
-    SUBCASE("operator* const") {
+    FL_SUBCASE("operator* const") {
         const Optional<int> opt(42);
         FL_CHECK(*opt == 42);
     }
 
-    SUBCASE("operator-> with struct") {
+    FL_SUBCASE("operator-> with struct") {
         struct Point {
             int x, y;
             Point(int x_, int y_) : x(x_), y(y_) {}
@@ -226,7 +226,7 @@ TEST_CASE("fl::Optional - dereference operators") {
         FL_CHECK(opt->x == 30);
     }
 
-    SUBCASE("operator-> const") {
+    FL_SUBCASE("operator-> const") {
         struct Point {
             int x, y;
             Point(int x_, int y_) : x(x_), y(y_) {}
@@ -238,28 +238,28 @@ TEST_CASE("fl::Optional - dereference operators") {
     }
 }
 
-TEST_CASE("fl::Optional - boolean operators") {
-    SUBCASE("operator! on empty") {
+FL_TEST_CASE("fl::Optional - boolean operators") {
+    FL_SUBCASE("operator! on empty") {
         Optional<int> opt;
         FL_CHECK(opt.operator!());
     }
 
-    SUBCASE("operator! on non-empty") {
+    FL_SUBCASE("operator! on non-empty") {
         Optional<int> opt(42);
         FL_CHECK(!opt.operator!());
     }
 
-    SUBCASE("operator() on empty") {
+    FL_SUBCASE("operator() on empty") {
         Optional<int> opt;
         FL_CHECK(!opt.operator()());
     }
 
-    SUBCASE("operator() on non-empty") {
+    FL_SUBCASE("operator() on non-empty") {
         Optional<int> opt(42);
         FL_CHECK(opt.operator()());
     }
 
-    SUBCASE("explicit operator bool on empty") {
+    FL_SUBCASE("explicit operator bool on empty") {
         Optional<int> opt;
         FL_CHECK(!static_cast<bool>(opt));
         if (opt) {
@@ -267,7 +267,7 @@ TEST_CASE("fl::Optional - boolean operators") {
         }
     }
 
-    SUBCASE("explicit operator bool on non-empty") {
+    FL_SUBCASE("explicit operator bool on non-empty") {
         Optional<int> opt(42);
         FL_CHECK(static_cast<bool>(opt));
         if (opt) {
@@ -278,15 +278,15 @@ TEST_CASE("fl::Optional - boolean operators") {
     }
 }
 
-TEST_CASE("fl::Optional - equality operators") {
-    SUBCASE("two empty optionals are equal") {
+FL_TEST_CASE("fl::Optional - equality operators") {
+    FL_SUBCASE("two empty optionals are equal") {
         Optional<int> opt1;
         Optional<int> opt2;
         FL_CHECK(opt1 == opt2);
         FL_CHECK(!(opt1 != opt2));
     }
 
-    SUBCASE("empty and non-empty are not equal") {
+    FL_SUBCASE("empty and non-empty are not equal") {
         Optional<int> opt1;
         Optional<int> opt2(42);
         FL_CHECK(opt1 != opt2);
@@ -295,53 +295,53 @@ TEST_CASE("fl::Optional - equality operators") {
         FL_CHECK(!(opt2 == opt1));
     }
 
-    SUBCASE("two non-empty with same value are equal") {
+    FL_SUBCASE("two non-empty with same value are equal") {
         Optional<int> opt1(42);
         Optional<int> opt2(42);
         FL_CHECK(opt1 == opt2);
         FL_CHECK(!(opt1 != opt2));
     }
 
-    SUBCASE("two non-empty with different values are not equal") {
+    FL_SUBCASE("two non-empty with different values are not equal") {
         Optional<int> opt1(42);
         Optional<int> opt2(43);
         FL_CHECK(opt1 != opt2);
         FL_CHECK(!(opt1 == opt2));
     }
 
-    SUBCASE("compare with value - empty") {
+    FL_SUBCASE("compare with value - empty") {
         Optional<int> opt;
         FL_CHECK(!(opt == 42));
     }
 
-    SUBCASE("compare with value - matching") {
+    FL_SUBCASE("compare with value - matching") {
         Optional<int> opt(42);
         FL_CHECK(opt == 42);
     }
 
-    SUBCASE("compare with value - not matching") {
+    FL_SUBCASE("compare with value - not matching") {
         Optional<int> opt(42);
         FL_CHECK(!(opt == 43));
     }
 
-    SUBCASE("compare with nullopt - empty") {
+    FL_SUBCASE("compare with nullopt - empty") {
         Optional<int> opt;
         FL_CHECK(opt == nullopt);
         FL_CHECK(!(opt != nullopt));
     }
 
-    SUBCASE("compare with nullopt - non-empty") {
+    FL_SUBCASE("compare with nullopt - non-empty") {
         Optional<int> opt(42);
         FL_CHECK(!(opt == nullopt));
         FL_CHECK(opt != nullopt);
     }
 }
 
-TEST_CASE("fl::Optional - swap") {
+FL_TEST_CASE("fl::Optional - swap") {
     // Note: swap requires variant to have swap() method
     // If variant doesn't support swap, these tests may not work
 
-    SUBCASE("manual swap via move") {
+    FL_SUBCASE("manual swap via move") {
         Optional<int> opt1(10);
         Optional<int> opt2(20);
         Optional<int> temp(fl::move(opt1));
@@ -352,14 +352,14 @@ TEST_CASE("fl::Optional - swap") {
     }
 }
 
-TEST_CASE("fl::make_optional helper functions") {
-    SUBCASE("make_optional with rvalue") {
+FL_TEST_CASE("fl::make_optional helper functions") {
+    FL_SUBCASE("make_optional with rvalue") {
         auto opt = make_optional(42);
         FL_CHECK(opt.has_value());
         FL_CHECK(*opt == 42);
     }
 
-    SUBCASE("make_optional type deduction") {
+    FL_SUBCASE("make_optional type deduction") {
         auto opt_int = make_optional(42);
         auto opt_double = make_optional(3.14);
 
@@ -369,7 +369,7 @@ TEST_CASE("fl::make_optional helper functions") {
         FL_CHECK_CLOSE(*opt_double, 3.14, 0.001);
     }
 
-    SUBCASE("make_optional with explicit copy") {
+    FL_SUBCASE("make_optional with explicit copy") {
         // To avoid reference issues, we construct from the value directly
         int value = 42;
         Optional<int> opt(value);
@@ -378,20 +378,20 @@ TEST_CASE("fl::make_optional helper functions") {
     }
 }
 
-TEST_CASE("fl::Optional - value() method") {
-    SUBCASE("value() on non-empty optional") {
+FL_TEST_CASE("fl::Optional - value() method") {
+    FL_SUBCASE("value() on non-empty optional") {
         Optional<int> opt(42);
         FL_CHECK(opt.value() == 42);
         opt.value() = 100;
         FL_CHECK(opt.value() == 100);
     }
 
-    SUBCASE("value() const on non-empty optional") {
+    FL_SUBCASE("value() const on non-empty optional") {
         const Optional<int> opt(42);
         FL_CHECK(opt.value() == 42);
     }
 
-    SUBCASE("value() with struct") {
+    FL_SUBCASE("value() with struct") {
         struct Point {
             int x, y;
             Point(int x_, int y_) : x(x_), y(y_) {}
@@ -404,15 +404,15 @@ TEST_CASE("fl::Optional - value() method") {
         FL_CHECK(opt.value().x == 30);
     }
 
-    SUBCASE("value() is compatible with operator*") {
+    FL_SUBCASE("value() is compatible with operator*") {
         Optional<int> opt(42);
         FL_CHECK(opt.value() == *opt);
         FL_CHECK(&opt.value() == &(*opt));
     }
 }
 
-TEST_CASE("fl::Optional - edge cases") {
-    SUBCASE("optional of bool") {
+FL_TEST_CASE("fl::Optional - edge cases") {
+    FL_SUBCASE("optional of bool") {
         Optional<bool> opt_false(false);
         Optional<bool> opt_true(true);
         Optional<bool> opt_empty;
@@ -429,7 +429,7 @@ TEST_CASE("fl::Optional - edge cases") {
         FL_CHECK(static_cast<bool>(opt_empty) == false);
     }
 
-    SUBCASE("optional of pointer") {
+    FL_SUBCASE("optional of pointer") {
         int x = 42;
         int* ptr = &x;
         Optional<int*> opt(ptr);
@@ -439,7 +439,7 @@ TEST_CASE("fl::Optional - edge cases") {
         FL_CHECK(**opt == 42);
     }
 
-    SUBCASE("multiple reset calls") {
+    FL_SUBCASE("multiple reset calls") {
         Optional<int> opt(42);
         opt.reset();
         opt.reset();
@@ -447,7 +447,7 @@ TEST_CASE("fl::Optional - edge cases") {
         FL_CHECK(opt.empty());
     }
 
-    SUBCASE("assign after reset") {
+    FL_SUBCASE("assign after reset") {
         Optional<int> opt(42);
         opt.reset();
         FL_CHECK(opt.empty());
@@ -457,8 +457,8 @@ TEST_CASE("fl::Optional - edge cases") {
     }
 }
 
-TEST_CASE("fl::Optional - constexpr support") {
-    SUBCASE("constexpr nullopt_t") {
+FL_TEST_CASE("fl::Optional - constexpr support") {
+    FL_SUBCASE("constexpr nullopt_t") {
         constexpr nullopt_t n = nullopt;
         (void)n;
     }
@@ -467,8 +467,8 @@ TEST_CASE("fl::Optional - constexpr support") {
     // which may not be supported. Testing what we can.
 }
 
-TEST_CASE("fl::Optional - type alias") {
-    SUBCASE("optional is alias for Optional") {
+FL_TEST_CASE("fl::Optional - type alias") {
+    FL_SUBCASE("optional is alias for Optional") {
         // Test that the lowercase alias works
         optional<int> opt(42);
         FL_CHECK(opt.has_value());
@@ -479,8 +479,8 @@ TEST_CASE("fl::Optional - type alias") {
     }
 }
 
-TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
-    SUBCASE("default construction creates empty optional") {
+FL_TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
+    FL_SUBCASE("default construction creates empty optional") {
         Optional<int&&> opt;
         FL_CHECK(opt.empty());
         FL_CHECK(!opt.has_value());
@@ -488,14 +488,14 @@ TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
         FL_CHECK(opt == nullopt);
     }
 
-    SUBCASE("nullopt constructor creates empty optional") {
+    FL_SUBCASE("nullopt constructor creates empty optional") {
         Optional<int&&> opt(nullopt);
         FL_CHECK(opt.empty());
         FL_CHECK(!opt.has_value());
         FL_CHECK(opt == nullopt);
     }
 
-    SUBCASE("construct with rvalue reference") {
+    FL_SUBCASE("construct with rvalue reference") {
         int value = 42;
         Optional<int&&> opt(fl::move(value));
         FL_CHECK(!opt.empty());
@@ -506,7 +506,7 @@ TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
         FL_CHECK(opt.ptr() == &value);
     }
 
-    SUBCASE("move construction transfers reference") {
+    FL_SUBCASE("move construction transfers reference") {
         int value = 100;
         Optional<int&&> opt1(fl::move(value));
         FL_CHECK(opt1.has_value());
@@ -518,7 +518,7 @@ TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
         FL_CHECK(opt1.empty());  // Original is now empty
     }
 
-    SUBCASE("move assignment transfers reference") {
+    FL_SUBCASE("move assignment transfers reference") {
         int value1 = 42;
         int value2 = 100;
         Optional<int&&> opt1(fl::move(value1));
@@ -532,7 +532,7 @@ TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
         FL_CHECK(opt2.empty());
     }
 
-    SUBCASE("assign nullopt clears reference") {
+    FL_SUBCASE("assign nullopt clears reference") {
         int value = 42;
         Optional<int&&> opt(fl::move(value));
         FL_CHECK(opt.has_value());
@@ -542,7 +542,7 @@ TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
         FL_CHECK(opt == nullopt);
     }
 
-    SUBCASE("reset clears reference") {
+    FL_SUBCASE("reset clears reference") {
         int value = 42;
         Optional<int&&> opt(fl::move(value));
         FL_CHECK(opt.has_value());
@@ -551,7 +551,7 @@ TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
         FL_CHECK(opt.empty());
     }
 
-    SUBCASE("dereference operator forwards rvalue reference") {
+    FL_SUBCASE("dereference operator forwards rvalue reference") {
         int value = 42;
         Optional<int&&> opt(fl::move(value));
 
@@ -561,7 +561,7 @@ TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
         FL_CHECK(moved_value == 42);
     }
 
-    SUBCASE("get method forwards rvalue reference") {
+    FL_SUBCASE("get method forwards rvalue reference") {
         int value = 99;
         Optional<int&&> opt(fl::move(value));
 
@@ -569,7 +569,7 @@ TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
         FL_CHECK(ref == 99);
     }
 
-    SUBCASE("arrow operator provides member access") {
+    FL_SUBCASE("arrow operator provides member access") {
         struct Point {
             int x, y;
             Point(int x_, int y_) : x(x_), y(y_) {}
@@ -582,7 +582,7 @@ TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
         FL_CHECK(opt->y == 20);
     }
 
-    SUBCASE("boolean operators work correctly") {
+    FL_SUBCASE("boolean operators work correctly") {
         int value = 42;
         Optional<int&&> opt_empty;
         Optional<int&&> opt_full(fl::move(value));
@@ -596,7 +596,7 @@ TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
         FL_CHECK(static_cast<bool>(opt_full));
     }
 
-    SUBCASE("equality operators") {
+    FL_SUBCASE("equality operators") {
         int value1 = 42;
         int value2 = 42;
         int value3 = 99;
@@ -620,7 +620,7 @@ TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
         FL_CHECK(opt1 != opt3);
     }
 
-    SUBCASE("ptr method returns correct pointer") {
+    FL_SUBCASE("ptr method returns correct pointer") {
         int value = 42;
         Optional<int&&> opt(fl::move(value));
 
@@ -629,7 +629,7 @@ TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
         FL_CHECK(*p == 42);
     }
 
-    SUBCASE("forwarding to function consuming rvalue reference") {
+    FL_SUBCASE("forwarding to function consuming rvalue reference") {
         struct Widget {
             int value;
             bool moved = false;
@@ -652,7 +652,7 @@ TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
         FL_CHECK(result == 42);
     }
 
-    SUBCASE("lifetime semantics - reference validity") {
+    FL_SUBCASE("lifetime semantics - reference validity") {
         // This test verifies that the optional correctly holds a reference
         // to an existing object and doesn't try to manage its lifetime
         int value = 100;
@@ -665,7 +665,7 @@ TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
         FL_CHECK(value == 200);
     }
 
-    SUBCASE("move from optional into new variable") {
+    FL_SUBCASE("move from optional into new variable") {
         struct MoveOnly {
             int value;
             MoveOnly(int v) : value(v) {}
@@ -684,7 +684,7 @@ TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
         FL_CHECK(obj.value == -1);  // Original was moved from
     }
 
-    SUBCASE("value() method forwards rvalue reference") {
+    FL_SUBCASE("value() method forwards rvalue reference") {
         int value = 42;
         Optional<int&&> opt(fl::move(value));
 
@@ -694,7 +694,7 @@ TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
         FL_CHECK(moved_value == 42);
     }
 
-    SUBCASE("value() is compatible with operator* and get()") {
+    FL_SUBCASE("value() is compatible with operator* and get()") {
         int value = 99;
         Optional<int&&> opt(fl::move(value));
 

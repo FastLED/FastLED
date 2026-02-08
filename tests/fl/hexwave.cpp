@@ -36,7 +36,7 @@ bool hasVariation(const float* samples, int32_t count) {
 
 }  // anonymous namespace
 
-TEST_CASE("HexWave - basic initialization and generation") {
+FL_TEST_CASE("HexWave - basic initialization and generation") {
     auto engine = IHexWaveEngine::create(32, 16);
     FL_CHECK_TRUE(engine->isValid());
 
@@ -53,7 +53,7 @@ TEST_CASE("HexWave - basic initialization and generation") {
     FL_CHECK_TRUE(hasVariation(samples, 256));
 }
 
-TEST_CASE("HexWave - waveform shapes") {
+FL_TEST_CASE("HexWave - waveform shapes") {
     auto engine = IHexWaveEngine::create();
 
     float samples[512];
@@ -79,7 +79,7 @@ TEST_CASE("HexWave - waveform shapes") {
     FL_CHECK_TRUE(hasVariation(samples, 512));
 }
 
-TEST_CASE("HexWave - custom parameters") {
+FL_TEST_CASE("HexWave - custom parameters") {
     auto engine = IHexWaveEngine::create();
 
     // Create with custom parameters
@@ -100,7 +100,7 @@ TEST_CASE("HexWave - custom parameters") {
     FL_CHECK_TRUE(samplesInRange(samples, 256));
 }
 
-TEST_CASE("HexWave - shape change at runtime") {
+FL_TEST_CASE("HexWave - shape change at runtime") {
     auto engine = IHexWaveEngine::create();
 
     auto osc = IHexWaveOscillator::create(engine, HexWaveShape::Sawtooth);
@@ -124,7 +124,7 @@ TEST_CASE("HexWave - shape change at runtime") {
     FL_CHECK_TRUE(hasVariation(samples, 256));
 }
 
-TEST_CASE("HexWave - span interface") {
+FL_TEST_CASE("HexWave - span interface") {
     auto engine = IHexWaveEngine::create();
 
     auto osc = IHexWaveOscillator::create(engine, HexWaveShape::Triangle);
@@ -138,7 +138,7 @@ TEST_CASE("HexWave - span interface") {
     FL_CHECK_TRUE(hasVariation(buffer, 128));
 }
 
-TEST_CASE("HexWave - reset functionality") {
+FL_TEST_CASE("HexWave - reset functionality") {
     auto engine = IHexWaveEngine::create();
 
     auto osc = IHexWaveOscillator::create(engine, HexWaveShape::Sawtooth);
@@ -167,7 +167,7 @@ TEST_CASE("HexWave - reset functionality") {
     FL_CHECK_TRUE(similar);
 }
 
-TEST_CASE("HexWave - multiple engines") {
+FL_TEST_CASE("HexWave - multiple engines") {
     // Create two separate engines with different settings
     auto engine1 = IHexWaveEngine::create(32, 16);
     auto engine2 = IHexWaveEngine::create(16, 8);
@@ -208,7 +208,7 @@ TEST_CASE("HexWave - multiple engines") {
     FL_CHECK_TRUE(different);
 }
 
-TEST_CASE("HexWave - oscillator keeps engine alive") {
+FL_TEST_CASE("HexWave - oscillator keeps engine alive") {
     IHexWaveOscillatorPtr osc;
     {
         // Create engine in inner scope

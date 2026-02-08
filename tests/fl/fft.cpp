@@ -10,7 +10,7 @@
 #include "fl/stl/math.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/log.h"
 #include "fl/map_range.h"
 #include "fl/math_macros.h"
@@ -27,7 +27,7 @@
 
 
 
-TEST_CASE("fft tester 512") {
+FL_TEST_CASE("fft tester 512") {
     int16_t buffer[512] = {0};
     const int n = 512;
     // fill in with a sine wave
@@ -80,7 +80,7 @@ TEST_CASE("fft tester 512") {
     FASTLED_WARN("Done");
 }
 
-TEST_CASE("fft tester 256") {
+FL_TEST_CASE("fft tester 256") {
     // fft_audio_buffer_t buffer = {0};
     fl::vector<int16_t> buffer;
     const int n = 256;
@@ -135,7 +135,7 @@ TEST_CASE("fft tester 256") {
     FASTLED_WARN("Done");
 }
 
-TEST_CASE("fft tester 256 with 64 bands") {
+FL_TEST_CASE("fft tester 256 with 64 bands") {
     // fft_audio_buffer_t buffer = {0};
     fl::vector<int16_t> buffer;
     const int n = 256;

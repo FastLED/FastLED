@@ -5,7 +5,7 @@
 /// Each LED byte is encoded as 32 bits (4 ticks per bit, 8 bits per byte).
 
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/int.h"
 
 using namespace fl;
@@ -50,7 +50,7 @@ static uint32_t encodeLedByte(uint8_t byte) {
 
 } // anonymous namespace
 
-TEST_CASE("WS2812 PARLIO encoding - all zeros") {
+FL_TEST_CASE("WS2812 PARLIO encoding - all zeros") {
     // Test encoding 0x00 (all bits 0)
     uint32_t result = encodeLedByte(0x00);
 
@@ -60,7 +60,7 @@ TEST_CASE("WS2812 PARLIO encoding - all zeros") {
     FL_CHECK_EQ(result, 0x88888888);
 }
 
-TEST_CASE("WS2812 PARLIO encoding - all ones") {
+FL_TEST_CASE("WS2812 PARLIO encoding - all ones") {
     // Test encoding 0xFF (all bits 1)
     uint32_t result = encodeLedByte(0xFF);
 
@@ -70,7 +70,7 @@ TEST_CASE("WS2812 PARLIO encoding - all ones") {
     FL_CHECK_EQ(result, 0xEEEEEEEE);
 }
 
-TEST_CASE("WS2812 PARLIO encoding - alternating pattern 0xAA") {
+FL_TEST_CASE("WS2812 PARLIO encoding - alternating pattern 0xAA") {
     // Test encoding 0xAA (10101010 in binary)
     uint32_t result = encodeLedByte(0xAA);
 
@@ -89,7 +89,7 @@ TEST_CASE("WS2812 PARLIO encoding - alternating pattern 0xAA") {
     FL_CHECK_EQ(result, 0xE8E8E8E8);
 }
 
-TEST_CASE("WS2812 PARLIO encoding - alternating pattern 0x55") {
+FL_TEST_CASE("WS2812 PARLIO encoding - alternating pattern 0x55") {
     // Test encoding 0x55 (01010101 in binary)
     uint32_t result = encodeLedByte(0x55);
 
@@ -108,7 +108,7 @@ TEST_CASE("WS2812 PARLIO encoding - alternating pattern 0x55") {
     FL_CHECK_EQ(result, 0x8E8E8E8E);
 }
 
-TEST_CASE("WS2812 PARLIO encoding - arbitrary value 0x0F") {
+FL_TEST_CASE("WS2812 PARLIO encoding - arbitrary value 0x0F") {
     // Test encoding 0x0F (00001111 in binary)
     uint32_t result = encodeLedByte(0x0F);
 
@@ -121,7 +121,7 @@ TEST_CASE("WS2812 PARLIO encoding - arbitrary value 0x0F") {
     FL_CHECK_EQ(result, 0x8888EEEE);
 }
 
-TEST_CASE("WS2812 PARLIO encoding - arbitrary value 0xF0") {
+FL_TEST_CASE("WS2812 PARLIO encoding - arbitrary value 0xF0") {
     // Test encoding 0xF0 (11110000 in binary)
     uint32_t result = encodeLedByte(0xF0);
 
@@ -134,7 +134,7 @@ TEST_CASE("WS2812 PARLIO encoding - arbitrary value 0xF0") {
     FL_CHECK_EQ(result, 0xEEEE8888);
 }
 
-TEST_CASE("WS2812 PARLIO encoding - arbitrary value 0xC3") {
+FL_TEST_CASE("WS2812 PARLIO encoding - arbitrary value 0xC3") {
     // Test encoding 0xC3 (11000011 in binary)
     uint32_t result = encodeLedByte(0xC3);
 
@@ -153,22 +153,22 @@ TEST_CASE("WS2812 PARLIO encoding - arbitrary value 0xC3") {
     FL_CHECK_EQ(result, 0xEE8888EE);
 }
 
-TEST_CASE("WS2812 PARLIO encoding - single bit patterns") {
+FL_TEST_CASE("WS2812 PARLIO encoding - single bit patterns") {
     // Test each individual bit position
 
-    SUBCASE("Only MSB set (0x80)") {
+    FL_SUBCASE("Only MSB set (0x80)") {
         uint32_t result = encodeLedByte(0x80);
         // 1000 0000 → 1110 1000 1000 1000 1000 1000 1000 1000
         FL_CHECK_EQ(result, 0xE8888888);
     }
 
-    SUBCASE("Only LSB set (0x01)") {
+    FL_SUBCASE("Only LSB set (0x01)") {
         uint32_t result = encodeLedByte(0x01);
         // 0000 0001 → 1000 1000 1000 1000 1000 1000 1000 1110
         FL_CHECK_EQ(result, 0x8888888E);
     }
 
-    SUBCASE("Middle bit set (0x10)") {
+    FL_SUBCASE("Middle bit set (0x10)") {
         uint32_t result = encodeLedByte(0x10);
         // 0001 0000 → 1000 1000 1000 1110 1000 1000 1000 1000
         FL_CHECK_EQ(result, 0x888E8888);

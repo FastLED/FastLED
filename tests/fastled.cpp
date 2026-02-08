@@ -4,7 +4,7 @@
 
 #include "FastLED.h"
 #include "colorutils.h"
-#include "doctest.h"
+#include "test.h"
 #include "eorder.h"
 #include "fl/colorutils_misc.h"
 #include "fl/eorder.h"
@@ -30,40 +30,40 @@
 #define DATA_PIN 2
 #define CLOCK_PIN 3
 
-TEST_CASE("Simple") {
+FL_TEST_CASE("Simple") {
     static CRGB leds[NUM_LEDS];  // Use static to avoid global constructor warning
     FastLED.addLeds<APA102, DATA_PIN, CLOCK_PIN, BGR>(leds, NUM_LEDS);
 }
 
-TEST_CASE("Fill Gradient SHORTEST_HUES") {
+FL_TEST_CASE("Fill Gradient SHORTEST_HUES") {
     static CRGB leds[NUM_LEDS];
     fill_gradient(leds, 0, CHSV(0, 255, 255), NUM_LEDS - 1, CHSV(96, 255, 255), SHORTEST_HUES);
 }
 
-TEST_CASE("Legacy aliases resolve to FastLED instance") {
+FL_TEST_CASE("Legacy aliases resolve to FastLED instance") {
     // Verify that all legacy aliases point to the same object
     // These aliases provide backward compatibility for code written for
     // FastSPI_LED and FastSPI_LED2 (the original library names)
 
-    SUBCASE("FastSPI_LED alias") {
+    FL_SUBCASE("FastSPI_LED alias") {
         CFastLED* pFastLED = &FastLED;
         CFastLED* pFastSPI_LED = &FastSPI_LED;
-        CHECK(pFastLED == pFastSPI_LED);
+        FL_CHECK(pFastLED == pFastSPI_LED);
     }
 
-    SUBCASE("FastSPI_LED2 alias") {
+    FL_SUBCASE("FastSPI_LED2 alias") {
         CFastLED* pFastLED = &FastLED;
         CFastLED* pFastSPI_LED2 = &FastSPI_LED2;
-        CHECK(pFastLED == pFastSPI_LED2);
+        FL_CHECK(pFastLED == pFastSPI_LED2);
     }
 
-    SUBCASE("LEDS alias") {
+    FL_SUBCASE("LEDS alias") {
         CFastLED* pFastLED = &FastLED;
         CFastLED* pLEDS = &LEDS;
-        CHECK(pFastLED == pLEDS);
+        FL_CHECK(pFastLED == pLEDS);
     }
 
-    SUBCASE("All aliases access same brightness setting") {
+    FL_SUBCASE("All aliases access same brightness setting") {
         static CRGB leds[NUM_LEDS];
         FastLED.clear();
         FastLED.addLeds<APA102, DATA_PIN, CLOCK_PIN, BGR>(leds, NUM_LEDS);
@@ -72,19 +72,19 @@ TEST_CASE("Legacy aliases resolve to FastLED instance") {
         FastLED.setBrightness(128);
 
         // Verify all aliases see the same brightness
-        CHECK(FastLED.getBrightness() == 128);
-        CHECK(FastSPI_LED.getBrightness() == 128);
-        CHECK(FastSPI_LED2.getBrightness() == 128);
-        CHECK(LEDS.getBrightness() == 128);
+        FL_CHECK(FastLED.getBrightness() == 128);
+        FL_CHECK(FastSPI_LED.getBrightness() == 128);
+        FL_CHECK(FastSPI_LED2.getBrightness() == 128);
+        FL_CHECK(LEDS.getBrightness() == 128);
 
         // Change brightness using legacy alias
         FastSPI_LED.setBrightness(64);
 
         // Verify all aliases see the new brightness
-        CHECK(FastLED.getBrightness() == 64);
-        CHECK(FastSPI_LED.getBrightness() == 64);
-        CHECK(FastSPI_LED2.getBrightness() == 64);
-        CHECK(LEDS.getBrightness() == 64);
+        FL_CHECK(FastLED.getBrightness() == 64);
+        FL_CHECK(FastSPI_LED.getBrightness() == 64);
+        FL_CHECK(FastSPI_LED2.getBrightness() == 64);
+        FL_CHECK(LEDS.getBrightness() == 64);
     }
 }
 
@@ -139,7 +139,7 @@ public:
 
 } // anonymous namespace
 
-TEST_CASE("Channel API: Mock engine workflow (GitHub issue #2167)") {
+FL_TEST_CASE("Channel API: Mock engine workflow (GitHub issue #2167)") {
     // This test validates the complete workflow reported in issue #2167:
     // 1. Create ChannelEngineMock with string name "MOCK"
     // 2. Inject it into ChannelBusManager
@@ -157,8 +157,8 @@ TEST_CASE("Channel API: Mock engine workflow (GitHub issue #2167)") {
 
     // Verify registration
     auto* registeredEngine = manager.getEngineByName("MOCK");
-    REQUIRE(registeredEngine != nullptr);
-    CHECK(registeredEngine == mockEngine.get());
+    FL_REQUIRE(registeredEngine != nullptr);
+    FL_CHECK(registeredEngine == mockEngine.get());
 
     // Step 3: Create channel with affinity "MOCK"
     static CRGB leds[10];
@@ -172,17 +172,17 @@ TEST_CASE("Channel API: Mock engine workflow (GitHub issue #2167)") {
 
     // Create channel
     auto channel = fl::Channel::create(config);
-    REQUIRE(channel != nullptr);
-    CHECK(channel->getChannelEngine() == mockEngine.get());
+    FL_REQUIRE(channel != nullptr);
+    FL_CHECK(channel->getChannelEngine() == mockEngine.get());
 
     // Verify channel is NOT in controller list yet (deferred registration)
-    CHECK(!channel->isInList());
+    FL_CHECK(!channel->isInList());
 
     // Step 4: Add to FastLED
     FastLED.add(channel);
 
     // Verify channel IS NOW in controller list (explicit registration)
-    CHECK(channel->isInList());
+    FL_CHECK(channel->isInList());
 
     // Double-check by walking the list
     bool found = false;
@@ -194,21 +194,21 @@ TEST_CASE("Channel API: Mock engine workflow (GitHub issue #2167)") {
         }
         pCur = pCur->next();
     }
-    CHECK(found);
+    FL_CHECK(found);
 
     // Step 5 & 6: Call FastLED.show() and verify enqueue()
     int enqueueBefore = mockEngine->mEnqueueCount;
     FastLED.show();
 
     // Validate: engine received data via enqueue()
-    CHECK(mockEngine->mEnqueueCount > enqueueBefore);
+    FL_CHECK(mockEngine->mEnqueueCount > enqueueBefore);
 
     // Clean up
     channel->removeFromDrawList();
     manager.setDriverEnabled("MOCK", false);
 }
 
-TEST_CASE("Channel API: Double add protection") {
+FL_TEST_CASE("Channel API: Double add protection") {
     // Verify that calling add() multiple times doesn't create duplicates
     auto mockEngine = fl::make_shared<ChannelEngineMock>();
     mockEngine->reset();
@@ -226,22 +226,22 @@ TEST_CASE("Channel API: Double add protection") {
     fl::ChannelConfig config(10, timing, fl::span<CRGB>(leds, 5), GRB, options);
     auto channel = fl::Channel::create(config);
 
-    REQUIRE(channel != nullptr);
+    FL_REQUIRE(channel != nullptr);
 
     // Before adding: not in list
-    CHECK(!channel->isInList());
+    FL_CHECK(!channel->isInList());
 
     // First add
     FastLED.add(channel);
-    CHECK(channel->isInList());
+    FL_CHECK(channel->isInList());
 
     // Second add (should be safe, no duplicate)
     FastLED.add(channel);
-    CHECK(channel->isInList());
+    FL_CHECK(channel->isInList());
 
     // Third add (should still be safe)
     FastLED.add(channel);
-    CHECK(channel->isInList());
+    FL_CHECK(channel->isInList());
 
     // Walk the list and count occurrences of this channel
     int occurrenceCount = 0;
@@ -254,14 +254,14 @@ TEST_CASE("Channel API: Double add protection") {
     }
 
     // Should appear exactly once, not multiple times
-    CHECK(occurrenceCount == 1);
+    FL_CHECK(occurrenceCount == 1);
 
     // Clean up
     channel->removeFromDrawList();
     manager.setDriverEnabled("MOCK_DOUBLE", false);
 }
 
-TEST_CASE("Channel API: Add and remove symmetry") {
+FL_TEST_CASE("Channel API: Add and remove symmetry") {
     // Verify that add() and remove() work symmetrically
     auto mockEngine = fl::make_shared<ChannelEngineMock>();
     mockEngine->reset();
@@ -279,42 +279,42 @@ TEST_CASE("Channel API: Add and remove symmetry") {
     fl::ChannelConfig config(12, timing, fl::span<CRGB>(leds, 8), GRB, options);
     auto channel = fl::Channel::create(config);
 
-    REQUIRE(channel != nullptr);
+    FL_REQUIRE(channel != nullptr);
 
     // Initial state: not in list
-    CHECK(!channel->isInList());
+    FL_CHECK(!channel->isInList());
 
     // Add to list
     FastLED.add(channel);
-    CHECK(channel->isInList());
+    FL_CHECK(channel->isInList());
 
     // Remove from list
     FastLED.remove(channel);
-    CHECK(!channel->isInList());
+    FL_CHECK(!channel->isInList());
 
     // Verify channel object is still valid (not destroyed)
-    CHECK(channel->size() == 8);
-    CHECK(channel->getPin() == 12);
-    CHECK(channel->getChannelEngine() == mockEngine.get());
+    FL_CHECK(channel->size() == 8);
+    FL_CHECK(channel->getPin() == 12);
+    FL_CHECK(channel->getChannelEngine() == mockEngine.get());
 
     // Can re-add if needed
     FastLED.add(channel);
-    CHECK(channel->isInList());
+    FL_CHECK(channel->isInList());
 
     // Remove again
     FastLED.remove(channel);
-    CHECK(!channel->isInList());
+    FL_CHECK(!channel->isInList());
 
     // Safe to call remove multiple times
     FastLED.remove(channel);
     FastLED.remove(channel);
-    CHECK(!channel->isInList());
+    FL_CHECK(!channel->isInList());
 
     // Clean up
     manager.setDriverEnabled("MOCK_REMOVE", false);
 }
 
-TEST_CASE("Channel API: Internal ChannelPtr storage prevents dangling") {
+FL_TEST_CASE("Channel API: Internal ChannelPtr storage prevents dangling") {
     // Verify that CFastLED stores ChannelPtrs internally so channels
     // survive even if the caller drops their reference.
     auto mockEngine = fl::make_shared<ChannelEngineMock>();
@@ -332,12 +332,12 @@ TEST_CASE("Channel API: Internal ChannelPtr storage prevents dangling") {
 
     fl::ChannelConfig config(7, timing, fl::span<CRGB>(leds, 4), GRB, options);
     auto channel = fl::Channel::create(config);
-    REQUIRE(channel != nullptr);
+    FL_REQUIRE(channel != nullptr);
 
     // After add, CFastLED holds an internal reference
     FastLED.add(channel);
-    CHECK(channel->isInList());
-    CHECK(channel.use_count() >= 2);  // caller + CFastLED internal
+    FL_CHECK(channel->isInList());
+    FL_CHECK(channel.use_count() >= 2);  // caller + CFastLED internal
 
     // Drop local reference - channel should survive via CFastLED's storage
     fl::Channel* raw = channel.get();
@@ -353,19 +353,19 @@ TEST_CASE("Channel API: Internal ChannelPtr storage prevents dangling") {
         }
         pCur = pCur->next();
     }
-    CHECK(found);
+    FL_CHECK(found);
 
     // After remove, the internal reference is released too
     // Re-acquire a ChannelPtr to call remove (we need to find it)
     // Use a fresh channel to test remove releases the internal ref
     auto channel2 = fl::Channel::create(config);
-    REQUIRE(channel2 != nullptr);
+    FL_REQUIRE(channel2 != nullptr);
     FastLED.add(channel2);
-    CHECK(channel2.use_count() >= 2);
+    FL_CHECK(channel2.use_count() >= 2);
 
     FastLED.remove(channel2);
-    CHECK(!channel2->isInList());
-    CHECK(channel2.use_count() == 1);  // only local ref remains
+    FL_CHECK(!channel2->isInList());
+    FL_CHECK(channel2.use_count() == 1);  // only local ref remains
 
     // Clean up the first channel that's still in the list
     // Walk list and remove the raw pointer's entry
@@ -380,7 +380,7 @@ TEST_CASE("Channel API: Internal ChannelPtr storage prevents dangling") {
     manager.setDriverEnabled("MOCK_STORAGE", false);
 }
 
-TEST_CASE("Legacy API: 4 parallel strips using FastLED.addLeds<>()") {
+FL_TEST_CASE("Legacy API: 4 parallel strips using FastLED.addLeds<>()") {
     // This test validates that the legacy FastLED.addLeds<>() API works with channel engines:
     // - Use template-based FastLED.addLeds<WS2812, PIN>() (no explicit channel creation)
     // - Set different colors on each strip
@@ -396,8 +396,8 @@ TEST_CASE("Legacy API: 4 parallel strips using FastLED.addLeds<>()") {
 
     // Verify registration
     auto* registeredEngine = manager.getEngineByName("MOCK_LEGACY");
-    REQUIRE(registeredEngine != nullptr);
-    CHECK(registeredEngine == mockEngine.get());
+    FL_REQUIRE(registeredEngine != nullptr);
+    FL_CHECK(registeredEngine == mockEngine.get());
 
     // Create 4 LED strips using legacy template API (no affinity, no explicit channel)
     #define NUM_LEDS 60
@@ -430,19 +430,19 @@ TEST_CASE("Legacy API: 4 parallel strips using FastLED.addLeds<>()") {
     FastLED.show();
 
     // Verify engine received all 4 strips
-    CHECK(mockEngine->mEnqueueCount == 4);
-    CHECK(mockEngine->mShowCount == 1);
-    CHECK(mockEngine->mEnqueuedChannels.size() == 0);  // Cleared by show()
+    FL_CHECK(mockEngine->mEnqueueCount == 4);
+    FL_CHECK(mockEngine->mShowCount == 1);
+    FL_CHECK(mockEngine->mEnqueuedChannels.size() == 0);  // Cleared by show()
 
     // Verify the channels have the correct data (spot check first LED of each strip)
-    CHECK(strip1[0] == CRGB::Red);
-    CHECK(strip2[0] == CRGB::Green);
-    CHECK(strip3[0] == CRGB::Blue);
-    CHECK(strip4[0] == CRGB::Yellow);
+    FL_CHECK(strip1[0] == CRGB::Red);
+    FL_CHECK(strip2[0] == CRGB::Green);
+    FL_CHECK(strip3[0] == CRGB::Blue);
+    FL_CHECK(strip4[0] == CRGB::Yellow);
 
     // Verify all LEDs in strip1 are red
     for (int i = 0; i < NUM_LEDS; i++) {
-        CHECK(strip1[i] == CRGB::Red);
+        FL_CHECK(strip1[i] == CRGB::Red);
     }
 
     // Test second frame with different pattern (rainbow effect from README)
@@ -458,8 +458,8 @@ TEST_CASE("Legacy API: 4 parallel strips using FastLED.addLeds<>()") {
     FastLED.show();
 
     // Verify engine received all 4 strips again
-    CHECK(mockEngine->mEnqueueCount == 4);
-    CHECK(mockEngine->mShowCount == 1);
+    FL_CHECK(mockEngine->mEnqueueCount == 4);
+    FL_CHECK(mockEngine->mShowCount == 1);
 
     // Cleanup - clear all controllers (legacy API doesn't return handles)
     FastLED.clear(true);  // Clear and deallocate
@@ -508,7 +508,7 @@ static bool controllerInList(CLEDController* ctrl) {
     return false;
 }
 
-TEST_CASE("FastLED.add stores ChannelPtr - survives caller scope") {
+FL_TEST_CASE("FastLED.add stores ChannelPtr - survives caller scope") {
     auto engine = fl::make_shared<StubEngine>();
     ChannelBusManager& mgr = ChannelBusManager::instance();
     mgr.addEngine(2000, engine, "STUB_ADD_REMOVE");
@@ -548,7 +548,7 @@ TEST_CASE("FastLED.add stores ChannelPtr - survives caller scope") {
     mgr.setDriverEnabled("STUB_ADD_REMOVE", false);
 }
 
-TEST_CASE("FastLED.add double-add is safe") {
+FL_TEST_CASE("FastLED.add double-add is safe") {
     auto engine = fl::make_shared<StubEngine>();
     ChannelBusManager& mgr = ChannelBusManager::instance();
     mgr.addEngine(2001, engine, "STUB_ADD_REMOVE");
@@ -576,7 +576,7 @@ TEST_CASE("FastLED.add double-add is safe") {
     mgr.setDriverEnabled("STUB_ADD_REMOVE", false);
 }
 
-TEST_CASE("FastLED.remove double-remove is safe") {
+FL_TEST_CASE("FastLED.remove double-remove is safe") {
     auto engine = fl::make_shared<StubEngine>();
     ChannelBusManager& mgr = ChannelBusManager::instance();
     mgr.addEngine(2002, engine, "STUB_ADD_REMOVE");
@@ -599,11 +599,11 @@ TEST_CASE("FastLED.remove double-remove is safe") {
     mgr.setDriverEnabled("STUB_ADD_REMOVE", false);
 }
 
-TEST_CASE("FastLED.remove nullptr is safe") {
+FL_TEST_CASE("FastLED.remove nullptr is safe") {
     FastLED.remove(ChannelPtr());
 }
 
-TEST_CASE("FastLED.add nullptr is safe") {
+FL_TEST_CASE("FastLED.add nullptr is safe") {
     FastLED.add(ChannelPtr());
 }
 

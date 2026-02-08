@@ -1,7 +1,7 @@
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/move.h"
@@ -11,8 +11,8 @@
 using namespace fl;
 
 // Test allocation_result struct
-TEST_CASE("fl::allocation_result") {
-    SUBCASE("basic construction") {
+FL_TEST_CASE("fl::allocation_result") {
+    FL_SUBCASE("basic construction") {
         allocation_result<int*, fl::size> result{nullptr, 0};
         FL_CHECK_EQ(result.ptr, nullptr);
         FL_CHECK_EQ(result.count, 0);
@@ -25,15 +25,15 @@ TEST_CASE("fl::allocation_result") {
 }
 
 // Test allocator_traits
-TEST_CASE("fl::allocator_traits") {
-    SUBCASE("basic allocator traits") {
+FL_TEST_CASE("fl::allocator_traits") {
+    FL_SUBCASE("basic allocator traits") {
         using traits = allocator_traits<allocator<int>>;
         FL_CHECK((fl::is_same<traits::value_type, int>::value));
         FL_CHECK((fl::is_same<traits::pointer, int*>::value));
         FL_CHECK((fl::is_same<traits::size_type, fl::size>::value));
     }
 
-    SUBCASE("allocator_realloc has both capabilities") {
+    FL_SUBCASE("allocator_realloc has both capabilities") {
         // allocator_realloc should support both reallocate() and allocate_at_least()
         static_assert(allocator_traits<allocator_realloc<int>>::has_reallocate_v,
                      "allocator_realloc should support reallocate()");
@@ -42,21 +42,21 @@ TEST_CASE("fl::allocator_traits") {
         FL_CHECK(true);  // Compile-time checks passed
     }
 
-    SUBCASE("base allocator<T> has allocate_at_least") {
+    FL_SUBCASE("base allocator<T> has allocate_at_least") {
         // Standard allocator should have allocate_at_least() (with default implementation)
         static_assert(allocator_traits<allocator<int>>::has_allocate_at_least_v,
                      "allocator<T> should support allocate_at_least()");
         FL_CHECK(true);
     }
 
-    SUBCASE("base allocator<T> has default reallocate") {
+    FL_SUBCASE("base allocator<T> has default reallocate") {
         // Standard allocator has reallocate() that returns nullptr (no-op)
         static_assert(allocator_traits<allocator<int>>::has_reallocate_v,
                      "allocator<T> should have reallocate() method");
         FL_CHECK(true);
     }
 
-    SUBCASE("allocator_psram capabilities") {
+    FL_SUBCASE("allocator_psram capabilities") {
         // PSRam allocator may or may not have the optional methods
         // Just verify the traits can be queried without errors
         (void)allocator_traits<allocator_psram<int>>::has_allocate_at_least_v;
@@ -64,7 +64,7 @@ TEST_CASE("fl::allocator_traits") {
         FL_CHECK(true);  // Just checking it compiles
     }
 
-    SUBCASE("has_reallocate detection") {
+    FL_SUBCASE("has_reallocate detection") {
         // allocator<T> does not have working reallocate
         constexpr bool has_reallocate_basic = allocator_traits<allocator<int>>::has_reallocate_v;
         FL_CHECK_EQ(has_reallocate_basic, true);
@@ -74,7 +74,7 @@ TEST_CASE("fl::allocator_traits") {
         FL_CHECK_EQ(has_reallocate_realloc, true);
     }
 
-    SUBCASE("has_allocate_at_least detection") {
+    FL_SUBCASE("has_allocate_at_least detection") {
         // Both allocator and allocator_realloc have allocate_at_least
         constexpr bool has_alloc_at_least_basic = allocator_traits<allocator<int>>::has_allocate_at_least_v;
         FL_CHECK_EQ(has_alloc_at_least_basic, true);
@@ -85,8 +85,8 @@ TEST_CASE("fl::allocator_traits") {
 }
 
 // Test basic allocator
-TEST_CASE("fl::allocator") {
-    SUBCASE("allocate and deallocate") {
+FL_TEST_CASE("fl::allocator") {
+    FL_SUBCASE("allocate and deallocate") {
         allocator<int> alloc;
 
         // Allocate zero elements
@@ -111,7 +111,7 @@ TEST_CASE("fl::allocator") {
         alloc.deallocate(nullptr, 0);
     }
 
-    SUBCASE("construct and destroy") {
+    FL_SUBCASE("construct and destroy") {
         allocator<int> alloc;
         int* ptr = alloc.allocate(1);
         FL_CHECK(ptr != nullptr);
@@ -129,7 +129,7 @@ TEST_CASE("fl::allocator") {
         alloc.destroy(static_cast<int*>(nullptr));
     }
 
-    SUBCASE("allocate_at_least") {
+    FL_SUBCASE("allocate_at_least") {
         allocator<int> alloc;
 
         // Zero allocation
@@ -144,7 +144,7 @@ TEST_CASE("fl::allocator") {
         alloc.deallocate(result.ptr, result.count);
     }
 
-    SUBCASE("reallocate works for trivially copyable types") {
+    FL_SUBCASE("reallocate works for trivially copyable types") {
         allocator<int> alloc;
         int* ptr = alloc.allocate(5);
 
@@ -170,7 +170,7 @@ TEST_CASE("fl::allocator") {
         alloc.deallocate(new_ptr, 10);
     }
 
-    SUBCASE("rebind allocator") {
+    FL_SUBCASE("rebind allocator") {
         using int_allocator = allocator<int>;
         using double_allocator = int_allocator::rebind<double>::other;
         FL_CHECK((fl::is_same<double_allocator, allocator<double>>::value));
@@ -178,8 +178,8 @@ TEST_CASE("fl::allocator") {
 }
 
 // Test allocator_realloc
-TEST_CASE("fl::allocator_realloc") {
-    SUBCASE("Simple allocation and deallocation") {
+FL_TEST_CASE("fl::allocator_realloc") {
+    FL_SUBCASE("Simple allocation and deallocation") {
         allocator_realloc<int> alloc;
         int* ptr = alloc.allocate(10);
         FL_REQUIRE(ptr != nullptr);
@@ -197,13 +197,13 @@ TEST_CASE("fl::allocator_realloc") {
         alloc.deallocate(ptr, 10);
     }
 
-    SUBCASE("Zero allocation returns nullptr") {
+    FL_SUBCASE("Zero allocation returns nullptr") {
         allocator_realloc<int> alloc;
         int* ptr = alloc.allocate(0);
         FL_CHECK_EQ(ptr, nullptr);
     }
 
-    SUBCASE("Multiple allocations") {
+    FL_SUBCASE("Multiple allocations") {
         allocator_realloc<int> alloc;
 
         int* ptr1 = alloc.allocate(5);
@@ -223,7 +223,7 @@ TEST_CASE("fl::allocator_realloc") {
         alloc.deallocate(ptr2, 3);
     }
 
-    SUBCASE("allocate_at_least returns >= requested size") {
+    FL_SUBCASE("allocate_at_least returns >= requested size") {
         allocator_realloc<int> alloc;
 
         auto result = alloc.allocate_at_least(10);
@@ -242,14 +242,14 @@ TEST_CASE("fl::allocator_realloc") {
         alloc.deallocate(result.ptr, result.count);
     }
 
-    SUBCASE("allocate_at_least with zero returns empty result") {
+    FL_SUBCASE("allocate_at_least with zero returns empty result") {
         allocator_realloc<int> alloc;
         auto result = alloc.allocate_at_least(0);
         FL_CHECK_EQ(result.ptr, nullptr);
         FL_CHECK_EQ(result.count, 0);
     }
 
-    SUBCASE("Reallocate to larger size") {
+    FL_SUBCASE("Reallocate to larger size") {
         allocator_realloc<int> alloc;
 
         // Initial allocation
@@ -286,7 +286,7 @@ TEST_CASE("fl::allocator_realloc") {
         }
     }
 
-    SUBCASE("Reallocate to smaller size") {
+    FL_SUBCASE("Reallocate to smaller size") {
         allocator_realloc<int> alloc;
 
         int* ptr = alloc.allocate(20);
@@ -310,7 +310,7 @@ TEST_CASE("fl::allocator_realloc") {
         }
     }
 
-    SUBCASE("Reallocate to zero size") {
+    FL_SUBCASE("Reallocate to zero size") {
         allocator_realloc<int> alloc;
 
         int* ptr = alloc.allocate(10);
@@ -320,7 +320,7 @@ TEST_CASE("fl::allocator_realloc") {
         FL_CHECK_EQ(result, nullptr);
     }
 
-    SUBCASE("Vector with allocator_realloc resizing") {
+    FL_SUBCASE("Vector with allocator_realloc resizing") {
         fl::vector<int, allocator_realloc<int>> vec;
 
         // Push back elements to trigger multiple reallocations
@@ -335,7 +335,7 @@ TEST_CASE("fl::allocator_realloc") {
         }
     }
 
-    SUBCASE("Vector with POD types benefits from realloc") {
+    FL_SUBCASE("Vector with POD types benefits from realloc") {
         fl::vector<float, allocator_realloc<float>> vec;
 
         for (float i = 0.0f; i < 50.0f; ++i) {
@@ -348,7 +348,7 @@ TEST_CASE("fl::allocator_realloc") {
         }
     }
 
-    SUBCASE("Vector reserve and access") {
+    FL_SUBCASE("Vector reserve and access") {
         fl::vector<int, allocator_realloc<int>> vec;
 
         vec.reserve(100);
@@ -364,7 +364,7 @@ TEST_CASE("fl::allocator_realloc") {
         }
     }
 
-    SUBCASE("Comparison: allocator_realloc vs standard allocator") {
+    FL_SUBCASE("Comparison: allocator_realloc vs standard allocator") {
         // Standard allocator
         fl::vector<int, allocator<int>> vec_standard;
         for (int i = 0; i < 100; ++i) {
@@ -384,7 +384,7 @@ TEST_CASE("fl::allocator_realloc") {
         }
     }
 
-    SUBCASE("Runtime trait queries") {
+    FL_SUBCASE("Runtime trait queries") {
         // These should compile to constexpr true/false
         constexpr bool realloc_has_reallocate =
             allocator_traits<allocator_realloc<int>>::has_reallocate_v;
@@ -399,7 +399,7 @@ TEST_CASE("fl::allocator_realloc") {
         FL_CHECK(standard_has_at_least);
     }
 
-    SUBCASE("allocation_result from allocator_realloc") {
+    FL_SUBCASE("allocation_result from allocator_realloc") {
         allocator_realloc<float> alloc;
         auto result = alloc.allocate_at_least(20);
 
@@ -421,8 +421,8 @@ TEST_CASE("fl::allocator_realloc") {
 }
 
 // Test allocator_psram
-TEST_CASE("fl::allocator_psram") {
-    SUBCASE("basic allocation") {
+FL_TEST_CASE("fl::allocator_psram") {
+    FL_SUBCASE("basic allocation") {
         allocator_psram<int> alloc;
 
         // Note: PSRam may not be available in test environment
@@ -433,7 +433,7 @@ TEST_CASE("fl::allocator_psram") {
         }
     }
 
-    SUBCASE("allocate_at_least") {
+    FL_SUBCASE("allocate_at_least") {
         allocator_psram<int> alloc;
         auto result = alloc.allocate_at_least(10);
         if (result.ptr != nullptr) {
@@ -442,7 +442,7 @@ TEST_CASE("fl::allocator_psram") {
         }
     }
 
-    SUBCASE("reallocate not supported") {
+    FL_SUBCASE("reallocate not supported") {
         allocator_psram<int> alloc;
         int* ptr = alloc.allocate(5);
         if (ptr != nullptr) {
@@ -455,8 +455,8 @@ TEST_CASE("fl::allocator_psram") {
 }
 
 // Test SlabAllocator
-TEST_CASE("fl::SlabAllocator") {
-    SUBCASE("basic allocation") {
+FL_TEST_CASE("fl::SlabAllocator") {
+    FL_SUBCASE("basic allocation") {
         SlabAllocator<int, 8> alloc;
 
         int* ptr = alloc.allocate(1);
@@ -465,7 +465,7 @@ TEST_CASE("fl::SlabAllocator") {
         alloc.deallocate(ptr, 1);
     }
 
-    SUBCASE("multiple allocations in same slab") {
+    FL_SUBCASE("multiple allocations in same slab") {
         SlabAllocator<int, 8> alloc;
 
         int* ptr1 = alloc.allocate(1);
@@ -491,7 +491,7 @@ TEST_CASE("fl::SlabAllocator") {
         alloc.deallocate(ptr3, 1);
     }
 
-    SUBCASE("allocation and deallocation statistics") {
+    FL_SUBCASE("allocation and deallocation statistics") {
         SlabAllocator<int, 8> alloc;
 
         FL_CHECK_EQ(alloc.getTotalAllocated(), 0);
@@ -515,7 +515,7 @@ TEST_CASE("fl::SlabAllocator") {
         FL_CHECK_EQ(alloc.getActiveAllocations(), 0);
     }
 
-    SUBCASE("cleanup clears statistics") {
+    FL_SUBCASE("cleanup clears statistics") {
         SlabAllocator<int, 8> alloc;
 
         int* ptr = alloc.allocate(3);
@@ -528,7 +528,7 @@ TEST_CASE("fl::SlabAllocator") {
         FL_CHECK_EQ(alloc.getActiveAllocations(), 0);
     }
 
-    SUBCASE("move constructor") {
+    FL_SUBCASE("move constructor") {
         SlabAllocator<int, 8> alloc1;
         int* ptr = alloc1.allocate(2);
         FL_CHECK_EQ(alloc1.getTotalAllocated(), 2);
@@ -540,7 +540,7 @@ TEST_CASE("fl::SlabAllocator") {
         alloc2.deallocate(ptr, 2);
     }
 
-    SUBCASE("move assignment") {
+    FL_SUBCASE("move assignment") {
         SlabAllocator<int, 8> alloc1;
         int* ptr = alloc1.allocate(2);
         FL_CHECK_EQ(alloc1.getTotalAllocated(), 2);
@@ -553,7 +553,7 @@ TEST_CASE("fl::SlabAllocator") {
         alloc2.deallocate(ptr, 2);
     }
 
-    SUBCASE("large allocation fallback") {
+    FL_SUBCASE("large allocation fallback") {
         SlabAllocator<int, 8> alloc;
 
         // Allocate more than slab size
@@ -566,12 +566,12 @@ TEST_CASE("fl::SlabAllocator") {
         alloc.deallocate(ptr, 20);
     }
 
-    SUBCASE("deallocate nullptr is safe") {
+    FL_SUBCASE("deallocate nullptr is safe") {
         SlabAllocator<int, 8> alloc;
         alloc.deallocate(nullptr, 1);  // Should not crash
     }
 
-    SUBCASE("slab count tracking") {
+    FL_SUBCASE("slab count tracking") {
         SlabAllocator<int, 4> alloc;  // Small slab size
 
         FL_CHECK_EQ(alloc.getSlabCount(), 0);
@@ -596,7 +596,7 @@ TEST_CASE("fl::SlabAllocator") {
         alloc.deallocate(ptr5, 1);
     }
 
-    SUBCASE("memory layout verification") {
+    FL_SUBCASE("memory layout verification") {
         SlabAllocator<uint32_t, 16> alloc;
 
         fl::vector<uint32_t*> ptrs;
@@ -620,7 +620,7 @@ TEST_CASE("fl::SlabAllocator") {
         }
     }
 
-    SUBCASE("allocation after cleanup") {
+    FL_SUBCASE("allocation after cleanup") {
         SlabAllocator<char, 8> alloc;
 
         char* ptr1 = alloc.allocate();
@@ -636,7 +636,7 @@ TEST_CASE("fl::SlabAllocator") {
         alloc.deallocate(ptr2);
     }
 
-    SUBCASE("large block allocation exceeding slab size") {
+    FL_SUBCASE("large block allocation exceeding slab size") {
         SlabAllocator<char, 8> alloc;
 
         // Try to allocate more blocks than fit in a single slab
@@ -657,7 +657,7 @@ TEST_CASE("fl::SlabAllocator") {
         alloc.deallocate(large_ptr, 10);
     }
 
-    SUBCASE("very large block allocation") {
+    FL_SUBCASE("very large block allocation") {
         SlabAllocator<char, 8> alloc;
 
         // Try to allocate a very large block that should definitely fall back to malloc
@@ -677,7 +677,7 @@ TEST_CASE("fl::SlabAllocator") {
         alloc.deallocate(huge_ptr, 1000);
     }
 
-    SUBCASE("small multi-allocation (3 objects)") {
+    FL_SUBCASE("small multi-allocation (3 objects)") {
         SlabAllocator<int, 8> alloc;
 
         // Allocate 3 objects at once
@@ -702,7 +702,7 @@ TEST_CASE("fl::SlabAllocator") {
         FL_CHECK_EQ(alloc.getTotalDeallocated(), 3);
     }
 
-    SUBCASE("medium multi-allocation (5 objects)") {
+    FL_SUBCASE("medium multi-allocation (5 objects)") {
         SlabAllocator<int, 8> alloc;
 
         // Allocate 5 objects at once
@@ -722,7 +722,7 @@ TEST_CASE("fl::SlabAllocator") {
         alloc.deallocate(ptr, 5);
     }
 
-    SUBCASE("large multi-allocation fallback (100 objects)") {
+    FL_SUBCASE("large multi-allocation fallback (100 objects)") {
         SlabAllocator<int, 8> alloc;
 
         // Allocate 100 objects - should fallback to malloc
@@ -746,7 +746,7 @@ TEST_CASE("fl::SlabAllocator") {
         alloc.deallocate(ptr, 100);
     }
 
-    SUBCASE("mixed single and multi-allocations") {
+    FL_SUBCASE("mixed single and multi-allocations") {
         SlabAllocator<int, 8> alloc;
 
         // Allocate single objects first
@@ -779,7 +779,7 @@ TEST_CASE("fl::SlabAllocator") {
         alloc.deallocate(multi, 3);
     }
 
-    SUBCASE("contiguous allocation verification") {
+    FL_SUBCASE("contiguous allocation verification") {
         SlabAllocator<int, 8> alloc;
 
         // Allocate 4 contiguous objects
@@ -797,8 +797,8 @@ TEST_CASE("fl::SlabAllocator") {
 }
 
 // Test allocator_slab (STL-compatible wrapper)
-TEST_CASE("fl::allocator_slab") {
-    SUBCASE("basic allocation") {
+FL_TEST_CASE("fl::allocator_slab") {
+    FL_SUBCASE("basic allocation") {
         allocator_slab<int, 8> alloc;
 
         int* ptr = alloc.allocate(1);
@@ -806,7 +806,7 @@ TEST_CASE("fl::allocator_slab") {
         alloc.deallocate(ptr, 1);
     }
 
-    SUBCASE("construct and destroy") {
+    FL_SUBCASE("construct and destroy") {
         allocator_slab<int, 8> alloc;
 
         int* ptr = alloc.allocate(1);
@@ -817,7 +817,7 @@ TEST_CASE("fl::allocator_slab") {
         alloc.deallocate(ptr, 1);
     }
 
-    SUBCASE("equality comparison") {
+    FL_SUBCASE("equality comparison") {
         allocator_slab<int, 8> alloc1;
         allocator_slab<int, 8> alloc2;
 
@@ -825,13 +825,13 @@ TEST_CASE("fl::allocator_slab") {
         FL_CHECK(!(alloc1 != alloc2));
     }
 
-    SUBCASE("rebind allocator") {
+    FL_SUBCASE("rebind allocator") {
         using int_alloc = allocator_slab<int, 8>;
         using double_alloc = int_alloc::rebind<double>::other;
         FL_CHECK((fl::is_same<double_alloc, allocator_slab<double, 8>>::value));
     }
 
-    SUBCASE("copy constructor and assignment") {
+    FL_SUBCASE("copy constructor and assignment") {
         allocator_slab<int, 8> alloc1;
         allocator_slab<int, 8> alloc2(alloc1);
         allocator_slab<int, 8> alloc3;
@@ -846,10 +846,10 @@ TEST_CASE("fl::allocator_slab") {
 }
 
 // Test allocator_inlined - Comprehensive tests from test_allocator_inlined.cpp
-TEST_CASE("fl::allocator_inlined - Basic functionality") {
+FL_TEST_CASE("fl::allocator_inlined - Basic functionality") {
     using TestAllocator = fl::allocator_inlined<int, 3>;
 
-    SUBCASE("Single allocation and deallocation") {
+    FL_SUBCASE("Single allocation and deallocation") {
         TestAllocator allocator;
 
         int* ptr = allocator.allocate(1);
@@ -862,7 +862,7 @@ TEST_CASE("fl::allocator_inlined - Basic functionality") {
         allocator.deallocate(ptr, 1);
     }
 
-    SUBCASE("Multiple inlined allocations") {
+    FL_SUBCASE("Multiple inlined allocations") {
         TestAllocator allocator;
 
         fl::vector<int*> ptrs;
@@ -887,10 +887,10 @@ TEST_CASE("fl::allocator_inlined - Basic functionality") {
     }
 }
 
-TEST_CASE("fl::allocator_inlined - Inlined to heap transition") {
+FL_TEST_CASE("fl::allocator_inlined - Inlined to heap transition") {
     using TestAllocator = fl::allocator_inlined<int, 3>;
 
-    SUBCASE("Overflow to heap") {
+    FL_SUBCASE("Overflow to heap") {
         TestAllocator allocator;
 
         fl::vector<int*> ptrs;
@@ -914,7 +914,7 @@ TEST_CASE("fl::allocator_inlined - Inlined to heap transition") {
         }
     }
 
-    SUBCASE("Mixed inlined and heap allocations") {
+    FL_SUBCASE("Mixed inlined and heap allocations") {
         TestAllocator allocator;
 
         fl::vector<int*> inlined_ptrs;
@@ -956,10 +956,10 @@ TEST_CASE("fl::allocator_inlined - Inlined to heap transition") {
     }
 }
 
-TEST_CASE("fl::allocator_inlined - Free slot management") {
+FL_TEST_CASE("fl::allocator_inlined - Free slot management") {
     using TestAllocator = fl::allocator_inlined<int, 3>;
 
-    SUBCASE("Deallocate and reuse inlined slots") {
+    FL_SUBCASE("Deallocate and reuse inlined slots") {
         TestAllocator allocator;
 
         fl::vector<int*> ptrs;
@@ -993,10 +993,10 @@ TEST_CASE("fl::allocator_inlined - Free slot management") {
     }
 }
 
-TEST_CASE("fl::allocator_inlined - Memory layout verification") {
+FL_TEST_CASE("fl::allocator_inlined - Memory layout verification") {
     using TestAllocator = fl::allocator_inlined<int, 3>;
 
-    SUBCASE("Basic memory layout") {
+    FL_SUBCASE("Basic memory layout") {
         TestAllocator allocator;
 
         fl::vector<int*> ptrs;
@@ -1021,10 +1021,10 @@ TEST_CASE("fl::allocator_inlined - Memory layout verification") {
     }
 }
 
-TEST_CASE("fl::allocator_inlined - Edge cases") {
+FL_TEST_CASE("fl::allocator_inlined - Edge cases") {
     using TestAllocator = fl::allocator_inlined<int, 3>;
 
-    SUBCASE("Zero size allocation") {
+    FL_SUBCASE("Zero size allocation") {
         TestAllocator allocator;
 
         // Zero size allocation should return nullptr or be handled gracefully
@@ -1036,7 +1036,7 @@ TEST_CASE("fl::allocator_inlined - Edge cases") {
         }
     }
 
-    SUBCASE("Null pointer deallocation") {
+    FL_SUBCASE("Null pointer deallocation") {
         TestAllocator allocator;
 
         // Should not crash
@@ -1044,10 +1044,10 @@ TEST_CASE("fl::allocator_inlined - Edge cases") {
     }
 }
 
-TEST_CASE("fl::allocator_inlined - Clear functionality") {
+FL_TEST_CASE("fl::allocator_inlined - Clear functionality") {
     using TestAllocator = fl::allocator_inlined<int, 3>;
 
-    SUBCASE("Clear after mixed allocations") {
+    FL_SUBCASE("Clear after mixed allocations") {
         TestAllocator allocator;
 
         fl::vector<int*> ptrs;
@@ -1079,8 +1079,8 @@ TEST_CASE("fl::allocator_inlined - Clear functionality") {
 }
 
 // Test allocator_inlined_psram alias
-TEST_CASE("fl::allocator_inlined_psram") {
-    SUBCASE("type alias verification") {
+FL_TEST_CASE("fl::allocator_inlined_psram") {
+    FL_SUBCASE("type alias verification") {
         using expected = allocator_inlined<int, 4, allocator_psram<int>>;
         using actual = allocator_inlined_psram<int, 4>;
         FL_CHECK((fl::is_same<expected, actual>::value));
@@ -1088,14 +1088,14 @@ TEST_CASE("fl::allocator_inlined_psram") {
 }
 
 // Test allocator_inlined_slab alias
-TEST_CASE("fl::allocator_inlined_slab") {
-    SUBCASE("type alias verification") {
+FL_TEST_CASE("fl::allocator_inlined_slab") {
+    FL_SUBCASE("type alias verification") {
         using expected = allocator_inlined<int, 4, allocator_slab<int>>;
         using actual = allocator_inlined_slab<int, 4>;
         FL_CHECK((fl::is_same<expected, actual>::value));
     }
 
-    SUBCASE("basic usage") {
+    FL_SUBCASE("basic usage") {
         allocator_inlined_slab<int, 4> alloc;
 
         int* ptr = alloc.allocate(1);
@@ -1103,7 +1103,7 @@ TEST_CASE("fl::allocator_inlined_slab") {
         alloc.deallocate(ptr, 1);
     }
 
-    SUBCASE("multiple inlined allocations") {
+    FL_SUBCASE("multiple inlined allocations") {
         allocator_inlined_slab<int, 3> alloc;
 
         fl::vector<int*> ptrs;
@@ -1127,7 +1127,7 @@ TEST_CASE("fl::allocator_inlined_slab") {
         }
     }
 
-    SUBCASE("memory layout verification") {
+    FL_SUBCASE("memory layout verification") {
         allocator_inlined_slab<int, 3> alloc;
 
         fl::vector<int*> ptrs;
@@ -1151,7 +1151,7 @@ TEST_CASE("fl::allocator_inlined_slab") {
         }
     }
 
-    SUBCASE("null pointer deallocation") {
+    FL_SUBCASE("null pointer deallocation") {
         allocator_inlined_slab<int, 3> alloc;
 
         // Should not crash
@@ -1160,8 +1160,8 @@ TEST_CASE("fl::allocator_inlined_slab") {
 }
 
 // Integration test with fl::vector
-TEST_CASE("fl::allocator integration with vector") {
-    SUBCASE("vector with default allocator") {
+FL_TEST_CASE("fl::allocator integration with vector") {
+    FL_SUBCASE("vector with default allocator") {
         fl::vector<int, allocator<int>> vec;
         vec.push_back(1);
         vec.push_back(2);
@@ -1173,7 +1173,7 @@ TEST_CASE("fl::allocator integration with vector") {
         FL_CHECK_EQ(vec[2], 3);
     }
 
-    SUBCASE("vector with realloc allocator") {
+    FL_SUBCASE("vector with realloc allocator") {
         fl::vector<int, allocator_realloc<int>> vec;
         vec.push_back(1);
         vec.push_back(2);
@@ -1185,7 +1185,7 @@ TEST_CASE("fl::allocator integration with vector") {
         FL_CHECK_EQ(vec[2], 3);
     }
 
-    SUBCASE("vector with slab allocator") {
+    FL_SUBCASE("vector with slab allocator") {
         fl::vector<int, allocator_slab<int, 8>> vec;
         vec.push_back(1);
         vec.push_back(2);
@@ -1197,7 +1197,7 @@ TEST_CASE("fl::allocator integration with vector") {
         FL_CHECK_EQ(vec[2], 3);
     }
 
-    SUBCASE("vector with inlined allocator") {
+    FL_SUBCASE("vector with inlined allocator") {
         fl::vector<int, allocator_inlined<int, 4>> vec;
 
         // Add elements within inlined capacity
@@ -1246,11 +1246,11 @@ static void ClearTrackingData() {
     // fl::SetMallocFreeHook(nullptr);
 }
 
-TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
+FL_TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
     // Clear any previous tracking data
     ClearTrackingData();
     
-    SUBCASE("Set and clear hooks") {
+    FL_SUBCASE("Set and clear hooks") {
         // Create hook instance
         TestMallocFreeHook hook;
         
@@ -1275,7 +1275,7 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
         FL_CHECK(gFreeCalls.empty());
     }
     
-    SUBCASE("Malloc hook is called after allocation") {
+    FL_SUBCASE("Malloc hook is called after allocation") {
         TestMallocFreeHook hook;
         fl::SetMallocFreeHook(&hook);
         
@@ -1303,7 +1303,7 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
         fl::ClearMallocFreeHook();
     }
     
-    SUBCASE("Free hook is called before deallocation") {
+    FL_SUBCASE("Free hook is called before deallocation") {
         TestMallocFreeHook hook;
         fl::SetMallocFreeHook(&hook);
         
@@ -1332,7 +1332,7 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
         fl::ClearMallocFreeHook();
     }
     
-    SUBCASE("Both hooks work together") {
+    FL_SUBCASE("Both hooks work together") {
         TestMallocFreeHook hook;
         fl::SetMallocFreeHook(&hook);
         
@@ -1368,7 +1368,7 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
         fl::ClearMallocFreeHook();
     }
     
-    SUBCASE("Null pointer handling") {
+    FL_SUBCASE("Null pointer handling") {
         TestMallocFreeHook hook;
         fl::SetMallocFreeHook(&hook);
         
@@ -1392,7 +1392,7 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
         fl::ClearMallocFreeHook();
     }
     
-    SUBCASE("Hook replacement") {
+    FL_SUBCASE("Hook replacement") {
         // Create initial hook
         TestMallocFreeHook hook1;
         fl::SetMallocFreeHook(&hook1);
@@ -1450,11 +1450,11 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
     }
 }
 
-TEST_CASE("Malloc/Free Test Hooks - Integration with allocators") {
+FL_TEST_CASE("Malloc/Free Test Hooks - Integration with allocators") {
     TestMallocFreeHook hook;
     fl::SetMallocFreeHook(&hook);
     
-    SUBCASE("Standard allocator integration") {
+    FL_SUBCASE("Standard allocator integration") {
         ClearTrackingData();
         
         fl::allocator<int> alloc;
@@ -1478,7 +1478,7 @@ TEST_CASE("Malloc/Free Test Hooks - Integration with allocators") {
         FL_CHECK(gFreeCalls[0] == ptr);
     }
     
-    SUBCASE("PSRAM allocator integration") {
+    FL_SUBCASE("PSRAM allocator integration") {
         ClearTrackingData();
         
         fl::allocator_psram<int> alloc;

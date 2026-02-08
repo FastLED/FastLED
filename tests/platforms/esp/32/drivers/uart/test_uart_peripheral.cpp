@@ -7,7 +7,7 @@
 #include "fl/stl/cstdint.h"
 #include "fl/stl/thread.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "platforms/esp/32/drivers/uart/iuart_peripheral.h"
 #include "fl/stl/vector.h"
 
@@ -30,16 +30,16 @@ UartPeripheralConfig createDefaultConfig() {
 
 } // anonymous namespace
 
-TEST_CASE("UartPeripheralMock - Lifecycle") {
+FL_TEST_CASE("UartPeripheralMock - Lifecycle") {
     UartPeripheralMock mock;
 
-    SUBCASE("Initial state") {
+    FL_SUBCASE("Initial state") {
         FL_CHECK_FALSE(mock.isInitialized());
         FL_CHECK_FALSE(mock.isBusy());
         FL_CHECK(mock.getCapturedByteCount() == 0);
     }
 
-    SUBCASE("Initialize and deinitialize") {
+    FL_SUBCASE("Initialize and deinitialize") {
         UartPeripheralConfig config = createDefaultConfig();
 
         FL_CHECK(mock.initialize(config));
@@ -52,7 +52,7 @@ TEST_CASE("UartPeripheralMock - Lifecycle") {
         FL_CHECK_FALSE(mock.isInitialized());
     }
 
-    SUBCASE("Double initialization") {
+    FL_SUBCASE("Double initialization") {
         UartPeripheralConfig config = createDefaultConfig();
 
         FL_CHECK(mock.initialize(config));
@@ -63,7 +63,7 @@ TEST_CASE("UartPeripheralMock - Lifecycle") {
         FL_CHECK(mock.isInitialized());
     }
 
-    SUBCASE("Invalid configuration - zero baud rate") {
+    FL_SUBCASE("Invalid configuration - zero baud rate") {
         UartPeripheralConfig config = createDefaultConfig();
         config.mBaudRate = 0;
 
@@ -71,7 +71,7 @@ TEST_CASE("UartPeripheralMock - Lifecycle") {
         FL_CHECK_FALSE(mock.isInitialized());
     }
 
-    SUBCASE("Invalid configuration - invalid TX pin") {
+    FL_SUBCASE("Invalid configuration - invalid TX pin") {
         UartPeripheralConfig config = createDefaultConfig();
         config.mTxPin = -1;
 
@@ -79,7 +79,7 @@ TEST_CASE("UartPeripheralMock - Lifecycle") {
         FL_CHECK_FALSE(mock.isInitialized());
     }
 
-    SUBCASE("Invalid configuration - invalid stop bits") {
+    FL_SUBCASE("Invalid configuration - invalid stop bits") {
         UartPeripheralConfig config = createDefaultConfig();
         config.mStopBits = 0;
 
@@ -88,12 +88,12 @@ TEST_CASE("UartPeripheralMock - Lifecycle") {
     }
 }
 
-TEST_CASE("UartPeripheralMock - Single byte transmission") {
+FL_TEST_CASE("UartPeripheralMock - Single byte transmission") {
     UartPeripheralMock mock;
     UartPeripheralConfig config = createDefaultConfig();
     FL_CHECK(mock.initialize(config));
 
-    SUBCASE("Write and verify single byte") {
+    FL_SUBCASE("Write and verify single byte") {
         uint8_t data = 0xA5;
         FL_CHECK(mock.writeBytes(&data, 1));
         FL_CHECK(mock.waitTxDone(1000));
@@ -103,7 +103,7 @@ TEST_CASE("UartPeripheralMock - Single byte transmission") {
         FL_CHECK(captured[0] == 0xA5);
     }
 
-    SUBCASE("Write multiple single bytes") {
+    FL_SUBCASE("Write multiple single bytes") {
         uint8_t data1 = 0xAA;
         uint8_t data2 = 0x55;
         uint8_t data3 = 0xFF;
@@ -120,28 +120,28 @@ TEST_CASE("UartPeripheralMock - Single byte transmission") {
         FL_CHECK(captured[2] == 0xFF);
     }
 
-    SUBCASE("Write without initialization") {
+    FL_SUBCASE("Write without initialization") {
         mock.deinitialize();
         uint8_t data = 0xA5;
         FL_CHECK_FALSE(mock.writeBytes(&data, 1));
     }
 
-    SUBCASE("Write with nullptr") {
+    FL_SUBCASE("Write with nullptr") {
         FL_CHECK_FALSE(mock.writeBytes(nullptr, 1));
     }
 
-    SUBCASE("Write with zero length") {
+    FL_SUBCASE("Write with zero length") {
         uint8_t data = 0xA5;
         FL_CHECK_FALSE(mock.writeBytes(&data, 0));
     }
 }
 
-TEST_CASE("UartPeripheralMock - Multi-byte transmission") {
+FL_TEST_CASE("UartPeripheralMock - Multi-byte transmission") {
     UartPeripheralMock mock;
     UartPeripheralConfig config = createDefaultConfig();
     FL_CHECK(mock.initialize(config));
 
-    SUBCASE("Write byte array") {
+    FL_SUBCASE("Write byte array") {
         uint8_t data[] = {0x01, 0x02, 0x03, 0x04, 0x05};
         FL_CHECK(mock.writeBytes(data, 5));
         FL_CHECK(mock.waitTxDone(1000));
@@ -153,7 +153,7 @@ TEST_CASE("UartPeripheralMock - Multi-byte transmission") {
         }
     }
 
-    SUBCASE("Write RGB LED data (3 bytes)") {
+    FL_SUBCASE("Write RGB LED data (3 bytes)") {
         uint8_t rgb[] = {0xFF, 0x80, 0x00};  // Orange
         FL_CHECK(mock.writeBytes(rgb, 3));
         FL_CHECK(mock.waitTxDone(1000));
@@ -165,7 +165,7 @@ TEST_CASE("UartPeripheralMock - Multi-byte transmission") {
         FL_CHECK(captured[2] == 0x00);
     }
 
-    SUBCASE("Large buffer streaming (50 RGB LEDs)") {
+    FL_SUBCASE("Large buffer streaming (50 RGB LEDs)") {
         // Reduced from 100 to 50 LEDs for performance (still tests large buffer streaming)
         const size_t num_leds = 50;
         fl::vector<uint8_t> data(num_leds * 3);
@@ -186,13 +186,13 @@ TEST_CASE("UartPeripheralMock - Multi-byte transmission") {
     }
 }
 
-TEST_CASE("UartPeripheralMock - Waveform extraction (8N1)") {
+FL_TEST_CASE("UartPeripheralMock - Waveform extraction (8N1)") {
     UartPeripheralMock mock;
     UartPeripheralConfig config = createDefaultConfig();
     config.mStopBits = 1;  // 8N1
     FL_CHECK(mock.initialize(config));
 
-    SUBCASE("Single byte waveform") {
+    FL_SUBCASE("Single byte waveform") {
         uint8_t data = 0xA5;  // 0b10100101
         FL_CHECK(mock.writeBytes(&data, 1));
         FL_CHECK(mock.waitTxDone(1000));
@@ -215,7 +215,7 @@ TEST_CASE("UartPeripheralMock - Waveform extraction (8N1)") {
         FL_CHECK(waveform[9] == true);   // Stop bit (HIGH)
     }
 
-    SUBCASE("Multiple byte waveform") {
+    FL_SUBCASE("Multiple byte waveform") {
         uint8_t data[] = {0xFF, 0x00, 0xAA};
         FL_CHECK(mock.writeBytes(data, 3));
         FL_CHECK(mock.waitTxDone(1000));
@@ -239,13 +239,13 @@ TEST_CASE("UartPeripheralMock - Waveform extraction (8N1)") {
     }
 }
 
-TEST_CASE("UartPeripheralMock - Waveform extraction (8N2)") {
+FL_TEST_CASE("UartPeripheralMock - Waveform extraction (8N2)") {
     UartPeripheralMock mock;
     UartPeripheralConfig config = createDefaultConfig();
     config.mStopBits = 2;  // 8N2
     FL_CHECK(mock.initialize(config));
 
-    SUBCASE("Single byte waveform with 2 stop bits") {
+    FL_SUBCASE("Single byte waveform with 2 stop bits") {
         uint8_t data = 0x55;  // 0b01010101
         FL_CHECK(mock.writeBytes(&data, 1));
         FL_CHECK(mock.waitTxDone(1000));
@@ -260,7 +260,7 @@ TEST_CASE("UartPeripheralMock - Waveform extraction (8N2)") {
         FL_CHECK(waveform[10] == true);   // Stop bit 2 (HIGH)
     }
 
-    SUBCASE("Multiple byte waveform with 2 stop bits") {
+    FL_SUBCASE("Multiple byte waveform with 2 stop bits") {
         uint8_t data[] = {0xAA, 0x55};
         FL_CHECK(mock.writeBytes(data, 2));
         FL_CHECK(mock.waitTxDone(1000));
@@ -270,11 +270,11 @@ TEST_CASE("UartPeripheralMock - Waveform extraction (8N2)") {
     }
 }
 
-TEST_CASE("UartPeripheralMock - Start/stop bit validation") {
+FL_TEST_CASE("UartPeripheralMock - Start/stop bit validation") {
     UartPeripheralMock mock;
     UartPeripheralConfig config = createDefaultConfig();
 
-    SUBCASE("Valid 8N1 frames") {
+    FL_SUBCASE("Valid 8N1 frames") {
         config.mStopBits = 1;
         FL_CHECK(mock.initialize(config));
 
@@ -285,7 +285,7 @@ TEST_CASE("UartPeripheralMock - Start/stop bit validation") {
         FL_CHECK(mock.verifyStartStopBits());
     }
 
-    SUBCASE("Valid 8N2 frames") {
+    FL_SUBCASE("Valid 8N2 frames") {
         config.mStopBits = 2;
         FL_CHECK(mock.initialize(config));
 
@@ -296,18 +296,18 @@ TEST_CASE("UartPeripheralMock - Start/stop bit validation") {
         FL_CHECK(mock.verifyStartStopBits());
     }
 
-    SUBCASE("Verification fails with no data") {
+    FL_SUBCASE("Verification fails with no data") {
         FL_CHECK(mock.initialize(config));
         FL_CHECK_FALSE(mock.verifyStartStopBits());
     }
 }
 
-TEST_CASE("UartPeripheralMock - Transmission timing") {
+FL_TEST_CASE("UartPeripheralMock - Transmission timing") {
     UartPeripheralMock mock;
     UartPeripheralConfig config = createDefaultConfig();
     FL_CHECK(mock.initialize(config));
 
-    SUBCASE("Automatic transmission timing (deterministic)") {
+    FL_SUBCASE("Automatic transmission timing (deterministic)") {
         // Enable virtual time mode for deterministic testing
         mock.setVirtualTimeMode(true);
 
@@ -328,7 +328,7 @@ TEST_CASE("UartPeripheralMock - Transmission timing") {
         FL_CHECK_FALSE(mock.isBusy());  // Now idle
     }
 
-    SUBCASE("Delayed transmission (deterministic)") {
+    FL_SUBCASE("Delayed transmission (deterministic)") {
         // Enable virtual time mode for deterministic testing
         mock.setVirtualTimeMode(true);
         mock.setTransmissionDelay(1000);  // 1ms delay
@@ -347,7 +347,7 @@ TEST_CASE("UartPeripheralMock - Transmission timing") {
         FL_CHECK_FALSE(mock.isBusy());
     }
 
-    SUBCASE("Force transmission complete") {
+    FL_SUBCASE("Force transmission complete") {
         mock.setTransmissionDelay(10000000);  // 10 second delay
 
         uint8_t data = 0xA5;
@@ -359,17 +359,17 @@ TEST_CASE("UartPeripheralMock - Transmission timing") {
         FL_CHECK_FALSE(mock.isBusy());
     }
 
-    SUBCASE("Wait on idle peripheral") {
+    FL_SUBCASE("Wait on idle peripheral") {
         FL_CHECK(mock.waitTxDone(1000));  // Should return immediately
     }
 }
 
-TEST_CASE("UartPeripheralMock - State management") {
+FL_TEST_CASE("UartPeripheralMock - State management") {
     UartPeripheralMock mock;
     UartPeripheralConfig config = createDefaultConfig();
     FL_CHECK(mock.initialize(config));
 
-    SUBCASE("Reset captured data") {
+    FL_SUBCASE("Reset captured data") {
         uint8_t data[] = {0x01, 0x02, 0x03};
         FL_CHECK(mock.writeBytes(data, 3));
         FL_CHECK(mock.waitTxDone(1000));
@@ -379,7 +379,7 @@ TEST_CASE("UartPeripheralMock - State management") {
         FL_CHECK(mock.getCapturedByteCount() == 0);
     }
 
-    SUBCASE("Full reset") {
+    FL_SUBCASE("Full reset") {
         uint8_t data[] = {0x01, 0x02, 0x03};
         FL_CHECK(mock.writeBytes(data, 3));
         FL_CHECK(mock.waitTxDone(1000));
@@ -390,7 +390,7 @@ TEST_CASE("UartPeripheralMock - State management") {
         FL_CHECK(mock.getCapturedByteCount() == 0);
     }
 
-    SUBCASE("Reset between tests") {
+    FL_SUBCASE("Reset between tests") {
         // First test
         uint8_t data1 = 0xAA;
         FL_CHECK(mock.writeBytes(&data1, 1));
@@ -411,12 +411,12 @@ TEST_CASE("UartPeripheralMock - State management") {
     }
 }
 
-TEST_CASE("UartPeripheralMock - Edge cases") {
+FL_TEST_CASE("UartPeripheralMock - Edge cases") {
     UartPeripheralMock mock;
     UartPeripheralConfig config = createDefaultConfig();
     FL_CHECK(mock.initialize(config));
 
-    SUBCASE("All zeros byte") {
+    FL_SUBCASE("All zeros byte") {
         uint8_t data = 0x00;
         FL_CHECK(mock.writeBytes(&data, 1));
         FL_CHECK(mock.waitTxDone(1000));
@@ -429,7 +429,7 @@ TEST_CASE("UartPeripheralMock - Edge cases") {
         FL_CHECK(waveform[9] == true);    // Stop bit
     }
 
-    SUBCASE("All ones byte") {
+    FL_SUBCASE("All ones byte") {
         uint8_t data = 0xFF;
         FL_CHECK(mock.writeBytes(&data, 1));
         FL_CHECK(mock.waitTxDone(1000));
@@ -442,7 +442,7 @@ TEST_CASE("UartPeripheralMock - Edge cases") {
         FL_CHECK(waveform[9] == true);    // Stop bit
     }
 
-    SUBCASE("Alternating pattern") {
+    FL_SUBCASE("Alternating pattern") {
         uint8_t data = 0xAA;  // 0b10101010
         FL_CHECK(mock.writeBytes(&data, 1));
         FL_CHECK(mock.waitTxDone(1000));
@@ -461,13 +461,13 @@ TEST_CASE("UartPeripheralMock - Edge cases") {
     }
 }
 
-TEST_CASE("UartPeripheralMock - Virtual time control") {
+FL_TEST_CASE("UartPeripheralMock - Virtual time control") {
     UartPeripheralMock mock;
     UartPeripheralConfig config = createDefaultConfig();
     FL_CHECK(mock.initialize(config));
     mock.setVirtualTimeMode(true);
 
-    SUBCASE("Manual time pumping - transmission lifecycle") {
+    FL_SUBCASE("Manual time pumping - transmission lifecycle") {
         uint8_t data = 0xA5;
         FL_CHECK(mock.writeBytes(&data, 1));
 
@@ -500,7 +500,7 @@ TEST_CASE("UartPeripheralMock - Virtual time control") {
         FL_CHECK(captured[0] == 0xA5);
     }
 
-    SUBCASE("Partial time advancement") {
+    FL_SUBCASE("Partial time advancement") {
         uint8_t data = 0xA5;
         FL_CHECK(mock.writeBytes(&data, 1));
 
@@ -527,7 +527,7 @@ TEST_CASE("UartPeripheralMock - Virtual time control") {
         FL_CHECK_FALSE(mock.isBusy());
     }
 
-    SUBCASE("Virtual time query methods") {
+    FL_SUBCASE("Virtual time query methods") {
         FL_CHECK(mock.getVirtualTime() > 0);  // Should be initialized to non-zero
         uint64_t start_time = mock.getVirtualTime();
 
@@ -538,7 +538,7 @@ TEST_CASE("UartPeripheralMock - Virtual time control") {
         FL_CHECK(mock.getVirtualTime() == start_time + 1500);
     }
 
-    SUBCASE("Multiple transmissions with virtual time") {
+    FL_SUBCASE("Multiple transmissions with virtual time") {
         // First transmission
         uint8_t data1 = 0xAA;
         FL_CHECK(mock.writeBytes(&data1, 1));
@@ -562,7 +562,7 @@ TEST_CASE("UartPeripheralMock - Virtual time control") {
         FL_CHECK(captured[1] == 0x55);
     }
 
-    SUBCASE("waitTxDone() in virtual time mode") {
+    FL_SUBCASE("waitTxDone() in virtual time mode") {
         uint8_t data = 0xA5;
         FL_CHECK(mock.writeBytes(&data, 1));
 

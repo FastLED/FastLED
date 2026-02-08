@@ -5,14 +5,14 @@
 #include "fl/fx/video/pixel_stream.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/fx/video.h"
 #include "fl/stl/shared_ptr.h"
 #include "hsv2rgb.h"
 
-TEST_CASE("ByteStreamMemory basic operations") {
+FL_TEST_CASE("ByteStreamMemory basic operations") {
 
-    SUBCASE("Write and read single byte") {
+    FL_SUBCASE("Write and read single byte") {
         fl::ByteStreamMemory stream(10);  // Stream with 10 bytes capacity
         uint8_t testByte = 42;
         FL_CHECK(stream.write(&testByte, 1) == 1);
@@ -25,7 +25,7 @@ TEST_CASE("ByteStreamMemory basic operations") {
         FL_CHECK(stream.read(&readByte, 1) == 0);
     }
 
-    SUBCASE("Write and read multiple bytes") {
+    FL_SUBCASE("Write and read multiple bytes") {
         fl::ByteStreamMemory stream(10);
         uint8_t testData[] = {1, 2, 3, 4, 5};
         FL_CHECK(stream.write(testData, 5) == 5);
@@ -37,19 +37,19 @@ TEST_CASE("ByteStreamMemory basic operations") {
         }
     }
 
-    SUBCASE("Attempt to read from empty stream") {
+    FL_SUBCASE("Attempt to read from empty stream") {
         fl::ByteStreamMemory stream(10);
         uint8_t readByte = 0;
         FL_CHECK(stream.read(&readByte, 1) == 0);
     }
 
-    SUBCASE("Attempt to write beyond capacity") {
+    FL_SUBCASE("Attempt to write beyond capacity") {
         fl::ByteStreamMemory stream(5);
         uint8_t testData[] = {1, 2, 3, 4, 5, 6};
         FL_CHECK(stream.write(testData, 6) == 5);  // Should write up to capacity
     }
 
-    SUBCASE("Attempt to read more than available data") {
+    FL_SUBCASE("Attempt to read more than available data") {
         fl::ByteStreamMemory stream(10);
         uint8_t testData[] = {1, 2, 3};
         FL_CHECK(stream.write(testData, 3) == 3);
@@ -61,7 +61,7 @@ TEST_CASE("ByteStreamMemory basic operations") {
         //FL_CHECK(readData[2] == 3);
     }
 
-    SUBCASE("Multiple write and read operations") {
+    FL_SUBCASE("Multiple write and read operations") {
         fl::ByteStreamMemory stream(10);
         uint8_t testData1[] = {1, 2, 3};
         uint8_t testData2[] = {4, 5};
@@ -78,7 +78,7 @@ TEST_CASE("ByteStreamMemory basic operations") {
     }
 
 
-    SUBCASE("Write after partial read") {
+    FL_SUBCASE("Write after partial read") {
         fl::ByteStreamMemory stream(10);
         uint8_t testData[] = {1, 2, 3, 4, 5};
         FL_CHECK(stream.write(testData, 5) == 5);
@@ -100,7 +100,7 @@ TEST_CASE("ByteStreamMemory basic operations") {
         FL_CHECK(remainingData[4] == 7);
     }
 
-    SUBCASE("Fill and empty stream multiple times") {
+    FL_SUBCASE("Fill and empty stream multiple times") {
         fl::ByteStreamMemory stream(10);
         uint8_t testData[10];
         for (uint8_t i = 0; i < 10; ++i) {
@@ -123,7 +123,7 @@ TEST_CASE("ByteStreamMemory basic operations") {
         }
     }
 
-    SUBCASE("Zero-length write and read") {
+    FL_SUBCASE("Zero-length write and read") {
         fl::ByteStreamMemory stream(10);
         uint8_t testData[] = {1, 2, 3};
         FL_CHECK(stream.write(testData, 0) == 0);
@@ -132,13 +132,13 @@ TEST_CASE("ByteStreamMemory basic operations") {
         FL_CHECK(stream.read(readData, 0) == 0);
     }
 
-    SUBCASE("Write and read with null pointers") {
+    FL_SUBCASE("Write and read with null pointers") {
         fl::ByteStreamMemory stream(10);
         FL_CHECK(stream.write(static_cast<uint8_t*>(nullptr), 5) == 0);
         FL_CHECK(stream.read(nullptr, 5) == 0);
     }
 
-    SUBCASE("Boundary conditions") {
+    FL_SUBCASE("Boundary conditions") {
         fl::ByteStreamMemory stream(10);
         uint8_t testData[10];
         for (uint8_t i = 0; i < 10; ++i) {
@@ -156,7 +156,7 @@ TEST_CASE("ByteStreamMemory basic operations") {
         FL_CHECK(stream.write(testData, 10) == 10);
     }
 
-    SUBCASE("Write with partial capacity") {
+    FL_SUBCASE("Write with partial capacity") {
         fl::ByteStreamMemory stream(5);
         uint8_t testData[] = {1, 2, 3, 4, 5};
         FL_CHECK(stream.write(testData, 5) == 5);
@@ -177,7 +177,7 @@ TEST_CASE("ByteStreamMemory basic operations") {
         FL_CHECK(readData[1] == 7);
     }
 
-    SUBCASE("Read after buffer is reset") {
+    FL_SUBCASE("Read after buffer is reset") {
         fl::ByteStreamMemory stream(10);
         uint8_t testData[] = {1, 2, 3};
         FL_CHECK(stream.write(testData, 3) == 3);
@@ -188,13 +188,13 @@ TEST_CASE("ByteStreamMemory basic operations") {
         FL_CHECK(stream.read(readData, 3) == 0);  // Should read nothing
     }
 
-    SUBCASE("Write zero bytes when buffer is full") {
+    FL_SUBCASE("Write zero bytes when buffer is full") {
         fl::ByteStreamMemory stream(0);  // Zero capacity
         uint8_t testByte = 42;
         FL_CHECK(stream.write(&testByte, 1) == 0);  // Cannot write to zero-capacity buffer
     }
 
-    SUBCASE("Sequential writes and reads") {
+    FL_SUBCASE("Sequential writes and reads") {
         fl::ByteStreamMemory stream(10);
         for (uint8_t i = 0; i < 10; ++i) {
             FL_CHECK(stream.write(&i, 1) == 1);
@@ -213,7 +213,7 @@ TEST_CASE("ByteStreamMemory basic operations") {
 }
 
 
-TEST_CASE("byte stream memory basic operations") {
+FL_TEST_CASE("byte stream memory basic operations") {
     const int BYTES_PER_FRAME = 3 * 10 * 10; // Assuming a 10x10 RGB video
     
     // Create a ByteStreamMemory

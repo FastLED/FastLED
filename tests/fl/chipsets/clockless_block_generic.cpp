@@ -5,7 +5,7 @@
 // Test that the header compiles and includes are correct
 #include "platforms/shared/clockless_blocking.h"
 
-TEST_SUITE("ClocklessBlockGeneric") {
+FL_TEST_SUITE("ClocklessBlockGeneric") {
 
     // Test WS2812B timing (typical values in nanoseconds)
     // WS2812B protocol uses timing where:
@@ -18,7 +18,7 @@ TEST_SUITE("ClocklessBlockGeneric") {
     //  T2 = T1L = 450ns (one bit low time)
     //  T3 = T0L = 850ns (zero bit low time)
     // Total bit time: T1+T2 = 1250ns
-    TEST_CASE("WS2812B Timing Constants") {
+    FL_TEST_CASE("WS2812B Timing Constants") {
         constexpr int T1_NS = 800;
         constexpr int T2_NS = 450;
         constexpr int T3_NS = 850;
@@ -35,7 +35,7 @@ TEST_SUITE("ClocklessBlockGeneric") {
     //  T2: 900ns
     //  T3: 600ns
     // Total bit time: 1200ns
-    TEST_CASE("SK6812 Timing Constants") {
+    FL_TEST_CASE("SK6812 Timing Constants") {
         constexpr int T1_NS = 300;
         constexpr int T2_NS = 900;
         constexpr int T3_NS = 600;
@@ -47,7 +47,7 @@ TEST_SUITE("ClocklessBlockGeneric") {
         FL_CHECK((T1_NS + T2_NS) > T3_NS);
     }
 
-    TEST_CASE("Controller Compilation") {
+    FL_TEST_CASE("Controller Compilation") {
         // Test that controller can be instantiated with valid template parameters
         // This is a compile-time test - if it compiles, it passes
         //
@@ -61,7 +61,7 @@ TEST_SUITE("ClocklessBlockGeneric") {
         FL_CHECK(true);
     }
 
-    TEST_CASE("Timing Assertions") {
+    FL_TEST_CASE("Timing Assertions") {
         // Test documentation of timing constraints
         // Valid: T1 > 0, T2 > 0, T3 > 0, (T1+T2) > T3
         // This would be: ClocklessBlockController<5, 100, 100, 150>
@@ -76,7 +76,7 @@ TEST_SUITE("ClocklessBlockGeneric") {
         FL_CHECK(true);
     }
 
-    TEST_CASE("Nanosecond Delay Support") {
+    FL_TEST_CASE("Nanosecond Delay Support") {
         // Test that nanosecond delays are properly supported via ::fl::delayNanoseconds
         // The implementation uses ::fl::delayNanoseconds which should work on all platforms
 
@@ -92,7 +92,7 @@ TEST_SUITE("ClocklessBlockGeneric") {
         FL_CHECK(true);
     }
 
-    TEST_CASE("Supported Protocols Documentation") {
+    FL_TEST_CASE("Supported Protocols Documentation") {
         // Document supported LED protocols that can use this controller
         //
         // WS2812B (NeoPixel):
@@ -114,7 +114,7 @@ TEST_SUITE("ClocklessBlockGeneric") {
         FL_CHECK(true);
     }
 
-    TEST_CASE("WS2812 100 LED Bit-Bang Timing Simulation") {
+    FL_TEST_CASE("WS2812 100 LED Bit-Bang Timing Simulation") {
         // Test that we can simulate bit-banging a WS2812 LED strip and verify
         // that it takes longer than 1ms on the stub platform
         //
@@ -203,7 +203,7 @@ TEST_SUITE("ClocklessBlockGeneric") {
         FL_CHECK(elapsed_ms > 1);
     }
 
-    TEST_CASE("SK6812 100 LED Bit-Bang Timing Simulation") {
+    FL_TEST_CASE("SK6812 100 LED Bit-Bang Timing Simulation") {
         // Test SK6812 variant with different timing
         // SK6812 timing (nanoseconds):
         // - T1: 300ns

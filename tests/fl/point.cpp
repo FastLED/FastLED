@@ -4,7 +4,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/ostream.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/exit.h"
 #include "fl/stl/math.h"
 #include "fl/stl/iostream.h"
@@ -23,7 +23,7 @@
     } while (0)
 
 
-TEST_CASE("0 is 0 distance from diagonal line through the center") {
+FL_TEST_CASE("0 is 0 distance from diagonal line through the center") {
     fl::line_xy<float> line(-100, -100, 100, 100);
     fl::vec2<float> p(0, 0);
     fl::vec2<float> projected;
@@ -34,7 +34,7 @@ TEST_CASE("0 is 0 distance from diagonal line through the center") {
 }
 
 
-TEST_CASE("point closest to line") {
+FL_TEST_CASE("point closest to line") {
     fl::line_xy<float> line(-100, -100, 100, 100);
 
     fl::vec2<float> p(50, 0);

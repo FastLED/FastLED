@@ -4,7 +4,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/function.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/hash.h"
 #include "fl/log.h"
 #include "fl/stl/move.h"
@@ -70,7 +70,7 @@ int TrackedObject::destruction_count = 0;
 int TrackedObject::move_construction_count = 0;
 int TrackedObject::copy_construction_count = 0;
 
-TEST_CASE("Variant move semantics and RAII") {
+FL_TEST_CASE("Variant move semantics and RAII") {
     // Test the core issue: moved-from variants should be empty and not destroy moved-from objects
     TrackedObject::reset_counters();
     
@@ -155,7 +155,7 @@ TEST_CASE("Variant move semantics and RAII") {
     }
 }
 
-TEST_CASE("HashMap iterator-based erase") {
+FL_TEST_CASE("HashMap iterator-based erase") {
     fl::hash_map<int, fl::string> map;
     
     // Fill the map with some data
@@ -200,7 +200,7 @@ TEST_CASE("HashMap iterator-based erase") {
 }
 
 // Test the original test cases
-TEST_CASE("Variant tests") {
+FL_TEST_CASE("Variant tests") {
     // 1) Default is empty
     fl::variant<int, fl::string> v;
     FL_REQUIRE(v.empty());
@@ -262,7 +262,7 @@ TEST_CASE("Variant tests") {
 #endif
 }
 
-TEST_CASE("Variant") {
+FL_TEST_CASE("Variant") {
     // 1) Default is empty
     fl::variant<int, fl::string, double> v;
     FL_REQUIRE(v.empty());
@@ -327,7 +327,7 @@ TEST_CASE("Variant") {
 }
 
 
-// TEST_CASE("Optional") {
+// FL_TEST_CASE("Optional") {
 //     Optional<int> opt;
 //     FL_REQUIRE(opt.empty());
 

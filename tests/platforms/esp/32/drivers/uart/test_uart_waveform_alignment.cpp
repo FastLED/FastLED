@@ -4,7 +4,7 @@
 /// This test verifies that the wave8 encoder patterns align correctly
 /// with UART LSB-first transmission and start/stop bit framing.
 
-#include "doctest.h"
+#include "test.h"
 
 #include "platforms/esp/32/drivers/uart/wave8_encoder_uart.h"
 #include "platforms/shared/mock/esp/32/drivers/uart_peripheral_mock.h"
@@ -35,7 +35,7 @@ UartPeripheralConfig createDefaultConfig() {
 
 } // anonymous namespace
 
-TEST_CASE("UART Waveform Alignment - Pattern 0b00") {
+FL_TEST_CASE("UART Waveform Alignment - Pattern 0b00") {
     // Create and configure mock UART
     UartPeripheralMock mock;
     UartPeripheralConfig config = createDefaultConfig();
@@ -76,12 +76,12 @@ TEST_CASE("UART Waveform Alignment - Pattern 0b00") {
     // Full waveform should be: [START(0)][1][0][0][0][1][0][0][0][STOP(1)]
 }
 
-TEST_CASE("UART Waveform Alignment - All patterns") {
+FL_TEST_CASE("UART Waveform Alignment - All patterns") {
     UartPeripheralMock mock;
     UartPeripheralConfig config = createDefaultConfig();
     FL_REQUIRE(mock.initialize(config));
 
-    SUBCASE("Pattern 0b00 → 0x11") {
+    FL_SUBCASE("Pattern 0b00 → 0x11") {
         uint8_t pattern = detail::encodeUart2Bits(0x00);
         FL_REQUIRE(pattern == 0x11);
 
@@ -106,7 +106,7 @@ TEST_CASE("UART Waveform Alignment - All patterns") {
         FL_REQUIRE(waveform[9] == true);   // STOP
     }
 
-    SUBCASE("Pattern 0b01 → 0x19") {
+    FL_SUBCASE("Pattern 0b01 → 0x19") {
         mock.resetCapturedData();
         uint8_t pattern = detail::encodeUart2Bits(0x01);
         FL_REQUIRE(pattern == 0x19);
@@ -132,7 +132,7 @@ TEST_CASE("UART Waveform Alignment - All patterns") {
         FL_REQUIRE(waveform[9] == true);   // STOP
     }
 
-    SUBCASE("Pattern 0b10 → 0x91") {
+    FL_SUBCASE("Pattern 0b10 → 0x91") {
         mock.resetCapturedData();
         uint8_t pattern = detail::encodeUart2Bits(0x02);
         FL_REQUIRE(pattern == 0x91);
@@ -158,7 +158,7 @@ TEST_CASE("UART Waveform Alignment - All patterns") {
         FL_REQUIRE(waveform[9] == true);   // STOP
     }
 
-    SUBCASE("Pattern 0b11 → 0x99") {
+    FL_SUBCASE("Pattern 0b11 → 0x99") {
         mock.resetCapturedData();
         uint8_t pattern = detail::encodeUart2Bits(0x03);
         FL_REQUIRE(pattern == 0x99);
@@ -185,7 +185,7 @@ TEST_CASE("UART Waveform Alignment - All patterns") {
     }
 }
 
-TEST_CASE("UART Waveform - Original patterns (pre-rotation)") {
+FL_TEST_CASE("UART Waveform - Original patterns (pre-rotation)") {
     // This test documents what the ORIGINAL patterns (0x88, 0x8C, 0xC8, 0xCC)
     // would look like when transmitted over UART LSB-first.
     // This helps us understand WHY the rotation was needed.
@@ -194,7 +194,7 @@ TEST_CASE("UART Waveform - Original patterns (pre-rotation)") {
     UartPeripheralConfig config = createDefaultConfig();
     FL_REQUIRE(mock.initialize(config));
 
-    SUBCASE("Original 0x88 (before rotation)") {
+    FL_SUBCASE("Original 0x88 (before rotation)") {
         // 0x88 = 0b10001000 → LSB-first: 0-0-0-1-0-0-0-1
         uint8_t pattern = 0x88;
         mock.writeBytes(&pattern, 1);
@@ -220,7 +220,7 @@ TEST_CASE("UART Waveform - Original patterns (pre-rotation)") {
         FL_REQUIRE(waveform[9] == true);   // STOP
     }
 
-    SUBCASE("Rotated 0x11 (after rotation)") {
+    FL_SUBCASE("Rotated 0x11 (after rotation)") {
         // 0x11 = 0b00010001 → LSB-first: 1-0-0-0-1-0-0-0
         uint8_t pattern = 0x11;
         mock.writeBytes(&pattern, 1);

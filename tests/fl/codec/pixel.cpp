@@ -2,9 +2,9 @@
 #include "fl/codec/pixel.h"
 
 
-TEST_CASE("RGB565 to RGB888 conversion validation") {
+FL_TEST_CASE("RGB565 to RGB888 conversion validation") {
     // This test doesn't need filesystem setup
-        MESSAGE("Validating RGB565 to RGB888 lookup tables against reference implementation");
+        FL_MESSAGE("Validating RGB565 to RGB888 lookup tables against reference implementation");
 
         // Reference function using floating point arithmetic with proper rounding
         auto rgb565ToRgb888_reference = [](fl::u16 rgb565, fl::u8& r, fl::u8& g, fl::u8& b) {
@@ -20,7 +20,7 @@ TEST_CASE("RGB565 to RGB888 conversion validation") {
         };
 
         // Test Red component progression (0,0,0) -> (255,0,0)
-        MESSAGE("Testing Red component progression through all 32 possible values");
+        FL_MESSAGE("Testing Red component progression through all 32 possible values");
         for (int red5 = 0; red5 <= 31; red5++) {
             // Create RGB565 value with only red component
             fl::u16 rgb565 = red5 << 11;  // Red in bits 15-11
@@ -42,10 +42,10 @@ TEST_CASE("RGB565 to RGB888 conversion validation") {
             FL_CHECK_EQ(g_lookup, 0);      // Green should be 0
             FL_CHECK_EQ(b_lookup, 0);      // Blue should be 0
         }
-        MESSAGE("✅ Red component: All 32 values validated against reference");
+        FL_MESSAGE("✅ Red component: All 32 values validated against reference");
 
         // Test Green component progression (0,0,0) -> (0,255,0)
-        MESSAGE("Testing Green component progression through all 64 possible values");
+        FL_MESSAGE("Testing Green component progression through all 64 possible values");
         for (int green6 = 0; green6 <= 63; green6++) {
             // Create RGB565 value with only green component
             fl::u16 rgb565 = green6 << 5;  // Green in bits 10-5
@@ -67,10 +67,10 @@ TEST_CASE("RGB565 to RGB888 conversion validation") {
             FL_CHECK_EQ(r_lookup, 0);      // Red should be 0
             FL_CHECK_EQ(b_lookup, 0);      // Blue should be 0
         }
-        MESSAGE("✅ Green component: All 64 values validated against reference");
+        FL_MESSAGE("✅ Green component: All 64 values validated against reference");
 
         // Test Blue component progression (0,0,0) -> (0,0,255)
-        MESSAGE("Testing Blue component progression through all 32 possible values");
+        FL_MESSAGE("Testing Blue component progression through all 32 possible values");
         for (int blue5 = 0; blue5 <= 31; blue5++) {
             // Create RGB565 value with only blue component
             fl::u16 rgb565 = blue5;  // Blue in bits 4-0
@@ -92,7 +92,7 @@ TEST_CASE("RGB565 to RGB888 conversion validation") {
             FL_CHECK_EQ(r_lookup, 0);      // Red should be 0
             FL_CHECK_EQ(g_lookup, 0);      // Green should be 0
         }
-        MESSAGE("✅ Blue component: All 32 values validated against reference");
+        FL_MESSAGE("✅ Blue component: All 32 values validated against reference");
 
         // Test boundary conditions and random sampling
         fl::u8 r_lookup, g_lookup, b_lookup;
@@ -138,10 +138,10 @@ TEST_CASE("RGB565 to RGB888 conversion validation") {
             FL_CHECK_EQ(b_lookup, b_ref);
         }
 
-    MESSAGE("✅ RGB565 to RGB888 conversion: All tests passed - lookup table validated against reference");
+    FL_MESSAGE("✅ RGB565 to RGB888 conversion: All tests passed - lookup table validated against reference");
 }
 
-TEST_CASE("RGB565 specific color values test") {
+FL_TEST_CASE("RGB565 specific color values test") {
         fl::u8 r, g, b;
 
         // Test pure red (RGB565: 0xF800 = 11111 000000 00000)
@@ -175,7 +175,7 @@ TEST_CASE("RGB565 specific color values test") {
     FL_CHECK_EQ(b, 0);    // 5-bit 0 -> 8-bit 0
 }
 
-TEST_CASE("RGB565 scaling accuracy test") {
+FL_TEST_CASE("RGB565 scaling accuracy test") {
         fl::u8 r, g, b;
 
         // Test mid-range values to verify proper scaling
@@ -188,10 +188,10 @@ TEST_CASE("RGB565 scaling accuracy test") {
         FL_CHECK_EQ(g, 125);  // rgb565_6to8_table[47] = 125
         FL_CHECK_EQ(b, 123);  // rgb565_5to8_table[15] = 123
 
-    MESSAGE("Mid-range test - RGB565: 0x7BEF -> RGB888: (" << (int)r << "," << (int)g << "," << (int)b << ")");
+    FL_MESSAGE("Mid-range test - RGB565: 0x7BEF -> RGB888: (" << (int)r << "," << (int)g << "," << (int)b << ")");
 }
 
-TEST_CASE("RGB565 full range scaling test") {
+FL_TEST_CASE("RGB565 full range scaling test") {
         fl::u8 r, g, b;
 
         // Test that maximum 5-bit value (31) scales to 255
@@ -209,7 +209,7 @@ TEST_CASE("RGB565 full range scaling test") {
     FL_CHECK_EQ(b, 0);
 }
 
-TEST_CASE("RGB565 intermediate values test") {
+FL_TEST_CASE("RGB565 intermediate values test") {
         fl::u8 r, g, b;
 
         // Test some intermediate values to ensure they're not 0 or 255
@@ -224,6 +224,6 @@ TEST_CASE("RGB565 intermediate values test") {
         FL_CHECK(b > 0);
         FL_CHECK(b < 255);
 
-    MESSAGE("Intermediate test - RGB565: " << rgb565
+    FL_MESSAGE("Intermediate test - RGB565: " << rgb565
             << " -> RGB888: (" << (int)r << "," << (int)g << "," << (int)b << ")");
 }

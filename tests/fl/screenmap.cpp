@@ -4,7 +4,7 @@
 
 #include "fl/screenmap.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/geometry.h"
 #include "fl/stl/map.h"
 #include "fl/stl/move.h"
@@ -13,7 +13,7 @@
 using namespace fl;
 using fl::string;
 
-TEST_CASE("ScreenMap basic functionality") {
+FL_TEST_CASE("ScreenMap basic functionality") {
     // Create a screen map for 3 LEDs
     ScreenMap map(3);
     
@@ -42,7 +42,7 @@ TEST_CASE("ScreenMap basic functionality") {
     FL_CHECK(coords.y == 4.0f);
 }
 
-TEST_CASE("ScreenMap JSON parsing") {
+FL_TEST_CASE("ScreenMap JSON parsing") {
     const char* json = R"({
         "map": {
             "strip1": {
@@ -83,7 +83,7 @@ TEST_CASE("ScreenMap JSON parsing") {
     FL_CHECK(strip2[1].y == 45.0f);
 }
 
-TEST_CASE("ScreenMap multiple strips JSON serialization") {
+FL_TEST_CASE("ScreenMap multiple strips JSON serialization") {
     // Create a map with multiple strips
     fl::fl_map<fl::string, ScreenMap> originalMaps;
     
@@ -129,7 +129,7 @@ TEST_CASE("ScreenMap multiple strips JSON serialization") {
     FL_CHECK(deserializedStrip2[2].y == 60.0f);
 }
 
-TEST_CASE("ScreenMap getBounds functionality") {
+FL_TEST_CASE("ScreenMap getBounds functionality") {
     // Create a screen map with points at different coordinates
     ScreenMap map(4);
     map.set(0, {1.0f, 2.0f});

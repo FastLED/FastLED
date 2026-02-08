@@ -12,7 +12,7 @@
 #include "fl/stl/thread.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/vector.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/compiler_control.h"
 #include "fl/int.h"
 #include "fl/stl/allocator.h"
@@ -30,8 +30,8 @@ using namespace fl;
 // SECTION: Tests from str.cpp
 //=============================================================================
 
-TEST_CASE("Str basic operations") {
-    SUBCASE("Construction and assignment") {
+FL_TEST_CASE("Str basic operations") {
+    FL_SUBCASE("Construction and assignment") {
         fl::string s1;
         FL_CHECK(s1.size() == 0);
         FL_CHECK(s1.c_str()[0] == '\0');
@@ -49,7 +49,7 @@ TEST_CASE("Str basic operations") {
         FL_CHECK(fl::strcmp(s1.c_str(), "world") == 0);
     }
 
-    SUBCASE("Comparison operators") {
+    FL_SUBCASE("Comparison operators") {
         fl::string s1("hello");
         fl::string s2("hello");
         fl::string s3("world");
@@ -58,27 +58,27 @@ TEST_CASE("Str basic operations") {
         FL_CHECK(s1 != s3);
     }
 
-    SUBCASE("Indexing") {
+    FL_SUBCASE("Indexing") {
         fl::string s("hello");
         FL_CHECK(s[0] == 'h');
         FL_CHECK(s[4] == 'o');
         FL_CHECK(s[5] == '\0');  // Null terminator
     }
 
-    SUBCASE("Append") {
+    FL_SUBCASE("Append") {
         fl::string s("hello");
         s.append(" world");
         FL_CHECK(s.size() == 11);
         FL_CHECK(fl::strcmp(s.c_str(), "hello world") == 0);
     }
 
-    SUBCASE("CRGB to Str") {
+    FL_SUBCASE("CRGB to Str") {
         CRGB c(255, 0, 0);
         fl::string s = c.toString();
         FL_CHECK_EQ(s, "CRGB(255,0,0)");
     }
 
-    SUBCASE("Copy-on-write behavior") {
+    FL_SUBCASE("Copy-on-write behavior") {
         fl::string s1("hello");
         fl::string s2 = s1;
         s2.append(" world");
@@ -88,7 +88,7 @@ TEST_CASE("Str basic operations") {
 }
 
 
-TEST_CASE("Str::reserve") {
+FL_TEST_CASE("Str::reserve") {
     fl::string s;
     s.reserve(10);
     FL_CHECK(s.size() == 0);
@@ -107,7 +107,7 @@ TEST_CASE("Str::reserve") {
     FL_CHECK_EQ(s, "hello");
 }
 
-TEST_CASE("Str with fl::FixedVector") {
+FL_TEST_CASE("Str with fl::FixedVector") {
     fl::FixedVector<fl::string, 10> vec;
     vec.push_back(fl::string("hello"));
     vec.push_back(fl::string("world"));
@@ -117,7 +117,7 @@ TEST_CASE("Str with fl::FixedVector") {
     FL_CHECK(fl::strcmp(vec[1].c_str(), "world") == 0);
 }
 
-TEST_CASE("Str with long strings") {
+FL_TEST_CASE("Str with long strings") {
     const char* long_string = "This is a very long string that exceeds the inline buffer size and should be allocated on the heap";
     fl::string s(long_string);
     FL_CHECK(s.size() == fl::strlen(long_string));
@@ -131,15 +131,15 @@ TEST_CASE("Str with long strings") {
     FL_CHECK(fl::strcmp(s.c_str(), long_string) == 0);  // Original string should remain unchanged
 }
 
-TEST_CASE("Str overflowing inline data") {
-    SUBCASE("Construction with long string") {
+FL_TEST_CASE("Str overflowing inline data") {
+    FL_SUBCASE("Construction with long string") {
         fl::string long_string(FASTLED_STR_INLINED_SIZE + 10, 'a');  // Create a string longer than the inline buffer
         fl::string s(long_string.c_str());
         FL_CHECK(s.size() == long_string.length());
         FL_CHECK(fl::strcmp(s.c_str(), long_string.c_str()) == 0);
     }
 
-    SUBCASE("Appending to overflow") {
+    FL_SUBCASE("Appending to overflow") {
         fl::string s("Short string");
         fl::string append_string(FASTLED_STR_INLINED_SIZE, 'b');  // String to append that will cause overflow
         s.append(append_string.c_str());
@@ -148,7 +148,7 @@ TEST_CASE("Str overflowing inline data") {
         FL_CHECK(s[s.size() - 1] == 'b');
     }
 
-    SUBCASE("Copy on write with long string") {
+    FL_SUBCASE("Copy on write with long string") {
         fl::string long_string(FASTLED_STR_INLINED_SIZE + 20, 'c');
         fl::string s1(long_string.c_str());
         fl::string s2 = s1;
@@ -163,38 +163,38 @@ TEST_CASE("Str overflowing inline data") {
     }
 }
 
-TEST_CASE("String concatenation operators") {
-    SUBCASE("String literal + fl::to_string") {
+FL_TEST_CASE("String concatenation operators") {
+    FL_SUBCASE("String literal + fl::to_string") {
         // Test the specific case mentioned in the user query
         fl::string val = "string" + fl::to_string(5);
         FL_CHECK(fl::strcmp(val.c_str(), "string5") == 0);
     }
 
-    SUBCASE("fl::to_string + string literal") {
+    FL_SUBCASE("fl::to_string + string literal") {
         fl::string val = fl::to_string(10) + " is a number";
         FL_CHECK(fl::strcmp(val.c_str(), "10 is a number") == 0);
     }
 
-    SUBCASE("String literal + fl::string") {
+    FL_SUBCASE("String literal + fl::string") {
         fl::string str = "world";
         fl::string result = "Hello " + str;
         FL_CHECK(fl::strcmp(result.c_str(), "Hello world") == 0);
     }
 
-    SUBCASE("fl::string + string literal") {
+    FL_SUBCASE("fl::string + string literal") {
         fl::string str = "Hello";
         fl::string result = str + " world";
         FL_CHECK(fl::strcmp(result.c_str(), "Hello world") == 0);
     }
 
-    SUBCASE("fl::string + fl::string") {
+    FL_SUBCASE("fl::string + fl::string") {
         fl::string str1 = "Hello";
         fl::string str2 = "World";
         fl::string result = str1 + " " + str2;
         FL_CHECK(fl::strcmp(result.c_str(), "Hello World") == 0);
     }
 
-    SUBCASE("Complex concatenation") {
+    FL_SUBCASE("Complex concatenation") {
         fl::string result = "Value: " + fl::to_string(42) + " and " + fl::to_string(3.14f);
         // Check that it contains the expected parts rather than exact match
         FL_CHECK(result.find("Value: ") != fl::string::npos);
@@ -203,87 +203,87 @@ TEST_CASE("String concatenation operators") {
         FL_CHECK(result.find("3.14") != fl::string::npos);
     }
 
-    SUBCASE("Number + string literal") {
+    FL_SUBCASE("Number + string literal") {
         fl::string result = fl::to_string(100) + " percent";
         FL_CHECK(fl::strcmp(result.c_str(), "100 percent") == 0);
     }
 
-    SUBCASE("String literal + number") {
+    FL_SUBCASE("String literal + number") {
         fl::string result = "Count: " + fl::to_string(7);
         FL_CHECK(fl::strcmp(result.c_str(), "Count: 7") == 0);
     }
 }
 
-TEST_CASE("String insert operations") {
-    SUBCASE("Insert character at beginning") {
+FL_TEST_CASE("String insert operations") {
+    FL_SUBCASE("Insert character at beginning") {
         fl::string s = "world";
         s.insert(0, 1, 'H');
         FL_CHECK_EQ(s, "Hworld");
         FL_CHECK(s.size() == 6);
     }
 
-    SUBCASE("Insert character in middle") {
+    FL_SUBCASE("Insert character in middle") {
         fl::string s = "helo";
         s.insert(2, 1, 'l');
         FL_CHECK_EQ(s, "hello");
         FL_CHECK(s.size() == 5);
     }
 
-    SUBCASE("Insert character at end") {
+    FL_SUBCASE("Insert character at end") {
         fl::string s = "hello";
         s.insert(5, 1, '!');
         FL_CHECK_EQ(s, "hello!");
         FL_CHECK(s.size() == 6);
     }
 
-    SUBCASE("Insert multiple characters") {
+    FL_SUBCASE("Insert multiple characters") {
         fl::string s = "hello";
         s.insert(5, 3, '!');
         FL_CHECK_EQ(s, "hello!!!");
         FL_CHECK(s.size() == 8);
     }
 
-    SUBCASE("Insert c-string") {
+    FL_SUBCASE("Insert c-string") {
         fl::string s = "hello";
         s.insert(5, " world");
         FL_CHECK_EQ(s, "hello world");
         FL_CHECK(s.size() == 11);
     }
 
-    SUBCASE("Insert c-string at beginning") {
+    FL_SUBCASE("Insert c-string at beginning") {
         fl::string s = "world";
         s.insert(0, "hello ");
         FL_CHECK_EQ(s, "hello world");
     }
 
-    SUBCASE("Insert partial c-string") {
+    FL_SUBCASE("Insert partial c-string") {
         fl::string s = "hello";
         s.insert(5, " wonderful world", 10);
         FL_CHECK_EQ(s, "hello wonderful");
     }
 
-    SUBCASE("Insert fl::string") {
+    FL_SUBCASE("Insert fl::string") {
         fl::string s = "hello";
         fl::string insert_str = " world";
         s.insert(5, insert_str);
         FL_CHECK_EQ(s, "hello world");
     }
 
-    SUBCASE("Insert substring of fl::string") {
+    FL_SUBCASE("Insert substring of fl::string") {
         fl::string s = "hello";
         fl::string insert_str = "the world";
         s.insert(5, insert_str, 3, 6);  // Insert " world"
         FL_CHECK_EQ(s, "hello world");
     }
 
-    SUBCASE("Insert substring with npos") {
+    FL_SUBCASE("Insert substring with npos") {
         fl::string s = "hello";
         fl::string insert_str = "the world";
         s.insert(5, insert_str, 3);  // Insert " world" (to end)
         FL_CHECK_EQ(s, "hello world");
     }
 
-    SUBCASE("Insert causing inline to heap transition") {
+    FL_SUBCASE("Insert causing inline to heap transition") {
         fl::string s = "short";
         // Create a long string that will cause heap allocation
         fl::string long_insert(FASTLED_STR_INLINED_SIZE, 'x');
@@ -293,7 +293,7 @@ TEST_CASE("String insert operations") {
         FL_CHECK(s[5] == 'x');
     }
 
-    SUBCASE("Insert on shared heap data (COW test)") {
+    FL_SUBCASE("Insert on shared heap data (COW test)") {
         // Create a string that uses heap
         fl::string long_str(FASTLED_STR_INLINED_SIZE + 10, 'a');
         fl::string s1 = long_str;
@@ -315,19 +315,19 @@ TEST_CASE("String insert operations") {
         FL_CHECK(s2[7] == 'X');
     }
 
-    SUBCASE("Insert with invalid position clamped") {
+    FL_SUBCASE("Insert with invalid position clamped") {
         fl::string s = "hello";
         s.insert(100, " world");  // Position beyond end
         FL_CHECK_EQ(s, "hello world");  // Should append at end
     }
 
-    SUBCASE("Insert zero characters") {
+    FL_SUBCASE("Insert zero characters") {
         fl::string s = "hello";
         s.insert(2, 0, 'x');
         FL_CHECK_EQ(s, "hello");  // Should remain unchanged
     }
 
-    SUBCASE("Insert empty string") {
+    FL_SUBCASE("Insert empty string") {
         fl::string s = "hello";
         s.insert(2, "");
         FL_CHECK_EQ(s, "hello");  // Should remain unchanged
@@ -337,36 +337,36 @@ TEST_CASE("String insert operations") {
     // They can be re-enabled once better type disambiguation is implemented
 }
 
-TEST_CASE("String erase operations") {
-    SUBCASE("Erase from beginning") {
+FL_TEST_CASE("String erase operations") {
+    FL_SUBCASE("Erase from beginning") {
         fl::string s = "hello world";
         s.erase(0, 6);
         FL_CHECK_EQ(s, "world");
         FL_CHECK(s.size() == 5);
     }
 
-    SUBCASE("Erase from middle") {
+    FL_SUBCASE("Erase from middle") {
         fl::string s = "hello world";
         s.erase(5, 1);  // Remove the space
         FL_CHECK_EQ(s, "helloworld");
         FL_CHECK(s.size() == 10);
     }
 
-    SUBCASE("Erase to end with npos") {
+    FL_SUBCASE("Erase to end with npos") {
         fl::string s = "hello world";
         s.erase(5);  // Erase from position 5 to end (default count=npos)
         FL_CHECK_EQ(s, "hello");
         FL_CHECK(s.size() == 5);
     }
 
-    SUBCASE("Erase to end explicit") {
+    FL_SUBCASE("Erase to end explicit") {
         fl::string s = "hello world";
         s.erase(5, fl::string::npos);
         FL_CHECK_EQ(s, "hello");
         FL_CHECK(s.size() == 5);
     }
 
-    SUBCASE("Erase entire string") {
+    FL_SUBCASE("Erase entire string") {
         fl::string s = "hello";
         s.erase(0);
         FL_CHECK_EQ(s, "");
@@ -374,26 +374,26 @@ TEST_CASE("String erase operations") {
         FL_CHECK(s.empty());
     }
 
-    SUBCASE("Erase with count larger than remaining") {
+    FL_SUBCASE("Erase with count larger than remaining") {
         fl::string s = "hello world";
         s.erase(5, 100);  // Count exceeds string length
         FL_CHECK_EQ(s, "hello");
         FL_CHECK(s.size() == 5);
     }
 
-    SUBCASE("Erase zero characters") {
+    FL_SUBCASE("Erase zero characters") {
         fl::string s = "hello";
         s.erase(2, 0);
         FL_CHECK_EQ(s, "hello");  // Should remain unchanged
     }
 
-    SUBCASE("Erase with invalid position") {
+    FL_SUBCASE("Erase with invalid position") {
         fl::string s = "hello";
         s.erase(100, 5);  // Position beyond end
         FL_CHECK_EQ(s, "hello");  // Should remain unchanged (no-op)
     }
 
-    SUBCASE("Erase on shared heap data (COW test)") {
+    FL_SUBCASE("Erase on shared heap data (COW test)") {
         // Create a string that uses heap
         fl::string long_str(FASTLED_STR_INLINED_SIZE + 20, 'a');
         fl::string s1 = long_str;
@@ -415,14 +415,14 @@ TEST_CASE("String erase operations") {
         }
     }
 
-    SUBCASE("Erase single character at position") {
+    FL_SUBCASE("Erase single character at position") {
         fl::string s = "hello";
         s.erase(1, 1);  // Remove 'e'
         FL_CHECK_EQ(s, "hllo");
         FL_CHECK(s.size() == 4);
     }
 
-    SUBCASE("Iterator-based erase single character") {
+    FL_SUBCASE("Iterator-based erase single character") {
         fl::string s = "hello";
         char* it = s.begin() + 1;  // Point to 'e'
         char* result = s.erase(it);
@@ -432,7 +432,7 @@ TEST_CASE("String erase operations") {
         FL_CHECK(*result == 'l');
     }
 
-    SUBCASE("Iterator-based erase range") {
+    FL_SUBCASE("Iterator-based erase range") {
         fl::string s = "hello world";
         char* first = s.begin() + 5;  // Point to space
         char* last = s.begin() + 11;  // Point to end
@@ -443,7 +443,7 @@ TEST_CASE("String erase operations") {
         FL_CHECK(result == s.end());
     }
 
-    SUBCASE("Iterator-based erase middle range") {
+    FL_SUBCASE("Iterator-based erase middle range") {
         fl::string s = "hello world";
         char* first = s.begin() + 2;  // Point to first 'l'
         char* last = s.begin() + 9;   // Point to second 'l' (end of range is exclusive)
@@ -452,7 +452,7 @@ TEST_CASE("String erase operations") {
         FL_CHECK(s.size() == 4);
     }
 
-    SUBCASE("Iterator-based erase at beginning") {
+    FL_SUBCASE("Iterator-based erase at beginning") {
         fl::string s = "hello";
         char* it = s.begin();
         s.erase(it);
@@ -460,7 +460,7 @@ TEST_CASE("String erase operations") {
         FL_CHECK(s.size() == 4);
     }
 
-    SUBCASE("Iterator-based erase at end-1") {
+    FL_SUBCASE("Iterator-based erase at end-1") {
         fl::string s = "hello";
         char* it = s.end() - 1;  // Point to 'o'
         s.erase(it);
@@ -468,14 +468,14 @@ TEST_CASE("String erase operations") {
         FL_CHECK(s.size() == 4);
     }
 
-    SUBCASE("Erase and verify null termination") {
+    FL_SUBCASE("Erase and verify null termination") {
         fl::string s = "hello world";
         s.erase(5);
         FL_CHECK(s.c_str()[5] == '\0');
         FL_CHECK(fl::strlen(s.c_str()) == s.size());
     }
 
-    SUBCASE("Multiple consecutive erases") {
+    FL_SUBCASE("Multiple consecutive erases") {
         fl::string s = "abcdefgh";
         s.erase(2, 2);  // Remove "cd" -> "abefgh"
         FL_CHECK_EQ(s, "abefgh");
@@ -487,118 +487,118 @@ TEST_CASE("String erase operations") {
     }
 }
 
-TEST_CASE("String replace operations") {
-    SUBCASE("Replace with shorter string") {
+FL_TEST_CASE("String replace operations") {
+    FL_SUBCASE("Replace with shorter string") {
         fl::string s = "hello world";
         s.replace(6, 5, "C++");  // Replace "world" with "C++"
         FL_CHECK_EQ(s, "hello C++");
         FL_CHECK(s.size() == 9);
     }
 
-    SUBCASE("Replace with longer string") {
+    FL_SUBCASE("Replace with longer string") {
         fl::string s = "hello";
         s.replace(0, 5, "goodbye");  // Replace "hello" with "goodbye"
         FL_CHECK_EQ(s, "goodbye");
         FL_CHECK(s.size() == 7);
     }
 
-    SUBCASE("Replace with equal length string") {
+    FL_SUBCASE("Replace with equal length string") {
         fl::string s = "hello world";
         s.replace(6, 5, "there");  // Replace "world" with "there"
         FL_CHECK_EQ(s, "hello there");
         FL_CHECK(s.size() == 11);
     }
 
-    SUBCASE("Replace at beginning") {
+    FL_SUBCASE("Replace at beginning") {
         fl::string s = "hello world";
         s.replace(0, 5, "hi");  // Replace "hello" with "hi"
         FL_CHECK_EQ(s, "hi world");
         FL_CHECK(s.size() == 8);
     }
 
-    SUBCASE("Replace in middle") {
+    FL_SUBCASE("Replace in middle") {
         fl::string s = "hello world";
         s.replace(5, 1, "---");  // Replace space with "---"
         FL_CHECK_EQ(s, "hello---world");
         FL_CHECK(s.size() == 13);
     }
 
-    SUBCASE("Replace to end with npos") {
+    FL_SUBCASE("Replace to end with npos") {
         fl::string s = "hello world";
         s.replace(6, fl::string::npos, "everyone");  // Replace "world" to end
         FL_CHECK_EQ(s, "hello everyone");
         FL_CHECK(s.size() == 14);
     }
 
-    SUBCASE("Replace entire string") {
+    FL_SUBCASE("Replace entire string") {
         fl::string s = "hello";
         s.replace(0, 5, "goodbye world");
         FL_CHECK_EQ(s, "goodbye world");
         FL_CHECK(s.size() == 13);
     }
 
-    SUBCASE("Replace with empty string (delete)") {
+    FL_SUBCASE("Replace with empty string (delete)") {
         fl::string s = "hello world";
         s.replace(5, 6, "");  // Remove " world"
         FL_CHECK_EQ(s, "hello");
         FL_CHECK(s.size() == 5);
     }
 
-    SUBCASE("Replace with c-string") {
+    FL_SUBCASE("Replace with c-string") {
         fl::string s = "hello world";
         s.replace(6, 5, "there");
         FL_CHECK_EQ(s, "hello there");
     }
 
-    SUBCASE("Replace with partial c-string") {
+    FL_SUBCASE("Replace with partial c-string") {
         fl::string s = "hello world";
         s.replace(6, 5, "wonderful place", 9);  // Use first 9 chars
         FL_CHECK_EQ(s, "hello wonderful");
         FL_CHECK(s.size() == 15);
     }
 
-    SUBCASE("Replace with fl::string") {
+    FL_SUBCASE("Replace with fl::string") {
         fl::string s = "hello world";
         fl::string replacement = "everyone";
         s.replace(6, 5, replacement);
         FL_CHECK_EQ(s, "hello everyone");
     }
 
-    SUBCASE("Replace with substring of fl::string") {
+    FL_SUBCASE("Replace with substring of fl::string") {
         fl::string s = "hello world";
         fl::string source = "the wonderful place";
         s.replace(6, 5, source, 4, 9);  // Use "wonderful"
         FL_CHECK_EQ(s, "hello wonderful");
     }
 
-    SUBCASE("Replace with substring using npos") {
+    FL_SUBCASE("Replace with substring using npos") {
         fl::string s = "hello world";
         fl::string source = "the wonderful";
         s.replace(6, 5, source, 4);  // Use "wonderful" to end
         FL_CHECK_EQ(s, "hello wonderful");
     }
 
-    SUBCASE("Replace with repeated character") {
+    FL_SUBCASE("Replace with repeated character") {
         fl::string s = "hello world";
         s.replace(6, 5, 3, '!');  // Replace "world" with "!!!"
         FL_CHECK_EQ(s, "hello !!!");
         FL_CHECK(s.size() == 9);
     }
 
-    SUBCASE("Replace with zero characters") {
+    FL_SUBCASE("Replace with zero characters") {
         fl::string s = "hello world";
         s.replace(6, 5, 0, 'x');  // Replace "world" with nothing
         FL_CHECK_EQ(s, "hello ");
         FL_CHECK(s.size() == 6);
     }
 
-    SUBCASE("Replace with count larger than string") {
+    FL_SUBCASE("Replace with count larger than string") {
         fl::string s = "hello world";
         s.replace(6, 100, "everyone");  // Count exceeds string length
         FL_CHECK_EQ(s, "hello everyone");
     }
 
-    SUBCASE("Replace causing heap growth") {
+    FL_SUBCASE("Replace causing heap growth") {
         fl::string s = "hello";
         // Create a long replacement string
         fl::string long_replacement(FASTLED_STR_INLINED_SIZE, 'x');
@@ -608,7 +608,7 @@ TEST_CASE("String replace operations") {
         FL_CHECK(s[FASTLED_STR_INLINED_SIZE - 1] == 'x');
     }
 
-    SUBCASE("Replace on shared heap data (COW test)") {
+    FL_SUBCASE("Replace on shared heap data (COW test)") {
         // Create a string that uses heap
         fl::string long_str(FASTLED_STR_INLINED_SIZE + 20, 'a');
         fl::string s1 = long_str;
@@ -631,27 +631,27 @@ TEST_CASE("String replace operations") {
         FL_CHECK(s2[8] == 'a');
     }
 
-    SUBCASE("Replace with invalid position") {
+    FL_SUBCASE("Replace with invalid position") {
         fl::string s = "hello world";
         s.replace(100, 5, "test");  // Position beyond end
         FL_CHECK_EQ(s, "hello world");  // Should remain unchanged (no-op)
     }
 
-    SUBCASE("Replace zero count at position") {
+    FL_SUBCASE("Replace zero count at position") {
         fl::string s = "hello world";
         s.replace(5, 0, "XXX");  // Replace nothing, effectively insert
         FL_CHECK_EQ(s, "helloXXX world");
         FL_CHECK(s.size() == 14);
     }
 
-    SUBCASE("Replace and verify null termination") {
+    FL_SUBCASE("Replace and verify null termination") {
         fl::string s = "hello world";
         s.replace(6, 5, "there");
         FL_CHECK(s.c_str()[11] == '\0');
         FL_CHECK(fl::strlen(s.c_str()) == s.size());
     }
 
-    SUBCASE("Multiple consecutive replaces") {
+    FL_SUBCASE("Multiple consecutive replaces") {
         fl::string s = "hello world";
         s.replace(0, 5, "hi");      // "hi world"
         FL_CHECK_EQ(s, "hi world");
@@ -662,35 +662,35 @@ TEST_CASE("String replace operations") {
         FL_CHECK(s.size() == 11);
     }
 
-    SUBCASE("Replace shrinking inline string") {
+    FL_SUBCASE("Replace shrinking inline string") {
         fl::string s = "hello world";
         s.replace(6, 5, "!");  // Replace "world" with "!"
         FL_CHECK_EQ(s, "hello !");
         FL_CHECK(s.size() == 7);
     }
 
-    SUBCASE("Replace growing inline string") {
+    FL_SUBCASE("Replace growing inline string") {
         fl::string s = "hi";
         s.replace(0, 2, "hello world");
         FL_CHECK_EQ(s, "hello world");
         FL_CHECK(s.size() == 11);
     }
 
-    SUBCASE("Replace with same content") {
+    FL_SUBCASE("Replace with same content") {
         fl::string s = "hello world";
         s.replace(0, 5, "hello");
         FL_CHECK_EQ(s, "hello world");
         FL_CHECK(s.size() == 11);
     }
 
-    SUBCASE("Replace at end position") {
+    FL_SUBCASE("Replace at end position") {
         fl::string s = "hello";
         s.replace(5, 0, " world");  // Insert at end
         FL_CHECK_EQ(s, "hello world");
         FL_CHECK(s.size() == 11);
     }
 
-    SUBCASE("Replace with null pointer (should erase)") {
+    FL_SUBCASE("Replace with null pointer (should erase)") {
         fl::string s = "hello world";
         s.replace(6, 5, static_cast<const char*>(nullptr));
         FL_CHECK_EQ(s, "hello ");
@@ -701,8 +701,8 @@ TEST_CASE("String replace operations") {
     // (same as insert/erase iterator variants)
 }
 
-TEST_CASE("String rfind operations") {
-    SUBCASE("rfind character in string") {
+FL_TEST_CASE("String rfind operations") {
+    FL_SUBCASE("rfind character in string") {
         fl::string s = "hello world";
         FL_CHECK(s.rfind('o') == 7);  // Last 'o' in "world"
         FL_CHECK(s.rfind('l') == 9);  // Last 'l' in "world"
@@ -710,7 +710,7 @@ TEST_CASE("String rfind operations") {
         FL_CHECK(s.rfind('x') == fl::string::npos);  // Not found
     }
 
-    SUBCASE("rfind character from specific position") {
+    FL_SUBCASE("rfind character from specific position") {
         fl::string s = "hello world";
         FL_CHECK(s.rfind('o', 10) == 7);  // Search from pos 10, find 'o' at 7
         FL_CHECK(s.rfind('o', 7) == 7);   // Search from pos 7, find 'o' at 7
@@ -720,19 +720,19 @@ TEST_CASE("String rfind operations") {
         FL_CHECK(s.rfind('h', 0) == 0);   // Find 'h' at position 0
     }
 
-    SUBCASE("rfind character with pos beyond string length") {
+    FL_SUBCASE("rfind character with pos beyond string length") {
         fl::string s = "hello";
         FL_CHECK(s.rfind('o', 100) == 4);  // Should search from end
         FL_CHECK(s.rfind('h', 1000) == 0); // Should find 'h' at start
     }
 
-    SUBCASE("rfind character in empty string") {
+    FL_SUBCASE("rfind character in empty string") {
         fl::string s = "";
         FL_CHECK(s.rfind('x') == fl::string::npos);
         FL_CHECK(s.rfind('x', 0) == fl::string::npos);
     }
 
-    SUBCASE("rfind substring") {
+    FL_SUBCASE("rfind substring") {
         fl::string s = "hello world hello";
         FL_CHECK(s.rfind("hello") == 12);  // Last occurrence
         FL_CHECK(s.rfind("world") == 6);   // Only occurrence
@@ -740,7 +740,7 @@ TEST_CASE("String rfind operations") {
         FL_CHECK(s.rfind("xyz") == fl::string::npos);  // Not found
     }
 
-    SUBCASE("rfind substring with position") {
+    FL_SUBCASE("rfind substring with position") {
         fl::string s = "hello world hello";
         FL_CHECK(s.rfind("hello", 15) == 12);  // Find last "hello"
         FL_CHECK(s.rfind("hello", 11) == 0);   // Find first "hello" (search before last one)
@@ -748,7 +748,7 @@ TEST_CASE("String rfind operations") {
         FL_CHECK(s.rfind("world", 5) == fl::string::npos);  // Can't find before position 6
     }
 
-    SUBCASE("rfind with c-string and count") {
+    FL_SUBCASE("rfind with c-string and count") {
         fl::string s = "hello world";
         FL_CHECK(s.rfind("world", fl::string::npos, 5) == 6);  // Full match
         FL_CHECK(s.rfind("world", fl::string::npos, 3) == 6);  // Match "wor"
@@ -756,7 +756,7 @@ TEST_CASE("String rfind operations") {
         FL_CHECK(s.rfind("hello", 10, 3) == 0);  // Match "hel"
     }
 
-    SUBCASE("rfind empty string") {
+    FL_SUBCASE("rfind empty string") {
         fl::string s = "hello";
         FL_CHECK(s.rfind("") == 5);  // Empty string matches at end
         FL_CHECK(s.rfind("", 2) == 2);  // Empty string matches at position
@@ -764,7 +764,7 @@ TEST_CASE("String rfind operations") {
         FL_CHECK(s.rfind("", fl::string::npos, 0) == 5);  // Empty with count=0
     }
 
-    SUBCASE("rfind fl::string") {
+    FL_SUBCASE("rfind fl::string") {
         fl::string s = "hello world hello";
         fl::string pattern1 = "hello";
         fl::string pattern2 = "world";
@@ -775,7 +775,7 @@ TEST_CASE("String rfind operations") {
         FL_CHECK(s.rfind(pattern3) == fl::string::npos);  // Not found
     }
 
-    SUBCASE("rfind fl::string with position") {
+    FL_SUBCASE("rfind fl::string with position") {
         fl::string s = "hello world hello";
         fl::string pattern = "hello";
 
@@ -784,26 +784,26 @@ TEST_CASE("String rfind operations") {
         FL_CHECK(s.rfind(pattern, 5) == 0);    // Before second occurrence
     }
 
-    SUBCASE("rfind at beginning of string") {
+    FL_SUBCASE("rfind at beginning of string") {
         fl::string s = "hello world";
         FL_CHECK(s.rfind("hello") == 0);
         FL_CHECK(s.rfind('h') == 0);
     }
 
-    SUBCASE("rfind at end of string") {
+    FL_SUBCASE("rfind at end of string") {
         fl::string s = "hello world";
         FL_CHECK(s.rfind('d') == 10);
         FL_CHECK(s.rfind("world") == 6);
         FL_CHECK(s.rfind("ld") == 9);
     }
 
-    SUBCASE("rfind single character string") {
+    FL_SUBCASE("rfind single character string") {
         fl::string s = "hello";
         FL_CHECK(s.rfind("o") == 4);
         FL_CHECK(s.rfind("h") == 0);
     }
 
-    SUBCASE("rfind with repeated pattern") {
+    FL_SUBCASE("rfind with repeated pattern") {
         fl::string s = "aaaaaaa";
         FL_CHECK(s.rfind('a') == 6);  // Last 'a'
         FL_CHECK(s.rfind('a', 3) == 3);  // 'a' at position 3
@@ -811,20 +811,20 @@ TEST_CASE("String rfind operations") {
         FL_CHECK(s.rfind("aaa") == 4);  // Last occurrence of "aaa"
     }
 
-    SUBCASE("rfind substring longer than string") {
+    FL_SUBCASE("rfind substring longer than string") {
         fl::string s = "hi";
         FL_CHECK(s.rfind("hello") == fl::string::npos);
         FL_CHECK(s.rfind("hello world") == fl::string::npos);
     }
 
-    SUBCASE("rfind on inline string") {
+    FL_SUBCASE("rfind on inline string") {
         fl::string s = "short";
         FL_CHECK(s.rfind('o') == 2);
         FL_CHECK(s.rfind("ort") == 2);
         FL_CHECK(s.rfind('s') == 0);
     }
 
-    SUBCASE("rfind on heap string") {
+    FL_SUBCASE("rfind on heap string") {
         // Create a string that uses heap allocation
         fl::string s(FASTLED_STR_INLINED_SIZE + 10, 'a');
         s.replace(5, 1, "b");  // Put a 'b' at position 5
@@ -835,14 +835,14 @@ TEST_CASE("String rfind operations") {
         FL_CHECK(s.rfind('a') == s.size() - 1);  // Last 'a'
     }
 
-    SUBCASE("rfind with overlapping matches") {
+    FL_SUBCASE("rfind with overlapping matches") {
         fl::string s = "aaaa";
         FL_CHECK(s.rfind("aa") == 2);  // Last possible match at position 2
         FL_CHECK(s.rfind("aa", 1) == 1);  // Match at position 1
         FL_CHECK(s.rfind("aa", 0) == 0);  // Match at position 0
     }
 
-    SUBCASE("rfind case sensitive") {
+    FL_SUBCASE("rfind case sensitive") {
         fl::string s = "Hello World";
         FL_CHECK(s.rfind('h') == fl::string::npos);  // Lowercase 'h' not found
         FL_CHECK(s.rfind('H') == 0);  // Uppercase 'H' found
@@ -850,14 +850,14 @@ TEST_CASE("String rfind operations") {
         FL_CHECK(s.rfind("Hello") == 0);  // Exact match
     }
 
-    SUBCASE("rfind with null terminator in count") {
+    FL_SUBCASE("rfind with null terminator in count") {
         fl::string s = "hello\0world";  // Contains embedded null
         // Note: string is actually "hello" due to constructor behavior
         FL_CHECK(s.size() == 5);  // Only "hello" is stored
         FL_CHECK(s.rfind("hello") == 0);
     }
 
-    SUBCASE("rfind comparison with find") {
+    FL_SUBCASE("rfind comparison with find") {
         fl::string s = "test";
         // For strings with unique characters, rfind should equal find
         FL_CHECK(s.rfind('t') == 3);  // Last 't'
@@ -868,7 +868,7 @@ TEST_CASE("String rfind operations") {
         FL_CHECK(s2.find('u') == 0);   // First 'u'
     }
 
-    SUBCASE("rfind with position 0") {
+    FL_SUBCASE("rfind with position 0") {
         fl::string s = "hello world";
         FL_CHECK(s.rfind('h', 0) == 0);  // Can find at position 0
         FL_CHECK(s.rfind("hello", 0) == 0);  // Can find at position 0
@@ -876,7 +876,7 @@ TEST_CASE("String rfind operations") {
         FL_CHECK(s.rfind("world", 0) == fl::string::npos);  // "world" is after position 0
     }
 
-    SUBCASE("rfind performance - multiple occurrences") {
+    FL_SUBCASE("rfind performance - multiple occurrences") {
         fl::string s = "the quick brown fox jumps over the lazy dog";
         FL_CHECK(s.rfind("the") == 31);  // Last occurrence of "the" in "the lazy"
         FL_CHECK(s.rfind("the", 30) == 0);  // First occurrence of "the" (before position 31)
@@ -885,15 +885,15 @@ TEST_CASE("String rfind operations") {
     }
 }
 
-TEST_CASE("String find_first_of operations") {
-    SUBCASE("find_first_of with character set") {
+FL_TEST_CASE("String find_first_of operations") {
+    FL_SUBCASE("find_first_of with character set") {
         fl::string s = "hello world";
         FL_CHECK(s.find_first_of("aeiou") == 1);  // 'e' at position 1
         FL_CHECK(s.find_first_of("xyz") == fl::string::npos);  // None found
         FL_CHECK(s.find_first_of("wo") == 4);  // 'o' in "hello" at position 4
     }
 
-    SUBCASE("find_first_of single character") {
+    FL_SUBCASE("find_first_of single character") {
         fl::string s = "hello world";
         FL_CHECK(s.find_first_of('o') == 4);  // First 'o'
         FL_CHECK(s.find_first_of('h') == 0);  // At beginning
@@ -901,7 +901,7 @@ TEST_CASE("String find_first_of operations") {
         FL_CHECK(s.find_first_of('x') == fl::string::npos);  // Not found
     }
 
-    SUBCASE("find_first_of with position offset") {
+    FL_SUBCASE("find_first_of with position offset") {
         fl::string s = "hello world";
         FL_CHECK(s.find_first_of("aeiou", 0) == 1);  // 'e' from start
         FL_CHECK(s.find_first_of("aeiou", 2) == 4);  // 'o' at position 4
@@ -909,38 +909,38 @@ TEST_CASE("String find_first_of operations") {
         FL_CHECK(s.find_first_of("aeiou", 8) == fl::string::npos);  // No vowels after 'o'
     }
 
-    SUBCASE("find_first_of beyond string length") {
+    FL_SUBCASE("find_first_of beyond string length") {
         fl::string s = "hello";
         FL_CHECK(s.find_first_of("aeiou", 100) == fl::string::npos);
         FL_CHECK(s.find_first_of('o', 100) == fl::string::npos);
     }
 
-    SUBCASE("find_first_of in empty string") {
+    FL_SUBCASE("find_first_of in empty string") {
         fl::string s = "";
         FL_CHECK(s.find_first_of("abc") == fl::string::npos);
         FL_CHECK(s.find_first_of('x') == fl::string::npos);
         FL_CHECK(s.find_first_of("") == fl::string::npos);
     }
 
-    SUBCASE("find_first_of with empty set") {
+    FL_SUBCASE("find_first_of with empty set") {
         fl::string s = "hello";
         FL_CHECK(s.find_first_of("") == fl::string::npos);
         FL_CHECK(s.find_first_of("", 0, 0) == fl::string::npos);
     }
 
-    SUBCASE("find_first_of with null pointer") {
+    FL_SUBCASE("find_first_of with null pointer") {
         fl::string s = "hello";
         FL_CHECK(s.find_first_of(static_cast<const char*>(nullptr)) == fl::string::npos);
     }
 
-    SUBCASE("find_first_of with counted string") {
+    FL_SUBCASE("find_first_of with counted string") {
         fl::string s = "hello world";
         FL_CHECK(s.find_first_of("aeiou", 0, 3) == 1);  // Search for "aei", find 'e'
         FL_CHECK(s.find_first_of("xyz", 0, 2) == fl::string::npos);  // Search for "xy"
         FL_CHECK(s.find_first_of("world", 0, 1) == 6);  // Search for "w", found at position 6
     }
 
-    SUBCASE("find_first_of with fl::string") {
+    FL_SUBCASE("find_first_of with fl::string") {
         fl::string s = "hello world";
         fl::string vowels = "aeiou";
         fl::string consonants = "bcdfghjklmnpqrstvwxyz";
@@ -951,7 +951,7 @@ TEST_CASE("String find_first_of operations") {
         FL_CHECK(s.find_first_of(digits) == fl::string::npos);  // No digits
     }
 
-    SUBCASE("find_first_of with fl::string and position") {
+    FL_SUBCASE("find_first_of with fl::string and position") {
         fl::string s = "hello world";
         fl::string vowels = "aeiou";
 
@@ -960,7 +960,7 @@ TEST_CASE("String find_first_of operations") {
         FL_CHECK(s.find_first_of(vowels, 5) == 7);  // 'o' in "world"
     }
 
-    SUBCASE("find_first_of whitespace") {
+    FL_SUBCASE("find_first_of whitespace") {
         fl::string s = "hello world";
         FL_CHECK(s.find_first_of(" \t\n") == 5);  // Space at position 5
 
@@ -968,74 +968,74 @@ TEST_CASE("String find_first_of operations") {
         FL_CHECK(s2.find_first_of(" \t\n") == fl::string::npos);
     }
 
-    SUBCASE("find_first_of digits in mixed string") {
+    FL_SUBCASE("find_first_of digits in mixed string") {
         fl::string s = "abc123def456";
         FL_CHECK(s.find_first_of("0123456789") == 3);  // '1' at position 3
         FL_CHECK(s.find_first_of("0123456789", 4) == 4);  // '2' at position 4
         FL_CHECK(s.find_first_of("0123456789", 6) == 9);  // '4' at position 9
     }
 
-    SUBCASE("find_first_of punctuation") {
+    FL_SUBCASE("find_first_of punctuation") {
         fl::string s = "hello, world!";
         FL_CHECK(s.find_first_of(",.;:!?") == 5);  // ',' at position 5
         FL_CHECK(s.find_first_of(",.;:!?", 6) == 12);  // '!' at position 12
     }
 
-    SUBCASE("find_first_of case sensitive") {
+    FL_SUBCASE("find_first_of case sensitive") {
         fl::string s = "Hello World";
         FL_CHECK(s.find_first_of("h") == fl::string::npos);  // Lowercase 'h' not found
         FL_CHECK(s.find_first_of("H") == 0);  // Uppercase 'H' found
         FL_CHECK(s.find_first_of("hH") == 0);  // Either case, finds 'H'
     }
 
-    SUBCASE("find_first_of with repeated characters in set") {
+    FL_SUBCASE("find_first_of with repeated characters in set") {
         fl::string s = "hello world";
         FL_CHECK(s.find_first_of("ooo") == 4);  // Duplicates in set don't matter
         FL_CHECK(s.find_first_of("llllll") == 2);  // First 'l' at position 2
     }
 
-    SUBCASE("find_first_of all characters match") {
+    FL_SUBCASE("find_first_of all characters match") {
         fl::string s = "aaaa";
         FL_CHECK(s.find_first_of("a") == 0);  // First match at start
         FL_CHECK(s.find_first_of("a", 1) == 1);  // From position 1
         FL_CHECK(s.find_first_of("a", 3) == 3);  // From position 3
     }
 
-    SUBCASE("find_first_of no characters match") {
+    FL_SUBCASE("find_first_of no characters match") {
         fl::string s = "hello";
         FL_CHECK(s.find_first_of("xyz") == fl::string::npos);
         FL_CHECK(s.find_first_of("123") == fl::string::npos);
         FL_CHECK(s.find_first_of("XYZ") == fl::string::npos);
     }
 
-    SUBCASE("find_first_of at string boundaries") {
+    FL_SUBCASE("find_first_of at string boundaries") {
         fl::string s = "hello";
         FL_CHECK(s.find_first_of("h") == 0);  // First character
         FL_CHECK(s.find_first_of("o") == 4);  // Last character
         FL_CHECK(s.find_first_of("ho") == 0);  // Either boundary
     }
 
-    SUBCASE("find_first_of with special characters") {
+    FL_SUBCASE("find_first_of with special characters") {
         fl::string s = "path/to/file.txt";
         FL_CHECK(s.find_first_of("/\\") == 4);  // First '/' or '\'
         FL_CHECK(s.find_first_of(".") == 12);  // First '.'
         FL_CHECK(s.find_first_of("/.", 5) == 7);  // Next '/' or '.' after position 5
     }
 
-    SUBCASE("find_first_of for tokenization") {
+    FL_SUBCASE("find_first_of for tokenization") {
         fl::string s = "word1,word2;word3:word4";
         FL_CHECK(s.find_first_of(",;:") == 5);  // First delimiter ','
         FL_CHECK(s.find_first_of(",;:", 6) == 11);  // Second delimiter ';'
         FL_CHECK(s.find_first_of(",;:", 12) == 17);  // Third delimiter ':'
     }
 
-    SUBCASE("find_first_of on inline string") {
+    FL_SUBCASE("find_first_of on inline string") {
         fl::string s = "short";
         FL_CHECK(s.find_first_of("aeiou") == 2);  // 'o' at position 2
         FL_CHECK(s.find_first_of("xyz") == fl::string::npos);
     }
 
-    SUBCASE("find_first_of on heap string") {
+    FL_SUBCASE("find_first_of on heap string") {
         // Create a string that uses heap allocation
         fl::string s(FASTLED_STR_INLINED_SIZE + 10, 'x');
         s.replace(10, 1, "a");  // Put an 'a' at position 10
@@ -1046,7 +1046,7 @@ TEST_CASE("String find_first_of operations") {
         FL_CHECK(s.find_first_of("ab", 51) == fl::string::npos);  // No more matches
     }
 
-    SUBCASE("find_first_of comparison with find") {
+    FL_SUBCASE("find_first_of comparison with find") {
         fl::string s = "hello world";
         // For single character, find_first_of should equal find
         FL_CHECK(s.find_first_of('o') == s.find('o'));
@@ -1054,7 +1054,7 @@ TEST_CASE("String find_first_of operations") {
         FL_CHECK(s.find_first_of('x') == s.find('x'));
     }
 
-    SUBCASE("find_first_of from each position") {
+    FL_SUBCASE("find_first_of from each position") {
         fl::string s = "abcdef";
         FL_CHECK(s.find_first_of("cf", 0) == 2);  // 'c' at position 2
         FL_CHECK(s.find_first_of("cf", 1) == 2);  // 'c' at position 2
@@ -1065,13 +1065,13 @@ TEST_CASE("String find_first_of operations") {
         FL_CHECK(s.find_first_of("cf", 6) == fl::string::npos);  // Past end
     }
 
-    SUBCASE("find_first_of with entire alphabet") {
+    FL_SUBCASE("find_first_of with entire alphabet") {
         fl::string s = "123 hello";
         fl::string alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         FL_CHECK(s.find_first_of(alphabet) == 4);  // 'h' at position 4
     }
 
-    SUBCASE("find_first_of realistic use case - trimming") {
+    FL_SUBCASE("find_first_of realistic use case - trimming") {
         fl::string s = "   hello";
         FL_CHECK(s.find_first_of("abcdefghijklmnopqrstuvwxyz") == 3);  // First letter at 3
 
@@ -1080,15 +1080,15 @@ TEST_CASE("String find_first_of operations") {
     }
 }
 
-TEST_CASE("String find_last_of operations") {
-    SUBCASE("find_last_of with character set") {
+FL_TEST_CASE("String find_last_of operations") {
+    FL_SUBCASE("find_last_of with character set") {
         fl::string s = "hello world";
         FL_CHECK(s.find_last_of("aeiou") == 7);  // Last vowel 'o' in "world" at position 7
         FL_CHECK(s.find_last_of("xyz") == fl::string::npos);  // None found
         FL_CHECK(s.find_last_of("hl") == 9);  // Last 'l' at position 9
     }
 
-    SUBCASE("find_last_of single character") {
+    FL_SUBCASE("find_last_of single character") {
         fl::string s = "hello world";
         FL_CHECK(s.find_last_of('o') == 7);  // Last 'o' in "world"
         FL_CHECK(s.find_last_of('h') == 0);  // Only 'h' at beginning
@@ -1096,7 +1096,7 @@ TEST_CASE("String find_last_of operations") {
         FL_CHECK(s.find_last_of('x') == fl::string::npos);  // Not found
     }
 
-    SUBCASE("find_last_of with position limit") {
+    FL_SUBCASE("find_last_of with position limit") {
         fl::string s = "hello world";
         FL_CHECK(s.find_last_of("aeiou") == 7);  // Last 'o' from end
         FL_CHECK(s.find_last_of("aeiou", 6) == 4);  // Last 'o' in "hello" at position 4
@@ -1104,37 +1104,37 @@ TEST_CASE("String find_last_of operations") {
         FL_CHECK(s.find_last_of("aeiou", 0) == fl::string::npos);  // No vowels at position 0
     }
 
-    SUBCASE("find_last_of with pos beyond string length") {
+    FL_SUBCASE("find_last_of with pos beyond string length") {
         fl::string s = "hello";
         FL_CHECK(s.find_last_of("aeiou", 100) == 4);  // Should search from end, find 'o'
         FL_CHECK(s.find_last_of('o', 1000) == 4);  // Should find 'o' at position 4
     }
 
-    SUBCASE("find_last_of with pos = npos") {
+    FL_SUBCASE("find_last_of with pos = npos") {
         fl::string s = "hello world";
         FL_CHECK(s.find_last_of("aeiou", fl::string::npos) == 7);  // Search from end
         FL_CHECK(s.find_last_of('l', fl::string::npos) == 9);  // Last 'l'
     }
 
-    SUBCASE("find_last_of in empty string") {
+    FL_SUBCASE("find_last_of in empty string") {
         fl::string s = "";
         FL_CHECK(s.find_last_of("abc") == fl::string::npos);
         FL_CHECK(s.find_last_of('x') == fl::string::npos);
         FL_CHECK(s.find_last_of("") == fl::string::npos);
     }
 
-    SUBCASE("find_last_of with empty set") {
+    FL_SUBCASE("find_last_of with empty set") {
         fl::string s = "hello";
         FL_CHECK(s.find_last_of("") == fl::string::npos);
         FL_CHECK(s.find_last_of("", fl::string::npos, 0) == fl::string::npos);
     }
 
-    SUBCASE("find_last_of with null pointer") {
+    FL_SUBCASE("find_last_of with null pointer") {
         fl::string s = "hello";
         FL_CHECK(s.find_last_of(static_cast<const char*>(nullptr)) == fl::string::npos);
     }
 
-    SUBCASE("find_last_of with counted string") {
+    FL_SUBCASE("find_last_of with counted string") {
         fl::string s = "hello world";
         // With "aeiou" and count=3, search for "aei" (first 3 chars)
         // In "hello world", 'e' at position 1 is the last occurrence of any char from "aei"
@@ -1142,7 +1142,7 @@ TEST_CASE("String find_last_of operations") {
         FL_CHECK(s.find_last_of("world", fl::string::npos, 1) == 6);  // Search for "w", found at position 6
     }
 
-    SUBCASE("find_last_of with fl::string") {
+    FL_SUBCASE("find_last_of with fl::string") {
         fl::string s = "hello world";
         fl::string vowels = "aeiou";
         fl::string consonants = "bcdfghjklmnpqrstvwxyz";
@@ -1153,7 +1153,7 @@ TEST_CASE("String find_last_of operations") {
         FL_CHECK(s.find_last_of(digits) == fl::string::npos);  // No digits
     }
 
-    SUBCASE("find_last_of with fl::string and position") {
+    FL_SUBCASE("find_last_of with fl::string and position") {
         fl::string s = "hello world";
         fl::string vowels = "aeiou";
 
@@ -1162,7 +1162,7 @@ TEST_CASE("String find_last_of operations") {
         FL_CHECK(s.find_last_of(vowels, 3) == 1);  // Last vowel at or before position 3 is 'e' at 1
     }
 
-    SUBCASE("find_last_of whitespace") {
+    FL_SUBCASE("find_last_of whitespace") {
         fl::string s = "hello world test";
         FL_CHECK(s.find_last_of(" \t\n") == 11);  // Last space at position 11
 
@@ -1170,74 +1170,74 @@ TEST_CASE("String find_last_of operations") {
         FL_CHECK(s2.find_last_of(" \t\n") == fl::string::npos);
     }
 
-    SUBCASE("find_last_of digits in mixed string") {
+    FL_SUBCASE("find_last_of digits in mixed string") {
         fl::string s = "abc123def456";
         FL_CHECK(s.find_last_of("0123456789") == 11);  // Last digit '6' at position 11
         FL_CHECK(s.find_last_of("0123456789", 8) == 5);  // Last digit at or before 8 is '3' at position 5
         FL_CHECK(s.find_last_of("0123456789", 2) == fl::string::npos);  // No digits before position 3
     }
 
-    SUBCASE("find_last_of punctuation") {
+    FL_SUBCASE("find_last_of punctuation") {
         fl::string s = "hello, world!";
         FL_CHECK(s.find_last_of(",.;:!?") == 12);  // Last '!' at position 12
         FL_CHECK(s.find_last_of(",.;:!?", 11) == 5);  // ',' at position 5
     }
 
-    SUBCASE("find_last_of case sensitive") {
+    FL_SUBCASE("find_last_of case sensitive") {
         fl::string s = "Hello World";
         FL_CHECK(s.find_last_of("h") == fl::string::npos);  // Lowercase 'h' not found
         FL_CHECK(s.find_last_of("H") == 0);  // Uppercase 'H' found
         FL_CHECK(s.find_last_of("hH") == 0);  // Either case, finds 'H'
     }
 
-    SUBCASE("find_last_of with repeated characters in set") {
+    FL_SUBCASE("find_last_of with repeated characters in set") {
         fl::string s = "hello world";
         FL_CHECK(s.find_last_of("ooo") == 7);  // Duplicates in set don't matter
         FL_CHECK(s.find_last_of("llllll") == 9);  // Last 'l' at position 9
     }
 
-    SUBCASE("find_last_of all characters match") {
+    FL_SUBCASE("find_last_of all characters match") {
         fl::string s = "aaaa";
         FL_CHECK(s.find_last_of("a") == 3);  // Last match at end
         FL_CHECK(s.find_last_of("a", 2) == 2);  // From position 2
         FL_CHECK(s.find_last_of("a", 0) == 0);  // From position 0
     }
 
-    SUBCASE("find_last_of no characters match") {
+    FL_SUBCASE("find_last_of no characters match") {
         fl::string s = "hello";
         FL_CHECK(s.find_last_of("xyz") == fl::string::npos);
         FL_CHECK(s.find_last_of("123") == fl::string::npos);
         FL_CHECK(s.find_last_of("XYZ") == fl::string::npos);
     }
 
-    SUBCASE("find_last_of at string boundaries") {
+    FL_SUBCASE("find_last_of at string boundaries") {
         fl::string s = "hello";
         FL_CHECK(s.find_last_of("h") == 0);  // First character (also last occurrence)
         FL_CHECK(s.find_last_of("o") == 4);  // Last character
         FL_CHECK(s.find_last_of("ho") == 4);  // Last occurrence is 'o'
     }
 
-    SUBCASE("find_last_of with special characters") {
+    FL_SUBCASE("find_last_of with special characters") {
         fl::string s = "path/to/file.txt";
         FL_CHECK(s.find_last_of("/\\") == 7);  // Last '/' at position 7
         FL_CHECK(s.find_last_of(".") == 12);  // Last '.' at position 12
         FL_CHECK(s.find_last_of("/.") == 12);  // Last '/' or '.' is '.' at position 12
     }
 
-    SUBCASE("find_last_of for reverse tokenization") {
+    FL_SUBCASE("find_last_of for reverse tokenization") {
         fl::string s = "word1,word2;word3:word4";
         FL_CHECK(s.find_last_of(",;:") == 17);  // Last delimiter ':' at position 17
         FL_CHECK(s.find_last_of(",;:", 16) == 11);  // Previous delimiter ';' at position 11
         FL_CHECK(s.find_last_of(",;:", 10) == 5);  // First delimiter ',' at position 5
     }
 
-    SUBCASE("find_last_of on inline string") {
+    FL_SUBCASE("find_last_of on inline string") {
         fl::string s = "short";
         FL_CHECK(s.find_last_of("aeiou") == 2);  // Last (and only) vowel 'o' at position 2
         FL_CHECK(s.find_last_of("xyz") == fl::string::npos);
     }
 
-    SUBCASE("find_last_of on heap string") {
+    FL_SUBCASE("find_last_of on heap string") {
         // Create a string that uses heap allocation
         fl::string s(FASTLED_STR_INLINED_SIZE + 10, 'x');
         s.replace(10, 1, "a");  // Put an 'a' at position 10
@@ -1248,7 +1248,7 @@ TEST_CASE("String find_last_of operations") {
         FL_CHECK(s.find_last_of("ab", 9) == fl::string::npos);  // No matches before position 10
     }
 
-    SUBCASE("find_last_of comparison with rfind") {
+    FL_SUBCASE("find_last_of comparison with rfind") {
         fl::string s = "hello world";
         // For single character, find_last_of should equal rfind
         FL_CHECK(s.find_last_of('o') == s.rfind('o'));
@@ -1257,7 +1257,7 @@ TEST_CASE("String find_last_of operations") {
         FL_CHECK(s.find_last_of('x') == s.rfind('x'));
     }
 
-    SUBCASE("find_last_of from each position") {
+    FL_SUBCASE("find_last_of from each position") {
         fl::string s = "abcdef";
         FL_CHECK(s.find_last_of("cf", 5) == 5);  // 'f' at position 5
         FL_CHECK(s.find_last_of("cf", 4) == 2);  // 'c' at position 2
@@ -1267,13 +1267,13 @@ TEST_CASE("String find_last_of operations") {
         FL_CHECK(s.find_last_of("cf", 0) == fl::string::npos);  // No match at position 0
     }
 
-    SUBCASE("find_last_of with entire alphabet") {
+    FL_SUBCASE("find_last_of with entire alphabet") {
         fl::string s = "123 hello 456";
         fl::string alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         FL_CHECK(s.find_last_of(alphabet) == 8);  // Last letter 'o' at position 8
     }
 
-    SUBCASE("find_last_of realistic use case - trailing whitespace") {
+    FL_SUBCASE("find_last_of realistic use case - trailing whitespace") {
         fl::string s = "hello   ";
         FL_CHECK(s.find_last_of("abcdefghijklmnopqrstuvwxyz") == 4);  // Last letter 'o' at position 4
 
@@ -1281,14 +1281,14 @@ TEST_CASE("String find_last_of operations") {
         FL_CHECK(s2.find_last_of("abcdefghijklmnopqrstuvwxyz") == 3);  // Last letter 't' at position 3
     }
 
-    SUBCASE("find_last_of with overlapping character sets") {
+    FL_SUBCASE("find_last_of with overlapping character sets") {
         fl::string s = "hello123world456";
         FL_CHECK(s.find_last_of("0123456789") == 15);  // Last digit '6'
         FL_CHECK(s.find_last_of("abcdefghijklmnopqrstuvwxyz") == 12);  // Last letter 'd'
         FL_CHECK(s.find_last_of("0123456789abcdefghijklmnopqrstuvwxyz") == 15);  // Last alphanumeric
     }
 
-    SUBCASE("find_last_of at position 0") {
+    FL_SUBCASE("find_last_of at position 0") {
         fl::string s = "hello world";
         FL_CHECK(s.find_last_of('h', 0) == 0);  // Can find at position 0
         FL_CHECK(s.find_last_of("h", 0) == 0);  // Can find at position 0
@@ -1296,7 +1296,7 @@ TEST_CASE("String find_last_of operations") {
         FL_CHECK(s.find_last_of("world", 0) == fl::string::npos);  // No characters from "world" at position 0
     }
 
-    SUBCASE("find_last_of with multiple occurrences") {
+    FL_SUBCASE("find_last_of with multiple occurrences") {
         fl::string s = "the quick brown fox jumps over the lazy dog";
         // Positions: "the quick brown fox jumps over the lazy dog"
         //             0123456789...
@@ -1308,28 +1308,28 @@ TEST_CASE("String find_last_of operations") {
         FL_CHECK(s.find_last_of("the") == 33);  // Last 'e' in "the lazy" at position 33
     }
 
-    SUBCASE("find_last_of single character string") {
+    FL_SUBCASE("find_last_of single character string") {
         fl::string s = "hello";
         FL_CHECK(s.find_last_of("o") == 4);
         FL_CHECK(s.find_last_of("h") == 0);
         FL_CHECK(s.find_last_of("l") == 3);
     }
 
-    SUBCASE("find_last_of with repeated pattern") {
+    FL_SUBCASE("find_last_of with repeated pattern") {
         fl::string s = "aaaaaaa";
         FL_CHECK(s.find_last_of('a') == 6);  // Last 'a'
         FL_CHECK(s.find_last_of('a', 3) == 3);  // 'a' at position 3
         FL_CHECK(s.find_last_of('a', 0) == 0);  // 'a' at position 0
     }
 
-    SUBCASE("find_last_of for file extension detection") {
+    FL_SUBCASE("find_last_of for file extension detection") {
         fl::string s = "file.backup.txt";
         FL_CHECK(s.find_last_of(".") == 11);  // Last '.' before extension
         fl::size ext_pos = s.find_last_of(".");
         FL_CHECK(s.substr(ext_pos + 1) == "txt");  // Extract extension
     }
 
-    SUBCASE("find_last_of for path separator") {
+    FL_SUBCASE("find_last_of for path separator") {
         fl::string s = "C:\\path\\to\\file.txt";
         // String is: "C:\path\to\file.txt" - backslashes are interpreted
         // Actually the backslash escapes: C:\p\t\f.txt with special chars
@@ -1338,7 +1338,7 @@ TEST_CASE("String find_last_of operations") {
         FL_CHECK(s.find_last_of("\\/") == 10);  // Last separator at position 10
     }
 
-    SUBCASE("find_last_of comparison find_first_of") {
+    FL_SUBCASE("find_last_of comparison find_first_of") {
         fl::string s = "test string";
         fl::string charset = "st";
         // find_first_of finds first occurrence of any character from set
@@ -1349,22 +1349,22 @@ TEST_CASE("String find_last_of operations") {
     }
 }
 
-TEST_CASE("String find_first_not_of operations") {
-    SUBCASE("find_first_not_of single character") {
+FL_TEST_CASE("String find_first_not_of operations") {
+    FL_SUBCASE("find_first_not_of single character") {
         fl::string s = "aaabbbccc";
         FL_CHECK(s.find_first_not_of('a') == 3);  // First 'b' at position 3
         FL_CHECK(s.find_first_not_of('b') == 0);  // First 'a' at position 0
         FL_CHECK(s.find_first_not_of('x') == 0);  // First char (no match with 'x')
     }
 
-    SUBCASE("find_first_not_of with character set") {
+    FL_SUBCASE("find_first_not_of with character set") {
         fl::string s = "aaabbbccc";
         FL_CHECK(s.find_first_not_of("ab") == 6);  // First 'c' at position 6
         FL_CHECK(s.find_first_not_of("abc") == fl::string::npos);  // All chars are in set
         FL_CHECK(s.find_first_not_of("xyz") == 0);  // First char not in set
     }
 
-    SUBCASE("find_first_not_of for trimming whitespace") {
+    FL_SUBCASE("find_first_not_of for trimming whitespace") {
         fl::string s = "   hello world";
         FL_CHECK(s.find_first_not_of(" ") == 3);  // First non-space at position 3
         FL_CHECK(s.find_first_not_of(" \t\n\r") == 3);  // First non-whitespace
@@ -1373,7 +1373,7 @@ TEST_CASE("String find_first_not_of operations") {
         FL_CHECK(s2.find_first_not_of(" \t\n\r") == 4);  // First non-whitespace at position 4
     }
 
-    SUBCASE("find_first_not_of with position offset") {
+    FL_SUBCASE("find_first_not_of with position offset") {
         fl::string s = "aaabbbccc";
         FL_CHECK(s.find_first_not_of("a", 0) == 3);  // From start, first non-'a'
         FL_CHECK(s.find_first_not_of("a", 3) == 3);  // From position 3, first non-'a' is at 3
@@ -1381,20 +1381,20 @@ TEST_CASE("String find_first_not_of operations") {
         FL_CHECK(s.find_first_not_of("c", 6) == fl::string::npos);  // From position 6, all are 'c'
     }
 
-    SUBCASE("find_first_not_of beyond string length") {
+    FL_SUBCASE("find_first_not_of beyond string length") {
         fl::string s = "hello";
         FL_CHECK(s.find_first_not_of("xyz", 100) == fl::string::npos);
         FL_CHECK(s.find_first_not_of('x', 100) == fl::string::npos);
     }
 
-    SUBCASE("find_first_not_of in empty string") {
+    FL_SUBCASE("find_first_not_of in empty string") {
         fl::string s = "";
         FL_CHECK(s.find_first_not_of("abc") == fl::string::npos);
         FL_CHECK(s.find_first_not_of('x') == fl::string::npos);
         FL_CHECK(s.find_first_not_of("") == fl::string::npos);
     }
 
-    SUBCASE("find_first_not_of with empty set") {
+    FL_SUBCASE("find_first_not_of with empty set") {
         fl::string s = "hello";
         // Empty set means every character is "not in the set"
         FL_CHECK(s.find_first_not_of("") == 0);  // First char
@@ -1402,21 +1402,21 @@ TEST_CASE("String find_first_not_of operations") {
         FL_CHECK(s.find_first_not_of("", 2) == 2);  // From position 2
     }
 
-    SUBCASE("find_first_not_of with null pointer") {
+    FL_SUBCASE("find_first_not_of with null pointer") {
         fl::string s = "hello";
         // Null pointer means every character is "not in the set"
         FL_CHECK(s.find_first_not_of(static_cast<const char*>(nullptr)) == 0);
         FL_CHECK(s.find_first_not_of(static_cast<const char*>(nullptr), 2) == 2);
     }
 
-    SUBCASE("find_first_not_of with counted string") {
+    FL_SUBCASE("find_first_not_of with counted string") {
         fl::string s = "aaabbbccc";
         FL_CHECK(s.find_first_not_of("abc", 0, 2) == 6);  // Search for NOT "ab", find 'c' at position 6
         FL_CHECK(s.find_first_not_of("abc", 0, 1) == 3);  // Search for NOT "a", find 'b' at position 3
         FL_CHECK(s.find_first_not_of("xyz", 0, 2) == 0);  // Search for NOT "xy", find 'a' at position 0
     }
 
-    SUBCASE("find_first_not_of with fl::string") {
+    FL_SUBCASE("find_first_not_of with fl::string") {
         fl::string s = "123abc456";
         fl::string digits = "0123456789";
         fl::string letters = "abcdefghijklmnopqrstuvwxyz";
@@ -1427,7 +1427,7 @@ TEST_CASE("String find_first_not_of operations") {
         FL_CHECK(s.find_first_not_of(punct) == 0);  // First char '1' not punctuation
     }
 
-    SUBCASE("find_first_not_of with fl::string and position") {
+    FL_SUBCASE("find_first_not_of with fl::string and position") {
         fl::string s = "123abc456";
         fl::string digits = "0123456789";
 
@@ -1437,7 +1437,7 @@ TEST_CASE("String find_first_not_of operations") {
         FL_CHECK(s.find_first_not_of(digits, 6) == fl::string::npos);  // All digits from position 6
     }
 
-    SUBCASE("find_first_not_of for parsing digits") {
+    FL_SUBCASE("find_first_not_of for parsing digits") {
         fl::string s = "123abc";
         FL_CHECK(s.find_first_not_of("0123456789") == 3);  // First non-digit 'a'
 
@@ -1445,7 +1445,7 @@ TEST_CASE("String find_first_not_of operations") {
         FL_CHECK(s2.find_first_not_of("0123456789") == fl::string::npos);  // All digits
     }
 
-    SUBCASE("find_first_not_of for alphanumeric detection") {
+    FL_SUBCASE("find_first_not_of for alphanumeric detection") {
         fl::string s = "hello_world";
         FL_CHECK(s.find_first_not_of("abcdefghijklmnopqrstuvwxyz") == 5);  // '_' at position 5
 
@@ -1453,41 +1453,41 @@ TEST_CASE("String find_first_not_of operations") {
         FL_CHECK(s2.find_first_not_of("abcdefghijklmnopqrstuvwxyz0123456789") == fl::string::npos);  // All alphanumeric
     }
 
-    SUBCASE("find_first_not_of case sensitive") {
+    FL_SUBCASE("find_first_not_of case sensitive") {
         fl::string s = "Hello World";
         FL_CHECK(s.find_first_not_of("hello") == 0);  // 'H' not in lowercase set
         FL_CHECK(s.find_first_not_of("HELLO") == 1);  // 'e' not in uppercase set
         FL_CHECK(s.find_first_not_of("HELOelo") == 5);  // Space at position 5
     }
 
-    SUBCASE("find_first_not_of with repeated characters in set") {
+    FL_SUBCASE("find_first_not_of with repeated characters in set") {
         fl::string s = "aaabbbccc";
         FL_CHECK(s.find_first_not_of("aaa") == 3);  // Duplicates don't matter, first non-'a'
         FL_CHECK(s.find_first_not_of("ababab") == 6);  // First non-'a' or 'b' is 'c'
     }
 
-    SUBCASE("find_first_not_of all characters match") {
+    FL_SUBCASE("find_first_not_of all characters match") {
         fl::string s = "aaaa";
         FL_CHECK(s.find_first_not_of("a") == fl::string::npos);  // All are 'a'
         FL_CHECK(s.find_first_not_of("a", 0) == fl::string::npos);
         FL_CHECK(s.find_first_not_of("a", 2) == fl::string::npos);
     }
 
-    SUBCASE("find_first_not_of no characters match") {
+    FL_SUBCASE("find_first_not_of no characters match") {
         fl::string s = "hello";
         FL_CHECK(s.find_first_not_of("xyz") == 0);  // First char not in set
         FL_CHECK(s.find_first_not_of("123") == 0);
         FL_CHECK(s.find_first_not_of("XYZ") == 0);
     }
 
-    SUBCASE("find_first_not_of at string boundaries") {
+    FL_SUBCASE("find_first_not_of at string boundaries") {
         fl::string s = "hello";
         FL_CHECK(s.find_first_not_of("h") == 1);  // First non-'h' is 'e'
         FL_CHECK(s.find_first_not_of("hel") == 4);  // First not 'h','e','l' is 'o' at position 4
         FL_CHECK(s.find_first_not_of("helo") == fl::string::npos);  // All chars are in set
     }
 
-    SUBCASE("find_first_not_of with special characters") {
+    FL_SUBCASE("find_first_not_of with special characters") {
         fl::string s = "///path/to/file";
         FL_CHECK(s.find_first_not_of("/") == 3);  // First non-'/' is 'p' at position 3
 
@@ -1495,7 +1495,7 @@ TEST_CASE("String find_first_not_of operations") {
         FL_CHECK(s2.find_first_not_of(".") == 3);  // First non-'.' is 'f' at position 3
     }
 
-    SUBCASE("find_first_not_of for tokenization") {
+    FL_SUBCASE("find_first_not_of for tokenization") {
         fl::string s = "   word1   word2";
         fl::size first_non_space = s.find_first_not_of(" ");
         FL_CHECK(first_non_space == 3);  // 'w' at position 3
@@ -1507,13 +1507,13 @@ TEST_CASE("String find_first_not_of operations") {
         FL_CHECK(next_word == 11);  // 'w' of "word2"
     }
 
-    SUBCASE("find_first_not_of on inline string") {
+    FL_SUBCASE("find_first_not_of on inline string") {
         fl::string s = "   text";
         FL_CHECK(s.find_first_not_of(" ") == 3);
         FL_CHECK(s.find_first_not_of(" \t") == 3);
     }
 
-    SUBCASE("find_first_not_of on heap string") {
+    FL_SUBCASE("find_first_not_of on heap string") {
         // Create a string that uses heap allocation
         fl::string s(FASTLED_STR_INLINED_SIZE + 10, 'x');
         s.replace(10, 1, "y");  // Put a 'y' at position 10
@@ -1524,7 +1524,7 @@ TEST_CASE("String find_first_not_of operations") {
         FL_CHECK(s.find_first_not_of("xyz") == fl::string::npos);  // All are x, y, or z
     }
 
-    SUBCASE("find_first_not_of from each position") {
+    FL_SUBCASE("find_first_not_of from each position") {
         fl::string s = "aaabbb";
         FL_CHECK(s.find_first_not_of("a", 0) == 3);  // First non-'a' from start
         FL_CHECK(s.find_first_not_of("a", 1) == 3);  // Still position 3
@@ -1534,7 +1534,7 @@ TEST_CASE("String find_first_not_of operations") {
         FL_CHECK(s.find_first_not_of("b", 3) == fl::string::npos);  // All 'b' from position 3
     }
 
-    SUBCASE("find_first_not_of realistic use case - leading whitespace") {
+    FL_SUBCASE("find_first_not_of realistic use case - leading whitespace") {
         fl::string s1 = "   hello";
         FL_CHECK(s1.find_first_not_of(" \t\n\r") == 3);
 
@@ -1548,7 +1548,7 @@ TEST_CASE("String find_first_not_of operations") {
         FL_CHECK(s4.find_first_not_of(" \t\n\r") == fl::string::npos);  // All whitespace
     }
 
-    SUBCASE("find_first_not_of realistic use case - parsing numbers") {
+    FL_SUBCASE("find_first_not_of realistic use case - parsing numbers") {
         fl::string s = "0000123";
         FL_CHECK(s.find_first_not_of("0") == 4);  // First non-zero digit at position 4
 
@@ -1556,7 +1556,7 @@ TEST_CASE("String find_first_not_of operations") {
         FL_CHECK(s2.find_first_not_of("0") == fl::string::npos);  // All zeros
     }
 
-    SUBCASE("find_first_not_of realistic use case - validation") {
+    FL_SUBCASE("find_first_not_of realistic use case - validation") {
         fl::string s1 = "12345";
         FL_CHECK(s1.find_first_not_of("0123456789") == fl::string::npos);  // All digits (valid)
 
@@ -1564,20 +1564,20 @@ TEST_CASE("String find_first_not_of operations") {
         FL_CHECK(s2.find_first_not_of("0123456789") == 3);  // Invalid char 'a' at position 3
     }
 
-    SUBCASE("find_first_not_of with entire alphabet") {
+    FL_SUBCASE("find_first_not_of with entire alphabet") {
         fl::string s = "123abc";
         fl::string alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         FL_CHECK(s.find_first_not_of(alphabet) == 0);  // First non-letter '1' at position 0
         FL_CHECK(s.find_first_not_of(alphabet, 3) == fl::string::npos);  // All letters from position 3
     }
 
-    SUBCASE("find_first_not_of with position at string end") {
+    FL_SUBCASE("find_first_not_of with position at string end") {
         fl::string s = "hello";
         FL_CHECK(s.find_first_not_of("xyz", 5) == fl::string::npos);  // Position at end
         FL_CHECK(s.find_first_not_of("xyz", 4) == 4);  // 'o' not in "xyz"
     }
 
-    SUBCASE("find_first_not_of comparison with find_first_of") {
+    FL_SUBCASE("find_first_not_of comparison with find_first_of") {
         fl::string s = "aaabbbccc";
         // find_first_of finds first char that IS in set
         // find_first_not_of finds first char that is NOT in set
@@ -1585,26 +1585,26 @@ TEST_CASE("String find_first_not_of operations") {
         FL_CHECK(s.find_first_not_of("ab") == 6);  // First non-'a' or 'b' is 'c' at position 6
     }
 
-    SUBCASE("find_first_not_of single character repeated") {
+    FL_SUBCASE("find_first_not_of single character repeated") {
         fl::string s = "aaaaaaa";
         FL_CHECK(s.find_first_not_of('a') == fl::string::npos);  // All 'a'
         FL_CHECK(s.find_first_not_of('b') == 0);  // First char not 'b'
     }
 
-    SUBCASE("find_first_not_of mixed alphanumeric") {
+    FL_SUBCASE("find_first_not_of mixed alphanumeric") {
         fl::string s = "abc123def456";
         FL_CHECK(s.find_first_not_of("abcdefghijklmnopqrstuvwxyz") == 3);  // First digit '1'
         FL_CHECK(s.find_first_not_of("0123456789") == 0);  // First letter 'a'
         FL_CHECK(s.find_first_not_of("abcdefghijklmnopqrstuvwxyz0123456789") == fl::string::npos);  // All alphanumeric
     }
 
-    SUBCASE("find_first_not_of for prefix detection") {
+    FL_SUBCASE("find_first_not_of for prefix detection") {
         fl::string s = "0x1A2B";  // Hex number with prefix
         FL_CHECK(s.find_first_not_of("0") == 1);  // 'x' at position 1
         FL_CHECK(s.find_first_not_of("0x", 0) == 2);  // First non-prefix char '1' at position 2
     }
 
-    SUBCASE("find_first_not_of multiple character types") {
+    FL_SUBCASE("find_first_not_of multiple character types") {
         fl::string s = "!!!hello";
         FL_CHECK(s.find_first_not_of("!") == 3);  // First letter at position 3
 
@@ -1612,21 +1612,21 @@ TEST_CASE("String find_first_not_of operations") {
         FL_CHECK(s2.find_first_not_of("$") == 3);  // First digit at position 3
     }
 
-    SUBCASE("find_first_not_of with zero count") {
+    FL_SUBCASE("find_first_not_of with zero count") {
         fl::string s = "hello";
         // Count 0 means empty set, so every character is "not in the set"
         FL_CHECK(s.find_first_not_of("xyz", 0, 0) == 0);  // First char
         FL_CHECK(s.find_first_not_of("xyz", 2, 0) == 2);  // From position 2
     }
 
-    SUBCASE("find_first_not_of for comment detection") {
+    FL_SUBCASE("find_first_not_of for comment detection") {
         fl::string s = "### This is a comment";
         // String positions: #(0) #(1) #(2) space(3) T(4)...
         FL_CHECK(s.find_first_not_of("#") == 3);  // First non-'#' is space at position 3
         FL_CHECK(s.find_first_not_of("# ") == 4);  // First non-'#' or space is 'T' at position 4
     }
 
-    SUBCASE("find_first_not_of comprehensive trim test") {
+    FL_SUBCASE("find_first_not_of comprehensive trim test") {
         fl::string s1 = "   \t\n  hello world  \t\n   ";
         fl::size start = s1.find_first_not_of(" \t\n\r");
         // String: space(0) space(1) space(2) tab(3) newline(4) space(5) space(6) h(7)
@@ -1636,7 +1636,7 @@ TEST_CASE("String find_first_not_of operations") {
         FL_CHECK(s2.find_first_not_of(" \t\n\r") == 0);  // No trimming needed
     }
 
-    SUBCASE("find_first_not_of versus operator==") {
+    FL_SUBCASE("find_first_not_of versus operator==") {
         fl::string s = "aaa";
         // All characters are 'a', so first not 'a' is npos
         FL_CHECK(s.find_first_not_of("a") == fl::string::npos);
@@ -1647,22 +1647,22 @@ TEST_CASE("String find_first_not_of operations") {
     }
 }
 
-TEST_CASE("String find_last_not_of operations") {
-    SUBCASE("find_last_not_of single character") {
+FL_TEST_CASE("String find_last_not_of operations") {
+    FL_SUBCASE("find_last_not_of single character") {
         fl::string s = "aaabbbccc";
         FL_CHECK(s.find_last_not_of('c') == 5);  // Last 'b' at position 5
         FL_CHECK(s.find_last_not_of('a') == 8);  // Last 'c' at position 8
         FL_CHECK(s.find_last_not_of('x') == 8);  // Last char (no match with 'x')
     }
 
-    SUBCASE("find_last_not_of with character set") {
+    FL_SUBCASE("find_last_not_of with character set") {
         fl::string s = "aaabbbccc";
         FL_CHECK(s.find_last_not_of("bc") == 2);  // Last 'a' at position 2
         FL_CHECK(s.find_last_not_of("abc") == fl::string::npos);  // All chars are in set
         FL_CHECK(s.find_last_not_of("xyz") == 8);  // Last char not in set
     }
 
-    SUBCASE("find_last_not_of for trimming trailing whitespace") {
+    FL_SUBCASE("find_last_not_of for trimming trailing whitespace") {
         fl::string s = "hello world   ";
         FL_CHECK(s.find_last_not_of(" ") == 10);  // Last non-space 'd' at position 10
         FL_CHECK(s.find_last_not_of(" \t\n\r") == 10);  // Last non-whitespace
@@ -1671,7 +1671,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s2.find_last_not_of(" \t\n\r") == 3);  // Last non-whitespace 't' at position 3
     }
 
-    SUBCASE("find_last_not_of with position limit") {
+    FL_SUBCASE("find_last_not_of with position limit") {
         fl::string s = "aaabbbccc";
         FL_CHECK(s.find_last_not_of("c") == 5);  // From end, last non-'c'
         FL_CHECK(s.find_last_not_of("c", 5) == 5);  // From position 5, last non-'c' is at 5
@@ -1679,26 +1679,26 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.find_last_not_of("a", 2) == fl::string::npos);  // From position 2, all are 'a'
     }
 
-    SUBCASE("find_last_not_of with pos beyond string length") {
+    FL_SUBCASE("find_last_not_of with pos beyond string length") {
         fl::string s = "hello";
         FL_CHECK(s.find_last_not_of("xyz", 100) == 4);  // Should search from end, find 'o'
         FL_CHECK(s.find_last_not_of('x', 1000) == 4);  // Should find 'o' at position 4
     }
 
-    SUBCASE("find_last_not_of with pos = npos") {
+    FL_SUBCASE("find_last_not_of with pos = npos") {
         fl::string s = "hello world";
         FL_CHECK(s.find_last_not_of(" ", fl::string::npos) == 10);  // Search from end, last non-space 'd'
         FL_CHECK(s.find_last_not_of('d', fl::string::npos) == 9);  // Last non-'d' is 'l'
     }
 
-    SUBCASE("find_last_not_of in empty string") {
+    FL_SUBCASE("find_last_not_of in empty string") {
         fl::string s = "";
         FL_CHECK(s.find_last_not_of("abc") == fl::string::npos);
         FL_CHECK(s.find_last_not_of('x') == fl::string::npos);
         FL_CHECK(s.find_last_not_of("") == fl::string::npos);
     }
 
-    SUBCASE("find_last_not_of with empty set") {
+    FL_SUBCASE("find_last_not_of with empty set") {
         fl::string s = "hello";
         // Empty set means every character is "not in the set"
         FL_CHECK(s.find_last_not_of("") == 4);  // Last char
@@ -1706,21 +1706,21 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.find_last_not_of("", 2) == 2);  // From position 2
     }
 
-    SUBCASE("find_last_not_of with null pointer") {
+    FL_SUBCASE("find_last_not_of with null pointer") {
         fl::string s = "hello";
         // Null pointer means every character is "not in the set"
         FL_CHECK(s.find_last_not_of(static_cast<const char*>(nullptr)) == 4);
         FL_CHECK(s.find_last_not_of(static_cast<const char*>(nullptr), 2) == 2);
     }
 
-    SUBCASE("find_last_not_of with counted string") {
+    FL_SUBCASE("find_last_not_of with counted string") {
         fl::string s = "aaabbbccc";
         FL_CHECK(s.find_last_not_of("abc", fl::string::npos, 2) == 8);  // Search for NOT "ab", find 'c' at position 8
         FL_CHECK(s.find_last_not_of("abc", fl::string::npos, 1) == 8);  // Search for NOT "a", find 'c' at position 8
         FL_CHECK(s.find_last_not_of("xyz", fl::string::npos, 2) == 8);  // Search for NOT "xy", find last char
     }
 
-    SUBCASE("find_last_not_of with fl::string") {
+    FL_SUBCASE("find_last_not_of with fl::string") {
         fl::string s = "123abc456";
         fl::string digits = "0123456789";
         fl::string letters = "abcdefghijklmnopqrstuvwxyz";
@@ -1731,7 +1731,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.find_last_not_of(punct) == 8);  // Last char not punctuation
     }
 
-    SUBCASE("find_last_not_of with fl::string and position") {
+    FL_SUBCASE("find_last_not_of with fl::string and position") {
         fl::string s = "123abc456";
         fl::string digits = "0123456789";
 
@@ -1741,7 +1741,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.find_last_not_of(digits, 2) == fl::string::npos);  // All digits before and at position 2
     }
 
-    SUBCASE("find_last_not_of for trailing zeros") {
+    FL_SUBCASE("find_last_not_of for trailing zeros") {
         fl::string s = "1230000";
         FL_CHECK(s.find_last_not_of("0") == 2);  // Last non-zero digit '3' at position 2
 
@@ -1749,7 +1749,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s2.find_last_not_of("0") == fl::string::npos);  // All zeros
     }
 
-    SUBCASE("find_last_not_of for validation") {
+    FL_SUBCASE("find_last_not_of for validation") {
         fl::string s1 = "12345";
         FL_CHECK(s1.find_last_not_of("0123456789") == fl::string::npos);  // All digits (valid)
 
@@ -1757,7 +1757,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s2.find_last_not_of("0123456789") == 3);  // Invalid char 'a' at position 3 is last non-digit
     }
 
-    SUBCASE("find_last_not_of case sensitive") {
+    FL_SUBCASE("find_last_not_of case sensitive") {
         fl::string s = "Hello World";
         // String: H(0) e(1) l(2) l(3) o(4) space(5) W(6) o(7) r(8) l(9) d(10)
         FL_CHECK(s.find_last_not_of("world") == 6);  // 'W' not in lowercase set (case sensitive)
@@ -1765,34 +1765,34 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.find_last_not_of("WORLDorld") == 5);  // Space at position 5
     }
 
-    SUBCASE("find_last_not_of with repeated characters in set") {
+    FL_SUBCASE("find_last_not_of with repeated characters in set") {
         fl::string s = "aaabbbccc";
         FL_CHECK(s.find_last_not_of("ccc") == 5);  // Duplicates don't matter, last non-'c'
         FL_CHECK(s.find_last_not_of("bcbcbc") == 2);  // Last non-'b' or 'c' is 'a'
     }
 
-    SUBCASE("find_last_not_of all characters match") {
+    FL_SUBCASE("find_last_not_of all characters match") {
         fl::string s = "aaaa";
         FL_CHECK(s.find_last_not_of("a") == fl::string::npos);  // All are 'a'
         FL_CHECK(s.find_last_not_of("a", 3) == fl::string::npos);
         FL_CHECK(s.find_last_not_of("a", 1) == fl::string::npos);
     }
 
-    SUBCASE("find_last_not_of no characters match") {
+    FL_SUBCASE("find_last_not_of no characters match") {
         fl::string s = "hello";
         FL_CHECK(s.find_last_not_of("xyz") == 4);  // Last char not in set
         FL_CHECK(s.find_last_not_of("123") == 4);
         FL_CHECK(s.find_last_not_of("XYZ") == 4);
     }
 
-    SUBCASE("find_last_not_of at string boundaries") {
+    FL_SUBCASE("find_last_not_of at string boundaries") {
         fl::string s = "hello";
         FL_CHECK(s.find_last_not_of("o") == 3);  // Last non-'o' is 'l'
         FL_CHECK(s.find_last_not_of("elo") == 0);  // Last not 'e','l','o' is 'h' at position 0
         FL_CHECK(s.find_last_not_of("helo") == fl::string::npos);  // All chars are in set
     }
 
-    SUBCASE("find_last_not_of with special characters") {
+    FL_SUBCASE("find_last_not_of with special characters") {
         fl::string s = "path/to/file///";
         FL_CHECK(s.find_last_not_of("/") == 11);  // Last non-'/' is 'e' at position 11
 
@@ -1800,7 +1800,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s2.find_last_not_of(".") == 7);  // Last non-'.' is 't' at position 7
     }
 
-    SUBCASE("find_last_not_of for reverse tokenization") {
+    FL_SUBCASE("find_last_not_of for reverse tokenization") {
         fl::string s = "word1   word2   word3";
         fl::size last_non_space = s.find_last_not_of(" ");
         FL_CHECK(last_non_space == 20);  // '3' at position 20
@@ -1812,13 +1812,13 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(prev_word_end == 12);  // '2' at position 12
     }
 
-    SUBCASE("find_last_not_of on inline string") {
+    FL_SUBCASE("find_last_not_of on inline string") {
         fl::string s = "text   ";
         FL_CHECK(s.find_last_not_of(" ") == 3);
         FL_CHECK(s.find_last_not_of(" \t") == 3);
     }
 
-    SUBCASE("find_last_not_of on heap string") {
+    FL_SUBCASE("find_last_not_of on heap string") {
         // Create a string that uses heap allocation
         fl::string s(FASTLED_STR_INLINED_SIZE + 10, 'x');
         s.replace(10, 1, "y");  // Put a 'y' at position 10
@@ -1829,7 +1829,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.find_last_not_of("xyz") == fl::string::npos);  // All are x, y, or z
     }
 
-    SUBCASE("find_last_not_of from each position") {
+    FL_SUBCASE("find_last_not_of from each position") {
         fl::string s = "aaabbb";
         FL_CHECK(s.find_last_not_of("b", 5) == 2);  // Last non-'b' from position 5 is 'a' at 2
         FL_CHECK(s.find_last_not_of("b", 4) == 2);  // Still position 2
@@ -1838,7 +1838,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.find_last_not_of("a", 2) == fl::string::npos);  // All 'a' from position 2
     }
 
-    SUBCASE("find_last_not_of realistic use case - trailing whitespace") {
+    FL_SUBCASE("find_last_not_of realistic use case - trailing whitespace") {
         fl::string s1 = "hello   ";
         FL_CHECK(s1.find_last_not_of(" \t\n\r") == 4);
 
@@ -1852,7 +1852,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s4.find_last_not_of(" \t\n\r") == fl::string::npos);  // All whitespace
     }
 
-    SUBCASE("find_last_not_of realistic use case - trailing zeros") {
+    FL_SUBCASE("find_last_not_of realistic use case - trailing zeros") {
         fl::string s = "1230000";
         FL_CHECK(s.find_last_not_of("0") == 2);  // Last non-zero digit at position 2
 
@@ -1860,26 +1860,26 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s2.find_last_not_of("0") == fl::string::npos);  // All zeros
     }
 
-    SUBCASE("find_last_not_of realistic use case - file extension") {
+    FL_SUBCASE("find_last_not_of realistic use case - file extension") {
         fl::string s = "file.txt   ";
         fl::size end = s.find_last_not_of(" ");
         FL_CHECK(end == 7);  // Last non-space 't' at position 7
     }
 
-    SUBCASE("find_last_not_of with entire alphabet") {
+    FL_SUBCASE("find_last_not_of with entire alphabet") {
         fl::string s = "abc123";
         fl::string alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         FL_CHECK(s.find_last_not_of(alphabet) == 5);  // Last non-letter '3' at position 5
         FL_CHECK(s.find_last_not_of(alphabet, 2) == fl::string::npos);  // All letters up to position 2
     }
 
-    SUBCASE("find_last_not_of with position at string end") {
+    FL_SUBCASE("find_last_not_of with position at string end") {
         fl::string s = "hello";
         FL_CHECK(s.find_last_not_of("xyz", 4) == 4);  // 'o' not in "xyz"
         FL_CHECK(s.find_last_not_of("o", 4) == 3);  // 'l' at position 3
     }
 
-    SUBCASE("find_last_not_of comparison with find_first_not_of") {
+    FL_SUBCASE("find_last_not_of comparison with find_first_not_of") {
         fl::string s = "aaabbbccc";
         // find_first_not_of finds first char that is NOT in set
         // find_last_not_of finds last char that is NOT in set
@@ -1887,20 +1887,20 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.find_last_not_of("c") == 5);  // Last non-'c' at position 5
     }
 
-    SUBCASE("find_last_not_of single character repeated") {
+    FL_SUBCASE("find_last_not_of single character repeated") {
         fl::string s = "aaaaaaa";
         FL_CHECK(s.find_last_not_of('a') == fl::string::npos);  // All 'a'
         FL_CHECK(s.find_last_not_of('b') == 6);  // Last char not 'b'
     }
 
-    SUBCASE("find_last_not_of mixed alphanumeric") {
+    FL_SUBCASE("find_last_not_of mixed alphanumeric") {
         fl::string s = "abc123def456";
         FL_CHECK(s.find_last_not_of("0123456789") == 8);  // Last letter 'f' at position 8
         FL_CHECK(s.find_last_not_of("abcdefghijklmnopqrstuvwxyz") == 11);  // Last digit '6' at position 11
         FL_CHECK(s.find_last_not_of("abcdefghijklmnopqrstuvwxyz0123456789") == fl::string::npos);  // All alphanumeric
     }
 
-    SUBCASE("find_last_not_of for suffix detection") {
+    FL_SUBCASE("find_last_not_of for suffix detection") {
         fl::string s = "hello!!!";
         FL_CHECK(s.find_last_not_of("!") == 4);  // Last letter 'o' at position 4
 
@@ -1908,7 +1908,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s2.find_last_not_of("$") == 4);  // Last letter 'e' at position 4
     }
 
-    SUBCASE("find_last_not_of multiple character types") {
+    FL_SUBCASE("find_last_not_of multiple character types") {
         fl::string s = "hello!!!";
         FL_CHECK(s.find_last_not_of("!") == 4);  // Last non-'!' at position 4
 
@@ -1916,20 +1916,20 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s2.find_last_not_of("$") == 2);  // Last digit '0' at position 2
     }
 
-    SUBCASE("find_last_not_of with zero count") {
+    FL_SUBCASE("find_last_not_of with zero count") {
         fl::string s = "hello";
         // Count 0 means empty set, so every character is "not in the set"
         FL_CHECK(s.find_last_not_of("xyz", fl::string::npos, 0) == 4);  // Last char
         FL_CHECK(s.find_last_not_of("xyz", 2, 0) == 2);  // From position 2
     }
 
-    SUBCASE("find_last_not_of for comment trailing spaces") {
+    FL_SUBCASE("find_last_not_of for comment trailing spaces") {
         fl::string s = "This is a comment   ";
         FL_CHECK(s.find_last_not_of(" ") == 16);  // Last non-space 't' at position 16
         FL_CHECK(s.find_last_not_of(" \t") == 16);  // Last non-whitespace
     }
 
-    SUBCASE("find_last_not_of comprehensive trim test") {
+    FL_SUBCASE("find_last_not_of comprehensive trim test") {
         fl::string s1 = "   \t\n  hello world  \t\n   ";
         fl::size end = s1.find_last_not_of(" \t\n\r");
         FL_CHECK(end == 17);  // 'd' at position 17
@@ -1938,7 +1938,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s2.find_last_not_of(" \t\n\r") == 4);  // No trimming needed
     }
 
-    SUBCASE("find_last_not_of versus operator==") {
+    FL_SUBCASE("find_last_not_of versus operator==") {
         fl::string s = "aaa";
         // All characters are 'a', so last not 'a' is npos
         FL_CHECK(s.find_last_not_of("a") == fl::string::npos);
@@ -1948,31 +1948,31 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s2.find_last_not_of("a") == 0);  // 'b' at position 0
     }
 
-    SUBCASE("find_last_not_of at position 0") {
+    FL_SUBCASE("find_last_not_of at position 0") {
         fl::string s = "hello world";
         FL_CHECK(s.find_last_not_of('h', 0) == fl::string::npos);  // Can't find non-'h' at position 0
         FL_CHECK(s.find_last_not_of("world", 0) == 0);  // 'h' not in "world"
         FL_CHECK(s.find_last_not_of('e', 0) == 0);  // 'h' at position 0 is not 'e'
     }
 
-    SUBCASE("find_last_not_of with overlapping character sets") {
+    FL_SUBCASE("find_last_not_of with overlapping character sets") {
         fl::string s = "hello123world456";
         FL_CHECK(s.find_last_not_of("0123456789") == 12);  // Last letter 'd'
         FL_CHECK(s.find_last_not_of("abcdefghijklmnopqrstuvwxyz") == 15);  // Last digit '6'
         FL_CHECK(s.find_last_not_of("0123456789abcdefghijklmnopqrstuvwxyz") == fl::string::npos);  // All alphanumeric
     }
 
-    SUBCASE("find_last_not_of for line ending detection") {
+    FL_SUBCASE("find_last_not_of for line ending detection") {
         fl::string s = "line of text\n\r\n";
         FL_CHECK(s.find_last_not_of("\n\r") == 11);  // Last non-line-ending 't' at position 11
     }
 
-    SUBCASE("find_last_not_of path trailing separators") {
+    FL_SUBCASE("find_last_not_of path trailing separators") {
         fl::string s = "path/to/dir///";
         FL_CHECK(s.find_last_not_of("/") == 10);  // Last non-'/' is 'r' at position 10
     }
 
-    SUBCASE("find_last_not_of comparison with rfind") {
+    FL_SUBCASE("find_last_not_of comparison with rfind") {
         fl::string s = "hello world";
         // For strings without the target character, behavior differs:
         // rfind('x') returns npos (not found)
@@ -1981,14 +1981,14 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.find_last_not_of('x') == 10);  // Last char not 'x' is 'd' at position 10
     }
 
-    SUBCASE("find_last_not_of with position exactly at boundary") {
+    FL_SUBCASE("find_last_not_of with position exactly at boundary") {
         fl::string s = "aaabbbccc";
         FL_CHECK(s.find_last_not_of("c", 5) == 5);  // Position 5 is 'b', which is not 'c'
         FL_CHECK(s.find_last_not_of("b", 5) == 2);  // From position 5, last non-'b' is 'a' at 2
         FL_CHECK(s.find_last_not_of("a", 2) == fl::string::npos);  // Positions 0-2 are all 'a'
     }
 
-    SUBCASE("find_last_not_of for data validation - trailing invalid chars") {
+    FL_SUBCASE("find_last_not_of for data validation - trailing invalid chars") {
         fl::string s = "12345xyz";
         FL_CHECK(s.find_last_not_of("0123456789") == 7);  // Last non-digit 'z' at position 7
 
@@ -1996,7 +1996,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s2.find_last_not_of("0123456789") == fl::string::npos);  // All digits (valid)
     }
 
-    SUBCASE("find_last_not_of empty string with various sets") {
+    FL_SUBCASE("find_last_not_of empty string with various sets") {
         fl::string s = "";
         FL_CHECK(s.find_last_not_of("abc") == fl::string::npos);
         FL_CHECK(s.find_last_not_of("") == fl::string::npos);
@@ -2004,7 +2004,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.find_last_not_of('a') == fl::string::npos);
     }
 
-    SUBCASE("find_last_not_of single character string") {
+    FL_SUBCASE("find_last_not_of single character string") {
         fl::string s = "x";
         FL_CHECK(s.find_last_not_of('x') == fl::string::npos);  // Only char is 'x'
         FL_CHECK(s.find_last_not_of('y') == 0);  // Only char 'x' is not 'y'
@@ -2012,7 +2012,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.find_last_not_of("yz") == 0);  // 'x' not in set
     }
 
-    SUBCASE("find_last_not_of realistic trim implementation") {
+    FL_SUBCASE("find_last_not_of realistic trim implementation") {
         fl::string s = "   hello world   ";
         fl::size start = s.find_first_not_of(" \t\n\r");
         fl::size end = s.find_last_not_of(" \t\n\r");
@@ -2027,7 +2027,7 @@ TEST_CASE("String find_last_not_of operations") {
     }
 
     // at() tests - bounds-checked element access (fl::string compatibility)
-    SUBCASE("at() basic access") {
+    FL_SUBCASE("at() basic access") {
         fl::string s = "Hello";
         FL_CHECK(s.at(0) == 'H');
         FL_CHECK(s.at(1) == 'e');
@@ -2036,7 +2036,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.at(4) == 'o');
     }
 
-    SUBCASE("at() const access") {
+    FL_SUBCASE("at() const access") {
         const fl::string s = "World";
         FL_CHECK(s.at(0) == 'W');
         FL_CHECK(s.at(1) == 'o');
@@ -2045,14 +2045,14 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.at(4) == 'd');
     }
 
-    SUBCASE("at() modification") {
+    FL_SUBCASE("at() modification") {
         fl::string s = "Hello";
         s.at(0) = 'h';
         s.at(4) = '!';
         FL_CHECK(s == "hell!");
     }
 
-    SUBCASE("at() out of bounds") {
+    FL_SUBCASE("at() out of bounds") {
         fl::string s = "test";
         // Out of bounds access returns dummy '\0'
         // (unlike fl::string which would throw exception)
@@ -2061,33 +2061,33 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.at(100) == '\0');  // far out of bounds
     }
 
-    SUBCASE("at() const out of bounds") {
+    FL_SUBCASE("at() const out of bounds") {
         const fl::string s = "test";
         FL_CHECK(s.at(4) == '\0');
         FL_CHECK(s.at(5) == '\0');
         FL_CHECK(s.at(100) == '\0');
     }
 
-    SUBCASE("at() empty string") {
+    FL_SUBCASE("at() empty string") {
         fl::string s;
         FL_CHECK(s.at(0) == '\0');
         FL_CHECK(s.at(1) == '\0');
     }
 
-    SUBCASE("at() single character") {
+    FL_SUBCASE("at() single character") {
         fl::string s = "A";
         FL_CHECK(s.at(0) == 'A');
         FL_CHECK(s.at(1) == '\0');  // out of bounds
     }
 
-    SUBCASE("at() first and last") {
+    FL_SUBCASE("at() first and last") {
         fl::string s = "ABCDEF";
         FL_CHECK(s.at(0) == 'A');  // first
         FL_CHECK(s.at(5) == 'F');  // last
         FL_CHECK(s.at(6) == '\0');  // past end
     }
 
-    SUBCASE("at() vs operator[]") {
+    FL_SUBCASE("at() vs operator[]") {
         fl::string s = "compare";
         // Both should behave the same for fl::string
         for (fl::size i = 0; i < s.size(); ++i) {
@@ -2097,14 +2097,14 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.at(s.size()) == s[s.size()]);
     }
 
-    SUBCASE("at() modification at boundaries") {
+    FL_SUBCASE("at() modification at boundaries") {
         fl::string s = "test";
         s.at(0) = 'T';  // first
         s.at(3) = 'T';  // last
         FL_CHECK(s == "TesT");
     }
 
-    SUBCASE("at() with inline string") {
+    FL_SUBCASE("at() with inline string") {
         fl::string s = "short";  // inline buffer
         FL_CHECK(s.at(0) == 's');
         FL_CHECK(s.at(4) == 't');
@@ -2112,7 +2112,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s == "shxrt");
     }
 
-    SUBCASE("at() with heap string") {
+    FL_SUBCASE("at() with heap string") {
         // Create a string that will use heap storage
         fl::string s;
         for (int i = 0; i < 100; ++i) {
@@ -2125,14 +2125,14 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.at(50) == 'X');
     }
 
-    SUBCASE("at() sequential access") {
+    FL_SUBCASE("at() sequential access") {
         fl::string s = "0123456789";
         for (fl::size i = 0; i < 10; ++i) {
             FL_CHECK(s.at(i) == '0' + i);
         }
     }
 
-    SUBCASE("at() modify all characters") {
+    FL_SUBCASE("at() modify all characters") {
         fl::string s = "aaaaa";
         for (fl::size i = 0; i < s.size(); ++i) {
             s.at(i) = 'a' + i;
@@ -2140,7 +2140,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s == "abcde");
     }
 
-    SUBCASE("at() with special characters") {
+    FL_SUBCASE("at() with special characters") {
         fl::string s = "!@#$%";
         FL_CHECK(s.at(0) == '!');
         FL_CHECK(s.at(1) == '@');
@@ -2149,14 +2149,14 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.at(4) == '%');
     }
 
-    SUBCASE("at() with numbers") {
+    FL_SUBCASE("at() with numbers") {
         fl::string s = "0123456789";
         for (fl::size i = 0; i < 10; ++i) {
             FL_CHECK(s.at(i) == ('0' + i));
         }
     }
 
-    SUBCASE("at() case sensitivity") {
+    FL_SUBCASE("at() case sensitivity") {
         fl::string s = "AaBbCc";
         FL_CHECK(s.at(0) == 'A');
         FL_CHECK(s.at(1) == 'a');
@@ -2166,7 +2166,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.at(5) == 'c');
     }
 
-    SUBCASE("at() with spaces") {
+    FL_SUBCASE("at() with spaces") {
         fl::string s = "a b c";
         FL_CHECK(s.at(0) == 'a');
         FL_CHECK(s.at(1) == ' ');
@@ -2175,7 +2175,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.at(4) == 'c');
     }
 
-    SUBCASE("at() with newlines and tabs") {
+    FL_SUBCASE("at() with newlines and tabs") {
         fl::string s = "a\nb\tc";
         FL_CHECK(s.at(0) == 'a');
         FL_CHECK(s.at(1) == '\n');
@@ -2184,13 +2184,13 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.at(4) == 'c');
     }
 
-    SUBCASE("at() after clear") {
+    FL_SUBCASE("at() after clear") {
         fl::string s = "test";
         s.clear();
         FL_CHECK(s.at(0) == '\0');
     }
 
-    SUBCASE("at() after erase") {
+    FL_SUBCASE("at() after erase") {
         fl::string s = "testing";
         s.erase(3, 4);  // "tes"
         FL_CHECK(s.at(0) == 't');
@@ -2199,7 +2199,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.at(3) == '\0');  // now out of bounds
     }
 
-    SUBCASE("at() after insert") {
+    FL_SUBCASE("at() after insert") {
         fl::string s = "test";
         s.insert(2, "XX");  // "teXXst"
         FL_CHECK(s.at(0) == 't');
@@ -2210,7 +2210,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.at(5) == 't');
     }
 
-    SUBCASE("at() after replace") {
+    FL_SUBCASE("at() after replace") {
         fl::string s = "Hello";
         s.replace(1, 3, "i");  // "Hio"
         FL_CHECK(s.at(0) == 'H');
@@ -2219,20 +2219,20 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.at(3) == '\0');
     }
 
-    SUBCASE("at() with repeated characters") {
+    FL_SUBCASE("at() with repeated characters") {
         fl::string s = "aaaaaaaaaa";
         for (fl::size i = 0; i < s.size(); ++i) {
             FL_CHECK(s.at(i) == 'a');
         }
     }
 
-    SUBCASE("at() boundary at length - 1") {
+    FL_SUBCASE("at() boundary at length - 1") {
         fl::string s = "test";
         FL_CHECK(s.at(s.size() - 1) == 't');  // last valid character
         FL_CHECK(s.at(s.size()) == '\0');  // first invalid position
     }
 
-    SUBCASE("at() return reference test") {
+    FL_SUBCASE("at() return reference test") {
         fl::string s = "test";
         char& ref = s.at(0);
         ref = 'T';
@@ -2240,34 +2240,34 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.at(0) == 'T');
     }
 
-    SUBCASE("at() const reference test") {
+    FL_SUBCASE("at() const reference test") {
         const fl::string s = "test";
         const char& ref = s.at(0);
         FL_CHECK(ref == 't');
         FL_CHECK(&ref == &s.at(0));  // same memory location
     }
 
-    SUBCASE("at() with zero position") {
+    FL_SUBCASE("at() with zero position") {
         fl::string s = "test";
         FL_CHECK(s.at(0) == 't');
         s.at(0) = 'T';
         FL_CHECK(s.at(0) == 'T');
     }
 
-    SUBCASE("at() comparison with front/back") {
+    FL_SUBCASE("at() comparison with front/back") {
         fl::string s = "test";
         FL_CHECK(s.at(0) == s.front());
         FL_CHECK(s.at(s.size() - 1) == s.back());
     }
 
-    SUBCASE("at() with substring result") {
+    FL_SUBCASE("at() with substring result") {
         fl::string s = "Hello World";
         fl::string sub = s.substr(6, 5);  // "World"
         FL_CHECK(sub.at(0) == 'W');
         FL_CHECK(sub.at(4) == 'd');
     }
 
-    SUBCASE("at() access pattern") {
+    FL_SUBCASE("at() access pattern") {
         fl::string s = "pattern";
         // Access in different order
         FL_CHECK(s.at(3) == 't');
@@ -2277,7 +2277,7 @@ TEST_CASE("String find_last_not_of operations") {
         FL_CHECK(s.at(5) == 'r');
     }
 
-    SUBCASE("at() large index out of bounds") {
+    FL_SUBCASE("at() large index out of bounds") {
         fl::string s = "small";
         FL_CHECK(s.at(1000) == '\0');
         FL_CHECK(s.at(fl::size(-1) / 2) == '\0');  // very large index
@@ -2285,8 +2285,8 @@ TEST_CASE("String find_last_not_of operations") {
 }
 
 // Test reverse iterators (fl::string compatibility)
-TEST_CASE("StrN reverse iterators") {
-    SUBCASE("rbegin/rend on non-empty string") {
+FL_TEST_CASE("StrN reverse iterators") {
+    FL_SUBCASE("rbegin/rend on non-empty string") {
         fl::string s = "Hello";
         // rbegin() should point to last character
         FL_CHECK(s.rbegin() != nullptr);
@@ -2303,13 +2303,13 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(it == s.rend() + 1);
     }
 
-    SUBCASE("rbegin/rend on empty string") {
+    FL_SUBCASE("rbegin/rend on empty string") {
         fl::string s = "";
         FL_CHECK(s.rbegin() == nullptr);
         FL_CHECK(s.rend() == nullptr);
     }
 
-    SUBCASE("const rbegin/rend") {
+    FL_SUBCASE("const rbegin/rend") {
         const fl::string s = "World";
         FL_CHECK(s.rbegin() != nullptr);
         FL_CHECK(*s.rbegin() == 'd');
@@ -2323,7 +2323,7 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(it == s.rend() + 1);
     }
 
-    SUBCASE("crbegin/crend") {
+    FL_SUBCASE("crbegin/crend") {
         fl::string s = "Test";
         // crbegin/crend should return const iterators
         const char* crit = s.crbegin();
@@ -2337,14 +2337,14 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(crit == s.crend() + 1);
     }
 
-    SUBCASE("reverse iteration with single character") {
+    FL_SUBCASE("reverse iteration with single character") {
         fl::string s = "X";
         FL_CHECK(s.rbegin() != nullptr);
         FL_CHECK(*s.rbegin() == 'X');
         FL_CHECK(s.rbegin() == s.rend() + 1);  // One element: rbegin is one past rend
     }
 
-    SUBCASE("reverse iteration builds reversed string") {
+    FL_SUBCASE("reverse iteration builds reversed string") {
         fl::string s = "ABC";
         fl::string reversed;
 
@@ -2354,7 +2354,7 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(reversed == "CBA");
     }
 
-    SUBCASE("const reverse iteration") {
+    FL_SUBCASE("const reverse iteration") {
         const fl::string s = "12345";
         fl::string result;
 
@@ -2364,7 +2364,7 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(result == "54321");
     }
 
-    SUBCASE("modification through reverse iterator") {
+    FL_SUBCASE("modification through reverse iterator") {
         fl::string s = "abcd";
         char* it = s.rbegin();
         *it = 'D';  // Change 'd' to 'D'
@@ -2375,7 +2375,7 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(s == "abCD");
     }
 
-    SUBCASE("reverse iterator with inline string") {
+    FL_SUBCASE("reverse iterator with inline string") {
         fl::string s = "Short";  // Fits in inline buffer
         FL_CHECK(s.rbegin() != nullptr);
         FL_CHECK(*s.rbegin() == 't');
@@ -2387,7 +2387,7 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(reversed == "trohS");
     }
 
-    SUBCASE("reverse iterator with heap string") {
+    FL_SUBCASE("reverse iterator with heap string") {
         // Create a string large enough to require heap allocation
         fl::string s;
         for (int i = 0; i < 100; ++i) {
@@ -2404,7 +2404,7 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(*it == 'T');        // i=97: 97%26=19
     }
 
-    SUBCASE("reverse iterator after modification") {
+    FL_SUBCASE("reverse iterator after modification") {
         fl::string s = "test";
         s.insert(2, "XX");  // "teXXst"
 
@@ -2415,7 +2415,7 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(reversed == "tsXXet");
     }
 
-    SUBCASE("reverse iterator matches forward") {
+    FL_SUBCASE("reverse iterator matches forward") {
         fl::string s = "abcdef";
 
         // Forward iteration
@@ -2434,7 +2434,7 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(reversed == "fedcba");
     }
 
-    SUBCASE("reverse iterator with special characters") {
+    FL_SUBCASE("reverse iterator with special characters") {
         fl::string s = "!@#$%";
         FL_CHECK(*s.rbegin() == '%');
 
@@ -2445,7 +2445,7 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(reversed == "%$#@!");
     }
 
-    SUBCASE("reverse iterator with digits") {
+    FL_SUBCASE("reverse iterator with digits") {
         fl::string s = "0123456789";
         FL_CHECK(*s.rbegin() == '9');
 
@@ -2456,7 +2456,7 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(reversed == "9876543210");
     }
 
-    SUBCASE("reverse iterator with whitespace") {
+    FL_SUBCASE("reverse iterator with whitespace") {
         fl::string s = "a b c";
         fl::string reversed;
         for (char* it = s.rbegin(); it != s.rend(); --it) {
@@ -2465,7 +2465,7 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(reversed == "c b a");
     }
 
-    SUBCASE("reverse iterator pointer arithmetic") {
+    FL_SUBCASE("reverse iterator pointer arithmetic") {
         fl::string s = "12345";
         char* last = s.rbegin();
         char* first_minus_one = s.rend();
@@ -2475,7 +2475,7 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(last - first_minus_one == static_cast<long>(s.size()));
     }
 
-    SUBCASE("const correctness of reverse iterators") {
+    FL_SUBCASE("const correctness of reverse iterators") {
         fl::string s = "test";
         const fl::string& cs = s;
 
@@ -2492,7 +2492,7 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(ccit != nullptr);
     }
 
-    SUBCASE("reverse iterator bounds checking") {
+    FL_SUBCASE("reverse iterator bounds checking") {
         fl::string s = "ABC";
         char* it = s.rbegin();
 
@@ -2506,7 +2506,7 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(it == s.rend());
     }
 
-    SUBCASE("reverse iterator with copy-on-write") {
+    FL_SUBCASE("reverse iterator with copy-on-write") {
         fl::string s1 = "shared";
         fl::string s2 = s1;  // COW: shares data
 
@@ -2520,14 +2520,14 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(s2 == "shared");  // s2 unchanged
     }
 
-    SUBCASE("reverse iterator comparison with at()") {
+    FL_SUBCASE("reverse iterator comparison with at()") {
         fl::string s = "test";
         FL_CHECK(*s.rbegin() == s.at(s.size() - 1));
         FL_CHECK(*(s.rbegin() - 1) == s.at(s.size() - 2));
         FL_CHECK(*(s.rbegin() - 2) == s.at(s.size() - 3));
     }
 
-    SUBCASE("reverse iterator with substr") {
+    FL_SUBCASE("reverse iterator with substr") {
         fl::string s = "Hello World";
         fl::string sub = s.substr(6, 5);  // "World"
 
@@ -2538,14 +2538,14 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(reversed == "dlroW");
     }
 
-    SUBCASE("reverse iterator empty after clear") {
+    FL_SUBCASE("reverse iterator empty after clear") {
         fl::string s = "test";
         s.clear();
         FL_CHECK(s.rbegin() == nullptr);
         FL_CHECK(s.rend() == nullptr);
     }
 
-    SUBCASE("reverse iterator with repeated characters") {
+    FL_SUBCASE("reverse iterator with repeated characters") {
         fl::string s = "aaaaaa";
         int count = 0;
         for (char* it = s.rbegin(); it != s.rend(); --it) {
@@ -2555,13 +2555,13 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(count == 6);
     }
 
-    SUBCASE("reverse iterator comparison with back()") {
+    FL_SUBCASE("reverse iterator comparison with back()") {
         fl::string s = "example";
         FL_CHECK(*s.rbegin() == s.back());
         FL_CHECK(s.rbegin() == s.begin() + s.size() - 1);
     }
 
-    SUBCASE("reverse iterator manual loop count") {
+    FL_SUBCASE("reverse iterator manual loop count") {
         fl::string s = "count";
         int iterations = 0;
         for (char* it = s.rbegin(); it != s.rend(); --it) {
@@ -2570,7 +2570,7 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(iterations == static_cast<int>(s.size()));
     }
 
-    SUBCASE("reverse iterator with newlines") {
+    FL_SUBCASE("reverse iterator with newlines") {
         fl::string s = "a\nb\nc";
         fl::string reversed;
         for (char* it = s.rbegin(); it != s.rend(); --it) {
@@ -2579,7 +2579,7 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(reversed == "c\nb\na");
     }
 
-    SUBCASE("reverse iterator palindrome check") {
+    FL_SUBCASE("reverse iterator palindrome check") {
         fl::string s = "racecar";
 
         // Check if palindrome using reverse iteration
@@ -2598,7 +2598,7 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(is_palindrome == true);
     }
 
-    SUBCASE("reverse iterator not palindrome") {
+    FL_SUBCASE("reverse iterator not palindrome") {
         fl::string s = "hello";
 
         char* fwd = s.begin();
@@ -2616,7 +2616,7 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(is_palindrome == false);
     }
 
-    SUBCASE("reverse iterator null terminator not included") {
+    FL_SUBCASE("reverse iterator null terminator not included") {
         fl::string s = "test";
         // Reverse iterators should not include null terminator
         int count = 0;
@@ -2626,7 +2626,7 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(count == 4);  // Only actual characters, not '\0'
     }
 
-    SUBCASE("reverse iterator after erase") {
+    FL_SUBCASE("reverse iterator after erase") {
         fl::string s = "testing";
         s.erase(3, 3);  // Remove "tin" -> "tesg"
 
@@ -2637,7 +2637,7 @@ TEST_CASE("StrN reverse iterators") {
         FL_CHECK(reversed == "gset");
     }
 
-    SUBCASE("reverse iterator after replace") {
+    FL_SUBCASE("reverse iterator after replace") {
         fl::string s = "test";
         s.replace(1, 2, "XX");  // "tXXt"
 
@@ -2649,25 +2649,25 @@ TEST_CASE("StrN reverse iterators") {
     }
 }
 
-TEST_CASE("String compare operations") {
+FL_TEST_CASE("String compare operations") {
     // compare() returns <0 if this<other, 0 if equal, >0 if this>other
     // Like strcmp, provides three-way comparison for lexicographical ordering
 
-    SUBCASE("compare with equal strings") {
+    FL_SUBCASE("compare with equal strings") {
         fl::string s1 = "hello";
         fl::string s2 = "hello";
         FL_CHECK(s1.compare(s2) == 0);
         FL_CHECK(s2.compare(s1) == 0);
     }
 
-    SUBCASE("compare with different strings") {
+    FL_SUBCASE("compare with different strings") {
         fl::string s1 = "abc";
         fl::string s2 = "def";
         FL_CHECK(s1.compare(s2) < 0);  // "abc" < "def"
         FL_CHECK(s2.compare(s1) > 0);  // "def" > "abc"
     }
 
-    SUBCASE("compare empty strings") {
+    FL_SUBCASE("compare empty strings") {
         fl::string s1 = "";
         fl::string s2 = "";
         FL_CHECK(s1.compare(s2) == 0);
@@ -2677,14 +2677,14 @@ TEST_CASE("String compare operations") {
         FL_CHECK(s3.compare(s1) > 0);  // Non-empty > empty
     }
 
-    SUBCASE("compare with C-string") {
+    FL_SUBCASE("compare with C-string") {
         fl::string s = "hello";
         FL_CHECK(s.compare("hello") == 0);
         FL_CHECK(s.compare("world") < 0);  // "hello" < "world"
         FL_CHECK(s.compare("abc") > 0);    // "hello" > "abc"
     }
 
-    SUBCASE("compare with null C-string") {
+    FL_SUBCASE("compare with null C-string") {
         fl::string s = "hello";
         FL_CHECK(s.compare(nullptr) > 0);  // Non-empty > null
 
@@ -2692,21 +2692,21 @@ TEST_CASE("String compare operations") {
         FL_CHECK(empty.compare(nullptr) == 0);  // Empty == null
     }
 
-    SUBCASE("compare prefix strings") {
+    FL_SUBCASE("compare prefix strings") {
         fl::string s1 = "hello";
         fl::string s2 = "hello world";
         FL_CHECK(s1.compare(s2) < 0);  // Shorter prefix < longer
         FL_CHECK(s2.compare(s1) > 0);  // Longer > shorter prefix
     }
 
-    SUBCASE("compare case sensitivity") {
+    FL_SUBCASE("compare case sensitivity") {
         fl::string s1 = "Hello";
         fl::string s2 = "hello";
         FL_CHECK(s1.compare(s2) < 0);  // 'H' (72) < 'h' (104)
         FL_CHECK(s2.compare(s1) > 0);
     }
 
-    SUBCASE("compare substring with another string") {
+    FL_SUBCASE("compare substring with another string") {
         fl::string s1 = "hello world";
         fl::string s2 = "world";
         // Compare substring [6, 11) with "world"
@@ -2716,28 +2716,28 @@ TEST_CASE("String compare operations") {
         FL_CHECK(s1.compare(0, 5, s2) < 0);  // "hello" < "world"
     }
 
-    SUBCASE("compare substring with npos count") {
+    FL_SUBCASE("compare substring with npos count") {
         fl::string s = "hello world";
         fl::string s2 = "world";
         // npos means "until end of string"
         FL_CHECK(s.compare(6, fl::string::npos, s2) == 0);
     }
 
-    SUBCASE("compare substring exceeding length") {
+    FL_SUBCASE("compare substring exceeding length") {
         fl::string s = "hello";
         fl::string s2 = "hello world";
         // Compare all of s with s2 (count is limited to available chars)
         FL_CHECK(s.compare(0, 100, s2) < 0);  // "hello" < "hello world"
     }
 
-    SUBCASE("compare substring with C-string") {
+    FL_SUBCASE("compare substring with C-string") {
         fl::string s = "hello world";
         FL_CHECK(s.compare(0, 5, "hello") == 0);
         FL_CHECK(s.compare(6, 5, "world") == 0);
         FL_CHECK(s.compare(0, 5, "world") < 0);  // "hello" < "world"
     }
 
-    SUBCASE("compare substring with substring") {
+    FL_SUBCASE("compare substring with substring") {
         fl::string s1 = "prefix_data_suffix";
         fl::string s2 = "other_data_end";
         // Compare "data" from s1 with "data" from s2
@@ -2747,14 +2747,14 @@ TEST_CASE("String compare operations") {
         FL_CHECK(s1.compare(0, 6, s2, 0, 5) > 0);  // "prefix" > "other"
     }
 
-    SUBCASE("compare substring with npos in second string") {
+    FL_SUBCASE("compare substring with npos in second string") {
         fl::string s1 = "hello_world";
         fl::string s2 = "world_is_beautiful";
         // Compare "world" from s1 with "world_is_beautiful" from s2
         FL_CHECK(s1.compare(6, 5, s2, 0, fl::string::npos) < 0);  // "world" < "world_is_beautiful"
     }
 
-    SUBCASE("compare out of bounds position") {
+    FL_SUBCASE("compare out of bounds position") {
         fl::string s1 = "hello";
         fl::string s2 = "world";
         // Out of bounds position returns comparison with empty string
@@ -2762,7 +2762,7 @@ TEST_CASE("String compare operations") {
         FL_CHECK(s2.compare(100, 5, "") == 0);  // "" == ""
     }
 
-    SUBCASE("compare with count2 for C-string") {
+    FL_SUBCASE("compare with count2 for C-string") {
         fl::string s = "hello";
         // Compare with first 3 chars of "hello world"
         FL_CHECK(s.compare(0, 3, "hello world", 3) == 0);  // "hel" == "hel"
@@ -2774,7 +2774,7 @@ TEST_CASE("String compare operations") {
         FL_CHECK(s.compare(0, 5, "hello world", 11) < 0);  // "hello" < "hello world"
     }
 
-    SUBCASE("compare substring length mismatch") {
+    FL_SUBCASE("compare substring length mismatch") {
         fl::string s1 = "testing";
         fl::string s2 = "test";
         // When actual compared portions are equal but lengths differ, shorter is "less"
@@ -2782,7 +2782,7 @@ TEST_CASE("String compare operations") {
         FL_CHECK(s1.compare(0, 7, s2, 0, 4) > 0);   // "testing" > "test"
     }
 
-    SUBCASE("compare with zero count") {
+    FL_SUBCASE("compare with zero count") {
         fl::string s1 = "hello";
         fl::string s2 = "world";
         // Zero count means comparing empty strings
@@ -2790,7 +2790,7 @@ TEST_CASE("String compare operations") {
         FL_CHECK(s1.compare(2, 0, s2, 3, 0) == 0);  // "" == ""
     }
 
-    SUBCASE("compare for sorting") {
+    FL_SUBCASE("compare for sorting") {
         fl::string s1 = "apple";
         fl::string s2 = "banana";
         fl::string s3 = "cherry";
@@ -2803,7 +2803,7 @@ TEST_CASE("String compare operations") {
         FL_CHECK((s1.compare(s2) < 0 && s2.compare(s3) < 0) == (s1.compare(s3) < 0));
     }
 
-    SUBCASE("compare with special characters") {
+    FL_SUBCASE("compare with special characters") {
         fl::string s1 = "hello!";
         fl::string s2 = "hello?";
         FL_CHECK(s1.compare(s2) < 0);  // '!' (33) < '?' (63)
@@ -2813,7 +2813,7 @@ TEST_CASE("String compare operations") {
         FL_CHECK(s3.compare(s4) > 0);  // '\n' (10) > '\t' (9), so s3 > s4
     }
 
-    SUBCASE("compare numbers as strings") {
+    FL_SUBCASE("compare numbers as strings") {
         fl::string s1 = "10";
         fl::string s2 = "9";
         // Lexicographical: '1' < '9', so "10" < "9"
@@ -2824,14 +2824,14 @@ TEST_CASE("String compare operations") {
         FL_CHECK(s3.compare(s4) < 0);  // '1' < '9'
     }
 
-    SUBCASE("compare position at string boundary") {
+    FL_SUBCASE("compare position at string boundary") {
         fl::string s = "hello";
         // Position at length() is valid (points to empty substring)
         FL_CHECK(s.compare(5, 0, "") == 0);
         FL_CHECK(s.compare(5, 0, "x") < 0);  // "" < "x"
     }
 
-    SUBCASE("compare entire string via substring") {
+    FL_SUBCASE("compare entire string via substring") {
         fl::string s1 = "hello world";
         fl::string s2 = "hello world";
         // These should be equivalent
@@ -2839,7 +2839,7 @@ TEST_CASE("String compare operations") {
         FL_CHECK(s1.compare(s2) == s1.compare(0, s1.length(), s2, 0, s2.length()));
     }
 
-    SUBCASE("compare after string modifications") {
+    FL_SUBCASE("compare after string modifications") {
         fl::string s1 = "hello";
         fl::string s2 = "hello";
         FL_CHECK(s1.compare(s2) == 0);
@@ -2851,7 +2851,7 @@ TEST_CASE("String compare operations") {
         FL_CHECK(s1.compare(s2) < 0);  // "" < "hello"
     }
 
-    SUBCASE("compare consistency with equality operators") {
+    FL_SUBCASE("compare consistency with equality operators") {
         fl::string s1 = "test";
         fl::string s2 = "test";
         fl::string s3 = "other";
@@ -2864,7 +2864,7 @@ TEST_CASE("String compare operations") {
         FL_CHECK((s1.compare(s3) != 0) == (s1 != s3));
     }
 
-    SUBCASE("compare with repeated characters") {
+    FL_SUBCASE("compare with repeated characters") {
         fl::string s1 = "aaaa";
         fl::string s2 = "aaab";
         FL_CHECK(s1.compare(s2) < 0);  // Last char: 'a' < 'b'
@@ -2873,14 +2873,14 @@ TEST_CASE("String compare operations") {
         FL_CHECK(s1.compare(s3) > 0);  // "aaaa" > "aaa"
     }
 
-    SUBCASE("compare middle substrings") {
+    FL_SUBCASE("compare middle substrings") {
         fl::string s = "the quick brown fox jumps";
         FL_CHECK(s.compare(4, 5, "quick") == 0);
         FL_CHECK(s.compare(10, 5, "brown") == 0);
         FL_CHECK(s.compare(20, 5, "jumps") == 0);
     }
 
-    SUBCASE("compare overlapping substrings of same string") {
+    FL_SUBCASE("compare overlapping substrings of same string") {
         fl::string s = "abcdefgh";
         // Compare "abc" with "def"
         FL_CHECK(s.compare(0, 3, s, 3, 3) < 0);  // "abc" < "def"
@@ -2890,8 +2890,8 @@ TEST_CASE("String compare operations") {
     }
 }
 
-TEST_CASE("StrN comparison operators") {
-    SUBCASE("operator< basic comparison") {
+FL_TEST_CASE("StrN comparison operators") {
+    FL_SUBCASE("operator< basic comparison") {
         fl::StrN<32> s1 = "abc";
         fl::StrN<32> s2 = "def";
         fl::StrN<32> s3 = "abc";
@@ -2901,7 +2901,7 @@ TEST_CASE("StrN comparison operators") {
         FL_CHECK_FALSE(s1 < s3); // NOT "abc" < "abc" (equal)
     }
 
-    SUBCASE("operator> basic comparison") {
+    FL_SUBCASE("operator> basic comparison") {
         fl::StrN<32> s1 = "abc";
         fl::StrN<32> s2 = "def";
         fl::StrN<32> s3 = "abc";
@@ -2911,7 +2911,7 @@ TEST_CASE("StrN comparison operators") {
         FL_CHECK_FALSE(s1 > s3); // NOT "abc" > "abc" (equal)
     }
 
-    SUBCASE("operator<= basic comparison") {
+    FL_SUBCASE("operator<= basic comparison") {
         fl::StrN<32> s1 = "abc";
         fl::StrN<32> s2 = "def";
         fl::StrN<32> s3 = "abc";
@@ -2921,7 +2921,7 @@ TEST_CASE("StrN comparison operators") {
         FL_CHECK_FALSE(s2 <= s1); // NOT "def" <= "abc"
     }
 
-    SUBCASE("operator>= basic comparison") {
+    FL_SUBCASE("operator>= basic comparison") {
         fl::StrN<32> s1 = "abc";
         fl::StrN<32> s2 = "def";
         fl::StrN<32> s3 = "abc";
@@ -2931,7 +2931,7 @@ TEST_CASE("StrN comparison operators") {
         FL_CHECK_FALSE(s1 >= s2); // NOT "abc" >= "def"
     }
 
-    SUBCASE("comparison with different template sizes") {
+    FL_SUBCASE("comparison with different template sizes") {
         fl::StrN<32> s1 = "abc";
         fl::StrN<64> s2 = "def";
         fl::StrN<128> s3 = "abc";
@@ -2957,7 +2957,7 @@ TEST_CASE("StrN comparison operators") {
         FL_CHECK_FALSE(s1 >= s2); // NOT "abc" >= "def"
     }
 
-    SUBCASE("comparison with empty strings") {
+    FL_SUBCASE("comparison with empty strings") {
         fl::StrN<32> empty1 = "";
         fl::StrN<32> empty2 = "";
         fl::StrN<32> nonempty = "abc";
@@ -2981,7 +2981,7 @@ TEST_CASE("StrN comparison operators") {
         FL_CHECK(nonempty >= empty1);     // "abc" >= ""
     }
 
-    SUBCASE("comparison with prefix strings") {
+    FL_SUBCASE("comparison with prefix strings") {
         fl::StrN<32> s1 = "abc";
         fl::StrN<32> s2 = "abcd";
 
@@ -2996,7 +2996,7 @@ TEST_CASE("StrN comparison operators") {
         FL_CHECK(s2 >= s1);      // "abcd" >= "abc"
     }
 
-    SUBCASE("case sensitivity") {
+    FL_SUBCASE("case sensitivity") {
         fl::StrN<32> lower = "abc";
         fl::StrN<32> upper = "ABC";
 
@@ -3007,7 +3007,7 @@ TEST_CASE("StrN comparison operators") {
         FL_CHECK_FALSE(upper >= lower); // NOT "ABC" >= "abc"
     }
 
-    SUBCASE("lexicographical ordering for sorting") {
+    FL_SUBCASE("lexicographical ordering for sorting") {
         fl::StrN<32> s1 = "apple";
         fl::StrN<32> s2 = "banana";
         fl::StrN<32> s3 = "cherry";
@@ -3033,7 +3033,7 @@ TEST_CASE("StrN comparison operators") {
         FL_CHECK(s3 >= s1);
     }
 
-    SUBCASE("comparison with special characters") {
+    FL_SUBCASE("comparison with special characters") {
         fl::StrN<32> s1 = "abc!";
         fl::StrN<32> s2 = "abc@";
         fl::StrN<32> s3 = "abc#";
@@ -3048,7 +3048,7 @@ TEST_CASE("StrN comparison operators") {
         FL_CHECK(s2 > s1);       // "abc@" > "abc!"
     }
 
-    SUBCASE("comparison with number strings") {
+    FL_SUBCASE("comparison with number strings") {
         fl::StrN<32> s1 = "10";
         fl::StrN<32> s2 = "2";
         fl::StrN<32> s3 = "100";
@@ -3061,7 +3061,7 @@ TEST_CASE("StrN comparison operators") {
         FL_CHECK(s2 > s3);       // "2" > "100"
     }
 
-    SUBCASE("consistency with equality operators") {
+    FL_SUBCASE("consistency with equality operators") {
         fl::StrN<32> s1 = "test";
         fl::StrN<32> s2 = "test";
         fl::StrN<32> s3 = "different";
@@ -3079,7 +3079,7 @@ TEST_CASE("StrN comparison operators") {
         FL_CHECK(one_comparison_true);
     }
 
-    SUBCASE("comparison operator completeness") {
+    FL_SUBCASE("comparison operator completeness") {
         fl::StrN<32> s1 = "abc";
         fl::StrN<32> s2 = "def";
 
@@ -3103,7 +3103,7 @@ TEST_CASE("StrN comparison operators") {
         FL_CHECK((s1 > s2) == !(s1 <= s2));
     }
 
-    SUBCASE("comparison with heap vs inline storage") {
+    FL_SUBCASE("comparison with heap vs inline storage") {
         // Short string (inline storage)
         fl::StrN<64> short1 = "short";
         fl::StrN<64> short2 = "short";
@@ -3136,8 +3136,8 @@ TEST_CASE("StrN comparison operators") {
 //=============================================================================
 
 
-TEST_CASE("fl::string - Construction and Assignment") {
-    SUBCASE("Default construction") {
+FL_TEST_CASE("fl::string - Construction and Assignment") {
+    FL_SUBCASE("Default construction") {
         fl::string s;
         FL_CHECK(s.empty());
         FL_CHECK(s.size() == 0);
@@ -3146,7 +3146,7 @@ TEST_CASE("fl::string - Construction and Assignment") {
         FL_CHECK(s.c_str()[0] == '\0');
     }
 
-    SUBCASE("Construction from C-string") {
+    FL_SUBCASE("Construction from C-string") {
         fl::string s("Hello, World!");
         FL_CHECK(s.size() == 13);
         FL_CHECK(s.length() == 13);
@@ -3154,14 +3154,14 @@ TEST_CASE("fl::string - Construction and Assignment") {
         FL_CHECK_FALSE(s.empty());
     }
 
-    SUBCASE("Construction from empty C-string") {
+    FL_SUBCASE("Construction from empty C-string") {
         fl::string s("");
         FL_CHECK(s.empty());
         FL_CHECK(s.size() == 0);
         FL_CHECK(s.c_str()[0] == '\0');
     }
 
-    SUBCASE("Copy construction") {
+    FL_SUBCASE("Copy construction") {
         fl::string s1("Original string");
         fl::string s2(s1);
         FL_CHECK(s2.size() == s1.size());
@@ -3169,14 +3169,14 @@ TEST_CASE("fl::string - Construction and Assignment") {
         FL_CHECK(s2 == s1);
     }
 
-    SUBCASE("Assignment from C-string") {
+    FL_SUBCASE("Assignment from C-string") {
         fl::string s;
         s = "Assigned string";
         FL_CHECK(s.size() == 15);
         FL_CHECK(fl::strcmp(s.c_str(), "Assigned string") == 0);
     }
 
-    SUBCASE("Copy assignment") {
+    FL_SUBCASE("Copy assignment") {
         fl::string s1("Source string");
         fl::string s2;
         s2 = s1;
@@ -3184,7 +3184,7 @@ TEST_CASE("fl::string - Construction and Assignment") {
         FL_CHECK(s2 == s1);
     }
 
-    SUBCASE("Self-assignment") {
+    FL_SUBCASE("Self-assignment") {
         fl::string s("Self assignment test");
         // Test self-assignment (suppress warning with compiler control macros)
         FL_DISABLE_WARNING_PUSH
@@ -3195,8 +3195,8 @@ TEST_CASE("fl::string - Construction and Assignment") {
     }
 }
 
-TEST_CASE("fl::string - Element Access") {
-    SUBCASE("operator[] - non-const") {
+FL_TEST_CASE("fl::string - Element Access") {
+    FL_SUBCASE("operator[] - non-const") {
         fl::string s("Hello");
         FL_CHECK(s[0] == 'H');
         FL_CHECK(s[1] == 'e');
@@ -3207,21 +3207,21 @@ TEST_CASE("fl::string - Element Access") {
         FL_CHECK(fl::strcmp(s.c_str(), "hello") == 0);
     }
 
-    SUBCASE("operator[] - const") {
+    FL_SUBCASE("operator[] - const") {
         const fl::string s("Hello");
         FL_CHECK(s[0] == 'H');
         FL_CHECK(s[1] == 'e');
         FL_CHECK(s[4] == 'o');
     }
 
-    SUBCASE("operator[] - out of bounds") {
+    FL_SUBCASE("operator[] - out of bounds") {
         fl::string s("Hello");
         // fl::string returns '\0' for out-of-bounds access
         FL_CHECK(s[10] == '\0');
         FL_CHECK(s[100] == '\0');
     }
 
-    SUBCASE("front() and back()") {
+    FL_SUBCASE("front() and back()") {
         fl::string s("Hello");
         FL_CHECK(s.front() == 'H');
         FL_CHECK(s.back() == 'o');
@@ -3231,7 +3231,7 @@ TEST_CASE("fl::string - Element Access") {
         FL_CHECK(empty_str.back() == '\0');
     }
 
-    SUBCASE("c_str() and data()") {
+    FL_SUBCASE("c_str() and data()") {
         fl::string s("Hello");
         FL_CHECK(fl::strcmp(s.c_str(), "Hello") == 0);
         FL_CHECK(s.c_str()[5] == '\0');
@@ -3243,8 +3243,8 @@ TEST_CASE("fl::string - Element Access") {
     }
 }
 
-TEST_CASE("fl::string - Capacity Operations") {
-    SUBCASE("empty()") {
+FL_TEST_CASE("fl::string - Capacity Operations") {
+    FL_SUBCASE("empty()") {
         fl::string s;
         FL_CHECK(s.empty());
         
@@ -3255,7 +3255,7 @@ TEST_CASE("fl::string - Capacity Operations") {
         FL_CHECK(s.empty());
     }
 
-    SUBCASE("size() and length()") {
+    FL_SUBCASE("size() and length()") {
         fl::string s;
         FL_CHECK(s.size() == 0);
         FL_CHECK(s.length() == 0);
@@ -3269,7 +3269,7 @@ TEST_CASE("fl::string - Capacity Operations") {
         FL_CHECK(s.length() == 45);
     }
 
-    SUBCASE("capacity() and reserve()") {
+    FL_SUBCASE("capacity() and reserve()") {
         fl::string s;
         size_t initial_capacity = s.capacity();
         FL_CHECK(initial_capacity >= 0);
@@ -3290,8 +3290,8 @@ TEST_CASE("fl::string - Capacity Operations") {
     }
 }
 
-TEST_CASE("fl::string - Modifiers") {
-    SUBCASE("clear()") {
+FL_TEST_CASE("fl::string - Modifiers") {
+    FL_SUBCASE("clear()") {
         fl::string s("Hello World");
         FL_CHECK_FALSE(s.empty());
         
@@ -3304,7 +3304,7 @@ TEST_CASE("fl::string - Modifiers") {
         FL_CHECK(s.size() == 0);  // This is the correct way to check if cleared
     }
 
-    SUBCASE("clear() with memory management") {
+    FL_SUBCASE("clear() with memory management") {
         fl::string s("Hello World");
         s.clear(false); // don't free memory
         FL_CHECK(s.empty());
@@ -3314,7 +3314,7 @@ TEST_CASE("fl::string - Modifiers") {
         FL_CHECK(s.empty());
     }
 
-    SUBCASE("append() - C-string") {
+    FL_SUBCASE("append() - C-string") {
         fl::string s("Hello");
         s.append(" World");
         FL_CHECK(s == "Hello World");
@@ -3324,20 +3324,20 @@ TEST_CASE("fl::string - Modifiers") {
         FL_CHECK(s == "Hello World!");
     }
 
-    SUBCASE("append() - substring") {
+    FL_SUBCASE("append() - substring") {
         fl::string s("Hello");
         s.append(" World!!!", 6); // append only " World"
         FL_CHECK(s == "Hello World");
     }
 
-    SUBCASE("append() - fl::string") {
+    FL_SUBCASE("append() - fl::string") {
         fl::string s1("Hello");
         fl::string s2(" World");
         s1.append(s2.c_str(), s2.size());
         FL_CHECK(s1 == "Hello World");
     }
 
-    SUBCASE("operator+=") {
+    FL_SUBCASE("operator+=") {
         fl::string s("Hello");
         s += " World";
         FL_CHECK(s == "Hello World");
@@ -3347,7 +3347,7 @@ TEST_CASE("fl::string - Modifiers") {
         FL_CHECK(s == "Hello World!");
     }
 
-    SUBCASE("swap()") {
+    FL_SUBCASE("swap()") {
         fl::string s1("First");
         fl::string s2("Second");
         
@@ -3364,8 +3364,8 @@ TEST_CASE("fl::string - Modifiers") {
     }
 }
 
-TEST_CASE("fl::string - Substring Operations") {
-    SUBCASE("substr() - standard behavior") {
+FL_TEST_CASE("fl::string - Substring Operations") {
+    FL_SUBCASE("substr() - standard behavior") {
         fl::string original("http://fastled.io");
         
         // Standard substr(pos, length) behavior
@@ -3382,7 +3382,7 @@ TEST_CASE("fl::string - Substring Operations") {
         FL_CHECK(fl::strcmp(from_host.c_str(), "fastled.io") == 0);
     }
 
-    SUBCASE("substr() - edge cases") {
+    FL_SUBCASE("substr() - edge cases") {
         fl::string original("http://fastled.io");
         
         // Start beyond end
@@ -3403,8 +3403,8 @@ TEST_CASE("fl::string - Substring Operations") {
     }
 }
 
-TEST_CASE("fl::string - String Operations") {
-    SUBCASE("find() - character") {
+FL_TEST_CASE("fl::string - String Operations") {
+    FL_SUBCASE("find() - character") {
         fl::string s("Hello World");
         FL_CHECK(s.find('H') == 0);
         FL_CHECK(s.find('o') == 4); // first occurrence
@@ -3413,7 +3413,7 @@ TEST_CASE("fl::string - String Operations") {
         FL_CHECK(s.find('x') == string::npos);
     }
 
-    SUBCASE("find() - substring") {
+    FL_SUBCASE("find() - substring") {
         fl::string s("Hello World Hello");
         FL_CHECK(s.find("Hello") == 0);
         FL_CHECK(s.find("World") == 6);
@@ -3421,7 +3421,7 @@ TEST_CASE("fl::string - String Operations") {
         FL_CHECK(s.find("") == 0); // empty string found at position 0
     }
 
-    SUBCASE("find() - with position parameter") {
+    FL_SUBCASE("find() - with position parameter") {
         fl::string url("http://fastled.io");
         
         // Test find operations that were working during debug
@@ -3437,7 +3437,7 @@ TEST_CASE("fl::string - String Operations") {
         FL_CHECK_EQ(18, path_pos);  // Position of '/' in path
     }
 
-    SUBCASE("find() - edge cases") {
+    FL_SUBCASE("find() - edge cases") {
         fl::string s("abc");
         FL_CHECK(s.find("abcd") == string::npos); // substring longer than string
         
@@ -3446,13 +3446,13 @@ TEST_CASE("fl::string - String Operations") {
         FL_CHECK(empty_str.find("") == 0); // empty string in empty string
     }
 
-    SUBCASE("npos constant") {
+    FL_SUBCASE("npos constant") {
         FL_CHECK(string::npos == static_cast<size_t>(-1));
     }
 }
 
-TEST_CASE("fl::string - Comparison Operators") {
-    SUBCASE("Equality operators") {
+FL_TEST_CASE("fl::string - Comparison Operators") {
+    FL_SUBCASE("Equality operators") {
         fl::string s1("Hello");
         fl::string s2("Hello");
         fl::string s3("World");
@@ -3463,7 +3463,7 @@ TEST_CASE("fl::string - Comparison Operators") {
         FL_CHECK(s1 != s3);
     }
 
-    SUBCASE("Equality operators - bug fix tests") {
+    FL_SUBCASE("Equality operators - bug fix tests") {
         // Test basic string equality that was broken
         fl::string str1("http");
         fl::string str2("http");
@@ -3491,7 +3491,7 @@ TEST_CASE("fl::string - Comparison Operators") {
         FL_CHECK(str1 != str3);
     }
 
-    SUBCASE("Relational operators") {
+    FL_SUBCASE("Relational operators") {
         fl::string s1("Apple");
         fl::string s2("Banana");
         fl::string s3("Apple");
@@ -3513,7 +3513,7 @@ TEST_CASE("fl::string - Comparison Operators") {
         FL_CHECK_FALSE(s1 >= s2);
     }
 
-    SUBCASE("Comparison with empty strings") {
+    FL_SUBCASE("Comparison with empty strings") {
         fl::string s1;
         fl::string s2("");
         fl::string s3("Hello");
@@ -3524,8 +3524,8 @@ TEST_CASE("fl::string - Comparison Operators") {
     }
 }
 
-TEST_CASE("fl::string - Stream Operations") {
-    SUBCASE("Stream output") {
+FL_TEST_CASE("fl::string - Stream Operations") {
+    FL_SUBCASE("Stream output") {
         fl::string test_str("http");
         
         // Test stream output - should show characters, not ASCII values
@@ -3544,7 +3544,7 @@ TEST_CASE("fl::string - Stream Operations") {
         FL_CHECK(fl::strcmp(result2.c_str(), "://") == 0);
     }
 
-    SUBCASE("Stream output - complex") {
+    FL_SUBCASE("Stream output - complex") {
         // Test combining stream operations
         fl::string scheme("https");
         fl::string host("192.0.2.0");
@@ -3557,8 +3557,8 @@ TEST_CASE("fl::string - Stream Operations") {
     }
 }
 
-TEST_CASE("fl::string - Copy-on-Write Behavior") {
-    SUBCASE("Shared data after copy") {
+FL_TEST_CASE("fl::string - Copy-on-Write Behavior") {
+    FL_SUBCASE("Shared data after copy") {
         fl::string s1("Hello World");
         fl::string s2 = s1;
         
@@ -3567,7 +3567,7 @@ TEST_CASE("fl::string - Copy-on-Write Behavior") {
         FL_CHECK(s1.size() == s2.size());
     }
 
-    SUBCASE("Copy-on-write on modification") {
+    FL_SUBCASE("Copy-on-write on modification") {
         fl::string s1("Hello World");
         fl::string s2 = s1;
         
@@ -3577,7 +3577,7 @@ TEST_CASE("fl::string - Copy-on-Write Behavior") {
         FL_CHECK(s2 == "Hello World!");
     }
 
-    SUBCASE("Copy-on-write with character modification") {
+    FL_SUBCASE("Copy-on-write with character modification") {
         fl::string s1("Hello");
         fl::string s2 = s1;
         
@@ -3587,8 +3587,8 @@ TEST_CASE("fl::string - Copy-on-Write Behavior") {
     }
 }
 
-TEST_CASE("fl::string - Inline vs Heap Storage") {
-    SUBCASE("Short strings (inline storage)") {
+FL_TEST_CASE("fl::string - Inline vs Heap Storage") {
+    FL_SUBCASE("Short strings (inline storage)") {
         // Create a string that fits in inline storage
         fl::string s("Short");
         FL_CHECK(s.size() == 5);
@@ -3599,7 +3599,7 @@ TEST_CASE("fl::string - Inline vs Heap Storage") {
         FL_CHECK(s == "Shorter");
     }
 
-    SUBCASE("Long strings (heap storage)") {
+    FL_SUBCASE("Long strings (heap storage)") {
         // Create a string longer than FASTLED_STR_INLINED_SIZE
         fl::string long_str(FASTLED_STR_INLINED_SIZE + 10, 'a');
         fl::string s(long_str.c_str());
@@ -3608,7 +3608,7 @@ TEST_CASE("fl::string - Inline vs Heap Storage") {
         FL_CHECK(fl::strcmp(s.c_str(), long_str.c_str()) == 0);
     }
 
-    SUBCASE("Transition from inline to heap") {
+    FL_SUBCASE("Transition from inline to heap") {
         fl::string s("Short");
         
         // Append enough to exceed inline capacity
@@ -3620,7 +3620,7 @@ TEST_CASE("fl::string - Inline vs Heap Storage") {
         FL_CHECK(s[5] == 'x');
     }
 
-    SUBCASE("Copy-on-write with heap storage") {
+    FL_SUBCASE("Copy-on-write with heap storage") {
         fl::string long_str(FASTLED_STR_INLINED_SIZE + 20, 'b');
         fl::string s1(long_str.c_str());
         fl::string s2 = s1;
@@ -3642,8 +3642,8 @@ TEST_CASE("fl::string - Inline vs Heap Storage") {
     }
 }
 
-TEST_CASE("fl::string - Edge Cases and Special Characters") {
-    SUBCASE("Null characters in string") {
+FL_TEST_CASE("fl::string - Edge Cases and Special Characters") {
+    FL_SUBCASE("Null characters in string") {
         // Since fl::string doesn't support (const char*, size_t) constructor,
         // we'll test null character handling differently
         fl::string s("Hello");
@@ -3655,7 +3655,7 @@ TEST_CASE("fl::string - Edge Cases and Special Characters") {
         FL_CHECK(s[4] == 'o');
     }
 
-    SUBCASE("Very long strings") {
+    FL_SUBCASE("Very long strings") {
         // Test with very long strings
         fl::string very_long(1000, 'z');
         fl::string s(very_long.c_str());
@@ -3664,7 +3664,7 @@ TEST_CASE("fl::string - Edge Cases and Special Characters") {
         FL_CHECK(s[999] == 'z');
     }
 
-    SUBCASE("Repeated operations") {
+    FL_SUBCASE("Repeated operations") {
         fl::string s;
         for (int i = 0; i < 100; ++i) {
             s.append("a");
@@ -3674,7 +3674,7 @@ TEST_CASE("fl::string - Edge Cases and Special Characters") {
         FL_CHECK(s[99] == 'a');
     }
 
-    SUBCASE("Multiple consecutive modifications") {
+    FL_SUBCASE("Multiple consecutive modifications") {
         fl::string s("Start");
         s.append(" middle");
         s.append(" end");
@@ -3683,8 +3683,8 @@ TEST_CASE("fl::string - Edge Cases and Special Characters") {
     }
 }
 
-TEST_CASE("fl::string - Memory Management") {
-    SUBCASE("Reserve and capacity management") {
+FL_TEST_CASE("fl::string - Memory Management") {
+    FL_SUBCASE("Reserve and capacity management") {
         fl::string s;
         
         // Test reserve with small capacity
@@ -3707,7 +3707,7 @@ TEST_CASE("fl::string - Memory Management") {
         FL_CHECK(s[4] == 'x');
     }
 
-    SUBCASE("Memory efficiency") {
+    FL_SUBCASE("Memory efficiency") {
         // Test that small strings don't allocate heap memory unnecessarily
         fl::string s1("Small");
         fl::string s2("Another small string");
@@ -3720,8 +3720,8 @@ TEST_CASE("fl::string - Memory Management") {
     }
 }
 
-TEST_CASE("fl::string - Compatibility with fl::string patterns") {
-    SUBCASE("Common fl::string usage patterns") {
+FL_TEST_CASE("fl::string - Compatibility with fl::string patterns") {
+    FL_SUBCASE("Common fl::string usage patterns") {
         // Pattern 1: Build string incrementally
         fl::string result;
         result += "Hello";
@@ -3745,7 +3745,7 @@ TEST_CASE("fl::string - Compatibility with fl::string patterns") {
         FL_CHECK(reusable == "Second content");
     }
 
-    SUBCASE("String container behavior") {
+    FL_SUBCASE("String container behavior") {
         // Test that fl::string can be used like fl::string in containers
         fl::vector<string> strings;
         strings.push_back(fl::string("First"));
@@ -3763,8 +3763,8 @@ TEST_CASE("fl::string - Compatibility with fl::string patterns") {
     }
 }
 
-TEST_CASE("fl::string - Performance and Stress Testing") {
-    SUBCASE("Large string operations") {
+FL_TEST_CASE("fl::string - Performance and Stress Testing") {
+    FL_SUBCASE("Large string operations") {
         fl::string s;
 
         // Build a large string (reduced from 1000 to 500 for performance, still provides excellent coverage)
@@ -3785,7 +3785,7 @@ TEST_CASE("fl::string - Performance and Stress Testing") {
         FL_CHECK(s2[500] == 'Y');
     }
 
-    SUBCASE("Repeated copy operations") {
+    FL_SUBCASE("Repeated copy operations") {
         fl::string original("Test string for copying");
         
         for (int i = 0; i < 100; ++i) {
@@ -3800,8 +3800,8 @@ TEST_CASE("fl::string - Performance and Stress Testing") {
     }
 }
 
-TEST_CASE("fl::string - Integration with FastLED types") {
-    SUBCASE("Append with various numeric types") {
+FL_TEST_CASE("fl::string - Integration with FastLED types") {
+    FL_SUBCASE("Append with various numeric types") {
         fl::string s;
         
         s.append(static_cast<int8_t>(127));
@@ -3820,7 +3820,7 @@ TEST_CASE("fl::string - Integration with FastLED types") {
         FL_CHECK(s.size() > 0);
     }
 
-    SUBCASE("Boolean append") {
+    FL_SUBCASE("Boolean append") {
         fl::string s;
         s.append(true);
         FL_CHECK(s == "true");
@@ -3831,8 +3831,8 @@ TEST_CASE("fl::string - Integration with FastLED types") {
     }
 }
 
-TEST_CASE("fl::string - Comprehensive Integration Tests") {
-    SUBCASE("URL parsing scenario") {
+FL_TEST_CASE("fl::string - Comprehensive Integration Tests") {
+    FL_SUBCASE("URL parsing scenario") {
         // Comprehensive test combining all operations
         fl::string url("https://192.0.2.0/test");
         
@@ -3864,8 +3864,8 @@ TEST_CASE("fl::string - Comprehensive Integration Tests") {
     }
 }
 
-TEST_CASE("fl::string - Regression Tests and Debug Scenarios") {
-    SUBCASE("Debug scenario - exact networking code failure") {
+FL_TEST_CASE("fl::string - Regression Tests and Debug Scenarios") {
+    FL_SUBCASE("Debug scenario - exact networking code failure") {
         // Test the exact scenario that was failing in the networking code
         fl::string test_url("http://fastled.io");
         
@@ -3903,11 +3903,11 @@ TEST_CASE("fl::string - Regression Tests and Debug Scenarios") {
 //=============================================================================
 
 
-TEST_CASE("StringHolder - Capacity off-by-one bugs") {
+FL_TEST_CASE("StringHolder - Capacity off-by-one bugs") {
     // These tests are designed to expose the bugs where mCapacity is set to mLength
     // instead of mLength + 1 in StringHolder constructors
 
-    SUBCASE("StringHolder(fl::size length) capacity bug") {
+    FL_SUBCASE("StringHolder(fl::size length) capacity bug") {
         // This constructor should allocate length+1 bytes and set mCapacity = length+1
         // But it incorrectly sets mCapacity = mLength (missing the +1 for null terminator)
 
@@ -3933,7 +3933,7 @@ TEST_CASE("StringHolder - Capacity off-by-one bugs") {
         FL_CHECK(s1.c_str()[target_size + 1] == '\0');  // Null terminator should be present
     }
 
-    SUBCASE("StringHolder(const char*, fl::size) capacity bug") {
+    FL_SUBCASE("StringHolder(const char*, fl::size) capacity bug") {
         // This constructor has the same bug: mCapacity = mLength instead of mLength + 1
 
         // Create a long string that will trigger heap allocation
@@ -3957,7 +3957,7 @@ TEST_CASE("StringHolder - Capacity off-by-one bugs") {
         FL_CHECK(s.c_str()[s.size()] == '\0');
     }
 
-    SUBCASE("StringHolder::grow() fallback path capacity bug") {
+    FL_SUBCASE("StringHolder::grow() fallback path capacity bug") {
         // In grow(), when realloc fails and malloc is used as fallback,
         // mCapacity = mLength is used instead of mLength + 1
 
@@ -3980,7 +3980,7 @@ TEST_CASE("StringHolder - Capacity off-by-one bugs") {
         FL_CHECK(s.c_str()[s.size()] == '\0');
     }
 
-    SUBCASE("Copy with length exactly at inline boundary") {
+    FL_SUBCASE("Copy with length exactly at inline boundary") {
         // Test strings that are exactly at the boundary between inline and heap storage
         // This is where off-by-one errors are most likely to manifest
 
@@ -4007,7 +4007,7 @@ TEST_CASE("StringHolder - Capacity off-by-one bugs") {
         FL_CHECK(s1[boundary + 1] == 'Y');
     }
 
-    SUBCASE("Null terminator preservation after operations") {
+    FL_SUBCASE("Null terminator preservation after operations") {
         // Verify that null terminators are always correctly placed
 
         fl::string s1("Hello");
@@ -4025,7 +4025,7 @@ TEST_CASE("StringHolder - Capacity off-by-one bugs") {
         FL_CHECK(::strlen(s1.c_str()) == s1.size());
     }
 
-    SUBCASE("Capacity after copy operations") {
+    FL_SUBCASE("Capacity after copy operations") {
         // Test that capacity is correctly maintained during copy-on-write operations
 
         fl::string long_str(FASTLED_STR_INLINED_SIZE + 50, 'c');
@@ -4053,10 +4053,10 @@ TEST_CASE("StringHolder - Capacity off-by-one bugs") {
     }
 }
 
-TEST_CASE("StringHolder - hasCapacity checks") {
+FL_TEST_CASE("StringHolder - hasCapacity checks") {
     // Test the hasCapacity() method which relies on mCapacity being correct
 
-    SUBCASE("Reserve and capacity tracking") {
+    FL_SUBCASE("Reserve and capacity tracking") {
         fl::string s;
 
         // Start with empty string
@@ -4087,7 +4087,7 @@ TEST_CASE("StringHolder - hasCapacity checks") {
         FL_CHECK(::strlen(s.c_str()) == 100);
     }
 
-    SUBCASE("Write operations and capacity") {
+    FL_SUBCASE("Write operations and capacity") {
         fl::string s;
 
         // Use write() method which checks capacity
@@ -4115,8 +4115,8 @@ TEST_CASE("StringHolder - hasCapacity checks") {
     }
 }
 
-TEST_CASE("StringHolder - Edge cases exposing capacity bugs") {
-    SUBCASE("Exact boundary conditions") {
+FL_TEST_CASE("StringHolder - Edge cases exposing capacity bugs") {
+    FL_SUBCASE("Exact boundary conditions") {
         // Test strings of length 0, 1, SIZE-1, SIZE, SIZE+1
 
         // Length 0
@@ -4151,7 +4151,7 @@ TEST_CASE("StringHolder - Edge cases exposing capacity bugs") {
         FL_CHECK(::strlen(s_sp1.c_str()) == FASTLED_STR_INLINED_SIZE + 1);
     }
 
-    SUBCASE("Multiple append operations at boundaries") {
+    FL_SUBCASE("Multiple append operations at boundaries") {
         fl::string s;
 
         // Build up to exactly SIZE-1
@@ -4175,7 +4175,7 @@ TEST_CASE("StringHolder - Edge cases exposing capacity bugs") {
         FL_CHECK(s[FASTLED_STR_INLINED_SIZE] == 'c');
     }
 
-    SUBCASE("Substr operations preserving null termination") {
+    FL_SUBCASE("Substr operations preserving null termination") {
         fl::string original("This is a test string for substring operations");
 
         fl::string sub1 = original.substr(0, 4);  // "This"
@@ -4195,11 +4195,11 @@ TEST_CASE("StringHolder - Edge cases exposing capacity bugs") {
     }
 }
 
-TEST_CASE("StringHolder - Memory safety with incorrect capacity") {
+FL_TEST_CASE("StringHolder - Memory safety with incorrect capacity") {
     // These tests attempt to expose memory corruption that would occur
     // if capacity is set incorrectly (missing +1 for null terminator)
 
-    SUBCASE("Rapid growth and access patterns") {
+    FL_SUBCASE("Rapid growth and access patterns") {
         fl::string s("initial");
 
         // Grow in various increments
@@ -4223,7 +4223,7 @@ TEST_CASE("StringHolder - Memory safety with incorrect capacity") {
         FL_CHECK(::strlen(s.c_str()) == 4);
     }
 
-    SUBCASE("Copy and modify patterns") {
+    FL_SUBCASE("Copy and modify patterns") {
         fl::string base(FASTLED_STR_INLINED_SIZE + 10, 'B');
         fl::string s1(base.c_str());
 
@@ -4252,7 +4252,7 @@ TEST_CASE("StringHolder - Memory safety with incorrect capacity") {
         FL_CHECK(s4.size() == base.length() + 3);
     }
 
-    SUBCASE("Insert operations with capacity constraints") {
+    FL_SUBCASE("Insert operations with capacity constraints") {
         fl::string s("Hello World");
 
         // Insert in the middle
@@ -4278,11 +4278,11 @@ TEST_CASE("StringHolder - Memory safety with incorrect capacity") {
 //=============================================================================
 
 
-TEST_CASE("fl::string - Numeric append performance patterns") {
+FL_TEST_CASE("fl::string - Numeric append performance patterns") {
     // Test numeric append operations that currently allocate temporary StrN<64> buffers
     // These tests validate that optimizations don't break functionality
 
-    SUBCASE("Integer append operations") {
+    FL_SUBCASE("Integer append operations") {
         fl::string s;
 
         // Test various integer types
@@ -4310,7 +4310,7 @@ TEST_CASE("fl::string - Numeric append performance patterns") {
         FL_CHECK(s == "4294967295");
     }
 
-    SUBCASE("64-bit integer append operations") {
+    FL_SUBCASE("64-bit integer append operations") {
         fl::string s;
 
         s.append(static_cast<int64_t>(-9223372036854775807LL));
@@ -4321,7 +4321,7 @@ TEST_CASE("fl::string - Numeric append performance patterns") {
         FL_CHECK(s == "18446744073709551615");
     }
 
-    SUBCASE("Float append operations") {
+    FL_SUBCASE("Float append operations") {
         fl::string s;
 
         s.append(3.14159f);
@@ -4335,7 +4335,7 @@ TEST_CASE("fl::string - Numeric append performance patterns") {
         FL_CHECK(s[0] == '-');
     }
 
-    SUBCASE("Mixed numeric append operations") {
+    FL_SUBCASE("Mixed numeric append operations") {
         fl::string s;
 
         s.append("Value: ");
@@ -4352,7 +4352,7 @@ TEST_CASE("fl::string - Numeric append performance patterns") {
         FL_CHECK(has_hex);
     }
 
-    SUBCASE("Rapid numeric append sequence") {
+    FL_SUBCASE("Rapid numeric append sequence") {
         fl::string s;
 
         // Simulate rapid appends that would benefit from buffer reuse
@@ -4368,8 +4368,8 @@ TEST_CASE("fl::string - Numeric append performance patterns") {
     }
 }
 
-TEST_CASE("fl::string - Hexadecimal formatting") {
-    SUBCASE("Hex append basic") {
+FL_TEST_CASE("fl::string - Hexadecimal formatting") {
+    FL_SUBCASE("Hex append basic") {
         fl::string s;
 
         s.appendHex(static_cast<u8>(0xFF));
@@ -4380,7 +4380,7 @@ TEST_CASE("fl::string - Hexadecimal formatting") {
         FL_CHECK(s.size() > 0);
     }
 
-    SUBCASE("Hex append 64-bit") {
+    FL_SUBCASE("Hex append 64-bit") {
         fl::string s;
 
         s.appendHex(static_cast<uint64_t>(0xFEEDFACECAFEBEEFULL));
@@ -4388,8 +4388,8 @@ TEST_CASE("fl::string - Hexadecimal formatting") {
     }
 }
 
-TEST_CASE("fl::string - Octal formatting") {
-    SUBCASE("Octal append basic") {
+FL_TEST_CASE("fl::string - Octal formatting") {
+    FL_SUBCASE("Octal append basic") {
         fl::string s;
 
         s.appendOct(static_cast<u32>(8));
@@ -4401,11 +4401,11 @@ TEST_CASE("fl::string - Octal formatting") {
     }
 }
 
-TEST_CASE("fl::string - Thread safety of numeric operations") {
+FL_TEST_CASE("fl::string - Thread safety of numeric operations") {
     // Test that numeric append operations work correctly when called from multiple threads
     // This is important if we use thread-local buffers for optimization
 
-    SUBCASE("Concurrent numeric appends") {
+    FL_SUBCASE("Concurrent numeric appends") {
         const int kNumThreads = 4;
         const int kIterations = 100;
 
@@ -4438,7 +4438,7 @@ TEST_CASE("fl::string - Thread safety of numeric operations") {
         }
     }
 
-    SUBCASE("Concurrent mixed format appends") {
+    FL_SUBCASE("Concurrent mixed format appends") {
         const int kNumThreads = 4;
 
         fl::vector<fl::thread> threads;
@@ -4472,10 +4472,10 @@ TEST_CASE("fl::string - Thread safety of numeric operations") {
     }
 }
 
-TEST_CASE("fl::string - Buffer size requirements") {
+FL_TEST_CASE("fl::string - Buffer size requirements") {
     // Test edge cases for numeric formatting buffer sizes
 
-    SUBCASE("Maximum 64-bit value") {
+    FL_SUBCASE("Maximum 64-bit value") {
         fl::string s;
 
         // Maximum uint64_t requires 20 digits in decimal
@@ -4484,7 +4484,7 @@ TEST_CASE("fl::string - Buffer size requirements") {
         FL_CHECK(s == "18446744073709551615");
     }
 
-    SUBCASE("Minimum int64_t value") {
+    FL_SUBCASE("Minimum int64_t value") {
         fl::string s;
 
         // Minimum int64_t: -9223372036854775808 (20 digits + sign)
@@ -4493,7 +4493,7 @@ TEST_CASE("fl::string - Buffer size requirements") {
         FL_CHECK(s.size() == 20);  // 19 digits + sign
     }
 
-    SUBCASE("Hex formatting maximum") {
+    FL_SUBCASE("Hex formatting maximum") {
         fl::string s;
 
         // Maximum uint64_t in hex: 16 hex digits
@@ -4501,7 +4501,7 @@ TEST_CASE("fl::string - Buffer size requirements") {
         FL_CHECK(s.size() == 16);
     }
 
-    SUBCASE("Float formatting buffer requirements") {
+    FL_SUBCASE("Float formatting buffer requirements") {
         fl::string s;
 
         // Test various float edge cases
@@ -4519,11 +4519,11 @@ TEST_CASE("fl::string - Buffer size requirements") {
     }
 }
 
-TEST_CASE("fl::string - Write method numeric variants") {
+FL_TEST_CASE("fl::string - Write method numeric variants") {
     // Test the write() methods that take numeric types
     // These also use temporary StrN buffers
 
-    SUBCASE("write() with integers") {
+    FL_SUBCASE("write() with integers") {
         fl::string s;
 
         s.write(static_cast<u16>(42));
@@ -4538,7 +4538,7 @@ TEST_CASE("fl::string - Write method numeric variants") {
         FL_CHECK(s == "18446744073709551615");
     }
 
-    SUBCASE("write() with signed integers") {
+    FL_SUBCASE("write() with signed integers") {
         fl::string s;
 
         s.write(static_cast<i32>(-2147483647));
@@ -4549,7 +4549,7 @@ TEST_CASE("fl::string - Write method numeric variants") {
         FL_CHECK(s == "-128");
     }
 
-    SUBCASE("Sequential write operations") {
+    FL_SUBCASE("Sequential write operations") {
         fl::string s;
 
         s.append("Count: ");
@@ -4562,10 +4562,10 @@ TEST_CASE("fl::string - Write method numeric variants") {
     }
 }
 
-TEST_CASE("fl::string - Memory efficiency improvements") {
+FL_TEST_CASE("fl::string - Memory efficiency improvements") {
     // Test patterns that could benefit from thread-local buffer optimization
 
-    SUBCASE("Repeated small string builds") {
+    FL_SUBCASE("Repeated small string builds") {
         // This pattern creates many temporary StrN<64> buffers (reduced from 1000 to 500 for performance)
         fl::vector<fl::string> results;
 
@@ -4583,7 +4583,7 @@ TEST_CASE("fl::string - Memory efficiency improvements") {
         FL_CHECK(results[499] == "Item 499: Value=998");
     }
 
-    SUBCASE("String builder pattern") {
+    FL_SUBCASE("String builder pattern") {
         fl::string s;
 
         // Simulate building a complex string with many numeric appends
@@ -4600,10 +4600,10 @@ TEST_CASE("fl::string - Memory efficiency improvements") {
     }
 }
 
-TEST_CASE("fl::string - StringFormatter buffer reuse") {
+FL_TEST_CASE("fl::string - StringFormatter buffer reuse") {
     // Test that StringFormatter can safely reuse buffers across multiple calls
 
-    SUBCASE("Repeated calls with same formatter") {
+    FL_SUBCASE("Repeated calls with same formatter") {
         fl::string results[10];
 
         for (int i = 0; i < 10; ++i) {
@@ -4616,7 +4616,7 @@ TEST_CASE("fl::string - StringFormatter buffer reuse") {
         FL_CHECK(results[9] == "999");
     }
 
-    SUBCASE("Interleaved formatting operations") {
+    FL_SUBCASE("Interleaved formatting operations") {
         fl::string s1, s2;
 
         // Interleave operations on two strings
@@ -4632,10 +4632,10 @@ TEST_CASE("fl::string - StringFormatter buffer reuse") {
     }
 }
 
-TEST_CASE("fl::string - Precision and accuracy") {
+FL_TEST_CASE("fl::string - Precision and accuracy") {
     // Ensure optimizations don't affect output correctness
 
-    SUBCASE("Float precision") {
+    FL_SUBCASE("Float precision") {
         fl::string s;
 
         s.append(1.5f);
@@ -4646,13 +4646,13 @@ TEST_CASE("fl::string - Precision and accuracy") {
         FL_CHECK(s.size() > 0);
     }
 
-    SUBCASE("Negative zero handling") {
+    FL_SUBCASE("Negative zero handling") {
         fl::string s;
         s.append(-0.0f);
         FL_CHECK(s.size() > 0);
     }
 
-    SUBCASE("All integer sizes produce correct output") {
+    FL_SUBCASE("All integer sizes produce correct output") {
         fl::string s;
 
         // Test boundary values for each integer type

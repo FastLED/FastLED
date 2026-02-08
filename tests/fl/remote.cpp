@@ -5,14 +5,14 @@
 
 #include "fl/stl/cstdio.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/fx/wled/segment.h"
 #include "fl/json.h"
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
 
 // Test 4.1 - Basic Function Registration
-TEST_CASE("Remote: Basic function registration") {
+FL_TEST_CASE("Remote: Basic function registration") {
     fl::Remote remote;
 
     bool called = false;
@@ -28,7 +28,7 @@ TEST_CASE("Remote: Basic function registration") {
 }
 
 // Test 4.2 - Immediate Execution
-TEST_CASE("Remote: Immediate execution") {
+FL_TEST_CASE("Remote: Immediate execution") {
     fl::Remote remote;
 
     int result = 0;
@@ -43,7 +43,7 @@ TEST_CASE("Remote: Immediate execution") {
 }
 
 // Test 4.3 - Scheduled Execution
-TEST_CASE("Remote: Scheduled execution") {
+FL_TEST_CASE("Remote: Scheduled execution") {
     fl::Remote remote;
 
     int callCount = 0;
@@ -64,7 +64,7 @@ TEST_CASE("Remote: Scheduled execution") {
 }
 
 // Test 4.4 - Error Handling
-TEST_CASE("Remote: Error handling") {
+FL_TEST_CASE("Remote: Error handling") {
     fl::Remote remote;
 
     // Invalid JSON
@@ -86,7 +86,7 @@ TEST_CASE("Remote: Error handling") {
 }
 
 // Test 4.5 - Argument Extraction
-TEST_CASE("Remote: Argument extraction") {
+FL_TEST_CASE("Remote: Argument extraction") {
     fl::Remote remote;
 
     fl::vector<int> received;
@@ -104,7 +104,7 @@ TEST_CASE("Remote: Argument extraction") {
 }
 
 // Test 4.6 - Multiple Scheduled Calls
-TEST_CASE("Remote: Multiple scheduled calls") {
+FL_TEST_CASE("Remote: Multiple scheduled calls") {
     fl::Remote remote;
 
     fl::vector<fl::string> executed;
@@ -134,7 +134,7 @@ TEST_CASE("Remote: Multiple scheduled calls") {
 }
 
 // Test 4.7 - Clear Operations
-TEST_CASE("Remote: Clear operations") {
+FL_TEST_CASE("Remote: Clear operations") {
     fl::Remote remote;
 
     remote.registerFunction("test", [](const fl::Json&) {});
@@ -158,7 +158,7 @@ TEST_CASE("Remote: Clear operations") {
 }
 
 // Test 4.8 - Return Values
-TEST_CASE("Remote: Return values") {
+FL_TEST_CASE("Remote: Return values") {
     fl::Remote remote;
 
     // Register function with return value (matches Arduino millis())
@@ -176,7 +176,7 @@ TEST_CASE("Remote: Return values") {
 }
 
 // Test 4.9 - Return Values with Arguments
-TEST_CASE("Remote: Return values with arguments") {
+FL_TEST_CASE("Remote: Return values with arguments") {
     fl::Remote remote;
 
     // Register function that performs calculation and returns result
@@ -196,7 +196,7 @@ TEST_CASE("Remote: Return values with arguments") {
 }
 
 // Test 4.10 - Scheduled Functions with Return Values and Timing Metadata
-TEST_CASE("Remote: Scheduled functions with return values and timing metadata") {
+FL_TEST_CASE("Remote: Scheduled functions with return values and timing metadata") {
     fl::Remote remote;
 
     int counter = 100;
@@ -233,7 +233,7 @@ TEST_CASE("Remote: Scheduled functions with return values and timing metadata") 
 }
 
 // Test 4.11 - Stable Ordering (FIFO for Same Timestamp)
-TEST_CASE("Remote: Stable ordering (FIFO for same timestamp)") {
+FL_TEST_CASE("Remote: Stable ordering (FIFO for same timestamp)") {
     fl::Remote remote;
 
     fl::vector<fl::string> executionOrder;
@@ -265,7 +265,7 @@ TEST_CASE("Remote: Stable ordering (FIFO for same timestamp)") {
 }
 
 // Additional test: Unregister function
-TEST_CASE("Remote: Unregister function") {
+FL_TEST_CASE("Remote: Unregister function") {
     fl::Remote remote;
 
     remote.registerFunction("test", [](const fl::Json&) {});
@@ -281,7 +281,7 @@ TEST_CASE("Remote: Unregister function") {
 }
 
 // Additional test: Results clearing
-TEST_CASE("Remote: Results clearing") {
+FL_TEST_CASE("Remote: Results clearing") {
     fl::Remote remote;
 
     remote.registerFunctionWithReturn("getValue", [](const fl::Json&) -> fl::Json {
@@ -300,7 +300,7 @@ TEST_CASE("Remote: Results clearing") {
 }
 
 // Additional test: No args field (should default to empty array)
-TEST_CASE("Remote: No args field defaults to empty array") {
+FL_TEST_CASE("Remote: No args field defaults to empty array") {
     fl::Remote remote;
 
     bool called = false;
@@ -316,7 +316,7 @@ TEST_CASE("Remote: No args field defaults to empty array") {
 }
 
 // Additional test: Scheduled function that was already executed should be in results
-TEST_CASE("Remote: Scheduled execution results") {
+FL_TEST_CASE("Remote: Scheduled execution results") {
     fl::Remote remote;
 
     remote.registerFunction("task", [](const fl::Json&) {});
@@ -343,7 +343,7 @@ TEST_CASE("Remote: Scheduled execution results") {
 }
 
 // Test: RpcResult::to_json() serialization
-TEST_CASE("Remote: RpcResult to_json serialization") {
+FL_TEST_CASE("Remote: RpcResult to_json serialization") {
     fl::Remote remote;
 
     remote.registerFunctionWithReturn("getValue", [](const fl::Json&) -> fl::Json {
@@ -379,7 +379,7 @@ TEST_CASE("Remote: RpcResult to_json serialization") {
 }
 
 // Test: RpcResult::to_json() for scheduled execution
-TEST_CASE("Remote: RpcResult to_json for scheduled execution") {
+FL_TEST_CASE("Remote: RpcResult to_json for scheduled execution") {
     fl::Remote remote;
 
     int counter = 100;
@@ -413,7 +413,7 @@ TEST_CASE("Remote: RpcResult to_json for scheduled execution") {
 }
 
 // Test: Remote::printJson() output format
-TEST_CASE("Remote: printJson single-line format") {
+FL_TEST_CASE("Remote: printJson single-line format") {
     fl::Json testJson = fl::Json::object();
     testJson.set("status", "ok");
     testJson.set("value", 42);
@@ -450,7 +450,7 @@ TEST_CASE("Remote: printJson single-line format") {
 }
 
 // Test: printJson handles newlines in JSON (defensive)
-TEST_CASE("Remote: printJson removes newlines from malformed JSON") {
+FL_TEST_CASE("Remote: printJson removes newlines from malformed JSON") {
     // Create a JSON object
     fl::Json testJson = fl::Json::object();
     testJson.set("key", "value");
@@ -481,7 +481,7 @@ TEST_CASE("Remote: printJson removes newlines from malformed JSON") {
 // WLED State Tests
 
 // Test: Set WLED state with on=true and bri=128
-TEST_CASE("Remote: WLED set state on and brightness") {
+FL_TEST_CASE("Remote: WLED set state on and brightness") {
     fl::WLED remote;
 
     fl::Json state = fl::Json::parse(R"({"on":true,"bri":128})");
@@ -492,7 +492,7 @@ TEST_CASE("Remote: WLED set state on and brightness") {
 }
 
 // Test: Set WLED state with on=false
-TEST_CASE("Remote: WLED set state off") {
+FL_TEST_CASE("Remote: WLED set state off") {
     fl::WLED remote;
 
     // Initially on (default is false, so turn it on first)
@@ -507,7 +507,7 @@ TEST_CASE("Remote: WLED set state off") {
 }
 
 // Test: Get WLED state returns correct JSON
-TEST_CASE("Remote: WLED get state") {
+FL_TEST_CASE("Remote: WLED get state") {
     fl::WLED remote;
 
     // Set state
@@ -527,7 +527,7 @@ TEST_CASE("Remote: WLED get state") {
 }
 
 // Test: Partial state updates (missing fields don't corrupt state)
-TEST_CASE("Remote: WLED partial state updates") {
+FL_TEST_CASE("Remote: WLED partial state updates") {
     fl::WLED remote;
 
     // Set initial state
@@ -550,7 +550,7 @@ TEST_CASE("Remote: WLED partial state updates") {
 }
 
 // Test: Invalid values are handled gracefully
-TEST_CASE("Remote: WLED invalid values") {
+FL_TEST_CASE("Remote: WLED invalid values") {
     fl::WLED remote;
 
     // Set initial valid state
@@ -580,7 +580,7 @@ TEST_CASE("Remote: WLED invalid values") {
 }
 
 // Test: State roundtrip (setState -> getState preserves values)
-TEST_CASE("Remote: WLED state roundtrip") {
+FL_TEST_CASE("Remote: WLED state roundtrip") {
     fl::WLED remote;
 
     // Set state
@@ -606,7 +606,7 @@ TEST_CASE("Remote: WLED state roundtrip") {
 }
 
 // Test: WLED transition field
-TEST_CASE("Remote: WLED transition field") {
+FL_TEST_CASE("Remote: WLED transition field") {
     fl::WLED remote;
 
     // Default transition should be 7 (700ms)
@@ -640,7 +640,7 @@ TEST_CASE("Remote: WLED transition field") {
 }
 
 // Test: WLED preset field (ps)
-TEST_CASE("Remote: WLED preset field") {
+FL_TEST_CASE("Remote: WLED preset field") {
     fl::WLED remote;
 
     // Default preset should be -1 (none)
@@ -679,7 +679,7 @@ TEST_CASE("Remote: WLED preset field") {
 }
 
 // Test: WLED playlist field (pl)
-TEST_CASE("Remote: WLED playlist field") {
+FL_TEST_CASE("Remote: WLED playlist field") {
     fl::WLED remote;
 
     // Default playlist should be -1 (none)
@@ -718,7 +718,7 @@ TEST_CASE("Remote: WLED playlist field") {
 }
 
 // Test: WLED live override field (lor)
-TEST_CASE("Remote: WLED live override field") {
+FL_TEST_CASE("Remote: WLED live override field") {
     fl::WLED remote;
 
     // Default live override should be 0 (off)
@@ -757,7 +757,7 @@ TEST_CASE("Remote: WLED live override field") {
 }
 
 // Test: WLED main segment field (mainseg)
-TEST_CASE("Remote: WLED main segment field") {
+FL_TEST_CASE("Remote: WLED main segment field") {
     fl::WLED remote;
 
     // Default main segment should be 0
@@ -791,7 +791,7 @@ TEST_CASE("Remote: WLED main segment field") {
 }
 
 // Test: WLED complete state with all fields
-TEST_CASE("Remote: WLED complete state with all fields") {
+FL_TEST_CASE("Remote: WLED complete state with all fields") {
     fl::WLED remote;
 
     // Set all fields at once
@@ -836,7 +836,7 @@ TEST_CASE("Remote: WLED complete state with all fields") {
 }
 
 // Test: WLED partial updates preserve all fields
-TEST_CASE("Remote: WLED partial updates preserve all fields") {
+FL_TEST_CASE("Remote: WLED partial updates preserve all fields") {
     fl::WLED remote;
 
     // Set initial complete state
@@ -888,7 +888,7 @@ TEST_CASE("Remote: WLED partial updates preserve all fields") {
 }
 
 // Test: WLED nightlight object parsing
-TEST_CASE("Remote: WLED nightlight object") {
+FL_TEST_CASE("Remote: WLED nightlight object") {
     fl::WLED remote;
 
     // Default nightlight state
@@ -908,7 +908,7 @@ TEST_CASE("Remote: WLED nightlight object") {
 }
 
 // Test: WLED nightlight partial updates
-TEST_CASE("Remote: WLED nightlight partial updates") {
+FL_TEST_CASE("Remote: WLED nightlight partial updates") {
     fl::WLED remote;
 
     // Set initial nightlight state
@@ -940,7 +940,7 @@ TEST_CASE("Remote: WLED nightlight partial updates") {
 }
 
 // Test: WLED nightlight field clamping
-TEST_CASE("Remote: WLED nightlight field clamping") {
+FL_TEST_CASE("Remote: WLED nightlight field clamping") {
     fl::WLED remote;
 
     // Test dur clamping: below 1
@@ -975,7 +975,7 @@ TEST_CASE("Remote: WLED nightlight field clamping") {
 }
 
 // Test: WLED nightlight invalid types
-TEST_CASE("Remote: WLED nightlight invalid types") {
+FL_TEST_CASE("Remote: WLED nightlight invalid types") {
     fl::WLED remote;
 
     // Set valid initial state
@@ -1008,7 +1008,7 @@ TEST_CASE("Remote: WLED nightlight invalid types") {
 }
 
 // Test: WLED nightlight in getState
-TEST_CASE("Remote: WLED nightlight in getState") {
+FL_TEST_CASE("Remote: WLED nightlight in getState") {
     fl::WLED remote;
 
     // Set nightlight state
@@ -1034,7 +1034,7 @@ TEST_CASE("Remote: WLED nightlight in getState") {
 }
 
 // Test: WLED nightlight roundtrip
-TEST_CASE("Remote: WLED nightlight roundtrip") {
+FL_TEST_CASE("Remote: WLED nightlight roundtrip") {
     fl::WLED remote;
 
     // Set complex state with nightlight
@@ -1077,7 +1077,7 @@ TEST_CASE("Remote: WLED nightlight roundtrip") {
 }
 
 // Test: WLED segment hex color string parsing
-TEST_CASE("Remote: WLED segment hex color strings") {
+FL_TEST_CASE("Remote: WLED segment hex color strings") {
     fl::WLED remote;
 
     // Test basic hex color strings (uppercase)
@@ -1107,7 +1107,7 @@ TEST_CASE("Remote: WLED segment hex color strings") {
 }
 
 // Test: WLED segment hex color strings (lowercase)
-TEST_CASE("Remote: WLED segment hex color strings lowercase") {
+FL_TEST_CASE("Remote: WLED segment hex color strings lowercase") {
     fl::WLED remote;
 
     // Test lowercase hex strings
@@ -1129,7 +1129,7 @@ TEST_CASE("Remote: WLED segment hex color strings lowercase") {
 }
 
 // Test: WLED segment hex color strings with leading '#'
-TEST_CASE("Remote: WLED segment hex color strings with hash") {
+FL_TEST_CASE("Remote: WLED segment hex color strings with hash") {
     fl::WLED remote;
 
     // Test hex strings with optional leading '#'
@@ -1157,7 +1157,7 @@ TEST_CASE("Remote: WLED segment hex color strings with hash") {
 }
 
 // Test: WLED segment mixed RGB arrays and hex strings
-TEST_CASE("Remote: WLED segment mixed color formats") {
+FL_TEST_CASE("Remote: WLED segment mixed color formats") {
     fl::WLED remote;
 
     // Test mixing RGB arrays and hex strings
@@ -1175,7 +1175,7 @@ TEST_CASE("Remote: WLED segment mixed color formats") {
 }
 
 // Test: WLED segment invalid hex strings
-TEST_CASE("Remote: WLED segment invalid hex strings") {
+FL_TEST_CASE("Remote: WLED segment invalid hex strings") {
     fl::WLED remote;
 
     // Test invalid hex strings (should be rejected with warnings)
@@ -1189,7 +1189,7 @@ TEST_CASE("Remote: WLED segment invalid hex strings") {
 }
 
 // Test: WLED segment hex string case insensitivity
-TEST_CASE("Remote: WLED segment hex string case insensitivity") {
+FL_TEST_CASE("Remote: WLED segment hex string case insensitivity") {
     fl::WLED remote;
 
     // Test mixed case hex strings
@@ -1211,7 +1211,7 @@ TEST_CASE("Remote: WLED segment hex string case insensitivity") {
 }
 
 // Test: WLED individual LED control - simple sequential format
-TEST_CASE("Remote: WLED individual LED control simple format") {
+FL_TEST_CASE("Remote: WLED individual LED control simple format") {
     fl::WLED remote;
 
     // Test simple sequential LED colors (no indices)
@@ -1240,7 +1240,7 @@ TEST_CASE("Remote: WLED individual LED control simple format") {
 }
 
 // Test: WLED individual LED control - indexed format
-TEST_CASE("Remote: WLED individual LED control indexed format") {
+FL_TEST_CASE("Remote: WLED individual LED control indexed format") {
     fl::WLED remote;
 
     // Test indexed LED colors (sets specific LED indices)
@@ -1268,7 +1268,7 @@ TEST_CASE("Remote: WLED individual LED control indexed format") {
 }
 
 // Test: WLED individual LED control - range format
-TEST_CASE("Remote: WLED individual LED control range format") {
+FL_TEST_CASE("Remote: WLED individual LED control range format") {
     fl::WLED remote;
 
     // Test range LED colors (sets multiple LEDs at once)
@@ -1295,7 +1295,7 @@ TEST_CASE("Remote: WLED individual LED control range format") {
 }
 
 // Test: WLED individual LED control - mixed formats
-TEST_CASE("Remote: WLED individual LED control mixed formats") {
+FL_TEST_CASE("Remote: WLED individual LED control mixed formats") {
     fl::WLED remote;
 
     // Test mixing simple, indexed, and range formats
@@ -1325,7 +1325,7 @@ TEST_CASE("Remote: WLED individual LED control mixed formats") {
 }
 
 // Test: WLED individual LED control - hex string with hash
-TEST_CASE("Remote: WLED individual LED control with hash") {
+FL_TEST_CASE("Remote: WLED individual LED control with hash") {
     fl::WLED remote;
 
     // Test hex strings with leading '#' (should be stripped)
@@ -1347,7 +1347,7 @@ TEST_CASE("Remote: WLED individual LED control with hash") {
 }
 
 // Test: WLED individual LED control - serialization roundtrip
-TEST_CASE("Remote: WLED individual LED control serialization roundtrip") {
+FL_TEST_CASE("Remote: WLED individual LED control serialization roundtrip") {
     fl::WLED remote;
 
     // Set individual LED colors
@@ -1388,7 +1388,7 @@ TEST_CASE("Remote: WLED individual LED control serialization roundtrip") {
 }
 
 // Test: WLED individual LED control - invalid formats
-TEST_CASE("Remote: WLED individual LED control invalid formats") {
+FL_TEST_CASE("Remote: WLED individual LED control invalid formats") {
     fl::WLED remote;
 
     // Test various invalid formats (should be rejected with warnings)
@@ -1402,7 +1402,7 @@ TEST_CASE("Remote: WLED individual LED control invalid formats") {
 }
 
 // Test: WLED individual LED control - case insensitivity
-TEST_CASE("Remote: WLED individual LED control case insensitivity") {
+FL_TEST_CASE("Remote: WLED individual LED control case insensitivity") {
     fl::WLED remote;
 
     // Test mixed case hex strings
@@ -1431,7 +1431,7 @@ TEST_CASE("Remote: WLED individual LED control case insensitivity") {
 }
 
 // Test: WLED individual LED control - empty array
-TEST_CASE("Remote: WLED individual LED control empty array") {
+FL_TEST_CASE("Remote: WLED individual LED control empty array") {
     fl::WLED remote;
 
     // Set some LEDs first
@@ -1450,7 +1450,7 @@ TEST_CASE("Remote: WLED individual LED control empty array") {
 }
 
 // Test: WLED individual LED control - large range
-TEST_CASE("Remote: WLED individual LED control large range") {
+FL_TEST_CASE("Remote: WLED individual LED control large range") {
     fl::WLED remote;
 
     // Test setting a large range of LEDs
@@ -1474,7 +1474,7 @@ TEST_CASE("Remote: WLED individual LED control large range") {
 // =============================================================================
 
 // Test: Typed method registration with auto-deduced signature
-TEST_CASE("Remote: Typed method registration") {
+FL_TEST_CASE("Remote: Typed method registration") {
     fl::Remote remote;
 
     // Register typed method
@@ -1483,16 +1483,16 @@ TEST_CASE("Remote: Typed method registration") {
     });
 
     // Direct invocation should work
-    REQUIRE(addFn);
+    FL_REQUIRE(addFn);
     int result = addFn(2, 3);
-    REQUIRE_EQ(result, 5);
+    FL_REQUIRE_EQ(result, 5);
 
     // Method should be discoverable
-    REQUIRE(remote.hasFunction("add"));
+    FL_REQUIRE(remote.hasFunction("add"));
 }
 
 // Test: Typed method via JSON RPC
-TEST_CASE("Remote: Typed method JSON-RPC invocation") {
+FL_TEST_CASE("Remote: Typed method JSON-RPC invocation") {
     fl::Remote remote;
 
     remote.method("multiply", [](int a, int b) -> int {
@@ -1502,14 +1502,14 @@ TEST_CASE("Remote: Typed method JSON-RPC invocation") {
     fl::Json result;
     auto err = remote.processRpc(R"({"function":"multiply","args":[6,7]})", result);
 
-    REQUIRE_EQ(err, fl::Remote::Error::None);
-    REQUIRE(result.has_value());
+    FL_REQUIRE_EQ(err, fl::Remote::Error::None);
+    FL_REQUIRE(result.has_value());
     int value = result.as_int().value_or(0);
-    REQUIRE_EQ(value, 42);
+    FL_REQUIRE_EQ(value, 42);
 }
 
 // Test: Typed void method
-TEST_CASE("Remote: Typed void method") {
+FL_TEST_CASE("Remote: Typed void method") {
     fl::Remote remote;
 
     int counter = 0;
@@ -1519,19 +1519,19 @@ TEST_CASE("Remote: Typed void method") {
 
     // Direct invocation
     auto incrementFn = remote.bind<void()>("increment");
-    REQUIRE(incrementFn);
+    FL_REQUIRE(incrementFn);
     incrementFn();
-    REQUIRE_EQ(counter, 1);
+    FL_REQUIRE_EQ(counter, 1);
 
     // JSON-RPC invocation
     fl::Json result;
     auto err = remote.processRpc(R"({"function":"increment","args":[]})", result);
-    REQUIRE_EQ(err, fl::Remote::Error::None);
-    REQUIRE_EQ(counter, 2);
+    FL_REQUIRE_EQ(err, fl::Remote::Error::None);
+    FL_REQUIRE_EQ(counter, 2);
 }
 
 // Test: Typed method with string arguments
-TEST_CASE("Remote: Typed method with string arguments") {
+FL_TEST_CASE("Remote: Typed method with string arguments") {
     fl::Remote remote;
 
     remote.method("greet", [](fl::string name) -> fl::string {
@@ -1541,13 +1541,13 @@ TEST_CASE("Remote: Typed method with string arguments") {
     fl::Json result;
     auto err = remote.processRpc(R"({"function":"greet","args":["World"]})", result);
 
-    REQUIRE_EQ(err, fl::Remote::Error::None);
+    FL_REQUIRE_EQ(err, fl::Remote::Error::None);
     fl::string greeting = result.as_string().value_or("");
-    REQUIRE_EQ(greeting, "Hello, World!");
+    FL_REQUIRE_EQ(greeting, "Hello, World!");
 }
 
 // Test: Mixed typed and legacy methods
-TEST_CASE("Remote: Mixed typed and legacy methods") {
+FL_TEST_CASE("Remote: Mixed typed and legacy methods") {
     fl::Remote remote;
 
     // Register typed method
@@ -1564,23 +1564,23 @@ TEST_CASE("Remote: Mixed typed and legacy methods") {
     });
 
     // Both should be found
-    REQUIRE(remote.hasFunction("typed_add"));
-    REQUIRE(remote.hasFunction("legacy_add"));
+    FL_REQUIRE(remote.hasFunction("typed_add"));
+    FL_REQUIRE(remote.hasFunction("legacy_add"));
 
     // Both should execute correctly
     fl::Json result1;
     auto err1 = remote.processRpc(R"({"function":"typed_add","args":[10,20]})", result1);
-    REQUIRE_EQ(err1, fl::Remote::Error::None);
-    REQUIRE_EQ(result1.as_int().value_or(0), 30);
+    FL_REQUIRE_EQ(err1, fl::Remote::Error::None);
+    FL_REQUIRE_EQ(result1.as_int().value_or(0), 30);
 
     fl::Json result2;
     auto err2 = remote.processRpc(R"({"function":"legacy_add","args":[5,7]})", result2);
-    REQUIRE_EQ(err2, fl::Remote::Error::None);
-    REQUIRE_EQ(legacyResult, 12);
+    FL_REQUIRE_EQ(err2, fl::Remote::Error::None);
+    FL_REQUIRE_EQ(legacyResult, 12);
 }
 
 // Test: Typed method with invalid params
-TEST_CASE("Remote: Typed method invalid params returns error") {
+FL_TEST_CASE("Remote: Typed method invalid params returns error") {
     fl::Remote remote;
 
     remote.method("square", [](int x) -> int {
@@ -1590,11 +1590,11 @@ TEST_CASE("Remote: Typed method invalid params returns error") {
     // Wrong number of arguments
     fl::Json result;
     auto err = remote.processRpc(R"({"function":"square","args":[1,2,3]})", result);
-    REQUIRE_EQ(err, fl::Remote::Error::InvalidParams);
+    FL_REQUIRE_EQ(err, fl::Remote::Error::InvalidParams);
 }
 
 // Test: bind returns empty function for wrong signature
-TEST_CASE("Remote: bind returns empty for wrong signature") {
+FL_TEST_CASE("Remote: bind returns empty for wrong signature") {
     fl::Remote remote;
 
     remote.method("add", [](int a, int b) -> int {
@@ -1603,16 +1603,16 @@ TEST_CASE("Remote: bind returns empty for wrong signature") {
 
     // Try to bind with wrong signature
     auto wrongFn = remote.try_bind<double(double, double)>("add");
-    REQUIRE_FALSE(wrongFn.has_value());
+    FL_REQUIRE_FALSE(wrongFn.has_value());
 
     // Correct signature should work
     auto correctFn = remote.try_bind<int(int, int)>("add");
-    REQUIRE(correctFn.has_value());
-    REQUIRE_EQ(correctFn.value()(3, 4), 7);
+    FL_REQUIRE(correctFn.has_value());
+    FL_REQUIRE_EQ(correctFn.value()(3, 4), 7);
 }
 
 // Test: method_with fluent builder API
-TEST_CASE("Remote: method_with fluent builder API") {
+FL_TEST_CASE("Remote: method_with fluent builder API") {
     fl::Remote remote;
 
     auto setBri = remote.method_with("led.setBrightness", [](int brightness) {
@@ -1623,31 +1623,31 @@ TEST_CASE("Remote: method_with fluent builder API") {
         .tags({"led", "control"})
         .done();
 
-    REQUIRE(setBri);
-    REQUIRE(remote.hasFunction("led.setBrightness"));
+    FL_REQUIRE(setBri);
+    FL_REQUIRE(remote.hasFunction("led.setBrightness"));
 
     // Verify schema contains metadata
     fl::Json methods = remote.methods();
-    REQUIRE_EQ(methods.size(), 1);
+    FL_REQUIRE_EQ(methods.size(), 1);
 
     fl::Json method = methods[0];
     fl::string name = method["name"].as_string().value_or("");
-    REQUIRE_EQ(name, "led.setBrightness");
+    FL_REQUIRE_EQ(name, "led.setBrightness");
 
     // Check param name
     fl::string paramName = method["params"][0]["name"].as_string().value_or("");
-    REQUIRE_EQ(paramName, "brightness");
+    FL_REQUIRE_EQ(paramName, "brightness");
 
     // Check description
     fl::string desc = method["description"].as_string().value_or("");
-    REQUIRE_EQ(desc, "Set LED brightness (0-255)");
+    FL_REQUIRE_EQ(desc, "Set LED brightness (0-255)");
 
     // Check tags
-    REQUIRE_EQ(method["tags"].size(), 2);
+    FL_REQUIRE_EQ(method["tags"].size(), 2);
 }
 
 // Test: count includes both typed and legacy methods
-TEST_CASE("Remote: count includes typed and legacy methods") {
+FL_TEST_CASE("Remote: count includes typed and legacy methods") {
     fl::Remote remote;
 
     // Add typed method
@@ -1657,11 +1657,11 @@ TEST_CASE("Remote: count includes typed and legacy methods") {
     remote.registerFunction("legacy1", [](const fl::Json&) {});
 
     // Count should be 2
-    REQUIRE_EQ(remote.count(), 2);
+    FL_REQUIRE_EQ(remote.count(), 2);
 }
 
 // Test: schema generation
-TEST_CASE("Remote: schema generation") {
+FL_TEST_CASE("Remote: schema generation") {
     fl::Remote remote;
 
     remote.method("add", [](int a, int b) -> int { return a + b; });
@@ -1669,21 +1669,21 @@ TEST_CASE("Remote: schema generation") {
 
     fl::Json schema = remote.schema("Test API", "1.0.0");
 
-    REQUIRE(schema.contains("openrpc"));
-    REQUIRE(schema.contains("info"));
-    REQUIRE(schema.contains("methods"));
+    FL_REQUIRE(schema.contains("openrpc"));
+    FL_REQUIRE(schema.contains("info"));
+    FL_REQUIRE(schema.contains("methods"));
 
     fl::string title = schema["info"]["title"].as_string().value_or("");
-    REQUIRE_EQ(title, "Test API");
+    FL_REQUIRE_EQ(title, "Test API");
 
     fl::string version = schema["info"]["version"].as_string().value_or("");
-    REQUIRE_EQ(version, "1.0.0");
+    FL_REQUIRE_EQ(version, "1.0.0");
 
-    REQUIRE_EQ(schema["methods"].size(), 2);
+    FL_REQUIRE_EQ(schema["methods"].size(), 2);
 }
 
 // Test: scheduled typed method execution
-TEST_CASE("Remote: Scheduled typed method execution") {
+FL_TEST_CASE("Remote: Scheduled typed method execution") {
     fl::Remote remote;
 
     int value = 0;
@@ -1693,12 +1693,12 @@ TEST_CASE("Remote: Scheduled typed method execution") {
 
     // Schedule for future execution
     auto err = remote.processRpc(R"({"timestamp":1000,"function":"setValue","args":[42]})");
-    REQUIRE_EQ(err, fl::Remote::Error::None);
-    REQUIRE_EQ(value, 0);  // Not executed yet
+    FL_REQUIRE_EQ(err, fl::Remote::Error::None);
+    FL_REQUIRE_EQ(value, 0);  // Not executed yet
 
     // Execute scheduled method
     remote.tick(1000);
-    REQUIRE_EQ(value, 42);  // Now executed
+    FL_REQUIRE_EQ(value, 42);  // Now executed
 }
 
 #endif // FASTLED_ENABLE_JSON

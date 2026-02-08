@@ -5,7 +5,7 @@
 #include "fl/audio/audio_context.h"
 #include "fl/stl/math.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/audio.h"
 #include "fl/int.h"
 #include "fl/math_macros.h"
@@ -19,7 +19,7 @@
 
 using namespace fl;
 
-TEST_CASE("BackbeatDetector - Basic initialization") {
+FL_TEST_CASE("BackbeatDetector - Basic initialization") {
     // Test construction with own BeatDetector
     BackbeatDetector detector1;
     FL_CHECK_EQ(detector1.isBackbeat(), false);
@@ -39,7 +39,7 @@ TEST_CASE("BackbeatDetector - Basic initialization") {
     FL_CHECK_EQ(detector3.getConfidence(), 0.0f);
 }
 
-TEST_CASE("BackbeatDetector - Configuration") {
+FL_TEST_CASE("BackbeatDetector - Configuration") {
     BackbeatDetector detector;
 
     // Test threshold configuration
@@ -59,7 +59,7 @@ TEST_CASE("BackbeatDetector - Configuration") {
     FL_CHECK(true);
 }
 
-TEST_CASE("BackbeatDetector - Reset functionality") {
+FL_TEST_CASE("BackbeatDetector - Reset functionality") {
     BackbeatDetector detector;
 
     // Set some configuration
@@ -75,7 +75,7 @@ TEST_CASE("BackbeatDetector - Reset functionality") {
     FL_CHECK_EQ(detector.getStrength(), 0.0f);
 }
 
-TEST_CASE("BackbeatDetector - Callbacks") {
+FL_TEST_CASE("BackbeatDetector - Callbacks") {
     auto beatDetector = make_shared<BeatDetector>();
     BackbeatDetector detector(beatDetector);
 
@@ -116,7 +116,7 @@ TEST_CASE("BackbeatDetector - Callbacks") {
     FL_CHECK(true);  // Smoke test passed
 }
 
-TEST_CASE("BackbeatDetector - Backbeat ratio") {
+FL_TEST_CASE("BackbeatDetector - Backbeat ratio") {
     BackbeatDetector detector;
 
     // Initial ratio should be 1.0 (neutral)
@@ -125,7 +125,7 @@ TEST_CASE("BackbeatDetector - Backbeat ratio") {
     FL_CHECK_LE(ratio, 10.0f);  // Plausible range
 }
 
-TEST_CASE("BackbeatDetector - State access") {
+FL_TEST_CASE("BackbeatDetector - State access") {
     auto beatDetector = make_shared<BeatDetector>();
     auto downbeatDetector = make_shared<DownbeatDetector>(beatDetector);
     BackbeatDetector detector(beatDetector, downbeatDetector);
@@ -139,7 +139,7 @@ TEST_CASE("BackbeatDetector - State access") {
     FL_CHECK_GE(detector.getBackbeatRatio(), 0.0f);
 }
 
-TEST_CASE("BackbeatDetector - Detector dependencies") {
+FL_TEST_CASE("BackbeatDetector - Detector dependencies") {
     auto beatDetector = make_shared<BeatDetector>();
     auto downbeatDetector = make_shared<DownbeatDetector>(beatDetector);
     BackbeatDetector detector;
@@ -160,7 +160,7 @@ TEST_CASE("BackbeatDetector - Detector dependencies") {
     FL_CHECK(true);  // Smoke test passed
 }
 
-TEST_CASE("BackbeatDetector - AudioDetector interface") {
+FL_TEST_CASE("BackbeatDetector - AudioDetector interface") {
     BackbeatDetector detector;
 
     // Test AudioDetector interface methods
@@ -173,7 +173,7 @@ TEST_CASE("BackbeatDetector - AudioDetector interface") {
     FL_CHECK(fl::strcmp(name, "BackbeatDetector") == 0);
 }
 
-TEST_CASE("BackbeatDetector - Multiple update cycles") {
+FL_TEST_CASE("BackbeatDetector - Multiple update cycles") {
     auto beatDetector = make_shared<BeatDetector>();
     BackbeatDetector detector(beatDetector);
 

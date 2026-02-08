@@ -14,7 +14,7 @@
 /// - encodeHD108() - Global brightness variant
 /// - encodeHD108_HD() - Per-LED brightness variant
 
-#include "doctest.h"
+#include "test.h"
 #include "fl/chipsets/encoders/hd108.h"
 #include "fl/chipsets/encoders/encoder_utils.h"
 #include "fl/stl/array.h"
@@ -84,7 +84,7 @@ static void verifyLEDData(const fl::vector<u8>& data, size_t offset, u8 r8, u8 g
 // encodeHD108() - Global brightness tests
 //-----------------------------------------------------------------------------
 
-TEST_CASE("encodeHD108() - empty range") {
+FL_TEST_CASE("encodeHD108() - empty range") {
     fl::vector<fl::array<u8, 3>> leds;
     fl::vector<u8> output;
 
@@ -97,7 +97,7 @@ TEST_CASE("encodeHD108() - empty range") {
     verifyEndFrame(output, 4);
 }
 
-TEST_CASE("encodeHD108() - single LED, max brightness") {
+FL_TEST_CASE("encodeHD108() - single LED, max brightness") {
     fl::vector<fl::array<u8, 3>> leds = {{{255, 128, 64}}};
     fl::vector<u8> output;
 
@@ -117,7 +117,7 @@ TEST_CASE("encodeHD108() - single LED, max brightness") {
     verifyEndFrame(output, 4);
 }
 
-TEST_CASE("encodeHD108() - single LED, mid brightness") {
+FL_TEST_CASE("encodeHD108() - single LED, mid brightness") {
     fl::vector<fl::array<u8, 3>> leds = {{{200, 100, 50}}};
     fl::vector<u8> output;
 
@@ -131,7 +131,7 @@ TEST_CASE("encodeHD108() - single LED, mid brightness") {
     verifyLEDData(output, 10, 200, 100, 50);
 }
 
-TEST_CASE("encodeHD108() - single LED, min brightness") {
+FL_TEST_CASE("encodeHD108() - single LED, min brightness") {
     fl::vector<fl::array<u8, 3>> leds = {{{100, 50, 25}}};
     fl::vector<u8> output;
 
@@ -145,7 +145,7 @@ TEST_CASE("encodeHD108() - single LED, min brightness") {
     verifyLEDData(output, 10, 100, 50, 25);
 }
 
-TEST_CASE("encodeHD108() - two LEDs, end frame boundary") {
+FL_TEST_CASE("encodeHD108() - two LEDs, end frame boundary") {
     fl::vector<fl::array<u8, 3>> leds = {{{255, 0, 0}}, {{0, 255, 0}}};
     fl::vector<u8> output;
 
@@ -167,7 +167,7 @@ TEST_CASE("encodeHD108() - two LEDs, end frame boundary") {
     verifyEndFrame(output, 5);
 }
 
-TEST_CASE("encodeHD108() - three LEDs, end frame size") {
+FL_TEST_CASE("encodeHD108() - three LEDs, end frame size") {
     fl::vector<fl::array<u8, 3>> leds = {
         {{255, 0, 0}},
         {{0, 255, 0}},
@@ -188,7 +188,7 @@ TEST_CASE("encodeHD108() - three LEDs, end frame size") {
     verifyEndFrame(output, 5);
 }
 
-TEST_CASE("encodeHD108() - four LEDs, end frame boundary") {
+FL_TEST_CASE("encodeHD108() - four LEDs, end frame boundary") {
     fl::vector<fl::array<u8, 3>> leds(4, {{128, 64, 32}});
     fl::vector<u8> output;
 
@@ -200,7 +200,7 @@ TEST_CASE("encodeHD108() - four LEDs, end frame boundary") {
     verifyEndFrame(output, 6);
 }
 
-TEST_CASE("encodeHD108() - eight LEDs, end frame size") {
+FL_TEST_CASE("encodeHD108() - eight LEDs, end frame size") {
     fl::vector<fl::array<u8, 3>> leds(8, {{200, 150, 100}});
     fl::vector<u8> output;
 
@@ -212,7 +212,7 @@ TEST_CASE("encodeHD108() - eight LEDs, end frame size") {
     verifyEndFrame(output, 8);
 }
 
-TEST_CASE("encodeHD108() - brightness mapping 8-bit to 5-bit") {
+FL_TEST_CASE("encodeHD108() - brightness mapping 8-bit to 5-bit") {
     // Test critical brightness values
     struct BrightnessTest {
         u8 input;
@@ -244,7 +244,7 @@ TEST_CASE("encodeHD108() - brightness mapping 8-bit to 5-bit") {
     }
 }
 
-TEST_CASE("encodeHD108() - gamma correction verification") {
+FL_TEST_CASE("encodeHD108() - gamma correction verification") {
     // Verify gamma 2.8 correction is applied to all channels
     fl::vector<fl::array<u8, 3>> leds = {{{255, 128, 64}}};
     fl::vector<u8> output;
@@ -265,7 +265,7 @@ TEST_CASE("encodeHD108() - gamma correction verification") {
     FL_CHECK_GT(r16, g16 * 2);  // 255 gamma'd should be > 2x 128 gamma'd
 }
 
-TEST_CASE("encodeHD108() - RGB color order") {
+FL_TEST_CASE("encodeHD108() - RGB color order") {
     // Verify RGB wire order (not BGR or GRB)
     fl::vector<fl::array<u8, 3>> leds = {{{200, 100, 50}}};
     fl::vector<u8> output;
@@ -282,7 +282,7 @@ TEST_CASE("encodeHD108() - RGB color order") {
 // encodeHD108_HD() - Per-LED brightness tests
 //-----------------------------------------------------------------------------
 
-TEST_CASE("encodeHD108_HD() - empty range") {
+FL_TEST_CASE("encodeHD108_HD() - empty range") {
     fl::vector<fl::array<u8, 3>> leds;
     fl::vector<u8> brightness;
     fl::vector<u8> output;
@@ -296,7 +296,7 @@ TEST_CASE("encodeHD108_HD() - empty range") {
     verifyEndFrame(output, 4);
 }
 
-TEST_CASE("encodeHD108_HD() - single LED with per-LED brightness") {
+FL_TEST_CASE("encodeHD108_HD() - single LED with per-LED brightness") {
     fl::vector<fl::array<u8, 3>> leds = {{{255, 128, 64}}};
     fl::vector<u8> brightness = {200};
     fl::vector<u8> output;
@@ -316,7 +316,7 @@ TEST_CASE("encodeHD108_HD() - single LED with per-LED brightness") {
     verifyEndFrame(output, 4);
 }
 
-TEST_CASE("encodeHD108_HD() - multiple LEDs with varying brightness") {
+FL_TEST_CASE("encodeHD108_HD() - multiple LEDs with varying brightness") {
     fl::vector<fl::array<u8, 3>> leds = {
         {{255, 0, 0}},
         {{0, 255, 0}},
@@ -347,7 +347,7 @@ TEST_CASE("encodeHD108_HD() - multiple LEDs with varying brightness") {
     verifyEndFrame(output, 5);
 }
 
-TEST_CASE("encodeHD108_HD() - brightness caching optimization") {
+FL_TEST_CASE("encodeHD108_HD() - brightness caching optimization") {
     // When consecutive LEDs have same brightness, header should be cached
     fl::vector<fl::array<u8, 3>> leds = {
         {{100, 0, 0}},
@@ -372,7 +372,7 @@ TEST_CASE("encodeHD108_HD() - brightness caching optimization") {
     verifyLEDData(output, 26, 0, 0, 100);
 }
 
-TEST_CASE("encodeHD108_HD() - end frame calculation") {
+FL_TEST_CASE("encodeHD108_HD() - end frame calculation") {
     // Test end frame size: (num_leds / 2) + 4
 
     // 1 LED: 1/2 + 4 = 4 bytes
@@ -409,7 +409,7 @@ TEST_CASE("encodeHD108_HD() - end frame calculation") {
     }
 }
 
-TEST_CASE("encodeHD108_HD() - min/max brightness values") {
+FL_TEST_CASE("encodeHD108_HD() - min/max brightness values") {
     fl::vector<fl::array<u8, 3>> leds = {{{100, 100, 100}}, {{150, 150, 150}}};
     fl::vector<u8> brightness = {0, 255};
     fl::vector<u8> output;
@@ -427,7 +427,7 @@ TEST_CASE("encodeHD108_HD() - min/max brightness values") {
 // Helper function tests
 //-----------------------------------------------------------------------------
 
-TEST_CASE("hd108BrightnessHeader() - max gain encoding") {
+FL_TEST_CASE("hd108BrightnessHeader() - max gain encoding") {
     // Test the per-channel gain header generation function
     // All channels use maximum gain (31) regardless of brightness input
     // Brightness control is handled via 16-bit PWM values, not gain
@@ -470,7 +470,7 @@ TEST_CASE("hd108BrightnessHeader() - max gain encoding") {
     }
 }
 
-TEST_CASE("hd108GammaCorrect() - gamma 2.8 correction") {
+FL_TEST_CASE("hd108GammaCorrect() - gamma 2.8 correction") {
     // Test gamma correction function directly
 
     FL_CHECK_EQ(hd108GammaCorrect(0), gamma_2_8(0));

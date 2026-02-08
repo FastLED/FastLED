@@ -17,7 +17,7 @@
 #include "platforms/esp/32/drivers/spi/wave8_encoder_spi.h"
 #include "fl/stl/cstddef.h"  // for size_t
 #include "fl/stl/stdint.h"  // for uint8_t
-#include "doctest.h"  // for ResultBuilder, CHECK, etc.
+#include "test.h"  // for ResultBuilder, CHECK, etc.
 #include "fl/slice.h"  // for span
 
 using namespace fl;
@@ -41,7 +41,7 @@ ChipsetTiming createWS2812ChipsetTiming() {
 // Test: Single-Lane Encoding (No Transposition)
 // ============================================================================
 
-TEST_CASE("wave8EncodeSingleLane_basic") {
+FL_TEST_CASE("wave8EncodeSingleLane_basic") {
     // Create WS2812 timing and build LUT
     ChipsetTiming chipsetTiming = createWS2812ChipsetTiming();
     Wave8BitExpansionLut lut = buildWave8ExpansionLUT(chipsetTiming);
@@ -68,7 +68,7 @@ TEST_CASE("wave8EncodeSingleLane_basic") {
     }
 }
 
-TEST_CASE("wave8EncodeSingleLane_zero_byte") {
+FL_TEST_CASE("wave8EncodeSingleLane_zero_byte") {
     // Create WS2812 timing and build LUT
     ChipsetTiming chipsetTiming = createWS2812ChipsetTiming();
     Wave8BitExpansionLut lut = buildWave8ExpansionLUT(chipsetTiming);
@@ -96,7 +96,7 @@ TEST_CASE("wave8EncodeSingleLane_zero_byte") {
     }
 }
 
-TEST_CASE("wave8EncodeSingleLane_multiple_bytes") {
+FL_TEST_CASE("wave8EncodeSingleLane_multiple_bytes") {
     // Create WS2812 timing and build LUT
     ChipsetTiming chipsetTiming = createWS2812ChipsetTiming();
     Wave8BitExpansionLut lut = buildWave8ExpansionLUT(chipsetTiming);
@@ -123,7 +123,7 @@ TEST_CASE("wave8EncodeSingleLane_multiple_bytes") {
     FL_REQUIRE(has_data);
 }
 
-TEST_CASE("wave8EncodeSingleLane_buffer_too_small") {
+FL_TEST_CASE("wave8EncodeSingleLane_buffer_too_small") {
     // Create WS2812 timing and build LUT
     ChipsetTiming chipsetTiming = createWS2812ChipsetTiming();
     Wave8BitExpansionLut lut = buildWave8ExpansionLUT(chipsetTiming);
@@ -145,7 +145,7 @@ TEST_CASE("wave8EncodeSingleLane_buffer_too_small") {
 // Test: Dual-Lane Encoding (2-Lane Transposition)
 // ============================================================================
 
-TEST_CASE("wave8EncodeDualLane_basic") {
+FL_TEST_CASE("wave8EncodeDualLane_basic") {
     // Create WS2812 timing and build LUT
     ChipsetTiming chipsetTiming = createWS2812ChipsetTiming();
     Wave8BitExpansionLut lut = buildWave8ExpansionLUT(chipsetTiming);
@@ -174,7 +174,7 @@ TEST_CASE("wave8EncodeDualLane_basic") {
     FL_REQUIRE(has_data);
 }
 
-TEST_CASE("wave8EncodeDualLane_lane_size_mismatch") {
+FL_TEST_CASE("wave8EncodeDualLane_lane_size_mismatch") {
     // Create WS2812 timing and build LUT
     ChipsetTiming chipsetTiming = createWS2812ChipsetTiming();
     Wave8BitExpansionLut lut = buildWave8ExpansionLUT(chipsetTiming);
@@ -194,7 +194,7 @@ TEST_CASE("wave8EncodeDualLane_lane_size_mismatch") {
     FL_REQUIRE(written == 0);
 }
 
-TEST_CASE("wave8EncodeDualLane_buffer_too_small") {
+FL_TEST_CASE("wave8EncodeDualLane_buffer_too_small") {
     // Create WS2812 timing and build LUT
     ChipsetTiming chipsetTiming = createWS2812ChipsetTiming();
     Wave8BitExpansionLut lut = buildWave8ExpansionLUT(chipsetTiming);
@@ -218,7 +218,7 @@ TEST_CASE("wave8EncodeDualLane_buffer_too_small") {
 // Test: Quad-Lane Encoding (4-Lane Transposition)
 // ============================================================================
 
-TEST_CASE("wave8EncodeQuadLane_basic") {
+FL_TEST_CASE("wave8EncodeQuadLane_basic") {
     // Create WS2812 timing and build LUT
     ChipsetTiming chipsetTiming = createWS2812ChipsetTiming();
     Wave8BitExpansionLut lut = buildWave8ExpansionLUT(chipsetTiming);
@@ -253,7 +253,7 @@ TEST_CASE("wave8EncodeQuadLane_basic") {
     FL_REQUIRE(has_data);
 }
 
-TEST_CASE("wave8EncodeQuadLane_lane_size_mismatch") {
+FL_TEST_CASE("wave8EncodeQuadLane_lane_size_mismatch") {
     // Create WS2812 timing and build LUT
     ChipsetTiming chipsetTiming = createWS2812ChipsetTiming();
     Wave8BitExpansionLut lut = buildWave8ExpansionLUT(chipsetTiming);
@@ -279,7 +279,7 @@ TEST_CASE("wave8EncodeQuadLane_lane_size_mismatch") {
     FL_REQUIRE(written == 0);
 }
 
-TEST_CASE("wave8EncodeQuadLane_buffer_too_small") {
+FL_TEST_CASE("wave8EncodeQuadLane_buffer_too_small") {
     // Create WS2812 timing and build LUT
     ChipsetTiming chipsetTiming = createWS2812ChipsetTiming();
     Wave8BitExpansionLut lut = buildWave8ExpansionLUT(chipsetTiming);
@@ -309,7 +309,7 @@ TEST_CASE("wave8EncodeQuadLane_buffer_too_small") {
 // Test: Output Buffer Size Calculation
 // ============================================================================
 
-TEST_CASE("wave8CalculateOutputSize") {
+FL_TEST_CASE("wave8CalculateOutputSize") {
     // Single-lane: 1 byte → 8 bytes
     FL_REQUIRE(wave8CalculateOutputSize(1, 1) == 8);
     FL_REQUIRE(wave8CalculateOutputSize(100, 1) == 800);
@@ -332,7 +332,7 @@ TEST_CASE("wave8CalculateOutputSize") {
 // to verify backward compatibility.
 
 /*
-TEST_CASE("wave8_vs_legacy_encoding") {
+FL_TEST_CASE("wave8_vs_legacy_encoding") {
     // Create WS2812 timing
     SpiTimingConfig spiTiming = createWS2812Timing();
 

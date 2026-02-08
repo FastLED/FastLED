@@ -7,7 +7,7 @@
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/log.h"
 #include "fl/promise.h"
 #include "fl/result.h"
@@ -41,7 +41,7 @@ using fl::DMABuffer;
 // Lazy Initialization Verification Tests
 // ============================================================================
 
-TEST_CASE("Lazy Init - SPI stub instances are registered") {
+FL_TEST_CASE("Lazy Init - SPI stub instances are registered") {
     // Verify that lazy initialization successfully registers all SPI stub instances
     // This confirms the platform::initSpiHwNInstances() mechanism works correctly
 
@@ -62,26 +62,26 @@ TEST_CASE("Lazy Init - SPI stub instances are registered") {
 // fl::Result<T> Tests
 // ============================================================================
 
-TEST_CASE("fl::Result<void, SPIError> basic operations") {
-    SUBCASE("Default construction creates failure state") {
+FL_TEST_CASE("fl::Result<void, SPIError> basic operations") {
+    FL_SUBCASE("Default construction creates failure state") {
         fl::Result<void, SPIError> r;
         FL_CHECK(!r.ok());
         FL_CHECK(r.error() == SPIError::NOT_INITIALIZED);
     }
 
-    SUBCASE("Success creation") {
+    FL_SUBCASE("Success creation") {
         fl::Result<void, SPIError> r = fl::Result<void, SPIError>::success();
         FL_CHECK(r.ok());
         FL_CHECK(static_cast<bool>(r));  // Explicit bool conversion
     }
 
-    SUBCASE("Failure creation with error code") {
+    FL_SUBCASE("Failure creation with error code") {
         fl::Result<void, SPIError> r = fl::Result<void, SPIError>::failure(SPIError::BUFFER_TOO_LARGE);
         FL_CHECK(!r.ok());
         FL_CHECK(r.error() == SPIError::BUFFER_TOO_LARGE);
     }
 
-    SUBCASE("Failure creation with error code and message") {
+    FL_SUBCASE("Failure creation with error code and message") {
         fl::Result<void, SPIError> r = fl::Result<void, SPIError>::failure(SPIError::ALLOCATION_FAILED, "Out of memory");
         FL_CHECK(!r.ok());
         FL_CHECK(r.error() == SPIError::ALLOCATION_FAILED);
@@ -90,32 +90,32 @@ TEST_CASE("fl::Result<void, SPIError> basic operations") {
     }
 }
 
-TEST_CASE("fl::Result<int> value type operations") {
-    SUBCASE("Success with value") {
+FL_TEST_CASE("fl::Result<int> value type operations") {
+    FL_SUBCASE("Success with value") {
         fl::Result<int, SPIError> r = fl::Result<int, SPIError>::success(42);
         FL_CHECK(r.ok());
         FL_CHECK(r.value() == 42);
     }
 
-    SUBCASE("Failure with no value") {
+    FL_SUBCASE("Failure with no value") {
         fl::Result<int, SPIError> r = fl::Result<int, SPIError>::failure(SPIError::BUSY, "Device busy");
         FL_CHECK(!r.ok());
         FL_CHECK(r.error() == SPIError::BUSY);
         FL_CHECK(r.message() != nullptr);
     }
 
-    SUBCASE("Value modification") {
+    FL_SUBCASE("Value modification") {
         fl::Result<int, SPIError> r = fl::Result<int, SPIError>::success(10);
         r.value() = 20;
         FL_CHECK(r.value() == 20);
     }
 }
 
-TEST_CASE("fl::Result<Transaction, SPIError> example usage") {
+FL_TEST_CASE("fl::Result<Transaction, SPIError> example usage") {
     // This tests that Result works with complex types
     // (Transaction will be properly implemented in later iterations)
 
-    SUBCASE("Failure case") {
+    FL_SUBCASE("Failure case") {
         fl::Result<int, SPIError> r = fl::Result<int, SPIError>::failure(SPIError::NOT_INITIALIZED);
         FL_CHECK(!r.ok());
         FL_CHECK(!static_cast<bool>(r));  // Bool conversion
@@ -126,8 +126,8 @@ TEST_CASE("fl::Result<Transaction, SPIError> example usage") {
 // Config Tests
 // ============================================================================
 
-TEST_CASE("Config construction") {
-    SUBCASE("Basic construction with default values") {
+FL_TEST_CASE("Config construction") {
+    FL_SUBCASE("Basic construction with default values") {
         Config cfg(18, 23);
         FL_CHECK(cfg.clock_pin == 18);
         FL_CHECK(cfg.data_pins.size() == 1);
@@ -136,7 +136,7 @@ TEST_CASE("Config construction") {
         FL_CHECK(cfg.spi_mode == 0);
     }
 
-    SUBCASE("Configuration modification") {
+    FL_SUBCASE("Configuration modification") {
         Config cfg(5, 6);
         cfg.clock_speed_hz = 20000000;  // 20 MHz
         cfg.spi_mode = 1;
@@ -150,8 +150,8 @@ TEST_CASE("Config construction") {
 // Device Construction Tests (Basic)
 // ============================================================================
 
-TEST_CASE("Device construction (basic)") {
-    SUBCASE("Device can be constructed") {
+FL_TEST_CASE("Device construction (basic)") {
+    FL_SUBCASE("Device can be constructed") {
         Config cfg(18, 23);
         Device spi(cfg);
 
@@ -159,7 +159,7 @@ TEST_CASE("Device construction (basic)") {
         FL_CHECK(!spi.isReady());
     }
 
-    SUBCASE("Device configuration access") {
+    FL_SUBCASE("Device configuration access") {
         Config cfg(5, 6);
         cfg.clock_speed_hz = 15000000;
         Device spi(cfg);
@@ -176,14 +176,14 @@ TEST_CASE("Device construction (basic)") {
 // Device Initialization Tests (Iteration 2)
 // ============================================================================
 
-TEST_CASE("Device initialization with begin()") {
-    SUBCASE("Device starts not ready") {
+FL_TEST_CASE("Device initialization with begin()") {
+    FL_SUBCASE("Device starts not ready") {
         Config cfg(18, 23);
         Device spi(cfg);
         FL_CHECK(!spi.isReady());
     }
 
-    SUBCASE("begin() initializes device") {
+    FL_SUBCASE("begin() initializes device") {
         Config cfg(18, 23);
         Device spi(cfg);
 
@@ -192,7 +192,7 @@ TEST_CASE("Device initialization with begin()") {
         FL_CHECK(spi.isReady());
     }
 
-    SUBCASE("Double begin() is idempotent") {
+    FL_SUBCASE("Double begin() is idempotent") {
         Config cfg(18, 23);
         Device spi(cfg);
 
@@ -206,7 +206,7 @@ TEST_CASE("Device initialization with begin()") {
         FL_CHECK(spi.isReady());
     }
 
-    SUBCASE("end() shuts down device") {
+    FL_SUBCASE("end() shuts down device") {
         Config cfg(18, 23);
         Device spi(cfg);
 
@@ -217,7 +217,7 @@ TEST_CASE("Device initialization with begin()") {
         FL_CHECK(!spi.isReady());
     }
 
-    SUBCASE("Multiple begin/end cycles") {
+    FL_SUBCASE("Multiple begin/end cycles") {
         Config cfg(18, 23);
         Device spi(cfg);
 
@@ -237,7 +237,7 @@ TEST_CASE("Device initialization with begin()") {
 
     // NOTE: write(), read(), transfer() methods are not implemented in Device class
     // Device only provides writeAsync() and zero-copy DMA API
-    // SUBCASE("Operations fail when not initialized") {
+    // FL_SUBCASE("Operations fail when not initialized") {
     //     Config cfg(18, 23);
     //     Device spi(cfg);
     //
@@ -259,8 +259,8 @@ TEST_CASE("Device initialization with begin()") {
     // }
 }
 
-TEST_CASE("Device destructor cleanup") {
-    SUBCASE("Destructor cleans up initialized device") {
+FL_TEST_CASE("Device destructor cleanup") {
+    FL_SUBCASE("Destructor cleans up initialized device") {
         Config cfg(18, 23);
         {
             Device spi(cfg);
@@ -272,7 +272,7 @@ TEST_CASE("Device destructor cleanup") {
         FL_CHECK(true);
     }
 
-    SUBCASE("Destructor handles uninitialized device") {
+    FL_SUBCASE("Destructor handles uninitialized device") {
         Config cfg(18, 23);
         {
             Device spi(cfg);
@@ -284,22 +284,22 @@ TEST_CASE("Device destructor cleanup") {
     }
 }
 
-TEST_CASE("Device state transitions") {
+FL_TEST_CASE("Device state transitions") {
     Config cfg(18, 23);
     Device spi(cfg);
 
-    SUBCASE("Initial state") {
+    FL_SUBCASE("Initial state") {
         FL_CHECK(!spi.isReady());
         FL_CHECK(!spi.isBusy());
     }
 
-    SUBCASE("After begin()") {
+    FL_SUBCASE("After begin()") {
         spi.begin();
         FL_CHECK(spi.isReady());
         FL_CHECK(!spi.isBusy());
     }
 
-    SUBCASE("After end()") {
+    FL_SUBCASE("After end()") {
         spi.begin();
         spi.end();
         FL_CHECK(!spi.isReady());
@@ -307,8 +307,8 @@ TEST_CASE("Device state transitions") {
     }
 }
 
-TEST_CASE("Device configuration updates") {
-    SUBCASE("Clock speed can be updated") {
+FL_TEST_CASE("Device configuration updates") {
+    FL_SUBCASE("Clock speed can be updated") {
         Config cfg(18, 23);
         cfg.clock_speed_hz = 10000000;
         Device spi(cfg);
@@ -320,7 +320,7 @@ TEST_CASE("Device configuration updates") {
         FL_CHECK(stored.clock_speed_hz == 20000000);
     }
 
-    SUBCASE("Configuration persists after begin()") {
+    FL_SUBCASE("Configuration persists after begin()") {
         Config cfg(18, 23);
         cfg.clock_speed_hz = 15000000;
         cfg.spi_mode = 2;
@@ -337,8 +337,8 @@ TEST_CASE("Device configuration updates") {
     }
 }
 
-TEST_CASE("Multiple devices on different pins") {
-    SUBCASE("Two devices can coexist") {
+FL_TEST_CASE("Multiple devices on different pins") {
+    FL_SUBCASE("Two devices can coexist") {
         // Use different clock pins to avoid conflicts with previous tests
         // Note: SPIBusManager is a global singleton and not reset between tests
         Config cfg1(10, 11);
@@ -369,8 +369,8 @@ TEST_CASE("Multiple devices on different pins") {
 // These tests are commented out
 
 /*
-TEST_CASE("Device write operations") {
-    SUBCASE("Basic write succeeds") {
+FL_TEST_CASE("Device write operations") {
+    FL_SUBCASE("Basic write succeeds") {
         Config cfg(14, 15);
         Device spi(cfg);
 
@@ -386,7 +386,7 @@ TEST_CASE("Device write operations") {
         spi.end();
     }
 
-    SUBCASE("Write fails without begin()") {
+    FL_SUBCASE("Write fails without begin()") {
         Config cfg(14, 15);
         Device spi(cfg);
 
@@ -397,7 +397,7 @@ TEST_CASE("Device write operations") {
         FL_CHECK(result.error() == SPIError::NOT_INITIALIZED);
     }
 
-    SUBCASE("Write fails with null data") {
+    FL_SUBCASE("Write fails with null data") {
         Config cfg(14, 15);
         Device spi(cfg);
         spi.begin();
@@ -410,7 +410,7 @@ TEST_CASE("Device write operations") {
         spi.end();
     }
 
-    SUBCASE("Write fails with zero size") {
+    FL_SUBCASE("Write fails with zero size") {
         Config cfg(14, 15);
         Device spi(cfg);
         spi.begin();
@@ -424,7 +424,7 @@ TEST_CASE("Device write operations") {
         spi.end();
     }
 
-    SUBCASE("Multiple writes work correctly") {
+    FL_SUBCASE("Multiple writes work correctly") {
         Config cfg(14, 15);
         Device spi(cfg);
         spi.begin();
@@ -441,7 +441,7 @@ TEST_CASE("Device write operations") {
         spi.end();
     }
 
-    SUBCASE("Write with varying buffer sizes") {
+    FL_SUBCASE("Write with varying buffer sizes") {
         Config cfg(14, 15);
         Device spi(cfg);
         spi.begin();
@@ -468,8 +468,8 @@ TEST_CASE("Device write operations") {
 }
 */
 
-TEST_CASE("Device buffer acquisition") {
-    SUBCASE("acquireBuffer returns valid buffer") {
+FL_TEST_CASE("Device buffer acquisition") {
+    FL_SUBCASE("acquireBuffer returns valid buffer") {
         Config cfg(16, 17);
         Device spi(cfg);
         spi.begin();
@@ -482,7 +482,7 @@ TEST_CASE("Device buffer acquisition") {
         spi.end();
     }
 
-    SUBCASE("acquireBuffer fails without begin()") {
+    FL_SUBCASE("acquireBuffer fails without begin()") {
         Config cfg(16, 17);
         Device spi(cfg);
 
@@ -492,7 +492,7 @@ TEST_CASE("Device buffer acquisition") {
         FL_CHECK(buffer.error() == SPIError::NOT_INITIALIZED);
     }
 
-    SUBCASE("Multiple buffer acquisitions work") {
+    FL_SUBCASE("Multiple buffer acquisitions work") {
         Config cfg(16, 17);
         Device spi(cfg);
         spi.begin();
@@ -507,8 +507,8 @@ TEST_CASE("Device buffer acquisition") {
     }
 }
 
-TEST_CASE("Device transmit operations") {
-    SUBCASE("Transmit with valid buffer succeeds (blocking)") {
+FL_TEST_CASE("Device transmit operations") {
+    FL_SUBCASE("Transmit with valid buffer succeeds (blocking)") {
         Config cfg(16, 17);
         Device spi(cfg);
         spi.begin();
@@ -529,7 +529,7 @@ TEST_CASE("Device transmit operations") {
         spi.end();
     }
 
-    SUBCASE("Transmit fails without begin()") {
+    FL_SUBCASE("Transmit fails without begin()") {
         Config cfg(16, 17);
         Device spi(cfg);
 
@@ -539,7 +539,7 @@ TEST_CASE("Device transmit operations") {
         FL_CHECK(result.has_value());  // Error present means failure
     }
 
-    SUBCASE("Transmit with invalid buffer fails") {
+    FL_SUBCASE("Transmit with invalid buffer fails") {
         Config cfg(16, 17);
         Device spi(cfg);
         spi.begin();
@@ -553,8 +553,8 @@ TEST_CASE("Device transmit operations") {
     }
 }
 
-TEST_CASE("Device busy state and waitComplete") {
-    SUBCASE("Device not busy after initialization") {
+FL_TEST_CASE("Device busy state and waitComplete") {
+    FL_SUBCASE("Device not busy after initialization") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -564,7 +564,7 @@ TEST_CASE("Device busy state and waitComplete") {
         spi.end();
     }
 
-    SUBCASE("Device not busy after blocking write") {
+    FL_SUBCASE("Device not busy after blocking write") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -582,7 +582,7 @@ TEST_CASE("Device busy state and waitComplete") {
         spi.end();
     }
 
-    SUBCASE("waitComplete returns true when not busy") {
+    FL_SUBCASE("waitComplete returns true when not busy") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -604,8 +604,8 @@ TEST_CASE("Device busy state and waitComplete") {
 // These tests are commented out
 
 /*
-TEST_CASE("Device read operations") {
-    SUBCASE("Basic read succeeds") {
+FL_TEST_CASE("Device read operations") {
+    FL_SUBCASE("Basic read succeeds") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -623,7 +623,7 @@ TEST_CASE("Device read operations") {
         spi.end();
     }
 
-    SUBCASE("Read fails without begin()") {
+    FL_SUBCASE("Read fails without begin()") {
         Config cfg(18, 19);
         Device spi(cfg);
 
@@ -634,7 +634,7 @@ TEST_CASE("Device read operations") {
         FL_CHECK(result.error() == SPIError::NOT_INITIALIZED);
     }
 
-    SUBCASE("Read fails with null buffer") {
+    FL_SUBCASE("Read fails with null buffer") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -647,7 +647,7 @@ TEST_CASE("Device read operations") {
         spi.end();
     }
 
-    SUBCASE("Read fails with zero size") {
+    FL_SUBCASE("Read fails with zero size") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -661,7 +661,7 @@ TEST_CASE("Device read operations") {
         spi.end();
     }
 
-    SUBCASE("Multiple reads work correctly") {
+    FL_SUBCASE("Multiple reads work correctly") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -678,7 +678,7 @@ TEST_CASE("Device read operations") {
         spi.end();
     }
 
-    SUBCASE("Read with varying buffer sizes") {
+    FL_SUBCASE("Read with varying buffer sizes") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -707,8 +707,8 @@ TEST_CASE("Device read operations") {
 // These tests are commented out
 
 /*
-TEST_CASE("Device transfer operations") {
-    SUBCASE("Basic transfer succeeds") {
+FL_TEST_CASE("Device transfer operations") {
+    FL_SUBCASE("Basic transfer succeeds") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -729,7 +729,7 @@ TEST_CASE("Device transfer operations") {
         spi.end();
     }
 
-    SUBCASE("Transfer fails without begin()") {
+    FL_SUBCASE("Transfer fails without begin()") {
         Config cfg(18, 19);
         Device spi(cfg);
 
@@ -742,7 +742,7 @@ TEST_CASE("Device transfer operations") {
         FL_CHECK(result.error() == SPIError::NOT_INITIALIZED);
     }
 
-    SUBCASE("Transfer fails with null tx_data") {
+    FL_SUBCASE("Transfer fails with null tx_data") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -756,7 +756,7 @@ TEST_CASE("Device transfer operations") {
         spi.end();
     }
 
-    SUBCASE("Transfer fails with null rx_buffer") {
+    FL_SUBCASE("Transfer fails with null rx_buffer") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -770,7 +770,7 @@ TEST_CASE("Device transfer operations") {
         spi.end();
     }
 
-    SUBCASE("Transfer fails with zero size") {
+    FL_SUBCASE("Transfer fails with zero size") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -785,7 +785,7 @@ TEST_CASE("Device transfer operations") {
         spi.end();
     }
 
-    SUBCASE("Multiple transfers work correctly") {
+    FL_SUBCASE("Multiple transfers work correctly") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -804,7 +804,7 @@ TEST_CASE("Device transfer operations") {
         spi.end();
     }
 
-    SUBCASE("Transfer with varying buffer sizes") {
+    FL_SUBCASE("Transfer with varying buffer sizes") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -829,7 +829,7 @@ TEST_CASE("Device transfer operations") {
         spi.end();
     }
 
-    SUBCASE("Transfer transmits TX data correctly") {
+    FL_SUBCASE("Transfer transmits TX data correctly") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -853,8 +853,8 @@ TEST_CASE("Device transfer operations") {
 // Async Write Tests (Iteration 5)
 // ============================================================================
 
-TEST_CASE("Device writeAsync operations") {
-    SUBCASE("Basic writeAsync succeeds and returns Transaction") {
+FL_TEST_CASE("Device writeAsync operations") {
+    FL_SUBCASE("Basic writeAsync succeeds and returns Transaction") {
         Config cfg(18, 19);
         Device spi(cfg);
         fl::optional<fl::Error> begin_result = spi.begin();
@@ -875,7 +875,7 @@ TEST_CASE("Device writeAsync operations") {
         spi.end();
     }
 
-    SUBCASE("writeAsync fails without begin()") {
+    FL_SUBCASE("writeAsync fails without begin()") {
         Config cfg(18, 19);
         Device spi(cfg);
 
@@ -886,7 +886,7 @@ TEST_CASE("Device writeAsync operations") {
         FL_CHECK(result.error() == SPIError::NOT_INITIALIZED);
     }
 
-    SUBCASE("writeAsync fails with null data") {
+    FL_SUBCASE("writeAsync fails with null data") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -899,7 +899,7 @@ TEST_CASE("Device writeAsync operations") {
         spi.end();
     }
 
-    SUBCASE("writeAsync fails with zero size") {
+    FL_SUBCASE("writeAsync fails with zero size") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -913,7 +913,7 @@ TEST_CASE("Device writeAsync operations") {
         spi.end();
     }
 
-    SUBCASE("Multiple sequential async writes work") {
+    FL_SUBCASE("Multiple sequential async writes work") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -937,7 +937,7 @@ TEST_CASE("Device writeAsync operations") {
         spi.end();
     }
 
-    SUBCASE("writeAsync with varying buffer sizes") {
+    FL_SUBCASE("writeAsync with varying buffer sizes") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -968,7 +968,7 @@ TEST_CASE("Device writeAsync operations") {
         spi.end();
     }
 
-    SUBCASE("Transaction auto-waits on destruction") {
+    FL_SUBCASE("Transaction auto-waits on destruction") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -997,8 +997,8 @@ TEST_CASE("Device writeAsync operations") {
 // These tests are commented out
 
 /*
-TEST_CASE("Device readAsync operations") {
-    SUBCASE("Basic readAsync succeeds and returns Transaction") {
+FL_TEST_CASE("Device readAsync operations") {
+    FL_SUBCASE("Basic readAsync succeeds and returns Transaction") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -1020,7 +1020,7 @@ TEST_CASE("Device readAsync operations") {
         spi.end();
     }
 
-    SUBCASE("readAsync fails without begin()") {
+    FL_SUBCASE("readAsync fails without begin()") {
         Config cfg(18, 19);
         Device spi(cfg);
 
@@ -1031,7 +1031,7 @@ TEST_CASE("Device readAsync operations") {
         FL_CHECK(result.error() == SPIError::NOT_INITIALIZED);
     }
 
-    SUBCASE("readAsync fails with null buffer") {
+    FL_SUBCASE("readAsync fails with null buffer") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -1044,7 +1044,7 @@ TEST_CASE("Device readAsync operations") {
         spi.end();
     }
 
-    SUBCASE("readAsync fails with zero size") {
+    FL_SUBCASE("readAsync fails with zero size") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -1067,8 +1067,8 @@ TEST_CASE("Device readAsync operations") {
 // These tests are commented out
 
 /*
-TEST_CASE("Device transferAsync operations") {
-    SUBCASE("Basic transferAsync succeeds and returns Transaction") {
+FL_TEST_CASE("Device transferAsync operations") {
+    FL_SUBCASE("Basic transferAsync succeeds and returns Transaction") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -1092,7 +1092,7 @@ TEST_CASE("Device transferAsync operations") {
         spi.end();
     }
 
-    SUBCASE("transferAsync fails without begin()") {
+    FL_SUBCASE("transferAsync fails without begin()") {
         Config cfg(18, 19);
         Device spi(cfg);
 
@@ -1104,7 +1104,7 @@ TEST_CASE("Device transferAsync operations") {
         FL_CHECK(result.error() == SPIError::NOT_INITIALIZED);
     }
 
-    SUBCASE("transferAsync fails with null tx_data") {
+    FL_SUBCASE("transferAsync fails with null tx_data") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -1118,7 +1118,7 @@ TEST_CASE("Device transferAsync operations") {
         spi.end();
     }
 
-    SUBCASE("transferAsync fails with null rx_buffer") {
+    FL_SUBCASE("transferAsync fails with null rx_buffer") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -1132,7 +1132,7 @@ TEST_CASE("Device transferAsync operations") {
         spi.end();
     }
 
-    SUBCASE("transferAsync fails with zero size") {
+    FL_SUBCASE("transferAsync fails with zero size") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -1153,8 +1153,8 @@ TEST_CASE("Device transferAsync operations") {
 // Transaction Tests (Iteration 5)
 // ============================================================================
 
-TEST_CASE("Transaction lifecycle") {
-    SUBCASE("Transaction isDone() and isPending() work correctly") {
+FL_TEST_CASE("Transaction lifecycle") {
+    FL_SUBCASE("Transaction isDone() and isPending() work correctly") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -1175,7 +1175,7 @@ TEST_CASE("Transaction lifecycle") {
         spi.end();
     }
 
-    SUBCASE("Transaction cancel() marks as completed") {
+    FL_SUBCASE("Transaction cancel() marks as completed") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -1198,7 +1198,7 @@ TEST_CASE("Transaction lifecycle") {
         spi.end();
     }
 
-    SUBCASE("Transaction getResult() returns correct result") {
+    FL_SUBCASE("Transaction getResult() returns correct result") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -1216,7 +1216,7 @@ TEST_CASE("Transaction lifecycle") {
         spi.end();
     }
 
-    SUBCASE("Transaction move semantics work") {
+    FL_SUBCASE("Transaction move semantics work") {
         Config cfg(18, 19);
         Device spi(cfg);
         spi.begin();
@@ -1241,8 +1241,8 @@ TEST_CASE("Transaction lifecycle") {
 // Configuration Management Tests (Iteration 7)
 // ============================================================================
 
-TEST_CASE("Device configuration management") {
-    SUBCASE("getConfig() returns correct configuration") {
+FL_TEST_CASE("Device configuration management") {
+    FL_SUBCASE("getConfig() returns correct configuration") {
         Config cfg(18, 19);
         cfg.clock_speed_hz = 5000000;  // 5 MHz
         cfg.spi_mode = 0;
@@ -1257,7 +1257,7 @@ TEST_CASE("Device configuration management") {
         FL_CHECK(retrieved.spi_mode == 0);
     }
 
-    SUBCASE("setClockSpeed() updates configuration before begin()") {
+    FL_SUBCASE("setClockSpeed() updates configuration before begin()") {
         Config cfg(18, 19);
         cfg.clock_speed_hz = 10000000;  // 10 MHz
 
@@ -1272,7 +1272,7 @@ TEST_CASE("Device configuration management") {
         FL_CHECK(retrieved.clock_speed_hz == 20000000);
     }
 
-    SUBCASE("setClockSpeed() updates configuration after begin()") {
+    FL_SUBCASE("setClockSpeed() updates configuration after begin()") {
         Config cfg(18, 19);
         Device spi(cfg);
 
@@ -1292,7 +1292,7 @@ TEST_CASE("Device configuration management") {
         spi.end();
     }
 
-    SUBCASE("setClockSpeed() with zero speed") {
+    FL_SUBCASE("setClockSpeed() with zero speed") {
         Config cfg(18, 19);
         Device spi(cfg);
 
@@ -1302,7 +1302,7 @@ TEST_CASE("Device configuration management") {
         FL_CHECK(spi.getConfig().clock_speed_hz == 0);
     }
 
-    SUBCASE("setClockSpeed() with very high speed") {
+    FL_SUBCASE("setClockSpeed() with very high speed") {
         Config cfg(18, 19);
         Device spi(cfg);
 
@@ -1314,8 +1314,8 @@ TEST_CASE("Device configuration management") {
     }
 }
 
-TEST_CASE("SPI mode configuration") {
-    SUBCASE("Mode 0 (default) is accepted") {
+FL_TEST_CASE("SPI mode configuration") {
+    FL_SUBCASE("Mode 0 (default) is accepted") {
         Config cfg(18, 19);
         cfg.spi_mode = 0;
 
@@ -1326,7 +1326,7 @@ TEST_CASE("SPI mode configuration") {
         spi.end();
     }
 
-    SUBCASE("Mode 1 generates warning but initialization succeeds") {
+    FL_SUBCASE("Mode 1 generates warning but initialization succeeds") {
         Config cfg(18, 19);
         cfg.spi_mode = 1;
 
@@ -1338,7 +1338,7 @@ TEST_CASE("SPI mode configuration") {
         spi.end();
     }
 
-    SUBCASE("Mode 2 generates warning but initialization succeeds") {
+    FL_SUBCASE("Mode 2 generates warning but initialization succeeds") {
         Config cfg(18, 19);
         cfg.spi_mode = 2;
 
@@ -1349,7 +1349,7 @@ TEST_CASE("SPI mode configuration") {
         spi.end();
     }
 
-    SUBCASE("Mode 3 generates warning but initialization succeeds") {
+    FL_SUBCASE("Mode 3 generates warning but initialization succeeds") {
         Config cfg(18, 19);
         cfg.spi_mode = 3;
 
@@ -1360,7 +1360,7 @@ TEST_CASE("SPI mode configuration") {
         spi.end();
     }
 
-    SUBCASE("Invalid mode (>3) is rejected") {
+    FL_SUBCASE("Invalid mode (>3) is rejected") {
         Config cfg(18, 19);
         cfg.spi_mode = 4;  // Invalid
 
@@ -1369,7 +1369,7 @@ TEST_CASE("SPI mode configuration") {
         FL_CHECK(result.has_value());  // Error present means failure
     }
 
-    SUBCASE("Invalid mode (255) is rejected") {
+    FL_SUBCASE("Invalid mode (255) is rejected") {
         Config cfg(18, 19);
         cfg.spi_mode = 255;  // Very invalid
 
@@ -1378,7 +1378,7 @@ TEST_CASE("SPI mode configuration") {
         FL_CHECK(result.has_value());  // Error present means failure
     }
 
-    SUBCASE("Mode configuration is preserved in getConfig()") {
+    FL_SUBCASE("Mode configuration is preserved in getConfig()") {
         Config cfg(18, 19);
         cfg.spi_mode = 2;
 

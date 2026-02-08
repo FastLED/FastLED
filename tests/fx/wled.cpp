@@ -3,7 +3,7 @@
 #include "mock_fastled.h"
 #include "fl/stl/cstddef.h"
 #include "crgb.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/fx/wled/client.h"
 #include "fl/rgb8.h"
 #include "fl/slice.h"
@@ -11,39 +11,39 @@
 
 using namespace fl;
 
-TEST_CASE("WLEDClient construction") {
+FL_TEST_CASE("WLEDClient construction") {
     auto mock = fl::make_shared<MockFastLED>(50);
     WLEDClient client(mock);
 
-    SUBCASE("Initial state is off with max brightness") {
+    FL_SUBCASE("Initial state is off with max brightness") {
         FL_CHECK(client.getOn() == false);
         FL_CHECK(client.getBrightness() == 255);
     }
 
-    SUBCASE("LED count is accessible") {
+    FL_SUBCASE("LED count is accessible") {
         FL_CHECK(client.getNumLEDs() == 50);
     }
 }
 
-TEST_CASE("WLEDClient brightness control") {
+FL_TEST_CASE("WLEDClient brightness control") {
     auto mock = fl::make_shared<MockFastLED>(50);
     WLEDClient client(mock);
 
-    SUBCASE("Setting brightness when off does not affect controller") {
+    FL_SUBCASE("Setting brightness when off does not affect controller") {
         client.setBrightness(128);
         FL_CHECK(client.getBrightness() == 128);
         // Controller should still have default brightness (not changed)
         FL_CHECK(mock->getBrightness() == 255);
     }
 
-    SUBCASE("Setting brightness when on applies to controller") {
+    FL_SUBCASE("Setting brightness when on applies to controller") {
         client.setOn(true);
         client.setBrightness(128);
         FL_CHECK(client.getBrightness() == 128);
         FL_CHECK(mock->getBrightness() == 128);
     }
 
-    SUBCASE("Brightness is preserved when turning off and on") {
+    FL_SUBCASE("Brightness is preserved when turning off and on") {
         client.setBrightness(100);
         client.setOn(true);
         FL_CHECK(mock->getBrightness() == 100);
@@ -57,18 +57,18 @@ TEST_CASE("WLEDClient brightness control") {
     }
 }
 
-TEST_CASE("WLEDClient on/off control") {
+FL_TEST_CASE("WLEDClient on/off control") {
     auto mock = fl::make_shared<MockFastLED>(50);
     WLEDClient client(mock);
 
-    SUBCASE("Turning on applies current brightness") {
+    FL_SUBCASE("Turning on applies current brightness") {
         client.setBrightness(150);
         client.setOn(true);
         FL_CHECK(client.getOn() == true);
         FL_CHECK(mock->getBrightness() == 150);
     }
 
-    SUBCASE("Turning off sets controller brightness to 0") {
+    FL_SUBCASE("Turning off sets controller brightness to 0") {
         client.setBrightness(200);
         client.setOn(true);
         client.setOn(false);
@@ -76,7 +76,7 @@ TEST_CASE("WLEDClient on/off control") {
         FL_CHECK(mock->getBrightness() == 0);
     }
 
-    SUBCASE("Multiple on/off cycles") {
+    FL_SUBCASE("Multiple on/off cycles") {
         client.setBrightness(80);
 
         for (int i = 0; i < 3; i++) {
@@ -89,23 +89,23 @@ TEST_CASE("WLEDClient on/off control") {
     }
 }
 
-TEST_CASE("WLEDClient clear operation") {
+FL_TEST_CASE("WLEDClient clear operation") {
     auto mock = fl::make_shared<MockFastLED>(50);
     WLEDClient client(mock);
 
-    SUBCASE("Clear without write increments clear count but not show count") {
+    FL_SUBCASE("Clear without write increments clear count but not show count") {
         client.clear(false);
         FL_CHECK(mock->getClearCallCount() == 1);
         FL_CHECK(mock->getShowCallCount() == 0);
     }
 
-    SUBCASE("Clear with write increments both clear and show count") {
+    FL_SUBCASE("Clear with write increments both clear and show count") {
         client.clear(true);
         FL_CHECK(mock->getClearCallCount() == 1);
         FL_CHECK(mock->getShowCallCount() == 1);
     }
 
-    SUBCASE("Clear sets all LEDs to black") {
+    FL_SUBCASE("Clear sets all LEDs to black") {
         // Set some LEDs to colors first
         auto leds = client.getLEDs();
         for (size_t i = 0; i < leds.size(); i++) {
@@ -122,11 +122,11 @@ TEST_CASE("WLEDClient clear operation") {
     }
 }
 
-TEST_CASE("WLEDClient update operation") {
+FL_TEST_CASE("WLEDClient update operation") {
     auto mock = fl::make_shared<MockFastLED>(50);
     WLEDClient client(mock);
 
-    SUBCASE("Update calls show on controller") {
+    FL_SUBCASE("Update calls show on controller") {
         client.update();
         FL_CHECK(mock->getShowCallCount() == 1);
 
@@ -134,7 +134,7 @@ TEST_CASE("WLEDClient update operation") {
         FL_CHECK(mock->getShowCallCount() == 2);
     }
 
-    SUBCASE("LED changes are visible after update") {
+    FL_SUBCASE("LED changes are visible after update") {
         auto leds = client.getLEDs();
         leds[0] = CRGB::Red;
         leds[1] = CRGB::Green;
@@ -149,11 +149,11 @@ TEST_CASE("WLEDClient update operation") {
     }
 }
 
-TEST_CASE("WLEDClient LED array access") {
+FL_TEST_CASE("WLEDClient LED array access") {
     auto mock = fl::make_shared<MockFastLED>(50);
     WLEDClient client(mock);
 
-    SUBCASE("Can read and write LEDs directly") {
+    FL_SUBCASE("Can read and write LEDs directly") {
         auto leds = client.getLEDs();
         FL_CHECK(leds.size() == 50);
 
@@ -177,11 +177,11 @@ TEST_CASE("WLEDClient LED array access") {
     }
 }
 
-TEST_CASE("WLEDClient complete workflow") {
+FL_TEST_CASE("WLEDClient complete workflow") {
     auto mock = fl::make_shared<MockFastLED>(50);
     WLEDClient client(mock);
 
-    SUBCASE("Typical usage pattern") {
+    FL_SUBCASE("Typical usage pattern") {
         // Set brightness and turn on
         client.setBrightness(128);
         client.setOn(true);
@@ -213,10 +213,10 @@ TEST_CASE("WLEDClient complete workflow") {
     }
 }
 
-TEST_CASE("WLEDClient null controller handling") {
+FL_TEST_CASE("WLEDClient null controller handling") {
     WLEDClient client(nullptr);
 
-    SUBCASE("Operations with null controller don't crash") {
+    FL_SUBCASE("Operations with null controller don't crash") {
         FL_CHECK(client.getNumLEDs() == 0);
         FL_CHECK(client.getLEDs().size() == 0);
 
@@ -228,11 +228,11 @@ TEST_CASE("WLEDClient null controller handling") {
     }
 }
 
-TEST_CASE("WLEDClient segment operations") {
+FL_TEST_CASE("WLEDClient segment operations") {
     auto mock = fl::make_shared<MockFastLED>(100);
     WLEDClient client(mock);
 
-    SUBCASE("Set segment restricts LED access to range") {
+    FL_SUBCASE("Set segment restricts LED access to range") {
         // Set segment to LEDs 10-20
         client.setSegment(10, 20);
 
@@ -254,7 +254,7 @@ TEST_CASE("WLEDClient segment operations") {
         }
     }
 
-    SUBCASE("Clear segment restores full array access") {
+    FL_SUBCASE("Clear segment restores full array access") {
         // Set a segment first
         client.setSegment(20, 30);
         FL_CHECK(client.getNumLEDs() == 10);
@@ -268,7 +268,7 @@ TEST_CASE("WLEDClient segment operations") {
         FL_CHECK(client.getNumLEDs() == 100);
     }
 
-    SUBCASE("Multiple segment operations") {
+    FL_SUBCASE("Multiple segment operations") {
         // First segment
         client.setSegment(0, 25);
         FL_CHECK(client.getNumLEDs() == 25);
@@ -317,7 +317,7 @@ TEST_CASE("WLEDClient segment operations") {
         FL_CHECK(mock->getShowCallCount() == 3);
     }
 
-    SUBCASE("Segment with clear operation") {
+    FL_SUBCASE("Segment with clear operation") {
         // Fill full array first (no segment set yet)
         auto leds = client.getLEDs();
         for (size_t i = 0; i < leds.size(); i++) {
@@ -344,11 +344,11 @@ TEST_CASE("WLEDClient segment operations") {
     }
 }
 
-TEST_CASE("WLEDClient color correction and temperature") {
+FL_TEST_CASE("WLEDClient color correction and temperature") {
     auto mock = fl::make_shared<MockFastLED>(50);
     WLEDClient client(mock);
 
-    SUBCASE("Set color correction") {
+    FL_SUBCASE("Set color correction") {
         CRGB correction(255, 200, 150);
         client.setCorrection(correction);
 
@@ -356,7 +356,7 @@ TEST_CASE("WLEDClient color correction and temperature") {
         FL_CHECK(mock->getLastCorrection() == correction);
     }
 
-    SUBCASE("Set color temperature") {
+    FL_SUBCASE("Set color temperature") {
         CRGB temperature(255, 220, 180);
         client.setTemperature(temperature);
 
@@ -364,7 +364,7 @@ TEST_CASE("WLEDClient color correction and temperature") {
         FL_CHECK(mock->getLastTemperature() == temperature);
     }
 
-    SUBCASE("Apply both correction and temperature") {
+    FL_SUBCASE("Apply both correction and temperature") {
         CRGB correction(250, 180, 200);
         CRGB temperature(255, 230, 190);
 
@@ -375,7 +375,7 @@ TEST_CASE("WLEDClient color correction and temperature") {
         FL_CHECK(mock->getLastTemperature() == temperature);
     }
 
-    SUBCASE("Typical white balance workflow") {
+    FL_SUBCASE("Typical white balance workflow") {
         // Set warm white temperature
         client.setTemperature(CRGB(255, 230, 180));
 
@@ -393,17 +393,17 @@ TEST_CASE("WLEDClient color correction and temperature") {
     }
 }
 
-TEST_CASE("WLEDClient max refresh rate") {
+FL_TEST_CASE("WLEDClient max refresh rate") {
     auto mock = fl::make_shared<MockFastLED>(50);
     WLEDClient client(mock);
 
-    SUBCASE("Set and get max refresh rate") {
+    FL_SUBCASE("Set and get max refresh rate") {
         client.setMaxRefreshRate(60);
         FL_CHECK(client.getMaxRefreshRate() == 60);
         FL_CHECK(mock->getMaxRefreshRate() == 60);
     }
 
-    SUBCASE("Change max refresh rate multiple times") {
+    FL_SUBCASE("Change max refresh rate multiple times") {
         client.setMaxRefreshRate(30);
         FL_CHECK(client.getMaxRefreshRate() == 30);
 
@@ -414,7 +414,7 @@ TEST_CASE("WLEDClient max refresh rate") {
         FL_CHECK(client.getMaxRefreshRate() == 0);
     }
 
-    SUBCASE("Max refresh rate with rapid updates") {
+    FL_SUBCASE("Max refresh rate with rapid updates") {
         client.setMaxRefreshRate(60);
 
         // Rapidly update
@@ -427,11 +427,11 @@ TEST_CASE("WLEDClient max refresh rate") {
     }
 }
 
-TEST_CASE("WLEDClient advanced integration workflow") {
+FL_TEST_CASE("WLEDClient advanced integration workflow") {
     auto mock = fl::make_shared<MockFastLED>(100);
     WLEDClient client(mock);
 
-    SUBCASE("Complete advanced feature workflow") {
+    FL_SUBCASE("Complete advanced feature workflow") {
         // Setup color correction and temperature
         client.setCorrection(CRGB(255, 200, 150));
         client.setTemperature(CRGB(255, 230, 180));

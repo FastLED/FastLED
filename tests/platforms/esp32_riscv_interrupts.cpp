@@ -7,10 +7,10 @@
 // code structure and documentation rather than runtime behavior.
 // Actual hardware/QEMU testing is done separately.
 
-#include "doctest.h"
+#include "test.h"
 
 // Simplified test that works on host platform
-TEST_CASE("riscv_interrupts_documentation_exists") {
+FL_TEST_CASE("riscv_interrupts_documentation_exists") {
     // This test verifies that the ESP32 interrupt documentation exists
     // and that the project structure is intact.
     //
@@ -34,7 +34,7 @@ static void FL_IRAM test_interrupt_handler(void *arg) {
     // Test handler - does nothing
 }
 
-TEST_CASE("riscv_interrupt_constants") {
+FL_TEST_CASE("riscv_interrupt_constants") {
     // Verify that the constants are defined correctly
 
     #ifdef CONFIG_IDF_TARGET_ESP32C3
@@ -50,7 +50,7 @@ TEST_CASE("riscv_interrupt_constants") {
     FL_CHECK(FASTLED_RISCV_PRIORITY_LOW == 1);
 }
 
-TEST_CASE("riscv_interrupt_install_validation") {
+FL_TEST_CASE("riscv_interrupt_install_validation") {
     // Test parameter validation for interrupt installation
 
     esp_intr_handle_t handle = nullptr;
@@ -76,7 +76,7 @@ TEST_CASE("riscv_interrupt_install_validation") {
     FL_CHECK(err == ESP_ERR_INVALID_ARG);
 }
 
-TEST_CASE("riscv_experimental_interrupt_validation") {
+FL_TEST_CASE("riscv_experimental_interrupt_validation") {
     // Test experimental interrupt priority validation
     // NOTE: Experimental interrupts (priority 4-7) are NOT SUPPORTED because
     // they require assembly handlers per ESP-IDF documentation.
@@ -104,7 +104,7 @@ TEST_CASE("riscv_experimental_interrupt_validation") {
     FL_CHECK(err == ESP_ERR_NOT_SUPPORTED);
 }
 
-TEST_CASE("riscv_rmt_init_validation") {
+FL_TEST_CASE("riscv_rmt_init_validation") {
     // Test RMT initialization parameter validation
     // NOTE: Experimental RMT (priority 4-7) is NOT SUPPORTED because
     // it requires assembly handlers per ESP-IDF documentation.
@@ -140,7 +140,7 @@ TEST_CASE("riscv_rmt_init_validation") {
     FL_CHECK(err == ESP_ERR_NOT_SUPPORTED);
 }
 
-TEST_CASE("riscv_handler_functions_exist") {
+FL_TEST_CASE("riscv_handler_functions_exist") {
     // Verify that all declared handler functions exist and can be referenced
 
     // These should compile without errors if functions are properly declared
@@ -156,7 +156,7 @@ TEST_CASE("riscv_handler_functions_exist") {
     FL_CHECK(rmt_experimental_handler != nullptr);
 }
 
-TEST_CASE("riscv_interrupt_trampoline_macro") {
+FL_TEST_CASE("riscv_interrupt_trampoline_macro") {
     // Test that the FASTLED_ESP_RISCV_INTERRUPT_TRAMPOLINE macro works
 
     static int call_count = 0;
@@ -181,7 +181,7 @@ TEST_CASE("riscv_interrupt_trampoline_macro") {
 
 #else
 // Not ESP32-C3/C6 RISC-V platform - provide dummy test
-TEST_CASE("riscv_interrupts_not_applicable") {
+FL_TEST_CASE("riscv_interrupts_not_applicable") {
     // This platform does not support RISC-V interrupts
     FL_CHECK(true);
 }

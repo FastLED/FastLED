@@ -3,10 +3,10 @@
 
 #include "fl/time_alpha.h"
 #include "fl/stl/cstdint.h"
-#include "doctest.h"
+#include "test.h"
 
 
-TEST_CASE("Test transition ramp") {
+FL_TEST_CASE("Test transition ramp") {
     // total latch = 100 ms, ramp‑up = 10 ms, ramp‑down = 10 ms
     fl::TimeRamp ramp(10, 100, 10);
     uint32_t t0 = 0;
@@ -50,7 +50,7 @@ TEST_CASE("Test transition ramp") {
     FL_REQUIRE(ramp.update8(410) == 0);
 }
 
-TEST_CASE("Real world Bug") {
+FL_TEST_CASE("Real world Bug") {
     fl::TimeRamp transition = fl::TimeRamp(500, 0, 500);
 
     uint8_t value = transition.update8(0);

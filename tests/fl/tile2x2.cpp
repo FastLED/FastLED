@@ -3,13 +3,13 @@
 
 #include "fl/tile2x2.h"
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/geometry.h"
 
 
 // Test basic fl::Tile2x2_u8 functionality
 // Verifies that a 2x2 tile can be created and values can be set/retrieved correctly
-TEST_CASE("Tile2x2_u8") {
+FL_TEST_CASE("Tile2x2_u8") {
     fl::Tile2x2_u8 tile;
     // Set the origin point of the tile
     tile.setOrigin(1, 1);
@@ -28,7 +28,7 @@ TEST_CASE("Tile2x2_u8") {
 
 // Test fl::Tile2x2_u8_wrap functionality
 // Verifies that a wrapped tile correctly maps coordinates to their wrapped positions
-TEST_CASE("Tile2x2_u8_wrap") {
+FL_TEST_CASE("Tile2x2_u8_wrap") {
     fl::Tile2x2_u8 tile;
     tile.setOrigin(4, 4);
     // Initialize the base tile with values
@@ -52,7 +52,7 @@ TEST_CASE("Tile2x2_u8_wrap") {
 }
 
 // Test fl::Tile2x2_u8_wrap wrap-around behavior
-TEST_CASE("Tile2x2_u8_wrap wrap-around test with width and height") {
+FL_TEST_CASE("Tile2x2_u8_wrap wrap-around test with width and height") {
     // Initialize a fl::Tile2x2_u8 with known values and set origin beyond boundaries
     fl::Tile2x2_u8 originalTile;
     originalTile.setOrigin(3, 3); // Set the origin beyond the width and height
@@ -84,7 +84,7 @@ TEST_CASE("Tile2x2_u8_wrap wrap-around test with width and height") {
 }
 
 // Test fl::Tile2x2_u8_wrap conversion with width and height
-TEST_CASE("Tile2x2_u8_wrap conversion with width and height") {
+FL_TEST_CASE("Tile2x2_u8_wrap conversion with width and height") {
     // Initialize a fl::Tile2x2_u8 with known values
     fl::Tile2x2_u8 originalTile;
     originalTile.setOrigin(0, 0); // Set the origin to (0, 0)
@@ -106,7 +106,7 @@ TEST_CASE("Tile2x2_u8_wrap conversion with width and height") {
 }
 
 // Test fl::Tile2x2_u8_wrap conversion with width only
-TEST_CASE("Tile2x2_u8_wrap conversion test") {
+FL_TEST_CASE("Tile2x2_u8_wrap conversion test") {
     // Initialize a fl::Tile2x2_u8 with known values and a specific origin
     fl::Tile2x2_u8 originalTile;
     originalTile.setOrigin(50, 50); // Set the origin to (50, 50)
@@ -132,7 +132,7 @@ TEST_CASE("Tile2x2_u8_wrap conversion test") {
     FL_REQUIRE_EQ(cycTile.at(3, 3).second, 4); // Wraps around to (1, 1)
 }
 
-TEST_CASE("Tile2x2_u8_wrap wrap-around test with width and height") {
+FL_TEST_CASE("Tile2x2_u8_wrap wrap-around test with width and height") {
     // Initialize a fl::Tile2x2_u8 with known values and set origin beyond boundaries
     fl::Tile2x2_u8 originalTile;
     originalTile.setOrigin(3, 3); // Set the origin beyond the width and height
@@ -163,9 +163,9 @@ TEST_CASE("Tile2x2_u8_wrap wrap-around test with width and height") {
     FL_REQUIRE_EQ(cycTile.at(1, 1).second, 4);
 }
 
-TEST_CASE("Tile2x2_u8_wrap::Interpolate") {
+FL_TEST_CASE("Tile2x2_u8_wrap::Interpolate") {
 
-    SUBCASE("Basic interpolation") {
+    FL_SUBCASE("Basic interpolation") {
         // Create test tiles by converting from regular fl::Tile2x2_u8
         fl::Tile2x2_u8 base_a, base_b;
         base_a.setOrigin(0, 0);
@@ -205,7 +205,7 @@ TEST_CASE("Tile2x2_u8_wrap::Interpolate") {
         FL_CHECK(interpolated.at(1, 1).first.y == 1);
     }
     
-    SUBCASE("Edge cases") {
+    FL_SUBCASE("Edge cases") {
         // Create simple test tiles
         fl::Tile2x2_u8 base_a, base_b;
         base_a.setOrigin(0, 0);

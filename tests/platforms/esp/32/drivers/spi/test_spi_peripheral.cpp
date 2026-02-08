@@ -15,7 +15,7 @@
 
 #include "platforms/shared/mock/esp/32/drivers/spi_peripheral_mock.h"
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/slice.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/vector.h"
@@ -64,7 +64,7 @@ static void testCallback(void* trans) {
 // Bus Lifecycle Tests
 //=============================================================================
 
-TEST_CASE("SpiPeripheralMock - initialize bus") {
+FL_TEST_CASE("SpiPeripheralMock - initialize bus") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -79,7 +79,7 @@ TEST_CASE("SpiPeripheralMock - initialize bus") {
     FL_CHECK_EQ(stored.sclk_pin, 18);
 }
 
-TEST_CASE("SpiPeripheralMock - initialize bus with invalid config") {
+FL_TEST_CASE("SpiPeripheralMock - initialize bus with invalid config") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -89,7 +89,7 @@ TEST_CASE("SpiPeripheralMock - initialize bus with invalid config") {
     FL_CHECK_FALSE(mock.isInitialized());
 }
 
-TEST_CASE("SpiPeripheralMock - double initialization fails") {
+FL_TEST_CASE("SpiPeripheralMock - double initialization fails") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -101,7 +101,7 @@ TEST_CASE("SpiPeripheralMock - double initialization fails") {
     FL_CHECK_FALSE(mock.initializeBus(config));
 }
 
-TEST_CASE("SpiPeripheralMock - free bus") {
+FL_TEST_CASE("SpiPeripheralMock - free bus") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -111,14 +111,14 @@ TEST_CASE("SpiPeripheralMock - free bus") {
     FL_CHECK_FALSE(mock.isInitialized());
 }
 
-TEST_CASE("SpiPeripheralMock - free uninitialized bus fails") {
+FL_TEST_CASE("SpiPeripheralMock - free uninitialized bus fails") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
     FL_CHECK_FALSE(mock.freeBus());
 }
 
-TEST_CASE("SpiPeripheralMock - free bus with device attached fails") {
+FL_TEST_CASE("SpiPeripheralMock - free bus with device attached fails") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -140,7 +140,7 @@ TEST_CASE("SpiPeripheralMock - free bus with device attached fails") {
 // Device Management Tests
 //=============================================================================
 
-TEST_CASE("SpiPeripheralMock - add device") {
+FL_TEST_CASE("SpiPeripheralMock - add device") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -157,7 +157,7 @@ TEST_CASE("SpiPeripheralMock - add device") {
     FL_CHECK_EQ(stored.queue_size, 3);
 }
 
-TEST_CASE("SpiPeripheralMock - add device without bus fails") {
+FL_TEST_CASE("SpiPeripheralMock - add device without bus fails") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -166,7 +166,7 @@ TEST_CASE("SpiPeripheralMock - add device without bus fails") {
     FL_CHECK_FALSE(mock.hasDevice());
 }
 
-TEST_CASE("SpiPeripheralMock - add device with invalid config fails") {
+FL_TEST_CASE("SpiPeripheralMock - add device with invalid config fails") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -182,7 +182,7 @@ TEST_CASE("SpiPeripheralMock - add device with invalid config fails") {
     FL_CHECK_FALSE(mock.addDevice(bad_queue));
 }
 
-TEST_CASE("SpiPeripheralMock - double add device fails") {
+FL_TEST_CASE("SpiPeripheralMock - double add device fails") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -196,7 +196,7 @@ TEST_CASE("SpiPeripheralMock - double add device fails") {
     FL_CHECK_FALSE(mock.addDevice(device_config));
 }
 
-TEST_CASE("SpiPeripheralMock - remove device") {
+FL_TEST_CASE("SpiPeripheralMock - remove device") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -211,7 +211,7 @@ TEST_CASE("SpiPeripheralMock - remove device") {
     FL_CHECK_FALSE(mock.hasDevice());
 }
 
-TEST_CASE("SpiPeripheralMock - remove non-existent device fails") {
+FL_TEST_CASE("SpiPeripheralMock - remove non-existent device fails") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -222,7 +222,7 @@ TEST_CASE("SpiPeripheralMock - remove non-existent device fails") {
 // Transaction Queuing Tests
 //=============================================================================
 
-TEST_CASE("SpiPeripheralMock - queue single transaction") {
+FL_TEST_CASE("SpiPeripheralMock - queue single transaction") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -243,7 +243,7 @@ TEST_CASE("SpiPeripheralMock - queue single transaction") {
     FL_CHECK_EQ(mock.getTransactionCount(), 1);
 }
 
-TEST_CASE("SpiPeripheralMock - queue transaction without device fails") {
+FL_TEST_CASE("SpiPeripheralMock - queue transaction without device fails") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -256,7 +256,7 @@ TEST_CASE("SpiPeripheralMock - queue transaction without device fails") {
     FL_CHECK_FALSE(mock.queueTransaction(trans));
 }
 
-TEST_CASE("SpiPeripheralMock - queue transaction without bus fails") {
+FL_TEST_CASE("SpiPeripheralMock - queue transaction without bus fails") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -266,7 +266,7 @@ TEST_CASE("SpiPeripheralMock - queue transaction without bus fails") {
     FL_CHECK_FALSE(mock.queueTransaction(trans));
 }
 
-TEST_CASE("SpiPeripheralMock - queue multiple transactions") {
+FL_TEST_CASE("SpiPeripheralMock - queue multiple transactions") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -290,7 +290,7 @@ TEST_CASE("SpiPeripheralMock - queue multiple transactions") {
     FL_CHECK_EQ(mock.getTransactionCount(), 3);
 }
 
-TEST_CASE("SpiPeripheralMock - queue overflow") {
+FL_TEST_CASE("SpiPeripheralMock - queue overflow") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -314,7 +314,7 @@ TEST_CASE("SpiPeripheralMock - queue overflow") {
     FL_CHECK_EQ(mock.getQueuedTransactionCount(), 2);
 }
 
-TEST_CASE("SpiPeripheralMock - transaction failure injection") {
+FL_TEST_CASE("SpiPeripheralMock - transaction failure injection") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -343,7 +343,7 @@ TEST_CASE("SpiPeripheralMock - transaction failure injection") {
 // Transaction History Tests
 //=============================================================================
 
-TEST_CASE("SpiPeripheralMock - capture transaction data") {
+FL_TEST_CASE("SpiPeripheralMock - capture transaction data") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -372,7 +372,7 @@ TEST_CASE("SpiPeripheralMock - capture transaction data") {
     FL_CHECK_EQ(record.buffer_copy[3], 0xEF);
 }
 
-TEST_CASE("SpiPeripheralMock - get last transaction data") {
+FL_TEST_CASE("SpiPeripheralMock - get last transaction data") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -400,7 +400,7 @@ TEST_CASE("SpiPeripheralMock - get last transaction data") {
     FL_CHECK_EQ(last_data[3], 0xBE);
 }
 
-TEST_CASE("SpiPeripheralMock - clear transaction history") {
+FL_TEST_CASE("SpiPeripheralMock - clear transaction history") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -430,7 +430,7 @@ TEST_CASE("SpiPeripheralMock - clear transaction history") {
 // Callback Tests
 //=============================================================================
 
-TEST_CASE("SpiPeripheralMock - register callback") {
+FL_TEST_CASE("SpiPeripheralMock - register callback") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -442,7 +442,7 @@ TEST_CASE("SpiPeripheralMock - register callback") {
     FL_CHECK(mock.registerCallback(callback, nullptr));
 }
 
-TEST_CASE("SpiPeripheralMock - register callback without bus fails") {
+FL_TEST_CASE("SpiPeripheralMock - register callback without bus fails") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -450,7 +450,7 @@ TEST_CASE("SpiPeripheralMock - register callback without bus fails") {
     FL_CHECK_FALSE(mock.registerCallback(callback, nullptr));
 }
 
-TEST_CASE("SpiPeripheralMock - simulate transaction complete triggers callback") {
+FL_TEST_CASE("SpiPeripheralMock - simulate transaction complete triggers callback") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -481,7 +481,7 @@ TEST_CASE("SpiPeripheralMock - simulate transaction complete triggers callback")
 // DMA Memory Allocation Tests
 //=============================================================================
 
-TEST_CASE("SpiPeripheralMock - allocate DMA buffer") {
+FL_TEST_CASE("SpiPeripheralMock - allocate DMA buffer") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -497,7 +497,7 @@ TEST_CASE("SpiPeripheralMock - allocate DMA buffer") {
     mock.freeDma(buffer);
 }
 
-TEST_CASE("SpiPeripheralMock - allocate DMA buffer with alignment") {
+FL_TEST_CASE("SpiPeripheralMock - allocate DMA buffer with alignment") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -512,7 +512,7 @@ TEST_CASE("SpiPeripheralMock - allocate DMA buffer with alignment") {
     mock.freeDma(buffer);
 }
 
-TEST_CASE("SpiPeripheralMock - free nullptr is safe") {
+FL_TEST_CASE("SpiPeripheralMock - free nullptr is safe") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -524,7 +524,7 @@ TEST_CASE("SpiPeripheralMock - free nullptr is safe") {
 // State Inspection Tests
 //=============================================================================
 
-TEST_CASE("SpiPeripheralMock - canQueueTransaction") {
+FL_TEST_CASE("SpiPeripheralMock - canQueueTransaction") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -550,7 +550,7 @@ TEST_CASE("SpiPeripheralMock - canQueueTransaction") {
     FL_CHECK_FALSE(mock.canQueueTransaction());
 }
 
-TEST_CASE("SpiPeripheralMock - reset clears all state") {
+FL_TEST_CASE("SpiPeripheralMock - reset clears all state") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -582,7 +582,7 @@ TEST_CASE("SpiPeripheralMock - reset clears all state") {
 // Multi-Lane Configuration Tests
 //=============================================================================
 
-TEST_CASE("SpiPeripheralMock - dual-lane bus configuration") {
+FL_TEST_CASE("SpiPeripheralMock - dual-lane bus configuration") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -596,7 +596,7 @@ TEST_CASE("SpiPeripheralMock - dual-lane bus configuration") {
     FL_CHECK_EQ(stored.sclk_pin, 18);
 }
 
-TEST_CASE("SpiPeripheralMock - quad-lane bus configuration") {
+FL_TEST_CASE("SpiPeripheralMock - quad-lane bus configuration") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
@@ -616,7 +616,7 @@ TEST_CASE("SpiPeripheralMock - quad-lane bus configuration") {
 // Platform Utility Tests
 //=============================================================================
 
-TEST_CASE("SpiPeripheralMock - getMicroseconds") {
+FL_TEST_CASE("SpiPeripheralMock - getMicroseconds") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 

@@ -3,7 +3,7 @@
 #include "fl/simd.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 
 using namespace fl;
 
@@ -11,7 +11,7 @@ using namespace fl;
 // Atomic Load/Store Tests
 //==============================================================================
 
-TEST_CASE("load_u8_16 loads 16 bytes correctly") {
+FL_TEST_CASE("load_u8_16 loads 16 bytes correctly") {
     uint8_t src[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
     uint8_t dst[16] = {0};
 
@@ -23,7 +23,7 @@ TEST_CASE("load_u8_16 loads 16 bytes correctly") {
     }
 }
 
-TEST_CASE("load_u32_4 loads 4 uint32_t correctly") {
+FL_TEST_CASE("load_u32_4 loads 4 uint32_t correctly") {
     uint32_t src[4] = {0x12345678, 0xABCDEF00, 0xDEADBEEF, 0xCAFEBABE};
     uint32_t dst[4] = {0};
 
@@ -35,7 +35,7 @@ TEST_CASE("load_u32_4 loads 4 uint32_t correctly") {
     }
 }
 
-TEST_CASE("store_u8_16 stores 16 bytes correctly") {
+FL_TEST_CASE("store_u8_16 stores 16 bytes correctly") {
     uint8_t buffer[32] = {0};  // Extra space to check bounds
     uint8_t pattern[16] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160};
 
@@ -54,7 +54,7 @@ TEST_CASE("store_u8_16 stores 16 bytes correctly") {
     }
 }
 
-TEST_CASE("store_u32_4 stores 4 uint32_t correctly") {
+FL_TEST_CASE("store_u32_4 stores 4 uint32_t correctly") {
     uint32_t buffer[8] = {0};  // Extra space to check bounds
     uint32_t pattern[4] = {0x11111111, 0x22222222, 0x33333333, 0x44444444};
 
@@ -77,7 +77,7 @@ TEST_CASE("store_u32_4 stores 4 uint32_t correctly") {
 // Arithmetic Operation Tests
 //==============================================================================
 
-TEST_CASE("add_sat_u8_16 adds without overflow") {
+FL_TEST_CASE("add_sat_u8_16 adds without overflow") {
     uint8_t a[16] = {100, 150, 200, 255, 0, 50, 100, 150, 200, 255, 0, 50, 100, 150, 200, 255};
     uint8_t b[16] = { 50, 100, 150, 200, 0, 50, 100, 150, 200, 255, 0, 50, 100, 150, 200, 255};
     uint8_t dst[16];
@@ -96,7 +96,7 @@ TEST_CASE("add_sat_u8_16 adds without overflow") {
     FL_REQUIRE(dst[5] == 100);   // 50 + 50 = 100
 }
 
-TEST_CASE("add_sat_u8_16 handles edge cases") {
+FL_TEST_CASE("add_sat_u8_16 handles edge cases") {
     // All zeros
     {
         uint8_t a[16] = {0};
@@ -130,7 +130,7 @@ TEST_CASE("add_sat_u8_16 handles edge cases") {
     }
 }
 
-TEST_CASE("scale_u8_16 scales values correctly") {
+FL_TEST_CASE("scale_u8_16 scales values correctly") {
     uint8_t src[16] = {0, 64, 128, 192, 255, 100, 200, 50, 10, 20, 30, 40, 60, 80, 120, 160};
     uint8_t dst[16];
 
@@ -146,7 +146,7 @@ TEST_CASE("scale_u8_16 scales values correctly") {
     FL_REQUIRE(dst[4] == 127);    // 255 * 128/256 = 127
 }
 
-TEST_CASE("scale_u8_16 handles identity scaling") {
+FL_TEST_CASE("scale_u8_16 handles identity scaling") {
     uint8_t src[16] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160};
     uint8_t dst[16];
 
@@ -162,7 +162,7 @@ TEST_CASE("scale_u8_16 handles identity scaling") {
     }
 }
 
-TEST_CASE("scale_u8_16 handles zero scaling") {
+FL_TEST_CASE("scale_u8_16 handles zero scaling") {
     uint8_t src[16] = {100, 150, 200, 255, 50, 75, 125, 175, 10, 20, 30, 40, 60, 80, 120, 160};
     uint8_t dst[16];
 
@@ -176,7 +176,7 @@ TEST_CASE("scale_u8_16 handles zero scaling") {
     }
 }
 
-TEST_CASE("set1_u32_4 broadcasts value to all lanes") {
+FL_TEST_CASE("set1_u32_4 broadcasts value to all lanes") {
     uint32_t dst[4];
     uint32_t pattern = 0xDEADBEEF;
 
@@ -188,7 +188,7 @@ TEST_CASE("set1_u32_4 broadcasts value to all lanes") {
     }
 }
 
-TEST_CASE("set1_u32_4 works with different patterns") {
+FL_TEST_CASE("set1_u32_4 works with different patterns") {
     uint32_t dst[4];
 
     // Test with 0xFFFFFFFF
@@ -219,7 +219,7 @@ TEST_CASE("set1_u32_4 works with different patterns") {
     }
 }
 
-TEST_CASE("blend_u8_16 blends two vectors correctly") {
+FL_TEST_CASE("blend_u8_16 blends two vectors correctly") {
     uint8_t a[16] = {0, 0, 0, 0, 100, 100, 100, 100, 200, 200, 200, 200, 50, 75, 125, 150};
     uint8_t b[16] = {255, 255, 255, 255, 200, 200, 200, 200, 100, 100, 100, 100, 150, 175, 225, 250};
     uint8_t dst[16];
@@ -238,7 +238,7 @@ TEST_CASE("blend_u8_16 blends two vectors correctly") {
     FL_REQUIRE(dst[12] == 100);  // 50 + ((150 - 50) * 128) / 256 = 100
 }
 
-TEST_CASE("blend_u8_16 handles edge cases") {
+FL_TEST_CASE("blend_u8_16 handles edge cases") {
     uint8_t a[16] = {100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100};
     uint8_t b[16] = {200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200};
     uint8_t dst[16];
@@ -269,7 +269,7 @@ TEST_CASE("blend_u8_16 handles edge cases") {
     }
 }
 
-TEST_CASE("blend_u8_16 handles blending extremes") {
+FL_TEST_CASE("blend_u8_16 handles blending extremes") {
     uint8_t a[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     uint8_t b[16] = {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
     uint8_t dst[16];
@@ -299,7 +299,7 @@ TEST_CASE("blend_u8_16 handles blending extremes") {
 // Composed Operations (Cache-Efficient Pipelines)
 //==============================================================================
 
-TEST_CASE("composed operations: scale then add in single loop") {
+FL_TEST_CASE("composed operations: scale then add in single loop") {
     // Demonstrate cache-efficient pattern: scale then add in one pass
     uint8_t src[64];
     uint8_t other[64];
@@ -347,7 +347,7 @@ TEST_CASE("composed operations: scale then add in single loop") {
     }
 }
 
-TEST_CASE("composed operations: pattern fill with set1 and store") {
+FL_TEST_CASE("composed operations: pattern fill with set1 and store") {
     uint32_t buffer[64];
 
     // Use atomic operations to fill pattern
@@ -370,7 +370,7 @@ TEST_CASE("composed operations: pattern fill with set1 and store") {
     }
 }
 
-TEST_CASE("composed operations: multiple adds in sequence") {
+FL_TEST_CASE("composed operations: multiple adds in sequence") {
     uint8_t a[16] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160};
     uint8_t b[16] = {5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80};
     uint8_t c[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};

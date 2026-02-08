@@ -4,13 +4,13 @@
 
 #include "fl/hash_map_lru.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
 
 
-TEST_CASE("Test HashMapLRU") {
-    SUBCASE("Basic operations") {
+FL_TEST_CASE("Test HashMapLRU") {
+    FL_SUBCASE("Basic operations") {
         fl::HashMapLru<int, int> lru(3);
         
         // Test empty state
@@ -47,7 +47,7 @@ TEST_CASE("Test HashMapLRU") {
         FL_CHECK(lru.size() == 0);
     }
     
-    SUBCASE("LRU eviction") {
+    FL_SUBCASE("LRU eviction") {
         fl::HashMapLru<int, int> lru(3);
         
         // Fill the cache
@@ -77,7 +77,7 @@ TEST_CASE("Test HashMapLRU") {
         FL_CHECK(*lru.find_value(5) == 500);
     }
     
-    SUBCASE("Operator[] LRU behavior") {
+    FL_SUBCASE("Operator[] LRU behavior") {
         fl::HashMapLru<int, int> lru(3);
         
         // Fill the cache using operator[]
@@ -98,7 +98,7 @@ TEST_CASE("Test HashMapLRU") {
         FL_CHECK(*lru.find_value(4) == 400);
     }
     
-    SUBCASE("Edge cases") {
+    FL_SUBCASE("Edge cases") {
         // Test with capacity 1
         fl::HashMapLru<int, int> tiny_lru(1);
         tiny_lru.insert(1, 100);
@@ -123,7 +123,7 @@ TEST_CASE("Test HashMapLRU") {
         FL_CHECK(*str_lru.find_value("three") == 3);
     }
     
-    SUBCASE("Update existing key") {
+    FL_SUBCASE("Update existing key") {
         fl::HashMapLru<int, int> lru(3);
         
         // Fill the cache

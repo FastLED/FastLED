@@ -1,34 +1,34 @@
 #include "fl/geometry.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/math.h"
 #include "fl/stl/move.h"
 #include "fl/int.h"
 
 using namespace fl;
 
-TEST_CASE("vec3::construction") {
-    SUBCASE("default constructor") {
+FL_TEST_CASE("vec3::construction") {
+    FL_SUBCASE("default constructor") {
         vec3<int> v;
         FL_CHECK_EQ(v.x, 0);
         FL_CHECK_EQ(v.y, 0);
         FL_CHECK_EQ(v.z, 0);
     }
 
-    SUBCASE("parameterized constructor") {
+    FL_SUBCASE("parameterized constructor") {
         vec3<int> v(1, 2, 3);
         FL_CHECK_EQ(v.x, 1);
         FL_CHECK_EQ(v.y, 2);
         FL_CHECK_EQ(v.z, 3);
     }
 
-    SUBCASE("uniform value constructor") {
+    FL_SUBCASE("uniform value constructor") {
         vec3<int> v(5);
         FL_CHECK_EQ(v.x, 5);
         FL_CHECK_EQ(v.y, 5);
         FL_CHECK_EQ(v.z, 5);
     }
 
-    SUBCASE("copy constructor") {
+    FL_SUBCASE("copy constructor") {
         vec3<int> v1(1, 2, 3);
         vec3<int> v2(v1);
         FL_CHECK_EQ(v2.x, 1);
@@ -36,7 +36,7 @@ TEST_CASE("vec3::construction") {
         FL_CHECK_EQ(v2.z, 3);
     }
 
-    SUBCASE("move constructor") {
+    FL_SUBCASE("move constructor") {
         vec3<int> v1(1, 2, 3);
         vec3<int> v2(fl::move(v1));
         FL_CHECK_EQ(v2.x, 1);
@@ -45,8 +45,8 @@ TEST_CASE("vec3::construction") {
     }
 }
 
-TEST_CASE("vec3::arithmetic_operators") {
-    SUBCASE("addition") {
+FL_TEST_CASE("vec3::arithmetic_operators") {
+    FL_SUBCASE("addition") {
         vec3<int> v1(1, 2, 3);
         vec3<int> v2(4, 5, 6);
         vec3<int> result = v1 + v2;
@@ -55,7 +55,7 @@ TEST_CASE("vec3::arithmetic_operators") {
         FL_CHECK_EQ(result.z, 9);
     }
 
-    SUBCASE("subtraction") {
+    FL_SUBCASE("subtraction") {
         vec3<int> v1(5, 7, 9);
         vec3<int> v2(1, 2, 3);
         vec3<int> result = v1 - v2;
@@ -64,7 +64,7 @@ TEST_CASE("vec3::arithmetic_operators") {
         FL_CHECK_EQ(result.z, 6);
     }
 
-    SUBCASE("multiplication") {
+    FL_SUBCASE("multiplication") {
         vec3<int> v1(2, 3, 4);
         vec3<int> v2(2, 2, 2);
         vec3<int> result = v1 * v2;
@@ -73,7 +73,7 @@ TEST_CASE("vec3::arithmetic_operators") {
         FL_CHECK_EQ(result.z, 8);
     }
 
-    SUBCASE("division") {
+    FL_SUBCASE("division") {
         vec3<int> v1(8, 12, 16);
         vec3<int> v2(2, 3, 4);
         vec3<int> result = v1 / v2;
@@ -82,7 +82,7 @@ TEST_CASE("vec3::arithmetic_operators") {
         FL_CHECK_EQ(result.z, 4);
     }
 
-    SUBCASE("scalar multiplication") {
+    FL_SUBCASE("scalar multiplication") {
         vec3<int> v(2, 3, 4);
         vec3<int> result = v * 3;
         FL_CHECK_EQ(result.x, 6);
@@ -90,7 +90,7 @@ TEST_CASE("vec3::arithmetic_operators") {
         FL_CHECK_EQ(result.z, 12);
     }
 
-    SUBCASE("scalar division") {
+    FL_SUBCASE("scalar division") {
         vec3<int> v(6, 9, 12);
         vec3<int> result = v / 3;
         FL_CHECK_EQ(result.x, 2);
@@ -98,7 +98,7 @@ TEST_CASE("vec3::arithmetic_operators") {
         FL_CHECK_EQ(result.z, 4);
     }
 
-    SUBCASE("scalar addition") {
+    FL_SUBCASE("scalar addition") {
         vec3<int> v(1, 2, 3);
         vec3<int> result = v + 5;
         FL_CHECK_EQ(result.x, 6);
@@ -106,7 +106,7 @@ TEST_CASE("vec3::arithmetic_operators") {
         FL_CHECK_EQ(result.z, 8);
     }
 
-    SUBCASE("scalar subtraction") {
+    FL_SUBCASE("scalar subtraction") {
         vec3<int> v(10, 20, 30);
         vec3<int> result = v - 5;
         FL_CHECK_EQ(result.x, 5);
@@ -115,8 +115,8 @@ TEST_CASE("vec3::arithmetic_operators") {
     }
 }
 
-TEST_CASE("vec3::compound_assignment_operators") {
-    SUBCASE("addition assignment") {
+FL_TEST_CASE("vec3::compound_assignment_operators") {
+    FL_SUBCASE("addition assignment") {
         vec3<int> v1(1, 2, 3);
         vec3<int> v2(4, 5, 6);
         v1 += v2;
@@ -125,7 +125,7 @@ TEST_CASE("vec3::compound_assignment_operators") {
         FL_CHECK_EQ(v1.z, 9);
     }
 
-    SUBCASE("subtraction assignment") {
+    FL_SUBCASE("subtraction assignment") {
         vec3<int> v1(5, 7, 9);
         vec3<int> v2(1, 2, 3);
         v1 -= v2;
@@ -134,7 +134,7 @@ TEST_CASE("vec3::compound_assignment_operators") {
         FL_CHECK_EQ(v1.z, 6);
     }
 
-    SUBCASE("multiplication assignment with float") {
+    FL_SUBCASE("multiplication assignment with float") {
         vec3<float> v(2.0f, 3.0f, 4.0f);
         v *= 2.0f;
         FL_CHECK(doctest::Approx(v.x).epsilon(0.001) == 4.0f);
@@ -142,7 +142,7 @@ TEST_CASE("vec3::compound_assignment_operators") {
         FL_CHECK(doctest::Approx(v.z).epsilon(0.001) == 8.0f);
     }
 
-    SUBCASE("division assignment with float") {
+    FL_SUBCASE("division assignment with float") {
         vec3<float> v(8.0f, 12.0f, 16.0f);
         v /= 2.0f;
         FL_CHECK(doctest::Approx(v.x).epsilon(0.001) == 4.0f);
@@ -150,7 +150,7 @@ TEST_CASE("vec3::compound_assignment_operators") {
         FL_CHECK(doctest::Approx(v.z).epsilon(0.001) == 8.0f);
     }
 
-    SUBCASE("division assignment with int") {
+    FL_SUBCASE("division assignment with int") {
         vec3<int> v(8, 12, 16);
         v /= 2;
         FL_CHECK_EQ(v.x, 4);
@@ -158,7 +158,7 @@ TEST_CASE("vec3::compound_assignment_operators") {
         FL_CHECK_EQ(v.z, 8);
     }
 
-    SUBCASE("division assignment with vec3") {
+    FL_SUBCASE("division assignment with vec3") {
         vec3<int> v1(8, 12, 16);
         vec3<int> v2(2, 3, 4);
         v1 /= v2;
@@ -168,8 +168,8 @@ TEST_CASE("vec3::compound_assignment_operators") {
     }
 }
 
-TEST_CASE("vec3::comparison_operators") {
-    SUBCASE("equality") {
+FL_TEST_CASE("vec3::comparison_operators") {
+    FL_SUBCASE("equality") {
         vec3<int> v1(1, 2, 3);
         vec3<int> v2(1, 2, 3);
         vec3<int> v3(4, 5, 6);
@@ -177,7 +177,7 @@ TEST_CASE("vec3::comparison_operators") {
         FL_CHECK_FALSE(v1 == v3);
     }
 
-    SUBCASE("inequality") {
+    FL_SUBCASE("inequality") {
         vec3<int> v1(1, 2, 3);
         vec3<int> v2(1, 2, 3);
         vec3<int> v3(4, 5, 6);
@@ -185,21 +185,21 @@ TEST_CASE("vec3::comparison_operators") {
         FL_CHECK(v1 != v3);
     }
 
-    SUBCASE("equality with different types") {
+    FL_SUBCASE("equality with different types") {
         vec3<int> v1(1, 2, 3);
         vec3<float> v2(1.0f, 2.0f, 3.0f);
         FL_CHECK(v1 == v2);
     }
 
-    SUBCASE("inequality with different types") {
+    FL_SUBCASE("inequality with different types") {
         vec3<int> v1(1, 2, 3);
         vec3<float> v2(4.0f, 5.0f, 6.0f);
         FL_CHECK(v1 != v2);
     }
 }
 
-TEST_CASE("vec3::utility_methods") {
-    SUBCASE("getMax") {
+FL_TEST_CASE("vec3::utility_methods") {
+    FL_SUBCASE("getMax") {
         vec3<int> v1(1, 5, 3);
         vec3<int> v2(4, 2, 6);
         vec3<int> result = v1.getMax(v2);
@@ -208,7 +208,7 @@ TEST_CASE("vec3::utility_methods") {
         FL_CHECK_EQ(result.z, 6);
     }
 
-    SUBCASE("getMin") {
+    FL_SUBCASE("getMin") {
         vec3<int> v1(1, 5, 3);
         vec3<int> v2(4, 2, 6);
         vec3<int> result = v1.getMin(v2);
@@ -217,7 +217,7 @@ TEST_CASE("vec3::utility_methods") {
         FL_CHECK_EQ(result.z, 3);
     }
 
-    SUBCASE("cast") {
+    FL_SUBCASE("cast") {
         vec3<int> v(1, 2, 3);
         vec3<float> result = v.cast<float>();
         FL_CHECK(doctest::Approx(result.x).epsilon(0.001) == 1.0f);
@@ -225,14 +225,14 @@ TEST_CASE("vec3::utility_methods") {
         FL_CHECK(doctest::Approx(result.z).epsilon(0.001) == 3.0f);
     }
 
-    SUBCASE("distance") {
+    FL_SUBCASE("distance") {
         vec3<float> v1(0.0f, 0.0f, 0.0f);
         vec3<float> v2(3.0f, 4.0f, 0.0f);
         float dist = v1.distance(v2);
         FL_CHECK(doctest::Approx(dist).epsilon(0.001) == 5.0f);
     }
 
-    SUBCASE("is_zero") {
+    FL_SUBCASE("is_zero") {
         vec3<int> v1(0, 0, 0);
         vec3<int> v2(1, 0, 0);
         FL_CHECK(v1.is_zero());
@@ -240,33 +240,33 @@ TEST_CASE("vec3::utility_methods") {
     }
 }
 
-TEST_CASE("vec2::construction") {
-    SUBCASE("default constructor") {
+FL_TEST_CASE("vec2::construction") {
+    FL_SUBCASE("default constructor") {
         vec2<int> v;
         FL_CHECK_EQ(v.x, 0);
         FL_CHECK_EQ(v.y, 0);
     }
 
-    SUBCASE("parameterized constructor") {
+    FL_SUBCASE("parameterized constructor") {
         vec2<int> v(1, 2);
         FL_CHECK_EQ(v.x, 1);
         FL_CHECK_EQ(v.y, 2);
     }
 
-    SUBCASE("uniform value constructor") {
+    FL_SUBCASE("uniform value constructor") {
         vec2<int> v(5);
         FL_CHECK_EQ(v.x, 5);
         FL_CHECK_EQ(v.y, 5);
     }
 
-    SUBCASE("copy constructor") {
+    FL_SUBCASE("copy constructor") {
         vec2<int> v1(1, 2);
         vec2<int> v2(v1);
         FL_CHECK_EQ(v2.x, 1);
         FL_CHECK_EQ(v2.y, 2);
     }
 
-    SUBCASE("move constructor") {
+    FL_SUBCASE("move constructor") {
         vec2<int> v1(1, 2);
         vec2<int> v2(fl::move(v1));
         FL_CHECK_EQ(v2.x, 1);
@@ -274,8 +274,8 @@ TEST_CASE("vec2::construction") {
     }
 }
 
-TEST_CASE("vec2::arithmetic_operators") {
-    SUBCASE("addition") {
+FL_TEST_CASE("vec2::arithmetic_operators") {
+    FL_SUBCASE("addition") {
         vec2<int> v1(1, 2);
         vec2<int> v2(4, 5);
         vec2<int> result = v1 + v2;
@@ -283,7 +283,7 @@ TEST_CASE("vec2::arithmetic_operators") {
         FL_CHECK_EQ(result.y, 7);
     }
 
-    SUBCASE("subtraction") {
+    FL_SUBCASE("subtraction") {
         vec2<int> v1(5, 7);
         vec2<int> v2(1, 2);
         vec2<int> result = v1 - v2;
@@ -291,7 +291,7 @@ TEST_CASE("vec2::arithmetic_operators") {
         FL_CHECK_EQ(result.y, 5);
     }
 
-    SUBCASE("multiplication") {
+    FL_SUBCASE("multiplication") {
         vec2<int> v1(2, 3);
         vec2<int> v2(2, 2);
         vec2<int> result = v1 * v2;
@@ -299,7 +299,7 @@ TEST_CASE("vec2::arithmetic_operators") {
         FL_CHECK_EQ(result.y, 6);
     }
 
-    SUBCASE("division") {
+    FL_SUBCASE("division") {
         vec2<int> v1(8, 12);
         vec2<int> v2(2, 3);
         vec2<int> result = v1 / v2;
@@ -307,28 +307,28 @@ TEST_CASE("vec2::arithmetic_operators") {
         FL_CHECK_EQ(result.y, 4);
     }
 
-    SUBCASE("scalar multiplication") {
+    FL_SUBCASE("scalar multiplication") {
         vec2<int> v(2, 3);
         vec2<int> result = v * 3;
         FL_CHECK_EQ(result.x, 6);
         FL_CHECK_EQ(result.y, 9);
     }
 
-    SUBCASE("scalar division") {
+    FL_SUBCASE("scalar division") {
         vec2<int> v(6, 9);
         vec2<int> result = v / 3;
         FL_CHECK_EQ(result.x, 2);
         FL_CHECK_EQ(result.y, 3);
     }
 
-    SUBCASE("scalar addition") {
+    FL_SUBCASE("scalar addition") {
         vec2<int> v(1, 2);
         vec2<int> result = v + 5;
         FL_CHECK_EQ(result.x, 6);
         FL_CHECK_EQ(result.y, 7);
     }
 
-    SUBCASE("scalar subtraction") {
+    FL_SUBCASE("scalar subtraction") {
         vec2<int> v(10, 20);
         vec2<int> result = v - 5;
         FL_CHECK_EQ(result.x, 5);
@@ -336,8 +336,8 @@ TEST_CASE("vec2::arithmetic_operators") {
     }
 }
 
-TEST_CASE("vec2::compound_assignment_operators") {
-    SUBCASE("addition assignment") {
+FL_TEST_CASE("vec2::compound_assignment_operators") {
+    FL_SUBCASE("addition assignment") {
         vec2<int> v1(1, 2);
         vec2<int> v2(4, 5);
         v1 += v2;
@@ -345,7 +345,7 @@ TEST_CASE("vec2::compound_assignment_operators") {
         FL_CHECK_EQ(v1.y, 7);
     }
 
-    SUBCASE("subtraction assignment") {
+    FL_SUBCASE("subtraction assignment") {
         vec2<int> v1(5, 7);
         vec2<int> v2(1, 2);
         v1 -= v2;
@@ -353,28 +353,28 @@ TEST_CASE("vec2::compound_assignment_operators") {
         FL_CHECK_EQ(v1.y, 5);
     }
 
-    SUBCASE("multiplication assignment with float") {
+    FL_SUBCASE("multiplication assignment with float") {
         vec2<float> v(2.0f, 3.0f);
         v *= 2.0f;
         FL_CHECK(doctest::Approx(v.x).epsilon(0.001) == 4.0f);
         FL_CHECK(doctest::Approx(v.y).epsilon(0.001) == 6.0f);
     }
 
-    SUBCASE("division assignment with float") {
+    FL_SUBCASE("division assignment with float") {
         vec2<float> v(8.0f, 12.0f);
         v /= 2.0f;
         FL_CHECK(doctest::Approx(v.x).epsilon(0.001) == 4.0f);
         FL_CHECK(doctest::Approx(v.y).epsilon(0.001) == 6.0f);
     }
 
-    SUBCASE("division assignment with int") {
+    FL_SUBCASE("division assignment with int") {
         vec2<int> v(8, 12);
         v /= 2;
         FL_CHECK_EQ(v.x, 4);
         FL_CHECK_EQ(v.y, 6);
     }
 
-    SUBCASE("division assignment with vec2") {
+    FL_SUBCASE("division assignment with vec2") {
         vec2<int> v1(8, 12);
         vec2<int> v2(2, 3);
         v1 /= v2;
@@ -383,8 +383,8 @@ TEST_CASE("vec2::compound_assignment_operators") {
     }
 }
 
-TEST_CASE("vec2::comparison_operators") {
-    SUBCASE("equality") {
+FL_TEST_CASE("vec2::comparison_operators") {
+    FL_SUBCASE("equality") {
         vec2<int> v1(1, 2);
         vec2<int> v2(1, 2);
         vec2<int> v3(4, 5);
@@ -392,7 +392,7 @@ TEST_CASE("vec2::comparison_operators") {
         FL_CHECK_FALSE(v1 == v3);
     }
 
-    SUBCASE("inequality") {
+    FL_SUBCASE("inequality") {
         vec2<int> v1(1, 2);
         vec2<int> v2(1, 2);
         vec2<int> v3(4, 5);
@@ -400,21 +400,21 @@ TEST_CASE("vec2::comparison_operators") {
         FL_CHECK(v1 != v3);
     }
 
-    SUBCASE("equality with different types") {
+    FL_SUBCASE("equality with different types") {
         vec2<int> v1(1, 2);
         vec2<float> v2(1.0f, 2.0f);
         FL_CHECK(v1 == v2);
     }
 
-    SUBCASE("inequality with different types") {
+    FL_SUBCASE("inequality with different types") {
         vec2<int> v1(1, 2);
         vec2<float> v2(4.0f, 5.0f);
         FL_CHECK(v1 != v2);
     }
 }
 
-TEST_CASE("vec2::utility_methods") {
-    SUBCASE("getMax") {
+FL_TEST_CASE("vec2::utility_methods") {
+    FL_SUBCASE("getMax") {
         vec2<int> v1(1, 5);
         vec2<int> v2(4, 2);
         vec2<int> result = v1.getMax(v2);
@@ -422,7 +422,7 @@ TEST_CASE("vec2::utility_methods") {
         FL_CHECK_EQ(result.y, 5);
     }
 
-    SUBCASE("getMin") {
+    FL_SUBCASE("getMin") {
         vec2<int> v1(1, 5);
         vec2<int> v2(4, 2);
         vec2<int> result = v1.getMin(v2);
@@ -430,21 +430,21 @@ TEST_CASE("vec2::utility_methods") {
         FL_CHECK_EQ(result.y, 2);
     }
 
-    SUBCASE("cast") {
+    FL_SUBCASE("cast") {
         vec2<int> v(1, 2);
         vec2<float> result = v.cast<float>();
         FL_CHECK(doctest::Approx(result.x).epsilon(0.001) == 1.0f);
         FL_CHECK(doctest::Approx(result.y).epsilon(0.001) == 2.0f);
     }
 
-    SUBCASE("distance") {
+    FL_SUBCASE("distance") {
         vec2<float> v1(0.0f, 0.0f);
         vec2<float> v2(3.0f, 4.0f);
         float dist = v1.distance(v2);
         FL_CHECK(doctest::Approx(dist).epsilon(0.001) == 5.0f);
     }
 
-    SUBCASE("is_zero") {
+    FL_SUBCASE("is_zero") {
         vec2<int> v1(0, 0);
         vec2<int> v2(1, 0);
         FL_CHECK(v1.is_zero());
@@ -452,8 +452,8 @@ TEST_CASE("vec2::utility_methods") {
     }
 }
 
-TEST_CASE("line_xy::construction") {
-    SUBCASE("default constructor") {
+FL_TEST_CASE("line_xy::construction") {
+    FL_SUBCASE("default constructor") {
         line_xy<int> line;
         FL_CHECK_EQ(line.start.x, 0);
         FL_CHECK_EQ(line.start.y, 0);
@@ -461,7 +461,7 @@ TEST_CASE("line_xy::construction") {
         FL_CHECK_EQ(line.end.y, 0);
     }
 
-    SUBCASE("vec2 constructor") {
+    FL_SUBCASE("vec2 constructor") {
         vec2<int> start(1, 2);
         vec2<int> end(3, 4);
         line_xy<int> line(start, end);
@@ -471,7 +471,7 @@ TEST_CASE("line_xy::construction") {
         FL_CHECK_EQ(line.end.y, 4);
     }
 
-    SUBCASE("scalar constructor") {
+    FL_SUBCASE("scalar constructor") {
         line_xy<int> line(1, 2, 3, 4);
         FL_CHECK_EQ(line.start.x, 1);
         FL_CHECK_EQ(line.start.y, 2);
@@ -479,7 +479,7 @@ TEST_CASE("line_xy::construction") {
         FL_CHECK_EQ(line.end.y, 4);
     }
 
-    SUBCASE("copy constructor") {
+    FL_SUBCASE("copy constructor") {
         line_xy<int> line1(1, 2, 3, 4);
         line_xy<int> line2(line1);
         FL_CHECK_EQ(line2.start.x, 1);
@@ -489,32 +489,32 @@ TEST_CASE("line_xy::construction") {
     }
 }
 
-TEST_CASE("line_xy::methods") {
-    SUBCASE("empty - true") {
+FL_TEST_CASE("line_xy::methods") {
+    FL_SUBCASE("empty - true") {
         line_xy<int> line(1, 2, 1, 2);
         FL_CHECK(line.empty());
     }
 
-    SUBCASE("empty - false") {
+    FL_SUBCASE("empty - false") {
         line_xy<int> line(1, 2, 3, 4);
         FL_CHECK_FALSE(line.empty());
     }
 
-    SUBCASE("distance_to - point on line") {
+    FL_SUBCASE("distance_to - point on line") {
         line_xy<float> line(0.0f, 0.0f, 4.0f, 0.0f);
         vec2<float> p(2.0f, 0.0f);
         float dist = line.distance_to(p);
         FL_CHECK(doctest::Approx(dist).epsilon(0.001) == 0.0f);
     }
 
-    SUBCASE("distance_to - point perpendicular to line") {
+    FL_SUBCASE("distance_to - point perpendicular to line") {
         line_xy<float> line(0.0f, 0.0f, 4.0f, 0.0f);
         vec2<float> p(2.0f, 3.0f);
         float dist = line.distance_to(p);
         FL_CHECK(doctest::Approx(dist).epsilon(0.001) == 3.0f);
     }
 
-    SUBCASE("distance_to - point beyond line end") {
+    FL_SUBCASE("distance_to - point beyond line end") {
         line_xy<float> line(0.0f, 0.0f, 4.0f, 0.0f);
         vec2<float> p(6.0f, 3.0f);
         float dist = line.distance_to(p);
@@ -522,7 +522,7 @@ TEST_CASE("line_xy::methods") {
         FL_CHECK(doctest::Approx(dist).epsilon(0.01) == fl::sqrt(13.0f));
     }
 
-    SUBCASE("distance_to - with projected point output") {
+    FL_SUBCASE("distance_to - with projected point output") {
         line_xy<float> line(0.0f, 0.0f, 4.0f, 0.0f);
         vec2<float> p(2.0f, 3.0f);
         vec2<float> projected;
@@ -532,7 +532,7 @@ TEST_CASE("line_xy::methods") {
         FL_CHECK(doctest::Approx(projected.y).epsilon(0.001) == 0.0f);
     }
 
-    SUBCASE("distance_to - degenerate line (point)") {
+    FL_SUBCASE("distance_to - degenerate line (point)") {
         line_xy<float> line(1.0f, 1.0f, 1.0f, 1.0f);
         vec2<float> p(4.0f, 5.0f);
         float dist = line.distance_to(p);
@@ -541,8 +541,8 @@ TEST_CASE("line_xy::methods") {
     }
 }
 
-TEST_CASE("rect::construction") {
-    SUBCASE("default constructor") {
+FL_TEST_CASE("rect::construction") {
+    FL_SUBCASE("default constructor") {
         rect<int> r;
         FL_CHECK_EQ(r.mMin.x, 0);
         FL_CHECK_EQ(r.mMin.y, 0);
@@ -550,7 +550,7 @@ TEST_CASE("rect::construction") {
         FL_CHECK_EQ(r.mMax.y, 0);
     }
 
-    SUBCASE("vec2 constructor") {
+    FL_SUBCASE("vec2 constructor") {
         vec2<int> min(1, 2);
         vec2<int> max(5, 7);
         rect<int> r(min, max);
@@ -560,7 +560,7 @@ TEST_CASE("rect::construction") {
         FL_CHECK_EQ(r.mMax.y, 7);
     }
 
-    SUBCASE("scalar constructor") {
+    FL_SUBCASE("scalar constructor") {
         rect<int> r(1, 2, 5, 7);
         FL_CHECK_EQ(r.mMin.x, 1);
         FL_CHECK_EQ(r.mMin.y, 2);
@@ -568,7 +568,7 @@ TEST_CASE("rect::construction") {
         FL_CHECK_EQ(r.mMax.y, 7);
     }
 
-    SUBCASE("copy constructor") {
+    FL_SUBCASE("copy constructor") {
         rect<int> r1(1, 2, 5, 7);
         rect<int> r2(r1);
         FL_CHECK_EQ(r2.mMin.x, 1);
@@ -578,30 +578,30 @@ TEST_CASE("rect::construction") {
     }
 }
 
-TEST_CASE("rect::dimensions") {
-    SUBCASE("width") {
+FL_TEST_CASE("rect::dimensions") {
+    FL_SUBCASE("width") {
         rect<u16> r(1, 2, 10, 7);
         FL_CHECK_EQ(r.width(), 9);
     }
 
-    SUBCASE("height") {
+    FL_SUBCASE("height") {
         rect<u16> r(1, 2, 10, 7);
         FL_CHECK_EQ(r.height(), 5);
     }
 
-    SUBCASE("empty - true") {
+    FL_SUBCASE("empty - true") {
         rect<int> r(1, 2, 1, 2);
         FL_CHECK(r.empty());
     }
 
-    SUBCASE("empty - false") {
+    FL_SUBCASE("empty - false") {
         rect<int> r(1, 2, 5, 7);
         FL_CHECK_FALSE(r.empty());
     }
 }
 
-TEST_CASE("rect::expand") {
-    SUBCASE("expand with point") {
+FL_TEST_CASE("rect::expand") {
+    FL_SUBCASE("expand with point") {
         rect<int> r(1, 2, 5, 7);
         r.expand(vec2<int>(0, 10));
         FL_CHECK_EQ(r.mMin.x, 0);
@@ -610,7 +610,7 @@ TEST_CASE("rect::expand") {
         FL_CHECK_EQ(r.mMax.y, 10);
     }
 
-    SUBCASE("expand with coordinates") {
+    FL_SUBCASE("expand with coordinates") {
         rect<int> r(1, 2, 5, 7);
         r.expand(6, 1);
         FL_CHECK_EQ(r.mMin.x, 1);
@@ -619,7 +619,7 @@ TEST_CASE("rect::expand") {
         FL_CHECK_EQ(r.mMax.y, 7);
     }
 
-    SUBCASE("expand with another rect") {
+    FL_SUBCASE("expand with another rect") {
         rect<int> r1(1, 2, 5, 7);
         rect<int> r2(0, 8, 6, 10);
         r1.expand(r2);
@@ -630,13 +630,13 @@ TEST_CASE("rect::expand") {
     }
 }
 
-TEST_CASE("rect::contains") {
-    SUBCASE("contains point - inside") {
+FL_TEST_CASE("rect::contains") {
+    FL_SUBCASE("contains point - inside") {
         rect<int> r(1, 2, 5, 7);
         FL_CHECK(r.contains(vec2<int>(3, 4)));
     }
 
-    SUBCASE("contains point - outside") {
+    FL_SUBCASE("contains point - outside") {
         rect<int> r(1, 2, 5, 7);
         FL_CHECK_FALSE(r.contains(vec2<int>(6, 4)));
         FL_CHECK_FALSE(r.contains(vec2<int>(0, 4)));
@@ -644,26 +644,26 @@ TEST_CASE("rect::contains") {
         FL_CHECK_FALSE(r.contains(vec2<int>(3, 1)));
     }
 
-    SUBCASE("contains point - on edge (min)") {
+    FL_SUBCASE("contains point - on edge (min)") {
         rect<int> r(1, 2, 5, 7);
         FL_CHECK(r.contains(vec2<int>(1, 2)));
     }
 
-    SUBCASE("contains point - on edge (max)") {
+    FL_SUBCASE("contains point - on edge (max)") {
         rect<int> r(1, 2, 5, 7);
         // Max is exclusive based on the contains logic
         FL_CHECK_FALSE(r.contains(vec2<int>(5, 7)));
     }
 
-    SUBCASE("contains coordinates") {
+    FL_SUBCASE("contains coordinates") {
         rect<int> r(1, 2, 5, 7);
         FL_CHECK(r.contains(3, 4));
         FL_CHECK_FALSE(r.contains(6, 4));
     }
 }
 
-TEST_CASE("rect::comparison_operators") {
-    SUBCASE("equality") {
+FL_TEST_CASE("rect::comparison_operators") {
+    FL_SUBCASE("equality") {
         rect<int> r1(1, 2, 5, 7);
         rect<int> r2(1, 2, 5, 7);
         rect<int> r3(0, 0, 10, 10);
@@ -671,7 +671,7 @@ TEST_CASE("rect::comparison_operators") {
         FL_CHECK_FALSE(r1 == r3);
     }
 
-    SUBCASE("inequality") {
+    FL_SUBCASE("inequality") {
         rect<int> r1(1, 2, 5, 7);
         rect<int> r2(1, 2, 5, 7);
         rect<int> r3(0, 0, 10, 10);
@@ -679,59 +679,59 @@ TEST_CASE("rect::comparison_operators") {
         FL_CHECK(r1 != r3);
     }
 
-    SUBCASE("equality with different types") {
+    FL_SUBCASE("equality with different types") {
         rect<int> r1(1, 2, 5, 7);
         rect<float> r2(1.0f, 2.0f, 5.0f, 7.0f);
         FL_CHECK(r1 == r2);
     }
 
-    SUBCASE("inequality with different types") {
+    FL_SUBCASE("inequality with different types") {
         rect<int> r1(1, 2, 5, 7);
         rect<float> r2(0.0f, 0.0f, 10.0f, 10.0f);
         FL_CHECK(r1 != r2);
     }
 }
 
-TEST_CASE("type_aliases") {
-    SUBCASE("vec3f") {
+FL_TEST_CASE("type_aliases") {
+    FL_SUBCASE("vec3f") {
         vec3f v(1.0f, 2.0f, 3.0f);
         FL_CHECK(doctest::Approx(v.x).epsilon(0.001) == 1.0f);
         FL_CHECK(doctest::Approx(v.y).epsilon(0.001) == 2.0f);
         FL_CHECK(doctest::Approx(v.z).epsilon(0.001) == 3.0f);
     }
 
-    SUBCASE("vec2f") {
+    FL_SUBCASE("vec2f") {
         vec2f v(1.0f, 2.0f);
         FL_CHECK(doctest::Approx(v.x).epsilon(0.001) == 1.0f);
         FL_CHECK(doctest::Approx(v.y).epsilon(0.001) == 2.0f);
     }
 
-    SUBCASE("vec2u8") {
+    FL_SUBCASE("vec2u8") {
         vec2u8 v(1, 2);
         FL_CHECK_EQ(v.x, 1);
         FL_CHECK_EQ(v.y, 2);
     }
 
-    SUBCASE("vec2i16") {
+    FL_SUBCASE("vec2i16") {
         vec2i16 v(-100, 200);
         FL_CHECK_EQ(v.x, -100);
         FL_CHECK_EQ(v.y, 200);
     }
 
-    SUBCASE("pair_xyz_float") {
+    FL_SUBCASE("pair_xyz_float") {
         pair_xyz_float v(1.0f, 2.0f, 3.0f);
         FL_CHECK(doctest::Approx(v.x).epsilon(0.001) == 1.0f);
         FL_CHECK(doctest::Approx(v.y).epsilon(0.001) == 2.0f);
         FL_CHECK(doctest::Approx(v.z).epsilon(0.001) == 3.0f);
     }
 
-    SUBCASE("pair_xy_float") {
+    FL_SUBCASE("pair_xy_float") {
         pair_xy_float v(1.0f, 2.0f);
         FL_CHECK(doctest::Approx(v.x).epsilon(0.001) == 1.0f);
         FL_CHECK(doctest::Approx(v.y).epsilon(0.001) == 2.0f);
     }
 
-    SUBCASE("pair_xy") {
+    FL_SUBCASE("pair_xy") {
         pair_xy<int> v(1, 2);
         FL_CHECK_EQ(v.x, 1);
         FL_CHECK_EQ(v.y, 2);
@@ -744,8 +744,8 @@ TEST_CASE("type_aliases") {
     }
 }
 
-TEST_CASE("vec3::cross_type_operations") {
-    SUBCASE("addition with different types") {
+FL_TEST_CASE("vec3::cross_type_operations") {
+    FL_SUBCASE("addition with different types") {
         vec3<int> v1(1, 2, 3);
         vec3<float> v2(1.5f, 2.5f, 3.5f);
         vec3<int> result = v1 + v2;
@@ -755,8 +755,8 @@ TEST_CASE("vec3::cross_type_operations") {
     }
 }
 
-TEST_CASE("vec2::cross_type_operations") {
-    SUBCASE("addition with different types") {
+FL_TEST_CASE("vec2::cross_type_operations") {
+    FL_SUBCASE("addition with different types") {
         vec2<int> v1(1, 2);
         vec2<float> v2(1.5f, 2.5f);
         vec2<int> result = v1 + v2;

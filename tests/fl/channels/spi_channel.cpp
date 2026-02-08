@@ -13,11 +13,11 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/move.h"
 #include "crgb.h"
-#include "doctest.h"
+#include "test.h"
 
 using namespace fl;
 
-TEST_CASE("SPI chipset channel creation and data push") {
+FL_TEST_CASE("SPI chipset channel creation and data push") {
     const int NUM_LEDS = 10;
     CRGB leds[NUM_LEDS];
 
@@ -35,22 +35,22 @@ TEST_CASE("SPI chipset channel creation and data push") {
     ChannelConfig config(spiConfig, fl::span<CRGB>(leds, NUM_LEDS), RGB);
 
     // Verify config is SPI type
-    CHECK(config.isSpi());
-    CHECK_FALSE(config.isClockless());
+    FL_CHECK(config.isSpi());
+    FL_CHECK_FALSE(config.isClockless());
 
     // Verify pin configuration
-    CHECK_EQ(config.getDataPin(), DATA_PIN);
-    CHECK_EQ(config.getClockPin(), CLOCK_PIN);
+    FL_CHECK_EQ(config.getDataPin(), DATA_PIN);
+    FL_CHECK_EQ(config.getClockPin(), CLOCK_PIN);
 
     // Create channel
     auto channel = Channel::create(config);
-    CHECK(channel != nullptr);
+    FL_CHECK(channel != nullptr);
 
     // Verify channel properties
-    CHECK(channel->isSpi());
-    CHECK_FALSE(channel->isClockless());
-    CHECK_EQ(channel->getPin(), DATA_PIN);
-    CHECK_EQ(channel->getClockPin(), CLOCK_PIN);
+    FL_CHECK(channel->isSpi());
+    FL_CHECK_FALSE(channel->isClockless());
+    FL_CHECK_EQ(channel->getPin(), DATA_PIN);
+    FL_CHECK_EQ(channel->getClockPin(), CLOCK_PIN);
 
     // Set pixel data
     leds[0] = CRGB::Red;
@@ -66,7 +66,7 @@ TEST_CASE("SPI chipset channel creation and data push") {
     // We don't test LED data integrity here since the channel doesn't modify it
 }
 
-TEST_CASE("SPI chipset config - APA102 factory method") {
+FL_TEST_CASE("SPI chipset config - APA102 factory method") {
     const int DATA_PIN = 23;
     const int CLOCK_PIN = 18;
 
@@ -75,13 +75,13 @@ TEST_CASE("SPI chipset config - APA102 factory method") {
     SpiChipsetConfig config{DATA_PIN, CLOCK_PIN, encoder};
 
     // Verify configuration
-    CHECK_EQ(config.dataPin, DATA_PIN);
-    CHECK_EQ(config.clockPin, CLOCK_PIN);
-    CHECK_EQ(config.timing.chipset, SpiChipset::APA102);
-    CHECK_EQ(config.timing.clock_hz, 6000000);  // Default 6MHz
+    FL_CHECK_EQ(config.dataPin, DATA_PIN);
+    FL_CHECK_EQ(config.clockPin, CLOCK_PIN);
+    FL_CHECK_EQ(config.timing.chipset, SpiChipset::APA102);
+    FL_CHECK_EQ(config.timing.clock_hz, 6000000);  // Default 6MHz
 }
 
-TEST_CASE("SPI chipset config - SK9822 factory method") {
+FL_TEST_CASE("SPI chipset config - SK9822 factory method") {
     const int DATA_PIN = 23;
     const int CLOCK_PIN = 18;
 
@@ -90,13 +90,13 @@ TEST_CASE("SPI chipset config - SK9822 factory method") {
     SpiChipsetConfig config{DATA_PIN, CLOCK_PIN, encoder};
 
     // Verify configuration
-    CHECK_EQ(config.dataPin, DATA_PIN);
-    CHECK_EQ(config.clockPin, CLOCK_PIN);
-    CHECK_EQ(config.timing.chipset, SpiChipset::SK9822);
-    CHECK_EQ(config.timing.clock_hz, 12000000);  // Default 12MHz
+    FL_CHECK_EQ(config.dataPin, DATA_PIN);
+    FL_CHECK_EQ(config.clockPin, CLOCK_PIN);
+    FL_CHECK_EQ(config.timing.chipset, SpiChipset::SK9822);
+    FL_CHECK_EQ(config.timing.clock_hz, 12000000);  // Default 12MHz
 }
 
-TEST_CASE("SPI chipset config - custom clock frequency") {
+FL_TEST_CASE("SPI chipset config - custom clock frequency") {
     const int DATA_PIN = 5;
     const int CLOCK_PIN = 6;
 
@@ -105,10 +105,10 @@ TEST_CASE("SPI chipset config - custom clock frequency") {
     SpiChipsetConfig config{DATA_PIN, CLOCK_PIN, encoder};
 
     // Verify custom frequency
-    CHECK_EQ(config.timing.clock_hz, 10000000);
+    FL_CHECK_EQ(config.timing.clock_hz, 10000000);
 }
 
-TEST_CASE("SPI chipset - variant type checking") {
+FL_TEST_CASE("SPI chipset - variant type checking") {
     const int NUM_LEDS = 10;
     CRGB leds[NUM_LEDS];
 
@@ -118,48 +118,48 @@ TEST_CASE("SPI chipset - variant type checking") {
     ChipsetVariant spiVariant = spiConfig;
 
     // Verify variant type
-    CHECK(spiVariant.is<SpiChipsetConfig>());
-    CHECK_FALSE(spiVariant.is<ClocklessChipset>());
+    FL_CHECK(spiVariant.is<SpiChipsetConfig>());
+    FL_CHECK_FALSE(spiVariant.is<ClocklessChipset>());
 
     // Extract SPI config from variant
     const SpiChipsetConfig* extracted = spiVariant.ptr<SpiChipsetConfig>();
-    CHECK(extracted != nullptr);
-    CHECK_EQ(extracted->dataPin, 23);
-    CHECK_EQ(extracted->clockPin, 18);
+    FL_CHECK(extracted != nullptr);
+    FL_CHECK_EQ(extracted->dataPin, 23);
+    FL_CHECK_EQ(extracted->clockPin, 18);
 }
 
-TEST_CASE("SPI chipset - equality comparison") {
+FL_TEST_CASE("SPI chipset - equality comparison") {
     SpiEncoder encoder1 = SpiEncoder::apa102(6000000);
     SpiEncoder encoder2 = SpiEncoder::apa102(6000000);
     SpiEncoder encoder3 = SpiEncoder::sk9822(12000000);
 
     // Same encoder should be equal
-    CHECK_EQ(encoder1, encoder2);
+    FL_CHECK_EQ(encoder1, encoder2);
 
     // Different encoders should not be equal
-    CHECK_NE(encoder1, encoder3);
+    FL_CHECK_NE(encoder1, encoder3);
 
     // SpiChipsetConfig equality
     SpiChipsetConfig config1{23, 18, encoder1};
     SpiChipsetConfig config2{23, 18, encoder2};
     SpiChipsetConfig config3{5, 6, encoder1};
 
-    CHECK_EQ(config1, config2);  // Same pins and encoder
-    CHECK_NE(config1, config3);  // Different pins
+    FL_CHECK_EQ(config1, config2);  // Same pins and encoder
+    FL_CHECK_NE(config1, config3);  // Different pins
 }
 
-TEST_CASE("SPI chipset - default constructor") {
+FL_TEST_CASE("SPI chipset - default constructor") {
     // Default constructor should create valid config
     SpiChipsetConfig defaultConfig;
 
     // Verify defaults
-    CHECK_EQ(defaultConfig.dataPin, -1);
-    CHECK_EQ(defaultConfig.clockPin, -1);
-    CHECK_EQ(defaultConfig.timing.chipset, SpiChipset::APA102);  // Default to APA102
-    CHECK_EQ(defaultConfig.timing.clock_hz, 6000000);  // Default 6MHz
+    FL_CHECK_EQ(defaultConfig.dataPin, -1);
+    FL_CHECK_EQ(defaultConfig.clockPin, -1);
+    FL_CHECK_EQ(defaultConfig.timing.chipset, SpiChipset::APA102);  // Default to APA102
+    FL_CHECK_EQ(defaultConfig.timing.clock_hz, 6000000);  // Default 6MHz
 }
 
-TEST_CASE("Clockless vs SPI chipset - type safety") {
+FL_TEST_CASE("Clockless vs SPI chipset - type safety") {
     const int NUM_LEDS = 10;
     CRGB leds[NUM_LEDS];
 
@@ -174,13 +174,13 @@ TEST_CASE("Clockless vs SPI chipset - type safety") {
     ChannelConfig spiConfig(spiChipset, fl::span<CRGB>(leds, NUM_LEDS), RGB);
 
     // Verify type safety
-    CHECK(clocklessConfig.isClockless());
-    CHECK_FALSE(clocklessConfig.isSpi());
-    CHECK_EQ(clocklessConfig.getClockPin(), -1);  // Clockless has no clock pin
+    FL_CHECK(clocklessConfig.isClockless());
+    FL_CHECK_FALSE(clocklessConfig.isSpi());
+    FL_CHECK_EQ(clocklessConfig.getClockPin(), -1);  // Clockless has no clock pin
 
-    CHECK(spiConfig.isSpi());
-    CHECK_FALSE(spiConfig.isClockless());
-    CHECK_EQ(spiConfig.getClockPin(), 18);  // SPI has clock pin
+    FL_CHECK(spiConfig.isSpi());
+    FL_CHECK_FALSE(spiConfig.isClockless());
+    FL_CHECK_EQ(spiConfig.getClockPin(), 18);  // SPI has clock pin
 }
 
 /// Mock IChannelEngine for testing SPI data flow
@@ -243,7 +243,7 @@ private:
     fl::vector<ChannelDataPtr> mTransmittingChannels;
 };
 
-TEST_CASE("SPI chipset - mock engine integration") {
+FL_TEST_CASE("SPI chipset - mock engine integration") {
     // Create and register mock SPI engine
     auto mockEngine = fl::make_shared<MockSpiEngine>();
     ChannelBusManager& manager = ChannelBusManager::instance();
@@ -251,7 +251,7 @@ TEST_CASE("SPI chipset - mock engine integration") {
 
     // Set mock engine as exclusive (disables all other engines)
     bool exclusive = manager.setExclusiveDriver("MOCK_SPI");
-    REQUIRE(exclusive);
+    FL_REQUIRE(exclusive);
 
     // Create LED array and set pixel data
     const int NUM_LEDS = 3;
@@ -269,8 +269,8 @@ TEST_CASE("SPI chipset - mock engine integration") {
     ChannelConfig config(spiConfig, fl::span<CRGB>(leds, NUM_LEDS), RGB, options);
 
     auto channel = Channel::create(config);
-    REQUIRE(channel != nullptr);
-    CHECK_EQ(channel->getChannelEngine(), mockEngine.get());
+    FL_REQUIRE(channel != nullptr);
+    FL_CHECK_EQ(channel->getChannelEngine(), mockEngine.get());
 
     // Add channel to FastLED
     FastLED.add(channel);
@@ -279,25 +279,25 @@ TEST_CASE("SPI chipset - mock engine integration") {
     FastLED.show();
 
     // Verify data was enqueued
-    CHECK_GT(mockEngine->mEnqueueCount, 0);
+    FL_CHECK_GT(mockEngine->mEnqueueCount, 0);
 
     // Trigger transmission (FastLED.show() enqueues, engine.show() transmits)
     mockEngine->show();
 
     // Verify data was transmitted
-    CHECK_GT(mockEngine->mTransmitCount, 0);
-    CHECK_GT(mockEngine->mLastTransmittedData.size(), 0);
+    FL_CHECK_GT(mockEngine->mTransmitCount, 0);
+    FL_CHECK_GT(mockEngine->mLastTransmittedData.size(), 0);
 
     // APA102 format: 4-byte start frame + (4 bytes per LED) + end frame
     size_t minExpectedSize = 4 + (4 * NUM_LEDS);
-    CHECK_GE(mockEngine->mLastTransmittedData.size(), minExpectedSize);
+    FL_CHECK_GE(mockEngine->mLastTransmittedData.size(), minExpectedSize);
 
     // Clean up
     channel->removeFromDrawList();
     manager.setDriverEnabled("MOCK_SPI", false);
 }
 
-TEST_CASE("ChannelData - chipset variant type checking") {
+FL_TEST_CASE("ChannelData - chipset variant type checking") {
     const int NUM_LEDS = 10;
     CRGB leds[NUM_LEDS];
 
@@ -311,25 +311,25 @@ TEST_CASE("ChannelData - chipset variant type checking") {
 
     // Create ChannelData for clockless chipset
     auto clocklessData = ChannelData::create(clocklessChipset);
-    CHECK(clocklessData->isClockless());
-    CHECK_FALSE(clocklessData->isSpi());
+    FL_CHECK(clocklessData->isClockless());
+    FL_CHECK_FALSE(clocklessData->isSpi());
 
     // Create ChannelData for SPI chipset
     auto spiData = ChannelData::create(spiChipset);
-    CHECK(spiData->isSpi());
-    CHECK_FALSE(spiData->isClockless());
+    FL_CHECK(spiData->isSpi());
+    FL_CHECK_FALSE(spiData->isClockless());
 
     // Test predicate filtering with mock SPI engine
     MockSpiEngine mockEngine;
 
     // SPI engine should reject clockless data
-    CHECK_FALSE(mockEngine.canHandle(clocklessData));
+    FL_CHECK_FALSE(mockEngine.canHandle(clocklessData));
 
     // SPI engine should accept SPI data
-    CHECK(mockEngine.canHandle(spiData));
+    FL_CHECK(mockEngine.canHandle(spiData));
 }
 
-TEST_CASE("ChannelBusManager - predicate filtering (clockless rejected)") {
+FL_TEST_CASE("ChannelBusManager - predicate filtering (clockless rejected)") {
     // Create mock SPI engine that ONLY accepts SPI chipsets
     auto mockSpiEngine = fl::make_shared<MockSpiEngine>();
     ChannelBusManager& manager = ChannelBusManager::instance();
@@ -337,15 +337,15 @@ TEST_CASE("ChannelBusManager - predicate filtering (clockless rejected)") {
 
     // Set mock engine as exclusive (disables all other engines)
     bool exclusive = manager.setExclusiveDriver("MOCK_SPI_TEST1");
-    REQUIRE(exclusive);
+    FL_REQUIRE(exclusive);
 
     // Create clockless ChannelData
     ChipsetTimingConfig ws2812Timing{350, 700, 600, 50, "WS2812"};
     ClocklessChipset clocklessChipset{5, ws2812Timing};
     auto clocklessData = ChannelData::create(clocklessChipset);
 
-    CHECK(clocklessData->isClockless());
-    CHECK_FALSE(clocklessData->isSpi());
+    FL_CHECK(clocklessData->isClockless());
+    FL_CHECK_FALSE(clocklessData->isSpi());
 
     // Try to enqueue clockless data to ChannelBusManager
     // Predicate filtering should reject it
@@ -353,13 +353,13 @@ TEST_CASE("ChannelBusManager - predicate filtering (clockless rejected)") {
     manager.show();  // Trigger transmission
 
     // Verify data was NOT forwarded to MOCK_SPI (predicate rejected)
-    CHECK_EQ(mockSpiEngine->mEnqueueCount, 0);
+    FL_CHECK_EQ(mockSpiEngine->mEnqueueCount, 0);
 
     // Clean up
     manager.setDriverEnabled("MOCK_SPI_TEST1", false);
 }
 
-TEST_CASE("ChannelBusManager - predicate filtering (SPI accepted)") {
+FL_TEST_CASE("ChannelBusManager - predicate filtering (SPI accepted)") {
     // Create mock SPI engine that ONLY accepts SPI chipsets
     auto mockSpiEngine = fl::make_shared<MockSpiEngine>();
     ChannelBusManager& manager = ChannelBusManager::instance();
@@ -367,15 +367,15 @@ TEST_CASE("ChannelBusManager - predicate filtering (SPI accepted)") {
 
     // Set mock engine as exclusive (disables all other engines)
     bool exclusive = manager.setExclusiveDriver("MOCK_SPI_TEST2");
-    REQUIRE(exclusive);
+    FL_REQUIRE(exclusive);
 
     // Create SPI ChannelData
     SpiEncoder encoder = SpiEncoder::apa102();
     SpiChipsetConfig spiChipset{23, 18, encoder};
     auto spiData = ChannelData::create(spiChipset);
 
-    CHECK(spiData->isSpi());
-    CHECK_FALSE(spiData->isClockless());
+    FL_CHECK(spiData->isSpi());
+    FL_CHECK_FALSE(spiData->isClockless());
 
     // Enqueue SPI data to ChannelBusManager
     // Predicate filtering should accept it
@@ -383,7 +383,7 @@ TEST_CASE("ChannelBusManager - predicate filtering (SPI accepted)") {
     manager.show();  // Trigger transmission
 
     // Verify data was forwarded to MOCK_SPI (predicate accepted)
-    CHECK_GT(mockSpiEngine->mEnqueueCount, 0);
+    FL_CHECK_GT(mockSpiEngine->mEnqueueCount, 0);
 
     // Clean up
     manager.setDriverEnabled("MOCK_SPI_TEST2", false);

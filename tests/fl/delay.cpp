@@ -2,38 +2,38 @@
 /// Unit tests for nanosecond-precision delay functionality (fl/delay.h)
 
 #include "fl/delay.h"
-#include "doctest.h"
+#include "test.h"
 
 // ============================================================================
 // Test Suite: Compile-time Template Delays
 // ============================================================================
 
-TEST_CASE("delayNanoseconds<50>() compiles") {
+FL_TEST_CASE("delayNanoseconds<50>() compiles") {
   fl::delayNanoseconds<50>();
   FL_CHECK(true);
 }
 
-TEST_CASE("delayNanoseconds<100>() compiles") {
+FL_TEST_CASE("delayNanoseconds<100>() compiles") {
   fl::delayNanoseconds<100>();
   FL_CHECK(true);
 }
 
-TEST_CASE("delayNanoseconds<350>() compiles (WS2812 T1)") {
+FL_TEST_CASE("delayNanoseconds<350>() compiles (WS2812 T1)") {
   fl::delayNanoseconds<350>();
   FL_CHECK(true);
 }
 
-TEST_CASE("delayNanoseconds<700>() compiles (WS2812 T2)") {
+FL_TEST_CASE("delayNanoseconds<700>() compiles (WS2812 T2)") {
   fl::delayNanoseconds<700>();
   FL_CHECK(true);
 }
 
-TEST_CASE("delayNanoseconds<1000>() compiles (1 microsecond)") {
+FL_TEST_CASE("delayNanoseconds<1000>() compiles (1 microsecond)") {
   fl::delayNanoseconds<1000>();
   FL_CHECK(true);
 }
 
-TEST_CASE("delayNanoseconds<10000>() compiles (10 microseconds)") {
+FL_TEST_CASE("delayNanoseconds<10000>() compiles (10 microseconds)") {
   fl::delayNanoseconds<10000>();
   FL_CHECK(true);
 }
@@ -42,42 +42,42 @@ TEST_CASE("delayNanoseconds<10000>() compiles (10 microseconds)") {
 // Test Suite: Runtime Delays
 // ============================================================================
 
-TEST_CASE("delayNanoseconds(0) does nothing") {
+FL_TEST_CASE("delayNanoseconds(0) does nothing") {
   fl::delayNanoseconds(0);
   FL_CHECK(true);
 }
 
-TEST_CASE("delayNanoseconds(50) compiles and runs") {
+FL_TEST_CASE("delayNanoseconds(50) compiles and runs") {
   fl::delayNanoseconds(50);
   FL_CHECK(true);
 }
 
-TEST_CASE("delayNanoseconds(350) compiles and runs (WS2812 T1)") {
+FL_TEST_CASE("delayNanoseconds(350) compiles and runs (WS2812 T1)") {
   fl::delayNanoseconds(350);
   FL_CHECK(true);
 }
 
-TEST_CASE("delayNanoseconds(700) compiles and runs (WS2812 T2)") {
+FL_TEST_CASE("delayNanoseconds(700) compiles and runs (WS2812 T2)") {
   fl::delayNanoseconds(700);
   FL_CHECK(true);
 }
 
-TEST_CASE("delayNanoseconds(1000) compiles and runs (1 microsecond)") {
+FL_TEST_CASE("delayNanoseconds(1000) compiles and runs (1 microsecond)") {
   fl::delayNanoseconds(1000);
   FL_CHECK(true);
 }
 
-TEST_CASE("delayNanoseconds with explicit clock frequency - 16 MHz") {
+FL_TEST_CASE("delayNanoseconds with explicit clock frequency - 16 MHz") {
   fl::delayNanoseconds(100, 16000000);
   FL_CHECK(true);
 }
 
-TEST_CASE("delayNanoseconds with explicit clock frequency - 80 MHz (ESP32)") {
+FL_TEST_CASE("delayNanoseconds with explicit clock frequency - 80 MHz (ESP32)") {
   fl::delayNanoseconds(350, 80000000);
   FL_CHECK(true);
 }
 
-TEST_CASE("delayNanoseconds with explicit clock frequency - 160 MHz (ESP32 turbo)") {
+FL_TEST_CASE("delayNanoseconds with explicit clock frequency - 160 MHz (ESP32 turbo)") {
   fl::delayNanoseconds(700, 160000000);
   FL_CHECK(true);
 }
@@ -86,7 +86,7 @@ TEST_CASE("delayNanoseconds with explicit clock frequency - 160 MHz (ESP32 turbo
 // Test Suite: LED Protocol Delays
 // ============================================================================
 
-TEST_CASE("WS2812 LED Protocol Delays") {
+FL_TEST_CASE("WS2812 LED Protocol Delays") {
   fl::delayNanoseconds<350>();
   fl::delayNanoseconds<800>();
   fl::delayNanoseconds<700>();
@@ -94,14 +94,14 @@ TEST_CASE("WS2812 LED Protocol Delays") {
   FL_CHECK(true);
 }
 
-TEST_CASE("SK6812 LED Protocol Delays") {
+FL_TEST_CASE("SK6812 LED Protocol Delays") {
   fl::delayNanoseconds<300>();
   fl::delayNanoseconds<600>();
   fl::delayNanoseconds<300>();
   FL_CHECK(true);
 }
 
-TEST_CASE("Various nanosecond delays") {
+FL_TEST_CASE("Various nanosecond delays") {
   fl::delayNanoseconds<50>();
   fl::delayNanoseconds<100>();
   fl::delayNanoseconds<500>();
@@ -111,7 +111,7 @@ TEST_CASE("Various nanosecond delays") {
   FL_CHECK(true);
 }
 
-TEST_CASE("Mix of compile-time and runtime delays") {
+FL_TEST_CASE("Mix of compile-time and runtime delays") {
   fl::delayNanoseconds<350>();
   fl::delayNanoseconds(700);
   fl::delayNanoseconds(600, 80000000);

@@ -7,7 +7,7 @@
 #include "fl/stl/vector.h"
 #include "chsv.h"
 #include "crgb.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/log.h"
 #include "fl/stl/math.h"
 #include "fl/stl/strstream.h"
@@ -103,7 +103,7 @@ static AccuracyStats testConversionFunction(ConversionFunc hsv2rgb_func, const c
     return stats;
 }
 
-TEST_CASE("HSV to RGB Conversion Accuracy Comparison") {
+FL_TEST_CASE("HSV to RGB Conversion Accuracy Comparison") {
     FL_WARN("=== HSV to RGB Conversion Accuracy Test ===");
     FL_WARN("Testing RGB -> HSV -> RGB round-trip accuracy");
     FL_WARN("Sampling every 8th RGB value for comprehensive coverage");
@@ -186,7 +186,7 @@ TEST_CASE("HSV to RGB Conversion Accuracy Comparison") {
     FL_CHECK_LT(rainbow_stats.average, fullspectrum_stats.average);
 }
 
-TEST_CASE("HSV to RGB Conversion - Specific Color Tests") {
+FL_TEST_CASE("HSV to RGB Conversion - Specific Color Tests") {
     FL_WARN("=== Specific Color Conversion Tests ===");
     
     // Test some specific colors known to be challenging
@@ -229,7 +229,7 @@ TEST_CASE("HSV to RGB Conversion - Specific Color Tests") {
     FL_WARN("");
 }
 
-TEST_CASE("HSV to RGB Conversion - Hue Sweep Test") {
+FL_TEST_CASE("HSV to RGB Conversion - Hue Sweep Test") {
     FL_WARN("=== Hue Sweep Conversion Test ===");
     FL_WARN("Testing full hue range at maximum saturation and brightness");
     FL_WARN("");

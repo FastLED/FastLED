@@ -1,10 +1,10 @@
 
 #include "fl/stl/mutex.h"
-#include "doctest.h"
+#include "test.h"
 #include "mutex_stub_stl.h"
 
 
-TEST_CASE("Mutex reentrant") {
+FL_TEST_CASE("Mutex reentrant") {
     // Tests that the lock can be acquired multiple times by the same thread.
     {
         fl::recursive_mutex m;

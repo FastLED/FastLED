@@ -1,13 +1,13 @@
 #include "fl/align.h"
 #include "fl/stl/cstddef.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/int.h"
 
 using namespace fl;
 
 // Test FL_ALIGN_BYTES macro value
-TEST_CASE("FL_ALIGN_BYTES") {
-    SUBCASE("value is compile-time constant") {
+FL_TEST_CASE("FL_ALIGN_BYTES") {
+    FL_SUBCASE("value is compile-time constant") {
         // FL_ALIGN_BYTES should be a compile-time constant
         constexpr int bytes = FL_ALIGN_BYTES;
 
@@ -18,7 +18,7 @@ TEST_CASE("FL_ALIGN_BYTES") {
 #endif
     }
 
-    SUBCASE("can be used in array declarations") {
+    FL_SUBCASE("can be used in array declarations") {
         // Test that FL_ALIGN_BYTES can be used as array size
         char buffer[FL_ALIGN_BYTES];
         (void)buffer; // Suppress unused variable warning
@@ -27,8 +27,8 @@ TEST_CASE("FL_ALIGN_BYTES") {
 }
 
 // Test FL_ALIGN macro
-TEST_CASE("FL_ALIGN") {
-    SUBCASE("struct alignment") {
+FL_TEST_CASE("FL_ALIGN") {
+    FL_SUBCASE("struct alignment") {
         struct FL_ALIGN AlignedStruct {
             char c;
             int i;
@@ -47,7 +47,7 @@ TEST_CASE("FL_ALIGN") {
 #endif
     }
 
-    SUBCASE("class alignment") {
+    FL_SUBCASE("class alignment") {
         class FL_ALIGN AlignedClass {
         public:
             double d;
@@ -66,7 +66,7 @@ TEST_CASE("FL_ALIGN") {
 #endif
     }
 
-    SUBCASE("multiple aligned members") {
+    FL_SUBCASE("multiple aligned members") {
         struct Container {
             FL_ALIGN int a;
             FL_ALIGN int b;
@@ -82,8 +82,8 @@ TEST_CASE("FL_ALIGN") {
 }
 
 // Test FL_ALIGN_AS macro
-TEST_CASE("FL_ALIGN_AS") {
-    SUBCASE("align to int") {
+FL_TEST_CASE("FL_ALIGN_AS") {
+    FL_SUBCASE("align to int") {
         struct FL_ALIGN_AS(int) AlignedToInt {
             char c;
         };
@@ -100,7 +100,7 @@ TEST_CASE("FL_ALIGN_AS") {
 #endif
     }
 
-    SUBCASE("align to double") {
+    FL_SUBCASE("align to double") {
         struct FL_ALIGN_AS(double) AlignedToDouble {
             char c;
             int i;
@@ -118,7 +118,7 @@ TEST_CASE("FL_ALIGN_AS") {
 #endif
     }
 
-    SUBCASE("align to custom struct") {
+    FL_SUBCASE("align to custom struct") {
         struct alignas(16) CustomAligned {
             int x, y, z, w;
         };
@@ -140,7 +140,7 @@ TEST_CASE("FL_ALIGN_AS") {
 #endif
     }
 
-    SUBCASE("align to pointer") {
+    FL_SUBCASE("align to pointer") {
         struct FL_ALIGN_AS(void*) AlignedToPointer {
             char data[7];
         };
@@ -159,8 +159,8 @@ TEST_CASE("FL_ALIGN_AS") {
 }
 
 // Test alignment affects memory layout
-TEST_CASE("FL_ALIGN memory layout") {
-    SUBCASE("aligned struct affects size") {
+FL_TEST_CASE("FL_ALIGN memory layout") {
+    FL_SUBCASE("aligned struct affects size") {
         struct FL_ALIGN LargeAligned {
             char c;
         };
@@ -174,7 +174,7 @@ TEST_CASE("FL_ALIGN memory layout") {
 #endif
     }
 
-    SUBCASE("alignment affects array stride") {
+    FL_SUBCASE("alignment affects array stride") {
         struct FL_ALIGN Element {
             char value;
         };
@@ -195,8 +195,8 @@ TEST_CASE("FL_ALIGN memory layout") {
 }
 
 // Test compile-time properties
-TEST_CASE("FL_ALIGN compile-time checks") {
-    SUBCASE("alignof is constexpr") {
+FL_TEST_CASE("FL_ALIGN compile-time checks") {
+    FL_SUBCASE("alignof is constexpr") {
         struct FL_ALIGN TestStruct {
             int x;
         };
@@ -208,7 +208,7 @@ TEST_CASE("FL_ALIGN compile-time checks") {
         FL_CHECK(alignment >= 1);
     }
 
-    SUBCASE("FL_ALIGN_AS is constexpr") {
+    FL_SUBCASE("FL_ALIGN_AS is constexpr") {
         struct FL_ALIGN_AS(double) TestStruct {
             char c;
         };
@@ -222,8 +222,8 @@ TEST_CASE("FL_ALIGN compile-time checks") {
 }
 
 // Test edge cases
-TEST_CASE("FL_ALIGN edge cases") {
-    SUBCASE("empty struct with alignment") {
+FL_TEST_CASE("FL_ALIGN edge cases") {
+    FL_SUBCASE("empty struct with alignment") {
         struct FL_ALIGN EmptyAligned {
         };
 
@@ -234,7 +234,7 @@ TEST_CASE("FL_ALIGN edge cases") {
         FL_CHECK(sizeof(EmptyAligned) >= 1);
     }
 
-    SUBCASE("nested aligned structs") {
+    FL_SUBCASE("nested aligned structs") {
         struct FL_ALIGN Inner {
             char c;
         };
@@ -250,7 +250,7 @@ TEST_CASE("FL_ALIGN edge cases") {
         FL_CHECK(sizeof(Outer) >= sizeof(Inner) + sizeof(int));
     }
 
-    SUBCASE("alignment with union") {
+    FL_SUBCASE("alignment with union") {
         union FL_ALIGN AlignedUnion {
             char c;
             int i;
@@ -271,8 +271,8 @@ TEST_CASE("FL_ALIGN edge cases") {
 }
 
 // Test macro interaction
-TEST_CASE("FL_ALIGN macro combinations") {
-    SUBCASE("both FL_ALIGN and FL_ALIGN_AS") {
+FL_TEST_CASE("FL_ALIGN macro combinations") {
+    FL_SUBCASE("both FL_ALIGN and FL_ALIGN_AS") {
         struct FL_ALIGN FL_ALIGN_AS(double) BothAligned {
             char c;
         };
@@ -289,7 +289,7 @@ TEST_CASE("FL_ALIGN macro combinations") {
 #endif
     }
 
-    SUBCASE("multiple FL_ALIGN_AS in same struct") {
+    FL_SUBCASE("multiple FL_ALIGN_AS in same struct") {
         struct Container {
             FL_ALIGN_AS(int) char a;
             FL_ALIGN_AS(double) char b;

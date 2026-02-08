@@ -1,5 +1,5 @@
 #include "fl/compiler_control.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/cstring.h"
 
@@ -66,27 +66,27 @@ namespace {
 constexpr int inline_constexpr_value = 123;
 }
 
-TEST_CASE("FL_STRINGIFY macros") {
-    SUBCASE("FL_STRINGIFY expands macro argument") {
+FL_TEST_CASE("FL_STRINGIFY macros") {
+    FL_SUBCASE("FL_STRINGIFY expands macro argument") {
         #define TEST_VALUE 42
         const char* str = FL_STRINGIFY(TEST_VALUE);
         FL_CHECK(fl::strcmp(str, "42") == 0);
         #undef TEST_VALUE
     }
 
-    SUBCASE("FL_STRINGIFY2 converts to string literal") {
+    FL_SUBCASE("FL_STRINGIFY2 converts to string literal") {
         const char* str = FL_STRINGIFY2(hello);
         FL_CHECK(fl::strcmp(str, "hello") == 0);
     }
 
-    SUBCASE("FL_STRINGIFY handles expressions") {
+    FL_SUBCASE("FL_STRINGIFY handles expressions") {
         const char* str = FL_STRINGIFY(1 + 1);
         FL_CHECK(fl::strcmp(str, "1 + 1") == 0);
     }
 }
 
-TEST_CASE("FL_DISABLE_WARNING macros are defined") {
-    SUBCASE("FL_DISABLE_WARNING_PUSH is defined") {
+FL_TEST_CASE("FL_DISABLE_WARNING macros are defined") {
+    FL_SUBCASE("FL_DISABLE_WARNING_PUSH is defined") {
         // Just check that the macro is defined and compiles
         FL_DISABLE_WARNING_PUSH
         // Should compile without error
@@ -94,13 +94,13 @@ TEST_CASE("FL_DISABLE_WARNING macros are defined") {
         FL_CHECK(true);
     }
 
-    SUBCASE("FL_DISABLE_WARNING_POP is defined") {
+    FL_SUBCASE("FL_DISABLE_WARNING_POP is defined") {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_POP
         FL_CHECK(true);
     }
 
-    SUBCASE("FL_DISABLE_WARNING is defined") {
+    FL_SUBCASE("FL_DISABLE_WARNING is defined") {
         // Test that the macro is defined and can be used
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING(unused-variable)
@@ -111,14 +111,14 @@ TEST_CASE("FL_DISABLE_WARNING macros are defined") {
     }
 }
 
-TEST_CASE("FL_DISABLE_WARNING_PUSH and POP are balanced") {
-    SUBCASE("single push-pop") {
+FL_TEST_CASE("FL_DISABLE_WARNING_PUSH and POP are balanced") {
+    FL_SUBCASE("single push-pop") {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_POP
         FL_CHECK(true);
     }
 
-    SUBCASE("nested push-pop") {
+    FL_SUBCASE("nested push-pop") {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_POP
@@ -126,7 +126,7 @@ TEST_CASE("FL_DISABLE_WARNING_PUSH and POP are balanced") {
         FL_CHECK(true);
     }
 
-    SUBCASE("multiple sequential push-pop") {
+    FL_SUBCASE("multiple sequential push-pop") {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_POP
         FL_DISABLE_WARNING_PUSH
@@ -135,8 +135,8 @@ TEST_CASE("FL_DISABLE_WARNING_PUSH and POP are balanced") {
     }
 }
 
-TEST_CASE("specific warning suppression macros") {
-    SUBCASE("FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS") {
+FL_TEST_CASE("specific warning suppression macros") {
+    FL_SUBCASE("FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS") {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
         // Should compile without warning
@@ -144,7 +144,7 @@ TEST_CASE("specific warning suppression macros") {
         FL_CHECK(true);
     }
 
-    SUBCASE("FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED") {
+    FL_SUBCASE("FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED") {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_SELF_ASSIGN
         FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED
@@ -154,7 +154,7 @@ TEST_CASE("specific warning suppression macros") {
         FL_CHECK(x == 5);
     }
 
-    SUBCASE("FL_DISABLE_FORMAT_TRUNCATION") {
+    FL_SUBCASE("FL_DISABLE_FORMAT_TRUNCATION") {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_FORMAT_TRUNCATION
         // Should compile without warning
@@ -162,7 +162,7 @@ TEST_CASE("specific warning suppression macros") {
         FL_CHECK(true);
     }
 
-    SUBCASE("FL_DISABLE_WARNING_NULL_DEREFERENCE") {
+    FL_SUBCASE("FL_DISABLE_WARNING_NULL_DEREFERENCE") {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_NULL_DEREFERENCE
         // Should compile without warning
@@ -170,7 +170,7 @@ TEST_CASE("specific warning suppression macros") {
         FL_CHECK(true);
     }
 
-    SUBCASE("FL_DISABLE_WARNING_UNUSED_PARAMETER") {
+    FL_SUBCASE("FL_DISABLE_WARNING_UNUSED_PARAMETER") {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_UNUSED_PARAMETER
         int result = unused_parameter_function(10, 20);
@@ -178,7 +178,7 @@ TEST_CASE("specific warning suppression macros") {
         FL_CHECK(result == 10);
     }
 
-    SUBCASE("FL_DISABLE_WARNING_RETURN_TYPE") {
+    FL_SUBCASE("FL_DISABLE_WARNING_RETURN_TYPE") {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_RETURN_TYPE
         // Should compile without warning
@@ -186,7 +186,7 @@ TEST_CASE("specific warning suppression macros") {
         FL_CHECK(true);
     }
 
-    SUBCASE("FL_DISABLE_WARNING_IMPLICIT_FALLTHROUGH") {
+    FL_SUBCASE("FL_DISABLE_WARNING_IMPLICIT_FALLTHROUGH") {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_IMPLICIT_FALLTHROUGH
         int result = fallthrough_function(1);
@@ -194,7 +194,7 @@ TEST_CASE("specific warning suppression macros") {
         FL_CHECK(result == 20);
     }
 
-    SUBCASE("FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION") {
+    FL_SUBCASE("FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION") {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
         // Should compile without warning
@@ -202,7 +202,7 @@ TEST_CASE("specific warning suppression macros") {
         FL_CHECK(true);
     }
 
-    SUBCASE("FL_DISABLE_WARNING_FLOAT_CONVERSION") {
+    FL_SUBCASE("FL_DISABLE_WARNING_FLOAT_CONVERSION") {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_FLOAT_CONVERSION
         float f = 3.14f;
@@ -211,7 +211,7 @@ TEST_CASE("specific warning suppression macros") {
         FL_CHECK(i == 3);
     }
 
-    SUBCASE("FL_DISABLE_WARNING_SIGN_CONVERSION") {
+    FL_SUBCASE("FL_DISABLE_WARNING_SIGN_CONVERSION") {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_SIGN_CONVERSION
         unsigned int u = 10;
@@ -220,7 +220,7 @@ TEST_CASE("specific warning suppression macros") {
         FL_CHECK(s == 10);
     }
 
-    SUBCASE("FL_DISABLE_WARNING_SHORTEN_64_TO_32") {
+    FL_SUBCASE("FL_DISABLE_WARNING_SHORTEN_64_TO_32") {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_SHORTEN_64_TO_32
         // Should compile without warning
@@ -228,7 +228,7 @@ TEST_CASE("specific warning suppression macros") {
         FL_CHECK(true);
     }
 
-    SUBCASE("FL_DISABLE_WARNING_VOLATILE") {
+    FL_SUBCASE("FL_DISABLE_WARNING_VOLATILE") {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_VOLATILE
         // Should compile without warning
@@ -237,20 +237,20 @@ TEST_CASE("specific warning suppression macros") {
     }
 }
 
-TEST_CASE("FL_FAST_MATH macros") {
-    SUBCASE("FL_FAST_MATH_BEGIN and END are defined") {
+FL_TEST_CASE("FL_FAST_MATH macros") {
+    FL_SUBCASE("FL_FAST_MATH_BEGIN and END are defined") {
         FL_FAST_MATH_BEGIN
         float result = 2.0f * 3.0f;
         FL_FAST_MATH_END
         FL_CHECK(result == 6.0f);
     }
 
-    SUBCASE("fast math function compiles and executes") {
+    FL_SUBCASE("fast math function compiles and executes") {
         float result = fast_math_multiply(2.5f, 4.0f);
         FL_CHECK(result == 10.0f);
     }
 
-    SUBCASE("fast math with multiple operations") {
+    FL_SUBCASE("fast math with multiple operations") {
         FL_FAST_MATH_BEGIN
         float a = 1.5f;
         float b = 2.0f;
@@ -260,7 +260,7 @@ TEST_CASE("FL_FAST_MATH macros") {
         FL_CHECK(result == 9.0f);
     }
 
-    SUBCASE("nested fast math blocks") {
+    FL_SUBCASE("nested fast math blocks") {
         FL_FAST_MATH_BEGIN
         FL_FAST_MATH_BEGIN
         float result = 10.0f / 2.0f;
@@ -270,20 +270,20 @@ TEST_CASE("FL_FAST_MATH macros") {
     }
 }
 
-TEST_CASE("FL_OPTIMIZATION_LEVEL_O3 macros") {
-    SUBCASE("O3 optimization macros are defined") {
+FL_TEST_CASE("FL_OPTIMIZATION_LEVEL_O3 macros") {
+    FL_SUBCASE("O3 optimization macros are defined") {
         FL_OPTIMIZATION_LEVEL_O3_BEGIN
         int result = 5 + 10;
         FL_OPTIMIZATION_LEVEL_O3_END
         FL_CHECK(result == 15);
     }
 
-    SUBCASE("O3 optimized function compiles and executes") {
+    FL_SUBCASE("O3 optimized function compiles and executes") {
         int result = o3_sum(100, 200);
         FL_CHECK(result == 300);
     }
 
-    SUBCASE("O3 with loop optimization") {
+    FL_SUBCASE("O3 with loop optimization") {
         FL_OPTIMIZATION_LEVEL_O3_BEGIN
         int sum = 0;
         for (int i = 0; i < 10; i++) {
@@ -293,7 +293,7 @@ TEST_CASE("FL_OPTIMIZATION_LEVEL_O3 macros") {
         FL_CHECK(sum == 45);
     }
 
-    SUBCASE("nested O3 blocks") {
+    FL_SUBCASE("nested O3 blocks") {
         FL_OPTIMIZATION_LEVEL_O3_BEGIN
         FL_OPTIMIZATION_LEVEL_O3_BEGIN
         int result = 7 * 8;
@@ -303,20 +303,20 @@ TEST_CASE("FL_OPTIMIZATION_LEVEL_O3 macros") {
     }
 }
 
-TEST_CASE("FL_OPTIMIZATION_LEVEL_O0 macros") {
-    SUBCASE("O0 optimization macros are defined") {
+FL_TEST_CASE("FL_OPTIMIZATION_LEVEL_O0 macros") {
+    FL_SUBCASE("O0 optimization macros are defined") {
         FL_OPTIMIZATION_LEVEL_O0_BEGIN
         int result = 3 + 4;
         FL_OPTIMIZATION_LEVEL_O0_END
         FL_CHECK(result == 7);
     }
 
-    SUBCASE("O0 debug function compiles and executes") {
+    FL_SUBCASE("O0 debug function compiles and executes") {
         int result = o0_sum(50, 75);
         FL_CHECK(result == 125);
     }
 
-    SUBCASE("O0 preserves debugging information") {
+    FL_SUBCASE("O0 preserves debugging information") {
         FL_OPTIMIZATION_LEVEL_O0_BEGIN
         volatile int x = 10;
         volatile int y = 20;
@@ -325,7 +325,7 @@ TEST_CASE("FL_OPTIMIZATION_LEVEL_O0 macros") {
         FL_CHECK(result == 30);
     }
 
-    SUBCASE("nested O0 blocks") {
+    FL_SUBCASE("nested O0 blocks") {
         FL_OPTIMIZATION_LEVEL_O0_BEGIN
         FL_OPTIMIZATION_LEVEL_O0_BEGIN
         int result = 12 - 5;
@@ -335,8 +335,8 @@ TEST_CASE("FL_OPTIMIZATION_LEVEL_O0 macros") {
     }
 }
 
-TEST_CASE("mixed optimization levels") {
-    SUBCASE("O3 followed by O0") {
+FL_TEST_CASE("mixed optimization levels") {
+    FL_SUBCASE("O3 followed by O0") {
         FL_OPTIMIZATION_LEVEL_O3_BEGIN
         int a = 10 * 2;
         FL_OPTIMIZATION_LEVEL_O3_END
@@ -349,7 +349,7 @@ TEST_CASE("mixed optimization levels") {
         FL_CHECK(b == 8);
     }
 
-    SUBCASE("fast math with O3") {
+    FL_SUBCASE("fast math with O3") {
         FL_OPTIMIZATION_LEVEL_O3_BEGIN
         FL_FAST_MATH_BEGIN
         float result = 3.0f * 4.0f;
@@ -358,7 +358,7 @@ TEST_CASE("mixed optimization levels") {
         FL_CHECK(result == 12.0f);
     }
 
-    SUBCASE("O0 with warning suppression") {
+    FL_SUBCASE("O0 with warning suppression") {
         FL_OPTIMIZATION_LEVEL_O0_BEGIN
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_UNUSED_PARAMETER
@@ -369,65 +369,65 @@ TEST_CASE("mixed optimization levels") {
     }
 }
 
-TEST_CASE("FL_LINK_WEAK attribute") {
-    SUBCASE("weak function is defined") {
+FL_TEST_CASE("FL_LINK_WEAK attribute") {
+    FL_SUBCASE("weak function is defined") {
         int result = weak_function();
         FL_CHECK(result == 42);
     }
 
-    SUBCASE("weak function can be called multiple times") {
+    FL_SUBCASE("weak function can be called multiple times") {
         FL_CHECK(weak_function() == 42);
         FL_CHECK(weak_function() == 42);
     }
 
-    SUBCASE("weak attribute allows override") {
+    FL_SUBCASE("weak attribute allows override") {
         // Weak linkage means this function can be overridden by strong symbols
         // Here we just verify it works
         FL_CHECK(weak_function() == 42);
     }
 }
 
-TEST_CASE("FL_EXTERN_C macros") {
-    SUBCASE("FL_EXTERN_C_BEGIN and END are defined") {
+FL_TEST_CASE("FL_EXTERN_C macros") {
+    FL_SUBCASE("FL_EXTERN_C_BEGIN and END are defined") {
         // Just check that the macros are defined
         // (Cannot test linkage inside function scope)
         FL_CHECK(true);
     }
 
-    SUBCASE("FL_EXTERN_C is defined") {
+    FL_SUBCASE("FL_EXTERN_C is defined") {
         // Check that FL_EXTERN_C functions can be called
         // (test_extern_c_function defined at file scope)
         FL_CHECK(c_function() == 100);
     }
 
-    SUBCASE("C linkage function compiles and executes") {
+    FL_SUBCASE("C linkage function compiles and executes") {
         int result = c_function();
         FL_CHECK(result == 100);
     }
 
-    SUBCASE("extern C function has C linkage") {
+    FL_SUBCASE("extern C function has C linkage") {
         // Verify the function can be called
         FL_CHECK(c_function() == 100);
     }
 }
 
-TEST_CASE("FL_INLINE_CONSTEXPR macro") {
-    SUBCASE("FL_INLINE_CONSTEXPR variable is defined") {
+FL_TEST_CASE("FL_INLINE_CONSTEXPR macro") {
+    FL_SUBCASE("FL_INLINE_CONSTEXPR variable is defined") {
         FL_CHECK(inline_constexpr_value == 123);
     }
 
-    SUBCASE("inline constexpr can be used in constexpr context") {
+    FL_SUBCASE("inline constexpr can be used in constexpr context") {
         constexpr int doubled = inline_constexpr_value * 2;
         FL_CHECK(doubled == 246);
     }
 
-    SUBCASE("inline constexpr variable has correct value") {
+    FL_SUBCASE("inline constexpr variable has correct value") {
         // Note: inline keyword not allowed in local scope, use constexpr only
         constexpr int local_value = 999;
         FL_CHECK(local_value == 999);
     }
 
-    SUBCASE("inline constexpr in array size") {
+    FL_SUBCASE("inline constexpr in array size") {
         // Note: inline keyword not allowed in local scope, use constexpr only
         constexpr fl::size_t array_size = 5;
         int array[array_size];
@@ -435,8 +435,8 @@ TEST_CASE("FL_INLINE_CONSTEXPR macro") {
     }
 }
 
-TEST_CASE("macro combinations and interactions") {
-    SUBCASE("warning suppression inside fast math") {
+FL_TEST_CASE("macro combinations and interactions") {
+    FL_SUBCASE("warning suppression inside fast math") {
         FL_FAST_MATH_BEGIN
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_FLOAT_CONVERSION
@@ -447,7 +447,7 @@ TEST_CASE("macro combinations and interactions") {
         FL_CHECK(i == 5);
     }
 
-    SUBCASE("multiple warning suppressions") {
+    FL_SUBCASE("multiple warning suppressions") {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_UNUSED_PARAMETER
         FL_DISABLE_WARNING_SIGN_CONVERSION
@@ -457,7 +457,7 @@ TEST_CASE("macro combinations and interactions") {
         FL_CHECK(result == 30);
     }
 
-    SUBCASE("all optimization macros together") {
+    FL_SUBCASE("all optimization macros together") {
         FL_OPTIMIZATION_LEVEL_O3_BEGIN
         FL_FAST_MATH_BEGIN
         FL_DISABLE_WARNING_PUSH
@@ -469,44 +469,44 @@ TEST_CASE("macro combinations and interactions") {
         FL_CHECK(result == 10.0f);
     }
 
-    SUBCASE("extern C with inline constexpr") {
+    FL_SUBCASE("extern C with inline constexpr") {
         // Cannot test linkage inside function scope
         // Just verify macros are defined
         FL_CHECK(true);
     }
 }
 
-TEST_CASE("macro edge cases") {
-    SUBCASE("empty warning suppression block") {
+FL_TEST_CASE("macro edge cases") {
+    FL_SUBCASE("empty warning suppression block") {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_POP
         FL_CHECK(true);
     }
 
-    SUBCASE("empty fast math block") {
+    FL_SUBCASE("empty fast math block") {
         FL_FAST_MATH_BEGIN
         FL_FAST_MATH_END
         FL_CHECK(true);
     }
 
-    SUBCASE("empty O3 block") {
+    FL_SUBCASE("empty O3 block") {
         FL_OPTIMIZATION_LEVEL_O3_BEGIN
         FL_OPTIMIZATION_LEVEL_O3_END
         FL_CHECK(true);
     }
 
-    SUBCASE("empty O0 block") {
+    FL_SUBCASE("empty O0 block") {
         FL_OPTIMIZATION_LEVEL_O0_BEGIN
         FL_OPTIMIZATION_LEVEL_O0_END
         FL_CHECK(true);
     }
 
-    SUBCASE("empty extern C block") {
+    FL_SUBCASE("empty extern C block") {
         // Cannot test extern C linkage inside function scope
         FL_CHECK(true);
     }
 
-    SUBCASE("deeply nested macros") {
+    FL_SUBCASE("deeply nested macros") {
         FL_OPTIMIZATION_LEVEL_O3_BEGIN
         FL_FAST_MATH_BEGIN
         FL_DISABLE_WARNING_PUSH
@@ -522,8 +522,8 @@ TEST_CASE("macro edge cases") {
     }
 }
 
-TEST_CASE("compiler portability") {
-    SUBCASE("macros work on current compiler") {
+FL_TEST_CASE("compiler portability") {
+    FL_SUBCASE("macros work on current compiler") {
         // Clang
         #if defined(__clang__)
         FL_CHECK(true);
@@ -543,7 +543,7 @@ TEST_CASE("compiler portability") {
         FL_CHECK(true);
     }
 
-    SUBCASE("fallback macros are safe") {
+    FL_SUBCASE("fallback macros are safe") {
         // Even on unknown compilers, the macros should be defined
         // and should do nothing (no-op) rather than causing errors
         FL_DISABLE_WARNING_PUSH
@@ -554,8 +554,8 @@ TEST_CASE("compiler portability") {
     }
 }
 
-TEST_CASE("practical usage scenarios") {
-    SUBCASE("suppress warning in template code") {
+FL_TEST_CASE("practical usage scenarios") {
+    FL_SUBCASE("suppress warning in template code") {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_UNUSED_PARAMETER
         auto lambda = [](int x, FL_MAYBE_UNUSED int y) { return x; };
@@ -563,7 +563,7 @@ TEST_CASE("practical usage scenarios") {
         FL_CHECK(lambda(10, 20) == 10);
     }
 
-    SUBCASE("fast math for performance-critical loop") {
+    FL_SUBCASE("fast math for performance-critical loop") {
         FL_FAST_MATH_BEGIN
         float sum = 0.0f;
         for (int i = 0; i < 100; i++) {
@@ -574,7 +574,7 @@ TEST_CASE("practical usage scenarios") {
         FL_CHECK(sum == 2475.0f);
     }
 
-    SUBCASE("debug code with O0") {
+    FL_SUBCASE("debug code with O0") {
         FL_OPTIMIZATION_LEVEL_O0_BEGIN
         volatile int debug_value = 42;
         int result = debug_value + 1;
@@ -582,7 +582,7 @@ TEST_CASE("practical usage scenarios") {
         FL_CHECK(result == 43);
     }
 
-    SUBCASE("optimized hot path with O3") {
+    FL_SUBCASE("optimized hot path with O3") {
         FL_OPTIMIZATION_LEVEL_O3_BEGIN
         int product = 1;
         for (int i = 1; i <= 5; i++) {
@@ -592,17 +592,17 @@ TEST_CASE("practical usage scenarios") {
         FL_CHECK(product == 120);  // 5! = 120
     }
 
-    SUBCASE("C API wrapper") {
+    FL_SUBCASE("C API wrapper") {
         // Test existing extern C function
         FL_CHECK(c_function() == 100);
     }
 
-    SUBCASE("weak symbol for optional override") {
+    FL_SUBCASE("weak symbol for optional override") {
         // Weak symbol can be overridden by user code
         FL_CHECK(weak_function() == 42);
     }
 
-    SUBCASE("constexpr configuration constant") {
+    FL_SUBCASE("constexpr configuration constant") {
         // Note: inline keyword not allowed in local scope
         constexpr int buffer_size = 256;
         char buffer[buffer_size];
@@ -610,8 +610,8 @@ TEST_CASE("practical usage scenarios") {
     }
 }
 
-TEST_CASE("stringify in practical scenarios") {
-    SUBCASE("version string") {
+FL_TEST_CASE("stringify in practical scenarios") {
+    FL_SUBCASE("version string") {
         #define VERSION_MAJOR 1
         #define VERSION_MINOR 2
         const char* version = FL_STRINGIFY(VERSION_MAJOR) "." FL_STRINGIFY(VERSION_MINOR);
@@ -620,14 +620,14 @@ TEST_CASE("stringify in practical scenarios") {
         #undef VERSION_MINOR
     }
 
-    SUBCASE("debug macro with stringify") {
+    FL_SUBCASE("debug macro with stringify") {
         #define DEBUG_VALUE 0xDEADBEEF
         const char* debug_str = FL_STRINGIFY(DEBUG_VALUE);
         FL_CHECK(fl::strcmp(debug_str, "0xDEADBEEF") == 0);
         #undef DEBUG_VALUE
     }
 
-    SUBCASE("pragma construction") {
+    FL_SUBCASE("pragma construction") {
         // Test that stringify can be used in pragma construction
         #define WARNING_NAME unused-variable
         // This would normally be used like: _Pragma(FL_STRINGIFY(GCC diagnostic ignored "-W" #WARNING_NAME))

@@ -1,5 +1,5 @@
 #include "fl/stl/atomic.h"
-#include "doctest.h"
+#include "test.h"
 #include "platforms/shared/atomic.h"
 
 using namespace fl;
@@ -11,38 +11,38 @@ using namespace fl;
 // - fetch_add(), fetch_sub()
 // - operator=, operator T() (conversion)
 
-TEST_CASE("fl::atomic<int> - basic construction and initialization") {
-    SUBCASE("default constructor initializes to zero") {
+FL_TEST_CASE("fl::atomic<int> - basic construction and initialization") {
+    FL_SUBCASE("default constructor initializes to zero") {
         atomic_int a;
         FL_CHECK_EQ(a.load(), 0);
     }
 
-    SUBCASE("value constructor initializes to given value") {
+    FL_SUBCASE("value constructor initializes to given value") {
         atomic_int a(42);
         FL_CHECK_EQ(a.load(), 42);
     }
 
-    SUBCASE("conversion operator works") {
+    FL_SUBCASE("conversion operator works") {
         atomic_int a(100);
         int value = a;  // Implicit conversion
         FL_CHECK_EQ(value, 100);
     }
 }
 
-TEST_CASE("fl::atomic<int> - store and load operations") {
+FL_TEST_CASE("fl::atomic<int> - store and load operations") {
     atomic_int a;
 
-    SUBCASE("store and load basic value") {
+    FL_SUBCASE("store and load basic value") {
         a.store(123);
         FL_CHECK_EQ(a.load(), 123);
     }
 
-    SUBCASE("store negative value") {
+    FL_SUBCASE("store negative value") {
         a.store(-456);
         FL_CHECK_EQ(a.load(), -456);
     }
 
-    SUBCASE("multiple stores") {
+    FL_SUBCASE("multiple stores") {
         a.store(10);
         FL_CHECK_EQ(a.load(), 10);
         a.store(20);
@@ -51,7 +51,7 @@ TEST_CASE("fl::atomic<int> - store and load operations") {
         FL_CHECK_EQ(a.load(), 30);
     }
 
-    SUBCASE("store with memory order parameters") {
+    FL_SUBCASE("store with memory order parameters") {
         a.store(100, memory_order_relaxed);
         FL_CHECK_EQ(a.load(memory_order_relaxed), 100);
 
@@ -63,21 +63,21 @@ TEST_CASE("fl::atomic<int> - store and load operations") {
     }
 }
 
-TEST_CASE("fl::atomic<int> - assignment operator") {
+FL_TEST_CASE("fl::atomic<int> - assignment operator") {
     atomic_int a;
 
-    SUBCASE("assignment stores value") {
+    FL_SUBCASE("assignment stores value") {
         a = 42;
         FL_CHECK_EQ(a.load(), 42);
     }
 
-    SUBCASE("assignment returns assigned value") {
+    FL_SUBCASE("assignment returns assigned value") {
         int result = (a = 123);
         FL_CHECK_EQ(result, 123);
         FL_CHECK_EQ(a.load(), 123);
     }
 
-    SUBCASE("chained assignment") {
+    FL_SUBCASE("chained assignment") {
         atomic_int b;
         b = a = 99;
         FL_CHECK_EQ(a.load(), 99);
@@ -85,16 +85,16 @@ TEST_CASE("fl::atomic<int> - assignment operator") {
     }
 }
 
-TEST_CASE("fl::atomic<int> - pre-increment operator") {
+FL_TEST_CASE("fl::atomic<int> - pre-increment operator") {
     atomic_int a(10);
 
-    SUBCASE("pre-increment") {
+    FL_SUBCASE("pre-increment") {
         int result = ++a;
         FL_CHECK_EQ(result, 11);
         FL_CHECK_EQ(a.load(), 11);
     }
 
-    SUBCASE("multiple increments") {
+    FL_SUBCASE("multiple increments") {
         ++a;
         ++a;
         ++a;
@@ -102,16 +102,16 @@ TEST_CASE("fl::atomic<int> - pre-increment operator") {
     }
 }
 
-TEST_CASE("fl::atomic<int> - pre-decrement operator") {
+FL_TEST_CASE("fl::atomic<int> - pre-decrement operator") {
     atomic_int a(10);
 
-    SUBCASE("pre-decrement") {
+    FL_SUBCASE("pre-decrement") {
         int result = --a;
         FL_CHECK_EQ(result, 9);
         FL_CHECK_EQ(a.load(), 9);
     }
 
-    SUBCASE("multiple decrements") {
+    FL_SUBCASE("multiple decrements") {
         --a;
         --a;
         --a;
@@ -119,29 +119,29 @@ TEST_CASE("fl::atomic<int> - pre-decrement operator") {
     }
 }
 
-TEST_CASE("fl::atomic<int> - fetch operations") {
-    SUBCASE("fetch_add returns old value and adds") {
+FL_TEST_CASE("fl::atomic<int> - fetch operations") {
+    FL_SUBCASE("fetch_add returns old value and adds") {
         atomic_int a(10);
         int old = a.fetch_add(5);
         FL_CHECK_EQ(old, 10);
         FL_CHECK_EQ(a.load(), 15);
     }
 
-    SUBCASE("fetch_sub returns old value and subtracts") {
+    FL_SUBCASE("fetch_sub returns old value and subtracts") {
         atomic_int a(20);
         int old = a.fetch_sub(7);
         FL_CHECK_EQ(old, 20);
         FL_CHECK_EQ(a.load(), 13);
     }
 
-    SUBCASE("fetch_add with negative value") {
+    FL_SUBCASE("fetch_add with negative value") {
         atomic_int a(50);
         int old = a.fetch_add(-10);
         FL_CHECK_EQ(old, 50);
         FL_CHECK_EQ(a.load(), 40);
     }
 
-    SUBCASE("fetch_sub with negative value") {
+    FL_SUBCASE("fetch_sub with negative value") {
         atomic_int a(30);
         int old = a.fetch_sub(-5);
         FL_CHECK_EQ(old, 30);
@@ -149,18 +149,18 @@ TEST_CASE("fl::atomic<int> - fetch operations") {
     }
 }
 
-TEST_CASE("fl::atomic_bool - boolean atomic operations") {
-    SUBCASE("default constructor initializes to false") {
+FL_TEST_CASE("fl::atomic_bool - boolean atomic operations") {
+    FL_SUBCASE("default constructor initializes to false") {
         atomic_bool a;
         FL_CHECK(!a.load());
     }
 
-    SUBCASE("value constructor") {
+    FL_SUBCASE("value constructor") {
         atomic_bool a(true);
         FL_CHECK(a.load());
     }
 
-    SUBCASE("store and load") {
+    FL_SUBCASE("store and load") {
         atomic_bool a;
         a.store(true);
         FL_CHECK(a.load());
@@ -168,13 +168,13 @@ TEST_CASE("fl::atomic_bool - boolean atomic operations") {
         FL_CHECK(!a.load());
     }
 
-    SUBCASE("assignment") {
+    FL_SUBCASE("assignment") {
         atomic_bool a;
         a = true;
         FL_CHECK(a.load());
     }
 
-    SUBCASE("conversion operator") {
+    FL_SUBCASE("conversion operator") {
         atomic_bool a(true);
         if (a) {  // Uses conversion operator
             FL_CHECK(true);
@@ -184,38 +184,38 @@ TEST_CASE("fl::atomic_bool - boolean atomic operations") {
     }
 }
 
-TEST_CASE("fl::atomic<unsigned int> - unsigned atomic operations") {
+FL_TEST_CASE("fl::atomic<unsigned int> - unsigned atomic operations") {
     atomic_uint a(100u);
 
-    SUBCASE("basic operations") {
+    FL_SUBCASE("basic operations") {
         FL_CHECK_EQ(a.load(), 100u);
         a.store(200u);
         FL_CHECK_EQ(a.load(), 200u);
     }
 
-    SUBCASE("pre-increment and pre-decrement") {
+    FL_SUBCASE("pre-increment and pre-decrement") {
         ++a;
         FL_CHECK_EQ(a.load(), 101u);
         --a;
         FL_CHECK_EQ(a.load(), 100u);
     }
 
-    SUBCASE("fetch operations") {
+    FL_SUBCASE("fetch operations") {
         unsigned old = a.fetch_add(10u);
         FL_CHECK_EQ(old, 100u);
         FL_CHECK_EQ(a.load(), 110u);
     }
 }
 
-TEST_CASE("fl::atomic_u32 and atomic_i32 - typed atomics") {
-    SUBCASE("atomic_u32 operations") {
+FL_TEST_CASE("fl::atomic_u32 and atomic_i32 - typed atomics") {
+    FL_SUBCASE("atomic_u32 operations") {
         atomic_u32 a(42u);
         FL_CHECK_EQ(a.load(), 42u);
         a.store(84u);
         FL_CHECK_EQ(a.load(), 84u);
     }
 
-    SUBCASE("atomic_i32 operations") {
+    FL_SUBCASE("atomic_i32 operations") {
         atomic_i32 a(-42);
         FL_CHECK_EQ(a.load(), -42);
         a.store(42);
@@ -224,8 +224,8 @@ TEST_CASE("fl::atomic_u32 and atomic_i32 - typed atomics") {
 }
 
 
-TEST_CASE("fl::atomic - edge cases and special values") {
-    SUBCASE("zero value") {
+FL_TEST_CASE("fl::atomic - edge cases and special values") {
+    FL_SUBCASE("zero value") {
         atomic_int a(0);
         FL_CHECK_EQ(a.load(), 0);
         ++a;
@@ -234,7 +234,7 @@ TEST_CASE("fl::atomic - edge cases and special values") {
         FL_CHECK_EQ(a.load(), 0);
     }
 
-    SUBCASE("negative values") {
+    FL_SUBCASE("negative values") {
         atomic_int a(-100);
         FL_CHECK_EQ(a.load(), -100);
         a.fetch_add(50);
@@ -243,7 +243,7 @@ TEST_CASE("fl::atomic - edge cases and special values") {
         FL_CHECK_EQ(a.load(), 50);
     }
 
-    SUBCASE("maximum and minimum int values") {
+    FL_SUBCASE("maximum and minimum int values") {
         atomic_int a_max(2147483647);  // INT_MAX
         FL_CHECK_EQ(a_max.load(), 2147483647);
 
@@ -252,8 +252,8 @@ TEST_CASE("fl::atomic - edge cases and special values") {
     }
 }
 
-TEST_CASE("fl::atomic - type traits and properties") {
-    SUBCASE("atomic types are not copyable") {
+FL_TEST_CASE("fl::atomic - type traits and properties") {
+    FL_SUBCASE("atomic types are not copyable") {
         // This test verifies at compile time that atomics are not copyable
         // Uncommenting these should cause compilation errors:
         // atomic_int a(10);
@@ -262,7 +262,7 @@ TEST_CASE("fl::atomic - type traits and properties") {
         FL_CHECK(true);  // Dummy check since this is a compile-time test
     }
 
-    SUBCASE("atomic types are not movable") {
+    FL_SUBCASE("atomic types are not movable") {
         // This test verifies at compile time that atomics are not movable
         // Uncommenting these should cause compilation errors:
         // atomic_int a(10);
@@ -272,9 +272,9 @@ TEST_CASE("fl::atomic - type traits and properties") {
     }
 }
 
-TEST_CASE("fl::memory_order - memory order enum values exist") {
+FL_TEST_CASE("fl::memory_order - memory order enum values exist") {
     // Test that memory_order enum values are defined
-    SUBCASE("memory order constants are available") {
+    FL_SUBCASE("memory order constants are available") {
         memory_order mo1 = memory_order_relaxed;
         memory_order mo2 = memory_order_acquire;
         memory_order mo3 = memory_order_release;
@@ -287,8 +287,8 @@ TEST_CASE("fl::memory_order - memory order enum values exist") {
     }
 }
 
-TEST_CASE("fl::atomic - complex usage patterns") {
-    SUBCASE("using atomic as counter") {
+FL_TEST_CASE("fl::atomic - complex usage patterns") {
+    FL_SUBCASE("using atomic as counter") {
         atomic_int counter(0);
         for (int i = 0; i < 100; ++i) {
             ++counter;
@@ -296,7 +296,7 @@ TEST_CASE("fl::atomic - complex usage patterns") {
         FL_CHECK_EQ(counter.load(), 100);
     }
 
-    SUBCASE("using atomic as flag") {
+    FL_SUBCASE("using atomic as flag") {
         atomic_bool flag(false);
         flag.store(true);
         if (flag) {
@@ -306,7 +306,7 @@ TEST_CASE("fl::atomic - complex usage patterns") {
         FL_CHECK(!flag.load());
     }
 
-    SUBCASE("accumulator pattern with fetch_add") {
+    FL_SUBCASE("accumulator pattern with fetch_add") {
         atomic_int total(0);
         for (int i = 1; i <= 10; ++i) {
             total.fetch_add(i);
@@ -314,7 +314,7 @@ TEST_CASE("fl::atomic - complex usage patterns") {
         FL_CHECK_EQ(total.load(), 55);  // Sum of 1..10
     }
 
-    SUBCASE("countdown pattern with fetch_sub") {
+    FL_SUBCASE("countdown pattern with fetch_sub") {
         atomic_int countdown(100);
         for (int i = 0; i < 10; ++i) {
             countdown.fetch_sub(10);

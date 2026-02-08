@@ -5,13 +5,13 @@
 #include "fl/hsv16.h"
 #include "lib8tion/intmap.h"
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 #include "hsv2rgb.h"
 
 
-TEST_CASE("RGB to HSV16 to RGB") {
+FL_TEST_CASE("RGB to HSV16 to RGB") {
 
-    SUBCASE("Primary Colors - Good Conversion") {
+    FL_SUBCASE("Primary Colors - Good Conversion") {
         // Test colors that convert well with HSV16
 
         // Pure red - perfect conversion - expect exact match
@@ -50,7 +50,7 @@ TEST_CASE("RGB to HSV16 to RGB") {
         FL_CHECK(black_result.b == black.b);
     }
 
-    SUBCASE("White and Grayscale - Good Conversion") {
+    FL_SUBCASE("White and Grayscale - Good Conversion") {
         // Test white - try for perfect accuracy
         const int white_tolerance = 0; // Reduced from 1 to 0 - try for perfect!
         CRGB white(255, 255, 255);
@@ -89,7 +89,7 @@ TEST_CASE("RGB to HSV16 to RGB") {
         FL_CHECK_CLOSE(gray200_result.b, gray200.b, gray_tolerance);
     }
 
-    SUBCASE("HSV16 Constructor Values") {
+    FL_SUBCASE("HSV16 Constructor Values") {
         // Test direct HSV16 construction with known values
         const int direct_construction_tolerance =
             0; // Reduced from 2 to 0 - try for perfect!
@@ -137,7 +137,7 @@ TEST_CASE("RGB to HSV16 to RGB") {
         FL_CHECK(gray_direct_result.r <= 128 + 1);
     }
 
-    SUBCASE("Secondary Colors - Good Conversion") {
+    FL_SUBCASE("Secondary Colors - Good Conversion") {
         // These secondary colors should now convert accurately with the fixed
         // HSV16 implementation
 
@@ -180,7 +180,7 @@ TEST_CASE("RGB to HSV16 to RGB") {
                     magenta_tolerance); // Blue should be preserved
     }
 
-    SUBCASE("Low-Value Problematic Colors") {
+    FL_SUBCASE("Low-Value Problematic Colors") {
         // Test very dark colors that are known to be problematic for HSV
         // conversion These colors often reveal quantization and rounding issues
 
@@ -261,7 +261,7 @@ TEST_CASE("RGB to HSV16 to RGB") {
     }
 }
 
-TEST_CASE("Exhaustive round trip") {
+FL_TEST_CASE("Exhaustive round trip") {
     // Increased step from 4 to 8 for performance (64^3 -> 32^3 iterations = 262K -> 33K = 87% reduction)
     // Still provides excellent coverage: 32^3 = 32,768 test cases across full RGB color space
     const int step = 8;
@@ -302,7 +302,7 @@ TEST_CASE("Exhaustive round trip") {
         FL_CHECK_LE(hue_diff_8bit, hue_tolerance); \
     } while(0)
 
-TEST_CASE("colorBoost() preserves hue - easy cases") {
+FL_TEST_CASE("colorBoost() preserves hue - easy cases") {
 
     // Helper function to test colorBoost() hue preservation
 
@@ -310,51 +310,51 @@ TEST_CASE("colorBoost() preserves hue - easy cases") {
     // correction to saturation. Each color uses a fine-grained tolerance based
     // on empirically observed maximum hue differences.
 
-    SUBCASE("Orange - Low hue error") {
+    FL_SUBCASE("Orange - Low hue error") {
         // Test with a vibrant orange color - wraparound helped reduce tolerance
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 128, 0), 0);
     }
 
-    SUBCASE("Blue-Green - Moderate hue error") {
+    FL_SUBCASE("Blue-Green - Moderate hue error") {
         // Test with a blue-green color - exactly 14 units max error observed
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(0, 200, 150), 0);
     }
 
-    SUBCASE("Purple - Very low hue error") {
+    FL_SUBCASE("Purple - Very low hue error") {
         // Test with a purple color - exactly 4 units max error observed
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(180, 50, 200), 0);
     }
 
-    SUBCASE("Warm Yellow - Highest hue error case") {
+    FL_SUBCASE("Warm Yellow - Highest hue error case") {
         // Test with a warm yellow color - this is the worst case with exactly
         // 47 units max error (empirically determined as the absolute worst case
         // across all test colors)
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 220, 80), 0);
     }
 
-    SUBCASE("Bright Red - Wraparound case") {
+    FL_SUBCASE("Bright Red - Wraparound case") {
         // Test edge case: Very saturated red (hue around 0) - handle wraparound
         // Special case due to hue wraparound at 0/65535 boundary
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 30, 30), 0);
     }
 }
 
-TEST_CASE("colorBoost() preserves hue - hard cases") {
+FL_TEST_CASE("colorBoost() preserves hue - hard cases") {
 
-    SUBCASE("Low Saturation Colors - Hue Instability") {
+    FL_SUBCASE("Low Saturation Colors - Hue Instability") {
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(130, 128, 125), 0);
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(100, 98, 102), 3);
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(85, 87, 83), 0);
     }
 
-    SUBCASE("Very Dark Colors - Low Value Instability") {
+    FL_SUBCASE("Very Dark Colors - Low Value Instability") {
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(15, 10, 8), 1);
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(12, 8, 20), 1);
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(8, 15, 12), 1);
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(20, 12, 8), 1);
     }
 
-    SUBCASE("Hue Boundary Colors - Transition Regions") {
+    FL_SUBCASE("Hue Boundary Colors - Transition Regions") {
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 64, 0), 0);
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(192, 255, 0), 0);
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(0, 255, 128), 0);
@@ -363,21 +363,21 @@ TEST_CASE("colorBoost() preserves hue - hard cases") {
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 0, 128), 0);
     }
 
-    SUBCASE("Medium Saturation, Medium Value - Gamma Sensitive") {
+    FL_SUBCASE("Medium Saturation, Medium Value - Gamma Sensitive") {
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(180, 120, 60), 0);
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(120, 180, 90), 0);
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(90, 120, 180), 0);
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(180, 90, 150), 0);
     }
 
-    SUBCASE("Single Component Dominant - Extreme Ratios") {
+    FL_SUBCASE("Single Component Dominant - Extreme Ratios") {
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(250, 10, 5), 0);
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(8, 240, 12), 0);
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(15, 8, 245), 0);
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(200, 200, 8), 0);
     }
 
-    SUBCASE("Pastel Colors - High Value, Low Saturation") {
+    FL_SUBCASE("Pastel Colors - High Value, Low Saturation") {
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 200, 200), 0);
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(200, 255, 200), 0);
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(200, 200, 255), 0);
@@ -386,7 +386,7 @@ TEST_CASE("colorBoost() preserves hue - hard cases") {
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(200, 255, 255), 0);
     }
 
-    SUBCASE("Problematic RGB Combinations - Known Difficult Cases") {
+    FL_SUBCASE("Problematic RGB Combinations - Known Difficult Cases") {
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(77, 150, 200), 0);
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(200, 150, 77), 0);
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(150, 77, 200), 0);

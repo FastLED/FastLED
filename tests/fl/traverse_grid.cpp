@@ -3,7 +3,7 @@
 #include "fl/stl/set.h"
 #include "fl/stl/new.h"
 #include "fl/stl/utility.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/geometry.h"
 
 
@@ -15,8 +15,8 @@ struct CollectingVisitor {
     }
 };
 
-TEST_CASE("Traverse grid") {
-    SUBCASE("Horizontal line") {
+FL_TEST_CASE("Traverse grid") {
+    FL_SUBCASE("Horizontal line") {
         fl::vec2f start{1.2f, 2.5f};
         fl::vec2f end{5.7f, 2.5f};
 
@@ -29,7 +29,7 @@ TEST_CASE("Traverse grid") {
         }
     }
 
-    SUBCASE("Vertical line") {
+    FL_SUBCASE("Vertical line") {
         fl::vec2f start{3.4f, 1.1f};
         fl::vec2f end{3.4f, 4.9f};
 
@@ -43,7 +43,7 @@ TEST_CASE("Traverse grid") {
     }
 
 
-    SUBCASE("Forward diagonal") {
+    FL_SUBCASE("Forward diagonal") {
         fl::vec2f start{1.1f, 1.1f};
         fl::vec2f end{4.9f, 4.9f};
 
@@ -60,7 +60,7 @@ TEST_CASE("Traverse grid") {
         }
     }
 
-    SUBCASE("Backward diagonal") {
+    FL_SUBCASE("Backward diagonal") {
         fl::vec2f start{4.9f, 1.1f};
         fl::vec2f end{1.1f, 4.9f};
 
@@ -77,7 +77,7 @@ TEST_CASE("Traverse grid") {
         }
     }
 
-    SUBCASE("Single cell") {
+    FL_SUBCASE("Single cell") {
         fl::vec2f start{2.2f, 3.3f};
         fl::vec2f end{2.2f, 3.3f};
 

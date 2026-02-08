@@ -1,7 +1,7 @@
 #include "fl/stl/istream.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/log.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/function.h"
@@ -11,7 +11,7 @@
 
 // Test that fl::cin and fl::istream compile without errors
 
-TEST_CASE("fl::istream basic instantiation compiles") {
+FL_TEST_CASE("fl::istream basic instantiation compiles") {
     // Test that we can create an istream instance
     fl::istream test_stream;
     
@@ -33,7 +33,7 @@ TEST_CASE("fl::istream basic instantiation compiles") {
     FL_CHECK(true); // If we got here, compilation succeeded
 }
 
-TEST_CASE("fl::cin_real global instance compiles") {
+FL_TEST_CASE("fl::cin_real global instance compiles") {
     // Test that we can use the fl::cin_real() function
     fl::istream_real* cin_real_ptr = &fl::cin_real();
     FL_CHECK(cin_real_ptr != nullptr);
@@ -52,7 +52,7 @@ TEST_CASE("fl::cin_real global instance compiles") {
     FL_CHECK(true); // If we got here, cin_real() compiled and is accessible
 }
 
-TEST_CASE("fl::istream input operators compile") {
+FL_TEST_CASE("fl::istream input operators compile") {
     fl::istream test_stream;
     
     // Test all input operator overloads compile
@@ -98,7 +98,7 @@ TEST_CASE("fl::istream input operators compile") {
     FL_CHECK(true); // If we got here, all operators compiled
 }
 
-TEST_CASE("fl::istream chaining operations compile") {
+FL_TEST_CASE("fl::istream chaining operations compile") {
     fl::istream test_stream;
     
     // Test that chaining input operations compiles
@@ -120,7 +120,7 @@ TEST_CASE("fl::istream chaining operations compile") {
     FL_CHECK(true); // If we got here, chaining compiled
 }
 
-TEST_CASE("fl::istream additional methods compile") {
+FL_TEST_CASE("fl::istream additional methods compile") {
     fl::istream test_stream;
     
     // Test getline method compiles
@@ -140,7 +140,7 @@ TEST_CASE("fl::istream additional methods compile") {
     FL_CHECK(true); // If we got here, all methods compiled
 }
 
-TEST_CASE("fl::cin global instance compiles") {
+FL_TEST_CASE("fl::cin global instance compiles") {
     // Test that we can use the global fl::cin instance
     fl::string test_str;
     int32_t test_int;
@@ -177,7 +177,7 @@ TEST_CASE("fl::cin global instance compiles") {
     FL_CHECK(true); // If we got here, global cin compiled
 }
 
-TEST_CASE("fl::istream state management compiles") {
+FL_TEST_CASE("fl::istream state management compiles") {
     fl::istream test_stream;
     
     // Test all state management methods
@@ -196,7 +196,7 @@ TEST_CASE("fl::istream state management compiles") {
     FL_CHECK(true); // State management compiled and basic checks passed
 }
 
-TEST_CASE("fl::istream types match expected interfaces") {
+FL_TEST_CASE("fl::istream types match expected interfaces") {
     // Verify that istream has the expected interface similar to std::istream
     
     // Test return type of operators is istream& (for chaining)
@@ -252,11 +252,11 @@ public:
     }
 };
 
-TEST_CASE("fl::istream handler injection test") {
+FL_TEST_CASE("fl::istream handler injection test") {
     // Clear any existing handlers first
     fl::clear_io_handlers();
     
-    SUBCASE("Test basic handler injection") {
+    FL_SUBCASE("Test basic handler injection") {
         // Test that we can inject handlers and they work
         bool available_called = false;
         bool read_called = false;
@@ -284,11 +284,11 @@ TEST_CASE("fl::istream handler injection test") {
     fl::clear_io_handlers();
 }
 
-TEST_CASE("fl::istream simple debug test") {
+FL_TEST_CASE("fl::istream simple debug test") {
     // Clear any existing handlers first
     fl::clear_io_handlers();
     
-    SUBCASE("Simple single word parsing") {
+    FL_SUBCASE("Simple single word parsing") {
         InputMocker mocker("Hello");
         
         fl::inject_available_handler([&mocker]() { return mocker.available(); });
@@ -314,11 +314,11 @@ TEST_CASE("fl::istream simple debug test") {
     fl::clear_io_handlers();
 }
 
-TEST_CASE("fl::istream integer parsing with mock input") {
+FL_TEST_CASE("fl::istream integer parsing with mock input") {
     // Clear any existing handlers first
     fl::clear_io_handlers();
     
-    SUBCASE("Parse positive integer from 'Number: 10'") {
+    FL_SUBCASE("Parse positive integer from 'Number: 10'") {
         InputMocker mocker("Number: 10");
         
         fl::inject_available_handler([&mocker]() { return mocker.available(); });
@@ -335,7 +335,7 @@ TEST_CASE("fl::istream integer parsing with mock input") {
         FL_CHECK(number == 10);
     }
     
-    SUBCASE("Parse negative integer from 'Value: -42'") {
+    FL_SUBCASE("Parse negative integer from 'Value: -42'") {
         InputMocker mocker("Value: -42");
         
         fl::inject_available_handler([&mocker]() { return mocker.available(); });
@@ -352,7 +352,7 @@ TEST_CASE("fl::istream integer parsing with mock input") {
         FL_CHECK(number == -42);
     }
     
-    SUBCASE("Parse unsigned integer from 'count: 255'") {
+    FL_SUBCASE("Parse unsigned integer from 'count: 255'") {
         InputMocker mocker("count: 255");
         
         fl::inject_available_handler([&mocker]() { return mocker.available(); });
@@ -369,7 +369,7 @@ TEST_CASE("fl::istream integer parsing with mock input") {
         FL_CHECK(number == 255);
     }
     
-    SUBCASE("Parse int8_t from 'byte: 127'") {
+    FL_SUBCASE("Parse int8_t from 'byte: 127'") {
         InputMocker mocker("byte: 127");
         
         fl::inject_available_handler([&mocker]() { return mocker.available(); });
@@ -386,7 +386,7 @@ TEST_CASE("fl::istream integer parsing with mock input") {
         FL_CHECK(number == 127);
     }
     
-    SUBCASE("Parse int16_t from 'short: -1000'") {
+    FL_SUBCASE("Parse int16_t from 'short: -1000'") {
         InputMocker mocker("short: -1000");
         
         fl::inject_available_handler([&mocker]() { return mocker.available(); });
@@ -407,11 +407,11 @@ TEST_CASE("fl::istream integer parsing with mock input") {
     fl::clear_io_handlers();
 }
 
-TEST_CASE("fl::istream float parsing with mock input") {
+FL_TEST_CASE("fl::istream float parsing with mock input") {
     // Clear any existing handlers first
     fl::clear_io_handlers();
     
-    SUBCASE("Parse float from 'number: 1.0f'") {
+    FL_SUBCASE("Parse float from 'number: 1.0f'") {
         InputMocker mocker("number: 1.0f");
         
         fl::inject_available_handler([&mocker]() { return mocker.available(); });
@@ -428,7 +428,7 @@ TEST_CASE("fl::istream float parsing with mock input") {
         FL_CHECK(number == doctest::Approx(1.0f));
     }
     
-    SUBCASE("Parse float from 'pi: 3.14159'") {
+    FL_SUBCASE("Parse float from 'pi: 3.14159'") {
         InputMocker mocker("pi: 3.14159");
         
         fl::inject_available_handler([&mocker]() { return mocker.available(); });
@@ -445,7 +445,7 @@ TEST_CASE("fl::istream float parsing with mock input") {
         FL_CHECK(number == doctest::Approx(3.14159f));
     }
     
-    SUBCASE("Parse negative float from 'temp: -25.5'") {
+    FL_SUBCASE("Parse negative float from 'temp: -25.5'") {
         InputMocker mocker("temp: -25.5");
         
         fl::inject_available_handler([&mocker]() { return mocker.available(); });
@@ -462,7 +462,7 @@ TEST_CASE("fl::istream float parsing with mock input") {
         FL_CHECK(number == doctest::Approx(-25.5f));
     }
     
-    SUBCASE("Parse double from 'precision: 123.456789'") {
+    FL_SUBCASE("Parse double from 'precision: 123.456789'") {
         InputMocker mocker("precision: 123.456789");
         
         fl::inject_available_handler([&mocker]() { return mocker.available(); });
@@ -483,11 +483,11 @@ TEST_CASE("fl::istream float parsing with mock input") {
     fl::clear_io_handlers();
 }
 
-TEST_CASE("fl::istream string and character parsing with mock input") {
+FL_TEST_CASE("fl::istream string and character parsing with mock input") {
     // Clear any existing handlers first
     fl::clear_io_handlers();
     
-    SUBCASE("Parse string from 'name: FastLED'") {
+    FL_SUBCASE("Parse string from 'name: FastLED'") {
         InputMocker mocker("name: FastLED");
         
         fl::inject_available_handler([&mocker]() { return mocker.available(); });
@@ -503,7 +503,7 @@ TEST_CASE("fl::istream string and character parsing with mock input") {
         FL_CHECK(value == "FastLED");
     }
     
-    SUBCASE("Parse character from 'letter: A'") {
+    FL_SUBCASE("Parse character from 'letter: A'") {
         InputMocker mocker("letter: A");
         
         fl::inject_available_handler([&mocker]() { return mocker.available(); });
@@ -520,7 +520,7 @@ TEST_CASE("fl::istream string and character parsing with mock input") {
         FL_CHECK(ch == 'A');
     }
     
-    SUBCASE("Parse multiple words with spaces") {
+    FL_SUBCASE("Parse multiple words with spaces") {
         InputMocker mocker("Hello World Test 42");
         
         fl::inject_available_handler([&mocker]() { return mocker.available(); });
@@ -543,11 +543,11 @@ TEST_CASE("fl::istream string and character parsing with mock input") {
     fl::clear_io_handlers();
 }
 
-TEST_CASE("fl::istream mixed data type parsing") {
+FL_TEST_CASE("fl::istream mixed data type parsing") {
     // Clear any existing handlers first
     fl::clear_io_handlers();
     
-    SUBCASE("Parse mixed types from 'LED strip: 144 brightness: 0.8 enabled: Y'") {
+    FL_SUBCASE("Parse mixed types from 'LED strip: 144 brightness: 0.8 enabled: Y'") {
         InputMocker mocker("LED strip: 144 brightness: 0.8 enabled: Y");
         
         fl::inject_available_handler([&mocker]() { return mocker.available(); });
@@ -571,7 +571,7 @@ TEST_CASE("fl::istream mixed data type parsing") {
         FL_CHECK(enabled == 'Y');
     }
     
-    SUBCASE("Parse configuration data 'width: 32 height: 16 fps: 60.0'") {
+    FL_SUBCASE("Parse configuration data 'width: 32 height: 16 fps: 60.0'") {
         InputMocker mocker("width: 32 height: 16 fps: 60.0");
         
         fl::inject_available_handler([&mocker]() { return mocker.available(); });
@@ -597,11 +597,11 @@ TEST_CASE("fl::istream mixed data type parsing") {
     fl::clear_io_handlers();
 }
 
-TEST_CASE("fl::istream error handling with mock input") {
+FL_TEST_CASE("fl::istream error handling with mock input") {
     // Clear any existing handlers first
     fl::clear_io_handlers();
     
-    SUBCASE("Invalid integer parsing") {
+    FL_SUBCASE("Invalid integer parsing") {
         InputMocker mocker("value: abc");
         
         fl::inject_available_handler([&mocker]() { return mocker.available(); });
@@ -618,7 +618,7 @@ TEST_CASE("fl::istream error handling with mock input") {
         FL_CHECK_FALSE(test_stream.good());
     }
     
-    SUBCASE("Integer overflow handling") {
+    FL_SUBCASE("Integer overflow handling") {
         InputMocker mocker("big: 999999999999999999999");
         
         fl::inject_available_handler([&mocker]() { return mocker.available(); });
@@ -635,7 +635,7 @@ TEST_CASE("fl::istream error handling with mock input") {
         FL_CHECK_FALSE(test_stream.good());
     }
     
-    SUBCASE("Clear error state and continue") {
+    FL_SUBCASE("Clear error state and continue") {
         InputMocker mocker("bad: abc good: 123");
         
         fl::inject_available_handler([&mocker]() { return mocker.available(); });
@@ -665,11 +665,11 @@ TEST_CASE("fl::istream error handling with mock input") {
     fl::clear_io_handlers();
 }
 
-TEST_CASE("fl::istream getline with mock input") {
+FL_TEST_CASE("fl::istream getline with mock input") {
     // Clear any existing handlers first
     fl::clear_io_handlers();
     
-    SUBCASE("Read full line with getline") {
+    FL_SUBCASE("Read full line with getline") {
         InputMocker mocker("This is a complete line with spaces\nSecond line");
         
         fl::inject_available_handler([&mocker]() { return mocker.available(); });

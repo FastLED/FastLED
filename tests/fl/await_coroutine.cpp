@@ -10,7 +10,7 @@
 #include "fl/stl/new.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/utility.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/promise_result.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/function.h"
@@ -105,7 +105,7 @@ promise<T> delayed_reject(const Error& error, uint32_t delay_ms) {
     return p;
 }
 
-TEST_CASE("await in coroutine - basic resolution") {
+FL_TEST_CASE("await in coroutine - basic resolution") {
     fl::atomic<bool> test_completed(false);
     fl::atomic<int> result_value(0);
 
@@ -144,7 +144,7 @@ TEST_CASE("await in coroutine - basic resolution") {
     cleanup_threads();
 }
 
-TEST_CASE("await in coroutine - error handling") {
+FL_TEST_CASE("await in coroutine - error handling") {
     fl::atomic<bool> test_completed(false);
     fl::atomic<bool> got_error(false);
 
@@ -182,7 +182,7 @@ TEST_CASE("await in coroutine - error handling") {
     cleanup_threads();
 }
 
-TEST_CASE("await in coroutine - already completed promise") {
+FL_TEST_CASE("await in coroutine - already completed promise") {
     fl::atomic<bool> test_completed(false);
     fl::atomic<int> result_value(0);
 
@@ -216,7 +216,7 @@ TEST_CASE("await in coroutine - already completed promise") {
     FL_CHECK(result_value.load() == 123);
 }
 
-TEST_CASE("await in coroutine - multiple concurrent coroutines") {
+FL_TEST_CASE("await in coroutine - multiple concurrent coroutines") {
     fl::atomic<int> completed_count(0);
     fl::atomic<int> sum(0);
 
@@ -269,7 +269,7 @@ TEST_CASE("await in coroutine - multiple concurrent coroutines") {
     cleanup_threads();
 }
 
-TEST_CASE("await in coroutine - invalid promise") {
+FL_TEST_CASE("await in coroutine - invalid promise") {
     fl::atomic<bool> test_completed(false);
     fl::atomic<bool> got_error(false);
 
@@ -303,7 +303,7 @@ TEST_CASE("await in coroutine - invalid promise") {
     FL_CHECK(got_error.load());
 }
 
-TEST_CASE("await in coroutine - sequential awaits") {
+FL_TEST_CASE("await in coroutine - sequential awaits") {
     fl::atomic<bool> test_completed(false);
     fl::atomic<int> total(0);
 
@@ -344,7 +344,7 @@ TEST_CASE("await in coroutine - sequential awaits") {
     cleanup_threads();
 }
 
-TEST_CASE("await vs await_top_level - CPU usage comparison") {
+FL_TEST_CASE("await vs await_top_level - CPU usage comparison") {
     // This test demonstrates the difference between await (blocking)
     // and await_top_level (busy-wait)
     //
@@ -386,7 +386,7 @@ TEST_CASE("await vs await_top_level - CPU usage comparison") {
 }
 
 #ifdef FASTLED_STUB_IMPL
-TEST_CASE("global coordination - no concurrent execution") {
+FL_TEST_CASE("global coordination - no concurrent execution") {
     // This test verifies that the global execution lock prevents
     // the main thread and coroutine threads from executing simultaneously
     //
@@ -476,7 +476,7 @@ TEST_CASE("global coordination - no concurrent execution") {
     FL_CHECK(max_concurrent_threads.load() == 1);  // Only one thread at a time
 }
 
-TEST_CASE("global coordination - await releases lock for other threads") {
+FL_TEST_CASE("global coordination - await releases lock for other threads") {
     // This test verifies that when a coroutine calls await(), it releases
     // the global lock, allowing other threads to make progress
 

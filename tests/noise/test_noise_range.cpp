@@ -1,11 +1,11 @@
 #include "noise.h"
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/log.h"
 #include "fl/stl/strstream.h"
 using namespace fl;
 
-TEST_CASE("Noise Range Analysis") {
+FL_TEST_CASE("Noise Range Analysis") {
     // Test 1D noise function
     uint8_t min_1d = 255;
     uint8_t max_1d = 0;
@@ -136,7 +136,7 @@ TEST_CASE("Noise Range Analysis") {
 // Disable non-critical detailed analysis tests for faster test runs
 #if 0
 
-TEST_CASE("[.]Noise Distribution Analysis") {
+FL_TEST_CASE("[.]Noise Distribution Analysis") {
     FL_WARN("=== NOISE DISTRIBUTION ANALYSIS ===");
     
     // Create histogram of noise values
@@ -196,7 +196,7 @@ TEST_CASE("[.]Noise Distribution Analysis") {
     FL_WARN("=== END DISTRIBUTION ANALYSIS ===");
 }
 
-TEST_CASE("[.]Noise Range Analysis Summary") {
+FL_TEST_CASE("[.]Noise Range Analysis Summary") {
     FL_WARN("=== NOISE RANGE ANALYSIS SUMMARY ===");
     FL_WARN("");
     FL_WARN("USER REPORT CONFIRMED: u8 noise functions do NOT use the full u8 range");
@@ -219,7 +219,7 @@ TEST_CASE("[.]Noise Range Analysis Summary") {
     FL_WARN("=== END SUMMARY ===");
 }
 
-TEST_CASE("[.]3D Gradient Behavior Demonstration") {
+FL_TEST_CASE("[.]3D Gradient Behavior Demonstration") {
     FL_WARN("=== 3D GRADIENT BEHAVIOR DEMONSTRATION ===");
     FL_WARN("");
     FL_WARN("Demonstrating 3D noise behavior with different coordinate patterns:");

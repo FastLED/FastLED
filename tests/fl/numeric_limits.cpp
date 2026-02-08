@@ -1,10 +1,10 @@
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/limits.h"
 
 using namespace fl;
 
-TEST_CASE("fl::numeric_limits<int>") {
-    SUBCASE("min returns minimum int value") {
+FL_TEST_CASE("fl::numeric_limits<int>") {
+    FL_SUBCASE("min returns minimum int value") {
         constexpr int min_val = numeric_limits<int>::min();
         // Should be -2^31 for 32-bit int
         FL_CHECK_EQ(min_val, -2147483647 - 1);
@@ -13,7 +13,7 @@ TEST_CASE("fl::numeric_limits<int>") {
         static_assert(numeric_limits<int>::min() < 0, "int min should be negative");
     }
 
-    SUBCASE("max returns maximum int value") {
+    FL_SUBCASE("max returns maximum int value") {
         constexpr int max_val = numeric_limits<int>::max();
         // Should be 2^31 - 1 for 32-bit int
         FL_CHECK_EQ(max_val, 2147483647);
@@ -22,14 +22,14 @@ TEST_CASE("fl::numeric_limits<int>") {
         static_assert(numeric_limits<int>::max() > 0, "int max should be positive");
     }
 
-    SUBCASE("min is less than max") {
+    FL_SUBCASE("min is less than max") {
         static_assert(numeric_limits<int>::min() < numeric_limits<int>::max(),
                       "min should be less than max");
     }
 }
 
-TEST_CASE("fl::numeric_limits<unsigned int>") {
-    SUBCASE("min returns 0") {
+FL_TEST_CASE("fl::numeric_limits<unsigned int>") {
+    FL_SUBCASE("min returns 0") {
         constexpr unsigned int min_val = numeric_limits<unsigned int>::min();
         FL_CHECK_EQ(min_val, 0u);
 
@@ -37,7 +37,7 @@ TEST_CASE("fl::numeric_limits<unsigned int>") {
                       "unsigned int min should be 0");
     }
 
-    SUBCASE("max returns maximum unsigned int value") {
+    FL_SUBCASE("max returns maximum unsigned int value") {
         constexpr unsigned int max_val = numeric_limits<unsigned int>::max();
         // Should be 2^32 - 1 for 32-bit unsigned int
         FL_CHECK_EQ(max_val, 4294967295u);
@@ -47,22 +47,22 @@ TEST_CASE("fl::numeric_limits<unsigned int>") {
     }
 }
 
-TEST_CASE("fl::numeric_limits<long>") {
-    SUBCASE("min returns minimum long value") {
+FL_TEST_CASE("fl::numeric_limits<long>") {
+    FL_SUBCASE("min returns minimum long value") {
         constexpr long min_val = numeric_limits<long>::min();
         FL_CHECK(min_val < 0);
 
         static_assert(numeric_limits<long>::min() < 0, "long min should be negative");
     }
 
-    SUBCASE("max returns maximum long value") {
+    FL_SUBCASE("max returns maximum long value") {
         constexpr long max_val = numeric_limits<long>::max();
         FL_CHECK(max_val > 0);
 
         static_assert(numeric_limits<long>::max() > 0, "long max should be positive");
     }
 
-    SUBCASE("consistent with sizeof") {
+    FL_SUBCASE("consistent with sizeof") {
         // On systems where long is 4 bytes
         if (sizeof(long) == 4) {
             FL_CHECK_EQ(numeric_limits<long>::max(), 2147483647L);
@@ -76,8 +76,8 @@ TEST_CASE("fl::numeric_limits<long>") {
     }
 }
 
-TEST_CASE("fl::numeric_limits<unsigned long>") {
-    SUBCASE("min returns 0") {
+FL_TEST_CASE("fl::numeric_limits<unsigned long>") {
+    FL_SUBCASE("min returns 0") {
         constexpr unsigned long min_val = numeric_limits<unsigned long>::min();
         FL_CHECK_EQ(min_val, 0ul);
 
@@ -85,7 +85,7 @@ TEST_CASE("fl::numeric_limits<unsigned long>") {
                       "unsigned long min should be 0");
     }
 
-    SUBCASE("max returns maximum unsigned long value") {
+    FL_SUBCASE("max returns maximum unsigned long value") {
         constexpr unsigned long max_val = numeric_limits<unsigned long>::max();
         FL_CHECK(max_val > 0);
 
@@ -93,7 +93,7 @@ TEST_CASE("fl::numeric_limits<unsigned long>") {
                       "unsigned long max should be positive");
     }
 
-    SUBCASE("consistent with sizeof") {
+    FL_SUBCASE("consistent with sizeof") {
         if (sizeof(unsigned long) == 4) {
             FL_CHECK_EQ(numeric_limits<unsigned long>::max(), 4294967295ul);
         }
@@ -103,8 +103,8 @@ TEST_CASE("fl::numeric_limits<unsigned long>") {
     }
 }
 
-TEST_CASE("fl::numeric_limits<long long>") {
-    SUBCASE("min returns minimum long long value") {
+FL_TEST_CASE("fl::numeric_limits<long long>") {
+    FL_SUBCASE("min returns minimum long long value") {
         constexpr long long min_val = numeric_limits<long long>::min();
         // Should be -2^63
         FL_CHECK_EQ(min_val, -9223372036854775807LL - 1);
@@ -113,7 +113,7 @@ TEST_CASE("fl::numeric_limits<long long>") {
                       "long long min should be negative");
     }
 
-    SUBCASE("max returns maximum long long value") {
+    FL_SUBCASE("max returns maximum long long value") {
         constexpr long long max_val = numeric_limits<long long>::max();
         // Should be 2^63 - 1
         FL_CHECK_EQ(max_val, 9223372036854775807LL);
@@ -123,8 +123,8 @@ TEST_CASE("fl::numeric_limits<long long>") {
     }
 }
 
-TEST_CASE("fl::numeric_limits<unsigned long long>") {
-    SUBCASE("min returns 0") {
+FL_TEST_CASE("fl::numeric_limits<unsigned long long>") {
+    FL_SUBCASE("min returns 0") {
         constexpr unsigned long long min_val = numeric_limits<unsigned long long>::min();
         FL_CHECK_EQ(min_val, 0ull);
 
@@ -132,7 +132,7 @@ TEST_CASE("fl::numeric_limits<unsigned long long>") {
                       "unsigned long long min should be 0");
     }
 
-    SUBCASE("max returns maximum unsigned long long value") {
+    FL_SUBCASE("max returns maximum unsigned long long value") {
         constexpr unsigned long long max_val = numeric_limits<unsigned long long>::max();
         // Should be 2^64 - 1
         FL_CHECK_EQ(max_val, 18446744073709551615ull);
@@ -142,8 +142,8 @@ TEST_CASE("fl::numeric_limits<unsigned long long>") {
     }
 }
 
-TEST_CASE("fl::numeric_limits<float>") {
-    SUBCASE("min returns minimum positive float value") {
+FL_TEST_CASE("fl::numeric_limits<float>") {
+    FL_SUBCASE("min returns minimum positive float value") {
         constexpr float min_val = numeric_limits<float>::min();
         FL_CHECK(min_val > 0.0f);
         FL_CHECK(min_val < 1.0f);
@@ -155,7 +155,7 @@ TEST_CASE("fl::numeric_limits<float>") {
                       "float min should be positive (smallest normalized value)");
     }
 
-    SUBCASE("max returns maximum float value") {
+    FL_SUBCASE("max returns maximum float value") {
         constexpr float max_val = numeric_limits<float>::max();
         FL_CHECK(max_val > 1.0f);
 
@@ -167,8 +167,8 @@ TEST_CASE("fl::numeric_limits<float>") {
     }
 }
 
-TEST_CASE("fl::numeric_limits<double>") {
-    SUBCASE("min returns minimum positive double value") {
+FL_TEST_CASE("fl::numeric_limits<double>") {
+    FL_SUBCASE("min returns minimum positive double value") {
         constexpr double min_val = numeric_limits<double>::min();
         FL_CHECK(min_val > 0.0);
         FL_CHECK(min_val < 1.0);
@@ -180,7 +180,7 @@ TEST_CASE("fl::numeric_limits<double>") {
                       "double min should be positive (smallest normalized value)");
     }
 
-    SUBCASE("max returns maximum double value") {
+    FL_SUBCASE("max returns maximum double value") {
         constexpr double max_val = numeric_limits<double>::max();
         FL_CHECK(max_val > 1.0);
 
@@ -191,7 +191,7 @@ TEST_CASE("fl::numeric_limits<double>") {
                       "double max should be positive");
     }
 
-    SUBCASE("double range is larger than float range") {
+    FL_SUBCASE("double range is larger than float range") {
         // Double should have larger range than float
         static_assert(numeric_limits<double>::max() > numeric_limits<float>::max(),
                       "double max should be larger than float max");
@@ -200,8 +200,8 @@ TEST_CASE("fl::numeric_limits<double>") {
     }
 }
 
-TEST_CASE("fl::numeric_limits compile-time evaluation") {
-    SUBCASE("all limits are constexpr") {
+FL_TEST_CASE("fl::numeric_limits compile-time evaluation") {
+    FL_SUBCASE("all limits are constexpr") {
         // Test that all limits can be used in constexpr contexts
         constexpr int int_min = numeric_limits<int>::min();
         constexpr int int_max = numeric_limits<int>::max();
@@ -225,15 +225,15 @@ TEST_CASE("fl::numeric_limits compile-time evaluation") {
     }
 }
 
-TEST_CASE("fl::numeric_limits integral relationships") {
-    SUBCASE("unsigned max is about twice signed max") {
+FL_TEST_CASE("fl::numeric_limits integral relationships") {
+    FL_SUBCASE("unsigned max is about twice signed max") {
         // For same-sized types, unsigned max ≈ 2 * signed max + 1
         static_assert(numeric_limits<unsigned int>::max() ==
                       static_cast<unsigned int>(numeric_limits<int>::max()) * 2u + 1u,
                       "unsigned max should be 2*signed_max + 1");
     }
 
-    SUBCASE("signed min magnitude equals signed max + 1") {
+    FL_SUBCASE("signed min magnitude equals signed max + 1") {
         // For two's complement: |min| = max + 1
         long long int_min_abs = -static_cast<long long>(numeric_limits<int>::min());
         long long int_max = static_cast<long long>(numeric_limits<int>::max());

@@ -1,12 +1,12 @@
 #include "platforms/cycle_type.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/type_traits.h"
 #include "fl/int.h"
 
 using namespace fl;
 
-TEST_CASE("fl::cycle_t type definition") {
-    SUBCASE("cycle_t exists and is signed") {
+FL_TEST_CASE("fl::cycle_t type definition") {
+    FL_SUBCASE("cycle_t exists and is signed") {
         cycle_t value = 0;
         FL_CHECK_EQ(value, 0);
 
@@ -16,7 +16,7 @@ TEST_CASE("fl::cycle_t type definition") {
     }
 
 #if defined(__AVR__)
-    SUBCASE("cycle_t is int on AVR platforms") {
+    FL_SUBCASE("cycle_t is int on AVR platforms") {
         // On AVR, cycle_t should be int (typically 16-bit)
         static_assert(fl::is_same<cycle_t, int>::value,
                      "cycle_t should be int on AVR");
@@ -25,7 +25,7 @@ TEST_CASE("fl::cycle_t type definition") {
         FL_CHECK_EQ(sizeof(cycle_t), sizeof(int));
     }
 #else
-    SUBCASE("cycle_t is fl::i64 on non-AVR platforms") {
+    FL_SUBCASE("cycle_t is fl::i64 on non-AVR platforms") {
         // On non-AVR platforms, cycle_t should be fl::i64
         static_assert(fl::is_same<cycle_t, fl::i64>::value,
                      "cycle_t should be fl::i64 on non-AVR");
@@ -35,7 +35,7 @@ TEST_CASE("fl::cycle_t type definition") {
     }
 #endif
 
-    SUBCASE("cycle_t basic arithmetic") {
+    FL_SUBCASE("cycle_t basic arithmetic") {
         cycle_t a = 100;
         cycle_t b = 50;
 
@@ -45,7 +45,7 @@ TEST_CASE("fl::cycle_t type definition") {
         FL_CHECK_EQ(a / 2, 50);
     }
 
-    SUBCASE("cycle_t can represent fixed-point values") {
+    FL_SUBCASE("cycle_t can represent fixed-point values") {
         // cycle_t is described as 8.8 fixed point
         // This means 8 bits for integer part, 8 bits for fractional part
         // Value 256 would represent 1.0 in 8.8 fixed point
@@ -57,7 +57,7 @@ TEST_CASE("fl::cycle_t type definition") {
         FL_CHECK_EQ(one_fixed * 2, 512);          // 2.0 in 8.8 fixed point
     }
 
-    SUBCASE("cycle_t comparison operations") {
+    FL_SUBCASE("cycle_t comparison operations") {
         cycle_t a = 100;
         cycle_t b = 50;
         cycle_t c = 100;
@@ -70,7 +70,7 @@ TEST_CASE("fl::cycle_t type definition") {
         FL_CHECK(a != b);
     }
 
-    SUBCASE("cycle_t range and limits") {
+    FL_SUBCASE("cycle_t range and limits") {
 #if defined(__AVR__)
         // On AVR, int is typically 16-bit signed
         cycle_t max_val = 32767;
@@ -85,12 +85,12 @@ TEST_CASE("fl::cycle_t type definition") {
 #endif
     }
 
-    SUBCASE("cycle_t default initialization") {
+    FL_SUBCASE("cycle_t default initialization") {
         cycle_t default_value = cycle_t();
         FL_CHECK_EQ(default_value, 0);
     }
 
-    SUBCASE("cycle_t assignment and copy") {
+    FL_SUBCASE("cycle_t assignment and copy") {
         cycle_t a = 42;
         cycle_t b = a;
         FL_CHECK_EQ(b, 42);

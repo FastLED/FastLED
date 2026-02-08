@@ -1,13 +1,13 @@
 #include "fl/alloca.h"
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/int.h"
 
 using namespace fl;
 
 // Test basic usage of FASTLED_STACK_ARRAY with different types
-TEST_CASE("FASTLED_STACK_ARRAY basic usage") {
-    SUBCASE("uint8_t array") {
+FL_TEST_CASE("FASTLED_STACK_ARRAY basic usage") {
+    FL_SUBCASE("uint8_t array") {
         FASTLED_STACK_ARRAY(uint8_t, buffer, 10);
         // Verify zero initialization
         for (int i = 0; i < 10; i++) {
@@ -18,7 +18,7 @@ TEST_CASE("FASTLED_STACK_ARRAY basic usage") {
         FL_CHECK_EQ(buffer[0], 42);
     }
 
-    SUBCASE("uint16_t array") {
+    FL_SUBCASE("uint16_t array") {
         FASTLED_STACK_ARRAY(uint16_t, buffer, 5);
         // Verify zero initialization
         for (int i = 0; i < 5; i++) {
@@ -29,7 +29,7 @@ TEST_CASE("FASTLED_STACK_ARRAY basic usage") {
         FL_CHECK_EQ(buffer[2], 1000);
     }
 
-    SUBCASE("uint32_t array") {
+    FL_SUBCASE("uint32_t array") {
         FASTLED_STACK_ARRAY(uint32_t, buffer, 8);
         // Verify zero initialization
         for (int i = 0; i < 8; i++) {
@@ -40,7 +40,7 @@ TEST_CASE("FASTLED_STACK_ARRAY basic usage") {
         FL_CHECK_EQ(buffer[7], 0xDEADBEEFu);
     }
 
-    SUBCASE("int32_t array") {
+    FL_SUBCASE("int32_t array") {
         FASTLED_STACK_ARRAY(int32_t, buffer, 6);
         // Verify zero initialization
         for (int i = 0; i < 6; i++) {
@@ -53,15 +53,15 @@ TEST_CASE("FASTLED_STACK_ARRAY basic usage") {
 }
 
 // Test with different sizes
-TEST_CASE("FASTLED_STACK_ARRAY different sizes") {
-    SUBCASE("size 1") {
+FL_TEST_CASE("FASTLED_STACK_ARRAY different sizes") {
+    FL_SUBCASE("size 1") {
         FASTLED_STACK_ARRAY(int, buffer, 1);
         FL_CHECK_EQ(buffer[0], 0);
         buffer[0] = 99;
         FL_CHECK_EQ(buffer[0], 99);
     }
 
-    SUBCASE("size 16") {
+    FL_SUBCASE("size 16") {
         FASTLED_STACK_ARRAY(uint8_t, buffer, 16);
         for (int i = 0; i < 16; i++) {
             FL_CHECK_EQ(buffer[i], 0);
@@ -76,7 +76,7 @@ TEST_CASE("FASTLED_STACK_ARRAY different sizes") {
         }
     }
 
-    SUBCASE("size 64") {
+    FL_SUBCASE("size 64") {
         FASTLED_STACK_ARRAY(uint8_t, buffer, 64);
         for (int i = 0; i < 64; i++) {
             FL_CHECK_EQ(buffer[i], 0);
@@ -90,7 +90,7 @@ TEST_CASE("FASTLED_STACK_ARRAY different sizes") {
         FL_CHECK_EQ(buffer[63], 30);
     }
 
-    SUBCASE("size 256") {
+    FL_SUBCASE("size 256") {
         FASTLED_STACK_ARRAY(uint8_t, buffer, 256);
         // Check all are zero initialized
         bool all_zero = true;
@@ -115,8 +115,8 @@ TEST_CASE("FASTLED_STACK_ARRAY different sizes") {
 }
 
 // Test with floating point types
-TEST_CASE("FASTLED_STACK_ARRAY floating point types") {
-    SUBCASE("float array") {
+FL_TEST_CASE("FASTLED_STACK_ARRAY floating point types") {
+    FL_SUBCASE("float array") {
         FASTLED_STACK_ARRAY(float, buffer, 10);
         // Verify zero initialization
         for (int i = 0; i < 10; i++) {
@@ -129,7 +129,7 @@ TEST_CASE("FASTLED_STACK_ARRAY floating point types") {
         FL_CHECK_EQ(buffer[5], doctest::Approx(-2.71f));
     }
 
-    SUBCASE("double array") {
+    FL_SUBCASE("double array") {
         FASTLED_STACK_ARRAY(double, buffer, 5);
         // Verify zero initialization
         for (int i = 0; i < 5; i++) {
@@ -142,13 +142,13 @@ TEST_CASE("FASTLED_STACK_ARRAY floating point types") {
 }
 
 // Test with struct types
-TEST_CASE("FASTLED_STACK_ARRAY struct types") {
+FL_TEST_CASE("FASTLED_STACK_ARRAY struct types") {
     struct Point {
         int x;
         int y;
     };
 
-    SUBCASE("struct array") {
+    FL_SUBCASE("struct array") {
         FASTLED_STACK_ARRAY(Point, buffer, 5);
         // Verify zero initialization
         for (int i = 0; i < 5; i++) {
@@ -172,7 +172,7 @@ TEST_CASE("FASTLED_STACK_ARRAY struct types") {
         uint8_t b;
     };
 
-    SUBCASE("RGB struct array") {
+    FL_SUBCASE("RGB struct array") {
         FASTLED_STACK_ARRAY(RGB, colors, 8);
         // Verify zero initialization
         for (int i = 0; i < 8; i++) {
@@ -194,8 +194,8 @@ TEST_CASE("FASTLED_STACK_ARRAY struct types") {
 }
 
 // Test with pointer types
-TEST_CASE("FASTLED_STACK_ARRAY pointer types") {
-    SUBCASE("pointer array") {
+FL_TEST_CASE("FASTLED_STACK_ARRAY pointer types") {
+    FL_SUBCASE("pointer array") {
         FASTLED_STACK_ARRAY(int*, buffer, 5);
         // Verify zero initialization (null pointers)
         for (int i = 0; i < 5; i++) {
@@ -213,8 +213,8 @@ TEST_CASE("FASTLED_STACK_ARRAY pointer types") {
 }
 
 // Test zero initialization is complete
-TEST_CASE("FASTLED_STACK_ARRAY zero initialization") {
-    SUBCASE("verify all bytes are zero") {
+FL_TEST_CASE("FASTLED_STACK_ARRAY zero initialization") {
+    FL_SUBCASE("verify all bytes are zero") {
         FASTLED_STACK_ARRAY(uint8_t, buffer, 100);
         bool all_zero = true;
         for (int i = 0; i < 100; i++) {
@@ -226,7 +226,7 @@ TEST_CASE("FASTLED_STACK_ARRAY zero initialization") {
         FL_CHECK(all_zero);
     }
 
-    SUBCASE("verify multi-byte types are zero") {
+    FL_SUBCASE("verify multi-byte types are zero") {
         FASTLED_STACK_ARRAY(uint32_t, buffer, 25);
         bool all_zero = true;
         for (int i = 0; i < 25; i++) {
@@ -240,8 +240,8 @@ TEST_CASE("FASTLED_STACK_ARRAY zero initialization") {
 }
 
 // Test usage in different contexts
-TEST_CASE("FASTLED_STACK_ARRAY usage contexts") {
-    SUBCASE("inside if statement") {
+FL_TEST_CASE("FASTLED_STACK_ARRAY usage contexts") {
+    FL_SUBCASE("inside if statement") {
         bool condition = true;
         if (condition) {
             FASTLED_STACK_ARRAY(int, buffer, 5);
@@ -250,7 +250,7 @@ TEST_CASE("FASTLED_STACK_ARRAY usage contexts") {
         }
     }
 
-    SUBCASE("inside loop") {
+    FL_SUBCASE("inside loop") {
         for (int iter = 0; iter < 3; iter++) {
             FASTLED_STACK_ARRAY(int, buffer, 4);
             // Should be zero initialized each iteration
@@ -261,7 +261,7 @@ TEST_CASE("FASTLED_STACK_ARRAY usage contexts") {
         }
     }
 
-    SUBCASE("multiple arrays in same scope") {
+    FL_SUBCASE("multiple arrays in same scope") {
         FASTLED_STACK_ARRAY(uint8_t, buffer1, 10);
         FASTLED_STACK_ARRAY(uint16_t, buffer2, 5);
         FASTLED_STACK_ARRAY(uint32_t, buffer3, 3);
@@ -283,8 +283,8 @@ TEST_CASE("FASTLED_STACK_ARRAY usage contexts") {
 }
 
 // Test with variable size (runtime size)
-TEST_CASE("FASTLED_STACK_ARRAY variable size") {
-    SUBCASE("size from variable") {
+FL_TEST_CASE("FASTLED_STACK_ARRAY variable size") {
+    FL_SUBCASE("size from variable") {
         int size = 10;
         FASTLED_STACK_ARRAY(int, buffer, size);
         for (int i = 0; i < size; i++) {
@@ -294,7 +294,7 @@ TEST_CASE("FASTLED_STACK_ARRAY variable size") {
         FL_CHECK_EQ(buffer[size - 1], 99);
     }
 
-    SUBCASE("size from expression") {
+    FL_SUBCASE("size from expression") {
         int base = 5;
         FASTLED_STACK_ARRAY(uint8_t, buffer, base * 2);
         for (int i = 0; i < base * 2; i++) {
@@ -302,7 +302,7 @@ TEST_CASE("FASTLED_STACK_ARRAY variable size") {
         }
     }
 
-    SUBCASE("size from function call") {
+    FL_SUBCASE("size from function call") {
         auto get_size = []() { return 7; };
         int size = get_size();
         FASTLED_STACK_ARRAY(int, buffer, size);
@@ -313,8 +313,8 @@ TEST_CASE("FASTLED_STACK_ARRAY variable size") {
 }
 
 // Test that macro is defined
-TEST_CASE("FASTLED_STACK_ARRAY macro definition") {
-    SUBCASE("FASTLED_STACK_ARRAY is defined") {
+FL_TEST_CASE("FASTLED_STACK_ARRAY macro definition") {
+    FL_SUBCASE("FASTLED_STACK_ARRAY is defined") {
         #ifdef FASTLED_STACK_ARRAY
         FL_CHECK(true);
         #else
@@ -322,7 +322,7 @@ TEST_CASE("FASTLED_STACK_ARRAY macro definition") {
         #endif
     }
 
-    SUBCASE("FASTLED_VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION is defined") {
+    FL_SUBCASE("FASTLED_VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION is defined") {
         #ifdef FASTLED_VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION
         FL_CHECK(true);
         #else
@@ -332,7 +332,7 @@ TEST_CASE("FASTLED_STACK_ARRAY macro definition") {
 }
 
 // Test passing to functions
-TEST_CASE("FASTLED_STACK_ARRAY function parameters") {
+FL_TEST_CASE("FASTLED_STACK_ARRAY function parameters") {
     auto fill_array = [](uint8_t* arr, int size, uint8_t value) {
         for (int i = 0; i < size; i++) {
             arr[i] = value;
@@ -347,7 +347,7 @@ TEST_CASE("FASTLED_STACK_ARRAY function parameters") {
         return sum;
     };
 
-    SUBCASE("pass to function for writing") {
+    FL_SUBCASE("pass to function for writing") {
         FASTLED_STACK_ARRAY(uint8_t, buffer, 10);
         fill_array(buffer, 10, 42);
         for (int i = 0; i < 10; i++) {
@@ -355,7 +355,7 @@ TEST_CASE("FASTLED_STACK_ARRAY function parameters") {
         }
     }
 
-    SUBCASE("pass to function for reading") {
+    FL_SUBCASE("pass to function for reading") {
         FASTLED_STACK_ARRAY(int, buffer, 5);
         for (int i = 0; i < 5; i++) {
             buffer[i] = i + 1; // 1, 2, 3, 4, 5
@@ -366,15 +366,15 @@ TEST_CASE("FASTLED_STACK_ARRAY function parameters") {
 }
 
 // Test edge cases
-TEST_CASE("FASTLED_STACK_ARRAY edge cases") {
-    SUBCASE("size 1 edge case") {
+FL_TEST_CASE("FASTLED_STACK_ARRAY edge cases") {
+    FL_SUBCASE("size 1 edge case") {
         FASTLED_STACK_ARRAY(uint64_t, buffer, 1);
         FL_CHECK_EQ(buffer[0], 0ull);
         buffer[0] = 0xFFFFFFFFFFFFFFFFull;
         FL_CHECK_EQ(buffer[0], 0xFFFFFFFFFFFFFFFFull);
     }
 
-    SUBCASE("large struct") {
+    FL_SUBCASE("large struct") {
         struct LargeStruct {
             uint8_t data[64];
             int id;
@@ -396,8 +396,8 @@ TEST_CASE("FASTLED_STACK_ARRAY edge cases") {
 }
 
 // Test with signed types
-TEST_CASE("FASTLED_STACK_ARRAY signed types") {
-    SUBCASE("int8_t array") {
+FL_TEST_CASE("FASTLED_STACK_ARRAY signed types") {
+    FL_SUBCASE("int8_t array") {
         FASTLED_STACK_ARRAY(int8_t, buffer, 10);
         for (int i = 0; i < 10; i++) {
             FL_CHECK_EQ(buffer[i], 0);
@@ -408,7 +408,7 @@ TEST_CASE("FASTLED_STACK_ARRAY signed types") {
         FL_CHECK_EQ(buffer[1], 127);
     }
 
-    SUBCASE("int16_t array") {
+    FL_SUBCASE("int16_t array") {
         FASTLED_STACK_ARRAY(int16_t, buffer, 8);
         for (int i = 0; i < 8; i++) {
             FL_CHECK_EQ(buffer[i], 0);
@@ -419,7 +419,7 @@ TEST_CASE("FASTLED_STACK_ARRAY signed types") {
         FL_CHECK_EQ(buffer[1], 32767);
     }
 
-    SUBCASE("int64_t array") {
+    FL_SUBCASE("int64_t array") {
         FASTLED_STACK_ARRAY(int64_t, buffer, 4);
         for (int i = 0; i < 4; i++) {
             FL_CHECK_EQ(buffer[i], 0ll);
@@ -432,8 +432,8 @@ TEST_CASE("FASTLED_STACK_ARRAY signed types") {
 }
 
 // Test sizeof and pointer arithmetic
-TEST_CASE("FASTLED_STACK_ARRAY pointer operations") {
-    SUBCASE("pointer arithmetic") {
+FL_TEST_CASE("FASTLED_STACK_ARRAY pointer operations") {
+    FL_SUBCASE("pointer arithmetic") {
         FASTLED_STACK_ARRAY(int, buffer, 5);
         int* ptr = buffer;
         for (int i = 0; i < 5; i++) {
@@ -447,7 +447,7 @@ TEST_CASE("FASTLED_STACK_ARRAY pointer operations") {
         FL_CHECK_EQ(buffer[4], 40);
     }
 
-    SUBCASE("pointer increment") {
+    FL_SUBCASE("pointer increment") {
         FASTLED_STACK_ARRAY(uint8_t, buffer, 10);
         uint8_t* ptr = buffer;
         for (int i = 0; i < 10; i++) {

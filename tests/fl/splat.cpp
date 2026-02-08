@@ -3,11 +3,11 @@
 
 
 #include "fl/splat.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/geometry.h"
 #include "fl/tile2x2.h"
 
-TEST_CASE("splat simple test") {
+FL_TEST_CASE("splat simple test") {
     // Define a simple input coordinate
     fl::vec2f input(0, 0);
 
@@ -27,7 +27,7 @@ TEST_CASE("splat simple test") {
     FL_REQUIRE_EQ(result.upper_right(), 0); // Expected intensity for upper-right
 }
 
-TEST_CASE("splat test for input (0.0, 0.5)") {
+FL_TEST_CASE("splat test for input (0.0, 0.5)") {
     // Define the input coordinate
     fl::vec2f input(0.0f, 0.5f);
 
@@ -47,7 +47,7 @@ TEST_CASE("splat test for input (0.0, 0.5)") {
     FL_REQUIRE_EQ(result.upper_right(), 0);   // Expected intensity for upper-right
 }
 
-TEST_CASE("splat test for input (0.0, 0.99)") {
+FL_TEST_CASE("splat test for input (0.0, 0.99)") {
     // Define the input coordinate
     fl::vec2f input(0.0f, 0.99f);
 
@@ -67,7 +67,7 @@ TEST_CASE("splat test for input (0.0, 0.99)") {
     FL_REQUIRE_EQ(result.upper_right(), 0);   // Expected intensity for upper-right
 }
 
-TEST_CASE("splat test for input (0.0, 1.0)") {
+FL_TEST_CASE("splat test for input (0.0, 1.0)") {
     // Define the input coordinate
     fl::vec2f input(0.0f, 1.0f);
 
@@ -87,7 +87,7 @@ TEST_CASE("splat test for input (0.0, 1.0)") {
     FL_REQUIRE_EQ(result.upper_right(), 0);   // Expected intensity for upper-right
 }
 
-TEST_CASE("splat test for input (0.5, 0.0)") {
+FL_TEST_CASE("splat test for input (0.5, 0.0)") {
     // Define the input coordinate
     fl::vec2f input(0.5f, 0.0f);
 
@@ -107,7 +107,7 @@ TEST_CASE("splat test for input (0.5, 0.0)") {
     FL_REQUIRE_EQ(result.upper_right(), 0);   // Expected intensity for upper-right
 }
 
-TEST_CASE("splat test for input (0.99, 0.0)") {
+FL_TEST_CASE("splat test for input (0.99, 0.0)") {
     // Define the input coordinate
     fl::vec2f input(0.99f, 0.0f);
 
@@ -127,7 +127,7 @@ TEST_CASE("splat test for input (0.99, 0.0)") {
     FL_REQUIRE_EQ(result.upper_right(), 0);   // Expected intensity for upper-right
 }
 
-TEST_CASE("splat test for input (1.0, 0.0)") {
+FL_TEST_CASE("splat test for input (1.0, 0.0)") {
     // Define the input coordinate
     fl::vec2f input(1.0f, 0.0f);
 

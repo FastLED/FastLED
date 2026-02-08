@@ -14,7 +14,7 @@
 #include "fl/stl/iterator.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/int.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/vector.h"
@@ -37,7 +37,7 @@ fl::array<u8, 4> makeRGBWPixel(u8 r, u8 g, u8 b, u8 w) {
 // RGB Mode Tests
 // ============================================================================
 
-TEST_CASE("WS2812_RGB - Zero LEDs (empty input)") {
+FL_TEST_CASE("WS2812_RGB - Zero LEDs (empty input)") {
     // Test encoding with no LEDs - should produce no output
     fl::vector<fl::array<u8, 3>> pixels;
     fl::vector<u8> output;
@@ -48,7 +48,7 @@ TEST_CASE("WS2812_RGB - Zero LEDs (empty input)") {
     FL_REQUIRE_EQ(output.size(), 0);
 }
 
-TEST_CASE("WS2812_RGB - Single LED (black)") {
+FL_TEST_CASE("WS2812_RGB - Single LED (black)") {
     // Test single black LED (0,0,0)
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeRGBPixel(0, 0, 0));
@@ -63,7 +63,7 @@ TEST_CASE("WS2812_RGB - Single LED (black)") {
     FL_CHECK_EQ(output[2], 0x00);  // Third byte
 }
 
-TEST_CASE("WS2812_RGB - Single LED (white)") {
+FL_TEST_CASE("WS2812_RGB - Single LED (white)") {
     // Test single white LED (255,255,255)
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeRGBPixel(255, 255, 255));
@@ -78,7 +78,7 @@ TEST_CASE("WS2812_RGB - Single LED (white)") {
     FL_CHECK_EQ(output[2], 0xFF);
 }
 
-TEST_CASE("WS2812_RGB - Single LED (red)") {
+FL_TEST_CASE("WS2812_RGB - Single LED (red)") {
     // Test single red LED - verify byte order preservation
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeRGBPixel(255, 0, 0));
@@ -93,7 +93,7 @@ TEST_CASE("WS2812_RGB - Single LED (red)") {
     FL_CHECK_EQ(output[2], 0x00);  // Blue
 }
 
-TEST_CASE("WS2812_RGB - Multiple LEDs") {
+FL_TEST_CASE("WS2812_RGB - Multiple LEDs") {
     // Test multiple LEDs to verify iteration works correctly
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeRGBPixel(255, 0, 0));    // Red
@@ -128,7 +128,7 @@ TEST_CASE("WS2812_RGB - Multiple LEDs") {
     FL_CHECK_EQ(output[11], 32);
 }
 
-TEST_CASE("WS2812_RGB - Many LEDs (stress test)") {
+FL_TEST_CASE("WS2812_RGB - Many LEDs (stress test)") {
     // Test with a larger number of LEDs to ensure iteration is robust
     // Reduced from 100 to 40 for performance (still provides good stress test coverage)
     const size_t NUM_LEDS = 40;
@@ -160,7 +160,7 @@ TEST_CASE("WS2812_RGB - Many LEDs (stress test)") {
 // RGBW Mode Tests
 // ============================================================================
 
-TEST_CASE("WS2812_RGBW - Zero LEDs (empty input)") {
+FL_TEST_CASE("WS2812_RGBW - Zero LEDs (empty input)") {
     // Test encoding with no LEDs - should produce no output
     fl::vector<fl::array<u8, 4>> pixels;
     fl::vector<u8> output;
@@ -171,7 +171,7 @@ TEST_CASE("WS2812_RGBW - Zero LEDs (empty input)") {
     FL_REQUIRE_EQ(output.size(), 0);
 }
 
-TEST_CASE("WS2812_RGBW - Single LED (black)") {
+FL_TEST_CASE("WS2812_RGBW - Single LED (black)") {
     // Test single black LED (0,0,0,0)
     fl::vector<fl::array<u8, 4>> pixels;
     pixels.push_back(makeRGBWPixel(0, 0, 0, 0));
@@ -187,7 +187,7 @@ TEST_CASE("WS2812_RGBW - Single LED (black)") {
     FL_CHECK_EQ(output[3], 0x00);
 }
 
-TEST_CASE("WS2812_RGBW - Single LED (white via W channel)") {
+FL_TEST_CASE("WS2812_RGBW - Single LED (white via W channel)") {
     // Test white LED using W channel
     fl::vector<fl::array<u8, 4>> pixels;
     pixels.push_back(makeRGBWPixel(0, 0, 0, 255));
@@ -203,7 +203,7 @@ TEST_CASE("WS2812_RGBW - Single LED (white via W channel)") {
     FL_CHECK_EQ(output[3], 0xFF);  // W
 }
 
-TEST_CASE("WS2812_RGBW - Single LED (all channels active)") {
+FL_TEST_CASE("WS2812_RGBW - Single LED (all channels active)") {
     // Test with all channels active
     fl::vector<fl::array<u8, 4>> pixels;
     pixels.push_back(makeRGBWPixel(255, 128, 64, 32));
@@ -219,7 +219,7 @@ TEST_CASE("WS2812_RGBW - Single LED (all channels active)") {
     FL_CHECK_EQ(output[3], 32);   // W
 }
 
-TEST_CASE("WS2812_RGBW - Multiple LEDs") {
+FL_TEST_CASE("WS2812_RGBW - Multiple LEDs") {
     // Test multiple RGBW LEDs
     fl::vector<fl::array<u8, 4>> pixels;
     pixels.push_back(makeRGBWPixel(255, 0, 0, 0));    // Red
@@ -265,7 +265,7 @@ TEST_CASE("WS2812_RGBW - Multiple LEDs") {
     FL_CHECK_EQ(output[19], 16);
 }
 
-TEST_CASE("WS2812_RGBW - Many LEDs (stress test)") {
+FL_TEST_CASE("WS2812_RGBW - Many LEDs (stress test)") {
     // Test with a larger number of LEDs
     // Reduced from 100 to 40 for performance (still provides good stress test coverage)
     const size_t NUM_LEDS = 40;

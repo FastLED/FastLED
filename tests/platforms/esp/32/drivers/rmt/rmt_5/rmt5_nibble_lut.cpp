@@ -7,7 +7,7 @@
 
 using namespace fl;
 
-TEST_CASE("rmt5_nibble_lut_correctness") {
+FL_TEST_CASE("rmt5_nibble_lut_correctness") {
     // WS2812B timings at 10MHz (100ns per tick)
     rmt_item32_t zero;
     zero.duration0 = 4;  // 400ns high

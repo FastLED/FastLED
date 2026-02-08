@@ -9,7 +9,7 @@ using namespace fl::third_party;
 
 // Minimal valid MP3 frame header (Layer III, MPEG1, 44.1kHz, 128kbps, mono)
 // This is a synthetic test - we'll just test initialization and basic API
-TEST_CASE("Mp3HelixDecoder initialization") {
+FL_TEST_CASE("Mp3HelixDecoder initialization") {
     Mp3HelixDecoder decoder;
 
     // Test initialization
@@ -20,7 +20,7 @@ TEST_CASE("Mp3HelixDecoder initialization") {
     decoder.reset();
 }
 
-TEST_CASE("Mp3HelixDecoder basic decode test") {
+FL_TEST_CASE("Mp3HelixDecoder basic decode test") {
     Mp3HelixDecoder decoder;
     FL_CHECK(decoder.init());
 
@@ -38,7 +38,7 @@ TEST_CASE("Mp3HelixDecoder basic decode test") {
     FL_CHECK(frames >= 0);  // Just verify the callback mechanism works
 }
 
-TEST_CASE("Mp3HelixDecoder empty data") {
+FL_TEST_CASE("Mp3HelixDecoder empty data") {
     Mp3HelixDecoder decoder;
     FL_CHECK(decoder.init());
 
@@ -52,7 +52,7 @@ TEST_CASE("Mp3HelixDecoder empty data") {
     FL_CHECK_EQ(frames, 0);  // No frames from empty data
 }
 
-TEST_CASE("Mp3HelixDecoder decodeToAudioSamples") {
+FL_TEST_CASE("Mp3HelixDecoder decodeToAudioSamples") {
     Mp3HelixDecoder decoder;
     FL_CHECK(decoder.init());
 
@@ -64,7 +64,7 @@ TEST_CASE("Mp3HelixDecoder decodeToAudioSamples") {
     FL_CHECK(samples.size() >= 0);
 }
 
-TEST_CASE("Mp3HelixDecoder - Decode real MP3 file") {
+FL_TEST_CASE("Mp3HelixDecoder - Decode real MP3 file") {
     // Set up filesystem to point to tests/data directory
     fl::setTestFileSystemRoot("tests/data");
 
@@ -116,7 +116,7 @@ TEST_CASE("Mp3HelixDecoder - Decode real MP3 file") {
            frames_decoded, total_samples, sample_rate, channels);
 }
 
-TEST_CASE("Mp3HelixDecoder - Convert to fl::AudioSamples from real file") {
+FL_TEST_CASE("Mp3HelixDecoder - Convert to fl::AudioSamples from real file") {
     // Set up filesystem to point to tests/data directory
     fl::setTestFileSystemRoot("tests/data");
 

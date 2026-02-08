@@ -2,13 +2,13 @@
 /// @brief Test for fl::string_view - non-owning string view
 
 #include "fl/string_view.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/string.h"
 #include "fl/int.h"
 
 using namespace fl;
 
-TEST_CASE("string_view - construction") {
+FL_TEST_CASE("string_view - construction") {
     // Default constructor
     string_view empty;
     FL_CHECK(empty.empty());
@@ -40,7 +40,7 @@ TEST_CASE("string_view - construction") {
     FL_CHECK(from_str[0] == 'f');
 }
 
-TEST_CASE("string_view - element access") {
+FL_TEST_CASE("string_view - element access") {
     string_view sv("hello");
 
     // operator[]
@@ -60,7 +60,7 @@ TEST_CASE("string_view - element access") {
     FL_CHECK(sv.data()[0] == 'h');
 }
 
-TEST_CASE("string_view - iterators") {
+FL_TEST_CASE("string_view - iterators") {
     string_view sv("abc");
 
     // Forward iteration
@@ -81,7 +81,7 @@ TEST_CASE("string_view - iterators") {
     }
 }
 
-TEST_CASE("string_view - capacity") {
+FL_TEST_CASE("string_view - capacity") {
     string_view empty;
     FL_CHECK(empty.size() == 0);
     FL_CHECK(empty.length() == 0);
@@ -93,7 +93,7 @@ TEST_CASE("string_view - capacity") {
     FL_CHECK_FALSE(non_empty.empty());
 }
 
-TEST_CASE("string_view - modifiers") {
+FL_TEST_CASE("string_view - modifiers") {
     // remove_prefix
     string_view sv1("hello");
     sv1.remove_prefix(2);
@@ -116,7 +116,7 @@ TEST_CASE("string_view - modifiers") {
     FL_CHECK(b[0] == 'a');
 }
 
-TEST_CASE("string_view - substr") {
+FL_TEST_CASE("string_view - substr") {
     string_view sv("hello world");
 
     // Basic substr
@@ -140,7 +140,7 @@ TEST_CASE("string_view - substr") {
     FL_CHECK(sub4.empty());
 }
 
-TEST_CASE("string_view - comparison") {
+FL_TEST_CASE("string_view - comparison") {
     string_view a("abc");
     string_view b("abc");
     string_view c("def");
@@ -162,7 +162,7 @@ TEST_CASE("string_view - comparison") {
     FL_CHECK(a > d);
 }
 
-TEST_CASE("string_view - find") {
+FL_TEST_CASE("string_view - find") {
     string_view sv("hello world");
 
     // Find character
@@ -185,7 +185,7 @@ TEST_CASE("string_view - find") {
     FL_CHECK(sv.find("") == 0);
 }
 
-TEST_CASE("string_view - rfind") {
+FL_TEST_CASE("string_view - rfind") {
     string_view sv("hello hello");
 
     // Reverse find character
@@ -200,7 +200,7 @@ TEST_CASE("string_view - rfind") {
     FL_CHECK(sv.rfind("xyz") == string_view::npos);
 }
 
-TEST_CASE("string_view - find_first_of") {
+FL_TEST_CASE("string_view - find_first_of") {
     string_view sv("hello world");
 
     // Find first of character set
@@ -212,7 +212,7 @@ TEST_CASE("string_view - find_first_of") {
     FL_CHECK(sv.find_first_of("aeiou", 2) == 4);  // 'o'
 }
 
-TEST_CASE("string_view - find_last_of") {
+FL_TEST_CASE("string_view - find_last_of") {
     string_view sv("hello world");
 
     // Find last of character set
@@ -221,7 +221,7 @@ TEST_CASE("string_view - find_last_of") {
     FL_CHECK(sv.find_last_of("h") == 0);
 }
 
-TEST_CASE("string_view - find_first_not_of") {
+FL_TEST_CASE("string_view - find_first_not_of") {
     string_view sv("aaabbbccc");
 
     // Find first not of character set
@@ -230,7 +230,7 @@ TEST_CASE("string_view - find_first_not_of") {
     FL_CHECK(sv.find_first_not_of("abc") == string_view::npos);
 }
 
-TEST_CASE("string_view - find_last_not_of") {
+FL_TEST_CASE("string_view - find_last_not_of") {
     string_view sv("aaabbbccc");
 
     // Find last not of character set
@@ -239,7 +239,7 @@ TEST_CASE("string_view - find_last_not_of") {
     FL_CHECK(sv.find_last_not_of("abc") == string_view::npos);
 }
 
-TEST_CASE("string_view - starts_with") {
+FL_TEST_CASE("string_view - starts_with") {
     string_view sv("hello world");
 
     // starts_with substring
@@ -253,7 +253,7 @@ TEST_CASE("string_view - starts_with") {
     FL_CHECK_FALSE(sv.starts_with('w'));
 }
 
-TEST_CASE("string_view - ends_with") {
+FL_TEST_CASE("string_view - ends_with") {
     string_view sv("hello world");
 
     // ends_with substring
@@ -267,7 +267,7 @@ TEST_CASE("string_view - ends_with") {
     FL_CHECK_FALSE(sv.ends_with('h'));
 }
 
-TEST_CASE("string_view - contains") {
+FL_TEST_CASE("string_view - contains") {
     string_view sv("hello world");
 
     // contains substring
@@ -282,7 +282,7 @@ TEST_CASE("string_view - contains") {
     FL_CHECK_FALSE(sv.contains('x'));
 }
 
-TEST_CASE("string_view - copy") {
+FL_TEST_CASE("string_view - copy") {
     string_view sv("hello world");
     char buffer[20] = {0};
 
@@ -304,7 +304,7 @@ TEST_CASE("string_view - copy") {
     FL_CHECK(copied == 5);  // Only 5 chars available
 }
 
-TEST_CASE("string_view - compare") {
+FL_TEST_CASE("string_view - compare") {
     string_view a("abc");
     string_view b("abc");
     string_view c("abd");
@@ -322,7 +322,7 @@ TEST_CASE("string_view - compare") {
     FL_CHECK(a.compare("abd") < 0);
 }
 
-TEST_CASE("string_view - hash") {
+FL_TEST_CASE("string_view - hash") {
     string_view a("hello");
     string_view b("hello");
     string_view c("world");
@@ -334,7 +334,7 @@ TEST_CASE("string_view - hash") {
     FL_CHECK(hash_string_view(a) != hash_string_view(c));
 }
 
-TEST_CASE("string_view - edge cases") {
+FL_TEST_CASE("string_view - edge cases") {
     // Empty string
     string_view empty("");
     FL_CHECK(empty.empty());

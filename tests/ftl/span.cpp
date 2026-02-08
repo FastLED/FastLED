@@ -2,13 +2,13 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/array.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/slice.h"
 #include "fl/stl/allocator.h"
 
 
-TEST_CASE("fl::span explicit conversions work correctly") {
-    SUBCASE("fl::vector to fl::span conversions") {
+FL_TEST_CASE("fl::span explicit conversions work correctly") {
+    FL_SUBCASE("fl::vector to fl::span conversions") {
         // Test const fl::vector -> fl::span<const T>
         fl::vector<int> vec = {1, 2, 3, 4, 5};
         
@@ -25,7 +25,7 @@ TEST_CASE("fl::span explicit conversions work correctly") {
         FL_CHECK(vec[0] == 10);  // Verify it's a view, not a copy
     }
     
-    SUBCASE("fl::array to fl::span conversions") {
+    FL_SUBCASE("fl::array to fl::span conversions") {
         fl::array<int, 4> arr = {10, 20, 30, 40};
         
         // ✅ These explicit conversions should work
@@ -41,7 +41,7 @@ TEST_CASE("fl::span explicit conversions work correctly") {
         FL_CHECK(arr[0] == 100);  // Verify it's a view
     }
     
-    SUBCASE("C-style array to fl::span conversions") {
+    FL_SUBCASE("C-style array to fl::span conversions") {
         int c_array[] = {5, 10, 15, 20};
         
         // ✅ These explicit conversions should work
@@ -57,7 +57,7 @@ TEST_CASE("fl::span explicit conversions work correctly") {
         FL_CHECK(c_array[0] == 50);  // Verify it's a view
     }
     
-    SUBCASE("const array to const span") {
+    FL_SUBCASE("const array to const span") {
         const int const_array[] = {100, 200, 300};
         
         // ✅ Const array to const span should work
@@ -68,7 +68,7 @@ TEST_CASE("fl::span explicit conversions work correctly") {
     }
 }
 
-TEST_CASE("fl::span non-template function conversions work") {
+FL_TEST_CASE("fl::span non-template function conversions work") {
     // These tests show that non-template functions CAN accept containers
     // via implicit conversion through our constructors
     
@@ -86,7 +86,7 @@ TEST_CASE("fl::span non-template function conversions work") {
         }
     };
     
-    SUBCASE("fl::vector implicit conversion to non-template function") {
+    FL_SUBCASE("fl::vector implicit conversion to non-template function") {
         fl::vector<int> vec = {1, 2, 3, 4, 5};
         
         // ✅ This should work - implicit conversion to function parameter
@@ -99,7 +99,7 @@ TEST_CASE("fl::span non-template function conversions work") {
         FL_CHECK(vec[4] == 6);
     }
     
-    SUBCASE("fl::array implicit conversion to non-template function") {
+    FL_SUBCASE("fl::array implicit conversion to non-template function") {
         fl::array<int, 3> arr = {10, 20, 30};
         
         // ✅ This should work
@@ -112,7 +112,7 @@ TEST_CASE("fl::span non-template function conversions work") {
         FL_CHECK(arr[2] == 31);
     }
     
-    SUBCASE("C-style array implicit conversion to non-template function") {
+    FL_SUBCASE("C-style array implicit conversion to non-template function") {
         int c_array[] = {7, 14, 21};
         
         // ✅ This should work
@@ -126,10 +126,10 @@ TEST_CASE("fl::span non-template function conversions work") {
     }
 }
 
-TEST_CASE("fl::span limitations - template argument deduction") {
+FL_TEST_CASE("fl::span limitations - template argument deduction") {
     // This test documents what DOESN'T work due to C++ language limitations
     
-    SUBCASE("template functions cannot deduce from implicit conversions") {
+    FL_SUBCASE("template functions cannot deduce from implicit conversions") {
         fl::vector<int> vec = {1, 2, 3};
         
         // ❌ This would NOT work (commented out to avoid compilation errors):

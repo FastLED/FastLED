@@ -1,7 +1,7 @@
 #include "fl/detail/async_log_queue.h"
 #include "fl/isr.h"  // For fl::isr::CriticalSection
 #include "fl/stl/sstream.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/string.h"
 #include "fl/stl/strstream.h"
 #include "fl/int.h"
@@ -12,8 +12,8 @@ using namespace fl;
 constexpr fl::size TEST_DESC_COUNT = 8;  // Power of 2
 constexpr fl::size TEST_ARENA_SIZE = 64; // Power of 2
 
-TEST_CASE("fl::isr::CriticalSection - RAII interrupt control") {
-    SUBCASE("constructor disables interrupts, destructor enables") {
+FL_TEST_CASE("fl::isr::CriticalSection - RAII interrupt control") {
+    FL_SUBCASE("constructor disables interrupts, destructor enables") {
         // This is hard to test directly without mocking, but we can verify it compiles
         {
             fl::isr::CriticalSection cs;
@@ -25,7 +25,7 @@ TEST_CASE("fl::isr::CriticalSection - RAII interrupt control") {
         FL_CHECK(true);
     }
 
-    SUBCASE("non-copyable") {
+    FL_SUBCASE("non-copyable") {
         // This is a compile-time check
         // If this compiles, the test fails (should not be copyable)
         // fl::isr::CriticalSection cs1;
@@ -34,8 +34,8 @@ TEST_CASE("fl::isr::CriticalSection - RAII interrupt control") {
     }
 }
 
-TEST_CASE("fl::AsyncLogQueue - basic operations") {
-    SUBCASE("constructor creates empty queue") {
+FL_TEST_CASE("fl::AsyncLogQueue - basic operations") {
+    FL_SUBCASE("constructor creates empty queue") {
         AsyncLogQueue<TEST_DESC_COUNT, TEST_ARENA_SIZE> queue;
 
         FL_CHECK(queue.empty());
@@ -44,7 +44,7 @@ TEST_CASE("fl::AsyncLogQueue - basic operations") {
         FL_CHECK_EQ(queue.droppedCount(), 0);
     }
 
-    SUBCASE("push and pop single message") {
+    FL_SUBCASE("push and pop single message") {
         AsyncLogQueue<TEST_DESC_COUNT, TEST_ARENA_SIZE> queue;
 
         FL_CHECK(queue.push("test message"));
@@ -62,7 +62,7 @@ TEST_CASE("fl::AsyncLogQueue - basic operations") {
         FL_CHECK_EQ(queue.size(), 0);
     }
 
-    SUBCASE("push fl::string variant") {
+    FL_SUBCASE("push fl::string variant") {
         AsyncLogQueue<TEST_DESC_COUNT, TEST_ARENA_SIZE> queue;
 
         fl::string msg = "string test";
@@ -77,7 +77,7 @@ TEST_CASE("fl::AsyncLogQueue - basic operations") {
         queue.commit();
     }
 
-    SUBCASE("push empty message") {
+    FL_SUBCASE("push empty message") {
         AsyncLogQueue<TEST_DESC_COUNT, TEST_ARENA_SIZE> queue;
 
         FL_CHECK(queue.push(""));  // Empty message accepted but not stored
@@ -85,8 +85,8 @@ TEST_CASE("fl::AsyncLogQueue - basic operations") {
     }
 }
 
-TEST_CASE("fl::AsyncLogQueue - FIFO ordering") {
-    SUBCASE("messages pop in FIFO order") {
+FL_TEST_CASE("fl::AsyncLogQueue - FIFO ordering") {
+    FL_SUBCASE("messages pop in FIFO order") {
         AsyncLogQueue<TEST_DESC_COUNT, TEST_ARENA_SIZE> queue;
 
         FL_CHECK(queue.push("msg1"));
@@ -113,8 +113,8 @@ TEST_CASE("fl::AsyncLogQueue - FIFO ordering") {
     }
 }
 
-TEST_CASE("fl::AsyncLogQueue - descriptor ring overflow") {
-    SUBCASE("descriptor ring full causes drop") {
+FL_TEST_CASE("fl::AsyncLogQueue - descriptor ring overflow") {
+    FL_SUBCASE("descriptor ring full causes drop") {
         AsyncLogQueue<TEST_DESC_COUNT, TEST_ARENA_SIZE> queue;
 
         // Fill descriptor ring to capacity (N-1 slots)
@@ -129,7 +129,7 @@ TEST_CASE("fl::AsyncLogQueue - descriptor ring overflow") {
         FL_CHECK_EQ(queue.droppedCount(), 1);
     }
 
-    SUBCASE("can push again after consuming") {
+    FL_SUBCASE("can push again after consuming") {
         AsyncLogQueue<TEST_DESC_COUNT, TEST_ARENA_SIZE> queue;
 
         // Fill to capacity
@@ -149,8 +149,8 @@ TEST_CASE("fl::AsyncLogQueue - descriptor ring overflow") {
     }
 }
 
-TEST_CASE("fl::AsyncLogQueue - arena space management") {
-    SUBCASE("arena full causes drop") {
+FL_TEST_CASE("fl::AsyncLogQueue - arena space management") {
+    FL_SUBCASE("arena full causes drop") {
         AsyncLogQueue<TEST_DESC_COUNT, TEST_ARENA_SIZE> queue;
 
         // Push messages until arena is nearly full
@@ -164,7 +164,7 @@ TEST_CASE("fl::AsyncLogQueue - arena space management") {
         FL_CHECK_EQ(queue.droppedCount(), 1);
     }
 
-    SUBCASE("arena space freed after commit") {
+    FL_SUBCASE("arena space freed after commit") {
         AsyncLogQueue<TEST_DESC_COUNT, TEST_ARENA_SIZE> queue;
 
         FL_CHECK(queue.push("01234567890123456789012345678901"));  // 32 bytes
@@ -179,8 +179,8 @@ TEST_CASE("fl::AsyncLogQueue - arena space management") {
     }
 }
 
-TEST_CASE("fl::AsyncLogQueue - arena wraparound with padding") {
-    SUBCASE("message that would wrap gets padded") {
+FL_TEST_CASE("fl::AsyncLogQueue - arena wraparound with padding") {
+    FL_SUBCASE("message that would wrap gets padded") {
         // Use larger arena for this test (256 bytes)
         AsyncLogQueue<16, 256> queue;
 
@@ -207,8 +207,8 @@ TEST_CASE("fl::AsyncLogQueue - arena wraparound with padding") {
     }
 }
 
-TEST_CASE("fl::AsyncLogQueue - bounded string length") {
-    SUBCASE("truncates string longer than MAX_MESSAGE_LENGTH") {
+FL_TEST_CASE("fl::AsyncLogQueue - bounded string length") {
+    FL_SUBCASE("truncates string longer than MAX_MESSAGE_LENGTH") {
         AsyncLogQueue<128, 1024> queue;  // Larger queue for this test
 
         // Create a string longer than MAX_MESSAGE_LENGTH (512)
@@ -230,8 +230,8 @@ TEST_CASE("fl::AsyncLogQueue - bounded string length") {
     }
 }
 
-TEST_CASE("fl::AsyncLogQueue - edge cases") {
-    SUBCASE("pop from empty queue returns false") {
+FL_TEST_CASE("fl::AsyncLogQueue - edge cases") {
+    FL_SUBCASE("pop from empty queue returns false") {
         AsyncLogQueue<TEST_DESC_COUNT, TEST_ARENA_SIZE> queue;
 
         const char* msg;
@@ -239,7 +239,7 @@ TEST_CASE("fl::AsyncLogQueue - edge cases") {
         FL_CHECK_FALSE(queue.tryPop(&msg, &len));
     }
 
-    SUBCASE("multiple pops without commit") {
+    FL_SUBCASE("multiple pops without commit") {
         AsyncLogQueue<TEST_DESC_COUNT, TEST_ARENA_SIZE> queue;
 
         FL_CHECK(queue.push("msg1"));
@@ -262,7 +262,7 @@ TEST_CASE("fl::AsyncLogQueue - edge cases") {
         FL_CHECK_EQ(fl::string(msg, len), "msg2");
     }
 
-    SUBCASE("push after pop without commit") {
+    FL_SUBCASE("push after pop without commit") {
         AsyncLogQueue<TEST_DESC_COUNT, TEST_ARENA_SIZE> queue;
 
         FL_CHECK(queue.push("msg1"));
@@ -280,8 +280,8 @@ TEST_CASE("fl::AsyncLogQueue - edge cases") {
     }
 }
 
-TEST_CASE("fl::AsyncLogQueue - drop counter") {
-    SUBCASE("drop counter increments on overflow") {
+FL_TEST_CASE("fl::AsyncLogQueue - drop counter") {
+    FL_SUBCASE("drop counter increments on overflow") {
         AsyncLogQueue<TEST_DESC_COUNT, TEST_ARENA_SIZE> queue;
 
         // Fill queue
@@ -297,7 +297,7 @@ TEST_CASE("fl::AsyncLogQueue - drop counter") {
         FL_CHECK_EQ(queue.droppedCount(), 5);
     }
 
-    SUBCASE("drop counter persists across pops") {
+    FL_SUBCASE("drop counter persists across pops") {
         AsyncLogQueue<TEST_DESC_COUNT, TEST_ARENA_SIZE> queue;
 
         FL_CHECK_FALSE(queue.push("0123456789012345678901234567890123456789012345678901234567890123"));  // Too big for arena
@@ -315,8 +315,8 @@ TEST_CASE("fl::AsyncLogQueue - drop counter") {
     }
 }
 
-TEST_CASE("fl::AsyncLogQueue - stress test") {
-    SUBCASE("many push/pop cycles") {
+FL_TEST_CASE("fl::AsyncLogQueue - stress test") {
+    FL_SUBCASE("many push/pop cycles") {
         AsyncLogQueue<128, 1024> queue;
 
         for (int iteration = 0; iteration < 10; iteration++) {
@@ -344,8 +344,8 @@ TEST_CASE("fl::AsyncLogQueue - stress test") {
     }
 }
 
-TEST_CASE("fl::AsyncLogQueue - default template parameters") {
-    SUBCASE("default constructor uses 128 descriptors and 4096 arena") {
+FL_TEST_CASE("fl::AsyncLogQueue - default template parameters") {
+    FL_SUBCASE("default constructor uses 128 descriptors and 4096 arena") {
         AsyncLogQueue<> queue;
 
         FL_CHECK_EQ(queue.capacity(), 127);  // 128 - 1

@@ -5,7 +5,7 @@
 #include "fl/slice.h"  // For fl::span
 #include "fl/stl/cstddef.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/insert_result.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/vector.h"
@@ -16,16 +16,16 @@
 
 
 
-TEST_CASE("Fixed vector simple") {
+FL_TEST_CASE("Fixed vector simple") {
     fl::FixedVector<int, 5> vec;
 
-    SUBCASE("Initial state") {
+    FL_SUBCASE("Initial state") {
         FL_CHECK(vec.size() == 0);
         FL_CHECK(vec.capacity() == 5);
         FL_CHECK(vec.empty());
     }
 
-    SUBCASE("Push back and access") {
+    FL_SUBCASE("Push back and access") {
         vec.push_back(10);
         vec.push_back(20);
         vec.push_back(30);
@@ -37,7 +37,7 @@ TEST_CASE("Fixed vector simple") {
         FL_CHECK(vec[2] == 30);
     }
 
-    SUBCASE("Push back beyond capacity") {
+    FL_SUBCASE("Push back beyond capacity") {
         for (int i = 0; i < 7; ++i) {
             vec.push_back(i * 10);
         }
@@ -47,7 +47,7 @@ TEST_CASE("Fixed vector simple") {
         FL_CHECK(vec[4] == 40);
     }
 
-    SUBCASE("Clear") {
+    FL_SUBCASE("Clear") {
         vec.push_back(10);
         vec.push_back(20);
         vec.clear();
@@ -57,10 +57,10 @@ TEST_CASE("Fixed vector simple") {
     }
 }
 
-TEST_CASE("Fixed vector insert") {
+FL_TEST_CASE("Fixed vector insert") {
     fl::FixedVector<int, 5> vec;
 
-    SUBCASE("Insert at beginning") {
+    FL_SUBCASE("Insert at beginning") {
         vec.push_back(20);
         vec.push_back(30);
         bool inserted = vec.insert(vec.begin(), 10);
@@ -72,7 +72,7 @@ TEST_CASE("Fixed vector insert") {
         FL_CHECK(vec[2] == 30);
     }
 
-    SUBCASE("Insert in middle") {
+    FL_SUBCASE("Insert in middle") {
         vec.push_back(10);
         vec.push_back(30);
         bool inserted = vec.insert(vec.begin() + 1, 20);
@@ -84,7 +84,7 @@ TEST_CASE("Fixed vector insert") {
         FL_CHECK(vec[2] == 30);
     }
 
-    SUBCASE("Insert at end") {
+    FL_SUBCASE("Insert at end") {
         vec.push_back(10);
         vec.push_back(20);
         bool inserted = vec.insert(vec.end(), 30);
@@ -96,7 +96,7 @@ TEST_CASE("Fixed vector insert") {
         FL_CHECK(vec[2] == 30);
     }
 
-    SUBCASE("Insert when full") {
+    FL_SUBCASE("Insert when full") {
         vec.push_back(10);
         vec.push_back(20);
         vec.push_back(30);
@@ -114,10 +114,10 @@ TEST_CASE("Fixed vector insert") {
     }
 }
 
-TEST_CASE("Fixed vector find_if with predicate") {
+FL_TEST_CASE("Fixed vector find_if with predicate") {
     fl::FixedVector<int, 5> vec;
 
-    SUBCASE("Find even number") {
+    FL_SUBCASE("Find even number") {
         vec.push_back(1);
         vec.push_back(2);
         vec.push_back(3);
@@ -129,7 +129,7 @@ TEST_CASE("Fixed vector find_if with predicate") {
         FL_CHECK(*it == 2);
     }
 
-    SUBCASE("Find number greater than 3") {
+    FL_SUBCASE("Find number greater than 3") {
         vec.push_back(1);
         vec.push_back(2);
         vec.push_back(3);
@@ -141,7 +141,7 @@ TEST_CASE("Fixed vector find_if with predicate") {
         FL_CHECK(*it == 4);
     }
 
-    SUBCASE("Find non-existent condition") {
+    FL_SUBCASE("Find non-existent condition") {
         vec.push_back(1);
         vec.push_back(3);
         vec.push_back(5);
@@ -150,7 +150,7 @@ TEST_CASE("Fixed vector find_if with predicate") {
         FL_CHECK(it == vec.end());
     }
 
-    SUBCASE("Find in empty vector") {
+    FL_SUBCASE("Find in empty vector") {
         auto it = vec.find_if([](int n) {
             FL_UNUSED(n);
             return true;
@@ -159,7 +159,7 @@ TEST_CASE("Fixed vector find_if with predicate") {
     }
 }
 
-TEST_CASE("fl::FixedVector construction and destruction") {
+FL_TEST_CASE("fl::FixedVector construction and destruction") {
     
     static int live_object_count = 0;
 
@@ -174,7 +174,7 @@ TEST_CASE("fl::FixedVector construction and destruction") {
         }
     };
 
-    SUBCASE("Construction and destruction") {
+    FL_SUBCASE("Construction and destruction") {
         FL_REQUIRE_EQ(0, live_object_count);
         live_object_count = 0;
         {
@@ -194,7 +194,7 @@ TEST_CASE("fl::FixedVector construction and destruction") {
         FL_REQUIRE_EQ(live_object_count, 0);
     }
 
-    SUBCASE("Clear") {
+    FL_SUBCASE("Clear") {
         live_object_count = 0;
         {
             fl::FixedVector<TestObject, 3> vec;
@@ -210,7 +210,7 @@ TEST_CASE("fl::FixedVector construction and destruction") {
         FL_CHECK(live_object_count == 0);
     }
 
-    SUBCASE("Stress test clear, insert and remove") {
+    FL_SUBCASE("Stress test clear, insert and remove") {
 
         fl::vector_inlined<TestObject, 20> vec;
         size_t checked_size = 0;
@@ -245,8 +245,8 @@ TEST_CASE("fl::FixedVector construction and destruction") {
     }
 }
 
-TEST_CASE("Fixed vector implicit copy constructor from span") {
-    SUBCASE("from C array via span") {
+FL_TEST_CASE("Fixed vector implicit copy constructor from span") {
+    FL_SUBCASE("from C array via span") {
         int source_data[] = {10, 20, 30, 40, 50};
         fl::span<const int> s(source_data, 5);
 
@@ -265,7 +265,7 @@ TEST_CASE("Fixed vector implicit copy constructor from span") {
         FL_CHECK(source_data[0] == 10);
     }
 
-    SUBCASE("from span larger than capacity") {
+    FL_SUBCASE("from span larger than capacity") {
         int source_data[] = {1, 2, 3, 4, 5, 6, 7, 8};
         fl::span<const int> s(source_data, 8);
 
@@ -280,7 +280,7 @@ TEST_CASE("Fixed vector implicit copy constructor from span") {
         FL_CHECK(vec[4] == 5);
     }
 
-    SUBCASE("from vector via span") {
+    FL_SUBCASE("from vector via span") {
         fl::vector<int> heap_vec;
         heap_vec.push_back(100);
         heap_vec.push_back(200);
@@ -296,10 +296,10 @@ TEST_CASE("Fixed vector implicit copy constructor from span") {
     }
 }
 
-TEST_CASE("Fixed vector advanced") {
+FL_TEST_CASE("Fixed vector advanced") {
     fl::FixedVector<int, 5> vec;
 
-    SUBCASE("Pop back") {
+    FL_SUBCASE("Pop back") {
         vec.push_back(10);
         vec.push_back(20);
         vec.pop_back();
@@ -308,7 +308,7 @@ TEST_CASE("Fixed vector advanced") {
         FL_CHECK(vec[0] == 10);
     }
 
-    SUBCASE("Front and back") {
+    FL_SUBCASE("Front and back") {
         vec.push_back(10);
         vec.push_back(20);
         vec.push_back(30);
@@ -317,7 +317,7 @@ TEST_CASE("Fixed vector advanced") {
         FL_CHECK(vec.back() == 30);
     }
 
-    SUBCASE("Iterator") {
+    FL_SUBCASE("Iterator") {
         vec.push_back(10);
         vec.push_back(20);
         vec.push_back(30);
@@ -330,7 +330,7 @@ TEST_CASE("Fixed vector advanced") {
         FL_CHECK(sum == 60);
     }
 
-    SUBCASE("Erase") {
+    FL_SUBCASE("Erase") {
         vec.push_back(10);
         vec.push_back(20);
         vec.push_back(30);
@@ -342,7 +342,7 @@ TEST_CASE("Fixed vector advanced") {
         FL_CHECK(vec[1] == 30);
     }
 
-    SUBCASE("Find and has") {
+    FL_SUBCASE("Find and has") {
         vec.push_back(10);
         vec.push_back(20);
         vec.push_back(30);
@@ -359,7 +359,7 @@ TEST_CASE("Fixed vector advanced") {
     }
 }
 
-TEST_CASE("Fixed vector with custom type") {
+FL_TEST_CASE("Fixed vector with custom type") {
     struct Point {
         int x, y;
         Point(int x = 0, int y = 0) : x(x), y(y) {}
@@ -368,7 +368,7 @@ TEST_CASE("Fixed vector with custom type") {
 
     fl::FixedVector<Point, 3> vec;
 
-    SUBCASE("Push and access custom type") {
+    FL_SUBCASE("Push and access custom type") {
         vec.push_back(Point(1, 2));
         vec.push_back(Point(3, 4));
 
@@ -379,7 +379,7 @@ TEST_CASE("Fixed vector with custom type") {
         FL_CHECK(vec[1].y == 4);
     }
 
-    SUBCASE("Find custom type") {
+    FL_SUBCASE("Find custom type") {
         vec.push_back(Point(1, 2));
         vec.push_back(Point(3, 4));
 
@@ -390,14 +390,14 @@ TEST_CASE("Fixed vector with custom type") {
     }
 }
 
-TEST_CASE("SortedVector") {    
+FL_TEST_CASE("SortedVector") {    
     struct Less {
         bool operator()(int a, int b) const { return a < b; }
     };
     
 
 
-    SUBCASE("Insert maintains order") {
+    FL_SUBCASE("Insert maintains order") {
         fl::SortedHeapVector<int, Less> vec;
         vec.insert(3);
         vec.insert(1);
@@ -411,7 +411,7 @@ TEST_CASE("SortedVector") {
         FL_CHECK(vec[3] == 4);
     }
 
-    SUBCASE("Erase removes element") {
+    FL_SUBCASE("Erase removes element") {
         fl::SortedHeapVector<int, Less> vec;
         vec.insert(3);
         vec.insert(1);
@@ -429,7 +429,7 @@ TEST_CASE("SortedVector") {
         FL_CHECK(vec[2] == 4);
     }
 
-    SUBCASE("Insert when full") {
+    FL_SUBCASE("Insert when full") {
         fl::SortedHeapVector<int, Less> vec;
         vec.setMaxSize(5);
         // Fill the vector to capacity
@@ -447,7 +447,7 @@ TEST_CASE("SortedVector") {
         FL_CHECK(vec[4] == 5);  // Last element should still be 5
     }
 
-    SUBCASE("Erase from empty") {
+    FL_SUBCASE("Erase from empty") {
         fl::SortedHeapVector<int, Less> vec;
         bool ok = vec.erase(1);  // Try to erase from empty vector
         FL_CHECK(!ok);  // Should return false
@@ -466,8 +466,8 @@ TEST_CASE("SortedVector") {
     }
 }
 
-TEST_CASE("vector") {
-    SUBCASE("resize") {
+FL_TEST_CASE("vector") {
+    FL_SUBCASE("resize") {
         fl::vector<int> vec;
         vec.resize(5);
         FL_CHECK(vec.size() == 5);
@@ -477,7 +477,7 @@ TEST_CASE("vector") {
         }
     }
 
-    SUBCASE("implicit copy constructor from span") {
+    FL_SUBCASE("implicit copy constructor from span") {
         // Create a source array
         int source_data[] = {10, 20, 30, 40, 50};
 
@@ -500,7 +500,7 @@ TEST_CASE("vector") {
         FL_CHECK(vec[0] == 99);           // Copy modified
     }
 
-    SUBCASE("copy constructor from span of different containers") {
+    FL_SUBCASE("copy constructor from span of different containers") {
         // Test with FixedVector
         fl::FixedVector<int, 5> fixed_vec;
         fixed_vec.push_back(1);
@@ -530,9 +530,9 @@ TEST_CASE("vector") {
 }
 
 
-TEST_CASE("Initializer list constructors") {
+FL_TEST_CASE("Initializer list constructors") {
     
-    SUBCASE("FixedVector initializer list") {
+    FL_SUBCASE("FixedVector initializer list") {
         fl::FixedVector<int, 10> vec{1, 2, 3, 4, 5};  
         
         FL_CHECK(vec.size() == 5);
@@ -543,7 +543,7 @@ TEST_CASE("Initializer list constructors") {
         FL_CHECK(vec[4] == 5);
     }
     
-    SUBCASE("FixedVector initializer list with overflow") {
+    FL_SUBCASE("FixedVector initializer list with overflow") {
         // Test that overflow is handled gracefully - only first N elements are taken
         fl::FixedVector<int, 3> vec{1, 2, 3, 4, 5, 6, 7};
         
@@ -553,7 +553,7 @@ TEST_CASE("Initializer list constructors") {
         FL_CHECK(vec[2] == 3);
     }
     
-    SUBCASE("vector initializer list") {
+    FL_SUBCASE("vector initializer list") {
         fl::vector<int> vec{10, 20, 30, 40};
         
         FL_CHECK(vec.size() == 4);
@@ -563,7 +563,7 @@ TEST_CASE("Initializer list constructors") {
         FL_CHECK(vec[3] == 40);
     }
     
-    SUBCASE("InlinedVector initializer list - small size") {
+    FL_SUBCASE("InlinedVector initializer list - small size") {
         fl::InlinedVector<int, 10> vec{1, 2, 3};
         
         FL_CHECK(vec.size() == 3);
@@ -572,7 +572,7 @@ TEST_CASE("Initializer list constructors") {
         FL_CHECK(vec[2] == 3);
     }
     
-    SUBCASE("InlinedVector initializer list - large size") {
+    FL_SUBCASE("InlinedVector initializer list - large size") {
         fl::InlinedVector<int, 3> vec{1, 2, 3, 4, 5, 6};  // Should trigger heap mode
         
         FL_CHECK(vec.size() == 6);
@@ -584,7 +584,7 @@ TEST_CASE("Initializer list constructors") {
         FL_CHECK(vec[5] == 6);
     }
     
-    SUBCASE("fl::vector initializer list") {
+    FL_SUBCASE("fl::vector initializer list") {
         fl::vector<int> vec{100, 200, 300};  // This uses vector
         
         FL_CHECK(vec.size() == 3);
@@ -593,7 +593,7 @@ TEST_CASE("Initializer list constructors") {
         FL_CHECK(vec[2] == 300);
     }
     
-    SUBCASE("Empty initializer list") {
+    FL_SUBCASE("Empty initializer list") {
         fl::FixedVector<int, 5> fixed_vec{};
         fl::vector<int> heap_vec{};
         fl::InlinedVector<int, 3> inlined_vec{};
@@ -608,8 +608,8 @@ TEST_CASE("Initializer list constructors") {
 }
 
 // Test automatic realloc() optimization for trivially copyable types
-TEST_CASE("Automatic realloc optimization for trivially copyable types") {
-    SUBCASE("Default allocator with int (trivially copyable)") {
+FL_TEST_CASE("Automatic realloc optimization for trivially copyable types") {
+    FL_SUBCASE("Default allocator with int (trivially copyable)") {
         // int is trivially copyable - default allocator should automatically use realloc()
         fl::vector<int> vec;  // Uses fl::allocator<int> by default
 
@@ -637,7 +637,7 @@ TEST_CASE("Automatic realloc optimization for trivially copyable types") {
         FL_CHECK(vec[1] == 20);
     }
 
-    SUBCASE("Default allocator with struct POD (trivially copyable)") {
+    FL_SUBCASE("Default allocator with struct POD (trivially copyable)") {
         // Simple POD struct should automatically use realloc() optimization
         struct SimplePOD {
             int x;
@@ -662,7 +662,7 @@ TEST_CASE("Automatic realloc optimization for trivially copyable types") {
         FL_CHECK(vec[1].x == 3);
     }
 
-    SUBCASE("Default allocator stress test with automatic realloc") {
+    FL_SUBCASE("Default allocator stress test with automatic realloc") {
         // Test many reallocations - all automatically optimized
         fl::vector<int> vec;
 
@@ -678,7 +678,7 @@ TEST_CASE("Automatic realloc optimization for trivially copyable types") {
         }
     }
 
-    SUBCASE("Non-trivially copyable types use safe path") {
+    FL_SUBCASE("Non-trivially copyable types use safe path") {
         // This struct has a non-trivial destructor
         // Default allocator should automatically use allocate-copy-deallocate
         struct NonTriviallyCopyable {
@@ -713,8 +713,8 @@ TEST_CASE("Automatic realloc optimization for trivially copyable types") {
 }
 
 // BACKWARDS COMPATIBILITY: allocator_realloc still works but is now redundant
-TEST_CASE("allocator_realloc backwards compatibility") {
-    SUBCASE("allocator_realloc still works (now redundant)") {
+FL_TEST_CASE("allocator_realloc backwards compatibility") {
+    FL_SUBCASE("allocator_realloc still works (now redundant)") {
         // This still compiles and works, but provides no benefit over default allocator
         fl::vector<int, fl::allocator_realloc<int>> vec;
 
@@ -732,7 +732,7 @@ TEST_CASE("allocator_realloc backwards compatibility") {
 // COMPILE-TIME TEST: Non-trivially copyable types should fail to compile
 // Uncomment these tests to verify static_assert works:
 //
-// TEST_CASE("allocator_realloc with non-POD types - SHOULD NOT COMPILE") {
+// FL_TEST_CASE("allocator_realloc with non-POD types - SHOULD NOT COMPILE") {
 //     // This struct has a non-trivial destructor
 //     struct NonTriviallyCopyable {
 //         int* ptr;
@@ -745,14 +745,14 @@ TEST_CASE("allocator_realloc backwards compatibility") {
 //     fl::vector<NonTriviallyCopyable, fl::allocator_realloc<NonTriviallyCopyable>> vec;
 // }
 //
-// TEST_CASE("allocator_realloc with fl::vector - SHOULD NOT COMPILE") {
+// FL_TEST_CASE("allocator_realloc with fl::vector - SHOULD NOT COMPILE") {
 //     // ❌ Nested vectors with allocator_realloc should fail:
 //     // fl::vector is not trivially copyable
 //     fl::vector<fl::vector<int>, fl::allocator_realloc<fl::vector<int>>> nested;
 // }
 
-TEST_CASE("is_trivially_copyable trait") {
-    SUBCASE("Fundamental types are trivially copyable") {
+FL_TEST_CASE("is_trivially_copyable trait") {
+    FL_SUBCASE("Fundamental types are trivially copyable") {
         FL_CHECK(fl::is_trivially_copyable<int>::value);
         FL_CHECK(fl::is_trivially_copyable<float>::value);
         FL_CHECK(fl::is_trivially_copyable<double>::value);
@@ -760,12 +760,12 @@ TEST_CASE("is_trivially_copyable trait") {
         FL_CHECK(fl::is_trivially_copyable<bool>::value);
     }
 
-    SUBCASE("Pointers are trivially copyable") {
+    FL_SUBCASE("Pointers are trivially copyable") {
         FL_CHECK(fl::is_trivially_copyable<int*>::value);
         FL_CHECK(fl::is_trivially_copyable<void*>::value);
     }
 
-    SUBCASE("Simple POD structs are trivially copyable") {
+    FL_SUBCASE("Simple POD structs are trivially copyable") {
         struct SimplePOD {
             int x;
             float y;
@@ -773,7 +773,7 @@ TEST_CASE("is_trivially_copyable trait") {
         FL_CHECK(fl::is_trivially_copyable<SimplePOD>::value);
     }
 
-    SUBCASE("Types with non-trivial operations are NOT trivially copyable") {
+    FL_SUBCASE("Types with non-trivial operations are NOT trivially copyable") {
         struct NonTriviallyCopyable {
             int* ptr;
             NonTriviallyCopyable() : ptr(nullptr) {}

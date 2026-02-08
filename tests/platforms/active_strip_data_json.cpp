@@ -8,7 +8,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "crgb.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/chipsets/encoders/pixel_iterator.h"
 #include "fl/eorder.h"
 #include "fl/log.h"
@@ -23,7 +23,7 @@
 #include "fl/stl/vector.h"
 #include "rgbw.h"
 using namespace fl;
-TEST_CASE("ActiveStripData JSON Round-Trip Test") {
+FL_TEST_CASE("ActiveStripData JSON Round-Trip Test") {
     FL_WARN("Testing ActiveStripData JSON round-trip...");
     
     // Create a simple stub controller for testing

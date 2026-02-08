@@ -3,14 +3,14 @@
 #include "fl/circular_buffer.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/audio.h"
 #include "fl/math_macros.h"
 #include "fl/stl/shared_ptr.h"
 
 using namespace fl;
 
-TEST_CASE("AudioReactive basic functionality") {
+FL_TEST_CASE("AudioReactive basic functionality") {
     // Test basic initialization
     AudioReactive audio;
     AudioReactiveConfig config;
@@ -58,7 +58,7 @@ TEST_CASE("AudioReactive basic functionality") {
     FL_CHECK(audioSample.timestamp() == testTimestamp);
 }
 
-TEST_CASE("AudioReactive convenience functions") {
+FL_TEST_CASE("AudioReactive convenience functions") {
     AudioReactive audio;
     AudioReactiveConfig config;
     config.sampleRate = 22050;
@@ -79,7 +79,7 @@ TEST_CASE("AudioReactive convenience functions") {
     (void)beat; // Suppress unused variable warning
 }
 
-TEST_CASE("AudioReactive enhanced beat detection") {
+FL_TEST_CASE("AudioReactive enhanced beat detection") {
     AudioReactive audio;
     AudioReactiveConfig config;
     config.sampleRate = 22050;
@@ -141,7 +141,7 @@ TEST_CASE("AudioReactive enhanced beat detection") {
     FL_CHECK(data.bassEnergy > data.trebleEnergy);
 }
 
-TEST_CASE("AudioReactive multi-band beat detection") {
+FL_TEST_CASE("AudioReactive multi-band beat detection") {
     AudioReactive audio;
     AudioReactiveConfig config;
     config.enableMultiBand = true;
@@ -190,7 +190,7 @@ TEST_CASE("AudioReactive multi-band beat detection") {
     FL_CHECK(audio.getTrebleEnergy() > 0.0f);
 }
 
-TEST_CASE("AudioReactive spectral flux detection") {
+FL_TEST_CASE("AudioReactive spectral flux detection") {
     AudioReactive audio;
     AudioReactiveConfig config;
     config.enableSpectralFlux = true;
@@ -241,7 +241,7 @@ TEST_CASE("AudioReactive spectral flux detection") {
     (void)firstFlux; // Suppress unused variable warning
 }
 
-TEST_CASE("AudioReactive perceptual weighting") {
+FL_TEST_CASE("AudioReactive perceptual weighting") {
     AudioReactive audio;
     AudioReactiveConfig config;
     config.sampleRate = 22050;
@@ -282,7 +282,7 @@ TEST_CASE("AudioReactive perceptual weighting") {
     FL_CHECK(hasNonZeroBins);
 }
 
-TEST_CASE("AudioReactive configuration validation") {
+FL_TEST_CASE("AudioReactive configuration validation") {
     AudioReactive audio;
     AudioReactiveConfig config;
     
@@ -306,7 +306,7 @@ TEST_CASE("AudioReactive configuration validation") {
     FL_CHECK_FALSE(audio.isTrebleBeat());
 }
 
-TEST_CASE("AudioReactive CircularBuffer functionality") {
+FL_TEST_CASE("AudioReactive CircularBuffer functionality") {
     // Test the CircularBuffer template directly
     StaticCircularBuffer<float, 8> buffer;
     

@@ -3,7 +3,7 @@
 
 #include "fl/stl/semaphore.h"
 #include "fl/stl/atomic.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/thread.h"
 #include "fl/stl/new.h"
 #include "fl/stl/type_traits.h"
@@ -15,8 +15,8 @@
 
 #if FASTLED_MULTITHREADED
 
-TEST_CASE("fl::counting_semaphore basic operations") {
-    SUBCASE("acquire and release single resource") {
+FL_TEST_CASE("fl::counting_semaphore basic operations") {
+    FL_SUBCASE("acquire and release single resource") {
         fl::counting_semaphore<5> sem(1);
 
         // Acquire the resource
@@ -32,7 +32,7 @@ TEST_CASE("fl::counting_semaphore basic operations") {
         FL_CHECK(sem.try_acquire() == true);
     }
 
-    SUBCASE("multiple acquire and release") {
+    FL_SUBCASE("multiple acquire and release") {
         fl::counting_semaphore<10> sem(3);
 
         // Acquire all 3 resources
@@ -52,14 +52,14 @@ TEST_CASE("fl::counting_semaphore basic operations") {
         FL_CHECK(sem.try_acquire() == false);
     }
 
-    SUBCASE("max() returns correct value") {
+    FL_SUBCASE("max() returns correct value") {
         fl::counting_semaphore<42> sem(0);
         FL_CHECK(sem.max() == 42);
     }
 }
 
-TEST_CASE("fl::binary_semaphore basic operations") {
-    SUBCASE("binary semaphore as simple flag") {
+FL_TEST_CASE("fl::binary_semaphore basic operations") {
+    FL_SUBCASE("binary semaphore as simple flag") {
         fl::binary_semaphore sem(0);
 
         // Initially unavailable
@@ -75,13 +75,13 @@ TEST_CASE("fl::binary_semaphore basic operations") {
         FL_CHECK(sem.try_acquire() == false);
     }
 
-    SUBCASE("binary semaphore max is 1") {
+    FL_SUBCASE("binary semaphore max is 1") {
         fl::binary_semaphore sem(1);
         FL_CHECK(sem.max() == 1);
     }
 }
 
-TEST_CASE("fl::counting_semaphore producer-consumer pattern") {
+FL_TEST_CASE("fl::counting_semaphore producer-consumer pattern") {
     constexpr int num_items = 10;
     fl::counting_semaphore<num_items> empty_slots(num_items);  // Initially all empty
     fl::counting_semaphore<num_items> filled_slots(0);         // Initially none filled
@@ -111,7 +111,7 @@ TEST_CASE("fl::counting_semaphore producer-consumer pattern") {
     FL_CHECK(consumed.load() == num_items);
 }
 
-TEST_CASE("fl::counting_semaphore multiple threads") {
+FL_TEST_CASE("fl::counting_semaphore multiple threads") {
     constexpr int num_threads = 5;
     constexpr int resources = 2;  // Only 2 can run concurrently
 
@@ -154,10 +154,10 @@ TEST_CASE("fl::counting_semaphore multiple threads") {
     FL_CHECK(max_concurrent.load() > 0);
 }
 
-TEST_CASE("fl::counting_semaphore try_acquire_for") {
+FL_TEST_CASE("fl::counting_semaphore try_acquire_for") {
     fl::counting_semaphore<1> sem(0);  // Start with no resources
 
-    SUBCASE("timeout when resource unavailable") {
+    FL_SUBCASE("timeout when resource unavailable") {
         auto start = std::chrono::steady_clock::now();  // okay std namespace
         bool acquired = sem.try_acquire_for(std::chrono::milliseconds(20));  // okay std namespace (reduced from 50ms)
         auto elapsed = std::chrono::steady_clock::now() - start;  // okay std namespace
@@ -166,7 +166,7 @@ TEST_CASE("fl::counting_semaphore try_acquire_for") {
         FL_CHECK(elapsed >= std::chrono::milliseconds(15));  // Allow some tolerance  // okay std namespace (reduced from 40ms)
     }
 
-    SUBCASE("immediate success when resource available") {
+    FL_SUBCASE("immediate success when resource available") {
         sem.release();
 
         auto start = std::chrono::steady_clock::now();  // okay std namespace
@@ -178,7 +178,7 @@ TEST_CASE("fl::counting_semaphore try_acquire_for") {
     }
 }
 
-TEST_CASE("fl::binary_semaphore as thread synchronization") {
+FL_TEST_CASE("fl::binary_semaphore as thread synchronization") {
     fl::binary_semaphore ready(0);
     fl::binary_semaphore done(0);
     fl::atomic<int> shared_value(0);
@@ -208,8 +208,8 @@ TEST_CASE("fl::binary_semaphore as thread synchronization") {
 
 #else // !FASTLED_MULTITHREADED
 
-TEST_CASE("fl::counting_semaphore single-threaded mode") {
-    SUBCASE("basic acquire and release") {
+FL_TEST_CASE("fl::counting_semaphore single-threaded mode") {
+    FL_SUBCASE("basic acquire and release") {
         fl::counting_semaphore<5> sem(2);
 
         // Can acquire when count > 0
@@ -224,7 +224,7 @@ TEST_CASE("fl::counting_semaphore single-threaded mode") {
         FL_CHECK(sem.try_acquire() == true);
     }
 
-    SUBCASE("release with update parameter") {
+    FL_SUBCASE("release with update parameter") {
         fl::counting_semaphore<10> sem(0);
 
         sem.release(3);
@@ -235,19 +235,19 @@ TEST_CASE("fl::counting_semaphore single-threaded mode") {
         FL_CHECK(sem.try_acquire() == false);
     }
 
-    SUBCASE("max() returns correct value") {
+    FL_SUBCASE("max() returns correct value") {
         fl::counting_semaphore<100> sem(0);
         FL_CHECK(sem.max() == 100);
     }
 
-    SUBCASE("try_acquire_for behaves like try_acquire") {
+    FL_SUBCASE("try_acquire_for behaves like try_acquire") {
         fl::counting_semaphore<1> sem(1);
 
         FL_CHECK(sem.try_acquire_for(std::chrono::milliseconds(100)) == true);  // okay std namespace
         FL_CHECK(sem.try_acquire_for(std::chrono::milliseconds(100)) == false);  // okay std namespace
     }
 
-    SUBCASE("try_acquire_until behaves like try_acquire") {
+    FL_SUBCASE("try_acquire_until behaves like try_acquire") {
         fl::counting_semaphore<1> sem(1);
         auto future = std::chrono::steady_clock::now() + std::chrono::seconds(1);  // okay std namespace
 
@@ -256,8 +256,8 @@ TEST_CASE("fl::counting_semaphore single-threaded mode") {
     }
 }
 
-TEST_CASE("fl::binary_semaphore single-threaded mode") {
-    SUBCASE("binary semaphore basic operations") {
+FL_TEST_CASE("fl::binary_semaphore single-threaded mode") {
+    FL_SUBCASE("binary semaphore basic operations") {
         fl::binary_semaphore sem(0);
 
         FL_CHECK(sem.try_acquire() == false);
@@ -267,7 +267,7 @@ TEST_CASE("fl::binary_semaphore single-threaded mode") {
         FL_CHECK(sem.try_acquire() == false);
     }
 
-    SUBCASE("binary semaphore max is 1") {
+    FL_SUBCASE("binary semaphore max is 1") {
         fl::binary_semaphore sem(1);
         FL_CHECK(sem.max() == 1);
     }

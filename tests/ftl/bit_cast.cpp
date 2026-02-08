@@ -1,12 +1,12 @@
 #include "test.h"
 #include "fl/stl/bit_cast.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/int.h"
 
 using namespace fl;
 
-TEST_CASE("fl::bit_cast basic conversions") {
-    SUBCASE("Integer to integer conversions") {
+FL_TEST_CASE("fl::bit_cast basic conversions") {
+    FL_SUBCASE("Integer to integer conversions") {
         u32 u32_val = 0x12345678;
         i32 i32_val = bit_cast<i32>(u32_val);
         FL_CHECK_EQ(bit_cast<u32>(i32_val), u32_val);
@@ -20,7 +20,7 @@ TEST_CASE("fl::bit_cast basic conversions") {
         FL_CHECK_EQ(bit_cast<u8>(i8_val), u8_val);
     }
 
-    SUBCASE("Float to integer conversions") {
+    FL_SUBCASE("Float to integer conversions") {
         float f = 3.14159f;
         u32 as_int = bit_cast<u32>(f);
         float back = bit_cast<float>(as_int);
@@ -36,7 +36,7 @@ TEST_CASE("fl::bit_cast basic conversions") {
         FL_CHECK_EQ(bit_cast<float>(neg_zero_bits), neg_zero);
     }
 
-    SUBCASE("Double to integer conversions") {
+    FL_SUBCASE("Double to integer conversions") {
         double d = 2.718281828;
         u64 as_int = bit_cast<u64>(d);
         double back = bit_cast<double>(as_int);
@@ -48,7 +48,7 @@ TEST_CASE("fl::bit_cast basic conversions") {
         FL_CHECK_EQ(bit_cast<double>(zero_bits), zero);
     }
 
-    SUBCASE("Pointer conversions") {
+    FL_SUBCASE("Pointer conversions") {
         int value = 42;
         int* ptr = &value;
 
@@ -63,7 +63,7 @@ TEST_CASE("fl::bit_cast basic conversions") {
         FL_CHECK_EQ(null_as_int, 0);
     }
 
-    SUBCASE("Signed to unsigned conversions") {
+    FL_SUBCASE("Signed to unsigned conversions") {
         i32 negative = -1;
         u32 as_unsigned = bit_cast<u32>(negative);
         FL_CHECK_EQ(as_unsigned, 0xFFFFFFFF);
@@ -72,7 +72,7 @@ TEST_CASE("fl::bit_cast basic conversions") {
         FL_CHECK_EQ(back, negative);
     }
 
-    SUBCASE("Round-trip conversions") {
+    FL_SUBCASE("Round-trip conversions") {
         // Test that bit_cast is truly zero-cost and preserves bits
         u32 original = 0xDEADBEEF;
         u32 round_trip = bit_cast<u32>(bit_cast<i32>(original));
@@ -84,8 +84,8 @@ TEST_CASE("fl::bit_cast basic conversions") {
     }
 }
 
-TEST_CASE("fl::bit_cast with structs") {
-    SUBCASE("POD struct conversions") {
+FL_TEST_CASE("fl::bit_cast with structs") {
+    FL_SUBCASE("POD struct conversions") {
         // Note: In C++11, we need to use simpler POD structs or arrays
         // Testing with array instead which is definitely POD
         u8 color[4] = {0xFF, 0x00, 0x80, 0x00};
@@ -105,7 +105,7 @@ TEST_CASE("fl::bit_cast with structs") {
         FL_CHECK_EQ(back[3], 0x00);
     }
 
-    SUBCASE("Array-like struct conversions") {
+    FL_SUBCASE("Array-like struct conversions") {
         struct Vec3f {
             float x, y, z;
         };
@@ -131,8 +131,8 @@ TEST_CASE("fl::bit_cast with structs") {
     }
 }
 
-TEST_CASE("fl::bit_cast_ptr") {
-    SUBCASE("Basic pointer casting") {
+FL_TEST_CASE("fl::bit_cast_ptr") {
+    FL_SUBCASE("Basic pointer casting") {
         int value = 42;
         void* storage = &value;
 
@@ -141,7 +141,7 @@ TEST_CASE("fl::bit_cast_ptr") {
         FL_CHECK_EQ(*typed_ptr, 42);
     }
 
-    SUBCASE("Const pointer casting") {
+    FL_SUBCASE("Const pointer casting") {
         const int value = 42;
         const void* storage = &value;
 
@@ -150,7 +150,7 @@ TEST_CASE("fl::bit_cast_ptr") {
         FL_CHECK_EQ(*typed_ptr, 42);
     }
 
-    SUBCASE("Struct pointer casting") {
+    FL_SUBCASE("Struct pointer casting") {
         struct Data {
             int x;
             float y;
@@ -165,8 +165,8 @@ TEST_CASE("fl::bit_cast_ptr") {
     }
 }
 
-TEST_CASE("fl::ptr_to_int and fl::int_to_ptr") {
-    SUBCASE("Basic pointer-integer conversion") {
+FL_TEST_CASE("fl::ptr_to_int and fl::int_to_ptr") {
+    FL_SUBCASE("Basic pointer-integer conversion") {
         int value = 42;
         int* ptr = &value;
 
@@ -177,7 +177,7 @@ TEST_CASE("fl::ptr_to_int and fl::int_to_ptr") {
         FL_CHECK_EQ(*ptr_back, 42);
     }
 
-    SUBCASE("Null pointer conversion") {
+    FL_SUBCASE("Null pointer conversion") {
         int* null_ptr = nullptr;
         uptr as_int = ptr_to_int(null_ptr);
         FL_CHECK_EQ(as_int, 0);
@@ -186,7 +186,7 @@ TEST_CASE("fl::ptr_to_int and fl::int_to_ptr") {
         FL_CHECK_EQ(ptr_back, nullptr);
     }
 
-    SUBCASE("Multiple pointer types") {
+    FL_SUBCASE("Multiple pointer types") {
         float f = 2.718f;
         float* f_ptr = &f;
         uptr f_int = ptr_to_int(f_ptr);
@@ -202,7 +202,7 @@ TEST_CASE("fl::ptr_to_int and fl::int_to_ptr") {
         FL_CHECK_CLOSE(*d_back, 3.14159, 0.00001);
     }
 
-    SUBCASE("Const pointer conversion") {
+    FL_SUBCASE("Const pointer conversion") {
         const int value = 123;
         const int* c_ptr = &value;
         uptr as_int = ptr_to_int(c_ptr);
@@ -212,8 +212,8 @@ TEST_CASE("fl::ptr_to_int and fl::int_to_ptr") {
     }
 }
 
-TEST_CASE("fl::is_bitcast_compatible trait") {
-    SUBCASE("Integral types are compatible") {
+FL_TEST_CASE("fl::is_bitcast_compatible trait") {
+    FL_SUBCASE("Integral types are compatible") {
         // Use static_assert to check at compile time
         static_assert(is_bitcast_compatible<u8>::value, "u8 should be bitcast compatible");
         static_assert(is_bitcast_compatible<u16>::value, "u16 should be bitcast compatible");
@@ -226,13 +226,13 @@ TEST_CASE("fl::is_bitcast_compatible trait") {
         FL_CHECK(true);  // Dummy runtime check
     }
 
-    SUBCASE("Floating point types are compatible") {
+    FL_SUBCASE("Floating point types are compatible") {
         static_assert(is_bitcast_compatible<float>::value, "float should be bitcast compatible");
         static_assert(is_bitcast_compatible<double>::value, "double should be bitcast compatible");
         FL_CHECK(true);  // Dummy runtime check
     }
 
-    SUBCASE("Pointer types are compatible") {
+    FL_SUBCASE("Pointer types are compatible") {
         static_assert(is_bitcast_compatible<int*>::value, "int* should be bitcast compatible");
         static_assert(is_bitcast_compatible<float*>::value, "float* should be bitcast compatible");
         static_assert(is_bitcast_compatible<void*>::value, "void* should be bitcast compatible");
@@ -240,7 +240,7 @@ TEST_CASE("fl::is_bitcast_compatible trait") {
         FL_CHECK(true);  // Dummy runtime check
     }
 
-    SUBCASE("Const types preserve compatibility") {
+    FL_SUBCASE("Const types preserve compatibility") {
         static_assert(is_bitcast_compatible<const int>::value, "const int should be bitcast compatible");
         static_assert(is_bitcast_compatible<const float>::value, "const float should be bitcast compatible");
         static_assert(is_bitcast_compatible<const u32>::value, "const u32 should be bitcast compatible");
@@ -248,8 +248,8 @@ TEST_CASE("fl::is_bitcast_compatible trait") {
     }
 }
 
-TEST_CASE("fl::bit_cast edge cases") {
-    SUBCASE("Zero values") {
+FL_TEST_CASE("fl::bit_cast edge cases") {
+    FL_SUBCASE("Zero values") {
         u32 zero_u32 = 0;
         i32 zero_i32 = bit_cast<i32>(zero_u32);
         FL_CHECK_EQ(zero_i32, 0);
@@ -259,7 +259,7 @@ TEST_CASE("fl::bit_cast edge cases") {
         FL_CHECK_EQ(bit_cast<float>(zero_f_bits), 0.0f);
     }
 
-    SUBCASE("Maximum values") {
+    FL_SUBCASE("Maximum values") {
         u32 max_u32 = 0xFFFFFFFF;
         i32 as_signed = bit_cast<i32>(max_u32);
         FL_CHECK_EQ(as_signed, -1);
@@ -269,7 +269,7 @@ TEST_CASE("fl::bit_cast edge cases") {
         FL_CHECK_EQ(as_i8, -1);
     }
 
-    SUBCASE("Bit pattern preservation") {
+    FL_SUBCASE("Bit pattern preservation") {
         // Ensure specific bit patterns are preserved
         u32 pattern = 0xA5A5A5A5;  // Alternating bits
         i32 as_signed = bit_cast<i32>(pattern);
@@ -282,7 +282,7 @@ TEST_CASE("fl::bit_cast edge cases") {
         FL_CHECK_EQ(as_float, 1.0f);
     }
 
-    SUBCASE("Small integer sizes") {
+    FL_SUBCASE("Small integer sizes") {
         u8 u8_max = 255;
         i8 i8_from_u8 = bit_cast<i8>(u8_max);
         FL_CHECK_EQ(i8_from_u8, -1);
@@ -293,8 +293,8 @@ TEST_CASE("fl::bit_cast edge cases") {
     }
 }
 
-TEST_CASE("fl::bit_cast runtime conversions") {
-    SUBCASE("Runtime bit_cast") {
+FL_TEST_CASE("fl::bit_cast runtime conversions") {
+    FL_SUBCASE("Runtime bit_cast") {
         // Note: fl::bit_cast is not constexpr in this C++11 implementation
         // It uses union-based type punning which is runtime-only
         u32 runtime_val = 0x12345678;

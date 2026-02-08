@@ -1,19 +1,19 @@
 #include "fl/stl/deque.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/move.h"
 
 using namespace fl;
 
-TEST_CASE("fl::deque - default constructor") {
+FL_TEST_CASE("fl::deque - default constructor") {
     deque<int> dq;
     FL_CHECK(dq.empty());
     FL_CHECK_EQ(dq.size(), 0u);
 }
 
-TEST_CASE("fl::deque - constructor with count and value") {
-    SUBCASE("int type") {
+FL_TEST_CASE("fl::deque - constructor with count and value") {
+    FL_SUBCASE("int type") {
         deque<int> dq(5, 42);
         FL_CHECK_EQ(dq.size(), 5u);
         FL_CHECK_FALSE(dq.empty());
@@ -22,7 +22,7 @@ TEST_CASE("fl::deque - constructor with count and value") {
         }
     }
 
-    SUBCASE("float type") {
+    FL_SUBCASE("float type") {
         deque<float> dq(3, 3.14f);
         FL_CHECK_EQ(dq.size(), 3u);
         for (size_t i = 0; i < 3; ++i) {
@@ -31,7 +31,7 @@ TEST_CASE("fl::deque - constructor with count and value") {
     }
 }
 
-TEST_CASE("fl::deque - initializer list constructor") {
+FL_TEST_CASE("fl::deque - initializer list constructor") {
     deque<int> dq = {1, 2, 3, 4, 5};
     FL_CHECK_EQ(dq.size(), 5u);
     FL_CHECK_EQ(dq[0], 1);
@@ -41,7 +41,7 @@ TEST_CASE("fl::deque - initializer list constructor") {
     FL_CHECK_EQ(dq[4], 5);
 }
 
-TEST_CASE("fl::deque - copy constructor") {
+FL_TEST_CASE("fl::deque - copy constructor") {
     deque<int> dq1 = {1, 2, 3};
     deque<int> dq2(dq1);
 
@@ -55,7 +55,7 @@ TEST_CASE("fl::deque - copy constructor") {
     FL_CHECK_EQ(dq2[0], 1);
 }
 
-TEST_CASE("fl::deque - move constructor") {
+FL_TEST_CASE("fl::deque - move constructor") {
     deque<int> dq1 = {1, 2, 3};
     deque<int> dq2(fl::move(dq1));
 
@@ -68,7 +68,7 @@ TEST_CASE("fl::deque - move constructor") {
     FL_CHECK(dq1.empty());
 }
 
-TEST_CASE("fl::deque - copy assignment") {
+FL_TEST_CASE("fl::deque - copy assignment") {
     deque<int> dq1 = {1, 2, 3};
     deque<int> dq2;
     dq2 = dq1;
@@ -86,7 +86,7 @@ TEST_CASE("fl::deque - copy assignment") {
     FL_CHECK_EQ(dq1.size(), 3u);
 }
 
-TEST_CASE("fl::deque - move assignment") {
+FL_TEST_CASE("fl::deque - move assignment") {
     deque<int> dq1 = {1, 2, 3};
     deque<int> dq2;
     dq2 = fl::move(dq1);
@@ -98,7 +98,7 @@ TEST_CASE("fl::deque - move assignment") {
     FL_CHECK(dq1.empty());
 }
 
-TEST_CASE("fl::deque - push_back") {
+FL_TEST_CASE("fl::deque - push_back") {
     deque<int> dq;
 
     dq.push_back(1);
@@ -114,7 +114,7 @@ TEST_CASE("fl::deque - push_back") {
     FL_CHECK_EQ(dq[2], 3);
 }
 
-TEST_CASE("fl::deque - push_front") {
+FL_TEST_CASE("fl::deque - push_front") {
     deque<int> dq;
 
     dq.push_front(1);
@@ -133,7 +133,7 @@ TEST_CASE("fl::deque - push_front") {
     FL_CHECK_EQ(dq[2], 1);
 }
 
-TEST_CASE("fl::deque - pop_back") {
+FL_TEST_CASE("fl::deque - pop_back") {
     deque<int> dq = {1, 2, 3, 4, 5};
 
     dq.pop_back();
@@ -150,7 +150,7 @@ TEST_CASE("fl::deque - pop_back") {
     FL_CHECK(empty_dq.empty());
 }
 
-TEST_CASE("fl::deque - pop_front") {
+FL_TEST_CASE("fl::deque - pop_front") {
     deque<int> dq = {1, 2, 3, 4, 5};
 
     dq.pop_front();
@@ -167,7 +167,7 @@ TEST_CASE("fl::deque - pop_front") {
     FL_CHECK(empty_dq.empty());
 }
 
-TEST_CASE("fl::deque - front and back") {
+FL_TEST_CASE("fl::deque - front and back") {
     deque<int> dq = {1, 2, 3, 4, 5};
 
     FL_CHECK_EQ(dq.front(), 1);
@@ -180,7 +180,7 @@ TEST_CASE("fl::deque - front and back") {
     FL_CHECK_EQ(dq.back(), 50);
 }
 
-TEST_CASE("fl::deque - at with bounds checking") {
+FL_TEST_CASE("fl::deque - at with bounds checking") {
     deque<int> dq = {1, 2, 3};
 
     FL_CHECK_EQ(dq.at(0), 1);
@@ -191,7 +191,7 @@ TEST_CASE("fl::deque - at with bounds checking") {
     FL_CHECK_EQ(dq.at(100), dq.front());
 }
 
-TEST_CASE("fl::deque - operator[]") {
+FL_TEST_CASE("fl::deque - operator[]") {
     deque<int> dq = {10, 20, 30, 40, 50};
 
     FL_CHECK_EQ(dq[0], 10);
@@ -202,7 +202,7 @@ TEST_CASE("fl::deque - operator[]") {
     FL_CHECK_EQ(dq[1], 200);
 }
 
-TEST_CASE("fl::deque - clear") {
+FL_TEST_CASE("fl::deque - clear") {
     deque<int> dq = {1, 2, 3, 4, 5};
     FL_CHECK_EQ(dq.size(), 5u);
 
@@ -211,8 +211,8 @@ TEST_CASE("fl::deque - clear") {
     FL_CHECK_EQ(dq.size(), 0u);
 }
 
-TEST_CASE("fl::deque - resize") {
-    SUBCASE("resize up") {
+FL_TEST_CASE("fl::deque - resize") {
+    FL_SUBCASE("resize up") {
         deque<int> dq = {1, 2, 3};
         dq.resize(5);
         FL_CHECK_EQ(dq.size(), 5u);
@@ -223,7 +223,7 @@ TEST_CASE("fl::deque - resize") {
         FL_CHECK_EQ(dq[4], 0);
     }
 
-    SUBCASE("resize up with value") {
+    FL_SUBCASE("resize up with value") {
         deque<int> dq = {1, 2, 3};
         dq.resize(5, 99);
         FL_CHECK_EQ(dq.size(), 5u);
@@ -231,7 +231,7 @@ TEST_CASE("fl::deque - resize") {
         FL_CHECK_EQ(dq[4], 99);
     }
 
-    SUBCASE("resize down") {
+    FL_SUBCASE("resize down") {
         deque<int> dq = {1, 2, 3, 4, 5};
         dq.resize(3);
         FL_CHECK_EQ(dq.size(), 3u);
@@ -240,7 +240,7 @@ TEST_CASE("fl::deque - resize") {
         FL_CHECK_EQ(dq[2], 3);
     }
 
-    SUBCASE("resize to same size") {
+    FL_SUBCASE("resize to same size") {
         deque<int> dq = {1, 2, 3};
         dq.resize(3);
         FL_CHECK_EQ(dq.size(), 3u);
@@ -250,7 +250,7 @@ TEST_CASE("fl::deque - resize") {
     }
 }
 
-TEST_CASE("fl::deque - swap") {
+FL_TEST_CASE("fl::deque - swap") {
     deque<int> dq1 = {1, 2, 3};
     deque<int> dq2 = {4, 5, 6, 7};
 
@@ -269,24 +269,24 @@ TEST_CASE("fl::deque - swap") {
     FL_CHECK_EQ(dq1.size(), 4u);
 }
 
-TEST_CASE("fl::deque - iterator") {
+FL_TEST_CASE("fl::deque - iterator") {
     deque<int> dq = {1, 2, 3, 4, 5};
 
-    SUBCASE("forward iteration") {
+    FL_SUBCASE("forward iteration") {
         int expected = 1;
         for (auto it = dq.begin(); it != dq.end(); ++it) {
             FL_CHECK_EQ(*it, expected++);
         }
     }
 
-    SUBCASE("range-based for loop") {
+    FL_SUBCASE("range-based for loop") {
         int expected = 1;
         for (int val : dq) {
             FL_CHECK_EQ(val, expected++);
         }
     }
 
-    SUBCASE("iterator modification") {
+    FL_SUBCASE("iterator modification") {
         for (auto it = dq.begin(); it != dq.end(); ++it) {
             *it *= 2;
         }
@@ -295,20 +295,20 @@ TEST_CASE("fl::deque - iterator") {
         FL_CHECK_EQ(dq[2], 6);
     }
 
-    SUBCASE("post-increment") {
+    FL_SUBCASE("post-increment") {
         auto it = dq.begin();
         auto it2 = it++;
         FL_CHECK_EQ(*it2, 1);
         FL_CHECK_EQ(*it, 2);
     }
 
-    SUBCASE("pre-decrement") {
+    FL_SUBCASE("pre-decrement") {
         auto it = dq.end();
         --it;
         FL_CHECK_EQ(*it, 5);
     }
 
-    SUBCASE("post-decrement") {
+    FL_SUBCASE("post-decrement") {
         auto it = dq.end();
         --it;
         auto it2 = it--;
@@ -317,17 +317,17 @@ TEST_CASE("fl::deque - iterator") {
     }
 }
 
-TEST_CASE("fl::deque - const_iterator") {
+FL_TEST_CASE("fl::deque - const_iterator") {
     const deque<int> dq = {1, 2, 3, 4, 5};
 
-    SUBCASE("forward iteration") {
+    FL_SUBCASE("forward iteration") {
         int expected = 1;
         for (auto it = dq.begin(); it != dq.end(); ++it) {
             FL_CHECK_EQ(*it, expected++);
         }
     }
 
-    SUBCASE("range-based for loop") {
+    FL_SUBCASE("range-based for loop") {
         int expected = 1;
         for (const int val : dq) {
             FL_CHECK_EQ(val, expected++);
@@ -335,7 +335,7 @@ TEST_CASE("fl::deque - const_iterator") {
     }
 }
 
-TEST_CASE("fl::deque - capacity management") {
+FL_TEST_CASE("fl::deque - capacity management") {
     deque<int> dq;
 
     // Initially empty
@@ -350,7 +350,7 @@ TEST_CASE("fl::deque - capacity management") {
     FL_CHECK_EQ(dq.size(), 10u);
 }
 
-TEST_CASE("fl::deque - mixed push_front and push_back") {
+FL_TEST_CASE("fl::deque - mixed push_front and push_back") {
     deque<int> dq;
 
     dq.push_back(3);
@@ -367,7 +367,7 @@ TEST_CASE("fl::deque - mixed push_front and push_back") {
     FL_CHECK_EQ(dq[4], 5);
 }
 
-TEST_CASE("fl::deque - mixed pop_front and pop_back") {
+FL_TEST_CASE("fl::deque - mixed pop_front and pop_back") {
     deque<int> dq = {1, 2, 3, 4, 5};
 
     dq.pop_front();
@@ -384,7 +384,7 @@ TEST_CASE("fl::deque - mixed pop_front and pop_back") {
     FL_CHECK_EQ(dq[1], 4);
 }
 
-TEST_CASE("fl::deque - wrap-around behavior") {
+FL_TEST_CASE("fl::deque - wrap-around behavior") {
     deque<int> dq;
 
     // Push to back
@@ -407,7 +407,7 @@ TEST_CASE("fl::deque - wrap-around behavior") {
     FL_CHECK_EQ(dq[4], 4);
 }
 
-TEST_CASE("fl::deque - stress test with many operations") {
+FL_TEST_CASE("fl::deque - stress test with many operations") {
     deque<int> dq;
 
     // Push many elements
@@ -430,27 +430,27 @@ TEST_CASE("fl::deque - stress test with many operations") {
     FL_CHECK_EQ(dq.size(), 75u);
 }
 
-TEST_CASE("fl::deque - typedefs") {
-    SUBCASE("deque_int") {
+FL_TEST_CASE("fl::deque - typedefs") {
+    FL_SUBCASE("deque_int") {
         deque_int dq = {1, 2, 3};
         FL_CHECK_EQ(dq.size(), 3u);
         FL_CHECK_EQ(dq[0], 1);
     }
 
-    SUBCASE("deque_float") {
+    FL_SUBCASE("deque_float") {
         deque_float dq = {1.5f, 2.5f, 3.5f};
         FL_CHECK_EQ(dq.size(), 3u);
         FL_CHECK_EQ(dq[0], 1.5f);
     }
 
-    SUBCASE("deque_double") {
+    FL_SUBCASE("deque_double") {
         deque_double dq = {1.5, 2.5, 3.5};
         FL_CHECK_EQ(dq.size(), 3u);
         FL_CHECK_EQ(dq[0], 1.5);
     }
 }
 
-TEST_CASE("fl::deque - empty deque operations") {
+FL_TEST_CASE("fl::deque - empty deque operations") {
     deque<int> dq;
 
     FL_CHECK(dq.empty());
@@ -460,7 +460,7 @@ TEST_CASE("fl::deque - empty deque operations") {
     FL_CHECK(dq.begin() == dq.end());
 }
 
-TEST_CASE("fl::deque - move semantics with push") {
+FL_TEST_CASE("fl::deque - move semantics with push") {
     struct MoveOnlyType {
         int value;
         MoveOnlyType(int v) : value(v) {}

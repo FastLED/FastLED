@@ -27,7 +27,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/new.h"
 #include "fl/stl/vector.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string.h"
 #include "fl/int.h"
@@ -68,7 +68,7 @@ private:
     }
 };
 
-TEST_CASE("FileSystem test with real hard drive") {
+FL_TEST_CASE("FileSystem test with real hard drive") {
     // Create a temporary test directory and file
     fl::string test_dir = "test_filesystem_temp";
     fl::string test_file = "test_data.txt";
@@ -129,7 +129,7 @@ TEST_CASE("FileSystem test with real hard drive") {
     // TestDirGuard destructor handles cleanup
 }
 
-TEST_CASE("FileSystem test with subdirectories") {
+FL_TEST_CASE("FileSystem test with subdirectories") {
     // Create a nested directory structure
     fl::string test_dir = "test_fs_nested";
     fl::string sub_dir = "data";
@@ -185,7 +185,7 @@ TEST_CASE("FileSystem test with subdirectories") {
     // TestDirGuard destructor handles cleanup
 }
 
-TEST_CASE("FileSystem test with text file reading") {
+FL_TEST_CASE("FileSystem test with text file reading") {
     // Test the readText functionality
     fl::string test_dir = "test_fs_text";
     fl::string test_file = "config.json";
@@ -246,7 +246,7 @@ public:
     }
 };
 
-TEST_CASE("FileSystem test with binary file loading") {
+FL_TEST_CASE("FileSystem test with binary file loading") {
     // Test loading a binary JPEG file to verify byte-accurate reading
 
     // Set the test filesystem root to the tests directory

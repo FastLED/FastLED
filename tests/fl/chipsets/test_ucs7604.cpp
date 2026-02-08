@@ -14,7 +14,7 @@
 #include "cled_controller.h"
 #include "cpixel_ledcontroller.h"
 #include "dither_mode.h"
-#include "doctest.h"
+#include "test.h"
 #include "eorder.h"
 #include "fl/chipsets/encoders/pixel_iterator.h"
 #include "fl/chipsets/encoders/ucs7604.h"
@@ -349,7 +349,7 @@ fl::span<const uint8_t> testUCS7604Controller(fl::span<const CRGB> leds) {
     return captured;
 }
 
-TEST_CASE("UCS7604 8-bit - RGB color order") {
+FL_TEST_CASE("UCS7604 8-bit - RGB color order") {
     CRGB leds[] = {
         CRGB(0xFF, 0x00, 0x00),  // Red
         CRGB(0x00, 0xFF, 0x00),  // Green
@@ -375,7 +375,7 @@ TEST_CASE("UCS7604 8-bit - RGB color order") {
     verifyPixels8bit(output, expected);
 }
 
-TEST_CASE("UCS7604 8-bit - GRB color order") {
+FL_TEST_CASE("UCS7604 8-bit - GRB color order") {
     CRGB leds[] = {
         CRGB(0xFF, 0x00, 0x00),  // Red
         CRGB(0x00, 0xFF, 0x00),  // Green
@@ -401,7 +401,7 @@ TEST_CASE("UCS7604 8-bit - GRB color order") {
     verifyPixels8bit(output, expected);
 }
 
-TEST_CASE("UCS7604 8-bit - BRG color order") {
+FL_TEST_CASE("UCS7604 8-bit - BRG color order") {
     CRGB leds[] = {
         CRGB(0xFF, 0x00, 0x00),  // Red
         CRGB(0x00, 0xFF, 0x00),  // Green
@@ -427,7 +427,7 @@ TEST_CASE("UCS7604 8-bit - BRG color order") {
     verifyPixels8bit(output, expected);
 }
 
-TEST_CASE("UCS7604 16-bit - RGB color order") {
+FL_TEST_CASE("UCS7604 16-bit - RGB color order") {
     CRGB leds[] = {
         CRGB(127, 0, 0),  // Red (mid-range to show gamma curve)
         CRGB(0, 127, 0),  // Green (mid-range to show gamma curve)
@@ -455,7 +455,7 @@ TEST_CASE("UCS7604 16-bit - RGB color order") {
     verifyPixels16bit(output, expected);
 }
 
-TEST_CASE("UCS7604 16-bit - GRB color order") {
+FL_TEST_CASE("UCS7604 16-bit - GRB color order") {
     CRGB leds[] = {
         CRGB(127, 0, 0),  // Red (mid-range to show gamma curve)
         CRGB(0, 127, 0),  // Green (mid-range to show gamma curve)
@@ -484,7 +484,7 @@ TEST_CASE("UCS7604 16-bit - GRB color order") {
     verifyPixels16bit(output, expected);
 }
 
-TEST_CASE("UCS7604 runtime brightness control") {
+FL_TEST_CASE("UCS7604 runtime brightness control") {
     // Test the global brightness control functions
 
     // Save original brightness
@@ -548,7 +548,7 @@ TEST_CASE("UCS7604 runtime brightness control") {
     fl::ucs7604::set_brightness(original);
 }
 
-TEST_CASE("UCS7604 brightness with color order - GRB") {
+FL_TEST_CASE("UCS7604 brightness with color order - GRB") {
     // Save original brightness
     fl::ucs7604::CurrentControl original = fl::ucs7604::brightness();
 
@@ -589,7 +589,7 @@ TEST_CASE("UCS7604 brightness with color order - GRB") {
     fl::ucs7604::set_brightness(original);
 }
 
-TEST_CASE("UCS7604 preamble updates with current control changes") {
+FL_TEST_CASE("UCS7604 preamble updates with current control changes") {
     // Save original brightness
     fl::ucs7604::CurrentControl original = fl::ucs7604::brightness();
 
@@ -667,7 +667,7 @@ TEST_CASE("UCS7604 preamble updates with current control changes") {
     fl::ucs7604::set_brightness(original);
 }
 
-TEST_CASE("UCS7604 preamble updates with current control changes - GRB order") {
+FL_TEST_CASE("UCS7604 preamble updates with current control changes - GRB order") {
     // Save original brightness
     fl::ucs7604::CurrentControl original = fl::ucs7604::brightness();
 
@@ -706,7 +706,7 @@ TEST_CASE("UCS7604 preamble updates with current control changes - GRB order") {
     fl::ucs7604::set_brightness(original);
 }
 
-TEST_CASE("UCS7604 current control follows color order transformations") {
+FL_TEST_CASE("UCS7604 current control follows color order transformations") {
     // Save original brightness
     fl::ucs7604::CurrentControl original = fl::ucs7604::brightness();
 
@@ -812,7 +812,7 @@ TEST_CASE("UCS7604 current control follows color order transformations") {
     fl::ucs7604::set_brightness(original);
 }
 
-TEST_CASE("UCS7604 8-bit RGBW - 3 LEDs (no padding)") {
+FL_TEST_CASE("UCS7604 8-bit RGBW - 3 LEDs (no padding)") {
     // 3 LEDs RGBW 8-bit: 15 + (3*4) = 27 bytes (27 % 3 = 0, no padding)
     CRGB leds[] = {
         CRGB(0xFF, 0x00, 0x00),  // Red
@@ -846,7 +846,7 @@ TEST_CASE("UCS7604 8-bit RGBW - 3 LEDs (no padding)") {
     verifyPixels8bitRGBW(output, expected, 0);
 }
 
-TEST_CASE("UCS7604 8-bit RGBW - 4 LEDs (2 bytes padding)") {
+FL_TEST_CASE("UCS7604 8-bit RGBW - 4 LEDs (2 bytes padding)") {
     // 4 LEDs RGBW 8-bit: 15 + (4*4) = 31 bytes (31 % 3 = 1, need 2 bytes padding)
     CRGB leds[] = {
         CRGB(0xFF, 0x00, 0x00),  // Red
@@ -882,7 +882,7 @@ TEST_CASE("UCS7604 8-bit RGBW - 4 LEDs (2 bytes padding)") {
     verifyPixels8bitRGBW(output, expected, 2);
 }
 
-TEST_CASE("UCS7604 8-bit RGBW - 5 LEDs (1 byte padding)") {
+FL_TEST_CASE("UCS7604 8-bit RGBW - 5 LEDs (1 byte padding)") {
     // 5 LEDs RGBW 8-bit: 15 + (5*4) = 35 bytes (35 % 3 = 2, need 1 byte padding)
     CRGB leds[] = {
         CRGB(0xFF, 0x00, 0x00),  // Red
@@ -920,7 +920,7 @@ TEST_CASE("UCS7604 8-bit RGBW - 5 LEDs (1 byte padding)") {
     verifyPixels8bitRGBW(output, expected, 1);
 }
 
-TEST_CASE("UCS7604 16-bit RGBW - 3 LEDs (no padding)") {
+FL_TEST_CASE("UCS7604 16-bit RGBW - 3 LEDs (no padding)") {
     // 3 LEDs RGBW 16-bit: 15 + (3*8) = 39 bytes (39 % 3 = 0, no padding)
     CRGB leds[] = {
         CRGB(127, 0, 0),  // Red (mid-range to show gamma curve)
@@ -956,7 +956,7 @@ TEST_CASE("UCS7604 16-bit RGBW - 3 LEDs (no padding)") {
     verifyPixels16bitRGBW(output, expected, 0);
 }
 
-TEST_CASE("UCS7604 16-bit RGBW - 4 LEDs (2 bytes padding)") {
+FL_TEST_CASE("UCS7604 16-bit RGBW - 4 LEDs (2 bytes padding)") {
     // 4 LEDs RGBW 16-bit: 15 + (4*8) = 47 bytes (47 % 3 = 2, need 1 byte padding)
     CRGB leds[] = {
         CRGB(127, 0, 0),    // Red
@@ -994,7 +994,7 @@ TEST_CASE("UCS7604 16-bit RGBW - 4 LEDs (2 bytes padding)") {
     verifyPixels16bitRGBW(output, expected, 1);
 }
 
-TEST_CASE("UCS7604 16-bit RGBW - 5 LEDs (1 byte padding)") {
+FL_TEST_CASE("UCS7604 16-bit RGBW - 5 LEDs (1 byte padding)") {
     // 5 LEDs RGBW 16-bit: 15 + (5*8) = 55 bytes (55 % 3 = 1, need 2 bytes padding)
     CRGB leds[] = {
         CRGB(127, 0, 0),    // Red

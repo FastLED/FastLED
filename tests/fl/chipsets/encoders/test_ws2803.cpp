@@ -25,7 +25,7 @@
 #include "fl/stl/iterator.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/int.h"
 #include "initializer_list"
 #include "fl/stl/vector.h"
@@ -53,7 +53,7 @@ using namespace test_ws2803;
 // Basic Functionality Tests (verify alias works)
 // ============================================================================
 
-TEST_CASE("WS2803 - Zero LEDs (empty input)") {
+FL_TEST_CASE("WS2803 - Zero LEDs (empty input)") {
     // Test encoding with no LEDs - should produce no output
     fl::vector<fl::array<u8, 3>> pixels;
     fl::vector<u8> output;
@@ -64,7 +64,7 @@ TEST_CASE("WS2803 - Zero LEDs (empty input)") {
     FL_REQUIRE_EQ(output.size(), 0);
 }
 
-TEST_CASE("WS2803 - Single LED (black)") {
+FL_TEST_CASE("WS2803 - Single LED (black)") {
     // Test single black LED
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeRGBPixel(0, 0, 0));
@@ -77,7 +77,7 @@ TEST_CASE("WS2803 - Single LED (black)") {
     verifyRGBAt(output, 0, 0x00, 0x00, 0x00);
 }
 
-TEST_CASE("WS2803 - Single LED (white)") {
+FL_TEST_CASE("WS2803 - Single LED (white)") {
     // Test single white LED
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeRGBPixel(255, 255, 255));
@@ -90,7 +90,7 @@ TEST_CASE("WS2803 - Single LED (white)") {
     verifyRGBAt(output, 0, 0xFF, 0xFF, 0xFF);
 }
 
-TEST_CASE("WS2803 - RGB primaries") {
+FL_TEST_CASE("WS2803 - RGB primaries") {
     // Test RGB primary colors to verify wire order
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeRGBPixel(255, 0, 0));    // Red
@@ -107,7 +107,7 @@ TEST_CASE("WS2803 - RGB primaries") {
     verifyRGBAt(output, 6, 0x00, 0x00, 0xFF);  // Blue
 }
 
-TEST_CASE("WS2803 - Multiple LEDs (mixed colors)") {
+FL_TEST_CASE("WS2803 - Multiple LEDs (mixed colors)") {
     // Test various color combinations
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeRGBPixel(128, 64, 32));
@@ -128,7 +128,7 @@ TEST_CASE("WS2803 - Multiple LEDs (mixed colors)") {
 // Protocol Equivalence Tests (verify identical to WS2801)
 // ============================================================================
 
-TEST_CASE("WS2803 - Protocol equivalence to WS2801") {
+FL_TEST_CASE("WS2803 - Protocol equivalence to WS2801") {
     // Verify that WS2803 produces identical output to WS2801
     // This is the key test - both encoders should produce the same output
     fl::vector<fl::array<u8, 3>> pixels;
@@ -149,7 +149,7 @@ TEST_CASE("WS2803 - Protocol equivalence to WS2801") {
     }
 }
 
-TEST_CASE("WS2803 - No frame overhead (same as WS2801)") {
+FL_TEST_CASE("WS2803 - No frame overhead (same as WS2801)") {
     // Verify WS2803 has no frame overhead, just like WS2801
     for (size_t num_leds : {0, 1, 5, 20, 60}) {
         fl::vector<fl::array<u8, 3>> pixels(num_leds, makeRGBPixel(128, 128, 128));
@@ -166,7 +166,7 @@ TEST_CASE("WS2803 - No frame overhead (same as WS2801)") {
 // Wire Order Tests
 // ============================================================================
 
-TEST_CASE("WS2803 - RGB wire order verification") {
+FL_TEST_CASE("WS2803 - RGB wire order verification") {
     // Verify bytes are written in RGB order
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeRGBPixel(0x12, 0x34, 0x56));
@@ -184,7 +184,7 @@ TEST_CASE("WS2803 - RGB wire order verification") {
 // Edge Case Tests
 // ============================================================================
 
-TEST_CASE("WS2803 - Boundary values") {
+FL_TEST_CASE("WS2803 - Boundary values") {
     // Test minimum and maximum byte values
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeRGBPixel(0, 0, 0));
@@ -198,7 +198,7 @@ TEST_CASE("WS2803 - Boundary values") {
     verifyRGBAt(output, 3, 0xFF, 0xFF, 0xFF);
 }
 
-TEST_CASE("WS2803 - Many LEDs (typical strip)") {
+FL_TEST_CASE("WS2803 - Many LEDs (typical strip)") {
     // Test typical strip size (reduced from 60 to 30 for performance)
     // Still provides excellent coverage for typical strip encoding
     const size_t NUM_LEDS = 30;

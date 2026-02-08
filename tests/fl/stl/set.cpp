@@ -4,7 +4,7 @@
 #include "fl/stl/set.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/log.h"
 #include "fl/stl/move.h"
 #include "fl/stl/pair.h"
@@ -18,10 +18,10 @@ using namespace fl;
 // Tests from test_fixed_set.cpp
 // ========================================
 
-TEST_CASE("FixedSet operations") {
+FL_TEST_CASE("FixedSet operations") {
     fl::FixedSet<int, 5> set;
 
-    SUBCASE("Insert and find") {
+    FL_SUBCASE("Insert and find") {
         FL_CHECK(set.insert(1));
         FL_CHECK(set.insert(2));
         FL_CHECK(set.insert(3));
@@ -32,7 +32,7 @@ TEST_CASE("FixedSet operations") {
         FL_CHECK_FALSE(set.insert(1)); // Duplicate insert should fail
     }
 
-    SUBCASE("Erase") {
+    FL_SUBCASE("Erase") {
         FL_CHECK(set.insert(1));
         FL_CHECK(set.insert(2));
         FL_CHECK(set.erase(1));
@@ -41,7 +41,7 @@ TEST_CASE("FixedSet operations") {
         FL_CHECK_FALSE(set.erase(3)); // Erasing non-existent element should fail
     }
 
-    SUBCASE("Next and prev") {
+    FL_SUBCASE("Next and prev") {
         FL_CHECK(set.insert(1));
         FL_CHECK(set.insert(2));
         FL_CHECK(set.insert(3));
@@ -59,7 +59,7 @@ TEST_CASE("FixedSet operations") {
         FL_CHECK(prev_value == 3);
     }
 
-    SUBCASE("Size and capacity") {
+    FL_SUBCASE("Size and capacity") {
         FL_CHECK(set.size() == 0);
         FL_CHECK(set.capacity() == 5);
         FL_CHECK(set.empty());
@@ -74,7 +74,7 @@ TEST_CASE("FixedSet operations") {
         FL_CHECK(set.empty());
     }
 
-    SUBCASE("Iterators") {
+    FL_SUBCASE("Iterators") {
         set.insert(1);
         set.insert(2);
         set.insert(3);
@@ -95,7 +95,7 @@ TEST_CASE("FixedSet operations") {
         FL_CHECK(it == set.end());
     }
 
-    SUBCASE("Front and back") {
+    FL_SUBCASE("Front and back") {
         set.insert(1);
         set.insert(2);
         set.insert(3);
@@ -109,16 +109,16 @@ TEST_CASE("FixedSet operations") {
 // Tests from test_set_inlined.cpp
 // ========================================
 
-TEST_CASE("fl::set_inlined - Basic functionality") {
+FL_TEST_CASE("fl::set_inlined - Basic functionality") {
 
-    SUBCASE("Empty set") {
+    FL_SUBCASE("Empty set") {
         fl::set_inlined<int, 5> set;
 
         FL_CHECK(set.empty());
         FL_CHECK(set.size() == 0);
     }
 
-    SUBCASE("Set has inlined elements") {
+    FL_SUBCASE("Set has inlined elements") {
         fl::set_inlined<int, 5> set;
         fl::uptr ptr_begin = fl::ptr_to_int(&set);
         fl::uptr ptr_end = ptr_begin + sizeof(set);
@@ -137,7 +137,7 @@ TEST_CASE("fl::set_inlined - Basic functionality") {
         }
     }
 
-    SUBCASE("Single element insertion") {
+    FL_SUBCASE("Single element insertion") {
         fl::set_inlined<int, 5> set;
         auto result = set.insert(42);
 
@@ -146,7 +146,7 @@ TEST_CASE("fl::set_inlined - Basic functionality") {
         FL_CHECK(set.contains(42));
     }
 
-    SUBCASE("Multiple elements within inlined size") {
+    FL_SUBCASE("Multiple elements within inlined size") {
         fl::set_inlined<int, 5> set;
 
         // Insert exactly 5 elements (the inlined size)
@@ -164,7 +164,7 @@ TEST_CASE("fl::set_inlined - Basic functionality") {
         FL_CHECK(set.contains(5));
     }
 
-    SUBCASE("Duplicate insertions") {
+    FL_SUBCASE("Duplicate insertions") {
         fl::set_inlined<int, 3> set;
 
         FL_CHECK(set.insert(10).second);
@@ -176,7 +176,7 @@ TEST_CASE("fl::set_inlined - Basic functionality") {
         FL_CHECK(set.contains(20));
     }
 
-    SUBCASE("Element removal") {
+    FL_SUBCASE("Element removal") {
         fl::set_inlined<int, 4> set;
 
         set.insert(100);
@@ -193,7 +193,7 @@ TEST_CASE("fl::set_inlined - Basic functionality") {
         FL_CHECK(set.contains(300));
     }
 
-    SUBCASE("Clear operation") {
+    FL_SUBCASE("Clear operation") {
         fl::set_inlined<int, 3> set;
 
         set.insert(1);
@@ -208,7 +208,7 @@ TEST_CASE("fl::set_inlined - Basic functionality") {
         FL_CHECK(set.size() == 0);
     }
 
-    SUBCASE("Emplace operation") {
+    FL_SUBCASE("Emplace operation") {
         fl::set_inlined<int, 3> set;
 
         FL_CHECK(set.emplace(42).second);
@@ -221,7 +221,7 @@ TEST_CASE("fl::set_inlined - Basic functionality") {
         FL_CHECK(set.contains(200));
     }
 
-    SUBCASE("Iterator operations") {
+    FL_SUBCASE("Iterator operations") {
         fl::set_inlined<int, 3> set;
         set.insert(1);
         set.insert(2);
@@ -243,7 +243,7 @@ TEST_CASE("fl::set_inlined - Basic functionality") {
         FL_CHECK(count == 3);
     }
 
-    SUBCASE("Find operations") {
+    FL_SUBCASE("Find operations") {
         fl::set_inlined<int, 3> set;
         set.insert(10);
         set.insert(20);
@@ -257,7 +257,7 @@ TEST_CASE("fl::set_inlined - Basic functionality") {
         FL_CHECK(it2 == set.end());
     }
 
-    SUBCASE("Count operations") {
+    FL_SUBCASE("Count operations") {
         fl::set_inlined<int, 3> set;
         set.insert(1);
         set.insert(2);
@@ -269,7 +269,7 @@ TEST_CASE("fl::set_inlined - Basic functionality") {
         FL_CHECK(set.count(99) == 0);
     }
 
-    SUBCASE("Contains operations") {
+    FL_SUBCASE("Contains operations") {
         fl::set_inlined<int, 3> set;
         set.insert(1);
         set.insert(2);
@@ -281,7 +281,7 @@ TEST_CASE("fl::set_inlined - Basic functionality") {
         FL_CHECK_FALSE(set.contains(99));
     }
 
-    SUBCASE("Custom type with inlined storage") {
+    FL_SUBCASE("Custom type with inlined storage") {
         struct TestStruct {
             int value;
             TestStruct(int v = 0) : value(v) {}
@@ -302,9 +302,9 @@ TEST_CASE("fl::set_inlined - Basic functionality") {
     }
 }
 
-TEST_CASE("fl::set_inlined - Exceeding inlined size") {
+FL_TEST_CASE("fl::set_inlined - Exceeding inlined size") {
 
-    SUBCASE("Exceeding inlined size") {
+    FL_SUBCASE("Exceeding inlined size") {
         fl::set_inlined<int, 2> set;
 
         // Insert within inlined size
@@ -320,7 +320,7 @@ TEST_CASE("fl::set_inlined - Exceeding inlined size") {
         FL_CHECK(set.contains(3));
     }
 
-    SUBCASE("Heap overflow") {
+    FL_SUBCASE("Heap overflow") {
         fl::set_inlined<int, 3> set;
 
         // Insert more than inlined capacity but not too many

@@ -12,7 +12,7 @@
 
 #ifdef FASTLED_STUB_IMPL  // Tests only run on stub platform
 
-#include "doctest.h"
+#include "test.h"
 #include "platforms/esp/32/drivers/lcd_cam/channel_engine_lcd_rgb.h"
 #include "platforms/esp/32/drivers/lcd_cam/lcd_rgb_peripheral_mock.h"
 #include "fl/channels/data.h"
@@ -105,30 +105,30 @@ ChannelDataPtr createTestChannelData(int pin, size_t numLeds) {
 // Test Suite: Channel Engine Creation
 //=============================================================================
 
-TEST_CASE("ChannelEngineLcdRgb - creation") {
+FL_TEST_CASE("ChannelEngineLcdRgb - creation") {
     resetMockState();
 
     auto peripheral = createMockPeripheral();
     ChannelEngineLcdRgb engine(peripheral);
 
-    CHECK(engine.getName() != nullptr);
-    CHECK(fl::strcmp(engine.getName(), "LCD_RGB") == 0);
+    FL_CHECK(engine.getName() != nullptr);
+    FL_CHECK(fl::strcmp(engine.getName(), "LCD_RGB") == 0);
 }
 
-TEST_CASE("ChannelEngineLcdRgb - initial state is READY") {
+FL_TEST_CASE("ChannelEngineLcdRgb - initial state is READY") {
     resetMockState();
 
     auto peripheral = createMockPeripheral();
     ChannelEngineLcdRgb engine(peripheral);
 
-    CHECK(engine.poll() == IChannelEngine::EngineState::READY);
+    FL_CHECK(engine.poll() == IChannelEngine::EngineState::READY);
 }
 
 //=============================================================================
 // Test Suite: Single Channel Transmission
 //=============================================================================
 
-TEST_CASE("ChannelEngineLcdRgb - single channel transmission") {
+FL_TEST_CASE("ChannelEngineLcdRgb - single channel transmission") {
     resetMockState();
 
     auto peripheral = createMockPeripheral();
@@ -148,10 +148,10 @@ TEST_CASE("ChannelEngineLcdRgb - single channel transmission") {
 
     // Verify mock received data
     auto& mock = LcdRgbPeripheralMock::instance();
-    CHECK(mock.getDrawCount() >= 1);
+    FL_CHECK(mock.getDrawCount() >= 1);
 }
 
-TEST_CASE("ChannelEngineLcdRgb - empty enqueue does not transmit") {
+FL_TEST_CASE("ChannelEngineLcdRgb - empty enqueue does not transmit") {
     resetMockState();
 
     auto peripheral = createMockPeripheral();
@@ -161,18 +161,18 @@ TEST_CASE("ChannelEngineLcdRgb - empty enqueue does not transmit") {
     engine.show();
 
     // Should still be ready
-    CHECK(engine.poll() == IChannelEngine::EngineState::READY);
+    FL_CHECK(engine.poll() == IChannelEngine::EngineState::READY);
 
     // Mock should not have been called
     auto& mock = LcdRgbPeripheralMock::instance();
-    CHECK(mock.getDrawCount() == 0);
+    FL_CHECK(mock.getDrawCount() == 0);
 }
 
 //=============================================================================
 // Test Suite: Multi-Channel Transmission
 //=============================================================================
 
-TEST_CASE("ChannelEngineLcdRgb - multi-channel transmission") {
+FL_TEST_CASE("ChannelEngineLcdRgb - multi-channel transmission") {
     resetMockState();
 
     auto peripheral = createMockPeripheral();
@@ -196,28 +196,28 @@ TEST_CASE("ChannelEngineLcdRgb - multi-channel transmission") {
 
     // Verify transmission occurred
     auto& mock = LcdRgbPeripheralMock::instance();
-    CHECK(mock.getDrawCount() >= 1);
+    FL_CHECK(mock.getDrawCount() >= 1);
 }
 
 //=============================================================================
 // Test Suite: State Machine
 //=============================================================================
 
-TEST_CASE("ChannelEngineLcdRgb - state transitions") {
+FL_TEST_CASE("ChannelEngineLcdRgb - state transitions") {
     resetMockState();
 
     auto peripheral = createMockPeripheral();
     ChannelEngineLcdRgb engine(peripheral);
 
     // Initial state
-    CHECK(engine.poll() == IChannelEngine::EngineState::READY);
+    FL_CHECK(engine.poll() == IChannelEngine::EngineState::READY);
 
     // Enqueue data
     auto channelData = createTestChannelData(1, 50);
     engine.enqueue(channelData);
 
     // Still ready (not transmitted yet)
-    CHECK(engine.poll() == IChannelEngine::EngineState::READY);
+    FL_CHECK(engine.poll() == IChannelEngine::EngineState::READY);
 
     // Start transmission
     engine.show();
@@ -230,15 +230,15 @@ TEST_CASE("ChannelEngineLcdRgb - state transitions") {
         iterations++;
     }
 
-    CHECK(iterations < maxIterations);  // Didn't timeout
-    CHECK(engine.poll() == IChannelEngine::EngineState::READY);  // Back to ready
+    FL_CHECK(iterations < maxIterations);  // Didn't timeout
+    FL_CHECK(engine.poll() == IChannelEngine::EngineState::READY);  // Back to ready
 }
 
 //=============================================================================
 // Test Suite: Error Handling
 //=============================================================================
 
-TEST_CASE("ChannelEngineLcdRgb - draw failure handling") {
+FL_TEST_CASE("ChannelEngineLcdRgb - draw failure handling") {
     resetMockState();
 
     auto peripheral = createMockPeripheral();
@@ -262,7 +262,7 @@ TEST_CASE("ChannelEngineLcdRgb - draw failure handling") {
         iterations++;
     }
 
-    CHECK(engine.poll() == IChannelEngine::EngineState::READY);
+    FL_CHECK(engine.poll() == IChannelEngine::EngineState::READY);
 }
 
 #endif // FASTLED_STUB_IMPL

@@ -3,7 +3,7 @@
 #include "fl/compiler_control.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/move.h"
 
@@ -32,7 +32,7 @@ private:
     bool* mDestructorCalled;
 };
 
-TEST_CASE("fl::weak_ptr default construction") {
+FL_TEST_CASE("fl::weak_ptr default construction") {
     fl::weak_ptr<TestClass> weak;
     FL_CHECK_EQ(weak.use_count(), 0);
     FL_CHECK(weak.expired());
@@ -42,7 +42,7 @@ TEST_CASE("fl::weak_ptr default construction") {
     FL_CHECK_EQ(shared.get(), nullptr);
 }
 
-TEST_CASE("fl::weak_ptr construction from shared_ptr") {
+FL_TEST_CASE("fl::weak_ptr construction from shared_ptr") {
     fl::shared_ptr<TestClass> shared = fl::make_shared<TestClass>(42);
     FL_CHECK_EQ(shared.use_count(), 1);
     
@@ -57,7 +57,7 @@ TEST_CASE("fl::weak_ptr construction from shared_ptr") {
     FL_CHECK_EQ(locked->getValue(), 42);
 }
 
-TEST_CASE("fl::weak_ptr copy construction") {
+FL_TEST_CASE("fl::weak_ptr copy construction") {
     fl::shared_ptr<TestClass> shared = fl::make_shared<TestClass>(42);
     fl::weak_ptr<TestClass> weak1(shared);
     fl::weak_ptr<TestClass> weak2(weak1);
@@ -73,7 +73,7 @@ TEST_CASE("fl::weak_ptr copy construction") {
     FL_CHECK_EQ(locked1->getValue(), 42);
 }
 
-TEST_CASE("fl::weak_ptr move construction") {
+FL_TEST_CASE("fl::weak_ptr move construction") {
     fl::shared_ptr<TestClass> shared = fl::make_shared<TestClass>(42);
     fl::weak_ptr<TestClass> weak1(shared);
     fl::weak_ptr<TestClass> weak2(fl::move(weak1));
@@ -88,7 +88,7 @@ TEST_CASE("fl::weak_ptr move construction") {
     FL_CHECK_EQ(locked->getValue(), 42);
 }
 
-TEST_CASE("fl::weak_ptr assignment from shared_ptr") {
+FL_TEST_CASE("fl::weak_ptr assignment from shared_ptr") {
     fl::shared_ptr<TestClass> shared1 = fl::make_shared<TestClass>(42);
     fl::shared_ptr<TestClass> shared2 = fl::make_shared<TestClass>(100);
     fl::weak_ptr<TestClass> weak(shared1);
@@ -99,7 +99,7 @@ TEST_CASE("fl::weak_ptr assignment from shared_ptr") {
     FL_CHECK_EQ(weak.lock()->getValue(), 100);
 }
 
-TEST_CASE("fl::weak_ptr assignment from weak_ptr") {
+FL_TEST_CASE("fl::weak_ptr assignment from weak_ptr") {
     fl::shared_ptr<TestClass> shared1 = fl::make_shared<TestClass>(42);
     fl::shared_ptr<TestClass> shared2 = fl::make_shared<TestClass>(100);
     fl::weak_ptr<TestClass> weak1(shared1);
@@ -113,7 +113,7 @@ TEST_CASE("fl::weak_ptr assignment from weak_ptr") {
     FL_CHECK_EQ(weak2.lock()->getValue(), 100);
 }
 
-TEST_CASE("fl::weak_ptr move assignment") {
+FL_TEST_CASE("fl::weak_ptr move assignment") {
     fl::shared_ptr<TestClass> shared1 = fl::make_shared<TestClass>(42);
     fl::shared_ptr<TestClass> shared2 = fl::make_shared<TestClass>(100);
     fl::weak_ptr<TestClass> weak1(shared1);
@@ -124,7 +124,7 @@ TEST_CASE("fl::weak_ptr move assignment") {
     FL_CHECK(weak2.expired());
 }
 
-TEST_CASE("fl::weak_ptr expiration when shared_ptr destroyed") {
+FL_TEST_CASE("fl::weak_ptr expiration when shared_ptr destroyed") {
     bool destructor_called = false;
     fl::weak_ptr<TestClass> weak;
     
@@ -150,7 +150,7 @@ TEST_CASE("fl::weak_ptr expiration when shared_ptr destroyed") {
     FL_CHECK_EQ(locked.get(), nullptr);
 }
 
-TEST_CASE("fl::weak_ptr with multiple shared_ptr references") {
+FL_TEST_CASE("fl::weak_ptr with multiple shared_ptr references") {
     fl::shared_ptr<TestClass> shared1 = fl::make_shared<TestClass>(42);
     fl::shared_ptr<TestClass> shared2 = shared1;
     fl::weak_ptr<TestClass> weak(shared1);
@@ -169,7 +169,7 @@ TEST_CASE("fl::weak_ptr with multiple shared_ptr references") {
     FL_CHECK_EQ(weak.use_count(), 0);
 }
 
-TEST_CASE("fl::weak_ptr reset functionality") {
+FL_TEST_CASE("fl::weak_ptr reset functionality") {
     fl::shared_ptr<TestClass> shared = fl::make_shared<TestClass>(42);
     fl::weak_ptr<TestClass> weak(shared);
     
@@ -184,7 +184,7 @@ TEST_CASE("fl::weak_ptr reset functionality") {
     FL_CHECK(!locked);
 }
 
-TEST_CASE("fl::weak_ptr swap functionality") {
+FL_TEST_CASE("fl::weak_ptr swap functionality") {
     fl::shared_ptr<TestClass> shared1 = fl::make_shared<TestClass>(42);
     fl::shared_ptr<TestClass> shared2 = fl::make_shared<TestClass>(100);
     fl::weak_ptr<TestClass> weak1(shared1);
@@ -198,7 +198,7 @@ TEST_CASE("fl::weak_ptr swap functionality") {
     FL_CHECK_EQ(weak2.lock()->getValue(), 42);
 }
 
-TEST_CASE("fl::weak_ptr owner_before functionality") {
+FL_TEST_CASE("fl::weak_ptr owner_before functionality") {
     fl::shared_ptr<TestClass> shared1 = fl::make_shared<TestClass>(42);
     fl::shared_ptr<TestClass> shared2 = fl::make_shared<TestClass>(100);
     fl::weak_ptr<TestClass> weak1(shared1);
@@ -217,7 +217,7 @@ TEST_CASE("fl::weak_ptr owner_before functionality") {
     FL_CHECK(order3 != order4);
 }
 
-TEST_CASE("fl::weak_ptr conversion to shared_ptr") {
+FL_TEST_CASE("fl::weak_ptr conversion to shared_ptr") {
     fl::shared_ptr<TestClass> shared = fl::make_shared<TestClass>(42);
     fl::weak_ptr<TestClass> weak(shared);
     
@@ -230,7 +230,7 @@ TEST_CASE("fl::weak_ptr conversion to shared_ptr") {
     FL_CHECK_EQ(converted.get(), shared.get());
 }
 
-TEST_CASE("fl::weak_ptr conversion from expired weak_ptr") {
+FL_TEST_CASE("fl::weak_ptr conversion from expired weak_ptr") {
     fl::weak_ptr<TestClass> weak;
     
     {
@@ -248,7 +248,7 @@ TEST_CASE("fl::weak_ptr conversion from expired weak_ptr") {
     FL_CHECK_EQ(converted.use_count(), 0);
 }
 
-TEST_CASE("fl::weak_ptr multiple weak references") {
+FL_TEST_CASE("fl::weak_ptr multiple weak references") {
     fl::shared_ptr<TestClass> shared = fl::make_shared<TestClass>(42);
     fl::weak_ptr<TestClass> weak1(shared);
     fl::weak_ptr<TestClass> weak2(shared);
@@ -269,7 +269,7 @@ TEST_CASE("fl::weak_ptr multiple weak references") {
     FL_CHECK_EQ(weak3.use_count(), 0);
 }
 
-TEST_CASE("fl::weak_ptr self-assignment safety") {
+FL_TEST_CASE("fl::weak_ptr self-assignment safety") {
     fl::shared_ptr<TestClass> shared = fl::make_shared<TestClass>(42);
     fl::weak_ptr<TestClass> weak(shared);
     
@@ -320,7 +320,7 @@ private:
     fl::weak_ptr<Node> mWeakNext;
 };
 
-TEST_CASE("fl::weak_ptr dead memory safety - basic scenario") {
+FL_TEST_CASE("fl::weak_ptr dead memory safety - basic scenario") {
     bool destructor_called = false;
     fl::weak_ptr<TestClass> weak;
     
@@ -352,7 +352,7 @@ TEST_CASE("fl::weak_ptr dead memory safety - basic scenario") {
     FL_CHECK_EQ(locked.get(), nullptr);
 }
 
-TEST_CASE("fl::weak_ptr dead memory safety - multiple weak_ptrs") {
+FL_TEST_CASE("fl::weak_ptr dead memory safety - multiple weak_ptrs") {
     bool destructor_called = false;
     fl::weak_ptr<TestClass> weak1, weak2, weak3;
     
@@ -381,7 +381,7 @@ TEST_CASE("fl::weak_ptr dead memory safety - multiple weak_ptrs") {
     FL_CHECK(!weak3.lock());
 }
 
-TEST_CASE("fl::weak_ptr dead memory safety - repeated lock attempts") {
+FL_TEST_CASE("fl::weak_ptr dead memory safety - repeated lock attempts") {
     bool destructor_called = false;
     fl::weak_ptr<TestClass> weak;
     
@@ -401,7 +401,7 @@ TEST_CASE("fl::weak_ptr dead memory safety - repeated lock attempts") {
     }
 }
 
-TEST_CASE("fl::weak_ptr circular reference - basic linked list") {
+FL_TEST_CASE("fl::weak_ptr circular reference - basic linked list") {
     bool nodeA_destroyed = false;
     bool nodeB_destroyed = false;
     
@@ -430,7 +430,7 @@ TEST_CASE("fl::weak_ptr circular reference - basic linked list") {
     FL_CHECK(nodeB_destroyed);
 }
 
-TEST_CASE("fl::weak_ptr circular reference - broken with weak_ptr") {
+FL_TEST_CASE("fl::weak_ptr circular reference - broken with weak_ptr") {
     bool nodeA_destroyed = false;
     bool nodeB_destroyed = false;
     
@@ -455,7 +455,7 @@ TEST_CASE("fl::weak_ptr circular reference - broken with weak_ptr") {
     FL_CHECK(nodeB_destroyed);
 }
 
-TEST_CASE("fl::weak_ptr self-assignment safety - a = b scenario") {
+FL_TEST_CASE("fl::weak_ptr self-assignment safety - a = b scenario") {
     bool nodeA_destroyed = false;
     bool nodeB_destroyed = false;
     
@@ -518,7 +518,7 @@ TEST_CASE("fl::weak_ptr self-assignment safety - a = b scenario") {
     FL_CHECK(nodeB_destroyed); // Now nodeB should be destroyed
 }
 
-TEST_CASE("fl::weak_ptr complex circular scenario with weak references") {
+FL_TEST_CASE("fl::weak_ptr complex circular scenario with weak references") {
     bool nodeA_destroyed = false;
     bool nodeB_destroyed = false;
     bool nodeC_destroyed = false;
@@ -559,7 +559,7 @@ TEST_CASE("fl::weak_ptr complex circular scenario with weak references") {
     FL_CHECK(weakC.expired());
 }
 
-TEST_CASE("fl::weak_ptr stress test - rapid creation and destruction") {
+FL_TEST_CASE("fl::weak_ptr stress test - rapid creation and destruction") {
     fl::vector<fl::weak_ptr<TestClass>> weak_ptrs;
     weak_ptrs.reserve(100);
     

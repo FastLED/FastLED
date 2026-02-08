@@ -3,13 +3,13 @@
 
 
 #include "fl/downscale.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/rgb8.h"
 #include "fl/xymap.h"
 #include "hsv2rgb.h"
 
 
-TEST_CASE("downscale 2x2 to 1x1") {
+FL_TEST_CASE("downscale 2x2 to 1x1") {
 
     CRGB red = CRGB(255, 0, 0);
     CRGB black = CRGB(0, 0, 0);
@@ -18,31 +18,31 @@ TEST_CASE("downscale 2x2 to 1x1") {
     // image is square-cartesian while the dst image is square-serpentine.
     CRGB src[4] = {black, red, black, red};
 
-    SUBCASE("downscaleHalf from 2x2 to 1x1") {
+    FL_SUBCASE("downscaleHalf from 2x2 to 1x1") {
         CRGB dst[1];
         downscaleHalf(src, 2, 2, dst);
-        INFO("Src: " << src);
-        INFO("Dst: " << dst);
+        FL_DINFO("Src: " << src);
+        FL_DINFO("Dst: " << dst);
         FL_CHECK(dst[0].r == 128);
         FL_CHECK(dst[0].g == 0);
         FL_CHECK(dst[0].b == 0);
     }
 
-    SUBCASE("downscale from 2x2 to 1x1") {
+    FL_SUBCASE("downscale from 2x2 to 1x1") {
         CRGB dst[1];
         fl::XYMap srcMap = fl::XYMap::constructRectangularGrid(2, 2);
         fl::XYMap dstMap = fl::XYMap::constructRectangularGrid(1, 1);
 
         downscale(src, srcMap, dst, dstMap);
-        INFO("Src: " << src);
-        INFO("Dst: " << dst);
+        FL_DINFO("Src: " << src);
+        FL_DINFO("Dst: " << dst);
         FL_CHECK(dst[0].r == 128);
         FL_CHECK(dst[0].g == 0);
         FL_CHECK(dst[0].b == 0);
     }
 
 
-    SUBCASE("4x4 rectangle to 2x2 serpentine") {
+    FL_SUBCASE("4x4 rectangle to 2x2 serpentine") {
         // We are going to simulate a 4x4 image with a 2x2 image. The source
         // image is square-cartesian while the dst image is square-serpentine.
 
@@ -57,8 +57,8 @@ TEST_CASE("downscale 2x2 to 1x1") {
         fl::XYMap dstMap = fl::XYMap::constructSerpentine(2, 2);
 
         downscale(src, srcMap, dst, dstMap);
-        INFO("Src: " << src);
-        INFO("Dst: " << dst);
+        FL_DINFO("Src: " << src);
+        FL_DINFO("Dst: " << dst);
 
         CRGB lowerLeft = dst[dstMap.mapToIndex(0, 0)];
         CRGB lowerRight = dst[dstMap.mapToIndex(1, 0)];
@@ -73,7 +73,7 @@ TEST_CASE("downscale 2x2 to 1x1") {
 
 }
 
-TEST_CASE("downscale 3x3 to 2x2") {
+FL_TEST_CASE("downscale 3x3 to 2x2") {
     CRGB red = CRGB(255, 0, 0);
     CRGB black = CRGB(0, 0, 0);
 
@@ -97,13 +97,13 @@ TEST_CASE("downscale 3x3 to 2x2") {
     downscale(src, srcMap, dst, dstMap);
 
     for (int i = 0; i < 4; ++i) {
-        INFO("Dst[" << i << "]: " << dst[i]);
+        FL_DINFO("Dst[" << i << "]: " << dst[i]);
         FL_CHECK(dst[i] == CRGB(142, 0, 0));  // Averaged color
     }
 }
 
 
-TEST_CASE("downscale 11x11 to 2x2") {
+FL_TEST_CASE("downscale 11x11 to 2x2") {
     CRGB red = CRGB(255, 0, 0);
     CRGB black = CRGB(0, 0, 0);
 
@@ -121,7 +121,7 @@ TEST_CASE("downscale 11x11 to 2x2") {
     downscale(src, srcMap, dst, dstMap);
 
     for (int i = 0; i < 4; ++i) {
-        INFO("Dst[" << i << "]: " << dst[i]);
+        FL_DINFO("Dst[" << i << "]: " << dst[i]);
         FL_CHECK(dst[i] == CRGB(129, 0, 0));  // Averaged color
     }
 }

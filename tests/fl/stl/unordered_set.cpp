@@ -5,12 +5,12 @@
 #include "fl/stl/unordered_map.h"
 #include "fl/stl/new.h"
 #include "fl/stl/map.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/string.h"
 
 
-TEST_CASE("Empty set properties") {
+FL_TEST_CASE("Empty set properties") {
     fl::unordered_set<int> s;
     FL_REQUIRE_EQ(s.size(), 0u);
     FL_REQUIRE(s.empty());
@@ -19,7 +19,7 @@ TEST_CASE("Empty set properties") {
     FL_REQUIRE(s.begin() == s.end());
 }
 
-TEST_CASE("Single insert and lookup") {
+FL_TEST_CASE("Single insert and lookup") {
     fl::unordered_set<int> s;
     s.insert(10);
     FL_REQUIRE_EQ(s.size(), 1u);
@@ -33,7 +33,7 @@ TEST_CASE("Single insert and lookup") {
     FL_REQUIRE(s.find(20) == s.end());
 }
 
-TEST_CASE("Insert duplicate key does not increase size") {
+FL_TEST_CASE("Insert duplicate key does not increase size") {
     fl::unordered_set<int> s;
     s.insert(5);
     FL_REQUIRE_EQ(s.size(), 1u);
@@ -44,7 +44,7 @@ TEST_CASE("Insert duplicate key does not increase size") {
     FL_REQUIRE(s.find(5) != s.end());
 }
 
-TEST_CASE("Multiple distinct inserts and lookups") {
+FL_TEST_CASE("Multiple distinct inserts and lookups") {
     fl::unordered_set<char> s;
     
     // Insert multiple elements
@@ -63,7 +63,7 @@ TEST_CASE("Multiple distinct inserts and lookups") {
     FL_REQUIRE(s.find('z') == s.end());
 }
 
-TEST_CASE("Erase behavior") {
+FL_TEST_CASE("Erase behavior") {
     fl::unordered_set<int> s;
     s.insert(5);
     s.insert(10);
@@ -88,7 +88,7 @@ TEST_CASE("Erase behavior") {
     FL_REQUIRE(s.empty());
 }
 
-TEST_CASE("Re-insert after erase") {
+FL_TEST_CASE("Re-insert after erase") {
     fl::unordered_set<int> s;  // Small initial capacity
     s.insert(1);
     s.erase(1);
@@ -101,7 +101,7 @@ TEST_CASE("Re-insert after erase") {
     FL_REQUIRE_EQ(s.size(), 1u);
 }
 
-TEST_CASE("Clear resets set") {
+FL_TEST_CASE("Clear resets set") {
     fl::unordered_set<int> s;
     for (int i = 0; i < 5; ++i) {
         s.insert(i);
@@ -123,7 +123,7 @@ TEST_CASE("Clear resets set") {
     FL_REQUIRE(s.find(100) != s.end());
 }
 
-TEST_CASE("Stress test with many elements and rehashing") {
+FL_TEST_CASE("Stress test with many elements and rehashing") {
     fl::unordered_set<int> s;  // Start with minimal capacity to force rehashing
     const int N = 100;
     
@@ -141,7 +141,7 @@ TEST_CASE("Stress test with many elements and rehashing") {
     }
 }
 
-TEST_CASE("Iterator functionality") {
+FL_TEST_CASE("Iterator functionality") {
     fl::unordered_set<int> s;
     fl::size expected_size = 0;
     
@@ -171,7 +171,7 @@ TEST_CASE("Iterator functionality") {
     }
 }
 
-TEST_CASE("Const iterator functionality") {
+FL_TEST_CASE("Const iterator functionality") {
     fl::unordered_set<int> s;
     for (int i = 1; i <= 5; ++i) {
         s.insert(i);
@@ -190,7 +190,7 @@ TEST_CASE("Const iterator functionality") {
     FL_REQUIRE_EQ(found_keys.size(), 5u);
 }
 
-TEST_CASE("Range-based for loop") {
+FL_TEST_CASE("Range-based for loop") {
     fl::unordered_set<int> s;
     for (int i = 10; i < 15; ++i) {
         s.insert(i);
@@ -213,7 +213,7 @@ TEST_CASE("Range-based for loop") {
     }
 }
 
-TEST_CASE("String elements") {
+FL_TEST_CASE("String elements") {
     fl::unordered_set<fl::string> s;
     
     s.insert("hello");
@@ -234,7 +234,7 @@ TEST_CASE("String elements") {
     FL_REQUIRE(s.find("test") != s.end());
 }
 
-TEST_CASE("Capacity management") {
+FL_TEST_CASE("Capacity management") {
     fl::unordered_set<int> s;
 
     // Initial state
@@ -253,7 +253,7 @@ TEST_CASE("Capacity management") {
 }
 
 #if 0  // Disabled: new unordered_set does not support custom hash/equal
-TEST_CASE("Custom hash and equality") {
+FL_TEST_CASE("Custom hash and equality") {
     // Test with custom hash and equality functions for case-insensitive strings
     struct CaseInsensitiveHash {
         fl::size operator()(const fl::string& str) const {
@@ -301,7 +301,7 @@ TEST_CASE("Custom hash and equality") {
 }
 #endif
 
-TEST_CASE("Equivalence with std::unordered_set for basic operations") {  // okay std namespace - testing compatibility
+FL_TEST_CASE("Equivalence with std::unordered_set for basic operations") {  // okay std namespace - testing compatibility
     fl::unordered_set<int> custom_set;
     std::unordered_set<int> std_set;  // okay std namespace - testing compatibility
     
@@ -338,7 +338,7 @@ TEST_CASE("Equivalence with std::unordered_set for basic operations") {  // okay
     FL_REQUIRE_EQ(custom_set.size(), 0u);
 }
 
-TEST_CASE("Edge cases") {
+FL_TEST_CASE("Edge cases") {
     fl::unordered_set<int> s;
     
     // Test with negative numbers
@@ -372,7 +372,7 @@ TEST_CASE("Edge cases") {
     FL_REQUIRE(multi.find(1) != multi.end());
 }
 
-TEST_CASE("Large scale operations with deletion patterns") {
+FL_TEST_CASE("Large scale operations with deletion patterns") {
     fl::unordered_set<int> s;  // Start small to test rehashing behavior
     
     // Insert and selectively delete to trigger rehashing behaviors
@@ -408,7 +408,7 @@ TEST_CASE("Large scale operations with deletion patterns") {
     }
 }
 
-TEST_CASE("Type aliases and compatibility") {
+FL_TEST_CASE("Type aliases and compatibility") {
     // Test that hash_set alias works
     fl::unordered_set<int> hs;
     hs.insert(123);

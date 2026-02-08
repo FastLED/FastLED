@@ -11,7 +11,7 @@
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/slice.h"
 #include "fl/stl/move.h"
@@ -73,7 +73,7 @@ void ucs7604PaddingGenerator(fl::span<const uint8_t> src, fl::span<uint8_t> dst)
 
 } // anonymous namespace
 
-TEST_CASE("writeWithPadding - no padding generator, exact size") {
+FL_TEST_CASE("writeWithPadding - no padding generator, exact size") {
     auto timing = ChipsetTimingConfig(800, 450, 450, 50, "WS2812");
     auto channelData = ChannelData::create(5, timing);
 
@@ -92,7 +92,7 @@ TEST_CASE("writeWithPadding - no padding generator, exact size") {
     FL_REQUIRE(dst[2] == 0xCC);
 }
 
-TEST_CASE("writeWithPadding - no padding generator, left-pad with zeros") {
+FL_TEST_CASE("writeWithPadding - no padding generator, left-pad with zeros") {
     auto timing = ChipsetTimingConfig(800, 450, 450, 50, "WS2812");
     auto channelData = ChannelData::create(5, timing);
 
@@ -112,7 +112,7 @@ TEST_CASE("writeWithPadding - no padding generator, left-pad with zeros") {
     FL_REQUIRE(dst[4] == 0xBB);
 }
 
-TEST_CASE("writeWithPadding - with padding generator") {
+FL_TEST_CASE("writeWithPadding - with padding generator") {
     auto timing = ChipsetTimingConfig(800, 450, 450, 50, "WS2812");
     auto channelData = ChannelData::create(5, timing);
 
@@ -138,7 +138,7 @@ TEST_CASE("writeWithPadding - with padding generator") {
     FL_REQUIRE(dst[4] == 0xFF);
 }
 
-TEST_CASE("writeWithPadding - UCS7604 complex padding") {
+FL_TEST_CASE("writeWithPadding - UCS7604 complex padding") {
     auto timing = ChipsetTimingConfig(800, 450, 450, 50, "UCS7604");
     auto channelData = ChannelData::create(5, timing);
     channelData->setPaddingGenerator(ucs7604PaddingGenerator);

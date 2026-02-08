@@ -2,11 +2,11 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/utility.h"
 
-TEST_CASE("priority_queue_stable: basic operations") {
+FL_TEST_CASE("priority_queue_stable: basic operations") {
     fl::priority_queue_stable<int> queue;
 
     FL_REQUIRE(queue.empty());
@@ -21,7 +21,7 @@ TEST_CASE("priority_queue_stable: basic operations") {
     FL_REQUIRE(queue.empty());
 }
 
-TEST_CASE("priority_queue_stable: ordering") {
+FL_TEST_CASE("priority_queue_stable: ordering") {
     fl::priority_queue_stable<int> queue;
 
     // Push in random order
@@ -42,7 +42,7 @@ TEST_CASE("priority_queue_stable: ordering") {
     FL_REQUIRE(queue.empty());
 }
 
-TEST_CASE("priority_queue_stable: FIFO for equal priorities") {
+FL_TEST_CASE("priority_queue_stable: FIFO for equal priorities") {
     fl::priority_queue_stable<int> queue;
 
     // Push elements with same priority - should maintain FIFO order
@@ -71,7 +71,7 @@ struct ScheduledCall {
     }
 };
 
-TEST_CASE("priority_queue_stable: scheduled calls with different times") {
+FL_TEST_CASE("priority_queue_stable: scheduled calls with different times") {
     fl::priority_queue_stable<ScheduledCall> queue;  // Uses default fl::greater for min-heap
 
     // Schedule calls at different times
@@ -95,7 +95,7 @@ TEST_CASE("priority_queue_stable: scheduled calls with different times") {
     FL_REQUIRE(queue.empty());
 }
 
-TEST_CASE("priority_queue_stable: scheduled calls with same time (FIFO)") {
+FL_TEST_CASE("priority_queue_stable: scheduled calls with same time (FIFO)") {
     fl::priority_queue_stable<ScheduledCall> queue;  // Uses default fl::greater for min-heap
 
     // Schedule multiple calls at the same timestamp - should execute in FIFO order
@@ -117,7 +117,7 @@ TEST_CASE("priority_queue_stable: scheduled calls with same time (FIFO)") {
     FL_REQUIRE(queue.empty());
 }
 
-TEST_CASE("priority_queue_stable: mixed times") {
+FL_TEST_CASE("priority_queue_stable: mixed times") {
     fl::priority_queue_stable<ScheduledCall> queue;  // Uses default fl::greater for min-heap
 
     // Mix of same and different times
@@ -142,7 +142,7 @@ TEST_CASE("priority_queue_stable: mixed times") {
     FL_REQUIRE_EQ(executionOrder[4], 4);
 }
 
-TEST_CASE("priority_queue_stable: clear") {
+FL_TEST_CASE("priority_queue_stable: clear") {
     fl::priority_queue_stable<int> queue;
 
     queue.push(1);

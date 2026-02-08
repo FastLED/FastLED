@@ -1,28 +1,28 @@
 #include "fl/stl/strstream.h"
 #include "fl/stl/cstdint.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/int.h"
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
 
-TEST_CASE("sstream handles all integer types generically") {
+FL_TEST_CASE("sstream handles all integer types generically") {
     fl::sstream ss;
 
-    SUBCASE("signed char types") {
+    FL_SUBCASE("signed char types") {
         signed char sc = -42;
         ss << sc;
         FL_CHECK(ss.str() == "-42");
     }
 
-    SUBCASE("unsigned char types") {
+    FL_SUBCASE("unsigned char types") {
         unsigned char uc = 200;
         ss.clear();
         ss << uc;
         FL_CHECK(ss.str() == "200");
     }
 
-    SUBCASE("short types") {
+    FL_SUBCASE("short types") {
         short s = -12345;
         ss.clear();
         ss << s;
@@ -34,7 +34,7 @@ TEST_CASE("sstream handles all integer types generically") {
         FL_CHECK(ss.str() == "54321");
     }
 
-    SUBCASE("int types") {
+    FL_SUBCASE("int types") {
         int i = -123456;
         ss.clear();
         ss << i;
@@ -46,7 +46,7 @@ TEST_CASE("sstream handles all integer types generically") {
         FL_CHECK(ss.str() == "654321");
     }
 
-    SUBCASE("long types") {
+    FL_SUBCASE("long types") {
         long l = -1234567;
         ss.clear();
         ss << l;
@@ -58,7 +58,7 @@ TEST_CASE("sstream handles all integer types generically") {
         FL_CHECK(ss.str() == "7654321");
     }
 
-    SUBCASE("long long types") {
+    FL_SUBCASE("long long types") {
         long long ll = -123456789012345LL;
         ss.clear();
         ss << ll;
@@ -70,7 +70,7 @@ TEST_CASE("sstream handles all integer types generically") {
         FL_CHECK(ss.str() == "987654321098765");
     }
 
-    SUBCASE("fixed-width integer types") {
+    FL_SUBCASE("fixed-width integer types") {
         int8_t i8 = -127;
         ss.clear();
         ss << i8;
@@ -112,7 +112,7 @@ TEST_CASE("sstream handles all integer types generically") {
         FL_CHECK(ss.str() == "18000000000000000");
     }
 
-    SUBCASE("fl:: integer types") {
+    FL_SUBCASE("fl:: integer types") {
         fl::i8 fi8 = -100;
         ss.clear();
         ss << fi8;
@@ -144,17 +144,17 @@ TEST_CASE("sstream handles all integer types generically") {
         FL_CHECK(ss.str() == "10000000000000");
     }
 
-    SUBCASE("mixed integer types in single stream") {
+    FL_SUBCASE("mixed integer types in single stream") {
         ss.clear();
         ss << int16_t(-100) << " " << uint32_t(123456) << " " << int64_t(-999999999);
         FL_CHECK(ss.str() == "-100 123456 -999999999");
     }
 }
 
-TEST_CASE("StrN write handles all integer types generically") {
+FL_TEST_CASE("StrN write handles all integer types generically") {
     fl::StrN<64> sn;
 
-    SUBCASE("various integer types") {
+    FL_SUBCASE("various integer types") {
         int16_t i16 = -1000;
         sn.write(i16);
         FL_CHECK(fl::string(sn.c_str()) == "-1000");
@@ -171,10 +171,10 @@ TEST_CASE("StrN write handles all integer types generically") {
     }
 }
 
-TEST_CASE("string append handles all integer types generically") {
+FL_TEST_CASE("string append handles all integer types generically") {
     fl::string s;
 
-    SUBCASE("various integer types") {
+    FL_SUBCASE("various integer types") {
         s.append(int16_t(-5000));
         FL_CHECK(s == "-5000");
 
@@ -195,7 +195,7 @@ TEST_CASE("string append handles all integer types generically") {
         FL_CHECK(s == "987654");
     }
 
-    SUBCASE("mixed integer types") {
+    FL_SUBCASE("mixed integer types") {
         s.clear();
         s.append((short)-100);
         s.append(" ");
@@ -206,29 +206,29 @@ TEST_CASE("string append handles all integer types generically") {
     }
 }
 
-TEST_CASE("char types are handled correctly") {
+FL_TEST_CASE("char types are handled correctly") {
     fl::sstream ss;
 
-    SUBCASE("char is treated as character by default") {
+    FL_SUBCASE("char is treated as character by default") {
         char c = 'A';
         ss << c;
         FL_CHECK(ss.str() == "A");
     }
 
-    SUBCASE("char can be treated as integer with flag") {
+    FL_SUBCASE("char can be treated as integer with flag") {
         ss.setTreatCharAsInt(true);
         char c = 65;  // ASCII 'A'
         ss << c;
         FL_CHECK(ss.str() == "65");
     }
 
-    SUBCASE("signed char is treated as number") {
+    FL_SUBCASE("signed char is treated as number") {
         signed char sc = 65;
         ss << sc;
         FL_CHECK(ss.str() == "65");
     }
 
-    SUBCASE("unsigned char is treated as number") {
+    FL_SUBCASE("unsigned char is treated as number") {
         unsigned char uc = 65;
         ss << uc;
         FL_CHECK(ss.str() == "65");

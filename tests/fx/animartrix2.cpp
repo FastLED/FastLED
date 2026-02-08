@@ -2,7 +2,7 @@
 #include "fl/fx/2d/animartrix.hpp"
 #include "fl/fx/2d/animartrix2.hpp"
 #include "crgb.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/xymap.h"
 
 #include <chrono> // ok include - for std::chrono::high_resolution_clock timing benchmarks
@@ -25,7 +25,7 @@ int compareLeds(const CRGB *leds1, const CRGB *leds2, uint16_t count,
     for (uint16_t i = 0; i < count; i++) {
         if (leds1[i] != leds2[i]) {
             if (mismatch_count < 5) {
-                MESSAGE("  [", animName, "] Mismatch at index ", i, ": (",
+                FL_MESSAGE("  [", animName, "] Mismatch at index ", i, ": (",
                         int(leds1[i].r), ",", int(leds1[i].g), ",",
                         int(leds1[i].b), ") vs (", int(leds2[i].r), ",",
                         int(leds2[i].g), ",", int(leds2[i].b), ")");
@@ -53,118 +53,118 @@ void testAnimation(int animIndex, const char *name) {
     fx2.draw(ctx2);
 
     int mismatches = compareLeds(leds1, leds2, N, name);
-    MESSAGE("Animation '", name, "': ", mismatches, " mismatched pixels / ", N);
-    CHECK_MESSAGE(mismatches == 0,
+    FL_MESSAGE("Animation '", name, "': ", mismatches, " mismatched pixels / ", N);
+    FL_CHECK_MESSAGE(mismatches == 0,
                   "Animation '", name, "' produced different output between "
                   "Animartrix and Animartrix2");
 }
 
 } // namespace
 
-TEST_CASE("Animartrix2 - RGB_BLOBS5") { testAnimation(0, "RGB_BLOBS5"); }
-TEST_CASE("Animartrix2 - RGB_BLOBS4") { testAnimation(1, "RGB_BLOBS4"); }
-TEST_CASE("Animartrix2 - RGB_BLOBS3") { testAnimation(2, "RGB_BLOBS3"); }
-TEST_CASE("Animartrix2 - RGB_BLOBS2") { testAnimation(3, "RGB_BLOBS2"); }
-TEST_CASE("Animartrix2 - RGB_BLOBS") { testAnimation(4, "RGB_BLOBS"); }
-TEST_CASE("Animartrix2 - POLAR_WAVES") { testAnimation(5, "POLAR_WAVES"); }
-TEST_CASE("Animartrix2 - SLOW_FADE") { testAnimation(6, "SLOW_FADE"); }
-TEST_CASE("Animartrix2 - ZOOM2") { testAnimation(7, "ZOOM2"); }
-TEST_CASE("Animartrix2 - ZOOM") { testAnimation(8, "ZOOM"); }
-TEST_CASE("Animartrix2 - HOT_BLOB") { testAnimation(9, "HOT_BLOB"); }
-TEST_CASE("Animartrix2 - SPIRALUS2") { testAnimation(10, "SPIRALUS2"); }
-TEST_CASE("Animartrix2 - SPIRALUS") { testAnimation(11, "SPIRALUS"); }
-TEST_CASE("Animartrix2 - YVES") { testAnimation(12, "YVES"); }
-TEST_CASE("Animartrix2 - SCALEDEMO1") { testAnimation(13, "SCALEDEMO1"); }
-TEST_CASE("Animartrix2 - LAVA1") { testAnimation(14, "LAVA1"); }
-TEST_CASE("Animartrix2 - CALEIDO3") { testAnimation(15, "CALEIDO3"); }
-TEST_CASE("Animartrix2 - CALEIDO2") { testAnimation(16, "CALEIDO2"); }
-TEST_CASE("Animartrix2 - CALEIDO1") { testAnimation(17, "CALEIDO1"); }
-TEST_CASE("Animartrix2 - DISTANCE_EXPERIMENT") { testAnimation(18, "DISTANCE_EXPERIMENT"); }
-TEST_CASE("Animartrix2 - CENTER_FIELD") { testAnimation(19, "CENTER_FIELD"); }
-TEST_CASE("Animartrix2 - WAVES") { testAnimation(20, "WAVES"); }
-TEST_CASE("Animartrix2 - CHASING_SPIRALS") { testAnimation(21, "CHASING_SPIRALS"); }
-TEST_CASE("Animartrix2 - ROTATING_BLOB") { testAnimation(22, "ROTATING_BLOB"); }
-TEST_CASE("Animartrix2 - RINGS") { testAnimation(23, "RINGS"); }
-TEST_CASE("Animartrix2 - COMPLEX_KALEIDO") { testAnimation(24, "COMPLEX_KALEIDO"); }
-TEST_CASE("Animartrix2 - COMPLEX_KALEIDO_2") { testAnimation(25, "COMPLEX_KALEIDO_2"); }
-TEST_CASE("Animartrix2 - COMPLEX_KALEIDO_3") { testAnimation(26, "COMPLEX_KALEIDO_3"); }
-TEST_CASE("Animartrix2 - COMPLEX_KALEIDO_4") { testAnimation(27, "COMPLEX_KALEIDO_4"); }
-TEST_CASE("Animartrix2 - COMPLEX_KALEIDO_5") { testAnimation(28, "COMPLEX_KALEIDO_5"); }
-TEST_CASE("Animartrix2 - COMPLEX_KALEIDO_6") { testAnimation(29, "COMPLEX_KALEIDO_6"); }
-TEST_CASE("Animartrix2 - WATER") { testAnimation(30, "WATER"); }
-TEST_CASE("Animartrix2 - PARAMETRIC_WATER") { testAnimation(31, "PARAMETRIC_WATER"); }
-TEST_CASE("Animartrix2 - MODULE_EXPERIMENT1") { testAnimation(32, "MODULE_EXPERIMENT1"); }
-TEST_CASE("Animartrix2 - MODULE_EXPERIMENT2") { testAnimation(33, "MODULE_EXPERIMENT2"); }
-TEST_CASE("Animartrix2 - MODULE_EXPERIMENT3") { testAnimation(34, "MODULE_EXPERIMENT3"); }
-TEST_CASE("Animartrix2 - MODULE_EXPERIMENT4") { testAnimation(35, "MODULE_EXPERIMENT4"); }
-TEST_CASE("Animartrix2 - MODULE_EXPERIMENT5") { testAnimation(36, "MODULE_EXPERIMENT5"); }
-TEST_CASE("Animartrix2 - MODULE_EXPERIMENT6") { testAnimation(37, "MODULE_EXPERIMENT6"); }
-TEST_CASE("Animartrix2 - MODULE_EXPERIMENT7") { testAnimation(38, "MODULE_EXPERIMENT7"); }
-TEST_CASE("Animartrix2 - MODULE_EXPERIMENT8") { testAnimation(39, "MODULE_EXPERIMENT8"); }
-TEST_CASE("Animartrix2 - MODULE_EXPERIMENT9") { testAnimation(40, "MODULE_EXPERIMENT9"); }
-TEST_CASE("Animartrix2 - MODULE_EXPERIMENT10") { testAnimation(41, "MODULE_EXPERIMENT10"); }
-TEST_CASE("Animartrix2 - MODULE_EXPERIMENT_SM1") { testAnimation(42, "MODULE_EXPERIMENT_SM1"); }
-TEST_CASE("Animartrix2 - MODULE_EXPERIMENT_SM2") { testAnimation(43, "MODULE_EXPERIMENT_SM2"); }
-TEST_CASE("Animartrix2 - MODULE_EXPERIMENT_SM3") { testAnimation(44, "MODULE_EXPERIMENT_SM3"); }
-TEST_CASE("Animartrix2 - MODULE_EXPERIMENT_SM4") { testAnimation(45, "MODULE_EXPERIMENT_SM4"); }
-TEST_CASE("Animartrix2 - MODULE_EXPERIMENT_SM5") { testAnimation(46, "MODULE_EXPERIMENT_SM5"); }
-TEST_CASE("Animartrix2 - MODULE_EXPERIMENT_SM6") { testAnimation(47, "MODULE_EXPERIMENT_SM6"); }
-TEST_CASE("Animartrix2 - MODULE_EXPERIMENT_SM8") { testAnimation(48, "MODULE_EXPERIMENT_SM8"); }
-TEST_CASE("Animartrix2 - MODULE_EXPERIMENT_SM9") { testAnimation(49, "MODULE_EXPERIMENT_SM9"); }
-TEST_CASE("Animartrix2 - MODULE_EXPERIMENT_SM10") { testAnimation(50, "MODULE_EXPERIMENT_SM10"); }
-TEST_CASE("Animartrix2 - FLUFFY_BLOBS") { testAnimation(51, "FLUFFY_BLOBS"); }
+FL_TEST_CASE("Animartrix2 - RGB_BLOBS5") { testAnimation(0, "RGB_BLOBS5"); }
+FL_TEST_CASE("Animartrix2 - RGB_BLOBS4") { testAnimation(1, "RGB_BLOBS4"); }
+FL_TEST_CASE("Animartrix2 - RGB_BLOBS3") { testAnimation(2, "RGB_BLOBS3"); }
+FL_TEST_CASE("Animartrix2 - RGB_BLOBS2") { testAnimation(3, "RGB_BLOBS2"); }
+FL_TEST_CASE("Animartrix2 - RGB_BLOBS") { testAnimation(4, "RGB_BLOBS"); }
+FL_TEST_CASE("Animartrix2 - POLAR_WAVES") { testAnimation(5, "POLAR_WAVES"); }
+FL_TEST_CASE("Animartrix2 - SLOW_FADE") { testAnimation(6, "SLOW_FADE"); }
+FL_TEST_CASE("Animartrix2 - ZOOM2") { testAnimation(7, "ZOOM2"); }
+FL_TEST_CASE("Animartrix2 - ZOOM") { testAnimation(8, "ZOOM"); }
+FL_TEST_CASE("Animartrix2 - HOT_BLOB") { testAnimation(9, "HOT_BLOB"); }
+FL_TEST_CASE("Animartrix2 - SPIRALUS2") { testAnimation(10, "SPIRALUS2"); }
+FL_TEST_CASE("Animartrix2 - SPIRALUS") { testAnimation(11, "SPIRALUS"); }
+FL_TEST_CASE("Animartrix2 - YVES") { testAnimation(12, "YVES"); }
+FL_TEST_CASE("Animartrix2 - SCALEDEMO1") { testAnimation(13, "SCALEDEMO1"); }
+FL_TEST_CASE("Animartrix2 - LAVA1") { testAnimation(14, "LAVA1"); }
+FL_TEST_CASE("Animartrix2 - CALEIDO3") { testAnimation(15, "CALEIDO3"); }
+FL_TEST_CASE("Animartrix2 - CALEIDO2") { testAnimation(16, "CALEIDO2"); }
+FL_TEST_CASE("Animartrix2 - CALEIDO1") { testAnimation(17, "CALEIDO1"); }
+FL_TEST_CASE("Animartrix2 - DISTANCE_EXPERIMENT") { testAnimation(18, "DISTANCE_EXPERIMENT"); }
+FL_TEST_CASE("Animartrix2 - CENTER_FIELD") { testAnimation(19, "CENTER_FIELD"); }
+FL_TEST_CASE("Animartrix2 - WAVES") { testAnimation(20, "WAVES"); }
+FL_TEST_CASE("Animartrix2 - CHASING_SPIRALS") { testAnimation(21, "CHASING_SPIRALS"); }
+FL_TEST_CASE("Animartrix2 - ROTATING_BLOB") { testAnimation(22, "ROTATING_BLOB"); }
+FL_TEST_CASE("Animartrix2 - RINGS") { testAnimation(23, "RINGS"); }
+FL_TEST_CASE("Animartrix2 - COMPLEX_KALEIDO") { testAnimation(24, "COMPLEX_KALEIDO"); }
+FL_TEST_CASE("Animartrix2 - COMPLEX_KALEIDO_2") { testAnimation(25, "COMPLEX_KALEIDO_2"); }
+FL_TEST_CASE("Animartrix2 - COMPLEX_KALEIDO_3") { testAnimation(26, "COMPLEX_KALEIDO_3"); }
+FL_TEST_CASE("Animartrix2 - COMPLEX_KALEIDO_4") { testAnimation(27, "COMPLEX_KALEIDO_4"); }
+FL_TEST_CASE("Animartrix2 - COMPLEX_KALEIDO_5") { testAnimation(28, "COMPLEX_KALEIDO_5"); }
+FL_TEST_CASE("Animartrix2 - COMPLEX_KALEIDO_6") { testAnimation(29, "COMPLEX_KALEIDO_6"); }
+FL_TEST_CASE("Animartrix2 - WATER") { testAnimation(30, "WATER"); }
+FL_TEST_CASE("Animartrix2 - PARAMETRIC_WATER") { testAnimation(31, "PARAMETRIC_WATER"); }
+FL_TEST_CASE("Animartrix2 - MODULE_EXPERIMENT1") { testAnimation(32, "MODULE_EXPERIMENT1"); }
+FL_TEST_CASE("Animartrix2 - MODULE_EXPERIMENT2") { testAnimation(33, "MODULE_EXPERIMENT2"); }
+FL_TEST_CASE("Animartrix2 - MODULE_EXPERIMENT3") { testAnimation(34, "MODULE_EXPERIMENT3"); }
+FL_TEST_CASE("Animartrix2 - MODULE_EXPERIMENT4") { testAnimation(35, "MODULE_EXPERIMENT4"); }
+FL_TEST_CASE("Animartrix2 - MODULE_EXPERIMENT5") { testAnimation(36, "MODULE_EXPERIMENT5"); }
+FL_TEST_CASE("Animartrix2 - MODULE_EXPERIMENT6") { testAnimation(37, "MODULE_EXPERIMENT6"); }
+FL_TEST_CASE("Animartrix2 - MODULE_EXPERIMENT7") { testAnimation(38, "MODULE_EXPERIMENT7"); }
+FL_TEST_CASE("Animartrix2 - MODULE_EXPERIMENT8") { testAnimation(39, "MODULE_EXPERIMENT8"); }
+FL_TEST_CASE("Animartrix2 - MODULE_EXPERIMENT9") { testAnimation(40, "MODULE_EXPERIMENT9"); }
+FL_TEST_CASE("Animartrix2 - MODULE_EXPERIMENT10") { testAnimation(41, "MODULE_EXPERIMENT10"); }
+FL_TEST_CASE("Animartrix2 - MODULE_EXPERIMENT_SM1") { testAnimation(42, "MODULE_EXPERIMENT_SM1"); }
+FL_TEST_CASE("Animartrix2 - MODULE_EXPERIMENT_SM2") { testAnimation(43, "MODULE_EXPERIMENT_SM2"); }
+FL_TEST_CASE("Animartrix2 - MODULE_EXPERIMENT_SM3") { testAnimation(44, "MODULE_EXPERIMENT_SM3"); }
+FL_TEST_CASE("Animartrix2 - MODULE_EXPERIMENT_SM4") { testAnimation(45, "MODULE_EXPERIMENT_SM4"); }
+FL_TEST_CASE("Animartrix2 - MODULE_EXPERIMENT_SM5") { testAnimation(46, "MODULE_EXPERIMENT_SM5"); }
+FL_TEST_CASE("Animartrix2 - MODULE_EXPERIMENT_SM6") { testAnimation(47, "MODULE_EXPERIMENT_SM6"); }
+FL_TEST_CASE("Animartrix2 - MODULE_EXPERIMENT_SM8") { testAnimation(48, "MODULE_EXPERIMENT_SM8"); }
+FL_TEST_CASE("Animartrix2 - MODULE_EXPERIMENT_SM9") { testAnimation(49, "MODULE_EXPERIMENT_SM9"); }
+FL_TEST_CASE("Animartrix2 - MODULE_EXPERIMENT_SM10") { testAnimation(50, "MODULE_EXPERIMENT_SM10"); }
+FL_TEST_CASE("Animartrix2 - FLUFFY_BLOBS") { testAnimation(51, "FLUFFY_BLOBS"); }
 
-TEST_CASE("Animartrix2 - API compatibility") {
+FL_TEST_CASE("Animartrix2 - API compatibility") {
     XYMap xy = XYMap::constructRectangularGrid(W, H);
 
-    SUBCASE("fxNum returns correct count") {
+    FL_SUBCASE("fxNum returns correct count") {
         Animartrix2 fx(xy, ANIM2_RGB_BLOBS);
-        CHECK(fx.fxNum() == ANIM2_NUM_ANIMATIONS);
+        FL_CHECK(fx.fxNum() == ANIM2_NUM_ANIMATIONS);
     }
 
-    SUBCASE("fxGet returns current animation") {
+    FL_SUBCASE("fxGet returns current animation") {
         Animartrix2 fx(xy, ANIM2_ZOOM);
-        CHECK(fx.fxGet() == static_cast<int>(ANIM2_ZOOM));
+        FL_CHECK(fx.fxGet() == static_cast<int>(ANIM2_ZOOM));
     }
 
-    SUBCASE("fxSet changes animation") {
+    FL_SUBCASE("fxSet changes animation") {
         Animartrix2 fx(xy, ANIM2_RGB_BLOBS);
         fx.fxSet(5);
-        CHECK(fx.fxGet() == 5);
+        FL_CHECK(fx.fxGet() == 5);
     }
 
-    SUBCASE("fxSet wraps around") {
+    FL_SUBCASE("fxSet wraps around") {
         Animartrix2 fx(xy, ANIM2_RGB_BLOBS);
         fx.fxSet(ANIM2_NUM_ANIMATIONS + 3);
-        CHECK(fx.fxGet() == 3);
+        FL_CHECK(fx.fxGet() == 3);
     }
 
-    SUBCASE("fxSet handles negative") {
+    FL_SUBCASE("fxSet handles negative") {
         Animartrix2 fx(xy, ANIM2_RGB_BLOBS5);
         fx.fxSet(-1);
-        CHECK(fx.fxGet() == ANIM2_NUM_ANIMATIONS - 1);
+        FL_CHECK(fx.fxGet() == ANIM2_NUM_ANIMATIONS - 1);
     }
 
-    SUBCASE("fxNext advances") {
+    FL_SUBCASE("fxNext advances") {
         Animartrix2 fx(xy, ANIM2_RGB_BLOBS5);
         fx.fxNext();
-        CHECK(fx.fxGet() == 1);
+        FL_CHECK(fx.fxGet() == 1);
     }
 
-    SUBCASE("fxName returns non-empty string") {
+    FL_SUBCASE("fxName returns non-empty string") {
         Animartrix2 fx(xy, ANIM2_RGB_BLOBS);
-        CHECK(fx.fxName().size() > 0);
+        FL_CHECK(fx.fxName().size() > 0);
     }
 
-    SUBCASE("getAnimationList returns all animations") {
+    FL_SUBCASE("getAnimationList returns all animations") {
         auto list = Animartrix2::getAnimationList();
-        CHECK(list.size() == ANIM2_NUM_ANIMATIONS);
+        FL_CHECK(list.size() == ANIM2_NUM_ANIMATIONS);
     }
 
-    SUBCASE("color order can be set and retrieved") {
+    FL_SUBCASE("color order can be set and retrieved") {
         Animartrix2 fx(xy, ANIM2_RGB_BLOBS);
         fx.setColorOrder(GRB);
-        CHECK(fx.getColorOrder() == GRB);
+        FL_CHECK(fx.getColorOrder() == GRB);
     }
 }
 #endif // #if 0
@@ -254,7 +254,7 @@ double benchmarkFx(FxType &fx, CRGB *leds, int iterations) { // okay std namespa
 
 } // namespace
 
-TEST_CASE("Chasing_Spirals Q31 - low error at t=1000") {
+FL_TEST_CASE("Chasing_Spirals Q31 - low error at t=1000") {
     CRGB leds_float[N] = {};
     CRGB leds_q31[N] = {};
 
@@ -265,14 +265,14 @@ TEST_CASE("Chasing_Spirals Q31 - low error at t=1000") {
     float avg_err = computeAvgError(leds_float, leds_q31, N);
     int max_err = computeMaxError(leds_float, leds_q31, N);
 
-    MESSAGE("t=1000: mismatches=", mismatches, "/", N,
+    FL_MESSAGE("t=1000: mismatches=", mismatches, "/", N,
             " avg_err=", avg_err, " max_err=", max_err);
 
     // Print first few mismatches for debugging
     int printed = 0;
     for (uint16_t i = 0; i < N && printed < 10; i++) {
         if (leds_float[i] != leds_q31[i]) {
-            MESSAGE("  pixel[", i, "]: float=(", int(leds_float[i].r), ",",
+            FL_MESSAGE("  pixel[", i, "]: float=(", int(leds_float[i].r), ",",
                     int(leds_float[i].g), ",", int(leds_float[i].b),
                     ") q31=(", int(leds_q31[i].r), ",",
                     int(leds_q31[i].g), ",", int(leds_q31[i].b), ")");
@@ -281,17 +281,17 @@ TEST_CASE("Chasing_Spirals Q31 - low error at t=1000") {
     }
 
     float error_pct = avg_err / 255.0f * 100.0f;
-    MESSAGE("Average error at t=1000: ", error_pct, "%");
+    FL_MESSAGE("Average error at t=1000: ", error_pct, "%");
 
     // s16x16 integer math introduces small rounding differences
     // At low time values, average error should be well under 1%
-    CHECK_MESSAGE(error_pct < 1.0f,
+    FL_CHECK_MESSAGE(error_pct < 1.0f,
                   "Q31 Chasing_Spirals average error should be < 1% at t=1000");
-    CHECK_MESSAGE(max_err <= 6,
+    FL_CHECK_MESSAGE(max_err <= 6,
                   "Q31 Chasing_Spirals max per-channel error should be <= 6 at t=1000");
 }
 
-TEST_CASE("Chasing_Spirals Q31 - approximate at high time") {
+FL_TEST_CASE("Chasing_Spirals Q31 - approximate at high time") {
     // Test multiple high time values to verify stability
     const uint32_t times[] = {
         1000000,     // ~16 minutes
@@ -311,16 +311,16 @@ TEST_CASE("Chasing_Spirals Q31 - approximate at high time") {
         int max_err = computeMaxError(leds_float, leds_q31, N);
 
         float error_pct = avg_err / 255.0f * 100.0f;
-        MESSAGE("t=", high_time, ": mismatches=", mismatches, "/", N,
+        FL_MESSAGE("t=", high_time, ": mismatches=", mismatches, "/", N,
                 " avg_err=", avg_err, " max_err=", max_err,
                 " error_pct=", error_pct, "%");
 
-        CHECK_MESSAGE(error_pct < 3.0f,
+        FL_CHECK_MESSAGE(error_pct < 3.0f,
                       "Q31 Chasing_Spirals average error should be < 3% at high time values");
     }
 }
 
-TEST_CASE("Chasing_Spirals Q31 - timing benchmark") {
+FL_TEST_CASE("Chasing_Spirals Q31 - timing benchmark") {
     // Benchmark float vs Q31 with persistent Fx instances (realistic usage).
     // Q31 benefits from persistent LUTs (PixelLUT, FadeLUT) that are built
     // once and reused across frames, so multi-frame benchmarks show true perf.
@@ -338,19 +338,19 @@ TEST_CASE("Chasing_Spirals Q31 - timing benchmark") {
 
     double speedup = float_us / q31_us;
 
-    MESSAGE("=== Chasing_Spirals Timing Benchmark (", BENCH_ITERS, " frames, ", W, "x", H, " grid) ===");
-    MESSAGE("  Float (Animartrix):  ", float_us, " us/frame");
-    MESSAGE("  Q31   (Animartrix2): ", q31_us, " us/frame");
-    MESSAGE("  Speedup: ", speedup, "x");
+    FL_MESSAGE("=== Chasing_Spirals Timing Benchmark (", BENCH_ITERS, " frames, ", W, "x", H, " grid) ===");
+    FL_MESSAGE("  Float (Animartrix):  ", float_us, " us/frame");
+    FL_MESSAGE("  Q31   (Animartrix2): ", q31_us, " us/frame");
+    FL_MESSAGE("  Speedup: ", speedup, "x");
     if (speedup >= 1.0) {
-        MESSAGE("  Q31 is ", (speedup - 1.0) * 100.0, "% faster than float");
+        FL_MESSAGE("  Q31 is ", (speedup - 1.0) * 100.0, "% faster than float");
     } else {
-        MESSAGE("  Q31 is ", (1.0 - speedup) / speedup * 100.0, "% slower than float");
+        FL_MESSAGE("  Q31 is ", (1.0 - speedup) / speedup * 100.0, "% slower than float");
     }
 
     // Q31 should be at least as fast as float on desktop (often faster on embedded)
     // On desktop with FPU, we mainly validate that the integer path isn't regressing.
     // The real speedup shows on embedded targets without hardware FPU.
-    CHECK_MESSAGE(q31_us > 0, "Q31 benchmark produced valid timing");
-    CHECK_MESSAGE(float_us > 0, "Float benchmark produced valid timing");
+    FL_CHECK_MESSAGE(q31_us > 0, "Q31 benchmark produced valid timing");
+    FL_CHECK_MESSAGE(float_us > 0, "Float benchmark produced valid timing");
 }

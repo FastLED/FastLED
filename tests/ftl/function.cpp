@@ -6,7 +6,7 @@
 #include "fl/stl/function.h"
 #include "fl/stl/new.h"
 #include "fl/stl/utility.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/move.h"
 
 
@@ -26,31 +26,31 @@ struct Mult {
     int operator()(int a, int b) const { return a * b; }
 };
 
-TEST_CASE("fl::function<bool()> is empty by default and bool-convertible") {
+FL_TEST_CASE("fl::function<bool()> is empty by default and bool-convertible") {
     fl::function<void()> f;
     FL_REQUIRE(!f);
 }
 
-TEST_CASE("Test function with lambda") {
+FL_TEST_CASE("Test function with lambda") {
     fl::function<int(int,int)> f = [](int a, int b) { return a + b; };
     FL_REQUIRE(f);
     FL_REQUIRE(f(2, 3) == 5);
 }
 
-TEST_CASE("Test function with free function pointer") {
+FL_TEST_CASE("Test function with free function pointer") {
     fl::function<int(int,int)> f(add);
     FL_REQUIRE(f);
     FL_REQUIRE(f(4, 6) == 10);
 }
 
-TEST_CASE("Test function with functor object") {
+FL_TEST_CASE("Test function with functor object") {
     Mult m;
     fl::function<int(int,int)> f(m);
     FL_REQUIRE(f);
     FL_REQUIRE(f(3, 7) == 21);
 }
 
-TEST_CASE("Test function with non-const member function") {
+FL_TEST_CASE("Test function with non-const member function") {
     Foo foo;
     fl::function<void(int)> fset(&Foo::set, &foo);
     FL_REQUIRE(fset);
@@ -58,7 +58,7 @@ TEST_CASE("Test function with non-const member function") {
     FL_REQUIRE(foo.value == 42);
 }
 
-TEST_CASE("Test function with const member function") {
+FL_TEST_CASE("Test function with const member function") {
     Foo foo;
     foo.value = 99;
     fl::function<int()> fget(&Foo::get, &foo);
@@ -66,14 +66,14 @@ TEST_CASE("Test function with const member function") {
     FL_REQUIRE(fget() == 99);
 }
 
-TEST_CASE("Void free function test") {
+FL_TEST_CASE("Void free function test") {
     fl::function<void(float)> f = [](float) { /* do nothing */ };
     FL_REQUIRE(f);
     f(1);
 }
 
 
-TEST_CASE("Copy and move semantics") {
+FL_TEST_CASE("Copy and move semantics") {
     fl::function<int(int,int)> orig = [](int a, int b) { return a - b; };
     FL_REQUIRE(orig(10, 4) == 6);
 
@@ -89,13 +89,13 @@ TEST_CASE("Copy and move semantics") {
     FL_REQUIRE(!orig);
 }
 
-TEST_CASE("Function list void float") {
+FL_TEST_CASE("Function list void float") {
     fl::function_list<void(float)> fl;
     fl.add([](float) { /* do nothing */ });
     fl.invoke(1.0f);
 }
 
-TEST_CASE("Test clear() method") {
+FL_TEST_CASE("Test clear() method") {
     // Test with lambda
     fl::function<int(int,int)> f = [](int a, int b) { return a + b; };
     FL_REQUIRE(f);

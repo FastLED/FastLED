@@ -92,13 +92,13 @@ void check_near(T val, float expected) {
 // Construction
 // ---------------------------------------------------------------------------
 
-TEST_CASE_TEMPLATE("fixed_point - default construction", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - default construction", T, FP_TYPES) {
     T a;
     FL_CHECK_EQ(a.raw(), raw_t<T>(0));
     FL_CHECK_EQ(a.to_int(), 0);
 }
 
-TEST_CASE_TEMPLATE("fixed_point - float construction", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - float construction", T, FP_TYPES) {
     using R = raw_t<T>;
     T one(1.0f);
     FL_CHECK_EQ(one.raw(), R(1) << T::FRAC_BITS);
@@ -122,7 +122,7 @@ TEST_CASE_TEMPLATE("fixed_point - float construction", T, FP_TYPES) {
     FL_CHECK_EQ(neg_val.to_int(), -3);
 }
 
-TEST_CASE_TEMPLATE("fixed_point - from_raw", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - from_raw", T, FP_TYPES) {
     using R = raw_t<T>;
     // 1.0
     T a = T::from_raw(R(1) << T::FRAC_BITS);
@@ -144,7 +144,7 @@ TEST_CASE_TEMPLATE("fixed_point - from_raw", T, FP_TYPES) {
 // Arithmetic
 // ---------------------------------------------------------------------------
 
-TEST_CASE_TEMPLATE("fixed_point - addition", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - addition", T, FP_TYPES) {
     T a(1.0f), b(2.0f);
     T c = a + b;
     FL_CHECK_EQ(c.to_int(), 3);
@@ -163,7 +163,7 @@ TEST_CASE_TEMPLATE("fixed_point - addition", T, FP_TYPES) {
     FL_CHECK_EQ((a + zero).raw(), a.raw());
 }
 
-TEST_CASE_TEMPLATE("fixed_point - subtraction", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - subtraction", T, FP_TYPES) {
     T a(3.0f), b(1.0f);
     check_near(a - b, 2.0f);
 
@@ -179,7 +179,7 @@ TEST_CASE_TEMPLATE("fixed_point - subtraction", T, FP_TYPES) {
     check_near(c - d, 1.5f);
 }
 
-TEST_CASE_TEMPLATE("fixed_point - unary negation", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - unary negation", T, FP_TYPES) {
     T a(3.5f);
     T neg_a = -a;
     check_near(neg_a, -3.5f);
@@ -192,7 +192,7 @@ TEST_CASE_TEMPLATE("fixed_point - unary negation", T, FP_TYPES) {
     FL_CHECK_EQ((-zero).raw(), raw_t<T>(0));
 }
 
-TEST_CASE_TEMPLATE("fixed_point - fixed-point multiply", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - fixed-point multiply", T, FP_TYPES) {
     T a(2.0f), b(3.0f);
     check_near(a * b, 6.0f);
 
@@ -224,7 +224,7 @@ TEST_CASE_TEMPLATE("fixed_point - fixed-point multiply", T, FP_TYPES) {
     check_near(e * f, 3.75f, tol<T>());
 }
 
-TEST_CASE_TEMPLATE("fixed_point - fixed-point divide", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - fixed-point divide", T, FP_TYPES) {
     T a(6.0f), b(3.0f);
     check_near(a / b, 2.0f);
 
@@ -252,7 +252,7 @@ TEST_CASE_TEMPLATE("fixed_point - fixed-point divide", T, FP_TYPES) {
     check_near(one / three, 0.3333f, tol<T>() * 10.0f);
 }
 
-TEST_CASE_TEMPLATE("fixed_point - scalar multiply", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - scalar multiply", T, FP_TYPES) {
     using R = raw_t<T>;
     T a(1.5f);
 
@@ -271,7 +271,7 @@ TEST_CASE_TEMPLATE("fixed_point - scalar multiply", T, FP_TYPES) {
     }
 }
 
-TEST_CASE_TEMPLATE("fixed_point - right shift", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - right shift", T, FP_TYPES) {
     T a(4.0f);
     check_near(a >> 1, 2.0f);
     check_near(a >> 2, 1.0f);
@@ -291,7 +291,7 @@ TEST_CASE_TEMPLATE("fixed_point - right shift", T, FP_TYPES) {
 // Comparisons
 // ---------------------------------------------------------------------------
 
-TEST_CASE_TEMPLATE("fixed_point - comparisons", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - comparisons", T, FP_TYPES) {
     T a(1.0f), b(2.0f), c(1.0f);
     T neg(-1.0f);
     T zero;
@@ -321,7 +321,7 @@ TEST_CASE_TEMPLATE("fixed_point - comparisons", T, FP_TYPES) {
 // Trigonometry
 // ---------------------------------------------------------------------------
 
-TEST_CASE_TEMPLATE("fixed_point - sin", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - sin", T, FP_TYPES) {
     T zero;
     check_near(T::sin(zero), 0.0f, trig_tol<T>());
 
@@ -335,7 +335,7 @@ TEST_CASE_TEMPLATE("fixed_point - sin", T, FP_TYPES) {
     check_near(T::sin(neg_half_pi), -1.0f, trig_tol<T>());
 }
 
-TEST_CASE_TEMPLATE("fixed_point - cos", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - cos", T, FP_TYPES) {
     T zero;
     check_near(T::cos(zero), 1.0f, trig_tol<T>());
 
@@ -346,7 +346,7 @@ TEST_CASE_TEMPLATE("fixed_point - cos", T, FP_TYPES) {
     check_near(T::cos(pi), -1.0f, trig_tol<T>());
 }
 
-TEST_CASE_TEMPLATE("fixed_point - sincos", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - sincos", T, FP_TYPES) {
     T angle(0.7854f); // ~pi/4
     T s, c;
     T::sincos(angle, s, c);
@@ -359,7 +359,7 @@ TEST_CASE_TEMPLATE("fixed_point - sincos", T, FP_TYPES) {
     FL_CHECK_EQ(c.raw(), T::cos(angle).raw());
 }
 
-TEST_CASE_TEMPLATE("fixed_point - pythagorean identity", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - pythagorean identity", T, FP_TYPES) {
     float angles[] = {0.0f, 0.5f, 1.0f, 1.5707963f, 2.0f, 3.1415926f, -1.0f};
     for (float ang : angles) {
         T a(ang);
@@ -374,7 +374,7 @@ TEST_CASE_TEMPLATE("fixed_point - pythagorean identity", T, FP_TYPES) {
 // Mixed arithmetic
 // ---------------------------------------------------------------------------
 
-TEST_CASE_TEMPLATE("fixed_point - mixed arithmetic expressions", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - mixed arithmetic expressions", T, FP_TYPES) {
     T a(2.0f), b(3.0f), c(0.5f);
     check_near((a + b) * c, 2.5f);
 
@@ -394,7 +394,7 @@ TEST_CASE_TEMPLATE("fixed_point - mixed arithmetic expressions", T, FP_TYPES) {
 // to_float
 // ---------------------------------------------------------------------------
 
-TEST_CASE_TEMPLATE("fixed_point - to_float", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - to_float", T, FP_TYPES) {
     T one(1.0f);
     FL_CHECK_CLOSE(one.to_float(), 1.0f, tol<T>());
 
@@ -412,7 +412,7 @@ TEST_CASE_TEMPLATE("fixed_point - to_float", T, FP_TYPES) {
 // Math functions
 // ---------------------------------------------------------------------------
 
-TEST_CASE_TEMPLATE("fixed_point - sqrt", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - sqrt", T, FP_TYPES) {
     check_near(T::sqrt(T(4.0f)), 2.0f, sqrt_tol<T>());
     check_near(T::sqrt(T(1.0f)), 1.0f, sqrt_tol<T>());
     check_near(T::sqrt(T(2.0f)), 1.4142f, sqrt_tol<T>());
@@ -426,7 +426,7 @@ TEST_CASE_TEMPLATE("fixed_point - sqrt", T, FP_TYPES) {
     }
 }
 
-TEST_CASE_TEMPLATE("fixed_point - rsqrt", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - rsqrt", T, FP_TYPES) {
     check_near(T::rsqrt(T(4.0f)), 0.5f, sqrt_tol<T>());
     check_near(T::rsqrt(T(1.0f)), 1.0f, sqrt_tol<T>());
 
@@ -434,7 +434,7 @@ TEST_CASE_TEMPLATE("fixed_point - rsqrt", T, FP_TYPES) {
     FL_CHECK_EQ(T::rsqrt(T(-1.0f)).raw(), raw_t<T>(0));  // rsqrt(neg) = 0
 }
 
-TEST_CASE_TEMPLATE("fixed_point - pow", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - pow", T, FP_TYPES) {
     // 2^2 = 4 (safe for all types)
     check_near(T::pow(T(2.0f), T(2.0f)), 4.0f, pow_tol<T>());
 
@@ -456,7 +456,7 @@ TEST_CASE_TEMPLATE("fixed_point - pow", T, FP_TYPES) {
     }
 }
 
-TEST_CASE_TEMPLATE("fixed_point - sqrt identity", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - sqrt identity", T, FP_TYPES) {
     float values[] = {1.0f, 2.0f, 4.0f};
     for (float v : values) {
         T x(v);
@@ -486,7 +486,7 @@ TEST_CASE_TEMPLATE("fixed_point - sqrt identity", T, FP_TYPES) {
     }
 }
 
-TEST_CASE_TEMPLATE("fixed_point - floor and ceil", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - floor and ceil", T, FP_TYPES) {
     check_near(T::floor(T(2.75f)), 2.0f);
     check_near(T::ceil(T(2.75f)), 3.0f);
     check_near(T::floor(T(-1.25f)), -2.0f);
@@ -495,13 +495,13 @@ TEST_CASE_TEMPLATE("fixed_point - floor and ceil", T, FP_TYPES) {
     check_near(T::ceil(T(3.0f)), 3.0f);
 }
 
-TEST_CASE_TEMPLATE("fixed_point - fract", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - fract", T, FP_TYPES) {
     check_near(T::fract(T(2.75f)), 0.75f);
     FL_CHECK_EQ(T::fract(T(1.0f)).raw(), raw_t<T>(0));
     check_near(T::fract(T(0.5f)), 0.5f);
 }
 
-TEST_CASE_TEMPLATE("fixed_point - abs and sign", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - abs and sign", T, FP_TYPES) {
     check_near(T::abs(T(3.5f)), 3.5f);
     check_near(T::abs(T(-3.5f)), 3.5f);
     FL_CHECK_EQ(T::abs(T()).raw(), raw_t<T>(0));
@@ -511,7 +511,7 @@ TEST_CASE_TEMPLATE("fixed_point - abs and sign", T, FP_TYPES) {
     FL_CHECK_EQ(T::sign(T()).raw(), raw_t<T>(0));
 }
 
-TEST_CASE_TEMPLATE("fixed_point - mod", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - mod", T, FP_TYPES) {
     check_near(T::mod(T(5.5f), T(2.0f)), 1.5f);
     check_near(T::mod(T(3.0f), T(1.5f)), 0.0f);
     check_near(T::mod(T(1.0f), T(3.0f)), 1.0f);
@@ -521,7 +521,7 @@ TEST_CASE_TEMPLATE("fixed_point - mod", T, FP_TYPES) {
 // Inverse trigonometry
 // ---------------------------------------------------------------------------
 
-TEST_CASE_TEMPLATE("fixed_point - inverse trig", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - inverse trig", T, FP_TYPES) {
     check_near(T::atan(T(1.0f)), 0.7854f, trig_tol<T>());
     check_near(T::atan(T(0.0f)), 0.0f, trig_tol<T>());
     check_near(T::atan2(T(1.0f), T(1.0f)), 0.7854f, trig_tol<T>());
@@ -535,7 +535,7 @@ TEST_CASE_TEMPLATE("fixed_point - inverse trig", T, FP_TYPES) {
 // Interpolation and clamping
 // ---------------------------------------------------------------------------
 
-TEST_CASE_TEMPLATE("fixed_point - lerp, clamp, step, smoothstep", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - lerp, clamp, step, smoothstep", T, FP_TYPES) {
     // lerp
     check_near(T::lerp(T(0.0f), T(4.0f), T(0.5f)), 2.0f, tol<T>());
     check_near(T::lerp(T(1.0f), T(3.0f), T(0.0f)), 1.0f);
@@ -566,7 +566,7 @@ TEST_CASE_TEMPLATE("fixed_point - lerp, clamp, step, smoothstep", T, FP_TYPES) {
 // Edge values
 // ---------------------------------------------------------------------------
 
-TEST_CASE_TEMPLATE("fixed_point - edge values", T, FP_TYPES) {
+FL_TEST_CASE_TEMPLATE("fixed_point - edge values", T, FP_TYPES) {
     using R = raw_t<T>;
     constexpr int max_int = (1 << (T::INT_BITS - 1)) - 1;
     constexpr int min_int = -(1 << (T::INT_BITS - 1));
@@ -812,7 +812,7 @@ void print_row2(const char *name, const AccuracyResult &r) {
                name, r.maxErr, r.avgErr, r.worstInput, r.worstInput2);
 }
 
-TEST_CASE("s16x16 accuracy report") {
+FL_TEST_CASE("s16x16 accuracy report") {
     fl::printf("\ns16x16 Accuracy Report (vs float reference)\n");
 
     AccuracyResult sin_r = measure_sin();
@@ -1003,7 +1003,7 @@ void run_type_accuracy(const char* name) {
                pow05_r.maxErr, pow20_r.maxErr, smooth_r.maxErr);
 }
 
-TEST_CASE("multi-type accuracy report") {
+FL_TEST_CASE("multi-type accuracy report") {
     fl::printf("\nMulti-type Accuracy Report (maxErr vs float)\n");
     run_type_accuracy<s4x12>("s4x12 ");
     run_type_accuracy<s8x8>("s8x8  ");

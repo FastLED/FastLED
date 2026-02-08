@@ -3,11 +3,11 @@
 
 
 #include "fl/fx/time.h"
-#include "doctest.h"
+#include "test.h"
 using namespace fl;
-TEST_CASE("TimeWarp basic functionality") {
+FL_TEST_CASE("TimeWarp basic functionality") {
 
-    SUBCASE("Initialization and normal time progression") {
+    FL_SUBCASE("Initialization and normal time progression") {
         TimeWarp tw(1000, 1.0f); // 1000 ms is the start time, speed is set at 1x
         FL_CHECK(tw.time() == 0);
         FL_CHECK(tw.scale() == 1.0f);
@@ -16,7 +16,7 @@ TEST_CASE("TimeWarp basic functionality") {
         FL_CHECK(tw.time() == 1000);
     }
 
-    SUBCASE("Time scaling") {
+    FL_SUBCASE("Time scaling") {
         TimeWarp tw(1000);
         tw.setSpeed(2.0f);  // now we are at 2x speed.
         FL_CHECK(tw.time() == 0);  // at t0 = 1000ms
@@ -31,7 +31,7 @@ TEST_CASE("TimeWarp basic functionality") {
         FL_CHECK(tw.time() == 1500);
     }
 
-    SUBCASE("Reset functionality") {
+    FL_SUBCASE("Reset functionality") {
         TimeWarp tw(1000, 1.0f);
         tw.update(2000);
         FL_CHECK(tw.time() == 1000);
@@ -43,7 +43,7 @@ TEST_CASE("TimeWarp basic functionality") {
         FL_CHECK(tw.time() == 1000);
     }
 
-    SUBCASE("Wrap-around protection - prevent from going below start time") {
+    FL_SUBCASE("Wrap-around protection - prevent from going below start time") {
         TimeWarp tw(1000, 1.0f);
         tw.update(1001);
         FL_CHECK(tw.time() == 1);

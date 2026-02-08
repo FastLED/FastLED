@@ -14,7 +14,7 @@
 #include "fl/stl/new.h"
 #include "colorutils.h"
 #include "crgb.h"
-#include "doctest.h"
+#include "test.h"
 #include "eorder.h"
 #include "fl/channels/options.h"
 #include "fl/chipsets/led_timing.h"
@@ -81,7 +81,7 @@ private:
     fl::vector<ChannelDataPtr> mTransmittingChannels;
 };
 
-TEST_CASE("Channel basic operations") {
+FL_TEST_CASE("Channel basic operations") {
     auto mockEngine = fl::make_shared<MockEngine>();
 
     // Register mock engine with ChannelBusManager for testing
@@ -106,7 +106,7 @@ TEST_CASE("Channel basic operations") {
     manager.setDriverEnabled("MOCK", false);
 }
 
-TEST_CASE("Channel transmission") {
+FL_TEST_CASE("Channel transmission") {
     auto mockEngine = fl::make_shared<MockEngine>();
 
     // Register mock engine with ChannelBusManager for testing
@@ -135,7 +135,7 @@ TEST_CASE("Channel transmission") {
     manager.setDriverEnabled("MOCK_TX", false);
 }
 
-TEST_CASE("FastLED.show() with channels") {
+FL_TEST_CASE("FastLED.show() with channels") {
     auto mockEngine = fl::make_shared<MockEngine>();
 
     // Register mock engine with ChannelBusManager for testing

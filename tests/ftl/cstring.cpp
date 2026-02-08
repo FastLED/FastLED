@@ -14,7 +14,7 @@
 
 #include "fl/stl/cstring.h"
 #include "fl/stl/cstddef.h"
-#include "doctest.h"
+#include "test.h"
 
 // Note: We do NOT use "using namespace fl;" because string functions
 // would conflict with system C library functions (strcmp, strcpy, etc.)
@@ -24,77 +24,77 @@
 // String Length and Comparison Tests
 // ============================================================================
 
-TEST_CASE("fl::strlen") {
-    SUBCASE("empty string") {
+FL_TEST_CASE("fl::strlen") {
+    FL_SUBCASE("empty string") {
         FL_CHECK_EQ(fl::strlen(""), 0);
     }
 
-    SUBCASE("single character") {
+    FL_SUBCASE("single character") {
         FL_CHECK_EQ(fl::strlen("a"), 1);
     }
 
-    SUBCASE("normal string") {
+    FL_SUBCASE("normal string") {
         FL_CHECK_EQ(fl::strlen("hello"), 5);
         FL_CHECK_EQ(fl::strlen("FastLED"), 7);
     }
 
-    SUBCASE("string with spaces") {
+    FL_SUBCASE("string with spaces") {
         FL_CHECK_EQ(fl::strlen("hello world"), 11);
     }
 
-    SUBCASE("string with special characters") {
+    FL_SUBCASE("string with special characters") {
         FL_CHECK_EQ(fl::strlen("test\n\t"), 6);
     }
 }
 
-TEST_CASE("fl::strcmp") {
-    SUBCASE("equal strings") {
+FL_TEST_CASE("fl::strcmp") {
+    FL_SUBCASE("equal strings") {
         FL_CHECK_EQ(fl::strcmp("hello", "hello"), 0);
         FL_CHECK_EQ(fl::strcmp("", ""), 0);
     }
 
-    SUBCASE("first less than second") {
+    FL_SUBCASE("first less than second") {
         FL_CHECK(fl::strcmp("abc", "abd") < 0);
         FL_CHECK(fl::strcmp("a", "b") < 0);
     }
 
-    SUBCASE("first greater than second") {
+    FL_SUBCASE("first greater than second") {
         FL_CHECK(fl::strcmp("abd", "abc") > 0);
         FL_CHECK(fl::strcmp("b", "a") > 0);
     }
 
-    SUBCASE("different lengths") {
+    FL_SUBCASE("different lengths") {
         FL_CHECK(fl::strcmp("hello", "hello world") < 0);
         FL_CHECK(fl::strcmp("hello world", "hello") > 0);
     }
 
-    SUBCASE("case sensitive") {
+    FL_SUBCASE("case sensitive") {
         FL_CHECK(fl::strcmp("Hello", "hello") != 0);
         FL_CHECK(fl::strcmp("HELLO", "hello") != 0);
     }
 }
 
-TEST_CASE("fl::strncmp") {
-    SUBCASE("compare n characters - equal") {
+FL_TEST_CASE("fl::strncmp") {
+    FL_SUBCASE("compare n characters - equal") {
         FL_CHECK_EQ(fl::strncmp("hello", "hello", 5), 0);
         FL_CHECK_EQ(fl::strncmp("hello world", "hello there", 5), 0);
     }
 
-    SUBCASE("compare n characters - different") {
+    FL_SUBCASE("compare n characters - different") {
         FL_CHECK(fl::strncmp("abc", "abd", 3) < 0);
         FL_CHECK(fl::strncmp("abd", "abc", 3) > 0);
     }
 
-    SUBCASE("compare less than full length") {
+    FL_SUBCASE("compare less than full length") {
         FL_CHECK_EQ(fl::strncmp("hello", "help", 2), 0);  // "he" == "he"
         FL_CHECK(fl::strncmp("hello", "help", 4) != 0);   // "hell" != "help"
     }
 
-    SUBCASE("compare with n=0") {
+    FL_SUBCASE("compare with n=0") {
         FL_CHECK_EQ(fl::strncmp("abc", "xyz", 0), 0);
     }
 
-    SUBCASE("compare n > string length") {
+    FL_SUBCASE("compare n > string length") {
         FL_CHECK_EQ(fl::strncmp("abc", "abc", 100), 0);
     }
 }
@@ -103,43 +103,43 @@ TEST_CASE("fl::strncmp") {
 // String Copy and Concatenation Tests
 // ============================================================================
 
-TEST_CASE("fl::strcpy") {
+FL_TEST_CASE("fl::strcpy") {
     char buffer[100];
 
-    SUBCASE("copy empty string") {
+    FL_SUBCASE("copy empty string") {
         fl::strcpy(buffer, "");
         FL_CHECK_EQ(fl::strlen(buffer), 0);
     }
 
-    SUBCASE("copy short string") {
+    FL_SUBCASE("copy short string") {
         fl::strcpy(buffer, "hello");
         FL_CHECK_EQ(fl::strcmp(buffer, "hello"), 0);
         FL_CHECK_EQ(fl::strlen(buffer), 5);
     }
 
-    SUBCASE("copy replaces previous content") {
+    FL_SUBCASE("copy replaces previous content") {
         fl::strcpy(buffer, "first");
         fl::strcpy(buffer, "new");
         FL_CHECK_EQ(fl::strcmp(buffer, "new"), 0);
         FL_CHECK_EQ(fl::strlen(buffer), 3);
     }
 
-    SUBCASE("return value is destination") {
+    FL_SUBCASE("return value is destination") {
         char* result = fl::strcpy(buffer, "test");
         FL_CHECK_EQ(result, buffer);
     }
 }
 
-TEST_CASE("fl::strncpy") {
+FL_TEST_CASE("fl::strncpy") {
     char buffer[100];
 
-    SUBCASE("copy n characters") {
+    FL_SUBCASE("copy n characters") {
         fl::strncpy(buffer, "hello", 3);
         buffer[3] = '\0';  // null terminate manually
         FL_CHECK_EQ(fl::strcmp(buffer, "hel"), 0);
     }
 
-    SUBCASE("copy with n >= source length - pads with zeros") {
+    FL_SUBCASE("copy with n >= source length - pads with zeros") {
         fl::memset(buffer, 'X', sizeof(buffer));
         fl::strncpy(buffer, "hi", 5);
         FL_CHECK_EQ(buffer[0], 'h');
@@ -149,7 +149,7 @@ TEST_CASE("fl::strncpy") {
         FL_CHECK_EQ(buffer[4], '\0');
     }
 
-    SUBCASE("copy with n < source length - no null terminator") {
+    FL_SUBCASE("copy with n < source length - no null terminator") {
         fl::memset(buffer, 'X', sizeof(buffer));
         fl::strncpy(buffer, "hello", 3);
         FL_CHECK_EQ(buffer[0], 'h');
@@ -158,64 +158,64 @@ TEST_CASE("fl::strncpy") {
         FL_CHECK_EQ(buffer[3], 'X');  // Original content preserved
     }
 
-    SUBCASE("return value is destination") {
+    FL_SUBCASE("return value is destination") {
         char* result = fl::strncpy(buffer, "test", 4);
         FL_CHECK_EQ(result, buffer);
     }
 }
 
-TEST_CASE("fl::strcat") {
+FL_TEST_CASE("fl::strcat") {
     char buffer[100];
 
-    SUBCASE("concatenate to empty string") {
+    FL_SUBCASE("concatenate to empty string") {
         buffer[0] = '\0';
         fl::strcat(buffer, "hello");
         FL_CHECK_EQ(fl::strcmp(buffer, "hello"), 0);
     }
 
-    SUBCASE("concatenate two strings") {
+    FL_SUBCASE("concatenate two strings") {
         fl::strcpy(buffer, "hello");
         fl::strcat(buffer, " world");
         FL_CHECK_EQ(fl::strcmp(buffer, "hello world"), 0);
         FL_CHECK_EQ(fl::strlen(buffer), 11);
     }
 
-    SUBCASE("concatenate multiple times") {
+    FL_SUBCASE("concatenate multiple times") {
         fl::strcpy(buffer, "a");
         fl::strcat(buffer, "b");
         fl::strcat(buffer, "c");
         FL_CHECK_EQ(fl::strcmp(buffer, "abc"), 0);
     }
 
-    SUBCASE("return value is destination") {
+    FL_SUBCASE("return value is destination") {
         fl::strcpy(buffer, "test");
         char* result = fl::strcat(buffer, "123");
         FL_CHECK_EQ(result, buffer);
     }
 }
 
-TEST_CASE("fl::strncat") {
+FL_TEST_CASE("fl::strncat") {
     char buffer[100];
 
-    SUBCASE("concatenate n characters") {
+    FL_SUBCASE("concatenate n characters") {
         fl::strcpy(buffer, "hello");
         fl::strncat(buffer, " world", 3);
         FL_CHECK_EQ(fl::strcmp(buffer, "hello wo"), 0);
     }
 
-    SUBCASE("concatenate with n >= source length") {
+    FL_SUBCASE("concatenate with n >= source length") {
         fl::strcpy(buffer, "hello");
         fl::strncat(buffer, " world", 100);
         FL_CHECK_EQ(fl::strcmp(buffer, "hello world"), 0);
     }
 
-    SUBCASE("concatenate with n=0") {
+    FL_SUBCASE("concatenate with n=0") {
         fl::strcpy(buffer, "hello");
         fl::strncat(buffer, " world", 0);
         FL_CHECK_EQ(fl::strcmp(buffer, "hello"), 0);
     }
 
-    SUBCASE("return value is destination") {
+    FL_SUBCASE("return value is destination") {
         fl::strcpy(buffer, "test");
         char* result = fl::strncat(buffer, "123", 3);
         FL_CHECK_EQ(result, buffer);
@@ -226,77 +226,77 @@ TEST_CASE("fl::strncat") {
 // String Search Tests
 // ============================================================================
 
-TEST_CASE("fl::strstr") {
-    SUBCASE("find substring at beginning") {
+FL_TEST_CASE("fl::strstr") {
+    FL_SUBCASE("find substring at beginning") {
         const char* result = fl::strstr("hello world", "hello");
         FL_CHECK(result != nullptr);
         FL_CHECK_EQ(result, static_cast<const char*>("hello world"));
     }
 
-    SUBCASE("find substring in middle") {
+    FL_SUBCASE("find substring in middle") {
         const char* haystack = "hello world";
         const char* result = fl::strstr(haystack, "lo wo");
         FL_CHECK(result != nullptr);
         FL_CHECK_EQ(result, haystack + 3);
     }
 
-    SUBCASE("find substring at end") {
+    FL_SUBCASE("find substring at end") {
         const char* haystack = "hello world";
         const char* result = fl::strstr(haystack, "world");
         FL_CHECK(result != nullptr);
         FL_CHECK_EQ(result, haystack + 6);
     }
 
-    SUBCASE("substring not found") {
+    FL_SUBCASE("substring not found") {
         const char* result = fl::strstr("hello world", "xyz");
         FL_CHECK(result == nullptr);
     }
 
-    SUBCASE("empty needle returns haystack") {
+    FL_SUBCASE("empty needle returns haystack") {
         const char* haystack = "hello";
         const char* result = fl::strstr(haystack, "");
         FL_CHECK_EQ(result, haystack);
     }
 
-    SUBCASE("case sensitive") {
+    FL_SUBCASE("case sensitive") {
         const char* result = fl::strstr("hello world", "WORLD");
         FL_CHECK(result == nullptr);
     }
 }
 
-TEST_CASE("fl::strchr") {
+FL_TEST_CASE("fl::strchr") {
     char buffer[] = "hello world";
 
-    SUBCASE("find character at beginning") {
+    FL_SUBCASE("find character at beginning") {
         char* result = fl::strchr(buffer, 'h');
         FL_CHECK(result != nullptr);
         FL_CHECK_EQ(result, buffer);
     }
 
-    SUBCASE("find character in middle") {
+    FL_SUBCASE("find character in middle") {
         char* result = fl::strchr(buffer, 'o');
         FL_CHECK(result != nullptr);
         FL_CHECK_EQ(result, buffer + 4);  // First 'o' in "hello"
     }
 
-    SUBCASE("find character at end") {
+    FL_SUBCASE("find character at end") {
         char* result = fl::strchr(buffer, 'd');
         FL_CHECK(result != nullptr);
         FL_CHECK_EQ(result, buffer + 10);
     }
 
-    SUBCASE("character not found") {
+    FL_SUBCASE("character not found") {
         char* result = fl::strchr(buffer, 'x');
         FL_CHECK(result == nullptr);
     }
 
-    SUBCASE("find null terminator") {
+    FL_SUBCASE("find null terminator") {
         char* result = fl::strchr(buffer, '\0');
         FL_CHECK(result != nullptr);
         FL_CHECK_EQ(result, buffer + 11);
     }
 
-    SUBCASE("const version") {
+    FL_SUBCASE("const version") {
         const char* const_buffer = "hello";
         const char* result = fl::strchr(const_buffer, 'l');
         FL_CHECK(result != nullptr);
@@ -304,33 +304,33 @@ TEST_CASE("fl::strchr") {
     }
 }
 
-TEST_CASE("fl::strrchr") {
+FL_TEST_CASE("fl::strrchr") {
     char buffer[] = "hello world";
 
-    SUBCASE("find last occurrence in middle") {
+    FL_SUBCASE("find last occurrence in middle") {
         char* result = fl::strrchr(buffer, 'o');
         FL_CHECK(result != nullptr);
         FL_CHECK_EQ(result, buffer + 7);  // Second 'o' in "world"
     }
 
-    SUBCASE("find single occurrence") {
+    FL_SUBCASE("find single occurrence") {
         char* result = fl::strrchr(buffer, 'h');
         FL_CHECK(result != nullptr);
         FL_CHECK_EQ(result, buffer);
     }
 
-    SUBCASE("character not found") {
+    FL_SUBCASE("character not found") {
         char* result = fl::strrchr(buffer, 'x');
         FL_CHECK(result == nullptr);
     }
 
-    SUBCASE("find null terminator") {
+    FL_SUBCASE("find null terminator") {
         char* result = fl::strrchr(buffer, '\0');
         FL_CHECK(result != nullptr);
         FL_CHECK_EQ(result, buffer + 11);
     }
 
-    SUBCASE("const version") {
+    FL_SUBCASE("const version") {
         const char* const_buffer = "hello";
         const char* result = fl::strrchr(const_buffer, 'l');
         FL_CHECK(result != nullptr);
@@ -338,73 +338,73 @@ TEST_CASE("fl::strrchr") {
     }
 }
 
-TEST_CASE("fl::strspn") {
-    SUBCASE("count matching prefix") {
+FL_TEST_CASE("fl::strspn") {
+    FL_SUBCASE("count matching prefix") {
         FL_CHECK_EQ(fl::strspn("abcdefg", "abc"), 3);
         FL_CHECK_EQ(fl::strspn("1234abc", "0123456789"), 4);
     }
 
-    SUBCASE("no matching characters") {
+    FL_SUBCASE("no matching characters") {
         FL_CHECK_EQ(fl::strspn("hello", "xyz"), 0);
     }
 
-    SUBCASE("all characters match") {
+    FL_SUBCASE("all characters match") {
         FL_CHECK_EQ(fl::strspn("aaa", "a"), 3);
         FL_CHECK_EQ(fl::strspn("abc", "cba"), 3);
     }
 
-    SUBCASE("empty strings") {
+    FL_SUBCASE("empty strings") {
         FL_CHECK_EQ(fl::strspn("", "abc"), 0);
         FL_CHECK_EQ(fl::strspn("abc", ""), 0);
     }
 }
 
-TEST_CASE("fl::strcspn") {
-    SUBCASE("count non-matching prefix") {
+FL_TEST_CASE("fl::strcspn") {
+    FL_SUBCASE("count non-matching prefix") {
         FL_CHECK_EQ(fl::strcspn("hello world", " "), 5);
         FL_CHECK_EQ(fl::strcspn("abc123", "0123456789"), 3);
     }
 
-    SUBCASE("no matching characters - returns length") {
+    FL_SUBCASE("no matching characters - returns length") {
         FL_CHECK_EQ(fl::strcspn("hello", "xyz"), 5);
     }
 
-    SUBCASE("first character matches") {
+    FL_SUBCASE("first character matches") {
         FL_CHECK_EQ(fl::strcspn("hello", "h"), 0);
     }
 
-    SUBCASE("empty strings") {
+    FL_SUBCASE("empty strings") {
         FL_CHECK_EQ(fl::strcspn("", "abc"), 0);
         FL_CHECK_EQ(fl::strcspn("abc", ""), 3);
     }
 }
 
-TEST_CASE("fl::strpbrk") {
+FL_TEST_CASE("fl::strpbrk") {
     char buffer[] = "hello world";
 
-    SUBCASE("find first occurrence of any character") {
+    FL_SUBCASE("find first occurrence of any character") {
         char* result = fl::strpbrk(buffer, "aeiou");
         FL_CHECK(result != nullptr);
         FL_CHECK_EQ(result, buffer + 1);  // First 'e'
     }
 
-    SUBCASE("find with multiple matching characters") {
+    FL_SUBCASE("find with multiple matching characters") {
         char* result = fl::strpbrk(buffer, " w");
         FL_CHECK(result != nullptr);
         FL_CHECK_EQ(result, buffer + 5);  // Space comes first
     }
 
-    SUBCASE("no matching characters") {
+    FL_SUBCASE("no matching characters") {
         char* result = fl::strpbrk(buffer, "xyz");
         FL_CHECK(result == nullptr);
     }
 
-    SUBCASE("empty search set") {
+    FL_SUBCASE("empty search set") {
         char* result = fl::strpbrk(buffer, "");
         FL_CHECK(result == nullptr);
     }
 
-    SUBCASE("const version") {
+    FL_SUBCASE("const version") {
         const char* const_buffer = "hello";
         const char* result = fl::strpbrk(const_buffer, "aeiou");
         FL_CHECK(result != nullptr);
@@ -412,10 +412,10 @@ TEST_CASE("fl::strpbrk") {
     }
 }
 
-TEST_CASE("fl::strtok") {
+FL_TEST_CASE("fl::strtok") {
     char buffer[100];
 
-    SUBCASE("tokenize with single delimiter") {
+    FL_SUBCASE("tokenize with single delimiter") {
         fl::strcpy(buffer, "hello world test");
         char* token1 = fl::strtok(buffer, " ");
         FL_CHECK(token1 != nullptr);
@@ -433,7 +433,7 @@ TEST_CASE("fl::strtok") {
         FL_CHECK(token4 == nullptr);
     }
 
-    SUBCASE("tokenize with multiple delimiters") {
+    FL_SUBCASE("tokenize with multiple delimiters") {
         fl::strcpy(buffer, "one,two:three;four");
         char* token1 = fl::strtok(buffer, ",:;");
         FL_CHECK_EQ(fl::strcmp(token1, "one"), 0);
@@ -448,7 +448,7 @@ TEST_CASE("fl::strtok") {
         FL_CHECK_EQ(fl::strcmp(token4, "four"), 0);
     }
 
-    SUBCASE("consecutive delimiters are skipped") {
+    FL_SUBCASE("consecutive delimiters are skipped") {
         fl::strcpy(buffer, "a  b    c");
         char* token1 = fl::strtok(buffer, " ");
         FL_CHECK_EQ(fl::strcmp(token1, "a"), 0);
@@ -465,15 +465,15 @@ TEST_CASE("fl::strtok") {
 // Memory Operation Tests
 // ============================================================================
 
-TEST_CASE("fl::memcpy") {
-    SUBCASE("copy small block") {
+FL_TEST_CASE("fl::memcpy") {
+    FL_SUBCASE("copy small block") {
         char src[] = "hello";
         char dest[10];
         fl::memcpy(dest, src, 6);  // Include null terminator
         FL_CHECK_EQ(fl::strcmp(dest, "hello"), 0);
     }
 
-    SUBCASE("copy integers") {
+    FL_SUBCASE("copy integers") {
         int src[] = {1, 2, 3, 4, 5};
         int dest[5];
         fl::memcpy(dest, src, sizeof(src));
@@ -482,7 +482,7 @@ TEST_CASE("fl::memcpy") {
         }
     }
 
-    SUBCASE("copy structs") {
+    FL_SUBCASE("copy structs") {
         struct Test {
             int a;
             double b;
@@ -494,14 +494,14 @@ TEST_CASE("fl::memcpy") {
         FL_CHECK_EQ(dest.b, 3.14);
     }
 
-    SUBCASE("copy zero bytes is safe") {
+    FL_SUBCASE("copy zero bytes is safe") {
         char src[] = "hello";
         char dest[10] = "world";
         fl::memcpy(dest, src, 0);
         FL_CHECK_EQ(fl::strcmp(dest, "world"), 0);  // Unchanged
     }
 
-    SUBCASE("return value is destination") {
+    FL_SUBCASE("return value is destination") {
         char src[] = "test";
         char dest[10];
         void* result = fl::memcpy(dest, src, 5);
@@ -509,15 +509,15 @@ TEST_CASE("fl::memcpy") {
     }
 }
 
-TEST_CASE("fl::memmove") {
-    SUBCASE("move non-overlapping regions") {
+FL_TEST_CASE("fl::memmove") {
+    FL_SUBCASE("move non-overlapping regions") {
         char src[] = "hello";
         char dest[10];
         fl::memmove(dest, src, 6);
         FL_CHECK_EQ(fl::strcmp(dest, "hello"), 0);
     }
 
-    SUBCASE("move overlapping regions - forward") {
+    FL_SUBCASE("move overlapping regions - forward") {
         char buffer[] = "hello world";
         fl::memmove(buffer + 2, buffer, 5);  // Move "hello" to position 2
         FL_CHECK_EQ(buffer[2], 'h');
@@ -527,7 +527,7 @@ TEST_CASE("fl::memmove") {
         FL_CHECK_EQ(buffer[6], 'o');
     }
 
-    SUBCASE("move overlapping regions - backward") {
+    FL_SUBCASE("move overlapping regions - backward") {
         char buffer[] = "hello world";
         fl::memmove(buffer, buffer + 6, 5);  // Move "world" to beginning
         FL_CHECK_EQ(buffer[0], 'w');
@@ -537,15 +537,15 @@ TEST_CASE("fl::memmove") {
         FL_CHECK_EQ(buffer[4], 'd');
     }
 
-    SUBCASE("return value is destination") {
+    FL_SUBCASE("return value is destination") {
         char buffer[] = "test";
         void* result = fl::memmove(buffer, buffer, 4);
         FL_CHECK_EQ(result, static_cast<void*>(buffer));
     }
 }
 
-TEST_CASE("fl::memset") {
-    SUBCASE("set bytes to value") {
+FL_TEST_CASE("fl::memset") {
+    FL_SUBCASE("set bytes to value") {
         char buffer[10];
         fl::memset(buffer, 'A', 5);
         FL_CHECK_EQ(buffer[0], 'A');
@@ -553,7 +553,7 @@ TEST_CASE("fl::memset") {
         FL_CHECK_EQ(buffer[4], 'A');
     }
 
-    SUBCASE("clear buffer to zero") {
+    FL_SUBCASE("clear buffer to zero") {
         int buffer[5] = {1, 2, 3, 4, 5};
         fl::memset(buffer, 0, sizeof(buffer));
         for (int i = 0; i < 5; i++) {
@@ -561,98 +561,98 @@ TEST_CASE("fl::memset") {
         }
     }
 
-    SUBCASE("set with n=0 is safe") {
+    FL_SUBCASE("set with n=0 is safe") {
         char buffer[] = "hello";
         fl::memset(buffer, 'X', 0);
         FL_CHECK_EQ(fl::strcmp(buffer, "hello"), 0);  // Unchanged
     }
 
-    SUBCASE("return value is destination") {
+    FL_SUBCASE("return value is destination") {
         char buffer[10];
         void* result = fl::memset(buffer, 0, 10);
         FL_CHECK_EQ(result, static_cast<void*>(buffer));
     }
 }
 
-TEST_CASE("fl::memcmp") {
-    SUBCASE("equal memory regions") {
+FL_TEST_CASE("fl::memcmp") {
+    FL_SUBCASE("equal memory regions") {
         char a[] = "hello";
         char b[] = "hello";
         FL_CHECK_EQ(fl::memcmp(a, b, 5), 0);
     }
 
-    SUBCASE("first less than second") {
+    FL_SUBCASE("first less than second") {
         char a[] = "abc";
         char b[] = "abd";
         FL_CHECK(fl::memcmp(a, b, 3) < 0);
     }
 
-    SUBCASE("first greater than second") {
+    FL_SUBCASE("first greater than second") {
         char a[] = "abd";
         char b[] = "abc";
         FL_CHECK(fl::memcmp(a, b, 3) > 0);
     }
 
-    SUBCASE("compare fewer bytes than difference") {
+    FL_SUBCASE("compare fewer bytes than difference") {
         char a[] = "hello";
         char b[] = "help!";
         FL_CHECK_EQ(fl::memcmp(a, b, 2), 0);  // "he" == "he"
         FL_CHECK(fl::memcmp(a, b, 4) != 0);   // "hell" != "help"
     }
 
-    SUBCASE("compare integers") {
+    FL_SUBCASE("compare integers") {
         int a[] = {1, 2, 3};
         int b[] = {1, 2, 3};
         FL_CHECK_EQ(fl::memcmp(a, b, sizeof(a)), 0);
     }
 
-    SUBCASE("compare with n=0") {
+    FL_SUBCASE("compare with n=0") {
         FL_CHECK_EQ(fl::memcmp("abc", "xyz", 0), 0);
     }
 }
 
-TEST_CASE("fl::memchr") {
-    SUBCASE("find byte in memory") {
+FL_TEST_CASE("fl::memchr") {
+    FL_SUBCASE("find byte in memory") {
         char buffer[] = "hello world";
         void* result = fl::memchr(buffer, 'o', 11);
         FL_CHECK(result != nullptr);
         FL_CHECK_EQ(static_cast<char*>(result), buffer + 4);  // First 'o'
     }
 
-    SUBCASE("find byte at beginning") {
+    FL_SUBCASE("find byte at beginning") {
         char buffer[] = "hello";
         void* result = fl::memchr(buffer, 'h', 5);
         FL_CHECK(result != nullptr);
         FL_CHECK_EQ(static_cast<char*>(result), buffer);
     }
 
-    SUBCASE("find byte at end") {
+    FL_SUBCASE("find byte at end") {
         char buffer[] = "hello";
         void* result = fl::memchr(buffer, 'o', 5);
         FL_CHECK(result != nullptr);
         FL_CHECK_EQ(static_cast<char*>(result), buffer + 4);
     }
 
-    SUBCASE("byte not found") {
+    FL_SUBCASE("byte not found") {
         char buffer[] = "hello";
         void* result = fl::memchr(buffer, 'x', 5);
         FL_CHECK(result == nullptr);
     }
 
-    SUBCASE("search limited by n parameter") {
+    FL_SUBCASE("search limited by n parameter") {
         char buffer[] = "hello";
         void* result = fl::memchr(buffer, 'o', 3);  // Only search "hel"
         FL_CHECK(result == nullptr);
     }
 
-    SUBCASE("find zero byte") {
+    FL_SUBCASE("find zero byte") {
         char buffer[] = "hello";
         void* result = fl::memchr(buffer, 0, 6);
         FL_CHECK(result != nullptr);
         FL_CHECK_EQ(static_cast<char*>(result), buffer + 5);
     }
 
-    SUBCASE("const version") {
+    FL_SUBCASE("const version") {
         const char* const_buffer = "hello";
         const void* result = fl::memchr(const_buffer, 'l', 5);
         FL_CHECK(result != nullptr);
@@ -664,30 +664,30 @@ TEST_CASE("fl::memchr") {
 // Legacy Function Tests
 // ============================================================================
 
-TEST_CASE("fl::memfill") {
-    SUBCASE("memfill is alias for memset") {
+FL_TEST_CASE("fl::memfill") {
+    FL_SUBCASE("memfill is alias for memset") {
         char buffer[10];
         fl::memfill(buffer, 'X', 5);
         FL_CHECK_EQ(buffer[0], 'X');
         FL_CHECK_EQ(buffer[4], 'X');
     }
 
-    SUBCASE("return value is destination") {
+    FL_SUBCASE("return value is destination") {
         char buffer[10];
         void* result = fl::memfill(buffer, 0, 10);
         FL_CHECK_EQ(result, static_cast<void*>(buffer));
     }
 }
 
-TEST_CASE("fl::memcopy") {
-    SUBCASE("memcopy is alias for memcpy") {
+FL_TEST_CASE("fl::memcopy") {
+    FL_SUBCASE("memcopy is alias for memcpy") {
         char src[] = "hello";
         char dest[10];
         fl::memcopy(dest, src, 6);
         FL_CHECK_EQ(fl::strcmp(dest, "hello"), 0);
     }
 
-    SUBCASE("return value is destination") {
+    FL_SUBCASE("return value is destination") {
         char src[] = "test";
         char dest[10];
         void* result = fl::memcopy(dest, src, 5);
@@ -699,8 +699,8 @@ TEST_CASE("fl::memcopy") {
 // Integration and Edge Case Tests
 // ============================================================================
 
-TEST_CASE("fl::cstring integration tests") {
-    SUBCASE("build string with multiple operations") {
+FL_TEST_CASE("fl::cstring integration tests") {
+    FL_SUBCASE("build string with multiple operations") {
         char buffer[100];
         fl::strcpy(buffer, "Hello");
         fl::strcat(buffer, " ");
@@ -709,7 +709,7 @@ TEST_CASE("fl::cstring integration tests") {
         FL_CHECK_EQ(fl::strlen(buffer), 11);
     }
 
-    SUBCASE("manipulate string in place") {
+    FL_SUBCASE("manipulate string in place") {
         char buffer[] = "hello world";
         char* space = fl::strchr(buffer, ' ');
         FL_CHECK(space != nullptr);
@@ -717,14 +717,14 @@ TEST_CASE("fl::cstring integration tests") {
         FL_CHECK_EQ(fl::strcmp(buffer, "hello_world"), 0);
     }
 
-    SUBCASE("copy and compare memory") {
+    FL_SUBCASE("copy and compare memory") {
         int src[] = {1, 2, 3, 4, 5};
         int dest[5];
         fl::memcpy(dest, src, sizeof(src));
         FL_CHECK_EQ(fl::memcmp(src, dest, sizeof(src)), 0);
     }
 
-    SUBCASE("clear structure with memset") {
+    FL_SUBCASE("clear structure with memset") {
         struct Data {
             int x;
             int y;
@@ -738,8 +738,8 @@ TEST_CASE("fl::cstring integration tests") {
     }
 }
 
-TEST_CASE("fl::cstring type safety") {
-    SUBCASE("functions work with fl::size_t") {
+FL_TEST_CASE("fl::cstring type safety") {
+    FL_SUBCASE("functions work with fl::size_t") {
         const char* str = "hello";
         size_t len = fl::strlen(str);
         FL_CHECK_EQ(len, 5);

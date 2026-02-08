@@ -39,7 +39,7 @@ void sketch_loop() {
     loop();
 }
 
-TEST_CASE("Sketch Runner - Basic Functionality") {
+FL_TEST_CASE("Sketch Runner - Basic Functionality") {
     // Reset counters and enable test mode
     setup_call_count = 0;
     loop_call_count = 0;

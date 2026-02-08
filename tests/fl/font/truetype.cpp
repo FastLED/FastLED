@@ -1,4 +1,4 @@
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/cstdio.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/memory.h"
@@ -43,10 +43,10 @@ fl::vector<unsigned char> loadFontFile(const char* filename) {
 
 } // anonymous namespace
 
-TEST_CASE("stbtt_truetype - Font loading") {
-    SUBCASE("Load Covenant5x5.ttf (default embedded font)") {
+FL_TEST_CASE("stbtt_truetype - Font loading") {
+    FL_SUBCASE("Load Covenant5x5.ttf (default embedded font)") {
         auto font_data = loadFontFile("Covenant5x5.ttf");
-        REQUIRE(!font_data.empty());
+        FL_REQUIRE(!font_data.empty());
 
         // Verify it's a valid font file
         int32_t num_fonts = stbtt_GetNumberOfFonts(font_data.data());
@@ -54,17 +54,17 @@ TEST_CASE("stbtt_truetype - Font loading") {
         FL_CHECK_LE(num_fonts, 10); // Reasonable upper bound
     }
 
-    SUBCASE("Get font offset") {
+    FL_SUBCASE("Get font offset") {
         auto font_data = loadFontFile("Covenant5x5.ttf");
-        REQUIRE(!font_data.empty());
+        FL_REQUIRE(!font_data.empty());
 
         int32_t offset = stbtt_GetFontOffsetForIndex(font_data.data(), 0);
         FL_CHECK_GE(offset, 0);
     }
 
-    SUBCASE("Initialize font info") {
+    FL_SUBCASE("Initialize font info") {
         auto font_data = loadFontFile("Covenant5x5.ttf");
-        REQUIRE(!font_data.empty());
+        FL_REQUIRE(!font_data.empty());
 
         stbtt_fontinfo font;
         int32_t result = stbtt_InitFont(&font, font_data.data(), 0);
@@ -72,14 +72,14 @@ TEST_CASE("stbtt_truetype - Font loading") {
     }
 }
 
-TEST_CASE("stbtt_truetype - Font metrics") {
+FL_TEST_CASE("stbtt_truetype - Font metrics") {
     auto font_data = loadFontFile("Covenant5x5.ttf");
-    REQUIRE(!font_data.empty());
+    FL_REQUIRE(!font_data.empty());
 
     stbtt_fontinfo font;
-    REQUIRE(stbtt_InitFont(&font, font_data.data(), 0) != 0);
+    FL_REQUIRE(stbtt_InitFont(&font, font_data.data(), 0) != 0);
 
-    SUBCASE("Get vertical metrics") {
+    FL_SUBCASE("Get vertical metrics") {
         int32_t ascent, descent, line_gap;
         stbtt_GetFontVMetrics(&font, &ascent, &descent, &line_gap);
 
@@ -89,7 +89,7 @@ TEST_CASE("stbtt_truetype - Font metrics") {
         FL_CHECK_GE(line_gap, 0);
     }
 
-    SUBCASE("Get bounding box") {
+    FL_SUBCASE("Get bounding box") {
         int32_t x0, y0, x1, y1;
         stbtt_GetFontBoundingBox(&font, &x0, &y0, &x1, &y1);
 
@@ -98,61 +98,61 @@ TEST_CASE("stbtt_truetype - Font metrics") {
         FL_CHECK_LT(y0, y1);
     }
 
-    SUBCASE("Scale for pixel height") {
+    FL_SUBCASE("Scale for pixel height") {
         float scale = stbtt_ScaleForPixelHeight(&font, 32.0f);
         FL_CHECK_GT(scale, 0.0f);
         FL_CHECK_LT(scale, 1.0f); // Scale should be less than 1 for typical fonts
     }
 }
 
-TEST_CASE("stbtt_truetype - Glyph queries") {
+FL_TEST_CASE("stbtt_truetype - Glyph queries") {
     auto font_data = loadFontFile("Covenant5x5.ttf");
-    REQUIRE(!font_data.empty());
+    FL_REQUIRE(!font_data.empty());
 
     stbtt_fontinfo font;
-    REQUIRE(stbtt_InitFont(&font, font_data.data(), 0) != 0);
+    FL_REQUIRE(stbtt_InitFont(&font, font_data.data(), 0) != 0);
 
-    SUBCASE("Find glyph index for period") {
+    FL_SUBCASE("Find glyph index for period") {
         int32_t glyph_index = stbtt_FindGlyphIndex(&font, '.');
         FL_CHECK_GT(glyph_index, 0); // Should find the period glyph
     }
 
-    SUBCASE("Find glyph index for '8'") {
+    FL_SUBCASE("Find glyph index for '8'") {
         int32_t glyph_index = stbtt_FindGlyphIndex(&font, '8');
         FL_CHECK_GT(glyph_index, 0); // Should find the '8' glyph
     }
 
-    SUBCASE("Get codepoint metrics") {
+    FL_SUBCASE("Get codepoint metrics") {
         int32_t advance_width, left_side_bearing;
         stbtt_GetCodepointHMetrics(&font, 'A', &advance_width, &left_side_bearing);
 
         FL_CHECK_GT(advance_width, 0);
     }
 
-    SUBCASE("Check glyph is not empty") {
+    FL_SUBCASE("Check glyph is not empty") {
         int32_t glyph_index = stbtt_FindGlyphIndex(&font, '.');
-        REQUIRE(glyph_index > 0);
+        FL_REQUIRE(glyph_index > 0);
 
         int32_t is_empty = stbtt_IsGlyphEmpty(&font, glyph_index);
         FL_CHECK_EQ(is_empty, 0); // Period should not be empty
     }
 }
 
-TEST_CASE("stbtt_truetype - Bitmap rendering - period") {
+FL_TEST_CASE("stbtt_truetype - Bitmap rendering - period") {
     auto font_data = loadFontFile("Covenant5x5.ttf");
-    REQUIRE(!font_data.empty());
+    FL_REQUIRE(!font_data.empty());
 
     stbtt_fontinfo font;
-    REQUIRE(stbtt_InitFont(&font, font_data.data(), 0) != 0);
+    FL_REQUIRE(stbtt_InitFont(&font, font_data.data(), 0) != 0);
 
     float scale = stbtt_ScaleForPixelHeight(&font, 32.0f);
 
-    SUBCASE("Render period (.) with antialiasing") {
+    FL_SUBCASE("Render period (.) with antialiasing") {
         int32_t width, height, xoff, yoff;
         unsigned char* bitmap = stbtt_GetCodepointBitmap(&font, scale, scale, '.',
                                                           &width, &height, &xoff, &yoff);
 
-        REQUIRE(bitmap != nullptr);
+        FL_REQUIRE(bitmap != nullptr);
         FL_CHECK_GT(width, 0);
         FL_CHECK_GT(height, 0);
 
@@ -172,7 +172,7 @@ TEST_CASE("stbtt_truetype - Bitmap rendering - period") {
         stbtt_FreeBitmap(bitmap, nullptr);
     }
 
-    SUBCASE("Get bitmap box for period") {
+    FL_SUBCASE("Get bitmap box for period") {
         int32_t ix0, iy0, ix1, iy1;
         stbtt_GetCodepointBitmapBox(&font, '.', scale, scale, &ix0, &iy0, &ix1, &iy1);
 
@@ -186,21 +186,21 @@ TEST_CASE("stbtt_truetype - Bitmap rendering - period") {
     }
 }
 
-TEST_CASE("stbtt_truetype - Bitmap rendering - digit 8") {
+FL_TEST_CASE("stbtt_truetype - Bitmap rendering - digit 8") {
     auto font_data = loadFontFile("Covenant5x5.ttf");
-    REQUIRE(!font_data.empty());
+    FL_REQUIRE(!font_data.empty());
 
     stbtt_fontinfo font;
-    REQUIRE(stbtt_InitFont(&font, font_data.data(), 0) != 0);
+    FL_REQUIRE(stbtt_InitFont(&font, font_data.data(), 0) != 0);
 
     float scale = stbtt_ScaleForPixelHeight(&font, 32.0f);
 
-    SUBCASE("Render '8' with antialiasing") {
+    FL_SUBCASE("Render '8' with antialiasing") {
         int32_t width, height, xoff, yoff;
         unsigned char* bitmap = stbtt_GetCodepointBitmap(&font, scale, scale, '8',
                                                           &width, &height, &xoff, &yoff);
 
-        REQUIRE(bitmap != nullptr);
+        FL_REQUIRE(bitmap != nullptr);
         FL_CHECK_GT(width, 0);
         FL_CHECK_GT(height, 0);
 
@@ -225,12 +225,12 @@ TEST_CASE("stbtt_truetype - Bitmap rendering - digit 8") {
         stbtt_FreeBitmap(bitmap, nullptr);
     }
 
-    SUBCASE("Verify '8' shape characteristics") {
+    FL_SUBCASE("Verify '8' shape characteristics") {
         int32_t width, height, xoff, yoff;
         unsigned char* bitmap = stbtt_GetCodepointBitmap(&font, scale, scale, '8',
                                                           &width, &height, &xoff, &yoff);
 
-        REQUIRE(bitmap != nullptr);
+        FL_REQUIRE(bitmap != nullptr);
 
         // '8' has two enclosed loops, so there should be white space in the middle
         // Check that not all pixels are solid
@@ -253,18 +253,18 @@ TEST_CASE("stbtt_truetype - Bitmap rendering - digit 8") {
     }
 }
 
-TEST_CASE("stbtt_truetype - Rendering without antialiasing") {
+FL_TEST_CASE("stbtt_truetype - Rendering without antialiasing") {
     auto font_data = loadFontFile("Covenant5x5.ttf");
-    REQUIRE(!font_data.empty());
+    FL_REQUIRE(!font_data.empty());
 
     stbtt_fontinfo font;
-    REQUIRE(stbtt_InitFont(&font, font_data.data(), 0) != 0);
+    FL_REQUIRE(stbtt_InitFont(&font, font_data.data(), 0) != 0);
 
     // Verify we can compute a scale (just test it works)
     float scale = stbtt_ScaleForPixelHeight(&font, 32.0f);
     (void)scale;
 
-    SUBCASE("Bake font bitmap (simplified packing)") {
+    FL_SUBCASE("Bake font bitmap (simplified packing)") {
         // Baking creates a bitmap atlas without antialiasing control,
         // but we can verify it works
         const int32_t bitmap_w = 512;
@@ -282,14 +282,14 @@ TEST_CASE("stbtt_truetype - Rendering without antialiasing") {
     }
 }
 
-TEST_CASE("stbtt_truetype - Kerning") {
+FL_TEST_CASE("stbtt_truetype - Kerning") {
     auto font_data = loadFontFile("Covenant5x5.ttf");
-    REQUIRE(!font_data.empty());
+    FL_REQUIRE(!font_data.empty());
 
     stbtt_fontinfo font;
-    REQUIRE(stbtt_InitFont(&font, font_data.data(), 0) != 0);
+    FL_REQUIRE(stbtt_InitFont(&font, font_data.data(), 0) != 0);
 
-    SUBCASE("Get kerning advance") {
+    FL_SUBCASE("Get kerning advance") {
         // Test kerning between common pairs
         int32_t kern_AV = stbtt_GetCodepointKernAdvance(&font, 'A', 'V');
         int32_t kern_AA = stbtt_GetCodepointKernAdvance(&font, 'A', 'A');

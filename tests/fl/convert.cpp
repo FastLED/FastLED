@@ -1,12 +1,12 @@
 #include "fl/convert.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/int.h"
 
 using namespace fl;
 
 // Test the single function in convert.h
-TEST_CASE("convert_fastled_timings_to_timedeltas") {
-    SUBCASE("basic conversion") {
+FL_TEST_CASE("convert_fastled_timings_to_timedeltas") {
+    FL_SUBCASE("basic conversion") {
         u16 T1 = 100;
         u16 T2 = 200;
         u16 T3 = 300;
@@ -24,7 +24,7 @@ TEST_CASE("convert_fastled_timings_to_timedeltas") {
         FL_CHECK_EQ(T1L, 300);
     }
 
-    SUBCASE("zero values") {
+    FL_SUBCASE("zero values") {
         u16 T0H, T0L, T1H, T1L;
 
         convert_fastled_timings_to_timedeltas(0, 0, 0, &T0H, &T0L, &T1H, &T1L);
@@ -35,7 +35,7 @@ TEST_CASE("convert_fastled_timings_to_timedeltas") {
         FL_CHECK_EQ(T1L, 0);
     }
 
-    SUBCASE("maximum values") {
+    FL_SUBCASE("maximum values") {
         u16 T1 = 0xFFFF;
         u16 T2 = 0;
         u16 T3 = 0;
@@ -49,7 +49,7 @@ TEST_CASE("convert_fastled_timings_to_timedeltas") {
         FL_CHECK_EQ(T1L, 0);
     }
 
-    SUBCASE("typical LED timing values (WS2812B-like)") {
+    FL_SUBCASE("typical LED timing values (WS2812B-like)") {
         // Typical FastLED timings for WS2812B:
         // T1 = 350ns (high time for both 0 and 1)
         // T2 = 350ns (additional high time for 1-bit)
@@ -76,7 +76,7 @@ TEST_CASE("convert_fastled_timings_to_timedeltas") {
         FL_CHECK_EQ(period_0, 1250);  // Total period = 1250ns
     }
 
-    SUBCASE("edge case - T2 and T3 sum") {
+    FL_SUBCASE("edge case - T2 and T3 sum") {
         // Test that T0L correctly sums T2 + T3
         u16 T1 = 10;
         u16 T2 = 20000;
@@ -91,7 +91,7 @@ TEST_CASE("convert_fastled_timings_to_timedeltas") {
         FL_CHECK_EQ(T1L, 30000);
     }
 
-    SUBCASE("overflow handling with wraparound") {
+    FL_SUBCASE("overflow handling with wraparound") {
         // Test behavior when sum would exceed u16 range
         // The function doesn't check for overflow, so wraparound occurs
         u16 T1 = 0x8000;  // 32768
@@ -109,7 +109,7 @@ TEST_CASE("convert_fastled_timings_to_timedeltas") {
         FL_CHECK_EQ(T1L, 0x1000);
     }
 
-    SUBCASE("realistic APA102 timing") {
+    FL_SUBCASE("realistic APA102 timing") {
         // APA102 uses different timing structure
         u16 T1 = 250;
         u16 T2 = 250;
@@ -126,7 +126,7 @@ TEST_CASE("convert_fastled_timings_to_timedeltas") {
 }
 
 // Additional test to verify the function doesn't modify input parameters
-TEST_CASE("convert_fastled_timings_to_timedeltas input preservation") {
+FL_TEST_CASE("convert_fastled_timings_to_timedeltas input preservation") {
     u16 T1 = 123;
     u16 T2 = 456;
     u16 T3 = 789;

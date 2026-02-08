@@ -10,7 +10,7 @@
 
 using namespace fl;
 
-TEST_CASE("SPIBusManager - device registration and bus type") {
+FL_TEST_CASE("SPIBusManager - device registration and bus type") {
     SPIBusManager& manager = getSPIBusManager();
     manager.reset();
 
@@ -22,22 +22,22 @@ TEST_CASE("SPIBusManager - device registration and bus type") {
         (void*)0x1234  // dummy controller
     );
 
-    CHECK(handle.is_valid);
+    FL_CHECK(handle.is_valid);
 
     // Initialize
     manager.initialize();
 
     // Verify bus info is available
     const SPIBusInfo* bus = manager.getBusInfo(handle.bus_id);
-    CHECK(bus != nullptr);
+    FL_CHECK(bus != nullptr);
 
     // Verify bus type based on FASTLED_FORCE_SOFTWARE_SPI define
     // When the define is set, bus_type should be SOFT_SPI
     // When the define is NOT set, bus_type should be SINGLE_SPI for one device
 #if defined(FASTLED_FORCE_SOFTWARE_SPI)
-    CHECK(bus->bus_type == SPIBusType::SOFT_SPI);
+    FL_CHECK(bus->bus_type == SPIBusType::SOFT_SPI);
 #else
-    CHECK(bus->bus_type == SPIBusType::SINGLE_SPI);
+    FL_CHECK(bus->bus_type == SPIBusType::SINGLE_SPI);
 #endif
 
     manager.reset();

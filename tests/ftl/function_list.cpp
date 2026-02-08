@@ -5,14 +5,14 @@
 #include "fl/unused.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/move.h"
 #include "fl/stl/vector.h"
 
 using namespace fl;
 
-TEST_CASE("function_list<void()> - no arguments") {
+FL_TEST_CASE("function_list<void()> - no arguments") {
     function_list<void()> callbacks;
     int call_count = 0;
     
@@ -26,7 +26,7 @@ TEST_CASE("function_list<void()> - no arguments") {
     FL_REQUIRE(call_count == 2);
 }
 
-TEST_CASE("function_list<void(float)> - single argument") {
+FL_TEST_CASE("function_list<void(float)> - single argument") {
     function_list<void(float)> callbacks;
     float received_value = 0.0f;
     
@@ -38,7 +38,7 @@ TEST_CASE("function_list<void(float)> - single argument") {
     FL_REQUIRE(received_value == 99.9f);
 }
 
-TEST_CASE("function_list<void(uint8_t, float, float)> - multiple arguments") {
+FL_TEST_CASE("function_list<void(uint8_t, float, float)> - multiple arguments") {
     function_list<void(uint8_t, float, float)> callbacks;
     uint8_t received_u8 = 0;
     float received_f1 = 0.0f;
@@ -56,7 +56,7 @@ TEST_CASE("function_list<void(uint8_t, float, float)> - multiple arguments") {
     FL_REQUIRE(received_f2 == 2.5f);
 }
 
-TEST_CASE("function_list<void()> - function signature syntax with no args") {
+FL_TEST_CASE("function_list<void()> - function signature syntax with no args") {
     function_list<void()> callbacks;
     int call_count = 0;
     
@@ -68,7 +68,7 @@ TEST_CASE("function_list<void()> - function signature syntax with no args") {
     FL_REQUIRE(call_count == 2);
 }
 
-TEST_CASE("function_list<void(float)> - function signature syntax with single arg") {
+FL_TEST_CASE("function_list<void(float)> - function signature syntax with single arg") {
     function_list<void(float)> callbacks;
     float received_value = 0.0f;
     
@@ -77,7 +77,7 @@ TEST_CASE("function_list<void(float)> - function signature syntax with single ar
     FL_REQUIRE(received_value == 3.14f);
 }
 
-TEST_CASE("function_list<void(uint8_t, float, float)> - function signature syntax with multiple args") {
+FL_TEST_CASE("function_list<void(uint8_t, float, float)> - function signature syntax with multiple args") {
     function_list<void(uint8_t, float, float)> callbacks;
     uint8_t received_u8 = 0;
     float received_f1 = 0.0f;
@@ -95,7 +95,7 @@ TEST_CASE("function_list<void(uint8_t, float, float)> - function signature synta
     FL_REQUIRE(received_f2 == 10.0f);
 }
 
-TEST_CASE("function_list - add() returns unique IDs") {
+FL_TEST_CASE("function_list - add() returns unique IDs") {
     function_list<void()> callbacks;
     
     int id1 = callbacks.add([]() {});
@@ -107,7 +107,7 @@ TEST_CASE("function_list - add() returns unique IDs") {
     FL_REQUIRE(id1 != id3);
 }
 
-TEST_CASE("function_list - remove() by ID") {
+FL_TEST_CASE("function_list - remove() by ID") {
     function_list<void()> callbacks;
     int call_count_1 = 0;
     int call_count_2 = 0;
@@ -131,7 +131,7 @@ TEST_CASE("function_list - remove() by ID") {
     FL_REQUIRE(call_count_3 == 2);
 }
 
-TEST_CASE("function_list - clear() removes all callbacks") {
+FL_TEST_CASE("function_list - clear() removes all callbacks") {
     function_list<void()> callbacks;
     int call_count = 0;
     
@@ -147,7 +147,7 @@ TEST_CASE("function_list - clear() removes all callbacks") {
     FL_REQUIRE(call_count == 3);  // No additional calls after clear()
 }
 
-TEST_CASE("function_list - empty() and size()") {
+FL_TEST_CASE("function_list - empty() and size()") {
     function_list<void()> callbacks;
     
     FL_REQUIRE(callbacks.empty());
@@ -169,7 +169,7 @@ TEST_CASE("function_list - empty() and size()") {
     FL_REQUIRE(callbacks.size() == 0);
 }
 
-TEST_CASE("function_list - operator bool()") {
+FL_TEST_CASE("function_list - operator bool()") {
     function_list<void()> callbacks;
     
     FL_REQUIRE_FALSE(callbacks);  // Empty list is false
@@ -181,7 +181,7 @@ TEST_CASE("function_list - operator bool()") {
     FL_REQUIRE_FALSE(callbacks);  // Empty again
 }
 
-TEST_CASE("function_list - multiple callbacks invoked in order") {
+FL_TEST_CASE("function_list - multiple callbacks invoked in order") {
     function_list<void(int)> callbacks;
     fl::vector<int> call_order;
     
@@ -197,7 +197,7 @@ TEST_CASE("function_list - multiple callbacks invoked in order") {
     FL_REQUIRE(call_order[2] == 30);
 }
 
-TEST_CASE("function_list - backward compatibility with function_list<void()>") {
+FL_TEST_CASE("function_list - backward compatibility with function_list<void()>") {
     function_list<void()> callbacks;
     int call_count = 0;
     
@@ -209,7 +209,7 @@ TEST_CASE("function_list - backward compatibility with function_list<void()>") {
     FL_REQUIRE(call_count == 2);
 }
 
-TEST_CASE("function_list - self-removal during iteration") {
+FL_TEST_CASE("function_list - self-removal during iteration") {
     function_list<void()> callbacks;
     int call_count_1 = 0;
     int call_count_2 = 0;
@@ -249,7 +249,7 @@ TEST_CASE("function_list - self-removal during iteration") {
     FL_REQUIRE(call_count_3 == 1);  // No change
 }
 
-TEST_CASE("function_list - remove other callback during iteration") {
+FL_TEST_CASE("function_list - remove other callback during iteration") {
     function_list<void()> callbacks;
     int call_count_1 = 0;
     int call_count_2 = 0;
@@ -281,7 +281,7 @@ TEST_CASE("function_list - remove other callback during iteration") {
     FL_REQUIRE(call_count_3 == 0);  // Never called because removed by id1
 }
 
-TEST_CASE("function_list - remove callback before current position") {
+FL_TEST_CASE("function_list - remove callback before current position") {
     function_list<void()> callbacks;
     int call_count_1 = 0;
     int call_count_2 = 0;
@@ -319,7 +319,7 @@ TEST_CASE("function_list - remove callback before current position") {
     FL_REQUIRE(call_count_3 == 2);  // Incremented
 }
 
-TEST_CASE("function_list - nested invocations") {
+FL_TEST_CASE("function_list - nested invocations") {
     function_list<void()> callbacks;
     int call_count_outer = 0;
     int call_count_inner = 0;
@@ -340,7 +340,7 @@ TEST_CASE("function_list - nested invocations") {
     FL_REQUIRE(call_count_inner == 1);
 }
 
-TEST_CASE("function_list - recursive self-invocation") {
+FL_TEST_CASE("function_list - recursive self-invocation") {
     function_list<void(int)> callbacks;
     int total_calls = 0;
 
@@ -355,7 +355,7 @@ TEST_CASE("function_list - recursive self-invocation") {
     FL_REQUIRE(total_calls == 4);
 }
 
-TEST_CASE("function_list - multiple removals in one callback") {
+FL_TEST_CASE("function_list - multiple removals in one callback") {
     function_list<void()> callbacks;
     int call_count_1 = 0;
     int call_count_2 = 0;
@@ -395,7 +395,7 @@ TEST_CASE("function_list - multiple removals in one callback") {
     FL_REQUIRE(call_count_4 == 0);  // Removed before execution
 }
 
-TEST_CASE("function_list - add during iteration") {
+FL_TEST_CASE("function_list - add during iteration") {
     function_list<void()> callbacks;
     int call_count_1 = 0;
     int call_count_2 = 0;
@@ -421,7 +421,7 @@ TEST_CASE("function_list - add during iteration") {
 // Compile-time error test - commented out because it should NOT compile
 // Uncomment this test to verify that non-void return types trigger static_assert
 /*
-TEST_CASE("function_list<int(float)> - should NOT compile due to non-void return type") {
+FL_TEST_CASE("function_list<int(float)> - should NOT compile due to non-void return type") {
     // This should trigger static_assert with message:
     // "function_list only supports void return type."
     function_list<int(float)> callbacks;  // ERROR: non-void return type

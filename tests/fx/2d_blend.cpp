@@ -10,7 +10,7 @@
 #include "fl/stl/ostream.h"
 #include "fl/stl/stdint.h"
 #include "crgb.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/fx/fx2d.h"
 #include "fl/rgb8.h"
 #include "fl/stl/string.h"
@@ -63,7 +63,7 @@ class TestFx2D : public fl::Fx2d {
     fl::scoped_array<CRGB> mLeds;
 };
 
-TEST_CASE("Test FX2d Layered Blending") {
+FL_TEST_CASE("Test FX2d Layered Blending") {
     const uint16_t width = 1;
     const uint16_t height = 1;
     fl::XYMap xyMap = fl::XYMap::constructRectangularGrid(width, height);
@@ -89,7 +89,7 @@ TEST_CASE("Test FX2d Layered Blending") {
     FL_CHECK(led.b == 0);
 }
 
-TEST_CASE("Test FX2d Layered with XYMap") {
+FL_TEST_CASE("Test FX2d Layered with XYMap") {
     enum {
         width = 2,
         height = 2,
@@ -98,7 +98,7 @@ TEST_CASE("Test FX2d Layered with XYMap") {
     fl::XYMap xyMapSerp = fl::XYMap::constructSerpentine(width, height);
     fl::XYMap xyRect = fl::XYMap::constructRectangularGrid(width, height);
 
-    SUBCASE("Rectangular Grid") {
+    FL_SUBCASE("Rectangular Grid") {
         // Create a blue layer
         // SolidColorFx2d blueLayer(width, height, CRGB(0, 0, 255));
         TestFx2D testFx(width, height);
@@ -142,7 +142,7 @@ TEST_CASE("Test FX2d Layered with XYMap") {
         FL_CHECK(led[3].b == 0);
     }
 
-    SUBCASE("Serpentine") {
+    FL_SUBCASE("Serpentine") {
         // Create a blue layer
         TestFx2D testFx(width, height);
         testFx.set(0, 0, CRGB(0, 0, 255)); // Set the first pixel to blue

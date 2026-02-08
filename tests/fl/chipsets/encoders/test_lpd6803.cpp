@@ -1,4 +1,4 @@
-#include "doctest.h"
+#include "test.h"
 #include "fl/chipsets/encoders/lpd6803.h"
 #include "fl/chipsets/encoders/encoder_utils.h"
 #include "fl/stl/array.h"
@@ -66,45 +66,45 @@ using namespace test_lpd6803;
 // Helper Function Tests
 // ============================================================================
 
-TEST_CASE("lpd6803EncodeRGB() - marker bit set") {
+FL_TEST_CASE("lpd6803EncodeRGB() - marker bit set") {
     u16 result = fl::lpd6803EncodeRGB(0, 0, 0);
     FL_CHECK((result & 0x8000) == 0x8000);
 }
 
-TEST_CASE("lpd6803EncodeRGB() - black (0,0,0)") {
+FL_TEST_CASE("lpd6803EncodeRGB() - black (0,0,0)") {
     u16 result = fl::lpd6803EncodeRGB(0, 0, 0);
     FL_CHECK(result == 0x8000);  // Only marker bit set
 }
 
-TEST_CASE("lpd6803EncodeRGB() - white (255,255,255)") {
+FL_TEST_CASE("lpd6803EncodeRGB() - white (255,255,255)") {
     u16 result = fl::lpd6803EncodeRGB(255, 255, 255);
     // 255 >> 3 = 31 (0x1F) for each component
     // Expected: 1bbbbbgggggrrrrr = 1_11111_11111_11111 = 0xFFFF
     FL_CHECK(result == 0xFFFF);
 }
 
-TEST_CASE("lpd6803EncodeRGB() - pure red (255,0,0)") {
+FL_TEST_CASE("lpd6803EncodeRGB() - pure red (255,0,0)") {
     u16 result = fl::lpd6803EncodeRGB(255, 0, 0);
     // Red in bits 14-10: (255 & 0xF8) << 7 = 0xF8 << 7 = 0x7C00
     // Expected: 0x8000 | 0x7C00 = 0xFC00
     FL_CHECK(result == 0xFC00);
 }
 
-TEST_CASE("lpd6803EncodeRGB() - pure green (0,255,0)") {
+FL_TEST_CASE("lpd6803EncodeRGB() - pure green (0,255,0)") {
     u16 result = fl::lpd6803EncodeRGB(0, 255, 0);
     // Green in bits 9-5: (255 & 0xF8) << 2 = 0xF8 << 2 = 0x03E0
     // Expected: 0x8000 | 0x03E0 = 0x83E0
     FL_CHECK(result == 0x83E0);
 }
 
-TEST_CASE("lpd6803EncodeRGB() - pure blue (0,0,255)") {
+FL_TEST_CASE("lpd6803EncodeRGB() - pure blue (0,0,255)") {
     u16 result = fl::lpd6803EncodeRGB(0, 0, 255);
     // Blue in bits 4-0: 255 >> 3 = 0x1F
     // Expected: 0x8000 | 0x001F = 0x801F
     FL_CHECK(result == 0x801F);
 }
 
-TEST_CASE("lpd6803EncodeRGB() - mid-range values (128,128,128)") {
+FL_TEST_CASE("lpd6803EncodeRGB() - mid-range values (128,128,128)") {
     u16 result = fl::lpd6803EncodeRGB(128, 128, 128);
     // 128 >> 3 = 16 (0x10) for each component
     // Red: (128 & 0xF8) << 7 = 0x80 << 7 = 0x4000
@@ -114,13 +114,13 @@ TEST_CASE("lpd6803EncodeRGB() - mid-range values (128,128,128)") {
     FL_CHECK(result == 0xC210);
 }
 
-TEST_CASE("lpd6803EncodeRGB() - low values (7,7,7)") {
+FL_TEST_CASE("lpd6803EncodeRGB() - low values (7,7,7)") {
     u16 result = fl::lpd6803EncodeRGB(7, 7, 7);
     // 7 >> 3 = 0 for each component (all bits lost in 5-bit precision)
     FL_CHECK(result == 0x8000);
 }
 
-TEST_CASE("lpd6803EncodeRGB() - boundary (8,8,8)") {
+FL_TEST_CASE("lpd6803EncodeRGB() - boundary (8,8,8)") {
     u16 result = fl::lpd6803EncodeRGB(8, 8, 8);
     // 8 >> 3 = 1 for each component
     // Red: (8 & 0xF8) << 7 = 0x08 << 7 = 0x0400
@@ -134,7 +134,7 @@ TEST_CASE("lpd6803EncodeRGB() - boundary (8,8,8)") {
 // Frame Structure Tests
 // ============================================================================
 
-TEST_CASE("encodeLPD6803() - empty range (0 LEDs)") {
+FL_TEST_CASE("encodeLPD6803() - empty range (0 LEDs)") {
     fl::vector<fl::array<fl::u8, 3>> leds;
     fl::vector<fl::u8> output;
 
@@ -145,7 +145,7 @@ TEST_CASE("encodeLPD6803() - empty range (0 LEDs)") {
     test_lpd6803::verifyStartBoundary(output);
 }
 
-TEST_CASE("encodeLPD6803() - single LED black") {
+FL_TEST_CASE("encodeLPD6803() - single LED black") {
     fl::vector<fl::array<fl::u8, 3>> leds = {{{0, 0, 0}}};
     fl::vector<fl::u8> output;
 
@@ -157,7 +157,7 @@ TEST_CASE("encodeLPD6803() - single LED black") {
     test_lpd6803::verifyLEDFrame(output, 4, 0, 0, 0);
 }
 
-TEST_CASE("encodeLPD6803() - single LED white") {
+FL_TEST_CASE("encodeLPD6803() - single LED white") {
     fl::vector<fl::array<fl::u8, 3>> leds = {{{255, 255, 255}}};
     fl::vector<fl::u8> output;
 
@@ -168,7 +168,7 @@ TEST_CASE("encodeLPD6803() - single LED white") {
     test_lpd6803::verifyLEDFrame(output, 4, 255, 255, 255);
 }
 
-TEST_CASE("encodeLPD6803() - single LED red") {
+FL_TEST_CASE("encodeLPD6803() - single LED red") {
     fl::vector<fl::array<fl::u8, 3>> leds = {{{255, 0, 0}}};
     fl::vector<fl::u8> output;
 
@@ -179,7 +179,7 @@ TEST_CASE("encodeLPD6803() - single LED red") {
     test_lpd6803::verifyLEDFrame(output, 4, 255, 0, 0);
 }
 
-TEST_CASE("encodeLPD6803() - multiple LEDs (3 LEDs)") {
+FL_TEST_CASE("encodeLPD6803() - multiple LEDs (3 LEDs)") {
     fl::vector<fl::array<fl::u8, 3>> leds = {
         {{255, 0, 0}},    // Red
         {{0, 255, 0}},    // Green
@@ -201,7 +201,7 @@ TEST_CASE("encodeLPD6803() - multiple LEDs (3 LEDs)") {
 // End Boundary Tests (Critical for LPD6803)
 // ============================================================================
 
-TEST_CASE("encodeLPD6803() - 31 LEDs (no end boundary)") {
+FL_TEST_CASE("encodeLPD6803() - 31 LEDs (no end boundary)") {
     fl::vector<fl::array<fl::u8, 3>> leds(31, {{128, 128, 128}});
     fl::vector<fl::u8> output;
 
@@ -213,7 +213,7 @@ TEST_CASE("encodeLPD6803() - 31 LEDs (no end boundary)") {
     test_lpd6803::verifyEndBoundary(output, 31, 66);
 }
 
-TEST_CASE("encodeLPD6803() - 32 LEDs (1 DWord end boundary)") {
+FL_TEST_CASE("encodeLPD6803() - 32 LEDs (1 DWord end boundary)") {
     fl::vector<fl::array<fl::u8, 3>> leds(32, {{128, 128, 128}});
     fl::vector<fl::u8> output;
 
@@ -225,7 +225,7 @@ TEST_CASE("encodeLPD6803() - 32 LEDs (1 DWord end boundary)") {
     test_lpd6803::verifyEndBoundary(output, 32, 68);
 }
 
-TEST_CASE("encodeLPD6803() - 40 LEDs (1 DWord end boundary)") {
+FL_TEST_CASE("encodeLPD6803() - 40 LEDs (1 DWord end boundary)") {
     // Reduced from 64 to 40 LEDs for performance (still tests end boundary beyond 32)
     fl::vector<fl::array<fl::u8, 3>> leds(40, {{255, 128, 64}});
     fl::vector<fl::u8> output;
@@ -239,7 +239,7 @@ TEST_CASE("encodeLPD6803() - 40 LEDs (1 DWord end boundary)") {
     test_lpd6803::verifyEndBoundary(output, 40, 84);
 }
 
-TEST_CASE("encodeLPD6803() - 70 LEDs (2 DWord end boundary)") {
+FL_TEST_CASE("encodeLPD6803() - 70 LEDs (2 DWord end boundary)") {
     // Reduced from 96 to 70 LEDs for performance (still tests multiple DWord end boundary)
     fl::vector<fl::array<fl::u8, 3>> leds(70, {{100, 150, 200}});
     fl::vector<fl::u8> output;
@@ -253,7 +253,7 @@ TEST_CASE("encodeLPD6803() - 70 LEDs (2 DWord end boundary)") {
     test_lpd6803::verifyEndBoundary(output, 70, 144);
 }
 
-TEST_CASE("encodeLPD6803() - 72 LEDs (2 DWord end boundary)") {
+FL_TEST_CASE("encodeLPD6803() - 72 LEDs (2 DWord end boundary)") {
     // Reduced from 100 to 72 LEDs for performance (still tests multiple DWord end boundary)
     fl::vector<fl::array<fl::u8, 3>> leds(72, {{50, 100, 150}});
     fl::vector<fl::u8> output;
@@ -271,7 +271,7 @@ TEST_CASE("encodeLPD6803() - 72 LEDs (2 DWord end boundary)") {
 // Color Precision Tests (5-bit per channel)
 // ============================================================================
 
-TEST_CASE("encodeLPD6803() - color precision loss") {
+FL_TEST_CASE("encodeLPD6803() - color precision loss") {
     // Test that consecutive values differing by less than 8 encode identically
     fl::vector<fl::array<fl::u8, 3>> leds = {
         {{0, 0, 0}},      // Bin 0
@@ -302,7 +302,7 @@ TEST_CASE("encodeLPD6803() - color precision loss") {
     FL_CHECK(led4 != led2);
 }
 
-TEST_CASE("encodeLPD6803() - 5-bit boundaries") {
+FL_TEST_CASE("encodeLPD6803() - 5-bit boundaries") {
     // Test each 5-bit boundary (0, 8, 16, ..., 248)
     fl::vector<fl::array<fl::u8, 3>> leds;
     for (int i = 0; i < 32; i++) {
@@ -328,7 +328,7 @@ TEST_CASE("encodeLPD6803() - 5-bit boundaries") {
 // Edge Case Tests
 // ============================================================================
 
-TEST_CASE("encodeLPD6803() - alternating pattern") {
+FL_TEST_CASE("encodeLPD6803() - alternating pattern") {
     fl::vector<fl::array<fl::u8, 3>> leds;
     for (int i = 0; i < 10; i++) {
         if (i % 2 == 0) {
@@ -354,7 +354,7 @@ TEST_CASE("encodeLPD6803() - alternating pattern") {
     }
 }
 
-TEST_CASE("encodeLPD6803() - gradient pattern") {
+FL_TEST_CASE("encodeLPD6803() - gradient pattern") {
     fl::vector<fl::array<fl::u8, 3>> leds;
     for (int i = 0; i < 16; i++) {
         u8 value = static_cast<u8>(i * 16);

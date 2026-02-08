@@ -1,6 +1,6 @@
 
 
-#include "doctest.h"
+#include "test.h"
 #include "fl/task.h"
 #include "fl/async.h"
 #include "fl/engine_events.h"
@@ -37,9 +37,9 @@ public:
 
 } // anonymous namespace
 
-TEST_CASE("Task self-registration and destruction behavior [task]") {
+FL_TEST_CASE("Task self-registration and destruction behavior [task]") {
     
-    SUBCASE("Task auto-registers when callback is set - SUCCESS") {
+    FL_SUBCASE("Task auto-registers when callback is set - SUCCESS") {
         // Clear any leftover tasks from previous tests
         fl::Scheduler::instance().clear_all_tasks();
         
@@ -66,7 +66,7 @@ TEST_CASE("Task self-registration and destruction behavior [task]") {
         fl::Scheduler::instance().clear_all_tasks();
     }
     
-    SUBCASE("Fluent API pattern works with auto-registration") {
+    FL_SUBCASE("Fluent API pattern works with auto-registration") {
         // Clear any leftover tasks from previous tests
         fl::Scheduler::instance().clear_all_tasks();
         
@@ -89,7 +89,7 @@ TEST_CASE("Task self-registration and destruction behavior [task]") {
         fl::Scheduler::instance().clear_all_tasks();
     }
     
-    SUBCASE("Multiple auto-registering tasks work correctly") {
+    FL_SUBCASE("Multiple auto-registering tasks work correctly") {
         // Clear any leftover tasks from previous tests
         fl::Scheduler::instance().clear_all_tasks();
         
@@ -115,7 +115,7 @@ TEST_CASE("Task self-registration and destruction behavior [task]") {
         fl::Scheduler::instance().clear_all_tasks();
     }
     
-    SUBCASE("Manual registration still works (backward compatibility)") {
+    FL_SUBCASE("Manual registration still works (backward compatibility)") {
         // Clear any leftover tasks from previous tests
         fl::Scheduler::instance().clear_all_tasks();
         
@@ -141,7 +141,7 @@ TEST_CASE("Task self-registration and destruction behavior [task]") {
         fl::Scheduler::instance().clear_all_tasks();
     }
     
-    SUBCASE("Task cancellation works with auto-registered tasks") {
+    FL_SUBCASE("Task cancellation works with auto-registered tasks") {
         // Clear any leftover tasks from previous tests
         fl::Scheduler::instance().clear_all_tasks();
         
@@ -168,7 +168,7 @@ TEST_CASE("Task self-registration and destruction behavior [task]") {
         fl::Scheduler::instance().clear_all_tasks();
     }
     
-    SUBCASE("Tasks without callbacks don't auto-register") {
+    FL_SUBCASE("Tasks without callbacks don't auto-register") {
         // Clear any leftover tasks from previous tests
         fl::Scheduler::instance().clear_all_tasks();
         
@@ -182,7 +182,7 @@ TEST_CASE("Task self-registration and destruction behavior [task]") {
         fl::Scheduler::instance().clear_all_tasks();
     }
     
-    SUBCASE("every_ms task runs immediately once then respects timing interval") {
+    FL_SUBCASE("every_ms task runs immediately once then respects timing interval") {
         // Clear any leftover tasks from previous tests
         fl::Scheduler::instance().clear_all_tasks();
         
@@ -229,7 +229,7 @@ TEST_CASE("Task self-registration and destruction behavior [task]") {
         fl::Scheduler::instance().clear_all_tasks();
     }
     
-    SUBCASE("after_frame task executes when FastLED.show() is called") {
+    FL_SUBCASE("after_frame task executes when FastLED.show() is called") {
         // Clear any leftover tasks from previous tests - CRITICAL for test isolation
         fl::Scheduler::instance().clear_all_tasks();
         

@@ -1,6 +1,6 @@
 #include "fl/log.h"
 #include "fl/stl/sstream.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/detail/async_logger.h"
 #include "fl/stl/string.h"
 #include "fl/stl/strstream.h"
@@ -11,8 +11,8 @@ using namespace fl;
 // Note: fl::println output is not captured in these tests
 // The tests verify buffer state management, not actual output
 
-TEST_CASE("fl::AsyncLogger - basic operations") {
-    SUBCASE("push and flush single message") {
+FL_TEST_CASE("fl::AsyncLogger - basic operations") {
+    FL_SUBCASE("push and flush single message") {
         AsyncLogger logger;
         logger.push(fl::string("test message"));
         FL_CHECK_FALSE(logger.empty());
@@ -24,7 +24,7 @@ TEST_CASE("fl::AsyncLogger - basic operations") {
         FL_CHECK_EQ(logger.size(), 0);
     }
 
-    SUBCASE("push multiple messages") {
+    FL_SUBCASE("push multiple messages") {
         AsyncLogger logger;
         logger.push(fl::string("message 1"));
         logger.push(fl::string("message 2"));
@@ -35,7 +35,7 @@ TEST_CASE("fl::AsyncLogger - basic operations") {
         FL_CHECK(logger.empty());
     }
 
-    SUBCASE("push C-string variant") {
+    FL_SUBCASE("push C-string variant") {
         AsyncLogger logger;
         logger.push("c-style string");
         FL_CHECK_FALSE(logger.empty());
@@ -44,7 +44,7 @@ TEST_CASE("fl::AsyncLogger - basic operations") {
         FL_CHECK(logger.empty());
     }
 
-    SUBCASE("clear removes all messages without printing") {
+    FL_SUBCASE("clear removes all messages without printing") {
         AsyncLogger logger;
         logger.push(fl::string("message 1"));
         logger.push(fl::string("message 2"));
@@ -56,8 +56,8 @@ TEST_CASE("fl::AsyncLogger - basic operations") {
     }
 }
 
-TEST_CASE("fl::AsyncLogger - overflow tracking") {
-    SUBCASE("tracks dropped messages") {
+FL_TEST_CASE("fl::AsyncLogger - overflow tracking") {
+    FL_SUBCASE("tracks dropped messages") {
         AsyncLogger logger;
 
         // Fill logger with many messages (more than default capacity of 128)
@@ -72,8 +72,8 @@ TEST_CASE("fl::AsyncLogger - overflow tracking") {
     }
 }
 
-TEST_CASE("fl::AsyncLogger - edge cases") {
-    SUBCASE("flush empty buffer is no-op") {
+FL_TEST_CASE("fl::AsyncLogger - edge cases") {
+    FL_SUBCASE("flush empty buffer is no-op") {
         AsyncLogger logger;
         FL_CHECK(logger.empty());
 
@@ -81,7 +81,7 @@ TEST_CASE("fl::AsyncLogger - edge cases") {
         FL_CHECK(logger.empty());
     }
 
-    SUBCASE("multiple flushes") {
+    FL_SUBCASE("multiple flushes") {
         AsyncLogger logger;
         logger.push(fl::string("msg1"));
         logger.push(fl::string("msg2"));
@@ -93,7 +93,7 @@ TEST_CASE("fl::AsyncLogger - edge cases") {
         FL_CHECK(logger.empty());
     }
 
-    SUBCASE("push after flush") {
+    FL_SUBCASE("push after flush") {
         AsyncLogger logger;
         logger.push(fl::string("msg1"));
         logger.flush();
@@ -106,8 +106,8 @@ TEST_CASE("fl::AsyncLogger - edge cases") {
     }
 }
 
-TEST_CASE("fl::AsyncLogger - global instances") {
-    SUBCASE("get_parlio_async_logger_isr returns valid logger") {
+FL_TEST_CASE("fl::AsyncLogger - global instances") {
+    FL_SUBCASE("get_parlio_async_logger_isr returns valid logger") {
         AsyncLogger& logger = get_parlio_async_logger_isr();
 
         // Verify it's usable
@@ -119,7 +119,7 @@ TEST_CASE("fl::AsyncLogger - global instances") {
         logger.clear();
     }
 
-    SUBCASE("get_parlio_async_logger_main returns valid logger") {
+    FL_SUBCASE("get_parlio_async_logger_main returns valid logger") {
         AsyncLogger& logger = get_parlio_async_logger_main();
 
         fl::size initial_size = logger.size();
@@ -129,7 +129,7 @@ TEST_CASE("fl::AsyncLogger - global instances") {
         logger.clear();
     }
 
-    SUBCASE("get_rmt_async_logger_isr returns valid logger") {
+    FL_SUBCASE("get_rmt_async_logger_isr returns valid logger") {
         AsyncLogger& logger = get_rmt_async_logger_isr();
 
         fl::size initial_size = logger.size();
@@ -139,7 +139,7 @@ TEST_CASE("fl::AsyncLogger - global instances") {
         logger.clear();
     }
 
-    SUBCASE("get_rmt_async_logger_main returns valid logger") {
+    FL_SUBCASE("get_rmt_async_logger_main returns valid logger") {
         AsyncLogger& logger = get_rmt_async_logger_main();
 
         fl::size initial_size = logger.size();
@@ -149,7 +149,7 @@ TEST_CASE("fl::AsyncLogger - global instances") {
         logger.clear();
     }
 
-    SUBCASE("get_spi_async_logger_isr returns valid logger") {
+    FL_SUBCASE("get_spi_async_logger_isr returns valid logger") {
         AsyncLogger& logger = get_spi_async_logger_isr();
 
         fl::size initial_size = logger.size();
@@ -159,7 +159,7 @@ TEST_CASE("fl::AsyncLogger - global instances") {
         logger.clear();
     }
 
-    SUBCASE("get_spi_async_logger_main returns valid logger") {
+    FL_SUBCASE("get_spi_async_logger_main returns valid logger") {
         AsyncLogger& logger = get_spi_async_logger_main();
 
         fl::size initial_size = logger.size();
@@ -169,7 +169,7 @@ TEST_CASE("fl::AsyncLogger - global instances") {
         logger.clear();
     }
 
-    SUBCASE("get_audio_async_logger_isr returns valid logger") {
+    FL_SUBCASE("get_audio_async_logger_isr returns valid logger") {
         AsyncLogger& logger = get_audio_async_logger_isr();
 
         fl::size initial_size = logger.size();
@@ -179,7 +179,7 @@ TEST_CASE("fl::AsyncLogger - global instances") {
         logger.clear();
     }
 
-    SUBCASE("get_audio_async_logger_main returns valid logger") {
+    FL_SUBCASE("get_audio_async_logger_main returns valid logger") {
         AsyncLogger& logger = get_audio_async_logger_main();
 
         fl::size initial_size = logger.size();
@@ -189,7 +189,7 @@ TEST_CASE("fl::AsyncLogger - global instances") {
         logger.clear();
     }
 
-    SUBCASE("ISR and main loggers are independent (PARLIO)") {
+    FL_SUBCASE("ISR and main loggers are independent (PARLIO)") {
         AsyncLogger& isr_logger = get_parlio_async_logger_isr();
         AsyncLogger& main_logger = get_parlio_async_logger_main();
 
@@ -210,7 +210,7 @@ TEST_CASE("fl::AsyncLogger - global instances") {
         main_logger.clear();
     }
 
-    SUBCASE("all loggers are independent across categories") {
+    FL_SUBCASE("all loggers are independent across categories") {
         AsyncLogger& parlio = get_parlio_async_logger_isr();
         AsyncLogger& rmt = get_rmt_async_logger_isr();
 
@@ -230,8 +230,8 @@ TEST_CASE("fl::AsyncLogger - global instances") {
     }
 }
 
-TEST_CASE("fl::AsyncLogger - flushN bounded flushing") {
-    SUBCASE("flushN processes up to N messages") {
+FL_TEST_CASE("fl::AsyncLogger - flushN bounded flushing") {
+    FL_SUBCASE("flushN processes up to N messages") {
         AsyncLogger logger;
         logger.push(fl::string("msg1"));
         logger.push(fl::string("msg2"));
@@ -250,7 +250,7 @@ TEST_CASE("fl::AsyncLogger - flushN bounded flushing") {
         FL_CHECK(logger.empty());
     }
 
-    SUBCASE("flushN returns 0 on empty buffer") {
+    FL_SUBCASE("flushN returns 0 on empty buffer") {
         AsyncLogger logger;
         FL_CHECK(logger.empty());
 
@@ -259,7 +259,7 @@ TEST_CASE("fl::AsyncLogger - flushN bounded flushing") {
         FL_CHECK(logger.empty());
     }
 
-    SUBCASE("flushN with N > queue size flushes all") {
+    FL_SUBCASE("flushN with N > queue size flushes all") {
         AsyncLogger logger;
         logger.push(fl::string("msg1"));
         logger.push(fl::string("msg2"));
@@ -271,13 +271,13 @@ TEST_CASE("fl::AsyncLogger - flushN bounded flushing") {
     }
 }
 
-TEST_CASE("fl::AsyncLogger - background flush enable/disable") {
-    SUBCASE("background flush initially disabled") {
+FL_TEST_CASE("fl::AsyncLogger - background flush enable/disable") {
+    FL_SUBCASE("background flush initially disabled") {
         AsyncLogger logger;
         FL_CHECK_FALSE(logger.isBackgroundFlushEnabled());
     }
 
-    SUBCASE("enableBackgroundFlush returns true on supported platforms") {
+    FL_SUBCASE("enableBackgroundFlush returns true on supported platforms") {
         AsyncLogger logger;
 
         // Enable background flush at 10 Hz (100ms), 5 messages per tick
@@ -292,7 +292,7 @@ TEST_CASE("fl::AsyncLogger - background flush enable/disable") {
         }
     }
 
-    SUBCASE("disableBackgroundFlush is safe when not enabled") {
+    FL_SUBCASE("disableBackgroundFlush is safe when not enabled") {
         AsyncLogger logger;
         FL_CHECK_FALSE(logger.isBackgroundFlushEnabled());
 
@@ -300,7 +300,7 @@ TEST_CASE("fl::AsyncLogger - background flush enable/disable") {
         FL_CHECK_FALSE(logger.isBackgroundFlushEnabled());
     }
 
-    SUBCASE("re-enabling background flush disables previous timer") {
+    FL_SUBCASE("re-enabling background flush disables previous timer") {
         AsyncLogger logger;
 
         bool result1 = logger.enableBackgroundFlush(100, 5);
@@ -317,13 +317,13 @@ TEST_CASE("fl::AsyncLogger - background flush enable/disable") {
     }
 }
 
-TEST_CASE("fl::AsyncLogger - async_log_service") {
-    SUBCASE("async_log_service is safe to call when nothing enabled") {
+FL_TEST_CASE("fl::AsyncLogger - async_log_service") {
+    FL_SUBCASE("async_log_service is safe to call when nothing enabled") {
         // Should not crash even if no background flush is active
         fl::async_log_service();
     }
 
-    SUBCASE("async_log_service flushes when timer triggers") {
+    FL_SUBCASE("async_log_service flushes when timer triggers") {
         AsyncLogger& logger = get_parlio_async_logger_isr();
         logger.clear();
 

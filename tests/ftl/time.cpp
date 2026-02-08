@@ -1,19 +1,19 @@
 #include "fl/stl/time.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/function.h"
 #include "fl/stl/move.h"
 #include "fl/int.h"
 
 using namespace fl;
 
-TEST_CASE("fl::time - basic functionality") {
-    SUBCASE("time returns non-zero values") {
+FL_TEST_CASE("fl::time - basic functionality") {
+    FL_SUBCASE("time returns non-zero values") {
         fl::u32 t1 = fl::millis();
         FL_CHECK(t1 >= 0); // Always true, but documents expectation
     }
 
-    SUBCASE("time is monotonically increasing") {
+    FL_SUBCASE("time is monotonically increasing") {
         fl::u32 t1 = fl::millis();
         // Small delay to ensure time advances
         volatile int dummy = 0;
@@ -25,7 +25,7 @@ TEST_CASE("fl::time - basic functionality") {
         FL_CHECK(t2 >= t1);
     }
 
-    SUBCASE("time difference calculation") {
+    FL_SUBCASE("time difference calculation") {
         fl::u32 start = fl::millis();
         // Small delay
         volatile int dummy = 0;
@@ -40,7 +40,7 @@ TEST_CASE("fl::time - basic functionality") {
         FL_CHECK(elapsed < 1000);
     }
 
-    SUBCASE("multiple calls to time") {
+    FL_SUBCASE("multiple calls to time") {
         fl::u32 t1 = fl::millis();
         fl::u32 t2 = fl::millis();
         fl::u32 t3 = fl::millis();
@@ -53,18 +53,18 @@ TEST_CASE("fl::time - basic functionality") {
 
 #ifdef FASTLED_TESTING
 
-TEST_CASE("fl::MockTimeProvider - basic functionality") {
-    SUBCASE("constructor with initial time") {
+FL_TEST_CASE("fl::MockTimeProvider - basic functionality") {
+    FL_SUBCASE("constructor with initial time") {
         MockTimeProvider mock(1000);
         FL_CHECK_EQ(mock.current_time(), 1000);
     }
 
-    SUBCASE("constructor with default time") {
+    FL_SUBCASE("constructor with default time") {
         MockTimeProvider mock;
         FL_CHECK_EQ(mock.current_time(), 0);
     }
 
-    SUBCASE("advance time") {
+    FL_SUBCASE("advance time") {
         MockTimeProvider mock(100);
         FL_CHECK_EQ(mock.current_time(), 100);
 
@@ -75,7 +75,7 @@ TEST_CASE("fl::MockTimeProvider - basic functionality") {
         FL_CHECK_EQ(mock.current_time(), 350);
     }
 
-    SUBCASE("set_time") {
+    FL_SUBCASE("set_time") {
         MockTimeProvider mock(100);
         FL_CHECK_EQ(mock.current_time(), 100);
 
@@ -86,7 +86,7 @@ TEST_CASE("fl::MockTimeProvider - basic functionality") {
         FL_CHECK_EQ(mock.current_time(), 0);
     }
 
-    SUBCASE("operator() returns current time") {
+    FL_SUBCASE("operator() returns current time") {
         MockTimeProvider mock(1234);
         FL_CHECK_EQ(mock(), 1234);
         FL_CHECK_EQ(mock.current_time(), 1234);
@@ -95,7 +95,7 @@ TEST_CASE("fl::MockTimeProvider - basic functionality") {
         FL_CHECK_EQ(mock(), 1334);
     }
 
-    SUBCASE("advance with wraparound") {
+    FL_SUBCASE("advance with wraparound") {
         // Test near u32 max value
         fl::u32 near_max = 0xFFFFFF00u;
         MockTimeProvider mock(near_max);
@@ -106,11 +106,11 @@ TEST_CASE("fl::MockTimeProvider - basic functionality") {
     }
 }
 
-TEST_CASE("fl::inject_time_provider - injection and clearing") {
+FL_TEST_CASE("fl::inject_time_provider - injection and clearing") {
     // Save any existing provider state (though there shouldn't be one)
     // and ensure we clean up after this test
 
-    SUBCASE("inject and use mock time provider") {
+    FL_SUBCASE("inject and use mock time provider") {
         MockTimeProvider mock(5000);
         // Need to capture mock by reference in a lambda for it to work
         inject_time_provider([&mock]() { return mock(); });
@@ -126,7 +126,7 @@ TEST_CASE("fl::inject_time_provider - injection and clearing") {
         clear_time_provider();
     }
 
-    SUBCASE("clear_time_provider restores platform time") {
+    FL_SUBCASE("clear_time_provider restores platform time") {
         MockTimeProvider mock(1000);
         inject_time_provider([&mock]() { return mock(); });
 
@@ -141,7 +141,7 @@ TEST_CASE("fl::inject_time_provider - injection and clearing") {
         FL_CHECK(platform_time >= 0);
     }
 
-    SUBCASE("multiple injections") {
+    FL_SUBCASE("multiple injections") {
         MockTimeProvider mock1(1000);
         inject_time_provider([&mock1]() { return mock1(); });
         FL_CHECK_EQ(fl::millis(), 1000);
@@ -153,7 +153,7 @@ TEST_CASE("fl::inject_time_provider - injection and clearing") {
         clear_time_provider();
     }
 
-    SUBCASE("clear without injection is safe") {
+    FL_SUBCASE("clear without injection is safe") {
         // Should be safe to call multiple times
         clear_time_provider();
         clear_time_provider();
@@ -164,8 +164,8 @@ TEST_CASE("fl::inject_time_provider - injection and clearing") {
     }
 }
 
-TEST_CASE("fl::time - timing scenarios with mock") {
-    SUBCASE("animation timing simulation") {
+FL_TEST_CASE("fl::time - timing scenarios with mock") {
+    FL_SUBCASE("animation timing simulation") {
         MockTimeProvider mock(0);
         inject_time_provider([&mock]() { return mock(); });
 
@@ -190,7 +190,7 @@ TEST_CASE("fl::time - timing scenarios with mock") {
         clear_time_provider();
     }
 
-    SUBCASE("timeout handling simulation") {
+    FL_SUBCASE("timeout handling simulation") {
         MockTimeProvider mock(1000);
         inject_time_provider([&mock]() { return mock(); });
 
@@ -210,7 +210,7 @@ TEST_CASE("fl::time - timing scenarios with mock") {
         clear_time_provider();
     }
 
-    SUBCASE("elapsed time calculation") {
+    FL_SUBCASE("elapsed time calculation") {
         MockTimeProvider mock(1000);
         inject_time_provider([&mock]() { return mock(); });
 
@@ -228,7 +228,7 @@ TEST_CASE("fl::time - timing scenarios with mock") {
         clear_time_provider();
     }
 
-    SUBCASE("wraparound handling") {
+    FL_SUBCASE("wraparound handling") {
         // Test time wraparound at 32-bit boundary
         fl::u32 near_max = 0xFFFFFFF0u;
         MockTimeProvider mock(near_max);
@@ -252,8 +252,8 @@ TEST_CASE("fl::time - timing scenarios with mock") {
     }
 }
 
-TEST_CASE("fl::time - edge cases") {
-    SUBCASE("time at u32 boundaries") {
+FL_TEST_CASE("fl::time - edge cases") {
+    FL_SUBCASE("time at u32 boundaries") {
         MockTimeProvider mock(0);
         inject_time_provider([&mock]() { return mock(); });
 
@@ -265,7 +265,7 @@ TEST_CASE("fl::time - edge cases") {
         clear_time_provider();
     }
 
-    SUBCASE("zero advances") {
+    FL_SUBCASE("zero advances") {
         MockTimeProvider mock(1000);
         inject_time_provider([&mock]() { return mock(); });
 
@@ -275,7 +275,7 @@ TEST_CASE("fl::time - edge cases") {
         clear_time_provider();
     }
 
-    SUBCASE("large time values") {
+    FL_SUBCASE("large time values") {
         fl::u32 large_time = 0x7FFFFFFF; // Max positive i32 value
         MockTimeProvider mock(large_time);
         inject_time_provider([&mock]() { return mock(); });
@@ -289,8 +289,8 @@ TEST_CASE("fl::time - edge cases") {
     }
 }
 
-TEST_CASE("fl::MockTimeProvider - functional behavior") {
-    SUBCASE("can be used as function object") {
+FL_TEST_CASE("fl::MockTimeProvider - functional behavior") {
+    FL_SUBCASE("can be used as function object") {
         MockTimeProvider mock(1234);
 
         // MockTimeProvider can be used directly as a functor
@@ -304,7 +304,7 @@ TEST_CASE("fl::MockTimeProvider - functional behavior") {
         FL_CHECK_EQ(func(), 1334);
     }
 
-    SUBCASE("copy and move semantics") {
+    FL_SUBCASE("copy and move semantics") {
         MockTimeProvider mock1(1000);
 
         // Copy construction
@@ -320,8 +320,8 @@ TEST_CASE("fl::MockTimeProvider - functional behavior") {
 
 #endif // FASTLED_TESTING
 
-TEST_CASE("fl::time - integration patterns") {
-    SUBCASE("debounce pattern") {
+FL_TEST_CASE("fl::time - integration patterns") {
+    FL_SUBCASE("debounce pattern") {
         fl::u32 last_trigger = 0;
         const fl::u32 debounce_time = 50;
 
@@ -334,7 +334,7 @@ TEST_CASE("fl::time - integration patterns") {
         }
     }
 
-    SUBCASE("rate limiting pattern") {
+    FL_SUBCASE("rate limiting pattern") {
         static fl::u32 last_action = 0;
         const fl::u32 min_interval = 100;
 
@@ -349,14 +349,14 @@ TEST_CASE("fl::time - integration patterns") {
     }
 }
 
-TEST_CASE("fl::millis64 - basic functionality") {
-    SUBCASE("millis64 returns non-zero values") {
+FL_TEST_CASE("fl::millis64 - basic functionality") {
+    FL_SUBCASE("millis64 returns non-zero values") {
         fl::millis64_reset();
         fl::u64 t1 = fl::millis64();
         FL_CHECK(t1 >= 0); // Always true, but documents expectation
     }
 
-    SUBCASE("millis64 is monotonically increasing") {
+    FL_SUBCASE("millis64 is monotonically increasing") {
         fl::millis64_reset();
         fl::u64 t1 = fl::millis64();
         // Small delay to ensure time advances
@@ -369,7 +369,7 @@ TEST_CASE("fl::millis64 - basic functionality") {
         FL_CHECK(t2 >= t1);
     }
 
-    SUBCASE("millis64 never wraps (practical test)") {
+    FL_SUBCASE("millis64 never wraps (practical test)") {
         fl::millis64_reset();
         fl::u64 t1 = fl::millis64();
         fl::u64 t2 = fl::millis64();
@@ -379,7 +379,7 @@ TEST_CASE("fl::millis64 - basic functionality") {
         FL_CHECK(t1 < 0xFFFFFFFFFFFFFFFFULL);
     }
 
-    SUBCASE("millis64 time difference calculation") {
+    FL_SUBCASE("millis64 time difference calculation") {
         fl::millis64_reset();
         fl::u64 start = fl::millis64();
         // Small delay
@@ -395,7 +395,7 @@ TEST_CASE("fl::millis64 - basic functionality") {
         FL_CHECK(elapsed < 1000);
     }
 
-    SUBCASE("multiple calls to millis64") {
+    FL_SUBCASE("multiple calls to millis64") {
         fl::millis64_reset();
         fl::u64 t1 = fl::millis64();
         fl::u64 t2 = fl::millis64();
@@ -406,7 +406,7 @@ TEST_CASE("fl::millis64 - basic functionality") {
         FL_CHECK(t3 >= t2);
     }
 
-    SUBCASE("millis64 compatibility with millis") {
+    FL_SUBCASE("millis64 compatibility with millis") {
         // Reset millis64 state to ensure clean test
         fl::millis64_reset();
 
@@ -420,8 +420,8 @@ TEST_CASE("fl::millis64 - basic functionality") {
     }
 }
 
-TEST_CASE("fl::time - alias for millis64") {
-    SUBCASE("time() returns same type as millis64()") {
+FL_TEST_CASE("fl::time - alias for millis64") {
+    FL_SUBCASE("time() returns same type as millis64()") {
         fl::millis64_reset();
         fl::u64 t1 = fl::millis64();
         fl::u64 t2 = fl::millis64();
@@ -431,7 +431,7 @@ TEST_CASE("fl::time - alias for millis64") {
         FL_CHECK(t2 >= 0);
     }
 
-    SUBCASE("time() and millis64() are consistent") {
+    FL_SUBCASE("time() and millis64() are consistent") {
         fl::millis64_reset();
         fl::u64 t1 = fl::millis64();
         fl::u64 m1 = fl::millis64();
@@ -441,7 +441,7 @@ TEST_CASE("fl::time - alias for millis64") {
         FL_CHECK(diff < 10); // Should be within 10ms
     }
 
-    SUBCASE("time() is monotonically increasing") {
+    FL_SUBCASE("time() is monotonically increasing") {
         fl::millis64_reset();
         fl::u64 t1 = fl::millis64();
         // Small delay
@@ -456,8 +456,8 @@ TEST_CASE("fl::time - alias for millis64") {
 
 #ifdef FASTLED_TESTING
 
-TEST_CASE("fl::millis64 - wraparound handling") {
-    SUBCASE("millis64 handles 32-bit wraparound correctly") {
+FL_TEST_CASE("fl::millis64 - wraparound handling") {
+    FL_SUBCASE("millis64 handles 32-bit wraparound correctly") {
         // This test verifies that millis64 correctly accumulates across 32-bit wraparounds
         fl::millis64_reset();
         MockTimeProvider mock(0xFFFFFFF0u); // Start near max u32
@@ -482,7 +482,7 @@ TEST_CASE("fl::millis64 - wraparound handling") {
         clear_time_provider();
     }
 
-    SUBCASE("millis64 accumulates correctly over multiple wraparounds") {
+    FL_SUBCASE("millis64 accumulates correctly over multiple wraparounds") {
         fl::millis64_reset();
         MockTimeProvider mock(0); // Start at 0
         inject_time_provider([&mock]() { return mock(); });
@@ -509,7 +509,7 @@ TEST_CASE("fl::millis64 - wraparound handling") {
         clear_time_provider();
     }
 
-    SUBCASE("time() handles wraparound same as millis64()") {
+    FL_SUBCASE("time() handles wraparound same as millis64()") {
         fl::millis64_reset();
         MockTimeProvider mock(0xFFFFFFF0u);
         inject_time_provider([&mock]() { return mock(); });

@@ -1,13 +1,13 @@
 #include "fl/stl/bitset.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/move.h"
 #include "fl/int.h"
 
 using namespace fl;
 
 // Test the utility functions
-TEST_CASE("fl::popcount") {
+FL_TEST_CASE("fl::popcount") {
     FL_CHECK_EQ(popcount(0u), 0);
     FL_CHECK_EQ(popcount(1u), 1);
     FL_CHECK_EQ(popcount(3u), 2);
@@ -16,7 +16,7 @@ TEST_CASE("fl::popcount") {
     FL_CHECK_EQ(popcount(255u), 8);
 }
 
-TEST_CASE("fl::countr_zero") {
+FL_TEST_CASE("fl::countr_zero") {
     FL_CHECK_EQ(countr_zero(1u), 0);
     FL_CHECK_EQ(countr_zero(2u), 1);
     FL_CHECK_EQ(countr_zero(4u), 2);
@@ -25,16 +25,16 @@ TEST_CASE("fl::countr_zero") {
 }
 
 // Test BitsetFixed class
-TEST_CASE("fl::BitsetFixed<8> - basic operations") {
+FL_TEST_CASE("fl::BitsetFixed<8> - basic operations") {
     BitsetFixed<8> bs;
 
-    SUBCASE("construction and size") {
+    FL_SUBCASE("construction and size") {
         FL_CHECK_EQ(bs.size(), 8);
         FL_CHECK(bs.none());
         FL_CHECK(!bs.any());
     }
 
-    SUBCASE("set and test") {
+    FL_SUBCASE("set and test") {
         bs.set(0);
         FL_CHECK(bs.test(0));
         FL_CHECK(!bs.test(1));
@@ -46,7 +46,7 @@ TEST_CASE("fl::BitsetFixed<8> - basic operations") {
         FL_CHECK_EQ(bs.count(), 2);
     }
 
-    SUBCASE("reset") {
+    FL_SUBCASE("reset") {
         bs.set(0).set(3).set(7);
         FL_CHECK_EQ(bs.count(), 3);
 
@@ -58,7 +58,7 @@ TEST_CASE("fl::BitsetFixed<8> - basic operations") {
         FL_CHECK(bs.none());
     }
 
-    SUBCASE("flip") {
+    FL_SUBCASE("flip") {
         bs.flip(2);
         FL_CHECK(bs.test(2));
         bs.flip(2);
@@ -73,7 +73,7 @@ TEST_CASE("fl::BitsetFixed<8> - basic operations") {
     }
 }
 
-TEST_CASE("fl::BitsetFixed<8> - count, any, none") {
+FL_TEST_CASE("fl::BitsetFixed<8> - count, any, none") {
     BitsetFixed<8> bs;
 
     FL_CHECK_EQ(bs.count(), 0);
@@ -86,14 +86,14 @@ TEST_CASE("fl::BitsetFixed<8> - count, any, none") {
     FL_CHECK(!bs.none());
 }
 
-TEST_CASE("fl::BitsetFixed<8> - bitwise operators") {
+FL_TEST_CASE("fl::BitsetFixed<8> - bitwise operators") {
     BitsetFixed<8> bs1;
     BitsetFixed<8> bs2;
 
     bs1.set(0).set(2).set(4);
     bs2.set(1).set(2).set(3);
 
-    SUBCASE("AND") {
+    FL_SUBCASE("AND") {
         auto result = bs1 & bs2;
         FL_CHECK(result.test(2));
         FL_CHECK(!result.test(0));
@@ -101,7 +101,7 @@ TEST_CASE("fl::BitsetFixed<8> - bitwise operators") {
         FL_CHECK_EQ(result.count(), 1);
     }
 
-    SUBCASE("OR") {
+    FL_SUBCASE("OR") {
         auto result = bs1 | bs2;
         FL_CHECK(result.test(0));
         FL_CHECK(result.test(1));
@@ -111,7 +111,7 @@ TEST_CASE("fl::BitsetFixed<8> - bitwise operators") {
         FL_CHECK_EQ(result.count(), 5);
     }
 
-    SUBCASE("XOR") {
+    FL_SUBCASE("XOR") {
         auto result = bs1 ^ bs2;
         FL_CHECK(result.test(0));
         FL_CHECK(result.test(1));
@@ -121,7 +121,7 @@ TEST_CASE("fl::BitsetFixed<8> - bitwise operators") {
         FL_CHECK_EQ(result.count(), 4);
     }
 
-    SUBCASE("NOT") {
+    FL_SUBCASE("NOT") {
         auto result = ~bs1;
         FL_CHECK(!result.test(0));
         FL_CHECK(result.test(1));
@@ -130,7 +130,7 @@ TEST_CASE("fl::BitsetFixed<8> - bitwise operators") {
     }
 }
 
-TEST_CASE("fl::BitsetFixed<16> - larger size") {
+FL_TEST_CASE("fl::BitsetFixed<16> - larger size") {
     BitsetFixed<16> bs;
     FL_CHECK_EQ(bs.size(), 16);
 
@@ -141,7 +141,7 @@ TEST_CASE("fl::BitsetFixed<16> - larger size") {
     FL_CHECK(bs.any());
 }
 
-TEST_CASE("fl::BitsetFixed<32> - cross-block operations") {
+FL_TEST_CASE("fl::BitsetFixed<32> - cross-block operations") {
     BitsetFixed<32> bs;
 
     bs.set(0);   // First block
@@ -156,7 +156,7 @@ TEST_CASE("fl::BitsetFixed<32> - cross-block operations") {
     FL_CHECK_EQ(bs.count(), 4);
 }
 
-TEST_CASE("fl::BitsetFixed<8> - assign") {
+FL_TEST_CASE("fl::BitsetFixed<8> - assign") {
     BitsetFixed<8> bs;
 
     bs.assign(5, true);
@@ -171,7 +171,7 @@ TEST_CASE("fl::BitsetFixed<8> - assign") {
     FL_CHECK(bs.test(4));  // Beyond assigned range
 }
 
-TEST_CASE("fl::BitsetFixed<16> - find_first") {
+FL_TEST_CASE("fl::BitsetFixed<16> - find_first") {
     BitsetFixed<16> bs;
 
     bs.set(5);
@@ -184,7 +184,7 @@ TEST_CASE("fl::BitsetFixed<16> - find_first") {
     FL_CHECK_EQ(bs.find_first(true, 6), -1);
 }
 
-TEST_CASE("fl::BitsetFixed<16> - find_run") {
+FL_TEST_CASE("fl::BitsetFixed<16> - find_run") {
     BitsetFixed<16> bs;
 
     bs.set(3).set(4).set(5).set(6);
@@ -194,7 +194,7 @@ TEST_CASE("fl::BitsetFixed<16> - find_run") {
 }
 
 // Test BitsetInlined class
-TEST_CASE("fl::BitsetInlined<16> - basic operations") {
+FL_TEST_CASE("fl::BitsetInlined<16> - basic operations") {
     BitsetInlined<16> bs;
     FL_CHECK_EQ(bs.size(), 16);
     FL_CHECK(bs.none());
@@ -204,7 +204,7 @@ TEST_CASE("fl::BitsetInlined<16> - basic operations") {
     FL_CHECK_EQ(bs.count(), 1);
 }
 
-TEST_CASE("fl::BitsetInlined<16> - dynamic growth") {
+FL_TEST_CASE("fl::BitsetInlined<16> - dynamic growth") {
     BitsetInlined<16> bs;
 
     bs.set(20);  // Forces dynamic allocation
@@ -212,7 +212,7 @@ TEST_CASE("fl::BitsetInlined<16> - dynamic growth") {
     FL_CHECK(bs.size() > 16);
 }
 
-TEST_CASE("fl::BitsetInlined<16> - preserve on growth") {
+FL_TEST_CASE("fl::BitsetInlined<16> - preserve on growth") {
     BitsetInlined<16> bs;
     bs.set(5).set(10);
     bs.set(25);  // Triggers growth
@@ -222,7 +222,7 @@ TEST_CASE("fl::BitsetInlined<16> - preserve on growth") {
     FL_CHECK_EQ(bs.count(), 3);
 }
 
-TEST_CASE("fl::BitsetInlined<16> - resize") {
+FL_TEST_CASE("fl::BitsetInlined<16> - resize") {
     BitsetInlined<16> bs;
 
     bs.set(5);
@@ -231,7 +231,7 @@ TEST_CASE("fl::BitsetInlined<16> - resize") {
     FL_CHECK(bs.size() >= 32);
 }
 
-TEST_CASE("fl::BitsetInlined<16> - copy and move") {
+FL_TEST_CASE("fl::BitsetInlined<16> - copy and move") {
     BitsetInlined<16> bs;
     bs.set(5).set(10);
 
@@ -241,7 +241,7 @@ TEST_CASE("fl::BitsetInlined<16> - copy and move") {
     FL_CHECK_EQ(bs2.count(), 2);
 }
 
-TEST_CASE("fl::BitsetInlined<16> - bitwise operators") {
+FL_TEST_CASE("fl::BitsetInlined<16> - bitwise operators") {
     BitsetInlined<16> bs1;
     BitsetInlined<16> bs2;
 
@@ -260,7 +260,7 @@ TEST_CASE("fl::BitsetInlined<16> - bitwise operators") {
     FL_CHECK_EQ(result_or.count(), 4);
 }
 
-TEST_CASE("fl::BitsetInlined<16> - find_first") {
+FL_TEST_CASE("fl::BitsetInlined<16> - find_first") {
     BitsetInlined<16> bs;
 
     bs.set(5).set(10);
@@ -268,7 +268,7 @@ TEST_CASE("fl::BitsetInlined<16> - find_first") {
     FL_CHECK_EQ(bs.find_first(true, 6), 10);
 }
 
-TEST_CASE("fl::bitset - type alias") {
+FL_TEST_CASE("fl::bitset - type alias") {
     bitset<> bs;
     FL_CHECK_EQ(bs.size(), 16);
 
@@ -276,7 +276,7 @@ TEST_CASE("fl::bitset - type alias") {
     FL_CHECK_EQ(bs32.size(), 32);
 }
 
-TEST_CASE("fl::bitset_fixed - type alias") {
+FL_TEST_CASE("fl::bitset_fixed - type alias") {
     bitset_fixed<8> bs;
     FL_CHECK_EQ(bs.size(), 8);
 

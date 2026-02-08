@@ -16,7 +16,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/iterator.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/int.h"
 #include "fl/rgb8.h"
 #include "fl/stl/array.h"
@@ -65,7 +65,7 @@ using namespace test_ws2816;
 // packWS2816Pixel() Tests - Helper Function Verification
 // ============================================================================
 
-TEST_CASE("packWS2816Pixel - all zeros") {
+FL_TEST_CASE("packWS2816Pixel - all zeros") {
     // Test packing (0, 0, 0) → two black CRGB pixels
     auto packed = packWS2816Pixel(0x0000, 0x0000, 0x0000);
 
@@ -77,7 +77,7 @@ TEST_CASE("packWS2816Pixel - all zeros") {
     FL_CHECK_EQ(packed.second.b, 0x00);
 }
 
-TEST_CASE("packWS2816Pixel - all max values") {
+FL_TEST_CASE("packWS2816Pixel - all max values") {
     // Test packing (0xFFFF, 0xFFFF, 0xFFFF) → two white CRGB pixels
     auto packed = packWS2816Pixel(0xFFFF, 0xFFFF, 0xFFFF);
 
@@ -89,7 +89,7 @@ TEST_CASE("packWS2816Pixel - all max values") {
     FL_CHECK_EQ(packed.second.b, 0xFF);
 }
 
-TEST_CASE("packWS2816Pixel - red channel only (high byte)") {
+FL_TEST_CASE("packWS2816Pixel - red channel only (high byte)") {
     // Test R = 0xFF00 (high byte only), G = 0, B = 0
     // Expected: [0xFF, 0x00, 0x00] and [0x00, 0x00, 0x00]
     auto packed = packWS2816Pixel(0xFF00, 0x0000, 0x0000);
@@ -102,7 +102,7 @@ TEST_CASE("packWS2816Pixel - red channel only (high byte)") {
     FL_CHECK_EQ(packed.second.b, 0x00);  // B_lo
 }
 
-TEST_CASE("packWS2816Pixel - red channel only (low byte)") {
+FL_TEST_CASE("packWS2816Pixel - red channel only (low byte)") {
     // Test R = 0x00FF (low byte only), G = 0, B = 0
     // Expected: [0x00, 0xFF, 0x00] and [0x00, 0x00, 0x00]
     auto packed = packWS2816Pixel(0x00FF, 0x0000, 0x0000);
@@ -115,7 +115,7 @@ TEST_CASE("packWS2816Pixel - red channel only (low byte)") {
     FL_CHECK_EQ(packed.second.b, 0x00);  // B_lo
 }
 
-TEST_CASE("packWS2816Pixel - green channel split") {
+FL_TEST_CASE("packWS2816Pixel - green channel split") {
     // Test R = 0, G = 0xAABB (split across both pixels), B = 0
     // Expected: [0x00, 0x00, 0xAA] and [0xBB, 0x00, 0x00]
     auto packed = packWS2816Pixel(0x0000, 0xAABB, 0x0000);
@@ -128,7 +128,7 @@ TEST_CASE("packWS2816Pixel - green channel split") {
     FL_CHECK_EQ(packed.second.b, 0x00);  // B_lo
 }
 
-TEST_CASE("packWS2816Pixel - blue channel only (high byte)") {
+FL_TEST_CASE("packWS2816Pixel - blue channel only (high byte)") {
     // Test R = 0, G = 0, B = 0xFF00 (high byte only)
     // Expected: [0x00, 0x00, 0x00] and [0x00, 0xFF, 0x00]
     auto packed = packWS2816Pixel(0x0000, 0x0000, 0xFF00);
@@ -141,7 +141,7 @@ TEST_CASE("packWS2816Pixel - blue channel only (high byte)") {
     FL_CHECK_EQ(packed.second.b, 0x00);  // B_lo
 }
 
-TEST_CASE("packWS2816Pixel - blue channel only (low byte)") {
+FL_TEST_CASE("packWS2816Pixel - blue channel only (low byte)") {
     // Test R = 0, G = 0, B = 0x00FF (low byte only)
     // Expected: [0x00, 0x00, 0x00] and [0x00, 0x00, 0xFF]
     auto packed = packWS2816Pixel(0x0000, 0x0000, 0x00FF);
@@ -154,7 +154,7 @@ TEST_CASE("packWS2816Pixel - blue channel only (low byte)") {
     FL_CHECK_EQ(packed.second.b, 0xFF);  // B_lo
 }
 
-TEST_CASE("packWS2816Pixel - mixed values") {
+FL_TEST_CASE("packWS2816Pixel - mixed values") {
     // Test R = 0x1234, G = 0x5678, B = 0x9ABC
     // Expected: [0x12, 0x34, 0x56] and [0x78, 0x9A, 0xBC]
     auto packed = packWS2816Pixel(0x1234, 0x5678, 0x9ABC);
@@ -167,7 +167,7 @@ TEST_CASE("packWS2816Pixel - mixed values") {
     FL_CHECK_EQ(packed.second.b, 0xBC);  // B_lo
 }
 
-TEST_CASE("packWS2816Pixel - sequential pattern") {
+FL_TEST_CASE("packWS2816Pixel - sequential pattern") {
     // Test sequential hex values: R = 0x0102, G = 0x0304, B = 0x0506
     // Expected: [0x01, 0x02, 0x03] and [0x04, 0x05, 0x06]
     auto packed = packWS2816Pixel(0x0102, 0x0304, 0x0506);
@@ -184,7 +184,7 @@ TEST_CASE("packWS2816Pixel - sequential pattern") {
 // encodeWS2816() Tests - Full Encoder Verification
 // ============================================================================
 
-TEST_CASE("encodeWS2816 - empty range (0 LEDs)") {
+FL_TEST_CASE("encodeWS2816 - empty range (0 LEDs)") {
     // Test encoding with no LEDs - should produce no output
     fl::vector<fl::array<u16, 3>> pixels;
     fl::vector<CRGB> output;
@@ -195,7 +195,7 @@ TEST_CASE("encodeWS2816 - empty range (0 LEDs)") {
     FL_REQUIRE_EQ(output.size(), 0);
 }
 
-TEST_CASE("encodeWS2816 - single pixel (all zeros)") {
+FL_TEST_CASE("encodeWS2816 - single pixel (all zeros)") {
     // Test single black pixel (0, 0, 0)
     fl::vector<fl::array<u16, 3>> pixels;
     pixels.push_back(makePixel16(0x0000, 0x0000, 0x0000));
@@ -208,7 +208,7 @@ TEST_CASE("encodeWS2816 - single pixel (all zeros)") {
     verifyDualPixel(output[0], output[1], 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 }
 
-TEST_CASE("encodeWS2816 - single pixel (all max)") {
+FL_TEST_CASE("encodeWS2816 - single pixel (all max)") {
     // Test single white pixel (0xFFFF, 0xFFFF, 0xFFFF)
     fl::vector<fl::array<u16, 3>> pixels;
     pixels.push_back(makePixel16(0xFFFF, 0xFFFF, 0xFFFF));
@@ -221,7 +221,7 @@ TEST_CASE("encodeWS2816 - single pixel (all max)") {
     verifyDualPixel(output[0], output[1], 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
 }
 
-TEST_CASE("encodeWS2816 - single pixel (red high byte)") {
+FL_TEST_CASE("encodeWS2816 - single pixel (red high byte)") {
     // Test R = 0xFF00, G = 0, B = 0
     fl::vector<fl::array<u16, 3>> pixels;
     pixels.push_back(makePixel16(0xFF00, 0x0000, 0x0000));
@@ -233,7 +233,7 @@ TEST_CASE("encodeWS2816 - single pixel (red high byte)") {
     verifyDualPixel(output[0], output[1], 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00);
 }
 
-TEST_CASE("encodeWS2816 - single pixel (red low byte)") {
+FL_TEST_CASE("encodeWS2816 - single pixel (red low byte)") {
     // Test R = 0x00FF, G = 0, B = 0
     fl::vector<fl::array<u16, 3>> pixels;
     pixels.push_back(makePixel16(0x00FF, 0x0000, 0x0000));
@@ -245,7 +245,7 @@ TEST_CASE("encodeWS2816 - single pixel (red low byte)") {
     verifyDualPixel(output[0], output[1], 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00);
 }
 
-TEST_CASE("encodeWS2816 - single pixel (green split)") {
+FL_TEST_CASE("encodeWS2816 - single pixel (green split)") {
     // Test R = 0, G = 0xAABB (split across pixels), B = 0
     fl::vector<fl::array<u16, 3>> pixels;
     pixels.push_back(makePixel16(0x0000, 0xAABB, 0x0000));
@@ -257,7 +257,7 @@ TEST_CASE("encodeWS2816 - single pixel (green split)") {
     verifyDualPixel(output[0], output[1], 0x00, 0x00, 0xAA, 0xBB, 0x00, 0x00);
 }
 
-TEST_CASE("encodeWS2816 - single pixel (blue high byte)") {
+FL_TEST_CASE("encodeWS2816 - single pixel (blue high byte)") {
     // Test R = 0, G = 0, B = 0xFF00
     fl::vector<fl::array<u16, 3>> pixels;
     pixels.push_back(makePixel16(0x0000, 0x0000, 0xFF00));
@@ -269,7 +269,7 @@ TEST_CASE("encodeWS2816 - single pixel (blue high byte)") {
     verifyDualPixel(output[0], output[1], 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00);
 }
 
-TEST_CASE("encodeWS2816 - single pixel (blue low byte)") {
+FL_TEST_CASE("encodeWS2816 - single pixel (blue low byte)") {
     // Test R = 0, G = 0, B = 0x00FF
     fl::vector<fl::array<u16, 3>> pixels;
     pixels.push_back(makePixel16(0x0000, 0x0000, 0x00FF));
@@ -281,7 +281,7 @@ TEST_CASE("encodeWS2816 - single pixel (blue low byte)") {
     verifyDualPixel(output[0], output[1], 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF);
 }
 
-TEST_CASE("encodeWS2816 - single pixel (mixed values)") {
+FL_TEST_CASE("encodeWS2816 - single pixel (mixed values)") {
     // Test R = 0x1234, G = 0x5678, B = 0x9ABC
     fl::vector<fl::array<u16, 3>> pixels;
     pixels.push_back(makePixel16(0x1234, 0x5678, 0x9ABC));
@@ -293,7 +293,7 @@ TEST_CASE("encodeWS2816 - single pixel (mixed values)") {
     verifyDualPixel(output[0], output[1], 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC);
 }
 
-TEST_CASE("encodeWS2816 - multiple pixels (2 LEDs)") {
+FL_TEST_CASE("encodeWS2816 - multiple pixels (2 LEDs)") {
     // Test 2 pixels: (0x1122, 0x3344, 0x5566) and (0x7788, 0x99AA, 0xBBCC)
     fl::vector<fl::array<u16, 3>> pixels;
     pixels.push_back(makePixel16(0x1122, 0x3344, 0x5566));
@@ -312,7 +312,7 @@ TEST_CASE("encodeWS2816 - multiple pixels (2 LEDs)") {
     verifyDualPixel(output[2], output[3], 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC);
 }
 
-TEST_CASE("encodeWS2816 - multiple pixels (3 LEDs)") {
+FL_TEST_CASE("encodeWS2816 - multiple pixels (3 LEDs)") {
     // Test 3 distinct pixels
     fl::vector<fl::array<u16, 3>> pixels;
     pixels.push_back(makePixel16(0xFF00, 0x0000, 0x0000));  // Red high
@@ -330,7 +330,7 @@ TEST_CASE("encodeWS2816 - multiple pixels (3 LEDs)") {
     verifyDualPixel(output[4], output[5], 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00);
 }
 
-TEST_CASE("encodeWS2816 - boundary values (min/max per channel)") {
+FL_TEST_CASE("encodeWS2816 - boundary values (min/max per channel)") {
     // Test extreme values: min (0x0000), mid (0x8000), max (0xFFFF)
     fl::vector<fl::array<u16, 3>> pixels;
     pixels.push_back(makePixel16(0x0000, 0x8000, 0xFFFF));
@@ -342,7 +342,7 @@ TEST_CASE("encodeWS2816 - boundary values (min/max per channel)") {
     verifyDualPixel(output[0], output[1], 0x00, 0x00, 0x80, 0x00, 0xFF, 0xFF);
 }
 
-TEST_CASE("encodeWS2816 - sequential hex pattern") {
+FL_TEST_CASE("encodeWS2816 - sequential hex pattern") {
     // Test sequential hex values for debugging
     fl::vector<fl::array<u16, 3>> pixels;
     pixels.push_back(makePixel16(0x0102, 0x0304, 0x0506));
@@ -359,7 +359,7 @@ TEST_CASE("encodeWS2816 - sequential hex pattern") {
     FL_CHECK_EQ(output[1].b, 0x06);
 }
 
-TEST_CASE("encodeWS2816 - large array (30 pixels)") {
+FL_TEST_CASE("encodeWS2816 - large array (30 pixels)") {
     // Test encoding large arrays efficiently (reduced from 100 to 30 for performance)
     // Still provides excellent coverage: 30 pixels = 60 CRGB output = adequate stress test
     fl::vector<fl::array<u16, 3>> pixels;
@@ -396,7 +396,7 @@ TEST_CASE("encodeWS2816 - large array (30 pixels)") {
 // Channel Layout Verification Tests
 // ============================================================================
 
-TEST_CASE("encodeWS2816 - channel layout documentation") {
+FL_TEST_CASE("encodeWS2816 - channel layout documentation") {
     // This test documents the exact channel layout for WS2816 encoding
     // Input: R16 = 0xRrRr, G16 = 0xGgGg, B16 = 0xBbBb (uppercase = high, lowercase = low)
     // Output: CRGB1 = [Rr, Rr, Gg], CRGB2 = [Gg, Bb, Bb]

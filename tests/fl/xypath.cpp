@@ -5,7 +5,7 @@
 #include "fl/xypath.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/geometry.h"
 #include "fl/math_macros.h"
 #include "fl/stl/vector.h"
@@ -16,16 +16,16 @@
 
 
 #define MESSAGE_TILE(TILE) \
-    MESSAGE("\nTile:\n" \
+    FL_MESSAGE("\nTile:\n" \
             << "  " << TILE.at(0, 0) << " " << TILE.at(1, 0) << "\n" \
             << "  " << TILE.at(0, 1) << " " << TILE.at(1, 1) << "\n");
 
 #define MESSAGE_TILE_ROW(TILE, ROW) \
-    MESSAGE("\nTile Row " << ROW << ":\n" \
+    FL_MESSAGE("\nTile Row " << ROW << ":\n" \
             << "  " << TILE.at(0, ROW) << " " << TILE.at(1, ROW) << "\n");
 
 
-TEST_CASE("LinePath") {
+FL_TEST_CASE("LinePath") {
     fl::LinePath path(0.0f, 0.0f, 1.0f, 1.0f);
     fl::vec2<float> xy = path.compute(0.5f);
     FL_REQUIRE(xy.x == 0.5f);
@@ -40,7 +40,7 @@ TEST_CASE("LinePath") {
     FL_REQUIRE(xy.y == 0.0f);
 }
 
-TEST_CASE("LinePath at_subpixel") {
+FL_TEST_CASE("LinePath at_subpixel") {
     // Tests that we can get the correct subpixel values at center point 0,0
     auto line = fl::make_shared<fl::LinePath>(-1.0f, -1.0f, 1.0f, -1.0f);
     fl::XYPath path(line);
@@ -51,7 +51,7 @@ TEST_CASE("LinePath at_subpixel") {
     FL_REQUIRE_EQ(255, tile.at(0, 0));
 }
 
-TEST_CASE("LinePath simple float sweep") {
+FL_TEST_CASE("LinePath simple float sweep") {
     // Tests that we can get the correct gaussian values at center point 0,0
     auto point = fl::make_shared<fl::LinePath>(0, 1.f, 1.f, 1.f);
     fl::XYPath path(point);
@@ -62,7 +62,7 @@ TEST_CASE("LinePath simple float sweep") {
     FL_REQUIRE_EQ(xy, fl::vec2<float>(1.f, 1.f));
 }
 
-TEST_CASE("Point at exactly the middle") {
+FL_TEST_CASE("Point at exactly the middle") {
     // Tests that we can get the correct gaussian values at center point 0,0
     auto point = fl::make_shared<fl::PointPath>(0.0, 0.0);  // Right in middle.
     fl::XYPath path(point);
@@ -73,12 +73,12 @@ TEST_CASE("Point at exactly the middle") {
     // FL_REQUIRE_EQ(fl::vec2(0.0f, 0.f), sp);
     // print out
     auto origin = sp.origin();
-    MESSAGE("Origin: " << origin.x << ", " << origin.y);
+    FL_MESSAGE("Origin: " << origin.x << ", " << origin.y);
 
-    MESSAGE(sp.at(0, 0));
-    MESSAGE(sp.at(0, 1));
-    MESSAGE(sp.at(1, 0));
-    MESSAGE(sp.at(1, 1));
+    FL_MESSAGE(sp.at(0, 0));
+    FL_MESSAGE(sp.at(0, 1));
+    FL_MESSAGE(sp.at(1, 0));
+    FL_MESSAGE(sp.at(1, 1));
 
     // require that all alpha be the same
     FL_REQUIRE_EQ(sp.at(0, 0), sp.at(0, 1));
@@ -87,7 +87,7 @@ TEST_CASE("Point at exactly the middle") {
     FL_REQUIRE_EQ(sp.at(0, 0), 64);
 }
 
-TEST_CASE("LinePath simple sweep in draw bounds") {
+FL_TEST_CASE("LinePath simple sweep in draw bounds") {
     // Tests that we can get the correct gaussian values at center point 0,0
     auto point = fl::make_shared<fl::LinePath>(-1.f, -1.f, 1.f, -1.f);
     fl::XYPath path(point);
@@ -99,7 +99,7 @@ TEST_CASE("LinePath simple sweep in draw bounds") {
     FL_REQUIRE_EQ(fl::vec2<float>(1.5f, 0.5f), end);
 }
 
-TEST_CASE("LinePath at_subpixel moves x") {
+FL_TEST_CASE("LinePath at_subpixel moves x") {
     // Tests that we can get the correct subpixel.
     auto point = fl::make_shared<fl::LinePath>(-1.f, -1.f, 1.f, -1.f);
     fl::XYPath path(point);
@@ -114,7 +114,7 @@ TEST_CASE("LinePath at_subpixel moves x") {
 }
 
 
-TEST_CASE("Test HeartPath") {
+FL_TEST_CASE("Test HeartPath") {
     fl::HeartPathPtr heart = fl::make_shared<fl::HeartPath>();
     
     // Track min and max values to help with scaling
@@ -137,14 +137,14 @@ TEST_CASE("Test HeartPath") {
         
         // Print every 10th point for visual inspection
         if (i % 10 == 0) {
-            MESSAGE("Heart point at alpha=" << alpha << ": (" << point.x << ", " << point.y << ")");
+            FL_MESSAGE("Heart point at alpha=" << alpha << ": (" << point.x << ", " << point.y << ")");
         }
     }
     
     // Print the min/max values
-    MESSAGE("\nHeart shape bounds:");
-    MESSAGE("X range: [" << min_x << ", " << max_x << "]");
-    MESSAGE("Y range: [" << min_y << ", " << max_y << "]");
+    FL_MESSAGE("\nHeart shape bounds:");
+    FL_MESSAGE("X range: [" << min_x << ", " << max_x << "]");
+    FL_MESSAGE("Y range: [" << min_y << ", " << max_y << "]");
     
     // Verify the heart is within the expected bounds
     FL_REQUIRE(min_x >= -1.0f);
@@ -153,7 +153,7 @@ TEST_CASE("Test HeartPath") {
     FL_REQUIRE(max_y <= 1.0f);
 }
 
-TEST_CASE("Test ArchimedeanSpiralPath") {
+FL_TEST_CASE("Test ArchimedeanSpiralPath") {
     fl::ArchimedeanSpiralPathPtr spiral = fl::make_shared<fl::ArchimedeanSpiralPath>(3, 1.0f);
     
     // Track min and max values to help with scaling
@@ -176,14 +176,14 @@ TEST_CASE("Test ArchimedeanSpiralPath") {
         
         // Print every 10th point for visual inspection
         if (i % 10 == 0) {
-            MESSAGE("Spiral point at alpha=" << alpha << ": (" << point.x << ", " << point.y << ")");
+            FL_MESSAGE("Spiral point at alpha=" << alpha << ": (" << point.x << ", " << point.y << ")");
         }
     }
     
     // Print the min/max values
-    MESSAGE("\nSpiral shape bounds:");
-    MESSAGE("X range: [" << min_x << ", " << max_x << "]");
-    MESSAGE("Y range: [" << min_y << ", " << max_y << "]");
+    FL_MESSAGE("\nSpiral shape bounds:");
+    FL_MESSAGE("X range: [" << min_x << ", " << max_x << "]");
+    FL_MESSAGE("Y range: [" << min_y << ", " << max_y << "]");
     
     // Verify the spiral is within the expected bounds
     FL_REQUIRE(min_x >= -1.0f);
@@ -192,9 +192,9 @@ TEST_CASE("Test ArchimedeanSpiralPath") {
     FL_REQUIRE(max_y <= 1.0f);
 }
 
-TEST_CASE("Test RosePath") {
+FL_TEST_CASE("Test RosePath") {
     // Test with different petal configurations
-    SUBCASE("3-petal rose") {
+    FL_SUBCASE("3-petal rose") {
         fl::RosePathPtr rose = fl::make_shared<fl::RosePath>(3, 1);
         
         // Track min and max values to help with scaling
@@ -217,14 +217,14 @@ TEST_CASE("Test RosePath") {
             
             // Print every 10th point for visual inspection
             if (i % 10 == 0) {
-                MESSAGE("3-petal rose point at alpha=" << alpha << ": (" << point.x << ", " << point.y << ")");
+                FL_MESSAGE("3-petal rose point at alpha=" << alpha << ": (" << point.x << ", " << point.y << ")");
             }
         }
         
         // Print the min/max values
-        MESSAGE("\n3-petal rose shape bounds:");
-        MESSAGE("X range: [" << min_x << ", " << max_x << "]");
-        MESSAGE("Y range: [" << min_y << ", " << max_y << "]");
+        FL_MESSAGE("\n3-petal rose shape bounds:");
+        FL_MESSAGE("X range: [" << min_x << ", " << max_x << "]");
+        FL_MESSAGE("Y range: [" << min_y << ", " << max_y << "]");
         
         // Verify the rose is within the expected bounds
         FL_REQUIRE(min_x >= -1.0f);
@@ -233,7 +233,7 @@ TEST_CASE("Test RosePath") {
         FL_REQUIRE(max_y <= 1.0f);
     }
     
-    SUBCASE("4-petal rose") {
+    FL_SUBCASE("4-petal rose") {
         fl::RosePathPtr rose = fl::make_shared<fl::RosePath>(2, 1);  // n=2 gives 4 petals
         
         // Track min and max values to help with scaling
@@ -263,7 +263,7 @@ TEST_CASE("Test RosePath") {
     }
 }
 
-TEST_CASE("Check complex types") {
+FL_TEST_CASE("Check complex types") {
     fl::vector<fl::XYPathPtr> paths;
     fl::XYPathPtr circle = fl::XYPath::NewCirclePath();
     paths.push_back(circle);
@@ -288,7 +288,7 @@ TEST_CASE("Check complex types") {
     // paths.push_back(fl::make_intrusive<GielisCurvePath>());
     // paths.push_back(fl::make_intrusive<CatmullRomPath>());
 
-    SUBCASE("Check floating point range") {
+    FL_SUBCASE("Check floating point range") {
         for (auto &path : paths) {
             for (float alpha = 0.0f; true; alpha += 0.01f) {
                 alpha = FL_MIN(1.f, alpha);
@@ -304,7 +304,7 @@ TEST_CASE("Check complex types") {
         }
     }
 
-    SUBCASE("Check float point range with transform to -8,8") {
+    FL_SUBCASE("Check float point range with transform to -8,8") {
         fl::TransformFloat tx;
         tx.set_scale(4.0f);
 

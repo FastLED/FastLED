@@ -2,7 +2,7 @@
 // g++ --std=c++11 test.cpp
 
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/int.h"
 
 
@@ -13,6 +13,6 @@ uint16_t XY(uint8_t, uint8_t);  // declaration to fix compiler warning.
 // This should go away someday and only use functions supplied by the user.
 uint16_t XY(uint8_t, uint8_t) { return 0; }
 
-TEST_CASE("Compile Test") {
+FL_TEST_CASE("Compile Test") {
     // Suceessful compilation test
 }

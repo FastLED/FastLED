@@ -20,7 +20,7 @@
 #include "fl/stl/cstddef.h"
 #include "fl/stl/new.h"
 #include "dither_mode.h"
-#include "doctest.h"
+#include "test.h"
 #include "eorder.h"
 #include "fl/chipsets/hd108.h"
 #include "fl/engine_events.h"
@@ -124,7 +124,7 @@ fl::vector<u8> captureBytes(const CRGB* leds, int num_leds, u8 brightness) {
     return result;
 }
 
-TEST_CASE("HD108 - Protocol format verification") {
+FL_TEST_CASE("HD108 - Protocol format verification") {
     // Test single LED with full protocol verification:
     // - Start frame: 8 bytes of 0x00
     // - LED frame: header (2 bytes) + RGB (6 bytes, 16-bit big-endian per channel)
@@ -156,7 +156,7 @@ TEST_CASE("HD108 - Protocol format verification") {
     FL_CHECK_EQ(getBigEndian16(capturedBytes, 10), gamma_2_8(255));
 }
 
-TEST_CASE("HD108 - Multi-LED with brightness and color order") {
+FL_TEST_CASE("HD108 - Multi-LED with brightness and color order") {
     // Test multiple LEDs to verify:
     // - Correct byte count scaling with LED count
     // - End frame size calculation: (num_leds/2 + 4)

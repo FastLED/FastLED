@@ -748,12 +748,12 @@ FL_TEST_SUITE_END()
 // When built with doctest (default), wrap FL tests in a doctest TEST_CASE
 // This allows us to test the FL framework within the existing test infrastructure
 #ifndef FLTEST_STANDALONE_MAIN
-#include "doctest.h"
+#include "test.h"
 
-TEST_CASE("FL_TEST framework self-test") {
+FL_TEST_CASE("FL_TEST framework self-test") {
     // Run all registered FL tests
     int result = fl::test::TestContext::instance().run();
-    REQUIRE(result == 0);
+    FL_REQUIRE(result == 0);
 }
 #else
 // Main function for standalone testing (when built without doctest)

@@ -1,14 +1,14 @@
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 #include "stdint.h" // ok include - testing FL types against standard
 
 // Test that fl/stl/stdint.h provides standard integer types without including <stdint.h>
 // This header is critical for FastLED's fast compilation strategy
 // ok INT_MAX (this file tests that the numeric limit macros are properly defined)
 
-TEST_CASE("stdint type definitions") {
-    SUBCASE("uint8_t and int8_t") {
+FL_TEST_CASE("stdint type definitions") {
+    FL_SUBCASE("uint8_t and int8_t") {
         // Verify 8-bit types exist and have correct size
         uint8_t u8 = 255;
         int8_t i8 = -128;
@@ -30,7 +30,7 @@ TEST_CASE("stdint type definitions") {
         FL_CHECK_EQ(i8, -128);
     }
 
-    SUBCASE("uint16_t and int16_t") {
+    FL_SUBCASE("uint16_t and int16_t") {
         // Verify 16-bit types exist and have correct size
         uint16_t u16 = 65535;
         int16_t i16 = -32768;
@@ -52,7 +52,7 @@ TEST_CASE("stdint type definitions") {
         FL_CHECK_EQ(i16, -32768);
     }
 
-    SUBCASE("uint32_t and int32_t") {
+    FL_SUBCASE("uint32_t and int32_t") {
         // Verify 32-bit types exist and have correct size
         uint32_t u32 = 4294967295U;
         int32_t i32 = -2147483647 - 1;
@@ -75,7 +75,7 @@ TEST_CASE("stdint type definitions") {
         FL_CHECK_EQ(i32, -2147483648);
     }
 
-    SUBCASE("uint64_t and int64_t") {
+    FL_SUBCASE("uint64_t and int64_t") {
         // Verify 64-bit types exist and have correct size
         uint64_t u64 = 18446744073709551615ULL;
         int64_t i64 = -9223372036854775807LL - 1;
@@ -93,7 +93,7 @@ TEST_CASE("stdint type definitions") {
         FL_CHECK_EQ(i64, 9223372036854775807LL);
     }
 
-    SUBCASE("size_t") {
+    FL_SUBCASE("size_t") {
         // size_t should be an unsigned type large enough for array indexing
         size_t sz = 100;
         FL_CHECK(sz > 0);
@@ -105,7 +105,7 @@ TEST_CASE("stdint type definitions") {
         FL_CHECK(ptr_as_size != 0);
     }
 
-    SUBCASE("uintptr_t and intptr_t") {
+    FL_SUBCASE("uintptr_t and intptr_t") {
         // Pointer-sized integer types
         int dummy;
         uintptr_t uptr = reinterpret_cast<uintptr_t>(&dummy);
@@ -122,7 +122,7 @@ TEST_CASE("stdint type definitions") {
         FL_CHECK_EQ(recovered_ptr, &dummy);
     }
 
-    SUBCASE("ptrdiff_t") {
+    FL_SUBCASE("ptrdiff_t") {
         // Signed type for pointer arithmetic
         int arr[10];
         ptrdiff_t diff = &arr[5] - &arr[2];
@@ -136,8 +136,8 @@ TEST_CASE("stdint type definitions") {
     }
 }
 
-TEST_CASE("stdint limit macros") {
-    SUBCASE("INT8_MIN and INT8_MAX") {
+FL_TEST_CASE("stdint limit macros") {
+    FL_SUBCASE("INT8_MIN and INT8_MAX") {
         FL_CHECK_EQ(INT8_MIN, -128);
         FL_CHECK_EQ(INT8_MAX, 127);
 
@@ -148,7 +148,7 @@ TEST_CASE("stdint limit macros") {
         FL_CHECK_EQ(max_val, 127);
     }
 
-    SUBCASE("INT16_MIN and INT16_MAX") {
+    FL_SUBCASE("INT16_MIN and INT16_MAX") {
         FL_CHECK_EQ(INT16_MIN, -32768);
         FL_CHECK_EQ(INT16_MAX, 32767);
 
@@ -158,7 +158,7 @@ TEST_CASE("stdint limit macros") {
         FL_CHECK_EQ(max_val, 32767);
     }
 
-    SUBCASE("INT32_MIN and INT32_MAX") {
+    FL_SUBCASE("INT32_MIN and INT32_MAX") {
         FL_CHECK_EQ(INT32_MIN, -2147483648);
         FL_CHECK_EQ(INT32_MAX, 2147483647);
 
@@ -168,7 +168,7 @@ TEST_CASE("stdint limit macros") {
         FL_CHECK_EQ(max_val, 2147483647);
     }
 
-    SUBCASE("INT64_MIN and INT64_MAX") {
+    FL_SUBCASE("INT64_MIN and INT64_MAX") {
         FL_CHECK_EQ(INT64_MIN, -9223372036854775807LL - 1);
         FL_CHECK_EQ(INT64_MAX, 9223372036854775807LL);
 
@@ -178,7 +178,7 @@ TEST_CASE("stdint limit macros") {
         FL_CHECK_EQ(max_val, 9223372036854775807LL);
     }
 
-    SUBCASE("UINT8_MAX") {
+    FL_SUBCASE("UINT8_MAX") {
         FL_CHECK_EQ(UINT8_MAX, 0xFF);
         FL_CHECK_EQ(UINT8_MAX, 255);
 
@@ -186,7 +186,7 @@ TEST_CASE("stdint limit macros") {
         FL_CHECK_EQ(max_val, 255);
     }
 
-    SUBCASE("UINT16_MAX") {
+    FL_SUBCASE("UINT16_MAX") {
         FL_CHECK_EQ(UINT16_MAX, 0xFFFF);
         FL_CHECK_EQ(UINT16_MAX, 65535);
 
@@ -194,7 +194,7 @@ TEST_CASE("stdint limit macros") {
         FL_CHECK_EQ(max_val, 65535);
     }
 
-    SUBCASE("UINT32_MAX") {
+    FL_SUBCASE("UINT32_MAX") {
         FL_CHECK_EQ(UINT32_MAX, 0xFFFFFFFFU);
         FL_CHECK_EQ(UINT32_MAX, 4294967295U);
 
@@ -202,7 +202,7 @@ TEST_CASE("stdint limit macros") {
         FL_CHECK_EQ(max_val, 4294967295U);
     }
 
-    SUBCASE("UINT64_MAX") {
+    FL_SUBCASE("UINT64_MAX") {
         FL_CHECK_EQ(UINT64_MAX, 0xFFFFFFFFFFFFFFFFULL);
         FL_CHECK_EQ(UINT64_MAX, 18446744073709551615ULL);
 
@@ -211,8 +211,8 @@ TEST_CASE("stdint limit macros") {
     }
 }
 
-TEST_CASE("stdint type relationships") {
-    SUBCASE("signed and unsigned relationships") {
+FL_TEST_CASE("stdint type relationships") {
+    FL_SUBCASE("signed and unsigned relationships") {
         // Unsigned types should have twice the positive range
         FL_CHECK_EQ(static_cast<uint8_t>(UINT8_MAX), 255);
         FL_CHECK_EQ(INT8_MAX, 127);
@@ -231,7 +231,7 @@ TEST_CASE("stdint type relationships") {
         FL_CHECK(UINT64_MAX > static_cast<uint64_t>(INT64_MAX));
     }
 
-    SUBCASE("size progression") {
+    FL_SUBCASE("size progression") {
         // Each size should be double the previous
         FL_CHECK_EQ(sizeof(uint16_t), sizeof(uint8_t) * 2);
         FL_CHECK_EQ(sizeof(uint32_t), sizeof(uint16_t) * 2);
@@ -242,7 +242,7 @@ TEST_CASE("stdint type relationships") {
         FL_CHECK_EQ(sizeof(int64_t), sizeof(int32_t) * 2);
     }
 
-    SUBCASE("pointer-sized types") {
+    FL_SUBCASE("pointer-sized types") {
         // size_t, uintptr_t, intptr_t, and ptrdiff_t should all be pointer-sized
         FL_CHECK_EQ(sizeof(size_t), sizeof(void*));
         FL_CHECK_EQ(sizeof(uintptr_t), sizeof(void*));
@@ -251,8 +251,8 @@ TEST_CASE("stdint type relationships") {
     }
 }
 
-TEST_CASE("stdint arithmetic operations") {
-    SUBCASE("8-bit arithmetic") {
+FL_TEST_CASE("stdint arithmetic operations") {
+    FL_SUBCASE("8-bit arithmetic") {
         uint8_t u8 = 100;
         u8 += 50;
         FL_CHECK_EQ(u8, 150);
@@ -271,7 +271,7 @@ TEST_CASE("stdint arithmetic operations") {
         FL_CHECK_EQ(i8, -106);  // (100 + 50) = 150, reinterpreted as int8_t = -106
     }
 
-    SUBCASE("16-bit arithmetic") {
+    FL_SUBCASE("16-bit arithmetic") {
         uint16_t u16 = 60000;
         u16 += 10000;
         FL_CHECK_EQ(u16, 4464);  // (70000) % 65536 = 4464
@@ -283,7 +283,7 @@ TEST_CASE("stdint arithmetic operations") {
         FL_CHECK_EQ(i16, -30536);  // (35000) reinterpreted as int16_t = -30536
     }
 
-    SUBCASE("32-bit arithmetic") {
+    FL_SUBCASE("32-bit arithmetic") {
         uint32_t u32 = 4000000000U;
         u32 += 500000000U;
         FL_CHECK_EQ(u32, 205032704U);  // Wraps around
@@ -295,7 +295,7 @@ TEST_CASE("stdint arithmetic operations") {
         FL_CHECK_EQ(i32, -1794967296);  // (2500000000) reinterpreted as int32_t
     }
 
-    SUBCASE("bitwise operations") {
+    FL_SUBCASE("bitwise operations") {
         uint32_t mask = 0xFF00FF00U;
         uint32_t value = 0x12345678U;
 
@@ -310,9 +310,9 @@ TEST_CASE("stdint arithmetic operations") {
     }
 }
 
-TEST_CASE("stdint constexpr compatibility") {
+FL_TEST_CASE("stdint constexpr compatibility") {
     // Test that limit macros can be used in constexpr contexts
-    SUBCASE("compile-time constants") {
+    FL_SUBCASE("compile-time constants") {
         constexpr int8_t min8 = INT8_MIN;
         constexpr int8_t max8 = INT8_MAX;
         constexpr uint8_t umax8 = UINT8_MAX;
@@ -330,7 +330,7 @@ TEST_CASE("stdint constexpr compatibility") {
         FL_CHECK_EQ(umax32, 4294967295U);
     }
 
-    SUBCASE("static assertions") {
+    FL_SUBCASE("static assertions") {
         // These should compile successfully
         static_assert(sizeof(uint8_t) == 1, "uint8_t should be 1 byte");
         static_assert(sizeof(uint16_t) == 2, "uint16_t should be 2 bytes");

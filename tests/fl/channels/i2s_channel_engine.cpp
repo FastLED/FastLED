@@ -12,7 +12,7 @@
 
 #ifdef FASTLED_STUB_IMPL  // Tests only run on stub platform
 
-#include "doctest.h"
+#include "test.h"
 #include "platforms/esp/32/drivers/i2s/channel_engine_i2s.h"
 #include "platforms/esp/32/drivers/i2s/i2s_lcd_cam_peripheral_mock.h"
 #include "fl/channels/data.h"
@@ -105,30 +105,30 @@ ChannelDataPtr createTestChannelData(int pin, size_t numLeds) {
 // Test Suite: Channel Engine Creation
 //=============================================================================
 
-TEST_CASE("ChannelEngineI2S - creation") {
+FL_TEST_CASE("ChannelEngineI2S - creation") {
     resetMockState();
 
     auto peripheral = createMockPeripheral();
     ChannelEngineI2S engine(peripheral);
 
-    CHECK(engine.getName() != nullptr);
-    CHECK(fl::strcmp(engine.getName(), "I2S") == 0);
+    FL_CHECK(engine.getName() != nullptr);
+    FL_CHECK(fl::strcmp(engine.getName(), "I2S") == 0);
 }
 
-TEST_CASE("ChannelEngineI2S - initial state is READY") {
+FL_TEST_CASE("ChannelEngineI2S - initial state is READY") {
     resetMockState();
 
     auto peripheral = createMockPeripheral();
     ChannelEngineI2S engine(peripheral);
 
-    CHECK(engine.poll() == IChannelEngine::EngineState::READY);
+    FL_CHECK(engine.poll() == IChannelEngine::EngineState::READY);
 }
 
 //=============================================================================
 // Test Suite: Single Channel Transmission
 //=============================================================================
 
-TEST_CASE("ChannelEngineI2S - single channel transmission") {
+FL_TEST_CASE("ChannelEngineI2S - single channel transmission") {
     resetMockState();
 
     auto peripheral = createMockPeripheral();
@@ -148,10 +148,10 @@ TEST_CASE("ChannelEngineI2S - single channel transmission") {
 
     // Verify mock received data
     auto& mock = I2sLcdCamPeripheralMock::instance();
-    CHECK(mock.getTransmitCount() >= 1);
+    FL_CHECK(mock.getTransmitCount() >= 1);
 }
 
-TEST_CASE("ChannelEngineI2S - empty enqueue does not transmit") {
+FL_TEST_CASE("ChannelEngineI2S - empty enqueue does not transmit") {
     resetMockState();
 
     auto peripheral = createMockPeripheral();
@@ -161,18 +161,18 @@ TEST_CASE("ChannelEngineI2S - empty enqueue does not transmit") {
     engine.show();
 
     // Should still be ready
-    CHECK(engine.poll() == IChannelEngine::EngineState::READY);
+    FL_CHECK(engine.poll() == IChannelEngine::EngineState::READY);
 
     // Mock should not have been called
     auto& mock = I2sLcdCamPeripheralMock::instance();
-    CHECK(mock.getTransmitCount() == 0);
+    FL_CHECK(mock.getTransmitCount() == 0);
 }
 
 //=============================================================================
 // Test Suite: Multi-Channel Transmission
 //=============================================================================
 
-TEST_CASE("ChannelEngineI2S - multi-channel transmission") {
+FL_TEST_CASE("ChannelEngineI2S - multi-channel transmission") {
     resetMockState();
 
     auto peripheral = createMockPeripheral();
@@ -196,28 +196,28 @@ TEST_CASE("ChannelEngineI2S - multi-channel transmission") {
 
     // Verify transmission occurred
     auto& mock = I2sLcdCamPeripheralMock::instance();
-    CHECK(mock.getTransmitCount() >= 1);
+    FL_CHECK(mock.getTransmitCount() >= 1);
 }
 
 //=============================================================================
 // Test Suite: State Machine
 //=============================================================================
 
-TEST_CASE("ChannelEngineI2S - state transitions") {
+FL_TEST_CASE("ChannelEngineI2S - state transitions") {
     resetMockState();
 
     auto peripheral = createMockPeripheral();
     ChannelEngineI2S engine(peripheral);
 
     // Initial state
-    CHECK(engine.poll() == IChannelEngine::EngineState::READY);
+    FL_CHECK(engine.poll() == IChannelEngine::EngineState::READY);
 
     // Enqueue data
     auto channelData = createTestChannelData(1, 50);
     engine.enqueue(channelData);
 
     // Still ready (not transmitted yet)
-    CHECK(engine.poll() == IChannelEngine::EngineState::READY);
+    FL_CHECK(engine.poll() == IChannelEngine::EngineState::READY);
 
     // Start transmission
     engine.show();
@@ -230,15 +230,15 @@ TEST_CASE("ChannelEngineI2S - state transitions") {
         iterations++;
     }
 
-    CHECK(iterations < maxIterations);  // Didn't timeout
-    CHECK(engine.poll() == IChannelEngine::EngineState::READY);  // Back to ready
+    FL_CHECK(iterations < maxIterations);  // Didn't timeout
+    FL_CHECK(engine.poll() == IChannelEngine::EngineState::READY);  // Back to ready
 }
 
 //=============================================================================
 // Test Suite: Error Handling
 //=============================================================================
 
-TEST_CASE("ChannelEngineI2S - transmit failure handling") {
+FL_TEST_CASE("ChannelEngineI2S - transmit failure handling") {
     resetMockState();
 
     auto peripheral = createMockPeripheral();
@@ -262,14 +262,14 @@ TEST_CASE("ChannelEngineI2S - transmit failure handling") {
         iterations++;
     }
 
-    CHECK(engine.poll() == IChannelEngine::EngineState::READY);
+    FL_CHECK(engine.poll() == IChannelEngine::EngineState::READY);
 }
 
 //=============================================================================
 // Test Suite: Multiple Show Cycles
 //=============================================================================
 
-TEST_CASE("ChannelEngineI2S - multiple show cycles") {
+FL_TEST_CASE("ChannelEngineI2S - multiple show cycles") {
     resetMockState();
 
     auto peripheral = createMockPeripheral();
@@ -289,14 +289,14 @@ TEST_CASE("ChannelEngineI2S - multiple show cycles") {
 
     // Verify all transmissions occurred
     auto& mock = I2sLcdCamPeripheralMock::instance();
-    CHECK(mock.getTransmitCount() >= 3);
+    FL_CHECK(mock.getTransmitCount() >= 3);
 }
 
 //=============================================================================
 // Test Suite: Varying LED Counts
 //=============================================================================
 
-TEST_CASE("ChannelEngineI2S - varying LED counts") {
+FL_TEST_CASE("ChannelEngineI2S - varying LED counts") {
     resetMockState();
 
     auto peripheral = createMockPeripheral();
@@ -319,7 +319,7 @@ TEST_CASE("ChannelEngineI2S - varying LED counts") {
         }
 
         // Verify transmission occurred
-        CHECK(mock.getTransmitHistory().size() >= 1);
+        FL_CHECK(mock.getTransmitHistory().size() >= 1);
     }
 }
 

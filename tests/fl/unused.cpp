@@ -1,5 +1,5 @@
 #include "fl/unused.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/int.h"
 
 using namespace fl;
@@ -11,37 +11,37 @@ using namespace fl;
 // TEST_CASE: FASTLED_UNUSED macro
 // ============================================================================
 
-TEST_CASE("FASTLED_UNUSED macro") {
-    SUBCASE("FASTLED_UNUSED is defined") {
+FL_TEST_CASE("FASTLED_UNUSED macro") {
+    FL_SUBCASE("FASTLED_UNUSED is defined") {
         // Verify the macro is defined
         #ifdef FASTLED_UNUSED
         FL_CHECK(true);
         #else
-        FAIL("FASTLED_UNUSED is not defined");
+        FL_FAIL("FASTLED_UNUSED is not defined");
         #endif
     }
 
-    SUBCASE("FASTLED_UNUSED with int variable") {
+    FL_SUBCASE("FASTLED_UNUSED with int variable") {
         int unused_var = 42;
         FASTLED_UNUSED(unused_var);
         // If we get here without compiler warnings, the macro works
         FL_CHECK(unused_var == 42);
     }
 
-    SUBCASE("FASTLED_UNUSED with pointer") {
+    FL_SUBCASE("FASTLED_UNUSED with pointer") {
         int value = 100;
         int* unused_ptr = &value;
         FASTLED_UNUSED(unused_ptr);
         FL_CHECK(*unused_ptr == 100);
     }
 
-    SUBCASE("FASTLED_UNUSED with const variable") {
+    FL_SUBCASE("FASTLED_UNUSED with const variable") {
         const double unused_const = 3.14;
         FASTLED_UNUSED(unused_const);
         FL_CHECK(unused_const == doctest::Approx(3.14));
     }
 
-    SUBCASE("FASTLED_UNUSED with struct") {
+    FL_SUBCASE("FASTLED_UNUSED with struct") {
         struct TestStruct {
             int x;
             int y;
@@ -52,7 +52,7 @@ TEST_CASE("FASTLED_UNUSED macro") {
         FL_CHECK(unused_struct.y == 20);
     }
 
-    SUBCASE("FASTLED_UNUSED with multiple calls") {
+    FL_SUBCASE("FASTLED_UNUSED with multiple calls") {
         int a = 1;
         int b = 2;
         int c = 3;
@@ -64,7 +64,7 @@ TEST_CASE("FASTLED_UNUSED macro") {
         FL_CHECK(c == 3);
     }
 
-    SUBCASE("FASTLED_UNUSED with function parameter") {
+    FL_SUBCASE("FASTLED_UNUSED with function parameter") {
         auto func = [](int param) {
             FASTLED_UNUSED(param);
             return 0;
@@ -72,20 +72,20 @@ TEST_CASE("FASTLED_UNUSED macro") {
         FL_CHECK(func(42) == 0);
     }
 
-    SUBCASE("FASTLED_UNUSED with volatile variable") {
+    FL_SUBCASE("FASTLED_UNUSED with volatile variable") {
         volatile int unused_volatile = 99;
         FASTLED_UNUSED(unused_volatile);
         FL_CHECK(unused_volatile == 99);
     }
 
-    SUBCASE("FASTLED_UNUSED with reference") {
+    FL_SUBCASE("FASTLED_UNUSED with reference") {
         int value = 50;
         int& unused_ref = value;
         FASTLED_UNUSED(unused_ref);
         FL_CHECK(unused_ref == 50);
     }
 
-    SUBCASE("FASTLED_UNUSED with expression result") {
+    FL_SUBCASE("FASTLED_UNUSED with expression result") {
         int x = 10;
         int y = 20;
         FASTLED_UNUSED(x + y);
@@ -99,36 +99,36 @@ TEST_CASE("FASTLED_UNUSED macro") {
 // TEST_CASE: FL_UNUSED macro
 // ============================================================================
 
-TEST_CASE("FL_UNUSED macro") {
-    SUBCASE("FL_UNUSED is defined") {
+FL_TEST_CASE("FL_UNUSED macro") {
+    FL_SUBCASE("FL_UNUSED is defined") {
         // Verify the macro is defined
         #ifdef FL_UNUSED
         FL_CHECK(true);
         #else
-        FAIL("FL_UNUSED is not defined");
+        FL_FAIL("FL_UNUSED is not defined");
         #endif
     }
 
-    SUBCASE("FL_UNUSED with int variable") {
+    FL_SUBCASE("FL_UNUSED with int variable") {
         int unused_var = 42;
         FL_UNUSED(unused_var);
         FL_CHECK(unused_var == 42);
     }
 
-    SUBCASE("FL_UNUSED with pointer") {
+    FL_SUBCASE("FL_UNUSED with pointer") {
         int value = 100;
         int* unused_ptr = &value;
         FL_UNUSED(unused_ptr);
         FL_CHECK(*unused_ptr == 100);
     }
 
-    SUBCASE("FL_UNUSED with const variable") {
+    FL_SUBCASE("FL_UNUSED with const variable") {
         const double unused_const = 2.718;
         FL_UNUSED(unused_const);
         FL_CHECK(unused_const == doctest::Approx(2.718));
     }
 
-    SUBCASE("FL_UNUSED with struct") {
+    FL_SUBCASE("FL_UNUSED with struct") {
         struct TestStruct {
             int a;
             int b;
@@ -139,7 +139,7 @@ TEST_CASE("FL_UNUSED macro") {
         FL_CHECK(unused_struct.b == 15);
     }
 
-    SUBCASE("FL_UNUSED with multiple calls") {
+    FL_SUBCASE("FL_UNUSED with multiple calls") {
         int x = 1;
         int y = 2;
         int z = 3;
@@ -151,7 +151,7 @@ TEST_CASE("FL_UNUSED macro") {
         FL_CHECK(z == 3);
     }
 
-    SUBCASE("FL_UNUSED with function parameter") {
+    FL_SUBCASE("FL_UNUSED with function parameter") {
         auto func = [](int param) {
             FL_UNUSED(param);
             return 42;
@@ -159,20 +159,20 @@ TEST_CASE("FL_UNUSED macro") {
         FL_CHECK(func(100) == 42);
     }
 
-    SUBCASE("FL_UNUSED with volatile variable") {
+    FL_SUBCASE("FL_UNUSED with volatile variable") {
         volatile int unused_volatile = 77;
         FL_UNUSED(unused_volatile);
         FL_CHECK(unused_volatile == 77);
     }
 
-    SUBCASE("FL_UNUSED with reference") {
+    FL_SUBCASE("FL_UNUSED with reference") {
         int value = 88;
         int& unused_ref = value;
         FL_UNUSED(unused_ref);
         FL_CHECK(unused_ref == 88);
     }
 
-    SUBCASE("FL_UNUSED with expression result") {
+    FL_SUBCASE("FL_UNUSED with expression result") {
         int a = 5;
         int b = 10;
         FL_UNUSED(a * b);
@@ -180,7 +180,7 @@ TEST_CASE("FL_UNUSED macro") {
         FL_CHECK(b == 10);
     }
 
-    SUBCASE("FL_UNUSED with array") {
+    FL_SUBCASE("FL_UNUSED with array") {
         int unused_array[3] = {1, 2, 3};
         FL_UNUSED(unused_array);
         FL_CHECK(unused_array[0] == 1);
@@ -206,34 +206,34 @@ FL_UNUSED_FUNCTION static void test_unused_func_void() {
     // Do nothing
 }
 
-TEST_CASE("FL_UNUSED_FUNCTION attribute") {
-    SUBCASE("FL_UNUSED_FUNCTION is defined") {
+FL_TEST_CASE("FL_UNUSED_FUNCTION attribute") {
+    FL_SUBCASE("FL_UNUSED_FUNCTION is defined") {
         // Verify the macro is defined
         #ifdef FL_UNUSED_FUNCTION
         FL_CHECK(true);
         #else
-        FAIL("FL_UNUSED_FUNCTION is not defined");
+        FL_FAIL("FL_UNUSED_FUNCTION is not defined");
         #endif
     }
 
-    SUBCASE("FL_UNUSED_FUNCTION with static function") {
+    FL_SUBCASE("FL_UNUSED_FUNCTION with static function") {
         // Call the function to verify it works
         int result = test_unused_func_1();
         FL_CHECK(result == 123);
     }
 
-    SUBCASE("FL_UNUSED_FUNCTION with another static function") {
+    FL_SUBCASE("FL_UNUSED_FUNCTION with another static function") {
         int result = test_unused_func_2();
         FL_CHECK(result == 456);
     }
 
-    SUBCASE("FL_UNUSED_FUNCTION with void function") {
+    FL_SUBCASE("FL_UNUSED_FUNCTION with void function") {
         // Just call the function to ensure it compiles
         test_unused_func_void();
         FL_CHECK(true);
     }
 
-    SUBCASE("FL_UNUSED_FUNCTION allows unused function definition") {
+    FL_SUBCASE("FL_UNUSED_FUNCTION allows unused function definition") {
         // These functions are defined but may not be called elsewhere
         // The attribute suppresses warnings about them being unused
         // If we get here without warnings, the macro works
@@ -245,8 +245,8 @@ TEST_CASE("FL_UNUSED_FUNCTION attribute") {
 // TEST_CASE: Macro interactions
 // ============================================================================
 
-TEST_CASE("macro interactions") {
-    SUBCASE("FASTLED_UNUSED and FL_UNUSED are equivalent") {
+FL_TEST_CASE("macro interactions") {
+    FL_SUBCASE("FASTLED_UNUSED and FL_UNUSED are equivalent") {
         int var1 = 10;
         int var2 = 10;
         FASTLED_UNUSED(var1);
@@ -255,7 +255,7 @@ TEST_CASE("macro interactions") {
         FL_CHECK(var1 == var2);
     }
 
-    SUBCASE("nested FASTLED_UNUSED calls") {
+    FL_SUBCASE("nested FASTLED_UNUSED calls") {
         int outer = 5;
         {
             int inner = 10;
@@ -266,7 +266,7 @@ TEST_CASE("macro interactions") {
         FL_CHECK(outer == 5);
     }
 
-    SUBCASE("nested FL_UNUSED calls") {
+    FL_SUBCASE("nested FL_UNUSED calls") {
         int outer = 15;
         {
             int inner = 20;
@@ -277,7 +277,7 @@ TEST_CASE("macro interactions") {
         FL_CHECK(outer == 15);
     }
 
-    SUBCASE("mixed FASTLED_UNUSED and FL_UNUSED") {
+    FL_SUBCASE("mixed FASTLED_UNUSED and FL_UNUSED") {
         int a = 1;
         int b = 2;
         int c = 3;
@@ -294,8 +294,8 @@ TEST_CASE("macro interactions") {
 // TEST_CASE: Practical usage scenarios
 // ============================================================================
 
-TEST_CASE("practical usage scenarios") {
-    SUBCASE("unused parameter in callback") {
+FL_TEST_CASE("practical usage scenarios") {
+    FL_SUBCASE("unused parameter in callback") {
         // Common pattern: callback receives parameters but doesn't use all of them
         auto callback = [](int used_param, int unused_param) {
             FL_UNUSED(unused_param);
@@ -304,21 +304,21 @@ TEST_CASE("practical usage scenarios") {
         FL_CHECK(callback(5, 999) == 10);
     }
 
-    SUBCASE("unused variable in debug code") {
+    FL_SUBCASE("unused variable in debug code") {
         // Variable used only in asserts (stripped in release builds)
         int result = 100;
         FL_UNUSED(result);  // Prevents warning when asserts are disabled
         FL_CHECK(result == 100);
     }
 
-    SUBCASE("unused result from function call") {
+    FL_SUBCASE("unused result from function call") {
         auto get_value = []() { return 42; };
         FL_UNUSED(get_value());
         // Intentionally ignoring return value
         FL_CHECK(true);
     }
 
-    SUBCASE("conditional compilation with unused variable") {
+    FL_SUBCASE("conditional compilation with unused variable") {
         int debug_var = 123;
         #ifdef NEVER_DEFINED
         // Variable only used in this block
@@ -330,7 +330,7 @@ TEST_CASE("practical usage scenarios") {
         FL_CHECK(debug_var == 123);
     }
 
-    SUBCASE("template function with unused type parameter") {
+    FL_SUBCASE("template function with unused type parameter") {
         // Some template instantiations may not use all parameters
         auto template_func = [](int value, const char* unused_value) {
             FL_UNUSED(unused_value);
@@ -339,7 +339,7 @@ TEST_CASE("practical usage scenarios") {
         FL_CHECK(template_func(42, "unused") == 42);
     }
 
-    SUBCASE("unused this pointer in static-like member") {
+    FL_SUBCASE("unused this pointer in static-like member") {
         struct TestClass {
             int member = 10;
             void method(TestClass* self) {
@@ -357,58 +357,58 @@ TEST_CASE("practical usage scenarios") {
 // TEST_CASE: Edge cases
 // ============================================================================
 
-TEST_CASE("edge cases") {
-    SUBCASE("FL_UNUSED with nullptr") {
+FL_TEST_CASE("edge cases") {
+    FL_SUBCASE("FL_UNUSED with nullptr") {
         int* null_ptr = nullptr;
         FL_UNUSED(null_ptr);
         FL_CHECK(null_ptr == nullptr);
     }
 
-    SUBCASE("FL_UNUSED with boolean") {
+    FL_SUBCASE("FL_UNUSED with boolean") {
         bool unused_bool = true;
         FL_UNUSED(unused_bool);
         FL_CHECK(unused_bool == true);
     }
 
-    SUBCASE("FL_UNUSED with char") {
+    FL_SUBCASE("FL_UNUSED with char") {
         char unused_char = 'A';
         FL_UNUSED(unused_char);
         FL_CHECK(unused_char == 'A');
     }
 
-    SUBCASE("FL_UNUSED with string literal") {
+    FL_SUBCASE("FL_UNUSED with string literal") {
         const char* unused_str = "test";
         FL_UNUSED(unused_str);
         FL_CHECK(unused_str[0] == 't');
     }
 
-    SUBCASE("FL_UNUSED with enum") {
+    FL_SUBCASE("FL_UNUSED with enum") {
         enum TestEnum { VALUE_A, VALUE_B, VALUE_C };
         TestEnum unused_enum = VALUE_B;
         FL_UNUSED(unused_enum);
         FL_CHECK(unused_enum == VALUE_B);
     }
 
-    SUBCASE("FL_UNUSED with lambda") {
+    FL_SUBCASE("FL_UNUSED with lambda") {
         auto unused_lambda = []() { return 42; };
         FL_UNUSED(unused_lambda);
         // Lambda defined but not called
         FL_CHECK(true);
     }
 
-    SUBCASE("FASTLED_UNUSED with cast expression") {
+    FL_SUBCASE("FASTLED_UNUSED with cast expression") {
         double pi = 3.14159;
         FASTLED_UNUSED(static_cast<int>(pi));
         FL_CHECK(pi == doctest::Approx(3.14159));
     }
 
-    SUBCASE("FL_UNUSED with sizeof expression") {
+    FL_SUBCASE("FL_UNUSED with sizeof expression") {
         int array[10];
         FL_UNUSED(sizeof(array));
         FL_CHECK(sizeof(array) == 10 * sizeof(int));
     }
 
-    SUBCASE("multiple FL_UNUSED_FUNCTION attributes") {
+    FL_SUBCASE("multiple FL_UNUSED_FUNCTION attributes") {
         // Already tested above, but verify they don't conflict
         FL_CHECK(test_unused_func_1() == 123);
         FL_CHECK(test_unused_func_2() == 456);
@@ -419,8 +419,8 @@ TEST_CASE("edge cases") {
 // TEST_CASE: Type compatibility
 // ============================================================================
 
-TEST_CASE("type compatibility") {
-    SUBCASE("FL_UNUSED with signed types") {
+FL_TEST_CASE("type compatibility") {
+    FL_SUBCASE("FL_UNUSED with signed types") {
         signed char sc = -1;
         signed short ss = -100;
         signed int si = -1000;
@@ -435,7 +435,7 @@ TEST_CASE("type compatibility") {
         FL_CHECK(sl == -10000);
     }
 
-    SUBCASE("FL_UNUSED with unsigned types") {
+    FL_SUBCASE("FL_UNUSED with unsigned types") {
         unsigned char uc = 255;
         unsigned short us = 65535;
         unsigned int ui = 1000;
@@ -450,7 +450,7 @@ TEST_CASE("type compatibility") {
         FL_CHECK(ul == 10000);
     }
 
-    SUBCASE("FL_UNUSED with floating point types") {
+    FL_SUBCASE("FL_UNUSED with floating point types") {
         float f = 1.5f;
         double d = 2.5;
         long double ld = 3.5L;
@@ -462,7 +462,7 @@ TEST_CASE("type compatibility") {
         FL_CHECK(ld == doctest::Approx(3.5L));
     }
 
-    SUBCASE("FL_UNUSED with const types") {
+    FL_SUBCASE("FL_UNUSED with const types") {
         const int ci = 100;
         const double cd = 3.14;
         const char* ccp = "test";
@@ -474,7 +474,7 @@ TEST_CASE("type compatibility") {
         FL_CHECK(ccp[0] == 't');
     }
 
-    SUBCASE("FL_UNUSED with pointer types") {
+    FL_SUBCASE("FL_UNUSED with pointer types") {
         int value = 42;
         int* p = &value;
         int** pp = &p;
@@ -486,7 +486,7 @@ TEST_CASE("type compatibility") {
         FL_CHECK(***ppp == 42);
     }
 
-    SUBCASE("FL_UNUSED with reference types") {
+    FL_SUBCASE("FL_UNUSED with reference types") {
         int value = 50;
         int& ref = value;
         const int& cref = value;
@@ -501,8 +501,8 @@ TEST_CASE("type compatibility") {
 // TEST_CASE: Macro expansion verification
 // ============================================================================
 
-TEST_CASE("macro expansion verification") {
-    SUBCASE("FASTLED_UNUSED expands to (void)(x)") {
+FL_TEST_CASE("macro expansion verification") {
+    FL_SUBCASE("FASTLED_UNUSED expands to (void)(x)") {
         // The macro should cast to void to suppress warnings
         int x = 10;
         // This should be equivalent to: (void)(x);
@@ -510,14 +510,14 @@ TEST_CASE("macro expansion verification") {
         FL_CHECK(x == 10);
     }
 
-    SUBCASE("FL_UNUSED expands to (void)(x)") {
+    FL_SUBCASE("FL_UNUSED expands to (void)(x)") {
         int x = 20;
         // This should be equivalent to: (void)(x);
         FL_UNUSED(x);
         FL_CHECK(x == 20);
     }
 
-    SUBCASE("FL_UNUSED_FUNCTION expands to __attribute__((unused))") {
+    FL_SUBCASE("FL_UNUSED_FUNCTION expands to __attribute__((unused))") {
         // The attribute should allow unused function definitions
         // If this compiles without warnings, the macro is correct
         #ifdef __GNUC__
@@ -534,8 +534,8 @@ TEST_CASE("macro expansion verification") {
 // TEST_CASE: Compiler compatibility
 // ============================================================================
 
-TEST_CASE("compiler compatibility") {
-    SUBCASE("macros work on current compiler") {
+FL_TEST_CASE("compiler compatibility") {
+    FL_SUBCASE("macros work on current compiler") {
         // All macros should be defined and functional
         int test_var = 42;
         FASTLED_UNUSED(test_var);
@@ -543,7 +543,7 @@ TEST_CASE("compiler compatibility") {
         FL_CHECK(test_var == 42);
     }
 
-    SUBCASE("FL_UNUSED_FUNCTION works on GCC/Clang") {
+    FL_SUBCASE("FL_UNUSED_FUNCTION works on GCC/Clang") {
         #if defined(__GNUC__) || defined(__clang__)
         // GCC and Clang support __attribute__((unused))
         FL_CHECK(test_unused_func_1() == 123);

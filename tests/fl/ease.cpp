@@ -4,7 +4,7 @@
 #include "test.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 #include <cstdlib>  // ok include - for abs()
 #include <cmath>  // ok include - for math functions
 using namespace fl;
@@ -23,16 +23,16 @@ static const fl::pair<fl::EaseType, const char*> ALL_EASING_TYPES[10] = {
 };
 static const size_t NUM_EASING_TYPES = sizeof(ALL_EASING_TYPES) / sizeof(ALL_EASING_TYPES[0]);
 
-TEST_CASE("8-bit easing functions") {
-    SUBCASE("easeInOutQuad8") {
-        SUBCASE("boundary values") {
+FL_TEST_CASE("8-bit easing functions") {
+    FL_SUBCASE("easeInOutQuad8") {
+        FL_SUBCASE("boundary values") {
             FL_CHECK_CLOSE(easeInOutQuad8(0), 0, 1);
             FL_CHECK_CLOSE(easeInOutQuad8(255), 255, 1);
             FL_CHECK_CLOSE(easeInOutQuad8(128), 128,
                         1); // midpoint should be unchanged
         }
 
-        SUBCASE("symmetry") {
+        FL_SUBCASE("symmetry") {
             // ease-in-out should be symmetric around midpoint
             for (uint8_t i = 0; i < 128; ++i) {
                 uint8_t forward = easeInOutQuad8(i);
@@ -43,21 +43,21 @@ TEST_CASE("8-bit easing functions") {
 
 
 
-        SUBCASE("first quarter should be slower than linear") {
+        FL_SUBCASE("first quarter should be slower than linear") {
             // ease-in portion should start slower than linear
             uint8_t quarter = easeInOutQuad8(64); // 64 = 255/4
             FL_CHECK_LT(quarter, 64); // should be less than linear progression
         }
     }
 
-    SUBCASE("easeInOutCubic8") {
-        SUBCASE("boundary values") {
+    FL_SUBCASE("easeInOutCubic8") {
+        FL_SUBCASE("boundary values") {
             FL_CHECK_CLOSE(easeInOutCubic8(0), 0, 1);
             FL_CHECK_CLOSE(easeInOutCubic8(255), 255, 1);
             FL_CHECK_CLOSE(easeInOutCubic8(128), 128, 1);
         }
 
-        SUBCASE("symmetry") {
+        FL_SUBCASE("symmetry") {
             const int kTolerance = 2; // This is too high, come back to this.
             for (uint8_t i = 0; i < 128; ++i) {
                 uint8_t forward = easeInOutCubic8(i);
@@ -68,7 +68,7 @@ TEST_CASE("8-bit easing functions") {
 
 
 
-        SUBCASE("more pronounced than quadratic") {
+        FL_SUBCASE("more pronounced than quadratic") {
             // cubic should be more pronounced than quadratic in ease-in portion
             uint8_t quarter = 64;
             uint8_t quad_result = easeInOutQuad8(quarter);
@@ -78,9 +78,9 @@ TEST_CASE("8-bit easing functions") {
     }
 }
 
-TEST_CASE("easing function special values") {
+FL_TEST_CASE("easing function special values") {
 
-    SUBCASE("quarter points") {
+    FL_SUBCASE("quarter points") {
         // Test specific values that are common in animations
         // 16-bit quarter points
         FL_CHECK_LT(easeInOutQuad16(16384), 16384);
@@ -91,8 +91,8 @@ TEST_CASE("easing function special values") {
     }
 }
 
-TEST_CASE("easeInOutQuad16") {
-    SUBCASE("boundary values") {
+FL_TEST_CASE("easeInOutQuad16") {
+    FL_SUBCASE("boundary values") {
         FL_CHECK_EQ(easeInOutQuad16(0), 0);
         FL_CHECK_EQ(easeInOutQuad16(65535), 65535);
         FL_CHECK_EQ(easeInOutQuad16(32768), 32768); // midpoint
@@ -106,7 +106,7 @@ TEST_CASE("easeInOutQuad16") {
         FL_CHECK_EQ(easeInOutQuad16(32769), 32770);
     }
 
-    SUBCASE("quartile values") {
+    FL_SUBCASE("quartile values") {
         // Test specific quartile values for 16-bit quadratic easing
         FL_CHECK_EQ(easeInOutQuad16(16384), 8192); // 25% input -> 12.5% output
         FL_CHECK_EQ(easeInOutQuad16(32768),
@@ -121,7 +121,7 @@ TEST_CASE("easeInOutQuad16") {
                  49152); // ease-out should be faster than linear
     }
 
-    SUBCASE("symmetry") {
+    FL_SUBCASE("symmetry") {
         for (uint16_t i = 0; i < 32768; i += 256) {
             uint16_t forward = easeInOutQuad16(i);
             uint16_t backward = easeInOutQuad16(65535 - i);
@@ -131,7 +131,7 @@ TEST_CASE("easeInOutQuad16") {
 
 
 
-    SUBCASE("scaling consistency with 8-bit") {
+    FL_SUBCASE("scaling consistency with 8-bit") {
         const int kTolerance = 2; // Note that this is too high.
         // 16-bit version should be consistent with 8-bit when scaled
         for (uint16_t i = 0; i <= 255; ++i) {
@@ -150,21 +150,21 @@ TEST_CASE("easeInOutQuad16") {
     }
 }
 
-TEST_CASE("easeInOutCubic16") {
+FL_TEST_CASE("easeInOutCubic16") {
 
-    SUBCASE("boundary values") {
+    FL_SUBCASE("boundary values") {
         FL_CHECK_EQ(easeInOutCubic16(0), 0);
         FL_CHECK_EQ(easeInOutCubic16(65535), 65535);
         FL_CHECK_EQ(easeInOutCubic16(32768), 32769);
     }
 
-    SUBCASE("quartile values") {
+    FL_SUBCASE("quartile values") {
         FL_CHECK_EQ(easeInOutCubic16(16384), 4096);
         FL_CHECK_EQ(easeInOutCubic16(32768), 32769);
         FL_CHECK_EQ(easeInOutCubic16(49152), 61440);
     }
 
-    SUBCASE("symmetry") {
+    FL_SUBCASE("symmetry") {
         const int kTolerance = 2; // Note that this is too high.
         for (uint16_t i = 0; i < 32768; i += 256) {
             uint16_t forward = easeInOutCubic16(i);
@@ -176,14 +176,14 @@ TEST_CASE("easeInOutCubic16") {
 
 
 
-    SUBCASE("more pronounced than quadratic") {
+    FL_SUBCASE("more pronounced than quadratic") {
         uint16_t quarter = 16384;
         uint16_t quad_result = easeInOutQuad16(quarter);
         uint16_t cubic_result = easeInOutCubic16(quarter);
         FL_CHECK_LT(cubic_result, quad_result);
     }
 
-    SUBCASE("scaling consistency with 8-bit") {
+    FL_SUBCASE("scaling consistency with 8-bit") {
         for (uint16_t i = 0; i <= 255; ++i) {
             uint8_t input8 = i;
             uint16_t input16 = map8_to_16(input8);
@@ -201,9 +201,9 @@ TEST_CASE("easeInOutCubic16") {
     }
 }
 
-TEST_CASE("easing function ordering") {
+FL_TEST_CASE("easing function ordering") {
 
-    SUBCASE("8-bit: cubic should be more pronounced than quadratic") {
+    FL_SUBCASE("8-bit: cubic should be more pronounced than quadratic") {
         for (uint16_t i = 32; i < 128; i += 16) { // test ease-in portion
             uint8_t quad = easeInOutQuad8(i);
             uint8_t cubic = easeInOutCubic8(i);
@@ -217,7 +217,7 @@ TEST_CASE("easing function ordering") {
         }
     }
 
-    SUBCASE("16-bit: cubic should be more pronounced than quadratic") {
+    FL_SUBCASE("16-bit: cubic should be more pronounced than quadratic") {
         for (uint32_t i = 8192; i < 32768; i += 4096) { // test ease-in portion
             uint16_t quad = easeInOutQuad16(i);
             uint16_t cubic = easeInOutCubic16(i);
@@ -233,8 +233,8 @@ TEST_CASE("easing function ordering") {
     }
 }
 
-TEST_CASE("easeInQuad16") {
-    SUBCASE("boundary values") {
+FL_TEST_CASE("easeInQuad16") {
+    FL_SUBCASE("boundary values") {
         FL_CHECK_EQ(easeInQuad16(0), 0);
         FL_CHECK_EQ(easeInQuad16(65535), 65535);
 
@@ -243,7 +243,7 @@ TEST_CASE("easeInQuad16") {
         FL_CHECK_EQ(easeInQuad16(65534), 65533); // (65534 * 65534) / 65535 = 65533
     }
 
-    SUBCASE("quartile values") {
+    FL_SUBCASE("quartile values") {
         // Test specific quartile values for 16-bit quadratic ease-in
         // Expected values calculated as (input * input) / 65535
         FL_CHECK_EQ(easeInQuad16(16384),
@@ -258,7 +258,7 @@ TEST_CASE("easeInQuad16") {
         FL_CHECK_EQ(easeInQuad16(57344), 50176); // 87.5% input -> ~76.56% output
     }
 
-    SUBCASE("mathematical precision") {
+    FL_SUBCASE("mathematical precision") {
         // Test specific values where we can verify the exact mathematical
         // result
         FL_CHECK_EQ(easeInQuad16(256), 1);    // (256 * 256) / 65535 = 1
@@ -270,7 +270,7 @@ TEST_CASE("easeInQuad16") {
 
 
 
-    SUBCASE("ease-in behavior") {
+    FL_SUBCASE("ease-in behavior") {
         // For ease-in, early values should be less than linear progression
         // while later values should be greater than linear progression
 
@@ -294,7 +294,7 @@ TEST_CASE("easeInQuad16") {
                  early_diff * 10); // Late differences should be much larger
     }
 
-    SUBCASE("specific known values") {
+    FL_SUBCASE("specific known values") {
         // Test some additional specific values for regression testing
         FL_CHECK_EQ(easeInQuad16(65535 / 4), 4095);      // Quarter point
         FL_CHECK_EQ(easeInQuad16(65535 / 2), 16383);     // Half point
@@ -306,36 +306,36 @@ TEST_CASE("easeInQuad16") {
     }
 }
 
-TEST_CASE("All easing functions boundary tests") {
-    SUBCASE("8-bit easing functions boundary conditions") {
+FL_TEST_CASE("All easing functions boundary tests") {
+    FL_SUBCASE("8-bit easing functions boundary conditions") {
         for (size_t i = 0; i < NUM_EASING_TYPES; ++i) {
             fl::EaseType type = ALL_EASING_TYPES[i].first;
             const char* name = ALL_EASING_TYPES[i].second;
             uint8_t result_0 = fl::ease8(type, 0);
             uint8_t result_255 = fl::ease8(type, 255);
             
-            INFO("Testing EaseType " << name);
+            FL_DINFO("Testing EaseType " << name);
             FL_CHECK_EQ(result_0, 0);
             FL_CHECK_EQ(result_255, 255);
         }
     }
     
-    SUBCASE("16-bit easing functions boundary conditions") {
+    FL_SUBCASE("16-bit easing functions boundary conditions") {
         for (size_t i = 0; i < NUM_EASING_TYPES; ++i) {
             fl::EaseType type = ALL_EASING_TYPES[i].first;
             const char* name = ALL_EASING_TYPES[i].second;
             uint16_t result_0 = fl::ease16(type, 0);
             uint16_t result_max = fl::ease16(type, 65535);
             
-            INFO("Testing EaseType " << name);
+            FL_DINFO("Testing EaseType " << name);
             FL_CHECK_EQ(result_0, 0);
             FL_CHECK_EQ(result_max, 65535);
         }
     }
 }
 
-TEST_CASE("All easing functions monotonicity tests") {
-    SUBCASE("8-bit easing functions monotonicity") {
+FL_TEST_CASE("All easing functions monotonicity tests") {
+    FL_SUBCASE("8-bit easing functions monotonicity") {
         for (size_t i = 0; i < NUM_EASING_TYPES; ++i) {
             fl::EaseType type = ALL_EASING_TYPES[i].first;
             const char* name = ALL_EASING_TYPES[i].second;
@@ -344,14 +344,14 @@ TEST_CASE("All easing functions monotonicity tests") {
             uint8_t prev = 0;
             for (uint16_t input = 0; input <= 255; ++input) {
                 uint8_t current = fl::ease8(type, input);
-                INFO("Testing EaseType " << name << " at input " << input);
+                FL_DINFO("Testing EaseType " << name << " at input " << input);
                 FL_CHECK_GE(current, prev);
                 prev = current;
             }
         }
     }
     
-    SUBCASE("16-bit easing functions monotonicity") {
+    FL_SUBCASE("16-bit easing functions monotonicity") {
         for (size_t i = 0; i < NUM_EASING_TYPES; ++i) {
             fl::EaseType type = ALL_EASING_TYPES[i].first;
             const char* name = ALL_EASING_TYPES[i].second;
@@ -360,7 +360,7 @@ TEST_CASE("All easing functions monotonicity tests") {
             uint16_t prev = 0;
             for (uint32_t input = 0; input <= 65535; input += 256) {
                 uint16_t current = fl::ease16(type, input);
-                INFO("Testing EaseType " << name << " at input " << input);
+                FL_DINFO("Testing EaseType " << name << " at input " << input);
                 FL_CHECK_GE(current, prev);
                 prev = current;
             }
@@ -368,7 +368,7 @@ TEST_CASE("All easing functions monotonicity tests") {
     }
 }
 
-TEST_CASE("All easing functions 8-bit vs 16-bit consistency tests") {
+FL_TEST_CASE("All easing functions 8-bit vs 16-bit consistency tests") {
     // Define expected tolerances for different easing types
     const int tolerances[] = {
         1, // EASE_NONE - should be perfect
@@ -383,7 +383,7 @@ TEST_CASE("All easing functions 8-bit vs 16-bit consistency tests") {
         4  // EASE_IN_OUT_SINE - sine functions have more precision loss
     };
     
-    SUBCASE("8-bit vs 16-bit scaling consistency") {
+    FL_SUBCASE("8-bit vs 16-bit scaling consistency") {
         for (size_t type_idx = 0; type_idx < NUM_EASING_TYPES; ++type_idx) {
             fl::EaseType type = ALL_EASING_TYPES[type_idx].first;
             const char* name = ALL_EASING_TYPES[type_idx].second;
@@ -410,7 +410,7 @@ TEST_CASE("All easing functions 8-bit vs 16-bit consistency tests") {
                     worst_input = input8;
                 }
                 
-                INFO("Testing EaseType " << name 
+                FL_DINFO("Testing EaseType " << name 
                      << " at input " << (int)input8 
                      << " (8-bit result: " << (int)result8
                      << ", 16-bit scaled result: " << (int)scaled_result16
@@ -419,12 +419,12 @@ TEST_CASE("All easing functions 8-bit vs 16-bit consistency tests") {
             }
             
             // Log the maximum difference found for this easing type
-            INFO("EaseType " << name << " maximum difference: " << max_diff 
+            FL_DINFO("EaseType " << name << " maximum difference: " << max_diff 
                  << " at input " << (int)worst_input);
         }
     }
     
-    SUBCASE("Boundary values consistency") {
+    FL_SUBCASE("Boundary values consistency") {
         for (size_t type_idx = 0; type_idx < NUM_EASING_TYPES; ++type_idx) {
             fl::EaseType type = ALL_EASING_TYPES[type_idx].first;
             const char* name = ALL_EASING_TYPES[type_idx].second;
@@ -438,7 +438,7 @@ TEST_CASE("All easing functions 8-bit vs 16-bit consistency tests") {
             uint16_t result16_65535 = fl::ease16(type, 65535);
             uint8_t scaled_result16_255 = map16_to_8(result16_65535);
             
-            INFO("Testing EaseType " << name << " boundary values");
+            FL_DINFO("Testing EaseType " << name << " boundary values");
             FL_CHECK_EQ(result8_0, scaled_result16_0);
             FL_CHECK_EQ(result8_255, scaled_result16_255);
             
@@ -450,7 +450,7 @@ TEST_CASE("All easing functions 8-bit vs 16-bit consistency tests") {
         }
     }
     
-        SUBCASE("Midpoint consistency") {
+        FL_SUBCASE("Midpoint consistency") {
         for (size_t type_idx = 0; type_idx < NUM_EASING_TYPES; ++type_idx) {
             fl::EaseType type = ALL_EASING_TYPES[type_idx].first;
             const char* name = ALL_EASING_TYPES[type_idx].second;
@@ -462,7 +462,7 @@ TEST_CASE("All easing functions 8-bit vs 16-bit consistency tests") {
             
             int16_t diff = abs((int16_t)result8_mid - (int16_t)scaled_result16_mid);
             
-            INFO("Testing EaseType " << name << " midpoint consistency"
+            FL_DINFO("Testing EaseType " << name << " midpoint consistency"
                  << " (8-bit: " << (int)result8_mid
                  << ", 16-bit scaled: " << (int)scaled_result16_mid
                  << ", diff: " << diff << ")");

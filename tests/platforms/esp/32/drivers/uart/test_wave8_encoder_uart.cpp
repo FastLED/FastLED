@@ -4,7 +4,7 @@
 /// Tests the 2-bit LUT encoding strategy for UART LED transmission.
 /// Validates encoding correctness, buffer sizing, and edge cases.
 
-#include "doctest.h"
+#include "test.h"
 
 #include "platforms/esp/32/drivers/uart/wave8_encoder_uart.h"
 #include "fl/stl/cstddef.h"
@@ -18,28 +18,28 @@ using namespace fl;
 // Test Suite: 2-Bit LUT Encoding
 //=============================================================================
 
-TEST_CASE("Wave8 UART Encoder - 2-bit LUT correctness") {
-    SUBCASE("LUT pattern 0x00 (0b00) → 0x11") {
+FL_TEST_CASE("Wave8 UART Encoder - 2-bit LUT correctness") {
+    FL_SUBCASE("LUT pattern 0x00 (0b00) → 0x11") {
         uint8_t result = detail::encodeUart2Bits(0x00);
         FL_REQUIRE(result == 0x11);
     }
 
-    SUBCASE("LUT pattern 0x01 (0b01) → 0x19") {
+    FL_SUBCASE("LUT pattern 0x01 (0b01) → 0x19") {
         uint8_t result = detail::encodeUart2Bits(0x01);
         FL_REQUIRE(result == 0x19);
     }
 
-    SUBCASE("LUT pattern 0x02 (0b10) → 0x91") {
+    FL_SUBCASE("LUT pattern 0x02 (0b10) → 0x91") {
         uint8_t result = detail::encodeUart2Bits(0x02);
         FL_REQUIRE(result == 0x91);
     }
 
-    SUBCASE("LUT pattern 0x03 (0b11) → 0x99") {
+    FL_SUBCASE("LUT pattern 0x03 (0b11) → 0x99") {
         uint8_t result = detail::encodeUart2Bits(0x03);
         FL_REQUIRE(result == 0x99);
     }
 
-    SUBCASE("LUT masking (input > 3 masked to 2 bits)") {
+    FL_SUBCASE("LUT masking (input > 3 masked to 2 bits)") {
         // encodeUart2Bits should mask input to 2 bits
         FL_REQUIRE(detail::encodeUart2Bits(0x00) == detail::encodeUart2Bits(0x00));
         FL_REQUIRE(detail::encodeUart2Bits(0x01) == detail::encodeUart2Bits(0xFD));
@@ -52,8 +52,8 @@ TEST_CASE("Wave8 UART Encoder - 2-bit LUT correctness") {
 // Test Suite: Byte-Level Encoding
 //=============================================================================
 
-TEST_CASE("Wave8 UART Encoder - Byte encoding") {
-    SUBCASE("Encode byte 0x00 (all bits 0)") {
+FL_TEST_CASE("Wave8 UART Encoder - Byte encoding") {
+    FL_SUBCASE("Encode byte 0x00 (all bits 0)") {
         uint8_t output[4];
         detail::encodeUartByte(0x00, output);
 
@@ -64,7 +64,7 @@ TEST_CASE("Wave8 UART Encoder - Byte encoding") {
         FL_REQUIRE(output[3] == 0x11);  // Bits 1-0: 0b00
     }
 
-    SUBCASE("Encode byte 0xFF (all bits 1)") {
+    FL_SUBCASE("Encode byte 0xFF (all bits 1)") {
         uint8_t output[4];
         detail::encodeUartByte(0xFF, output);
 
@@ -75,7 +75,7 @@ TEST_CASE("Wave8 UART Encoder - Byte encoding") {
         FL_REQUIRE(output[3] == 0x99);  // Bits 1-0: 0b11
     }
 
-    SUBCASE("Encode byte 0xAA (alternating 1010 1010)") {
+    FL_SUBCASE("Encode byte 0xAA (alternating 1010 1010)") {
         uint8_t output[4];
         detail::encodeUartByte(0xAA, output);
 
@@ -86,7 +86,7 @@ TEST_CASE("Wave8 UART Encoder - Byte encoding") {
         FL_REQUIRE(output[3] == 0x91);  // Bits 1-0: 0b10
     }
 
-    SUBCASE("Encode byte 0x55 (alternating 0101 0101)") {
+    FL_SUBCASE("Encode byte 0x55 (alternating 0101 0101)") {
         uint8_t output[4];
         detail::encodeUartByte(0x55, output);
 
@@ -97,7 +97,7 @@ TEST_CASE("Wave8 UART Encoder - Byte encoding") {
         FL_REQUIRE(output[3] == 0x19);  // Bits 1-0: 0b01
     }
 
-    SUBCASE("Encode byte 0xE4 (mixed pattern)") {
+    FL_SUBCASE("Encode byte 0xE4 (mixed pattern)") {
         uint8_t output[4];
         detail::encodeUartByte(0xE4, output);
 
@@ -113,8 +113,8 @@ TEST_CASE("Wave8 UART Encoder - Byte encoding") {
 // Test Suite: Buffer-Level Encoding
 //=============================================================================
 
-TEST_CASE("Wave8 UART Encoder - Buffer encoding") {
-    SUBCASE("Encode single byte") {
+FL_TEST_CASE("Wave8 UART Encoder - Buffer encoding") {
+    FL_SUBCASE("Encode single byte") {
         uint8_t input[] = { 0x42 };
         uint8_t output[4];
 
@@ -128,7 +128,7 @@ TEST_CASE("Wave8 UART Encoder - Buffer encoding") {
         FL_REQUIRE(output[3] == 0x91);  // 0b10 → 0x91
     }
 
-    SUBCASE("Encode multiple bytes") {
+    FL_SUBCASE("Encode multiple bytes") {
         uint8_t input[] = { 0x00, 0xFF, 0xAA };
         uint8_t output[12];
 
@@ -155,7 +155,7 @@ TEST_CASE("Wave8 UART Encoder - Buffer encoding") {
         FL_REQUIRE(output[11] == 0x91);
     }
 
-    SUBCASE("Encode RGB LED (3 bytes)") {
+    FL_SUBCASE("Encode RGB LED (3 bytes)") {
         // Red LED: R=255, G=0, B=0
         uint8_t input[] = { 0xFF, 0x00, 0x00 };
         uint8_t output[12];  // 3 bytes × 4 = 12 bytes
@@ -183,7 +183,7 @@ TEST_CASE("Wave8 UART Encoder - Buffer encoding") {
         FL_REQUIRE(output[11] == 0x11);
     }
 
-    SUBCASE("Encode 100 RGB LEDs") {
+    FL_SUBCASE("Encode 100 RGB LEDs") {
         const size_t num_leds = 100;
         fl::vector<uint8_t> input(num_leds * 3);  // 300 bytes
         fl::vector<uint8_t> output(num_leds * 3 * 4);  // 1200 bytes
@@ -217,21 +217,21 @@ TEST_CASE("Wave8 UART Encoder - Buffer encoding") {
 // Test Suite: Buffer Sizing
 //=============================================================================
 
-TEST_CASE("Wave8 UART Encoder - Buffer sizing") {
-    SUBCASE("Calculate buffer size for raw bytes") {
+FL_TEST_CASE("Wave8 UART Encoder - Buffer sizing") {
+    FL_SUBCASE("Calculate buffer size for raw bytes") {
         FL_REQUIRE(calculateUartBufferSize(1) == 4);
         FL_REQUIRE(calculateUartBufferSize(3) == 12);
         FL_REQUIRE(calculateUartBufferSize(300) == 1200);  // 100 RGB LEDs
     }
 
-    SUBCASE("Calculate buffer size for RGB LEDs") {
+    FL_SUBCASE("Calculate buffer size for RGB LEDs") {
         FL_REQUIRE(calculateUartBufferSizeForLeds(1) == 12);    // 1 LED = 12 bytes
         FL_REQUIRE(calculateUartBufferSizeForLeds(10) == 120);  // 10 LEDs = 120 bytes
         FL_REQUIRE(calculateUartBufferSizeForLeds(100) == 1200);  // 100 LEDs = 1200 bytes
         FL_REQUIRE(calculateUartBufferSizeForLeds(1000) == 12000);  // 1000 LEDs = 12000 bytes
     }
 
-    SUBCASE("Insufficient output buffer (returns 0)") {
+    FL_SUBCASE("Insufficient output buffer (returns 0)") {
         uint8_t input[] = { 0xFF };
         uint8_t output[3];  // Need 4 bytes, only 3 available
 
@@ -240,7 +240,7 @@ TEST_CASE("Wave8 UART Encoder - Buffer sizing") {
         FL_REQUIRE(encoded == 0);  // Encoding failed due to insufficient capacity
     }
 
-    SUBCASE("Exact output buffer capacity (success)") {
+    FL_SUBCASE("Exact output buffer capacity (success)") {
         uint8_t input[] = { 0xFF };
         uint8_t output[4];  // Exactly 4 bytes
 
@@ -255,8 +255,8 @@ TEST_CASE("Wave8 UART Encoder - Buffer sizing") {
 // Test Suite: Edge Cases
 //=============================================================================
 
-TEST_CASE("Wave8 UART Encoder - Edge cases") {
-    SUBCASE("Empty input (0 bytes)") {
+FL_TEST_CASE("Wave8 UART Encoder - Edge cases") {
+    FL_SUBCASE("Empty input (0 bytes)") {
         uint8_t output[16];
 
         size_t encoded = encodeLedsToUart(nullptr, 0, output, sizeof(output));
@@ -264,7 +264,7 @@ TEST_CASE("Wave8 UART Encoder - Edge cases") {
         FL_REQUIRE(encoded == 0);  // 0 input bytes → 0 output bytes
     }
 
-    SUBCASE("Large buffer encoding (stress test)") {
+    FL_SUBCASE("Large buffer encoding (stress test)") {
         const size_t large_size = 10000;  // 10,000 bytes input
         fl::vector<uint8_t> input(large_size, 0xAA);
         fl::vector<uint8_t> output(large_size * 4);
@@ -290,8 +290,8 @@ TEST_CASE("Wave8 UART Encoder - Edge cases") {
 // Test Suite: Waveform Validation
 //=============================================================================
 
-TEST_CASE("Wave8 UART Encoder - Waveform structure validation") {
-    SUBCASE("Encoded byte has valid UART patterns") {
+FL_TEST_CASE("Wave8 UART Encoder - Waveform structure validation") {
+    FL_SUBCASE("Encoded byte has valid UART patterns") {
         // All LUT values must have valid bit patterns for UART transmission
         // Valid patterns: 0x11, 0x19, 0x91, 0x99 (rotated from original 0x88, 0x8C, 0xC8, 0xCC)
         for (uint8_t two_bits = 0; two_bits < 4; ++two_bits) {
@@ -304,7 +304,7 @@ TEST_CASE("Wave8 UART Encoder - Waveform structure validation") {
         }
     }
 
-    SUBCASE("Verify bit distribution for LED protocols") {
+    FL_SUBCASE("Verify bit distribution for LED protocols") {
         // LED protocols require specific pulse width ratios
         // The LUT patterns (0x11, 0x19, 0x91, 0x99) provide these ratios
         // when transmitted at 3.2 Mbps with UART start/stop bits
@@ -336,8 +336,8 @@ TEST_CASE("Wave8 UART Encoder - Waveform structure validation") {
 // Test Suite: Performance Characteristics
 //=============================================================================
 
-TEST_CASE("Wave8 UART Encoder - Performance characteristics") {
-    SUBCASE("Encoding determinism (repeated calls produce same output)") {
+FL_TEST_CASE("Wave8 UART Encoder - Performance characteristics") {
+    FL_SUBCASE("Encoding determinism (repeated calls produce same output)") {
         uint8_t input[] = { 0x42, 0xAA, 0xFF };
         uint8_t output1[12];
         uint8_t output2[12];
@@ -353,7 +353,7 @@ TEST_CASE("Wave8 UART Encoder - Performance characteristics") {
         }
     }
 
-    SUBCASE("No data dependencies (parallel encoding feasible)") {
+    FL_SUBCASE("No data dependencies (parallel encoding feasible)") {
         // Each input byte encodes independently
         // Verify that encoding order doesn't affect output
         uint8_t input[] = { 0x11, 0x22, 0x33 };
@@ -378,8 +378,8 @@ TEST_CASE("Wave8 UART Encoder - Performance characteristics") {
 // Test Suite: Bit Rotation Verification
 //=============================================================================
 
-TEST_CASE("Wave8 UART Encoder - Bit rotation correctness") {
-    SUBCASE("LUT values are left-rotated by 1 bit from original patterns") {
+FL_TEST_CASE("Wave8 UART Encoder - Bit rotation correctness") {
+    FL_SUBCASE("LUT values are left-rotated by 1 bit from original patterns") {
         // Original patterns (before rotation): 0x88, 0x8C, 0xC8, 0xCC
         // Rotated patterns (current): 0x11, 0x19, 0x91, 0x99
         //
@@ -418,7 +418,7 @@ TEST_CASE("Wave8 UART Encoder - Bit rotation correctness") {
         FL_REQUIRE(detail::encodeUart2Bits(0x03) == rotated_11);
     }
 
-    SUBCASE("Rotation preserves bit count (HIGH bits remain same)") {
+    FL_SUBCASE("Rotation preserves bit count (HIGH bits remain same)") {
         // Rotation doesn't change the number of HIGH bits, only their position
         // This is critical for maintaining pulse width characteristics
 
@@ -443,7 +443,7 @@ TEST_CASE("Wave8 UART Encoder - Bit rotation correctness") {
         }
     }
 
-    SUBCASE("Rotated patterns align with UART framing sequence") {
+    FL_SUBCASE("Rotated patterns align with UART framing sequence") {
         // The rotation compensates for the UART transmission preamble:
         // 1. Preamble (transmission setup)
         // 2. Start bit (LOW)

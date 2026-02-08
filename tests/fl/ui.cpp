@@ -19,7 +19,7 @@
 #include "fl/json.h"
 #include "fl/unused.h"
 #include "fl/str.h" // ok include
-#include "doctest.h"
+#include "test.h"
 #include "test.h"
 #include "fl/log.h"
 #include "fl/sketch_macros.h"
@@ -42,7 +42,7 @@ public:
     void updateInternal(const fl::Json& json) override { FL_UNUSED(json); }
 };
 
-TEST_CASE("no updateJs handler") {
+FL_TEST_CASE("no updateJs handler") {
     // Set up handler WITHOUT updateJs callback - should return empty function
     auto updateEngineState = fl::setJsonUiHandlers(fl::function<void(const char*)>{});
     
@@ -60,7 +60,7 @@ TEST_CASE("no updateJs handler") {
     fl::removeJsonUiComponent(weakComponent);
 }
 
-TEST_CASE("internal manager with updateJs") {
+FL_TEST_CASE("internal manager with updateJs") {
     // Test variables to track handler calls
     int updateJsCallCount = 0;
     
@@ -95,7 +95,7 @@ TEST_CASE("internal manager with updateJs") {
     updateEngineState("{\"test\": \"data\"}");
 }
 
-TEST_CASE("pending component storage without updateJs") {
+FL_TEST_CASE("pending component storage without updateJs") {
     // Clear any existing handlers
     auto updateEngineState = fl::setJsonUiHandlers(fl::function<void(const char*)>{});
     FL_CHECK(!updateEngineState); // Should return empty function
@@ -126,7 +126,7 @@ TEST_CASE("pending component storage without updateJs") {
     fl::removeJsonUiComponent(weakComponent2);
 }
 
-TEST_CASE("pending component storage with updateJs") {
+FL_TEST_CASE("pending component storage with updateJs") {
     // Clear any existing handlers
     auto updateEngineState = fl::setJsonUiHandlers(fl::function<void(const char*)>{});
     FL_CHECK(!updateEngineState); // Should return empty function
@@ -157,7 +157,7 @@ TEST_CASE("pending component storage with updateJs") {
     fl::removeJsonUiComponent(weakComponent2);
 }
 
-TEST_CASE("pending component cleanup with destroyed components") {
+FL_TEST_CASE("pending component cleanup with destroyed components") {
     // Clear any existing handlers
     auto updateEngineState = fl::setJsonUiHandlers(fl::function<void(const char*)>{});
     FL_CHECK(!updateEngineState); // Should return empty function
@@ -199,7 +199,7 @@ TEST_CASE("pending component cleanup with destroyed components") {
     fl::removeJsonUiComponent(weakValidComponent);
 }
 
-TEST_CASE("null handlers behavior") {
+FL_TEST_CASE("null handlers behavior") {
     // Test with null handler (should not crash)
     auto updateEngineState = fl::setJsonUiHandlers(fl::function<void(const char*)>{});
     
@@ -221,7 +221,7 @@ TEST_CASE("null handlers behavior") {
     fl::removeJsonUiComponent(weakComponent);
 }
 
-TEST_CASE("updateEngineState function behavior") {
+FL_TEST_CASE("updateEngineState function behavior") {
     // Test with valid updateJs handler
     int updateJsCallCount = 0;
     auto updateEngineState = fl::setJsonUiHandlers(
@@ -251,7 +251,7 @@ TEST_CASE("updateEngineState function behavior") {
     fl::removeJsonUiComponent(weakComponent);
 }
 
-TEST_CASE("manager replacement") {
+FL_TEST_CASE("manager replacement") {
     // Create a manager with one handler
     int firstCallCount = 0;
     auto updateEngineState1 = fl::setJsonUiHandlers(
@@ -290,7 +290,7 @@ TEST_CASE("manager replacement") {
     fl::removeJsonUiComponent(weakComponent);
 }
 
-TEST_CASE("ui component basic functionality test") {
+FL_TEST_CASE("ui component basic functionality test") {
     // Test variables to track handler calls
     int updateJsCallCount = 0;
     fl::string capturedJsonOutput;
@@ -330,7 +330,7 @@ TEST_CASE("ui component basic functionality test") {
     // The checkbox will be automatically cleaned up by its destructor
 }
 
-TEST_CASE("complex ui element serialization") {
+FL_TEST_CASE("complex ui element serialization") {
     // 1. Set up handler with a mock updateJs callback to capture serialized JSON
     fl::string capturedJsonOutput;
     auto updateEngineState = fl::setJsonUiHandlers(
@@ -410,7 +410,7 @@ TEST_CASE("complex ui element serialization") {
 }
 
 #ifdef SKETCH_HAS_LOTS_OF_MEMORY
-TEST_CASE("JsonConsole destructor cleanup") {
+FL_TEST_CASE("JsonConsole destructor cleanup") {
     // Mock callback functions for testing
     fl::string capturedOutput;
     int availableCallCount = 0;
@@ -512,7 +512,7 @@ TEST_CASE("JsonConsole destructor cleanup") {
     FL_CHECK(true); // Test passed if no crashes occurred
 }
 
-TEST_CASE("JsonConsole dump function" * doctest::skip()) {
+FL_TEST_CASE("JsonConsole dump function" * doctest::skip()) {
     // SKIPPED: Test crashes in destructor after handling invalid JSON
     // This appears to be a race condition or memory corruption issue in fl::function cleanup
     // Mock callback functions for testing
@@ -668,7 +668,7 @@ TEST_CASE("JsonConsole dump function" * doctest::skip()) {
 
 // TEMPORARILY SKIP ALL REMAINING TESTS DUE TO JSON/UI CRASHES
 #if 0
-TEST_CASE("JsonSlider step output behavior" * doctest::skip()) {
+FL_TEST_CASE("JsonSlider step output behavior" * doctest::skip()) {
     FL_WARN("JsonSlider step output behavior: TEST STARTING");
     // Test that step field is only output when explicitly set by user
 
@@ -734,7 +734,7 @@ TEST_CASE("JsonSlider step output behavior" * doctest::skip()) {
 
 #endif // SKETCH_HAS_LOTS_OF_MEMORY
 
-TEST_CASE("XYPath slider step serialization bug - C++ verification" * doctest::skip()) {
+FL_TEST_CASE("XYPath slider step serialization bug - C++ verification" * doctest::skip()) {
     // TEMP DISABLED: This test causes a segfault when extracting strings from JSON.
     // The bug appears to be in fl::Json::as_string() or related optional/variant code.
     // See .agent_task/ITERATION_8.md for debugging details.
@@ -860,7 +860,7 @@ TEST_CASE("XYPath slider step serialization bug - C++ verification" * doctest::s
 // Tests from test_ui_help.cpp
 // ========================================
 
-TEST_CASE("JsonHelpImpl basic functionality") {
+FL_TEST_CASE("JsonHelpImpl basic functionality") {
     fl::string markdownContent = "# Test Help\n\nThis is a **test** help text with *emphasis* and `code`.";
 
     JsonHelpImpl help(markdownContent);
@@ -875,7 +875,7 @@ TEST_CASE("JsonHelpImpl basic functionality") {
     FL_CHECK(help.groupName() == groupName);
 }
 
-TEST_CASE("JsonHelpImpl JSON serialization") {
+FL_TEST_CASE("JsonHelpImpl JSON serialization") {
     fl::string markdownContent = R"(# FastLED Help
 
 ## Getting Started
@@ -924,7 +924,7 @@ Visit our [documentation](https://fastled.io) for more details!)";
     FL_CHECK(name2 == fl::string("help"));
 }
 
-TEST_CASE("UIHelp wrapper functionality") {
+FL_TEST_CASE("UIHelp wrapper functionality") {
     fl::string markdownContent = "## Quick Reference\n\n- Use `CRGB` for colors\n- Call `FastLED.show()` to update LEDs";
 
     UIHelp help(markdownContent.c_str());
@@ -938,7 +938,7 @@ TEST_CASE("UIHelp wrapper functionality") {
     FL_CHECK(help.hasGroup());
 }
 
-TEST_CASE("UIHelp with complex markdown") {
+FL_TEST_CASE("UIHelp with complex markdown") {
     fl::string complexMarkdown = R"(# Complex Markdown Test
 
 ## Headers and Formatting
@@ -989,7 +989,7 @@ And some Unicode: ★ ♪ ⚡)";
     FL_CHECK(content2 == complexMarkdown);
 }
 
-TEST_CASE("UIHelp edge cases") {
+FL_TEST_CASE("UIHelp edge cases") {
     // Test with empty markdown
     JsonHelpImpl emptyHelp("");
     FL_CHECK(emptyHelp.markdownContent() == "");
@@ -1020,7 +1020,7 @@ TEST_CASE("UIHelp edge cases") {
     FL_CHECK(content2 == longContent);
 }
 
-TEST_CASE("UIHelp group operations") {
+FL_TEST_CASE("UIHelp group operations") {
     JsonHelpImpl help("Test content");
 
     // Test initial state
@@ -1043,7 +1043,7 @@ TEST_CASE("UIHelp group operations") {
 // Tests from test_ui_title_bug.cpp
 // ========================================
 
-TEST_CASE("UI Bug - Memory Corruption") {
+FL_TEST_CASE("UI Bug - Memory Corruption") {
     // This test simulates the conditions that might lead to memory corruption
     // in the UI system, particularly when components are destroyed while
     // the JsonUiManager still holds references to them.

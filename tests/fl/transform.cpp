@@ -5,39 +5,39 @@
 #include "lib8tion/intmap.h"
 #include "fl/transform.h"
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/geometry.h"
 #include "fl/math_macros.h"
 
 
 
-TEST_CASE("Transform16::ToBounds(max_value)") {
+FL_TEST_CASE("Transform16::ToBounds(max_value)") {
     // fl::Transform16 tx = fl::Transform16::ToBounds(255);
 
-    SUBCASE("Check bounds at 128") {
+    FL_SUBCASE("Check bounds at 128") {
         // known bad at i == 128
         fl::Transform16 tx = fl::Transform16::ToBounds(255);
         uint16_t i16 = fl::map8_to_16(128);
         fl::vec2<uint16_t> xy_input = fl::vec2<uint16_t>(i16, i16);
         fl::vec2<uint16_t> xy = tx.transform(xy_input);
-        INFO("i = " << 128);
+        FL_DINFO("i = " << 128);
         FL_REQUIRE_EQ(128, xy.x);
         FL_REQUIRE_EQ(128, xy.y);
     }
 
-    SUBCASE("Check identity from 8 -> 16") {
+    FL_SUBCASE("Check identity from 8 -> 16") {
         fl::Transform16 tx = fl::Transform16::ToBounds(255);
         for (uint16_t i = 0; i < 256; i++) {
             uint16_t i16 = fl::map8_to_16(i);
             fl::vec2<uint16_t> xy_input = fl::vec2<uint16_t>(i16, i16);
             fl::vec2<uint16_t> xy = tx.transform(xy_input);
-            INFO("i = " << i);
+            FL_DINFO("i = " << i);
             FL_REQUIRE_EQ(i, xy.x);
             FL_REQUIRE_EQ(i, xy.y);
         }
     }
 
-    SUBCASE("Check all bounds are in 255") {
+    FL_SUBCASE("Check all bounds are in 255") {
         fl::Transform16 tx = fl::Transform16::ToBounds(255);
         uint32_t smallest = ~0;
         uint32_t largest = 0;
@@ -45,7 +45,7 @@ TEST_CASE("Transform16::ToBounds(max_value)") {
             uint16_t i16 = fl::map8_to_16(i);
             fl::vec2<uint16_t> xy_input = fl::vec2<uint16_t>(i16, i16);
             fl::vec2<uint16_t> xy = tx.transform(xy_input);
-            INFO("i = " << i);
+            FL_DINFO("i = " << i);
             FL_REQUIRE_LE(xy.x, 255);
             FL_REQUIRE_LE(xy.y, 255);
             smallest = FL_MIN(smallest, xy.x);
@@ -57,8 +57,8 @@ TEST_CASE("Transform16::ToBounds(max_value)") {
     }
 }
 
-TEST_CASE("Transform16::ToBounds(min, max)") {
-    SUBCASE("Check bounds at 128") {
+FL_TEST_CASE("Transform16::ToBounds(min, max)") {
+    FL_SUBCASE("Check bounds at 128") {
         uint16_t low = 127;
         uint16_t high = 255 + 127;
         fl::vec2<uint16_t> min = fl::vec2<uint16_t>(low, low);

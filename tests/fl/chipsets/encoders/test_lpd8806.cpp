@@ -15,7 +15,7 @@
 #include "fl/stl/array.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/int.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/vector.h"
@@ -25,7 +25,7 @@ using namespace fl;
 
 namespace {
 
-TEST_CASE("LPD8806 - lpd8806Encode() helper function") {
+FL_TEST_CASE("LPD8806 - lpd8806Encode() helper function") {
     // Verify 7-bit encoding with MSB set
     // Range: 0x80 (min) to 0xFF (max)
 
@@ -51,7 +51,7 @@ TEST_CASE("LPD8806 - lpd8806Encode() helper function") {
     }
 }
 
-TEST_CASE("LPD8806 - Single LED encoding with GRB order") {
+FL_TEST_CASE("LPD8806 - Single LED encoding with GRB order") {
     // Single LED: Green=100, Red=150, Blue=200
     // Wire format: GRB (pixel[0]=G, pixel[1]=R, pixel[2]=B)
     fl::vector<fl::array<u8, 3>> input = {
@@ -74,7 +74,7 @@ TEST_CASE("LPD8806 - Single LED encoding with GRB order") {
     FL_CHECK_EQ(output[3], 0x00);
 }
 
-TEST_CASE("LPD8806 - Multiple LEDs with GRB color order") {
+FL_TEST_CASE("LPD8806 - Multiple LEDs with GRB color order") {
     // Three LEDs to verify GRB ordering consistency
     fl::vector<fl::array<u8, 3>> input = {
         {255, 0, 0},      // LED 0: G=255, R=0, B=0 (pure green in GRB)
@@ -108,7 +108,7 @@ TEST_CASE("LPD8806 - Multiple LEDs with GRB color order") {
     FL_CHECK_EQ(output[9], 0x00);
 }
 
-TEST_CASE("LPD8806 - Zero LEDs edge case") {
+FL_TEST_CASE("LPD8806 - Zero LEDs edge case") {
     // Empty input should produce only latch bytes
     fl::vector<fl::array<u8, 3>> input = {};
 
@@ -119,7 +119,7 @@ TEST_CASE("LPD8806 - Zero LEDs edge case") {
     FL_CHECK_EQ(output.size(), 0);
 }
 
-TEST_CASE("LPD8806 - Latch calculation boundary - 21 LEDs") {
+FL_TEST_CASE("LPD8806 - Latch calculation boundary - 21 LEDs") {
     // Test latch boundary: 21 LEDs = 63 bytes
     // Latch: ((21 * 3 + 63) / 64) = 126 / 64 = 1 byte
     // At 22 LEDs: ((22 * 3 + 63) / 64) = 129 / 64 = 2 bytes
@@ -135,7 +135,7 @@ TEST_CASE("LPD8806 - Latch calculation boundary - 21 LEDs") {
     FL_CHECK_EQ(output[63], 0x00);
 }
 
-TEST_CASE("LPD8806 - Latch calculation boundary - 22 LEDs") {
+FL_TEST_CASE("LPD8806 - Latch calculation boundary - 22 LEDs") {
     // Test latch boundary crossing: 22 LEDs = 66 bytes
     // Latch: ((22 * 3 + 63) / 64) = 129 / 64 = 2 bytes
     fl::vector<fl::array<u8, 3>> input(22, {128, 128, 128});
@@ -151,7 +151,7 @@ TEST_CASE("LPD8806 - Latch calculation boundary - 22 LEDs") {
     FL_CHECK_EQ(output[67], 0x00);
 }
 
-TEST_CASE("LPD8806 - Latch calculation - 40 LEDs") {
+FL_TEST_CASE("LPD8806 - Latch calculation - 40 LEDs") {
     // Test larger LED count (reduced from 64 to 40 for performance)
     // Still provides good coverage of latch calculation with multiple latch bytes
     // Latch: ((40 * 3 + 63) / 64) = 183 / 64 = 2 bytes
@@ -173,7 +173,7 @@ TEST_CASE("LPD8806 - Latch calculation - 40 LEDs") {
     FL_CHECK_EQ(output[121], 0x00);
 }
 
-TEST_CASE("LPD8806 - MSB always set on all LED bytes") {
+FL_TEST_CASE("LPD8806 - MSB always set on all LED bytes") {
     // Verify that all LED data bytes have MSB set (0x80 bit)
     fl::vector<fl::array<u8, 3>> input = {
         {0, 0, 0},        // All zeros
@@ -194,7 +194,7 @@ TEST_CASE("LPD8806 - MSB always set on all LED bytes") {
     FL_CHECK_EQ(output[9], 0x00);
 }
 
-TEST_CASE("LPD8806 - 7-bit color depth verification") {
+FL_TEST_CASE("LPD8806 - 7-bit color depth verification") {
     // Verify that encoding preserves proportional relationships
     // within 7-bit range (0-127)
     fl::vector<fl::array<u8, 3>> input = {

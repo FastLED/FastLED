@@ -1,11 +1,11 @@
 #include "fl/stl/ostream.h"
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 
 // Since we can't override the fl::print function easily in this test setup,
 // we'll just verify that the ostream compiles and basic functionality works
 
-TEST_CASE("fl::cout basic operations compile and run without crash") {
+FL_TEST_CASE("fl::cout basic operations compile and run without crash") {
     // Test basic string output - should not crash
     fl::cout << "Hello, World!";
     
@@ -46,7 +46,7 @@ TEST_CASE("fl::cout basic operations compile and run without crash") {
     FL_CHECK(true);
 }
 
-TEST_CASE("fl::cout type conversions work correctly") {
+FL_TEST_CASE("fl::cout type conversions work correctly") {
     // We can't easily capture output for verification in this test setup,
     // but we can verify that the type conversion methods don't crash
     // and that temporary string objects are created properly

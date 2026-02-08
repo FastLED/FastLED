@@ -24,7 +24,7 @@
 #include "fl/stl/iterator.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/int.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/vector.h"
@@ -53,7 +53,7 @@ using namespace test_ws2801;
 // Frame Structure Tests
 // ============================================================================
 
-TEST_CASE("WS2801 - Zero LEDs (empty input)") {
+FL_TEST_CASE("WS2801 - Zero LEDs (empty input)") {
     // Test encoding with no LEDs - should produce no output
     // WS2801 has NO frame overhead (no start/end frames)
     fl::vector<fl::array<u8, 3>> pixels;
@@ -65,7 +65,7 @@ TEST_CASE("WS2801 - Zero LEDs (empty input)") {
     FL_REQUIRE_EQ(output.size(), 0);
 }
 
-TEST_CASE("WS2801 - Single LED (black)") {
+FL_TEST_CASE("WS2801 - Single LED (black)") {
     // Test single black LED (0,0,0)
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeRGBPixel(0, 0, 0));
@@ -78,7 +78,7 @@ TEST_CASE("WS2801 - Single LED (black)") {
     verifyRGBAt(output, 0, 0x00, 0x00, 0x00);
 }
 
-TEST_CASE("WS2801 - Single LED (white)") {
+FL_TEST_CASE("WS2801 - Single LED (white)") {
     // Test single white LED (255,255,255)
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeRGBPixel(255, 255, 255));
@@ -91,7 +91,7 @@ TEST_CASE("WS2801 - Single LED (white)") {
     verifyRGBAt(output, 0, 0xFF, 0xFF, 0xFF);
 }
 
-TEST_CASE("WS2801 - Single LED (red)") {
+FL_TEST_CASE("WS2801 - Single LED (red)") {
     // Test single red LED - verify RGB byte order
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeRGBPixel(255, 0, 0));
@@ -104,7 +104,7 @@ TEST_CASE("WS2801 - Single LED (red)") {
     verifyRGBAt(output, 0, 0xFF, 0x00, 0x00);
 }
 
-TEST_CASE("WS2801 - Single LED (green)") {
+FL_TEST_CASE("WS2801 - Single LED (green)") {
     // Test single green LED - verify RGB byte order
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeRGBPixel(0, 255, 0));
@@ -117,7 +117,7 @@ TEST_CASE("WS2801 - Single LED (green)") {
     verifyRGBAt(output, 0, 0x00, 0xFF, 0x00);
 }
 
-TEST_CASE("WS2801 - Single LED (blue)") {
+FL_TEST_CASE("WS2801 - Single LED (blue)") {
     // Test single blue LED - verify RGB byte order
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeRGBPixel(0, 0, 255));
@@ -130,7 +130,7 @@ TEST_CASE("WS2801 - Single LED (blue)") {
     verifyRGBAt(output, 0, 0x00, 0x00, 0xFF);
 }
 
-TEST_CASE("WS2801 - Multiple LEDs (RGB primaries)") {
+FL_TEST_CASE("WS2801 - Multiple LEDs (RGB primaries)") {
     // Test multiple LEDs to verify iteration works correctly
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeRGBPixel(255, 0, 0));    // Red
@@ -149,7 +149,7 @@ TEST_CASE("WS2801 - Multiple LEDs (RGB primaries)") {
     verifyRGBAt(output, 6, 0x00, 0x00, 0xFF);  // LED 2: Blue
 }
 
-TEST_CASE("WS2801 - Multiple LEDs (mixed colors)") {
+FL_TEST_CASE("WS2801 - Multiple LEDs (mixed colors)") {
     // Test various color combinations
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeRGBPixel(128, 64, 32));   // Mixed low
@@ -172,7 +172,7 @@ TEST_CASE("WS2801 - Multiple LEDs (mixed colors)") {
 // Edge Case Tests
 // ============================================================================
 
-TEST_CASE("WS2801 - Boundary values (min/max)") {
+FL_TEST_CASE("WS2801 - Boundary values (min/max)") {
     // Test minimum and maximum byte values
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeRGBPixel(0, 0, 0));        // Minimum
@@ -187,7 +187,7 @@ TEST_CASE("WS2801 - Boundary values (min/max)") {
     verifyRGBAt(output, 3, 0xFF, 0xFF, 0xFF);
 }
 
-TEST_CASE("WS2801 - Many LEDs (typical strip size)") {
+FL_TEST_CASE("WS2801 - Many LEDs (typical strip size)") {
     // Test a typical strip size (reduced from 60 to 30 for performance)
     // Still provides excellent coverage for typical strip encoding
     const size_t NUM_LEDS = 30;
@@ -220,7 +220,7 @@ TEST_CASE("WS2801 - Many LEDs (typical strip size)") {
 namespace test_ws2801 {
 using namespace test_ws2801;
 
-TEST_CASE("WS2801 - RGB wire order verification") {
+FL_TEST_CASE("WS2801 - RGB wire order verification") {
     // Verify that bytes are written in RGB order
     // Input pixel: array<u8, 3> where [0]=R, [1]=G, [2]=B
     // Expected output: byte[0]=R, byte[1]=G, byte[2]=B
@@ -241,7 +241,7 @@ TEST_CASE("WS2801 - RGB wire order verification") {
 // Protocol Compliance Tests
 // ============================================================================
 
-TEST_CASE("WS2801 - No start frame") {
+FL_TEST_CASE("WS2801 - No start frame") {
     // Verify that WS2801 produces no start frame
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeRGBPixel(128, 128, 128));
@@ -254,7 +254,7 @@ TEST_CASE("WS2801 - No start frame") {
     FL_CHECK_EQ(output[0], 128);  // First byte should be LED data, not frame marker
 }
 
-TEST_CASE("WS2801 - No end frame") {
+FL_TEST_CASE("WS2801 - No end frame") {
     // Verify that WS2801 produces no end frame
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeRGBPixel(128, 128, 128));
@@ -266,7 +266,7 @@ TEST_CASE("WS2801 - No end frame") {
     FL_REQUIRE_EQ(output.size(), 3);  // Exactly 3 bytes, no extra termination
 }
 
-TEST_CASE("WS2801 - Byte count calculation (protocol compliance)") {
+FL_TEST_CASE("WS2801 - Byte count calculation (protocol compliance)") {
     // Verify byte count matches protocol specification
     // WS2801: 3 bytes per LED, no overhead
 

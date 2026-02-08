@@ -10,7 +10,7 @@
 #include "fl/isr.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/thread.h"
-#include "doctest.h"
+#include "test.h"
 #include "isr_stub.hpp"
 
 using namespace fl;
@@ -68,7 +68,7 @@ static void test_isr_handler(void* user_data) {
 // Test Cases
 // =============================================================================
 
-TEST_CASE("test_isr_platform_info") {
+FL_TEST_CASE("test_isr_platform_info") {
     const char* platform = isr::getPlatformName();
     FL_REQUIRE(platform != nullptr);
 
@@ -80,7 +80,7 @@ TEST_CASE("test_isr_platform_info") {
     (void)isr::requiresAssemblyHandler(5);
 }
 
-TEST_CASE("test_isr_timer_basic") {
+FL_TEST_CASE("test_isr_timer_basic") {
     g_isr_call_count = 0;
     g_isr_user_data_value = 0;
 
@@ -145,7 +145,7 @@ TEST_CASE("test_isr_timer_basic") {
     FL_REQUIRE(final_count == count_after_detach);
 }
 
-TEST_CASE("test_isr_timer_user_data") {
+FL_TEST_CASE("test_isr_timer_user_data") {
     g_isr_call_count = 0;
     g_isr_user_data_value = 0;
 
@@ -178,7 +178,7 @@ TEST_CASE("test_isr_timer_user_data") {
     FL_REQUIRE(result == 0);
 }
 
-TEST_CASE("test_isr_timer_enable_disable") {
+FL_TEST_CASE("test_isr_timer_enable_disable") {
     g_isr_call_count = 0;
 
     // Configure timer
@@ -250,7 +250,7 @@ TEST_CASE("test_isr_timer_enable_disable") {
     FL_REQUIRE(result == 0);
 }
 
-TEST_CASE("test_isr_error_handling") {
+FL_TEST_CASE("test_isr_error_handling") {
     // Test null handler
     isr::isr_config_t config;
     config.handler = nullptr;  // Invalid
@@ -282,7 +282,7 @@ TEST_CASE("test_isr_error_handling") {
     FL_REQUIRE(!isr::isHandlerEnabled(invalid_handle));
 }
 
-TEST_CASE("test_interrupts_global_state") {
+FL_TEST_CASE("test_interrupts_global_state") {
     // Interrupts should start enabled
     FL_REQUIRE(interruptsEnabled());
     FL_REQUIRE(!interruptsDisabled());
@@ -298,7 +298,7 @@ TEST_CASE("test_interrupts_global_state") {
     FL_REQUIRE(!interruptsDisabled());
 }
 
-TEST_CASE("test_interrupts_global_disable_blocks_isr") {
+FL_TEST_CASE("test_interrupts_global_disable_blocks_isr") {
     g_isr_call_count = 0;
 
     // Ensure interrupts are enabled initially

@@ -3,16 +3,16 @@
 
 #include "fl/rx_device.h"
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 
 using namespace fl;
 
-TEST_CASE("EdgeTime - size check") {
+FL_TEST_CASE("EdgeTime - size check") {
     // EdgeTime should be exactly 4 bytes (packed into uint32_t)
     FL_CHECK(sizeof(EdgeTime) == 4);
 }
 
-TEST_CASE("EdgeTime - construction") {
+FL_TEST_CASE("EdgeTime - construction") {
     // Test construction with high=true
     EdgeTime e1(true, 400);
     uint32_t high1 = e1.high;
@@ -28,7 +28,7 @@ TEST_CASE("EdgeTime - construction") {
     FL_CHECK(ns2 == 850);
 }
 
-TEST_CASE("EdgeTime - default constructor") {
+FL_TEST_CASE("EdgeTime - default constructor") {
     EdgeTime e;
     uint32_t high = e.high;
     uint32_t ns = e.ns;
@@ -36,7 +36,7 @@ TEST_CASE("EdgeTime - default constructor") {
     FL_CHECK(ns == 0);
 }
 
-TEST_CASE("EdgeTime - max ns value") {
+FL_TEST_CASE("EdgeTime - max ns value") {
     // Maximum ns value is 31 bits (0x7FFFFFFF = 2147483647ns ~= 2.1 seconds)
     EdgeTime e(true, 0x7FFFFFFF);
     uint32_t high = e.high;
@@ -45,7 +45,7 @@ TEST_CASE("EdgeTime - max ns value") {
     FL_CHECK(ns == 0x7FFFFFFF);
 }
 
-TEST_CASE("EdgeTime - overflow masking") {
+FL_TEST_CASE("EdgeTime - overflow masking") {
     // Values larger than 31 bits should be masked (automatically by bit field)
     EdgeTime e(true, 0xFFFFFFFF);
     uint32_t high = e.high;
@@ -54,7 +54,7 @@ TEST_CASE("EdgeTime - overflow masking") {
     FL_CHECK(ns == 0x7FFFFFFF);  // Bit field automatically masks to 31 bits
 }
 
-TEST_CASE("EdgeTime - direct field access") {
+FL_TEST_CASE("EdgeTime - direct field access") {
     // With bit fields, we can directly modify fields
     EdgeTime e;
     e.high = 1;
@@ -79,7 +79,7 @@ TEST_CASE("EdgeTime - direct field access") {
     FL_CHECK(ns == 2500);
 }
 
-TEST_CASE("EdgeTime - WS2812B pattern") {
+FL_TEST_CASE("EdgeTime - WS2812B pattern") {
     // WS2812B typical bit patterns
     // Bit 0: 400ns high, 850ns low
     EdgeTime bit0_high(true, 400);
@@ -110,7 +110,7 @@ TEST_CASE("EdgeTime - WS2812B pattern") {
     FL_CHECK(ns1l == 450);
 }
 
-TEST_CASE("EdgeTime - constexpr") {
+FL_TEST_CASE("EdgeTime - constexpr") {
     // Ensure constexpr constructors work at compile time
     constexpr EdgeTime e1;
     static_assert(e1.high == 0, "Default constructor should create low edge");

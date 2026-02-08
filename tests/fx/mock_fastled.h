@@ -25,8 +25,8 @@ namespace fl {
  * wled.setBrightness(128);
  * wled.update();
  *
- * REQUIRE(mock->getShowCallCount() == 1);
- * REQUIRE(mock->getLastBrightness() == 128);
+ * FL_REQUIRE(mock->getShowCallCount() == 1);
+ * FL_REQUIRE(mock->getLastBrightness() == 128);
  * @endcode
  *
  * @see IFastLED for the interface definition

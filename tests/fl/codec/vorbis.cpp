@@ -47,7 +47,7 @@ static fl::vector<fl::u8> loadTestAudioFile() {
     return data;
 }
 
-TEST_CASE("Vorbis - factory creation") {
+FL_TEST_CASE("Vorbis - factory creation") {
     // Test that the factory can create a decoder
     fl::string error;
     VorbisDecoderPtr decoder = Vorbis::createDecoder(&error);
@@ -55,12 +55,12 @@ TEST_CASE("Vorbis - factory creation") {
     FL_CHECK(error.empty());
 }
 
-TEST_CASE("Vorbis - isSupported") {
+FL_TEST_CASE("Vorbis - isSupported") {
     // stb_vorbis is always supported
     FL_CHECK(Vorbis::isSupported());
 }
 
-TEST_CASE("Vorbis - decoder initial state") {
+FL_TEST_CASE("Vorbis - decoder initial state") {
     VorbisDecoderPtr decoder = Vorbis::createDecoder();
     FL_REQUIRE(decoder != nullptr);
 
@@ -71,7 +71,7 @@ TEST_CASE("Vorbis - decoder initial state") {
     FL_CHECK_FALSE(decoder->hasError());
 }
 
-TEST_CASE("Vorbis - parseVorbisInfo with invalid data") {
+FL_TEST_CASE("Vorbis - parseVorbisInfo with invalid data") {
     // Test error handling with invalid data (not valid Vorbis)
     fl::u8 invalidData[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07 };
     fl::string error;
@@ -86,7 +86,7 @@ TEST_CASE("Vorbis - parseVorbisInfo with invalid data") {
     FL_CHECK_FALSE(error.empty());
 }
 
-TEST_CASE("Vorbis - decodeAll with invalid data") {
+FL_TEST_CASE("Vorbis - decodeAll with invalid data") {
     // Test error handling with invalid data
     fl::u8 invalidData[] = { 0xFF, 0xFE, 0xFD, 0xFC };
     fl::string error;
@@ -101,7 +101,7 @@ TEST_CASE("Vorbis - decodeAll with invalid data") {
     FL_CHECK_FALSE(error.empty());
 }
 
-TEST_CASE("Vorbis - StbVorbisDecoder low-level API") {
+FL_TEST_CASE("Vorbis - StbVorbisDecoder low-level API") {
     StbVorbisDecoder decoder;
 
     // Initial state
@@ -119,7 +119,7 @@ TEST_CASE("Vorbis - StbVorbisDecoder low-level API") {
     FL_CHECK_FALSE(info.isValid);
 }
 
-TEST_CASE("Vorbis - VorbisInfo default construction") {
+FL_TEST_CASE("Vorbis - VorbisInfo default construction") {
     VorbisInfo info;
 
     FL_CHECK_EQ(info.sampleRate, 0);
@@ -129,7 +129,7 @@ TEST_CASE("Vorbis - VorbisInfo default construction") {
     FL_CHECK_FALSE(info.isValid);
 }
 
-TEST_CASE("Vorbis - VorbisInfo parameterized construction") {
+FL_TEST_CASE("Vorbis - VorbisInfo parameterized construction") {
     VorbisInfo info(44100, 2);
 
     FL_CHECK_EQ(info.sampleRate, 44100);
@@ -137,7 +137,7 @@ TEST_CASE("Vorbis - VorbisInfo parameterized construction") {
     FL_CHECK(info.isValid);
 }
 
-TEST_CASE("Vorbis - decoder seek on closed decoder") {
+FL_TEST_CASE("Vorbis - decoder seek on closed decoder") {
     StbVorbisDecoder decoder;
 
     // Seek on closed decoder should fail gracefully
@@ -145,7 +145,7 @@ TEST_CASE("Vorbis - decoder seek on closed decoder") {
     FL_CHECK_FALSE(decoder.seek(1000));
 }
 
-TEST_CASE("Vorbis - decoder getSamples on closed decoder") {
+FL_TEST_CASE("Vorbis - decoder getSamples on closed decoder") {
     StbVorbisDecoder decoder;
 
     // getSamplesShortInterleaved on closed decoder should return 0
@@ -154,7 +154,7 @@ TEST_CASE("Vorbis - decoder getSamples on closed decoder") {
     FL_CHECK_EQ(result, 0);
 }
 
-TEST_CASE("Vorbis - VorbisDecoder with null stream") {
+FL_TEST_CASE("Vorbis - VorbisDecoder with null stream") {
     VorbisDecoder decoder;
 
     // begin with null stream should fail
@@ -167,7 +167,7 @@ TEST_CASE("Vorbis - VorbisDecoder with null stream") {
     FL_CHECK_FALSE(errorMsg.empty());
 }
 
-TEST_CASE("Vorbis - decode OGG file and verify metadata") {
+FL_TEST_CASE("Vorbis - decode OGG file and verify metadata") {
     // Load test audio data from file
     fl::vector<fl::u8> oggData = loadTestAudioFile();
     FL_REQUIRE(!oggData.empty());
@@ -183,7 +183,7 @@ TEST_CASE("Vorbis - decode OGG file and verify metadata") {
     FL_CHECK(info.totalSamples <= 8500);
 }
 
-TEST_CASE("Vorbis - decode and verify 440Hz sine wave") {
+FL_TEST_CASE("Vorbis - decode and verify 440Hz sine wave") {
     // Load test audio data from file (440Hz sine wave at 8kHz)
     fl::vector<fl::u8> oggData = loadTestAudioFile();
     FL_REQUIRE(!oggData.empty());
@@ -247,7 +247,7 @@ TEST_CASE("Vorbis - decode and verify 440Hz sine wave") {
     FL_CHECK(zeroCrossings <= 1100);  // Upper bound
 }
 
-TEST_CASE("Vorbis - decodeAll convenience function") {
+FL_TEST_CASE("Vorbis - decodeAll convenience function") {
     // Load test audio data from file
     fl::vector<fl::u8> oggData = loadTestAudioFile();
     FL_REQUIRE(!oggData.empty());
@@ -271,7 +271,7 @@ TEST_CASE("Vorbis - decodeAll convenience function") {
 }
 
 #ifndef FL_STB_VORBIS_NO_PUSHDATA_API
-TEST_CASE("Vorbis - pushdata streaming mode") {
+FL_TEST_CASE("Vorbis - pushdata streaming mode") {
     // Test the pushdata (streaming buffer callback) mode
     // This mode allows decoding from a stream of buffers without needing the entire file in memory
 
@@ -352,7 +352,7 @@ TEST_CASE("Vorbis - pushdata streaming mode") {
     }
 }
 
-TEST_CASE("Vorbis - pushdata flush") {
+FL_TEST_CASE("Vorbis - pushdata flush") {
     // Test flush operation in pushdata mode
     using namespace fl::third_party::vorbis;
 
@@ -399,7 +399,7 @@ TEST_CASE("Vorbis - pushdata flush") {
 #endif // !FL_STB_VORBIS_NO_PUSHDATA_API
 
 #ifndef FL_STB_VORBIS_NO_STDIO
-TEST_CASE("Vorbis - FILE-based decoding") {
+FL_TEST_CASE("Vorbis - FILE-based decoding") {
     // Test decoding from fl::FILE*
     using namespace fl::third_party::vorbis;
 
@@ -434,7 +434,7 @@ TEST_CASE("Vorbis - FILE-based decoding") {
     stb_vorbis_close(v);
 }
 
-TEST_CASE("Vorbis - FILE-based seeking") {
+FL_TEST_CASE("Vorbis - FILE-based seeking") {
     // Test seeking with FILE-based decoder
     using namespace fl::third_party::vorbis;
 
@@ -468,7 +468,7 @@ TEST_CASE("Vorbis - FILE-based seeking") {
     stb_vorbis_close(v);
 }
 
-TEST_CASE("Vorbis - FILE section decoding") {
+FL_TEST_CASE("Vorbis - FILE section decoding") {
     // Test stb_vorbis_open_file_section with limited length
     using namespace fl::third_party::vorbis;
 

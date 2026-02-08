@@ -5,11 +5,11 @@
 #include "lib8tion/intmap.h"
 #include "fl/lut.h"
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 
 
 
-TEST_CASE("LUT interp8") {
+FL_TEST_CASE("LUT interp8") {
     fl::LUT<uint16_t> lut(2);
     uint16_t* data = lut.getDataMutable();
     data[0] = 0;
@@ -25,7 +25,7 @@ TEST_CASE("LUT interp8") {
     }
 }
 
-TEST_CASE("LUT interp16") {
+FL_TEST_CASE("LUT interp16") {
     fl::LUT<uint16_t> lut(2);
     uint16_t* data = lut.getDataMutable();
     data[0] = 0;

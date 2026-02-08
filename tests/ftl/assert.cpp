@@ -1,13 +1,13 @@
 #include "fl/stl/assert.h"
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/int.h"
 
 using namespace fl;
 
 // Test FL_ASSERT macro basic usage
-TEST_CASE("FL_ASSERT basic usage") {
-    SUBCASE("assert with true condition does not fail") {
+FL_TEST_CASE("FL_ASSERT basic usage") {
+    FL_SUBCASE("assert with true condition does not fail") {
         // This should not produce any output or fail
         FL_ASSERT(true, "This should not trigger");
         FL_ASSERT(1 == 1, "One equals one");
@@ -15,7 +15,7 @@ TEST_CASE("FL_ASSERT basic usage") {
         FL_CHECK(true); // If we get here, asserts passed
     }
 
-    SUBCASE("assert with simple expressions") {
+    FL_SUBCASE("assert with simple expressions") {
         int x = 42;
         FL_ASSERT(x == 42, "x should be 42");
         FL_ASSERT(x > 0, "x should be positive");
@@ -23,7 +23,7 @@ TEST_CASE("FL_ASSERT basic usage") {
         FL_CHECK(true); // If we get here, asserts passed
     }
 
-    SUBCASE("assert with pointer checks") {
+    FL_SUBCASE("assert with pointer checks") {
         int value = 100;
         int* ptr = &value;
         FL_ASSERT(ptr != nullptr, "pointer should not be null");
@@ -33,8 +33,8 @@ TEST_CASE("FL_ASSERT basic usage") {
 }
 
 // Test FL_ASSERT with various data types
-TEST_CASE("FL_ASSERT with different types") {
-    SUBCASE("integer types") {
+FL_TEST_CASE("FL_ASSERT with different types") {
+    FL_SUBCASE("integer types") {
         int8_t i8 = 127;
         uint8_t u8 = 255;
         int16_t i16 = 32767;
@@ -51,7 +51,7 @@ TEST_CASE("FL_ASSERT with different types") {
         FL_CHECK(true);
     }
 
-    SUBCASE("floating point types") {
+    FL_SUBCASE("floating point types") {
         float f = 3.14f;
         double d = 2.718;
 
@@ -62,7 +62,7 @@ TEST_CASE("FL_ASSERT with different types") {
         FL_CHECK(true);
     }
 
-    SUBCASE("boolean expressions") {
+    FL_SUBCASE("boolean expressions") {
         bool flag = true;
         FL_ASSERT(flag, "flag is true");
         FL_ASSERT(flag == true, "flag equals true");
@@ -72,8 +72,8 @@ TEST_CASE("FL_ASSERT with different types") {
 }
 
 // Test FL_ASSERT with complex expressions
-TEST_CASE("FL_ASSERT complex expressions") {
-    SUBCASE("logical AND") {
+FL_TEST_CASE("FL_ASSERT complex expressions") {
+    FL_SUBCASE("logical AND") {
         int x = 5;
         int y = 10;
         FL_ASSERT(x > 0 && y > 0, "both x and y are positive");
@@ -81,7 +81,7 @@ TEST_CASE("FL_ASSERT complex expressions") {
         FL_CHECK(true);
     }
 
-    SUBCASE("logical OR") {
+    FL_SUBCASE("logical OR") {
         int a = 0;
         int b = 5;
         FL_ASSERT(a == 0 || b == 0, "at least one is zero");
@@ -89,7 +89,7 @@ TEST_CASE("FL_ASSERT complex expressions") {
         FL_CHECK(true);
     }
 
-    SUBCASE("compound expressions") {
+    FL_SUBCASE("compound expressions") {
         int arr[] = {1, 2, 3, 4, 5};
         int len = sizeof(arr) / sizeof(arr[0]);
         FL_ASSERT(len == 5, "array has 5 elements");
@@ -99,37 +99,37 @@ TEST_CASE("FL_ASSERT complex expressions") {
 }
 
 // Test FL_ASSERT with string literals
-TEST_CASE("FL_ASSERT message formatting") {
-    SUBCASE("simple string messages") {
+FL_TEST_CASE("FL_ASSERT message formatting") {
+    FL_SUBCASE("simple string messages") {
         FL_ASSERT(true, "Simple message");
         FL_ASSERT(1 + 1 == 2, "Math works");
         FL_ASSERT(sizeof(int) >= 2, "int is at least 2 bytes");
         FL_CHECK(true);
     }
 
-    SUBCASE("messages with special characters") {
+    FL_SUBCASE("messages with special characters") {
         FL_ASSERT(true, "Message with \"quotes\"");
         FL_ASSERT(true, "Message with 'apostrophes'");
         FL_ASSERT(true, "Message with numbers: 123");
         FL_CHECK(true);
     }
 
-    SUBCASE("empty message") {
+    FL_SUBCASE("empty message") {
         FL_ASSERT(true, "");
         FL_CHECK(true);
     }
 }
 
 // Test FL_ASSERT in different contexts
-TEST_CASE("FL_ASSERT in various contexts") {
-    SUBCASE("inside if statement") {
+FL_TEST_CASE("FL_ASSERT in various contexts") {
+    FL_SUBCASE("inside if statement") {
         if (true) {
             FL_ASSERT(1 == 1, "Inside if block");
         }
         FL_CHECK(true);
     }
 
-    SUBCASE("inside loop") {
+    FL_SUBCASE("inside loop") {
         for (int i = 0; i < 5; i++) {
             FL_ASSERT(i >= 0, "Loop index is non-negative");
             FL_ASSERT(i < 5, "Loop index is within bounds");
@@ -137,7 +137,7 @@ TEST_CASE("FL_ASSERT in various contexts") {
         FL_CHECK(true);
     }
 
-    SUBCASE("inside function call chain") {
+    FL_SUBCASE("inside function call chain") {
         auto check_value = [](int val) {
             FL_ASSERT(val > 0, "Value must be positive");
             return val * 2;
@@ -148,8 +148,8 @@ TEST_CASE("FL_ASSERT in various contexts") {
 }
 
 // Test FL_ASSERT with constexpr contexts (compile-time checks)
-TEST_CASE("FL_ASSERT compile-time properties") {
-    SUBCASE("assert in constexpr function") {
+FL_TEST_CASE("FL_ASSERT compile-time properties") {
+    FL_SUBCASE("assert in constexpr function") {
         // Note: FL_ASSERT itself is not constexpr, but we can verify
         // it doesn't interfere with constexpr computations
         constexpr int computed = 2 + 2;
@@ -157,14 +157,14 @@ TEST_CASE("FL_ASSERT compile-time properties") {
         FL_CHECK_EQ(computed, 4);
     }
 
-    SUBCASE("assert with sizeof") {
+    FL_SUBCASE("assert with sizeof") {
         FL_ASSERT(sizeof(char) == 1, "char is 1 byte");
         FL_ASSERT(sizeof(int) >= sizeof(char), "int is at least as big as char");
         FL_ASSERT(sizeof(double) >= sizeof(float), "double is at least as big as float");
         FL_CHECK(true);
     }
 
-    SUBCASE("assert with alignof") {
+    FL_SUBCASE("assert with alignof") {
         FL_ASSERT(alignof(char) == 1, "char alignment is 1");
         FL_ASSERT(alignof(int) >= 1, "int alignment is at least 1");
         FL_CHECK(true);
@@ -172,8 +172,8 @@ TEST_CASE("FL_ASSERT compile-time properties") {
 }
 
 // Test that FL_ASSERT macros are defined
-TEST_CASE("FL_ASSERT macro definitions") {
-    SUBCASE("FL_ASSERT is defined") {
+FL_TEST_CASE("FL_ASSERT macro definitions") {
+    FL_SUBCASE("FL_ASSERT is defined") {
         #ifdef FL_ASSERT
         FL_CHECK(true);
         #else
@@ -181,7 +181,7 @@ TEST_CASE("FL_ASSERT macro definitions") {
         #endif
     }
 
-    SUBCASE("FL_ASSERT_IF is defined") {
+    FL_SUBCASE("FL_ASSERT_IF is defined") {
         #ifdef FL_ASSERT_IF
         FL_CHECK(true);
         #else
@@ -193,28 +193,28 @@ TEST_CASE("FL_ASSERT macro definitions") {
 }
 
 // Test FL_ASSERT with edge cases
-TEST_CASE("FL_ASSERT edge cases") {
-    SUBCASE("assert with null pointer literal") {
+FL_TEST_CASE("FL_ASSERT edge cases") {
+    FL_SUBCASE("assert with null pointer literal") {
         int* p = nullptr;
         FL_ASSERT(p == nullptr, "pointer is null");
         FL_CHECK(true);
     }
 
-    SUBCASE("assert with zero") {
+    FL_SUBCASE("assert with zero") {
         int zero = 0;
         FL_ASSERT(zero == 0, "zero is zero");
         FL_ASSERT(!zero, "zero is falsy");
         FL_CHECK(true);
     }
 
-    SUBCASE("assert with negative numbers") {
+    FL_SUBCASE("assert with negative numbers") {
         int neg = -5;
         FL_ASSERT(neg < 0, "negative number is less than zero");
         FL_ASSERT(neg != 0, "negative number is not zero");
         FL_CHECK(true);
     }
 
-    SUBCASE("assert with maximum values") {
+    FL_SUBCASE("assert with maximum values") {
         uint8_t max_u8 = 255;
         uint16_t max_u16 = 65535;
         FL_ASSERT(max_u8 == 255, "max uint8 value");
@@ -224,8 +224,8 @@ TEST_CASE("FL_ASSERT edge cases") {
 }
 
 // Test that FL_ASSERT can be used with struct/class members
-TEST_CASE("FL_ASSERT with structs and classes") {
-    SUBCASE("struct member checks") {
+FL_TEST_CASE("FL_ASSERT with structs and classes") {
+    FL_SUBCASE("struct member checks") {
         struct Point {
             int x;
             int y;
@@ -238,7 +238,7 @@ TEST_CASE("FL_ASSERT with structs and classes") {
         FL_CHECK(true);
     }
 
-    SUBCASE("class method checks") {
+    FL_SUBCASE("class method checks") {
         class Counter {
         public:
             Counter() : count(0) {}
@@ -257,8 +257,8 @@ TEST_CASE("FL_ASSERT with structs and classes") {
 }
 
 // Test FL_ASSERT with array bounds
-TEST_CASE("FL_ASSERT with arrays") {
-    SUBCASE("array index checks") {
+FL_TEST_CASE("FL_ASSERT with arrays") {
+    FL_SUBCASE("array index checks") {
         int arr[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         int len = sizeof(arr) / sizeof(arr[0]);
 
@@ -270,7 +270,7 @@ TEST_CASE("FL_ASSERT with arrays") {
         FL_CHECK(true);
     }
 
-    SUBCASE("multidimensional array") {
+    FL_SUBCASE("multidimensional array") {
         int matrix[3][3] = {
             {1, 2, 3},
             {4, 5, 6},
@@ -285,8 +285,8 @@ TEST_CASE("FL_ASSERT with arrays") {
 }
 
 // Test that FL_ASSERT doesn't interfere with normal program flow
-TEST_CASE("FL_ASSERT program flow") {
-    SUBCASE("multiple asserts in sequence") {
+FL_TEST_CASE("FL_ASSERT program flow") {
+    FL_SUBCASE("multiple asserts in sequence") {
         int x = 1;
         FL_ASSERT(x == 1, "first assert");
         x = 2;
@@ -296,7 +296,7 @@ TEST_CASE("FL_ASSERT program flow") {
         FL_CHECK_EQ(x, 3);
     }
 
-    SUBCASE("assert doesn't affect return values") {
+    FL_SUBCASE("assert doesn't affect return values") {
         auto function_with_assert = [](int val) -> int {
             FL_ASSERT(val > 0, "input must be positive");
             return val * 2;
@@ -306,7 +306,7 @@ TEST_CASE("FL_ASSERT program flow") {
         FL_CHECK_EQ(result, 10);
     }
 
-    SUBCASE("assert in conditional branches") {
+    FL_SUBCASE("assert in conditional branches") {
         int value = 42;
         if (value > 0) {
             FL_ASSERT(value > 0, "positive branch");

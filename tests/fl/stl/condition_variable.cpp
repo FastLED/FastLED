@@ -4,7 +4,7 @@
 #include "fl/stl/condition_variable.h"
 #include "fl/stl/mutex.h"
 #include "fl/stl/atomic.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/thread.h"
 #include "fl/stl/new.h"
 #include "fl/stl/type_traits.h"
@@ -16,13 +16,13 @@
 #if FASTLED_MULTITHREADED
 
 
-TEST_CASE("fl::condition_variable basic operations") {
+FL_TEST_CASE("fl::condition_variable basic operations") {
     fl::mutex mtx;
     fl::condition_variable cv;
     fl::atomic<bool> ready(false);
     fl::atomic<bool> processed(false);
 
-    SUBCASE("notify_one wakes waiting thread") {
+    FL_SUBCASE("notify_one wakes waiting thread") {
         std::thread worker([&]() {  // okay std namespace - fl::thread not available
             fl::unique_lock<fl::mutex> lock(mtx);
             ready.store(true);
@@ -47,7 +47,7 @@ TEST_CASE("fl::condition_variable basic operations") {
         FL_CHECK(processed.load() == true);
     }
 
-    SUBCASE("notify_all wakes multiple threads") {
+    FL_SUBCASE("notify_all wakes multiple threads") {
         constexpr int num_threads = 3;
         fl::atomic<int> wake_count(0);
         fl::vector<std::thread> threads;  // okay std namespace - fl::thread not available
@@ -79,7 +79,7 @@ TEST_CASE("fl::condition_variable basic operations") {
     }
 }
 
-TEST_CASE("fl::condition_variable with predicate") {
+FL_TEST_CASE("fl::condition_variable with predicate") {
     fl::mutex mtx;
     fl::condition_variable cv;
     fl::atomic<int> value(0);
@@ -107,12 +107,12 @@ TEST_CASE("fl::condition_variable with predicate") {
 
 #else // !FASTLED_MULTITHREADED
 
-TEST_CASE("fl::condition_variable single-threaded mode") {
+FL_TEST_CASE("fl::condition_variable single-threaded mode") {
     fl::mutex mtx;
     fl::condition_variable cv;
     (void)mtx;  // Suppress unused variable warning
 
-    SUBCASE("notify operations are no-ops") {
+    FL_SUBCASE("notify operations are no-ops") {
         // These should compile and run without error in single-threaded mode
         cv.notify_one();
         cv.notify_all();

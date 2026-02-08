@@ -25,7 +25,7 @@
 #include "fl/channels/config.h"
 #include "fl/channels/engine.h"
 #include "fl/stl/vector.h"
-#include "doctest.h"
+#include "test.h"
 
 using namespace fl;
 using namespace fl::detail;
@@ -100,17 +100,17 @@ void resetMock() {
 // Test Suite: Basic Transmission
 //=============================================================================
 
-TEST_CASE("RMT5 engine - create and destroy") {
+FL_TEST_CASE("RMT5 engine - create and destroy") {
     resetMock();
 
     auto engine = ChannelEngineRMT::create();
-    CHECK(engine != nullptr);
+    FL_CHECK(engine != nullptr);
 
     // Initial state should be READY
-    CHECK(engine->poll() == EngineState::READY);
+    FL_CHECK(engine->poll() == EngineState::READY);
 }
 
-TEST_CASE("RMT5 engine - single channel transmission") {
+FL_TEST_CASE("RMT5 engine - single channel transmission") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();
     auto engine = ChannelEngineRMT::create();
@@ -124,11 +124,11 @@ TEST_CASE("RMT5 engine - single channel transmission") {
     engine->show();
 
     // Verify transmission started
-    CHECK(mock.getTransmissionCount() >= 1);
-    CHECK(ch->isInUse() == true);
+    FL_CHECK(mock.getTransmissionCount() >= 1);
+    FL_CHECK(ch->isInUse() == true);
 
     // Engine should be BUSY
-    CHECK(engine->poll() == EngineState::BUSY);
+    FL_CHECK(engine->poll() == EngineState::BUSY);
 
     // Simulate transmission completion
     const auto& history = mock.getTransmissionHistory();
@@ -145,10 +145,10 @@ TEST_CASE("RMT5 engine - single channel transmission") {
     }
 
     // Should eventually return to READY and clear inUse flag
-    CHECK(ch->isInUse() == false);
+    FL_CHECK(ch->isInUse() == false);
 }
 
-TEST_CASE("RMT5 engine - multiple LED transmission") {
+FL_TEST_CASE("RMT5 engine - multiple LED transmission") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();
     auto engine = ChannelEngineRMT::create();
@@ -165,13 +165,13 @@ TEST_CASE("RMT5 engine - multiple LED transmission") {
     engine->show();
 
     // Verify transmission occurred
-    CHECK(mock.getTransmissionCount() >= 1);
+    FL_CHECK(mock.getTransmissionCount() >= 1);
 
     // Verify transmitted data size (3 LEDs = 9 bytes in GRB format)
     const auto& history = mock.getTransmissionHistory();
     if (!history.empty()) {
-        CHECK(history[0].buffer_size == 9);
-        CHECK(history[0].gpio_pin == 18);
+        FL_CHECK(history[0].buffer_size == 9);
+        FL_CHECK(history[0].gpio_pin == 18);
     }
 
     // Complete transmission to allow clean shutdown
@@ -188,7 +188,7 @@ TEST_CASE("RMT5 engine - multiple LED transmission") {
 // Test Suite: Multi-Channel Time-Multiplexing
 //=============================================================================
 
-TEST_CASE("RMT5 engine - two channels different pins") {
+FL_TEST_CASE("RMT5 engine - two channels different pins") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();
     auto engine = ChannelEngineRMT::create();
@@ -206,7 +206,7 @@ TEST_CASE("RMT5 engine - two channels different pins") {
 
     // Verify both channels were created (or at least attempted)
     // Note: Actual transmission count depends on hardware limits
-    CHECK(mock.getChannelCount() >= 1);
+    FL_CHECK(mock.getChannelCount() >= 1);
 
     // Complete transmissions to allow clean shutdown
     for (size_t ch_id = 1; ch_id <= mock.getChannelCount(); ch_id++) {
@@ -218,7 +218,7 @@ TEST_CASE("RMT5 engine - two channels different pins") {
     }
 }
 
-TEST_CASE("RMT5 engine - same pin sequential frames") {
+FL_TEST_CASE("RMT5 engine - same pin sequential frames") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();
     auto engine = ChannelEngineRMT::create();
@@ -245,7 +245,7 @@ TEST_CASE("RMT5 engine - same pin sequential frames") {
     engine->show();
 
     // Verify second transmission occurred
-    CHECK(mock.getTransmissionCount() >= 1);
+    FL_CHECK(mock.getTransmissionCount() >= 1);
 
     // Complete second transmission
     if (mock.getChannelCount() > 0) {
@@ -261,13 +261,13 @@ TEST_CASE("RMT5 engine - same pin sequential frames") {
 // Test Suite: State Machine
 //=============================================================================
 
-TEST_CASE("RMT5 engine - state progression READY → BUSY → READY") {
+FL_TEST_CASE("RMT5 engine - state progression READY → BUSY → READY") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();
     auto engine = ChannelEngineRMT::create();
 
     // Initial state should be READY
-    CHECK(engine->poll() == EngineState::READY);
+    FL_CHECK(engine->poll() == EngineState::READY);
 
     // Enqueue and show
     auto ch = createChannelData(18, 1);
@@ -275,7 +275,7 @@ TEST_CASE("RMT5 engine - state progression READY → BUSY → READY") {
     engine->show();
 
     // State should be BUSY after show()
-    CHECK(engine->poll() == EngineState::BUSY);
+    FL_CHECK(engine->poll() == EngineState::BUSY);
 
     // Simulate completion
     if (mock.getChannelCount() > 0) {
@@ -290,7 +290,7 @@ TEST_CASE("RMT5 engine - state progression READY → BUSY → READY") {
     }
 
     // Should eventually return to READY
-    CHECK(state == EngineState::READY);
+    FL_CHECK(state == EngineState::READY);
 }
 
 //=============================================================================
@@ -298,7 +298,7 @@ TEST_CASE("RMT5 engine - state progression READY → BUSY → READY") {
 //=============================================================================
 
 // TODO: Re-enable after fixing engine failure handling
-// TEST_CASE("RMT5 engine - handle transmission failure") {
+// FL_TEST_CASE("RMT5 engine - handle transmission failure") {
 //     resetMock();
 //     auto& mock = Rmt5PeripheralMock::instance();
 //     auto engine = ChannelEngineRMT::create();
@@ -325,7 +325,7 @@ TEST_CASE("RMT5 engine - state progression READY → BUSY → READY") {
 // Test Suite: Edge Cases
 //=============================================================================
 
-TEST_CASE("RMT5 engine - empty enqueue") {
+FL_TEST_CASE("RMT5 engine - empty enqueue") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();
     auto engine = ChannelEngineRMT::create();
@@ -334,11 +334,11 @@ TEST_CASE("RMT5 engine - empty enqueue") {
     engine->show();
 
     // Should not crash, no transmissions
-    CHECK(mock.getTransmissionCount() == 0);
+    FL_CHECK(mock.getTransmissionCount() == 0);
 }
 
 // TODO: Re-enable after fixing engine 0-byte buffer handling
-// TEST_CASE("RMT5 engine - zero LED channel") {
+// FL_TEST_CASE("RMT5 engine - zero LED channel") {
 //     resetMock();
 //     auto engine = ChannelEngineRMT::create();
 
@@ -349,11 +349,11 @@ TEST_CASE("RMT5 engine - empty enqueue") {
 
 //     // Should handle gracefully (0 bytes = no transmission, immediate READY)
 //     auto state = engine->poll();
-//     CHECK(state == EngineState::READY);
-//     CHECK(ch->isInUse() == false);  // Should not be in use (no valid transmission)
+//     FL_CHECK(state == EngineState::READY);
+//     FL_CHECK(ch->isInUse() == false);  // Should not be in use (no valid transmission)
 // }
 
-TEST_CASE("RMT5 engine - rapid show() calls") {
+FL_TEST_CASE("RMT5 engine - rapid show() calls") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();
     auto engine = ChannelEngineRMT::create();
@@ -369,7 +369,7 @@ TEST_CASE("RMT5 engine - rapid show() calls") {
     auto state = engine->poll();
     (void)state; // Don't care about state - just verifying no crash
 
-    CHECK(mock.getChannelCount() >= 0);
+    FL_CHECK(mock.getChannelCount() >= 0);
 
     // Complete transmission to allow clean shutdown
     if (mock.getChannelCount() > 0) {

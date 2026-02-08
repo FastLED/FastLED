@@ -1,27 +1,27 @@
 #include "fl/stl/algorithm.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/pair.h"
 #include "fl/stl/random.h"
 
 using namespace fl;
 
-TEST_CASE("fl::reverse") {
-    SUBCASE("reverse empty vector") {
+FL_TEST_CASE("fl::reverse") {
+    FL_SUBCASE("reverse empty vector") {
         fl::vector<int> v;
         fl::reverse(v.begin(), v.end());
         FL_CHECK(v.empty());
     }
 
-    SUBCASE("reverse single element") {
+    FL_SUBCASE("reverse single element") {
         fl::vector<int> v = {42};
         fl::reverse(v.begin(), v.end());
         FL_CHECK_EQ(v[0], 42);
     }
 
-    SUBCASE("reverse multiple elements") {
+    FL_SUBCASE("reverse multiple elements") {
         fl::vector<int> v = {1, 2, 3, 4, 5};
         fl::reverse(v.begin(), v.end());
         FL_CHECK_EQ(v[0], 5);
@@ -31,7 +31,7 @@ TEST_CASE("fl::reverse") {
         FL_CHECK_EQ(v[4], 1);
     }
 
-    SUBCASE("reverse even number of elements") {
+    FL_SUBCASE("reverse even number of elements") {
         fl::vector<int> v = {1, 2, 3, 4};
         fl::reverse(v.begin(), v.end());
         FL_CHECK_EQ(v[0], 4);
@@ -41,26 +41,26 @@ TEST_CASE("fl::reverse") {
     }
 }
 
-TEST_CASE("fl::max_element") {
-    SUBCASE("max_element empty range") {
+FL_TEST_CASE("fl::max_element") {
+    FL_SUBCASE("max_element empty range") {
         fl::vector<int> v;
         auto it = fl::max_element(v.begin(), v.end());
         FL_CHECK(it == v.end());
     }
 
-    SUBCASE("max_element single element") {
+    FL_SUBCASE("max_element single element") {
         fl::vector<int> v = {42};
         auto it = fl::max_element(v.begin(), v.end());
         FL_CHECK_EQ(*it, 42);
     }
 
-    SUBCASE("max_element finds maximum") {
+    FL_SUBCASE("max_element finds maximum") {
         fl::vector<int> v = {3, 7, 2, 9, 1, 5};
         auto it = fl::max_element(v.begin(), v.end());
         FL_CHECK_EQ(*it, 9);
     }
 
-    SUBCASE("max_element with duplicates") {
+    FL_SUBCASE("max_element with duplicates") {
         fl::vector<int> v = {1, 9, 3, 9, 2};
         auto it = fl::max_element(v.begin(), v.end());
         FL_CHECK_EQ(*it, 9);
@@ -68,33 +68,33 @@ TEST_CASE("fl::max_element") {
         FL_CHECK_EQ(it - v.begin(), 1);
     }
 
-    SUBCASE("max_element with custom comparator") {
+    FL_SUBCASE("max_element with custom comparator") {
         fl::vector<int> v = {3, 7, 2, 9, 1, 5};
         auto it = fl::max_element(v.begin(), v.end(), [](int a, int b) { return a > b; });
         FL_CHECK_EQ(*it, 1); // Min with reversed comparator
     }
 }
 
-TEST_CASE("fl::min_element") {
-    SUBCASE("min_element empty range") {
+FL_TEST_CASE("fl::min_element") {
+    FL_SUBCASE("min_element empty range") {
         fl::vector<int> v;
         auto it = fl::min_element(v.begin(), v.end());
         FL_CHECK(it == v.end());
     }
 
-    SUBCASE("min_element single element") {
+    FL_SUBCASE("min_element single element") {
         fl::vector<int> v = {42};
         auto it = fl::min_element(v.begin(), v.end());
         FL_CHECK_EQ(*it, 42);
     }
 
-    SUBCASE("min_element finds minimum") {
+    FL_SUBCASE("min_element finds minimum") {
         fl::vector<int> v = {3, 7, 2, 9, 1, 5};
         auto it = fl::min_element(v.begin(), v.end());
         FL_CHECK_EQ(*it, 1);
     }
 
-    SUBCASE("min_element with duplicates") {
+    FL_SUBCASE("min_element with duplicates") {
         fl::vector<int> v = {3, 1, 7, 1, 2};
         auto it = fl::min_element(v.begin(), v.end());
         FL_CHECK_EQ(*it, 1);
@@ -102,88 +102,88 @@ TEST_CASE("fl::min_element") {
         FL_CHECK_EQ(it - v.begin(), 1);
     }
 
-    SUBCASE("min_element with custom comparator") {
+    FL_SUBCASE("min_element with custom comparator") {
         fl::vector<int> v = {3, 7, 2, 9, 1, 5};
         auto it = fl::min_element(v.begin(), v.end(), [](int a, int b) { return a > b; });
         FL_CHECK_EQ(*it, 9); // Max with reversed comparator
     }
 }
 
-TEST_CASE("fl::equal") {
-    SUBCASE("equal empty ranges") {
+FL_TEST_CASE("fl::equal") {
+    FL_SUBCASE("equal empty ranges") {
         fl::vector<int> v1, v2;
         FL_CHECK(fl::equal(v1.begin(), v1.end(), v2.begin()));
     }
 
-    SUBCASE("equal identical ranges") {
+    FL_SUBCASE("equal identical ranges") {
         fl::vector<int> v1 = {1, 2, 3, 4, 5};
         fl::vector<int> v2 = {1, 2, 3, 4, 5};
         FL_CHECK(fl::equal(v1.begin(), v1.end(), v2.begin()));
     }
 
-    SUBCASE("equal different ranges") {
+    FL_SUBCASE("equal different ranges") {
         fl::vector<int> v1 = {1, 2, 3, 4, 5};
         fl::vector<int> v2 = {1, 2, 3, 4, 6};
         FL_CHECK_FALSE(fl::equal(v1.begin(), v1.end(), v2.begin()));
     }
 
-    SUBCASE("equal with custom predicate") {
+    FL_SUBCASE("equal with custom predicate") {
         fl::vector<int> v1 = {1, 2, 3};
         fl::vector<int> v2 = {2, 4, 6};
         FL_CHECK(fl::equal(v1.begin(), v1.end(), v2.begin(),
             [](int a, int b) { return a * 2 == b; }));
     }
 
-    SUBCASE("equal with both ranges checked") {
+    FL_SUBCASE("equal with both ranges checked") {
         fl::vector<int> v1 = {1, 2, 3};
         fl::vector<int> v2 = {1, 2, 3};
         FL_CHECK(fl::equal(v1.begin(), v1.end(), v2.begin(), v2.end()));
     }
 
-    SUBCASE("equal different sizes") {
+    FL_SUBCASE("equal different sizes") {
         fl::vector<int> v1 = {1, 2, 3};
         fl::vector<int> v2 = {1, 2, 3, 4};
         FL_CHECK_FALSE(fl::equal(v1.begin(), v1.end(), v2.begin(), v2.end()));
     }
 }
 
-TEST_CASE("fl::lexicographical_compare") {
-    SUBCASE("lexicographical empty ranges") {
+FL_TEST_CASE("fl::lexicographical_compare") {
+    FL_SUBCASE("lexicographical empty ranges") {
         fl::vector<int> v1, v2;
         FL_CHECK_FALSE(fl::lexicographical_compare(v1.begin(), v1.end(), v2.begin(), v2.end()));
     }
 
-    SUBCASE("lexicographical first is less") {
+    FL_SUBCASE("lexicographical first is less") {
         fl::vector<int> v1 = {1, 2, 3};
         fl::vector<int> v2 = {1, 2, 4};
         FL_CHECK(fl::lexicographical_compare(v1.begin(), v1.end(), v2.begin(), v2.end()));
     }
 
-    SUBCASE("lexicographical first is greater") {
+    FL_SUBCASE("lexicographical first is greater") {
         fl::vector<int> v1 = {1, 2, 5};
         fl::vector<int> v2 = {1, 2, 4};
         FL_CHECK_FALSE(fl::lexicographical_compare(v1.begin(), v1.end(), v2.begin(), v2.end()));
     }
 
-    SUBCASE("lexicographical first is prefix") {
+    FL_SUBCASE("lexicographical first is prefix") {
         fl::vector<int> v1 = {1, 2};
         fl::vector<int> v2 = {1, 2, 3};
         FL_CHECK(fl::lexicographical_compare(v1.begin(), v1.end(), v2.begin(), v2.end()));
     }
 
-    SUBCASE("lexicographical second is prefix") {
+    FL_SUBCASE("lexicographical second is prefix") {
         fl::vector<int> v1 = {1, 2, 3};
         fl::vector<int> v2 = {1, 2};
         FL_CHECK_FALSE(fl::lexicographical_compare(v1.begin(), v1.end(), v2.begin(), v2.end()));
     }
 
-    SUBCASE("lexicographical equal ranges") {
+    FL_SUBCASE("lexicographical equal ranges") {
         fl::vector<int> v1 = {1, 2, 3};
         fl::vector<int> v2 = {1, 2, 3};
         FL_CHECK_FALSE(fl::lexicographical_compare(v1.begin(), v1.end(), v2.begin(), v2.end()));
     }
 
-    SUBCASE("lexicographical with custom comparator") {
+    FL_SUBCASE("lexicographical with custom comparator") {
         fl::vector<int> v1 = {3, 2, 1};
         fl::vector<int> v2 = {3, 2, 0};
         FL_CHECK(fl::lexicographical_compare(v1.begin(), v1.end(), v2.begin(), v2.end(),
@@ -191,40 +191,40 @@ TEST_CASE("fl::lexicographical_compare") {
     }
 }
 
-TEST_CASE("fl::equal_container") {
-    SUBCASE("equal_container identical") {
+FL_TEST_CASE("fl::equal_container") {
+    FL_SUBCASE("equal_container identical") {
         fl::vector<int> v1 = {1, 2, 3, 4, 5};
         fl::vector<int> v2 = {1, 2, 3, 4, 5};
         FL_CHECK(fl::equal_container(v1, v2));
     }
 
-    SUBCASE("equal_container different values") {
+    FL_SUBCASE("equal_container different values") {
         fl::vector<int> v1 = {1, 2, 3, 4, 5};
         fl::vector<int> v2 = {1, 2, 3, 4, 6};
         FL_CHECK_FALSE(fl::equal_container(v1, v2));
     }
 
-    SUBCASE("equal_container different sizes") {
+    FL_SUBCASE("equal_container different sizes") {
         fl::vector<int> v1 = {1, 2, 3};
         fl::vector<int> v2 = {1, 2, 3, 4};
         FL_CHECK_FALSE(fl::equal_container(v1, v2));
     }
 
-    SUBCASE("equal_container with predicate") {
+    FL_SUBCASE("equal_container with predicate") {
         fl::vector<int> v1 = {1, 2, 3};
         fl::vector<int> v2 = {2, 4, 6};
         FL_CHECK(fl::equal_container(v1, v2, [](int a, int b) { return a * 2 == b; }));
     }
 }
 
-TEST_CASE("fl::fill") {
-    SUBCASE("fill empty range") {
+FL_TEST_CASE("fl::fill") {
+    FL_SUBCASE("fill empty range") {
         fl::vector<int> v;
         fl::fill(v.begin(), v.end(), 42);
         FL_CHECK(v.empty());
     }
 
-    SUBCASE("fill with value") {
+    FL_SUBCASE("fill with value") {
         fl::vector<int> v(5);
         fl::fill(v.begin(), v.end(), 42);
         for (int i = 0; i < 5; i++) {
@@ -232,7 +232,7 @@ TEST_CASE("fl::fill") {
         }
     }
 
-    SUBCASE("fill partial range") {
+    FL_SUBCASE("fill partial range") {
         fl::vector<int> v = {1, 2, 3, 4, 5};
         fl::fill(v.begin() + 1, v.begin() + 4, 99);
         FL_CHECK_EQ(v[0], 1);
@@ -243,14 +243,14 @@ TEST_CASE("fl::fill") {
     }
 }
 
-TEST_CASE("fl::find") {
-    SUBCASE("find in empty range") {
+FL_TEST_CASE("fl::find") {
+    FL_SUBCASE("find in empty range") {
         fl::vector<int> v;
         auto it = fl::find(v.begin(), v.end(), 42);
         FL_CHECK(it == v.end());
     }
 
-    SUBCASE("find existing element") {
+    FL_SUBCASE("find existing element") {
         fl::vector<int> v = {1, 2, 3, 4, 5};
         auto it = fl::find(v.begin(), v.end(), 3);
         FL_CHECK(it != v.end());
@@ -258,75 +258,75 @@ TEST_CASE("fl::find") {
         FL_CHECK_EQ(it - v.begin(), 2);
     }
 
-    SUBCASE("find non-existing element") {
+    FL_SUBCASE("find non-existing element") {
         fl::vector<int> v = {1, 2, 3, 4, 5};
         auto it = fl::find(v.begin(), v.end(), 10);
         FL_CHECK(it == v.end());
     }
 
-    SUBCASE("find first occurrence") {
+    FL_SUBCASE("find first occurrence") {
         fl::vector<int> v = {1, 2, 3, 2, 5};
         auto it = fl::find(v.begin(), v.end(), 2);
         FL_CHECK_EQ(it - v.begin(), 1);
     }
 }
 
-TEST_CASE("fl::find_if") {
-    SUBCASE("find_if in empty range") {
+FL_TEST_CASE("fl::find_if") {
+    FL_SUBCASE("find_if in empty range") {
         fl::vector<int> v;
         auto it = fl::find_if(v.begin(), v.end(), [](int x) { return x > 5; });
         FL_CHECK(it == v.end());
     }
 
-    SUBCASE("find_if existing element") {
+    FL_SUBCASE("find_if existing element") {
         fl::vector<int> v = {1, 2, 3, 4, 5};
         auto it = fl::find_if(v.begin(), v.end(), [](int x) { return x > 3; });
         FL_CHECK(it != v.end());
         FL_CHECK_EQ(*it, 4);
     }
 
-    SUBCASE("find_if non-existing element") {
+    FL_SUBCASE("find_if non-existing element") {
         fl::vector<int> v = {1, 2, 3, 4, 5};
         auto it = fl::find_if(v.begin(), v.end(), [](int x) { return x > 10; });
         FL_CHECK(it == v.end());
     }
 }
 
-TEST_CASE("fl::find_if_not") {
-    SUBCASE("find_if_not in empty range") {
+FL_TEST_CASE("fl::find_if_not") {
+    FL_SUBCASE("find_if_not in empty range") {
         fl::vector<int> v;
         auto it = fl::find_if_not(v.begin(), v.end(), [](int x) { return x > 5; });
         FL_CHECK(it == v.end());
     }
 
-    SUBCASE("find_if_not existing element") {
+    FL_SUBCASE("find_if_not existing element") {
         fl::vector<int> v = {1, 2, 3, 4, 5};
         auto it = fl::find_if_not(v.begin(), v.end(), [](int x) { return x < 3; });
         FL_CHECK(it != v.end());
         FL_CHECK_EQ(*it, 3);
     }
 
-    SUBCASE("find_if_not all match") {
+    FL_SUBCASE("find_if_not all match") {
         fl::vector<int> v = {1, 2, 3, 4, 5};
         auto it = fl::find_if_not(v.begin(), v.end(), [](int x) { return x < 10; });
         FL_CHECK(it == v.end());
     }
 }
 
-TEST_CASE("fl::remove") {
-    SUBCASE("remove from empty range") {
+FL_TEST_CASE("fl::remove") {
+    FL_SUBCASE("remove from empty range") {
         fl::vector<int> v;
         auto new_end = fl::remove(v.begin(), v.end(), 42);
         FL_CHECK(new_end == v.end());
     }
 
-    SUBCASE("remove no matching elements") {
+    FL_SUBCASE("remove no matching elements") {
         fl::vector<int> v = {1, 2, 3, 4, 5};
         auto new_end = fl::remove(v.begin(), v.end(), 10);
         FL_CHECK(new_end == v.end());
     }
 
-    SUBCASE("remove matching elements") {
+    FL_SUBCASE("remove matching elements") {
         fl::vector<int> v = {1, 2, 3, 2, 4, 2, 5};
         auto new_end = fl::remove(v.begin(), v.end(), 2);
         FL_CHECK_EQ(new_end - v.begin(), 4);
@@ -336,27 +336,27 @@ TEST_CASE("fl::remove") {
         FL_CHECK_EQ(v[3], 5);
     }
 
-    SUBCASE("remove all elements") {
+    FL_SUBCASE("remove all elements") {
         fl::vector<int> v = {2, 2, 2, 2};
         auto new_end = fl::remove(v.begin(), v.end(), 2);
         FL_CHECK(new_end == v.begin());
     }
 }
 
-TEST_CASE("fl::remove_if") {
-    SUBCASE("remove_if from empty range") {
+FL_TEST_CASE("fl::remove_if") {
+    FL_SUBCASE("remove_if from empty range") {
         fl::vector<int> v;
         auto new_end = fl::remove_if(v.begin(), v.end(), [](int x) { return x > 5; });
         FL_CHECK(new_end == v.end());
     }
 
-    SUBCASE("remove_if no matching elements") {
+    FL_SUBCASE("remove_if no matching elements") {
         fl::vector<int> v = {1, 2, 3, 4, 5};
         auto new_end = fl::remove_if(v.begin(), v.end(), [](int x) { return x > 10; });
         FL_CHECK(new_end == v.end());
     }
 
-    SUBCASE("remove_if matching elements") {
+    FL_SUBCASE("remove_if matching elements") {
         fl::vector<int> v = {1, 2, 3, 4, 5, 6, 7};
         auto new_end = fl::remove_if(v.begin(), v.end(), [](int x) { return x % 2 == 0; });
         FL_CHECK_EQ(new_end - v.begin(), 4);
@@ -367,20 +367,20 @@ TEST_CASE("fl::remove_if") {
     }
 }
 
-TEST_CASE("fl::sort") {
-    SUBCASE("sort empty range") {
+FL_TEST_CASE("fl::sort") {
+    FL_SUBCASE("sort empty range") {
         fl::vector<int> v;
         fl::sort(v.begin(), v.end());
         FL_CHECK(v.empty());
     }
 
-    SUBCASE("sort single element") {
+    FL_SUBCASE("sort single element") {
         fl::vector<int> v = {42};
         fl::sort(v.begin(), v.end());
         FL_CHECK_EQ(v[0], 42);
     }
 
-    SUBCASE("sort already sorted") {
+    FL_SUBCASE("sort already sorted") {
         fl::vector<int> v = {1, 2, 3, 4, 5};
         fl::sort(v.begin(), v.end());
         FL_CHECK_EQ(v[0], 1);
@@ -390,7 +390,7 @@ TEST_CASE("fl::sort") {
         FL_CHECK_EQ(v[4], 5);
     }
 
-    SUBCASE("sort reverse order") {
+    FL_SUBCASE("sort reverse order") {
         fl::vector<int> v = {5, 4, 3, 2, 1};
         fl::sort(v.begin(), v.end());
         FL_CHECK_EQ(v[0], 1);
@@ -400,7 +400,7 @@ TEST_CASE("fl::sort") {
         FL_CHECK_EQ(v[4], 5);
     }
 
-    SUBCASE("sort random order") {
+    FL_SUBCASE("sort random order") {
         fl::vector<int> v = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3};
         fl::sort(v.begin(), v.end());
         FL_CHECK_EQ(v[0], 1);
@@ -415,7 +415,7 @@ TEST_CASE("fl::sort") {
         FL_CHECK_EQ(v[9], 9);
     }
 
-    SUBCASE("sort with custom comparator") {
+    FL_SUBCASE("sort with custom comparator") {
         fl::vector<int> v = {1, 2, 3, 4, 5};
         fl::sort(v.begin(), v.end(), [](int a, int b) { return a > b; });
         FL_CHECK_EQ(v[0], 5);
@@ -425,7 +425,7 @@ TEST_CASE("fl::sort") {
         FL_CHECK_EQ(v[4], 1);
     }
 
-    SUBCASE("sort larger array") {
+    FL_SUBCASE("sort larger array") {
         fl::vector<int> v;
         for (int i = 100; i > 0; i--) {
             v.push_back(i);
@@ -437,20 +437,20 @@ TEST_CASE("fl::sort") {
     }
 }
 
-TEST_CASE("fl::stable_sort") {
-    SUBCASE("stable_sort empty range") {
+FL_TEST_CASE("fl::stable_sort") {
+    FL_SUBCASE("stable_sort empty range") {
         fl::vector<int> v;
         fl::stable_sort(v.begin(), v.end());
         FL_CHECK(v.empty());
     }
 
-    SUBCASE("stable_sort single element") {
+    FL_SUBCASE("stable_sort single element") {
         fl::vector<int> v = {42};
         fl::stable_sort(v.begin(), v.end());
         FL_CHECK_EQ(v[0], 42);
     }
 
-    SUBCASE("stable_sort preserves order") {
+    FL_SUBCASE("stable_sort preserves order") {
         // Using pairs where second value tracks original position
         fl::vector<fl::pair<int, int>> v;
         v.push_back({3, 0});
@@ -476,7 +476,7 @@ TEST_CASE("fl::stable_sort") {
         FL_CHECK_EQ(v[4].second, 4);
     }
 
-    SUBCASE("stable_sort reverse order") {
+    FL_SUBCASE("stable_sort reverse order") {
         fl::vector<int> v = {5, 4, 3, 2, 1};
         fl::stable_sort(v.begin(), v.end());
         FL_CHECK_EQ(v[0], 1);
@@ -486,7 +486,7 @@ TEST_CASE("fl::stable_sort") {
         FL_CHECK_EQ(v[4], 5);
     }
 
-    SUBCASE("stable_sort larger array") {
+    FL_SUBCASE("stable_sort larger array") {
         fl::vector<int> v;
         for (int i = 100; i > 0; i--) {
             v.push_back(i);
@@ -498,20 +498,20 @@ TEST_CASE("fl::stable_sort") {
     }
 }
 
-TEST_CASE("fl::shuffle") {
-    SUBCASE("shuffle empty range") {
+FL_TEST_CASE("fl::shuffle") {
+    FL_SUBCASE("shuffle empty range") {
         fl::vector<int> v;
         fl::shuffle(v.begin(), v.end());
         FL_CHECK(v.empty());
     }
 
-    SUBCASE("shuffle single element") {
+    FL_SUBCASE("shuffle single element") {
         fl::vector<int> v = {42};
         fl::shuffle(v.begin(), v.end());
         FL_CHECK_EQ(v[0], 42);
     }
 
-    SUBCASE("shuffle contains all elements") {
+    FL_SUBCASE("shuffle contains all elements") {
         fl::vector<int> original = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
         fl::vector<int> v = original;
 
@@ -522,7 +522,7 @@ TEST_CASE("fl::shuffle") {
         FL_CHECK(fl::equal(v.begin(), v.end(), original.begin()));
     }
 
-    SUBCASE("shuffle with custom generator") {
+    FL_SUBCASE("shuffle with custom generator") {
         fl::vector<int> original = {1, 2, 3, 4, 5};
         fl::vector<int> v = original;
 

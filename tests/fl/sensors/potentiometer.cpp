@@ -4,13 +4,13 @@
 #include "fl/sensors/potentiometer.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/stl/function.h"
 #include "fl/stl/move.h"
 
 using namespace fl;
 
-TEST_CASE("Potentiometer - raw value reading") {
+FL_TEST_CASE("Potentiometer - raw value reading") {
     Potentiometer pot(0);
 
     // Inject test values directly
@@ -21,7 +21,7 @@ TEST_CASE("Potentiometer - raw value reading") {
     FL_CHECK(pot.raw() == 750);
 }
 
-TEST_CASE("Potentiometer - normalized conversion (full range)") {
+FL_TEST_CASE("Potentiometer - normalized conversion (full range)") {
     Potentiometer pot(0);
     // Default calibration: 0-1023 (10-bit ADC on stub platform)
 
@@ -38,7 +38,7 @@ TEST_CASE("Potentiometer - normalized conversion (full range)") {
     FL_CHECK(pot.normalized() == 1.0f);
 }
 
-TEST_CASE("Potentiometer - fractional16 conversion (full range)") {
+FL_TEST_CASE("Potentiometer - fractional16 conversion (full range)") {
     Potentiometer pot(0);
 
     // Test minimum
@@ -55,7 +55,7 @@ TEST_CASE("Potentiometer - fractional16 conversion (full range)") {
     FL_CHECK(pot.fractional16() == 65535);
 }
 
-TEST_CASE("Potentiometer - calibration range setRange()") {
+FL_TEST_CASE("Potentiometer - calibration range setRange()") {
     Potentiometer pot(0);
 
     // Set calibration range: 100-900 maps to [0.0, 1.0]
@@ -83,7 +83,7 @@ TEST_CASE("Potentiometer - calibration range setRange()") {
     FL_CHECK(pot.normalized() == 1.0f);
 }
 
-TEST_CASE("Potentiometer - calibrateMin/calibrateMax") {
+FL_TEST_CASE("Potentiometer - calibrateMin/calibrateMax") {
     Potentiometer pot(0);
 
     // Move to minimum position and calibrate
@@ -108,7 +108,7 @@ TEST_CASE("Potentiometer - calibrateMin/calibrateMax") {
     FL_CHECK(pot.normalized() == doctest::Approx(expected).epsilon(0.001));
 }
 
-TEST_CASE("Potentiometer - resetCalibration") {
+FL_TEST_CASE("Potentiometer - resetCalibration") {
     Potentiometer pot(0);
 
     // Set custom range
@@ -122,7 +122,7 @@ TEST_CASE("Potentiometer - resetCalibration") {
     FL_CHECK(pot.getRangeMax() == 1023);  // 10-bit ADC on stub platform
 }
 
-TEST_CASE("Potentiometer - fractional16 with calibration") {
+FL_TEST_CASE("Potentiometer - fractional16 with calibration") {
     Potentiometer pot(0);
     pot.setRange(100, 900);
 
@@ -140,7 +140,7 @@ TEST_CASE("Potentiometer - fractional16 with calibration") {
     FL_CHECK(pot.fractional16() == expected);
 }
 
-TEST_CASE("Potentiometer - hysteresis default calculation") {
+FL_TEST_CASE("Potentiometer - hysteresis default calculation") {
     Potentiometer pot(0);
 
     // Default hysteresis: 1% of range or 10, whichever is larger
@@ -149,14 +149,14 @@ TEST_CASE("Potentiometer - hysteresis default calculation") {
     FL_CHECK(pot.getHysteresis() == expected_hyst);
 }
 
-TEST_CASE("Potentiometer - setHysteresis") {
+FL_TEST_CASE("Potentiometer - setHysteresis") {
     Potentiometer pot(0);
 
     pot.setHysteresis(50);
     FL_CHECK(pot.getHysteresis() == 50);
 }
 
-TEST_CASE("Potentiometer - setHysteresisPercent") {
+FL_TEST_CASE("Potentiometer - setHysteresisPercent") {
     Potentiometer pot(0);
     pot.setRange(0, 1000);
 
@@ -169,7 +169,7 @@ TEST_CASE("Potentiometer - setHysteresisPercent") {
     FL_CHECK(pot.getHysteresis() == 100);
 }
 
-TEST_CASE("Potentiometer - onChange callback") {
+FL_TEST_CASE("Potentiometer - onChange callback") {
     Potentiometer pot(0);
     pot.setHysteresis(50);  // Require 50 ADC counts change
 
@@ -197,7 +197,7 @@ TEST_CASE("Potentiometer - onChange callback") {
     FL_CHECK(last_raw == 600);
 }
 
-TEST_CASE("Potentiometer - onChange normalized callback") {
+FL_TEST_CASE("Potentiometer - onChange normalized callback") {
     Potentiometer pot(0);
     pot.setHysteresis(50);
 
@@ -221,7 +221,7 @@ TEST_CASE("Potentiometer - onChange normalized callback") {
     FL_CHECK(last_normalized == doctest::Approx(800.0f / 1023.0f).epsilon(0.001));
 }
 
-TEST_CASE("Potentiometer - hasChanged flag") {
+FL_TEST_CASE("Potentiometer - hasChanged flag") {
     Potentiometer pot(0);
     pot.setHysteresis(50);
 
@@ -238,7 +238,7 @@ TEST_CASE("Potentiometer - hasChanged flag") {
     FL_CHECK(pot.hasChanged() == true);
 }
 
-TEST_CASE("Potentiometer - callback removal") {
+FL_TEST_CASE("Potentiometer - callback removal") {
     Potentiometer pot(0);
     pot.setHysteresis(50);
 
@@ -261,7 +261,7 @@ TEST_CASE("Potentiometer - callback removal") {
     FL_CHECK(callback_count == 1);  // Still 1, no increment
 }
 
-TEST_CASE("Potentiometer - clamping behavior") {
+FL_TEST_CASE("Potentiometer - clamping behavior") {
     Potentiometer pot(0);
     pot.setRange(100, 900);
 
@@ -277,7 +277,7 @@ TEST_CASE("Potentiometer - clamping behavior") {
     FL_CHECK(pot.fractional16() == 65535);
 }
 
-TEST_CASE("Potentiometer - edge case: invalid range") {
+FL_TEST_CASE("Potentiometer - edge case: invalid range") {
     Potentiometer pot(0);
 
     // Attempt to set invalid range (min >= max)
@@ -292,7 +292,7 @@ TEST_CASE("Potentiometer - edge case: invalid range") {
     FL_CHECK(pot.getRangeMax() == 1023);
 }
 
-TEST_CASE("Potentiometer - multiple callbacks") {
+FL_TEST_CASE("Potentiometer - multiple callbacks") {
     Potentiometer pot(0);
     pot.setHysteresis(50);
 

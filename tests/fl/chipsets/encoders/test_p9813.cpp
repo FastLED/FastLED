@@ -17,7 +17,7 @@
 #include "fl/stl/array.h"
 #include "fl/stl/iterator.h"
 #include "fl/stl/new.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/int.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/vector.h"
@@ -36,7 +36,7 @@ fl::array<u8, 3> makeBGRPixel(u8 r, u8 g, u8 b) {
     return {b, g, r};  // Wire order: BGR
 }
 
-TEST_CASE("P9813 - Zero LEDs (empty input)") {
+FL_TEST_CASE("P9813 - Zero LEDs (empty input)") {
     // Test encoding with no LEDs - should only have start and end boundaries
     fl::vector<fl::array<u8, 3>> pixels;
     fl::vector<u8> output;
@@ -59,7 +59,7 @@ TEST_CASE("P9813 - Zero LEDs (empty input)") {
     FL_CHECK_EQ(output[7], 0x00);
 }
 
-TEST_CASE("P9813 - Single LED (all black)") {
+FL_TEST_CASE("P9813 - Single LED (all black)") {
     // Test single black LED (RGB = 0,0,0)
     // All bits inverted for checksum: 0xFF for each channel
     // Checksum: (~0 & 0xC0) >> 2 | (~0 & 0xC0) >> 4 | (~0 & 0xC0) >> 6
@@ -94,7 +94,7 @@ TEST_CASE("P9813 - Single LED (all black)") {
     FL_CHECK_EQ(output[11], 0x00);
 }
 
-TEST_CASE("P9813 - Single LED (all white)") {
+FL_TEST_CASE("P9813 - Single LED (all white)") {
     // Test single white LED (RGB = 255,255,255)
     // All bits set for checksum: 0x00 after inversion
     // Checksum: (~255 & 0xC0) >> 2 | (~255 & 0xC0) >> 4 | (~255 & 0xC0) >> 6
@@ -116,7 +116,7 @@ TEST_CASE("P9813 - Single LED (all white)") {
     FL_CHECK_EQ(output[7], 0xFF);  // Red
 }
 
-TEST_CASE("P9813 - Single LED (pure red)") {
+FL_TEST_CASE("P9813 - Single LED (pure red)") {
     // Test pure red LED (RGB = 255,0,0)
     // R=255 (top 2 bits: 11): (~255 & 0xC0) >> 6 = 0x00
     // G=0   (top 2 bits: 00): (~0 & 0xC0) >> 4 = 0x0C
@@ -142,7 +142,7 @@ TEST_CASE("P9813 - Single LED (pure red)") {
     FL_CHECK_EQ(output[7], 0xFF);          // Red
 }
 
-TEST_CASE("P9813 - Single LED (pure green)") {
+FL_TEST_CASE("P9813 - Single LED (pure green)") {
     // Test pure green LED (RGB = 0,255,0)
     // R=0   (top 2 bits: 00): (~0 & 0xC0) >> 6 = 0x03
     // G=255 (top 2 bits: 11): (~255 & 0xC0) >> 4 = 0x00
@@ -168,7 +168,7 @@ TEST_CASE("P9813 - Single LED (pure green)") {
     FL_CHECK_EQ(output[7], 0x00);          // Red
 }
 
-TEST_CASE("P9813 - Single LED (pure blue)") {
+FL_TEST_CASE("P9813 - Single LED (pure blue)") {
     // Test pure blue LED (RGB = 0,0,255)
     // R=0   (top 2 bits: 00): (~0 & 0xC0) >> 6 = 0x03
     // G=0   (top 2 bits: 00): (~0 & 0xC0) >> 4 = 0x0C
@@ -194,9 +194,9 @@ TEST_CASE("P9813 - Single LED (pure blue)") {
     FL_CHECK_EQ(output[7], 0x00);          // Red
 }
 
-TEST_CASE("P9813 - Checksum boundary values") {
+FL_TEST_CASE("P9813 - Checksum boundary values") {
     // Test checksum calculation with various top 2-bit patterns
-    SUBCASE("RGB = 64,64,64 (top 2 bits all 01)") {
+    FL_SUBCASE("RGB = 64,64,64 (top 2 bits all 01)") {
         // R=64  (0b01000000, top 2: 01): (~64 & 0xC0) >> 6 = 0b10 >> 6 = 0x02
         // G=64  (0b01000000, top 2: 01): (~64 & 0xC0) >> 4 = 0b10 >> 4 = 0x08
         // B=64  (0b01000000, top 2: 01): (~64 & 0xC0) >> 2 = 0b10 >> 2 = 0x20
@@ -214,7 +214,7 @@ TEST_CASE("P9813 - Checksum boundary values") {
         FL_CHECK_EQ(output[4], expectedFlag);
     }
 
-    SUBCASE("RGB = 128,128,128 (top 2 bits all 10)") {
+    FL_SUBCASE("RGB = 128,128,128 (top 2 bits all 10)") {
         // R=128 (0b10000000, top 2: 10): (~128 & 0xC0) >> 6 = 0b01 >> 6 = 0x01
         // G=128 (0b10000000, top 2: 10): (~128 & 0xC0) >> 4 = 0b01 >> 4 = 0x04
         // B=128 (0b10000000, top 2: 10): (~128 & 0xC0) >> 2 = 0b01 >> 2 = 0x10
@@ -232,7 +232,7 @@ TEST_CASE("P9813 - Checksum boundary values") {
         FL_CHECK_EQ(output[4], expectedFlag);
     }
 
-    SUBCASE("RGB = 192,192,192 (top 2 bits all 11)") {
+    FL_SUBCASE("RGB = 192,192,192 (top 2 bits all 11)") {
         // R=192 (0b11000000, top 2: 11): (~192 & 0xC0) >> 6 = 0x00
         // G=192 (0b11000000, top 2: 11): (~192 & 0xC0) >> 4 = 0x00
         // B=192 (0b11000000, top 2: 11): (~192 & 0xC0) >> 2 = 0x00
@@ -251,7 +251,7 @@ TEST_CASE("P9813 - Checksum boundary values") {
     }
 }
 
-TEST_CASE("P9813 - Multiple LEDs (three different colors)") {
+FL_TEST_CASE("P9813 - Multiple LEDs (three different colors)") {
     // Test encoding 3 LEDs with different RGB values
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeBGRPixel(255, 0, 0));    // Red
@@ -295,7 +295,7 @@ TEST_CASE("P9813 - Multiple LEDs (three different colors)") {
     FL_CHECK_EQ(output[19], 0x00);
 }
 
-TEST_CASE("P9813 - Multiple LEDs (five LEDs with mixed values)") {
+FL_TEST_CASE("P9813 - Multiple LEDs (five LEDs with mixed values)") {
     // Test encoding 5 LEDs with various RGB combinations
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makeBGRPixel(255, 128, 64));   // Orange-ish
@@ -359,7 +359,7 @@ TEST_CASE("P9813 - Multiple LEDs (five LEDs with mixed values)") {
     }
 }
 
-TEST_CASE("P9813 - Flag byte helper function verification") {
+FL_TEST_CASE("P9813 - Flag byte helper function verification") {
     // Direct tests of p9813FlagByte() helper function
     FL_CHECK_EQ(p9813FlagByte(0, 0, 0), 0xFF);           // All black
     FL_CHECK_EQ(p9813FlagByte(255, 255, 255), 0xC0);    // All white
@@ -376,7 +376,7 @@ TEST_CASE("P9813 - Flag byte helper function verification") {
     FL_CHECK_EQ(p9813FlagByte(0, 0, 192), 0xCF);        // Blue with high bits set
 }
 
-TEST_CASE("P9813 - BGR wire order verification") {
+FL_TEST_CASE("P9813 - BGR wire order verification") {
     // Verify that pixel array is interpreted as BGR (not RGB)
     // Create a pixel where indices matter: B=100, G=150, R=200
     fl::array<u8, 3> pixel = {100, 150, 200};  // Wire order: BGR
@@ -397,7 +397,7 @@ TEST_CASE("P9813 - BGR wire order verification") {
     FL_CHECK_EQ(output[7], 200);  // Red (pixel[2])
 }
 
-TEST_CASE("P9813 - Output iterator compatibility") {
+FL_TEST_CASE("P9813 - Output iterator compatibility") {
     // Test that encoder works with back_inserter (already tested above)
     // and verify it's compatible with generic output iterators
     fl::vector<fl::array<u8, 3>> pixels;

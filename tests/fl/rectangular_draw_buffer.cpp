@@ -5,27 +5,27 @@
 #include "rgbw.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/rgbw.h"
 #include "fl/stl/span.h"
 
 
-TEST_CASE("Rectangular Buffer") {
+FL_TEST_CASE("Rectangular Buffer") {
     fl::RectangularDrawBuffer buffer;
 
-    SUBCASE("Empty buffer has no LEDs") {
+    FL_SUBCASE("Empty buffer has no LEDs") {
         FL_CHECK(buffer.getTotalBytes() == 0);
         FL_CHECK(buffer.getMaxBytesInStrip() == 0);
     }
 
-    SUBCASE("Add one strip of 10 RGB LEDs") {
+    FL_SUBCASE("Add one strip of 10 RGB LEDs") {
         buffer.queue(fl::DrawItem(1, 10, false));
 
         FL_CHECK(buffer.getMaxBytesInStrip() == 30);
         FL_CHECK(buffer.getTotalBytes() == 30);
     }
 
-    SUBCASE("Add two strips of 10 RGB LEDs") {
+    FL_SUBCASE("Add two strips of 10 RGB LEDs") {
         buffer.queue(fl::DrawItem(1, 10, false));
         buffer.queue(fl::DrawItem(2, 10, false));
 
@@ -33,7 +33,7 @@ TEST_CASE("Rectangular Buffer") {
         FL_CHECK(buffer.getTotalBytes() == 60);
     }
 
-    SUBCASE("Add one strip of 10 RGBW LEDs") {
+    FL_SUBCASE("Add one strip of 10 RGBW LEDs") {
         buffer.queue(fl::DrawItem(1, 10, true));
 
         uint32_t num_bytes = Rgbw::size_as_rgb(10) * 3;
@@ -42,7 +42,7 @@ TEST_CASE("Rectangular Buffer") {
         FL_CHECK(buffer.getTotalBytes() == num_bytes);
     }
 
-    SUBCASE("Add one strip of 10 RGBW LEDs and one strip of 10 RGB LEDs") {
+    FL_SUBCASE("Add one strip of 10 RGBW LEDs and one strip of 10 RGB LEDs") {
         buffer.queue(fl::DrawItem(1, 10, true));
         buffer.queue(fl::DrawItem(2, 10, false));
 
@@ -53,10 +53,10 @@ TEST_CASE("Rectangular Buffer") {
     }
 };
 
-TEST_CASE("Rectangular Buffer queue tests") {
+FL_TEST_CASE("Rectangular Buffer queue tests") {
     fl::RectangularDrawBuffer buffer;
 
-    SUBCASE("Queueing start and done") {
+    FL_SUBCASE("Queueing start and done") {
         FL_CHECK(buffer.mQueueState == fl::RectangularDrawBuffer::IDLE);
         buffer.onQueuingStart();
         FL_CHECK(buffer.mQueueState == fl::RectangularDrawBuffer::QUEUEING);
@@ -66,7 +66,7 @@ TEST_CASE("Rectangular Buffer queue tests") {
         FL_CHECK(buffer.mQueueState == fl::RectangularDrawBuffer::QUEUEING);
     }
 
-    SUBCASE("Queue and then draw") {
+    FL_SUBCASE("Queue and then draw") {
         buffer.onQueuingStart();
         buffer.queue(fl::DrawItem(1, 10, false));
         buffer.queue(fl::DrawItem(2, 10, false));
@@ -125,7 +125,7 @@ TEST_CASE("Rectangular Buffer queue tests") {
         }
     }
 
-    SUBCASE("Test that the order that the pins are added are preserved") {
+    FL_SUBCASE("Test that the order that the pins are added are preserved") {
         buffer.onQueuingStart();
         buffer.queue(fl::DrawItem(2, 10, false));
         buffer.queue(fl::DrawItem(1, 10, false));
@@ -154,7 +154,7 @@ TEST_CASE("Rectangular Buffer queue tests") {
         FL_CHECK((reinterpret_cast<uintptr_t>(slice1.data()) & 0x3) == 0);
     }
 
-    SUBCASE("Complex test where all strip data is confirmed to be inside the "
+    FL_SUBCASE("Complex test where all strip data is confirmed to be inside the "
             "buffer block") {
         buffer.onQueuingStart();
         buffer.queue(fl::DrawItem(1, 10, true));
@@ -194,7 +194,7 @@ TEST_CASE("Rectangular Buffer queue tests") {
         }
     }
 
-    SUBCASE("I2S test where we load 16 X 256 leds") {
+    FL_SUBCASE("I2S test where we load 16 X 256 leds") {
         buffer.onQueuingStart();
         for (int i = 0; i < 16; i++) {
             buffer.queue(fl::DrawItem(i, 256, false));

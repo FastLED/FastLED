@@ -12,7 +12,7 @@
 
 using namespace fl::third_party;
 
-TEST_CASE("BeatDetector - Basic initialization") {
+FL_TEST_CASE("BeatDetector - Basic initialization") {
     BeatDetectorConfig config;
     config.sample_rate_hz = 44100;
     config.frame_size = 512;
@@ -34,7 +34,7 @@ TEST_CASE("BeatDetector - Basic initialization") {
     FL_CHECK_GE(odf, 0.0f); // Should be non-negative
 }
 
-TEST_CASE("BeatDetector - EDM beat detection from MP3") {
+FL_TEST_CASE("BeatDetector - EDM beat detection from MP3") {
     // Set up filesystem to point to tests/data directory
     setTestFileSystemRoot("tests/data");
 
@@ -180,7 +180,7 @@ TEST_CASE("BeatDetector - EDM beat detection from MP3") {
     }
 }
 
-TEST_CASE("BeatDetector - Configuration options") {
+FL_TEST_CASE("BeatDetector - Configuration options") {
     BeatDetectorConfig config;
     config.sample_rate_hz = 44100;
     config.frame_size = 512;
@@ -188,25 +188,25 @@ TEST_CASE("BeatDetector - Configuration options") {
     config.fft_size = 512;
 
     // Test different ODF types
-    SUBCASE("Energy ODF") {
+    FL_SUBCASE("Energy ODF") {
         config.odf_type = OnsetDetectionFunction::Energy;
         BeatDetector detector(config);
         FL_CHECK_EQ(detector.getCurrentODF(), 0.0f);
     }
 
-    SUBCASE("SpectralFlux ODF") {
+    FL_SUBCASE("SpectralFlux ODF") {
         config.odf_type = OnsetDetectionFunction::SpectralFlux;
         BeatDetector detector(config);
         FL_CHECK_EQ(detector.getCurrentODF(), 0.0f);
     }
 
-    SUBCASE("SuperFlux ODF") {
+    FL_SUBCASE("SuperFlux ODF") {
         config.odf_type = OnsetDetectionFunction::SuperFlux;
         BeatDetector detector(config);
         FL_CHECK_EQ(detector.getCurrentODF(), 0.0f);
     }
 
-    SUBCASE("MultiBand ODF") {
+    FL_SUBCASE("MultiBand ODF") {
         config.odf_type = OnsetDetectionFunction::MultiBand;
         config.bands.clear();
         config.bands.push_back({60.0f, 160.0f, 1.5f});   // Bass
@@ -217,39 +217,39 @@ TEST_CASE("BeatDetector - Configuration options") {
     }
 }
 
-TEST_CASE("BeatDetector - Peak picking modes") {
+FL_TEST_CASE("BeatDetector - Peak picking modes") {
     BeatDetectorConfig config;
     config.sample_rate_hz = 44100;
     config.frame_size = 512;
     config.hop_size = 256;
 
-    SUBCASE("LocalMaximum mode") {
+    FL_SUBCASE("LocalMaximum mode") {
         config.peak_mode = PeakPickingMode::LocalMaximum;
         BeatDetector detector(config);
         // Just verify it initializes
         FL_CHECK_EQ(detector.getCurrentODF(), 0.0f);
     }
 
-    SUBCASE("AdaptiveThreshold mode") {
+    FL_SUBCASE("AdaptiveThreshold mode") {
         config.peak_mode = PeakPickingMode::AdaptiveThreshold;
         BeatDetector detector(config);
         FL_CHECK_EQ(detector.getCurrentODF(), 0.0f);
     }
 
-    SUBCASE("SuperFluxPeaks mode") {
+    FL_SUBCASE("SuperFluxPeaks mode") {
         config.peak_mode = PeakPickingMode::SuperFluxPeaks;
         BeatDetector detector(config);
         FL_CHECK_EQ(detector.getCurrentODF(), 0.0f);
     }
 }
 
-TEST_CASE("BeatDetector - Tempo tracking modes") {
+FL_TEST_CASE("BeatDetector - Tempo tracking modes") {
     BeatDetectorConfig config;
     config.sample_rate_hz = 44100;
     config.frame_size = 512;
     config.hop_size = 256;
 
-    SUBCASE("No tempo tracking") {
+    FL_SUBCASE("No tempo tracking") {
         config.tempo_tracker = TempoTrackerType::None;
         BeatDetector detector(config);
         TempoEstimate tempo = detector.getTempo();
@@ -257,7 +257,7 @@ TEST_CASE("BeatDetector - Tempo tracking modes") {
         FL_CHECK_GE(tempo.bpm, 0.0f);
     }
 
-    SUBCASE("CombFilter tempo tracking") {
+    FL_SUBCASE("CombFilter tempo tracking") {
         config.tempo_tracker = TempoTrackerType::CombFilter;
         BeatDetector detector(config);
         TempoEstimate tempo = detector.getTempo();
@@ -265,7 +265,7 @@ TEST_CASE("BeatDetector - Tempo tracking modes") {
         FL_CHECK_GE(tempo.bpm, 0.0f);
     }
 
-    SUBCASE("Autocorrelation tempo tracking") {
+    FL_SUBCASE("Autocorrelation tempo tracking") {
         config.tempo_tracker = TempoTrackerType::Autocorrelation;
         BeatDetector detector(config);
         TempoEstimate tempo = detector.getTempo();
@@ -274,7 +274,7 @@ TEST_CASE("BeatDetector - Tempo tracking modes") {
     }
 }
 
-TEST_CASE("BeatDetector - Callback mechanisms") {
+FL_TEST_CASE("BeatDetector - Callback mechanisms") {
     BeatDetectorConfig config;
     config.sample_rate_hz = 44100;
     config.frame_size = 512;

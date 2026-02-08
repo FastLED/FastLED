@@ -1,4 +1,4 @@
-#include "doctest.h"
+#include "test.h"
 #include "fl/chipsets/encoders/sm16716.h"
 #include "fl/stl/array.h"
 #include "fl/stl/iterator.h"
@@ -43,7 +43,7 @@ using namespace test_sm16716;
 // Frame Structure Tests
 // ============================================================================
 
-TEST_CASE("encodeSM16716() - empty range (0 LEDs)") {
+FL_TEST_CASE("encodeSM16716() - empty range (0 LEDs)") {
     fl::vector<fl::array<fl::u8, 3>> leds;
     fl::vector<fl::u8> output;
 
@@ -56,7 +56,7 @@ TEST_CASE("encodeSM16716() - empty range (0 LEDs)") {
     }
 }
 
-TEST_CASE("encodeSM16716() - single LED") {
+FL_TEST_CASE("encodeSM16716() - single LED") {
     fl::vector<fl::array<fl::u8, 3>> leds = {
         {255, 128, 64}  // R=255, G=128, B=64
     };
@@ -74,7 +74,7 @@ TEST_CASE("encodeSM16716() - single LED") {
     test_sm16716::verifyTerminationHeader(output, 1);
 }
 
-TEST_CASE("encodeSM16716() - multiple LEDs (3 LEDs)") {
+FL_TEST_CASE("encodeSM16716() - multiple LEDs (3 LEDs)") {
     fl::vector<fl::array<fl::u8, 3>> leds = {
         {255, 0, 0},    // Red
         {0, 255, 0},    // Green
@@ -100,22 +100,22 @@ TEST_CASE("encodeSM16716() - multiple LEDs (3 LEDs)") {
 // Termination Header Tests
 // ============================================================================
 
-TEST_CASE("encodeSM16716() - termination header always 7 bytes") {
-    SUBCASE("1 LED") {
+FL_TEST_CASE("encodeSM16716() - termination header always 7 bytes") {
+    FL_SUBCASE("1 LED") {
         fl::vector<fl::array<fl::u8, 3>> leds = {{0, 0, 0}};
         fl::vector<fl::u8> output;
         fl::encodeSM16716(leds.begin(), leds.end(), fl::back_inserter(output));
         test_sm16716::verifyTerminationHeader(output, 1);
     }
 
-    SUBCASE("10 LEDs") {
+    FL_SUBCASE("10 LEDs") {
         fl::vector<fl::array<fl::u8, 3>> leds(10, {0, 0, 0});
         fl::vector<fl::u8> output;
         fl::encodeSM16716(leds.begin(), leds.end(), fl::back_inserter(output));
         test_sm16716::verifyTerminationHeader(output, 10);
     }
 
-    SUBCASE("40 LEDs") {
+    FL_SUBCASE("40 LEDs") {
         // Reduced from 100 to 40 for performance (still provides good stress test coverage)
         fl::vector<fl::array<fl::u8, 3>> leds(40, {0, 0, 0});
         fl::vector<fl::u8> output;
@@ -128,7 +128,7 @@ TEST_CASE("encodeSM16716() - termination header always 7 bytes") {
 // Color Order Tests
 // ============================================================================
 
-TEST_CASE("encodeSM16716() - color order RGB") {
+FL_TEST_CASE("encodeSM16716() - color order RGB") {
     fl::vector<fl::array<fl::u8, 3>> leds = {
         {0xAA, 0xBB, 0xCC}  // R=0xAA, G=0xBB, B=0xCC
     };
@@ -142,22 +142,22 @@ TEST_CASE("encodeSM16716() - color order RGB") {
     FL_CHECK(output[2] == 0xCC);  // Blue third
 }
 
-TEST_CASE("encodeSM16716() - pure colors") {
-    SUBCASE("Pure red") {
+FL_TEST_CASE("encodeSM16716() - pure colors") {
+    FL_SUBCASE("Pure red") {
         fl::vector<fl::array<fl::u8, 3>> leds = {{255, 0, 0}};
         fl::vector<fl::u8> output;
         fl::encodeSM16716(leds.begin(), leds.end(), fl::back_inserter(output));
         test_sm16716::verifyLEDFrame(output, 0, 255, 0, 0);
     }
 
-    SUBCASE("Pure green") {
+    FL_SUBCASE("Pure green") {
         fl::vector<fl::array<fl::u8, 3>> leds = {{0, 255, 0}};
         fl::vector<fl::u8> output;
         fl::encodeSM16716(leds.begin(), leds.end(), fl::back_inserter(output));
         test_sm16716::verifyLEDFrame(output, 0, 0, 255, 0);
     }
 
-    SUBCASE("Pure blue") {
+    FL_SUBCASE("Pure blue") {
         fl::vector<fl::array<fl::u8, 3>> leds = {{0, 0, 255}};
         fl::vector<fl::u8> output;
         fl::encodeSM16716(leds.begin(), leds.end(), fl::back_inserter(output));
@@ -169,7 +169,7 @@ TEST_CASE("encodeSM16716() - pure colors") {
 // Edge Case Tests
 // ============================================================================
 
-TEST_CASE("encodeSM16716() - black (0,0,0)") {
+FL_TEST_CASE("encodeSM16716() - black (0,0,0)") {
     fl::vector<fl::array<fl::u8, 3>> leds = {{0, 0, 0}};
     fl::vector<fl::u8> output;
 
@@ -179,7 +179,7 @@ TEST_CASE("encodeSM16716() - black (0,0,0)") {
     test_sm16716::verifyTerminationHeader(output, 1);
 }
 
-TEST_CASE("encodeSM16716() - white (255,255,255)") {
+FL_TEST_CASE("encodeSM16716() - white (255,255,255)") {
     fl::vector<fl::array<fl::u8, 3>> leds = {{255, 255, 255}};
     fl::vector<fl::u8> output;
 
@@ -189,7 +189,7 @@ TEST_CASE("encodeSM16716() - white (255,255,255)") {
     test_sm16716::verifyTerminationHeader(output, 1);
 }
 
-TEST_CASE("encodeSM16716() - mixed values") {
+FL_TEST_CASE("encodeSM16716() - mixed values") {
     fl::vector<fl::array<fl::u8, 3>> leds = {
         {0, 0, 0},          // Black
         {255, 255, 255},    // White
@@ -217,36 +217,36 @@ TEST_CASE("encodeSM16716() - mixed values") {
 // Boundary Tests
 // ============================================================================
 
-TEST_CASE("encodeSM16716() - boundary LED counts") {
-    SUBCASE("1 LED") {
+FL_TEST_CASE("encodeSM16716() - boundary LED counts") {
+    FL_SUBCASE("1 LED") {
         fl::vector<fl::array<fl::u8, 3>> leds(1, {0x11, 0x22, 0x33});
         fl::vector<fl::u8> output;
         fl::encodeSM16716(leds.begin(), leds.end(), fl::back_inserter(output));
         FL_CHECK(output.size() == 3 + 7);  // 3 bytes LED + 7 bytes header
     }
 
-    SUBCASE("31 LEDs") {
+    FL_SUBCASE("31 LEDs") {
         fl::vector<fl::array<fl::u8, 3>> leds(31, {0x11, 0x22, 0x33});
         fl::vector<fl::u8> output;
         fl::encodeSM16716(leds.begin(), leds.end(), fl::back_inserter(output));
         FL_CHECK(output.size() == (31 * 3) + 7);
     }
 
-    SUBCASE("32 LEDs") {
+    FL_SUBCASE("32 LEDs") {
         fl::vector<fl::array<fl::u8, 3>> leds(32, {0x11, 0x22, 0x33});
         fl::vector<fl::u8> output;
         fl::encodeSM16716(leds.begin(), leds.end(), fl::back_inserter(output));
         FL_CHECK(output.size() == (32 * 3) + 7);
     }
 
-    SUBCASE("64 LEDs") {
+    FL_SUBCASE("64 LEDs") {
         fl::vector<fl::array<fl::u8, 3>> leds(64, {0x11, 0x22, 0x33});
         fl::vector<fl::u8> output;
         fl::encodeSM16716(leds.begin(), leds.end(), fl::back_inserter(output));
         FL_CHECK(output.size() == (64 * 3) + 7);
     }
 
-    SUBCASE("40 LEDs") {
+    FL_SUBCASE("40 LEDs") {
         // Reduced from 100 to 40 for performance (still provides good stress test coverage)
         fl::vector<fl::array<fl::u8, 3>> leds(40, {0x11, 0x22, 0x33});
         fl::vector<fl::u8> output;
@@ -259,22 +259,22 @@ TEST_CASE("encodeSM16716() - boundary LED counts") {
 // Iterator Compatibility Tests
 // ============================================================================
 
-TEST_CASE("encodeSM16716() - works with different iterator types") {
-    SUBCASE("vector iterators") {
+FL_TEST_CASE("encodeSM16716() - works with different iterator types") {
+    FL_SUBCASE("vector iterators") {
         fl::vector<fl::array<fl::u8, 3>> leds = {{255, 128, 64}};
         fl::vector<fl::u8> output;
         fl::encodeSM16716(leds.begin(), leds.end(), fl::back_inserter(output));
         FL_CHECK(output.size() == 10);
     }
 
-    SUBCASE("array iterators") {
+    FL_SUBCASE("array iterators") {
         fl::array<fl::array<fl::u8, 3>, 2> leds = {{{255, 0, 0}, {0, 255, 0}}};
         fl::vector<fl::u8> output;
         fl::encodeSM16716(leds.begin(), leds.end(), fl::back_inserter(output));
         FL_CHECK(output.size() == 13);  // 2 LEDs * 3 + 7
     }
 
-    SUBCASE("pointer iterators") {
+    FL_SUBCASE("pointer iterators") {
         fl::array<fl::u8, 3> leds[] = {{255, 128, 64}, {64, 128, 255}};
         fl::vector<fl::u8> output;
         fl::encodeSM16716(leds, leds + 2, fl::back_inserter(output));
@@ -286,7 +286,7 @@ TEST_CASE("encodeSM16716() - works with different iterator types") {
 // Protocol Specification Tests
 // ============================================================================
 
-TEST_CASE("encodeSM16716() - protocol structure") {
+FL_TEST_CASE("encodeSM16716() - protocol structure") {
     fl::vector<fl::array<fl::u8, 3>> leds = {{0xAA, 0xBB, 0xCC}};
     fl::vector<fl::u8> output;
 
@@ -314,7 +314,7 @@ TEST_CASE("encodeSM16716() - protocol structure") {
     FL_CHECK(output[9] == 0x00);
 }
 
-TEST_CASE("encodeSM16716() - 50 zero bits termination") {
+FL_TEST_CASE("encodeSM16716() - 50 zero bits termination") {
     // Verify that the termination header is exactly 50 zero bits
     // which equals 7 full bytes (56 bits), but SM16716 spec says 50 bits
     // The encoder outputs 7 bytes for simplicity, which is > 50 bits

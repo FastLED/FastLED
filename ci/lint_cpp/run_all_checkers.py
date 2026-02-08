@@ -48,6 +48,7 @@ from ci.lint_cpp.stdint_type_checker import (
 )
 from ci.lint_cpp.test_path_structure_checker import TestPathStructureChecker
 from ci.lint_cpp.test_unity_build import check as check_unity_build
+from ci.lint_cpp.unit_test_checker import UnitTestChecker
 from ci.lint_cpp.using_namespace_fl_in_examples_checker import (
     UsingNamespaceFlInExamplesChecker,
 )
@@ -228,6 +229,7 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
         ),
         StdNamespaceChecker(),
         TestPathStructureChecker(),
+        UnitTestChecker(),
     ]
 
     return checkers_by_scope

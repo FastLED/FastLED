@@ -5,12 +5,12 @@
 
 #include "fl/channels/wave8.h"
 #include "fl/stl/cstring.h"
-#include "doctest.h"
+#include "test.h"
 #include "fl/chipsets/led_timing.h"
 
 using namespace fl;
 
-TEST_CASE("buildWave8ExpansionLUT") {
+FL_TEST_CASE("buildWave8ExpansionLUT") {
     // Create timing where bit0 is at 1/4 time, bit1 is at 3/4 time
     ChipsetTiming timing;
     timing.T1 = 250; // bit0 goes LOW at 1/4 of period (250/1000)
@@ -45,7 +45,7 @@ TEST_CASE("buildWave8ExpansionLUT") {
     FL_REQUIRE(lut.lut[nibble][3].data == 0xC0);
 }
 
-TEST_CASE("convertToWave8Bit") {
+FL_TEST_CASE("convertToWave8Bit") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     // This creates simple patterns for testing transpose
     ChipsetTiming timing;
@@ -75,7 +75,7 @@ TEST_CASE("convertToWave8Bit") {
     }
 }
 
-TEST_CASE("wave8Transpose_4_all_ones_and_zeros") {
+FL_TEST_CASE("wave8Transpose_4_all_ones_and_zeros") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -107,7 +107,7 @@ TEST_CASE("wave8Transpose_4_all_ones_and_zeros") {
     }
 }
 
-TEST_CASE("wave8Transpose_4_all_ones") {
+FL_TEST_CASE("wave8Transpose_4_all_ones") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -130,7 +130,7 @@ TEST_CASE("wave8Transpose_4_all_ones") {
     }
 }
 
-TEST_CASE("wave8Transpose_4_all_zeros") {
+FL_TEST_CASE("wave8Transpose_4_all_zeros") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -153,7 +153,7 @@ TEST_CASE("wave8Transpose_4_all_zeros") {
     }
 }
 
-TEST_CASE("wave8Transpose_4_distinct_patterns") {
+FL_TEST_CASE("wave8Transpose_4_distinct_patterns") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -190,7 +190,7 @@ TEST_CASE("wave8Transpose_4_distinct_patterns") {
     }
 }
 
-TEST_CASE("wave8Transpose_4_incremental_verification") {
+FL_TEST_CASE("wave8Transpose_4_incremental_verification") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -234,7 +234,7 @@ TEST_CASE("wave8Transpose_4_incremental_verification") {
     }
 }
 
-TEST_CASE("wave8Untranspose_2_simple_pattern") {
+FL_TEST_CASE("wave8Untranspose_2_simple_pattern") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -266,7 +266,7 @@ TEST_CASE("wave8Untranspose_2_simple_pattern") {
     }
 }
 
-TEST_CASE("wave8Untranspose_2_complex_pattern") {
+FL_TEST_CASE("wave8Untranspose_2_complex_pattern") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -324,7 +324,7 @@ TEST_CASE("wave8Untranspose_2_complex_pattern") {
     FL_REQUIRE(untransposed[15] == 0xFF);
 }
 
-TEST_CASE("wave8Untranspose_4_simple_pattern") {
+FL_TEST_CASE("wave8Untranspose_4_simple_pattern") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -350,7 +350,7 @@ TEST_CASE("wave8Untranspose_4_simple_pattern") {
     }
 }
 
-TEST_CASE("wave8Untranspose_4_alternating_pattern") {
+FL_TEST_CASE("wave8Untranspose_4_alternating_pattern") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -391,7 +391,7 @@ TEST_CASE("wave8Untranspose_4_alternating_pattern") {
     }
 }
 
-TEST_CASE("wave8Untranspose_4_distinct_patterns") {
+FL_TEST_CASE("wave8Untranspose_4_distinct_patterns") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -453,7 +453,7 @@ TEST_CASE("wave8Untranspose_4_distinct_patterns") {
     }
 }
 
-TEST_CASE("wave8Transpose_8_all_ones") {
+FL_TEST_CASE("wave8Transpose_8_all_ones") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -476,7 +476,7 @@ TEST_CASE("wave8Transpose_8_all_ones") {
     }
 }
 
-TEST_CASE("wave8Transpose_8_all_zeros") {
+FL_TEST_CASE("wave8Transpose_8_all_zeros") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -499,7 +499,7 @@ TEST_CASE("wave8Transpose_8_all_zeros") {
     }
 }
 
-TEST_CASE("wave8Transpose_8_alternating_pattern") {
+FL_TEST_CASE("wave8Transpose_8_alternating_pattern") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -530,7 +530,7 @@ TEST_CASE("wave8Transpose_8_alternating_pattern") {
     }
 }
 
-TEST_CASE("wave8Transpose_8_distinct_patterns") {
+FL_TEST_CASE("wave8Transpose_8_distinct_patterns") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -560,7 +560,7 @@ TEST_CASE("wave8Transpose_8_distinct_patterns") {
     }
 }
 
-TEST_CASE("wave8Untranspose_8_all_ones") {
+FL_TEST_CASE("wave8Untranspose_8_all_ones") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -586,7 +586,7 @@ TEST_CASE("wave8Untranspose_8_all_ones") {
     }
 }
 
-TEST_CASE("wave8Untranspose_8_alternating_pattern") {
+FL_TEST_CASE("wave8Untranspose_8_alternating_pattern") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -615,7 +615,7 @@ TEST_CASE("wave8Untranspose_8_alternating_pattern") {
     }
 }
 
-TEST_CASE("wave8Untranspose_8_distinct_patterns") {
+FL_TEST_CASE("wave8Untranspose_8_distinct_patterns") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -656,7 +656,7 @@ TEST_CASE("wave8Untranspose_8_distinct_patterns") {
     }
 }
 
-TEST_CASE("wave8Transpose_16_all_ones") {
+FL_TEST_CASE("wave8Transpose_16_all_ones") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -680,7 +680,7 @@ TEST_CASE("wave8Transpose_16_all_ones") {
     }
 }
 
-TEST_CASE("wave8Transpose_16_all_zeros") {
+FL_TEST_CASE("wave8Transpose_16_all_zeros") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -704,7 +704,7 @@ TEST_CASE("wave8Transpose_16_all_zeros") {
     }
 }
 
-TEST_CASE("wave8Transpose_16_alternating_pattern") {
+FL_TEST_CASE("wave8Transpose_16_alternating_pattern") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -731,7 +731,7 @@ TEST_CASE("wave8Transpose_16_alternating_pattern") {
     }
 }
 
-TEST_CASE("wave8Transpose_16_distinct_patterns") {
+FL_TEST_CASE("wave8Transpose_16_distinct_patterns") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -759,7 +759,7 @@ TEST_CASE("wave8Transpose_16_distinct_patterns") {
     FL_REQUIRE(output[113] == 0x01); // Low byte (lanes 0-7)
 }
 
-TEST_CASE("wave8Untranspose_16_all_ones") {
+FL_TEST_CASE("wave8Untranspose_16_all_ones") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -786,7 +786,7 @@ TEST_CASE("wave8Untranspose_16_all_ones") {
     }
 }
 
-TEST_CASE("wave8Untranspose_16_alternating_pattern") {
+FL_TEST_CASE("wave8Untranspose_16_alternating_pattern") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
@@ -816,7 +816,7 @@ TEST_CASE("wave8Untranspose_16_alternating_pattern") {
     }
 }
 
-TEST_CASE("wave8Untranspose_16_distinct_patterns") {
+FL_TEST_CASE("wave8Untranspose_16_distinct_patterns") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
     timing.T1 = 1;   // bit0: ~0 HIGH pulses (rounds to 0)
