@@ -34,6 +34,19 @@ namespace detail {
 static_assert(FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES >= 12 * 1024,
               "FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES too small (minimum 12 KB)");
 
+// PSRAM ring buffer memory cap (used when PSRAM is available at runtime)
+// Much larger than internal SRAM cap since PSRAM provides ~8MB on ESP32-P4
+// Override via build flags: -DFASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM=<bytes>
+#ifndef FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM
+  #if defined(FL_IS_ESP_32P4)
+    // ESP32-P4: 2 MB (has ~8MB PSRAM, generous allocation for 5+ channels)
+    #define FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM (2 * 1024 * 1024)
+  #else
+    // Other platforms: 1 MB (conservative default)
+    #define FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM (1 * 1024 * 1024)
+  #endif
+#endif
+
 //=============================================================================
 // Buffer Size Calculator - Unified DMA Buffer Size Calculations
 //=============================================================================
@@ -155,7 +168,8 @@ struct ParlioBufferCalculator {
     /// - DMA bytes per buffer: 3000 × 8 = 24000 bytes
     /// - Reset padding: 280 bytes (35 Wave8Bytes × 8 bytes)
     /// - With safety margin: 24000 + 280 + 128 = 24408 bytes
-    size_t calculateRingBufferCapacity(size_t maxLedsPerChannel, u32 reset_us, size_t numRingBuffers = 3) const {
+    size_t calculateRingBufferCapacity(size_t maxLedsPerChannel, u32 reset_us, size_t numRingBuffers = 3,
+                                       size_t totalCapBytes = FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES) const {
         // Step 1: Calculate LEDs per buffer (divide total LEDs by number of buffers)
         size_t ledsPerBuffer = (maxLedsPerChannel + numRingBuffers - 1) / numRingBuffers;
 
@@ -168,9 +182,10 @@ struct ParlioBufferCalculator {
         //         and add reset padding bytes (for last buffer in stream)
         size_t dmaBufferCapacity = dmaBufferSize(inputBytesPerBuffer, reset_us);
 
-        // Step 4: Apply total ring buffer memory cap (prevent OOM on C6/S3)
+        // Step 4: Apply total ring buffer memory cap (prevent OOM)
         // When cap exceeded, system uses streaming mode (multiple buffer iterations)
-        constexpr size_t TOTAL_CAP = FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES;
+        // totalCapBytes is runtime-configurable: larger for PSRAM, smaller for internal SRAM
+        size_t TOTAL_CAP = totalCapBytes;
         size_t perBufferCap = TOTAL_CAP / numRingBuffers;
 
         if (dmaBufferCapacity > perBufferCap) {

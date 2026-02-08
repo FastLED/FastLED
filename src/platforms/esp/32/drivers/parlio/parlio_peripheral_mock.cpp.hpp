@@ -136,6 +136,7 @@ public:
     //=========================================================================
 
     bool initialize(const ParlioPeripheralConfig& config) override;
+    bool deinitialize() override;
     bool enable() override;
     bool disable() override;
     bool transmit(const u8* buffer, size_t bit_count, u16 idle_value) override;
@@ -295,6 +296,12 @@ bool ParlioPeripheralMockImpl::initialize(const ParlioPeripheralConfig& config) 
     mConfig = config;
     mInitialized = true;
 
+    return true;
+}
+
+bool ParlioPeripheralMockImpl::deinitialize() {
+    mInitialized = false;
+    mEnabled = false;
     return true;
 }
 

@@ -609,7 +609,7 @@ FL_TEST_CASE("FastLED.add nullptr is safe") {
 
 } // namespace channel_add_remove_test
 
-TEST_CASE("Channel::applyConfig updates reconfigurable fields") {
+FL_TEST_CASE("Channel::applyConfig updates reconfigurable fields") {
     // Create initial channel with known settings
     static CRGB leds1[8];
     fl::fill_solid(leds1, 8, CRGB::Red);
@@ -622,16 +622,16 @@ TEST_CASE("Channel::applyConfig updates reconfigurable fields") {
 
     fl::ChannelConfig config1(5, timing, fl::span<CRGB>(leds1, 8), GRB, opts);
     auto channel = fl::Channel::create(config1);
-    REQUIRE(channel != nullptr);
+    FL_REQUIRE(channel != nullptr);
 
     fl::i32 originalId = channel->id();
     int originalPin = channel->getPin();
 
     // Verify initial state
-    CHECK(channel->getRgbOrder() == GRB);
-    CHECK(channel->size() == 8);
-    CHECK(channel->getCorrection() == CRGB(TypicalSMD5050));
-    CHECK(channel->getDither() == BINARY_DITHER);
+    FL_CHECK(channel->getRgbOrder() == GRB);
+    FL_CHECK(channel->size() == 8);
+    FL_CHECK(channel->getCorrection() == CRGB(TypicalSMD5050));
+    FL_CHECK(channel->getDither() == BINARY_DITHER);
 
     // Build new config with different values
     static CRGB leds2[16];
@@ -649,20 +649,20 @@ TEST_CASE("Channel::applyConfig updates reconfigurable fields") {
     channel->applyConfig(config2);
 
     // Verify reconfigurable fields changed
-    CHECK(channel->getRgbOrder() == BGR);
-    CHECK(channel->size() == 16);
-    CHECK(channel->leds() == leds2);
-    CHECK(channel->getCorrection() == CRGB(Typical8mmPixel));
-    CHECK(channel->getTemperature() == CRGB(200, 180, 160));
-    CHECK(channel->getDither() == DISABLE_DITHER);
-    CHECK(channel->getRgbw().active());
+    FL_CHECK(channel->getRgbOrder() == BGR);
+    FL_CHECK(channel->size() == 16);
+    FL_CHECK(channel->leds() == leds2);
+    FL_CHECK(channel->getCorrection() == CRGB(Typical8mmPixel));
+    FL_CHECK(channel->getTemperature() == CRGB(200, 180, 160));
+    FL_CHECK(channel->getDither() == DISABLE_DITHER);
+    FL_CHECK(channel->getRgbw().active());
 
     // Verify structural members are unchanged
-    CHECK(channel->id() == originalId);
-    CHECK(channel->getPin() == originalPin);
+    FL_CHECK(channel->id() == originalId);
+    FL_CHECK(channel->getPin() == originalPin);
 }
 
-TEST_CASE("Channel LED span tracks underlying array correctly") {
+FL_TEST_CASE("Channel LED span tracks underlying array correctly") {
     // Channel stores a span (non-owning view) into an LED array.
     // Verify that:
     //  1) Writes through channel->leds() modify the original array
@@ -673,13 +673,13 @@ TEST_CASE("Channel LED span tracks underlying array correctly") {
     auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
     fl::ChannelConfig config1(5, timing, fl::span<CRGB>(leds1, 4), GRB);
     auto channel = fl::Channel::create(config1);
-    REQUIRE(channel != nullptr);
+    FL_REQUIRE(channel != nullptr);
 
     // Write through channel — should modify leds1 directly (span is a view)
     channel->leds()[0] = CRGB::Red;
     channel->leds()[1] = CRGB::Green;
-    CHECK(leds1[0] == CRGB::Red);
-    CHECK(leds1[1] == CRGB::Green);
+    FL_CHECK(leds1[0] == CRGB::Red);
+    FL_CHECK(leds1[1] == CRGB::Green);
 
     // Switch to a different LED array via applyConfig
     static CRGB leds2[6] = {CRGB::Black, CRGB::Black, CRGB::Black,
@@ -687,13 +687,13 @@ TEST_CASE("Channel LED span tracks underlying array correctly") {
     fl::ChannelConfig config2(5, timing, fl::span<CRGB>(leds2, 6), GRB);
     channel->applyConfig(config2);
 
-    CHECK(channel->size() == 6);
-    CHECK(channel->leds() == leds2);
+    FL_CHECK(channel->size() == 6);
+    FL_CHECK(channel->leds() == leds2);
 
     // Writes now go to leds2, not leds1
     channel->leds()[0] = CRGB::Blue;
-    CHECK(leds2[0] == CRGB::Blue);
+    FL_CHECK(leds2[0] == CRGB::Blue);
     // leds1 retains its last state — channel no longer points to it
-    CHECK(leds1[0] == CRGB::Red);
-    CHECK(leds1[1] == CRGB::Green);
+    FL_CHECK(leds1[0] == CRGB::Red);
+    FL_CHECK(leds1[1] == CRGB::Green);
 }

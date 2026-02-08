@@ -30,20 +30,6 @@
 #include "fl/stl/assert.h"
 #include "fl/stl/time.h"
 
-#ifdef FL_IS_ESP32
-#include "platforms/esp/32/core/fastpin_esp32.h" // For _FL_VALID_PIN_MASK
-#include "platforms/memory_barrier.h" // For FL_MEMORY_BARRIER
-#else
-// Stub platform definitions
-#ifndef FL_MEMORY_BARRIER
-#define FL_MEMORY_BARRIER do {} while(0)
-#endif
-#ifndef _FL_VALID_PIN_MASK
-#define _FL_VALID_PIN_MASK 0xFFFFFFFFFFFFFFFFULL  // All pins valid on stub
-#endif
-#endif
-
-
 #ifdef FASTLED_STUB_IMPL
 #include "parlio_peripheral_mock.h"
 #else
@@ -115,38 +101,6 @@ namespace detail {
 
 // Worker function is now called directly from txDoneCallback (no timer needed)
 // This eliminates the 50µs periodic timer overhead
-
-//=============================================================================
-// Pin Validation Using FastLED's _FL_PIN_VALID System
-//=============================================================================
-// PARLIO no longer uses default pins. Instead, pins are extracted from
-// ChannelData objects and validated using the FastLED pin validation system
-// defined in platforms/esp/32/core/fastpin_esp32.h.
-//
-// The _FL_PIN_VALID macro checks against:
-// 1. SOC_GPIO_VALID_OUTPUT_GPIO_MASK (ESP-IDF's valid output pins)
-// 2. FASTLED_UNUSABLE_PIN_MASK (platform-specific forbidden pins)
-//
-// Pins are provided by user via FastLED.addLeds<WS2812, PIN>() API.
-//=============================================================================
-
-// Import pin validation mask from fastpin_esp32.h
-// This is defined per-platform in src/platforms/esp/32/core/fastpin_esp32.h
-#ifndef _FL_VALID_PIN_MASK
-#error "Pin validation system not available - check fastpin_esp32.h is included"
-#endif
-
-/// @brief Validate a GPIO pin for PARLIO use
-/// @param pin GPIO pin number to validate
-/// @return true if pin is valid for PARLIO output, false otherwise
-static inline bool isParlioPinValid(int pin) {
-    if (pin < 0 || pin >= 64) {
-        return false;
-    }
-    // Use FastLED's pin validation system
-    uint64_t pin_mask = (1ULL << pin);
-    return (_FL_VALID_PIN_MASK & pin_mask) != 0;
-}
 
 //=============================================================================
 // Buffer Population Helper - Shared Logic for DMA Buffer Byte Count Calculation
@@ -1251,18 +1205,11 @@ bool ParlioEngine::initialize(size_t dataWidth,
         mIsrContext = fl::make_unique<ParlioIsrContext>();
     }
 
-    // Validate pins
+    // Validate pin count matches data width
     if (pins.size() != dataWidth) {
         FL_LOG_PARLIO("PARLIO: Pin configuration error - expected "
                 << dataWidth << " pins, got " << pins.size());
         return false;
-    }
-
-    for (size_t i = 0; i < pins.size(); i++) {
-        if (!isParlioPinValid(pins[i])) {
-            FL_LOG_PARLIO("PARLIO: Invalid pin " << pins[i] << " for channel " << i);
-            return false;
-        }
     }
 
     // Build wave8 expansion LUT from timing configuration
@@ -1278,6 +1225,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
 
     // Configure peripheral (constructor handles -1 filling for unused pins)
+    // prefer_psram defaults true: allocator tries PSRAM+DMA first, falls back to internal SRAM
     // DIAGNOSTIC: Allow compile-time override to LSB mode for waveform inspection
     #ifndef PARLIO_FORCE_LSB_MODE
         #define PARLIO_FORCE_LSB_MODE 0  // Default: use MSB (correct mode)
@@ -1289,10 +1237,11 @@ bool ParlioEngine::initialize(size_t dataWidth,
         FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH,
         65534,
         #if PARLIO_FORCE_LSB_MODE
-        ParlioBitPackOrder::FL_PARLIO_LSB  // DIAGNOSTIC: LSB mode for waveform inspection
+        ParlioBitPackOrder::FL_PARLIO_LSB,  // DIAGNOSTIC: LSB mode for waveform inspection
         #else
-        ParlioBitPackOrder::FL_PARLIO_MSB  // MSB packing required - Wave8 data is MSB-ordered
+        ParlioBitPackOrder::FL_PARLIO_MSB,  // MSB packing required - Wave8 data is MSB-ordered
         #endif
+        true  // prefer_psram: try PSRAM first, fall back to internal SRAM
     );
     FL_DBG("PARLIO_INIT: Config - clock=" << FL_ESP_PARLIO_CLOCK_FREQ_HZ << " queue_depth=" << FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH);
 
@@ -1318,14 +1267,18 @@ bool ParlioEngine::initialize(size_t dataWidth,
             reinterpret_cast<void*>(txDoneCallback), this)) { // ok reinterpret cast - callback function pointer to void*
         FL_LOG_PARLIO("PARLIO_INIT: FAILED to register ISR callback");
         FL_LOG_PARLIO("PARLIO: Failed to register callbacks");
+        mPeripheral->deinitialize(); // Clean up TX unit so re-init can succeed
         mPeripheral = nullptr;
         return false;
     }
     FL_LOG_PARLIO("PARLIO_INIT: ISR callback registered successfully");
 
     // Calculate ring buffer capacity
+    // Try PSRAM cap first (larger buffers for 5+ channels), fall back to SRAM cap
     ParlioBufferCalculator calc{mDataWidth};
-    size_t raw_capacity = calc.calculateRingBufferCapacity(maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT);
+    size_t raw_capacity = calc.calculateRingBufferCapacity(
+        maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT,
+        FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM);
 
     // NEEDS REVIEW!!! are we potentially accessing memory outside of the cache??
     // Please invesatigate
@@ -1338,14 +1291,24 @@ bool ParlioEngine::initialize(size_t dataWidth,
         FL_DBG("PARLIO: Rounded buffer capacity from " << raw_capacity << " to " << mRingBufferCapacity << " bytes (64-byte alignment)");
     }
 
-    // Allocate ring buffers
+    // Allocate ring buffers - try PSRAM-sized first, fall back to SRAM-sized
     FL_LOG_PARLIO("PARLIO_INIT: Allocating ring buffers (capacity=" << mRingBufferCapacity << ")");
     if (!allocateRingBuffers()) {
-        FL_DBG("PARLIO_INIT: FAILED to allocate ring buffers");
-        mPeripheral = nullptr;
-        return false;
+        // PSRAM-sized allocation failed, retry with internal SRAM cap
+        FL_DBG("PARLIO_INIT: PSRAM-sized allocation failed, retrying with SRAM cap");
+        raw_capacity = calc.calculateRingBufferCapacity(
+            maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT,
+            FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
+        mRingBufferCapacity = ((raw_capacity + 63) / 64) * 64;
+
+        if (!allocateRingBuffers()) {
+            FL_DBG("PARLIO_INIT: FAILED to allocate ring buffers");
+            mPeripheral->deinitialize(); // Clean up TX unit so re-init can succeed
+            mPeripheral = nullptr;
+            return false;
+        }
     }
-    FL_LOG_PARLIO("PARLIO_INIT: Ring buffers allocated successfully");
+    FL_LOG_PARLIO("PARLIO_INIT: Ring buffers allocated successfully (capacity=" << mRingBufferCapacity << ")");
 
     // Initialize ISR context state
     if (mIsrContext) {

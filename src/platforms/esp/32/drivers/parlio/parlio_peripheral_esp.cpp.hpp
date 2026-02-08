@@ -53,6 +53,7 @@ public:
 
     // IParlioPeripheral Interface Implementation
     bool initialize(const ParlioPeripheralConfig& config) override;
+    bool deinitialize() override;
     bool enable() override;
     bool disable() override;
     bool isInitialized() const override;
@@ -68,6 +69,7 @@ public:
 private:
     ::parlio_tx_unit_handle_t mTxUnit;  ///< ESP-IDF TX unit handle
     bool mEnabled;                       ///< Track enable state (for cleanup)
+    bool mPreferPsram;                   ///< Prefer PSRAM for DMA buffers
 };
 
 //=============================================================================
@@ -92,7 +94,8 @@ ParlioPeripheralESP::~ParlioPeripheralESP() {
 
 ParlioPeripheralESPImpl::ParlioPeripheralESPImpl()
     : mTxUnit(nullptr),
-      mEnabled(false) {
+      mEnabled(false),
+      mPreferPsram(true) {
 }
 
 ParlioPeripheralESPImpl::~ParlioPeripheralESPImpl() {
@@ -138,10 +141,16 @@ bool ParlioPeripheralESPImpl::initialize(const ParlioPeripheralConfig& config) {
     // Recommendation: Use RMT driver for >95% reliability requirements on ESP32-C6.
     // See: src/platforms/esp/32/drivers/parlio/README.md (ESP32-C6 Hardware Reliability Issue)
 
-    // Validate not already initialized
+    // Store PSRAM preference
+    mPreferPsram = config.prefer_psram;
+
+    // If already initialized, clean up first so re-initialization can succeed.
+    // This prevents the "Already initialized" retry loop when a previous init
+    // partially succeeded (TX unit created) but a later step (e.g., ring buffer
+    // allocation) failed and the caller is retrying.
     if (mTxUnit != nullptr) {
-        FL_WARN("ParlioPeripheralESP: Already initialized");
-        return false;
+        FL_DBG("ParlioPeripheralESP: Already initialized, deinitializing for re-init");
+        deinitialize();
     }
 
     // Configure PARLIO TX unit (maps directly to ESP-IDF structure)
@@ -170,12 +179,21 @@ bool ParlioPeripheralESPImpl::initialize(const ParlioPeripheralConfig& config) {
     esp_config.clk_out_gpio_num = static_cast<gpio_num_t>(-1);
     esp_config.valid_gpio_num = static_cast<gpio_num_t>(-1);
 
+    // Log heap availability before allocation attempts (visible with FASTLED_LOG_PARLIO_ENABLED)
+    FL_LOG_PARLIO("PARLIO_PERIPH: DMA heap - free: "
+           << heap_caps_get_free_size(MALLOC_CAP_DMA)
+           << ", largest block: " << heap_caps_get_largest_free_block(MALLOC_CAP_DMA));
+    FL_LOG_PARLIO("PARLIO_PERIPH: PSRAM heap - free: "
+           << heap_caps_get_free_size(MALLOC_CAP_SPIRAM)
+           << ", largest block: " << heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM));
+
     // Create TX unit (delegate to ESP-IDF)
     FL_LOG_PARLIO("PARLIO_PERIPH: Calling parlio_new_tx_unit()");
     esp_err_t err = parlio_new_tx_unit(&esp_config, &mTxUnit);
     if (err != ESP_OK) {
-        FL_LOG_PARLIO("PARLIO_PERIPH: FAILED parlio_new_tx_unit() - ESP-IDF error code: " << err);
-        FL_LOG_PARLIO("ParlioPeripheralESP: Failed to create TX unit: " << err);
+        FL_WARN("ParlioPeripheralESP: parlio_new_tx_unit() failed: "
+                << esp_err_to_name(err) << " (" << err << ")"
+                << " data_width=" << config.data_width);
         mTxUnit = nullptr;
         return false;
     }
@@ -184,6 +202,33 @@ bool ParlioPeripheralESPImpl::initialize(const ParlioPeripheralConfig& config) {
     FL_LOG_PARLIO("PARLIO: Initialized (data_width=" << config.data_width
                   << ", clock=" << config.clock_freq_hz << " Hz)");
 
+    return true;
+}
+
+bool ParlioPeripheralESPImpl::deinitialize() {
+    if (mTxUnit == nullptr) {
+        return true; // Already deinitialized
+    }
+
+    // Disable TX unit if enabled
+    if (mEnabled) {
+        esp_err_t err = parlio_tx_unit_disable(mTxUnit);
+        if (err != ESP_OK) {
+            FL_WARN("ParlioPeripheralESP: Failed to disable TX unit during deinitialize: "
+                    << esp_err_to_name(err) << " (" << err << ")");
+        }
+        mEnabled = false;
+    }
+
+    // Delete TX unit to free hardware resources
+    esp_err_t err = parlio_del_tx_unit(mTxUnit);
+    if (err != ESP_OK) {
+        FL_WARN("ParlioPeripheralESP: Failed to delete TX unit during deinitialize: "
+                << esp_err_to_name(err) << " (" << err << ")");
+        return false;
+    }
+
+    mTxUnit = nullptr;
     return true;
 }
 
@@ -199,8 +244,8 @@ bool ParlioPeripheralESPImpl::enable() {
     FL_LOG_PARLIO("PARLIO_PERIPH: Calling parlio_tx_unit_enable()");
     esp_err_t err = parlio_tx_unit_enable(mTxUnit);
     if (err != ESP_OK) {
-        FL_LOG_PARLIO("PARLIO_PERIPH: FAILED parlio_tx_unit_enable() - ESP-IDF error code: " << err);
-        FL_LOG_PARLIO("ParlioPeripheralESP: Failed to enable TX unit: " << err);
+        FL_WARN("ParlioPeripheralESP: Failed to enable TX unit: "
+                << esp_err_to_name(err) << " (" << err << ")");
         return false;
     }
 
@@ -315,8 +360,8 @@ bool ParlioPeripheralESPImpl::registerTxDoneCallback(void* callback, void* user_
     FL_LOG_PARLIO("PARLIO_PERIPH: Calling parlio_tx_unit_register_event_callbacks()");
     esp_err_t err = parlio_tx_unit_register_event_callbacks(mTxUnit, &callbacks, user_ctx);
     if (err != ESP_OK) {
-        FL_LOG_PARLIO("PARLIO_PERIPH: FAILED parlio_tx_unit_register_event_callbacks() - ESP-IDF error code: " << err);
-        FL_LOG_PARLIO("ParlioPeripheralESP: Failed to register callbacks: " << err);
+        FL_WARN("ParlioPeripheralESP: Failed to register callbacks: "
+                << esp_err_to_name(err) << " (" << err << ")");
         return false;
     }
 
@@ -332,14 +377,33 @@ u8* ParlioPeripheralESPImpl::allocateDmaBuffer(size_t size) {
     // Round up to 64-byte multiple for cache line alignment
     size_t aligned_size = ((size + 63) / 64) * 64;
 
-    // Allocate DMA-capable memory with 64-byte alignment
-    // MALLOC_CAP_DMA ensures buffer is accessible by PARLIO peripheral
-    u8* buffer = static_cast<u8*>(
-        heap_caps_aligned_alloc(64, aligned_size, MALLOC_CAP_DMA)
-    );
+    u8* buffer = nullptr;
+
+    // Try PSRAM+DMA first if enabled (follows I2S LCD CAM pattern)
+    // PSRAM provides much larger memory pool (~8MB on ESP32-P4) vs internal SRAM (~512KB)
+    if (mPreferPsram) {
+        buffer = static_cast<u8*>(
+            heap_caps_aligned_alloc(64, aligned_size,
+                MALLOC_CAP_SPIRAM | MALLOC_CAP_DMA | MALLOC_CAP_8BIT)
+        );
+    }
+
+    // Fallback to internal DMA memory (current behavior)
+    if (buffer == nullptr) {
+        buffer = static_cast<u8*>(
+            heap_caps_aligned_alloc(64, aligned_size, MALLOC_CAP_DMA)
+        );
+    }
 
     if (buffer == nullptr) {
         FL_WARN("ParlioPeripheralESP: Failed to allocate DMA buffer (" << aligned_size << " bytes)");
+        // Detailed heap stats visible with FASTLED_LOG_PARLIO_ENABLED
+        FL_LOG_PARLIO("  DMA heap: " << heap_caps_get_free_size(MALLOC_CAP_DMA)
+                << " free, " << heap_caps_get_largest_free_block(MALLOC_CAP_DMA) << " largest block");
+        if (mPreferPsram) {
+            FL_LOG_PARLIO("  PSRAM heap: " << heap_caps_get_free_size(MALLOC_CAP_SPIRAM)
+                    << " free, " << heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM) << " largest block");
+        }
     }
 
     return buffer;

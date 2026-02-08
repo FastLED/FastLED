@@ -77,6 +77,7 @@ public:
     //=========================================================================
 
     bool initialize(const ParlioPeripheralConfig& config) override = 0;
+    bool deinitialize() override = 0;
     bool enable() override = 0;
     bool disable() override = 0;
     bool isInitialized() const override = 0;

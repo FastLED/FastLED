@@ -81,6 +81,7 @@ struct ParlioPeripheralConfig {
     size_t queue_depth;                 ///< Hardware queue depth
     size_t max_transfer_size;           ///< Max DMA transfer size (bytes)
     ParlioBitPackOrder packing;         ///< Bit packing order (ParlioBitPackOrder::FL_PARLIO_LSB or ParlioBitPackOrder::FL_PARLIO_MSB)
+    bool prefer_psram;                  ///< Prefer PSRAM for DMA buffers (falls back to internal RAM if unavailable)
 
     /// @brief Default constructor (for mock testing)
     ParlioPeripheralConfig()
@@ -89,7 +90,8 @@ struct ParlioPeripheralConfig {
           clock_freq_hz(0),
           queue_depth(0),
           max_transfer_size(0),
-          packing(ParlioBitPackOrder::FL_PARLIO_MSB) {}  ///< Default to MSB packing (Wave8 format)
+          packing(ParlioBitPackOrder::FL_PARLIO_MSB),
+          prefer_psram(true) {}  ///< Default to MSB packing (Wave8 format)
 
     /// @brief Constructor with mandatory parameters
     /// @tparam PinContainer Any container with .size() and operator[] (e.g., fl::vector, fl::vector_fixed)
@@ -103,13 +105,15 @@ struct ParlioPeripheralConfig {
                            u32 clock_freq,
                            size_t queue_depth_val,
                            size_t max_transfer,
-                           ParlioBitPackOrder pack_order = ParlioBitPackOrder::FL_PARLIO_MSB)
+                           ParlioBitPackOrder pack_order = ParlioBitPackOrder::FL_PARLIO_MSB,
+                           bool psram = true)
         : data_width(pins.size()),
           gpio_pins(),
           clock_freq_hz(clock_freq),
           queue_depth(queue_depth_val),
           max_transfer_size(max_transfer),
-          packing(pack_order) {
+          packing(pack_order),
+          prefer_psram(psram) {
         // Resize to full 16 slots
         gpio_pins.resize(16);
 
@@ -186,6 +190,16 @@ public:
     /// Call once during engine initialization. Must succeed before any
     /// other methods can be used.
     virtual bool initialize(const ParlioPeripheralConfig& config) = 0;
+
+    /// @brief Deinitialize PARLIO peripheral and release hardware resources
+    /// @return true on success, false on error
+    ///
+    /// Maps to ESP-IDF: parlio_del_tx_unit()
+    ///
+    /// Releases the TX unit handle so that initialize() can be called again.
+    /// Used for graceful cleanup when post-init steps (e.g., ring buffer
+    /// allocation) fail, preventing the "Already initialized" error loop.
+    virtual bool deinitialize() = 0;
 
     /// @brief Enable PARLIO TX unit for transmission
     /// @return true on success, false on error

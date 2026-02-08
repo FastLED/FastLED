@@ -328,7 +328,10 @@ void ChannelEnginePARLIOImpl::beginTransmission(
 
     // Initialize HAL if needed
     if (!mEngine.initialize(mDataWidth, pins, timing, maxLeds)) {
-        FL_WARN("PARLIO: HAL initialization failed");
+        FL_WARN("PARLIO: HAL initialization failed (data_width=" << mDataWidth
+                << ", channels=" << channel_count << ", maxLeds=" << maxLeds
+                << "). Try reducing FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL or "
+                << "FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES");
         return;
     }
 
