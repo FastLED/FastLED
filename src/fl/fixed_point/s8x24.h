@@ -3,7 +3,7 @@
 // Signed 8.24 fixed-point arithmetic and trigonometry.
 // All operations are integer-only in the hot path.
 
-#include "fl/stl/stdint.h"
+#include "fl/int.h"
 #include "fl/sin32.h"
 #include "fl/fixed_point/isqrt.h"
 #include "fl/compiler_control.h"

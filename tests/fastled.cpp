@@ -21,6 +21,9 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/move.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/weak_ptr.h"
+#include "fl/stl/new.h"
+#include "fl/cled_controller.h"
 
 #undef NUM_LEDS  // Avoid redefinition in unity builds
 #define NUM_LEDS 1000
@@ -402,3 +405,140 @@ TEST_CASE("Legacy API: 4 parallel strips using FastLED.addLeds<>()") {
     #undef PIN3
     #undef PIN4
 }
+
+// --- Tests moved from tests/fl/channels/channel_add_remove.cpp ---
+
+namespace channel_add_remove_test {
+
+using namespace fl;
+
+/// Minimal engine for testing - always READY
+class StubEngine : public IChannelEngine {
+public:
+    bool canHandle(const ChannelDataPtr&) const override { return true; }
+    void enqueue(ChannelDataPtr) override {}
+    void show() override {}
+    EngineState poll() override { return EngineState::READY; }
+    const char* getName() const override { return "STUB_ADD_REMOVE"; }
+    Capabilities getCapabilities() const override {
+        return Capabilities(true, true);
+    }
+};
+
+static ChannelPtr makeChannel(CRGB* leds, int n) {
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelOptions opts;
+    opts.mAffinity = "STUB_ADD_REMOVE";
+    ChannelConfig config(1, timing, fl::span<CRGB>(leds, n), RGB, opts);
+    return Channel::create(config);
+}
+
+static bool controllerInList(CLEDController* ctrl) {
+    CLEDController* cur = CLEDController::head();
+    while (cur) {
+        if (cur == ctrl) return true;
+        cur = cur->next();
+    }
+    return false;
+}
+
+TEST_CASE("FastLED.add stores ChannelPtr - survives caller scope") {
+    auto engine = fl::make_shared<StubEngine>();
+    ChannelBusManager& mgr = ChannelBusManager::instance();
+    mgr.addEngine(2000, engine, "STUB_ADD_REMOVE");
+
+    CRGB leds[4];
+    fl::weak_ptr<Channel> weakRef;
+
+    {
+        auto ch = makeChannel(leds, 4);
+        weakRef = ch;
+        // Before add: refcount is 1 (only 'ch')
+        FL_CHECK(ch.use_count() == 1);
+        FL_CHECK(!weakRef.expired());
+
+        FastLED.add(ch);
+
+        // After add: refcount is 2 ('ch' + internal storage)
+        FL_CHECK(ch.use_count() == 2);
+        FL_CHECK(controllerInList(ch.get()));
+        // 'ch' goes out of scope here, dropping refcount to 1
+    }
+
+    // The weak_ptr must NOT be expired because FastLED's internal
+    // mChannels keeps the ChannelPtr alive
+    FL_CHECK(!weakRef.expired());
+    FL_CHECK(weakRef.use_count() == 1);
+
+    // Lock the weak_ptr to get a shared_ptr for verification
+    auto locked = weakRef.lock();
+    FL_REQUIRE(locked != nullptr);
+    FL_CHECK(controllerInList(locked.get()));
+
+    // Clean up
+    FastLED.remove(locked);
+    FL_CHECK(!controllerInList(locked.get()));
+
+    mgr.setDriverEnabled("STUB_ADD_REMOVE", false);
+}
+
+TEST_CASE("FastLED.add double-add is safe") {
+    auto engine = fl::make_shared<StubEngine>();
+    ChannelBusManager& mgr = ChannelBusManager::instance();
+    mgr.addEngine(2001, engine, "STUB_ADD_REMOVE");
+
+    CRGB leds[4];
+    auto ch = makeChannel(leds, 4);
+
+    FastLED.add(ch);
+    FL_CHECK(ch.use_count() == 2); // ch + internal
+
+    FastLED.add(ch); // double add - should be no-op
+    FL_CHECK(ch.use_count() == 2); // still only 2, not 3
+
+    // Controller should appear exactly once in the linked list
+    int count = 0;
+    CLEDController* cur = CLEDController::head();
+    while (cur) {
+        if (cur == ch.get()) count++;
+        cur = cur->next();
+    }
+    FL_CHECK(count == 1);
+
+    // Clean up
+    FastLED.remove(ch);
+    mgr.setDriverEnabled("STUB_ADD_REMOVE", false);
+}
+
+TEST_CASE("FastLED.remove double-remove is safe") {
+    auto engine = fl::make_shared<StubEngine>();
+    ChannelBusManager& mgr = ChannelBusManager::instance();
+    mgr.addEngine(2002, engine, "STUB_ADD_REMOVE");
+
+    CRGB leds[4];
+    auto ch = makeChannel(leds, 4);
+
+    FastLED.add(ch);
+    FL_CHECK(controllerInList(ch.get()));
+
+    FastLED.remove(ch);
+    FL_CHECK(!controllerInList(ch.get()));
+
+    // Double remove - should not crash or change refcount
+    long rc = ch.use_count();
+    FastLED.remove(ch);
+    FL_CHECK(!controllerInList(ch.get()));
+    FL_CHECK(ch.use_count() == rc);
+
+    mgr.setDriverEnabled("STUB_ADD_REMOVE", false);
+}
+
+TEST_CASE("FastLED.remove nullptr is safe") {
+    FastLED.remove(ChannelPtr());
+}
+
+TEST_CASE("FastLED.add nullptr is safe") {
+    FastLED.add(ChannelPtr());
+}
+
+} // namespace channel_add_remove_test

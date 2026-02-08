@@ -1,5 +1,5 @@
 #define FASTLED_INTERNAL
-#include <stdint.h>  // for uint8_t, uint32_t, uint16_t
+#include <stdint.h>  // for u8, u32, u16
 #include "FastLED.h"
 #include "fl/engine_events.h"
 #include "fl/compiler_control.h"
@@ -115,18 +115,29 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 	return *pLed;
 }
 
+fl::vector<fl::ChannelPtr> CFastLED::mChannels;
+
 void CFastLED::add(fl::ChannelPtr channel) {
+	if (!channel) {
+		return;
+	}
+	// Protect against double-add
+	if (mChannels.has(channel)) {
+		return;
+	}
+	mChannels.push_back(channel);
 	// Add channel to the CLEDController linked list
 	// Channel uses DeferRegister mode, so explicit addToList() call is required
-	if (channel) {
-		channel->addToList();
-	}
+	channel->addToList();
 }
 
 void CFastLED::remove(fl::ChannelPtr channel) {
-	if (channel) {
-		channel->removeFromDrawList();
+	if (!channel) {
+		return;
 	}
+	channel->removeFromDrawList();
+	// Remove from internal storage (safe if not found - erase is a no-op)
+	mChannels.erase(channel);
 }
 
 // This is bad code. But it produces the smallest binaries for reasons

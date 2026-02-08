@@ -41,12 +41,12 @@ class s16x16 {
 
     FASTLED_FORCE_INLINE s16x16 operator*(s16x16 b) const {
         return from_raw(static_cast<i32>(
-            (static_cast<int64_t>(mValue) * b.mValue) >> FRAC_BITS));
+            (static_cast<i64>(mValue) * b.mValue) >> FRAC_BITS));
     }
 
     FASTLED_FORCE_INLINE s16x16 operator/(s16x16 b) const {
         return from_raw(static_cast<i32>(
-            (static_cast<int64_t>(mValue) << FRAC_BITS) / b.mValue));
+            (static_cast<i64>(mValue) << FRAC_BITS) / b.mValue));
     }
 
     FASTLED_FORCE_INLINE s16x16 operator+(s16x16 b) const {
@@ -320,7 +320,7 @@ class s16x16 {
         // 256/(2*PI) in s16x16 — converts radians to sin32/cos32 format.
         static constexpr i32 RAD_TO_24 = 2670177;
         return static_cast<u32>(
-            (static_cast<int64_t>(angle.mValue) * RAD_TO_24) >> FRAC_BITS);
+            (static_cast<i64>(angle.mValue) * RAD_TO_24) >> FRAC_BITS);
     }
 
     // Polynomial atan for t in [0, 1]. Returns [0, π/4].

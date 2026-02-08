@@ -3,7 +3,7 @@
 // Integer square root utilities for fixed-point types.
 // Bit-by-bit algorithm — no float, no division.
 
-#include "fl/stl/stdint.h"
+#include "fl/int.h"
 
 namespace fl {
 

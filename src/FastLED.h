@@ -460,6 +460,7 @@ class CFastLED {
 	fl::u32 m_nMinMicros;    ///< minimum µs between frames, used for capping frame rates
 	fl::u32 m_nPowerData;    ///< max power use parameter
 	power_func m_pPowerFunc;  ///< function for overriding brightness when using FastLED.show();
+	static fl::vector<fl::ChannelPtr> mChannels; ///< stored ChannelPtrs to keep them alive
 
 public:
 	CFastLED();
@@ -1174,8 +1175,8 @@ public:
 	///
 	/// @note Usage examples:
 	///       @code
-	///       uint32_t actual = FastLED.getEstimatedPowerInMilliWatts();        // With limiting (default)
-	///       uint32_t requested = FastLED.getEstimatedPowerInMilliWatts(false); // Without limiting
+	///       fl::u32 actual = FastLED.getEstimatedPowerInMilliWatts();        // With limiting (default)
+	///       fl::u32 requested = FastLED.getEstimatedPowerInMilliWatts(false); // Without limiting
 	///       @endcode
 	///
 	/// @note When apply_limiter=true:
@@ -1185,8 +1186,8 @@ public:
 	/// @note MCU power consumption is NOT included in this calculation.
 	///       Add your platform-specific MCU power separately:
 	///       @code
-	///       uint32_t mcu_power_mW = 25 * 5;  // 25mA @ 5V = 125mW (Arduino Uno example)
-	///       uint32_t total_power = FastLED.getEstimatedPowerInMilliWatts() + mcu_power_mW;
+	///       fl::u32 mcu_power_mW = 25 * 5;  // 25mA @ 5V = 125mW (Arduino Uno example)
+	///       fl::u32 total_power = FastLED.getEstimatedPowerInMilliWatts() + mcu_power_mW;
 	///       @endcode
 	///
 	/// @note Uses linear brightness scaling (conservative estimate).

@@ -1,4 +1,5 @@
 #pragma once
+// allow-include-after-namespace
 
 // Animartrix2 detail: Refactored version of animartrix_detail.hpp
 // Original by Stefan Petrick 2023. Adapted to C++ by Netmindz 2023.
