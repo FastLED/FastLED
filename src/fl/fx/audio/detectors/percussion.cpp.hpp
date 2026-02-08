@@ -23,7 +23,7 @@ PercussionDetector::~PercussionDetector() = default;
 
 void PercussionDetector::update(shared_ptr<AudioContext> context) {
     const FFTBins& fft = context->getFFT(16);
-    uint32_t timestamp = context->getTimestamp();
+    u32 timestamp = context->getTimestamp();
 
     // Calculate energy in each frequency band
     float bassEnergy = getBassEnergy(fft);
@@ -101,7 +101,7 @@ float PercussionDetector::getTrebleEnergy(const FFTBins& fft) {
     return energy / 8.0f;
 }
 
-bool PercussionDetector::detectKick(float bassEnergy, float bassFlux, uint32_t timestamp) {
+bool PercussionDetector::detectKick(float bassEnergy, float bassFlux, u32 timestamp) {
     // Check cooldown period to prevent double-triggering
     if (timestamp - mLastKickTime < KICK_COOLDOWN_MS) return false;
 
@@ -114,7 +114,7 @@ bool PercussionDetector::detectKick(float bassEnergy, float bassFlux, uint32_t t
     return strongBass && strongOnset;
 }
 
-bool PercussionDetector::detectSnare(float midEnergy, float midFlux, uint32_t timestamp) {
+bool PercussionDetector::detectSnare(float midEnergy, float midFlux, u32 timestamp) {
     // Check cooldown period to prevent double-triggering
     if (timestamp - mLastSnareTime < SNARE_COOLDOWN_MS) return false;
 
@@ -127,7 +127,7 @@ bool PercussionDetector::detectSnare(float midEnergy, float midFlux, uint32_t ti
     return strongMid && strongOnset;
 }
 
-bool PercussionDetector::detectHiHat(float trebleEnergy, float trebleFlux, uint32_t timestamp) {
+bool PercussionDetector::detectHiHat(float trebleEnergy, float trebleFlux, u32 timestamp) {
     // Check cooldown period to prevent double-triggering
     if (timestamp - mLastHiHatTime < HIHAT_COOLDOWN_MS) return false;
 

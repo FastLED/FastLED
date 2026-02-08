@@ -21,10 +21,10 @@
 /// RGB LED power consumption model
 /// Used for standard 3-channel LEDs (WS2812, WS2812B, APA102, etc.)
 struct PowerModelRGB {
-    uint8_t red_mW;    ///< Red channel power at full brightness (255), in milliwatts
-    uint8_t green_mW;  ///< Green channel power at full brightness (255), in milliwatts
-    uint8_t blue_mW;   ///< Blue channel power at full brightness (255), in milliwatts
-    uint8_t dark_mW;   ///< Dark LED baseline power consumption, in milliwatts
+    fl::u8 red_mW;    ///< Red channel power at full brightness (255), in milliwatts
+    fl::u8 green_mW;  ///< Green channel power at full brightness (255), in milliwatts
+    fl::u8 blue_mW;   ///< Blue channel power at full brightness (255), in milliwatts
+    fl::u8 dark_mW;   ///< Dark LED baseline power consumption, in milliwatts
 
     /// Default constructor - WS2812 @ 5V (16mA/11mA/15mA @ 5V)
     constexpr PowerModelRGB()
@@ -35,7 +35,7 @@ struct PowerModelRGB {
     /// @param g Green channel power (mW)
     /// @param b Blue channel power (mW)
     /// @param d Dark state power (mW)
-    constexpr PowerModelRGB(uint8_t r, uint8_t g, uint8_t b, uint8_t d)
+    constexpr PowerModelRGB(fl::u8 r, fl::u8 g, fl::u8 b, fl::u8 d)
         : red_mW(r), green_mW(g), blue_mW(b), dark_mW(d) {}
 };
 
@@ -43,11 +43,11 @@ struct PowerModelRGB {
 /// @note Future API enhancement - not yet implemented in power calculations
 /// @note Currently forwards to PowerModelRGB, ignoring white channel
 struct PowerModelRGBW {
-    uint8_t red_mW;    ///< Red channel power at full brightness (255), in milliwatts
-    uint8_t green_mW;  ///< Green channel power at full brightness (255), in milliwatts
-    uint8_t blue_mW;   ///< Blue channel power at full brightness (255), in milliwatts
-    uint8_t white_mW;  ///< White channel power at full brightness (255), in milliwatts
-    uint8_t dark_mW;   ///< Dark LED baseline power consumption, in milliwatts
+    fl::u8 red_mW;    ///< Red channel power at full brightness (255), in milliwatts
+    fl::u8 green_mW;  ///< Green channel power at full brightness (255), in milliwatts
+    fl::u8 blue_mW;   ///< Blue channel power at full brightness (255), in milliwatts
+    fl::u8 white_mW;  ///< White channel power at full brightness (255), in milliwatts
+    fl::u8 dark_mW;   ///< Dark LED baseline power consumption, in milliwatts
 
     /// Default constructor - SK6812 RGBW @ 5V estimate
     constexpr PowerModelRGBW()
@@ -59,7 +59,7 @@ struct PowerModelRGBW {
     /// @param b Blue channel power (mW)
     /// @param w White channel power (mW)
     /// @param d Dark state power (mW)
-    constexpr PowerModelRGBW(uint8_t r, uint8_t g, uint8_t b, uint8_t w, uint8_t d)
+    constexpr PowerModelRGBW(fl::u8 r, fl::u8 g, fl::u8 b, fl::u8 w, fl::u8 d)
         : red_mW(r), green_mW(g), blue_mW(b), white_mW(w), dark_mW(d) {}
 
     /// Convert to RGB model (extracts RGB components only)
@@ -73,12 +73,12 @@ struct PowerModelRGBW {
 /// @note Future API enhancement - not yet implemented in power calculations
 /// @note Currently forwards to PowerModelRGB, ignoring white channels
 struct PowerModelRGBWW {
-    uint8_t red_mW;        ///< Red channel power at full brightness (255), in milliwatts
-    uint8_t green_mW;      ///< Green channel power at full brightness (255), in milliwatts
-    uint8_t blue_mW;       ///< Blue channel power at full brightness (255), in milliwatts
-    uint8_t white_mW;      ///< Cool white channel power at full brightness (255), in milliwatts
-    uint8_t warm_white_mW; ///< Warm white channel power at full brightness (255), in milliwatts
-    uint8_t dark_mW;       ///< Dark LED baseline power consumption, in milliwatts
+    fl::u8 red_mW;        ///< Red channel power at full brightness (255), in milliwatts
+    fl::u8 green_mW;      ///< Green channel power at full brightness (255), in milliwatts
+    fl::u8 blue_mW;       ///< Blue channel power at full brightness (255), in milliwatts
+    fl::u8 white_mW;      ///< Cool white channel power at full brightness (255), in milliwatts
+    fl::u8 warm_white_mW; ///< Warm white channel power at full brightness (255), in milliwatts
+    fl::u8 dark_mW;       ///< Dark LED baseline power consumption, in milliwatts
 
     /// Default constructor - Hypothetical RGBWW @ 5V estimate
     constexpr PowerModelRGBWW()
@@ -92,8 +92,8 @@ struct PowerModelRGBWW {
     /// @param w Cool white channel power (mW)
     /// @param ww Warm white channel power (mW)
     /// @param d Dark state power (mW)
-    constexpr PowerModelRGBWW(uint8_t r, uint8_t g, uint8_t b,
-                              uint8_t w, uint8_t ww, uint8_t d)
+    constexpr PowerModelRGBWW(fl::u8 r, fl::u8 g, fl::u8 b,
+                              fl::u8 w, fl::u8 ww, fl::u8 d)
         : red_mW(r), green_mW(g), blue_mW(b),
           white_mW(w), warm_white_mW(ww), dark_mW(d) {}
 
@@ -137,16 +137,16 @@ PowerModelRGB get_power_model();
 
 /// Set the maximum power used in milliamps for a given voltage
 /// @deprecated Use CFastLED::setMaxPowerInVoltsAndMilliamps()
-void set_max_power_in_volts_and_milliamps( uint8_t volts, uint32_t milliamps);
+void set_max_power_in_volts_and_milliamps( fl::u8 volts, fl::u32 milliamps);
 
 /// Set the maximum power used in watts
 /// @deprecated Use CFastLED::setMaxPowerInMilliWatts
-void set_max_power_in_milliwatts( uint32_t powerInmW);
+void set_max_power_in_milliwatts( fl::u32 powerInmW);
 
 /// Select a pin with an LED that will be flashed to indicate that power management
 /// is pulling down the brightness
 /// @param pinNumber output pin. Zero is "no indicator LED".
-void set_max_power_indicator_LED( uint8_t pinNumber); // zero = no indicator LED
+void set_max_power_indicator_LED( fl::u8 pinNumber); // zero = no indicator LED
 
 /// @} PowerSetup
 
@@ -168,7 +168,7 @@ void show_at_max_brightness_for_power();
 /// Similar to CFastLED::delay(), but pre-adjusts brightness to keep below the power
 /// threshold.
 /// @deprecated This is now a part of CFastLED::delay()
-void delay_at_max_brightness_for_power( uint16_t ms);
+void delay_at_max_brightness_for_power( fl::u16 ms);
 
 /// @} PowerShowDelay
 
@@ -182,11 +182,11 @@ void delay_at_max_brightness_for_power( uint16_t ms);
 /// @param ledbuffer the LED data to check
 /// @param numLeds the number of LEDs in the data array
 /// @returns the number of milliwatts the LED data would consume at max brightness
-uint32_t calculate_unscaled_power_mW( const CRGB* ledbuffer, uint16_t numLeds);
+fl::u32 calculate_unscaled_power_mW( const CRGB* ledbuffer, fl::u16 numLeds);
 
 /// @copydoc calculate_unscaled_power_mW(const CRGB*, uint16_t)
 /// @param leds span of LED data to check
-uint32_t calculate_unscaled_power_mW(fl::span<const CRGB> leds);
+fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds);
 
 /// Determines the highest brightness level you can use and still stay under
 /// the specified power budget for a given set of LEDs.
@@ -196,7 +196,7 @@ uint32_t calculate_unscaled_power_mW(fl::span<const CRGB> leds);
 /// @param max_power_mW the max power draw desired, in milliwatts
 /// @returns a limited brightness value. No higher than the target brightness,
 /// but may be lower depending on the power limit.
-uint8_t calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_mW);
+fl::u8 calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, fl::u16 numLeds, fl::u8 target_brightness, fl::u32 max_power_mW);
 
 /// @copybrief calculate_max_brightness_for_power_mW()
 /// @param ledbuffer the LED data to check
@@ -206,7 +206,7 @@ uint8_t calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, uint16_t nu
 /// @param max_power_mA the max power in milliamps
 /// @returns a limited brightness value. No higher than the target brightness,
 /// but may be lower depending on the power limit.
-uint8_t calculate_max_brightness_for_power_vmA(const CRGB* ledbuffer, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_V, uint32_t max_power_mA);
+fl::u8 calculate_max_brightness_for_power_vmA(const CRGB* ledbuffer, fl::u16 numLeds, fl::u8 target_brightness, fl::u32 max_power_V, fl::u32 max_power_mA);
 
 /// Determines the highest brightness level you can use and still stay under
 /// the specified power budget for all sets of LEDs. 
@@ -217,7 +217,7 @@ uint8_t calculate_max_brightness_for_power_vmA(const CRGB* ledbuffer, uint16_t n
 /// @param max_power_mW the max power draw desired, in milliwatts
 /// @returns a limited brightness value. No higher than the target brightness,
 /// but may be lower depending on the power limit.
-uint8_t  calculate_max_brightness_for_power_mW( uint8_t target_brightness, fl::u32 max_power_mW);
+fl::u8  calculate_max_brightness_for_power_mW( fl::u8 target_brightness, fl::u32 max_power_mW);
 
 /// @} PowerInternal
 

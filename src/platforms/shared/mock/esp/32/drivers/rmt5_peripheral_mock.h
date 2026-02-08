@@ -111,10 +111,10 @@ public:
     bool enableChannel(void* channel_handle) override = 0;
     bool disableChannel(void* channel_handle) override = 0;
     bool transmit(void* channel_handle, void* encoder_handle,
-                  const uint8_t* buffer, size_t buffer_size) override = 0;
-    bool waitAllDone(void* channel_handle, uint32_t timeout_ms) override = 0;
+                  const u8* buffer, size_t buffer_size) override = 0;
+    bool waitAllDone(void* channel_handle, u32 timeout_ms) override = 0;
     void* createEncoder(const ChipsetTiming& timing,
-                        uint32_t resolution_hz) override = 0;
+                        u32 resolution_hz) override = 0;
     void deleteEncoder(void* encoder_handle) override = 0;
     bool resetEncoder(void* encoder_handle) override = 0;
     bool registerTxCallback(void* channel_handle,
@@ -122,8 +122,8 @@ public:
                             void* user_ctx) override = 0;
     void configureLogging() override = 0;
     bool syncCache(void* buffer, size_t size) override = 0;
-    uint8_t* allocateDmaBuffer(size_t size) override = 0;
-    void freeDmaBuffer(uint8_t* buffer) override = 0;
+    u8* allocateDmaBuffer(size_t size) override = 0;
+    void freeDmaBuffer(u8* buffer) override = 0;
 
     //=========================================================================
     // Mock-Specific API (for unit tests)
@@ -131,11 +131,11 @@ public:
 
     /// @brief Transmission record (captured pixel data)
     struct TransmissionRecord {
-        fl::vector<uint8_t> buffer_copy;  ///< Copy of transmitted pixel data
+        fl::vector<u8> buffer_copy;  ///< Copy of transmitted pixel data
         size_t buffer_size;                ///< Size of buffer in bytes
         int gpio_pin;                      ///< GPIO pin number
         ChipsetTiming timing;              ///< LED chipset timing
-        uint32_t resolution_hz;            ///< Channel clock resolution
+        u32 resolution_hz;            ///< Channel clock resolution
         bool used_dma;                     ///< Whether DMA was enabled
         uint64_t timestamp_us;             ///< Simulated timestamp (microseconds)
     };
@@ -188,7 +188,7 @@ public:
     ///
     /// Returns the captured data from the most recent transmit() call.
     /// Useful for quick validation without iterating through history.
-    virtual fl::span<const uint8_t> getLastTransmissionData() const = 0;
+    virtual fl::span<const u8> getLastTransmissionData() const = 0;
 
     //-------------------------------------------------------------------------
     // State Inspection
@@ -228,7 +228,7 @@ public:
 ///
 /// Simple byte-wise comparison of pixel data.
 inline bool verifyPixelData(const Rmt5PeripheralMock::TransmissionRecord& record,
-                             fl::span<const uint8_t> expected) {
+                             fl::span<const u8> expected) {
     if (record.buffer_copy.size() != expected.size()) {
         return false;
     }

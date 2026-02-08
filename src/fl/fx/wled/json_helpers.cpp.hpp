@@ -6,7 +6,7 @@ namespace fl {
 namespace wled {
 
 // Helper function to parse hex color string to RGB
-bool parseHexColor(const fl::string& hexStr, uint8_t& r, uint8_t& g, uint8_t& b) {
+bool parseHexColor(const fl::string& hexStr, u8& r, u8& g, u8& b) {
     fl::string hex = hexStr;
 
     // Strip leading '#' if present
@@ -28,7 +28,7 @@ bool parseHexColor(const fl::string& hexStr, uint8_t& r, uint8_t& g, uint8_t& b)
     }
 
     // Parse hex digits
-    auto hexDigitToInt = [](char c) -> uint8_t {
+    auto hexDigitToInt = [](char c) -> u8 {
         if (c >= '0' && c <= '9') return c - '0';
         if (c >= 'a' && c <= 'f') return c - 'a' + 10;
         if (c >= 'A' && c <= 'F') return c - 'A' + 10;
@@ -43,11 +43,11 @@ bool parseHexColor(const fl::string& hexStr, uint8_t& r, uint8_t& g, uint8_t& b)
 }
 
 // Helper function to convert RGB to hex string
-fl::string rgbToHex(uint8_t r, uint8_t g, uint8_t b) {
+fl::string rgbToHex(u8 r, u8 g, u8 b) {
     fl::string hex;
     hex.reserve(6);
 
-    auto byteToHex = [](uint8_t val) -> fl::string {
+    auto byteToHex = [](u8 val) -> fl::string {
         const char hexChars[] = "0123456789ABCDEF";
         fl::string result;
         result.push_back(hexChars[val >> 4]);
@@ -69,42 +69,42 @@ void parseSegmentFields(const fl::Json& segJson, WLEDSegment& seg) {
         int64_t startInt = segJson["start"] | 0;
         if (startInt < 0) startInt = 0;
         if (startInt > 65535) startInt = 65535;
-        seg.mStart = static_cast<uint16_t>(startInt);
+        seg.mStart = static_cast<u16>(startInt);
     }
 
     if (segJson.contains("stop") && segJson["stop"].is_int()) {
         int64_t stopInt = segJson["stop"] | 0;
         if (stopInt < 0) stopInt = 0;
         if (stopInt > 65535) stopInt = 65535;
-        seg.mStop = static_cast<uint16_t>(stopInt);
+        seg.mStop = static_cast<u16>(stopInt);
     }
 
     if (segJson.contains("len") && segJson["len"].is_int()) {
         int64_t lenInt = segJson["len"] | 0;
         if (lenInt < 0) lenInt = 0;
         if (lenInt > 65535) lenInt = 65535;
-        seg.mLen = static_cast<uint16_t>(lenInt);
+        seg.mLen = static_cast<u16>(lenInt);
     }
 
     if (segJson.contains("grp") && segJson["grp"].is_int()) {
         int64_t grpInt = segJson["grp"] | 1;
         if (grpInt < 1) grpInt = 1;
         if (grpInt > 255) grpInt = 255;
-        seg.mGrp = static_cast<uint8_t>(grpInt);
+        seg.mGrp = static_cast<u8>(grpInt);
     }
 
     if (segJson.contains("spc") && segJson["spc"].is_int()) {
         int64_t spcInt = segJson["spc"] | 0;
         if (spcInt < 0) spcInt = 0;
         if (spcInt > 255) spcInt = 255;
-        seg.mSpc = static_cast<uint8_t>(spcInt);
+        seg.mSpc = static_cast<u8>(spcInt);
     }
 
     if (segJson.contains("of") && segJson["of"].is_int()) {
         int64_t ofInt = segJson["of"] | 0;
         if (ofInt < 0) ofInt = 0;
         if (ofInt > 65535) ofInt = 65535;
-        seg.mOf = static_cast<uint16_t>(ofInt);
+        seg.mOf = static_cast<u16>(ofInt);
     }
 
     if (segJson.contains("on") && segJson["on"].is_bool()) {
@@ -115,14 +115,14 @@ void parseSegmentFields(const fl::Json& segJson, WLEDSegment& seg) {
         int64_t briInt = segJson["bri"] | 255;
         if (briInt < 0) briInt = 0;
         if (briInt > 255) briInt = 255;
-        seg.mBri = static_cast<uint8_t>(briInt);
+        seg.mBri = static_cast<u8>(briInt);
     }
 
     if (segJson.contains("cct") && segJson["cct"].is_int()) {
         int64_t cctInt = segJson["cct"] | 0;
         if (cctInt < 0) cctInt = 0;
         if (cctInt > 65535) cctInt = 65535;
-        seg.mCct = static_cast<uint16_t>(cctInt);
+        seg.mCct = static_cast<u16>(cctInt);
     }
 
     // Effect properties
@@ -130,49 +130,49 @@ void parseSegmentFields(const fl::Json& segJson, WLEDSegment& seg) {
         int64_t fxInt = segJson["fx"] | 0;
         if (fxInt < 0) fxInt = 0;
         if (fxInt > 255) fxInt = 255;
-        seg.mFx = static_cast<uint8_t>(fxInt);
+        seg.mFx = static_cast<u8>(fxInt);
     }
 
     if (segJson.contains("sx") && segJson["sx"].is_int()) {
         int64_t sxInt = segJson["sx"] | 128;
         if (sxInt < 0) sxInt = 0;
         if (sxInt > 255) sxInt = 255;
-        seg.mSx = static_cast<uint8_t>(sxInt);
+        seg.mSx = static_cast<u8>(sxInt);
     }
 
     if (segJson.contains("ix") && segJson["ix"].is_int()) {
         int64_t ixInt = segJson["ix"] | 128;
         if (ixInt < 0) ixInt = 0;
         if (ixInt > 255) ixInt = 255;
-        seg.mIx = static_cast<uint8_t>(ixInt);
+        seg.mIx = static_cast<u8>(ixInt);
     }
 
     if (segJson.contains("pal") && segJson["pal"].is_int()) {
         int64_t palInt = segJson["pal"] | 0;
         if (palInt < 0) palInt = 0;
         if (palInt > 255) palInt = 255;
-        seg.mPal = static_cast<uint8_t>(palInt);
+        seg.mPal = static_cast<u8>(palInt);
     }
 
     if (segJson.contains("c1") && segJson["c1"].is_int()) {
         int64_t c1Int = segJson["c1"] | 128;
         if (c1Int < 0) c1Int = 0;
         if (c1Int > 255) c1Int = 255;
-        seg.mC1 = static_cast<uint8_t>(c1Int);
+        seg.mC1 = static_cast<u8>(c1Int);
     }
 
     if (segJson.contains("c2") && segJson["c2"].is_int()) {
         int64_t c2Int = segJson["c2"] | 128;
         if (c2Int < 0) c2Int = 0;
         if (c2Int > 255) c2Int = 255;
-        seg.mC2 = static_cast<uint8_t>(c2Int);
+        seg.mC2 = static_cast<u8>(c2Int);
     }
 
     if (segJson.contains("c3") && segJson["c3"].is_int()) {
         int64_t c3Int = segJson["c3"] | 16;
         if (c3Int < 0) c3Int = 0;
         if (c3Int > 255) c3Int = 255;
-        seg.mC3 = static_cast<uint8_t>(c3Int);
+        seg.mC3 = static_cast<u8>(c3Int);
     }
 
     // Boolean flags
@@ -204,14 +204,14 @@ void parseSegmentFields(const fl::Json& segJson, WLEDSegment& seg) {
         int64_t siInt = segJson["si"] | 0;
         if (siInt < 0) siInt = 0;
         if (siInt > 3) siInt = 3;
-        seg.mSi = static_cast<uint8_t>(siInt);
+        seg.mSi = static_cast<u8>(siInt);
     }
 
     if (segJson.contains("m12") && segJson["m12"].is_int()) {
         int64_t m12Int = segJson["m12"] | 0;
         if (m12Int < 0) m12Int = 0;
         if (m12Int > 3) m12Int = 3;
-        seg.mM12 = static_cast<uint8_t>(m12Int);
+        seg.mM12 = static_cast<u8>(m12Int);
     }
 
     if (segJson.contains("rpt") && segJson["rpt"].is_bool()) {
@@ -230,13 +230,13 @@ void parseSegmentFields(const fl::Json& segJson, WLEDSegment& seg) {
 
             if (colJson.is_array()) {
                 // RGB(W) array format: [R,G,B] or [R,G,B,W]
-                fl::vector<uint8_t> color;
+                fl::vector<u8> color;
                 for (size_t j = 0; j < colJson.size() && j < 4; j++) {
                     if (colJson[j].is_int()) {
                         int64_t val = colJson[j] | 0;
                         if (val < 0) val = 0;
                         if (val > 255) val = 255;
-                        color.push_back(static_cast<uint8_t>(val));
+                        color.push_back(static_cast<u8>(val));
                     }
                 }
                 if (color.size() >= 3) {
@@ -245,9 +245,9 @@ void parseSegmentFields(const fl::Json& segJson, WLEDSegment& seg) {
             } else if (colJson.is_string()) {
                 // Hex string format: "RRGGBB" or "#RRGGBB"
                 fl::string hexStr = colJson | fl::string("");
-                uint8_t r, g, b;
+                u8 r, g, b;
                 if (parseHexColor(hexStr, r, g, b)) {
-                    fl::vector<uint8_t> color;
+                    fl::vector<u8> color;
                     color.push_back(r);
                     color.push_back(g);
                     color.push_back(b);
@@ -325,7 +325,7 @@ void parseSegmentFields(const fl::Json& segJson, WLEDSegment& seg) {
             }
 
             // Parse hex color
-            uint8_t r, g, b;
+            u8 r, g, b;
             if (!parseHexColor(hexStr, r, g, b)) {
                 FL_WARN("WLED: invalid hex color in individual LED: " << hexStr);
                 continue;

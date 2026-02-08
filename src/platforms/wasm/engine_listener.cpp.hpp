@@ -32,7 +32,7 @@ void EngineListener::onEndFrame() {
     jsOnFrame(active_strips);
 }
 
-void EngineListener::onStripAdded(CLEDController *strip, uint32_t num_leds) {
+void EngineListener::onStripAdded(CLEDController *strip, u32 num_leds) {
     // Use ActiveStripData's IdTracker for consistent ID management
     ActiveStripData &active_strips = ActiveStripData::Instance();
     int id = active_strips.getIdTracker().getOrCreateId(strip);

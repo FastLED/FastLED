@@ -15,7 +15,7 @@
 #endif
 
 // Global delay function override for fast testing (non-static for access from platform_time.cpp.hpp)
-fl::function<void(uint32_t)> g_delay_override;
+fl::function<void(fl::u32)> g_delay_override;
 
 extern "C" {
 
@@ -25,11 +25,11 @@ extern "C" {
 
 // Global millis() and micros() forward to fl:: layer (which handles time injection in tests)
 // These are needed for Arduino API compatibility
-uint32_t millis() {
+fl::u32 millis() {
     return fl::millis();
 }
 
-uint32_t micros() {
+fl::u32 micros() {
     return fl::micros();
 }
 
@@ -47,7 +47,7 @@ void yield() {
 } // extern "C"
 
 // Function to set delay override (C++ linkage for test runner)
-void setDelayFunction(const fl::function<void(uint32_t)>& delayFunc) {
+void setDelayFunction(const fl::function<void(fl::u32)>& delayFunc) {
     g_delay_override = delayFunc;
 }
 

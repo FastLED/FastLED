@@ -43,42 +43,42 @@ public:
     /// @brief Construct a timeout with specified start time and duration
     /// @param start_time Start timestamp (in any consistent units)
     /// @param duration Duration (in same units as start_time)
-    Timeout(uint32_t start_time, uint32_t duration)
+    Timeout(u32 start_time, u32 duration)
         : mStartTime(start_time), mDuration(duration) {}
 
     /// @brief Check if the timeout has completed
     /// @param current_time Current timestamp (in same units as constructor)
     /// @return true if elapsed time >= duration, false otherwise
     /// @note Handles uint32_t rollover correctly via unsigned arithmetic
-    bool done(uint32_t current_time) const {
-        uint32_t elapsed_time = current_time - mStartTime;  // Rollover-safe
+    bool done(u32 current_time) const {
+        u32 elapsed_time = current_time - mStartTime;  // Rollover-safe
         return elapsed_time >= mDuration;
     }
 
     /// @brief Get elapsed time since timeout started
     /// @param current_time Current timestamp (in same units as constructor)
     /// @return Elapsed time (in same units as constructor)
-    uint32_t elapsed(uint32_t current_time) const {
+    u32 elapsed(u32 current_time) const {
         return current_time - mStartTime;  // Rollover-safe
     }
 
     /// @brief Reset the timeout to start counting from specified time
     /// @param start_time New start timestamp
-    void reset(uint32_t start_time) {
+    void reset(u32 start_time) {
         mStartTime = start_time;
     }
 
     /// @brief Reset with a new start time and duration
     /// @param start_time New start timestamp
     /// @param duration New duration (in same units as start_time)
-    void reset(uint32_t start_time, uint32_t duration) {
+    void reset(u32 start_time, u32 duration) {
         mStartTime = start_time;
         mDuration = duration;
     }
 
 private:
-    uint32_t mStartTime;  ///< Start timestamp
-    uint32_t mDuration;   ///< Timeout duration
+    u32 mStartTime;  ///< Start timestamp
+    u32 mDuration;   ///< Timeout duration
 };
 
 }  // namespace fl

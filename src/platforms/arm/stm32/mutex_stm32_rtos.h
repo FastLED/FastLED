@@ -185,7 +185,7 @@ private:
     // Static mutex definition (required by v1 API)
     // Note: Using anonymous union to avoid static-in-header issues on Teensy
     struct MutexDef {
-        uint32_t os_mutex_cb[4]; // Placeholder for control block (implementation-specific)
+        u32 os_mutex_cb[4]; // Placeholder for control block (implementation-specific)
     };
     MutexDef mMutexDef;
 
@@ -251,7 +251,7 @@ private:
 
     // Static mutex definition (required by v1 API)
     struct MutexDef {
-        uint32_t os_mutex_cb[4]; // Placeholder for control block (implementation-specific)
+        u32 os_mutex_cb[4]; // Placeholder for control block (implementation-specific)
     };
     MutexDef mMutexDef;
 

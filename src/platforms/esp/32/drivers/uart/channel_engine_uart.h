@@ -216,10 +216,10 @@ private:
     bool mInitialized;
 
     /// @brief Scratch buffer for LED RGB data (owned by channel engine)
-    fl::vector<uint8_t> mScratchBuffer;
+    fl::vector<u8> mScratchBuffer;
 
     /// @brief Encoded UART buffer for wave8 output (owned by channel engine)
-    fl::vector<uint8_t> mEncodedBuffer;
+    fl::vector<u8> mEncodedBuffer;
 
     /// @brief Internal state management for IChannelEngine interface
     fl::vector<ChannelDataPtr> mEnqueuedChannels;     ///< Channels waiting for show()
@@ -240,6 +240,6 @@ private:
 /// The engine will be registered with ChannelBusManager automatically.
 fl::shared_ptr<IChannelEngine> createUartEngine(int uart_num,
                                                 int tx_pin,
-                                                uint32_t baud_rate = 3200000);
+                                                u32 baud_rate = 3200000);
 
 } // namespace fl

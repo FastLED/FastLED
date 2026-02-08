@@ -11,7 +11,7 @@ namespace fl {
 
 Spi::Spi(int clock_pin, fl::span<const int> data_pins,
          spi_output_mode_t output_mode,
-         uint32_t clock_speed_hz)
+         u32 clock_speed_hz)
     : Spi(SpiConfig(clock_pin, data_pins, clock_speed_hz, output_mode, 0)) {
 }
 
@@ -28,10 +28,10 @@ Spi::Spi(const SpiConfig& config)
 
     // Convert SpiConfig to MultiLaneDevice::Config
     spi::MultiLaneDevice::Config ml_config;
-    ml_config.clock_pin = static_cast<uint8_t>(config.clock_pin);
+    ml_config.clock_pin = static_cast<u8>(config.clock_pin);
     ml_config.data_pins.resize(config.data_pins.size());
     for (size_t i = 0; i < config.data_pins.size(); i++) {
-        ml_config.data_pins[i] = static_cast<uint8_t>(config.data_pins[i]);
+        ml_config.data_pins[i] = static_cast<u8>(config.data_pins[i]);
     }
     ml_config.clock_speed_hz = config.clock_speed_hz;
     ml_config.mode = config.spi_mode;
@@ -70,7 +70,7 @@ Spi& Spi::operator=(Spi&& other) noexcept {
     return *this;
 }
 
-bool Spi::wait(uint32_t timeout_ms) {
+bool Spi::wait(u32 timeout_ms) {
     if (!device) {
         return false;
     }

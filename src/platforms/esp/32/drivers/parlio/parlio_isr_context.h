@@ -71,15 +71,15 @@ struct alignas(64) ParlioIsrContext {
     // === Non-Volatile Fields (read after barrier only) ===
     size_t mTotalBytes;
     size_t mNumLanes;
-    uint32_t mIsrCount;
-    uint32_t mBytesTransmitted;
-    uint32_t mChunksCompleted;
+    u32 mIsrCount;
+    u32 mBytesTransmitted;
+    u32 mChunksCompleted;
     bool mTransmissionActive;
     uint64_t mEndTimeUs;
 
     // === Debug Counters (volatile for ISR access) ===
-    volatile uint32_t mDebugTxDoneCount;       // Count of txDoneCallback invocations
-    volatile uint32_t mDebugWorkerIsrCount;    // Count of workerIsrCallback invocations
+    volatile u32 mDebugTxDoneCount;       // Count of txDoneCallback invocations
+    volatile u32 mDebugWorkerIsrCount;    // Count of workerIsrCallback invocations
     volatile uint64_t mDebugLastTxDoneTime;    // esp_timer_get_time() at last txDone
     volatile uint64_t mDebugLastWorkerIsrTime; // esp_timer_get_time() at last worker ISR
 

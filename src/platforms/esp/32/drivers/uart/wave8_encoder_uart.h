@@ -73,7 +73,7 @@ namespace detail {
 /// FIXED: The original patterns (0x88, 0x8C, 0xC8, 0xCC) had bit alignment issues
 /// due to UART transmission preamble. All values have been left-rotated by 1 bit
 /// to properly align with the UART framing sequence.
-constexpr uint8_t kUartEncode2BitLUT[4] = {
+constexpr u8 kUartEncode2BitLUT[4] = {
     0x11,  // 0b00 → 00010001 (was 0x88)
     0x19,  // 0b01 → 00011001 (was 0x8C)
     0x91,  // 0b10 → 10010001 (was 0xC8)
@@ -86,7 +86,7 @@ constexpr uint8_t kUartEncode2BitLUT[4] = {
 ///
 /// This function is force-inlined for performance in encoding loops.
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
-uint8_t encodeUart2Bits(uint8_t two_bits) {
+u8 encodeUart2Bits(u8 two_bits) {
     return kUartEncode2BitLUT[two_bits & 0x03];
 }
 
@@ -100,7 +100,7 @@ uint8_t encodeUart2Bits(uint8_t two_bits) {
 /// - Bits 3-2 → output[2]
 /// - Bits 1-0 → output[3]
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
-void encodeUartByte(uint8_t led_byte, uint8_t* output) {
+void encodeUartByte(u8 led_byte, u8* output) {
     output[0] = encodeUart2Bits((led_byte >> 6) & 0x03);  // Bits 7-6
     output[1] = encodeUart2Bits((led_byte >> 4) & 0x03);  // Bits 5-4
     output[2] = encodeUart2Bits((led_byte >> 2) & 0x03);  // Bits 3-2
@@ -150,9 +150,9 @@ void encodeUartByte(uint8_t led_byte, uint8_t* output) {
 /// @note This function is ISR-safe and can be called from interrupt context
 /// @note Output buffer must have capacity for at least (input_size * 4) bytes
 FL_IRAM FL_OPTIMIZE_FUNCTION
-size_t encodeLedsToUart(const uint8_t* input,
+size_t encodeLedsToUart(const u8* input,
                         size_t input_size,
-                        uint8_t* output,
+                        u8* output,
                         size_t output_capacity);
 
 /// @brief Calculate required output buffer size for LED encoding

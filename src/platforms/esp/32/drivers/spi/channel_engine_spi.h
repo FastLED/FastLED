@@ -79,21 +79,21 @@ struct SpiTimingConfig {
     };
 
     Protocol protocol;           ///< LED protocol type
-    uint32_t clock_hz;           ///< SPI clock frequency (e.g., 2500000 for WS2812)
-    uint8_t bits_per_led_bit;    ///< Encoding expansion ratio (3 for WS2812)
-    uint32_t reset_time_us;      ///< Inter-frame reset time in microseconds
+    u32 clock_hz;           ///< SPI clock frequency (e.g., 2500000 for WS2812)
+    u8 bits_per_led_bit;    ///< Encoding expansion ratio (3 for WS2812)
+    u32 reset_time_us;      ///< Inter-frame reset time in microseconds
 
     // Calculated bit patterns for encoding (dynamic timing adaptation)
-    uint32_t bit0_pattern;       ///< Bit pattern for logical '0' (MSB first)
-    uint8_t bit0_count;          ///< Number of SPI bits in bit0_pattern
-    uint32_t bit1_pattern;       ///< Bit pattern for logical '1' (MSB first)
-    uint8_t bit1_count;          ///< Number of SPI bits in bit1_pattern
+    u32 bit0_pattern;       ///< Bit pattern for logical '0' (MSB first)
+    u8 bit0_count;          ///< Number of SPI bits in bit0_pattern
+    u32 bit1_pattern;       ///< Bit pattern for logical '1' (MSB first)
+    u8 bit1_count;          ///< Number of SPI bits in bit1_pattern
 
     // Achieved timing validation (for debugging)
-    uint32_t achieved_t0h_ns;    ///< Actual T0H timing achieved
-    uint32_t achieved_t0l_ns;    ///< Actual T0L timing achieved
-    uint32_t achieved_t1h_ns;    ///< Actual T1H timing achieved
-    uint32_t achieved_t1l_ns;    ///< Actual T1L timing achieved
+    u32 achieved_t0h_ns;    ///< Actual T0H timing achieved
+    u32 achieved_t0l_ns;    ///< Actual T0L timing achieved
+    u32 achieved_t1h_ns;    ///< Actual T1H timing achieved
+    u32 achieved_t1l_ns;    ///< Actual T1L timing achieved
 
     /// @brief Default constructor for WS2812-over-SPI
     constexpr SpiTimingConfig()
@@ -113,7 +113,7 @@ struct SpiTimingConfig {
 
     /// @brief Create WS2812-over-SPI timing configuration
     /// @param reset_us Reset time in microseconds (default 50μs)
-    static constexpr SpiTimingConfig ws2812(uint32_t reset_us = 50) {
+    static constexpr SpiTimingConfig ws2812(u32 reset_us = 50) {
         SpiTimingConfig config;
         config.protocol = WS2812_OVER_SPI;
         config.clock_hz = 2500000;  // 2.5MHz
@@ -195,8 +195,8 @@ struct MultiLanePinConfig {
     {}
 
     /// @brief Get number of active lanes
-    uint8_t getLaneCount() const {
-        uint8_t count = (data0_pin >= 0) ? 1 : 0;
+    u8 getLaneCount() const {
+        u8 count = (data0_pin >= 0) ? 1 : 0;
         if (data1_pin >= 0) count++;
         if (data2_pin >= 0) count++;
         if (data3_pin >= 0) count++;
@@ -286,7 +286,7 @@ private:
     /// @brief Determine maximum parallel transmission capacity
     /// @param channels Channels in a timing group (unused, for future extension)
     /// @return Number of SPI hosts available (2 for ESP32/S2/S3/P4, 1 for ESP32-C3)
-    uint8_t determineLaneCapacity(fl::span<const ChannelDataPtr> channels);
+    u8 determineLaneCapacity(fl::span<const ChannelDataPtr> channels);
     /// @brief SPI channel state (per-pin tracking)
     struct SpiChannelState {
         spi_host_device_t spi_host;        ///< SPI peripheral (SPI2_HOST, SPI3_HOST, etc.)
@@ -299,7 +299,7 @@ private:
 
         // Multi-lane SPI support (dual/quad modes)
         // NOTE: Multi-lane NOT supported with Espressif 3-bit encoding
-        uint8_t numLanes;                  ///< Number of active data lanes (always 1 for Espressif encoding)
+        u8 numLanes;                  ///< Number of active data lanes (always 1 for Espressif encoding)
         gpio_num_t data1_pin;              ///< Data1/MISO pin for dual/quad mode (-1, unused)
         gpio_num_t data2_pin;              ///< Data2/WP pin for quad mode (-1, unused)
         gpio_num_t data3_pin;              ///< Data3/HD pin for quad mode (-1, unused)
@@ -312,17 +312,17 @@ private:
         bool cacheSyncDisabled;            ///< Set when esp_cache_msync() returns ESP_ERR_INVALID_ARG
 
         // Double-buffered staging (4KB each for DMA efficiency)
-        uint8_t* stagingA;                 ///< Staging buffer A (DMA-capable memory)
-        uint8_t* stagingB;                 ///< Staging buffer B (DMA-capable memory)
-        uint8_t* currentStaging;           ///< Current staging buffer (points to A or B)
+        u8* stagingA;                 ///< Staging buffer A (DMA-capable memory)
+        u8* stagingB;                 ///< Staging buffer B (DMA-capable memory)
+        u8* currentStaging;           ///< Current staging buffer (points to A or B)
         size_t stagingOffset;              ///< Current write position in staging buffer
         size_t stagingCapacity;            ///< Size of each staging buffer (4096 bytes)
 
         // LED source data
         // CRITICAL: LED data must be in internal SRAM for ISR access (PSRAM not ISR-safe)
-        uint8_t* ledSourceBuffer;          ///< Internal SRAM copy of LED data (DMA-capable)
+        u8* ledSourceBuffer;          ///< Internal SRAM copy of LED data (DMA-capable)
         size_t ledSourceBufferSize;        ///< Size of ledSourceBuffer allocation
-        const uint8_t* ledSource;          ///< Current position in source LED data
+        const u8* ledSource;          ///< Current position in source LED data
         size_t ledBytesRemaining;          ///< LED bytes left to encode
         ChannelDataPtr sourceData;         ///< Reference to source ChannelData for cleanup
 
@@ -337,7 +337,7 @@ private:
 
         // Debug: ISR tx_buffer capture for diagnosis
         volatile bool debugTxCaptured;     ///< Flag: first tx_buffer captured
-        uint8_t debugTxBuffer[8];          ///< First 8 bytes of tx_buffer at queue time
+        u8 debugTxBuffer[8];          ///< First 8 bytes of tx_buffer at queue time
     };
 
     /// @brief Pending channel data waiting for hardware availability
@@ -353,7 +353,7 @@ private:
         spi_host_device_t host;
         int refCount;  ///< Reference counting (multiple channels can share a bus)
         bool initialized; ///< Bus has been initialized
-        uint8_t activeLanes; ///< Number of lanes in use (0=unused, 1=single, 2=dual, 4=quad)
+        u8 activeLanes; ///< Number of lanes in use (0=unused, 1=single, 2=dual, 4=quad)
     };
 
     /// @brief Hash function for SpiTimingConfig (future use for caching)
@@ -361,7 +361,7 @@ private:
         size_t operator()(const SpiTimingConfig& t) const {
             // FNV-1a hash algorithm for better distribution
             size_t hash = 2166136261u;
-            hash = (hash ^ static_cast<uint32_t>(t.protocol)) * 16777619u;
+            hash = (hash ^ static_cast<u32>(t.protocol)) * 16777619u;
             hash = (hash ^ t.clock_hz) * 16777619u;
             hash = (hash ^ t.bits_per_led_bit) * 16777619u;
             hash = (hash ^ t.reset_time_us) * 16777619u;
@@ -399,8 +399,8 @@ private:
     /// @param spiBuffer Output SPI buffer (must be 3x size of ledData for WS2812)
     /// @param timing SPI timing configuration
     /// @return true if encoding successful
-    bool encodeLedData(const fl::span<const uint8_t>& ledData,
-                       fl::vector<uint8_t>& spiBuffer,
+    bool encodeLedData(const fl::span<const u8>& ledData,
+                       fl::vector<u8>& spiBuffer,
                        const SpiTimingConfig& timing);
 
     /// @brief Encode a single LED color byte to SPI bits (dynamic pattern)
@@ -409,7 +409,7 @@ private:
     /// @param timing SPI timing configuration with bit patterns
     /// @param output_bit_offset Bit offset in output buffer (for non-byte-aligned patterns)
     /// @return Number of bits written to buffer
-    static uint32_t encodeLedByte(uint8_t data, uint8_t* buf, const SpiTimingConfig& timing, uint32_t output_bit_offset = 0);
+    static u32 encodeLedByte(u8 data, u8* buf, const SpiTimingConfig& timing, u32 output_bit_offset = 0);
 
     /// @brief Pre-encode ALL LED data and sync cache (called from main task, NOT ISR)
     /// @param channel Channel state with LED data to encode
@@ -471,7 +471,7 @@ private:
     bool mAllocationFailed;
 
     /// @brief Track last frame number to allow retry once per frame
-    uint32_t mLastRetryFrame;
+    u32 mLastRetryFrame;
 
     /// @brief Multi-lane pin configurations (keyed by data0_pin)
     fl::hash_map<gpio_num_t, MultiLanePinConfig> mMultiLaneConfigs;

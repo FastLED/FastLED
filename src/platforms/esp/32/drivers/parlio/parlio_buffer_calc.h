@@ -92,7 +92,7 @@ struct ParlioBufferCalculator {
     /// @param inputBytes Number of input bytes to transmit
     /// @param reset_us Reset time in microseconds (default: 0)
     /// @return Total DMA buffer size in bytes (front_pad + pixel data + back_pad + reset_pad)
-    size_t dmaBufferSize(size_t inputBytes, uint32_t reset_us = 0) const {
+    size_t dmaBufferSize(size_t inputBytes, u32 reset_us = 0) const {
         size_t front_back_padding = boundaryPaddingBytes();
         size_t pixel_bytes = inputBytes * outputBytesPerInputByte();
         size_t reset_padding = resetPaddingBytes(reset_us);
@@ -120,7 +120,7 @@ struct ParlioBufferCalculator {
     /// - Each Wave8Byte = 64 pulses × 125ns (8MHz clock) = 8µs
     /// - Reset padding bytes = ceil(reset_us / 8µs) × 8 bytes
     /// - Example: 280µs reset ÷ 8µs = 35 Wave8Bytes = 280 bytes
-    size_t resetPaddingBytes(uint32_t reset_us) const {
+    size_t resetPaddingBytes(u32 reset_us) const {
         if (reset_us == 0) {
             return 0;
         }
@@ -155,7 +155,7 @@ struct ParlioBufferCalculator {
     /// - DMA bytes per buffer: 3000 × 8 = 24000 bytes
     /// - Reset padding: 280 bytes (35 Wave8Bytes × 8 bytes)
     /// - With safety margin: 24000 + 280 + 128 = 24408 bytes
-    size_t calculateRingBufferCapacity(size_t maxLedsPerChannel, uint32_t reset_us, size_t numRingBuffers = 3) const {
+    size_t calculateRingBufferCapacity(size_t maxLedsPerChannel, u32 reset_us, size_t numRingBuffers = 3) const {
         // Step 1: Calculate LEDs per buffer (divide total LEDs by number of buffers)
         size_t ledsPerBuffer = (maxLedsPerChannel + numRingBuffers - 1) / numRingBuffers;
 

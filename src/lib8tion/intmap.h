@@ -44,68 +44,68 @@ namespace fl {
 // Deprecated legacy unsigned functions that delegate to the new int_scale<FROM, TO>() template
 /// @deprecated Use int_scale<uint8_t, uint16_t>() instead
 
-inline uint16_t map8_to_16(uint8_t x) {
-    return fl::int_scale<uint8_t, uint16_t>(x);
+inline u16 map8_to_16(u8 x) {
+    return fl::int_scale<u8, u16>(x);
 }
 
 /// @deprecated Use int_scale<uint8_t, uint32_t>() instead
 
-inline uint32_t map8_to_32(uint8_t x) {
-    return fl::int_scale<uint8_t, uint32_t>(x);
+inline u32 map8_to_32(u8 x) {
+    return fl::int_scale<u8, u32>(x);
 }
 
 /// @deprecated Use int_scale<uint16_t, uint32_t>() instead
 
-inline uint32_t map16_to_32(uint16_t x) {
-    return fl::int_scale<uint16_t, uint32_t>(x);
+inline u32 map16_to_32(u16 x) {
+    return fl::int_scale<u16, u32>(x);
 }
 
 /// @deprecated Use int_scale<uint16_t, uint8_t>() instead
 
-inline uint8_t map16_to_8(uint16_t x) {
-    return fl::int_scale<uint16_t, uint8_t>(x);
+inline u8 map16_to_8(u16 x) {
+    return fl::int_scale<u16, u8>(x);
 }
 
 /// @deprecated Use int_scale<uint32_t, uint16_t>() instead
 
-inline uint16_t map32_to_16(uint32_t x) {
-    return fl::int_scale<uint32_t, uint16_t>(x);
+inline u16 map32_to_16(u32 x) {
+    return fl::int_scale<u32, u16>(x);
 }
 
 /// @deprecated Use int_scale<uint32_t, uint8_t>() instead
-inline uint8_t map32_to_8(uint32_t x) {
-    return fl::int_scale<uint32_t, uint8_t>(x);
+inline u8 map32_to_8(u32 x) {
+    return fl::int_scale<u32, u8>(x);
 }
 
 // New signed functions that delegate to int_scale
 /// Use int_scale<int8_t, int16_t>() instead
-inline int16_t smap8_to_16(int8_t x) {
-    return fl::int_scale<int8_t, int16_t>(x);
+inline i16 smap8_to_16(i8 x) {
+    return fl::int_scale<i8, i16>(x);
 }
 
 /// Use int_scale<int8_t, int32_t>() instead
-inline int32_t smap8_to_32(int8_t x) {
-    return fl::int_scale<int8_t, int32_t>(x);
+inline i32 smap8_to_32(i8 x) {
+    return fl::int_scale<i8, i32>(x);
 }
 
 /// Use int_scale<int16_t, int32_t>() instead
-inline int32_t smap16_to_32(int16_t x) {
-    return fl::int_scale<int16_t, int32_t>(x);
+inline i32 smap16_to_32(i16 x) {
+    return fl::int_scale<i16, i32>(x);
 }
 
 /// Use int_scale<int16_t, int8_t>() instead
-inline int8_t smap16_to_8(int16_t x) {
-    return fl::int_scale<int16_t, int8_t>(x);
+inline i8 smap16_to_8(i16 x) {
+    return fl::int_scale<i16, i8>(x);
 }
 
 /// Use int_scale<int32_t, int16_t>() instead
-inline int16_t smap32_to_16(int32_t x) {
-    return fl::int_scale<int32_t, int16_t>(x);
+inline i16 smap32_to_16(i32 x) {
+    return fl::int_scale<i32, i16>(x);
 }
 
 /// Use int_scale<int32_t, int8_t>() instead
-inline int8_t smap32_to_8(int32_t x) {
-    return fl::int_scale<int32_t, int8_t>(x);
+inline i8 smap32_to_8(i32 x) {
+    return fl::int_scale<i32, i8>(x);
 }
 
 /// @} intmap

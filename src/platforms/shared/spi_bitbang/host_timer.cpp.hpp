@@ -33,12 +33,12 @@
 
 /* ISR context for thread-based execution */
 struct ISRContext {
-    uint32_t timer_hz;
+    fl::u32 timer_hz;
     fl::atomic<bool> running;
     fl::atomic<bool> started;  // Signals when thread has begun execution
     std::thread thread;  // okay std namespace
 
-    ISRContext(uint32_t hz) : timer_hz(hz), running(false), started(false) {}
+    ISRContext(fl::u32 hz) : timer_hz(hz), running(false), started(false) {}
 };
 
 /* Global ISR registry (for multi-instance support) */
@@ -60,7 +60,7 @@ static void isr_thread_func(ISRContext* ctx) {
     ctx->started.store(true, fl::memory_order_release);
 
     auto interval = std::chrono::nanoseconds(1000000000 / ctx->timer_hz);  // okay std namespace
-    uint32_t tick_count = 0;
+    fl::u32 tick_count = 0;
 
     while (ctx->running.load(fl::memory_order_acquire)) {
         auto start = std::chrono::steady_clock::now();  // okay std namespace
@@ -69,10 +69,10 @@ static void isr_thread_func(ISRContext* ctx) {
         std::atomic_thread_fence(std::memory_order_acquire);  // okay std namespace
 
         // Execute ISR (same code as ESP32 hardware)
-        uint32_t flags_before = fl_spi_status_flags();
+        fl::u32 flags_before = fl_spi_status_flags();
         fl_parallel_spi_isr();
         fl_gpio_sim_tick();
-        uint32_t flags_after = fl_spi_status_flags();
+        fl::u32 flags_after = fl_spi_status_flags();
         tick_count++;
 
         // Release fence: ensure status_flags write is visible to main thread
@@ -96,7 +96,7 @@ static void isr_thread_func(ISRContext* ctx) {
 extern "C" {
 
 /* Start timer (launches ISR thread) */
-int fl_spi_platform_isr_start(uint32_t timer_hz) {
+int fl_spi_platform_isr_start(fl::u32 timer_hz) {
     ISR_DBG("fl_spi_platform_isr_start called, frequency: %u Hz\n", timer_hz);
     fl::unique_lock<fl::mutex> lock(get_isr_mutex());
 
@@ -145,7 +145,7 @@ bool fl_spi_host_timer_is_running(void) {
     return !get_isr_contexts().empty();
 }
 
-uint32_t fl_spi_host_timer_get_hz(void) {
+fl::u32 fl_spi_host_timer_get_hz(void) {
     fl::unique_lock<fl::mutex> lock(get_isr_mutex());
     if (!get_isr_contexts().empty()) {
         return get_isr_contexts()[0]->timer_hz;

@@ -31,20 +31,20 @@ class PixelStream {
     bool begin(fl::FileHandlePtr h);
     bool beginStream(fl::ByteStreamPtr s);
     void close();
-    int32_t bytesPerFrame();
+    i32 bytesPerFrame();
     bool readPixel(CRGB *dst); // Convenience function to read a pixel
-    size_t readBytes(uint8_t *dst, size_t len);
+    size_t readBytes(u8 *dst, size_t len);
 
     bool readFrame(Frame *frame);
     bool readFrameAt(fl::u32 frameNumber, Frame *frame);
     bool hasFrame(fl::u32 frameNumber);
-    int32_t framesRemaining() const; // -1 if this is a stream.
-    int32_t framesDisplayed() const;
+    i32 framesRemaining() const; // -1 if this is a stream.
+    i32 framesDisplayed() const;
     bool available() const;
     bool atEnd() const;
 
-    int32_t bytesRemaining() const;
-    int32_t bytesRemainingInFrame() const;
+    i32 bytesRemaining() const;
+    i32 bytesRemainingInFrame() const;
     bool
     rewind(); // Returns false on failure, which can happen for streaming mode.
     Type getType()

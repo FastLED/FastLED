@@ -33,7 +33,7 @@ bool SpiHw4Stub::begin(const SpiHw4::Config& config) {
     }
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
-    if (mBusId != -1 && config.bus_num != static_cast<uint8_t>(mBusId)) {
+    if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
         return false;  // Mismatch
     }
 
@@ -92,7 +92,7 @@ bool SpiHw4Stub::transmit(TransmitMode mode) {
 
     // Capture data for inspection
     mLastBuffer.clear();
-    fl::span<uint8_t> buffer_span = mCurrentBuffer.data();
+    fl::span<u8> buffer_span = mCurrentBuffer.data();
     mLastBuffer.reserve(buffer_span.size());
     for (size_t i = 0; i < buffer_span.size(); ++i) {
         mLastBuffer.push_back(buffer_span[i]);
@@ -104,7 +104,7 @@ bool SpiHw4Stub::transmit(TransmitMode mode) {
     return true;
 }
 
-bool SpiHw4Stub::waitComplete(uint32_t timeout_ms) {
+bool SpiHw4Stub::waitComplete(u32 timeout_ms) {
     (void)timeout_ms;  // Unused in mock
     mBusy = false;
 
@@ -130,15 +130,15 @@ const char* SpiHw4Stub::getName() const {
     return mName;
 }
 
-const fl::vector<uint8_t>& SpiHw4Stub::getLastTransmission() const {
+const fl::vector<u8>& SpiHw4Stub::getLastTransmission() const {
     return mLastBuffer;
 }
 
-uint32_t SpiHw4Stub::getTransmissionCount() const {
+u32 SpiHw4Stub::getTransmissionCount() const {
     return mTransmitCount;
 }
 
-uint32_t SpiHw4Stub::getClockSpeed() const {
+u32 SpiHw4Stub::getClockSpeed() const {
     return mClockSpeed;
 }
 
@@ -152,11 +152,11 @@ void SpiHw4Stub::reset() {
     mBusy = false;
 }
 
-fl::vector<fl::vector<uint8_t>> SpiHw4Stub::extractLanes(uint8_t num_lanes, size_t bytes_per_lane) const {
-    fl::vector<fl::vector<uint8_t>> lanes(num_lanes);
+fl::vector<fl::vector<u8>> SpiHw4Stub::extractLanes(u8 num_lanes, size_t bytes_per_lane) const {
+    fl::vector<fl::vector<u8>> lanes(num_lanes);
 
     // Pre-allocate per-lane buffers
-    for (uint8_t lane = 0; lane < num_lanes; ++lane) {
+    for (u8 lane = 0; lane < num_lanes; ++lane) {
         lanes[lane].resize(bytes_per_lane);
     }
 
@@ -167,7 +167,7 @@ fl::vector<fl::vector<uint8_t>> SpiHw4Stub::extractLanes(uint8_t num_lanes, size
     size_t output_bytes = bytes_per_lane * 4;  // Interleaved size
 
     for (size_t out_idx = 0; out_idx < output_bytes && out_idx < mLastBuffer.size(); ++out_idx) {
-        uint8_t interleaved_byte = mLastBuffer[out_idx];
+        u8 interleaved_byte = mLastBuffer[out_idx];
 
         // Which input byte does this correspond to?
         size_t in_byte_idx = out_idx / 4;
@@ -176,8 +176,8 @@ fl::vector<fl::vector<uint8_t>> SpiHw4Stub::extractLanes(uint8_t num_lanes, size
         if (in_byte_idx >= bytes_per_lane) break;
 
         // Extract 2 bits for each lane
-        for (uint8_t lane = 0; lane < num_lanes && lane < 4; ++lane) {
-            uint8_t bits = (interleaved_byte >> (lane * 2)) & 3;
+        for (u8 lane = 0; lane < num_lanes && lane < 4; ++lane) {
+            u8 bits = (interleaved_byte >> (lane * 2)) & 3;
             lanes[lane][in_byte_idx] |= (bits << ((3 - nibble_idx) * 2));
         }
     }

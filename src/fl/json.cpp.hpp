@@ -94,12 +94,12 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
             } else if (src.is<int64_t>()) {
                 // Handle 64-bit integers
                 return fl::make_shared<JsonValue>(src.as<int64_t>());
-            } else if (src.is<int32_t>()) {
+            } else if (src.is<i32>()) {
                 // Handle 32-bit integers explicitly for platform compatibility
-                return fl::make_shared<JsonValue>(static_cast<int64_t>(src.as<int32_t>()));
-            } else if (src.is<uint32_t>()) {
+                return fl::make_shared<JsonValue>(static_cast<int64_t>(src.as<i32>()));
+            } else if (src.is<u32>()) {
                 // Handle unsigned 32-bit integers
-                return fl::make_shared<JsonValue>(static_cast<int64_t>(src.as<uint32_t>()));
+                return fl::make_shared<JsonValue>(static_cast<int64_t>(src.as<u32>()));
             } else if (src.is<double>()) {
                 // Handle double precision floats - convert to float
                 return fl::make_shared<JsonValue>(static_cast<float>(src.as<double>()));
@@ -181,7 +181,7 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                 
                 for (const auto& item : arr) {
                     // Check if all items are numeric
-                    if (!item.is<int32_t>() && !item.is<int64_t>() && !item.is<double>()) {
+                    if (!item.is<i32>() && !item.is<int64_t>() && !item.is<double>()) {
                         typeInfo.disableAll();
                         #if FASTLED_DEBUG_LEVEL >= 2
                         FASTLED_WARN("Non-numeric value found, no optimization possible");
@@ -194,7 +194,7 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                         double val = item.as<double>();
                         typeInfo.checkNumericValue(val);
                     } else {
-                        int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
+                        int64_t val = item.is<i32>() ? item.as<i32>() : item.as<int64_t>();
                         typeInfo.checkIntegerValue(val);
                     }
                 }
@@ -206,26 +206,26 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                 switch (arrayType) {
                     case ALL_UINT8: {
                         // All values fit in uint8_t - most compact representation
-                        fl::vector<uint8_t> byteData;
+                        fl::vector<u8> byteData;
                         for (const auto& item : arr) {
                             if (item.is<double>()) {
-                                byteData.push_back(static_cast<uint8_t>(item.as<double>()));
+                                byteData.push_back(static_cast<u8>(item.as<double>()));
                             } else {
-                                int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
-                                byteData.push_back(static_cast<uint8_t>(val));
+                                int64_t val = item.is<i32>() ? item.as<i32>() : item.as<int64_t>();
+                                byteData.push_back(static_cast<u8>(val));
                             }
                         }
                         return fl::make_shared<JsonValue>(fl::move(byteData));
                     }
                     case ALL_INT16: {
                         // All values fit in int16_t - good compression
-                        fl::vector<int16_t> intData;
+                        fl::vector<i16> intData;
                         for (const auto& item : arr) {
                             if (item.is<double>()) {
-                                intData.push_back(static_cast<int16_t>(item.as<double>()));
+                                intData.push_back(static_cast<i16>(item.as<double>()));
                             } else {
-                                int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
-                                intData.push_back(static_cast<int16_t>(val));
+                                int64_t val = item.is<i32>() ? item.as<i32>() : item.as<int64_t>();
+                                intData.push_back(static_cast<i16>(val));
                             }
                         }
                         return fl::make_shared<JsonValue>(fl::move(intData));
@@ -237,7 +237,7 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                             if (item.is<double>()) {
                                 floatData.push_back(static_cast<float>(item.as<double>()));
                             } else {
-                                int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
+                                int64_t val = item.is<i32>() ? item.as<i32>() : item.as<int64_t>();
                                 floatData.push_back(static_cast<float>(val));
                             }
                         }

@@ -10,7 +10,7 @@ namespace fl {
 namespace platforms {
 
 // Serial initialization (no-op on POSIX)
-void begin(uint32_t baudRate) {
+void begin(u32 baudRate) {
     (void)baudRate;
     // POSIX host platform doesn't have serial ports - no-op
 }
@@ -56,14 +56,14 @@ int read() {
 }
 
 // Utility functions
-bool flush(uint32_t timeoutMs) {
+bool flush(u32 timeoutMs) {
     (void)timeoutMs;
     // Force flush stderr
     fsync(2);
     return true;
 }
 
-size_t write_bytes(const uint8_t* buffer, size_t size) {
+size_t write_bytes(const u8* buffer, size_t size) {
     if (!buffer || size == 0) return 0;
 
     // Write raw bytes to stderr

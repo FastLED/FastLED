@@ -34,7 +34,7 @@ inline const char* esp_err_to_name(esp_err_t err) {
 
 // Stub ESP32 RMT types
 struct rmt_tx_done_event_data_t {
-    uint32_t num_symbols;
+    fl::u32 num_symbols;
 };
 using rmt_channel_handle_t = void*;
 
@@ -92,12 +92,12 @@ public:
 
     static fl::size calculateMemoryBlocks(bool) { return 2; }
 
-    AllocationResult allocateTx(uint8_t, bool, bool) { return AllocationResult{}; }
-    void free(uint8_t, bool) {}
-    void recordRecoveryAllocation(uint8_t, fl::size, bool) {}
+    AllocationResult allocateTx(u8, bool, bool) { return AllocationResult{}; }
+    void free(u8, bool) {}
+    void recordRecoveryAllocation(u8, fl::size, bool) {}
     bool isDMAAvailable() { return false; }
-    bool allocateDMA(uint8_t, bool) { return false; }
-    void freeDMA(uint8_t, bool) {}
+    bool allocateDMA(u8, bool) { return false; }
+    void freeDMA(u8, bool) {}
     fl::size availableTxWords() { return 256; }
     int getDMAChannelsInUse() { return 0; }
     bool hasActiveRxChannels() const { return false; }
@@ -112,20 +112,20 @@ public:
 /// Uses std::vector for buffer storage instead of DMA-capable memory.
 /// No alignment requirements or DMA constraints on host platforms.
 class RMTBufferPool {
-    fl::vector<uint8_t> mInternalBuffer;
-    fl::vector<uint8_t> mDMABuffer;
+    fl::vector<u8> mInternalBuffer;
+    fl::vector<u8> mDMABuffer;
 public:
-    fl::span<uint8_t> acquireInternal(fl::size size) {
+    fl::span<u8> acquireInternal(fl::size size) {
         mInternalBuffer.resize(size);
-        return fl::span<uint8_t>(mInternalBuffer.data(), size);
+        return fl::span<u8>(mInternalBuffer.data(), size);
     }
 
-    fl::span<uint8_t> acquireDMA(fl::size size) {
+    fl::span<u8> acquireDMA(fl::size size) {
         mDMABuffer.resize(size);
-        return fl::span<uint8_t>(mDMABuffer.data(), size);
+        return fl::span<u8>(mDMABuffer.data(), size);
     }
 
-    void releaseInternal(fl::span<uint8_t>) {}
+    void releaseInternal(fl::span<u8>) {}
     void releaseDMA() {}
 };
 

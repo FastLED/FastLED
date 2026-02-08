@@ -50,7 +50,7 @@ extern "C" void yield(void) { }
 
 // Implementation of cled_contoller_size() moved to src/fl/fastled_internal.cpp
 
-uint8_t get_brightness();
+fl::u8 get_brightness();
 
 /// Pointer to the matrix object when using the Smart Matrix Library
 /// @see https://github.com/pixelmatix/SmartMatrix
@@ -137,7 +137,7 @@ void CFastLED::remove(fl::ChannelPtr channel) {
 // static uninitialized gControllersData produces the smallest binary on attiny85.
 static void* gControllersData[MAX_CLED_CONTROLLERS];
 
-FL_KEEP_ALIVE void CFastLED::show(uint8_t scale) {
+FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 	FL_SCOPED_TRACE;
 	onBeginFrame();
 	while(m_nMinMicros && ((fl::micros()-lastshow) < m_nMinMicros));
@@ -214,7 +214,7 @@ CLEDController & CFastLED::operator[](int x) {
 	}
 }
 
-void CFastLED::showColor(const CRGB & color, uint8_t scale) {
+void CFastLED::showColor(const CRGB & color, fl::u8 scale) {
 	while(m_nMinMicros && ((fl::micros()-lastshow) < m_nMinMicros));
 	lastshow = fl::micros();
 
@@ -302,7 +302,7 @@ void CFastLED::setCorrection(const CRGB & correction) {
 	}
 }
 
-void CFastLED::setDither(uint8_t ditherMode)  {
+void CFastLED::setDither(fl::u8 ditherMode)  {
 	CLEDController *pCur = CLEDController::head();
 	while(pCur) {
 		pCur->setDither(ditherMode);
@@ -418,7 +418,7 @@ void CFastLED::setMaxRefreshRate(fl::u16 refresh, bool constrain) {
 }
 
 
-uint8_t get_brightness() {
+fl::u8 get_brightness() {
 	return FastLED.getBrightness();
 }
 
@@ -429,12 +429,12 @@ uint8_t get_brightness() {
 // They were originally in power_mgt.cpp but have been moved here to avoid
 // circular dependencies (power_mgt.cpp should not include FastLED.h).
 
-void set_max_power_in_volts_and_milliamps(uint8_t volts, uint32_t milliamps)
+void set_max_power_in_volts_and_milliamps(fl::u8 volts, fl::u32 milliamps)
 {
 	FastLED.setMaxPowerInVoltsAndMilliamps(volts, milliamps);
 }
 
-void set_max_power_in_milliwatts(uint32_t powerInmW)
+void set_max_power_in_milliwatts(fl::u32 powerInmW)
 {
 	FastLED.setMaxPowerInMilliWatts(powerInmW);
 }
@@ -445,7 +445,7 @@ void show_at_max_brightness_for_power()
 	FastLED.show();
 }
 
-void delay_at_max_brightness_for_power(uint16_t ms)
+void delay_at_max_brightness_for_power(fl::u16 ms)
 {
 	FastLED.delay(ms);
 }

@@ -23,11 +23,11 @@ namespace fl {
 /// that something about the way gcc does register allocation results in the bit-band code being slower.  It will need more fine tuning.
 /// The registers are data output, set output, clear output, toggle output, input, and direction
 
-template<uint8_t PIN, bsp_io_port_pin_t bspPin, uint32_t _PORT> class _ARMPIN {
+template<u8 PIN, bsp_io_port_pin_t bspPin, u32 _PORT> class _ARMPIN {
 public:
 
-    typedef volatile uint16_t * port_ptr_t;
-    typedef uint16_t port_t;
+    typedef volatile u16 * port_ptr_t;
+    typedef u16 port_t;
 
     /// Pin is valid for use
     constexpr static bool validpin() { return true; }

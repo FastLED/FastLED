@@ -32,7 +32,7 @@ void DropDetector::update(shared_ptr<AudioContext> context) {
 
     const FFTBins& fft = context->getFFT(32);
     float rms = context->getRMS();
-    uint32_t timestamp = context->getTimestamp();
+    u32 timestamp = context->getTimestamp();
 
     // Calculate frequency band energies
     float bassEnergy = getBassEnergy(fft);
@@ -193,7 +193,7 @@ float DropDetector::calculateDropImpact(float energyFlux, float bassFlux, float 
     return fl::fl_max(0.0f, fl::fl_min(1.0f, impact));
 }
 
-bool DropDetector::shouldTriggerDrop(float impact, uint32_t timestamp) const {
+bool DropDetector::shouldTriggerDrop(float impact, u32 timestamp) const {
     // Don't trigger if:
     // 1. Impact below threshold
     if (impact < mImpactThreshold) {
@@ -201,7 +201,7 @@ bool DropDetector::shouldTriggerDrop(float impact, uint32_t timestamp) const {
     }
 
     // 2. Too soon after last drop (cooldown)
-    uint32_t timeSinceLast = timestamp - mLastDrop.timestamp;
+    u32 timeSinceLast = timestamp - mLastDrop.timestamp;
     if (timeSinceLast < mMinTimeBetweenDrops) {
         return false;
     }

@@ -29,7 +29,7 @@
 namespace fl {
 
 /// @brief Error codes for RMT memory allocation
-enum class RmtMemoryError : uint8_t {
+enum class RmtMemoryError : u8 {
     INSUFFICIENT_TX_MEMORY = 1,  ///< Not enough TX memory available
     INSUFFICIENT_RX_MEMORY = 2,  ///< Not enough RX memory available
     CHANNEL_ALREADY_ALLOCATED = 3,  ///< Channel already has an allocation
@@ -152,7 +152,7 @@ public:
     ///
     /// When with_dma=true in rmt_tx_channel_config_t, mem_block_symbols controls
     /// the DRAM buffer size, NOT on-chip RMT memory.
-    Result<size_t, RmtMemoryError> allocateTx(uint8_t channel_id, bool use_dma, bool networkActive = false);
+    Result<size_t, RmtMemoryError> allocateTx(u8 channel_id, bool use_dma, bool networkActive = false);
 
     /// @brief Allocate memory for RX channel with user-specified size
     /// @param channel_id RMT channel ID (0-7 for ESP32, 0-3 for S3, 0-1 for C3/C6/H2)
@@ -166,12 +166,12 @@ public:
     ///
     /// When with_dma=true in rmt_rx_channel_config_t, mem_block_symbols controls
     /// the DRAM buffer size, NOT on-chip RMT memory.
-    Result<size_t, RmtMemoryError> allocateRx(uint8_t channel_id, size_t symbols, bool use_dma = false);
+    Result<size_t, RmtMemoryError> allocateRx(u8 channel_id, size_t symbols, bool use_dma = false);
 
     /// @brief Free allocated memory for a channel
     /// @param channel_id RMT channel ID
     /// @param is_tx true for TX channel, false for RX channel
-    void free(uint8_t channel_id, bool is_tx);
+    void free(u8 channel_id, bool is_tx);
 
     /// @brief Record allocation after recovery (channel already created externally)
     /// @param channel_id RMT channel ID
@@ -181,7 +181,7 @@ public:
     /// This is used during memory recovery when the ESP-IDF channel was created
     /// successfully but our internal allocation attempt had already been freed.
     /// Adds the allocation to the ledger without re-allocating memory.
-    void recordRecoveryAllocation(uint8_t channel_id, size_t words, bool is_tx);
+    void recordRecoveryAllocation(u8 channel_id, size_t words, bool is_tx);
 
     /// @brief Query available TX memory
     /// @return Number of words available for TX allocation
@@ -206,7 +206,7 @@ public:
     /// @param channel_id RMT channel ID
     /// @param is_tx true for TX channel, false for RX channel
     /// @return Number of words allocated, or 0 if not found
-    size_t getAllocatedWords(uint8_t channel_id, bool is_tx) const;
+    size_t getAllocatedWords(u8 channel_id, bool is_tx) const;
 
     // ========================================================================
     // State Inspection Methods - For Testing and Debugging
@@ -336,14 +336,14 @@ public:
     ///
     /// Only one channel (TX or RX) can hold the DMA slot at a time.
     /// Subsequent allocations will fail until the DMA channel is freed.
-    bool allocateDMA(uint8_t channel_id, bool is_tx);
+    bool allocateDMA(u8 channel_id, bool is_tx);
 
     /// @brief Free the DMA channel slot
     /// @param channel_id Channel ID releasing DMA
     /// @param is_tx true for TX channel, false for RX channel
     ///
     /// Allows another channel to use DMA after this channel releases it.
-    void freeDMA(uint8_t channel_id, bool is_tx);
+    void freeDMA(u8 channel_id, bool is_tx);
 
     /// @brief Get current DMA allocation info (debug/logging)
     /// @return Number of DMA channels in use (0 or 1)
@@ -359,13 +359,13 @@ private:
 
     /// @brief Per-channel allocation record
     struct ChannelAllocation {
-        uint8_t channel_id;
+        u8 channel_id;
         size_t words;
         bool is_tx;
         bool is_dma;  ///< DMA channels don't consume on-chip memory
 
         ChannelAllocation() : channel_id(0), words(0), is_tx(false), is_dma(false) {}
-        ChannelAllocation(uint8_t id, size_t w, bool tx, bool dma)
+        ChannelAllocation(u8 id, size_t w, bool tx, bool dma)
             : channel_id(id), words(w), is_tx(tx), is_dma(dma) {}
     };
 
@@ -398,7 +398,7 @@ private:
 
     /// @brief DMA channel allocation tracking (ESP32-S3: 1 channel shared TX/RX)
     struct DMAAllocation {
-        uint8_t channel_id;  ///< Channel ID holding DMA
+        u8 channel_id;  ///< Channel ID holding DMA
         bool is_tx;          ///< true if TX channel, false if RX channel
         bool allocated;      ///< true if DMA slot is currently allocated
     };
@@ -414,10 +414,10 @@ private:
     /// @param channel_id RMT channel ID
     /// @param is_tx true for TX, false for RX
     /// @return Pointer to allocation, or nullptr if not found
-    ChannelAllocation* findAllocation(uint8_t channel_id, bool is_tx);
+    ChannelAllocation* findAllocation(u8 channel_id, bool is_tx);
 
     /// @brief Find allocation record for a channel (const version)
-    const ChannelAllocation* findAllocation(uint8_t channel_id, bool is_tx) const;
+    const ChannelAllocation* findAllocation(u8 channel_id, bool is_tx) const;
 
     /// @brief Initialize platform-specific memory limits
     static void initPlatformLimits(size_t& total_tx, size_t& total_rx);

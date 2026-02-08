@@ -79,7 +79,7 @@ bool UartPeripheralMock::isInitialized() const {
     return mInitialized;
 }
 
-bool UartPeripheralMock::writeBytes(const uint8_t* data, size_t length) {
+bool UartPeripheralMock::writeBytes(const u8* data, size_t length) {
     if (!mInitialized) {
         return false;  // Not initialized
     }
@@ -104,7 +104,7 @@ bool UartPeripheralMock::writeBytes(const uint8_t* data, size_t length) {
             // Calculate transmission time in microseconds
             uint64_t transmission_time_us = (total_bits * 1000000ULL) / mConfig.mBaudRate;
             // Add small overhead for buffer switching (10 microseconds)
-            mTransmissionDelayUs = static_cast<uint32_t>(transmission_time_us) + 10;
+            mTransmissionDelayUs = static_cast<u32>(transmission_time_us) + 10;
         } else {
             // Fallback: Use a small default delay if baud rate not configured
             mTransmissionDelayUs = 100;  // 100 microseconds default
@@ -119,7 +119,7 @@ bool UartPeripheralMock::writeBytes(const uint8_t* data, size_t length) {
     return true;
 }
 
-bool UartPeripheralMock::waitTxDone(uint32_t timeout_ms) {
+bool UartPeripheralMock::waitTxDone(u32 timeout_ms) {
     if (!mInitialized) {
         return false;  // Not initialized
     }
@@ -186,7 +186,7 @@ const UartPeripheralConfig& UartPeripheralMock::getConfig() const {
 // Mock-Specific API
 //=============================================================================
 
-void UartPeripheralMock::setTransmissionDelay(uint32_t microseconds) {
+void UartPeripheralMock::setTransmissionDelay(u32 microseconds) {
     mTransmissionDelayUs = microseconds;
     mManualDelaySet = true;
 }
@@ -210,7 +210,7 @@ void UartPeripheralMock::reset() {
     mConfig = UartPeripheralConfig();
 }
 
-fl::vector<uint8_t> UartPeripheralMock::getCapturedBytes() const {
+fl::vector<u8> UartPeripheralMock::getCapturedBytes() const {
     return mCapturedData;
 }
 
@@ -279,7 +279,7 @@ fl::vector<bool> UartPeripheralMock::getWaveformWithFraming() const {
     fl::vector<bool> waveform;
     waveform.reserve(mCapturedData.size() * 10);  // 10 bits per byte (8N1)
 
-    for (uint8_t byte : mCapturedData) {
+    for (u8 byte : mCapturedData) {
         // Start bit (always LOW/false)
         waveform.push_back(false);
 

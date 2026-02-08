@@ -118,14 +118,14 @@ rmt_item32_t ChannelEngineRMT4Impl::makeZeroSymbol(const ChipsetTimingConfig& ti
     // Zero bit timing: T0H (high) + T0L (low)
     // For WS2812: T0H=400ns, T0L=850ns
 
-    uint32_t T1 = timing.t1_ns;  // T0H in nanoseconds
-    uint32_t T2 = timing.t2_ns;  // T0L (partial)
-    uint32_t T3 = timing.t3_ns;  // T0L (remaining)
+    u32 T1 = timing.t1_ns;  // T0H in nanoseconds
+    u32 T2 = timing.t2_ns;  // T0L (partial)
+    u32 T3 = timing.t3_ns;  // T0L (remaining)
 
     // Convert to CPU cycles, then to RMT cycles
-    uint32_t T1_cycles = NS_TO_ESP_CYCLES(T1);
-    uint32_t T2_cycles = NS_TO_ESP_CYCLES(T2);
-    uint32_t T3_cycles = NS_TO_ESP_CYCLES(T3);
+    u32 T1_cycles = NS_TO_ESP_CYCLES(T1);
+    u32 T2_cycles = NS_TO_ESP_CYCLES(T2);
+    u32 T3_cycles = NS_TO_ESP_CYCLES(T3);
 
     rmt_item32_t zero;
     zero.level0 = 1;  // High during T0H
@@ -140,14 +140,14 @@ rmt_item32_t ChannelEngineRMT4Impl::makeOneSymbol(const ChipsetTimingConfig& tim
     // One bit timing: T1H (high) + T1L (low)
     // For WS2812: T1H=850ns, T1L=400ns
 
-    uint32_t T1 = timing.t1_ns;  // T1H (partial)
-    uint32_t T2 = timing.t2_ns;  // T1H (remaining)
-    uint32_t T3 = timing.t3_ns;  // T1L
+    u32 T1 = timing.t1_ns;  // T1H (partial)
+    u32 T2 = timing.t2_ns;  // T1H (remaining)
+    u32 T3 = timing.t3_ns;  // T1L
 
     // Convert to CPU cycles, then to RMT cycles
-    uint32_t T1_cycles = NS_TO_ESP_CYCLES(T1);
-    uint32_t T2_cycles = NS_TO_ESP_CYCLES(T2);
-    uint32_t T3_cycles = NS_TO_ESP_CYCLES(T3);
+    u32 T1_cycles = NS_TO_ESP_CYCLES(T1);
+    u32 T2_cycles = NS_TO_ESP_CYCLES(T2);
+    u32 T3_cycles = NS_TO_ESP_CYCLES(T3);
 
     rmt_item32_t one;
     one.level0 = 1;  // High during T1H
@@ -334,9 +334,9 @@ bool ChannelEngineRMT4Impl::configureChannel(
     state->pixelDataPos = 0;
 
     // Calculate expected timing for WiFi interference detection
-    uint32_t T1_cycles = NS_TO_ESP_CYCLES(timing.t1_ns);
-    uint32_t T2_cycles = NS_TO_ESP_CYCLES(timing.t2_ns);
-    uint32_t T3_cycles = NS_TO_ESP_CYCLES(timing.t3_ns);
+    u32 T1_cycles = NS_TO_ESP_CYCLES(timing.t1_ns);
+    u32 T2_cycles = NS_TO_ESP_CYCLES(timing.t2_ns);
+    u32 T3_cycles = NS_TO_ESP_CYCLES(timing.t3_ns);
     state->cyclesPerFill = (T1_cycles + T2_cycles + T3_cycles) * PULSES_PER_FILL_RMT4;
     state->maxCyclesPerFill = state->cyclesPerFill + state->cyclesPerFill / 2;
     state->lastFill = 0;
@@ -565,7 +565,7 @@ IChannelEngine::EngineState ChannelEngineRMT4Impl::poll() {
         } else {
             // Channel still transmitting - check for timeout
 #if FASTLED_RMT4_TRANSMISSION_TIMEOUT_MS > 0
-            uint32_t elapsed = fl::millis() - state.transmissionStartTime;
+            u32 elapsed = fl::millis() - state.transmissionStartTime;
             if (elapsed > FASTLED_RMT4_TRANSMISSION_TIMEOUT_MS) {
                 // Timeout detected - force channel reset
                 FL_WARN("poll: Channel " << state.channel << " timed out after "

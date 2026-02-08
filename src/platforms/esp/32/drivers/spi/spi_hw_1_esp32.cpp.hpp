@@ -40,7 +40,7 @@ public:
     void end() override;
     DMABuffer acquireDMABuffer(size_t bytes_per_lane) override;
     bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
-    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max()) override;
+    bool waitComplete(u32 timeout_ms = fl::numeric_limits<u32>::max()) override;
     bool isBusy() const override;
     bool isInitialized() const override;
     int getBusId() const override;
@@ -92,12 +92,12 @@ bool SPISingleESP32::begin(const SpiHw1::Config& config) {
     }
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
-    if (mBusId != -1 && config.bus_num != static_cast<uint8_t>(mBusId)) {
+    if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
         return false;  // Mismatch: driver is for bus X but config requests bus Y
     }
 
     // Use config.bus_num to determine SPI host
-    uint8_t bus_num = (mBusId != -1) ? static_cast<uint8_t>(mBusId) : config.bus_num;
+    u8 bus_num = (mBusId != -1) ? static_cast<u8>(mBusId) : config.bus_num;
 
     // Convert platform-agnostic bus_num to ESP32 SPI host
     if (bus_num == 2) {
@@ -201,7 +201,7 @@ bool SPISingleESP32::transmit(TransmitMode mode) {
     (void)mode;
 
     // Get the buffer span
-    fl::span<uint8_t> buffer_span = mDMABuffer.data();
+    fl::span<u8> buffer_span = mDMABuffer.data();
 
     // Configure transaction using internal DMA buffer
     fl::memset(&mTransaction, 0, sizeof(mTransaction));
@@ -218,7 +218,7 @@ bool SPISingleESP32::transmit(TransmitMode mode) {
     return true;
 }
 
-bool SPISingleESP32::waitComplete(uint32_t timeout_ms) {
+bool SPISingleESP32::waitComplete(u32 timeout_ms) {
     if (!mTransactionActive) {
         return true;  // Nothing to wait for
     }

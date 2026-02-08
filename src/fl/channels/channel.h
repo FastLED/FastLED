@@ -50,7 +50,7 @@ public:
 
     /// @brief Get the channel ID
     /// @return Channel ID (always increments, starts at 0)
-    int32_t id() const { return mId; }
+    i32 id() const { return mId; }
 
     /// @brief Get the pin number for this channel (data pin)
     /// @return Pin number
@@ -112,14 +112,14 @@ private:
     Channel(Channel&&) = delete;
     Channel& operator=(Channel&&) = delete;
 
-    static int32_t nextId();
+    static i32 nextId();
 
     ChipsetVariant mChipset;         // Chipset configuration (clockless or SPI)
     const int mPin;                  // Data pin (backwards compatibility)
     const ChipsetTimingConfig mTiming; // Timing (backwards compatibility, clockless only)
     const EOrder mRgbOrder;
     IChannelEngine* mEngine;         // Singleton pointer, not owned
-    const int32_t mId;
+    const i32 mId;
     ChannelDataPtr mChannelData;
 };
 

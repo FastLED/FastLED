@@ -46,7 +46,7 @@ bool keep_going() {
 // Only sets delay to zero when FASTLED_STUB_MAIN_FAST_EXIT is defined
 static inline void maybe_set_delay_to_zero() {
 #if defined(FASTLED_STUB_MAIN_FAST_EXIT) && (!defined(ARDUINO) || defined(FASTLED_USE_STUB_ARDUINO))
-    setDelayFunction([](uint32_t ms) {
+    setDelayFunction([](u32 ms) {
         (void)ms; // Suppress unused parameter warning
     });
 #endif

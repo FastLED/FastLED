@@ -105,8 +105,8 @@ public:
     bool initialize(const UartPeripheralConfig& config) override;
     void deinitialize() override;
     bool isInitialized() const override;
-    bool writeBytes(const uint8_t* data, size_t length) override;
-    bool waitTxDone(uint32_t timeout_ms) override;
+    bool writeBytes(const u8* data, size_t length) override;
+    bool waitTxDone(u32 timeout_ms) override;
     bool isBusy() const override;
     const UartPeripheralConfig& getConfig() const override;
 
@@ -123,7 +123,7 @@ public:
     ///
     /// Simulates hardware transmission time. Affects waitTxDone() behavior.
     /// Default: 0 (instant transmission for fast tests)
-    void setTransmissionDelay(uint32_t microseconds);
+    void setTransmissionDelay(u32 microseconds);
 
     /// @brief Force immediate transmission completion
     ///
@@ -151,7 +151,7 @@ public:
     ///
     /// Returns raw bytes submitted via writeBytes(). Does NOT include
     /// start/stop bits. Use getWaveformWithFraming() for full UART frames.
-    fl::vector<uint8_t> getCapturedBytes() const;
+    fl::vector<u8> getCapturedBytes() const;
 
     /// @brief Get number of captured bytes
     /// @return Total number of bytes captured since last reset()
@@ -273,8 +273,8 @@ private:
     UartPeripheralConfig mConfig;                    ///< Current configuration
     bool mInitialized;                     ///< Initialization state
     bool mBusy;                            ///< Transmission in progress
-    fl::vector<uint8_t> mCapturedData;     ///< Captured byte history
-    uint32_t mTransmissionDelayUs;         ///< Simulated TX delay (microseconds)
+    fl::vector<u8> mCapturedData;     ///< Captured byte history
+    u32 mTransmissionDelayUs;         ///< Simulated TX delay (microseconds)
     bool mManualDelaySet;                  ///< True if delay was manually set via setTransmissionDelay()
     uint64_t mLastWriteTimestamp;          ///< Timestamp of last writeBytes() call
     uint64_t mResetExpireTime;             ///< Timestamp when reset period expires

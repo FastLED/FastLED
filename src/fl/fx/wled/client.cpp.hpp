@@ -13,7 +13,7 @@ WLEDClient::WLEDClient(fl::shared_ptr<IFastLED> controller)
     }
 }
 
-void WLEDClient::setBrightness(uint8_t brightness) {
+void WLEDClient::setBrightness(u8 brightness) {
     mBrightness = brightness;
     FL_DBG("WLEDClient: setBrightness(" << static_cast<int>(mBrightness) << ")");
 
@@ -120,7 +120,7 @@ void WLEDClient::setTemperature(CRGB temperature) {
     mController->setTemperature(temperature);
 }
 
-void WLEDClient::setMaxRefreshRate(uint16_t fps) {
+void WLEDClient::setMaxRefreshRate(u16 fps) {
     FL_DBG("WLEDClient: setMaxRefreshRate(" << fps << ")");
 
     if (!mController) {
@@ -130,7 +130,7 @@ void WLEDClient::setMaxRefreshRate(uint16_t fps) {
     mController->setMaxRefreshRate(fps);
 }
 
-uint16_t WLEDClient::getMaxRefreshRate() const {
+u16 WLEDClient::getMaxRefreshRate() const {
     if (!mController) {
         return 0;
     }

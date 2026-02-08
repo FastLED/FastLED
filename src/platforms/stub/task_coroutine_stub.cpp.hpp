@@ -76,7 +76,7 @@ public:
     TaskCoroutineStubImpl(fl::string name,
                           TaskFunction function,
                           size_t /*stack_size*/,   // Ignored on host
-                          uint8_t /*priority*/)    // Ignored on host
+                          u8 /*priority*/)    // Ignored on host
         : mName(fl::move(name))
         , mFunction(fl::move(function)) {
 
@@ -184,7 +184,7 @@ private:
 TaskCoroutineStub* TaskCoroutineStub::create(fl::string name,
                                               TaskFunction function,
                                               size_t stack_size,
-                                              uint8_t priority) {
+                                              u8 priority) {
     return new TaskCoroutineStubImpl(fl::move(name), fl::move(function), stack_size, priority);
 }
 
@@ -195,7 +195,7 @@ TaskCoroutineStub* TaskCoroutineStub::create(fl::string name,
 ITaskCoroutine* createTaskCoroutine(fl::string name,
                                      ITaskCoroutine::TaskFunction function,
                                      size_t stack_size,
-                                     uint8_t priority) {
+                                     u8 priority) {
     return TaskCoroutineStub::create(fl::move(name), fl::move(function), stack_size, priority);
 }
 

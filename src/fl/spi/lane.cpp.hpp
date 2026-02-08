@@ -10,7 +10,7 @@ Lane::Lane(size_t lane_id, MultiLaneDevice* parent)
     (void)parent;  // Unused parameter (reserved for future use)
 }
 
-void Lane::write(const uint8_t* data, size_t size) {
+void Lane::write(const u8* data, size_t size) {
     if (!data || size == 0) {
         FL_WARN("Lane " << mLaneId << ": Invalid data or size");
         return;
@@ -27,16 +27,16 @@ void Lane::write(const uint8_t* data, size_t size) {
     FL_DBG("Lane " << mLaneId << ": Buffered " << size << " bytes");
 }
 
-fl::span<uint8_t> Lane::getBuffer(size_t size) {
+fl::span<u8> Lane::getBuffer(size_t size) {
     // Resize buffer to requested size
     mBuffer.resize(size);
 
     // Return span to buffer
-    return fl::span<uint8_t>(mBuffer.data(), mBuffer.size());
+    return fl::span<u8>(mBuffer.data(), mBuffer.size());
 }
 
-fl::span<const uint8_t> Lane::data() const {
-    return fl::span<const uint8_t>(mBuffer.data(), mBuffer.size());
+fl::span<const u8> Lane::data() const {
+    return fl::span<const u8>(mBuffer.data(), mBuffer.size());
 }
 
 } // namespace spi

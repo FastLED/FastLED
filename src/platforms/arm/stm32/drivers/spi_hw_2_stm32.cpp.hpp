@@ -111,7 +111,7 @@ public:
     /// @brief Wait for current transmission to complete
     /// @param timeout_ms Maximum time to wait in milliseconds (fl::numeric_limits<uint32_t>::max() = infinite)
     /// @return true if transmission completed, false on timeout
-    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max()) override;
+    bool waitComplete(u32 timeout_ms = fl::numeric_limits<u32>::max()) override;
 
     /// @brief Check if transmission is currently in progress
     /// @return true if busy, false if idle
@@ -144,7 +144,7 @@ private:
     /// @param dst0 Destination buffer for lane 0 (odd bits)
     /// @param dst1 Destination buffer for lane 1 (even bits)
     /// @param dst_len Destination buffer length (will be src_len * 4 bits per byte / 2 lanes = src_len * 2 bytes)
-    void interleaveBits(const uint8_t* src, size_t src_len, uint8_t* dst0, uint8_t* dst1, size_t dst_len);
+    void interleaveBits(const u8* src, size_t src_len, u8* dst0, u8* dst1, size_t dst_len);
 
     int mBusId;  ///< Logical bus identifier
     const char* mName;
@@ -164,7 +164,7 @@ private:
 #endif
 
     // DMA buffer management (zero-copy API)
-    fl::span<uint8_t> mDMABuffer;    ///< Allocated DMA buffer (interleaved format for dual-lane)
+    fl::span<u8> mDMABuffer;    ///< Allocated DMA buffer (interleaved format for dual-lane)
     size_t mMaxBytesPerLane;         ///< Max bytes per lane we've allocated for
     size_t mCurrentTotalSize;        ///< Current transmission size (bytes_per_lane * 2)
     bool mBufferAcquired;            ///< True if buffer acquired and ready for transmit
@@ -179,10 +179,10 @@ private:
     bool mInitialized;
 
     // Configuration
-    uint8_t mClockPin;
-    uint8_t mData0Pin;
-    uint8_t mData1Pin;
-    uint32_t mClockSpeedHz;
+    u8 mClockPin;
+    u8 mData0Pin;
+    u8 mData1Pin;
+    u32 mClockSpeedHz;
 
     SPIDualSTM32(const SPIDualSTM32&) = delete;
     SPIDualSTM32& operator=(const SPIDualSTM32&) = delete;
@@ -225,7 +225,7 @@ bool SPIDualSTM32::begin(const SpiHw2::Config& config) {
     }
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
-    if (mBusId != -1 && config.bus_num != static_cast<uint8_t>(mBusId)) {
+    if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
         FL_WARN("SPIDualSTM32: Bus ID mismatch");
         return false;
     }
@@ -321,7 +321,7 @@ bool SPIDualSTM32::begin(const SpiHw2::Config& config) {
     }
 
     // Get DMA channel number for timer update event
-    uint32_t dma_channel = getDMAChannel(mTimer);
+    u32 dma_channel = getDMAChannel(mTimer);
     if (dma_channel == 0xFF) {
         FL_WARN("SPIDualSTM32: Failed to get DMA channel for timer");
         mTimer = nullptr;
@@ -387,16 +387,16 @@ DMABuffer SPIDualSTM32::acquireDMABuffer(size_t bytes_per_lane) {
     if (bytes_per_lane > mMaxBytesPerLane) {
         if (!mDMABuffer.empty()) {
             free(mDMABuffer.data());
-            mDMABuffer = fl::span<uint8_t>();
+            mDMABuffer = fl::span<u8>();
         }
 
         // Allocate DMA-capable memory (regular malloc for STM32)
-        uint8_t* ptr = static_cast<uint8_t*>(malloc(total_size));
+        u8* ptr = static_cast<u8*>(malloc(total_size));
         if (!ptr) {
             return DMABuffer(SPIError::ALLOCATION_FAILED);
         }
 
-        mDMABuffer = fl::span<uint8_t>(ptr, total_size);
+        mDMABuffer = fl::span<u8>(ptr, total_size);
         mMaxBytesPerLane = bytes_per_lane;
     }
 
@@ -443,8 +443,8 @@ bool SPIDualSTM32::allocateDMABuffer(size_t required_size) {
     return true;
 }
 
-void SPIDualSTM32::interleaveBits(const uint8_t* src, size_t src_len,
-                                   uint8_t* dst0, uint8_t* dst1, size_t dst_len) {
+void SPIDualSTM32::interleaveBits(const u8* src, size_t src_len,
+                                   u8* dst0, u8* dst1, size_t dst_len) {
     // Interleave bits from source bytes across two lanes
     // Lane 0 (dst0) gets: bits 7, 5, 3, 1 from each byte
     // Lane 1 (dst1) gets: bits 6, 4, 2, 0 from each byte
@@ -456,17 +456,17 @@ void SPIDualSTM32::interleaveBits(const uint8_t* src, size_t src_len,
     (void)dst_len;  // Unused parameter, kept for interface consistency
 
     for (size_t i = 0; i < src_len; i++) {
-        uint8_t byte = src[i];
+        u8 byte = src[i];
 
         // Extract odd bits (7, 5, 3, 1) for lane 0
-        uint8_t lane0_bits = 0;
+        u8 lane0_bits = 0;
         lane0_bits |= ((byte >> 7) & 1) << 3;  // Bit 7 -> position 3
         lane0_bits |= ((byte >> 5) & 1) << 2;  // Bit 5 -> position 2
         lane0_bits |= ((byte >> 3) & 1) << 1;  // Bit 3 -> position 1
         lane0_bits |= ((byte >> 1) & 1) << 0;  // Bit 1 -> position 0
 
         // Extract even bits (6, 4, 2, 0) for lane 1
-        uint8_t lane1_bits = 0;
+        u8 lane1_bits = 0;
         lane1_bits |= ((byte >> 6) & 1) << 3;  // Bit 6 -> position 3
         lane1_bits |= ((byte >> 4) & 1) << 2;  // Bit 4 -> position 2
         lane1_bits |= ((byte >> 2) & 1) << 1;  // Bit 2 -> position 1
@@ -513,7 +513,7 @@ bool SPIDualSTM32::transmit(TransmitMode mode) {
 
     // Interleave bits from mDMABuffer across two lanes
     interleaveBits(mDMABuffer.data(), mCurrentTotalSize,
-                   (uint8_t*)mDMABuffer0, (uint8_t*)mDMABuffer1,
+                   (u8*)mDMABuffer0, (u8*)mDMABuffer1,
                    buffer_size_per_lane);
 
     // Start DMA transfers and timer
@@ -528,7 +528,7 @@ bool SPIDualSTM32::transmit(TransmitMode mode) {
     }
 
     // Get DMA channel number for timer update event
-    uint32_t dma_channel = getDMAChannel(mTimer);
+    u32 dma_channel = getDMAChannel(mTimer);
     if (dma_channel == 0xFF) {
         FL_WARN("SPIDualSTM32: Failed to get DMA channel for timer");
         return false;
@@ -579,7 +579,7 @@ bool SPIDualSTM32::transmit(TransmitMode mode) {
 #endif
 }
 
-bool SPIDualSTM32::waitComplete(uint32_t timeout_ms) {
+bool SPIDualSTM32::waitComplete(u32 timeout_ms) {
     if (!mTransactionActive) {
         return true;  // Nothing to wait for
     }
@@ -587,8 +587,8 @@ bool SPIDualSTM32::waitComplete(uint32_t timeout_ms) {
     // Wait for DMA completion with timeout
 #if defined(HAL_DMA_MODULE_ENABLED) && defined(FASTLED_STM32_HAS_DMA_STREAMS)
     // Record start time for timeout checking
-    uint32_t start_ms = fl::millis();
-    bool timeout_enabled = (timeout_ms != fl::numeric_limits<uint32_t>::max());
+    u32 start_ms = fl::millis();
+    bool timeout_enabled = (timeout_ms != fl::numeric_limits<u32>::max());
 
     // Poll DMA completion flags for both streams
     while (true) {
@@ -603,7 +603,7 @@ bool SPIDualSTM32::waitComplete(uint32_t timeout_ms) {
 
         // Check timeout
         if (timeout_enabled) {
-            uint32_t elapsed_ms = fl::millis() - start_ms;
+            u32 elapsed_ms = fl::millis() - start_ms;
             if (elapsed_ms >= timeout_ms) {
                 FL_WARN("SPIDualSTM32: DMA transfer timeout after " << elapsed_ms << " ms");
 
@@ -715,7 +715,7 @@ void SPIDualSTM32::cleanup() {
         // Free main DMA buffer
         if (!mDMABuffer.empty()) {
             free(mDMABuffer.data());
-            mDMABuffer = fl::span<uint8_t>();
+            mDMABuffer = fl::span<u8>();
             mMaxBytesPerLane = 0;
             mCurrentTotalSize = 0;
             mBufferAcquired = false;

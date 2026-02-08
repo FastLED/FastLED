@@ -145,7 +145,7 @@ struct rgb {
     float blue = 0.0f;
 };
 
-static const uint8_t PERLIN_NOISE[] = {
+static const fl::u8 PERLIN_NOISE[] = {
     151, 160, 137, 91,  90,  15,  131, 13,  201, 95,  96,  53,  194, 233, 7,
     225, 140, 36,  103, 30,  69,  142, 8,   99,  37,  240, 21,  10,  23,  190,
     6,   148, 247, 120, 234, 75,  0,   26,  197, 62,  94,  252, 219, 203, 117,
@@ -165,9 +165,9 @@ static const uint8_t PERLIN_NOISE[] = {
     222, 114, 67,  29,  24,  72,  243, 141, 128, 195, 78,  66,  215, 61,  156,
     180};
 
-FASTLED_FORCE_INLINE uint8_t P(uint8_t x) {
-    const uint8_t idx = x & 255;
-    const uint8_t *ptr = PERLIN_NOISE + idx;
+FASTLED_FORCE_INLINE fl::u8 P(fl::u8 x) {
+    const fl::u8 idx = x & 255;
+    const fl::u8 *ptr = PERLIN_NOISE + idx;
     return *ptr;
 }
 
@@ -214,7 +214,7 @@ class ANIMartRIX {
 
     virtual ~ANIMartRIX() {}
 
-    virtual uint16_t xyMap(uint16_t x, uint16_t y) = 0;
+    virtual fl::u16 xyMap(fl::u16 x, fl::u16 y) = 0;
 
     fl::optional<fl::u32> currentTime;
     void setTime(fl::u32 t) { currentTime = t; }
@@ -4087,7 +4087,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                uint8_t a = getTime() / 100;
+                fl::u8 a = getTime() / 100;
                 CRGB p = CRGB(CHSV(((a + show1 + show2) + show3), 255, 255));
                 rgb pixel;
                 pixel.red = p.red;

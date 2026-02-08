@@ -11,8 +11,8 @@
 
 // Forward declare WASM timer functions (defined in timer.cpp.hpp)
 extern "C" {
-    uint32_t millis();
-    uint32_t micros();
+    fl::u32 millis();
+    fl::u32 micros();
 }
 
 namespace fl {
@@ -20,7 +20,7 @@ namespace platforms {
 
 void delay(fl::u32 ms) {
     if (ms == 0) return;
-    uint32_t end = ::millis() + ms;
+    u32 end = ::millis() + ms;
     while (::millis() < end) {
         // Busy-wait (no async pumping at platform layer)
     }

@@ -111,7 +111,7 @@ class TwinkleFox : public Fx1d {
     CRGBPalette16 targetPalette;
     CRGBPalette16 currentPalette;
 
-    TwinkleFox(uint16_t num_leds)
+    TwinkleFox(u16 num_leds)
         : Fx1d(num_leds), backgroundColor(CRGB::Black),
           twinkleSpeed(TWINKLE_SPEED), twinkleDensity(TWINKLE_DENSITY),
           coolLikeIncandescent(COOL_LIKE_INCANDESCENT),
@@ -131,8 +131,8 @@ class TwinkleFox : public Fx1d {
 
   private:
     CRGB backgroundColor;
-    uint8_t twinkleSpeed;
-    uint8_t twinkleDensity;
+    u8 twinkleSpeed;
+    u8 twinkleDensity;
     bool coolLikeIncandescent;
     bool autoSelectBackgroundColor;
 
@@ -141,14 +141,14 @@ class TwinkleFox : public Fx1d {
         // It MUST be reset to the same starting value each time
         // this function is called, so that the sequence of 'random'
         // numbers that it generates is (paradoxically) stable.
-        uint16_t PRNG16 = 11337;
+        u16 PRNG16 = 11337;
         fl::u32 clock32 = fl::millis();
 
         CRGB bg = backgroundColor;
         if (autoSelectBackgroundColor &&
             currentPalette[0] == currentPalette[1]) {
             bg = currentPalette[0];
-            uint8_t bglight = bg.getAverageLight();
+            u8 bglight = bg.getAverageLight();
             if (bglight > 64) {
                 bg.nscale8_video(16);
             } else if (bglight > 16) {
@@ -158,23 +158,23 @@ class TwinkleFox : public Fx1d {
             }
         }
 
-        uint8_t backgroundBrightness = bg.getAverageLight();
+        u8 backgroundBrightness = bg.getAverageLight();
 
-        for (uint16_t i = 0; i < mNumLeds; i++) {
-            PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384;
-            uint16_t myclockoffset16 = PRNG16;
-            PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384;
-            uint8_t myspeedmultiplierQ5_3 =
+        for (u16 i = 0; i < mNumLeds; i++) {
+            PRNG16 = (u16)(PRNG16 * 2053) + 1384;
+            u16 myclockoffset16 = PRNG16;
+            PRNG16 = (u16)(PRNG16 * 2053) + 1384;
+            u8 myspeedmultiplierQ5_3 =
                 ((((PRNG16 & 0xFF) >> 4) + (PRNG16 & 0x0F)) & 0x0F) + 0x08;
             fl::u32 myclock30 =
                 (fl::u32)((clock32 * myspeedmultiplierQ5_3) >> 3) +
                 myclockoffset16;
-            uint8_t myunique8 = PRNG16 >> 8;
+            u8 myunique8 = PRNG16 >> 8;
 
             CRGB c = computeOneTwinkle(myclock30, myunique8);
 
-            uint8_t cbright = c.getAverageLight();
-            int16_t deltabright = cbright - backgroundBrightness;
+            u8 cbright = c.getAverageLight();
+            i16 deltabright = cbright - backgroundBrightness;
             if (deltabright >= 32 || (!bg)) {
                 leds[i] = c;
             } else if (deltabright > 0) {
@@ -185,20 +185,20 @@ class TwinkleFox : public Fx1d {
         }
     }
 
-    CRGB computeOneTwinkle(fl::u32 ms, uint8_t salt) {
-        uint16_t ticks = ms >> (8 - twinkleSpeed);
-        uint8_t fastcycle8 = ticks;
-        uint16_t slowcycle16 = (ticks >> 8) + salt;
+    CRGB computeOneTwinkle(fl::u32 ms, u8 salt) {
+        u16 ticks = ms >> (8 - twinkleSpeed);
+        u8 fastcycle8 = ticks;
+        u16 slowcycle16 = (ticks >> 8) + salt;
         slowcycle16 += sin8(slowcycle16);
         slowcycle16 = (slowcycle16 * 2053) + 1384;
-        uint8_t slowcycle8 = (slowcycle16 & 0xFF) + (slowcycle16 >> 8);
+        u8 slowcycle8 = (slowcycle16 & 0xFF) + (slowcycle16 >> 8);
 
-        uint8_t bright = 0;
+        u8 bright = 0;
         if (((slowcycle8 & 0x0E) / 2) < twinkleDensity) {
             bright = attackDecayWave8(fastcycle8);
         }
 
-        uint8_t hue = slowcycle8 - salt;
+        u8 hue = slowcycle8 - salt;
         CRGB c;
         if (bright > 0) {
             c = ColorFromPalette(currentPalette, hue, bright, NOBLEND);
@@ -211,7 +211,7 @@ class TwinkleFox : public Fx1d {
         return c;
     }
 
-    uint8_t attackDecayWave8(uint8_t i) {
+    u8 attackDecayWave8(u8 i) {
         if (i < 86) {
             return i * 3;
         } else {
@@ -220,11 +220,11 @@ class TwinkleFox : public Fx1d {
         }
     }
 
-    void coolLikeIncandescentFunction(CRGB &c, uint8_t phase) {
+    void coolLikeIncandescentFunction(CRGB &c, u8 phase) {
         if (phase < 128)
             return;
 
-        uint8_t cooling = (phase - 128) >> 4;
+        u8 cooling = (phase - 128) >> 4;
         c.g = qsub8(c.g, cooling);
         c.b = qsub8(c.b, cooling * 2);
     }
@@ -259,8 +259,8 @@ const TProgmemRGBPalette16 FairyLight_p = {
     CRGB::FairyLight,
     CRGB::FairyLight,
     CRGB::FairyLight,
-    CRGB(CRGB::FairyLight).nscale8_constexpr(uint8_t(128)).as_uint32_t(),
-    CRGB(CRGB::FairyLight).nscale8_constexpr(uint8_t(128)).as_uint32_t(),
+    CRGB(CRGB::FairyLight).nscale8_constexpr(u8(128)).as_uint32_t(),
+    CRGB(CRGB::FairyLight).nscale8_constexpr(u8(128)).as_uint32_t(),
     CRGB::FairyLight,
     CRGB::FairyLight,
     CRGB(CRGB::FairyLight).nscale8_constexpr(64).as_uint32_t(),
@@ -295,9 +295,9 @@ const TProgmemRGBPalette16 *ActivePaletteList[] = {
     &Holly_p,         &Ice_p};
 
 void TwinkleFox::chooseNextColorPalette(CRGBPalette16 &pal) {
-    const uint8_t numberOfPalettes =
+    const u8 numberOfPalettes =
         sizeof(ActivePaletteList) / sizeof(ActivePaletteList[0]);
-    static uint8_t whichPalette = -1;  // okay static in header
+    static u8 whichPalette = -1;  // okay static in header
     whichPalette = addmod8(whichPalette, 1, numberOfPalettes);
     pal = *(ActivePaletteList[whichPalette]);
 }

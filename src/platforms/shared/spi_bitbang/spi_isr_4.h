@@ -37,8 +37,8 @@ namespace fl {
 class SpiIsr4 {
 public:
     /// Status bit definitions
-    static constexpr uint32_t STATUS_BUSY = 1u;
-    static constexpr uint32_t STATUS_DONE = 2u;
+    static constexpr u32 STATUS_BUSY = 1u;
+    static constexpr u32 STATUS_DONE = 2u;
 
     /// Maximum pins per lane (quad = 4)
     static constexpr int NUM_DATA_PINS = 4;
@@ -57,12 +57,12 @@ public:
      * Automatically initializes the 256-entry LUT to map byte values
      * to GPIO masks for the 4 specified data pins.
      */
-    void setPinMapping(uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3, uint8_t clk) {
+    void setPinMapping(u8 d0, u8 d1, u8 d2, u8 d3, u8 clk) {
         // Store clock mask
         fl_spi_set_clock_mask(1u << clk);
 
         // Build pin masks array
-        uint32_t dataPinMasks[NUM_DATA_PINS] = {
+        u32 dataPinMasks[NUM_DATA_PINS] = {
             1u << d0,  // Bit 0
             1u << d1,  // Bit 1
             1u << d2,  // Bit 2
@@ -77,8 +77,8 @@ public:
         PinMaskEntry* lut = fl_spi_get_lut_array();
 
         for (int byteValue = 0; byteValue < 256; byteValue++) {
-            uint32_t setMask = 0;
-            uint32_t clearMask = 0;
+            u32 setMask = 0;
+            u32 clearMask = 0;
 
             // Only process lower 4 bits (upper 4 bits ignored)
             for (int bitPos = 0; bitPos < NUM_DATA_PINS; bitPos++) {
@@ -99,17 +99,17 @@ public:
      * @param d0-d3 GPIO numbers for data pins
      * @param clockMask Pre-computed GPIO mask for clock pin (e.g., 1 << 8)
      */
-    void setPinMappingWithMask(uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3, uint32_t clockMask) {
+    void setPinMappingWithMask(u8 d0, u8 d1, u8 d2, u8 d3, u32 clockMask) {
         fl_spi_set_clock_mask(clockMask);
 
-        uint32_t dataPinMasks[NUM_DATA_PINS] = {
+        u32 dataPinMasks[NUM_DATA_PINS] = {
             1u << d0, 1u << d1, 1u << d2, 1u << d3
         };
 
         PinMaskEntry* lut = fl_spi_get_lut_array();
         for (int v = 0; v < 256; v++) {
-            uint32_t setMask = 0;
-            uint32_t clearMask = 0;
+            u32 setMask = 0;
+            u32 clearMask = 0;
 
             for (int b = 0; b < NUM_DATA_PINS; b++) {
                 if (v & (1 << b)) {
@@ -132,12 +132,12 @@ public:
      * Each byte in the buffer represents 4 parallel bits to output.
      * Only the lower 4 bits of each byte are used.
      */
-    void loadBuffer(const uint8_t* data, uint16_t n) {
+    void loadBuffer(const u8* data, u16 n) {
         if (!data) return;
         if (n > 256) n = 256;
 
-        uint8_t* dest = fl_spi_get_data_array();
-        for (uint16_t i = 0; i < n; ++i) {
+        u8* dest = fl_spi_get_data_array();
+        for (u16 i = 0; i < n; ++i) {
             dest[i] = data[i];
         }
         fl_spi_set_total_bytes(n);
@@ -150,7 +150,7 @@ public:
      *
      * Example: For 800kHz SPI output, use 1600000 Hz timer
      */
-    int setupISR(uint32_t timer_hz) {
+    int setupISR(u32 timer_hz) {
         return fl_spi_platform_isr_start(timer_hz);
     }
 
@@ -179,7 +179,7 @@ public:
     /**
      * Get raw status flags
      */
-    uint32_t statusFlags() const {
+    u32 statusFlags() const {
         return fl_spi_status_flags();
     }
 
@@ -194,7 +194,7 @@ public:
      * Visibility delay (ensures memory writes are visible to ISR)
      * Typical value: 10 microseconds
      */
-    static void visibilityDelayUs(uint32_t us) {
+    static void visibilityDelayUs(u32 us) {
         fl_spi_visibility_delay_us(us);
     }
 
@@ -217,7 +217,7 @@ public:
      * Get mutable reference to data buffer array (256 bytes)
      * For advanced users who want direct buffer access
      */
-    static uint8_t* getDataArray() {
+    static u8* getDataArray() {
         return fl_spi_get_data_array();
     }
 
@@ -233,12 +233,12 @@ public:
     /**
      * Get number of GPIO events captured
      */
-    static uint16_t getValidationEventCount() {
+    static u16 getValidationEventCount() {
         return fl_spi_get_validation_event_count();
     }
 
     // C++ wrapper types for GPIO events
-    enum class GPIOEventType : uint8_t {
+    enum class GPIOEventType : u8 {
         StateStart  = FASTLED_GPIO_EVENT_STATE_START,
         StateDone   = FASTLED_GPIO_EVENT_STATE_DONE,
         SetBits     = FASTLED_GPIO_EVENT_SET_BITS,
@@ -248,11 +248,11 @@ public:
     };
 
     struct GPIOEvent {
-        uint8_t  event_type;
-        uint8_t  padding[3];
+        u8  event_type;
+        u8  padding[3];
         union {
-            uint32_t gpio_mask;
-            uint32_t state_info;
+            u32 gpio_mask;
+            u32 state_info;
         } payload;
 
         GPIOEventType type() const { return static_cast<GPIOEventType>(event_type); }

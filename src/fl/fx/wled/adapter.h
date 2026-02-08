@@ -37,7 +37,7 @@ public:
      * @param controllerIndex Index of the LED controller to use (default: 0)
      *                        Use 0 for the first controller, 1 for second, etc.
      */
-    explicit FastLEDAdapter(uint8_t controllerIndex = 0);
+    explicit FastLEDAdapter(u8 controllerIndex = 0);
 
     /**
      * @brief Destructor
@@ -50,24 +50,24 @@ public:
     size_t getNumLEDs() const override;
 
     void show() override;
-    void show(uint8_t brightness) override;
+    void show(u8 brightness) override;
     void clear(bool writeToStrip = false) override;
 
-    void setBrightness(uint8_t brightness) override;
-    uint8_t getBrightness() const override;
+    void setBrightness(u8 brightness) override;
+    u8 getBrightness() const override;
 
     void setCorrection(CRGB correction) override;
     void setTemperature(CRGB temperature) override;
 
     void delay(unsigned long ms) override;
-    void setMaxRefreshRate(uint16_t fps) override;
-    uint16_t getMaxRefreshRate() const override;
+    void setMaxRefreshRate(u16 fps) override;
+    u16 getMaxRefreshRate() const override;
 
     void setSegment(size_t start, size_t end) override;
     void clearSegment() override;
 
 private:
-    uint8_t mControllerIndex; // Index of the LED controller in FastLED
+    u8 mControllerIndex; // Index of the LED controller in FastLED
     size_t mSegmentStart;     // Start of current segment (0 if no segment)
     size_t mSegmentEnd;       // End of current segment (numLeds if no segment)
     bool mHasSegment;         // True if a segment is active
@@ -85,6 +85,6 @@ private:
  * auto controller = createFastLEDController();  // Uses controller index 0
  * @endcode
  */
-fl::shared_ptr<IFastLED> createFastLEDController(uint8_t controllerIndex = 0);
+fl::shared_ptr<IFastLED> createFastLEDController(u8 controllerIndex = 0);
 
 } // namespace fl

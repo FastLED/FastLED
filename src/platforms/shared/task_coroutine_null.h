@@ -63,7 +63,7 @@ public:
     static TaskCoroutineNull* create(fl::string name,
                                       TaskFunction function,
                                       size_t stack_size = 4096,
-                                      uint8_t priority = 5);
+                                      u8 priority = 5);
 
     //=========================================================================
     // Lifecycle

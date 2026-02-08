@@ -29,7 +29,7 @@ struct SpiBusConfig {
     int data2_pin;         ///< Data2/WP pin for quad mode (-1 if unused)
     int data3_pin;         ///< Data3/HD pin for quad mode (-1 if unused)
     int max_transfer_sz;   ///< Max transfer size in bytes (0 = default 4094)
-    uint32_t flags;        ///< Bus flags (e.g., SPICOMMON_BUSFLAG_MASTER)
+    u32 flags;        ///< Bus flags (e.g., SPICOMMON_BUSFLAG_MASTER)
 
     /// @brief Default constructor (single-lane mode)
     SpiBusConfig()
@@ -94,10 +94,10 @@ struct SpiBusConfig {
 /// Encapsulates device-specific parameters (clock speed, mode, queue depth).
 /// Maps directly to ESP-IDF's spi_device_interface_config_t structure.
 struct SpiDeviceConfig {
-    uint8_t mode;          ///< SPI mode (0-3), typically 0 for WS2812
+    u8 mode;          ///< SPI mode (0-3), typically 0 for WS2812
     int clock_speed_hz;    ///< Clock frequency in Hz (e.g., 2500000 for WS2812)
     int queue_size;        ///< Transaction queue depth (typically 2-4)
-    uint32_t flags;        ///< Device flags (e.g., SPI_DEVICE_NO_DUMMY)
+    u32 flags;        ///< Device flags (e.g., SPI_DEVICE_NO_DUMMY)
     int spics_io_num;      ///< Chip select pin (-1 if unused)
 
     /// @brief Default constructor
@@ -113,7 +113,7 @@ struct SpiDeviceConfig {
     /// @param clock_hz Clock frequency in Hz
     /// @param queue_depth Transaction queue size
     /// @param spi_mode SPI mode (0-3)
-    SpiDeviceConfig(int clock_hz, int queue_depth, uint8_t spi_mode = 0)
+    SpiDeviceConfig(int clock_hz, int queue_depth, u8 spi_mode = 0)
         : mode(spi_mode)
         , clock_speed_hz(clock_hz)
         , queue_size(queue_depth)
@@ -127,9 +127,9 @@ struct SpiDeviceConfig {
 /// Encapsulates a single DMA transaction (buffer + metadata).
 /// Maps to ESP-IDF's spi_transaction_t structure (simplified).
 struct SpiTransaction {
-    const uint8_t* tx_buffer;  ///< Transmit buffer (DMA-capable)
+    const u8* tx_buffer;  ///< Transmit buffer (DMA-capable)
     size_t length_bits;        ///< Transaction length in bits (buffer size × 8)
-    uint32_t flags;            ///< Transaction flags (e.g., SPI_TRANS_USE_TXDATA)
+    u32 flags;            ///< Transaction flags (e.g., SPI_TRANS_USE_TXDATA)
     void* user;                ///< User context pointer (optional)
 
     /// @brief Default constructor
@@ -143,7 +143,7 @@ struct SpiTransaction {
     /// @brief Constructor with buffer and size
     /// @param buffer Transmit buffer pointer
     /// @param size_bytes Buffer size in bytes
-    SpiTransaction(const uint8_t* buffer, size_t size_bytes)
+    SpiTransaction(const u8* buffer, size_t size_bytes)
         : tx_buffer(buffer)
         , length_bits(size_bytes * 8)
         , flags(0)
@@ -154,7 +154,7 @@ struct SpiTransaction {
     /// @param buffer Transmit buffer pointer
     /// @param size_bytes Buffer size in bytes
     /// @param user_ctx User context pointer
-    SpiTransaction(const uint8_t* buffer, size_t size_bytes, void* user_ctx)
+    SpiTransaction(const u8* buffer, size_t size_bytes, void* user_ctx)
         : tx_buffer(buffer)
         , length_bits(size_bytes * 8)
         , flags(0)
@@ -268,7 +268,7 @@ public:
     ///
     /// Returns true if transaction completes successfully.
     /// Returns false on timeout or hardware error.
-    virtual bool pollTransaction(uint32_t timeout_ms) = 0;
+    virtual bool pollTransaction(u32 timeout_ms) = 0;
 
     /// @brief Register post-transaction callback
     /// @param callback Function pointer (cast to void*)
@@ -312,7 +312,7 @@ public:
     ///
     /// Size is automatically rounded up to 4-byte multiple to meet
     /// ESP32 DMA alignment requirements.
-    virtual uint8_t* allocateDma(size_t size) = 0;
+    virtual u8* allocateDma(size_t size) = 0;
 
     /// @brief Free DMA buffer allocated via allocateDma()
     /// @param buffer Buffer pointer (must be from allocateDma())
@@ -320,7 +320,7 @@ public:
     /// Maps to ESP-IDF: heap_caps_free()
     ///
     /// Safe to call with nullptr (no-op).
-    virtual void freeDma(uint8_t* buffer) = 0;
+    virtual void freeDma(u8* buffer) = 0;
 
     //=========================================================================
     // Platform Utilities
@@ -332,7 +332,7 @@ public:
     /// Maps to platform-specific delay:
     /// - ESP32/FreeRTOS: vTaskDelay(pdMS_TO_TICKS(ms))
     /// - Host/Mock: std::this_thread::sleep_for() or usleep()
-    virtual void delay(uint32_t ms) = 0;
+    virtual void delay(u32 ms) = 0;
 
     /// @brief Get current timestamp in microseconds
     /// @return Current timestamp in microseconds (monotonic clock)

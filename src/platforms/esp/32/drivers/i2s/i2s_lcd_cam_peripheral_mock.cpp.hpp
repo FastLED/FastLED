@@ -49,18 +49,18 @@ public:
     void deinitialize() override;
     bool isInitialized() const override;
 
-    uint16_t* allocateBuffer(size_t size_bytes) override;
-    void freeBuffer(uint16_t* buffer) override;
+    u16* allocateBuffer(size_t size_bytes) override;
+    void freeBuffer(u16* buffer) override;
 
-    bool transmit(const uint16_t* buffer, size_t size_bytes) override;
-    bool waitTransmitDone(uint32_t timeout_ms) override;
+    bool transmit(const u16* buffer, size_t size_bytes) override;
+    bool waitTransmitDone(u32 timeout_ms) override;
     bool isBusy() const override;
 
     bool registerTransmitCallback(void* callback, void* user_ctx) override;
     const I2sLcdCamConfig& getConfig() const override;
 
     uint64_t getMicroseconds() override;
-    void delay(uint32_t ms) override;
+    void delay(u32 ms) override;
 
     //=========================================================================
     // Mock-Specific API
@@ -68,10 +68,10 @@ public:
 
     void simulateTransmitComplete() override;
     void setTransmitFailure(bool should_fail) override;
-    void setTransmitDelay(uint32_t microseconds) override;
+    void setTransmitDelay(u32 microseconds) override;
     const fl::vector<TransmitRecord>& getTransmitHistory() const override;
     void clearTransmitHistory() override;
-    fl::span<const uint16_t> getLastTransmitData() const override;
+    fl::span<const u16> getLastTransmitData() const override;
     bool isEnabled() const override;
     size_t getTransmitCount() const override;
     void reset() override;
@@ -93,7 +93,7 @@ private:
     void* mUserCtx;
 
     // Simulation settings
-    uint32_t mTransmitDelayUs;
+    u32 mTransmitDelayUs;
     bool mTransmitDelayForced;  // If true, use mTransmitDelayUs instead of calculating
     bool mShouldFailTransmit;
 
@@ -198,7 +198,7 @@ bool I2sLcdCamPeripheralMockImpl::isInitialized() const {
 // Buffer Management
 //=============================================================================
 
-uint16_t* I2sLcdCamPeripheralMockImpl::allocateBuffer(size_t size_bytes) {
+u16* I2sLcdCamPeripheralMockImpl::allocateBuffer(size_t size_bytes) {
     // Round up to 64-byte alignment (PSRAM requirement)
     size_t aligned_size = ((size_bytes + 63) / 64) * 64;
 
@@ -213,10 +213,10 @@ uint16_t* I2sLcdCamPeripheralMockImpl::allocateBuffer(size_t size_bytes) {
         FL_WARN("I2sLcdCamPeripheralMock: Failed to allocate buffer (" << aligned_size << " bytes)");
     }
 
-    return static_cast<uint16_t*>(buffer);
+    return static_cast<u16*>(buffer);
 }
 
-void I2sLcdCamPeripheralMockImpl::freeBuffer(uint16_t* buffer) {
+void I2sLcdCamPeripheralMockImpl::freeBuffer(u16* buffer) {
     if (buffer != nullptr) {
 #ifdef FL_IS_WIN
         _aligned_free(buffer);
@@ -230,7 +230,7 @@ void I2sLcdCamPeripheralMockImpl::freeBuffer(uint16_t* buffer) {
 // Transmission Methods
 //=============================================================================
 
-bool I2sLcdCamPeripheralMockImpl::transmit(const uint16_t* buffer, size_t size_bytes) {
+bool I2sLcdCamPeripheralMockImpl::transmit(const u16* buffer, size_t size_bytes) {
     if (!mInitialized) {
         FL_WARN("I2sLcdCamPeripheralMock: Cannot transmit - not initialized");
         return false;
@@ -241,7 +241,7 @@ bool I2sLcdCamPeripheralMockImpl::transmit(const uint16_t* buffer, size_t size_b
     }
 
     // Calculate transmit delay - use forced value if set, otherwise calculate from PCLK
-    uint32_t transmit_delay_us;
+    u32 transmit_delay_us;
     if (mTransmitDelayForced) {
         transmit_delay_us = mTransmitDelayUs;
     } else if (mConfig.pclk_hz > 0) {
@@ -249,7 +249,7 @@ bool I2sLcdCamPeripheralMockImpl::transmit(const uint16_t* buffer, size_t size_b
         size_t pixels = size_bytes / 2;
         // Time = pixels / pclk_hz (seconds) * 1000000 (microseconds)
         uint64_t transmit_time_us = (static_cast<uint64_t>(pixels) * 1000000ULL) / mConfig.pclk_hz;
-        transmit_delay_us = static_cast<uint32_t>(transmit_time_us) + 10;
+        transmit_delay_us = static_cast<u32>(transmit_time_us) + 10;
         mTransmitDelayUs = transmit_delay_us;
     } else {
         transmit_delay_us = 100;  // Default fallback
@@ -285,7 +285,7 @@ bool I2sLcdCamPeripheralMockImpl::transmit(const uint16_t* buffer, size_t size_b
     return true;
 }
 
-bool I2sLcdCamPeripheralMockImpl::waitTransmitDone(uint32_t timeout_ms) {
+bool I2sLcdCamPeripheralMockImpl::waitTransmitDone(u32 timeout_ms) {
     if (!mInitialized) {
         return false;
     }
@@ -304,8 +304,8 @@ bool I2sLcdCamPeripheralMockImpl::waitTransmitDone(uint32_t timeout_ms) {
     }
 
     // Wait for completion
-    uint32_t start_us = fl::micros();
-    uint32_t timeout_us = timeout_ms * 1000;
+    u32 start_us = fl::micros();
+    u32 timeout_us = timeout_ms * 1000;
 
     while (true) {
         {
@@ -355,7 +355,7 @@ uint64_t I2sLcdCamPeripheralMockImpl::getMicroseconds() {
     return fl::micros();
 }
 
-void I2sLcdCamPeripheralMockImpl::delay(uint32_t ms) {
+void I2sLcdCamPeripheralMockImpl::delay(u32 ms) {
     fl::delay(ms);
 }
 
@@ -386,7 +386,7 @@ void I2sLcdCamPeripheralMockImpl::setTransmitFailure(bool should_fail) {
     mShouldFailTransmit = should_fail;
 }
 
-void I2sLcdCamPeripheralMockImpl::setTransmitDelay(uint32_t microseconds) {
+void I2sLcdCamPeripheralMockImpl::setTransmitDelay(u32 microseconds) {
     mTransmitDelayUs = microseconds;
     mTransmitDelayForced = true;  // Mark as explicitly set - don't recalculate in transmit()
 }
@@ -402,11 +402,11 @@ void I2sLcdCamPeripheralMockImpl::clearTransmitHistory() {
     mBusy = false;
 }
 
-fl::span<const uint16_t> I2sLcdCamPeripheralMockImpl::getLastTransmitData() const {
+fl::span<const u16> I2sLcdCamPeripheralMockImpl::getLastTransmitData() const {
     if (mHistory.empty()) {
-        return fl::span<const uint16_t>();
+        return fl::span<const u16>();
     }
-    return fl::span<const uint16_t>(mHistory.back().buffer_copy);
+    return fl::span<const u16>(mHistory.back().buffer_copy);
 }
 
 bool I2sLcdCamPeripheralMockImpl::isEnabled() const {

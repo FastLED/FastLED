@@ -10,7 +10,7 @@ FASTLED_SHARED_PTR(NoiseWave);
 
 class NoiseWave : public Fx1d {
   public:
-    NoiseWave(uint16_t num_leds)
+    NoiseWave(u16 num_leds)
         : Fx1d(num_leds), noiseGeneratorRed(500, 14),
           noiseGeneratorBlue(500, 10) {}
 
@@ -24,7 +24,7 @@ class NoiseWave : public Fx1d {
 
         unsigned long time_now = fl::millis() - start_time;
 
-        for (int32_t i = 0; i < mNumLeds; ++i) {
+        for (i32 i = 0; i < mNumLeds; ++i) {
             int r = noiseGeneratorRed.LedValue(i, time_now);
             int b = noiseGeneratorBlue.LedValue(i, time_now + 100000) >> 1;
             int g = 0;

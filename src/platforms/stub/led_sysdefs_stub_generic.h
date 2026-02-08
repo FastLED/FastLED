@@ -53,14 +53,14 @@
 #error "INPUT_PULLUP is not 2"
 #endif
 
-typedef volatile uint32_t RoReg;
-typedef volatile uint32_t RwReg;
+typedef volatile fl::u32 RoReg;
+typedef volatile fl::u32 RwReg;
 
 extern "C" {
-    void pinMode(uint8_t pin, uint8_t mode);
+    void pinMode(fl::u8 pin, fl::u8 mode);
 
-    uint32_t millis(void);
-    uint32_t micros(void);
+    fl::u32 millis(void);
+    fl::u32 micros(void);
 
     // delay() is provided by fl::delay() via "using fl::delay;" in FastLED.h
     // This gives sketches the async-pumping version automatically

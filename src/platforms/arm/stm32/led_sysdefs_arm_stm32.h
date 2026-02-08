@@ -61,8 +61,8 @@
 #endif
 
 // Register type definitions
-typedef volatile uint8_t RoReg; /**< Read only 8-bit register (volatile const unsigned int) */
-typedef volatile uint8_t RwReg; /**< Read-Write 8-bit register (volatile unsigned int) */
+typedef volatile fl::u8 RoReg; /**< Read only 8-bit register (volatile const unsigned int) */
+typedef volatile fl::u8 RwReg; /**< Read-Write 8-bit register (volatile unsigned int) */
 
 // Pin map - STM32 uses dynamic pin mapping
 #define FASTLED_NO_PINMAP

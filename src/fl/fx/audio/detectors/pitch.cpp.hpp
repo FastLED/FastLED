@@ -29,7 +29,7 @@ PitchDetector::~PitchDetector() = default;
 
 void PitchDetector::update(shared_ptr<AudioContext> context) {
     // Get PCM data from context
-    span<const int16_t> pcm = context->getPCM();
+    span<const i16> pcm = context->getPCM();
     size numSamples = pcm.size();
 
     // Need at least 2x max period for autocorrelation
@@ -105,7 +105,7 @@ void PitchDetector::updatePeriodRange() {
     mMaxPeriod = frequencyToPeriod(mMinFrequency);
 }
 
-float PitchDetector::calculateAutocorrelation(const int16_t* pcm, size numSamples) {
+float PitchDetector::calculateAutocorrelation(const i16* pcm, size numSamples) {
     // Clear and resize autocorrelation buffer
     mAutocorrelation.clear();
     mAutocorrelation.resize(static_cast<size>(mMaxPeriod + 1), 0.0f);

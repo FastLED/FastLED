@@ -13,16 +13,16 @@ namespace fl {
 /// This struct captures the essential timing information from compile-time
 /// chipset definitions and makes it available at runtime for driver configuration.
 struct ChipsetTimingConfig {
-    constexpr ChipsetTimingConfig(uint32_t t1, uint32_t t2, uint32_t t3, uint32_t reset, const char* name = "UNNAMED CHIPSET")
+    constexpr ChipsetTimingConfig(u32 t1, u32 t2, u32 t3, u32 reset, const char* name = "UNNAMED CHIPSET")
         : t1_ns(t1), t2_ns(t2), t3_ns(t3), reset_us(reset), name(name) {}
-    uint32_t t1_ns;      ///< T0H: High time for bit 0 (nanoseconds)
-    uint32_t t2_ns;      ///< T1H-T0H: Additional high time for bit 1 (nanoseconds)
-    uint32_t t3_ns;      ///< T0L: Low tail duration (nanoseconds)
-    uint32_t reset_us;   ///< Reset/latch time (microseconds)
+    u32 t1_ns;      ///< T0H: High time for bit 0 (nanoseconds)
+    u32 t2_ns;      ///< T1H-T0H: Additional high time for bit 1 (nanoseconds)
+    u32 t3_ns;      ///< T0L: Low tail duration (nanoseconds)
+    u32 reset_us;   ///< Reset/latch time (microseconds)
     const char* name;    ///< Human-readable chipset name
 
     /// @brief Get total bit period (T1 + T2 + T3)
-    constexpr uint32_t total_period_ns() const {
+    constexpr u32 total_period_ns() const {
         return t1_ns + t2_ns + t3_ns;
     }
 

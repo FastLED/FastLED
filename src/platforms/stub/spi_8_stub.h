@@ -23,30 +23,30 @@ public:
     void end() override;
     DMABuffer acquireDMABuffer(size_t bytes_per_lane) override;
     bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
-    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max()) override;
+    bool waitComplete(u32 timeout_ms = fl::numeric_limits<u32>::max()) override;
     bool isBusy() const override;
     bool isInitialized() const override;
     int getBusId() const override;
     const char* getName() const override;
 
     // Test inspection methods
-    const fl::vector<uint8_t>& getLastTransmission() const;
-    uint32_t getTransmissionCount() const;
-    uint32_t getClockSpeed() const;
+    const fl::vector<u8>& getLastTransmission() const;
+    u32 getTransmissionCount() const;
+    u32 getClockSpeed() const;
     bool isTransmissionActive() const;
     void reset();
 
     // De-interleave transmitted data to extract per-lane data (for testing)
-    fl::vector<fl::vector<uint8_t>> extractLanes(uint8_t num_lanes, size_t bytes_per_lane) const;
+    fl::vector<fl::vector<u8>> extractLanes(u8 num_lanes, size_t bytes_per_lane) const;
 
 private:
     int mBusId;
     const char* mName;
     bool mInitialized;
     bool mBusy;
-    uint32_t mClockSpeed;
-    uint32_t mTransmitCount;
-    fl::vector<uint8_t> mLastBuffer;
+    u32 mClockSpeed;
+    u32 mTransmitCount;
+    fl::vector<u8> mLastBuffer;
 
     // DMA buffer management
     DMABuffer mCurrentBuffer;            // Current active buffer

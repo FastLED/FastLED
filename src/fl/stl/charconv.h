@@ -37,7 +37,7 @@ fl::string to_hex(T value, bool uppercase = false, bool pad_to_width = false);
 namespace detail {
 
 /// @brief Integer width classification for hex conversion
-enum class HexIntWidth : uint8_t {
+enum class HexIntWidth : u8 {
     Width8 = 8,
     Width16 = 16,
     Width32 = 32,
@@ -94,7 +94,7 @@ constexpr HexIntWidth get_hex_int_width<8>() {
 /// @param buffer Output buffer (must be at least 34 bytes for base 2, 12 for base 10, 12 for base 16)
 /// @param radix Number base (2-36, typically 10 for decimal, 16 for hex, 8 for octal)
 /// @return Number of characters written (excluding null terminator)
-int itoa(int32_t value, char *buffer, int radix);
+int itoa(i32 value, char *buffer, int radix);
 
 /// @brief Convert signed 64-bit integer to string buffer in given radix
 /// @param value The signed 64-bit integer value to convert
@@ -108,7 +108,7 @@ int itoa64(int64_t value, char *buffer, int radix);
 /// @param buffer Output buffer (must be at least 33 bytes for base 2, 11 for base 10, 9 for base 16)
 /// @param radix Number base (2-36, typically 10 for decimal, 16 for hex, 8 for octal)
 /// @return Number of characters written (excluding null terminator)
-int utoa32(uint32_t value, char *buffer, int radix);
+int utoa32(u32 value, char *buffer, int radix);
 
 /// @brief Convert unsigned 64-bit integer to string buffer in given radix
 /// @param value The unsigned 64-bit integer value to convert

@@ -43,13 +43,13 @@ namespace fl {
 /// @tparam SPI_CLOCK_RATE SPI clock speed in Hz
 /// @tparam SPIObject Reference to SPIClass object (SPI, SPI1, or SPI2)
 /// @tparam SPI_INDEX SPI peripheral index (0, 1, or 2)
-template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_CLOCK_RATE, SPIClass & SPIObject, int SPI_INDEX>
+template<u8 DATA_PIN, u8 CLOCK_PIN, u32 SPI_CLOCK_RATE, SPIClass & SPIObject, int SPI_INDEX>
 class SPIDeviceProxy {
 private:
     SPIBusHandle mHandle;                    // Handle from SPIBusManager
     SPIBusManager* mBusManager;              // Pointer to global bus manager
     Teensy4HardwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_CLOCK_RATE, SPIObject, SPI_INDEX>* mSingleSPI;
-    fl::vector<uint8_t> mWriteBuffer;        // Buffered writes (for Dual/Quad-SPI)
+    fl::vector<u8> mWriteBuffer;        // Buffered writes (for Dual/Quad-SPI)
     bool mInitialized;                       // Whether init() was called
     bool mInTransaction;                     // Whether select() was called
 
@@ -156,7 +156,7 @@ public:
 
     /// Write single byte
     /// Mirrors Teensy4HardwareSPIOutput::writeByte()
-    void writeByte(uint8_t b) {
+    void writeByte(u8 b) {
         if (!mInitialized || !mInTransaction) {
             return;
         }
@@ -173,9 +173,9 @@ public:
 
     /// Write 16-bit word (big-endian)
     /// Mirrors Teensy4HardwareSPIOutput::writeWord()
-    void writeWord(uint16_t w) {
-        writeByte(static_cast<uint8_t>(w >> 8));
-        writeByte(static_cast<uint8_t>(w & 0xFF));
+    void writeWord(u16 w) {
+        writeByte(static_cast<u8>(w >> 8));
+        writeByte(static_cast<u8>(w & 0xFF));
     }
 
     /// Wait for SPI to be ready (NOP for buffered writes)

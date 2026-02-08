@@ -11,10 +11,10 @@
 /// that something about the way gcc does register allocation results in the bit-band code being slower.  It will need more fine tuning.
 /// The registers are data output, set output, clear output, toggle output, input, and direction
 #if 0
-template<uint8_t PIN, uint32_t _MASK, typename _DIRSET, typename _DIRCLR, typename _OUTSET, typename _OUTCLR, typename _OUT> class _ARMPIN {
+template<fl::u8 PIN, fl::u32 _MASK, typename _DIRSET, typename _DIRCLR, typename _OUTSET, typename _OUTCLR, typename _OUT> class _ARMPIN {
 public:
-    typedef volatile uint32_t * port_ptr_t;
-    typedef uint32_t port_t;
+    typedef volatile fl::u32 * port_ptr_t;
+    typedef fl::u32 port_t;
 
     inline static void setOutput() { _DIRSET::r() = _MASK; }
     inline static void setInput() { _DIRCLR::r() = _MASK; }
@@ -37,8 +37,8 @@ public:
     inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
-#define ADDR(X) *(volatile uint32_t*)X
-#define NR_GPIO_ADDR(base,offset) (*(volatile uint32_t *))((uint32_t)(base + offset))
+#define ADDR(X) *(volatile fl::u32*)X
+#define NR_GPIO_ADDR(base,offset) (*(volatile fl::u32 *))((fl::u32)(base + offset))
 #define NR_DIRSET ADDR(0x50000518UL) // NR_GPIO_ADDR(NRF_GPIO_BASE, 0x518)
 #define NR_DIRCLR ADDR(0x5000051CUL) // NR_GPIO_ADDR(NRF_GPIO_BASE, 0x51C)
 #define NR_OUTSET ADDR(0x50000508UL) // NR_GPIO_ADDR(NRF_GPIO_BASE, 0x508)
@@ -59,24 +59,24 @@ _RD32_NRF(NR_OUT);
 
 typedef struct {                                    /*!< GPIO Structure                                                        */
     // __I  uint32_t  RESERVED0[321];
-    __IO uint32_t  OUT;                               /*!< Write GPIO port.                                                      */
-    __IO uint32_t  OUTSET;                            /*!< Set individual bits in GPIO port.                                     */
-    __IO uint32_t  OUTCLR;                            /*!< Clear individual bits in GPIO port.                                   */
-    __I  uint32_t  IN;                                /*!< Read GPIO port.                                                       */
-    __IO uint32_t  DIR;                               /*!< Direction of GPIO pins.                                               */
-    __IO uint32_t  DIRSET;                            /*!< DIR set register.                                                     */
-    __IO uint32_t  DIRCLR;                            /*!< DIR clear register.                                                   */
-    __I  uint32_t  RESERVED1[120];
-    __IO uint32_t  PIN_CNF[32];                       /*!< Configuration of GPIO pins.                                           */
+    __IO fl::u32  OUT;                               /*!< Write GPIO port.                                                      */
+    __IO fl::u32  OUTSET;                            /*!< Set individual bits in GPIO port.                                     */
+    __IO fl::u32  OUTCLR;                            /*!< Clear individual bits in GPIO port.                                   */
+    __I  fl::u32  IN;                                /*!< Read GPIO port.                                                       */
+    __IO fl::u32  DIR;                               /*!< Direction of GPIO pins.                                               */
+    __IO fl::u32  DIRSET;                            /*!< DIR set register.                                                     */
+    __IO fl::u32  DIRCLR;                            /*!< DIR clear register.                                                   */
+    __I  fl::u32  RESERVED1[120];
+    __IO fl::u32  PIN_CNF[32];                       /*!< Configuration of GPIO pins.                                           */
 } FL_NRF_GPIO_Type;
 
 #define FL_NRF_GPIO_BASE                   0x50000504UL
 #define FL_NRF_GPIO                        ((FL_NRF_GPIO_Type           *) FL_NRF_GPIO_BASE)
 
-template<uint8_t PIN, uint32_t _MASK> class _ARMPIN : public ValidPinBase {
+template<fl::u8 PIN, fl::u32 _MASK> class _ARMPIN : public ValidPinBase {
 public:
-    typedef volatile uint32_t * port_ptr_t;
-    typedef uint32_t port_t;
+    typedef volatile fl::u32 * port_ptr_t;
+    typedef fl::u32 port_t;
 
     inline static void setOutput() { FL_NRF_GPIO->DIRSET = _MASK; }
     inline static void setInput() { FL_NRF_GPIO->DIRCLR = _MASK; }

@@ -124,7 +124,7 @@ EMSCRIPTEN_KEEPALIVE void* getScreenMapData(int* dataSize) {
         fl::Json xArray = fl::Json::array();
         fl::Json yArray = fl::Json::array();
 
-        for (uint32_t i = 0; i < screenMap.getLength(); i++) {
+        for (fl::u32 i = 0; i < screenMap.getLength(); i++) {
             float x = screenMap[i].x;
             float y = screenMap[i].y;
 
@@ -174,10 +174,10 @@ EMSCRIPTEN_KEEPALIVE void freeFrameData(void* data) {
  * Frame Version Function
  * Gets current frame version number for JavaScript polling
  */
-EMSCRIPTEN_KEEPALIVE uint32_t getFrameVersion() {
+EMSCRIPTEN_KEEPALIVE fl::u32 getFrameVersion() {
     // Simple frame counter using millis()
     // WASM is single-threaded so this is safe
-    static uint32_t frameCounter = 0;
+    static fl::u32 frameCounter = 0;
     frameCounter++;
     return frameCounter;
 }
@@ -186,7 +186,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t getFrameVersion() {
  * New Frame Data Check Function
  * Checks if new frame data is available since last known version
  */
-EMSCRIPTEN_KEEPALIVE bool hasNewFrameData(uint32_t lastKnownVersion) {
+EMSCRIPTEN_KEEPALIVE bool hasNewFrameData(fl::u32 lastKnownVersion) {
     // Simple implementation - in WASM single-threaded environment
     // we can assume there's always new data if the versions differ
     return getFrameVersion() > lastKnownVersion;
@@ -290,7 +290,7 @@ void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
         fl::Json xArray = fl::Json::array();
         fl::Json yArray = fl::Json::array();
 
-        for (uint32_t i = 0; i < screenMap.getLength(); i++) {
+        for (u32 i = 0; i < screenMap.getLength(); i++) {
             float x = screenMap[i].x;
             float y = screenMap[i].y;
 
@@ -342,16 +342,16 @@ EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_stri
             printf("Missing screenmap for strip %d\n", stripIndex);
             // okay now generate a screenmap for this strip, let's assume
             // a linear strip with only one row.
-            const uint32_t pixel_count = stripData.size() / 3;
+            const u32 pixel_count = stripData.size() / 3;
             ScreenMap screenmap(pixel_count);
             if (pixel_count > 255 && Function::isSquare(pixel_count)) {
                 printf("Creating square screenmap for %d\n", pixel_count);
-                uint32_t side = sqrt(pixel_count);
+                u32 side = sqrt(pixel_count);
                 // This is a square matrix, let's assume it's a square matrix
                 // and generate a screenmap for it.
-                for (uint16_t i = 0; i < side; i++) {
-                    for (uint16_t j = 0; j < side; j++) {
-                        uint16_t index = i * side + j;
+                for (u16 i = 0; i < side; i++) {
+                    for (u16 j = 0; j < side; j++) {
+                        u16 index = i * side + j;
                         vec2f p = {
                             static_cast<float>(i),
                             static_cast<float>(j)
@@ -366,7 +366,7 @@ EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_stri
             } else {
                 printf("Creating linear screenmap for %d\n", pixel_count);
                 ScreenMap screenmap(pixel_count);
-                for (uint32_t i = 0; i < pixel_count; i++) {
+                for (u32 i = 0; i < pixel_count; i++) {
                     screenmap.set(i, {static_cast<float>(i), 0});
                 }
                 active_strips.updateScreenMap(stripIndex, screenmap);
@@ -390,7 +390,7 @@ EMSCRIPTEN_KEEPALIVE void jsOnFrame(ActiveStripData& active_strips) {
 /**
  * Pure C++ Strip Addition Notification - Simple logging
  */
-EMSCRIPTEN_KEEPALIVE void jsOnStripAdded(uintptr_t strip, uint32_t num_leds) {
+EMSCRIPTEN_KEEPALIVE void jsOnStripAdded(uintptr_t strip, u32 num_leds) {
     // Use the pure C++ notification function
     notifyStripAdded(strip, num_leds);
 }
@@ -425,13 +425,13 @@ EMSCRIPTEN_KEEPALIVE void updateJs(const char* jsonStr) {
  *   Module._free(sizePtr);
  */
 extern "C" EMSCRIPTEN_KEEPALIVE 
-uint8_t* getStripPixelData(int stripIndex, int* outSize) {
+u8* getStripPixelData(int stripIndex, int* outSize) {
     ActiveStripData& instance = ActiveStripData::Instance();
     ActiveStripData::StripDataMap::mapped_type stripData;
     
     if (instance.getData().get(stripIndex, &stripData)) {
         if (outSize) *outSize = static_cast<int>(stripData.size());
-        return const_cast<uint8_t*>(stripData.data());
+        return const_cast<u8*>(stripData.data());
     }
     
     if (outSize) *outSize = 0;

@@ -78,7 +78,7 @@ namespace {
  * Checks high time and low time against timing thresholds.
  * Returns -1 if timing doesn't match either bit pattern.
  */
-inline int decodePulseBit(uint32_t high_ns, uint32_t low_ns, const ChipsetTiming4Phase &timing) {
+inline int decodePulseBit(u32 high_ns, u32 low_ns, const ChipsetTiming4Phase &timing) {
     // Decision logic: check if timing matches bit 0 pattern
     bool t0h_match = (high_ns >= timing.t0h_min_ns) && (high_ns <= timing.t0h_max_ns);
     bool t0l_match = (low_ns >= timing.t0l_min_ns) && (low_ns <= timing.t0l_max_ns);
@@ -105,8 +105,8 @@ inline int decodePulseBit(uint32_t high_ns, uint32_t low_ns, const ChipsetTiming
  * @param timing Timing thresholds
  * @return true if pulse is reset pulse (long low duration)
  */
-inline bool isResetPulse(uint32_t duration_ns, const ChipsetTiming4Phase &timing) {
-    uint32_t reset_min_ns = timing.reset_min_us * 1000;
+inline bool isResetPulse(u32 duration_ns, const ChipsetTiming4Phase &timing) {
+    u32 reset_min_ns = timing.reset_min_us * 1000;
     return duration_ns >= reset_min_ns;
 }
 
@@ -120,20 +120,20 @@ inline bool isResetPulse(uint32_t duration_ns, const ChipsetTiming4Phase &timing
  * Note: Edge detection/filtering must happen upstream when edges are stored.
  * This function assumes continuous LOW samples at the beginning have been skipped.
  */
-fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase &timing,
+fl::Result<u32, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase &timing,
                                                          fl::span<const EdgeTimestamp> edges,
-                                                         fl::span<uint8_t> bytes_out) {
+                                                         fl::span<u8> bytes_out) {
     const size_t edge_count = edges.size();
     const size_t bytes_capacity = bytes_out.size();
 
     if (edge_count == 0) {
         FL_WARN("decodeEdgeTimestamps: edges span is empty");
-        return fl::Result<uint32_t, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
+        return fl::Result<u32, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
     }
 
     if (bytes_capacity == 0) {
         FL_WARN("decodeEdgeTimestamps: bytes_out span is empty");
-        return fl::Result<uint32_t, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
+        return fl::Result<u32, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
     }
 
     FL_LOG_RX("decodeEdgeTimestamps: decoding " << edge_count << " edges into buffer of " << bytes_capacity << " bytes");
@@ -146,16 +146,16 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
 
     // Decoding state
     size_t error_count = 0;
-    uint32_t bytes_decoded = 0;
-    uint8_t current_byte = 0;
+    u32 bytes_decoded = 0;
+    u8 current_byte = 0;
     int bit_index = 0; // 0-7, MSB first
 
     // Precompute reset threshold
-    const uint32_t reset_min_ns = timing.reset_min_us * 1000;
+    const u32 reset_min_ns = timing.reset_min_us * 1000;
 
     // Cache pointer for faster access
     const EdgeTimestamp* edge_ptr = edges.data();
-    uint8_t* out_ptr = bytes_out.data();
+    u8* out_ptr = bytes_out.data();
 
     // Process edges in pairs
     size_t i = 0;
@@ -165,7 +165,7 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
         const EdgeTimestamp &edge2 = edge_ptr[i + 2];
 
         // Check for reset pulse (long low period indicates frame end)
-        uint32_t pulse0_duration = edge1.time_ns - edge0.time_ns;
+        u32 pulse0_duration = edge1.time_ns - edge0.time_ns;
         if (edge0.level == 0 && pulse0_duration >= reset_min_ns) {
             FL_LOG_RX("decodeEdgeTimestamps: reset pulse detected at edge " << i);
 
@@ -177,7 +177,7 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
                     out_ptr[bytes_decoded++] = current_byte;
                 } else {
                     FL_WARN("decodeEdgeTimestamps: buffer overflow");
-                    return fl::Result<uint32_t, DecodeError>::failure(DecodeError::BUFFER_OVERFLOW);
+                    return fl::Result<u32, DecodeError>::failure(DecodeError::BUFFER_OVERFLOW);
                 }
             }
             break;
@@ -192,8 +192,8 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
         }
 
         // Calculate pulse timings
-        uint32_t high_ns = edge1.time_ns - edge0.time_ns;
-        uint32_t low_ns = edge2.time_ns - edge1.time_ns;
+        u32 high_ns = edge1.time_ns - edge0.time_ns;
+        u32 low_ns = edge2.time_ns - edge1.time_ns;
 
         // Inline bit decoding for speed
         int bit = -1;
@@ -231,7 +231,7 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
         }
 
         // Accumulate bit into byte (MSB first)
-        current_byte = (current_byte << 1) | static_cast<uint8_t>(bit);
+        current_byte = (current_byte << 1) | static_cast<u8>(bit);
         bit_index++;
 
         // Log detailed info for first 3 bytes (24 bits = first LED's RGB) - using FL_WARN to ensure output
@@ -245,7 +245,7 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
         if (bit_index == 8) {
             if (bytes_decoded >= bytes_capacity) {
                 FL_WARN("decodeEdgeTimestamps: buffer overflow at byte " << bytes_decoded);
-                return fl::Result<uint32_t, DecodeError>::failure(DecodeError::BUFFER_OVERFLOW);
+                return fl::Result<u32, DecodeError>::failure(DecodeError::BUFFER_OVERFLOW);
             }
             out_ptr[bytes_decoded++] = current_byte;
 
@@ -268,7 +268,7 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
         if (bytes_decoded < bytes_capacity) {
             out_ptr[bytes_decoded++] = current_byte;
         } else {
-            return fl::Result<uint32_t, DecodeError>::failure(DecodeError::BUFFER_OVERFLOW);
+            return fl::Result<u32, DecodeError>::failure(DecodeError::BUFFER_OVERFLOW);
         }
     }
 
@@ -278,10 +278,10 @@ fl::Result<uint32_t, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase
     size_t total_pulses = edge_count / 2;
     if (total_pulses > 0 && error_count >= (total_pulses / 10)) {
         FL_WARN("decodeEdgeTimestamps: high error rate: " << error_count << "/" << total_pulses);
-        return fl::Result<uint32_t, DecodeError>::failure(DecodeError::HIGH_ERROR_RATE);
+        return fl::Result<u32, DecodeError>::failure(DecodeError::HIGH_ERROR_RATE);
     }
 
-    return fl::Result<uint32_t, DecodeError>::success(bytes_decoded);
+    return fl::Result<u32, DecodeError>::success(bytes_decoded);
 }
 
 } // anonymous namespace
@@ -305,25 +305,25 @@ struct alignas(64) IsrContext {
     // Hot path - accessed on EVERY ISR invocation (highest priority)
     EdgeTimestamp* writePtr;             ///< Current write position (read/write every edge)
     EdgeTimestamp* endPtr;                ///< End of buffer (read every edge for overflow check)
-    uint32_t gpioInRegAddr;              ///< GPIO_IN_REG or GPIO_IN1_REG address (read every call)
-    uint32_t gpioBitMask;                ///< Bit mask for pin (read every call)
+    u32 gpioInRegAddr;              ///< GPIO_IN_REG or GPIO_IN1_REG address (read every call)
+    u32 gpioBitMask;                ///< Bit mask for pin (read every call)
 
     // Medium-hot path - accessed on edge detection only
-    uint32_t startCycles;                ///< Start cycle count (read on edge, write once)
-    uint32_t lastEdgeCycles;             ///< Last edge cycles (read/write on edge)
-    uint32_t timeoutCycles;              ///< Timeout in CPU cycles (read when no edge)
-    uint32_t minPulseCycles;             ///< Minimum pulse width in cycles (read on edge)
+    u32 startCycles;                ///< Start cycle count (read on edge, write once)
+    u32 lastEdgeCycles;             ///< Last edge cycles (read/write on edge)
+    u32 timeoutCycles;              ///< Timeout in CPU cycles (read when no edge)
+    u32 minPulseCycles;             ///< Minimum pulse width in cycles (read on edge)
 
     // State variables - accessed on edge or state change
-    uint8_t currentLevel;                 ///< Current pin level (read every call, write on edge)
+    u8 currentLevel;                 ///< Current pin level (read every call, write on edge)
     bool receiveDone;                     ///< Done flag (read every call, write on timeout/full)
-    uint8_t _pad0[2];                     ///< Padding for alignment
-    uint32_t skipCounter;                 ///< Edges to skip before recording (read/write on edge)
+    u8 _pad0[2];                     ///< Padding for alignment
+    u32 skipCounter;                 ///< Edges to skip before recording (read/write on edge)
     size_t edgesCounter;                  ///< Edge count (write on edge, read by main)
 
     // Config values - rarely accessed in ISR (read-only after init)
     gpio_num_t pin;                       ///< GPIO pin number (stored for debug)
-    uint32_t cpuFreqMhz;                 ///< CPU frequency in MHz (main thread conversion)
+    u32 cpuFreqMhz;                 ///< CPU frequency in MHz (main thread conversion)
 
     // Timer handle - accessed only on done condition
     gptimer_handle_t hwTimer;            ///< Hardware timer handle
@@ -359,11 +359,11 @@ public:
 #ifdef GPIO_IN1_REG
         // ESP32/S2/S3 have >32 pins and use GPIO_IN1_REG for pins 32+
         mIsrCtx.gpioInRegAddr = (mPin < 32) ? GPIO_IN_REG : GPIO_IN1_REG;
-        uint8_t pin_bit = (mPin < 32) ? mPin : (mPin - 32);
+        u8 pin_bit = (mPin < 32) ? mPin : (mPin - 32);
 #else
         // ESP32-C3/C6/H2 have ≤32 pins and only use GPIO_IN_REG
         mIsrCtx.gpioInRegAddr = GPIO_IN_REG;
-        uint8_t pin_bit = mPin;
+        u8 pin_bit = mPin;
 #endif
         mIsrCtx.gpioBitMask = (1U << pin_bit);
 
@@ -435,7 +435,7 @@ public:
 
         // Convert nanoseconds to CPU cycles for ISR
         // cycles = (nanoseconds * CPU_MHz) / 1000
-        uint32_t cpuMhz = mIsrCtx.cpuFreqMhz;
+        u32 cpuMhz = mIsrCtx.cpuFreqMhz;
         mIsrCtx.timeoutCycles = (config.signal_range_max_ns * cpuMhz) / 1000;
         mIsrCtx.minPulseCycles = (config.signal_range_min_ns * cpuMhz) / 1000;
         if (mIsrCtx.minPulseCycles == 0) mIsrCtx.minPulseCycles = 1;  // Minimum 1 cycle
@@ -578,7 +578,7 @@ public:
         return done;
     }
 
-    RxWaitResult wait(uint32_t timeout_ms) override {
+    RxWaitResult wait(u32 timeout_ms) override {
         if (!mIsrInstalled) {
             FL_WARN("wait(): GPIO ISR not initialized");
             return RxWaitResult::TIMEOUT;
@@ -629,7 +629,7 @@ public:
 
         // Convert cycles to nanoseconds in-place (only once, when needed)
         if (mNeedsConversion) {
-            const uint32_t cpuMhz = mIsrCtx.cpuFreqMhz;
+            const u32 cpuMhz = mIsrCtx.cpuFreqMhz;
             const size_t count = mIsrCtx.edgesCounter;
             EdgeTimestamp* buffer = const_cast<EdgeTimestamp*>(mEdgeBuffer.data());
 
@@ -644,13 +644,13 @@ public:
         return fl::span<const EdgeTimestamp>(mEdgeBuffer.data(), mIsrCtx.edgesCounter);
     }
 
-    fl::Result<uint32_t, DecodeError> decode(const ChipsetTiming4Phase &timing,
-                                               fl::span<uint8_t> out) override {
+    fl::Result<u32, DecodeError> decode(const ChipsetTiming4Phase &timing,
+                                               fl::span<u8> out) override {
         // Get captured edges from last receive operation
         fl::span<const EdgeTimestamp> edges = getEdges();
 
         if (edges.empty()) {
-            return fl::Result<uint32_t, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
+            return fl::Result<u32, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
         }
 
         // Use the edge timestamp decoder (edge detection already done in ISR)
@@ -705,11 +705,11 @@ private:
 
         // CRITICAL PATH OPTIMIZATION: Minimize checks before GPIO read
         // Read pin state directly from register FIRST (fastest method - uses precomputed address & mask)
-        uint32_t gpio_in_reg = REG_READ(ctx->gpioInRegAddr);
-        uint8_t new_level = (gpio_in_reg & ctx->gpioBitMask) ? 1 : 0;
+        u32 gpio_in_reg = REG_READ(ctx->gpioInRegAddr);
+        u8 new_level = (gpio_in_reg & ctx->gpioBitMask) ? 1 : 0;
 
         // Fast path: no edge detected (most common case at 500ns polling)
-        uint8_t current_level = ctx->currentLevel;
+        u8 current_level = ctx->currentLevel;
         if (__builtin_expect(new_level == current_level, 1)) {
             // Check if already done
             if (__builtin_expect(ctx->receiveDone, 0)) {
@@ -723,8 +723,8 @@ private:
 
             // Check for idle timeout only if we have captured edges
             if (__builtin_expect(ctx->edgesCounter > 0, 0)) {
-                uint32_t now_cycles = __clock_cycles();
-                uint32_t cycles_since_last = now_cycles - ctx->lastEdgeCycles;
+                u32 now_cycles = __clock_cycles();
+                u32 cycles_since_last = now_cycles - ctx->lastEdgeCycles;
                 if (cycles_since_last >= ctx->timeoutCycles) {
                     ctx->receiveDone = true;
                 }
@@ -733,10 +733,10 @@ private:
         }
 
         // Edge detected - get timestamp
-        uint32_t now_cycles = __clock_cycles();
+        u32 now_cycles = __clock_cycles();
 
         // Initialize start cycles on first edge
-        uint32_t start_cycles = ctx->startCycles;
+        u32 start_cycles = ctx->startCycles;
         bool is_first_edge = (start_cycles == 0);
         if (__builtin_expect(is_first_edge, 0)) {
             ctx->startCycles = now_cycles;
@@ -744,7 +744,7 @@ private:
             start_cycles = now_cycles;  // Cache for elapsed calculation below
         } else {
             // Noise filter: reject pulses shorter than minimum (skip on first edge)
-            uint32_t cycles_since_last = now_cycles - ctx->lastEdgeCycles;
+            u32 cycles_since_last = now_cycles - ctx->lastEdgeCycles;
             if (__builtin_expect(cycles_since_last < ctx->minPulseCycles, 0)) {
                 ctx->currentLevel = new_level;
                 return false;
@@ -757,7 +757,7 @@ private:
         ctx->currentLevel = new_level;
 
         // Skip counter (honor skip_signals config)
-        uint32_t skip = ctx->skipCounter;
+        u32 skip = ctx->skipCounter;
         if (__builtin_expect(skip > 0, 0)) {
             ctx->skipCounter = skip - 1;
             return false;
@@ -773,7 +773,7 @@ private:
         }
 
         // Write edge (fastest path - store cycles directly)
-        uint32_t elapsed_cycles = now_cycles - start_cycles;
+        u32 elapsed_cycles = now_cycles - start_cycles;
         ptr->cycles = elapsed_cycles;
         ptr->level = new_level;
 
@@ -800,8 +800,8 @@ private:
         // First pass: Count total valid edges
         size_t total_edges = 0;
         for (size_t i = 0; i < edges.size(); ) {
-            uint8_t current_state = edges[i].level;
-            uint32_t state_start_ns = edges[i].time_ns;
+            u8 current_state = edges[i].level;
+            u32 state_start_ns = edges[i].time_ns;
 
             size_t next_i = i + 1;
             while (next_i < edges.size() && edges[next_i].level == current_state) {
@@ -809,7 +809,7 @@ private:
             }
 
             if (next_i < edges.size()) {
-                uint32_t accumulated_ns = edges[next_i].time_ns - state_start_ns;
+                u32 accumulated_ns = edges[next_i].time_ns - state_start_ns;
                 if (accumulated_ns >= mSignalRangeMinNs) {
                     total_edges++;
                 }
@@ -830,15 +830,15 @@ private:
         size_t out_index = 0;
 
         for (size_t i = 0; i < edges.size() && out_index < out.size(); ) {
-            uint8_t current_state = edges[i].level;
-            uint32_t state_start_ns = edges[i].time_ns;
+            u8 current_state = edges[i].level;
+            u32 state_start_ns = edges[i].time_ns;
 
             size_t next_i = i + 1;
             while (next_i < edges.size() && edges[next_i].level == current_state) {
                 next_i++;
             }
 
-            uint32_t accumulated_ns;
+            u32 accumulated_ns;
             if (next_i < edges.size()) {
                 accumulated_ns = edges[next_i].time_ns - state_start_ns;
             } else {
@@ -891,7 +891,7 @@ private:
 
         // Convert EdgeTime to EdgeTimestamp (accumulate nanoseconds)
         // EdgeTime stores durations, EdgeTimestamp stores transition times
-        uint32_t accumulated_ns = 0;
+        u32 accumulated_ns = 0;
         for (size_t i = 0; i < edges.size(); i++) {
             const EdgeTime& edge = edges[i];
 
@@ -927,8 +927,8 @@ private:
     fl::vector<EdgeTimestamp> mEdgeBuffer;   ///< Buffer (ISR writes cycles, getEdges() converts to ns)
     bool mIsrInstalled;                          ///< True if ISR handler is installed
     bool mNeedsConversion;                       ///< True if buffer has cycles (not yet converted to ns)
-    uint32_t mSignalRangeMinNs;                ///< Minimum pulse width (noise filtering)
-    uint32_t mSignalRangeMaxNs;                ///< Maximum pulse width (idle detection)
+    u32 mSignalRangeMinNs;                ///< Minimum pulse width (noise filtering)
+    u32 mSignalRangeMaxNs;                ///< Maximum pulse width (idle detection)
     bool mStartLow;                              ///< Pin idle state: true=LOW (WS2812B), false=HIGH (inverted)
 };
 

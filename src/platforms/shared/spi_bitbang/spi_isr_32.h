@@ -8,7 +8,7 @@
 
 #ifdef FL_SPI_ISR_VALIDATE
 // C++ wrapper types for GPIO events (provides type safety and convenience methods)
-enum class GPIOEventType : uint8_t {
+enum class GPIOEventType : fl::u8 {
     StateStart  = FASTLED_GPIO_EVENT_STATE_START,
     StateDone   = FASTLED_GPIO_EVENT_STATE_DONE,
     SetBits     = FASTLED_GPIO_EVENT_SET_BITS,
@@ -19,11 +19,11 @@ enum class GPIOEventType : uint8_t {
 
 // C++ wrapper for FastLED_GPIO_Event (same memory layout, adds convenience methods)
 struct GPIOEvent {
-    uint8_t  event_type;
-    uint8_t  padding[3];
+    fl::u8  event_type;
+    fl::u8  padding[3];
     union {
-        uint32_t gpio_mask;
-        uint32_t state_info;
+        fl::u32 gpio_mask;
+        fl::u32 state_info;
     } payload;
 
     GPIOEventType type() const { return static_cast<GPIOEventType>(event_type); }
@@ -67,8 +67,8 @@ namespace fl {
 class SpiIsr32 {
 public:
     /// Status bit definitions
-    static constexpr uint32_t STATUS_BUSY = 1u;
-    static constexpr uint32_t STATUS_DONE = 2u;
+    static constexpr u32 STATUS_BUSY = 1u;
+    static constexpr u32 STATUS_DONE = 2u;
 
     SpiIsr32() = default;
     ~SpiIsr32() = default;
@@ -77,7 +77,7 @@ public:
      * Configure GPIO clock mask (single bit for clock pin)
      * Example: setClockMask(1 << 32) for GPIO32
      */
-    void setClockMask(uint32_t mask) {
+    void setClockMask(u32 mask) {
         fl_spi_set_clock_mask(mask);
     }
 
@@ -85,14 +85,14 @@ public:
      * Set number of bytes to transmit in next burst
      * Max: 256 bytes
      */
-    void setTotalBytes(uint16_t n) {
+    void setTotalBytes(u16 n) {
         fl_spi_set_total_bytes(n);
     }
 
     /**
      * Set a single data byte at index i
      */
-    void setDataByte(uint16_t i, uint8_t v) {
+    void setDataByte(u16 i, u8 v) {
         fl_spi_set_data_byte(i, v);
     }
 
@@ -102,7 +102,7 @@ public:
      * @param setMask GPIO bits to set high
      * @param clearMask GPIO bits to set low
      */
-    void setLUTEntry(uint8_t value, uint32_t setMask, uint32_t clearMask) {
+    void setLUTEntry(u8 value, u32 setMask, u32 clearMask) {
         fl_spi_set_lut_entry(value, setMask, clearMask);
     }
 
@@ -111,10 +111,10 @@ public:
      * @param data Pointer to data bytes
      * @param n Number of bytes (max 256)
      */
-    void loadBuffer(const uint8_t* data, uint16_t n) {
+    void loadBuffer(const u8* data, u16 n) {
         if (!data) return;
         if (n > 256) n = 256;
-        for (uint16_t i = 0; i < n; ++i) {
+        for (u16 i = 0; i < n; ++i) {
             fl_spi_set_data_byte(i, data[i]);
         }
         fl_spi_set_total_bytes(n);
@@ -126,11 +126,11 @@ public:
      * @param clearMasks Array of 256 clear masks
      * @param count Number of entries to load (default 256)
      */
-    void loadLUT(const uint32_t* setMasks, const uint32_t* clearMasks, size_t count = 256) {
+    void loadLUT(const u32* setMasks, const u32* clearMasks, size_t count = 256) {
         if (!setMasks || !clearMasks) return;
         if (count > 256) count = 256;
         for (size_t v = 0; v < count; ++v) {
-            fl_spi_set_lut_entry(static_cast<uint8_t>(v), setMasks[v], clearMasks[v]);
+            fl_spi_set_lut_entry(static_cast<u8>(v), setMasks[v], clearMasks[v]);
         }
     }
 
@@ -139,7 +139,7 @@ public:
      * @param timer_hz Timer frequency in Hz (should be 2× target SPI bit rate)
      * @return 0 on success, error code on failure
      */
-    int setupISR(uint32_t timer_hz) {
+    int setupISR(u32 timer_hz) {
         return fl_spi_platform_isr_start(timer_hz);
     }
 
@@ -168,7 +168,7 @@ public:
     /**
      * Get raw status flags
      */
-    uint32_t statusFlags() const {
+    u32 statusFlags() const {
         return fl_spi_status_flags();
     }
 
@@ -183,7 +183,7 @@ public:
      * Visibility delay (ensures memory writes are visible to ISR)
      * Typical value: 10 microseconds
      */
-    static void visibilityDelayUs(uint32_t us) {
+    static void visibilityDelayUs(u32 us) {
         fl_spi_visibility_delay_us(us);
     }
 
@@ -217,7 +217,7 @@ public:
      *   uint8_t* data = spi.getDataArray();
      *   memcpy(data, source, length);
      */
-    static uint8_t* getDataArray() {
+    static u8* getDataArray() {
         return fl_spi_get_data_array();
     }
 
@@ -233,7 +233,7 @@ public:
     /**
      * Get number of GPIO events captured
      */
-    static uint16_t getValidationEventCount() {
+    static u16 getValidationEventCount() {
         return fl_spi_get_validation_event_count();
     }
 #endif

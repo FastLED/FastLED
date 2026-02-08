@@ -19,7 +19,7 @@ namespace wled {
  * - "RRGGBB" (6 hex digits)
  * - "#RRGGBB" (# prefix optional)
  */
-bool parseHexColor(const fl::string& hexStr, uint8_t& r, uint8_t& g, uint8_t& b);
+bool parseHexColor(const fl::string& hexStr, u8& r, u8& g, u8& b);
 
 /**
  * @brief Convert RGB components to hex string
@@ -28,7 +28,7 @@ bool parseHexColor(const fl::string& hexStr, uint8_t& r, uint8_t& g, uint8_t& b)
  * @param b Blue component (0-255)
  * @return Hex color string (format: "RRGGBB")
  */
-fl::string rgbToHex(uint8_t r, uint8_t g, uint8_t b);
+fl::string rgbToHex(u8 r, u8 g, u8 b);
 
 /**
  * @brief Parse all fields from a segment JSON object into a WLEDSegment

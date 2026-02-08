@@ -57,12 +57,12 @@ namespace platforms {
 struct avr_isr_handle_data {
     isr_handler_t mUserHandler;    // User handler function
     void* mUserData;                // User context
-    uint32_t mFrequencyHz;          // Timer frequency in Hz
-    uint8_t mGpioPin;               // GPIO pin number (0xFF if not GPIO)
+    u32 mFrequencyHz;          // Timer frequency in Hz
+    u8 mGpioPin;               // GPIO pin number (0xFF if not GPIO)
     bool mIsTimer;                  // true = timer ISR, false = external ISR
     bool mIsEnabled;                // Current enable state
-    uint8_t mPrescalerIndex;        // Prescaler index (0-4)
-    uint16_t mOcrValue;             // OCR1A value for timer
+    u8 mPrescalerIndex;        // Prescaler index (0-4)
+    u16 mOcrValue;             // OCR1A value for timer
 
     avr_isr_handle_data()
         : mUserHandler(nullptr)
@@ -77,15 +77,15 @@ struct avr_isr_handle_data {
 };
 
 // Platform ID for AVR
-constexpr uint8_t AVR_PLATFORM_ID = 2;
+constexpr u8 AVR_PLATFORM_ID = 2;
 
 // Global timer handle data (AVR Timer1 limitation: only one timer can be active)
 static avr_isr_handle_data* g_avr_timer_data = nullptr;
 
 // Prescaler values and corresponding CS1x bits
 struct prescaler_config_t {
-    uint16_t value;
-    uint8_t cs_bits;  // CS12:CS11:CS10 bits
+    u16 value;
+    u8 cs_bits;  // CS12:CS11:CS10 bits
 };
 
 static const prescaler_config_t PRESCALERS[] = {
@@ -95,7 +95,7 @@ static const prescaler_config_t PRESCALERS[] = {
     {256,  (1 << CS12) | (0 << CS11) | (0 << CS10)},  // /256
     {1024, (1 << CS12) | (0 << CS11) | (1 << CS10)},  // /1024
 };
-constexpr uint8_t NUM_PRESCALERS = sizeof(PRESCALERS) / sizeof(PRESCALERS[0]);
+constexpr u8 NUM_PRESCALERS = sizeof(PRESCALERS) / sizeof(PRESCALERS[0]);
 
 // =============================================================================
 // Timer Calculation Helpers
@@ -106,17 +106,17 @@ constexpr uint8_t NUM_PRESCALERS = sizeof(PRESCALERS) / sizeof(PRESCALERS[0]);
  * Formula: OCR1A = (F_CPU / (prescaler * frequency)) - 1
  * Returns true on success, false if frequency is out of range.
  */
-static bool calculate_timer_config(uint32_t target_freq_hz, uint8_t& prescaler_idx, uint16_t& ocr_value) {
+static bool calculate_timer_config(u32 target_freq_hz, u8& prescaler_idx, u16& ocr_value) {
     // Try each prescaler, starting with smallest for best precision
-    for (uint8_t i = 0; i < NUM_PRESCALERS; i++) {
-        uint32_t prescaler = PRESCALERS[i].value;
+    for (u8 i = 0; i < NUM_PRESCALERS; i++) {
+        u32 prescaler = PRESCALERS[i].value;
         // Calculate OCR value: (F_CPU / (prescaler * freq)) - 1
-        uint32_t ocr_calc = (F_CPU / (prescaler * target_freq_hz)) - 1;
+        u32 ocr_calc = (F_CPU / (prescaler * target_freq_hz)) - 1;
 
         // OCR1A is 16-bit, so must fit in 0-65535
         if (ocr_calc <= 65535) {
             prescaler_idx = i;
-            ocr_value = static_cast<uint16_t>(ocr_calc);
+            ocr_value = static_cast<u16>(ocr_calc);
             return true;
         }
     }
@@ -128,9 +128,9 @@ static bool calculate_timer_config(uint32_t target_freq_hz, uint8_t& prescaler_i
  * Calculate actual frequency achieved with given prescaler and OCR value.
  * Formula: freq = F_CPU / (prescaler * (OCR1A + 1))
  */
-static uint32_t calculate_actual_frequency(uint8_t prescaler_idx, uint16_t ocr_value) {
-    uint32_t prescaler = PRESCALERS[prescaler_idx].value;
-    return F_CPU / (prescaler * (static_cast<uint32_t>(ocr_value) + 1));
+static u32 calculate_actual_frequency(u8 prescaler_idx, u16 ocr_value) {
+    u32 prescaler = PRESCALERS[prescaler_idx].value;
+    return F_CPU / (prescaler * (static_cast<u32>(ocr_value) + 1));
 }
 
 // =============================================================================
@@ -176,8 +176,8 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     }
 
     // Calculate timer configuration
-    uint8_t prescaler_idx;
-    uint16_t ocr_value;
+    u8 prescaler_idx;
+    u16 ocr_value;
     if (!calculate_timer_config(config.frequency_hz, prescaler_idx, ocr_value)) {
         FL_WARN("AVR ISR: frequency " << config.frequency_hz << " Hz out of range");
         delete handle_data;
@@ -185,11 +185,11 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     }
 
     // Calculate actual achieved frequency
-    uint32_t actual_freq = calculate_actual_frequency(prescaler_idx, ocr_value);
+    u32 actual_freq = calculate_actual_frequency(prescaler_idx, ocr_value);
 
     // Warn if frequency error is >5%
-    int32_t freq_error = static_cast<int32_t>(actual_freq) - static_cast<int32_t>(config.frequency_hz);
-    int32_t error_pct = (freq_error * 100) / static_cast<int32_t>(config.frequency_hz);
+    i32 freq_error = static_cast<i32>(actual_freq) - static_cast<i32>(config.frequency_hz);
+    i32 error_pct = (freq_error * 100) / static_cast<i32>(config.frequency_hz);
     if (error_pct > 5 || error_pct < -5) {
         FL_WARN("AVR ISR: frequency error " << error_pct << "% (requested "
                 << config.frequency_hz << " Hz, actual " << actual_freq << " Hz)");
@@ -210,7 +210,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     g_avr_timer_data = handle_data;
 
     // Disable interrupts during timer configuration
-    uint8_t oldSREG = SREG;
+    u8 oldSREG = SREG;
     cli();
 
     // Configure Timer1 for CTC mode (Clear Timer on Compare)
@@ -245,7 +245,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     return 0;  // Success
 }
 
-int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) {
+int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) {
     // External interrupts not yet implemented
     // AVR supports external interrupts via INT0/INT1 and Pin Change Interrupts
     // Implementation would use Arduino's attachInterrupt() or direct register manipulation
@@ -270,7 +270,7 @@ int detach_handler(isr_handle_t& handle) {
 
     if (handle_data->mIsTimer) {
         // Disable Timer1 interrupts
-        uint8_t oldSREG = SREG;
+        u8 oldSREG = SREG;
         cli();
 
         TIMSK1 &= ~(1 << OCIE1A);  // Disable compare match interrupt
@@ -310,7 +310,7 @@ int enable_handler(const isr_handle_t& handle) {
     }
 
     if (handle_data->mIsTimer) {
-        uint8_t oldSREG = SREG;
+        u8 oldSREG = SREG;
         cli();
 
         // Re-enable timer with stored configuration
@@ -345,7 +345,7 @@ int disable_handler(const isr_handle_t& handle) {
     }
 
     if (handle_data->mIsTimer) {
-        uint8_t oldSREG = SREG;
+        u8 oldSREG = SREG;
         cli();
 
         TIMSK1 &= ~(1 << OCIE1A);  // Disable interrupt
@@ -396,28 +396,28 @@ const char* get_platform_name() {
 #endif
 }
 
-uint32_t get_max_timer_frequency() {
+u32 get_max_timer_frequency() {
     // Maximum frequency with prescaler=1 and OCR1A=1
     // freq = F_CPU / (1 * (1 + 1)) = F_CPU / 2
     // For 16MHz: 8MHz theoretical, but ~250kHz is more practical
     return F_CPU / 64;  // Conservative estimate (250kHz @ 16MHz)
 }
 
-uint32_t get_min_timer_frequency() {
+u32 get_min_timer_frequency() {
     // Minimum frequency with prescaler=1024 and OCR1A=65535
     // freq = F_CPU / (1024 * (65535 + 1))
     // For 16MHz: ~0.238 Hz
     return 1;  // 1 Hz minimum (well within capability)
 }
 
-uint8_t get_max_priority() {
+u8 get_max_priority() {
     // AVR has no hardware interrupt priority levels
     // All interrupts are equal priority (can't nest by default)
     // Return 0 to indicate no priority support
     return 0;
 }
 
-bool requires_assembly_handler(uint8_t priority) {
+bool requires_assembly_handler(u8 priority) {
     (void)priority;
     // AVR interrupts use ISR() macro - no assembly required
     return false;

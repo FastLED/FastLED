@@ -40,8 +40,8 @@
 
 #define FASTLED_NO_PINMAP
 
-typedef volatile uint32_t RoReg;
-typedef volatile uint32_t RwReg;
+typedef volatile fl::u32 RoReg;
+typedef volatile fl::u32 RwReg;
 
 // F_CPU is platform-specific and should be defined by the including platform header
 // RP2040: 125 MHz, RP2350: 150 MHz
@@ -102,7 +102,7 @@ typedef volatile uint32_t RwReg;
 #endif
 
 #if !defined(cli) && !defined(sei)
-static uint32_t saved_interrupt_status;
+static fl::u32 saved_interrupt_status;
 #define cli() (saved_interrupt_status = save_and_disable_interrupts())
 #define sei() (restore_interrupts(saved_interrupt_status))
 #endif

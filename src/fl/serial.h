@@ -42,7 +42,7 @@ public:
      * Note: On some platforms (host), baud rate is ignored.
      * On embedded platforms, this configures the UART hardware.
      */
-    void begin(uint32_t baudRate = 115200);
+    void begin(u32 baudRate = 115200);
 
     /**
      * @brief Close serial communication
@@ -78,7 +78,7 @@ public:
      * @param byte Byte to write
      * @return Number of bytes written (1 on success, 0 on failure)
      */
-    size_t write(uint8_t byte);
+    size_t write(u8 byte);
 
     /**
      * @brief Write buffer to serial output
@@ -86,7 +86,7 @@ public:
      * @param size Number of bytes to write
      * @return Number of bytes written
      */
-    size_t write(const uint8_t* buffer, size_t size);
+    size_t write(const u8* buffer, size_t size);
 
     /**
      * @brief Print string to serial output
@@ -189,7 +189,7 @@ public:
      * Blocks until all buffered data is transmitted.
      * Note: On platforms without buffering, this returns immediately.
      */
-    bool flush(uint32_t timeoutMs = 1000);
+    bool flush(u32 timeoutMs = 1000);
 
     /**
      * @brief Check if serial port is ready for I/O
@@ -205,7 +205,7 @@ public:
      *
      * This affects readString(), readStringUntil(), readBytes(), and readBytesUntil().
      */
-    void setTimeout(uint32_t timeoutMs);
+    void setTimeout(u32 timeoutMs);
 
     /**
      * @brief Read all available bytes into a string
@@ -233,7 +233,7 @@ public:
      *
      * Reads up to length bytes from serial. May return fewer bytes if timeout occurs.
      */
-    size_t readBytes(uint8_t* buffer, size_t length);
+    size_t readBytes(u8* buffer, size_t length);
 
     /**
      * @brief Read bytes until delimiter is found
@@ -245,7 +245,7 @@ public:
      * Reads bytes from serial until delimiter is found, timeout occurs, or buffer is full.
      * The delimiter character is discarded (not included in the buffer).
      */
-    size_t readBytesUntil(char delimiter, uint8_t* buffer, size_t length);
+    size_t readBytesUntil(char delimiter, u8* buffer, size_t length);
 
     /**
      * @brief Parse integer from serial input
@@ -266,7 +266,7 @@ public:
     float parseFloat();
 
 private:
-    uint32_t mTimeoutMs = 1000;  // Default 1 second timeout
+    u32 mTimeoutMs = 1000;  // Default 1 second timeout
 };
 
 // ============================================================================

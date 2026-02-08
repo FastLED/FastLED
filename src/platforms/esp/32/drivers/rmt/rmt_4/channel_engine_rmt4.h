@@ -225,17 +225,17 @@ private:
         volatile rmt_item32_t* memStart;
 
         // Pixel Data Buffer
-        const uint8_t* pixelData;
+        const u8* pixelData;
         size_t pixelDataSize;
         volatile size_t pixelDataPos;
 
         // Performance Monitoring
-        uint32_t cyclesPerFill;
-        uint32_t maxCyclesPerFill;
-        volatile uint32_t lastFill;
+        u32 cyclesPerFill;
+        u32 maxCyclesPerFill;
+        volatile u32 lastFill;
 
         // Timeout Detection
-        uint32_t transmissionStartTime;  // millis() when transmission started
+        u32 transmissionStartTime;  // millis() when transmission started
 
         // Source reference
         ChannelDataPtr sourceData;
@@ -262,11 +262,11 @@ private:
 
         // Enter critical section and read interrupt status
         portENTER_CRITICAL_ISR(&engine->mRmtSpinlock);
-        uint32_t intr_st = RMT.int_st.val;
+        u32 intr_st = RMT.int_st.val;
         portEXIT_CRITICAL_ISR(&engine->mRmtSpinlock);
 
         // Check each channel for interrupts
-        for (uint8_t channel = 0; channel < FASTLED_RMT_MAX_CHANNELS; channel++) {
+        for (u8 channel = 0; channel < FASTLED_RMT_MAX_CHANNELS; channel++) {
 #if FL_IS_ESP_32S2
             int tx_done_bit = channel * 3;
             int tx_next_bit = channel + 12;
@@ -353,10 +353,10 @@ private:
         }
 
         // WiFi interference detection: Measure time between buffer refills
-        uint32_t now = __clock_cycles();
+        u32 now = __clock_cycles();
         if (checkTime && state->lastFill != 0) {
-            int32_t delta = static_cast<int32_t>(now - state->lastFill);
-            if (delta > static_cast<int32_t>(state->maxCyclesPerFill)) {
+            i32 delta = static_cast<i32>(now - state->lastFill);
+            if (delta > static_cast<i32>(state->maxCyclesPerFill)) {
                 // Too much time elapsed - WiFi interrupt interference detected
                 state->pixelDataPos = state->pixelDataSize;
             }
@@ -364,8 +364,8 @@ private:
         state->lastFill = now;
 
         // Get timing symbols into local registers (fast access)
-        FASTLED_REGISTER uint32_t one_val = state->one.val;
-        FASTLED_REGISTER uint32_t zero_val = state->zero.val;
+        FASTLED_REGISTER u32 one_val = state->one.val;
+        FASTLED_REGISTER u32 zero_val = state->zero.val;
 
         // Calculate pointer to current buffer half
         volatile FASTLED_REGISTER rmt_item32_t* pItem = state->memPtr;
@@ -374,7 +374,7 @@ private:
         for (FASTLED_REGISTER int i = 0; i < PULSES_PER_FILL_RMT4 / 8; i++) {
             if (state->pixelDataPos < state->pixelDataSize) {
                 // Convert next byte to 8 RMT symbols
-                uint8_t byteval = state->pixelData[state->pixelDataPos];
+                u8 byteval = state->pixelData[state->pixelDataPos];
                 convertByteToRMT(byteval, state->zero, state->one, pItem);
                 pItem += 8;
                 state->pixelDataPos++;
@@ -397,19 +397,19 @@ private:
     }
 
     static inline IRAM_ATTR void convertByteToRMT(
-        uint8_t byteval,
+        u8 byteval,
         const rmt_item32_t& zero,
         const rmt_item32_t& one,
         volatile rmt_item32_t* pItem
     ) {
         // Convert 1 byte → 8 RMT symbols (MSB first)
-        uint32_t pixel_u32 = byteval;
+        u32 pixel_u32 = byteval;
         pixel_u32 <<= 24;  // Shift to MSB position for bit extraction
 
-        uint32_t tmp[8];
-        for (uint32_t j = 0; j < 8; j++) {
+        u32 tmp[8];
+        for (u32 j = 0; j < 8; j++) {
             // Extract MSB and select symbol
-            uint32_t new_val = (pixel_u32 & 0x80000000L) ? one.val : zero.val;
+            u32 new_val = (pixel_u32 & 0x80000000L) ? one.val : zero.val;
             pixel_u32 <<= 1;
 
             // Write to non-volatile buffer (compiler can optimize)

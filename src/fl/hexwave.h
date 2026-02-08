@@ -55,7 +55,7 @@ enum class HexWaveShape {
 
 /// Waveform parameters for custom waveforms
 struct HexWaveParams {
-    int32_t reflect = 1;      ///< Mirror second half of waveform (0 or 1)
+    i32 reflect = 1;      ///< Mirror second half of waveform (0 or 1)
     float peakTime = 0.0f;    ///< Position of peak in cycle [0..1]
     float halfHeight = 0.0f;  ///< Height at half-cycle point
     float zeroWait = 0.0f;    ///< Wait time at zero [0..1]
@@ -64,7 +64,7 @@ struct HexWaveParams {
     HexWaveParams() = default;
 
     /// Full parameter constructor
-    HexWaveParams(int32_t reflect, float peakTime, float halfHeight, float zeroWait)
+    HexWaveParams(i32 reflect, float peakTime, float halfHeight, float zeroWait)
         : reflect(reflect), peakTime(peakTime), halfHeight(halfHeight), zeroWait(zeroWait) {}
 
     /// Create parameters for a predefined shape
@@ -82,7 +82,7 @@ public:
     /// @param width BLEP width (4..64), larger = better quality, more CPU
     /// @param oversample Oversampling factor (2+), larger = less noise
     /// @return Shared pointer to the engine
-    static IHexWaveEnginePtr create(int32_t width = 32, int32_t oversample = 16);
+    static IHexWaveEnginePtr create(i32 width = 32, i32 oversample = 16);
 
     virtual ~IHexWaveEngine() = default;
 
@@ -90,10 +90,10 @@ public:
     virtual bool isValid() const = 0;
 
     /// Get the width setting
-    virtual int32_t getWidth() const = 0;
+    virtual i32 getWidth() const = 0;
 
     /// Get the oversample setting
-    virtual int32_t getOversample() const = 0;
+    virtual i32 getOversample() const = 0;
 };
 
 /// Interface class for HexWave oscillator
@@ -120,7 +120,7 @@ public:
     /// @param output Buffer to fill with samples
     /// @param numSamples Number of samples to generate
     /// @param freq Frequency divided by sample rate (e.g., 440/44100 for 440 Hz at 44.1 kHz)
-    virtual void generateSamples(float* output, int32_t numSamples, float freq) = 0;
+    virtual void generateSamples(float* output, i32 numSamples, float freq) = 0;
 
     /// Generate audio samples (span version)
     /// @param output Span to fill with samples

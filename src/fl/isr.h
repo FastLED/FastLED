@@ -54,12 +54,12 @@ typedef void (*isr_handler_t)(void* user_data);
 // Platforms map these to their native priority schemes internally
 // These are abstract priority levels that map to platform-specific values
 // Declared here so they can be used in isr_config_t constructor
-constexpr uint8_t ISR_PRIORITY_LOW        = 1;  // Lowest priority
-constexpr uint8_t ISR_PRIORITY_DEFAULT    = 1;  // Default priority (alias for LOW)
-constexpr uint8_t ISR_PRIORITY_MEDIUM     = 2;  // Medium priority
-constexpr uint8_t ISR_PRIORITY_HIGH       = 3;  // High priority (recommended max)
-constexpr uint8_t ISR_PRIORITY_CRITICAL   = 4;  // Critical (experimental, platform-dependent)
-constexpr uint8_t ISR_PRIORITY_MAX        = 7;  // Maximum (may require assembly, platform-dependent)
+constexpr u8 ISR_PRIORITY_LOW        = 1;  // Lowest priority
+constexpr u8 ISR_PRIORITY_DEFAULT    = 1;  // Default priority (alias for LOW)
+constexpr u8 ISR_PRIORITY_MEDIUM     = 2;  // Medium priority
+constexpr u8 ISR_PRIORITY_HIGH       = 3;  // High priority (recommended max)
+constexpr u8 ISR_PRIORITY_CRITICAL   = 4;  // Critical (experimental, platform-dependent)
+constexpr u8 ISR_PRIORITY_MAX        = 7;  // Maximum (may require assembly, platform-dependent)
 
 // =============================================================================
 // ISR Configuration Structure
@@ -74,9 +74,9 @@ constexpr uint8_t ISR_PRIORITY_MAX        = 7;  // Maximum (may require assembly
 struct isr_config_t {
     isr_handler_t handler;        // Handler function pointer
     void* user_data;              // User context (passed to handler)
-    uint32_t frequency_hz;        // Timer frequency in Hz (0 = GPIO/external interrupt)
-    uint8_t priority;             // Priority level (platform-dependent range)
-    uint32_t flags;               // Platform-specific flags (see below)
+    u32 frequency_hz;        // Timer frequency in Hz (0 = GPIO/external interrupt)
+    u8 priority;             // Priority level (platform-dependent range)
+    u32 flags;               // Platform-specific flags (see below)
 
     // Constructor with defaults
     isr_config_t()
@@ -93,20 +93,20 @@ struct isr_config_t {
 // =============================================================================
 
 // Common flags (applicable to most platforms)
-constexpr uint32_t ISR_FLAG_IRAM_SAFE     = (1u << 0);  // Place in IRAM (ESP32)
-constexpr uint32_t ISR_FLAG_EDGE_RISING   = (1u << 1);  // Edge-triggered, rising edge
-constexpr uint32_t ISR_FLAG_EDGE_FALLING  = (1u << 2);  // Edge-triggered, falling edge
-constexpr uint32_t ISR_FLAG_LEVEL_HIGH    = (1u << 3);  // Level-triggered, high level
-constexpr uint32_t ISR_FLAG_LEVEL_LOW     = (1u << 4);  // Level-triggered, low level
-constexpr uint32_t ISR_FLAG_ONE_SHOT      = (1u << 5);  // One-shot timer (vs auto-reload)
-constexpr uint32_t ISR_FLAG_MANUAL_TICK   = (1u << 6);  // Manual tick mode (simulation/testing)
+constexpr u32 ISR_FLAG_IRAM_SAFE     = (1u << 0);  // Place in IRAM (ESP32)
+constexpr u32 ISR_FLAG_EDGE_RISING   = (1u << 1);  // Edge-triggered, rising edge
+constexpr u32 ISR_FLAG_EDGE_FALLING  = (1u << 2);  // Edge-triggered, falling edge
+constexpr u32 ISR_FLAG_LEVEL_HIGH    = (1u << 3);  // Level-triggered, high level
+constexpr u32 ISR_FLAG_LEVEL_LOW     = (1u << 4);  // Level-triggered, low level
+constexpr u32 ISR_FLAG_ONE_SHOT      = (1u << 5);  // One-shot timer (vs auto-reload)
+constexpr u32 ISR_FLAG_MANUAL_TICK   = (1u << 6);  // Manual tick mode (simulation/testing)
 
 // ESP32-specific flags
-constexpr uint32_t ISR_FLAG_ESP_SHARED    = (1ul << 16); // Shared interrupt (ESP32)
-constexpr uint32_t ISR_FLAG_ESP_LOWMED    = (1ul << 17); // Low/medium priority shared (ESP32)
+constexpr u32 ISR_FLAG_ESP_SHARED    = (1ul << 16); // Shared interrupt (ESP32)
+constexpr u32 ISR_FLAG_ESP_LOWMED    = (1ul << 17); // Low/medium priority shared (ESP32)
 
 // STM32-specific flags
-constexpr uint32_t ISR_FLAG_STM32_PREEMPT = (1ul << 18); // Use preemption priority (STM32)
+constexpr u32 ISR_FLAG_STM32_PREEMPT = (1ul << 18); // Use preemption priority (STM32)
 
 // =============================================================================
 // ISR Handle Type
@@ -120,7 +120,7 @@ struct isr_handle_t {
     void* platform_handle;        // Platform-specific handle
     isr_handler_t handler;        // Handler function (for validation)
     void* user_data;              // User data (for validation)
-    uint8_t platform_id;          // Platform identifier (for runtime checks)
+    u8 platform_id;          // Platform identifier (for runtime checks)
 
     isr_handle_t()
         : platform_handle(nullptr)
@@ -200,7 +200,7 @@ int attachTimerHandler(const isr_config_t& config, isr_handle_t* handle = nullpt
  * - STM32: Uses HAL_NVIC_SetPriority and EXTI configuration
  * - Stub: Simulates GPIO events
  */
-int attachExternalHandler(uint8_t pin, const isr_config_t& config, isr_handle_t* handle = nullptr);
+int attachExternalHandler(u8 pin, const isr_config_t& config, isr_handle_t* handle = nullptr);
 
 /**
  * Detach an ISR handler.
@@ -258,26 +258,26 @@ const char* getPlatformName();
  * Get the maximum timer frequency supported by this platform.
  * @return: Maximum frequency in Hz, or 0 if unlimited
  */
-uint32_t getMaxTimerFrequency();
+u32 getMaxTimerFrequency();
 
 /**
  * Get the minimum timer frequency supported by this platform.
  * @return: Minimum frequency in Hz
  */
-uint32_t getMinTimerFrequency();
+u32 getMinTimerFrequency();
 
 /**
  * Get the maximum priority level supported by this platform.
  * @return: Maximum priority value
  */
-uint8_t getMaxPriority();
+u8 getMaxPriority();
 
 /**
  * Check if assembly is required for a given priority level.
  * @param priority: Priority level to check
  * @return: true if assembly handler required, false if C handler allowed
  */
-bool requiresAssemblyHandler(uint8_t priority);
+bool requiresAssemblyHandler(u8 priority);
 
 // =============================================================================
 // ISR-Optimized Memory Copy Utilities
@@ -297,8 +297,8 @@ FASTLED_FORCE_INLINE bool is_aligned(const void* ptr, size_t alignment) {
 /// @param count Number of 32-bit words to copy (NOT bytes)
 /// @note Only call with 4-byte aligned pointers and valid count
 FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
-void memcpy32(uint32_t* FL_RESTRICT_PARAM dst,
-              const uint32_t* FL_RESTRICT_PARAM src,
+void memcpy32(u32* FL_RESTRICT_PARAM dst,
+              const u32* FL_RESTRICT_PARAM src,
               size_t count) {
     // Optimized 32-bit word copy - compiler will often vectorize this
     for (size_t i = 0; i < count; i++) {
@@ -312,8 +312,8 @@ void memcpy32(uint32_t* FL_RESTRICT_PARAM dst,
 /// @param count Number of 16-bit words to copy (NOT bytes)
 /// @note Only call with 2-byte aligned pointers and valid count
 FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
-void memcpy16(uint16_t* FL_RESTRICT_PARAM dst,
-              const uint16_t* FL_RESTRICT_PARAM src,
+void memcpy16(u16* FL_RESTRICT_PARAM dst,
+              const u16* FL_RESTRICT_PARAM src,
               size_t count) {
     // Optimized 16-bit word copy
     for (size_t i = 0; i < count; i++) {
@@ -327,8 +327,8 @@ void memcpy16(uint16_t* FL_RESTRICT_PARAM dst,
 /// @param count Number of bytes to copy
 /// @note No alignment requirements
 FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
-void memcpybyte(uint8_t* FL_RESTRICT_PARAM dst,
-                const uint8_t* FL_RESTRICT_PARAM src,
+void memcpybyte(u8* FL_RESTRICT_PARAM dst,
+                const u8* FL_RESTRICT_PARAM src,
                 size_t count) {
     // Byte-by-byte copy
     for (size_t i = 0; i < count; i++) {
@@ -367,19 +367,19 @@ void memcpy(void* FL_RESTRICT_PARAM dst,
     // Note: This introduces a branch, but it's a predicted indirect jump
     switch (index) {
         case 2:
-            memcpy32(static_cast<uint32_t*>(dst),
-                     static_cast<const uint32_t*>(src),
+            memcpy32(static_cast<u32*>(dst),
+                     static_cast<const u32*>(src),
                      num_bytes >> 2);
             break;
         case 1:
-            memcpy16(static_cast<uint16_t*>(dst),
-                     static_cast<const uint16_t*>(src),
+            memcpy16(static_cast<u16*>(dst),
+                     static_cast<const u16*>(src),
                      num_bytes >> 1);
             break;
         case 0:
         default:
-            memcpybyte(static_cast<uint8_t*>(dst),
-                       static_cast<const uint8_t*>(src),
+            memcpybyte(static_cast<u8*>(dst),
+                       static_cast<const u8*>(src),
                        num_bytes);
             break;
     }
@@ -395,7 +395,7 @@ void memcpy(void* FL_RESTRICT_PARAM dst,
 /// @note fl::memset is not allowed in ISR context on some platforms
 /// @note This function uses a simple loop to zero memory
 FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
-void memset_zero_byte(uint8_t* dest, size_t count) {
+void memset_zero_byte(u8* dest, size_t count) {
     for (size_t i = 0; i < count; i++) {
         dest[i] = 0x0;
     }
@@ -406,8 +406,8 @@ void memset_zero_byte(uint8_t* dest, size_t count) {
 /// @param count Number of bytes to zero (will process in 4-byte chunks)
 /// @note Handles remainder bytes using byte writes
 FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
-void memset_zero_word(uint8_t* dest, size_t count) {
-    uint32_t* dest32 = fl::bit_cast<uint32_t*>(dest);
+void memset_zero_word(u8* dest, size_t count) {
+    u32* dest32 = fl::bit_cast<u32*>(dest);
     size_t count32 = count / 4;
     size_t remainder = count % 4;
 
@@ -416,7 +416,7 @@ void memset_zero_word(uint8_t* dest, size_t count) {
     }
 
     if (remainder > 0) {
-        uint8_t* remainder_ptr = dest + (count32 * 4);
+        u8* remainder_ptr = dest + (count32 * 4);
         memset_zero_byte(remainder_ptr, remainder);
     }
 }
@@ -426,7 +426,7 @@ void memset_zero_word(uint8_t* dest, size_t count) {
 /// @param count Number of bytes to zero
 /// @note Automatically selects word or byte writes based on alignment
 FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
-void memset_zero(uint8_t* dest, size_t count) {
+void memset_zero(u8* dest, size_t count) {
     uintptr_t address = fl::ptr_to_int(dest);
 
     // If aligned AND large enough, use fast word writes

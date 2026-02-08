@@ -39,8 +39,8 @@ namespace platforms {
 
 /// Pin mapping: converts Arduino pin number to (port_group, pin_bit)
 struct PinMapping {
-    uint8_t group;  ///< Port group (0=PORTA, 1=PORTB, etc.)
-    uint8_t bit;    ///< Bit position within group (0-31)
+    u8 group;  ///< Port group (0=PORTA, 1=PORTB, etc.)
+    u8 bit;    ///< Bit position within group (0-31)
 };
 
 /// Get pin mapping for Arduino pin number
@@ -61,8 +61,8 @@ inline PinMapping getPinMapping(int pin) {
 
     // Simple heuristic: first 32 pins on PORTA, next 32 on PORTB, etc.
     // Real board definitions should override this
-    uint8_t group = static_cast<uint8_t>(pin / 32);
-    uint8_t bit = static_cast<uint8_t>(pin % 32);
+    u8 group = static_cast<u8>(pin / 32);
+    u8 bit = static_cast<u8>(pin % 32);
 
     return {group, bit};
 }
@@ -81,7 +81,7 @@ inline void pinMode(int pin, PinMode mode) {
     }
 
     PortGroup* port = &PORT->Group[pm.group];
-    uint32_t mask = 1ul << pm.bit;
+    u32 mask = 1ul << pm.bit;
 
     switch (mode) {
         case PinMode::Output:
@@ -132,7 +132,7 @@ inline void digitalWrite(int pin, PinValue val) {
     }
 
     PortGroup* port = &PORT->Group[pm.group];
-    uint32_t mask = 1ul << pm.bit;
+    u32 mask = 1ul << pm.bit;
 
     if (val == PinValue::High) {
         // Set pin high using OUTSET register (atomic set)
@@ -153,7 +153,7 @@ inline PinValue digitalRead(int pin) {
     }
 
     PortGroup* port = &PORT->Group[pm.group];
-    uint32_t mask = 1ul << pm.bit;
+    u32 mask = 1ul << pm.bit;
 
     // Read from IN register
     return (port->IN.reg & mask) ? PinValue::High : PinValue::Low;
@@ -163,7 +163,7 @@ inline PinValue digitalRead(int pin) {
 /// @param pin Arduino pin number
 /// @return ADC value (0-1023 for 10-bit, 0-4095 for 12-bit)
 /// @note STUB: Real implementation requires ADC peripheral configuration
-inline uint16_t analogRead(int /*pin*/) {
+inline u16 analogRead(int /*pin*/) {
     // STUB: ADC implementation requires:
     // 1. Enable ADC peripheral clock (GCLK + MCLK/PM)
     // 2. Configure ADC resolution, reference, prescaler
@@ -180,7 +180,7 @@ inline uint16_t analogRead(int /*pin*/) {
 /// @param pin Arduino pin number
 /// @param val PWM duty cycle (0-255)
 /// @note STUB: Real implementation requires TCC/TC peripheral configuration
-inline void analogWrite(int /*pin*/, uint16_t /*val*/) {
+inline void analogWrite(int /*pin*/, u16 /*val*/) {
     // STUB: PWM implementation requires:
     // 1. Enable TCC/TC peripheral clock (GCLK + MCLK/PM)
     // 2. Configure timer mode, period, prescaler
@@ -196,7 +196,7 @@ inline void analogWrite(int /*pin*/, uint16_t /*val*/) {
 /// @param pin Arduino pin number
 /// @param val PWM duty cycle (0-65535)
 /// @note STUB: Real implementation requires TCC/TC peripheral configuration
-inline void setPwm16(int /*pin*/, uint16_t /*val*/) {
+inline void setPwm16(int /*pin*/, u16 /*val*/) {
     // STUB: 16-bit PWM would use same TCC/TC configuration as analogWrite
     // but with 16-bit period and compare registers
     // For now, no-op as stub.

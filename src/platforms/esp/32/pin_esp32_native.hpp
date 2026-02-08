@@ -111,7 +111,7 @@ namespace {
     }
 }
 
-inline uint16_t analogRead(int pin) {
+inline u16 analogRead(int pin) {
     // Map GPIO pin to ADC channel (ESP32-specific mapping)
     // This is a simplified mapping - real implementation would need
     // platform-specific channel detection
@@ -134,7 +134,7 @@ inline uint16_t analogRead(int pin) {
 
     int raw_value = 0;
     adc_oneshot_read(adc1_handle, channel, &raw_value);
-    return static_cast<uint16_t>(raw_value);
+    return static_cast<u16>(raw_value);
 }
 
 #else  // ESP-IDF v4.x legacy ADC API
@@ -151,7 +151,7 @@ namespace {
     }
 }
 
-inline uint16_t analogRead(int pin) {
+inline u16 analogRead(int pin) {
     initADC1();
 
     // Note: This is a stub implementation. Real implementation would need
@@ -163,12 +163,12 @@ inline uint16_t analogRead(int pin) {
     if (raw_value < 0) {
         return 0;
     }
-    return static_cast<uint16_t>(raw_value);
+    return static_cast<u16>(raw_value);
 }
 
 #endif  // ESP_IDF_VERSION_5_OR_HIGHER
 
-inline void analogWrite(int pin, uint16_t val) {
+inline void analogWrite(int pin, u16 val) {
     // ESP-IDF does not provide a simple analogWrite API like Arduino
     // This would require LEDC (LED PWM Controller) setup
     // Stub implementation - no-op
@@ -176,7 +176,7 @@ inline void analogWrite(int pin, uint16_t val) {
     (void)val;
 }
 
-inline void setPwm16(int pin, uint16_t val) {
+inline void setPwm16(int pin, u16 val) {
     // ESP-IDF native: Full LEDC 16-bit PWM would require:
     // 1. Channel allocation (16 channels available)
     // 2. ledc_timer_config for 16-bit resolution

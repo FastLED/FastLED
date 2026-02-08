@@ -35,13 +35,13 @@ namespace fl {
 /// @tparam DATA_PIN GPIO pin for SPI data (MOSI)
 /// @tparam CLOCK_PIN GPIO pin for SPI clock (SCK)
 /// @tparam SPI_SPEED SPI clock speed in Hz
-template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
+template<u8 DATA_PIN, u8 CLOCK_PIN, u32 SPI_SPEED>
 class SPIDeviceProxy {
 private:
     SPIBusHandle mHandle;                    // Handle from SPIBusManager
     SPIBusManager* mBusManager;              // Pointer to global bus manager
     ESP32SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>* mSingleSPI;  // Owned single-SPI backend
-    fl::vector<uint8_t> mWriteBuffer;        // Buffered writes (for Quad-SPI)
+    fl::vector<u8> mWriteBuffer;        // Buffered writes (for Quad-SPI)
     bool mInitialized;                       // Whether init() was called
     bool mBusInitialized;                    // Whether bus manager has been initialized
     bool mInTransaction;                     // Whether select() was called
@@ -166,7 +166,7 @@ public:
 
     /// Write single byte
     /// Mirrors ESP32SPIOutput::writeByte()
-    void writeByte(uint8_t b) {
+    void writeByte(u8 b) {
         if (!mInitialized || !mInTransaction) {
             return;
         }
@@ -186,14 +186,14 @@ public:
 
     /// Write 16-bit word (big-endian)
     /// Mirrors ESP32SPIOutput::writeWord()
-    void writeWord(uint16_t w) {
-        writeByte(static_cast<uint8_t>(w >> 8));
-        writeByte(static_cast<uint8_t>(w & 0xFF));
+    void writeWord(u16 w) {
+        writeByte(static_cast<u8>(w >> 8));
+        writeByte(static_cast<u8>(w & 0xFF));
     }
 
     /// Write the same byte value repeatedly
     /// Mirrors ESP32SPIOutput::writeBytesValueRaw()
-    void writeBytesValueRaw(uint8_t value, int len) {
+    void writeBytesValueRaw(u8 value, int len) {
         for (int i = 0; i < len; i++) {
             writeByte(value);
         }
@@ -201,19 +201,19 @@ public:
 
     /// Write the same byte value repeatedly with select/release
     /// Mirrors ESP32SPIOutput::writeBytesValue()
-    void writeBytesValue(uint8_t value, int len) {
+    void writeBytesValue(u8 value, int len) {
         select();
         writeBytesValueRaw(value, len);
         release();
     }
 
     /// Write byte without wait (same as writeByte for proxy)
-    void writeByteNoWait(uint8_t b) {
+    void writeByteNoWait(u8 b) {
         writeByte(b);
     }
 
     /// Write byte with post-wait (same as writeByte for proxy)
-    void writeBytePostWait(uint8_t b) {
+    void writeBytePostWait(u8 b) {
         writeByte(b);
     }
 
@@ -223,8 +223,8 @@ public:
     /// This matches the behavior of other platform implementations (AVR, ARM, etc.)
     /// @tparam BIT the bit index in the byte to test
     /// @param b the byte to test
-    template <uint8_t BIT = 0>
-    void writeBit(uint8_t b) {
+    template <u8 BIT = 0>
+    void writeBit(u8 b) {
         // Test bit BIT in value b, send 0xFF if set, 0x00 if clear
         // This matches the behavior of other platforms (AVR, ARM, etc.)
         writeByte((b & (1 << BIT)) ? 0xFF : 0x00);

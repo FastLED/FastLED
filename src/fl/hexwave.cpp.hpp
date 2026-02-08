@@ -25,7 +25,7 @@ using fl::third_party::hexwave::hexwave_generate_samples;
 
 class HexWaveEngineImpl : public IHexWaveEngine {
 public:
-    HexWaveEngineImpl(int32_t width, int32_t oversample);
+    HexWaveEngineImpl(i32 width, i32 oversample);
     ~HexWaveEngineImpl() override;
 
     // Non-copyable
@@ -34,16 +34,16 @@ public:
 
     // IHexWaveEngine interface
     bool isValid() const override;
-    int32_t getWidth() const override { return mWidth; }
-    int32_t getOversample() const override { return mOversample; }
+    i32 getWidth() const override { return mWidth; }
+    i32 getOversample() const override { return mOversample; }
 
     // Internal access for HexWaveOscillatorImpl (same compilation unit)
     HexWaveEngine* getEngineInternal() const { return mEngine; }
 
 private:
     HexWaveEngine* mEngine = nullptr;
-    int32_t mWidth;
-    int32_t mOversample;
+    i32 mWidth;
+    i32 mOversample;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -60,7 +60,7 @@ public:
     HexWaveOscillatorImpl& operator=(const HexWaveOscillatorImpl&) = delete;
 
     // IHexWaveOscillator interface
-    void generateSamples(float* output, int32_t numSamples, float freq) override;
+    void generateSamples(float* output, i32 numSamples, float freq) override;
     void generateSamples(fl::span<float> output, float freq) override;
     void setShape(HexWaveShape shape) override;
     void setParams(const HexWaveParams& params) override;
@@ -95,7 +95,7 @@ HexWaveParams HexWaveParams::fromShape(HexWaveShape shape) {
 // IHexWaveEngine static factory method
 //////////////////////////////////////////////////////////////////////////////
 
-IHexWaveEnginePtr IHexWaveEngine::create(int32_t width, int32_t oversample) {
+IHexWaveEnginePtr IHexWaveEngine::create(i32 width, i32 oversample) {
     return fl::make_shared<HexWaveEngineImpl>(width, oversample);
 }
 
@@ -103,7 +103,7 @@ IHexWaveEnginePtr IHexWaveEngine::create(int32_t width, int32_t oversample) {
 // HexWaveEngineImpl implementation
 //////////////////////////////////////////////////////////////////////////////
 
-HexWaveEngineImpl::HexWaveEngineImpl(int32_t width, int32_t oversample)
+HexWaveEngineImpl::HexWaveEngineImpl(i32 width, i32 oversample)
     : mWidth(width), mOversample(oversample) {
     // Clamp width to valid range
     if (mWidth < 4) mWidth = 4;
@@ -171,14 +171,14 @@ HexWaveOscillatorImpl::~HexWaveOscillatorImpl() {
     }
 }
 
-void HexWaveOscillatorImpl::generateSamples(float* output, int32_t numSamples, float freq) {
+void HexWaveOscillatorImpl::generateSamples(float* output, i32 numSamples, float freq) {
     if (mHexWave && output && numSamples > 0) {
         hexwave_generate_samples(output, numSamples, mHexWave, freq);
     }
 }
 
 void HexWaveOscillatorImpl::generateSamples(fl::span<float> output, float freq) {
-    generateSamples(output.data(), static_cast<int32_t>(output.size()), freq);
+    generateSamples(output.data(), static_cast<i32>(output.size()), freq);
 }
 
 void HexWaveOscillatorImpl::setShape(HexWaveShape shape) {

@@ -66,7 +66,7 @@ public:
 
     /// @brief Set state callback (called on state transitions)
     /// @param callback Callback function (state code)
-    virtual void onState(fl::function<void(uint8_t)> callback) = 0;
+    virtual void onState(fl::function<void(u8)> callback) = 0;
 
     /// @brief Set callback to be called before device reboots after OTA update
     /// @param callback Callback function to call (e.g., to save state)
@@ -83,7 +83,7 @@ public:
 
     /// @brief Get bitmask of services that failed to initialize
     /// @return Bitfield of OTAService flags indicating which services failed
-    virtual uint8_t getFailedServices() const = 0;
+    virtual u8 getFailedServices() const = 0;
 };
 
 // Platform-specific factory function - can be overridden via strong linkage

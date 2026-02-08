@@ -10,7 +10,7 @@ namespace fl {
 namespace platforms {
 
 // External API functions - simple delegation to EspIO singleton
-void begin(uint32_t baudRate) {
+void begin(u32 baudRate) {
     EspIO::instance().begin(baudRate);
 }
 
@@ -34,11 +34,11 @@ int read() {
     return EspIO::instance().read();
 }
 
-bool flush(uint32_t timeoutMs = 1000) {
+bool flush(u32 timeoutMs = 1000) {
     return EspIO::instance().flush(timeoutMs);
 }
 
-size_t write_bytes(const uint8_t* buffer, size_t size) {
+size_t write_bytes(const u8* buffer, size_t size) {
     return EspIO::instance().writeBytes(buffer, size);
 }
 

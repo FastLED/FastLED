@@ -51,7 +51,7 @@ public:
     void end() override;
     DMABuffer acquireDMABuffer(size_t bytes_per_lane) override;
     bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
-    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max()) override;
+    bool waitComplete(u32 timeout_ms = fl::numeric_limits<u32>::max()) override;
     bool isBusy() const override;
     bool isInitialized() const override;
     int getBusId() const override;
@@ -66,15 +66,15 @@ private:
     SPIClass* mSPI;
     bool mTransactionActive;
     bool mInitialized;
-    uint32_t mClockSpeed;
-    uint8_t mActiveLanes;  // Number of active data lanes (1-4)
+    u32 mClockSpeed;
+    u8 mActiveLanes;  // Number of active data lanes (1-4)
 
     // Pin configuration
-    int8_t mClockPin;
-    int8_t mData0Pin;
-    int8_t mData1Pin;
-    int8_t mData2Pin;
-    int8_t mData3Pin;
+    i8 mClockPin;
+    i8 mData0Pin;
+    i8 mData1Pin;
+    i8 mData2Pin;
+    i8 mData3Pin;
 
     // DMA buffer management
     DMABuffer mDMABuffer;            // DMA buffer (managed internally by DMABuffer)
@@ -135,13 +135,13 @@ bool SpiHw4MXRT1062::begin(const SpiHw4::Config& config) {
     }
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
-    if (mBusId != -1 && config.bus_num != static_cast<uint8_t>(mBusId)) {
+    if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
         FL_LOG_SPI("SpiHw4MXRT1062: Bus mismatch - expected " << mBusId << ", got " << static_cast<int>(config.bus_num));
         return false;
     }
 
     // Select SPI object based on bus_num
-    uint8_t bus_num = (mBusId != -1) ? static_cast<uint8_t>(mBusId) : config.bus_num;
+    u8 bus_num = (mBusId != -1) ? static_cast<u8>(mBusId) : config.bus_num;
     switch (bus_num) {
         case 0:
             mSPI = &SPI;
@@ -280,14 +280,14 @@ bool SpiHw4MXRT1062::transmit(TransmitMode mode) {
     }
 
     // Save current TCR
-    uint32_t old_tcr = port->TCR;
+    u32 old_tcr = port->TCR;
 
     // Configure for appropriate mode based on active lanes
     // TCR.WIDTH field is bits 17:16
     // 0b00 = 1-bit (standard SPI)
     // 0b01 = 2-bit (dual SPI)
     // 0b10 = 4-bit (quad SPI)
-    uint32_t width_bits = 0;
+    u32 width_bits = 0;
     if (mActiveLanes >= 4) {
         width_bits = 0x2;  // Quad mode
     } else if (mActiveLanes >= 2) {
@@ -296,13 +296,13 @@ bool SpiHw4MXRT1062::transmit(TransmitMode mode) {
         width_bits = 0x0;  // Standard SPI
     }
 
-    uint32_t new_tcr = (old_tcr & ~(0x3 << 16)) | (width_bits << 16);
+    u32 new_tcr = (old_tcr & ~(0x3 << 16)) | (width_bits << 16);
     port->TCR = new_tcr;
 
     // Transmit data using internal DMA buffer
     // In quad mode, each byte is transmitted with 2 bits per data line
     // The transposer has already prepared the data in interleaved format
-    fl::span<uint8_t> buffer_span = mDMABuffer.data();
+    fl::span<u8> buffer_span = mDMABuffer.data();
     for (size_t i = 0; i < mCurrentTotalSize; ++i) {
         // Wait for transmit FIFO to have space
         while (!(port->SR & LPSPI_SR_TDF)) ;
@@ -326,7 +326,7 @@ bool SpiHw4MXRT1062::transmit(TransmitMode mode) {
     return true;
 }
 
-bool SpiHw4MXRT1062::waitComplete(uint32_t timeout_ms) {
+bool SpiHw4MXRT1062::waitComplete(u32 timeout_ms) {
     if (!mTransactionActive) {
         return true;  // Nothing to wait for
     }

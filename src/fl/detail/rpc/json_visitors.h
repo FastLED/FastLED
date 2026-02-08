@@ -81,11 +81,11 @@ struct JsonToIntegerVisitor {
     }
 
     // Specialized arrays
-    void operator()(const fl::vector<int16_t>&) {
+    void operator()(const fl::vector<i16>&) {
         mResult.setError("cannot convert array to integer");
     }
 
-    void operator()(const fl::vector<uint8_t>&) {
+    void operator()(const fl::vector<u8>&) {
         mResult.setError("cannot convert array to integer");
     }
 
@@ -154,11 +154,11 @@ struct JsonToBoolVisitor {
     }
 
     // Specialized arrays
-    void operator()(const fl::vector<int16_t>&) {
+    void operator()(const fl::vector<i16>&) {
         mResult.setError("cannot convert array to bool");
     }
 
-    void operator()(const fl::vector<uint8_t>&) {
+    void operator()(const fl::vector<u8>&) {
         mResult.setError("cannot convert array to bool");
     }
 
@@ -230,11 +230,11 @@ struct JsonToFloatVisitor {
     }
 
     // Specialized arrays
-    void operator()(const fl::vector<int16_t>&) {
+    void operator()(const fl::vector<i16>&) {
         mResult.setError("cannot convert array to float");
     }
 
-    void operator()(const fl::vector<uint8_t>&) {
+    void operator()(const fl::vector<u8>&) {
         mResult.setError("cannot convert array to float");
     }
 
@@ -297,11 +297,11 @@ struct JsonToStringVisitor {
     }
 
     // Specialized arrays
-    void operator()(const fl::vector<int16_t>&) {
+    void operator()(const fl::vector<i16>&) {
         mResult.setError("cannot convert array to string");
     }
 
-    void operator()(const fl::vector<uint8_t>&) {
+    void operator()(const fl::vector<u8>&) {
         mResult.setError("cannot convert array to string");
     }
 

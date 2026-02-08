@@ -42,8 +42,8 @@ void Blend2d::add(Fx2dPtr layer, const Params &p) {
             layer->setXYMap(XYMap::constructRectangularGrid(layer->getWidth(), layer->getHeight()));
         }
     }
-    uint8_t blurAmount = p.blur_amount;
-    uint8_t blurPasses = p.blur_passes;
+    u8 blurAmount = p.blur_amount;
+    u8 blurPasses = p.blur_passes;
     Entry entry(layer, blurAmount, blurPasses);
     mLayers.push_back(entry);
 }
@@ -68,11 +68,11 @@ void Blend2d::draw(DrawContext context) {
                               : DrawMode::DRAW_MODE_BLEND_BY_MAX_BRIGHTNESS;
         first = false;
         // Apply the blur effect per effect.
-        uint8_t blur_amount = it->blur_amount;
+        u8 blur_amount = it->blur_amount;
         if (blur_amount > 0) {
             const XYMap &xyMap = fx->getXYMap();
-            uint8_t blur_passes = FL_MAX(1, it->blur_passes);
-            for (uint8_t i = 0; i < blur_passes; ++i) {
+            u8 blur_passes = FL_MAX(1, it->blur_passes);
+            for (u8 i = 0; i < blur_passes; ++i) {
                 // Apply the blur effect
                 blur2d(mFrame->rgb(), mXyMap.getWidth(), mXyMap.getHeight(),
                        blur_amount, xyMap);
@@ -83,12 +83,12 @@ void Blend2d::draw(DrawContext context) {
 
     if (mGlobalBlurAmount > 0) {
         // Apply the blur effect
-        uint16_t width = mXyMap.getWidth();
-        uint16_t height = mXyMap.getHeight();
+        u16 width = mXyMap.getWidth();
+        u16 height = mXyMap.getHeight();
         XYMap rect = XYMap::constructRectangularGrid(width, height);
         CRGB *rgb = mFrameTransform->rgb();
-        uint8_t blur_passes = FL_MAX(1, mGlobalBlurPasses);
-        for (uint8_t i = 0; i < blur_passes; ++i) {
+        u8 blur_passes = FL_MAX(1, mGlobalBlurPasses);
+        for (u8 i = 0; i < blur_passes; ++i) {
             // Apply the blur effect
             blur2d(rgb, width, height, mGlobalBlurAmount, rect);
         }
@@ -104,8 +104,8 @@ void Blend2d::draw(DrawContext context) {
 void Blend2d::clear() { mLayers.clear(); }
 
 bool Blend2d::setParams(Fx2dPtr fx, const Params &p) {
-    uint8_t blur_amount = p.blur_amount;
-    uint8_t blur_passes = p.blur_passes;
+    u8 blur_amount = p.blur_amount;
+    u8 blur_passes = p.blur_passes;
     for (auto &layer : mLayers) {
         if (layer.fx == fx) {
             layer.blur_amount = blur_amount;

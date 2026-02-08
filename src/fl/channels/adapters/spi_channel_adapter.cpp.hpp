@@ -161,7 +161,7 @@ bool SpiChannelEngineAdapter::initializeControllerIfNeeded(
     }
 
     // Initialize controller based on lane count
-    uint8_t lanes = ctrl.controller->getLaneCount();
+    u8 lanes = ctrl.controller->getLaneCount();
 
     if (lanes == 1) {
         SpiHw1::Config config;
@@ -394,7 +394,7 @@ bool SpiChannelEngineAdapter::transmitBatch(fl::span<const ChannelDataPtr> chann
         }
 
         // Copy data to DMA buffer
-        fl::span<uint8_t> buffer = dmaBuffer.data();
+        fl::span<u8> buffer = dmaBuffer.data();
         if (buffer.size() < data.size()) {
             FL_WARN("SpiChannelEngineAdapter: DMA buffer too small ("
                    << buffer.size() << " < " << data.size() << ")");

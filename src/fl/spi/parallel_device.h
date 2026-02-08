@@ -66,10 +66,10 @@ class ParallelDevice {
 public:
     /// @brief Configuration for parallel GPIO SPI
     struct Config {
-        uint8_t clock_pin;              ///< Clock pin (SCK)
-        fl::vector<uint8_t> gpio_pins;  ///< GPIO pins (1-32 pins)
+        u8 clock_pin;              ///< Clock pin (SCK)
+        fl::vector<u8> gpio_pins;  ///< GPIO pins (1-32 pins)
         SpiParallelMode mode;           ///< Execution mode (ISR vs bit-bang)
-        uint32_t timer_hz;              ///< Timer frequency for ISR mode
+        u32 timer_hz;              ///< Timer frequency for ISR mode
 
         Config();  // Implemented in .cpp to avoid circular dependency
     };
@@ -108,13 +108,13 @@ public:
     /// @param size Number of bytes
     /// @returns Result containing Transaction handle or error
     /// @note Each byte value is mapped via LUT to GPIO pin states
-    Result<Transaction> write(const uint8_t* data, size_t size);
+    Result<Transaction> write(const u8* data, size_t size);
 
     /// @brief Wait for pending transmission to complete
     /// @param timeout_ms Maximum time to wait (default: forever)
     /// @returns true if completed, false on timeout
     // Use (max)() to prevent macro expansion by Arduino.h's max macro
-    bool waitComplete(uint32_t timeout_ms = (fl::numeric_limits<uint32_t>::max)());
+    bool waitComplete(u32 timeout_ms = (fl::numeric_limits<u32>::max)());
 
     /// @brief Check if transmission is in progress
     /// @returns true if busy, false if idle
@@ -127,7 +127,7 @@ public:
     /// @param clear_masks Array of 256 clear masks (GPIO pins to clear low for each byte value)
     /// @note Default LUT maps byte bits directly to GPIO pins
     /// @note Must be called before begin() or after begin() but before write()
-    void configureLUT(const uint32_t* set_masks, const uint32_t* clear_masks);
+    void configureLUT(const u32* set_masks, const u32* clear_masks);
 
     /// @brief Get current configuration
     /// @returns Reference to config

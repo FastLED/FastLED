@@ -52,7 +52,7 @@ public:
     }
 
     // Initialize/reconfigure serial
-    void begin(uint32_t baudRate) {
+    void begin(u32 baudRate) {
         // Both drivers are already initialized in constructor with default baud rate
         // USB-Serial JTAG doesn't support baud rate configuration (fixed USB speed)
         // UART reconfiguration after initialization is not currently supported
@@ -134,7 +134,7 @@ public:
     }
 
     // Write raw bytes to serial (binary data)
-    size_t writeBytes(const uint8_t* buffer, size_t size) {
+    size_t writeBytes(const u8* buffer, size_t size) {
 #if FL_ESP_HAS_USB_SERIAL_JTAG
         if (mUseUsbSerialJtag) {
             return mUsbSerialJtag.write(buffer, size);
@@ -147,7 +147,7 @@ public:
     }
 
     // Flush TX buffer and wait for transmission to complete
-    bool flush(uint32_t timeoutMs = 1000) {
+    bool flush(u32 timeoutMs = 1000) {
 #if FL_ESP_HAS_USB_SERIAL_JTAG
         if (mUseUsbSerialJtag) {
             return mUsbSerialJtag.flush(timeoutMs);

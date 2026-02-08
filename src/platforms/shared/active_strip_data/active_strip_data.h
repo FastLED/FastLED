@@ -13,7 +13,7 @@ namespace fl {
 
 
 
-typedef fl::span<const uint8_t> SliceUint8;
+typedef fl::span<const u8> SliceUint8;
 
 // Zero copy data transfer of strip information - platform-agnostic core logic
 class ActiveStripData : public fl::EngineEvents::Listener {
@@ -22,7 +22,7 @@ class ActiveStripData : public fl::EngineEvents::Listener {
     typedef fl::SortedHeapMap<int, ScreenMap> ScreenMapMap;
 
     static ActiveStripData &Instance();
-    void update(int id, uint32_t now, fl::span<const uint8_t> pixel_data);
+    void update(int id, u32 now, fl::span<const u8> pixel_data);
     void updateScreenMap(int id, const ScreenMap &screenmap);
 
     // JSON creation methods

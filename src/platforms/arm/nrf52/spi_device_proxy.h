@@ -48,13 +48,13 @@ namespace fl {
 /// @tparam DATA_PIN GPIO pin for SPI data (MOSI)
 /// @tparam CLOCK_PIN GPIO pin for SPI clock (SCK)
 /// @tparam SPI_CLOCK_DIVIDER SPI clock divider (see NRF52SPIOutput for details)
-template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_CLOCK_DIVIDER>
+template<u8 DATA_PIN, u8 CLOCK_PIN, u32 SPI_CLOCK_DIVIDER>
 class SPIDeviceProxy {
 private:
     SPIBusHandle mHandle;                    // Handle from SPIBusManager
     SPIBusManager* mBusManager;              // Pointer to global bus manager
     NRF52SPIOutput<DATA_PIN, CLOCK_PIN, SPI_CLOCK_DIVIDER>* mSingleSPI;  // Owned single-SPI backend
-    fl::vector<uint8_t> mWriteBuffer;        // Buffered writes (for multi-lane SPI)
+    fl::vector<u8> mWriteBuffer;        // Buffered writes (for multi-lane SPI)
     bool mInitialized;                       // Whether init() was called
     bool mInTransaction;                     // Whether select() was called
 
@@ -155,7 +155,7 @@ public:
 
     /// Write single byte
     /// Mirrors NRF52SPIOutput::writeByte()
-    void writeByte(uint8_t b) {
+    void writeByte(u8 b) {
         if (!mInitialized || !mInTransaction) {
             return;
         }
@@ -172,7 +172,7 @@ public:
 
     /// Write 16-bit word (big-endian)
     /// Mirrors NRF52SPIOutput::writeWord()
-    void writeWord(uint16_t w) {
+    void writeWord(u16 w) {
         if (!mInitialized || !mInTransaction) {
             return;
         }
@@ -183,14 +183,14 @@ public:
             mSingleSPI->writeWord(w);
         } else {
             // Buffer for multi-lane SPI (flushed in finalizeTransmission)
-            mWriteBuffer.push_back(static_cast<uint8_t>(w >> 8));
-            mWriteBuffer.push_back(static_cast<uint8_t>(w & 0xFF));
+            mWriteBuffer.push_back(static_cast<u8>(w >> 8));
+            mWriteBuffer.push_back(static_cast<u8>(w & 0xFF));
         }
     }
 
     /// Write byte values (repeated value)
     /// Mirrors NRF52SPIOutput::writeBytesValue()
-    void writeBytesValue(uint8_t value, int len) {
+    void writeBytesValue(u8 value, int len) {
         if (!mInitialized) {
             return;
         }
@@ -213,7 +213,7 @@ public:
 
     /// Write byte buffer
     /// Mirrors NRF52SPIOutput::writeBytes()
-    void writeBytes(uint8_t* data, int len) {
+    void writeBytes(u8* data, int len) {
         if (!mInitialized) {
             return;
         }
@@ -237,7 +237,7 @@ public:
     /// Write byte buffer with adjustment
     /// Mirrors NRF52SPIOutput::writeBytes<D>()
     template<class D>
-    void writeBytes(uint8_t* data, int len) {
+    void writeBytes(u8* data, int len) {
         if (!mInitialized) {
             return;
         }
@@ -261,8 +261,8 @@ public:
 
     /// Write a single bit
     /// Mirrors NRF52SPIOutput::writeBit()
-    template <uint8_t BIT>
-    void writeBit(uint8_t b) {
+    template <u8 BIT>
+    void writeBit(u8 b) {
         if (!mInitialized || !mInTransaction) {
             return;
         }
@@ -291,7 +291,7 @@ public:
 
     /// Raw byte write value (static for use by adjustment classes)
     /// Mirrors NRF52SPIOutput::writeBytesValueRaw()
-    static void writeBytesValueRaw(uint8_t value, int len) {
+    static void writeBytesValueRaw(u8 value, int len) {
         // This is a static method used by adjustment classes
         // For the proxy, we can't easily support this in multi-lane mode
         // since we need the instance's buffer

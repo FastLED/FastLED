@@ -41,7 +41,7 @@ public:
         // No-op
     }
 
-    void onState(fl::function<void(uint8_t)>) override {
+    void onState(fl::function<void(u8)>) override {
         FL_WARN("OTA not supported on this platform");
         // No-op
     }
@@ -62,7 +62,7 @@ public:
         return false;  // Not supported
     }
 
-    uint8_t getFailedServices() const override {
+    u8 getFailedServices() const override {
         return 0;  // No services on unsupported platforms
     }
 };

@@ -80,11 +80,11 @@ bool VideoImpl::draw(fl::u32 now, Frame *frame) {
     return draw(now, frame->rgb());
 }
 
-int32_t VideoImpl::durationMicros() const {
+i32 VideoImpl::durationMicros() const {
     if (!mStream) {
         return -1;
     }
-    int32_t frames = mStream->framesRemaining();
+    i32 frames = mStream->framesRemaining();
     if (frames < 0) {
         return -1; // Stream case, duration unknown
     }
@@ -124,7 +124,7 @@ bool VideoImpl::draw(fl::u32 now, CRGB *leds) {
                 brightness = time * 255 / mFadeInTime;
             }
         } else if (mFadeOutTime) {
-            int32_t frames_remaining = mStream->framesRemaining();
+            i32 frames_remaining = mStream->framesRemaining();
             if (frames_remaining < 0) {
                 // -1 means this is a stream.
                 brightness = 255;

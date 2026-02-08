@@ -15,7 +15,7 @@ namespace fl {
 #pragma GCC diagnostic ignored "-Wcast-align"
 
 void FL_OPTIMIZE_FUNCTION FL_IRAM transpose8x1_noinline(unsigned char *A, unsigned char *B) {
-    uint32_t x, y, t;
+    u32 x, y, t;
 
     // Load the array and pack it into x and y.
     y = *(unsigned int*)(A);
@@ -34,8 +34,8 @@ void FL_OPTIMIZE_FUNCTION FL_IRAM transpose8x1_noinline(unsigned char *A, unsign
     y = ((x << 4) & 0xF0F0F0F0) | (y & 0x0F0F0F0F);
     x = t;
 
-    *((uint32_t*)B) = y;
-    *((uint32_t*)(B+4)) = x;
+    *((u32*)B) = y;
+    *((u32*)(B+4)) = x;
 }
 
 #pragma GCC diagnostic pop
@@ -50,7 +50,7 @@ void FL_OPTIMIZE_FUNCTION FL_IRAM transpose8x1_noinline(unsigned char *A, unsign
 
 bool SPITransposer::transpose2(const fl::optional<LaneData>& lane0,
                                 const fl::optional<LaneData>& lane1,
-                                fl::span<uint8_t> output,
+                                fl::span<u8> output,
                                 const char** error) {
     // Validate output buffer size (must be divisible by 2)
     if (output.size() % 2 != 0) {
@@ -75,7 +75,7 @@ bool SPITransposer::transpose2(const fl::optional<LaneData>& lane0,
     const fl::optional<LaneData>* lanes[2] = {&lane0, &lane1};
 
     // Determine default padding byte from first available lane
-    uint8_t default_padding = 0x00;
+    u8 default_padding = 0x00;
     for (size_t i = 0; i < 2; i++) {
         if (lanes[i]->has_value() && !(*lanes[i])->padding_frame.empty()) {
             default_padding = (*lanes[i])->padding_frame[0];
@@ -84,8 +84,8 @@ bool SPITransposer::transpose2(const fl::optional<LaneData>& lane0,
     }
 
     // Gather all bytes from each lane into temporary buffers
-    fl::vector<uint8_t> lane0_buffer(max_size);
-    fl::vector<uint8_t> lane1_buffer(max_size);
+    fl::vector<u8> lane0_buffer(max_size);
+    fl::vector<u8> lane1_buffer(max_size);
 
     for (size_t byte_idx = 0; byte_idx < max_size; byte_idx++) {
         lane0_buffer[byte_idx] = lanes[0]->has_value() ?
@@ -113,7 +113,7 @@ bool SPITransposer::transpose4(const fl::optional<LaneData>& lane0,
                                 const fl::optional<LaneData>& lane1,
                                 const fl::optional<LaneData>& lane2,
                                 const fl::optional<LaneData>& lane3,
-                                fl::span<uint8_t> output,
+                                fl::span<u8> output,
                                 const char** error) {
     // Validate output buffer size (must be divisible by 4)
     if (output.size() % 4 != 0) {
@@ -138,7 +138,7 @@ bool SPITransposer::transpose4(const fl::optional<LaneData>& lane0,
     const fl::optional<LaneData>* lanes[4] = {&lane0, &lane1, &lane2, &lane3};
 
     // Determine default padding byte from first available lane
-    uint8_t default_padding = 0x00;
+    u8 default_padding = 0x00;
     for (size_t i = 0; i < 4; i++) {
         if (lanes[i]->has_value() && !(*lanes[i])->padding_frame.empty()) {
             default_padding = (*lanes[i])->padding_frame[0];
@@ -147,8 +147,8 @@ bool SPITransposer::transpose4(const fl::optional<LaneData>& lane0,
     }
 
     // Gather all bytes from each lane into temporary buffers
-    fl::vector<uint8_t> lane_buffers[4];
-    const uint8_t* lane_ptrs[4];
+    fl::vector<u8> lane_buffers[4];
+    const u8* lane_ptrs[4];
 
     for (size_t lane = 0; lane < 4; lane++) {
         lane_buffers[lane].resize(max_size);
@@ -176,7 +176,7 @@ bool SPITransposer::transpose4(const fl::optional<LaneData>& lane0,
 // ----------------------------------------------------------------------------
 
 bool SPITransposer::transpose8(const fl::optional<LaneData> lanes[8],
-                                fl::span<uint8_t> output,
+                                fl::span<u8> output,
                                 const char** error) {
     // Validate output buffer size (must be divisible by 8)
     if (output.size() % 8 != 0) {
@@ -198,7 +198,7 @@ bool SPITransposer::transpose8(const fl::optional<LaneData> lanes[8],
     }
 
     // Determine default padding byte from first available lane
-    uint8_t default_padding = 0x00;
+    u8 default_padding = 0x00;
     for (size_t i = 0; i < 8; i++) {
         if (lanes[i].has_value() && !lanes[i]->padding_frame.empty()) {
             default_padding = lanes[i]->padding_frame[0];
@@ -207,8 +207,8 @@ bool SPITransposer::transpose8(const fl::optional<LaneData> lanes[8],
     }
 
     // Gather all bytes from each lane into temporary buffers
-    fl::vector<uint8_t> lane_buffers[8];
-    const uint8_t* lane_ptrs[8];
+    fl::vector<u8> lane_buffers[8];
+    const u8* lane_ptrs[8];
 
     for (size_t lane = 0; lane < 8; lane++) {
         lane_buffers[lane].resize(max_size);
@@ -236,7 +236,7 @@ bool SPITransposer::transpose8(const fl::optional<LaneData> lanes[8],
 // ----------------------------------------------------------------------------
 
 bool SPITransposer::transpose16(const fl::optional<LaneData> lanes[16],
-                                fl::span<uint8_t> output,
+                                fl::span<u8> output,
                                 const char** error) {
     // Validate output buffer size (must be divisible by 16)
     if (output.size() % 16 != 0) {
@@ -258,7 +258,7 @@ bool SPITransposer::transpose16(const fl::optional<LaneData> lanes[16],
     }
 
     // Determine default padding byte from first available lane
-    uint8_t default_padding = 0x00;
+    u8 default_padding = 0x00;
     for (size_t i = 0; i < 16; i++) {
         if (lanes[i].has_value() && !lanes[i]->padding_frame.empty()) {
             default_padding = lanes[i]->padding_frame[0];
@@ -267,8 +267,8 @@ bool SPITransposer::transpose16(const fl::optional<LaneData> lanes[16],
     }
 
     // Gather all bytes from each lane into temporary buffers
-    fl::vector<uint8_t> lane_buffers[16];
-    const uint8_t* lane_ptrs[16];
+    fl::vector<u8> lane_buffers[16];
+    const u8* lane_ptrs[16];
 
     for (size_t lane = 0; lane < 16; lane++) {
         lane_buffers[lane].resize(max_size);
@@ -295,7 +295,7 @@ bool SPITransposer::transpose16(const fl::optional<LaneData> lanes[16],
 // Common Helper Functions
 // ----------------------------------------------------------------------------
 
-uint8_t SPITransposer::getLaneByte(const LaneData& lane, size_t byte_idx, size_t max_size) {
+u8 SPITransposer::getLaneByte(const LaneData& lane, size_t byte_idx, size_t max_size) {
     // Calculate padding needed for this lane
     const size_t lane_size = lane.payload.size();
     const size_t padding_bytes = max_size - lane_size;

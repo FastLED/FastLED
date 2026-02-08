@@ -62,19 +62,19 @@ namespace fl {
 
 
 // Variations on the functions in delay.h - w/a loop var passed in to preserve registers across calls by the optimizer/compiler
-template<int CYCLES> inline void _dc(FASTLED_REGISTER uint8_t & loopvar);
+template<int CYCLES> inline void _dc(FASTLED_REGISTER u8 & loopvar);
 
 // Delay function that consumes a specific number of CPU cycles while preserving carry flag state
 // _LOOP: Number of 6-cycle iterations to perform (each loop iteration = 6 cycles: MOV + DEC + BRNE = 1 + 1 + 2 cycles, loop overhead = 2)
 // PAD: Additional cycles to add (0-5) to fine-tune total delay
 // The function branches based on carry flag state and restores it after the delay
-template<int _LOOP, int PAD> FASTLED_FORCE_INLINE void _dc_AVR(FASTLED_REGISTER uint8_t & loopvar) {
+template<int _LOOP, int PAD> FASTLED_FORCE_INLINE void _dc_AVR(FASTLED_REGISTER u8 & loopvar) {
 	_dc<PAD>(loopvar);  // First handle the padding cycles (remainder when CYCLES % 6)
 
 	// The convolution in here is to ensure that the state of the carry flag coming into the delay loop is preserved
 	// This is critical because many scaling operations depend on the carry flag state
 	// Use a const variable to allow "any register" constraint
-	const uint8_t loop_count = _LOOP;
+	const u8 loop_count = _LOOP;
 
 	// Assembly breakdown:
 	// - BRCS: Branch if carry set (1 cycle if not taken, 2 if taken)
@@ -91,7 +91,7 @@ template<int _LOOP, int PAD> FASTLED_FORCE_INLINE void _dc_AVR(FASTLED_REGISTER 
 }
 
 // Primary template: splits requested cycles into 6-cycle chunks (handled by loop) plus remainder (handled by specializations)
-template<int CYCLES> FASTLED_FORCE_INLINE void _dc(FASTLED_REGISTER uint8_t & loopvar) {
+template<int CYCLES> FASTLED_FORCE_INLINE void _dc(FASTLED_REGISTER u8 & loopvar) {
 	_dc_AVR<CYCLES/6,CYCLES%6>(loopvar);
 }
 
@@ -100,46 +100,46 @@ template<int CYCLES> FASTLED_FORCE_INLINE void _dc(FASTLED_REGISTER uint8_t & lo
 // Negative values and zero simply do nothing (used when timing calculations result in no delay needed)
 
 // No-op for negative cycle requests (can occur when other operations already consumed the required time)
-template<> FASTLED_FORCE_INLINE void _dc<-6>(FASTLED_REGISTER uint8_t & ) {}
-template<> FASTLED_FORCE_INLINE void _dc<-5>(FASTLED_REGISTER uint8_t & ) {}
-template<> FASTLED_FORCE_INLINE void _dc<-4>(FASTLED_REGISTER uint8_t & ) {}
-template<> FASTLED_FORCE_INLINE void _dc<-3>(FASTLED_REGISTER uint8_t & ) {}
-template<> FASTLED_FORCE_INLINE void _dc<-2>(FASTLED_REGISTER uint8_t & ) {}
-template<> FASTLED_FORCE_INLINE void _dc<-1>(FASTLED_REGISTER uint8_t & ) {}
-template<> FASTLED_FORCE_INLINE void _dc< 0>(FASTLED_REGISTER uint8_t & ) {}
+template<> FASTLED_FORCE_INLINE void _dc<-6>(FASTLED_REGISTER u8 & ) {}
+template<> FASTLED_FORCE_INLINE void _dc<-5>(FASTLED_REGISTER u8 & ) {}
+template<> FASTLED_FORCE_INLINE void _dc<-4>(FASTLED_REGISTER u8 & ) {}
+template<> FASTLED_FORCE_INLINE void _dc<-3>(FASTLED_REGISTER u8 & ) {}
+template<> FASTLED_FORCE_INLINE void _dc<-2>(FASTLED_REGISTER u8 & ) {}
+template<> FASTLED_FORCE_INLINE void _dc<-1>(FASTLED_REGISTER u8 & ) {}
+template<> FASTLED_FORCE_INLINE void _dc< 0>(FASTLED_REGISTER u8 & ) {}
 
 // 1 cycle: MOV r0,r0 is a no-op that consumes exactly 1 cycle
-template<> FASTLED_FORCE_INLINE void _dc< 1>(FASTLED_REGISTER uint8_t & ) {asm __volatile__("mov r0,r0":::);}
+template<> FASTLED_FORCE_INLINE void _dc< 1>(FASTLED_REGISTER u8 & ) {asm __volatile__("mov r0,r0":::);}
 
 // 2 cycles: Different implementations for different AVR variants
 #if defined(__LGT8F__)
 // LGT8F: Use two 1-cycle operations (MOV instructions have different timing on LGT8F)
-template<> FASTLED_FORCE_INLINE void _dc< 2>(FASTLED_REGISTER uint8_t & loopvar) { _dc<1>(loopvar); _dc<1>(loopvar); }
+template<> FASTLED_FORCE_INLINE void _dc< 2>(FASTLED_REGISTER u8 & loopvar) { _dc<1>(loopvar); _dc<1>(loopvar); }
 #else
 // Standard AVR: RJMP .+0 (relative jump to next instruction) = 2 cycles
-template<> FASTLED_FORCE_INLINE void _dc< 2>(FASTLED_REGISTER uint8_t & ) {asm __volatile__("rjmp .+0":::);}
+template<> FASTLED_FORCE_INLINE void _dc< 2>(FASTLED_REGISTER u8 & ) {asm __volatile__("rjmp .+0":::);}
 #endif
 
 // 3-20 cycles: Build up delays by combining smaller delays
 // This approach ensures accurate timing through template metaprogramming
-template<> FASTLED_FORCE_INLINE void _dc< 3>(FASTLED_REGISTER uint8_t & loopvar) { _dc<2>(loopvar); _dc<1>(loopvar); }  // 2+1
-template<> FASTLED_FORCE_INLINE void _dc< 4>(FASTLED_REGISTER uint8_t & loopvar) { _dc<2>(loopvar); _dc<2>(loopvar); }  // 2+2
-template<> FASTLED_FORCE_INLINE void _dc< 5>(FASTLED_REGISTER uint8_t & loopvar) { _dc<2>(loopvar); _dc<3>(loopvar); }  // 2+3
-template<> FASTLED_FORCE_INLINE void _dc< 6>(FASTLED_REGISTER uint8_t & loopvar) { _dc<2>(loopvar); _dc<2>(loopvar); _dc<2>(loopvar);}  // 2+2+2
-template<> FASTLED_FORCE_INLINE void _dc< 7>(FASTLED_REGISTER uint8_t & loopvar) { _dc<4>(loopvar); _dc<3>(loopvar); }  // 4+3
-template<> FASTLED_FORCE_INLINE void _dc< 8>(FASTLED_REGISTER uint8_t & loopvar) { _dc<4>(loopvar); _dc<4>(loopvar); }  // 4+4
-template<> FASTLED_FORCE_INLINE void _dc< 9>(FASTLED_REGISTER uint8_t & loopvar) { _dc<5>(loopvar); _dc<4>(loopvar); }  // 5+4
-template<> FASTLED_FORCE_INLINE void _dc<10>(FASTLED_REGISTER uint8_t & loopvar) { _dc<6>(loopvar); _dc<4>(loopvar); }  // 6+4
-template<> FASTLED_FORCE_INLINE void _dc<11>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<1>(loopvar); }  // 10+1
-template<> FASTLED_FORCE_INLINE void _dc<12>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<2>(loopvar); }  // 10+2
-template<> FASTLED_FORCE_INLINE void _dc<13>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<3>(loopvar); }  // 10+3
-template<> FASTLED_FORCE_INLINE void _dc<14>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<4>(loopvar); }  // 10+4
-template<> FASTLED_FORCE_INLINE void _dc<15>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<5>(loopvar); }  // 10+5
-template<> FASTLED_FORCE_INLINE void _dc<16>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<6>(loopvar); }  // 10+6
-template<> FASTLED_FORCE_INLINE void _dc<17>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<7>(loopvar); }  // 10+7
-template<> FASTLED_FORCE_INLINE void _dc<18>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<8>(loopvar); }  // 10+8
-template<> FASTLED_FORCE_INLINE void _dc<19>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<9>(loopvar); }  // 10+9
-template<> FASTLED_FORCE_INLINE void _dc<20>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<10>(loopvar); }  // 10+10
+template<> FASTLED_FORCE_INLINE void _dc< 3>(FASTLED_REGISTER u8 & loopvar) { _dc<2>(loopvar); _dc<1>(loopvar); }  // 2+1
+template<> FASTLED_FORCE_INLINE void _dc< 4>(FASTLED_REGISTER u8 & loopvar) { _dc<2>(loopvar); _dc<2>(loopvar); }  // 2+2
+template<> FASTLED_FORCE_INLINE void _dc< 5>(FASTLED_REGISTER u8 & loopvar) { _dc<2>(loopvar); _dc<3>(loopvar); }  // 2+3
+template<> FASTLED_FORCE_INLINE void _dc< 6>(FASTLED_REGISTER u8 & loopvar) { _dc<2>(loopvar); _dc<2>(loopvar); _dc<2>(loopvar);}  // 2+2+2
+template<> FASTLED_FORCE_INLINE void _dc< 7>(FASTLED_REGISTER u8 & loopvar) { _dc<4>(loopvar); _dc<3>(loopvar); }  // 4+3
+template<> FASTLED_FORCE_INLINE void _dc< 8>(FASTLED_REGISTER u8 & loopvar) { _dc<4>(loopvar); _dc<4>(loopvar); }  // 4+4
+template<> FASTLED_FORCE_INLINE void _dc< 9>(FASTLED_REGISTER u8 & loopvar) { _dc<5>(loopvar); _dc<4>(loopvar); }  // 5+4
+template<> FASTLED_FORCE_INLINE void _dc<10>(FASTLED_REGISTER u8 & loopvar) { _dc<6>(loopvar); _dc<4>(loopvar); }  // 6+4
+template<> FASTLED_FORCE_INLINE void _dc<11>(FASTLED_REGISTER u8 & loopvar) { _dc<10>(loopvar); _dc<1>(loopvar); }  // 10+1
+template<> FASTLED_FORCE_INLINE void _dc<12>(FASTLED_REGISTER u8 & loopvar) { _dc<10>(loopvar); _dc<2>(loopvar); }  // 10+2
+template<> FASTLED_FORCE_INLINE void _dc<13>(FASTLED_REGISTER u8 & loopvar) { _dc<10>(loopvar); _dc<3>(loopvar); }  // 10+3
+template<> FASTLED_FORCE_INLINE void _dc<14>(FASTLED_REGISTER u8 & loopvar) { _dc<10>(loopvar); _dc<4>(loopvar); }  // 10+4
+template<> FASTLED_FORCE_INLINE void _dc<15>(FASTLED_REGISTER u8 & loopvar) { _dc<10>(loopvar); _dc<5>(loopvar); }  // 10+5
+template<> FASTLED_FORCE_INLINE void _dc<16>(FASTLED_REGISTER u8 & loopvar) { _dc<10>(loopvar); _dc<6>(loopvar); }  // 10+6
+template<> FASTLED_FORCE_INLINE void _dc<17>(FASTLED_REGISTER u8 & loopvar) { _dc<10>(loopvar); _dc<7>(loopvar); }  // 10+7
+template<> FASTLED_FORCE_INLINE void _dc<18>(FASTLED_REGISTER u8 & loopvar) { _dc<10>(loopvar); _dc<8>(loopvar); }  // 10+8
+template<> FASTLED_FORCE_INLINE void _dc<19>(FASTLED_REGISTER u8 & loopvar) { _dc<10>(loopvar); _dc<9>(loopvar); }  // 10+9
+template<> FASTLED_FORCE_INLINE void _dc<20>(FASTLED_REGISTER u8 & loopvar) { _dc<10>(loopvar); _dc<10>(loopvar); }  // 10+10
 
 // ===== INTERRUPT AND TIMING ADJUSTMENT =====
 
@@ -200,21 +200,21 @@ template<> FASTLED_FORCE_INLINE void _dc<20>(FASTLED_REGISTER uint8_t & loopvar)
 #endif
 
 
-inline uint8_t& avr_time_accumulator() {
-	static uint8_t gTimeErrorAccum256ths = 0;
+inline u8& avr_time_accumulator() {
+	static u8 gTimeErrorAccum256ths = 0;
 	return gTimeErrorAccum256ths;
 }
 
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
-template <uint8_t DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 10>
+template <u8 DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 10>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	// Extract timing values from struct and convert from nanoseconds to clock cycles
 	// Formula: cycles = (nanoseconds * CPU_MHz + 500) / 1000
 	// The +500 provides rounding to nearest integer
-	static constexpr uint32_t T1 = (TIMING::T1 * (F_CPU / 1000000UL) + 500) / 1000;
-	static constexpr uint32_t T2 = (TIMING::T2 * (F_CPU / 1000000UL) + 500) / 1000;
-	static constexpr uint32_t T3 = (TIMING::T3 * (F_CPU / 1000000UL) + 500) / 1000;
+	static constexpr u32 T1 = (TIMING::T1 * (F_CPU / 1000000UL) + 500) / 1000;
+	static constexpr u32 T2 = (TIMING::T2 * (F_CPU / 1000000UL) + 500) / 1000;
+	static constexpr u32 T3 = (TIMING::T3 * (F_CPU / 1000000UL) + 500) / 1000;
 
 	static_assert(T1 >= 2 && T2 >= 2 && T3 >= 3, "Not enough cycles - use a higher clock speed");
 
@@ -228,7 +228,7 @@ public:
 		FastPin<DATA_PIN>::setOutput();
 	}
 
-	virtual uint16_t getMaxRefreshRate() const { return 400; }
+	virtual u16 getMaxRefreshRate() const { return 400; }
 
 protected:
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
@@ -244,7 +244,7 @@ protected:
 
 		// Adjust the timer
 #if (!defined(NO_CLOCK_CORRECTION) || (NO_CLOCK_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
-		uint32_t microsTaken = pixels.size();
+		u32 microsTaken = pixels.size();
 		microsTaken *= CLKS_TO_MICROS(24 * (T1 + T2 + T3));
 
         // adust for approximate observed actal runtime (as of January 2015)
@@ -267,10 +267,10 @@ protected:
             // Now convert microseconds to 256ths of a second, approximately like this:
             // 250ths = (us/4)
             // 256ths = 250ths * (263/256);
-            uint16_t x256ths = microsTaken >> 2;
+            u16 x256ths = microsTaken >> 2;
             x256ths += scale16by8(x256ths,7);
 
-			uint8_t& accum = avr_time_accumulator();
+			u8& accum = avr_time_accumulator();
 
             x256ths += accum;
             MS_COUNTER += (x256ths >> 8);
@@ -288,10 +288,10 @@ protected:
         // a 16-bit variable.  The difference between /1000 and /1024 only starts showing
         // up in the range of about 100 pixels, so many ATtiny projects won't even
         // see a clock difference due to the approximation there.
-		uint32_t microsTaken = nLeds;
+		u32 microsTaken = nLeds;
 		microsTaken *= CLKS_TO_MICROS(24 * (T1 + T2 + T3));
 		//uint16_t microsTaken = (uint32_t)nLeds * (uint32_t)CLKS_TO_MICROS((24) * (T1 + T2 + T3));
-        MS_COUNTER += static_cast<uint16_t>(microsTaken >> 10);
+        MS_COUNTER += static_cast<u16>(microsTaken >> 10);
 #endif
 
 #endif
@@ -667,10 +667,10 @@ protected:
 	// 2. Output byte 1 (e.g., G) while preparing byte 2 (e.g., B)
 	// 3. Output byte 2 (e.g., B) while preparing byte 0 of next pixel (e.g., next R)
 	static void /*__attribute__((optimize("O0")))*/  /*__attribute__ ((always_inline))*/  showRGBInternal(PixelController<RGB_ORDER> & pixels)  {
-		uint8_t *data = (uint8_t*)pixels.mData;  // Pointer to pixel array
+		u8 *data = (u8*)pixels.mData;  // Pointer to pixel array
 		data_ptr_t port = FastPin<DATA_PIN>::port();  // GPIO port register address
 		data_t mask = FastPin<DATA_PIN>::mask();  // Pin bit mask
-		uint8_t scale_base = 0;  // Scratch variable for scaling operations
+		u8 scale_base = 0;  // Scratch variable for scaling operations
 
 		// FASTLED_REGISTER uint8_t *end = data + nLeds;
 
@@ -680,8 +680,8 @@ protected:
 		*port = lo;  // Initialize line to LOW state
 
 		// DOUBLE-BUFFER BYTES: b0=currently outputting, b1=next being prepared
-		uint8_t b0 = 0;  // The byte currently being written out bit-by-bit
-		uint8_t b1 = 0;  // The byte currently being loaded, dithered, and scaled for next output
+		u8 b0 = 0;  // The byte currently being written out bit-by-bit
+		u8 b1 = 0;  // The byte currently being loaded, dithered, and scaled for next output
 
 		// Setup the pixel controller
 		pixels.preStepFirstByteDithering();
@@ -692,15 +692,15 @@ protected:
 
 		// advanceBy: Stride to next pixel (typically 3 for RGB, 4 for RGBW, negative for reverse order)
 		// Cast to int16 for sign extension (handles negative strides correctly)
-		int16_t advanceBy = pixels.advanceBy();
-		uint16_t count = pixels.mLen;  // Number of pixels to output
+		i16 advanceBy = pixels.advanceBy();
+		u16 count = pixels.mLen;  // Number of pixels to output
 
 		// s0, s1, s2: Scale factors for each color channel (brightness/color correction)
 		// Range: 0-255 (0=off, 255=full brightness)
 		// RO() handles RGB_ORDER remapping (e.g., RGB vs GRB vs BGR)
-		uint8_t s0 = pixels.mColorAdjustment.premixed.raw[RO(0)];
-		uint8_t s1 = pixels.mColorAdjustment.premixed.raw[RO(1)];
-		uint8_t s2 = pixels.mColorAdjustment.premixed.raw[RO(2)];
+		u8 s0 = pixels.mColorAdjustment.premixed.raw[RO(0)];
+		u8 s1 = pixels.mColorAdjustment.premixed.raw[RO(1)];
+		u8 s2 = pixels.mColorAdjustment.premixed.raw[RO(2)];
 #if (FASTLED_SCALE8_FIXED==1)
 		// Scale8 fix: increment scale factors so 255 wraps to 0
 		// Assembly code detects s==0 as special case to return unscaled value
@@ -710,16 +710,16 @@ protected:
 
 		// d0, d1, d2: Current dither values for each channel
 		// Dithering reduces color banding by adding controlled temporal noise
-		uint8_t d0 = pixels.d[RO(0)];
-		uint8_t d1 = pixels.d[RO(1)];
-		uint8_t d2 = pixels.d[RO(2)];
+		u8 d0 = pixels.d[RO(0)];
+		u8 d1 = pixels.d[RO(1)];
+		u8 d2 = pixels.d[RO(2)];
 
 		// e0, e1, e2: Dither step values (d is updated by: d = e - d after each pixel)
-		uint8_t e0 = pixels.e[RO(0)];
-		uint8_t e1 = pixels.e[RO(1)];
-		uint8_t e2 = pixels.e[RO(2)];
+		u8 e0 = pixels.e[RO(0)];
+		u8 e1 = pixels.e[RO(1)];
+		u8 e2 = pixels.e[RO(2)];
 
-		uint8_t loopvar=0;  // Scratch variable for delay loops
+		u8 loopvar=0;  // Scratch variable for delay loops
 
 		// ===== FIRST BYTE INITIALIZATION =====
 		// Load and scale the very first byte (byte 0 of first pixel) before entering main loop

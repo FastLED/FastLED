@@ -97,7 +97,7 @@ public:
     /// @brief Wait for current transmission to complete
     /// @param timeout_ms Maximum time to wait in milliseconds (fl::numeric_limits<uint32_t>::max() = infinite)
     /// @return true if transmission completed, false on timeout
-    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max()) override;
+    bool waitComplete(u32 timeout_ms = fl::numeric_limits<u32>::max()) override;
 
     /// @brief Check if transmission is currently in progress
     /// @return true if busy, false if idle
@@ -132,8 +132,8 @@ private:
     /// @param dst2 Destination buffer for lane 2 (bits [5,1] from each byte)
     /// @param dst3 Destination buffer for lane 3 (bits [4,0] from each byte)
     /// @param dst_len Destination buffer length per lane
-    void interleaveBits(const uint8_t* src, size_t src_len,
-                        uint8_t* dst0, uint8_t* dst1, uint8_t* dst2, uint8_t* dst3,
+    void interleaveBits(const u8* src, size_t src_len,
+                        u8* dst0, u8* dst1, u8* dst2, u8* dst3,
                         size_t dst_len);
 
     int mBusId;  ///< Logical bus identifier
@@ -150,7 +150,7 @@ private:
     // DMA_HandleTypeDef* mDMAChannel3;  // DMA for D3
 
     // DMA buffer management (zero-copy API)
-    fl::span<uint8_t> mDMABuffer;    ///< Allocated DMA buffer (interleaved format for quad-lane)
+    fl::span<u8> mDMABuffer;    ///< Allocated DMA buffer (interleaved format for quad-lane)
     size_t mMaxBytesPerLane;         ///< Max bytes per lane we've allocated for
     size_t mCurrentTotalSize;        ///< Current transmission size (bytes_per_lane * 4)
     bool mBufferAcquired;            ///< True if buffer acquired and ready for transmit
@@ -167,12 +167,12 @@ private:
     bool mInitialized;
 
     // Configuration
-    uint8_t mClockPin;
-    uint8_t mData0Pin;
-    uint8_t mData1Pin;
-    uint8_t mData2Pin;
-    uint8_t mData3Pin;
-    uint32_t mClockSpeedHz;
+    u8 mClockPin;
+    u8 mData0Pin;
+    u8 mData1Pin;
+    u8 mData2Pin;
+    u8 mData3Pin;
+    u32 mClockSpeedHz;
 
     SPIQuadSTM32(const SPIQuadSTM32&) = delete;
     SPIQuadSTM32& operator=(const SPIQuadSTM32&) = delete;
@@ -216,7 +216,7 @@ bool SPIQuadSTM32::begin(const SpiHw4::Config& config) {
     }
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
-    if (mBusId != -1 && config.bus_num != static_cast<uint8_t>(mBusId)) {
+    if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
         FL_WARN("SPIQuadSTM32: Bus ID mismatch");
         return false;
     }
@@ -341,16 +341,16 @@ DMABuffer SPIQuadSTM32::acquireDMABuffer(size_t bytes_per_lane) {
     if (bytes_per_lane > mMaxBytesPerLane) {
         if (!mDMABuffer.empty()) {
             free(mDMABuffer.data());
-            mDMABuffer = fl::span<uint8_t>();
+            mDMABuffer = fl::span<u8>();
         }
 
         // Allocate DMA-capable memory (regular malloc for STM32)
-        uint8_t* ptr = static_cast<uint8_t*>(malloc(total_size));
+        u8* ptr = static_cast<u8*>(malloc(total_size));
         if (!ptr) {
             return DMABuffer(SPIError::ALLOCATION_FAILED);
         }
 
-        mDMABuffer = fl::span<uint8_t>(ptr, total_size);
+        mDMABuffer = fl::span<u8>(ptr, total_size);
         mMaxBytesPerLane = bytes_per_lane;
     }
 
@@ -426,8 +426,8 @@ bool SPIQuadSTM32::allocateDMABuffer(size_t required_size) {
     return true;
 }
 
-void SPIQuadSTM32::interleaveBits(const uint8_t* src, size_t src_len,
-                                   uint8_t* dst0, uint8_t* dst1, uint8_t* dst2, uint8_t* dst3,
+void SPIQuadSTM32::interleaveBits(const u8* src, size_t src_len,
+                                   u8* dst0, u8* dst1, u8* dst2, u8* dst3,
                                    size_t dst_len) {
     // Interleave bits from source bytes across four lanes
     // Lane 0 (dst0) gets: bits 7, 3 from each byte
@@ -447,22 +447,22 @@ void SPIQuadSTM32::interleaveBits(const uint8_t* src, size_t src_len,
     (void)dst_len;  // Unused parameter, kept for interface consistency
 
     for (size_t i = 0; i < src_len; i++) {
-        uint8_t byte = src[i];
+        u8 byte = src[i];
 
         // Extract bits for each lane (2 bits per lane per source byte)
-        uint8_t lane0_bits = 0;
+        u8 lane0_bits = 0;
         lane0_bits |= ((byte >> 7) & 1) << 1;  // Bit 7 -> position 1
         lane0_bits |= ((byte >> 3) & 1) << 0;  // Bit 3 -> position 0
 
-        uint8_t lane1_bits = 0;
+        u8 lane1_bits = 0;
         lane1_bits |= ((byte >> 6) & 1) << 1;  // Bit 6 -> position 1
         lane1_bits |= ((byte >> 2) & 1) << 0;  // Bit 2 -> position 0
 
-        uint8_t lane2_bits = 0;
+        u8 lane2_bits = 0;
         lane2_bits |= ((byte >> 5) & 1) << 1;  // Bit 5 -> position 1
         lane2_bits |= ((byte >> 1) & 1) << 0;  // Bit 1 -> position 0
 
-        uint8_t lane3_bits = 0;
+        u8 lane3_bits = 0;
         lane3_bits |= ((byte >> 4) & 1) << 1;  // Bit 4 -> position 1
         lane3_bits |= ((byte >> 0) & 1) << 0;  // Bit 0 -> position 0
 
@@ -516,8 +516,8 @@ bool SPIQuadSTM32::transmit(TransmitMode mode) {
 
     // Interleave bits from mDMABuffer across four lanes
     interleaveBits(mDMABuffer.data(), mCurrentTotalSize,
-                   (uint8_t*)mDMABuffer0, (uint8_t*)mDMABuffer1,
-                   (uint8_t*)mDMABuffer2, (uint8_t*)mDMABuffer3,
+                   (u8*)mDMABuffer0, (u8*)mDMABuffer1,
+                   (u8*)mDMABuffer2, (u8*)mDMABuffer3,
                    buffer_size_per_lane);
 
     // TODO: Start DMA transfers
@@ -537,7 +537,7 @@ bool SPIQuadSTM32::transmit(TransmitMode mode) {
     return false;  // Not yet implemented
 }
 
-bool SPIQuadSTM32::waitComplete(uint32_t timeout_ms) {
+bool SPIQuadSTM32::waitComplete(u32 timeout_ms) {
     if (!mTransactionActive) {
         return true;  // Nothing to wait for
     }
@@ -600,7 +600,7 @@ void SPIQuadSTM32::cleanup() {
         // Free main DMA buffer
         if (!mDMABuffer.empty()) {
             free(mDMABuffer.data());
-            mDMABuffer = fl::span<uint8_t>();
+            mDMABuffer = fl::span<u8>();
             mMaxBytesPerLane = 0;
             mCurrentTotalSize = 0;
             mBufferAcquired = false;

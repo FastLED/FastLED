@@ -16,10 +16,10 @@ namespace fl {
 /// Template definition for teensy 4.0 style ARM pins, providing direct access to the various GPIO registers.  Note that this
 /// uses the full port GPIO registers.  It calls through to pinMode for setting input/output on pins
 /// The registers are data output, set output, clear output, toggle output, input, and direction
-template<uint8_t PIN, uint32_t _BIT, uint32_t _MASK, typename _GPIO_DR, typename _GPIO_DR_SET, typename _GPIO_DR_CLEAR, typename _GPIO_DR_TOGGLE> class _ARMPIN {
+template<u8 PIN, u32 _BIT, u32 _MASK, typename _GPIO_DR, typename _GPIO_DR_SET, typename _GPIO_DR_CLEAR, typename _GPIO_DR_TOGGLE> class _ARMPIN {
 public:
-	typedef volatile uint32_t * port_ptr_t;
-	typedef uint32_t port_t;
+	typedef volatile u32 * port_ptr_t;
+	typedef u32 port_t;
 
 	inline static void setOutput() { pinMode(PIN, OUTPUT); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
 	inline static void setInput() { pinMode(PIN, INPUT); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
@@ -42,7 +42,7 @@ public:
 	inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &_GPIO_DR_SET::r(); }
 	inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_GPIO_DR_CLEAR::r(); }
 	inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
-	inline static uint32_t pinbit() __attribute__ ((always_inline)) { return _BIT; }
+	inline static u32 pinbit() __attribute__ ((always_inline)) { return _BIT; }
 };
 
 

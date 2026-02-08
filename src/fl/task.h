@@ -135,7 +135,7 @@ struct CoroutineConfig {
     fl::function<void()> function;
     fl::string name = "task";
     size_t stack_size = 4096;
-    uint8_t priority = 5;
+    u8 priority = 5;
     fl::optional<TracePoint> trace;
 };
 
@@ -187,9 +187,9 @@ public:
     string trace_label() const;
     TaskType type() const;
     int interval_ms() const;
-    uint32_t last_run_time() const;
-    void set_last_run_time(uint32_t time);
-    bool ready_to_run(uint32_t current_time) const;
+    u32 last_run_time() const;
+    void set_last_run_time(u32 time);
+    bool ready_to_run(u32 current_time) const;
     bool is_valid() const;
     bool isCoroutine() const;
 
@@ -209,9 +209,9 @@ private:
     void _set_id(int id);
     int _id() const;
     bool _is_canceled() const;
-    bool _ready_to_run(uint32_t current_time) const;
-    bool _ready_to_run_frame_task(uint32_t current_time) const;
-    void _set_last_run_time(uint32_t time);
+    bool _ready_to_run(u32 current_time) const;
+    bool _ready_to_run_frame_task(u32 current_time) const;
+    void _set_last_run_time(u32 time);
     bool _has_then() const;
     void _execute_then();
     void _execute_catch(const Error& error);

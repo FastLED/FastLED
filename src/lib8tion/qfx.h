@@ -16,38 +16,38 @@ public:
     /// Constructor, storing a float as a fractional int
     qfx(float fx) { i = fx; f = (fx-i) * (1<<F); }
     /// Constructor, storing a fractional int directly
-    qfx(uint8_t _i, uint8_t _f) {i=_i; f=_f; }
+    qfx(u8 _i, u8 _f) {i=_i; f=_f; }
 
     /// Multiply the fractional int by a value
-    uint32_t operator*(uint32_t v) { return (v*i) + ((v*f)>>F); }
+    u32 operator*(u32 v) { return (v*i) + ((v*f)>>F); }
     /// @copydoc operator*(uint32_t)
-    uint16_t operator*(uint16_t v) { return (v*i) + ((v*f)>>F); }
+    u16 operator*(u16 v) { return (v*i) + ((v*f)>>F); }
     /// @copydoc operator*(uint32_t)
-    int32_t operator*(int32_t v) { return (v*i) + ((v*f)>>F); }
+    i32 operator*(i32 v) { return (v*i) + ((v*f)>>F); }
     /// @copydoc operator*(uint32_t)
-    int16_t operator*(int16_t v) { return (v*i) + ((v*f)>>F); }
+    i16 operator*(i16 v) { return (v*i) + ((v*f)>>F); }
 #if defined(FL_IS_ARM) | defined(FASTLED_RISCV) | defined(FASTLED_APOLLO3)
     /// @copydoc operator*(uint32_t)
     int operator*(int v) { return (v*i) + ((v*f)>>F); }
 #endif
 };
 
-template<class T, int F, int I> static uint32_t operator*(uint32_t v, qfx<T,F,I> & q) { return q * v; }
-template<class T, int F, int I> static uint16_t operator*(uint16_t v, qfx<T,F,I> & q) { return q * v; }
-template<class T, int F, int I> static int32_t operator*(int32_t v, qfx<T,F,I> & q) { return q * v; }
-template<class T, int F, int I> static int16_t operator*(int16_t v, qfx<T,F,I> & q) { return q * v; }
+template<class T, int F, int I> static u32 operator*(u32 v, qfx<T,F,I> & q) { return q * v; }
+template<class T, int F, int I> static u16 operator*(u16 v, qfx<T,F,I> & q) { return q * v; }
+template<class T, int F, int I> static i32 operator*(i32 v, qfx<T,F,I> & q) { return q * v; }
+template<class T, int F, int I> static i16 operator*(i16 v, qfx<T,F,I> & q) { return q * v; }
 #if defined(FL_IS_ARM) | defined(FASTLED_RISCV) | defined(FASTLED_APOLLO3)
 template<class T, int F, int I> static int operator*(int v, qfx<T,F,I> & q) { return q * v; }
 #endif
 
 /// A 4.4 integer (4 bits integer, 4 bits fraction)
-typedef qfx<uint8_t, 4,4> q44;
+typedef qfx<u8, 4,4> q44;
 /// A 6.2 integer (6 bits integer, 2 bits fraction)
-typedef qfx<uint8_t, 6,2> q62;
+typedef qfx<u8, 6,2> q62;
 /// A 8.8 integer (8 bits integer, 8 bits fraction)
-typedef qfx<uint16_t, 8,8> q88;
+typedef qfx<u16, 8,8> q88;
 /// A 12.4 integer (12 bits integer, 4 bits fraction)
-typedef qfx<uint16_t, 12,4> q124;
+typedef qfx<u16, 12,4> q124;
 
 /// @} FractionalTypes
 }  // namespace fl

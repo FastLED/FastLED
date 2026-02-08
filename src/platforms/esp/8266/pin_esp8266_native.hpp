@@ -18,7 +18,7 @@ extern "C" {
     #include "esp8266_peri.h"
     #include "osapi.h"
     // ADC function from ESP8266 SDK (user_interface.h)
-    uint16_t system_adc_read(void);
+    fl::u16 system_adc_read(void);
 }
 FL_EXTERN_C_END
 
@@ -30,7 +30,7 @@ namespace platforms {
 // ============================================================================
 
 // Base register address for GPIO
-#define ESP8266_REG(addr) (*reinterpret_cast<volatile uint32_t*>(0x60000000 + (addr)))  // ok reinterpret cast
+#define ESP8266_REG(addr) (*reinterpret_cast<volatile u32*>(0x60000000 + (addr)))  // ok reinterpret cast
 
 // GPIO (pins 0-15) registers
 #define GPO      ESP8266_REG(0x300)  // Output level
@@ -203,7 +203,7 @@ inline PinValue digitalRead(int pin) {
 // A0 pin constant (matches Arduino ESP8266 core definition)
 #define A0 17
 
-inline uint16_t analogRead(int pin) {
+inline u16 analogRead(int pin) {
     // ESP8266 has only one ADC on A0/TOUT pin (pin 17 or 0)
     // Pin 17 is the standard A0 constant, pin 0 is accepted for compatibility
     if (pin == 17 || pin == 0) {
@@ -214,10 +214,10 @@ inline uint16_t analogRead(int pin) {
 
     // For non-ADC pins, return digital read scaled to ADC range
     // This matches Arduino ESP8266 core behavior
-    return static_cast<uint16_t>(platforms::digitalRead(pin) == PinValue::High ? 1023 : 0);
+    return static_cast<u16>(platforms::digitalRead(pin) == PinValue::High ? 1023 : 0);
 }
 
-inline void analogWrite(int pin, uint16_t val) {
+inline void analogWrite(int pin, u16 val) {
     // ESP8266 does not have true analog output (no DAC)
     // The Arduino core implements PWM via software waveform generation using
     // TIMER1 and GPIO manipulation, which is complex and requires:
@@ -249,7 +249,7 @@ inline void analogWrite(int pin, uint16_t val) {
     // True PWM would require timer-based implementation
 }
 
-inline void setPwm16(int pin, uint16_t val) {
+inline void setPwm16(int pin, u16 val) {
     // ESP8266 hardware supports up to 14-bit PWM via TIMER1
     // However, implementing true PWM requires complex timer configuration
     // Provide digital fallback similar to analogWrite

@@ -23,7 +23,7 @@ namespace fl {
 
 /// Scale one byte by a second one (AVR assembly with MUL)
 /// @note Takes 4 clocks on AVR with MUL, 2 clocks on ARM
-FL_ALWAYS_INLINE uint8_t scale8(uint8_t i, fract8 scale) {
+FL_ALWAYS_INLINE u8 scale8(u8 i, fract8 scale) {
     asm volatile(
 #if (FASTLED_SCALE8_FIXED == 1)
         // Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0
@@ -52,8 +52,8 @@ FL_ALWAYS_INLINE uint8_t scale8(uint8_t i, fract8 scale) {
 }
 
 /// The "video" version of scale8() (AVR assembly with MUL)
-FL_ALWAYS_INLINE uint8_t scale8_video(uint8_t i, fract8 scale) {
-    uint8_t j = 0;
+FL_ALWAYS_INLINE u8 scale8_video(u8 i, fract8 scale) {
+    u8 j = 0;
     asm volatile("  tst %[i]\n\t"
                  "  breq L_%=\n\t"
                  "  mul %[i], %[scale]\n\t"
@@ -70,7 +70,7 @@ FL_ALWAYS_INLINE uint8_t scale8_video(uint8_t i, fract8 scale) {
 
 /// This version of scale8() does not clean up the R1 register on AVR (AVR assembly with MUL)
 /// @warning You **MUST** call cleanup_R1() after using this function!
-FL_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i,
+FL_ALWAYS_INLINE u8 scale8_LEAVING_R1_DIRTY(u8 i,
                                                          fract8 scale) {
     asm volatile(
 #if (FASTLED_SCALE8_FIXED == 1)
@@ -100,7 +100,7 @@ FL_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i,
 
 /// In place modifying version of scale8() that does not clean up the R1 (AVR assembly with MUL)
 /// @warning You **MUST** call cleanup_R1() after using this function!
-FL_ALWAYS_INLINE void nscale8_LEAVING_R1_DIRTY(uint8_t &i,
+FL_ALWAYS_INLINE void nscale8_LEAVING_R1_DIRTY(u8 &i,
                                                        fract8 scale) {
     asm volatile(
 #if (FASTLED_SCALE8_FIXED == 1)
@@ -129,9 +129,9 @@ FL_ALWAYS_INLINE void nscale8_LEAVING_R1_DIRTY(uint8_t &i,
 
 /// This version of scale8_video() does not clean up the R1 register on AVR (AVR assembly with MUL)
 /// @warning You **MUST** call cleanup_R1() after using this function!
-FL_ALWAYS_INLINE uint8_t scale8_video_LEAVING_R1_DIRTY(uint8_t i,
+FL_ALWAYS_INLINE u8 scale8_video_LEAVING_R1_DIRTY(u8 i,
                                                                fract8 scale) {
-    uint8_t j = 0;
+    u8 j = 0;
     asm volatile("  tst %[i]\n\t"
                  "  breq L_%=\n\t"
                  "  mul %[i], %[scale]\n\t"
@@ -147,7 +147,7 @@ FL_ALWAYS_INLINE uint8_t scale8_video_LEAVING_R1_DIRTY(uint8_t i,
 
 /// In place modifying version of scale8_video() that does not clean up the R1 (AVR assembly with MUL)
 /// @warning You **MUST** call cleanup_R1() after using this function!
-FL_ALWAYS_INLINE void nscale8_video_LEAVING_R1_DIRTY(uint8_t &i,
+FL_ALWAYS_INLINE void nscale8_video_LEAVING_R1_DIRTY(u8 &i,
                                                              fract8 scale) {
     asm volatile("  tst %[i]\n\t"
                  "  breq L_%=\n\t"
@@ -168,13 +168,13 @@ FL_ALWAYS_INLINE void cleanup_R1() {
 }
 
 /// Scale a 16-bit unsigned value by an 8-bit value (AVR assembly with MUL)
-FL_ALWAYS_INLINE uint16_t scale16by8(uint16_t i, fract8 scale) {
+FL_ALWAYS_INLINE u16 scale16by8(u16 i, fract8 scale) {
     if (scale == 0) {
         return 0; // Fixes non zero output when scale == 0 and
                   // FASTLED_SCALE8_FIXED==1
     }
 #if FASTLED_SCALE8_FIXED == 1
-    uint16_t result = 0;
+    u16 result = 0;
     asm volatile(
         // result.A = HighByte( (i.A x scale) + i.A )
         "  mul %A[i], %[scale]                 \n\t"
@@ -198,7 +198,7 @@ FL_ALWAYS_INLINE uint16_t scale16by8(uint16_t i, fract8 scale) {
         : "r0", "r1");
     return result;
 #else
-    uint16_t result = 0;
+    u16 result = 0;
     asm volatile(
         // result.A = HighByte(i.A x j )
         "  mul %A[i], %[scale]                 \n\t"
@@ -220,7 +220,7 @@ FL_ALWAYS_INLINE uint16_t scale16by8(uint16_t i, fract8 scale) {
 }
 
 /// Scale a 16-bit unsigned value by an 16-bit value (AVR assembly with MUL)
-LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale) {
+LIB8STATIC u16 scale16(u16 i, fract16 scale) {
 #if FASTLED_SCALE8_FIXED == 1
     // implemented sort of like
     //   result = ((i * scale) + i ) / 65536
@@ -229,7 +229,7 @@ LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale) {
     //   result = (i * (scale+1)) / 65536
     // the answer is that if scale is 65535, then scale+1
     // will be zero, which is not what we want.
-    uint32_t result;
+    u32 result;
     asm volatile(
         // result.A-B  = i.A x scale.A
         "  mul %A[i], %A[scale]                 \n\t"
@@ -246,7 +246,7 @@ LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale) {
         : [i] "r"(i), [scale] "r"(scale)
         : "r0", "r1");
 
-    const uint8_t zero = 0;
+    const u8 zero = 0;
     asm volatile(
         // result.B-D += i.B x scale.A
         "  mul %B[i], %A[scale]                 \n\t"
@@ -281,7 +281,7 @@ LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale) {
     result = result >> 16;
     return result;
 #else
-    uint32_t result;
+    u32 result;
     asm volatile(
         // result.A-B  = i.A x scale.A
         "  mul %A[i], %A[scale]                 \n\t"
@@ -299,7 +299,7 @@ LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale) {
         : [i] "r"(i), [scale] "r"(scale)
         : "r0", "r1");
 
-    const uint8_t zero = 0;
+    const u8 zero = 0;
     asm volatile(
         // result.B-D += i.B x scale.A
         "  mul %B[i], %A[scale]                 \n\t"
@@ -330,16 +330,16 @@ LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale) {
 /// Scale a 32-bit unsigned value by an 8-bit value (C implementation for AVR)
 /// Promotes to 64-bit to prevent overflow during multiplication
 /// @note Uses C implementation on AVR since 64-bit assembly would be very slow
-FL_ALWAYS_INLINE uint32_t scale32by8(uint32_t i, fract8 scale) {
+FL_ALWAYS_INLINE u32 scale32by8(u32 i, fract8 scale) {
     if (scale == 0) {
         return 0;
     }
 #if FASTLED_SCALE8_FIXED == 1
-    uint32_t result;
+    u32 result;
     result = (((uint64_t)(i) * (1 + ((uint64_t)scale))) >> 8);
     return result;
 #else
-    uint32_t result;
+    u32 result;
     result = (((uint64_t)i * (uint64_t)scale) >> 8);
     return result;
 #endif

@@ -65,15 +65,15 @@ inline fl::PinValue digitalRead(int pin) {
     return ::digitalRead(pin) ? fl::PinValue::High : fl::PinValue::Low;
 }
 
-inline uint16_t analogRead(int pin) {
-    return static_cast<uint16_t>(::analogRead(pin));
+inline u16 analogRead(int pin) {
+    return static_cast<u16>(::analogRead(pin));
 }
 
-inline void analogWrite(int pin, uint16_t val) {
+inline void analogWrite(int pin, u16 val) {
     ::analogWrite(pin, val);
 }
 
-inline void setPwm16(int pin, uint16_t val) {
+inline void setPwm16(int pin, u16 val) {
     // Teensy has excellent 16-bit PWM support via analogWriteResolution
     // Set 16-bit resolution for full dynamic range (0-65535)
     // Note: This may affect PWM frequency depending on timer configuration

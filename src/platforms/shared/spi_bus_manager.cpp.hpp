@@ -28,7 +28,7 @@ namespace fl {
 // ============================================================================
 
 SPIBusManager::SPIBusManager() : mNumBuses(0), mInitialized(false) {
-    for (uint8_t i = 0; i < MAX_BUSES; i++) {
+    for (u8 i = 0; i < MAX_BUSES; i++) {
         mBuses[i] = SPIBusInfo{};
     }
 }
@@ -43,7 +43,7 @@ SPIBusManager::~SPIBusManager() {
     // Device destructors already handle cleanup via unregisterDevice(), so this is safe.
 }
 
-SPIBusHandle SPIBusManager::registerDevice(uint8_t clock_pin, uint8_t data_pin, uint32_t requested_speed_hz, void* controller) {
+SPIBusHandle SPIBusManager::registerDevice(u8 clock_pin, u8 data_pin, u32 requested_speed_hz, void* controller) {
     if (!controller) {
         FL_WARN("SPIBusManager: nullptr controller pointer");
         return SPIBusHandle();
@@ -63,7 +63,7 @@ SPIBusHandle SPIBusManager::registerDevice(uint8_t clock_pin, uint8_t data_pin, 
     }
 
     // Add device to bus
-    uint8_t device_idx = bus->num_devices;
+    u8 device_idx = bus->num_devices;
     bus->devices[device_idx].clock_pin = clock_pin;
     bus->devices[device_idx].data_pin = data_pin;
     bus->devices[device_idx].controller = controller;
@@ -74,7 +74,7 @@ SPIBusHandle SPIBusManager::registerDevice(uint8_t clock_pin, uint8_t data_pin, 
     bus->num_devices++;
 
     // Return handle
-    uint8_t bus_id = static_cast<uint8_t>(bus - mBuses);
+    u8 bus_id = static_cast<u8>(bus - mBuses);
     return SPIBusHandle(bus_id, device_idx);
 }
 
@@ -99,8 +99,8 @@ bool SPIBusManager::unregisterDevice(SPIBusHandle handle) {
     device.controller = nullptr;
 
     // Count remaining allocated devices
-    uint8_t allocated_count = 0;
-    for (uint8_t i = 0; i < bus.num_devices; i++) {
+    u8 allocated_count = 0;
+    for (u8 i = 0; i < bus.num_devices; i++) {
         if (bus.devices[i].is_allocated) {
             allocated_count++;
         }
@@ -118,7 +118,7 @@ bool SPIBusManager::initialize() {
     bool all_ok = true;
 
     // Initialize each bus that hasn't been initialized yet
-    for (uint8_t i = 0; i < mNumBuses; i++) {
+    for (u8 i = 0; i < mNumBuses; i++) {
         if (!mBuses[i].is_initialized) {
             if (!initializeBus(mBuses[i])) {
                 all_ok = false;
@@ -130,7 +130,7 @@ bool SPIBusManager::initialize() {
     return all_ok;
 }
 
-void SPIBusManager::transmit(SPIBusHandle handle, const uint8_t* data, size_t length) {
+void SPIBusManager::transmit(SPIBusHandle handle, const u8* data, size_t length) {
     if (!handle.is_valid || handle.bus_id >= mNumBuses) {
         return;
     }
@@ -161,7 +161,7 @@ void SPIBusManager::transmit(SPIBusHandle handle, const uint8_t* data, size_t le
             }
 
             // Append data to this lane's buffer
-            fl::vector<uint8_t>& lane_buffer = bus.lane_buffers[handle.lane_id];
+            fl::vector<u8>& lane_buffer = bus.lane_buffers[handle.lane_id];
             for (size_t i = 0; i < length; i++) {
                 lane_buffer.push_back(data[i]);
             }
@@ -178,7 +178,7 @@ void SPIBusManager::transmit(SPIBusHandle handle, const uint8_t* data, size_t le
             }
 
             // Append data to this lane's buffer
-            fl::vector<uint8_t>& lane_buffer = bus.lane_buffers[handle.lane_id];
+            fl::vector<u8>& lane_buffer = bus.lane_buffers[handle.lane_id];
             for (size_t i = 0; i < length; i++) {
                 lane_buffer.push_back(data[i]);
             }
@@ -242,7 +242,7 @@ void SPIBusManager::finalizeTransmission(SPIBusHandle handle) {
 
         // Find maximum lane size
         size_t max_size = 0;
-        for (uint8_t i = 0; i < bus.num_devices && i < 2; i++) {
+        for (u8 i = 0; i < bus.num_devices && i < 2; i++) {
             if (bus.devices[i].is_enabled && i < bus.lane_buffers.size()) {
                 max_size = fl::fl_max(max_size, bus.lane_buffers[i].size());
             }
@@ -262,20 +262,20 @@ void SPIBusManager::finalizeTransmission(SPIBusHandle handle) {
             }
             return;
         }
-        fl::span<uint8_t> dma_buf = result.data();
+        fl::span<u8> dma_buf = result.data();
 
         // Prepare 2-lane data for transposer
         fl::optional<SPITransposer::LaneData> lane0, lane1;
         if (bus.num_devices > 0 && bus.devices[0].is_enabled && 0 < bus.lane_buffers.size()) {
             lane0 = SPITransposer::LaneData{
-                fl::span<const uint8_t>(bus.lane_buffers[0].data(), bus.lane_buffers[0].size()),
-                fl::span<const uint8_t>()  // No padding frame yet
+                fl::span<const u8>(bus.lane_buffers[0].data(), bus.lane_buffers[0].size()),
+                fl::span<const u8>()  // No padding frame yet
             };
         }
         if (bus.num_devices > 1 && bus.devices[1].is_enabled && 1 < bus.lane_buffers.size()) {
             lane1 = SPITransposer::LaneData{
-                fl::span<const uint8_t>(bus.lane_buffers[1].data(), bus.lane_buffers[1].size()),
-                fl::span<const uint8_t>()  // No padding frame yet
+                fl::span<const u8>(bus.lane_buffers[1].data(), bus.lane_buffers[1].size()),
+                fl::span<const u8>()  // No padding frame yet
             };
         }
 
@@ -316,7 +316,7 @@ void SPIBusManager::finalizeTransmission(SPIBusHandle handle) {
 
     // Find maximum lane size
     size_t max_size = 0;
-    for (uint8_t i = 0; i < bus.num_devices; i++) {
+    for (u8 i = 0; i < bus.num_devices; i++) {
         if (bus.devices[i].is_enabled && i < bus.lane_buffers.size()) {
             max_size = fl::fl_max(max_size, bus.lane_buffers[i].size());
         }
@@ -332,7 +332,7 @@ void SPIBusManager::finalizeTransmission(SPIBusHandle handle) {
 
     // Acquire DMA buffer (zero-copy API)
     DMABuffer result;
-    fl::span<uint8_t> dma_buf;
+    fl::span<u8> dma_buf;
     if (is_hexadeca) {
         SpiHw16* hexadeca = static_cast<SpiHw16*>(bus.hw_controller.get());
         result = hexadeca->acquireDMABuffer(max_size);
@@ -375,11 +375,11 @@ void SPIBusManager::finalizeTransmission(SPIBusHandle handle) {
     if (is_hexadeca) {
         // Prepare 16-lane data for transposer
         fl::optional<SPITransposer::LaneData> lanes[16];
-        for (uint8_t i = 0; i < bus.num_devices && i < 16; i++) {
+        for (u8 i = 0; i < bus.num_devices && i < 16; i++) {
             if (bus.devices[i].is_enabled && i < bus.lane_buffers.size()) {
                 lanes[i] = SPITransposer::LaneData{
-                    fl::span<const uint8_t>(bus.lane_buffers[i].data(), bus.lane_buffers[i].size()),
-                    fl::span<const uint8_t>()  // Zero-padding (universal fallback)
+                    fl::span<const u8>(bus.lane_buffers[i].data(), bus.lane_buffers[i].size()),
+                    fl::span<const u8>()  // Zero-padding (universal fallback)
                 };
             }
         }
@@ -396,7 +396,7 @@ void SPIBusManager::finalizeTransmission(SPIBusHandle handle) {
     } else if (is_octal) {
         // Prepare 8-lane data for transposer
         fl::optional<SPITransposer::LaneData> lanes[8];
-        for (uint8_t i = 0; i < bus.num_devices && i < 8; i++) {
+        for (u8 i = 0; i < bus.num_devices && i < 8; i++) {
             if (bus.devices[i].is_enabled && i < bus.lane_buffers.size()) {
                 // Padding frame support: Currently uses zero-padding for synchronized latching.
                 // Zero-padding ensures all lanes finish transmitting simultaneously, which is
@@ -412,8 +412,8 @@ void SPIBusManager::finalizeTransmission(SPIBusHandle handle) {
                 // 2. Padding frame passed during device registration (requires user management)
                 // 3. Ensure all strips in parallel group have identical LED counts (current best practice)
                 lanes[i] = SPITransposer::LaneData{
-                    fl::span<const uint8_t>(bus.lane_buffers[i].data(), bus.lane_buffers[i].size()),
-                    fl::span<const uint8_t>()  // Zero-padding (universal fallback)
+                    fl::span<const u8>(bus.lane_buffers[i].data(), bus.lane_buffers[i].size()),
+                    fl::span<const u8>()  // Zero-padding (universal fallback)
                 };
             }
         }
@@ -430,7 +430,7 @@ void SPIBusManager::finalizeTransmission(SPIBusHandle handle) {
     } else {
         // Prepare 4-lane data for transposer
         fl::optional<SPITransposer::LaneData> lanes[4];
-        for (uint8_t i = 0; i < bus.num_devices && i < 4; i++) {
+        for (u8 i = 0; i < bus.num_devices && i < 4; i++) {
             if (bus.devices[i].is_enabled && i < bus.lane_buffers.size()) {
                 // Padding frame support: Currently uses zero-padding for synchronized latching.
                 // Zero-padding ensures all lanes finish transmitting simultaneously, which is
@@ -446,8 +446,8 @@ void SPIBusManager::finalizeTransmission(SPIBusHandle handle) {
                 // 2. Padding frame passed during device registration (requires user management)
                 // 3. Ensure all strips in parallel group have identical LED counts (current best practice)
                 lanes[i] = SPITransposer::LaneData{
-                    fl::span<const uint8_t>(bus.lane_buffers[i].data(), bus.lane_buffers[i].size()),
-                    fl::span<const uint8_t>()  // Zero-padding (universal fallback)
+                    fl::span<const u8>(bus.lane_buffers[i].data(), bus.lane_buffers[i].size()),
+                    fl::span<const u8>()  // Zero-padding (universal fallback)
                 };
             }
         }
@@ -514,13 +514,13 @@ bool SPIBusManager::isDeviceEnabled(SPIBusHandle handle) const {
 void SPIBusManager::reset() {
     FL_DBG("SPIBusManager: reset() called");
     // Save current mNumBuses before clearing
-    uint8_t num_buses_to_clear = mNumBuses;
+    u8 num_buses_to_clear = mNumBuses;
     // Set mNumBuses to 0 first to prevent re-entry issues
     mNumBuses = 0;
     mInitialized = false;
 
     // Only iterate through buses that were actually used
-    for (uint8_t i = 0; i < num_buses_to_clear; i++) {
+    for (u8 i = 0; i < num_buses_to_clear; i++) {
         FL_DBG("SPIBusManager: reset() checking bus " << static_cast<int>(i));
         // Clean up hardware controllers if allocated
         if (mBuses[i].is_initialized) {
@@ -544,7 +544,7 @@ void SPIBusManager::reset() {
         mBuses[i].is_initialized = false;
         mBuses[i].error_message = nullptr;
         // Clear device slots
-        for (uint8_t j = 0; j < 16; j++) {
+        for (u8 j = 0; j < 16; j++) {
             mBuses[i].devices[j] = SPIDeviceInfo();
         }
         FL_DBG("SPIBusManager: reset() done with bus " << static_cast<int>(i));
@@ -552,11 +552,11 @@ void SPIBusManager::reset() {
     FL_DBG("SPIBusManager: reset() complete");
 }
 
-uint8_t SPIBusManager::getNumBuses() const {
+u8 SPIBusManager::getNumBuses() const {
     return mNumBuses;
 }
 
-const SPIBusInfo* SPIBusManager::getBusInfo(uint8_t bus_id) const {
+const SPIBusInfo* SPIBusManager::getBusInfo(u8 bus_id) const {
     if (bus_id >= mNumBuses) {
         return nullptr;
     }
@@ -567,9 +567,9 @@ const SPIBusInfo* SPIBusManager::getBusInfo(uint8_t bus_id) const {
 // Private Methods
 // ============================================================================
 
-SPIBusInfo* SPIBusManager::getOrCreateBus(uint8_t clock_pin) {
+SPIBusInfo* SPIBusManager::getOrCreateBus(u8 clock_pin) {
     // Search for existing bus with this clock pin
-    for (uint8_t i = 0; i < mNumBuses; i++) {
+    for (u8 i = 0; i < mNumBuses; i++) {
         if (mBuses[i].clock_pin == clock_pin) {
             return &mBuses[i];
         }
@@ -639,7 +639,7 @@ bool SPIBusManager::promoteToMultiSPI(SPIBusInfo& bus) {
     SPIBusType max_type = getMaxSupportedSPIType();
 
     // Determine which multi-SPI type to use
-    if (bus.num_devices == 2 && static_cast<uint8_t>(max_type) >= static_cast<uint8_t>(SPIBusType::DUAL_SPI)) {
+    if (bus.num_devices == 2 && static_cast<u8>(max_type) >= static_cast<u8>(SPIBusType::DUAL_SPI)) {
         bus.bus_type = SPIBusType::DUAL_SPI;
 
         // Get available Dual-SPI controllers and find one we can use (runtime detection)
@@ -665,7 +665,7 @@ bool SPIBusManager::promoteToMultiSPI(SPIBusInfo& bus) {
 
         // Configure Dual-SPI
         SpiHw2::Config config;
-        config.bus_num = static_cast<uint8_t>(dual_ctrl->getBusId());
+        config.bus_num = static_cast<u8>(dual_ctrl->getBusId());
         config.clock_speed_hz = selectBusSpeed(bus);  // Use slowest requested speed
         config.clock_pin = bus.clock_pin;
         config.data0_pin = bus.devices[0].data_pin;
@@ -691,7 +691,7 @@ bool SPIBusManager::promoteToMultiSPI(SPIBusInfo& bus) {
         return true;
 
     } else if (bus.num_devices >= 3 && bus.num_devices <= 4 &&
-               static_cast<uint8_t>(max_type) >= static_cast<uint8_t>(SPIBusType::QUAD_SPI)) {
+               static_cast<u8>(max_type) >= static_cast<u8>(SPIBusType::QUAD_SPI)) {
         bus.bus_type = SPIBusType::QUAD_SPI;
 
         // Get available Quad-SPI controllers and find one we can use (runtime detection)
@@ -717,7 +717,7 @@ bool SPIBusManager::promoteToMultiSPI(SPIBusInfo& bus) {
 
         // Configure Quad-SPI
         SpiHw4::Config config;
-        config.bus_num = static_cast<uint8_t>(quad_ctrl->getBusId());
+        config.bus_num = static_cast<u8>(quad_ctrl->getBusId());
         config.clock_speed_hz = selectBusSpeed(bus);  // Use slowest requested speed
         config.clock_pin = bus.clock_pin;
         config.data0_pin = bus.devices[0].data_pin;
@@ -746,7 +746,7 @@ bool SPIBusManager::promoteToMultiSPI(SPIBusInfo& bus) {
         return true;
 
     } else if (bus.num_devices >= 5 && bus.num_devices <= 8 &&
-               static_cast<uint8_t>(max_type) >= static_cast<uint8_t>(SPIBusType::OCTO_SPI)) {
+               static_cast<u8>(max_type) >= static_cast<u8>(SPIBusType::OCTO_SPI)) {
         // Octal-SPI: 8 lanes using SpiHw8 interface
         bus.bus_type = SPIBusType::OCTO_SPI;
 
@@ -773,7 +773,7 @@ bool SPIBusManager::promoteToMultiSPI(SPIBusInfo& bus) {
 
         // Configure Octal-SPI (8 data lines)
         SpiHw8::Config config;
-        config.bus_num = static_cast<uint8_t>(octal_ctrl->getBusId());
+        config.bus_num = static_cast<u8>(octal_ctrl->getBusId());
         config.clock_speed_hz = selectBusSpeed(bus);  // Use slowest requested speed
         config.clock_pin = bus.clock_pin;
         config.data0_pin = bus.devices[0].data_pin;
@@ -806,7 +806,7 @@ bool SPIBusManager::promoteToMultiSPI(SPIBusInfo& bus) {
         return true;
 
     } else if (bus.num_devices >= 9 && bus.num_devices <= 16 &&
-               static_cast<uint8_t>(max_type) >= static_cast<uint8_t>(SPIBusType::HEXADECA_SPI)) {
+               static_cast<u8>(max_type) >= static_cast<u8>(SPIBusType::HEXADECA_SPI)) {
         // Hexadeca-SPI: 16 lanes using SpiHw16 interface
         bus.bus_type = SPIBusType::HEXADECA_SPI;
 
@@ -833,7 +833,7 @@ bool SPIBusManager::promoteToMultiSPI(SPIBusInfo& bus) {
 
         // Configure Hexadeca-SPI (16 data lines)
         SpiHw16::Config config;
-        config.bus_num = static_cast<uint8_t>(hexadeca_ctrl->getBusId());
+        config.bus_num = static_cast<u8>(hexadeca_ctrl->getBusId());
         config.clock_speed_hz = selectBusSpeed(bus);  // Use slowest requested speed
         config.clock_pin = bus.clock_pin;
         config.data0_pin = bus.devices[0].data_pin;
@@ -888,7 +888,7 @@ bool SPIBusManager::createSingleSPI(SPIBusInfo& bus) {
 
 void SPIBusManager::disableConflictingDevices(SPIBusInfo& bus) {
     // Keep first device enabled, disable all others
-    for (uint8_t i = 1; i < bus.num_devices; i++) {
+    for (u8 i = 1; i < bus.num_devices; i++) {
         bus.devices[i].is_enabled = false;
         FL_WARN_FMT("SPI Manager: Disabled device " << i << " on clock pin " << bus.clock_pin << " (conflict)");
     }
@@ -901,13 +901,13 @@ void SPIBusManager::disableConflictingDevices(SPIBusInfo& bus) {
     }
 }
 
-uint32_t SPIBusManager::selectBusSpeed(const SPIBusInfo& bus) {
+u32 SPIBusManager::selectBusSpeed(const SPIBusInfo& bus) {
     // Find the minimum (slowest) requested speed from all devices on this bus
     // This ensures all devices can handle the speed
-    uint32_t min_speed = fl::numeric_limits<uint32_t>::max();
-    uint32_t devices_with_speed = 0;
+    u32 min_speed = fl::numeric_limits<u32>::max();
+    u32 devices_with_speed = 0;
 
-    for (uint8_t i = 0; i < bus.num_devices; i++) {
+    for (u8 i = 0; i < bus.num_devices; i++) {
         if (bus.devices[i].is_allocated && bus.devices[i].requested_speed_hz > 0) {
             min_speed = fl::fl_min(min_speed, bus.devices[i].requested_speed_hz);
             devices_with_speed++;
@@ -915,12 +915,12 @@ uint32_t SPIBusManager::selectBusSpeed(const SPIBusInfo& bus) {
     }
 
     // If no devices specified a speed (or all specified 0), use platform default
-    if (devices_with_speed == 0 || min_speed == fl::numeric_limits<uint32_t>::max()) {
+    if (devices_with_speed == 0 || min_speed == fl::numeric_limits<u32>::max()) {
         min_speed = getPlatformDefaultSpeed();
     }
 
     // Clamp to platform-specific maximum
-    uint32_t platform_max = getPlatformMaxSpeed();
+    u32 platform_max = getPlatformMaxSpeed();
     if (min_speed > platform_max) {
         FL_WARN_FMT("SPI: Requested speed " << min_speed << " Hz exceeds platform max "
                 << platform_max << " Hz, clamping to " << platform_max);
@@ -928,15 +928,15 @@ uint32_t SPIBusManager::selectBusSpeed(const SPIBusInfo& bus) {
     }
 
     // Log selected speed in MHz with one decimal place
-    uint32_t mhz_whole = min_speed / 1000000;
-    uint32_t mhz_tenth = (min_speed / 100000) % 10;
+    u32 mhz_whole = min_speed / 1000000;
+    u32 mhz_tenth = (min_speed / 100000) % 10;
     FL_LOG_SPI("SPI: Selected bus speed " << mhz_whole << "." << mhz_tenth
                << " MHz for clock pin " << static_cast<int>(bus.clock_pin));
 
     return min_speed;
 }
 
-uint32_t SPIBusManager::getPlatformDefaultSpeed() {
+u32 SPIBusManager::getPlatformDefaultSpeed() {
     // Platform-specific defaults based on hardware capabilities
     #if defined(FL_IS_ESP32)
         return 40000000;  // ESP32: 40 MHz default (can do up to 80 MHz)
@@ -953,7 +953,7 @@ uint32_t SPIBusManager::getPlatformDefaultSpeed() {
     #endif
 }
 
-uint32_t SPIBusManager::getPlatformMaxSpeed() {
+u32 SPIBusManager::getPlatformMaxSpeed() {
     // Platform-specific maximums based on hardware datasheets
     #if defined(FL_IS_ESP32)
         return 80000000;  // ESP32: 80 MHz maximum with IO_MUX pins
@@ -1026,7 +1026,7 @@ void SPIBusManager::releaseBusHardware(SPIBusInfo& bus) {
     bus.num_devices = 0;  // Reset device count to prevent stale state
 }
 
-void SPIBusManager::softwareSPIWrite(uint8_t clock_pin, uint8_t data_pin, const uint8_t* data, size_t length) {
+void SPIBusManager::softwareSPIWrite(u8 clock_pin, u8 data_pin, const u8* data, size_t length) {
 #if !defined(FASTLED_STUB_IMPL) && !defined(FL_IS_WASM)
     // Real hardware implementation using Pin class for bit-banging
     // At this point in the header (after class definition), Pin should be available
@@ -1045,10 +1045,10 @@ void SPIBusManager::softwareSPIWrite(uint8_t clock_pin, uint8_t data_pin, const 
 
     // Bit-bang each byte
     for (size_t i = 0; i < length; i++) {
-        uint8_t byte = data[i];
+        u8 byte = data[i];
 
         // Send 8 bits, MSB first
-        for (uint8_t bit = 0; bit < 8; bit++) {
+        for (u8 bit = 0; bit < 8; bit++) {
             // Set data line based on MSB
             if (byte & 0x80) {
                 dataOut.hi();

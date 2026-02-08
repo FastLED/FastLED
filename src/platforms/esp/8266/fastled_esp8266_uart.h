@@ -37,27 +37,27 @@ public:
         : mDataPin(dataPin), mBaud(FASTLED_ESP8266_UART_BAUD) {}
 
     // Optional: allow runtime override of baud/reset.
-    void setBaud(uint32_t baud) { mBaud = baud; }
-    void setResetTimeUs(uint16_t us) { mResetUs = us; }
+    void setBaud(u32 baud) { mBaud = baud; }
+    void setResetTimeUs(u16 us) { mResetUs = us; }
 
     virtual void init() override;
     virtual void clearLeds(int nLeds) override;
-    virtual uint16_t getMaxRefreshRate() const override { return 400; }
+    virtual u16 getMaxRefreshRate() const override { return 400; }
 
 protected:
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) override;
 
 private:
     int mDataPin;
-    uint32_t mBaud;
-    uint16_t mResetUs = FASTLED_ESP8266_UART_RESET_US;
+    u32 mBaud;
+    u16 mResetUs = FASTLED_ESP8266_UART_RESET_US;
 
     // Encodes two WS2812 bits into one UART byte using 4-bit symbols:
     // 0 -> 1000, 1 -> 1100 ; packed as pairs: 00->0x88, 01->0x8C, 10->0xC8, 11->0xCC.
-    static inline uint8_t encode2Bits(uint8_t twoBits);
+    static inline u8 encode2Bits(u8 twoBits);
 
     // Encode one 8-bit color to 4 UART bytes (MSB first).
-    static inline void encodeByte(uint8_t b, uint8_t* out4);
+    static inline void encodeByte(u8 b, u8* out4);
 
     // Block until UART TX finishes.
     static inline void uartFlush();
@@ -70,21 +70,21 @@ private:
 
 // Helper to extract a 2-bit group from a byte, MSB-first.
 // group 0: bits 7..6, group 1: 5..4, group 2: 3..2, group 3: 1..0
-static inline uint8_t _pair_from_byte(uint8_t b, uint8_t groupIdx) {
-    uint8_t shift = 6 - (groupIdx * 2);
+static inline u8 _pair_from_byte(u8 b, u8 groupIdx) {
+    u8 shift = 6 - (groupIdx * 2);
     return (b >> shift) & 0x03;
 }
 
 template<EOrder RGB_ORDER>
-inline uint8_t UARTController_ESP8266<RGB_ORDER>::encode2Bits(uint8_t twoBits) {
+inline u8 UARTController_ESP8266<RGB_ORDER>::encode2Bits(u8 twoBits) {
     // twoBits layout: bit1 (MSB) | bit0 (LSB)
     // Map: 00->0x88, 01->0x8C, 10->0xC8, 11->0xCC
-    static const uint8_t LUT[4] = { 0x88, 0x8C, 0xC8, 0xCC };
+    static const u8 LUT[4] = { 0x88, 0x8C, 0xC8, 0xCC };
     return LUT[twoBits & 0x03];
 }
 
 template<EOrder RGB_ORDER>
-inline void UARTController_ESP8266<RGB_ORDER>::encodeByte(uint8_t b, uint8_t* out4) {
+inline void UARTController_ESP8266<RGB_ORDER>::encodeByte(u8 b, u8* out4) {
     out4[0] = encode2Bits(_pair_from_byte(b, 0));
     out4[1] = encode2Bits(_pair_from_byte(b, 1));
     out4[2] = encode2Bits(_pair_from_byte(b, 2));
@@ -99,7 +99,7 @@ inline void UARTController_ESP8266<RGB_ORDER>::uartFlush() {
 template<EOrder RGB_ORDER>
 void UARTController_ESP8266<RGB_ORDER>::beginUartIfNeeded() {
     // Re-init every show() is unnecessary; only if not begun or baud changed.
-    static uint32_t s_currentBaud = 0;
+    static u32 s_currentBaud = 0;
     if (s_currentBaud != mBaud) {
         // UART1 on ESP8266 is TX-only on GPIO2.
         Serial1.begin(mBaud);
@@ -119,7 +119,7 @@ void UARTController_ESP8266<RGB_ORDER>::clearLeds(int nLeds) {
     // Send zeros as a quick clear.
     // Build a tiny zero frame for one LED and reuse.
     const int bytesPerLed = 12; // 24 bits -> 12 UART bytes
-    uint8_t zeroEncoded[bytesPerLed];
+    u8 zeroEncoded[bytesPerLed];
     // 0x00 encodes to 0x88,0x88,0x88,0x88
     for (int i = 0; i < bytesPerLed; ++i) zeroEncoded[i] = 0x88;
 
@@ -139,16 +139,16 @@ void UARTController_ESP8266<RGB_ORDER>::showPixels(PixelController<RGB_ORDER> &p
     if (n <= 0) return;
 
     // Temporary buffer for one LED (3 colors * 4 UART bytes each = 12)
-    uint8_t enc[12];
+    u8 enc[12];
 
     // Iterate pixels; encode and stream out.
     pixels.preStepFirstByteDithering();
     for (int i = 0; i < n; ++i) {
         // Fetch pixel in wire order with FastLED's scaling/dithering applied
         // loadAndScale0/1/2() already handle RGB_ORDER reordering
-        uint8_t b0 = pixels.loadAndScale0();
-        uint8_t b1 = pixels.loadAndScale1();
-        uint8_t b2 = pixels.loadAndScale2();
+        u8 b0 = pixels.loadAndScale0();
+        u8 b1 = pixels.loadAndScale1();
+        u8 b2 = pixels.loadAndScale2();
 
         // Encode each byte into 4 UART bytes (MSB-first)
         encodeByte(b0, &enc[0]);

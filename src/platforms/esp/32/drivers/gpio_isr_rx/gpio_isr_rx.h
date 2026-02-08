@@ -19,10 +19,10 @@ namespace fl {
  */
 struct EdgeTimestamp {
     union {
-        uint32_t time_ns;    ///< Timestamp in nanoseconds (after conversion)
-        uint32_t cycles;     ///< CPU cycles (during ISR capture)
+        u32 time_ns;    ///< Timestamp in nanoseconds (after conversion)
+        u32 cycles;     ///< CPU cycles (during ISR capture)
     };
-    uint8_t level;       ///< GPIO level (0 or 1)
+    u8 level;       ///< GPIO level (0 or 1)
 };
 
 /**
@@ -151,7 +151,7 @@ public:
      * 1. Buffer filled (reached buffer_size edges)
      * 2. Idle timeout elapsed since first edge (signal_range_max_ns from begin())
      */
-    virtual RxWaitResult wait(uint32_t timeout_ms) override = 0;
+    virtual RxWaitResult wait(u32 timeout_ms) override = 0;
 
     /**
      * @brief Get captured edge timestamps as a span
@@ -187,8 +187,8 @@ public:
      * }
      * @endcode
      */
-    virtual fl::Result<uint32_t, DecodeError> decode(const ChipsetTiming4Phase &timing,
-                                                       fl::span<uint8_t> out) override = 0;
+    virtual fl::Result<u32, DecodeError> decode(const ChipsetTiming4Phase &timing,
+                                                       fl::span<u8> out) override = 0;
 
     /**
      * @brief Manually inject edge timings for testing (Phase 1)

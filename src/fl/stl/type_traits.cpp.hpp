@@ -101,25 +101,25 @@ FL_MAYBE_UNUSED void __compile_test() {
                   "uint should be integral");
 
     // fixed width int types from fl/stl/stdint.h
-    static_assert(fl::is_integral<int8_t>::value, "int8_t should be integral");
-    static_assert(fl::is_integral<uint8_t>::value,
-                  "uint8_t should be integral");
-    static_assert(fl::is_integral<int16_t>::value,
-                  "int16_t should be integral");
-    static_assert(fl::is_integral<uint16_t>::value,
-                  "uint16_t should be integral");
-    static_assert(fl::is_integral<int32_t>::value,
-                  "int32_t should be integral");
-    static_assert(fl::is_integral<uint32_t>::value,
-                  "uint32_t should be integral");
+    static_assert(fl::is_integral<fl::i8>::value, "fl::i8 should be integral");
+    static_assert(fl::is_integral<fl::u8>::value,
+                  "fl::u8 should be integral");
+    static_assert(fl::is_integral<fl::i16>::value,
+                  "fl::i16 should be integral");
+    static_assert(fl::is_integral<fl::u16>::value,
+                  "fl::u16 should be integral");
+    static_assert(fl::is_integral<fl::i32>::value,
+                  "fl::i32 should be integral");
+    static_assert(fl::is_integral<fl::u32>::value,
+                  "fl::u32 should be integral");
     static_assert(fl::is_integral<int64_t>::value,
                   "int64_t should be integral");
     static_assert(fl::is_integral<uint64_t>::value,
                   "uint64_t should be integral");
-    static_assert(fl::is_integral<int8_t *>::value == false,
-                  "int8_t* should not be integral");
-    static_assert(fl::is_integral<uint8_t *>::value == false,
-                  "uint8_t* should not be integral");
+    static_assert(fl::is_integral<fl::i8 *>::value == false,
+                  "fl::i8* should not be integral");
+    static_assert(fl::is_integral<fl::u8 *>::value == false,
+                  "fl::u8* should not be integral");
 }
 } // namespace
 

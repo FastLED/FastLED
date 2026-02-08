@@ -17,11 +17,11 @@ class Fx2d : public Fx {
     // XYMap holds either a function or a look up table to map x, y coordinates
     // to a 1D index.
     Fx2d(const XYMap &xyMap) : Fx(xyMap.getTotal()), mXyMap(xyMap) {}
-    uint16_t xyMap(uint16_t x, uint16_t y) const {
+    u16 xyMap(u16 x, u16 y) const {
         return mXyMap.mapToIndex(x, y);
     }
-    uint16_t getHeight() const { return mXyMap.getHeight(); }
-    uint16_t getWidth() const { return mXyMap.getWidth(); }
+    u16 getHeight() const { return mXyMap.getHeight(); }
+    u16 getWidth() const { return mXyMap.getWidth(); }
     void setXYMap(const XYMap &xyMap) { mXyMap = xyMap; }
     XYMap &getXYMap() { return mXyMap; }
     const XYMap &getXYMap() const { return mXyMap; }

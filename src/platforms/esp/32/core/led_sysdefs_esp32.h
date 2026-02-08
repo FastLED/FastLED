@@ -30,8 +30,8 @@
 // Use system millis timer
 #define FASTLED_HAS_MILLIS
 
-typedef volatile uint32_t RoReg;
-typedef volatile uint32_t RwReg;
+typedef volatile fl::u32 RoReg;
+typedef volatile fl::u32 RwReg;
 typedef unsigned long prog_uint32_t;
 
 

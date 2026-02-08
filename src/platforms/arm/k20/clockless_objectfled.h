@@ -34,9 +34,9 @@ namespace fl {
 class ObjectFled {
   public:
     static void SetOverclock(float overclock);
-    static void SetLatchDelay(uint16_t latchDelayUs);
+    static void SetLatchDelay(u16 latchDelayUs);
     void beginShowLeds(int data_pin, int nleds);
-    void showPixels(uint8_t data_pin, PixelIterator& pixel_iterator);
+    void showPixels(u8 data_pin, PixelIterator& pixel_iterator);
     void endShowLeds();
 };
 
@@ -59,7 +59,7 @@ class ClocklessController_ObjectFLED_WS2812
         }
     }
     void init() override {}
-    virtual uint16_t getMaxRefreshRate() const { return 800; }
+    virtual u16 getMaxRefreshRate() const { return 800; }
 
   protected:
     // Wait until the last draw is complete, if necessary.

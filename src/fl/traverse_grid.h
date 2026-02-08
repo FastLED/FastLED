@@ -148,11 +148,11 @@ inline void traverseGridSegment16(const vec2f &start, const vec2f &end,
     u16 absDeltaX_fp =
         (deltaX_fp != 0) ? static_cast<u16>(
                                FL_ABS((i32(FP_ONE) << FP_SHIFT) / deltaX_fp))
-                         : (fl::numeric_limits<uint16_t>::max)();
+                         : (fl::numeric_limits<u16>::max)();
     u16 absDeltaY_fp =
         (deltaY_fp != 0) ? static_cast<u16>(
                                FL_ABS((i32(FP_ONE) << FP_SHIFT) / deltaY_fp))
-                         : (fl::numeric_limits<uint16_t>::max)();
+                         : (fl::numeric_limits<u16>::max)();
 
     i16 nextX_fp = (stepX > 0) ? ((x0 + 1) << FP_SHIFT) : (x0 << FP_SHIFT);
     i16 nextY_fp = (stepY > 0) ? ((y0 + 1) << FP_SHIFT) : (y0 << FP_SHIFT);
@@ -162,12 +162,12 @@ inline void traverseGridSegment16(const vec2f &start, const vec2f &end,
         (deltaX_fp != 0)
             ? static_cast<u16>(
                   FL_ABS(i32(nextX_fp - startX_fp)) * absDeltaX_fp >> FP_SHIFT)
-            : (fl::numeric_limits<uint16_t>::max)();
+            : (fl::numeric_limits<u16>::max)();
     u16 tMaxY_fp =
         (deltaY_fp != 0)
             ? static_cast<u16>(
                   FL_ABS(i32(nextY_fp - startY_fp)) * absDeltaY_fp >> FP_SHIFT)
-            : (fl::numeric_limits<uint16_t>::max)();
+            : (fl::numeric_limits<u16>::max)();
 
     const u16 maxT_fp = FP_ONE;
 
@@ -230,11 +230,11 @@ inline void traverseGridSegment32(const vec2f &start, const vec2f &end,
     u32 absDeltaX_fp =
         (deltaX_fp != 0) ? static_cast<u32>(
                                FL_ABS((fl::i64(FP_ONE) << FP_SHIFT) / deltaX_fp))
-                         : (fl::numeric_limits<uint32_t>::max)();
+                         : (fl::numeric_limits<u32>::max)();
     u32 absDeltaY_fp =
         (deltaY_fp != 0) ? static_cast<u32>(
                                FL_ABS((fl::i64(FP_ONE) << FP_SHIFT) / deltaY_fp))
-                         : (fl::numeric_limits<uint32_t>::max)();
+                         : (fl::numeric_limits<u32>::max)();
 
     i32 nextX_fp = (stepX > 0) ? ((x0 + 1) << FP_SHIFT) : (x0 << FP_SHIFT);
     i32 nextY_fp = (stepY > 0) ? ((y0 + 1) << FP_SHIFT) : (y0 << FP_SHIFT);
@@ -244,12 +244,12 @@ inline void traverseGridSegment32(const vec2f &start, const vec2f &end,
         (deltaX_fp != 0)
             ? static_cast<u32>(
                   FL_ABS(fl::i64(nextX_fp - startX_fp)) * absDeltaX_fp >> FP_SHIFT)
-            : (fl::numeric_limits<uint32_t>::max)();
+            : (fl::numeric_limits<u32>::max)();
     u32 tMaxY_fp =
         (deltaY_fp != 0)
             ? static_cast<u32>(
                   FL_ABS(fl::i64(nextY_fp - startY_fp)) * absDeltaY_fp >> FP_SHIFT)
-            : (fl::numeric_limits<uint32_t>::max)();
+            : (fl::numeric_limits<u32>::max)();
 
     const u32 maxT_fp = FP_ONE;
 

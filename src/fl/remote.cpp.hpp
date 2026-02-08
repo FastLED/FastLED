@@ -138,7 +138,7 @@ Remote::Error Remote::processRpc(const fl::string& jsonStr, fl::Json& outResult)
 
     // Extract timestamp with validation
     Error errorCode = Error::None;
-    uint32_t timestamp = 0;
+    u32 timestamp = 0;
 
     if (doc.contains("timestamp")) {
         if (doc["timestamp"].is_int()) {
@@ -148,7 +148,7 @@ Remote::Error Remote::processRpc(const fl::string& jsonStr, fl::Json& outResult)
                 timestamp = 0;
                 errorCode = Error::InvalidTimestamp;
             } else {
-                timestamp = static_cast<uint32_t>(ts);
+                timestamp = static_cast<u32>(ts);
             }
         } else {
             FL_WARN("RPC: Invalid timestamp type, using immediate execution");
@@ -175,12 +175,12 @@ Remote::Error Remote::processRpc(const fl::string& jsonStr, fl::Json& outResult)
         return Error::UnknownFunction;
     }
 
-    uint32_t receivedAt = fl::millis();
+    u32 receivedAt = fl::millis();
 
     // Execute or schedule
     if (timestamp == 0) {
         // Immediate execution
-        uint32_t executedAt = receivedAt;  // Immediate execution happens at receive time
+        u32 executedAt = receivedAt;  // Immediate execution happens at receive time
 
         // Try typed RPC first
         if (mRpc.has(funcName.c_str())) {
@@ -242,18 +242,18 @@ fl::tuple<Remote::Error, fl::Json> Remote::executeFunctionTyped(const fl::string
     return fl::make_tuple(Error::None, result);
 }
 
-void Remote::scheduleFunction(uint32_t timestamp, uint32_t receivedAt, const fl::string& funcName, const fl::Json& args) {
+void Remote::scheduleFunction(u32 timestamp, u32 receivedAt, const fl::string& funcName, const fl::Json& args) {
     mScheduled.push({timestamp, funcName, args, receivedAt});
     FL_DBG("Scheduled RPC: " << funcName << " at " << timestamp);
 }
 
-void Remote::recordResult(const fl::string& funcName, const fl::Json& result, uint32_t scheduledAt, uint32_t receivedAt, uint32_t executedAt, bool wasScheduled) {
+void Remote::recordResult(const fl::string& funcName, const fl::Json& result, u32 scheduledAt, u32 receivedAt, u32 executedAt, bool wasScheduled) {
     mResults.push_back({funcName, result, scheduledAt, receivedAt, executedAt, wasScheduled});
 }
 
 // Update Loop
 
-size_t Remote::tick(uint32_t currentTimeMs) {
+size_t Remote::tick(u32 currentTimeMs) {
     size_t executedCount = 0;
 
     // Clear previous results
@@ -264,7 +264,7 @@ size_t Remote::tick(uint32_t currentTimeMs) {
     while (!mScheduled.empty() && currentTimeMs >= mScheduled.top().mExecuteAt) {
         const ScheduledCall& call = mScheduled.top();
 
-        uint32_t executedAt = currentTimeMs;  // Use the tick time, not wall clock time
+        u32 executedAt = currentTimeMs;  // Use the tick time, not wall clock time
         fl::Json result;
 
         // Try typed RPC first

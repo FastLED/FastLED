@@ -35,7 +35,7 @@ static void taskWrapperFunction(void* arg) {
 TaskCoroutineESP32::TaskCoroutineESP32(fl::string name,
                                        TaskFunction function,
                                        size_t stack_size,
-                                       uint8_t priority)
+                                       u8 priority)
     : mHandle(nullptr)
     , mName(fl::move(name))
     , mFunction(fl::move(function)) {
@@ -44,7 +44,7 @@ TaskCoroutineESP32::TaskCoroutineESP32(fl::string name,
 
     // Convert stack size from bytes to words (FreeRTOS uses words)
     // ESP32 uses 32-bit words (4 bytes per word)
-    const size_t stack_words = stack_size / sizeof(uint32_t);
+    const size_t stack_words = stack_size / sizeof(u32);
 
     // Pass the function object address as user_data
     // SAFETY: The TaskCoroutineESP32 object owns mFunction, which lives as long as the task
@@ -89,7 +89,7 @@ bool TaskCoroutineESP32::isRunning() const {
 ITaskCoroutine* createTaskCoroutine(fl::string name,
                                      ITaskCoroutine::TaskFunction function,
                                      size_t stack_size,
-                                     uint8_t priority) {
+                                     u8 priority) {
     return new TaskCoroutineESP32(fl::move(name), fl::move(function), stack_size, priority);
 }
 

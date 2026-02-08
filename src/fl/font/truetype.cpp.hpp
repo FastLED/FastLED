@@ -13,7 +13,7 @@ namespace fl {
 // FontImpl - concrete implementation of Font using stb_truetype
 class FontImpl : public Font {
 public:
-    FontImpl(fl::span<const uint8_t> fontData, int32_t fontIndex = 0)
+    FontImpl(fl::span<const u8> fontData, i32 fontIndex = 0)
         : mFontData(fontData.begin(), fontData.end()) {
         mValid = third_party::truetype::stbtt_InitFont(
             &mFontInfo,
@@ -26,7 +26,7 @@ public:
 
     bool isValid() const { return mValid; }
 
-    int32_t getNumFonts() const override {
+    i32 getNumFonts() const override {
         return third_party::truetype::stbtt_GetNumberOfFonts(mFontData.data());
     }
 
@@ -53,7 +53,7 @@ public:
         return third_party::truetype::stbtt_ScaleForPixelHeight(&mFontInfo, pixelHeight);
     }
 
-    GlyphMetrics getGlyphMetrics(int32_t codepoint) const override {
+    GlyphMetrics getGlyphMetrics(i32 codepoint) const override {
         GlyphMetrics metrics = {};
         if (!mValid) return metrics;
 
@@ -63,7 +63,7 @@ public:
             &metrics.leftSideBearing
         );
 
-        int32_t result = third_party::truetype::stbtt_GetCodepointBox(
+        i32 result = third_party::truetype::stbtt_GetCodepointBox(
             &mFontInfo, codepoint,
             &metrics.x0, &metrics.y0,
             &metrics.x1, &metrics.y1
@@ -73,17 +73,17 @@ public:
         return metrics;
     }
 
-    int32_t getKerning(int32_t codepoint1, int32_t codepoint2) const override {
+    i32 getKerning(i32 codepoint1, i32 codepoint2) const override {
         if (!mValid) return 0;
         return third_party::truetype::stbtt_GetCodepointKernAdvance(&mFontInfo, codepoint1, codepoint2);
     }
 
-    GlyphBitmap renderGlyph(int32_t codepoint, float scale) const override {
+    GlyphBitmap renderGlyph(i32 codepoint, float scale) const override {
         return renderGlyph(codepoint, scale, 1, 1);
     }
 
-    GlyphBitmap renderGlyph(int32_t codepoint, float scale,
-                            int32_t oversampleX, int32_t oversampleY) const override {
+    GlyphBitmap renderGlyph(i32 codepoint, float scale,
+                            i32 oversampleX, i32 oversampleY) const override {
         GlyphBitmap result;
         if (!mValid) return result;
 
@@ -117,24 +117,24 @@ public:
 
             if (bitmap && result.width > 0 && result.height > 0) {
                 // Downsample to final size
-                int32_t finalWidth = (result.width + oversampleX - 1) / oversampleX;
-                int32_t finalHeight = (result.height + oversampleY - 1) / oversampleY;
+                i32 finalWidth = (result.width + oversampleX - 1) / oversampleX;
+                i32 finalHeight = (result.height + oversampleY - 1) / oversampleY;
 
                 result.data.resize(
                     static_cast<size_t>(finalWidth) * static_cast<size_t>(finalHeight)
                 );
 
-                for (int32_t y = 0; y < finalHeight; ++y) {
-                    for (int32_t x = 0; x < finalWidth; ++x) {
-                        int32_t sum = 0;
-                        int32_t count = 0;
+                for (i32 y = 0; y < finalHeight; ++y) {
+                    for (i32 x = 0; x < finalWidth; ++x) {
+                        i32 sum = 0;
+                        i32 count = 0;
 
-                        for (int32_t oy = 0; oy < oversampleY; ++oy) {
-                            int32_t srcY = y * oversampleY + oy;
+                        for (i32 oy = 0; oy < oversampleY; ++oy) {
+                            i32 srcY = y * oversampleY + oy;
                             if (srcY >= result.height) break;
 
-                            for (int32_t ox = 0; ox < oversampleX; ++ox) {
-                                int32_t srcX = x * oversampleX + ox;
+                            for (i32 ox = 0; ox < oversampleX; ++ox) {
+                                i32 srcX = x * oversampleX + ox;
                                 if (srcX >= result.width) break;
 
                                 sum += bitmap[srcY * result.width + srcX];
@@ -142,7 +142,7 @@ public:
                             }
                         }
 
-                        result.data[y * finalWidth + x] = static_cast<uint8_t>(
+                        result.data[y * finalWidth + x] = static_cast<u8>(
                             count > 0 ? sum / count : 0
                         );
                     }
@@ -163,7 +163,7 @@ public:
     const third_party::truetype::stbtt_fontinfo& getFontInfo() const { return mFontInfo; }
 
 private:
-    fl::vector<uint8_t> mFontData;
+    fl::vector<u8> mFontData;
     third_party::truetype::stbtt_fontinfo mFontInfo;
     bool mValid;
 };
@@ -173,11 +173,11 @@ fl::shared_ptr<Font> Font::loadDefault() {
     return load(ttf::covenant5x5(), 0);
 }
 
-fl::shared_ptr<Font> Font::load(fl::span<const uint8_t> fontData) {
+fl::shared_ptr<Font> Font::load(fl::span<const u8> fontData) {
     return load(fontData, 0);
 }
 
-fl::shared_ptr<Font> Font::load(fl::span<const uint8_t> fontData, int32_t fontIndex) {
+fl::shared_ptr<Font> Font::load(fl::span<const u8> fontData, i32 fontIndex) {
     auto impl = fl::make_shared<FontImpl>(fontData, fontIndex);
     if (!impl->isValid()) {
         return nullptr;
@@ -205,27 +205,27 @@ FontRenderer::ScaledMetrics FontRenderer::getScaledMetrics() const {
     return result;
 }
 
-GlyphBitmap FontRenderer::render(int32_t codepoint) const {
+GlyphBitmap FontRenderer::render(i32 codepoint) const {
     // Use 2x2 oversampling by default for LED displays
     return render(codepoint, 2, 2);
 }
 
-GlyphBitmap FontRenderer::render(int32_t codepoint, int32_t oversampleX, int32_t oversampleY) const {
+GlyphBitmap FontRenderer::render(i32 codepoint, i32 oversampleX, i32 oversampleY) const {
     if (!mFont) return GlyphBitmap();
     return mFont->renderGlyph(codepoint, mScale, oversampleX, oversampleY);
 }
 
-GlyphBitmap FontRenderer::renderNoAA(int32_t codepoint) const {
+GlyphBitmap FontRenderer::renderNoAA(i32 codepoint) const {
     return render(codepoint, 1, 1);
 }
 
-float FontRenderer::getAdvance(int32_t codepoint) const {
+float FontRenderer::getAdvance(i32 codepoint) const {
     if (!mFont) return 0.0f;
     GlyphMetrics metrics = mFont->getGlyphMetrics(codepoint);
     return static_cast<float>(metrics.advanceWidth) * mScale;
 }
 
-float FontRenderer::getKerning(int32_t codepoint1, int32_t codepoint2) const {
+float FontRenderer::getKerning(i32 codepoint1, i32 codepoint2) const {
     if (!mFont) return 0.0f;
     return static_cast<float>(mFont->getKerning(codepoint1, codepoint2)) * mScale;
 }
@@ -239,10 +239,10 @@ float FontRenderer::measureString(fl::span<const char> str) const {
     if (str.empty() || !mFont) return 0.0f;
 
     float width = 0.0f;
-    int32_t prevCodepoint = 0;
+    i32 prevCodepoint = 0;
 
     for (size_t i = 0; i < str.size(); ++i) {
-        int32_t codepoint = static_cast<int32_t>(static_cast<unsigned char>(str[i]));
+        i32 codepoint = static_cast<i32>(static_cast<unsigned char>(str[i]));
 
         // Add kerning adjustment if this isn't the first character
         if (prevCodepoint != 0) {

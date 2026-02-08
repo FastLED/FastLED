@@ -102,7 +102,7 @@ namespace platforms {
 
 /// @brief OTA service initialization status flags
 /// @note Used with getFailedServices() to identify which services failed during initialization
-enum class OTAService : uint8_t {
+enum class OTAService : u8 {
     NONE = 0,                    ///< No failures
     MDNS_FAILED = 1 << 0,        ///< mDNS initialization failed (device not discoverable at hostname.local)
     HTTP_FAILED = 1 << 1,        ///< HTTP server failed to start (Web OTA unavailable)
@@ -165,7 +165,7 @@ public:
 
     /// @brief Callback function type for OTA state changes
     /// @param state New state code (platform-specific)
-    using StateCallback = fl::function<void(uint8_t state)>;
+    using StateCallback = fl::function<void(u8 state)>;
 
     /// @brief Set progress callback (called during firmware upload)
     /// @param callback Callback function (supports lambdas, function pointers, functors)
@@ -197,7 +197,7 @@ public:
     /// @brief Get bitmask of services that failed to initialize
     /// @return Bitfield of OTAService flags indicating which services failed
     /// @note Check specific services with: (getFailedServices() & (uint8_t)OTAService::MDNS_FAILED)
-    uint8_t getFailedServices() const;
+    u8 getFailedServices() const;
 
 private:
     // Platform-specific implementation (lazy initialized via shared_ptr)

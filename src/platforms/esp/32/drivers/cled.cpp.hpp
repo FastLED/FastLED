@@ -53,7 +53,7 @@ bool CLED::begin(const CLEDConfig& config) {
 
 #if ESP_ARDUINO_VERSION_MAJOR >= 3
     // New API (Arduino Core 3.x): ledcAttach auto-assigns channel
-    uint8_t assigned_channel = ledcAttach(config.pin, config.frequency, config.resolution_bits);
+    u8 assigned_channel = ledcAttach(config.pin, config.frequency, config.resolution_bits);
     if (assigned_channel == 0) {
         FL_WARN("CLED: LEDC attach failed for pin " << config.pin);
         return false;
@@ -68,7 +68,7 @@ bool CLED::begin(const CLEDConfig& config) {
 #else
     // Old API (Arduino Core 2.x): ledcSetup + ledcAttachPin with explicit channel
     ledcAttachPin(config.pin, config.channel);
-    uint32_t freq = ledcSetup(config.channel, config.frequency, config.resolution_bits);
+    u32 freq = ledcSetup(config.channel, config.frequency, config.resolution_bits);
 
     if (freq == 0) {
         FL_WARN("CLED: LEDC setup failed for channel " << config.channel);
@@ -97,10 +97,10 @@ void CLED::end() {
     mInitialized = false;
 }
 
-void CLED::write16(uint16_t value) {
+void CLED::write16(u16 value) {
     // Accept 16-bit input (0-65535), scale to configured resolution
     // Users apply gamma correction upstream
-    uint32_t duty = mapToDutyCycle(value);
+    u32 duty = mapToDutyCycle(value);
 
     // Invert for sink configuration
     if (mConfig.is_sink) {
@@ -119,8 +119,8 @@ void CLED::write16(uint16_t value) {
         duty = mMaxDuty + 1;
     }
 
-    uint8_t group = mConfig.channel / 8;
-    uint8_t channel = mConfig.channel % 8;
+    u8 group = mConfig.channel / 8;
+    u8 channel = mConfig.channel % 8;
 
     ledc_set_duty(ledc_mode_t(group), ledc_channel_t(channel), duty);
     ledc_update_duty(ledc_mode_t(group), ledc_channel_t(channel));
@@ -130,20 +130,20 @@ void CLED::write16(uint16_t value) {
 #endif
 }
 
-uint32_t CLED::getMaxDuty() const {
+u32 CLED::getMaxDuty() const {
     return mMaxDuty;
 }
 
-uint8_t CLED::getResolutionBits() const {
+u8 CLED::getResolutionBits() const {
     return mConfig.resolution_bits;
 }
 
-uint32_t CLED::mapToDutyCycle(uint16_t val16) const {
+u32 CLED::mapToDutyCycle(u16 val16) const {
     // Map 16-bit input (0-65535) to current resolution
     // Formula: (val16 * maxDuty + 32767) / 65535 (with rounding)
     // Use 32-bit math to avoid overflow
     // Adding 32767 (half of 65535) provides proper rounding to nearest integer
-    return ((uint32_t(val16) * mMaxDuty) + 32767) / 65535;
+    return ((u32(val16) * mMaxDuty) + 32767) / 65535;
 }
 
 }  // namespace esp32

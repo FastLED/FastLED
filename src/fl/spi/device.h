@@ -86,7 +86,7 @@ public:
     ///     result.value().wait();  // Wait for completion
     /// }
     /// @endcode
-    Result<Transaction> writeAsync(const uint8_t* data, size_t size);
+    Result<Transaction> writeAsync(const u8* data, size_t size);
 
     // ========== Zero-Copy DMA API (Expert) ==========
 
@@ -107,7 +107,7 @@ public:
     /// @brief Wait for pending async operation to complete
     /// @param timeout_ms Maximum time to wait (default: forever)
     /// @returns true if completed, false on timeout
-    bool waitComplete(uint32_t timeout_ms = (fl::numeric_limits<uint32_t>::max)());
+    bool waitComplete(u32 timeout_ms = (fl::numeric_limits<u32>::max)());
 
     /// @brief Check if async operation is in progress
     /// @returns true if busy, false if idle
@@ -120,7 +120,7 @@ public:
     /// @returns Result indicating success or error
     /// @note Runtime updates not yet supported - new speed takes effect on next begin()
     /// @note To apply immediately: call end() then begin()
-    fl::optional<fl::Error> setClockSpeed(uint32_t speed_hz);
+    fl::optional<fl::Error> setClockSpeed(u32 speed_hz);
 
     /// @brief Get current configuration
     /// @returns Reference to configuration structure

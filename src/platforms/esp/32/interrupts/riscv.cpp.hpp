@@ -158,7 +158,7 @@ void FL_IRAM fastled_riscv_experimental_handler(void *arg) {
 esp_err_t fastled_riscv_rmt_init_official(
     int channel,
     int gpio_num,
-    uint32_t resolution_hz,
+    fl::u32 resolution_hz,
     size_t mem_block_symbols,
     int priority_level
 ) {
@@ -183,7 +183,7 @@ esp_err_t fastled_riscv_rmt_init_official(
 esp_err_t fastled_riscv_rmt_init_experimental(
     int channel,
     int gpio_num,
-    uint32_t resolution_hz,
+    fl::u32 resolution_hz,
     size_t mem_block_symbols,
     int priority_level
 ) {

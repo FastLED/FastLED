@@ -55,7 +55,7 @@ struct esp32_idf3_isr_handle_data {
     bool is_enabled;                 // Current enable state
     isr_handler_t user_handler;      // User handler function
     void* user_data;                 // User context
-    uint8_t gpio_pin;                // GPIO pin number (0xFF if not GPIO)
+    u8 gpio_pin;                // GPIO pin number (0xFF if not GPIO)
     intr_handle_t intr_handle;       // ESP-IDF interrupt handle (for timer ISR)
 
     esp32_idf3_isr_handle_data()
@@ -71,7 +71,7 @@ struct esp32_idf3_isr_handle_data {
 };
 
 // Platform ID for ESP32 IDF3
-constexpr uint8_t ESP32_IDF3_PLATFORM_ID = 1;
+constexpr u8 ESP32_IDF3_PLATFORM_ID = 1;
 
 #define ESP32_IDF3_ISR_TAG "fl_isr_esp32_idf3"
 
@@ -206,18 +206,18 @@ inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_ha
     // Using divider=80 gives 1MHz timer clock (1us resolution)
     // Using divider=8 gives 10MHz timer clock (0.1us resolution)
 
-    uint16_t divider;
+    u16 divider;
     uint64_t alarm_value;
 
     if (config.frequency_hz > 1000000) {
         // For high frequencies, use smaller divider for better resolution
         divider = 8;  // 10MHz timer clock
-        uint32_t timer_clock = 80000000 / divider;  // 10MHz
+        u32 timer_clock = 80000000 / divider;  // 10MHz
         alarm_value = timer_clock / config.frequency_hz;
     } else {
         // For lower frequencies, use divider=80 for 1MHz (1us resolution)
         divider = 80;  // 1MHz timer clock
-        uint32_t timer_clock = 80000000 / divider;  // 1MHz
+        u32 timer_clock = 80000000 / divider;  // 1MHz
         alarm_value = timer_clock / config.frequency_hz;
     }
 
@@ -312,7 +312,7 @@ inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_ha
     return 0;  // Success
 }
 
-inline int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) {
+inline int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) {
     if (!config.handler) {
         ESP_LOGW(ESP32_IDF3_ISR_TAG, "attachExternalHandler: handler is null");
         return -1;  // Invalid parameter
@@ -537,22 +537,22 @@ inline const char* get_platform_name() {
     return "ESP32 (IDF3)";
 }
 
-inline uint32_t get_max_timer_frequency() {
+inline u32 get_max_timer_frequency() {
     // With divider=8, timer clock is 10MHz
     // Minimum alarm value of 1 gives max frequency of 10MHz
     return 10000000;  // 10 MHz
 }
 
-inline uint32_t get_min_timer_frequency() {
+inline u32 get_min_timer_frequency() {
     return 1;  // 1 Hz
 }
 
-inline uint8_t get_max_priority() {
+inline u8 get_max_priority() {
     // Xtensa: Priority 1-3 (official), 4-5 (experimental, requires assembly)
     return 5;
 }
 
-inline bool requires_assembly_handler(uint8_t priority) {
+inline bool requires_assembly_handler(u8 priority) {
     // Xtensa: Priority 4+ requires assembly handlers
     return priority >= 4;
 }

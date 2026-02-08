@@ -14,7 +14,7 @@ struct UartConfig;
 /**
  * @brief UART port identifiers (platform-agnostic)
  */
-enum class UartPort : uint8_t {
+enum class UartPort : u8 {
     UART0 = 0,  // Primary UART (often console)
     UART1 = 1,  // Secondary UART
     UART2 = 2   // Tertiary UART (ESP32-S3, ESP32-C3, etc.)
@@ -23,7 +23,7 @@ enum class UartPort : uint8_t {
 /**
  * @brief UART data bits configuration
  */
-enum class UartDataBits : uint8_t {
+enum class UartDataBits : u8 {
     BITS_5 = 5,
     BITS_6 = 6,
     BITS_7 = 7,
@@ -33,7 +33,7 @@ enum class UartDataBits : uint8_t {
 /**
  * @brief UART parity configuration
  */
-enum class UartParity : uint8_t {
+enum class UartParity : u8 {
     NONE = 0,   // No parity
     ODD = 1,    // Odd parity
     EVEN = 2    // Even parity
@@ -42,7 +42,7 @@ enum class UartParity : uint8_t {
 /**
  * @brief UART stop bits configuration
  */
-enum class UartStopBits : uint8_t {
+enum class UartStopBits : u8 {
     BITS_1 = 1,     // 1 stop bit
     BITS_1_5 = 2,   // 1.5 stop bits
     BITS_2 = 3      // 2 stop bits
@@ -51,7 +51,7 @@ enum class UartStopBits : uint8_t {
 /**
  * @brief UART hardware flow control configuration
  */
-enum class UartFlowControl : uint8_t {
+enum class UartFlowControl : u8 {
     NONE = 0,       // No flow control
     RTS = 1,        // RTS only
     CTS = 2,        // CTS only
@@ -63,7 +63,7 @@ enum class UartFlowControl : uint8_t {
  *
  * Controls ISR scheduling priority and robustness under load.
  */
-enum class UartIntrPriority : uint8_t {
+enum class UartIntrPriority : u8 {
     LEVEL1 = 1,  // Lowest priority (can be masked)
     LEVEL2 = 2,  // Medium priority
     LEVEL3 = 3,  // High priority
@@ -78,7 +78,7 @@ enum class UartIntrPriority : uint8_t {
  * - IRAM: ISR runs from IRAM, works during flash cache disable
  * - SHARED: Allow interrupt line sharing with other peripherals
  */
-enum class UartIntrFlags : uint8_t {
+enum class UartIntrFlags : u8 {
     NONE = 0,          // No special flags (ISR in flash, can be blocked)
     IRAM = 1,          // ISR in IRAM (essential for reliability)
     SHARED = 2,        // Shared interrupt line
@@ -91,7 +91,7 @@ enum class UartIntrFlags : uint8_t {
  * Determines which clock feeds the UART peripheral.
  * Different sources affect baud rate accuracy and power consumption.
  */
-enum class UartClockSource : uint8_t {
+enum class UartClockSource : u8 {
     CLK_DEFAULT = 0,   // Use platform default (APB on most chips)
     CLK_APB = 1,       // APB clock (typical: 80 MHz)
     CLK_REF_TICK = 2,  // REF_TICK (1 MHz, lower power)
@@ -119,7 +119,7 @@ struct UartRS485Config {
     bool enabled = false;           // Enable RS485 mode
     bool rtsBeforeSend = false;     // Assert RTS before sending (true = active high)
     bool rtsAfterSend = true;       // Deassert RTS after sending
-    uint16_t txWaitTime = 0;        // Wait time before/after TX (bit times)
+    u16 txWaitTime = 0;        // Wait time before/after TX (bit times)
 };
 
 /**
@@ -178,7 +178,7 @@ struct UartPinConfig {
 struct UartConfig {
     // Basic UART parameters
     UartPort port = UartPort::UART0;
-    uint32_t baudRate = 115200;
+    u32 baudRate = 115200;
     UartDataBits dataBits = UartDataBits::BITS_8;
     UartParity parity = UartParity::NONE;
     UartStopBits stopBits = UartStopBits::BITS_1;
@@ -240,7 +240,7 @@ struct UartConfig {
      * Large buffers + high priority + hardware flow control.
      * Suitable for: GPS, sensors, binary protocols
      */
-    static UartConfig highSpeed(UartPort port, uint32_t baudRate) {
+    static UartConfig highSpeed(UartPort port, u32 baudRate) {
         UartConfig config;
         config.port = port;
         config.baudRate = baudRate;
@@ -380,7 +380,7 @@ public:
      * Buffered mode: Copies to TX ring buffer (non-blocking)
      * Fallback mode: Writes directly to FIFO (may block if full)
      */
-    size_t write(const uint8_t* buffer, size_t size);
+    size_t write(const u8* buffer, size_t size);
 
     /**
      * @brief Write string with newline to UART
@@ -413,7 +413,7 @@ public:
      * Blocks until all buffered data is transmitted.
      * Only works in buffered mode.
      */
-    bool flush(uint32_t timeoutMs = 1000);
+    bool flush(u32 timeoutMs = 1000);
 
     /**
      * @brief Get event queue handle (if configured)
@@ -440,7 +440,7 @@ public:
      * @brief Get current baud rate
      * @return Baud rate in bits per second
      */
-    uint32_t getBaudRate() const { return mConfig.baudRate; }
+    u32 getBaudRate() const { return mConfig.baudRate; }
 
 private:
     UartConfig mConfig;     // Configuration parameters

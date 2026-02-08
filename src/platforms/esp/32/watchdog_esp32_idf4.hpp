@@ -48,7 +48,7 @@ static watchdog_callback_t s_user_callback = nullptr;
 static void* s_user_data = nullptr;
 
 // USB disconnect delay for Windows compatibility (150ms minimum)
-constexpr uint32_t USB_DISCONNECT_DELAY_US = 150000;
+constexpr u32 USB_DISCONNECT_DELAY_US = 150000;
 
 } // namespace detail
 
@@ -112,10 +112,10 @@ void deinit_existing_watchdog() {
 }
 
 // Initializes watchdog with specified timeout
-bool init_task_watchdog(uint32_t timeout_ms) {
+bool init_task_watchdog(u32 timeout_ms) {
     // ESP-IDF v4.x uses simple parameters: esp_task_wdt_init(timeout_seconds, panic)
     // Convert milliseconds to seconds (ESP-IDF v4.x uses seconds, not milliseconds)
-    uint32_t timeout_s = (timeout_ms + 999) / 1000;  // Round up to nearest second
+    u32 timeout_s = (timeout_ms + 999) / 1000;  // Round up to nearest second
 
     esp_err_t err = esp_task_wdt_init(timeout_s, true);  // true = trigger panic on timeout
     if (err != ESP_OK) {
@@ -127,7 +127,7 @@ bool init_task_watchdog(uint32_t timeout_ms) {
 }
 
 // Logs watchdog configuration status
-void log_watchdog_status(uint32_t timeout_ms, watchdog_callback_t callback) {
+void log_watchdog_status(u32 timeout_ms, watchdog_callback_t callback) {
     FL_DBG("[WATCHDOG] ✓ " << timeout_ms << "ms watchdog active with reset on timeout");
     if (callback != nullptr) {
         FL_DBG("[WATCHDOG] ℹ️  User callback registered");
@@ -137,7 +137,7 @@ void log_watchdog_status(uint32_t timeout_ms, watchdog_callback_t callback) {
 
 } // anonymous namespace
 
-void watchdog_setup(uint32_t timeout_ms,
+void watchdog_setup(u32 timeout_ms,
                     watchdog_callback_t callback,
                     void* user_data) {
     FL_DBG("\n[WATCHDOG] Configuring ESP32 custom " << timeout_ms << "ms watchdog (IDF v4.x)");

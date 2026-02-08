@@ -9,11 +9,11 @@
 
 namespace fl {
 
-template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_RATE, SPIClass & _SPIObject, int _SPI_INDEX>
+template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_RATE, SPIClass & _SPIObject, int _SPI_INDEX>
 class Teensy4HardwareSPIOutput {
 	Selectable *m_pSelect = nullptr;
-	uint32_t  m_bitCount = 0;
-	uint32_t m_bitData = 0;
+	u32  m_bitCount = 0;
+	u32 m_bitData = 0;
 	inline IMXRT_LPSPI_t & port() __attribute__((always_inline)) {
 		switch(_SPI_INDEX) {
 			case 0:
@@ -57,13 +57,13 @@ public:
 	static void waitFully() { /* TODO */ }
 
 	// write a byte out via SPI (returns immediately on writing register) -
-	void inline writeByte(uint8_t b) __attribute__((always_inline)) {
+	void inline writeByte(u8 b) __attribute__((always_inline)) {
 		if(m_bitCount == 0) {
 			_SPIObject.transfer(b);
 		} else {
 			// There's been a bit of data written, add that to the output as well
-			uint32_t outData = (m_bitData << 8) | b;
-			uint32_t tcr = port().TCR;
+			u32 outData = (m_bitData << 8) | b;
+			u32 tcr = port().TCR;
 			port().TCR = (tcr & 0xfffff000) | LPSPI_TCR_FRAMESZ((8+m_bitCount) - 1);  // turn on 9 bit mode
 			port().TDR = outData;		// output 9 bit data.
 			while ((port().RSR & LPSPI_RSR_RXEMPTY)) ;	// wait while the RSR fifo is empty...
@@ -74,24 +74,24 @@ public:
 	}
 
 	// write a word out via SPI (returns immediately on writing register)
-	void inline writeWord(uint16_t w) __attribute__((always_inline)) {
+	void inline writeWord(u16 w) __attribute__((always_inline)) {
 		writeByte(((w>>8) & 0xFF));
 		_SPIObject.transfer(w & 0xFF);
 	}
 
 	// A raw set of writing byte values, assumes setup/init/waiting done elsewhere
-	static void writeBytesValueRaw(uint8_t value, int len) {
+	static void writeBytesValueRaw(u8 value, int len) {
 		while(len--) { _SPIObject.transfer(value); }
 	}
 
 	// A full cycle of writing a value for len bytes, including select, release, and waiting
-	void writeBytesValue(uint8_t value, int len) {
+	void writeBytesValue(u8 value, int len) {
 		select(); writeBytesValueRaw(value, len); release();
 	}
 
 	// A full cycle of writing a value for len bytes, including select, release, and waiting
-	template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
-		uint8_t *end = data + len;
+	template <class D> void writeBytes(FASTLED_REGISTER u8 *data, int len) {
+		u8 *end = data + len;
 		select();
 		// could be optimized to write 16bit words out instead of 8bit bytes
 		while(data != end) {
@@ -103,13 +103,13 @@ public:
 	}
 
 	// A full cycle of writing a value for len bytes, including select, release, and waiting
-	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER u8 *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	// write a single bit out, which bit from the passed in byte is determined by template parameter
-	template <uint8_t BIT> inline void writeBit(uint8_t b) {
+	template <u8 BIT> inline void writeBit(u8 b) {
 		m_bitData = (m_bitData<<1) | ((b&(1<<BIT)) != 0);
 		// If this is the 8th bit we've collected, just write it out raw
-		FASTLED_REGISTER uint32_t bc = m_bitCount;
+		FASTLED_REGISTER u32 bc = m_bitCount;
 		bc = (bc + 1) & 0x07;
 		if (!bc) {
 			m_bitCount = 0;
@@ -120,7 +120,7 @@ public:
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
+	template <u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
 		select();
     int len = pixels.mLen;
 

@@ -111,11 +111,11 @@ public:
     bool freeBus() override = 0;
     bool isInitialized() const override = 0;
     bool queueTransaction(const SpiTransaction& trans) override = 0;
-    bool pollTransaction(uint32_t timeout_ms) override = 0;
+    bool pollTransaction(u32 timeout_ms) override = 0;
     bool registerCallback(void* callback, void* user_ctx) override = 0;
-    uint8_t* allocateDma(size_t size) override = 0;
-    void freeDma(uint8_t* buffer) override = 0;
-    void delay(uint32_t ms) override = 0;
+    u8* allocateDma(size_t size) override = 0;
+    void freeDma(u8* buffer) override = 0;
+    void delay(u32 ms) override = 0;
     uint64_t getMicroseconds() override = 0;
 
     //=========================================================================
@@ -124,9 +124,9 @@ public:
 
     /// @brief Transaction record (captured waveform data)
     struct TransactionRecord {
-        fl::vector<uint8_t> buffer_copy;  ///< Copy of transmitted buffer
+        fl::vector<u8> buffer_copy;  ///< Copy of transmitted buffer
         size_t length_bits;                ///< Number of bits transmitted
-        uint32_t flags;                    ///< Transaction flags
+        u32 flags;                    ///< Transaction flags
         void* user;                        ///< User context pointer
         uint64_t timestamp_us;             ///< Simulated timestamp (microseconds)
     };
@@ -139,7 +139,7 @@ public:
     /// @param microseconds Delay in microseconds (0 = instant)
     ///
     /// Simulates hardware transmission time. Affects pollTransaction() behavior.
-    virtual void setTransactionDelay(uint32_t microseconds) = 0;
+    virtual void setTransactionDelay(u32 microseconds) = 0;
 
     /// @brief Manually trigger transaction completion (fire callback)
     ///
@@ -184,7 +184,7 @@ public:
     ///
     /// Returns the captured data from the most recent queueTransaction() call.
     /// Useful for quick validation without iterating through history.
-    virtual fl::span<const uint8_t> getLastTransactionData() const = 0;
+    virtual fl::span<const u8> getLastTransactionData() const = 0;
 
     //-------------------------------------------------------------------------
     // State Inspection

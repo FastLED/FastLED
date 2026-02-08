@@ -178,7 +178,7 @@ bool Device::isReady() const {
 // Transaction API (Primary Interface)
 // ============================================================================
 
-Result<Transaction> Device::writeAsync(const uint8_t* data, size_t size) {
+Result<Transaction> Device::writeAsync(const u8* data, size_t size) {
     if (!isReady()) {
         return Result<Transaction>::failure(SPIError::NOT_INITIALIZED, "Device not initialized");
     }
@@ -200,7 +200,7 @@ Result<Transaction> Device::writeAsync(const uint8_t* data, size_t size) {
     }
 
     // Copy data to DMA buffer
-    fl::span<uint8_t> buf_span = buffer.data();
+    fl::span<u8> buf_span = buffer.data();
     if (buf_span.size() < size) {
         FL_WARN("SPI Device: Buffer size mismatch");
         return Result<Transaction>::failure(SPIError::BUFFER_TOO_LARGE, "Buffer size mismatch");
@@ -319,7 +319,7 @@ fl::optional<fl::Error> Device::transmit(DMABuffer& buffer, bool async) {
     return fl::nullopt;
 }
 
-bool Device::waitComplete(uint32_t timeout_ms) {
+bool Device::waitComplete(u32 timeout_ms) {
     if (!isReady()) {
         return false;
     }
@@ -352,7 +352,7 @@ bool Device::isBusy() const {
     return hw->isBusy();
 }
 
-fl::optional<fl::Error> Device::setClockSpeed(uint32_t speed_hz) {
+fl::optional<fl::Error> Device::setClockSpeed(u32 speed_hz) {
     if (!pImpl) {
         return fl::Error("Device not initialized");
     }
@@ -405,7 +405,7 @@ Transaction::~Transaction() {
     }
 }
 
-bool Transaction::wait(uint32_t timeout_ms) {
+bool Transaction::wait(u32 timeout_ms) {
     if (!pImpl) {
         return true;  // Already completed (or invalid)
     }
@@ -433,7 +433,7 @@ bool Transaction::wait(uint32_t timeout_ms) {
     }
 
     // Wait for the hardware to complete
-    uint32_t start_time = fl::millis();
+    u32 start_time = fl::millis();
     bool success = pImpl->device->waitComplete(timeout_ms);
 
     if (success) {
@@ -444,7 +444,7 @@ bool Transaction::wait(uint32_t timeout_ms) {
         pImpl->completed = true;
         pImpl->result = fl::nullopt;
 
-        uint32_t elapsed = fl::millis() - start_time;
+        u32 elapsed = fl::millis() - start_time;
         FL_LOG_SPI("Transaction: Completed successfully (waited " << elapsed << "ms)");
         return true;
     } else {

@@ -97,7 +97,7 @@ public:
 
     /// @brief Update strip data with RGB pixel data
     /// @param pixel_data Span of RGB pixel data (3 bytes per pixel: R, G, B)
-    void update(fl::span<const uint8_t> pixel_data) {
+    void update(fl::span<const u8> pixel_data) {
         fl::ActiveStripData::Instance().update(mId, fl::millis(), pixel_data);
     }
 
@@ -105,9 +105,9 @@ public:
     /// @param pixels Span of CRGB pixels
     void update(fl::span<const CRGB> pixels) {
         // Convert CRGB span to uint8_t span (safe because CRGB is packed RGB)
-        const uint8_t* data = fl::bit_cast<const uint8_t*>(pixels.data());
+        const u8* data = fl::bit_cast<const u8*>(pixels.data());
         size_t size = pixels.size() * 3; // 3 bytes per CRGB
-        update(fl::span<const uint8_t>(data, size));
+        update(fl::span<const u8>(data, size));
     }
 
     /// @brief Get the strip ID for this tracker

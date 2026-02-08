@@ -8,7 +8,7 @@ namespace fl {
 
 // Define the internal data structure
 struct DMABufferInternalData {
-    fl::vector<uint8_t, allocator_psram<uint8_t>> buffer;
+    fl::vector<u8, allocator_psram<u8>> buffer;
 
     DMABufferInternalData() : buffer() {}
 
@@ -29,7 +29,7 @@ DMABuffer::DMABuffer(size_t size)
     }
 }
 
-DMABuffer::DMABuffer(fl::shared_ptr<uint8_t> ptr, size_t size)
+DMABuffer::DMABuffer(fl::shared_ptr<u8> ptr, size_t size)
     : m_internal(fl::make_shared<DMABufferInternalData>()),
       error_code(SPIError::NOT_INITIALIZED),
       is_ok(true) {
@@ -50,11 +50,11 @@ bool DMABuffer::ok() const {
     return is_ok && m_internal != nullptr;
 }
 
-fl::span<uint8_t> DMABuffer::data() const {
+fl::span<u8> DMABuffer::data() const {
     if (!ok()) {
-        return fl::span<uint8_t>();
+        return fl::span<u8>();
     }
-    return fl::span<uint8_t>(m_internal->buffer.data(), m_internal->buffer.size());
+    return fl::span<u8>(m_internal->buffer.data(), m_internal->buffer.size());
 }
 
 SPIError DMABuffer::error() const {

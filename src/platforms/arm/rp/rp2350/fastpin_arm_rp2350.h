@@ -7,7 +7,7 @@
 #include "fl/fastpin_base.h"
 namespace fl {
 // Forward declare FastPin template to support specializations below
-template<uint8_t PIN> class FastPin;
+template<u8 PIN> class FastPin;
 
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be slightly slower."
@@ -17,10 +17,10 @@ template<uint8_t PIN> class FastPin;
 #else
 
 // warning: set and fastset are not thread-safe! use with caution!
-template<uint PIN, uint32_t _MASK> class _RP2350PIN {
+template<uint PIN, u32 _MASK> class _RP2350PIN {
 public:
-  typedef volatile uint32_t * port_ptr_t;
-  typedef uint32_t port_t;
+  typedef volatile u32 * port_ptr_t;
+  typedef u32 port_t;
 
   inline static constexpr bool validpin() { return true; }
 
@@ -49,7 +49,7 @@ public:
 
 // Use 64-bit literal for pin mask calculation to support RP2350B pins 32-47
 // The template parameter is still uint32_t to maintain register compatibility
-#define _FL_DEFPIN(PIN) template<> class FastPin<PIN> : public _RP2350PIN<PIN, (uint32_t)(1ULL << PIN)> {};
+#define _FL_DEFPIN(PIN) template<> class FastPin<PIN> : public _RP2350PIN<PIN, (u32)(1ULL << PIN)> {};
 
 // RP2350B has up to 48 pins (0-47), RP2350A has 30 pins (0-29)
 // We support up to 47 for all RP2350 variants

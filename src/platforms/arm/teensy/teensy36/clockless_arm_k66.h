@@ -16,9 +16,9 @@ namespace fl {
 
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
-	static constexpr uint32_t T1 = TIMING::T1;
-	static constexpr uint32_t T2 = TIMING::T2;
-	static constexpr uint32_t T3 = TIMING::T3;
+	static constexpr u32 T1 = TIMING::T1;
+	static constexpr u32 T2 = TIMING::T2;
+	static constexpr u32 T3 = TIMING::T3;
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
 
@@ -33,7 +33,7 @@ public:
 		mPort = FastPin<DATA_PIN>::port();
 	}
 
-	virtual uint16_t getMaxRefreshRate() const { return 400; }
+	virtual u16 getMaxRefreshRate() const { return 400; }
 
 protected:
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
@@ -48,8 +48,8 @@ protected:
 		mWait.mark();
 	}
 
-	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER uint32_t & next_mark, FASTLED_REGISTER data_ptr_t port, FASTLED_REGISTER data_t hi, FASTLED_REGISTER data_t lo, FASTLED_REGISTER uint8_t & b)  {
-		for(FASTLED_REGISTER uint32_t i = BITS-1; i > 0; --i) {
+	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER data_ptr_t port, FASTLED_REGISTER data_t hi, FASTLED_REGISTER data_t lo, FASTLED_REGISTER u8 & b)  {
+		for(FASTLED_REGISTER u32 i = BITS-1; i > 0; --i) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 			FastPin<DATA_PIN>::fastset(port, hi);
@@ -78,7 +78,7 @@ protected:
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-	static uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels, Rgbw rgbw) {
+	static u32 showRGBInternal(PixelController<RGB_ORDER> pixels, Rgbw rgbw) {
 	    // Get access to the clock
 		ARM_DEMCR    |= ARM_DEMCR_TRCENA;
 		ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
@@ -91,7 +91,7 @@ protected:
 
 		cli();
 
-		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
+		u32 next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 
 		// Detect RGBW mode using pattern from STM32 driver
 		const bool is_rgbw = rgbw.active();
@@ -120,9 +120,9 @@ protected:
 			#endif
 
 			// Load bytes into fixed buffer (3 for RGB, 4 for RGBW)
-			fl::vector_fixed<uint8_t, 4> bytes;
+			fl::vector_fixed<u8, 4> bytes;
 			if (is_rgbw) {
-				uint8_t b0, b1, b2, b3;
+				u8 b0, b1, b2, b3;
 				pixels.loadAndScaleRGBW(rgbw, &b0, &b1, &b2, &b3);
 				bytes.push_back(b0);
 				bytes.push_back(b1);

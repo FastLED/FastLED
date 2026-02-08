@@ -110,7 +110,7 @@ constexpr size_t SPI_BYTES_PER_COLOR_BYTE = 3;
 ///   Input bit 6 → buf[0] bits 2-4
 ///   Input bit 7 → buf[0] bits 5-7
 FASTLED_FORCE_INLINE
-void led_strip_encode_byte(uint8_t data, uint8_t* buf) {
+void led_strip_encode_byte(u8 data, u8* buf) {
     // Exact Espressif implementation - DO NOT MODIFY
     // Each color of 1 bit is represented by 3 bits of SPI,
     // low_level:100, high_level:110
@@ -127,9 +127,9 @@ void led_strip_encode_byte(uint8_t data, uint8_t* buf) {
 }
 
 /// @brief Calculate greatest common divisor using Euclidean algorithm
-constexpr uint32_t gcd(uint32_t a, uint32_t b) {
+constexpr u32 gcd(u32 a, u32 b) {
     while (b != 0) {
-        uint32_t temp = b;
+        u32 temp = b;
         b = a % b;
         a = temp;
     }
@@ -137,13 +137,13 @@ constexpr uint32_t gcd(uint32_t a, uint32_t b) {
 }
 
 /// @brief Calculate GCD of four values
-constexpr uint32_t gcd4(uint32_t a, uint32_t b, uint32_t c, uint32_t d) {
+constexpr u32 gcd4(u32 a, u32 b, u32 c, u32 d) {
     return gcd(gcd(gcd(a, b), c), d);
 }
 
 /// @brief Count number of set bits in a value
-constexpr uint8_t countBits(uint32_t value) {
-    uint8_t count = 0;
+constexpr u8 countBits(u32 value) {
+    u8 count = 0;
     while (value) {
         count++;
         value >>= 1;
@@ -241,7 +241,7 @@ void ChannelEngineSpi::configureMultiLanePins(
         return;
     }
 
-    uint8_t laneCount = pinConfig.getLaneCount();
+    u8 laneCount = pinConfig.getLaneCount();
     FL_DBG("ChannelEngineSpi: Configuring "
            << static_cast<int>(laneCount) << "-lane SPI for pin "
            << pinConfig.data0_pin << " (data0=" << pinConfig.data0_pin
@@ -385,7 +385,7 @@ void ChannelEngineSpi::beginBatchedTransmission(
     for (const auto& [timing, groupChannels] : timingGroups) {
         // Determine lane capacity (K) for this timing group
         // K = max number of channels that can transmit simultaneously
-        uint8_t K = determineLaneCapacity(groupChannels);
+        u8 K = determineLaneCapacity(groupChannels);
         size_t N = groupChannels.size();
         size_t numBatches = (N + K - 1) / K;  // ceil(N/K)
 
@@ -450,7 +450,7 @@ void ChannelEngineSpi::beginBatchedTransmission(
     }
 }
 
-uint8_t ChannelEngineSpi::determineLaneCapacity(
+u8 ChannelEngineSpi::determineLaneCapacity(
     fl::span<const ChannelDataPtr> channels) {
 
     // Determine the maximum number of channels that can transmit in parallel (K).
@@ -481,7 +481,7 @@ uint8_t ChannelEngineSpi::determineLaneCapacity(
 // Note: Multi-lane SPI (dual/quad mode) can still be used on a SINGLE host
 // for parallel data lines to multiple LED strips, but that's different from
 // using multiple SPI peripheral hosts.
-    constexpr uint8_t PARALLEL_SPI_HOSTS = 1;  // Single SPI host policy
+    constexpr u8 PARALLEL_SPI_HOSTS = 1;  // Single SPI host policy
 
     FL_DBG_EVERY(100, "ChannelEngineSpi: Determined lane capacity: "
            << static_cast<int>(PARALLEL_SPI_HOSTS) << " SPI hosts");
@@ -557,8 +557,8 @@ void ChannelEngineSpi::beginTransmission(
 
             // DEBUG: Verify Espressif 3-bit encoding works by testing first byte
             if (channel->ledSourceBuffer && ledData.size() >= 1) {
-                uint8_t test_byte = channel->ledSourceBuffer[0];
-                uint8_t test_output[SPI_BYTES_PER_COLOR_BYTE] = {0, 0, 0};  // Must be pre-cleared
+                u8 test_byte = channel->ledSourceBuffer[0];
+                u8 test_output[SPI_BYTES_PER_COLOR_BYTE] = {0, 0, 0};  // Must be pre-cleared
                 led_strip_encode_byte(test_byte, test_output);
                 FL_DBG_EVERY(100, "ChannelEngineSpi: Test encode byte " << static_cast<int>(test_byte)
                        << " → SPI[0..2]: [" << static_cast<int>(test_output[0])
@@ -814,8 +814,8 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
                                      size_t dataSize, const ChipsetTimingConfig *originalTiming) {
     // Safety counter to detect infinite channel creation loops
     static int creation_count = 0;
-    static uint32_t last_reset_ms = 0;
-    uint32_t now_ms = millis();
+    static u32 last_reset_ms = 0;
+    u32 now_ms = millis();
 
     // Reset counter every 5 seconds
     if (now_ms - last_reset_ms > 5000) {
@@ -902,8 +902,8 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     // Use Espressif led_strip default: 2.5 MHz (400ns per SPI bit)
     // With 3-bit encoding: LED '0' = 100 (T0H=400ns, T0L=800ns), LED '1' = 110 (T1H=800ns, T1L=400ns)
     // Reference: https://github.com/espressif/idf-extra-components/blob/master/led_strip/src/led_strip_spi_dev.c
-    constexpr uint32_t LED_STRIP_SPI_DEFAULT_RESOLUTION = 2500000;  // 2.5 MHz
-    const uint32_t spi_clock_hz = LED_STRIP_SPI_DEFAULT_RESOLUTION;
+    constexpr u32 LED_STRIP_SPI_DEFAULT_RESOLUTION = 2500000;  // 2.5 MHz
+    const u32 spi_clock_hz = LED_STRIP_SPI_DEFAULT_RESOLUTION;
     FL_DBG("ChannelEngineSpi: Using Espressif led_strip clock: " << spi_clock_hz << "Hz (2.5MHz, 3-bit encoding)");
 
     spi_device_interface_config_t dev_config = {};
@@ -986,9 +986,9 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     // Using internal DMA memory eliminates cache coherence issues.
     const size_t staging_size = 4096;
 
-    state->stagingA = (uint8_t *)heap_caps_malloc(
+    state->stagingA = (u8 *)heap_caps_malloc(
         staging_size, MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA);
-    state->stagingB = (uint8_t *)heap_caps_malloc(
+    state->stagingB = (u8 *)heap_caps_malloc(
         staging_size, MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA);
 
     if (!state->stagingA || !state->stagingB) {
@@ -1016,7 +1016,7 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     // Allocate LED source buffer (internal SRAM for ISR-safe access)
     // CRITICAL: PSRAM is NOT safe for ISR access - we must copy LED data here
     // Allocate for typical LED strip size (dataSize is passed from channel data)
-    state->ledSourceBuffer = (uint8_t *)heap_caps_malloc(
+    state->ledSourceBuffer = (u8 *)heap_caps_malloc(
         dataSize, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
     state->ledSourceBufferSize = state->ledSourceBuffer ? dataSize : 0;
 
@@ -1092,8 +1092,8 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     return true;
 }
 
-bool ChannelEngineSpi::encodeLedData(const fl::span<const uint8_t> &ledData,
-                                     fl::vector<uint8_t> &spiBuffer,
+bool ChannelEngineSpi::encodeLedData(const fl::span<const u8> &ledData,
+                                     fl::vector<u8> &spiBuffer,
                                      const SpiTimingConfig &timing) {
     // Calculate required SPI buffer size (variable expansion ratio)
     // Total bits = ledData.size() * 8 * timing.bits_per_led_bit
@@ -1108,7 +1108,7 @@ bool ChannelEngineSpi::encodeLedData(const fl::span<const uint8_t> &ledData,
     fl::memset(spiBuffer.data(), 0, spiSize);
 
     // Encode each LED byte using dynamic pattern
-    uint32_t output_bit_offset = 0;
+    u32 output_bit_offset = 0;
     for (size_t i = 0; i < ledData.size(); i++) {
         output_bit_offset += encodeLedByte(ledData[i], spiBuffer.data(), timing,
                                            output_bit_offset);
@@ -1117,28 +1117,28 @@ bool ChannelEngineSpi::encodeLedData(const fl::span<const uint8_t> &ledData,
     return true;
 }
 
-uint32_t ChannelEngineSpi::encodeLedByte(uint8_t data, uint8_t *buf,
+u32 ChannelEngineSpi::encodeLedByte(u8 data, u8 *buf,
                                          const SpiTimingConfig &timing,
-                                         uint32_t output_bit_offset) {
+                                         u32 output_bit_offset) {
     // Dynamic encoding: Each LED bit expands to timing.bits_per_led_bit SPI
     // bits using the bit patterns from timing.bit0_pattern and
     // timing.bit1_pattern
     //
     // Process LED byte MSB first (bit 7 → bit 0)
 
-    uint32_t current_bit_offset = output_bit_offset;
-    uint32_t last_byte_index = 0xFFFFFFFF; // Track which byte we're writing to
+    u32 current_bit_offset = output_bit_offset;
+    u32 last_byte_index = 0xFFFFFFFF; // Track which byte we're writing to
 
     for (int led_bit = 7; led_bit >= 0; led_bit--) {
         // Select pattern based on LED bit value
-        const uint32_t pattern =
+        const u32 pattern =
             (data & (1 << led_bit)) ? timing.bit1_pattern : timing.bit0_pattern;
-        const uint8_t pattern_bits = timing.bits_per_led_bit;
+        const u8 pattern_bits = timing.bits_per_led_bit;
 
         // Write pattern bits to buffer (MSB first)
-        for (uint8_t i = 0; i < pattern_bits; i++) {
-            const uint32_t byte_index = current_bit_offset / 8;
-            const uint8_t bit_index = 7 - (current_bit_offset % 8); // MSB first
+        for (u8 i = 0; i < pattern_bits; i++) {
+            const u32 byte_index = current_bit_offset / 8;
+            const u8 bit_index = 7 - (current_bit_offset % 8); // MSB first
 
             // Zero the byte when we first touch it
             if (byte_index != last_byte_index) {
@@ -1147,7 +1147,7 @@ uint32_t ChannelEngineSpi::encodeLedByte(uint8_t data, uint8_t *buf,
             }
 
             // Get bit from pattern (MSB first)
-            const uint8_t pattern_bit = (pattern >> (pattern_bits - 1 - i)) & 1;
+            const u8 pattern_bit = (pattern >> (pattern_bits - 1 - i)) & 1;
 
             if (pattern_bit) {
                 // Set bit in output buffer
@@ -1265,14 +1265,14 @@ ChannelEngineSpi::calculateSpiTiming(const ChipsetTimingConfig &chipsetTiming) {
     // For bit '0': high for T1, low for T2+T3
     // For bit '1': high for T1+T2, low for T3
 
-    const uint32_t t1_ns = chipsetTiming.t1_ns;
-    const uint32_t t2_ns = chipsetTiming.t2_ns;
-    const uint32_t t3_ns = chipsetTiming.t3_ns;
+    const u32 t1_ns = chipsetTiming.t1_ns;
+    const u32 t2_ns = chipsetTiming.t2_ns;
+    const u32 t3_ns = chipsetTiming.t3_ns;
 
     // Find GCD of original timings to get the optimal time quantum
     // This provides best memory efficiency while maintaining perfect timing
     // accuracy
-    uint32_t quantum_ns = gcd(gcd(t1_ns, t2_ns), t3_ns);
+    u32 quantum_ns = gcd(gcd(t1_ns, t2_ns), t3_ns);
 
     // Ensure minimum quantum of 10ns to avoid excessively high frequencies
     if (quantum_ns < 10) {
@@ -1282,17 +1282,17 @@ ChannelEngineSpi::calculateSpiTiming(const ChipsetTimingConfig &chipsetTiming) {
     }
 
     // Calculate how many quanta each phase needs (use original timings)
-    const uint32_t t1_quanta =
+    const u32 t1_quanta =
         (t1_ns + quantum_ns / 2) / quantum_ns; // Round to nearest
-    const uint32_t t2_quanta = (t2_ns + quantum_ns / 2) / quantum_ns;
-    const uint32_t t3_quanta = (t3_ns + quantum_ns / 2) / quantum_ns;
+    const u32 t2_quanta = (t2_ns + quantum_ns / 2) / quantum_ns;
+    const u32 t3_quanta = (t3_ns + quantum_ns / 2) / quantum_ns;
 
     // Calculate SPI frequency: 1 / quantum_time
     // freq = 1 / (quantum_ns * 1e-9) = 1e9 / quantum_ns
-    const uint32_t spi_freq_hz = 1000000000UL / quantum_ns;
+    const u32 spi_freq_hz = 1000000000UL / quantum_ns;
 
     // Total bits per LED bit (symmetric for both bit 0 and bit 1)
-    const uint32_t bits_per_led_bit = t1_quanta + t2_quanta + t3_quanta;
+    const u32 bits_per_led_bit = t1_quanta + t2_quanta + t3_quanta;
 
     // Validate maximum bit pattern length (32 bits max for storage)
     if (bits_per_led_bit > 32) {
@@ -1309,40 +1309,40 @@ ChannelEngineSpi::calculateSpiTiming(const ChipsetTimingConfig &chipsetTiming) {
     // Bit '0': high for T1 quanta, low for T2+T3 quanta
     // Bit '1': high for T1+T2 quanta, low for T3 quanta
 
-    uint32_t bit0_pattern = 0;
-    uint32_t bit1_pattern = 0;
+    u32 bit0_pattern = 0;
+    u32 bit1_pattern = 0;
 
     // Set high bits for bit0 (T1 quanta high, T2+T3 low)
-    for (uint32_t i = 0; i < t1_quanta; i++) {
+    for (u32 i = 0; i < t1_quanta; i++) {
         bit0_pattern |= (1UL << (bits_per_led_bit - 1 - i));
     }
 
     // Set high bits for bit1 (T1+T2 quanta high, T3 low)
-    for (uint32_t i = 0; i < (t1_quanta + t2_quanta); i++) {
+    for (u32 i = 0; i < (t1_quanta + t2_quanta); i++) {
         bit1_pattern |= (1UL << (bits_per_led_bit - 1 - i));
     }
 
     // Calculate actual achieved timing (for validation/debugging)
-    const uint32_t ns_per_bit = quantum_ns;
-    const uint32_t achieved_t0h_ns =
+    const u32 ns_per_bit = quantum_ns;
+    const u32 achieved_t0h_ns =
         t1_quanta * ns_per_bit; // Bit '0' high time = T1
-    const uint32_t achieved_t0l_ns =
+    const u32 achieved_t0l_ns =
         (t2_quanta + t3_quanta) * ns_per_bit; // Bit '0' low time = T2+T3
-    const uint32_t achieved_t1h_ns =
+    const u32 achieved_t1h_ns =
         (t1_quanta + t2_quanta) * ns_per_bit; // Bit '1' high time = T1+T2
-    const uint32_t achieved_t1l_ns =
+    const u32 achieved_t1l_ns =
         t3_quanta * ns_per_bit; // Bit '1' low time = T3
 
     // Construct SpiTimingConfig
     SpiTimingConfig config;
     config.protocol = SpiTimingConfig::CUSTOM;
     config.clock_hz = spi_freq_hz;
-    config.bits_per_led_bit = static_cast<uint8_t>(bits_per_led_bit);
+    config.bits_per_led_bit = static_cast<u8>(bits_per_led_bit);
     config.reset_time_us = chipsetTiming.reset_us;
     config.bit0_pattern = bit0_pattern;
-    config.bit0_count = static_cast<uint8_t>(bits_per_led_bit);
+    config.bit0_count = static_cast<u8>(bits_per_led_bit);
     config.bit1_pattern = bit1_pattern;
-    config.bit1_count = static_cast<uint8_t>(bits_per_led_bit);
+    config.bit1_count = static_cast<u8>(bits_per_led_bit);
     config.achieved_t0h_ns = achieved_t0h_ns;
     config.achieved_t0l_ns = achieved_t0l_ns;
     config.achieved_t1h_ns = achieved_t1h_ns;
@@ -1457,7 +1457,7 @@ void ChannelEngineSpi::preEncodeAllData(SpiChannelState* channel) {
     // With 4KB staging buffer, we can hold ~1365 LED bytes (455 RGB LEDs)
     // For typical use cases, this is sufficient. For larger strips, we fill what fits.
 
-    uint8_t* output = channel->currentStaging;
+    u8* output = channel->currentStaging;
     const size_t max_output = channel->stagingCapacity;
 
     // NOTE: Multi-lane SPI is NOT supported with Espressif 3-bit encoding
@@ -1472,7 +1472,7 @@ void ChannelEngineSpi::preEncodeAllData(SpiChannelState* channel) {
     const size_t bytes_to_encode = fl_min(total_led_bytes, max_led_bytes);
 
     for (size_t i = 0; i < bytes_to_encode; i++) {
-        uint8_t input_byte = channel->ledSource[i];
+        u8 input_byte = channel->ledSource[i];
         led_strip_encode_byte(input_byte, output + total_bytes_written);
         total_bytes_written += SPI_BYTES_PER_COLOR_BYTE;
     }
@@ -1555,12 +1555,12 @@ void ChannelEngineSpi::transmitBlockingPolled(SpiChannelState* channel) {
     }
 
     // Use spi_device_transmit() (queue-based blocking API, matches Espressif led_strip)
-    uint32_t start_time = millis();
+    u32 start_time = millis();
 
     // Transmit data via SPI (queue-based API, matches Espressif led_strip)
     esp_err_t ret = spi_device_transmit(channel->spi_device, &trans);
 
-    uint32_t elapsed_ms = millis() - start_time;
+    u32 elapsed_ms = millis() - start_time;
 
     if (ret != ESP_OK) {
         FL_WARN_EVERY(100, "ChannelEngineSpi: spi_device_transmit failed: " << ret);
@@ -1668,7 +1668,7 @@ void IRAM_ATTR ChannelEngineSpi::timerEncodingISR(void *user_data) {
     // DEBUG: Capture first 8 bytes of tx_buffer right before queuing
     if (!channel->debugTxCaptured && trans->tx_buffer && channel->stagingOffset >= 8) {
         channel->debugTxCaptured = true;
-        const uint8_t* buf = static_cast<const uint8_t*>(trans->tx_buffer);
+        const u8* buf = static_cast<const u8*>(trans->tx_buffer);
         for (int i = 0; i < 8; i++) {
             channel->debugTxBuffer[i] = buf[i];
         }

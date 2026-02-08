@@ -207,7 +207,7 @@ cv_status ConditionVariableESP32::wait_for(
 
     // Wait for notification with timeout
     TickType_t ticks = pdMS_TO_TICKS(ms.count());
-    uint32_t notify_value = ulTaskNotifyTake(pdTRUE, ticks);
+    u32 notify_value = ulTaskNotifyTake(pdTRUE, ticks);
 
     // Re-lock user mutex after waking up
     lock.lock();

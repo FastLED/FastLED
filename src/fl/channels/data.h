@@ -26,7 +26,7 @@ FASTLED_SHARED_PTR(ChannelData);
 ///
 /// @param src Source encoded data (read-only)
 /// @param dst Destination buffer to write to (dst.size() >= src.size())
-using PaddingGenerator = fl::function<void(fl::span<const uint8_t> src, fl::span<uint8_t> dst)>;
+using PaddingGenerator = fl::function<void(fl::span<const u8> src, fl::span<u8> dst)>;
 
 /// @brief Transmission data for a single LED channel
 ///
@@ -41,7 +41,7 @@ public:
     /// @param encodedData Encoded byte stream ready for transmission (defaults to empty)
     static ChannelDataPtr create(
         const ChipsetVariant& chipset,
-        fl::vector_psram<uint8_t>&& encodedData = fl::vector_psram<uint8_t>()
+        fl::vector_psram<u8>&& encodedData = fl::vector_psram<u8>()
     );
 
     /// @brief Create channel transmission data (backwards compatibility)
@@ -52,7 +52,7 @@ public:
     static ChannelDataPtr create(
         int pin,
         const ChipsetTimingConfig& timing,
-        fl::vector_psram<uint8_t>&& encodedData = fl::vector_psram<uint8_t>()
+        fl::vector_psram<u8>&& encodedData = fl::vector_psram<u8>()
     );
 
     /// @brief Get the GPIO pin number
@@ -72,10 +72,10 @@ public:
     const ChipsetTimingConfig& getTiming() const { return mTiming; }
 
     /// @brief Get the encoded transmission data
-    const fl::vector_psram<uint8_t>& getData() const { return mEncodedData; }
+    const fl::vector_psram<u8>& getData() const { return mEncodedData; }
 
     /// @brief Get the encoded transmission data (mutable)
-    fl::vector_psram<uint8_t>& getData() { return mEncodedData; }
+    fl::vector_psram<u8>& getData() { return mEncodedData; }
 
     /// @brief Get the data size in bytes
     size_t getSize() const { return mEncodedData.size(); }
@@ -105,7 +105,7 @@ public:
     /// The destination buffer size must be >= current data size. If a padding
     /// generator is configured, it will be used to extend the data to fill the
     /// entire destination buffer.
-    void writeWithPadding(fl::span<uint8_t> dst);
+    void writeWithPadding(fl::span<u8> dst);
 
     /// @brief Calculate the size needed for writeWithPadding() without allocating
     ///
@@ -126,7 +126,7 @@ private:
     /// @brief Private constructor - variant-based (modern API)
     ChannelData(
         const ChipsetVariant& chipset,
-        fl::vector_psram<uint8_t>&& encodedData
+        fl::vector_psram<u8>&& encodedData
     );
 
     /// @brief Private constructor - legacy API (backwards compatibility)
@@ -134,7 +134,7 @@ private:
     ChannelData(
         int pin,
         const ChipsetTimingConfig& timing,
-        fl::vector_psram<uint8_t>&& encodedData
+        fl::vector_psram<u8>&& encodedData
     );
 
     // Non-copyable (move-only via shared_ptr)
@@ -145,7 +145,7 @@ private:
     const int mPin;                         ///< GPIO pin number (extracted from chipset for convenience)
     const ChipsetTimingConfig mTiming;      ///< Chipset timing (T0H, T1H, T0L, reset) - backwards compatibility, clockless only
     PaddingGenerator mPaddingGenerator;     ///< Optional padding generator for block-size alignment
-    fl::vector_psram<uint8_t> mEncodedData; ///< Encoded transmission bytes (PSRAM)
+    fl::vector_psram<u8> mEncodedData; ///< Encoded transmission bytes (PSRAM)
     volatile bool mInUse = false;           ///< Engine is transmitting this data (prevents creator updates)
 };
 

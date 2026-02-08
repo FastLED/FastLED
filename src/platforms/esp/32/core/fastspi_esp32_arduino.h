@@ -100,15 +100,15 @@ namespace fl {
 	#endif
 #endif
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
+template <u8 DATA_PIN, u8 CLOCK_PIN, u32 SPI_SPEED>
 class ESP32SPIOutput {
     // ESP32 classic, ESP32S2/S3/C3/C6/etc. all support GPIO matrix for flexible pin routing
     // Use template parameters DATA_PIN and CLOCK_PIN instead of hardcoded pins
     // This enables users to specify custom pins via FastLED.addLeds<APA102, 2, 12>(...)
-    static constexpr int8_t spiMosi = DATA_PIN;
-    static constexpr int8_t spiClk = CLOCK_PIN;
-    static constexpr int8_t spiMiso = -1;
-    static constexpr int8_t spiCs = -1;
+    static constexpr i8 spiMosi = DATA_PIN;
+    static constexpr i8 spiClk = CLOCK_PIN;
+    static constexpr i8 spiMiso = -1;
+    static constexpr i8 spiCs = -1;
 
     SPIClass m_ledSPI;
 	Selectable 	*m_pSelect;
@@ -140,21 +140,21 @@ public:
 	static void wait() __attribute__((always_inline)) { }
 	static void waitFully() __attribute__((always_inline)) { wait(); }
 
-	void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { writeByte(b); }
-	void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { writeByte(b); wait(); }
+	void writeByteNoWait(u8 b) __attribute__((always_inline)) { writeByte(b); }
+	void writeBytePostWait(u8 b) __attribute__((always_inline)) { writeByte(b); wait(); }
 
-	void writeWord(uint16_t w) __attribute__((always_inline)) {
-		writeByte(static_cast<uint8_t>(w>>8));
-		writeByte(static_cast<uint8_t>(w&0xFF));
+	void writeWord(u16 w) __attribute__((always_inline)) {
+		writeByte(static_cast<u8>(w>>8));
+		writeByte(static_cast<u8>(w&0xFF));
 	}
 
 	// naive writeByte implelentation, simply calls writeBit on the 8 bits in the byte.
-	void writeByte(uint8_t b) {
+	void writeByte(u8 b) {
 		m_ledSPI.transfer(b);
 	}
 
 	void writePixelsBulk(const CRGB* pixels, size_t n) {
-		uint8_t* data = reinterpret_cast<uint8_t*>(const_cast<CRGB*>(pixels)); // ok reinterpret cast - Arduino SPI API requires non-const, const_cast needed
+		u8* data = reinterpret_cast<u8*>(const_cast<CRGB*>(pixels)); // ok reinterpret cast - Arduino SPI API requires non-const, const_cast needed
 		size_t n_bytes = n * 3;
 		m_ledSPI.writePixels(data, n_bytes);
 	}
@@ -180,13 +180,13 @@ public:
 	}
 
 	// Write out len bytes of the given value out over m_ledSPI.  Useful for quickly flushing, say, a line of 0's down the line.
-	void writeBytesValue(uint8_t value, int len) {
+	void writeBytesValue(u8 value, int len) {
 		select();
 		writeBytesValueRaw(value, len);
 		release();
 	}
 
-	void writeBytesValueRaw(uint8_t value, int len) {
+	void writeBytesValueRaw(u8 value, int len) {
 		while(len--) {
 			m_ledSPI.transfer(value);
 		}
@@ -194,9 +194,9 @@ public:
 
 	// write a block of len uint8_ts out.  Need to type this better so that explicit casts into the call aren't required.
 	// note that this template version takes a class parameter for a per-byte modifier to the data.
-	template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
+	template <class D> void writeBytes(FASTLED_REGISTER u8 *data, int len) {
 		select();
-		uint8_t *end = data + len;
+		u8 *end = data + len;
 		while(data != end) {
 			writeByte(D::adjust(*data++));
 		}
@@ -205,7 +205,7 @@ public:
 	}
 
 	// default version of writing a block of data out to the SPI port, with no data modifications being made
-	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER u8 *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	/// Finalize transmission (no-op for standard ESP32 SPI)
 	/// This method exists for compatibility with Quad-SPI implementations
@@ -213,7 +213,7 @@ public:
 	static void finalizeTransmission() { }
 
 	// write a single bit out, which bit from the passed in byte is determined by template parameter
-	template <uint8_t BIT> inline void writeBit(uint8_t b) {
+	template <u8 BIT> inline void writeBit(u8 b) {
 		// Test bit BIT in value b, send 0xFF if set, 0x00 if clear
 		// This matches the behavior of other platforms (AVR, ARM, etc.)
 		m_ledSPI.transfer((b & (1 << BIT)) ? 0xFF : 0x00);
@@ -222,7 +222,7 @@ public:
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning of each grouping, as well as a class specifying a per
 	// byte of data modification to be made.  (See DATA_NOP above)
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER>  __attribute__((noinline)) void writePixels(PixelController<RGB_ORDER> pixels, void* context) {
+	template <u8 FLAGS, class D, EOrder RGB_ORDER>  __attribute__((noinline)) void writePixels(PixelController<RGB_ORDER> pixels, void* context) {
 		#if FASTLED_ESP32_SPI_BULK_TRANSFER
 		select();
 		int len = pixels.mLen;

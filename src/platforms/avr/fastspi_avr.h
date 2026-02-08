@@ -22,7 +22,7 @@ namespace fl {
 #define UCPHA1 1
 #endif
 
-template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
+template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_DIVIDER>
 class AVRUSART1SPIOutput {
 	Selectable *m_pSelect;
 
@@ -75,14 +75,14 @@ public:
 	}
 	static void waitFully() __attribute__((always_inline)) { wait(); }
 
-	static void writeWord(uint16_t w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
+	static void writeWord(u16 w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
 
-	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); UDR1=b;  shouldWait(true); }
-	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { UDR1=b; shouldWait(true); wait(); }
-	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { UDR1=b; shouldWait(true); }
+	static void writeByte(u8 b) __attribute__((always_inline)) { wait(); UDR1=b;  shouldWait(true); }
+	static void writeBytePostWait(u8 b) __attribute__((always_inline)) { UDR1=b; shouldWait(true); wait(); }
+	static void writeByteNoWait(u8 b) __attribute__((always_inline)) { UDR1=b; shouldWait(true); }
 
 
-	template <uint8_t BIT> inline static void writeBit(uint8_t b) {
+	template <u8 BIT> inline static void writeBit(u8 b) {
 		if(b && (1 << BIT)) {
 			FastPin<_DATA_PIN>::hi();
 		} else {
@@ -116,13 +116,13 @@ public:
 		release();
 	}
 
-	static void writeBytesValueRaw(uint8_t value, int len) {
+	static void writeBytesValueRaw(u8 value, int len) {
 		while(len--) {
 			writeByte(value);
 		}
 	}
 
-	void writeBytesValue(uint8_t value, int len) {
+	void writeBytesValue(u8 value, int len) {
 		//setSPIRate();
 		select();
 		while(len--) {
@@ -132,9 +132,9 @@ public:
 	}
 
 	// Write a block of n uint8_ts out
-	template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
+	template <class D> void writeBytes(FASTLED_REGISTER u8 *data, int len) {
 		//setSPIRate();
-		uint8_t *end = data + len;
+		u8 *end = data + len;
 		select();
 		while(data != end) {
 			// a slight touch of delay here helps optimize the timing of the status register check loop (not used on ARM)
@@ -143,7 +143,7 @@ public:
 		release();
 	}
 
-	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER u8 *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	/// Finalize transmission (no-op for AVR USART1 SPI)
 	/// This method exists for compatibility with other SPI implementations
@@ -152,7 +152,7 @@ public:
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
+	template <u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
 		//setSPIRate();
 		int len = pixels.mLen;
 
@@ -179,7 +179,7 @@ public:
 #endif
 
 #if defined(UBRR0)
-template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
+template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_DIVIDER>
 class AVRUSART0SPIOutput {
 	Selectable *m_pSelect;
 
@@ -231,14 +231,14 @@ public:
 	}
 	static void waitFully() __attribute__((always_inline)) { wait(); }
 
-	static void writeWord(uint16_t w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
+	static void writeWord(u16 w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
 
-	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); UDR0=b;  shouldWait(true); }
-	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { UDR0=b; shouldWait(true); wait(); }
-	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { UDR0=b; shouldWait(true); }
+	static void writeByte(u8 b) __attribute__((always_inline)) { wait(); UDR0=b;  shouldWait(true); }
+	static void writeBytePostWait(u8 b) __attribute__((always_inline)) { UDR0=b; shouldWait(true); wait(); }
+	static void writeByteNoWait(u8 b) __attribute__((always_inline)) { UDR0=b; shouldWait(true); }
 
 
-	template <uint8_t BIT> inline static void writeBit(uint8_t b) {
+	template <u8 BIT> inline static void writeBit(u8 b) {
 		if(b && (1 << BIT)) {
 			FastPin<_DATA_PIN>::hi();
 		} else {
@@ -272,13 +272,13 @@ public:
 		release();
 	}
 
-	static void writeBytesValueRaw(uint8_t value, int len) {
+	static void writeBytesValueRaw(u8 value, int len) {
 		while(len--) {
 			writeByte(value);
 		}
 	}
 
-	void writeBytesValue(uint8_t value, int len) {
+	void writeBytesValue(u8 value, int len) {
 		//setSPIRate();
 		select();
 		while(len--) {
@@ -288,9 +288,9 @@ public:
 	}
 
 	// Write a block of n uint8_ts out
-	template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
+	template <class D> void writeBytes(FASTLED_REGISTER u8 *data, int len) {
 		//setSPIRate();
-		uint8_t *end = data + len;
+		u8 *end = data + len;
 		select();
 		while(data != end) {
 			// a slight touch of delay here helps optimize the timing of the status register check loop (not used on ARM)
@@ -299,11 +299,11 @@ public:
 		release();
 	}
 
-	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER u8 *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
+	template <u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
 		//setSPIRate();
 		int len = pixels.mLen;
 
@@ -338,7 +338,7 @@ public:
 
 #if defined(SPI0_CTRLA)
 
-template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
+template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_DIVIDER>
 class AVRHardwareSPIOutput {
 	Selectable *m_pSelect;
 
@@ -410,14 +410,14 @@ public:
 	}
 	static void waitFully() __attribute__((always_inline)) { wait(); }
 
-	static void writeWord(uint16_t w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
+	static void writeWord(u16 w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
 
-	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); SPI0_DATA=b;  shouldWait(true); }
-	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { SPI0_DATA=b; shouldWait(true); wait(); }
-	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { SPI0_DATA=b; shouldWait(true); }
+	static void writeByte(u8 b) __attribute__((always_inline)) { wait(); SPI0_DATA=b;  shouldWait(true); }
+	static void writeBytePostWait(u8 b) __attribute__((always_inline)) { SPI0_DATA=b; shouldWait(true); wait(); }
+	static void writeByteNoWait(u8 b) __attribute__((always_inline)) { SPI0_DATA=b; shouldWait(true); }
 
 
-	template <uint8_t BIT> inline static void writeBit(uint8_t b) {
+	template <u8 BIT> inline static void writeBit(u8 b) {
 		if(b && (1 << BIT)) {
 			FastPin<_DATA_PIN>::hi();
 		} else {
@@ -451,13 +451,13 @@ public:
 		release();
 	}
 
-	static void writeBytesValueRaw(uint8_t value, int len) {
+	static void writeBytesValueRaw(u8 value, int len) {
 		while(len--) {
 			writeByte(value);
 		}
 	}
 
-	void writeBytesValue(uint8_t value, int len) {
+	void writeBytesValue(u8 value, int len) {
 		//setSPIRate();
 		select();
 		while(len--) {
@@ -467,9 +467,9 @@ public:
 	}
 
 	// Write a block of n uint8_ts out
-	template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
+	template <class D> void writeBytes(FASTLED_REGISTER u8 *data, int len) {
 		//setSPIRate();
-		uint8_t *end = data + len;
+		u8 *end = data + len;
 		select();
 		while(data != end) {
 			// a slight touch of delay here helps optimize the timing of the status register check loop (not used on ARM)
@@ -478,11 +478,11 @@ public:
 		release();
 	}
 
-	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER u8 *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
+	template <u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
 		//setSPIRate();
 		int len = pixels.mLen;
 
@@ -527,7 +527,7 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
+template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_DIVIDER>
 class AVRHardwareSPIOutput {
 	Selectable *m_pSelect;
 	bool mWait;
@@ -555,7 +555,7 @@ public:
 	}
 
 	void init() {
-		volatile uint8_t clr;
+		volatile u8 clr;
 
 		// set the pins to output
 		FastPin<_DATA_PIN>::setOutput();
@@ -599,13 +599,13 @@ public:
 	static void wait() __attribute__((always_inline)) { if(shouldWait()) { while(!(SPSR & (1<<SPIF))); } }
 	static void waitFully() __attribute__((always_inline)) { wait(); }
 
-	static void writeWord(uint16_t w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
+	static void writeWord(u16 w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
 
-	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); SPDR=b;  shouldWait(true); }
-	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { SPDR=b; shouldWait(true); wait(); }
-	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { SPDR=b; shouldWait(true); }
+	static void writeByte(u8 b) __attribute__((always_inline)) { wait(); SPDR=b;  shouldWait(true); }
+	static void writeBytePostWait(u8 b) __attribute__((always_inline)) { SPDR=b; shouldWait(true); wait(); }
+	static void writeByteNoWait(u8 b) __attribute__((always_inline)) { SPDR=b; shouldWait(true); }
 
-	template <uint8_t BIT> inline static void writeBit(uint8_t b) {
+	template <u8 BIT> inline static void writeBit(u8 b) {
 		SPCR &= ~(1 << SPE);
 		if(b & (1 << BIT)) {
 			FastPin<_DATA_PIN>::hi();
@@ -643,11 +643,11 @@ public:
 		release();
 	}
 
-	static void writeBytesValueRaw(uint8_t value, int len) {
+	static void writeBytesValueRaw(u8 value, int len) {
 		while(len--) { writeByte(value); }
 	}
 
-	void writeBytesValue(uint8_t value, int len) {
+	void writeBytesValue(u8 value, int len) {
 		//setSPIRate();
 		select();
 		while(len--) {
@@ -657,9 +657,9 @@ public:
 	}
 
 	// Write a block of n uint8_ts out
-	template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
+	template <class D> void writeBytes(FASTLED_REGISTER u8 *data, int len) {
 		//setSPIRate();
-		uint8_t *end = data + len;
+		u8 *end = data + len;
 		select();
 		while(data != end) {
 			// a slight touch of delay here helps optimize the timing of the status register check loop (not used on ARM)
@@ -668,11 +668,11 @@ public:
 		release();
 	}
 
-	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER u8 *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
+	template <u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
 		//setSPIRate();
 		int len = pixels.mLen;
 
@@ -715,7 +715,7 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
+template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_DIVIDER>
 class AVRHardwareSPIOutput {
 	Selectable *m_pSelect;
 	bool mWait;
@@ -743,7 +743,7 @@ public:
 	}
 
 	void init() {
-		volatile uint8_t clr;
+		volatile u8 clr;
 
 		// set the pins to output
 		FastPin<_DATA_PIN>::setOutput();
@@ -787,13 +787,13 @@ public:
 	static void wait() __attribute__((always_inline)) { if(shouldWait()) { while(!(SPSR0 & (1<<SPIF))); } }
 	static void waitFully() __attribute__((always_inline)) { wait(); }
 
-	static void writeWord(uint16_t w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
+	static void writeWord(u16 w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
 
-	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); SPDR0=b;  shouldWait(true); }
-	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { SPDR0=b; shouldWait(true); wait(); }
-	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { SPDR0=b; shouldWait(true); }
+	static void writeByte(u8 b) __attribute__((always_inline)) { wait(); SPDR0=b;  shouldWait(true); }
+	static void writeBytePostWait(u8 b) __attribute__((always_inline)) { SPDR0=b; shouldWait(true); wait(); }
+	static void writeByteNoWait(u8 b) __attribute__((always_inline)) { SPDR0=b; shouldWait(true); }
 
-	template <uint8_t BIT> inline static void writeBit(uint8_t b) {
+	template <u8 BIT> inline static void writeBit(u8 b) {
 		SPCR0 &= ~(1 << SPE);
 		if(b & (1 << BIT)) {
 			FastPin<_DATA_PIN>::hi();
@@ -831,11 +831,11 @@ public:
 		release();
 	}
 
-	static void writeBytesValueRaw(uint8_t value, int len) {
+	static void writeBytesValueRaw(u8 value, int len) {
 		while(len--) { writeByte(value); }
 	}
 
-	void writeBytesValue(uint8_t value, int len) {
+	void writeBytesValue(u8 value, int len) {
 		//setSPIRate();
 		select();
 		while(len--) {
@@ -845,9 +845,9 @@ public:
 	}
 
 	// Write a block of n uint8_ts out
-	template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
+	template <class D> void writeBytes(FASTLED_REGISTER u8 *data, int len) {
 		//setSPIRate();
-		uint8_t *end = data + len;
+		u8 *end = data + len;
 		select();
 		while(data != end) {
 			// a slight touch of delay here helps optimize the timing of the status register check loop (not used on ARM)
@@ -856,11 +856,11 @@ public:
 		release();
 	}
 
-	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER u8 *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
+	template <u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
 		//setSPIRate();
 		int len = pixels.mLen;
 

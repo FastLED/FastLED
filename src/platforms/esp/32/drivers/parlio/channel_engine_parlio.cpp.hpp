@@ -361,7 +361,7 @@ void ChannelEnginePARLIOImpl::prepareScratchBuffer(
     // Copy channel data to scratch buffer with right-padding
     for (size_t i = 0; i < channelData.size(); i++) {
         size_t dataSize = channelData[i]->getSize();
-        uint8_t* laneDst = mScratchBuffer.data() + (i * maxChannelSize);
+        u8* laneDst = mScratchBuffer.data() + (i * maxChannelSize);
 
         const auto& srcData = channelData[i]->getData();
 

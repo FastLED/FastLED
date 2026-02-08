@@ -56,23 +56,23 @@ public:
     bool freeBus() override;
     bool isInitialized() const override;
     bool queueTransaction(const SpiTransaction& trans) override;
-    bool pollTransaction(uint32_t timeout_ms) override;
+    bool pollTransaction(u32 timeout_ms) override;
     bool registerCallback(void* callback, void* user_ctx) override;
-    uint8_t* allocateDma(size_t size) override;
-    void freeDma(uint8_t* buffer) override;
-    void delay(uint32_t ms) override;
+    u8* allocateDma(size_t size) override;
+    void freeDma(u8* buffer) override;
+    void delay(u32 ms) override;
     uint64_t getMicroseconds() override;
 
     //=========================================================================
     // Mock-Specific API
     //=========================================================================
 
-    void setTransactionDelay(uint32_t microseconds) override;
+    void setTransactionDelay(u32 microseconds) override;
     void simulateTransactionComplete() override;
     void setTransactionFailure(bool should_fail) override;
     const fl::vector<TransactionRecord>& getTransactionHistory() const override;
     void clearTransactionHistory() override;
-    fl::span<const uint8_t> getLastTransactionData() const override;
+    fl::span<const u8> getLastTransactionData() const override;
     bool hasDevice() const override;
     bool canQueueTransaction() const override;
     size_t getQueuedTransactionCount() const override;
@@ -102,7 +102,7 @@ private:
     void* mUserCtx;
 
     // Simulation settings
-    uint32_t mTransactionDelayUs;
+    u32 mTransactionDelayUs;
     bool mShouldFailTransaction;
 
     // Waveform capture
@@ -279,7 +279,7 @@ bool SpiPeripheralMockImpl::queueTransaction(const SpiTransaction& trans) {
     return true;
 }
 
-bool SpiPeripheralMockImpl::pollTransaction(uint32_t timeout_ms) {
+bool SpiPeripheralMockImpl::pollTransaction(u32 timeout_ms) {
     (void)timeout_ms;  // Unused in synchronous mock
 
     if (!mInitialized) {
@@ -326,7 +326,7 @@ bool SpiPeripheralMockImpl::registerCallback(void* callback, void* user_ctx) {
 // DMA Memory Management
 //=============================================================================
 
-uint8_t* SpiPeripheralMockImpl::allocateDma(size_t size) {
+u8* SpiPeripheralMockImpl::allocateDma(size_t size) {
     // Round up to 4-byte multiple (SPI DMA alignment requirement)
     size_t aligned_size = ((size + 3) / 4) * 4;
 
@@ -353,10 +353,10 @@ uint8_t* SpiPeripheralMockImpl::allocateDma(size_t size) {
         FL_WARN("SpiPeripheralMock: Failed to allocate buffer (" << aligned_size << " bytes)");
     }
 
-    return static_cast<uint8_t*>(buffer);
+    return static_cast<u8*>(buffer);
 }
 
-void SpiPeripheralMockImpl::freeDma(uint8_t* buffer) {
+void SpiPeripheralMockImpl::freeDma(u8* buffer) {
     if (buffer != nullptr) {
 #ifdef FL_IS_WIN
         _aligned_free(buffer);
@@ -370,7 +370,7 @@ void SpiPeripheralMockImpl::freeDma(uint8_t* buffer) {
 // Platform Utilities
 //=============================================================================
 
-void SpiPeripheralMockImpl::delay(uint32_t ms) {
+void SpiPeripheralMockImpl::delay(u32 ms) {
     // Use portable delay abstraction:
     // - Arduino: Arduino delay() function
     // - Host: time_stub.h delay() (can be fast-forwarded for testing)
@@ -386,7 +386,7 @@ uint64_t SpiPeripheralMockImpl::getMicroseconds() {
 // Mock-Specific API (for unit tests)
 //=============================================================================
 
-void SpiPeripheralMockImpl::setTransactionDelay(uint32_t microseconds) {
+void SpiPeripheralMockImpl::setTransactionDelay(u32 microseconds) {
     mTransactionDelayUs = microseconds;
 }
 
@@ -433,13 +433,13 @@ void SpiPeripheralMockImpl::clearTransactionHistory() {
     mQueuedTransactions.clear();
 }
 
-fl::span<const uint8_t> SpiPeripheralMockImpl::getLastTransactionData() const {
+fl::span<const u8> SpiPeripheralMockImpl::getLastTransactionData() const {
     if (mHistory.empty()) {
-        return fl::span<const uint8_t>();
+        return fl::span<const u8>();
     }
 
     const auto& last_record = mHistory.back();
-    return fl::span<const uint8_t>(last_record.buffer_copy);
+    return fl::span<const u8>(last_record.buffer_copy);
 }
 
 //-------------------------------------------------------------------------

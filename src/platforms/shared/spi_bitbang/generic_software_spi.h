@@ -31,7 +31,7 @@ namespace fl {
 /// @note This is a cross-platform software SPI implementation that works on any platform.
 /// @note Previously named AVRSoftwareSPIOutput (legacy name from when FastLED was AVR-focused)
 /// @todo Replace the select pin definition with a set of pins, to allow using mux hardware for routing in the future.
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, fl::u32 SPI_SPEED>
+template <u8 DATA_PIN, u8 CLOCK_PIN, fl::u32 SPI_SPEED>
 class GenericSoftwareSPIOutput {
 	// The data types for pointers to the pin port - typedef'd here from the ::Pin definition because on AVR these
 	// are pointers to 8 bit values, while on ARM they are 32 bit
@@ -74,16 +74,16 @@ public:
 	static void waitFully() __attribute__((always_inline)) { wait(); }
 
 	/// Write a single byte over SPI without waiting.
-	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { writeByte(b); }
+	static void writeByteNoWait(u8 b) __attribute__((always_inline)) { writeByte(b); }
 	/// Write a single byte over SPI and wait afterwards.
-	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { writeByte(b); wait(); }
+	static void writeBytePostWait(u8 b) __attribute__((always_inline)) { writeByte(b); wait(); }
 
 	/// Write a word (two bytes) over SPI.
 	static void writeWord(u16 w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
 
 	/// Write a single byte over SPI.
 	/// Naive implelentation, simply calls writeBit() on the 8 bits in the byte.
-	static void writeByte(uint8_t b) {
+	static void writeByte(u8 b) {
 		writeBit<7>(b);
 		writeBit<6>(b);
 		writeBit<5>(b);
@@ -96,7 +96,7 @@ public:
 
 private:
 	/// writeByte() implementation with data/clock registers passed in.
-	static void writeByte(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin)  {
+	static void writeByte(u8 b, clock_ptr_t clockpin, data_ptr_t datapin)  {
 		writeBit<7>(b, clockpin, datapin);
 		writeBit<6>(b, clockpin, datapin);
 		writeBit<5>(b, clockpin, datapin);
@@ -110,7 +110,7 @@ private:
 	/// writeByte() implementation with the data register passed in and prebaked values for data hi w/clock hi and
 	/// low and data lo w/clock hi and lo.  This is to be used when clock and data are on the same GPIO register,
 	/// can get close to getting a bit out the door in 2 clock cycles!
-	static void writeByte(uint8_t b, data_ptr_t datapin,
+	static void writeByte(u8 b, data_ptr_t datapin,
 						  data_t hival, data_t loval,
 						  clock_t hiclock, clock_t loclock) {
 		writeBit<7>(b, datapin, hival, loval, hiclock, loclock);
@@ -127,7 +127,7 @@ private:
 	/// data hi/lo and clock hi/lo values.
 	/// @note Weird things will happen if this method is called in cases where
 	/// the data and clock pins are on the same port!  Don't do that!
-	static void writeByte(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin,
+	static void writeByte(u8 b, clock_ptr_t clockpin, data_ptr_t datapin,
 						  data_t hival, data_t loval,
 						  clock_t hiclock, clock_t loclock) {
 		writeBit<7>(b, clockpin, datapin, hival, loval, hiclock, loclock);
@@ -159,7 +159,7 @@ public:
 	/// Write the BIT'th bit out via SPI, setting the data pin then strobing the clock
 	/// @tparam BIT the bit index in the byte
 	/// @param b the byte to read the bit from
-	template <uint8_t BIT> __attribute__((always_inline, hot)) inline static void writeBit(uint8_t b) {
+	template <u8 BIT> __attribute__((always_inline, hot)) inline static void writeBit(u8 b) {
 		//cli();
 		if(b & (1 << BIT)) {
 			fl::FastPin<DATA_PIN>::hi();
@@ -187,7 +187,7 @@ public:
 
 private:
 	/// Write the BIT'th bit out via SPI, setting the data pin then strobing the clock, using the passed in pin registers to accelerate access if needed
-	template <uint8_t BIT> FASTLED_FORCE_INLINE static void writeBit(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin) {
+	template <u8 BIT> FASTLED_FORCE_INLINE static void writeBit(u8 b, clock_ptr_t clockpin, data_ptr_t datapin) {
 		if(b & (1 << BIT)) {
 			fl::FastPin<DATA_PIN>::hi(datapin);
 			fl::FastPin<CLOCK_PIN>::hi(clockpin); CLOCK_HI_DELAY;
@@ -202,7 +202,7 @@ private:
 
 	/// The version of writeBit() to use when clock and data are on separate pins with precomputed values for setting
 	/// the clock and data pins
-	template <uint8_t BIT> FASTLED_FORCE_INLINE static void writeBit(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin,
+	template <u8 BIT> FASTLED_FORCE_INLINE static void writeBit(u8 b, clock_ptr_t clockpin, data_ptr_t datapin,
 													data_t hival, data_t loval, clock_t hiclock, clock_t loclock) {
 		// // only need to explicitly set clock hi if clock and data are on different ports
 		if(b & (1 << BIT)) {
@@ -219,7 +219,7 @@ private:
 
 	/// The version of writeBit() to use when clock and data are on the same port with precomputed values for the various
 	/// combinations
-	template <uint8_t BIT> FASTLED_FORCE_INLINE static void writeBit(uint8_t b, data_ptr_t clockdatapin,
+	template <u8 BIT> FASTLED_FORCE_INLINE static void writeBit(u8 b, data_ptr_t clockdatapin,
 													data_t datahiclockhi, data_t dataloclockhi,
 													data_t datahiclocklo, data_t dataloclocklo) {
 #if 0
@@ -259,7 +259,7 @@ public:
 	/// Useful for quickly flushing, say, a line of 0's down the line.
 	/// @param value the value to write to the bus
 	/// @param len how many copies of the value to write
-	void writeBytesValue(uint8_t value, int len) {
+	void writeBytesValue(fl::u8 value, int len) {
 		select();
 		writeBytesValueRaw(value, len);
 		release();
@@ -267,7 +267,7 @@ public:
 
 	/// Write multiple bytes of the given value over SPI, without selecting the interface.
 	/// @copydetails GenericSoftwareSPIOutput::writeBytesValue(uint8_t, int)
-	static void writeBytesValueRaw(uint8_t value, int len) {
+	static void writeBytesValueRaw(fl::u8 value, int len) {
 #ifdef FAST_SPI_INTERRUPTS_WRITE_PINS
 		// TODO: Weird things may happen if software bitbanging SPI output and other pins on the output reigsters are being twiddled.  Need
 		// to allow specifying whether or not exclusive i/o access is allowed during this process, and if i/o access is not allowed fall
@@ -309,10 +309,10 @@ public:
 	/// @param data pointer to data to write
 	/// @param len number of bytes to write
 	/// @todo Need to type this better so that explicit casts into the call aren't required.
-	template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
+	template <class D> void writeBytes(FASTLED_REGISTER fl::u8 *data, int len) {
 		select();
 #ifdef FAST_SPI_INTERRUPTS_WRITE_PINS
-		uint8_t *end = data + len;
+		fl::u8 *end = data + len;
 		while(data != end) {
 			writeByte(D::adjust(*data++));
 		}
@@ -327,7 +327,7 @@ public:
 			FASTLED_REGISTER data_t datalo = fl::FastPin<DATA_PIN>::loval();
 			FASTLED_REGISTER clock_t clockhi = fl::FastPin<CLOCK_PIN>::hival();
 			FASTLED_REGISTER clock_t clocklo = fl::FastPin<CLOCK_PIN>::loval();
-			uint8_t *end = data + len;
+			fl::u8 *end = data + len;
 
 			while(data != end) {
 				writeByte(D::adjust(*data++), clockpin, datapin, datahi, datalo, clockhi, clocklo);
@@ -341,7 +341,7 @@ public:
 			FASTLED_REGISTER data_t datahi_clocklo = fl::FastPin<DATA_PIN>::hival() & ~fl::FastPin<CLOCK_PIN>::mask();
 			FASTLED_REGISTER data_t datalo_clocklo = fl::FastPin<DATA_PIN>::loval() & ~fl::FastPin<CLOCK_PIN>::mask();
 
-			uint8_t *end = data + len;
+			fl::u8 *end = data + len;
 
 			while(data != end) {
 				writeByte(D::adjust(*data++), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
@@ -356,7 +356,7 @@ public:
 	/// Write an array of data to the SPI interface.
 	/// @param data pointer to data to write
 	/// @param len number of bytes to write
-	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER fl::u8 *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	/// Finalize transmission (no-op for software SPI)
 	/// This method exists for compatibility with hardware SPI implementations
@@ -369,7 +369,7 @@ public:
 	/// @tparam D Per-byte modifier class, e.g. ::DATA_NOP
 	/// @tparam RGB_ORDER the rgb ordering for the LED data (e.g. what order red, green, and blue data is written out in)
 	/// @param pixels a ::PixelController with the LED data and modifier options
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER>  __attribute__((noinline)) void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
+	template <fl::u8 FLAGS, class D, EOrder RGB_ORDER>  __attribute__((noinline)) void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
 		FASTLED_UNUSED(context);
 		select();
 		int len = pixels.mLen;

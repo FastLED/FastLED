@@ -19,12 +19,12 @@ namespace fl {
 
 /// @brief Result of timing calculation
 struct ClocklessTimingResult {
-    uint32_t pclk_hz;        ///< Calculated PCLK frequency (Hz)
-    uint32_t slot_ns;        ///< Duration of each time slot (nanoseconds)
-    uint32_t n_bit;          ///< Number of words (slots) per bit
-    uint32_t actual_T1_ns;   ///< Actual T1 timing after quantization (ns)
-    uint32_t actual_T2_ns;   ///< Actual T2 timing after quantization (ns)
-    uint32_t actual_T3_ns;   ///< Actual T3 timing after quantization (ns)
+    u32 pclk_hz;        ///< Calculated PCLK frequency (Hz)
+    u32 slot_ns;        ///< Duration of each time slot (nanoseconds)
+    u32 n_bit;          ///< Number of words (slots) per bit
+    u32 actual_T1_ns;   ///< Actual T1 timing after quantization (ns)
+    u32 actual_T2_ns;   ///< Actual T2 timing after quantization (ns)
+    u32 actual_T3_ns;   ///< Actual T3 timing after quantization (ns)
     float error_T1;          ///< Timing error for T1 (fraction, not percent)
     float error_T2;          ///< Timing error for T1+T2 combined (fraction)
     float error_T3;          ///< Timing error for T3 (fraction)
@@ -55,12 +55,12 @@ public:
     /// @param round_to_mhz If true, round result to nearest MHz
     /// @return ClocklessTimingResult with calculated values and errors
     static FL_CONSTEXPR14 ClocklessTimingResult calculate_optimal_pclk(
-        uint32_t T1_ns,
-        uint32_t T2_ns,
-        uint32_t T3_ns,
-        uint32_t n_words_per_bit = 3,
-        uint32_t min_pclk_hz = 1000000,      // 1 MHz min
-        uint32_t max_pclk_hz = 80000000,     // 80 MHz max
+        u32 T1_ns,
+        u32 T2_ns,
+        u32 T3_ns,
+        u32 n_words_per_bit = 3,
+        u32 min_pclk_hz = 1000000,      // 1 MHz min
+        u32 max_pclk_hz = 80000000,     // 80 MHz max
         bool round_to_mhz = true
     ) {
         ClocklessTimingResult result = {};
@@ -72,10 +72,10 @@ public:
         }
 
         // Calculate total bit period
-        uint32_t tbit_ns = T1_ns + T2_ns + T3_ns;
+        u32 tbit_ns = T1_ns + T2_ns + T3_ns;
 
         // Calculate ideal slot duration for N-word encoding
-        uint32_t ideal_slot_ns = tbit_ns / n_words_per_bit;
+        u32 ideal_slot_ns = tbit_ns / n_words_per_bit;
 
         if (ideal_slot_ns == 0) {
             result.valid = false;
@@ -83,12 +83,12 @@ public:
         }
 
         // Convert to PCLK frequency
-        uint32_t ideal_pclk_hz = 1000000000UL / ideal_slot_ns;
+        u32 ideal_pclk_hz = 1000000000UL / ideal_slot_ns;
 
         // Round to nearest MHz if requested
-        uint32_t pclk_hz = ideal_pclk_hz;
+        u32 pclk_hz = ideal_pclk_hz;
         if (round_to_mhz) {
-            uint32_t rounded_mhz = (ideal_pclk_hz + 500000) / 1000000;
+            u32 rounded_mhz = (ideal_pclk_hz + 500000) / 1000000;
             if (rounded_mhz < (min_pclk_hz / 1000000)) {
                 rounded_mhz = (min_pclk_hz + 999999) / 1000000;
             }
@@ -103,7 +103,7 @@ public:
         }
 
         // Calculate actual slot duration
-        uint32_t slot_ns = 1000000000UL / pclk_hz;
+        u32 slot_ns = 1000000000UL / pclk_hz;
 
         // Calculate actual timing values based on 3-word pattern:
         // Bit-0: [HIGH, LOW, LOW]   - 1 slot HIGH, 2 slots LOW
@@ -113,22 +113,22 @@ public:
         // - T1 = minimum HIGH time (for bit 0)
         // - T2 = additional HIGH time for bit 1 (so bit-1 HIGH = T1 + T2)
         // - T3 = LOW tail duration
-        uint32_t actual_bit0_high_ns = slot_ns;      // Bit-0: 1 slot HIGH
-        uint32_t actual_bit1_high_ns = 2 * slot_ns;  // Bit-1: 2 slots HIGH
-        uint32_t actual_low_ns = slot_ns;            // Low tail: 1 slot
+        u32 actual_bit0_high_ns = slot_ns;      // Bit-0: 1 slot HIGH
+        u32 actual_bit1_high_ns = 2 * slot_ns;  // Bit-1: 2 slots HIGH
+        u32 actual_low_ns = slot_ns;            // Low tail: 1 slot
 
         // Map to T1/T2/T3 convention
-        uint32_t actual_T1_ns = actual_bit0_high_ns;  // Minimum high (bit 0)
-        uint32_t actual_T2_ns = actual_bit1_high_ns - actual_bit0_high_ns;  // Additional high for bit 1
-        uint32_t actual_T3_ns = actual_low_ns;        // Low tail
+        u32 actual_T1_ns = actual_bit0_high_ns;  // Minimum high (bit 0)
+        u32 actual_T2_ns = actual_bit1_high_ns - actual_bit0_high_ns;  // Additional high for bit 1
+        u32 actual_T3_ns = actual_low_ns;        // Low tail
 
         // Calculate timing errors
         // Error for T1 (bit-0 high time)
         float error_T1 = calculate_error(actual_T1_ns, T1_ns);
 
         // Error for T1+T2 combined (bit-1 total high time)
-        uint32_t target_T1_T2 = T1_ns + T2_ns;
-        uint32_t actual_T1_T2 = actual_T1_ns + actual_T2_ns;
+        u32 target_T1_T2 = T1_ns + T2_ns;
+        u32 actual_T1_T2 = actual_T1_ns + actual_T2_ns;
         float error_T2 = calculate_error(actual_T1_T2, target_T1_T2);
 
         // Error for T3 (low tail)
@@ -158,11 +158,11 @@ public:
     /// @param slot_ns Duration of each slot in nanoseconds
     /// @return Buffer size in bytes
     static FL_CONSTEXPR14 size_t calculate_buffer_size(
-        uint32_t num_leds,
-        uint32_t bits_per_led,
-        uint32_t words_per_bit,
-        uint32_t latch_us,
-        uint32_t slot_ns
+        u32 num_leds,
+        u32 bits_per_led,
+        u32 words_per_bit,
+        u32 latch_us,
+        u32 slot_ns
     ) {
         // Data size: num_leds × bits_per_led × words_per_bit × 2 bytes
         size_t data_size = num_leds * bits_per_led * words_per_bit * 2;
@@ -182,16 +182,16 @@ public:
     /// @param slot_ns Duration of each slot in nanoseconds
     /// @param latch_us Latch gap duration in microseconds
     /// @return Frame time in microseconds
-    static FL_CONSTEXPR14 uint32_t calculate_frame_time_us(
-        uint32_t num_leds,
-        uint32_t bits_per_led,
-        uint32_t words_per_bit,
-        uint32_t slot_ns,
-        uint32_t latch_us
+    static FL_CONSTEXPR14 u32 calculate_frame_time_us(
+        u32 num_leds,
+        u32 bits_per_led,
+        u32 words_per_bit,
+        u32 slot_ns,
+        u32 latch_us
     ) {
         // Transmission time: num_leds × bits × words × slot_ns
-        uint32_t transmission_ns = num_leds * bits_per_led * words_per_bit * slot_ns;
-        uint32_t transmission_us = transmission_ns / 1000;
+        u32 transmission_ns = num_leds * bits_per_led * words_per_bit * slot_ns;
+        u32 transmission_us = transmission_ns / 1000;
 
         return transmission_us + latch_us;
     }
@@ -218,10 +218,10 @@ private:
     /// @param actual Actual measured/calculated value
     /// @param target Target desired value
     /// @return Relative error as fraction (e.g., 0.05 = 5% error)
-    static FL_CONSTEXPR14 float calculate_error(uint32_t actual, uint32_t target) {
+    static FL_CONSTEXPR14 float calculate_error(u32 actual, u32 target) {
         if (target == 0) return 0.0f;
 
-        int32_t diff = (int32_t)actual - (int32_t)target;
+        i32 diff = (i32)actual - (i32)target;
         if (diff < 0) diff = -diff;  // abs()
 
         return (float)diff / (float)target;

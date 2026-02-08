@@ -18,23 +18,23 @@ namespace fl {
 /// typedef for IEEE754 "binary32" float type internals
 /// @see https://en.wikipedia.org/wiki/IEEE_754
 typedef union {
-    uint32_t i;  ///< raw value, as an integer
+    u32 i;  ///< raw value, as an integer
     float    f;  ///< raw value, as a float
     struct {
-        uint32_t mantissa: 23;  ///< 23-bit mantissa
-        uint32_t exponent:  8;  ///< 8-bit exponent
-        uint32_t signbit:   1;  ///< sign bit
+        u32 mantissa: 23;  ///< 23-bit mantissa
+        u32 exponent:  8;  ///< 8-bit exponent
+        u32 signbit:   1;  ///< sign bit
     };
     struct {
-        uint32_t mant7 :  7;  ///< @todo Doc: what is this for?
-        uint32_t mant16: 16;  ///< @todo Doc: what is this for?
-        uint32_t exp_  :  8;  ///< @todo Doc: what is this for?
-        uint32_t sb_   :  1;  ///< @todo Doc: what is this for?
+        u32 mant7 :  7;  ///< @todo Doc: what is this for?
+        u32 mant16: 16;  ///< @todo Doc: what is this for?
+        u32 exp_  :  8;  ///< @todo Doc: what is this for?
+        u32 sb_   :  1;  ///< @todo Doc: what is this for?
     };
     struct {
-        uint32_t mant_lo8 : 8;  ///< @todo Doc: what is this for?
-        uint32_t mant_hi16_exp_lo1 : 16;  ///< @todo Doc: what is this for?
-        uint32_t sb_exphi7 : 8;  ///< @todo Doc: what is this for?
+        u32 mant_lo8 : 8;  ///< @todo Doc: what is this for?
+        u32 mant_hi16_exp_lo1 : 16;  ///< @todo Doc: what is this for?
+        u32 sb_exphi7 : 8;  ///< @todo Doc: what is this for?
     };
 } IEEE754binary32_t;
 

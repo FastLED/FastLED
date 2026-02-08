@@ -19,7 +19,7 @@ class Fx {
     // Alias DrawContext for use within Fx
     using DrawContext = _DrawContext;
 
-    Fx(uint16_t numLeds) : mNumLeds(numLeds) {}
+    Fx(u16 numLeds) : mNumLeds(numLeds) {}
 
     /// @param now The current time in milliseconds. Fx writers are encouraged
     /// to use this instead of millis() directly as this will more deterministic
@@ -45,11 +45,11 @@ class Fx {
     } // Called when the fx is resumed after a pause,
       // usually when a transition has started.
 
-    uint16_t getNumLeds() const { return mNumLeds; }
+    u16 getNumLeds() const { return mNumLeds; }
 
   protected:
     virtual ~Fx() {} // Protected destructor
-    uint16_t mNumLeds;
+    u16 mNumLeds;
 };
 
 } // namespace fl

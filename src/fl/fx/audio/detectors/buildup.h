@@ -16,8 +16,8 @@ class AudioContext;
 struct Buildup {
     float intensity;        // Buildup intensity (0.0 to 1.0)
     float progress;         // Progress through buildup (0.0 to 1.0)
-    uint32_t duration;      // Duration in milliseconds
-    uint32_t timestamp;     // When buildup started
+    u32 duration;      // Duration in milliseconds
+    u32 timestamp;     // When buildup started
     bool active;            // Whether buildup is currently active
 
     Buildup()
@@ -71,8 +71,8 @@ public:
     const Buildup& getBuildup() const { return mCurrentBuildup; }
 
     // Configuration
-    void setMinDuration(uint32_t ms) { mMinDuration = ms; }
-    void setMaxDuration(uint32_t ms) { mMaxDuration = ms; }
+    void setMinDuration(u32 ms) { mMinDuration = ms; }
+    void setMaxDuration(u32 ms) { mMaxDuration = ms; }
     void setIntensityThreshold(float threshold) { mIntensityThreshold = threshold; }
     void setEnergyRiseThreshold(float threshold) { mEnergyRiseThreshold = threshold; }
 
@@ -95,11 +95,11 @@ private:
     // Previous frame state
     float mPrevEnergy;
     float mPrevTreble;
-    uint32_t mLastUpdateTime;
+    u32 mLastUpdateTime;
 
     // Configuration
-    uint32_t mMinDuration;          // Minimum buildup duration (ms)
-    uint32_t mMaxDuration;          // Maximum buildup duration (ms)
+    u32 mMinDuration;          // Minimum buildup duration (ms)
+    u32 mMaxDuration;          // Maximum buildup duration (ms)
     float mIntensityThreshold;      // Minimum intensity to start buildup
     float mEnergyRiseThreshold;     // Minimum energy rise rate
 

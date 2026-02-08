@@ -44,7 +44,7 @@ public:
         auto rgbw = pixelIterator.get_rgbw();
         
         // Determine the appropriate NeoPixel type based on RGBW mode
-        uint16_t neoPixelType = NEO_KHZ800;
+        u16 neoPixelType = NEO_KHZ800;
         if (rgbw.active()) {
             neoPixelType |= NEO_RGBW;  // RGBW mode
         } else {

@@ -13,11 +13,11 @@ FASTLED_SHARED_PTR(Luminova);
 
 struct LuminovaParams {
     // Global fade amount applied each frame (higher = faster fade)
-    uint8_t fade_amount = 18;
+    u8 fade_amount = 18;
     // Blur amount applied each frame for trail softness
-    uint8_t blur_amount = 24;
+    u8 blur_amount = 24;
     // Per-dot gain applied to plotted pixels to prevent blowout on small grids
-    uint8_t point_gain = 128; // 50%
+    u8 point_gain = 128; // 50%
     // Number of particles alive in the system (upper bound)
     int max_particles = 256;
 };
@@ -33,9 +33,9 @@ class Luminova : public Fx2d {
 
     fl::string fxName() const override { return "Luminova"; }
 
-    void setFadeAmount(uint8_t fade_amount) { mParams.fade_amount = fade_amount; }
-    void setBlurAmount(uint8_t blur_amount) { mParams.blur_amount = blur_amount; }
-    void setPointGain(uint8_t point_gain) { mParams.point_gain = point_gain; }
+    void setFadeAmount(u8 fade_amount) { mParams.fade_amount = fade_amount; }
+    void setBlurAmount(u8 blur_amount) { mParams.blur_amount = blur_amount; }
+    void setPointGain(u8 point_gain) { mParams.point_gain = point_gain; }
 
     // Adjust maximum particle slots (reinitializes pool if size changes)
     void setMaxParticles(int max_particles);
@@ -52,7 +52,7 @@ class Luminova : public Fx2d {
     };
 
     void resetParticle(Particle &p, fl::u32 tick);
-    void plotDot(CRGB *leds, int x, int y, uint8_t v) const;
+    void plotDot(CRGB *leds, int x, int y, u8 v) const;
     void plotSoftDot(CRGB *leds, float fx, float fy, float s) const;
 
     Params mParams;

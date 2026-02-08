@@ -102,8 +102,8 @@ class ScaleUp : public Fx2d {
     /// @param width Width of the low-resolution input buffer
     /// @param height Height of the low-resolution input buffer
     /// @param mXyMap The target high-resolution XYMap defining output dimensions and layout
-    void expand(const CRGB *input, CRGB *output, uint16_t width,
-                uint16_t height, const XYMap& mXyMap);
+    void expand(const CRGB *input, CRGB *output, u16 width,
+                u16 height, const XYMap& mXyMap);
 
   private:
     /// @brief Direct copy without expansion (used when resolutions match)
@@ -111,8 +111,8 @@ class ScaleUp : public Fx2d {
     /// @param output Destination buffer
     /// @param width Buffer width
     /// @param height Buffer height
-    void noExpand(const CRGB *input, CRGB *output, uint16_t width,
-                  uint16_t height);
+    void noExpand(const CRGB *input, CRGB *output, u16 width,
+                  u16 height);
 
     Fx2dPtr mDelegate;  ///< The wrapped effect that renders at low resolution
     fl::vector<CRGB, fl::allocator_psram<CRGB>> mSurface;  ///< Low-resolution render buffer

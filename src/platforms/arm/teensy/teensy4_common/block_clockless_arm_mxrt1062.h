@@ -12,19 +12,19 @@ namespace fl {
 #if defined(FL_IS_TEENSY_4X)
 
 #define __FL_T4_MASK ((1<<(LANES))-1)
-template <uint8_t LANES, int FIRST_PIN, typename TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+template <u8 LANES, int FIRST_PIN, typename TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class FlexibleInlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, __FL_T4_MASK> {
-    static constexpr uint32_t T1 = TIMING::T1;
-    static constexpr uint32_t T2 = TIMING::T2;
-    static constexpr uint32_t T3 = TIMING::T3;
-    uint8_t m_bitOffsets[16];
-    uint8_t m_nActualLanes;
-    uint8_t m_nLowBit;
-    uint8_t m_nHighBit;
-    uint32_t m_nWriteMask;
-    uint8_t m_nOutBlocks;
-    uint32_t m_offsets[3];
-    uint32_t MS_COUNTER;
+    static constexpr u32 T1 = TIMING::T1;
+    static constexpr u32 T2 = TIMING::T2;
+    static constexpr u32 T3 = TIMING::T3;
+    u8 m_bitOffsets[16];
+    u8 m_nActualLanes;
+    u8 m_nLowBit;
+    u8 m_nHighBit;
+    u32 m_nWriteMask;
+    u8 m_nOutBlocks;
+    u32 m_offsets[3];
+    u32 MS_COUNTER;
     CMinWait<WAIT_TIME> mWait;
 
 public:
@@ -100,12 +100,12 @@ public:
 
     }
 
-    virtual uint16_t getMaxRefreshRate() const { return 400; }
+    virtual u16 getMaxRefreshRate() const { return 400; }
 
     virtual void showPixels(PixelController<RGB_ORDER, LANES, __FL_T4_MASK> & pixels) {
         mWait.wait();
     #if FASTLED_ALLOW_INTERRUPTS == 0
-        uint32_t clocks = showRGBInternal(pixels);
+        u32 clocks = showRGBInternal(pixels);
         // Adjust the timer
         long microsTaken = CLKS_TO_MICROS(clocks);
         MS_COUNTER += (1 + (microsTaken / 1000));
@@ -116,31 +116,31 @@ public:
 	}
 
   typedef union {
-    uint8_t bytes[32];
-    uint8_t bg[4][8];
-    uint16_t shorts[16];
-    uint32_t raw[8];
+    u8 bytes[32];
+    u8 bg[4][8];
+    u16 shorts[16];
+    u32 raw[8];
   } _outlines;
 
 
-  template<int BITS,int PX> __attribute__ ((always_inline)) inline void writeBits(FASTLED_REGISTER uint32_t & next_mark, FASTLED_REGISTER _outlines & b, PixelController<RGB_ORDER, LANES, __FL_T4_MASK> &pixels) {
+  template<int BITS,int PX> __attribute__ ((always_inline)) inline void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER _outlines & b, PixelController<RGB_ORDER, LANES, __FL_T4_MASK> &pixels) {
         _outlines b2;
         transpose8x1(b.bg[3], b2.bg[3]);
         transpose8x1(b.bg[2], b2.bg[2]);
         transpose8x1(b.bg[1], b2.bg[1]);
         transpose8x1(b.bg[0], b2.bg[0]);
 
-        FASTLED_REGISTER uint8_t d = pixels.template getd<PX>(pixels);
-        FASTLED_REGISTER uint8_t scale = pixels.template getscale<PX>(pixels);
+        FASTLED_REGISTER u8 d = pixels.template getd<PX>(pixels);
+        FASTLED_REGISTER u8 scale = pixels.template getscale<PX>(pixels);
 
         int x = 0;
-        for(uint32_t i = 8; i > 0;) {
+        for(u32 i = 8; i > 0;) {
             --i;
             while(ARM_DWT_CYCCNT < next_mark);
             *fl::FastPin<FIRST_PIN>::sport() = m_nWriteMask;
             next_mark = ARM_DWT_CYCCNT + m_offsets[0];
 
-            uint32_t out = (b2.bg[3][i] << 24) | (b2.bg[2][i] << 16) | (b2.bg[1][i] << 8) | b2.bg[0][i];
+            u32 out = (b2.bg[3][i] << 24) | (b2.bg[2][i] << 16) | (b2.bg[1][i] << 8) | b2.bg[0][i];
 
             out = ((~out) & m_nWriteMask);
             while((next_mark - ARM_DWT_CYCCNT) > m_offsets[1]);
@@ -162,10 +162,10 @@ public:
         }
     }
 
-    uint32_t showRGBInternal(PixelController<RGB_ORDER,LANES, __FL_T4_MASK> &allpixels) {
+    u32 showRGBInternal(PixelController<RGB_ORDER,LANES, __FL_T4_MASK> &allpixels) {
         allpixels.preStepFirstByteDithering();
         _outlines b0;
-        uint32_t start = ARM_DWT_CYCCNT;
+        u32 start = ARM_DWT_CYCCNT;
 
         for(int i = 0; i < m_nActualLanes; ++i) {
             b0.bytes[m_bitOffsets[i]] = allpixels.loadAndScale0(i);
@@ -176,9 +176,9 @@ public:
         m_offsets[0] = _FASTLED_NS_TO_DWT(T1+T2+T3);
         m_offsets[1] = _FASTLED_NS_TO_DWT(T2+T3);
         m_offsets[2] = _FASTLED_NS_TO_DWT(T3);
-        uint32_t wait_off = _FASTLED_NS_TO_DWT((WAIT_TIME-INTERRUPT_THRESHOLD));
+        u32 wait_off = _FASTLED_NS_TO_DWT((WAIT_TIME-INTERRUPT_THRESHOLD));
 
-        uint32_t next_mark = ARM_DWT_CYCCNT + m_offsets[0];
+        u32 next_mark = ARM_DWT_CYCCNT + m_offsets[0];
 
         while(allpixels.has(1)) {
             allpixels.stepDithering();
@@ -209,7 +209,7 @@ public:
     }
 };
 
-template<template<uint8_t DATA_PIN, fl::EOrder RGB_ORDER> class CHIPSET, uint8_t DATA_PIN, int NUM_LANES, fl::EOrder RGB_ORDER=GRB>
+template<template<u8 DATA_PIN, fl::EOrder RGB_ORDER> class CHIPSET, u8 DATA_PIN, int NUM_LANES, fl::EOrder RGB_ORDER=GRB>
 class __FIBCC : public FlexibleInlineBlockClocklessController<NUM_LANES,DATA_PIN,typename CHIPSET<DATA_PIN,RGB_ORDER>::__TIMING,RGB_ORDER,CHIPSET<DATA_PIN,RGB_ORDER>::__XTRA0(),CHIPSET<DATA_PIN,RGB_ORDER>::__FLIP(),CHIPSET<DATA_PIN,RGB_ORDER>::__WAIT_TIME()> {};
 
 #define __FASTLED_HAS_FIBCC 1

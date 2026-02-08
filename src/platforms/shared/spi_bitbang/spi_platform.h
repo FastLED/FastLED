@@ -31,8 +31,8 @@ FL_EXTERN_C_BEGIN
 
 #ifdef FASTLED_SPI_HOST_SIMULATION
     /* Host simulation - capture events to ring buffer */
-    void fl_gpio_sim_write_set(uint32_t mask);
-    void fl_gpio_sim_write_clear(uint32_t mask);
+    void fl_gpio_sim_write_set(fl::u32 mask);
+    void fl_gpio_sim_write_clear(fl::u32 mask);
 
     #define FL_GPIO_WRITE_SET(mask)   fl_gpio_sim_write_set(mask)
     #define FL_GPIO_WRITE_CLEAR(mask) fl_gpio_sim_write_clear(mask)
@@ -46,9 +46,9 @@ FL_EXTERN_C_BEGIN
     #endif
 
     #define FL_GPIO_WRITE_SET(mask) \
-        (*(volatile uint32_t*)(uintptr_t)FASTLED_GPIO_W1TS_ADDR = (mask))
+        (*(volatile fl::u32*)(uintptr_t)FASTLED_GPIO_W1TS_ADDR = (mask))
     #define FL_GPIO_WRITE_CLEAR(mask) \
-        (*(volatile uint32_t*)(uintptr_t)FASTLED_GPIO_W1TC_ADDR = (mask))
+        (*(volatile fl::u32*)(uintptr_t)FASTLED_GPIO_W1TC_ADDR = (mask))
 #endif
 
 FL_EXTERN_C_END

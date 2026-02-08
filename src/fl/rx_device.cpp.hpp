@@ -24,15 +24,15 @@ fl::shared_ptr<RxDevice> RxDevice::createDummy() {
 
 // Implementation of make4PhaseTiming function
 ChipsetTiming4Phase make4PhaseTiming(const ChipsetTiming& timing_3phase,
-                                      uint32_t tolerance_ns) {
+                                      u32 tolerance_ns) {
     // Calculate derived values from 3-phase timing
     // The encoder uses:
     //   Bit 0: T1 high + (T2+T3) low
     //   Bit 1: (T1+T2) high + T3 low
-    uint32_t t0h = timing_3phase.T1;                    // Bit 0 high time
-    uint32_t t0l = timing_3phase.T2 + timing_3phase.T3; // Bit 0 low time
-    uint32_t t1h = timing_3phase.T1 + timing_3phase.T2; // Bit 1 high time
-    uint32_t t1l = timing_3phase.T3;                    // Bit 1 low time
+    u32 t0h = timing_3phase.T1;                    // Bit 0 high time
+    u32 t0l = timing_3phase.T2 + timing_3phase.T3; // Bit 0 low time
+    u32 t1h = timing_3phase.T1 + timing_3phase.T2; // Bit 1 high time
+    u32 t1l = timing_3phase.T3;                    // Bit 1 low time
 
     ChipsetTiming4Phase result;
 

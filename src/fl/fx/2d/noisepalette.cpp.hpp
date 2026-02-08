@@ -106,16 +106,16 @@ void NoisePalette::setPalettePreset(int paletteIndex) {
 }
 
 void NoisePalette::mapNoiseToLEDsUsingPalette(CRGB *leds) {
-    static uint8_t ihue = 0; // okay static in header
+    static u8 ihue = 0; // okay static in header
 
-    for (uint16_t i = 0; i < width; i++) {
-        for (uint16_t j = 0; j < height; j++) {
+    for (u16 i = 0; i < width; i++) {
+        for (u16 j = 0; j < height; j++) {
             // We use the value at the (i,j) coordinate in the noise
             // array for our brightness, and the flipped value from (j,i)
             // for our pixel's index into the color palette.
 
-            uint8_t index = noise[i * height + j];
-            uint8_t bri = noise[j * width + i];
+            u8 index = noise[i * height + j];
+            u8 bri = noise[j * width + i];
 
             // if this palette is a 'loop', add a slowly-changing base value
             if (colorLoop) {
@@ -143,17 +143,17 @@ void NoisePalette::fillnoise8() {
     // visible from frame-to-frame.  In order to reduce this, we can do some
     // fast data-smoothing. The amount of data smoothing we're doing depends
     // on "speed".
-    uint8_t dataSmoothing = 0;
+    u8 dataSmoothing = 0;
     if (speed < 50) {
         dataSmoothing = 200 - (speed * 4);
     }
 
-    for (uint16_t i = 0; i < width; i++) {
+    for (u16 i = 0; i < width; i++) {
         int ioffset = scale * i;
-        for (uint16_t j = 0; j < height; j++) {
+        for (u16 j = 0; j < height; j++) {
             int joffset = scale * j;
 
-            uint8_t data = inoise8(mX + ioffset, mY + joffset, mZ);
+            u8 data = inoise8(mX + ioffset, mY + joffset, mZ);
 
             // The range of the inoise8 function is roughly 16-238.
             // These two operations expand those values out to roughly
@@ -163,8 +163,8 @@ void NoisePalette::fillnoise8() {
             data = qadd8(data, scale8(data, 39));
 
             if (dataSmoothing) {
-                uint8_t olddata = noise[i * height + j];
-                uint8_t newdata = scale8(olddata, dataSmoothing) +
+                u8 olddata = noise[i * height + j];
+                u8 newdata = scale8(olddata, dataSmoothing) +
                                   scale8(data, 256 - dataSmoothing);
                 data = newdata;
             }
@@ -180,9 +180,9 @@ void NoisePalette::fillnoise8() {
     mY -= speed / 16;
 }
 
-uint8_t NoisePalette::changeToRandomPalette() {
+u8 NoisePalette::changeToRandomPalette() {
     while (true) {
-        uint8_t new_idx = random8() % 12;
+        u8 new_idx = random8() % 12;
         if (new_idx == currentPaletteIndex) {
             continue;
         }

@@ -210,7 +210,7 @@ class RGBWEmulatedController
 
 
     static const int LANES = CONTROLLER::LANES_VALUE;
-    static const uint32_t MASK = CONTROLLER::MASK_VALUE;
+    static const fl::u32 MASK = CONTROLLER::MASK_VALUE;
 
     // The delegated controller must do no reordering.
     static_assert(RGB == CONTROLLER::RGB_ORDER_VALUE, "The delegated controller MUST NOT do reordering");
@@ -282,18 +282,18 @@ class RGBWEmulatedController
     /// @param num_leds Number of RGB LEDs to convert to RGBW
     /// @details Reallocates the buffer if needed, accounting for the 4:3 byte ratio
     /// when packing RGBW data into RGB format
-    void ensureBuffer(int32_t num_leds) {
+    void ensureBuffer(fl::i32 num_leds) {
         if (num_leds != mNumRGBLeds) {
             mNumRGBLeds = num_leds;
             // The delegate controller expects the raw pixel byte data in multiples of 3.
             // In the case of src data not a multiple of 3, then we need to
             // add pad bytes so that the delegate controller doesn't walk off the end
             // of the array and invoke a buffer overflow panic.
-            uint32_t new_size = Rgbw::size_as_rgb(num_leds);
+            fl::u32 new_size = Rgbw::size_as_rgb(num_leds);
             delete[] mRGBWPixels;
             mRGBWPixels = new CRGB[new_size];
 			// showPixels may never clear the last two pixels.
-			for (uint32_t i = 0; i < new_size; i++) {
+			for (fl::u32 i = 0; i < new_size; i++) {
 				mRGBWPixels[i] = CRGB(0, 0, 0);
 			}
 
@@ -302,8 +302,8 @@ class RGBWEmulatedController
     }
 
     CRGB *mRGBWPixels = nullptr;        ///< Internal buffer for packed RGBW data
-    int32_t mNumRGBLeds = 0;            ///< Number of RGB LEDs in the original array
-    int32_t mNumRGBWLeds = 0;           ///< Number of RGBW pixels the buffer can hold
+    fl::i32 mNumRGBLeds = 0;            ///< Number of RGB LEDs in the original array
+    fl::i32 mNumRGBWLeds = 0;           ///< Number of RGBW pixels the buffer can hold
     ControllerT mController;             ///< The underlying RGB controller instance
 };
 
@@ -600,7 +600,7 @@ public:
 	};
 
     static const int LANES = ControllerT::LANES_VALUE;
-    static const uint32_t MASK = ControllerT::MASK_VALUE;
+    static const fl::u32 MASK = ControllerT::MASK_VALUE;
 
     WS2816Controller() {}
     ~WS2816Controller() {

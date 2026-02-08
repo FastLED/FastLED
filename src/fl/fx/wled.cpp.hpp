@@ -35,7 +35,7 @@ void WLED::setState(const fl::Json& wledState) {
                 FL_WARN("WLED: brightness " << briInt << " out of range, clamping to 255");
                 briInt = 255;
             }
-            uint8_t newBri = static_cast<uint8_t>(briInt);
+            u8 newBri = static_cast<u8>(briInt);
             if (newBri != mWledBri) {
                 mWledBri = newBri;
                 FL_DBG("WLED: bri=" << static_cast<int>(mWledBri));
@@ -57,7 +57,7 @@ void WLED::setState(const fl::Json& wledState) {
                 FL_WARN("WLED: transition " << transInt << " out of range, clamping to 65535");
                 transInt = 65535;
             }
-            uint16_t newTransition = static_cast<uint16_t>(transInt);
+            u16 newTransition = static_cast<u16>(transInt);
             if (newTransition != mTransition) {
                 mTransition = newTransition;
                 FL_DBG("WLED: transition=" << mTransition);
@@ -79,7 +79,7 @@ void WLED::setState(const fl::Json& wledState) {
                 FL_WARN("WLED: preset " << psInt << " out of range, clamping to 250");
                 psInt = 250;
             }
-            int16_t newPreset = static_cast<int16_t>(psInt);
+            i16 newPreset = static_cast<i16>(psInt);
             if (newPreset != mPreset) {
                 mPreset = newPreset;
                 FL_DBG("WLED: ps=" << mPreset);
@@ -101,7 +101,7 @@ void WLED::setState(const fl::Json& wledState) {
                 FL_WARN("WLED: playlist " << plInt << " out of range, clamping to 250");
                 plInt = 250;
             }
-            int16_t newPlaylist = static_cast<int16_t>(plInt);
+            i16 newPlaylist = static_cast<i16>(plInt);
             if (newPlaylist != mPlaylist) {
                 mPlaylist = newPlaylist;
                 FL_DBG("WLED: pl=" << mPlaylist);
@@ -123,7 +123,7 @@ void WLED::setState(const fl::Json& wledState) {
                 FL_WARN("WLED: live override " << lorInt << " out of range, clamping to 2");
                 lorInt = 2;
             }
-            uint8_t newLiveOverride = static_cast<uint8_t>(lorInt);
+            u8 newLiveOverride = static_cast<u8>(lorInt);
             if (newLiveOverride != mLiveOverride) {
                 mLiveOverride = newLiveOverride;
                 FL_DBG("WLED: lor=" << static_cast<int>(mLiveOverride));
@@ -145,7 +145,7 @@ void WLED::setState(const fl::Json& wledState) {
                 FL_WARN("WLED: main segment " << mainsegInt << " out of range, clamping to 255");
                 mainsegInt = 255;
             }
-            uint8_t newMainSegment = static_cast<uint8_t>(mainsegInt);
+            u8 newMainSegment = static_cast<u8>(mainsegInt);
             if (newMainSegment != mMainSegment) {
                 mMainSegment = newMainSegment;
                 FL_DBG("WLED: mainseg=" << static_cast<int>(mMainSegment));
@@ -181,7 +181,7 @@ void WLED::setState(const fl::Json& wledState) {
                         FL_WARN("WLED: nl.dur " << durInt << " out of range, clamping to 255");
                         durInt = 255;
                     }
-                    uint8_t newDur = static_cast<uint8_t>(durInt);
+                    u8 newDur = static_cast<u8>(durInt);
                     if (newDur != mNightlightDuration) {
                         mNightlightDuration = newDur;
                         FL_DBG("WLED: nl.dur=" << static_cast<int>(mNightlightDuration));
@@ -203,7 +203,7 @@ void WLED::setState(const fl::Json& wledState) {
                         FL_WARN("WLED: nl.mode " << modeInt << " out of range, clamping to 3");
                         modeInt = 3;
                     }
-                    uint8_t newMode = static_cast<uint8_t>(modeInt);
+                    u8 newMode = static_cast<u8>(modeInt);
                     if (newMode != mNightlightMode) {
                         mNightlightMode = newMode;
                         FL_DBG("WLED: nl.mode=" << static_cast<int>(mNightlightMode));
@@ -225,7 +225,7 @@ void WLED::setState(const fl::Json& wledState) {
                         FL_WARN("WLED: nl.tbri " << tbriInt << " out of range, clamping to 255");
                         tbriInt = 255;
                     }
-                    uint8_t newTbri = static_cast<uint8_t>(tbriInt);
+                    u8 newTbri = static_cast<u8>(tbriInt);
                     if (newTbri != mNightlightTargetBrightness) {
                         mNightlightTargetBrightness = newTbri;
                         FL_DBG("WLED: nl.tbri=" << static_cast<int>(mNightlightTargetBrightness));
@@ -280,7 +280,7 @@ void WLED::setState(const fl::Json& wledState) {
                         // Clamp to valid range -1 to 250
                         if (psInt < -1) psInt = -1;
                         if (psInt > 250) psInt = 250;
-                        mPlaylistPresets.push_back(static_cast<int16_t>(psInt));
+                        mPlaylistPresets.push_back(static_cast<i16>(psInt));
                     }
                 }
                 FL_DBG("WLED: playlist.ps count=" << mPlaylistPresets.size());
@@ -294,7 +294,7 @@ void WLED::setState(const fl::Json& wledState) {
                         int64_t durInt = pl["dur"][i] | 0;
                         if (durInt < 0) durInt = 0;
                         if (durInt > 65535) durInt = 65535;
-                        mPlaylistDurations.push_back(static_cast<uint16_t>(durInt));
+                        mPlaylistDurations.push_back(static_cast<u16>(durInt));
                     }
                 }
             }
@@ -307,7 +307,7 @@ void WLED::setState(const fl::Json& wledState) {
                         int64_t transInt = pl["transition"][i] | 0;
                         if (transInt < 0) transInt = 0;
                         if (transInt > 65535) transInt = 65535;
-                        mPlaylistTransitions.push_back(static_cast<uint16_t>(transInt));
+                        mPlaylistTransitions.push_back(static_cast<u16>(transInt));
                     }
                 }
             }
@@ -317,7 +317,7 @@ void WLED::setState(const fl::Json& wledState) {
                 int64_t repeatInt = pl["repeat"] | 0;
                 if (repeatInt < 0) repeatInt = 0;
                 if (repeatInt > 65535) repeatInt = 65535;
-                mPlaylistRepeat = static_cast<uint16_t>(repeatInt);
+                mPlaylistRepeat = static_cast<u16>(repeatInt);
                 FL_DBG("WLED: playlist.repeat=" << mPlaylistRepeat);
             }
 
@@ -326,7 +326,7 @@ void WLED::setState(const fl::Json& wledState) {
                 int64_t endInt = pl["end"] | -1;
                 if (endInt < -1) endInt = -1;
                 if (endInt > 250) endInt = 250;
-                mPlaylistEnd = static_cast<int16_t>(endInt);
+                mPlaylistEnd = static_cast<i16>(endInt);
                 FL_DBG("WLED: playlist.end=" << mPlaylistEnd);
             }
 
@@ -351,15 +351,15 @@ void WLED::setState(const fl::Json& wledState) {
                 }
 
                 // Extract segment ID (required for updates)
-                uint8_t segId = 0;
+                u8 segId = 0;
                 if (segJson.contains("id") && segJson["id"].is_int()) {
                     int64_t idInt = segJson["id"] | 0;
                     if (idInt < 0) idInt = 0;
                     if (idInt > 255) idInt = 255;
-                    segId = static_cast<uint8_t>(idInt);
+                    segId = static_cast<u8>(idInt);
                 } else {
                     // If no ID provided, use index
-                    segId = static_cast<uint8_t>(i);
+                    segId = static_cast<u8>(i);
                 }
 
                 // Find existing segment or create new one
@@ -530,7 +530,7 @@ fl::Json WLED::getPlaylistConfig() const {
     return playlist;
 }
 
-const WLEDSegment* WLED::findSegmentById(uint8_t id) const {
+const WLEDSegment* WLED::findSegmentById(u8 id) const {
     for (const auto& seg : mSegments) {
         if (seg.mId == id) {
             return &seg;

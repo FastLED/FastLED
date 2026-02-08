@@ -40,16 +40,16 @@ inline PinValue digitalRead(int /*pin*/) {
 // Analog I/O
 // ============================================================================
 
-inline uint16_t analogRead(int /*pin*/) {
+inline u16 analogRead(int /*pin*/) {
     // No-op: Host builds don't have physical pins
     return 0;  // Always return 0
 }
 
-inline void analogWrite(int /*pin*/, uint16_t /*val*/) {
+inline void analogWrite(int /*pin*/, u16 /*val*/) {
     // No-op: Host builds don't have physical pins
 }
 
-inline void setPwm16(int /*pin*/, uint16_t /*val*/) {
+inline void setPwm16(int /*pin*/, u16 /*val*/) {
     // No-op: Host builds don't have physical pins
 }
 

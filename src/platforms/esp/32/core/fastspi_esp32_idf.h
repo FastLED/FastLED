@@ -30,7 +30,7 @@ namespace fl {
     #define FASTLED_ESP32_DEFAULT_SPI_HOST SPI2_HOST
 #endif
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
+template <u8 DATA_PIN, u8 CLOCK_PIN, u32 SPI_SPEED>
 class ESP32SPIOutput {
     spi_device_handle_t mSPIHandle;
     spi_host_device_t mHost;
@@ -124,21 +124,21 @@ public:
     static void wait() {}
     static void waitFully() {}
 
-    void writeByteNoWait(uint8_t b) __attribute__((always_inline)) {
+    void writeByteNoWait(u8 b) __attribute__((always_inline)) {
         writeByte(b);
     }
 
-    void writeBytePostWait(uint8_t b) __attribute__((always_inline)) {
+    void writeBytePostWait(u8 b) __attribute__((always_inline)) {
         writeByte(b);
         wait();
     }
 
-    void writeWord(uint16_t w) __attribute__((always_inline)) {
-        writeByte(static_cast<uint8_t>(w >> 8));
-        writeByte(static_cast<uint8_t>(w & 0xFF));
+    void writeWord(u16 w) __attribute__((always_inline)) {
+        writeByte(static_cast<u8>(w >> 8));
+        writeByte(static_cast<u8>(w & 0xFF));
     }
 
-    void writeByte(uint8_t b) {
+    void writeByte(u8 b) {
         if (!mInitialized || !mSPIHandle) {
             return;
         }
@@ -156,7 +156,7 @@ public:
             return;
         }
 
-        const uint8_t* data = fl::bit_cast<const uint8_t*>(pixels);
+        const u8* data = fl::bit_cast<const u8*>(pixels);
         size_t n_bytes = n * 3;
 
         spi_transaction_t t = {};
@@ -199,22 +199,22 @@ public:
         release();
     }
 
-    void writeBytesValue(uint8_t value, int len) {
+    void writeBytesValue(u8 value, int len) {
         select();
         writeBytesValueRaw(value, len);
         release();
     }
 
-    void writeBytesValueRaw(uint8_t value, int len) {
+    void writeBytesValueRaw(u8 value, int len) {
         while (len--) {
             writeByte(value);
         }
     }
 
     template <class D>
-    void writeBytes(FASTLED_REGISTER uint8_t* data, int len) {
+    void writeBytes(FASTLED_REGISTER u8* data, int len) {
         select();
-        uint8_t* end = data + len;
+        u8* end = data + len;
         while (data != end) {
             writeByte(D::adjust(*data++));
         }
@@ -222,19 +222,19 @@ public:
         release();
     }
 
-    void writeBytes(FASTLED_REGISTER uint8_t* data, int len) {
+    void writeBytes(FASTLED_REGISTER u8* data, int len) {
         writeBytes<DATA_NOP>(data, len);
     }
 
     static void finalizeTransmission() {}
 
-    template <uint8_t BIT>
-    inline void writeBit(uint8_t b) {
+    template <u8 BIT>
+    inline void writeBit(u8 b) {
         // Test bit BIT in value b, send 0xFF if set, 0x00 if clear
         writeByte((b & (1 << BIT)) ? 0xFF : 0x00);
     }
 
-    template <uint8_t FLAGS, class D, EOrder RGB_ORDER>
+    template <u8 FLAGS, class D, EOrder RGB_ORDER>
     __attribute__((noinline)) void writePixels(PixelController<RGB_ORDER> pixels, void* context) {
         #if FASTLED_ESP32_SPI_BULK_TRANSFER
         select();

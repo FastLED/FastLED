@@ -60,7 +60,7 @@ public:
     /// @param timeout_ms Maximum wait time in milliseconds
     /// @returns true if completed, false on timeout
     /// @note **Releases DMA buffer** - buffer acquired via acquireDMABuffer() becomes invalid
-    virtual bool waitComplete(uint32_t timeout_ms = (fl::numeric_limits<uint32_t>::max)()) = 0;
+    virtual bool waitComplete(u32 timeout_ms = (fl::numeric_limits<u32>::max)()) = 0;
 
     /// Check if a transmission is currently in progress
     /// @returns true if busy, false if idle
@@ -83,7 +83,7 @@ public:
     /// Get the number of data lanes for this controller
     /// @returns Lane count: 1, 2, 4, or 8
     /// @note Used to determine hardware capabilities without downcasting
-    virtual uint8_t getLaneCount() const = 0;
+    virtual u8 getLaneCount() const = 0;
 };
 
 } // namespace fl

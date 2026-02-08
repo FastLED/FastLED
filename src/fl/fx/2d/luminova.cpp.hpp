@@ -52,7 +52,7 @@ void Luminova::resetParticle(Particle &p, fl::u32 tt) {
 
     // Original used noise(I)*W, we approximate with 1D noise scaled to width
     int I = static_cast<int>(tt / 50);
-    uint8_t n1 = inoise8(static_cast<uint16_t>(I * 19));
+    u8 n1 = inoise8(static_cast<u16>(I * 19));
     float noiseW = (static_cast<float>(n1) / 255.0f) * static_cast<float>(getWidth());
 
     p.a = static_cast<float>(tt) * 1.25f + noiseW;
@@ -62,11 +62,11 @@ void Luminova::resetParticle(Particle &p, fl::u32 tt) {
     p.alive = true;
 }
 
-void Luminova::plotDot(CRGB *leds, int x, int y, uint8_t v) const {
+void Luminova::plotDot(CRGB *leds, int x, int y, u8 v) const {
     if (!mXyMap.has(x, y)) {
         return;
     }
-    const uint16_t idx = mXyMap.mapToIndex(static_cast<uint16_t>(x), static_cast<uint16_t>(y));
+    const u16 idx = mXyMap.mapToIndex(static_cast<u16>(x), static_cast<u16>(y));
     leds[idx] += CHSV(0, 0, scale8(v, mParams.point_gain));
 }
 
@@ -86,7 +86,7 @@ void Luminova::plotSoftDot(CRGB *leds, float fx, float fy, float s) const {
                 float vf = 255.0f * fall;
                 if (vf < 0.0f) vf = 0.0f;
                 if (vf > 255.0f) vf = 255.0f;
-                uint8_t v = static_cast<uint8_t>(vf);
+                u8 v = static_cast<u8>(vf);
                 plotDot(leds, cx + dx, cy + dy, v);
             }
         }
@@ -121,7 +121,7 @@ void Luminova::draw(DrawContext context) {
 
         // angle jitter using 2D noise: (t/99, g)
         float tOver99 = static_cast<float>(mTick) / 99.0f;
-        uint8_t n2 = inoise8(static_cast<uint16_t>(tOver99 * 4096.0f), static_cast<uint16_t>(p.g * 37));
+        u8 n2 = inoise8(static_cast<u16>(tOver99 * 4096.0f), static_cast<u16>(p.g * 37));
         float n2c = (static_cast<int>(n2) - 128) / 255.0f; // ~ -0.5 .. +0.5
         p.a += (n2c) / 9.0f;
 

@@ -61,7 +61,7 @@ inline void FxCompositor::draw(fl::u32 now, fl::u32 warpedTime,
         return;
     }
     mLayers[0]->draw(warpedTime);
-    uint8_t progress = mTransition.getProgress(now);
+    u8 progress = mTransition.getProgress(now);
     if (!progress) {
         fl::memcpy(finalBuffer, mLayers[0]->getSurface(), sizeof(CRGB) * mNumLeds);
         return;

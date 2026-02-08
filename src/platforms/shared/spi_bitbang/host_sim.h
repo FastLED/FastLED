@@ -26,9 +26,9 @@ FL_EXTERN_C_BEGIN
 
 /* GPIO event structure (matches internal ring buffer format) */
 typedef struct {
-    uint8_t  event_type;  /* 0=SET, 1=CLEAR */
-    uint32_t gpio_mask;
-    uint32_t timestamp;   /* Relative tick count */
+    fl::u8  event_type;  /* 0=SET, 1=CLEAR */
+    fl::u32 gpio_mask;
+    fl::u32 timestamp;   /* Relative tick count */
 } FL_GPIO_Event;
 
 /* Ring buffer management */
@@ -36,12 +36,12 @@ void fl_gpio_sim_init(void);
 void fl_gpio_sim_clear(void);
 void fl_gpio_sim_tick(void);
 bool fl_gpio_sim_read_event(FL_GPIO_Event* out);
-uint32_t fl_gpio_sim_get_event_count(void);
-uint32_t fl_gpio_sim_get_overflow_count(void);
+fl::u32 fl_gpio_sim_get_event_count(void);
+fl::u32 fl_gpio_sim_get_overflow_count(void);
 
 /* Timer simulation */
 bool fl_spi_host_timer_is_running(void);
-uint32_t fl_spi_host_timer_get_hz(void);
+fl::u32 fl_spi_host_timer_get_hz(void);
 
 FL_EXTERN_C_END
 

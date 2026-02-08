@@ -55,19 +55,19 @@ class InternalI2SDriver {
     static InternalI2SDriver *create();
     virtual ~InternalI2SDriver() {};
     virtual void
-    initled(uint8_t *led_block,
+    initled(u8 *led_block,
             const int *pins,      // array of ints representing the gpio pins.
             int number_of_strips, // the number of strips, also describes the
                                   // size of the pins array.
             int number_of_leds_per_strip) = 0;
-    virtual void setBrightness(uint8_t brightness) = 0;
+    virtual void setBrightness(u8 brightness) = 0;
     virtual void show() = 0;
 };
 
 class I2S_Esp32 {
   public:
     void beginShowLeds(int data_pin, int nleds, bool is_rgbw);
-    void showPixels(uint8_t data_pin, PixelIterator &pixel_iterator);
+    void showPixels(u8 data_pin, PixelIterator &pixel_iterator);
     void endShowLeds();
 };
 
@@ -83,7 +83,7 @@ class ClocklessController_I2S_Esp32_WS2812Base
   public:
     ClocklessController_I2S_Esp32_WS2812Base(int pin) : mPin(pin) {}
     void init() override {}
-    virtual uint16_t getMaxRefreshRate() const { return 800; }
+    virtual u16 getMaxRefreshRate() const { return 800; }
 
   protected:
     // Wait until the last draw is complete, if necessary.
@@ -125,7 +125,7 @@ class ClocklessController_I2S_Esp32_WS2812
   public:
     ClocklessController_I2S_Esp32_WS2812() : Base(DATA_PIN) {};
     void init() override {}
-    virtual uint16_t getMaxRefreshRate() const { return 800; }
+    virtual u16 getMaxRefreshRate() const { return 800; }
 };
 
 } // namespace fl

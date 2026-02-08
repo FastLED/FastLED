@@ -58,7 +58,7 @@ public:
     static constexpr int NUM_DATA_PINS = 1;
 
     /// Maximum buffer size
-    static constexpr uint16_t MAX_BUFFER_SIZE = 256;
+    static constexpr u16 MAX_BUFFER_SIZE = 256;
 
     SpiBlock1() = default;
     ~SpiBlock1() = default;
@@ -71,12 +71,12 @@ public:
      * Initializes the 256-entry LUT to map byte values to GPIO masks
      * for the specified data pin.
      */
-    void setPinMapping(uint8_t data, uint8_t clk) {
+    void setPinMapping(u8 data, u8 clk) {
         // Store clock mask
         mClockMask = 1u << clk;
 
         // Build data pin mask
-        uint32_t dataPinMask = 1u << data;
+        u32 dataPinMask = 1u << data;
 
         // Initialize 256-entry LUT
         // For each possible byte value (0-255):
@@ -105,7 +105,7 @@ public:
      * Each byte in the buffer represents 1 bit to output on the data pin.
      * Only bit 0 of each byte is used.
      */
-    void loadBuffer(const uint8_t* data, uint16_t n) {
+    void loadBuffer(const u8* data, u16 n) {
         if (!data) return;
         if (n > MAX_BUFFER_SIZE) n = MAX_BUFFER_SIZE;
 
@@ -127,12 +127,12 @@ public:
         if (!mBuffer || mBufferLen == 0) return;
 
         // Inline bit-banging loop (same logic as ISR implementation)
-        for (uint16_t i = 0; i < mBufferLen; i++) {
-            uint8_t byte = mBuffer[i];
+        for (u16 i = 0; i < mBufferLen; i++) {
+            u8 byte = mBuffer[i];
 
             // Phase 0: Present data + force CLK low
-            uint32_t pins_to_set = mLUT[byte].set_mask;
-            uint32_t pins_to_clear = mLUT[byte].clear_mask | mClockMask;
+            u32 pins_to_set = mLUT[byte].set_mask;
+            u32 pins_to_clear = mLUT[byte].clear_mask | mClockMask;
 
             FL_GPIO_WRITE_SET(pins_to_set);      // data-high bits
             FL_GPIO_WRITE_CLEAR(pins_to_clear);  // data-low bits + CLK low
@@ -145,14 +145,14 @@ public:
     /**
      * Get buffer pointer (for inspection)
      */
-    const uint8_t* getBuffer() const {
+    const u8* getBuffer() const {
         return mBuffer;
     }
 
     /**
      * Get buffer length (for inspection)
      */
-    uint16_t getBufferLength() const {
+    u16 getBufferLength() const {
         return mBufferLen;
     }
 
@@ -164,10 +164,10 @@ public:
     }
 
 private:
-    uint32_t mClockMask = 0;           ///< Clock pin mask
+    u32 mClockMask = 0;           ///< Clock pin mask
     PinMaskEntry mLUT[256];            ///< 256-entry lookup table
-    const uint8_t* mBuffer = nullptr;  ///< Data buffer pointer
-    uint16_t mBufferLen = 0;           ///< Buffer length
+    const u8* mBuffer = nullptr;  ///< Data buffer pointer
+    u16 mBufferLen = 0;           ///< Buffer length
 };
 
 }  // namespace fl

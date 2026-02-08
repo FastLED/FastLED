@@ -14,13 +14,13 @@ extern "C" {
 // the overflow handler is called every 256 ticks.
 #define MICROSECONDS_PER_TIMER0_OVERFLOW (clockCyclesToMicroseconds(64 * 256))
 
-typedef union { unsigned long _long; uint8_t raw[4]; } tBytesForLong;
+typedef union { unsigned long _long; fl::u8 raw[4]; } tBytesForLong;
 // tBytesForLong FastLED_timer0_overflow_count;
 volatile unsigned long FastLED_timer0_overflow_count=0;
 volatile unsigned long FastLED_timer0_millis = 0;
 
-LIB8STATIC void  __attribute__((always_inline)) fastinc32 (volatile uint32_t & _long) {
-  uint8_t b = ++((tBytesForLong&)_long).raw[0];
+LIB8STATIC void  __attribute__((always_inline)) fastinc32 (volatile fl::u32 & _long) {
+  fl::u8 b = ++((tBytesForLong&)_long).raw[0];
   if(!b) {
     b = ++((tBytesForLong&)_long).raw[1];
     if(!b) {
@@ -46,7 +46,7 @@ ISR(TIMER0_OVF_vect)
 unsigned long millis()
 {
         unsigned long m;
-        uint8_t oldSREG = SREG;
+        fl::u8 oldSREG = SREG;
 
         // disable interrupts while we read FastLED_timer0_millis or we might get an
         // inconsistent value (e.g. in the middle of a write to FastLED_timer0_millis)
@@ -59,7 +59,7 @@ unsigned long millis()
 
 unsigned long micros() {
         unsigned long m;
-        uint8_t oldSREG = SREG, t;
+        fl::u8 oldSREG = SREG, t;
 
         cli();
         m = FastLED_timer0_overflow_count; // ._long;
@@ -87,10 +87,10 @@ unsigned long micros() {
 
 void delay(unsigned long ms)
 {
-        uint16_t start = (uint16_t)micros();
+        fl::u16 start = (fl::u16)micros();
 
         while (ms > 0) {
-                if (((uint16_t)micros() - start) >= 1000) {
+                if (((fl::u16)micros() - start) >= 1000) {
                         --ms;
                         start += 1000;
                 }

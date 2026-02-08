@@ -15,7 +15,7 @@ public:
 
     // ----- Basic Sample Access -----
     const AudioSample& getSample() const { return mSample; }
-    span<const int16_t> getPCM() const { return mSample.pcm(); }
+    span<const i16> getPCM() const { return mSample.pcm(); }
     float getRMS() const { return mSample.rms(); }
     float getZCF() const { return mSample.zcf(); }
     u32 getTimestamp() const { return mSample.timestamp(); }

@@ -8,11 +8,11 @@
 namespace fl {
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
-template <uint8_t DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+template <u8 DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
-  static constexpr uint32_t T1 = TIMING::T1;
-  static constexpr uint32_t T2 = TIMING::T2;
-  static constexpr uint32_t T3 = TIMING::T3;
+  static constexpr u32 T1 = TIMING::T1;
+  static constexpr u32 T2 = TIMING::T2;
+  static constexpr u32 T3 = TIMING::T3;
   typedef typename FastPinBB<DATA_PIN>::port_ptr_t data_ptr_t;
   typedef typename FastPinBB<DATA_PIN>::port_t data_t;
 
@@ -26,12 +26,12 @@ public:
     mPort = FastPinBB<DATA_PIN>::port();
   }
 
-  virtual uint16_t getMaxRefreshRate() const { return 400; }
+  virtual u16 getMaxRefreshRate() const { return 400; }
 
   virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
     mWait.wait();
     cli();
-    uint32_t clocks = showRGBInternal(pixels);
+    u32 clocks = showRGBInternal(pixels);
     if(!clocks) {
       sei(); delayMicroseconds(WAIT_TIME); cli();
       clocks = showRGBInternal(pixels);
@@ -44,7 +44,7 @@ public:
 
   // This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
   // gcc will use register Y for the this pointer.
-  static uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels) {
+  static u32 showRGBInternal(PixelController<RGB_ORDER> pixels) {
     struct M0ClocklessData data;
     data.d[0] = pixels.d[0];
     data.d[1] = pixels.d[1];

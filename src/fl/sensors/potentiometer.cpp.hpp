@@ -18,7 +18,7 @@ PotentiometerLowLevel::PotentiometerLowLevel(int pin)
 
 PotentiometerLowLevel::~PotentiometerLowLevel() {}
 
-uint16_t PotentiometerLowLevel::read() {
+u16 PotentiometerLowLevel::read() {
     return fl::analogRead(mPin);
 }
 
@@ -26,7 +26,7 @@ uint16_t PotentiometerLowLevel::read() {
 // Potentiometer Implementation
 // ============================================================================
 
-Potentiometer::Potentiometer(int pin, uint16_t hysteresis)
+Potentiometer::Potentiometer(int pin, u16 hysteresis)
     : mPot(pin), mListener(this), mHysteresis(hysteresis) {
     // Initialize calibration range to full ADC range
     mMinValue = 0;
@@ -49,7 +49,7 @@ float Potentiometer::normalized() const {
     }
 
     // Clamp current value to calibrated range
-    uint16_t clamped_value;
+    u16 clamped_value;
     if (mCurrentValue < mMinValue) {
         clamped_value = mMinValue;
     } else if (mCurrentValue > mMaxValue) {
@@ -59,19 +59,19 @@ float Potentiometer::normalized() const {
     }
 
     // Map calibrated range to [0.0, 1.0]
-    uint16_t range = mMaxValue - mMinValue;
-    uint16_t offset = clamped_value - mMinValue;
+    u16 range = mMaxValue - mMinValue;
+    u16 offset = clamped_value - mMinValue;
     return static_cast<float>(offset) / static_cast<float>(range);
 }
 
-uint16_t Potentiometer::fractional16() const {
+u16 Potentiometer::fractional16() const {
     // Handle invalid range
     if (mMaxValue <= mMinValue) {
         return 0;
     }
 
     // Clamp current value to calibrated range
-    uint16_t clamped_value;
+    u16 clamped_value;
     if (mCurrentValue < mMinValue) {
         clamped_value = mMinValue;
     } else if (mCurrentValue > mMaxValue) {
@@ -82,10 +82,10 @@ uint16_t Potentiometer::fractional16() const {
 
     // Map calibrated range to [0, 65535]
     // Use 32-bit intermediate to avoid overflow
-    uint32_t range = mMaxValue - mMinValue;
-    uint32_t offset = clamped_value - mMinValue;
-    uint32_t scaled = (offset * 65535U) / range;
-    return static_cast<uint16_t>(scaled);
+    u32 range = mMaxValue - mMinValue;
+    u32 offset = clamped_value - mMinValue;
+    u32 scaled = (offset * 65535U) / range;
+    return static_cast<u16>(scaled);
 }
 
 void Potentiometer::setHysteresisPercent(float percent) {
@@ -94,11 +94,11 @@ void Potentiometer::setHysteresisPercent(float percent) {
     if (percent > 100.0f) percent = 100.0f;
 
     // Calculate hysteresis based on calibrated range
-    uint16_t range = (mMaxValue > mMinValue) ? (mMaxValue - mMinValue) : getAdcMaxValue();
-    mHysteresis = static_cast<uint16_t>((percent / 100.0f) * range);
+    u16 range = (mMaxValue > mMinValue) ? (mMaxValue - mMinValue) : getAdcMaxValue();
+    mHysteresis = static_cast<u16>((percent / 100.0f) * range);
 }
 
-void Potentiometer::setRange(uint16_t min, uint16_t max) {
+void Potentiometer::setRange(u16 min, u16 max) {
     // Ensure min < max
     if (min >= max) {
         return;  // Invalid range, do nothing
@@ -107,7 +107,7 @@ void Potentiometer::setRange(uint16_t min, uint16_t max) {
     mMaxValue = max;
 }
 
-uint16_t Potentiometer::getAdcMaxValue() const {
+u16 Potentiometer::getAdcMaxValue() const {
     // Platform detection for ADC resolution
     // Stub and AVR platforms use 10-bit (0-1023), modern platforms use 12-bit (0-4095)
 #if defined(FL_IS_AVR) || defined(STUB_PLATFORM) || defined(FASTLED_USE_STUB_ARDUINO)
@@ -117,20 +117,20 @@ uint16_t Potentiometer::getAdcMaxValue() const {
 #endif
 }
 
-uint16_t Potentiometer::calculateDefaultHysteresis() const {
+u16 Potentiometer::calculateDefaultHysteresis() const {
     // Default: 1% of calibrated range or minimum of 10 counts (whichever is larger)
-    uint16_t range = (mMaxValue > mMinValue) ? (mMaxValue - mMinValue) : getAdcMaxValue();
-    uint16_t one_percent = range / 100;
+    u16 range = (mMaxValue > mMinValue) ? (mMaxValue - mMinValue) : getAdcMaxValue();
+    u16 one_percent = range / 100;
     return (one_percent > 10) ? one_percent : 10;
 }
 
 void Potentiometer::Listener::onEndFrame() {
     // Read current value
-    uint16_t new_value = mOwner->mPot.read();
+    u16 new_value = mOwner->mPot.read();
     mOwner->mCurrentValue = new_value;
 
     // Calculate absolute difference from last triggered value
-    uint16_t diff;
+    u16 diff;
     if (new_value > mOwner->mLastValue) {
         diff = new_value - mOwner->mLastValue;
     } else {

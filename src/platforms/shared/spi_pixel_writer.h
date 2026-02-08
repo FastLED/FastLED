@@ -29,7 +29,7 @@ namespace fl {
 /// @param pixels the PixelController containing pixel data
 /// @param spi the SPI output device to write bytes to
 /// @param context optional context pointer for post-block callbacks
-template <uint8_t FLAGS, class D, EOrder RGB_ORDER, class SPI_OUT>
+template <u8 FLAGS, class D, EOrder RGB_ORDER, class SPI_OUT>
 void writePixelsToSPI(PixelController<RGB_ORDER> pixels, SPI_OUT& spi, void* context = nullptr) {
     spi.select();
     int len = pixels.mLen;

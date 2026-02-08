@@ -42,7 +42,9 @@ class UsingNamespaceFlChecker(FileContentChecker):
             return False
 
         # Check all C++ file types
-        return any(file_path.endswith(ext) for ext in [".h", ".hpp", ".cpp", ".cpp.hpp"])
+        return any(
+            file_path.endswith(ext) for ext in [".h", ".hpp", ".cpp", ".cpp.hpp"]
+        )
 
     def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check file content for 'using namespace fl;' declarations."""
@@ -81,7 +83,9 @@ class NoUsingNamespaceFlInHeaderTester(unittest.TestCase):
         src_dir = str(SRC_ROOT)
 
         # Collect files using collect_files_to_check
-        files_to_check = collect_files_to_check([src_dir], extensions=[".h", ".hpp", ".cpp"])
+        files_to_check = collect_files_to_check(
+            [src_dir], extensions=[".h", ".hpp", ".cpp"]
+        )
 
         # Create checker and processor
         checker = UsingNamespaceFlChecker()

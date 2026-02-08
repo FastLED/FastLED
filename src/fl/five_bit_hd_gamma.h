@@ -68,9 +68,9 @@ inline void five_bit_hd_gamma_bitshift(
 // It's not clear what scale brightness is, or how it is to be applied,
 // so we assume 8 bits applied over the given rgb values.
 FL_NO_INLINE_IF_AVR
-inline void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
-                              uint8_t brightness, CRGB *out,
-                              uint8_t *out_power_5bit) {
+inline void five_bit_bitshift(u16 r16, u16 g16, u16 b16,
+                              u8 brightness, CRGB *out,
+                              u8 *out_power_5bit) {
 
     // NEW in 3.10.2: A new closed form solution has been found!
     // Thank you https://github.com/gwgill!
@@ -79,7 +79,7 @@ inline void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
     // bad quantization issues (sudden jumps in brightness in certain intervals).
 
     // ix/31 * 255/65536 * 256 scaling factors, valid for indexes 1..31
-    static uint32_t bright_scale[32] = {
+    static u32 bright_scale[32] = {
         0,      2023680, 1011840, 674560, 505920, 404736, 337280, 289097,
         252960, 224853,  202368,  183971, 168640, 155668, 144549, 134912,
         126480, 119040,  112427,  106509, 101184, 96366,  91985,  87986,
@@ -99,7 +99,7 @@ inline void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
         return;
     }
 
-    uint8_t r8 = 0, g8 = 0, b8 = 0;
+    u8 r8 = 0, g8 = 0, b8 = 0;
 
     // Apply any brightness setting (we assume brightness is 0..255)
     if (brightness != 0xff) {
@@ -109,14 +109,14 @@ inline void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
     }
 
     // Locate the largest value to set the brightness/scale factor
-    uint16_t scale = max3(r16, g16, b16);
+    u16 scale = max3(r16, g16, b16);
 
     if (scale == 0) {
         *out = CRGB(0, 0, 0);
         *out_power_5bit = 0;
         return;
     } else {
-        uint32_t scalef;
+        u32 scalef;
 
         // Compute 5 bit quantized scale that is at or above the maximum value.
         scale = (scale + (2047 - (scale >> 5))) >> 11;
@@ -129,7 +129,7 @@ inline void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
         b8 = (b16 * scalef + 0x808000) >> 24;
 
         *out = CRGB(r8, g8, b8);
-        *out_power_5bit = static_cast<uint8_t>(scale);
+        *out_power_5bit = static_cast<u8>(scale);
         return;
     }
 }

@@ -27,19 +27,19 @@ public:
     WasmFetchCallbackManager() : mNextRequestId(1) {}
     
     // Generate unique request ID
-    uint32_t generateRequestId() {
+    u32 generateRequestId() {
         fl::unique_lock<fl::mutex> lock(mCallbacksMutex);
         return mNextRequestId++;
     }
 
     // Store callback for a request ID (using move semantics)
-    void storeCallback(uint32_t request_id, FetchResponseCallback callback) {
+    void storeCallback(u32 request_id, FetchResponseCallback callback) {
         fl::unique_lock<fl::mutex> lock(mCallbacksMutex);
         mPendingCallbacks[request_id] = fl::move(callback);
     }
 
     // Retrieve and remove callback for a request ID (using move semantics)
-    fl::optional<FetchResponseCallback> takeCallback(uint32_t request_id) {
+    fl::optional<FetchResponseCallback> takeCallback(u32 request_id) {
         fl::unique_lock<fl::mutex> lock(mCallbacksMutex);
         auto it = mPendingCallbacks.find(request_id);
         if (it != mPendingCallbacks.end()) {
@@ -53,9 +53,9 @@ public:
 
 private:
     // Thread-safe storage for pending callbacks using request IDs
-    fl::hash_map<uint32_t, FetchResponseCallback> mPendingCallbacks;
+    fl::hash_map<u32, FetchResponseCallback> mPendingCallbacks;
     fl::mutex mCallbacksMutex;
-    uint32_t mNextRequestId;
+    u32 mNextRequestId;
 };
 
 // Get singleton instance
@@ -64,7 +64,7 @@ static WasmFetchCallbackManager& getCallbackManager() {
 }
 
 // C++ callback function that JavaScript can call when fetch completes
-extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_success_callback(uint32_t request_id, const char* content) {
+extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_success_callback(u32 request_id, const char* content) {
     FL_WARN("Fetch success callback received for request " << request_id << ", content length: " << strlen(content));
     
     auto callback_opt = getCallbackManager().takeCallback(request_id);
@@ -81,7 +81,7 @@ extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_success_callback(uint32_t request_
 }
 
 // C++ error callback function that JavaScript can call when fetch fails
-extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_error_callback(uint32_t request_id, const char* error_message) {
+extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_error_callback(u32 request_id, const char* error_message) {
     FL_WARN("Fetch error callback received for request " << request_id << ": " << error_message);
     
     auto callback_opt = getCallbackManager().takeCallback(request_id);
@@ -99,7 +99,7 @@ extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_error_callback(uint32_t request_id
 }
 
 // JavaScript function that performs the actual fetch and calls back to C++
-EM_JS(void, js_fetch_async, (uint32_t request_id, const char* url), {
+EM_JS(void, js_fetch_async, (u32 request_id, const char* url), {
     var urlString = UTF8ToString(url);
     console.log('🌐 JavaScript fetch starting for request', request_id, 'URL:', urlString);
     
@@ -128,7 +128,7 @@ void WasmFetchRequest::response(const FetchResponseCallback& callback) {
     FL_WARN("Starting JavaScript-based fetch request to: " << mUrl);
     
     // Generate unique request ID for this request
-    uint32_t request_id = getCallbackManager().generateRequestId();
+    u32 request_id = getCallbackManager().generateRequestId();
     
     // Store the callback for when JavaScript calls back (using move semantics)
     getCallbackManager().storeCallback(request_id, FetchResponseCallback(callback));

@@ -113,7 +113,7 @@
 namespace fl {
 
 // Forward declaration for RGBW conversion scratchpad
-fl::vector<uint8_t>& get_rgbw_scratchpad();
+fl::vector<u8>& get_rgbw_scratchpad();
 
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 #define NUM_COLOR_CHANNELS 3
@@ -159,9 +159,9 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
     // -- Store the GPIO pin
     gpio_num_t mPin;
 
-    static constexpr uint32_t T1 = TIMING::T1;
-    static constexpr uint32_t T2 = TIMING::T2;
-    static constexpr uint32_t T3 = TIMING::T3;
+    static constexpr u32 T1 = TIMING::T1;
+    static constexpr u32 T2 = TIMING::T2;
+    static constexpr u32 T3 = TIMING::T3;
 
     // -- Verify that the pin is valid
     static_assert(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
@@ -203,7 +203,7 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
         i2s_setup_pin(DATA_PIN, my_index);
     }
 
-    virtual uint16_t getMaxRefreshRate() const { return 400; }
+    virtual u16 getMaxRefreshRate() const { return 400; }
 
   protected:
     /** Clear DMA buffer
@@ -211,7 +211,7 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
      *  Yves' clever trick: initialize the bits that we know must be 0
      *  or 1 regardless of what bit they encode.
      */
-    static void empty(uint32_t *buf) { i2s_clear_dma_buffer(buf); }
+    static void empty(u32 *buf) { i2s_clear_dma_buffer(buf); }
 
     /** Fill DMA buffer
      *
@@ -221,12 +221,12 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
      */
     static void fillBuffer() {
         // -- Alternate between buffers
-        volatile uint32_t *buf = (uint32_t *)dmaBuffers[gCurBuffer]->buffer;
+        volatile u32 *buf = (u32 *)dmaBuffers[gCurBuffer]->buffer;
         gCurBuffer = (gCurBuffer + 1) % NUM_DMA_BUFFERS;
 
         // -- Get the requested pixel from each controller. Store the
         //    data for each color channel in a separate array.
-        uint32_t has_data_mask = 0;
+        u32 has_data_mask = 0;
         for (int i = 0; i < gNumControllers; ++i) {
             // -- Store the pixels in reverse controller order starting at index
             // 23
@@ -278,7 +278,7 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
             int rgb_pixel_count = Rgbw::size_as_rgb(num_leds);
 
             // -- Get the scratchpad and resize if needed
-            fl::vector<uint8_t>& scratchpad = get_rgbw_scratchpad();
+            fl::vector<u8>& scratchpad = get_rgbw_scratchpad();
             size_t required_bytes = rgb_pixel_count * sizeof(CRGB);
             if (scratchpad.size() != required_bytes) {
                 scratchpad.resize(required_bytes);
@@ -290,10 +290,10 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
             }
 
             // -- Convert RGBW to RGB-packed format
-            uint8_t *dest = scratchpad.data();
+            u8 *dest = scratchpad.data();
             PixelController<RGB_ORDER> temp_pixels = pixels;  // Make a copy to iterate
             while (temp_pixels.has(1)) {
-                uint8_t r, g, b, w;
+                u8 r, g, b, w;
                 temp_pixels.loadAndScaleRGBW(rgbw, &r, &g, &b, &w);
                 // Pack RGBW (4 bytes) as consecutive RGB data (3 bytes at a time)
                 // This creates the "spoofing" effect where 4-byte RGBW becomes
@@ -328,7 +328,7 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
         //    all of the actual work
         if (gNumStarted == gNumControllers) {
             for (int i = 0; i < NUM_DMA_BUFFERS; i++) {
-                empty((uint32_t *)dmaBuffers[i]->buffer);
+                empty((u32 *)dmaBuffers[i]->buffer);
             }
             gCurBuffer = 0;
             gDoneFilling = false;

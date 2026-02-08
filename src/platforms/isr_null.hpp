@@ -19,7 +19,7 @@ namespace fl {
 namespace isr {
 
 // Platform ID for null implementation
-constexpr uint8_t NULL_PLATFORM_ID = 255;  // Indicates "no platform"
+constexpr u8 NULL_PLATFORM_ID = 255;  // Indicates "no platform"
 
 // Error code for not implemented
 constexpr int ERR_NOT_IMPLEMENTED = -100;
@@ -41,7 +41,7 @@ inline int null_attach_timer_handler(const isr_config_t& config, isr_handle_t* o
     return ERR_NOT_IMPLEMENTED;  // Not implemented error
 }
 
-inline int null_attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) {
+inline int null_attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) {
     (void)pin;
     (void)config;
     if (out_handle) {
@@ -82,19 +82,19 @@ inline const char* null_get_platform_name() {
     return "Null";
 }
 
-inline uint32_t null_get_max_timer_frequency() {
+inline u32 null_get_max_timer_frequency() {
     return 0;  // No timer support
 }
 
-inline uint32_t null_get_min_timer_frequency() {
+inline u32 null_get_min_timer_frequency() {
     return 0;  // No timer support
 }
 
-inline uint8_t null_get_max_priority() {
+inline u8 null_get_max_priority() {
     return 0;  // No priority support
 }
 
-inline bool null_requires_assembly_handler(uint8_t priority) {
+inline bool null_requires_assembly_handler(u8 priority) {
     (void)priority;
     return false;
 }
@@ -111,7 +111,7 @@ inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* handle
     return null_attach_timer_handler(config, handle);
 }
 
-inline int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* handle) {
+inline int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* handle) {
     return null_attach_external_handler(pin, config, handle);
 }
 
@@ -139,19 +139,19 @@ inline const char* get_platform_name() {
     return null_get_platform_name();
 }
 
-inline uint32_t get_max_timer_frequency() {
+inline u32 get_max_timer_frequency() {
     return null_get_max_timer_frequency();
 }
 
-inline uint32_t get_min_timer_frequency() {
+inline u32 get_min_timer_frequency() {
     return null_get_min_timer_frequency();
 }
 
-inline uint8_t get_max_priority() {
+inline u8 get_max_priority() {
     return null_get_max_priority();
 }
 
-inline bool requires_assembly_handler(uint8_t priority) {
+inline bool requires_assembly_handler(u8 priority) {
     return null_requires_assembly_handler(priority);
 }
 

@@ -45,7 +45,7 @@ public:
     fl::size size() const override { 
         return _file.fileSize(); 
     }
-    fl::size read(uint8_t *dst, fl::size bytesToRead) override { 
+    fl::size read(u8 *dst, fl::size bytesToRead) override { 
         return _file.read(dst, bytesToRead); 
     }
     fl::size pos() const override { 
@@ -90,7 +90,7 @@ public:
         auto f = const_cast<File&>(_file);
         return f.size(); 
     }
-    fl::size read(uint8_t *dst, fl::size bytesToRead) override { 
+    fl::size read(u8 *dst, fl::size bytesToRead) override { 
         return _file.read(dst, bytesToRead); 
     }
     fl::size pos() const override { 

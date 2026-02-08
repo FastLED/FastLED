@@ -45,7 +45,7 @@ public:
         mPort = FastPin<DATA_PIN>::port();
     }
 
-    virtual uint16_t getMaxRefreshRate() const { return 400; }
+    virtual u16 getMaxRefreshRate() const { return 400; }
 
 protected:
     virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
@@ -53,16 +53,16 @@ protected:
 
         // Compute timing from actual CPU frequency (just-in-time per-frame calculation)
         // F_CPU is runtime SystemCoreClock on STM32duino, compile-time constant elsewhere
-        uint32_t cpu_freq = F_CPU;
+        u32 cpu_freq = F_CPU;
 
         // Convert nanoseconds to clock cycles: cycles = nanoseconds * frequency / 1e9
         // Use uint64_t to avoid overflow (e.g., 900ns * 180MHz = 162 billion)
-        uint32_t t1_clocks = static_cast<uint64_t>(TIMING::T1) * cpu_freq / 1000000000ULL;
-        uint32_t t2_clocks = static_cast<uint64_t>(TIMING::T2) * cpu_freq / 1000000000ULL;
-        uint32_t t3_clocks = static_cast<uint64_t>(TIMING::T3) * cpu_freq / 1000000000ULL;
+        u32 t1_clocks = static_cast<uint64_t>(TIMING::T1) * cpu_freq / 1000000000ULL;
+        u32 t2_clocks = static_cast<uint64_t>(TIMING::T2) * cpu_freq / 1000000000ULL;
+        u32 t3_clocks = static_cast<uint64_t>(TIMING::T3) * cpu_freq / 1000000000ULL;
 
         // Clocks per microsecond for interrupt timeout checks
-        uint32_t clks_per_us = cpu_freq / 1000000;
+        u32 clks_per_us = cpu_freq / 1000000;
 
         Rgbw rgbw = this->getRgbw();
         if(!showRGBInternal(pixels, rgbw, t1_clocks, t2_clocks, t3_clocks, clks_per_us)) {
@@ -74,14 +74,14 @@ protected:
         mWait.mark();
     }
 
-#define _CYCCNT (*(volatile uint32_t*)(0xE0001004UL))
+#define _CYCCNT (*(volatile u32*)(0xE0001004UL))
 
     template<int BITS> __attribute__ ((always_inline))
     inline static void writeBits(
-        FASTLED_REGISTER uint32_t & next_mark, FASTLED_REGISTER data_ptr_t port,
-        FASTLED_REGISTER data_t hi, FASTLED_REGISTER data_t lo, FASTLED_REGISTER uint8_t & b,
-        uint32_t t1_clocks, uint32_t t1t2_clocks, uint32_t t1t2t3_clocks)  {
-        for(FASTLED_REGISTER uint32_t i = BITS-1; i > 0; --i) {
+        FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER data_ptr_t port,
+        FASTLED_REGISTER data_t hi, FASTLED_REGISTER data_t lo, FASTLED_REGISTER u8 & b,
+        u32 t1_clocks, u32 t1t2_clocks, u32 t1t2t3_clocks)  {
+        for(FASTLED_REGISTER u32 i = BITS-1; i > 0; --i) {
             while(_CYCCNT < (t1t2t3_clocks-ADJ));
             FastPin<DATA_PIN>::fastset(port, hi);
             _CYCCNT = 4;
@@ -108,12 +108,12 @@ protected:
         }
     }
 
-    static uint32_t showRGBInternal(
+    static u32 showRGBInternal(
             PixelController<RGB_ORDER> pixels, Rgbw rgbw,
-            uint32_t t1_clocks, uint32_t t2_clocks, uint32_t t3_clocks, uint32_t clks_per_us) {
+            u32 t1_clocks, u32 t2_clocks, u32 t3_clocks, u32 clks_per_us) {
         // Pre-calculate combined timing values for the hot loop
-        const uint32_t t1t2_clocks = t1_clocks + t2_clocks;
-        const uint32_t t1t2t3_clocks = t1t2_clocks + t3_clocks;
+        const u32 t1t2_clocks = t1_clocks + t2_clocks;
+        const u32 t1t2t3_clocks = t1t2_clocks + t3_clocks;
 
         // Get access to the clock
         CoreDebug->DEMCR  |= CoreDebug_DEMCR_TRCENA_Msk;
@@ -127,7 +127,7 @@ protected:
 
         fl::interruptsDisable();
 
-        uint32_t next_mark = t1t2t3_clocks;
+        u32 next_mark = t1t2t3_clocks;
 
         DWT->CYCCNT = 0;
 
@@ -160,9 +160,9 @@ protected:
             #endif
 
             // Load bytes into fixed buffer (3 for RGB, 4 for RGBW)
-            fl::vector_fixed<uint8_t, 4> bytes;
+            fl::vector_fixed<u8, 4> bytes;
             if (is_rgbw) {
-                uint8_t b0, b1, b2, b3;
+                u8 b0, b1, b2, b3;
                 pixels.loadAndScaleRGBW(rgbw, &b0, &b1, &b2, &b3);
                 bytes.push_back(b0);
                 bytes.push_back(b1);

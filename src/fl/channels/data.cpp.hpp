@@ -11,7 +11,7 @@ namespace fl {
 
 ChannelDataPtr ChannelData::create(
     const ChipsetVariant& chipset,
-    fl::vector_psram<uint8_t>&& encodedData
+    fl::vector_psram<u8>&& encodedData
 ) {
     return fl::make_shared<ChannelData>(chipset, fl::move(encodedData));
 }
@@ -19,14 +19,14 @@ ChannelDataPtr ChannelData::create(
 ChannelDataPtr ChannelData::create(
     int pin,
     const ChipsetTimingConfig& timing,
-    fl::vector_psram<uint8_t>&& encodedData
+    fl::vector_psram<u8>&& encodedData
 ) {
     return fl::make_shared<ChannelData>(pin, timing, fl::move(encodedData));
 }
 
 ChannelData::ChannelData(
     const ChipsetVariant& chipset,
-    fl::vector_psram<uint8_t>&& encodedData
+    fl::vector_psram<u8>&& encodedData
 )
     : mChipset(chipset)
     , mPin(getDataPinFromChipset(chipset))
@@ -37,7 +37,7 @@ ChannelData::ChannelData(
 ChannelData::ChannelData(
     int pin,
     const ChipsetTimingConfig& timing,
-    fl::vector_psram<uint8_t>&& encodedData
+    fl::vector_psram<u8>&& encodedData
 )
     : mChipset(ClocklessChipset(pin, timing))
     , mPin(pin)
@@ -45,7 +45,7 @@ ChannelData::ChannelData(
     , mEncodedData(fl::move(encodedData))
 {}
 
-void ChannelData::writeWithPadding(fl::span<uint8_t> dst) {
+void ChannelData::writeWithPadding(fl::span<u8> dst) {
     size_t targetSize = dst.size();
     size_t currentSize = mEncodedData.size();
 
@@ -55,7 +55,7 @@ void ChannelData::writeWithPadding(fl::span<uint8_t> dst) {
     }
 
     // Create source span from encoded data
-    fl::span<const uint8_t> src(mEncodedData.data(), currentSize);
+    fl::span<const u8> src(mEncodedData.data(), currentSize);
 
     if (mPaddingGenerator) {
         // Use custom padding generator (writes directly to dst)
@@ -65,7 +65,7 @@ void ChannelData::writeWithPadding(fl::span<uint8_t> dst) {
         // Padding bytes go out first to non-existent pixels
         size_t paddingSize = targetSize - currentSize;
         if (paddingSize > 0) {
-            fl::fill(dst.begin(), dst.begin() + paddingSize, uint8_t(0));
+            fl::fill(dst.begin(), dst.begin() + paddingSize, u8(0));
         }
         fl::memcopy(dst.data() + paddingSize, src.data(), currentSize);
     }

@@ -12,13 +12,13 @@
 extern "C" {
     // Global timing functions for Arduino compatibility
     // These are provided by the platform layer but need to be declared globally
-    uint32_t millis(void);
-    uint32_t micros(void);
+    fl::u32 millis(void);
+    fl::u32 micros(void);
     void yield(void);
 }
 
 // C++ function to override delay behavior for fast testing
-void setDelayFunction(const fl::function<void(uint32_t)>& delayFunc);
+void setDelayFunction(const fl::function<void(fl::u32)>& delayFunc);
 
 // Check if delay override is active (for fast testing)
 bool isDelayOverrideActive(void);

@@ -30,8 +30,8 @@ struct teensy_isr_handle_data {
     IntervalTimer timer;
     isr_handler_t handler;
     void* user_data;
-    uint32_t frequency_hz;
-    uint8_t nvic_priority;  // Stored NVIC priority for re-enable
+    u32 frequency_hz;
+    u8 nvic_priority;  // Stored NVIC priority for re-enable
     bool enabled;
     bool is_timer;  // true for timer, false for external interrupt
 
@@ -46,7 +46,7 @@ struct teensy_isr_handle_data {
 
 // Platform ID for Teensy
 // Platform ID registry: 0=STUB, 1=ESP32, 2=AVR, 3=NRF52, 4=RP2040, 5=Teensy, 6=STM32, 7=SAMD, 255=NULL
-constexpr uint8_t TEENSY_PLATFORM_ID = 5;
+constexpr u8 TEENSY_PLATFORM_ID = 5;
 
 // Helper to convert isr_handle_t to platform data
 static teensy_isr_handle_data* get_handle_data(const isr_handle_t& handle) {
@@ -102,7 +102,7 @@ int teensy_attach_timer_handler(const isr_config_t& config, isr_handle_t* handle
     data->is_timer = true;
 
     // Calculate interval in microseconds
-    uint32_t interval_us = 1000000 / config.frequency_hz;
+    u32 interval_us = 1000000 / config.frequency_hz;
 
     // Store as global for ISR access (limitation of IntervalTimer API)
     g_active_timer_data = data;
@@ -129,12 +129,12 @@ int teensy_attach_timer_handler(const isr_config_t& config, isr_handle_t* handle
     // Priority 7: (16 - 14) * 16 = 32
 
     // Clamp priority to valid range [1, 7]
-    uint8_t priority = config.priority;
+    u8 priority = config.priority;
     if (priority < 1) priority = 1;
     if (priority > 7) priority = 7;
 
     // Map to Teensy NVIC priority (using stepped mapping across available range)
-    uint8_t teensy_priority = (16 - priority * 2) * 16;
+    u8 teensy_priority = (16 - priority * 2) * 16;
     data->nvic_priority = teensy_priority;  // Store for later use
     data->timer.priority(teensy_priority);
 
@@ -151,7 +151,7 @@ int teensy_attach_timer_handler(const isr_config_t& config, isr_handle_t* handle
     return 0;  // Success
 }
 
-int teensy_attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* handle) {
+int teensy_attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* handle) {
     // External interrupts on Teensy use attachInterrupt() from Arduino core
     // Not implemented yet - return "not implemented"
     (void)pin;
@@ -194,7 +194,7 @@ int teensy_enable_handler(const isr_handle_t& handle) {
     }
 
     if (data->is_timer) {
-        uint32_t interval_us = 1000000 / data->frequency_hz;
+        u32 interval_us = 1000000 / data->frequency_hz;
         // Restore global pointer for ISR access
         g_active_timer_data = data;
         if (!data->timer.begin(teensy_isr_trampoline, interval_us)) {
@@ -270,20 +270,20 @@ const char* teensy_get_platform_name() {
 #endif
 }
 
-uint32_t teensy_get_max_timer_frequency() {
+u32 teensy_get_max_timer_frequency() {
     // Conservative estimate for all Teensy variants
     return 150000;  // 150 kHz
 }
 
-uint32_t teensy_get_min_timer_frequency() {
+u32 teensy_get_min_timer_frequency() {
     return 1;  // 1 Hz minimum
 }
 
-uint8_t teensy_get_max_priority() {
+u8 teensy_get_max_priority() {
     return 7;  // Teensy supports 0-255, but we map to 1-7 range
 }
 
-bool teensy_requires_assembly_handler(uint8_t priority) {
+bool teensy_requires_assembly_handler(u8 priority) {
     (void)priority;
     return false;  // Teensy IntervalTimer handles ISR registration internally
 }
@@ -295,7 +295,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* handle) {
     return teensy_attach_timer_handler(config, handle);
 }
 
-int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* handle) {
+int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* handle) {
     return teensy_attach_external_handler(pin, config, handle);
 }
 
@@ -323,19 +323,19 @@ const char* get_platform_name() {
     return teensy_get_platform_name();
 }
 
-uint32_t get_max_timer_frequency() {
+u32 get_max_timer_frequency() {
     return teensy_get_max_timer_frequency();
 }
 
-uint32_t get_min_timer_frequency() {
+u32 get_min_timer_frequency() {
     return teensy_get_min_timer_frequency();
 }
 
-uint8_t get_max_priority() {
+u8 get_max_priority() {
     return teensy_get_max_priority();
 }
 
-bool requires_assembly_handler(uint8_t priority) {
+bool requires_assembly_handler(u8 priority) {
     return teensy_requires_assembly_handler(priority);
 }
 

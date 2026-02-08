@@ -35,13 +35,13 @@ typedef enum _FASTLED_NRF52_ENABLED_PWM_INSTANCE {
 
 static_assert(FASTLED_NRF52_PWM_INSTANCE_COUNT > 0, "Instance count must be greater than zero -- define FASTLED_NRF52_ENABLE_PWM_INSTNACE[n] (replace `[n]` with digit)");
 
-template <uint32_t _PWM_ID>
+template <fl::u32 _PWM_ID>
 class PWM_Arbiter {
 private:
     static_assert(_PWM_ID < 32, "PWM_ID over 31 breaks current arbitration bitmask");
     //const  uint32_t _ACQUIRE_MASK =             (1u << _PWM_ID) ;
     //const  uint32_t _CLEAR_MASK   = ~((uint32_t)(1u << _PWM_ID));
-    static uint32_t                              s_PwmInUse;
+    static fl::u32                              s_PwmInUse;
     static NRF_PWM_Type * const                  s_PWM;
     static IRQn_Type      const                           s_PWM_IRQ;
     static FASTLED_NRF52_PWM_INTERRUPT_HANDLER volatile   s_Isr;
@@ -57,7 +57,7 @@ public:
         while (!tryAcquire(isr));
     }
     FASTLED_NRF52_INLINE_ATTRIBUTE static bool            tryAcquire(FASTLED_NRF52_PWM_INTERRUPT_HANDLER isr) {
-        uint32_t oldValue = __sync_fetch_and_or(&s_PwmInUse, 1u); // _ACQUIRE_MASK
+        fl::u32 oldValue = __sync_fetch_and_or(&s_PwmInUse, 1u); // _ACQUIRE_MASK
         if (0u == (oldValue & 1u)) { // _ACQUIRE_MASK
             s_Isr = isr;
             return true;
@@ -65,7 +65,7 @@ public:
         return false;
     }
     FASTLED_NRF52_INLINE_ATTRIBUTE static void            releaseFromIsr() {
-        uint32_t oldValue = __sync_fetch_and_and(&s_PwmInUse, ~1u); // _CLEAR_MASK
+        fl::u32 oldValue = __sync_fetch_and_and(&s_PwmInUse, ~1u); // _CLEAR_MASK
         if (0u == (oldValue & 1u)) { // _ACQUIRE_MASK
             // TODO: This should never be true... indicates was not held.
             // Assert here?
@@ -78,7 +78,7 @@ public:
     }
     FASTLED_NRF52_INLINE_ATTRIBUTE static IRQn_Type       getIRQn() { return s_PWM_IRQ; }
 };
-template <uint32_t _PWM_ID> NRF_PWM_Type * const PWM_Arbiter<_PWM_ID>::s_PWM           =
+template <fl::u32 _PWM_ID> NRF_PWM_Type * const PWM_Arbiter<_PWM_ID>::s_PWM           =
     #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE0)
         (_PWM_ID == 0 ? NRF_PWM0 :
     #endif
@@ -105,9 +105,9 @@ template <uint32_t _PWM_ID> NRF_PWM_Type * const PWM_Arbiter<_PWM_ID>::s_PWM    
         )
     #endif
     ;
-template <uint32_t _PWM_ID> IRQn_Type    const                            PWM_Arbiter<_PWM_ID>::s_PWM_IRQ   = ((IRQn_Type)((uint8_t)((uint32_t)(s_PWM) >> 12)));
-template <uint32_t _PWM_ID> uint32_t                                      PWM_Arbiter<_PWM_ID>::s_PwmInUse  = 0;
-template <uint32_t _PWM_ID> FASTLED_NRF52_PWM_INTERRUPT_HANDLER volatile  PWM_Arbiter<_PWM_ID>::s_Isr       = nullptr;
+template <fl::u32 _PWM_ID> IRQn_Type    const                            PWM_Arbiter<_PWM_ID>::s_PWM_IRQ   = ((IRQn_Type)((fl::u8)((fl::u32)(s_PWM) >> 12)));
+template <fl::u32 _PWM_ID> fl::u32                                      PWM_Arbiter<_PWM_ID>::s_PwmInUse  = 0;
+template <fl::u32 _PWM_ID> FASTLED_NRF52_PWM_INTERRUPT_HANDLER volatile  PWM_Arbiter<_PWM_ID>::s_Isr       = nullptr;
 
 #endif // FL_IS_NRF52
 #endif // __INC_ARBITER_NRF52

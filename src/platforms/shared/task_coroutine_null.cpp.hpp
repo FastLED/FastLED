@@ -23,7 +23,7 @@ public:
     TaskCoroutineNullImpl(fl::string name,
                           TaskFunction function,
                           size_t /*stack_size*/,
-                          uint8_t /*priority*/)
+                          u8 /*priority*/)
         : mName(fl::move(name))
         , mFunction(fl::move(function)) {
         // No OS support - task is not created
@@ -53,7 +53,7 @@ private:
 TaskCoroutineNull* TaskCoroutineNull::create(fl::string name,
                                               TaskFunction function,
                                               size_t stack_size,
-                                              uint8_t priority) {
+                                              u8 priority) {
     return new TaskCoroutineNullImpl(fl::move(name), fl::move(function), stack_size, priority);
 }
 
@@ -64,7 +64,7 @@ TaskCoroutineNull* TaskCoroutineNull::create(fl::string name,
 ITaskCoroutine* createTaskCoroutine(fl::string name,
                                      ITaskCoroutine::TaskFunction function,
                                      size_t stack_size,
-                                     uint8_t priority) {
+                                     u8 priority) {
     return TaskCoroutineNull::create(fl::move(name), fl::move(function), stack_size, priority);
 }
 

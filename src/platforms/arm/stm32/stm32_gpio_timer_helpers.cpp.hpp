@@ -51,7 +51,7 @@ namespace stm32 {
 // GPIO Helper Functions
 // ============================================================================
 
-GPIO_TypeDef* getGPIOPort(uint8_t pin) {
+GPIO_TypeDef* getGPIOPort(u8 pin) {
 #ifdef HAL_GPIO_MODULE_ENABLED
     PinName pin_name = digitalPinToPinName(pin);
     if (pin_name == NC) {
@@ -63,7 +63,7 @@ GPIO_TypeDef* getGPIOPort(uint8_t pin) {
 #if defined(FL_IS_STM32_H7)
     // PinName format: (port << 4) | pin_number
     // Extract port number and map to GPIO_TypeDef*
-    uint32_t port_idx = STM_PORT(pin_name);
+    u32 port_idx = STM_PORT(pin_name);
     static GPIO_TypeDef* const gpio_ports[] = {
         GPIOA, GPIOB, GPIOC, GPIOD, GPIOE, GPIOF, GPIOG, GPIOH,
 #ifdef GPIOI
@@ -89,7 +89,7 @@ GPIO_TypeDef* getGPIOPort(uint8_t pin) {
 #endif
 }
 
-uint32_t getGPIOPin(uint8_t pin) {
+u32 getGPIOPin(u8 pin) {
 #ifdef HAL_GPIO_MODULE_ENABLED
     PinName pin_name = digitalPinToPinName(pin);
     if (pin_name == NC) {
@@ -101,7 +101,7 @@ uint32_t getGPIOPin(uint8_t pin) {
 #if defined(FL_IS_STM32_H7)
     // PinName format: (port << 4) | pin_number
     // Extract pin number and convert to GPIO_PIN_x define
-    uint32_t pin_num = STM_PIN(pin_name);
+    u32 pin_num = STM_PIN(pin_name);
     return (1 << pin_num);  // Convert to GPIO_PIN_0, GPIO_PIN_1, etc.
 #else
     return STM_GPIO_PIN(pin_name);
@@ -190,10 +190,10 @@ void enableGPIOClock(GPIO_TypeDef* port) {
 #endif
 }
 
-bool configurePinAsOutput(uint8_t pin, uint32_t speed) {
+bool configurePinAsOutput(u8 pin, u32 speed) {
 #ifdef HAL_GPIO_MODULE_ENABLED
     GPIO_TypeDef* port = getGPIOPort(pin);
-    uint32_t pin_mask = getGPIOPin(pin);
+    u32 pin_mask = getGPIOPin(pin);
 
     if (port == nullptr || pin_mask == 0) {
         return false;
@@ -218,10 +218,10 @@ bool configurePinAsOutput(uint8_t pin, uint32_t speed) {
 #endif
 }
 
-bool configurePinAsTimerAF(uint8_t pin, TIM_TypeDef* timer, uint32_t speed) {
+bool configurePinAsTimerAF(u8 pin, TIM_TypeDef* timer, u32 speed) {
 #ifdef HAL_GPIO_MODULE_ENABLED
     GPIO_TypeDef* port = getGPIOPort(pin);
-    uint32_t pin_mask = getGPIOPin(pin);
+    u32 pin_mask = getGPIOPin(pin);
     PinName pin_name = digitalPinToPinName(pin);
 
     if (port == nullptr || pin_mask == 0 || pin_name == NC) {
@@ -254,12 +254,12 @@ bool configurePinAsTimerAF(uint8_t pin, TIM_TypeDef* timer, uint32_t speed) {
     // Find the AF number for this pin and timer using STM32duino pinmap
     // Note: H7 uses PinMap_PWM instead of PinMap_TIM
     #if defined(FL_IS_STM32_H7)
-        uint32_t af_mode = pinmap_find_function(pin_name, PinMap_PWM);
+        u32 af_mode = pinmap_find_function(pin_name, PinMap_PWM);
     #else
-        uint32_t af_mode = pinmap_find_function(pin_name, PinMap_TIM);
+        u32 af_mode = pinmap_find_function(pin_name, PinMap_TIM);
     #endif
 
-    if (af_mode == (uint32_t)NC) {
+    if (af_mode == (u32)NC) {
         // Pin doesn't support Timer AF
         FL_WARN("STM32: Pin " << pin << " does not support Timer AF");
         return false;
@@ -288,7 +288,7 @@ bool configurePinAsTimerAF(uint8_t pin, TIM_TypeDef* timer, uint32_t speed) {
 #endif
 }
 
-bool isValidPin(uint8_t pin) {
+bool isValidPin(u8 pin) {
 #ifdef HAL_GPIO_MODULE_ENABLED
     PinName pin_name = digitalPinToPinName(pin);
     return pin_name != NC;
@@ -376,7 +376,7 @@ void enableTimerClock(TIM_TypeDef* timer) {
 #endif
 }
 
-uint32_t getTimerClockFreq(TIM_TypeDef* timer) {
+u32 getTimerClockFreq(TIM_TypeDef* timer) {
 #if defined(HAL_TIM_MODULE_ENABLED) && defined(HAL_RCC_MODULE_ENABLED)
     if (timer == nullptr) {
         return 0;
@@ -400,23 +400,23 @@ uint32_t getTimerClockFreq(TIM_TypeDef* timer) {
     );
 
     // Get APB clock frequency using HAL
-    uint32_t apb_freq = is_apb1 ? HAL_RCC_GetPCLK1Freq() : HAL_RCC_GetPCLK2Freq();
+    u32 apb_freq = is_apb1 ? HAL_RCC_GetPCLK1Freq() : HAL_RCC_GetPCLK2Freq();
 
     // Timer clock = APB clock × 2 if APB prescaler != 1 (per STM32 reference manual)
     // Check RCC prescaler bits to determine if 2x multiplier applies
-    uint32_t timer_freq = apb_freq;
+    u32 timer_freq = apb_freq;
 
 #if defined(FL_IS_STM32_F1) || defined(FL_IS_STM32_F2) || defined(FL_IS_STM32_F4) || defined(FL_IS_STM32_F7)
     // F1/F2/F4/F7: Check PPRE bits in RCC->CFGR
     if (is_apb1) {
         // Check APB1 prescaler (PPRE1 bits [10:8])
-        uint32_t ppre1 = (RCC->CFGR & RCC_CFGR_PPRE1) >> 8;
+        u32 ppre1 = (RCC->CFGR & RCC_CFGR_PPRE1) >> 8;
         if (ppre1 >= 4) {  // Prescaler != 1 (values 4-7 mean /2, /4, /8, /16)
             timer_freq = apb_freq * 2;
         }
     } else {
         // Check APB2 prescaler (PPRE2 bits [13:11])
-        uint32_t ppre2 = (RCC->CFGR & RCC_CFGR_PPRE2) >> 11;
+        u32 ppre2 = (RCC->CFGR & RCC_CFGR_PPRE2) >> 11;
         if (ppre2 >= 4) {  // Prescaler != 1
             timer_freq = apb_freq * 2;
         }
@@ -424,12 +424,12 @@ uint32_t getTimerClockFreq(TIM_TypeDef* timer) {
 #elif defined(FL_IS_STM32_H7)
     // H7: Check D2PPRE bits in RCC->D2CFGR (more complex clock tree)
     if (is_apb1) {
-        uint32_t d2ppre1 = (RCC->D2CFGR & RCC_D2CFGR_D2PPRE1) >> RCC_D2CFGR_D2PPRE1_Pos;
+        u32 d2ppre1 = (RCC->D2CFGR & RCC_D2CFGR_D2PPRE1) >> RCC_D2CFGR_D2PPRE1_Pos;
         if (d2ppre1 >= 4) {
             timer_freq = apb_freq * 2;
         }
     } else {
-        uint32_t d2ppre2 = (RCC->D2CFGR & RCC_D2CFGR_D2PPRE2) >> RCC_D2CFGR_D2PPRE2_Pos;
+        u32 d2ppre2 = (RCC->D2CFGR & RCC_D2CFGR_D2PPRE2) >> RCC_D2CFGR_D2PPRE2_Pos;
         if (d2ppre2 >= 4) {
             timer_freq = apb_freq * 2;
         }
@@ -437,12 +437,12 @@ uint32_t getTimerClockFreq(TIM_TypeDef* timer) {
 #elif defined(FL_IS_STM32_L4) || defined(FL_IS_STM32_G4)
     // L4/G4: Similar to F4 but with different register names
     if (is_apb1) {
-        uint32_t ppre1 = (RCC->CFGR & RCC_CFGR_PPRE1) >> RCC_CFGR_PPRE1_Pos;
+        u32 ppre1 = (RCC->CFGR & RCC_CFGR_PPRE1) >> RCC_CFGR_PPRE1_Pos;
         if (ppre1 >= 4) {
             timer_freq = apb_freq * 2;
         }
     } else {
-        uint32_t ppre2 = (RCC->CFGR & RCC_CFGR_PPRE2) >> RCC_CFGR_PPRE2_Pos;
+        u32 ppre2 = (RCC->CFGR & RCC_CFGR_PPRE2) >> RCC_CFGR_PPRE2_Pos;
         if (ppre2 >= 4) {
             timer_freq = apb_freq * 2;
         }
@@ -460,7 +460,7 @@ uint32_t getTimerClockFreq(TIM_TypeDef* timer) {
 #endif
 }
 
-bool initTimerPWM(TIM_HandleTypeDef* htim, TIM_TypeDef* timer, uint32_t frequency_hz) {
+bool initTimerPWM(TIM_HandleTypeDef* htim, TIM_TypeDef* timer, u32 frequency_hz) {
 #if defined(HAL_TIM_MODULE_ENABLED)
     if (htim == nullptr || timer == nullptr || frequency_hz == 0) {
         return false;
@@ -470,7 +470,7 @@ bool initTimerPWM(TIM_HandleTypeDef* htim, TIM_TypeDef* timer, uint32_t frequenc
     enableTimerClock(timer);
 
     // Get timer clock frequency
-    uint32_t timer_clock = getTimerClockFreq(timer);
+    u32 timer_clock = getTimerClockFreq(timer);
     if (timer_clock == 0) {
         FL_WARN("STM32: Failed to get timer clock frequency");
         return false;
@@ -478,7 +478,7 @@ bool initTimerPWM(TIM_HandleTypeDef* htim, TIM_TypeDef* timer, uint32_t frequenc
 
     // Calculate period (ARR register value)
     // Period = (Timer_Clock / Desired_Frequency) - 1
-    uint32_t period = (timer_clock / frequency_hz) - 1;
+    u32 period = (timer_clock / frequency_hz) - 1;
 
     // Validate period is within timer range
     // 16-bit timers: max 65535, 32-bit timers: max 4294967295
@@ -487,7 +487,7 @@ bool initTimerPWM(TIM_HandleTypeDef* htim, TIM_TypeDef* timer, uint32_t frequenc
         || timer == TIM5
 #endif
     );
-    uint32_t max_period = is_32bit ? 0xFFFFFFFF : 0xFFFF;
+    u32 max_period = is_32bit ? 0xFFFFFFFF : 0xFFFF;
 
     if (period > max_period) {
         FL_WARN("STM32: Timer period " << period << " exceeds max " << max_period);
@@ -561,7 +561,7 @@ void stopTimer(TIM_HandleTypeDef* htim) {
 #endif
 }
 
-uint8_t getTimerChannel(uint8_t pin, TIM_TypeDef* timer) {
+u8 getTimerChannel(u8 pin, TIM_TypeDef* timer) {
 #if defined(HAL_TIM_MODULE_ENABLED) && defined(FASTLED_STM32_GPIO_USES_AF_NUMBERS)
     // For F2/F4/F7/H7/L4/G4/U5: Use pinmap_pinAF to determine channel
     PinName pin_name = digitalPinToPinName(pin);
@@ -669,7 +669,7 @@ DMA_Stream_TypeDef* getDMAStream(TIM_TypeDef* timer, int bus_id, int lane) {
     return nullptr;
 }
 
-uint32_t getDMAChannel(TIM_TypeDef* timer) {
+u32 getDMAChannel(TIM_TypeDef* timer) {
 #if defined(FASTLED_STM32_HAS_DMA_STREAMS)
 
 #if defined(FL_IS_STM32_H7)
@@ -749,7 +749,7 @@ DMA_TypeDef* getDMAController(DMA_Stream_TypeDef* stream) {
     return nullptr;
 }
 
-uint8_t getStreamIndex(DMA_Stream_TypeDef* stream) {
+u8 getStreamIndex(DMA_Stream_TypeDef* stream) {
 #if defined(FASTLED_STM32_HAS_DMA_STREAMS)
     // Use lookup table to avoid pointer arithmetic
     // (pointer arithmetic fails with DMA stream structures)
@@ -758,7 +758,7 @@ uint8_t getStreamIndex(DMA_Stream_TypeDef* stream) {
         DMA1_Stream0, DMA1_Stream1, DMA1_Stream2, DMA1_Stream3,
         DMA1_Stream4, DMA1_Stream5, DMA1_Stream6, DMA1_Stream7
     };
-    for (uint8_t i = 0; i < 8; i++) {
+    for (u8 i = 0; i < 8; i++) {
         if (stream == dma1_streams[i]) {
             return i;
         }
@@ -769,7 +769,7 @@ uint8_t getStreamIndex(DMA_Stream_TypeDef* stream) {
         DMA2_Stream0, DMA2_Stream1, DMA2_Stream2, DMA2_Stream3,
         DMA2_Stream4, DMA2_Stream5, DMA2_Stream6, DMA2_Stream7
     };
-    for (uint8_t i = 0; i < 8; i++) {
+    for (u8 i = 0; i < 8; i++) {
         if (stream == dma2_streams[i]) {
             return i;
         }
@@ -781,7 +781,7 @@ uint8_t getStreamIndex(DMA_Stream_TypeDef* stream) {
     return 0xFF;  // Invalid stream
 }
 
-bool initDMA(DMA_Stream_TypeDef* stream, const void* src, volatile void* dst, uint32_t size, uint32_t channel) {
+bool initDMA(DMA_Stream_TypeDef* stream, const void* src, volatile void* dst, u32 size, u32 channel) {
 #if defined(HAL_DMA_MODULE_ENABLED) && defined(FASTLED_STM32_HAS_DMA_STREAMS)
     if (stream == nullptr || src == nullptr || dst == nullptr || size == 0) {
         return false;
@@ -820,7 +820,7 @@ bool initDMA(DMA_Stream_TypeDef* stream, const void* src, volatile void* dst, ui
     }
 
     // Configure transfer addresses and size
-    if (HAL_DMA_Start(&hdma, (uint32_t)src, (uint32_t)dst, size) != HAL_OK) {
+    if (HAL_DMA_Start(&hdma, (u32)src, (u32)dst, size) != HAL_OK) {
         FL_WARN("STM32: DMA start failed");
         return false;
     }
@@ -850,7 +850,7 @@ bool isDMAComplete(DMA_Stream_TypeDef* stream) {
 
     // Check transfer complete flag
     DMA_TypeDef* dma = getDMAController(stream);
-    uint8_t stream_idx = getStreamIndex(stream);
+    u8 stream_idx = getStreamIndex(stream);
 
     if (dma == nullptr || stream_idx == 0xFF) {
         return true;  // Assume complete if invalid
@@ -862,14 +862,14 @@ bool isDMAComplete(DMA_Stream_TypeDef* stream) {
     if (stream_idx < 4) {
         // Streams 0-3: Use LISR (Low Interrupt Status Register)
         // Bit positions: Stream 0: bit 5, Stream 1: bit 11, Stream 2: bit 21, Stream 3: bit 27
-        static const uint32_t tc_flags[] = {
+        static const u32 tc_flags[] = {
             DMA_LISR_TCIF0, DMA_LISR_TCIF1, DMA_LISR_TCIF2, DMA_LISR_TCIF3
         };
         return (dma->LISR & tc_flags[stream_idx]) != 0;
     } else {
         // Streams 4-7: Use HISR (High Interrupt Status Register)
         // Bit positions: Stream 4: bit 5, Stream 5: bit 11, Stream 6: bit 21, Stream 7: bit 27
-        static const uint32_t tc_flags[] = {
+        static const u32 tc_flags[] = {
             DMA_HISR_TCIF4, DMA_HISR_TCIF5, DMA_HISR_TCIF6, DMA_HISR_TCIF7
         };
         return (dma->HISR & tc_flags[stream_idx - 4]) != 0;
@@ -877,7 +877,7 @@ bool isDMAComplete(DMA_Stream_TypeDef* stream) {
 #else
     // STM32F2/F4/F7/L4: Use LL driver functions for flag checking (stream-specific)
     // Create function pointer array for TC flag checks
-    typedef uint32_t (*FlagFunc)(DMA_TypeDef*);
+    typedef u32 (*FlagFunc)(DMA_TypeDef*);
     static const FlagFunc tc_funcs[] = {
         LL_DMA_IsActiveFlag_TC0, LL_DMA_IsActiveFlag_TC1,
         LL_DMA_IsActiveFlag_TC2, LL_DMA_IsActiveFlag_TC3,
@@ -905,7 +905,7 @@ void clearDMAFlags(DMA_Stream_TypeDef* stream) {
     }
 
     DMA_TypeDef* dma = getDMAController(stream);
-    uint8_t stream_idx = getStreamIndex(stream);
+    u8 stream_idx = getStreamIndex(stream);
 
     if (dma == nullptr || stream_idx == 0xFF) {
         return;
@@ -916,7 +916,7 @@ void clearDMAFlags(DMA_Stream_TypeDef* stream) {
     // Clear all interrupt flags for this stream (TC, HT, TE, DME, FE)
     if (stream_idx < 4) {
         // Streams 0-3: Use LIFCR (Low Interrupt Flag Clear Register)
-        static const uint32_t clear_flags[] = {
+        static const u32 clear_flags[] = {
             DMA_LIFCR_CTCIF0 | DMA_LIFCR_CHTIF0 | DMA_LIFCR_CTEIF0 | DMA_LIFCR_CDMEIF0 | DMA_LIFCR_CFEIF0,
             DMA_LIFCR_CTCIF1 | DMA_LIFCR_CHTIF1 | DMA_LIFCR_CTEIF1 | DMA_LIFCR_CDMEIF1 | DMA_LIFCR_CFEIF1,
             DMA_LIFCR_CTCIF2 | DMA_LIFCR_CHTIF2 | DMA_LIFCR_CTEIF2 | DMA_LIFCR_CDMEIF2 | DMA_LIFCR_CFEIF2,
@@ -925,7 +925,7 @@ void clearDMAFlags(DMA_Stream_TypeDef* stream) {
         dma->LIFCR = clear_flags[stream_idx];
     } else {
         // Streams 4-7: Use HIFCR (High Interrupt Flag Clear Register)
-        static const uint32_t clear_flags[] = {
+        static const u32 clear_flags[] = {
             DMA_HIFCR_CTCIF4 | DMA_HIFCR_CHTIF4 | DMA_HIFCR_CTEIF4 | DMA_HIFCR_CDMEIF4 | DMA_HIFCR_CFEIF4,
             DMA_HIFCR_CTCIF5 | DMA_HIFCR_CHTIF5 | DMA_HIFCR_CTEIF5 | DMA_HIFCR_CDMEIF5 | DMA_HIFCR_CFEIF5,
             DMA_HIFCR_CTCIF6 | DMA_HIFCR_CHTIF6 | DMA_HIFCR_CTEIF6 | DMA_HIFCR_CDMEIF6 | DMA_HIFCR_CFEIF6,

@@ -69,7 +69,7 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
     void pause(fl::u32 now) override;
     void resume(fl::u32 now) override;
     void setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime);
-    int32_t durationMicros() const; // -1 if this is a stream.
+    i32 durationMicros() const; // -1 if this is a stream.
 
     // make compatible with if statements
     operator bool() const { return mImpl.get(); }

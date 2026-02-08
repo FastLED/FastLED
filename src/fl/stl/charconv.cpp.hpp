@@ -65,7 +65,7 @@ fl::string hex(uint64_t value, HexIntWidth width, bool is_negative, bool upperca
 // Public API implementations for integer to string conversion
 // Moved from string_functions namespace in str.cpp for better organization
 
-int itoa(int32_t value, char *sp, int radix) {
+int itoa(i32 value, char *sp, int radix) {
     char tmp[16]; // be careful with the length of the buffer
     char *tp = tmp;
     int i;
@@ -135,11 +135,11 @@ int itoa64(int64_t value, char *sp, int radix) {
     return len;
 }
 
-int utoa32(uint32_t value, char *sp, int radix) {
+int utoa32(u32 value, char *sp, int radix) {
     char tmp[16]; // be careful with the length of the buffer
     char *tp = tmp;
     int i;
-    uint32_t v = value;
+    u32 v = value;
 
     while (v || tp == tmp) {
         i = v % radix;

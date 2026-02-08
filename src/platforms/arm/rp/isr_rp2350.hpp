@@ -62,20 +62,20 @@ namespace platforms {
 
 struct rp2350_isr_handle_data {
     // Timer-related fields
-    int8_t alarm_num;              // Hardware alarm number (0-3, or -1 if not timer)
+    i8 alarm_num;              // Hardware alarm number (0-3, or -1 if not timer)
     alarm_id_t alarm_id;           // Pico SDK alarm ID (for cancellation)
-    uint32_t frequency_hz;         // Timer frequency in Hz
+    u32 frequency_hz;         // Timer frequency in Hz
 
     // GPIO-related fields
-    uint8_t gpio_pin;              // GPIO pin number (0xFF if not GPIO)
-    uint32_t gpio_events;          // GPIO event mask (rise/fall/level)
+    u8 gpio_pin;              // GPIO pin number (0xFF if not GPIO)
+    u32 gpio_events;          // GPIO event mask (rise/fall/level)
 
     // Common fields
     bool is_timer;                 // true = timer ISR, false = GPIO ISR
     bool is_enabled;               // Current enable state
     isr_handler_t user_handler;    // User handler function
     void* user_data;               // User context
-    uint8_t core_num;              // Core that registered this ISR (0 or 1)
+    u8 core_num;              // Core that registered this ISR (0 or 1)
 
     rp2350_isr_handle_data()
         : alarm_num(-1)
@@ -92,10 +92,10 @@ struct rp2350_isr_handle_data {
 };
 
 // Platform ID for RP2350
-constexpr uint8_t RP2350_PLATFORM_ID = 14;
+constexpr u8 RP2350_PLATFORM_ID = 14;
 
 // Maximum hardware alarms
-constexpr uint8_t FL_NUM_ALARMS = 4;
+constexpr u8 FL_NUM_ALARMS = 4;
 
 // Track allocated alarms
 static bool alarm_allocated[FL_NUM_ALARMS] = {};
@@ -118,13 +118,13 @@ static void init_alarm_lock() {
 }
 
 // Allocate a hardware alarm (thread-safe, multi-core safe)
-static int8_t allocate_alarm() {
+static i8 allocate_alarm() {
     init_alarm_lock();
 
     critical_section_enter_blocking(&alarm_lock);
 
-    int8_t alarm_num = -1;
-    for (uint8_t i = 0; i < FL_NUM_ALARMS; i++) {
+    i8 alarm_num = -1;
+    for (u8 i = 0; i < FL_NUM_ALARMS; i++) {
         if (!alarm_allocated[i]) {
             alarm_allocated[i] = true;
             alarm_num = i;
@@ -137,7 +137,7 @@ static int8_t allocate_alarm() {
 }
 
 // Free a hardware alarm (thread-safe, multi-core safe)
-static void free_alarm(int8_t alarm_num) {
+static void free_alarm(i8 alarm_num) {
     if (alarm_num < 0 || alarm_num >= FL_NUM_ALARMS) {
         return;
     }
@@ -152,7 +152,7 @@ static void free_alarm(int8_t alarm_num) {
 
 // Map ISR priority (1-7) to NVIC priority (0-255, lower = higher)
 // RP2350 Cortex-M33 supports 8-bit priority (0-255)
-static uint8_t map_priority_to_nvic(uint8_t isr_priority) {
+static u8 map_priority_to_nvic(u8 isr_priority) {
     // Clamp to valid range
     if (isr_priority < 1) isr_priority = 1;
     if (isr_priority > 7) isr_priority = 7;
@@ -196,7 +196,7 @@ static int64_t alarm_callback_wrapper(alarm_id_t id, void* user_data) {
 static rp2350_isr_handle_data* gpio_handles[30] = {};  // 30 GPIO pins max
 
 // GPIO interrupt handler (shared callback for all GPIOs on this core)
-static void gpio_callback_wrapper(uint gpio, uint32_t events) {
+static void gpio_callback_wrapper(uint gpio, u32 events) {
     if (gpio < 30 && gpio_handles[gpio]) {
         rp2350_isr_handle_data* handle = gpio_handles[gpio];
 
@@ -231,7 +231,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     }
 
     // Allocate a hardware alarm
-    int8_t alarm_num = allocate_alarm();
+    i8 alarm_num = allocate_alarm();
     if (alarm_num < 0) {
         FL_WARN("attachTimerHandler: no free hardware alarms (max 4)");
         return -3;  // Out of resources
@@ -274,7 +274,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     // RP2350 has dual timers (TIMER0/TIMER1) with separate IRQs
     // Use TIMER_ALARM_IRQ_NUM macro for portability with PICO_DEFAULT_TIMER
     if (config.priority != ISR_PRIORITY_DEFAULT) {
-        uint8_t nvic_priority = map_priority_to_nvic(config.priority);
+        u8 nvic_priority = map_priority_to_nvic(config.priority);
         irq_set_priority(TIMER_ALARM_IRQ_NUM(timer_hw, alarm_num), nvic_priority);
     }
 
@@ -292,7 +292,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     return 0;  // Success
 }
 
-int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) {
+int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) {
     if (!config.handler) {
         FL_WARN("attachExternalHandler: handler is null");
         return -1;  // Invalid parameter
@@ -325,7 +325,7 @@ int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_
     handle_data->core_num = get_core_num();
 
     // Determine GPIO event mask from flags
-    uint32_t events = 0;
+    u32 events = 0;
     if (config.flags & ISR_FLAG_EDGE_RISING) {
         events |= GPIO_IRQ_EDGE_RISE;
     }
@@ -357,7 +357,7 @@ int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_
 
     // Set IRQ priority if specified
     if (config.priority != ISR_PRIORITY_DEFAULT) {
-        uint8_t nvic_priority = map_priority_to_nvic(config.priority);
+        u8 nvic_priority = map_priority_to_nvic(config.priority);
         irq_set_priority(IO_IRQ_BANK0, nvic_priority);
     }
 
@@ -505,21 +505,21 @@ const char* get_platform_name() {
     return "RP2350";
 }
 
-uint32_t get_max_timer_frequency() {
+u32 get_max_timer_frequency() {
     return 1000000;  // 1 MHz (limited by microsecond counter resolution)
 }
 
-uint32_t get_min_timer_frequency() {
+u32 get_min_timer_frequency() {
     return 1;  // 1 Hz (practical minimum given 32-bit alarm period)
 }
 
-uint8_t get_max_priority() {
+u8 get_max_priority() {
     // RP2350 Cortex-M33 supports priority levels 0-255 in hardware
     // We expose 1-7 in the ISR API and map to 0-255 in NVIC
     return 7;
 }
 
-bool requires_assembly_handler(uint8_t priority) {
+bool requires_assembly_handler(u8 priority) {
     // ARM Cortex-M33: All priority levels support C handlers
     (void)priority;
     return false;

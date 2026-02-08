@@ -97,8 +97,8 @@ bool UsbSerialJtagEsp32::initDriver() {
 
     // Configure USB-Serial JTAG with buffer sizes
     usb_serial_jtag_driver_config_t usb_config = {};
-    usb_config.tx_buffer_size = static_cast<uint32_t>(mConfig.txBufferSize);
-    usb_config.rx_buffer_size = static_cast<uint32_t>(mConfig.rxBufferSize);
+    usb_config.tx_buffer_size = static_cast<u32>(mConfig.txBufferSize);
+    usb_config.rx_buffer_size = static_cast<u32>(mConfig.rxBufferSize);
 
     esp_rom_printf("USB-Serial JTAG: Installing driver (rx_buf=%d, tx_buf=%d)...\n",
                   static_cast<int>(mConfig.rxBufferSize),
@@ -169,7 +169,7 @@ void UsbSerialJtagEsp32::write(const char* str) {
     }
 }
 
-size_t UsbSerialJtagEsp32::write(const uint8_t* buffer, size_t size) {
+size_t UsbSerialJtagEsp32::write(const u8* buffer, size_t size) {
     if (!buffer || size == 0)
         return 0;
 
@@ -243,7 +243,7 @@ int UsbSerialJtagEsp32::read() {
         return -1;  // Driver not installed, cannot read
     }
 
-    uint8_t c = 0;
+    u8 c = 0;
     int len = usb_serial_jtag_read_bytes(&c, 1, 0);  // timeout=0 (non-blocking)
 
     if (len == 1) {
@@ -256,7 +256,7 @@ int UsbSerialJtagEsp32::read() {
 #endif
 }
 
-bool UsbSerialJtagEsp32::flush(uint32_t timeoutMs) {
+bool UsbSerialJtagEsp32::flush(u32 timeoutMs) {
 #ifdef FL_HAS_USB_SERIAL_JTAG
     if (!mBuffered) {
         return false;  // Driver not installed, cannot flush

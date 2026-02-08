@@ -93,7 +93,7 @@ namespace detail {
 //=============================================================================
 
 struct HeapCapsDeleter {
-    void operator()(uint8_t *ptr) const {
+    void operator()(u8 *ptr) const {
         if (ptr) {
             heap_caps_free(ptr);
         }
@@ -116,14 +116,14 @@ struct ParlioRingBuffer3 {
     static constexpr size_t RING_BUFFER_COUNT = 3;
 
     // Ring buffer storage (POD C arrays - no dynamic allocation)
-    uint8_t* ptrs[RING_BUFFER_COUNT];       // Buffer pointers (not owned)
+    u8* ptrs[RING_BUFFER_COUNT];       // Buffer pointers (not owned)
     size_t sizes[RING_BUFFER_COUNT];        // Actual DMA buffer size in each buffer (includes reset padding)
     size_t input_sizes[RING_BUFFER_COUNT];  // Input byte count (source data, excludes reset padding)
     size_t capacity;                        // Capacity of each buffer (bytes)
 
     // Destructor callback for buffer cleanup (set by owner)
     // Called once per buffer (3 times total)
-    fl::function<void(uint8_t*)> on_destroy;
+    fl::function<void(u8*)> on_destroy;
 
     /// @brief Initialize ring buffer with external buffers
     /// @param buffer0 Pointer to first buffer
@@ -131,9 +131,9 @@ struct ParlioRingBuffer3 {
     /// @param buffer2 Pointer to third buffer
     /// @param buffer_capacity Capacity of each buffer (all must be same size)
     /// @param destroy_callback Function to call on destruction to free each buffer
-    ParlioRingBuffer3(uint8_t* buffer0, uint8_t* buffer1, uint8_t* buffer2,
+    ParlioRingBuffer3(u8* buffer0, u8* buffer1, u8* buffer2,
                       size_t buffer_capacity,
-                      fl::function<void(uint8_t*)> destroy_callback)
+                      fl::function<void(u8*)> destroy_callback)
         : ptrs{buffer0, buffer1, buffer2},
           sizes{0, 0, 0},
           input_sizes{0, 0, 0},

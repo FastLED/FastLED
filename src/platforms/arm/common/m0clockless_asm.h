@@ -51,10 +51,10 @@ FL_EXTERN_C_BEGIN
 
 // Define the SysTick structure
 typedef struct {
-    volatile uint32_t CTRL;
-    volatile uint32_t LOAD;
-    volatile uint32_t VAL;
-    volatile const uint32_t CALIB;
+    volatile fl::u32 CTRL;
+    volatile fl::u32 LOAD;
+    volatile fl::u32 VAL;
+    volatile const fl::u32 CALIB;
 } SysTick_Type;
 
 #endif
@@ -80,16 +80,16 @@ FL_EXTERN_C_END
  *   s[x]:     offsets 8, 12, 16 (4*(2+RO(x)) - 32-bit values)
  ******************************************************************************/
 struct M0ClocklessData {
-  uint8_t d[3];      // Dither values for R, G, B
-  uint8_t e[3];      // Error accumulation (Floyd-Steinberg-style dithering)
-  uint8_t adj;       // Bytes to advance LED pointer (3 for RGB, 4 for RGBW)
-  uint8_t pad;       // Padding for alignment
-  uint32_t s[3];     // Fixed-point scale factors for color adjustment
+  fl::u8 d[3];      // Dither values for R, G, B
+  fl::u8 e[3];      // Error accumulation (Floyd-Steinberg-style dithering)
+  fl::u8 adj;       // Bytes to advance LED pointer (3 for RGB, 4 for RGBW)
+  fl::u8 pad;       // Padding for alignment
+  fl::u32 s[3];     // Fixed-point scale factors for color adjustment
 };
 
 
 template<int HI_OFFSET, int LO_OFFSET, typename TIMING, EOrder RGB_ORDER, int WAIT_TIME>int
-showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, uint32_t num_leds, struct M0ClocklessData *pData) {
+showLedData(volatile fl::u32 *_port, fl::u32 _bitmask, const fl::u8 *_leds, fl::u32 num_leds, struct M0ClocklessData *pData) {
   /////////////////////////////////////////////////////////////////////////////
   // TIMING CALCULATION
   // Convert nanosecond timing values to CPU clock cycles
@@ -101,9 +101,9 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
   //   T2 (800ns) = (800 * 48 + 500) / 1000 = 38 cycles
   //   T3 (450ns) = (450 * 48 + 500) / 1000 = 22 cycles
   /////////////////////////////////////////////////////////////////////////////
-  static constexpr uint32_t T1 = (TIMING::T1 * (F_CPU / 1000000UL) + 500) / 1000;
-  static constexpr uint32_t T2 = (TIMING::T2 * (F_CPU / 1000000UL) + 500) / 1000;
-  static constexpr uint32_t T3 = (TIMING::T3 * (F_CPU / 1000000UL) + 500) / 1000;
+  static constexpr fl::u32 T1 = (TIMING::T1 * (F_CPU / 1000000UL) + 500) / 1000;
+  static constexpr fl::u32 T2 = (TIMING::T2 * (F_CPU / 1000000UL) + 500) / 1000;
+  static constexpr fl::u32 T3 = (TIMING::T3 * (F_CPU / 1000000UL) + 500) / 1000;
 
   /////////////////////////////////////////////////////////////////////////////
   // REGISTER ALLOCATION
@@ -124,17 +124,17 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
   // High register variable (r8-r15):
   //   leds     - Pointer to LED data array (can use high register for ldrb)
   /////////////////////////////////////////////////////////////////////////////
-  FASTLED_REGISTER uint32_t scratch=0;
+  FASTLED_REGISTER fl::u32 scratch=0;
   FASTLED_REGISTER struct M0ClocklessData *base = pData;
-  FASTLED_REGISTER volatile uint32_t *port = _port;
-  FASTLED_REGISTER uint32_t d=0;
-  FASTLED_REGISTER uint32_t counter=num_leds;
-  FASTLED_REGISTER uint32_t bn=0;
-  FASTLED_REGISTER uint32_t b=0;
-  FASTLED_REGISTER uint32_t bitmask = _bitmask;
+  FASTLED_REGISTER volatile fl::u32 *port = _port;
+  FASTLED_REGISTER fl::u32 d=0;
+  FASTLED_REGISTER fl::u32 counter=num_leds;
+  FASTLED_REGISTER fl::u32 bn=0;
+  FASTLED_REGISTER fl::u32 b=0;
+  FASTLED_REGISTER fl::u32 bitmask = _bitmask;
 
   // High register variable
-  FASTLED_REGISTER const uint8_t *leds = _leds;
+  FASTLED_REGISTER const fl::u8 *leds = _leds;
 #if (FASTLED_SCALE8_FIXED == 1)
   ++pData->s[0];
   ++pData->s[1];
@@ -813,7 +813,7 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
       //   WS2812 LEDs require data within ~50μs or they latch/reset.
       //   We allow 45μs maximum interrupt duration to stay safe.
       /////////////////////////////////////////////////////////////////////////
-      uint32_t ticksBeforeInterrupts = SysTick->VAL;
+      fl::u32 ticksBeforeInterrupts = SysTick->VAL;
       sei();          // Enable interrupts
       --counter;
       cli();          // Disable interrupts
@@ -821,11 +821,11 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
       // Calculate elapsed time and check if it exceeds 45μs
       // Note: This check isn't perfect - if >1ms elapses, SysTick wraps around
       // and we may not detect it correctly. But 1ms is way too long anyway.
-      const uint32_t kTicksPerMs = VARIANT_MCK / 1000;
-      const uint32_t kTicksPerUs = kTicksPerMs / 1000;
-      const uint32_t kTicksIn45us = kTicksPerUs * 45;
+      const fl::u32 kTicksPerMs = VARIANT_MCK / 1000;
+      const fl::u32 kTicksPerUs = kTicksPerMs / 1000;
+      const fl::u32 kTicksIn45us = kTicksPerUs * 45;
 
-      const uint32_t currentTicks = SysTick->VAL;
+      const fl::u32 currentTicks = SysTick->VAL;
 
       if (ticksBeforeInterrupts < currentTicks) {
         // Timer wrapped around (started over during interrupt)

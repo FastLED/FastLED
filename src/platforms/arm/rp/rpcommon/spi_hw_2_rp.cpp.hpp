@@ -137,7 +137,7 @@ public:
     /// @brief Wait for current transmission to complete
     /// @param timeout_ms Maximum time to wait in milliseconds (fl::numeric_limits<uint32_t>::max() = infinite)
     /// @return true if transmission completed, false on timeout
-    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max()) override;
+    bool waitComplete(u32 timeout_ms = fl::numeric_limits<u32>::max()) override;
 
     /// @brief Check if transmission is currently in progress
     /// @return true if busy, false if idle
@@ -171,7 +171,7 @@ private:
     int mDMAChannel;
 
     // DMA buffer management
-    fl::span<uint8_t> mDMABuffer;    // Allocated DMA buffer (interleaved format for dual-lane)
+    fl::span<u8> mDMABuffer;    // Allocated DMA buffer (interleaved format for dual-lane)
     size_t mMaxBytesPerLane;         // Max bytes per lane we've allocated for
     size_t mCurrentTotalSize;        // Current transmission size (bytes_per_lane * 2)
     bool mBufferAcquired;
@@ -181,9 +181,9 @@ private:
     bool mInitialized;
 
     // Configuration
-    uint8_t mClockPin;
-    uint8_t mData0Pin;
-    uint8_t mData1Pin;
+    u8 mClockPin;
+    u8 mData0Pin;
+    u8 mData1Pin;
 
     SPIDualRP2040(const SPIDualRP2040&) = delete;
     SPIDualRP2040& operator=(const SPIDualRP2040&) = delete;
@@ -221,7 +221,7 @@ bool SPIDualRP2040::begin(const SpiHw2::Config& config) {
     }
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
-    if (mBusId != -1 && config.bus_num != static_cast<uint8_t>(mBusId)) {
+    if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
         FL_WARN("SPIDualRP2040: Bus ID mismatch");
         return false;
     }
@@ -365,16 +365,16 @@ DMABuffer SPIDualRP2040::acquireDMABuffer(size_t bytes_per_lane) {
     if (bytes_per_lane > mMaxBytesPerLane) {
         if (!mDMABuffer.empty()) {
             free(mDMABuffer.data());
-            mDMABuffer = fl::span<uint8_t>();
+            mDMABuffer = fl::span<u8>();
         }
 
         // Allocate DMA-capable memory (regular malloc for RP2040)
-        uint8_t* ptr = (uint8_t*)malloc(buffer_size_bytes);
+        u8* ptr = (u8*)malloc(buffer_size_bytes);
         if (!ptr) {
             return DMABuffer(SPIError::ALLOCATION_FAILED);
         }
 
-        mDMABuffer = fl::span<uint8_t>(ptr, buffer_size_bytes);
+        mDMABuffer = fl::span<u8>(ptr, buffer_size_bytes);
         mMaxBytesPerLane = bytes_per_lane;
     }
 
@@ -405,26 +405,26 @@ bool SPIDualRP2040::transmit(TransmitMode mode) {
     size_t word_count = (byte_count + 1) / 2;
 
     // Access the buffer data - already allocated with enough space for words
-    uint8_t* byte_buffer = mDMABuffer.data();
-    uint32_t* word_buffer = (uint32_t*)mDMABuffer.data();
+    u8* byte_buffer = mDMABuffer.data();
+    u32* word_buffer = (u32*)mDMABuffer.data();
 
     // Convert interleaved byte data to PIO word format
     // Work backwards to avoid overwriting data we haven't read yet
     for (int i = (int)word_count - 1; i >= 0; i--) {
         size_t byte_idx = i * 2;
-        uint8_t byte0 = byte_buffer[byte_idx];
-        uint8_t byte1 = (byte_idx + 1 < byte_count) ? byte_buffer[byte_idx + 1] : 0;
+        u8 byte0 = byte_buffer[byte_idx];
+        u8 byte1 = (byte_idx + 1 < byte_count) ? byte_buffer[byte_idx + 1] : 0;
 
         // Interleave bits from byte0 and byte1
         // Result: 16 bits where even bits are from byte0, odd bits from byte1
-        uint32_t interleaved = 0;
+        u32 interleaved = 0;
         for (int bit = 0; bit < 8; bit++) {
             // Extract bit from byte0 and place at position (bit*2)
-            uint32_t bit0 = (byte0 >> (7 - bit)) & 1;
+            u32 bit0 = (byte0 >> (7 - bit)) & 1;
             interleaved |= (bit0 << (15 - bit * 2));
 
             // Extract bit from byte1 and place at position (bit*2 + 1)
-            uint32_t bit1 = (byte1 >> (7 - bit)) & 1;
+            u32 bit1 = (byte1 >> (7 - bit)) & 1;
             interleaved |= (bit1 << (14 - bit * 2));
         }
 
@@ -440,13 +440,13 @@ bool SPIDualRP2040::transmit(TransmitMode mode) {
     return true;
 }
 
-bool SPIDualRP2040::waitComplete(uint32_t timeout_ms) {
+bool SPIDualRP2040::waitComplete(u32 timeout_ms) {
     if (!mTransactionActive) {
         return true;  // Nothing to wait for
     }
 
     // Poll with timeout checking
-    if (timeout_ms == fl::numeric_limits<uint32_t>::max()) {
+    if (timeout_ms == fl::numeric_limits<u32>::max()) {
         // Infinite timeout - just wait
         dma_channel_wait_for_finish_blocking(mDMAChannel);
     } else {
@@ -497,7 +497,7 @@ void SPIDualRP2040::cleanup() {
         // Free DMA buffer
         if (!mDMABuffer.empty()) {
             free(mDMABuffer.data());
-            mDMABuffer = fl::span<uint8_t>();
+            mDMABuffer = fl::span<u8>();
             mMaxBytesPerLane = 0;
             mCurrentTotalSize = 0;
             mBufferAcquired = false;

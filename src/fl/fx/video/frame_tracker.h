@@ -19,7 +19,7 @@ class FrameTracker {
     // time.
     void get_interval_frames(fl::u32 now, fl::u32 *frameNumber,
                              fl::u32 *nextFrameNumber,
-                             uint8_t *amountOfNextFrame = nullptr) const;
+                             u8 *amountOfNextFrame = nullptr) const;
 
     // Given a frame number, returns the exact timestamp in milliseconds that
     // the frame should be displayed.

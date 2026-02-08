@@ -81,11 +81,11 @@ public:
     bool freeBus() override = 0;
     bool isInitialized() const override = 0;
     bool queueTransaction(const SpiTransaction& trans) override = 0;
-    bool pollTransaction(uint32_t timeout_ms) override = 0;
+    bool pollTransaction(u32 timeout_ms) override = 0;
     bool registerCallback(void* callback, void* user_ctx) override = 0;
-    uint8_t* allocateDma(size_t size) override = 0;
-    void freeDma(uint8_t* buffer) override = 0;
-    void delay(uint32_t ms) override = 0;
+    u8* allocateDma(size_t size) override = 0;
+    void freeDma(u8* buffer) override = 0;
+    void delay(u32 ms) override = 0;
     uint64_t getMicroseconds() override = 0;
 
 protected:

@@ -9,7 +9,7 @@ namespace fl {
 namespace platforms {
 
 // Serial initialization
-void begin(uint32_t baudRate);
+void begin(u32 baudRate);
 
 // Print functions
 void print(const char* str);
@@ -21,8 +21,8 @@ int peek();
 int read();
 
 // Utility functions
-bool flush(uint32_t timeoutMs = 1000);
-size_t write_bytes(const uint8_t* buffer, size_t size);
+bool flush(u32 timeoutMs = 1000);
+size_t write_bytes(const u8* buffer, size_t size);
 bool serial_ready();
 
 // Test/diagnostic helper: Check if using buffered mode (not ROM UART fallback)

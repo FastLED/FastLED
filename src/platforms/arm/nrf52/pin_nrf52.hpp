@@ -59,7 +59,7 @@ inline PinValue digitalRead(int pin) {
     return nrf_gpio_pin_read(pin) ? PinValue::High : PinValue::Low;
 }
 
-inline uint16_t analogRead(int pin) {
+inline u16 analogRead(int pin) {
     // SAADC (Successive Approximation ADC) requires complex initialization
     // For now, return 0 as a safe default - full implementation would require:
     // 1. SAADC channel configuration
@@ -71,7 +71,7 @@ inline uint16_t analogRead(int pin) {
     return 0;
 }
 
-inline void analogWrite(int pin, uint16_t val) {
+inline void analogWrite(int pin, u16 val) {
     // PWM on nRF52 requires complex PWM peripheral configuration
     // For now, this is a no-op - full implementation would require:
     // 1. PWM instance allocation
@@ -83,7 +83,7 @@ inline void analogWrite(int pin, uint16_t val) {
     (void)val;
 }
 
-inline void setPwm16(int pin, uint16_t val) {
+inline void setPwm16(int pin, u16 val) {
     // nRF52 PWM peripheral natively supports 15-bit resolution (0-32767)
     // For 16-bit input, scale down by 1 bit
     // However, without Arduino core support, we'd need direct PWM peripheral access

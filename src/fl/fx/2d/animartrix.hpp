@@ -163,7 +163,7 @@ class FastLEDANIMartRIX : public animartrix_detail::ANIMartRIX {
         setPixelColor(x, y, CRGB(pixel.red, pixel.green, pixel.blue));
     }
 
-    uint16_t xyMap(uint16_t x, uint16_t y) override {
+    u16 xyMap(u16 x, u16 y) override {
         return data->xyMap(x, y);
     }
 
@@ -316,9 +316,9 @@ void Animartrix::draw(DrawContext ctx) {
     if (color_order != RGB) {
         for (int i = 0; i < mXyMap.getTotal(); ++i) {
             CRGB &pixel = ctx.leds[i];
-            const uint8_t b0_index = RGB_BYTE0(color_order);
-            const uint8_t b1_index = RGB_BYTE1(color_order);
-            const uint8_t b2_index = RGB_BYTE2(color_order);
+            const u8 b0_index = RGB_BYTE0(color_order);
+            const u8 b1_index = RGB_BYTE1(color_order);
+            const u8 b2_index = RGB_BYTE2(color_order);
             pixel = CRGB(pixel.raw[b0_index], pixel.raw[b1_index],
                          pixel.raw[b2_index]);
         }

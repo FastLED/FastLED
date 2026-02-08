@@ -30,7 +30,7 @@ public:
 ITaskCoroutine* createTaskCoroutine(fl::string name,
                                      ITaskCoroutine::TaskFunction function,
                                      size_t stack_size,
-                                     uint8_t priority);
+                                     u8 priority);
 
 } // namespace platforms
 } // namespace fl

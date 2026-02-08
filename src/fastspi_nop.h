@@ -16,7 +16,7 @@
 /// A nop/stub class, mostly to show the SPI methods that are needed/used by the various SPI chipset implementations.  Should
 /// be used as a definition for the set of methods that the spi implementation classes should use (since C++ doesn't support the
 /// idea of interfaces - it's possible this could be done with virtual classes, need to decide if i want that overhead)
-template <fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
+template <fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
 class NOPSPIOutput {
 	Selectable *m_pSelect;
 
@@ -53,7 +53,7 @@ public:
 	/// write a byte out via SPI (returns immediately on writing register)
 	void writeByte(fl::u8 b) { /* TODO */ }
 	/// write a word out via SPI (returns immediately on writing register)
-	void writeWord(uint16_t w) { /* TODO */ }
+	void writeWord(fl::u16 w) { /* TODO */ }
 
 	/// A raw set of writing byte values, assumes setup/init/waiting done elsewhere (static for use by adjustment classes)
 	static void writeBytesValueRaw(fl::u8 value, int len) { /* TODO */ }

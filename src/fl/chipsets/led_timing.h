@@ -79,10 +79,10 @@ namespace fl {
 /// @brief Generic chipset timing entry
 /// Provides T1, T2, T3 timing parameters in nanoseconds for any LED protocol
 struct ChipsetTiming {
-    uint32_t T1;        ///< High time for bit 0 (nanoseconds)
-    uint32_t T2;        ///< Additional high time for bit 1 (nanoseconds)
-    uint32_t T3;        ///< Low tail duration (nanoseconds)
-    uint32_t RESET;     ///< Reset/latch time (microseconds)
+    u32 T1;        ///< High time for bit 0 (nanoseconds)
+    u32 T2;        ///< Additional high time for bit 1 (nanoseconds)
+    u32 T3;        ///< Low tail duration (nanoseconds)
+    u32 RESET;     ///< Reset/latch time (microseconds)
     const char* name;   ///< Human-readable chipset name
 };
 
@@ -93,7 +93,7 @@ struct ChipsetTiming {
 /// GE8822 RGB controller @ 800 kHz
 /// Four-phase: TH0=350ns, TH1=1010ns, TL0=1010ns, TL1=350ns
 struct TIMING_GE8822_800KHZ {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 350,
         T2 = 660,
         T3 = 350,
@@ -119,7 +119,7 @@ struct TIMING_GE8822_800KHZ {
 /// Four-phase: TH0=250ns, TH1=875ns, TL0=1000ns, TL1=375ns
 /// @note Timings can be overridden at compile time using FASTLED_WS2812_T1, FASTLED_WS2812_T2, FASTLED_WS2812_T3
 struct TIMING_WS2812_800KHZ {
-    enum : uint32_t {
+    enum : u32 {
         T1 = FASTLED_WS2812_T1,
         T2 = FASTLED_WS2812_T2,
         T3 = FASTLED_WS2812_T3,
@@ -155,7 +155,7 @@ using WS2812ChipsetTiming = TIMING_WS2812_800KHZ;
 /// @see https://www.peace-corp.co.jp/data/WS2812B-Mini-V3_V3.0_EN.pdf (Mini-V3)
 /// @see https://www.laskakit.cz/user/related_files/ws2812b.pdf (V5)
 struct TIMING_WS2812B_MINI_V3 {
-    enum : uint32_t {
+    enum : u32 {
         T1 = FASTLED_WS2812B_V5_T1,
         T2 = FASTLED_WS2812B_V5_T2,
         T3 = FASTLED_WS2812B_V5_T3,
@@ -169,7 +169,7 @@ using TIMING_WS2812B_V5 = TIMING_WS2812B_MINI_V3;
 /// WS2812 RGB controller @ 800 kHz legacy variant
 /// Four-phase: TH0=320ns, TH1=640ns, TL0=960ns, TL1=640ns
 struct TIMING_WS2812_800KHZ_LEGACY {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 320,
         T2 = 320,
         T3 = 640,
@@ -180,7 +180,7 @@ struct TIMING_WS2812_800KHZ_LEGACY {
 /// WS2813 RGB controller (same timing as WS2812)
 /// Four-phase: TH0=320ns, TH1=640ns, TL0=960ns, TL1=640ns
 struct TIMING_WS2813 {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 320,
         T2 = 320,
         T3 = 640,
@@ -191,7 +191,7 @@ struct TIMING_WS2813 {
 /// SK6812 RGBW controller @ 800 kHz
 /// Four-phase: TH0=300ns, TH1=900ns, TL0=900ns, TL1=300ns
 struct TIMING_SK6812 {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 300,
         T2 = 600,
         T3 = 300,
@@ -202,7 +202,7 @@ struct TIMING_SK6812 {
 /// SK6822 RGB controller @ 800 kHz
 /// Four-phase: TH0=375ns, TH1=1375ns, TL0=1375ns, TL1=375ns
 struct TIMING_SK6822 {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 375,
         T2 = 1000,
         T3 = 375,
@@ -213,7 +213,7 @@ struct TIMING_SK6822 {
 /// UCS1903B controller @ 800 kHz
 /// Four-phase: TH0=400ns, TH1=850ns, TL0=900ns, TL1=450ns
 struct TIMING_UCS1903B_800KHZ {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 400,
         T2 = 450,
         T3 = 450,
@@ -224,7 +224,7 @@ struct TIMING_UCS1903B_800KHZ {
 /// UCS1904 controller @ 800 kHz
 /// Four-phase: TH0=400ns, TH1=800ns, TL0=850ns, TL1=450ns
 struct TIMING_UCS1904_800KHZ {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 400,
         T2 = 400,
         T3 = 450,
@@ -235,7 +235,7 @@ struct TIMING_UCS1904_800KHZ {
 /// UCS2903 controller @ 800 kHz
 /// Four-phase: TH0=250ns, TH1=1000ns, TL0=1000ns, TL1=250ns
 struct TIMING_UCS2903 {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 250,
         T2 = 750,
         T3 = 250,
@@ -246,7 +246,7 @@ struct TIMING_UCS2903 {
 /// TM1809 RGB controller @ 800 kHz
 /// Four-phase: TH0=350ns, TH1=700ns, TL0=800ns, TL1=450ns
 struct TIMING_TM1809_800KHZ {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 350,
         T2 = 350,
         T3 = 450,
@@ -257,7 +257,7 @@ struct TIMING_TM1809_800KHZ {
 /// TM1829 RGB controller @ 800 kHz
 /// Four-phase: TH0=340ns, TH1=680ns, TL0=890ns, TL1=550ns
 struct TIMING_TM1829_800KHZ {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 340,
         T2 = 340,
         T3 = 550,
@@ -268,7 +268,7 @@ struct TIMING_TM1829_800KHZ {
 /// TM1829 RGB controller @ 1600 kHz (high-speed variant)
 /// Four-phase: TH0=100ns, TH1=400ns, TL0=500ns, TL1=200ns
 struct TIMING_TM1829_1600KHZ {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 100,
         T2 = 300,
         T3 = 200,
@@ -279,7 +279,7 @@ struct TIMING_TM1829_1600KHZ {
 /// LPD1886 RGB controller @ 1250 kHz
 /// Four-phase: TH0=200ns, TH1=600ns, TL0=600ns, TL1=200ns
 struct TIMING_LPD1886_1250KHZ {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 200,
         T2 = 400,
         T3 = 200,
@@ -290,7 +290,7 @@ struct TIMING_LPD1886_1250KHZ {
 /// PL9823 RGB controller @ 800 kHz
 /// Four-phase: TH0=350ns, TH1=1360ns, TL0=1360ns, TL1=350ns
 struct TIMING_PL9823 {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 350,
         T2 = 1010,
         T3 = 350,
@@ -301,7 +301,7 @@ struct TIMING_PL9823 {
 /// SM16703 RGB controller @ 800 kHz
 /// Four-phase: TH0=300ns, TH1=900ns, TL0=900ns, TL1=300ns
 struct TIMING_SM16703 {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 300,
         T2 = 600,
         T3 = 300,
@@ -312,7 +312,7 @@ struct TIMING_SM16703 {
 /// SM16824E RGB controller (high-speed variant)
 /// Four-phase: TH0=300ns, TH1=1200ns, TL0=1000ns, TL1=100ns
 struct TIMING_SM16824E {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 300,
         T2 = 900,
         T3 = 100,
@@ -331,7 +331,7 @@ struct TIMING_SM16824E {
 /// @note WS2811 supports both 400kHz and 800kHz modes (configurable via pins 7&8)
 /// @note Reset time increased to 280us for reliability (datasheet minimum is 50us)
 struct TIMING_WS2811_400KHZ {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 500,   // T0H: 500ns (datasheet: 500ns ±150ns)
         T2 = 700,   // T1H - T0H: 700ns (T1H=1200ns per datasheet)
         T3 = 1300,  // T1L: 1300ns (datasheet: 1300ns ±150ns)
@@ -343,7 +343,7 @@ struct TIMING_WS2811_400KHZ {
 /// Four-phase: TH0=250ns, TH1=1340ns, TL0=1640ns, TL1=550ns
 /// @note Can be overclocked to 800kHz
 struct TIMING_WS2815 {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 250,
         T2 = 1090,
         T3 = 550,
@@ -354,7 +354,7 @@ struct TIMING_WS2815 {
 /// UCS1903 controller @ 400 kHz
 /// Four-phase: TH0=500ns, TH1=2000ns, TL0=2000ns, TL1=500ns
 struct TIMING_UCS1903_400KHZ {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 500,
         T2 = 1500,
         T3 = 500,
@@ -365,7 +365,7 @@ struct TIMING_UCS1903_400KHZ {
 /// DP1903 controller @ 400 kHz
 /// Four-phase: TH0=800ns, TH1=2400ns, TL0=2400ns, TL1=800ns
 struct TIMING_DP1903_400KHZ {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 800,
         T2 = 1600,
         T3 = 800,
@@ -376,7 +376,7 @@ struct TIMING_DP1903_400KHZ {
 /// TM1803 controller @ 400 kHz
 /// Four-phase: TH0=700ns, TH1=1800ns, TL0=1800ns, TL1=700ns
 struct TIMING_TM1803_400KHZ {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 700,
         T2 = 1100,
         T3 = 700,
@@ -387,7 +387,7 @@ struct TIMING_TM1803_400KHZ {
 /// GW6205 controller @ 400 kHz
 /// Four-phase: TH0=800ns, TH1=1600ns, TL0=1600ns, TL1=800ns
 struct TIMING_GW6205_400KHZ {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 800,
         T2 = 800,
         T3 = 800,
@@ -398,7 +398,7 @@ struct TIMING_GW6205_400KHZ {
 /// UCS1912 controller @ 800 kHz
 /// Four-phase: TH0=250ns, TH1=1250ns, TL0=1350ns, TL1=350ns
 struct TIMING_UCS1912 {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 250,
         T2 = 1000,
         T3 = 350,
@@ -417,7 +417,7 @@ struct TIMING_UCS1912 {
 /// @note WS2811 supports both 400kHz and 800kHz modes (configurable via pins 7&8)
 /// @note Reset time increased to 280us for reliability (datasheet minimum is 50us)
 struct TIMING_WS2811_800KHZ_LEGACY {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 250,   // T0H: 250ns (half of 500ns @ 400kHz)
         T2 = 350,   // T1H - T0H: 350ns (T1H=600ns, half of 1200ns @ 400kHz)
         T3 = 650,   // T1L: 650ns (half of 1300ns @ 400kHz)
@@ -428,7 +428,7 @@ struct TIMING_WS2811_800KHZ_LEGACY {
 /// GW6205 controller @ 800 kHz (fast variant)
 /// Four-phase: TH0=400ns, TH1=800ns, TL0=800ns, TL1=400ns
 struct TIMING_GW6205_800KHZ {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 400,
         T2 = 400,
         T3 = 400,
@@ -439,7 +439,7 @@ struct TIMING_GW6205_800KHZ {
 /// DP1903 controller @ 800 kHz
 /// Four-phase: TH0=400ns, TH1=1400ns, TL0=1400ns, TL1=400ns
 struct TIMING_DP1903_800KHZ {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 400,
         T2 = 1000,
         T3 = 400,
@@ -454,7 +454,7 @@ struct TIMING_DP1903_800KHZ {
 /// TM1814 RGBW controller @ 800 kHz
 /// Four-phase: TH0=360ns, TH1=960ns, TL0=940ns, TL1=340ns
 struct TIMING_TM1814 {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 360,
         T2 = 600,
         T3 = 340,
@@ -470,7 +470,7 @@ struct TIMING_TM1814 {
 /// Four-phase: TH0=420ns, TH1=840ns, TL0=580ns, TL1=160ns
 /// @note Special protocol with preamble support
 struct TIMING_UCS7604_800KHZ {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 420,
         T2 = 420,
         T3 = 160,
@@ -482,7 +482,7 @@ struct TIMING_UCS7604_800KHZ {
 /// Four-phase: TH0=210ns, TH1=420ns, TL0=380ns, TL1=170ns
 /// @note Exactly half the 800kHz timings
 struct TIMING_UCS7604_1600KHZ {
-    enum : uint32_t {
+    enum : u32 {
         T1 = 210,
         T2 = 210,
         T3 = 170,
@@ -505,28 +505,28 @@ constexpr ChipsetTiming to_runtime_timing() {
 /// @brief Get total bit period (T1 + T2 + T3) in nanoseconds
 /// @param timing Chipset timing structure
 /// @return Total bit period in nanoseconds
-constexpr uint32_t get_bit_period_ns(const ChipsetTiming& timing) {
+constexpr u32 get_bit_period_ns(const ChipsetTiming& timing) {
     return timing.T1 + timing.T2 + timing.T3;
 }
 
 /// @brief Extract T1 (high time for bit 0) from timing constant
 /// @param timing Chipset timing structure
 /// @return T1 value in nanoseconds
-constexpr uint32_t get_timing_t1(const ChipsetTiming& timing) {
+constexpr u32 get_timing_t1(const ChipsetTiming& timing) {
     return timing.T1;
 }
 
 /// @brief Extract T2 (additional high time for bit 1) from timing constant
 /// @param timing Chipset timing structure
 /// @return T2 value in nanoseconds
-constexpr uint32_t get_timing_t2(const ChipsetTiming& timing) {
+constexpr u32 get_timing_t2(const ChipsetTiming& timing) {
     return timing.T2;
 }
 
 /// @brief Extract T3 (low tail duration) from timing constant
 /// @param timing Chipset timing structure
 /// @return T3 value in nanoseconds
-constexpr uint32_t get_timing_t3(const ChipsetTiming& timing) {
+constexpr u32 get_timing_t3(const ChipsetTiming& timing) {
     return timing.T3;
 }
 

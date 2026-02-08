@@ -175,13 +175,13 @@ fl::string SerialEmulation::readStringUntil(char terminator) {
     return fl::string();
 }
 
-void SerialEmulation::write(uint8_t) {}
+void SerialEmulation::write(fl::u8) {}
 
 void SerialEmulation::write(const char *s) {
     fl::printf("%s", s);
 }
 
-void SerialEmulation::write(const uint8_t *s, size_t n) {
+void SerialEmulation::write(const fl::u8 *s, size_t n) {
     fwrite(s, 1, n, stdout);
 }
 
@@ -193,7 +193,7 @@ void SerialEmulation::flush() {}
 
 void SerialEmulation::end() {}
 
-uint8_t SerialEmulation::peek() {
+fl::u8 SerialEmulation::peek() {
     return 0;
 }
 

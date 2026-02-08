@@ -42,7 +42,7 @@ CountingSemaphoreRP<LeastMaxValue>::CountingSemaphoreRP(ptrdiff_t desired)
     // Get the actual spinlock instance and store as opaque pointer
     spin_lock_t* spinlock = spin_lock_instance(spinlock_num);
     // spin_lock_t* may be volatile, so we need reinterpret_cast (fl::bit_cast cannot handle volatile)
-    mSpinlock = reinterpret_cast<void*>(const_cast<uint32_t*>(reinterpret_cast<volatile uint32_t*>(spinlock))); // ok reinterpret cast
+    mSpinlock = reinterpret_cast<void*>(const_cast<u32*>(reinterpret_cast<volatile u32*>(spinlock))); // ok reinterpret cast
 }
 
 template<ptrdiff_t LeastMaxValue>
@@ -66,7 +66,7 @@ void CountingSemaphoreRP<LeastMaxValue>::release(ptrdiff_t update) {
     spin_lock_t* spinlock = static_cast<spin_lock_t*>(mSpinlock);
 
     // Acquire spinlock to protect count manipulation
-    uint32_t save = spin_lock_blocking(spinlock);
+    u32 save = spin_lock_blocking(spinlock);
 
     // Check if we would exceed max value
     if (mCount + update > mMaxValue) {
@@ -89,7 +89,7 @@ void CountingSemaphoreRP<LeastMaxValue>::acquire() {
 
     // Spin until we can decrement the count
     while (true) {
-        uint32_t save = spin_lock_blocking(spinlock);
+        u32 save = spin_lock_blocking(spinlock);
 
         if (mCount > 0) {
             mCount--;
@@ -112,7 +112,7 @@ bool CountingSemaphoreRP<LeastMaxValue>::try_acquire() {
 
     spin_lock_t* spinlock = static_cast<spin_lock_t*>(mSpinlock);
 
-    uint32_t save = spin_lock_blocking(spinlock);
+    u32 save = spin_lock_blocking(spinlock);
 
     bool acquired = false;
     if (mCount > 0) {
@@ -142,7 +142,7 @@ bool CountingSemaphoreRP<LeastMaxValue>::try_acquire_for(
 
     // Spin until we can decrement the count or timeout
     while (true) {
-        uint32_t save = spin_lock_blocking(spinlock);
+        u32 save = spin_lock_blocking(spinlock);
 
         if (mCount > 0) {
             mCount--;

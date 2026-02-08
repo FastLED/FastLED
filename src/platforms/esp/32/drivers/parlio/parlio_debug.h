@@ -16,12 +16,12 @@ namespace detail {
 struct ParlioDebugMetrics {
     uint64_t mStartTimeUs;
     uint64_t mEndTimeUs;
-    uint32_t mIsrCount;
-    uint32_t mChunksQueued;
-    uint32_t mChunksCompleted;
-    uint32_t mBytesTotal;
-    uint32_t mBytesTransmitted;
-    uint32_t mErrorCode;
+    u32 mIsrCount;
+    u32 mChunksQueued;
+    u32 mChunksCompleted;
+    u32 mBytesTotal;
+    u32 mBytesTransmitted;
+    u32 mErrorCode;
     bool mTransmissionActive;
 };
 

@@ -80,31 +80,31 @@ double get_time_since_epoch() {
 extern "C" {
 
 // Replacement for 'millis' in WebAssembly context
-EMSCRIPTEN_KEEPALIVE uint32_t millis() {
+EMSCRIPTEN_KEEPALIVE fl::u32 millis() {
     double elapsed_ms = get_time_since_epoch();
 
     // Handle potential overflow - Arduino millis() wraps around every ~49.7 days
     // This matches Arduino behavior where millis() overflows back to 0
-    if (elapsed_ms >= fl::numeric_limits<uint32_t>::max()) {
-        elapsed_ms = fmod(elapsed_ms, fl::numeric_limits<uint32_t>::max());
+    if (elapsed_ms >= fl::numeric_limits<fl::u32>::max()) {
+        elapsed_ms = fmod(elapsed_ms, fl::numeric_limits<fl::u32>::max());
     }
 
-    uint32_t result = uint32_t(elapsed_ms);
+    fl::u32 result = fl::u32(elapsed_ms);
     return result;
 }
 
 // Replacement for 'micros' in WebAssembly context
-EMSCRIPTEN_KEEPALIVE uint32_t micros() {
+EMSCRIPTEN_KEEPALIVE fl::u32 micros() {
     double elapsed_ms = get_time_since_epoch();
     double elapsed_micros = elapsed_ms * 1000.0;
 
     // Handle potential overflow - Arduino micros() wraps around every ~71.6 minutes
     // This matches Arduino behavior where micros() overflows back to 0
-    if (elapsed_micros >= fl::numeric_limits<uint32_t>::max()) {
-        elapsed_micros = fmod(elapsed_micros, fl::numeric_limits<uint32_t>::max());
+    if (elapsed_micros >= fl::numeric_limits<fl::u32>::max()) {
+        elapsed_micros = fmod(elapsed_micros, fl::numeric_limits<fl::u32>::max());
     }
 
-    uint32_t result = uint32_t(elapsed_micros);
+    fl::u32 result = fl::u32(elapsed_micros);
     return result;
 }
 

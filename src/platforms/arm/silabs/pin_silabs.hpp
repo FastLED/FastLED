@@ -35,7 +35,7 @@ inline void _silabs_gpio_init() {
 // Pin mapping structure - converts Arduino pin number to (port, pin)
 struct SilabsPinMapping {
     GPIO_Port_TypeDef port;
-    uint8_t pin;
+    u8 pin;
 };
 
 // Get GPIO port and pin for Arduino pin number
@@ -51,13 +51,13 @@ inline SilabsPinMapping getSilabsPinMapping(int pin) {
     }
 
     if (pin < 16) {
-        return {gpioPortA, static_cast<uint8_t>(pin)};
+        return {gpioPortA, static_cast<u8>(pin)};
     } else if (pin < 32) {
-        return {gpioPortB, static_cast<uint8_t>(pin - 16)};
+        return {gpioPortB, static_cast<u8>(pin - 16)};
     } else if (pin < 48) {
-        return {gpioPortC, static_cast<uint8_t>(pin - 32)};
+        return {gpioPortC, static_cast<u8>(pin - 32)};
     } else {
-        return {gpioPortD, static_cast<uint8_t>(pin - 48)};
+        return {gpioPortD, static_cast<u8>(pin - 48)};
     }
 }
 
@@ -107,7 +107,7 @@ inline PinValue digitalRead(int pin) {
     return result ? PinValue::High : PinValue::Low;
 }
 
-inline uint16_t analogRead(int pin) {
+inline u16 analogRead(int pin) {
     // Silicon Labs ADC implementation would go here
     // For now, return 0 as placeholder - ADC requires more complex EMLIB setup
     // (ADC_Init, ADC_Start, ADC_DataSingleGet, etc.)
@@ -115,14 +115,14 @@ inline uint16_t analogRead(int pin) {
     return 0;
 }
 
-inline void analogWrite(int pin, uint16_t val) {
+inline void analogWrite(int pin, u16 val) {
     // Silicon Labs PWM/Timer implementation would go here
     // For now, no-op - PWM requires TIMER peripheral setup via EMLIB
     (void)pin;
     (void)val;
 }
 
-inline void setPwm16(int pin, uint16_t val) {
+inline void setPwm16(int pin, u16 val) {
     // Silicon Labs 16-bit PWM implementation would go here
     // For now, no-op - PWM requires TIMER peripheral setup via EMLIB
     (void)pin;

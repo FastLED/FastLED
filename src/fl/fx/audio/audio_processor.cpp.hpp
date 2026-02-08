@@ -235,17 +235,17 @@ void AudioProcessor::onVoicedChange(function<void(bool)> callback) {
     detector->onVoicedChange.add(callback);
 }
 
-void AudioProcessor::onNoteOn(function<void(uint8_t, uint8_t)> callback) {
+void AudioProcessor::onNoteOn(function<void(u8, u8)> callback) {
     auto detector = getNoteDetector();
     detector->onNoteOn.add(callback);
 }
 
-void AudioProcessor::onNoteOff(function<void(uint8_t)> callback) {
+void AudioProcessor::onNoteOff(function<void(u8)> callback) {
     auto detector = getNoteDetector();
     detector->onNoteOff.add(callback);
 }
 
-void AudioProcessor::onNoteChange(function<void(uint8_t, uint8_t)> callback) {
+void AudioProcessor::onNoteChange(function<void(u8, u8)> callback) {
     auto detector = getNoteDetector();
     detector->onNoteChange.add(callback);
 }

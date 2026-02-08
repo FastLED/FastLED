@@ -88,14 +88,14 @@ public:
     /// @return true on success, false on error
     ///
     /// Maps to ESP-IDF: uart_write_bytes()
-    bool writeBytes(const uint8_t* data, size_t length) override;
+    bool writeBytes(const u8* data, size_t length) override;
 
     /// @brief Wait for all queued bytes to be transmitted
     /// @param timeout_ms Timeout in milliseconds (0 = non-blocking poll)
     /// @return true if transmission complete, false on timeout or error
     ///
     /// Maps to ESP-IDF: uart_wait_tx_done()
-    bool waitTxDone(uint32_t timeout_ms) override;
+    bool waitTxDone(u32 timeout_ms) override;
 
     /// @brief Check if UART is busy transmitting
     /// @return true if transmission in progress, false if idle

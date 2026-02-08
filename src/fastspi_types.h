@@ -43,7 +43,7 @@ class DATA_NOP {
 public:
     /// Hook called to adjust a byte of data before writing it to the output.
     /// In this dummy version, no adjustment is made.
-    static FASTLED_FORCE_INLINE uint8_t adjust(FASTLED_REGISTER uint8_t data) { return data; }
+    static FASTLED_FORCE_INLINE fl::u8 adjust(FASTLED_REGISTER fl::u8 data) { return data; }
 
     // Two-parameter version commented out due to circular dependency issues
     // (would need fl::scale8 which requires crgb.h, creating circular dependency).

@@ -56,12 +56,12 @@ static FastLED_SPI_ISR_State g_isr_state;
 FastLED_SPI_ISR_State* fl_spi_state(void) { return &g_isr_state; }
 
 /* Visibility: crude ~microsecond spin (portable). Replace with platform fence if desired. */
-void fl_spi_visibility_delay_us(uint32_t approx_us) {
-  volatile uint32_t spin = 0;
+void fl_spi_visibility_delay_us(fl::u32 approx_us) {
+  volatile fl::u32 spin = 0;
   /* Tune constant per CPU; here ~100 cycles/us at 240 MHz, coarse. */
   FL_DISABLE_WARNING_PUSH
   FL_DISABLE_WARNING_VOLATILE
-  for (uint32_t i = 0; i < approx_us * 100u; ++i) spin += 1;
+  for (fl::u32 i = 0; i < approx_us * 100u; ++i) spin += 1;
   FL_DISABLE_WARNING_POP
   (void)spin;
 }
@@ -72,7 +72,7 @@ void fl_spi_arm(void) {
 }
 
 /* Status accessors (main thread) */
-uint32_t fl_spi_status_flags(void) {
+fl::u32 fl_spi_status_flags(void) {
   return g_isr_state.status_flags;
 }
 void fl_spi_ack_done(void) {
@@ -80,10 +80,10 @@ void fl_spi_ack_done(void) {
 }
 
 /* Payload setters (main thread) */
-void fl_spi_set_clock_mask(uint32_t mask) { g_isr_state.clock_pin_mask = mask; }
-void fl_spi_set_total_bytes(uint16_t n)   { g_isr_state.total_bytes_to_send = n; }
-void fl_spi_set_data_byte(uint16_t i, uint8_t v){ g_isr_state.spi_data_bytes[i] = v; }
-void fl_spi_set_lut_entry(uint8_t v, uint32_t set_m, uint32_t clr_m) {
+void fl_spi_set_clock_mask(fl::u32 mask) { g_isr_state.clock_pin_mask = mask; }
+void fl_spi_set_total_bytes(fl::u16 n)   { g_isr_state.total_bytes_to_send = n; }
+void fl_spi_set_data_byte(fl::u16 i, fl::u8 v){ g_isr_state.spi_data_bytes[i] = v; }
+void fl_spi_set_lut_entry(fl::u8 v, fl::u32 set_m, fl::u32 clr_m) {
   g_isr_state.pin_lookup_table[v].set_mask  = set_m;
   g_isr_state.pin_lookup_table[v].clear_mask= clr_m;
 }
@@ -105,16 +105,16 @@ PinMaskEntry* fl_spi_get_lut_array(void) {
   return g_isr_state.pin_lookup_table;
 }
 
-uint8_t* fl_spi_get_data_array(void) {
+fl::u8* fl_spi_get_data_array(void) {
   return g_isr_state.spi_data_bytes;
 }
 
 #ifdef FL_SPI_ISR_VALIDATE
 /* Log GPIO event to validation buffer */
-static inline void fl_spi_log_event(FastLED_GPIO_Event_Type type, uint32_t payload) {
+static inline void fl_spi_log_event(FastLED_GPIO_Event_Type type, fl::u32 payload) {
   if (g_isr_state.validation_event_count < FL_SPI_ISR_VALIDATE_SIZE) {
     FastLED_GPIO_Event *evt = &g_isr_state.validation_events[g_isr_state.validation_event_count++];
-    evt->event_type = (uint8_t)type;
+    evt->event_type = (fl::u8)type;
     evt->padding[0] = 0;
     evt->padding[1] = 0;
     evt->padding[2] = 0;
@@ -126,7 +126,7 @@ static inline void fl_spi_log_event(FastLED_GPIO_Event_Type type, uint32_t paylo
 const FastLED_GPIO_Event* fl_spi_get_validation_events(void) {
   return g_isr_state.validation_events;
 }
-uint16_t fl_spi_get_validation_event_count(void) {
+fl::u16 fl_spi_get_validation_event_count(void) {
   return g_isr_state.validation_event_count;
 }
 #endif
@@ -136,7 +136,7 @@ uint16_t fl_spi_get_validation_event_count(void) {
 /* Note: Function has C linkage via extern "C" block above                      */
 void fl_parallel_spi_isr(void) {
   /* 1) Edge detect: new work? */
-  uint32_t current_doorbell = g_isr_state.doorbell_counter;
+  fl::u32 current_doorbell = g_isr_state.doorbell_counter;
   if (current_doorbell != g_isr_state.last_processed_counter) {
     g_isr_state.last_processed_counter = current_doorbell;
     g_isr_state.current_position       = 0;
@@ -153,7 +153,7 @@ void fl_parallel_spi_isr(void) {
     if (g_isr_state.clock_phase == 0) {
       /* Phase 0: No more bytes to send, mark as done */
       if (g_isr_state.status_flags & FASTLED_STATUS_BUSY) {
-        uint32_t s = g_isr_state.status_flags;
+        fl::u32 s = g_isr_state.status_flags;
         s &= ~FASTLED_STATUS_BUSY;
         s |=  FASTLED_STATUS_DONE;
         g_isr_state.status_flags = s;
@@ -174,9 +174,9 @@ void fl_parallel_spi_isr(void) {
       return;
     }
 
-    uint8_t  next_data = g_isr_state.spi_data_bytes[g_isr_state.current_position++];
-    uint32_t pins_to_set   = g_isr_state.pin_lookup_table[next_data].set_mask;
-    uint32_t pins_to_clear = g_isr_state.pin_lookup_table[next_data].clear_mask | g_isr_state.clock_pin_mask;
+    fl::u8  next_data = g_isr_state.spi_data_bytes[g_isr_state.current_position++];
+    fl::u32 pins_to_set   = g_isr_state.pin_lookup_table[next_data].set_mask;
+    fl::u32 pins_to_clear = g_isr_state.pin_lookup_table[next_data].clear_mask | g_isr_state.clock_pin_mask;
 
 #ifdef FL_SPI_ISR_VALIDATE
     /* Log GPIO operations */
@@ -201,7 +201,7 @@ void fl_parallel_spi_isr(void) {
 
     /* If we've emitted the last byte, this rise completes the burst. */
     if (g_isr_state.current_position >= g_isr_state.total_bytes_to_send) {
-      uint32_t s = g_isr_state.status_flags;
+      fl::u32 s = g_isr_state.status_flags;
       s &= ~FASTLED_STATUS_BUSY;
       s |=  FASTLED_STATUS_DONE;
       g_isr_state.status_flags = s;

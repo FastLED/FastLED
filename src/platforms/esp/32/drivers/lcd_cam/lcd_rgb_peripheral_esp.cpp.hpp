@@ -163,11 +163,11 @@ bool LcdRgbPeripheralEsp::isInitialized() const {
 // Buffer Management
 //=============================================================================
 
-uint16_t* LcdRgbPeripheralEsp::allocateFrameBuffer(size_t size_bytes) {
+u16* LcdRgbPeripheralEsp::allocateFrameBuffer(size_t size_bytes) {
     // Round up to 64-byte alignment
     size_t aligned_size = ((size_bytes + 63) / 64) * 64;
 
-    uint32_t alloc_caps;
+    u32 alloc_caps;
     if (mConfig.use_psram) {
         alloc_caps = MALLOC_CAP_SPIRAM | MALLOC_CAP_DMA | MALLOC_CAP_8BIT;
     } else {
@@ -189,10 +189,10 @@ uint16_t* LcdRgbPeripheralEsp::allocateFrameBuffer(size_t size_bytes) {
         );
     }
 
-    return static_cast<uint16_t*>(buffer);
+    return static_cast<u16*>(buffer);
 }
 
-void LcdRgbPeripheralEsp::freeFrameBuffer(uint16_t* buffer) {
+void LcdRgbPeripheralEsp::freeFrameBuffer(u16* buffer) {
     if (buffer != nullptr) {
         heap_caps_free(buffer);
     }
@@ -202,7 +202,7 @@ void LcdRgbPeripheralEsp::freeFrameBuffer(uint16_t* buffer) {
 // Transmission Methods
 //=============================================================================
 
-bool LcdRgbPeripheralEsp::drawFrame(const uint16_t* buffer, size_t size_bytes) {
+bool LcdRgbPeripheralEsp::drawFrame(const u16* buffer, size_t size_bytes) {
     if (!mInitialized || mPanelHandle == nullptr) {
         return false;
     }
@@ -227,16 +227,16 @@ bool LcdRgbPeripheralEsp::drawFrame(const uint16_t* buffer, size_t size_bytes) {
     return true;
 }
 
-bool LcdRgbPeripheralEsp::waitFrameDone(uint32_t timeout_ms) {
+bool LcdRgbPeripheralEsp::waitFrameDone(u32 timeout_ms) {
     if (!mInitialized) {
         return false;
     }
 
     // Simple polling wait (callback will clear mBusy)
-    uint32_t start = (uint32_t)(esp_timer_get_time() / 1000);
+    u32 start = (u32)(esp_timer_get_time() / 1000);
     while (mBusy) {
         if (timeout_ms > 0) {
-            uint32_t now = (uint32_t)(esp_timer_get_time() / 1000);
+            u32 now = (u32)(esp_timer_get_time() / 1000);
             if ((now - start) >= timeout_ms) {
                 return false;  // Timeout
             }
@@ -310,7 +310,7 @@ uint64_t LcdRgbPeripheralEsp::getMicroseconds() {
     return esp_timer_get_time();
 }
 
-void LcdRgbPeripheralEsp::delay(uint32_t ms) {
+void LcdRgbPeripheralEsp::delay(u32 ms) {
     vTaskDelay(pdMS_TO_TICKS(ms));
 }
 

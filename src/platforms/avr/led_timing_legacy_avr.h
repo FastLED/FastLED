@@ -37,9 +37,9 @@ namespace fl {
 /// @brief Generic AVR timing entry using FMUL multiplier system
 /// All values are multiples of FMUL for 8/16/24 MHz frequencies
 struct AVRChipsetTimingLegacy {
-    uint32_t T1;        ///< High time for bit 0 (in FMUL units)
-    uint32_t T2;        ///< Additional high time for bit 1 (in FMUL units)
-    uint32_t T3;        ///< Low tail duration (in FMUL units)
+    u32 T1;        ///< High time for bit 0 (in FMUL units)
+    u32 T2;        ///< Additional high time for bit 1 (in FMUL units)
+    u32 T3;        ///< Low tail duration (in FMUL units)
     const char* name;   ///< Human-readable chipset name
 };
 
@@ -154,7 +154,7 @@ static constexpr AVRChipsetTimingLegacy AVR_TIMING_UCS1912 = {2, 8, 3, "UCS1912"
 /// @brief Get total bit period in FMUL units
 /// @param timing AVR chipset timing structure
 /// @return Total bit period (T1 + T2 + T3) in FMUL units
-constexpr uint32_t get_avr_bit_period_fmul(const AVRChipsetTimingLegacy& timing) {
+constexpr u32 get_avr_bit_period_fmul(const AVRChipsetTimingLegacy& timing) {
     return timing.T1 + timing.T2 + timing.T3;
 }
 
@@ -162,7 +162,7 @@ constexpr uint32_t get_avr_bit_period_fmul(const AVRChipsetTimingLegacy& timing)
 /// @param fmul_cycles FMUL multiplier value
 /// @param frequency_hz CPU frequency in Hz
 /// @return Approximate nanoseconds
-constexpr uint32_t avr_fmul_to_ns(uint32_t fmul_cycles, uint32_t frequency_hz) {
+constexpr u32 avr_fmul_to_ns(u32 fmul_cycles, u32 frequency_hz) {
     // At frequency_hz, each cycle = 1000000000 / frequency_hz nanoseconds
     // fmul represents cycles at 8MHz = 125ns per cycle
     // So: ns = fmul_cycles * 125 / FMUL = fmul_cycles * (8000000 / frequency_hz) * 125 / (frequency_hz / 8000000)

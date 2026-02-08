@@ -29,10 +29,10 @@ namespace fl {
 
 /// Template definition for STM32 style ARM pins, providing direct access to the various GPIO registers.
 /// This class is shared across STM32F1, Spark Core, and similar STM32 boards that use BRR register.
-template<uint8_t PIN, uint8_t _BIT, uint32_t _MASK, typename _GPIO> class _ARMPIN {
+template<u8 PIN, u8 _BIT, u32 _MASK, typename _GPIO> class _ARMPIN {
 public:
-  typedef volatile uint32_t * port_ptr_t;
-  typedef uint32_t port_t;
+  typedef volatile u32 * port_ptr_t;
+  typedef u32 port_t;
 
   inline static void setOutput() { pinMode(PIN, OUTPUT); }
   inline static void setInput() { pinMode(PIN, INPUT); }

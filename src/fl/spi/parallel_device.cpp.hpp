@@ -39,7 +39,7 @@ struct ParallelDevice::Impl {
     bool initialized;
     void* backend;  // Points to SpiIsr* or SpiBlock* (not owned by shared_ptr)
     bool is_isr_mode;
-    uint8_t backend_width;  // 1, 2, 4, 8, 16, or 32
+    u8 backend_width;  // 1, 2, 4, 8, 16, or 32
 
     Impl(const Config& cfg)
         : config(cfg)
@@ -93,19 +93,19 @@ namespace {
 /// @param gpio_pins Vector of GPIO pin numbers
 /// @param set_masks Output array of 256 set masks
 /// @param clear_masks Output array of 256 clear masks
-void buildDefaultLUT(const fl::vector<uint8_t>& gpio_pins,
-                     uint32_t* set_masks,
-                     uint32_t* clear_masks) {
+void buildDefaultLUT(const fl::vector<u8>& gpio_pins,
+                     u32* set_masks,
+                     u32* clear_masks) {
     size_t num_pins = gpio_pins.size();
 
     // For each possible byte value (0-255)
     for (int byte_val = 0; byte_val < 256; byte_val++) {
-        uint32_t set_mask = 0;
-        uint32_t clear_mask = 0;
+        u32 set_mask = 0;
+        u32 clear_mask = 0;
 
         // Map byte bits to GPIO pins
         for (size_t bit_pos = 0; bit_pos < num_pins && bit_pos < 8; bit_pos++) {
-            uint32_t pin_mask = 1u << gpio_pins[bit_pos];
+            u32 pin_mask = 1u << gpio_pins[bit_pos];
 
             if (byte_val & (1 << bit_pos)) {
                 set_mask |= pin_mask;    // Set this pin high
@@ -167,7 +167,7 @@ fl::optional<fl::Error> ParallelDevice::begin() {
     }
 
     // Determine backend width (round up to next supported width: 1,2,4,8,16,32)
-    uint8_t backend_width = 1;
+    u8 backend_width = 1;
     if (num_pins > 16) backend_width = 32;
     else if (num_pins > 8) backend_width = 16;
     else if (num_pins > 4) backend_width = 8;
@@ -182,8 +182,8 @@ fl::optional<fl::Error> ParallelDevice::begin() {
     pImpl->is_isr_mode = use_isr;
 
     // Build default LUT
-    uint32_t set_masks[256];
-    uint32_t clear_masks[256];
+    u32 set_masks[256];
+    u32 clear_masks[256];
     buildDefaultLUT(pImpl->config.gpio_pins, set_masks, clear_masks);
 
     // Create and initialize backend
@@ -229,7 +229,7 @@ bool ParallelDevice::isReady() const {
     return pImpl && pImpl->initialized && pImpl->backend != nullptr;
 }
 
-Result<Transaction> ParallelDevice::write(const uint8_t* data, size_t size) {
+Result<Transaction> ParallelDevice::write(const u8* data, size_t size) {
     if (!isReady()) {
         return Result<Transaction>::failure(SPIError::NOT_INITIALIZED,
             "Device not initialized");
@@ -246,7 +246,7 @@ Result<Transaction> ParallelDevice::write(const uint8_t* data, size_t size) {
         "ParallelDevice::write() not yet implemented");
 }
 
-bool ParallelDevice::waitComplete(uint32_t timeout_ms) {
+bool ParallelDevice::waitComplete(u32 timeout_ms) {
     (void)timeout_ms;  // Unused parameter - reserved for future implementation
     if (!isReady()) {
         return false;
@@ -268,7 +268,7 @@ bool ParallelDevice::isBusy() const {
     return false;  // Placeholder
 }
 
-void ParallelDevice::configureLUT(const uint32_t* set_masks, const uint32_t* clear_masks) {
+void ParallelDevice::configureLUT(const u32* set_masks, const u32* clear_masks) {
     if (!set_masks || !clear_masks) {
         FL_WARN("ParallelDevice: Invalid LUT pointers");
         return;

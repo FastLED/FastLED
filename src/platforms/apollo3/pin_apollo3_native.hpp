@@ -49,9 +49,9 @@ static ADCState g_adc_state;
 
 // PWM state - track which pins are configured for PWM
 struct PWMState {
-    uint8_t timer_num;
-    uint8_t segment;
-    uint32_t period;
+    u8 timer_num;
+    u8 segment;
+    u32 period;
     bool active;
 };
 
@@ -104,7 +104,7 @@ inline void pinMode(int pin, PinMode mode) {
             break;
     }
 
-    uint32_t result = am_hal_gpio_pinconfig(pin, pin_config);
+    u32 result = am_hal_gpio_pinconfig(pin, pin_config);
     if (result != AM_HAL_STATUS_SUCCESS) {
         FL_WARN("Apollo3: Failed to configure pin " << pin);
     }
@@ -125,8 +125,8 @@ inline PinValue digitalRead(int pin) {
         return PinValue::Low;  // Invalid pin
     }
 
-    uint32_t read_state = 0;
-    uint32_t result = am_hal_gpio_state_read(pin, AM_HAL_GPIO_INPUT_READ, &read_state);
+    u32 read_state = 0;
+    u32 result = am_hal_gpio_state_read(pin, AM_HAL_GPIO_INPUT_READ, &read_state);
 
     if (result != AM_HAL_STATUS_SUCCESS) {
         return PinValue::Low;
@@ -139,7 +139,7 @@ inline PinValue digitalRead(int pin) {
 // Analog Pin Functions
 // ============================================================================
 
-inline uint16_t analogRead(int pin) {
+inline u16 analogRead(int pin) {
     // Apollo3 ADC implementation using HAL APIs
     // Maps Arduino pin numbers to ADC channels and performs 12-bit conversion
     // Returns 10-bit value (0-1023) for Arduino compatibility
@@ -169,7 +169,7 @@ inline uint16_t analogRead(int pin) {
 
     // Initialize ADC on first use
     if (!g_adc_state.initialized) {
-        uint32_t status = am_hal_adc_initialize(0, &g_adc_state.handle);
+        u32 status = am_hal_adc_initialize(0, &g_adc_state.handle);
         if (status != AM_HAL_STATUS_SUCCESS) {
             FL_WARN("Apollo3: ADC initialization failed");
             return 0;
@@ -224,7 +224,7 @@ inline uint16_t analogRead(int pin) {
     slot_config.bWindowCompare = false;
     slot_config.bEnabled = true;
 
-    uint32_t status = am_hal_adc_configure_slot(g_adc_state.handle, 0, &slot_config);
+    u32 status = am_hal_adc_configure_slot(g_adc_state.handle, 0, &slot_config);
     if (status != AM_HAL_STATUS_SUCCESS) {
         FL_WARN("Apollo3: ADC slot configuration failed");
         return 0;
@@ -239,9 +239,9 @@ inline uint16_t analogRead(int pin) {
 
     // Wait for conversion to complete (poll for completion)
     // Typical conversion time is ~5-10 microseconds
-    uint32_t timeout = 10000;  // 10ms timeout
+    u32 timeout = 10000;  // 10ms timeout
     am_hal_adc_sample_t sample;
-    uint32_t sample_count = 0;
+    u32 sample_count = 0;
 
     while (timeout-- > 0) {
         sample_count = 1;
@@ -249,10 +249,10 @@ inline uint16_t analogRead(int pin) {
 
         if (status == AM_HAL_STATUS_SUCCESS && sample_count > 0) {
             // Conversion complete - extract 12-bit value
-            uint16_t adc_value = AM_HAL_ADC_FIFO_SAMPLE(sample.ui32Sample);
+            u16 adc_value = AM_HAL_ADC_FIFO_SAMPLE(sample.ui32Sample);
 
             // Scale 12-bit (0-4095) to 10-bit (0-1023) for Arduino compatibility
-            return static_cast<uint16_t>(adc_value >> 2);
+            return static_cast<u16>(adc_value >> 2);
         }
 
         // Small delay before retry
@@ -263,7 +263,7 @@ inline uint16_t analogRead(int pin) {
     return 0;
 }
 
-inline void analogWrite(int pin, uint16_t val) {
+inline void analogWrite(int pin, u16 val) {
     // Apollo3 PWM implementation using CTIMER HAL APIs
     // Generates PWM output at ~490Hz (Arduino default) with 8-bit duty cycle
 
@@ -276,15 +276,15 @@ inline void analogWrite(int pin, uint16_t val) {
     }
 
     // Clamp value to 8-bit range (0-255) for Arduino compatibility
-    uint16_t clamped_val = val;
+    u16 clamped_val = val;
     if (clamped_val > 255) clamped_val = 255;
 
     // Pin to CTIMER mapping (based on Apollo3 capabilities)
     // Each pin can map to different timers/segments via alternate functions
     // This is a simplified mapping - full implementation would query pinmux
-    uint8_t timer_num = 0;
-    uint8_t segment = 0;
-    uint32_t output_cfg = 0;
+    u8 timer_num = 0;
+    u8 segment = 0;
+    u32 output_cfg = 0;
 
     // Map common pins to timers (simplified - actual mapping more complex)
     // Timer segment: 0 = A, 1 = B
@@ -305,12 +305,12 @@ inline void analogWrite(int pin, uint16_t val) {
     // Calculate PWM period for 490Hz (Arduino default)
     // Apollo3 runs at 48MHz, CTIMER can use HFRC (48MHz) with prescaler
     // Period = Clock / Frequency
-    const uint32_t PWM_FREQUENCY = 490;  // Hz
-    const uint32_t TIMER_CLOCK = 48000000 / 16;  // 3MHz with prescaler
-    uint32_t period = (TIMER_CLOCK / PWM_FREQUENCY) - 1;
+    const u32 PWM_FREQUENCY = 490;  // Hz
+    const u32 TIMER_CLOCK = 48000000 / 16;  // 3MHz with prescaler
+    u32 period = (TIMER_CLOCK / PWM_FREQUENCY) - 1;
 
     // Calculate duty cycle (on-time) from 8-bit value
-    uint32_t on_time = (clamped_val * period) / 255;
+    u32 on_time = (clamped_val * period) / 255;
 
     // Configure timer if not already active for this pin
     if (!g_pwm_state[pin].active || g_pwm_state[pin].period != period) {
@@ -320,14 +320,14 @@ inline void analogWrite(int pin, uint16_t val) {
         pin_config.eDriveStrength = AM_HAL_GPIO_PIN_DRIVESTRENGTH_2MA;
         pin_config.eGPOutcfg = AM_HAL_GPIO_PIN_OUTCFG_PUSHPULL;
 
-        uint32_t status = am_hal_gpio_pinconfig(pin, pin_config);
+        u32 status = am_hal_gpio_pinconfig(pin, pin_config);
         if (status != AM_HAL_STATUS_SUCCESS) {
             FL_WARN("Apollo3: Failed to configure pin " << pin << " for PWM");
             return;
         }
 
         // Configure timer for PWM repeated mode
-        uint32_t timer_config = (AM_HAL_CTIMER_FN_PWM_REPEAT |
+        u32 timer_config = (AM_HAL_CTIMER_FN_PWM_REPEAT |
                                  AM_HAL_CTIMER_HFRC_3MHZ);
 
         am_hal_ctimer_config_single(timer_num, segment, timer_config);
@@ -354,7 +354,7 @@ inline void analogWrite(int pin, uint16_t val) {
     }
 }
 
-inline void setPwm16(int pin, uint16_t val) {
+inline void setPwm16(int pin, u16 val) {
     // Apollo3 16-bit PWM implementation using CTIMER
     // Hardware supports 32-bit counters, capable of full 16-bit PWM
     // Scale 16-bit value down to 8-bit for simplified implementation
@@ -410,7 +410,7 @@ inline void setAdcRange(AdcRange range) {
         adc_config.ePowerMode = AM_HAL_ADC_LPMODE0;
         adc_config.eRepeat = AM_HAL_ADC_SINGLE_SCAN;
 
-        uint32_t status = am_hal_adc_configure(g_adc_state.handle, &adc_config);
+        u32 status = am_hal_adc_configure(g_adc_state.handle, &adc_config);
         if (status != AM_HAL_STATUS_SUCCESS) {
             FL_WARN("Apollo3: ADC reconfiguration failed");
             return;

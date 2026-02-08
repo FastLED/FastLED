@@ -16,10 +16,10 @@ namespace fl {
 /// uses the full port GPIO registers.  In theory, in some way, bit-band register access -should- be faster, however I have found
 /// that something about the way gcc does register allocation results in the bit-band code being slower.  It will need more fine tuning.
 /// The registers are data output, set output, clear output, toggle output, input, and direction
-template<uint8_t PIN, uint32_t _MASK, typename _PDOR, typename _PSOR, typename _PCOR, typename _PTOR, typename _PDIR, typename _PDDR> class _ARMPIN {
+template<u8 PIN, u32 _MASK, typename _PDOR, typename _PSOR, typename _PCOR, typename _PTOR, typename _PDIR, typename _PDDR> class _ARMPIN {
 public:
-	typedef volatile uint32_t * port_ptr_t;
-	typedef uint32_t port_t;
+	typedef volatile u32 * port_ptr_t;
+	typedef u32 port_t;
 
 	/// Check if this pin is valid for I/O operations
 	static constexpr bool validpin() { return true; }
@@ -49,10 +49,10 @@ public:
 
 /// Template definition for teensy 3.0 style ARM pins using bit banding, providing direct access to the various GPIO registers.  GCC
 /// does a poor job of optimizing around these accesses so they are not being used just yet.
-template<uint8_t PIN, int _BIT, typename _PDOR, typename _PSOR, typename _PCOR, typename _PTOR, typename _PDIR, typename _PDDR> class _ARMPIN_BITBAND {
+template<u8 PIN, int _BIT, typename _PDOR, typename _PSOR, typename _PCOR, typename _PTOR, typename _PDIR, typename _PDDR> class _ARMPIN_BITBAND {
 public:
-	typedef volatile uint32_t * port_ptr_t;
-	typedef uint32_t port_t;
+	typedef volatile u32 * port_ptr_t;
+	typedef u32 port_t;
 
 	/// Check if this pin is valid for I/O operations
 	static constexpr bool validpin() { return true; }
@@ -79,8 +79,8 @@ public:
 };
 
 // Macros for k20 pin access/definition
-#define GPIO_BITBAND_ADDR(reg, bit) (((uint32_t)&(reg) - 0x40000000) * 32 + (bit) * 4 + 0x42000000)
-#define GPIO_BITBAND_PTR(reg, bit) ((uint32_t *)GPIO_BITBAND_ADDR((reg), (bit)))
+#define GPIO_BITBAND_ADDR(reg, bit) (((u32)&(reg) - 0x40000000) * 32 + (bit) * 4 + 0x42000000)
+#define GPIO_BITBAND_PTR(reg, bit) ((u32 *)GPIO_BITBAND_ADDR((reg), (bit)))
 
 #define _R(T) struct __gen_struct_ ## T
 #define _RD32(T) struct __gen_struct_ ## T { static FASTLED_FORCE_INLINE reg32_t r() { return (reg32_t)T; } \

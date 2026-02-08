@@ -599,7 +599,9 @@ def run_meson_build_and_test(
 
                 if not runner_exe.exists():
                     # Try compiling the runner target
-                    compile_meson(build_dir, target="runner", quiet=True, verbose=verbose)
+                    compile_meson(
+                        build_dir, target="runner", quiet=True, verbose=verbose
+                    )
 
                 if runner_exe.exists() and test_dll.exists():
                     test_cmd = [str(runner_exe), str(test_dll)]

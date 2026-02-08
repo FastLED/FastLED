@@ -44,7 +44,7 @@ namespace fl {
 
 /// @brief Generic error codes for expected type
 /// @details Default error type when no specific error enum is needed
-enum class ResultError : uint8_t {
+enum class ResultError : u8 {
     OK,                     ///< No error (not typically used)
     UNKNOWN,                ///< Unknown or unspecified error
     INVALID_ARGUMENT,       ///< Invalid argument provided

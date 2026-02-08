@@ -34,14 +34,14 @@ public:
 
     /// Platform-agnostic configuration structure for 4-lane SPI
     struct Config {
-        uint8_t bus_num;           ///< SPI bus number (platform-specific numbering)
-        uint32_t clock_speed_hz;   ///< Clock frequency in Hz
-        int8_t clock_pin;          ///< SCK GPIO pin
-        int8_t data0_pin;          ///< D0/MOSI GPIO pin
-        int8_t data1_pin;          ///< D1/MISO GPIO pin (-1 = unused)
-        int8_t data2_pin;          ///< D2/WP GPIO pin (-1 = unused)
-        int8_t data3_pin;          ///< D3/HD GPIO pin (-1 = unused)
-        uint32_t max_transfer_sz;  ///< Max bytes per transfer
+        u8 bus_num;           ///< SPI bus number (platform-specific numbering)
+        u32 clock_speed_hz;   ///< Clock frequency in Hz
+        i8 clock_pin;          ///< SCK GPIO pin
+        i8 data0_pin;          ///< D0/MOSI GPIO pin
+        i8 data1_pin;          ///< D1/MISO GPIO pin (-1 = unused)
+        i8 data2_pin;          ///< D2/WP GPIO pin (-1 = unused)
+        i8 data3_pin;          ///< D3/HD GPIO pin (-1 = unused)
+        u32 max_transfer_sz;  ///< Max bytes per transfer
 
         Config()
             : bus_num(0)
@@ -70,7 +70,7 @@ public:
 
     /// @brief Get lane count for polymorphic interface
     /// @returns Always returns 4 for quad-lane SPI
-    uint8_t getLaneCount() const override { return 4; }
+    u8 getLaneCount() const override { return 4; }
 
     /// Shutdown SPI peripheral and release resources
     /// @note Should wait for any pending transmissions to complete
@@ -93,7 +93,7 @@ public:
     /// @param timeout_ms Maximum wait time in milliseconds
     /// @returns true if completed, false on timeout
     /// @note **Releases DMA buffer** - buffer acquired via acquireDMABuffer() becomes invalid
-    virtual bool waitComplete(uint32_t timeout_ms = (fl::numeric_limits<uint32_t>::max)()) override = 0;
+    virtual bool waitComplete(u32 timeout_ms = (fl::numeric_limits<u32>::max)()) override = 0;
 
     /// Check if a transmission is currently in progress
     /// @returns true if busy, false if idle

@@ -30,10 +30,10 @@ template <
 	// you down?  Probably not. And you can always bump it up for speed. Therefore we are prioritizing
 	// "just works" over "fastest possible" here.
 	// https://www.pjrc.com/why-apa102-leds-have-trouble-at-24-mhz/
-	uint32_t SPI_SPEED = DATA_RATE_MHZ(6),
+	fl::u32 SPI_SPEED = DATA_RATE_MHZ(6),
 	fl::FiveBitGammaCorrectionMode GAMMA_CORRECTION_MODE = fl::kFiveBitGammaCorrectionMode_Null,
-	uint32_t START_FRAME = 0x00000000,
-	uint32_t END_FRAME = 0xFF000000
+	fl::u32 START_FRAME = 0x00000000,
+	fl::u32 END_FRAME = 0xFF000000
 >
 class APA102Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef fl::SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
@@ -277,7 +277,7 @@ template <
 	// you down?  Probably not. And you can always bump it up for speed. Therefore we are prioritizing
 	// "just works" over "fastest possible" here.
 	// https://www.pjrc.com/why-apa102-leds-have-trouble-at-24-mhz/
-	uint32_t SPI_SPEED = DATA_RATE_MHZ(6)
+	fl::u32 SPI_SPEED = DATA_RATE_MHZ(6)
 >
 class APA102ControllerHD : public APA102Controller<
 	DATA_PIN,
@@ -285,8 +285,8 @@ class APA102ControllerHD : public APA102Controller<
 	RGB_ORDER,
 	SPI_SPEED,
 	fl::kFiveBitGammaCorrectionMode_BitShift,
-	uint32_t(0x00000000),
-	uint32_t(0x00000000)> {
+	fl::u32(0x00000000),
+	fl::u32(0x00000000)> {
 public:
   APA102ControllerHD() = default;
   APA102ControllerHD(const APA102ControllerHD&) = delete;
@@ -301,7 +301,7 @@ template <
 	fl::u8 DATA_PIN,
 	fl::u8 CLOCK_PIN,
 	EOrder RGB_ORDER = RGB,
-	uint32_t SPI_SPEED = DATA_RATE_MHZ(12)
+	fl::u32 SPI_SPEED = DATA_RATE_MHZ(12)
 >
 class SK9822Controller : public APA102Controller<
 	DATA_PIN,
@@ -323,7 +323,7 @@ template <
 	fl::u8 DATA_PIN,
 	fl::u8 CLOCK_PIN,
 	EOrder RGB_ORDER = RGB,
-	uint32_t SPI_SPEED = DATA_RATE_MHZ(12)
+	fl::u32 SPI_SPEED = DATA_RATE_MHZ(12)
 >
 class SK9822ControllerHD : public APA102Controller<
 	DATA_PIN,
@@ -342,7 +342,7 @@ template <
 	fl::u8 DATA_PIN,
 	fl::u8 CLOCK_PIN,
 	EOrder RGB_ORDER = RGB,
-	uint32_t SPI_SPEED = DATA_RATE_MHZ(40)
+	fl::u32 SPI_SPEED = DATA_RATE_MHZ(40)
 >
 class HD107Controller : public APA102Controller<
 	DATA_PIN,
@@ -359,7 +359,7 @@ template <
 	fl::u8 DATA_PIN,
 	fl::u8 CLOCK_PIN,
 	EOrder RGB_ORDER = RGB,
-	uint32_t SPI_SPEED = DATA_RATE_MHZ(40)
+	fl::u32 SPI_SPEED = DATA_RATE_MHZ(40)
 >
 class HD107HDController : public APA102ControllerHD<
 	DATA_PIN,

@@ -98,7 +98,7 @@ public:
     /// @param timeout_ms Maximum time to wait in milliseconds (fl::numeric_limits<uint32_t>::max() = infinite)
     /// @return true if transmission completed, false on timeout
     // Use (max)() to prevent macro expansion by Arduino.h's max macro
-    bool waitComplete(uint32_t timeout_ms = (fl::numeric_limits<uint32_t>::max)()) override;
+    bool waitComplete(u32 timeout_ms = (fl::numeric_limits<u32>::max)()) override;
 
     /// @brief Check if transmission is currently in progress
     /// @return true if busy, false if idle
@@ -138,9 +138,9 @@ private:
     bool mInitialized;
 
     // Configuration
-    uint8_t mClockPin;
-    uint8_t mData0Pin;
-    uint8_t mData1Pin;
+    u8 mClockPin;
+    u8 mData0Pin;
+    u8 mData1Pin;
 
     // DMA buffer management
     DMABuffer mDMABuffer;            // Current DMA buffer
@@ -180,7 +180,7 @@ bool SPIDualSAMD51::begin(const SpiHw2::Config& config) {
     }
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
-    if (mBusId != -1 && config.bus_num != static_cast<uint8_t>(mBusId)) {
+    if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
         FL_WARN("SPIDualSAMD51: Bus ID mismatch");
         return false;
     }
@@ -302,7 +302,7 @@ bool SPIDualSAMD51::begin(const SpiHw2::Config& config) {
     // - CPHA = 0 (Sample on leading edge)
     // - CPOL = 0 (Clock idle low)
     // - DORD = 0 (MSB first)
-    uint32_t ctrla_value = SERCOM_SPI_CTRLA_MODE(0x3) |      // SPI Master
+    u32 ctrla_value = SERCOM_SPI_CTRLA_MODE(0x3) |      // SPI Master
                            SERCOM_SPI_CTRLA_DOPO(0x0) |      // PAD[0]=MOSI, PAD[1]=SCK
                            SERCOM_SPI_CTRLA_DIPO(0x2) |      // PAD[2]=MISO (unused)
                            SERCOM_SPI_CTRLA_FORM(0x0);       // SPI Frame
@@ -315,18 +315,18 @@ bool SPIDualSAMD51::begin(const SpiHw2::Config& config) {
     // Calculate baud rate
     // Baud = F_CPU / (2 * (BAUD + 1))
     // BAUD = (F_CPU / (2 * target_freq)) - 1
-    uint32_t f_cpu = F_CPU;  // Typically 120 MHz for SAMD51
-    uint32_t target_freq = config.clock_speed_hz;
+    u32 f_cpu = F_CPU;  // Typically 120 MHz for SAMD51
+    u32 target_freq = config.clock_speed_hz;
     if (target_freq == 0) {
         target_freq = 10000000;  // Default 10 MHz
     }
 
-    uint32_t baud_div = (f_cpu / (2 * target_freq)) - 1;
+    u32 baud_div = (f_cpu / (2 * target_freq)) - 1;
     if (baud_div > 255) {
         baud_div = 255;  // Clamp to maximum
     }
 
-    mSercom->SPI.BAUD.reg = static_cast<uint8_t>(baud_div);
+    mSercom->SPI.BAUD.reg = static_cast<u8>(baud_div);
 
     // Configure CTRLB register
     // - CHSIZE = 0 (8-bit data)
@@ -425,7 +425,7 @@ bool SPIDualSAMD51::transmit(TransmitMode mode) {
     // For now, we use polling-based transmission on a single lane
 
     // Get the buffer span
-    fl::span<uint8_t> buffer_span = mDMABuffer.data();
+    fl::span<u8> buffer_span = mDMABuffer.data();
 
     mTransactionActive = true;
 
@@ -445,7 +445,7 @@ bool SPIDualSAMD51::transmit(TransmitMode mode) {
     return true;
 }
 
-bool SPIDualSAMD51::waitComplete(uint32_t timeout_ms) {
+bool SPIDualSAMD51::waitComplete(u32 timeout_ms) {
     if (!mTransactionActive) {
         return true;  // Nothing to wait for
     }

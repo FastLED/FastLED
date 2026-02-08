@@ -4,18 +4,18 @@
 #include "fl/fastpin_base.h"
 namespace fl {
 struct FASTLED_ESP_IO {
-    volatile uint32_t _GPO;
-    volatile uint32_t _GPOS;
-    volatile uint32_t _GPOC;
+    volatile u32 _GPO;
+    volatile u32 _GPOS;
+    volatile u32 _GPOC;
 };
 
 #define _GPB (*(FASTLED_ESP_IO*)(0x60000000+(0x300)))
 
 
-template<uint8_t PIN, uint32_t MASK> class _ESPPIN {
+template<u8 PIN, u32 MASK> class _ESPPIN {
 public:
-    typedef volatile uint32_t * port_ptr_t;
-    typedef uint32_t port_t;
+    typedef volatile u32 * port_ptr_t;
+    typedef u32 port_t;
 
     inline static void setOutput() { pinMode(PIN, OUTPUT); }
     inline static void setInput() { pinMode(PIN, INPUT); }
@@ -45,7 +45,7 @@ public:
 };
 
 // Forward declaration of FastPin template
-template<uint8_t PIN> class FastPin;
+template<u8 PIN> class FastPin;
 
 #define _FL_DEFPIN(PIN, REAL_PIN) template<> class FastPin<PIN> : public _ESPPIN<REAL_PIN, (1<<(REAL_PIN & 0x0F))> {};
 

@@ -24,10 +24,10 @@ struct Device::Impl {
     /// @brief State for async operations
     struct AsyncState {
         bool active;                    ///< Whether an async operation is in progress
-        const uint8_t* tx_buffer;       ///< TX buffer pointer (caller-owned)
-        uint8_t* rx_buffer;             ///< RX buffer pointer (caller-owned)
+        const u8* tx_buffer;       ///< TX buffer pointer (caller-owned)
+        u8* rx_buffer;             ///< RX buffer pointer (caller-owned)
         size_t size;                    ///< Transfer size in bytes
-        uint32_t start_time;            ///< Start time for timeout tracking
+        u32 start_time;            ///< Start time for timeout tracking
     } async_state;
 
     /// @brief Platform-specific backend pointer (for single-lane SPI)
@@ -67,7 +67,7 @@ struct Transaction::Impl {
     bool completed;                     ///< Whether transaction has completed
     bool cancelled;                     ///< Whether transaction was cancelled
     fl::optional<fl::Error> result;     ///< Result of the transaction (nullopt = success)
-    uint32_t timeout_ms;                ///< Timeout value in milliseconds
+    u32 timeout_ms;                ///< Timeout value in milliseconds
 
     // Platform-specific completion tracking
 #ifdef FL_IS_ESP32
@@ -80,7 +80,7 @@ struct Transaction::Impl {
         , completed(false)
         , cancelled(false)
         , result(fl::nullopt)  // nullopt = success
-        , timeout_ms((fl::numeric_limits<uint32_t>::max)())
+        , timeout_ms((fl::numeric_limits<u32>::max)())
 #ifdef FL_IS_ESP32
         , notify_task(nullptr)
 #endif

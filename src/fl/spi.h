@@ -59,7 +59,7 @@ public:
     /// @param clock_speed_hz Clock speed in Hz (0xffffffff = as fast as possible)
     Spi(int clock_pin, fl::span<const int> data_pins,
         spi_output_mode_t output_mode = SPI_HW,
-        uint32_t clock_speed_hz = 0xffffffff);
+        u32 clock_speed_hz = 0xffffffff);
 
     /// @brief Construct from SpiConfig
     /// @param config SPI configuration
@@ -124,7 +124,7 @@ public:
     /// spi.write(lane0, lane1, lane2, lane3);
     /// spi.wait();  // Block until transmission completes
     /// @endcode
-    bool wait(uint32_t timeout_ms = 0xFFFFFFFF);
+    bool wait(u32 timeout_ms = 0xFFFFFFFF);
 
     /// @brief Get access to underlying device (for advanced operations)
     /// @returns Pointer to device (nullptr if !ok())

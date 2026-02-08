@@ -40,29 +40,29 @@ class NoisePalette : public Fx2d {
     string fxName() const override { return "NoisePalette"; }
     void mapNoiseToLEDsUsingPalette(CRGB *leds);
 
-    uint8_t changeToRandomPalette();
+    u8 changeToRandomPalette();
 
     // There are 12 palette indexes but they don't have names. Use this to set
     // which one you want.
-    uint8_t getPalettePresetCount() const { return 12; }
-    uint8_t getPalettePreset() const { return currentPaletteIndex; }
+    u8 getPalettePresetCount() const { return 12; }
+    u8 getPalettePreset() const { return currentPaletteIndex; }
     void setPalettePreset(int paletteIndex);
-    void setPalette(const CRGBPalette16 &palette, uint16_t speed,
-                    uint16_t scale, bool colorLoop) {
+    void setPalette(const CRGBPalette16 &palette, u16 speed,
+                    u16 scale, bool colorLoop) {
         currentPalette = palette;
         this->speed = speed;
         this->scale = scale;
         this->colorLoop = colorLoop;
     }
-    void setSpeed(uint16_t speed) { this->speed = speed; }
-    void setScale(uint16_t scale) { this->scale = scale; }
+    void setSpeed(u16 speed) { this->speed = speed; }
+    void setScale(u16 scale) { this->scale = scale; }
 
   private:
-    uint16_t mX, mY, mZ;
-    uint16_t width, height;
-    uint16_t speed = 0;
-    uint16_t scale = 0;
-    fl::vector<uint8_t, fl::allocator_psram<uint8_t>> noise;
+    u16 mX, mY, mZ;
+    u16 width, height;
+    u16 speed = 0;
+    u16 scale = 0;
+    fl::vector<u8, fl::allocator_psram<u8>> noise;
     CRGBPalette16 currentPalette;
     bool colorLoop = 0;
     int currentPaletteIndex = 0;
@@ -70,7 +70,7 @@ class NoisePalette : public Fx2d {
 
     void fillnoise8();
 
-    uint16_t XY(uint8_t x, uint8_t y) const { return mXyMap.mapToIndex(x, y); }
+    u16 XY(u8 x, u8 y) const { return mXyMap.mapToIndex(x, y); }
 
     void SetupRandomPalette() {
         CRGBPalette16 newPalette;

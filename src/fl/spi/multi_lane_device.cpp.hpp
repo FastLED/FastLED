@@ -19,7 +19,7 @@ namespace spi {
 struct MultiLaneDevice::Impl : public DeviceImplBase {
     Config config;
     fl::vector<Lane> lanes;
-    uint8_t backend_type;  // 1, 2, 4, or 8 (number of lanes supported by backend)
+    u8 backend_type;  // 1, 2, 4, or 8 (number of lanes supported by backend)
 
     Impl(const Config& cfg)
         : DeviceImplBase()
@@ -114,7 +114,7 @@ fl::optional<fl::Error> MultiLaneDevice::begin() {
 
         // Configure Single-SPI
         SpiHw1::Config hw_config;
-        hw_config.bus_num = static_cast<uint8_t>(hw->getBusId());
+        hw_config.bus_num = static_cast<u8>(hw->getBusId());
         hw_config.clock_speed_hz = pImpl->config.clock_speed_hz;
         hw_config.clock_pin = pImpl->config.clock_pin;
         hw_config.data_pin = pImpl->config.data_pins[0];
@@ -152,7 +152,7 @@ fl::optional<fl::Error> MultiLaneDevice::begin() {
 
         // Configure Dual-SPI
         SpiHw2::Config hw_config;
-        hw_config.bus_num = static_cast<uint8_t>(hw->getBusId());
+        hw_config.bus_num = static_cast<u8>(hw->getBusId());
         hw_config.clock_speed_hz = pImpl->config.clock_speed_hz;
         hw_config.clock_pin = pImpl->config.clock_pin;
         hw_config.data0_pin = pImpl->config.data_pins[0];
@@ -191,7 +191,7 @@ fl::optional<fl::Error> MultiLaneDevice::begin() {
 
         // Configure Quad-SPI
         SpiHw4::Config hw_config;
-        hw_config.bus_num = static_cast<uint8_t>(hw->getBusId());
+        hw_config.bus_num = static_cast<u8>(hw->getBusId());
         hw_config.clock_speed_hz = pImpl->config.clock_speed_hz;
         hw_config.clock_pin = pImpl->config.clock_pin;
         hw_config.data0_pin = pImpl->config.data_pins[0];
@@ -232,7 +232,7 @@ fl::optional<fl::Error> MultiLaneDevice::begin() {
 
         // Configure Octal-SPI
         SpiHw8::Config hw_config;
-        hw_config.bus_num = static_cast<uint8_t>(hw->getBusId());
+        hw_config.bus_num = static_cast<u8>(hw->getBusId());
         hw_config.clock_speed_hz = pImpl->config.clock_speed_hz;
         hw_config.clock_pin = pImpl->config.clock_pin;
         hw_config.data0_pin = pImpl->config.data_pins[0];
@@ -348,8 +348,8 @@ Result<void> MultiLaneDevice::flush() {
     if (pImpl->backend_type == 1) {
         // Single lane - no transposition needed, just copy data directly
         if (pImpl->lanes.size() > 0) {
-            fl::span<const uint8_t> lane_data = pImpl->lanes[0].data();
-            fl::span<uint8_t> dma_data = dma_buffer.data();
+            fl::span<const u8> lane_data = pImpl->lanes[0].data();
+            fl::span<u8> dma_data = dma_buffer.data();
 
             // Verify sizes match (DMA buffer should be exactly the size we requested)
             if (lane_data.size() != dma_data.size()) {
@@ -375,13 +375,13 @@ Result<void> MultiLaneDevice::flush() {
         if (pImpl->lanes.size() > 0) {
             lane0 = SPITransposer::LaneData{
                 pImpl->lanes[0].data(),
-                fl::span<const uint8_t>()  // No padding
+                fl::span<const u8>()  // No padding
             };
         }
         if (pImpl->lanes.size() > 1) {
             lane1 = SPITransposer::LaneData{
                 pImpl->lanes[1].data(),
-                fl::span<const uint8_t>()  // No padding
+                fl::span<const u8>()  // No padding
             };
         }
 
@@ -393,7 +393,7 @@ Result<void> MultiLaneDevice::flush() {
         for (size_t i = 0; i < pImpl->lanes.size() && i < 4; i++) {
             lanes[i] = SPITransposer::LaneData{
                 pImpl->lanes[i].data(),
-                fl::span<const uint8_t>()  // No padding
+                fl::span<const u8>()  // No padding
             };
         }
 
@@ -406,7 +406,7 @@ Result<void> MultiLaneDevice::flush() {
         for (size_t i = 0; i < pImpl->lanes.size() && i < 8; i++) {
             lanes[i] = SPITransposer::LaneData{
                 pImpl->lanes[i].data(),
-                fl::span<const uint8_t>()  // No padding
+                fl::span<const u8>()  // No padding
             };
         }
 
@@ -441,7 +441,7 @@ Result<void> MultiLaneDevice::flush() {
     return Result<void>::success();
 }
 
-bool MultiLaneDevice::waitComplete(uint32_t timeout_ms) {
+bool MultiLaneDevice::waitComplete(u32 timeout_ms) {
     if (!isReady()) {
         return false;
     }
@@ -459,7 +459,7 @@ bool MultiLaneDevice::isBusy() const {
     return pImpl->backend->isBusy();
 }
 
-WriteResult MultiLaneDevice::writeImpl(fl::span<const fl::span<const uint8_t>> lane_data) {
+WriteResult MultiLaneDevice::writeImpl(fl::span<const fl::span<const u8>> lane_data) {
     if (!isReady()) {
         FL_WARN("MultiLaneDevice: Not ready for write");
         return WriteResult("Device not ready");

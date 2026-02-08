@@ -20,7 +20,7 @@ struct ChipsetTiming;
 ///
 /// Example: 0b11000000 (0xC0) = 2 HIGH pulses, 6 LOW pulses
 struct Wave8Bit {
-    uint8_t data;  // Each bit represents one pulse (MSB first)
+    u8 data;  // Each bit represents one pulse (MSB first)
 };
 
 /// @brief Container for 8 packed wave symbols (8 bytes total)
@@ -60,47 +60,47 @@ struct FL_ALIGNAS(8) Wave8BitExpansionLut {
 Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing);
 
 // Forward declaration for inline function (implementation in detail/wave8.hpp)
-void wave8(uint8_t lane,
+void wave8(u8 lane,
            const Wave8BitExpansionLut &lut,
-           uint8_t (&FL_RESTRICT_PARAM output)[sizeof(Wave8Byte)]);
+           u8 (&FL_RESTRICT_PARAM output)[sizeof(Wave8Byte)]);
 
 // Public transposition functions (implementations in wave8.cpp)
 void wave8Transpose_2(
-    const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
+    const u8 (&FL_RESTRICT_PARAM lanes)[2],
     const Wave8BitExpansionLut &lut,
-    uint8_t (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]);
+    u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]);
 
 void wave8Transpose_4(
-    const uint8_t (&FL_RESTRICT_PARAM lanes)[4],
+    const u8 (&FL_RESTRICT_PARAM lanes)[4],
     const Wave8BitExpansionLut &lut,
-    uint8_t (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]);
+    u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]);
 
 void wave8Transpose_8(
-    const uint8_t (&FL_RESTRICT_PARAM lanes)[8],
+    const u8 (&FL_RESTRICT_PARAM lanes)[8],
     const Wave8BitExpansionLut &lut,
-    uint8_t (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]);
+    u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]);
 
 void wave8Transpose_16(
-    const uint8_t (&FL_RESTRICT_PARAM lanes)[16],
+    const u8 (&FL_RESTRICT_PARAM lanes)[16],
     const Wave8BitExpansionLut &lut,
-    uint8_t (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]);
+    u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]);
 
 // Untranspose functions (for testing - reverse the transpose operation)
 void wave8Untranspose_2(
-    const uint8_t (&FL_RESTRICT_PARAM transposed)[2 * sizeof(Wave8Byte)],
-    uint8_t (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]);
+    const u8 (&FL_RESTRICT_PARAM transposed)[2 * sizeof(Wave8Byte)],
+    u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]);
 
 void wave8Untranspose_4(
-    const uint8_t (&FL_RESTRICT_PARAM transposed)[4 * sizeof(Wave8Byte)],
-    uint8_t (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]);
+    const u8 (&FL_RESTRICT_PARAM transposed)[4 * sizeof(Wave8Byte)],
+    u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]);
 
 void wave8Untranspose_8(
-    const uint8_t (&FL_RESTRICT_PARAM transposed)[8 * sizeof(Wave8Byte)],
-    uint8_t (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]);
+    const u8 (&FL_RESTRICT_PARAM transposed)[8 * sizeof(Wave8Byte)],
+    u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]);
 
 void wave8Untranspose_16(
-    const uint8_t (&FL_RESTRICT_PARAM transposed)[16 * sizeof(Wave8Byte)],
-    uint8_t (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]);
+    const u8 (&FL_RESTRICT_PARAM transposed)[16 * sizeof(Wave8Byte)],
+    u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]);
 
 } // namespace fl
 

@@ -18,7 +18,7 @@ namespace platforms {
 
 // Platform ID for STM32
 // Platform ID registry: 0=STUB, 1=ESP32, 2=AVR, 3=NRF52, 4=RP2040, 5=Teensy, 6=STM32, 7=SAMD, 255=NULL
-constexpr uint8_t STM32_PLATFORM_ID = 6;
+constexpr u8 STM32_PLATFORM_ID = 6;
 
 int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     (void)config;
@@ -27,7 +27,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     return -100;  // Not implemented
 }
 
-int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) {
+int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) {
     (void)pin;
     (void)config;
     (void)out_handle;
@@ -70,19 +70,19 @@ const char* get_platform_name() {
     return "STM32 (stub)";
 }
 
-uint32_t get_max_timer_frequency() {
+u32 get_max_timer_frequency() {
     return 1000000;  // 1 MHz placeholder
 }
 
-uint32_t get_min_timer_frequency() {
+u32 get_min_timer_frequency() {
     return 1;  // 1 Hz placeholder
 }
 
-uint8_t get_max_priority() {
+u8 get_max_priority() {
     return 15;  // STM32 NVIC supports 16 priority levels (0-15)
 }
 
-bool requires_assembly_handler(uint8_t priority) {
+bool requires_assembly_handler(u8 priority) {
     (void)priority;
     return false;
 }

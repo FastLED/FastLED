@@ -309,13 +309,13 @@ int decodeBase64(const char* input, char* output, size_t max_output_len) {
             return -1;
         }
 
-        uint32_t sextet_a = pos_a - base64_chars;
-        uint32_t sextet_b = pos_b - base64_chars;
-        uint32_t sextet_c = pos_c ? (pos_c - base64_chars) : 0;
-        uint32_t sextet_d = pos_d ? (pos_d - base64_chars) : 0;
+        u32 sextet_a = pos_a - base64_chars;
+        u32 sextet_b = pos_b - base64_chars;
+        u32 sextet_c = pos_c ? (pos_c - base64_chars) : 0;
+        u32 sextet_d = pos_d ? (pos_d - base64_chars) : 0;
 
         // Combine into 3 bytes
-        uint32_t triple = (sextet_a << 18) | (sextet_b << 12) | (sextet_c << 6) | sextet_d;
+        u32 triple = (sextet_a << 18) | (sextet_b << 12) | (sextet_c << 6) | sextet_d;
 
         // Write output bytes with bounds checking
         if (out_len + 1 <= (int)max_output_len) {
@@ -421,7 +421,7 @@ bool checkBasicAuth(httpd_req_t *req, const char* password) {
 /// @param data Pointer to firmware data (at least 24 bytes)
 /// @param len Length of firmware data
 /// @return true if firmware header is valid, false otherwise
-bool validateESP32Firmware(const uint8_t* data, size_t len) {
+bool validateESP32Firmware(const u8* data, size_t len) {
     // Need at least 24 bytes for ESP32 image header
     if (len < 24) {
         FL_WARN("Firmware validation: header too small (" << len << " bytes)");
@@ -436,7 +436,7 @@ bool validateESP32Firmware(const uint8_t* data, size_t len) {
     }
 
     // Check segment count is reasonable (1-16)
-    uint8_t segments = data[1];
+    u8 segments = data[1];
     if (segments == 0 || segments > 16) {
         FL_WARN("Firmware validation: invalid segment count " << (int)segments);
         return false;
@@ -504,7 +504,7 @@ esp_err_t otaHttpPostHandler(httpd_req_t *req) {
     while ((received = httpd_req_recv(req, buffer, sizeof(buffer))) > 0) {
         // Validate firmware header on first chunk
         if (first_chunk) {
-            if (!validateESP32Firmware((const uint8_t*)buffer, received)) {
+            if (!validateESP32Firmware((const u8*)buffer, received)) {
                 if (ctx->error_cb && *ctx->error_cb) {
                     (*ctx->error_cb)("Invalid ESP32 firmware image");
                 }
@@ -675,7 +675,7 @@ public:
         // Initialize mDNS
         if (!initMDNS(mHostname.c_str())) {
             FL_WARN("mDNS init failed - device won't be discoverable at " << mHostname.c_str() << ".local");
-            mFailedServices |= (uint8_t)fl::OTAService::MDNS_FAILED;
+            mFailedServices |= (u8)fl::OTAService::MDNS_FAILED;
         }
 
         // Setup custom ESP-IDF OTA server (TCP listener on port 3232)
@@ -685,7 +685,7 @@ public:
         mHttpServer = startHttpServer(&mHttpContext);
         if (!mHttpServer) {
             FL_WARN("HTTP server failed - Web OTA unavailable (TCP OTA still works)");
-            mFailedServices |= (uint8_t)fl::OTAService::HTTP_FAILED;
+            mFailedServices |= (u8)fl::OTAService::HTTP_FAILED;
         }
 
         return true;
@@ -709,7 +709,7 @@ public:
         // Initialize mDNS
         if (!initMDNS(mHostname.c_str())) {
             FL_WARN("mDNS init failed - device won't be discoverable at " << mHostname.c_str() << ".local");
-            mFailedServices |= (uint8_t)fl::OTAService::MDNS_FAILED;
+            mFailedServices |= (u8)fl::OTAService::MDNS_FAILED;
         }
 
         // Setup custom ESP-IDF OTA server (TCP listener on port 3232)
@@ -719,7 +719,7 @@ public:
         mHttpServer = startHttpServer(&mHttpContext);
         if (!mHttpServer) {
             FL_WARN("HTTP server failed - Web OTA unavailable (TCP OTA still works)");
-            mFailedServices |= (uint8_t)fl::OTAService::HTTP_FAILED;
+            mFailedServices |= (u8)fl::OTAService::HTTP_FAILED;
         }
 
         return true;
@@ -752,7 +752,7 @@ public:
         mErrorCb = callback;
     }
 
-    void onState(fl::function<void(uint8_t)> callback) override {
+    void onState(fl::function<void(u8)> callback) override {
         mStateCb = callback;
     }
 
@@ -770,7 +770,7 @@ public:
         return mWifiConnected;
     }
 
-    uint8_t getFailedServices() const override {
+    u8 getFailedServices() const override {
         return mFailedServices;
     }
 
@@ -781,7 +781,7 @@ private:
     /// @param event_id Event ID (e.g., WIFI_EVENT_STA_CONNECTED)
     /// @param event_data Event-specific data
     static void wifiEventHandler(void* arg, esp_event_base_t event_base,
-                                  int32_t event_id, void* event_data) {
+                                  i32 event_id, void* event_data) {
         ESP32OTA* self = static_cast<ESP32OTA*>(arg);
 
         if (event_base == WIFI_EVENT) {
@@ -913,7 +913,7 @@ private:
         mbedtls_sha256_init(&ctx);
         mbedtls_sha256_starts(&ctx, 0);  // 0 = SHA256 (not SHA224)
 
-        uint32_t seed = esp_random();
+        u32 seed = esp_random();
         mbedtls_sha256_update(&ctx, (unsigned char*)&seed, sizeof(seed));
 
         int64_t time_us = esp_timer_get_time();
@@ -1075,7 +1075,7 @@ private:
         mbedtls_md5_starts(&md5_ctx);
 
         // Receive and write firmware data
-        uint8_t buffer[1024];
+        u8 buffer[1024];
         size_t total_received = 0;
         bool write_error = false;
 
@@ -1345,7 +1345,7 @@ private:
         if (result != pdPASS) {
             FL_WARN("OTA: Failed to create server task");
             mOtaRunning = false;
-            mFailedServices |= static_cast<uint8_t>(OTAService::IDE);
+            mFailedServices |= static_cast<u8>(OTAService::IDE);
         } else {
             FL_DBG("OTA: Custom server started (port 3232)");
         }
@@ -1395,7 +1395,7 @@ private:
     // Callbacks
     fl::function<void(size_t, size_t)> mProgressCb;
     fl::function<void(const char*)> mErrorCb;
-    fl::function<void(uint8_t)> mStateCb;
+    fl::function<void(u8)> mStateCb;
     void (*mBeforeRebootCb)() = nullptr;
 
     // HTTP server handle
@@ -1405,7 +1405,7 @@ private:
     OTAHttpContext mHttpContext;
 
     // Service initialization status
-    uint8_t mFailedServices;
+    u8 mFailedServices;
 
     // Custom ESP-IDF OTA server state (pure ESP-IDF, no Arduino)
     int mOtaUdpSocket = -1;              // UDP socket for OTA invitations

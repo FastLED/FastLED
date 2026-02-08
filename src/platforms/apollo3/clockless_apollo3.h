@@ -28,13 +28,13 @@ namespace fl {
 //! @return Current count value.
 //
 //*****************************************************************************
-__attribute__ ((always_inline)) inline static uint32_t __am_hal_systick_count() {
+__attribute__ ((always_inline)) inline static u32 __am_hal_systick_count() {
 	return SysTick->VAL;
 }
 
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
-template <uint8_t DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+template <u8 DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
@@ -43,7 +43,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	// Formula: cycles = (nanoseconds * CPU_MHz + 500) / 1000
 	// The +500 provides rounding to nearest integer
 	// Apollo3 uses SysTick at F_CPU (48MHz by default)
-	enum : uint32_t {
+	enum : u32 {
 		T1 = (TIMING::T1 * (F_CPU / 1000000UL) + 500) / 1000,
 		T2 = (TIMING::T2 * (F_CPU / 1000000UL) + 500) / 1000,
 		T3 = (TIMING::T3 * (F_CPU / 1000000UL) + 500) / 1000
@@ -90,7 +90,7 @@ public:
 		SysTick_Config(0xFFFFFFUL); // The LOAD value needs to be 24-bit
 	}
 
-	virtual uint16_t getMaxRefreshRate() const { return 400; }
+	virtual u16 getMaxRefreshRate() const { return 400; }
 
 protected:
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
@@ -102,9 +102,9 @@ protected:
     	mWait.mark();
  	}
 
-	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER uint32_t & next_mark, FASTLED_REGISTER uint8_t & b)  {
+	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER u8 & b)  {
 		// SysTick counts down (not up) and is 24-bit
-		for(FASTLED_REGISTER uint32_t i = BITS-1; i > 0; i--) { // We could speed this up by using Bit Banding
+		for(FASTLED_REGISTER u32 i = BITS-1; i > 0; i--) { // We could speed this up by using Bit Banding
 			while(__am_hal_systick_count() > next_mark) { ; } // Wait for the remainder of this cycle to complete
 				// Calculate next_mark (the time of the next DATA_PIN transition) by subtracting T1+T2+T3
 				// SysTick counts down (not up) and is 24-bit
@@ -140,18 +140,18 @@ protected:
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-	static uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels) {
+	static u32 showRGBInternal(PixelController<RGB_ORDER> pixels) {
 
 		// Setup the pixel controller and load/scale the first byte
 		pixels.preStepFirstByteDithering();
-		FASTLED_REGISTER uint8_t b = pixels.loadAndScale0();
+		FASTLED_REGISTER u8 b = pixels.loadAndScale0();
 
 		cli();
 
 		// Calculate next_mark (the time of the next DATA_PIN transition) by subtracting T1+T2+T3
 		// SysTick counts down (not up) and is 24-bit
 		// The subtraction could underflow (wrap round) so let's mask the result to 24 bits
-		FASTLED_REGISTER uint32_t next_mark = (__am_hal_systick_count() - (T1+T2+T3)) & 0xFFFFFFUL;
+		FASTLED_REGISTER u32 next_mark = (__am_hal_systick_count() - (T1+T2+T3)) & 0xFFFFFFUL;
 
 		while(pixels.has(1)) { // Keep going for as long as we have pixels
 			pixels.stepDithering();

@@ -166,7 +166,7 @@ extern "C" {
  * @param timestamp Timestamp in milliseconds
  */
 EMSCRIPTEN_KEEPALIVE
-void pushAudioSamples(const int16_t* samples, int count, uint32_t timestamp) {
+void pushAudioSamples(const fl::i16* samples, int count, fl::u32 timestamp) {
     if (!fl::g_wasmAudioInput) {
         // No audio input instance created yet
         return;

@@ -21,14 +21,14 @@ namespace detail {
 // ============================================================================
 
 // 2-lane LUT: Spreads 4 bits into 2-lane interleaved positions (nibble → byte)
-constexpr uint8_t kTranspose4_16_LUT[16] = {0x00, 0x01, 0x04, 0x05, 0x10, 0x11,
+constexpr u8 kTranspose4_16_LUT[16] = {0x00, 0x01, 0x04, 0x05, 0x10, 0x11,
                                             0x14, 0x15, 0x40, 0x41, 0x44, 0x45,
                                             0x50, 0x51, 0x54, 0x55};
 
 // 4-lane LUT: Spreads 2 bits into 4-lane interleaved positions (2-bit → byte)
 // Maps [0b00, 0b01, 0b10, 0b11] → bit patterns at lane positions
 // For lane N: bits placed at positions (bit*4 + N)
-constexpr uint8_t kTranspose2_4_LUT[4] = {
+constexpr u8 kTranspose2_4_LUT[4] = {
     0x00,  // 0b00 → no bits set
     0x01,  // 0b01 → bit at position 0 (pulse 1)
     0x10,  // 0b10 → bit at position 4 (pulse 0)
@@ -42,19 +42,19 @@ constexpr uint8_t kTranspose2_4_LUT[4] = {
 /// @brief Helper: Convert byte to Wave8Byte using nibble LUT (internal use only)
 /// @note Inline implementation for ISR performance
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
-void wave8_convert_byte_to_wave8byte(uint8_t byte_value,
+void wave8_convert_byte_to_wave8byte(u8 byte_value,
                                       const Wave8BitExpansionLut &lut,
                                       Wave8Byte *output) {
     // ISR-optimized copy: Copy high nibble (4 bytes = 1 x uint32_t)
     const Wave8Bit *high_nibble_data = lut.lut[(byte_value >> 4) & 0xF];
-    isr::memcpy32(fl::bit_cast_ptr<uint32_t>(&output->symbols[0]),
-                  fl::bit_cast_ptr<const uint32_t>(high_nibble_data),
+    isr::memcpy32(fl::bit_cast_ptr<u32>(&output->symbols[0]),
+                  fl::bit_cast_ptr<const u32>(high_nibble_data),
                   1); // 4 bytes = 1 x uint32_t
 
     // ISR-optimized copy: Copy low nibble (4 bytes = 1 x uint32_t)
     const Wave8Bit *low_nibble_data = lut.lut[byte_value & 0xF];
-    isr::memcpy32(fl::bit_cast_ptr<uint32_t>(&output->symbols[4]),
-                  fl::bit_cast_ptr<const uint32_t>(low_nibble_data),
+    isr::memcpy32(fl::bit_cast_ptr<u32>(&output->symbols[4]),
+                  fl::bit_cast_ptr<const u32>(low_nibble_data),
                   1); // 4 bytes = 1 x uint32_t
 }
 
@@ -64,16 +64,16 @@ void wave8_convert_byte_to_wave8byte(uint8_t byte_value,
 
 #define FL_WAVE8_SPREAD_TO_16(lane_u8_0, lane_u8_1, out_16)                            \
     do {                                                                       \
-        const uint8_t _a = (uint8_t)(lane_u8_0);                               \
-        const uint8_t _b = (uint8_t)(lane_u8_1);                               \
-        const uint16_t _even =                                                 \
-            (uint16_t)((uint16_t)::fl::detail::kTranspose4_16_LUT[_b & 0x0Fu] |        \
-                       ((uint16_t)::fl::detail::kTranspose4_16_LUT[_b >> 4] << 8));    \
-        const uint16_t _odd =                                                  \
-            (uint16_t)(((uint16_t)::fl::detail::kTranspose4_16_LUT[_a & 0x0Fu] |       \
-                        ((uint16_t)::fl::detail::kTranspose4_16_LUT[_a >> 4] << 8))    \
+        const u8 _a = (u8)(lane_u8_0);                               \
+        const u8 _b = (u8)(lane_u8_1);                               \
+        const u16 _even =                                                 \
+            (u16)((u16)::fl::detail::kTranspose4_16_LUT[_b & 0x0Fu] |        \
+                       ((u16)::fl::detail::kTranspose4_16_LUT[_b >> 4] << 8));    \
+        const u16 _odd =                                                  \
+            (u16)(((u16)::fl::detail::kTranspose4_16_LUT[_a & 0x0Fu] |       \
+                        ((u16)::fl::detail::kTranspose4_16_LUT[_a >> 4] << 8))    \
                        << 1);                                                  \
-        (out_16) |= (uint16_t)(_even | _odd);                                  \
+        (out_16) |= (u16)(_even | _odd);                                  \
     } while (0)
 
 // ============================================================================
@@ -85,17 +85,17 @@ void wave8_convert_byte_to_wave8byte(uint8_t byte_value,
 /// @param output Output buffer (16 bytes)
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
 void wave8_transpose_2(const Wave8Byte lane_waves[2],
-                       uint8_t output[2 * sizeof(Wave8Byte)]) {
+                       u8 output[2 * sizeof(Wave8Byte)]) {
     for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
-        uint16_t interleaved = 0;
+        u16 interleaved = 0;
         // NOTE: FL_WAVE8_SPREAD_TO_16 macro treats first param as ODD bits, second as EVEN bits
         // This matches wave8Untranspose_2 expectations: lane[0]→odd, lane[1]→even
         FL_WAVE8_SPREAD_TO_16(lane_waves[0].symbols[symbol_idx].data,
                               lane_waves[1].symbols[symbol_idx].data,
                               interleaved);
 
-        output[symbol_idx * 2] = (uint8_t)(interleaved & 0xFF);      // Low byte first
-        output[symbol_idx * 2 + 1] = (uint8_t)(interleaved >> 8);    // High byte second
+        output[symbol_idx * 2] = (u8)(interleaved & 0xFF);      // Low byte first
+        output[symbol_idx * 2 + 1] = (u8)(interleaved >> 8);    // High byte second
     }
 }
 
@@ -108,7 +108,7 @@ void wave8_transpose_2(const Wave8Byte lane_waves[2],
 /// @param output Output buffer (32 bytes)
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
 void wave8_transpose_4(const Wave8Byte lane_waves[4],
-                       uint8_t output[4 * sizeof(Wave8Byte)]) {
+                       u8 output[4 * sizeof(Wave8Byte)]) {
     // Each symbol (Wave8Bit) has 8 pulses
     // With 4 lanes, we produce 4 bytes per symbol (2 pulses per byte × 4 lanes)
     // Output format: [L3_P7, L2_P7, L1_P7, L0_P7, L3_P6, L2_P6, L1_P6, L0_P6, ...]
@@ -120,10 +120,10 @@ void wave8_transpose_4(const Wave8Byte lane_waves[4],
     // Process each symbol (8 iterations)
     for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
         // Pre-load all 4 lane bytes into registers
-        uint8_t l0 = lane_waves[0].symbols[symbol_idx].data;
-        uint8_t l1 = lane_waves[1].symbols[symbol_idx].data;
-        uint8_t l2 = lane_waves[2].symbols[symbol_idx].data;
-        uint8_t l3 = lane_waves[3].symbols[symbol_idx].data;
+        u8 l0 = lane_waves[0].symbols[symbol_idx].data;
+        u8 l1 = lane_waves[1].symbols[symbol_idx].data;
+        u8 l2 = lane_waves[2].symbols[symbol_idx].data;
+        u8 l3 = lane_waves[3].symbols[symbol_idx].data;
 
         // Explicitly construct all 4 output bytes
         // Each output byte contains 2 pulses from all 4 lanes
@@ -184,7 +184,7 @@ void wave8_transpose_4(const Wave8Byte lane_waves[4],
 /// @param output Output buffer (64 bytes)
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
 void wave8_transpose_8(const Wave8Byte lane_waves[8],
-                       uint8_t output[8 * sizeof(Wave8Byte)]) {
+                       u8 output[8 * sizeof(Wave8Byte)]) {
     // Each symbol (Wave8Bit) has 8 pulses
     // With 8 lanes, we produce 8 bytes per symbol (1 pulse per byte × 8 lanes)
     // Output format: [L7_P7, L6_P7, ..., L0_P7, L7_P6, L6_P6, ..., L0_P6, ...]
@@ -196,19 +196,19 @@ void wave8_transpose_8(const Wave8Byte lane_waves[8],
     // Process each of the 8 symbols (Wave8Bit structures)
     for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
         // Load 8 lane bytes for this symbol into a temporary array
-        uint8_t lane_bytes[8];
+        u8 lane_bytes[8];
         for (int lane = 0; lane < 8; lane++) {
             lane_bytes[lane] = lane_waves[lane].symbols[symbol_idx].data;
         }
 
         // Apply Hacker's Delight 8x8 transpose algorithm inline
         // This transposes the 8x8 bit matrix in ~6 XOR-shift operations
-        uint32_t x, y, t;
+        u32 x, y, t;
 
         // Load the array and pack it into x and y (little-endian)
         // Use ISR-safe memcpy32 for aligned 32-bit loads
-        isr::memcpy32(&y, fl::bit_cast_ptr<const uint32_t>(lane_bytes), 1);      // lanes 0-3
-        isr::memcpy32(&x, fl::bit_cast_ptr<const uint32_t>(lane_bytes + 4), 1);  // lanes 4-7
+        isr::memcpy32(&y, fl::bit_cast_ptr<const u32>(lane_bytes), 1);      // lanes 0-3
+        isr::memcpy32(&x, fl::bit_cast_ptr<const u32>(lane_bytes + 4), 1);  // lanes 4-7
 
         // Pre-transform x
         t = (x ^ (x >> 7)) & 0x00AA00AA;  x = x ^ t ^ (t << 7);
@@ -225,8 +225,8 @@ void wave8_transpose_8(const Wave8Byte lane_waves[8],
 
         // Store result directly to output (little-endian)
         // Use ISR-safe memcpy32 for aligned 32-bit stores
-        isr::memcpy32(fl::bit_cast_ptr<uint32_t>(output + symbol_idx * 8), &y, 1);
-        isr::memcpy32(fl::bit_cast_ptr<uint32_t>(output + symbol_idx * 8 + 4), &x, 1);
+        isr::memcpy32(fl::bit_cast_ptr<u32>(output + symbol_idx * 8), &y, 1);
+        isr::memcpy32(fl::bit_cast_ptr<u32>(output + symbol_idx * 8 + 4), &x, 1);
     }
 }
 
@@ -240,31 +240,31 @@ void wave8_transpose_8(const Wave8Byte lane_waves[8],
 /// @note Fully unrolled implementation for 8x performance improvement
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
 void wave8_transpose_16(const Wave8Byte lane_waves[16],
-                        uint8_t output[16 * sizeof(Wave8Byte)]) {
+                        u8 output[16 * sizeof(Wave8Byte)]) {
     // Fully unrolled version: Eliminates all loop overhead
     // Process each of 8 symbols with explicit pulse extraction
     // Achieves ~8x speedup over generic baseline (1,300 vs 10,000 cycles)
 
     for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
         // Load all 16 lane bytes for this symbol
-        const uint8_t l0  = lane_waves[0].symbols[symbol_idx].data;
-        const uint8_t l1  = lane_waves[1].symbols[symbol_idx].data;
-        const uint8_t l2  = lane_waves[2].symbols[symbol_idx].data;
-        const uint8_t l3  = lane_waves[3].symbols[symbol_idx].data;
-        const uint8_t l4  = lane_waves[4].symbols[symbol_idx].data;
-        const uint8_t l5  = lane_waves[5].symbols[symbol_idx].data;
-        const uint8_t l6  = lane_waves[6].symbols[symbol_idx].data;
-        const uint8_t l7  = lane_waves[7].symbols[symbol_idx].data;
-        const uint8_t l8  = lane_waves[8].symbols[symbol_idx].data;
-        const uint8_t l9  = lane_waves[9].symbols[symbol_idx].data;
-        const uint8_t l10 = lane_waves[10].symbols[symbol_idx].data;
-        const uint8_t l11 = lane_waves[11].symbols[symbol_idx].data;
-        const uint8_t l12 = lane_waves[12].symbols[symbol_idx].data;
-        const uint8_t l13 = lane_waves[13].symbols[symbol_idx].data;
-        const uint8_t l14 = lane_waves[14].symbols[symbol_idx].data;
-        const uint8_t l15 = lane_waves[15].symbols[symbol_idx].data;
+        const u8 l0  = lane_waves[0].symbols[symbol_idx].data;
+        const u8 l1  = lane_waves[1].symbols[symbol_idx].data;
+        const u8 l2  = lane_waves[2].symbols[symbol_idx].data;
+        const u8 l3  = lane_waves[3].symbols[symbol_idx].data;
+        const u8 l4  = lane_waves[4].symbols[symbol_idx].data;
+        const u8 l5  = lane_waves[5].symbols[symbol_idx].data;
+        const u8 l6  = lane_waves[6].symbols[symbol_idx].data;
+        const u8 l7  = lane_waves[7].symbols[symbol_idx].data;
+        const u8 l8  = lane_waves[8].symbols[symbol_idx].data;
+        const u8 l9  = lane_waves[9].symbols[symbol_idx].data;
+        const u8 l10 = lane_waves[10].symbols[symbol_idx].data;
+        const u8 l11 = lane_waves[11].symbols[symbol_idx].data;
+        const u8 l12 = lane_waves[12].symbols[symbol_idx].data;
+        const u8 l13 = lane_waves[13].symbols[symbol_idx].data;
+        const u8 l14 = lane_waves[14].symbols[symbol_idx].data;
+        const u8 l15 = lane_waves[15].symbols[symbol_idx].data;
 
-        uint8_t* out = &output[symbol_idx * 16];
+        u8* out = &output[symbol_idx * 16];
 
         // Pulse 7 (bit 7): out[0] = lanes 0-7 (low byte), out[1] = lanes 8-15 (high byte)
         out[0] = ((l7  >> 7) & 1) << 7 | ((l6  >> 7) & 1) << 6 | ((l5  >> 7) & 1) << 5 | ((l4  >> 7) & 1) << 4 |
@@ -325,9 +325,9 @@ void wave8_transpose_16(const Wave8Byte lane_waves[16],
 /// @brief Convert byte to 8 Wave8Bit structures using nibble LUT
 /// @note Inline implementation for ISR performance (always_inline requires visible body)
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
-void wave8(uint8_t lane,
+void wave8(u8 lane,
            const Wave8BitExpansionLut &lut,
-           uint8_t (&FL_RESTRICT_PARAM output)[sizeof(Wave8Byte)]) {
+           u8 (&FL_RESTRICT_PARAM output)[sizeof(Wave8Byte)]) {
     // Convert single lane byte to wave pulse symbols (8 bytes packed)
     // Use properly aligned local variable to avoid alignment issues
     Wave8Byte waveformSymbol;
@@ -335,8 +335,8 @@ void wave8(uint8_t lane,
 
     // ISR-optimized 32-bit copy: Copy 8 bytes as 2 x uint32_t words
     // Wave8Byte is 8-byte aligned (FL_ALIGNAS(8)), guaranteeing 4-byte alignment
-    isr::memcpy32(fl::bit_cast_ptr<uint32_t>(output),
-                  fl::bit_cast_ptr<const uint32_t>(&waveformSymbol.symbols[0].data),
+    isr::memcpy32(fl::bit_cast_ptr<u32>(output),
+                  fl::bit_cast_ptr<const u32>(&waveformSymbol.symbols[0].data),
                   2); // 8 bytes = 2 x uint32_t
 }
 

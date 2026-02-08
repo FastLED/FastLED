@@ -101,7 +101,7 @@ CRGB *operator+(const CRGBSet & pixels, int offset);
 template<class PIXEL_TYPE>
 class CPixelView {
 public:
-    const int8_t dir;             ///< direction of the LED data, either 1 or -1. Determines how the pointer is incremented.
+    const fl::i8 dir;             ///< direction of the LED data, either 1 or -1. Determines how the pointer is incremented.
     const int len;                ///< length of the LED data, in PIXEL_TYPE units. More accurately, it's the distance from
                                   ///  the start of the CPixelView::leds array to the end of the set (CPixelView::end_pos)
     PIXEL_TYPE * const leds;      ///< pointer to the LED data
@@ -190,12 +190,12 @@ public:
     /// @{
 
     /// Add the passed in value to all channels for all of the pixels in this set
-    inline CPixelView & addToRGB(uint8_t inc) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) += inc; } return *this; }
+    inline CPixelView & addToRGB(fl::u8 inc) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) += inc; } return *this; }
     /// Add every pixel in the other set to this set
     inline CPixelView & operator+=(CPixelView & rhs) { for(iterator pixel = begin(), rhspixel = rhs.begin(), _end = end(), rhs_end = rhs.end(); (pixel != _end) && (rhspixel != rhs_end); ++pixel, ++rhspixel) { (*pixel) += (*rhspixel); } return *this; }
 
     /// Subtract the passed in value from all channels for all of the pixels in this set
-    inline CPixelView & subFromRGB(uint8_t inc) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) -= inc; } return *this; }
+    inline CPixelView & subFromRGB(fl::u8 inc) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) -= inc; } return *this; }
     /// Subtract every pixel in the other set from this set
     inline CPixelView & operator-=(CPixelView & rhs) { for(iterator pixel = begin(), rhspixel = rhs.begin(), _end = end(), rhs_end = rhs.end(); (pixel != _end) && (rhspixel != rhs_end); ++pixel, ++rhspixel) { (*pixel) -= (*rhspixel); } return *this; }
 
@@ -222,28 +222,28 @@ public:
     }
 
     /// Divide every LED by the given value
-    inline CPixelView & operator/=(uint8_t d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) /= d; } return *this; }
+    inline CPixelView & operator/=(fl::u8 d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) /= d; } return *this; }
     /// Shift every LED in this set right by the given number of bits
-    inline CPixelView & operator>>=(uint8_t d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) >>= d; } return *this; }
+    inline CPixelView & operator>>=(fl::u8 d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) >>= d; } return *this; }
     /// Multiply every LED in this set by the given value
-    inline CPixelView & operator*=(uint8_t d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) *= d; } return *this; }
+    inline CPixelView & operator*=(fl::u8 d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) *= d; } return *this; }
 
     /// Scale every LED by the given scale
-    inline CPixelView & nscale8_video(uint8_t scaledown) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel).nscale8_video(scaledown); } return *this;}
+    inline CPixelView & nscale8_video(fl::u8 scaledown) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel).nscale8_video(scaledown); } return *this;}
     /// Scale down every LED by the given scale
-    inline CPixelView & operator%=(uint8_t scaledown) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel).nscale8_video(scaledown); } return *this; }
+    inline CPixelView & operator%=(fl::u8 scaledown) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel).nscale8_video(scaledown); } return *this; }
     /// Fade every LED down by the given scale
-    inline CPixelView & fadeLightBy(uint8_t fadefactor) { return nscale8_video(255 - fadefactor); }
+    inline CPixelView & fadeLightBy(fl::u8 fadefactor) { return nscale8_video(255 - fadefactor); }
 
     /// Scale every LED by the given scale
-    inline CPixelView & nscale8(uint8_t scaledown) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel).nscale8(scaledown); } return *this; }
+    inline CPixelView & nscale8(fl::u8 scaledown) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel).nscale8(scaledown); } return *this; }
     /// Scale every LED by the given scale
     inline CPixelView & nscale8(PIXEL_TYPE & scaledown) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel).nscale8(scaledown); } return *this; }
     /// Scale every LED in this set by every led in the other set
     inline CPixelView & nscale8(CPixelView & rhs) { for(iterator pixel = begin(), rhspixel = rhs.begin(), _end = end(), rhs_end = rhs.end(); (pixel != _end) && (rhspixel != rhs_end); ++pixel, ++rhspixel) { (*pixel).nscale8((*rhspixel)); } return *this; }
 
     /// Fade every LED down by the given scale
-    inline CPixelView & fadeToBlackBy(uint8_t fade) { return nscale8(255 - fade); }
+    inline CPixelView & fadeToBlackBy(fl::u8 fade) { return nscale8(255 - fade); }
 
     /// Apply the PIXEL_TYPE |= operator to every pixel in this set with the given PIXEL_TYPE value. 
     /// With CRGB, this brings up each channel to the higher of the two values
@@ -254,7 +254,7 @@ public:
     inline CPixelView & operator|=(const CPixelView & rhs) { for(iterator pixel = begin(), rhspixel = rhs.begin(), _end = end(), rhs_end = rhs.end(); (pixel != _end) && (rhspixel != rhs_end); ++pixel, ++rhspixel) { (*pixel) |= (*rhspixel); } return *this; }
     /// Apply the PIXEL_TYPE |= operator to every pixel in this set. 
     /// @copydetails operator|=(const PIXEL_TYPE&)
-    inline CPixelView & operator|=(uint8_t d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) |= d; } return *this; }
+    inline CPixelView & operator|=(fl::u8 d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) |= d; } return *this; }
 
     /// Apply the PIXEL_TYPE &= operator to every pixel in this set with the given PIXEL_TYPE value. 
     /// With CRGB, this brings up each channel down to the lower of the two values
@@ -265,7 +265,7 @@ public:
     inline CPixelView & operator&=(const CPixelView & rhs) { for(iterator pixel = begin(), rhspixel = rhs.begin(), _end = end(), rhs_end = rhs.end(); (pixel != _end) && (rhspixel != rhs_end); ++pixel, ++rhspixel) { (*pixel) &= (*rhspixel); } return *this; }
     /// Apply the PIXEL_TYPE &= operator to every pixel in this set with the passed in value. 
     /// @copydetails operator&=(const PIXEL_TYPE&)
-    inline CPixelView & operator&=(uint8_t d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) &= d; } return *this; }
+    inline CPixelView & operator&=(fl::u8 d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) &= d; } return *this; }
 
     /// @} Modification/Scaling Operators
 
@@ -287,7 +287,7 @@ public:
     /// @param initialhue the starting hue for the rainbow
     /// @param deltahue how many hue values to advance for each LED
     /// @see ::fill_rainbow(struct CRGB*, int, uint8_t, uint8_t)
-    inline CPixelView & fill_rainbow(uint8_t initialhue, uint8_t deltahue=5) {
+    inline CPixelView & fill_rainbow(fl::u8 initialhue, fl::u8 deltahue=5) {
         if(dir >= 0) {
             FUNCTION_FILL_RAINBOW(leds,len,initialhue,deltahue);
         } else {
@@ -448,7 +448,7 @@ public:
     template <class T>
     class pixelset_iterator_base {
         T * leds;          ///< pointer to LED array
-        const int8_t dir;  ///< direction of LED array, for incrementing the pointer
+        const fl::i8 dir;  ///< direction of LED array, for incrementing the pointer
 
     public:
         /// Copy constructor

@@ -52,10 +52,10 @@ class MultiLaneDevice {
 public:
     /// @brief Configuration for multi-lane SPI
     struct Config {
-        uint8_t clock_pin;              ///< Shared clock pin (SCK)
-        fl::vector<uint8_t> data_pins;  ///< Data pins (1-8 pins)
-        uint32_t clock_speed_hz;        ///< Clock speed in Hz (0xffffffff = as fast as possible)
-        uint8_t mode;                   ///< SPI mode (CPOL/CPHA)
+        u8 clock_pin;              ///< Shared clock pin (SCK)
+        fl::vector<u8> data_pins;  ///< Data pins (1-8 pins)
+        u32 clock_speed_hz;        ///< Clock speed in Hz (0xffffffff = as fast as possible)
+        u8 mode;                   ///< SPI mode (CPOL/CPHA)
 
         Config() : clock_pin(0xFF), clock_speed_hz(0xffffffff), mode(0) {}
     };
@@ -114,7 +114,7 @@ public:
     /// @brief Wait for pending transmission to complete
     /// @param timeout_ms Maximum time to wait (default: forever)
     /// @returns true if completed, false on timeout
-    bool waitComplete(uint32_t timeout_ms = (fl::numeric_limits<uint32_t>::max)());
+    bool waitComplete(u32 timeout_ms = (fl::numeric_limits<u32>::max)());
 
     /// @brief Convenience method - wait for transmission to complete
     /// @returns true if completed, false on timeout
@@ -168,8 +168,8 @@ public:
     template<typename... Spans>
     WriteResult write(Spans&&... lanes) {
         // Unpack variadic template into stack-allocated FixedVector
-        fl::span<const uint8_t> lane_spans[] = {fl::forward<Spans>(lanes)...};
-        fl::FixedVector<fl::span<const uint8_t>, MAX_SPI_LANES> lane_vec;
+        fl::span<const u8> lane_spans[] = {fl::forward<Spans>(lanes)...};
+        fl::FixedVector<fl::span<const u8>, MAX_SPI_LANES> lane_vec;
 
         // Copy spans into vector
         for (size_t i = 0; i < sizeof...(lanes); i++) {
@@ -177,7 +177,7 @@ public:
         }
 
         // Single atomic write operation
-        return writeImpl(fl::span<const fl::span<const uint8_t>>(lane_vec.data(), lane_vec.size()));
+        return writeImpl(fl::span<const fl::span<const u8>>(lane_vec.data(), lane_vec.size()));
     }
 
     // ========== Configuration ==========
@@ -191,7 +191,7 @@ private:
     /// @param lane_data Span of spans containing lane data
     /// @note Waits for previous transmission, writes all lanes, then flushes
     /// @returns WriteResult with ok=true on success, or ok=false with error message
-    WriteResult writeImpl(fl::span<const fl::span<const uint8_t>> lane_data);
+    WriteResult writeImpl(fl::span<const fl::span<const u8>> lane_data);
 
     struct Impl;
     fl::unique_ptr<Impl> pImpl;

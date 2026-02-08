@@ -24,13 +24,13 @@ namespace fl {
 #define PORTB_FIRST_PIN 90
 
 typedef union {
-    uint8_t bytes[8];
-    uint32_t raw[2];
+    u8 bytes[8];
+    u32 raw[2];
 } Lines;
 
-template <uint8_t LANES, int FIRST_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false>
+template <u8 LANES, int FIRST_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false>
 class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, PORT_MASK> {
-	enum : uint32_t {
+	enum : u32 {
 		T1 = TIMING::T1,
 		T2 = TIMING::T2,
 		T3 = TIMING::T3,
@@ -89,7 +89,7 @@ public:
         mPort = FastPin<FIRST_PIN>::port();
     }
 
-    virtual uint16_t getMaxRefreshRate() const { return 400; }
+    virtual u16 getMaxRefreshRate() const { return 400; }
 
     virtual void showPixels(PixelController<RGB_ORDER, LANES, PORT_MASK> & pixels) {
         mWait.wait();
@@ -98,7 +98,7 @@ public:
         mWait.mark();
     }
 
-    static uint32_t showRGBInternal(PixelController<RGB_ORDER, LANES, PORT_MASK> &allpixels) {
+    static u32 showRGBInternal(PixelController<RGB_ORDER, LANES, PORT_MASK> &allpixels) {
         // Serial.println("Entering show");
 
         int nLeds = allpixels.mLen;
@@ -107,7 +107,7 @@ public:
         Lines b0,b1,b2;
 
         allpixels.preStepFirstByteDithering();
-        for(uint8_t i = 0; i < LANES; i++) {
+        for(u8 i = 0; i < LANES; i++) {
             b0.bytes[i] = allpixels.loadAndScale0(i);
         }
 
@@ -119,7 +119,7 @@ public:
         #if (FASTLED_ALLOW_INTERRUPTS == 1)
         cli();
         #endif
-        uint32_t next_mark = (DUE_TIMER_VAL + (TOTAL));
+        u32 next_mark = (DUE_TIMER_VAL + (TOTAL));
         while(nLeds--) {
             allpixels.stepDithering();
             #if (FASTLED_ALLOW_INTERRUPTS == 1)
@@ -149,14 +149,14 @@ public:
         return DUE_TIMER_VAL;
     }
 
-    template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER uint32_t & next_mark, FASTLED_REGISTER Lines & b, Lines & b3, PixelController<RGB_ORDER,LANES, PORT_MASK> &pixels) { // , FASTLED_REGISTER uint32_t & b2)  {
+    template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER Lines & b, Lines & b3, PixelController<RGB_ORDER,LANES, PORT_MASK> &pixels) { // , FASTLED_REGISTER uint32_t & b2)  {
         Lines b2;
         fl::transpose8x1(b.bytes,b2.bytes);
 
-        FASTLED_REGISTER uint8_t d = pixels.template getd<PX>(pixels);
-        FASTLED_REGISTER uint8_t scale = pixels.template getscale<PX>(pixels);
+        FASTLED_REGISTER u8 d = pixels.template getd<PX>(pixels);
+        FASTLED_REGISTER u8 scale = pixels.template getscale<PX>(pixels);
 
-        for(uint32_t i = 0; (i < LANES) && (i<8); i++) {
+        for(u32 i = 0; (i < LANES) && (i<8); i++) {
             while(DUE_TIMER_VAL < next_mark);
             next_mark = (DUE_TIMER_VAL+TOTAL);
 
@@ -171,7 +171,7 @@ public:
             b3.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
         }
 
-        for(uint32_t i = LANES; i < 8; i++) {
+        for(u32 i = LANES; i < 8; i++) {
             while(DUE_TIMER_VAL < next_mark);
             next_mark = (DUE_TIMER_VAL+TOTAL);
             *FastPin<FIRST_PIN>::sport() = PORT_MASK;

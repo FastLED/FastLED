@@ -16,7 +16,7 @@ namespace fl {
 namespace platforms {
 
 /// Initialize serial (no-op on WASM)
-void begin(uint32_t baudRate) {
+void begin(u32 baudRate) {
     (void)baudRate;
     // WASM doesn't have serial ports - no-op
 }
@@ -49,13 +49,13 @@ int read() {
 }
 
 /// Flush output (no-op on WASM - printf is unbuffered)
-bool flush(uint32_t timeoutMs) {
+bool flush(u32 timeoutMs) {
     (void)timeoutMs;
     return true;
 }
 
 /// Write raw bytes to console
-size_t write_bytes(const uint8_t* buffer, size_t size) {
+size_t write_bytes(const u8* buffer, size_t size) {
     if (!buffer || size == 0) return 0;
 
     // Write bytes as binary data to console (hex output)

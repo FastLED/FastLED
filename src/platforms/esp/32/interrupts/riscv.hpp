@@ -275,12 +275,12 @@ static inline void fastled_plic_enable_interrupt(int source) {
     (void)source;
 }
 
-static inline uint32_t fastled_plic_claim(void) {
+static inline fl::u32 fastled_plic_claim(void) {
     // ESP32-C3/C6 use ESP-IDF APIs, not direct PLIC access
     return 0;
 }
 
-static inline void fastled_plic_complete(uint32_t interrupt_id) {
+static inline void fastled_plic_complete(fl::u32 interrupt_id) {
     // ESP32-C3/C6 use ESP-IDF APIs, not direct PLIC access
     (void)interrupt_id;
 }
@@ -385,7 +385,7 @@ esp_err_t fastled_riscv_install_experimental_interrupt(
 esp_err_t fastled_riscv_rmt_init_official(
     int channel,
     int gpio_num,
-    uint32_t resolution_hz,
+    fl::u32 resolution_hz,
     size_t mem_block_symbols,
     int priority_level  // 1-3, recommend FASTLED_RISCV_PRIORITY_RECOMMENDED
 );
@@ -394,7 +394,7 @@ esp_err_t fastled_riscv_rmt_init_official(
 esp_err_t fastled_riscv_rmt_init_experimental(
     int channel,
     int gpio_num,
-    uint32_t resolution_hz,
+    fl::u32 resolution_hz,
     size_t mem_block_symbols,
     int priority_level  // 4-7, custom implementation required
 );

@@ -38,7 +38,7 @@ using std::adopt_lock;  // okay std namespace
 class MutexRP {
 private:
     void* mSpinlock;      // spin_lock_t* (opaque pointer to avoid including Pico SDK headers)
-    uint32_t mOwnerCore;  // Core ID of the owner (for debug/assert purposes)
+    u32 mOwnerCore;  // Core ID of the owner (for debug/assert purposes)
     bool mLocked;         // Lock state
 
 public:
@@ -60,8 +60,8 @@ public:
 class RecursiveMutexRP {
 private:
     void* mSpinlock;      // spin_lock_t* (opaque pointer to avoid including Pico SDK headers)
-    uint32_t mOwnerCore;  // Core ID of the owner
-    uint32_t mLockCount;  // Recursion depth counter
+    u32 mOwnerCore;  // Core ID of the owner
+    u32 mLockCount;  // Recursion depth counter
 
 public:
     RecursiveMutexRP();

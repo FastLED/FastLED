@@ -36,19 +36,19 @@ using simd_f32x4 = float32x4_t;
 // Atomic Load/Store Operations (NEON)
 //==============================================================================
 
-FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 load_u8_16(const uint8_t* ptr) noexcept {
+FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 load_u8_16(const u8* ptr) noexcept {
     return vld1q_u8(ptr);
 }
 
-FASTLED_FORCE_INLINE FL_IRAM void store_u8_16(uint8_t* ptr, simd_u8x16 vec) noexcept {
+FASTLED_FORCE_INLINE FL_IRAM void store_u8_16(u8* ptr, simd_u8x16 vec) noexcept {
     vst1q_u8(ptr, vec);
 }
 
-FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 load_u32_4(const uint32_t* ptr) noexcept {
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 load_u32_4(const u32* ptr) noexcept {
     return vld1q_u32(ptr);
 }
 
-FASTLED_FORCE_INLINE FL_IRAM void store_u32_4(uint32_t* ptr, simd_u32x4 vec) noexcept {
+FASTLED_FORCE_INLINE FL_IRAM void store_u32_4(u32* ptr, simd_u32x4 vec) noexcept {
     vst1q_u32(ptr, vec);
 }
 
@@ -68,7 +68,7 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 add_sat_u8_16(simd_u8x16 a, simd_u8x16 b
     return vqaddq_u8(a, b);  // Saturating add
 }
 
-FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 scale_u8_16(simd_u8x16 vec, uint8_t scale) noexcept {
+FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 scale_u8_16(simd_u8x16 vec, u8 scale) noexcept {
     if (scale == 255) {
         return vec;  // Identity
     }
@@ -102,11 +102,11 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 scale_u8_16(simd_u8x16 vec, uint8_t scal
     return vcombine_u8(low_result, high_result);
 }
 
-FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 set1_u32_4(uint32_t value) noexcept {
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 set1_u32_4(u32 value) noexcept {
     return vdupq_n_u32(value);
 }
 
-FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 blend_u8_16(simd_u8x16 a, simd_u8x16 b, uint8_t amount) noexcept {
+FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 blend_u8_16(simd_u8x16 a, simd_u8x16 b, u8 amount) noexcept {
     // NEON implementation: result = a + ((b - a) * amount) / 256
 
     // Extract low and high 8 bytes
@@ -120,8 +120,8 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 blend_u8_16(simd_u8x16 a, simd_u8x16 b, 
     int16x8_t diff_high = vreinterpretq_s16_u16(vsubl_u8(b_high, a_high));
 
     // Multiply by amount
-    int16x8_t scaled_low = vmulq_n_s16(diff_low, static_cast<int16_t>(amount));
-    int16x8_t scaled_high = vmulq_n_s16(diff_high, static_cast<int16_t>(amount));
+    int16x8_t scaled_low = vmulq_n_s16(diff_low, static_cast<i16>(amount));
+    int16x8_t scaled_high = vmulq_n_s16(diff_high, static_cast<i16>(amount));
 
     // Shift right by 8 to divide by 256
     scaled_low = vshrq_n_s16(scaled_low, 8);
@@ -249,11 +249,11 @@ namespace platforms {
 //==============================================================================
 
 struct simd_u8x16 {
-    uint8_t data[16];
+    u8 data[16];
 };
 
 struct simd_u32x4 {
-    uint32_t data[4];
+    u32 data[4];
 };
 
 struct simd_f32x4 {
@@ -264,7 +264,7 @@ struct simd_f32x4 {
 // Atomic Load/Store Operations (Scalar Fallback)
 //==============================================================================
 
-FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 load_u8_16(const uint8_t* ptr) noexcept {
+FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 load_u8_16(const u8* ptr) noexcept {
     simd_u8x16 result;
     for (int i = 0; i < 16; ++i) {
         result.data[i] = ptr[i];
@@ -272,13 +272,13 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 load_u8_16(const uint8_t* ptr) noexcept 
     return result;
 }
 
-FASTLED_FORCE_INLINE FL_IRAM void store_u8_16(uint8_t* ptr, simd_u8x16 vec) noexcept {
+FASTLED_FORCE_INLINE FL_IRAM void store_u8_16(u8* ptr, simd_u8x16 vec) noexcept {
     for (int i = 0; i < 16; ++i) {
         ptr[i] = vec.data[i];
     }
 }
 
-FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 load_u32_4(const uint32_t* ptr) noexcept {
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 load_u32_4(const u32* ptr) noexcept {
     simd_u32x4 result;
     for (int i = 0; i < 4; ++i) {
         result.data[i] = ptr[i];
@@ -286,7 +286,7 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 load_u32_4(const uint32_t* ptr) noexcept
     return result;
 }
 
-FASTLED_FORCE_INLINE FL_IRAM void store_u32_4(uint32_t* ptr, simd_u32x4 vec) noexcept {
+FASTLED_FORCE_INLINE FL_IRAM void store_u32_4(u32* ptr, simd_u32x4 vec) noexcept {
     for (int i = 0; i < 4; ++i) {
         ptr[i] = vec.data[i];
     }
@@ -313,21 +313,21 @@ FASTLED_FORCE_INLINE FL_IRAM void store_f32_4(float* ptr, simd_f32x4 vec) noexce
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 add_sat_u8_16(simd_u8x16 a, simd_u8x16 b) noexcept {
     simd_u8x16 result;
     for (int i = 0; i < 16; ++i) {
-        uint16_t sum = static_cast<uint16_t>(a.data[i]) + static_cast<uint16_t>(b.data[i]);
-        result.data[i] = (sum > 255) ? 255 : static_cast<uint8_t>(sum);
+        u16 sum = static_cast<u16>(a.data[i]) + static_cast<u16>(b.data[i]);
+        result.data[i] = (sum > 255) ? 255 : static_cast<u8>(sum);
     }
     return result;
 }
 
-FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 scale_u8_16(simd_u8x16 vec, uint8_t scale) noexcept {
+FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 scale_u8_16(simd_u8x16 vec, u8 scale) noexcept {
     simd_u8x16 result;
     for (int i = 0; i < 16; ++i) {
-        result.data[i] = static_cast<uint8_t>((static_cast<uint16_t>(vec.data[i]) * scale) >> 8);
+        result.data[i] = static_cast<u8>((static_cast<u16>(vec.data[i]) * scale) >> 8);
     }
     return result;
 }
 
-FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 set1_u32_4(uint32_t value) noexcept {
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 set1_u32_4(u32 value) noexcept {
     simd_u32x4 result;
     for (int i = 0; i < 4; ++i) {
         result.data[i] = value;
@@ -405,13 +405,13 @@ FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 max_f32_4(simd_f32x4 a, simd_f32x4 b) no
 
 
 
-FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 blend_u8_16(simd_u8x16 a, simd_u8x16 b, uint8_t amount) noexcept {
+FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 blend_u8_16(simd_u8x16 a, simd_u8x16 b, u8 amount) noexcept {
     simd_u8x16 result;
     // result = a + ((b - a) * amount) / 256
     for (int i = 0; i < 16; ++i) {
-        int16_t diff = static_cast<int16_t>(b.data[i]) - static_cast<int16_t>(a.data[i]);
-        int16_t scaled = (diff * amount) >> 8;
-        result.data[i] = static_cast<uint8_t>(a.data[i] + scaled);
+        i16 diff = static_cast<i16>(b.data[i]) - static_cast<i16>(a.data[i]);
+        i16 scaled = (diff * amount) >> 8;
+        result.data[i] = static_cast<u8>(a.data[i] + scaled);
     }
     return result;
 }
@@ -419,8 +419,8 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 blend_u8_16(simd_u8x16 a, simd_u8x16 b, 
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 sub_sat_u8_16(simd_u8x16 a, simd_u8x16 b) noexcept {
     simd_u8x16 result;
     for (int i = 0; i < 16; ++i) {
-        int16_t diff = static_cast<int16_t>(a.data[i]) - static_cast<int16_t>(b.data[i]);
-        result.data[i] = (diff < 0) ? 0 : static_cast<uint8_t>(diff);
+        i16 diff = static_cast<i16>(a.data[i]) - static_cast<i16>(b.data[i]);
+        result.data[i] = (diff < 0) ? 0 : static_cast<u8>(diff);
     }
     return result;
 }
@@ -428,7 +428,7 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 sub_sat_u8_16(simd_u8x16 a, simd_u8x16 b
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 avg_u8_16(simd_u8x16 a, simd_u8x16 b) noexcept {
     simd_u8x16 result;
     for (int i = 0; i < 16; ++i) {
-        result.data[i] = static_cast<uint8_t>((static_cast<uint16_t>(a.data[i]) + static_cast<uint16_t>(b.data[i])) >> 1);
+        result.data[i] = static_cast<u8>((static_cast<u16>(a.data[i]) + static_cast<u16>(b.data[i])) >> 1);
     }
     return result;
 }
@@ -436,7 +436,7 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 avg_u8_16(simd_u8x16 a, simd_u8x16 b) no
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 avg_round_u8_16(simd_u8x16 a, simd_u8x16 b) noexcept {
     simd_u8x16 result;
     for (int i = 0; i < 16; ++i) {
-        result.data[i] = static_cast<uint8_t>((static_cast<uint16_t>(a.data[i]) + static_cast<uint16_t>(b.data[i]) + 1) >> 1);
+        result.data[i] = static_cast<u8>((static_cast<u16>(a.data[i]) + static_cast<u16>(b.data[i]) + 1) >> 1);
     }
     return result;
 }

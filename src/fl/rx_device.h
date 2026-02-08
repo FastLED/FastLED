@@ -34,14 +34,14 @@ struct ChipsetTiming;
  * - Bit 1: {high: true, ns: 800}, {high: false, ns: 450}
  */
 struct EdgeTime {
-    uint32_t ns : 31;    ///< Duration in nanoseconds (31 bits, max ~2.1s)
-    uint32_t high : 1;   ///< High/low level (1 bit: 1=high, 0=low)
+    u32 ns : 31;    ///< Duration in nanoseconds (31 bits, max ~2.1s)
+    u32 high : 1;   ///< High/low level (1 bit: 1=high, 0=low)
 
     /// Default constructor (low, 0ns)
     constexpr EdgeTime() : ns(0), high(0) {}
 
     /// Construct from high/low state and duration
-    constexpr EdgeTime(bool high_level, uint32_t ns_duration)
+    constexpr EdgeTime(bool high_level, u32 ns_duration)
         : ns(ns_duration), high(high_level ? 1 : 0) {}
 };
 
@@ -67,7 +67,7 @@ struct EdgeRange {
 /**
  * @brief Error codes for RX decoder operations
  */
-enum class DecodeError : uint8_t {
+enum class DecodeError : u8 {
     OK = 0,                  ///< No error (not typically used)
     HIGH_ERROR_RATE,         ///< Symbol decode error rate too high (>10%)
     BUFFER_OVERFLOW,         ///< Output buffer overflow
@@ -88,22 +88,22 @@ enum class DecodeError : uint8_t {
  */
 struct ChipsetTiming4Phase {
     // Bit 0 timing thresholds
-    uint32_t t0h_min_ns; ///< Bit 0 high time minimum (e.g., 250ns)
-    uint32_t t0h_max_ns; ///< Bit 0 high time maximum (e.g., 550ns)
-    uint32_t t0l_min_ns; ///< Bit 0 low time minimum (e.g., 700ns)
-    uint32_t t0l_max_ns; ///< Bit 0 low time maximum (e.g., 1000ns)
+    u32 t0h_min_ns; ///< Bit 0 high time minimum (e.g., 250ns)
+    u32 t0h_max_ns; ///< Bit 0 high time maximum (e.g., 550ns)
+    u32 t0l_min_ns; ///< Bit 0 low time minimum (e.g., 700ns)
+    u32 t0l_max_ns; ///< Bit 0 low time maximum (e.g., 1000ns)
 
     // Bit 1 timing thresholds
-    uint32_t t1h_min_ns; ///< Bit 1 high time minimum (e.g., 650ns)
-    uint32_t t1h_max_ns; ///< Bit 1 high time maximum (e.g., 950ns)
-    uint32_t t1l_min_ns; ///< Bit 1 low time minimum (e.g., 300ns)
-    uint32_t t1l_max_ns; ///< Bit 1 low time maximum (e.g., 600ns)
+    u32 t1h_min_ns; ///< Bit 1 high time minimum (e.g., 650ns)
+    u32 t1h_max_ns; ///< Bit 1 high time maximum (e.g., 950ns)
+    u32 t1l_min_ns; ///< Bit 1 low time minimum (e.g., 300ns)
+    u32 t1l_max_ns; ///< Bit 1 low time maximum (e.g., 600ns)
 
     // Reset pulse threshold
-    uint32_t reset_min_us; ///< Reset pulse minimum duration (e.g., 50us)
+    u32 reset_min_us; ///< Reset pulse minimum duration (e.g., 50us)
 
     // Gap tolerance (optional, for handling transmission gaps like PARLIO DMA gaps)
-    uint32_t gap_tolerance_ns = 0; ///< Maximum gap duration to tolerate (0 = no gap tolerance, treat as error)
+    u32 gap_tolerance_ns = 0; ///< Maximum gap duration to tolerate (0 = no gap tolerance, treat as error)
                                     ///< Pulses longer than reset_min_us but shorter than gap_tolerance_ns
                                     ///< are skipped during decoding without triggering errors.
                                     ///< Useful for PARLIO ~20us DMA gaps between frames.
@@ -145,12 +145,12 @@ struct ChipsetTiming4Phase {
  * @endcode
  */
 ChipsetTiming4Phase make4PhaseTiming(const ChipsetTiming& timing_3phase,
-                                      uint32_t tolerance_ns = 150);
+                                      u32 tolerance_ns = 150);
 
 /**
  * @brief Result codes for RX wait() operations
  */
-enum class RxWaitResult : uint8_t {
+enum class RxWaitResult : u8 {
     SUCCESS = 0,             ///< Operation completed successfully
     TIMEOUT = 1,             ///< Operation timed out
     BUFFER_OVERFLOW = 2      ///< Buffer overflow
@@ -162,7 +162,7 @@ enum class RxWaitResult : uint8_t {
  * Defines available RX device implementations. Used with template-based
  * factory pattern for compile-time device selection.
  */
-enum class RxDeviceType : uint8_t {
+enum class RxDeviceType : u8 {
     ISR = 0,  ///< GPIO ISR-based receiver (ESP32)
     RMT = 1   ///< RMT-based receiver (ESP32)
 };
@@ -206,12 +206,12 @@ inline const char* toString(RxDeviceType type) {
 struct RxConfig {
     // Hardware parameters
     size_t buffer_size = 512;               ///< Buffer size in symbols/edges (default: 512)
-    fl::optional<uint32_t> hz = fl::nullopt; ///< Optional clock frequency (RMT only, default: 40MHz)
+    fl::optional<u32> hz = fl::nullopt; ///< Optional clock frequency (RMT only, default: 40MHz)
 
     // Signal detection parameters
-    uint32_t signal_range_min_ns = 100;     ///< Minimum pulse width (glitch filter, default: 100ns)
-    uint32_t signal_range_max_ns = 100000;  ///< Maximum pulse width (idle threshold, default: 100μs)
-    uint32_t skip_signals = 0;              ///< Number of signals to skip before capturing (default: 0)
+    u32 signal_range_min_ns = 100;     ///< Minimum pulse width (glitch filter, default: 100ns)
+    u32 signal_range_max_ns = 100000;  ///< Maximum pulse width (idle threshold, default: 100μs)
+    u32 skip_signals = 0;              ///< Number of signals to skip before capturing (default: 0)
     bool start_low = true;                  ///< Pin idle state: true=LOW (WS2812B), false=HIGH (inverted)
 
     // Internal loopback configuration (ESP32 RMT only)
@@ -300,7 +300,7 @@ public:
      * @param timeout_ms Timeout in milliseconds
      * @return RxWaitResult - SUCCESS, TIMEOUT, or BUFFER_OVERFLOW
      */
-    virtual RxWaitResult wait(uint32_t timeout_ms) = 0;
+    virtual RxWaitResult wait(u32 timeout_ms) = 0;
 
     /**
      * @brief Decode captured data to bytes into a span
@@ -308,8 +308,8 @@ public:
      * @param out Output span to write decoded bytes
      * @return Result with total bytes decoded, or error
      */
-    virtual fl::Result<uint32_t, DecodeError> decode(const ChipsetTiming4Phase &timing,
-                                                       fl::span<uint8_t> out) = 0;
+    virtual fl::Result<u32, DecodeError> decode(const ChipsetTiming4Phase &timing,
+                                                       fl::span<u8> out) = 0;
 
     /**
      * @brief Get raw edge timings in universal format (for debugging)

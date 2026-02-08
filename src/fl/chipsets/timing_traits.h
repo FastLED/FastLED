@@ -32,19 +32,19 @@ namespace fl {
 template <typename TIMING>
 struct TimingTraits {
     /// @brief High time for bit 0 (nanoseconds)
-    static constexpr uint32_t T1 = TIMING::T1;
+    static constexpr u32 T1 = TIMING::T1;
 
     /// @brief Additional high time for bit 1 (nanoseconds)
-    static constexpr uint32_t T2 = TIMING::T2;
+    static constexpr u32 T2 = TIMING::T2;
 
     /// @brief Low tail duration (nanoseconds)
-    static constexpr uint32_t T3 = TIMING::T3;
+    static constexpr u32 T3 = TIMING::T3;
 
     /// @brief Reset/latch time (microseconds)
-    static constexpr uint32_t RESET = TIMING::RESET;
+    static constexpr u32 RESET = TIMING::RESET;
 
     /// @brief Total bit period (T1 + T2 + T3) in nanoseconds
-    static constexpr uint32_t BIT_PERIOD = TIMING::T1 + TIMING::T2 + TIMING::T3;
+    static constexpr u32 BIT_PERIOD = TIMING::T1 + TIMING::T2 + TIMING::T3;
 };
 
 // ============================================================================
@@ -57,13 +57,13 @@ struct TimingTraits {
 /// @tparam T2_NS Additional high time for bit 1 (nanoseconds)
 /// @tparam T3_NS Low tail duration (nanoseconds)
 /// @tparam RESET_US Reset/latch time (microseconds)
-template <uint32_t T1_NS, uint32_t T2_NS, uint32_t T3_NS, uint32_t RESET_US = 280>
+template <u32 T1_NS, u32 T2_NS, u32 T3_NS, u32 RESET_US = 280>
 struct CustomTimingTraits {
-    static constexpr uint32_t T1 = T1_NS;
-    static constexpr uint32_t T2 = T2_NS;
-    static constexpr uint32_t T3 = T3_NS;
-    static constexpr uint32_t RESET = RESET_US;
-    static constexpr uint32_t BIT_PERIOD = T1_NS + T2_NS + T3_NS;
+    static constexpr u32 T1 = T1_NS;
+    static constexpr u32 T2 = T2_NS;
+    static constexpr u32 T3 = T3_NS;
+    static constexpr u32 RESET = RESET_US;
+    static constexpr u32 BIT_PERIOD = T1_NS + T2_NS + T3_NS;
 };
 
 }  // namespace fl

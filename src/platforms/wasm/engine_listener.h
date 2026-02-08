@@ -19,7 +19,7 @@ class EngineListener : public fl::EngineEvents::Listener {
 
   private:
     void onEndFrame() override;
-    void onStripAdded(CLEDController *strip, uint32_t num_leds) override;
+    void onStripAdded(CLEDController *strip, u32 num_leds) override;
     void onCanvasUiSet(CLEDController *strip,
                        const fl::ScreenMap &screenmap) override;
     EngineListener();

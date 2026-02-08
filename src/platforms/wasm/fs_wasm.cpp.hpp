@@ -65,17 +65,17 @@ FASTLED_SHARED_PTR(FileData);
 class FileData {
   public:
     FileData(size_t capacity) : mCapacity(capacity) { mData.reserve(capacity); }
-    FileData(const std::vector<uint8_t> &data, size_t len)  // okay std namespace
+    FileData(const std::vector<u8> &data, size_t len)  // okay std namespace
         : mData(data), mCapacity(len) {}
     FileData() = default;
 
-    void append(const uint8_t *data, size_t len) {
+    void append(const u8 *data, size_t len) {
         fl::unique_lock<fl::mutex> lock(mMutex);
         mData.insert(mData.end(), data, data + len);
         mCapacity = FL_MAX(mCapacity, mData.size());
     }
 
-    size_t read(size_t pos, uint8_t *dst, size_t len) {
+    size_t read(size_t pos, u8 *dst, size_t len) {
         fl::unique_lock<fl::mutex> lock(mMutex);
         if (pos >= mData.size()) {
             return 0;
@@ -104,7 +104,7 @@ class FileData {
     }
 
   private:
-    std::vector<uint8_t> mData;  // okay std namespace
+    std::vector<u8> mData;  // okay std namespace
     size_t mCapacity = 0;
     mutable fl::mutex mMutex;
 };
@@ -149,7 +149,7 @@ class WasmFileHandle : public fl::FileHandle {
     }
     size_t size() const override { return mData->capacity(); }
 
-    size_t read(uint8_t *dst, size_t bytesToRead) override {
+    size_t read(u8 *dst, size_t bytesToRead) override {
         if (mPos >= mData->capacity()) {
             return 0;
         }
@@ -261,7 +261,7 @@ FileDataPtr _createIfNotExists(const string &path, size_t len) {
 
 extern "C" {
 
-EMSCRIPTEN_KEEPALIVE bool jsInjectFile(const char *path, const uint8_t *data,
+EMSCRIPTEN_KEEPALIVE bool jsInjectFile(const char *path, const fl::u8 *data,
                                        size_t len) {
 
     auto inserted = fl::_createIfNotExists(fl::Str(path), len);
@@ -273,7 +273,7 @@ EMSCRIPTEN_KEEPALIVE bool jsInjectFile(const char *path, const uint8_t *data,
     return true;
 }
 
-EMSCRIPTEN_KEEPALIVE bool jsAppendFile(const char *path, const uint8_t *data,
+EMSCRIPTEN_KEEPALIVE bool jsAppendFile(const char *path, const fl::u8 *data,
                                        size_t len) {
     auto entry = fl::_findIfExists(fl::Str(path));
     if (!entry) {

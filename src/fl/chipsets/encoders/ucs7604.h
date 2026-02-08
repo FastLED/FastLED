@@ -32,20 +32,20 @@ enum UCS7604Mode {
 
 /// @brief UCS7604 current control structure with 4-bit fields for each channel
 struct UCS7604CurrentControl {
-    uint8_t r;  ///< Red channel current (0x0-0xF)
-    uint8_t g;  ///< Green channel current (0x0-0xF)
-    uint8_t b;  ///< Blue channel current (0x0-0xF)
-    uint8_t w;  ///< White channel current (0x0-0xF)
+    u8 r;  ///< Red channel current (0x0-0xF)
+    u8 g;  ///< Green channel current (0x0-0xF)
+    u8 b;  ///< Blue channel current (0x0-0xF)
+    u8 w;  ///< White channel current (0x0-0xF)
 
     /// Default constructor - maximum brightness
     UCS7604CurrentControl() : r(0xF), g(0xF), b(0xF), w(0xF) {}
 
     /// Construct from single brightness value (all channels)
-    explicit UCS7604CurrentControl(uint8_t brightness)
+    explicit UCS7604CurrentControl(u8 brightness)
         : r(brightness & 0xF), g(brightness & 0xF), b(brightness & 0xF), w(brightness & 0xF) {}
 
     /// Construct from individual channel values
-    UCS7604CurrentControl(uint8_t r_, uint8_t g_, uint8_t b_, uint8_t w_)
+    UCS7604CurrentControl(u8 r_, u8 g_, u8 b_, u8 w_)
         : r(r_ & 0xF), g(g_ & 0xF), b(b_ & 0xF), w(w_ & 0xF) {}
 };
 
@@ -60,8 +60,8 @@ struct UCS7604CurrentControl {
 /// @note Current control values should already be reordered to match wire protocol (RGB)
 template <typename OutputIterator>
 void buildUCS7604Preamble(OutputIterator out, UCS7604Mode mode,
-                          uint8_t r_current, uint8_t g_current,
-                          uint8_t b_current, uint8_t w_current) {
+                          u8 r_current, u8 g_current,
+                          u8 b_current, u8 w_current) {
     // Sync pattern (6 bytes)
     *out++ = 0xFF;
     *out++ = 0xFF;
@@ -75,7 +75,7 @@ void buildUCS7604Preamble(OutputIterator out, UCS7604Mode mode,
     *out++ = 0x02;
 
     // Mode byte
-    *out++ = static_cast<uint8_t>(mode);
+    *out++ = static_cast<u8>(mode);
 
     // Current control (4 bytes, 4-bit each, wire order RGBW)
     *out++ = r_current & 0x0F;
@@ -139,9 +139,9 @@ void encodeUCS7604_16bit_RGB(InputIterator first, InputIterator last, OutputIter
         const auto& pixel = *first;
 
         // Apply gamma 2.8 correction for 16-bit output
-        uint16_t r16 = fl::gamma_2_8(pixel[0]);
-        uint16_t g16 = fl::gamma_2_8(pixel[1]);
-        uint16_t b16 = fl::gamma_2_8(pixel[2]);
+        u16 r16 = fl::gamma_2_8(pixel[0]);
+        u16 g16 = fl::gamma_2_8(pixel[1]);
+        u16 b16 = fl::gamma_2_8(pixel[2]);
 
         // Write big-endian 16-bit values
         *out++ = r16 >> 8;
@@ -168,10 +168,10 @@ void encodeUCS7604_16bit_RGBW(InputIterator first, InputIterator last, OutputIte
         const auto& pixel = *first;
 
         // Apply gamma 2.8 correction for 16-bit output
-        uint16_t r16 = fl::gamma_2_8(pixel[0]);
-        uint16_t g16 = fl::gamma_2_8(pixel[1]);
-        uint16_t b16 = fl::gamma_2_8(pixel[2]);
-        uint16_t w16 = fl::gamma_2_8(pixel[3]);
+        u16 r16 = fl::gamma_2_8(pixel[0]);
+        u16 g16 = fl::gamma_2_8(pixel[1]);
+        u16 b16 = fl::gamma_2_8(pixel[2]);
+        u16 w16 = fl::gamma_2_8(pixel[3]);
 
         // Write big-endian 16-bit values
         *out++ = r16 >> 8;

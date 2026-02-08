@@ -46,18 +46,18 @@ namespace details {
 /// @{
 
 // Forward declarations for legacy functions (defined below)
-FL_ALWAYS_INLINE uint16_t map8_to_16(uint8_t x);
-FL_ALWAYS_INLINE int16_t smap8_to_16(int8_t x);
-FL_ALWAYS_INLINE uint32_t map8_to_32(uint8_t x);
-FL_ALWAYS_INLINE int32_t smap8_to_32(int8_t x);
-FL_ALWAYS_INLINE uint32_t map16_to_32(uint16_t x);
-FL_ALWAYS_INLINE int32_t smap16_to_32(int16_t x);
-FL_ALWAYS_INLINE uint8_t map16_to_8(uint16_t x);
-FL_ALWAYS_INLINE int8_t smap16_to_8(int16_t x);
-FL_ALWAYS_INLINE uint16_t map32_to_16(uint32_t x);
-FL_ALWAYS_INLINE int16_t smap32_to_16(int32_t x);
-FL_ALWAYS_INLINE uint8_t map32_to_8(uint32_t x);
-FL_ALWAYS_INLINE int8_t smap32_to_8(int32_t x);
+FL_ALWAYS_INLINE u16 map8_to_16(u8 x);
+FL_ALWAYS_INLINE i16 smap8_to_16(i8 x);
+FL_ALWAYS_INLINE u32 map8_to_32(u8 x);
+FL_ALWAYS_INLINE i32 smap8_to_32(i8 x);
+FL_ALWAYS_INLINE u32 map16_to_32(u16 x);
+FL_ALWAYS_INLINE i32 smap16_to_32(i16 x);
+FL_ALWAYS_INLINE u8 map16_to_8(u16 x);
+FL_ALWAYS_INLINE i8 smap16_to_8(i16 x);
+FL_ALWAYS_INLINE u16 map32_to_16(u32 x);
+FL_ALWAYS_INLINE i16 smap32_to_16(i32 x);
+FL_ALWAYS_INLINE u8 map32_to_8(u32 x);
+FL_ALWAYS_INLINE i8 smap32_to_8(i32 x);
 
 // ============================================================================
 // int_scale_impl: C++11-compatible template specializations
@@ -82,97 +82,97 @@ struct int_scale_impl {
 
 // uint8_t → uint16_t
 template <>
-struct int_scale_impl<uint8_t, uint16_t> {
-    FL_ALWAYS_INLINE uint16_t apply(uint8_t x) {
-        return uint16_t(x) * 0x101;
+struct int_scale_impl<u8, u16> {
+    FL_ALWAYS_INLINE u16 apply(u8 x) {
+        return u16(x) * 0x101;
     }
 };
 
 // int8_t → int16_t
 template <>
-struct int_scale_impl<int8_t, int16_t> {
-    FL_ALWAYS_INLINE int16_t apply(int8_t x) {
-        return int16_t(uint16_t(uint8_t(x)) * 0x101);
+struct int_scale_impl<i8, i16> {
+    FL_ALWAYS_INLINE i16 apply(i8 x) {
+        return i16(u16(u8(x)) * 0x101);
     }
 };
 
 // uint8_t → int16_t
 template <>
-struct int_scale_impl<uint8_t, int16_t> {
-    FL_ALWAYS_INLINE int16_t apply(uint8_t x) {
-        return int16_t(uint16_t(x) * 0x101);
+struct int_scale_impl<u8, i16> {
+    FL_ALWAYS_INLINE i16 apply(u8 x) {
+        return i16(u16(x) * 0x101);
     }
 };
 
 // int8_t → uint16_t
 template <>
-struct int_scale_impl<int8_t, uint16_t> {
-    FL_ALWAYS_INLINE uint16_t apply(int8_t x) {
-        return uint16_t(uint8_t(x)) * 0x101;
+struct int_scale_impl<i8, u16> {
+    FL_ALWAYS_INLINE u16 apply(i8 x) {
+        return u16(u8(x)) * 0x101;
     }
 };
 
 // uint8_t → uint32_t
 template <>
-struct int_scale_impl<uint8_t, uint32_t> {
-    FL_ALWAYS_INLINE uint32_t apply(uint8_t x) {
-        return uint32_t(x) * 0x1010101;
+struct int_scale_impl<u8, u32> {
+    FL_ALWAYS_INLINE u32 apply(u8 x) {
+        return u32(x) * 0x1010101;
     }
 };
 
 // int8_t → int32_t
 template <>
-struct int_scale_impl<int8_t, int32_t> {
-    FL_ALWAYS_INLINE int32_t apply(int8_t x) {
-        return int32_t(uint32_t(uint8_t(x)) * 0x1010101);
+struct int_scale_impl<i8, i32> {
+    FL_ALWAYS_INLINE i32 apply(i8 x) {
+        return i32(u32(u8(x)) * 0x1010101);
     }
 };
 
 // uint8_t → int32_t
 template <>
-struct int_scale_impl<uint8_t, int32_t> {
-    FL_ALWAYS_INLINE int32_t apply(uint8_t x) {
-        return int32_t(uint32_t(x) * 0x1010101);
+struct int_scale_impl<u8, i32> {
+    FL_ALWAYS_INLINE i32 apply(u8 x) {
+        return i32(u32(x) * 0x1010101);
     }
 };
 
 // int8_t → uint32_t
 template <>
-struct int_scale_impl<int8_t, uint32_t> {
-    FL_ALWAYS_INLINE uint32_t apply(int8_t x) {
-        return uint32_t(uint8_t(x)) * 0x1010101;
+struct int_scale_impl<i8, u32> {
+    FL_ALWAYS_INLINE u32 apply(i8 x) {
+        return u32(u8(x)) * 0x1010101;
     }
 };
 
 // uint16_t → uint32_t
 template <>
-struct int_scale_impl<uint16_t, uint32_t> {
-    FL_ALWAYS_INLINE uint32_t apply(uint16_t x) {
-        return uint32_t(x) * 0x10001;
+struct int_scale_impl<u16, u32> {
+    FL_ALWAYS_INLINE u32 apply(u16 x) {
+        return u32(x) * 0x10001;
     }
 };
 
 // int16_t → int32_t
 template <>
-struct int_scale_impl<int16_t, int32_t> {
-    FL_ALWAYS_INLINE int32_t apply(int16_t x) {
-        return int32_t(uint32_t(uint16_t(x)) * 0x10001);
+struct int_scale_impl<i16, i32> {
+    FL_ALWAYS_INLINE i32 apply(i16 x) {
+        return i32(u32(u16(x)) * 0x10001);
     }
 };
 
 // uint16_t → int32_t
 template <>
-struct int_scale_impl<uint16_t, int32_t> {
-    FL_ALWAYS_INLINE int32_t apply(uint16_t x) {
-        return int32_t(uint32_t(x) * 0x10001);
+struct int_scale_impl<u16, i32> {
+    FL_ALWAYS_INLINE i32 apply(u16 x) {
+        return i32(u32(x) * 0x10001);
     }
 };
 
 // int16_t → uint32_t
 template <>
-struct int_scale_impl<int16_t, uint32_t> {
-    FL_ALWAYS_INLINE uint32_t apply(int16_t x) {
-        return uint32_t(uint16_t(x)) * 0x10001;
+struct int_scale_impl<i16, u32> {
+    FL_ALWAYS_INLINE u32 apply(i16 x) {
+        return u32(u16(x)) * 0x10001;
     }
 };
 
@@ -182,13 +182,13 @@ struct int_scale_impl<int16_t, uint32_t> {
 
 // uint16_t → uint8_t
 template <>
-struct int_scale_impl<uint16_t, uint8_t> {
-    FL_ALWAYS_INLINE uint8_t apply(uint16_t x) {
+struct int_scale_impl<u16, u8> {
+    FL_ALWAYS_INLINE u8 apply(u16 x) {
 #if SKETCH_HAS_LOTS_OF_MEMORY == 0
         if (x >= 0xff00) return 0xff;
-        return uint8_t((x + 128) >> 8);
+        return u8((x + 128) >> 8);
 #else
-        uint8_t result = (x + 128) >> 8;
+        u8 result = (x + 128) >> 8;
         return (x >= 0xff00) ? 0xff : result;
 #endif
     }
@@ -196,41 +196,41 @@ struct int_scale_impl<uint16_t, uint8_t> {
 
 // int16_t → int8_t
 template <>
-struct int_scale_impl<int16_t, int8_t> {
-    FL_ALWAYS_INLINE int8_t apply(int16_t x) {
+struct int_scale_impl<i16, i8> {
+    FL_ALWAYS_INLINE i8 apply(i16 x) {
 #if SKETCH_HAS_LOTS_OF_MEMORY == 0
         if (x >= 0x7f80) return 127;
-        return int8_t((x + 128) >> 8);
+        return i8((x + 128) >> 8);
 #else
-        uint8_t result = (uint16_t(x) + 128) >> 8;
-        return (x >= 0x7f80) ? 127 : int8_t(result);
+        u8 result = (u16(x) + 128) >> 8;
+        return (x >= 0x7f80) ? 127 : i8(result);
 #endif
     }
 };
 
 // uint16_t → int8_t
 template <>
-struct int_scale_impl<uint16_t, int8_t> {
-    FL_ALWAYS_INLINE int8_t apply(uint16_t x) {
+struct int_scale_impl<u16, i8> {
+    FL_ALWAYS_INLINE i8 apply(u16 x) {
 #if SKETCH_HAS_LOTS_OF_MEMORY == 0
         if (x >= 0xff00) return 0xff;
-        return int8_t((x + 128) >> 8);
+        return i8((x + 128) >> 8);
 #else
-        uint8_t result = (x + 128) >> 8;
-        return int8_t((x >= 0xff00) ? 0xff : result);
+        u8 result = (x + 128) >> 8;
+        return i8((x >= 0xff00) ? 0xff : result);
 #endif
     }
 };
 
 // int16_t → uint8_t
 template <>
-struct int_scale_impl<int16_t, uint8_t> {
-    FL_ALWAYS_INLINE uint8_t apply(int16_t x) {
+struct int_scale_impl<i16, u8> {
+    FL_ALWAYS_INLINE u8 apply(i16 x) {
 #if SKETCH_HAS_LOTS_OF_MEMORY == 0
         if (x >= 0x7f80) return 255;
-        return uint8_t((x + 128) >> 8);
+        return u8((x + 128) >> 8);
 #else
-        uint8_t result = (uint16_t(x) + 128) >> 8;
+        u8 result = (u16(x) + 128) >> 8;
         return (x >= 0x7f80) ? 255 : result;
 #endif
     }
@@ -238,13 +238,13 @@ struct int_scale_impl<int16_t, uint8_t> {
 
 // uint32_t → uint16_t
 template <>
-struct int_scale_impl<uint32_t, uint16_t> {
-    FL_ALWAYS_INLINE uint16_t apply(uint32_t x) {
+struct int_scale_impl<u32, u16> {
+    FL_ALWAYS_INLINE u16 apply(u32 x) {
 #if SKETCH_HAS_LOTS_OF_MEMORY == 0
         if (x >= 0xffff0000) return 0xffff;
-        return uint16_t((x + 32768) >> 16);
+        return u16((x + 32768) >> 16);
 #else
-        uint16_t result = (x + 32768) >> 16;
+        u16 result = (x + 32768) >> 16;
         return (x >= 0xffff0000) ? 0xffff : result;
 #endif
     }
@@ -252,41 +252,41 @@ struct int_scale_impl<uint32_t, uint16_t> {
 
 // int32_t → int16_t
 template <>
-struct int_scale_impl<int32_t, int16_t> {
-    FL_ALWAYS_INLINE int16_t apply(int32_t x) {
+struct int_scale_impl<i32, i16> {
+    FL_ALWAYS_INLINE i16 apply(i32 x) {
 #if SKETCH_HAS_LOTS_OF_MEMORY == 0
         if (x >= 0x7fff8000) return 32767;
-        return int16_t((x + 32768) >> 16);
+        return i16((x + 32768) >> 16);
 #else
-        uint16_t result = (uint32_t(x) + 32768) >> 16;
-        return (x >= 0x7fff8000) ? 32767 : int16_t(result);
+        u16 result = (u32(x) + 32768) >> 16;
+        return (x >= 0x7fff8000) ? 32767 : i16(result);
 #endif
     }
 };
 
 // uint32_t → int16_t
 template <>
-struct int_scale_impl<uint32_t, int16_t> {
-    FL_ALWAYS_INLINE int16_t apply(uint32_t x) {
+struct int_scale_impl<u32, i16> {
+    FL_ALWAYS_INLINE i16 apply(u32 x) {
 #if SKETCH_HAS_LOTS_OF_MEMORY == 0
         if (x >= 0xffff0000) return 0xffff;
-        return int16_t((x + 32768) >> 16);
+        return i16((x + 32768) >> 16);
 #else
-        uint16_t result = (x + 32768) >> 16;
-        return int16_t((x >= 0xffff0000) ? 0xffff : result);
+        u16 result = (x + 32768) >> 16;
+        return i16((x >= 0xffff0000) ? 0xffff : result);
 #endif
     }
 };
 
 // int32_t → uint16_t
 template <>
-struct int_scale_impl<int32_t, uint16_t> {
-    FL_ALWAYS_INLINE uint16_t apply(int32_t x) {
+struct int_scale_impl<i32, u16> {
+    FL_ALWAYS_INLINE u16 apply(i32 x) {
 #if SKETCH_HAS_LOTS_OF_MEMORY == 0
         if (x >= 0x7fff8000) return 0xffff;
-        return uint16_t((x + 32768) >> 16);
+        return u16((x + 32768) >> 16);
 #else
-        uint16_t result = (uint32_t(x) + 32768) >> 16;
+        u16 result = (u32(x) + 32768) >> 16;
         return (x >= 0x7fff8000) ? 0xffff : result;
 #endif
     }
@@ -294,13 +294,13 @@ struct int_scale_impl<int32_t, uint16_t> {
 
 // uint32_t → uint8_t
 template <>
-struct int_scale_impl<uint32_t, uint8_t> {
-    FL_ALWAYS_INLINE uint8_t apply(uint32_t x) {
+struct int_scale_impl<u32, u8> {
+    FL_ALWAYS_INLINE u8 apply(u32 x) {
 #if SKETCH_HAS_LOTS_OF_MEMORY == 0
         if (x >= 0xFF000000) return 0xff;
-        return uint8_t((x + 0x800000) >> 24);
+        return u8((x + 0x800000) >> 24);
 #else
-        uint8_t result = (x + 0x800000) >> 24;
+        u8 result = (x + 0x800000) >> 24;
         return (x >= 0xFF000000) ? 0xff : result;
 #endif
     }
@@ -308,41 +308,41 @@ struct int_scale_impl<uint32_t, uint8_t> {
 
 // int32_t → int8_t
 template <>
-struct int_scale_impl<int32_t, int8_t> {
-    FL_ALWAYS_INLINE int8_t apply(int32_t x) {
+struct int_scale_impl<i32, i8> {
+    FL_ALWAYS_INLINE i8 apply(i32 x) {
 #if SKETCH_HAS_LOTS_OF_MEMORY == 0
         if (x >= 0x7F000000) return 127;
-        return int8_t((x + 0x800000) >> 24);
+        return i8((x + 0x800000) >> 24);
 #else
-        uint8_t result = (uint32_t(x) + 0x800000) >> 24;
-        return (x >= 0x7F000000) ? 127 : int8_t(result);
+        u8 result = (u32(x) + 0x800000) >> 24;
+        return (x >= 0x7F000000) ? 127 : i8(result);
 #endif
     }
 };
 
 // uint32_t → int8_t
 template <>
-struct int_scale_impl<uint32_t, int8_t> {
-    FL_ALWAYS_INLINE int8_t apply(uint32_t x) {
+struct int_scale_impl<u32, i8> {
+    FL_ALWAYS_INLINE i8 apply(u32 x) {
 #if SKETCH_HAS_LOTS_OF_MEMORY == 0
         if (x >= 0xFF000000) return 0x7f;
-        return int8_t((x + 0x800000) >> 24);
+        return i8((x + 0x800000) >> 24);
 #else
-        uint8_t result = (x + 0x800000) >> 24;
-        return int8_t((x >= 0xFF000000) ? 0x7f : result);
+        u8 result = (x + 0x800000) >> 24;
+        return i8((x >= 0xFF000000) ? 0x7f : result);
 #endif
     }
 };
 
 // int32_t → uint8_t
 template <>
-struct int_scale_impl<int32_t, uint8_t> {
-    FL_ALWAYS_INLINE uint8_t apply(int32_t x) {
+struct int_scale_impl<i32, u8> {
+    FL_ALWAYS_INLINE u8 apply(i32 x) {
 #if SKETCH_HAS_LOTS_OF_MEMORY == 0
         if (x >= 0x7F000000) return 0xff;
-        return uint8_t((x + 0x800000) >> 24);
+        return u8((x + 0x800000) >> 24);
 #else
-        uint8_t result = (uint32_t(x) + 0x800000) >> 24;
+        u8 result = (u32(x) + 0x800000) >> 24;
         return (x >= 0x7F000000) ? 0xff : result;
 #endif
     }
@@ -405,8 +405,8 @@ FL_ALWAYS_INLINE INT_TO int_scale(typename fl::identity<INT_FROM>::type x) {
 /// Correctly maps both endpoints: 0x00 → 0x0000 and 0xFF → 0xFFFF.
 ///
 /// @note Performs no floating point operations; suitable for embedded systems.
-FL_ALWAYS_INLINE uint16_t map8_to_16(uint8_t x) {
-    return uint16_t(x) * 0x101;
+FL_ALWAYS_INLINE u16 map8_to_16(u8 x) {
+    return u16(x) * 0x101;
 }
 
 /// @brief Maps an 8-bit signed value to a 16-bit signed value.
@@ -419,10 +419,10 @@ FL_ALWAYS_INLINE uint16_t map8_to_16(uint8_t x) {
 /// Maps correctly: 0 → 0, 127 → 32639, -1 → -1, -128 → -32640.
 ///
 /// @note Performs no floating point operations; suitable for embedded systems.
-FL_ALWAYS_INLINE int16_t smap8_to_16(int8_t x) {
+FL_ALWAYS_INLINE i16 smap8_to_16(i8 x) {
     // Cast signed to unsigned to preserve bit pattern, map with unsigned function,
     // then reinterpret result as signed
-    return int16_t(map8_to_16(uint8_t(x)));
+    return i16(map8_to_16(u8(x)));
 }
 
 /// @brief Maps an 8-bit unsigned value to a 32-bit unsigned value.
@@ -435,8 +435,8 @@ FL_ALWAYS_INLINE int16_t smap8_to_16(int8_t x) {
 /// Correctly maps both endpoints: 0x00 → 0x00000000 and 0xFF → 0xFFFFFFFF.
 ///
 /// @note Performs no floating point operations; suitable for embedded systems.
-FL_ALWAYS_INLINE uint32_t map8_to_32(uint8_t x) {
-    return uint32_t(x) * 0x1010101;
+FL_ALWAYS_INLINE u32 map8_to_32(u8 x) {
+    return u32(x) * 0x1010101;
 }
 
 /// @brief Maps an 8-bit signed value to a 32-bit signed value.
@@ -449,8 +449,8 @@ FL_ALWAYS_INLINE uint32_t map8_to_32(uint8_t x) {
 /// Maps correctly: 0 → 0, 127 → 2139062143, -1 → -1, -128 → -2139062144.
 ///
 /// @note Performs no floating point operations; suitable for embedded systems.
-FL_ALWAYS_INLINE int32_t smap8_to_32(int8_t x) {
-    return int32_t(map8_to_32(uint8_t(x)));
+FL_ALWAYS_INLINE i32 smap8_to_32(i8 x) {
+    return i32(map8_to_32(u8(x)));
 }
 
 /// @brief Maps a 16-bit unsigned value to a 32-bit unsigned value.
@@ -463,8 +463,8 @@ FL_ALWAYS_INLINE int32_t smap8_to_32(int8_t x) {
 /// Correctly maps both endpoints: 0x0000 → 0x00000000 and 0xFFFF → 0xFFFFFFFF.
 ///
 /// @note Performs no floating point operations; suitable for embedded systems.
-FL_ALWAYS_INLINE uint32_t map16_to_32(uint16_t x) {
-    return uint32_t(x) * 0x10001;
+FL_ALWAYS_INLINE u32 map16_to_32(u16 x) {
+    return u32(x) * 0x10001;
 }
 
 /// @brief Maps a 16-bit signed value to a 32-bit signed value.
@@ -477,8 +477,8 @@ FL_ALWAYS_INLINE uint32_t map16_to_32(uint16_t x) {
 /// Maps correctly: 0 → 0, 32767 → 2147450879, -1 → -1, -32768 → -2147483648.
 ///
 /// @note Performs no floating point operations; suitable for embedded systems.
-FL_ALWAYS_INLINE int32_t smap16_to_32(int16_t x) {
-    return int32_t(map16_to_32(uint16_t(x)));
+FL_ALWAYS_INLINE i32 smap16_to_32(i16 x) {
+    return i32(map16_to_32(u16(x)));
 }
 
 
@@ -498,18 +498,18 @@ FL_ALWAYS_INLINE int32_t smap16_to_32(int16_t x) {
 /// @note Tested to produce results nearly identical to double-precision floating-point
 ///       division while remaining integer-only. The zero case is handled naturally
 ///       by the rounding math: (0 + 128) >> 8 = 0.
-FL_ALWAYS_INLINE uint8_t map16_to_8(uint16_t x) {
+FL_ALWAYS_INLINE u8 map16_to_8(u16 x) {
 #if SKETCH_HAS_LOTS_OF_MEMORY == 0
     // On memory-constrained devices (typically with simple CPUs and no branch prediction),
     // use branched version since it's faster to skip the shift operation entirely when x >= 0xff00
     if (x >= 0xff00) {
         return 0xff;
     }
-    return uint8_t((x + 128) >> 8);
+    return u8((x + 128) >> 8);
 #else
     // On modern CPUs with branch prediction, use ternary to compile to cmov
     // (conditional move), avoiding branch misprediction penalties.
-    uint8_t result = (x + 128) >> 8;
+    u8 result = (x + 128) >> 8;
     return (x >= 0xff00) ? 0xff : result;
 #endif
 }
@@ -526,17 +526,17 @@ FL_ALWAYS_INLINE uint8_t map16_to_8(uint16_t x) {
 ///
 /// @note Tested to produce results nearly identical to double-precision floating-point
 ///       division while remaining integer-only.
-FL_ALWAYS_INLINE int8_t smap16_to_8(int16_t x) {
+FL_ALWAYS_INLINE i8 smap16_to_8(i16 x) {
 #if SKETCH_HAS_LOTS_OF_MEMORY == 0
     // On memory-constrained devices
     if (x >= 0x7f80) {
         return 127;
     }
-    return int8_t((x + 128) >> 8);
+    return i8((x + 128) >> 8);
 #else
     // On modern CPUs with branch prediction, use ternary to compile to cmov
-    uint8_t result = (uint16_t(x) + 128) >> 8;
-    return (x >= 0x7f80) ? 127 : int8_t(result);
+    u8 result = (u16(x) + 128) >> 8;
+    return (x >= 0x7f80) ? 127 : i8(result);
 #endif
 }
 
@@ -556,18 +556,18 @@ FL_ALWAYS_INLINE int8_t smap16_to_8(int16_t x) {
 /// @note Tested to produce results nearly identical to double-precision floating-point
 ///       division while remaining integer-only. The zero case is handled naturally
 ///       by the rounding math: (0 + 32768) >> 16 = 0.
-FL_ALWAYS_INLINE uint16_t map32_to_16(uint32_t x) {
+FL_ALWAYS_INLINE u16 map32_to_16(u32 x) {
 #if SKETCH_HAS_LOTS_OF_MEMORY == 0
     // On memory-constrained devices (typically with simple CPUs and no branch prediction),
     // use branched version since it's faster to skip the shift operation entirely when x >= 0xffff0000
     if (x >= 0xffff0000) {
         return 0xffff;
     }
-    return uint16_t((x + 32768) >> 16);
+    return u16((x + 32768) >> 16);
 #else
     // On modern CPUs with branch prediction, use ternary to compile to cmov
     // (conditional move), avoiding branch misprediction penalties.
-    uint16_t result = (x + 32768) >> 16;
+    u16 result = (x + 32768) >> 16;
     return (x >= 0xffff0000) ? 0xffff : result;
 #endif
 }
@@ -585,17 +585,17 @@ FL_ALWAYS_INLINE uint16_t map32_to_16(uint32_t x) {
 ///
 /// @note Tested to produce results nearly identical to double-precision floating-point
 ///       division while remaining integer-only.
-FL_ALWAYS_INLINE int16_t smap32_to_16(int32_t x) {
+FL_ALWAYS_INLINE i16 smap32_to_16(i32 x) {
 #if SKETCH_HAS_LOTS_OF_MEMORY == 0
     // On memory-constrained devices
     if (x >= 0x7fff8000) {
         return 32767;
     }
-    return int16_t((x + 32768) >> 16);
+    return i16((x + 32768) >> 16);
 #else
     // On modern CPUs with branch prediction, use ternary to compile to cmov
-    uint16_t result = (uint32_t(x) + 32768) >> 16;
-    return (x >= 0x7fff8000) ? 32767 : int16_t(result);
+    u16 result = (u32(x) + 32768) >> 16;
+    return (x >= 0x7fff8000) ? 32767 : i16(result);
 #endif
 }
 
@@ -615,18 +615,18 @@ FL_ALWAYS_INLINE int16_t smap32_to_16(int32_t x) {
 /// @note Tested to produce results nearly identical to double-precision floating-point
 ///       division while remaining integer-only. The zero case is handled naturally
 ///       by the rounding math: (0 + 0x800000) >> 24 = 0.
-FL_ALWAYS_INLINE uint8_t map32_to_8(uint32_t x) {
+FL_ALWAYS_INLINE u8 map32_to_8(u32 x) {
 #if SKETCH_HAS_LOTS_OF_MEMORY == 0
     // On memory-constrained devices (typically with simple CPUs and no branch prediction),
     // use branched version since it's faster to skip the shift operation entirely when x >= 0xFF000000
     if (x >= 0xFF000000) {
         return 0xff;
     }
-    return uint8_t((x + 0x800000) >> 24);
+    return u8((x + 0x800000) >> 24);
 #else
     // On modern CPUs with branch prediction, use ternary to compile to cmov
     // (conditional move), avoiding branch misprediction penalties.
-    uint8_t result = (x + 0x800000) >> 24;
+    u8 result = (x + 0x800000) >> 24;
     return (x >= 0xFF000000) ? 0xff : result;
 #endif
 }
@@ -644,17 +644,17 @@ FL_ALWAYS_INLINE uint8_t map32_to_8(uint32_t x) {
 ///
 /// @note Tested to produce results nearly identical to double-precision floating-point
 ///       division while remaining integer-only.
-FL_ALWAYS_INLINE int8_t smap32_to_8(int32_t x) {
+FL_ALWAYS_INLINE i8 smap32_to_8(i32 x) {
 #if SKETCH_HAS_LOTS_OF_MEMORY == 0
     // On memory-constrained devices
     if (x >= 0x7F000000) {
         return 127;
     }
-    return int8_t((x + 0x800000) >> 24);
+    return i8((x + 0x800000) >> 24);
 #else
     // On modern CPUs with branch prediction, use ternary to compile to cmov
-    uint8_t result = (uint32_t(x) + 0x800000) >> 24;
-    return (x >= 0x7F000000) ? 127 : int8_t(result);
+    u8 result = (u32(x) + 0x800000) >> 24;
+    return (x >= 0x7F000000) ? 127 : i8(result);
 #endif
 }
 

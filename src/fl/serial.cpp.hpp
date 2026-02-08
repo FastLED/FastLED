@@ -14,7 +14,7 @@ namespace fl {
 // SerialPort Implementation
 // ============================================================================
 
-void SerialPort::begin(uint32_t baudRate) {
+void SerialPort::begin(u32 baudRate) {
     fl::serial_begin(baudRate);
 }
 
@@ -35,13 +35,13 @@ int SerialPort::peek() {
     return fl::peek();
 }
 
-size_t SerialPort::write(uint8_t byte) {
+size_t SerialPort::write(u8 byte) {
     char str[2] = {static_cast<char>(byte), '\0'};
     fl::print(str);
     return 1;
 }
 
-size_t SerialPort::write(const uint8_t* buffer, size_t size) {
+size_t SerialPort::write(const u8* buffer, size_t size) {
     return fl::write_bytes(buffer, size);
 }
 
@@ -118,7 +118,7 @@ size_t SerialPort::println(unsigned long value) {
 
 // Note: printf() is now implemented as an inline template in serial.h
 
-bool SerialPort::flush(uint32_t timeoutMs) {
+bool SerialPort::flush(u32 timeoutMs) {
     return fl::flush(timeoutMs);
 }
 
@@ -126,13 +126,13 @@ SerialPort::operator bool() const {
     return fl::serial_ready();
 }
 
-void SerialPort::setTimeout(uint32_t timeoutMs) {
+void SerialPort::setTimeout(u32 timeoutMs) {
     mTimeoutMs = timeoutMs;
 }
 
 fl::string SerialPort::readString() {
     fl::string result;
-    uint32_t startTime = fl::millis();
+    u32 startTime = fl::millis();
 
     while (fl::millis() - startTime < mTimeoutMs) {
         if (available() > 0) {
@@ -149,7 +149,7 @@ fl::string SerialPort::readString() {
 
 fl::string SerialPort::readStringUntil(char delimiter) {
     fl::string result;
-    uint32_t startTime = fl::millis();
+    u32 startTime = fl::millis();
 
     while (fl::millis() - startTime < mTimeoutMs) {
         if (available() > 0) {
@@ -168,19 +168,19 @@ fl::string SerialPort::readStringUntil(char delimiter) {
     return result;
 }
 
-size_t SerialPort::readBytes(uint8_t* buffer, size_t length) {
+size_t SerialPort::readBytes(u8* buffer, size_t length) {
     if (!buffer || length == 0) {
         return 0;
     }
 
     size_t count = 0;
-    uint32_t startTime = fl::millis();
+    u32 startTime = fl::millis();
 
     while (count < length && (fl::millis() - startTime < mTimeoutMs)) {
         if (available() > 0) {
             int c = read();
             if (c != -1) {
-                buffer[count++] = static_cast<uint8_t>(c);
+                buffer[count++] = static_cast<u8>(c);
                 startTime = fl::millis();  // Reset timeout on successful read
             }
         }
@@ -189,13 +189,13 @@ size_t SerialPort::readBytes(uint8_t* buffer, size_t length) {
     return count;
 }
 
-size_t SerialPort::readBytesUntil(char delimiter, uint8_t* buffer, size_t length) {
+size_t SerialPort::readBytesUntil(char delimiter, u8* buffer, size_t length) {
     if (!buffer || length == 0) {
         return 0;
     }
 
     size_t count = 0;
-    uint32_t startTime = fl::millis();
+    u32 startTime = fl::millis();
 
     while (count < length && (fl::millis() - startTime < mTimeoutMs)) {
         if (available() > 0) {
@@ -206,7 +206,7 @@ size_t SerialPort::readBytesUntil(char delimiter, uint8_t* buffer, size_t length
             if (c == delimiter) {
                 break;  // Found delimiter, stop reading
             }
-            buffer[count++] = static_cast<uint8_t>(c);
+            buffer[count++] = static_cast<u8>(c);
             startTime = fl::millis();  // Reset timeout on successful read
         }
     }
@@ -218,7 +218,7 @@ long SerialPort::parseInt() {
     bool negative = false;
     long value = 0;
     bool foundDigit = false;
-    uint32_t startTime = fl::millis();
+    u32 startTime = fl::millis();
 
     // Skip non-numeric characters
     while (fl::millis() - startTime < mTimeoutMs) {
@@ -275,7 +275,7 @@ float SerialPort::parseFloat() {
     int fracDigits = 0;
     bool foundDigit = false;
     bool inFraction = false;
-    uint32_t startTime = fl::millis();
+    u32 startTime = fl::millis();
 
     // Skip non-numeric characters
     while (fl::millis() - startTime < mTimeoutMs) {

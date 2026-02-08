@@ -74,8 +74,8 @@
 #endif
 
 /// @brief Type definitions for ARM register access
-typedef volatile uint32_t RwReg;  ///< Read-write register (32-bit)
-typedef volatile uint32_t RoReg;  ///< Read-only register (32-bit)
+typedef volatile fl::u32 RwReg;  ///< Read-write register (32-bit)
+typedef volatile fl::u32 RoReg;  ///< Read-only register (32-bit)
 
 /// @brief Arduino compatibility macros
 /// These provide fallback pin manipulation functions when hardware FastPin is not available.
@@ -92,9 +92,9 @@ typedef volatile uint32_t RoReg;  ///< Read-only register (32-bit)
 /// These provide generic ARM memory-mapped register access for Arduino compatibility.
 /// The MGM240 platform primarily uses Silicon Labs EMLIB GPIO functions instead.
 #ifndef portOutputRegister
-#define portOutputRegister(P) ((volatile uint32_t*)(0x40000000 + (P) * 0x400))
+#define portOutputRegister(P) ((volatile fl::u32*)(0x40000000 + (P) * 0x400))
 #endif
 
 #ifndef portInputRegister
-#define portInputRegister(P) ((volatile uint32_t*)(0x40000000 + (P) * 0x400))
+#define portInputRegister(P) ((volatile fl::u32*)(0x40000000 + (P) * 0x400))
 #endif

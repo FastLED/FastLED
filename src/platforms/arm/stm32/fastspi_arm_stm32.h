@@ -33,7 +33,7 @@ namespace fl {
  */
 
 // STM32 SPI Output class template
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
+template <u8 DATA_PIN, u8 CLOCK_PIN, u32 SPI_SPEED>
 class STM32SPIOutput {
 private:
 #if FASTLED_STM32_USE_HAL
@@ -139,23 +139,23 @@ public:
     }
 
     // Write byte variants
-    void writeByteNoWait(uint8_t b) __attribute__((always_inline)) {
+    void writeByteNoWait(u8 b) __attribute__((always_inline)) {
         writeByte(b);
     }
 
-    void writeBytePostWait(uint8_t b) __attribute__((always_inline)) {
+    void writeBytePostWait(u8 b) __attribute__((always_inline)) {
         writeByte(b);
         wait();
     }
 
     // Write a 16-bit word
-    void writeWord(uint16_t w) __attribute__((always_inline)) {
-        writeByte(static_cast<uint8_t>(w >> 8));
-        writeByte(static_cast<uint8_t>(w & 0xFF));
+    void writeWord(u16 w) __attribute__((always_inline)) {
+        writeByte(static_cast<u8>(w >> 8));
+        writeByte(static_cast<u8>(w & 0xFF));
     }
 
     // Write a single byte via SPI
-    void writeByte(uint8_t b) {
+    void writeByte(u8 b) {
 #if FASTLED_STM32_USE_HAL
         #ifdef FL_IS_STM32_MBED
             if (m_spi) {
@@ -166,7 +166,7 @@ public:
         #endif
 #else
         // Software SPI fallback - bitbang implementation
-        for (uint8_t bit = 0; bit < 8; bit++) {
+        for (u8 bit = 0; bit < 8; bit++) {
             if (b & 0x80) {
                 FastPin<DATA_PIN>::hi();
             } else {
@@ -184,7 +184,7 @@ public:
 #if FASTLED_STM32_USE_HAL
         // Calculate SPI settings based on SPI_SPEED
         // STM32 SPI can typically handle up to 18 MHz on APB1, 36 MHz on APB2
-        uint32_t spi_speed = SPI_SPEED;
+        u32 spi_speed = SPI_SPEED;
         if (spi_speed > 36000000) spi_speed = 36000000; // Cap at 36 MHz
 
         #ifdef FL_IS_STM32_MBED
@@ -222,13 +222,13 @@ public:
     }
 
     // Write out len bytes of the given value
-    void writeBytesValue(uint8_t value, int len) {
+    void writeBytesValue(u8 value, int len) {
         select();
         writeBytesValueRaw(value, len);
         release();
     }
 
-    void writeBytesValueRaw(uint8_t value, int len) {
+    void writeBytesValueRaw(u8 value, int len) {
         while (len--) {
 #if FASTLED_STM32_USE_HAL
             #ifdef FL_IS_STM32_MBED
@@ -246,9 +246,9 @@ public:
 
     // Write a block of bytes with per-byte data modifier
     template <class D>
-    void writeBytes(FASTLED_REGISTER uint8_t* data, int len) {
+    void writeBytes(FASTLED_REGISTER u8* data, int len) {
         select();
-        uint8_t* end = data + len;
+        u8* end = data + len;
         while (data != end) {
             writeByte(D::adjust(*data++));
         }
@@ -257,7 +257,7 @@ public:
     }
 
     // Default version - write a block of data with no modifications
-    void writeBytes(FASTLED_REGISTER uint8_t* data, int len) {
+    void writeBytes(FASTLED_REGISTER u8* data, int len) {
         writeBytes<DATA_NOP>(data, len);
     }
 
@@ -267,8 +267,8 @@ public:
     static void finalizeTransmission() { }
 
     // Write a single bit out
-    template <uint8_t BIT>
-    inline void writeBit(uint8_t b) {
+    template <u8 BIT>
+    inline void writeBit(u8 b) {
 #if FASTLED_STM32_USE_HAL
         // For single bit writes, we need to use GPIO directly
         // This is typically only used for specific LED chipsets
@@ -292,7 +292,7 @@ public:
     }
 
     // Write pixels with color order and optional flags
-    template <uint8_t FLAGS, class D, EOrder RGB_ORDER>
+    template <u8 FLAGS, class D, EOrder RGB_ORDER>
     __attribute__((noinline))
     void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
         select();

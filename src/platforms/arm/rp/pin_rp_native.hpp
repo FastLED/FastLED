@@ -67,7 +67,7 @@ inline PinValue digitalRead(int pin) {
 /// - GPIO28 = ADC2
 /// - GPIO29 = ADC3 (also VSYS/3 on Pico)
 /// - ADC4 = Internal temperature sensor (virtual pin 4)
-inline uint16_t analogRead(int pin) {
+inline u16 analogRead(int pin) {
     static bool adc_initialized = false; // okay static in header
 
     // Initialize ADC hardware on first use
@@ -93,7 +93,7 @@ inline uint16_t analogRead(int pin) {
 
     // Select ADC input and read
     adc_select_input(adc_channel);
-    return static_cast<uint16_t>(adc_read());
+    return static_cast<u16>(adc_read());
 }
 
 /// @brief Write an analog (PWM) value to a GPIO pin
@@ -102,7 +102,7 @@ inline uint16_t analogRead(int pin) {
 ///
 /// Uses hardware PWM. Each PWM slice controls 2 pins (A/B channels).
 /// PWM frequency is approximately 244 Hz (system clock / 65536).
-inline void analogWrite(int pin, uint16_t val) {
+inline void analogWrite(int pin, u16 val) {
     // Check if pin supports PWM
     if (pin >= NUM_BANK0_GPIOS) {
         return;  // Invalid pin for PWM
@@ -133,7 +133,7 @@ inline void analogWrite(int pin, uint16_t val) {
 /// WARNING: All pins on the same PWM slice share the same period (wrap value).
 /// Setting 16-bit resolution on one pin affects all pins on that slice.
 /// PWM frequency is approximately 1.9 Hz @ 125 MHz (system clock / 65536).
-inline void setPwm16(int pin, uint16_t val) {
+inline void setPwm16(int pin, u16 val) {
     // Check if pin supports PWM
     if (pin >= NUM_BANK0_GPIOS) {
         return;  // Invalid pin for PWM

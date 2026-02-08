@@ -208,10 +208,10 @@ private:
     CRGB* mStrips[16];
 
     /// @brief Scratch buffer for per-lane data layout (owned by channel engine)
-    fl::vector<uint8_t> mScratchBuffer;
+    fl::vector<u8> mScratchBuffer;
 
     /// @brief DMA buffers (double-buffered)
-    uint16_t* mBuffers[2];
+    u16* mBuffers[2];
     size_t mBufferSize;
     int mFrontBuffer;
 
@@ -225,7 +225,7 @@ private:
 
     /// @brief Transfer state
     volatile bool mBusy;
-    uint32_t mFrameCounter;
+    u32 mFrameCounter;
 };
 
 /// @brief Factory function to create LCD RGB engine with real hardware peripheral

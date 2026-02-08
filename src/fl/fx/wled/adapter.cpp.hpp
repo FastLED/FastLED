@@ -6,7 +6,7 @@ namespace fl {
 
 // FastLEDAdapter implementation
 
-FastLEDAdapter::FastLEDAdapter(uint8_t controllerIndex)
+FastLEDAdapter::FastLEDAdapter(u8 controllerIndex)
     : mControllerIndex(controllerIndex)
     , mSegmentStart(0)
     , mSegmentEnd(0)
@@ -43,7 +43,7 @@ void FastLEDAdapter::show() {
     FastLED.show();
 }
 
-void FastLEDAdapter::show(uint8_t brightness) {
+void FastLEDAdapter::show(u8 brightness) {
     FastLED.show(brightness);
 }
 
@@ -72,11 +72,11 @@ void FastLEDAdapter::clear(bool writeToStrip) {
     }
 }
 
-void FastLEDAdapter::setBrightness(uint8_t brightness) {
+void FastLEDAdapter::setBrightness(u8 brightness) {
     FastLED.setBrightness(brightness);
 }
 
-uint8_t FastLEDAdapter::getBrightness() const {
+u8 FastLEDAdapter::getBrightness() const {
     return FastLED.getBrightness();
 }
 
@@ -92,11 +92,11 @@ void FastLEDAdapter::delay(unsigned long ms) {
     FastLED.delay(ms);
 }
 
-void FastLEDAdapter::setMaxRefreshRate(uint16_t fps) {
+void FastLEDAdapter::setMaxRefreshRate(u16 fps) {
     FastLED.setMaxRefreshRate(fps);
 }
 
-uint16_t FastLEDAdapter::getMaxRefreshRate() const {
+u16 FastLEDAdapter::getMaxRefreshRate() const {
     // CFastLED doesn't expose the max refresh rate setting
     // Return 0 to indicate no limit
     return 0;
@@ -134,7 +134,7 @@ void FastLEDAdapter::clearSegment() {
 }
 
 // Helper function implementation
-fl::shared_ptr<IFastLED> createFastLEDController(uint8_t controllerIndex) {
+fl::shared_ptr<IFastLED> createFastLEDController(u8 controllerIndex) {
     return fl::make_shared<FastLEDAdapter>(controllerIndex);
 }
 

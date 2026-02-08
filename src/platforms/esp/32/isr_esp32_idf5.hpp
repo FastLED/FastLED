@@ -49,7 +49,7 @@ struct esp32_isr_handle_data {
     bool is_enabled;                 // Current enable state
     isr_handler_t user_handler;      // User handler function
     void* user_data;                 // User context
-    uint8_t gpio_pin;                // GPIO pin number (0xFF if not GPIO)
+    u8 gpio_pin;                // GPIO pin number (0xFF if not GPIO)
 
     esp32_isr_handle_data()
         : timer_handle(nullptr)
@@ -63,7 +63,7 @@ struct esp32_isr_handle_data {
 };
 
 // Platform ID for ESP32
-constexpr uint8_t ESP32_PLATFORM_ID = 1;
+constexpr u8 ESP32_PLATFORM_ID = 1;
 
 #define ESP32_ISR_TAG "fl_isr_esp32"
 
@@ -139,7 +139,7 @@ inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_ha
         //
         // IMPORTANT: ESP32 timer hardware requires clock divider >= 2
         // With 80MHz source clock, max resolution is 40MHz (80MHz / 2 = 40MHz)
-        uint32_t timer_resolution_hz;
+        u32 timer_resolution_hz;
         uint64_t alarm_count;
 
         if (config.frequency_hz > 1000000) {
@@ -231,7 +231,7 @@ inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_ha
         return 0;  // Success
 }
 
-inline int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) {
+inline int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) {
         if (!config.handler) {
             ESP_LOGW(ESP32_ISR_TAG, "attachExternalHandler: handler is null");
             return -1;  // Invalid parameter
@@ -471,15 +471,15 @@ inline const char* get_platform_name() {
 #endif
 }
 
-inline uint32_t get_max_timer_frequency() {
+inline u32 get_max_timer_frequency() {
     return 40000000;  // 40 MHz (limited by hardware divider >= 2 requirement)
 }
 
-inline uint32_t get_min_timer_frequency() {
+inline u32 get_min_timer_frequency() {
     return 1;  // 1 Hz
 }
 
-inline uint8_t get_max_priority() {
+inline u8 get_max_priority() {
 #if defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6)
     // RISC-V: Priority 1-7 (but 4-7 may have limitations)
     return 7;
@@ -489,7 +489,7 @@ inline uint8_t get_max_priority() {
 #endif
 }
 
-inline bool requires_assembly_handler(uint8_t priority) {
+inline bool requires_assembly_handler(u8 priority) {
 #if defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6)
     // RISC-V: All priority levels can use C handlers
     return false;

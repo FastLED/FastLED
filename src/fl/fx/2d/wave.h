@@ -58,7 +58,7 @@ class WaveCrgbMapDefault : public WaveCrgbMap {
         for (fl::u32 y = 0; y < height; y++) {
             for (fl::u32 x = 0; x < width; x++) {
                 fl::u32 idx = xymap(x, y);
-                uint8_t value8 = waveSim.getu8(x, y);
+                u8 value8 = waveSim.getu8(x, y);
                 leds[idx] = CRGB(value8, value8, value8);
             }
         }
@@ -298,7 +298,7 @@ class WaveFx : public Fx2d {
     ///
     /// Returns the current wave amplitude at the given position,
     /// scaled and mapped to 0-255 range.
-    uint8_t getu8(size_t x, size_t y) const {
+    u8 getu8(size_t x, size_t y) const {
         // Get the 8-bit value at the given coordinates in the wave simulation.
         return mWaveSim.getu8(x, y);
     }

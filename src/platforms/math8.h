@@ -43,13 +43,13 @@ namespace fl {
 /// Square root for 16-bit integers.
 /// About three times faster and five times smaller
 /// than Arduino's general `sqrt` on AVR.
-LIB8STATIC uint8_t sqrt16(uint16_t x) {
+LIB8STATIC u8 sqrt16(u16 x) {
     if (x <= 1) {
         return x;
     }
 
-    uint8_t low = 1; // lower bound
-    uint8_t hi, mid;
+    u8 low = 1; // lower bound
+    u8 hi, mid;
 
     if (x > 7904) {
         hi = 255;
@@ -59,7 +59,7 @@ LIB8STATIC uint8_t sqrt16(uint16_t x) {
 
     do {
         mid = (low + hi) >> 1;
-        if ((uint16_t)(mid * mid) > x) {
+        if ((u16)(mid * mid) > x) {
             hi = mid - 1;
         } else {
             if (mid == 255) {
@@ -72,7 +72,7 @@ LIB8STATIC uint8_t sqrt16(uint16_t x) {
     return low - 1;
 }
 
-FL_ALWAYS_INLINE uint8_t sqrt8(uint8_t x) {
+FL_ALWAYS_INLINE u8 sqrt8(u8 x) {
     return sqrt16(map8_to_16(x));
 }
 

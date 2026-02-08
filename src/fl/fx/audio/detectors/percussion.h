@@ -36,20 +36,20 @@ private:
     float mPrevBassEnergy;
     float mPrevMidEnergy;
     float mPrevTrebleEnergy;
-    uint32_t mLastKickTime;
-    uint32_t mLastSnareTime;
-    uint32_t mLastHiHatTime;
+    u32 mLastKickTime;
+    u32 mLastSnareTime;
+    u32 mLastHiHatTime;
 
-    static constexpr uint32_t KICK_COOLDOWN_MS = 100;
-    static constexpr uint32_t SNARE_COOLDOWN_MS = 80;
-    static constexpr uint32_t HIHAT_COOLDOWN_MS = 50;
+    static constexpr u32 KICK_COOLDOWN_MS = 100;
+    static constexpr u32 SNARE_COOLDOWN_MS = 80;
+    static constexpr u32 HIHAT_COOLDOWN_MS = 50;
 
     float getBassEnergy(const FFTBins& fft);
     float getMidEnergy(const FFTBins& fft);
     float getTrebleEnergy(const FFTBins& fft);
-    bool detectKick(float bassEnergy, float bassFlux, uint32_t timestamp);
-    bool detectSnare(float midEnergy, float midFlux, uint32_t timestamp);
-    bool detectHiHat(float trebleEnergy, float trebleFlux, uint32_t timestamp);
+    bool detectKick(float bassEnergy, float bassFlux, u32 timestamp);
+    bool detectSnare(float midEnergy, float midFlux, u32 timestamp);
+    bool detectHiHat(float trebleEnergy, float trebleFlux, u32 timestamp);
 };
 
 } // namespace fl

@@ -42,9 +42,9 @@ class Frame {
     size_t size() const { return mPixelsCount; }
     void copy(const Frame &other);
     void interpolate(const Frame &frame1, const Frame &frame2,
-                     uint8_t amountOfFrame2);
+                     u8 amountOfFrame2);
     static void interpolate(const Frame &frame1, const Frame &frame2,
-                            uint8_t amountofFrame2, CRGB *pixels);
+                            u8 amountofFrame2, CRGB *pixels);
     void draw(CRGB *leds, DrawMode draw_mode = DRAW_MODE_OVERWRITE) const;
     void drawXY(CRGB *leds, const XYMap &xyMap,
                 DrawMode draw_mode = DRAW_MODE_OVERWRITE) const;

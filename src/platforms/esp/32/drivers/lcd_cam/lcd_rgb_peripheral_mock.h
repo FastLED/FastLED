@@ -86,18 +86,18 @@ public:
     void deinitialize() override = 0;
     bool isInitialized() const override = 0;
 
-    uint16_t* allocateFrameBuffer(size_t size_bytes) override = 0;
-    void freeFrameBuffer(uint16_t* buffer) override = 0;
+    u16* allocateFrameBuffer(size_t size_bytes) override = 0;
+    void freeFrameBuffer(u16* buffer) override = 0;
 
-    bool drawFrame(const uint16_t* buffer, size_t size_bytes) override = 0;
-    bool waitFrameDone(uint32_t timeout_ms) override = 0;
+    bool drawFrame(const u16* buffer, size_t size_bytes) override = 0;
+    bool waitFrameDone(u32 timeout_ms) override = 0;
     bool isBusy() const override = 0;
 
     bool registerDrawCallback(void* callback, void* user_ctx) override = 0;
     const LcdRgbPeripheralConfig& getConfig() const override = 0;
 
     uint64_t getMicroseconds() override = 0;
-    void delay(uint32_t ms) override = 0;
+    void delay(u32 ms) override = 0;
 
     //=========================================================================
     // Mock-Specific API (for unit tests)
@@ -105,7 +105,7 @@ public:
 
     /// @brief Frame record (captured data)
     struct FrameRecord {
-        fl::vector<uint16_t> buffer_copy;  ///< Copy of frame buffer
+        fl::vector<u16> buffer_copy;  ///< Copy of frame buffer
         size_t size_bytes;                  ///< Size in bytes
         uint64_t timestamp_us;              ///< Capture timestamp
     };
@@ -126,7 +126,7 @@ public:
 
     /// @brief Set simulated draw delay
     /// @param microseconds Delay in microseconds (0 = instant)
-    virtual void setDrawDelay(uint32_t microseconds) = 0;
+    virtual void setDrawDelay(u32 microseconds) = 0;
 
     //-------------------------------------------------------------------------
     // Data Capture (for validation)
@@ -141,7 +141,7 @@ public:
 
     /// @brief Get most recent frame data as span
     /// @return Span of uint16_t frame data (empty if no frames)
-    virtual fl::span<const uint16_t> getLastFrameData() const = 0;
+    virtual fl::span<const u16> getLastFrameData() const = 0;
 
     //-------------------------------------------------------------------------
     // State Inspection

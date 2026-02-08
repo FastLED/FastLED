@@ -193,14 +193,14 @@ IChannelEngine::EngineState ChannelEngineI2S::poll() {
 // Transpose Implementation (from Yves driver)
 //=============================================================================
 
-void ChannelEngineI2S::transpose16x1(const uint8_t* A, uint16_t* B) {
-    uint32_t x, y, x1, y1, t;
+void ChannelEngineI2S::transpose16x1(const u8* A, u16* B) {
+    u32 x, y, x1, y1, t;
 
     // Load the array - handle up to 16 strips
-    y = *(reinterpret_cast<const uint32_t*>(A)); // ok reinterpret cast
-    x = *(reinterpret_cast<const uint32_t*>(A + 4)); // ok reinterpret cast
-    y1 = *(reinterpret_cast<const uint32_t*>(A + 8)); // ok reinterpret cast
-    x1 = *(reinterpret_cast<const uint32_t*>(A + 12)); // ok reinterpret cast
+    y = *(reinterpret_cast<const u32*>(A)); // ok reinterpret cast
+    x = *(reinterpret_cast<const u32*>(A + 4)); // ok reinterpret cast
+    y1 = *(reinterpret_cast<const u32*>(A + 8)); // ok reinterpret cast
+    x1 = *(reinterpret_cast<const u32*>(A + 12)); // ok reinterpret cast
 
     // Pre-transform x
     t = (x ^ (x >> 7)) & AA;
@@ -243,14 +243,14 @@ void ChannelEngineI2S::transpose16x1(const uint8_t* A, uint16_t* B) {
     // For bit 1: HIGH-HIGH-LOW = long pulse (~833ns HIGH, ~417ns LOW)
     //
     // Transposed data goes in middle words (indices 1,4,7,10,13,16,19,22)
-    B[1] = static_cast<uint16_t>(((x & 0xff000000) >> 8 | ((x1 & 0xff000000))) >> 16);
-    B[4] = static_cast<uint16_t>(((x & 0xff0000) >> 16 | ((x1 & 0xff0000) >> 8)));
-    B[7] = static_cast<uint16_t>(((x & 0xff00) | ((x1 & 0xff00) << 8)) >> 8);
-    B[10] = static_cast<uint16_t>((x & 0xff) | ((x1 & 0xff) << 8));
-    B[13] = static_cast<uint16_t>(((y & 0xff000000) >> 8 | ((y1 & 0xff000000))) >> 16);
-    B[16] = static_cast<uint16_t>(((y & 0xff0000) | ((y1 & 0xff0000) << 8)) >> 16);
-    B[19] = static_cast<uint16_t>(((y & 0xff00) | ((y1 & 0xff00) << 8)) >> 8);
-    B[22] = static_cast<uint16_t>((y & 0xff) | ((y1 & 0xff) << 8));
+    B[1] = static_cast<u16>(((x & 0xff000000) >> 8 | ((x1 & 0xff000000))) >> 16);
+    B[4] = static_cast<u16>(((x & 0xff0000) >> 16 | ((x1 & 0xff0000) >> 8)));
+    B[7] = static_cast<u16>(((x & 0xff00) | ((x1 & 0xff00) << 8)) >> 8);
+    B[10] = static_cast<u16>((x & 0xff) | ((x1 & 0xff) << 8));
+    B[13] = static_cast<u16>(((y & 0xff000000) >> 8 | ((y1 & 0xff000000))) >> 16);
+    B[16] = static_cast<u16>(((y & 0xff0000) | ((y1 & 0xff0000) << 8)) >> 16);
+    B[19] = static_cast<u16>(((y & 0xff00) | ((y1 & 0xff00) << 8)) >> 8);
+    B[22] = static_cast<u16>((y & 0xff) | ((y1 & 0xff) << 8));
 }
 
 //=============================================================================
@@ -295,7 +295,7 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
         mCurrentTiming = timing;
 
         // Calculate required I2S clock frequency for wave8 encoding
-        uint32_t clock_hz = calculateI2sClockHz(ct);
+        u32 clock_hz = calculateI2sClockHz(ct);
         mConfig.pclk_hz = clock_hz;
 
         FL_DBG("ChannelEngineI2S: Built Wave8 LUT for timing T1=" << timing.t1_ns
@@ -351,7 +351,7 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
         size_t reset_words = 64;  // ~50µs reset at typical clock
         size_t data_words = static_cast<size_t>(mNumLeds) * mNumComponents * 64;
         size_t total_words = data_words + reset_words;
-        size_t data_size = total_words * sizeof(uint16_t);
+        size_t data_size = total_words * sizeof(u16);
         pconfig.max_transfer_bytes = data_size;
         mBufferSize = data_size;
 
@@ -390,7 +390,7 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
 #if !FASTLED_I2S_USE_WAVE8
         // Initialize fixed high bits in buffer pattern for legacy transpose encoding
         for (int buf = 0; buf < 2; buf++) {
-            uint16_t* output = mBuffers[buf];
+            u16* output = mBuffers[buf];
             for (int i = 0; i < mNumLeds * mNumComponents * 8; i++) {
                 output[3 * i + 0] = 0xFFFF;
             }
@@ -452,7 +452,7 @@ void ChannelEngineI2S::prepareScratchBuffer(fl::span<const ChannelDataPtr> chann
 
 void ChannelEngineI2S::encodeFrame() {
     int backBuffer = 1 - mFrontBuffer;
-    uint16_t* output = mBuffers[backBuffer];
+    u16* output = mBuffers[backBuffer];
 
 #if FASTLED_I2S_USE_WAVE8
     // Wave8 encoding: Convert each LED byte to 64 output bits
@@ -469,7 +469,7 @@ void ChannelEngineI2S::encodeFrame() {
             Wave8Byte wave8_lanes[16];
 
             for (int lane = 0; lane < mConfig.num_lanes; lane++) {
-                uint8_t byte_val = 0;
+                u8 byte_val = 0;
                 if (mStrips[lane] != nullptr) {
                     byte_val = mStrips[lane][led_idx].raw[component];
                 }
@@ -487,12 +487,12 @@ void ChannelEngineI2S::encodeFrame() {
             for (int sym = 0; sym < 8; sym++) {
                 // For each pulse within the symbol (MSB first):
                 for (int pulse = 7; pulse >= 0; pulse--) {
-                    uint16_t word = 0;
+                    u16 word = 0;
 
                     // Gather pulse bit from each lane
                     for (int lane = 0; lane < mConfig.num_lanes; lane++) {
-                        uint8_t wave8_bits = wave8_lanes[lane].symbols[sym].data;
-                        uint16_t bit = (wave8_bits >> pulse) & 1;
+                        u8 wave8_bits = wave8_lanes[lane].symbols[sym].data;
+                        u16 bit = (wave8_bits >> pulse) & 1;
                         word |= (bit << lane);
                     }
 
@@ -509,7 +509,7 @@ void ChannelEngineI2S::encodeFrame() {
     // transpose16x1 writes data to output[1,4,7,...] (middle words)
     // output[2,5,8,...] remain 0 (last words, already zeros from memset)
 
-    uint8_t pixel_bytes[16];
+    u8 pixel_bytes[16];
 
     for (int led_idx = 0; led_idx < mNumLeds; led_idx++) {
         // Process each color component (RGB)
@@ -552,14 +552,14 @@ public:
     }
     void deinitialize() override { mImpl.deinitialize(); }
     bool isInitialized() const override { return mImpl.isInitialized(); }
-    uint16_t* allocateBuffer(size_t size_bytes) override {
+    u16* allocateBuffer(size_t size_bytes) override {
         return mImpl.allocateBuffer(size_bytes);
     }
-    void freeBuffer(uint16_t* buffer) override { mImpl.freeBuffer(buffer); }
-    bool transmit(const uint16_t* buffer, size_t size_bytes) override {
+    void freeBuffer(u16* buffer) override { mImpl.freeBuffer(buffer); }
+    bool transmit(const u16* buffer, size_t size_bytes) override {
         return mImpl.transmit(buffer, size_bytes);
     }
-    bool waitTransmitDone(uint32_t timeout_ms) override {
+    bool waitTransmitDone(u32 timeout_ms) override {
         return mImpl.waitTransmitDone(timeout_ms);
     }
     bool isBusy() const override { return mImpl.isBusy(); }
@@ -570,7 +570,7 @@ public:
         return mImpl.getConfig();
     }
     uint64_t getMicroseconds() override { return mImpl.getMicroseconds(); }
-    void delay(uint32_t ms) override { mImpl.delay(ms); }
+    void delay(u32 ms) override { mImpl.delay(ms); }
 
 private:
     detail::II2sLcdCamPeripheral& mImpl;

@@ -22,7 +22,7 @@ namespace fl {
 namespace isr {
 
 // Platform ID for SAM
-constexpr uint8_t SAM_PLATFORM_ID = 10;
+constexpr u8 SAM_PLATFORM_ID = 10;
 
 // Error code for not implemented
 constexpr int ERR_NOT_IMPLEMENTED = -100;
@@ -44,7 +44,7 @@ int sam_attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handl
     return ERR_NOT_IMPLEMENTED;  // Not implemented error
 }
 
-int sam_attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) {
+int sam_attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) {
     (void)pin;
     (void)config;
     if (out_handle) {
@@ -85,19 +85,19 @@ const char* sam_get_platform_name() {
     return "SAM";
 }
 
-uint32_t sam_get_max_timer_frequency() {
+u32 sam_get_max_timer_frequency() {
     return 0;  // No timer support yet
 }
 
-uint32_t sam_get_min_timer_frequency() {
+u32 sam_get_min_timer_frequency() {
     return 0;  // No timer support yet
 }
 
-uint8_t sam_get_max_priority() {
+u8 sam_get_max_priority() {
     return 0;  // No priority support yet
 }
 
-bool sam_requires_assembly_handler(uint8_t priority) {
+bool sam_requires_assembly_handler(u8 priority) {
     (void)priority;
     return false;
 }
@@ -109,7 +109,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* handle) {
     return sam_attach_timer_handler(config, handle);
 }
 
-int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* handle) {
+int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* handle) {
     return sam_attach_external_handler(pin, config, handle);
 }
 
@@ -137,19 +137,19 @@ const char* get_platform_name() {
     return sam_get_platform_name();
 }
 
-uint32_t get_max_timer_frequency() {
+u32 get_max_timer_frequency() {
     return sam_get_max_timer_frequency();
 }
 
-uint32_t get_min_timer_frequency() {
+u32 get_min_timer_frequency() {
     return sam_get_min_timer_frequency();
 }
 
-uint8_t get_max_priority() {
+u8 get_max_priority() {
     return sam_get_max_priority();
 }
 
-bool requires_assembly_handler(uint8_t priority) {
+bool requires_assembly_handler(u8 priority) {
     return sam_requires_assembly_handler(priority);
 }
 

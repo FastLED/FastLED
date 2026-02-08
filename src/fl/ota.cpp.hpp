@@ -82,7 +82,7 @@ bool OTA::isConnected() const {
     return mImpl->isConnected();
 }
 
-uint8_t OTA::getFailedServices() const {
+u8 OTA::getFailedServices() const {
     if (!mImpl) {
         return 0;
     }

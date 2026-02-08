@@ -1,17 +1,24 @@
 #!/usr/bin/env python3
-"""Checker to ensure stdint types (uint32_t, etc.) are not used in ESP32 platform files.
+"""Checker to ensure stdint types (uint32_t, etc.) are not used in platform files.
 
 Use FastLED's own integer types (u32, u16, etc.) instead of stdint types
-in src/platforms/esp/32/** to maintain consistency.
+in src/platforms/** to maintain consistency.
 """
 
 from ci.util.check_files import FileContent, FileContentChecker
 from ci.util.paths import PROJECT_ROOT
 
 
-# Target directory for this checker
-ESP32_ROOT = PROJECT_ROOT / "platforms" / "esp" / "32"
-ESP32_ROOT_SRC = PROJECT_ROOT / "src" / "platforms" / "esp" / "32"
+# Directories excluded from checking (vendor/third-party code)
+_EXCLUDED_DIRS = [
+    "/third_party/",
+]
+
+# Files excluded from checking (type definition files that intentionally use stdint types)
+_EXCLUDED_FILENAMES = {
+    "stdint.h",  # fl/stl/stdint.h - defines uint8_t as typedef of fl::u8
+    "cstdint.h",  # fl/stl/cstdint.h - C language type definitions
+}
 
 # Mapping of stdint types to FastLED equivalents
 STDINT_TO_FL: dict[str, str] = {
@@ -116,21 +123,30 @@ def _find_stdint_matches(code_part: str) -> list[str]:
 
 
 class StdintTypeChecker(FileContentChecker):
-    """Checker that flags stdint types (uint32_t, etc.) in ESP32 platform files."""
+    """Checker that flags stdint types (uint32_t, etc.) in platform files."""
 
     def __init__(self) -> None:
         self.violations: dict[str, list[tuple[int, str]]] = {}
 
     def should_process_file(self, file_path: str) -> bool:
-        """Only process C++ files under src/platforms/esp/32/."""
+        """Process C++ files under checked platform and src directories."""
         normalized = _normalize_path(file_path)
-
-        # Must be under platforms/esp/32/
-        if "/platforms/esp/32/" not in normalized:
-            return False
 
         # Only C++ source/header files
         if not normalized.endswith((".cpp", ".h", ".hpp", ".cpp.hpp")):
+            return False
+
+        # Check excluded filenames (type definition files)
+        filename = normalized.rsplit("/", 1)[-1] if "/" in normalized else normalized
+        if filename in _EXCLUDED_FILENAMES:
+            return False
+
+        # Must be under src/ directory
+        if "/src/" not in normalized:
+            return False
+
+        # Exclude third-party/vendor code
+        if any(d in normalized for d in _EXCLUDED_DIRS):
             return False
 
         return True
@@ -145,26 +161,45 @@ class StdintTypeChecker(FileContentChecker):
         in_multiline_comment = False
 
         for line_number, line in enumerate(file_content.lines, 1):
-            # Track multi-line comment state
-            if "/*" in line:
-                in_multiline_comment = True
-            if "*/" in line:
-                in_multiline_comment = False
-                continue
-
-            if in_multiline_comment:
-                continue
-
             # Fast bail: all stdint types contain "int"
-            if "int" not in line:
+            if (
+                not in_multiline_comment
+                and "int" not in line
+                and "/*" not in line
+                and "*/" not in line
+            ):
                 continue
 
-            # Skip full-line comments without allocating a strip() copy
+            # Skip full-line comments (before multiline comment tracking
+            # to avoid false multiline triggers from /* inside // comments)
             i = 0
             n = len(line)
             while i < n and (line[i] == " " or line[i] == "\t"):
                 i += 1
-            if i + 1 < n and line[i] == "/" and line[i + 1] == "/":
+            is_line_comment = i + 1 < n and line[i] == "/" and line[i + 1] == "/"
+
+            if is_line_comment and not in_multiline_comment:
+                continue
+
+            # Track multi-line comment state using only the code portion
+            # (exclude text after // to avoid false triggers from /* in comments)
+            if in_multiline_comment:
+                if "*/" in line:
+                    in_multiline_comment = False
+                continue
+
+            code_for_comment_tracking = line.split("//", 1)[0]
+            if "/*" in code_for_comment_tracking:
+                # Check if the comment closes on the same line (inline comment)
+                open_pos = code_for_comment_tracking.index("/*")
+                close_pos = code_for_comment_tracking.find("*/", open_pos + 2)
+                if close_pos == -1:
+                    # True multiline comment start - skip rest of line
+                    in_multiline_comment = True
+                    continue
+
+            # Fast bail: all stdint types contain "int"
+            if "int" not in line:
                 continue
 
             # Remove trailing comment before checking
@@ -193,11 +228,13 @@ def main() -> None:
     """Run stdint type checker standalone."""
     from ci.util.check_files import run_checker_standalone
 
+    # Check all of src/ (checker's should_process_file excludes third_party/)
+    target_dirs = [str(PROJECT_ROOT / "src")]
     checker = StdintTypeChecker()
     run_checker_standalone(
         checker,
-        [str(ESP32_ROOT_SRC)],
-        "Found stdint types in ESP32 platform files (use u8/u16/u32/i8/i16/i32 instead)",
+        target_dirs,
+        "Found stdint types in checked files (use u8/u16/u32/i8/i16/i32 instead)",
     )
 
 

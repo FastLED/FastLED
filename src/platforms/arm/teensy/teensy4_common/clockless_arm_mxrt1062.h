@@ -23,21 +23,21 @@ class ClocklessController_BitBang : public CPixelLEDController<RGB_ORDER> {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
 
-	static constexpr uint32_t T1 = TIMING::T1;
-	static constexpr uint32_t T2 = TIMING::T2;
-	static constexpr uint32_t T3 = TIMING::T3;
+	static constexpr u32 T1 = TIMING::T1;
+	static constexpr u32 T2 = TIMING::T2;
+	static constexpr u32 T3 = TIMING::T3;
 
 	data_t mPinMask;
 	data_ptr_t mPort;
 	CMinWait<WAIT_TIME> mWait;
-	uint32_t off[3];
+	u32 off[3];
 
 public:
 	using __TIMING = TIMING;
 	static constexpr int __DATA_PIN() { return DATA_PIN; }
-	static constexpr uint32_t __T1() { return T1; }
-	static constexpr uint32_t __T2() { return T2; }
-	static constexpr uint32_t __T3() { return T3; }
+	static constexpr u32 __T1() { return T1; }
+	static constexpr u32 __T2() { return T2; }
+	static constexpr u32 __T3() { return T3; }
 	static constexpr EOrder __RGB_ORDER() { return RGB_ORDER; }
 	static constexpr int __XTRA0() { return XTRA0; }
 	static constexpr bool __FLIP() { return FLIP; }
@@ -50,7 +50,7 @@ public:
     	FastPin<DATA_PIN>::lo();
 	}
 
-	virtual uint16_t getMaxRefreshRate() const { return 400; }
+	virtual u16 getMaxRefreshRate() const { return 400; }
 
 protected:
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
@@ -62,8 +62,8 @@ protected:
     	mWait.mark();
   	}
 
-	template<int BITS> __attribute__ ((always_inline)) inline void writeBits(FASTLED_REGISTER uint32_t & next_mark, FASTLED_REGISTER uint32_t & b)  {
-		for(FASTLED_REGISTER uint32_t i = BITS-1; i > 0; --i) {
+	template<int BITS> __attribute__ ((always_inline)) inline void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER u32 & b)  {
+		for(FASTLED_REGISTER u32 i = BITS-1; i > 0; --i) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + off[0];
 			FastPin<DATA_PIN>::hi();
@@ -90,12 +90,12 @@ protected:
 		}
 	}
 
-	uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels) {
-		uint32_t start = ARM_DWT_CYCCNT;
+	u32 showRGBInternal(PixelController<RGB_ORDER> pixels) {
+		u32 start = ARM_DWT_CYCCNT;
 
 		// Setup the pixel controller and load/scale the first byte
 		pixels.preStepFirstByteDithering();
-		FASTLED_REGISTER uint32_t b = pixels.loadAndScale0();
+		FASTLED_REGISTER u32 b = pixels.loadAndScale0();
 
 		cli();
 
@@ -103,9 +103,9 @@ protected:
 		off[1] = _FASTLED_NS_TO_DWT(T2+T3);
 		off[2] = _FASTLED_NS_TO_DWT(T3);
 
-	uint32_t wait_off = _FASTLED_NS_TO_DWT((WAIT_TIME-INTERRUPT_THRESHOLD)*1000);
+	u32 wait_off = _FASTLED_NS_TO_DWT((WAIT_TIME-INTERRUPT_THRESHOLD)*1000);
 
-    	uint32_t next_mark = ARM_DWT_CYCCNT + off[0];
+    	u32 next_mark = ARM_DWT_CYCCNT + off[0];
 
 		while(pixels.has(1)) {
 			pixels.stepDithering();

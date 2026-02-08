@@ -344,28 +344,28 @@ struct alignas(64) ParlioIsrContext {
 
     // Diagnostic counters (ISR writes, main reads after barrier)
     // Note: Using simple increment operations, synchronized via memory barrier
-    uint32_t isr_count;             ///< ISR callback invocation count
-    uint32_t bytes_transmitted;     ///< Total bytes transmitted this frame
-    uint32_t chunks_completed;      ///< Number of chunks completed this frame
+    u32 isr_count;             ///< ISR callback invocation count
+    u32 bytes_transmitted;     ///< Total bytes transmitted this frame
+    u32 chunks_completed;      ///< Number of chunks completed this frame
 
     // Phase 0: Buffer accounting for simplified ISR
-    uint32_t buffers_submitted;         ///< Total buffers submitted to hardware (main thread writes)
-    volatile uint32_t buffers_completed; ///< ISR increments, CPU polls (volatile required per LOOP.md line 34)
-    uint32_t buffers_total;             ///< Total buffers for entire transmission (main thread sets)
+    u32 buffers_submitted;         ///< Total buffers submitted to hardware (main thread writes)
+    volatile u32 buffers_completed; ///< ISR increments, CPU polls (volatile required per LOOP.md line 34)
+    u32 buffers_total;             ///< Total buffers for entire transmission (main thread sets)
 
     // ISR Debug Counters (Iteration 1: diagnose why ISR not submitting buffers)
-    volatile uint32_t isr_submit_attempted; ///< ISR attempted to submit buffer
-    volatile uint32_t isr_submit_success;   ///< ISR successfully submitted buffer
-    volatile uint32_t isr_submit_failed;    ///< ISR failed to submit buffer
-    volatile uint32_t isr_ring_empty;       ///< ISR found ring empty (read_ptr == write_ptr)
-    volatile uint32_t isr_all_buffers_done; ///< ISR detected all buffers completed
+    volatile u32 isr_submit_attempted; ///< ISR attempted to submit buffer
+    volatile u32 isr_submit_success;   ///< ISR successfully submitted buffer
+    volatile u32 isr_submit_failed;    ///< ISR failed to submit buffer
+    volatile u32 isr_ring_empty;       ///< ISR found ring empty (read_ptr == write_ptr)
+    volatile u32 isr_all_buffers_done; ///< ISR detected all buffers completed
 
     // Diagnostic fields (written by ISR, read by main thread after barrier)
     bool transmission_active;       ///< Debug: Transmission currently active
     uint64_t end_time_us;           ///< Debug: Transmission end timestamp (microseconds)
 
     // Debug: DMA buffer output tracking (main thread writes, Validation.ino reads)
-    fl::deque<uint8_t> mDebugDmaOutput; ///< Copy of all DMA buffer data for validation (uses deque to avoid large contiguous allocation)
+    fl::deque<u8> mDebugDmaOutput; ///< Copy of all DMA buffer data for validation (uses deque to avoid large contiguous allocation)
 
     // Constructor: Initialize all fields to safe defaults
     ParlioIsrContext()
@@ -496,7 +496,7 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
     size_t mDataWidth;
 
     /// @brief Scratch buffer for per-lane data layout (owned by channel engine)
-    fl::vector<uint8_t> mScratchBuffer;
+    fl::vector<u8> mScratchBuffer;
 
     /// @brief Internal state management for IChannelEngine interface
     fl::vector<ChannelDataPtr>
@@ -632,12 +632,12 @@ struct ParlioDebugMetrics {
         mStartTimeUs; ///< Timestamp when transmission begins (microseconds)
     uint64_t
         mEndTimeUs; ///< Timestamp when transmission completes (microseconds)
-    uint32_t mIsrCount;        ///< Number of ISR callbacks fired
-    uint32_t mChunksQueued;    ///< Number of chunks queued for transmission
-    uint32_t mChunksCompleted; ///< Number of chunks that completed transmission
-    uint32_t mBytesTotal;      ///< Total bytes expected to transmit
-    uint32_t mBytesTransmitted; ///< Total bytes actually transmitted
-    uint32_t mErrorCode;        ///< ESP-IDF error code (0 = success)
+    u32 mIsrCount;        ///< Number of ISR callbacks fired
+    u32 mChunksQueued;    ///< Number of chunks queued for transmission
+    u32 mChunksCompleted; ///< Number of chunks that completed transmission
+    u32 mBytesTotal;      ///< Total bytes expected to transmit
+    u32 mBytesTransmitted; ///< Total bytes actually transmitted
+    u32 mErrorCode;        ///< ESP-IDF error code (0 = success)
     bool mTransmissionActive;   ///< True if transmission is in progress
 };
 

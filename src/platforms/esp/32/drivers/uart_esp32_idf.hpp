@@ -23,7 +23,7 @@ namespace fl {
 // ============================================================================
 
 static uart_port_t convertPort(UartPort port) {
-    return static_cast<uart_port_t>(static_cast<uint8_t>(port));
+    return static_cast<uart_port_t>(static_cast<u8>(port));
 }
 
 static uart_word_length_t convertDataBits(UartDataBits bits) {
@@ -74,13 +74,13 @@ static int convertIntrFlags(UartIntrPriority priority, UartIntrFlags flags) {
     esp_flags |= (1 << level);
 
     // Add IRAM flag if requested (ESP_INTR_FLAG_IRAM = 0x400)
-    bool use_iram = (static_cast<uint8_t>(flags) & static_cast<uint8_t>(UartIntrFlags::IRAM)) != 0;
+    bool use_iram = (static_cast<u8>(flags) & static_cast<u8>(UartIntrFlags::IRAM)) != 0;
     if (use_iram) {
         esp_flags |= ESP_INTR_FLAG_IRAM;
     }
 
     // Add SHARED flag if requested (ESP_INTR_FLAG_SHARED = 0x800)
-    bool use_shared = (static_cast<uint8_t>(flags) & static_cast<uint8_t>(UartIntrFlags::SHARED)) != 0;
+    bool use_shared = (static_cast<u8>(flags) & static_cast<u8>(UartIntrFlags::SHARED)) != 0;
     if (use_shared) {
         esp_flags |= ESP_INTR_FLAG_SHARED;
     }
@@ -259,7 +259,7 @@ bool UartEsp32::initDriver() {
     uart_config.parity = convertParity(mConfig.parity);
     uart_config.stop_bits = convertStopBits(mConfig.stopBits);
     uart_config.flow_ctrl = convertFlowControl(mConfig.flowControl);
-    uart_config.rx_flow_ctrl_thresh = static_cast<uint8_t>(mConfig.rxFlowControlThresh);
+    uart_config.rx_flow_ctrl_thresh = static_cast<u8>(mConfig.rxFlowControlThresh);
 
     // Set clock source (version-dependent field)
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0)
@@ -290,7 +290,7 @@ bool UartEsp32::initDriver() {
     // Configure signal inversion if requested
     if (mConfig.signalInvert.txInvert || mConfig.signalInvert.rxInvert ||
         mConfig.signalInvert.rtsInvert || mConfig.signalInvert.ctsInvert) {
-        uint32_t inv_mask = 0;
+        u32 inv_mask = 0;
         if (mConfig.signalInvert.txInvert)  inv_mask |= UART_SIGNAL_TXD_INV;
         if (mConfig.signalInvert.rxInvert)  inv_mask |= UART_SIGNAL_RXD_INV;
         if (mConfig.signalInvert.rtsInvert) inv_mask |= UART_SIGNAL_RTS_INV;
@@ -369,7 +369,7 @@ void UartEsp32::write(const char* str) {
     }
 }
 
-size_t UartEsp32::write(const uint8_t* buffer, size_t size) {
+size_t UartEsp32::write(const u8* buffer, size_t size) {
     if (!buffer || size == 0)
         return 0;
 
@@ -433,7 +433,7 @@ int UartEsp32::read() {
     }
 
     uart_port_t port = static_cast<uart_port_t>(mPortInt);
-    uint8_t c = 0;
+    u8 c = 0;
     int len = uart_read_bytes(port, &c, 1, 0);  // timeout=0 (non-blocking)
 
     if (len == 1) {
@@ -443,7 +443,7 @@ int UartEsp32::read() {
     }
 }
 
-bool UartEsp32::flush(uint32_t timeoutMs) {
+bool UartEsp32::flush(u32 timeoutMs) {
     if (!mBuffered) {
         return false;  // Driver not installed, cannot flush
     }

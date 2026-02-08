@@ -11,7 +11,7 @@
 namespace fl {
 
 #if (!defined(NO_CLOCK_CORRECTION) || (NO_CLOCK_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
-uint8_t gTimeErrorAccum256ths = 0;
+u8 gTimeErrorAccum256ths = 0;
 #endif
 
 }  // namespace fl

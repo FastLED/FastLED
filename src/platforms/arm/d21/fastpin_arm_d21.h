@@ -16,10 +16,10 @@ namespace fl {
 /// that something about the way gcc does register allocation results in the bit-band code being slower.  It will need more fine tuning.
 /// The registers are data output, set output, clear output, toggle output, input, and direction
 
-template<uint8_t PIN, uint8_t _BIT, uint32_t _MASK, int _GRP> class _ARMPIN : public ValidPinBase {
+template<u8 PIN, u8 _BIT, u32 _MASK, int _GRP> class _ARMPIN : public ValidPinBase {
 public:
-    typedef volatile uint32_t * port_ptr_t;
-    typedef uint32_t port_t;
+    typedef volatile u32 * port_ptr_t;
+    typedef u32 port_t;
 
     #if 0
     inline static void setOutput() {

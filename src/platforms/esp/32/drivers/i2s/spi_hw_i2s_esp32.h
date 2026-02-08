@@ -142,7 +142,7 @@ public:
     /// @param timeout_ms Maximum time to wait in milliseconds (fl::numeric_limits<uint32_t>::max() = infinite)
     /// @returns true if completed successfully, false on timeout
     /// @note Uses FreeRTOS semaphore for efficient blocking
-    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max()) override;
+    bool waitComplete(u32 timeout_ms = fl::numeric_limits<u32>::max()) override;
 
     /// @brief Check if a transmission is currently in progress
     /// @returns true if busy, false if idle
@@ -176,13 +176,13 @@ private:
     /// @param size Buffer size in bytes
     /// @returns Pointer to buffer, or nullptr on failure
     /// @note Tries PSRAM+DMA first (ESP32-S3 EDMA), falls back to internal DMA RAM
-    uint8_t* allocate_dma_buffer(size_t size);
+    u8* allocate_dma_buffer(size_t size);
 
     /// @brief Calculate clock dividers for target frequency
     /// @param target_hz Target clock frequency in Hz
     /// @returns Clock frequency in MHz (for Yves driver API)
     /// @note ESP32 I2S base clock is 80 MHz (PLL_D2_CLK)
-    int calculate_clock_mhz(uint32_t target_hz);
+    int calculate_clock_mhz(u32 target_hz);
 
     /// @brief Count active lanes from Config struct
     /// @param config Configuration with data0_pin through data15_pin
@@ -199,12 +199,12 @@ private:
     // ========================================================================
 
     I2SClockBasedLedDriver mDriver;      ///< Yves' I2S driver instance
-    uint8_t* mInterleavedBuffer;        ///< Interleaved buffer for Yves driver
+    u8* mInterleavedBuffer;        ///< Interleaved buffer for Yves driver
     size_t mBufferSize;                 ///< Size of interleaved buffer in bytes
     DMABuffer mCurrentBuffer;           ///< Current DMABuffer from acquireDMABuffer() (data copied to mInterleavedBuffer in transmit())
     fl::vector<int> mDataPins;          ///< Copy of data pin numbers
     int mClockPin;                      ///< Clock pin number
-    uint32_t mClockSpeedHz;            ///< Clock speed in Hz
+    u32 mClockSpeedHz;            ///< Clock speed in Hz
     int mNumStrips;                     ///< Number of strips (lane count)
     int mNumLedsPerStrip;             ///< Number of LEDs per strip (0 until first write)
     int mBusId;                         ///< Bus ID (always 0 for I2S0)

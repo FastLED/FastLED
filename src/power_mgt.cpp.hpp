@@ -54,14 +54,14 @@ static PowerModelRGB gPowerModel;  // Uses default constructor: R=80, G=55, B=75
 
 
 // Power consumed by the MCU
-static const uint8_t gMCU_mW  =  25 * 5; // 25mA @ 5v = 125 mW
+static const fl::u8 gMCU_mW  =  25 * 5; // 25mA @ 5v = 125 mW
 
-static uint8_t  gMaxPowerIndicatorLEDPinNumber = 0; // default = Arduino onboard LED pin.  set to zero to skip this.
+static fl::u8  gMaxPowerIndicatorLEDPinNumber = 0; // default = Arduino onboard LED pin.  set to zero to skip this.
 
 
 // Span-based version (primary implementation)
-uint32_t calculate_unscaled_power_mW(fl::span<const CRGB> leds) {
-    uint32_t red32 = 0, green32 = 0, blue32 = 0;
+fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds) {
+    fl::u32 red32 = 0, green32 = 0, blue32 = 0;
 
     // Iterate using span's safe indexing
     for(size_t i = 0; i < leds.size(); i++) {
@@ -78,30 +78,30 @@ uint32_t calculate_unscaled_power_mW(fl::span<const CRGB> leds) {
     green32 >>= 8;
     blue32  >>= 8;
 
-    uint32_t total = red32 + green32 + blue32 + (gPowerModel.dark_mW * leds.size());
+    fl::u32 total = red32 + green32 + blue32 + (gPowerModel.dark_mW * leds.size());
 
     return total;
 }
 
 // Pointer-based version (delegates to span version)
-uint32_t calculate_unscaled_power_mW( const CRGB* ledbuffer, uint16_t numLeds ) //25354
+fl::u32 calculate_unscaled_power_mW( const CRGB* ledbuffer, fl::u16 numLeds ) //25354
 {
     return calculate_unscaled_power_mW(fl::span<const CRGB>(ledbuffer, numLeds));
 }
 
 
-uint8_t calculate_max_brightness_for_power_vmA(const CRGB* ledbuffer, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_V, uint32_t max_power_mA) {
+fl::u8 calculate_max_brightness_for_power_vmA(const CRGB* ledbuffer, fl::u16 numLeds, fl::u8 target_brightness, fl::u32 max_power_V, fl::u32 max_power_mA) {
 	return calculate_max_brightness_for_power_mW(ledbuffer, numLeds, target_brightness, max_power_V * max_power_mA);
 }
 
-uint8_t calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_mW) {
- 	uint32_t total_mW = calculate_unscaled_power_mW( ledbuffer, numLeds);
+fl::u8 calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, fl::u16 numLeds, fl::u8 target_brightness, fl::u32 max_power_mW) {
+ 	fl::u32 total_mW = calculate_unscaled_power_mW( ledbuffer, numLeds);
 
-	uint32_t requested_power_mW = fl::scale32by8(total_mW, target_brightness);
+	fl::u32 requested_power_mW = fl::scale32by8(total_mW, target_brightness);
 
-	uint8_t recommended_brightness = target_brightness;
+	fl::u8 recommended_brightness = target_brightness;
 	if(requested_power_mW > max_power_mW) { 
-        recommended_brightness = (uint32_t)((uint8_t)(target_brightness) * (uint32_t)(max_power_mW)) / ((uint32_t)(requested_power_mW));
+        recommended_brightness = (fl::u32)((fl::u8)(target_brightness) * (fl::u32)(max_power_mW)) / ((fl::u32)(requested_power_mW));
 	}
 
 	return recommended_brightness;
@@ -110,9 +110,9 @@ uint8_t calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, uint16_t nu
 // sets brightness to
 //  - no more than target_brightness
 //  - no more than max_mW milliwatts
-uint8_t calculate_max_brightness_for_power_mW( uint8_t target_brightness, fl::u32 max_power_mW)
+fl::u8 calculate_max_brightness_for_power_mW( fl::u8 target_brightness, fl::u32 max_power_mW)
 {
-    uint32_t total_mW = gMCU_mW;
+    fl::u32 total_mW = gMCU_mW;
 
     CLEDController *pCur = CLEDController::head();
 	while(pCur) {
@@ -125,7 +125,7 @@ uint8_t calculate_max_brightness_for_power_mW( uint8_t target_brightness, fl::u3
     Serial.println( total_mW);
 #endif
 
-    uint32_t requested_power_mW = fl::scale32by8(total_mW, target_brightness);
+    fl::u32 requested_power_mW = fl::scale32by8(total_mW, target_brightness);
 #if POWER_DEBUG_PRINT == 1
     if( target_brightness != 255 ) {
         Serial.print("power demand at scaled brightness mW = ");
@@ -147,12 +147,12 @@ uint8_t calculate_max_brightness_for_power_mW( uint8_t target_brightness, fl::u3
         return target_brightness;
     }
 
-    uint8_t recommended_brightness = (uint32_t)((uint8_t)(target_brightness) * (uint32_t)(max_power_mW)) / ((uint32_t)(requested_power_mW));
+    fl::u8 recommended_brightness = (fl::u32)((fl::u8)(target_brightness) * (fl::u32)(max_power_mW)) / ((fl::u32)(requested_power_mW));
 #if POWER_DEBUG_PRINT == 1
     Serial.print("recommended brightness # = ");
     Serial.println( recommended_brightness);
 
-    uint32_t resultant_power_mW = (total_mW * recommended_brightness) / 256;
+    fl::u32 resultant_power_mW = (total_mW * recommended_brightness) / 256;
     Serial.print("resultant power demand mW = ");
     Serial.println( resultant_power_mW);
 
@@ -168,7 +168,7 @@ uint8_t calculate_max_brightness_for_power_mW( uint8_t target_brightness, fl::u3
     return recommended_brightness;
 }
 
-void set_max_power_indicator_LED( uint8_t pinNumber)
+void set_max_power_indicator_LED( fl::u8 pinNumber)
 {
     gMaxPowerIndicatorLEDPinNumber = pinNumber;
 }

@@ -6,11 +6,11 @@
 #include "fl/chipsets/timing_traits.h"
 namespace fl {
 // ARM Cortex-M33 DWT (Data Watchpoint and Trace) registers for cycle-accurate timing
-#define ARM_DEMCR               (*(volatile uint32_t *)0xE000EDFC) // Debug Exception and Monitor Control
+#define ARM_DEMCR               (*(volatile u32 *)0xE000EDFC) // Debug Exception and Monitor Control
 #define ARM_DEMCR_TRCENA                (1 << 24)        // Enable debugging & monitoring blocks
-#define ARM_DWT_CTRL            (*(volatile uint32_t *)0xE0001000) // DWT control register
+#define ARM_DWT_CTRL            (*(volatile u32 *)0xE0001000) // DWT control register
 #define ARM_DWT_CTRL_CYCCNTENA          (1 << 0)                // Enable cycle count
-#define ARM_DWT_CYCCNT          (*(volatile uint32_t *)0xE0001004) // Cycle count register
+#define ARM_DWT_CYCCNT          (*(volatile u32 *)0xE0001004) // Cycle count register
 
 // Enable clockless LED support for MGM240
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
@@ -42,15 +42,15 @@ namespace fl {
 /// @tparam FLIP Bit order flip flag
 /// @tparam WAIT_TIME Minimum wait time between updates (microseconds)
 
-template <uint8_t DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+template <u8 DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     // Extract timing values from ChipsetTiming struct and convert from nanoseconds to clock cycles
     // Formula: cycles = (nanoseconds * CPU_MHz + 500) / 1000
     // The +500 provides rounding to nearest integer
     // MGM240 uses DWT cycle counter at F_CPU (39MHz or 78MHz)
-    static constexpr uint32_t T1 = (TIMING::T1 * (F_CPU / 1000000UL) + 500) / 1000;
-    static constexpr uint32_t T2 = (TIMING::T2 * (F_CPU / 1000000UL) + 500) / 1000;
-    static constexpr uint32_t T3 = (TIMING::T3 * (F_CPU / 1000000UL) + 500) / 1000;
+    static constexpr u32 T1 = (TIMING::T1 * (F_CPU / 1000000UL) + 500) / 1000;
+    static constexpr u32 T2 = (TIMING::T2 * (F_CPU / 1000000UL) + 500) / 1000;
+    static constexpr u32 T3 = (TIMING::T3 * (F_CPU / 1000000UL) + 500) / 1000;
 
     typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
     typedef typename FastPin<DATA_PIN>::port_t data_t;
@@ -70,7 +70,7 @@ public:
 
     /// @brief Get maximum refresh rate in Hz
     /// @return Maximum safe refresh rate (400 Hz for most applications)
-    virtual uint16_t getMaxRefreshRate() const { return 400; }
+    virtual u16 getMaxRefreshRate() const { return 400; }
 
 protected:
     /// @brief Output pixel data to LED strip
@@ -94,8 +94,8 @@ protected:
     /// @param hi Port value with data pin high
     /// @param lo Port value with data pin low
     /// @param b Reference to byte containing bits to send (MSB first)
-    template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER uint32_t & next_mark, FASTLED_REGISTER data_ptr_t port, FASTLED_REGISTER data_t hi, FASTLED_REGISTER data_t lo, FASTLED_REGISTER uint8_t & b)  {
-        for(FASTLED_REGISTER uint32_t i = BITS-1; i > 0; --i) {
+    template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER data_ptr_t port, FASTLED_REGISTER data_t hi, FASTLED_REGISTER data_t lo, FASTLED_REGISTER u8 & b)  {
+        for(FASTLED_REGISTER u32 i = BITS-1; i > 0; --i) {
             while(ARM_DWT_CYCCNT < next_mark);
             next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
             FastPin<DATA_PIN>::fastset(port, hi);
@@ -125,7 +125,7 @@ protected:
     /// @brief Internal RGB data output with DWT cycle-accurate timing
     /// @param pixels Pixel controller with RGB data
     /// @return DWT cycle count when completed (0 if interrupted)
-    static uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels) {
+    static u32 showRGBInternal(PixelController<RGB_ORDER> pixels) {
         // Enable ARM DWT cycle counter for precise timing
         ARM_DEMCR    |= ARM_DEMCR_TRCENA;
         ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
@@ -138,10 +138,10 @@ protected:
 
         // Setup the pixel controller and load/scale the first byte
         pixels.preStepFirstByteDithering();
-        FASTLED_REGISTER uint8_t b = pixels.loadAndScale0();
+        FASTLED_REGISTER u8 b = pixels.loadAndScale0();
 
         cli();
-        uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
+        u32 next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 
         while(pixels.has(1)) {
             pixels.stepDithering();

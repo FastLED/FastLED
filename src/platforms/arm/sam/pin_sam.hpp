@@ -47,11 +47,11 @@ using ::fl::AdcRange;
 namespace detail {
     // Pin mapping helper - converts Arduino pin number to (PIO controller, bit mask)
     // Returns nullptr for invalid pins
-    inline Pio* getPioController(int pin, uint32_t& mask);
+    inline Pio* getPioController(int pin, u32& mask);
 }
 
 inline void pinMode(int pin, PinMode mode) {
-    uint32_t mask;
+    u32 mask;
     Pio* pio = detail::getPioController(pin, mask);
     if (!pio) return;
 
@@ -81,7 +81,7 @@ inline void pinMode(int pin, PinMode mode) {
 }
 
 inline void digitalWrite(int pin, PinValue val) {
-    uint32_t mask;
+    u32 mask;
     Pio* pio = detail::getPioController(pin, mask);
     if (!pio) return;
 
@@ -93,7 +93,7 @@ inline void digitalWrite(int pin, PinValue val) {
 }
 
 inline PinValue digitalRead(int pin) {
-    uint32_t mask;
+    u32 mask;
     Pio* pio = detail::getPioController(pin, mask);
     if (!pio) return PinValue::Low;
 
@@ -101,7 +101,7 @@ inline PinValue digitalRead(int pin) {
     return (pio->PIO_PDSR & mask) ? PinValue::High : PinValue::Low;
 }
 
-inline uint16_t analogRead(int pin) {
+inline u16 analogRead(int pin) {
     // ADC implementation requires complex peripheral configuration
     // For now, use stub - full implementation would require:
     // 1. Enable ADC peripheral clock via PMC
@@ -113,7 +113,7 @@ inline uint16_t analogRead(int pin) {
     return 0;
 }
 
-inline void analogWrite(int pin, uint16_t val) {
+inline void analogWrite(int pin, u16 val) {
     // PWM implementation requires complex peripheral configuration
     // For now, use stub - full implementation would require:
     // 1. Enable PWM peripheral clock via PMC
@@ -124,7 +124,7 @@ inline void analogWrite(int pin, uint16_t val) {
     (void)val;
 }
 
-inline void setPwm16(int pin, uint16_t val) {
+inline void setPwm16(int pin, u16 val) {
     // 16-bit PWM would configure SAM3X8E PWM controller with CPRD=65535
     // For now, delegate to analogWrite stub
     analogWrite(pin, val);
@@ -144,7 +144,7 @@ namespace detail {
 
 // Pin mapping table: converts Arduino pin numbers to (PIO controller, bit position)
 // Based on Arduino Due pin mapping from fastpin_arm_sam.h
-inline Pio* getPioController(int pin, uint32_t& mask) {
+inline Pio* getPioController(int pin, u32& mask) {
     // Arduino Due pin mapping (from fastpin_arm_sam.h)
     // Format: pin -> (controller, bit)
     switch (pin) {

@@ -47,7 +47,7 @@ struct MockChannel {
 struct MockEncoder {
     int id;
     ChipsetTiming timing;
-    uint32_t resolution_hz;
+    u32 resolution_hz;
 
     MockEncoder()
         : id(0), timing(), resolution_hz(0) {}
@@ -80,10 +80,10 @@ public:
     bool enableChannel(void* channel_handle) override;
     bool disableChannel(void* channel_handle) override;
     bool transmit(void* channel_handle, void* encoder_handle,
-                  const uint8_t* buffer, size_t buffer_size) override;
-    bool waitAllDone(void* channel_handle, uint32_t timeout_ms) override;
+                  const u8* buffer, size_t buffer_size) override;
+    bool waitAllDone(void* channel_handle, u32 timeout_ms) override;
     void* createEncoder(const ChipsetTiming& timing,
-                        uint32_t resolution_hz) override;
+                        u32 resolution_hz) override;
     void deleteEncoder(void* encoder_handle) override;
     bool resetEncoder(void* encoder_handle) override;
     bool registerTxCallback(void* channel_handle,
@@ -91,8 +91,8 @@ public:
                             void* user_ctx) override;
     void configureLogging() override;
     bool syncCache(void* buffer, size_t size) override;
-    uint8_t* allocateDmaBuffer(size_t size) override;
-    void freeDmaBuffer(uint8_t* buffer) override;
+    u8* allocateDmaBuffer(size_t size) override;
+    void freeDmaBuffer(u8* buffer) override;
 
     //=========================================================================
     // Mock-Specific API
@@ -102,7 +102,7 @@ public:
     void setTransmitFailure(bool should_fail) override;
     const fl::vector<TransmissionRecord>& getTransmissionHistory() const override;
     void clearTransmissionHistory() override;
-    fl::span<const uint8_t> getLastTransmissionData() const override;
+    fl::span<const u8> getLastTransmissionData() const override;
     size_t getChannelCount() const override;
     size_t getEncoderCount() const override;
     size_t getTransmissionCount() const override;
@@ -301,7 +301,7 @@ bool Rmt5PeripheralMockImpl::disableChannel(void* channel_handle) {
 //=============================================================================
 
 bool Rmt5PeripheralMockImpl::transmit(void* channel_handle, void* encoder_handle,
-                                       const uint8_t* buffer, size_t buffer_size) {
+                                       const u8* buffer, size_t buffer_size) {
     // Error injection
     if (mShouldFailTransmit) {
         FL_WARN("Rmt5PeripheralMock: Transmit failure injected");
@@ -355,7 +355,7 @@ bool Rmt5PeripheralMockImpl::transmit(void* channel_handle, void* encoder_handle
     return true;
 }
 
-bool Rmt5PeripheralMockImpl::waitAllDone(void* channel_handle, uint32_t timeout_ms) {
+bool Rmt5PeripheralMockImpl::waitAllDone(void* channel_handle, u32 timeout_ms) {
     (void)timeout_ms;  // Mock always returns immediately
 
     MockChannel* channel = findChannel(channel_handle);
@@ -412,7 +412,7 @@ bool Rmt5PeripheralMockImpl::syncCache(void* buffer, size_t size) {
 //=============================================================================
 
 void* Rmt5PeripheralMockImpl::createEncoder(const ChipsetTiming& timing,
-                                              uint32_t resolution_hz) {
+                                              u32 resolution_hz) {
     // Create mock encoder
     int encoder_id = mNextEncoderId++;
     MockEncoder* encoder = new MockEncoder();
@@ -460,7 +460,7 @@ bool Rmt5PeripheralMockImpl::resetEncoder(void* encoder_handle) {
 // DMA Memory Management
 //=============================================================================
 
-uint8_t* Rmt5PeripheralMockImpl::allocateDmaBuffer(size_t size) {
+u8* Rmt5PeripheralMockImpl::allocateDmaBuffer(size_t size) {
     if (size == 0) {
         FL_WARN("Rmt5PeripheralMock: Cannot allocate zero-size buffer");
         return nullptr;
@@ -472,9 +472,9 @@ uint8_t* Rmt5PeripheralMockImpl::allocateDmaBuffer(size_t size) {
 
     // Allocate aligned memory
     #ifdef FL_IS_WIN
-    uint8_t* buffer = static_cast<uint8_t*>(_aligned_malloc(aligned_size, alignment));
+    u8* buffer = static_cast<u8*>(_aligned_malloc(aligned_size, alignment));
     #else
-    uint8_t* buffer = static_cast<uint8_t*>(aligned_alloc(alignment, aligned_size));
+    u8* buffer = static_cast<u8*>(aligned_alloc(alignment, aligned_size));
     #endif
 
     if (buffer == nullptr) {
@@ -487,7 +487,7 @@ uint8_t* Rmt5PeripheralMockImpl::allocateDmaBuffer(size_t size) {
     return buffer;
 }
 
-void Rmt5PeripheralMockImpl::freeDmaBuffer(uint8_t* buffer) {
+void Rmt5PeripheralMockImpl::freeDmaBuffer(u8* buffer) {
     if (buffer == nullptr) {
         return;  // Safe no-op
     }
@@ -537,12 +537,12 @@ void Rmt5PeripheralMockImpl::clearTransmissionHistory() {
     FL_DBG("RMT5_MOCK: Cleared transmission history");
 }
 
-fl::span<const uint8_t> Rmt5PeripheralMockImpl::getLastTransmissionData() const {
+fl::span<const u8> Rmt5PeripheralMockImpl::getLastTransmissionData() const {
     if (mHistory.empty()) {
-        return fl::span<const uint8_t>();
+        return fl::span<const u8>();
     }
     const auto& last = mHistory.back();
-    return fl::span<const uint8_t>(last.buffer_copy.data(), last.buffer_copy.size());
+    return fl::span<const u8>(last.buffer_copy.data(), last.buffer_copy.size());
 }
 
 size_t Rmt5PeripheralMockImpl::getChannelCount() const {

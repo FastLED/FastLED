@@ -7,12 +7,12 @@ namespace fl {
 // RMT item structure (compatible with RMT4)
 union rmt_item32_t {
     struct {
-        uint32_t duration0 : 15;
-        uint32_t level0 : 1;
-        uint32_t duration1 : 15;
-        uint32_t level1 : 1;
+        u32 duration0 : 15;
+        u32 level0 : 1;
+        u32 duration1 : 15;
+        u32 level1 : 1;
     };
-    uint32_t val;
+    u32 val;
 };
 
 // Nibble lookup table: 16 nibbles (0x0-0xF), each mapping to 4 RMT items
@@ -28,7 +28,7 @@ typedef rmt_item32_t rmt_nibble_lut_t[16][4];
  * @param zero_val RMT item value for '0' bit (uint32_t)
  * @param one_val RMT item value for '1' bit (uint32_t)
  */
-inline void buildNibbleLut(rmt_nibble_lut_t& lut, uint32_t zero_val, uint32_t one_val) {
+inline void buildNibbleLut(rmt_nibble_lut_t& lut, u32 zero_val, u32 one_val) {
     for (int nibble = 0; nibble < 16; nibble++) {
         // Nibble LUT: MSB first (bit 3 → bit 2 → bit 1 → bit 0)
         lut[nibble][0].val = (nibble & 0x8) ? one_val : zero_val;  // bit 3 (MSB)

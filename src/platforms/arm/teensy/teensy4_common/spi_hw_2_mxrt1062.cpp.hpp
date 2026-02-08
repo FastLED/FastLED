@@ -41,7 +41,7 @@ public:
     void end() override;
     DMABuffer acquireDMABuffer(size_t bytes_per_lane) override;
     bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
-    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max()) override;
+    bool waitComplete(u32 timeout_ms = fl::numeric_limits<u32>::max()) override;
     bool isBusy() const override;
     bool isInitialized() const override;
     int getBusId() const override;
@@ -56,12 +56,12 @@ private:
     SPIClass* mSPI;
     bool mTransactionActive;
     bool mInitialized;
-    uint32_t mClockSpeed;
+    u32 mClockSpeed;
 
     // Pin configuration
-    int8_t mClockPin;
-    int8_t mData0Pin;
-    int8_t mData1Pin;
+    i8 mClockPin;
+    i8 mData0Pin;
+    i8 mData1Pin;
 
     // DMA buffer management
     DMABuffer mDMABuffer;            // DMA buffer (managed internally by DMABuffer)
@@ -119,13 +119,13 @@ bool SpiHw2MXRT1062::begin(const SpiHw2::Config& config) {
     }
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
-    if (mBusId != -1 && config.bus_num != static_cast<uint8_t>(mBusId)) {
+    if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
         FL_WARN("SpiHw2MXRT1062: Bus mismatch - expected " << mBusId << ", got " << static_cast<int>(config.bus_num));
         return false;
     }
 
     // Select SPI object based on bus_num
-    uint8_t bus_num = (mBusId != -1) ? static_cast<uint8_t>(mBusId) : config.bus_num;
+    u8 bus_num = (mBusId != -1) ? static_cast<u8>(mBusId) : config.bus_num;
     switch (bus_num) {
         case 0:
             mSPI = &SPI;
@@ -159,8 +159,8 @@ bool SpiHw2MXRT1062::begin(const SpiHw2::Config& config) {
     // Validate pins match hardware capabilities
     // Each LPSPI bus has fixed pin assignments on Teensy 4.x
     struct ValidPinSet {
-        uint8_t bus_id;
-        int8_t sck, mosi, miso;
+        u8 bus_id;
+        i8 sck, mosi, miso;
     };
     constexpr ValidPinSet valid_pins[] = {
         {0, 13, 11, 12},  // SPI  (LPSPI4)
@@ -170,7 +170,7 @@ bool SpiHw2MXRT1062::begin(const SpiHw2::Config& config) {
 
     bool pins_valid = false;
     for (const auto& vp : valid_pins) {
-        if (vp.bus_id == static_cast<uint8_t>(mBusId) &&
+        if (vp.bus_id == static_cast<u8>(mBusId) &&
             vp.sck == mClockPin &&
             vp.mosi == mData0Pin &&
             vp.miso == mData1Pin) {
@@ -215,7 +215,7 @@ bool SpiHw2MXRT1062::begin(const SpiHw2::Config& config) {
     // This allows the LPSPI hardware to control SDI (MISO) as an output in dual-mode
     IMXRT_LPSPI_t* port = getPort();
     if (port) {
-        uint32_t cfgr1 = port->CFGR1;
+        u32 cfgr1 = port->CFGR1;
 
         // Set OUTCFG (bit 26) to enable data output tristating for multi-bit mode
         cfgr1 |= LPSPI_CFGR1_OUTCFG;
@@ -317,20 +317,20 @@ bool SpiHw2MXRT1062::transmit(TransmitMode mode) {
     }
 
     // Save current TCR
-    uint32_t old_tcr = port->TCR;
+    u32 old_tcr = port->TCR;
 
     // Configure for dual-mode (2-bit width)
     // TCR.WIDTH field is bits 17:16
     // 0b00 = 1-bit (standard SPI)
     // 0b01 = 2-bit (dual SPI)
     // 0b10 = 4-bit (quad SPI)
-    uint32_t new_tcr = (old_tcr & ~(0x3 << 16)) | (0x1 << 16);  // Set WIDTH to 0b01
+    u32 new_tcr = (old_tcr & ~(0x3 << 16)) | (0x1 << 16);  // Set WIDTH to 0b01
     port->TCR = new_tcr;
 
     // Transmit data using internal DMA buffer
     // In dual mode, each byte in the buffer will be transmitted as nibbles
     // split across the two data lines
-    fl::span<uint8_t> buffer_span = mDMABuffer.data();
+    fl::span<u8> buffer_span = mDMABuffer.data();
     for (size_t i = 0; i < mCurrentTotalSize; ++i) {
         // Wait for transmit FIFO to have space
         while (!(port->SR & LPSPI_SR_TDF)) ;
@@ -354,7 +354,7 @@ bool SpiHw2MXRT1062::transmit(TransmitMode mode) {
     return true;
 }
 
-bool SpiHw2MXRT1062::waitComplete(uint32_t timeout_ms) {
+bool SpiHw2MXRT1062::waitComplete(u32 timeout_ms) {
     if (!mTransactionActive) {
         return true;  // Nothing to wait for
     }

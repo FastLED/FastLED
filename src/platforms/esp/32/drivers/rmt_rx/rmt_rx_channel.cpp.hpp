@@ -65,7 +65,7 @@ namespace {
  * @param ns_per_tick Cached nanoseconds per tick
  * @return Duration in nanoseconds
  */
-inline uint32_t ticksToNs(uint32_t ticks, uint32_t ns_per_tick) {
+inline u32 ticksToNs(u32 ticks, u32 ns_per_tick) {
     // Convert RMT ticks to nanoseconds
     // Example: 16 ticks × 25 ns/tick = 400ns
     return ticks * ns_per_tick;
@@ -79,7 +79,7 @@ inline uint32_t ticksToNs(uint32_t ticks, uint32_t ns_per_tick) {
  * @return true if symbol is reset pulse (long low duration)
  */
 inline bool isResetPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
-                         uint32_t ns_per_tick) {
+                         u32 ns_per_tick) {
     // Cast RmtSymbol to rmt_symbol_word_t to access bitfields
     const auto rmt_sym = fl::bit_cast<rmt_symbol_word_t>(symbol);
 
@@ -88,11 +88,11 @@ inline bool isResetPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
     // - Either duration0 or duration1 can be the low period
 
     // Convert durations to nanoseconds
-    uint32_t duration0_ns = ticksToNs(rmt_sym.duration0, ns_per_tick);
-    uint32_t duration1_ns = ticksToNs(rmt_sym.duration1, ns_per_tick);
+    u32 duration0_ns = ticksToNs(rmt_sym.duration0, ns_per_tick);
+    u32 duration1_ns = ticksToNs(rmt_sym.duration1, ns_per_tick);
 
     // Check if either duration exceeds reset threshold
-    uint32_t reset_min_ns = timing.reset_min_us * 1000;
+    u32 reset_min_ns = timing.reset_min_us * 1000;
 
     // Reset pulse should have level=0 (low) for the long duration
     // Check duration0 with level0=0, or duration1 with level1=0
@@ -123,7 +123,7 @@ inline bool isResetPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
  * errors. Common in PARLIO TX due to DMA transfer gaps (~20us).
  */
 inline bool isGapPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
-                       uint32_t ns_per_tick) {
+                       u32 ns_per_tick) {
     // No gap tolerance configured - treat as error
     if (timing.gap_tolerance_ns == 0) {
         return false;
@@ -133,11 +133,11 @@ inline bool isGapPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
     const auto rmt_sym = fl::bit_cast<rmt_symbol_word_t>(symbol);
 
     // Convert durations to nanoseconds
-    uint32_t duration0_ns = ticksToNs(rmt_sym.duration0, ns_per_tick);
-    uint32_t duration1_ns = ticksToNs(rmt_sym.duration1, ns_per_tick);
+    u32 duration0_ns = ticksToNs(rmt_sym.duration0, ns_per_tick);
+    u32 duration1_ns = ticksToNs(rmt_sym.duration1, ns_per_tick);
 
     // Reset threshold (convert microseconds to nanoseconds)
-    uint32_t reset_min_ns = timing.reset_min_us * 1000;
+    u32 reset_min_ns = timing.reset_min_us * 1000;
 
     // Gap pulse characteristics:
     // - Long LOW duration (longer than normal bit LOW timing)
@@ -178,13 +178,13 @@ inline bool isGapPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
  * Returns -1 if timing doesn't match either bit pattern.
  */
 inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
-                     uint32_t ns_per_tick) {
+                     u32 ns_per_tick) {
     // Cast RmtSymbol to rmt_symbol_word_t to access bitfields
     const auto rmt_sym = fl::bit_cast<rmt_symbol_word_t>(symbol);
 
     // Convert tick durations to nanoseconds
-    uint32_t high_ns = ticksToNs(rmt_sym.duration0, ns_per_tick);
-    uint32_t low_ns = ticksToNs(rmt_sym.duration1, ns_per_tick);
+    u32 high_ns = ticksToNs(rmt_sym.duration0, ns_per_tick);
+    u32 low_ns = ticksToNs(rmt_sym.duration1, ns_per_tick);
 
     // WS2812B protocol: first duration is high, second is low
     // Check if levels match expected pattern (high=1, low=0)
@@ -237,26 +237,26 @@ inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
  * @param start_low Pin idle state: true=LOW (detect rising edge), false=HIGH
  * (detect falling edge)
  */
-fl::Result<uint32_t, DecodeError>
-decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
-                 fl::span<const RmtSymbol> symbols, fl::span<uint8_t> bytes_out,
+fl::Result<u32, DecodeError>
+decodeRmtSymbols(const ChipsetTiming4Phase &timing, u32 resolution_hz,
+                 fl::span<const RmtSymbol> symbols, fl::span<u8> bytes_out,
                  bool start_low = true) {
     if (symbols.empty()) {
         FL_WARN("decodeRmtSymbols: symbols span is empty");
-        return fl::Result<uint32_t, DecodeError>::failure(
+        return fl::Result<u32, DecodeError>::failure(
             DecodeError::INVALID_ARGUMENT);
     }
 
     if (bytes_out.empty()) {
         FL_WARN("decodeRmtSymbols: bytes_out span is empty");
-        return fl::Result<uint32_t, DecodeError>::failure(
+        return fl::Result<u32, DecodeError>::failure(
             DecodeError::INVALID_ARGUMENT);
     }
 
     // Calculate nanoseconds per tick for efficient conversion
     // Example: 40MHz = 40,000,000 Hz → 1,000,000,000 / 40,000,000 = 25ns per
     // tick
-    uint32_t ns_per_tick = 1000000000UL / resolution_hz;
+    u32 ns_per_tick = 1000000000UL / resolution_hz;
 
     FL_LOG_RX("decodeRmtSymbols: resolution="
               << resolution_hz << "Hz, ns_per_tick=" << ns_per_tick);
@@ -264,8 +264,8 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
     // Decoding state
     size_t error_count = 0;
     size_t reset_pulse_count = 0;
-    uint32_t bytes_decoded = 0;
-    uint8_t current_byte = 0;
+    u32 bytes_decoded = 0;
+    u8 current_byte = 0;
     int bit_index = 0; // 0-7, MSB first
     bool buffer_overflow = false;
 
@@ -281,8 +281,8 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
 #if FASTLED_RX_LOG_ENABLED
     size_t log_symbol_limit = (symbols.size() < 30) ? symbols.size() : 30;
     for (size_t idx = 0; idx < log_symbol_limit; idx++) {
-        uint32_t high_ns = ticksToNs(rmt_symbols[idx].duration0, ns_per_tick);
-        uint32_t low_ns = ticksToNs(rmt_symbols[idx].duration1, ns_per_tick);
+        u32 high_ns = ticksToNs(rmt_symbols[idx].duration0, ns_per_tick);
+        u32 low_ns = ticksToNs(rmt_symbols[idx].duration1, ns_per_tick);
         FL_LOG_RX("Symbol[" << idx << "]: duration0=" << rmt_symbols[idx].duration0
                << " (" << high_ns << "ns) level0=" << static_cast<int>(rmt_symbols[idx].level0)
                << ", duration1=" << rmt_symbols[idx].duration1
@@ -361,8 +361,8 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
         int bit = decodeBit(symbols[i], timing, ns_per_tick);
         if (bit < 0) {
             error_count++;
-            uint32_t high_ns = ticksToNs(rmt_symbols[i].duration0, ns_per_tick);
-            uint32_t low_ns = ticksToNs(rmt_symbols[i].duration1, ns_per_tick);
+            u32 high_ns = ticksToNs(rmt_symbols[i].duration0, ns_per_tick);
+            u32 low_ns = ticksToNs(rmt_symbols[i].duration1, ns_per_tick);
             FL_LOG_RX("decodeRmtSymbols: invalid symbol at index "
                    << i << " (duration0=" << rmt_symbols[i].duration0
                    << ", duration1=" << rmt_symbols[i].duration1 << " => "
@@ -374,7 +374,7 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
             // using only the high period (duration0)
             if (i == symbols.size() - 1 && rmt_symbols[i].duration1 == 0 &&
                 rmt_symbols[i].level0 == 1) {
-                uint32_t high_ns =
+                u32 high_ns =
                     ticksToNs(rmt_symbols[i].duration0, ns_per_tick);
 
                 // Check if high period matches bit 0 pattern
@@ -407,14 +407,14 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
         }
 
         // Accumulate bit into byte (MSB first)
-        current_byte = (current_byte << 1) | static_cast<uint8_t>(bit);
+        current_byte = (current_byte << 1) | static_cast<u8>(bit);
         bit_index++;
 
         // Log detailed info for first 3 bytes (24 bits = first LED's RGB) - disabled by default
 #if FASTLED_RX_LOG_ENABLED
         if (bytes_decoded < 3) {
-            uint32_t high_ns = ticksToNs(rmt_symbols[i].duration0, ns_per_tick);
-            uint32_t low_ns = ticksToNs(rmt_symbols[i].duration1, ns_per_tick);
+            u32 high_ns = ticksToNs(rmt_symbols[i].duration0, ns_per_tick);
+            u32 low_ns = ticksToNs(rmt_symbols[i].duration1, ns_per_tick);
             FL_LOG_RX("Bit[byte=" << bytes_decoded << ", bit=" << (bit_index-1) << "]: value=" << bit
                    << " (symbol " << i << ": high=" << high_ns << "ns, low=" << low_ns << "ns) current_byte=0x"
                    << fl::hex << static_cast<int>(current_byte) << fl::dec);
@@ -473,7 +473,7 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
     // Determine error type and return Result
     if (buffer_overflow) {
         FL_WARN("decodeRmtSymbols: buffer overflow - output buffer too small");
-        return fl::Result<uint32_t, DecodeError>::failure(
+        return fl::Result<u32, DecodeError>::failure(
             DecodeError::BUFFER_OVERFLOW);
     }
 
@@ -481,11 +481,11 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
         FL_WARN("decodeRmtSymbols: high error rate: "
                 << error_count << "/" << symbols.size() << " symbols ("
                 << (100 * error_count / symbols.size()) << "%)");
-        return fl::Result<uint32_t, DecodeError>::failure(
+        return fl::Result<u32, DecodeError>::failure(
             DecodeError::HIGH_ERROR_RATE);
     }
 
-    return fl::Result<uint32_t, DecodeError>::success(bytes_decoded);
+    return fl::Result<u32, DecodeError>::success(bytes_decoded);
 }
 
 /**
@@ -493,31 +493,31 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
  * Internal implementation - not exposed in public header
  */
 template <typename OutputIteratorUint8>
-fl::Result<uint32_t, DecodeError>
-decodeRmtSymbols(const ChipsetTiming4Phase &timing, uint32_t resolution_hz,
+fl::Result<u32, DecodeError>
+decodeRmtSymbols(const ChipsetTiming4Phase &timing, u32 resolution_hz,
                  fl::span<const RmtSymbol> symbols, OutputIteratorUint8 out,
                  bool start_low = true) {
     // Chunk size for decoding
     constexpr size_t MAX_CHUNK_SIZE = 256;
 
-    fl::array<uint8_t, MAX_CHUNK_SIZE> chunk_buffer;
-    fl::span<uint8_t> chunk_span(chunk_buffer.data(), MAX_CHUNK_SIZE);
+    fl::array<u8, MAX_CHUNK_SIZE> chunk_buffer;
+    fl::span<u8> chunk_span(chunk_buffer.data(), MAX_CHUNK_SIZE);
 
     // Call span-based decode implementation with edge detection
     auto result =
         decodeRmtSymbols(timing, resolution_hz, symbols, chunk_span, start_low);
     if (!result.ok()) {
-        return fl::Result<uint32_t, DecodeError>::failure(result.error());
+        return fl::Result<u32, DecodeError>::failure(result.error());
     }
 
-    uint32_t bytes_decoded = result.value();
+    u32 bytes_decoded = result.value();
 
     // Copy decoded bytes to output iterator
-    for (uint32_t i = 0; i < bytes_decoded; i++) {
+    for (u32 i = 0; i < bytes_decoded; i++) {
         *out++ = chunk_buffer[i];
     }
 
-    return fl::Result<uint32_t, DecodeError>::success(bytes_decoded);
+    return fl::Result<u32, DecodeError>::success(bytes_decoded);
 }
 
 } // anonymous namespace
@@ -557,8 +557,8 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // We use a minimum allocation (64 symbols) here just to mark RX as active.
         // The actual allocation size may be adjusted in begin() if needed.
         auto &memMgr = RmtMemoryManager::instance();
-        mMemoryChannelId = static_cast<uint8_t>(128 + (mPin & 0x7F));
-        constexpr uint32_t kMinRxSymbols = 64;  // Minimum RX buffer size
+        mMemoryChannelId = static_cast<u8>(128 + (mPin & 0x7F));
+        constexpr u32 kMinRxSymbols = 64;  // Minimum RX buffer size
         auto alloc_result = memMgr.allocateRx(mMemoryChannelId, kMinRxSymbols, false);
         if (alloc_result.ok()) {
             mMemoryRegistered = true;
@@ -714,7 +714,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         if (!mMemoryRegistered) {
             FL_WARN("RMT RX was not pre-registered in constructor - registering now");
             auto &memMgr = RmtMemoryManager::instance();
-            mMemoryChannelId = static_cast<uint8_t>(128 + (mPin & 0x7F));
+            mMemoryChannelId = static_cast<u8>(128 + (mPin & 0x7F));
             auto alloc_result = memMgr.allocateRx(mMemoryChannelId, rx_config.mem_block_symbols, false);
             if (!alloc_result.ok()) {
                 FL_WARN("RMT RX memory allocation failed for channel "
@@ -787,7 +787,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
     bool finished() const override { return mReceiveDone; }
 
-    RxWaitResult wait(uint32_t timeout_ms) override {
+    RxWaitResult wait(u32 timeout_ms) override {
         if (!mChannel) {
             FL_WARN("wait(): channel not initialized");
             return RxWaitResult::TIMEOUT; // Treat as timeout
@@ -843,15 +843,15 @@ class RmtRxChannelImpl : public RmtRxChannel {
         return RxWaitResult::SUCCESS;
     }
 
-    uint32_t getResolutionHz() const override { return mResolutionHz; }
+    u32 getResolutionHz() const override { return mResolutionHz; }
 
-    fl::Result<uint32_t, DecodeError> decode(const ChipsetTiming4Phase &timing,
-                                             fl::span<uint8_t> out) override {
+    fl::Result<u32, DecodeError> decode(const ChipsetTiming4Phase &timing,
+                                             fl::span<u8> out) override {
         // Get received symbols (spurious symbols already filtered by wait())
         fl::span<const RmtSymbol> symbols = getReceivedSymbols();
 
         if (symbols.empty()) {
-            return fl::Result<uint32_t, DecodeError>::failure(
+            return fl::Result<u32, DecodeError>::failure(
                 DecodeError::INVALID_ARGUMENT);
         }
 
@@ -874,7 +874,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         }
 
         // Calculate nanoseconds per tick for conversion
-        uint32_t ns_per_tick = 1000000000UL / mResolutionHz;
+        u32 ns_per_tick = 1000000000UL / mResolutionHz;
 
         // Each RMT symbol produces 2 EdgeTime entries (duration0/level0,
         // duration1/level1) Cast RmtSymbol to rmt_symbol_word_t to access
@@ -964,7 +964,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // Calculate nanoseconds per tick for conversion (ns → ticks)
         // Example: 40MHz = 40,000,000 Hz → 1,000,000,000 / 40,000,000 = 25ns
         // per tick
-        uint32_t ns_per_tick = 1000000000UL / mResolutionHz;
+        u32 ns_per_tick = 1000000000UL / mResolutionHz;
 
         FL_LOG_RX("injectEdges(): converting "
                << edges.size() << " edges to " << symbol_count
@@ -980,9 +980,9 @@ class RmtRxChannelImpl : public RmtRxChannel {
             const EdgeTime &edge1 = edges[i * 2 + 1]; // Second edge (duration1)
 
             // Convert nanoseconds to ticks
-            uint32_t duration0_ticks =
+            u32 duration0_ticks =
                 (edge0.ns + ns_per_tick / 2) / ns_per_tick; // Round to nearest
-            uint32_t duration1_ticks =
+            u32 duration1_ticks =
                 (edge1.ns + ns_per_tick / 2) / ns_per_tick;
 
             // Clamp to RMT symbol limits (15 bits = 0-32767)
@@ -1062,7 +1062,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             }
 
             // Wait for receive to complete (with timeout)
-            constexpr uint32_t SKIP_TIMEOUT_MS =
+            constexpr u32 SKIP_TIMEOUT_MS =
                 5000; // 5 second timeout per chunk
             int64_t start_time_us = esp_timer_get_time();
             int64_t timeout_us = SKIP_TIMEOUT_MS * 1000;
@@ -1410,15 +1410,15 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
     rmt_channel_handle_t mChannel; ///< RMT channel handle
     gpio_num_t mPin;               ///< GPIO pin for RX
-    uint32_t mResolutionHz;        ///< Clock resolution in Hz
+    u32 mResolutionHz;        ///< Clock resolution in Hz
     size_t mBufferSize; ///< User-requested buffer size in symbols (accumulation
                         ///< buffer size)
     volatile bool mReceiveDone;       ///< Set by ISR when receive complete
     volatile size_t mSymbolsReceived; ///< Total symbols received across all
                                       ///< callbacks (set by ISR)
-    uint32_t mSignalRangeMinNs;       ///< Minimum pulse width (noise filtering)
-    uint32_t mSignalRangeMaxNs;       ///< Maximum pulse width (idle detection)
-    uint32_t
+    u32 mSignalRangeMinNs;       ///< Minimum pulse width (noise filtering)
+    u32 mSignalRangeMaxNs;       ///< Maximum pulse width (idle detection)
+    u32
         mSkipCounter; ///< Runtime counter for skipping (decremented in ISR)
     bool mStartLow;   ///< Pin idle state: true=LOW (WS2812B), false=HIGH
                       ///< (inverted)
@@ -1431,12 +1431,12 @@ class RmtRxChannelImpl : public RmtRxChannel {
     volatile size_t
         mAccumulationOffset; ///< Current write position in accumulation buffer
                              ///< (updated by ISR)
-    volatile uint32_t mCallbackCount; ///< Debug: Count ISR callbacks (TEMP -
+    volatile u32 mCallbackCount; ///< Debug: Count ISR callbacks (TEMP -
                                       ///< for testing en_partial_rx)
 
     // RMT Memory Manager coordination (prevents TX/RX conflicts on ESP32-S3)
     bool mMemoryRegistered;       ///< Whether this RX channel is registered with memory manager
-    uint8_t mMemoryChannelId;     ///< Channel ID for memory manager tracking (pin + 128)
+    u8 mMemoryChannelId;     ///< Channel ID for memory manager tracking (pin + 128)
 };
 
 // Factory method implementation

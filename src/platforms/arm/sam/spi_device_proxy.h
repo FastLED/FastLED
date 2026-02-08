@@ -38,13 +38,13 @@ namespace fl {
 /// @tparam DATA_PIN GPIO pin for SPI data (MOSI)
 /// @tparam CLOCK_PIN GPIO pin for SPI clock (SCK)
 /// @tparam SPI_CLOCK_DIVIDER SPI clock divider (matches SAMHardwareSPIOutput)
-template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_CLOCK_DIVIDER>
+template<u8 DATA_PIN, u8 CLOCK_PIN, u32 SPI_CLOCK_DIVIDER>
 class SPIDeviceProxy {
 private:
     SPIBusHandle mHandle;                    // Handle from SPIBusManager
     SPIBusManager* mBusManager;              // Pointer to global bus manager
     SAMDHardwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_CLOCK_DIVIDER>* mSingleSPI;
-    fl::vector<uint8_t> mWriteBuffer;        // Buffered writes (for Dual/Quad-SPI)
+    fl::vector<u8> mWriteBuffer;        // Buffered writes (for Dual/Quad-SPI)
     bool mInitialized;                       // Whether init() was called
     bool mInTransaction;                     // Whether select() was called
 
@@ -88,7 +88,7 @@ public:
         // NOTE: Bus manager will determine if we use Single/Dual/Quad SPI
         // based on how many devices share our clock pin
         // Calculate SPI speed from clock divider: speed_hz = F_CPU / divider
-        constexpr uint32_t spi_speed_hz = F_CPU / SPI_CLOCK_DIVIDER;
+        constexpr u32 spi_speed_hz = F_CPU / SPI_CLOCK_DIVIDER;
         mHandle = mBusManager->registerDevice(CLOCK_PIN, DATA_PIN, spi_speed_hz, this);
 
         if (!mHandle.is_valid) {
@@ -147,7 +147,7 @@ public:
 
     /// Write single byte
     /// Mirrors SAMHardwareSPIOutput::writeByte()
-    void writeByte(uint8_t b) {
+    void writeByte(u8 b) {
         if (!mInitialized || !mInTransaction) {
             return;
         }
@@ -164,13 +164,13 @@ public:
 
     /// Write 16-bit word
     /// Mirrors SAMHardwareSPIOutput::writeWord()
-    void writeWord(uint16_t w) {
+    void writeWord(u16 w) {
         if (mSingleSPI) {
             mSingleSPI->writeWord(w);
         } else {
             // Buffer as two bytes (big-endian)
-            writeByte(static_cast<uint8_t>(w >> 8));
-            writeByte(static_cast<uint8_t>(w & 0xFF));
+            writeByte(static_cast<u8>(w >> 8));
+            writeByte(static_cast<u8>(w & 0xFF));
         }
     }
 

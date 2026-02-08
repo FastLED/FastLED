@@ -1,7 +1,7 @@
 #ifndef __INC_FASTSPI_ARM_KL26_H
 #define __INC_FASTSPI_ARM_KL26_h
 namespace fl {
-template <int VAL> void getScalars(uint8_t & sppr, uint8_t & spr) {
+template <int VAL> void getScalars(u8 & sppr, u8 & spr) {
   if(VAL > 4096) { sppr=7; spr=8; }
   else if(VAL > 3584) { sppr=6; spr=8; }
   else if(VAL > 3072) { sppr=5; spr=8; }
@@ -80,7 +80,7 @@ template <int VAL> void getScalars(uint8_t & sppr, uint8_t & spr) {
 #define SPIX (*(KINETISL_SPI_t*)pSPIX)
 #define ARM_HARDWARE_SPI
 
-template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER, uint32_t pSPIX>
+template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_DIVIDER, u32 pSPIX>
 class ARMHardwareSPIOutput {
   Selectable *m_pSelect;
 
@@ -121,7 +121,7 @@ class ARMHardwareSPIOutput {
   }
 
   void setSPIRate() {
-    uint8_t sppr, spr;
+    u8 sppr, spr;
     getScalars<_SPI_CLOCK_DIVIDER>(sppr, spr);
 
     // Set the speed
@@ -145,7 +145,7 @@ public:
     FastPin<_CLOCK_PIN>::setOutput();
 
     // Enable the SPI clocks
-    uint32_t sim4 = SIM_SCGC4;
+    u32 sim4 = SIM_SCGC4;
     if ((pSPIX == 0x40076000) && !(sim4 & SIM_SCGC4_SPI0)) {
       SIM_SCGC4 = sim4 | SIM_SCGC4_SPI0;
     }
@@ -185,20 +185,20 @@ public:
   void waitFully() { wait(); }
 
   // not the most efficient mechanism in the world - but should be enough for sm16716 and friends
-  template <uint8_t BIT> inline static void writeBit(uint8_t b) { /* TODO */ }
+  template <u8 BIT> inline static void writeBit(u8 b) { /* TODO */ }
 
   // write a byte out via SPI (returns immediately on writing register)
-  static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); SPIX.DL = b; }
+  static void writeByte(u8 b) __attribute__((always_inline)) { wait(); SPIX.DL = b; }
   // write a word out via SPI (returns immediately on writing register)
-  static void writeWord(uint16_t w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w & 0xFF); }
+  static void writeWord(u16 w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w & 0xFF); }
 
   // A raw set of writing byte values, assumes setup/init/waiting done elsewhere (static for use by adjustment classes)
-  static void writeBytesValueRaw(uint8_t value, int len) {
+  static void writeBytesValueRaw(u8 value, int len) {
     while(len--) { writeByte(value); }
   }
 
   // A full cycle of writing a value for len bytes, including select, release, and waiting
-  void writeBytesValue(uint8_t value, int len) {
+  void writeBytesValue(u8 value, int len) {
     setSPIRate();
     select();
     while(len--) {
@@ -209,9 +209,9 @@ public:
   }
 
   // A full cycle of writing a raw block of data out, including select, release, and waiting
-  template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
+  template <class D> void writeBytes(FASTLED_REGISTER u8 *data, int len) {
     setSPIRate();
-    uint8_t *end = data + len;
+    u8 *end = data + len;
     select();
     // could be optimized to write 16bit words out instead of 8bit bytes
     while(data != end) {
@@ -222,10 +222,10 @@ public:
     release();
   }
 
-  void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+  void writeBytes(FASTLED_REGISTER u8 *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 
-  template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
+  template <u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
     int len = pixels.mLen;
 
     select();

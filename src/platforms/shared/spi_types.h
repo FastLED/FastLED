@@ -15,13 +15,13 @@ struct DMABufferInternalData;
 
 /// @brief Transmission mode for SPI operations
 /// @note Most platforms use async DMA-based transmission and ignore SYNC mode
-enum class TransmitMode : uint8_t {
+enum class TransmitMode : u8 {
     SYNC,   ///< Synchronous/blocking transmission (may not be supported on all platforms)
     ASYNC   ///< Asynchronous/non-blocking transmission (default, uses DMA)
 };
 
 /// @brief Error codes for SPI DMA buffer operations
-enum class SPIError : uint8_t {
+enum class SPIError : u8 {
     NOT_INITIALIZED,    ///< SPI hardware not initialized
     BUFFER_TOO_LARGE,   ///< Requested buffer size exceeds platform maximum
     ALLOCATION_FAILED,  ///< Memory allocation failed
@@ -56,7 +56,7 @@ public:
     /// @param ptr Shared pointer to buffer data
     /// @param size Size of buffer in bytes
     /// @deprecated Use DMABuffer(size_t) constructor instead
-    DMABuffer(fl::shared_ptr<uint8_t> ptr, size_t size);
+    DMABuffer(fl::shared_ptr<u8> ptr, size_t size);
 
     /// @brief Construct error result
     explicit DMABuffer(SPIError err);
@@ -65,7 +65,7 @@ public:
     bool ok() const;
 
     /// @brief Get the buffer span (only valid if ok() returns true)
-    fl::span<uint8_t> data() const;
+    fl::span<u8> data() const;
 
     /// @brief Get the error code (only meaningful if ok() returns false)
     SPIError error() const;

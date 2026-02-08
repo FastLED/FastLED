@@ -301,7 +301,7 @@ void RmtMemoryManager::getMemoryBlockStrategy(size_t& idleBlocks, size_t& networ
     networkBlocks = mNetworkBlocks;
 }
 
-Result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(uint8_t channel_id, bool use_dma, bool networkActive) {
+Result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(u8 channel_id, bool use_dma, bool networkActive) {
     // Check if channel already allocated
     if (findAllocation(channel_id, true) != nullptr) {
         FL_WARN("RMT TX channel " << static_cast<int>(channel_id) << " already allocated");
@@ -416,7 +416,7 @@ Result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(uint8_t channel_id, 
     return Result<size_t, RmtMemoryError>::success(words_needed);
 }
 
-Result<size_t, RmtMemoryError> RmtMemoryManager::allocateRx(uint8_t channel_id, size_t symbols, bool use_dma) {
+Result<size_t, RmtMemoryError> RmtMemoryManager::allocateRx(u8 channel_id, size_t symbols, bool use_dma) {
     // Check if channel already allocated
     if (findAllocation(channel_id, false) != nullptr) {
         FL_WARN("RMT RX channel " << static_cast<int>(channel_id) << " already allocated");
@@ -469,7 +469,7 @@ Result<size_t, RmtMemoryError> RmtMemoryManager::allocateRx(uint8_t channel_id, 
     return Result<size_t, RmtMemoryError>::success(words_needed);
 }
 
-void RmtMemoryManager::free(uint8_t channel_id, bool is_tx) {
+void RmtMemoryManager::free(u8 channel_id, bool is_tx) {
     ChannelAllocation* alloc = findAllocation(channel_id, is_tx);
     if (!alloc) {
         FL_WARN("RMT " << (is_tx ? "TX" : "RX") << " channel "
@@ -493,7 +493,7 @@ void RmtMemoryManager::free(uint8_t channel_id, bool is_tx) {
     }
 }
 
-void RmtMemoryManager::recordRecoveryAllocation(uint8_t channel_id, size_t words, bool is_tx) {
+void RmtMemoryManager::recordRecoveryAllocation(u8 channel_id, size_t words, bool is_tx) {
     // Check if already exists (shouldn't, but be safe)
     ChannelAllocation* existing = findAllocation(channel_id, is_tx);
     if (existing) {
@@ -543,7 +543,7 @@ bool RmtMemoryManager::canAllocateRx(size_t symbols) const {
     return symbols <= getAvailableWords(false);
 }
 
-size_t RmtMemoryManager::getAllocatedWords(uint8_t channel_id, bool is_tx) const {
+size_t RmtMemoryManager::getAllocatedWords(u8 channel_id, bool is_tx) const {
     const ChannelAllocation* alloc = findAllocation(channel_id, is_tx);
     return alloc ? alloc->words : 0;
 }
@@ -655,7 +655,7 @@ bool RmtMemoryManager::isDMAAvailable() const {
 #endif
 }
 
-bool RmtMemoryManager::allocateDMA(uint8_t channel_id, bool is_tx) {
+bool RmtMemoryManager::allocateDMA(u8 channel_id, bool is_tx) {
 #if FASTLED_RMT5_DMA_SUPPORTED
     if (mDMAAllocation.allocated) {
         FL_WARN("DMA allocation failed: DMA already allocated to "
@@ -679,7 +679,7 @@ bool RmtMemoryManager::allocateDMA(uint8_t channel_id, bool is_tx) {
 #endif
 }
 
-void RmtMemoryManager::freeDMA(uint8_t channel_id, bool is_tx) {
+void RmtMemoryManager::freeDMA(u8 channel_id, bool is_tx) {
 #if FASTLED_RMT5_DMA_SUPPORTED
     if (!mDMAAllocation.allocated) {
         FL_WARN("DMA free called but no DMA allocated");
@@ -721,7 +721,7 @@ int RmtMemoryManager::getDMAChannelsInUse() const {
 // ============================================================================
 
 RmtMemoryManager::ChannelAllocation*
-RmtMemoryManager::findAllocation(uint8_t channel_id, bool is_tx) {
+RmtMemoryManager::findAllocation(u8 channel_id, bool is_tx) {
     for (auto& alloc : mLedger.allocations) {
         if (alloc.channel_id == channel_id && alloc.is_tx == is_tx) {
             return &alloc;
@@ -731,7 +731,7 @@ RmtMemoryManager::findAllocation(uint8_t channel_id, bool is_tx) {
 }
 
 const RmtMemoryManager::ChannelAllocation*
-RmtMemoryManager::findAllocation(uint8_t channel_id, bool is_tx) const {
+RmtMemoryManager::findAllocation(u8 channel_id, bool is_tx) const {
     for (const auto& alloc : mLedger.allocations) {
         if (alloc.channel_id == channel_id && alloc.is_tx == is_tx) {
             return &alloc;

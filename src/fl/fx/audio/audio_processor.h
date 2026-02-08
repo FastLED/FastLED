@@ -87,9 +87,9 @@ public:
     void onVoicedChange(function<void(bool voiced)> callback);
 
     // ----- Note Detection Events -----
-    void onNoteOn(function<void(uint8_t note, uint8_t velocity)> callback);
-    void onNoteOff(function<void(uint8_t note)> callback);
-    void onNoteChange(function<void(uint8_t note, uint8_t velocity)> callback);
+    void onNoteOn(function<void(u8 note, u8 velocity)> callback);
+    void onNoteOff(function<void(u8 note)> callback);
+    void onNoteChange(function<void(u8 note, u8 velocity)> callback);
 
     // ----- Downbeat Detection Events -----
     void onDownbeat(function<void()> callback);

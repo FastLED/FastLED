@@ -313,13 +313,13 @@ void ChannelEngineLcdRgb::prepareScratchBuffer(fl::span<const ChannelDataPtr> ch
 
 void ChannelEngineLcdRgb::encodeFrame() {
     int backBuffer = 1 - mFrontBuffer;
-    uint16_t* output = mBuffers[backBuffer];
+    u16* output = mBuffers[backBuffer];
 
     // 4-pixel encoding templates
     // Bit 0: [HI, LO, LO, LO]
     // Bit 1: [HI, HI, LO, LO]
-    constexpr uint16_t templateBit0[4] = {0xFFFF, 0x0000, 0x0000, 0x0000};
-    constexpr uint16_t templateBit1[4] = {0xFFFF, 0xFFFF, 0x0000, 0x0000};
+    constexpr u16 templateBit0[4] = {0xFFFF, 0x0000, 0x0000, 0x0000};
+    constexpr u16 templateBit1[4] = {0xFFFF, 0xFFFF, 0x0000, 0x0000};
 
     // Encode all LEDs
     for (int led_idx = 0; led_idx < mNumLeds; led_idx++) {
@@ -330,7 +330,7 @@ void ChannelEngineLcdRgb::encodeFrame() {
             int component = color_order[color];
 
             // Gather bytes across all lanes
-            uint8_t pixel_bytes[16];
+            u8 pixel_bytes[16];
             for (int lane = 0; lane < mConfig.num_lanes; lane++) {
                 if (mStrips[lane] != nullptr) {
                     pixel_bytes[lane] = mStrips[lane][led_idx].raw[component];
@@ -347,7 +347,7 @@ void ChannelEngineLcdRgb::encodeFrame() {
             // Transpose and encode bits (MSB first)
             for (int bit_idx = 7; bit_idx >= 0; bit_idx--) {
                 // Build lane mask from bit at bit_idx
-                uint16_t mask = 0;
+                u16 mask = 0;
                 for (int lane = 0; lane < 16; lane++) {
                     if (pixel_bytes[lane] & (1 << bit_idx)) {
                         mask |= (1 << lane);
@@ -382,14 +382,14 @@ public:
     }
     void deinitialize() override { mImpl.deinitialize(); }
     bool isInitialized() const override { return mImpl.isInitialized(); }
-    uint16_t* allocateFrameBuffer(size_t size_bytes) override {
+    u16* allocateFrameBuffer(size_t size_bytes) override {
         return mImpl.allocateFrameBuffer(size_bytes);
     }
-    void freeFrameBuffer(uint16_t* buffer) override { mImpl.freeFrameBuffer(buffer); }
-    bool drawFrame(const uint16_t* buffer, size_t size_bytes) override {
+    void freeFrameBuffer(u16* buffer) override { mImpl.freeFrameBuffer(buffer); }
+    bool drawFrame(const u16* buffer, size_t size_bytes) override {
         return mImpl.drawFrame(buffer, size_bytes);
     }
-    bool waitFrameDone(uint32_t timeout_ms) override {
+    bool waitFrameDone(u32 timeout_ms) override {
         return mImpl.waitFrameDone(timeout_ms);
     }
     bool isBusy() const override { return mImpl.isBusy(); }
@@ -400,7 +400,7 @@ public:
         return mImpl.getConfig();
     }
     uint64_t getMicroseconds() override { return mImpl.getMicroseconds(); }
-    void delay(uint32_t ms) override { mImpl.delay(ms); }
+    void delay(u32 ms) override { mImpl.delay(ms); }
 
 private:
     detail::ILcdRgbPeripheral& mImpl;

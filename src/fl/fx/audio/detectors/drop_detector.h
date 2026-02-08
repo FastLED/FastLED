@@ -72,7 +72,7 @@ private:
     float calculateEnergyFlux(float currentRMS) const;
     float calculateBassFlux(float currentBass) const;
     float calculateDropImpact(float energyFlux, float bassFlux, float spectralNovelty, float rms) const;
-    bool shouldTriggerDrop(float impact, uint32_t timestamp) const;
+    bool shouldTriggerDrop(float impact, u32 timestamp) const;
 
     // Baseline update method for adaptive detection
     void updateBaselines(float rms, float bass);

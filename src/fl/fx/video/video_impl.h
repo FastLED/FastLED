@@ -51,7 +51,7 @@ class VideoImpl {
     void pause(fl::u32 now);
     void resume(fl::u32 now);
     bool needsFrame(fl::u32 now) const;
-    int32_t durationMicros() const; // -1 if this is a stream.
+    i32 durationMicros() const; // -1 if this is a stream.
 
   private:
     bool updateBufferIfNecessary(fl::u32 prev, fl::u32 now);

@@ -34,7 +34,7 @@ MutexRP::MutexRP() : mSpinlock(nullptr), mOwnerCore(0xFFFFFFFF), mLocked(false) 
     // Get the actual spinlock instance and store as opaque pointer
     spin_lock_t* spinlock = spin_lock_instance(spinlock_num);
     // spin_lock_t* may be volatile, so we need reinterpret_cast
-    mSpinlock = reinterpret_cast<void*>(const_cast<uint32_t*>(reinterpret_cast<volatile uint32_t*>(spinlock))); // ok reinterpret cast
+    mSpinlock = reinterpret_cast<void*>(const_cast<u32*>(reinterpret_cast<volatile u32*>(spinlock))); // ok reinterpret cast
 }
 
 MutexRP::~MutexRP() {
@@ -55,7 +55,7 @@ void MutexRP::lock() {
     spin_lock_t* spinlock = static_cast<spin_lock_t*>(mSpinlock);
 
     // Block until we acquire the spinlock
-    uint32_t save = spin_lock_blocking(spinlock);
+    u32 save = spin_lock_blocking(spinlock);
 
     // Mark as locked and record owner
     mLocked = true;
@@ -117,7 +117,7 @@ RecursiveMutexRP::RecursiveMutexRP() : mSpinlock(nullptr), mOwnerCore(0xFFFFFFFF
     // Get the actual spinlock instance and store as opaque pointer
     spin_lock_t* spinlock = spin_lock_instance(spinlock_num);
     // spin_lock_t* may be volatile, so we need reinterpret_cast
-    mSpinlock = reinterpret_cast<void*>(const_cast<uint32_t*>(reinterpret_cast<volatile uint32_t*>(spinlock))); // ok reinterpret cast
+    mSpinlock = reinterpret_cast<void*>(const_cast<u32*>(reinterpret_cast<volatile u32*>(spinlock))); // ok reinterpret cast
 }
 
 RecursiveMutexRP::~RecursiveMutexRP() {
@@ -136,7 +136,7 @@ void RecursiveMutexRP::lock() {
     FL_ASSERT(mSpinlock != nullptr, "RecursiveMutexRP::lock() called on null mutex");
 
     spin_lock_t* spinlock = static_cast<spin_lock_t*>(mSpinlock);
-    uint32_t current_core = get_core_num();
+    u32 current_core = get_core_num();
 
     // Check if we already own the lock (recursive case)
     if (mLockCount > 0 && mOwnerCore == current_core) {
@@ -145,7 +145,7 @@ void RecursiveMutexRP::lock() {
     }
 
     // Block until we acquire the spinlock
-    uint32_t save = spin_lock_blocking(spinlock);
+    u32 save = spin_lock_blocking(spinlock);
 
     // Mark as locked and record owner
     mLockCount = 1;
@@ -177,7 +177,7 @@ bool RecursiveMutexRP::try_lock() {
     }
 
     spin_lock_t* spinlock = static_cast<spin_lock_t*>(mSpinlock);
-    uint32_t current_core = get_core_num();
+    u32 current_core = get_core_num();
 
     // Check if we already own the lock (recursive case)
     if (mLockCount > 0 && mOwnerCore == current_core) {

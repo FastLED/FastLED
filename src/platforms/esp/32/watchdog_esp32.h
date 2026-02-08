@@ -37,7 +37,7 @@ typedef void (*watchdog_callback_t)(void* user_data);
 /// @note Watchdog automatically fed by ESP32 framework - no manual feeding needed
 /// @note On timeout: Calls user callback (if provided), prints message, disconnects USB, then resets
 /// @note Callback executes in ISR context - keep it simple and avoid logging functions
-void watchdog_setup(uint32_t timeout_ms = 5000,
+void watchdog_setup(u32 timeout_ms = 5000,
                     watchdog_callback_t callback = nullptr,
                     void* user_data = nullptr);
 

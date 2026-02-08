@@ -19,9 +19,9 @@
 // Legacy XY function. This is a weak symbol that can be overridden by the user.
 // IMPORTANT: This MUST be in the global namespace (not fl::) for backward compatibility
 // with user code from FastLED 3.7.6 that defines: uint16_t XY(uint8_t x, uint8_t y)
-uint16_t XY(uint8_t x, uint8_t y) FL_LINK_WEAK;
+fl::u16 XY(fl::u8 x, fl::u8 y) FL_LINK_WEAK;
 
-FL_LINK_WEAK uint16_t XY(uint8_t x, uint8_t y) {
+FL_LINK_WEAK fl::u16 XY(fl::u8 x, fl::u8 y) {
     FASTLED_UNUSED(x);
     FASTLED_UNUSED(y);
     FL_ERROR("XY function not provided - using default [0][0]. Use blur2d with XYMap instead");

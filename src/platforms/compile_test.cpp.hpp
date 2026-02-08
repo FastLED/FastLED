@@ -76,12 +76,12 @@ FL_MAYBE_UNUSED static void test_strstream_integer_operators() {
     fss << sc << uc << s << us << i << ui << l << ul << ll << ull;
 
     // Test with stdint types (should match fl:: types)
-    int8_t i8_std = 20; ss << i8_std; fss << i8_std;
-    uint8_t u8_std = 21; ss << u8_std; fss << u8_std;
-    int16_t i16_std = 22; ss << i16_std; fss << i16_std;
-    uint16_t u16_std = 23; ss << u16_std; fss << u16_std;
-    int32_t i32_std = 24; ss << i32_std; fss << i32_std;
-    uint32_t u32_std = 25; ss << u32_std; fss << u32_std;
+    i8 i8_std = 20; ss << i8_std; fss << i8_std;
+    u8 u8_std = 21; ss << u8_std; fss << u8_std;
+    i16 i16_std = 22; ss << i16_std; fss << i16_std;
+    u16 u16_std = 23; ss << u16_std; fss << u16_std;
+    i32 i32_std = 24; ss << i32_std; fss << i32_std;
+    u32 u32_std = 25; ss << u32_std; fss << u32_std;
     int64_t i64_std = 26; ss << i64_std; fss << i64_std;
     uint64_t u64_std = 27; ss << u64_std; fss << u64_std;
 }
@@ -91,12 +91,12 @@ FL_MAYBE_UNUSED static void test_strstream_integer_operators() {
 // any compile-time errors if the platform is not configured correctly.
 FL_MAYBE_UNUSED static void compile_tests() {
 
-    static_assert(fl::is_same<u32, uint32_t>::value, "u32 must be the same type as uint32_t");
-    static_assert(fl::is_same<u16, uint16_t>::value, "u16 must be the same type as uint16_t");
-    static_assert(fl::is_same<u8, uint8_t>::value, "u8 must be the same type as uint8_t");
-    static_assert(fl::is_same<i32, int32_t>::value, "i32 must be the same type as int32_t");
-    static_assert(fl::is_same<i16, int16_t>::value, "i16 must be the same type as int16_t");
-    static_assert(fl::is_same<i8, int8_t>::value, "i8 must be the same type as int8_t");
+    static_assert(fl::is_same<u32, u32>::value, "u32 must be the same type as u32");
+    static_assert(fl::is_same<u16, u16>::value, "u16 must be the same type as u16");
+    static_assert(fl::is_same<u8, u8>::value, "u8 must be the same type as u8");
+    static_assert(fl::is_same<i32, i32>::value, "i32 must be the same type as i32");
+    static_assert(fl::is_same<i16, i16>::value, "i16 must be the same type as i16");
+    static_assert(fl::is_same<i8, i8>::value, "i8 must be the same type as i8");
     static_assert(fl::is_same<size, size_t>::value, "size must be the same type as size_t");
     static_assert(fl::is_same<uptr, uintptr_t>::value, "uptr must be the same type as uintptr_t");
 

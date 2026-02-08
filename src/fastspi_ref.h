@@ -48,7 +48,7 @@ public:
 	static void writeByte(fl::u8 b) { /* TODO */ }
 
 	/// write a word out via SPI (returns immediately on writing register)
-	static void writeWord(uint16_t w) { /* TODO */ }
+	static void writeWord(fl::u16 w) { /* TODO */ }
 
 	/// A raw set of writing byte values, assumes setup/init/waiting done elsewhere
 	static void writeBytesValueRaw(fl::u8 value, int len) {

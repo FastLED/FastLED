@@ -18,7 +18,7 @@ namespace fl {
 // when they flow through fl::print/fl::println.
 
 /// Log level constants - higher values include more output
-enum LogLevel : uint8_t {
+enum LogLevel : u8 {
     LOG_LEVEL_NONE  = 0,  ///< No logging (completely silent)
     LOG_LEVEL_ERROR = 1,  ///< Only errors
     LOG_LEVEL_WARN  = 2,  ///< Errors and warnings
@@ -28,12 +28,12 @@ enum LogLevel : uint8_t {
 
 /// Get the current global log level
 /// @return Current log level (0-4)
-uint8_t getLogLevel();
+u8 getLogLevel();
 
 /// Set the global log level
 /// @param level New log level (use LogLevel enum values)
 /// @note Setting to LOG_LEVEL_NONE disables all logging output
-void setLogLevel(uint8_t level);
+void setLogLevel(u8 level);
 
 // =============================================================================
 // RAII Scoped Log Control
@@ -85,7 +85,7 @@ public:
     ScopedLogDisable& operator=(ScopedLogDisable&&) = delete;
 
 private:
-    uint8_t mPreviousLevel;
+    u8 mPreviousLevel;
 };
 
 // =============================================================================
@@ -93,7 +93,7 @@ private:
 // =============================================================================
 // Initialize serial communication with specified baud rate
 // Note: On some platforms (host), this is a no-op
-void serial_begin(uint32_t baudRate = 115200);
+void serial_begin(u32 baudRate = 115200);
 
 // =============================================================================
 // Low-Level Print Functions
@@ -113,7 +113,7 @@ void println(const char* str);
 
 // Write raw bytes (binary data)
 // Returns number of bytes written
-size_t write_bytes(const uint8_t* buffer, size_t size);
+size_t write_bytes(const u8* buffer, size_t size);
 
 // Low-level input functions that provide Serial-style read functionality
 // These use the most efficient input method for each platform
@@ -137,7 +137,7 @@ int read();
 // Waits for all buffered data to be transmitted
 // Returns true if flush completed successfully, false on timeout
 // Note: On platforms without buffering, this returns immediately
-bool flush(uint32_t timeoutMs = 1000);
+bool flush(u32 timeoutMs = 1000);
 
 // Check if serial port is ready for I/O
 // Returns true if serial is initialized and available

@@ -60,12 +60,12 @@ namespace fl {
 /// Maps directly to ESP-IDF's uart_config_t structure.
 /// Note: This is separate from the general-purpose UartPeripheralConfig in uart_esp32.h
 struct UartPeripheralConfig {
-    uint32_t mBaudRate;          ///< Baud rate (e.g., 3200000 for 3.2 Mbps)
+    u32 mBaudRate;          ///< Baud rate (e.g., 3200000 for 3.2 Mbps)
     int mTxPin;                  ///< GPIO pin for TX output
     int mRxPin;                  ///< GPIO pin for RX (typically -1 for TX-only)
-    uint32_t mTxBufferSize;      ///< TX ring buffer size (0 = blocking mode)
-    uint32_t mRxBufferSize;      ///< RX ring buffer size (typically 0 for LED control)
-    uint8_t mStopBits;           ///< Stop bits: 1 or 2 (UART_STOP_BITS_1=1, UART_STOP_BITS_2=2)
+    u32 mTxBufferSize;      ///< TX ring buffer size (0 = blocking mode)
+    u32 mRxBufferSize;      ///< RX ring buffer size (typically 0 for LED control)
+    u8 mStopBits;           ///< Stop bits: 1 or 2 (UART_STOP_BITS_1=1, UART_STOP_BITS_2=2)
     int mUartNum;                ///< UART peripheral number (0, 1, or 2)
 
     /// @brief Default constructor (for mock testing)
@@ -79,12 +79,12 @@ struct UartPeripheralConfig {
           mUartNum(0) {}
 
     /// @brief Constructor with all parameters
-    UartPeripheralConfig(uint32_t baud_rate,
+    UartPeripheralConfig(u32 baud_rate,
                          int tx_pin,
                          int rx_pin,
-                         uint32_t tx_buffer_size,
-                         uint32_t rx_buffer_size,
-                         uint8_t stop_bits,
+                         u32 tx_buffer_size,
+                         u32 rx_buffer_size,
+                         u8 stop_bits,
                          int uart_num)
         : mBaudRate(baud_rate),
           mTxPin(tx_pin),
@@ -194,7 +194,7 @@ public:
     /// - If TX buffer is full: Blocks until space available (or timeout)
     ///
     /// Each byte is automatically framed with start bit (LOW) and stop bit (HIGH).
-    virtual bool writeBytes(const uint8_t* data, size_t length) = 0;
+    virtual bool writeBytes(const u8* data, size_t length) = 0;
 
     /// @brief Wait for all queued bytes to be transmitted
     /// @param timeout_ms Timeout in milliseconds (0 = non-blocking poll)
@@ -212,7 +212,7 @@ public:
     /// Returns false if:
     /// - Timeout occurs before completion
     /// - Hardware error occurs during transmission
-    virtual bool waitTxDone(uint32_t timeout_ms) = 0;
+    virtual bool waitTxDone(u32 timeout_ms) = 0;
 
     //=========================================================================
     // State Queries

@@ -41,10 +41,10 @@ FL_EXTERN_C_BEGIN
 
 // Define the SysTick structure
 typedef struct {
-    volatile uint32_t CTRL;
-    volatile uint32_t LOAD;
-    volatile uint32_t VAL;
-    volatile const uint32_t CALIB;
+    volatile fl::u32 CTRL;
+    volatile fl::u32 LOAD;
+    volatile fl::u32 VAL;
+    volatile const fl::u32 CALIB;
 } SysTick_Type;
 
 #endif
@@ -54,11 +54,11 @@ FL_EXTERN_C_END
 
 // Reuse the M0ClocklessData structure from m0clockless.h
 struct M0ClocklessData {
-  uint8_t d[3];      // Dither values for R, G, B
-  uint8_t e[3];      // Error accumulation (Floyd-Steinberg-style dithering)
-  uint8_t adj;       // Bytes to advance LED pointer (3 for RGB, 4 for RGBW)
-  uint8_t pad;       // Padding for alignment
-  uint32_t s[3];     // Fixed-point scale factors for color adjustment
+  fl::u8 d[3];      // Dither values for R, G, B
+  fl::u8 e[3];      // Error accumulation (Floyd-Steinberg-style dithering)
+  fl::u8 adj;       // Bytes to advance LED pointer (3 for RGB, 4 for RGBW)
+  fl::u8 pad;       // Padding for alignment
+  fl::u32 s[3];     // Fixed-point scale factors for color adjustment
 };
 
 // Force inline macro for time-critical functions
@@ -125,13 +125,13 @@ FL_BEGIN_OPTIMIZE_FOR_EXACT_TIMING
  *
  * @return Current cycle count (32-bit, wraps around)
  */
-FL_FORCE_INLINE uint32_t get_cycle_count() {
+FL_FORCE_INLINE fl::u32 get_cycle_count() {
 #if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__) || \
     defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__)
     // M3/M4/M7/M23/M33: Use DWT CYCCNT (Data Watchpoint and Trace cycle counter)
     // Note: DWT may need to be enabled first (usually done by Arduino core)
     // ARMv8-M (M23/M33) also has DWT with compatible register layout
-    #define DWT_CYCCNT  (*(volatile uint32_t *)0xE0001004)
+    #define DWT_CYCCNT  (*(volatile fl::u32 *)0xE0001004)
     return DWT_CYCCNT;
 #elif defined(__ARM_ARCH_6M__)
     // M0/M0+: No DWT, use SysTick (down-counter, invert for up-count)
@@ -155,11 +155,11 @@ FL_FORCE_INLINE uint32_t get_cycle_count() {
  *
  * @param cycles Number of CPU cycles to delay
  */
-FL_FORCE_INLINE void delay_cycles(uint32_t cycles) {
+FL_FORCE_INLINE void delay_cycles(fl::u32 cycles) {
     if (cycles == 0) return;
 
-    uint32_t start = get_cycle_count();
-    uint32_t target = start + cycles;
+    fl::u32 start = get_cycle_count();
+    fl::u32 target = start + cycles;
 
     // Busy-wait until target time (handles 32-bit wraparound)
     if (target >= start) {
@@ -211,11 +211,11 @@ FL_FORCE_INLINE void delay_cycles(uint32_t cycles) {
  *
  * @param byte Reference to byte being output (will be shifted left by 1)
  */
-FL_FORCE_INLINE uint8_t gpio_conditional_low(uint8_t byte, volatile uint32_t* port,
-                                           uint32_t bitmask, int lo_offset) {
+FL_FORCE_INLINE fl::u8 gpio_conditional_low(fl::u8 byte, volatile fl::u32* port,
+                                           fl::u32 bitmask, int lo_offset) {
     // Shift left to get bit 7 into bit 8 position, check if it was set
-    uint16_t temp = (uint16_t)byte << 1;
-    uint8_t shifted_byte = (uint8_t)temp;  // Get shifted value
+    fl::u16 temp = (fl::u16)byte << 1;
+    fl::u8 shifted_byte = (fl::u8)temp;  // Get shifted value
 
     // If bit 7 was 0 (bit 8 of temp is 0), set pin LOW
     FL_COMPILER_BARRIER();
@@ -233,7 +233,7 @@ FL_FORCE_INLINE uint8_t gpio_conditional_low(uint8_t byte, volatile uint32_t* po
  * load_led_byte - Load byte from LED array
  * Equivalent to: loadleds3 macro
  */
-FL_FORCE_INLINE uint8_t load_led_byte(const uint8_t* leds, int offset) {
+FL_FORCE_INLINE fl::u8 load_led_byte(const fl::u8* leds, int offset) {
     return leds[offset];
 }
 
@@ -250,8 +250,8 @@ FL_FORCE_INLINE uint8_t load_led_byte(const uint8_t* leds, int offset) {
  * @param channel Channel index (0, 1, or 2 for R, G, B)
  * @return Dither value to add to pixel
  */
-FL_FORCE_INLINE uint8_t load_and_prepare_dither(uint8_t pixel, M0ClocklessData* data, int channel) {
-    uint8_t dither = data->d[channel];
+FL_FORCE_INLINE fl::u8 load_and_prepare_dither(fl::u8 pixel, M0ClocklessData* data, int channel) {
+    fl::u8 dither = data->d[channel];
 
     // Optimization: if pixel is black, skip dithering
     if (pixel == 0) {
@@ -268,10 +268,10 @@ FL_FORCE_INLINE uint8_t load_and_prepare_dither(uint8_t pixel, M0ClocklessData* 
  * The assembly version stores scale factors as 32-bit fixed-point multipliers.
  * After multiplication, the high 16 bits contain the scaled result.
  */
-FL_FORCE_INLINE uint8_t apply_scale(uint8_t pixel, uint32_t scale_factor) {
-    uint32_t result = (uint32_t)pixel * scale_factor;
+FL_FORCE_INLINE fl::u8 apply_scale(fl::u8 pixel, fl::u32 scale_factor) {
+    fl::u32 result = (fl::u32)pixel * scale_factor;
     // Extract high byte (bits 23:16) as the scaled result
-    return (uint8_t)(result >> 16);
+    return (fl::u8)(result >> 16);
 }
 
 /**
@@ -283,15 +283,15 @@ FL_FORCE_INLINE uint8_t apply_scale(uint8_t pixel, uint32_t scale_factor) {
  */
 FL_FORCE_INLINE void adjust_dither(M0ClocklessData* data, int channel) {
     // Calculate: d = e - d
-    int16_t new_dither = (int16_t)data->e[channel] - (int16_t)data->d[channel];
-    data->d[channel] = (uint8_t)new_dither;
+    fl::i16 new_dither = (fl::i16)data->e[channel] - (fl::i16)data->d[channel];
+    data->d[channel] = (fl::u8)new_dither;
 }
 
 /**
  * advance_led_pointer - Move to next pixel in LED array
  * Equivalent to: incleds3 macro
  */
-FL_FORCE_INLINE const uint8_t* advance_led_pointer(const uint8_t* leds, M0ClocklessData* data) {
+FL_FORCE_INLINE const fl::u8* advance_led_pointer(const fl::u8* leds, M0ClocklessData* data) {
     return leds + data->adj;
 }
 
@@ -303,7 +303,7 @@ FL_FORCE_INLINE const uint8_t* advance_led_pointer(const uint8_t* leds, M0Clockl
  * left-shifts move each bit into the carry flag. In C++, we just need to
  * ensure the byte is ready for our gpio_conditional_low to extract bits.
  */
-FL_FORCE_INLINE uint8_t prepare_byte_for_output(uint8_t byte) {
+FL_FORCE_INLINE fl::u8 prepare_byte_for_output(fl::u8 byte) {
     // In C++ version, we don't need special positioning since gpio_conditional_low
     // handles bit extraction differently (checks bit 7 after left shift)
     return byte;
@@ -322,13 +322,13 @@ FL_END_OPTIMIZE_FOR_EXACT_TIMING
 FL_BEGIN_OPTIMIZE_FOR_EXACT_TIMING
 
 
-static constexpr uint32_t ns_to_cycles(uint32_t ns) {
-  return (uint32_t)(((uint64_t)ns * (uint64_t)F_CPU + 999'999'999ULL) / 1'000'000'000ULL);
+static constexpr fl::u32 ns_to_cycles(fl::u32 ns) {
+  return (fl::u32)(((uint64_t)ns * (uint64_t)F_CPU + 999'999'999ULL) / 1'000'000'000ULL);
 }
 
 template<int HI_OFFSET, int LO_OFFSET, typename TIMING, EOrder RGB_ORDER, int WAIT_TIME>
-int showLedData(volatile uint32_t* port, uint32_t bitmask,
-                const uint8_t* leds, uint32_t num_leds,
+int showLedData(volatile fl::u32* port, fl::u32 bitmask,
+                const fl::u8* leds, fl::u32 num_leds,
                 M0ClocklessData* pData) {
 
     // Compile-time validation of GPIO offsets
@@ -342,9 +342,9 @@ int showLedData(volatile uint32_t* port, uint32_t bitmask,
     // static constexpr uint32_t T1_CYCLES = (TIMING::T1 * (F_CPU / 1000000UL) + 500) / 1000;
     // static constexpr uint32_t T2_CYCLES = (TIMING::T2 * (F_CPU / 1000000UL) + 500) / 1000;
     // static constexpr uint32_t T3_CYCLES = (TIMING::T3 * (F_CPU / 1000000UL) + 500) / 1000;
-    static constexpr uint32_t T1_CYCLES = ns_to_cycles(TIMING::T1);
-    static constexpr uint32_t T2_CYCLES = ns_to_cycles(TIMING::T2);
-    static constexpr uint32_t T3_CYCLES = ns_to_cycles(TIMING::T3);
+    static constexpr fl::u32 T1_CYCLES = ns_to_cycles(TIMING::T1);
+    static constexpr fl::u32 T2_CYCLES = ns_to_cycles(TIMING::T2);
+    static constexpr fl::u32 T3_CYCLES = ns_to_cycles(TIMING::T3);
 
 
     // RGB channel ordering macro (use unique name to avoid collision with pixel_controller.h)
@@ -355,9 +355,9 @@ int showLedData(volatile uint32_t* port, uint32_t bitmask,
                    (RGB_ORDER == BRG && X == 1 ? 0 : (RGB_ORDER == BGR && X == 0 ? 2 : X)))))))))))
 
     // Local variables
-    uint32_t counter = num_leds;
-    uint8_t b0 = 0, b1 = 0, b2 = 0;  // Bytes for current pixel (positioned for output)
-    uint8_t bn0 = 0, bn1 = 0, bn2 = 0;  // Next bytes being processed
+    fl::u32 counter = num_leds;
+    fl::u8 b0 = 0, b1 = 0, b2 = 0;  // Bytes for current pixel (positioned for output)
+    fl::u8 bn0 = 0, bn1 = 0, bn2 = 0;  // Next bytes being processed
 
 #if (FASTLED_SCALE8_FIXED == 1)
     ++pData->s[0];
@@ -369,8 +369,8 @@ int showLedData(volatile uint32_t* port, uint32_t bitmask,
     // Helper macro: Process a byte (load, dither, scale)
     /////////////////////////////////////////////////////////////////////////////
     #define PROCESS_BYTE(channel, bn) do { \
-        uint8_t pixel = load_led_byte(leds, M0_RO(channel)); \
-        uint8_t dither = load_and_prepare_dither(pixel, pData, M0_RO(channel)); \
+        fl::u8 pixel = load_led_byte(leds, M0_RO(channel)); \
+        fl::u8 dither = load_and_prepare_dither(pixel, pData, M0_RO(channel)); \
         pixel = qadd8(pixel, dither); \
         pixel = apply_scale(pixel, pData->s[M0_RO(channel)]); \
         adjust_dither(pData, M0_RO(channel)); \
@@ -395,7 +395,7 @@ int showLedData(volatile uint32_t* port, uint32_t bitmask,
         byte = gpio_conditional_low(byte, port, bitmask, LO_OFFSET); \
         FL_COMPILER_BARRIER(); \
         work_code; \
-        constexpr uint32_t t2_overhead = 4 + work_cycles; \
+        constexpr fl::u32 t2_overhead = 4 + work_cycles; \
         if (T2_CYCLES > t2_overhead) { delay_cycles(T2_CYCLES - t2_overhead); } \
         FL_COMPILER_BARRIER(); \
         gpio_set_low(port, bitmask, LO_OFFSET); \
@@ -476,18 +476,18 @@ int showLedData(volatile uint32_t* port, uint32_t bitmask,
         });
 
         // Check interrupt timing using SysTick
-        uint32_t ticksBeforeInterrupts = SysTick->VAL;
-        uint32_t prim = __get_PRIMASK();
+        fl::u32 ticksBeforeInterrupts = SysTick->VAL;
+        fl::u32 prim = __get_PRIMASK();
         __enable_irq();
         --counter;
         if (prim == 0) __disable_irq();
 
         // Calculate elapsed time and check if it exceeds 45μs
-        const uint32_t kTicksPerMs = VARIANT_MCK / 1000;
-        const uint32_t kTicksPerUs = kTicksPerMs / 1000;
-        const uint32_t kTicksIn45us = kTicksPerUs * 45;
+        const fl::u32 kTicksPerMs = VARIANT_MCK / 1000;
+        const fl::u32 kTicksPerUs = kTicksPerMs / 1000;
+        const fl::u32 kTicksIn45us = kTicksPerUs * 45;
 
-        const uint32_t currentTicks = SysTick->VAL;
+        const fl::u32 currentTicks = SysTick->VAL;
 
         if (ticksBeforeInterrupts < currentTicks) {
             // Timer wrapped around
@@ -608,23 +608,23 @@ FL_END_OPTIMIZE_FOR_EXACT_TIMING
 
 // GPIO offsets <4, 8> (KL26, NRF platforms)
 template int showLedData<4, 8, fl::TIMING_WS2812_800KHZ, fl::RGB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<4, 8, fl::TIMING_WS2812_800KHZ, fl::GRB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<4, 8, fl::TIMING_WS2812_800KHZ, fl::BGR, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<4, 8, fl::TIMING_WS2812_800KHZ, fl::BRG, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 
 // GPIO offsets <8, 4> (SAMD platforms)
 template int showLedData<8, 4, fl::TIMING_WS2812_800KHZ, fl::RGB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<8, 4, fl::TIMING_WS2812_800KHZ, fl::GRB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<8, 4, fl::TIMING_WS2812_800KHZ, fl::BGR, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<8, 4, fl::TIMING_WS2812_800KHZ, fl::BRG, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 
 //-----------------------------------------------------------------------------
 // WS2813 @ 800kHz - WS2812 variant with signal amplification
@@ -632,15 +632,15 @@ template int showLedData<8, 4, fl::TIMING_WS2812_800KHZ, fl::BRG, 0>(
 
 // GPIO offsets <4, 8>
 template int showLedData<4, 8, fl::TIMING_WS2813, RGB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<4, 8, fl::TIMING_WS2813, GRB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 
 // GPIO offsets <8, 4>
 template int showLedData<8, 4, fl::TIMING_WS2813, RGB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<8, 4, fl::TIMING_WS2813, GRB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 
 //-----------------------------------------------------------------------------
 // WS2811 @ 400kHz - Slower variant
@@ -648,15 +648,15 @@ template int showLedData<8, 4, fl::TIMING_WS2813, GRB, 0>(
 
 // GPIO offsets <4, 8>
 template int showLedData<4, 8, fl::TIMING_WS2811_400KHZ, fl::RGB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<4, 8, fl::TIMING_WS2811_400KHZ, fl::GRB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 
 // GPIO offsets <8, 4>
 template int showLedData<8, 4, fl::TIMING_WS2811_400KHZ, fl::RGB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<8, 4, fl::TIMING_WS2811_400KHZ, fl::GRB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 
 //-----------------------------------------------------------------------------
 // WS2815 @ 400kHz - High voltage variant (12V LEDs)
@@ -664,15 +664,15 @@ template int showLedData<8, 4, fl::TIMING_WS2811_400KHZ, fl::GRB, 0>(
 
 // GPIO offsets <4, 8>
 template int showLedData<4, 8, fl::TIMING_WS2815, RGB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<4, 8, fl::TIMING_WS2815, GRB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 
 // GPIO offsets <8, 4>
 template int showLedData<8, 4, fl::TIMING_WS2815, RGB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<8, 4, fl::TIMING_WS2815, GRB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 
 //-----------------------------------------------------------------------------
 // SK6812 @ 800kHz - Alternative to WS2812 (often RGBW)
@@ -680,15 +680,15 @@ template int showLedData<8, 4, fl::TIMING_WS2815, GRB, 0>(
 
 // GPIO offsets <4, 8>
 template int showLedData<4, 8, fl::TIMING_SK6812, fl::RGB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<4, 8, fl::TIMING_SK6812, GRB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 
 // GPIO offsets <8, 4>
 template int showLedData<8, 4, fl::TIMING_SK6812, fl::RGB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<8, 4, fl::TIMING_SK6812, GRB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 
 //-----------------------------------------------------------------------------
 // SK6822 @ 800kHz - Another SK series variant
@@ -696,15 +696,15 @@ template int showLedData<8, 4, fl::TIMING_SK6812, GRB, 0>(
 
 // GPIO offsets <4, 8>
 template int showLedData<4, 8, fl::TIMING_SK6822, RGB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<4, 8, fl::TIMING_SK6822, GRB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 
 // GPIO offsets <8, 4>
 template int showLedData<8, 4, fl::TIMING_SK6822, RGB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<8, 4, fl::TIMING_SK6822, GRB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 
 //-----------------------------------------------------------------------------
 // TM1809 @ 800kHz - Alternative chipset
@@ -712,15 +712,15 @@ template int showLedData<8, 4, fl::TIMING_SK6822, GRB, 0>(
 
 // GPIO offsets <4, 8>
 template int showLedData<4, 8, fl::TIMING_TM1809_800KHZ, fl::RGB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<4, 8, fl::TIMING_TM1809_800KHZ, fl::GRB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 
 // GPIO offsets <8, 4>
 template int showLedData<8, 4, fl::TIMING_TM1809_800KHZ, fl::RGB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<8, 4, fl::TIMING_TM1809_800KHZ, fl::GRB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 
 //-----------------------------------------------------------------------------
 // TM1829 @ 800kHz - Another TM series chipset
@@ -728,15 +728,15 @@ template int showLedData<8, 4, fl::TIMING_TM1809_800KHZ, fl::GRB, 0>(
 
 // GPIO offsets <4, 8>
 template int showLedData<4, 8, fl::TIMING_TM1829_800KHZ, fl::RGB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<4, 8, fl::TIMING_TM1829_800KHZ, fl::GRB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 
 // GPIO offsets <8, 4>
 template int showLedData<8, 4, fl::TIMING_TM1829_800KHZ, fl::RGB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<8, 4, fl::TIMING_TM1829_800KHZ, fl::GRB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 
 //-----------------------------------------------------------------------------
 // TM1814 RGBW @ 800kHz - 4-channel (RGBW) chipset
@@ -745,15 +745,15 @@ template int showLedData<8, 4, fl::TIMING_TM1829_800KHZ, fl::GRB, 0>(
 
 // GPIO offsets <4, 8>
 template int showLedData<4, 8, fl::TIMING_TM1814, RGB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<4, 8, fl::TIMING_TM1814, GRB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 
 // GPIO offsets <8, 4>
 template int showLedData<8, 4, fl::TIMING_TM1814, RGB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 template int showLedData<8, 4, fl::TIMING_TM1814, GRB, 0>(
-    volatile uint32_t*, uint32_t, const uint8_t*, uint32_t, M0ClocklessData*);
+    volatile fl::u32*, fl::u32, const fl::u8*, fl::u32, M0ClocklessData*);
 
 #endif  // End of disabled explicit instantiations
 

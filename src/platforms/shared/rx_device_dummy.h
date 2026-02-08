@@ -34,18 +34,18 @@ public:
         return true;  // Always finished (no data)
     }
 
-    RxWaitResult wait(uint32_t timeout_ms) override {
+    RxWaitResult wait(u32 timeout_ms) override {
         (void)timeout_ms;
         warnOnce();
         return RxWaitResult::TIMEOUT;
     }
 
-    fl::Result<uint32_t, DecodeError> decode(const ChipsetTiming4Phase &timing,
-                                               fl::span<uint8_t> out) override {
+    fl::Result<u32, DecodeError> decode(const ChipsetTiming4Phase &timing,
+                                               fl::span<u8> out) override {
         (void)timing;
         (void)out;
         warnOnce();
-        return fl::Result<uint32_t, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
+        return fl::Result<u32, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
     }
 
     size_t getRawEdgeTimes(fl::span<EdgeTime> out, size_t offset = 0) override {

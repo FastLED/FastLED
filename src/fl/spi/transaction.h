@@ -16,7 +16,7 @@
 namespace fl {
 
 // Forward declaration for SPIError
-enum class SPIError : uint8_t;
+enum class SPIError : u8;
 
 namespace spi {
 
@@ -39,7 +39,7 @@ public:
     /// @brief Wait for transaction to complete
     /// @param timeout_ms Maximum time to wait
     /// @returns true if completed, false on timeout
-    bool wait(uint32_t timeout_ms = (fl::numeric_limits<uint32_t>::max)());
+    bool wait(u32 timeout_ms = (fl::numeric_limits<u32>::max)());
 
     /// @brief Check if transaction is complete
     /// @returns true if done, false if still in progress

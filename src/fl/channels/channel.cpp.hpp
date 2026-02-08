@@ -26,8 +26,8 @@ FL_EXTERN_C_END
 namespace fl {
 
 
-int32_t Channel::nextId() {
-    static fl::atomic<int32_t> gNextChannelId(0); // okay static in header
+i32 Channel::nextId() {
+    static fl::atomic<i32> gNextChannelId(0); // okay static in header
     return gNextChannelId.fetch_add(1);
 }
 

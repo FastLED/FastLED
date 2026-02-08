@@ -21,7 +21,7 @@ constexpr size_t MAX_SPI_LANES = 32;
 // ============================================================================
 
 /// @brief SPI output mode for multi-lane devices
-enum spi_output_mode_t : uint8_t {
+enum spi_output_mode_t : u8 {
     SPI_AUTO = 0,  ///< Auto-selects best backend (DMA/bit-bang/ISR)
     SPI_HW,        ///< Use DMA-capable hardware (Async or Sync), supports 1/2/4/8 lanes depending on platform
     SPI_BITBANG,   ///< Use bit-bang software (Blocking)
@@ -29,7 +29,7 @@ enum spi_output_mode_t : uint8_t {
 };
 
 /// @brief Parallel device execution modes
-enum class SpiParallelMode : uint8_t {
+enum class SpiParallelMode : u8 {
     AUTO = 0,          ///< Auto-select best mode (default: ISR)
     ISR_ASYNC,         ///< ISR-driven async mode
     BITBANG_BLOCKING   ///< Bit-bang blocking mode
@@ -44,7 +44,7 @@ struct SpiConfig {
     SpiConfig() = default;
 
     /// @brief Construct single-lane SPI config
-    SpiConfig(int clk, int data, uint32_t speed_hz = 0xffffffff, spi_output_mode_t output_mode = SPI_AUTO, uint8_t spi_mode = 0)
+    SpiConfig(int clk, int data, u32 speed_hz = 0xffffffff, spi_output_mode_t output_mode = SPI_AUTO, u8 spi_mode = 0)
         : clock_pin(clk)
         , clock_speed_hz(speed_hz)
         , output_mode(output_mode)
@@ -53,7 +53,7 @@ struct SpiConfig {
     }
 
     /// @brief Construct multi-lane SPI config
-    SpiConfig(int clk, fl::span<const int> pins, uint32_t speed_hz = 0xffffffff, spi_output_mode_t output_mode = SPI_AUTO, uint8_t spi_mode = 0)
+    SpiConfig(int clk, fl::span<const int> pins, u32 speed_hz = 0xffffffff, spi_output_mode_t output_mode = SPI_AUTO, u8 spi_mode = 0)
         : clock_pin(clk)
         , clock_speed_hz(speed_hz)
         , output_mode(output_mode)
@@ -69,9 +69,9 @@ struct SpiConfig {
 
     int clock_pin;                          ///< SCK pin number
     fl::vector<int> data_pins;              ///< Data pins (1 = single-lane, 2-8 = multi-lane)
-    uint32_t clock_speed_hz = 0xffffffff;   ///< Clock frequency in Hz (0xffffffff = as fast as possible)
+    u32 clock_speed_hz = 0xffffffff;   ///< Clock frequency in Hz (0xffffffff = as fast as possible)
     spi_output_mode_t output_mode = SPI_AUTO; ///< Output mode (auto/hw/bitbang/isr)
-    uint8_t spi_mode = 0;                   ///< SPI mode 0-3 (CPOL/CPHA)
+    u8 spi_mode = 0;                   ///< SPI mode 0-3 (CPOL/CPHA)
 };
 
 namespace spi {

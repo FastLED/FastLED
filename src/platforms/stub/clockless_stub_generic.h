@@ -29,12 +29,12 @@ protected:
 		pixels_rgb.disableColorAdjustment();
 		auto iterator = pixels_rgb.as_iterator(RgbwInvalid());
 		iterator.writeWS2812(&mRgb);
-		mTracker.update(fl::span<const uint8_t>(mRgb.data(), mRgb.size()));
+		mTracker.update(fl::span<const u8>(mRgb.data(), mRgb.size()));
 	}
 
 private:
 	ActiveStripTracker mTracker;
-	fl::vector<uint8_t> mRgb;
+	fl::vector<u8> mRgb;
 };
 
 // Adapter struct that accepts timing-like objects via duck typing
@@ -52,12 +52,12 @@ protected:
 		pixels_rgb.disableColorAdjustment();
 		auto iterator = pixels_rgb.as_iterator(RgbwInvalid());
 		iterator.writeWS2812(&mRgb);
-		mTracker.update(fl::span<const uint8_t>(mRgb.data(), mRgb.size()));
+		mTracker.update(fl::span<const u8>(mRgb.data(), mRgb.size()));
 	}
 
 private:
 	ActiveStripTracker mTracker;
-	fl::vector<uint8_t> mRgb;
+	fl::vector<u8> mRgb;
 };
 
 // ClocklessBlockController for type-based timing (TIMING_WS2812_800KHZ, etc.)
@@ -76,11 +76,11 @@ protected:
 		pixels_rgb.disableColorAdjustment();
 		auto iterator = pixels_rgb.as_iterator(RgbwInvalid());
 		iterator.writeWS2812(&mRgb);
-		mTracker.update(fl::span<const uint8_t>(mRgb.data(), mRgb.size()));
+		mTracker.update(fl::span<const u8>(mRgb.data(), mRgb.size()));
 	}
 
 private:
 	ActiveStripTracker mTracker;
-	fl::vector<uint8_t> mRgb;
+	fl::vector<u8> mRgb;
 };
 }  // namespace fl

@@ -80,7 +80,7 @@ inline PinValue digitalRead(int /*pin*/) {
 /// @param pin Arduino pin number
 /// @return ADC value (0-4095 for 12-bit SAM3X8E ADC)
 /// @note STUB: Real implementation requires ADC peripheral configuration
-inline uint16_t analogRead(int /*pin*/) {
+inline u16 analogRead(int /*pin*/) {
     // STUB: ADC implementation requires:
     // 1. Enable ADC peripheral clock (PMC)
     // 2. Configure ADC resolution, timing, reference
@@ -96,7 +96,7 @@ inline uint16_t analogRead(int /*pin*/) {
 /// @param pin Arduino pin number
 /// @param val PWM duty cycle (0-255)
 /// @note STUB: Real implementation requires PWM peripheral configuration
-inline void analogWrite(int /*pin*/, uint16_t /*val*/) {
+inline void analogWrite(int /*pin*/, u16 /*val*/) {
     // STUB: PWM implementation requires:
     // 1. Enable PWM peripheral clock (PMC)
     // 2. Configure PWM channel mode, period, prescaler
@@ -110,7 +110,7 @@ inline void analogWrite(int /*pin*/, uint16_t /*val*/) {
 /// @param pin Arduino pin number
 /// @param val PWM duty cycle (0-65535)
 /// @note STUB: Real implementation requires PWM peripheral configuration
-inline void setPwm16(int /*pin*/, uint16_t /*val*/) {
+inline void setPwm16(int /*pin*/, u16 /*val*/) {
     // STUB: 16-bit PWM would configure SAM3X8E PWM controller
     // with CPRD=65535 for full 16-bit resolution
     // For now, no-op as stub.

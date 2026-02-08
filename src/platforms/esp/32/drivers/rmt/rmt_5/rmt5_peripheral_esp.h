@@ -83,10 +83,10 @@ public:
     bool enableChannel(void* channel_handle) override = 0;
     bool disableChannel(void* channel_handle) override = 0;
     bool transmit(void* channel_handle, void* encoder_handle,
-                  const uint8_t* buffer, size_t buffer_size) override = 0;
-    bool waitAllDone(void* channel_handle, uint32_t timeout_ms) override = 0;
+                  const u8* buffer, size_t buffer_size) override = 0;
+    bool waitAllDone(void* channel_handle, u32 timeout_ms) override = 0;
     void* createEncoder(const ChipsetTiming& timing,
-                        uint32_t resolution_hz) override = 0;
+                        u32 resolution_hz) override = 0;
     void deleteEncoder(void* encoder_handle) override = 0;
     bool resetEncoder(void* encoder_handle) override = 0;
     bool registerTxCallback(void* channel_handle,
@@ -94,8 +94,8 @@ public:
                             void* user_ctx) override = 0;
     void configureLogging() override = 0;
     bool syncCache(void* buffer, size_t size) override = 0;
-    uint8_t* allocateDmaBuffer(size_t size) override = 0;
-    void freeDmaBuffer(uint8_t* buffer) override = 0;
+    u8* allocateDmaBuffer(size_t size) override = 0;
+    void freeDmaBuffer(u8* buffer) override = 0;
 
 protected:
     /// @brief Protected constructor for singleton

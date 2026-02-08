@@ -11,8 +11,8 @@
 namespace fl {
 
 size_t wave8EncodeI2sSingleLane(
-    fl::span<const uint8_t> input,
-    fl::span<uint16_t> output,
+    fl::span<const u8> input,
+    fl::span<u16> output,
     const Wave8BitExpansionLut& lut) {
 
     // Calculate required output size
@@ -42,11 +42,11 @@ size_t wave8EncodeI2sSingleLane(
         // Output = 64 uint16_t words (each with D0 = pulse value)
 
         for (int sym = 0; sym < 8; sym++) {
-            uint8_t wave8_bits = wave8_output.symbols[sym].data;
+            u8 wave8_bits = wave8_output.symbols[sym].data;
 
             // Each bit in wave8_bits becomes one output word
             for (int bit = 7; bit >= 0; bit--) {
-                uint16_t word = ((wave8_bits >> bit) & 1);
+                u16 word = ((wave8_bits >> bit) & 1);
                 output[output_idx++] = word;
             }
         }
@@ -56,9 +56,9 @@ size_t wave8EncodeI2sSingleLane(
 }
 
 size_t wave8EncodeI2sMultiLane(
-    fl::span<const uint8_t>* lanes,
+    fl::span<const u8>* lanes,
     int num_lanes,
-    fl::span<uint16_t> output,
+    fl::span<u16> output,
     const Wave8BitExpansionLut& lut) {
 
     if (num_lanes < 1 || num_lanes > 16 || lanes == nullptr) {
@@ -102,12 +102,12 @@ size_t wave8EncodeI2sMultiLane(
         for (int sym = 0; sym < 8; sym++) {
             // For each of the 8 pulses in the symbol:
             for (int pulse = 7; pulse >= 0; pulse--) {
-                uint16_t word = 0;
+                u16 word = 0;
 
                 // Gather pulse bit from each lane
                 for (int lane = 0; lane < num_lanes; lane++) {
-                    uint8_t wave8_bits = wave8_lanes[lane].symbols[sym].data;
-                    uint16_t bit = (wave8_bits >> pulse) & 1;
+                    u8 wave8_bits = wave8_lanes[lane].symbols[sym].data;
+                    u16 bit = (wave8_bits >> pulse) & 1;
                     word |= (bit << lane);
                 }
 
@@ -119,19 +119,19 @@ size_t wave8EncodeI2sMultiLane(
     return output_idx;
 }
 
-uint32_t calculateI2sClockHz(const ChipsetTiming& timing) {
+u32 calculateI2sClockHz(const ChipsetTiming& timing) {
     // Calculate total period for one LED bit
     // WS2812: T1 (T0H/T1H start) + T2 (middle) + T3 (T0L/T1L end)
     // Total period = T1 + T2 + T3 nanoseconds
-    uint32_t total_period_ns = timing.T1 + timing.T2 + timing.T3;
+    u32 total_period_ns = timing.T1 + timing.T2 + timing.T3;
 
     // Wave8 expands each bit to 8 pulses
     // Pulse period = total_period_ns / 8
-    uint32_t pulse_period_ns = total_period_ns / 8;
+    u32 pulse_period_ns = total_period_ns / 8;
 
     // Clock frequency = 1 / pulse_period
     // f = 1e9 / pulse_period_ns
-    uint32_t clock_hz = 1000000000U / pulse_period_ns;
+    u32 clock_hz = 1000000000U / pulse_period_ns;
 
     return clock_hz;
 }

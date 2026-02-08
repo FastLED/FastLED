@@ -41,13 +41,13 @@ public:
      *
      * Updates the brightness and applies to controller if client is on.
      */
-    void setBrightness(uint8_t brightness);
+    void setBrightness(u8 brightness);
 
     /**
      * @brief Get current brightness level
      * @return Brightness value (0-255)
      */
-    uint8_t getBrightness() const { return mBrightness; }
+    u8 getBrightness() const { return mBrightness; }
 
     /**
      * @brief Set on/off state
@@ -138,17 +138,17 @@ public:
      * Limits how often the LED strip can be updated.
      * Delegates to controller's setMaxRefreshRate method.
      */
-    void setMaxRefreshRate(uint16_t fps);
+    void setMaxRefreshRate(u16 fps);
 
     /**
      * @brief Get maximum refresh rate
      * @return Maximum frames per second (0 = no limit)
      */
-    uint16_t getMaxRefreshRate() const;
+    u16 getMaxRefreshRate() const;
 
 private:
     fl::shared_ptr<IFastLED> mController;  // FastLED controller interface
-    uint8_t mBrightness;                    // Current brightness (0-255)
+    u8 mBrightness;                    // Current brightness (0-255)
     bool mOn;                                // On/off state
 };
 

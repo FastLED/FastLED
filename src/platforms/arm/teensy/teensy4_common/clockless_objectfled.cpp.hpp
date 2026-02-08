@@ -13,15 +13,15 @@
 
 namespace {
 
-typedef fl::FixedVector<uint8_t, 50> PinList50;
+typedef fl::FixedVector<fl::u8, 50> PinList50;
 
 // Lightweight strip tracking
 struct StripInfo {
-    uint8_t pin;
-    uint16_t numLeds;
-    uint16_t numBytes;      // numLeds * (3 or 4)
-    uint16_t offsetBytes;   // Offset into frameBufferLocal
-    uint16_t bytesWritten;  // Bytes written so far (for padding check)
+    fl::u8 pin;
+    fl::u16 numLeds;
+    fl::u16 numBytes;      // numLeds * (3 or 4)
+    fl::u16 offsetBytes;   // Offset into frameBufferLocal
+    fl::u16 bytesWritten;  // Bytes written so far (for padding check)
     bool isRgbw;
 };
 
@@ -94,7 +94,7 @@ void ObjectFLEDGroupBase::onQueuingStart() {
     mDrawn = false;
 }
 
-void ObjectFLEDGroupBase::addStrip(uint8_t pin, PixelIterator& pixel_iterator) {
+void ObjectFLEDGroupBase::addStrip(u8 pin, PixelIterator& pixel_iterator) {
     auto& strips = *static_cast<fl::vector<StripInfo>*>(mStripsData);
 
     // Validate pin before adding
@@ -172,7 +172,7 @@ void ObjectFLEDGroupBase::onQueuingDone() {
     }
 
     // Assign offsets for each strip (interleaved layout)
-    uint16_t offset = 0;
+    u16 offset = 0;
     for (auto& strip : strips) {
         strip.offsetBytes = offset;
         strip.bytesWritten = 0;
@@ -242,7 +242,7 @@ void ObjectFLEDGroupBase::rebuildObjectFLED() {
     fl::memset(objectfled->frameBufferLocal, 0, totalBytes);
 }
 
-void ObjectFLEDGroupBase::writePixels(uint8_t pin, PixelIterator& pixel_iterator) {
+void ObjectFLEDGroupBase::writePixels(u8 pin, PixelIterator& pixel_iterator) {
     auto& strips = *static_cast<fl::vector<StripInfo>*>(mStripsData);
     auto* objectfled = static_cast<fl::ObjectFLED*>(mObjectFLED);
 
@@ -266,13 +266,13 @@ void ObjectFLEDGroupBase::writePixels(uint8_t pin, PixelIterator& pixel_iterator
     }
 
     // Write directly to ObjectFLED's frameBufferLocal (saves a frame buffer!)
-    uint8_t* dest = objectfled->frameBufferLocal + stripInfo->offsetBytes;
-    uint16_t bytesWritten = 0;
+    u8* dest = objectfled->frameBufferLocal + stripInfo->offsetBytes;
+    u16 bytesWritten = 0;
 
     const Rgbw rgbw = pixel_iterator.get_rgbw();
 
     if (rgbw.active()) {
-        uint8_t r, g, b, w;
+        u8 r, g, b, w;
         while (pixel_iterator.has(1)) {
             pixel_iterator.loadAndScaleRGBW(&r, &g, &b, &w);
             *dest++ = r;
@@ -284,7 +284,7 @@ void ObjectFLEDGroupBase::writePixels(uint8_t pin, PixelIterator& pixel_iterator
             pixel_iterator.stepDithering();
         }
     } else {
-        uint8_t r, g, b;
+        u8 r, g, b;
         while (pixel_iterator.has(1)) {
             pixel_iterator.loadAndScaleRGB(&r, &g, &b);
             *dest++ = r;

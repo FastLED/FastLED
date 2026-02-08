@@ -26,7 +26,7 @@ bool SpiHw2Stub::begin(const SpiHw2::Config& config) {
     }
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
-    if (mBusId != -1 && config.bus_num != static_cast<uint8_t>(mBusId)) {
+    if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
         return false;  // Mismatch
     }
 
@@ -85,7 +85,7 @@ bool SpiHw2Stub::transmit(TransmitMode mode) {
 
     // Capture data for inspection
     mLastBuffer.clear();
-    fl::span<uint8_t> buffer_span = mCurrentBuffer.data();
+    fl::span<u8> buffer_span = mCurrentBuffer.data();
     mLastBuffer.reserve(buffer_span.size());
     for (size_t i = 0; i < buffer_span.size(); ++i) {
         mLastBuffer.push_back(buffer_span[i]);
@@ -97,7 +97,7 @@ bool SpiHw2Stub::transmit(TransmitMode mode) {
     return true;
 }
 
-bool SpiHw2Stub::waitComplete(uint32_t timeout_ms) {
+bool SpiHw2Stub::waitComplete(u32 timeout_ms) {
     (void)timeout_ms;  // Unused in stub
     mBusy = false;
 
@@ -123,15 +123,15 @@ const char* SpiHw2Stub::getName() const {
     return mName;
 }
 
-const fl::vector<uint8_t>& SpiHw2Stub::getLastTransmission() const {
+const fl::vector<u8>& SpiHw2Stub::getLastTransmission() const {
     return mLastBuffer;
 }
 
-uint32_t SpiHw2Stub::getTransmissionCount() const {
+u32 SpiHw2Stub::getTransmissionCount() const {
     return mTransmitCount;
 }
 
-uint32_t SpiHw2Stub::getClockSpeed() const {
+u32 SpiHw2Stub::getClockSpeed() const {
     return mClockSpeed;
 }
 
@@ -145,15 +145,15 @@ void SpiHw2Stub::reset() {
     mBusy = false;
 }
 
-fl::vector<fl::vector<uint8_t>> SpiHw2Stub::extractLanes(uint8_t num_lanes, size_t bytes_per_lane) const {
-    fl::vector<fl::vector<uint8_t>> lanes(num_lanes);
+fl::vector<fl::vector<u8>> SpiHw2Stub::extractLanes(u8 num_lanes, size_t bytes_per_lane) const {
+    fl::vector<fl::vector<u8>> lanes(num_lanes);
 
     if (num_lanes != 2) {
         return lanes;  // Only support 2 lanes for dual-SPI
     }
 
     // Initialize lane vectors
-    for (uint8_t i = 0; i < num_lanes; i++) {
+    for (u8 i = 0; i < num_lanes; i++) {
         lanes[i].resize(bytes_per_lane);
     }
 
@@ -166,13 +166,13 @@ fl::vector<fl::vector<uint8_t>> SpiHw2Stub::extractLanes(uint8_t num_lanes, size
         }
 
         // Extract bit pairs from interleaved data
-        uint8_t byte0 = mLastBuffer[input_offset];     // Bit positions 7,6,5,4
-        uint8_t byte1 = mLastBuffer[input_offset + 1];  // Bit positions 3,2,1,0
+        u8 byte0 = mLastBuffer[input_offset];     // Bit positions 7,6,5,4
+        u8 byte1 = mLastBuffer[input_offset + 1];  // Bit positions 3,2,1,0
 
         // Reconstruct lane bytes by extracting individual bits
         // Each pair has: lane0 bit at position 0, lane1 bit at position 1
-        uint8_t lane0_byte = 0;
-        uint8_t lane1_byte = 0;
+        u8 lane0_byte = 0;
+        u8 lane1_byte = 0;
 
         // Extract from byte0 (bits 7,6,5,4)
         lane0_byte |= ((byte0 >> 0) & 0x01) << 7;  // bit 7

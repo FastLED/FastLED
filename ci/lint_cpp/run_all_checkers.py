@@ -44,7 +44,7 @@ from ci.lint_cpp.serial_printf_checker import SerialPrintfChecker
 from ci.lint_cpp.static_in_headers_checker import StaticInHeaderChecker
 from ci.lint_cpp.std_namespace_checker import StdNamespaceChecker
 from ci.lint_cpp.stdint_type_checker import (
-    StdintTypeChecker,  # noqa: F401 - disabled, will be enabled later
+    StdintTypeChecker,
 )
 from ci.lint_cpp.test_path_structure_checker import TestPathStructureChecker
 from ci.lint_cpp.test_unity_build import check as check_unity_build
@@ -142,6 +142,7 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
         ReinterpretCastChecker(),
         RelativeIncludeChecker(),
         FastLEDHeaderUsageChecker(),
+        StdintTypeChecker(),  # Covers all src/ (excludes third_party/ internally)
     ]
 
     # Platforms-specific checkers
@@ -149,7 +150,6 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
         PlatformsFlNamespaceChecker(),
         NamespacePlatformsChecker(),
         IsHeaderIncludeChecker(),
-        # StdintTypeChecker(),  # Disabled - will be enabled later
     ]
 
     # Native platform defines checker — runs on ALL src/ files (including third_party/)

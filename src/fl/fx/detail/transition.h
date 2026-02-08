@@ -11,7 +11,7 @@ class Transition {
     Transition() : mStart(0), mDuration(0), mNotStarted(true) {}
     ~Transition() {}
 
-    uint8_t getProgress(fl::u32 now) {
+    u8 getProgress(fl::u32 now) {
         if (mNotStarted) {
             return 0;
         }

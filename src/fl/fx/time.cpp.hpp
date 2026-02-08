@@ -70,7 +70,7 @@ void TimeWarp::applyExact(fl::u32 timeNow) {
         scaledTime = -2147483648.0f;
     }
 
-    int32_t diff = static_cast<int32_t>(scaledTime);
+    i32 diff = static_cast<i32>(scaledTime);
     if (diff == 0) {
         return;
     }

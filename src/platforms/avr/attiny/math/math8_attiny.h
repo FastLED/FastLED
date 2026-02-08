@@ -22,7 +22,7 @@ namespace fl {
 /// @{
 
 /// Add one byte to another, saturating at 0xFF (AVR assembly)
-FL_ALWAYS_INLINE uint8_t qadd8(uint8_t i, uint8_t j) {
+FL_ALWAYS_INLINE u8 qadd8(u8 i, u8 j) {
     asm volatile(
         /* First, add j to i, conditioning the C flag */
         "add %0, %1    \n\t"
@@ -40,7 +40,7 @@ FL_ALWAYS_INLINE uint8_t qadd8(uint8_t i, uint8_t j) {
 }
 
 /// Add one byte to another, saturating at 0x7F and -0x80 (AVR assembly)
-FL_ALWAYS_INLINE int8_t qadd7(int8_t i, int8_t j) {
+FL_ALWAYS_INLINE i8 qadd7(i8 i, i8 j) {
     asm volatile(
         /* First, add j to i, conditioning the V and C flags */
         "add %0, %1    \n\t"
@@ -63,7 +63,7 @@ FL_ALWAYS_INLINE int8_t qadd7(int8_t i, int8_t j) {
 }
 
 /// Subtract one byte from another, saturating at 0x00 (AVR assembly)
-FL_ALWAYS_INLINE uint8_t qsub8(uint8_t i, uint8_t j) {
+FL_ALWAYS_INLINE u8 qsub8(u8 i, u8 j) {
     asm volatile(
         /* First, subtract j from i, conditioning the C flag */
         "sub %0, %1    \n\t"
@@ -81,14 +81,14 @@ FL_ALWAYS_INLINE uint8_t qsub8(uint8_t i, uint8_t j) {
 }
 
 /// Add one byte to another, with 8-bit result (AVR assembly)
-FL_ALWAYS_INLINE uint8_t add8(uint8_t i, uint8_t j) {
+FL_ALWAYS_INLINE u8 add8(u8 i, u8 j) {
     // Add j to i, period.
     asm volatile("add %0, %1" : "+r"(i) : "r"(j));
     return i;
 }
 
 /// Add one byte to two bytes, with 16-bit result (AVR assembly)
-FL_ALWAYS_INLINE uint16_t add8to16(uint8_t i, uint16_t j) {
+FL_ALWAYS_INLINE u16 add8to16(u8 i, u16 j) {
     // Add i(one byte) to j(two bytes)
     asm volatile("add %A[j], %[i]              \n\t"
                  "adc %B[j], __zero_reg__      \n\t"
@@ -98,14 +98,14 @@ FL_ALWAYS_INLINE uint16_t add8to16(uint8_t i, uint16_t j) {
 }
 
 /// Subtract one byte from another, 8-bit result (AVR assembly)
-FL_ALWAYS_INLINE uint8_t sub8(uint8_t i, uint8_t j) {
+FL_ALWAYS_INLINE u8 sub8(u8 i, u8 j) {
     // Subtract j from i, period.
     asm volatile("sub %0, %1" : "+r"(i) : "r"(j));
     return i;
 }
 
 /// Calculate an integer average of two unsigned 8-bit values (AVR assembly)
-FL_ALWAYS_INLINE uint8_t avg8(uint8_t i, uint8_t j) {
+FL_ALWAYS_INLINE u8 avg8(u8 i, u8 j) {
     asm volatile(
         /* First, add j to i, 9th bit overflows into C flag */
         "add %0, %1    \n\t"
@@ -117,7 +117,7 @@ FL_ALWAYS_INLINE uint8_t avg8(uint8_t i, uint8_t j) {
 }
 
 /// Calculate an integer average of two unsigned 16-bit values (AVR assembly)
-FL_ALWAYS_INLINE uint16_t avg16(uint16_t i, uint16_t j) {
+FL_ALWAYS_INLINE u16 avg16(u16 i, u16 j) {
     asm volatile(
         /* First, add jLo (heh) to iLo, 9th bit overflows into C flag */
         "add %A[i], %A[j]    \n\t"
@@ -134,7 +134,7 @@ FL_ALWAYS_INLINE uint16_t avg16(uint16_t i, uint16_t j) {
 }
 
 /// Calculate an integer average of two unsigned 8-bit values, rounded up (AVR assembly)
-FL_ALWAYS_INLINE uint8_t avg8r(uint8_t i, uint8_t j) {
+FL_ALWAYS_INLINE u8 avg8r(u8 i, u8 j) {
     asm volatile(
         /* First, add j to i, 9th bit overflows into C flag */
         "add %0, %1          \n\t"
@@ -148,7 +148,7 @@ FL_ALWAYS_INLINE uint8_t avg8r(uint8_t i, uint8_t j) {
 }
 
 /// Calculate an integer average of two unsigned 16-bit values, rounded up (AVR assembly)
-FL_ALWAYS_INLINE uint16_t avg16r(uint16_t i, uint16_t j) {
+FL_ALWAYS_INLINE u16 avg16r(u16 i, u16 j) {
     asm volatile(
         /* First, add jLo (heh) to iLo, 9th bit overflows into C flag */
         "add %A[i], %A[j]    \n\t"
@@ -169,7 +169,7 @@ FL_ALWAYS_INLINE uint16_t avg16r(uint16_t i, uint16_t j) {
 }
 
 /// Calculate an integer average of two signed 7-bit integers (AVR assembly)
-FL_ALWAYS_INLINE int8_t avg7(int8_t i, int8_t j) {
+FL_ALWAYS_INLINE i8 avg7(i8 i, i8 j) {
     asm volatile("asr %1        \n\t"
                  "asr %0        \n\t"
                  "adc %0, %1    \n\t"
@@ -179,7 +179,7 @@ FL_ALWAYS_INLINE int8_t avg7(int8_t i, int8_t j) {
 }
 
 /// Calculate an integer average of two signed 15-bit integers (AVR assembly)
-FL_ALWAYS_INLINE int16_t avg15(int16_t i, int16_t j) {
+FL_ALWAYS_INLINE i16 avg15(i16 i, i16 j) {
     asm volatile(
         /* first divide j by 2, throwing away lowest bit */
         "asr %B[j]          \n\t"
@@ -196,7 +196,7 @@ FL_ALWAYS_INLINE int16_t avg15(int16_t i, int16_t j) {
 }
 
 /// Take the absolute value of a signed 8-bit int8_t (AVR assembly)
-FL_ALWAYS_INLINE int8_t abs8(int8_t i) {
+FL_ALWAYS_INLINE i8 abs8(i8 i) {
     asm volatile(
         /* First, check the high bit, and prepare to skip if it's clear */
         "sbrc %0, 7 \n"
@@ -220,7 +220,7 @@ FL_ALWAYS_INLINE int8_t abs8(int8_t i) {
 /// @param a dividend byte
 /// @param m divisor byte
 /// @returns remainder of a / m (i.e. a % m)
-FL_ALWAYS_INLINE uint8_t mod8(uint8_t a, uint8_t m) {
+FL_ALWAYS_INLINE u8 mod8(u8 a, u8 m) {
     asm volatile("L_%=:  sub %[a],%[m]    \n\t"
                  "       brcc L_%=        \n\t"
                  "       add %[a],%[m]    \n\t"
@@ -246,7 +246,7 @@ FL_ALWAYS_INLINE uint8_t mod8(uint8_t a, uint8_t m) {
 /// @param m divisor byte
 /// @returns remainder of (a + b) / m
 /// @see mod8() for notes on performance.
-LIB8STATIC uint8_t addmod8(uint8_t a, uint8_t b, uint8_t m) {
+LIB8STATIC u8 addmod8(u8 a, u8 b, u8 m) {
     asm volatile("       add %[a],%[b]    \n\t"
                  "L_%=:  sub %[a],%[m]    \n\t"
                  "       brcc L_%=        \n\t"
@@ -273,7 +273,7 @@ LIB8STATIC uint8_t addmod8(uint8_t a, uint8_t b, uint8_t m) {
 /// @param m divisor byte
 /// @returns remainder of (a - b) / m
 /// @see mod8() for notes on performance.
-LIB8STATIC uint8_t submod8(uint8_t a, uint8_t b, uint8_t m) {
+LIB8STATIC u8 submod8(u8 a, u8 b, u8 m) {
     asm volatile("       sub %[a],%[b]    \n\t"
                  "L_%=:  sub %[a],%[m]    \n\t"
                  "       brcc L_%=        \n\t"
@@ -284,12 +284,12 @@ LIB8STATIC uint8_t submod8(uint8_t a, uint8_t b, uint8_t m) {
 }
 
 /// 8x8 bit multiplication, with 8-bit result (C implementation for ATtiny)
-FL_ALWAYS_INLINE uint8_t mul8(uint8_t i, uint8_t j) {
+FL_ALWAYS_INLINE u8 mul8(u8 i, u8 j) {
     return ((int)i * (int)(j)) & 0xFF;
 }
 
 /// 8x8 bit multiplication with 8-bit result, saturating at 0xFF (C implementation for ATtiny)
-FL_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
+FL_ALWAYS_INLINE u8 qmul8(u8 i, u8 j) {
     unsigned p = (unsigned)i * (unsigned)j;
     if (p > 255)
         p = 255;
@@ -299,8 +299,8 @@ FL_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
 /// Blend a variable proportion of one byte to another - 8-bit precision (C implementation for ATtiny)
 /// Uses Option 1: result = ((a << 8) + (b - a) * M + 0x80) >> 8
 /// This provides proper rounding with minimal memory overhead
-LIB8STATIC uint8_t blend8_8bit(uint8_t a, uint8_t b, uint8_t amountOfB) {
-    uint16_t partial;
+LIB8STATIC u8 blend8_8bit(u8 a, u8 b, u8 amountOfB) {
+    u16 partial;
 
     // Calculate: (a * 256 + (b - a) * amountOfB + 128) / 256
     // The +128 (0x80) provides proper rounding instead of truncation
@@ -315,13 +315,13 @@ LIB8STATIC uint8_t blend8_8bit(uint8_t a, uint8_t b, uint8_t amountOfB) {
 /// Blend a variable proportion of one byte to another - 16-bit precision (C implementation for ATtiny)
 /// Uses Option 2: result = ((a << 16) + (b - a) * M * 257 + 0x8000) >> 16
 /// This provides higher accuracy by using 16-bit intermediate values
-LIB8STATIC uint8_t blend8_16bit(uint8_t a, uint8_t b, uint8_t amountOfB) {
-    uint32_t partial;
-    int16_t delta = (int16_t)b - (int16_t)a;
+LIB8STATIC u8 blend8_16bit(u8 a, u8 b, u8 amountOfB) {
+    u32 partial;
+    i16 delta = (i16)b - (i16)a;
 
     // Calculate: (a * 65536 + (b - a) * amountOfB * 257 + 32768) / 65536
-    partial = ((uint32_t)a << 16);
-    partial += (uint32_t)delta * amountOfB * 257;
+    partial = ((u32)a << 16);
+    partial += (u32)delta * amountOfB * 257;
     partial += 0x8000;
 
     return partial >> 16;
@@ -330,11 +330,11 @@ LIB8STATIC uint8_t blend8_16bit(uint8_t a, uint8_t b, uint8_t amountOfB) {
 /// Blend a variable proportion of one byte to another (C implementation for ATtiny)
 /// Automatically selects between 8-bit and 16-bit precision based on available memory
 #if (SKETCH_HAS_LOTS_OF_MEMORY)
-LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
+LIB8STATIC u8 blend8(u8 a, u8 b, u8 amountOfB) {
     return blend8_16bit(a, b, amountOfB);
 }
 #else
-LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
+LIB8STATIC u8 blend8(u8 a, u8 b, u8 amountOfB) {
     return blend8_8bit(a, b, amountOfB);
 }
 #endif

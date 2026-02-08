@@ -95,10 +95,10 @@ struct __generated_struct_NRF_P1 {
 namespace fl {
 
 // The actual class template can then use a typename, for what is essentially a constexpr NRF_GPIO_Type*
-template <uint32_t _MASK, typename _PORT, uint8_t _PORT_NUMBER, uint8_t _PIN_NUMBER> class _ARMPIN : public ValidPinBase {
+template <u32 _MASK, typename _PORT, u8 _PORT_NUMBER, u8 _PIN_NUMBER> class _ARMPIN : public ValidPinBase {
 public:
-    typedef volatile uint32_t * port_ptr_t;
-    typedef uint32_t port_t;
+    typedef volatile u32 * port_ptr_t;
+    typedef u32 port_t;
 
     FASTLED_NRF52_INLINE_ATTRIBUTE static void       setOutput() {
         // OK for this to be more than one instruction, as unusual to quickly switch input/output modes
@@ -136,7 +136,7 @@ public:
     FASTLED_NRF52_INLINE_ATTRIBUTE static void lo (FASTLED_REGISTER port_ptr_t port) { lo();                      } // sets _MASK in the CLEAR OUTPUT register (output set low)
     FASTLED_NRF52_INLINE_ATTRIBUTE static void set(FASTLED_REGISTER port_t     val ) { (reinterpret_cast<NRF_GPIO_Type*>(_PORT::r()))->OUT = val;     } // sets entire port's value (optimization used by FastLED) // ok reinterpret cast
     FASTLED_NRF52_INLINE_ATTRIBUTE static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) { *port = val; }
-    constexpr                      static uint32_t   nrf_pin2() { return NRF_GPIO_PIN_MAP(_PORT_NUMBER, _PIN_NUMBER); }
+    constexpr                      static u32   nrf_pin2() { return NRF_GPIO_PIN_MAP(_PORT_NUMBER, _PIN_NUMBER); }
     constexpr                      static bool       LowSpeedOnlyRecommended() {
         // Caller must always determine if high speed use if allowed on a given pin,
         // because it depends on more than just the chip packaging ... it depends on entire board (and even system) design.
@@ -144,11 +144,11 @@ public:
     }
     // Expose the nrf pin (port/pin combined), port, and pin as properties (e.g., for setting up SPI)
 
-    FASTLED_NRF52_INLINE_ATTRIBUTE static uint32_t   nrf_pin()  { return NRF_GPIO_PIN_MAP(_PORT_NUMBER, _PIN_NUMBER); }
+    FASTLED_NRF52_INLINE_ATTRIBUTE static u32   nrf_pin()  { return NRF_GPIO_PIN_MAP(_PORT_NUMBER, _PIN_NUMBER); }
 };
 
 
-template <uint32_t _MASK, typename _PORT, uint8_t _PORT_NUMBER, uint8_t _PIN_NUMBER>
+template <u32 _MASK, typename _PORT, u8 _PORT_NUMBER, u8 _PIN_NUMBER>
 class _INVALID_ARMPIN: public _ARMPIN<_MASK, _PORT, _PORT_NUMBER, _PIN_NUMBER> {
 public:
     _INVALID_ARMPIN() {

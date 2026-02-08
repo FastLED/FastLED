@@ -82,7 +82,7 @@ private:
 
     // Helper methods
     void updatePeriodRange();
-    float calculateAutocorrelation(const int16_t* pcm, size numSamples);
+    float calculateAutocorrelation(const i16* pcm, size numSamples);
     float periodToFrequency(int period) const;
     int frequencyToPeriod(float frequency) const;
     float calculateConfidence(const vector<float>& autocorr, int peakLag) const;

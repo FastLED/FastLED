@@ -17,10 +17,10 @@ namespace fl {
 
 #else
 
-template<uint8_t PIN, uint8_t PAD> class _APOLLO3PIN {
+template<u8 PIN, u8 PAD> class _APOLLO3PIN {
 public:
-    typedef volatile uint32_t * port_ptr_t;
-    typedef uint32_t port_t;
+    typedef volatile u32 * port_ptr_t;
+    typedef u32 port_t;
 
     inline static void setOutput() { pinMode(PIN, OUTPUT); am_hal_gpio_fastgpio_enable(PAD); }
     inline static void setInput() { am_hal_gpio_fastgpio_disable(PAD); pinMode(PIN, INPUT); }

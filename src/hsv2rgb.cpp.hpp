@@ -56,26 +56,26 @@ void hsv2rgb_raw_C (const CHSV & hsv, CRGB & rgb)
     // the output more visually linear.
 
     // Apply dimming curves
-    uint8_t value = APPLY_DIMMING( hsv.val);  // cppcheck-suppress selfAssignment
-    uint8_t saturation = hsv.sat;
+    fl::u8 value = APPLY_DIMMING( hsv.val);  // cppcheck-suppress selfAssignment
+    fl::u8 saturation = hsv.sat;
 
     // The brightness floor is minimum number that all of
     // R, G, and B will be set to.
-    uint8_t invsat = APPLY_DIMMING( 255 - saturation);  // cppcheck-suppress selfAssignment
-    uint8_t brightness_floor = (value * invsat) / 256;
+    fl::u8 invsat = APPLY_DIMMING( 255 - saturation);  // cppcheck-suppress selfAssignment
+    fl::u8 brightness_floor = (value * invsat) / 256;
 
     // The color amplitude is the maximum amount of R, G, and B
     // that will be added on top of the brightness_floor to
     // create the specific hue desired.
-    uint8_t color_amplitude = value - brightness_floor;
+    fl::u8 color_amplitude = value - brightness_floor;
 
     // Figure out which section of the hue wheel we're in,
     // and how far offset we are withing that section
-    uint8_t section = hsv.hue / HSV_SECTION_3; // 0..2
-    uint8_t offset = hsv.hue % HSV_SECTION_3;  // 0..63
+    fl::u8 section = hsv.hue / HSV_SECTION_3; // 0..2
+    fl::u8 offset = hsv.hue % HSV_SECTION_3;  // 0..63
 
-    uint8_t rampup = offset; // 0..63
-    uint8_t rampdown = (HSV_SECTION_3 - 1) - offset; // 63..0
+    fl::u8 rampup = offset; // 0..63
+    fl::u8 rampdown = (HSV_SECTION_3 - 1) - offset; // 63..0
 
     // We now scale rampup and rampdown to a 0-255 range -- at least
     // in theory, but here's where architecture-specific decsions
@@ -107,12 +107,12 @@ void hsv2rgb_raw_C (const CHSV & hsv, CRGB & rgb)
     //  //rampdown *= 4; // 0..252
 
     // compute color-amplitude-scaled-down versions of rampup and rampdown
-    uint8_t rampup_amp_adj   = (rampup   * color_amplitude) / (256 / 4);
-    uint8_t rampdown_amp_adj = (rampdown * color_amplitude) / (256 / 4);
+    fl::u8 rampup_amp_adj   = (rampup   * color_amplitude) / (256 / 4);
+    fl::u8 rampdown_amp_adj = (rampdown * color_amplitude) / (256 / 4);
 
     // add brightness_floor offset to everything
-    uint8_t rampup_adj_with_floor   = rampup_amp_adj   + brightness_floor;
-    uint8_t rampdown_adj_with_floor = rampdown_amp_adj + brightness_floor;
+    fl::u8 rampup_adj_with_floor   = rampup_amp_adj   + brightness_floor;
+    fl::u8 rampdown_adj_with_floor = rampdown_amp_adj + brightness_floor;
 
 
     if( section ) {
@@ -140,7 +140,7 @@ void hsv2rgb_raw_C (const CHSV & hsv, CRGB & rgb)
 #if defined(FL_IS_AVR) && !defined(FL_IS_AVR_ATTINY)
 void hsv2rgb_raw_avr(const CHSV & hsv, CRGB & rgb)
 {
-    uint8_t hue, saturation, value;
+    fl::u8 hue, saturation, value;
 
     hue =        hsv.hue;
     saturation = hsv.sat;
@@ -148,14 +148,14 @@ void hsv2rgb_raw_avr(const CHSV & hsv, CRGB & rgb)
 
     // Saturation more useful the other way around
     saturation = 255 - saturation;
-    uint8_t invsat = APPLY_DIMMING( saturation );  // cppcheck-suppress selfAssignment
+    fl::u8 invsat = APPLY_DIMMING( saturation );  // cppcheck-suppress selfAssignment
 
     // Apply dimming curves
     value = APPLY_DIMMING( value );  // cppcheck-suppress selfAssignment
 
     // The brightness floor is minimum number that all of
     // R, G, and B will be set to, which is value * invsat
-    uint8_t brightness_floor;
+    fl::u8 brightness_floor;
 
     asm volatile(
                  "mul %[value], %[invsat]            \n"
@@ -169,17 +169,17 @@ void hsv2rgb_raw_avr(const CHSV & hsv, CRGB & rgb)
     // The color amplitude is the maximum amount of R, G, and B
     // that will be added on top of the brightness_floor to
     // create the specific hue desired.
-    uint8_t color_amplitude = value - brightness_floor;
+    fl::u8 color_amplitude = value - brightness_floor;
 
     // Figure how far we are offset into the section of the
     // color wheel that we're in
-    uint8_t offset = hsv.hue & (HSV_SECTION_3 - 1);  // 0..63
-    uint8_t rampup = offset * 4; // 0..252
+    fl::u8 offset = hsv.hue & (HSV_SECTION_3 - 1);  // 0..63
+    fl::u8 rampup = offset * 4; // 0..252
 
 
     // compute color-amplitude-scaled-down versions of rampup and rampdown
-    uint8_t rampup_amp_adj;
-    uint8_t rampdown_amp_adj;
+    fl::u8 rampup_amp_adj;
+    fl::u8 rampdown_amp_adj;
 
     asm volatile(
                  "mul %[rampup], %[color_amplitude]       \n"
@@ -196,8 +196,8 @@ void hsv2rgb_raw_avr(const CHSV & hsv, CRGB & rgb)
 
 
     // add brightness_floor offset to everything
-    uint8_t rampup_adj_with_floor   = rampup_amp_adj   + brightness_floor;
-    uint8_t rampdown_adj_with_floor = rampdown_amp_adj + brightness_floor;
+    fl::u8 rampup_adj_with_floor   = rampup_amp_adj   + brightness_floor;
+    fl::u8 rampdown_adj_with_floor = rampdown_amp_adj + brightness_floor;
 
 
     // keep gcc from using "X" as the index register for storing
@@ -275,26 +275,26 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
     // colors.
     // Level Y1 is a moderate boost, the default.
     // Level Y2 is a strong boost.
-    const uint8_t Y1 = 1;
-    const uint8_t Y2 = 0;
+    const fl::u8 Y1 = 1;
+    const fl::u8 Y2 = 0;
 
     // G2: Whether to divide all greens by two.
     // Depends GREATLY on your particular LEDs
-    const uint8_t G2 = 0;
+    const fl::u8 G2 = 0;
 
     // Gscale: what to scale green down by.
     // Depends GREATLY on your particular LEDs
-    const uint8_t Gscale = 0;
+    const fl::u8 Gscale = 0;
 
 
-    uint8_t hue = hsv.hue;
-    uint8_t sat = hsv.sat;
-    uint8_t val = hsv.val;
+    fl::u8 hue = hsv.hue;
+    fl::u8 sat = hsv.sat;
+    fl::u8 val = hsv.val;
 
-    uint8_t offset = hue & 0x1F; // 0..31
+    fl::u8 offset = hue & 0x1F; // 0..31
 
     // offset8 = offset * 8
-    uint8_t offset8 = offset;
+    fl::u8 offset8 = offset;
     {
 #if defined(FL_IS_AVR)
         // Left to its own devices, gcc turns "x <<= 3" into a loop
@@ -311,9 +311,9 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
 #endif
     }
 
-    uint8_t third = scale8( offset8, (256 / 3)); // max = 85
+    fl::u8 third = scale8( offset8, (256 / 3)); // max = 85
 
-    uint8_t r, g, b;
+    fl::u8 r, g, b;
 
     if( ! (hue & 0x80) ) {
         // 0XX
@@ -339,7 +339,7 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
                 if( Y2 ) {
                     r = K170 + third;
                     //uint8_t twothirds = (third << 1);
-                    uint8_t twothirds = scale8( offset8, ((256 * 2) / 3)); // max=170
+                    fl::u8 twothirds = scale8( offset8, ((256 * 2) / 3)); // max=170
                     g = K85 + twothirds;
                     b = 0;
                     FORCE_REFERENCE(b);
@@ -353,7 +353,7 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
                 //case 2: // Y -> G
                 if( Y1 ) {
                     //uint8_t twothirds = (third << 1);
-                    uint8_t twothirds = scale8( offset8, ((256 * 2) / 3)); // max=170
+                    fl::u8 twothirds = scale8( offset8, ((256 * 2) / 3)); // max=170
                     r = K171 - twothirds;
                     g = K170 + third;
                     b = 0;
@@ -385,7 +385,7 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
                 r = 0;
                 FORCE_REFERENCE(r);
                 //uint8_t twothirds = (third << 1);
-                uint8_t twothirds = scale8( offset8, ((256 * 2) / 3)); // max=170
+                fl::u8 twothirds = scale8( offset8, ((256 * 2) / 3)); // max=170
                 g = K171 - twothirds; //K170?
                 b = K85  + twothirds;
 
@@ -430,10 +430,10 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
         if( sat == 0) {
             r = 255; b = 255; g = 255;
         } else {
-            uint8_t desat = 255 - sat;
+            fl::u8 desat = 255 - sat;
             desat = scale8_video( desat, desat);
 
-            uint8_t satscale = 255 - desat;
+            fl::u8 satscale = 255 - desat;
             //satscale = sat; // uncomment to revert to pre-2021 saturation behavior
 
             //nscale8x3_video( r, g, b, sat);
@@ -450,7 +450,7 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
             if( g ) g = scale8( g, satscale) + 1;
             if( b ) b = scale8( b, satscale) + 1;
 #endif
-            uint8_t brightness_floor = desat;
+            fl::u8 brightness_floor = desat;
             r += brightness_floor;
             g += brightness_floor;
             b += brightness_floor;
@@ -493,7 +493,7 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
 }
 
 void hsv2rgb_fullspectrum( const CHSV& hsv, CRGB& rgb) {
-  const auto f = [](const int n, const uint8_t h) -> unsigned int {
+  const auto f = [](const int n, const fl::u8 h) -> unsigned int {
     constexpr int kZero = 0 << 8;
     constexpr int kOne  = 1 << 8;
     constexpr int kFour = 4 << 8;
@@ -550,13 +550,13 @@ void hsv2rgb_fullspectrum( const CHSV* phsv, CRGB * prgb, int numLeds) {
 // See extended notes in the .h file.
 CHSV rgb2hsv_approximate( const CRGB& rgb)
 {
-    uint8_t r = rgb.r;
-    uint8_t g = rgb.g;
-    uint8_t b = rgb.b;
-    uint8_t h, s, v;
+    fl::u8 r = rgb.r;
+    fl::u8 g = rgb.g;
+    fl::u8 b = rgb.b;
+    fl::u8 h, s, v;
 
     // find desaturation
-    uint8_t desat = 255;
+    fl::u8 desat = 255;
     if( r < desat) desat = r;
     if( g < desat) desat = g;
     if( b < desat) desat = b;
@@ -595,26 +595,26 @@ CHSV rgb2hsv_approximate( const CRGB& rgb)
     // scale all channels up to compensate for desaturation
     if( s < 255) {
         if( s == 0) s = 1;
-        uint32_t scaleup = 65535 / (s);
-        r = ((uint32_t)(r) * scaleup) / 256;
-        g = ((uint32_t)(g) * scaleup) / 256;
-        b = ((uint32_t)(b) * scaleup) / 256;
+        fl::u32 scaleup = 65535 / (s);
+        r = ((fl::u32)(r) * scaleup) / 256;
+        g = ((fl::u32)(g) * scaleup) / 256;
+        b = ((fl::u32)(b) * scaleup) / 256;
     }
     //Serial.print("r.2="); Serial.print(r); Serial.println("");
     //Serial.print("g.2="); Serial.print(g); Serial.println("");
     //Serial.print("b.2="); Serial.print(b); Serial.println("");
 
-    uint16_t total = r + g + b;
+    fl::u16 total = r + g + b;
 
     //Serial.print("total="); Serial.print(total); Serial.println("");
 
     // scale all channels up to compensate for low values
     if( total < 255) {
         if( total == 0) total = 1;
-        uint32_t scaleup = 65535 / (total);
-        r = ((uint32_t)(r) * scaleup) / 256;
-        g = ((uint32_t)(g) * scaleup) / 256;
-        b = ((uint32_t)(b) * scaleup) / 256;
+        fl::u32 scaleup = 65535 / (total);
+        r = ((fl::u32)(r) * scaleup) / 256;
+        g = ((fl::u32)(g) * scaleup) / 256;
+        b = ((fl::u32)(b) * scaleup) / 256;
     }
     //Serial.print("r.3="); Serial.print(r); Serial.println("");
     //Serial.print("g.3="); Serial.print(g); Serial.println("");
@@ -640,7 +640,7 @@ CHSV rgb2hsv_approximate( const CRGB& rgb)
     if( v != 255) {
         // this part could probably use refinement/rethinking,
         // (but it doesn't overflow & wrap anymore)
-        uint16_t s16;
+        fl::u16 s16;
         s16 = (s * 256);
         s16 /= v;
         //Serial.print("s16="); Serial.print(s16); Serial.println("");
@@ -662,7 +662,7 @@ CHSV rgb2hsv_approximate( const CRGB& rgb)
 
     // start with which channel is highest
     // (ties don't matter)
-    uint8_t highest = r;
+    fl::u8 highest = r;
     if( g > highest) highest = g;
     if( b > highest) highest = b;
 
@@ -691,10 +691,10 @@ CHSV rgb2hsv_approximate( const CRGB& rgb)
             //   G = 171..255
             //   R = 171..  0
             h = HUE_YELLOW;
-            uint8_t radj = fl::scale8( fl::qsub8(171,r),   47); //171..0 -> 0..171 -> 0..31
-            uint8_t gadj = fl::scale8( fl::qsub8(g,171),   96); //171..255 -> 0..84 -> 0..31;
-            uint8_t rgadj = radj + gadj;
-            uint8_t hueadv = rgadj / 2;
+            fl::u8 radj = fl::scale8( fl::qsub8(171,r),   47); //171..0 -> 0..171 -> 0..31
+            fl::u8 gadj = fl::scale8( fl::qsub8(g,171),   96); //171..255 -> 0..84 -> 0..31;
+            fl::u8 rgadj = radj + gadj;
+            fl::u8 hueadv = rgadj / 2;
             h += hueadv;
             //h += scale8( qadd8( 4, qadd8((g - 128), (128 - r))),
             //             FIXFRAC8(32,255)); //

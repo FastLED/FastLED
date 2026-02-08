@@ -22,9 +22,9 @@ class ClocklessSAMHardware : public CPixelLEDController<RGB_ORDER> {
 	// Formula: cycles = (nanoseconds * CPU_MHz + 500) / 1000
 	// The +500 provides rounding to nearest integer
 	// SAM Due uses hardware timer at F_CPU (84MHz)
-	static constexpr uint32_t T1 = (TIMING::T1 * (F_CPU / 1000000UL) + 500) / 1000;
-	static constexpr uint32_t T2 = (TIMING::T2 * (F_CPU / 1000000UL) + 500) / 1000;
-	static constexpr uint32_t T3 = (TIMING::T3 * (F_CPU / 1000000UL) + 500) / 1000;
+	static constexpr u32 T1 = (TIMING::T1 * (F_CPU / 1000000UL) + 500) / 1000;
+	static constexpr u32 T2 = (TIMING::T2 * (F_CPU / 1000000UL) + 500) / 1000;
+	static constexpr u32 T3 = (TIMING::T3 * (F_CPU / 1000000UL) + 500) / 1000;
 	#define TADJUST 0
 	#define TOTAL ( (T1+TADJUST) + (T2+TADJUST) + (T3+TADJUST) )
 	typedef typename FastPinBB<DATA_PIN>::port_ptr_t data_ptr_t;
@@ -41,7 +41,7 @@ public:
 		mPort = FastPinBB<DATA_PIN>::port();
 	}
 
-	virtual uint16_t getMaxRefreshRate() const { return 400; }
+	virtual u16 getMaxRefreshRate() const { return 400; }
 
 protected:
     virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
@@ -53,13 +53,13 @@ protected:
         mWait.mark();
     }
 
-	template<int BITS>  __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER uint32_t & next_mark, FASTLED_REGISTER data_ptr_t port, FASTLED_REGISTER uint8_t & b) {
+	template<int BITS>  __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER data_ptr_t port, FASTLED_REGISTER u8 & b) {
 		// Make sure we don't slot into a wrapping spot, this will delay up to 12.5µs for WS2812
 		// bool bShift=0;
 		// while(VAL < (TOTAL*10)) { bShift=true; }
 		// if(bShift) { next_mark = (VAL-TOTAL); };
 
-		for(FASTLED_REGISTER uint32_t i = BITS; i > 0; --i) {
+		for(FASTLED_REGISTER u32 i = BITS; i > 0; --i) {
 			// wait to start the bit, then set the pin high
 			while(DUE_TIMER_VAL < next_mark);
 			next_mark = (DUE_TIMER_VAL+TOTAL);
@@ -81,7 +81,7 @@ protected:
 #define FORCE_REFERENCE(var)  asm volatile( "" : : "r" (var) )
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-	static uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels) {
+	static u32 showRGBInternal(PixelController<RGB_ORDER> pixels) {
 		// Setup and start the clock
 		TC_Configure(DUE_TIMER,DUE_TIMER_CHANNEL,TC_CMR_TCCLKS_TIMER_CLOCK1);
 		pmc_enable_periph_clk(DUE_TIMER_ID);
@@ -92,9 +92,9 @@ protected:
 
 		// Setup the pixel controller and load/scale the first byte
 		pixels.preStepFirstByteDithering();
-		uint8_t b = pixels.loadAndScale0();
+		u8 b = pixels.loadAndScale0();
 
-		uint32_t next_mark = (DUE_TIMER_VAL + (TOTAL));
+		u32 next_mark = (DUE_TIMER_VAL + (TOTAL));
 		while(pixels.has(1)) {
 			pixels.stepDithering();
 

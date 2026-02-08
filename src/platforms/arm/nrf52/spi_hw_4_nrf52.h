@@ -93,7 +93,7 @@ public:
     /// @brief Wait for current transmission to complete
     /// @param timeout_ms Maximum time to wait in milliseconds (fl::numeric_limits<uint32_t>::max() = infinite)
     /// @return true if transmission completed, false on timeout
-    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max()) override;
+    bool waitComplete(u32 timeout_ms = fl::numeric_limits<u32>::max()) override;
 
     /// @brief Check if transmission is currently in progress
     /// @return true if busy, false if idle
@@ -122,7 +122,7 @@ private:
 
     /// @brief Configure TIMER1 for synchronization trigger
     /// @param clock_speed_hz Desired clock frequency
-    void configureTimer(uint32_t clock_speed_hz);
+    void configureTimer(u32 clock_speed_hz);
 
     /// @brief Configure PPI channels for synchronization
     void configurePPI();
@@ -149,10 +149,10 @@ private:
     bool mBufferAcquired;            ///< True if buffer has been acquired for transmission
 
     // Legacy lane buffers (kept for internal de-interleaving)
-    uint8_t* mLane0Buffer;  ///< Buffer for lane 0 data
-    uint8_t* mLane1Buffer;  ///< Buffer for lane 1 data
-    uint8_t* mLane2Buffer;  ///< Buffer for lane 2 data
-    uint8_t* mLane3Buffer;  ///< Buffer for lane 3 data
+    u8* mLane0Buffer;  ///< Buffer for lane 0 data
+    u8* mLane1Buffer;  ///< Buffer for lane 1 data
+    u8* mLane2Buffer;  ///< Buffer for lane 2 data
+    u8* mLane3Buffer;  ///< Buffer for lane 3 data
     size_t mBufferSize;     ///< Size of each lane buffer in bytes
 
     // State
@@ -160,18 +160,18 @@ private:
     bool mInitialized;        ///< True if controller initialized
 
     // Configuration
-    uint8_t mClockPin;  ///< Clock pin (SCK)
-    uint8_t mData0Pin;  ///< Data pin for lane 0
-    uint8_t mData1Pin;  ///< Data pin for lane 1
-    uint8_t mData2Pin;  ///< Data pin for lane 2
-    uint8_t mData3Pin;  ///< Data pin for lane 3
-    uint32_t mClockSpeed;  ///< Clock frequency in Hz
+    u8 mClockPin;  ///< Clock pin (SCK)
+    u8 mData0Pin;  ///< Data pin for lane 0
+    u8 mData1Pin;  ///< Data pin for lane 1
+    u8 mData2Pin;  ///< Data pin for lane 2
+    u8 mData3Pin;  ///< Data pin for lane 3
+    u32 mClockSpeed;  ///< Clock frequency in Hz
 
     // PPI channels used (4-7)
-    uint8_t mPPIChannel4;  ///< PPI channel for TIMER -> SPIM0.START
-    uint8_t mPPIChannel5;  ///< PPI channel for TIMER -> SPIM1.START
-    uint8_t mPPIChannel6;  ///< PPI channel for TIMER -> SPIM2.START
-    uint8_t mPPIChannel7;  ///< PPI channel for TIMER -> SPIM3.START
+    u8 mPPIChannel4;  ///< PPI channel for TIMER -> SPIM0.START
+    u8 mPPIChannel5;  ///< PPI channel for TIMER -> SPIM1.START
+    u8 mPPIChannel6;  ///< PPI channel for TIMER -> SPIM2.START
+    u8 mPPIChannel7;  ///< PPI channel for TIMER -> SPIM3.START
 
     SPIQuadNRF52(const SPIQuadNRF52&) = delete;
     SPIQuadNRF52& operator=(const SPIQuadNRF52&) = delete;

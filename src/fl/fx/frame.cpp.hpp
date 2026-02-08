@@ -13,7 +13,7 @@ namespace fl {
 Frame::Frame(int pixels_count) : mPixelsCount(pixels_count), mRgb(), mIsFromCodec(false) {
     mRgb.resize(pixels_count);
     if (pixels_count > 0) {
-        fl::memset((uint8_t*)mRgb.data(), 0, pixels_count * sizeof(CRGB));
+        fl::memset((u8*)mRgb.data(), 0, pixels_count * sizeof(CRGB));
     }
 }
 
@@ -26,7 +26,7 @@ Frame::Frame(fl::u8* pixels, fl::u16 width, fl::u16 height, PixelFormat format, 
     if (pixels && width > 0 && height > 0) {
         convertPixelsToRgb(pixels, format);
     } else if (mPixelsCount > 0) {
-        fl::memset((uint8_t*)mRgb.data(), 0, mPixelsCount * sizeof(CRGB));
+        fl::memset((u8*)mRgb.data(), 0, mPixelsCount * sizeof(CRGB));
     }
 }
 
@@ -63,11 +63,11 @@ void Frame::draw(CRGB *leds, DrawMode draw_mode) const {
 }
 
 void Frame::drawXY(CRGB *leds, const XYMap &xyMap, DrawMode draw_mode) const {
-    const uint16_t width = xyMap.getWidth();
-    const uint16_t height = xyMap.getHeight();
+    const u16 width = xyMap.getWidth();
+    const u16 height = xyMap.getHeight();
     fl::u32 count = 0;
-    for (uint16_t h = 0; h < height; ++h) {
-        for (uint16_t w = 0; w < width; ++w) {
+    for (u16 h = 0; h < height; ++h) {
+        for (u16 w = 0; w < width; ++w) {
             fl::u32 in_idx = xyMap(w, h);
             fl::u32 out_idx = count++;
             if (in_idx >= mPixelsCount) {
@@ -97,12 +97,12 @@ void Frame::drawXY(CRGB *leds, const XYMap &xyMap, DrawMode draw_mode) const {
 
 void Frame::clear() {
     if (mPixelsCount > 0 && !mRgb.empty()) {
-        fl::memset((uint8_t*)mRgb.data(), 0, mPixelsCount * sizeof(CRGB));
+        fl::memset((u8*)mRgb.data(), 0, mPixelsCount * sizeof(CRGB));
     }
 }
 
 void Frame::interpolate(const Frame &frame1, const Frame &frame2,
-                        uint8_t amountofFrame2, CRGB *pixels) {
+                        u8 amountofFrame2, CRGB *pixels) {
     if (frame1.size() != frame2.size()) {
         return; // Frames must have the same size
     }
@@ -122,7 +122,7 @@ void Frame::interpolate(const Frame &frame1, const Frame &frame2,
 }
 
 void Frame::interpolate(const Frame &frame1, const Frame &frame2,
-                        uint8_t amountOfFrame2) {
+                        u8 amountOfFrame2) {
     if (frame1.size() != frame2.size() || frame1.size() != mPixelsCount) {
         FASTLED_DBG("Frames must have the same size");
         return; // Frames must have the same size
@@ -177,7 +177,7 @@ void Frame::convertPixelsToRgb(fl::u8* pixels, PixelFormat format) {
         default: {
             // Fallback: fill with black
             if (mPixelsCount > 0 && !mRgb.empty()) {
-                fl::memset((uint8_t*)rgbData, 0, mPixelsCount * sizeof(CRGB));
+                fl::memset((u8*)rgbData, 0, mPixelsCount * sizeof(CRGB));
             }
             break;
         }

@@ -49,18 +49,18 @@ public:
     void deinitialize() override;
     bool isInitialized() const override;
 
-    uint16_t* allocateFrameBuffer(size_t size_bytes) override;
-    void freeFrameBuffer(uint16_t* buffer) override;
+    u16* allocateFrameBuffer(size_t size_bytes) override;
+    void freeFrameBuffer(u16* buffer) override;
 
-    bool drawFrame(const uint16_t* buffer, size_t size_bytes) override;
-    bool waitFrameDone(uint32_t timeout_ms) override;
+    bool drawFrame(const u16* buffer, size_t size_bytes) override;
+    bool waitFrameDone(u32 timeout_ms) override;
     bool isBusy() const override;
 
     bool registerDrawCallback(void* callback, void* user_ctx) override;
     const LcdRgbPeripheralConfig& getConfig() const override;
 
     uint64_t getMicroseconds() override;
-    void delay(uint32_t ms) override;
+    void delay(u32 ms) override;
 
     //=========================================================================
     // Mock-Specific API
@@ -68,10 +68,10 @@ public:
 
     void simulateDrawComplete() override;
     void setDrawFailure(bool should_fail) override;
-    void setDrawDelay(uint32_t microseconds) override;
+    void setDrawDelay(u32 microseconds) override;
     const fl::vector<FrameRecord>& getFrameHistory() const override;
     void clearFrameHistory() override;
-    fl::span<const uint16_t> getLastFrameData() const override;
+    fl::span<const u16> getLastFrameData() const override;
     bool isEnabled() const override;
     size_t getDrawCount() const override;
     void reset() override;
@@ -93,7 +93,7 @@ private:
     void* mUserCtx;
 
     // Simulation settings
-    uint32_t mDrawDelayUs;
+    u32 mDrawDelayUs;
     bool mDrawDelayForced;  // If true, use mDrawDelayUs instead of calculating from PCLK
     bool mShouldFailDraw;
 
@@ -198,7 +198,7 @@ bool LcdRgbPeripheralMockImpl::isInitialized() const {
 // Buffer Management
 //=============================================================================
 
-uint16_t* LcdRgbPeripheralMockImpl::allocateFrameBuffer(size_t size_bytes) {
+u16* LcdRgbPeripheralMockImpl::allocateFrameBuffer(size_t size_bytes) {
     // Round up to 64-byte alignment
     size_t aligned_size = ((size_bytes + 63) / 64) * 64;
 
@@ -213,10 +213,10 @@ uint16_t* LcdRgbPeripheralMockImpl::allocateFrameBuffer(size_t size_bytes) {
         FL_WARN("LcdRgbPeripheralMock: Failed to allocate buffer (" << aligned_size << " bytes)");
     }
 
-    return static_cast<uint16_t*>(buffer);
+    return static_cast<u16*>(buffer);
 }
 
-void LcdRgbPeripheralMockImpl::freeFrameBuffer(uint16_t* buffer) {
+void LcdRgbPeripheralMockImpl::freeFrameBuffer(u16* buffer) {
     if (buffer != nullptr) {
 #ifdef FL_IS_WIN
         _aligned_free(buffer);
@@ -230,7 +230,7 @@ void LcdRgbPeripheralMockImpl::freeFrameBuffer(uint16_t* buffer) {
 // Transmission Methods
 //=============================================================================
 
-bool LcdRgbPeripheralMockImpl::drawFrame(const uint16_t* buffer, size_t size_bytes) {
+bool LcdRgbPeripheralMockImpl::drawFrame(const u16* buffer, size_t size_bytes) {
     if (!mInitialized) {
         FL_WARN("LcdRgbPeripheralMock: Cannot draw - not initialized");
         return false;
@@ -241,7 +241,7 @@ bool LcdRgbPeripheralMockImpl::drawFrame(const uint16_t* buffer, size_t size_byt
     }
 
     // Calculate draw delay - use forced value if set, otherwise calculate from PCLK
-    uint32_t draw_delay_us;
+    u32 draw_delay_us;
     if (mDrawDelayForced) {
         draw_delay_us = mDrawDelayUs;
     } else if (mConfig.pclk_hz > 0) {
@@ -249,7 +249,7 @@ bool LcdRgbPeripheralMockImpl::drawFrame(const uint16_t* buffer, size_t size_byt
         size_t pixels = size_bytes / 2;
         // Time = pixels / pclk_hz (seconds) * 1000000 (microseconds)
         uint64_t draw_time_us = (static_cast<uint64_t>(pixels) * 1000000ULL) / mConfig.pclk_hz;
-        draw_delay_us = static_cast<uint32_t>(draw_time_us) + 10;
+        draw_delay_us = static_cast<u32>(draw_time_us) + 10;
         mDrawDelayUs = draw_delay_us;
     } else {
         draw_delay_us = 100;  // Default fallback
@@ -285,7 +285,7 @@ bool LcdRgbPeripheralMockImpl::drawFrame(const uint16_t* buffer, size_t size_byt
     return true;
 }
 
-bool LcdRgbPeripheralMockImpl::waitFrameDone(uint32_t timeout_ms) {
+bool LcdRgbPeripheralMockImpl::waitFrameDone(u32 timeout_ms) {
     if (!mInitialized) {
         return false;
     }
@@ -304,8 +304,8 @@ bool LcdRgbPeripheralMockImpl::waitFrameDone(uint32_t timeout_ms) {
     }
 
     // Wait for completion
-    uint32_t start_us = fl::micros();
-    uint32_t timeout_us = timeout_ms * 1000;
+    u32 start_us = fl::micros();
+    u32 timeout_us = timeout_ms * 1000;
 
     while (true) {
         {
@@ -355,7 +355,7 @@ uint64_t LcdRgbPeripheralMockImpl::getMicroseconds() {
     return fl::micros();
 }
 
-void LcdRgbPeripheralMockImpl::delay(uint32_t ms) {
+void LcdRgbPeripheralMockImpl::delay(u32 ms) {
     fl::delay(ms);
 }
 
@@ -386,7 +386,7 @@ void LcdRgbPeripheralMockImpl::setDrawFailure(bool should_fail) {
     mShouldFailDraw = should_fail;
 }
 
-void LcdRgbPeripheralMockImpl::setDrawDelay(uint32_t microseconds) {
+void LcdRgbPeripheralMockImpl::setDrawDelay(u32 microseconds) {
     mDrawDelayUs = microseconds;
     mDrawDelayForced = true;  // Mark as explicitly set - don't recalculate in drawFrame()
 }
@@ -402,11 +402,11 @@ void LcdRgbPeripheralMockImpl::clearFrameHistory() {
     mBusy = false;
 }
 
-fl::span<const uint16_t> LcdRgbPeripheralMockImpl::getLastFrameData() const {
+fl::span<const u16> LcdRgbPeripheralMockImpl::getLastFrameData() const {
     if (mHistory.empty()) {
-        return fl::span<const uint16_t>();
+        return fl::span<const u16>();
     }
-    return fl::span<const uint16_t>(mHistory.back().buffer_copy);
+    return fl::span<const u16>(mHistory.back().buffer_copy);
 }
 
 bool LcdRgbPeripheralMockImpl::isEnabled() const {

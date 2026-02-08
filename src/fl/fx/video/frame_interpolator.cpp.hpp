@@ -25,7 +25,7 @@ bool FrameInterpolator::draw(fl::u32 now, Frame *dst) {
 
 bool FrameInterpolator::draw(fl::u32 now, CRGB *leds) {
     fl::u32 frameNumber, nextFrameNumber;
-    uint8_t amountOfNextFrame;
+    u8 amountOfNextFrame;
     // DBG("now: " << now);
     mFrameTracker.get_interval_frames(now, &frameNumber, &nextFrameNumber,
                                       &amountOfNextFrame);

@@ -19,9 +19,9 @@ namespace fl {
 // ============================================================================
 
 FL_OPTIMIZE_FUNCTION FL_IRAM
-void wave8Transpose_2(const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
+void wave8Transpose_2(const u8 (&FL_RESTRICT_PARAM lanes)[2],
                       const Wave8BitExpansionLut &lut,
-                      uint8_t (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
+                      u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
     // Allocate waveform buffers on stack (16 Wave8Bit total: 8 packed bytes per lane × 2 lanes)
     // Each Wave8Byte is 8 bytes (8 Wave8Bit × 1 byte each)
     // Layout: [Lane0_bit7, Lane0_bit6, ..., Lane0_bit0, Lane1_bit7, Lane1_bit6, ..., Lane1_bit0]
@@ -36,9 +36,9 @@ void wave8Transpose_2(const uint8_t (&FL_RESTRICT_PARAM lanes)[2],
 }
 
 FL_OPTIMIZE_FUNCTION FL_IRAM
-void wave8Transpose_4(const uint8_t (&FL_RESTRICT_PARAM lanes)[4],
+void wave8Transpose_4(const u8 (&FL_RESTRICT_PARAM lanes)[4],
                       const Wave8BitExpansionLut &lut,
-                      uint8_t (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) {
+                      u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) {
     // Allocate waveform buffers on stack (32 Wave8Bit total: 8 packed bytes per lane × 4 lanes)
     Wave8Byte laneWaveformSymbols[4];
 
@@ -52,9 +52,9 @@ void wave8Transpose_4(const uint8_t (&FL_RESTRICT_PARAM lanes)[4],
 }
 
 FL_OPTIMIZE_FUNCTION FL_IRAM
-void wave8Transpose_8(const uint8_t (&FL_RESTRICT_PARAM lanes)[8],
+void wave8Transpose_8(const u8 (&FL_RESTRICT_PARAM lanes)[8],
                       const Wave8BitExpansionLut &lut,
-                      uint8_t (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) {
+                      u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) {
     // Allocate waveform buffers on stack (64 Wave8Bit total: 8 packed bytes per lane × 8 lanes)
     Wave8Byte laneWaveformSymbols[8];
 
@@ -68,9 +68,9 @@ void wave8Transpose_8(const uint8_t (&FL_RESTRICT_PARAM lanes)[8],
 }
 
 FL_OPTIMIZE_FUNCTION FL_IRAM
-void wave8Transpose_16(const uint8_t (&FL_RESTRICT_PARAM lanes)[16],
+void wave8Transpose_16(const u8 (&FL_RESTRICT_PARAM lanes)[16],
                        const Wave8BitExpansionLut &lut,
-                       uint8_t (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) {
+                       u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) {
     // Allocate waveform buffers on stack (128 Wave8Bit total: 8 packed bytes per lane × 16 lanes)
     Wave8Byte laneWaveformSymbols[16];
 
@@ -95,9 +95,9 @@ Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing) {
     // ChipsetTiming.T1 = T0H (high time for bit 0)
     // ChipsetTiming.T2 = T1H - T0H (ADDITIONAL high time for bit 1)
     // ChipsetTiming.T3 = T0L (low tail duration)
-    const uint32_t t0h = timing.T1;                     // T0H: bit 0 goes LOW here
-    const uint32_t t1h = timing.T1 + timing.T2;          // T1H: bit 1 goes LOW here
-    const uint32_t period = timing.T1 + timing.T2 + timing.T3; // Total period
+    const u32 t0h = timing.T1;                     // T0H: bit 0 goes LOW here
+    const u32 t1h = timing.T1 + timing.T2;          // T1H: bit 1 goes LOW here
+    const u32 period = timing.T1 + timing.T2 + timing.T3; // Total period
 
     // Step 2: Normalize absolute times
     const float t0h_norm = static_cast<float>(t0h) / period;
@@ -106,10 +106,10 @@ Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing) {
     // Step 3: Convert to pulse counts (fixed 8 pulses per bit)
     // pulses_bit0: number of HIGH pulses for bit 0 (before it goes LOW at t0h)
     // pulses_bit1: number of HIGH pulses for bit 1 (before it goes LOW at t1h)
-    uint32_t pulses_bit0 =
-        static_cast<uint32_t>(t0h_norm * 8.0f + 0.5f); // round
-    uint32_t pulses_bit1 =
-        static_cast<uint32_t>(t1h_norm * 8.0f + 0.5f); // round
+    u32 pulses_bit0 =
+        static_cast<u32>(t0h_norm * 8.0f + 0.5f); // round
+    u32 pulses_bit1 =
+        static_cast<u32>(t1h_norm * 8.0f + 0.5f); // round
 
     // Clamp to valid range [0, 8]
     if (pulses_bit0 > 8)
@@ -119,26 +119,26 @@ Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing) {
 
     // Step 4: Generate bit0 and bit1 waveforms (1 byte each, packed format)
     // Each bit represents one pulse (MSB = first pulse)
-    uint8_t bit0_waveform = 0;
-    uint8_t bit1_waveform = 0;
+    u8 bit0_waveform = 0;
+    u8 bit1_waveform = 0;
 
     // Bit 0: Set MSB bits for HIGH pulses
-    for (uint32_t i = 0; i < pulses_bit0; i++) {
+    for (u32 i = 0; i < pulses_bit0; i++) {
         bit0_waveform |= (0x80 >> i);  // Set bit from MSB
     }
 
     // Bit 1: Set MSB bits for HIGH pulses
-    for (uint32_t i = 0; i < pulses_bit1; i++) {
+    for (u32 i = 0; i < pulses_bit1; i++) {
         bit1_waveform |= (0x80 >> i);  // Set bit from MSB
     }
 
     // Step 5: Build LUT for all 16 nibbles
-    for (uint8_t nibble = 0; nibble < 16; nibble++) {
+    for (u8 nibble = 0; nibble < 16; nibble++) {
         // For each nibble, generate 4 Wave8Bit (one per bit, MSB first)
         for (int bit_pos = 3; bit_pos >= 0; bit_pos--) {
             // Extract bit (MSB first: bit 3, 2, 1, 0)
             const bool bit_set = (nibble >> bit_pos) & 1;
-            const uint8_t waveform = bit_set ? bit1_waveform : bit0_waveform;
+            const u8 waveform = bit_set ? bit1_waveform : bit0_waveform;
 
             // Store packed waveform to LUT entry
             lut.lut[nibble][3 - bit_pos].data = waveform;
@@ -153,8 +153,8 @@ Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing) {
 // ============================================================================
 
 FL_OPTIMIZE_FUNCTION
-void wave8Untranspose_2(const uint8_t (&FL_RESTRICT_PARAM transposed)[2 * sizeof(Wave8Byte)],
-                        uint8_t (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
+void wave8Untranspose_2(const u8 (&FL_RESTRICT_PARAM transposed)[2 * sizeof(Wave8Byte)],
+                        u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
     // Reverse the 2-lane transposition
     // Input: 16 bytes of interleaved data (2 bytes per symbol, 8 symbols)
     // Output: 2 Wave8Byte structures (16 bytes total, de-interleaved)
@@ -164,12 +164,12 @@ void wave8Untranspose_2(const uint8_t (&FL_RESTRICT_PARAM transposed)[2 * sizeof
     // Process each of the 8 symbols
     for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
         // Read the 2 interleaved bytes for this symbol
-        uint16_t interleaved = ((uint16_t)transposed[symbol_idx * 2] << 8) |
+        u16 interleaved = ((u16)transposed[symbol_idx * 2] << 8) |
                                transposed[symbol_idx * 2 + 1];
 
         // De-interleave bits back to lanes
-        uint8_t lane0_bits = 0;
-        uint8_t lane1_bits = 0;
+        u8 lane0_bits = 0;
+        u8 lane1_bits = 0;
 
         // Extract bits: interleaved format has alternating bits [L0, L1, L0, L1, ...]
         // Bits are ordered: [L1_b7, L0_b7, L1_b6, L0_b6, L1_b5, L0_b5, L1_b4, L0_b4, ...]
@@ -194,8 +194,8 @@ void wave8Untranspose_2(const uint8_t (&FL_RESTRICT_PARAM transposed)[2 * sizeof
 }
 
 FL_OPTIMIZE_FUNCTION
-void wave8Untranspose_4(const uint8_t (&FL_RESTRICT_PARAM transposed)[4 * sizeof(Wave8Byte)],
-                        uint8_t (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) {
+void wave8Untranspose_4(const u8 (&FL_RESTRICT_PARAM transposed)[4 * sizeof(Wave8Byte)],
+                        u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) {
     // Reverse the 4-lane transposition
     // Input: 32 bytes of interleaved data (4 bytes per symbol, 8 symbols)
     // Output: 4 Wave8Byte structures (32 bytes total, de-interleaved)
@@ -204,11 +204,11 @@ void wave8Untranspose_4(const uint8_t (&FL_RESTRICT_PARAM transposed)[4 * sizeof
 
     // Process each of the 8 symbols
     for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
-        uint8_t lane_bytes[4] = {0, 0, 0, 0};
+        u8 lane_bytes[4] = {0, 0, 0, 0};
 
         // Process 4 input bytes (2 pulses per byte)
         for (int byte_idx = 0; byte_idx < 4; byte_idx++) {
-            uint8_t input_byte = transposed[symbol_idx * 4 + byte_idx];
+            u8 input_byte = transposed[symbol_idx * 4 + byte_idx];
 
             // Calculate which pulse bits these correspond to
             int pulse_bit_hi = 7 - (byte_idx * 2);
@@ -218,8 +218,8 @@ void wave8Untranspose_4(const uint8_t (&FL_RESTRICT_PARAM transposed)[4 * sizeof
             // Bit layout: [L3_hi, L2_hi, L1_hi, L0_hi, L3_lo, L2_lo, L1_lo, L0_lo]
             for (int lane = 0; lane < 4; lane++) {
                 // Extract bits for this lane
-                uint8_t pulse_hi = (input_byte >> (4 + lane)) & 1;
-                uint8_t pulse_lo = (input_byte >> lane) & 1;
+                u8 pulse_hi = (input_byte >> (4 + lane)) & 1;
+                u8 pulse_lo = (input_byte >> lane) & 1;
 
                 // Reconstruct lane byte
                 lane_bytes[lane] |= (pulse_hi << pulse_bit_hi);
@@ -240,8 +240,8 @@ void wave8Untranspose_4(const uint8_t (&FL_RESTRICT_PARAM transposed)[4 * sizeof
 }
 
 FL_OPTIMIZE_FUNCTION
-void wave8Untranspose_8(const uint8_t (&FL_RESTRICT_PARAM transposed)[8 * sizeof(Wave8Byte)],
-                        uint8_t (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) {
+void wave8Untranspose_8(const u8 (&FL_RESTRICT_PARAM transposed)[8 * sizeof(Wave8Byte)],
+                        u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) {
     // Reverse the 8-lane transposition
     // Input: 64 bytes of interleaved data (8 bytes per symbol, 8 symbols)
     // Output: 8 Wave8Byte structures (64 bytes total, de-interleaved)
@@ -250,11 +250,11 @@ void wave8Untranspose_8(const uint8_t (&FL_RESTRICT_PARAM transposed)[8 * sizeof
 
     // Process each of the 8 symbols
     for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
-        uint8_t lane_bytes[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+        u8 lane_bytes[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
         // Process 8 input bytes (1 pulse per byte)
         for (int byte_idx = 0; byte_idx < 8; byte_idx++) {
-            uint8_t input_byte = transposed[symbol_idx * 8 + byte_idx];
+            u8 input_byte = transposed[symbol_idx * 8 + byte_idx];
 
             // Calculate which pulse bit this corresponds to
             int pulse_bit = 7 - byte_idx;
@@ -263,7 +263,7 @@ void wave8Untranspose_8(const uint8_t (&FL_RESTRICT_PARAM transposed)[8 * sizeof
             // Bit layout: [L7, L6, L5, L4, L3, L2, L1, L0]
             for (int lane = 0; lane < 8; lane++) {
                 // Extract bit for this lane (lane 0 = LSB, lane 7 = MSB)
-                uint8_t pulse = (input_byte >> lane) & 1;
+                u8 pulse = (input_byte >> lane) & 1;
 
                 // Reconstruct lane byte
                 lane_bytes[lane] |= (pulse << pulse_bit);
@@ -283,8 +283,8 @@ void wave8Untranspose_8(const uint8_t (&FL_RESTRICT_PARAM transposed)[8 * sizeof
 }
 
 FL_OPTIMIZE_FUNCTION
-void wave8Untranspose_16(const uint8_t (&FL_RESTRICT_PARAM transposed)[16 * sizeof(Wave8Byte)],
-                         uint8_t (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) {
+void wave8Untranspose_16(const u8 (&FL_RESTRICT_PARAM transposed)[16 * sizeof(Wave8Byte)],
+                         u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) {
     // Reverse the 16-lane transposition
     // Input: 128 bytes of interleaved data (16 bytes per symbol, 8 symbols)
     // Output: 16 Wave8Byte structures (128 bytes total, de-interleaved)
@@ -293,7 +293,7 @@ void wave8Untranspose_16(const uint8_t (&FL_RESTRICT_PARAM transposed)[16 * size
 
     // Process each of the 8 symbols
     for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
-        uint8_t lane_bytes[16] = {0};
+        u8 lane_bytes[16] = {0};
 
         // Process 8 pulses (16 bytes total: 2 bytes per pulse)
         for (int pulse_idx = 0; pulse_idx < 8; pulse_idx++) {
@@ -301,14 +301,14 @@ void wave8Untranspose_16(const uint8_t (&FL_RESTRICT_PARAM transposed)[16 * size
 
             // Read 16-bit word for this pulse
             int input_offset = symbol_idx * 16 + pulse_idx * 2;
-            uint16_t input_word = (uint16_t)transposed[input_offset] |
-                                  ((uint16_t)transposed[input_offset + 1] << 8);
+            u16 input_word = (u16)transposed[input_offset] |
+                                  ((u16)transposed[input_offset + 1] << 8);
 
             // De-interleave 16 lanes from this word
             // Bit layout: [L15, L14, L13, ..., L1, L0]
             for (int lane = 0; lane < 16; lane++) {
                 // Extract bit for this lane (lane 0 = LSB, lane 15 = MSB)
-                uint8_t pulse = (input_word >> lane) & 1;
+                u8 pulse = (input_word >> lane) & 1;
 
                 // Reconstruct lane byte
                 lane_bytes[lane] |= (pulse << pulse_bit);

@@ -42,7 +42,7 @@ static void FL_IRAM spi_isr_wrapper(void* user_ctx) {
  * @param timer_hz Timer frequency in Hz (should be 2× target SPI bit rate)
  * @return 0 on success, error code on failure
  */
-FL_EXTERN_C int fl_spi_platform_isr_start(uint32_t timer_hz) {
+FL_EXTERN_C int fl_spi_platform_isr_start(fl::u32 timer_hz) {
     if (s_isr_handle.is_valid()) {
         ESP_LOGW(PARALLEL_SPI_TAG, "Timer already initialized");
         return -1;

@@ -73,7 +73,7 @@ namespace ucs7604 {
     /// @param w White channel current (0x0-0xF)
     /// @note This is SECONDARY to FastLED::setBrightness() - use that as primary control
     /// @note Affects current control which may impact color accuracy
-    inline void set_brightness(uint8_t r, uint8_t g, uint8_t b, uint8_t w) {
+    inline void set_brightness(u8 r, u8 g, u8 b, u8 w) {
         set_brightness(CurrentControl(r, g, b, w));
     }
 
@@ -111,7 +111,7 @@ private:
 
     // Reusable byte buffer (uses PSRAM on ESP32, regular heap elsewhere)
     // Cleared each frame but memory is reused (no reallocation after first use)
-    fl::vector_psram<uint8_t> mByteBuffer;
+    fl::vector_psram<u8> mByteBuffer;
 
 public:
     UCS7604ControllerT() {}
@@ -131,7 +131,7 @@ public:
 
 protected:
 
-    fl::span<const uint8_t> bytes() const {
+    fl::span<const u8> bytes() const {
         return mByteBuffer;
     }
 
@@ -146,21 +146,21 @@ protected:
         // Reorder RGB current values to match the color order (RGB_ORDER template parameter)
         // The current control values are semantic (current.r controls RED LEDs, etc.)
         // but need to be sent in wire order matching the pixel data reordering
-        uint8_t rgb_currents[3] = {current.r, current.g, current.b};
+        u8 rgb_currents[3] = {current.r, current.g, current.b};
 
         // Extract channel positions from RGB_ORDER (octal encoding: 0=R, 1=G, 2=B)
         // Octal digits are read right-to-left in bit positions but left-to-right semantically
         // RGB (012 octal): wire position 0=R(0), 1=G(1), 2=B(2)
         // GRB (102 octal): wire position 0=G(1), 1=R(0), 2=B(2)
-        uint8_t pos0 = (RGB_ORDER >> 6) & 0x3;  // Wire position 0 (leftmost octal digit)
-        uint8_t pos1 = (RGB_ORDER >> 3) & 0x3;  // Wire position 1 (middle octal digit)
-        uint8_t pos2 = (RGB_ORDER >> 0) & 0x3;  // Wire position 2 (rightmost octal digit)
+        u8 pos0 = (RGB_ORDER >> 6) & 0x3;  // Wire position 0 (leftmost octal digit)
+        u8 pos1 = (RGB_ORDER >> 3) & 0x3;  // Wire position 1 (middle octal digit)
+        u8 pos2 = (RGB_ORDER >> 0) & 0x3;  // Wire position 2 (rightmost octal digit)
 
         // Reorder: wire R gets current for channel at pos0, etc.
-        uint8_t r_current = rgb_currents[pos0];  // Wire R (position 0)
-        uint8_t g_current = rgb_currents[pos1];  // Wire G (position 1)
-        uint8_t b_current = rgb_currents[pos2];  // Wire B (position 2)
-        uint8_t w_current = current.w;  // W always in position 3
+        u8 r_current = rgb_currents[pos0];  // Wire R (position 0)
+        u8 g_current = rgb_currents[pos1];  // Wire G (position 1)
+        u8 b_current = rgb_currents[pos2];  // Wire B (position 2)
+        u8 w_current = current.w;  // W always in position 3
 
         // Create current control struct with reordered values
         fl::UCS7604CurrentControl wire_current(r_current, g_current, b_current, w_current);

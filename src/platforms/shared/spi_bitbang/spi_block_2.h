@@ -64,7 +64,7 @@ public:
     static constexpr int NUM_DATA_PINS = 2;
 
     /// Maximum buffer size
-    static constexpr uint16_t MAX_BUFFER_SIZE = 256;
+    static constexpr u16 MAX_BUFFER_SIZE = 256;
 
     SpiBlock2() = default;
     ~SpiBlock2() = default;
@@ -78,12 +78,12 @@ public:
      * Initializes the 256-entry LUT to map byte values to GPIO masks
      * for the specified data pins.
      */
-    void setPinMapping(uint8_t d0, uint8_t d1, uint8_t clk) {
+    void setPinMapping(u8 d0, u8 d1, u8 clk) {
         // Store clock mask
         mClockMask = 1u << clk;
 
         // Build data pin masks array
-        uint32_t dataPinMasks[NUM_DATA_PINS] = {
+        u32 dataPinMasks[NUM_DATA_PINS] = {
             1u << d0,  // Bit 0 (LSB)
             1u << d1   // Bit 1 (MSB)
         };
@@ -94,8 +94,8 @@ public:
         // - Map each bit to corresponding GPIO pin
         // - Generate set_mask (pins to set high) and clear_mask (pins to clear low)
         for (int byteValue = 0; byteValue < 256; byteValue++) {
-            uint32_t setMask = 0;
-            uint32_t clearMask = 0;
+            u32 setMask = 0;
+            u32 clearMask = 0;
 
             // Only process lower 2 bits (upper 6 bits ignored)
             for (int bitPos = 0; bitPos < NUM_DATA_PINS; bitPos++) {
@@ -119,7 +119,7 @@ public:
      * Each byte in the buffer represents 2 parallel bits to output.
      * Only the lower 2 bits of each byte are used.
      */
-    void loadBuffer(const uint8_t* data, uint16_t n) {
+    void loadBuffer(const u8* data, u16 n) {
         if (!data) return;
         if (n > MAX_BUFFER_SIZE) n = MAX_BUFFER_SIZE;
 
@@ -141,12 +141,12 @@ public:
         if (!mBuffer || mBufferLen == 0) return;
 
         // Inline bit-banging loop (same logic as ISR implementation)
-        for (uint16_t i = 0; i < mBufferLen; i++) {
-            uint8_t byte = mBuffer[i];
+        for (u16 i = 0; i < mBufferLen; i++) {
+            u8 byte = mBuffer[i];
 
             // Phase 0: Present data + force CLK low
-            uint32_t pins_to_set = mLUT[byte].set_mask;
-            uint32_t pins_to_clear = mLUT[byte].clear_mask | mClockMask;
+            u32 pins_to_set = mLUT[byte].set_mask;
+            u32 pins_to_clear = mLUT[byte].clear_mask | mClockMask;
 
             FL_GPIO_WRITE_SET(pins_to_set);      // data-high bits
             FL_GPIO_WRITE_CLEAR(pins_to_clear);  // data-low bits + CLK low
@@ -159,14 +159,14 @@ public:
     /**
      * Get buffer pointer (for inspection)
      */
-    const uint8_t* getBuffer() const {
+    const u8* getBuffer() const {
         return mBuffer;
     }
 
     /**
      * Get buffer length (for inspection)
      */
-    uint16_t getBufferLength() const {
+    u16 getBufferLength() const {
         return mBufferLen;
     }
 
@@ -178,10 +178,10 @@ public:
     }
 
 private:
-    uint32_t mClockMask = 0;           ///< Clock pin mask
+    u32 mClockMask = 0;           ///< Clock pin mask
     PinMaskEntry mLUT[256];            ///< 256-entry lookup table
-    const uint8_t* mBuffer = nullptr;  ///< Data buffer pointer
-    uint16_t mBufferLen = 0;           ///< Buffer length
+    const u8* mBuffer = nullptr;  ///< Data buffer pointer
+    u16 mBufferLen = 0;           ///< Buffer length
 };
 
 }  // namespace fl

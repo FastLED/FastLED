@@ -42,29 +42,29 @@ class FontRendererImpl;
 
 // Font metrics returned by Font::getMetrics()
 struct FontMetrics {
-    int32_t ascent;     // Units above baseline
-    int32_t descent;    // Units below baseline (typically negative)
-    int32_t lineGap;    // Additional spacing between lines
-    int32_t x0, y0;     // Bounding box min
-    int32_t x1, y1;     // Bounding box max
+    i32 ascent;     // Units above baseline
+    i32 descent;    // Units below baseline (typically negative)
+    i32 lineGap;    // Additional spacing between lines
+    i32 x0, y0;     // Bounding box min
+    i32 x1, y1;     // Bounding box max
 };
 
 // Glyph (single character) metrics
 struct GlyphMetrics {
-    int32_t advanceWidth;      // Horizontal advance after glyph
-    int32_t leftSideBearing;   // Left side bearing
-    int32_t x0, y0;            // Bounding box min
-    int32_t x1, y1;            // Bounding box max
+    i32 advanceWidth;      // Horizontal advance after glyph
+    i32 leftSideBearing;   // Left side bearing
+    i32 x0, y0;            // Bounding box min
+    i32 x1, y1;            // Bounding box max
     bool isEmpty;              // True if glyph has no visual representation
 };
 
 // Rendered glyph data
 struct GlyphBitmap {
-    fl::vector<uint8_t> data;  // Grayscale bitmap (0=transparent, 255=opaque)
-    int32_t width;                    // Bitmap width in pixels
-    int32_t height;                   // Bitmap height in pixels
-    int32_t xOffset;                  // X offset from origin to top-left of bitmap
-    int32_t yOffset;                  // Y offset from origin to top-left of bitmap (typically negative)
+    fl::vector<u8> data;  // Grayscale bitmap (0=transparent, 255=opaque)
+    i32 width;                    // Bitmap width in pixels
+    i32 height;                   // Bitmap height in pixels
+    i32 xOffset;                  // X offset from origin to top-left of bitmap
+    i32 yOffset;                  // Y offset from origin to top-left of bitmap (typically negative)
 
     GlyphBitmap() : width(0), height(0), xOffset(0), yOffset(0) {}
 
@@ -72,7 +72,7 @@ struct GlyphBitmap {
     bool valid() const { return !data.empty() && width > 0 && height > 0; }
 
     // Get pixel value at (x, y) - returns 0 if out of bounds
-    uint8_t getPixel(int32_t x, int32_t y) const {
+    u8 getPixel(i32 x, i32 y) const {
         if (data.empty() || x < 0 || y < 0 || x >= width || y >= height) {
             return 0;
         }
@@ -89,16 +89,16 @@ public:
 
     // Load a font from raw TrueType data (.ttf file contents)
     // Returns nullptr if the font data is invalid
-    static fl::shared_ptr<Font> load(fl::span<const uint8_t> fontData);
+    static fl::shared_ptr<Font> load(fl::span<const u8> fontData);
 
     // Load a specific font from a TrueType collection (.ttc file)
     // fontIndex: 0-based index of the font in the collection
-    static fl::shared_ptr<Font> load(fl::span<const uint8_t> fontData, int32_t fontIndex);
+    static fl::shared_ptr<Font> load(fl::span<const u8> fontData, i32 fontIndex);
 
     virtual ~Font() = default;
 
     // Get the number of fonts in this file (1 for .ttf, possibly more for .ttc)
-    virtual int32_t getNumFonts() const = 0;
+    virtual i32 getNumFonts() const = 0;
 
     // Get overall font metrics (unscaled)
     virtual FontMetrics getMetrics() const = 0;
@@ -107,20 +107,20 @@ public:
     virtual float getScaleForPixelHeight(float pixelHeight) const = 0;
 
     // Get glyph metrics for a unicode codepoint (unscaled)
-    virtual GlyphMetrics getGlyphMetrics(int32_t codepoint) const = 0;
+    virtual GlyphMetrics getGlyphMetrics(i32 codepoint) const = 0;
 
     // Get kerning adjustment between two characters (unscaled)
     // Returns the adjustment to add to advance width
-    virtual int32_t getKerning(int32_t codepoint1, int32_t codepoint2) const = 0;
+    virtual i32 getKerning(i32 codepoint1, i32 codepoint2) const = 0;
 
     // Render a single character to a grayscale bitmap
     // Returns an empty GlyphBitmap if the character doesn't exist
-    virtual GlyphBitmap renderGlyph(int32_t codepoint, float scale) const = 0;
+    virtual GlyphBitmap renderGlyph(i32 codepoint, float scale) const = 0;
 
     // Render with antialiasing control
     // oversampleX/Y: 1 = no oversampling, 2+ = oversample for smoother edges
-    virtual GlyphBitmap renderGlyph(int32_t codepoint, float scale,
-                                    int32_t oversampleX, int32_t oversampleY) const = 0;
+    virtual GlyphBitmap renderGlyph(i32 codepoint, float scale,
+                                    i32 oversampleX, i32 oversampleY) const = 0;
 
 protected:
     Font() = default;
@@ -156,19 +156,19 @@ public:
 
     // Render a character at the current size
     // Uses 2x2 oversampling by default for smooth edges on LED displays
-    GlyphBitmap render(int32_t codepoint) const;
+    GlyphBitmap render(i32 codepoint) const;
 
     // Render with custom oversampling
-    GlyphBitmap render(int32_t codepoint, int32_t oversampleX, int32_t oversampleY) const;
+    GlyphBitmap render(i32 codepoint, i32 oversampleX, i32 oversampleY) const;
 
     // Render without antialiasing (1x1 oversampling)
-    GlyphBitmap renderNoAA(int32_t codepoint) const;
+    GlyphBitmap renderNoAA(i32 codepoint) const;
 
     // Get the advance width for a character (in pixels)
-    float getAdvance(int32_t codepoint) const;
+    float getAdvance(i32 codepoint) const;
 
     // Get kerning between two characters (in pixels)
-    float getKerning(int32_t codepoint1, int32_t codepoint2) const;
+    float getKerning(i32 codepoint1, i32 codepoint2) const;
 
     // Calculate the width of a string (in pixels)
     // Includes kerning between characters

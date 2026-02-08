@@ -46,18 +46,18 @@ public:
     void deinitialize() override;
     bool isInitialized() const override;
 
-    uint16_t* allocateFrameBuffer(size_t size_bytes) override;
-    void freeFrameBuffer(uint16_t* buffer) override;
+    u16* allocateFrameBuffer(size_t size_bytes) override;
+    void freeFrameBuffer(u16* buffer) override;
 
-    bool drawFrame(const uint16_t* buffer, size_t size_bytes) override;
-    bool waitFrameDone(uint32_t timeout_ms) override;
+    bool drawFrame(const u16* buffer, size_t size_bytes) override;
+    bool waitFrameDone(u32 timeout_ms) override;
     bool isBusy() const override;
 
     bool registerDrawCallback(void* callback, void* user_ctx) override;
     const LcdRgbPeripheralConfig& getConfig() const override;
 
     uint64_t getMicroseconds() override;
-    void delay(uint32_t ms) override;
+    void delay(u32 ms) override;
 
 private:
     friend class fl::Singleton<LcdRgbPeripheralEsp>;

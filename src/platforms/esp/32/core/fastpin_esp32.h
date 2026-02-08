@@ -12,21 +12,21 @@ namespace fl {
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wvolatile"
 
-template<uint8_t PIN, uint32_t MASK, bool VALIDPIN> class _ESPPIN {
+template<u8 PIN, u32 MASK, bool VALIDPIN> class _ESPPIN {
 public:
-  typedef volatile uint32_t * port_ptr_t;
-  typedef uint32_t port_t;
+  typedef volatile u32 * port_ptr_t;
+  typedef u32 port_t;
 
   static constexpr bool validpin() { return VALIDPIN; }
 
 #ifndef GPIO_OUT1_REG
-  static constexpr uint32_t GPIO_REG = GPIO_OUT_REG;
-  static constexpr uint32_t GPIO_BIT_SET_REG = GPIO_OUT_W1TS_REG;
-  static constexpr uint32_t GPIO_BIT_CLEAR_REG = GPIO_OUT_W1TC_REG;
+  static constexpr u32 GPIO_REG = GPIO_OUT_REG;
+  static constexpr u32 GPIO_BIT_SET_REG = GPIO_OUT_W1TS_REG;
+  static constexpr u32 GPIO_BIT_CLEAR_REG = GPIO_OUT_W1TC_REG;
   #else
-  static constexpr uint32_t GPIO_REG = PIN < 32 ? GPIO_OUT_REG : GPIO_OUT1_REG;
-  static constexpr uint32_t GPIO_BIT_SET_REG = PIN < 32 ? GPIO_OUT_W1TS_REG : GPIO_OUT1_W1TS_REG;
-  static constexpr uint32_t GPIO_BIT_CLEAR_REG = PIN < 32 ? GPIO_OUT_W1TC_REG : GPIO_OUT1_W1TC_REG;
+  static constexpr u32 GPIO_REG = PIN < 32 ? GPIO_OUT_REG : GPIO_OUT1_REG;
+  static constexpr u32 GPIO_BIT_SET_REG = PIN < 32 ? GPIO_OUT_W1TS_REG : GPIO_OUT1_W1TS_REG;
+  static constexpr u32 GPIO_BIT_CLEAR_REG = PIN < 32 ? GPIO_OUT_W1TC_REG : GPIO_OUT1_W1TC_REG;
   #endif
 
   inline static void setOutput() {
@@ -166,7 +166,7 @@ public:
 
 #define _FL_PIN_VALID(PIN) ((_FL_VALID_PIN_MASK & (1ULL << PIN)) != 0)
 
-#define _FL_DEFPIN(PIN) template <> class FastPin<PIN> : public _ESPPIN<PIN, ((uint32_t)1 << (PIN % 32)), _FL_PIN_VALID(PIN)> {};
+#define _FL_DEFPIN(PIN) template <> class FastPin<PIN> : public _ESPPIN<PIN, ((u32)1 << (PIN % 32)), _FL_PIN_VALID(PIN)> {};
 
 // Define all possible pins.  If the pin is not valid for a particular ESP32 variant, the pin number
 // will be shifted into the 192-255 range, in effect rendering it unusable.

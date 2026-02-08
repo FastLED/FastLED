@@ -77,7 +77,7 @@ enum class ParlioBitPackOrder {
 struct ParlioPeripheralConfig {
     size_t data_width;                  ///< PARLIO data width (1, 2, 4, 8, or 16)
     fl::vector_fixed<int, 16> gpio_pins;///< GPIO pin assignments (-1 for unused)
-    uint32_t clock_freq_hz;             ///< Clock frequency (Hz)
+    u32 clock_freq_hz;             ///< Clock frequency (Hz)
     size_t queue_depth;                 ///< Hardware queue depth
     size_t max_transfer_size;           ///< Max DMA transfer size (bytes)
     ParlioBitPackOrder packing;         ///< Bit packing order (ParlioBitPackOrder::FL_PARLIO_LSB or ParlioBitPackOrder::FL_PARLIO_MSB)
@@ -100,7 +100,7 @@ struct ParlioPeripheralConfig {
     /// @param pack_order Bit packing order (default: ParlioBitPackOrder::FL_PARLIO_MSB)
     template<typename PinContainer>
     ParlioPeripheralConfig(const PinContainer& pins,
-                           uint32_t clock_freq,
+                           u32 clock_freq,
                            size_t queue_depth_val,
                            size_t max_transfer,
                            ParlioBitPackOrder pack_order = ParlioBitPackOrder::FL_PARLIO_MSB)
@@ -233,7 +233,7 @@ public:
     ///
     /// The peripheral will trigger the TX done callback when transmission
     /// completes. Multiple buffers can be queued (up to queue_depth).
-    virtual bool transmit(const uint8_t* buffer, size_t bit_count, uint16_t idle_value) = 0;
+    virtual bool transmit(const u8* buffer, size_t bit_count, u16 idle_value) = 0;
 
     /// @brief Wait for all queued transmissions to complete
     /// @param timeout_ms Timeout in milliseconds (0 = non-blocking poll)
@@ -251,7 +251,7 @@ public:
     /// Returns false if:
     /// - Timeout occurs before completion
     /// - Hardware error occurs during transmission
-    virtual bool waitAllDone(uint32_t timeout_ms) = 0;
+    virtual bool waitAllDone(u32 timeout_ms) = 0;
 
     //=========================================================================
     // ISR Callback Registration
@@ -302,7 +302,7 @@ public:
     ///
     /// Size is automatically rounded up to 64-byte multiple to ensure
     /// cache sync operations work correctly (address AND size must be aligned).
-    virtual uint8_t* allocateDmaBuffer(size_t size) = 0;
+    virtual u8* allocateDmaBuffer(size_t size) = 0;
 
     /// @brief Free DMA buffer allocated via allocateDmaBuffer()
     /// @param buffer Buffer pointer (must be from allocateDmaBuffer())
@@ -310,7 +310,7 @@ public:
     /// Maps to ESP-IDF: heap_caps_free()
     ///
     /// Safe to call with nullptr (no-op).
-    virtual void freeDmaBuffer(uint8_t* buffer) = 0;
+    virtual void freeDmaBuffer(u8* buffer) = 0;
 
     //=========================================================================
     // Platform Utilities
@@ -335,7 +335,7 @@ public:
     ///
     /// ⚠️  NOT for timing-critical operations. Use hardware timers or busy-wait
     /// for sub-millisecond precision requirements.
-    virtual void delay(uint32_t ms) = 0;
+    virtual void delay(u32 ms) = 0;
 
     //=========================================================================
     // Task Management (REMOVED - Use fl::TaskCoroutine directly)

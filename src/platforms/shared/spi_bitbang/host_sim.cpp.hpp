@@ -23,10 +23,10 @@
 
 typedef struct {
     FL_GPIO_Event events[FL_GPIO_SIM_RING_SIZE];
-    uint32_t write_pos;
-    uint32_t read_pos;
-    uint32_t tick_counter;
-    uint32_t overflow_count;
+    fl::u32 write_pos;
+    fl::u32 read_pos;
+    fl::u32 tick_counter;
+    fl::u32 overflow_count;
 } FL_GPIO_RingBuffer;
 
 static FL_GPIO_RingBuffer g_gpio_ring;
@@ -39,8 +39,8 @@ void fl_gpio_sim_init(void) {
 }
 
 /* Capture SET event */
-void fl_gpio_sim_write_set(uint32_t mask) {
-    uint32_t pos = g_gpio_ring.write_pos;
+void fl_gpio_sim_write_set(fl::u32 mask) {
+    fl::u32 pos = g_gpio_ring.write_pos;
     g_gpio_ring.events[pos].event_type = 0;  /* SET */
     g_gpio_ring.events[pos].gpio_mask = mask;
     g_gpio_ring.events[pos].timestamp = g_gpio_ring.tick_counter;
@@ -52,8 +52,8 @@ void fl_gpio_sim_write_set(uint32_t mask) {
 }
 
 /* Capture CLEAR event */
-void fl_gpio_sim_write_clear(uint32_t mask) {
-    uint32_t pos = g_gpio_ring.write_pos;
+void fl_gpio_sim_write_clear(fl::u32 mask) {
+    fl::u32 pos = g_gpio_ring.write_pos;
     g_gpio_ring.events[pos].event_type = 1;  /* CLEAR */
     g_gpio_ring.events[pos].gpio_mask = mask;
     g_gpio_ring.events[pos].timestamp = g_gpio_ring.tick_counter;
@@ -81,7 +81,7 @@ bool fl_gpio_sim_read_event(FL_GPIO_Event* out) {
 }
 
 /* Get event count */
-uint32_t fl_gpio_sim_get_event_count(void) {
+fl::u32 fl_gpio_sim_get_event_count(void) {
     if (g_gpio_ring.write_pos >= g_gpio_ring.read_pos) {
         return g_gpio_ring.write_pos - g_gpio_ring.read_pos;
     } else {
@@ -97,7 +97,7 @@ void fl_gpio_sim_clear(void) {
 }
 
 /* Get overflow count (for diagnostics) */
-uint32_t fl_gpio_sim_get_overflow_count(void) {
+fl::u32 fl_gpio_sim_get_overflow_count(void) {
     return g_gpio_ring.overflow_count;
 }
 

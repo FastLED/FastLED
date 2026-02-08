@@ -23,7 +23,7 @@ FL_DISABLE_WARNING_FLOAT_CONVERSION
 FL_DISABLE_WARNING_SIGN_CONVERSION
 
 
-FASTLED_FORCE_INLINE CRGB& CRGB::addToRGB (uint8_t d )
+FASTLED_FORCE_INLINE CRGB& CRGB::addToRGB (fl::u8 d )
 {
     r = fl::qadd8( r, d);
     g = fl::qadd8( g, d);
@@ -54,7 +54,7 @@ FASTLED_FORCE_INLINE CRGB CRGB::operator++ (int )
     return retval;
 }
 
-FASTLED_FORCE_INLINE CRGB& CRGB::subtractFromRGB(uint8_t d)
+FASTLED_FORCE_INLINE CRGB& CRGB::subtractFromRGB(fl::u8 d)
 {
     r = fl::qsub8( r, d);
     g = fl::qsub8( g, d);
@@ -62,7 +62,7 @@ FASTLED_FORCE_INLINE CRGB& CRGB::subtractFromRGB(uint8_t d)
     return *this;
 }
 
-FASTLED_FORCE_INLINE CRGB& CRGB::operator*= (uint8_t d )
+FASTLED_FORCE_INLINE CRGB& CRGB::operator*= (fl::u8 d )
 {
     r = fl::qmul8( r, d);
     g = fl::qmul8( g, d);
@@ -70,19 +70,19 @@ FASTLED_FORCE_INLINE CRGB& CRGB::operator*= (uint8_t d )
     return *this;
 }
 
-FASTLED_FORCE_INLINE CRGB& CRGB::nscale8_video(uint8_t scaledown )
+FASTLED_FORCE_INLINE CRGB& CRGB::nscale8_video(fl::u8 scaledown )
 {
     nscale8x3_video( r, g, b, scaledown);
     return *this;
 }
 
-FASTLED_FORCE_INLINE CRGB& CRGB::operator%= (uint8_t scaledown )
+FASTLED_FORCE_INLINE CRGB& CRGB::operator%= (fl::u8 scaledown )
 {
     nscale8x3_video( r, g, b, scaledown);
     return *this;
 }
 
-FASTLED_FORCE_INLINE CRGB& CRGB::fadeLightBy (uint8_t fadefactor )
+FASTLED_FORCE_INLINE CRGB& CRGB::fadeLightBy (fl::u8 fadefactor )
 {
     nscale8x3_video( r, g, b, 255 - fadefactor);
     return *this;
@@ -107,9 +107,9 @@ FASTLED_FORCE_INLINE CRGB CRGB::operator-- (int )
 constexpr CRGB CRGB::nscale8_constexpr(const CRGB scaledown) const
 {
     return CRGB(
-        (((uint16_t)r) * (1 + (uint16_t)(scaledown.r))) >> 8,
-        (((uint16_t)g) * (1 + (uint16_t)(scaledown.g))) >> 8,
-        (((uint16_t)b) * (1 + (uint16_t)(scaledown.b))) >> 8
+        (((fl::u16)r) * (1 + (fl::u16)(scaledown.r))) >> 8,
+        (((fl::u16)g) * (1 + (fl::u16)(scaledown.g))) >> 8,
+        (((fl::u16)b) * (1 + (fl::u16)(scaledown.b))) >> 8
     );
 }
 
@@ -122,7 +122,7 @@ FASTLED_FORCE_INLINE CRGB& CRGB::nscale8 (const CRGB & scaledown )
     return *this;
 }
 
-FASTLED_FORCE_INLINE CRGB CRGB::scale8 (uint8_t scaledown ) const
+FASTLED_FORCE_INLINE CRGB CRGB::scale8 (fl::u8 scaledown ) const
 {
     CRGB out = *this;
     nscale8x3( out.r, out.g, out.b, scaledown);
@@ -139,24 +139,24 @@ FASTLED_FORCE_INLINE CRGB CRGB::scale8 (const CRGB & scaledown ) const
 }
 
 
-FASTLED_FORCE_INLINE uint8_t CRGB::getLuma( )  const {
+FASTLED_FORCE_INLINE fl::u8 CRGB::getLuma( )  const {
     //Y' = 0.2126 R' + 0.7152 G' + 0.0722 B'
     //     54            183       18 (!)
 
-    uint8_t luma = scale8_LEAVING_R1_DIRTY( r, 54) + \
+    fl::u8 luma = scale8_LEAVING_R1_DIRTY( r, 54) + \
     scale8_LEAVING_R1_DIRTY( g, 183) + \
     scale8_LEAVING_R1_DIRTY( b, 18);
     cleanup_R1();
     return luma;
 }
 
-FASTLED_FORCE_INLINE uint8_t CRGB::getAverageLight( )  const {
+FASTLED_FORCE_INLINE fl::u8 CRGB::getAverageLight( )  const {
 #if FASTLED_SCALE8_FIXED == 1
-    const uint8_t eightyfive = 85;
+    const fl::u8 eightyfive = 85;
 #else
-    const uint8_t eightyfive = 86;
+    const fl::u8 eightyfive = 86;
 #endif
-    uint8_t avg = scale8_LEAVING_R1_DIRTY( r, eightyfive) + \
+    fl::u8 avg = scale8_LEAVING_R1_DIRTY( r, eightyfive) + \
     scale8_LEAVING_R1_DIRTY( g, eightyfive) + \
     scale8_LEAVING_R1_DIRTY( b, eightyfive);
     cleanup_R1();
@@ -194,7 +194,7 @@ FASTLED_FORCE_INLINE CRGB operator-( const CRGB& p1, const CRGB& p2)
 }
 
 /// @copydoc CRGB::operator*=
-FASTLED_FORCE_INLINE CRGB operator*( const CRGB& p1, uint8_t d)
+FASTLED_FORCE_INLINE CRGB operator*( const CRGB& p1, fl::u8 d)
 {
     return CRGB( fl::qmul8( p1.r, d),
                  fl::qmul8( p1.g, d),
@@ -202,7 +202,7 @@ FASTLED_FORCE_INLINE CRGB operator*( const CRGB& p1, uint8_t d)
 }
 
 /// Scale using CRGB::nscale8_video()
-FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, uint8_t d)
+FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, fl::u8 d)
 {
     CRGB retval( p1);
     retval.nscale8_video( d);

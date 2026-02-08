@@ -17,7 +17,7 @@
 // RMT symbol is a 32-bit value (union with duration0/level0/duration1/level1 bitfields)
 // We expose uint32_t in the interface to avoid ESP-IDF header dependencies
 // Implementation will cast between uint32_t and rmt_symbol_word_t (static_assert size match)
-using RmtSymbol = uint32_t;
+using RmtSymbol = fl::u32;
 
 namespace fl {
 
@@ -165,13 +165,13 @@ public:
      * }
      * @endcode
      */
-    virtual RxWaitResult wait(uint32_t timeout_ms) override = 0;
+    virtual RxWaitResult wait(u32 timeout_ms) override = 0;
 
     /**
      * @brief Get the RMT clock resolution in Hz
      * @return Resolution in Hz (e.g., 40000000 for 40MHz)
      */
-    virtual uint32_t getResolutionHz() const = 0;
+    virtual u32 getResolutionHz() const = 0;
 
     /**
      * @brief Decode received RMT symbols to bytes into a span
@@ -201,8 +201,8 @@ public:
      * }
      * @endcode
      */
-    virtual fl::Result<uint32_t, DecodeError> decode(const ChipsetTiming4Phase &timing,
-                                                       fl::span<uint8_t> out) override = 0;
+    virtual fl::Result<u32, DecodeError> decode(const ChipsetTiming4Phase &timing,
+                                                       fl::span<u8> out) override = 0;
 
     /**
      * @brief Get raw edge timings in universal format (for debugging)

@@ -21,26 +21,26 @@ class ISpiStripWs2812 {
 
     class OutputIterator {
       public:
-        OutputIterator(ISpiStripWs2812 *strip, uint32_t num_leds);
+        OutputIterator(ISpiStripWs2812 *strip, u32 num_leds);
         OutputIterator(OutputIterator &) = default;
         OutputIterator(OutputIterator &&) = default;
         ~OutputIterator();
 
         void flush();
-        void operator()(uint8_t value);
-        void push_back(uint8_t value) { (*this)(value); }  // Adapter for writeWS2812 compatibility
+        void operator()(u8 value);
+        void push_back(u8 value) { (*this)(value); }  // Adapter for writeWS2812 compatibility
         void finish();  // Must call this at the end.
 
-        uint32_t mPosition = 0;
-        uint32_t mWritten = 0; // whenever this hits 3, we flush.
-        uint8_t mRed = 0;
-        uint8_t mGreen = 0;
-        uint8_t mBlue = 0;
+        u32 mPosition = 0;
+        u32 mWritten = 0; // whenever this hits 3, we flush.
+        u8 mRed = 0;
+        u8 mGreen = 0;
+        u8 mBlue = 0;
         ISpiStripWs2812 *mStrip;
-        uint32_t mNumLeds;
+        u32 mNumLeds;
     };
 
-    static ISpiStripWs2812 *Create(int pin, uint32_t led_count, bool is_rgbw,
+    static ISpiStripWs2812 *Create(int pin, u32 led_count, bool is_rgbw,
                                    SpiHostMode spi_bus = SPI_HOST_MODE_AUTO,
                                    DmaMode dma_mode = DMA_AUTO);
     virtual ~ISpiStripWs2812() {}
@@ -52,7 +52,7 @@ class ISpiStripWs2812 {
     virtual void waitDone() = 0;
     virtual bool isDrawing() = 0;
 
-    virtual void fill(uint8_t red, uint8_t green, uint8_t blue) = 0;
+    virtual void fill(u8 red, u8 green, u8 blue) = 0;
     virtual u32 numPixels() = 0;
 
     // Useful for iterating over the LEDs in a strip, especially RGBW mode which the spi
@@ -61,7 +61,7 @@ class ISpiStripWs2812 {
 
 protected:
     // Don't use this Use outputIterator() instead.
-    virtual void setPixel(uint32_t index, uint8_t red, uint8_t green,
-                          uint8_t blue) = 0;
+    virtual void setPixel(u32 index, u8 red, u8 green,
+                          u8 blue) = 0;
 };
 }  // namespace fl

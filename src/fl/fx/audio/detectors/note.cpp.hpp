@@ -56,7 +56,7 @@ void NoteDetector::update(shared_ptr<AudioContext> context) {
     float pitch = mPitchDetector->getPitch();
     float confidence = mPitchDetector->getConfidence();
     bool voiced = mPitchDetector->isVoiced();
-    uint32_t timestamp = context->getTimestamp();
+    u32 timestamp = context->getTimestamp();
     float energy = context->getRMS();
 
     mCurrentPitch = pitch;
@@ -66,8 +66,8 @@ void NoteDetector::update(shared_ptr<AudioContext> context) {
     if (!mNoteActive) {
         // No note currently active - check for note-on
         if (shouldTriggerNoteOn(confidence, pitch)) {
-            uint8_t newNote = frequencyToMidiNote(pitch);
-            uint8_t velocity = calculateVelocity(energy, confidence);
+            u8 newNote = frequencyToMidiNote(pitch);
+            u8 velocity = calculateVelocity(energy, confidence);
 
             mCurrentNote = newNote;
             mLastVelocity = velocity;
@@ -84,7 +84,7 @@ void NoteDetector::update(shared_ptr<AudioContext> context) {
         // Note currently active - check for note-off or note-change
         if (shouldTriggerNoteOff(confidence, voiced)) {
             // Check minimum note duration to prevent flicker
-            uint32_t noteDuration = timestamp - mNoteOnTime;
+            u32 noteDuration = timestamp - mNoteOnTime;
             if (noteDuration >= mMinNoteDuration) {
                 if (onNoteOff) {
                     onNoteOff(mCurrentNote);
@@ -97,11 +97,11 @@ void NoteDetector::update(shared_ptr<AudioContext> context) {
             }
         } else if (voiced && confidence >= mNoteOnThreshold) {
             // Note still active - check for note change
-            uint8_t newNote = frequencyToMidiNote(pitch);
+            u8 newNote = frequencyToMidiNote(pitch);
             mPitchBend = calculatePitchBend(pitch, mCurrentNote);
 
             if (shouldTriggerNoteChange(newNote, mCurrentNote)) {
-                uint8_t velocity = calculateVelocity(energy, confidence);
+                u8 velocity = calculateVelocity(energy, confidence);
 
                 // Fire note-off for old note
                 if (onNoteOff) {
@@ -143,7 +143,7 @@ void NoteDetector::reset() {
     }
 }
 
-uint8_t NoteDetector::frequencyToMidiNote(float hz) const {
+u8 NoteDetector::frequencyToMidiNote(float hz) const {
     if (hz <= 0.0f) {
         return NO_NOTE;
     }
@@ -160,10 +160,10 @@ uint8_t NoteDetector::frequencyToMidiNote(float hz) const {
         return 127;
     }
 
-    return static_cast<uint8_t>(midiNote);
+    return static_cast<u8>(midiNote);
 }
 
-float NoteDetector::midiNoteToFrequency(uint8_t note) const {
+float NoteDetector::midiNoteToFrequency(u8 note) const {
     if (note == NO_NOTE) {
         return 0.0f;
     }
@@ -173,7 +173,7 @@ float NoteDetector::midiNoteToFrequency(uint8_t note) const {
     return A4_FREQUENCY * fl::powf(2.0f, semitones / 12.0f);
 }
 
-float NoteDetector::calculatePitchBend(float hz, uint8_t note) const {
+float NoteDetector::calculatePitchBend(float hz, u8 note) const {
     if (note == NO_NOTE || hz <= 0.0f) {
         return 0.0f;
     }
@@ -191,7 +191,7 @@ float NoteDetector::calculatePitchBend(float hz, uint8_t note) const {
     return fl::clamp(cents, -50.0f, 50.0f);
 }
 
-uint8_t NoteDetector::calculateVelocity(float energy, float confidence) const {
+u8 NoteDetector::calculateVelocity(float energy, float confidence) const {
     // Velocity calculation based on RMS energy and pitch confidence
     // Higher energy = higher velocity
     // Higher confidence = more reliable velocity
@@ -205,7 +205,7 @@ uint8_t NoteDetector::calculateVelocity(float energy, float confidence) const {
     // Convert to MIDI velocity (1-127, 0 reserved for note-off)
     int velocity = static_cast<int>(weightedVelocity * 126.0f) + 1;
 
-    return static_cast<uint8_t>(fl::clamp(velocity, 1, 127));
+    return static_cast<u8>(fl::clamp(velocity, 1, 127));
 }
 
 bool NoteDetector::shouldTriggerNoteOn(float confidence, float pitch) const {
@@ -222,7 +222,7 @@ bool NoteDetector::shouldTriggerNoteOff(float confidence, bool voiced) const {
     return (confidence < mNoteOffThreshold) || !voiced;
 }
 
-bool NoteDetector::shouldTriggerNoteChange(uint8_t newNote, uint8_t currentNote) const {
+bool NoteDetector::shouldTriggerNoteChange(u8 newNote, u8 currentNote) const {
     if (newNote == NO_NOTE || currentNote == NO_NOTE) {
         return false;
     }

@@ -106,7 +106,7 @@ public:
      * Buffered mode: Copies to TX ring buffer (non-blocking)
      * Fallback mode: Writes directly via ROM UART (may block if full)
      */
-    size_t write(const uint8_t* buffer, size_t size);
+    size_t write(const u8* buffer, size_t size);
 
     /**
      * @brief Write string with newline to USB-Serial JTAG
@@ -139,7 +139,7 @@ public:
      * Blocks until all buffered data is transmitted.
      * Only works in buffered mode.
      */
-    bool flush(uint32_t timeoutMs = 1000);
+    bool flush(u32 timeoutMs = 1000);
 
     /**
      * @brief Check if USB-Serial JTAG is connected to host

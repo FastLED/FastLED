@@ -61,7 +61,7 @@ void jsOnFrame(ActiveStripData &active_strips);
  * Note: This function calls async JavaScript callbacks that may return Promises.
  * Strip addition will await JavaScript Promise returns when Asyncify is enabled.
  */
-void jsOnStripAdded(uintptr_t strip, uint32_t num_leds);
+void jsOnStripAdded(uintptr_t strip, u32 num_leds);
 
 /**
  * Async-aware UI update function

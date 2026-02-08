@@ -61,7 +61,7 @@ class ClocklessBlockingGeneric : public CPixelLEDController<RGB_ORDER>
 {
 private:
     // Reference timing values from the TIMING type
-    enum : uint32_t {
+    enum : u32 {
         T1 = TIMING::T1,
         T2 = TIMING::T2,
         T3 = TIMING::T3
@@ -96,7 +96,7 @@ public:
         fl::FastPin<DATA_PIN>::lo();
     }
 
-    virtual uint16_t getMaxRefreshRate() const {
+    virtual u16 getMaxRefreshRate() const {
         // Rough estimate: about 300-400 Hz for typical 60 LED WS2812 strings
         // Actual rate depends on T1+T2 timing and LED count
         return 300;
@@ -133,12 +133,12 @@ private:
     FASTLED_FORCE_INLINE static void sendPixelData(PixelController<RGB_ORDER> & pixels)
     {
         // Get color component order
-        uint16_t pixel_count = pixels.mLen;
-        uint8_t *data = (uint8_t *)pixels.mData;
+        u16 pixel_count = pixels.mLen;
+        u8 *data = (u8 *)pixels.mData;
 
         // Iterate through all bytes in all pixels
-        for (uint16_t i = 0; i < pixel_count * 3; ++i) {
-            uint8_t byte = data[i];
+        for (u16 i = 0; i < pixel_count * 3; ++i) {
+            u8 byte = data[i];
             sendByte(byte);
         }
 
@@ -149,7 +149,7 @@ private:
     }
 
     /// Send a single byte with bit-by-bit timing
-    FASTLED_FORCE_INLINE static void sendByte(uint8_t byte)
+    FASTLED_FORCE_INLINE static void sendByte(u8 byte)
     {
         // Send bits MSB first (standard for most LED protocols)
         for (int bit = 7; bit >= 0; --bit) {

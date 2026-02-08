@@ -120,7 +120,7 @@ FL_EXTERN_C_END
  */
 #define RMT5_CLEAR_INTERRUPTS(channel_id, clear_done, clear_threshold) \
     do { \
-        uint32_t clear_mask = 0; \
+        fl::u32 clear_mask = 0; \
         if (clear_done) { \
             clear_mask |= (1 << RMT5_TX_DONE_BIT(channel_id)); \
         } \
@@ -141,7 +141,7 @@ FL_EXTERN_C_END
  */
 #define RMT5_ENABLE_INTERRUPTS(channel_id, enable_done, enable_threshold) \
     do { \
-        uint32_t enable_mask = 0; \
+        fl::u32 enable_mask = 0; \
         if (enable_done) { \
             enable_mask |= (1 << RMT5_TX_DONE_BIT(channel_id)); \
         } \

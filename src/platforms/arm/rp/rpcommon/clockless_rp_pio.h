@@ -61,7 +61,7 @@ static inline void __isr clockless_dma_complete_handler() {
 static bool clockless_isr_installed = false;
 #endif
 
-template <uint8_t DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+template <u8 DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     // Extract timing values from struct and convert from nanoseconds to clock cycles
     // Formula: cycles = (nanoseconds * CPU_MHz + 500) / 1000
@@ -94,7 +94,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     
     // writes bits to an in-memory buffer (to DMA from)
     // pico has enough memory to not really care about using a buffer for DMA
-    template<int BITS> __attribute__ ((always_inline)) inline static int writeBitsToBuf(int32_t *out_buf, unsigned int bitpos, uint8_t b)  {
+    template<int BITS> __attribute__ ((always_inline)) inline static int writeBitsToBuf(i32 *out_buf, unsigned int bitpos, u8 b)  {
         // not really optimised and I haven't checked output assembly, but this should take ~50 cycles worst case
         // (and on average substantially fewer -- LEDs without XTRA0 should never trigger the second half of the function)
         
@@ -107,7 +107,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
         int bitshift_1 = bitcnt_1 - 8;
         // mask for output bits that are taken from input
         // int32_t bitmask_1 = 0xFF << bitshift_1;
-        int32_t bitmask_1 = ((1 << BITS) - 1) << (bitshift_1 - (BITS-8));
+        i32 bitmask_1 = ((1 << BITS) - 1) << (bitshift_1 - (BITS-8));
         
         out_buf[wordpos_1] = (out_buf[wordpos_1] & ~bitmask_1) | ((b << bitshift_1) & bitmask_1);
         
@@ -119,7 +119,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
         int bitshift_2 = 32 - bitcnt_2;
         // mask for output bits that are taken from input
         // int32_t bitmask_2 = ((1 << bitcnt_2) - 1) << bitshift_2;
-        int32_t bitmask_2 = ((1 << (bitcnt_2 + (BITS-8))) - 1) << (bitshift_2 - (BITS-8)); // fixed XTRA0
+        i32 bitmask_2 = ((1 << (bitcnt_2 + (BITS-8))) - 1) << (bitshift_2 - (BITS-8)); // fixed XTRA0
         
         out_buf[wordpos_1 + 1] = (out_buf[wordpos_1 + 1] & ~bitmask_2) | ((b << bitshift_2) & bitmask_2);
         
@@ -245,7 +245,7 @@ public:
 #endif // FASTLED_RP2040_CLOCKLESS_PIO
     }
 
-    virtual uint16_t getMaxRefreshRate() const { return 400; }
+    virtual u16 getMaxRefreshRate() const { return 400; }
 
     virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 #if FASTLED_RP2040_CLOCKLESS_PIO
@@ -323,35 +323,35 @@ public:
                 pixels.stepDithering();
 
                 // Load all 4 channels (R, G, B, W) with proper color adjustment and RGBW conversion
-                uint8_t b0, b1, b2, b3;
+                u8 b0, b1, b2, b3;
                 pixels.loadAndScaleRGBW(rgbw, &b0, &b1, &b2, &b3);
 
                 // Write all 4 bytes to buffer
-                bitpos += writeBitsToBuf<8+XTRA0>((int32_t*)(dma_buf), bitpos, b0);
-                bitpos += writeBitsToBuf<8+XTRA0>((int32_t*)(dma_buf), bitpos, b1);
-                bitpos += writeBitsToBuf<8+XTRA0>((int32_t*)(dma_buf), bitpos, b2);
-                bitpos += writeBitsToBuf<8+XTRA0>((int32_t*)(dma_buf), bitpos, b3);
+                bitpos += writeBitsToBuf<8+XTRA0>((i32*)(dma_buf), bitpos, b0);
+                bitpos += writeBitsToBuf<8+XTRA0>((i32*)(dma_buf), bitpos, b1);
+                bitpos += writeBitsToBuf<8+XTRA0>((i32*)(dma_buf), bitpos, b2);
+                bitpos += writeBitsToBuf<8+XTRA0>((i32*)(dma_buf), bitpos, b3);
 
                 pixels.advanceData();
             };
         } else {
             // RGB mode: process 3 bytes per pixel (original logic)
             pixels.preStepFirstByteDithering();
-            uint8_t b = pixels.loadAndScale0();
+            u8 b = pixels.loadAndScale0();
 
             while(pixels.has(1)) {
                 pixels.stepDithering();
 
                 // Write first byte, read next byte
-                bitpos += writeBitsToBuf<8+XTRA0>((int32_t*)(dma_buf), bitpos, b);
+                bitpos += writeBitsToBuf<8+XTRA0>((i32*)(dma_buf), bitpos, b);
                 b = pixels.loadAndScale1();
 
                 // Write second byte, read 3rd byte
-                bitpos += writeBitsToBuf<8+XTRA0>((int32_t*)(dma_buf), bitpos, b);
+                bitpos += writeBitsToBuf<8+XTRA0>((i32*)(dma_buf), bitpos, b);
                 b = pixels.loadAndScale2();
 
                 // Write third byte, read 1st byte of next pixel
-                bitpos += writeBitsToBuf<8+XTRA0>((int32_t*)(dma_buf), bitpos, b);
+                bitpos += writeBitsToBuf<8+XTRA0>((i32*)(dma_buf), bitpos, b);
                 b = pixels.advanceAndLoadAndScale0();
             };
         }
@@ -375,9 +375,9 @@ public:
         data.adj = pixels.mAdvance;
 
         typedef FastPin<DATA_PIN> pin;
-        volatile uint32_t *portBase = &sio_hw->gpio_out;
-        const int portSetOff = (uint32_t)&sio_hw->gpio_set - (uint32_t)&sio_hw->gpio_out;
-        const int portClrOff = (uint32_t)&sio_hw->gpio_clr - (uint32_t)&sio_hw->gpio_out;
+        volatile u32 *portBase = &sio_hw->gpio_out;
+        const int portSetOff = (u32)&sio_hw->gpio_set - (u32)&sio_hw->gpio_out;
+        const int portClrOff = (u32)&sio_hw->gpio_clr - (u32)&sio_hw->gpio_out;
         
         cli();
         showLedData<portSetOff, portClrOff, TIMING, RGB_ORDER, WAIT_TIME>(portBase, pin::mask(), pixels.mData, pixels.mLen, &data);

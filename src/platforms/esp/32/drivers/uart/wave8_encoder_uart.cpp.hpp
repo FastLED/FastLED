@@ -9,9 +9,9 @@
 namespace fl {
 
 FL_IRAM FL_OPTIMIZE_FUNCTION
-size_t encodeLedsToUart(const uint8_t* input,
+size_t encodeLedsToUart(const u8* input,
                         size_t input_size,
-                        uint8_t* output,
+                        u8* output,
                         size_t output_capacity) {
     // Calculate required output buffer size
     size_t required_size = input_size * 4;  // 4 UART bytes per LED byte

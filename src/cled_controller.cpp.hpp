@@ -58,7 +58,7 @@ bool CLEDController::isInList() const {
 
 void CLEDController::clearLedDataInternal(int nLeds) {
     // On common code that runs on avr, every byte counts.
-    uint16_t n = nLeds >= 0 ? static_cast<uint16_t>(nLeds) : static_cast<uint16_t>(m_Leds.size());
+    fl::u16 n = nLeds >= 0 ? static_cast<fl::u16>(nLeds) : static_cast<fl::u16>(m_Leds.size());
     if (m_Leds.data()) {
         fl::memset((void*)m_Leds.data(), 0, sizeof(CRGB) * n);
     }
@@ -103,7 +103,7 @@ void CLEDController::removeFromList(CLEDController* controller) {
     }
 }
 
-ColorAdjustment CLEDController::getAdjustmentData(uint8_t brightness) {
+ColorAdjustment CLEDController::getAdjustmentData(fl::u8 brightness) {
     // *premixed = getAdjustment(brightness);
     // if (color_correction) {
     //     *color_correction = getAdjustment(255);

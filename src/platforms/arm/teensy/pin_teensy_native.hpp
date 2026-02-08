@@ -115,9 +115,9 @@ inline fl::PinValue digitalRead(int pin) {
 // Analog I/O
 // ============================================================================
 
-inline uint16_t analogRead(int pin) {
+inline u16 analogRead(int pin) {
 #if defined(CORE_TEENSY)
-    return static_cast<uint16_t>(::analogRead(pin));
+    return static_cast<u16>(::analogRead(pin));
 #else
     // No-op: Teensy core not available
     (void)pin;
@@ -125,7 +125,7 @@ inline uint16_t analogRead(int pin) {
 #endif
 }
 
-inline void analogWrite(int pin, uint16_t val) {
+inline void analogWrite(int pin, u16 val) {
 #if defined(CORE_TEENSY)
     ::analogWrite(pin, val);
 #else
@@ -135,7 +135,7 @@ inline void analogWrite(int pin, uint16_t val) {
 #endif
 }
 
-inline void setPwm16(int pin, uint16_t val) {
+inline void setPwm16(int pin, u16 val) {
 #if defined(CORE_TEENSY)
     // Teensy native path: Use analogWriteResolution for 16-bit PWM
     analogWriteResolution(16);

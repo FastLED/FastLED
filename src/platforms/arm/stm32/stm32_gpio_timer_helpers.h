@@ -61,12 +61,12 @@ namespace stm32 {
 /// @brief Get GPIO port from Arduino pin number
 /// @param pin Arduino pin number
 /// @return GPIO_TypeDef* or nullptr if invalid
-GPIO_TypeDef* getGPIOPort(uint8_t pin);
+GPIO_TypeDef* getGPIOPort(u8 pin);
 
 /// @brief Get GPIO pin mask from Arduino pin number
 /// @param pin Arduino pin number
 /// @return GPIO pin mask (GPIO_PIN_x)
-uint32_t getGPIOPin(uint8_t pin);
+u32 getGPIOPin(u8 pin);
 
 /// @brief Enable clock for a GPIO port
 /// @param port GPIO port (GPIOA, GPIOB, etc.)
@@ -76,19 +76,19 @@ void enableGPIOClock(GPIO_TypeDef* port);
 /// @param pin Arduino pin number
 /// @param speed GPIO speed (default: GPIO_SPEED_FREQ_HIGH)
 /// @return true if successful
-bool configurePinAsOutput(uint8_t pin, uint32_t speed = 0x02 /* GPIO_SPEED_FREQ_HIGH */);
+bool configurePinAsOutput(u8 pin, u32 speed = 0x02 /* GPIO_SPEED_FREQ_HIGH */);
 
 /// @brief Configure pin as Timer alternate function (for clock generation)
 /// @param pin Arduino pin number
 /// @param timer TIM_TypeDef* timer peripheral
 /// @param speed GPIO speed (default: FASTLED_GPIO_SPEED_MAX from capabilities.h)
 /// @return true if successful
-bool configurePinAsTimerAF(uint8_t pin, TIM_TypeDef* timer, uint32_t speed = 0x03 /* GPIO_SPEED_FREQ_VERY_HIGH */);
+bool configurePinAsTimerAF(u8 pin, TIM_TypeDef* timer, u32 speed = 0x03 /* GPIO_SPEED_FREQ_VERY_HIGH */);
 
 /// @brief Validate that a pin number is valid
 /// @param pin Arduino pin number
 /// @return true if valid
-bool isValidPin(uint8_t pin);
+bool isValidPin(u8 pin);
 
 // ============================================================================
 // Timer Helper Functions
@@ -107,7 +107,7 @@ void enableTimerClock(TIM_TypeDef* timer);
 /// @param timer Timer peripheral
 /// @return Timer clock frequency in Hz
 /// @note Uses HAL functions to query actual clock configuration
-uint32_t getTimerClockFreq(TIM_TypeDef* timer);
+u32 getTimerClockFreq(TIM_TypeDef* timer);
 
 /// @brief Initialize timer for PWM clock generation
 /// @param htim Timer handle (must be persistent, e.g., class member)
@@ -115,7 +115,7 @@ uint32_t getTimerClockFreq(TIM_TypeDef* timer);
 /// @param frequency_hz Desired PWM frequency in Hz (SPI clock rate)
 /// @return true if successful
 /// @note htim must remain valid for the lifetime of the timer usage
-bool initTimerPWM(TIM_HandleTypeDef* htim, TIM_TypeDef* timer, uint32_t frequency_hz);
+bool initTimerPWM(TIM_HandleTypeDef* htim, TIM_TypeDef* timer, u32 frequency_hz);
 
 /// @brief Start timer PWM output
 /// @param htim Timer handle (must be previously initialized)
@@ -130,7 +130,7 @@ void stopTimer(TIM_HandleTypeDef* htim);
 /// @param pin Arduino pin number
 /// @param timer Timer peripheral
 /// @return Timer channel (1-4) or 0 if not supported
-uint8_t getTimerChannel(uint8_t pin, TIM_TypeDef* timer);
+u8 getTimerChannel(u8 pin, TIM_TypeDef* timer);
 
 // ============================================================================
 // DMA Helper Functions (Stream-based DMA for F2/F4/F7/H7/L4)
@@ -153,7 +153,7 @@ DMA_Stream_TypeDef* getDMAStream(TIM_TypeDef* timer, int bus_id, int lane);
 /// @brief Get DMA channel number for timer update event
 /// @param timer Timer peripheral
 /// @return DMA channel number or 0xFF if not available
-uint32_t getDMAChannel(TIM_TypeDef* timer);
+u32 getDMAChannel(TIM_TypeDef* timer);
 
 /// @brief Get DMA controller for a stream
 /// @param stream DMA stream pointer
@@ -163,7 +163,7 @@ DMA_TypeDef* getDMAController(DMA_Stream_TypeDef* stream);
 /// @brief Get stream index (0-7) within its controller
 /// @param stream DMA stream pointer
 /// @return Stream index (0-7) or 0xFF if invalid
-uint8_t getStreamIndex(DMA_Stream_TypeDef* stream);
+u8 getStreamIndex(DMA_Stream_TypeDef* stream);
 
 /// @brief Initialize DMA stream for memory-to-peripheral transfer
 /// @param stream DMA stream
@@ -172,7 +172,7 @@ uint8_t getStreamIndex(DMA_Stream_TypeDef* stream);
 /// @param size Transfer size in bytes
 /// @param channel DMA channel number for request routing
 /// @return true if successful
-bool initDMA(DMA_Stream_TypeDef* stream, const void* src, volatile void* dst, uint32_t size, uint32_t channel);
+bool initDMA(DMA_Stream_TypeDef* stream, const void* src, volatile void* dst, u32 size, u32 channel);
 
 /// @brief Check if DMA transfer is complete
 /// @param stream DMA stream

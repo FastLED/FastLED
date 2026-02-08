@@ -22,13 +22,13 @@ namespace fl {
 
 /// Scale one byte by a second one (ATtiny shift-and-add assembly)
 /// Using inline instead of FL_ALWAYS_INLINE to reduce register pressure on ATtiny
-inline uint8_t scale8(uint8_t i, fract8 scale) {
+inline u8 scale8(u8 i, fract8 scale) {
 #if (FASTLED_SCALE8_FIXED == 1)
-    uint8_t work = i;
+    u8 work = i;
 #else
-    uint8_t work = 0;
+    u8 work = 0;
 #endif
-    uint8_t cnt = 0x80;
+    u8 cnt = 0x80;
     asm volatile(
 #if (FASTLED_SCALE8_FIXED == 1)
         "  inc %[scale]                 \n\t"
@@ -50,16 +50,16 @@ inline uint8_t scale8(uint8_t i, fract8 scale) {
 }
 
 /// The "video" version of scale8() (C implementation for ATtiny)
-inline uint8_t scale8_video(uint8_t i, fract8 scale) {
-    uint8_t j = (((int)i * (int)scale) >> 8) + ((i && scale) ? 1 : 0);
+inline u8 scale8_video(u8 i, fract8 scale) {
+    u8 j = (((int)i * (int)scale) >> 8) + ((i && scale) ? 1 : 0);
     return j;
 }
 
 /// This version of scale8() does not clean up the R1 register (C implementation for ATtiny)
 /// @warning You **MUST** call cleanup_R1() after using this function!
-inline uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale) {
+inline u8 scale8_LEAVING_R1_DIRTY(u8 i, fract8 scale) {
 #if (FASTLED_SCALE8_FIXED == 1)
-    return (((uint16_t)i) * ((uint16_t)(scale) + 1)) >> 8;
+    return (((u16)i) * ((u16)(scale) + 1)) >> 8;
 #else
     return ((int)i * (int)(scale)) >> 8;
 #endif
@@ -67,9 +67,9 @@ inline uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale) {
 
 /// In place modifying version of scale8() that does not clean up the R1 (C implementation for ATtiny)
 /// @warning You **MUST** call cleanup_R1() after using this function!
-inline void nscale8_LEAVING_R1_DIRTY(uint8_t &i, fract8 scale) {
+inline void nscale8_LEAVING_R1_DIRTY(u8 &i, fract8 scale) {
 #if (FASTLED_SCALE8_FIXED == 1)
-    i = (((uint16_t)i) * ((uint16_t)(scale) + 1)) >> 8;
+    i = (((u16)i) * ((u16)(scale) + 1)) >> 8;
 #else
     i = ((int)i * (int)(scale)) >> 8;
 #endif
@@ -77,14 +77,14 @@ inline void nscale8_LEAVING_R1_DIRTY(uint8_t &i, fract8 scale) {
 
 /// This version of scale8_video() does not clean up the R1 register (C implementation for ATtiny)
 /// @warning You **MUST** call cleanup_R1() after using this function!
-inline uint8_t scale8_video_LEAVING_R1_DIRTY(uint8_t i, fract8 scale) {
-    uint8_t j = (((int)i * (int)scale) >> 8) + ((i && scale) ? 1 : 0);
+inline u8 scale8_video_LEAVING_R1_DIRTY(u8 i, fract8 scale) {
+    u8 j = (((int)i * (int)scale) >> 8) + ((i && scale) ? 1 : 0);
     return j;
 }
 
 /// In place modifying version of scale8_video() that does not clean up the R1 (C implementation for ATtiny)
 /// @warning You **MUST** call cleanup_R1() after using this function!
-inline void nscale8_video_LEAVING_R1_DIRTY(uint8_t &i, fract8 scale) {
+inline void nscale8_video_LEAVING_R1_DIRTY(u8 &i, fract8 scale) {
     i = (((int)i * (int)scale) >> 8) + ((i && scale) ? 1 : 0);
 }
 
@@ -94,30 +94,30 @@ inline void cleanup_R1() {
 }
 
 /// Scale a 16-bit unsigned value by an 8-bit value (C implementation for ATtiny)
-inline uint16_t scale16by8(uint16_t i, fract8 scale) {
+inline u16 scale16by8(u16 i, fract8 scale) {
     if (scale == 0) {
         return 0;
     }
 #if FASTLED_SCALE8_FIXED == 1
-    uint16_t result;
-    result = (((uint32_t)(i) * (1 + ((uint32_t)scale))) >> 8);
+    u16 result;
+    result = (((u32)(i) * (1 + ((u32)scale))) >> 8);
     return result;
 #else
-    uint16_t result;
+    u16 result;
     result = (i * scale) / 256;
     return result;
 #endif
 }
 
 /// Scale a 16-bit unsigned value by an 16-bit value (C implementation for ATtiny)
-LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale) {
+LIB8STATIC u16 scale16(u16 i, fract16 scale) {
 #if FASTLED_SCALE8_FIXED == 1
-    uint16_t result;
-    result = ((uint32_t)(i) * (1 + (uint32_t)(scale))) / 65536;
+    u16 result;
+    result = ((u32)(i) * (1 + (u32)(scale))) / 65536;
     return result;
 #else
-    uint16_t result;
-    result = ((uint32_t)(i) * (uint32_t)(scale)) / 65536;
+    u16 result;
+    result = ((u32)(i) * (u32)(scale)) / 65536;
     return result;
 #endif
 }

@@ -26,7 +26,7 @@ int attachTimerHandler(const isr_config_t& config, isr_handle_t* handle) {
     return isr::platforms::attach_timer_handler(config, handle);
 }
 
-int attachExternalHandler(uint8_t pin, const isr_config_t& config, isr_handle_t* handle) {
+int attachExternalHandler(u8 pin, const isr_config_t& config, isr_handle_t* handle) {
     return isr::platforms::attach_external_handler(pin, config, handle);
 }
 
@@ -54,19 +54,19 @@ const char* getPlatformName() {
     return isr::platforms::get_platform_name();
 }
 
-uint32_t getMaxTimerFrequency() {
+u32 getMaxTimerFrequency() {
     return isr::platforms::get_max_timer_frequency();
 }
 
-uint32_t getMinTimerFrequency() {
+u32 getMinTimerFrequency() {
     return isr::platforms::get_min_timer_frequency();
 }
 
-uint8_t getMaxPriority() {
+u8 getMaxPriority() {
     return isr::platforms::get_max_priority();
 }
 
-bool requiresAssemblyHandler(uint8_t priority) {
+bool requiresAssemblyHandler(u8 priority) {
     return isr::platforms::requires_assembly_handler(priority);
 }
 

@@ -9,8 +9,8 @@
 // NOTE: millis(), micros(), delayMicroseconds() moved to platform_time.cpp.hpp
 extern "C" {
 // Timer functions declared in timer.cpp.hpp
-uint32_t millis();
-uint32_t micros();
+fl::u32 millis();
+fl::u32 micros();
 }
 
 //////////////////////////////////////////////////////////////////////////

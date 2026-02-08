@@ -164,7 +164,7 @@ struct BufferPopulationParams {
     size_t ringBufferCapacity;      ///< Capacity of each ring buffer
     size_t dataWidth;               ///< Data width (number of lanes: 1, 2, 4, 8, 16)
     size_t laneStride;              ///< Bytes per lane in scratch buffer
-    uint32_t resetUs;               ///< Reset time in microseconds
+    u32 resetUs;               ///< Reset time in microseconds
 };
 
 /// @brief Calculate the byte count for a DMA buffer population
@@ -590,7 +590,7 @@ ParlioEngine::txDoneCallback(void* tx_unit,
 
     // Next buffer is ready - submit it to hardware
     size_t buffer_idx = read_idx;
-    uint8_t *buffer_ptr = self->mRingBuffer->ptrs[buffer_idx];  // Use cached pointer (ISR optimization)
+    u8 *buffer_ptr = self->mRingBuffer->ptrs[buffer_idx];  // Use cached pointer (ISR optimization)
     size_t buffer_size = self->mRingBuffer->sizes[buffer_idx];
 
     // Invalid buffer - set error flag
@@ -710,7 +710,7 @@ ParlioEngine::workerIsrCallback(void *user_data) {
     size_t ring_index = ctx->mRingWriteIdx;
 
     // Get ring buffer pointer (use cached pointer for optimization)
-    uint8_t *outputBuffer = self->mRingBuffer->ptrs[ring_index];
+    u8 *outputBuffer = self->mRingBuffer->ptrs[ring_index];
     if (!outputBuffer) {
         return;  // Invalid buffer - should never happen
     }
@@ -797,7 +797,7 @@ ParlioEngine::workerIsrCallback(void *user_data) {
 /// @param outputBytesWritten [out] Number of bytes written to output buffer
 /// @return true on success, false on error (buffer overflow, etc.)
 FL_OPTIMIZE_FUNCTION bool FL_IRAM
-ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
+ParlioEngine::populateDmaBuffer(u8* outputBuffer,
                                  size_t outputBufferCapacity,
                                  size_t startByte,
                                  size_t byteCount,
@@ -852,7 +852,7 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
             // Single-lane mode: Convert byte directly to Wave8Byte WITHOUT interleaving
             // For single-lane, we don't want 2-lane transpose which would interleave
             // lane[0] with dummy lane[1] padding
-            uint8_t byte_value = (mActualChannels > 0)
+            u8 byte_value = (mActualChannels > 0)
                 ? mScratchBuffer[0 * mLaneStride + startByte + byteOffset]
                 : 0;
 
@@ -866,7 +866,7 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
             outputIdx += sizeof(Wave8Byte);
         } else if (mDataWidth == 2) {
             // Two-lane mode: Use 2-lane transpose to interleave lanes
-            uint8_t lanes[2];
+            u8 lanes[2];
             lanes[0] = (mActualChannels > 0)
                 ? mScratchBuffer[0 * mLaneStride + startByte + byteOffset]
                 : 0;
@@ -875,51 +875,51 @@ ParlioEngine::populateDmaBuffer(uint8_t* outputBuffer,
                 : 0;
 
             // MSB bit packing: Use natural lane order (no swap needed)
-            uint8_t transposed[2 * sizeof(Wave8Byte)];
-            fl::wave8Transpose_2(reinterpret_cast<const uint8_t(&)[2]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
-                                reinterpret_cast<uint8_t(&)[2 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
+            u8 transposed[2 * sizeof(Wave8Byte)];
+            fl::wave8Transpose_2(reinterpret_cast<const u8(&)[2]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
+                                reinterpret_cast<u8(&)[2 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
 
             fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
             outputIdx += blockSize;
         } else if (mDataWidth == 4) {
-            uint8_t lanes[4];
+            u8 lanes[4];
             for (size_t lane = 0; lane < 4; lane++) {
                 lanes[lane] = (lane < mActualChannels)
                     ? mScratchBuffer[lane * mLaneStride + startByte + byteOffset]
                     : 0;
             }
 
-            uint8_t transposed[4 * sizeof(Wave8Byte)];
-            fl::wave8Transpose_4(reinterpret_cast<const uint8_t(&)[4]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
-                                reinterpret_cast<uint8_t(&)[4 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
+            u8 transposed[4 * sizeof(Wave8Byte)];
+            fl::wave8Transpose_4(reinterpret_cast<const u8(&)[4]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
+                                reinterpret_cast<u8(&)[4 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
 
             fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
             outputIdx += blockSize;
         } else if (mDataWidth == 8) {
-            uint8_t lanes[8];
+            u8 lanes[8];
             for (size_t lane = 0; lane < 8; lane++) {
                 lanes[lane] = (lane < mActualChannels)
                     ? mScratchBuffer[lane * mLaneStride + startByte + byteOffset]
                     : 0;
             }
 
-            uint8_t transposed[8 * sizeof(Wave8Byte)];
-            fl::wave8Transpose_8(reinterpret_cast<const uint8_t(&)[8]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
-                                reinterpret_cast<uint8_t(&)[8 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
+            u8 transposed[8 * sizeof(Wave8Byte)];
+            fl::wave8Transpose_8(reinterpret_cast<const u8(&)[8]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
+                                reinterpret_cast<u8(&)[8 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
 
             fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
             outputIdx += blockSize;
         } else if (mDataWidth == 16) {
-            uint8_t lanes[16];
+            u8 lanes[16];
             for (size_t lane = 0; lane < 16; lane++) {
                 lanes[lane] = (lane < mActualChannels)
                     ? mScratchBuffer[lane * mLaneStride + startByte + byteOffset]
                     : 0;
             }
 
-            uint8_t transposed[16 * sizeof(Wave8Byte)];
-            fl::wave8Transpose_16(reinterpret_cast<const uint8_t(&)[16]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
-                                 reinterpret_cast<uint8_t(&)[16 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
+            u8 transposed[16 * sizeof(Wave8Byte)];
+            fl::wave8Transpose_16(reinterpret_cast<const u8(&)[16]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
+                                 reinterpret_cast<u8(&)[16 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
 
             fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
             outputIdx += blockSize;
@@ -1017,7 +1017,7 @@ bool ParlioEngine::allocateRingBuffers() {
     // - Eliminates ESP-IDF cache errors that lead to system crashes
     // - Memory barriers (FL_MEMORY_BARRIER) provide ordering guarantees
 
-    uint8_t* buffers[3] = {nullptr, nullptr, nullptr};
+    u8* buffers[3] = {nullptr, nullptr, nullptr};
 
     // Allocate all 3 buffers via peripheral interface (handles DMA requirements)
     for (size_t i = 0; i < 3; i++) {
@@ -1044,7 +1044,7 @@ bool ParlioEngine::allocateRingBuffers() {
     mRingBuffer.reset(new ParlioRingBuffer3(
         buffers[0], buffers[1], buffers[2],
         mRingBufferCapacity,
-        [peripheral](uint8_t* ptr) {
+        [peripheral](u8* ptr) {
             peripheral->freeDmaBuffer(ptr);
         }
     ));
@@ -1103,7 +1103,7 @@ ParlioEngine::populateNextDMABuffer() {
     size_t ring_index = mIsrContext->mRingWriteIdx;
 
     // Get ring buffer pointer (use cached pointer for optimization)
-    uint8_t *outputBuffer = mRingBuffer->ptrs[ring_index];
+    u8 *outputBuffer = mRingBuffer->ptrs[ring_index];
     if (!outputBuffer) {
         //FL_WARN("PARLIO: Ring buffer " << ring_index << " not allocated");
         mErrorOccurred = true;
@@ -1156,7 +1156,7 @@ ParlioEngine::populateNextDMABuffer() {
     if (mIsrContext->mHardwareIdle) {
         // Get the buffer that was just populated (read_idx points to next buffer to transmit)
         size_t buffer_idx = mIsrContext->mRingReadIdx;
-        uint8_t *buffer_ptr = mRingBuffer->ptrs[buffer_idx];  // Use cached pointer for optimization
+        u8 *buffer_ptr = mRingBuffer->ptrs[buffer_idx];  // Use cached pointer for optimization
         size_t buffer_size = mRingBuffer->sizes[buffer_idx];
 
         if (buffer_ptr && buffer_size > 0) {
@@ -1361,7 +1361,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
     return true;
 }
 
-bool ParlioEngine::beginTransmission(const uint8_t* scratchBuffer,
+bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
                                      size_t totalBytes,
                                      size_t numLanes,
                                      size_t laneStride) {

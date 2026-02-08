@@ -95,10 +95,10 @@ constexpr int type_rank<long double>::value;
 
 // SpiBlock8
 constexpr int SpiBlock8::NUM_DATA_PINS;
-constexpr uint16_t SpiBlock8::MAX_BUFFER_SIZE;
+constexpr u16 SpiBlock8::MAX_BUFFER_SIZE;
 
 // SpiBlock16
 constexpr int SpiBlock16::NUM_DATA_PINS;
-constexpr uint16_t SpiBlock16::MAX_BUFFER_SIZE;
+constexpr u16 SpiBlock16::MAX_BUFFER_SIZE;
 
 } // namespace fl

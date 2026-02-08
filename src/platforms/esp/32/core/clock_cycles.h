@@ -12,36 +12,36 @@
 #define __cpu_hal_get_cycle_count esp_cpu_get_cycle_count
 #elif FL_HAS_INCLUDE(<esp32-hal.h>) && ESP_IDF_VERSION > ESP_IDF_VERSION_VAL(4, 1, 4)
 #include <esp32-hal.h>  // Relies on the Arduino core for ESP32
-inline uint32_t __cpu_hal_get_cycle_count() {
-  return static_cast<uint32_t>(cpu_hal_get_cycle_count());
+inline fl::u32 __cpu_hal_get_cycle_count() {
+  return static_cast<fl::u32>(cpu_hal_get_cycle_count());
 }
 #elif FL_HAS_INCLUDE(<hal/cpu_ll.h>)
   // esp-idf v4.3.0+
 #include <hal/cpu_ll.h>
-inline uint32_t __cpu_hal_get_cycle_count() {
-  return static_cast<uint32_t>(cpu_ll_get_cycle_count());
+inline fl::u32 __cpu_hal_get_cycle_count() {
+  return static_cast<fl::u32>(cpu_ll_get_cycle_count());
 }
 #elif FL_HAS_INCLUDE(<esp_cpu.h>)  // First Fallback
 #include <esp_cpu.h>
-inline uint32_t __cpu_hal_get_cycle_count() {
+inline fl::u32 __cpu_hal_get_cycle_count() {
   return static_cast<uint32>(esp_cpu_get_cycle_count());
 }
 #elif FL_HAS_INCLUDE(<xtensa/hal.h>)  // Second fallback
 #include <xtensa/hal.h>
-inline uint32_t __cpu_hal_get_cycle_count() {
-  return static_cast<uint32_t>(xthal_get_ccount());
+inline fl::u32 __cpu_hal_get_cycle_count() {
+  return static_cast<fl::u32>(xthal_get_ccount());
 }
 #else // Last fallback, if this fails then please file a bug at github.com/fastled/FastLED/issues and let us know what board you are using.
 #include <esp32-hal.h>  // Relies on the Arduino core for ESP32
-inline uint32_t __cpu_hal_get_cycle_count() {
-  return static_cast<uint32_t>(cpu_hal_get_cycle_count());
+inline fl::u32 __cpu_hal_get_cycle_count() {
+  return static_cast<fl::u32>(cpu_hal_get_cycle_count());
 }
 #endif  // ESP_IDF_VERSION
 
 
 
-__attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
-  uint32_t cyc;
+__attribute__ ((always_inline)) inline static fl::u32 __clock_cycles() {
+  fl::u32 cyc;
 #ifdef FASTLED_XTENSA
   __asm__ __volatile__ ("rsr %0,ccount":"=a" (cyc));
 #else

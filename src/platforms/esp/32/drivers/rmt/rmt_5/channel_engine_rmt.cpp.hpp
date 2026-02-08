@@ -303,10 +303,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         volatile bool transmissionComplete;
         bool inUse;
         bool useDMA; // Whether this channel uses DMA
-        uint32_t reset_us;
-        fl::span<uint8_t> pooledBuffer; // Buffer acquired from pool (must be
+        u32 reset_us;
+        fl::span<u8> pooledBuffer; // Buffer acquired from pool (must be
                                         // released on complete)
-        uint8_t memoryChannelId;        // Virtual channel ID for memory manager
+        u8 memoryChannelId;        // Virtual channel ID for memory manager
                                         // accounting (vector index)
     };
 
@@ -316,7 +316,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         ChannelDataPtr data;
         int pin;
         ChipsetTiming timing;
-        uint32_t reset_us;
+        u32 reset_us;
     };
 
     /// @brief Begin LED data transmission for all channels (internal)
@@ -407,7 +407,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
         if (!isExistingState) {
             // New channel: assign next available ID (will be index after push_back)
-            state->memoryChannelId = static_cast<uint8_t>(mChannels.size());
+            state->memoryChannelId = static_cast<u8>(mChannels.size());
         }
         // else: Existing channel being reconfigured - keep existing memoryChannelId
 
@@ -926,7 +926,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
             // Acquire buffer from pool (PSRAM -> DRAM/DMA transfer)
             // Note: dataSize already retrieved earlier for channel acquisition
-            fl::span<uint8_t> pooledBuffer = channel->useDMA ?
+            fl::span<u8> pooledBuffer = channel->useDMA ?
                 mBufferPool.acquireDMA(dataSize) :
                 mBufferPool.acquireInternal(dataSize);
 
@@ -954,7 +954,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 } else {
                     mBufferPool.releaseInternal(channel->pooledBuffer);
                 }
-                channel->pooledBuffer = fl::span<uint8_t>();
+                channel->pooledBuffer = fl::span<u8>();
                 releaseChannel(channel);
                 ++i;
                 continue;
@@ -970,7 +970,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 } else {
                     mBufferPool.releaseInternal(channel->pooledBuffer);
                 }
-                channel->pooledBuffer = fl::span<uint8_t>();
+                channel->pooledBuffer = fl::span<u8>();
                 releaseChannel(channel);
                 ++i;
                 continue;
@@ -1001,7 +1001,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 } else {
                     mBufferPool.releaseInternal(channel->pooledBuffer);
                 }
-                channel->pooledBuffer = fl::span<uint8_t>();
+                channel->pooledBuffer = fl::span<u8>();
                 releaseChannel(channel);
                 ++i;
                 continue;
@@ -1325,7 +1325,7 @@ void ChannelEngineRMTImpl::releaseChannel(ChannelState *channel) {
         } else {
             mBufferPool.releaseInternal(channel->pooledBuffer);
         }
-        channel->pooledBuffer = fl::span<uint8_t>();
+        channel->pooledBuffer = fl::span<u8>();
     }
 
     channel->inUse = false;

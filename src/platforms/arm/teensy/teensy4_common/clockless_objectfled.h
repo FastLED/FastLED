@@ -79,10 +79,10 @@ private:
 
 // Timing configuration passed at runtime instead of compile-time
 struct ObjectFLEDTimingConfig {
-    uint32_t T1;     // High time (ns)
-    uint32_t T2;     // Low time (ns)
-    uint32_t T3;     // Total bit period (ns)
-    uint32_t RESET;  // Reset/latch time (ns)
+    u32 T1;     // High time (ns)
+    u32 T2;     // Low time (ns)
+    u32 T3;     // Total bit period (ns)
+    u32 RESET;  // Reset/latch time (ns)
 };
 
 /// Concrete (non-template) group that manages ObjectFLED for a specific timing
@@ -96,7 +96,7 @@ public:
     void onQueuingStart();
 
     // Called by proxy in showPixels()
-    void addStrip(uint8_t pin, PixelIterator& pixel_iterator);
+    void addStrip(u8 pin, PixelIterator& pixel_iterator);
 
     // Called by registry when chipset changes or frame ends
     void flush();
@@ -104,13 +104,13 @@ public:
 private:
     void onQueuingDone();
     void rebuildObjectFLED();
-    void writePixels(uint8_t pin, PixelIterator& pixel_iterator);
+    void writePixels(u8 pin, PixelIterator& pixel_iterator);
 
     ObjectFLEDTimingConfig mTiming;
     void* mObjectFLED;  // Opaque pointer to ObjectFLED
     void* mStripsData;  // Opaque pointer to strips vector
     void* mPrevStripsData;  // Opaque pointer to previous strips vector
-    uint16_t mMaxBytesPerStrip;
+    u16 mMaxBytesPerStrip;
     bool mDrawn;
     bool mStripsChanged;
 };
@@ -136,7 +136,7 @@ public:
     }
 
     void onQueuingStart() { mBase.onQueuingStart(); }
-    void addStrip(uint8_t pin, PixelIterator& pixel_iterator) {
+    void addStrip(u8 pin, PixelIterator& pixel_iterator) {
         mBase.addStrip(pin, pixel_iterator);
     }
     void flush() { mBase.flush(); }
@@ -161,9 +161,9 @@ class ClocklessController_ObjectFLED_Proxy
 
     void init() override {}
 
-    virtual uint16_t getMaxRefreshRate() const override {
+    virtual u16 getMaxRefreshRate() const override {
         // Calculate based on timing: if total period > 2000ns, it's 400kHz, else 800kHz
-        uint32_t total_ns = TIMING::T1 + TIMING::T2 + TIMING::T3;
+        u32 total_ns = TIMING::T1 + TIMING::T2 + TIMING::T3;
         return (total_ns > 2000) ? 400 : 800;
     }
 

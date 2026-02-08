@@ -31,11 +31,11 @@
 #include <avr/interrupt.h> // for cli/se definitions
 // Define the register types
 #if defined(ARDUINO) // && ARDUINO < 150
-typedef volatile       uint8_t RoReg; /**< Read only 8-bit register (volatile const unsigned int) */
-typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile unsigned int) */
+typedef volatile       fl::u8 RoReg; /**< Read only 8-bit register (volatile const unsigned int) */
+typedef volatile       fl::u8 RwReg; /**< Read-Write 8-bit register (volatile unsigned int) */
 #endif
 
-extern volatile uint32_t systick_millis_count;
+extern volatile fl::u32 systick_millis_count;
 #  define MS_COUNTER systick_millis_count
 
 

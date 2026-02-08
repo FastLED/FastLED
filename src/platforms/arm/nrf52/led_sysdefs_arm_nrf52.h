@@ -48,8 +48,8 @@
 #include <nrf_spim.h>   // for FastSPI
 #include <nrf_pwm.h>    // for Clockless
 #include <nrf_nvic.h>   // for Clockless / anything else using interrupts
-typedef __I  uint32_t RoReg;
-typedef __IO uint32_t RwReg;
+typedef __I  fl::u32 RoReg;
+typedef __IO fl::u32 RwReg;
 
 #define cli()  __disable_irq()
 #define sei()  __enable_irq()

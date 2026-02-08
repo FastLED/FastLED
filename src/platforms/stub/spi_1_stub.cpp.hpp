@@ -25,7 +25,7 @@ bool SpiHw1Stub::begin(const SpiHw1::Config& config) {
     }
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
-    if (mBusId != -1 && config.bus_num != static_cast<uint8_t>(mBusId)) {
+    if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
         return false;  // Mismatch
     }
 
@@ -89,7 +89,7 @@ bool SpiHw1Stub::transmit(TransmitMode mode) {
 
     // Capture data for inspection (simulates blocking transmission)
     mLastBuffer.clear();
-    fl::span<uint8_t> buffer_span = mCurrentBuffer.data();
+    fl::span<u8> buffer_span = mCurrentBuffer.data();
     mLastBuffer.reserve(buffer_span.size());
     for (size_t i = 0; i < buffer_span.size(); ++i) {
         mLastBuffer.push_back(buffer_span[i]);
@@ -101,7 +101,7 @@ bool SpiHw1Stub::transmit(TransmitMode mode) {
     return true;
 }
 
-bool SpiHw1Stub::waitComplete(uint32_t timeout_ms) {
+bool SpiHw1Stub::waitComplete(u32 timeout_ms) {
     (void)timeout_ms;  // Unused in stub (transmission already complete)
 
     // AUTO-RELEASE DMA buffer
@@ -127,15 +127,15 @@ const char* SpiHw1Stub::getName() const {
     return mName;
 }
 
-const fl::vector<uint8_t>& SpiHw1Stub::getLastTransmission() const {
+const fl::vector<u8>& SpiHw1Stub::getLastTransmission() const {
     return mLastBuffer;
 }
 
-uint32_t SpiHw1Stub::getTransmissionCount() const {
+u32 SpiHw1Stub::getTransmissionCount() const {
     return mTransmitCount;
 }
 
-uint32_t SpiHw1Stub::getClockSpeed() const {
+u32 SpiHw1Stub::getClockSpeed() const {
     return mClockSpeed;
 }
 

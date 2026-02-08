@@ -21,7 +21,7 @@ public:
     TaskCoroutineESP32(fl::string name,
                        TaskFunction function,
                        size_t stack_size,
-                       uint8_t priority);
+                       u8 priority);
     ~TaskCoroutineESP32() override;
 
     void stop() override;

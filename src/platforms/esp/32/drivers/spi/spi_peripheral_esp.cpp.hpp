@@ -49,11 +49,11 @@ public:
     bool freeBus() override;
     bool isInitialized() const override;
     bool queueTransaction(const SpiTransaction& trans) override;
-    bool pollTransaction(uint32_t timeout_ms) override;
+    bool pollTransaction(u32 timeout_ms) override;
     bool registerCallback(void* callback, void* user_ctx) override;
-    uint8_t* allocateDma(size_t size) override;
-    void freeDma(uint8_t* buffer) override;
-    void delay(uint32_t ms) override;
+    u8* allocateDma(size_t size) override;
+    void freeDma(u8* buffer) override;
+    void delay(u32 ms) override;
     uint64_t getMicroseconds() override;
 
 private:
@@ -269,7 +269,7 @@ bool SpiPeripheralESPImpl::queueTransaction(const SpiTransaction& trans) {
     return true;
 }
 
-bool SpiPeripheralESPImpl::pollTransaction(uint32_t timeout_ms) {
+bool SpiPeripheralESPImpl::pollTransaction(u32 timeout_ms) {
     if (!mDeviceAdded) {
         FL_WARN("SpiPeripheralESP: Cannot poll transaction - device not added");
         return false;
@@ -309,12 +309,12 @@ bool SpiPeripheralESPImpl::registerCallback(void* callback, void* user_ctx) {
 // DMA Memory Management
 //=============================================================================
 
-uint8_t* SpiPeripheralESPImpl::allocateDma(size_t size) {
+u8* SpiPeripheralESPImpl::allocateDma(size_t size) {
     // Round up to 4-byte multiple (ESP32 DMA alignment requirement)
     size_t aligned_size = (size + 3) & ~3;
 
     // Allocate DMA-capable memory (delegate to ESP-IDF)
-    uint8_t* buffer = static_cast<uint8_t*>(
+    u8* buffer = static_cast<u8*>(
         ::heap_caps_malloc(aligned_size, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL)
     );
 
@@ -325,7 +325,7 @@ uint8_t* SpiPeripheralESPImpl::allocateDma(size_t size) {
     return buffer;
 }
 
-void SpiPeripheralESPImpl::freeDma(uint8_t* buffer) {
+void SpiPeripheralESPImpl::freeDma(u8* buffer) {
     if (buffer != nullptr) {
         ::heap_caps_free(buffer);
     }
@@ -335,7 +335,7 @@ void SpiPeripheralESPImpl::freeDma(uint8_t* buffer) {
 // Platform Utilities
 //=============================================================================
 
-void SpiPeripheralESPImpl::delay(uint32_t ms) {
+void SpiPeripheralESPImpl::delay(u32 ms) {
     ::vTaskDelay(pdMS_TO_TICKS(ms));
 }
 

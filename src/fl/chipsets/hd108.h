@@ -39,7 +39,7 @@
 /// @tparam CLOCK_PIN the clock pin for these LEDs
 /// @tparam RGB_ORDER the RGB ordering for these LEDs
 /// @tparam SPI_SPEED the clock divider used for these LEDs (default 25 MHz, max 40 MHz)
-template <int DATA_PIN, fl::u8 CLOCK_PIN, EOrder RGB_ORDER = GRB, uint32_t SPI_SPEED = DATA_RATE_MHZ(25)>
+template <int DATA_PIN, fl::u8 CLOCK_PIN, EOrder RGB_ORDER = GRB, fl::u32 SPI_SPEED = DATA_RATE_MHZ(25)>
 class HD108Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef fl::SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;

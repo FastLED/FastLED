@@ -36,8 +36,8 @@ namespace fl {
 /// @param lut Wave8 expansion lookup table
 /// @return Number of uint16_t words written
 size_t wave8EncodeI2sSingleLane(
-    fl::span<const uint8_t> input,
-    fl::span<uint16_t> output,
+    fl::span<const u8> input,
+    fl::span<u16> output,
     const Wave8BitExpansionLut& lut);
 
 /// @brief Encode multi-lane LED data for I2S LCD_CAM using wave8 expansion
@@ -55,9 +55,9 @@ size_t wave8EncodeI2sSingleLane(
 /// @param lut Wave8 expansion lookup table
 /// @return Number of uint16_t words written
 size_t wave8EncodeI2sMultiLane(
-    fl::span<const uint8_t>* lanes,
+    fl::span<const u8>* lanes,
     int num_lanes,
-    fl::span<uint16_t> output,
+    fl::span<u16> output,
     const Wave8BitExpansionLut& lut);
 
 /// @brief Calculate required output buffer size for I2S wave8 encoding
@@ -82,6 +82,6 @@ constexpr size_t wave8CalculateI2sOutputSize(size_t input_bytes) {
 ///
 /// @param timing ChipsetTiming configuration
 /// @return Recommended I2S PCLK frequency in Hz
-uint32_t calculateI2sClockHz(const ChipsetTiming& timing);
+u32 calculateI2sClockHz(const ChipsetTiming& timing);
 
 } // namespace fl

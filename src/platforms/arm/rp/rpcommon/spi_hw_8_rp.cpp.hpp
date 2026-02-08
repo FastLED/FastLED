@@ -147,7 +147,7 @@ public:
     /// @brief Wait for current transmission to complete
     /// @param timeout_ms Maximum time to wait in milliseconds (fl::numeric_limits<uint32_t>::max() = infinite)
     /// @return true if transmission completed, false on timeout
-    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max()) override;
+    bool waitComplete(u32 timeout_ms = fl::numeric_limits<u32>::max()) override;
 
     /// @brief Check if transmission is currently in progress
     /// @return true if busy, false if idle
@@ -181,7 +181,7 @@ private:
     int mDMAChannel;
 
     // DMA buffer management
-    fl::span<uint8_t> mDMABuffer;    // Allocated DMA buffer (interleaved format for octal-lane)
+    fl::span<u8> mDMABuffer;    // Allocated DMA buffer (interleaved format for octal-lane)
     size_t mMaxBytesPerLane;         // Max bytes per lane we've allocated for
     size_t mCurrentTotalSize;        // Current transmission size (bytes_per_lane * 8)
     bool mBufferAcquired;
@@ -191,8 +191,8 @@ private:
     bool mInitialized;
 
     // Configuration
-    uint8_t mClockPin;
-    uint8_t mDataPins[8];  // All 8 data pins
+    u8 mClockPin;
+    u8 mDataPins[8];  // All 8 data pins
 
     SpiHw8RP2040(const SpiHw8RP2040&) = delete;
     SpiHw8RP2040& operator=(const SpiHw8RP2040&) = delete;
@@ -232,7 +232,7 @@ bool SpiHw8RP2040::begin(const SpiHw8::Config& config) {
     }
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
-    if (mBusId != -1 && config.bus_num != static_cast<uint8_t>(mBusId)) {
+    if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
         FL_WARN("SpiHw8RP2040: Bus ID mismatch");
         return false;
     }
@@ -384,16 +384,16 @@ DMABuffer SpiHw8RP2040::acquireDMABuffer(size_t bytes_per_lane) {
     if (bytes_per_lane > mMaxBytesPerLane) {
         if (!mDMABuffer.empty()) {
             free(mDMABuffer.data());
-            mDMABuffer = fl::span<uint8_t>();
+            mDMABuffer = fl::span<u8>();
         }
 
         // Allocate DMA-capable memory (regular malloc for RP2040)
-        uint8_t* ptr = (uint8_t*)malloc(buffer_size_bytes);
+        u8* ptr = (u8*)malloc(buffer_size_bytes);
         if (!ptr) {
             return DMABuffer(SPIError::ALLOCATION_FAILED);
         }
 
-        mDMABuffer = fl::span<uint8_t>(ptr, buffer_size_bytes);
+        mDMABuffer = fl::span<u8>(ptr, buffer_size_bytes);
         mMaxBytesPerLane = bytes_per_lane;
     }
 
@@ -428,24 +428,24 @@ bool SpiHw8RP2040::transmit(TransmitMode mode) {
     size_t word_count = (byte_count + 3) / 4;
 
     // Access the buffer data - already allocated with enough space for words
-    uint8_t* byte_buffer = mDMABuffer.data();
-    uint32_t* word_buffer = (uint32_t*)mDMABuffer.data();
+    u8* byte_buffer = mDMABuffer.data();
+    u32* word_buffer = (u32*)mDMABuffer.data();
 
     // Convert byte data to PIO word format
     // Work backwards to avoid overwriting data we haven't read yet
     for (int i = (int)word_count - 1; i >= 0; i--) {
         size_t byte_idx = i * 4;
-        uint8_t byte0 = byte_buffer[byte_idx];
-        uint8_t byte1 = (byte_idx + 1 < byte_count) ? byte_buffer[byte_idx + 1] : 0;
-        uint8_t byte2 = (byte_idx + 2 < byte_count) ? byte_buffer[byte_idx + 2] : 0;
-        uint8_t byte3 = (byte_idx + 3 < byte_count) ? byte_buffer[byte_idx + 3] : 0;
+        u8 byte0 = byte_buffer[byte_idx];
+        u8 byte1 = (byte_idx + 1 < byte_count) ? byte_buffer[byte_idx + 1] : 0;
+        u8 byte2 = (byte_idx + 2 < byte_count) ? byte_buffer[byte_idx + 2] : 0;
+        u8 byte3 = (byte_idx + 3 < byte_count) ? byte_buffer[byte_idx + 3] : 0;
 
         // Pack 4 bytes into one 32-bit word, MSB first
         // The PIO will output these 4 bytes sequentially, one per clock cycle
-        uint32_t word = (static_cast<uint32_t>(byte0) << 24) |
-                        (static_cast<uint32_t>(byte1) << 16) |
-                        (static_cast<uint32_t>(byte2) << 8) |
-                        static_cast<uint32_t>(byte3);
+        u32 word = (static_cast<u32>(byte0) << 24) |
+                        (static_cast<u32>(byte1) << 16) |
+                        (static_cast<u32>(byte2) << 8) |
+                        static_cast<u32>(byte3);
 
         word_buffer[i] = word;
     }
@@ -458,13 +458,13 @@ bool SpiHw8RP2040::transmit(TransmitMode mode) {
     return true;
 }
 
-bool SpiHw8RP2040::waitComplete(uint32_t timeout_ms) {
+bool SpiHw8RP2040::waitComplete(u32 timeout_ms) {
     if (!mTransactionActive) {
         return true;  // Nothing to wait for
     }
 
     // Poll with timeout checking
-    if (timeout_ms == fl::numeric_limits<uint32_t>::max()) {
+    if (timeout_ms == fl::numeric_limits<u32>::max()) {
         // Infinite timeout - just wait
         dma_channel_wait_for_finish_blocking(mDMAChannel);
     } else {
@@ -515,7 +515,7 @@ void SpiHw8RP2040::cleanup() {
         // Free DMA buffer
         if (!mDMABuffer.empty()) {
             free(mDMABuffer.data());
-            mDMABuffer = fl::span<uint8_t>();
+            mDMABuffer = fl::span<u8>();
             mMaxBytesPerLane = 0;
             mCurrentTotalSize = 0;
             mBufferAcquired = false;

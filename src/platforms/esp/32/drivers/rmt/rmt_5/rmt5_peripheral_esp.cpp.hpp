@@ -73,10 +73,10 @@ public:
     bool enableChannel(void* channel_handle) override;
     bool disableChannel(void* channel_handle) override;
     bool transmit(void* channel_handle, void* encoder_handle,
-                  const uint8_t* buffer, size_t buffer_size) override;
-    bool waitAllDone(void* channel_handle, uint32_t timeout_ms) override;
+                  const u8* buffer, size_t buffer_size) override;
+    bool waitAllDone(void* channel_handle, u32 timeout_ms) override;
     void* createEncoder(const ChipsetTiming& timing,
-                        uint32_t resolution_hz) override;
+                        u32 resolution_hz) override;
     void deleteEncoder(void* encoder_handle) override;
     bool resetEncoder(void* encoder_handle) override;
     bool registerTxCallback(void* channel_handle,
@@ -84,8 +84,8 @@ public:
                             void* user_ctx) override;
     void configureLogging() override;
     bool syncCache(void* buffer, size_t size) override;
-    uint8_t* allocateDmaBuffer(size_t size) override;
-    void freeDmaBuffer(uint8_t* buffer) override;
+    u8* allocateDmaBuffer(size_t size) override;
+    void freeDmaBuffer(u8* buffer) override;
 
 private:
     /// @brief Disable cache sync after ESP_ERR_INVALID_ARG error
@@ -255,16 +255,16 @@ bool Rmt5PeripheralESPImpl::disableChannel(void* channel_handle) {
 //=============================================================================
 
 /// Static counter to track TX done callback invocations (for debugging RMT TX → RX issues)
-static volatile uint32_t s_txDoneCallbackCount = 0;
+static volatile u32 s_txDoneCallbackCount = 0;
 
 /// Static counter to track encoder encode callback invocations (ISR context)
-static volatile uint32_t s_encoderCallCount = 0;
+static volatile u32 s_encoderCallCount = 0;
 
 /// Static counter to track total symbols encoded
 static volatile size_t s_totalSymbolsEncoded = 0;
 
 bool Rmt5PeripheralESPImpl::transmit(void* channel_handle, void* encoder_handle,
-                                      const uint8_t* buffer, size_t buffer_size) {
+                                      const u8* buffer, size_t buffer_size) {
     if (channel_handle == nullptr || encoder_handle == nullptr || buffer == nullptr) {
         FL_WARN("Rmt5PeripheralESP: Invalid parameter (nullptr)");
         return false;
@@ -288,7 +288,7 @@ bool Rmt5PeripheralESPImpl::transmit(void* channel_handle, void* encoder_handle,
     return true;
 }
 
-bool Rmt5PeripheralESPImpl::waitAllDone(void* channel_handle, uint32_t timeout_ms) {
+bool Rmt5PeripheralESPImpl::waitAllDone(void* channel_handle, u32 timeout_ms) {
     if (channel_handle == nullptr) {
         FL_WARN("Rmt5PeripheralESP: channel_handle is nullptr");
         return false;
@@ -469,7 +469,7 @@ bool Rmt5PeripheralESPImpl::syncCache(void* buffer, size_t size) {
 // DMA Memory Management
 //=============================================================================
 
-uint8_t* Rmt5PeripheralESPImpl::allocateDmaBuffer(size_t size) {
+u8* Rmt5PeripheralESPImpl::allocateDmaBuffer(size_t size) {
     if (size == 0) {
         FL_WARN("Rmt5PeripheralESP: Cannot allocate zero-size buffer");
         return nullptr;
@@ -480,7 +480,7 @@ uint8_t* Rmt5PeripheralESPImpl::allocateDmaBuffer(size_t size) {
     size_t aligned_size = (size + alignment - 1) & ~(alignment - 1);
 
     // Allocate DMA-capable memory with 64-byte alignment
-    uint8_t* buffer = static_cast<uint8_t*>(
+    u8* buffer = static_cast<u8*>(
         heap_caps_aligned_alloc(alignment, aligned_size, MALLOC_CAP_DMA));
 
     if (buffer == nullptr) {
@@ -493,7 +493,7 @@ uint8_t* Rmt5PeripheralESPImpl::allocateDmaBuffer(size_t size) {
     return buffer;
 }
 
-void Rmt5PeripheralESPImpl::freeDmaBuffer(uint8_t* buffer) {
+void Rmt5PeripheralESPImpl::freeDmaBuffer(u8* buffer) {
     if (buffer == nullptr) {
         return;  // Safe no-op
     }
@@ -538,14 +538,14 @@ struct Rmt5EncoderImpl {
     rmt_symbol_word_t mResetCode;
 
     // Timing configuration (stored for debugging)
-    uint32_t mBit0HighTicks;
-    uint32_t mBit0LowTicks;
-    uint32_t mBit1HighTicks;
-    uint32_t mBit1LowTicks;
-    uint32_t mResetTicks;
+    u32 mBit0HighTicks;
+    u32 mBit0LowTicks;
+    u32 mBit1HighTicks;
+    u32 mBit1LowTicks;
+    u32 mResetTicks;
 
     // Factory method to create encoder instance
-    static Rmt5EncoderImpl* create(const ChipsetTiming& timing, uint32_t resolution_hz) {
+    static Rmt5EncoderImpl* create(const ChipsetTiming& timing, u32 resolution_hz) {
         Rmt5EncoderImpl* impl = new Rmt5EncoderImpl(timing, resolution_hz);
         if (impl == nullptr) {
             FL_WARN("Rmt5EncoderImpl::create: Failed to allocate encoder");
@@ -571,7 +571,7 @@ struct Rmt5EncoderImpl {
 
 private:
     // Private constructor - use create() factory method
-    Rmt5EncoderImpl(const ChipsetTiming& timing, uint32_t resolution_hz)
+    Rmt5EncoderImpl(const ChipsetTiming& timing, u32 resolution_hz)
         : mBytesEncoder(nullptr), mCopyEncoder(nullptr), mState(0),
           mBit0HighTicks(0), mBit0LowTicks(0), mBit1HighTicks(0),
           mBit1LowTicks(0), mResetTicks(0) {
@@ -662,18 +662,18 @@ private:
         return ESP_OK;
     }
 
-    esp_err_t initialize(const ChipsetTiming& timing, uint32_t resolution_hz) {
+    esp_err_t initialize(const ChipsetTiming& timing, u32 resolution_hz) {
         const uint64_t ns_per_tick = 1000000000ULL / resolution_hz;
         const uint64_t half_ns_per_tick = ns_per_tick / 2;
 
         // WS2812 3-phase to 4-phase conversion:
         // Bit 0: T0H = T1 (high), T0L = T2 + T3 (low)
         // Bit 1: T1H = T1 + T2 (high), T1L = T3 (low)
-        mBit0HighTicks = static_cast<uint32_t>((timing.T1 + half_ns_per_tick) / ns_per_tick);
-        mBit0LowTicks = static_cast<uint32_t>((timing.T2 + timing.T3 + half_ns_per_tick) / ns_per_tick);
-        mBit1HighTicks = static_cast<uint32_t>((timing.T1 + timing.T2 + half_ns_per_tick) / ns_per_tick);
-        mBit1LowTicks = static_cast<uint32_t>((timing.T3 + half_ns_per_tick) / ns_per_tick);
-        mResetTicks = static_cast<uint32_t>((timing.RESET * 1000ULL + half_ns_per_tick) / ns_per_tick);
+        mBit0HighTicks = static_cast<u32>((timing.T1 + half_ns_per_tick) / ns_per_tick);
+        mBit0LowTicks = static_cast<u32>((timing.T2 + timing.T3 + half_ns_per_tick) / ns_per_tick);
+        mBit1HighTicks = static_cast<u32>((timing.T1 + timing.T2 + half_ns_per_tick) / ns_per_tick);
+        mBit1LowTicks = static_cast<u32>((timing.T3 + half_ns_per_tick) / ns_per_tick);
+        mResetTicks = static_cast<u32>((timing.RESET * 1000ULL + half_ns_per_tick) / ns_per_tick);
 
         FL_WARN("[RMT5_ENCODER] Timing config: resolution=" << resolution_hz
                 << "Hz, ns_per_tick=" << ns_per_tick);
@@ -743,7 +743,7 @@ private:
 //=============================================================================
 
 void* Rmt5PeripheralESPImpl::createEncoder(const ChipsetTiming& timing,
-                                            uint32_t resolution_hz) {
+                                            u32 resolution_hz) {
     Rmt5EncoderImpl* encoder = Rmt5EncoderImpl::create(timing, resolution_hz);
     if (encoder == nullptr) {
         FL_WARN("Rmt5PeripheralESP: Failed to create encoder");

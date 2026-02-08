@@ -17,7 +17,7 @@ struct Drop {
     float impact;           // Impact strength (0.0 to 1.0)
     float bassEnergy;       // Bass energy at drop
     float energyIncrease;   // Energy increase from previous state
-    uint32_t timestamp;     // When drop occurred
+    u32 timestamp;     // When drop occurred
 
     Drop()
         : impact(0.0f)
@@ -66,13 +66,13 @@ public:
 
     // State access
     const Drop& getLastDrop() const { return mLastDrop; }
-    uint32_t getTimeSinceLastDrop(uint32_t currentTime) const {
+    u32 getTimeSinceLastDrop(u32 currentTime) const {
         return currentTime - mLastDrop.timestamp;
     }
 
     // Configuration
     void setImpactThreshold(float threshold) { mImpactThreshold = threshold; }
-    void setMinTimeBetweenDrops(uint32_t ms) { mMinTimeBetweenDrops = ms; }
+    void setMinTimeBetweenDrops(u32 ms) { mMinTimeBetweenDrops = ms; }
     void setBassThreshold(float threshold) { mBassThreshold = threshold; }
     void setEnergyFluxThreshold(float threshold) { mEnergyFluxThreshold = threshold; }
 
@@ -92,7 +92,7 @@ private:
 
     // Configuration
     float mImpactThreshold;         // Minimum impact to trigger drop
-    uint32_t mMinTimeBetweenDrops;  // Cooldown period between drops (ms)
+    u32 mMinTimeBetweenDrops;  // Cooldown period between drops (ms)
     float mBassThreshold;           // Minimum bass energy ratio
     float mEnergyFluxThreshold;     // Minimum energy increase ratio
 
@@ -104,7 +104,7 @@ private:
     float calculateEnergyFlux(float currentRMS) const;
     float calculateBassFlux(float currentBass) const;
     float calculateDropImpact(float energyFlux, float bassFlux, float spectralNovelty, float rms) const;
-    bool shouldTriggerDrop(float impact, uint32_t timestamp) const;
+    bool shouldTriggerDrop(float impact, u32 timestamp) const;
     void updateBaselines(float rms, float bass);
 };
 

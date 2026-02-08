@@ -8,7 +8,7 @@
  * Comes with no guarantees of correctness.
  */
 
-typedef uint16_t pio_instr;
+typedef fl::u16 pio_instr;
 
 #define PIO_INSTR_JMP  (0b000 << 13)
 #define PIO_INSTR_WAIT (0b001 << 13)

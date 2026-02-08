@@ -106,7 +106,7 @@ public:
     /// @brief Wait for current transmission to complete
     /// @param timeout_ms Maximum time to wait in milliseconds (fl::numeric_limits<uint32_t>::max() = infinite)
     /// @return true if transmission completed, false on timeout
-    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max()) override;
+    bool waitComplete(u32 timeout_ms = fl::numeric_limits<u32>::max()) override;
 
     /// @brief Check if transmission is currently in progress
     /// @return true if busy, false if idle
@@ -162,13 +162,13 @@ private:
     void* mDMAHandles[8];  ///< DMA_HandleTypeDef* (8 DMA channels, one per lane)
 
     // DMA buffer management (zero-copy API)
-    fl::span<uint8_t> mDMABuffer;    ///< Allocated DMA buffer (interleaved format for octal-lane)
+    fl::span<u8> mDMABuffer;    ///< Allocated DMA buffer (interleaved format for octal-lane)
     size_t mMaxBytesPerLane;         ///< Max bytes per lane we've allocated for
     size_t mCurrentTotalSize;        ///< Current transmission size (bytes_per_lane * 8)
     bool mBufferAcquired;            ///< True if buffer acquired and ready for transmit
 
     // Legacy DMA buffers (one per data lane, derived from mDMABuffer for lane splitting)
-    uint8_t* mDMABuffers[8];  ///< 8 separate DMA buffers (derived)
+    u8* mDMABuffers[8];  ///< 8 separate DMA buffers (derived)
     size_t mDMABufferSize;  ///< Size of each DMA buffer (all same size, derived)
 
     // State
@@ -176,9 +176,9 @@ private:
     bool mInitialized;  ///< True if hardware initialized
 
     // Configuration
-    uint8_t mClockPin;  ///< Clock output pin (Timer PWM)
-    uint8_t mDataPins[8];  ///< All 8 data pins (D0-D7)
-    uint32_t mClockSpeedHz;  ///< Configured clock frequency
+    u8 mClockPin;  ///< Clock output pin (Timer PWM)
+    u8 mDataPins[8];  ///< All 8 data pins (D0-D7)
+    u32 mClockSpeedHz;  ///< Configured clock frequency
 
     SPIOctalSTM32(const SPIOctalSTM32&) = delete;
     SPIOctalSTM32& operator=(const SPIOctalSTM32&) = delete;
@@ -221,7 +221,7 @@ bool SPIOctalSTM32::begin(const SpiHw8::Config& config) {
     }
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
-    if (mBusId != -1 && config.bus_num != static_cast<uint8_t>(mBusId)) {
+    if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
         FL_WARN("SPIOctalSTM32: Bus ID mismatch");
         return false;
     }
@@ -330,16 +330,16 @@ DMABuffer SPIOctalSTM32::acquireDMABuffer(size_t bytes_per_lane) {
     if (bytes_per_lane > mMaxBytesPerLane) {
         if (!mDMABuffer.empty()) {
             free(mDMABuffer.data());
-            mDMABuffer = fl::span<uint8_t>();
+            mDMABuffer = fl::span<u8>();
         }
 
         // Allocate DMA-capable memory (regular malloc for STM32)
-        uint8_t* ptr = static_cast<uint8_t*>(malloc(total_size));
+        u8* ptr = static_cast<u8*>(malloc(total_size));
         if (!ptr) {
             return DMABuffer(SPIError::ALLOCATION_FAILED);
         }
 
-        mDMABuffer = fl::span<uint8_t>(ptr, total_size);
+        mDMABuffer = fl::span<u8>(ptr, total_size);
         mMaxBytesPerLane = bytes_per_lane;
     }
 
@@ -366,7 +366,7 @@ bool SPIOctalSTM32::allocateDMABuffer(size_t required_size) {
 
     // Allocate new buffers for all 8 lanes (word-aligned for DMA)
     for (int i = 0; i < 8; ++i) {
-        mDMABuffers[i] = (uint8_t*)malloc(required_size);
+        mDMABuffers[i] = (u8*)malloc(required_size);
         if (mDMABuffers[i] == nullptr) {
             FL_WARN("SPIOctalSTM32: Failed to allocate DMA buffer for lane " << i);
             // Free any buffers that were successfully allocated
@@ -396,17 +396,17 @@ void SPIOctalSTM32::interleaveBits() {
 
     // Interleave bits from mDMABuffer across lanes
     for (size_t src_idx = 0; src_idx < byte_count; ++src_idx) {
-        uint8_t src_byte = mDMABuffer[src_idx];
+        u8 src_byte = mDMABuffer[src_idx];
 
         // Which output byte index in each lane buffer
         size_t lane_byte_idx = src_idx / 8;
         // Which bit position within that byte (0-7)
-        uint8_t bit_pos = 7 - (src_idx % 8);
+        u8 bit_pos = 7 - (src_idx % 8);
 
         // Extract and distribute each bit to its corresponding lane
         // Lane 0 gets bit 7, Lane 1 gets bit 6, ..., Lane 7 gets bit 0
         for (int lane = 0; lane < 8; ++lane) {
-            uint8_t bit = (src_byte >> (7 - lane)) & 0x01;
+            u8 bit = (src_byte >> (7 - lane)) & 0x01;
             mDMABuffers[lane][lane_byte_idx] |= (bit << bit_pos);
         }
     }
@@ -456,7 +456,7 @@ bool SPIOctalSTM32::transmit(TransmitMode mode) {
     return true;
 }
 
-bool SPIOctalSTM32::waitComplete(uint32_t timeout_ms) {
+bool SPIOctalSTM32::waitComplete(u32 timeout_ms) {
     if (!mTransactionActive) {
         return true;  // Nothing to wait for
     }
@@ -574,7 +574,7 @@ void SPIOctalSTM32::cleanup() {
         // Free main DMA buffer
         if (!mDMABuffer.empty()) {
             free(mDMABuffer.data());
-            mDMABuffer = fl::span<uint8_t>();
+            mDMABuffer = fl::span<u8>();
             mMaxBytesPerLane = 0;
             mCurrentTotalSize = 0;
             mBufferAcquired = false;

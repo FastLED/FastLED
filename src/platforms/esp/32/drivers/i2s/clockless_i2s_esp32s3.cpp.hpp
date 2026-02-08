@@ -38,7 +38,7 @@
 namespace { // anonymous namespace
 
 typedef fl::FixedVector<int, 16> PinList16;
-typedef uint8_t I2SPin; // Renamed to avoid conflict with FastLED Pin class
+typedef fl::u8 I2SPin; // Renamed to avoid conflict with FastLED Pin class
 
 bool gPsramInited = false;
 
@@ -63,7 +63,7 @@ class I2SEsp32S3_Group {
 
     void onQueuingDone() { mRectDrawBuffer.onQueuingDone(); }
 
-    void addObject(I2SPin pin, uint16_t numLeds, bool is_rgbw) {
+    void addObject(I2SPin pin, fl::u16 numLeds, bool is_rgbw) {
         mRectDrawBuffer.queue(fl::DrawItem(pin, numLeds, is_rgbw));
     }
 
@@ -93,13 +93,13 @@ class I2SEsp32S3_Group {
                 }
                 pinList.push_back(it->mPin);
             }
-            uint32_t num_strips = 0;
-            uint32_t bytes_per_strip = 0;
-            uint32_t total_bytes = 0;
+            fl::u32 num_strips = 0;
+            fl::u32 bytes_per_strip = 0;
+            fl::u32 total_bytes = 0;
             mRectDrawBuffer.getBlockInfo(&num_strips, &bytes_per_strip,
                                          &total_bytes);
             int num_leds_per_strip = bytes_per_strip / 3;
-            uint32_t total_leds = total_bytes / 3;
+            fl::u32 total_leds = total_bytes / 3;
             mDriver->initled(mRectDrawBuffer.mAllLedsBufferUint8.get(),
                              pinList.data(), pinList.size(),
                              num_leds_per_strip);
@@ -118,15 +118,15 @@ void I2S_Esp32::beginShowLeds(int datapin, int nleds, bool is_rgbw) {
     group.addObject(datapin, nleds, is_rgbw);
 }
 
-void I2S_Esp32::showPixels(uint8_t data_pin, PixelIterator &pixel_iterator) {
+void I2S_Esp32::showPixels(u8 data_pin, PixelIterator &pixel_iterator) {
     I2SEsp32S3_Group &group = I2SEsp32S3_Group::getInstance();
     group.onQueuingDone();
     const Rgbw rgbw = pixel_iterator.get_rgbw();
     int numLeds = pixel_iterator.size();
-    span<uint8_t> strip_bytes =
+    span<u8> strip_bytes =
         group.mRectDrawBuffer.getLedsBufferBytesForPin(data_pin, true);
     if (rgbw.active()) {
-        uint8_t r, g, b, w;
+        u8 r, g, b, w;
         while (pixel_iterator.has(1)) {
             pixel_iterator.loadAndScaleRGBW(&r, &g, &b, &w);
             strip_bytes[0] = r;
@@ -141,7 +141,7 @@ void I2S_Esp32::showPixels(uint8_t data_pin, PixelIterator &pixel_iterator) {
             pixel_iterator.stepDithering();
         }
     } else {
-        uint8_t r, g, b;
+        u8 r, g, b;
         while (pixel_iterator.has(1)) {
             pixel_iterator.loadAndScaleRGB(&r, &g, &b);
             strip_bytes[0] = r;
@@ -166,13 +166,13 @@ class Driver : public InternalI2SDriver {
   public:
     Driver() = default;
     ~Driver() override = default;
-    void initled(uint8_t *leds, const int *pins, int numstrip,
+    void initled(u8 *leds, const int *pins, int numstrip,
                  int NUM_LED_PER_STRIP) override {
         mDriver.initled(leds, pins, numstrip, NUM_LED_PER_STRIP);
     }
     void show() override { mDriver.show(); }
 
-    void setBrightness(uint8_t brightness) override {
+    void setBrightness(u8 brightness) override {
         mDriver.setBrightness(brightness);
     }
 

@@ -188,7 +188,7 @@ bool UartPeripheralEsp::isInitialized() const {
 // Transmission Methods
 //=============================================================================
 
-bool UartPeripheralEsp::writeBytes(const uint8_t* data, size_t length) {
+bool UartPeripheralEsp::writeBytes(const u8* data, size_t length) {
     if (!mInitialized) {
         FL_WARN("UartPeripheralEsp: Cannot write - not initialized");
         return false;
@@ -233,7 +233,7 @@ bool UartPeripheralEsp::writeBytes(const uint8_t* data, size_t length) {
     return true;
 }
 
-bool UartPeripheralEsp::waitTxDone(uint32_t timeout_ms) {
+bool UartPeripheralEsp::waitTxDone(u32 timeout_ms) {
     if (!mInitialized) {
         FL_WARN("UartPeripheralEsp: Cannot wait - not initialized");
         return false;

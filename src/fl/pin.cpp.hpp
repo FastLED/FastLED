@@ -53,17 +53,17 @@ PinValue digitalRead(int pin) {
     return platforms::digitalRead(pin);
 }
 
-uint16_t analogRead(int pin) {
+u16 analogRead(int pin) {
     // Forward to platform-specific inline implementation
     return platforms::analogRead(pin);
 }
 
-void analogWrite(int pin, uint16_t val) {
+void analogWrite(int pin, u16 val) {
     // Forward to platform-specific inline implementation
     platforms::analogWrite(pin, val);
 }
 
-void setPwm16(int pin, uint16_t val) {
+void setPwm16(int pin, u16 val) {
     // Forward to platform-specific inline implementation
     platforms::setPwm16(pin, val);
 }

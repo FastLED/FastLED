@@ -35,7 +35,7 @@ class TaskCoroutine {
 public:
     using TaskFunction = fl::function<void()>;
 
-    TaskCoroutine(fl::string name, TaskFunction function, size_t stack_size = 4096, uint8_t priority = 5)
+    TaskCoroutine(fl::string name, TaskFunction function, size_t stack_size = 4096, u8 priority = 5)
         : mImpl(platforms::createTaskCoroutine(fl::move(name), fl::move(function), stack_size, priority)) {
     }
 
@@ -92,10 +92,10 @@ public:
     virtual string trace_label() const = 0;
     virtual TaskType type() const = 0;
     virtual int interval_ms() const = 0;
-    virtual uint32_t last_run_time() const = 0;
-    virtual void set_last_run_time(uint32_t time) = 0;
-    virtual bool ready_to_run(uint32_t current_time) const = 0;
-    virtual bool ready_to_run_frame_task(uint32_t current_time) const = 0;
+    virtual u32 last_run_time() const = 0;
+    virtual void set_last_run_time(u32 time) = 0;
+    virtual bool ready_to_run(u32 current_time) const = 0;
+    virtual bool ready_to_run_frame_task(u32 current_time) const = 0;
     virtual bool is_canceled() const = 0;
     virtual bool is_auto_registered() const = 0;
     virtual void execute_then() = 0;
@@ -119,7 +119,7 @@ public:
         , mIntervalMs(interval_ms)
         , mTraceLabel(trace ? make_unique<string>(make_trace_label(*trace)) : nullptr)
         // Use (max)() to prevent macro expansion by Arduino.h's max macro
-        , mLastRunTime((numeric_limits<uint32_t>::max)()) {}
+        , mLastRunTime((numeric_limits<u32>::max)()) {}
 
     void set_then(function<void()> on_then) override {
         mThenCallback = fl::move(on_then);
@@ -140,22 +140,22 @@ public:
     string trace_label() const override { return mTraceLabel ? *mTraceLabel : ""; }
     TaskType type() const override { return mType; }
     int interval_ms() const override { return mIntervalMs; }
-    uint32_t last_run_time() const override { return mLastRunTime; }
-    void set_last_run_time(uint32_t time) override { mLastRunTime = time; }
+    u32 last_run_time() const override { return mLastRunTime; }
+    void set_last_run_time(u32 time) override { mLastRunTime = time; }
     bool is_canceled() const override { return mCanceled; }
     bool is_auto_registered() const override { return mAutoRegistered; }
 
-    bool ready_to_run(uint32_t current_time) const override {
+    bool ready_to_run(u32 current_time) const override {
         if (mType == TaskType::kBeforeFrame || mType == TaskType::kAfterFrame) {
             return false;  // Frame tasks not ready during regular updates
         }
         if (mIntervalMs <= 0) return true;
         // Use (max)() to prevent macro expansion by Arduino.h's max macro
-        if (mLastRunTime == (fl::numeric_limits<uint32_t>::max)()) return true;
-        return (current_time - mLastRunTime) >= static_cast<uint32_t>(mIntervalMs);
+        if (mLastRunTime == (fl::numeric_limits<u32>::max)()) return true;
+        return (current_time - mLastRunTime) >= static_cast<u32>(mIntervalMs);
     }
 
-    bool ready_to_run_frame_task(uint32_t /*current_time*/) const override {
+    bool ready_to_run_frame_task(u32 /*current_time*/) const override {
         return mType == TaskType::kBeforeFrame || mType == TaskType::kAfterFrame;
     }
 
@@ -194,7 +194,7 @@ private:
     unique_ptr<string> mTraceLabel;
     bool mHasThen = false;
     bool mHasCatch = false;
-    uint32_t mLastRunTime;
+    u32 mLastRunTime;
     function<void()> mThenCallback;
     function<void(const Error&)> mCatchCallback;
 };
@@ -221,13 +221,13 @@ public:
     string trace_label() const override { return mTraceLabel ? *mTraceLabel : ""; }
     TaskType type() const override { return TaskType::kCoroutine; }
     int interval_ms() const override { return 0; }
-    uint32_t last_run_time() const override { return 0; }
-    void set_last_run_time(uint32_t) override {}
+    fl::u32 last_run_time() const override { return 0; }
+    void set_last_run_time(fl::u32) override {}
     bool is_canceled() const override { return mCanceled; }
     bool is_auto_registered() const override { return mAutoRegistered; }
 
-    bool ready_to_run(uint32_t) const override { return false; }
-    bool ready_to_run_frame_task(uint32_t) const override { return false; }
+    bool ready_to_run(fl::u32) const override { return false; }
+    bool ready_to_run_frame_task(fl::u32) const override { return false; }
 
     void execute_then() override {}
     void execute_catch(const Error&) override {}
@@ -342,9 +342,9 @@ bool task::has_catch() const { return mImpl ? mImpl->has_catch() : false; }
 string task::trace_label() const { return mImpl ? mImpl->trace_label() : ""; }
 TaskType task::type() const { return mImpl ? mImpl->type() : TaskType::kEveryMs; }
 int task::interval_ms() const { return mImpl ? mImpl->interval_ms() : 0; }
-uint32_t task::last_run_time() const { return mImpl ? mImpl->last_run_time() : 0; }
-void task::set_last_run_time(uint32_t time) { if (mImpl) mImpl->set_last_run_time(time); }
-bool task::ready_to_run(uint32_t current_time) const { return mImpl ? mImpl->ready_to_run(current_time) : false; }
+fl::u32 task::last_run_time() const { return mImpl ? mImpl->last_run_time() : 0; }
+void task::set_last_run_time(fl::u32 time) { if (mImpl) mImpl->set_last_run_time(time); }
+bool task::ready_to_run(fl::u32 current_time) const { return mImpl ? mImpl->ready_to_run(current_time) : false; }
 bool task::is_valid() const { return mImpl != nullptr; }
 bool task::isCoroutine() const { return mImpl && mImpl->type() == TaskType::kCoroutine; }
 
@@ -357,9 +357,9 @@ void task::exitCurrent() { TaskCoroutine::exitCurrent(); }
 void task::_set_id(int id) { if (mImpl) mImpl->set_id(id); }
 int task::_id() const { return mImpl ? mImpl->id() : 0; }
 bool task::_is_canceled() const { return mImpl ? mImpl->is_canceled() : true; }
-bool task::_ready_to_run(uint32_t current_time) const { return mImpl ? mImpl->ready_to_run(current_time) : false; }
-bool task::_ready_to_run_frame_task(uint32_t current_time) const { return mImpl ? mImpl->ready_to_run_frame_task(current_time) : false; }
-void task::_set_last_run_time(uint32_t time) { if (mImpl) mImpl->set_last_run_time(time); }
+bool task::_ready_to_run(fl::u32 current_time) const { return mImpl ? mImpl->ready_to_run(current_time) : false; }
+bool task::_ready_to_run_frame_task(fl::u32 current_time) const { return mImpl ? mImpl->ready_to_run_frame_task(current_time) : false; }
+void task::_set_last_run_time(fl::u32 time) { if (mImpl) mImpl->set_last_run_time(time); }
 bool task::_has_then() const { return mImpl ? mImpl->has_then() : false; }
 void task::_execute_then() { if (mImpl) mImpl->execute_then(); }
 void task::_execute_catch(const Error& error) { if (mImpl) mImpl->execute_catch(error); }

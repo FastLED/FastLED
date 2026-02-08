@@ -27,13 +27,13 @@ public:
     /// @param data Data to transmit (copied into internal buffer)
     /// @param size Number of bytes
     /// @note Data is buffered, not transmitted until parent device's flush() is called
-    void write(const uint8_t* data, size_t size);
+    void write(const u8* data, size_t size);
 
     /// @brief Get direct buffer access for zero-copy writes
     /// @param size Number of bytes needed
     /// @returns Span to write into (valid until flush())
     /// @note Resizes internal buffer to requested size
-    fl::span<uint8_t> getBuffer(size_t size);
+    fl::span<u8> getBuffer(size_t size);
 
     /// @brief Get lane ID
     /// @returns Lane index (0-7 for Dual/Quad/Octal)
@@ -56,10 +56,10 @@ private:
 
     /// @brief Get const access to buffer data
     /// @returns Const span of buffered data
-    fl::span<const uint8_t> data() const;
+    fl::span<const u8> data() const;
 
     size_t mLaneId;
-    fl::vector<uint8_t> mBuffer;  // Buffered data for this lane
+    fl::vector<u8> mBuffer;  // Buffered data for this lane
 };
 
 } // namespace spi

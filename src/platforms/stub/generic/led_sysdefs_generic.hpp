@@ -8,7 +8,7 @@
 
 // No timing-related includes needed here anymore
 
-void pinMode(uint8_t pin, uint8_t mode) {
+void pinMode(fl::u8 pin, fl::u8 mode) {
     // Empty stub as we don't actually ever write anything
     FASTLED_UNUSED(pin);
     FASTLED_UNUSED(mode);

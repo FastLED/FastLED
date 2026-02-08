@@ -15,7 +15,7 @@ namespace fl {
 
 #define AVR_PIN_CYCLES(_PIN) ((((int)FastPin<_PIN>::port()) - 0x20 < 64) ? 1 : 2)
 
-typedef volatile uint8_t& reg8_t;
+typedef volatile u8& reg8_t;
 
 #define _CONCAT3(a, b, c) a##b##c
 

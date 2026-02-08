@@ -97,7 +97,7 @@ void Video::draw(DrawContext context) {
     mImpl->draw(context.now, context.leds);
 }
 
-int32_t Video::durationMicros() const {
+i32 Video::durationMicros() const {
     if (!mImpl) {
         return -1;
     }

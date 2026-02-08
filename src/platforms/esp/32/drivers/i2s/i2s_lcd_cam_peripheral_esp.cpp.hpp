@@ -26,7 +26,7 @@
 
 // Default I2S clock frequency (2.4 MHz - standard for WS2812)
 #ifndef FASTLED_ESP32S3_I2S_CLOCK_HZ
-#define FASTLED_ESP32S3_I2S_CLOCK_HZ uint32_t(24 * 100 * 1000)
+#define FASTLED_ESP32S3_I2S_CLOCK_HZ fl::u32(24 * 100 * 1000)
 #endif
 
 namespace fl {
@@ -209,11 +209,11 @@ bool I2sLcdCamPeripheralEsp::isInitialized() const {
 // Buffer Management
 //=============================================================================
 
-uint16_t* I2sLcdCamPeripheralEsp::allocateBuffer(size_t size_bytes) {
+u16* I2sLcdCamPeripheralEsp::allocateBuffer(size_t size_bytes) {
     // Round up to 64-byte alignment
     size_t aligned_size = ((size_bytes + 63) / 64) * 64;
 
-    uint32_t alloc_caps;
+    u32 alloc_caps;
     if (mConfig.use_psram) {
         alloc_caps = MALLOC_CAP_SPIRAM | MALLOC_CAP_DMA | MALLOC_CAP_8BIT;
     } else {
@@ -235,10 +235,10 @@ uint16_t* I2sLcdCamPeripheralEsp::allocateBuffer(size_t size_bytes) {
         );
     }
 
-    return static_cast<uint16_t*>(buffer);
+    return static_cast<u16*>(buffer);
 }
 
-void I2sLcdCamPeripheralEsp::freeBuffer(uint16_t* buffer) {
+void I2sLcdCamPeripheralEsp::freeBuffer(u16* buffer) {
     if (buffer != nullptr) {
         heap_caps_free(buffer);
     }
@@ -248,7 +248,7 @@ void I2sLcdCamPeripheralEsp::freeBuffer(uint16_t* buffer) {
 // Transmission Methods
 //=============================================================================
 
-bool I2sLcdCamPeripheralEsp::transmit(const uint16_t* buffer, size_t size_bytes) {
+bool I2sLcdCamPeripheralEsp::transmit(const u16* buffer, size_t size_bytes) {
     if (!mInitialized || mPanelIo == nullptr) {
         return false;
     }
@@ -268,16 +268,16 @@ bool I2sLcdCamPeripheralEsp::transmit(const uint16_t* buffer, size_t size_bytes)
     return true;
 }
 
-bool I2sLcdCamPeripheralEsp::waitTransmitDone(uint32_t timeout_ms) {
+bool I2sLcdCamPeripheralEsp::waitTransmitDone(u32 timeout_ms) {
     if (!mInitialized) {
         return false;
     }
 
     // Simple polling wait (callback will clear mBusy)
-    uint32_t start = (uint32_t)(esp_timer_get_time() / 1000);
+    u32 start = (u32)(esp_timer_get_time() / 1000);
     while (mBusy) {
         if (timeout_ms > 0) {
-            uint32_t now = (uint32_t)(esp_timer_get_time() / 1000);
+            u32 now = (u32)(esp_timer_get_time() / 1000);
             if ((now - start) >= timeout_ms) {
                 return false;  // Timeout
             }
@@ -322,7 +322,7 @@ uint64_t I2sLcdCamPeripheralEsp::getMicroseconds() {
     return esp_timer_get_time();
 }
 
-void I2sLcdCamPeripheralEsp::delay(uint32_t ms) {
+void I2sLcdCamPeripheralEsp::delay(u32 ms) {
     vTaskDelay(pdMS_TO_TICKS(ms));
 }
 

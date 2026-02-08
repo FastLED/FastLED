@@ -24,7 +24,7 @@
 #include "fl/fastpin_base.h"
 namespace fl {
 /// Forward declaration of base FastPin template
-template<uint8_t PIN> class FastPin;
+template<u8 PIN> class FastPin;
 
 /// Initialize GPIO clock (required for Silicon Labs EFM32/EFR32 devices)
 void _mgm240_gpio_init();
@@ -52,10 +52,10 @@ struct __generated_struct_GPIO_PORT_D {
 /// @tparam _PORT_STRUCT Port accessor structure (e.g., __generated_struct_GPIO_PORT_A)
 /// @tparam _PORT_NUMBER Port number (0=A, 1=B, 2=C, 3=D)
 /// @tparam _PIN_NUMBER Pin number within the port (0-7 typically)
-template<uint32_t _MASK, typename _PORT_STRUCT, uint8_t _PORT_NUMBER, uint8_t _PIN_NUMBER> class _ARMPIN : public ValidPinBase {
+template<u32 _MASK, typename _PORT_STRUCT, u8 _PORT_NUMBER, u8 _PIN_NUMBER> class _ARMPIN : public ValidPinBase {
 public:
-    typedef volatile uint32_t * port_ptr_t;
-    typedef uint32_t port_t;
+    typedef volatile u32 * port_ptr_t;
+    typedef u32 port_t;
 
     /// Configure pin as push-pull output
     FASTLED_FORCE_INLINE static void setOutput() {

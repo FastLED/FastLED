@@ -30,7 +30,7 @@ struct BatchDraw {
     /// @param alpha Wave amplitude (0-255) for gradient lookup
     ///
     /// If the batch is full, automatically flushes before adding.
-    void push(fl::u32 index, uint8_t alpha) {
+    void push(fl::u32 index, u8 alpha) {
         if (isFull()) {
             flush();
         }
@@ -48,7 +48,7 @@ struct BatchDraw {
     /// alphas, then writes the resulting colors to their corresponding LEDs.
     /// Clears the batch after processing.
     void flush() {
-        span<const uint8_t> alphas(mAlphas);
+        span<const u8> alphas(mAlphas);
         CRGB rgb[kMaxBatchSize] = {};
         mGradient->fill(mAlphas, rgb);
         for (size_t i = 0; i < mIndices.size(); i++) {
@@ -60,7 +60,7 @@ struct BatchDraw {
 
     static const size_t kMaxBatchSize = 32;  ///< Maximum batch size before forced flush
     using ArrayIndices = fl::FixedVector<fl::u32, kMaxBatchSize>;
-    using ArrayAlphas = fl::FixedVector<uint8_t, kMaxBatchSize>;
+    using ArrayAlphas = fl::FixedVector<u8, kMaxBatchSize>;
     ArrayIndices mIndices;   ///< LED indices in current batch
     ArrayAlphas mAlphas;     ///< Wave amplitudes in current batch
     CRGB *mLeds = nullptr;   ///< Target LED array
@@ -76,7 +76,7 @@ void WaveCrgbGradientMap::mapWaveToLEDs(const XYMap &xymap,
     for (fl::u32 y = 0; y < height; y++) {
         for (fl::u32 x = 0; x < width; x++) {
             fl::u32 idx = xymap(x, y);
-            uint8_t value8 = waveSim.getu8(x, y);
+            u8 value8 = waveSim.getu8(x, y);
             batch.push(idx, value8);
         }
     }

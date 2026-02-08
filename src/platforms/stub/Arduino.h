@@ -151,13 +151,13 @@ struct SerialEmulation {
     int available();
     int read();
     fl::string readStringUntil(char terminator);
-    void write(uint8_t);
+    void write(fl::u8);
     void write(const char *s);
-    void write(const uint8_t *s, size_t n);
+    void write(const fl::u8 *s, size_t n);
     void write(const char *s, size_t n);
     void flush();
     void end();
-    uint8_t peek();
+    fl::u8 peek();
 
     // Support for Serial boolean checks (always returns true for stub platform)
     explicit operator bool() const { return true; }
@@ -177,8 +177,8 @@ struct SerialEmulation {
 #define bitSet(value, bit) ((value) |= (1UL << (bit)))
 #define bitClear(value, bit) ((value) &= ~(1UL << (bit)))
 #define bitWrite(value, bit, bitvalue) ((bitvalue) ? bitSet(value, bit) : bitClear(value, bit))
-#define lowByte(w) ((uint8_t) ((w) & 0xff))
-#define highByte(w) ((uint8_t) ((w) >> 8))
+#define lowByte(w) ((fl::u8) ((w) & 0xff))
+#define highByte(w) ((fl::u8) ((w) >> 8))
 
 void digitalWrite(int, int);
 void analogWrite(int, int);

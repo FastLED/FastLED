@@ -78,9 +78,9 @@ public:
     struct RpcResult {
         fl::string functionName;    // Name of function that executed
         fl::Json result;            // Return value (null if no return)
-        uint32_t scheduledAt;       // Timestamp when scheduled (0 for immediate)
-        uint32_t receivedAt;        // Timestamp when RPC request received
-        uint32_t executedAt;        // Timestamp when function executed
+        u32 scheduledAt;       // Timestamp when scheduled (0 for immediate)
+        u32 receivedAt;        // Timestamp when RPC request received
+        u32 executedAt;        // Timestamp when function executed
         bool wasScheduled;          // true if scheduled, false if immediate
 
         /**
@@ -308,7 +308,7 @@ public:
      * Return values from scheduled functions are stored and can be retrieved
      * via getResults().
      */
-    size_t tick(uint32_t currentTimeMs);
+    size_t tick(u32 currentTimeMs);
 
     /**
      * @brief Get results from recently executed functions (both immediate and scheduled)
@@ -466,10 +466,10 @@ public:
 
 protected:
     struct ScheduledCall {
-        uint32_t mExecuteAt;        // millis() timestamp when to execute
+        u32 mExecuteAt;        // millis() timestamp when to execute
         fl::string mFunctionName;   // Name of function to call
         fl::Json mArgs;             // Arguments to pass
-        uint32_t mReceivedAt;       // Timestamp when RPC was received
+        u32 mReceivedAt;       // Timestamp when RPC was received
 
         // Comparison operator for stable priority queue (earlier times have higher priority)
         // priority_queue_stable uses fl::greater by default, so use natural comparison
@@ -500,8 +500,8 @@ protected:
 
     fl::Json executeFunction(const fl::string& funcName, const fl::Json& args);
     fl::tuple<Error, fl::Json> executeFunctionTyped(const fl::string& funcName, const fl::Json& args);
-    void scheduleFunction(uint32_t timestamp, uint32_t receivedAt, const fl::string& funcName, const fl::Json& args);
-    void recordResult(const fl::string& funcName, const fl::Json& result, uint32_t scheduledAt, uint32_t receivedAt, uint32_t executedAt, bool wasScheduled);
+    void scheduleFunction(u32 timestamp, u32 receivedAt, const fl::string& funcName, const fl::Json& args);
+    void recordResult(const fl::string& funcName, const fl::Json& result, u32 scheduledAt, u32 receivedAt, u32 executedAt, bool wasScheduled);
 
     // Typed RPC registry (NEW)
     fl::Rpc mRpc;

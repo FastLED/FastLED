@@ -43,11 +43,11 @@ struct stub_isr_handle_data {
     fl::atomic<bool> mIsEnabled;               // Current enable state
     isr_handler_t mUserHandler;                // User handler function
     void* mUserData;                           // User context
-    uint32_t mFrequencyHz;                     // Timer frequency
+    u32 mFrequencyHz;                     // Timer frequency
     uint64_t mNextTickUs;                      // Next scheduled tick (microseconds since epoch)
     bool mIsOneShot;                           // One-shot vs auto-reload
     bool mIsTimer;                             // true = timer, false = external
-    uint32_t mHandleId;                        // Unique ID for this handler
+    u32 mHandleId;                        // Unique ID for this handler
 
     stub_isr_handle_data()
         : mIsEnabled(true)
@@ -63,9 +63,9 @@ struct stub_isr_handle_data {
 
 // Platform ID for stub/WASM
 #if defined(FL_IS_WASM)
-    constexpr uint8_t STUB_PLATFORM_ID = 200;  // WASM platform
+    constexpr u8 STUB_PLATFORM_ID = 200;  // WASM platform
 #else
-    constexpr uint8_t STUB_PLATFORM_ID = 0;    // Stub platform
+    constexpr u8 STUB_PLATFORM_ID = 0;    // Stub platform
 #endif
 
 // =============================================================================
@@ -259,7 +259,7 @@ private:
     fl::vector<stub_isr_handle_data*> mHandlers;
     fl::unique_ptr<std::thread> mTimerThread;  // okay std namespace
     fl::atomic<bool> mShouldStop;
-    uint32_t mNextHandleId;
+    u32 mNextHandleId;
 
     // Test synchronization support
     fl::mutex mTestSyncMutex;
@@ -310,7 +310,7 @@ inline int stub_attach_timer_handler(const isr_config_t& config, isr_handle_t* o
         return 0;  // Success
 }
 
-inline int stub_attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) {
+inline int stub_attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) {
         (void)pin;  // Unused in stub implementation
         if (!config.handler) {
             STUB_LOG("attachExternalHandler: handler is null");
@@ -441,19 +441,19 @@ inline const char* stub_get_platform_name() {
 #endif
 }
 
-inline uint32_t stub_get_max_timer_frequency() {
+inline u32 stub_get_max_timer_frequency() {
     return 0;  // Unlimited in host-based simulation
 }
 
-inline uint32_t stub_get_min_timer_frequency() {
+inline u32 stub_get_min_timer_frequency() {
     return 1;  // 1 Hz
 }
 
-inline uint8_t stub_get_max_priority() {
+inline u8 stub_get_max_priority() {
     return 1;  // No priority in host-based platforms
 }
 
-inline bool stub_requires_assembly_handler(uint8_t priority) {
+inline bool stub_requires_assembly_handler(u8 priority) {
     (void)priority;
     return false;  // Host-based platforms never require assembly
 }
@@ -468,7 +468,7 @@ inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* handle
     return stub_attach_timer_handler(config, handle);
 }
 
-inline int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* handle) {
+inline int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* handle) {
     return stub_attach_external_handler(pin, config, handle);
 }
 
@@ -496,19 +496,19 @@ inline const char* get_platform_name() {
     return stub_get_platform_name();
 }
 
-inline uint32_t get_max_timer_frequency() {
+inline u32 get_max_timer_frequency() {
     return stub_get_max_timer_frequency();
 }
 
-inline uint32_t get_min_timer_frequency() {
+inline u32 get_min_timer_frequency() {
     return stub_get_min_timer_frequency();
 }
 
-inline uint8_t get_max_priority() {
+inline u8 get_max_priority() {
     return stub_get_max_priority();
 }
 
-inline bool requires_assembly_handler(uint8_t priority) {
+inline bool requires_assembly_handler(u8 priority) {
     return stub_requires_assembly_handler(priority);
 }
 

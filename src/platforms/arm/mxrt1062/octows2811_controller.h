@@ -5,15 +5,15 @@
 
 #include "OctoWS2811.h"
 namespace fl {
-template<EOrder RGB_ORDER = GRB, uint8_t CHIP = WS2811_800kHz>
+template<EOrder RGB_ORDER = GRB, u8 CHIP = WS2811_800kHz>
 class COctoWS2811Controller : public CPixelLEDController<RGB_ORDER, 8, 0xFF> {
   OctoWS2811  *pocto;
-  uint8_t *drawbuffer,*framebuffer;
+  u8 *drawbuffer,*framebuffer;
 
   void _init(int nLeds) {
     if(pocto == nullptr) {
-      drawbuffer = (uint8_t*)malloc(nLeds * 8 * 3);
-      framebuffer = (uint8_t*)malloc(nLeds * 8 * 3);
+      drawbuffer = (u8*)malloc(nLeds * 8 * 3);
+      framebuffer = (u8*)malloc(nLeds * 8 * 3);
 
       // byte ordering is handled in show by the pixel controller
       int config = WS2811_RGB;
@@ -31,16 +31,16 @@ public:
   virtual void init() { /* do nothing yet */ }
 
   virtual void showPixels(PixelController<RGB_ORDER, 8, 0xFF> &pixels) {
-    uint32_t size = pixels.size();
-    uint32_t sizeTimes8 = 8U * size;
+    u32 size = pixels.size();
+    u32 sizeTimes8 = 8U * size;
     _init(size);
 
-    uint32_t index = 0;
+    u32 index = 0;
     while (pixels.has(1)) {
       for (int lane = 0; lane < 8; lane++) {
-        uint8_t r = pixels.loadAndScale0(lane);
-        uint8_t g = pixels.loadAndScale1(lane);
-        uint8_t b = pixels.loadAndScale2(lane);
+        u8 r = pixels.loadAndScale0(lane);
+        u8 g = pixels.loadAndScale1(lane);
+        u8 b = pixels.loadAndScale2(lane);
         pocto->setPixel(index, r, g, b);
         index += size;
       }

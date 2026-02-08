@@ -12,7 +12,7 @@
 #include <chrono>  // okay banned header (platform-specific time implementation)
 
 // Forward declare delay override (defined in time_stub.cpp.hpp)
-extern fl::function<void(uint32_t)> g_delay_override;
+extern fl::function<void(fl::u32)> g_delay_override;
 
 namespace {
     // Shared start time for millis/micros consistency

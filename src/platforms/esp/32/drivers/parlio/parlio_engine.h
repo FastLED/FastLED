@@ -163,7 +163,7 @@ public:
     ///
     /// ⚠️  CRITICAL: This function contains HOT PATH code (blocking loop)
     /// DO NOT add logging inside the blocking loop after first buffer submission
-    bool beginTransmission(const uint8_t* scratchBuffer,
+    bool beginTransmission(const u8* scratchBuffer,
                           size_t totalBytes,
                           size_t numLanes,
                           size_t laneStride);
@@ -224,7 +224,7 @@ private:
 
     /// @brief Populate a DMA buffer with waveform data
     /// ⚠️  CRITICAL HOT PATH - NO LOGGING IN IMPLEMENTATION
-    bool populateDmaBuffer(uint8_t* outputBuffer,
+    bool populateDmaBuffer(u8* outputBuffer,
                           size_t outputBufferCapacity,
                           size_t startByte,
                           size_t byteCount,
@@ -256,10 +256,10 @@ private:
     fl::vector<int> mPins;
 
     // Timing configuration
-    uint32_t mTimingT1Ns;
-    uint32_t mTimingT2Ns;
-    uint32_t mTimingT3Ns;
-    uint32_t mResetUs;  // Reset time in microseconds
+    u32 mTimingT1Ns;
+    u32 mTimingT2Ns;
+    u32 mTimingT3Ns;
+    u32 mResetUs;  // Reset time in microseconds
 
     // Wave8 lookup table
     fl::Wave8BitExpansionLut mWave8Lut;
@@ -280,7 +280,7 @@ private:
     size_t mRingBufferCapacity;  // Capacity of each ring buffer (64-byte aligned)
 
     // Scratch buffer pointer (owned by caller, NOT by this class)
-    const uint8_t* mScratchBuffer;
+    const u8* mScratchBuffer;
     size_t mLaneStride;
 
     // Error state

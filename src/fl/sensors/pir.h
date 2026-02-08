@@ -43,23 +43,23 @@ public:
     /// @param risingTime  ramp‑up duration (ms)
     /// @param fallingTime ramp‑down duration (ms)
     Pir(int pin,
-                uint32_t latchMs     = 5000,
-                uint32_t risingTime  = 1000,
-                uint32_t fallingTime = 1000,
+                u32 latchMs     = 5000,
+                u32 risingTime  = 1000,
+                u32 fallingTime = 1000,
                 const char* button_name = nullptr);
 
     /// Returns true if the PIR is “latched on” (within latchMs of last trigger).
-    bool detect(uint32_t now);
+    bool detect(u32 now);
 
     /// Returns a 0–255 ramp value:
     ///  • ramps 0→255 over risingTime
     ///  • holds 255 until latchMs–fallingTime
     ///  • ramps 255→0 over fallingTime
     /// Outside latch period returns 0.
-    uint8_t transition(uint32_t now);
+    u8 transition(u32 now);
 
     /// Manually start the latch cycle (e.g. on startup)
-    void activate(uint32_t now) { mRamp.trigger(now); }
+    void activate(u32 now) { mRamp.trigger(now); }
 
 private:
     PirLowLevel        mPir;

@@ -62,13 +62,13 @@ FL_EXTERN_C_END
 namespace fl {
 struct I2SDMABuffer {
     lldesc_t descriptor;
-    uint8_t *buffer;
+    u8 *buffer;
 };
 extern int gCntBuffer;
 extern int gCurBuffer;
 extern bool gDoneFilling;
-extern uint8_t gPixelRow[NUM_COLOR_CHANNELS][32];
-extern uint8_t gPixelBits[NUM_COLOR_CHANNELS][8][4];
+extern u8 gPixelRow[NUM_COLOR_CHANNELS][32];
+extern u8 gPixelBits[NUM_COLOR_CHANNELS][8][4];
 extern I2SDMABuffer *dmaBuffers[NUM_DMA_BUFFERS];
 
 // typedef for a void function pointer
@@ -90,7 +90,7 @@ int pgcd(int smallest, int precision, int a, int b, int c);
 void i2s_define_bit_patterns(const ChipsetTiming& TIMING);
 bool i2s_is_initialized();
 void i2s_init(int i2s_device);
-void i2s_clear_dma_buffer(uint32_t *buf);  // warning, this function assumes length.
+void i2s_clear_dma_buffer(u32 *buf);  // warning, this function assumes length.
 void i2s_start();
 void i2s_reset();
 void i2s_reset_dma();
@@ -99,5 +99,5 @@ void i2s_stop();
 void i2s_begin();
 void i2s_wait();
 void i2s_setup_pin(int pin, int offset);
-void i2s_transpose_and_encode(int channel, uint32_t has_data_mask, volatile uint32_t *buf);
+void i2s_transpose_and_encode(int channel, u32 has_data_mask, volatile u32 *buf);
 }  // namespace fl

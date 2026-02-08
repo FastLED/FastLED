@@ -24,7 +24,7 @@ void FxLayer::draw(fl::u32 now) {
 
     if (!running) {
         // Clear the frame
-        fl::memset((uint8_t*)frame->rgb(), 0, frame->size() * sizeof(CRGB));
+        fl::memset((u8*)frame->rgb(), 0, frame->size() * sizeof(CRGB));
         fx->resume(now);
         running = true;
     }

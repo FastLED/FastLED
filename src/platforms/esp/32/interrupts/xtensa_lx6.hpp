@@ -286,7 +286,7 @@ esp_err_t fastled_esp32_install_level5_interrupt(
 esp_err_t fastled_esp32_rmt_init_official(
     int channel,
     int gpio_num,
-    uint32_t resolution_hz,
+    fl::u32 resolution_hz,
     size_t mem_block_symbols,
     int interrupt_level  // 1-3 only, 3 recommended
 );
@@ -295,7 +295,7 @@ esp_err_t fastled_esp32_rmt_init_official(
 esp_err_t fastled_esp32_rmt_init_custom(
     int channel,
     int gpio_num,
-    uint32_t resolution_hz,
+    fl::u32 resolution_hz,
     size_t mem_block_symbols,
     int interrupt_level  // 4 or 5, bypasses official driver
 );

@@ -46,10 +46,10 @@ void ScaleUp::draw(DrawContext context) {
     delegateContext.leds = mSurface.data();
     mDelegate->draw(delegateContext);
 
-    uint16_t in_w = mDelegate->getWidth();
-    uint16_t in_h = mDelegate->getHeight();
-    uint16_t out_w = getWidth();
-    uint16_t out_h = getHeight();
+    u16 in_w = mDelegate->getWidth();
+    u16 in_h = mDelegate->getHeight();
+    u16 out_w = getWidth();
+    u16 out_h = getHeight();
     ;
     if (in_w == out_w && in_h == out_h) {
         noExpand(mSurface.data(), context.leds, in_w, in_h);
@@ -58,27 +58,27 @@ void ScaleUp::draw(DrawContext context) {
     }
 }
 
-void ScaleUp::expand(const CRGB *input, CRGB *output, uint16_t width,
-                     uint16_t height, const XYMap& mXyMap) {
+void ScaleUp::expand(const CRGB *input, CRGB *output, u16 width,
+                     u16 height, const XYMap& mXyMap) {
 #if FASTLED_SCALE_UP == FASTLED_SCALE_UP_ALWAYS_POWER_OF_2
-    fl::upscalePowerOf2(input, output, static_cast<uint8_t>(width), static_cast<uint8_t>(height), mXyMap);
+    fl::upscalePowerOf2(input, output, static_cast<u8>(width), static_cast<u8>(height), mXyMap);
 #elif FASTLED_SCALE_UP == FASTLED_SCALE_UP_HIGH_PRECISION
     fl::upscaleArbitrary(input, output, width, height, mXyMap);
 #elif FASTLED_SCALE_UP == FASTLED_SCALE_UP_DECIDE_AT_RUNTIME
     fl::upscale(input, output, width, height, mXyMap);
 #elif FASTLED_SCALE_UP == FASTLED_SCALE_UP_FORCE_FLOATING_POINT
-    fl::upscaleFloat(input, output, static_cast<uint8_t>(width), static_cast<uint8_t>(height), mXyMap);
+    fl::upscaleFloat(input, output, static_cast<u8>(width), static_cast<u8>(height), mXyMap);
 #else
 #error "Invalid FASTLED_SCALE_UP"
 #endif
 }
 
-void ScaleUp::noExpand(const CRGB *input, CRGB *output, uint16_t width,
-                       uint16_t height) {
-    uint16_t n = mXyMap.getTotal();
-    for (uint16_t w = 0; w < width; w++) {
-        for (uint16_t h = 0; h < height; h++) {
-            uint16_t idx = mXyMap.mapToIndex(w, h);
+void ScaleUp::noExpand(const CRGB *input, CRGB *output, u16 width,
+                       u16 height) {
+    u16 n = mXyMap.getTotal();
+    for (u16 w = 0; w < width; w++) {
+        for (u16 h = 0; h < height; h++) {
+            u16 idx = mXyMap.mapToIndex(w, h);
             if (idx < n) {
                 output[idx] = input[w * height + h];
             }

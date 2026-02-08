@@ -205,7 +205,7 @@ protected:
     /// Override this in derived classes to customize bus creation
     /// @param pixelCount number of pixels (0 for default)
     /// @return unique pointer to the created bus
-    virtual fl::unique_ptr<BusType> createPixelBus(uint16_t pixelCount = 0) {
+    virtual fl::unique_ptr<BusType> createPixelBus(u16 pixelCount = 0) {
         return fl::make_unique<BusType>(pixelCount, DATA_PIN);
     }
     

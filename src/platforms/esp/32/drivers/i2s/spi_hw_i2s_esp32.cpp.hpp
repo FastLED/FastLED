@@ -16,7 +16,7 @@
 
 // Compatibility for ESP-IDF 3.3: heap_caps_aligned_alloc was added in IDF 4.1
 #if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR <= 3
-static inline void* heap_caps_aligned_alloc(size_t alignment, size_t size, uint32_t caps) {
+static inline void* heap_caps_aligned_alloc(size_t alignment, size_t size, fl::u32 caps) {
     (void)alignment;  // IDF 3.3 heap_caps_malloc doesn't support alignment
     return heap_caps_malloc(size, caps);
 }
@@ -139,7 +139,7 @@ DMABuffer SpiHwI2SESP32::acquireDMABuffer(size_t bytes_per_lane) {
     // Step 3: Check if buffer needs resizing
     if (required_size > mBufferSize) {
         // Need to reallocate larger buffer
-        uint8_t* new_buffer = allocate_dma_buffer(required_size);
+        u8* new_buffer = allocate_dma_buffer(required_size);
         if (new_buffer == nullptr) {
             FL_WARN("SpiHwI2SESP32: Failed to allocate larger buffer (" << required_size << " bytes)");
             return DMABuffer(SPIError::ALLOCATION_FAILED);
@@ -179,7 +179,7 @@ bool SpiHwI2SESP32::transmit(TransmitMode mode) {
     // Copy data from mCurrentBuffer to mInterleavedBuffer
     // SPIBusManager writes to mCurrentBuffer, but Yves driver reads from mInterleavedBuffer
     if (mCurrentBuffer.ok()) {
-        fl::span<uint8_t> src = mCurrentBuffer.data();
+        fl::span<u8> src = mCurrentBuffer.data();
         if (src.size() <= mBufferSize) {
             fl::memcpy(mInterleavedBuffer, src.data(), src.size());
         } else {
@@ -198,7 +198,7 @@ bool SpiHwI2SESP32::transmit(TransmitMode mode) {
     return true;
 }
 
-bool SpiHwI2SESP32::waitComplete(uint32_t timeout_ms) {
+bool SpiHwI2SESP32::waitComplete(u32 timeout_ms) {
     if (!mIsInitialized) {
         return false;
     }
@@ -219,7 +219,7 @@ bool SpiHwI2SESP32::waitComplete(uint32_t timeout_ms) {
     while (mDriver.isDisplaying) {
         vTaskDelay(pdMS_TO_TICKS(1));  // Check every 1ms
 
-        if (timeout_ms != fl::numeric_limits<uint32_t>::max()) {  // Check for infinite timeout
+        if (timeout_ms != fl::numeric_limits<u32>::max()) {  // Check for infinite timeout
             TickType_t elapsed_ticks = xTaskGetTickCount() - start_ticks;
             if (elapsed_ticks >= timeout_ticks) {
                 return false;  // Timeout
@@ -297,12 +297,12 @@ bool SpiHwI2SESP32::validate_pins(int clock_pin, const fl::vector<int>& data_pin
     return true;
 }
 
-uint8_t* SpiHwI2SESP32::allocate_dma_buffer(size_t size) {
-    uint8_t* buffer = nullptr;
+u8* SpiHwI2SESP32::allocate_dma_buffer(size_t size) {
+    u8* buffer = nullptr;
 
 #if defined(FL_IS_ESP_32S3)
     // ESP32-S3: EDMA supports PSRAM directly
-    buffer = static_cast<uint8_t*>(heap_caps_aligned_alloc(
+    buffer = static_cast<u8*>(heap_caps_aligned_alloc(
         4,  // 4-byte alignment for DMA
         size,
         MALLOC_CAP_SPIRAM | MALLOC_CAP_DMA | MALLOC_CAP_8BIT
@@ -316,7 +316,7 @@ uint8_t* SpiHwI2SESP32::allocate_dma_buffer(size_t size) {
 #endif
 
     // Fallback: Try internal DMA RAM (all ESP32 variants)
-    buffer = static_cast<uint8_t*>(heap_caps_aligned_alloc(
+    buffer = static_cast<u8*>(heap_caps_aligned_alloc(
         4,  // 4-byte alignment for DMA
         size,
         MALLOC_CAP_DMA | MALLOC_CAP_8BIT
@@ -329,7 +329,7 @@ uint8_t* SpiHwI2SESP32::allocate_dma_buffer(size_t size) {
     return buffer;
 }
 
-int SpiHwI2SESP32::calculate_clock_mhz(uint32_t target_hz) {
+int SpiHwI2SESP32::calculate_clock_mhz(u32 target_hz) {
     // Convert Hz to MHz, rounding to nearest integer
     int mhz = static_cast<int>((target_hz + 500000) / 1000000);
 

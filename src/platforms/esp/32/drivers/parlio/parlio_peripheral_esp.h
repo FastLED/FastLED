@@ -80,12 +80,12 @@ public:
     bool enable() override = 0;
     bool disable() override = 0;
     bool isInitialized() const override = 0;
-    bool transmit(const uint8_t* buffer, size_t bit_count, uint16_t idle_value) override = 0;
-    bool waitAllDone(uint32_t timeout_ms) override = 0;
+    bool transmit(const u8* buffer, size_t bit_count, u16 idle_value) override = 0;
+    bool waitAllDone(u32 timeout_ms) override = 0;
     bool registerTxDoneCallback(void* callback, void* user_ctx) override = 0;
-    uint8_t* allocateDmaBuffer(size_t size) override = 0;
-    void freeDmaBuffer(uint8_t* buffer) override = 0;
-    void delay(uint32_t ms) override = 0;
+    u8* allocateDmaBuffer(size_t size) override = 0;
+    void freeDmaBuffer(u8* buffer) override = 0;
+    void delay(u32 ms) override = 0;
     uint64_t getMicroseconds() override = 0;
     void freeDmaBuffer(void* ptr) override = 0;
 

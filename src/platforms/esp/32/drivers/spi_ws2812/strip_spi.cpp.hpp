@@ -30,7 +30,7 @@ static const char *STRIP_SPI_TAG = "strip_spi";
 /// - High bit (1): 110 (binary) → ~800ns high, ~400ns low
 ///
 /// Ported directly from Espressif led_strip_spi_dev.cpp
-static void encodeLedByte(uint8_t data, uint8_t* buf) {
+static void encodeLedByte(u8 data, u8* buf) {
     // WS2812 timing via SPI at 2.5MHz (400ns per bit):
     // Each LED bit needs 3 SPI bits:
     //   LED '0' → 100 (1×400ns high + 2×400ns low = 400ns + 800ns)
@@ -51,7 +51,7 @@ static void encodeLedByte(uint8_t data, uint8_t* buf) {
 
     // Process each bit from MSB (bit 7) to LSB (bit 0)
     for (int bit = 7; bit >= 0; bit--) {
-        uint8_t pattern = (data & (1 << bit)) ? 0b110 : 0b100;  // High bit: 110, Low bit: 100
+        u8 pattern = (data & (1 << bit)) ? 0b110 : 0b100;  // High bit: 110, Low bit: 100
 
         // Map LED bit position to SPI byte/bit positions
         int spi_bit_offset = (7 - bit) * 3;  // Each LED bit → 3 SPI bits
@@ -114,7 +114,7 @@ static void releaseSpiHost(spi_host_device_t spi_host)
 
 class SpiStripWs2812 : public ISpiStripWs2812 {
 public:
-    SpiStripWs2812(int pin, uint32_t led_count, ISpiStripWs2812::SpiHostMode spi_bus_mode, ISpiStripWs2812::DmaMode dma_mode = DMA_AUTO)
+    SpiStripWs2812(int pin, u32 led_count, ISpiStripWs2812::SpiHostMode spi_bus_mode, ISpiStripWs2812::DmaMode dma_mode = DMA_AUTO)
         : mLedCount(led_count)
         , mDrawIssued(false)
     {
@@ -200,7 +200,7 @@ public:
         FL_DBG("SPI device destroyed");
     }
 
-    void setPixel(uint32_t index, uint8_t red, uint8_t green, uint8_t blue) override
+    void setPixel(u32 index, u8 red, u8 green, u8 blue) override
     {
         if (index >= mLedCount) {
             FL_WARN("setPixel index out of range: " << index << " >= " << mLedCount);
@@ -209,7 +209,7 @@ public:
 
         // Store in RGB order (WS2812 expects GRB, but we'll handle that in encoding)
         // Actually, let's store in GRB order directly to match WS2812 protocol
-        uint32_t offset = index * 3;
+        u32 offset = index * 3;
         mLedBuffer[offset + 0] = green;
         mLedBuffer[offset + 1] = red;
         mLedBuffer[offset + 2] = blue;
@@ -268,8 +268,8 @@ public:
         return mDrawIssued;
     }
 
-    void fill(uint8_t red, uint8_t green, uint8_t blue) {
-        for (uint32_t i = 0; i < mLedCount; i++)
+    void fill(u8 red, u8 green, u8 blue) {
+        for (u32 i = 0; i < mLedCount; i++)
         {
             setPixel(i, red, green, blue);
         }
@@ -291,14 +291,14 @@ private:
     u32 mLedCount;
     bool mDrawIssued;
 
-    fl::vector<uint8_t> mLedBuffer;   // LED pixel data (3 bytes per LED: GRB)
-    fl::vector<uint8_t> mSpiBuffer;   // Encoded SPI data (9 bytes per LED)
+    fl::vector<u8> mLedBuffer;   // LED pixel data (3 bytes per LED: GRB)
+    fl::vector<u8> mSpiBuffer;   // Encoded SPI data (9 bytes per LED)
     spi_transaction_t mTransaction;   // SPI transaction descriptor
 };
 
 
 
-ISpiStripWs2812::OutputIterator::OutputIterator(ISpiStripWs2812 *strip, uint32_t num_leds)
+ISpiStripWs2812::OutputIterator::OutputIterator(ISpiStripWs2812 *strip, u32 num_leds)
     : mStrip(strip), mNumLeds(num_leds) {}
 
 ISpiStripWs2812::OutputIterator::~OutputIterator() {
@@ -313,7 +313,7 @@ void ISpiStripWs2812::OutputIterator::flush() {
     mRed = mGreen = mBlue = 0;
 }
 
-void ISpiStripWs2812::OutputIterator::operator()(uint8_t value) {
+void ISpiStripWs2812::OutputIterator::operator()(u8 value) {
     switch (mWritten) {
     case 0:
         mRed = value;
@@ -339,12 +339,12 @@ void ISpiStripWs2812::OutputIterator::finish() {
     }
 }
 
-ISpiStripWs2812* ISpiStripWs2812::Create(int pin, uint32_t led_count, bool is_rgbw, ISpiStripWs2812::SpiHostMode spi_bus, ISpiStripWs2812::DmaMode dma_mode) {
+ISpiStripWs2812* ISpiStripWs2812::Create(int pin, u32 led_count, bool is_rgbw, ISpiStripWs2812::SpiHostMode spi_bus, ISpiStripWs2812::DmaMode dma_mode) {
     if (!is_rgbw) {
         return new SpiStripWs2812(pin, led_count, spi_bus, dma_mode);
     }
     // Emulate RGBW mode by pretending the RGBW pixels are RGB pixels.
-    uint32_t size_as_rgb = Rgbw::size_as_rgb(led_count);
+    u32 size_as_rgb = Rgbw::size_as_rgb(led_count);
     return new SpiStripWs2812(pin, size_as_rgb, spi_bus, dma_mode);
 }
 }  // namespace fl

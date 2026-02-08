@@ -45,7 +45,7 @@ public:
     ///
     /// @param size Minimum size needed in bytes
     /// @return Span of acquired buffer (capacity >= size), or empty span on failure
-    fl::span<uint8_t> acquireInternal(fl::size size);
+    fl::span<u8> acquireInternal(fl::size size);
 
     /// Acquire the DMA buffer (DMA-capable memory)
     /// - Only ONE DMA buffer exists (ESP32 hardware limitation: max 1 RMT channel with DMA)
@@ -54,14 +54,14 @@ public:
     ///
     /// @param size Minimum size needed in bytes
     /// @return Span of acquired DMA buffer (capacity >= size), or empty span on failure
-    fl::span<uint8_t> acquireDMA(fl::size size);
+    fl::span<u8> acquireDMA(fl::size size);
 
     /// Release an internal buffer back to the pool
     /// - Marks buffer as available for reuse
     /// - Buffer memory is NOT freed (kept for future reuse)
     ///
     /// @param buffer The buffer to release (must be from acquireInternal)
-    void releaseInternal(fl::span<uint8_t> buffer);
+    void releaseInternal(fl::span<u8> buffer);
 
     /// Release the DMA buffer back to the pool
     /// - Marks DMA buffer as available for reuse
@@ -80,7 +80,7 @@ public:
 private:
     /// Internal buffer slot in the pool
     struct BufferSlot {
-        uint8_t* data;     // Raw buffer pointer (MALLOC_CAP_INTERNAL)
+        u8* data;     // Raw buffer pointer (MALLOC_CAP_INTERNAL)
         fl::size capacity; // Allocated size in bytes
         bool inUse;        // Whether buffer is currently acquired
 
@@ -89,7 +89,7 @@ private:
 
     /// DMA buffer (separate from internal pool due to hardware limitations)
     struct DMABuffer {
-        uint8_t* data;     // Raw buffer pointer (MALLOC_CAP_DMA)
+        u8* data;     // Raw buffer pointer (MALLOC_CAP_DMA)
         fl::size capacity; // Allocated size in bytes
         bool inUse;        // Whether buffer is currently acquired
 

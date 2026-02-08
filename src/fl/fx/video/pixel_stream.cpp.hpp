@@ -37,7 +37,7 @@ void PixelStream::close() {
     mFileHandle.reset();
 }
 
-int32_t PixelStream::bytesPerFrame() { return mbytesPerFrame; }
+i32 PixelStream::bytesPerFrame() { return mbytesPerFrame; }
 
 bool PixelStream::readPixel(CRGB *dst) {
     if (mUsingByteStream) {
@@ -119,37 +119,37 @@ bool PixelStream::readFrameAt(fl::u32 frameNumber, Frame *frame) {
     }
 }
 
-int32_t PixelStream::framesRemaining() const {
+i32 PixelStream::framesRemaining() const {
     if (mbytesPerFrame == 0)
         return 0;
-    int32_t bytes_left = bytesRemaining();
+    i32 bytes_left = bytesRemaining();
     if (bytes_left <= 0) {
         return 0;
     }
     return bytes_left / mbytesPerFrame;
 }
 
-int32_t PixelStream::framesDisplayed() const {
+i32 PixelStream::framesDisplayed() const {
     if (mUsingByteStream) {
         // ByteStream doesn't have a concept of total size, so we can't
         // calculate this
         return -1;
     } else {
-        int32_t bytes_played = mFileHandle->pos();
+        i32 bytes_played = mFileHandle->pos();
         return bytes_played / mbytesPerFrame;
     }
 }
 
-int32_t PixelStream::bytesRemaining() const {
+i32 PixelStream::bytesRemaining() const {
     if (mUsingByteStream) {
         // Use (max)() to prevent macro expansion by Arduino.h's max macro
-        return (fl::numeric_limits<int32_t>::max)();
+        return (fl::numeric_limits<i32>::max)();
     } else {
         return mFileHandle->bytesLeft();
     }
 }
 
-int32_t PixelStream::bytesRemainingInFrame() const {
+i32 PixelStream::bytesRemainingInFrame() const {
     return bytesRemaining() % mbytesPerFrame;
 }
 
@@ -167,8 +167,8 @@ PixelStream::Type PixelStream::getType() const {
     return mUsingByteStream ? Type::kStreaming : Type::kFile;
 }
 
-size_t PixelStream::readBytes(uint8_t *dst, size_t len) {
-    uint16_t bytesRead = 0;
+size_t PixelStream::readBytes(u8 *dst, size_t len) {
+    u16 bytesRead = 0;
     if (mUsingByteStream) {
         while (bytesRead < len && mByteStream->available(len)) {
             // use pop_front()

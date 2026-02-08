@@ -37,15 +37,15 @@ bool PirLowLevel::detect() {
 }
 
 
-Pir::Pir(int pin, uint32_t latchMs, uint32_t risingTime,
-                         uint32_t fallingTime, const char* button_name)
+Pir::Pir(int pin, u32 latchMs, u32 risingTime,
+                         u32 fallingTime, const char* button_name)
     : mPir(pin), mRamp(risingTime, latchMs, fallingTime), mButton(getButtonName(button_name).c_str()) {
     mButton.onChanged([this](UIButton&) {
         this->mRamp.trigger(fl::millis());
     });
 }
 
-bool Pir::detect(uint32_t now) {
+bool Pir::detect(u32 now) {
     bool currentState = mPir.detect();
     if (currentState && !mLastState) {
         // Use smart retrigger to avoid resetting brightness when already active
@@ -55,7 +55,7 @@ bool Pir::detect(uint32_t now) {
     return mRamp.isActive(now);
 }
 
-uint8_t Pir::transition(uint32_t now) {
+u8 Pir::transition(u32 now) {
     // ensure detect() logic runs so we trigger on edges
     detect(now);
     return mRamp.update8(now);

@@ -45,18 +45,18 @@ public:
     void deinitialize() override;
     bool isInitialized() const override;
 
-    uint16_t* allocateBuffer(size_t size_bytes) override;
-    void freeBuffer(uint16_t* buffer) override;
+    u16* allocateBuffer(size_t size_bytes) override;
+    void freeBuffer(u16* buffer) override;
 
-    bool transmit(const uint16_t* buffer, size_t size_bytes) override;
-    bool waitTransmitDone(uint32_t timeout_ms) override;
+    bool transmit(const u16* buffer, size_t size_bytes) override;
+    bool waitTransmitDone(u32 timeout_ms) override;
     bool isBusy() const override;
 
     bool registerTransmitCallback(void* callback, void* user_ctx) override;
     const I2sLcdCamConfig& getConfig() const override;
 
     uint64_t getMicroseconds() override;
-    void delay(uint32_t ms) override;
+    void delay(u32 ms) override;
 
 private:
     // Allow Singleton to call private constructor

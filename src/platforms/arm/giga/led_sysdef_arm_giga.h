@@ -31,8 +31,8 @@
 
 #define FASTLED_NO_PINMAP
 
-typedef volatile uint32_t RoReg;
-typedef volatile uint32_t RwReg;
+typedef volatile fl::u32 RoReg;
+typedef volatile fl::u32 RwReg;
 
 #define F_CPU 480000000
 

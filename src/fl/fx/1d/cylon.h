@@ -11,8 +11,8 @@ FASTLED_SHARED_PTR(Cylon);
 /// effect)
 class Cylon : public Fx1d {
   public:
-    uint8_t delay_ms;
-    Cylon(uint16_t num_leds, uint8_t fade_amount = 250, uint8_t delay_ms = 10)
+    u8 delay_ms;
+    Cylon(u16 num_leds, u8 fade_amount = 250, u8 delay_ms = 10)
         : Fx1d(num_leds), delay_ms(delay_ms), fade_amount(fade_amount) {}
 
     void draw(DrawContext context) override {
@@ -26,7 +26,7 @@ class Cylon : public Fx1d {
         leds[position] = CHSV(hue++, 255, 255);
 
         // Fade all LEDs
-        for (uint16_t i = 0; i < mNumLeds; i++) {
+        for (u16 i = 0; i < mNumLeds; i++) {
             leds[i].nscale8(fade_amount);
         }
 
@@ -39,7 +39,7 @@ class Cylon : public Fx1d {
             }
         } else {
             position++;
-            if (position >= int16_t(mNumLeds)) {
+            if (position >= i16(mNumLeds)) {
                 position = mNumLeds - 2;
                 reverse = true;
             }
@@ -49,12 +49,12 @@ class Cylon : public Fx1d {
     fl::string fxName() const override { return "Cylon"; }
 
   private:
-    uint8_t hue = 0;
+    u8 hue = 0;
 
-    uint8_t fade_amount;
+    u8 fade_amount;
 
     bool reverse = false;
-    int16_t position = 0;
+    i16 position = 0;
 };
 
 } // namespace fl

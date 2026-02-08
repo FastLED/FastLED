@@ -10,7 +10,7 @@ namespace fl {
 namespace ttf {
 
 // Get the embedded Covenant5x5 TTF font data as a span
-fl::span<const uint8_t> covenant5x5();
+fl::span<const u8> covenant5x5();
 
 } // namespace ttf
 } // namespace fl

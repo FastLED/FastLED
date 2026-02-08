@@ -51,7 +51,7 @@ inline void pinMode(int pin, PinMode mode) {
 #if defined(HAL_GPIO_MODULE_ENABLED) && defined(FL_STM32_HAS_HAL)
     // Use native helper functions instead of Arduino-specific digitalPinToPinName()
     GPIO_TypeDef* port = fl::stm32::getGPIOPort(pin);
-    uint32_t pin_mask = fl::stm32::getGPIOPin(pin);
+    u32 pin_mask = fl::stm32::getGPIOPin(pin);
 
     if (port == nullptr || pin_mask == 0) {
         FL_WARN("STM32: Invalid pin " << pin);
@@ -138,7 +138,7 @@ inline void digitalWrite(int pin, PinValue val) {
 #if defined(HAL_GPIO_MODULE_ENABLED) && defined(FL_STM32_HAS_HAL)
     // Use native helper functions instead of Arduino-specific digitalPinToPinName()
     GPIO_TypeDef* port = fl::stm32::getGPIOPort(pin);
-    uint32_t pin_mask = fl::stm32::getGPIOPin(pin);
+    u32 pin_mask = fl::stm32::getGPIOPin(pin);
 
     if (port == nullptr || pin_mask == 0) {
         return;
@@ -157,7 +157,7 @@ inline PinValue digitalRead(int pin) {
 #if defined(HAL_GPIO_MODULE_ENABLED) && defined(FL_STM32_HAS_HAL)
     // Use native helper functions instead of Arduino-specific digitalPinToPinName()
     GPIO_TypeDef* port = fl::stm32::getGPIOPort(pin);
-    uint32_t pin_mask = fl::stm32::getGPIOPin(pin);
+    u32 pin_mask = fl::stm32::getGPIOPin(pin);
 
     if (port == nullptr || pin_mask == 0) {
         return PinValue::Low;
@@ -175,7 +175,7 @@ inline PinValue digitalRead(int pin) {
 // Analog I/O
 // ============================================================================
 
-inline uint16_t analogRead(int pin) {
+inline u16 analogRead(int pin) {
     // NOTE: analogRead requires STM32duino pinmap functions for ADC channel mapping
     // This is because there's no direct way to map Arduino pin numbers to ADC channels
     // without the pinmap tables provided by STM32duino core.
@@ -197,15 +197,15 @@ inline uint16_t analogRead(int pin) {
     }
 
     // Find ADC instance and channel for this pin using STM32duino pinmap
-    uint32_t function = pinmap_find_function(pin_name, PinMap_ADC);
-    if (function == (uint32_t)NC) {
+    u32 function = pinmap_find_function(pin_name, PinMap_ADC);
+    if (function == (u32)NC) {
         FL_WARN("STM32: Pin " << pin << " does not support ADC");
         return 0;
     }
 
     // Extract ADC instance and channel from pinmap function
     ADC_TypeDef* adc_instance = (ADC_TypeDef*)pinmap_peripheral(pin_name, PinMap_ADC);
-    uint32_t adc_channel = STM_PIN_CHANNEL(function);
+    u32 adc_channel = STM_PIN_CHANNEL(function);
 
     if (adc_instance == nullptr) {
         FL_WARN("STM32: Failed to get ADC instance for pin " << pin);
@@ -288,9 +288,9 @@ inline uint16_t analogRead(int pin) {
     }
 
     // Read converted value
-    uint16_t value = 0;
+    u16 value = 0;
     if ((HAL_ADC_GetState(&AdcHandle) & HAL_ADC_STATE_REG_EOC) == HAL_ADC_STATE_REG_EOC) {
-        value = static_cast<uint16_t>(HAL_ADC_GetValue(&AdcHandle));
+        value = static_cast<u16>(HAL_ADC_GetValue(&AdcHandle));
     }
 
     // Stop and deinitialize ADC
@@ -298,7 +298,7 @@ inline uint16_t analogRead(int pin) {
     HAL_ADC_DeInit(&AdcHandle);
 
     // Scale 12-bit value to 10-bit Arduino-compatible value (0-1023)
-    return static_cast<uint16_t>(value >> 2);  // 4096 -> 1024 range
+    return static_cast<u16>(value >> 2);  // 4096 -> 1024 range
 
 #else
     (void)pin;
@@ -307,7 +307,7 @@ inline uint16_t analogRead(int pin) {
 #endif  // #if 0 - disabled code
 }
 
-inline void analogWrite(int pin, uint16_t val) {
+inline void analogWrite(int pin, u16 val) {
     // NOTE: analogWrite requires STM32duino pinmap functions for Timer channel mapping
     // This is because there's no direct way to map Arduino pin numbers to Timer channels
     // without the pinmap tables provided by STM32duino core.
@@ -332,8 +332,8 @@ inline void analogWrite(int pin, uint16_t val) {
     if (val > 255) val = 255;
 
     // Find Timer instance and channel for this pin using STM32duino pinmap
-    uint32_t function = pinmap_find_function(pin_name, PinMap_TIM);
-    if (function == (uint32_t)NC) {
+    u32 function = pinmap_find_function(pin_name, PinMap_TIM);
+    if (function == (u32)NC) {
         // Pin doesn't support PWM - fall back to digital write
         fl::pinMode(pin, PinMode::Output);
         fl::digitalWrite(pin, val >= 128 ? PinValue::High : PinValue::Low);
@@ -342,7 +342,7 @@ inline void analogWrite(int pin, uint16_t val) {
 
     // Extract timer instance and channel from pinmap
     TIM_TypeDef* timer_instance = (TIM_TypeDef*)pinmap_peripheral(pin_name, PinMap_TIM);
-    uint32_t timer_channel = STM_PIN_CHANNEL(function);
+    u32 timer_channel = STM_PIN_CHANNEL(function);
 
     if (timer_instance == nullptr) {
         FL_WARN("STM32: Failed to get Timer instance for pin " << pin);
@@ -350,7 +350,7 @@ inline void analogWrite(int pin, uint16_t val) {
     }
 
     // Convert STM32 channel number to HAL channel constant
-    uint32_t hal_channel;
+    u32 hal_channel;
     switch (timer_channel) {
         case 1: hal_channel = TIM_CHANNEL_1; break;
         case 2: hal_channel = TIM_CHANNEL_2; break;
@@ -364,7 +364,7 @@ inline void analogWrite(int pin, uint16_t val) {
     // Configure GPIO pin as Timer alternate function
     // This enables the timer to control the pin for PWM output
     GPIO_TypeDef* port = get_GPIO_Port(STM_PORT(pin_name));
-    uint32_t pin_mask = STM_GPIO_PIN(pin_name);
+    u32 pin_mask = STM_GPIO_PIN(pin_name);
 
     if (port == nullptr) {
         FL_WARN("STM32: Failed to get GPIO port for pin " << pin);
@@ -392,7 +392,7 @@ inline void analogWrite(int pin, uint16_t val) {
     fl::stm32::enableTimerClock(timer_instance);
 
     // Get timer clock frequency for PWM calculation
-    uint32_t timer_clock = fl::stm32::getTimerClockFreq(timer_instance);
+    u32 timer_clock = fl::stm32::getTimerClockFreq(timer_instance);
     if (timer_clock == 0) {
         FL_WARN("STM32: Failed to get timer clock frequency");
         return;
@@ -400,8 +400,8 @@ inline void analogWrite(int pin, uint16_t val) {
 
     // Calculate timer period for 490Hz PWM (Arduino default frequency)
     // Period = (Timer_Clock / PWM_Frequency) - 1
-    const uint32_t PWM_FREQUENCY = 490;  // Hz (Arduino default)
-    uint32_t period = (timer_clock / PWM_FREQUENCY) - 1;
+    const u32 PWM_FREQUENCY = 490;  // Hz (Arduino default)
+    u32 period = (timer_clock / PWM_FREQUENCY) - 1;
 
     // Validate period fits in timer (16-bit or 32-bit)
     bool is_32bit = (timer_instance == TIM2
@@ -409,7 +409,7 @@ inline void analogWrite(int pin, uint16_t val) {
         || timer_instance == TIM5
 #endif
     );
-    uint32_t max_period = is_32bit ? 0xFFFFFFFF : 0xFFFF;
+    u32 max_period = is_32bit ? 0xFFFFFFFF : 0xFFFF;
 
     if (period > max_period) {
         // Frequency too low, use prescaler
@@ -462,7 +462,7 @@ inline void analogWrite(int pin, uint16_t val) {
 
     // Calculate pulse width (duty cycle) from 8-bit value
     // val: 0-255 -> pulse: 0-period
-    sConfigOC.Pulse = (static_cast<uint32_t>(val) * period) / 255;
+    sConfigOC.Pulse = (static_cast<u32>(val) * period) / 255;
 
     if (HAL_TIM_PWM_ConfigChannel(htim, &sConfigOC, hal_channel) != HAL_OK) {
         FL_WARN("STM32: Timer PWM configuration failed");
@@ -482,7 +482,7 @@ inline void analogWrite(int pin, uint16_t val) {
 #endif  // #if 0 - disabled code
 }
 
-inline void setPwm16(int pin, uint16_t val) {
+inline void setPwm16(int pin, u16 val) {
     // STM32 16-bit PWM implementation would configure Timer PWM with period=65535
     // For simplified implementation, scale 16-bit value to 8-bit and use analogWrite
     // Full 16-bit implementation would require HAL timer reconfiguration

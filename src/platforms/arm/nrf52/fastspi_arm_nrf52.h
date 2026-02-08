@@ -30,7 +30,7 @@ namespace fl {
      */
 
     /// SPI_CLOCK_DIVIDER is number of CPU clock cycles per SPI transmission bit?
-    template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
+    template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_DIVIDER>
     class NRF52HardwareSPIOutput {
     private:
         // static variables -- always using same SPIM instance
@@ -50,29 +50,29 @@ namespace fl {
         //         avoid use of single-transaction writeBytes()
         //         as cannot control where that memory lies....
         */
-        static uint8_t  s_BufferIndex;
-        static uint8_t  s_Buffer[2][2]; // 2x two-byte buffers, allows one buffer currently being sent, and a second one being prepped to send.
+        static u8  s_BufferIndex;
+        static u8  s_Buffer[2][2]; // 2x two-byte buffers, allows one buffer currently being sent, and a second one being prepped to send.
 
         // This allows saving the configuration of the SPIM instance
         // upon select(), and restoring the configuration upon release().
         struct spim_config {
-            uint32_t inten;
-            uint32_t shorts;
-            uint32_t sck_pin;
-            uint32_t mosi_pin;
-            uint32_t miso_pin;
-            uint32_t frequency;
+            u32 inten;
+            u32 shorts;
+            u32 sck_pin;
+            u32 mosi_pin;
+            u32 miso_pin;
+            u32 frequency;
             // data pointers, RX/TX counts not saved as would only hide bugs
-            uint32_t config; // mode & bit order
-            uint32_t orc;
+            u32 config; // mode & bit order
+            u32 orc;
 
 #if false // additional configuration to save/restore for SPIM3
-            uint32_t csn_pin;
-            uint32_t csn_polarity; // CSNPOL
-            uint32_t csn_duration; // IFTIMING.CSNDUR
-            uint32_t rx_delay;     // IFTIMING.RXDELAY
-            uint32_t dcx_pin;      // PSELDCX
-            uint32_t dcx_config;   // DCXCNT
+            u32 csn_pin;
+            u32 csn_polarity; // CSNPOL
+            u32 csn_duration; // IFTIMING.CSNDUR
+            u32 rx_delay;     // IFTIMING.RXDELAY
+            u32 dcx_pin;      // PSELDCX
+            u32 dcx_config;   // DCXCNT
 #endif
 
         } m_SpiSavedConfig;
@@ -199,10 +199,10 @@ namespace fl {
         }
 
         /// write a byte out via SPI (returns immediately on writing register)
-        static void writeByte(uint8_t b) {
+        static void writeByte(u8 b) {
             wait();
             // cannot use pointer to stack, so copy to m_buffer[]
-            uint8_t i = (s_BufferIndex ? 1u : 0u);
+            u8 i = (s_BufferIndex ? 1u : 0u);
             s_BufferIndex = !s_BufferIndex; // 1 <==> 0 swap
 
             s_Buffer[i][0u] = b; // cannot use the stack location, so copy to a more permanent buffer...
@@ -221,10 +221,10 @@ namespace fl {
         }
 
         /// write a word out via SPI (returns immediately on writing register)
-        static void writeWord(uint16_t w) {
+        static void writeWord(u16 w) {
             wait();
             // cannot use pointer to stack, so copy to m_buffer[]
-            uint8_t i = (s_BufferIndex ? 1u : 0u);
+            u8 i = (s_BufferIndex ? 1u : 0u);
             s_BufferIndex = !s_BufferIndex; // 1 <==> 0 swap
 
             s_Buffer[i][0u] = (w >> 8u); // cannot use the stack location, so copy to a more permanent buffer...
@@ -244,12 +244,12 @@ namespace fl {
         }
 
         /// A raw set of writing byte values, assumes setup/init/waiting done elsewhere (static for use by adjustment classes)
-        static void writeBytesValueRaw(uint8_t value, int len) {
+        static void writeBytesValueRaw(u8 value, int len) {
             while (len--) { writeByte(value); }
         }
 
         /// A full cycle of writing a value for len bytes, including select, release, and waiting
-        void writeBytesValue(uint8_t value, int len) {
+        void writeBytesValue(u8 value, int len) {
             select();
             writeBytesValueRaw(value, len);
             waitFully();
@@ -257,7 +257,7 @@ namespace fl {
         }
 
         /// A full cycle of writing a raw block of data out, including select, release, and waiting
-        void writeBytes(uint8_t *data, int len) {
+        void writeBytes(u8 *data, int len) {
             // This is a special-case, with no adjustment of the bytes... write them directly...
             select();
             wait();
@@ -276,8 +276,8 @@ namespace fl {
         }
 
         /// A full cycle of writing a raw block of data out, including select, release, and waiting
-        template<class D> void writeBytes(uint8_t *data, int len) {
-            uint8_t * end = data + len;
+        template<class D> void writeBytes(u8 *data, int len) {
+            u8 * end = data + len;
             select();
             wait();
             while(data != end) {
@@ -293,7 +293,7 @@ namespace fl {
         //}
 
         /// write a single bit out, which bit from the passed in byte is determined by template parameter
-        template <uint8_t BIT> inline static void writeBit(uint8_t b) {
+        template <u8 BIT> inline static void writeBit(u8 b) {
             // SPIM instance must be finished transmitting and then disabled
             waitFully();
             nrf_spim_disable(FASTLED_NRF52_SPIM);
@@ -318,7 +318,7 @@ namespace fl {
         static void finalizeTransmission() { }
 
         /// write out pixel data from the given PixelController object, including select, release, and waiting
-        template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
+        template <u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
             select();
             int len = pixels.mLen;
             // TODO: If user indicates a pre-allocated double-buffer,
@@ -343,14 +343,14 @@ namespace fl {
 
     // Static member definition and initialization using templates.
     // see https://stackoverflow.com/questions/3229883/static-member-initialization-in-a-class-template#answer-3229919
-    template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
+    template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_DIVIDER>
     bool NRF52HardwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER>::s_InUse = false;
-    template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
+    template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_DIVIDER>
     bool NRF52HardwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER>::s_NeedToWait = false;
-    template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
-    uint8_t NRF52HardwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER>::s_BufferIndex = 0;
-    template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
-    uint8_t NRF52HardwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER>::s_Buffer[2][2] = {{0,0},{0,0}};
+    template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_DIVIDER>
+    u8 NRF52HardwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER>::s_BufferIndex = 0;
+    template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_DIVIDER>
+    u8 NRF52HardwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER>::s_Buffer[2][2] = {{0,0},{0,0}};
 
 #endif // #ifndef FASTLED_FORCE_SOFTWARE_SPI
 

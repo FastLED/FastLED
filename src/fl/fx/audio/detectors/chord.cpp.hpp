@@ -45,7 +45,7 @@ ChordDetector::~ChordDetector() = default;
 
 void ChordDetector::update(shared_ptr<AudioContext> context) {
     const FFTBins& fft = context->getFFT(32);  // Higher resolution for pitch detection
-    uint32_t timestamp = context->getTimestamp();
+    u32 timestamp = context->getTimestamp();
 
     // Calculate chroma features
     calculateChroma(fft);
@@ -85,7 +85,7 @@ void ChordDetector::update(shared_ptr<AudioContext> context) {
     } else {
         // No valid chord or low confidence
         if (mCurrentChord.isValid()) {
-            uint32_t duration = timestamp - mChordStartTime;
+            u32 duration = timestamp - mChordStartTime;
             if (duration >= mMinChordDuration) {
                 mChordEndTime = timestamp;
                 if (onChordEnd) {
@@ -153,7 +153,7 @@ void ChordDetector::calculateChroma(const FFTBins& fft) {
     normalizeChroma(mChroma);
 }
 
-Chord ChordDetector::detectChord(const float* chroma, uint32_t timestamp) {
+Chord ChordDetector::detectChord(const float* chroma, u32 timestamp) {
     float bestScore = 0.0f;
     int bestRoot = -1;
     ChordType bestType = ChordType::UNKNOWN;

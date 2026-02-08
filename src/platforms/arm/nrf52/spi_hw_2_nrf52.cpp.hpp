@@ -53,7 +53,7 @@ bool SPIDualNRF52::begin(const SpiHw2::Config& config) {
     }
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
-    if (mBusId != -1 && config.bus_num != static_cast<uint8_t>(mBusId)) {
+    if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
         FL_WARN("SPIDualNRF52: Bus ID mismatch");
         return false;
     }
@@ -201,13 +201,13 @@ bool SPIDualNRF52::allocateDMABuffers(size_t required_size) {
     mBufferSize = 0;
 
     // Allocate new buffers in RAM (required for EasyDMA)
-    mLane0Buffer = (uint8_t*)malloc(required_size);
+    mLane0Buffer = (u8*)malloc(required_size);
     if (mLane0Buffer == nullptr) {
         FL_WARN("SPIDualNRF52: Failed to allocate lane 0 DMA buffer");
         return false;
     }
 
-    mLane1Buffer = (uint8_t*)malloc(required_size);
+    mLane1Buffer = (u8*)malloc(required_size);
     if (mLane1Buffer == nullptr) {
         FL_WARN("SPIDualNRF52: Failed to allocate lane 1 DMA buffer");
         free(mLane0Buffer);
@@ -246,7 +246,7 @@ bool SPIDualNRF52::transmit(TransmitMode mode) {
 
     // De-interleave mDMABuffer into lane-specific buffers
     // mDMABuffer contains interleaved data: first half -> lane 0, second half -> lane 1
-    fl::span<uint8_t> buffer_span = mDMABuffer.data();
+    fl::span<u8> buffer_span = mDMABuffer.data();
     fl::memcpy(mLane0Buffer, buffer_span.data(), bytes_per_lane);
     fl::memcpy(mLane1Buffer, buffer_span.data() + bytes_per_lane, bytes_per_lane);
 
@@ -266,27 +266,27 @@ bool SPIDualNRF52::transmit(TransmitMode mode) {
     return true;
 }
 
-bool SPIDualNRF52::waitComplete(uint32_t timeout_ms) {
+bool SPIDualNRF52::waitComplete(u32 timeout_ms) {
     if (!mTransactionActive) {
         return true;  // Nothing to wait for
     }
 
     // Use a simple timeout mechanism based on loop iterations
     // For more accurate timing, could use TIMER peripheral or system tick counter
-    uint32_t timeout_iterations = timeout_ms * 1000;  // Rough approximation
-    uint32_t iterations = 0;
+    u32 timeout_iterations = timeout_ms * 1000;  // Rough approximation
+    u32 iterations = 0;
 
     // Wait for both SPIM peripherals to complete
     // Use (max)() to prevent macro expansion by Arduino.h's max macro
     while ((!nrf_spim_event_check(mSPIM0, NRF_SPIM_EVENT_END) ||
             !nrf_spim_event_check(mSPIM1, NRF_SPIM_EVENT_END)) &&
-           (timeout_ms == (fl::numeric_limits<uint32_t>::max)() || iterations < timeout_iterations)) {
+           (timeout_ms == (fl::numeric_limits<u32>::max)() || iterations < timeout_iterations)) {
         iterations++;
     }
 
     // Check if we timed out
     // Use (max)() to prevent macro expansion by Arduino.h's max macro
-    bool timed_out = (timeout_ms != (fl::numeric_limits<uint32_t>::max)()) && (iterations >= timeout_iterations);
+    bool timed_out = (timeout_ms != (fl::numeric_limits<u32>::max)()) && (iterations >= timeout_iterations);
     if (timed_out) {
         FL_WARN("SPIDualNRF52: Transaction timeout");
         // Clear state even on timeout
@@ -374,7 +374,7 @@ void SPIDualNRF52::cleanup() {
     }
 }
 
-void SPIDualNRF52::configureTimer(uint32_t clock_speed_hz) {
+void SPIDualNRF52::configureTimer(u32 clock_speed_hz) {
     // Configure TIMER0 to generate compare events for synchronization
     // TIMER will not generate the actual clock signal, but will trigger
     // SPIM START tasks via PPI for synchronized transmission
@@ -407,9 +407,9 @@ void SPIDualNRF52::configurePPI() {
     // All PPI channels connect TIMER0 COMPARE[0] event to SPIM START tasks
 
     // Get event and task addresses
-    uint32_t timer_compare_event = (uint32_t)&mTimer->EVENTS_COMPARE[0];
-    uint32_t spim0_start_task = (uint32_t)&mSPIM0->TASKS_START;
-    uint32_t spim1_start_task = (uint32_t)&mSPIM1->TASKS_START;
+    u32 timer_compare_event = (u32)&mTimer->EVENTS_COMPARE[0];
+    u32 spim0_start_task = (u32)&mSPIM0->TASKS_START;
+    u32 spim1_start_task = (u32)&mSPIM1->TASKS_START;
 
     // Configure PPI channel 1: TIMER0.COMPARE[0] -> SPIM0.START
     NRF_PPI->CH[mPPIChannel1].EEP = timer_compare_event;

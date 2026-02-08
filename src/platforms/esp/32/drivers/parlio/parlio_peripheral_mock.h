@@ -105,12 +105,12 @@ public:
     bool initialize(const ParlioPeripheralConfig& config) override = 0;
     bool enable() override = 0;
     bool disable() override = 0;
-    bool transmit(const uint8_t* buffer, size_t bit_count, uint16_t idle_value) override = 0;
-    bool waitAllDone(uint32_t timeout_ms) override = 0;
+    bool transmit(const u8* buffer, size_t bit_count, u16 idle_value) override = 0;
+    bool waitAllDone(u32 timeout_ms) override = 0;
     bool registerTxDoneCallback(void* callback, void* user_ctx) override = 0;
-    uint8_t* allocateDmaBuffer(size_t size) override = 0;
-    void freeDmaBuffer(uint8_t* buffer) override = 0;
-    void delay(uint32_t ms) override = 0;
+    u8* allocateDmaBuffer(size_t size) override = 0;
+    void freeDmaBuffer(u8* buffer) override = 0;
+    void delay(u32 ms) override = 0;
     uint64_t getMicroseconds() override = 0;
     void freeDmaBuffer(void* ptr) override = 0;
 
@@ -120,9 +120,9 @@ public:
 
     /// @brief Transmission record (captured waveform data)
     struct TransmissionRecord {
-        fl::vector<uint8_t> buffer_copy;  ///< Copy of transmitted buffer
+        fl::vector<u8> buffer_copy;  ///< Copy of transmitted buffer
         size_t bit_count;                  ///< Number of bits transmitted
-        uint16_t idle_value;               ///< Idle value used
+        u16 idle_value;               ///< Idle value used
         uint64_t timestamp_us;             ///< Simulated timestamp (microseconds)
     };
 
@@ -134,7 +134,7 @@ public:
     /// @param microseconds Delay in microseconds (0 = instant)
     ///
     /// Simulates hardware transmission time. Affects waitAllDone() behavior.
-    virtual void setTransmitDelay(uint32_t microseconds) = 0;
+    virtual void setTransmitDelay(u32 microseconds) = 0;
 
     /// @brief Manually trigger transmission completion (fire ISR callback)
     ///
@@ -188,7 +188,7 @@ public:
     /// fl::span<const uint8_t> pin1_data = mock.getTransmissionDataForPin(1);
     /// REQUIRE(pin1_data[0] == 0xFF);  // Check first byte of GPIO pin 1 waveform
     /// ```
-    virtual fl::span<const uint8_t> getTransmissionDataForPin(int gpio_pin) const = 0;
+    virtual fl::span<const u8> getTransmissionDataForPin(int gpio_pin) const = 0;
 
     /// @brief Untranspose interleaved bit-parallel data to per-pin waveforms
     /// @param transposed_data Interleaved bit data (output from wave8Transpose_N)
@@ -207,8 +207,8 @@ public:
     /// // result[1] = {0xFF, 0xFF, ...}  // Lane 0 waveform (all high)
     /// // result[2] = {0x00, 0x00, ...}  // Lane 1 waveform (all low)
     /// ```
-    static fl::vector<fl::pair<int, fl::vector<uint8_t>>> untransposeParlioBitstream(
-        fl::span<const uint8_t> transposed_data,
+    static fl::vector<fl::pair<int, fl::vector<u8>>> untransposeParlioBitstream(
+        fl::span<const u8> transposed_data,
         fl::span<const int> pins,  // Pin order that will be return in the result.
         ParlioBitPackOrder packing = ParlioBitPackOrder::FL_PARLIO_MSB);
 

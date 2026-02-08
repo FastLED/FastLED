@@ -54,7 +54,7 @@ namespace detail {
 struct I2sLcdCamConfig {
     fl::vector_fixed<int, 16> data_gpios;  ///< Data lane GPIOs (D0-D15)
     int num_lanes;                          ///< Active data lanes (1-16)
-    uint32_t pclk_hz;                       ///< Pixel clock frequency
+    u32 pclk_hz;                       ///< Pixel clock frequency
     size_t max_transfer_bytes;              ///< Maximum bytes per transfer
     bool use_psram;                         ///< Allocate buffers in PSRAM
 
@@ -72,7 +72,7 @@ struct I2sLcdCamConfig {
     }
 
     /// @brief Constructor with mandatory parameters
-    I2sLcdCamConfig(int lanes, uint32_t freq, size_t max_bytes)
+    I2sLcdCamConfig(int lanes, u32 freq, size_t max_bytes)
         : data_gpios(),
           num_lanes(lanes),
           pclk_hz(freq),
@@ -164,13 +164,13 @@ public:
     /// - Is 64-byte aligned (PSRAM alignment requirement)
     /// - Is DMA-capable and in PSRAM
     /// - Must be freed via freeBuffer()
-    virtual uint16_t* allocateBuffer(size_t size_bytes) = 0;
+    virtual u16* allocateBuffer(size_t size_bytes) = 0;
 
     /// @brief Free buffer allocated via allocateBuffer()
     /// @param buffer Buffer pointer (nullptr is safe, no-op)
     ///
     /// Maps to ESP-IDF: heap_caps_free()
-    virtual void freeBuffer(uint16_t* buffer) = 0;
+    virtual void freeBuffer(u16* buffer) = 0;
 
     //=========================================================================
     // Transmission Methods
@@ -185,12 +185,12 @@ public:
     ///
     /// This method queues a DMA transfer of the buffer.
     /// The buffer must remain valid until the transfer completes (callback fires).
-    virtual bool transmit(const uint16_t* buffer, size_t size_bytes) = 0;
+    virtual bool transmit(const u16* buffer, size_t size_bytes) = 0;
 
     /// @brief Wait for all pending transmissions to complete
     /// @param timeout_ms Timeout in milliseconds (0 = non-blocking poll)
     /// @return true if complete, false on timeout
-    virtual bool waitTransmitDone(uint32_t timeout_ms) = 0;
+    virtual bool waitTransmitDone(u32 timeout_ms) = 0;
 
     /// @brief Check if a transmission is in progress
     /// @return true if busy, false if idle
@@ -233,7 +233,7 @@ public:
 
     /// @brief Portable delay
     /// @param ms Delay duration in milliseconds
-    virtual void delay(uint32_t ms) = 0;
+    virtual void delay(u32 ms) = 0;
 };
 
 } // namespace detail

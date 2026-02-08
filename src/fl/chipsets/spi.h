@@ -36,18 +36,18 @@ namespace fl {
 /// - P9813 - SPI protocol with checksum header (default 10 MHz)
 struct SpiEncoder {
     SpiChipset chipset;          ///< LED chipset type (determines all encoding behavior)
-    uint32_t clock_hz;           ///< SPI clock frequency in Hz (e.g., 6000000 for 6MHz)
+    u32 clock_hz;           ///< SPI clock frequency in Hz (e.g., 6000000 for 6MHz)
 
     /// @brief Create APA102 encoder configuration
     /// @param clock_hz Clock frequency (default 6MHz)
-    static inline SpiEncoder apa102(uint32_t clock_hz = 6000000) {
+    static inline SpiEncoder apa102(u32 clock_hz = 6000000) {
         SpiEncoder config = {SpiChipset::APA102, clock_hz};
         return config;
     }
 
     /// @brief Create SK9822 encoder configuration
     /// @param clock_hz Clock frequency (default 12MHz)
-    static inline SpiEncoder sk9822(uint32_t clock_hz = 12000000) {
+    static inline SpiEncoder sk9822(u32 clock_hz = 12000000) {
         SpiEncoder config = {SpiChipset::SK9822, clock_hz};
         return config;
     }

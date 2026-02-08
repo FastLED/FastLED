@@ -57,7 +57,7 @@ int RMTBufferPool::allocateOrResizeSlot(fl::size size) {
         auto& slot = mInternalBuffers[i];
         if (!slot.inUse && slot.capacity < size) {
             // Resize this buffer
-            uint8_t* newData = static_cast<uint8_t*>(fl::InternalRealloc(slot.data, size));
+            u8* newData = static_cast<u8*>(fl::InternalRealloc(slot.data, size));
             if (!newData) {
                 FL_WARN("RMTBufferPool: Failed to realloc internal buffer from "
                         << slot.capacity << " to " << size << " bytes");
@@ -72,7 +72,7 @@ int RMTBufferPool::allocateOrResizeSlot(fl::size size) {
 
     // No suitable buffer to resize - create new slot
     BufferSlot newSlot;
-    newSlot.data = static_cast<uint8_t*>(fl::InternalAlloc(size));
+    newSlot.data = static_cast<u8*>(fl::InternalAlloc(size));
     if (!newSlot.data) {
         FL_WARN("RMTBufferPool: Failed to allocate new internal buffer of " << size << " bytes");
         return -1;
@@ -86,9 +86,9 @@ int RMTBufferPool::allocateOrResizeSlot(fl::size size) {
     return static_cast<int>(mInternalBuffers.size() - 1);
 }
 
-fl::span<uint8_t> RMTBufferPool::acquireInternal(fl::size size) {
+fl::span<u8> RMTBufferPool::acquireInternal(fl::size size) {
     if (size == 0) {
-        return fl::span<uint8_t>();
+        return fl::span<u8>();
     }
 
     // Try to find existing suitable buffer
@@ -98,24 +98,24 @@ fl::span<uint8_t> RMTBufferPool::acquireInternal(fl::size size) {
     if (slotIndex < 0) {
         slotIndex = allocateOrResizeSlot(size);
         if (slotIndex < 0) {
-            return fl::span<uint8_t>(); // Allocation failed
+            return fl::span<u8>(); // Allocation failed
         }
     }
 
     // Mark buffer as in-use and return sub-span
     auto& slot = mInternalBuffers[slotIndex];
     slot.inUse = true;
-    return fl::span<uint8_t>(slot.data, size);
+    return fl::span<u8>(slot.data, size);
 }
 
-fl::span<uint8_t> RMTBufferPool::acquireDMA(fl::size size) {
+fl::span<u8> RMTBufferPool::acquireDMA(fl::size size) {
     if (size == 0) {
-        return fl::span<uint8_t>();
+        return fl::span<u8>();
     }
 
     if (mDMABuffer.inUse) {
         FL_WARN("RMTBufferPool: DMA buffer already in use (hardware limit: 1 DMA channel)");
-        return fl::span<uint8_t>();
+        return fl::span<u8>();
     }
 
     // Allocate or resize DMA buffer if needed
@@ -127,26 +127,26 @@ fl::span<uint8_t> RMTBufferPool::acquireDMA(fl::size size) {
             mDMABuffer.capacity = 0;
         }
 
-        mDMABuffer.data = static_cast<uint8_t*>(fl::DMAAlloc(size));
+        mDMABuffer.data = static_cast<u8*>(fl::DMAAlloc(size));
         if (!mDMABuffer.data) {
             FL_WARN("RMTBufferPool: Failed to allocate DMA buffer of " << size << " bytes");
-            return fl::span<uint8_t>();
+            return fl::span<u8>();
         }
         mDMABuffer.capacity = size;
         FL_LOG_RMT("RMTBufferPool: Allocated DMA buffer with " << size << " bytes");
     }
 
     mDMABuffer.inUse = true;
-    return fl::span<uint8_t>(mDMABuffer.data, size);
+    return fl::span<u8>(mDMABuffer.data, size);
 }
 
-void RMTBufferPool::releaseInternal(fl::span<uint8_t> buffer) {
+void RMTBufferPool::releaseInternal(fl::span<u8> buffer) {
     if (buffer.empty()) {
         return;
     }
 
     // Find the slot that owns this buffer
-    uint8_t* bufferPtr = buffer.data();
+    u8* bufferPtr = buffer.data();
     for (auto& slot : mInternalBuffers) {
         if (slot.data == bufferPtr) {
             if (!slot.inUse) {

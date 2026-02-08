@@ -26,7 +26,7 @@ public:
     ClocklessSpiWs2812Controller() = default;
 
     void init() override { }
-    virtual uint16_t getMaxRefreshRate() const { return 800; }
+    virtual fl::u16 getMaxRefreshRate() const { return 800; }
 
 protected:
     // Prepares data for the draw.

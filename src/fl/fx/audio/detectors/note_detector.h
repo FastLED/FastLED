@@ -9,9 +9,9 @@ namespace fl {
 class NoteDetector {
 public:
     // Constants
-    static constexpr uint8_t NO_NOTE = 255;
+    static constexpr u8 NO_NOTE = 255;
     static constexpr float A4_FREQUENCY = 440.0f;
-    static constexpr uint8_t A4_MIDI_NOTE = 69;
+    static constexpr u8 A4_MIDI_NOTE = 69;
 
     // Constructors
     NoteDetector();
@@ -23,8 +23,8 @@ public:
     void reset();
 
     // Callback types
-    using NoteVelocityCallback = void(*)(uint8_t note);
-    using NoteStartCallback = void(*)(uint8_t note, uint8_t velocity);
+    using NoteVelocityCallback = void(*)(u8 note);
+    using NoteStartCallback = void(*)(u8 note, u8 velocity);
 
     // Note-related callback functions
     NoteStartCallback onNoteOn = nullptr;      // Triggered on new note start with velocity
@@ -32,19 +32,19 @@ public:
     NoteStartCallback onNoteChange = nullptr;  // Triggered on note change
 
     // Conversion utilities
-    uint8_t frequencyToMidiNote(float hz) const;
-    float midiNoteToFrequency(uint8_t note) const;
+    u8 frequencyToMidiNote(float hz) const;
+    float midiNoteToFrequency(u8 note) const;
 
     // Getters
-    uint8_t getCurrentNote() const { return mCurrentNote; }
-    uint8_t getLastVelocity() const { return mLastVelocity; }
+    u8 getCurrentNote() const { return mCurrentNote; }
+    u8 getLastVelocity() const { return mLastVelocity; }
     float getCurrentPitch() const { return mCurrentPitch; }
     float getPitchBend() const { return mPitchBend; }
 
     // Configuration
     void setNoteOnThreshold(float threshold) { mNoteOnThreshold = threshold; }
     void setNoteOffThreshold(float threshold) { mNoteOffThreshold = threshold; }
-    void setMinNoteDuration(uint32_t ms) { mMinNoteDuration = ms; }
+    void setMinNoteDuration(u32 ms) { mMinNoteDuration = ms; }
     void setNoteChangeThreshold(int semitones) { mNoteChangeThreshold = semitones; }
     void setVelocitySensitivity(float sensitivity) { mVelocitySensitivity = sensitivity; }
 
@@ -54,30 +54,30 @@ private:
     bool mOwnsPitchDetector;
 
     // Note state tracking
-    uint8_t mCurrentNote;
-    uint8_t mLastVelocity;
+    u8 mCurrentNote;
+    u8 mLastVelocity;
     bool mNoteActive;
     float mCurrentPitch;
     float mPitchBend;
     float mNoteOnEnergy;
-    uint32_t mNoteOnTime;
-    uint32_t mLastUpdateTime;
+    u32 mNoteOnTime;
+    u32 mLastUpdateTime;
 
     // Detection thresholds
     float mNoteOnThreshold;
     float mNoteOffThreshold;
-    uint32_t mMinNoteDuration;
+    u32 mMinNoteDuration;
     int mNoteChangeThreshold;
     float mVelocitySensitivity;
 
     // Note detection helpers
-    float calculatePitchBend(float hz, uint8_t note) const;
-    uint8_t calculateVelocity(float energy, float confidence) const;
+    float calculatePitchBend(float hz, u8 note) const;
+    u8 calculateVelocity(float energy, float confidence) const;
 
     // Triggers
     bool shouldTriggerNoteOn(float confidence, float pitch) const;
     bool shouldTriggerNoteOff(float confidence, bool voiced) const;
-    bool shouldTriggerNoteChange(uint8_t newNote, uint8_t currentNote) const;
+    bool shouldTriggerNoteChange(u8 newNote, u8 currentNote) const;
 };
 
 } // namespace fl

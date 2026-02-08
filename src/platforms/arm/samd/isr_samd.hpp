@@ -35,10 +35,10 @@ namespace platforms {
 
 struct samd_isr_handle_data {
     Tc* timer_instance;              // Timer peripheral instance (TC3, TC4, TC5, etc.)
-    uint8_t timer_index;             // Timer index (3-7 for SAMD21, 0-7 for SAMD51)
+    u8 timer_index;             // Timer index (3-7 for SAMD21, 0-7 for SAMD51)
     IRQn_Type timer_irq;             // Timer IRQ number
-    uint8_t eic_channel;             // EIC channel (0-15, or 0xFF if not EIC)
-    uint8_t gpio_pin;                // GPIO pin number (0xFF if not GPIO)
+    u8 eic_channel;             // EIC channel (0-15, or 0xFF if not EIC)
+    u8 gpio_pin;                // GPIO pin number (0xFF if not GPIO)
     bool is_timer;                   // true = timer ISR, false = external ISR
     bool is_enabled;                 // Current enable state
     isr_handler_t user_handler;      // User handler function
@@ -59,27 +59,27 @@ struct samd_isr_handle_data {
 
 // Platform ID for SAMD
 // Platform ID registry: 0=STUB, 1=ESP32, 2=AVR, 3=NRF52, 4=RP2040, 5=Teensy, 6=STM32, 7=SAMD, 255=NULL
-constexpr uint8_t SAMD_PLATFORM_ID = 7;
+constexpr u8 SAMD_PLATFORM_ID = 7;
 
 // Timer configuration
 #if defined(FL_IS_SAMD21)
 // SAMD21: TC3, TC4, TC5 (sometimes TC6, TC7)
-constexpr uint8_t MIN_TIMER_INDEX = 3;
-constexpr uint8_t MAX_TIMER_INDEX = 5;  // Conservative, some boards have TC6/TC7
+constexpr u8 MIN_TIMER_INDEX = 3;
+constexpr u8 MAX_TIMER_INDEX = 5;  // Conservative, some boards have TC6/TC7
 #elif defined(FL_IS_SAMD51)
 // SAMD51: TC0-TC7
-constexpr uint8_t MIN_TIMER_INDEX = 0;
-constexpr uint8_t MAX_TIMER_INDEX = 7;
+constexpr u8 MIN_TIMER_INDEX = 0;
+constexpr u8 MAX_TIMER_INDEX = 7;
 #else
 // Default conservative range
-constexpr uint8_t MIN_TIMER_INDEX = 3;
-constexpr uint8_t MAX_TIMER_INDEX = 5;
+constexpr u8 MIN_TIMER_INDEX = 3;
+constexpr u8 MAX_TIMER_INDEX = 5;
 #endif
 
-constexpr uint8_t MAX_TIMER_INSTANCES = MAX_TIMER_INDEX - MIN_TIMER_INDEX + 1;
+constexpr u8 MAX_TIMER_INSTANCES = MAX_TIMER_INDEX - MIN_TIMER_INDEX + 1;
 
 // EIC configuration
-constexpr uint8_t MAX_EIC_CHANNELS = 16;
+constexpr u8 MAX_EIC_CHANNELS = 16;
 
 // Track allocated resources
 static bool timer_allocated[MAX_TIMER_INDEX + 1] = {};
@@ -94,7 +94,7 @@ static samd_isr_handle_data* eic_handles[MAX_EIC_CHANNELS] = {};
 // =============================================================================
 
 // Get timer instance pointer from index
-static Tc* get_timer_instance(uint8_t index) {
+static Tc* get_timer_instance(u8 index) {
     switch (index) {
 #ifdef TC0
         case 0: return TC0;
@@ -125,7 +125,7 @@ static Tc* get_timer_instance(uint8_t index) {
 }
 
 // Get timer IRQ from index
-static IRQn_Type get_timer_irq(uint8_t index) {
+static IRQn_Type get_timer_irq(u8 index) {
     switch (index) {
 #ifdef TC0_IRQn
         case 0: return TC0_IRQn;
@@ -156,12 +156,12 @@ static IRQn_Type get_timer_irq(uint8_t index) {
 }
 
 // Allocate a free timer
-static bool allocate_timer(uint8_t& timer_idx) {
+static bool allocate_timer(u8& timer_idx) {
     // Critical section: prevent interrupt from modifying allocation state
     __disable_irq();
 
     bool found = false;
-    for (uint8_t i = MIN_TIMER_INDEX; i <= MAX_TIMER_INDEX; i++) {
+    for (u8 i = MIN_TIMER_INDEX; i <= MAX_TIMER_INDEX; i++) {
         if (!timer_allocated[i]) {
             timer_allocated[i] = true;
             timer_idx = i;
@@ -175,7 +175,7 @@ static bool allocate_timer(uint8_t& timer_idx) {
 }
 
 // Free a timer
-static void free_timer(uint8_t timer_idx) {
+static void free_timer(u8 timer_idx) {
     if (timer_idx <= MAX_TIMER_INDEX) {
         // Critical section: prevent interrupt from accessing freed resources
         __disable_irq();
@@ -186,12 +186,12 @@ static void free_timer(uint8_t timer_idx) {
 }
 
 // Allocate a free EIC channel
-static bool allocate_eic_channel(uint8_t& channel) {
+static bool allocate_eic_channel(u8& channel) {
     // Critical section: prevent interrupt from modifying allocation state
     __disable_irq();
 
     bool found = false;
-    for (uint8_t i = 0; i < MAX_EIC_CHANNELS; i++) {
+    for (u8 i = 0; i < MAX_EIC_CHANNELS; i++) {
         if (!eic_allocated[i]) {
             eic_allocated[i] = true;
             channel = i;
@@ -205,7 +205,7 @@ static bool allocate_eic_channel(uint8_t& channel) {
 }
 
 // Free an EIC channel
-static void free_eic_channel(uint8_t channel) {
+static void free_eic_channel(u8 channel) {
     if (channel < MAX_EIC_CHANNELS) {
         // Critical section: prevent interrupt from accessing freed resources
         __disable_irq();
@@ -219,7 +219,7 @@ static void free_eic_channel(uint8_t channel) {
 // For SAMD21 (M0+): 4 priority levels (0-3), lower number = higher priority
 // For SAMD51 (M4): 8 priority levels (0-7), lower number = higher priority
 // ISR priority 1 (low) -> NVIC 3, ISR priority 7 (max) -> NVIC 0
-static uint8_t map_priority_to_nvic(uint8_t isr_priority) {
+static u8 map_priority_to_nvic(u8 isr_priority) {
     // Clamp to valid range
     if (isr_priority < 1) isr_priority = 1;
 
@@ -272,7 +272,7 @@ static void tc_reset(Tc* tc) {
 // =============================================================================
 
 // Common timer interrupt handler
-static void timer_interrupt_handler(uint8_t timer_idx) {
+static void timer_interrupt_handler(u8 timer_idx) {
     Tc* timer = get_timer_instance(timer_idx);
     if (!timer) return;
 
@@ -340,8 +340,8 @@ extern "C" {
 
     // EIC (External Interrupt Controller) handler
     void EIC_Handler(void) {
-        for (uint8_t ch = 0; ch < MAX_EIC_CHANNELS; ch++) {
-            uint32_t flag = 1UL << ch;
+        for (u8 ch = 0; ch < MAX_EIC_CHANNELS; ch++) {
+            u32 flag = 1UL << ch;
 
             if (EIC->INTFLAG.reg & flag) {
                 // Clear the interrupt flag
@@ -372,7 +372,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     }
 
     // Allocate a free timer
-    uint8_t timer_idx = 0;
+    u8 timer_idx = 0;
     if (!allocate_timer(timer_idx)) {
         FL_WARN("attachTimerHandler: no free timers");
         return -3;  // Out of resources
@@ -407,14 +407,14 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
 #if defined(FL_IS_SAMD21)
     // SAMD21: Use GCLK to route clock to TC peripheral
     // Most SAMD21 boards use GCLK_CLKCTRL_ID_TCC2_TC3 for TC3/TC4/TC5
-    uint16_t gclk_id;
+    u16 gclk_id;
     if (timer_idx <= 5) {
         gclk_id = GCLK_CLKCTRL_ID_TCC2_TC3;
     } else {
         gclk_id = GCLK_CLKCTRL_ID_TCC2_TC3;  // Adjust if TC6/TC7 available
     }
 
-    GCLK->CLKCTRL.reg = (uint16_t)(GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | gclk_id);
+    GCLK->CLKCTRL.reg = (u16)(GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | gclk_id);
     while (GCLK->STATUS.bit.SYNCBUSY) {
         // Wait for sync
     }
@@ -446,8 +446,8 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
 
     // Choose prescaler based on requested frequency
     // SystemCoreClock is typically 48 MHz (SAMD21) or 120 MHz (SAMD51)
-    uint32_t prescaler_div;
-    uint32_t prescaler_reg;
+    u32 prescaler_div;
+    u32 prescaler_reg;
 
     if (config.frequency_hz >= 100000) {
         prescaler_div = 1;
@@ -470,8 +470,8 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     tc_wait_sync(timer);
 
     // Calculate compare value
-    uint32_t timer_freq = SystemCoreClock / prescaler_div;
-    uint32_t compare_value = timer_freq / config.frequency_hz;
+    u32 timer_freq = SystemCoreClock / prescaler_div;
+    u32 compare_value = timer_freq / config.frequency_hz;
 
     // Clamp to 16-bit range
     if (compare_value > 0xFFFF) {
@@ -482,14 +482,14 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     }
 
     // Set compare value for match/compare channel 0
-    timer->COUNT16.CC[0].reg = (uint16_t)compare_value;
+    timer->COUNT16.CC[0].reg = (u16)compare_value;
     tc_wait_sync(timer);
 
     // Enable MC0 (Match/Compare 0) interrupt
     timer->COUNT16.INTENSET.reg = TC_INTENSET_MC0;
 
     // Configure NVIC
-    uint8_t nvic_priority = map_priority_to_nvic(config.priority);
+    u8 nvic_priority = map_priority_to_nvic(config.priority);
     NVIC_DisableIRQ(handle_data->timer_irq);
     NVIC_ClearPendingIRQ(handle_data->timer_irq);
     NVIC_SetPriority(handle_data->timer_irq, nvic_priority);
@@ -512,14 +512,14 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     return 0;  // Success
 }
 
-int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) {
+int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) {
     if (!config.handler) {
         FL_WARN("attachExternalHandler: handler is null");
         return -1;  // Invalid parameter
     }
 
     // Allocate an EIC channel
-    uint8_t eic_ch = 0;
+    u8 eic_ch = 0;
     if (!allocate_eic_channel(eic_ch)) {
         FL_WARN("attachExternalHandler: no free EIC channels");
         return -3;  // Out of resources
@@ -544,7 +544,7 @@ int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_
 
     // Enable EIC clock
 #if defined(FL_IS_SAMD21)
-    GCLK->CLKCTRL.reg = (uint16_t)(GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID_EIC);
+    GCLK->CLKCTRL.reg = (u16)(GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID_EIC);
     while (GCLK->STATUS.bit.SYNCBUSY) {
         // Wait for sync
     }
@@ -558,8 +558,8 @@ int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_
     // Configure GPIO pin for EIC function
     // Note: Pin-to-EIC-channel mapping is board-specific
     // For now, we use a simple mapping (this may need board-specific adjustments)
-    uint8_t port = pin / 32;
-    uint8_t pin_num = pin % 32;
+    u8 port = pin / 32;
+    u8 pin_num = pin % 32;
 
     PORT->Group[port].PINCFG[pin_num].reg |= PORT_PINCFG_PMUXEN;
 
@@ -602,7 +602,7 @@ int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_
 #endif
 
     // Determine sense configuration from flags
-    uint8_t sense;
+    u8 sense;
     if (config.flags & ISR_FLAG_EDGE_RISING) {
         sense = EIC_CONFIG_SENSE0_RISE_Val;
     } else if (config.flags & ISR_FLAG_EDGE_FALLING) {
@@ -612,8 +612,8 @@ int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_
     }
 
     // Configure EIC channel
-    uint8_t config_idx = eic_ch / 8;  // Each CONFIG register handles 8 channels
-    uint8_t sense_shift = (eic_ch % 8) * 4;  // 4 bits per channel
+    u8 config_idx = eic_ch / 8;  // Each CONFIG register handles 8 channels
+    u8 sense_shift = (eic_ch % 8) * 4;  // 4 bits per channel
 
     EIC->CONFIG[config_idx].reg &= ~(0xF << sense_shift);
     EIC->CONFIG[config_idx].reg |= (sense << sense_shift);
@@ -622,7 +622,7 @@ int attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_
     EIC->INTENSET.reg = (1UL << eic_ch);
 
     // Configure NVIC
-    uint8_t nvic_priority = map_priority_to_nvic(config.priority);
+    u8 nvic_priority = map_priority_to_nvic(config.priority);
     NVIC_DisableIRQ(EIC_IRQn);
     NVIC_ClearPendingIRQ(EIC_IRQn);
     NVIC_SetPriority(EIC_IRQn, nvic_priority);
@@ -770,7 +770,7 @@ const char* get_platform_name() {
 #endif
 }
 
-uint32_t get_max_timer_frequency() {
+u32 get_max_timer_frequency() {
 #if defined(FL_IS_SAMD51)
     return 120000000;  // 120 MHz (SAMD51 max clock)
 #elif defined(FL_IS_SAMD21)
@@ -780,11 +780,11 @@ uint32_t get_max_timer_frequency() {
 #endif
 }
 
-uint32_t get_min_timer_frequency() {
+u32 get_min_timer_frequency() {
     return 1;  // 1 Hz (practical minimum)
 }
 
-uint8_t get_max_priority() {
+u8 get_max_priority() {
 #if defined(FL_IS_SAMD51)
     return 7;  // SAMD51 has 8 levels (0-7)
 #elif defined(FL_IS_SAMD21)
@@ -794,7 +794,7 @@ uint8_t get_max_priority() {
 #endif
 }
 
-bool requires_assembly_handler(uint8_t priority) {
+bool requires_assembly_handler(u8 priority) {
     // ARM Cortex-M0+ and Cortex-M4F: All priority levels support C handlers
     (void)priority;
     return false;

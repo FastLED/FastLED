@@ -114,7 +114,7 @@ public:
     /// @param timeout_ms Maximum time to wait in milliseconds (fl::numeric_limits<uint32_t>::max() = infinite)
     /// @return true if transmission completed, false on timeout
     // Use (max)() to prevent macro expansion by Arduino.h's max macro
-    bool waitComplete(uint32_t timeout_ms = (fl::numeric_limits<uint32_t>::max)()) override;
+    bool waitComplete(u32 timeout_ms = (fl::numeric_limits<u32>::max)()) override;
 
     /// @brief Check if transmission is currently in progress
     /// @return true if busy, false if idle
@@ -150,17 +150,17 @@ private:
     // State
     bool mTransactionActive;
     bool mInitialized;
-    uint8_t mActiveLanes;
+    u8 mActiveLanes;
 
     // Configuration
-    uint8_t mClockPin;
-    uint8_t mData0Pin;
-    uint8_t mData1Pin;
-    uint8_t mData2Pin;
-    uint8_t mData3Pin;
+    u8 mClockPin;
+    u8 mData0Pin;
+    u8 mData1Pin;
+    u8 mData2Pin;
+    u8 mData3Pin;
 
     // DMA buffer management
-    fl::span<uint8_t> mDMABuffer;    // Allocated DMA buffer (interleaved format for quad-lane)
+    fl::span<u8> mDMABuffer;    // Allocated DMA buffer (interleaved format for quad-lane)
     size_t mMaxBytesPerLane;         // Max bytes per lane we've allocated for
     size_t mCurrentTotalSize;        // Current transmission size (bytes_per_lane * num_lanes)
     bool mBufferAcquired;
@@ -201,7 +201,7 @@ bool SPIQuadSAMD51::begin(const SpiHw4::Config& config) {
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
     // SAMD51 only has one QSPI peripheral (bus 0)
-    if (mBusId != -1 && config.bus_num != static_cast<uint8_t>(mBusId)) {
+    if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
         FL_WARN("SPIQuadSAMD51: Bus ID mismatch");
         return false;
     }
@@ -261,15 +261,15 @@ bool SPIQuadSAMD51::begin(const SpiHw4::Config& config) {
     // 4. Calculate baud rate divider
     // QSPI baud rate = MCU_CLOCK / (2 * (BAUD + 1))
     // For requested clock_speed_hz, we need: BAUD = (MCU_CLOCK / (2 * clock_speed_hz)) - 1
-    uint32_t mcu_clock = F_CPU;  // Arduino defines F_CPU as main clock frequency
-    uint32_t target_clock = config.clock_speed_hz > 0 ? config.clock_speed_hz : 4000000;  // Default 4 MHz
+    u32 mcu_clock = F_CPU;  // Arduino defines F_CPU as main clock frequency
+    u32 target_clock = config.clock_speed_hz > 0 ? config.clock_speed_hz : 4000000;  // Default 4 MHz
 
     // Clamp to maximum safe clock (60 MHz for SAMD51)
     if (target_clock > 60000000) {
         target_clock = 60000000;
     }
 
-    uint32_t baud_div = (mcu_clock / (2 * target_clock)) - 1;
+    u32 baud_div = (mcu_clock / (2 * target_clock)) - 1;
     if (baud_div > 255) {
         baud_div = 255;  // BAUD field is 8 bits
     }
@@ -282,7 +282,7 @@ bool SPIQuadSAMD51::begin(const SpiHw4::Config& config) {
     // - MODE: 1 = SPI mode (0 = memory mode for XIP)
     // - DATALEN: 0 = 8-bit transfers
     // - CSMODE: 0 = NORELOAD (CS stays low during transfer)
-    uint32_t ctrlb_value = QSPI_CTRLB_DATALEN(0) |  // 8-bit data length
+    u32 ctrlb_value = QSPI_CTRLB_DATALEN(0) |  // 8-bit data length
                            QSPI_CTRLB_CSMODE(0);     // CS stays low during transfer
 
     // Set SPI mode bit (bit 0 of MODE field)
@@ -342,16 +342,16 @@ DMABuffer SPIQuadSAMD51::acquireDMABuffer(size_t bytes_per_lane) {
     if (bytes_per_lane > mMaxBytesPerLane) {
         if (!mDMABuffer.empty()) {
             free(mDMABuffer.data());
-            mDMABuffer = fl::span<uint8_t>();
+            mDMABuffer = fl::span<u8>();
         }
 
         // Allocate DMA-capable memory (SAMD51 uses regular malloc)
-        uint8_t* ptr = static_cast<uint8_t*>(malloc(total_size));
+        u8* ptr = static_cast<u8*>(malloc(total_size));
         if (!ptr) {
             return SPIError::ALLOCATION_FAILED;
         }
 
-        mDMABuffer = fl::span<uint8_t>(ptr, total_size);
+        mDMABuffer = fl::span<u8>(ptr, total_size);
         mMaxBytesPerLane = bytes_per_lane;
     }
 
@@ -359,7 +359,7 @@ DMABuffer SPIQuadSAMD51::acquireDMABuffer(size_t bytes_per_lane) {
     mCurrentTotalSize = total_size;
 
     // Return span of current size (not max allocated size)
-    return fl::span<uint8_t>(mDMABuffer.data(), total_size);
+    return fl::span<u8>(mDMABuffer.data(), total_size);
 }
 
 bool SPIQuadSAMD51::transmit(TransmitMode mode) {
@@ -402,7 +402,7 @@ bool SPIQuadSAMD51::transmit(TransmitMode mode) {
     // - Data phase enabled (DATAEN=1)
     // - No instruction, address, or dummy phases
 
-    uint32_t width_mode = 0;  // Default: single lane
+    u32 width_mode = 0;  // Default: single lane
     if (mActiveLanes == 2) {
         width_mode = 1;  // Dual lane
     } else if (mActiveLanes >= 4) {
@@ -413,7 +413,7 @@ bool SPIQuadSAMD51::transmit(TransmitMode mode) {
     // TFRTYPE (bits 17-16): 2 = write
     // WIDTH (bits 13-12): 0/1/2 for 1/2/4 lanes
     // DATAEN (bit 9): 1 = data phase enabled
-    uint32_t instrframe_value = (2u << 16) |         // TFRTYPE = write
+    u32 instrframe_value = (2u << 16) |         // TFRTYPE = write
                                 (width_mode << 12) |  // WIDTH based on lanes
                                 (1u << 9);            // DATAEN = 1
 
@@ -432,7 +432,7 @@ bool SPIQuadSAMD51::transmit(TransmitMode mode) {
     //
     // Note: This is polling-based (blocking) for simplicity.
     // A DMA-based implementation would be more efficient.
-    const uint8_t* data_ptr = mDMABuffer.data();
+    const u8* data_ptr = mDMABuffer.data();
     size_t remaining = mCurrentTotalSize;
 
     while (remaining > 0) {
@@ -467,7 +467,7 @@ bool SPIQuadSAMD51::transmit(TransmitMode mode) {
     return true;
 }
 
-bool SPIQuadSAMD51::waitComplete(uint32_t timeout_ms) {
+bool SPIQuadSAMD51::waitComplete(u32 timeout_ms) {
     if (!mTransactionActive) {
         return true;  // Nothing to wait for
     }
@@ -536,7 +536,7 @@ void SPIQuadSAMD51::cleanup() {
         // Free DMA buffer
         if (!mDMABuffer.empty()) {
             free(mDMABuffer.data());
-            mDMABuffer = fl::span<uint8_t>();
+            mDMABuffer = fl::span<u8>();
             mMaxBytesPerLane = 0;
             mCurrentTotalSize = 0;
             mBufferAcquired = false;

@@ -85,7 +85,7 @@ using Rmt5TxDoneCallback = bool (*)(void* channel_handle,
 /// Maps directly to ESP-IDF's rmt_tx_channel_config_t structure.
 struct Rmt5ChannelConfig {
     int gpio_num;                   ///< GPIO pin number for RMT output
-    uint32_t resolution_hz;         ///< Channel clock resolution (Hz)
+    u32 resolution_hz;         ///< Channel clock resolution (Hz)
     size_t mem_block_symbols;       ///< Memory block size in RMT symbols (48-bit symbols)
     size_t trans_queue_depth;       ///< Transaction queue depth (typically 1)
     bool invert_out;                ///< Invert output signal
@@ -109,7 +109,7 @@ struct Rmt5ChannelConfig {
     /// @param queue_depth Transaction queue depth
     /// @param use_dma Enable DMA
     /// @param intr_pri Interrupt priority
-    Rmt5ChannelConfig(int pin, uint32_t res_hz, size_t mem_blocks,
+    Rmt5ChannelConfig(int pin, u32 res_hz, size_t mem_blocks,
                       size_t queue_depth, bool use_dma, int intr_pri = 0)
         : gpio_num(pin),
           resolution_hz(res_hz),
@@ -238,7 +238,7 @@ public:
     /// The encoder performs the pixel-to-waveform conversion. The peripheral
     /// will trigger the TX done callback when transmission completes.
     virtual bool transmit(void* channel_handle, void* encoder_handle,
-                          const uint8_t* buffer, size_t buffer_size) = 0;
+                          const u8* buffer, size_t buffer_size) = 0;
 
     /// @brief Wait for all queued transmissions to complete
     /// @param channel_handle Channel handle from createTxChannel()
@@ -257,7 +257,7 @@ public:
     /// Returns false if:
     /// - Timeout occurs before completion
     /// - Hardware error occurs during transmission
-    virtual bool waitAllDone(void* channel_handle, uint32_t timeout_ms) = 0;
+    virtual bool waitAllDone(void* channel_handle, u32 timeout_ms) = 0;
 
     //=========================================================================
     // Encoder Management
@@ -283,7 +283,7 @@ public:
     /// The encoder can be reused across multiple transmit() calls and
     /// multiple channels (if they share the same timing and resolution).
     virtual void* createEncoder(const ChipsetTiming& timing,
-                                 uint32_t resolution_hz) = 0;
+                                 u32 resolution_hz) = 0;
 
     /// @brief Delete encoder and free resources
     /// @param encoder_handle Encoder handle from createEncoder()
@@ -390,7 +390,7 @@ public:
     ///
     /// Size is automatically rounded up to 64-byte multiple to ensure
     /// cache sync operations work correctly (address AND size must be aligned).
-    virtual uint8_t* allocateDmaBuffer(size_t size) = 0;
+    virtual u8* allocateDmaBuffer(size_t size) = 0;
 
     /// @brief Free DMA buffer allocated via allocateDmaBuffer()
     /// @param buffer Buffer pointer (must be from allocateDmaBuffer())
@@ -398,7 +398,7 @@ public:
     /// Maps to ESP-IDF: heap_caps_free()
     ///
     /// Safe to call with nullptr (no-op).
-    virtual void freeDmaBuffer(uint8_t* buffer) = 0;
+    virtual void freeDmaBuffer(u8* buffer) = 0;
 };
 
 } // namespace detail

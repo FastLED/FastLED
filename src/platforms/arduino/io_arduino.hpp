@@ -7,7 +7,7 @@ namespace fl {
 namespace platforms {
 
 // Serial initialization
-void begin(uint32_t baudRate) {
+void begin(u32 baudRate) {
     Serial.begin(baudRate);
 }
 
@@ -34,7 +34,7 @@ int read() {
 }
 
 // Utility functions
-bool flush(uint32_t timeoutMs) {
+bool flush(u32 timeoutMs) {
     Serial.flush();
     return true;
 }
@@ -44,7 +44,7 @@ bool serial_ready() {
 }
 
 // Binary write function
-size_t write_bytes(const uint8_t* buffer, size_t size) {
+size_t write_bytes(const u8* buffer, size_t size) {
     return Serial.write(buffer, size);
     //return 0;
 }

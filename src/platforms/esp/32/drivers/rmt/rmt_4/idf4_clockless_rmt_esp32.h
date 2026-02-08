@@ -66,7 +66,7 @@ public:
     }
 
     void init() override { }
-    virtual uint16_t getMaxRefreshRate() const { return 400; }
+    virtual u16 getMaxRefreshRate() const { return 400; }
 
 protected:
     // -- Show pixels
@@ -75,13 +75,13 @@ protected:
     {
         // Wait for previous transmission to complete and release buffer
         // This prevents race conditions when show() is called faster than hardware can transmit
-        uint32_t startTime = fl::millis();
-        uint32_t lastWarnTime = startTime;
+        u32 startTime = fl::millis();
+        u32 lastWarnTime = startTime;
         while (mChannelData->isInUse()) {
             mEngine->poll();  // Keep polling until buffer is released
 
             // Warn every second if still waiting (possible deadlock or hardware issue)
-            uint32_t elapsed = fl::millis() - startTime;
+            u32 elapsed = fl::millis() - startTime;
             if (elapsed > 1000 && (fl::millis() - lastWarnTime) >= 1000) {
                 FL_WARN("ClocklessIdf4: Buffer still busy after " << elapsed << "ms total - possible deadlock or slow hardware");
                 lastWarnTime = fl::millis();

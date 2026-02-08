@@ -39,10 +39,10 @@ namespace fl {
 #define ESPCLKS_TO_NS(_CLKS) (((long)(_CLKS) * 1000L) / F_CPU_MHZ)
 
 static int gPulsesPerBit = 0;
-static uint32_t gOneBit[40] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+static u32 gOneBit[40] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-static uint32_t gZeroBit[40] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+static u32 gZeroBit[40] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
@@ -51,8 +51,8 @@ static int ones_for_one;
 static int ones_for_zero;
 
 // -- Temp buffers for pixels and bits being formatted for DMA
-uint8_t gPixelRow[NUM_COLOR_CHANNELS][32];
-uint8_t gPixelBits[NUM_COLOR_CHANNELS][8][4];
+u8 gPixelRow[NUM_COLOR_CHANNELS][32];
+u8 gPixelBits[NUM_COLOR_CHANNELS][8][4];
 
 static int CLOCK_DIVIDER_N;
 static int CLOCK_DIVIDER_A;
@@ -94,7 +94,7 @@ static I2SDMABuffer *allocateDMABuffer(int bytes) {
     I2SDMABuffer *b =
         (I2SDMABuffer *)heap_caps_malloc(sizeof(I2SDMABuffer), MALLOC_CAP_DMA);
 
-    b->buffer = (uint8_t *)heap_caps_malloc(bytes, MALLOC_CAP_DMA);
+    b->buffer = (u8 *)heap_caps_malloc(bytes, MALLOC_CAP_DMA);
     fl::memset(b->buffer, 0, bytes);
 
     b->descriptor.length = bytes;
@@ -149,8 +149,8 @@ static FL_IRAM void interruptHandler(void *arg) {
 /** Transpose 8x8 bit matrix
  *  From Hacker's Delight
  */
-static void transpose8rS32(uint8_t *A, int m, int n, uint8_t *B) {
-    uint32_t x, y, t;
+static void transpose8rS32(u8 *A, int m, int n, u8 *B) {
+    u32 x, y, t;
 
     // Load the array and pack it into x and y.
 
@@ -181,7 +181,7 @@ static void transpose8rS32(uint8_t *A, int m, int n, uint8_t *B) {
     B[7 * n] = y;
 }
 
-static void transpose32(uint8_t *pixels, uint8_t *bits) {
+static void transpose32(u8 *pixels, u8 *bits) {
     transpose8rS32(&pixels[0], 1, 4, &bits[0]);
     transpose8rS32(&pixels[8], 1, 4, &bits[1]);
     transpose8rS32(&pixels[16], 1, 4, &bits[2]);
@@ -190,9 +190,9 @@ static void transpose32(uint8_t *pixels, uint8_t *bits) {
 
 void i2s_define_bit_patterns(const ChipsetTiming& TIMING) {
     // Extract timing values from struct (already in nanoseconds)
-    uint32_t T1ns = TIMING.T1;
-    uint32_t T2ns = TIMING.T2;
-    uint32_t T3ns = TIMING.T3;
+    u32 T1ns = TIMING.T1;
+    u32 T2ns = TIMING.T2;
+    u32 T3ns = TIMING.T3;
 
     /*
      We calculate the best pcgd to the timing
@@ -437,7 +437,7 @@ void i2s_init(int i2s_device) {
     gInitializedI2sInitialized = true;
 }
 
-void i2s_clear_dma_buffer(uint32_t *buf) {
+void i2s_clear_dma_buffer(u32 *buf) {
     for (int i = 0; i < 8 * NUM_COLOR_CHANNELS; ++i) {
         int offset = gPulsesPerBit * i;
         for (int j = 0; j < ones_for_zero; ++j)
@@ -455,7 +455,7 @@ void i2s_start() {
     // Serial.println(dmaBuffers[0]->sampleCount());
     i2s->lc_conf.val =
         I2S_OUT_DATA_BURST_EN | I2S_OUTDSCR_BURST_EN | I2S_OUT_DATA_BURST_EN;
-    i2s->out_link.addr = (uint32_t) & (dmaBuffers[0]->descriptor);
+    i2s->out_link.addr = (u32) & (dmaBuffers[0]->descriptor);
     i2s->out_link.start = 1;
     ////vTaskDelay(5);
     i2s->int_clr.val = i2s->int_raw.val;
@@ -479,7 +479,7 @@ void i2s_reset() {
     i2s->lc_conf.val |= lc_conf_reset_flags;
     i2s->lc_conf.val &= ~lc_conf_reset_flags;
 
-    const uint32_t conf_reset_flags = I2S_RX_RESET_M | I2S_RX_FIFO_RESET_M |
+    const u32 conf_reset_flags = I2S_RX_RESET_M | I2S_RX_FIFO_RESET_M |
                                       I2S_TX_RESET_M | I2S_TX_FIFO_RESET_M;
     i2s->conf.val |= conf_reset_flags;
     i2s->conf.val &= ~conf_reset_flags;
@@ -524,8 +524,8 @@ void i2s_setup_pin(int _pin, int offset) {
     gpio_matrix_out(pin, i2s_base_pin_index + offset, false, false);
 }
 
-void i2s_transpose_and_encode(int channel, uint32_t has_data_mask,
-                              volatile uint32_t *buf) {
+void i2s_transpose_and_encode(int channel, u32 has_data_mask,
+                              volatile u32 *buf) {
 
     // -- Tranpose each array: all the bit 7's, then all the bit 6's,
     // ...
@@ -534,8 +534,8 @@ void i2s_transpose_and_encode(int channel, uint32_t has_data_mask,
     // Serial.print("Channel: "); Serial.print(channel); Serial.print("
     // ");
     for (int bitnum = 0; bitnum < 8; ++bitnum) {
-        uint8_t *row = (uint8_t *)(gPixelBits[channel][bitnum]);
-        uint32_t bit = (row[0] << 24) | (row[1] << 16) | (row[2] << 8) | row[3];
+        u8 *row = (u8 *)(gPixelBits[channel][bitnum]);
+        u32 bit = (row[0] << 24) | (row[1] << 16) | (row[2] << 8) | row[3];
 
         /* SZG: More general, but too slow:
              for (int pulse_num = 0; pulse_num < gPulsesPerBit;

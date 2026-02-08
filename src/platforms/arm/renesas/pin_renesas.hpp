@@ -51,7 +51,7 @@ inline bsp_io_port_pin_t getBspPin(int pin) {
 /// @param mode Pin mode (PinMode enum)
 inline void pinMode(int pin, PinMode mode) {
     bsp_io_port_pin_t bsp_pin = getBspPin(pin);
-    uint32_t cfg = 0;
+    u32 cfg = 0;
 
     // Map fl::PinMode to Renesas IOPORT configuration flags
     // PinMode: Input=0, Output=1, InputPullup=2, InputPulldown=3
@@ -123,7 +123,7 @@ inline PinValue digitalRead(int pin) {
 /// @param pin Arduino pin number
 /// @return ADC value (0-1023 for 10-bit, 0-4095 for 12-bit)
 /// @note STUB: Real implementation requires ADC peripheral configuration
-inline uint16_t analogRead(int /*pin*/) {
+inline u16 analogRead(int /*pin*/) {
     // STUB: ADC implementation requires:
     // 1. Map Arduino pin to ADC channel (via g_pin_cfg or pinmap)
     // 2. Initialize ADC peripheral (R_ADC_Open, R_ADC_ScanCfg)
@@ -140,7 +140,7 @@ inline uint16_t analogRead(int /*pin*/) {
 /// @param pin Arduino pin number
 /// @param val PWM duty cycle (0-255)
 /// @note STUB: Real implementation requires GPT timer configuration
-inline void analogWrite(int /*pin*/, uint16_t /*val*/) {
+inline void analogWrite(int /*pin*/, u16 /*val*/) {
     // STUB: PWM implementation requires:
     // 1. Map Arduino pin to GPT channel (via g_pin_cfg or pinmap)
     // 2. Initialize GPT peripheral (R_GPT_Open, R_GPT_PeriodSet)
@@ -155,7 +155,7 @@ inline void analogWrite(int /*pin*/, uint16_t /*val*/) {
 /// @param pin Arduino pin number
 /// @param val PWM duty cycle (0-65535)
 /// @note STUB: Real implementation requires GPT timer configuration
-inline void setPwm16(int pin, uint16_t val) {
+inline void setPwm16(int pin, fl::u16 val) {
     // STUB: 16-bit PWM would use same GPT configuration as analogWrite
     // but with 16-bit period and compare registers
     // For now, scale to 8-bit and use analogWrite stub

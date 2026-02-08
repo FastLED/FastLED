@@ -11,7 +11,7 @@ FrameTracker::FrameTracker(float fps) {
 
 void FrameTracker::get_interval_frames(fl::u32 now, fl::u32 *frameNumber,
                                        fl::u32 *nextFrameNumber,
-                                       uint8_t *amountOfNextFrame) const {
+                                       u8 *amountOfNextFrame) const {
     // Account for any pause time
     fl::u32 effectiveTime = now;
 
@@ -28,7 +28,7 @@ void FrameTracker::get_interval_frames(fl::u32 now, fl::u32 *frameNumber,
         fl::u64 frame2_start = (*nextFrameNumber * mMicrosSecondsPerInterval);
         fl::u32 rel_time = microseconds - frame1_start;
         fl::u32 frame_duration = frame2_start - frame1_start;
-        uint8_t progress = map_range<fl::u32, uint8_t>(rel_time, 0, frame_duration, 0, 255);
+        u8 progress = map_range<fl::u32, u8>(rel_time, 0, frame_duration, 0, 255);
         *amountOfNextFrame = progress;
     }
 }

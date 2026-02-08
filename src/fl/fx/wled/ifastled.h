@@ -52,7 +52,7 @@ public:
      * @brief Send the LED data to the strip with a specific brightness
      * @param brightness Brightness level (0-255)
      */
-    virtual void show(uint8_t brightness) = 0;
+    virtual void show(u8 brightness) = 0;
 
     /**
      * @brief Clear all LEDs (set to black)
@@ -66,13 +66,13 @@ public:
      * @brief Set the global brightness
      * @param brightness Brightness level (0-255)
      */
-    virtual void setBrightness(uint8_t brightness) = 0;
+    virtual void setBrightness(u8 brightness) = 0;
 
     /**
      * @brief Get the current global brightness
      * @return Brightness level (0-255)
      */
-    virtual uint8_t getBrightness() const = 0;
+    virtual u8 getBrightness() const = 0;
 
     // Color correction
 
@@ -100,13 +100,13 @@ public:
      * @brief Set the maximum refresh rate
      * @param fps Maximum frames per second (0 = no limit)
      */
-    virtual void setMaxRefreshRate(uint16_t fps) = 0;
+    virtual void setMaxRefreshRate(u16 fps) = 0;
 
     /**
      * @brief Get the maximum refresh rate
      * @return Maximum frames per second (0 = no limit)
      */
-    virtual uint16_t getMaxRefreshRate() const = 0;
+    virtual u16 getMaxRefreshRate() const = 0;
 
     // Advanced features (segment support for WLED)
 

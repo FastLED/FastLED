@@ -132,8 +132,8 @@ FASTLED_FORCE_INLINE void transpose8x1(unsigned char *A, unsigned char *B) {
     y = ((x << 4) & 0xF0F0F0F0) | (y & 0x0F0F0F0F);
     x = t;
 
-    *((uint32_t*)B) = y;
-    *((uint32_t*)(B+4)) = x;
+    *((u32*)B) = y;
+    *((u32*)(B+4)) = x;
 }
 
 /// Simplified 8x1 bit transpose with MSB-first output
@@ -236,9 +236,9 @@ FASTLED_FORCE_INLINE void transpose8(unsigned char *A, unsigned char *B) {
 /// @note Inline function - inlined at call site (including ISR contexts)
 /// @note Output size is num_bytes * 2
 inline void transpose_2lane_inline(
-    const uint8_t* lane0_byte,
-    const uint8_t* lane1_byte,
-    uint8_t* output,
+    const u8* lane0_byte,
+    const u8* lane1_byte,
+    u8* output,
     size_t num_bytes
 );
 
@@ -255,8 +255,8 @@ inline void transpose_2lane_inline(
 /// @note Inline function - inlined at call site (including ISR contexts)
 /// @note Output size is num_bytes * 4
 inline void transpose_4lane_inline(
-    const uint8_t* const lanes[4],
-    uint8_t* output,
+    const u8* const lanes[4],
+    u8* output,
     size_t num_bytes
 );
 
@@ -273,8 +273,8 @@ inline void transpose_4lane_inline(
 /// @note Inline function - inlined at call site (including ISR contexts)
 /// @note Output size is num_bytes * 8
 inline void transpose_8lane_inline(
-    const uint8_t* const lanes[8],
-    uint8_t* output,
+    const u8* const lanes[8],
+    u8* output,
     size_t num_bytes
 );
 
@@ -291,8 +291,8 @@ inline void transpose_8lane_inline(
 /// @note Inline function - inlined at call site (including ISR contexts)
 /// @note Output size is num_bytes * 16
 inline void transpose_16lane_inline(
-    const uint8_t* const lanes[16],
-    uint8_t* output,
+    const u8* const lanes[16],
+    u8* output,
     size_t num_bytes
 );
 
@@ -319,21 +319,21 @@ template<typename TSource>
 inline void transpose_generic_inline(
     const TSource* const lanes[],
     size_t num_lanes,
-    uint8_t* output,
+    u8* output,
     size_t num_items
 );
 
 // Implementation of inline ISR-safe primitives
 
 inline void transpose_2lane_inline(
-    const uint8_t* lane0_byte,
-    const uint8_t* lane1_byte,
-    uint8_t* output,
+    const u8* lane0_byte,
+    const u8* lane1_byte,
+    u8* output,
     size_t num_bytes
 ) {
     for (size_t byte_idx = 0; byte_idx < num_bytes; byte_idx++) {
-        uint8_t a = lane0_byte[byte_idx];
-        uint8_t b = lane1_byte[byte_idx];
+        u8 a = lane0_byte[byte_idx];
+        u8 b = lane1_byte[byte_idx];
 
         // dest[0] contains bit pairs for positions 7,6,5,4 (MSB first)
         output[byte_idx * 2 + 0] =
@@ -352,17 +352,17 @@ inline void transpose_2lane_inline(
 }
 
 inline void transpose_4lane_inline(
-    const uint8_t* const lanes[4],
-    uint8_t* output,
+    const u8* const lanes[4],
+    u8* output,
     size_t num_bytes
 ) {
     for (size_t byte_idx = 0; byte_idx < num_bytes; byte_idx++) {
-        uint8_t a = lanes[0][byte_idx];
-        uint8_t b = lanes[1][byte_idx];
-        uint8_t c = lanes[2][byte_idx];
-        uint8_t d = lanes[3][byte_idx];
+        u8 a = lanes[0][byte_idx];
+        u8 b = lanes[1][byte_idx];
+        u8 c = lanes[2][byte_idx];
+        u8 d = lanes[3][byte_idx];
 
-        uint8_t* dest = &output[byte_idx * 4];
+        u8* dest = &output[byte_idx * 4];
 
         dest[0] = ((a >> 7) & 0x01) << 0 | ((b >> 7) & 0x01) << 1 | ((c >> 7) & 0x01) << 2 | ((d >> 7) & 0x01) << 3 |
                   ((a >> 6) & 0x01) << 4 | ((b >> 6) & 0x01) << 5 | ((c >> 6) & 0x01) << 6 | ((d >> 6) & 0x01) << 7;
@@ -379,8 +379,8 @@ inline void transpose_4lane_inline(
 }
 
 inline void transpose_8lane_inline(
-    const uint8_t* const lanes[8],
-    uint8_t* output,
+    const u8* const lanes[8],
+    u8* output,
     size_t num_bytes
 ) {
     for (size_t byte_idx = 0; byte_idx < num_bytes; byte_idx++) {
@@ -396,7 +396,7 @@ inline void transpose_8lane_inline(
             ((uint64_t)lanes[6][byte_idx] << 48) |
             ((uint64_t)lanes[7][byte_idx] << 56);
 
-        uint8_t* dest = &output[byte_idx * 8];
+        u8* dest = &output[byte_idx * 8];
 
         // Extract bits in parallel (compiler can optimize independent shifts)
         for (int bit = 7; bit >= 0; bit--) {
@@ -414,8 +414,8 @@ inline void transpose_8lane_inline(
 }
 
 inline void transpose_16lane_inline(
-    const uint8_t* const lanes[16],
-    uint8_t* output,
+    const u8* const lanes[16],
+    u8* output,
     size_t num_bytes
 ) {
     for (size_t byte_idx = 0; byte_idx < num_bytes; byte_idx++) {
@@ -441,7 +441,7 @@ inline void transpose_16lane_inline(
             ((uint64_t)lanes[14][byte_idx] << 48) |
             ((uint64_t)lanes[15][byte_idx] << 56);
 
-        uint8_t* dest = &output[byte_idx * 16];
+        u8* dest = &output[byte_idx * 16];
 
         // Extract bits in parallel from both packed registers
         for (int bit = 7; bit >= 0; bit--) {
@@ -472,23 +472,23 @@ template<typename TSource>
 inline void transpose_generic_inline(
     const TSource* const lanes[],
     size_t num_lanes,
-    uint8_t* output,
+    u8* output,
     size_t num_items
 ) {
     constexpr size_t bits_per_item = sizeof(TSource) * 8;
 
     for (size_t item_idx = 0; item_idx < num_items; item_idx++) {
-        uint8_t* dest = &output[item_idx * bits_per_item];
+        u8* dest = &output[item_idx * bits_per_item];
 
         // Process each bit position in the source data (MSB to LSB)
         for (size_t bit_pos = 0; bit_pos < bits_per_item; bit_pos++) {
             size_t src_bit = (bits_per_item - 1) - bit_pos;
-            uint8_t output_byte = 0;
+            u8 output_byte = 0;
 
             // Extract bit from each lane (up to 8 lanes per output byte)
             for (size_t lane = 0; lane < num_lanes && lane < 8; lane++) {
                 TSource src_value = lanes[lane][item_idx];
-                uint8_t bit = (src_value >> src_bit) & 0x01;
+                u8 bit = (src_value >> src_bit) & 0x01;
                 output_byte |= (bit << (7 - lane));
             }
 
@@ -583,8 +583,8 @@ class SPITransposer {
 public:
     /// Lane data structure: payload + padding frame
     struct LaneData {
-        fl::span<const uint8_t> payload;        ///< Actual LED data for this lane
-        fl::span<const uint8_t> padding_frame;  ///< Black LED frame for padding (repeating pattern)
+        fl::span<const u8> payload;        ///< Actual LED data for this lane
+        fl::span<const u8> padding_frame;  ///< Black LED frame for padding (repeating pattern)
     };
 
     /// Transpose 2 lanes of data into interleaved dual-SPI format
@@ -600,7 +600,7 @@ public:
     /// @note Empty lanes (nullopt) are filled with zeros or first lane's padding
     static bool transpose2(const fl::optional<LaneData>& lane0,
                           const fl::optional<LaneData>& lane1,
-                          fl::span<uint8_t> output,
+                          fl::span<u8> output,
                           const char** error = nullptr);
 
     /// Transpose 4 lanes of data into interleaved quad-SPI format
@@ -620,7 +620,7 @@ public:
                           const fl::optional<LaneData>& lane1,
                           const fl::optional<LaneData>& lane2,
                           const fl::optional<LaneData>& lane3,
-                          fl::span<uint8_t> output,
+                          fl::span<u8> output,
                           const char** error = nullptr);
 
     /// Transpose 8 lanes of data into interleaved octal-SPI format
@@ -634,7 +634,7 @@ public:
     /// @note Shorter lanes are padded at the beginning with repeating padding_frame pattern
     /// @note Empty lanes (nullopt) are filled with zeros or first lane's padding
     static bool transpose8(const fl::optional<LaneData> lanes[8],
-                          fl::span<uint8_t> output,
+                          fl::span<u8> output,
                           const char** error = nullptr);
 
     /// Transpose 16 lanes of data into interleaved hex-SPI format
@@ -648,12 +648,12 @@ public:
     /// @note Shorter lanes are padded at the beginning with repeating padding_frame pattern
     /// @note Empty lanes (nullopt) are filled with zeros or first lane's padding
     static bool transpose16(const fl::optional<LaneData> lanes[16],
-                           fl::span<uint8_t> output,
+                           fl::span<u8> output,
                            const char** error = nullptr);
 
 private:
     /// Get byte from lane at given index, handling padding automatically
-    static uint8_t getLaneByte(const LaneData& lane, size_t byte_idx, size_t max_size);
+    static u8 getLaneByte(const LaneData& lane, size_t byte_idx, size_t max_size);
 };
 
 // ============================================================================
@@ -842,8 +842,8 @@ inline bool transpose_strips(
 /// @tparam DATA_WIDTH Number of parallel lanes (1, 2, 4, 8, or 16) - compile-time constant
 template<size_t DATA_WIDTH>
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION size_t transpose_wave8byte_parlio_template(
-    const uint8_t* FL_RESTRICT_PARAM laneWaveforms,
-    uint8_t* FL_RESTRICT_PARAM outputBuffer
+    const u8* FL_RESTRICT_PARAM laneWaveforms,
+    u8* FL_RESTRICT_PARAM outputBuffer
 ) {
     constexpr size_t bytes_per_lane = 8;   // sizeof(Wave8Byte)
     constexpr size_t pulsesPerByte = 64;   // 8 bits × 8 pulses per bit
@@ -887,7 +887,7 @@ FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION size_t transpose_wave8byte_par
         const size_t numOutputBytes = (pulsesPerByte + ticksPerByte - 1) / ticksPerByte;
 
         for (size_t outputByteIdx = 0; outputByteIdx < numOutputBytes; outputByteIdx++) {
-            uint8_t outputByte = 0;
+            u8 outputByte = 0;
 
             FL_UNROLL(8)
             for (size_t t = 0; t < ticksPerByte; t++) {
@@ -900,9 +900,9 @@ FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION size_t transpose_wave8byte_par
 
                 FL_UNROLL(8)
                 for (size_t lane = 0; lane < DATA_WIDTH; lane++) {
-                    const uint8_t* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
-                    uint8_t wave8_byte = laneWaveform[bit_pos];
-                    uint8_t pulse = (wave8_byte >> (7 - pulse_bit)) & 1;
+                    const u8* laneWaveform = laneWaveforms + (lane * bytes_per_lane);
+                    u8 wave8_byte = laneWaveform[bit_pos];
+                    u8 pulse = (wave8_byte >> (7 - pulse_bit)) & 1;
 
                     size_t bitPos = t * DATA_WIDTH + lane;
                     outputByte |= (pulse << bitPos);
@@ -918,7 +918,7 @@ FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION size_t transpose_wave8byte_par
 
         // Output buffer: accumulate 16 words (32 bytes) before writing
         // This aligns with typical 32-byte cache lines and reduces memory write overhead
-        uint8_t writeBuffer[32];
+        u8 writeBuffer[32];
         size_t writeIdx = 0;
 
         for (size_t bit_pos = 0; bit_pos < 8; bit_pos += 2) {
@@ -968,7 +968,7 @@ FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION size_t transpose_wave8byte_par
             // This allows CPU to execute independent operations in parallel
             for (size_t pulse_bit = 0; pulse_bit < 8; pulse_bit++) {
                 // Extract pulse bits for first bit position
-                uint16_t outputWord_0 =
+                u16 outputWord_0 =
                     ((packed_lo_0 >> (7 - pulse_bit + 0))  & 0x01) << 0  |
                     ((packed_lo_0 >> (7 - pulse_bit + 8))  & 0x01) << 1  |
                     ((packed_lo_0 >> (7 - pulse_bit + 16)) & 0x01) << 2  |
@@ -987,7 +987,7 @@ FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION size_t transpose_wave8byte_par
                     ((packed_hi_0 >> (7 - pulse_bit + 56)) & 0x01) << 15;
 
                 // Extract pulse bits for second bit position
-                uint16_t outputWord_1 =
+                u16 outputWord_1 =
                     ((packed_lo_1 >> (7 - pulse_bit + 0))  & 0x01) << 0  |
                     ((packed_lo_1 >> (7 - pulse_bit + 8))  & 0x01) << 1  |
                     ((packed_lo_1 >> (7 - pulse_bit + 16)) & 0x01) << 2  |
@@ -1060,9 +1060,9 @@ FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION size_t transpose_wave8byte_par
 /// size_t written = transpose_wave8byte_parlio(laneWaveforms, 8, output);
 /// ```
 FASTLED_FORCE_INLINE FL_IRAM size_t transpose_wave8byte_parlio(
-    const uint8_t* FL_RESTRICT_PARAM laneWaveforms,
+    const u8* FL_RESTRICT_PARAM laneWaveforms,
     size_t data_width,
-    uint8_t* FL_RESTRICT_PARAM outputBuffer
+    u8* FL_RESTRICT_PARAM outputBuffer
 ) {
     // Dispatch to template specialization based on runtime data_width
     // Compiler generates optimized code for each specialization (no runtime branching)

@@ -35,7 +35,7 @@ FL_LINK_WEAK volatile unsigned long timer_millis = 0;
     #include "platforms/arm/nrf52/led_sysdefs_arm_nrf52.h"
     #include "platforms/arm/nrf52/arbiter_nrf52.h"
 
-    uint32_t isrCount;
+    fl::u32 isrCount;
 
     FL_EXTERN_C_BEGIN
             // NOTE: Update platforms.cpp in root of FastLED library if this changes        

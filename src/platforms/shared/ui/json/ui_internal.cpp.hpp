@@ -41,7 +41,7 @@ void JsonUiInternal::clearChanged() {
 }
 
 int JsonUiInternal::nextId() {
-    static fl::atomic<uint32_t> sNextId(0);
+    static fl::atomic<u32> sNextId(0);
     return sNextId.fetch_add(1);
 }
 

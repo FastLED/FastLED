@@ -86,22 +86,22 @@ PinValue digitalRead(int pin);
 /// Read analog value from pin
 /// @param pin Pin number (platform-specific numbering)
 /// @return Analog value (0-1023 for 10-bit ADC, 0-4095 for 12-bit ADC)
-uint16_t analogRead(int pin);
+u16 analogRead(int pin);
 
 /// Write analog value to pin (PWM)
 /// @param pin Pin number (platform-specific numbering)
 /// @param val PWM duty cycle (0-255 typical, platform-specific maximum)
-void analogWrite(int pin, uint16_t val);
+void analogWrite(int pin, u16 val);
 
 /// Set PWM duty cycle with 16-bit resolution
 /// @param pin Pin number (platform-specific numbering)
 /// @param val PWM duty cycle (0-65535, platform-specific maximum)
-void setPwm16(int pin, uint16_t val);
+void setPwm16(int pin, u16 val);
 
 /// Alias for setPwm16 - Set PWM duty cycle with 16-bit resolution
 /// @param pin Pin number (platform-specific numbering)
 /// @param val PWM duty cycle (0-65535, platform-specific maximum)
-inline void analogWrite16(int pin, uint16_t val) {
+inline void analogWrite16(int pin, u16 val) {
     setPwm16(pin, val);
 }
 

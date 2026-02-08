@@ -56,12 +56,12 @@ public:
     bool enable() override;
     bool disable() override;
     bool isInitialized() const override;
-    bool transmit(const uint8_t* buffer, size_t bit_count, uint16_t idle_value) override;
-    bool waitAllDone(uint32_t timeout_ms) override;
+    bool transmit(const u8* buffer, size_t bit_count, u16 idle_value) override;
+    bool waitAllDone(u32 timeout_ms) override;
     bool registerTxDoneCallback(void* callback, void* user_ctx) override;
-    uint8_t* allocateDmaBuffer(size_t size) override;
-    void freeDmaBuffer(uint8_t* buffer) override;
-    void delay(uint32_t ms) override;
+    u8* allocateDmaBuffer(size_t size) override;
+    void freeDmaBuffer(u8* buffer) override;
+    void delay(u32 ms) override;
     uint64_t getMicroseconds() override;
     void freeDmaBuffer(void* ptr) override;
 
@@ -235,7 +235,7 @@ bool ParlioPeripheralESPImpl::isInitialized() const {
 // Transmission Methods
 //=============================================================================
 
-bool FL_IRAM ParlioPeripheralESPImpl::transmit(const uint8_t* buffer, size_t bit_count, uint16_t idle_value) {
+bool FL_IRAM ParlioPeripheralESPImpl::transmit(const u8* buffer, size_t bit_count, u16 idle_value) {
     // ⚠️  ISR CONTEXT - NO LOGGING ALLOWED ⚠️
     // This function is called from FL_IRAM txDoneCallback via virtual dispatch.
     if (mTxUnit == nullptr) {
@@ -274,7 +274,7 @@ bool FL_IRAM ParlioPeripheralESPImpl::transmit(const uint8_t* buffer, size_t bit
     return true;
 }
 
-bool ParlioPeripheralESPImpl::waitAllDone(uint32_t timeout_ms) {
+bool ParlioPeripheralESPImpl::waitAllDone(u32 timeout_ms) {
     if (mTxUnit == nullptr) {
         FL_WARN("ParlioPeripheralESP: Cannot wait - not initialized");
         return false;
@@ -328,13 +328,13 @@ bool ParlioPeripheralESPImpl::registerTxDoneCallback(void* callback, void* user_
 // DMA Memory Management
 //=============================================================================
 
-uint8_t* ParlioPeripheralESPImpl::allocateDmaBuffer(size_t size) {
+u8* ParlioPeripheralESPImpl::allocateDmaBuffer(size_t size) {
     // Round up to 64-byte multiple for cache line alignment
     size_t aligned_size = ((size + 63) / 64) * 64;
 
     // Allocate DMA-capable memory with 64-byte alignment
     // MALLOC_CAP_DMA ensures buffer is accessible by PARLIO peripheral
-    uint8_t* buffer = static_cast<uint8_t*>(
+    u8* buffer = static_cast<u8*>(
         heap_caps_aligned_alloc(64, aligned_size, MALLOC_CAP_DMA)
     );
 
@@ -345,13 +345,13 @@ uint8_t* ParlioPeripheralESPImpl::allocateDmaBuffer(size_t size) {
     return buffer;
 }
 
-void ParlioPeripheralESPImpl::freeDmaBuffer(uint8_t* buffer) {
+void ParlioPeripheralESPImpl::freeDmaBuffer(u8* buffer) {
     if (buffer != nullptr) {
         heap_caps_free(buffer);
     }
 }
 
-void ParlioPeripheralESPImpl::delay(uint32_t ms) {
+void ParlioPeripheralESPImpl::delay(u32 ms) {
     // Map to FreeRTOS vTaskDelay
     // pdMS_TO_TICKS converts milliseconds to RTOS ticks
     vTaskDelay(pdMS_TO_TICKS(ms));

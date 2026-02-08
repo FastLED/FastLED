@@ -14,13 +14,13 @@
 namespace fl {
 
 // Default log level is DEBUG (all logging enabled)
-static uint8_t gLogLevel = LOG_LEVEL_DEBUG;
+static u8 gLogLevel = LOG_LEVEL_DEBUG;
 
-uint8_t getLogLevel() {
+u8 getLogLevel() {
     return gLogLevel;
 }
 
-void setLogLevel(uint8_t level) {
+void setLogLevel(u8 level) {
     gLogLevel = level;
 }
 
@@ -117,16 +117,16 @@ int read() {
     return platforms::read();
 }
 
-bool flush(uint32_t timeoutMs) {
+bool flush(u32 timeoutMs) {
     return platforms::flush(timeoutMs);
 }
 
-size_t write_bytes(const uint8_t* buffer, size_t size) {
+size_t write_bytes(const u8* buffer, size_t size) {
     if (!buffer || size == 0) return 0;
     return platforms::write_bytes(buffer, size);
 }
 
-void serial_begin(uint32_t baudRate) {
+void serial_begin(u32 baudRate) {
     platforms::begin(baudRate);
 }
 

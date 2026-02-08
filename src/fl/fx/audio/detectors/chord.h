@@ -26,10 +26,10 @@ struct Chord {
     int rootNote;           // MIDI note number (0-11 for C-B)
     ChordType type;         // Chord type
     float confidence;       // Detection confidence (0.0-1.0)
-    uint32_t timestamp;     // When detected
+    u32 timestamp;     // When detected
 
     Chord() : rootNote(-1), type(ChordType::UNKNOWN), confidence(0.0f), timestamp(0) {}
-    Chord(int root, ChordType t, float conf, uint32_t ts)
+    Chord(int root, ChordType t, float conf, u32 ts)
         : rootNote(root), type(t), confidence(conf), timestamp(ts) {}
 
     bool isValid() const { return rootNote >= 0 && rootNote < 12; }
@@ -61,18 +61,18 @@ public:
 
     // Configuration
     void setConfidenceThreshold(float threshold) { mConfidenceThreshold = threshold; }
-    void setMinDuration(uint32_t ms) { mMinChordDuration = ms; }
+    void setMinDuration(u32 ms) { mMinChordDuration = ms; }
 
 private:
     // Current state
     Chord mCurrentChord;
     Chord mPreviousChord;
-    uint32_t mChordStartTime;
-    uint32_t mChordEndTime;
+    u32 mChordStartTime;
+    u32 mChordEndTime;
 
     // Configuration
     float mConfidenceThreshold;
-    uint32_t mMinChordDuration;
+    u32 mMinChordDuration;
 
     // Chroma feature (pitch class profile)
     float mChroma[12];  // Energy for each pitch class (C, C#, D, ...)
@@ -80,7 +80,7 @@ private:
 
     // Detection methods
     void calculateChroma(const FFTBins& fft);
-    Chord detectChord(const float* chroma, uint32_t timestamp);
+    Chord detectChord(const float* chroma, u32 timestamp);
     float matchChordPattern(const float* chroma, int root, ChordType type);
     bool isSimilarChord(const Chord& a, const Chord& b);
 

@@ -61,7 +61,7 @@ bool SPIQuadNRF52::begin(const SpiHw4::Config& config) {
     }
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
-    if (mBusId != -1 && config.bus_num != static_cast<uint8_t>(mBusId)) {
+    if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
         FL_WARN("SPIQuadNRF52: Bus ID mismatch");
         return false;
     }
@@ -228,13 +228,13 @@ bool SPIQuadNRF52::allocateDMABuffers(size_t required_size) {
     mBufferSize = 0;
 
     // Allocate new buffers in RAM (required for EasyDMA)
-    mLane0Buffer = (uint8_t*)malloc(required_size);
+    mLane0Buffer = (u8*)malloc(required_size);
     if (mLane0Buffer == nullptr) {
         FL_WARN("SPIQuadNRF52: Failed to allocate lane 0 DMA buffer");
         return false;
     }
 
-    mLane1Buffer = (uint8_t*)malloc(required_size);
+    mLane1Buffer = (u8*)malloc(required_size);
     if (mLane1Buffer == nullptr) {
         FL_WARN("SPIQuadNRF52: Failed to allocate lane 1 DMA buffer");
         free(mLane0Buffer);
@@ -242,7 +242,7 @@ bool SPIQuadNRF52::allocateDMABuffers(size_t required_size) {
         return false;
     }
 
-    mLane2Buffer = (uint8_t*)malloc(required_size);
+    mLane2Buffer = (u8*)malloc(required_size);
     if (mLane2Buffer == nullptr) {
         FL_WARN("SPIQuadNRF52: Failed to allocate lane 2 DMA buffer");
         free(mLane0Buffer);
@@ -252,7 +252,7 @@ bool SPIQuadNRF52::allocateDMABuffers(size_t required_size) {
         return false;
     }
 
-    mLane3Buffer = (uint8_t*)malloc(required_size);
+    mLane3Buffer = (u8*)malloc(required_size);
     if (mLane3Buffer == nullptr) {
         FL_WARN("SPIQuadNRF52: Failed to allocate lane 3 DMA buffer");
         free(mLane0Buffer);
@@ -295,7 +295,7 @@ bool SPIQuadNRF52::transmit(TransmitMode mode) {
 
     // De-interleave mDMABuffer into lane-specific buffers
     // mDMABuffer contains interleaved data: quarters for each lane
-    fl::span<uint8_t> buffer_span = mDMABuffer.data();
+    fl::span<u8> buffer_span = mDMABuffer.data();
     fl::memcpy(mLane0Buffer, buffer_span.data(), bytes_per_lane);
     fl::memcpy(mLane1Buffer, buffer_span.data() + bytes_per_lane, bytes_per_lane);
     fl::memcpy(mLane2Buffer, buffer_span.data() + (bytes_per_lane * 2), bytes_per_lane);
@@ -325,27 +325,27 @@ bool SPIQuadNRF52::transmit(TransmitMode mode) {
     return true;
 }
 
-bool SPIQuadNRF52::waitComplete(uint32_t timeout_ms) {
+bool SPIQuadNRF52::waitComplete(u32 timeout_ms) {
     if (!mTransactionActive) {
         return true;  // Nothing to wait for
     }
 
     // Use a simple timeout mechanism based on loop iterations
     // For more accurate timing, could use TIMER peripheral or system tick counter
-    uint32_t timeout_iterations = timeout_ms * 1000;  // Rough approximation
-    uint32_t iterations = 0;
+    u32 timeout_iterations = timeout_ms * 1000;  // Rough approximation
+    u32 iterations = 0;
 
     // Wait for all SPIM peripherals to complete
     while ((!nrf_spim_event_check(mSPIM0, NRF_SPIM_EVENT_END) ||
             !nrf_spim_event_check(mSPIM1, NRF_SPIM_EVENT_END) ||
             !nrf_spim_event_check(mSPIM2, NRF_SPIM_EVENT_END) ||
             !nrf_spim_event_check(mSPIM3, NRF_SPIM_EVENT_END)) &&
-           (timeout_ms == fl::numeric_limits<uint32_t>::max() || iterations < timeout_iterations)) {
+           (timeout_ms == fl::numeric_limits<u32>::max() || iterations < timeout_iterations)) {
         iterations++;
     }
 
     // Check if we timed out
-    bool timed_out = (timeout_ms != fl::numeric_limits<uint32_t>::max()) && (iterations >= timeout_iterations);
+    bool timed_out = (timeout_ms != fl::numeric_limits<u32>::max()) && (iterations >= timeout_iterations);
     if (timed_out) {
         FL_WARN("SPIQuadNRF52: Transaction timeout");
         // Clear state even on timeout
@@ -448,7 +448,7 @@ void SPIQuadNRF52::cleanup() {
     }
 }
 
-void SPIQuadNRF52::configureTimer(uint32_t clock_speed_hz) {
+void SPIQuadNRF52::configureTimer(u32 clock_speed_hz) {
     // Configure TIMER1 to generate compare events for synchronization
     // TIMER will not generate the actual clock signal, but will trigger
     // SPIM START tasks via PPI for synchronized transmission
@@ -481,11 +481,11 @@ void SPIQuadNRF52::configurePPI() {
     // All PPI channels connect TIMER1 COMPARE[0] event to SPIM START tasks
 
     // Get event and task addresses
-    uint32_t timer_compare_event = (uint32_t)&mTimer->EVENTS_COMPARE[0];
-    uint32_t spim0_start_task = (uint32_t)&mSPIM0->TASKS_START;
-    uint32_t spim1_start_task = (uint32_t)&mSPIM1->TASKS_START;
-    uint32_t spim2_start_task = (uint32_t)&mSPIM2->TASKS_START;
-    uint32_t spim3_start_task = (uint32_t)&mSPIM3->TASKS_START;
+    u32 timer_compare_event = (u32)&mTimer->EVENTS_COMPARE[0];
+    u32 spim0_start_task = (u32)&mSPIM0->TASKS_START;
+    u32 spim1_start_task = (u32)&mSPIM1->TASKS_START;
+    u32 spim2_start_task = (u32)&mSPIM2->TASKS_START;
+    u32 spim3_start_task = (u32)&mSPIM3->TASKS_START;
 
     // Configure PPI channel 4: TIMER1.COMPARE[0] -> SPIM0.START
     NRF_PPI->CH[mPPIChannel4].EEP = timer_compare_event;

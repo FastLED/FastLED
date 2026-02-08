@@ -50,8 +50,8 @@ ISR(TCA0_OVF_vect)
 static void init()
 {
     // Prescaler options for TCA0
-    uint16_t prescaler_values[] = {1, 2, 4, 8, 16, 64, 256, 1024};
-    uint8_t prescaler_gc_values[] = {
+    fl::u16 prescaler_values[] = {1, 2, 4, 8, 16, 64, 256, 1024};
+    fl::u8 prescaler_gc_values[] = {
         TCA_SINGLE_CLKSEL_DIV1_gc,
         TCA_SINGLE_CLKSEL_DIV2_gc,
         TCA_SINGLE_CLKSEL_DIV4_gc,
@@ -61,23 +61,23 @@ static void init()
         TCA_SINGLE_CLKSEL_DIV256_gc,
         TCA_SINGLE_CLKSEL_DIV1024_gc
     };
-    uint8_t num_prescalers = sizeof(prescaler_values) / sizeof(prescaler_values[0]);
+    fl::u8 num_prescalers = sizeof(prescaler_values) / sizeof(prescaler_values[0]);
 
-    uint16_t prescaler = 0;
-    uint16_t period_counts = 0;
-    uint8_t prescaler_index = 0;
+    fl::u16 prescaler = 0;
+    fl::u16 period_counts = 0;
+    fl::u8 prescaler_index = 0;
 
-    uint32_t min_error = 0xFFFFFFFF;
+    fl::u32 min_error = 0xFFFFFFFF;
 
-    for (uint8_t i = 0; i < num_prescalers; i++)
+    for (fl::u8 i = 0; i < num_prescalers; i++)
     {
-        uint16_t current_prescaler = prescaler_values[i];
-        uint32_t counts = (F_CPU / current_prescaler) / 1000;
+        fl::u16 current_prescaler = prescaler_values[i];
+        fl::u32 counts = (F_CPU / current_prescaler) / 1000;
         if (counts == 0 || counts > 65535)
             continue;
 
-        uint32_t actual_period = (counts * current_prescaler * 1000000UL) / F_CPU; // in microseconds
-        int32_t error = (int32_t)actual_period - 1000; // error in microseconds
+        fl::u32 actual_period = (counts * current_prescaler * 1000000UL) / F_CPU; // in microseconds
+        fl::i32 error = (fl::i32)actual_period - 1000; // error in microseconds
 
         if (ABS(error) < min_error)
         {

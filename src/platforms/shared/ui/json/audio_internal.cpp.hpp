@@ -27,8 +27,8 @@ void JsonUiAudioInternal::updateInternal(const fl::Json &value) {
             for (size_t i = 0; i < audioDataArray.size(); ++i) {
                 fl::Json bufferJson = audioDataArray[i];
                 if (bufferJson.is_object()) {
-                    fl::vector<int16_t> samples;
-                    uint32_t timestamp = bufferJson["timestamp"] | 0;
+                    fl::vector<i16> samples;
+                    u32 timestamp = bufferJson["timestamp"] | 0;
 
                     if (bufferJson.contains("samples") &&
                         bufferJson["samples"].is_array()) {
@@ -41,8 +41,8 @@ void JsonUiAudioInternal::updateInternal(const fl::Json &value) {
                     // This part of the loop is now inside the if
                     // (bufferJson.is_object()) and directly uses 'samples' and
                     // 'timestamp'
-                    const fl::vector<int16_t> &current_samples = samples;
-                    uint32_t current_timestamp = timestamp;
+                    const fl::vector<i16> &current_samples = samples;
+                    u32 current_timestamp = timestamp;
 
                     if (!current_samples.empty()) {
                         AudioSampleImplPtr sample =

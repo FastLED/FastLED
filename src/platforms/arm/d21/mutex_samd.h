@@ -90,7 +90,7 @@ public:
 /// allow multiple lock() calls from the same context.
 class RecursiveMutexSAMD {
 private:
-    volatile uint32_t mLockCount;  // Number of times locked (0 = unlocked)
+    volatile u32 mLockCount;  // Number of times locked (0 = unlocked)
 
 public:
     RecursiveMutexSAMD();

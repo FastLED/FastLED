@@ -3,7 +3,7 @@
 
 namespace fl {
 
-FxEngine::FxEngine(uint16_t numLeds, bool interpolate)
+FxEngine::FxEngine(u16 numLeds, bool interpolate)
     : mTimeFunction(0), mCompositor(numLeds), mCurrId(0),
       mInterpolate(interpolate) {
     mEffects.setMaxSize(FASTLED_FX_ENGINE_MAX_FX);
@@ -32,7 +32,7 @@ int FxEngine::addFx(FxPtr effect) {
     return mCounter++;
 }
 
-bool FxEngine::nextFx(uint16_t duration) {
+bool FxEngine::nextFx(u16 duration) {
     bool ok = mEffects.next(mCurrId, &mCurrId, true);
     if (!ok) {
         return false;
@@ -41,7 +41,7 @@ bool FxEngine::nextFx(uint16_t duration) {
     return true;
 }
 
-bool FxEngine::setNextFx(int index, uint16_t duration) {
+bool FxEngine::setNextFx(int index, u16 duration) {
     if (!mEffects.has(index)) {
         return false;
     }

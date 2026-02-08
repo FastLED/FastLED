@@ -17,25 +17,25 @@
 fl::string CRGB::toString() const {
     fl::string out;
     out.append("CRGB(");
-    out.append(int16_t(r));
+    out.append(fl::i16(r));
     out.append(",");
-    out.append(int16_t(g));
+    out.append(fl::i16(g));
     out.append(",");
-    out.append(int16_t(b));
+    out.append(fl::i16(b));
     out.append(")");
     return out;
 }
 
-CRGB CRGB::computeAdjustment(uint8_t scale, const CRGB &colorCorrection,
+CRGB CRGB::computeAdjustment(fl::u8 scale, const CRGB &colorCorrection,
                              const CRGB &colorTemperature) {
 #if defined(NO_CORRECTION) && (NO_CORRECTION == 1)
     return CRGB(scale, scale, scale);
 #else
     CRGB adj(0, 0, 0);
     if (scale > 0) {
-        for (uint8_t i = 0; i < 3; ++i) {
-            uint8_t cc = colorCorrection.raw[i];
-            uint8_t ct = colorTemperature.raw[i];
+        for (fl::u8 i = 0; i < 3; ++i) {
+            fl::u8 cc = colorCorrection.raw[i];
+            fl::u8 ct = colorTemperature.raw[i];
             if (cc > 0 && ct > 0) {
                 // Optimized for AVR size. This function is only called very
                 // infrequently so size matters more than speed.
@@ -58,7 +58,7 @@ CRGB CRGB::blend(const CRGB &p1, const CRGB &p2, fract8 amountOfP2) {
 
 CRGB CRGB::blendAlphaMaxChannel(const CRGB &upper, const CRGB &lower) {
     // Use luma of upper pixel as alpha (0..255)
-    uint8_t max_component = 0;
+    fl::u8 max_component = 0;
     for (int i = 0; i < 3; ++i) {
         if (upper.raw[i] > max_component) {
             max_component = upper.raw[i];
@@ -66,7 +66,7 @@ CRGB CRGB::blendAlphaMaxChannel(const CRGB &upper, const CRGB &lower) {
     }
     // uint8_t alpha = upper.getLuma();
     // blend(lower, upper, alpha) → (lower * (255−alpha) + upper * alpha) / 256
-    uint8_t amountOf2 = 255 - max_component;
+    fl::u8 amountOf2 = 255 - max_component;
     return CRGB::blend(upper, lower, amountOf2);
 }
 
@@ -85,7 +85,7 @@ void CRGB::upscale(const CRGB *src, const fl::XYMap &srcXY, CRGB *dst,
     fl::upscale(src, dst, w, h, dstXY);
 }
 
-CRGB &CRGB::nscale8(uint8_t scaledown) {
+CRGB &CRGB::nscale8(fl::u8 scaledown) {
     nscale8x3(r, g, b, scaledown);
     return *this;
 }
@@ -108,7 +108,7 @@ CRGB CRGB::lerp8(const CRGB &other, fract8 amountOf2) const {
     return ret;
 }
 
-CRGB &CRGB::fadeToBlackBy(uint8_t fadefactor) {
+CRGB &CRGB::fadeToBlackBy(fl::u8 fadefactor) {
     nscale8x3(r, g, b, 255 - fadefactor);
     return *this;
 }

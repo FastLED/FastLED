@@ -9,9 +9,9 @@ namespace fl {
 
 class MockQuadSPIDriver {
 private:
-    fl::vector<uint8_t> mLastDMABuffer;
-    uint32_t mClockSpeed;
-    uint32_t mTransmissionCount;
+    fl::vector<u8> mLastDMABuffer;
+    u32 mClockSpeed;
+    u32 mTransmissionCount;
     bool mTransmissionActive;
 
 public:
@@ -22,7 +22,7 @@ public:
     }
 
     // Fake DMA transmission (just captures data)
-    void transmitDMA(const uint8_t* buffer, size_t length) {
+    void transmitDMA(const u8* buffer, size_t length) {
         mLastDMABuffer.clear();
         mLastDMABuffer.reserve(length);
         for (size_t i = 0; i < length; ++i) {
@@ -38,11 +38,11 @@ public:
     }
 
     // Test inspection methods
-    const fl::vector<uint8_t>& getLastTransmission() const {
+    const fl::vector<u8>& getLastTransmission() const {
         return mLastDMABuffer;
     }
 
-    uint32_t getTransmissionCount() const {
+    u32 getTransmissionCount() const {
         return mTransmissionCount;
     }
 
@@ -50,11 +50,11 @@ public:
         return mTransmissionActive;
     }
 
-    void setClockSpeed(uint32_t hz) {
+    void setClockSpeed(u32 hz) {
         mClockSpeed = hz;
     }
 
-    uint32_t getClockSpeed() const {
+    u32 getClockSpeed() const {
         return mClockSpeed;
     }
 
@@ -67,11 +67,11 @@ public:
 
     // Simulate de-interleaving to verify each lane's data
     // This reverses the bit-interleaving to extract per-lane data
-    fl::vector<fl::vector<uint8_t>> extractLanes(uint8_t num_lanes, size_t bytes_per_lane) const {
-        fl::vector<fl::vector<uint8_t>> lanes(num_lanes);
+    fl::vector<fl::vector<u8>> extractLanes(u8 num_lanes, size_t bytes_per_lane) const {
+        fl::vector<fl::vector<u8>> lanes(num_lanes);
 
         // Pre-allocate per-lane buffers
-        for (uint8_t lane = 0; lane < num_lanes; ++lane) {
+        for (u8 lane = 0; lane < num_lanes; ++lane) {
             lanes[lane].resize(bytes_per_lane);
         }
 
@@ -82,7 +82,7 @@ public:
         size_t output_bytes = bytes_per_lane * 4;  // Interleaved size
 
         for (size_t out_idx = 0; out_idx < output_bytes && out_idx < mLastDMABuffer.size(); ++out_idx) {
-            uint8_t interleaved_byte = mLastDMABuffer[out_idx];
+            u8 interleaved_byte = mLastDMABuffer[out_idx];
 
             // Which input byte does this correspond to?
             size_t in_byte_idx = out_idx / 4;
@@ -91,8 +91,8 @@ public:
             if (in_byte_idx >= bytes_per_lane) break;
 
             // Extract 2 bits for each lane
-            for (uint8_t lane = 0; lane < num_lanes && lane < 4; ++lane) {
-                uint8_t bits = (interleaved_byte >> (lane * 2)) & 0b11;
+            for (u8 lane = 0; lane < num_lanes && lane < 4; ++lane) {
+                u8 bits = (interleaved_byte >> (lane * 2)) & 0b11;
                 lanes[lane][in_byte_idx] |= (bits << ((3 - nibble_idx) * 2));
             }
         }

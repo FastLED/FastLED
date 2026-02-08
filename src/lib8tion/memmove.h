@@ -11,9 +11,9 @@
 
 #if defined(FL_IS_AVR) || defined(FASTLED_DOXYGEN)
 extern "C" {
-void * memmove8( void * dst, const void * src, uint16_t num );  ///< Faster alternative to memmove() on AVR
-void * memcpy8 ( void * dst, const void * src, uint16_t num )  __attribute__ ((noinline));  ///< Faster alternative to memcpy() on AVR
-void * memset8 ( void * ptr, uint8_t value, uint16_t num ) __attribute__ ((noinline)) ;  ///< Faster alternative to memset() on AVR
+void * memmove8( void * dst, const void * src, fl::u16 num );  ///< Faster alternative to memmove() on AVR
+void * memcpy8 ( void * dst, const void * src, fl::u16 num )  __attribute__ ((noinline));  ///< Faster alternative to memcpy() on AVR
+void * memset8 ( void * ptr, fl::u8 value, fl::u16 num ) __attribute__ ((noinline)) ;  ///< Faster alternative to memset() on AVR
 }
 #else
 #include "fl/stl/cstring.h"

@@ -249,7 +249,7 @@ void ChannelEngineUART::beginTransmission(
         // Calculate baud rate from LED timing
         // For WS2812: 3.2 Mbps achieves correct timing with 2-bit LUT encoding
         // TODO: Make baud rate configurable based on timing requirements
-        uint32_t baud_rate = 3200000; // 3.2 Mbps
+        u32 baud_rate = 3200000; // 3.2 Mbps
 
         UartPeripheralConfig config(
             baud_rate,         // mBaudRate
@@ -341,7 +341,7 @@ void ChannelEngineUART::prepareScratchBuffer(
 
 fl::shared_ptr<IChannelEngine> createUartEngine(int uart_num,
                                                 int tx_pin,
-                                                uint32_t baud_rate) {
+                                                u32 baud_rate) {
     // Note: Factory function implementation requires UartPeripheralEsp
     // This will be implemented when UartPeripheralEsp is available
     // For now, return nullptr
