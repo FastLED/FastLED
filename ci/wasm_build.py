@@ -347,7 +347,7 @@ def link_wasm(
     Returns True on success.
     """
     emcc = get_emcc()
-    library_archive = build_dir / "libfastled.a"
+    library_archive = build_dir / "ci" / "meson" / "wasm" / "libfastled.a"
 
     if not library_archive.exists():
         print(f"[WASM] Library not found: {library_archive}")

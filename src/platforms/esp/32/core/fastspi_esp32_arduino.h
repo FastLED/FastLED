@@ -70,21 +70,21 @@ namespace fl {
   #define FASTLED_SPI_USES_NEW_CONSTANTS 0
 #endif
 
-#if FL_IS_ESP_32S2
+#if defined(FL_IS_ESP_32S2)
     // https://github.com/FastLED/FastLED/issues/1782
 	#undef FASTLED_ESP32_SPI_BUS
 	#define FASTLED_ESP32_SPI_BUS FSPI
-#elif FL_IS_ESP_32S3
+#elif defined(FL_IS_ESP_32S3)
 	// #pragma message "Targeting ESP32S3, which has better SPI support. Configuring for flexible pin assignment."
 	#undef FASTLED_ESP32_SPI_BUS
 	// I *think* we have to "fake" being FSPI... there might be a better way to do this.
 	// whatever the case, this "tricks" the pin assignment defines below into using DATA_PIN & CLOCK_PIN
 	#define FASTLED_ESP32_SPI_BUS FSPI
-#elif FL_IS_ESP_32P4
+#elif defined(FL_IS_ESP_32P4)
 	// #pragma message "Targeting ESP32P4, which has flexible SPI support. Configuring for flexible pin assignment."
 	#undef FASTLED_ESP32_SPI_BUS
 	#define FASTLED_ESP32_SPI_BUS FSPI
-#elif FL_IS_ESP_32C2 || FL_IS_ESP_32C3 || FL_IS_ESP_32C5 || FL_IS_ESP_32C6 || FL_IS_ESP_32H2
+#elif defined(FL_IS_ESP_32C2) || defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2)
 	// #pragma message "Targeting ESP32-C2/C3/C5/C6/H2, using FSPI for hardware SPI support."
 	#undef FASTLED_ESP32_SPI_BUS
 	#define FASTLED_ESP32_SPI_BUS FSPI

@@ -569,9 +569,9 @@ public:
         if (done) {
             // Memory barrier: ensure all ISR writes are visible
             __asm__ __volatile__("" ::: "memory");  // Compiler barrier
-            #if FL_IS_ESP32_XTENSA
+            #if defined(FL_IS_ESP32_XTENSA)
             asm volatile("memw" ::: "memory");      // Hardware barrier (Xtensa)
-            #elif FL_IS_ESP32_RISCV
+            #elif defined(FL_IS_ESP32_RISCV)
             asm volatile("fence" ::: "memory");     // Hardware barrier (RISC-V)
             #endif
         }
@@ -621,9 +621,9 @@ public:
 
         // Memory barrier: ensure all ISR writes are visible to main thread
         __asm__ __volatile__("" ::: "memory");  // Compiler barrier
-        #if FL_IS_ESP32_XTENSA
+        #if defined(FL_IS_ESP32_XTENSA)
         asm volatile("memw" ::: "memory");      // Hardware barrier (Xtensa)
-        #elif FL_IS_ESP32_RISCV
+        #elif defined(FL_IS_ESP32_RISCV)
         asm volatile("fence" ::: "memory");     // Hardware barrier (RISC-V)
         #endif
 
