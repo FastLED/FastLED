@@ -656,6 +656,12 @@ The package installation daemon is a singleton background process that ensures P
   - Use `T | None` instead of `Optional[T]`
   - No need for `from __future__ import annotations` (works natively in Python 3.11+)
 
+- **Structured Return Types**: Prefer `@dataclass` over tuples and dicts for function return types:
+  - ✅ Correct: Return a `@dataclass` with named fields (e.g., `CompileResult(success=True, error_output="")`)
+  - ❌ Avoid: Returning `tuple[bool, str]` or `dict[str, Any]` — unnamed fields are error-prone and hard to read
+  - Named fields are self-documenting, support IDE autocomplete, and make refactoring safer
+  - Exception: Single-value returns or well-established conventions (e.g., `divmod`) don't need a dataclass
+
 - **Exception Handling - KeyboardInterrupt**:
   - **CRITICAL**: NEVER silently catch or suppress `KeyboardInterrupt` exceptions
   - When catching broad `Exception`, ALWAYS explicitly re-raise `KeyboardInterrupt` first:
