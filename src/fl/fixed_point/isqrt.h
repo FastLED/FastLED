@@ -8,10 +8,10 @@
 namespace fl {
 
 // Integer square root of a 64-bit value. Returns floor(sqrt(x)).
-inline uint32_t isqrt64(uint64_t x) {
+inline u32 isqrt64(u64 x) {
     if (x == 0) return 0;
-    uint64_t result = 0;
-    uint64_t bit = uint64_t(1) << 62;
+    u64 result = 0;
+    u64 bit = u64(1) << 62;
     while (bit > x) bit >>= 2;
     while (bit != 0) {
         if (x >= result + bit) {
@@ -22,14 +22,14 @@ inline uint32_t isqrt64(uint64_t x) {
         }
         bit >>= 2;
     }
-    return static_cast<uint32_t>(result);
+    return static_cast<u32>(result);
 }
 
 // Integer square root of a 32-bit value. Returns floor(sqrt(x)).
-inline uint16_t isqrt32(uint32_t x) {
+inline u16 isqrt32(u32 x) {
     if (x == 0) return 0;
-    uint32_t result = 0;
-    uint32_t bit = uint32_t(1) << 30;
+    u32 result = 0;
+    u32 bit = u32(1) << 30;
     while (bit > x) bit >>= 2;
     while (bit != 0) {
         if (x >= result + bit) {
@@ -40,7 +40,7 @@ inline uint16_t isqrt32(uint32_t x) {
         }
         bit >>= 2;
     }
-    return static_cast<uint16_t>(result);
+    return static_cast<u16>(result);
 }
 
 } // namespace fl

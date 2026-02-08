@@ -148,10 +148,10 @@ inline void Chasing_Spirals_Q31(Context &ctx) {
         Perlin::init_fade_lut(e->mFadeLUT);
         e->mFadeLUTInitialized = true;
     }
-    const int32_t *fade_lut = e->mFadeLUT;
+    const fl::i32 *fade_lut = e->mFadeLUT;
 
     // Permutation table for Perlin noise
-    const uint8_t *perm = animartrix_detail::PERLIN_NOISE;
+    const fl::u8 *perm = animartrix_detail::PERLIN_NOISE;
 
     // One noise layer: polar->cartesian, 2D Perlin, clamp to [0, 255].
     auto render_layer = [&](FP angle, FP dist_scaled,
@@ -175,17 +175,17 @@ inline void Chasing_Spirals_Q31(Context &ctx) {
         FP show2 = render_layer(px.base_angle + radial1, px.dist_scaled, linear1_scaled);
         FP show3 = render_layer(px.base_angle + radial2, px.dist_scaled, linear2_scaled);
 
-        int32_t r = (show1 * px.rf3).to_int();
-        int32_t g = (show2 * px.rf_half).to_int();
-        int32_t b = (show3 * px.rf_quarter).to_int();
+        fl::i32 r = (show1 * px.rf3).to_int();
+        fl::i32 g = (show2 * px.rf_half).to_int();
+        fl::i32 b = (show3 * px.rf_quarter).to_int();
 
         if (r < 0) r = 0; if (r > 255) r = 255;
         if (g < 0) g = 0; if (g > 255) g = 255;
         if (b < 0) b = 0; if (b > 255) b = 255;
 
-        leds[px.pixel_idx] = CRGB(static_cast<uint8_t>(r),
-                                   static_cast<uint8_t>(g),
-                                   static_cast<uint8_t>(b));
+        leds[px.pixel_idx] = CRGB(static_cast<fl::u8>(r),
+                                   static_cast<fl::u8>(g),
+                                   static_cast<fl::u8>(b));
     }
 }
 

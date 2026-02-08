@@ -172,7 +172,7 @@ inline Animartrix2AnimInfo getAnimartrix2Info(int index) {
 }
 
 // XYMap callback adapter
-inline uint16_t xyMapCallbackAdapter(uint16_t x, uint16_t y, void *userData) {
+inline u16 xyMapCallbackAdapter(u16 x, u16 y, void *userData) {
     Fx2d *self = static_cast<Fx2d *>(userData);
     return self->xyMap(x, y);
 }
@@ -216,9 +216,9 @@ class Animartrix2 : public Fx2d {
         if (mColorOrder != RGB) {
             for (int i = 0; i < mXyMap.getTotal(); ++i) {
                 CRGB &pixel = ctx.leds[i];
-                const uint8_t b0_index = RGB_BYTE0(mColorOrder);
-                const uint8_t b1_index = RGB_BYTE1(mColorOrder);
-                const uint8_t b2_index = RGB_BYTE2(mColorOrder);
+                const u8 b0_index = RGB_BYTE0(mColorOrder);
+                const u8 b1_index = RGB_BYTE1(mColorOrder);
+                const u8 b2_index = RGB_BYTE2(mColorOrder);
                 pixel = CRGB(pixel.raw[b0_index], pixel.raw[b1_index],
                              pixel.raw[b2_index]);
             }

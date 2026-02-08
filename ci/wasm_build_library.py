@@ -444,6 +444,11 @@ def create_thin_archive(
     # Ensure output directory exists
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
+    # Remove existing archive to prevent stale objects from persisting.
+    # The 'r' flag in emar inserts/replaces, so old entries would remain.
+    if output_path.exists():
+        output_path.unlink()
+
     # Create response file for object list (avoid command line length limits)
     response_file = BUILD_DIR / "archive_objects.rsp"
     with open(response_file, "w") as f:
@@ -687,8 +692,15 @@ def build_library(
             f"  {len(sources_to_compile)} sources to compile, {up_to_date_count} up-to-date"
         )
 
-        # Early exit optimization: If no sources need compilation AND archive exists, we're done
-        if not sources_to_compile and LIBRARY_OUTPUT.exists():
+        # Early exit optimization: If no sources need compilation AND archive exists
+        # AND the partial object exists and is older than the archive, we're done.
+        partial_object = BUILD_DIR / "libfastled_partial.o"
+        if (
+            not sources_to_compile
+            and LIBRARY_OUTPUT.exists()
+            and partial_object.exists()
+            and partial_object.stat().st_mtime <= LIBRARY_OUTPUT.stat().st_mtime
+        ):
             elapsed = time.time() - start_time
             print(
                 f"\n✓ Library is up-to-date, skipping archive creation ({elapsed:.2f}s)"

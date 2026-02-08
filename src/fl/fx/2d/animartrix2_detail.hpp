@@ -50,7 +50,7 @@ struct Context;
 using Visualizer = void (*)(Context &ctx);
 
 // Callback for mapping (x,y) to a 1D LED index
-using XYMapCallback = uint16_t (*)(uint16_t x, uint16_t y, void *userData);
+using XYMapCallback = fl::u16 (*)(fl::u16 x, fl::u16 y, void *userData);
 
 // Context: All shared state for animations, passed to free-function visualizers.
 // Internally wraps an animartrix_detail::ANIMartRIX to reuse existing logic.
@@ -86,7 +86,7 @@ struct ChasingSpiralPixelLUT {
     fl::s16x16 rf3;            // 3 * radial_filter (for red channel)
     fl::s16x16 rf_half;        // radial_filter / 2 (for green channel)
     fl::s16x16 rf_quarter;     // radial_filter / 4 (for blue channel)
-    uint16_t pixel_idx;        // Pre-computed xyMap(x, y) output pixel index
+    fl::u16 pixel_idx;        // Pre-computed xyMap(x, y) output pixel index
 };
 
 // LUT-accelerated 2D Perlin noise using s16x16 fixed-point.
@@ -95,38 +95,38 @@ struct ChasingSpiralPixelLUT {
 // The z=0 specialization halves work vs full 3D noise.
 struct perlin_s16x16 {
     static constexpr int HP_BITS = 24;
-    static constexpr int32_t HP_ONE = 1 << HP_BITS; // 16777216 = 1.0
+    static constexpr fl::i32 HP_ONE = 1 << HP_BITS; // 16777216 = 1.0
 
     // Build 257-entry Perlin fade LUT in Q8.24 format.
-    static inline void init_fade_lut(int32_t *table) {
+    static inline void init_fade_lut(fl::i32 *table) {
         for (int i = 0; i <= 256; i++) {
-            int64_t t = static_cast<int64_t>(i) * (HP_ONE / 256);
-            int64_t t2 = (t * t) >> HP_BITS;
-            int64_t t3 = (t2 * t) >> HP_BITS;
-            int64_t inner = (t * (6LL * HP_ONE)) >> HP_BITS;
+            fl::i64 t = static_cast<fl::i64>(i) * (HP_ONE / 256);
+            fl::i64 t2 = (t * t) >> HP_BITS;
+            fl::i64 t3 = (t2 * t) >> HP_BITS;
+            fl::i64 inner = (t * (6LL * HP_ONE)) >> HP_BITS;
             inner -= 15LL * HP_ONE;
             inner = (t * inner) >> HP_BITS;
             inner += 10LL * HP_ONE;
-            table[i] = static_cast<int32_t>((t3 * inner) >> HP_BITS);
+            table[i] = static_cast<fl::i32>((t3 * inner) >> HP_BITS);
         }
     }
 
     // 2D Perlin noise. Input s16x16, output s16x16 approx [-1, 1].
     // perm: 256-byte Perlin permutation table (indexed with & 255).
     static inline fl::s16x16 pnoise2d(fl::s16x16 fx, fl::s16x16 fy,
-                                      const int32_t *fade_lut,
-                                      const uint8_t *perm) {
+                                      const fl::i32 *fade_lut,
+                                      const fl::u8 *perm) {
         auto P = [perm](int x) -> int { return perm[x & 255]; };
 
         int X, Y;
-        int32_t x, y;
+        fl::i32 x, y;
         floor_frac(fx.raw(), X, x);
         floor_frac(fy.raw(), Y, y);
         X &= 255;
         Y &= 255;
 
-        int32_t u = fade(x, fade_lut);
-        int32_t v = fade(y, fade_lut);
+        fl::i32 u = fade(x, fade_lut);
+        fl::i32 v = fade(y, fade_lut);
 
         int A  = P(X)     + Y;
         int AA = P(A);
@@ -135,7 +135,7 @@ struct perlin_s16x16 {
         int BA = P(B);
         int BB = P(B + 1);
 
-        int32_t result = lerp(v,
+        fl::i32 result = lerp(v,
             lerp(u, grad(P(AA), x,          y),
                     grad(P(BA), x - HP_ONE, y)),
             lerp(u, grad(P(AB), x,          y - HP_ONE),
@@ -146,33 +146,33 @@ struct perlin_s16x16 {
 
   private:
     static constexpr int FP_BITS = fl::s16x16::FRAC_BITS;
-    static constexpr int32_t FP_ONE = 1 << FP_BITS;
+    static constexpr fl::i32 FP_ONE = 1 << FP_BITS;
 
     // Decompose s16x16 raw value into integer floor and Q8.24 fractional part.
-    static FASTLED_FORCE_INLINE void floor_frac(int32_t fp16, int &ifloor,
-                                                int32_t &frac24) {
+    static FASTLED_FORCE_INLINE void floor_frac(fl::i32 fp16, int &ifloor,
+                                                fl::i32 &frac24) {
         ifloor = fp16 >> FP_BITS;
         frac24 = (fp16 & (FP_ONE - 1)) << (HP_BITS - FP_BITS);
     }
 
     // LUT fade: 1 lookup + 1 lerp replaces 5 multiplies.
-    static FASTLED_FORCE_INLINE int32_t fade(int32_t t, const int32_t *table) {
-        uint32_t idx = static_cast<uint32_t>(t) >> 16;
-        int32_t frac = t & 0xFFFF;
-        int32_t a = table[idx];
-        int32_t b = table[idx + 1];
-        return a + static_cast<int32_t>(
-            (static_cast<int64_t>(frac) * (b - a)) >> 16);
+    static FASTLED_FORCE_INLINE fl::i32 fade(fl::i32 t, const fl::i32 *table) {
+        fl::u32 idx = static_cast<fl::u32>(t) >> 16;
+        fl::i32 frac = t & 0xFFFF;
+        fl::i32 a = table[idx];
+        fl::i32 b = table[idx + 1];
+        return a + static_cast<fl::i32>(
+            (static_cast<fl::i64>(frac) * (b - a)) >> 16);
     }
 
-    static FASTLED_FORCE_INLINE int32_t lerp(int32_t t, int32_t a, int32_t b) {
-        return a + static_cast<int32_t>(
-            (static_cast<int64_t>(t) * (b - a)) >> HP_BITS);
+    static FASTLED_FORCE_INLINE fl::i32 lerp(fl::i32 t, fl::i32 a, fl::i32 b) {
+        return a + static_cast<fl::i32>(
+            (static_cast<fl::i64>(t) * (b - a)) >> HP_BITS);
     }
 
     // z=0 gradient via branchless coefficient LUT.
-    static FASTLED_FORCE_INLINE int32_t grad(int hash, int32_t x, int32_t y) {
-        struct GradCoeff { int8_t cx; int8_t cy; };
+    static FASTLED_FORCE_INLINE fl::i32 grad(int hash, fl::i32 x, fl::i32 y) {
+        struct GradCoeff { fl::i8 cx; fl::i8 cy; };
         constexpr GradCoeff lut[16] = {
             { 1,  1}, {-1,  1}, { 1, -1}, {-1, -1},
             { 1,  0}, {-1,  0}, { 1,  0}, {-1,  0},
@@ -196,18 +196,18 @@ struct Context::Engine : public animartrix_detail::ANIMartRIX {
     // Persistent hp_fade LUT for Perlin noise (257 entries, Q8.24 format).
     // Replaces 5 multiplies per hp_fade call with table lookup + lerp.
     // Initialized on first use by q31::Chasing_Spirals_Q31.
-    int32_t mFadeLUT[257];
+    fl::i32 mFadeLUT[257];
     bool mFadeLUTInitialized;
 
     Engine(Context *ctx) : mCtx(ctx), mFadeLUT{}, mFadeLUTInitialized(false) {}
 
     void setPixelColorInternal(int x, int y,
                                animartrix_detail::rgb pixel) override {
-        uint16_t idx = mCtx->xyMapFn(x, y, mCtx->xyMapUserData);
+        fl::u16 idx = mCtx->xyMapFn(x, y, mCtx->xyMapUserData);
         mCtx->leds[idx] = CRGB(pixel.red, pixel.green, pixel.blue);
     }
 
-    uint16_t xyMap(uint16_t x, uint16_t y) override {
+    fl::u16 xyMap(fl::u16 x, fl::u16 y) override {
         return mCtx->xyMapFn(x, y, mCtx->xyMapUserData);
     }
 };
@@ -3450,7 +3450,7 @@ inline void Module_Experiment10(Context &ctx) {
 
             e->pixel = e->rgb_sanity_check(e->pixel);
 
-            uint8_t a = e->getTime() / 100;
+            fl::u8 a = e->getTime() / 100;
             CRGB p = CRGB(CHSV(((a + e->show1 + e->show2) + e->show3), 255, 255));
             animartrix_detail::rgb pixel;
             pixel.red = p.red;
@@ -3568,7 +3568,7 @@ inline void Fluffy_Blobs(Context &ctx) {
 // Q31 optimized Chasing_Spirals extracted to its own file.
 // Included after main namespace so all types are defined.
 #define ANIMARTRIX2_CHASING_SPIRALS_INTERNAL
-#include "fl/fx/2d/chasing_spirals.hpp" // nolint
+#include "fl/fx/2d/chasing_spirals.hpp" // allow-include-after-namespace
 
 #if FL_ANIMARTRIX_USES_FAST_MATH
 FL_OPTIMIZATION_LEVEL_O3_END

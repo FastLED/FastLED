@@ -199,7 +199,7 @@ def compile_meson(
                 if quiet or not verbose:
                     # Print error and failure lines so compiler errors are never silently swallowed
                     stripped_lower = stripped.lower()
-                    if 'error:' in stripped_lower or 'FAILED:' in stripped:
+                    if "error:" in stripped_lower or "FAILED:" in stripped:
                         _ts_print(line, file=sys.stderr)
                     continue
 

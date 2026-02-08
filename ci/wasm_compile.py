@@ -1,6 +1,4 @@
 import argparse
-import json
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -115,21 +113,23 @@ def main() -> int:
         )
     console.print()
 
-    # Compile the WASM using native toolchain (clang-tool-chain emscripten)
+    # Compile the WASM using Meson + Ninja build system
     console.print(
         f"[bold cyan]Step 1/{'2' if args.run else '1'}:[/bold cyan] Compiling WASM..."
     )
 
-    # Use native compiler instead of Docker-based fastled command
     # Output to examples/<name>/fastled_js/fastled.js to match expected location
     output_dir = Path("examples") / example_name / "fastled_js"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     output_js = output_dir / "fastled.js"
+
+    # Use the new Meson-based WASM build orchestrator
+    # It handles: meson setup, library build, sketch compile, link, template copy, manifest
     compile_cmd = [
         sys.executable,
         "-m",
-        "ci.wasm_compile_native",
+        "ci.wasm_build",
         "--example",
         example_name,
         "-o",
@@ -140,83 +140,6 @@ def main() -> int:
     if compile_result != 0:
         console.print("[bold red]✗ WASM compilation failed[/bold red]")
         return compile_result
-
-    # Copy template files to output directory
-    template_dir = Path("src") / "platforms" / "wasm" / "compiler"
-
-    # Copy individual template files
-    template_files = [
-        "index.html",
-        "index.css",
-        "index.js",
-        "jsconfig.json",
-        "types.d.ts",
-        "emscripten.d.ts",
-    ]
-
-    for template_file in template_files:
-        src = template_dir / template_file
-        dst = output_dir / template_file
-        if src.exists():
-            shutil.copy2(src, dst)
-            console.print(f"[dim]Copied {template_file} to output directory[/dim]")
-        else:
-            console.print(f"[yellow]Warning: Template file not found: {src}[/yellow]")
-
-    # Copy entire modules directory
-    modules_src = template_dir / "modules"
-    modules_dst = output_dir / "modules"
-    if modules_src.exists():
-        if modules_dst.exists():
-            shutil.rmtree(modules_dst)
-        shutil.copytree(modules_src, modules_dst)
-        console.print("[dim]Copied modules directory to output[/dim]")
-    else:
-        console.print(
-            f"[yellow]Warning: modules directory not found: {modules_src}[/yellow]"
-        )
-
-    # Copy entire vendor directory (Three.js and other third-party libraries)
-    vendor_src = template_dir / "vendor"
-    vendor_dst = output_dir / "vendor"
-    if vendor_src.exists():
-        if vendor_dst.exists():
-            shutil.rmtree(vendor_dst)
-        shutil.copytree(vendor_src, vendor_dst)
-        console.print("[dim]Copied vendor directory to output[/dim]")
-    else:
-        console.print(
-            f"[yellow]Warning: vendor directory not found: {vendor_src}[/yellow]"
-        )
-
-    # Generate files.json manifest for data files
-    # This lists data files (.json, .csv, .txt, .bin, etc.) that the sketch can load
-    example_dir = Path("examples") / example_name
-    data_extensions = {".json", ".csv", ".txt", ".cfg", ".bin", ".dat", ".mp3", ".wav"}
-    data_files: list[dict[str, str | int]] = []
-
-    # Scan example directory for data files (exclude .ino and fastled_js output dir)
-    for file_path in example_dir.rglob("*"):
-        if (
-            file_path.is_file()
-            and file_path.suffix.lower() in data_extensions
-            and "fastled_js" not in file_path.parts
-        ):
-            # Get relative path from example directory
-            rel_path = file_path.relative_to(example_dir)
-            data_files.append({"path": str(rel_path), "size": file_path.stat().st_size})
-
-    # Write files.json to output directory
-    files_json_path = output_dir / "files.json"
-    with open(files_json_path, "w", encoding="utf-8") as f:
-        json.dump(data_files, f, indent=2)
-
-    if data_files:
-        console.print(
-            f"[dim]Generated files.json with {len(data_files)} data file(s)[/dim]"  # pyright: ignore[reportUnknownArgumentType]
-        )
-    else:
-        console.print("[dim]Generated empty files.json (no data files found)[/dim]")
 
     console.print("[bold green]✓ WASM compilation successful[/bold green]")
 

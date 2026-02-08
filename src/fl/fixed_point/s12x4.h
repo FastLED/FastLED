@@ -23,9 +23,9 @@ class s12x4 {
     constexpr s12x4() = default;
 
     explicit constexpr s12x4(float f)
-        : mValue(static_cast<int16_t>(f * (1 << FRAC_BITS))) {}
+        : mValue(static_cast<i16>(f * (1 << FRAC_BITS))) {}
 
-    static FASTLED_FORCE_INLINE s12x4 from_raw(int16_t raw) {
+    static FASTLED_FORCE_INLINE s12x4 from_raw(i16 raw) {
         s12x4 r;
         r.mValue = raw;
         return r;
@@ -33,20 +33,20 @@ class s12x4 {
 
     // ---- Access ------------------------------------------------------------
 
-    int16_t raw() const { return mValue; }
-    int16_t to_int() const { return mValue >> FRAC_BITS; }
+    i16 raw() const { return mValue; }
+    i16 to_int() const { return mValue >> FRAC_BITS; }
     float to_float() const { return static_cast<float>(mValue) / (1 << FRAC_BITS); }
 
     // ---- Fixed-point arithmetic --------------------------------------------
 
     FASTLED_FORCE_INLINE s12x4 operator*(s12x4 b) const {
-        return from_raw(static_cast<int16_t>(
-            (static_cast<int32_t>(mValue) * b.mValue) >> FRAC_BITS));
+        return from_raw(static_cast<i16>(
+            (static_cast<i32>(mValue) * b.mValue) >> FRAC_BITS));
     }
 
     FASTLED_FORCE_INLINE s12x4 operator/(s12x4 b) const {
-        return from_raw(static_cast<int16_t>(
-            (static_cast<int32_t>(mValue) << FRAC_BITS) / b.mValue));
+        return from_raw(static_cast<i16>(
+            (static_cast<i32>(mValue) << FRAC_BITS) / b.mValue));
     }
 
     FASTLED_FORCE_INLINE s12x4 operator+(s12x4 b) const {
@@ -67,11 +67,11 @@ class s12x4 {
 
     // ---- Scalar multiply (no fixed-point shift) ----------------------------
 
-    FASTLED_FORCE_INLINE s12x4 operator*(int16_t scalar) const {
+    FASTLED_FORCE_INLINE s12x4 operator*(i16 scalar) const {
         return from_raw(mValue * scalar);
     }
 
-    friend FASTLED_FORCE_INLINE s12x4 operator*(int16_t scalar, s12x4 fp) {
+    friend FASTLED_FORCE_INLINE s12x4 operator*(i16 scalar, s12x4 fp) {
         return s12x4::from_raw(scalar * fp.mValue);
     }
 
@@ -91,19 +91,19 @@ class s12x4 {
     }
 
     static FASTLED_FORCE_INLINE s12x4 floor(s12x4 x) {
-        constexpr int16_t frac_mask = (1 << FRAC_BITS) - 1;
+        constexpr i16 frac_mask = (1 << FRAC_BITS) - 1;
         return from_raw(x.mValue & ~frac_mask);
     }
 
     static FASTLED_FORCE_INLINE s12x4 ceil(s12x4 x) {
-        constexpr int16_t frac_mask = (1 << FRAC_BITS) - 1;
-        int16_t floored = x.mValue & ~frac_mask;
+        constexpr i16 frac_mask = (1 << FRAC_BITS) - 1;
+        i16 floored = x.mValue & ~frac_mask;
         if (x.mValue & frac_mask) floored += (1 << FRAC_BITS);
         return from_raw(floored);
     }
 
     static FASTLED_FORCE_INLINE s12x4 fract(s12x4 x) {
-        constexpr int16_t frac_mask = (1 << FRAC_BITS) - 1;
+        constexpr i16 frac_mask = (1 << FRAC_BITS) - 1;
         return from_raw(x.mValue & frac_mask);
     }
 
@@ -190,14 +190,14 @@ class s12x4 {
 
     static FASTLED_FORCE_INLINE s12x4 sqrt(s12x4 x) {
         if (x.mValue <= 0) return s12x4();
-        return from_raw(static_cast<int16_t>(
-            fl::isqrt32(static_cast<uint32_t>(x.mValue) << FRAC_BITS)));
+        return from_raw(static_cast<i16>(
+            fl::isqrt32(static_cast<u32>(x.mValue) << FRAC_BITS)));
     }
 
     static FASTLED_FORCE_INLINE s12x4 rsqrt(s12x4 x) {
         s12x4 s = sqrt(x);
         if (s.mValue == 0) return s12x4();
-        return from_raw(static_cast<int16_t>(1) << FRAC_BITS) / s;
+        return from_raw(static_cast<i16>(1) << FRAC_BITS) / s;
     }
 
     static FASTLED_FORCE_INLINE s12x4 pow(s12x4 base, s12x4 exp) {
@@ -211,26 +211,26 @@ class s12x4 {
     // ---- Trigonometry ------------------------------------------------------
 
     static FASTLED_FORCE_INLINE s12x4 sin(s12x4 angle) {
-        return from_raw(static_cast<int16_t>(fl::sin32(angle_to_a24(angle)) >> 27));
+        return from_raw(static_cast<i16>(fl::sin32(angle_to_a24(angle)) >> 27));
     }
 
     static FASTLED_FORCE_INLINE s12x4 cos(s12x4 angle) {
-        return from_raw(static_cast<int16_t>(fl::cos32(angle_to_a24(angle)) >> 27));
+        return from_raw(static_cast<i16>(fl::cos32(angle_to_a24(angle)) >> 27));
     }
 
     // Combined sin+cos from s12x4 radians. Output in s12x4 [-1, 1].
     static FASTLED_FORCE_INLINE void sincos(s12x4 angle, s12x4 &out_sin,
                                             s12x4 &out_cos) {
-        uint32_t a24 = angle_to_a24(angle);
-        out_sin = from_raw(static_cast<int16_t>(fl::sin32(a24) >> 27));
-        out_cos = from_raw(static_cast<int16_t>(fl::cos32(a24) >> 27));
+        u32 a24 = angle_to_a24(angle);
+        out_sin = from_raw(static_cast<i16>(fl::sin32(a24) >> 27));
+        out_cos = from_raw(static_cast<i16>(fl::cos32(a24) >> 27));
     }
 
   private:
-    int16_t mValue = 0;
+    i16 mValue = 0;
 
     // Returns 0-based position of highest set bit, or -1 if v==0.
-    static FASTLED_FORCE_INLINE int highest_bit(uint32_t v) {
+    static FASTLED_FORCE_INLINE int highest_bit(u32 v) {
         if (v == 0) return -1;
         int r = 0;
         if (v & 0xFFFF0000u) { v >>= 16; r += 16; }
@@ -243,23 +243,23 @@ class s12x4 {
 
     // Fixed-point log base 2 for positive values.
     static FASTLED_FORCE_INLINE s12x4 log2_fp(s12x4 x) {
-        uint32_t val = static_cast<uint32_t>(x.mValue);
+        u32 val = static_cast<u32>(x.mValue);
         int msb = highest_bit(val);
-        int32_t int_part = msb - FRAC_BITS;
-        int32_t t;
+        i32 int_part = msb - FRAC_BITS;
+        i32 t;
         if (msb >= FRAC_BITS) {
-            t = static_cast<int32_t>(
+            t = static_cast<i32>(
                 (val >> (msb - FRAC_BITS)) - (1u << FRAC_BITS));
         } else {
-            t = static_cast<int32_t>(
+            t = static_cast<i32>(
                 (val << (FRAC_BITS - msb)) - (1u << FRAC_BITS));
         }
-        s12x4 tf = from_raw(static_cast<int16_t>(t));
+        s12x4 tf = from_raw(static_cast<i16>(t));
         constexpr s12x4 c0(1.4284f);
         constexpr s12x4 c1(-0.5765f);
         constexpr s12x4 c2(0.1481f);
         s12x4 frac_part = tf * (c0 + tf * (c1 + tf * c2));
-        return from_raw(static_cast<int16_t>(
+        return from_raw(static_cast<i16>(
             (int_part << FRAC_BITS) + frac_part.mValue));
     }
 
@@ -267,30 +267,30 @@ class s12x4 {
     static FASTLED_FORCE_INLINE s12x4 exp2_fp(s12x4 x) {
         s12x4 fl_val = floor(x);
         s12x4 fr = x - fl_val;
-        int32_t n = fl_val.mValue >> FRAC_BITS;
+        i32 n = fl_val.mValue >> FRAC_BITS;
         if (n >= INT_BITS - 1) return from_raw(0x7FFF);
         if (n < -FRAC_BITS) return s12x4();
-        int32_t int_pow;
+        i32 int_pow;
         if (n >= 0) {
-            int_pow = static_cast<int32_t>(1u << FRAC_BITS) << n;
+            int_pow = static_cast<i32>(1u << FRAC_BITS) << n;
         } else {
-            int_pow = static_cast<int32_t>(1u << FRAC_BITS) >> (-n);
+            int_pow = static_cast<i32>(1u << FRAC_BITS) >> (-n);
         }
         constexpr s12x4 one(1.0f);
         constexpr s12x4 d0(0.69314718f);
         constexpr s12x4 d1(0.24022651f);
         constexpr s12x4 d2(0.05550411f);
         s12x4 frac_pow = one + fr * (d0 + fr * (d1 + fr * d2));
-        int32_t result =
-            (int_pow * static_cast<int32_t>(frac_pow.mValue)) >> FRAC_BITS;
-        return from_raw(static_cast<int16_t>(result));
+        i32 result =
+            (int_pow * static_cast<i32>(frac_pow.mValue)) >> FRAC_BITS;
+        return from_raw(static_cast<i16>(result));
     }
 
     // Converts s12x4 radians to sin32/cos32 input format.
-    static FASTLED_FORCE_INLINE uint32_t angle_to_a24(s12x4 angle) {
+    static FASTLED_FORCE_INLINE u32 angle_to_a24(s12x4 angle) {
         // 256/(2*PI) in s16x16 — converts radians to sin32/cos32 format.
-        static constexpr int32_t RAD_TO_24 = 2670177;
-        return static_cast<uint32_t>(
+        static constexpr i32 RAD_TO_24 = 2670177;
+        return static_cast<u32>(
             (static_cast<int64_t>(angle.mValue) * RAD_TO_24) >> FRAC_BITS);
     }
 
