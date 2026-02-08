@@ -134,6 +134,95 @@ void loop() {
 
 **Note:** This advanced API is primarily for runtime configuration or testing. Most users should use `FastLED.addLeds<>()` which automatically selects the best engine and uses static storage.
 
+## Runtime Reconfiguration with `applyConfig()`
+
+Once a channel is created and registered, you can update its reconfigurable settings at runtime without destroying and recreating it. This is useful for LED controller software where users change settings through a UI.
+
+### What `applyConfig()` updates:
+- **RGB order** (`GRB`, `BGR`, `RGB`, etc.)
+- **LED buffer** (pointer and size — can switch to a different array)
+- **Color correction**
+- **Color temperature**
+- **Dither mode**
+- **RGBW settings**
+
+### What it does NOT change (structural/identity fields):
+- Pin assignment
+- Chipset timing
+- Engine binding
+- Channel ID
+
+### Example: Reconfigure a channel at runtime
+
+```cpp
+#include "FastLED.h"
+#include "fl/channels/channel.h"
+#include "fl/channels/config.h"
+
+#define PIN 16
+
+CRGB leds1[256];
+fl::ChannelPtr channel;
+
+void setup() {
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::ChannelConfig config(PIN, timing, fl::span<CRGB>(leds1, 256), GRB);
+    channel = fl::Channel::create(config);
+    FastLED.add(channel);
+}
+
+// Called when user changes settings (e.g., from a web UI)
+void reconfigure(CRGB* newLeds, int newCount, EOrder newOrder) {
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::ChannelOptions opts;
+    opts.mCorrection = TypicalSMD5050;
+    opts.mTemperature = CRGB(200, 180, 160);
+    opts.mDitherMode = DISABLE_DITHER;
+
+    fl::ChannelConfig newConfig(PIN, timing,
+        fl::span<CRGB>(newLeds, newCount), newOrder, opts);
+    channel->applyConfig(newConfig);
+    // Channel keeps its ID, pin, engine — only the settings above change.
+}
+
+void loop() {
+    fill_solid(leds1, 256, CRGB::Red);
+    FastLED.show();
+    delay(20);
+}
+```
+
+### Managing multiple channels
+
+Store `ChannelPtr` objects so you can reconfigure individual channels later:
+
+```cpp
+fl::vector<fl::ChannelPtr> channels;
+
+void setupChannels(const int* pins, int nrOfPins,
+                   CRGB* leds, const int* ledsPerPin) {
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    int startLed = 0;
+    for (int i = 0; i < nrOfPins; i++) {
+        fl::ChannelConfig config(pins[i], timing,
+            fl::span<CRGB>(&leds[startLed], ledsPerPin[i]), GRB);
+        auto ch = fl::Channel::create(config);
+        FastLED.add(ch);
+        channels.push_back(ch);
+        startLed += ledsPerPin[i];
+    }
+}
+
+void reconfigureChannel(int index, CRGB* newLeds, int newCount, EOrder order) {
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::ChannelConfig updated(pins[index], timing,
+        fl::span<CRGB>(newLeds, newCount), order);
+    channels[index]->applyConfig(updated);
+}
+```
+
+**Bug reports welcome:** If calling `applyConfig()` does not correctly update any of the reconfigurable fields listed above, please report it as a bug.
+
 ## Minimal Example: 4 Parallel LED Strips
 
 ```cpp
