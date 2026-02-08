@@ -25,6 +25,9 @@ class CompileResult:
 
     success: bool
     error_output: str
+    suppressed_errors: list[
+        str
+    ]  # Validation errors suppressed during quiet mode (max 5)
 
 
 # Error patterns that indicate stale build state recoverable by reconfiguration
@@ -183,6 +186,9 @@ def compile_meson(
             r"\[\d+/\d+\]\s+Linking (?:CXX executable|target)\s+(.+)$"
         )
 
+        # Validation error list for suppressed errors during quiet mode (max 5 entries)
+        suppressed_errors: list[str] = []
+
         # Stream output line by line to rewrite Ninja paths
         # In quiet mode or non-verbose mode, suppress all output (errors shown via error filter)
         # In verbose mode, show full compilation output for detailed debugging
@@ -208,8 +214,16 @@ def compile_meson(
                 # In verbose mode: show full compilation output for detailed debugging
                 if quiet or not verbose:
                     # Print error and failure lines so compiler errors are never silently swallowed
+                    # Exception: Store "Can't invoke target" errors in validation list (shown on self-healing)
                     stripped_lower = stripped.lower()
                     if "error:" in stripped_lower or "FAILED:" in stripped:
+                        # In quiet mode, store "Can't invoke target" errors for later diagnostic use
+                        # These are shown only when self-healing occurs (all targets fail)
+                        if quiet and "can't invoke target" in stripped_lower:
+                            # Cap at 5 errors to prevent list bloat
+                            if len(suppressed_errors) < 5:
+                                suppressed_errors.append(stripped)
+                            continue
                         _ts_print(line, file=sys.stderr)
                     continue
 
@@ -257,7 +271,9 @@ def compile_meson(
                 file=sys.stderr,
             )
             # Return failure - caller should trigger reconfiguration
-            return CompileResult(success=False, error_output=output)
+            return CompileResult(
+                success=False, error_output=output, suppressed_errors=suppressed_errors
+            )
 
         # Check for Ninja dependency database corruption
         # This appears as "ninja: warning: premature end of file; recovering"
@@ -338,18 +354,22 @@ def compile_meson(
                         file=sys.stderr,
                     )
 
-            return CompileResult(success=False, error_output=output)
+            return CompileResult(
+                success=False, error_output=output, suppressed_errors=suppressed_errors
+            )
 
         # Don't print "Compilation successful" - the transition to Running phase implies success
         # This was previously conditional on quiet mode, but it's always redundant
-        return CompileResult(success=True, error_output="")
+        return CompileResult(
+            success=True, error_output="", suppressed_errors=suppressed_errors
+        )
 
     except KeyboardInterrupt:
         handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         _ts_print(f"[MESON] Compilation failed with exception: {e}", file=sys.stderr)
-        return CompileResult(success=False, error_output=str(e))
+        return CompileResult(success=False, error_output=str(e), suppressed_errors=[])
 
 
 def _create_error_context_filter(

@@ -534,6 +534,9 @@ def run_meson_build_and_test(
                 compilation_success = False
                 successful_target: Optional[str] = None
                 last_error_output: str = ""
+                all_suppressed_errors: list[
+                    str
+                ] = []  # Collect validation errors from all attempts
 
                 for candidate in targets_to_try:
                     # Use quiet mode when there are fallbacks (suppress failure noise)
@@ -554,6 +557,8 @@ def run_meson_build_and_test(
                         )
                         break
                     last_error_output = result.error_output
+                    # Collect suppressed validation errors (capped at 5 per attempt)
+                    all_suppressed_errors.extend(result.suppressed_errors)
 
                 # Show the final result after target resolution
                 if compilation_success and has_fallbacks:
@@ -562,6 +567,17 @@ def run_meson_build_and_test(
                     # Note: Don't print "Compilation successful" - redundant before Running phase
 
                 if not compilation_success:
+                    # SELF-HEALING DIAGNOSTICS: Show validation errors that were suppressed during fallback
+                    # These errors explain why each target attempt failed (helps diagnose why self-healing occurred)
+                    if all_suppressed_errors:
+                        _print_error(
+                            "[MESON] Self-healing triggered - showing suppressed validation errors:"
+                        )
+                        for err in all_suppressed_errors[
+                            :5
+                        ]:  # Cap at 5 total (already capped per-attempt)
+                            _print_error(f"  {err}")
+
                     # Print diagnostic: show what was tried and why it failed
                     _print_error(f"[MESON] Compilation failed for test '{test_name}'")
                     if has_fallbacks:

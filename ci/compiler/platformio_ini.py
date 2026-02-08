@@ -324,13 +324,13 @@ class FrameworkInfo:
     def from_dict(cls, data: dict[str, Any]) -> "FrameworkInfo":
         """Create FrameworkInfo from raw CLI JSON response."""
         return cls(
-            name=data.get("name", ""),
-            title=data.get("title"),
-            description=data.get("description"),
-            url=data.get("url"),
-            homepage=data.get("homepage"),
-            platforms=data.get("platforms", []),
-            version=data.get("version"),
+            name=cast(str, data.get("name", "")),
+            title=cast(Optional[str], data.get("title")),
+            description=cast(Optional[str], data.get("description")),
+            url=cast(Optional[str], data.get("url")),
+            homepage=cast(Optional[str], data.get("homepage")),
+            platforms=cast(list[str], data.get("platforms", [])),
+            version=cast(Optional[str], data.get("version")),
         )
 
 

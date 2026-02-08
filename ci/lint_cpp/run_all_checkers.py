@@ -10,6 +10,7 @@ instead of K times (where K is the number of checkers).
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 from ci.lint_cpp.banned_headers_checker import (
     BANNED_HEADERS_COMMON,

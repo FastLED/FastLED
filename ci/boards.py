@@ -3,7 +3,7 @@
 import json
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 
 # An open source version of the esp-idf 5.1 platform for the ESP32 that
@@ -154,12 +154,13 @@ class Board:
             board_name=self.board_name,
             add_board_to_all=False,
         )
-        for field_name, field_info in self.__dataclass_fields__.items():
+        for field_name, _field_info in self.__dataclass_fields__.items():
             field_value: Any = getattr(self, field_name)
             # Create deep copy for mutable types to avoid shared references
             if isinstance(field_value, (list, dict)):
-                field_value = deepcopy(field_value)  # type: ignore[arg-type]
-            setattr(out, field_name, field_value)
+                setattr(out, field_name, cast(Any, deepcopy(field_value)))
+            else:
+                setattr(out, field_name, field_value)
         return out
 
     def get_real_board_name(self) -> str:

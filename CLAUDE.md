@@ -719,6 +719,14 @@ The package installation daemon is a singleton background process that ensures P
    - Pattern: Use `run_command()` to call Python helpers that output Meson-parseable data
    - Example: `tests/organize_tests.py` outputs `TEST:name:path:category` format
 
+5. **NO Global Error Suppression** - Meson/build errors MUST NOT be globally suppressed
+   - ❌ FORBIDDEN: Filtering out all error messages matching a pattern (e.g., `if "error:" in line: continue`)
+   - ✅ REQUIRED: Collect errors in a validation list with diagnostics about WHY they were suppressed
+   - ✅ REQUIRED: Show suppressed errors when self-healing or fallback mechanisms trigger
+   - Pattern: Store errors with context, cap at 5 entries, display only when needed for debugging
+   - Example: `ci/meson/compile.py` stores "Can't invoke target" errors during quiet fallback, shows them only when ALL targets fail
+   - Rationale: Silent error suppression hides critical diagnostic information needed to debug build failures
+
 **Current Architecture** (after refactoring):
 - `meson.build` (root): Source discovery + library compilation (⚠️ still has duplication - needs refactoring)
 - `tests/meson.build`: Uses `organize_tests.py` for test discovery (✅ refactored)

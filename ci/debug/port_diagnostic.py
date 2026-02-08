@@ -1,6 +1,3 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
-
-
 #!/usr/bin/env python3
 """Diagnostic script to identify processes holding a serial port open.
 
@@ -20,6 +17,8 @@ import sys
 from typing import Any, cast
 
 import psutil
+
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 
 def format_cmdline(cmdline: list[str] | None, max_length: int = 80) -> str:

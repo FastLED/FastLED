@@ -1,6 +1,3 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
-
-
 #!/usr/bin/env python3
 """Serial port detection and management utilities.
 
@@ -27,6 +24,8 @@ import psutil
 import serial.tools.list_ports
 from psutil import Process
 from serial.tools.list_ports_common import ListPortInfo
+
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 
 # Mapping from detected ESP chip type to PlatformIO environment

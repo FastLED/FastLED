@@ -3,6 +3,7 @@ import os
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from typing import Any
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.paths import PROJECT_ROOT

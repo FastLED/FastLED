@@ -1,6 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
-
-
+#!/usr/bin/env python3
 """
 Work in progress to generate doxygen via a script instead of a GitHub action.
 """
@@ -14,6 +12,8 @@ from pathlib import Path
 from typing import Optional
 
 from download import download  # type: ignore[import-untyped]
+
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 
 # Configs
