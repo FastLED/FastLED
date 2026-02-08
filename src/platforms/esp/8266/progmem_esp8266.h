@@ -4,6 +4,7 @@
 #pragma once
 
 #include <pgmspace.h>
+#include "fl/int.h"
 
 #define FL_PROGMEM    PROGMEM
 
@@ -13,3 +14,6 @@
 
 /// Force 4-byte alignment (for safe multibyte reads)
 #define FL_ALIGN_PROGMEM  __attribute__((aligned(4)))
+
+// Aligned 4-byte PROGMEM read using platform pgm_read_dword.
+#define FL_PGM_READ_DWORD_ALIGNED(addr) ((fl::u32)pgm_read_dword(addr))

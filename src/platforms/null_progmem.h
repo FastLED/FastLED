@@ -47,4 +47,15 @@ static inline fl::u32 fl_pgm_read_dword_near_safe(const void* addr) {
 #define FL_PGM_READ_DWORD_NEAR(x) (fl_pgm_read_dword_near_safe(x))
 #define FL_ALIGN_PROGMEM
 
+// Aligned 4-byte PROGMEM read. On non-AVR/non-flash platforms, data lives in
+// normal memory. Uses __builtin_memcpy (compiler intrinsic) which always lowers
+// to a single load instruction — unlike fl::memcpy which is a cross-TU call
+// that the compiler cannot inline without LTO.
+static inline fl::u32 _fl_progmem_aligned_read_4(const void* addr) {
+    fl::u32 result;
+    __builtin_memcpy(&result, addr, 4);
+    return result;
+}
+#define FL_PGM_READ_DWORD_ALIGNED(addr) (_fl_progmem_aligned_read_4(addr))
+
 #define FL_PROGMEM_USES_NULL 1

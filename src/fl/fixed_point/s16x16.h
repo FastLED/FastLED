@@ -219,11 +219,13 @@ class s16x16 {
     }
 
     // Combined sin+cos from s16x16 radians. Output in s16x16 [-1, 1].
+    // Uses sincos32 which shares angle decomposition for ~30% fewer ops.
     static FASTLED_FORCE_INLINE void sincos(s16x16 angle, s16x16 &out_sin,
                                             s16x16 &out_cos) {
         u32 a24 = angle_to_a24(angle);
-        out_sin = from_raw(fl::sin32(a24) >> 15);
-        out_cos = from_raw(fl::cos32(a24) >> 15);
+        SinCos32 sc = fl::sincos32(a24);
+        out_sin = from_raw(sc.sin_val >> 15);
+        out_cos = from_raw(sc.cos_val >> 15);
     }
 
   private:

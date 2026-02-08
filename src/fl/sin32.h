@@ -25,7 +25,7 @@ struct SinCos32 {
 
 // Read an i32 from the PROGMEM-qualified LUT.
 FASTLED_FORCE_INLINE static i32 sin32_pgm_read(const i32* addr) {
-    return (i32)FL_PGM_READ_DWORD_NEAR(addr);
+    return (i32)FL_PGM_READ_DWORD_ALIGNED(addr);
 }
 
 // Core branchless quadratic interpolation from quarter-wave table.

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "platforms/is_platform.h"
+#include "fl/int.h"
 
 #if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
 #include "platforms/null_progmem.h"
@@ -72,6 +73,9 @@
 #define FL_PGM_READ_DWORD_NEAR(x) (pgm_read_dword_near(x))
 
 /// @} PROGMEM
+
+// Aligned 4-byte PROGMEM read using AVR pgm_read_dword_near.
+#define FL_PGM_READ_DWORD_ALIGNED(addr) ((fl::u32)pgm_read_dword_near(addr))
 
 // Workaround for http://gcc.gnu.org/bugzilla/show_bug.cgi?id=34734
 #if __GNUC__ < 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ < 6))
