@@ -6,6 +6,7 @@ import sys
 import time
 from collections import deque
 from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
@@ -16,6 +17,14 @@ from ci.meson.output import _print_banner
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.timestamp_print import ts_print as _ts_print
+
+
+@dataclass
+class CompileResult:
+    """Result of a Meson compilation."""
+
+    success: bool
+    error_output: str
 
 
 # Error patterns that indicate stale build state recoverable by reconfiguration
@@ -44,7 +53,7 @@ def compile_meson(
     check: bool = False,
     quiet: bool = False,
     verbose: bool = False,
-) -> bool:
+) -> CompileResult:
     """
     Compile using Meson.
 
@@ -56,7 +65,7 @@ def compile_meson(
         verbose: Enable verbose output with section banners
 
     Returns:
-        True if compilation successful, False otherwise
+        CompileResult with success flag and error_output (empty on success).
     """
     cmd = [get_meson_executable(), "compile", "-C", str(build_dir)]
 
@@ -188,8 +197,9 @@ def compile_meson(
                     continue  # Skip Ninja directory change messages
                 if "calculating backend command" in stripped.lower():
                     continue  # Skip Meson backend calculation message
-                if "ERROR: Can't invoke target" in stripped:
-                    continue  # Skip target-not-found errors (handled by fallback)
+                # Note: "Can't invoke target" errors are NOT filtered here.
+                # They are preserved in output for caller diagnostics (e.g., ambiguous target).
+                # The caller controls whether to display them via the quiet parameter.
                 if "ninja: no work to do" in stripped.lower():
                     continue  # Skip no-work ninja message (already up to date)
 
@@ -247,7 +257,7 @@ def compile_meson(
                 file=sys.stderr,
             )
             # Return failure - caller should trigger reconfiguration
-            return False
+            return CompileResult(success=False, error_output=output)
 
         # Check for Ninja dependency database corruption
         # This appears as "ninja: warning: premature end of file; recovering"
@@ -328,18 +338,18 @@ def compile_meson(
                         file=sys.stderr,
                     )
 
-            return False
+            return CompileResult(success=False, error_output=output)
 
         # Don't print "Compilation successful" - the transition to Running phase implies success
         # This was previously conditional on quiet mode, but it's always redundant
-        return True
+        return CompileResult(success=True, error_output="")
 
     except KeyboardInterrupt:
         handle_keyboard_interrupt_properly()
         raise
     except Exception as e:
         _ts_print(f"[MESON] Compilation failed with exception: {e}", file=sys.stderr)
-        return False
+        return CompileResult(success=False, error_output=str(e))
 
 
 def _create_error_context_filter(

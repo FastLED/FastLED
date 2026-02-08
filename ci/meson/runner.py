@@ -17,7 +17,7 @@ from ci.meson.build_config import (
     perform_ninja_maintenance,
     setup_meson_build,
 )
-from ci.meson.compile import compile_meson, is_stale_build_error
+from ci.meson.compile import CompileResult, compile_meson, is_stale_build_error
 from ci.meson.compiler import check_meson_installed, get_meson_executable
 from ci.meson.output import _print_banner, _print_error, _print_info, _print_success
 from ci.meson.streaming import stream_compile_and_run_tests
@@ -514,25 +514,40 @@ def run_meson_build_and_test(
                         if c not in targets_to_try:
                             targets_to_try.append(c)
 
+                # Add path-qualified variants for disambiguation.
+                # Meson supports "subdir/target" format to resolve ambiguous names
+                # (e.g., "tests/fastled" disambiguates from the library "fastled").
+                path_qualified = []
+                for candidate in targets_to_try:
+                    qualified = f"tests/{candidate}"
+                    if candidate and "/" not in candidate and qualified not in targets_to_try:
+                        path_qualified.append(qualified)
+                targets_to_try.extend(path_qualified)
+
                 # When there are multiple candidates, run all in quiet mode
                 # Only show banner once with final resolved target
                 has_fallbacks = len(targets_to_try) > 1
                 compilation_success = False
                 successful_target: Optional[str] = None
+                last_error_output: str = ""
 
                 for candidate in targets_to_try:
                     # Use quiet mode when there are fallbacks (suppress failure noise)
-                    compilation_success = compile_meson(
+                    result = compile_meson(
                         build_dir,
                         target=candidate,
                         quiet=has_fallbacks,
                         verbose=verbose,
                     )
+                    compilation_success = result.success
                     if compilation_success:
                         successful_target = candidate
                         compile_target = candidate
-                        meson_test_name = candidate
+                        # Strip path prefix for executable lookup: meson_test_name is used
+                        # to find binaries in build_dir/tests/, so "tests/fastled" → "fastled"
+                        meson_test_name = candidate.removeprefix("tests/") if candidate else candidate
                         break
+                    last_error_output = result.error_output
 
                 # Show the final result after target resolution
                 if compilation_success and has_fallbacks:
@@ -541,6 +556,17 @@ def run_meson_build_and_test(
                     # Note: Don't print "Compilation successful" - redundant before Running phase
 
                 if not compilation_success:
+                    # Print diagnostic: show what was tried and why it failed
+                    _print_error(f"[MESON] Compilation failed for test '{test_name}'")
+                    if has_fallbacks:
+                        tried = ", ".join(str(t) for t in targets_to_try)
+                        _print_error(f"[MESON] Tried targets: {tried}")
+                    # Show the last meson error if it's informative (e.g., ambiguous target)
+                    if last_error_output:
+                        for line in last_error_output.splitlines():
+                            if "ERROR:" in line or "Can't invoke target" in line:
+                                _print_error(f"[MESON] {line.strip()}")
+                                break
                     return MesonTestResult(
                         success=False,
                         duration=time.time() - start_time,
@@ -599,7 +625,7 @@ def run_meson_build_and_test(
 
                 if not runner_exe.exists():
                     # Try compiling the runner target
-                    compile_meson(
+                    _runner_result = compile_meson(
                         build_dir, target="runner", quiet=True, verbose=verbose
                     )
 
