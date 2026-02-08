@@ -1,15 +1,6 @@
 #pragma once
 
-#include "fl/compiler_control.h"
-#include "platforms/is_platform.h"
-#ifdef FL_IS_ESP32
-
-#include "platforms/esp/32/feature_flags/enabled.h"
-
-#if FASTLED_RMT5
-
 #include "fl/stl/stdint.h"
-#include "common.h"
 
 namespace fl {
 
@@ -48,7 +39,3 @@ inline void buildNibbleLut(rmt_nibble_lut_t& lut, uint32_t zero_val, uint32_t on
 }
 
 } // namespace fl
-
-#endif // FASTLED_RMT5
-
-#endif // FL_IS_ESP32

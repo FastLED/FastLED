@@ -501,14 +501,14 @@ def setup_meson_build(
                 discover_test_files,  # type: ignore[import-not-found]
             )
             from test_config import (  # type: ignore[import-not-found]
+                EXCLUDED_TEST_DIRS,
                 EXCLUDED_TEST_FILES,
-                TEST_SUBDIRS,
             )
 
             # Get current test files
             tests_dir = source_dir / "tests"
             current_test_files: list[str] = sorted(
-                discover_test_files(tests_dir, EXCLUDED_TEST_FILES, TEST_SUBDIRS)  # type: ignore[no-untyped-call]
+                discover_test_files(tests_dir, EXCLUDED_TEST_FILES, EXCLUDED_TEST_DIRS)  # type: ignore[no-untyped-call]
             )
 
             # Check cached test file list

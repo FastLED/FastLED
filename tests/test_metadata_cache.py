@@ -43,27 +43,33 @@ def compute_test_files_hash(tests_dir: Path) -> str:
     Returns:
         SHA256 hash of all test file metadata
     """
-    # Find all test files using same pattern as discover_tests.py
+    # Find all *.cpp files recursively, same logic as discover_tests.py
+    from test_config import EXCLUDED_TEST_DIRS, EXCLUDED_TEST_FILES
+
     test_files: List[Path] = []
 
-    # Find all test_*.cpp files recursively
-    for f in sorted(tests_dir.rglob("test_*.cpp")):
+    for f in sorted(tests_dir.rglob("*.cpp")):
+        resolved = f.resolve()
+
+        # Skip excluded files
+        if resolved in EXCLUDED_TEST_FILES:
+            continue
+
+        # Skip files inside excluded directories
+        if any(resolved.is_relative_to(d) for d in EXCLUDED_TEST_DIRS):
+            continue
+
+        # Skip hidden directories and .dir directories
+        rel = f.relative_to(tests_dir)
+        parent_parts = rel.parts[:-1]
+        if any(
+            part.startswith(".") or part.endswith(".dir")
+            for part in parent_parts
+        ):
+            continue
         test_files.append(f)
 
-    # Also find *.cpp files in fl/, ftl/, fx/ subdirectories
-    for subdir in ["fl", "ftl", "fx"]:
-        subdir_path = tests_dir / subdir
-        if subdir_path.exists():
-            for f in sorted(subdir_path.glob("*.cpp")):
-                test_files.append(f)
-
-    # Deduplicate while preserving order
-    seen = set()
-    unique_files = []
-    for f in test_files:
-        if f not in seen:
-            seen.add(f)
-            unique_files.append(f)
+    unique_files = test_files  # already deduplicated by rglob + sorted
 
     # Create hash input from file metadata
     hash_input = []

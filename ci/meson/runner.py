@@ -577,15 +577,41 @@ def run_meson_build_and_test(
     # When a specific test is requested, run the executable directly
     # to avoid meson test discovery issues
     if meson_test_name:
-        # Find the test executable
+        # Find the test executable or DLL
+        # Tests can be either:
+        # 1. A copied runner .exe (e.g., fl_async.exe) - legacy naming
+        # 2. A DLL loaded by the shared runner.exe (e.g., fl_fixed_point_s16x16.dll)
         test_exe_path = build_dir / "tests" / f"{meson_test_name}.exe"
-        if not test_exe_path.exists():
-            # Try Unix variant (no .exe extension)
-            test_exe_path = build_dir / "tests" / meson_test_name
+        test_cmd: list[str] = []
 
-        if not test_exe_path.exists():
+        if test_exe_path.exists():
+            # Found copied runner .exe
+            test_cmd = [str(test_exe_path)]
+        else:
+            # Try Unix variant (no .exe extension)
+            test_exe_unix = build_dir / "tests" / meson_test_name
+            if test_exe_unix.exists():
+                test_cmd = [str(test_exe_unix)]
+            else:
+                # Try DLL-based test architecture: runner.exe + test.dll
+                runner_exe = build_dir / "tests" / "runner.exe"
+                test_dll = build_dir / "tests" / f"{meson_test_name}.dll"
+
+                if not runner_exe.exists():
+                    # Try compiling the runner target
+                    compile_meson(build_dir, target="runner", quiet=True, verbose=verbose)
+
+                if runner_exe.exists() and test_dll.exists():
+                    test_cmd = [str(runner_exe), str(test_dll)]
+                elif runner_exe.exists() and not test_dll.exists():
+                    # Try .so for Linux
+                    test_so = build_dir / "tests" / f"{meson_test_name}.so"
+                    if test_so.exists():
+                        test_cmd = [str(runner_exe), str(test_so)]
+
+        if not test_cmd:
             _ts_print(
-                f"[MESON] Error: test executable not found: {test_exe_path}",
+                f"[MESON] Error: test executable not found for: {meson_test_name}",
                 file=sys.stderr,
             )
             return MesonTestResult(
@@ -602,7 +628,7 @@ def run_meson_build_and_test(
         # Run the test executable directly
         try:
             proc = RunningProcess(
-                [str(test_exe_path)],
+                test_cmd,
                 cwd=source_dir,  # Run from project root
                 timeout=600,  # 10 minute timeout
                 auto_run=True,

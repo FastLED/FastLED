@@ -14,24 +14,30 @@ def get_fuzzy_test_candidates(build_dir: Path, test_name: str) -> list[str]:
     """
     Get fuzzy match candidates for a test name using meson introspect.
 
-    This queries the Meson build system for all test targets containing the
+    This queries the Meson build system for all registered tests containing the
     test name substring, enabling fuzzy matching even when the build directory
     is freshly created and no executables exist yet.
 
+    Uses ``meson introspect --tests`` which returns registered test names directly,
+    avoiding issues with target type filtering (tests are shared libraries, not
+    executables, in the DLL-based test architecture).
+
     Args:
         build_dir: Meson build directory
-        test_name: Test name to search for (e.g., "async")
+        test_name: Test name to search for (e.g., "async", "s16x16")
 
     Returns:
-        List of matching target names (e.g., ["fl_async", "fl_async_logger"])
+        List of matching test names (e.g., ["fl_async", "fl_fixed_point_s16x16"])
     """
     if not build_dir.exists():
         return []
 
     try:
-        # Query Meson for all targets
+        # Query Meson for all registered tests (not targets)
+        # --tests returns test registrations which have the correct names
+        # regardless of whether the underlying target is exe, shared_library, etc.
         result = subprocess.run(
-            [get_meson_executable(), "introspect", str(build_dir), "--targets"],
+            [get_meson_executable(), "introspect", str(build_dir), "--tests"],
             capture_output=True,
             text=True,
             encoding="utf-8",
@@ -44,28 +50,16 @@ def get_fuzzy_test_candidates(build_dir: Path, test_name: str) -> list[str]:
             return []
 
         # Parse JSON output
-        targets = json.loads(result.stdout)
+        tests = json.loads(result.stdout)
 
-        # Filter targets:
-        # 1. Must be an executable (type == "executable")
-        # 2. Must be in tests/ directory
-        # 3. Must contain the test name substring (case-insensitive)
+        # Filter tests whose name contains the test_name substring (case-insensitive)
         test_name_lower = test_name.lower()
         candidates: list[str] = []
 
-        for target in targets:
-            if target.get("type") != "executable":
-                continue
-
-            target_name = target.get("name", "")
-            # Check if this is a test executable (defined in tests/ directory)
-            defined_in = target.get("defined_in", "")
-            if "tests" not in defined_in.lower():
-                continue
-
-            # Check if target name contains the test name substring
-            if test_name_lower in target_name.lower():
-                candidates.append(target_name)
+        for test in tests:
+            registered_name = test.get("name", "")
+            if test_name_lower in registered_name.lower():
+                candidates.append(registered_name)
 
         return candidates
 

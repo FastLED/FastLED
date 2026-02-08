@@ -3,12 +3,6 @@
 // Validates that buildNibbleLut() produces correct RMT symbols for all nibble values
 
 #include "test.h"
-
-#ifndef ESP32
-#define ESP32
-#endif
-
-
 #include "platforms/esp/32/drivers/rmt/rmt_5/rmt5_worker_lut.h"
 
 using namespace fl;
@@ -40,9 +34,9 @@ TEST_CASE("rmt5_nibble_lut_correctness") {
         }
     }
 
-    // Test specific byte conversion: 0b01101001 = 0x69
+    // Test specific byte conversion: 0x69 = 0110_1001
     // Bit pattern (MSB first): 0-1-1-0-1-0-0-1
-    uint8_t test_byte = 0b01101001;
+    uint8_t test_byte = 0x69;
     uint8_t high_nibble = test_byte >> 4;    // 0x6 = 0110
     uint8_t low_nibble = test_byte & 0x0F;   // 0x9 = 1001
 

@@ -19,13 +19,13 @@ NUM_WORKERS = 1 if os.environ.get("NO_PARALLEL") else (os.cpu_count() or 1) * 4
 
 
 class UsingNamespaceFlChecker(FileContentChecker):
-    """FileContentChecker implementation for detecting 'using namespace fl;' in headers."""
+    """FileContentChecker implementation for detecting 'using namespace fl;' in src/."""
 
     def __init__(self):
         self.violations: dict[str, list[tuple[int, str]]] = {}
 
     def should_process_file(self, file_path: str) -> bool:
-        """Check if file should be processed (only PROJECT_ROOT/src/ directory headers)."""
+        """Check if file should be processed (all C++ files in PROJECT_ROOT/src/)."""
         # Fast normalized path check
         normalized_path = file_path.replace("\\", "/")
 
@@ -41,12 +41,8 @@ class UsingNamespaceFlChecker(FileContentChecker):
         if "FastLED.h" in file_path:
             return False
 
-        # Exclude .cpp.hpp files (unity build implementation files, not traditional headers)
-        if file_path.endswith(".cpp.hpp"):
-            return False
-
-        # Only check header files
-        return any(file_path.endswith(ext) for ext in [".h", ".hpp"])
+        # Check all C++ file types
+        return any(file_path.endswith(ext) for ext in [".h", ".hpp", ".cpp", ".cpp.hpp"])
 
     def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check file content for 'using namespace fl;' declarations."""
@@ -80,12 +76,12 @@ class NoUsingNamespaceFlInHeaderTester(unittest.TestCase):
         return failings
 
     def test_no_using_namespace(self) -> None:
-        """Searches through the program files to check for 'using namespace fl;' in headers."""
+        """Searches through src/ files to check for 'using namespace fl;'."""
         # Use the new FileContentChecker-based approach
         src_dir = str(SRC_ROOT)
 
         # Collect files using collect_files_to_check
-        files_to_check = collect_files_to_check([src_dir], extensions=[".h", ".hpp"])
+        files_to_check = collect_files_to_check([src_dir], extensions=[".h", ".hpp", ".cpp"])
 
         # Create checker and processor
         checker = UsingNamespaceFlChecker()

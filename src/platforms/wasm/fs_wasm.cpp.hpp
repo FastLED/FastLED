@@ -258,13 +258,13 @@ FileDataPtr _createIfNotExists(const string &path, size_t len) {
 }
 
 } // namespace fl
-using namespace fl;
+
 extern "C" {
 
 EMSCRIPTEN_KEEPALIVE bool jsInjectFile(const char *path, const uint8_t *data,
                                        size_t len) {
 
-    auto inserted = _createIfNotExists(string(path), len);
+    auto inserted = fl::_createIfNotExists(fl::Str(path), len);
     if (!inserted) {
         FASTLED_WARN("File can only be injected once.");
         return false;
@@ -275,7 +275,7 @@ EMSCRIPTEN_KEEPALIVE bool jsInjectFile(const char *path, const uint8_t *data,
 
 EMSCRIPTEN_KEEPALIVE bool jsAppendFile(const char *path, const uint8_t *data,
                                        size_t len) {
-    auto entry = _findIfExists(string(path));
+    auto entry = fl::_findIfExists(fl::Str(path));
     if (!entry) {
         FASTLED_WARN("File must be declared before it can be appended.");
         return false;
@@ -286,7 +286,7 @@ EMSCRIPTEN_KEEPALIVE bool jsAppendFile(const char *path, const uint8_t *data,
 
 EMSCRIPTEN_KEEPALIVE bool jsDeclareFile(const char *path, size_t len) {
     // declare a file and it's length. But don't fill it in yet
-    auto inserted = _createIfNotExists(string(path), len);
+    auto inserted = fl::_createIfNotExists(fl::Str(path), len);
     if (!inserted) {
         FASTLED_WARN("File can only be declared once.");
         return false;

@@ -3,55 +3,56 @@ Test file discovery for FastLED test suite.
 
 This module finds and reports all test files that should be built and executed.
 It's designed to be called by the Meson build system during configuration.
+
+Discovery is fully automatic: every *.cpp file under tests/ is a test,
+except for files in EXCLUDED_TEST_FILES and directories in EXCLUDED_TEST_DIRS.
 """
 
 import sys
 from pathlib import Path
-from typing import List, Set
 
 
-def discover_test_files(tests_dir: Path, excluded: Set[str], test_subdirs: List[str] | None = None) -> List[str]:
+def discover_test_files(tests_dir: Path, excluded_files: set[Path], excluded_dirs: set[Path]) -> list[str]:
     """
     Discover all test files in the tests directory.
 
+    Recursively scans the entire tests/ tree for *.cpp files, excluding
+    infrastructure files and directories. No hardcoded subdirectory list needed.
+
     Args:
         tests_dir: Root directory containing test files
-        excluded: Set of filenames to exclude from discovery
-        test_subdirs: List of subdirectories to search for tests (defaults to ["fl", "fx", "ftl"])
+        excluded_files: Set of full paths to exclude (e.g., {Path(".../tests/doctest_main.cpp")})
+        excluded_dirs: Set of full directory paths to exclude (e.g., {Path(".../tests/shared")})
 
     Returns:
         List of relative paths (POSIX format) to test files, sorted
     """
-    if test_subdirs is None:
-        test_subdirs = ["fl", "fx", "ftl"]
+    test_files: list[str] = []
 
-    test_files: List[str] = []
+    for f in tests_dir.rglob("*.cpp"):
+        resolved = f.resolve()
 
-    # Find all test_*.cpp files recursively
-    for f in sorted(tests_dir.rglob("test_*.cpp")):
-        if f.name not in excluded:
-            rel_path = f.relative_to(tests_dir)
-            test_files.append(rel_path.as_posix())
+        # Skip excluded files
+        if resolved in excluded_files:
+            continue
 
-    # Also find *.cpp files directly in the root tests directory
-    for f in sorted(tests_dir.glob("*.cpp")):
-        if f.name not in excluded:
-            rel_path = f.relative_to(tests_dir)
-            test_files.append(rel_path.as_posix())
+        # Skip files inside excluded directories
+        if any(resolved.is_relative_to(d) for d in excluded_dirs):
+            continue
 
-    # Also find *.cpp files directly in specified subdirectories
-    for subdir in test_subdirs:
-        subdir_path = tests_dir / subdir
-        if subdir_path.exists():
-            for f in sorted(subdir_path.glob("*.cpp")):
-                rel_path = f.relative_to(tests_dir)
-                test_files.append(rel_path.as_posix())
+        # Skip hidden directories and .dir directories
+        rel = f.relative_to(tests_dir)
+        parent_parts = rel.parts[:-1]  # directory components only
+        if any(
+            part.startswith(".") or part.endswith(".dir")
+            for part in parent_parts
+        ):
+            continue
 
-    # Deduplicate while preserving order (use dict for Python 3.7+ ordered guarantee)
-    seen = {}
-    for path in test_files:
-        seen[path] = None
-    return list(seen.keys())
+        test_files.append(rel.as_posix())
+
+    # Sort and deduplicate
+    return sorted(set(test_files))
 
 
 def main() -> None:
@@ -66,10 +67,9 @@ def main() -> None:
         print(f"Error: Tests directory not found: {tests_dir}", file=sys.stderr)
         sys.exit(1)
 
-    # Exclude special files that have their own build rules or aren't standard tests
-    excluded: Set[str] = set()
+    from test_config import EXCLUDED_TEST_DIRS, EXCLUDED_TEST_FILES
 
-    test_files = discover_test_files(tests_dir, excluded)
+    test_files = discover_test_files(tests_dir, EXCLUDED_TEST_FILES, EXCLUDED_TEST_DIRS)
 
     # Output one file path per line
     for test_file in test_files:
