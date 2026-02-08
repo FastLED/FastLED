@@ -147,7 +147,7 @@ public:
 
     /// @brief Get the engine name for affinity binding
     /// @return "LCD_RGB"
-    const char* getName() const override { return "LCD_RGB"; }
+    fl::string getName() const override { return fl::string::from_literal("LCD_RGB"); }
 
     /// @brief Get engine capabilities (CLOCKLESS protocols only)
     /// @return Capabilities with supportsClockless=true, supportsSpi=false

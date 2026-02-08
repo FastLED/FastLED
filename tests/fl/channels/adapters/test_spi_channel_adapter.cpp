@@ -165,7 +165,7 @@ FL_TEST_CASE("SpiChannelEngineAdapter - Create with valid controllers") {
     auto adapter = SpiChannelEngineAdapter::create(controllers, priorities, names, "SPI_SINGLE");
 
     FL_CHECK(adapter != nullptr);
-    FL_CHECK_EQ(fl::string(adapter->getName()), fl::string("SPI_SINGLE"));
+    FL_CHECK_EQ(adapter->getName(), fl::string("SPI_SINGLE"));
     FL_CHECK_EQ(adapter->getPriority(), 5);
 }
 

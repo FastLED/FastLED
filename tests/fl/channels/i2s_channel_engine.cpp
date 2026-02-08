@@ -111,8 +111,7 @@ FL_TEST_CASE("ChannelEngineI2S - creation") {
     auto peripheral = createMockPeripheral();
     ChannelEngineI2S engine(peripheral);
 
-    FL_CHECK(engine.getName() != nullptr);
-    FL_CHECK(fl::strcmp(engine.getName(), "I2S") == 0);
+    FL_CHECK(engine.getName() == "I2S");
 }
 
 FL_TEST_CASE("ChannelEngineI2S - initial state is READY") {

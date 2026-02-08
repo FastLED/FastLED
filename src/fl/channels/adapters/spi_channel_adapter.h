@@ -99,7 +99,7 @@ public:
 
     /// @brief Get adapter name for debugging
     /// @return Engine name (e.g., "SPI_SINGLE")
-    const char* getName() const override { return mName.c_str(); }
+    fl::string getName() const override { return mName; }
 
     /// @brief Get engine capabilities (SPI protocols only)
     /// @return Capabilities with supportsSpi=true, supportsClockless=false

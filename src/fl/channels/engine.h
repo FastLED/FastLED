@@ -108,9 +108,9 @@ public:
     virtual EngineState poll() = 0;
 
     /// @brief Get the engine name for affinity binding
-    /// @return Engine name (e.g., "RMT", "SPI", "PARLIO"), or nullptr if unnamed
+    /// @return Engine name (e.g., "RMT", "SPI", "PARLIO"), or empty string if unnamed
     /// @note Used by Channel affinity system to bind channels to specific engines
-    virtual const char* getName() const { return nullptr; }
+    virtual fl::string getName() const { return fl::string::from_literal(""); }
 
     /// @brief Get engine capabilities (clockless, SPI, or both)
     /// @return Capabilities struct with bool flags for supported protocols

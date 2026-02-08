@@ -458,7 +458,7 @@ class ChannelEnginePARLIOImpl : public IChannelEngine {
 
     /// @brief Get the engine name for affinity binding
     /// @return "PARLIO"
-    const char* getName() const override { return "PARLIO"; }
+    fl::string getName() const override { return fl::string::from_literal("PARLIO"); }
 
     /// @brief Get engine capabilities (CLOCKLESS protocols only)
     /// @return Capabilities with supportsClockless=true, supportsSpi=false
@@ -589,7 +589,7 @@ class ChannelEnginePARLIO : public IChannelEngine {
 
     /// @brief Get the engine name for affinity binding
     /// @return "PARLIO"
-    const char* getName() const override { return "PARLIO"; }
+    fl::string getName() const override { return fl::string::from_literal("PARLIO"); }
 
     /// @brief Get engine capabilities (CLOCKLESS protocols only)
     /// @return Capabilities with supportsClockless=true, supportsSpi=false

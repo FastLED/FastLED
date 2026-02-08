@@ -172,7 +172,7 @@ public:
 
     /// @brief Get the engine name for affinity binding
     /// @return "UART"
-    const char* getName() const override { return "UART"; }
+    fl::string getName() const override { return fl::string::from_literal("UART"); }
 
     /// @brief Get engine capabilities (CLOCKLESS protocols only)
     /// @return Capabilities with supportsClockless=true, supportsSpi=false

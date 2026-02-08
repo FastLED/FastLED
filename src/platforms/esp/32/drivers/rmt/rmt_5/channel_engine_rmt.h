@@ -85,7 +85,7 @@ public:
      * @brief Get the engine name for affinity binding
      * @return "RMT"
      */
-    const char* getName() const override { return "RMT"; }
+    fl::string getName() const override { return fl::string::from_literal("RMT"); }
 
     /**
      * @brief Get engine capabilities (CLOCKLESS protocols only)

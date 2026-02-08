@@ -4,6 +4,7 @@
 #include "fl/engine_events.h"
 #include "fl/compiler_control.h"
 #include "fl/channels/channel.h"
+#include "fl/channels/channel_events.h"
 #include "fl/channels/bus_manager.h"
 #include "fl/trace.h"
 #include "fl/channels/engine.h"  // for IChannelEngine
@@ -127,14 +128,16 @@ void CFastLED::add(fl::ChannelPtr channel) {
 	}
 	mChannels.push_back(channel);
 	// Add channel to the CLEDController linked list
-	// Channel uses DeferRegister mode, so explicit addToList() call is required
-	channel->addToList();
+	// Channel uses DeferRegister mode, so explicit addToDrawList() call is required
+	// Note: addToDrawList() now fires onChannelAdded event
+	channel->addToDrawList();
 }
 
 void CFastLED::remove(fl::ChannelPtr channel) {
 	if (!channel) {
 		return;
 	}
+	// Note: removeFromDrawList() now fires onChannelRemoved event
 	channel->removeFromDrawList();
 	// Remove from internal storage (safe if not found - erase is a no-op)
 	mChannels.erase(channel);
@@ -600,4 +603,8 @@ void CFastLED::onEndShowLeds() {
 	#if FASTLED_HAS_ENGINE_EVENTS
 	fl::EngineEvents::onEndShowLeds();
 	#endif
+}
+
+fl::ChannelEvents& CFastLED::channelEvents() {
+	return fl::ChannelEvents::instance();
 }

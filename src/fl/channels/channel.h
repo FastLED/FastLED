@@ -16,6 +16,7 @@
 #include "pixel_controller.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/stdint.h"
+#include "fl/string.h"
 #include "fl/singleton.h"
 #include "pixeltypes.h"
 #include "fl/channels/config.h"
@@ -26,7 +27,6 @@ namespace fl {
 class IChannelEngine;
 class ChannelData;
 struct ChannelOptions;
-
 class Channel;
 FASTLED_SHARED_PTR(Channel);
 FASTLED_SHARED_PTR(ChannelData);
@@ -36,7 +36,7 @@ FASTLED_SHARED_PTR(ChannelData);
 ///
 /// Provides access to LED channel functionality for driving LED strips.
 /// RGB_ORDER is set to RGB - reordering is handled internally by the Channel
-class Channel: public CPixelLEDController<RGB> {
+class Channel: protected CPixelLEDController<RGB> {
 public:
     /// @brief Create a new channel with optional affinity binding
     /// @param config Channel configuration (includes optional affinity for engine selection)
@@ -51,6 +51,10 @@ public:
     /// @brief Get the channel ID
     /// @return Channel ID (always increments, starts at 0)
     i32 id() const { return mId; }
+
+    /// @brief Get the channel name
+    /// @return Channel name (user-specified or auto-generated "Channel_<id>")
+    const fl::string& name() const { return mName; }
 
     /// @brief Get the pin number for this channel (data pin)
     /// @return Pin number
@@ -92,6 +96,44 @@ public:
     /// @note Does NOT change: mPin, mTiming, mChipset, mEngine, mId
     void applyConfig(const ChannelConfig& config);
 
+    // Re-expose protected base class methods for external access
+    /// @brief Add this channel to the global controller draw list
+    void addToDrawList();
+
+    /// @brief Remove this channel from the global controller draw list
+    void removeFromDrawList();
+
+    /// @brief Get the number of LEDs in this channel
+    int size() const;
+
+    /// @brief Show the LEDs with optional brightness scaling
+    void showLeds(u8 brightness = 255);
+
+    /// @brief Check if this channel is in the controller draw list
+    bool isInDrawList() const;
+
+    /// @brief Get pointer to base CLEDController for linked list traversal
+    CLEDController* asController() { return static_cast<CLEDController*>(this); }
+    const CLEDController* asController() const { return static_cast<const CLEDController*>(this); }
+
+    /// @brief Get the LED array as a span (non-const)
+    fl::span<CRGB> leds();
+
+    /// @brief Get the LED array as a span (const)
+    fl::span<const CRGB> leds() const;
+
+    /// @brief Get the color correction
+    CRGB getCorrection();
+
+    /// @brief Get the color temperature
+    CRGB getTemperature();
+
+    /// @brief Get the dither mode
+    u8 getDither();
+
+    /// @brief Get the RGBW conversion mode
+    Rgbw getRgbw() const;
+
 private:
     // CPixelLEDController interface implementation
     virtual void showPixels(PixelController<RGB, 1, 0xFFFFFFFF>& pixels) override;
@@ -122,6 +164,7 @@ private:
     Channel& operator=(Channel&&) = delete;
 
     static i32 nextId();
+    static fl::string makeName(i32 id, const fl::optional<fl::string>& configName = fl::optional<fl::string>());
 
     ChipsetVariant mChipset;         // Chipset configuration (clockless or SPI)
     int mPin;                        // Data pin (backwards compatibility)
@@ -129,6 +172,7 @@ private:
     EOrder mRgbOrder;
     IChannelEngine* mEngine;         // Singleton pointer, not owned
     const i32 mId;
+    fl::string mName;               // User-specified or auto-generated name
     ChannelDataPtr mChannelData;
 };
 

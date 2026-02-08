@@ -3,6 +3,7 @@
 
 #include "platforms/is_platform.h"
 #include "fl/channels/channel.h"
+#include "fl/channels/channel_events.h"
 #include "fl/channels/chipset_helpers.h"
 #include "fl/channels/config.h"
 #include "fl/channels/data.h"
@@ -29,6 +30,13 @@ namespace fl {
 i32 Channel::nextId() {
     static fl::atomic<i32> gNextChannelId(0); // okay static in header
     return gNextChannelId.fetch_add(1);
+}
+
+fl::string Channel::makeName(i32 id, const fl::optional<fl::string>& configName) {
+    if (configName.has_value()) {
+        return configName.value();
+    }
+    return "Channel_" + fl::to_string(static_cast<int64_t>(id));
 }
 
 ChannelPtr Channel::create(const ChannelConfig &config) {
@@ -65,8 +73,12 @@ ChannelPtr Channel::create(const ChannelConfig &config) {
         }
     }
 
-    return fl::make_shared<Channel>(config.chipset, config.mLeds,
-                                     config.rgb_order, selectedEngine, config.options);
+    auto channel = fl::make_shared<Channel>(config.chipset, config.mLeds,
+                                              config.rgb_order, selectedEngine, config.options);
+    channel->mName = makeName(channel->mId, config.mName);
+    auto& events = ChannelEvents::instance();
+    events.onChannelCreated(*channel);
+    return channel;
 }
 
 Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
@@ -77,7 +89,8 @@ Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
     , mTiming(getTimingFromChipset(chipset))
     , mRgbOrder(rgbOrder)
     , mEngine(engine)
-    , mId(nextId()) {
+    , mId(nextId())
+    , mName(makeName(mId)) {
 #ifdef FL_IS_ESP32
     // ESP32: Initialize GPIO with pulldown to ensure stable LOW state
     // This prevents RX from capturing noise/glitches on uninitialized pins
@@ -112,7 +125,8 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
     , mTiming(timing)
     , mRgbOrder(rgbOrder)
     , mEngine(engine)
-    , mId(nextId()) {
+    , mId(nextId())
+    , mName(makeName(mId)) {
 #ifdef FL_IS_ESP32
     // ESP32: Initialize GPIO with pulldown to ensure stable LOW state
     gpio_set_pull_mode(static_cast<gpio_num_t>(pin), GPIO_PULLDOWN_ONLY);
@@ -131,15 +145,23 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
     mChannelData = ChannelData::create(mPin, mTiming);
 }
 
-Channel::~Channel() {}
+Channel::~Channel() {
+    auto& events = ChannelEvents::instance();
+    events.onChannelBeginDestroy(*this);
+}
 
 void Channel::applyConfig(const ChannelConfig& config) {
     mRgbOrder = config.rgb_order;
+    if (config.mName.has_value()) {
+        mName = config.mName.value();
+    }
     setLeds(config.mLeds);
     setCorrection(config.options.mCorrection);
     setTemperature(config.options.mTemperature);
     setDither(config.options.mDitherMode);
     setRgbw(config.options.mRgbw);
+    auto& events = ChannelEvents::instance();
+    events.onChannelConfigured(*this, config);
 }
 
 int Channel::getClockPin() const {
@@ -152,6 +174,7 @@ int Channel::getClockPin() const {
 
 void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     FL_SCOPED_TRACE;
+
     // Safety check: don't modify buffer if engine is currently transmitting it
     if (mChannelData->isInUse()) {
         FL_ASSERT(false, "Channel " << mId << ": Skipping update - buffer in use by engine");
@@ -231,6 +254,8 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     // Enqueue for transmission (will be sent when engine->show() is called)
     if (mEngine) {
         mEngine->enqueue(mChannelData);
+        auto& events = ChannelEvents::instance();
+        events.onChannelEnqueued(*this, mEngine->getName());
     }
 }
 
@@ -276,6 +301,57 @@ public:
 IChannelEngine* getStubChannelEngine() {
     static StubChannelEngine instance;
     return &instance;
+}
+
+// Re-exposed protected base class methods
+void Channel::addToDrawList() {
+    CPixelLEDController<RGB>::addToList();
+    // Fire event after adding to draw list (detectable even if user bypasses FastLED.add())
+    auto& events = ChannelEvents::instance();
+    events.onChannelAdded(*this);
+}
+
+void Channel::removeFromDrawList() {
+    CPixelLEDController<RGB>::removeFromDrawList();
+    // Fire event after removing from draw list (detectable even if user bypasses FastLED.remove())
+    auto& events = ChannelEvents::instance();
+    events.onChannelRemoved(*this);
+}
+
+int Channel::size() const {
+    return CPixelLEDController<RGB>::size();
+}
+
+void Channel::showLeds(u8 brightness) {
+    CPixelLEDController<RGB>::showLeds(brightness);
+}
+
+bool Channel::isInDrawList() const {
+    return CPixelLEDController<RGB>::isInList();
+}
+
+fl::span<CRGB> Channel::leds() {
+    return fl::span<CRGB>(CPixelLEDController<RGB>::leds(), CPixelLEDController<RGB>::size());
+}
+
+fl::span<const CRGB> Channel::leds() const {
+    return fl::span<const CRGB>(CPixelLEDController<RGB>::leds(), CPixelLEDController<RGB>::size());
+}
+
+CRGB Channel::getCorrection() {
+    return CPixelLEDController<RGB>::getCorrection();
+}
+
+CRGB Channel::getTemperature() {
+    return CPixelLEDController<RGB>::getTemperature();
+}
+
+u8 Channel::getDither() {
+    return CPixelLEDController<RGB>::getDither();
+}
+
+Rgbw Channel::getRgbw() const {
+    return CPixelLEDController<RGB>::getRgbw();
 }
 
 } // namespace fl

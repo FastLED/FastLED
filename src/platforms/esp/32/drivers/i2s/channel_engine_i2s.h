@@ -142,7 +142,7 @@ public:
 
     /// @brief Get the engine name for affinity binding
     /// @return "I2S"
-    const char* getName() const override { return "I2S"; }
+    fl::string getName() const override { return fl::string::from_literal("I2S"); }
 
     /// @brief Get engine capabilities (CLOCKLESS protocols only)
     /// @return Capabilities with supportsClockless=true, supportsSpi=false

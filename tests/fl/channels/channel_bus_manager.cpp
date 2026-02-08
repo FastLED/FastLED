@@ -56,7 +56,7 @@ public:
     // Test accessors
     int getTransmitCount() const { return mTransmitCount; }
     int getLastChannelCount() const { return mLastChannelCount; }
-    const char* getName() const override { return mName; }
+    fl::string getName() const override { return mName; }
     Capabilities getCapabilities() const override { return mCapabilities; }
     void reset() { mTransmitCount = 0; mLastChannelCount = 0; }
     void setShouldFail(bool shouldFail) { mShouldFail = shouldFail; }
@@ -872,7 +872,7 @@ public:
         return EngineState::READY;
     }
 
-    const char* getName() const override { return mName; }
+    fl::string getName() const override { return mName; }
     int getTransmitCount() const { return mTransmitCount; }
     int getLastChannelCount() const { return mLastChannelCount; }
     void reset() { mTransmitCount = 0; mLastChannelCount = 0; }
@@ -925,7 +925,7 @@ public:
         return EngineState::READY;
     }
 
-    const char* getName() const override { return mName; }
+    fl::string getName() const override { return mName; }
     int getTransmitCount() const { return mTransmitCount; }
     int getLastChannelCount() const { return mLastChannelCount; }
     void reset() { mTransmitCount = 0; mLastChannelCount = 0; }

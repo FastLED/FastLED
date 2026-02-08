@@ -109,6 +109,7 @@
 #include "fl/fastled.h"
 
 #include "fl/channels/channel.h"
+#include "fl/channels/channel_events.h"
 #include "fl/channels/bus_manager.h"
 #include "fl/channels/config.h"  // for ChannelConfig, MultiChannelConfig
 
@@ -482,6 +483,14 @@ public:
 	// This is disabled on AVR to save space.
 	void addListener(fl::EngineEvents::Listener *listener) { fl::EngineEvents::addListener(listener); }
 	void removeListener(fl::EngineEvents::Listener *listener) { fl::EngineEvents::removeListener(listener); }
+
+	/// @brief Access the channel event system
+	/// @return Reference to the ChannelEvents singleton
+	/// @note Use to register callbacks for channel lifecycle events
+	/// @code
+	/// int id = FastLED.channelEvents().onChannelCreated.add([](const fl::Channel& ch) { ... });
+	/// @endcode
+	static fl::ChannelEvents& channelEvents();
 
 	/// @name Manual Engine Events
 	/// When FASTLED_MANUAL_ENGINE_EVENTS is defined, these methods allow manual control of engine events.

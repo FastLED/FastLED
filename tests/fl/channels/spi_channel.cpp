@@ -212,7 +212,7 @@ public:
         return EngineState::READY;
     }
 
-    const char* getName() const override { return "MOCK_SPI"; }
+    fl::string getName() const override { return fl::string::from_literal("MOCK_SPI"); }
 
     /// @brief Predicate: only accept SPI chipsets (reject clockless)
     bool canHandle(const ChannelDataPtr& data) const override {

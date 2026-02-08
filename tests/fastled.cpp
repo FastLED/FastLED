@@ -124,7 +124,7 @@ public:
         return EngineState(EngineState::READY);
     }
 
-    const char* getName() const override { return "MOCK"; }
+    fl::string getName() const override { return fl::string::from_literal("MOCK"); }
 
     Capabilities getCapabilities() const override {
         return Capabilities(true, true);  // Mock accepts both clockless and SPI
@@ -176,19 +176,19 @@ FL_TEST_CASE("Channel API: Mock engine workflow (GitHub issue #2167)") {
     FL_CHECK(channel->getChannelEngine() == mockEngine.get());
 
     // Verify channel is NOT in controller list yet (deferred registration)
-    FL_CHECK(!channel->isInList());
+    FL_CHECK(!channel->isInDrawList());
 
     // Step 4: Add to FastLED
     FastLED.add(channel);
 
     // Verify channel IS NOW in controller list (explicit registration)
-    FL_CHECK(channel->isInList());
+    FL_CHECK(channel->isInDrawList());
 
     // Double-check by walking the list
     bool found = false;
     CLEDController* pCur = CLEDController::head();
     while (pCur) {
-        if (pCur == channel.get()) {
+        if (pCur == channel->asController()) {
             found = true;
             break;
         }
@@ -229,25 +229,25 @@ FL_TEST_CASE("Channel API: Double add protection") {
     FL_REQUIRE(channel != nullptr);
 
     // Before adding: not in list
-    FL_CHECK(!channel->isInList());
+    FL_CHECK(!channel->isInDrawList());
 
     // First add
     FastLED.add(channel);
-    FL_CHECK(channel->isInList());
+    FL_CHECK(channel->isInDrawList());
 
     // Second add (should be safe, no duplicate)
     FastLED.add(channel);
-    FL_CHECK(channel->isInList());
+    FL_CHECK(channel->isInDrawList());
 
     // Third add (should still be safe)
     FastLED.add(channel);
-    FL_CHECK(channel->isInList());
+    FL_CHECK(channel->isInDrawList());
 
     // Walk the list and count occurrences of this channel
     int occurrenceCount = 0;
     CLEDController* pCur = CLEDController::head();
     while (pCur) {
-        if (pCur == channel.get()) {
+        if (pCur == channel->asController()) {
             occurrenceCount++;
         }
         pCur = pCur->next();
@@ -282,15 +282,15 @@ FL_TEST_CASE("Channel API: Add and remove symmetry") {
     FL_REQUIRE(channel != nullptr);
 
     // Initial state: not in list
-    FL_CHECK(!channel->isInList());
+    FL_CHECK(!channel->isInDrawList());
 
     // Add to list
     FastLED.add(channel);
-    FL_CHECK(channel->isInList());
+    FL_CHECK(channel->isInDrawList());
 
     // Remove from list
     FastLED.remove(channel);
-    FL_CHECK(!channel->isInList());
+    FL_CHECK(!channel->isInDrawList());
 
     // Verify channel object is still valid (not destroyed)
     FL_CHECK(channel->size() == 8);
@@ -299,16 +299,16 @@ FL_TEST_CASE("Channel API: Add and remove symmetry") {
 
     // Can re-add if needed
     FastLED.add(channel);
-    FL_CHECK(channel->isInList());
+    FL_CHECK(channel->isInDrawList());
 
     // Remove again
     FastLED.remove(channel);
-    FL_CHECK(!channel->isInList());
+    FL_CHECK(!channel->isInDrawList());
 
     // Safe to call remove multiple times
     FastLED.remove(channel);
     FastLED.remove(channel);
-    FL_CHECK(!channel->isInList());
+    FL_CHECK(!channel->isInDrawList());
 
     // Clean up
     manager.setDriverEnabled("MOCK_REMOVE", false);
@@ -336,7 +336,7 @@ FL_TEST_CASE("Channel API: Internal ChannelPtr storage prevents dangling") {
 
     // After add, CFastLED holds an internal reference
     FastLED.add(channel);
-    FL_CHECK(channel->isInList());
+    FL_CHECK(channel->isInDrawList());
     FL_CHECK(channel.use_count() >= 2);  // caller + CFastLED internal
 
     // Drop local reference - channel should survive via CFastLED's storage
@@ -347,7 +347,7 @@ FL_TEST_CASE("Channel API: Internal ChannelPtr storage prevents dangling") {
     bool found = false;
     CLEDController* pCur = CLEDController::head();
     while (pCur) {
-        if (pCur == raw) {
+        if (pCur == raw->asController()) {
             found = true;
             break;
         }
@@ -364,15 +364,15 @@ FL_TEST_CASE("Channel API: Internal ChannelPtr storage prevents dangling") {
     FL_CHECK(channel2.use_count() >= 2);
 
     FastLED.remove(channel2);
-    FL_CHECK(!channel2->isInList());
+    FL_CHECK(!channel2->isInDrawList());
     FL_CHECK(channel2.use_count() == 1);  // only local ref remains
 
     // Clean up the first channel that's still in the list
     // Walk list and remove the raw pointer's entry
     pCur = CLEDController::head();
     while (pCur) {
-        if (pCur == raw) {
-            static_cast<fl::Channel*>(pCur)->removeFromDrawList();
+        if (pCur == raw->asController()) {
+            raw->removeFromDrawList();
             break;
         }
         pCur = pCur->next();
@@ -485,7 +485,7 @@ public:
     void enqueue(ChannelDataPtr) override {}
     void show() override {}
     EngineState poll() override { return EngineState::READY; }
-    const char* getName() const override { return "STUB_ADD_REMOVE"; }
+    fl::string getName() const override { return fl::string::from_literal("STUB_ADD_REMOVE"); }
     Capabilities getCapabilities() const override {
         return Capabilities(true, true);
     }
@@ -506,6 +506,10 @@ static bool controllerInList(CLEDController* ctrl) {
         cur = cur->next();
     }
     return false;
+}
+
+static bool controllerInList(fl::Channel* channel) {
+    return controllerInList(channel->asController());
 }
 
 FL_TEST_CASE("FastLED.add stores ChannelPtr - survives caller scope") {
@@ -566,7 +570,7 @@ FL_TEST_CASE("FastLED.add double-add is safe") {
     int count = 0;
     CLEDController* cur = CLEDController::head();
     while (cur) {
-        if (cur == ch.get()) count++;
+        if (cur == ch->asController()) count++;
         cur = cur->next();
     }
     FL_CHECK(count == 1);
@@ -697,3 +701,387 @@ FL_TEST_CASE("Channel LED span tracks underlying array correctly") {
     FL_CHECK(leds1[0] == CRGB::Red);
     FL_CHECK(leds1[1] == CRGB::Green);
 }
+
+// --- Channel Events Tests ---
+
+namespace channel_events_test {
+
+using namespace fl;
+
+/// @brief Event tracker for channel event testing
+struct EventTracker {
+    int mCreatedCount = 0;
+    int mBeginDestroyCount = 0;
+    int mAddedCount = 0;
+    int mRemovedCount = 0;
+    int mConfiguredCount = 0;
+    int mEnqueuedCount = 0;
+    fl::string mLastEngineName;
+    const Channel* mLastChannel = nullptr;
+
+    void reset() {
+        mCreatedCount = 0;
+        mBeginDestroyCount = 0;
+        mAddedCount = 0;
+        mRemovedCount = 0;
+        mConfiguredCount = 0;
+        mEnqueuedCount = 0;
+        mLastEngineName.clear();
+        mLastChannel = nullptr;
+    }
+
+    void onCreated(const Channel& ch) {
+        mCreatedCount++;
+        mLastChannel = &ch;
+    }
+
+    void onBeginDestroy(const Channel& ch) {
+        mBeginDestroyCount++;
+        mLastChannel = &ch;
+    }
+
+    void onAdded(const Channel& ch) {
+        mAddedCount++;
+        mLastChannel = &ch;
+    }
+
+    void onRemoved(const Channel& ch) {
+        mRemovedCount++;
+        mLastChannel = &ch;
+    }
+
+    void onConfigured(const Channel& ch, const ChannelConfig&) {
+        mConfiguredCount++;
+        mLastChannel = &ch;
+    }
+
+    void onEnqueued(const Channel& ch, const fl::string& engineName) {
+        mEnqueuedCount++;
+        mLastChannel = &ch;
+        mLastEngineName = engineName;
+    }
+};
+
+/// Minimal engine for event testing
+class EventTestEngine : public IChannelEngine {
+public:
+    bool canHandle(const ChannelDataPtr&) const override { return true; }
+    void enqueue(ChannelDataPtr) override {}
+    void show() override {}
+    EngineState poll() override { return EngineState::READY; }
+    fl::string getName() const override { return fl::string::from_literal("EVENT_TEST"); }
+    Capabilities getCapabilities() const override {
+        return Capabilities(true, true);
+    }
+};
+
+FL_TEST_CASE("Channel Events: onChannelCreated fires on Channel::create()") {
+    EventTracker tracker;
+    auto& events = ChannelEvents::instance();
+
+    // Add listener
+    int listenerId = events.onChannelCreated.add([&tracker](const Channel& ch) {
+        tracker.onCreated(ch);
+    });
+
+    // Create channel
+    static CRGB leds[10];
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelConfig config(5, timing, fl::span<CRGB>(leds, 10), GRB);
+
+    int countBefore = tracker.mCreatedCount;
+    auto channel = Channel::create(config);
+
+    // Verify event was called
+    FL_CHECK(tracker.mCreatedCount == countBefore + 1);
+    FL_CHECK(tracker.mLastChannel == channel.get());
+
+    // Cleanup
+    events.onChannelCreated.remove(listenerId);
+}
+
+FL_TEST_CASE("Channel Events: onChannelBeginDestroy fires on channel destruction") {
+    EventTracker tracker;
+    auto& events = ChannelEvents::instance();
+
+    // Add listener
+    int listenerId = events.onChannelBeginDestroy.add([&tracker](const Channel& ch) {
+        tracker.onBeginDestroy(ch);
+    });
+
+    // Create and destroy channel
+    static CRGB leds[10];
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelConfig config(5, timing, fl::span<CRGB>(leds, 10), GRB);
+
+    int countBefore = tracker.mBeginDestroyCount;
+    {
+        auto channel = Channel::create(config);
+        // channel goes out of scope and is destroyed here
+    }
+
+    // Verify event was called
+    FL_CHECK(tracker.mBeginDestroyCount == countBefore + 1);
+
+    // Cleanup
+    events.onChannelBeginDestroy.remove(listenerId);
+}
+
+FL_TEST_CASE("Channel Events: onChannelAdded fires on FastLED.add()") {
+    EventTracker tracker;
+    auto& events = ChannelEvents::instance();
+    auto engine = fl::make_shared<EventTestEngine>();
+    ChannelBusManager& mgr = ChannelBusManager::instance();
+    mgr.addEngine(3000, engine, "EVENT_TEST");
+
+    // Add listener
+    int listenerId = events.onChannelAdded.add([&tracker](const Channel& ch) {
+        tracker.onAdded(ch);
+    });
+
+    // Create channel
+    static CRGB leds[10];
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelOptions opts;
+    opts.mAffinity = "EVENT_TEST";
+    ChannelConfig config(5, timing, fl::span<CRGB>(leds, 10), GRB, opts);
+    auto channel = Channel::create(config);
+
+    int countBefore = tracker.mAddedCount;
+
+    // Add to FastLED
+    FastLED.add(channel);
+
+    // Verify event was called
+    FL_CHECK(tracker.mAddedCount == countBefore + 1);
+    FL_CHECK(tracker.mLastChannel == channel.get());
+
+    // Cleanup
+    FastLED.remove(channel);
+    events.onChannelAdded.remove(listenerId);
+    mgr.setDriverEnabled("EVENT_TEST", false);
+}
+
+FL_TEST_CASE("Channel Events: onChannelRemoved fires on FastLED.remove()") {
+    EventTracker tracker;
+    auto& events = ChannelEvents::instance();
+    auto engine = fl::make_shared<EventTestEngine>();
+    ChannelBusManager& mgr = ChannelBusManager::instance();
+    mgr.addEngine(3001, engine, "EVENT_TEST");
+
+    // Add listener
+    int listenerId = events.onChannelRemoved.add([&tracker](const Channel& ch) {
+        tracker.onRemoved(ch);
+    });
+
+    // Create and add channel
+    static CRGB leds[10];
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelOptions opts;
+    opts.mAffinity = "EVENT_TEST";
+    ChannelConfig config(5, timing, fl::span<CRGB>(leds, 10), GRB, opts);
+    auto channel = Channel::create(config);
+    FastLED.add(channel);
+
+    int countBefore = tracker.mRemovedCount;
+
+    // Remove from FastLED
+    FastLED.remove(channel);
+
+    // Verify event was called
+    FL_CHECK(tracker.mRemovedCount == countBefore + 1);
+    FL_CHECK(tracker.mLastChannel == channel.get());
+
+    // Cleanup
+    events.onChannelRemoved.remove(listenerId);
+    mgr.setDriverEnabled("EVENT_TEST", false);
+}
+
+FL_TEST_CASE("Channel Events: onChannelConfigured fires on applyConfig()") {
+    EventTracker tracker;
+    auto& events = ChannelEvents::instance();
+
+    // Add listener
+    int listenerId = events.onChannelConfigured.add([&tracker](const Channel& ch, const ChannelConfig& cfg) {
+        tracker.onConfigured(ch, cfg);
+    });
+
+    // Create channel
+    static CRGB leds1[10];
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelConfig config1(5, timing, fl::span<CRGB>(leds1, 10), GRB);
+    auto channel = Channel::create(config1);
+
+    int countBefore = tracker.mConfiguredCount;
+
+    // Apply new config
+    static CRGB leds2[20];
+    ChannelConfig config2(5, timing, fl::span<CRGB>(leds2, 20), BGR);
+    channel->applyConfig(config2);
+
+    // Verify event was called
+    FL_CHECK(tracker.mConfiguredCount == countBefore + 1);
+    FL_CHECK(tracker.mLastChannel == channel.get());
+
+    // Cleanup
+    events.onChannelConfigured.remove(listenerId);
+}
+
+FL_TEST_CASE("Channel Events: onChannelEnqueued fires when data is enqueued to engine") {
+    EventTracker tracker;
+    auto& events = ChannelEvents::instance();
+    auto mockEngine = fl::make_shared<ChannelEngineMock>();
+    mockEngine->reset();
+    ChannelBusManager& mgr = ChannelBusManager::instance();
+    mgr.addEngine(3003, mockEngine, "EVENT_ENQUEUE_TEST");
+
+    // Add listener
+    int listenerId = events.onChannelEnqueued.add([&tracker](const Channel& ch, const fl::string& engineName) {
+        tracker.onEnqueued(ch, engineName);
+    });
+
+    // Create and add channel
+    static CRGB leds[10];
+    fl::fill_solid(leds, 10, CRGB::Green);
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelOptions opts;
+    opts.mAffinity = "EVENT_ENQUEUE_TEST";
+    ChannelConfig config(5, timing, fl::span<CRGB>(leds, 10), GRB, opts);
+    auto channel = Channel::create(config);
+    FastLED.add(channel);
+
+    int countBefore = tracker.mEnqueuedCount;
+
+    // Trigger show (which calls enqueue)
+    FastLED.show();
+
+    // Verify event was called with correct engine name
+    FL_CHECK(tracker.mEnqueuedCount == countBefore + 1);
+    FL_CHECK(tracker.mLastChannel == channel.get());
+    FL_CHECK(tracker.mLastEngineName == "MOCK");  // ChannelEngineMock returns "MOCK"
+
+    // Cleanup
+    FastLED.remove(channel);
+    events.onChannelEnqueued.remove(listenerId);
+    mgr.setDriverEnabled("EVENT_ENQUEUE_TEST", false);
+}
+
+FL_TEST_CASE("Channel Events: Multiple listeners with priority ordering") {
+    auto& events = ChannelEvents::instance();
+
+    fl::vector<int> callOrder;
+
+    // Add listeners with different priorities (higher priority = called first)
+    int id1 = events.onChannelCreated.add([&callOrder](const Channel&) {
+        callOrder.push_back(1);
+    }, 10);  // Low priority
+
+    int id2 = events.onChannelCreated.add([&callOrder](const Channel&) {
+        callOrder.push_back(2);
+    }, 100);  // High priority
+
+    int id3 = events.onChannelCreated.add([&callOrder](const Channel&) {
+        callOrder.push_back(3);
+    }, 50);  // Medium priority
+
+    // Create channel (triggers event)
+    static CRGB leds[5];
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelConfig config(5, timing, fl::span<CRGB>(leds, 5), GRB);
+    auto channel = Channel::create(config);
+
+    // Verify listeners were called in priority order (high to low)
+    FL_REQUIRE(callOrder.size() == 3);
+    FL_CHECK(callOrder[0] == 2);  // Priority 100
+    FL_CHECK(callOrder[1] == 3);  // Priority 50
+    FL_CHECK(callOrder[2] == 1);  // Priority 10
+
+    // Cleanup
+    events.onChannelCreated.remove(id1);
+    events.onChannelCreated.remove(id2);
+    events.onChannelCreated.remove(id3);
+}
+
+FL_TEST_CASE("Channel Events: Complete lifecycle event sequence") {
+    EventTracker tracker;
+    auto& events = ChannelEvents::instance();
+    auto mockEngine = fl::make_shared<ChannelEngineMock>();
+    mockEngine->reset();
+    ChannelBusManager& mgr = ChannelBusManager::instance();
+    mgr.addEngine(3004, mockEngine, "EVENT_LIFECYCLE_TEST");
+
+    // Add all listeners
+    int createdId = events.onChannelCreated.add([&tracker](const Channel& ch) {
+        tracker.onCreated(ch);
+    });
+    int addedId = events.onChannelAdded.add([&tracker](const Channel& ch) {
+        tracker.onAdded(ch);
+    });
+    int configuredId = events.onChannelConfigured.add([&tracker](const Channel& ch, const ChannelConfig& cfg) {
+        tracker.onConfigured(ch, cfg);
+    });
+    int enqueuedId = events.onChannelEnqueued.add([&tracker](const Channel& ch, const fl::string& engineName) {
+        tracker.onEnqueued(ch, engineName);
+    });
+    int removedId = events.onChannelRemoved.add([&tracker](const Channel& ch) {
+        tracker.onRemoved(ch);
+    });
+    int destroyId = events.onChannelBeginDestroy.add([&tracker](const Channel& ch) {
+        tracker.onBeginDestroy(ch);
+    });
+
+    tracker.reset();
+
+    // Complete lifecycle
+    {
+        // 1. Create channel
+        static CRGB leds1[10];
+        fl::fill_solid(leds1, 10, CRGB::Red);
+        auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+        ChannelOptions opts;
+        opts.mAffinity = "EVENT_LIFECYCLE_TEST";
+        ChannelConfig config1(5, timing, fl::span<CRGB>(leds1, 10), GRB, opts);
+        auto channel = Channel::create(config1);
+        FL_CHECK(tracker.mCreatedCount == 1);
+
+        // 2. Add to FastLED
+        FastLED.add(channel);
+        FL_CHECK(tracker.mAddedCount == 1);
+
+        // 3. Apply new config
+        static CRGB leds2[20];
+        ChannelConfig config2(5, timing, fl::span<CRGB>(leds2, 20), BGR, opts);
+        channel->applyConfig(config2);
+        FL_CHECK(tracker.mConfiguredCount == 1);
+
+        // 4. Show (triggers Enqueued)
+        FastLED.show();
+        FL_CHECK(tracker.mEnqueuedCount == 1);
+
+        // 5. Remove from FastLED
+        FastLED.remove(channel);
+        FL_CHECK(tracker.mRemovedCount == 1);
+
+        // 6. Channel destroyed at end of scope
+    }
+    FL_CHECK(tracker.mBeginDestroyCount == 1);
+
+    // Verify complete sequence
+    FL_CHECK(tracker.mCreatedCount == 1);
+    FL_CHECK(tracker.mAddedCount == 1);
+    FL_CHECK(tracker.mConfiguredCount == 1);
+    FL_CHECK(tracker.mEnqueuedCount == 1);
+    FL_CHECK(tracker.mRemovedCount == 1);
+    FL_CHECK(tracker.mBeginDestroyCount == 1);
+
+    // Cleanup
+    events.onChannelCreated.remove(createdId);
+    events.onChannelAdded.remove(addedId);
+    events.onChannelConfigured.remove(configuredId);
+    events.onChannelEnqueued.remove(enqueuedId);
+    events.onChannelRemoved.remove(removedId);
+    events.onChannelBeginDestroy.remove(destroyId);
+    mgr.setDriverEnabled("EVENT_LIFECYCLE_TEST", false);
+}
+
+} // namespace channel_events_test

@@ -7,6 +7,12 @@ namespace fl {
 
 // ========== New Variant-Based Constructors ==========
 
+ChannelConfig::ChannelConfig(const fl::string& name, const ChipsetVariant& chipset,
+                              fl::span<CRGB> leds, EOrder rgbOrder, const ChannelOptions& options)
+    : ChannelConfig(chipset, leds, rgbOrder, options) {
+    mName = name;
+}
+
 ChannelConfig::ChannelConfig(const ChipsetVariant& chipset, fl::span<CRGB> leds,
                               EOrder rgbOrder, const ChannelOptions& options)
     : chipset(chipset)
@@ -51,6 +57,7 @@ ChannelConfig::ChannelConfig(const ChannelConfig& other)
     , rgb_order(other.rgb_order)
     , options(other.options)
     , mScreenMap(other.mScreenMap)
+    , mName(other.mName)
     , pin(other.pin)
     , timing(other.timing) {}
 
@@ -60,6 +67,7 @@ ChannelConfig::ChannelConfig(ChannelConfig&& other)
     , rgb_order(other.rgb_order)
     , options(fl::move(other.options))
     , mScreenMap(fl::move(other.mScreenMap))
+    , mName(fl::move(other.mName))
     , pin(other.pin)
     , timing(other.timing) {}
 

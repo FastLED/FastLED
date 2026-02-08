@@ -94,8 +94,10 @@ static uart_sclk_t convertClockSource(UartClockSource source) {
         case UartClockSource::CLK_DEFAULT:
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
             return UART_SCLK_DEFAULT;
-#else
+#elif defined(UART_SCLK_APB)
             return UART_SCLK_APB;
+#else
+            return UART_SCLK_DEFAULT;
 #endif
         case UartClockSource::CLK_APB:
 #if defined(UART_SCLK_APB)

@@ -11,6 +11,7 @@
 #include "fl/chipsets/spi.h"
 #include "fl/eorder.h"
 #include "fl/channels/options.h"
+#include "fl/stl/optional.h"
 #include "color.h"
 #include "dither_mode.h"
 
@@ -127,6 +128,15 @@ struct ChannelConfig {
 
     // ========== New Variant-Based Constructors ==========
 
+    /// @brief Named constructor with chipset variant
+    /// @param name User-specified channel name
+    /// @param chipset Chipset configuration (clockless or SPI)
+    /// @param leds LED data array
+    /// @param rgbOrder RGB channel ordering
+    /// @param options Channel options (correction, temperature, dither, affinity)
+    ChannelConfig(const fl::string& name, const ChipsetVariant& chipset, fl::span<CRGB> leds,
+                  EOrder rgbOrder = RGB, const ChannelOptions& options = ChannelOptions());
+
     /// @brief Primary constructor with chipset variant
     /// @param chipset Chipset configuration (clockless or SPI)
     /// @param leds LED data array
@@ -216,6 +226,9 @@ struct ChannelConfig {
 
     /// Screen mapping
     fl::ScreenMap mScreenMap;
+
+    /// Optional user-specified name (if not set, Channel generates one automatically)
+    fl::optional<fl::string> mName;
 
     // ========== Deprecated Members (for compatibility during migration) ==========
 

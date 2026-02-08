@@ -72,6 +72,48 @@ vector_inlined<ChannelEngineSpi::SpiHostTracking, 3>
 namespace {
 
 // ============================================================================
+// Platform-specific SPI signal helpers
+// ============================================================================
+
+/// @brief Get the SPI MOSI (data output) signal index for GPIO routing
+/// @param host SPI host device (SPI2_HOST, SPI3_HOST, etc.)
+/// @return GPIO matrix signal index for MOSI/D output
+/// @note Different ESP32 variants use different signal naming conventions:
+///   - ESP32-P4: SPI2_D_PAD_OUT_IDX, SPI3_D_PAD_OUT_IDX
+///   - ESP32-S2/S3/C3/C6/H2: FSPID_OUT_IDX (for SPI2_HOST/FSPI)
+///   - ESP32 original: HSPID_OUT_IDX, VSPID_OUT_IDX
+inline int getSpiMosiSignalIndex(spi_host_device_t host) {
+#if defined(FL_IS_ESP_32P4)
+    // ESP32-P4: Use SPI2_D_PAD_OUT_IDX or SPI3_D_PAD_OUT_IDX
+    if (host == SPI2_HOST) {
+        return SPI2_D_PAD_OUT_IDX;
+    } else if (host == SPI3_HOST) {
+        return SPI3_D_PAD_OUT_IDX;
+    }
+#elif defined(FSPID_OUT_IDX)
+    // ESP32-S2/S3/C3/C6/H2: Use FSPID_OUT_IDX for SPI2_HOST (FSPI)
+    if (host == SPI2_HOST) {
+        return FSPID_OUT_IDX;
+    }
+#endif
+#if defined(VSPID_OUT_IDX)
+    // ESP32 original and S3: Use VSPID_OUT_IDX for SPI3_HOST (VSPI/HSPI)
+    if (host == SPI3_HOST) {
+        return VSPID_OUT_IDX;
+    }
+#endif
+#if defined(HSPID_OUT_IDX)
+    // ESP32 original: Use HSPID_OUT_IDX for SPI2_HOST (HSPI)
+    if (host == SPI2_HOST) {
+        return HSPID_OUT_IDX;
+    }
+#endif
+    // Fallback: return -1 if no valid signal found
+    FL_WARN("getSpiMosiSignalIndex: Unsupported SPI host " << host);
+    return -1;
+}
+
+// ============================================================================
 // Math helpers
 // ============================================================================
 
@@ -598,8 +640,13 @@ ChannelEngineSpi::acquireChannel(gpio_num_t pin, const ChipsetTimingConfig &timi
                 // The MOSI signal might be routed to a different pin from a previous batch.
                 // Use GPIO matrix to reroute SPI MOSI output to this pin.
                 gpio_set_direction(pin, GPIO_MODE_OUTPUT);
-                esp_rom_gpio_connect_out_signal(pin, FSPID_OUT_IDX, false, false);
-                FL_DBG_EVERY(100, "ChannelEngineSpi: Rerouted MOSI to pin " << pin);
+                int mosiSignal = getSpiMosiSignalIndex(channel.spi_host);
+                if (mosiSignal >= 0) {
+                    esp_rom_gpio_connect_out_signal(pin, mosiSignal, false, false);
+                    FL_DBG_EVERY(100, "ChannelEngineSpi: Rerouted MOSI to pin " << pin);
+                } else {
+                    FL_WARN("ChannelEngineSpi: Failed to get MOSI signal for spi_host " << channel.spi_host);
+                }
                 return &channel;
             }
 
@@ -614,9 +661,14 @@ ChannelEngineSpi::acquireChannel(gpio_num_t pin, const ChipsetTimingConfig &timi
                     other.spi_device = nullptr;
                     // Reroute MOSI to new pin via GPIO matrix
                     gpio_set_direction(pin, GPIO_MODE_OUTPUT);
-                    esp_rom_gpio_connect_out_signal(pin, FSPID_OUT_IDX, false, false);
-                    FL_DBG("ChannelEngineSpi: Rerouted MOSI from pin "
-                           << static_cast<int>(other.pin) << " to pin " << pin);
+                    int mosiSignal = getSpiMosiSignalIndex(channel.spi_host);
+                    if (mosiSignal >= 0) {
+                        esp_rom_gpio_connect_out_signal(pin, mosiSignal, false, false);
+                        FL_DBG("ChannelEngineSpi: Rerouted MOSI from pin "
+                               << static_cast<int>(other.pin) << " to pin " << pin);
+                    } else {
+                        FL_WARN("ChannelEngineSpi: Failed to get MOSI signal for spi_host " << channel.spi_host);
+                    }
                     return &channel;
                 }
             }

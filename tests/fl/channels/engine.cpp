@@ -65,7 +65,7 @@ public:
         return EngineState::READY;
     }
 
-    const char* getName() const override { return "MOCK"; }
+    fl::string getName() const override { return fl::string::from_literal("MOCK"); }
 
     Capabilities getCapabilities() const override {
         return Capabilities(true, true);  // Mock accepts both clockless and SPI

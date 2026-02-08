@@ -111,8 +111,7 @@ FL_TEST_CASE("ChannelEngineLcdRgb - creation") {
     auto peripheral = createMockPeripheral();
     ChannelEngineLcdRgb engine(peripheral);
 
-    FL_CHECK(engine.getName() != nullptr);
-    FL_CHECK(fl::strcmp(engine.getName(), "LCD_RGB") == 0);
+    FL_CHECK(engine.getName() == "LCD_RGB");
 }
 
 FL_TEST_CASE("ChannelEngineLcdRgb - initial state is READY") {
