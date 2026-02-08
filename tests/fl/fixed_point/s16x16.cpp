@@ -311,6 +311,165 @@ TEST_CASE("s16x16 - mixed arithmetic expressions") {
     check_near(result, 2.5f);
 }
 
+TEST_CASE("s16x16 - to_float") {
+    s16x16 one(1.0f);
+    CHECK(one.to_float() == doctest::Approx(1.0f).epsilon(0.001f));
+
+    s16x16 half(0.5f);
+    CHECK(half.to_float() == doctest::Approx(0.5f).epsilon(0.001f));
+
+    s16x16 neg(-2.5f);
+    CHECK(neg.to_float() == doctest::Approx(-2.5f).epsilon(0.001f));
+
+    s16x16 zero;
+    CHECK(zero.to_float() == doctest::Approx(0.0f));
+}
+
+TEST_CASE("s16x16 - sqrt") {
+    // sqrt(4) = 2
+    check_near(s16x16::sqrt(s16x16(4.0f)), 2.0f, 0.001f);
+
+    // sqrt(1) = 1
+    check_near(s16x16::sqrt(s16x16(1.0f)), 1.0f, 0.001f);
+
+    // sqrt(2) ~ 1.4142
+    check_near(s16x16::sqrt(s16x16(2.0f)), 1.4142f, 0.01f);
+
+    // sqrt(0) = 0
+    CHECK(s16x16::sqrt(s16x16()).raw() == 0);
+
+    // sqrt(negative) = 0
+    CHECK(s16x16::sqrt(s16x16(-1.0f)).raw() == 0);
+
+    // sqrt(9) = 3
+    check_near(s16x16::sqrt(s16x16(9.0f)), 3.0f, 0.001f);
+}
+
+TEST_CASE("s16x16 - rsqrt") {
+    // rsqrt(4) = 0.5
+    check_near(s16x16::rsqrt(s16x16(4.0f)), 0.5f, 0.01f);
+
+    // rsqrt(1) = 1
+    check_near(s16x16::rsqrt(s16x16(1.0f)), 1.0f, 0.01f);
+
+    // rsqrt(0) = 0 (sentinel)
+    CHECK(s16x16::rsqrt(s16x16()).raw() == 0);
+
+    // rsqrt(negative) = 0
+    CHECK(s16x16::rsqrt(s16x16(-1.0f)).raw() == 0);
+}
+
+TEST_CASE("s16x16 - pow") {
+    // 2^3 = 8
+    check_near(s16x16::pow(s16x16(2.0f), s16x16(3.0f)), 8.0f, 0.05f);
+
+    // 4^0.5 = 2 (sqrt via pow)
+    check_near(s16x16::pow(s16x16(4.0f), s16x16(0.5f)), 2.0f, 0.05f);
+
+    // x^0 = 1
+    check_near(s16x16::pow(s16x16(5.0f), s16x16(0.0f)), 1.0f, 0.05f);
+
+    // 0^x = 0
+    CHECK(s16x16::pow(s16x16(), s16x16(2.0f)).raw() == 0);
+
+    // negative base = 0
+    CHECK(s16x16::pow(s16x16(-1.0f), s16x16(2.0f)).raw() == 0);
+}
+
+TEST_CASE("s16x16 - sqrt identity: sqrt(x)^2 ~ x") {
+    float values[] = {1.0f, 2.0f, 4.0f, 9.0f, 0.25f, 100.0f};
+    for (float v : values) {
+        s16x16 x(v);
+        s16x16 s = s16x16::sqrt(x);
+        s16x16 sq = s * s;
+        check_near(sq, v, v * 0.02f + 0.01f);
+    }
+}
+
+TEST_CASE("s16x16 - floor and ceil") {
+    // floor(2.75) = 2
+    check_near(s16x16::floor(s16x16(2.75f)), 2.0f);
+    // ceil(2.75) = 3
+    check_near(s16x16::ceil(s16x16(2.75f)), 3.0f);
+    // floor(-1.25) = -2 (two's complement bitmask floors correctly)
+    check_near(s16x16::floor(s16x16(-1.25f)), -2.0f);
+    // ceil(-1.25) = -1
+    check_near(s16x16::ceil(s16x16(-1.25f)), -1.0f);
+    // floor(3.0) = 3 (integer no-op)
+    check_near(s16x16::floor(s16x16(3.0f)), 3.0f);
+    // ceil(3.0) = 3 (integer no-op)
+    check_near(s16x16::ceil(s16x16(3.0f)), 3.0f);
+}
+
+TEST_CASE("s16x16 - fract") {
+    // fract(2.75) = 0.75
+    check_near(s16x16::fract(s16x16(2.75f)), 0.75f);
+    // fract(1.0) = 0
+    CHECK(s16x16::fract(s16x16(1.0f)).raw() == 0);
+    // fract(0.5) = 0.5
+    check_near(s16x16::fract(s16x16(0.5f)), 0.5f);
+}
+
+TEST_CASE("s16x16 - abs and sign") {
+    // abs
+    check_near(s16x16::abs(s16x16(3.5f)), 3.5f);
+    check_near(s16x16::abs(s16x16(-3.5f)), 3.5f);
+    CHECK(s16x16::abs(s16x16()).raw() == 0);
+    // sign
+    check_near(s16x16::sign(s16x16(5.0f)), 1.0f);
+    check_near(s16x16::sign(s16x16(-5.0f)), -1.0f);
+    CHECK(s16x16::sign(s16x16()).raw() == 0);
+}
+
+TEST_CASE("s16x16 - mod") {
+    // 5.5 mod 2.0 = 1.5
+    check_near(s16x16::mod(s16x16(5.5f), s16x16(2.0f)), 1.5f);
+    // 3.0 mod 1.5 = 0
+    check_near(s16x16::mod(s16x16(3.0f), s16x16(1.5f)), 0.0f);
+    // 1.0 mod 3.0 = 1.0
+    check_near(s16x16::mod(s16x16(1.0f), s16x16(3.0f)), 1.0f);
+}
+
+TEST_CASE("s16x16 - inverse trig") {
+    // atan(1) ~ pi/4
+    check_near(s16x16::atan(s16x16(1.0f)), 0.7854f, 0.02f);
+    // atan(0) = 0
+    check_near(s16x16::atan(s16x16(0.0f)), 0.0f, 0.01f);
+    // atan2(1, 1) ~ pi/4
+    check_near(s16x16::atan2(s16x16(1.0f), s16x16(1.0f)), 0.7854f, 0.02f);
+    // asin(0) = 0
+    check_near(s16x16::asin(s16x16(0.0f)), 0.0f, 0.01f);
+    // asin(1) ~ pi/2
+    check_near(s16x16::asin(s16x16(1.0f)), 1.5708f, 0.02f);
+    // acos(1) = 0
+    check_near(s16x16::acos(s16x16(1.0f)), 0.0f, 0.01f);
+    // acos(0) ~ pi/2
+    check_near(s16x16::acos(s16x16(0.0f)), 1.5708f, 0.02f);
+}
+
+TEST_CASE("s16x16 - lerp, clamp, step, smoothstep") {
+    // lerp(0, 10, 0.5) = 5
+    check_near(s16x16::lerp(s16x16(0.0f), s16x16(10.0f), s16x16(0.5f)), 5.0f, 0.01f);
+    // lerp endpoints
+    check_near(s16x16::lerp(s16x16(1.0f), s16x16(3.0f), s16x16(0.0f)), 1.0f);
+    check_near(s16x16::lerp(s16x16(1.0f), s16x16(3.0f), s16x16(1.0f)), 3.0f);
+
+    // clamp
+    check_near(s16x16::clamp(s16x16(5.0f), s16x16(0.0f), s16x16(3.0f)), 3.0f);
+    check_near(s16x16::clamp(s16x16(-1.0f), s16x16(0.0f), s16x16(3.0f)), 0.0f);
+    check_near(s16x16::clamp(s16x16(1.5f), s16x16(0.0f), s16x16(3.0f)), 1.5f);
+
+    // step
+    check_near(s16x16::step(s16x16(1.0f), s16x16(0.5f)), 0.0f);
+    check_near(s16x16::step(s16x16(1.0f), s16x16(1.5f)), 1.0f);
+    check_near(s16x16::step(s16x16(1.0f), s16x16(1.0f)), 1.0f);
+
+    // smoothstep
+    check_near(s16x16::smoothstep(s16x16(0.0f), s16x16(1.0f), s16x16(-0.5f)), 0.0f, 0.01f);
+    check_near(s16x16::smoothstep(s16x16(0.0f), s16x16(1.0f), s16x16(1.5f)), 1.0f, 0.01f);
+    check_near(s16x16::smoothstep(s16x16(0.0f), s16x16(1.0f), s16x16(0.5f)), 0.5f, 0.02f);
+}
+
 TEST_CASE("s16x16 - edge values") {
     // Largest positive integer representable: 32767.x
     s16x16 big(32767.0f);

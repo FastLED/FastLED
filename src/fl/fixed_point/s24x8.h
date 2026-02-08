@@ -1,6 +1,6 @@
 #pragma once
 
-// Signed 16.16 fixed-point arithmetic and trigonometry.
+// Signed 24.8 fixed-point arithmetic and trigonometry.
 // All operations are integer-only in the hot path.
 
 #include "fl/stl/stdint.h"
@@ -12,21 +12,21 @@ FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
-// Signed 16.16 fixed-point value type.
-class s16x16 {
+// Signed 24.8 fixed-point value type.
+class s24x8 {
   public:
-    static constexpr int INT_BITS = 16;
-    static constexpr int FRAC_BITS = 16;
+    static constexpr int INT_BITS = 24;
+    static constexpr int FRAC_BITS = 8;
 
     // ---- Construction ------------------------------------------------------
 
-    constexpr s16x16() = default;
+    constexpr s24x8() = default;
 
-    explicit constexpr s16x16(float f)
+    explicit constexpr s24x8(float f)
         : mValue(static_cast<int32_t>(f * (1 << FRAC_BITS))) {}
 
-    static FASTLED_FORCE_INLINE s16x16 from_raw(int32_t raw) {
-        s16x16 r;
+    static FASTLED_FORCE_INLINE s24x8 from_raw(int32_t raw) {
+        s24x8 r;
         r.mValue = raw;
         return r;
     }
@@ -39,118 +39,118 @@ class s16x16 {
 
     // ---- Fixed-point arithmetic --------------------------------------------
 
-    FASTLED_FORCE_INLINE s16x16 operator*(s16x16 b) const {
+    FASTLED_FORCE_INLINE s24x8 operator*(s24x8 b) const {
         return from_raw(static_cast<int32_t>(
             (static_cast<int64_t>(mValue) * b.mValue) >> FRAC_BITS));
     }
 
-    FASTLED_FORCE_INLINE s16x16 operator/(s16x16 b) const {
+    FASTLED_FORCE_INLINE s24x8 operator/(s24x8 b) const {
         return from_raw(static_cast<int32_t>(
             (static_cast<int64_t>(mValue) << FRAC_BITS) / b.mValue));
     }
 
-    FASTLED_FORCE_INLINE s16x16 operator+(s16x16 b) const {
+    FASTLED_FORCE_INLINE s24x8 operator+(s24x8 b) const {
         return from_raw(mValue + b.mValue);
     }
 
-    FASTLED_FORCE_INLINE s16x16 operator-(s16x16 b) const {
+    FASTLED_FORCE_INLINE s24x8 operator-(s24x8 b) const {
         return from_raw(mValue - b.mValue);
     }
 
-    FASTLED_FORCE_INLINE s16x16 operator-() const {
+    FASTLED_FORCE_INLINE s24x8 operator-() const {
         return from_raw(-mValue);
     }
 
-    FASTLED_FORCE_INLINE s16x16 operator>>(int shift) const {
+    FASTLED_FORCE_INLINE s24x8 operator>>(int shift) const {
         return from_raw(mValue >> shift);
     }
 
     // ---- Scalar multiply (no fixed-point shift) ----------------------------
 
-    FASTLED_FORCE_INLINE s16x16 operator*(int32_t scalar) const {
+    FASTLED_FORCE_INLINE s24x8 operator*(int32_t scalar) const {
         return from_raw(mValue * scalar);
     }
 
-    friend FASTLED_FORCE_INLINE s16x16 operator*(int32_t scalar, s16x16 fp) {
-        return s16x16::from_raw(scalar * fp.mValue);
+    friend FASTLED_FORCE_INLINE s24x8 operator*(int32_t scalar, s24x8 fp) {
+        return s24x8::from_raw(scalar * fp.mValue);
     }
 
     // ---- Comparisons -------------------------------------------------------
 
-    bool operator<(s16x16 b) const { return mValue < b.mValue; }
-    bool operator>(s16x16 b) const { return mValue > b.mValue; }
-    bool operator<=(s16x16 b) const { return mValue <= b.mValue; }
-    bool operator>=(s16x16 b) const { return mValue >= b.mValue; }
-    bool operator==(s16x16 b) const { return mValue == b.mValue; }
-    bool operator!=(s16x16 b) const { return mValue != b.mValue; }
+    bool operator<(s24x8 b) const { return mValue < b.mValue; }
+    bool operator>(s24x8 b) const { return mValue > b.mValue; }
+    bool operator<=(s24x8 b) const { return mValue <= b.mValue; }
+    bool operator>=(s24x8 b) const { return mValue >= b.mValue; }
+    bool operator==(s24x8 b) const { return mValue == b.mValue; }
+    bool operator!=(s24x8 b) const { return mValue != b.mValue; }
 
     // ---- Math ---------------------------------------------------------------
 
-    static FASTLED_FORCE_INLINE s16x16 mod(s16x16 a, s16x16 b) {
+    static FASTLED_FORCE_INLINE s24x8 mod(s24x8 a, s24x8 b) {
         return from_raw(a.mValue % b.mValue);
     }
 
-    static FASTLED_FORCE_INLINE s16x16 floor(s16x16 x) {
+    static FASTLED_FORCE_INLINE s24x8 floor(s24x8 x) {
         constexpr int32_t frac_mask = (1 << FRAC_BITS) - 1;
         return from_raw(x.mValue & ~frac_mask);
     }
 
-    static FASTLED_FORCE_INLINE s16x16 ceil(s16x16 x) {
+    static FASTLED_FORCE_INLINE s24x8 ceil(s24x8 x) {
         constexpr int32_t frac_mask = (1 << FRAC_BITS) - 1;
         int32_t floored = x.mValue & ~frac_mask;
         if (x.mValue & frac_mask) floored += (1 << FRAC_BITS);
         return from_raw(floored);
     }
 
-    static FASTLED_FORCE_INLINE s16x16 fract(s16x16 x) {
+    static FASTLED_FORCE_INLINE s24x8 fract(s24x8 x) {
         constexpr int32_t frac_mask = (1 << FRAC_BITS) - 1;
         return from_raw(x.mValue & frac_mask);
     }
 
-    static FASTLED_FORCE_INLINE s16x16 abs(s16x16 x) {
+    static FASTLED_FORCE_INLINE s24x8 abs(s24x8 x) {
         return from_raw(x.mValue < 0 ? -x.mValue : x.mValue);
     }
 
-    static FASTLED_FORCE_INLINE s16x16 sign(s16x16 x) {
-        constexpr s16x16 pos_one(1.0f);
-        constexpr s16x16 neg_one(-1.0f);
+    static FASTLED_FORCE_INLINE s24x8 sign(s24x8 x) {
+        constexpr s24x8 pos_one(1.0f);
+        constexpr s24x8 neg_one(-1.0f);
         if (x.mValue > 0) return pos_one;
         if (x.mValue < 0) return neg_one;
-        return s16x16();
+        return s24x8();
     }
 
-    static FASTLED_FORCE_INLINE s16x16 lerp(s16x16 a, s16x16 b, s16x16 t) {
+    static FASTLED_FORCE_INLINE s24x8 lerp(s24x8 a, s24x8 b, s24x8 t) {
         return a + (b - a) * t;
     }
 
-    static FASTLED_FORCE_INLINE s16x16 clamp(s16x16 x, s16x16 lo, s16x16 hi) {
+    static FASTLED_FORCE_INLINE s24x8 clamp(s24x8 x, s24x8 lo, s24x8 hi) {
         if (x < lo) return lo;
         if (x > hi) return hi;
         return x;
     }
 
-    static FASTLED_FORCE_INLINE s16x16 step(s16x16 edge, s16x16 x) {
-        constexpr s16x16 one(1.0f);
-        return x < edge ? s16x16() : one;
+    static FASTLED_FORCE_INLINE s24x8 step(s24x8 edge, s24x8 x) {
+        constexpr s24x8 one(1.0f);
+        return x < edge ? s24x8() : one;
     }
 
-    static FASTLED_FORCE_INLINE s16x16 smoothstep(s16x16 edge0, s16x16 edge1, s16x16 x) {
-        constexpr s16x16 zero(0.0f);
-        constexpr s16x16 one(1.0f);
-        constexpr s16x16 two(2.0f);
-        constexpr s16x16 three(3.0f);
-        s16x16 t = clamp((x - edge0) / (edge1 - edge0), zero, one);
+    static FASTLED_FORCE_INLINE s24x8 smoothstep(s24x8 edge0, s24x8 edge1, s24x8 x) {
+        constexpr s24x8 zero(0.0f);
+        constexpr s24x8 one(1.0f);
+        constexpr s24x8 two(2.0f);
+        constexpr s24x8 three(3.0f);
+        s24x8 t = clamp((x - edge0) / (edge1 - edge0), zero, one);
         return t * t * (three - two * t);
     }
 
     // ---- Inverse Trigonometry (pure fixed-point) ----------------------------
 
-    static FASTLED_FORCE_INLINE s16x16 atan(s16x16 x) {
-        constexpr s16x16 one(1.0f);
-        constexpr s16x16 pi_over_2(1.5707963f);
+    static FASTLED_FORCE_INLINE s24x8 atan(s24x8 x) {
+        constexpr s24x8 one(1.0f);
+        constexpr s24x8 pi_over_2(1.5707963f);
         bool neg = x.mValue < 0;
-        s16x16 ax = abs(x);
-        s16x16 result;
+        s24x8 ax = abs(x);
+        s24x8 result;
         if (ax <= one) {
             result = atan_unit(ax);
         } else {
@@ -159,15 +159,15 @@ class s16x16 {
         return neg ? -result : result;
     }
 
-    static FASTLED_FORCE_INLINE s16x16 atan2(s16x16 y, s16x16 x) {
-        constexpr s16x16 pi(3.1415926f);
-        constexpr s16x16 pi_over_2(1.5707963f);
-        if (x.mValue == 0 && y.mValue == 0) return s16x16();
+    static FASTLED_FORCE_INLINE s24x8 atan2(s24x8 y, s24x8 x) {
+        constexpr s24x8 pi(3.1415926f);
+        constexpr s24x8 pi_over_2(1.5707963f);
+        if (x.mValue == 0 && y.mValue == 0) return s24x8();
         if (x.mValue == 0) return y.mValue > 0 ? pi_over_2 : -pi_over_2;
-        if (y.mValue == 0) return x.mValue > 0 ? s16x16() : pi;
-        s16x16 ax = abs(x);
-        s16x16 ay = abs(y);
-        s16x16 a;
+        if (y.mValue == 0) return x.mValue > 0 ? s24x8() : pi;
+        s24x8 ax = abs(x);
+        s24x8 ay = abs(y);
+        s24x8 a;
         if (ax >= ay) {
             a = atan_unit(ay / ax);
         } else {
@@ -178,31 +178,31 @@ class s16x16 {
         return a;
     }
 
-    static FASTLED_FORCE_INLINE s16x16 asin(s16x16 x) {
-        constexpr s16x16 one(1.0f);
+    static FASTLED_FORCE_INLINE s24x8 asin(s24x8 x) {
+        constexpr s24x8 one(1.0f);
         return atan2(x, sqrt(one - x * x));
     }
 
-    static FASTLED_FORCE_INLINE s16x16 acos(s16x16 x) {
-        constexpr s16x16 one(1.0f);
+    static FASTLED_FORCE_INLINE s24x8 acos(s24x8 x) {
+        constexpr s24x8 one(1.0f);
         return atan2(sqrt(one - x * x), x);
     }
 
-    static FASTLED_FORCE_INLINE s16x16 sqrt(s16x16 x) {
-        if (x.mValue <= 0) return s16x16();
+    static FASTLED_FORCE_INLINE s24x8 sqrt(s24x8 x) {
+        if (x.mValue <= 0) return s24x8();
         return from_raw(static_cast<int32_t>(
             fl::isqrt64(static_cast<uint64_t>(x.mValue) << FRAC_BITS)));
     }
 
-    static FASTLED_FORCE_INLINE s16x16 rsqrt(s16x16 x) {
-        s16x16 s = sqrt(x);
-        if (s.mValue == 0) return s16x16();
+    static FASTLED_FORCE_INLINE s24x8 rsqrt(s24x8 x) {
+        s24x8 s = sqrt(x);
+        if (s.mValue == 0) return s24x8();
         return from_raw(static_cast<int32_t>(1) << FRAC_BITS) / s;
     }
 
-    static FASTLED_FORCE_INLINE s16x16 pow(s16x16 base, s16x16 exp) {
-        if (base.mValue <= 0) return s16x16();
-        constexpr s16x16 one(1.0f);
+    static FASTLED_FORCE_INLINE s24x8 pow(s24x8 base, s24x8 exp) {
+        if (base.mValue <= 0) return s24x8();
+        constexpr s24x8 one(1.0f);
         if (exp.mValue == 0) return one;
         if (base == one) return one;
         return exp2_fp(exp * log2_fp(base));
@@ -210,20 +210,20 @@ class s16x16 {
 
     // ---- Trigonometry ------------------------------------------------------
 
-    static FASTLED_FORCE_INLINE s16x16 sin(s16x16 angle) {
-        return from_raw(fl::sin32(angle_to_a24(angle)) >> 15);
+    static FASTLED_FORCE_INLINE s24x8 sin(s24x8 angle) {
+        return from_raw(fl::sin32(angle_to_a24(angle)) >> (31 - FRAC_BITS));
     }
 
-    static FASTLED_FORCE_INLINE s16x16 cos(s16x16 angle) {
-        return from_raw(fl::cos32(angle_to_a24(angle)) >> 15);
+    static FASTLED_FORCE_INLINE s24x8 cos(s24x8 angle) {
+        return from_raw(fl::cos32(angle_to_a24(angle)) >> (31 - FRAC_BITS));
     }
 
-    // Combined sin+cos from s16x16 radians. Output in s16x16 [-1, 1].
-    static FASTLED_FORCE_INLINE void sincos(s16x16 angle, s16x16 &out_sin,
-                                            s16x16 &out_cos) {
+    // Combined sin+cos from s24x8 radians. Output in s24x8 [-1, 1].
+    static FASTLED_FORCE_INLINE void sincos(s24x8 angle, s24x8 &out_sin,
+                                            s24x8 &out_cos) {
         uint32_t a24 = angle_to_a24(angle);
-        out_sin = from_raw(fl::sin32(a24) >> 15);
-        out_cos = from_raw(fl::cos32(a24) >> 15);
+        out_sin = from_raw(fl::sin32(a24) >> (31 - FRAC_BITS));
+        out_cos = from_raw(fl::cos32(a24) >> (31 - FRAC_BITS));
     }
 
   private:
@@ -242,7 +242,7 @@ class s16x16 {
     }
 
     // Fixed-point log base 2 for positive values.
-    static FASTLED_FORCE_INLINE s16x16 log2_fp(s16x16 x) {
+    static FASTLED_FORCE_INLINE s24x8 log2_fp(s24x8 x) {
         uint32_t val = static_cast<uint32_t>(x.mValue);
         int msb = highest_bit(val);
         int32_t int_part = msb - FRAC_BITS;
@@ -254,52 +254,51 @@ class s16x16 {
             t = static_cast<int32_t>(
                 (val << (FRAC_BITS - msb)) - (1u << FRAC_BITS));
         }
-        s16x16 tf = from_raw(t);
-        constexpr s16x16 c0(1.4284f);
-        constexpr s16x16 c1(-0.5765f);
-        constexpr s16x16 c2(0.1481f);
-        s16x16 frac_part = tf * (c0 + tf * (c1 + tf * c2));
+        s24x8 tf = from_raw(t);
+        constexpr s24x8 c0(1.4284f);
+        constexpr s24x8 c1(-0.5765f);
+        constexpr s24x8 c2(0.1481f);
+        s24x8 frac_part = tf * (c0 + tf * (c1 + tf * c2));
         return from_raw((int_part << FRAC_BITS) + frac_part.mValue);
     }
 
     // Fixed-point 2^x.
-    static FASTLED_FORCE_INLINE s16x16 exp2_fp(s16x16 x) {
-        s16x16 fl_val = floor(x);
-        s16x16 fr = x - fl_val;
+    static FASTLED_FORCE_INLINE s24x8 exp2_fp(s24x8 x) {
+        s24x8 fl_val = floor(x);
+        s24x8 fr = x - fl_val;
         int32_t n = fl_val.mValue >> FRAC_BITS;
         if (n >= INT_BITS - 1) return from_raw(0x7FFFFFFF);
-        if (n < -FRAC_BITS) return s16x16();
+        if (n < -FRAC_BITS) return s24x8();
         int32_t int_pow;
         if (n >= 0) {
             int_pow = static_cast<int32_t>(1u << FRAC_BITS) << n;
         } else {
             int_pow = static_cast<int32_t>(1u << FRAC_BITS) >> (-n);
         }
-        constexpr s16x16 one(1.0f);
-        constexpr s16x16 d0(0.69314718f);
-        constexpr s16x16 d1(0.24022651f);
-        constexpr s16x16 d2(0.05550411f);
-        s16x16 frac_pow = one + fr * (d0 + fr * (d1 + fr * d2));
+        constexpr s24x8 one(1.0f);
+        constexpr s24x8 d0(0.69314718f);
+        constexpr s24x8 d1(0.24022651f);
+        constexpr s24x8 d2(0.05550411f);
+        s24x8 frac_pow = one + fr * (d0 + fr * (d1 + fr * d2));
         int64_t result =
             (static_cast<int64_t>(int_pow) * frac_pow.mValue) >> FRAC_BITS;
         return from_raw(static_cast<int32_t>(result));
     }
 
-    // Converts s16x16 radians to sin32/cos32 input format.
-    static FASTLED_FORCE_INLINE uint32_t angle_to_a24(s16x16 angle) {
-        // 256/(2*PI) in s16x16 — converts radians to sin32/cos32 format.
+    // Converts s24x8 radians to sin32/cos32 input format.
+    static FASTLED_FORCE_INLINE uint32_t angle_to_a24(s24x8 angle) {
+        // 2^24/(2*PI) — converts radians to sin32/cos32 format.
         static constexpr int32_t RAD_TO_24 = 2670177;
         return static_cast<uint32_t>(
             (static_cast<int64_t>(angle.mValue) * RAD_TO_24) >> FRAC_BITS);
     }
 
     // Polynomial atan for t in [0, 1]. Returns [0, π/4].
-    // atan(t) ≈ (π/4)·t − t·(t−1)·(0.2447 + 0.0663·t)
-    static FASTLED_FORCE_INLINE s16x16 atan_unit(s16x16 t) {
-        constexpr s16x16 pi_over_4(0.7853981f);
-        constexpr s16x16 c1(0.2447f);
-        constexpr s16x16 c2(0.0663f);
-        constexpr s16x16 one(1.0f);
+    static FASTLED_FORCE_INLINE s24x8 atan_unit(s24x8 t) {
+        constexpr s24x8 pi_over_4(0.7853981f);
+        constexpr s24x8 c1(0.2447f);
+        constexpr s24x8 c2(0.0663f);
+        constexpr s24x8 one(1.0f);
         return pi_over_4 * t - t * (t - one) * (c1 + c2 * t);
     }
 };
