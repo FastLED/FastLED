@@ -314,6 +314,72 @@ TEST_CASE("Channel API: Add and remove symmetry") {
     manager.setDriverEnabled("MOCK_REMOVE", false);
 }
 
+TEST_CASE("Channel API: Internal ChannelPtr storage prevents dangling") {
+    // Verify that CFastLED stores ChannelPtrs internally so channels
+    // survive even if the caller drops their reference.
+    auto mockEngine = fl::make_shared<ChannelEngineMock>();
+    mockEngine->reset();
+
+    fl::ChannelBusManager& manager = fl::ChannelBusManager::instance();
+    manager.addEngine(1000, mockEngine, "MOCK_STORAGE");
+
+    static CRGB leds[4];
+    fl::fill_solid(leds, 4, CRGB::White);
+
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::ChannelOptions options;
+    options.mAffinity = "MOCK_STORAGE";
+
+    fl::ChannelConfig config(7, timing, fl::span<CRGB>(leds, 4), GRB, options);
+    auto channel = fl::Channel::create(config);
+    REQUIRE(channel != nullptr);
+
+    // After add, CFastLED holds an internal reference
+    FastLED.add(channel);
+    CHECK(channel->isInList());
+    CHECK(channel.use_count() >= 2);  // caller + CFastLED internal
+
+    // Drop local reference - channel should survive via CFastLED's storage
+    fl::Channel* raw = channel.get();
+    channel.reset();
+
+    // Channel should still be in the linked list (not destroyed)
+    bool found = false;
+    CLEDController* pCur = CLEDController::head();
+    while (pCur) {
+        if (pCur == raw) {
+            found = true;
+            break;
+        }
+        pCur = pCur->next();
+    }
+    CHECK(found);
+
+    // After remove, the internal reference is released too
+    // Re-acquire a ChannelPtr to call remove (we need to find it)
+    // Use a fresh channel to test remove releases the internal ref
+    auto channel2 = fl::Channel::create(config);
+    REQUIRE(channel2 != nullptr);
+    FastLED.add(channel2);
+    CHECK(channel2.use_count() >= 2);
+
+    FastLED.remove(channel2);
+    CHECK(!channel2->isInList());
+    CHECK(channel2.use_count() == 1);  // only local ref remains
+
+    // Clean up the first channel that's still in the list
+    // Walk list and remove the raw pointer's entry
+    pCur = CLEDController::head();
+    while (pCur) {
+        if (pCur == raw) {
+            static_cast<fl::Channel*>(pCur)->removeFromDrawList();
+            break;
+        }
+        pCur = pCur->next();
+    }
+    manager.setDriverEnabled("MOCK_STORAGE", false);
+}
+
 TEST_CASE("Legacy API: 4 parallel strips using FastLED.addLeds<>()") {
     // This test validates that the legacy FastLED.addLeds<>() API works with channel engines:
     // - Use template-based FastLED.addLeds<WS2812, PIN>() (no explicit channel creation)

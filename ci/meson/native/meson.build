@@ -8,13 +8,11 @@
 # Configuration hierarchy:
 #   base_compile_args        → Shared by all targets (ABI-critical)
 #   test_specific_args       → Additional flags for unit tests only
-#   example_specific_args    → Additional flags for examples only
 #   unit_test_compile_args   → base + test_specific + platform-specific
-#   example_compile_args     → base + example_specific + platform-specific
+#   example_compile_args     → base (same as base_compile_args)
 #
 #   base_link_args           → Shared platform-specific linking (stdlib, threading)
 #   test_link_args           → base + test-specific additions (debug libs)
-#   example_link_args        → base + example-specific additions
 # ============================================================================
 
 # ============================================================================
@@ -129,13 +127,9 @@ test_specific_args = [
   '-DFASTLED_DEBUG_STACK_TRACE',
 ]
 
-# Example-specific compilation flags (reserved for future use)
-# Currently empty - examples use only base_compile_args
-example_specific_args = []
-
 # Construct final compile args for tests and examples
 unit_test_compile_args = base_compile_args + test_specific_args
-example_compile_args = base_compile_args + example_specific_args
+example_compile_args = base_compile_args
 
 # ============================================================================
 # UNIFIED LINK CONFIGURATION
@@ -145,7 +139,6 @@ example_compile_args = base_compile_args + example_specific_args
 
 # Detect platform for the few remaining differences
 is_windows = build_machine.system() == 'windows'
-is_darwin = build_machine.system() == 'darwin'
 
 # ============================================================================
 # Detect if clang-tool-chain is being used
@@ -297,12 +290,6 @@ endif
 # Legacy aliases for backward compatibility
 # ============================================================================
 unit_test_link_args = dll_link_args
-example_link_args = core_link_args + sanitizer_link_args
-if is_windows
-  example_link_args += ['-mconsole', '-lpthread', '-Wl,--stack,16777216']
-else
-  example_link_args += ['-pthread', '-rdynamic']
-endif
 
 # ============================================================================
 # libunwind for enhanced stack traces (Unix only)

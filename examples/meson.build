@@ -74,7 +74,6 @@ endif
 # Format: EXAMPLE|<name>|<dir1>|..., SOURCES|<name>|<src1>|..., SKIP|<name>|<reason>
 # Note: Using | delimiter instead of : to avoid Windows path issues (C:\...)
 stub_incompatible_examples = []
-filter_reasons = {}  # Map example name to skip reason
 example_includes = {}
 example_paths = {}  # Map example name to its root directory path
 example_sources = {}
@@ -114,14 +113,10 @@ foreach line : example_metadata_output.split('\n')
                 # Parse SKIP|<name>|<reason>
                 reason = parts[2]
                 stub_incompatible_examples += [example_name]
-                filter_reasons += {example_name: reason}
             endif
         endif
     endif
 endforeach
-
-# Get stub_main.cpp source file (provides main() that calls setup/loop)
-stub_main_src = project_root / 'src' / 'platforms' / 'stub_main.cpp'
 
 # ============================================================================
 # BUILD EXAMPLE RUNNER (DLL LOADER)

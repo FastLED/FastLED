@@ -513,12 +513,12 @@ def setup_meson_build(
             mod_tc = importlib.util.module_from_spec(spec_tc)
             spec_tc.loader.exec_module(mod_tc)
             EXCLUDED_TEST_FILES = mod_tc.EXCLUDED_TEST_FILES
-            TEST_SUBDIRS = mod_tc.TEST_SUBDIRS
+            EXCLUDED_TEST_DIRS = mod_tc.EXCLUDED_TEST_DIRS
 
             # Get current test files
             tests_dir = source_dir / "tests"
             current_test_files: list[str] = sorted(
-                discover_test_files(tests_dir, EXCLUDED_TEST_FILES, TEST_SUBDIRS)
+                discover_test_files(tests_dir, EXCLUDED_TEST_FILES, EXCLUDED_TEST_DIRS)
             )
 
             # Check cached test file list

@@ -39,15 +39,6 @@ test_pch = custom_target('test_pch',
   install: false
 )
 
-# Doctest main for normal mode - compiled separately without PCH
-# This creates a static library that provides the doctest main() function
-doctest_main = static_library('doctest_main',
-  'doctest_main.cpp',
-  include_directories: [tests_dir, src_dir, stub_dir],  # Add src and stub for platform headers
-  cpp_args: ['-DENABLE_CRASH_HANDLER', '-DFASTLED_STUB_IMPL'],  # No TEST_DLL_MODE for normal builds
-  install: false
-)
-
 # Doctest main for DLL mode - compiled separately without PCH to avoid namespace conflicts
 # This creates a static library that provides the run_tests() export function
 # NOTE: ENABLE_CRASH_HANDLER is removed - crash handler setup moved to runner.exe
