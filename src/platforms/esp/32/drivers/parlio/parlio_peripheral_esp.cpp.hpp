@@ -379,19 +379,21 @@ u8* ParlioPeripheralESPImpl::allocateDmaBuffer(size_t size) {
 
     u8* buffer = nullptr;
 
-    // Try PSRAM+DMA first if enabled (follows I2S LCD CAM pattern)
+    // Try PSRAM first if enabled (follows I2S LCD CAM and MoonBase pattern)
     // PSRAM provides much larger memory pool (~8MB on ESP32-P4) vs internal SRAM (~512KB)
+    // Use calloc (zero-initialized) for deterministic behavior
     if (mPreferPsram) {
         buffer = static_cast<u8*>(
-            heap_caps_aligned_alloc(64, aligned_size,
+            heap_caps_aligned_calloc(64, aligned_size, 1,
                 MALLOC_CAP_SPIRAM | MALLOC_CAP_DMA | MALLOC_CAP_8BIT)
         );
     }
 
-    // Fallback to internal DMA memory (current behavior)
+    // Fallback to internal DMA memory
     if (buffer == nullptr) {
         buffer = static_cast<u8*>(
-            heap_caps_aligned_alloc(64, aligned_size, MALLOC_CAP_DMA)
+            heap_caps_aligned_calloc(64, aligned_size, 1,
+                MALLOC_CAP_DMA | MALLOC_CAP_8BIT)
         );
     }
 

@@ -988,8 +988,7 @@ bool ParlioEngine::allocateRingBuffers() {
             return false;
         }
 
-        // Zero-initialize buffer to prevent garbage data
-        fl::memset(buffers[i], 0x00, mRingBufferCapacity);
+        // Note: No memset needed - heap_caps_aligned_calloc already zeros memory
     }
 
     // Create ring buffer with unique_ptr and cleanup callback

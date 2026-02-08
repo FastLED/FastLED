@@ -213,24 +213,23 @@ u16* I2sLcdCamPeripheralEsp::allocateBuffer(size_t size_bytes) {
     // Round up to 64-byte alignment
     size_t aligned_size = ((size_bytes + 63) / 64) * 64;
 
-    u32 alloc_caps;
+    void* buffer = nullptr;
+
+    // Try PSRAM first if enabled (follows MoonBase pattern)
+    // Use calloc (zero-initialized) for deterministic behavior
     if (mConfig.use_psram) {
-        alloc_caps = MALLOC_CAP_SPIRAM | MALLOC_CAP_DMA | MALLOC_CAP_8BIT;
-    } else {
-        alloc_caps = MALLOC_CAP_DMA | MALLOC_CAP_8BIT;
+        buffer = heap_caps_aligned_calloc(
+            LCD_DRIVER_PSRAM_DATA_ALIGNMENT,
+            aligned_size, 1,
+            MALLOC_CAP_SPIRAM | MALLOC_CAP_DMA | MALLOC_CAP_8BIT
+        );
     }
 
-    void* buffer = heap_caps_aligned_alloc(
-        LCD_DRIVER_PSRAM_DATA_ALIGNMENT,
-        aligned_size,
-        alloc_caps
-    );
-
-    // Fallback to internal DMA RAM if PSRAM allocation failed
-    if (buffer == nullptr && mConfig.use_psram) {
-        buffer = heap_caps_aligned_alloc(
+    // Fallback to internal DMA RAM
+    if (buffer == nullptr) {
+        buffer = heap_caps_aligned_calloc(
             LCD_DRIVER_PSRAM_DATA_ALIGNMENT,
-            aligned_size,
+            aligned_size, 1,
             MALLOC_CAP_DMA | MALLOC_CAP_8BIT
         );
     }
