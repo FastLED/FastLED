@@ -278,8 +278,21 @@ fl::TestMatrixConfig buildTestMatrix(const fl::vector<fl::DriverInfo>& drivers_a
     return matrix;
 }
 
+// Helper: assign consecutive GPIO pins for multi-lane, skipping pin_rx
+static void assignLanePins(fl::TestCaseConfig& test_case, int pin_tx, int pin_rx, int lane_count) {
+    int current_pin = pin_tx;
+    for (int lane_idx = 0; lane_idx < lane_count; lane_idx++) {
+        // Skip the RX pin to avoid hardware conflict (SPI MOSI vs RMT RX)
+        if (current_pin == pin_rx) {
+            current_pin++;
+        }
+        test_case.lanes[lane_idx].pin = current_pin;
+        current_pin++;
+    }
+}
+
 // Generate all test cases from the test matrix configuration
-fl::vector<fl::TestCaseConfig> generateTestCases(const fl::TestMatrixConfig& matrix_config, int pin_tx) {
+fl::vector<fl::TestCaseConfig> generateTestCases(const fl::TestMatrixConfig& matrix_config, int pin_tx, int pin_rx) {
     fl::vector<fl::TestCaseConfig> test_cases;
 
     // NEW: If lane_sizes is explicitly set, use variable lane sizing
@@ -290,6 +303,7 @@ fl::vector<fl::TestCaseConfig> generateTestCases(const fl::TestMatrixConfig& mat
 
             // Create test case with variable lane sizes
             fl::TestCaseConfig test_case(driver_name, matrix_config.lane_sizes, pin_tx);
+            assignLanePins(test_case, pin_tx, pin_rx, static_cast<int>(matrix_config.lane_sizes.size()));
 
             test_cases.push_back(test_case);
         }
@@ -306,10 +320,8 @@ fl::vector<fl::TestCaseConfig> generateTestCases(const fl::TestMatrixConfig& mat
             for (fl::size size_idx = 0; size_idx < matrix_config.strip_sizes.size(); size_idx++) {
                 int led_count = matrix_config.strip_sizes[size_idx];
                 fl::TestCaseConfig test_case(driver_name, lane_count, led_count);
-                // Assign consecutive GPIO pins for multi-lane
-                for (int lane_idx = 0; lane_idx < lane_count; lane_idx++) {
-                    test_case.lanes[lane_idx].pin = pin_tx + lane_idx;
-                }
+                // Assign consecutive GPIO pins, skipping RX pin
+                assignLanePins(test_case, pin_tx, pin_rx, lane_count);
                 test_cases.push_back(test_case);
             }
         }

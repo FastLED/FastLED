@@ -179,7 +179,7 @@ void ValidationRemoteControl::registerFunctions(
         FL_PRINT("[REGEN] Regenerating test cases from modified configuration");
 
         // Rebuild test cases from current test_matrix
-        *mpTestCases = generateTestCases(*mpTestMatrix, *mpPinTx);  // Use configured TX pin
+        *mpTestCases = generateTestCases(*mpTestMatrix, *mpPinTx, *mpPinRx);  // Use configured TX pin
 
         // Clear and rebuild test results to match new test cases
         mpTestResults->clear();
@@ -1460,7 +1460,7 @@ void ValidationRemoteControl::registerFunctions(
         mpTestMatrix->test_iterations = 1;
 
         // Regenerate test cases (should produce exactly 1 test case)
-        *mpTestCases = generateTestCases(*mpTestMatrix, *mpPinTx);
+        *mpTestCases = generateTestCases(*mpTestMatrix, *mpPinTx, *mpPinRx);
 
         if (mpTestCases->empty()) {
             return makeResponse(false, ReturnCode::HARDWARE_ERROR,

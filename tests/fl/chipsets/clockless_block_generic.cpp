@@ -105,7 +105,7 @@ TEST_SUITE("ClocklessBlockGeneric") {
         //
         // APA102:
         //   - Uses SPI, not supported by this clockless controller
-        //   - (Would use ClocklessSpiWs2812Controller instead)
+        //   - (Would use SpiChannelEngineAdapter instead)
         //
         // WS2811:
         //   - 400 kHz bit rate (2.5µs per bit)

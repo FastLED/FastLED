@@ -64,8 +64,9 @@ fl::TestMatrixConfig buildTestMatrix(const fl::vector<fl::DriverInfo>& drivers_a
 /// @brief Generate all test cases from the test matrix configuration
 /// @param matrix_config Test matrix configuration
 /// @param pin_tx Base TX pin for lane 0 (consecutive pins for multi-lane)
+/// @param pin_rx RX pin to skip when assigning multi-lane pins (-1 to not skip any)
 /// @return Vector of all test case configurations to run
-fl::vector<fl::TestCaseConfig> generateTestCases(const fl::TestMatrixConfig& matrix_config, int pin_tx);
+fl::vector<fl::TestCaseConfig> generateTestCases(const fl::TestMatrixConfig& matrix_config, int pin_tx, int pin_rx = -1);
 
 /// @brief Print test matrix summary (drivers, lanes, strip sizes, total cases)
 /// @param matrix_config Test matrix configuration

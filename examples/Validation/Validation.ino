@@ -520,7 +520,7 @@ void setup() {
     FL_PRINT(ss.str());
 
     // Generate all test cases from the matrix
-    test_cases = generateTestCases(test_matrix, PIN_TX);
+    test_cases = generateTestCases(test_matrix, PIN_TX, PIN_RX);
     ss.clear();
     ss << "\n[TEST CASE GENERATION]\n";
     ss << "  Generated " << test_cases.size() << " test case(s)\n";

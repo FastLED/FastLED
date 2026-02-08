@@ -112,38 +112,18 @@ spi_host_device_t hosts[] = {
 
 ### Clock Speed
 
-Default: 2.5 MHz for WS2812-over-SPI encoding
+Dynamically calculated from chipset T1/T2/T3 timing via `calculateSpiTiming()`.
+For WS2812: ~6.67 MHz (8 SPI bits per 1250ns LED bit period).
 
-**Code**: `channel_engine_spi.cpp`
+### Wave8 Encoding
 
-```cpp
-#define FASTLED_SPI_CLOCKLESS_DEFAULT_FREQ_MHZ 2.5
-```
-
-### WS2812-over-SPI Encoding
-
-- **Bit expansion**: 3x (each LED bit → 3 SPI bits)
-- **Encoding**: `100` for bit 0, `110` for bit 1 (MSB first)
-- **Timing**: Precise timing via SPI clock frequency
-
-### Espressif 3-Bit Encoding
-
-The SPI engine uses **Espressif led_strip 3-bit encoding**, matching the official ESP-IDF led_strip component:
-
-**Reference**: [ESP-IDF led_strip SPI implementation](https://github.com/espressif/idf-extra-components/blob/master/led_strip/src/led_strip_spi_dev.c)
-
-**How it works**:
-- **3x expansion ratio**: Each LED bit → 3 SPI bits
-- **Bit patterns** (MSB first):
-  - LED bit `0` → SPI pattern `100` (binary) = short high, long low
-  - LED bit `1` → SPI pattern `110` (binary) = long high, short low
-- **Timing**: 2.5 MHz SPI clock = 400ns per SPI bit
-  - T0H = 400ns (1 high bit), T0L = 800ns (2 low bits)
-  - T1H = 800ns (2 high bits), T1L = 400ns (1 low bit)
-
-**Implementation**: See `led_strip_spi_bit()` and `led_strip_encode_byte()` in `channel_engine_spi.cpp.hpp`.
-
-**Note**: Multi-lane SPI (dual/quad) is NOT supported with this encoding. For multi-lane support, use PARLIO or RMT drivers instead.
+- **Bit expansion**: 8x (each LED bit → 8 SPI bits = 1 SPI byte)
+- **Encoding**: Wave8 LUT built from chipset timing at channel creation
+- **Bit patterns** (MSB first, for WS2812):
+  - LED bit `0` → `11000000` (2 HIGH bits = short pulse ~300ns)
+  - LED bit `1` → `11111000` (5 HIGH bits = long pulse ~750ns)
+- **Timing**: SPI clock = `1e9 / quantum_ns` where quantum = GCD of T1, T2, T3
+- **Implementation**: See `wave8_encoder_spi.h` (LUT builder) and `encodeChunk()` in `channel_engine_spi.cpp.hpp`
 
 ## Performance
 

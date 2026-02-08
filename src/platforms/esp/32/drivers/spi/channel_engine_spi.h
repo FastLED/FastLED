@@ -8,26 +8,23 @@
 /// but is NEVER physically connected to the LED strip - only the MOSI/data pin is used.
 ///
 /// How it works:
-/// 1. The SPI peripheral generates a clock signal internally (e.g., 2.5MHz for WS2812)
+/// 1. The SPI peripheral generates a clock signal internally
 /// 2. This clock controls the precise timing of MOSI bit transitions
-/// 3. Each LED bit (0 or 1) expands to 3 SPI bits with specific high/low patterns:
-///    - LED bit '0' → SPI pattern 100 (binary) = short high, long low
-///    - LED bit '1' → SPI pattern 110 (binary) = long high, short low
+/// 3. Each LED bit (0 or 1) expands to 8 SPI bits using wave8 encoding:
+///    - LED bit '0' → wave8 pattern with ~2 HIGH pulses (short high, long low)
+///    - LED bit '1' → wave8 pattern with ~5 HIGH pulses (long high, short low)
 /// 4. The LEDs decode these patterns based on pulse width (T0H/T0L vs T1H/T1L)
 /// 5. The clock signal itself is ignored by the LEDs (never leaves the ESP32)
 ///
 /// Why use SPI for clockless protocols?
 /// - Precise timing: SPI hardware generates exact bit patterns without CPU intervention
 /// - DMA support: Large LED buffers transmit without blocking the CPU
-/// - ISR-safe: Encoding and transmission happen in background (timer ISR + DMA)
 ///
-/// Uses Espressif led_strip encoding (3-bit expansion):
-/// - Reference: https://github.com/espressif/idf-extra-components/blob/master/led_strip/src/led_strip_spi_dev.c
-/// - SPI clock: 2.5 MHz (400ns per SPI bit)
-/// - Each LED byte expands to 3 SPI bytes (24 bits)
-///
-/// NOTE: Multi-lane SPI (dual/quad) is NOT supported with this encoding.
-/// For multi-lane support, use PARLIO or RMT drivers instead.
+/// Uses wave8 encoding (8-bit expansion):
+/// - Each LED bit expands to 8 SPI bits (1 byte per LED bit)
+/// - Each LED byte (8 bits) expands to 8 SPI bytes (64 bits)
+/// - SPI clock: ~6.4 MHz for WS2812 (8 pulses per 1250ns bit period)
+/// - Wave8 LUT built from chipset T1/T2/T3 timing for any LED protocol
 
 #pragma once
 
@@ -42,13 +39,13 @@
 
 #include "fl/channels/engine.h"
 #include "fl/channels/data.h"
+#include "fl/channels/wave8.h"
+#include "fl/chipsets/chipset_timing_config.h"
 #include "fl/engine_events.h"
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/unordered_map.h"
 #include "fl/stl/time.h"
-#include "fl/timeout.h"
-#include "fl/isr.h"
 
 // EXCEPTION: Platform headers in .h file (technical debt)
 // Normally platform-specific headers (driver/*.h, soc/*.h) should only be in .cpp files
@@ -59,90 +56,6 @@
 #include "driver/gpio.h"
 
 namespace fl {
-
-/// @brief SPI timing configuration for CLOCKLESS LED protocols
-///
-/// ⚠️ This struct configures CLOCKLESS protocols (WS2812, SK6812, etc.) using SPI hardware!
-///
-/// Unlike RMT (which uses nanosecond-precise T1/T2/T3 timing), this approach uses SPI
-/// clock-synchronized bit patterns to encode clockless LED data. The SPI clock runs
-/// internally (never connected to LEDs) and controls precise MOSI bit timing.
-///
-/// APA102/SK9822 protocols listed below are NOT currently implemented - this driver
-/// is exclusively for clockless-over-SPI encoding.
-struct SpiTimingConfig {
-    enum Protocol {
-        WS2812_OVER_SPI,  ///< WS2812 CLOCKLESS encoded as SPI bits (2.5MHz, 3:1 expansion)
-        APA102,           ///< ⚠️ NOT IMPLEMENTED - would require true clocked SPI driver
-        SK9822,           ///< ⚠️ NOT IMPLEMENTED - would require true clocked SPI driver
-        CUSTOM            ///< User-defined custom CLOCKLESS protocol
-    };
-
-    Protocol protocol;           ///< LED protocol type
-    u32 clock_hz;           ///< SPI clock frequency (e.g., 2500000 for WS2812)
-    u8 bits_per_led_bit;    ///< Encoding expansion ratio (3 for WS2812)
-    u32 reset_time_us;      ///< Inter-frame reset time in microseconds
-
-    // Calculated bit patterns for encoding (dynamic timing adaptation)
-    u32 bit0_pattern;       ///< Bit pattern for logical '0' (MSB first)
-    u8 bit0_count;          ///< Number of SPI bits in bit0_pattern
-    u32 bit1_pattern;       ///< Bit pattern for logical '1' (MSB first)
-    u8 bit1_count;          ///< Number of SPI bits in bit1_pattern
-
-    // Achieved timing validation (for debugging)
-    u32 achieved_t0h_ns;    ///< Actual T0H timing achieved
-    u32 achieved_t0l_ns;    ///< Actual T0L timing achieved
-    u32 achieved_t1h_ns;    ///< Actual T1H timing achieved
-    u32 achieved_t1l_ns;    ///< Actual T1L timing achieved
-
-    /// @brief Default constructor for WS2812-over-SPI
-    constexpr SpiTimingConfig()
-        : protocol(WS2812_OVER_SPI)
-        , clock_hz(2500000)           // 2.5MHz
-        , bits_per_led_bit(3)         // Each LED bit → 3 SPI bits
-        , reset_time_us(50)           // 50μs reset time
-        , bit0_pattern(0b100)         // WS2812: 100 binary
-        , bit0_count(3)
-        , bit1_pattern(0b110)         // WS2812: 110 binary
-        , bit1_count(3)
-        , achieved_t0h_ns(400)        // 1 bit @ 2.5MHz
-        , achieved_t0l_ns(800)        // 2 bits @ 2.5MHz
-        , achieved_t1h_ns(800)        // 2 bits @ 2.5MHz
-        , achieved_t1l_ns(400)        // 1 bit @ 2.5MHz
-    {}
-
-    /// @brief Create WS2812-over-SPI timing configuration
-    /// @param reset_us Reset time in microseconds (default 50μs)
-    static constexpr SpiTimingConfig ws2812(u32 reset_us = 50) {
-        SpiTimingConfig config;
-        config.protocol = WS2812_OVER_SPI;
-        config.clock_hz = 2500000;  // 2.5MHz
-        config.bits_per_led_bit = 3;
-        config.reset_time_us = reset_us;
-        config.bit0_pattern = 0b100;
-        config.bit0_count = 3;
-        config.bit1_pattern = 0b110;
-        config.bit1_count = 3;
-        config.achieved_t0h_ns = 400;
-        config.achieved_t0l_ns = 800;
-        config.achieved_t1h_ns = 800;
-        config.achieved_t1l_ns = 400;
-        return config;
-    }
-
-    /// @brief Equality operator (required for hash map key)
-    bool operator==(const SpiTimingConfig& other) const {
-        return protocol == other.protocol &&
-               clock_hz == other.clock_hz &&
-               bits_per_led_bit == other.bits_per_led_bit &&
-               reset_time_us == other.reset_time_us;
-    }
-
-    /// @brief Inequality operator
-    bool operator!=(const SpiTimingConfig& other) const {
-        return !(*this == other);
-    }
-};
 
 /// @brief Multi-lane SPI pin configuration
 ///
@@ -211,7 +124,7 @@ struct MultiLanePinConfig {
 /// Consolidates clockless LED strip functionality using SPI peripheral as bit-banger:
 /// - Implements clockless protocols (WS2812, SK6812, etc.) via SPI bit patterns
 /// - Direct ESP-IDF SPI master driver integration
-/// - WS2812-over-SPI bit encoding (2.5MHz SPI clock, 3:1 bit expansion)
+/// - Wave8 encoding (SPI clock from chipset timing, 8:1 bit expansion)
 /// - Multi-lane SPI support (dual/quad modes for parallel strip transmission)
 /// - Channel persistence between frames (avoid recreation overhead)
 /// - On-demand SPI bus allocation with reference counting
@@ -263,12 +176,9 @@ public:
     /// @param data Channel data to check
     /// @return true for CLOCKLESS chipsets (WS2812, SK6812, etc.), false for true SPI chipsets
     ///
-    /// ⚠️ CURRENT IMPLEMENTATION IS BACKWARDS!
-    /// This engine is a CLOCKLESS-over-SPI driver, so it should return:
-    ///   - true for clockless protocols (WS2812, SK6812, etc.)
-    ///   - false for true SPI protocols (APA102, SK9822, etc.)
-    /// But the current implementation uses `data->isSpi()` which inverts this logic.
-    /// TODO: Fix to use `!data->isSpi()` or equivalent clockless check
+    /// This engine is a CLOCKLESS-over-SPI driver:
+    ///   - Returns true for clockless protocols (WS2812, SK6812, etc.)
+    ///   - Returns false for true SPI protocols (APA102, SK9822, etc.)
     bool canHandle(const ChannelDataPtr& data) const override;
 
 private:
@@ -292,59 +202,108 @@ private:
         spi_host_device_t spi_host;        ///< SPI peripheral (SPI2_HOST, SPI3_HOST, etc.)
         spi_device_handle_t spi_device;    ///< Device handle from spi_bus_add_device
         gpio_num_t pin;                    ///< Output GPIO pin (data0/MOSI)
-        SpiTimingConfig timing;            ///< Timing configuration
+        ChipsetTimingConfig timing;        ///< Clockless timing configuration
         volatile bool transmissionComplete; ///< Set when all encoding/transmission complete
         bool inUse;                        ///< Channel active flag
         bool useDMA;                       ///< DMA enabled for this channel
 
         // Multi-lane SPI support (dual/quad modes)
-        // NOTE: Multi-lane NOT supported with Espressif 3-bit encoding
-        u8 numLanes;                  ///< Number of active data lanes (always 1 for Espressif encoding)
+        u8 numLanes;                       ///< Number of active data lanes
         gpio_num_t data1_pin;              ///< Data1/MISO pin for dual/quad mode (-1, unused)
         gpio_num_t data2_pin;              ///< Data2/WP pin for quad mode (-1, unused)
         gpio_num_t data3_pin;              ///< Data3/HD pin for quad mode (-1, unused)
 
-        // Event-driven streaming state
-        volatile bool hasNewData;          ///< Set by post_cb, cleared by timer ISR after posting transaction
-        volatile bool isShuttingDown;      ///< Set during releaseChannel(), prevents ISR from accessing freed memory
-
         // Cache coherence control (ESP32-S3/C6 workaround)
         bool cacheSyncDisabled;            ///< Set when esp_cache_msync() returns ESP_ERR_INVALID_ARG
 
-        // Double-buffered staging (4KB each for DMA efficiency)
-        u8* stagingA;                 ///< Staging buffer A (DMA-capable memory)
-        u8* stagingB;                 ///< Staging buffer B (DMA-capable memory)
-        u8* currentStaging;           ///< Current staging buffer (points to A or B)
+        // Staging buffers (4KB each for DMA efficiency)
+        // Double-buffered: encode into one while DMA transmits the other.
+        u8* stagingA;                      ///< Staging buffer A (DMA-capable memory)
+        u8* stagingB;                      ///< Staging buffer B (DMA-capable memory, for double-buffering)
+        u8* currentStaging;                ///< Points to active encoding buffer
         size_t stagingOffset;              ///< Current write position in staging buffer
         size_t stagingCapacity;            ///< Size of each staging buffer (4096 bytes)
 
         // LED source data
-        // CRITICAL: LED data must be in internal SRAM for ISR access (PSRAM not ISR-safe)
-        u8* ledSourceBuffer;          ///< Internal SRAM copy of LED data (DMA-capable)
+        u8* ledSourceBuffer;               ///< Internal SRAM copy of LED data (DMA-capable)
         size_t ledSourceBufferSize;        ///< Size of ledSourceBuffer allocation
         const u8* ledSource;          ///< Current position in source LED data
         size_t ledBytesRemaining;          ///< LED bytes left to encode
         ChannelDataPtr sourceData;         ///< Reference to source ChannelData for cleanup
 
-        // Double-buffered transactions
-        spi_transaction_t transA;          ///< Transaction A
-        spi_transaction_t transB;          ///< Transaction B
-        volatile bool transAInFlight;      ///< Transaction A queued/transmitting
-        volatile bool transBInFlight;      ///< Transaction B queued/transmitting
+        // Transactions (double-buffered)
+        spi_transaction_t transA;          ///< Transaction struct for buffer A
+        spi_transaction_t transB;          ///< Transaction struct for buffer B
+        volatile bool transAInFlight;      ///< Transaction A in progress flag
+        volatile bool transBInFlight;      ///< Transaction B in progress flag
 
-        // Timer ISR handle
-        fl::isr::isr_handle_t timerHandle; ///< Timer ISR handle
-
-        // Debug: ISR tx_buffer capture for diagnosis
-        volatile bool debugTxCaptured;     ///< Flag: first tx_buffer captured
-        u8 debugTxBuffer[8];          ///< First 8 bytes of tx_buffer at queue time
+        // Wave8 encoding LUT (built once from chipset timing)
+        Wave8BitExpansionLut wave8Lut;     ///< Wave8 expansion lookup table (64 bytes)
+        bool wave8LutInitialized;          ///< LUT has been built from timing
     };
+
+    /// @brief DMA pipeline state for poll()-driven async transmission
+    ///
+    /// Phase 3: No FreeRTOS worker task. show() starts the first DMA transaction
+    /// and returns immediately. poll() advances the pipeline by checking DMA
+    /// completion and encoding/queueing the next chunk.
+    struct DmaPipelineState {
+        enum Phase {
+            IDLE,           ///< No transmission in progress
+            STREAMING,      ///< DMA in flight, encoding pipeline active
+            RESET_DELAY,    ///< Waiting for inter-batch reset delay
+            COMPLETING,     ///< Final DMA in flight, no more encoding needed
+        };
+
+        Phase mPhase;
+        SpiChannelState* mActiveChannel;
+        int mEncodeIdx;
+        bool mDmaInFlight;
+
+        size_t mCurrentBatchIdx;
+        size_t mCurrentChannelInBatch;
+        size_t mCurrentTimingGroup;
+
+        struct TimingGroupInfo {
+            ChipsetTimingConfig timing;
+            fl::vector<ChannelDataPtr> channels;
+            u8 laneCapacity;
+        };
+        fl::vector<TimingGroupInfo> mTimingGroups;
+
+        u32 mResetDelayStartUs;
+        u32 mResetDelayDurationUs;
+
+        DmaPipelineState()
+            : mPhase(IDLE)
+            , mActiveChannel(nullptr)
+            , mEncodeIdx(0)
+            , mDmaInFlight(false)
+            , mCurrentBatchIdx(0)
+            , mCurrentChannelInBatch(0)
+            , mCurrentTimingGroup(0)
+            , mResetDelayStartUs(0)
+            , mResetDelayDurationUs(0)
+        {}
+    };
+
+    /// @brief Advance the DMA pipeline state machine (called from poll())
+    EngineState advancePipeline();
+
+    /// @brief Start transmitting the next channel in the pipeline
+    bool startNextChannel();
+
+    /// @brief Start the first DMA transaction for the active channel
+    void startFirstDma();
+
+    /// @brief Poll channel states for cleanup
+    EngineState pollChannels();
 
     /// @brief Pending channel data waiting for hardware availability
     struct PendingChannel {
         ChannelDataPtr data;
         int pin;
-        SpiTimingConfig timing;
+        ChipsetTimingConfig timing;
         int retry_count = 0;  ///< Number of failed acquisition attempts
     };
 
@@ -356,31 +315,29 @@ private:
         u8 activeLanes; ///< Number of lanes in use (0=unused, 1=single, 2=dual, 4=quad)
     };
 
-    /// @brief Hash function for SpiTimingConfig (future use for caching)
+    /// @brief Hash function for ChipsetTimingConfig (timing group key)
     struct TimingHash {
-        size_t operator()(const SpiTimingConfig& t) const {
-            // FNV-1a hash algorithm for better distribution
+        size_t operator()(const ChipsetTimingConfig& t) const {
             size_t hash = 2166136261u;
-            hash = (hash ^ static_cast<u32>(t.protocol)) * 16777619u;
-            hash = (hash ^ t.clock_hz) * 16777619u;
-            hash = (hash ^ t.bits_per_led_bit) * 16777619u;
-            hash = (hash ^ t.reset_time_us) * 16777619u;
+            hash = (hash ^ t.t1_ns) * 16777619u;
+            hash = (hash ^ t.t2_ns) * 16777619u;
+            hash = (hash ^ t.t3_ns) * 16777619u;
+            hash = (hash ^ t.reset_us) * 16777619u;
             return hash;
         }
     };
 
-    /// @brief Equality function for SpiTimingConfig (hash map key)
+    /// @brief Equality function for ChipsetTimingConfig (hash map key)
     struct TimingEqual {
-        bool operator()(const SpiTimingConfig& a, const SpiTimingConfig& b) const {
+        bool operator()(const ChipsetTimingConfig& a, const ChipsetTimingConfig& b) const {
             return a == b;
         }
     };
 
     /// @brief Acquire a channel for given pin and timing
     /// @param dataSize Size of LED data in bytes
-    /// @param originalTiming Original chipset timing (preserved for timing validation)
     /// @return Pointer to channel state, or nullptr if no hardware available
-    SpiChannelState* acquireChannel(gpio_num_t pin, const SpiTimingConfig& timing, size_t dataSize, const ChipsetTimingConfig& originalTiming);
+    SpiChannelState* acquireChannel(gpio_num_t pin, const ChipsetTimingConfig& timing, size_t dataSize);
 
     /// @brief Release a channel (marks as available for reuse)
     void releaseChannel(SpiChannelState* channel);
@@ -388,47 +345,35 @@ private:
     /// @brief Create new SPI channel with given configuration
     /// @param state Channel state to initialize
     /// @param pin GPIO pin
-    /// @param timing SPI timing configuration
+    /// @param timing Clockless timing configuration (T1/T2/T3)
     /// @param dataSize Size of LED data in bytes
-    /// @param originalTiming Original chipset timing (optional, for timing validation)
     /// @return true if channel created successfully
-    bool createChannel(SpiChannelState* state, gpio_num_t pin, const SpiTimingConfig& timing, size_t dataSize, const ChipsetTimingConfig* originalTiming = nullptr);
+    bool createChannel(SpiChannelState* state, gpio_num_t pin, const ChipsetTimingConfig& timing, size_t dataSize);
 
-    /// @brief Encode LED data to SPI buffer
-    /// @param ledData Source LED data (RGB/RGBW bytes)
-    /// @param spiBuffer Output SPI buffer (must be 3x size of ledData for WS2812)
-    /// @param timing SPI timing configuration
-    /// @return true if encoding successful
-    bool encodeLedData(const fl::span<const u8>& ledData,
-                       fl::vector<u8>& spiBuffer,
-                       const SpiTimingConfig& timing);
+    /// @brief Lightweight SPI bus + device re-initialization for reused channels.
+    /// Only sets up SPI bus and device; staging buffers and timer ISR are kept.
+    bool reinitSpiHardware(SpiChannelState* state, gpio_num_t pin, size_t dataSize);
 
-    /// @brief Encode a single LED color byte to SPI bits (dynamic pattern)
-    /// @param data LED color byte (0-255)
-    /// @param buf Output buffer (must be zeroed, sized for bits_per_led_bit * 8 bits)
-    /// @param timing SPI timing configuration with bit patterns
-    /// @param output_bit_offset Bit offset in output buffer (for non-byte-aligned patterns)
-    /// @return Number of bits written to buffer
-    static u32 encodeLedByte(u8 data, u8* buf, const SpiTimingConfig& timing, u32 output_bit_offset = 0);
-
-    /// @brief Pre-encode ALL LED data and sync cache (called from main task, NOT ISR)
+    /// @brief Encode one chunk of LED data into a staging buffer
     /// @param channel Channel state with LED data to encode
+    /// @param output Output buffer to write encoded SPI bytes into
+    /// @param output_capacity Size of the output buffer in bytes
+    /// @return Number of SPI bytes written to the output buffer
     ///
-    /// CRITICAL: This must be called from main task context because:
-    /// 1. esp_cache_msync() is NOT ISR-safe
-    /// 2. On ESP32-S3/C6, CPU writes stay in cache until explicitly flushed
-    /// 3. DMA reads from memory, not cache, so it sees stale data without sync
-    ///
-    /// This function encodes the ENTIRE LED buffer into staging buffers, then
-    /// syncs cache to memory. The ISR only queues pre-encoded data.
-    void preEncodeAllData(SpiChannelState* channel);
+    /// Used by transmitStreaming() for double-buffered DMA pipeline.
+    /// Advances channel->ledSource and decrements channel->ledBytesRemaining.
+    /// Appends reset zeros after the last chunk.
+    size_t encodeChunk(SpiChannelState* channel, u8* output, size_t output_capacity);
 
-    /// @brief Transmit pre-encoded data using blocking polling (cache coherence fix)
-    /// @param channel Channel state with pre-encoded staging data
+    /// @brief Double-buffered streaming transmission
+    /// @param channel Channel state with LED data to transmit
     ///
-    /// Uses spi_device_polling_transmit() which handles cache coherence internally.
-    /// This approach trades some throughput for reliability on ESP32-S3.
-    void transmitBlockingPolled(SpiChannelState* channel);
+    /// Overlaps DMA transfer with CPU encoding using ping-pong buffers:
+    ///   1. Encode chunk into buffer A
+    ///   2. Queue buffer A for DMA, encode chunk into buffer B
+    ///   3. Wait for A to complete, queue B, encode into A
+    ///   ... until all LED data is transmitted.
+    void transmitStreaming(SpiChannelState* channel);
 
     /// @brief Acquire SPI host for new channel
     /// @return SPI host, or SPI_HOST_MAX on failure
@@ -436,24 +381,6 @@ private:
 
     /// @brief Release SPI host when channel is destroyed
     void releaseSpiHost(spi_host_device_t host);
-
-    /// @brief Get SpiTimingConfig from ChannelData
-    /// @param data Channel data
-    /// @return SPI timing configuration (converts from ChipsetTimingConfig)
-    SpiTimingConfig getSpiTimingFromChannel(const ChannelDataPtr& data);
-
-    /// @brief Calculate optimal SPI timing from chipset timing
-    /// @param chipsetTiming LED chipset timing specification (T1/T2/T3 model)
-    /// @return SPI timing configuration with calculated frequency and bit patterns
-    static SpiTimingConfig calculateSpiTiming(const ChipsetTimingConfig& chipsetTiming);
-
-    /// @brief SPI post-transaction callback (sets hasNewData flag)
-    /// @param trans Completed transaction
-    static void IRAM_ATTR spiPostTransactionCallback(spi_transaction_t* trans);
-
-    /// @brief Timer ISR callback (encodes chunks when hasNewData is set)
-    /// @param user_data Pointer to SpiChannelState
-    static void IRAM_ATTR timerEncodingISR(void* user_data);
 
     /// @brief Process pending channels that couldn't be started earlier
     void processPendingChannels();
@@ -482,6 +409,9 @@ private:
 
     /// @brief Channels currently transmitting (tracked by poll() for cleanup)
     fl::vector_inlined<ChannelDataPtr, 16> mTransmittingChannels;
+
+    /// @brief DMA pipeline state (Phase 3: poll()-driven async show())
+    DmaPipelineState mPipeline;
 };
 
 } // namespace fl

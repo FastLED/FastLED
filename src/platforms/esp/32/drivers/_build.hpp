@@ -17,5 +17,4 @@
 #include "platforms/esp/32/drivers/rmt/_build.hpp"
 #include "platforms/esp/32/drivers/rmt_rx/_build.hpp"
 #include "platforms/esp/32/drivers/spi/_build.hpp"
-#include "platforms/esp/32/drivers/spi_ws2812/_build.hpp"
 #include "platforms/esp/32/drivers/uart/_build.hpp"

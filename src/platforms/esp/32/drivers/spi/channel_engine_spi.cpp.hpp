@@ -7,12 +7,10 @@
 /// physically connected to the LED strip - only the MOSI/data pin is used.
 /// See channel_engine_spi.h for detailed explanation.
 ///
-/// ENCODING: Uses Espressif led_strip 3-bit encoding (NOT wave8):
-/// - LED bit '0' → SPI bits: 100 (binary) = short high, long low
-/// - LED bit '1' → SPI bits: 110 (binary) = long high, short low
-/// - Each LED byte (8 bits) expands to 3 SPI bytes (24 bits)
-/// - SPI clock: 2.5 MHz (400ns per bit)
-/// Reference: https://github.com/espressif/idf-extra-components/blob/master/led_strip/src/led_strip_spi_dev.c
+/// ENCODING: Uses wave8 encoding (8-bit expansion):
+/// - Each LED bit → 8 SPI bits (1 byte per LED bit, 8 bytes per LED byte)
+/// - Wave8 LUT maps nibbles to 4-byte waveform patterns
+/// - SPI clock derived from chipset timing: ~6.4 MHz for WS2812
 ///
 /// @todo Known issues and future improvements:
 /// - [x] ESP32-S3 CACHE COHERENCE: Fixed by using non-aligned heap_caps_malloc()
@@ -20,6 +18,7 @@
 ///       CPU cache to physical memory, solving the DMA cache coherence issue.
 ///       Trade-off: ~50% memory overhead for internal copy buffer.
 /// - [ ] Multi-SPI host support: Currently limited by single-host-per-bus design.
+/// - [ ] Multi-lane wave8: dual/quad mode via wave8 transposition
 
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
@@ -29,6 +28,8 @@
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
 #include "channel_engine_spi.h"
+#include "wave8_encoder_spi.h"
+#include "fl/chipsets/led_timing.h"
 #include "fl/dbg.h"
 #include "fl/delay.h"
 #include "fl/math_macros.h"
@@ -39,6 +40,7 @@
 #include "platforms/memory_barrier.h" // FL_MEMORY_BARRIER for cache coherence
 
 FL_EXTERN_C_BEGIN
+#include "freertos/FreeRTOS.h"  // portMAX_DELAY, pdMS_TO_TICKS
 #include "driver/gpio.h"
 #include "driver/spi_master.h"
 #include "esp_check.h"
@@ -70,86 +72,26 @@ vector_inlined<ChannelEngineSpi::SpiHostTracking, 3>
 namespace {
 
 // ============================================================================
-// Espressif 3-bit LED Encoding (matches led_strip_spi_dev.c)
+// Wave8 encoding constants
 // ============================================================================
-// Reference: https://github.com/espressif/idf-extra-components/blob/master/led_strip/src/led_strip_spi_dev.c
-//
-// Encoding scheme:
-// - Each LED bit expands to 3 SPI bits
-// - LED bit '0' → SPI bits: 100 (binary) = 0x4 (high nibble position)
-// - LED bit '1' → SPI bits: 110 (binary) = 0x6 (high nibble position)
-// - Each LED color byte (8 bits) expands to 24 SPI bits (3 bytes)
-// - SPI clock: 2.5 MHz = 400ns per SPI bit
-//
-// Timing achieved:
-// - LED '0': T0H = 400ns (1 SPI bit), T0L = 800ns (2 SPI bits)
-// - LED '1': T1H = 800ns (2 SPI bits), T1L = 400ns (1 SPI bit)
+// Each LED bit expands to 8 SPI bits (1 byte per LED bit, 8 bytes per LED byte)
+// SPI clock frequency is derived from chipset timing: 8 / (T1+T2+T3) in Hz
+// For WS2812 (T1=250, T2=625, T3=375 → 1250ns period): clock = 6.4 MHz
 
-/// @brief Number of SPI bytes per LED color byte (3:1 expansion)
-constexpr size_t SPI_BYTES_PER_COLOR_BYTE = 3;
+/// @brief Number of SPI bytes per LED color byte (8:1 wave8 expansion)
+constexpr size_t WAVE8_BYTES_PER_COLOR_BYTE = 8;
 
-/// @brief Encode a single LED color byte into 3 SPI bytes
-/// @param data The LED color value (0-255)
-/// @param buf Pointer to 3-byte output buffer (must be pre-cleared)
-///
-/// EXACT copy of Espressif led_strip encoding function:
-/// https://github.com/espressif/idf-extra-components/blob/master/led_strip/src/led_strip_spi_dev.c
-///
-/// Each color bit (8 bits) is represented by 3 SPI bits:
-///   - low_level (LED '0'): 100 (binary)
-///   - high_level (LED '1'): 110 (binary)
-/// So a color byte occupies 3 bytes of SPI data.
-///
-/// Bit mapping (buf is treated as little-endian within each byte):
-///   Input bit 0 → buf[2] bits 0-2 (3 bits starting at LSB)
-///   Input bit 1 → buf[2] bits 3-5
-///   Input bit 2 → buf[2] bit 6-7 + buf[1] bit 0
-///   Input bit 3 → buf[1] bits 1-3
-///   Input bit 4 → buf[1] bits 4-6
-///   Input bit 5 → buf[1] bit 7 + buf[0] bits 0-1
-///   Input bit 6 → buf[0] bits 2-4
-///   Input bit 7 → buf[0] bits 5-7
-FASTLED_FORCE_INLINE
-void led_strip_encode_byte(u8 data, u8* buf) {
-    // Exact Espressif implementation - DO NOT MODIFY
-    // Each color of 1 bit is represented by 3 bits of SPI,
-    // low_level:100, high_level:110
-    // So a color byte occupies 3 bytes of SPI.
-    *(buf + 2) |= data & (1 << 0) ? (1 << 2) | (1 << 1) : (1 << 2);
-    *(buf + 2) |= data & (1 << 1) ? (1 << 5) | (1 << 4) : (1 << 5);
-    *(buf + 2) |= data & (1 << 2) ? (1 << 7) : 0x00;
-    *(buf + 1) |= (1 << 0);
-    *(buf + 1) |= data & (1 << 3) ? (1 << 3) | (1 << 2) : (1 << 3);
-    *(buf + 1) |= data & (1 << 4) ? (1 << 6) | (1 << 5) : (1 << 6);
-    *(buf + 0) |= data & (1 << 5) ? (1 << 1) | (1 << 0) : (1 << 1);
-    *(buf + 0) |= data & (1 << 6) ? (1 << 4) | (1 << 3) : (1 << 4);
-    *(buf + 0) |= data & (1 << 7) ? (1 << 7) | (1 << 6) : (1 << 7);
+/// @brief Calculate SPI clock frequency for wave8 encoding from chipset timing
+/// @param total_period_ns Total LED bit period (T1+T2+T3) in nanoseconds
+/// @return SPI clock frequency in Hz (8 pulses per LED bit period)
+constexpr uint32_t calculateWave8SpiClockHz(uint32_t total_period_ns) {
+    // Wave8 expands each LED bit to 8 SPI bits
+    // Pulse period = total_period_ns / 8
+    // Clock frequency = 1e9 / pulse_period_ns = 8e9 / total_period_ns
+    const uint32_t pulse_period_ns = total_period_ns / 8;
+    return (pulse_period_ns > 0) ? (1000000000U / pulse_period_ns) : 6400000U;
 }
 
-/// @brief Calculate greatest common divisor using Euclidean algorithm
-constexpr u32 gcd(u32 a, u32 b) {
-    while (b != 0) {
-        u32 temp = b;
-        b = a % b;
-        a = temp;
-    }
-    return a;
-}
-
-/// @brief Calculate GCD of four values
-constexpr u32 gcd4(u32 a, u32 b, u32 c, u32 d) {
-    return gcd(gcd(gcd(a, b), c), d);
-}
-
-/// @brief Count number of set bits in a value
-constexpr u8 countBits(u32 value) {
-    u8 count = 0;
-    while (value) {
-        count++;
-        value >>= 1;
-    }
-    return count;
-}
 } // namespace
 
 ChannelEngineSpi::ChannelEngineSpi()
@@ -160,6 +102,12 @@ ChannelEngineSpi::ChannelEngineSpi()
 ChannelEngineSpi::~ChannelEngineSpi() {
     FL_DBG("ChannelEngineSpi: Destructor called");
 
+    // Wait for any in-flight pipeline to complete before cleanup
+    while (mPipeline.mPhase != DmaPipelineState::IDLE) {
+        advancePipeline();
+        fl::delayMicroseconds(100);
+    }
+
     // Poll to ensure cleanup of any in-flight transmissions
     poll();
 
@@ -167,14 +115,9 @@ ChannelEngineSpi::~ChannelEngineSpi() {
 
     // Clean up all channels
     for (auto &channel : mChannels) {
-        // Detach timer ISR
-        if (channel.timerHandle.is_valid()) {
-            fl::isr::detachHandler(channel.timerHandle);
-        }
-
-        // Free staging buffers (allocated with heap_caps_aligned_alloc)
+        // Free staging buffers (allocated with heap_caps_malloc)
         if (channel.stagingA) {
-            heap_caps_free(channel.stagingA);  // heap_caps_aligned_alloc uses heap_caps_free()
+            heap_caps_free(channel.stagingA);
         }
         if (channel.stagingB) {
             heap_caps_free(channel.stagingB);
@@ -219,8 +162,8 @@ bool ChannelEngineSpi::canHandle(const ChannelDataPtr& data) const {
     // MOSI/data pin carries signals to the LEDs.
     //
     // How it works:
-    //   - Clockless LED bits are encoded as SPI bit patterns (e.g., 100b = '0', 110b = '1')
-    //   - The SPI clock controls MOSI timing (e.g., 2.5MHz for WS2812 = 400ns per bit)
+    //   - Clockless LED bits are encoded as SPI bit patterns via wave8 (8:1 expansion)
+    //   - The SPI clock controls MOSI timing (e.g., ~6.67MHz for WS2812 = ~150ns per bit)
     //   - LEDs decode pulse widths on the data line, ignoring the clock signal
     //
     // ✅ CORRECTED LOGIC:
@@ -280,55 +223,108 @@ void ChannelEngineSpi::show() {
         return;
     }
 
+    // Wait for any previous pipeline to complete before starting new frame
+    while (mPipeline.mPhase != DmaPipelineState::IDLE) {
+        advancePipeline();
+        fl::delayMicroseconds(100);
+    }
+
+    // Release any channels from previous frame
+    for (auto &channel : mChannels) {
+        if (!channel.inUse) continue;
+        if (channel.transmissionComplete) {
+            if (channel.sourceData) {
+                channel.sourceData->setInUse(false);
+            }
+            releaseChannel(&channel);
+        }
+    }
+
     // Move enqueued channels to transmitting list
     mTransmittingChannels = fl::move(mEnqueuedChannels);
     mEnqueuedChannels.clear();
 
-    // Begin batched transmission (groups by timing, batches when N > K)
-    beginBatchedTransmission(mTransmittingChannels);
+    // Build timing groups for batched transmission
+    mPipeline.mTimingGroups.clear();
+    fl::hash_map<ChipsetTimingConfig, fl::vector<ChannelDataPtr>, TimingHash, TimingEqual> timingGroups;
+    for (const auto& channel : mTransmittingChannels) {
+        const ChipsetTimingConfig& timing = channel->getTiming();
+        timingGroups[timing].push_back(channel);
+    }
+
+    for (const auto& [timing, groupChannels] : timingGroups) {
+        DmaPipelineState::TimingGroupInfo info;
+        info.timing = timing;
+        info.channels = groupChannels;
+        info.laneCapacity = determineLaneCapacity(groupChannels);
+        mPipeline.mTimingGroups.push_back(fl::move(info));
+    }
+
+    // Initialize pipeline state
+    mPipeline.mCurrentTimingGroup = 0;
+    mPipeline.mCurrentBatchIdx = 0;
+    mPipeline.mCurrentChannelInBatch = 0;
+    mPipeline.mActiveChannel = nullptr;
+    mPipeline.mDmaInFlight = false;
+    mPipeline.mEncodeIdx = 0;
+
+    // Start the first channel
+    if (startNextChannel()) {
+        startFirstDma();
+    }
 }
 
 IChannelEngine::EngineState ChannelEngineSpi::poll() {
+    // If pipeline is active, advance it
+    if (mPipeline.mPhase != DmaPipelineState::IDLE) {
+        return advancePipeline();
+    }
+
+    // Pipeline idle — check for any channels needing cleanup
     bool anyBusy = false;
-    bool anyError = false;
-
-    // Check all active channels
     for (auto &channel : mChannels) {
-        if (!channel.inUse)
-            continue;
-
-        // With blocking transmit, transmission is complete as soon as
-        // beginTransmission() returns. Check transmissionComplete flag.
+        if (!channel.inUse) continue;
         if (channel.transmissionComplete) {
-            // Clear in-use flag on source data
             if (channel.sourceData) {
                 channel.sourceData->setInUse(false);
             }
-
             releaseChannel(&channel);
         } else {
-            // Still waiting for transmission to complete (shouldn't happen with blocking)
             anyBusy = true;
         }
     }
 
-    // Process pending channels if hardware available
-    if (!mPendingChannels.empty() && !anyBusy) {
-        processPendingChannels();
-    }
-
-    // Determine final state
-    if (anyError)
-        return EngineState::ERROR;
     if (anyBusy)
         return EngineState::BUSY;
-    if (!mPendingChannels.empty())
-        return EngineState::DRAINING;
 
     // All channels complete - clear transmitting list
     if (!mTransmittingChannels.empty()) {
         mTransmittingChannels.clear();
     }
+
+    return EngineState::READY;
+}
+
+/// @brief Poll channel states for cleanup
+IChannelEngine::EngineState ChannelEngineSpi::pollChannels() {
+    bool anyBusy = false;
+
+    for (auto &channel : mChannels) {
+        if (!channel.inUse)
+            continue;
+
+        if (channel.transmissionComplete) {
+            if (channel.sourceData) {
+                channel.sourceData->setInUse(false);
+            }
+            releaseChannel(&channel);
+        } else {
+            anyBusy = true;
+        }
+    }
+
+    if (anyBusy)
+        return EngineState::BUSY;
 
     return EngineState::READY;
 }
@@ -352,15 +348,15 @@ void ChannelEngineSpi::beginBatchedTransmission(
     //      We can only batch channels with identical timing requirements together.
     //
     // Example: If you have 4 WS2812 strips and 4 SK6812 strips, they form 2 groups:
-    //   - Group 1 (WS2812): 4 channels with 2.5MHz clock, 100/110 bit patterns
+    //   - Group 1 (WS2812): 4 channels with ~6.67MHz clock, wave8 bit patterns
     //   - Group 2 (SK6812): 4 channels with different clock/patterns
     //
-    // Hash map key: SpiTimingConfig (clock_hz, bits_per_led_bit, protocol, reset_time_us)
+    // Hash map key: ChipsetTimingConfig (t1_ns, t2_ns, t3_ns, reset_us)
     // Hash map value: Vector of channels with matching timing
-    fl::hash_map<SpiTimingConfig, fl::vector<ChannelDataPtr>, TimingHash, TimingEqual> timingGroups;
+    fl::hash_map<ChipsetTimingConfig, fl::vector<ChannelDataPtr>, TimingHash, TimingEqual> timingGroups;
 
     for (const auto& channel : channels) {
-        SpiTimingConfig timing = getSpiTimingFromChannel(channel);
+        const ChipsetTimingConfig& timing = channel->getTiming();
         timingGroups[timing].push_back(channel);
     }
 
@@ -427,8 +423,8 @@ void ChannelEngineSpi::beginBatchedTransmission(
             //
             // Critical: Early versions only checked BUSY, missing DRAINING state.
             //           This caused batches to overlap incorrectly.
-            EngineState state;
-            while ((state = poll()) != EngineState::READY) {
+            EngineState state(EngineState::BUSY);
+            while ((state = pollChannels()) != EngineState::READY) {
                 if (state == EngineState::ERROR) {
                     FL_WARN_EVERY(10, "ChannelEngineSpi: Error during batch transmission");
                     break;
@@ -443,8 +439,8 @@ void ChannelEngineSpi::beginBatchedTransmission(
             // causing alternating black/color frames (protocol violation).
             if (batchIdx + 1 < numBatches) {
                 FL_DBG_EVERY(100, "ChannelEngineSpi: Inserting reset delay ("
-                       << timing.reset_time_us << " μs) between batches");
-                fl::delayMicroseconds(timing.reset_time_us);
+                       << timing.reset_us << " μs) between batches");
+                fl::delayMicroseconds(timing.reset_us);
             }
         }
     }
@@ -493,16 +489,13 @@ void ChannelEngineSpi::beginTransmission(
     for (const auto &data : channelData) {
         gpio_num_t pin = static_cast<gpio_num_t>(data->getPin());
 
-        // Get timing configuration from channel data
-        SpiTimingConfig timing = getSpiTimingFromChannel(data);
-
-        // Get original chipset timing for reference (not used for encoding, kept for debug)
-        const ChipsetTimingConfig& originalTiming = data->getTiming();
+        // Get clockless timing configuration from channel data
+        const ChipsetTimingConfig& timing = data->getTiming();
 
         // DEBUG: Trace timing values received from channel data
         FL_DBG_EVERY(100, "ChannelEngineSpi: Received timing from ChannelData: t1_ns="
-               << originalTiming.t1_ns << ", t2_ns=" << originalTiming.t2_ns
-               << ", t3_ns=" << originalTiming.t3_ns << ", reset_us=" << originalTiming.reset_us);
+               << timing.t1_ns << ", t2_ns=" << timing.t2_ns
+               << ", t3_ns=" << timing.t3_ns << ", reset_us=" << timing.reset_us);
 
         // Get LED data from channel
         const auto &ledData = data->getData();
@@ -512,7 +505,7 @@ void ChannelEngineSpi::beginTransmission(
         }
 
         // Acquire or reuse channel
-        SpiChannelState *channel = acquireChannel(pin, timing, ledData.size(), originalTiming);
+        SpiChannelState *channel = acquireChannel(pin, timing, ledData.size());
         if (!channel) {
             // No hardware available - queue for later
             FL_DBG("ChannelEngineSpi: No HW available for pin " << pin
@@ -554,34 +547,21 @@ void ChannelEngineSpi::beginTransmission(
                    << static_cast<int>(ledData[3]) << ","
                    << static_cast<int>(ledData[4]) << ","
                    << static_cast<int>(ledData[5]) << "]");
-
-            // DEBUG: Verify Espressif 3-bit encoding works by testing first byte
-            if (channel->ledSourceBuffer && ledData.size() >= 1) {
-                u8 test_byte = channel->ledSourceBuffer[0];
-                u8 test_output[SPI_BYTES_PER_COLOR_BYTE] = {0, 0, 0};  // Must be pre-cleared
-                led_strip_encode_byte(test_byte, test_output);
-                FL_DBG_EVERY(100, "ChannelEngineSpi: Test encode byte " << static_cast<int>(test_byte)
-                       << " → SPI[0..2]: [" << static_cast<int>(test_output[0])
-                       << "," << static_cast<int>(test_output[1])
-                       << "," << static_cast<int>(test_output[2]) << "]");
-            }
         }
 
         // Store reference to source data for cleanup
         channel->sourceData = data;
 
-        // Use blocking polling transmit from main task. This ensures:
-        // 1. SPI driver handles cache coherence internally during polling
-        // 2. Transaction completes before returning (no async DMA race conditions)
-        // 3. No timer ISR needed for transmission
+        // Double-buffered streaming transmission from main task context.
+        // Overlaps DMA transfer with CPU encoding using ping-pong buffers:
+        //   - Encode into buffer A, queue for DMA
+        //   - Encode into buffer B while DMA sends buffer A
+        //   - Wait for A to complete, queue B, encode next into A
+        //   ... until all LED data is transmitted.
         //
-        // Blocking transmit is simpler and works reliably across all ESP32 variants.
-
-        // Encode ALL LED data in main task context
-        preEncodeAllData(channel);
-
-        // Transmit using blocking poll (handles cache coherence internally)
-        transmitBlockingPolled(channel);
+        // Each staging buffer is 4KB, holding ~512 LED bytes (~170 RGB LEDs) with wave8.
+        // Reset zeros are only appended after the LAST chunk.
+        transmitStreaming(channel);
 
         // Mark transmission as complete (no async waiting needed)
         channel->transmissionComplete = true;
@@ -589,29 +569,51 @@ void ChannelEngineSpi::beginTransmission(
 }
 
 ChannelEngineSpi::SpiChannelState *
-ChannelEngineSpi::acquireChannel(gpio_num_t pin, const SpiTimingConfig &timing,
-                                 size_t dataSize, const ChipsetTimingConfig &originalTiming) {
+ChannelEngineSpi::acquireChannel(gpio_num_t pin, const ChipsetTimingConfig &timing,
+                                 size_t dataSize) {
 
     // Try to find existing idle channel with matching pin and timing
     for (auto &channel : mChannels) {
         if (!channel.inUse && channel.pin == pin && channel.timing == timing) {
             channel.inUse = true;
             channel.transmissionComplete = false;
-            channel.hasNewData = false;
             channel.ledBytesRemaining = 0;
 
-            // CRITICAL FIX: Reinitialize channel if SPI host was released
-            // After releaseChannel(), spi_host is set to SPI_HOST_MAX to enable batching
-            // We need to reacquire SPI hardware before reusing the channel
-            if (channel.spi_host == SPI_HOST_MAX) {
-                FL_DBG("ChannelEngineSpi: Reinitializing released channel for pin " << pin);
-                if (!createChannel(&channel, pin, timing, dataSize, &originalTiming)) {
-                    FL_WARN("ChannelEngineSpi: Failed to reinitialize channel for pin " << pin);
-                    channel.inUse = false; // Mark as not in use since reinitialization failed
-                    return nullptr;
+            if (channel.spi_host != SPI_HOST_MAX) {
+                // SPI hardware still allocated - just reroute MOSI to this pin
+                // The MOSI signal might be routed to a different pin from a previous batch.
+                // Use GPIO matrix to reroute SPI MOSI output to this pin.
+                gpio_set_direction(pin, GPIO_MODE_OUTPUT);
+                esp_rom_gpio_connect_out_signal(pin, FSPID_OUT_IDX, false, false);
+                FL_DBG_EVERY(100, "ChannelEngineSpi: Rerouted MOSI to pin " << pin);
+                return &channel;
+            }
+
+            // SPI hardware was released - need full reinit
+            // First try to reclaim SPI from another idle channel
+            for (auto &other : mChannels) {
+                if (!other.inUse && other.spi_host != SPI_HOST_MAX && &other != &channel) {
+                    // Steal SPI device and host from the other channel
+                    channel.spi_host = other.spi_host;
+                    channel.spi_device = other.spi_device;
+                    other.spi_host = SPI_HOST_MAX;
+                    other.spi_device = nullptr;
+                    // Reroute MOSI to new pin via GPIO matrix
+                    gpio_set_direction(pin, GPIO_MODE_OUTPUT);
+                    esp_rom_gpio_connect_out_signal(pin, FSPID_OUT_IDX, false, false);
+                    FL_DBG("ChannelEngineSpi: Rerouted MOSI from pin "
+                           << static_cast<int>(other.pin) << " to pin " << pin);
+                    return &channel;
                 }
             }
 
+            // No SPI hardware available anywhere - reinitialize
+            FL_DBG("ChannelEngineSpi: Reinitializing SPI hardware for pin " << pin);
+            if (!reinitSpiHardware(&channel, pin, dataSize)) {
+                FL_WARN("ChannelEngineSpi: Failed to reinit SPI for pin " << pin);
+                channel.inUse = false;
+                return nullptr;
+            }
             return &channel;
         }
     }
@@ -624,7 +626,6 @@ ChannelEngineSpi::acquireChannel(gpio_num_t pin, const SpiTimingConfig &timing,
     newChannel.timing = timing;
     newChannel.inUse = true;
     newChannel.transmissionComplete = false;
-    newChannel.hasNewData = false;
     newChannel.spi_host = SPI_HOST_MAX;
     newChannel.spi_device = nullptr;
 
@@ -653,8 +654,23 @@ ChannelEngineSpi::acquireChannel(gpio_num_t pin, const SpiTimingConfig &timing,
     mChannels.push_back(newChannel);
     SpiChannelState *channelPtr = &mChannels.back();
 
+    // Free SPI from any idle channel on a different pin to make host available
+    for (auto &other : mChannels) {
+        if (!other.inUse && other.spi_host != SPI_HOST_MAX && other.pin != pin) {
+            FL_DBG("ChannelEngineSpi: Freeing SPI from idle pin "
+                   << static_cast<int>(other.pin) << " for new pin " << pin);
+            if (other.spi_device) {
+                spi_bus_remove_device(other.spi_device);
+                other.spi_device = nullptr;
+            }
+            releaseSpiHost(other.spi_host);
+            other.spi_host = SPI_HOST_MAX;
+            break;
+        }
+    }
+
     // Now initialize the channel (this will attach ISR with correct pointer)
-    if (!createChannel(channelPtr, pin, timing, dataSize, &originalTiming)) {
+    if (!createChannel(channelPtr, pin, timing, dataSize)) {
         FL_WARN_ONCE("ChannelEngineSpi: Failed to create channel for pin " << pin);
         // Remove the partially created channel
         mChannels.pop_back();
@@ -668,10 +684,9 @@ ChannelEngineSpi::acquireChannel(gpio_num_t pin, const SpiTimingConfig &timing,
 
 void ChannelEngineSpi::releaseChannel(SpiChannelState *channel) {
     if (channel) {
-        // Clear usage flags
+        // Clear usage flags - keep SPI hardware allocated for fast reuse
         channel->inUse = false;
         channel->transmissionComplete = false;
-        channel->hasNewData = false;
 
         // Reset streaming state (prevents stale data corruption on reuse)
         channel->ledSource = nullptr;
@@ -682,136 +697,86 @@ void ChannelEngineSpi::releaseChannel(SpiChannelState *channel) {
         // Release reference to source data
         channel->sourceData = nullptr;
 
-        // CRITICAL: Set shutdown flag BEFORE detaching ISR
-        // This prevents race condition where ISR fires one more time after detachment
-        channel->isShuttingDown = true;
+        // Clear transaction flags
+        channel->transAInFlight = false;
+        channel->transBInFlight = false;
 
-        // Detach timer ISR before releasing hardware resources
-        if (channel->timerHandle.is_valid()) {
-            fl::isr::detachHandler(channel->timerHandle);
-            // Note: detachHandler() invalidates the handle internally
-        }
-
-        // Small delay to ensure any in-flight ISR completes (1ms = 1000 ISR ticks at 1kHz)
-        // This prevents accessing freed memory if ISR fires between detach and buffer free
-        vTaskDelay(pdMS_TO_TICKS(2));
-
-        // CRITICAL FIX: Release SPI host to enable batching
-        // Without this, subsequent batches can't acquire SPI hosts
-        // The channel remains in mChannels for reuse, but SPI hardware is freed
-        // On next use, acquireChannel() will find this idle channel and reinitialize it
-        if (channel->spi_device) {
-            // Drain all pending transactions BEFORE removing device
-            // This prevents "Have unfinished transactions" errors from ESP-IDF
-            // Note: spi_device_get_trans_result() returns ESP_ERR_TIMEOUT if no transactions are queued
-            // We loop until we get a timeout, indicating the queue is empty
-            spi_transaction_t *trans_ptr;
-            esp_err_t result;
-            int drained = 0;
-            const int max_drain = 10; // Safety limit to prevent infinite loop
-
-            while (drained < max_drain) {
-                result = spi_device_get_trans_result(channel->spi_device, &trans_ptr, pdMS_TO_TICKS(100));
-                if (result == ESP_ERR_TIMEOUT) {
-                    // No more transactions in queue
-                    break;
-                } else if (result == ESP_OK) {
-                    // Transaction completed
-                    drained++;
-                } else {
-                    // Other error - log and break
-                    FL_WARN_ONCE("ChannelEngineSpi: spi_device_get_trans_result failed during drain: " << result);
-                    break;
-                }
-            }
-
-            if (drained > 0) {
-                FL_DBG_EVERY(100, "ChannelEngineSpi: Drained " << drained << " pending transactions before device removal");
-
-                // DEBUG: Dump first 16 bytes of staging buffer A to see what was actually transmitted
-                // This helps diagnose if the ISR is encoding correctly
-                if (channel->stagingA) {
-                    FL_DBG_EVERY(100, "ChannelEngineSpi: Staging buffer A (first 16 bytes): ["
-                           << static_cast<int>(channel->stagingA[0]) << ","
-                           << static_cast<int>(channel->stagingA[1]) << ","
-                           << static_cast<int>(channel->stagingA[2]) << ","
-                           << static_cast<int>(channel->stagingA[3]) << ","
-                           << static_cast<int>(channel->stagingA[4]) << ","
-                           << static_cast<int>(channel->stagingA[5]) << ","
-                           << static_cast<int>(channel->stagingA[6]) << ","
-                           << static_cast<int>(channel->stagingA[7]) << " | "
-                           << static_cast<int>(channel->stagingA[8]) << ","
-                           << static_cast<int>(channel->stagingA[9]) << ","
-                           << static_cast<int>(channel->stagingA[10]) << ","
-                           << static_cast<int>(channel->stagingA[11]) << ","
-                           << static_cast<int>(channel->stagingA[12]) << ","
-                           << static_cast<int>(channel->stagingA[13]) << ","
-                           << static_cast<int>(channel->stagingA[14]) << ","
-                           << static_cast<int>(channel->stagingA[15]) << "]");
-
-                    // DEBUG: Also check last transaction size (from transA/B structures)
-                    FL_DBG_EVERY(100, "ChannelEngineSpi: TransA length=" << (channel->transA.length / 8) << " bytes"
-                           << ", TransB length=" << (channel->transB.length / 8) << " bytes");
-
-                    // DEBUG: Verify tx_buffer addresses match staging buffers
-                    FL_DBG_EVERY(100, "ChannelEngineSpi: Buffer addresses - stagingA=" << fl::ptr_to_int(channel->stagingA)
-                           << ", stagingB=" << fl::ptr_to_int(channel->stagingB)
-                           << ", transA.tx_buffer=" << fl::ptr_to_int(channel->transA.tx_buffer)
-                           << ", transB.tx_buffer=" << fl::ptr_to_int(channel->transB.tx_buffer));
-
-                    // DEBUG: Print captured tx_buffer from ISR
-                    if (channel->debugTxCaptured) {
-                        FL_DBG_EVERY(100, "ChannelEngineSpi: ISR tx_buffer (captured at queue): ["
-                               << static_cast<int>(channel->debugTxBuffer[0]) << ","
-                               << static_cast<int>(channel->debugTxBuffer[1]) << ","
-                               << static_cast<int>(channel->debugTxBuffer[2]) << ","
-                               << static_cast<int>(channel->debugTxBuffer[3]) << ","
-                               << static_cast<int>(channel->debugTxBuffer[4]) << ","
-                               << static_cast<int>(channel->debugTxBuffer[5]) << ","
-                               << static_cast<int>(channel->debugTxBuffer[6]) << ","
-                               << static_cast<int>(channel->debugTxBuffer[7]) << "]");
-                    } else {
-                        FL_WARN_EVERY(100, "ChannelEngineSpi: ISR tx_buffer NOT captured (debugTxCaptured=false)");
-                    }
-                }
-            }
-
-            // Clear transaction flags after draining
-            channel->transAInFlight = false;
-            channel->transBInFlight = false;
-
-            // Remove SPI device from bus
-            spi_bus_remove_device(channel->spi_device);
-            channel->spi_device = nullptr;
-        } else {
-            // No device, but clear flags anyway
-            channel->transAInFlight = false;
-            channel->transBInFlight = false;
-        }
-
-        if (channel->spi_host != SPI_HOST_MAX) {
-            // Free SPI bus and decrement host refCount
-            releaseSpiHost(channel->spi_host);
-            channel->spi_host = SPI_HOST_MAX;
-        }
-
-        // Free staging buffers to prevent memory leak on reinitialization
-        // (allocated with heap_caps_aligned_alloc, freed with heap_caps_free())
-        if (channel->stagingA) {
-            heap_caps_free(channel->stagingA);  // heap_caps_aligned_alloc uses heap_caps_free()
-            channel->stagingA = nullptr;
-        }
-        if (channel->stagingB) {
-            heap_caps_free(channel->stagingB);
-            channel->stagingB = nullptr;
-        }
-        channel->stagingCapacity = 0;
+        // KEEP SPI hardware allocated between frames for fast reuse.
+        // Teardown only happens in destructor or when the channel is actually destroyed.
+        // This avoids the expensive ~1.2s SPI bus re-initialization cycle per frame
+        // and ensures the GPIO stays in SPI MOSI mode (driven LOW by zero bytes at end of frame).
+        FL_DBG_EVERY(100, "ChannelEngineSpi: Released channel for pin " << static_cast<int>(channel->pin)
+               << " (SPI hardware kept allocated for reuse)");
     }
 }
 
+bool ChannelEngineSpi::reinitSpiHardware(SpiChannelState *state, gpio_num_t pin,
+                                         size_t dataSize) {
+    // Lightweight re-initialization: only SPI bus + device.
+    // Staging buffers, timer ISR, and LED source buffer are already allocated.
+
+    state->spi_host = acquireSpiHost();
+    if (state->spi_host == SPI_HOST_MAX) {
+        FL_WARN_EVERY(10, "ChannelEngineSpi: No available SPI host for reinit");
+        return false;
+    }
+
+    const size_t staging_size = 4096;
+    const size_t spiBufferSize = dataSize * WAVE8_BYTES_PER_COLOR_BYTE;
+    state->useDMA = (spiBufferSize > 64);
+
+    // Calculate SPI clock from chipset timing (wave8: 8 pulses per LED bit period)
+    const uint32_t total_period = state->timing.total_period_ns();
+    const uint32_t spi_clock_hz = calculateWave8SpiClockHz(total_period > 0 ? total_period : 1250);
+
+    spi_bus_config_t bus_config = {};
+    bus_config.mosi_io_num = pin;
+    bus_config.miso_io_num = -1;
+    bus_config.sclk_io_num = -1;
+    bus_config.quadwp_io_num = -1;
+    bus_config.quadhd_io_num = -1;
+    bus_config.max_transfer_sz = staging_size;
+    bus_config.flags = 0;
+
+    esp_err_t ret = spi_bus_initialize(state->spi_host, &bus_config, SPI_DMA_CH_AUTO);
+    if (ret != ESP_OK) {
+        FL_WARN("ChannelEngineSpi: reinit spi_bus_initialize failed: " << ret);
+        releaseSpiHost(state->spi_host);
+        state->spi_host = SPI_HOST_MAX;
+        return false;
+    }
+
+    spi_device_interface_config_t dev_config = {};
+    dev_config.clock_source = SPI_CLK_SRC_DEFAULT;
+    dev_config.command_bits = 0;
+    dev_config.address_bits = 0;
+    dev_config.dummy_bits = 0;
+    dev_config.clock_speed_hz = spi_clock_hz;
+    dev_config.mode = 0;
+    dev_config.spics_io_num = -1;
+    dev_config.queue_size = 4;
+    dev_config.post_cb = nullptr;
+    dev_config.flags = (state->numLanes >= 2) ? SPI_DEVICE_HALFDUPLEX : 0;
+
+    ret = spi_bus_add_device(state->spi_host, &dev_config, &state->spi_device);
+    if (ret != ESP_OK) {
+        FL_WARN("ChannelEngineSpi: reinit spi_bus_add_device failed: " << ret);
+        spi_bus_free(state->spi_host);
+        releaseSpiHost(state->spi_host);
+        state->spi_host = SPI_HOST_MAX;
+        return false;
+    }
+
+    gpio_set_drive_capability(pin, GPIO_DRIVE_CAP_3);
+
+    FL_DBG_EVERY(100, "ChannelEngineSpi: Reinit SPI hardware for pin " << pin
+           << " host=" << static_cast<int>(state->spi_host));
+    return true;
+}
+
 bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
-                                     const SpiTimingConfig &timing,
-                                     size_t dataSize, const ChipsetTimingConfig *originalTiming) {
+                                     const ChipsetTimingConfig &timing,
+                                     size_t dataSize) {
     // Safety counter to detect infinite channel creation loops
     static int creation_count = 0;
     static u32 last_reset_ms = 0;
@@ -840,13 +805,13 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
         return false;
     }
 
-    // Calculate buffer size for Espressif 3-bit encoding (3 SPI bits per LED bit)
-    // Each LED byte (8 bits) expands to 24 SPI bits (3 bytes)
-    // Total: dataSize * 3 bytes
-    const size_t spiBufferSize = dataSize * SPI_BYTES_PER_COLOR_BYTE;
+    // Staging buffer size determines max SPI transaction size (chunked transmission)
+    // We use 4KB staging buffers, so max_transfer_sz matches staging capacity
+    const size_t staging_size = 4096;
 
     // Determine if we should use DMA
-    // Use DMA for larger buffers (>64 bytes) similar to Espressif driver
+    // Use DMA for larger buffers (>64 bytes)
+    const size_t spiBufferSize = dataSize * WAVE8_BYTES_PER_COLOR_BYTE;
     state->useDMA = (spiBufferSize > 64);
 
     // Espressif's led_strip driver does NOT call gpio_reset_pin() before
@@ -861,7 +826,7 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     //   .miso_io_num = -1,                          // Not used for LED output
     //   .sclk_io_num = -1,                          // Not used (internal timing only)
     //
-    // The SPI peripheral generates clock internally (2.5MHz for 3-bit encoding) but
+    // The SPI peripheral generates clock internally (wave8 clock from chipset timing) but
     // the clock signal is NEVER connected to the LED strip - only MOSI carries data.
     spi_bus_config_t bus_config = {};
     bus_config.mosi_io_num = pin;   // Data pin (only pin connected to LED strip)
@@ -869,7 +834,7 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     bus_config.sclk_io_num = -1;    // Match Espressif led_strip: not used (internal only)
     bus_config.quadwp_io_num = -1;  // Not used for LED strips
     bus_config.quadhd_io_num = -1;  // Not used for LED strips
-    bus_config.max_transfer_sz = spiBufferSize;
+    bus_config.max_transfer_sz = staging_size;  // Chunked transmission: max = staging buffer size
 
     FL_DBG("ChannelEngineSpi: SPI bus config (Espressif led_strip pattern) - MOSI=" << static_cast<int>(pin)
            << ", SCLK=-1 (internal), MISO=-1 (unused)"
@@ -899,12 +864,12 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     }
 
     // Configure SPI device
-    // Use Espressif led_strip default: 2.5 MHz (400ns per SPI bit)
-    // With 3-bit encoding: LED '0' = 100 (T0H=400ns, T0L=800ns), LED '1' = 110 (T1H=800ns, T1L=400ns)
-    // Reference: https://github.com/espressif/idf-extra-components/blob/master/led_strip/src/led_strip_spi_dev.c
-    constexpr u32 LED_STRIP_SPI_DEFAULT_RESOLUTION = 2500000;  // 2.5 MHz
-    const u32 spi_clock_hz = LED_STRIP_SPI_DEFAULT_RESOLUTION;
-    FL_DBG("ChannelEngineSpi: Using Espressif led_strip clock: " << spi_clock_hz << "Hz (2.5MHz, 3-bit encoding)");
+    // Calculate SPI clock from chipset timing for wave8 encoding:
+    // Wave8 expands each LED bit to 8 SPI bits, so SPI clock = 8 / bit_period
+    // For WS2812 (1250ns period): 8e9 / 1250 = 6.4 MHz
+    const uint32_t total_period_ns = timing.total_period_ns();
+    const uint32_t spi_clock_hz = calculateWave8SpiClockHz(total_period_ns > 0 ? total_period_ns : 1250);
+    FL_DBG("ChannelEngineSpi: Wave8 SPI clock: " << spi_clock_hz << "Hz (8-bit expansion, period=" << total_period_ns << "ns)");
 
     spi_device_interface_config_t dev_config = {};
     dev_config.clock_source = SPI_CLK_SRC_DEFAULT;  // Match Espressif led_strip (ESP-IDF 5.x)
@@ -920,8 +885,8 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     dev_config.post_cb = nullptr;
 
     FL_DBG("ChannelEngineSpi: SPI clock_hz=" << spi_clock_hz
-           << " (Espressif 2.5MHz)"
-           << ", bits_per_led_bit=3 (Espressif encoding)"
+           << " (wave8 encoding)"
+           << ", bits_per_led_bit=8 (wave8)"
            << ", buffer_size=" << spiBufferSize << " bytes");
 
     // Device flags configuration:
@@ -950,16 +915,16 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
         return false;
     }
 
-    // Verify actual clock frequency (match Espressif led_strip tolerance: ±300 kHz)
+    // Verify actual clock frequency (tolerance: ±500 kHz for wave8)
     int actual_freq_khz = 0;
     spi_device_get_actual_freq(state->spi_device, &actual_freq_khz);
-    constexpr int requested_freq_khz = LED_STRIP_SPI_DEFAULT_RESOLUTION / 1000;  // 2500 kHz
-    FL_DBG("ChannelEngineSpi: Actual SPI clock frequency: " << actual_freq_khz << " kHz");
-    if (actual_freq_khz < requested_freq_khz - 300 ||
-        actual_freq_khz > requested_freq_khz + 300) {
+    const int requested_freq_khz = static_cast<int>(spi_clock_hz / 1000);
+    FL_DBG("ChannelEngineSpi: Actual SPI clock frequency: " << actual_freq_khz << " kHz (requested " << requested_freq_khz << " kHz)");
+    if (actual_freq_khz < requested_freq_khz - 500 ||
+        actual_freq_khz > requested_freq_khz + 500) {
         FL_WARN_ONCE("ChannelEngineSpi: Clock frequency mismatch - requested "
                 << requested_freq_khz << " kHz, actual " << actual_freq_khz
-                << " kHz (Espressif tolerance: ±300kHz)");
+                << " kHz (tolerance: ±500kHz)");
     }
 
     // DEBUG: Verify GPIO is configured as output by using ESP-IDF API
@@ -979,12 +944,15 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     FL_DBG("ChannelEngineSpi: Relying on spi_bus_initialize() for GPIO "
            << static_cast<int>(pin) << " routing");
 
-    // Allocate double-buffered staging buffers (4KB each)
+    // Allocate staging buffers (4KB each, double-buffered)
     // Following Espressif's led_strip driver pattern:
     // - MALLOC_CAP_INTERNAL: Forces allocation in internal SRAM
     // - MALLOC_CAP_DMA: Ensures DMA-accessible memory alignment
     // Using internal DMA memory eliminates cache coherence issues.
-    const size_t staging_size = 4096;
+    //
+    // Double-buffering allows overlapping DMA transfer with CPU encoding:
+    //   - Encode into buffer A while DMA sends buffer B (and vice versa)
+    //   - Reduces wall-clock time by overlapping encode + transfer
 
     state->stagingA = (u8 *)heap_caps_malloc(
         staging_size, MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA);
@@ -993,21 +961,19 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
 
     if (!state->stagingA || !state->stagingB) {
         FL_WARN("ChannelEngineSpi: Failed to allocate staging buffers");
-        if (state->stagingA)
-            heap_caps_free(state->stagingA);
-        if (state->stagingB)
-            heap_caps_free(state->stagingB);
+        if (state->stagingA) { heap_caps_free(state->stagingA); state->stagingA = nullptr; }
+        if (state->stagingB) { heap_caps_free(state->stagingB); state->stagingB = nullptr; }
         spi_bus_remove_device(state->spi_device);
         spi_bus_free(state->spi_host);
         releaseSpiHost(state->spi_host);
         return false;
     }
 
-    // Zero the staging buffers - Espressif 3-bit encoding assumes zero-initialized memory
+    // Zero both staging buffers
     fl::memset(state->stagingA, 0, staging_size);
     fl::memset(state->stagingB, 0, staging_size);
 
-    FL_DBG("ChannelEngineSpi: Allocated staging buffers via heap_caps_malloc (INTERNAL|DMA)");
+    FL_DBG("ChannelEngineSpi: Allocated double staging buffers via heap_caps_malloc (INTERNAL|DMA)");
 
     state->stagingCapacity = staging_size;
     state->currentStaging = state->stagingA;
@@ -1027,8 +993,6 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     }
 
     // Initialize streaming state
-    state->hasNewData = false;
-    state->isShuttingDown = false;  // Clear shutdown flag for new/reused channel
     state->cacheSyncDisabled = false;  // Enable cache sync for new channel (will auto-disable if fails)
     state->ledSource = nullptr;
     state->ledBytesRemaining = 0;
@@ -1036,54 +1000,24 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     state->transBInFlight = false;
 
     // CRITICAL: Zero-initialize transaction structures to avoid stale data
-    // spi_transaction_t has many fields that must be properly initialized
     fl::memset(&state->transA, 0, sizeof(spi_transaction_t));
     fl::memset(&state->transB, 0, sizeof(spi_transaction_t));
 
-    // NOTE: Using Espressif 3-bit encoding (no LUT needed)
-    // The encoding is done inline in preEncodeAllData() using led_strip_encode_byte()
-    // This matches the Espressif led_strip reference implementation
-    FL_DBG("ChannelEngineSpi: Using Espressif 3-bit encoding (no LUT)");
-
-    // Set up timer ISR (1 kHz = 1ms period, reduced from 4kHz to avoid stack overflow)
-    // The ISR encodes LED data into SPI staging buffers. Lower frequency reduces
-    // CPU overhead at the cost of slightly longer initial latency.
-
-    // Check stack - WARN if critically low (< 700 bytes)
-    // Note: attachTimerHandler needs ~500-600 bytes for ESP-IDF gptimer setup
+    // Build wave8 LUT from chipset timing
     {
-        UBaseType_t hwm = uxTaskGetStackHighWaterMark(nullptr);
-        if (hwm < 700) {
-            FL_WARN_ONCE("ChannelEngineSpi: Low stack: " << hwm << "B");
-        }
+        ChipsetTiming ct;
+        ct.T1 = timing.t1_ns;
+        ct.T2 = timing.t2_ns;
+        ct.T3 = timing.t3_ns;
+        ct.RESET = timing.reset_us;
+        ct.name = timing.name;
+        state->wave8Lut = buildWave8ExpansionLUT(ct);
+        state->wave8LutInitialized = true;
+        FL_DBG("ChannelEngineSpi: Built wave8 LUT (T1=" << ct.T1 << ", T2=" << ct.T2 << ", T3=" << ct.T3 << ")");
     }
 
-    // Set up timer ISR at 1kHz for encoding chunks
-    fl::isr::isr_config_t isr_config;
-    isr_config.handler = timerEncodingISR;
-    isr_config.user_data = state;
-    isr_config.frequency_hz = 1000;
-    isr_config.flags = 0;
-
-    fl::isr::isr_handle_t isr_handle;
-    int isr_ret = fl::isr::attachTimerHandler(isr_config, &isr_handle);
-    if (isr_ret != 0) {
-        FL_WARN_ONCE("ChannelEngineSpi: Timer attach failed: " << isr_ret);
-        heap_caps_free(state->stagingA);  // heap_caps_aligned_alloc uses heap_caps_free()
-        heap_caps_free(state->stagingB);
-        spi_bus_remove_device(state->spi_device);
-        spi_bus_free(state->spi_host);
-        releaseSpiHost(state->spi_host);
-        return false;
-    }
-
-    state->timerHandle = isr_handle;
-
-    // Initialize debug capture state
-    state->debugTxCaptured = false;
-    for (int i = 0; i < 8; i++) {
-        state->debugTxBuffer[i] = 0;
-    }
+    // NOTE: Timer ISR removed. Transmission uses double-buffered streaming via
+    // transmitStreaming() with spi_device_queue_trans()/spi_device_get_trans_result().
 
     FL_DBG_EVERY(10, "ChannelEngineSpi: Created pin=" << pin
            << " lanes=" << static_cast<int>(state->numLanes)
@@ -1092,8 +1026,8 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
     return true;
 }
 
-bool ChannelEngineSpi::encodeLedData(const fl::span<const u8> &ledData,
-                                     fl::vector<u8> &spiBuffer,
+bool ChannelEngineSpi::encodeLedData(const fl::span<const uint8_t> &ledData,
+                                     fl::vector<uint8_t> &spiBuffer,
                                      const SpiTimingConfig &timing) {
     // Calculate required SPI buffer size (variable expansion ratio)
     // Total bits = ledData.size() * 8 * timing.bits_per_led_bit
@@ -1108,7 +1042,7 @@ bool ChannelEngineSpi::encodeLedData(const fl::span<const u8> &ledData,
     fl::memset(spiBuffer.data(), 0, spiSize);
 
     // Encode each LED byte using dynamic pattern
-    u32 output_bit_offset = 0;
+    uint32_t output_bit_offset = 0;
     for (size_t i = 0; i < ledData.size(); i++) {
         output_bit_offset += encodeLedByte(ledData[i], spiBuffer.data(), timing,
                                            output_bit_offset);
@@ -1117,28 +1051,28 @@ bool ChannelEngineSpi::encodeLedData(const fl::span<const u8> &ledData,
     return true;
 }
 
-u32 ChannelEngineSpi::encodeLedByte(u8 data, u8 *buf,
+uint32_t ChannelEngineSpi::encodeLedByte(uint8_t data, uint8_t *buf,
                                          const SpiTimingConfig &timing,
-                                         u32 output_bit_offset) {
+                                         uint32_t output_bit_offset) {
     // Dynamic encoding: Each LED bit expands to timing.bits_per_led_bit SPI
     // bits using the bit patterns from timing.bit0_pattern and
     // timing.bit1_pattern
     //
     // Process LED byte MSB first (bit 7 → bit 0)
 
-    u32 current_bit_offset = output_bit_offset;
-    u32 last_byte_index = 0xFFFFFFFF; // Track which byte we're writing to
+    uint32_t current_bit_offset = output_bit_offset;
+    uint32_t last_byte_index = 0xFFFFFFFF; // Track which byte we're writing to
 
     for (int led_bit = 7; led_bit >= 0; led_bit--) {
         // Select pattern based on LED bit value
-        const u32 pattern =
+        const uint32_t pattern =
             (data & (1 << led_bit)) ? timing.bit1_pattern : timing.bit0_pattern;
-        const u8 pattern_bits = timing.bits_per_led_bit;
+        const uint8_t pattern_bits = timing.bits_per_led_bit;
 
         // Write pattern bits to buffer (MSB first)
-        for (u8 i = 0; i < pattern_bits; i++) {
-            const u32 byte_index = current_bit_offset / 8;
-            const u8 bit_index = 7 - (current_bit_offset % 8); // MSB first
+        for (uint8_t i = 0; i < pattern_bits; i++) {
+            const uint32_t byte_index = current_bit_offset / 8;
+            const uint8_t bit_index = 7 - (current_bit_offset % 8); // MSB first
 
             // Zero the byte when we first touch it
             if (byte_index != last_byte_index) {
@@ -1147,7 +1081,7 @@ u32 ChannelEngineSpi::encodeLedByte(u8 data, u8 *buf,
             }
 
             // Get bit from pattern (MSB first)
-            const u8 pattern_bit = (pattern >> (pattern_bits - 1 - i)) & 1;
+            const uint8_t pattern_bit = (pattern >> (pattern_bits - 1 - i)) & 1;
 
             if (pattern_bit) {
                 // Set bit in output buffer
@@ -1265,14 +1199,14 @@ ChannelEngineSpi::calculateSpiTiming(const ChipsetTimingConfig &chipsetTiming) {
     // For bit '0': high for T1, low for T2+T3
     // For bit '1': high for T1+T2, low for T3
 
-    const u32 t1_ns = chipsetTiming.t1_ns;
-    const u32 t2_ns = chipsetTiming.t2_ns;
-    const u32 t3_ns = chipsetTiming.t3_ns;
+    const uint32_t t1_ns = chipsetTiming.t1_ns;
+    const uint32_t t2_ns = chipsetTiming.t2_ns;
+    const uint32_t t3_ns = chipsetTiming.t3_ns;
 
     // Find GCD of original timings to get the optimal time quantum
     // This provides best memory efficiency while maintaining perfect timing
     // accuracy
-    u32 quantum_ns = gcd(gcd(t1_ns, t2_ns), t3_ns);
+    uint32_t quantum_ns = gcd(gcd(t1_ns, t2_ns), t3_ns);
 
     // Ensure minimum quantum of 10ns to avoid excessively high frequencies
     if (quantum_ns < 10) {
@@ -1282,17 +1216,17 @@ ChannelEngineSpi::calculateSpiTiming(const ChipsetTimingConfig &chipsetTiming) {
     }
 
     // Calculate how many quanta each phase needs (use original timings)
-    const u32 t1_quanta =
+    const uint32_t t1_quanta =
         (t1_ns + quantum_ns / 2) / quantum_ns; // Round to nearest
-    const u32 t2_quanta = (t2_ns + quantum_ns / 2) / quantum_ns;
-    const u32 t3_quanta = (t3_ns + quantum_ns / 2) / quantum_ns;
+    const uint32_t t2_quanta = (t2_ns + quantum_ns / 2) / quantum_ns;
+    const uint32_t t3_quanta = (t3_ns + quantum_ns / 2) / quantum_ns;
 
     // Calculate SPI frequency: 1 / quantum_time
     // freq = 1 / (quantum_ns * 1e-9) = 1e9 / quantum_ns
-    const u32 spi_freq_hz = 1000000000UL / quantum_ns;
+    const uint32_t spi_freq_hz = 1000000000UL / quantum_ns;
 
     // Total bits per LED bit (symmetric for both bit 0 and bit 1)
-    const u32 bits_per_led_bit = t1_quanta + t2_quanta + t3_quanta;
+    const uint32_t bits_per_led_bit = t1_quanta + t2_quanta + t3_quanta;
 
     // Validate maximum bit pattern length (32 bits max for storage)
     if (bits_per_led_bit > 32) {
@@ -1309,40 +1243,40 @@ ChannelEngineSpi::calculateSpiTiming(const ChipsetTimingConfig &chipsetTiming) {
     // Bit '0': high for T1 quanta, low for T2+T3 quanta
     // Bit '1': high for T1+T2 quanta, low for T3 quanta
 
-    u32 bit0_pattern = 0;
-    u32 bit1_pattern = 0;
+    uint32_t bit0_pattern = 0;
+    uint32_t bit1_pattern = 0;
 
     // Set high bits for bit0 (T1 quanta high, T2+T3 low)
-    for (u32 i = 0; i < t1_quanta; i++) {
+    for (uint32_t i = 0; i < t1_quanta; i++) {
         bit0_pattern |= (1UL << (bits_per_led_bit - 1 - i));
     }
 
     // Set high bits for bit1 (T1+T2 quanta high, T3 low)
-    for (u32 i = 0; i < (t1_quanta + t2_quanta); i++) {
+    for (uint32_t i = 0; i < (t1_quanta + t2_quanta); i++) {
         bit1_pattern |= (1UL << (bits_per_led_bit - 1 - i));
     }
 
     // Calculate actual achieved timing (for validation/debugging)
-    const u32 ns_per_bit = quantum_ns;
-    const u32 achieved_t0h_ns =
+    const uint32_t ns_per_bit = quantum_ns;
+    const uint32_t achieved_t0h_ns =
         t1_quanta * ns_per_bit; // Bit '0' high time = T1
-    const u32 achieved_t0l_ns =
+    const uint32_t achieved_t0l_ns =
         (t2_quanta + t3_quanta) * ns_per_bit; // Bit '0' low time = T2+T3
-    const u32 achieved_t1h_ns =
+    const uint32_t achieved_t1h_ns =
         (t1_quanta + t2_quanta) * ns_per_bit; // Bit '1' high time = T1+T2
-    const u32 achieved_t1l_ns =
+    const uint32_t achieved_t1l_ns =
         t3_quanta * ns_per_bit; // Bit '1' low time = T3
 
     // Construct SpiTimingConfig
     SpiTimingConfig config;
     config.protocol = SpiTimingConfig::CUSTOM;
     config.clock_hz = spi_freq_hz;
-    config.bits_per_led_bit = static_cast<u8>(bits_per_led_bit);
+    config.bits_per_led_bit = static_cast<uint8_t>(bits_per_led_bit);
     config.reset_time_us = chipsetTiming.reset_us;
     config.bit0_pattern = bit0_pattern;
-    config.bit0_count = static_cast<u8>(bits_per_led_bit);
+    config.bit0_count = static_cast<uint8_t>(bits_per_led_bit);
     config.bit1_pattern = bit1_pattern;
-    config.bit1_count = static_cast<u8>(bits_per_led_bit);
+    config.bit1_count = static_cast<uint8_t>(bits_per_led_bit);
     config.achieved_t0h_ns = achieved_t0h_ns;
     config.achieved_t0l_ns = achieved_t0l_ns;
     config.achieved_t1h_ns = achieved_t1h_ns;
@@ -1369,11 +1303,8 @@ void ChannelEngineSpi::processPendingChannels() {
         gpio_num_t pin = static_cast<gpio_num_t>(pending.pin);
         const auto &ledData = pending.data->getData();
 
-        // Get original chipset timing for reference (passed to acquireChannel)
-        const ChipsetTimingConfig& originalTiming = pending.data->getTiming();
-
         SpiChannelState *channel =
-            acquireChannel(pin, pending.timing, ledData.size(), originalTiming);
+            acquireChannel(pin, pending.timing, ledData.size());
         if (!channel) {
             // Still no hardware - increment retry count
             pending.retry_count++;
@@ -1415,79 +1346,61 @@ void ChannelEngineSpi::processPendingChannels() {
         // Store reference to source data for cleanup
         channel->sourceData = pending.data;
 
-        // Pre-encode ALL LED data
-        preEncodeAllData(channel);
+        // Double-buffered streaming transmission (same as beginTransmission)
+        transmitStreaming(channel);
 
-        // Kick-start the timer ISR for async transmission
-        channel->hasNewData = true;
+        // Mark transmission as complete
+        channel->transmissionComplete = true;
     }
 
     // Replace pending list with those that couldn't be processed
     mPendingChannels = fl::move(stillPending);
 }
 
-void ChannelEngineSpi::preEncodeAllData(SpiChannelState* channel) {
-    // =========================================================================
-    // Pre-encode ALL LED data into staging buffer using Espressif 3-bit encoding
-    // This function runs in MAIN TASK context (not ISR)
-    //
-    // Espressif encoding scheme:
-    // - Each LED byte (8 bits) → 24 SPI bits (3 bytes)
-    // - LED bit '0' → SPI bits: 100 (binary)
-    // - LED bit '1' → SPI bits: 110 (binary)
-    // Reference: https://github.com/espressif/idf-extra-components/blob/master/led_strip/src/led_strip_spi_dev.c
-    // =========================================================================
+size_t ChannelEngineSpi::encodeChunk(SpiChannelState* channel, uint8_t* output, size_t output_capacity) {
+    // Encode one chunk of LED data into the output buffer using wave8 encoding.
+    // Advances channel->ledSource and decrements channel->ledBytesRemaining.
+    // Appends reset zero bytes after the last chunk.
+    // Returns the number of SPI bytes written.
 
     if (!channel || !channel->ledSource || channel->ledBytesRemaining == 0) {
-        return;
+        return 0;
     }
 
-    size_t total_led_bytes = channel->ledBytesRemaining;
-    size_t total_bytes_written = 0;
+    if (!channel->wave8LutInitialized) {
+        FL_WARN("ChannelEngineSpi: Wave8 LUT not initialized, cannot encode");
+        return 0;
+    }
 
-    // Reset staging to start fresh
-    channel->stagingOffset = 0;
-    channel->currentStaging = channel->stagingA;
-
-    // Clear staging buffer (Espressif encoding uses |= so buffer must be zeroed)
-    fl::memset(channel->currentStaging, 0, channel->stagingCapacity);
-
-    // Encode ALL LED data into staging buffer
-    // For Espressif 3-bit encoding: each LED byte expands to 3 SPI bytes
-    // With 4KB staging buffer, we can hold ~1365 LED bytes (455 RGB LEDs)
-    // For typical use cases, this is sufficient. For larger strips, we fill what fits.
-
-    u8* output = channel->currentStaging;
-    const size_t max_output = channel->stagingCapacity;
-
-    // NOTE: Multi-lane SPI is NOT supported with Espressif 3-bit encoding
-    // The Espressif led_strip driver only supports single-lane mode
-    // For multi-lane support, use PARLIO or RMT drivers instead
     if (channel->numLanes > 1) {
-        FL_WARN_ONCE("ChannelEngineSpi: Multi-lane mode not supported with Espressif 3-bit encoding, using single-lane");
+        FL_WARN_ONCE("ChannelEngineSpi: Multi-lane wave8 encoding not yet implemented, using single-lane");
     }
 
-    // Single-lane encoding - each LED byte → 3 output bytes (Espressif encoding)
-    const size_t max_led_bytes = max_output / SPI_BYTES_PER_COLOR_BYTE;
-    const size_t bytes_to_encode = fl_min(total_led_bytes, max_led_bytes);
+    // Single-lane wave8 encoding via LUT
+    const size_t max_led_bytes = output_capacity / WAVE8_BYTES_PER_COLOR_BYTE;
+    const size_t bytes_to_encode = fl_min(channel->ledBytesRemaining, max_led_bytes);
 
-    for (size_t i = 0; i < bytes_to_encode; i++) {
-        u8 input_byte = channel->ledSource[i];
-        led_strip_encode_byte(input_byte, output + total_bytes_written);
-        total_bytes_written += SPI_BYTES_PER_COLOR_BYTE;
-    }
+    size_t total_bytes_written = wave8EncodeSingleLane(
+        fl::span<const uint8_t>(channel->ledSource, bytes_to_encode),
+        fl::span<uint8_t>(output, output_capacity),
+        channel->wave8Lut);
 
     channel->ledSource += bytes_to_encode;
     channel->ledBytesRemaining -= bytes_to_encode;
 
-    channel->stagingOffset = total_bytes_written;
+    // Append reset zero bytes ONLY after the LAST chunk
+    if (channel->ledBytesRemaining == 0) {
+        constexpr size_t RESET_ZERO_BYTES = 50;
+        const size_t available = output_capacity - total_bytes_written;
+        const size_t reset_bytes = fl_min(RESET_ZERO_BYTES, available);
+        if (reset_bytes > 0) {
+            fl::memset(output + total_bytes_written, 0, reset_bytes);
+            total_bytes_written += reset_bytes;
+        }
+    }
 
-    // Cache coherence: Staging buffers use MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA
-    // Internal SRAM is non-cacheable for DMA, so memory barriers are sufficient.
     FL_MEMORY_BARRIER;
-
-    FL_DBG_EVERY(100, "ChannelEngineSpi: Pre-encoded " << (total_led_bytes - channel->ledBytesRemaining)
-           << " LED bytes → " << total_bytes_written << " SPI bytes");
+    return total_bytes_written;
 }
 
 void ChannelEngineSpi::transmitBlockingPolled(SpiChannelState* channel) {
@@ -1555,12 +1468,12 @@ void ChannelEngineSpi::transmitBlockingPolled(SpiChannelState* channel) {
     }
 
     // Use spi_device_transmit() (queue-based blocking API, matches Espressif led_strip)
-    u32 start_time = millis();
+    uint32_t start_time = millis();
 
     // Transmit data via SPI (queue-based API, matches Espressif led_strip)
     esp_err_t ret = spi_device_transmit(channel->spi_device, &trans);
 
-    u32 elapsed_ms = millis() - start_time;
+    uint32_t elapsed_ms = millis() - start_time;
 
     if (ret != ESP_OK) {
         FL_WARN_EVERY(100, "ChannelEngineSpi: spi_device_transmit failed: " << ret);
@@ -1633,19 +1546,24 @@ void IRAM_ATTR ChannelEngineSpi::timerEncodingISR(void *user_data) {
         return;
     }
 
-    // CRITICAL: Validate currentStaging pointer before use
-    if (!channel->currentStaging) {
-        channel->hasNewData = false;
+    return false;  // No more channels
+}
+
+void ChannelEngineSpi::startFirstDma() {
+    auto* ch = mPipeline.mActiveChannel;
+    if (!ch || !ch->ledSource || ch->ledBytesRemaining == 0) {
+        mPipeline.mPhase = DmaPipelineState::IDLE;
         return;
     }
 
-    // Select which transaction to use
-    spi_transaction_t *trans =
-        channel->transAInFlight ? &channel->transB : &channel->transA;
+    // Encode first chunk into buffer 0
+    uint8_t* buffers[2] = {ch->stagingA, ch->stagingB};
+    spi_transaction_t* trans[2] = {&ch->transA, &ch->transB};
 
-    // Don't queue if both transactions are in flight
-    if (channel->transAInFlight && channel->transBInFlight) {
-        // Both transactions busy - keep hasNewData=true and retry on next ISR fire
+    size_t encoded = encodeChunk(ch, buffers[0], ch->stagingCapacity);
+    if (encoded == 0) {
+        ch->transmissionComplete = true;
+        mPipeline.mPhase = DmaPipelineState::IDLE;
         return;
     }
 
@@ -1668,7 +1586,7 @@ void IRAM_ATTR ChannelEngineSpi::timerEncodingISR(void *user_data) {
     // DEBUG: Capture first 8 bytes of tx_buffer right before queuing
     if (!channel->debugTxCaptured && trans->tx_buffer && channel->stagingOffset >= 8) {
         channel->debugTxCaptured = true;
-        const u8* buf = static_cast<const u8*>(trans->tx_buffer);
+        const uint8_t* buf = static_cast<const uint8_t*>(trans->tx_buffer);
         for (int i = 0; i < 8; i++) {
             channel->debugTxBuffer[i] = buf[i];
         }

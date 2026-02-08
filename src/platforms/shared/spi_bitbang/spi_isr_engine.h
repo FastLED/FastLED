@@ -109,7 +109,7 @@ void     fl_spi_ack_done(void);
 void     fl_spi_reset_state(void);
 
 /* --- ISR function ---------------------------------------------------------- */
-void fl_parallel_spi_isr(void);
+FL_IRAM void fl_parallel_spi_isr(void);
 
 /* --- Platform-specific ISR setup/teardown ---------------------------------- */
 int  fl_spi_platform_isr_start(fl::u32 timer_hz);

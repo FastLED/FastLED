@@ -111,7 +111,7 @@ fl::u8* fl_spi_get_data_array(void) {
 
 #ifdef FL_SPI_ISR_VALIDATE
 /* Log GPIO event to validation buffer */
-static inline void fl_spi_log_event(FastLED_GPIO_Event_Type type, fl::u32 payload) {
+static inline FL_IRAM void fl_spi_log_event(FastLED_GPIO_Event_Type type, fl::u32 payload) {
   if (g_isr_state.validation_event_count < FL_SPI_ISR_VALIDATE_SIZE) {
     FastLED_GPIO_Event *evt = &g_isr_state.validation_events[g_isr_state.validation_event_count++];
     evt->event_type = (fl::u8)type;
@@ -134,7 +134,7 @@ fl::u16 fl_spi_get_validation_event_count(void) {
 /* --- The ISR body (zero volatile reads) ------------------------------------ */
 /* Place in IRAM (attribute depends on platform). For .S generation, just -S.  */
 /* Note: Function has C linkage via extern "C" block above                      */
-void fl_parallel_spi_isr(void) {
+FL_IRAM void fl_parallel_spi_isr(void) {
   /* 1) Edge detect: new work? */
   fl::u32 current_doorbell = g_isr_state.doorbell_counter;
   if (current_doorbell != g_isr_state.last_processed_counter) {
