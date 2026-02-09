@@ -1,4 +1,4 @@
-# Debugging C++ Crashes
+# Debugging C++ Crashes and Hangs
 
 ## Built-in Crash Handler (Recommended First Step)
 
@@ -11,6 +11,47 @@ When unit tests crash, the crash handler automatically captures:
 - Module names and memory addresses
 
 **For most debugging needs, the automatic stack traces are sufficient.** See the crash output for detailed information.
+
+## Signal Handler Chaining (Crash + Hang Detection)
+
+FastLED uses **signal handler chaining** to provide both crash dumps AND debugger access:
+
+### How It Works
+
+1. **Test crashes** → Internal handler dumps stack trace → Uninstalls itself → Re-raises signal → External debugger can catch it
+2. **Test hangs** (>10s timeout) → External watchdog attaches lldb/gdb → Dumps all thread stacks → Kills process
+
+### Benefits for Agents
+
+✅ **Automatic crash dumps** - Internal handler provides immediate stack traces (< 1s)
+✅ **Automatic hang detection** - Tests timeout after 10 seconds, stack traces dumped automatically
+✅ **Zero configuration** - Works out of the box, no environment variables needed
+✅ **Debugger-friendly** - External debuggers can still attach if needed
+
+### Example Output
+
+**Crash (SIGSEGV):**
+```
+=== INTERNAL CRASH HANDLER (SIGNAL 11) ===
+Stack trace:
+  #0 test_crash() at test.cpp:42
+=== END INTERNAL HANDLER ===
+Segmentation fault
+```
+
+**Hang (timeout after 10s):**
+```
+TEST HUNG: test_name
+Exceeded timeout of 10.0s
+📍 Attaching lldb to hung process (PID 12345)...
+THREAD STACK TRACES:
+  * frame #0: infinite_loop() at test.cpp:67
+🔪 Killed hung process
+```
+
+**For detailed technical information, see:**
+- `docs/signal-handler-chaining.md` - Signal chaining implementation
+- `docs/deadlock-detection.md` - Hang detection system
 
 ## Interactive Debugging with LLDB
 

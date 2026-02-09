@@ -183,12 +183,39 @@ foreach test_name : test_names
   # Register test: runner.exe loads the DLL and executes it
   # Some tests have race conditions when run in parallel (use wall-clock time via micros())
   is_serial = test_name in ['fl_file_system', 'test_uart_channel_engine']
-  test(test_name, runner_exe,
-    args: [test_dll.full_path()],
-    workdir: meson.project_source_root(),
-    depends: [test_dll],
-    is_parallel: not is_serial
-  )
+
+  # Configure timeout with deadlock detection
+  # Default timeout is 10 seconds per test (generous for most tests)
+  # Hung tests will be detected, get stack dumps via lldb/gdb, then killed
+  test_timeout = 10
+
+  # Check if deadlock detection wrapper should be used
+  # Set FASTLED_TEST_WRAPPER=1 to enable wrapper with stack dumping
+  use_wrapper = get_option('test_wrapper')
+
+  if use_wrapper
+    # Use Python wrapper for deadlock detection with stack traces
+    test(test_name, find_program('python'),
+      args: [
+        meson.current_source_dir() / 'test_wrapper.py',
+        runner_exe.full_path(),
+        test_dll.full_path(),
+      ],
+      workdir: meson.project_source_root(),
+      depends: [test_dll],
+      is_parallel: not is_serial,
+      timeout: test_timeout,
+    )
+  else
+    # Direct test execution (Meson handles timeout, but no stack dumps)
+    test(test_name, runner_exe,
+      args: [test_dll.full_path()],
+      workdir: meson.project_source_root(),
+      depends: [test_dll],
+      is_parallel: not is_serial,
+      timeout: test_timeout,
+    )
+  endif
 endforeach
 
 # Create alias target that builds all test DLLs and runners

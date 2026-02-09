@@ -7,3 +7,9 @@
 # Usage: meson setup -Dbuild_mode=debug build
 option('build_mode', type: 'combo', choices: ['quick', 'debug', 'release'], value: 'quick',
        description: 'Build mode: quick (default), debug (full symbols+sanitizers), or release (optimized)')
+
+# Test wrapper: Enable deadlock detection with stack traces for hung tests
+# When enabled, tests that exceed timeout (10s) will have their thread stacks dumped via lldb/gdb
+# Usage: meson setup -Dtest_wrapper=true build
+option('test_wrapper', type: 'boolean', value: false,
+       description: 'Enable test wrapper with deadlock detection and stack dumping for hung tests')

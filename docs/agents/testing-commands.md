@@ -24,6 +24,38 @@ clang++ main.cpp -o main            # WRONG - use bash scripts
 
 **Exceptions:** Runtime debugging (e.g., `lldb .build/runner.exe`) and compiler feature testing are allowed. See `docs/agents/build-system.md` for details.
 
+## Test Timeouts and Hang Detection
+
+**Tests automatically timeout after 10 seconds to detect infinite loops and deadlocks.**
+
+### How It Works
+
+1. **Test runs normally** - Internal crash handler provides stack traces if test crashes
+2. **Test hangs** (no output for 10s) - Watchdog detects hang
+3. **Automatic diagnosis** - lldb/gdb attaches and dumps all thread stacks
+4. **Process killed** - Hung process terminated, failure reported with stack traces
+
+### Example Output
+
+```
+TEST HUNG: test_name
+Exceeded timeout of 10.0s
+📍 Attaching lldb to hung process (PID 12345)...
+THREAD STACK TRACES:
+  * frame #0: infinite_loop() at test.cpp:67
+🔪 Killed hung process
+```
+
+**What to do:**
+- Check the stack trace to see where the test is stuck
+- Look for infinite loops, deadlocks, or blocking operations
+- Fix the issue and re-run the test
+
+**Technical details:**
+- Default timeout: 10 seconds (configured in `tests/meson.build`)
+- Signal handler chaining allows both internal dumps AND external debugger access
+- See `docs/signal-handler-chaining.md` and `docs/deadlock-detection.md` for details
+
 ## Clean Builds
 
 **Use the `--clean` flag to rebuild from scratch. DO NOT manually delete build directories.**

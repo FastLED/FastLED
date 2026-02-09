@@ -102,7 +102,12 @@
   - Use: `bash test`, `bash compile`, `bash lint` instead
   - Never use: `meson setup builddir`, `ninja -C builddir`, `clang++ main.cpp -o main`
   - Exception: Runtime debugging of already-built executables (e.g., `lldb .build/runner.exe`) is allowed
-  - Exception: Compiler feature testing (e.g., `clang++ -std=c++17 test.cpp`) is allowed
+  - Exception: Compiler feature testing is allowed, but MUST use clang-tool-chain wrappers:
+    - ✅ Use: `clang-tool-chain-clant test.cpp -o test.exe` (C++)
+    - ✅ Use: `clang-tool-chain-lldb test.exe` (debugger)
+    - ❌ NEVER: `clang++`, `clang`, `gcc`, `g++`, `lldb`, `gdb` (bare toolchain commands)
+    - ❌ NEVER: `uv run clang-tool-chain clang++` (wrong invocation)
+    - Rationale: clang-tool-chain wrappers ensure consistent compiler versions and settings
   - Rationale: FastLED build system handles configuration, caching, dependencies, and platform-specific setup
   - See: `docs/agents/build-system.md` for details
 - **NEVER manually delete build caches**: Do NOT use `rm -rf .build/` or delete build directories

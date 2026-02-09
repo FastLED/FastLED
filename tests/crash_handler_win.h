@@ -317,11 +317,18 @@ inline void print_stacktrace_windows() {
 }
 
 inline LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS* ExceptionInfo) {
-    printf("\n=== WINDOWS EXCEPTION HANDLER ===\n");
-    printf("Exception caught: 0x%08lx at address 0x%p\n", 
+    // Prevent recursion if handler crashes
+    static volatile LONG already_dumping = 0;
+    if (InterlockedExchange(&already_dumping, 1) != 0) {
+        // Recursive exception - bail out
+        return EXCEPTION_CONTINUE_SEARCH;
+    }
+
+    printf("\n=== INTERNAL EXCEPTION HANDLER (WINDOWS) ===\n");
+    printf("Exception caught: 0x%08lx at address 0x%p\n",
            ExceptionInfo->ExceptionRecord->ExceptionCode,
            ExceptionInfo->ExceptionRecord->ExceptionAddress);
-    
+
     // Print exception details
     switch (ExceptionInfo->ExceptionRecord->ExceptionCode) {
         case EXCEPTION_ACCESS_VIOLATION:
@@ -373,23 +380,43 @@ inline LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS* ExceptionInfo) 
             printf("Exception type: Integer Overflow\n");
             break;
         default:
-            printf("Exception type: Unknown (0x%08lx)\n", 
+            printf("Exception type: Unknown (0x%08lx)\n",
                    ExceptionInfo->ExceptionRecord->ExceptionCode);
             break;
     }
-    
+
+    // Internal stack trace dump
     print_stacktrace_windows();
-    
-    printf("=== END EXCEPTION HANDLER ===\n\n");
-    
-    // Return EXCEPTION_EXECUTE_HANDLER to terminate the process
-    return EXCEPTION_EXECUTE_HANDLER;
+
+    printf("=== END INTERNAL HANDLER ===\n\n");
+    fflush(stdout);
+    fflush(stderr);
+
+    // CHAINING: Remove our handler and continue search
+    // This allows external debuggers (like WinDbg, lldb) to catch the exception
+    printf("Uninstalling exception handler, passing exception to external debugger...\n");
+    fflush(stdout);
+
+    SetUnhandledExceptionFilter(NULL);  // Remove our filter
+
+    // Return EXCEPTION_CONTINUE_SEARCH to pass to next handler (debugger or OS)
+    return EXCEPTION_CONTINUE_SEARCH;
 }
 
 inline void crash_handler(int sig) {
-    printf("\n=== SIGNAL HANDLER ===\n");
+    // Prevent recursion if handler crashes
+    static volatile sig_atomic_t already_dumping = 0;
+    if (already_dumping) {
+        // Recursive crash - bail out immediately
+        signal(sig, SIG_DFL);
+        raise(sig);
+        return;
+    }
+    already_dumping = 1;
+
+    printf("\n=== INTERNAL CRASH HANDLER (SIGNAL) ===\n");
     fprintf(stderr, "Error: signal %d:\n", sig);
-    
+
     // Print signal details
     switch (sig) {
         case SIGABRT:
@@ -414,18 +441,42 @@ inline void crash_handler(int sig) {
             printf("Signal: Unknown (%d)\n", sig);
             break;
     }
-    
+
+    // Internal stack trace dump
     print_stacktrace_windows();
-    printf("=== END SIGNAL HANDLER ===\n\n");
+    printf("=== END INTERNAL HANDLER ===\n\n");
+    fflush(stdout);
+    fflush(stderr);
+
+    // CHAINING: Uninstall our handler and re-raise signal
+    // This allows external debuggers to catch the signal
+    printf("Uninstalling crash handler and re-raising signal %d for external debugger...\n", sig);
+    fflush(stdout);
+
+    // Restore default handler
+    signal(sig, SIG_DFL);
+
+    // Re-raise the signal - will now go to default handler or external debugger
+    raise(sig);
+
+    // If we get here, signal didn't terminate us - exit manually
     exit(1);
 }
 
 inline void setup_crash_handler() {
+    // Check if crash handler should be disabled (for debugger attachment)
+    const char* disable_handler = getenv("FASTLED_DISABLE_CRASH_HANDLER");
+    if (disable_handler && (strcmp(disable_handler, "1") == 0 || strcmp(disable_handler, "true") == 0)) {
+        printf("Crash handler disabled (FASTLED_DISABLE_CRASH_HANDLER set)\n");
+        printf("This allows external debuggers to attach for deadlock detection.\n");
+        return;
+    }
+
     printf("Setting up Windows crash handler...\n");
-    
+
     // Set up Windows structured exception handling
     SetUnhandledExceptionFilter(windows_exception_handler);
-    
+
     // Also handle standard C signals on Windows
     signal(SIGABRT, crash_handler);
     signal(SIGFPE, crash_handler);
@@ -433,7 +484,7 @@ inline void setup_crash_handler() {
     signal(SIGINT, crash_handler);
     signal(SIGSEGV, crash_handler);
     signal(SIGTERM, crash_handler);
-    
+
     printf("Windows crash handler setup complete.\n");
 }
 
