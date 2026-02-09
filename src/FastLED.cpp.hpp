@@ -179,12 +179,18 @@ void CFastLED::reset(ResetFlags flags) {
 	if (clearFlag(ResetFlags::CHANNELS)) {
 		// Always wait for all channel bus transmissions to complete first
 		FastLED.wait();
+
 		// Remove all channels by iterating through a copy of the vector
 		// (we make a copy because remove() modifies mChannels)
 		fl::vector<fl::ChannelPtr> channelsCopy = mChannels;
 		for (auto& channel : channelsCopy) {
 			remove(channel);
 		}
+
+		// Reset bus manager state (clear enqueued and transmitting channels)
+		fl::ChannelBusManager& manager = fl::channelBusManager();
+		manager.reset();
+
 		// Clear the internal storage (should already be empty, but ensure it)
 		mChannels.clear();
 	}

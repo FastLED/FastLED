@@ -433,6 +433,15 @@ void ChannelBusManager::onEndFrame() {
     show();
 }
 
+void ChannelBusManager::reset() {
+    // Clear all pending channels
+    mEnqueuedChannels.clear();
+    mTransmittingChannels.clear();
+    // Allow all channel engines to clean up
+    wait();
+    FL_DBG("ChannelBusManager: reset() - cleared all channels");
+}
+
 IChannelEngine* ChannelBusManager::selectEngine(const ChannelDataPtr& data) {
     if (mEngines.empty()) {
         FL_WARN("ChannelBusManager::selectEngine() - No engines registered");

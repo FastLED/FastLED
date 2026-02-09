@@ -171,6 +171,10 @@ public:
     /// @note Called at frame boundaries to flush enqueued channels
     void onEndFrame() override;
 
+    /// @brief Reset bus manager state, clearing all enqueued and transmitting channels
+    /// @note Call this between test cases or when reinitializing the LED system
+    void reset();
+
 private:
     /// @brief Begin transmission using active engine with fallback
     /// @param channelData Span of channel data to transmit

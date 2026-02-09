@@ -693,9 +693,9 @@ void validateChipsetTiming(fl::ValidationConfig& config,
     driver_passed += passed;
 
     // Destroy ALL channels before testing next timing configuration
-    for (auto& ch : channels) {
-        ch.reset();
-    }
+    // CRITICAL: Clear FastLED's global channel registry to prevent accumulation
+    // If we only destroy local shared_ptrs, FastLED still holds references
+    FastLED.reset(ResetFlags::CHANNELS);
     // Channel destruction is synchronous - no delay needed
 }
 
