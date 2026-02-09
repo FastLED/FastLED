@@ -645,6 +645,66 @@ FL_TEST_CASE("FastLED.add nullptr is safe") {
     FastLED.add(ChannelPtr());
 }
 
+FL_TEST_CASE("FastLED.reset() removes all channels and drops refcount to 1") {
+    auto engine = fl::make_shared<StubEngine>();
+    ChannelBusManager& mgr = ChannelBusManager::instance();
+    mgr.addEngine(2003, engine);
+
+    CRGB leds1[4];
+    CRGB leds2[4];
+    CRGB leds3[4];
+
+    // Create three channels
+    auto ch1 = makeChannel(leds1, 4);
+    auto ch2 = makeChannel(leds2, 4);
+    auto ch3 = makeChannel(leds3, 4);
+
+    // Before add: refcount is 1 (only stack reference)
+    FL_CHECK(ch1.use_count() == 1);
+    FL_CHECK(ch2.use_count() == 1);
+    FL_CHECK(ch3.use_count() == 1);
+
+    // Add all channels
+    FastLED.add(ch1);
+    FastLED.add(ch2);
+    FastLED.add(ch3);
+
+    // After add: refcount is 2 (stack + internal storage)
+    FL_CHECK(ch1.use_count() == 2);
+    FL_CHECK(ch2.use_count() == 2);
+    FL_CHECK(ch3.use_count() == 2);
+
+    // Verify all channels are in the draw list
+    FL_CHECK(controllerInList(ch1.get()));
+    FL_CHECK(controllerInList(ch2.get()));
+    FL_CHECK(controllerInList(ch3.get()));
+
+    // Call reset() - should wait for transmissions and remove all channels
+    FastLED.reset();
+
+    // After reset: refcount should be 1 (only stack reference remains)
+    FL_CHECK(ch1.use_count() == 1);
+    FL_CHECK(ch2.use_count() == 1);
+    FL_CHECK(ch3.use_count() == 1);
+
+    // Verify no channels are in the draw list
+    FL_CHECK(!controllerInList(ch1.get()));
+    FL_CHECK(!controllerInList(ch2.get()));
+    FL_CHECK(!controllerInList(ch3.get()));
+
+    // Verify channels are still valid (not destroyed)
+    FL_CHECK(ch1->size() == 4);
+    FL_CHECK(ch2->size() == 4);
+    FL_CHECK(ch3->size() == 4);
+
+    mgr.setDriverEnabled("STUB_ADD_REMOVE", false);
+}
+
+FL_TEST_CASE("FastLED.reset() when no channels exist is safe") {
+    // Should be safe to call reset when no channels are registered
+    FastLED.reset();  // Should not crash
+}
+
 } // namespace channel_add_remove_test
 
 FL_TEST_CASE("Channel::applyConfig updates reconfigurable fields") {

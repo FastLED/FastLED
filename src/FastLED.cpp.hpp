@@ -143,6 +143,21 @@ void CFastLED::remove(fl::ChannelPtr channel) {
 	mChannels.erase(channel);
 }
 
+void CFastLED::reset() {
+	// Wait for all channel bus transmissions to complete
+	FastLED.wait();
+
+	// Remove all channels by iterating through a copy of the vector
+	// (we make a copy because remove() modifies mChannels)
+	fl::vector<fl::ChannelPtr> channelsCopy = mChannels;
+	for (auto& channel : channelsCopy) {
+		remove(channel);
+	}
+
+	// Clear the internal storage (should already be empty, but ensure it)
+	mChannels.clear();
+}
+
 // This is bad code. But it produces the smallest binaries for reasons
 // beyond mortal comprehensions.
 // Instead of iterating through the link list for onBeginFrame(), beginShowLeds()

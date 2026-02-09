@@ -661,6 +661,26 @@ public:
 	/// @endcode
 	static void remove(fl::ChannelPtr channel);
 
+	/// @brief Reset all channels - wait for transmissions and remove all channels
+	///
+	/// Waits for all pending channel bus transmissions to complete, then removes
+	/// all channels from the internal controller list. This is useful for cleanup
+	/// or when you need to reconfigure all LED channels from scratch.
+	///
+	/// @note Calls wait() first to ensure all transmissions complete
+	/// @note Removes all channels from the internal mChannels vector
+	/// @note Channel objects are not destroyed, only removed from the list
+	/// @note After reset(), you can add new channels with add() if needed
+	///
+	/// Example:
+	/// @code
+	/// auto channel1 = FastLED.add(config1);
+	/// auto channel2 = FastLED.add(config2);
+	/// // ... use channels ...
+	/// FastLED.reset();  // Wait for completion and remove all channels
+	/// @endcode
+	static void reset();
+
 	/// @}
 
 	/// @name Adding SPI-based controllers
