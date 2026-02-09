@@ -104,6 +104,12 @@ void ChannelEnginePARLIOImpl::show() {
     FL_SCOPED_TRACE;
     if (!mEnqueuedChannels.empty()) {
         FL_ASSERT(mTransmittingChannels.empty(), "ChannelEnginePARLIOImpl::show() - enqueue while mTransmittingChannels is not empty, indicating transmission is in progress");
+
+        // Mark all channels as in use before transmission
+        for (auto& channel : mEnqueuedChannels) {
+            channel->setInUse(true);
+        }
+
         // Move enqueued channels to transmitting channels
         mTransmittingChannels = fl::move(mEnqueuedChannels);
         mEnqueuedChannels.clear();
@@ -229,7 +235,10 @@ IChannelEngine::EngineState ChannelEnginePARLIOImpl::poll() {
                 return is_last_group ? EngineState::DRAINING : EngineState::READY;
             }
 
-            // All groups completed - clear state and return READY
+            // All groups completed - clear in-use flags and state
+            for (auto& channel : mTransmittingChannels) {
+                channel->setInUse(false);
+            }
             mTransmittingChannels.clear();
             mChipsetGroups.clear();
             mCurrentGroupIndex = 0;
@@ -243,6 +252,10 @@ IChannelEngine::EngineState ChannelEnginePARLIOImpl::poll() {
             return EngineState::BUSY;
 
         case detail::ParlioEngineState::ERROR:
+            // Clear in-use flags on error
+            for (auto& channel : mTransmittingChannels) {
+                channel->setInUse(false);
+            }
             mTransmittingChannels.clear();
             mChipsetGroups.clear();
             mCurrentGroupIndex = 0;
@@ -413,6 +426,11 @@ void ChannelEnginePARLIO::enqueue(ChannelDataPtr channelData) {
 void ChannelEnginePARLIO::show() {
     FL_SCOPED_TRACE;
     if (!mEnqueuedChannels.empty()) {
+        // Mark all channels as in use before transmission
+        for (auto& channel : mEnqueuedChannels) {
+            channel->setInUse(true);
+        }
+
         // Move enqueued channels to transmitting channels
         mTransmittingChannels = fl::move(mEnqueuedChannels);
         mEnqueuedChannels.clear();
@@ -428,8 +446,11 @@ IChannelEngine::EngineState ChannelEnginePARLIO::poll() {
     if (mEngine) {
         EngineState state = mEngine->poll();
 
-        // Clear transmitting channels when READY
+        // Clear in-use flags and transmitting channels when READY
         if (state == EngineState::READY && !mTransmittingChannels.empty()) {
+            for (auto& channel : mTransmittingChannels) {
+                channel->setInUse(false);
+            }
             mTransmittingChannels.clear();
         }
 
