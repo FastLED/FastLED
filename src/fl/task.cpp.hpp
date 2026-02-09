@@ -92,6 +92,7 @@ public:
     virtual string trace_label() const = 0;
     virtual TaskType type() const = 0;
     virtual int interval_ms() const = 0;
+    virtual void set_interval_ms(int interval_ms) = 0;
     virtual u32 last_run_time() const = 0;
     virtual void set_last_run_time(u32 time) = 0;
     virtual bool ready_to_run(u32 current_time) const = 0;
@@ -140,6 +141,7 @@ public:
     string trace_label() const override { return mTraceLabel ? *mTraceLabel : ""; }
     TaskType type() const override { return mType; }
     int interval_ms() const override { return mIntervalMs; }
+    void set_interval_ms(int interval_ms) override { mIntervalMs = interval_ms; }
     u32 last_run_time() const override { return mLastRunTime; }
     void set_last_run_time(u32 time) override { mLastRunTime = time; }
     bool is_canceled() const override { return mCanceled; }
@@ -221,6 +223,7 @@ public:
     string trace_label() const override { return mTraceLabel ? *mTraceLabel : ""; }
     TaskType type() const override { return TaskType::kCoroutine; }
     int interval_ms() const override { return 0; }
+    void set_interval_ms(int) override { /* Coroutine tasks don't use intervals */ }
     fl::u32 last_run_time() const override { return 0; }
     void set_last_run_time(fl::u32) override {}
     bool is_canceled() const override { return mCanceled; }
@@ -342,6 +345,7 @@ bool task::has_catch() const { return mImpl ? mImpl->has_catch() : false; }
 string task::trace_label() const { return mImpl ? mImpl->trace_label() : ""; }
 TaskType task::type() const { return mImpl ? mImpl->type() : TaskType::kEveryMs; }
 int task::interval_ms() const { return mImpl ? mImpl->interval_ms() : 0; }
+void task::set_interval_ms(int interval_ms) { if (mImpl) mImpl->set_interval_ms(interval_ms); }
 fl::u32 task::last_run_time() const { return mImpl ? mImpl->last_run_time() : 0; }
 void task::set_last_run_time(fl::u32 time) { if (mImpl) mImpl->set_last_run_time(time); }
 bool task::ready_to_run(fl::u32 current_time) const { return mImpl ? mImpl->ready_to_run(current_time) : false; }

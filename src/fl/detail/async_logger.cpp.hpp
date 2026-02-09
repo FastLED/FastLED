@@ -6,6 +6,8 @@
 #include "fl/isr.h"
 #include "fl/math_macros.h"
 #include "fl/log.h"  // For FL_ERROR macro
+#include "fl/task.h"  // For fl::task and fl::Scheduler
+#include "fl/async.h"  // For fl::Scheduler::instance()
 
 namespace fl {
 
@@ -41,6 +43,9 @@ namespace detail {
     void FL_IRAM async_log_flush_timer_isr(void* user_data) {
         BackgroundFlushState* state = static_cast<BackgroundFlushState*>(user_data);
         state->mNeedsFlush = true;
+        // Debug: Toggle a counter to verify ISR is firing (visible in debugger)
+        static volatile fl::u32 isr_fire_count = 0;
+        isr_fire_count++;
     }
 } // namespace detail
 
@@ -212,6 +217,64 @@ void async_log_service() {
     detail::ActiveLoggerRegistry::instance().forEach([n](AsyncLogger& logger) {
         logger.flushN(n);
     });
+}
+
+// ============================================================================
+// Auto-instantiating service task implementation
+// ============================================================================
+
+namespace detail {
+
+AsyncLoggerServiceTask& AsyncLoggerServiceTask::instance() {
+    static AsyncLoggerServiceTask task;
+    return task;
+}
+
+AsyncLoggerServiceTask::AsyncLoggerServiceTask()
+    : mIntervalMs(16)
+    , mMessagesPerTick(5)
+    , mTask()
+{
+    // Create and register task with scheduler
+    // Default 16ms interval = 60 Hz (one frame at 60fps)
+    mTask = fl::task::every_ms(mIntervalMs)
+        .then([this]() {
+            // Service all registered async loggers
+            this->serviceLoggers();
+        });
+
+    fl::Scheduler::instance().add_task(mTask);
+}
+
+void AsyncLoggerServiceTask::setInterval(u32 interval_ms) {
+    mIntervalMs = interval_ms;
+
+    // Dynamically update task interval if task exists
+    if (mTask.is_valid()) {
+        mTask.set_interval_ms(interval_ms);
+    }
+}
+
+void AsyncLoggerServiceTask::setMessagesPerTick(fl::size messages_per_tick) {
+    mMessagesPerTick = messages_per_tick;
+}
+
+void AsyncLoggerServiceTask::serviceLoggers() {
+    // Flush N messages from all registered loggers
+    detail::ActiveLoggerRegistry::instance().forEach([this](AsyncLogger& logger) {
+        logger.flushN(mMessagesPerTick);
+    });
+}
+
+} // namespace detail
+
+// ============================================================================
+// Public configuration API
+// ============================================================================
+
+void configureAsyncLogService(u32 interval_ms, fl::size messages_per_tick) {
+    detail::AsyncLoggerServiceTask::instance().setInterval(interval_ms);
+    detail::AsyncLoggerServiceTask::instance().setMessagesPerTick(messages_per_tick);
 }
 
 } // namespace fl

@@ -187,6 +187,7 @@ public:
     string trace_label() const;
     TaskType type() const;
     int interval_ms() const;
+    void set_interval_ms(int interval_ms);
     u32 last_run_time() const;
     void set_last_run_time(u32 time);
     bool ready_to_run(u32 current_time) const;

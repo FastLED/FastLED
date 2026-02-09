@@ -330,15 +330,35 @@ const char *fastled_file_offset(const char *file);
 /// main thread. This prevents watchdog timeouts caused by slow Serial I/O
 /// operations inside ISRs.
 ///
-/// **Usage Pattern:**
+/// **Automatic Servicing (Recommended):**
+/// Async loggers are automatically serviced by fl::task system when using fl::delay().
+/// No manual service calls required!
 /// ```cpp
 /// void IRAM_ATTR my_isr_handler() {
-///     FL_LOG_PARLIO_ASYNC_ISR("DMA complete");  // ISR-safe (const char* only, zero heap allocation)
+///     FL_LOG_PARLIO_ASYNC_ISR("DMA complete");  // ISR-safe (const char* only)
 /// }
 ///
 /// void loop() {
-///     FL_LOG_PARLIO_ASYNC_MAIN("Processing batch " << batch_id);  // Main thread (supports stream expressions)
-///     FL_LOG_PARLIO_ASYNC_FLUSH();  // Drain queued messages (blocking)
+///     FL_LOG_PARLIO_ASYNC_MAIN("Processing batch " << batch_id);  // Main thread
+///     fl::delay(10);  // Loggers serviced automatically every 16ms (60fps)!
+/// }
+/// ```
+///
+/// **Manual Control (Optional):**
+/// For fine-grained control, you can still manually service or flush loggers:
+/// ```cpp
+/// void loop() {
+///     fl::async_log_service();       // Manual service (for legacy timer-based flush)
+///     FL_LOG_PARLIO_ASYNC_FLUSH();   // Flush PARLIO immediately (all queued messages)
+/// }
+/// ```
+///
+/// **Custom Configuration (Optional):**
+/// Configure service interval and messages-per-tick BEFORE first logger access:
+/// ```cpp
+/// void setup() {
+///     fl::configureAsyncLogService(50, 10);  // 50ms interval, 10 msgs/tick
+///     FL_LOG_PARLIO_ASYNC_MAIN("Setup complete");  // Task auto-instantiates here
 /// }
 /// ```
 ///
@@ -466,10 +486,33 @@ const char *fastled_file_offset(const char *file);
 // -----------------------------------------------------------------------------
 
 /// @brief Service function to check timer flag and flush all async loggers
+/// @deprecated This function is now optional - async loggers are automatically
+///             serviced by fl::task system when using fl::delay()
 /// Call this from your main loop() if using enableBackgroundFlush()
 /// This function is lightweight - returns immediately if no flush needed
 namespace fl {
     void async_log_service();
+
+    /// @brief Configure async logger automatic servicing task
+    /// @param interval_ms Service interval in milliseconds (default 16ms = 60fps)
+    /// @param messages_per_tick Messages to flush per service call (default 5)
+    /// @note Can be called at any time to dynamically adjust servicing rate
+    /// @note If not called, defaults are used (16ms interval, 5 messages/tick)
+    ///
+    /// Example:
+    /// ```cpp
+    /// void setup() {
+    ///     // Configure before accessing any loggers
+    ///     fl::configureAsyncLogService(50, 10);  // 50ms interval, 10 msgs/tick
+    ///
+    ///     FL_LOG_PARLIO_ASYNC_MAIN("Setup complete");
+    /// }
+    ///
+    /// void loop() {
+    ///     fl::delay(10);  // Loggers serviced automatically!
+    /// }
+    /// ```
+    void configureAsyncLogService(u32 interval_ms = 16, fl::size messages_per_tick = 5);
 }
 
 /// @}

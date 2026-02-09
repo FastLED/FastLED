@@ -11,6 +11,10 @@
 
 namespace fl {
 
+// Forward declarations for task system
+class task;
+class Scheduler;
+
 /// @brief ISR-safe async logger wrapper (zero heap allocation)
 /// Uses embedded AsyncLogQueue instead of heap-allocated pointer
 /// Registers itself automatically in ActiveLoggerRegistry on first access
@@ -175,6 +179,43 @@ namespace detail {
             }
         }
     };
+
+    /// @brief Auto-instantiating task for async logger servicing
+    /// Registers itself with fl::Scheduler when first accessed
+    /// Only instantiated if at least one async logger is used (linker removes if unused)
+    class AsyncLoggerServiceTask {
+    public:
+        static AsyncLoggerServiceTask& instance();
+
+        /// @brief Change the service interval (default 16ms)
+        /// @param interval_ms New interval in milliseconds
+        /// @note Can be called at any time to dynamically adjust servicing rate
+        void setInterval(u32 interval_ms);
+
+        /// @brief Get current service interval
+        u32 getInterval() const { return mIntervalMs; }
+
+        /// @brief Configure number of messages to flush per service call
+        /// @param messages_per_tick Number of messages (default 5)
+        void setMessagesPerTick(fl::size messages_per_tick);
+
+        /// @brief Get messages per tick
+        fl::size getMessagesPerTick() const { return mMessagesPerTick; }
+
+        /// @brief Service all registered loggers (called by task)
+        void serviceLoggers();
+
+    private:
+        friend class fl::Singleton<AsyncLoggerServiceTask>;
+
+        AsyncLoggerServiceTask();
+        ~AsyncLoggerServiceTask() = default;
+
+        u32 mIntervalMs;
+        fl::size mMessagesPerTick;
+        fl::task mTask;  // Task object (stored to allow dynamic interval changes)
+    };
+
 } // namespace detail
 
 /// @brief Template-based logger accessor with auto-registration and enablement check
@@ -189,6 +230,11 @@ inline AsyncLogger& get_async_logger_by_index() {
     static AsyncLogger* logger_ptr = []() {
         AsyncLogger* ptr = &Singleton<AsyncLogger, N>::instance();
         detail::ActiveLoggerRegistry::instance().registerLogger(ptr);
+
+        // Auto-instantiate service task on first logger access
+        // This ensures automatic background servicing via fl::delay() and fl::Scheduler
+        (void)detail::AsyncLoggerServiceTask::instance();
+
         return ptr;
     }();
 
