@@ -8,11 +8,10 @@
 #include "fl/stl/stdint.h"
 #include "fl/str.h"
 #include "fl/singleton.h"
+#include "fl/task.h"
 
 namespace fl {
 
-// Forward declarations for task system
-class task;
 class Scheduler;
 
 /// @brief ISR-safe async logger wrapper (zero heap allocation)
