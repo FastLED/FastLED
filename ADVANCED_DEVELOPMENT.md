@@ -4,16 +4,22 @@
 ![perpetualmaniac_neo_giving_two_pills _one_of_them_is_black_and__4b145870-9ead-4976-b031-f4df3f2bfbe1](https://github.com/user-attachments/assets/9bba6113-688f-469f-8b51-bcb4fea910e5)
 
 
-## GDB On Unit Tests
+## LLDB Debugging on Unit Tests
 
-Yes, we have step through debugging with FastLED.
+Yes, we have step through debugging with FastLED using LLDB.
 
-  * VSCode
-  * Install Plugin: GDB Debugger - Beyond
-  * Navigate to one of the tests in `tests/` and open in
-  * Hit `F5`
+**Quick Start:**
+  * VSCode with LLDB extension (recommended: CodeLLDB)
+  * Navigate to one of the tests in `tests/` and open it
+  * Hit `F5` to start debugging
 
-If the Python Debugger pops up, then manually switch the VSCode debugger using `Launch(gdb)`
+**Command Line:**
+  * Interactive: `uv run clang-tool-chain-lldb <executable>`
+  * For unit tests: `uv run clang-tool-chain-lldb .build/meson-debug/tests/runner.exe -- <test_name>.dll`
+
+**Note:** FastLED includes built-in crash handlers that automatically provide excellent stack traces with function names, line numbers, and full call stacks. For most debugging needs, the automatic crash output is sufficient. Use LLDB when you need breakpoints, variable inspection, or step-through debugging.
+
+See `docs/agents/lldb-debugging.md` for detailed LLDB usage guide.
 
 ![image](https://github.com/user-attachments/assets/c1246803-df4b-4583-8c11-8243c084afc5)
 

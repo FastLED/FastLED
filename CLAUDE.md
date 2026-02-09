@@ -37,19 +37,25 @@
 
 ## Key Commands (Cheat Sheet)
 
-- `uv run test.py` - Run all tests
-- `uv run test.py --cpp` - C++ tests only
-- `uv run test.py TestName` - Specific test (e.g., `uv run test.py xypath`)
-- `uv run test.py --no-fingerprint` - **LAST RESORT ONLY**: Disable fingerprint caching (very slow)
+**🚨 CRITICAL: Always use bash wrapper scripts (NOT direct Python invocation):**
+
+- `bash test` - Run all tests
+- `bash test --cpp` - C++ tests only
+- `bash test TestName` - Specific test (e.g., `bash test xypath`)
 - `bash lint` - Run code formatting/linting
-- `bash validate --parlio` - Live device testing (must specify driver; see `docs/agents/hardware-validation.md`)
-- `uv run ci/ci-compile.py uno --examples Blink` - Compile for specific platform
+- `bash compile uno --examples Blink` - Compile for specific platform
+- `bash validate --parlio` - Live device testing (must specify driver)
+
+**Advanced (only when bash scripts don't provide needed functionality):**
+- `uv run test.py --no-fingerprint` - **LAST RESORT ONLY**: Disable fingerprint caching (very slow)
 - `uv run ci/wasm_compile.py examples/Blink --just-compile` - WASM compilation
 - `uv run mcp_server.py` - Start MCP server
 
+**NEVER use:** `uv run python test.py` (always use `bash test` or `uv run test.py`)
+
 **Test disambiguation:**
-- Path-based: `uv run test.py tests/fl/async` or `uv run test.py examples/Blink`
-- Flag-based: `uv run test.py async --cpp` or `uv run test.py Async --examples`
+- Path-based: `bash test tests/fl/async` or `bash test examples/Blink`
+- Flag-based: `bash test async --cpp` or `bash test Async --examples`
 
 **Other tools:**
 - `/git-historian keyword1 keyword2` - Search codebase and recent git history for keywords
@@ -75,13 +81,26 @@
 - **Exception**: Only skip fixing errors if they are clearly outside the scope of the codebase (e.g., external dependency issues requiring upstream fixes)
 
 ### Command Execution
-- **Python**: Always use `uv run python script.py` (never just `python`)
+- **Build commands**: ALWAYS use bash wrapper scripts (`bash test`, `bash compile`, `bash lint`)
+  - ✅ Use: `bash test`, `bash compile`, `bash lint`, `bash validate`
+  - ⚠️ Avoid: `uv run test.py` (only when bash scripts don't provide needed functionality)
+  - ❌ NEVER: `uv run python test.py` (always use bash scripts or `uv run test.py`)
+- **Python scripts**: When directly invoking Python (not for builds):
+  - Always use `uv run python script.py` (never just `python`)
+  - For build tools, prefer `uv run <script>` over `uv run python <script>`
 - **Stay in project root** - never `cd` to subdirectories
-- **Git-bash compatibility**: Prefix commands with space: `bash test`
+- **Git-bash compatibility**: Commands work in git-bash on Windows
 - **NEVER use bare `pio` or `platformio` commands**: Direct PlatformIO commands are DANGEROUS and NOT ALLOWED
   - Use: `bash compile`, `bash validate`, or `bash debug` instead
   - Never use: `pio run`, `platformio run`, or any bare `pio`/`platformio` commands
   - Rationale: Bare PlatformIO commands bypass critical safety checks and daemon-managed package installation
+- **NEVER use low-level build commands directly**: Do NOT run `meson`, `ninja`, `clang++`, or `gcc` for standard builds
+  - Use: `bash test`, `bash compile`, `bash lint` instead
+  - Never use: `meson setup builddir`, `ninja -C builddir`, `clang++ main.cpp -o main`
+  - Exception: Runtime debugging of already-built executables (e.g., `lldb .build/runner.exe`) is allowed
+  - Exception: Compiler feature testing (e.g., `clang++ -std=c++17 test.cpp`) is allowed
+  - Rationale: FastLED build system handles configuration, caching, dependencies, and platform-specific setup
+  - See: `docs/agents/build-system.md` for details
 - **Platform compilation timeout**: Use minimum 15 minute timeout for platform builds (e.g., `bash compile --docker esp32s3`)
 - **NEVER disable sccache**: Do NOT set `SCCACHE_DISABLE=1` or disable sccache in any way (see `docs/agents/build-system.md`)
 

@@ -23,9 +23,8 @@ cd fastled
 ./lint
 ./test  # runs unit tests
 # Note that you do NOT need to install the C++ compiler toolchain
-# for compiling + running unit tests via ./test. If `gcc` is not
-# found in your system `PATH` then the `ziglang` clang compiler
-# will be swapped in automatically.
+# for compiling + running unit tests via ./test. The clang-tool-chain
+# compiler will be automatically installed when you run the tests.
 ````
 
 
@@ -131,7 +130,9 @@ You can also use the [platformio](https://marketplace.visualstudio.com/items?ite
 
 ## VSCode Debugging Guide
 
-FastLED includes comprehensive VSCode debugging support with GDB and Clang-generated debug symbols, providing professional-grade step-through debugging capabilities for the test suite.
+FastLED includes comprehensive VSCode debugging support with LLDB and Clang-generated debug symbols, providing professional-grade step-through debugging capabilities for the test suite.
+
+**Note:** FastLED also includes built-in crash handlers that automatically provide excellent stack traces with function names, line numbers, and full call stacks. For many debugging scenarios, the automatic crash output is sufficient.
 
 ### Quick Start
 
@@ -214,15 +215,18 @@ Access via `Ctrl+Shift+P` → "Tasks: Run Task":
 
 ### Technical Setup
 
-#### Clang + GDB Benefits
+#### Clang + LLDB Benefits
 This setup provides the **best of both worlds**:
 - **Clang's superior symbol generation**: Better template debugging, modern C++ support
-- **GDB's mature debugging features**: Robust breakpoint handling, memory inspection
+- **LLDB's native LLVM integration**: Seamless debugging with Clang-compiled binaries
 - **Cross-platform compatibility**: Works on Linux, macOS, Windows
+- **Advanced features**: Python scripting, data formatters, modern C++ support
+
+For detailed LLDB usage, see `docs/agents/lldb-debugging.md`.
 
 #### Debug Build Configuration
 The FastLED test system automatically uses optimal debug settings:
-- **Compiler**: Clang (when available) or GCC fallback
+- **Compiler**: Clang via clang-tool-chain (automatically installed)
 - **Debug info**: `-g3` (full debug information including macros)
 - **Optimization**: `-O0` (no optimization for accurate debugging)
 - **Frame pointers**: `-fno-omit-frame-pointer` (for accurate stack traces)

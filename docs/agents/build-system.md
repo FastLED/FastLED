@@ -1,13 +1,86 @@
 # Build System Standards
 
-## Compiler Requirements (Windows)
-The project requires clang for Windows builds. When configuring meson:
+## 🚨 CRITICAL: Use Bash Wrapper Scripts
+
+**ALWAYS use bash wrapper scripts for all build operations. DO NOT run low-level tools directly.**
+
+### Use These Commands
+
 ```bash
+# ✅ CORRECT - Use bash wrapper scripts
+bash test                            # Run all tests
+bash test <test_name>                # Run specific test
+bash compile <platform>              # Compile for platforms
+bash lint                            # Run linting
+bash validate --parlio               # Hardware validation
+
+# ⚠️ AVOID - Only when bash scripts don't provide needed functionality
+uv run test.py <test_name>           # Direct Python script
+uv run ci/ci-compile.py <platform>   # Direct Python script
+
+# ❌ FORBIDDEN - Never use these
+uv run python test.py                # WRONG - never "uv run python"
+meson setup builddir                 # WRONG - use bash scripts
+ninja -C builddir                    # WRONG - use bash scripts
+clang++ main.cpp -o main             # WRONG - use bash scripts
+CXX=... meson setup builddir         # WRONG - use bash scripts
+```
+
+### Exceptions (When Low-Level Commands Are Allowed)
+
+**ONLY use low-level build commands in these specific scenarios:**
+
+1. **Runtime Debugging** - When the build is already complete:
+   ```bash
+   # ✅ ALLOWED - debugging already-built executables
+   uv run clang-tool-chain-lldb .build/meson-debug/tests/runner.exe
+   gdb .build/meson-debug/examples/example-Blink.exe
+   ```
+
+2. **Compiler Feature Testing** - Manual builds to test specific compiler features:
+   ```bash
+   # ✅ ALLOWED - testing specific compiler behavior
+   clang++ -std=c++17 test_feature.cpp -o test && ./test
+   ```
+
+3. **Build System Development** - When explicitly modifying the build system itself:
+   ```bash
+   # ✅ ALLOWED - only when working on build system internals
+   meson introspect builddir --targets
+   ninja -C builddir -t commands
+   ```
+
+### Rationale
+
+- **Consistency**: FastLED build system handles configuration, caching, dependencies
+- **Safety**: Direct meson/ninja calls bypass critical setup and validation
+- **Complexity**: Build system manages sccache, compiler selection, platform-specific flags
+- **Reliability**: test.py/compile scripts ensure correct build environment
+
+**If you see example commands like `CXX=clang-tool-chain-sccache-cpp meson setup builddir` in documentation, these are for REFERENCE ONLY showing what the build system does internally - do NOT execute them directly.**
+
+### Command Hierarchy Summary
+
+**Tier 1: Bash Scripts (ALWAYS USE)** - Primary interface:
+- `bash test`, `bash compile`, `bash lint`, `bash validate`
+
+**Tier 2: Direct Python (AVOID)** - Only when bash doesn't provide functionality:
+- `uv run test.py` (use `bash test` instead when possible)
+- `uv run ci/ci-compile.py` (use `bash compile` instead when possible)
+
+**Tier 3: Low-Level Tools (FORBIDDEN)** - Never for standard builds:
+- `uv run python test.py` (NEVER - always wrong)
+- `meson`, `ninja`, `clang++`, `gcc` (only for exceptions above)
+
+## Compiler Requirements
+The project uses clang-tool-chain for all builds. The build system internally configures meson with:
+```bash
+# REFERENCE ONLY - DO NOT RUN THIS DIRECTLY
+# The build system (test.py/compile) handles this automatically
 CXX=clang-tool-chain-sccache-cpp CC=clang-tool-chain-sccache-c meson setup builddir
 ```
-- GCC 12.2.0 on Windows has `_aligned_malloc` errors in ESP32 mock drivers
-- Clang 21.1.5 provides proper MSVC compatibility layer and resolves these issues
-- test.py automatically uses clang on Windows (can override with `--gcc` flag)
+- Clang 21.1.5 provides proper MSVC compatibility layer and cross-platform support
+- test.py automatically uses clang-tool-chain (no alternative compilers supported)
 - The clang-tool-chain wrappers include sccache integration for fast builds
 
 ## Unified GNU Build (Windows = Linux)

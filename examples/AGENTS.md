@@ -204,6 +204,40 @@ int brightness = doc["config"]["brightness"].as<int>();  // Can crash if missing
 
 **📚 Reference Example:** See `examples/Json/Json.ino` for comprehensive usage patterns and API comparison.
 
+## 🚨 Build Command Requirements
+
+**CRITICAL: Use bash wrapper scripts for all build operations.**
+
+```bash
+# ✅ CORRECT - Use these bash scripts
+bash test --examples              # Compile and test all examples
+bash test --examples Blink        # Compile specific example
+bash compile uno --examples Blink # Platform compilation
+
+# ⚠️ AVOID - Only use when bash scripts don't provide needed functionality
+uv run test.py --examples         # Direct Python script (use bash test instead)
+uv run ci/ci-compile.py uno       # Direct Python script (use bash compile instead)
+
+# ❌ FORBIDDEN - Never use these for standard builds
+uv run python test.py             # WRONG - never use "uv run python"
+meson setup builddir              # WRONG - use bash scripts
+ninja -C builddir                 # WRONG - use bash scripts
+clang++ example.cpp -o example    # WRONG - use bash scripts
+```
+
+**Why bash scripts?**
+- Handle platform differences automatically
+- Set up correct environment variables
+- Manage build directories and caching
+- Provide consistent interface across all systems
+
+**Manual Python invocation (`uv run <script>`) is only for:**
+- Advanced debugging of build system internals
+- When bash wrapper doesn't expose needed functionality
+- Always use `uv run <script>`, NEVER `uv run python <script>`
+
+See `docs/agents/build-system.md` for complete details.
+
 ## Example Compilation Commands
 
 ### Host-Based Compilation with Build Modes
@@ -250,7 +284,7 @@ uv run python ci/util/meson_example_runner.py Blink --debug
 - **Build directory**: `.build/meson-debug/examples/`
 - **Sanitizers**: AddressSanitizer (ASan) + UndefinedBehaviorSanitizer (UBSan)
 - **Binary size**: 3.3x larger than quick mode (e.g., Blink: 9.1M)
-- **Debug symbols**: Full DWARF debug info for GDB debugging
+- **Debug symbols**: Full DWARF debug info for LLDB debugging
 
 **Debug Mode Benefits:**
 - Detects heap buffer overflows
@@ -259,7 +293,8 @@ uv run python ci/util/meson_example_runner.py Blink --debug
 - Detects integer overflow
 - Detects null pointer dereference
 - Detects misaligned memory access
-- Full source-level debugging with GDB
+- Full source-level debugging with LLDB
+- Built-in crash handlers provide automatic stack traces
 
 #### Release Mode
 ```bash
@@ -328,19 +363,25 @@ Sanitizers will print detailed error messages when memory errors or undefined be
 =================================================================
 ```
 
-**Step 4: Use GDB for deeper investigation** (if needed)
-```bash
-# Load example in GDB
-gdb .build/meson-debug/examples/example-ExampleName.exe
+**Step 4: Use LLDB for deeper investigation** (if needed)
 
-# Common GDB commands
-(gdb) run                  # Execute program
-(gdb) bt                   # Show backtrace when crashed
-(gdb) bt full              # Show backtrace with local variables
-(gdb) frame 3              # Switch to frame 3
-(gdb) print variable_name  # Print variable value
-(gdb) info locals          # Show all local variables
+**Note:** FastLED includes built-in crash handlers that automatically provide excellent stack traces. For most debugging, the automatic crash output is sufficient.
+
+```bash
+# Load example in LLDB
+uv run clang-tool-chain-lldb .build/meson-debug/examples/example-ExampleName.exe
+
+# Common LLDB commands
+(lldb) run                    # Execute program
+(lldb) bt                     # Show backtrace when crashed
+(lldb) bt all                 # Show backtrace of all threads
+(lldb) frame select 3         # Switch to frame 3
+(lldb) print variable_name    # Print variable value
+(lldb) frame variable         # Show all local variables
+(lldb) breakpoint set -n main # Set breakpoint at main
 ```
+
+For detailed LLDB usage, see `docs/agents/lldb-debugging.md`.
 
 ### Performance Comparison
 

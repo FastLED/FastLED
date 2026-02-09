@@ -56,6 +56,46 @@ The project uses a comprehensive test suite including:
 
 **Why:** The `bash test` wrapper handles platform differences, environment setup, and proper test execution across all supported systems.
 
+## 🚨 Build Command Restrictions
+
+**ALWAYS use bash wrapper scripts for standard test builds:**
+
+```bash
+# ✅ CORRECT - Use bash wrapper scripts (ALWAYS PREFER THESE)
+bash test                           # Run all tests
+bash test <test_name>               # Run specific test
+bash test --cpp                     # C++ tests only
+bash test --quick                   # Quick mode
+
+# ⚠️ AVOID - Only when bash scripts don't provide needed functionality
+uv run test.py <test_name>          # Direct Python script
+
+# ❌ FORBIDDEN - Never use these for standard builds
+uv run python test.py               # WRONG - never "uv run python"
+meson setup builddir                # WRONG - use bash scripts
+ninja -C builddir                   # WRONG - use bash scripts
+clang++ test.cpp -o test            # WRONG - use bash scripts
+gcc test.c -o test                  # WRONG - use bash scripts
+```
+
+**Allowed exceptions:**
+- ✅ Runtime debugging: `uv run clang-tool-chain-lldb .build/meson-debug/tests/runner.exe`
+- ✅ Compiler feature testing: `clang++ -std=c++17 feature_test.cpp -o test && ./test`
+- ✅ Build system development: Modifying meson.build or investigating build internals
+
+**Rationale:** Bash wrapper scripts handle:
+- Platform differences (Windows/Linux/macOS)
+- Environment variable setup
+- Compiler configuration (clang-tool-chain with sccache)
+- Build directory management and caching
+- Precompiled headers (PCH) for fast builds
+- Platform-specific flags and dependencies
+- Sanitizers (ASAN/LSAN) in debug mode
+
+Direct Python or meson/ninja calls bypass this infrastructure and will fail or produce incorrect builds.
+
+See `docs/agents/build-system.md` for complete details.
+
 ## Test Assertion Macros
 
 **🚨 CRITICAL: Always use the proper assertion macros for better error messages and debugging:**
@@ -478,8 +518,8 @@ sudo apt-get install -y libunwind-dev build-essential
 
 **CentOS/RHEL/Fedora**:
 ```bash
-sudo yum install -y libunwind-devel gcc-c++  # CentOS/RHEL
-sudo dnf install -y libunwind-devel gcc-c++  # Fedora
+sudo yum install -y libunwind-devel  # CentOS/RHEL
+sudo dnf install -y libunwind-devel  # Fedora
 ```
 
 **macOS**:
@@ -540,7 +580,7 @@ bash test --unit --no-pch --verbose
 
 **Available Build Options:**
 - `--no-pch` - Disable precompiled headers
-- `--clang` - Use Clang compiler (recommended for speed)
+- `--clang` - Use Clang compiler (default, always enabled via clang-tool-chain)
 - `--clean` - Force full rebuild
 - `--verbose` - Show detailed compilation output
 

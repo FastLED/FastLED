@@ -665,7 +665,7 @@ public:
 | Platform | Debugging Method | Best For |
 |----------|------------------|----------|
 | WASM | Chrome DevTools | Interactive stepping, variable inspection |
-| QEMU | GDB remote | Hardware peripheral validation |
+| QEMU | LLDB/GDB remote | Hardware peripheral validation |
 | AVR8JS | Web console | Quick Arduino sketch validation |
 | Real hardware | Serial logging | Final integration testing |
 

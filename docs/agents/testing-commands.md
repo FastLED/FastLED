@@ -1,5 +1,29 @@
 # Testing Commands
 
+## 🚨 CRITICAL: Use Bash Wrapper Scripts
+
+**ALWAYS use bash wrapper scripts. DO NOT run low-level build tools or Python scripts directly.**
+
+```bash
+# ✅ CORRECT - Use bash wrapper scripts
+bash test                           # Run all tests
+bash test <test_name>               # Build and run specific test
+bash compile <platform>             # Compile for platforms
+bash lint                           # Run linting
+bash validate --parlio              # Hardware validation
+
+# ⚠️ AVOID - Only when bash scripts don't provide needed functionality
+uv run test.py <test_name>          # Direct Python script
+
+# ❌ FORBIDDEN - Never use these
+uv run python test.py               # WRONG - never "uv run python"
+meson setup builddir                # WRONG - use bash scripts
+ninja -C builddir                   # WRONG - use bash scripts
+clang++ main.cpp -o main            # WRONG - use bash scripts
+```
+
+**Exceptions:** Runtime debugging (e.g., `lldb .build/runner.exe`) and compiler feature testing are allowed. See `docs/agents/build-system.md` for details.
+
 ## Docker Testing (Linux Environment)
 Run tests inside a Docker container for consistent Linux environment with ASAN/LSAN sanitizers:
 
