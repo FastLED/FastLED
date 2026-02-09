@@ -8,6 +8,16 @@
 - 10-100x faster than running standalone scripts on each file
 - All checkers run in a single pass per scope (src/, examples/, tests/)
 
+## Single-File Mode (NEW)
+- **Usage**: `uv run python ci/lint_cpp/run_all_checkers.py <file_path>`
+- Runs all applicable checkers on a single file (< 1 second)
+- ~43x faster than full codebase scan for quick validation
+- Useful for:
+  - Pre-commit hooks (`.claude/hooks/lint-on-save.py`)
+  - IDE integration
+  - Quick validation during development
+  - Testing new linter rules
+
 ## Creating a New C++ Linter
 1. Create a checker class in `ci/lint_cpp/your_checker.py` inheriting from `FileContentChecker`
 2. Implement `should_process_file(file_path: str) -> bool` (filter which files to check)

@@ -365,38 +365,7 @@ def run_checkers(
     for scope_checkers in checkers_by_scope.values():
         all_checkers.extend(scope_checkers)
 
-    for checker in all_checkers:
-        checker_name = checker.__class__.__name__
-        violations = getattr(checker, "violations", None)
-        if violations:
-            # Convert legacy dict format to CheckerResults
-            if isinstance(violations, CheckerResults):
-                results = violations
-            else:
-                # Legacy dict format
-                results = CheckerResults()
-                for file_path, violation_list in violations.items():
-                    if isinstance(violation_list, list):
-                        for item in violation_list:  # type: ignore[misc]
-                            if isinstance(item, tuple) and len(item) >= 2:  # type: ignore[arg-type]
-                                line_num = int(item[0])  # type: ignore[arg-type]
-                                content = str(item[1])  # type: ignore[arg-type]
-                                results.add_violation(file_path, line_num, content)
-                    elif isinstance(violation_list, str):
-                        results.add_violation(file_path, 0, violation_list)
-
-            # Merge violations from multiple checkers with same name
-            if checker_name not in all_results:
-                all_results[checker_name] = results
-            else:
-                # Merge into existing results
-                for file_path, file_violations in results.violations.items():
-                    for violation in file_violations.violations:
-                        all_results[checker_name].add_violation(
-                            file_path, violation.line_number, violation.content
-                        )
-
-    return all_results
+    return _collect_violations_from_checkers(all_checkers)
 
 
 def format_and_print_results(results: dict[str, CheckerResults]) -> int:
@@ -447,33 +416,237 @@ def run_unity_build_check() -> tuple[int, list[str]]:
     return (len(result.violations), result.violations)
 
 
+def _convert_violations_to_results(violations: Any) -> CheckerResults:
+    """Convert checker violations (dict or CheckerResults) to CheckerResults format.
+
+    Args:
+        violations: Either a CheckerResults object or legacy dict format
+
+    Returns:
+        CheckerResults object
+    """
+    if isinstance(violations, CheckerResults):
+        return violations
+
+    # Legacy dict format conversion
+    results = CheckerResults()
+    for file_path, violation_list in violations.items():
+        if isinstance(violation_list, list):
+            for item in violation_list:
+                if isinstance(item, tuple) and len(item) >= 2:
+                    line_num = int(item[0])
+                    content = str(item[1])
+                    results.add_violation(file_path, line_num, content)
+        elif isinstance(violation_list, str):
+            results.add_violation(file_path, 0, violation_list)
+
+    return results
+
+
+def _collect_violations_from_checkers(
+    checkers: list[FileContentChecker],
+) -> dict[str, CheckerResults]:
+    """Collect violations from a list of checkers.
+
+    Args:
+        checkers: List of checker instances to collect violations from
+
+    Returns:
+        Dictionary mapping checker class name to CheckerResults
+    """
+    all_results: dict[str, CheckerResults] = {}
+
+    for checker in checkers:
+        checker_name = checker.__class__.__name__
+        violations = getattr(checker, "violations", None)
+        if not violations:
+            continue
+
+        results = _convert_violations_to_results(violations)
+
+        # Merge violations from multiple checkers with same name
+        if checker_name not in all_results:
+            all_results[checker_name] = results
+        else:
+            # Merge into existing results
+            for file_path, file_violations in results.violations.items():
+                for violation in file_violations.violations:
+                    all_results[checker_name].add_violation(
+                        file_path, violation.line_number, violation.content
+                    )
+
+    return all_results
+
+
+def _determine_file_scopes(file_path: str) -> set[str]:
+    """Determine which checker scopes apply to a file.
+
+    Args:
+        file_path: Absolute path to the file
+
+    Returns:
+        Set of scope names that apply to this file
+    """
+    normalized_path = str(Path(file_path).resolve())
+    posix_path = normalized_path.replace("\\", "/")
+    scopes: set[str] = set()
+
+    # Determine file characteristics
+    is_src = "/src/" in posix_path
+    is_example = "/examples/" in posix_path
+    is_test = "/tests/" in posix_path
+    is_fl = "/src/fl/" in posix_path
+    is_lib8tion = "/src/lib8tion/" in posix_path
+    is_fx = "/src/fx/" in posix_path
+    is_sensors = "/src/sensors/" in posix_path
+    is_platforms = "/src/platforms/" in posix_path
+    is_platforms_shared = "/src/platforms/shared/" in posix_path
+    is_third_party = "/src/third_party/" in posix_path
+
+    # Add scopes based on file location
+    if is_src or is_example or is_test:
+        scopes.add("global")
+
+    if is_src:
+        scopes.add("src")
+        scopes.add("native_platform_defines")
+
+    if is_platforms:
+        scopes.add("platforms")
+        scopes.add("platforms_banned")
+
+    if is_example:
+        scopes.add("examples")
+        scopes.add("examples_banned")
+
+    if is_fl:
+        scopes.add("fl")
+        scopes.add("fl_platforms_include_paths")
+        if normalized_path.endswith((".h", ".hpp", ".hxx", ".hh")):
+            scopes.add("fl_headers")
+
+    if is_lib8tion:
+        scopes.add("lib8tion")
+
+    if is_fx or is_sensors or is_platforms_shared:
+        scopes.add("fx_sensors_platforms_shared")
+
+    if is_platforms:
+        scopes.add("fl_platforms_include_paths")
+
+    if is_third_party:
+        scopes.add("third_party")
+
+    if is_test:
+        scopes.add("tests")
+
+    # Check for src root files
+    if is_src and Path(normalized_path).parent.resolve() == SRC_ROOT.resolve():
+        scopes.add("src_root")
+
+    return scopes
+
+
+def run_checkers_on_single_file(
+    file_path: str, checkers_by_scope: dict[str, list[FileContentChecker]]
+) -> dict[str, CheckerResults]:
+    """Run all applicable checkers on a single file.
+
+    Args:
+        file_path: Absolute path to the file to check
+        checkers_by_scope: Dictionary of checkers organized by scope
+
+    Returns:
+        Dictionary mapping checker class name to CheckerResults
+    """
+    processor = MultiCheckerFileProcessor()
+    normalized_path = str(Path(file_path).resolve())
+
+    # Determine which scopes apply to this file
+    applicable_scopes = _determine_file_scopes(normalized_path)
+
+    # Collect all checkers for the applicable scopes
+    applicable_checkers: list[FileContentChecker] = []
+    for scope in applicable_scopes:
+        applicable_checkers.extend(checkers_by_scope.get(scope, []))
+
+    # Remove duplicate checkers (same instance may be added from multiple scopes)
+    seen_checkers: set[int] = set()
+    unique_checkers: list[FileContentChecker] = []
+    for checker in applicable_checkers:
+        checker_id = id(checker)
+        if checker_id not in seen_checkers:
+            seen_checkers.add(checker_id)
+            unique_checkers.append(checker)
+
+    # Run all applicable checkers on this single file
+    if unique_checkers:
+        processor.process_files_with_checkers([normalized_path], unique_checkers)
+        return _collect_violations_from_checkers(unique_checkers)
+
+    return {}
+
+
 def main() -> int:
     """Main entry point for unified C++ linting."""
-    print("Running unified C++ linting checks...")
-    print(f"Project root: {PROJECT_ROOT}")
-    print()
+    import argparse
 
-    # Collect all files by directory
-    files_by_dir = collect_all_files_by_directory()
+    parser = argparse.ArgumentParser(
+        description="Run unified C++ linting checks on all files or a single file"
+    )
+    parser.add_argument(
+        "file", nargs="?", help="Optional: single file to check (faster)"
+    )
+    args = parser.parse_args()
 
-    # Create all checker instances
-    checkers_by_scope = create_checkers()
+    if args.file:
+        # Single file mode
+        file_path = Path(args.file).resolve()
+        if not file_path.exists():
+            print(f"Error: File not found: {file_path}")
+            return 1
 
-    # Run all checkers in a single pass per scope
-    results = run_checkers(files_by_dir, checkers_by_scope)
+        print(f"Running unified C++ linting checks on single file...")
+        print(f"File: {file_path}")
+        print()
 
-    # Run unity build structure check (formerly standalone subprocess)
-    unity_violation_count, unity_violations = run_unity_build_check()
-    if unity_violation_count > 0:
-        unity_results = CheckerResults()
-        for violation in unity_violations:
-            unity_results.add_violation("unity_build_structure", 0, violation)
-        results["UnityBuildChecker"] = unity_results
+        # Create all checker instances
+        checkers_by_scope = create_checkers()
 
-    # Format and print results
-    exit_code = format_and_print_results(results)
+        # Run all applicable checkers on the single file
+        results = run_checkers_on_single_file(str(file_path), checkers_by_scope)
 
-    return exit_code
+        # Format and print results
+        exit_code = format_and_print_results(results)
+
+        return exit_code
+    else:
+        # Normal mode - check all files
+        print("Running unified C++ linting checks...")
+        print(f"Project root: {PROJECT_ROOT}")
+        print()
+
+        # Collect all files by directory
+        files_by_dir = collect_all_files_by_directory()
+
+        # Create all checker instances
+        checkers_by_scope = create_checkers()
+
+        # Run all checkers in a single pass per scope
+        results = run_checkers(files_by_dir, checkers_by_scope)
+
+        # Run unity build structure check (formerly standalone subprocess)
+        unity_violation_count, unity_violations = run_unity_build_check()
+        if unity_violation_count > 0:
+            unity_results = CheckerResults()
+            for violation in unity_violations:
+                unity_results.add_violation("unity_build_structure", 0, violation)
+            results["UnityBuildChecker"] = unity_results
+
+        # Format and print results
+        exit_code = format_and_print_results(results)
+
+        return exit_code
 
 
 if __name__ == "__main__":
