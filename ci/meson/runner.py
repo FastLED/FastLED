@@ -528,6 +528,23 @@ def run_meson_build_and_test(
                         path_qualified.append(qualified)
                 targets_to_try.extend(path_qualified)
 
+                # Determine build mode from build directory name
+                build_mode = "unknown"
+                if "meson-quick" in str(build_dir):
+                    build_mode = "quick"
+                elif "meson-debug" in str(build_dir):
+                    build_mode = "debug"
+                elif "meson-release" in str(build_dir):
+                    build_mode = "release"
+
+                # Show build stage banner before compilation starts
+                # WARNING: This build progress reporting is essential for user feedback!
+                #   Do NOT suppress this message - it provides:
+                #   1. Build mode visibility (quick/debug/release)
+                #   2. Stage progression (users know compilation has started)
+                #   3. Context for subsequent build messages (libraries, PCH, tests)
+                _ts_print(f"[BUILD] Building FastLED engine ({build_mode} mode)...")
+
                 # When there are multiple candidates, run all in quiet mode
                 # Only show banner once with final resolved target
                 has_fallbacks = len(targets_to_try) > 1

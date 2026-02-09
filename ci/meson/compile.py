@@ -72,14 +72,32 @@ def compile_meson(
     """
     cmd = [get_meson_executable(), "compile", "-C", str(build_dir)]
 
+    # Determine build mode from build directory name
+    build_mode = "unknown"
+    if "meson-quick" in str(build_dir):
+        build_mode = "quick"
+    elif "meson-debug" in str(build_dir):
+        build_mode = "debug"
+    elif "meson-release" in str(build_dir):
+        build_mode = "release"
+
     if target:
         cmd.append(target)
         if not quiet:
             _print_banner("Compile", "📦", verbose=verbose)
             print(f"Compiling: {target}")
     else:
-        _print_banner("Compile", "📦", verbose=verbose)
-        print("Compiling all targets...")
+        if not quiet:
+            _print_banner("Compile", "📦", verbose=verbose)
+            print("Compiling all targets...")
+
+    # Show build stage banner (unless in quiet mode for fallback retries)
+    # WARNING: Do NOT re-enable quiet mode here! quiet=False is required for:
+    #   1. Build progress inspection (users need to see what's being built)
+    #   2. Timing information (helps diagnose slow builds)
+    #   3. Cache status reporting (shows when artifacts are up-to-date)
+    if not quiet:
+        _ts_print(f"[BUILD] Building FastLED engine ({build_mode} mode)...")
 
     # Inject IWYU wrapper by modifying build.ninja when check mode is enabled
     # This avoids meson setup probe issues while still running IWYU during compilation
@@ -186,8 +204,25 @@ def compile_meson(
             r"\[\d+/\d+\]\s+Linking (?:CXX executable|target)\s+(.+)$"
         )
 
+        # Pattern to detect static library archiving
+        archive_pattern = re.compile(r"\[\d+/\d+\]\s+Linking static target\s+(.+)$")
+
+        # Pattern to detect PCH compilation
+        # Example: "[1/1] Generating tests/test_pch with a custom command"
+        pch_pattern = re.compile(r"\[\d+/\d+\]\s+Generating\s+\S*test_pch\b")
+
         # Validation error list for suppressed errors during quiet mode (max 5 entries)
         suppressed_errors: list[str] = []
+
+        # Track build stages for progress reporting
+        shown_tests_stage = False  # Track if we've shown "Building tests..." message
+
+        # Track what we've seen during build for cache status reporting
+        seen_libfastled = False
+        seen_libplatforms_shared = False
+        seen_libcrash_handler = False
+        seen_pch = False
+        seen_any_test = False
 
         # Stream output line by line to rewrite Ninja paths
         # In quiet mode or non-verbose mode, suppress all output (errors shown via error filter)
@@ -209,9 +244,95 @@ def compile_meson(
                 if "ninja: no work to do" in stripped.lower():
                     continue  # Skip no-work ninja message (already up to date)
 
+                # Check for key build milestones (show even in quiet/non-verbose mode)
+                is_key_milestone = False
+                custom_message_shown = False
+
+                # Check for library archiving
+                archive_match = archive_pattern.search(stripped)
+                if archive_match:
+                    if any(
+                        lib in stripped
+                        for lib in [
+                            "libfastled",
+                            "libplatforms_shared",
+                            "libcrash_handler",
+                        ]
+                    ):
+                        is_key_milestone = True
+                        custom_message_shown = True
+                        # Show library path when it finishes building
+                        lib_match = re.search(
+                            r"(ci[\\/]meson[\\/]native[\\/]lib\S+\.a)", stripped
+                        )
+                        if lib_match:
+                            rel_path = lib_match.group(1)
+                            full_path = build_dir / rel_path
+                            try:
+                                display_path = full_path.relative_to(Path.cwd())
+                            except ValueError:
+                                display_path = full_path
+                            _ts_print(f"[BUILD] ✓ Core library: {display_path}")
+
+                            # Track which libraries we've seen for cache status reporting
+                            if "libfastled" in stripped:
+                                seen_libfastled = True
+                            if "libplatforms_shared" in stripped:
+                                seen_libplatforms_shared = True
+                            if "libcrash_handler" in stripped:
+                                seen_libcrash_handler = True
+
+                # Check for PCH compilation
+                pch_match = pch_pattern.search(stripped)
+                if pch_match:
+                    is_key_milestone = True
+                    custom_message_shown = True
+                    seen_pch = True  # Track that we've seen PCH compilation
+                    # Extract PCH path from the line
+                    # Format: "[1/1] Generating tests/test_pch with a custom command"
+                    pch_path_match = re.search(
+                        r"Generating\s+(\S+test_pch)\b", stripped
+                    )
+                    if pch_path_match:
+                        rel_path = (
+                            pch_path_match.group(1) + ".h.pch"
+                        )  # Add extension for display
+                        full_path = build_dir / rel_path
+                        try:
+                            display_path = full_path.relative_to(Path.cwd())
+                        except ValueError:
+                            display_path = full_path
+                        _ts_print(f"[BUILD] ✓ Precompiled header: {display_path}")
+
+                # Check for test/example linking
+                test_link_match = link_pattern.search(stripped)
+                if test_link_match:
+                    if (
+                        "tests/" in stripped
+                        or "tests\\" in stripped
+                        or "examples/" in stripped
+                        or "examples\\" in stripped
+                    ):
+                        # Exclude test infrastructure (runner.exe is not a test)
+                        # Extract test name from the stripped line
+                        test_name_match = re.search(
+                            r"[\\/](runner|test_runner|example_runner)\.", stripped
+                        )
+                        if not test_name_match:
+                            seen_any_test = (
+                                True  # Track that we've seen at least one test
+                            )
+                            # Show "Building tests..." stage message on first test
+                            if not shown_tests_stage:
+                                _ts_print("[BUILD] Building tests...")
+                                shown_tests_stage = True
+                            is_key_milestone = True
+
                 # Suppress output unless verbose mode enabled
                 # In quiet or non-verbose mode: still print error/failure lines to stderr
                 # In verbose mode: show full compilation output for detailed debugging
+                # WARNING: The milestone detection below (is_key_milestone) requires quiet=False!
+                #   Do NOT suppress milestone messages - they provide essential build progress feedback.
                 if quiet or not verbose:
                     # Print error and failure lines so compiler errors are never silently swallowed
                     # Exception: Store "Can't invoke target" errors in validation list (shown on self-healing)
@@ -225,6 +346,13 @@ def compile_meson(
                                 suppressed_errors.append(stripped)
                             continue
                         _ts_print(line, file=sys.stderr)
+                        continue
+
+                    # Show key milestones even in quiet/non-verbose mode
+                    # But skip if we already printed a custom message (like library path)
+                    if is_key_milestone and not custom_message_shown:
+                        _ts_print(f"[BUILD] {line}")
+
                     continue
 
                 # Rewrite Ninja paths to show full build-relative paths for clarity
@@ -357,6 +485,34 @@ def compile_meson(
             return CompileResult(
                 success=False, error_output=output, suppressed_errors=suppressed_errors
             )
+
+        # Report cached artifacts (things we didn't see being built)
+        # Only report if we saw at least one artifact being built (otherwise it's a no-op build)
+        # Note: Show cached messages even in quiet mode - they provide useful build context
+        if (
+            seen_libfastled
+            or seen_libplatforms_shared
+            or seen_libcrash_handler
+            or seen_pch
+            or seen_any_test
+        ):
+            # Report cached core libraries
+            cached_libs = []
+            if not seen_libfastled:
+                cached_libs.append("libfastled.a")
+            if not seen_libplatforms_shared:
+                cached_libs.append("libplatforms_shared.a")
+            if not seen_libcrash_handler:
+                cached_libs.append("libcrash_handler.a")
+
+            if cached_libs:
+                _ts_print(
+                    f"[BUILD] ✓ Core libraries: up-to-date (cached: {', '.join(cached_libs)})"
+                )
+
+            # Report cached PCH
+            if not seen_pch:
+                _ts_print(f"[BUILD] ✓ Precompiled header: up-to-date (cached)")
 
         # Don't print "Compilation successful" - the transition to Running phase implies success
         # This was previously conditional on quiet mode, but it's always redundant

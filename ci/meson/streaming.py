@@ -47,6 +47,23 @@ def stream_compile_and_run_tests(
     """
     cmd = [get_meson_executable(), "compile", "-C", str(build_dir)]
 
+    # Determine build mode from build directory name
+    build_mode = "unknown"
+    if "meson-quick" in str(build_dir):
+        build_mode = "quick"
+    elif "meson-debug" in str(build_dir):
+        build_mode = "debug"
+    elif "meson-release" in str(build_dir):
+        build_mode = "release"
+
+    # Show build stage banner
+    # WARNING: This build progress reporting is essential for user feedback!
+    #   Do NOT suppress these messages - they provide:
+    #   1. Build stage visibility (engine → libraries → PCH → tests)
+    #   2. Timing information (helps diagnose slow builds)
+    #   3. Cache status reporting (shows when artifacts are up-to-date)
+    _ts_print(f"[BUILD] Building FastLED engine ({build_mode} mode)...")
+
     if target:
         cmd.append(target)
         if verbose:
@@ -63,12 +80,29 @@ def stream_compile_and_run_tests(
         r"^\[\d+/\d+\]\s+Linking (?:CXX executable|target)\s+(.+)$"
     )
 
+    # Pattern to detect static library archiving
+    archive_pattern = re.compile(r"^\[\d+/\d+\]\s+Linking static target\s+(.+)$")
+
+    # Pattern to detect PCH compilation
+    # Example: "[1/1] Generating tests/test_pch with a custom command"
+    pch_pattern = re.compile(r"^\[\d+/\d+\]\s+Generating\s+\S*test_pch\b")
+
     # Track compilation success and test results
     compilation_failed = False
     compilation_output = ""  # Capture compilation output for error analysis
     num_passed = 0
     num_failed = 0
     tests_run = 0
+
+    # Track build stages for progress reporting
+    shown_tests_stage = False  # Track if we've shown "Building tests..." message
+
+    # Track what we've seen during build for cache status reporting
+    seen_libfastled = False
+    seen_libplatforms_shared = False
+    seen_libcrash_handler = False
+    seen_pch = False
+    seen_any_test = False
 
     # Queue for completed test executables
     test_queue: queue.Queue[Optional[Path]] = queue.Queue()
@@ -78,7 +112,13 @@ def stream_compile_and_run_tests(
 
     def producer_thread() -> None:
         """Parse Ninja output and queue completed test executables"""
-        nonlocal compilation_failed, compilation_output
+        nonlocal compilation_failed, compilation_output, shown_tests_stage
+        nonlocal \
+            seen_libfastled, \
+            seen_libplatforms_shared, \
+            seen_libcrash_handler, \
+            seen_pch, \
+            seen_any_test
 
         try:
             # Use RunningProcess for streaming output
@@ -102,6 +142,58 @@ def stream_compile_and_run_tests(
                     if "Entering directory" in stripped:
                         continue  # Skip Ninja directory change messages
 
+                    # Check for key build milestones (show even in non-verbose mode)
+                    is_key_milestone = False
+
+                    # Check for library archiving
+                    archive_match = archive_pattern.match(stripped)
+                    if archive_match:
+                        if any(
+                            lib in stripped
+                            for lib in [
+                                "libfastled",
+                                "libplatforms_shared",
+                                "libcrash_handler",
+                            ]
+                        ):
+                            is_key_milestone = True
+                            # Show library path when it finishes building
+                            rel_path = archive_match.group(1)
+                            full_path = build_dir / rel_path
+                            try:
+                                display_path = full_path.relative_to(Path.cwd())
+                            except ValueError:
+                                display_path = full_path
+                            _ts_print(f"[BUILD] ✓ Core library: {display_path}")
+
+                            # Track which libraries we've seen for cache status reporting
+                            if "libfastled" in stripped:
+                                seen_libfastled = True
+                            if "libplatforms_shared" in stripped:
+                                seen_libplatforms_shared = True
+                            if "libcrash_handler" in stripped:
+                                seen_libcrash_handler = True
+
+                    # Check for PCH compilation
+                    elif pch_pattern.match(stripped):
+                        is_key_milestone = True
+                        seen_pch = True  # Track that we've seen PCH compilation
+                        # Extract PCH path from the line
+                        # Format: "[1/1] Generating tests/test_pch with a custom command"
+                        pch_match_result = re.search(
+                            r"Generating\s+(\S+test_pch)\b", stripped
+                        )
+                        if pch_match_result:
+                            rel_path = (
+                                pch_match_result.group(1) + ".h.pch"
+                            )  # Add extension for display
+                            full_path = build_dir / rel_path
+                            try:
+                                display_path = full_path.relative_to(Path.cwd())
+                            except ValueError:
+                                display_path = full_path
+                            _ts_print(f"[BUILD] ✓ Precompiled header: {display_path}")
+
                     # Rewrite Ninja paths to show full build-relative paths for clarity
                     # Ninja outputs paths relative to build directory (e.g., "tests/fx_frame.exe")
                     # Users expect to see full paths (e.g., ".build/meson-quick/tests/fx_frame.exe")
@@ -120,8 +212,37 @@ def stream_compile_and_run_tests(
                             # If path is outside project, show absolute path
                             display_line = line.replace(rel_path, str(full_path))
 
-                    # Echo output for visibility (skip empty lines) - only in verbose mode
-                    if stripped and verbose:
+                        # Test/example linking is also a key milestone
+                        if (
+                            "tests/" in rel_path
+                            or "tests\\" in rel_path
+                            or "examples/" in rel_path
+                            or "examples\\" in rel_path
+                        ):
+                            # Exclude test infrastructure (runner.exe is not a test)
+                            test_name = Path(rel_path).stem
+                            if test_name not in (
+                                "runner",
+                                "test_runner",
+                                "example_runner",
+                            ):
+                                seen_any_test = (
+                                    True  # Track that we've seen at least one test
+                                )
+                                # Show "Building tests..." stage message on first test
+                                if not shown_tests_stage:
+                                    _ts_print("[BUILD] Building tests...")
+                                    shown_tests_stage = True
+                                is_key_milestone = True
+
+                    # Echo output for visibility (skip empty lines)
+                    # Show in verbose mode OR if it's a key milestone (but skip if we already printed a custom message)
+                    if (
+                        stripped
+                        and (verbose or is_key_milestone)
+                        and not archive_match
+                        and not pch_pattern.match(stripped)
+                    ):
                         _ts_print(f"[BUILD] {display_line}")
 
                     # Check for link completion
@@ -172,6 +293,33 @@ def stream_compile_and_run_tests(
 
                 compilation_failed = True
             else:
+                # Report cached artifacts (things we didn't see being built)
+                # Only report if we saw at least one artifact being built (otherwise it's a no-op build)
+                if (
+                    seen_libfastled
+                    or seen_libplatforms_shared
+                    or seen_libcrash_handler
+                    or seen_pch
+                    or seen_any_test
+                ):
+                    # Report cached core libraries
+                    cached_libs = []
+                    if not seen_libfastled:
+                        cached_libs.append("libfastled.a")
+                    if not seen_libplatforms_shared:
+                        cached_libs.append("libplatforms_shared.a")
+                    if not seen_libcrash_handler:
+                        cached_libs.append("libcrash_handler.a")
+
+                    if cached_libs:
+                        _ts_print(
+                            f"[BUILD] ✓ Core libraries: up-to-date (cached: {', '.join(cached_libs)})"
+                        )
+
+                    # Report cached PCH
+                    if not seen_pch:
+                        _ts_print(f"[BUILD] ✓ Precompiled header: up-to-date (cached)")
+
                 if verbose:
                     _ts_print(f"[MESON] Compilation completed successfully")
 
