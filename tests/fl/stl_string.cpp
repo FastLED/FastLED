@@ -424,8 +424,8 @@ FL_TEST_CASE("String erase operations") {
 
     FL_SUBCASE("Iterator-based erase single character") {
         fl::string s = "hello";
-        char* it = s.begin() + 1;  // Point to 'e'
-        char* result = s.erase(it);
+        auto it = s.begin() + 1;  // Point to 'e'
+        auto result = s.erase(static_cast<char*>(it));
         FL_CHECK_EQ(s, "hllo");
         FL_CHECK(s.size() == 4);
         // Result should point to 'l' (the character after erased 'e')
@@ -434,9 +434,9 @@ FL_TEST_CASE("String erase operations") {
 
     FL_SUBCASE("Iterator-based erase range") {
         fl::string s = "hello world";
-        char* first = s.begin() + 5;  // Point to space
-        char* last = s.begin() + 11;  // Point to end
-        char* result = s.erase(first, last);
+        auto first = s.begin() + 5;  // Point to space
+        auto last = s.begin() + 11;  // Point to end
+        auto result = s.erase(static_cast<char*>(first), static_cast<char*>(last));
         FL_CHECK_EQ(s, "hello");
         FL_CHECK(s.size() == 5);
         // Result should point to end
@@ -445,25 +445,25 @@ FL_TEST_CASE("String erase operations") {
 
     FL_SUBCASE("Iterator-based erase middle range") {
         fl::string s = "hello world";
-        char* first = s.begin() + 2;  // Point to first 'l'
-        char* last = s.begin() + 9;   // Point to second 'l' (end of range is exclusive)
-        s.erase(first, last);
+        auto first = s.begin() + 2;  // Point to first 'l'
+        auto last = s.begin() + 9;   // Point to second 'l' (end of range is exclusive)
+        s.erase(static_cast<char*>(first), static_cast<char*>(last));
         FL_CHECK_EQ(s, "held");
         FL_CHECK(s.size() == 4);
     }
 
     FL_SUBCASE("Iterator-based erase at beginning") {
         fl::string s = "hello";
-        char* it = s.begin();
-        s.erase(it);
+        auto it = s.begin();
+        s.erase(static_cast<char*>(it));
         FL_CHECK_EQ(s, "ello");
         FL_CHECK(s.size() == 4);
     }
 
     FL_SUBCASE("Iterator-based erase at end-1") {
         fl::string s = "hello";
-        char* it = s.end() - 1;  // Point to 'o'
-        s.erase(it);
+        auto it = s.end() - 1;  // Point to 'o'
+        s.erase(static_cast<char*>(it));
         FL_CHECK_EQ(s, "hell");
         FL_CHECK(s.size() == 4);
     }
@@ -2289,66 +2289,67 @@ FL_TEST_CASE("StrN reverse iterators") {
     FL_SUBCASE("rbegin/rend on non-empty string") {
         fl::string s = "Hello";
         // rbegin() should point to last character
-        FL_CHECK(s.rbegin() != nullptr);
+        FL_CHECK(s.rbegin() != s.rend());
         FL_CHECK(*s.rbegin() == 'o');
 
         // Manually iterate backwards
-        char* it = s.rbegin();
-        FL_CHECK(*it == 'o'); it--;
-        FL_CHECK(*it == 'l'); it--;
-        FL_CHECK(*it == 'l'); it--;
-        FL_CHECK(*it == 'e'); it--;
-        FL_CHECK(*it == 'H');
-        // rend() is one-before-first
-        FL_CHECK(it == s.rend() + 1);
+        auto it = s.rbegin();
+        FL_CHECK(*it == 'o'); ++it;
+        FL_CHECK(*it == 'l'); ++it;
+        FL_CHECK(*it == 'l'); ++it;
+        FL_CHECK(*it == 'e'); ++it;
+        FL_CHECK(*it == 'H'); ++it;
+        // After incrementing past all characters, should equal rend()
+        FL_CHECK(it == s.rend());
     }
 
     FL_SUBCASE("rbegin/rend on empty string") {
         fl::string s = "";
-        FL_CHECK(s.rbegin() == nullptr);
-        FL_CHECK(s.rend() == nullptr);
+        FL_CHECK(s.rbegin() == s.rend());
     }
 
     FL_SUBCASE("const rbegin/rend") {
         const fl::string s = "World";
-        FL_CHECK(s.rbegin() != nullptr);
+        FL_CHECK(s.rbegin() != s.rend());
         FL_CHECK(*s.rbegin() == 'd');
 
-        const char* it = s.rbegin();
-        FL_CHECK(*it == 'd'); it--;
-        FL_CHECK(*it == 'l'); it--;
-        FL_CHECK(*it == 'r'); it--;
-        FL_CHECK(*it == 'o'); it--;
-        FL_CHECK(*it == 'W');
-        FL_CHECK(it == s.rend() + 1);
+        auto it = s.rbegin();
+        FL_CHECK(*it == 'd'); ++it;
+        FL_CHECK(*it == 'l'); ++it;
+        FL_CHECK(*it == 'r'); ++it;
+        FL_CHECK(*it == 'o'); ++it;
+        FL_CHECK(*it == 'W'); ++it;
+        FL_CHECK(it == s.rend());
     }
 
     FL_SUBCASE("crbegin/crend") {
         fl::string s = "Test";
         // crbegin/crend should return const iterators
-        const char* crit = s.crbegin();
-        FL_CHECK(crit != nullptr);
+        auto crit = s.crbegin();
+        FL_CHECK(crit != s.crend());
         FL_CHECK(*crit == 't');
 
-        crit--;
-        FL_CHECK(*crit == 's'); crit--;
-        FL_CHECK(*crit == 'e'); crit--;
-        FL_CHECK(*crit == 'T');
-        FL_CHECK(crit == s.crend() + 1);
+        ++crit;
+        FL_CHECK(*crit == 's'); ++crit;
+        FL_CHECK(*crit == 'e'); ++crit;
+        FL_CHECK(*crit == 'T'); ++crit;
+        FL_CHECK(crit == s.crend());
     }
 
     FL_SUBCASE("reverse iteration with single character") {
         fl::string s = "X";
-        FL_CHECK(s.rbegin() != nullptr);
+        FL_CHECK(s.rbegin() != s.rend());
         FL_CHECK(*s.rbegin() == 'X');
-        FL_CHECK(s.rbegin() == s.rend() + 1);  // One element: rbegin is one past rend
+        auto it = s.rbegin();
+        ++it;
+        FL_CHECK(it == s.rend());  // After one increment, should reach rend
     }
 
     FL_SUBCASE("reverse iteration builds reversed string") {
         fl::string s = "ABC";
         fl::string reversed;
 
-        for (char* it = s.rbegin(); it != s.rend(); --it) {
+        for (auto it = s.rbegin(); it != s.rend(); ++it) {
             reversed.push_back(*it);
         }
         FL_CHECK(reversed == "CBA");
@@ -2358,7 +2359,7 @@ FL_TEST_CASE("StrN reverse iterators") {
         const fl::string s = "12345";
         fl::string result;
 
-        for (const char* it = s.rbegin(); it != s.rend(); --it) {
+        for (auto it = s.rbegin(); it != s.rend(); ++it) {
             result.push_back(*it);
         }
         FL_CHECK(result == "54321");
@@ -2366,22 +2367,22 @@ FL_TEST_CASE("StrN reverse iterators") {
 
     FL_SUBCASE("modification through reverse iterator") {
         fl::string s = "abcd";
-        char* it = s.rbegin();
+        auto it = s.rbegin();
         *it = 'D';  // Change 'd' to 'D'
         FL_CHECK(s == "abcD");
 
-        it--;
+        ++it;
         *it = 'C';  // Change 'c' to 'C'
         FL_CHECK(s == "abCD");
     }
 
     FL_SUBCASE("reverse iterator with inline string") {
         fl::string s = "Short";  // Fits in inline buffer
-        FL_CHECK(s.rbegin() != nullptr);
+        FL_CHECK(s.rbegin() != s.rend());
         FL_CHECK(*s.rbegin() == 't');
 
         fl::string reversed;
-        for (char* it = s.rbegin(); it != s.rend(); --it) {
+        for (auto it = s.rbegin(); it != s.rend(); ++it) {
             reversed.push_back(*it);
         }
         FL_CHECK(reversed == "trohS");
@@ -2394,13 +2395,13 @@ FL_TEST_CASE("StrN reverse iterators") {
             s.push_back('A' + (i % 26));
         }
 
-        FL_CHECK(s.rbegin() != nullptr);
+        FL_CHECK(s.rbegin() != s.rend());
         FL_CHECK(*s.rbegin() == 'V');  // 99 % 26 = 21, 'A' + 21 = 'V'
 
         // Verify first few characters in reverse
-        char* it = s.rbegin();
-        FL_CHECK(*it == 'V'); it--;  // i=99: 99%26=21
-        FL_CHECK(*it == 'U'); it--;  // i=98: 98%26=20
+        auto it = s.rbegin();
+        FL_CHECK(*it == 'V'); ++it;  // i=99: 99%26=21
+        FL_CHECK(*it == 'U'); ++it;  // i=98: 98%26=20
         FL_CHECK(*it == 'T');        // i=97: 97%26=19
     }
 
@@ -2409,7 +2410,7 @@ FL_TEST_CASE("StrN reverse iterators") {
         s.insert(2, "XX");  // "teXXst"
 
         fl::string reversed;
-        for (char* it = s.rbegin(); it != s.rend(); --it) {
+        for (auto it = s.rbegin(); it != s.rend(); ++it) {
             reversed.push_back(*it);
         }
         FL_CHECK(reversed == "tsXXet");
@@ -2420,13 +2421,13 @@ FL_TEST_CASE("StrN reverse iterators") {
 
         // Forward iteration
         fl::string forward;
-        for (char* it = s.begin(); it != s.end(); ++it) {
+        for (auto it = s.begin(); it != s.end(); ++it) {
             forward.push_back(*it);
         }
 
         // Reverse iteration
         fl::string reversed;
-        for (char* it = s.rbegin(); it != s.rend(); --it) {
+        for (auto it = s.rbegin(); it != s.rend(); ++it) {
             reversed.push_back(*it);
         }
 
@@ -2439,7 +2440,7 @@ FL_TEST_CASE("StrN reverse iterators") {
         FL_CHECK(*s.rbegin() == '%');
 
         fl::string reversed;
-        for (char* it = s.rbegin(); it != s.rend(); --it) {
+        for (auto it = s.rbegin(); it != s.rend(); ++it) {
             reversed.push_back(*it);
         }
         FL_CHECK(reversed == "%$#@!");
@@ -2450,7 +2451,7 @@ FL_TEST_CASE("StrN reverse iterators") {
         FL_CHECK(*s.rbegin() == '9');
 
         fl::string reversed;
-        for (char* it = s.rbegin(); it != s.rend(); --it) {
+        for (auto it = s.rbegin(); it != s.rend(); ++it) {
             reversed.push_back(*it);
         }
         FL_CHECK(reversed == "9876543210");
@@ -2459,50 +2460,48 @@ FL_TEST_CASE("StrN reverse iterators") {
     FL_SUBCASE("reverse iterator with whitespace") {
         fl::string s = "a b c";
         fl::string reversed;
-        for (char* it = s.rbegin(); it != s.rend(); --it) {
+        for (auto it = s.rbegin(); it != s.rend(); ++it) {
             reversed.push_back(*it);
         }
         FL_CHECK(reversed == "c b a");
     }
 
-    FL_SUBCASE("reverse iterator pointer arithmetic") {
+    FL_SUBCASE("reverse iterator iteration") {
         fl::string s = "12345";
-        char* last = s.rbegin();
-        char* first_minus_one = s.rend();
-
-        // rbegin is at last element, rend is one-before-first
-        // Distance should be length
-        FL_CHECK(last - first_minus_one == static_cast<long>(s.size()));
+        int count = 0;
+        for (auto it = s.rbegin(); it != s.rend(); ++it) {
+            count++;
+        }
+        FL_CHECK(count == static_cast<int>(s.size()));
     }
 
     FL_SUBCASE("const correctness of reverse iterators") {
         fl::string s = "test";
         const fl::string& cs = s;
 
-        // Non-const version returns char*
-        char* it = s.rbegin();
-        FL_CHECK(it != nullptr);
+        // Non-const version
+        auto it = s.rbegin();
+        FL_CHECK(it != s.rend());
 
-        // Const version returns const char*
-        const char* cit = cs.rbegin();
-        FL_CHECK(cit != nullptr);
+        // Const version
+        auto cit = cs.rbegin();
+        FL_CHECK(cit != cs.rend());
 
         // crbegin always returns const
-        const char* ccit = s.crbegin();
-        FL_CHECK(ccit != nullptr);
+        auto ccit = s.crbegin();
+        FL_CHECK(ccit != s.crend());
     }
 
     FL_SUBCASE("reverse iterator bounds checking") {
         fl::string s = "ABC";
-        char* it = s.rbegin();
+        auto it = s.rbegin();
 
         // Should be able to access all characters
-        FL_CHECK(*it == 'C'); it--;
-        FL_CHECK(*it == 'B'); it--;
-        FL_CHECK(*it == 'A');
+        FL_CHECK(*it == 'C'); ++it;
+        FL_CHECK(*it == 'B'); ++it;
+        FL_CHECK(*it == 'A'); ++it;
 
-        // Now at rend + 1, one more decrement gives rend (invalid)
-        it--;
+        // After iterating past all elements, should reach rend
         FL_CHECK(it == s.rend());
     }
 
@@ -2523,8 +2522,8 @@ FL_TEST_CASE("StrN reverse iterators") {
     FL_SUBCASE("reverse iterator comparison with at()") {
         fl::string s = "test";
         FL_CHECK(*s.rbegin() == s.at(s.size() - 1));
-        FL_CHECK(*(s.rbegin() - 1) == s.at(s.size() - 2));
-        FL_CHECK(*(s.rbegin() - 2) == s.at(s.size() - 3));
+        FL_CHECK(*(s.rbegin() + 1) == s.at(s.size() - 2));
+        FL_CHECK(*(s.rbegin() + 2) == s.at(s.size() - 3));
     }
 
     FL_SUBCASE("reverse iterator with substr") {
@@ -2532,7 +2531,7 @@ FL_TEST_CASE("StrN reverse iterators") {
         fl::string sub = s.substr(6, 5);  // "World"
 
         fl::string reversed;
-        for (char* it = sub.rbegin(); it != sub.rend(); --it) {
+        for (auto it = sub.rbegin(); it != sub.rend(); ++it) {
             reversed.push_back(*it);
         }
         FL_CHECK(reversed == "dlroW");
@@ -2541,14 +2540,13 @@ FL_TEST_CASE("StrN reverse iterators") {
     FL_SUBCASE("reverse iterator empty after clear") {
         fl::string s = "test";
         s.clear();
-        FL_CHECK(s.rbegin() == nullptr);
-        FL_CHECK(s.rend() == nullptr);
+        FL_CHECK(s.rbegin() == s.rend());
     }
 
     FL_SUBCASE("reverse iterator with repeated characters") {
         fl::string s = "aaaaaa";
         int count = 0;
-        for (char* it = s.rbegin(); it != s.rend(); --it) {
+        for (auto it = s.rbegin(); it != s.rend(); ++it) {
             FL_CHECK(*it == 'a');
             count++;
         }
@@ -2558,13 +2556,15 @@ FL_TEST_CASE("StrN reverse iterators") {
     FL_SUBCASE("reverse iterator comparison with back()") {
         fl::string s = "example";
         FL_CHECK(*s.rbegin() == s.back());
-        FL_CHECK(s.rbegin() == s.begin() + s.size() - 1);
+        // Note: Can't directly compare reverse_iterator with forward iterator
+        // Just verify rbegin points to the last element
+        FL_CHECK(*s.rbegin() == s[s.size() - 1]);
     }
 
     FL_SUBCASE("reverse iterator manual loop count") {
         fl::string s = "count";
         int iterations = 0;
-        for (char* it = s.rbegin(); it != s.rend(); --it) {
+        for (auto it = s.rbegin(); it != s.rend(); ++it) {
             iterations++;
         }
         FL_CHECK(iterations == static_cast<int>(s.size()));
@@ -2573,7 +2573,7 @@ FL_TEST_CASE("StrN reverse iterators") {
     FL_SUBCASE("reverse iterator with newlines") {
         fl::string s = "a\nb\nc";
         fl::string reversed;
-        for (char* it = s.rbegin(); it != s.rend(); --it) {
+        for (auto it = s.rbegin(); it != s.rend(); ++it) {
             reversed.push_back(*it);
         }
         FL_CHECK(reversed == "c\nb\na");
@@ -2583,17 +2583,17 @@ FL_TEST_CASE("StrN reverse iterators") {
         fl::string s = "racecar";
 
         // Check if palindrome using reverse iteration
-        char* fwd = s.begin();
-        char* rev = s.rbegin();
+        auto fwd = s.begin();
+        auto rev = s.rbegin();
         bool is_palindrome = true;
 
-        while (fwd < s.end() && rev != s.rend()) {
+        while (fwd != s.end() && rev != s.rend()) {
             if (*fwd != *rev) {
                 is_palindrome = false;
                 break;
             }
-            fwd++;
-            rev--;
+            ++fwd;
+            ++rev;
         }
         FL_CHECK(is_palindrome == true);
     }
@@ -2601,17 +2601,17 @@ FL_TEST_CASE("StrN reverse iterators") {
     FL_SUBCASE("reverse iterator not palindrome") {
         fl::string s = "hello";
 
-        char* fwd = s.begin();
-        char* rev = s.rbegin();
+        auto fwd = s.begin();
+        auto rev = s.rbegin();
         bool is_palindrome = true;
 
-        while (fwd < s.end() && rev != s.rend()) {
+        while (fwd != s.end() && rev != s.rend()) {
             if (*fwd != *rev) {
                 is_palindrome = false;
                 break;
             }
-            fwd++;
-            rev--;
+            ++fwd;
+            ++rev;
         }
         FL_CHECK(is_palindrome == false);
     }
@@ -2620,7 +2620,7 @@ FL_TEST_CASE("StrN reverse iterators") {
         fl::string s = "test";
         // Reverse iterators should not include null terminator
         int count = 0;
-        for (char* it = s.rbegin(); it != s.rend(); --it) {
+        for (auto it = s.rbegin(); it != s.rend(); ++it) {
             count++;
         }
         FL_CHECK(count == 4);  // Only actual characters, not '\0'
@@ -2631,7 +2631,7 @@ FL_TEST_CASE("StrN reverse iterators") {
         s.erase(3, 3);  // Remove "tin" -> "tesg"
 
         fl::string reversed;
-        for (char* it = s.rbegin(); it != s.rend(); --it) {
+        for (auto it = s.rbegin(); it != s.rend(); ++it) {
             reversed.push_back(*it);
         }
         FL_CHECK(reversed == "gset");
@@ -2642,7 +2642,7 @@ FL_TEST_CASE("StrN reverse iterators") {
         s.replace(1, 2, "XX");  // "tXXt"
 
         fl::string reversed;
-        for (char* it = s.rbegin(); it != s.rend(); --it) {
+        for (auto it = s.rbegin(); it != s.rend(); ++it) {
             reversed.push_back(*it);
         }
         FL_CHECK(reversed == "tXXt");  // Palindrome!

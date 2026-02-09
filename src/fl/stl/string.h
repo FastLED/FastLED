@@ -28,6 +28,7 @@
 #include "fl/deprecated.h"
 #include "fl/compiler_control.h"
 #include "fl/string_view.h"
+#include "fl/stl/iterator.h"
 
 #ifndef FASTLED_STR_INLINED_SIZE
 #define FASTLED_STR_INLINED_SIZE 64
@@ -714,35 +715,113 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
     bool empty() const { return mLength == 0; }
 
+    // Iterator wrapper class to provide proper iterator interface
+    class iterator {
+    private:
+        char* ptr;
+    public:
+        typedef char value_type;
+        typedef char& reference;
+        typedef char* pointer;
+        typedef fl::ptrdiff_t difference_type;
+
+        iterator() : ptr(nullptr) {}
+        explicit iterator(char* p) : ptr(p) {}
+
+        reference operator*() const { return *ptr; }
+        pointer operator->() const { return ptr; }
+        iterator& operator++() { ++ptr; return *this; }
+        iterator operator++(int) { iterator tmp = *this; ++ptr; return tmp; }
+        iterator& operator--() { --ptr; return *this; }
+        iterator operator--(int) { iterator tmp = *this; --ptr; return tmp; }
+
+        // Random access operators
+        iterator operator+(difference_type n) const { return iterator(ptr + n); }
+        iterator operator-(difference_type n) const { return iterator(ptr - n); }
+        iterator& operator+=(difference_type n) { ptr += n; return *this; }
+        iterator& operator-=(difference_type n) { ptr -= n; return *this; }
+        difference_type operator-(const iterator& other) const { return ptr - other.ptr; }
+        reference operator[](difference_type n) const { return ptr[n]; }
+
+        bool operator==(const iterator& other) const { return ptr == other.ptr; }
+        bool operator!=(const iterator& other) const { return ptr != other.ptr; }
+        bool operator<(const iterator& other) const { return ptr < other.ptr; }
+        bool operator>(const iterator& other) const { return ptr > other.ptr; }
+        bool operator<=(const iterator& other) const { return ptr <= other.ptr; }
+        bool operator>=(const iterator& other) const { return ptr >= other.ptr; }
+
+        // Allow implicit conversion to char* for compatibility
+        operator char*() const { return ptr; }
+    };
+
+    class const_iterator {
+    private:
+        const char* ptr;
+    public:
+        typedef char value_type;
+        typedef const char& reference;
+        typedef const char* pointer;
+        typedef fl::ptrdiff_t difference_type;
+
+        const_iterator() : ptr(nullptr) {}
+        explicit const_iterator(const char* p) : ptr(p) {}
+        const_iterator(const iterator& it) : ptr(it.operator char*()) {}
+
+        reference operator*() const { return *ptr; }
+        pointer operator->() const { return ptr; }
+        const_iterator& operator++() { ++ptr; return *this; }
+        const_iterator operator++(int) { const_iterator tmp = *this; ++ptr; return tmp; }
+        const_iterator& operator--() { --ptr; return *this; }
+        const_iterator operator--(int) { const_iterator tmp = *this; --ptr; return tmp; }
+
+        // Random access operators
+        const_iterator operator+(difference_type n) const { return const_iterator(ptr + n); }
+        const_iterator operator-(difference_type n) const { return const_iterator(ptr - n); }
+        const_iterator& operator+=(difference_type n) { ptr += n; return *this; }
+        const_iterator& operator-=(difference_type n) { ptr -= n; return *this; }
+        difference_type operator-(const const_iterator& other) const { return ptr - other.ptr; }
+        reference operator[](difference_type n) const { return ptr[n]; }
+
+        bool operator==(const const_iterator& other) const { return ptr == other.ptr; }
+        bool operator!=(const const_iterator& other) const { return ptr != other.ptr; }
+        bool operator<(const const_iterator& other) const { return ptr < other.ptr; }
+        bool operator>(const const_iterator& other) const { return ptr > other.ptr; }
+        bool operator<=(const const_iterator& other) const { return ptr <= other.ptr; }
+        bool operator>=(const const_iterator& other) const { return ptr >= other.ptr; }
+
+        // Allow implicit conversion to const char* for compatibility
+        operator const char*() const { return ptr; }
+    };
+
+    typedef fl::reverse_iterator<iterator> reverse_iterator;
+    typedef fl::reverse_iterator<const_iterator> const_reverse_iterator;
+
     // Iterator support for range-based for loops
-    char* begin() { return c_str_mutable(); }
-    char* end() { return c_str_mutable() + mLength; }
-    const char* begin() const { return c_str(); }
-    const char* end() const { return c_str() + mLength; }
-    const char* cbegin() const { return c_str(); }
-    const char* cend() const { return c_str() + mLength; }
+    iterator begin() { return iterator(c_str_mutable()); }
+    iterator end() { return iterator(c_str_mutable() + mLength); }
+    const_iterator begin() const { return const_iterator(c_str()); }
+    const_iterator end() const { return const_iterator(c_str() + mLength); }
+    const_iterator cbegin() const { return const_iterator(c_str()); }
+    const_iterator cend() const { return const_iterator(c_str() + mLength); }
 
     // Reverse iterator support (std::string compatibility)
-    // Note: These return raw pointers pointing to elements in reverse order
-    // rbegin() points to the last element, rend() points to one-before-first
-    // Use with caution: decrement to move forward in reverse iteration
-    char* rbegin() {
-        return empty() ? nullptr : (c_str_mutable() + mLength - 1);
+    reverse_iterator rbegin() {
+        return reverse_iterator(end());
     }
-    char* rend() {
-        return empty() ? nullptr : (c_str_mutable() - 1);
+    reverse_iterator rend() {
+        return reverse_iterator(begin());
     }
-    const char* rbegin() const {
-        return empty() ? nullptr : (c_str() + mLength - 1);
+    const_reverse_iterator rbegin() const {
+        return const_reverse_iterator(end());
     }
-    const char* rend() const {
-        return empty() ? nullptr : (c_str() - 1);
+    const_reverse_iterator rend() const {
+        return const_reverse_iterator(begin());
     }
-    const char* crbegin() const {
-        return rbegin();
+    const_reverse_iterator crbegin() const {
+        return const_reverse_iterator(end());
     }
-    const char* crend() const {
-        return rend();
+    const_reverse_iterator crend() const {
+        return const_reverse_iterator(begin());
     }
 
     // Comparison operators (std::string compatibility)
@@ -2871,16 +2950,20 @@ inline string operator+(const string& lhs, const string& rhs) {
 }
 
 // String literal + any type that can be converted to string
+// Exclude arithmetic types to avoid conflicts with pointer arithmetic
 template<typename T>
-inline string operator+(const char* lhs, const T& rhs) {
+inline typename fl::enable_if<!fl::is_arithmetic<T>::value, string>::type
+operator+(const char* lhs, const T& rhs) {
     string result(lhs);
     result += rhs;
     return result;
 }
 
 // Any type that can be converted to string + string literal
+// Exclude arithmetic types to avoid conflicts with pointer arithmetic
 template<typename T>
-inline string operator+(const T& lhs, const char* rhs) {
+inline typename fl::enable_if<!fl::is_arithmetic<T>::value, string>::type
+operator+(const T& lhs, const char* rhs) {
     string result;
     result.append(lhs);
     result += rhs;

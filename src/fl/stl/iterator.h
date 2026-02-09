@@ -119,6 +119,7 @@ public:
     typedef typename Iterator::value_type value_type;
     typedef typename Iterator::reference reference;
     typedef typename Iterator::pointer pointer;
+    typedef fl::ptrdiff_t difference_type;
 
 protected:
     Iterator current;
@@ -174,6 +175,33 @@ public:
         return tmp;
     }
 
+    // Random access operators
+    reverse_iterator operator+(difference_type n) const {
+        return reverse_iterator(current - n);
+    }
+
+    reverse_iterator operator-(difference_type n) const {
+        return reverse_iterator(current + n);
+    }
+
+    reverse_iterator& operator+=(difference_type n) {
+        current -= n;
+        return *this;
+    }
+
+    reverse_iterator& operator-=(difference_type n) {
+        current += n;
+        return *this;
+    }
+
+    difference_type operator-(const reverse_iterator& other) const {
+        return other.current - current;
+    }
+
+    reference operator[](difference_type n) const {
+        return *(*this + n);
+    }
+
     // Comparison operators
     bool operator==(const reverse_iterator& other) const {
         return current == other.current;
@@ -181,6 +209,22 @@ public:
 
     bool operator!=(const reverse_iterator& other) const {
         return current != other.current;
+    }
+
+    bool operator<(const reverse_iterator& other) const {
+        return current > other.current;
+    }
+
+    bool operator>(const reverse_iterator& other) const {
+        return current < other.current;
+    }
+
+    bool operator<=(const reverse_iterator& other) const {
+        return current >= other.current;
+    }
+
+    bool operator>=(const reverse_iterator& other) const {
+        return current <= other.current;
     }
 
     // For comparing with different iterator types
