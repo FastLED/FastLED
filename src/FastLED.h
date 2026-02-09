@@ -133,6 +133,10 @@
 // MATH FUNCTION USING DECLARATIONS
 // ============================================================================
 
+// Note: fl/undef.h is included AFTER platform headers to ensure Arduino macros
+// are undefined even if platform-specific headers define them.
+// This section is completed after the platform includes below.
+
 
 #include "controller.h"
 #include "fastpin.h"
@@ -140,6 +144,24 @@
 #include "dmx.h"
 
 #include "platforms.h"
+
+// Arduino.h defines min, max, abs, map, radians, degrees as macros
+// These macros cause problems with C++ code (double evaluation, no type safety)
+// Include fl/undef.h AFTER platform headers to ensure macros are truly undefined
+#include "fl/undef.h"
+
+// Include math functions (min, max, abs, radians, degrees)
+#include "fl/stl/math.h"
+
+// Bring fl:: math functions into global namespace for Arduino compatibility
+using fl::min;
+using fl::max;
+using fl::abs;
+using fl::radians;
+using fl::degrees;
+
+// Note: Arduino map() function is defined in global namespace (platforms/stub/Arduino.h)
+// fl::map refers to the map container (red-black tree) and our map() function delegate.
 #include "fastled_progmem.h"
 #include "pixeltypes.h"
 #include "hsv2rgb.h"
@@ -1370,7 +1392,7 @@ using fl::delay;  // Template version coexists with Arduino's extern "C" delay()
 
 // Common fl:: type aliases for global namespace convenience
 template<typename T> using fl_vector = fl::vector<T>;
-template<typename Key, typename Value, typename Compare = fl::less<Key>> using fl_map = fl::fl_map<Key, Value, Compare>;
+template<typename Key, typename Value, typename Compare = fl::less<Key>> using fl_map = fl::map<Key, Value, Compare>;
 using fl_string = fl::string;
 
 // Note: delayMicroseconds and delayMillis are provided by Arduino core

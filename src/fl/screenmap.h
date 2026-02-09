@@ -90,16 +90,16 @@ class ScreenMap {
     vec2f getBounds() const;
 
     static bool ParseJson(const char *jsonStrScreenMap,
-                          fl::fl_map<string, ScreenMap> *segmentMaps,
+                          fl::map<string, ScreenMap> *segmentMaps,
                           string *err = nullptr);
 
     static bool ParseJson(const char *jsonStrScreenMap,
                           const char *screenMapName, ScreenMap *screenmap,
                           string *err = nullptr);
 
-    static void toJsonStr(const fl::fl_map<string, ScreenMap> &,
+    static void toJsonStr(const fl::map<string, ScreenMap> &,
                           string *jsonBuffer);
-    static void toJson(const fl::fl_map<string, ScreenMap> &, fl::Json *doc);
+    static void toJson(const fl::map<string, ScreenMap> &, fl::Json *doc);
 
   private:
     static const vec2f &empty();

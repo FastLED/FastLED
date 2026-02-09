@@ -27,3 +27,15 @@
 #ifdef round
 #undef round
 #endif
+
+#ifdef radians
+#undef radians
+#endif
+
+#ifdef degrees
+#undef degrees
+#endif
+
+#ifdef map
+#undef map
+#endif

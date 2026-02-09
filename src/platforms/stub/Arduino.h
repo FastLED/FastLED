@@ -1,5 +1,6 @@
 // Arduino.h emulation for the WebAssembly platform.
 // This allows us to compile sketches as is for the WebAssembly platform.
+// ok no namespace fl
 
 #pragma once
 
@@ -17,43 +18,22 @@
 #include "fl/stl/stdio.h"
 #include "time_stub.h"
 #include "fl/math_macros.h"
-#include "fl/stl/math.h"
 
 // Math functions from fl:: namespace
-// On stub platform, standard library <cmath> provides math functions in global namespace
-// through included headers like <mutex>. No need to re-export fl:: math functions here.
-// Arduino sketches can use either the stdlib versions or explicitly use fl:: prefix.
-
-#ifndef FASTLED_NO_ARDUINO_STUBS
-// Custom min/max to avoid <algorithm> include
-// Excluded when FASTLED_NO_ARDUINO_STUBS is defined (for compatibility with ArduinoFake, etc.)
-template <typename T>
-T min(T a, T b) {
-    return a < b ? a : b;
-}
-template <typename T>
-T max(T a, T b) {
-    return a > b ? a : b;
-}
-#endif // FASTLED_NO_ARDUINO_STUBS
-
-
-
-
-namespace fl {
-
-long map(long x, long in_min, long in_max, long out_min, long out_max);
-
-// constrain
-template <typename T> T constrain(T x, T a, T b) {
-    return x < a ? a : (x > b ? b : x);
-}
-} // namespace fl
+// On stub platform, min/max/abs/radians/degrees are provided by
+// FastLED.h (from fl/stl/math.h) which undefs Arduino macros and brings fl:: functions
+// into global namespace via using declarations.
+// Note: fl::map refers to the map container (red-black tree), not the Arduino map function
+// Note: fl/stl/math.h is NOT included here - it's included by FastLED.h after macro undefs
+// Note: fl/map_range.h provides fl::map_range() which the global map() function delegates to
 
 #ifndef FASTLED_NO_ARDUINO_STUBS
 // Arduino stub functions - excluded when FASTLED_NO_ARDUINO_STUBS is defined
-using fl::constrain;
-using fl::map;
+
+// Arduino map() function - defined in global namespace (NOT in fl::)
+// fl::map refers to the map container
+// This delegates to fl::map_range() for consistent behavior and overflow protection
+long map(long x, long in_min, long in_max, long out_min, long out_max);
 
 long random(long min, long max);
 long random(long max);

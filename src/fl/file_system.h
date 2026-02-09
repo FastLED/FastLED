@@ -62,7 +62,7 @@ class FileSystem {
                    fl::size nFrameHistory = 0); // Open MPEG1 video file
     bool readText(const char *path, string *out);
     bool readJson(const char *path, Json *doc);
-    bool readScreenMaps(const char *path, fl::fl_map<string, ScreenMap> *out,
+    bool readScreenMaps(const char *path, fl::map<string, ScreenMap> *out,
                         string *error = nullptr);
     bool readScreenMap(const char *path, const char *name, ScreenMap *out,
                        string *error = nullptr);

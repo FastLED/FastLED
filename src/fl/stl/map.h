@@ -575,16 +575,16 @@ class SortedHeapMap {
 } // namespace fl
 
 // Drop-in replacement for std::map
-// Note: We use "fl_map" instead of "map" because Arduino.h defines a map() function
-// which would conflict with fl::map usage in sketches that include Arduino.h and
-// are using `using namespace fl`
 namespace fl {
 
 // Default map uses slab allocator for better performance
-// Can't use fl::map because it conflicts with Arduino.h's map() function when
-// the user is using `using namespace fl`
+// In fl:: namespace, "map" refers to the container (map data structure)
+// The Arduino map() function exists only in global namespace (not in fl::)
 template <typename Key, typename T, typename Compare = fl::less<Key>>
-using fl_map = MapRedBlackTree<Key, T, Compare, fl::allocator_slab<char>>;
+using map = MapRedBlackTree<Key, T, Compare, fl::allocator_slab<char>>;
 
+// Legacy alias for backward compatibility
+template <typename Key, typename T, typename Compare = fl::less<Key>>
+using fl_map = map<Key, T, Compare>;
 
 } // namespace fl

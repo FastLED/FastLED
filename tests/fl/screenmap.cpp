@@ -59,7 +59,7 @@ FL_TEST_CASE("ScreenMap JSON parsing") {
         }
     })";
 
-    fl::fl_map<string, ScreenMap> segmentMaps;
+    fl::map<string, ScreenMap> segmentMaps;
     ScreenMap::ParseJson(json, &segmentMaps);
 
     ScreenMap& strip1 = segmentMaps["strip1"];
@@ -85,7 +85,7 @@ FL_TEST_CASE("ScreenMap JSON parsing") {
 
 FL_TEST_CASE("ScreenMap multiple strips JSON serialization") {
     // Create a map with multiple strips
-    fl::fl_map<fl::string, ScreenMap> originalMaps;
+    fl::map<fl::string, ScreenMap> originalMaps;
     
     // First strip
     ScreenMap strip1(2, 2.0f);
@@ -105,7 +105,7 @@ FL_TEST_CASE("ScreenMap multiple strips JSON serialization") {
     ScreenMap::toJsonStr(originalMaps, &jsonStr);
 
     // Deserialize back to a new map
-    fl::fl_map<fl::string, ScreenMap> deserializedMaps;
+    fl::map<fl::string, ScreenMap> deserializedMaps;
     ScreenMap::ParseJson(jsonStr.c_str(), &deserializedMaps);
 
     // Verify first strip

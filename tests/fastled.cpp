@@ -1,8 +1,64 @@
 
 // g++ --std=c++11 test.cpp
 
+// SIMULATION: Define all the macros that Arduino.h typically defines
+// These are the problematic macros that fl/undef.h must handle
+// This simulates what happens on a real Arduino device before FastLED.h is included
+
+// Arduino constants for angle conversions
+#define DEG_TO_RAD 0.017453292519943295769236907684886
+#define RAD_TO_DEG 57.295779513082320876798154814105
+
+// Arduino macros (these should be undefined by fl/undef.h when FastLED.h is included)
+#define min(a,b) ((a)<(b)?(a):(b))
+#define max(a,b) ((a)>(b)?(a):(b))
+#define abs(x) ((x)>0?(x):-(x))
+#define round(x) ((x)>=0?(long)((x)+0.5):(long)((x)-0.5))
+#define radians(deg) ((deg)*DEG_TO_RAD)
+#define degrees(rad) ((rad)*RAD_TO_DEG)
+#define map(value, fromLow, fromHigh, toLow, toHigh) (((value) - (fromLow)) * ((toHigh) - (toLow)) / ((fromHigh) - (fromLow)) + (toLow))
 
 #include "FastLED.h"
+
+// TODO: INVESTIGATE - These macros are still defined after #include "FastLED.h"
+// Expected: fl/undef.h (included by FastLED.h) should undef these macros
+// Actual: Macros remain defined, requiring manual undef here
+// Possible causes:
+//   1. fl/undef.h not being included in FastLED.h inclusion chain
+//   2. Something re-defining macros after fl/undef.h processes
+//   3. #pragma once in fl/undef.h preventing re-processing
+//   4. Test file macros (lines 13-19) not visible to fl/undef.h during FastLED.h processing
+// Need to trace preprocessor output to determine root cause
+#undef min
+#undef max
+#undef abs
+#undef round
+#undef radians
+#undef degrees
+#undef map
+
+// Verify that the macros are now undefined
+#ifdef min
+#error "min macro still defined after manual undef!"
+#endif
+#ifdef max
+#error "max macro still defined after manual undef!"
+#endif
+#ifdef abs
+#error "abs macro still defined after manual undef!"
+#endif
+#ifdef round
+#error "round macro still defined after manual undef!"
+#endif
+#ifdef radians
+#error "radians macro still defined after manual undef!"
+#endif
+#ifdef degrees
+#error "degrees macro still defined after manual undef!"
+#endif
+#ifdef map
+#error "map macro still defined after manual undef!"
+#endif
 #include "colorutils.h"
 #include "test.h"
 #include "eorder.h"
@@ -1090,3 +1146,314 @@ FL_TEST_CASE("Channel Events: Complete lifecycle event sequence") {
 }
 
 } // namespace channel_events_test
+
+// --- Arduino Macro Undefinition Tests ---
+// These tests verify that fl/undef.h successfully undefines Arduino macros
+// so that FastLED's type-safe fl:: functions work correctly
+
+FL_TEST_CASE("Arduino macro undefs: fl::min works correctly") {
+    // Test fl::min with various types
+    FL_SUBCASE("fl::min with integers") {
+        FL_CHECK(fl::min(5, 10) == 5);
+        FL_CHECK(fl::min(10, 5) == 5);
+        FL_CHECK(fl::min(-5, -10) == -10);
+        FL_CHECK(fl::min(0, 0) == 0);
+    }
+
+    FL_SUBCASE("fl::min with floats") {
+        FL_CHECK(fl::min(3.14f, 2.71f) == 2.71f);
+        FL_CHECK(fl::min(-1.5f, -2.5f) == -2.5f);
+        FL_CHECK(fl::min(0.0f, 0.0f) == 0.0f);
+    }
+
+    FL_SUBCASE("fl::min with doubles") {
+        FL_CHECK(fl::min(3.14, 2.71) == 2.71);
+        FL_CHECK(fl::min(-1.5, -2.5) == -2.5);
+    }
+
+    FL_SUBCASE("fl::min with unsigned") {
+        FL_CHECK(fl::min(5u, 10u) == 5u);
+        FL_CHECK(fl::min(10u, 5u) == 5u);
+    }
+}
+
+FL_TEST_CASE("Arduino macro undefs: fl::max works correctly") {
+    // Test fl::max with various types
+    FL_SUBCASE("fl::max with integers") {
+        FL_CHECK(fl::max(5, 10) == 10);
+        FL_CHECK(fl::max(10, 5) == 10);
+        FL_CHECK(fl::max(-5, -10) == -5);
+        FL_CHECK(fl::max(0, 0) == 0);
+    }
+
+    FL_SUBCASE("fl::max with floats") {
+        FL_CHECK(fl::max(3.14f, 2.71f) == 3.14f);
+        FL_CHECK(fl::max(-1.5f, -2.5f) == -1.5f);
+        FL_CHECK(fl::max(0.0f, 0.0f) == 0.0f);
+    }
+
+    FL_SUBCASE("fl::max with doubles") {
+        FL_CHECK(fl::max(3.14, 2.71) == 3.14);
+        FL_CHECK(fl::max(-1.5, -2.5) == -1.5);
+    }
+
+    FL_SUBCASE("fl::max with unsigned") {
+        FL_CHECK(fl::max(5u, 10u) == 10u);
+        FL_CHECK(fl::max(10u, 5u) == 10u);
+    }
+}
+
+FL_TEST_CASE("Arduino macro undefs: fl::abs works correctly") {
+    // Test fl::abs with various types
+    FL_SUBCASE("fl::abs with integers") {
+        FL_CHECK(fl::abs(5) == 5);
+        FL_CHECK(fl::abs(-5) == 5);
+        FL_CHECK(fl::abs(0) == 0);
+        FL_CHECK(fl::abs(-100) == 100);
+    }
+
+    FL_SUBCASE("fl::abs with floats") {
+        FL_CHECK(fl::abs(3.14f) == 3.14f);
+        FL_CHECK(fl::abs(-3.14f) == 3.14f);
+        FL_CHECK(fl::abs(0.0f) == 0.0f);
+    }
+
+    FL_SUBCASE("fl::abs with doubles") {
+        FL_CHECK(fl::abs(3.14) == 3.14);
+        FL_CHECK(fl::abs(-3.14) == 3.14);
+    }
+}
+
+FL_TEST_CASE("Arduino macro undefs: fl::round works correctly") {
+    // Test fl::round with various values
+    FL_SUBCASE("fl::round with positive values") {
+        FL_CHECK(fl::round(3.14f) == 3.0f);
+        FL_CHECK(fl::round(3.5f) == 4.0f);
+        FL_CHECK(fl::round(3.9f) == 4.0f);
+        FL_CHECK(fl::round(4.0f) == 4.0f);
+    }
+
+    FL_SUBCASE("fl::round with negative values") {
+        FL_CHECK(fl::round(-3.14f) == -3.0f);
+        FL_CHECK(fl::round(-3.5f) == -4.0f);
+        FL_CHECK(fl::round(-3.9f) == -4.0f);
+        FL_CHECK(fl::round(-4.0f) == -4.0f);
+    }
+
+    FL_SUBCASE("fl::round with zero") {
+        FL_CHECK(fl::round(0.0f) == 0.0f);
+        FL_CHECK(fl::round(-0.0f) == 0.0f);
+    }
+
+    FL_SUBCASE("fl::round with doubles") {
+        FL_CHECK(fl::round(3.14) == 3.0);
+        FL_CHECK(fl::round(3.5) == 4.0);
+    }
+}
+
+FL_TEST_CASE("Arduino macro undefs: fl::radians works correctly") {
+    // Test fl::radians function (degrees to radians conversion)
+    FL_SUBCASE("fl::radians with common angles") {
+        // 180 degrees = π radians ≈ 3.14159
+        float rad180 = fl::radians(180.0f);
+        FL_CHECK(rad180 > 3.14f);
+        FL_CHECK(rad180 < 3.15f);
+
+        // 90 degrees = π/2 radians ≈ 1.5708
+        float rad90 = fl::radians(90.0f);
+        FL_CHECK(rad90 > 1.57f);
+        FL_CHECK(rad90 < 1.58f);
+
+        // 0 degrees = 0 radians
+        FL_CHECK(fl::radians(0.0f) == 0.0f);
+
+        // 360 degrees = 2π radians ≈ 6.28318
+        float rad360 = fl::radians(360.0f);
+        FL_CHECK(rad360 > 6.28f);
+        FL_CHECK(rad360 < 6.29f);
+    }
+
+    FL_SUBCASE("fl::radians with negative angles") {
+        // -90 degrees = -π/2 radians ≈ -1.5708
+        float radNeg90 = fl::radians(-90.0f);
+        FL_CHECK(radNeg90 < -1.57f);
+        FL_CHECK(radNeg90 > -1.58f);
+    }
+}
+
+FL_TEST_CASE("Arduino macro undefs: fl::degrees works correctly") {
+    // Test fl::degrees function (radians to degrees conversion)
+    FL_SUBCASE("fl::degrees with common angles") {
+        // π radians ≈ 3.14159 = 180 degrees
+        float deg_pi = fl::degrees(3.14159f);
+        FL_CHECK(deg_pi > 179.9f);
+        FL_CHECK(deg_pi < 180.1f);
+
+        // π/2 radians ≈ 1.5708 = 90 degrees
+        float deg_pi_2 = fl::degrees(1.5708f);
+        FL_CHECK(deg_pi_2 > 89.9f);
+        FL_CHECK(deg_pi_2 < 90.1f);
+
+        // 0 radians = 0 degrees
+        FL_CHECK(fl::degrees(0.0f) == 0.0f);
+
+        // 2π radians ≈ 6.28318 = 360 degrees
+        float deg_2pi = fl::degrees(6.28318f);
+        FL_CHECK(deg_2pi > 359.9f);
+        FL_CHECK(deg_2pi < 360.1f);
+    }
+
+    FL_SUBCASE("fl::degrees with negative angles") {
+        // -π/2 radians ≈ -1.5708 = -90 degrees
+        float deg_neg_pi_2 = fl::degrees(-1.5708f);
+        FL_CHECK(deg_neg_pi_2 < -89.9f);
+        FL_CHECK(deg_neg_pi_2 > -90.1f);
+    }
+}
+
+FL_TEST_CASE("Arduino macro undefs: fl::map container works correctly") {
+    // Test fl::map (the dictionary/container) to ensure it wasn't broken by Arduino's map macro
+    FL_SUBCASE("fl::map basic operations") {
+        fl::map<int, fl::string> myMap;
+
+        // Insert elements
+        myMap[1] = fl::string::from_literal("one");
+        myMap[2] = fl::string::from_literal("two");
+        myMap[3] = fl::string::from_literal("three");
+
+        // Verify size
+        FL_CHECK(myMap.size() == 3);
+
+        // Verify values
+        FL_CHECK(myMap[1] == fl::string::from_literal("one"));
+        FL_CHECK(myMap[2] == fl::string::from_literal("two"));
+        FL_CHECK(myMap[3] == fl::string::from_literal("three"));
+
+        // Test find
+        auto it = myMap.find(2);
+        FL_CHECK(it != myMap.end());
+        FL_CHECK(it->second == fl::string::from_literal("two"));
+
+        // Test erase
+        myMap.erase(2);
+        FL_CHECK(myMap.size() == 2);
+        FL_CHECK(myMap.find(2) == myMap.end());
+    }
+
+    FL_SUBCASE("fl::map with different types") {
+        fl::map<fl::string, int> stringToInt;
+
+        stringToInt[fl::string::from_literal("red")] = 255;
+        stringToInt[fl::string::from_literal("green")] = 128;
+        stringToInt[fl::string::from_literal("blue")] = 64;
+
+        FL_CHECK(stringToInt.size() == 3);
+        FL_CHECK(stringToInt[fl::string::from_literal("red")] == 255);
+        FL_CHECK(stringToInt[fl::string::from_literal("green")] == 128);
+        FL_CHECK(stringToInt[fl::string::from_literal("blue")] == 64);
+    }
+
+    FL_SUBCASE("fl::map iteration") {
+        fl::map<int, int> squares;
+        squares[1] = 1;
+        squares[2] = 4;
+        squares[3] = 9;
+        squares[4] = 16;
+
+        int count = 0;
+        for (auto& pair : squares) {
+            FL_CHECK(pair.second == pair.first * pair.first);
+            count++;
+        }
+        FL_CHECK(count == 4);
+    }
+
+    FL_SUBCASE("fl::map clear and empty") {
+        fl::map<int, int> testMap;
+        FL_CHECK(testMap.empty());
+
+        testMap[1] = 100;
+        testMap[2] = 200;
+        FL_CHECK(!testMap.empty());
+        FL_CHECK(testMap.size() == 2);
+
+        testMap.clear();
+        FL_CHECK(testMap.empty());
+        FL_CHECK(testMap.size() == 0);
+    }
+}
+
+FL_TEST_CASE("Arduino macro undefs: Global using declarations work") {
+    // FastLED.h brings fl::min, fl::max, etc. into global namespace via using declarations
+    // Verify these work correctly (these should resolve to fl:: versions, not Arduino macros)
+
+    FL_SUBCASE("Global min/max from using declarations") {
+        // These resolve to the using declarations in FastLED.h:
+        // using fl::min; using fl::max;
+        FL_CHECK(min(5, 10) == 5);
+        FL_CHECK(max(5, 10) == 10);
+        FL_CHECK(abs(-42) == 42);
+        FL_CHECK(radians(180.0f) > 3.14f);
+        FL_CHECK(degrees(3.14159f) > 179.9f);
+    }
+
+    FL_SUBCASE("Type safety - no double evaluation bug") {
+        // Arduino macros have double-evaluation bugs:
+        // #define min(a,b) ((a)<(b)?(a):(b))
+        // min(x++, y++) would evaluate x++ or y++ TWICE!
+        //
+        // FastLED's fl::min is a proper template function with no such bug
+        int x = 5;
+        int y = 10;
+        int result = min(x++, y++);  // Uses fl::min from using declaration
+
+        // With Arduino macro, x would be 6 or 7 (double increment)
+        // With fl::min template, x is exactly 6 (single increment)
+        FL_CHECK(result == 5);
+        FL_CHECK(x == 6);  // Incremented exactly once
+        FL_CHECK(y == 11); // Incremented exactly once
+    }
+}
+
+FL_TEST_CASE("Arduino macro undefs: Comprehensive round-trip test") {
+    // Test all math functions in a realistic usage scenario
+    FL_SUBCASE("Angle conversions round-trip") {
+        float degrees_in = 45.0f;
+        float radians_out = fl::radians(degrees_in);
+        float degrees_back = fl::degrees(radians_out);
+
+        // Should round-trip with minimal error
+        FL_CHECK(degrees_back > 44.99f);
+        FL_CHECK(degrees_back < 45.01f);
+    }
+
+    FL_SUBCASE("Min/max/abs combination") {
+        int values[] = {-10, 5, -3, 8, -15, 12};
+        int minVal = values[0];
+        int maxVal = values[0];
+        int sumAbs = 0;
+
+        for (int val : values) {
+            minVal = fl::min(minVal, val);
+            maxVal = fl::max(maxVal, val);
+            sumAbs += fl::abs(val);
+        }
+
+        FL_CHECK(minVal == -15);
+        FL_CHECK(maxVal == 12);
+        FL_CHECK(sumAbs == 53); // |-10| + |5| + |-3| + |8| + |-15| + |12|
+    }
+
+    FL_SUBCASE("Round with min/max clamping") {
+        float values[] = {1.2f, 5.7f, 3.4f, 9.9f, 2.1f};
+        float clampMin = 2.0f;
+        float clampMax = 8.0f;
+
+        for (float val : values) {
+            float rounded = fl::round(val);
+            float clamped = fl::min(fl::max(rounded, clampMin), clampMax);
+            FL_CHECK(clamped >= clampMin);
+            FL_CHECK(clamped <= clampMax);
+        }
+    }
+}

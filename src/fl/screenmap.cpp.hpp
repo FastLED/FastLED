@@ -92,7 +92,7 @@ ScreenMap ScreenMap::DefaultStrip(int numLeds, float cm_between_leds,
 }
 
 bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
-                          fl::fl_map<string, ScreenMap> *segmentMaps, string *err) {
+                          fl::map<string, ScreenMap> *segmentMaps, string *err) {
 
 #if FASTLED_NO_JSON
     FL_UNUSED(jsonStrScreenMap);
@@ -230,7 +230,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
                           const char *screenMapName, ScreenMap *screenmap,
                           string *err) {
 
-    fl::fl_map<string, ScreenMap> segmentMaps;
+    fl::map<string, ScreenMap> segmentMaps;
     bool ok = ParseJson(jsonStrScreenMap, &segmentMaps, err);
     if (!ok) {
         return false;
@@ -251,7 +251,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
     return false;
 }
 
-void ScreenMap::toJson(const fl::fl_map<string, ScreenMap> &segmentMaps,
+void ScreenMap::toJson(const fl::map<string, ScreenMap> &segmentMaps,
                        fl::Json *doc) {
 
 #if FASTLED_NO_JSON
@@ -312,7 +312,7 @@ void ScreenMap::toJson(const fl::fl_map<string, ScreenMap> &segmentMaps,
 #endif
 }
 
-void ScreenMap::toJsonStr(const fl::fl_map<string, ScreenMap> &segmentMaps,
+void ScreenMap::toJsonStr(const fl::map<string, ScreenMap> &segmentMaps,
                           string *jsonBuffer) {
     fl::Json doc;
     toJson(segmentMaps, &doc);

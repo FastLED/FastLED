@@ -187,7 +187,7 @@ void setup() {
     Serial.println("JSON SCREENMAP");
     Serial.println(JSON_SCREEN_MAP);
 
-    fl::fl_map<fl::string, fl::ScreenMap> segmentMaps;
+    fl::map<fl::string, fl::ScreenMap> segmentMaps;
     fl::ScreenMap::ParseJson(JSON_SCREEN_MAP, &segmentMaps);
 
     fl::printf("Parsed %d segment maps\n", int(segmentMaps.size()));

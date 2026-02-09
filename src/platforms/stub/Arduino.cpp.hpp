@@ -1,3 +1,4 @@
+// ok no namespace fl
 
 #include "platforms/wasm/is_wasm.h"
 #if (defined(FASTLED_USE_STUB_ARDUINO) || defined(FL_IS_WASM)) && !defined(FASTLED_NO_ARDUINO_STUBS)
@@ -11,21 +12,14 @@
 
 #include "fl/stl/map.h"
 #include "fl/stl/stdio.h"
+#include "fl/map_range.h"
 
-// fl namespace functions
-namespace fl {
-
+// Arduino map() function - in global namespace (NOT in fl::)
+// fl::map refers to the map container (red-black tree)
+// Delegates to fl::map_range() for consistent behavior and overflow protection
 long map(long x, long in_min, long in_max, long out_min, long out_max) {
-    const long run = in_max - in_min;
-    if (run == 0) {
-        return 0; // AVR returns -1, SAM returns 0
-    }
-    const long rise = out_max - out_min;
-    const long delta = x - in_min;
-    return (delta * rise) / run + out_min;
+    return fl::map_range<long, long>(x, in_min, in_max, out_min, out_max);
 }
-
-} // namespace fl
 
 // Random number generation functions
 long random(long min, long max) {
@@ -47,7 +41,7 @@ long random(long max) {
 
 // Analog value storage for test injection
 // Key: pin number, Value: analog value (or -1 for unset/random)
-static fl::fl_map<int, int> g_analog_values;
+static fl::map<int, int> g_analog_values;
 
 int analogRead(int pin) {
     // Check if a test value has been set for this pin
