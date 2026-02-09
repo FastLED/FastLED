@@ -96,4 +96,103 @@ back_insert_iterator<Container> back_inserter(Container& c) {
     return back_insert_iterator<Container>(c);
 }
 
+/// Reverse iterator adapter - reverses the direction of a bidirectional iterator
+///
+/// This adapter wraps any bidirectional iterator and reverses its direction.
+/// Incrementing a reverse_iterator moves backwards through the sequence,
+/// and dereferencing returns the element before the current position.
+///
+/// Usage example:
+/// @code
+///     fl::vector<int> vec = {1, 2, 3, 4, 5};
+///     auto rit = fl::reverse_iterator<fl::vector<int>::iterator>(vec.end());
+///     auto rend = fl::reverse_iterator<fl::vector<int>::iterator>(vec.begin());
+///     while (rit != rend) {
+///         // Iterates: 5, 4, 3, 2, 1
+///         ++rit;
+///     }
+/// @endcode
+template <typename Iterator>
+class reverse_iterator {
+public:
+    typedef Iterator iterator_type;
+    typedef typename Iterator::value_type value_type;
+    typedef typename Iterator::reference reference;
+    typedef typename Iterator::pointer pointer;
+
+protected:
+    Iterator current;
+
+public:
+    // Constructors
+    reverse_iterator() : current() {}
+
+    explicit reverse_iterator(Iterator it) : current(it) {}
+
+    template <typename U>
+    reverse_iterator(const reverse_iterator<U>& other) : current(other.base()) {}
+
+    // Access to underlying iterator
+    Iterator base() const { return current; }
+
+    // Dereference - returns element before current position
+    reference operator*() const {
+        Iterator tmp = current;
+        --tmp;
+        return *tmp;
+    }
+
+    pointer operator->() const {
+        Iterator tmp = current;
+        --tmp;
+        return &(*tmp);
+    }
+
+    // Pre-increment - moves backwards
+    reverse_iterator& operator++() {
+        --current;
+        return *this;
+    }
+
+    // Post-increment
+    reverse_iterator operator++(int) {
+        reverse_iterator tmp = *this;
+        --current;
+        return tmp;
+    }
+
+    // Pre-decrement - moves forwards
+    reverse_iterator& operator--() {
+        ++current;
+        return *this;
+    }
+
+    // Post-decrement
+    reverse_iterator operator--(int) {
+        reverse_iterator tmp = *this;
+        ++current;
+        return tmp;
+    }
+
+    // Comparison operators
+    bool operator==(const reverse_iterator& other) const {
+        return current == other.current;
+    }
+
+    bool operator!=(const reverse_iterator& other) const {
+        return current != other.current;
+    }
+
+    // For comparing with different iterator types
+    template <typename U>
+    bool operator==(const reverse_iterator<U>& other) const {
+        return current == other.base();
+    }
+
+    template <typename U>
+    bool operator!=(const reverse_iterator<U>& other) const {
+        return current != other.base();
+    }
+};
+
 } // namespace fl

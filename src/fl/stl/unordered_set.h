@@ -65,6 +65,10 @@ class unordered_set {
     };
 
     unordered_set() = default;
+    unordered_set(const unordered_set& other) = default;
+    unordered_set(unordered_set&& other) = default;
+    unordered_set& operator=(const unordered_set& other) = default;
+    unordered_set& operator=(unordered_set&& other) = default;
     ~unordered_set() = default;
 
     // Iterator methods

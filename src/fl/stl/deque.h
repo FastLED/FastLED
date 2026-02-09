@@ -8,6 +8,7 @@
 #include "fl/stl/new.h"
 #include "fl/stl/move.h"
 #include "fl/stl/type_traits.h"
+#include "fl/stl/iterator.h"
 
 namespace fl {
 
@@ -60,6 +61,11 @@ private:
 public:
     // Iterator implementation
     class iterator {
+    public:
+        typedef T value_type;
+        typedef T& reference;
+        typedef T* pointer;
+
     private:
         deque* mDeque;
         fl::size mIndex;
@@ -107,6 +113,11 @@ public:
     };
 
     class const_iterator {
+    public:
+        typedef T value_type;
+        typedef const T& reference;
+        typedef const T* pointer;
+
     private:
         const deque* mDeque;
         fl::size mIndex;
@@ -153,8 +164,14 @@ public:
         }
     };
 
+    typedef Allocator allocator_type;
+    typedef fl::reverse_iterator<iterator> reverse_iterator;
+    typedef fl::reverse_iterator<const_iterator> const_reverse_iterator;
+
     // Constructors
     deque() : mData(nullptr), mCapacity(0), mSize(0), mFront(0) {}
+
+    explicit deque(const Allocator& alloc) : mData(nullptr), mCapacity(0), mSize(0), mFront(0), mAlloc(alloc) {}
 
     explicit deque(fl::size count, const T& value = T()) : deque() {
         resize(count, value);
@@ -273,6 +290,23 @@ public:
         return const_iterator(this, mSize);
     }
 
+    // Reverse iterators
+    reverse_iterator rbegin() {
+        return reverse_iterator(end());
+    }
+
+    const_reverse_iterator rbegin() const {
+        return const_reverse_iterator(end());
+    }
+
+    reverse_iterator rend() {
+        return reverse_iterator(begin());
+    }
+
+    const_reverse_iterator rend() const {
+        return const_reverse_iterator(begin());
+    }
+
     // Capacity
     bool empty() const {
         return mSize == 0;
@@ -284,6 +318,10 @@ public:
 
     fl::size capacity() const {
         return mCapacity;
+    }
+
+    allocator_type get_allocator() const {
+        return mAlloc;
     }
 
     // Modifiers

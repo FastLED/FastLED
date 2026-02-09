@@ -2332,12 +2332,17 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         resize(len, c);
     }
     string(const string &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
+    string(string&& other) noexcept : StrN<FASTLED_STR_INLINED_SIZE>(fl::move(other)) {}
     template <fl::size M>
     string(const StrN<M> &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
     // Constructor from string_view
     string(const string_view& sv) : StrN<FASTLED_STR_INLINED_SIZE>(sv) {}
     string &operator=(const string &other) {
         copy(other);
+        return *this;
+    }
+    string& operator=(string&& other) noexcept {
+        StrN<FASTLED_STR_INLINED_SIZE>::operator=(fl::move(other));
         return *this;
     }
     

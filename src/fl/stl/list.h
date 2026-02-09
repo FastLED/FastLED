@@ -6,6 +6,7 @@
 #include "fl/stl/new.h"
 #include "fl/stl/move.h"
 #include "fl/stl/type_traits.h"
+#include "fl/stl/iterator.h"
 
 namespace fl {
 
@@ -84,6 +85,11 @@ private:
 public:
     // Iterator implementation
     class iterator {
+    public:
+        typedef T value_type;
+        typedef T& reference;
+        typedef T* pointer;
+
     private:
         Node* mNode;
         friend class list;
@@ -131,6 +137,11 @@ public:
     };
 
     class const_iterator {
+    public:
+        typedef T value_type;
+        typedef const T& reference;
+        typedef const T* pointer;
+
     private:
         const Node* mNode;
         friend class list;
@@ -178,8 +189,16 @@ public:
         }
     };
 
+    typedef Allocator allocator_type;
+    typedef fl::reverse_iterator<iterator> reverse_iterator;
+    typedef fl::reverse_iterator<const_iterator> const_reverse_iterator;
+
     // Constructors
     list() {
+        init_sentinel();
+    }
+
+    explicit list(const Allocator& alloc) : mAlloc(alloc) {
         init_sentinel();
     }
 
@@ -268,6 +287,23 @@ public:
         return const_iterator(mHead);
     }
 
+    // Reverse iterators
+    reverse_iterator rbegin() {
+        return reverse_iterator(end());
+    }
+
+    const_reverse_iterator rbegin() const {
+        return const_reverse_iterator(end());
+    }
+
+    reverse_iterator rend() {
+        return reverse_iterator(begin());
+    }
+
+    const_reverse_iterator rend() const {
+        return const_reverse_iterator(begin());
+    }
+
     // Capacity
     bool empty() const {
         return mSize == 0;
@@ -275,6 +311,10 @@ public:
 
     fl::size size() const {
         return mSize;
+    }
+
+    allocator_type get_allocator() const {
+        return mAlloc;
     }
 
     // Modifiers

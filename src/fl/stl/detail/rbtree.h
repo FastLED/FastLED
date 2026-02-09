@@ -1441,13 +1441,17 @@ private:
 public:
     using iterator = typename TreeType::const_iterator;  // Set iterators are always const
     using const_iterator = typename TreeType::const_iterator;
+    using reverse_iterator = typename TreeType::const_reverse_iterator;  // Set reverse iterators are always const
+    using const_reverse_iterator = typename TreeType::const_reverse_iterator;
 
     // Constructors and destructor
     SetRedBlackTree(const Compare& comp = Compare(), const Allocator& alloc = Allocator()) 
         : mTree(comp, alloc) {}
 
     SetRedBlackTree(const SetRedBlackTree& other) = default;
+    SetRedBlackTree(SetRedBlackTree&& other) = default;
     SetRedBlackTree& operator=(const SetRedBlackTree& other) = default;
+    SetRedBlackTree& operator=(SetRedBlackTree&& other) = default;
     ~SetRedBlackTree() = default;
 
     // Iterators
@@ -1456,10 +1460,17 @@ public:
     const_iterator end() const { return mTree.end(); }
     const_iterator cend() const { return mTree.cend(); }
 
+    // Reverse iterators
+    const_reverse_iterator rbegin() const { return mTree.rbegin(); }
+    const_reverse_iterator rend() const { return mTree.rend(); }
+
     // Capacity
     bool empty() const { return mTree.empty(); }
     fl::size size() const { return mTree.size(); }
     fl::size max_size() const { return mTree.max_size(); }
+
+    // Allocator
+    allocator_type get_allocator() const { return mTree.get_allocator(); }
 
     // Modifiers
     void clear() { mTree.clear(); }

@@ -177,9 +177,12 @@ template <typename Key, typename Allocator = fl::allocator<Key>> class VectorSet
     typedef fl::vector<Key, Allocator> VectorType;
     typedef typename VectorType::iterator iterator;
     typedef typename VectorType::const_iterator const_iterator;
+    typedef typename VectorType::reverse_iterator reverse_iterator;
+    typedef Allocator allocator_type;
 
     // Constructor
     constexpr VectorSet() = default;
+    explicit VectorSet(const Allocator& alloc) : data(alloc) {}
 
     // Copy constructor
     VectorSet(const VectorSet<Key, Allocator> &other) : data(other.data) {}
@@ -208,6 +211,9 @@ template <typename Key, typename Allocator = fl::allocator<Key>> class VectorSet
     iterator end() { return data.end(); }
     const_iterator begin() const { return data.begin(); }
     const_iterator end() const { return data.end(); }
+
+    reverse_iterator rbegin() { return data.rbegin(); }
+    reverse_iterator rend() { return data.rend(); }
 
     iterator find(const Key &key) {
         for (auto it = begin(); it != end(); ++it) {
@@ -284,6 +290,8 @@ template <typename Key, typename Allocator = fl::allocator<Key>> class VectorSet
     // Get the capacity of the set
     constexpr fl::size capacity() const { return data.capacity(); }
 
+    allocator_type get_allocator() const { return data.get_allocator(); }
+
     // Clear the set
     void clear() { data.clear(); }
 
@@ -320,9 +328,13 @@ template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set 
     // Iterator types - we only provide const iterators since set elements are immutable
     using const_iterator = typename TreeType::const_iterator;
     using iterator = const_iterator;  // set only provides const iterators
-    
+    using const_reverse_iterator = typename TreeType::const_reverse_iterator;
+    using reverse_iterator = const_reverse_iterator;  // set only provides const reverse iterators
+    using allocator_type = Allocator;
+
     // Constructors
     set() = default;
+    explicit set(const Allocator& alloc) : mTree(fl::less<Key>(), alloc) {}
     set(const set& other) = default;
     set(set&& other) = default;
     set& operator=(const set& other) = default;
@@ -349,12 +361,17 @@ template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set 
     const_iterator end() const { return mTree.end(); }
     const_iterator cbegin() const { return mTree.cbegin(); }
     const_iterator cend() const { return mTree.cend(); }
+
+    // Reverse iterators
+    const_reverse_iterator rbegin() const { return mTree.rbegin(); }
+    const_reverse_iterator rend() const { return mTree.rend(); }
     
     // Capacity
     bool empty() const { return mTree.empty(); }
     size_type size() const { return mTree.size(); }
     size_type max_size() const { return mTree.max_size(); }
-    
+    allocator_type get_allocator() const { return mTree.get_allocator(); }
+
     // Modifiers
     void clear() { mTree.clear(); }
     

@@ -304,9 +304,12 @@ class SortedHeapMap {
   public:
     typedef typename SortedHeapVector<value_type, PairLess, Allocator>::iterator iterator;
     typedef typename SortedHeapVector<value_type, PairLess, Allocator>::const_iterator const_iterator;
+    typedef typename SortedHeapVector<value_type, PairLess, Allocator>::reverse_iterator reverse_iterator;
+    typedef typename SortedHeapVector<value_type, PairLess, Allocator>::const_reverse_iterator const_reverse_iterator;
 
     // Constructors
     SortedHeapMap(Less less = Less()) : data(PairLess{less}) {}
+    explicit SortedHeapMap(const Allocator& alloc) : data(PairLess{Less()}, alloc) {}
     SortedHeapMap(const SortedHeapMap& other) = default;
     SortedHeapMap& operator=(const SortedHeapMap& other) = default;
 
@@ -330,12 +333,19 @@ class SortedHeapMap {
     const_iterator cbegin() const { return data.begin(); }
     const_iterator cend() const { return data.end(); }
 
+    // Reverse iterators
+    reverse_iterator rbegin() { return data.rbegin(); }
+    reverse_iterator rend() { return data.rend(); }
+    const_reverse_iterator rbegin() const { return data.rbegin(); }
+    const_reverse_iterator rend() const { return data.rend(); }
+
     // Capacity
     fl::size size() const { return data.size(); }
     bool empty() const { return data.empty(); }
     bool full() const { return data.full(); }
     fl::size capacity() const { return data.capacity(); }
     fl::size max_size() const { return data.capacity(); }
+    allocator_type get_allocator() const { return data.get_allocator(); }
 
     // FastLED specific methods
     void setMaxSize(fl::size n) { data.setMaxSize(n); }

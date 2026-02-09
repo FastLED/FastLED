@@ -121,6 +121,11 @@ public:
         mContainer.swap(other.mContainer);
     }
 
+    /// @brief Remove all elements from the queue
+    void clear() {
+        mContainer.clear();
+    }
+
     /// @brief Get access to the underlying container (for advanced use)
     /// @return Reference to the underlying container
     Container& get_container() {

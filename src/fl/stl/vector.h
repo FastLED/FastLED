@@ -378,22 +378,48 @@ class FL_ALIGN vector {
   public:
     typedef T *iterator;
     typedef const T *const_iterator;
+    typedef Allocator allocator_type;
 
     struct reverse_iterator {
         iterator it;
         reverse_iterator(iterator i) : it(i) {}
         T &operator*() { return *(it - 1); }
+        T *operator->() { return (it - 1); }
         reverse_iterator &operator++() {
             --it;
             return *this;
+        }
+        bool operator==(const reverse_iterator &other) const {
+            return it == other.it;
         }
         bool operator!=(const reverse_iterator &other) const {
             return it != other.it;
         }
     };
 
+    struct const_reverse_iterator {
+        const_iterator it;
+        const_reverse_iterator(const_iterator i) : it(i) {}
+        const T &operator*() const { return *(it - 1); }
+        const T *operator->() const { return (it - 1); }
+        const_reverse_iterator &operator++() {
+            --it;
+            return *this;
+        }
+        bool operator==(const const_reverse_iterator &other) const {
+            return it == other.it;
+        }
+        bool operator!=(const const_reverse_iterator &other) const {
+            return it != other.it;
+        }
+    };
+
     // Default constructor
     vector() : mArray(nullptr),mCapacity(0), mSize(0) {
+    }
+
+    // Constructor with allocator
+    explicit vector(const Allocator& alloc) : mArray(nullptr), mCapacity(0), mSize(0), mAlloc(alloc) {
     }
 
     // Constructor with size and value
@@ -674,6 +700,8 @@ public:
 
     fl::size capacity() const { return mCapacity; }
 
+    allocator_type get_allocator() const { return mAlloc; }
+
     // Element addition/removal
     void push_back(const T &value) {
         ensure_size(mSize + 1);
@@ -723,8 +751,10 @@ public:
     }
 
     reverse_iterator rbegin() { return reverse_iterator(end()); }
+    const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
 
     reverse_iterator rend() { return reverse_iterator(begin()); }
+    const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
     // Element access
     T &front() { return mArray[0]; }
@@ -907,8 +937,13 @@ class FL_ALIGN SortedHeapVector {
   public:
     typedef typename vector<T, Allocator>::iterator iterator;
     typedef typename vector<T, Allocator>::const_iterator const_iterator;
+    typedef typename vector<T, Allocator>::reverse_iterator reverse_iterator;
+    typedef typename vector<T, Allocator>::const_reverse_iterator const_reverse_iterator;
+    typedef Allocator allocator_type;
 
     SortedHeapVector(LessThan less = LessThan()) : mLess(less) {}
+
+    SortedHeapVector(LessThan less, const Allocator& alloc) : mArray(alloc), mLess(less) {}
 
     // Copy constructor
     SortedHeapVector(const SortedHeapVector& other) = default;
@@ -1036,6 +1071,8 @@ class FL_ALIGN SortedHeapVector {
     fl::size size() const { return mArray.size(); }
     bool empty() const { return mArray.empty(); }
     fl::size capacity() const { return mArray.capacity(); }
+    allocator_type get_allocator() const { return mArray.get_allocator(); }
+
     void clear() { mArray.clear(); }
     bool full() const {
         if (mArray.size() >= mMaxSize) {
@@ -1059,6 +1096,12 @@ class FL_ALIGN SortedHeapVector {
     const_iterator begin() const { return mArray.begin(); }
     iterator end() { return mArray.end(); }
     const_iterator end() const { return mArray.end(); }
+
+    // Reverse iterators
+    reverse_iterator rbegin() { return mArray.rbegin(); }
+    const_reverse_iterator rbegin() const { return mArray.rbegin(); }
+    reverse_iterator rend() { return mArray.rend(); }
+    const_reverse_iterator rend() const { return mArray.rend(); }
 
     // Raw data access
     T *data() { return mArray.data(); }

@@ -387,6 +387,10 @@ class function_list<void(Args...)> {
 
   public:
     function_list() = default;
+    function_list(const function_list& other) = default;
+    function_list(function_list&& other) = default;
+    function_list& operator=(const function_list& other) = default;
+    function_list& operator=(function_list&& other) = default;
     ~function_list() = default;
 
     int add(function<void(Args...)> fn, int priority = 0) {
