@@ -103,7 +103,7 @@ static void addSpiHardwareIfPossible(ChannelBusManager& manager) {
                 }
             }
 
-            manager.addEngine(maxPriority, adapter, "SPI_UNIFIED");
+            manager.addEngine(maxPriority, adapter);
 
             FL_DBG("RP2040/RP2350: Registered unified SPI engine with "
                    << controllers.size() << " controllers (priority "

@@ -190,6 +190,8 @@ public:
     int mTransmitCount = 0;
     fl::vector<uint8_t> mLastTransmittedData;
 
+    explicit MockSpiEngine(const char* name = "MOCK_SPI") : mName(fl::string::from_literal(name)) {}
+
     void enqueue(ChannelDataPtr channelData) override {
         if (channelData) {
             mEnqueueCount++;
@@ -212,7 +214,7 @@ public:
         return EngineState::READY;
     }
 
-    fl::string getName() const override { return fl::string::from_literal("MOCK_SPI"); }
+    fl::string getName() const override { return mName; }
 
     /// @brief Predicate: only accept SPI chipsets (reject clockless)
     bool canHandle(const ChannelDataPtr& data) const override {
@@ -239,15 +241,16 @@ private:
         }
     }
 
+    fl::string mName;
     fl::vector<ChannelDataPtr> mEnqueuedChannels;
     fl::vector<ChannelDataPtr> mTransmittingChannels;
 };
 
 FL_TEST_CASE("SPI chipset - mock engine integration") {
     // Create and register mock SPI engine
-    auto mockEngine = fl::make_shared<MockSpiEngine>();
+    auto mockEngine = fl::make_shared<MockSpiEngine>("MOCK_SPI");
     ChannelBusManager& manager = ChannelBusManager::instance();
-    manager.addEngine(1000, mockEngine, "MOCK_SPI");
+    manager.addEngine(1000, mockEngine);
 
     // Set mock engine as exclusive (disables all other engines)
     bool exclusive = manager.setExclusiveDriver("MOCK_SPI");
@@ -331,9 +334,9 @@ FL_TEST_CASE("ChannelData - chipset variant type checking") {
 
 FL_TEST_CASE("ChannelBusManager - predicate filtering (clockless rejected)") {
     // Create mock SPI engine that ONLY accepts SPI chipsets
-    auto mockSpiEngine = fl::make_shared<MockSpiEngine>();
+    auto mockSpiEngine = fl::make_shared<MockSpiEngine>("MOCK_SPI_TEST1");
     ChannelBusManager& manager = ChannelBusManager::instance();
-    manager.addEngine(1000, mockSpiEngine, "MOCK_SPI_TEST1");
+    manager.addEngine(1000, mockSpiEngine);
 
     // Set mock engine as exclusive (disables all other engines)
     bool exclusive = manager.setExclusiveDriver("MOCK_SPI_TEST1");
@@ -361,9 +364,9 @@ FL_TEST_CASE("ChannelBusManager - predicate filtering (clockless rejected)") {
 
 FL_TEST_CASE("ChannelBusManager - predicate filtering (SPI accepted)") {
     // Create mock SPI engine that ONLY accepts SPI chipsets
-    auto mockSpiEngine = fl::make_shared<MockSpiEngine>();
+    auto mockSpiEngine = fl::make_shared<MockSpiEngine>("MOCK_SPI_TEST2");
     ChannelBusManager& manager = ChannelBusManager::instance();
-    manager.addEngine(1000, mockSpiEngine, "MOCK_SPI_TEST2");
+    manager.addEngine(1000, mockSpiEngine);
 
     // Set mock engine as exclusive (disables all other engines)
     bool exclusive = manager.setExclusiveDriver("MOCK_SPI_TEST2");

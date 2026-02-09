@@ -58,14 +58,19 @@ public:
     /// @brief Destructor - cleanup shared engines (automatic via shared_ptr)
     ~ChannelBusManager() override;
 
-    /// @brief Add an engine with priority and name (higher priority = preferred)
+    /// @brief Add an engine with priority (higher priority = preferred)
     /// @param priority Engine priority (higher values = higher priority)
     /// @param engine Shared engine implementation (allows caller to retain reference for testing)
-    /// @param name Engine name for runtime enable/disable control (e.g., "RMT", "SPI", "PARLIO")
     /// @note Platform-specific code calls this during static initialization
     /// @note Engines are automatically sorted by priority on each insertion
-    /// @note Empty name or nullptr engine will be ignored
-    void addEngine(int priority, fl::shared_ptr<IChannelEngine> engine, const char* name = nullptr);
+    /// @note Engine name is obtained via engine->getName()
+    /// @note If engine->getName() returns empty string, engine is rejected (emits FL_WARN and returns)
+    /// @note If an engine with the same name already exists, it will be replaced:
+    ///       1. FL_WARN emitted about replacement
+    ///       2. All engines polled until READY state (1 second timeout)
+    ///       3. Old engine removed (shared_ptr may trigger deletion)
+    ///       4. New engine added with specified priority
+    void addEngine(int priority, fl::shared_ptr<IChannelEngine> engine);
 
     /// @brief Remove an engine from the manager
     /// @param engine Shared pointer to the engine to remove
@@ -92,6 +97,15 @@ public:
     /// @warning This will disable ALL other registered drivers, including future additions
     /// @warning This ensures forward compatibility - new drivers are automatically excluded
     bool setExclusiveDriver(const char* name);
+
+    /// @brief Change the priority of a registered driver
+    /// @param name Driver name (case-sensitive, e.g., "RMT", "SPI", "PARLIO")
+    /// @param priority New priority value (higher = preferred, e.g., 9000 > 5000)
+    /// @return true if driver was found and priority updated, false if name not found
+    /// @note Triggers automatic re-sort of engine list by priority (descending)
+    /// @note Changes take effect immediately on next enqueue()
+    /// @note Higher priority engines are selected first during canHandle() iteration
+    bool setDriverPriority(const fl::string& name, int priority);
 
     /// @brief Check if a driver is enabled by name
     /// @param name Driver name to query (case-sensitive)
@@ -138,6 +152,11 @@ public:
     /// @return Current engine state (READY, BUSY, DRAINING, or ERROR)
     EngineState poll() override;
 
+    /// @brief Wait for all engines to become READY
+    /// @note Polls engines in a loop, calling async_run() and yielding with minimal delay
+    /// @note Uses time-based delays to avoid busy-waiting while allowing async tasks to run
+    void wait();
+
     /// @brief Poll engines before frame starts to clear previous frame state
     /// @note Called at the beginning of each frame to ensure buffers from previous frame are released
     void onBeginFrame() override;
@@ -151,6 +170,14 @@ private:
     /// @param channelData Span of channel data to transmit
     /// @note Tries active engine, falls back to next priority on failure
     void beginTransmission(fl::span<const ChannelDataPtr> channelData);
+
+    /// @brief Wait until a condition is met, with check-pump-delay logic
+    /// @param condition Function that returns true when waiting should stop
+    /// @param timeoutMs Optional timeout in milliseconds (0 = no timeout)
+    /// @return true if condition was met, false if timeout occurred
+    /// @note Runs async_run() on each iteration and delays intelligently to avoid busy-waiting
+    template<typename Condition>
+    bool waitForCondition(Condition condition, u32 timeoutMs = 1000);
 
 private:
     /// @brief Engine registry entry (priority + shared pointer + runtime control)

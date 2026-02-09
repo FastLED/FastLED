@@ -28,7 +28,7 @@ inline void initChannelEngines() {
     auto sharedStub = fl::shared_ptr<IChannelEngine>(stubEngine, [](IChannelEngine*){});
 
     // Register with low priority so test mocks can override
-    manager.addEngine(0, sharedStub, "STUB");
+    manager.addEngine(0, sharedStub);
 }
 
 }  // namespace platforms

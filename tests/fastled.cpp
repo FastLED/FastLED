@@ -103,6 +103,8 @@ public:
     int mShowCount = 0;
     fl::vector<fl::ChannelDataPtr> mEnqueuedChannels;
 
+    explicit ChannelEngineMock(const char* name = "MOCK") : mName(fl::string::from_literal(name)) {}
+
     bool canHandle(const fl::ChannelDataPtr& data) const override {
         (void)data;
         return true;  // Test engine accepts all channel types
@@ -124,7 +126,7 @@ public:
         return EngineState(EngineState::READY);
     }
 
-    fl::string getName() const override { return fl::string::from_literal("MOCK"); }
+    fl::string getName() const override { return mName; }
 
     Capabilities getCapabilities() const override {
         return Capabilities(true, true);  // Mock accepts both clockless and SPI
@@ -135,6 +137,9 @@ public:
         mShowCount = 0;
         mEnqueuedChannels.clear();
     }
+
+private:
+    fl::string mName;
 };
 
 } // anonymous namespace
@@ -148,12 +153,12 @@ FL_TEST_CASE("Channel API: Mock engine workflow (GitHub issue #2167)") {
     // 5. Call FastLED.show()
     // 6. Verify engine received data via enqueue()
 
-    auto mockEngine = fl::make_shared<ChannelEngineMock>();
+    auto mockEngine = fl::make_shared<ChannelEngineMock>("MOCK");
     mockEngine->reset();
 
     // Step 1 & 2: Register mock engine
     fl::ChannelBusManager& manager = fl::ChannelBusManager::instance();
-    manager.addEngine(1000, mockEngine, "MOCK");  // High priority
+    manager.addEngine(1000, mockEngine);  // High priority
 
     // Verify registration
     auto* registeredEngine = manager.getEngineByName("MOCK");
@@ -210,11 +215,11 @@ FL_TEST_CASE("Channel API: Mock engine workflow (GitHub issue #2167)") {
 
 FL_TEST_CASE("Channel API: Double add protection") {
     // Verify that calling add() multiple times doesn't create duplicates
-    auto mockEngine = fl::make_shared<ChannelEngineMock>();
+    auto mockEngine = fl::make_shared<ChannelEngineMock>("MOCK_DOUBLE");
     mockEngine->reset();
 
     fl::ChannelBusManager& manager = fl::ChannelBusManager::instance();
-    manager.addEngine(1000, mockEngine, "MOCK_DOUBLE");
+    manager.addEngine(1000, mockEngine);
 
     static CRGB leds[5];
     fl::fill_solid(leds, 5, CRGB::Green);
@@ -263,11 +268,11 @@ FL_TEST_CASE("Channel API: Double add protection") {
 
 FL_TEST_CASE("Channel API: Add and remove symmetry") {
     // Verify that add() and remove() work symmetrically
-    auto mockEngine = fl::make_shared<ChannelEngineMock>();
+    auto mockEngine = fl::make_shared<ChannelEngineMock>("MOCK_REMOVE");
     mockEngine->reset();
 
     fl::ChannelBusManager& manager = fl::ChannelBusManager::instance();
-    manager.addEngine(1000, mockEngine, "MOCK_REMOVE");
+    manager.addEngine(1000, mockEngine);
 
     static CRGB leds[8];
     fl::fill_solid(leds, 8, CRGB::Blue);
@@ -317,11 +322,11 @@ FL_TEST_CASE("Channel API: Add and remove symmetry") {
 FL_TEST_CASE("Channel API: Internal ChannelPtr storage prevents dangling") {
     // Verify that CFastLED stores ChannelPtrs internally so channels
     // survive even if the caller drops their reference.
-    auto mockEngine = fl::make_shared<ChannelEngineMock>();
+    auto mockEngine = fl::make_shared<ChannelEngineMock>("MOCK_STORAGE");
     mockEngine->reset();
 
     fl::ChannelBusManager& manager = fl::ChannelBusManager::instance();
-    manager.addEngine(1000, mockEngine, "MOCK_STORAGE");
+    manager.addEngine(1000, mockEngine);
 
     static CRGB leds[4];
     fl::fill_solid(leds, 4, CRGB::White);
@@ -387,12 +392,12 @@ FL_TEST_CASE("Legacy API: 4 parallel strips using FastLED.addLeds<>()") {
     // - Call FastLED.show()
     // - Verify engine received all 4 strips with correct data
 
-    auto mockEngine = fl::make_shared<ChannelEngineMock>();
+    auto mockEngine = fl::make_shared<ChannelEngineMock>("MOCK_LEGACY");
     mockEngine->reset();
 
     // Register mock engine with high priority
     fl::ChannelBusManager& manager = fl::ChannelBusManager::instance();
-    manager.addEngine(1000, mockEngine, "MOCK_LEGACY");
+    manager.addEngine(1000, mockEngine);
 
     // Verify registration
     auto* registeredEngine = manager.getEngineByName("MOCK_LEGACY");
@@ -515,7 +520,7 @@ static bool controllerInList(fl::Channel* channel) {
 FL_TEST_CASE("FastLED.add stores ChannelPtr - survives caller scope") {
     auto engine = fl::make_shared<StubEngine>();
     ChannelBusManager& mgr = ChannelBusManager::instance();
-    mgr.addEngine(2000, engine, "STUB_ADD_REMOVE");
+    mgr.addEngine(2000, engine);
 
     CRGB leds[4];
     fl::weak_ptr<Channel> weakRef;
@@ -555,7 +560,7 @@ FL_TEST_CASE("FastLED.add stores ChannelPtr - survives caller scope") {
 FL_TEST_CASE("FastLED.add double-add is safe") {
     auto engine = fl::make_shared<StubEngine>();
     ChannelBusManager& mgr = ChannelBusManager::instance();
-    mgr.addEngine(2001, engine, "STUB_ADD_REMOVE");
+    mgr.addEngine(2001, engine);
 
     CRGB leds[4];
     auto ch = makeChannel(leds, 4);
@@ -583,7 +588,7 @@ FL_TEST_CASE("FastLED.add double-add is safe") {
 FL_TEST_CASE("FastLED.remove double-remove is safe") {
     auto engine = fl::make_shared<StubEngine>();
     ChannelBusManager& mgr = ChannelBusManager::instance();
-    mgr.addEngine(2002, engine, "STUB_ADD_REMOVE");
+    mgr.addEngine(2002, engine);
 
     CRGB leds[4];
     auto ch = makeChannel(leds, 4);
@@ -832,7 +837,7 @@ FL_TEST_CASE("Channel Events: onChannelAdded fires on FastLED.add()") {
     auto& events = ChannelEvents::instance();
     auto engine = fl::make_shared<EventTestEngine>();
     ChannelBusManager& mgr = ChannelBusManager::instance();
-    mgr.addEngine(3000, engine, "EVENT_TEST");
+    mgr.addEngine(3000, engine);
 
     // Add listener
     int listenerId = events.onChannelAdded.add([&tracker](const Channel& ch) {
@@ -867,7 +872,7 @@ FL_TEST_CASE("Channel Events: onChannelRemoved fires on FastLED.remove()") {
     auto& events = ChannelEvents::instance();
     auto engine = fl::make_shared<EventTestEngine>();
     ChannelBusManager& mgr = ChannelBusManager::instance();
-    mgr.addEngine(3001, engine, "EVENT_TEST");
+    mgr.addEngine(3001, engine);
 
     // Add listener
     int listenerId = events.onChannelRemoved.add([&tracker](const Channel& ch) {
@@ -930,10 +935,10 @@ FL_TEST_CASE("Channel Events: onChannelConfigured fires on applyConfig()") {
 FL_TEST_CASE("Channel Events: onChannelEnqueued fires when data is enqueued to engine") {
     EventTracker tracker;
     auto& events = ChannelEvents::instance();
-    auto mockEngine = fl::make_shared<ChannelEngineMock>();
+    auto mockEngine = fl::make_shared<ChannelEngineMock>("EVENT_ENQUEUE_TEST");
     mockEngine->reset();
     ChannelBusManager& mgr = ChannelBusManager::instance();
-    mgr.addEngine(3003, mockEngine, "EVENT_ENQUEUE_TEST");
+    mgr.addEngine(3003, mockEngine);
 
     // Add listener
     int listenerId = events.onChannelEnqueued.add([&tracker](const Channel& ch, const fl::string& engineName) {
@@ -958,7 +963,7 @@ FL_TEST_CASE("Channel Events: onChannelEnqueued fires when data is enqueued to e
     // Verify event was called with correct engine name
     FL_CHECK(tracker.mEnqueuedCount == countBefore + 1);
     FL_CHECK(tracker.mLastChannel == channel.get());
-    FL_CHECK(tracker.mLastEngineName == "MOCK");  // ChannelEngineMock returns "MOCK"
+    FL_CHECK(tracker.mLastEngineName == "EVENT_ENQUEUE_TEST");  // ChannelEngineMock returns configured name
 
     // Cleanup
     FastLED.remove(channel);
@@ -1005,10 +1010,10 @@ FL_TEST_CASE("Channel Events: Multiple listeners with priority ordering") {
 FL_TEST_CASE("Channel Events: Complete lifecycle event sequence") {
     EventTracker tracker;
     auto& events = ChannelEvents::instance();
-    auto mockEngine = fl::make_shared<ChannelEngineMock>();
+    auto mockEngine = fl::make_shared<ChannelEngineMock>("EVENT_LIFECYCLE_TEST");
     mockEngine->reset();
     ChannelBusManager& mgr = ChannelBusManager::instance();
-    mgr.addEngine(3004, mockEngine, "EVENT_LIFECYCLE_TEST");
+    mgr.addEngine(3004, mockEngine);
 
     // Add all listeners
     int createdId = events.onChannelCreated.add([&tracker](const Channel& ch) {

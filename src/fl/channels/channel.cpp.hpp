@@ -291,6 +291,10 @@ public:
         return EngineState(EngineState::READY);  // Always "ready" (does nothing)
     }
 
+    virtual fl::string getName() const override {
+        return fl::string::from_literal("STUB");
+    }
+
     virtual Capabilities getCapabilities() const override {
         return Capabilities(true, true);  // Stub accepts both clockless and SPI
     }

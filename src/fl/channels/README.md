@@ -59,7 +59,6 @@ void loop() {
     fill_solid(leds1, NUM_LEDS, CRGB::Red);
     fill_solid(leds2, NUM_LEDS, CRGB::Blue);
     FastLED.show();
-    delay(1000);
 }
 ```
 
@@ -88,7 +87,6 @@ void setup() {
 void loop() {
     fill_solid(leds1, 60, CRGB::Red);
     FastLED.show();
-    delay(1000);
 }
 ```
 
@@ -114,7 +112,7 @@ Engines are tried in priority order until one accepts the channel:
 
 ### Overriding Engine Selection
 
-For testing or performance tuning, you can force a specific engine:
+For testing or performance tuning, you can control engine selection:
 
 ```cpp
 void setup() {
@@ -122,10 +120,19 @@ void setup() {
     fl::ChannelConfig config(16, timing, leds, RGB);
     FastLED.add(config);
 
-    // Force RMT engine exclusively
+    // Method 1: Force a specific engine exclusively (disables all others)
     FastLED.setExclusiveDriver("RMT");
 
-    // Query available drivers
+    // Method 2: Enable/disable specific engines
+    FastLED.setDriverEnabled("PARLIO", true);   // Enable
+    FastLED.setDriverEnabled("SPI", false);     // Disable
+
+    // Method 3: Adjust engine priority (higher = preferred)
+    // Engines are sorted by priority - changing priority triggers re-sort
+    FastLED.setDriverPriority("RMT", 9000);     // Increase priority
+    FastLED.setDriverPriority("PARLIO", 8000);  // Set below RMT
+
+    // Query available drivers (sorted by priority, high to low)
     for (size_t i = 0; i < FastLED.getDriverCount(); i++) {
         auto info = FastLED.getDriverInfos()[i];
         Serial.printf("%s: priority=%d, enabled=%s\n",
@@ -135,10 +142,16 @@ void setup() {
 }
 ```
 
+**Control methods:**
+- `setExclusiveDriver(name)` - Disable all engines except the named one
+- `setDriverEnabled(name, enabled)` - Enable/disable specific engine
+- `setDriverPriority(name, priority)` - Change priority (triggers automatic re-sort)
+
 **When to override:**
 - Testing different engines for performance comparison
 - Debugging hardware-specific issues
 - Forcing a specific engine for known-good behavior
+- Prioritizing a custom third-party engine over built-in engines
 
 **Default behavior is recommended** - automatic selection provides optimal performance and reliability.
 
@@ -180,8 +193,7 @@ void setup() {
 
 void loop() {
     fill_rainbow(leds, 60, 0, 255 / 60);
-    FastLED.show();  // Triggers onChannelEnqueued
-    delay(20);
+    FastLED.show();  // Triggers onChannelEnqueued for "my_strip"
 }
 ```
 
@@ -388,6 +400,328 @@ void loop() {
 - High frame rate applications requiring CPU/DMA parallelism
 - Custom transmission scheduling across multiple engines
 - Fine-grained control over transmission timing
+
+---
+
+## Implementing a Custom Channel Engine
+
+Third-party developers can create custom channel engines to support new hardware peripherals or transmission protocols. This section covers the requirements and best practices.
+
+### Overview
+
+A channel engine bridges the gap between high-level `Channel` objects and low-level hardware. Channels pass their encoded data to engines via an **ephemeral enqueue** - engines manage transmission, not channel registration.
+
+**Key responsibilities:**
+- Accept ChannelData pointers via `enqueue()` (temporary, per-frame)
+- Manage two-queue architecture: **pending** → **in-flight**
+- Protect ChannelData with `isInUse` flag during transmission
+- Implement 4-state machine: READY → BUSY → DRAINING → READY
+
+### Required Interface: IChannelEngine
+
+Inherit from `fl::IChannelEngine` and implement these methods:
+
+```cpp
+#include "fl/channels/engine.h"
+#include "fl/channels/data.h"
+
+class MyCustomEngine : public fl::IChannelEngine {
+public:
+    /// Check if engine can handle this channel type
+    bool canHandle(const ChannelDataPtr& data) const override {
+        // Example: Only accept clockless chipsets
+        return data && data->isClockless();
+    }
+
+    /// Enqueue channel data for transmission (ephemeral, per-frame)
+    void enqueue(ChannelDataPtr channelData) override {
+        if (channelData) {
+            mEnqueuedChannels.push_back(channelData);
+        }
+    }
+
+    /// Trigger transmission of enqueued channels
+    void show() override {
+        if (mEnqueuedChannels.empty()) {
+            return;
+        }
+
+        // CRITICAL: Mark all channels as in-use BEFORE transmission
+        for (auto& channel : mEnqueuedChannels) {
+            channel->setInUse(true);
+        }
+
+        // Move pending queue to in-flight queue
+        mTransmittingChannels = fl::move(mEnqueuedChannels);
+        mEnqueuedChannels.clear();
+
+        // Start hardware transmission
+        beginTransmission(fl::span<const ChannelDataPtr>(
+            mTransmittingChannels.data(),
+            mTransmittingChannels.size()));
+    }
+
+    /// Query engine state and perform maintenance
+    EngineState poll() override {
+        // Check hardware status
+        if (isHardwareBusy()) {
+            return EngineState::BUSY;
+        }
+
+        if (isTransmitting()) {
+            return EngineState::DRAINING;
+        }
+
+        // Transmission complete - CRITICAL: Clear isInUse flags
+        if (!mTransmittingChannels.empty()) {
+            for (auto& channel : mTransmittingChannels) {
+                channel->setInUse(false);
+            }
+            mTransmittingChannels.clear();
+        }
+
+        return EngineState::READY;
+    }
+
+    /// Get engine name for affinity binding
+    fl::string getName() const override {
+        return fl::string::from_literal("MY_ENGINE");
+    }
+
+    /// Declare capabilities (clockless, SPI, or both)
+    Capabilities getCapabilities() const override {
+        return Capabilities(true, false);  // Clockless only
+    }
+
+private:
+    void beginTransmission(fl::span<const ChannelDataPtr> channels);
+    bool isHardwareBusy() const;
+    bool isTransmitting() const;
+
+    // Two-queue architecture (required)
+    fl::vector<ChannelDataPtr> mEnqueuedChannels;     // Pending queue
+    fl::vector<ChannelDataPtr> mTransmittingChannels; // In-flight queue
+};
+```
+
+### Critical: isInUse Flag Management
+
+The `isInUse` flag prevents channels from modifying their data while the engine is transmitting. **All engines MUST manage this flag correctly.**
+
+**Rules:**
+1. **Set `isInUse(true)` in `show()`** - Before starting transmission
+2. **Clear `isInUse(false)` in `poll()`** - When transmission completes (READY state)
+3. **Clear `isInUse(false)` on errors** - When returning ERROR state
+
+**Why it matters:**
+- Channels reuse their ChannelData buffer across frames
+- Without protection, channels could overwrite data mid-transmission
+- The safety check in `Channel::showPixels()` prevents this:
+  ```cpp
+  if (mChannelData->isInUse()) {
+      FL_ASSERT(false, "Skipping update - buffer in use by engine");
+      return;
+  }
+  ```
+
+**Example (correct pattern):**
+```cpp
+void show() override {
+    // Mark in-use BEFORE transmission
+    for (auto& channel : mEnqueuedChannels) {
+        channel->setInUse(true);  // ✅ Prevent modification
+    }
+
+    mTransmittingChannels = fl::move(mEnqueuedChannels);
+    mEnqueuedChannels.clear();
+    startHardware();
+}
+
+EngineState poll() override {
+    if (hardwareComplete()) {
+        // Clear in-use AFTER transmission
+        for (auto& channel : mTransmittingChannels) {
+            channel->setInUse(false);  // ✅ Allow modification
+        }
+        mTransmittingChannels.clear();
+        return EngineState::READY;
+    }
+    return EngineState::DRAINING;
+}
+```
+
+### Two-Queue Architecture
+
+Engines use a dual-queue system to separate pending data from in-flight data:
+
+**Pending Queue (`mEnqueuedChannels`):**
+- Receives ChannelData via `enqueue()` calls
+- Accumulates channels until `show()` is called
+- Cleared in `show()` after moving to in-flight queue
+
+**In-Flight Queue (`mTransmittingChannels`):**
+- Holds channels currently being transmitted
+- Populated by `show()`, cleared by `poll()` when READY
+- Protected by `isInUse` flag
+
+**Lifecycle flow:**
+```
+Channel::showPixels()
+    ↓
+engine->enqueue(data)  →  mEnqueuedChannels.push_back(data)
+    ↓
+engine->show()         →  Move to mTransmittingChannels, clear mEnqueuedChannels
+    ↓
+engine->poll()         →  Check hardware status
+    ↓
+EngineState::READY     →  Clear mTransmittingChannels, ready for next frame
+```
+
+### State Machine
+
+Engines implement a 4-state machine for non-blocking transmission:
+
+| State | Description | Transition |
+|-------|-------------|------------|
+| **READY** | Idle, ready for new data | `show()` → BUSY |
+| **BUSY** | Actively enqueueing channels | Auto → DRAINING |
+| **DRAINING** | All channels queued, DMA transmitting | Hardware complete → READY |
+| **ERROR** | Hardware error occurred | User must reset |
+
+**State flow:**
+```
+READY → show() → BUSY → (all queued) → DRAINING → (complete) → READY
+                                           ↓
+                                       (error) → ERROR
+```
+
+**Implementation notes:**
+- Most engines skip BUSY (instant transition to DRAINING)
+- DRAINING is the primary "transmission in progress" state
+- ERROR requires manual recovery (reset hardware, clear state)
+
+### Registration with ChannelBusManager
+
+Register your engine with the bus manager to make it available:
+
+```cpp
+#include "fl/channels/bus_manager.h"
+
+// In your platform initialization code
+void setupCustomEngine() {
+    auto engine = fl::make_shared<MyCustomEngine>();
+
+    // Register with priority (higher = preferred)
+    // Priority range: 0 (lowest) to 10000 (highest)
+    fl::ChannelBusManager::instance().addEngine(
+        5000,              // Priority (between RMT=7000 and SPI=3000)
+        engine,            // Shared pointer to engine
+        "MY_ENGINE"        // Unique name for affinity binding
+    );
+}
+```
+
+**Priority guidelines:**
+- **10000+**: Reserved for testing/debugging overrides
+- **7000-9000**: High-performance hardware (e.g., RMT)
+- **5000-6000**: Standard hardware (e.g., PARLIO, I2S)
+- **3000-4000**: Fallback hardware (e.g., SPI)
+- **1000-2000**: Software implementations (e.g., bit-banging)
+
+**Engine selection:**
+1. Bus manager maintains engines sorted by priority (high to low)
+2. Iterates engines in priority order, calls `canHandle()` on each
+3. First engine returning `true` wins
+4. User can override with `ChannelOptions.mAffinity` or `FastLED.setExclusiveDriver()`
+
+**Priority modification:**
+- Engines are sorted by priority on registration (via `addEngine()`)
+- Priority can be changed at runtime via `setDriverPriority(name, priority)`
+- Changing priority triggers automatic re-sort of engine list
+- Higher priority engines are checked first (e.g., 9000 before 5000)
+
+### Best Practices
+
+**Memory Management:**
+- Use `fl::vector` for dynamic arrays (not `std::vector`)
+- Store ChannelDataPtr as `fl::shared_ptr<ChannelData>` (not raw pointers)
+- Never delete ChannelData - shared_ptr handles lifetime
+
+**Thread Safety:**
+- `enqueue()`, `show()`, `poll()` are called from main thread
+- ISR callbacks must be marked with `FL_IRAM` attribute
+- Use memory barriers when sharing state with ISRs
+- See `src/platforms/esp/32/drivers/parlio/parlio_engine.h` for ISR patterns
+
+**Error Handling:**
+- Return `EngineState::ERROR` on hardware failures
+- Clear `isInUse` flags before returning ERROR
+- Log errors with `FL_WARN()` or `FL_DBG()`
+- Provide diagnostic information in error messages
+
+**Performance:**
+- Minimize work in `show()` and `poll()` (hot paths)
+- Use DMA for data transmission (not CPU loops)
+- Avoid memory allocation in hot paths
+- Pre-allocate buffers during initialization
+
+**Compatibility:**
+- Implement `canHandle()` conservatively (reject unsupported chipsets)
+- Check timing constraints in `canHandle()` if hardware has limits
+- Support both clockless and SPI if hardware permits
+- Document hardware requirements in engine header
+
+### Example Engines
+
+Reference implementations in the codebase:
+
+**Simple (good starting point):**
+- `src/platforms/esp/32/drivers/uart/channel_engine_uart.cpp.hpp` - UART Wave8 encoding
+- `src/platforms/stub/clockless_channel_stub.h` - Stub engine for testing
+
+**Advanced (full-featured):**
+- `src/platforms/esp/32/drivers/rmt/rmt_5/channel_engine_rmt.cpp.hpp` - RMT with ISR callbacks
+- `src/platforms/esp/32/drivers/parlio/channel_engine_parlio.cpp.hpp` - PARLIO with chipset grouping
+
+**Key differences:**
+- UART: Simple blocking transmission
+- RMT: ISR-driven async transmission with channel pooling
+- PARLIO: Multi-lane parallel output with chipset grouping
+
+### Testing Your Engine
+
+Create unit tests following the existing patterns:
+
+```cpp
+#include "test.h"
+#include "fl/channels/engine.h"
+#include "fl/channels/data.h"
+
+FL_TEST_CASE("MyEngine: Basic enqueue and transmission") {
+    auto engine = fl::make_shared<MyCustomEngine>();
+
+    // Create test data
+    auto data = fl::ChannelData::create(5, timing, fl::move(encodedData));
+
+    // Enqueue
+    engine->enqueue(data);
+
+    // Verify isInUse flag lifecycle
+    FL_CHECK_FALSE(data->isInUse());  // Not in use before show()
+
+    engine->show();
+    FL_CHECK(data->isInUse());  // In use during transmission
+
+    // Poll until complete
+    while (engine->poll() != fl::IChannelEngine::EngineState::READY) {
+        fl::delayMicroseconds(100);
+    }
+
+    FL_CHECK_FALSE(data->isInUse());  // Not in use after transmission
+}
+```
+
+See `tests/fl/channels/engine.cpp` for more test examples.
 
 ---
 

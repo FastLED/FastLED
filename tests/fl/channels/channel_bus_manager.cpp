@@ -319,8 +319,8 @@ FL_TEST_CASE("ChannelBusManager - Driver enable/disable") {
     auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
     auto spiEngine = fl::make_shared<FakeEngine>("SPI");
 
-    manager.addEngine(10, rmtEngine, "RMT");
-    manager.addEngine(50, spiEngine, "SPI");
+    manager.addEngine(10, rmtEngine);
+    manager.addEngine(50, spiEngine);
 
     // By default, all engines should be enabled
     FL_CHECK(manager.isDriverEnabled("RMT") == true);
@@ -367,8 +367,8 @@ FL_TEST_CASE("ChannelBusManager - Disable all drivers") {
     auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
     auto spiEngine = fl::make_shared<FakeEngine>("SPI");
 
-    manager.addEngine(10, rmtEngine, "RMT");
-    manager.addEngine(50, spiEngine, "SPI");
+    manager.addEngine(10, rmtEngine);
+    manager.addEngine(50, spiEngine);
 
     // Disable both engines
     manager.setDriverEnabled("RMT", false);
@@ -386,38 +386,39 @@ FL_TEST_CASE("ChannelBusManager - Disable all drivers") {
     FL_CHECK(manager.poll() == IChannelEngine::EngineState::READY);
 }
 
-FL_TEST_CASE("ChannelBusManager - Multiple engines with same name") {
+FL_TEST_CASE("ChannelBusManager - Replacement engine can be disabled/enabled") {
     ChannelBusManager manager;
-    auto rmt1 = fl::make_shared<FakeEngine>("RMT1");
-    auto rmt2 = fl::make_shared<FakeEngine>("RMT2");
+    // Both engines have the SAME name from getName()
+    auto rmt1 = fl::make_shared<FakeEngine>("RMT");
+    auto rmt2 = fl::make_shared<FakeEngine>("RMT");
 
-    manager.addEngine(100, rmt1, "RMT");
-    manager.addEngine(50, rmt2, "RMT");
+    manager.addEngine(100, rmt1);
+    manager.addEngine(50, rmt2);  // Replaces rmt1 (same name)
 
-    // Disable RMT name - should disable BOTH engines with that name
+    // Disable RMT name - should disable the replacement engine (rmt2)
     manager.setDriverEnabled("RMT", false);
 
     manager.enqueue(createDummyChannelData());
     manager.show();
 
-    FL_CHECK(rmt1->getTransmitCount() == 0);
-    FL_CHECK(rmt2->getTransmitCount() == 0);
+    FL_CHECK(rmt1->getTransmitCount() == 0);  // rmt1 was replaced
+    FL_CHECK(rmt2->getTransmitCount() == 0);  // rmt2 is disabled
 
-    // Re-enable RMT - should use highest priority RMT engine
+    // Re-enable RMT - should use the replacement engine (rmt2)
     manager.setDriverEnabled("RMT", true);
 
     manager.enqueue(createDummyChannelData());
     manager.show();
 
-    FL_CHECK(rmt1->getTransmitCount() == 1);  // Higher priority
-    FL_CHECK(rmt2->getTransmitCount() == 0);
+    FL_CHECK(rmt1->getTransmitCount() == 0);  // Still replaced
+    FL_CHECK(rmt2->getTransmitCount() == 1);  // rmt2 is the active engine
 }
 
 FL_TEST_CASE("ChannelBusManager - Query non-existent driver name") {
     ChannelBusManager manager;
     auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
 
-    manager.addEngine(10, rmtEngine, "RMT");
+    manager.addEngine(10, rmtEngine);
 
     // Query PARLIO when only RMT is registered
     FL_CHECK(manager.isDriverEnabled("PARLIO") == false);
@@ -436,8 +437,8 @@ FL_TEST_CASE("ChannelBusManager - Immediate effect of setDriverEnabled") {
     auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
     auto spiEngine = fl::make_shared<FakeEngine>("SPI");
 
-    manager.addEngine(10, rmtEngine, "RMT");
-    manager.addEngine(50, spiEngine, "SPI");
+    manager.addEngine(10, rmtEngine);
+    manager.addEngine(50, spiEngine);
 
     // First transmission - should use SPI
     manager.enqueue(createDummyChannelData());
@@ -470,9 +471,9 @@ FL_TEST_CASE("ChannelBusManager - Query driver info") {
     auto spiEngine = fl::make_shared<FakeEngine>("SPI");
     auto parlioEngine = fl::make_shared<FakeEngine>("PARLIO");
 
-    manager.addEngine(10, rmtEngine, "RMT");
-    manager.addEngine(50, spiEngine, "SPI");
-    manager.addEngine(100, parlioEngine, "PARLIO");
+    manager.addEngine(10, rmtEngine);
+    manager.addEngine(50, spiEngine);
+    manager.addEngine(100, parlioEngine);
 
     // Check count
     FL_CHECK(manager.getDriverCount() == 3);
@@ -497,49 +498,48 @@ FL_TEST_CASE("ChannelBusManager - Query driver info") {
     FL_CHECK(hasPARLIO == true);
 }
 
-FL_TEST_CASE("ChannelBusManager - Query with unnamed engines") {
+FL_TEST_CASE("ChannelBusManager - Query with unnamed engines rejected") {
     ChannelBusManager manager;
 
     auto namedEngine = fl::make_shared<FakeEngine>("Named");
-    auto unnamedEngine = fl::make_shared<FakeEngine>("Unnamed");
+    auto unnamedEngine = fl::make_shared<FakeEngine>("");  // Empty name from getName()
 
-    manager.addEngine(10, namedEngine, "Named");
-    manager.addEngine(20, unnamedEngine, nullptr);  // Unnamed
+    manager.addEngine(10, namedEngine);
+    manager.addEngine(20, unnamedEngine);  // Rejected (empty getName())
 
-    // Count includes both
-    FL_CHECK(manager.getDriverCount() == 2);
+    // Count should be 1 (unnamed engine was rejected)
+    FL_CHECK(manager.getDriverCount() == 1);
 
-    // Info includes both (unnamed has empty string)
+    // Info includes only the named engine
     auto info = manager.getDriverInfos();
-    FL_CHECK(info.size() == 2);
+    FL_CHECK(info.size() == 1);
 
-    // Higher priority first (20 > 10)
-    FL_CHECK(info[0].priority == 20);
-    FL_CHECK(info[0].name == "");  // Unnamed
-
-    FL_CHECK(info[1].priority == 10);
-    FL_CHECK(info[1].name == "Named");
+    FL_CHECK(info[0].priority == 10);
+    FL_CHECK(info[0].name == "Named");
 }
 
-FL_TEST_CASE("ChannelBusManager - Query with duplicate names") {
+FL_TEST_CASE("ChannelBusManager - Duplicate names cause replacement") {
     ChannelBusManager manager;
 
-    auto rmt1 = fl::make_shared<FakeEngine>("RMT1");
-    auto rmt2 = fl::make_shared<FakeEngine>("RMT2");
+    // Both engines have the SAME name from getName()
+    auto rmt1 = fl::make_shared<FakeEngine>("RMT");
+    auto rmt2 = fl::make_shared<FakeEngine>("RMT");
 
-    manager.addEngine(100, rmt1, "RMT");
-    manager.addEngine(50, rmt2, "RMT");
+    manager.addEngine(100, rmt1);
+    manager.addEngine(50, rmt2);  // Replaces first engine (same name)
 
-    // Count should be 2 (two engines)
-    FL_CHECK(manager.getDriverCount() == 2);
+    // Count should be 1 (second engine replaced the first)
+    FL_CHECK(manager.getDriverCount() == 1);
 
-    // Info should include both "RMT" entries (duplicates allowed)
+    // Info should include only the replacement engine
     auto info = manager.getDriverInfos();
-    FL_CHECK(info.size() == 2);
+    FL_CHECK(info.size() == 1);
     FL_CHECK(info[0].name == "RMT");
-    FL_CHECK(info[0].priority == 100);
-    FL_CHECK(info[1].name == "RMT");
-    FL_CHECK(info[1].priority == 50);
+    FL_CHECK(info[0].priority == 50);  // Second engine's priority
+
+    // Retrieved engine should be rmt2, not rmt1
+    IChannelEngine* retrieved = manager.getEngineByName("RMT");
+    FL_CHECK(retrieved == rmt2.get());
 }
 
 FL_TEST_CASE("ChannelBusManager - Query full driver state") {
@@ -549,9 +549,9 @@ FL_TEST_CASE("ChannelBusManager - Query full driver state") {
     auto spiEngine = fl::make_shared<FakeEngine>("SPI");
     auto parlioEngine = fl::make_shared<FakeEngine>("PARLIO");
 
-    manager.addEngine(10, rmtEngine, "RMT");
-    manager.addEngine(50, spiEngine, "SPI");
-    manager.addEngine(100, parlioEngine, "PARLIO");
+    manager.addEngine(10, rmtEngine);
+    manager.addEngine(50, spiEngine);
+    manager.addEngine(100, parlioEngine);
 
     // Get full info (span, no allocation!)
     auto info = manager.getDriverInfos();
@@ -585,8 +585,8 @@ FL_TEST_CASE("ChannelBusManager - Span validity") {
     auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
     auto spiEngine = fl::make_shared<FakeEngine>("SPI");
 
-    manager.addEngine(10, rmtEngine, "RMT");
-    manager.addEngine(50, spiEngine, "SPI");
+    manager.addEngine(10, rmtEngine);
+    manager.addEngine(50, spiEngine);
 
     // Get span (no allocation)
     auto info = manager.getDriverInfos();
@@ -613,9 +613,9 @@ FL_TEST_CASE("ChannelBusManager - setExclusiveDriver with valid name") {
     auto spiEngine = fl::make_shared<FakeEngine>("SPI");
     auto parlioEngine = fl::make_shared<FakeEngine>("PARLIO");
 
-    manager.addEngine(10, rmtEngine, "RMT");
-    manager.addEngine(50, spiEngine, "SPI");
-    manager.addEngine(100, parlioEngine, "PARLIO");
+    manager.addEngine(10, rmtEngine);
+    manager.addEngine(50, spiEngine);
+    manager.addEngine(100, parlioEngine);
 
     // All drivers should be enabled by default
     FL_CHECK(manager.isDriverEnabled("RMT") == true);
@@ -644,8 +644,8 @@ FL_TEST_CASE("ChannelBusManager - setExclusiveDriver with invalid name") {
     auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
     auto spiEngine = fl::make_shared<FakeEngine>("SPI");
 
-    manager.addEngine(10, rmtEngine, "RMT");
-    manager.addEngine(50, spiEngine, "SPI");
+    manager.addEngine(10, rmtEngine);
+    manager.addEngine(50, spiEngine);
 
     // Try to set non-existent driver as exclusive
     bool result = manager.setExclusiveDriver("NONEXISTENT");
@@ -667,8 +667,8 @@ FL_TEST_CASE("ChannelBusManager - setExclusiveDriver with nullptr") {
     auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
     auto spiEngine = fl::make_shared<FakeEngine>("SPI");
 
-    manager.addEngine(10, rmtEngine, "RMT");
-    manager.addEngine(50, spiEngine, "SPI");
+    manager.addEngine(10, rmtEngine);
+    manager.addEngine(50, spiEngine);
 
     // nullptr should disable all drivers
     bool result = manager.setExclusiveDriver(nullptr);
@@ -690,8 +690,8 @@ FL_TEST_CASE("ChannelBusManager - setExclusiveDriver with empty string") {
     auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
     auto spiEngine = fl::make_shared<FakeEngine>("SPI");
 
-    manager.addEngine(10, rmtEngine, "RMT");
-    manager.addEngine(50, spiEngine, "SPI");
+    manager.addEngine(10, rmtEngine);
+    manager.addEngine(50, spiEngine);
 
     // Empty string should disable all drivers
     bool result = manager.setExclusiveDriver("");
@@ -707,8 +707,8 @@ FL_TEST_CASE("ChannelBusManager - setExclusiveDriver forward compatibility") {
     auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
     auto spiEngine = fl::make_shared<FakeEngine>("SPI");
 
-    manager.addEngine(10, rmtEngine, "RMT");
-    manager.addEngine(50, spiEngine, "SPI");
+    manager.addEngine(10, rmtEngine);
+    manager.addEngine(50, spiEngine);
 
     // Set RMT as exclusive
     manager.setExclusiveDriver("RMT");
@@ -717,7 +717,7 @@ FL_TEST_CASE("ChannelBusManager - setExclusiveDriver forward compatibility") {
 
     // Simulate adding a new driver (future scenario)
     auto parlioEngine = fl::make_shared<FakeEngine>("PARLIO");
-    manager.addEngine(100, parlioEngine, "PARLIO");
+    manager.addEngine(100, parlioEngine);
 
     // New driver should be auto-disabled (not matching "RMT")
     FL_CHECK(manager.isDriverEnabled("PARLIO") == false);
@@ -736,8 +736,8 @@ FL_TEST_CASE("ChannelBusManager - setExclusiveDriver immediate effect") {
     auto rmtEngine = fl::make_shared<FakeEngine>("RMT");
     auto spiEngine = fl::make_shared<FakeEngine>("SPI");
 
-    manager.addEngine(10, rmtEngine, "RMT");
-    manager.addEngine(50, spiEngine, "SPI");
+    manager.addEngine(10, rmtEngine);
+    manager.addEngine(50, spiEngine);
 
     // First transmission - should use SPI (higher priority)
     manager.enqueue(createDummyChannelData());
@@ -757,27 +757,28 @@ FL_TEST_CASE("ChannelBusManager - setExclusiveDriver immediate effect") {
     FL_CHECK(spiEngine->getTransmitCount() == 0);
 }
 
-FL_TEST_CASE("ChannelBusManager - setExclusiveDriver with duplicate names") {
+FL_TEST_CASE("ChannelBusManager - setExclusiveDriver with replaced engine") {
     ChannelBusManager manager;
-    auto rmt1 = fl::make_shared<FakeEngine>("RMT1");
-    auto rmt2 = fl::make_shared<FakeEngine>("RMT2");
+    // Both RMT engines have the SAME name from getName()
+    auto rmt1 = fl::make_shared<FakeEngine>("RMT");
+    auto rmt2 = fl::make_shared<FakeEngine>("RMT");
     auto spiEngine = fl::make_shared<FakeEngine>("SPI");
 
-    manager.addEngine(100, rmt1, "RMT");
-    manager.addEngine(50, rmt2, "RMT");
-    manager.addEngine(25, spiEngine, "SPI");
+    manager.addEngine(100, rmt1);
+    manager.addEngine(50, rmt2);  // Replaces rmt1 (same name)
+    manager.addEngine(25, spiEngine);
 
-    // Set RMT as exclusive - should enable BOTH engines with name "RMT"
+    // Set RMT as exclusive - should enable only the replacement RMT engine (rmt2)
     manager.setExclusiveDriver("RMT");
 
     FL_CHECK(manager.isDriverEnabled("RMT") == true);
     FL_CHECK(manager.isDriverEnabled("SPI") == false);
 
-    // Should use highest priority RMT engine (priority 100)
+    // Should use the replacement RMT engine (rmt2, priority 50)
     manager.enqueue(createDummyChannelData());
     manager.show();
-    FL_CHECK(rmt1->getTransmitCount() == 1);
-    FL_CHECK(rmt2->getTransmitCount() == 0);
+    FL_CHECK(rmt1->getTransmitCount() == 0);  // rmt1 was replaced
+    FL_CHECK(rmt2->getTransmitCount() == 1);  // rmt2 is the active engine
     FL_CHECK(spiEngine->getTransmitCount() == 0);
 }
 
@@ -787,9 +788,9 @@ FL_TEST_CASE("ChannelBusManager - setExclusiveDriver switch between drivers") {
     auto spiEngine = fl::make_shared<FakeEngine>("SPI");
     auto parlioEngine = fl::make_shared<FakeEngine>("PARLIO");
 
-    manager.addEngine(10, rmtEngine, "RMT");
-    manager.addEngine(50, spiEngine, "SPI");
-    manager.addEngine(100, parlioEngine, "PARLIO");
+    manager.addEngine(10, rmtEngine);
+    manager.addEngine(50, spiEngine);
+    manager.addEngine(100, parlioEngine);
 
     // Test 1: Set RMT exclusive
     manager.setExclusiveDriver("RMT");
@@ -959,8 +960,8 @@ FL_TEST_CASE("ChannelBusManager - APA102 routes to HW SPI adapter (priority 9)")
     auto hwSpiEngine = fl::make_shared<FakeSpiHardwareEngine>("HW_SPI", 9);
     auto clocklessEngine = fl::make_shared<FakeClocklessEngine>("CLOCKLESS_SPI", 2);
 
-    manager.addEngine(9, hwSpiEngine, "HW_SPI");
-    manager.addEngine(2, clocklessEngine, "CLOCKLESS_SPI");
+    manager.addEngine(9, hwSpiEngine);
+    manager.addEngine(2, clocklessEngine);
 
     // Create APA102 channel data
     auto data = createSpiChannelData(5, 18);
@@ -980,8 +981,8 @@ FL_TEST_CASE("ChannelBusManager - WS2812 routes to clockless engine (priority 2)
     auto hwSpiEngine = fl::make_shared<FakeSpiHardwareEngine>("HW_SPI", 9);
     auto clocklessEngine = fl::make_shared<FakeClocklessEngine>("CLOCKLESS_SPI", 2);
 
-    manager.addEngine(9, hwSpiEngine, "HW_SPI");
-    manager.addEngine(2, clocklessEngine, "CLOCKLESS_SPI");
+    manager.addEngine(9, hwSpiEngine);
+    manager.addEngine(2, clocklessEngine);
 
     // Create WS2812 channel data
     auto data = createClocklessChannelData(5);
@@ -1001,8 +1002,8 @@ FL_TEST_CASE("ChannelBusManager - Mixed APA102 and WS2812 in separate frames") {
     auto hwSpiEngine = fl::make_shared<FakeSpiHardwareEngine>("HW_SPI", 9);
     auto clocklessEngine = fl::make_shared<FakeClocklessEngine>("CLOCKLESS_SPI", 2);
 
-    manager.addEngine(9, hwSpiEngine, "HW_SPI");
-    manager.addEngine(2, clocklessEngine, "CLOCKLESS_SPI");
+    manager.addEngine(9, hwSpiEngine);
+    manager.addEngine(2, clocklessEngine);
 
     // Frame 1: APA102
     auto apa102 = createSpiChannelData(5, 18);
@@ -1033,10 +1034,10 @@ FL_TEST_CASE("ChannelBusManager - Priority ordering ensures HW SPI first") {
 
     // Register in WRONG order (clockless before HW SPI)
     auto clocklessEngine = fl::make_shared<FakeClocklessEngine>("CLOCKLESS_SPI", 2);
-    manager.addEngine(2, clocklessEngine, "CLOCKLESS_SPI");
+    manager.addEngine(2, clocklessEngine);
 
     auto hwSpiEngine = fl::make_shared<FakeSpiHardwareEngine>("HW_SPI", 9);
-    manager.addEngine(9, hwSpiEngine, "HW_SPI");
+    manager.addEngine(9, hwSpiEngine);
 
     // Create APA102 channel data
     auto data = createSpiChannelData(5, 18);
@@ -1055,8 +1056,8 @@ FL_TEST_CASE("ChannelBusManager - SK9822 routes to HW SPI adapter") {
     auto hwSpiEngine = fl::make_shared<FakeSpiHardwareEngine>("HW_SPI", 9);
     auto clocklessEngine = fl::make_shared<FakeClocklessEngine>("CLOCKLESS_SPI", 2);
 
-    manager.addEngine(9, hwSpiEngine, "HW_SPI");
-    manager.addEngine(2, clocklessEngine, "CLOCKLESS_SPI");
+    manager.addEngine(9, hwSpiEngine);
+    manager.addEngine(2, clocklessEngine);
 
     // Create SK9822 channel data
     SpiEncoder encoder = SpiEncoder::sk9822();
@@ -1078,8 +1079,8 @@ FL_TEST_CASE("ChannelBusManager - SK6812 routes to clockless engine") {
     auto hwSpiEngine = fl::make_shared<FakeSpiHardwareEngine>("HW_SPI", 9);
     auto clocklessEngine = fl::make_shared<FakeClocklessEngine>("CLOCKLESS_SPI", 2);
 
-    manager.addEngine(9, hwSpiEngine, "HW_SPI");
-    manager.addEngine(2, clocklessEngine, "CLOCKLESS_SPI");
+    manager.addEngine(9, hwSpiEngine);
+    manager.addEngine(2, clocklessEngine);
 
     // Create SK6812 channel data
     auto timing = makeTimingConfig<TIMING_SK6812>();
@@ -1106,9 +1107,9 @@ FL_TEST_CASE("ChannelBusManager - Capability logging") {
     auto spiEngine = fl::make_shared<FakeEngine>("HW_SPI", false, false, true);     // SPI only
     auto bothEngine = fl::make_shared<FakeEngine>("BOTH", false, true, true);       // Both
 
-    manager.addEngine(10, clocklessEngine, "RMT");
-    manager.addEngine(50, spiEngine, "HW_SPI");
-    manager.addEngine(100, bothEngine, "BOTH");
+    manager.addEngine(10, clocklessEngine);
+    manager.addEngine(50, spiEngine);
+    manager.addEngine(100, bothEngine);
 
     // Get captured output
     fl::string output = test_helper::get_capture();
@@ -1134,6 +1135,209 @@ FL_TEST_CASE("ChannelBusManager - Capability logging") {
 
     // Cleanup
     fl::clear_io_handlers();
+}
+
+FL_TEST_CASE("ChannelBusManager - setDriverPriority re-sorts engines") {
+    ChannelBusManager manager;
+
+    // Add engines with initial priorities
+    auto engineA = fl::make_shared<FakeEngine>("ENGINE_A", false, true, false);
+    auto engineB = fl::make_shared<FakeEngine>("ENGINE_B", false, true, false);
+    auto engineC = fl::make_shared<FakeEngine>("ENGINE_C", false, true, false);
+
+    manager.addEngine(1000, engineA);  // Lowest priority
+    manager.addEngine(5000, engineB);  // Medium priority
+    manager.addEngine(9000, engineC);  // Highest priority
+
+    // Verify initial order (sorted by priority: high to low)
+    auto infos = manager.getDriverInfos();
+    FL_REQUIRE(infos.size() == 3);
+    FL_CHECK(infos[0].name == "ENGINE_C");  // Priority 9000
+    FL_CHECK(infos[1].name == "ENGINE_B");  // Priority 5000
+    FL_CHECK(infos[2].name == "ENGINE_A");  // Priority 1000
+    FL_CHECK_EQ(infos[0].priority, 9000);
+    FL_CHECK_EQ(infos[1].priority, 5000);
+    FL_CHECK_EQ(infos[2].priority, 1000);
+
+    // Change ENGINE_A to highest priority
+    bool result = manager.setDriverPriority("ENGINE_A", 10000);
+    FL_CHECK(result);
+
+    // Verify engines re-sorted (ENGINE_A should now be first)
+    infos = manager.getDriverInfos();
+    FL_REQUIRE(infos.size() == 3);
+    FL_CHECK(infos[0].name == "ENGINE_A");  // Priority 10000 (was 1000)
+    FL_CHECK(infos[1].name == "ENGINE_C");  // Priority 9000
+    FL_CHECK(infos[2].name == "ENGINE_B");  // Priority 5000
+    FL_CHECK_EQ(infos[0].priority, 10000);
+    FL_CHECK_EQ(infos[1].priority, 9000);
+    FL_CHECK_EQ(infos[2].priority, 5000);
+
+    // Change ENGINE_B to medium-high priority
+    result = manager.setDriverPriority("ENGINE_B", 9500);
+    FL_CHECK(result);
+
+    // Verify re-sorted again
+    infos = manager.getDriverInfos();
+    FL_REQUIRE(infos.size() == 3);
+    FL_CHECK(infos[0].name == "ENGINE_A");  // Priority 10000
+    FL_CHECK(infos[1].name == "ENGINE_B");  // Priority 9500 (was 5000)
+    FL_CHECK(infos[2].name == "ENGINE_C");  // Priority 9000
+    FL_CHECK_EQ(infos[0].priority, 10000);
+    FL_CHECK_EQ(infos[1].priority, 9500);
+    FL_CHECK_EQ(infos[2].priority, 9000);
+
+    // Verify non-existent engine returns false
+    result = manager.setDriverPriority("NONEXISTENT", 5000);
+    FL_CHECK_FALSE(result);
+
+    // Verify list unchanged after failed operation
+    infos = manager.getDriverInfos();
+    FL_REQUIRE(infos.size() == 3);
+    FL_CHECK(infos[0].name == "ENGINE_A");
+    FL_CHECK(infos[1].name == "ENGINE_B");
+    FL_CHECK(infos[2].name == "ENGINE_C");
+}
+
+FL_TEST_CASE("ChannelBusManager - priority re-sort affects engine selection order") {
+    ChannelBusManager manager;
+
+    // Create engines that both accept clockless channels
+    auto lowPriorityEngine = fl::make_shared<FakeEngine>("LOW_PRIORITY", false, true, false);
+    auto highPriorityEngine = fl::make_shared<FakeEngine>("HIGH_PRIORITY", false, true, false);
+
+    manager.addEngine(1000, lowPriorityEngine);
+    manager.addEngine(9000, highPriorityEngine);
+
+    // Create clockless channel data
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    fl::vector_psram<uint8_t> channelData = {0xFF, 0x00, 0xAA};
+    auto data = ChannelData::create(5, timing, fl::move(channelData));
+
+    // First transmission should use high priority engine
+    manager.enqueue(data);
+    manager.show();
+    FL_CHECK_EQ(highPriorityEngine->getTransmitCount(), 1);
+    FL_CHECK_EQ(lowPriorityEngine->getTransmitCount(), 0);
+
+    // Reset counters
+    highPriorityEngine->reset();
+    lowPriorityEngine->reset();
+
+    // Increase low priority engine's priority above high priority engine
+    manager.setDriverPriority("LOW_PRIORITY", 10000);
+
+    // Create new channel data for second transmission
+    fl::vector_psram<uint8_t> channelData2 = {0xFF, 0x00, 0xAA};
+    auto data2 = ChannelData::create(5, timing, fl::move(channelData2));
+
+    // Second transmission should now use formerly-low-priority engine
+    manager.enqueue(data2);
+    manager.show();
+    FL_CHECK_EQ(lowPriorityEngine->getTransmitCount(), 1);  // Now selected first
+    FL_CHECK_EQ(highPriorityEngine->getTransmitCount(), 0);
+}
+
+FL_TEST_CASE("ChannelBusManager - addEngine rejects engine with empty getName()") {
+    ChannelBusManager manager;
+    // Engine with empty name from getName()
+    auto engine = fl::make_shared<FakeEngine>("");
+
+    // Attempt to add engine with empty getName() (should be rejected)
+    size_t countBefore = manager.getDriverCount();
+    manager.addEngine(100, engine);
+    size_t countAfter = manager.getDriverCount();
+
+    // Engine should NOT be added
+    FL_CHECK_EQ(countBefore, countAfter);
+}
+
+FL_TEST_CASE("ChannelBusManager - addEngine replaces engine with same name") {
+    ChannelBusManager manager;
+
+    // Add first engine with name "REPLACEABLE"
+    auto engine1 = fl::make_shared<FakeEngine>("REPLACEABLE", false, true, false);
+    manager.addEngine(100, engine1);
+
+    FL_CHECK_EQ(manager.getDriverCount(), 1);
+
+    // Get reference to first engine via name
+    IChannelEngine* retrievedEngine1 = manager.getEngineByName("REPLACEABLE");
+    FL_CHECK(retrievedEngine1 != nullptr);
+    FL_CHECK(retrievedEngine1 == engine1.get());
+
+    // Add second engine with SAME name "REPLACEABLE" (should replace)
+    auto engine2 = fl::make_shared<FakeEngine>("REPLACEABLE", false, true, true);
+    manager.addEngine(200, engine2);  // Same name, different priority and capabilities
+
+    // Should still have only 1 engine
+    FL_CHECK_EQ(manager.getDriverCount(), 1);
+
+    // Retrieved engine should now be engine2
+    IChannelEngine* retrievedEngine2 = manager.getEngineByName("REPLACEABLE");
+    FL_CHECK(retrievedEngine2 != nullptr);
+    FL_CHECK(retrievedEngine2 == engine2.get());
+    FL_CHECK(retrievedEngine2 != engine1.get());  // Not the old engine
+
+    // Verify capabilities changed (engine2 supports SPI, engine1 didn't)
+    auto caps = retrievedEngine2->getCapabilities();
+    FL_CHECK(caps.supportsSpi == true);
+}
+
+FL_TEST_CASE("ChannelBusManager - engine replacement waits for READY state") {
+    ChannelBusManager manager;
+
+    // Create engine that stays BUSY initially
+    class BusyEngine : public FakeEngine {
+    public:
+        BusyEngine() : FakeEngine("BUSY"), mPollCount(0), mBusyCycles(5) {}
+
+        EngineState poll() override {
+            mPollCount++;
+            // Stay BUSY for first 5 polls, then become READY
+            if (mPollCount < mBusyCycles) {
+                return EngineState::BUSY;
+            }
+            return FakeEngine::poll();  // Return READY
+        }
+
+        int getPollCount() const { return mPollCount; }
+        void reset() { mPollCount = 0; FakeEngine::reset(); }
+        void setBusyCycles(int cycles) { mBusyCycles = cycles; }
+
+    private:
+        int mPollCount;
+        int mBusyCycles;
+    };
+
+    auto busyEngine = fl::make_shared<BusyEngine>();
+    manager.addEngine(100, busyEngine);
+
+    // Enqueue some data to make it transmitting
+    auto data = createDummyChannelData();
+    manager.enqueue(data);
+    manager.show();
+
+    // Verify engine is BUSY after transmission starts
+    int initialPollCount = busyEngine->getPollCount();
+    FL_CHECK(initialPollCount > 0);  // Should have been polled
+
+    // Reset poll count to make it BUSY again for replacement test
+    busyEngine->reset();
+    busyEngine->setBusyCycles(5);  // Will be BUSY for 5 polls
+
+    // Replace the engine with another engine with SAME name "BUSY"
+    // (should wait for READY, polling busyEngine until it becomes READY)
+    auto newEngine = fl::make_shared<FakeEngine>("BUSY");
+    manager.addEngine(200, newEngine);
+
+    // Verify poll was called multiple times while waiting for READY
+    // (busyEngine should have been polled at least 5 times during replacement)
+    FL_CHECK(busyEngine->getPollCount() >= 5);
+
+    // Verify replacement succeeded
+    IChannelEngine* retrieved = manager.getEngineByName("BUSY");
+    FL_CHECK(retrieved == newEngine.get());
 }
 
 } // namespace channel_bus_manager_test

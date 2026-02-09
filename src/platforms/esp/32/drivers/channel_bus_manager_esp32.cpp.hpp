@@ -132,7 +132,7 @@ static void addSpiHardwareIfPossible(ChannelBusManager& manager) {
                 }
             }
 
-            manager.addEngine(maxPriority, adapter, "SPI_UNIFIED");
+            manager.addEngine(maxPriority, adapter);
 
             FL_DBG("ESP32: Registered unified SPI engine with "
                    << controllers.size() << " controllers (priority "
@@ -150,7 +150,7 @@ static void addParlioIfPossible(ChannelBusManager& manager) {
 #if FASTLED_ESP32_HAS_PARLIO
     // ESP32-C6: Fixed by explicitly setting clk_in_gpio_num = -1 (Iteration 2)
     // This tells the driver to use internal clock source instead of external GPIO 0
-    manager.addEngine(PRIORITY_PARLIO, fl::make_shared<ChannelEnginePARLIO>(), "PARLIO");
+    manager.addEngine(PRIORITY_PARLIO, fl::make_shared<ChannelEnginePARLIO>());
     FL_DBG("ESP32: Added PARLIO engine (priority " << PRIORITY_PARLIO << ")");
 #else
     (void)manager;  // Suppress unused parameter warning
@@ -162,7 +162,7 @@ static void addLcdRgbIfPossible(ChannelBusManager& manager) {
 #if FASTLED_ESP32_HAS_LCD_RGB
     auto engine = createLcdRgbEngine();
     if (engine) {
-        manager.addEngine(PRIORITY_LCD_RGB, engine, "LCD_RGB");
+        manager.addEngine(PRIORITY_LCD_RGB, engine);
         FL_DBG("ESP32: Added LCD_RGB engine (priority " << PRIORITY_LCD_RGB << ")");
     } else {
         FL_DBG("ESP32-P4: LCD_RGB engine creation failed");
@@ -182,7 +182,7 @@ static void addSpiIfPossible(ChannelBusManager& manager) {
     FL_DBG("ESP32-C6: SPI engine not enabled (only 1 SPI host available, RMT5 preferred)");
     (void)manager;  // Suppress unused parameter warning
     #else
-    manager.addEngine(PRIORITY_SPI, fl::make_shared<ChannelEngineSpi>(), "SPI");
+    manager.addEngine(PRIORITY_SPI, fl::make_shared<ChannelEngineSpi>());
     FL_DBG("ESP32: Added SPI engine (priority " << PRIORITY_SPI << ")");
     #endif
 #else
@@ -198,7 +198,7 @@ static void addUartIfPossible(ChannelBusManager& manager) {
     // Uses automatic start/stop bit insertion for efficient waveform generation
     auto peripheral = fl::make_shared<UartPeripheralEsp>();
     auto engine = fl::make_shared<ChannelEngineUART>(peripheral);
-    manager.addEngine(PRIORITY_UART, engine, "UART");
+    manager.addEngine(PRIORITY_UART, engine);
     FL_DBG("ESP32: Added UART engine (priority " << PRIORITY_UART << ")");
 #else
     (void)manager;  // Suppress unused parameter warning
@@ -217,7 +217,7 @@ static void addRmtIfPossible(ChannelBusManager& manager) {
     const char* version = "RMT4";
     #endif
 
-    manager.addEngine(PRIORITY_RMT, engine, "RMT");
+    manager.addEngine(PRIORITY_RMT, engine);
     FL_DBG("ESP32: Added " << version << " engine (priority " << PRIORITY_RMT << ")");
 #else
     (void)manager;  // Suppress unused parameter warning
@@ -231,7 +231,7 @@ static void addI2sIfPossible(ChannelBusManager& manager) {
     // Experimental driver - uses transpose encoding for parallel LED output
     auto engine = createI2sEngine();
     if (engine) {
-        manager.addEngine(PRIORITY_I2S, engine, "I2S");
+        manager.addEngine(PRIORITY_I2S, engine);
         FL_DBG("ESP32-S3: Added I2S LCD_CAM engine (priority " << PRIORITY_I2S << ")");
     } else {
         FL_DBG("ESP32-S3: I2S LCD_CAM engine creation failed");

@@ -27,7 +27,7 @@ inline void initChannelEngines() {
     auto sharedStub = fl::make_shared_no_tracking(*stubEngine);
 
     // Register with low priority (stub is a fallback/testing engine)
-    manager.addEngine(0, sharedStub, "STUB");
+    manager.addEngine(0, sharedStub);
 }
 
 }  // namespace platforms

@@ -8,9 +8,11 @@
 #include "fl/log.h"
 #include "fl/engine_events.h"
 #include "fl/delay.h"
+#include "fl/stl/time.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/move.h"
 #include "fl/trace.h"
+#include "fl/async.h"
 #include "platforms/init_channel_engine.h"
 
 namespace fl {
@@ -43,13 +45,45 @@ ChannelBusManager::~ChannelBusManager() {
     // Shared engines automatically cleaned up by shared_ptr destructors
 }
 
-void ChannelBusManager::addEngine(int priority, fl::shared_ptr<IChannelEngine> engine, const char* name) {
+void ChannelBusManager::addEngine(int priority, fl::shared_ptr<IChannelEngine> engine) {
     if (!engine) {
         FL_WARN("ChannelBusManager::addEngine() - Null engine provided");
         return;
     }
 
-    fl::string engineName = name ? name : "";
+    // Get engine name from the engine itself
+    fl::string engineName = engine->getName();
+
+    // Reject engines with empty names
+    if (engineName.empty()) {
+        FL_WARN("ChannelBusManager::addEngine() - Engine has empty name (engine->getName() returned empty string)");
+        return;
+    }
+
+    // Check if engine with this name already exists
+    bool replacing = false;
+    for (const auto& entry : mEngines) {
+        if (entry.name == engineName) {
+            replacing = true;
+            FL_WARN("ChannelBusManager::addEngine() - Replacing existing engine '" << engineName.c_str() << "'");
+            break;
+        }
+    }
+
+    // If replacing, wait for all engines to become READY
+    if (replacing) {
+        FL_DBG("ChannelBusManager: Waiting for all engines to become READY before replacement");
+        wait();
+
+        // Remove the old engine with matching name (shared_ptr may trigger deletion)
+        for (size_t i = 0; i < mEngines.size(); ++i) {
+            if (mEngines[i].name == engineName) {
+                FL_DBG("ChannelBusManager: Removing old engine '" << engineName.c_str() << "' (shared_ptr may delete)");
+                mEngines.erase(mEngines.begin() + i);
+                break;
+            }
+        }
+    }
 
     // Respect exclusive driver mode: auto-disable if name doesn't match exclusive driver
     bool enabled = true;  // Default: enabled
@@ -73,11 +107,7 @@ void ChannelBusManager::addEngine(int priority, fl::shared_ptr<IChannelEngine> e
         capStr = "NONE";
     }
 
-    if (!engineName.empty()) {
-        FL_DBG("ChannelBusManager: Added engine '" << engineName.c_str() << "' (priority " << priority << ", caps: " << capStr.c_str() << ")");
-    } else {
-        FL_DBG("ChannelBusManager: Added unnamed engine (priority " << priority << ", caps: " << capStr.c_str() << ")");
-    }
+    FL_DBG("ChannelBusManager: Added engine '" << engineName.c_str() << "' (priority " << priority << ", caps: " << capStr.c_str() << ")");
 
     // Sort engines by priority descending (higher values first) after each insertion
     // Higher priority values = higher precedence (e.g., priority 50 selected over priority 10)
@@ -155,6 +185,35 @@ bool ChannelBusManager::setExclusiveDriver(const char* name) {
     }
 
     return found;
+}
+
+bool ChannelBusManager::setDriverPriority(const fl::string& name, int priority) {
+    if (name.empty()) {
+        FL_ERROR("ChannelBusManager::setDriverPriority() - Empty driver name provided");
+        return false;
+    }
+
+    // Find engine and update priority
+    bool found = false;
+    for (auto& entry : mEngines) {
+        if (entry.name == name) {
+            entry.priority = priority;
+            found = true;
+            FL_DBG("ChannelBusManager: Driver '" << name << "' priority changed to " << priority);
+            break;
+        }
+    }
+
+    if (!found) {
+        FL_ERROR("ChannelBusManager::setDriverPriority() - Driver '" << name << "' not found in registry");
+        return false;
+    }
+
+    // Re-sort engines by priority (descending: higher values first)
+    fl::sort(mEngines.begin(), mEngines.end());
+
+    FL_DBG("ChannelBusManager: Engine list re-sorted after priority change");
+    return true;
 }
 
 bool ChannelBusManager::isDriverEnabled(const char* name) const {
@@ -280,6 +339,41 @@ IChannelEngine::EngineState ChannelBusManager::poll() {
     return EngineState(anyBusy ? EngineState::BUSY : EngineState::READY);
 }
 
+template<typename Condition>
+bool ChannelBusManager::waitForCondition(Condition condition, u32 timeoutMs) {
+    const u32 POLL_INTERVAL_US = 100;  // Target 100µs between polls
+    const u32 startTime = timeoutMs > 0 ? millis() : 0;
+
+    while (!condition()) {
+        // Check timeout if specified
+        if (timeoutMs > 0 && (millis() - startTime >= timeoutMs)) {
+            FL_ERROR("ChannelBusManager: Timeout occurred while waiting for condition");
+            return false;  // Timeout occurred
+        }
+
+        u32 loopStart = micros();
+
+        // Run async tasks first (allows HTTP requests, timers, etc. to process)
+        async_run();
+
+        // Calculate elapsed time
+        u32 elapsed = micros() - loopStart;
+
+        // If we have time remaining in the 100µs interval, delay for the remainder
+        if (elapsed < POLL_INTERVAL_US) {
+            delayMicroseconds(POLL_INTERVAL_US - elapsed);
+        }
+        // Otherwise skip delay and go straight to next poll iteration
+    }
+
+    return true;  // Condition met
+}
+
+void ChannelBusManager::wait() {
+    waitForCondition([this]() { return poll() == EngineState::READY; });
+}
+
+
 void ChannelBusManager::onBeginFrame() {
     // CRITICAL: Poll engines before the frame starts to release buffers from previous frame
     // This ensures that ChannelData::mInUse flags are cleared before Channel::showPixels() is called
@@ -307,10 +401,9 @@ void ChannelBusManager::beginTransmission(fl::span<const ChannelDataPtr> channel
     }
 
     // Forward channel data to selected engine by enqueueing and showing
-    // Poll in a loop until engine is ready for new data
-    while (engine->poll() != EngineState::READY) {
-        // Yield to watchdog task to prevent watchdog timeout
-        delayMicroseconds(100);
+    // Wait until engine is ready for new data (with check-pump-delay logic)
+    if (engine) {
+        waitForCondition([engine]() { return engine->poll() == EngineState::READY; });
     }
 
     for (const auto& channel : channelData) {

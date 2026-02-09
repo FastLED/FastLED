@@ -88,7 +88,7 @@ static void addSpiHardwareIfPossible(ChannelBusManager& manager) {
                 }
             }
 
-            manager.addEngine(maxPriority, adapter, "SPI_UNIFIED");
+            manager.addEngine(maxPriority, adapter);
 
             FL_DBG("Teensy 4.x: Registered unified SPI engine with "
                    << controllers.size() << " controllers (priority "

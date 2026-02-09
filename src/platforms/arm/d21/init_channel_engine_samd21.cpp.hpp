@@ -68,7 +68,7 @@ static void addSpiHardwareIfPossible(ChannelBusManager& manager) {
                 }
             }
 
-            manager.addEngine(maxPriority, adapter, "SPI_UNIFIED");
+            manager.addEngine(maxPriority, adapter);
 
             FL_DBG("SAMD21: Registered unified SPI engine with "
                    << controllers.size() << " controllers (priority "
