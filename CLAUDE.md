@@ -101,6 +101,12 @@
   - Exception: Compiler feature testing (e.g., `clang++ -std=c++17 test.cpp`) is allowed
   - Rationale: FastLED build system handles configuration, caching, dependencies, and platform-specific setup
   - See: `docs/agents/build-system.md` for details
+- **NEVER manually delete build caches**: Do NOT use `rm -rf .build/` or delete build directories
+  - Use: `bash test --clean`, `bash compile --clean` instead of manual deletion
+  - Never use: `rm -rf .build/meson-quick`, `rm -rf .build && bash test`
+  - Rationale: Build system is self-healing and has special cache invalidation code
+  - **HIGHLY DISCOURAGED**: The build system will revalidate and self-heal on its own
+  - See: `docs/agents/build-system.md` for details
 - **Platform compilation timeout**: Use minimum 15 minute timeout for platform builds (e.g., `bash compile --docker esp32s3`)
 - **NEVER disable sccache**: Do NOT set `SCCACHE_DISABLE=1` or disable sccache in any way (see `docs/agents/build-system.md`)
 

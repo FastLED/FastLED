@@ -59,6 +59,47 @@ CXX=... meson setup builddir         # WRONG - use bash scripts
 
 **If you see example commands like `CXX=clang-tool-chain-sccache-cpp meson setup builddir` in documentation, these are for REFERENCE ONLY showing what the build system does internally - do NOT execute them directly.**
 
+## 🚨 CRITICAL: Never Manually Delete Build Caches
+
+**DO NOT manually delete build directories. The build system is self-healing and will revalidate on its own.**
+
+### ❌ FORBIDDEN - Never Do This
+
+```bash
+# ❌ WRONG - Never manually delete build caches
+rm -rf .build/meson-quick
+rm -rf .build/meson-debug
+rm -rf .build/meson-release
+rm -rf .build/pio
+rm -rf .fbuild
+
+# ❌ WRONG - Never combine cache deletion with commands
+rm -rf .build/meson-quick && uv run test.py tests/fl/stl/move
+rm -rf .build && bash test
+```
+
+### ✅ CORRECT - Use Clean Flags Instead
+
+```bash
+# ✅ CORRECT - Use clean flag to rebuild from scratch
+bash test --clean                          # Clean and rebuild all tests
+bash test --clean tests/fl/stl/move        # Clean and rebuild specific test
+bash compile --clean esp32s3               # Clean and rebuild platform
+
+# ✅ CORRECT - Just run the command (build system self-heals)
+bash test tests/fl/stl/move                # Build system revalidates automatically
+```
+
+### Rationale: Why Manual Deletion Is Discouraged
+
+1. **Self-Healing**: The build system automatically detects stale builds and revalidates
+2. **Special Code**: We have dedicated cache invalidation logic that handles edge cases
+3. **Safety**: Manual deletion can corrupt build state or remove important artifacts
+4. **Performance**: The `--clean` flag selectively cleans only what's needed, preserving sccache
+5. **Correctness**: `--clean` ensures proper cleanup order and dependency tracking
+
+**The build system is designed to be robust. Trust it to self-heal. Only use `--clean` if you specifically need a guaranteed clean rebuild.**
+
 ### Command Hierarchy Summary
 
 **Tier 1: Bash Scripts (ALWAYS USE)** - Primary interface:

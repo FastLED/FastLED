@@ -24,6 +24,23 @@ clang++ main.cpp -o main            # WRONG - use bash scripts
 
 **Exceptions:** Runtime debugging (e.g., `lldb .build/runner.exe`) and compiler feature testing are allowed. See `docs/agents/build-system.md` for details.
 
+## Clean Builds
+
+**Use the `--clean` flag to rebuild from scratch. DO NOT manually delete build directories.**
+
+```bash
+# ✅ CORRECT - Use clean flag
+bash test --clean                          # Clean and rebuild all tests
+bash test --clean tests/fl/async           # Clean and rebuild specific test
+bash compile --clean esp32s3               # Clean and rebuild platform
+
+# ❌ FORBIDDEN - Never manually delete build caches
+rm -rf .build/meson-quick                  # WRONG - use --clean instead
+rm -rf .build && bash test                 # WRONG - use bash test --clean
+```
+
+**The build system is self-healing and revalidates automatically. Manual cache deletion is highly discouraged.** See `docs/agents/build-system.md` for details.
+
 ## Docker Testing (Linux Environment)
 Run tests inside a Docker container for consistent Linux environment with ASAN/LSAN sanitizers:
 
