@@ -79,6 +79,12 @@ public:
     /// @note Useful for test cleanup
     bool removeEngine(fl::shared_ptr<IChannelEngine> engine);
 
+    /// @brief Remove all engines from the manager
+    /// @note Clears the entire engine registry
+    /// @note Useful for FastLED.reset() with CHANNEL_ENGINES flag
+    /// @note Waits for all engines to become READY before clearing (1 second timeout)
+    void clearAllEngines();
+
     /// @brief Enable or disable a driver by name at runtime
     /// @param name Driver name to control (case-sensitive, e.g., "RMT", "SPI", "PARLIO")
     /// @param enabled true to enable, false to disable

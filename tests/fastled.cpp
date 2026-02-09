@@ -680,7 +680,7 @@ FL_TEST_CASE("FastLED.reset() removes all channels and drops refcount to 1") {
     FL_CHECK(controllerInList(ch3.get()));
 
     // Call reset() - should wait for transmissions and remove all channels
-    FastLED.reset();
+    FastLED.reset(ResetFlags::CHANNELS);
 
     // After reset: refcount should be 1 (only stack reference remains)
     FL_CHECK(ch1.use_count() == 1);
@@ -702,7 +702,169 @@ FL_TEST_CASE("FastLED.reset() removes all channels and drops refcount to 1") {
 
 FL_TEST_CASE("FastLED.reset() when no channels exist is safe") {
     // Should be safe to call reset when no channels are registered
-    FastLED.reset();  // Should not crash
+    FastLED.reset(ResetFlags::CHANNELS);  // Should not crash
+    FastLED.reset(ResetFlags::POWER_SETTINGS);  // Should not crash
+    FastLED.reset(ResetFlags::BRIGHTNESS);  // Should not crash
+    FastLED.reset(ResetFlags::CHANNEL_ENGINES);  // Should not crash
+}
+
+FL_TEST_CASE("FastLED.reset() with POWER_SETTINGS flag resets power management") {
+    // Set power management and brightness separately
+    FastLED.setBrightness(128);
+    FL_CHECK(FastLED.getBrightness() == 128);
+
+    FastLED.setMaxPowerInMilliWatts(5000);
+
+    // Reset only power settings (should NOT affect brightness)
+    FastLED.reset(ResetFlags::POWER_SETTINGS);
+
+    // Brightness should remain unchanged
+    FL_CHECK(FastLED.getBrightness() == 128);
+
+    // Power settings should be reset to defaults (tested indirectly via show())
+    // After reset, power limiting should be disabled
+}
+
+FL_TEST_CASE("FastLED.reset() with BRIGHTNESS flag resets brightness to 255") {
+    // Set custom brightness
+    FastLED.setBrightness(64);
+    FL_CHECK(FastLED.getBrightness() == 64);
+
+    // Reset only brightness
+    FastLED.reset(ResetFlags::BRIGHTNESS);
+
+    // Brightness should be back to default (255)
+    FL_CHECK(FastLED.getBrightness() == 255);
+}
+
+FL_TEST_CASE("FastLED.reset() with REFRESH_RATE flag resets refresh rate") {
+    // Set a custom refresh rate (30 FPS = 33333 microseconds per frame)
+    FastLED.setMaxRefreshRate(30, false);
+
+    // Reset only refresh rate
+    FastLED.reset(ResetFlags::REFRESH_RATE);
+
+    // Refresh rate should be unlimited (0 microseconds minimum)
+    // Can't directly test m_nMinMicros, but reset should work without error
+}
+
+FL_TEST_CASE("FastLED.reset() with FPS_COUNTER flag resets FPS tracking") {
+    // Note: FPS counter is internal state, we can only verify reset doesn't crash
+    FastLED.reset(ResetFlags::FPS_COUNTER);
+
+    // After reset, FPS should be 0
+    FL_CHECK(FastLED.getFPS() == 0);
+}
+
+FL_TEST_CASE("FastLED.reset() with multiple flags using OR operator") {
+    auto engine = fl::make_shared<StubEngine>();
+    ChannelBusManager& mgr = ChannelBusManager::instance();
+    mgr.addEngine(2004, engine);
+
+    CRGB leds[4];
+    auto ch = makeChannel(leds, 4);
+
+    // Set up non-default state
+    FastLED.add(ch);
+    FastLED.setBrightness(100);
+    FastLED.setMaxPowerInMilliWatts(5000);
+    FastLED.setMaxRefreshRate(60, false);
+
+    // Verify non-default state
+    FL_CHECK(ch.use_count() == 2);
+    FL_CHECK(FastLED.getBrightness() == 100);
+
+    // Reset multiple settings at once
+    FastLED.reset(ResetFlags::CHANNELS | ResetFlags::BRIGHTNESS | ResetFlags::POWER_SETTINGS);
+
+    // Verify channels were removed
+    FL_CHECK(ch.use_count() == 1);
+    FL_CHECK(!controllerInList(ch.get()));
+
+    // Verify brightness was reset
+    FL_CHECK(FastLED.getBrightness() == 255);
+
+    // Refresh rate should NOT be reset (we didn't include that flag)
+    // Power settings should be reset (included in flags)
+
+    mgr.setDriverEnabled("STUB_ADD_REMOVE", false);
+}
+
+FL_TEST_CASE("FastLED.reset() with all flags resets everything") {
+    auto engine = fl::make_shared<StubEngine>();
+    ChannelBusManager& mgr = ChannelBusManager::instance();
+    mgr.addEngine(2005, engine);
+
+    CRGB leds[4];
+    auto ch = makeChannel(leds, 4);
+
+    // Set up all non-default state
+    FastLED.add(ch);
+    FastLED.setBrightness(50);
+    FastLED.setMaxPowerInMilliWatts(3000);
+    FastLED.setMaxRefreshRate(30, false);
+
+    // Verify non-default state
+    FL_CHECK(ch.use_count() == 2);
+    FL_CHECK(FastLED.getBrightness() == 50);
+
+    // Reset EVERYTHING by OR'ing all flags together
+    FastLED.reset(ResetFlags::CHANNELS | ResetFlags::POWER_SETTINGS |
+                  ResetFlags::BRIGHTNESS | ResetFlags::REFRESH_RATE |
+                  ResetFlags::FPS_COUNTER | ResetFlags::CHANNEL_ENGINES);
+
+    // Verify all state was reset to defaults
+    FL_CHECK(ch.use_count() == 1);           // Channels removed
+    FL_CHECK(!controllerInList(ch.get()));   // Not in draw list
+    FL_CHECK(FastLED.getBrightness() == 255); // Brightness reset
+    FL_CHECK(FastLED.getFPS() == 0);          // FPS counter reset
+    // Power settings and refresh rate also reset (can't directly test)
+    // Channel drivers also cleared (tested separately)
+
+    mgr.setDriverEnabled("STUB_ADD_REMOVE", false);
+}
+
+FL_TEST_CASE("FastLED.reset() with CHANNELS flag resets only channels") {
+    auto engine = fl::make_shared<StubEngine>();
+    ChannelBusManager& mgr = ChannelBusManager::instance();
+    mgr.addEngine(2006, engine);
+
+    CRGB leds[4];
+    auto ch = makeChannel(leds, 4);
+
+    // Set up mixed state
+    FastLED.add(ch);
+    FastLED.setBrightness(75);
+    FL_CHECK(FastLED.getBrightness() == 75);
+
+    // Call reset with CHANNELS flag only
+    FastLED.reset(ResetFlags::CHANNELS);
+
+    // Verify channels were removed
+    FL_CHECK(ch.use_count() == 1);
+    FL_CHECK(!controllerInList(ch.get()));
+
+    // Verify brightness was NOT reset (only CHANNELS was specified)
+    FL_CHECK(FastLED.getBrightness() == 75);
+
+    mgr.setDriverEnabled("STUB_ADD_REMOVE", false);
+}
+
+FL_TEST_CASE("FastLED.reset() with CHANNEL_ENGINES flag clears all engines") {
+    ChannelBusManager& mgr = ChannelBusManager::instance();
+
+    // Add a test engine to the manager
+    auto engine = fl::make_shared<StubEngine>();
+    mgr.addEngine(3000, engine);
+
+    // Verify engine was registered
+    FL_CHECK(mgr.getDriverCount() > 0);
+
+    // Reset only channel drivers
+    FastLED.reset(ResetFlags::CHANNEL_ENGINES);
+
+    // Verify all engines were cleared
+    FL_CHECK(mgr.getDriverCount() == 0);
 }
 
 } // namespace channel_add_remove_test

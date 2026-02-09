@@ -143,19 +143,62 @@ void CFastLED::remove(fl::ChannelPtr channel) {
 	mChannels.erase(channel);
 }
 
-void CFastLED::reset() {
-	// Wait for all channel bus transmissions to complete
-	FastLED.wait();
+void CFastLED::reset(ResetFlags flags) {
+	// Lambda to check if flag is set, clear it, and return true if it was set
+	auto clearFlag = [&flags](ResetFlags flag) -> bool {
+		if ((flags & flag) != ResetFlags::NONE) {
+			flags = static_cast<ResetFlags>(static_cast<fl::u32>(flags) & ~static_cast<fl::u32>(flag));
+			return true;
+		}
+		return false;
+	};
 
-	// Remove all channels by iterating through a copy of the vector
-	// (we make a copy because remove() modifies mChannels)
-	fl::vector<fl::ChannelPtr> channelsCopy = mChannels;
-	for (auto& channel : channelsCopy) {
-		remove(channel);
+
+	// Reset POWER_SETTINGS - reset power management to defaults
+	if (clearFlag(ResetFlags::POWER_SETTINGS)) {
+		FastLED.m_pPowerFunc = nullptr;      // No power limiting function
+		FastLED.m_nPowerData = 0xFFFFFFFF;   // No power limit (max value)
 	}
 
-	// Clear the internal storage (should already be empty, but ensure it)
-	mChannels.clear();
+	// Reset BRIGHTNESS - reset global brightness to 255 (full brightness)
+	if (clearFlag(ResetFlags::BRIGHTNESS)) {
+		FastLED.m_Scale = 255;
+	}
+
+	// Reset REFRESH_RATE - reset refresh rate limiting to unlimited
+	if (clearFlag(ResetFlags::REFRESH_RATE)) {
+		FastLED.m_nMinMicros = 0;  // No minimum delay between frames
+	}
+
+	// Reset FPS_COUNTER - reset FPS tracking counter to 0
+	if (clearFlag(ResetFlags::FPS_COUNTER)) {
+		FastLED.m_nFPS = 0;
+	}
+
+	// Reset CHANNELS - remove all channels from controller list
+	if (clearFlag(ResetFlags::CHANNELS)) {
+		// Always wait for all channel bus transmissions to complete first
+		FastLED.wait();
+		// Remove all channels by iterating through a copy of the vector
+		// (we make a copy because remove() modifies mChannels)
+		fl::vector<fl::ChannelPtr> channelsCopy = mChannels;
+		for (auto& channel : channelsCopy) {
+			remove(channel);
+		}
+		// Clear the internal storage (should already be empty, but ensure it)
+		mChannels.clear();
+	}
+
+	// Reset CHANNEL_ENGINES - clear all registered channel engines
+	if (clearFlag(ResetFlags::CHANNEL_ENGINES)) {
+		// Always wait for all channel bus transmissions to complete first
+		FastLED.wait();
+		fl::ChannelBusManager& manager = fl::channelBusManager();
+		manager.clearAllEngines();
+	}
+
+	// Ensure all flags were handled - catches typos or missing implementations
+	FL_ASSERT(flags == ResetFlags::NONE, "Unhandled flags in FastLED.reset()");
 }
 
 // This is bad code. But it produces the smallest binaries for reasons

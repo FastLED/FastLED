@@ -137,6 +137,19 @@ bool ChannelBusManager::removeEngine(fl::shared_ptr<IChannelEngine> engine) {
     return false;
 }
 
+void ChannelBusManager::clearAllEngines() {
+    FL_DBG("ChannelBusManager: Waiting for all engines to become READY before clearing");
+
+    // Wait for all engines to become READY before clearing
+    // This prevents clearing engines that are still transmitting
+    wait();
+
+    FL_DBG("ChannelBusManager: Clearing " << mEngines.size() << " engines");
+
+    // Clear all engines (shared_ptr handles cleanup automatically)
+    mEngines.clear();
+}
+
 void ChannelBusManager::setDriverEnabled(const char* name, bool enabled) {
     if (!name) {
         FL_ERROR("ChannelBusManager::setDriverEnabled() - Null driver name provided");
