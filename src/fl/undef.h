@@ -1,5 +1,11 @@
 #pragma once
 
+#include "fl/compiler_control.h"
+
+#if FL_HAS_INCLUDE(<stdlib.h>)
+#include <stdlib.h>  // This will sometimes define macros like abs, min, max, etc.
+#endif
+
 // Undefine common macros that conflict with FastLED function/method names
 // Arduino and many platform headers define min/max/abs/round as function-like macros,
 // which prevents us from declaring functions or member functions with these names.

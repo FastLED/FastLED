@@ -1,63 +1,36 @@
 
 // g++ --std=c++11 test.cpp
 
-// SIMULATION: Define all the macros that Arduino.h typically defines
-// These are the problematic macros that fl/undef.h must handle
-// This simulates what happens on a real Arduino device before FastLED.h is included
-
-// Arduino constants for angle conversions
-#define DEG_TO_RAD 0.017453292519943295769236907684886
-#define RAD_TO_DEG 57.295779513082320876798154814105
-
-// Arduino macros (these should be undefined by fl/undef.h when FastLED.h is included)
-#define min(a,b) ((a)<(b)?(a):(b))
-#define max(a,b) ((a)>(b)?(a):(b))
-#define abs(x) ((x)>0?(x):-(x))
-#define round(x) ((x)>=0?(long)((x)+0.5):(long)((x)-0.5))
-#define radians(deg) ((deg)*DEG_TO_RAD)
-#define degrees(rad) ((rad)*RAD_TO_DEG)
-#define map(value, fromLow, fromHigh, toLow, toHigh) (((value) - (fromLow)) * ((toHigh) - (toLow)) / ((fromHigh) - (fromLow)) + (toLow))
+// NOTE: Arduino macros (min, max, abs, round, radians, degrees, map) are defined
+// in tests/test_pch.h BEFORE FastLED.h is included to test that fl/undef.h works correctly.
+// This simulates what happens on real Arduino hardware where Arduino.h defines these macros
+// before user code includes FastLED.h.
 
 #include "FastLED.h"
 
-// TODO: INVESTIGATE - These macros are still defined after #include "FastLED.h"
-// Expected: fl/undef.h (included by FastLED.h) should undef these macros
-// Actual: Macros remain defined, requiring manual undef here
-// Possible causes:
-//   1. fl/undef.h not being included in FastLED.h inclusion chain
-//   2. Something re-defining macros after fl/undef.h processes
-//   3. #pragma once in fl/undef.h preventing re-processing
-//   4. Test file macros (lines 13-19) not visible to fl/undef.h during FastLED.h processing
-// Need to trace preprocessor output to determine root cause
-#undef min
-#undef max
-#undef abs
-#undef round
-#undef radians
-#undef degrees
-#undef map
-
-// Verify that the macros are now undefined
+// Verify that fl/undef.h successfully undefined the Arduino macros
+// The macros are defined in tests/test_pch.h BEFORE FastLED.h is included
+// fl/undef.h includes stdlib.h first (so stdlib can use macro versions), then undefs them
 #ifdef min
-#error "min macro still defined after manual undef!"
+#error "min macro still defined after FastLED.h"
 #endif
 #ifdef max
-#error "max macro still defined after manual undef!"
+#error "max macro still defined after FastLED.h"
 #endif
 #ifdef abs
-#error "abs macro still defined after manual undef!"
+#error "abs macro still defined after FastLED.h"
 #endif
 #ifdef round
-#error "round macro still defined after manual undef!"
+#error "round macro still defined after FastLED.h"
 #endif
 #ifdef radians
-#error "radians macro still defined after manual undef!"
+#error "radians macro still defined after FastLED.h"
 #endif
 #ifdef degrees
-#error "degrees macro still defined after manual undef!"
+#error "degrees macro still defined after FastLED.h"
 #endif
 #ifdef map
-#error "map macro still defined after manual undef!"
+#error "map macro still defined after FastLED.h"
 #endif
 #include "colorutils.h"
 #include "test.h"
