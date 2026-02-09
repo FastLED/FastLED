@@ -47,9 +47,13 @@
 - `bash validate --parlio` - Live device testing (must specify driver)
 
 **Advanced (only when bash scripts don't provide needed functionality):**
-- `uv run test.py --no-fingerprint` - **LAST RESORT ONLY**: Disable fingerprint caching (very slow)
 - `uv run ci/wasm_compile.py examples/Blink --just-compile` - WASM compilation
 - `uv run mcp_server.py` - Start MCP server
+
+**🚨 FORBIDDEN (unless explicit evidence of fingerprint cache bug):**
+- `uv run test.py --no-fingerprint` - **STRONGLY DISCOURAGED**: Disables fingerprint caching, makes builds 10-100x slower
+  - Use `bash test --clean` instead if you suspect cache issues
+  - Only use if you have concrete evidence that fingerprint caching itself is broken (extremely rare)
 
 **NEVER use:** `uv run python test.py` (always use `bash test` or `uv run test.py`)
 
@@ -106,6 +110,12 @@
   - Never use: `rm -rf .build/meson-quick`, `rm -rf .build && bash test`
   - Rationale: Build system is self-healing and has special cache invalidation code
   - **HIGHLY DISCOURAGED**: The build system will revalidate and self-heal on its own
+  - See: `docs/agents/build-system.md` for details
+- **NEVER disable fingerprint caching**: Do NOT use `--no-fingerprint` flag
+  - Use: `bash test --clean` if you suspect cache issues
+  - Never use: `uv run test.py --no-fingerprint` (makes builds 10-100x slower)
+  - Rationale: Fingerprint caching is critical performance optimization that tracks file changes correctly
+  - **STRONGLY DISCOURAGED**: Only use if you have concrete evidence fingerprint caching itself is broken (extremely rare)
   - See: `docs/agents/build-system.md` for details
 - **Platform compilation timeout**: Use minimum 15 minute timeout for platform builds (e.g., `bash compile --docker esp32s3`)
 - **NEVER disable sccache**: Do NOT set `SCCACHE_DISABLE=1` or disable sccache in any way (see `docs/agents/build-system.md`)

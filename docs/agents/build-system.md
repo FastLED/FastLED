@@ -100,6 +100,47 @@ bash test tests/fl/stl/move                # Build system revalidates automatica
 
 **The build system is designed to be robust. Trust it to self-heal. Only use `--clean` if you specifically need a guaranteed clean rebuild.**
 
+## 🚨 CRITICAL: Never Disable Fingerprint Caching
+
+**DO NOT use `--no-fingerprint`. Fingerprint caching is a critical performance optimization.**
+
+### ❌ FORBIDDEN - Never Do This
+
+```bash
+# ❌ WRONG - Never disable fingerprint caching
+uv run test.py --no-fingerprint
+bash test --no-fingerprint
+uv run test.py tests/fl/async --no-fingerprint
+
+# ❌ WRONG - This makes builds extremely slow
+uv run test.py --no-fingerprint --cpp
+```
+
+### ✅ CORRECT - Trust the Build System
+
+```bash
+# ✅ CORRECT - Let fingerprint caching work
+bash test
+bash test tests/fl/async
+bash test --cpp
+
+# ✅ CORRECT - Use --clean if you suspect cache issues
+bash test --clean                    # Clean rebuilds, but keeps fingerprint cache
+bash test --clean tests/fl/async     # Selective clean rebuild
+```
+
+### Rationale: Why --no-fingerprint Is Forbidden
+
+1. **Performance**: Fingerprint caching makes builds 10-100x faster by skipping unchanged files
+2. **Reliability**: The fingerprint system is battle-tested and automatically detects file changes
+3. **Self-Healing**: If fingerprints are stale, `--clean` will fix it while preserving cache
+4. **Correctness**: Fingerprint cache tracks source files, headers, and compiler flags correctly
+5. **No Benefit**: Disabling fingerprints only adds massive build time without fixing real issues
+
+**The fingerprint cache is NOT the problem. If you suspect cache issues, use `--clean` instead, which rebuilds but keeps the fingerprint system working.**
+
+**LAST RESORT ONLY**: If you have concrete evidence that fingerprint caching itself is broken (not just a stale build), then `--no-fingerprint` may be used for debugging. This should be extremely rare (< 0.01% of builds).
+
 ### Command Hierarchy Summary
 
 **Tier 1: Bash Scripts (ALWAYS USE)** - Primary interface:

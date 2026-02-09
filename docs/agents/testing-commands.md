@@ -41,6 +41,24 @@ rm -rf .build && bash test                 # WRONG - use bash test --clean
 
 **The build system is self-healing and revalidates automatically. Manual cache deletion is highly discouraged.** See `docs/agents/build-system.md` for details.
 
+## Performance: Never Disable Fingerprint Caching
+
+**DO NOT use `--no-fingerprint`. This flag disables critical performance optimizations and makes builds 10-100x slower.**
+
+```bash
+# ❌ FORBIDDEN - Never disable fingerprint caching
+uv run test.py --no-fingerprint              # WRONG - extremely slow
+bash test --no-fingerprint                   # WRONG - extremely slow
+
+# ✅ CORRECT - Trust the fingerprint cache
+bash test                                    # Fast, uses fingerprint cache
+bash test --clean                            # Clean rebuild, preserves fingerprint cache
+```
+
+**Rationale**: Fingerprint caching tracks file changes and skips rebuilding unchanged files. Disabling it forces full rebuilds every time, which is unnecessary and extremely slow. If you suspect cache issues, use `--clean` instead.
+
+**LAST RESORT ONLY**: Only use `--no-fingerprint` if you have concrete evidence that fingerprint caching itself is broken (not just a stale build). This should be extremely rare. See `docs/agents/build-system.md` for details.
+
 ## Docker Testing (Linux Environment)
 Run tests inside a Docker container for consistent Linux environment with ASAN/LSAN sanitizers:
 
