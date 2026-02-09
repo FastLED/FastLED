@@ -144,6 +144,14 @@ class FL_ALIGN FixedVector {
         return *this;
     }
 
+    FixedVector &operator=(FixedVector &&other) { // cppcheck-suppress operatorEqVarError
+        if (this != &other) {
+            fl::swap(*this, other);
+            other.clear();
+        }
+        return *this;
+    }
+
     // Destructor
     ~FixedVector() { clear(); }
 
