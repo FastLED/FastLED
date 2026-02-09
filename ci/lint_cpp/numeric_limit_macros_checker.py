@@ -116,12 +116,10 @@ class NumericLimitMacroChecker(FileContentChecker):
         # Exclude test files that test the macros themselves
         if file_path.endswith(
             (
-                "tests/ftl/cstdint.cpp",
-                "tests\\ftl\\cstdint.cpp",
-                "tests/ftl/stdint.cpp",
-                "tests\\ftl\\stdint.cpp",
-                "tests/ftl/rbtree.cpp",
-                "tests\\ftl\\rbtree.cpp",
+                "tests/fl/stl/cstdint.cpp",
+                "tests\\fl\\stl\\cstdint.cpp",
+                "tests/fl/stl/stdint.cpp",
+                "tests\\fl\\stl\\stdint.cpp",
             )
         ):
             return False

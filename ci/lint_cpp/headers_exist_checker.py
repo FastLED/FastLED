@@ -12,7 +12,7 @@ How it works:
     4. Check if the main matching header exists (based on test filename)
 
 Examples:
-    tests/fl/algorithm.cpp includes "ftl/algorithm.h" → checks src/ftl/algorithm.h
+    tests/fl/algorithm.cpp includes "fl/stl/algorithm.h" → checks src/fl/stl/algorithm.h
     tests/fl/async.cpp includes "fl/async.h" → checks src/fl/async.h
     tests/fx/engine.cpp includes "fx/engine.h" → checks src/fx/engine.h
 
@@ -106,29 +106,70 @@ class HeadersExistChecker(FileContentChecker):
         includes = self._extract_includes(file_content)
 
         # Get candidate headers that should exist
-        candidates = self._get_expected_header_candidates(test_file, includes)
+        primary_candidate, fallback_candidates = self._get_expected_header_candidates(
+            test_file, includes
+        )
 
-        # Check if at least one candidate exists
-        found = any(candidate.exists() for candidate in candidates)
+        # Check if primary exists (ideal case)
+        primary_exists = primary_candidate.exists()
 
-        if not found:
-            # Build error message
+        # Check if any fallback exists
+        fallback_exists = (
+            any(candidate.exists() for candidate in fallback_candidates)
+            if fallback_candidates
+            else False
+        )
+
+        # LENIENT: Pass if ANY header exists (primary or fallback)
+        # BUT: Warn if directory structure looks wrong
+        if not primary_exists and not fallback_exists:
+            # FAIL: No headers found at all
             test_rel = test_file.relative_to(PROJECT_ROOT)
-            msg_parts = [f"Test file {test_rel} has no corresponding header in src/"]
+            primary_rel = primary_candidate.relative_to(PROJECT_ROOT)
+
+            msg_parts = [
+                f"Test file {test_rel} has no corresponding header in src/",
+                f"  Expected: {primary_rel}",
+            ]
 
             if includes:
                 msg_parts.append(f"  Includes: {', '.join(includes[:3])}")
                 if len(includes) > 3:
                     msg_parts.append(f"  ... and {len(includes) - 3} more")
-
-            msg_parts.append("  Expected one of:")
-            for candidate in candidates[:3]:
-                candidate_rel = candidate.relative_to(PROJECT_ROOT)
-                exists_marker = "✓" if candidate.exists() else "✗"
-                msg_parts.append(f"    {exists_marker} {candidate_rel}")
+            else:
+                msg_parts.append("  No project headers included!")
 
             error_msg = "\n".join(msg_parts)
             self.violations[file_content.path] = error_msg
+
+        elif not primary_exists and fallback_exists:
+            # WARN: Directory structure mismatch (like tests/ftl/ including fl/stl/)
+            # Only warn if the first include path suggests the test is in the wrong dir
+            if includes:
+                first_include = includes[0]
+                test_rel = test_file.relative_to(TESTS_ROOT)
+
+                # Get full test directory path (e.g., "fl/stl" from "fl/stl/algorithm.cpp")
+                test_dir_path = str(test_rel.parent).replace("\\", "/")
+
+                # Get include directory path (e.g., "fl/stl" from "fl/stl/algorithm.h")
+                include_parts = first_include.rsplit("/", 1)  # Split off filename
+                include_dir_path = include_parts[0] if len(include_parts) > 1 else ""
+
+                # Check if test directory doesn't match include directory
+                if (
+                    test_dir_path
+                    and include_dir_path
+                    and test_dir_path != include_dir_path
+                ):
+                    test_full_rel = test_file.relative_to(PROJECT_ROOT)
+                    msg = (
+                        f"⚠️  Test file {test_full_rel} may be in wrong directory:\n"
+                        f"  Test location: tests/{test_dir_path}/\n"
+                        f"  Includes headers from: src/{include_dir_path}/\n"
+                        f"  Expected location: tests/{include_dir_path}/"
+                    )
+                    self.violations[file_content.path] = msg
 
         return []  # We collect violations internally
 
@@ -154,55 +195,37 @@ class HeadersExistChecker(FileContentChecker):
 
     def _get_expected_header_candidates(
         self, test_file: Path, includes: list[str]
-    ) -> list[Path]:
+    ) -> tuple[Path, list[Path]]:
         """Get candidate header paths that this test file should be testing.
 
-        Returns multiple candidates based on common patterns:
-        1. Same relative path in src/fl/, src/ftl/, src/fx/ etc.
-        2. Headers actually included by the test file
+        Returns:
+            (primary_candidate, fallback_candidates)
+            - primary: Expected header based on test directory structure
+            - fallbacks: Headers actually included by the test
 
         Examples:
-            tests/fl/algorithm.cpp → [src/fl/algorithm.h, src/ftl/algorithm.h]
-            tests/fx/engine.cpp → [src/fx/engine.h]
+            tests/fl/algorithm.cpp → (src/fl/algorithm.h, [included headers])
+            tests/fx/engine.cpp → (src/fx/engine.h, [included headers])
         """
-        candidates: list[Path] = []
-
         # Get path relative to tests root
         relative_path = test_file.relative_to(TESTS_ROOT)
 
         # Get the base name without extension
         base_name = relative_path.stem + ".h"
 
-        # For tests/fl/*.cpp, check both src/fl/ and src/ftl/
-        if relative_path.parts[0] == "fl":
-            rest_of_path = (
-                Path(*relative_path.parts[1:])
-                if len(relative_path.parts) > 1
-                else Path(".")
-            )
-            candidates.append(SRC_ROOT / "fl" / rest_of_path.parent / base_name)
-            candidates.append(SRC_ROOT / "ftl" / rest_of_path.parent / base_name)
-        # For tests/ftl/*.cpp, check both src/ftl/ and src/fl/stl/
-        elif relative_path.parts[0] == "ftl":
-            rest_of_path = (
-                Path(*relative_path.parts[1:])
-                if len(relative_path.parts) > 1
-                else Path(".")
-            )
-            candidates.append(SRC_ROOT / "ftl" / rest_of_path.parent / base_name)
-            candidates.append(SRC_ROOT / "fl" / "stl" / rest_of_path.parent / base_name)
-        else:
-            # For other directories, use the same structure
-            candidates.append(SRC_ROOT / relative_path.parent / base_name)
+        # PRIMARY: Expected header based on directory structure
+        # tests/fl/stl/algorithm.cpp -> src/fl/stl/algorithm.h
+        primary_candidate = SRC_ROOT / relative_path.parent / base_name
 
-        # Also check headers that are actually included in the test file
+        # FALLBACKS: Headers actually included in the test file
+        fallback_candidates: list[Path] = []
         for include in includes:
             # Convert include path to absolute path
             header_path = SRC_ROOT / include
-            if header_path not in candidates:
-                candidates.append(header_path)
+            if header_path != primary_candidate:
+                fallback_candidates.append(header_path)
 
-        return candidates
+        return primary_candidate, fallback_candidates
 
 
 def main() -> None:

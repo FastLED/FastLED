@@ -1,7 +1,5 @@
 #pragma once
 
-#define FTL_CSTDIO_H_INCLUDED
-
 #include "fl/stl/stdint.h"
 
 #ifdef FASTLED_TESTING

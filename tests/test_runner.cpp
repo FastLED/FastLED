@@ -23,7 +23,6 @@ static const TestCategory test_categories[] = {
     {"core_tests", "libcore_tests.dll"},
     {"fl_tests_1", "libfl_tests_1.dll"},
     {"fl_tests_2", "libfl_tests_2.dll"},
-    {"ftl_tests", "libftl_tests.dll"},
     {"fx_tests", "libfx_tests.dll"},
     {"noise_tests", "libnoise_tests.dll"},
     {"platform_tests", "libplatform_tests.dll"},

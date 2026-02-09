@@ -6,19 +6,8 @@
 #include "fl/sketch_macros.h"
 #include "fl/int.h"
 
-// Forward declarations to avoid pulling in fl/stl/cstdio.h and causing fl/stl/cstdio.cpp to be compiled
-#ifndef FTL_CSTDIO_H_INCLUDED
-namespace fl {
-    int available();
-    int read();
-#ifdef FASTLED_TESTING
-    template<typename T> class function;  // Forward declare
-    void clear_io_handlers();
-    void inject_available_handler(const function<int()>& handler);
-    void inject_read_handler(const function<int()>& handler);
-#endif
-}
-#endif
+// Include cstdio for I/O functions
+#include "fl/stl/cstdio.h"
 
 namespace fl {
 

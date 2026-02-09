@@ -96,7 +96,6 @@ class PlatformIncludesChecker(FileContentChecker):
             "/src/sensors/",
             "/tests/fl/",
             "/tests/fx/",
-            "/tests/ftl/",
             "/examples/",
         ]
 

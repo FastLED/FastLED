@@ -31,7 +31,7 @@ Each build mode has its own cache file:
 
 ### Hash Computation
 The hash includes for each test file:
-- Relative path: `ftl/algorithm.cpp`
+- Relative path: `fl/stl/algorithm.cpp`
 - Modification time: `1769214722.177534`
 - File size: `12345`
 

@@ -7,12 +7,8 @@
 #include "fl/stl/string.h"
 #include "fl/stl/ios.h"
 
-// Forward declaration to avoid pulling in fl/stl/cstdio.h and causing fl/stl/cstdio.cpp to be compiled
-#ifndef FTL_CSTDIO_H_INCLUDED
-namespace fl {
-    void print(const char* str);
-}
-#endif
+// Include cstdio for print function
+#include "fl/stl/cstdio.h"
 
 namespace fl {
 

@@ -14,8 +14,6 @@ def extract_test_name(test_file_path: str) -> str:
     Naming rules:
     - fl/*.cpp files: prefix with "fl_" and include subdirectories
       (e.g., fl/algorithm.cpp -> fl_algorithm, fl/channels/spi.cpp -> fl_channels_spi)
-    - ftl/*.cpp files: prefix with "ftl_" and include subdirectories
-      (e.g., ftl/algorithm.cpp -> ftl_algorithm)
     - fx/*.cpp files: prefix with "fx_" and include subdirectories
       (e.g., fx/engine.cpp -> fx_engine)
     - Other files: use basename without .cpp (e.g., noise/test_noise.cpp -> test_noise)
@@ -29,12 +27,10 @@ def extract_test_name(test_file_path: str) -> str:
     # Remove .cpp extension
     path_no_ext = test_file_path.replace(".cpp", "")
 
-    # For fl/, ftl/, fx/ subdirectories, convert path to name with underscores
+    # For fl/, fx/ subdirectories, convert path to name with underscores
     # This ensures uniqueness for nested files (e.g., fl/channels/spi.cpp vs fl/spi.cpp)
     if test_file_path.startswith("fl/"):
         # Replace / with _ to create unique name: fl/channels/spi.cpp -> fl_channels_spi
-        return path_no_ext.replace("/", "_")
-    elif test_file_path.startswith("ftl/"):
         return path_no_ext.replace("/", "_")
     elif test_file_path.startswith("fx/"):
         return path_no_ext.replace("/", "_")
@@ -48,8 +44,7 @@ def categorize_test(test_name: str, test_file_path: str) -> str:
     Categorize a test by directory and type.
 
     Categories:
-    - fl_tests: Tests from fl/ directory (legacy stdlib-like utilities)
-    - ftl_tests: Tests from ftl/ directory (FastLED Template Library utilities)
+    - fl_tests: Tests from fl/ directory (stdlib-like utilities)
     - fx_tests: Tests from fx/ directory or containing "fx" (effects framework)
     - noise_tests: Tests from noise/ directory
     - platform_tests: Tests from platforms/ directory
@@ -65,8 +60,6 @@ def categorize_test(test_name: str, test_file_path: str) -> str:
     # Categorize by directory path (consistent with how all other categories work)
     if test_name.startswith("fl_"):
         return "fl_tests"
-    elif test_name.startswith("ftl_"):
-        return "ftl_tests"
     elif test_name.startswith("fx_") or "fx" in test_name:
         return "fx_tests"
     elif test_file_path.startswith("noise/"):

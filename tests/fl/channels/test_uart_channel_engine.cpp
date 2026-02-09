@@ -181,9 +181,9 @@ FL_TEST_CASE("ChannelEngineUART - Single channel enqueue and show") {
 FL_TEST_CASE("ChannelEngineUART - State machine") {
     ChannelEngineUARTFixture fixture;
 
-    FL_SUBCASE("State progression: READY → DRAINING → READY") {
-        // Set a transmission delay so we can observe DRAINING state
-        fixture.mMockPeripheral->setTransmissionDelay(1000); // 1ms delay
+    FL_SUBCASE("State progression: READY → DRAINING → READY (deterministic virtual time)") {
+        // Enable virtual time for deterministic testing
+        fixture.mMockPeripheral->setVirtualTimeMode(true);
 
         auto channel = fixture.createChannel(17, 10);
         fixture.mEngine.enqueue(channel);
@@ -191,15 +191,22 @@ FL_TEST_CASE("ChannelEngineUART - State machine") {
         // Initial: READY
         FL_CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::READY);
 
-        // After show: DRAINING (transmission in progress)
+        // Call show() to start transmission
         fixture.mEngine.show();
+
+        // Immediately after show(), poll should return DRAINING
+        // (transmission started but not complete)
         FL_CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::DRAINING);
 
-        // Complete transmission
-        fixture.mMockPeripheral->forceTransmissionComplete();
+        // Get actual transmission duration from mock
+        uint64_t transmissionDuration = fixture.mMockPeripheral->getTransmissionDuration();
+        FL_CHECK(transmissionDuration > 0); // Should have calculated a duration
 
-        // After completion: READY
-        FL_CHECK(fixture.pollUntilReady());
+        // Advance virtual time to complete the transmission
+        fixture.mMockPeripheral->pumpTime(transmissionDuration + 1000);
+
+        // After transmission completes, poll should return READY
+        FL_CHECK(fixture.mEngine.poll() == IChannelEngine::EngineState::READY);
     }
 
     FL_SUBCASE("Multiple show() calls with different data") {

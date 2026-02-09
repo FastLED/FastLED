@@ -131,7 +131,6 @@ FASTLED_PLATFORM_SUBDIRS = (
 # These are misspellings or variations that look like they're trying to
 # include FastLED code but got the prefix wrong
 TYPO_PREFIXES = {
-    "ftl/": "fl/stl/",  # Typo: "ftl/" should be "fl/stl/"
     "fL/": "fl/",  # Case typo
     "FL/": "fl/",  # Case typo
     "Fl/": "fl/",  # Case typo
