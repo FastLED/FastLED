@@ -19,6 +19,11 @@ from ci.util.paths import PROJECT_ROOT
 TESTS_ROOT = PROJECT_ROOT / "tests"
 SRC_ROOT = PROJECT_ROOT / "src"
 
+# Test files that are exempt from path matching (infrastructure/entry points)
+EXCLUDED_TEST_FILES = {
+    "doctest_main.cpp",  # Test framework entry point
+}
+
 
 class TestPathStructureChecker(FileContentChecker):
     """Checker class for test file path structure validation."""
@@ -36,65 +41,62 @@ class TestPathStructureChecker(FileContentChecker):
         if not file_path.endswith(".cpp"):
             return False
 
+        test_path = Path(file_path)
+
+        # Skip excluded files (infrastructure/entry points)
+        if test_path.name in EXCLUDED_TEST_FILES:
+            return False
+
+        # Skip tests/misc/ directory (these tests don't need to match source structure)
+        try:
+            rel_path = test_path.relative_to(TESTS_ROOT)
+            if rel_path.parts[0] == "misc":
+                return False
+        except (ValueError, IndexError):
+            pass
+
         return True
 
     def check_file_content(self, file_content: FileContent) -> list[str]:
-        """Check if test file path matches the source file directory structure."""
+        """Check if test file path matches the source file directory structure.
+
+        Rule: tests/**/file.cpp must match src/**/file.{h,cpp,cpp.hpp}
+        Exception: Tests in tests/misc/ are exempt (don't need to match).
+        Exception: Tests with '// standalone test' comment are exempt.
+        """
         test_path = Path(file_content.path)
 
         # Get the relative path from tests root: tests/fl/flat_map.cpp -> fl/flat_map
         rel_from_tests = test_path.relative_to(TESTS_ROOT)
         test_name_no_ext = rel_from_tests.with_suffix("")  # Remove .cpp
 
-        # Convert to source path to search for
-        # tests/fl/flat_map.cpp -> search for src/fl/**/flat_map.h
-        potential_src_dir = SRC_ROOT / test_name_no_ext.parent
-        test_basename = test_name_no_ext.name
+        # Check for source file at exact matching path with various extensions
+        source_extensions = [".h", ".cpp", ".cpp.hpp", ".hpp"]
+        expected_source_base = SRC_ROOT / test_name_no_ext
 
-        # Check if the source file exists at the expected location
-        expected_header = SRC_ROOT / test_name_no_ext.with_suffix(".h")
+        # If any matching source file exists at the expected location, no issue
+        for ext in source_extensions:
+            if expected_source_base.with_suffix(ext).exists():
+                return []
 
-        # If expected location exists, no issue
-        if expected_header.exists():
-            return []
+        # Check if file has "// standalone test" comment in first few lines
+        for line in file_content.lines[:5]:  # Check first 5 lines
+            if "// standalone test" in line.lower():
+                return []  # Exempt from path matching requirement
 
-        # Now search for the actual location of this header file in subdirectories
-        # Only search within the same top-level directory (e.g., fl/, platforms/, etc.)
-        # This prevents false positives from unrelated files with the same name
-        actual_header_path = None
+        # Source file doesn't exist at expected location
+        # Flag as violation (test file has no corresponding source at matching path)
+        rel_current_test = test_path.relative_to(PROJECT_ROOT)
 
-        # Search for any .h file with this basename under the expected directory and its subdirs
-        if potential_src_dir.exists():
-            # Search recursively for the header file
-            for header_path in potential_src_dir.rglob(f"{test_basename}.h"):
-                actual_header_path = header_path
-                break  # Take the first match
+        message = (
+            f"Test file has no corresponding source file at matching path. "
+            f"Test is at '{rel_current_test}' but no source file found at "
+            f"'src/{rel_from_tests.with_suffix('')}.{{h,cpp,cpp.hpp}}'. "
+            f"Either move the test to match an existing source file location, "
+            f"or add '// standalone test' comment if this test doesn't correspond to a single source file."
+        )
 
-        # If we found the header in a different subdirectory structure, flag this
-        if actual_header_path is not None:
-            # Get the relative path from src root
-            actual_rel_from_src = actual_header_path.relative_to(SRC_ROOT)
-            expected_rel_from_src = expected_header.relative_to(SRC_ROOT)
-
-            # Check if paths differ (excluding extension)
-            actual_path_no_ext = actual_rel_from_src.with_suffix("")
-            expected_path_no_ext = expected_rel_from_src.with_suffix("")
-
-            if actual_path_no_ext != expected_path_no_ext:
-                # Paths differ - test file is in wrong location
-                correct_test_path = TESTS_ROOT / actual_path_no_ext.with_suffix(".cpp")
-                rel_correct_test = correct_test_path.relative_to(PROJECT_ROOT)
-                rel_actual_src = actual_header_path.relative_to(PROJECT_ROOT)
-                rel_current_test = test_path.relative_to(PROJECT_ROOT)
-
-                message = (
-                    f"Test file path does not match source file structure. "
-                    f"Source file is at '{rel_actual_src}' but test is at '{rel_current_test}'. "
-                    f"Move test to '{rel_correct_test}' to match source structure."
-                )
-
-                self.violations[file_content.path] = [(1, message)]
-
+        self.violations[file_content.path] = [(1, message)]
         return []  # We collect violations internally
 
 

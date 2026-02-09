@@ -1,3 +1,4 @@
+// standalone test
 // Crash handler initialization for runner.exe
 // This file is compiled into a static library and linked with runner.exe
 // to provide crash handling before any test DLLs are loaded.

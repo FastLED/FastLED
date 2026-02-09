@@ -31,9 +31,16 @@ exclude = [
     "**/*.egg-info",
 ]
 
-# All 103 ty rules are active - zero suppressions.
+# All 103 ty rules are active except unused-type-ignore-comment.
 # Previously 11 rules were suppressed due to ty beta limitations.
 # All false positives resolved via:
 # - Code fixes (colorama f-strings, assert narrowing)
 # - Targeted # ty: ignore comments for genuine beta inference gaps
-# - Removal of 91 redundant # type: ignore comments (pyright-only)
+# - Mypy-style # type: ignore[error-code] comments are preserved for
+#   documentation and cross-checker compatibility, even though ty
+#   doesn't understand mypy error codes
+
+[rules.unused-type-ignore-comment.ignore]
+# Allow mypy-style type ignore comments with error codes
+# ty doesn't understand mypy error codes like [arg-type], [misc], etc.
+# but these are intentionally kept for documentation purposes

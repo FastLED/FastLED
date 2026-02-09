@@ -1,3 +1,4 @@
+// standalone test
 // Generic example runner that loads and executes example shared libraries
 // Usage: example_runner.exe <example_dll_path> [args...]
 // Or:    <example_name>.exe (auto-loads <example_name>.dll from same directory)

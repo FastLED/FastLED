@@ -69,6 +69,84 @@ namespace detail {
     // Forward declare BackgroundFlushState for async_log_service
     struct BackgroundFlushState;
 
+    // Forward declare printLoggerDisabledError (defined in async_logger.cpp.hpp)
+    void printLoggerDisabledError(const char* category_name, const char* define_name);
+
+    /// @brief Check if logger is enabled and print error once if not
+    /// @tparam InfoProvider Type providing category name, define name, and enabled status
+    template<typename InfoProvider>
+    inline void checkLoggerEnabled() {
+        if (!InfoProvider::isEnabled()) {
+            static bool error_printed = false;
+            if (!error_printed) {
+                error_printed = true;
+                printLoggerDisabledError(InfoProvider::categoryName(), InfoProvider::defineName());
+            }
+        }
+    }
+
+    /// @brief Info providers for each logger category
+    /// Used to supply category name, define name, and enabled status
+    struct ParlioLoggerInfo {
+        static const char* categoryName() { return "PARLIO"; }
+        static const char* defineName() { return "FASTLED_LOG_PARLIO_ENABLED"; }
+        static bool isEnabled() {
+            #ifdef FASTLED_LOG_PARLIO_ENABLED
+            return true;
+            #else
+            return false;
+            #endif
+        }
+    };
+
+    struct RmtLoggerInfo {
+        static const char* categoryName() { return "RMT"; }
+        static const char* defineName() { return "FASTLED_LOG_RMT_ENABLED"; }
+        static bool isEnabled() {
+            #ifdef FASTLED_LOG_RMT_ENABLED
+            return true;
+            #else
+            return false;
+            #endif
+        }
+    };
+
+    struct SpiLoggerInfo {
+        static const char* categoryName() { return "SPI"; }
+        static const char* defineName() { return "FASTLED_LOG_SPI_ENABLED"; }
+        static bool isEnabled() {
+            #ifdef FASTLED_LOG_SPI_ENABLED
+            return true;
+            #else
+            return false;
+            #endif
+        }
+    };
+
+    struct AudioLoggerInfo {
+        static const char* categoryName() { return "AUDIO"; }
+        static const char* defineName() { return "FASTLED_LOG_AUDIO_ENABLED"; }
+        static bool isEnabled() {
+            #ifdef FASTLED_LOG_AUDIO_ENABLED
+            return true;
+            #else
+            return false;
+            #endif
+        }
+    };
+
+    struct InterruptLoggerInfo {
+        static const char* categoryName() { return "INTERRUPT"; }
+        static const char* defineName() { return "FASTLED_LOG_INTERRUPT_ENABLED"; }
+        static bool isEnabled() {
+            #ifdef FASTLED_LOG_INTERRUPT_ENABLED
+            return true;
+            #else
+            return false;
+            #endif
+        }
+    };
+
     /// @brief Active logger registry for iteration (flush operations)
     /// Only tracks loggers that have been instantiated via template access
     struct ActiveLoggerRegistry {
@@ -99,11 +177,13 @@ namespace detail {
     };
 } // namespace detail
 
-/// @brief Template-based logger accessor with auto-registration
+/// @brief Template-based logger accessor with auto-registration and enablement check
 /// @tparam N Logger index (0-15, maps to Singleton<AsyncLogger, N>)
+/// @tparam InfoProvider Type providing category name and define name via static methods
 /// @return Reference to AsyncLogger singleton instance
 /// @note Only instantiated template indices are compiled - linker removes unused ones
-template<fl::size N>
+/// @note Prints error message once if logging is disabled for this category
+template<fl::size N, typename InfoProvider>
 inline AsyncLogger& get_async_logger_by_index() {
     // Get singleton instance (only this specific N is instantiated)
     static AsyncLogger* logger_ptr = []() {
@@ -112,19 +192,55 @@ inline AsyncLogger& get_async_logger_by_index() {
         return ptr;
     }();
 
+    // Check if logging is enabled, print error once if not
+    // (Implementation in async_logger.cpp.hpp uses FL_ERROR)
+    detail::checkLoggerEnabled<InfoProvider>();
+
     return *logger_ptr;
 }
 
 // Convenience wrappers for category-based access (linker removes unused ones)
-inline AsyncLogger& get_parlio_async_logger_isr() { return get_async_logger_by_index<0>(); }
-inline AsyncLogger& get_parlio_async_logger_main() { return get_async_logger_by_index<1>(); }
-inline AsyncLogger& get_rmt_async_logger_isr() { return get_async_logger_by_index<2>(); }
-inline AsyncLogger& get_rmt_async_logger_main() { return get_async_logger_by_index<3>(); }
-inline AsyncLogger& get_spi_async_logger_isr() { return get_async_logger_by_index<4>(); }
-inline AsyncLogger& get_spi_async_logger_main() { return get_async_logger_by_index<5>(); }
-inline AsyncLogger& get_audio_async_logger_isr() { return get_async_logger_by_index<6>(); }
-inline AsyncLogger& get_audio_async_logger_main() { return get_async_logger_by_index<7>(); }
-inline AsyncLogger& get_interrupt_async_logger_isr() { return get_async_logger_by_index<8>(); }
-inline AsyncLogger& get_interrupt_async_logger_main() { return get_async_logger_by_index<9>(); }
+// Each wrapper uses an info provider to check if logging is enabled
+// and prints an error message on first access if logging is disabled
+
+inline AsyncLogger& get_parlio_async_logger_isr() {
+    return get_async_logger_by_index<0, detail::ParlioLoggerInfo>();
+}
+
+inline AsyncLogger& get_parlio_async_logger_main() {
+    return get_async_logger_by_index<1, detail::ParlioLoggerInfo>();
+}
+
+inline AsyncLogger& get_rmt_async_logger_isr() {
+    return get_async_logger_by_index<2, detail::RmtLoggerInfo>();
+}
+
+inline AsyncLogger& get_rmt_async_logger_main() {
+    return get_async_logger_by_index<3, detail::RmtLoggerInfo>();
+}
+
+inline AsyncLogger& get_spi_async_logger_isr() {
+    return get_async_logger_by_index<4, detail::SpiLoggerInfo>();
+}
+
+inline AsyncLogger& get_spi_async_logger_main() {
+    return get_async_logger_by_index<5, detail::SpiLoggerInfo>();
+}
+
+inline AsyncLogger& get_audio_async_logger_isr() {
+    return get_async_logger_by_index<6, detail::AudioLoggerInfo>();
+}
+
+inline AsyncLogger& get_audio_async_logger_main() {
+    return get_async_logger_by_index<7, detail::AudioLoggerInfo>();
+}
+
+inline AsyncLogger& get_interrupt_async_logger_isr() {
+    return get_async_logger_by_index<8, detail::InterruptLoggerInfo>();
+}
+
+inline AsyncLogger& get_interrupt_async_logger_main() {
+    return get_async_logger_by_index<9, detail::InterruptLoggerInfo>();
+}
 
 } // namespace fl

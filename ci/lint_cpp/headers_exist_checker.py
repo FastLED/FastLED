@@ -102,6 +102,14 @@ class HeadersExistChecker(FileContentChecker):
         """Check if test file has corresponding header in src/."""
         test_file = Path(file_content.path)
 
+        # Skip tests in tests/misc/ (these don't need to match source structure)
+        try:
+            rel_path = test_file.relative_to(TESTS_ROOT)
+            if rel_path.parts[0] == "misc":
+                return []
+        except (ValueError, IndexError):
+            pass
+
         # Extract includes from the test file
         includes = self._extract_includes(file_content)
 

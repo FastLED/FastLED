@@ -15,6 +15,8 @@
 #include "fl/channels/bus_manager.h"
 #include "pixel_iterator.h"
 #include "fl/warn.h"
+#include "fl/stl/vector.h"
+#include "platforms/shared/active_strip_tracker/active_strip_tracker.h"
 
 namespace fl {
 
@@ -31,6 +33,10 @@ private:
 
     // Channel engine reference (manager provides best available engine)
     IChannelEngine* mEngine;
+
+    // LED capture tracker for simulation/testing
+    ActiveStripTracker mTracker;
+    fl::vector<u8> mCaptureData;
 
 public:
     ClocklessController()
@@ -61,7 +67,21 @@ protected:
             }
         }
 
-        // Convert pixels to encoded byte data
+        // Capture LED data for simulation/testing BEFORE encoding
+        // Use separate pixel controller with RGB order and no color adjustment
+        mCaptureData.clear();
+        PixelController<RGB> pixels_rgb = pixels; // Converts to RGB pixels
+        // NOTE: disableColorAdjustment() only sets color=white but keeps brightness
+        // We need to manually ensure full brightness for accurate capture
+        #if FASTLED_HD_COLOR_MIXING
+        pixels_rgb.mColorAdjustment.brightness = 255;
+        #endif
+        pixels_rgb.disableColorAdjustment();
+        auto capture_iterator = pixels_rgb.as_iterator(RgbwInvalid());
+        capture_iterator.writeWS2812(&mCaptureData);
+        mTracker.update(fl::span<const u8>(mCaptureData.data(), mCaptureData.size()));
+
+        // Convert pixels to encoded byte data for transmission
         fl::PixelIterator iterator = pixels.as_iterator(this->getRgbw());
         auto& data = mChannelData->getData();
         data.clear();

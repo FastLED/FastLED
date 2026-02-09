@@ -5,8 +5,19 @@
 #include "fl/stl/cstdio.h"
 #include "fl/isr.h"
 #include "fl/math_macros.h"
+#include "fl/log.h"  // For FL_ERROR macro
 
 namespace fl {
+
+namespace detail {
+    /// @brief Print error message for disabled logger (non-template helper)
+    /// Called from checkLoggerEnabled template function
+    /// IMPORTANT: This must NOT be inline - needs external linkage for cross-TU calls
+    void printLoggerDisabledError(const char* category_name, const char* define_name) {
+        FL_ERROR(category_name << " ASYNC LOGGING NOT ENABLED. "
+            << "Add '#define " << define_name << "' before including FastLED.h");
+    }
+} // namespace detail
 
 // ============================================================================
 // Background flush infrastructure (timer-based automatic flushing)
