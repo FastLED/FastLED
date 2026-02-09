@@ -8,6 +8,7 @@ import threading
 import time
 import traceback
 import warnings
+from enum import Enum, auto
 from pathlib import Path
 
 from ci.runners.avr8js_runner import run_avr8js_tests
@@ -32,6 +33,14 @@ from ci.util.test_types import (
     process_test_flags,
 )
 from ci.util.timestamp_print import ts_print
+
+
+class RebuildMode(Enum):
+    """Defines the rebuild/cache behavior for test execution."""
+
+    CACHED = auto()  # Use fingerprint cache normally
+    NO_CACHE = auto()  # Disable fingerprint cache (--no-fingerprint)
+    FULL_REBUILD = auto()  # Force full rebuild (--force, --clean)
 
 
 _CANCEL_WATCHDOG = threading.Event()
@@ -325,13 +334,19 @@ def main() -> None:
                     sys.exit(1)
             else:
                 # Use normal test runner for other cases
-                # Force change flags=True when running a specific test to disable fingerprint cache
-                # Also force when --no-fingerprint or --force is used
+                # Determine rebuild mode based on flags (single source of truth)
+                if args.no_fingerprint:
+                    rebuild_mode = RebuildMode.NO_CACHE
+                elif args.force or args.clean:
+                    rebuild_mode = RebuildMode.FULL_REBUILD
+                else:
+                    rebuild_mode = RebuildMode.CACHED
+
+                # Force change flags=True when running a specific test or when cache is disabled
                 force_cpp_test_change = (
                     cpp_test_change
                     or (args.test is not None)
-                    or args.no_fingerprint
-                    or args.force
+                    or rebuild_mode != RebuildMode.CACHED
                 )
                 # Note: args.examples == [] means "all examples" (e.g., default mode or --examples flag)
                 # args.examples with specific items (e.g., ['Blink']) means specific examples requested
@@ -339,18 +354,16 @@ def main() -> None:
                 force_examples_change = (
                     examples_change
                     or (args.examples is not None and len(args.examples) > 0)
-                    or args.no_fingerprint
-                    or args.force
+                    or rebuild_mode != RebuildMode.CACHED
                 )
                 force_python_test_change = (
                     python_test_change
                     or (args.test is not None)
-                    or args.no_fingerprint
-                    or args.force
+                    or rebuild_mode != RebuildMode.CACHED
                 )
-                force_wasm_change = wasm_change or args.no_fingerprint or args.force
+                force_wasm_change = wasm_change or rebuild_mode != RebuildMode.CACHED
                 force_src_code_change = (
-                    src_code_change or args.no_fingerprint or args.force
+                    src_code_change or rebuild_mode != RebuildMode.CACHED
                 )
 
                 # Only show cache status when it's enabled (the notable case)
