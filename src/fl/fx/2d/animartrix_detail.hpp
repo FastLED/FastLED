@@ -57,6 +57,9 @@ License CC BY-NC 3.0
 // purposes, then you need to contact Stefan Petrick for a commercial use
 // license.
 
+// Audio responsive work in progress
+// https://github.com/4wheeljive/AuroraPortal/blob/main/src/programs/animartrix_detail.hpp
+
 #include "crgb.h"
 #include "fl/force_inline.h"
 #include "fl/compiler_control.h"
