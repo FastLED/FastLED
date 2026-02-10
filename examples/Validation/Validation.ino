@@ -69,6 +69,11 @@
 //   validateChipsetTiming(timing, "WS2812", fl::span(configs, 3), nullptr, buffer);
 //   ```
 //
+// ASYNC ARCHITECTURE:
+// The JSON-RPC system runs on an async task (10ms interval) registered during setup().
+// The task calls RemoteControlSingleton::tick() and processSerialInput() automatically.
+// loop() aggressively pumps fl::async_run() (100x per iteration) to ensure responsiveness.
+//
 
 // ============================================================================
 // AGENT INSTRUCTIONS
@@ -184,6 +189,7 @@
 #include "ValidationTest.h"
 #include "ValidationHelpers.h"
 #include "ValidationRemote.h"
+#include "ValidationAsync.h"
 #include "SketchHalt.h"
 #include "platforms/esp/32/watchdog_esp32.h"  // For fl::watchdog_setup()
 
@@ -398,6 +404,13 @@ void setup() {
     );
 
     FL_PRINT("[REMOTE RPC] ✓ RPC system initialized (testGpioConnection available)");
+
+    // ========================================================================
+    // Async Task Setup - JSON-RPC Processing
+    // ========================================================================
+    FL_PRINT("[ASYNC] Setting up JSON-RPC async task (10ms interval)");
+    validation::setupRpcAsyncTask(RemoteControlSingleton::instance(), 10);
+    FL_PRINT("[ASYNC] ✓ JSON-RPC task registered with scheduler");
 
     // ========================================================================
     // GPIO Baseline Test - Verify GPIO→GPIO path works before testing PARLIO
@@ -653,11 +666,13 @@ void runSingleTestCase(
 //   - Easy retry logic and error recovery
 
 void loop() {
-    // Process RPC commands - this is the primary entry point for all test control
-    RemoteControlSingleton::instance().tick(millis());
-    RemoteControlSingleton::instance().processSerialInput();
+    // Aggressively pump async tasks (including JSON-RPC task)
+    // This ensures RPC commands are processed frequently even without delay() calls
+    for (int i = 0; i < 100; i++) {
+        fl::async_run();
+    }
 
-    // Check halt state after processing RPC (allows reset to work)
+    // Check halt state after async pumping (allows reset to work)
     if (halt.check()) return;
 
     // Emit periodic ready status (every 5 seconds) for Python connection detection
@@ -671,7 +686,4 @@ void loop() {
         printStreamRaw("status", status);
         last_status_ms = now;
     }
-
-    // Minimal delay to prevent tight loop and reduce power consumption
-    delay(1);
 }

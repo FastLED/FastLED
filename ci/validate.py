@@ -16,8 +16,15 @@ JSON-RPC Workflow (Fail-Fast Model):
     3. runTest({drivers, laneRange?, stripSizes?}) - Configure and execute test matrix
        → Args: Named config object with drivers (required), laneRange (optional), stripSizes (optional)
        → Streams: test_start, case_result, test_complete events
+       → Emits: "TEST_COMPLETED_EXIT_OK" (all passed) or "TEST_COMPLETED_EXIT_ERROR" (some failed)
+       → Validate script then queries getTestSummary() for full results
        → Returns: {success, passedTests, totalTests}
        → Replaces: setDrivers + setLaneRange + setStripSizes + runTest (legacy multi-call format)
+
+    4. getTestSummary() - Get abbreviated summary of all test results
+       → Called by validate script after stop word detection
+       → Returns: {allPassed, totalTests, passedTests, successRate, results: [...]}
+       → Each result contains: {driver, lanes, leds, passed, total, successPct, ok}
 
 Legacy Text Patterns:
     - Text output is for human diagnostics ONLY
@@ -103,9 +110,12 @@ init(autoreset=True)
 # full JSON-RPC orchestration.
 DEFAULT_EXPECT_PATTERNS: list[str] = []
 
-# Stop pattern - early exit when test suite completes successfully
-# Firmware emits: RESULT: {"type":"test_complete",...} after runTest() RPC completes
-STOP_PATTERN = "test_complete"
+# Stop patterns - early exit when test suite completes
+# Firmware emits either:
+#   TEST_COMPLETED_EXIT_OK (all tests passed)
+#   TEST_COMPLETED_EXIT_ERROR (some tests failed)
+# After detection, validate script queries getTestSummary RPC for final status
+STOP_PATTERN = "TEST_COMPLETED_EXIT_(OK|ERROR)"
 
 # Default fail-on pattern
 DEFAULT_FAIL_ON_PATTERN = "ERROR"
@@ -968,6 +978,10 @@ def run(args: Args | None = None) -> int:
             "⚠️  Note: setSolidColor RPC command requires firmware support (may need implementation)"
         )
 
+    # Add start command first (required to enable RPC processing)
+    start_cmd = {"function": "start", "args": []}
+    rpc_commands_list.append(start_cmd)
+
     # Add runTest command with config
     # Result: {"function":"runTest","args":{"drivers":["I2S"],"laneRange":{"min":2,"max":2},"stripSizes":[100,300]}}
     rpc_command = {"function": "runTest", "args": config}
@@ -1486,34 +1500,334 @@ def run(args: Args | None = None) -> int:
                 if client is not None:
                     client.close()
 
-        # Kill port users before starting monitor phase
-        # RPC client above may have left the port in a held state
+        # ============================================================
+        # CUSTOM SERIAL MONITORING - Stay connected throughout
+        # ============================================================
+        # We handle serial connection ourselves to avoid reconnection/reboot
+        # Flow: connect → send RPCs → monitor for stop word → parse results → close
+
+        # Kill port users before starting
         if upload_port:
             kill_port_users(upload_port)
-            time.sleep(0.5)  # Brief delay to ensure port is fully released
+            time.sleep(0.5)
 
-        success, _output, _rpc_handler = run_monitor(
-            build_dir,
-            final_environment,
-            upload_port,
-            args.verbose,
-            timeout_seconds,
-            fail_keywords,
-            expect_keywords,
-            stream=False,
-            input_on_trigger=INPUT_ON_TRIGGER,
-            device_error_keywords=None,  # Use defaults
-            stop_keyword=STOP_PATTERN,
-            json_rpc_commands=json_rpc_commands,
-            use_pyserial=args.no_fbuild,  # Use pyserial when --no-fbuild is specified
-        )
+        print()
+        print("=" * 60)
+        print("MONITORING DEVICE OUTPUT")
+        print("=" * 60)
 
-        if not success:
+        output_lines: list[str] = []
+        stop_word_found: str | None = None
+        test_failed = False
+        start_time = time.time()
+
+        try:
+            # Open serial connection (stays open until we're done)
+            print(f"📡 Connecting to {upload_port}...")
+            if args.no_fbuild:
+                import serial
+
+                ser = serial.Serial(upload_port, 115200, timeout=0.1)
+                monitor = ser
+            else:
+                from fbuild.api import SerialMonitor as FbuildSerialMonitor
+
+                monitor = FbuildSerialMonitor(upload_port, baud_rate=115200)
+                monitor.__enter__()
+
+            # Wait for device boot
+            print("⏳ Waiting for device boot...")
+            time.sleep(3.0)
+
+            # Drain boot output
+            print("📥 Draining boot output...")
+            boot_lines = 0
+            drain_start = time.time()
+            while time.time() - drain_start < 2.0:
+                if args.no_fbuild:
+                    if monitor.in_waiting:
+                        line = (
+                            monitor.readline().decode("utf-8", errors="replace").strip()
+                        )
+                        if line:
+                            boot_lines += 1
+                else:
+                    try:
+                        for line in monitor.read_lines(timeout=0.5):
+                            boot_lines += 1
+                            break
+                    except KeyboardInterrupt:
+                        handle_keyboard_interrupt_properly()
+                    except Exception:
+                        break
+            print(f"   Drained {boot_lines} boot lines")
+
+            # Send RPC commands
+            print(f"🔧 Sending {len(json_rpc_commands)} JSON-RPC command(s)...")
+            for i, cmd in enumerate(json_rpc_commands, 1):
+                cmd_str = json.dumps(cmd, separators=(",", ":"))
+                if args.no_fbuild:
+                    monitor.write((cmd_str + "\n").encode())
+                else:
+                    monitor.write(cmd_str + "\n")
+                print(
+                    f"   ✓ Sent command {i}/{len(json_rpc_commands)}: {cmd['function']}()"
+                )
+                time.sleep(0.1)  # Brief delay between commands
+
+            # Monitor output for stop word
+            print(f"\n👀 Monitoring output (timeout: {timeout_seconds}s)...")
+            print("─" * 60)
+
+            while True:
+                # Check timeout
+                elapsed = time.time() - start_time
+                if elapsed >= timeout_seconds:
+                    print(f"\n⏱️  Timeout after {timeout_seconds}s")
+                    break
+
+                # Check interrupt
+                if is_interrupted():
+                    raise KeyboardInterrupt()
+
+                # Read line
+                line = None
+                if args.no_fbuild:
+                    if monitor.in_waiting:
+                        line = (
+                            monitor.readline().decode("utf-8", errors="replace").strip()
+                        )
+                else:
+                    try:
+                        for read_line in monitor.read_lines(timeout=0.1):
+                            line = read_line
+                            break
+                    except KeyboardInterrupt:
+                        handle_keyboard_interrupt_properly()
+                    except Exception:
+                        continue
+
+                if not line:
+                    continue
+
+                # Store line
+                output_lines.append(line)
+
+                # Check for stop words
+                if "TEST_COMPLETED_EXIT_OK" in line:
+                    stop_word_found = "OK"
+                    print(f"\n{Fore.GREEN}✓ TEST_COMPLETED_EXIT_OK{Style.RESET_ALL}")
+                    break
+                elif "TEST_COMPLETED_EXIT_ERROR" in line:
+                    stop_word_found = "ERROR"
+                    print(f"\n{Fore.RED}✗ TEST_COMPLETED_EXIT_ERROR{Style.RESET_ALL}")
+                    break
+
+                # Check for failure patterns
+                for pattern in fail_keywords:
+                    if pattern in line and "ERROR" in pattern:
+                        # Only flag as error if it's a real error, not test failure message
+                        if "register dump" in line or "ClearCommError" in line:
+                            test_failed = True
+                            print(
+                                f"\n{Fore.RED}❌ Device error detected: {line[:80]}{Style.RESET_ALL}"
+                            )
+                            break
+
+                # Print progress (show test completions)
+                if "PASS] Test case" in line or "FAIL] Test case" in line:
+                    print(f"  {line[:100]}")
+
+        except KeyboardInterrupt:
+            print("\n\n⚠️  Interrupted by user")
+            handle_keyboard_interrupt_properly()
+            return 130
+        except Exception as e:
+            print(f"\n{Fore.RED}❌ Serial error: {e}{Style.RESET_ALL}")
+            return 1
+        finally:
+            # Close serial connection
+            if args.no_fbuild:
+                monitor.close()
+            else:
+                monitor.__exit__(None, None, None)
+            print(f"\n✅ Serial connection closed")
+
+        print("─" * 60)
+        print(f"📊 Captured {len(output_lines)} output lines")
+
+        # Check if we failed due to device error
+        if test_failed:
             return 1
 
-        # Test summary is already shown by run_monitor()
-        print(f"\n{Fore.GREEN}PASSED{Style.RESET_ALL} All validation tests completed")
-        return 0
+        # Check if no stop word found
+        if not stop_word_found:
+            print(
+                f"\n{Fore.YELLOW}⚠️  No completion stop word found within timeout{Style.RESET_ALL}"
+            )
+            return 1
+
+        # If stop word found, parse test summary from captured output
+        if stop_word_found:
+            print()
+            print("=" * 60)
+            print("FINAL TEST SUMMARY")
+            print("=" * 60)
+
+            try:
+                # Parse test results from JSON-RPC responses in output
+                # Look for RESULT lines with type="test_complete" for overall stats
+                # and type="test_case_result" for individual case results
+                # Also parse test case headers like "[PASS] Test case PARLIO (2 lanes, 100 LEDs)"
+                print("  Parsing test results from captured output...")
+
+                summary = None
+                test_complete_data = None
+                case_results = []
+                current_driver = None
+                current_lanes = None
+                current_leds = None
+
+                for line in output_lines:
+                    # Parse test case headers to extract driver, lanes, LEDs
+                    if "Test case" in line and ("PASS" in line or "FAIL" in line):
+                        # Example: "[PASS] Test case PARLIO (2 lanes, 100 LEDs) completed successfully"
+                        # Example: "[FAIL] Test case PARLIO (5 lanes, 100 LEDs) FAILED: 0/4 tests passed"
+                        import re
+
+                        match = re.search(
+                            r"Test case (\w+) \((\d+) lane.*?(\d+) LEDs\)", line
+                        )
+                        if match:
+                            current_driver = match.group(1)
+                            current_lanes = int(match.group(2))
+                            current_leds = int(match.group(3))
+
+                    # Parse JSON results
+                    if "RESULT:" in line and "{" in line:
+                        # Extract JSON portion
+                        json_start = line.index("{")
+                        json_str = line[json_start:]
+                        try:
+                            data = json.loads(json_str)
+                            if data.get("type") == "test_complete":
+                                test_complete_data = data
+                            elif data.get("type") == "test_case_result":
+                                # Enrich with driver/lanes/LEDs from test header
+                                if current_driver:
+                                    data["driver"] = current_driver
+                                    data["lanes"] = current_lanes
+                                    data["leds"] = current_leds
+                                case_results.append(data)
+                        except json.JSONDecodeError:
+                            continue
+
+                # Build summary from parsed data
+                if test_complete_data:
+                    total_tests = test_complete_data.get("totalTests", 0)
+                    passed_tests = test_complete_data.get("passedTests", 0)
+                    failed_tests = total_tests - passed_tests
+                    all_passed = test_complete_data.get("passed", False)
+                    success_rate = (
+                        100.0 * passed_tests / total_tests if total_tests > 0 else 0.0
+                    )
+
+                    summary = {
+                        "success": True,
+                        "allPassed": all_passed,
+                        "totalTests": total_tests,
+                        "passedTests": passed_tests,
+                        "failedTests": failed_tests,
+                        "successRate": success_rate,
+                        "results": case_results,
+                    }
+
+                # Display summary if we successfully parsed the data
+                if summary and summary.get("success"):
+                    # Display overall statistics
+                    all_passed = summary.get("allPassed", False)
+                    total_tests = summary.get("totalTests", 0)
+                    passed_tests = summary.get("passedTests", 0)
+                    failed_tests = summary.get("failedTests", 0)
+                    total_cases = summary.get("totalCases", 0)
+                    passed_cases = summary.get("passedCases", 0)
+                    success_rate = summary.get("successRate", 0.0)
+
+                    print(f"  Total Test Cases: {passed_cases}/{total_cases} passed")
+                    print(f"  Total Tests: {passed_tests}/{total_tests} passed")
+                    print(f"  Failed Tests: {failed_tests}")
+                    print(f"  Success Rate: {success_rate:.1f}%")
+                    print()
+
+                    # Display per-case results
+                    results = summary.get("results", [])
+                    if results and isinstance(results, list):
+                        print("  Individual Results:")
+                        print(
+                            f"    {'Driver':<10} {'Lanes':<6} {'LEDs':<8} {'Passed/Total':<15} {'%':<8} {'Status'}"
+                        )
+                        print("    " + "-" * 70)
+
+                        for result in results:
+                            driver = result.get("driver", "?")
+                            lanes = result.get("lanes", 0)
+                            leds = result.get("leds", 0)
+                            passed = result.get("passedTests", 0)
+                            total = result.get("totalTests", 0)
+                            ok = result.get("passed", False)
+                            pct = 100.0 * passed / total if total > 0 else 0.0
+                            skipped = result.get("skipped", False)
+
+                            status_str = ""
+                            if skipped:
+                                status_str = f"{Fore.YELLOW}SKIPPED{Style.RESET_ALL}"
+                            elif ok:
+                                status_str = f"{Fore.GREEN}PASS{Style.RESET_ALL}"
+                            else:
+                                status_str = f"{Fore.RED}FAIL{Style.RESET_ALL}"
+
+                            print(
+                                f"    {driver:<10} {lanes:<6} {leds:<8} {passed}/{total:<13} {pct:>6.1f}% {status_str}"
+                            )
+
+                    print()
+                    print("=" * 60)
+
+                    # Return exit code based on whether all tests passed
+                    if all_passed:
+                        print(
+                            f"{Fore.GREEN}✓ ALL TESTS PASSED{Style.RESET_ALL} - Validation successful"
+                        )
+                        return 0
+                    else:
+                        print(
+                            f"{Fore.RED}✗ SOME TESTS FAILED{Style.RESET_ALL} - {failed_tests} test(s) failed"
+                        )
+                        return 1
+                else:
+                    print(
+                        f"{Fore.YELLOW}⚠️  Failed to get test summary via RPC{Style.RESET_ALL}"
+                    )
+                    # Fall through to default behavior
+
+            except KeyboardInterrupt:
+                handle_keyboard_interrupt_properly()
+            except Exception as e:
+                print(
+                    f"{Fore.YELLOW}⚠️  Error querying test summary: {e}{Style.RESET_ALL}"
+                )
+                # Fall through to default behavior
+
+        # Fallback: If no stop word found or RPC query failed
+        # Use stop word type or success flag to determine exit code
+        if stop_word_found == "ERROR":
+            print(f"\n{Fore.RED}FAILED{Style.RESET_ALL} Some validation tests failed")
+            return 1
+        else:
+            print(
+                f"\n{Fore.GREEN}PASSED{Style.RESET_ALL} All validation tests completed"
+            )
+            return 0
 
     except KeyboardInterrupt:
         print("\n\n⚠️  Interrupted by user")

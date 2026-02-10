@@ -87,12 +87,14 @@ public:
         RxDeviceFactory rx_factory
     );
 
-    /// @brief Process scheduled RPC commands (call from loop())
+    /// @brief Process scheduled RPC commands (called by async task)
     /// @param current_millis Current timestamp in milliseconds
+    /// @note This function is automatically called by the async task registered in setup()
     void tick(uint32_t current_millis);
 
-    /// @brief Process incoming serial data for RPC commands
+    /// @brief Process incoming serial data for RPC commands (called by async task)
     /// @return false always (legacy return value, no longer used)
+    /// @note This function is automatically called by the async task registered in setup()
     bool processSerialInput();
 
     /// @brief Get underlying Remote instance

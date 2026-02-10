@@ -782,6 +782,66 @@ void ValidationRemoteControl::registerFunctions(
         return response;
     });
 
+    // Register "getTestSummary" function - return abbreviated summary of all test results
+    // Used by bash validate script after TEST_COMPLETED_EXIT_OK/ERROR
+    mRemote->registerFunctionWithReturn("getTestSummary", [this](const fl::Json& args) -> fl::Json {
+        fl::Json response = fl::Json::object();
+
+        // Calculate overall statistics
+        int total_tests = 0, passed_tests = 0;
+        int total_cases = static_cast<int>(mpTestResults->size());
+        int passed_cases = 0;
+
+        for (fl::size i = 0; i < mpTestResults->size(); i++) {
+            const auto& result = (*mpTestResults)[i];
+            total_tests += result.total_tests;
+            passed_tests += result.passed_tests;
+            if (result.allPassed() && !result.skipped) {
+                passed_cases++;
+            }
+        }
+
+        bool all_passed = (passed_tests == total_tests);
+        float success_rate = total_tests > 0 ? (100.0f * passed_tests / total_tests) : 0.0f;
+
+        // Build summary object
+        response.set("success", true);
+        response.set("allPassed", all_passed);
+        response.set("totalTests", static_cast<int64_t>(total_tests));
+        response.set("passedTests", static_cast<int64_t>(passed_tests));
+        response.set("failedTests", static_cast<int64_t>(total_tests - passed_tests));
+        response.set("totalCases", static_cast<int64_t>(total_cases));
+        response.set("passedCases", static_cast<int64_t>(passed_cases));
+        response.set("successRate", static_cast<int64_t>(success_rate * 100) / 100.0); // Round to 2 decimals
+
+        // Build abbreviated test results array
+        fl::Json results = fl::Json::array();
+        for (fl::size i = 0; i < mpTestResults->size(); i++) {
+            const auto& result = (*mpTestResults)[i];
+
+            fl::Json item = fl::Json::object();
+            item.set("driver", result.driver_name);
+            item.set("lanes", static_cast<int64_t>(result.lane_count));
+            item.set("leds", static_cast<int64_t>(result.base_strip_size));
+            item.set("passed", static_cast<int64_t>(result.passed_tests));
+            item.set("total", static_cast<int64_t>(result.total_tests));
+
+            // Calculate per-case success rate
+            float case_success = result.total_tests > 0 ?
+                (100.0f * result.passed_tests / result.total_tests) : 0.0f;
+            item.set("successPct", static_cast<int64_t>(case_success * 100) / 100.0);
+
+            item.set("ok", result.allPassed() && !result.skipped);
+            item.set("skipped", result.skipped);
+
+            results.push_back(item);
+        }
+
+        response.set("results", results);
+
+        return response;
+    });
+
     // ========================================================================
     // NEW Phase: Variable Lane Size Support (per LOOP.md design)
     // ========================================================================
@@ -1389,15 +1449,25 @@ void ValidationRemoteControl::registerFunctions(
             passed_tests += (*mpTestResults)[i].passed_tests;
         }
 
+        // Calculate success status
+        bool all_passed = (passed_tests == total_tests);
+
         // Emit test_complete event (JSONL streaming)
         {
             fl::Json data = fl::Json::object();
             data.set("timestamp", static_cast<int64_t>(end_ms));
             data.set("totalTests", static_cast<int64_t>(total_tests));
             data.set("passedTests", static_cast<int64_t>(passed_tests));
-            data.set("passed", passed_tests == total_tests);
+            data.set("passed", all_passed);
             data.set("durationMs", static_cast<int64_t>(end_ms - start_ms));
             printStreamRaw("test_complete", data);
+        }
+
+        // Emit stop word for bash validate script detection (pass/fail)
+        if (all_passed) {
+            Serial.println("TEST_COMPLETED_EXIT_OK");
+        } else {
+            Serial.println("TEST_COMPLETED_EXIT_ERROR");
         }
 
         // Return minimal response (full details streamed above)
