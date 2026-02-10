@@ -1370,6 +1370,73 @@ def run(args: Args | None = None) -> int:
             time.sleep(0.5)  # Brief delay to ensure port is fully released
 
         # ============================================================
+        # Validate RPC Commands Against Device Schema
+        # ============================================================
+        # Fetch schema from device and validate commands using Pydantic
+        # This catches parameter mismatches early before running tests
+        # Must run AFTER firmware upload (device needs getSchema method)
+
+        # Skip schema validation on constrained platforms (stack overflow risk)
+        # ESP32-C6 (320KB RAM, ~8KB stack) crashes when serializing full RPC schema
+        constrained_platforms = ["esp32c6", "esp32c2"]
+        skip_schema = final_environment in constrained_platforms
+
+        if skip_schema:
+            print(
+                f"\n⏭️  Skipping schema validation on {final_environment} (constrained platform)"
+            )
+
+        if not skip_schema:
+            try:
+                from ci.rpc_schema_validator import RpcSchemaValidator
+
+                print("\n🔍 Validating RPC commands against device schema...")
+                validator = RpcSchemaValidator(port=upload_port, timeout=10.0)
+
+                validation_errors = []
+                for i, cmd in enumerate(json_rpc_commands):
+                    method = cmd.get("function") or cmd.get("method")
+                    if not method:
+                        validation_errors.append(
+                            f"Command {i + 1}: Missing 'method' or 'function' field"
+                        )
+                        continue
+
+                    args = cmd.get("args", [])
+
+                    # Unwrap single-element arrays (RPC system does this automatically)
+                    if isinstance(args, list) and len(args) == 1:
+                        args = args[0]
+
+                    try:
+                        validator.validate_request(method, args)
+                    except KeyboardInterrupt:
+                        handle_keyboard_interrupt_properly()
+                        raise
+                    except Exception as e:
+                        validation_errors.append(f"Command {i + 1} ({method}): {e}")
+
+                if validation_errors:
+                    print(f"\n❌ Schema validation failed:")
+                    for error in validation_errors:
+                        print(f"  - {error}")
+                    print(f"\n💡 Fix: Update command parameters to match device schema")
+                    return 1
+
+                print(
+                    f"✅ All {len(json_rpc_commands)} RPC commands validated against schema"
+                )
+            except KeyboardInterrupt:
+                handle_keyboard_interrupt_properly()
+                raise
+
+            except ImportError:
+                print("⚠️  pydantic not available - skipping schema validation")
+            except Exception as e:
+                # Schema validation is optional - don't fail if device unavailable
+                print(f"⚠️  Schema validation skipped: {e}")
+
+        # ============================================================
         # Phase 3.5: Pin Discovery (runs FIRST if enabled)
         # ============================================================
         effective_tx_pin: int | None = None

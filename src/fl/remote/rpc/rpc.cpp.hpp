@@ -9,11 +9,13 @@ namespace fl {
 Json Rpc::handle(const Json& request) {
     // Extract method name
     if (!request.contains("method")) {
+        FL_ERROR("RPC: Invalid Request - missing 'method' field");
         return detail::makeJsonRpcError(-32600, "Invalid Request: missing 'method'", request["id"]);
     }
 
     auto methodOpt = request["method"].as_string();
     if (!methodOpt.has_value()) {
+        FL_ERROR("RPC: Invalid Request - 'method' must be a string");
         return detail::makeJsonRpcError(-32600, "Invalid Request: 'method' must be a string", request["id"]);
     }
     fl::string methodName = methodOpt.value();
@@ -32,12 +34,14 @@ Json Rpc::handle(const Json& request) {
     // Look up the method
     auto it = mRegistry.find(methodName);
     if (it == mRegistry.end()) {
+        FL_ERROR("RPC: Method not found: " << methodName.c_str());
         return detail::makeJsonRpcError(-32601, "Method not found: " + methodName, request["id"]);
     }
 
     // Extract params (default to empty array)
     Json params = request.contains("params") ? request["params"] : Json::parse("[]");
     if (!params.is_array()) {
+        FL_ERROR("RPC: Invalid params - must be an array for method: " << methodName.c_str());
         return detail::makeJsonRpcError(-32602, "Invalid params: must be an array", request["id"]);
     }
 
@@ -48,6 +52,7 @@ Json Rpc::handle(const Json& request) {
 
     // Check for conversion errors
     if (!convResult.ok()) {
+        FL_ERROR("RPC: Invalid params for method '" << methodName.c_str() << "': " << convResult.errorMessage().c_str());
         return detail::makeJsonRpcError(-32602, "Invalid params: " + convResult.errorMessage(), request["id"]);
     }
 

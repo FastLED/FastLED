@@ -23,7 +23,18 @@
 // ============================================================================
 
 void printJsonRaw(const fl::Json& json, const char* prefix) {
+    Serial.println("[DEBUG] printJsonRaw start");
+    Serial.print("[DEBUG] Free heap: ");
+    Serial.println(ESP.getFreeHeap());
+    Serial.flush();
+
     fl::string jsonStr = json.to_string();
+
+    Serial.print("[DEBUG] JSON string length: ");
+    Serial.println(jsonStr.size());
+    Serial.print("[DEBUG] Free heap: ");
+    Serial.println(ESP.getFreeHeap());
+    Serial.flush();
 
     // Ensure single-line (replace any newlines/carriage returns with spaces)
     for (size_t i = 0; i < jsonStr.size(); ++i) {
@@ -32,11 +43,19 @@ void printJsonRaw(const fl::Json& json, const char* prefix) {
         }
     }
 
+    Serial.println("[DEBUG] Sending JSON to Serial");
+    Serial.flush();
+
     // Output directly to Serial, bypassing fl::println
     if (prefix && prefix[0] != '\0') {
         Serial.print(prefix);
     }
     Serial.println(jsonStr.c_str());
+
+    Serial.println("[DEBUG] printJsonRaw done");
+    Serial.print("[DEBUG] Free heap: ");
+    Serial.println(ESP.getFreeHeap());
+    Serial.flush();
 }
 
 void printStreamRaw(const char* messageType, const fl::Json& data) {
@@ -199,6 +218,27 @@ void ValidationRemoteControl::registerFunctions(
         return status;
     });
 
+    // NOTE: getSchema is no longer needed - use built-in "rpc.discover" instead
+    // The rpc.discover method is automatically available via Remote->Rpc and returns
+    // the full OpenRPC schema. Our custom getSchema was causing stack overflow on ESP32-C6.
+
+    // Register "debugTest" function - test RPC argument passing
+    mRemote->bind("debugTest", [](const fl::Json& args) -> fl::Json {
+        Serial.println("[DEBUG] debugTest called!");
+        Serial.print("[DEBUG] args type: ");
+        if (args.is_array()) Serial.println("array");
+        else if (args.is_object()) Serial.println("object");
+        else Serial.println("other");
+        Serial.print("[DEBUG] args toString: ");
+        Serial.println(args.to_string().c_str());
+        Serial.flush();
+
+        fl::Json response = fl::Json::object();
+        response.set("success", true);
+        response.set("received", args);
+        return response;
+    });
+
     // Register "drivers" function - list available drivers
     mRemote->bind("drivers", [this](const fl::Json& args) -> fl::Json {
         fl::Json drivers = fl::Json::array();
@@ -215,17 +255,27 @@ void ValidationRemoteControl::registerFunctions(
     // Returns: {success, passed, totalTests, passedTests, duration_ms, driver,
     //          laneCount, laneSizes, pattern, firstFailure?}
     mRemote->bind("runSingleTest", [this](const fl::Json& args) -> fl::Json {
+        Serial.println("[DEBUG] runSingleTest called");
+        Serial.print("[DEBUG] Free heap: ");
+        Serial.println(ESP.getFreeHeap());
+        Serial.flush();
+
         fl::Json response = fl::Json::object();
 
-        // Validate args is an array with single config object
-        if (!args.is_array() || args.size() != 1 || !args[0].is_object()) {
+        // RPC system unwraps single-element arrays, so args is the config object directly
+        if (!args.is_object()) {
+            Serial.println("[DEBUG] Args validation failed - not an object");
+            Serial.flush();
             response.set("success", false);
             response.set("error", "InvalidArgs");
-            response.set("message", "Expected [{driver, laneSizes, pattern?, iterations?, pinTx?, pinRx?, timing?}]");
+            response.set("message", "Expected {driver, laneSizes, pattern?, iterations?, pinTx?, pinRx?, timing?}");
             return response;
         }
 
-        fl::Json config = args[0];
+        Serial.println("[DEBUG] Args validation passed");
+        Serial.flush();
+
+        fl::Json config = args;
 
         // ========== REQUIRED PARAMETERS ==========
 
@@ -354,31 +404,65 @@ void ValidationRemoteControl::registerFunctions(
 
         // ========== EXECUTION ==========
 
+        Serial.print("[DEBUG] runSingleTest starting - driver: ");
+        Serial.println(driver_name.c_str());
+        Serial.print("[DEBUG] Free heap: ");
+        Serial.println(ESP.getFreeHeap());
+        Serial.flush();
+
         uint32_t start_ms = millis();
 
         // Set driver as exclusive
+        Serial.println("[DEBUG] Setting exclusive driver...");
+        Serial.flush();
         if (!FastLED.setExclusiveDriver(driver_name.c_str())) {
             response.set("success", false);
             response.set("error", "DriverSetupFailed");
             fl::sstream msg;
             msg << "Failed to set " << driver_name.c_str() << " as exclusive driver";
             response.set("message", msg.str().c_str());
+            Serial.println("[DEBUG] Failed to set exclusive driver");
+            Serial.flush();
             return response;
         }
+        Serial.println("[DEBUG] Exclusive driver set");
+        Serial.flush();
 
         // Get timing configuration (currently hardcoded to WS2812B-V5)
+        Serial.println("[DEBUG] Creating timing config");
+        Serial.flush();
         fl::NamedTimingConfig timing_config(
             fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(),
             timing_name.c_str()
         );
 
         // Dynamically allocate LED arrays for each lane
+        Serial.print("[DEBUG] Allocating LED arrays - lanes: ");
+        Serial.println(lane_sizes.size());
+        Serial.print("[DEBUG] Free heap: ");
+        Serial.println(ESP.getFreeHeap());
+        Serial.flush();
+
         fl::vector<fl::unique_ptr<fl::vector<CRGB>>> led_arrays;
         fl::vector<fl::ChannelConfig> tx_configs;
 
         for (fl::size i = 0; i < lane_sizes.size(); i++) {
+            Serial.print("[DEBUG] Lane ");
+            Serial.print(i);
+            Serial.print(" - allocating ");
+            Serial.print(lane_sizes[i]);
+            Serial.println(" LEDs");
+            Serial.print("[DEBUG] Free heap: ");
+            Serial.println(ESP.getFreeHeap());
+            Serial.flush();
+
             // Allocate LED array
             auto leds = fl::make_unique<fl::vector<CRGB>>(lane_sizes[i]);
+
+            Serial.print("[DEBUG] Lane ");
+            Serial.print(i);
+            Serial.println(" - creating channel config");
+            Serial.flush();
 
             // Create channel config
             tx_configs.push_back(fl::ChannelConfig(
@@ -390,24 +474,51 @@ void ValidationRemoteControl::registerFunctions(
 
             // Store array to keep it alive
             led_arrays.push_back(fl::move(leds));
+
+            Serial.print("[DEBUG] Lane ");
+            Serial.print(i);
+            Serial.print(" complete, free heap: ");
+            Serial.println(ESP.getFreeHeap());
+            Serial.flush();
         }
 
+        Serial.print("[DEBUG] All lanes allocated, free heap: ");
+        Serial.println(ESP.getFreeHeap());
+        Serial.flush();
+
         // Create temporary RX channel if pinRx differs from default
+        Serial.println("[DEBUG] Setting up RX channel");
+        Serial.print("[DEBUG] Free heap: ");
+        Serial.println(ESP.getFreeHeap());
+        Serial.flush();
+
         fl::shared_ptr<fl::RxDevice> rx_channel_to_use = *mpRxChannel;
         bool created_temp_rx = false;
 
         if (pin_rx != *mpPinRx && mRxFactory) {
+            Serial.println("[DEBUG] Creating temp RX channel");
+            Serial.flush();
             rx_channel_to_use = mRxFactory(pin_rx);
             if (!rx_channel_to_use) {
                 response.set("success", false);
                 response.set("error", "RxChannelCreationFailed");
                 response.set("message", "Failed to create RX channel on custom pin");
+                Serial.println("[DEBUG] RX channel creation failed");
+                Serial.flush();
                 return response;
             }
             created_temp_rx = true;
+            Serial.println("[DEBUG] Temp RX channel created");
+            Serial.flush();
         }
 
+        Serial.print("[DEBUG] Free heap after RX: ");
+        Serial.println(ESP.getFreeHeap());
+        Serial.flush();
+
         // Create validation configuration
+        Serial.println("[DEBUG] Creating validation config");
+        Serial.flush();
         fl::ValidationConfig validation_config(
             timing_config.timing,
             timing_config.name,
@@ -419,32 +530,72 @@ void ValidationRemoteControl::registerFunctions(
             fl::RxDeviceType::RMT  // Default RX device type
         );
 
+        Serial.print("[DEBUG] Validation config created, free heap: ");
+        Serial.println(ESP.getFreeHeap());
+        Serial.flush();
+
         // Run test with debug output suppressed
+        Serial.print("[DEBUG] Starting test - iterations: ");
+        Serial.println(iterations);
+        Serial.print("[DEBUG] Free heap: ");
+        Serial.println(ESP.getFreeHeap());
+        Serial.flush();
+
         int total_tests = 0;
         int passed_tests = 0;
         bool passed = false;
 
         {
+            Serial.println("[DEBUG] Entering test scope (log disable)");
+            Serial.flush();
+
             fl::ScopedLogDisable logGuard;  // Suppress FL_DBG/FL_PRINT during test
 
             // Run warm-up iteration (discard results)
+            Serial.println("[DEBUG] Running warmup");
+            Serial.flush();
             int warmup_total = 0, warmup_passed = 0;
             validateChipsetTiming(validation_config, warmup_total, warmup_passed);
+            Serial.print("[DEBUG] Warmup done, heap: ");
+            Serial.println(ESP.getFreeHeap());
+            Serial.flush();
 
             // Run actual test iterations
             for (int iter = 0; iter < iterations; iter++) {
+                Serial.print("[DEBUG] Iteration ");
+                Serial.println(iter + 1);
+                Serial.print("[DEBUG] Free heap: ");
+                Serial.println(ESP.getFreeHeap());
+                Serial.flush();
+
                 int iter_total = 0, iter_passed = 0;
                 validateChipsetTiming(validation_config, iter_total, iter_passed);
                 total_tests += iter_total;
                 passed_tests += iter_passed;
+
+                Serial.print("[DEBUG] Iteration ");
+                Serial.print(iter + 1);
+                Serial.println(" done");
+                Serial.flush();
             }
 
             passed = (total_tests > 0) && (passed_tests == total_tests);
         }  // logGuard destroyed, logging restored
 
+        Serial.print("[DEBUG] Test complete - passed: ");
+        Serial.println(passed);
+        Serial.print("[DEBUG] Free heap: ");
+        Serial.println(ESP.getFreeHeap());
+        Serial.flush();
+
         uint32_t duration_ms = millis() - start_ms;
 
         // ========== RESPONSE ==========
+
+        Serial.println("[DEBUG] Building response");
+        Serial.print("[DEBUG] Free heap: ");
+        Serial.println(ESP.getFreeHeap());
+        Serial.flush();
 
         response.set("success", true);
         response.set("passed", passed);
@@ -454,6 +605,8 @@ void ValidationRemoteControl::registerFunctions(
         response.set("driver", driver_name.c_str());
         response.set("laneCount", static_cast<int64_t>(lane_sizes.size()));
 
+        Serial.println("[DEBUG] Building laneSizes array");
+        Serial.flush();
         // Add laneSizes array to response
         fl::Json sizes_response = fl::Json::array();
         for (int size : lane_sizes) {
@@ -464,11 +617,18 @@ void ValidationRemoteControl::registerFunctions(
 
         // Add first failure info if test failed
         if (!passed) {
+            Serial.println("[DEBUG] Adding failure info");
+            Serial.flush();
             fl::Json failure = fl::Json::object();
             failure.set("pattern", pattern.c_str());
             failure.set("details", "Validation mismatch detected");
             response.set("firstFailure", failure);
         }
+
+        Serial.print("[DEBUG] Response built, heap: ");
+        Serial.println(ESP.getFreeHeap());
+        Serial.println("[DEBUG] Returning response");
+        Serial.flush();
 
         return response;
     });
