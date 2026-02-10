@@ -125,8 +125,9 @@ EXIT_ON_ERROR_PATTERNS = [
 INPUT_ON_TRIGGER = None  # No legacy START command needed
 
 # GPIO pin definitions (must match Validation.ino)
+# Note: ESP32-C6 uses RX=0, ESP32 uses RX=2 (different defaults per platform)
 PIN_TX = 1  # TX pin used by FastLED drivers
-PIN_RX = 2  # RX pin used by RMT receiver
+PIN_RX = 0  # RX pin used by RMT receiver (ESP32-C6 default; ESP32 uses 2)
 
 
 # ============================================================
