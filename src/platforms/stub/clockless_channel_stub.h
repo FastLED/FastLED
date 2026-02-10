@@ -13,6 +13,7 @@
 #include "fl/channels/data.h"
 #include "fl/channels/engine.h"
 #include "fl/channels/bus_manager.h"
+#include "fl/stl/weak_ptr.h"
 #include "pixel_iterator.h"
 #include "fl/warn.h"
 #include "fl/stl/vector.h"
@@ -31,8 +32,8 @@ private:
     // Channel data for transmission
     ChannelDataPtr mChannelData;
 
-    // Channel engine reference (manager provides best available engine)
-    IChannelEngine* mEngine;
+    // Channel engine reference (weak pointer for lifetime safety)
+    fl::weak_ptr<IChannelEngine> mEngine;
 
     // LED capture tracker for simulation/testing
     ActiveStripTracker mTracker;
@@ -40,7 +41,6 @@ private:
 
 public:
     ClocklessController()
-        : mEngine(&channelBusManager())
     {
         // Create channel data with pin and timing configuration
         ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
@@ -52,12 +52,27 @@ public:
 protected:
     virtual void showPixels(PixelController<RGB_ORDER>& pixels) override
     {
+        // Get engine (lock weak_ptr to shared_ptr)
+        fl::shared_ptr<IChannelEngine> engine = mEngine.lock();
+
+        // If engine is null/expired, select one from ChannelBusManager
+        if (!engine) {
+            engine = ChannelBusManager::instance().selectEngineForChannel(mChannelData, fl::string());  // Empty affinity
+            if (engine) {
+                // Cache the selected engine as weak_ptr
+                mEngine = engine;
+            } else {
+                FL_ERROR("ClocklessController(stub): No compatible engine found - cannot transmit");
+                return;
+            }
+        }
+
         // Wait for previous transmission to complete and release buffer
         // This prevents race conditions when show() is called faster than hardware can transmit
         u32 startTime = fl::millis();
         u32 lastWarnTime = startTime;
         while (mChannelData->isInUse()) {
-            mEngine->poll();  // Keep polling until buffer is released
+            engine->poll();  // Keep polling until buffer is released
 
             // Warn every second if still waiting (possible deadlock or hardware issue)
             u32 elapsed = fl::millis() - startTime;
@@ -88,7 +103,7 @@ protected:
         iterator.writeWS2812(&data);
 
         // Enqueue for transmission (will be sent when engine->show() is called)
-        mEngine->enqueue(mChannelData);
+        engine->enqueue(mChannelData);
     }
 };
 

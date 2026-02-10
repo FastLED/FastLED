@@ -73,7 +73,7 @@ void ChannelBusManager::addEngine(int priority, fl::shared_ptr<IChannelEngine> e
     // If replacing, wait for all engines to become READY
     if (replacing) {
         FL_DBG("ChannelBusManager: Waiting for all engines to become READY before replacement");
-        wait();
+        waitForReady();
 
         // Remove the old engine with matching name (shared_ptr may trigger deletion)
         for (size_t i = 0; i < mEngines.size(); ++i) {
@@ -142,7 +142,7 @@ void ChannelBusManager::clearAllEngines() {
 
     // Wait for all engines to become READY before clearing
     // This prevents clearing engines that are still transmitting
-    wait();
+    waitForReady();
 
     FL_DBG("ChannelBusManager: Clearing " << mEngines.size() << " engines");
 
@@ -266,91 +266,58 @@ fl::span<const DriverInfo> ChannelBusManager::getDriverInfos() const {
     return fl::span<const DriverInfo>(mCachedDriverInfo.data(), mCachedDriverInfo.size());
 }
 
-IChannelEngine* ChannelBusManager::getEngineByName(const fl::string& name) const {
+fl::shared_ptr<IChannelEngine> ChannelBusManager::getEngineByName(const fl::string& name) const {
     if (name.empty()) {
         FL_ERROR("ChannelBusManager::getEngineByName() - Empty driver name provided");
-        return nullptr;
+        return fl::shared_ptr<IChannelEngine>();
     }
 
     for (const auto& entry : mEngines) {
         if (entry.enabled && entry.name == name) {
-            return entry.engine.get();
+            return entry.engine;  // Return shared_ptr directly
         }
     }
 
     FL_ERROR("ChannelBusManager::getEngineByName() - Driver '" << name.c_str() << "' not found or not enabled");
-    return nullptr;
+    return fl::shared_ptr<IChannelEngine>();
 }
 
-IChannelEngine::Capabilities ChannelBusManager::getCapabilities() const {
-    // OR together all engine capabilities
-    bool supportsClockless = false;
-    bool supportsSpi = false;
+fl::shared_ptr<IChannelEngine> ChannelBusManager::selectEngineForChannel(const ChannelDataPtr& data, const fl::string& affinity) {
+    if (!data) {
+        FL_ERROR("ChannelBusManager::selectEngineForChannel() - Null channel data");
+        return fl::shared_ptr<IChannelEngine>();
+    }
+
+    // If affinity is specified, look up by name    
+    do {
+        if (affinity.empty()) {
+            break;
+        }
+        auto engine = getEngineByName(affinity);
+        if (!engine) {
+            FL_ERROR("ChannelBusManager: Affinity engine '" << affinity << "' not found");
+            break;
+        }
+        if (!engine->canHandle(data)) {
+            FL_ERROR("ChannelBusManager: Affinity engine '" << affinity << "' cannot handle channel data");
+            break;
+        }
+        return engine;
+    } while (false);
+    
+
+    // No affinity: iterate engines by priority (already sorted descending)
     for (const auto& entry : mEngines) {
-        IChannelEngine::Capabilities caps = entry.engine->getCapabilities();
-        supportsClockless = supportsClockless || caps.supportsClockless;
-        supportsSpi = supportsSpi || caps.supportsSpi;
-    }
-    return IChannelEngine::Capabilities(supportsClockless, supportsSpi);
-}
-
-bool ChannelBusManager::canHandle(const ChannelDataPtr& data) const {
-    (void)data;
-    return true;  // Bus manager accepts all - delegates to registered engines
-}
-
-// IChannelEngine interface implementation
-void ChannelBusManager::enqueue(ChannelDataPtr channelData) {
-    if (!channelData) {
-        FL_WARN("ChannelBusManager::enqueue() - Null channel data provided");
-        return;
-    }
-
-    // Batch the channel data for later transmission
-    mEnqueuedChannels.push_back(channelData);
-}
-
-void ChannelBusManager::show() {
-    FL_SCOPED_TRACE;
-    if (!mEnqueuedChannels.empty()) {
-        // Move enqueued channels to transmitting channels
-        mTransmittingChannels = fl::move(mEnqueuedChannels);
-        mEnqueuedChannels.clear();
-
-        // Begin transmission
-        beginTransmission(fl::span<const ChannelDataPtr>(mTransmittingChannels.data(), mTransmittingChannels.size()));
-    }
-}
-
-IChannelEngine::EngineState ChannelBusManager::poll() {
-    FL_SCOPED_TRACE;
-    // Poll all registered engines to allow buffer cleanup
-    // even when mActiveEngine is nullptr (after onEndFrame reset)
-    bool anyBusy = false;
-    fl::string firstError;
-    for (auto& entry : mEngines) {
-        EngineState result = entry.engine->poll();
-        if (result.state == EngineState::BUSY) {
-            anyBusy = true;
-        }
-        // Capture first error encountered
-        if (result.state == EngineState::ERROR && firstError.empty()) {
-            firstError = result.error;
+        if (!entry.enabled) continue;
+        if (entry.engine->canHandle(data)) {
+            return entry.engine;  // Return shared_ptr
         }
     }
 
-    // Clear transmitting channels when all engines are ready
-    if (!anyBusy && !mTransmittingChannels.empty()) {
-        mTransmittingChannels.clear();
-    }
-
-    // Return error if any engine reported error
-    if (!firstError.empty()) {
-        return EngineState(EngineState::ERROR, firstError);
-    }
-
-    return EngineState(anyBusy ? EngineState::BUSY : EngineState::READY);
+    FL_ERROR("ChannelBusManager: No compatible engine found for channel data");
+    return fl::shared_ptr<IChannelEngine>();
 }
+
 
 template<typename Condition>
 bool ChannelBusManager::waitForCondition(Condition condition, u32 timeoutMs) {
@@ -382,104 +349,77 @@ bool ChannelBusManager::waitForCondition(Condition condition, u32 timeoutMs) {
     return true;  // Condition met
 }
 
-void ChannelBusManager::wait() {
-    waitForCondition([this]() { return poll() == EngineState::READY; });
+IChannelEngine::EngineState ChannelBusManager::poll() {
+    // Poll all registered engines and return aggregate state
+    // Return "worst" state: ERROR > BUSY > READY
+    bool anyBusy = false;
+    fl::string firstError;
+
+    for (auto& entry : mEngines) {
+        IChannelEngine::EngineState result = entry.engine->poll();
+        if (result.state == IChannelEngine::EngineState::BUSY) {
+            anyBusy = true;
+        }
+        // Capture first error encountered
+        if (result.state == IChannelEngine::EngineState::ERROR && firstError.empty()) {
+            firstError = result.error;
+        }
+    }
+
+    // Return error if any engine reported error
+    if (!firstError.empty()) {
+        return IChannelEngine::EngineState(IChannelEngine::EngineState::ERROR, firstError);
+    }
+
+    return IChannelEngine::EngineState(anyBusy ? IChannelEngine::EngineState::BUSY : IChannelEngine::EngineState::READY);
+}
+
+bool ChannelBusManager::waitForReady(u32 timeoutMs) {
+    bool ok = waitForCondition([this]() {
+        return poll().state == IChannelEngine::EngineState::READY;
+    }, timeoutMs);
+    if (!ok) {
+        FL_ERROR("ChannelBusManager: Timeout occurred while waiting for READY state");
+    }
+    return ok;
+}
+
+bool ChannelBusManager::waitForReadyOrDraining(u32 timeoutMs) {
+    bool ok = waitForCondition([this]() {
+        auto state = poll();
+        bool draining_or_done = (
+            state.state == IChannelEngine::EngineState::READY ||
+            state.state == IChannelEngine::EngineState::DRAINING
+        );
+        return draining_or_done;
+    }, timeoutMs);
+    if (!ok) {
+        FL_ERROR("ChannelBusManager: Timeout occurred while waiting for READY or DRAINING state");
+    }
+    return ok;
 }
 
 
 void ChannelBusManager::onBeginFrame() {
-    // CRITICAL: Poll engines before the frame starts to release buffers from previous frame
-    // This ensures that ChannelData::mInUse flags are cleared before Channel::showPixels() is called
-    // Sequence:
-    //   1. Frame N transmission completes (ISR sets transmissionComplete)
-    //   2. onBeginFrame() called (this method)
-    //   3. poll() clears mInUse flags via ChannelEngineRMT::poll()
-    //   4. Channel::showPixels() called for Frame N+1 (can now encode safely)
-    poll();
-}
-
-void ChannelBusManager::beginTransmission(fl::span<const ChannelDataPtr> channelData) {
-    FL_SCOPED_TRACE;
-    if (channelData.size() == 0) {
-        return;
-    }
-
-    // Select engine for this transmission
-    // Use first channel data for predicate filtering (all channels should be compatible)
-    IChannelEngine* engine = selectEngine(channelData.size() > 0 ? channelData[0] : nullptr);
-    if (!engine) {
-        FL_WARN("ChannelBusManager::beginTransmission() - No compatible engines available");
-        mLastError = "No compatible engines available";
-        return;
-    }
-
-    // Forward channel data to selected engine by enqueueing and showing
-    // Wait until engine is ready for new data (with check-pump-delay logic)
-    if (engine) {
-        waitForCondition([engine]() { return engine->poll() == EngineState::READY; });
-    }
-
-    for (const auto& channel : channelData) {
-        engine->enqueue(channel);
-    }
-
-    engine->show();
-
-    mLastError.clear();  // Success - clear any previous errors
+    waitForReady();  // Wait for all engines to become READY before clearing previous frame state.
 }
 
 void ChannelBusManager::onEndFrame() {
-    // Trigger transmission of all batched channel data
-    show();
+    // Call show() on all engines to trigger transmission
+    // Channels have enqueued data directly to engines during showPixels()
+    // Now we trigger transmission by calling show() on each engine
+    for (auto& entry : mEngines) {
+        if (entry.enabled) {
+            entry.engine->show();
+        }
+    }
+    waitForReadyOrDraining();
 }
 
 void ChannelBusManager::reset() {
-    // Clear all pending channels
-    mEnqueuedChannels.clear();
-    mTransmittingChannels.clear();
     // Allow all channel engines to clean up
-    wait();
-    FL_DBG("ChannelBusManager: reset() - cleared all channels");
-}
-
-IChannelEngine* ChannelBusManager::selectEngine(const ChannelDataPtr& data) {
-    if (mEngines.empty()) {
-        FL_WARN("ChannelBusManager::selectEngine() - No engines registered");
-        return nullptr;
-    }
-
-    // Engines are already sorted by priority descending
-    // Select first enabled engine that can handle the channel data (highest priority)
-    for (auto& entry : mEngines) {
-        if (!entry.enabled) {
-            continue;
-        }
-
-        // Check if engine can handle this channel data (predicate filtering)
-        // Skip predicate check if data is nullptr (backwards compatibility)
-        if (data && !entry.engine->canHandle(data)) {
-            if (!entry.name.empty()) {
-                FL_DBG("ChannelBusManager: Engine '" << entry.name.c_str() << "' cannot handle channel data (chipset mismatch)");
-            }
-            continue;
-        }
-
-        // Found compatible engine
-        // Only log when engine selection actually changes (avoid per-frame spam)
-        if (entry.name != mLastSelectedEngine) {
-            mLastSelectedEngine = entry.name;
-            if (!entry.name.empty()) {
-                FL_DBG("ChannelBusManager: Selected engine '" << entry.name.c_str() << "' (priority " << entry.priority << ")");
-            } else {
-                FL_DBG("ChannelBusManager: Selected unnamed engine (priority " << entry.priority << ")");
-            }
-        }
-        return entry.engine.get();
-    }
-
-    // No compatible engines found
-    FL_WARN("ChannelBusManager::selectEngine() - No compatible enabled engines available");
-    return nullptr;
+    waitForReady();
+    FL_DBG("ChannelBusManager: reset() - all engines ready");
 }
 
 ChannelBusManager& channelBusManager() {

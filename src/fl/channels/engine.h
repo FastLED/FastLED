@@ -124,6 +124,12 @@ public:
     /// @note Used by ChannelBusManager to route channels to compatible engines
     virtual bool canHandle(const ChannelDataPtr& data) const = 0;
 
+    /// @brief Wait for engine to become READY
+    /// @param timeoutMs Optional timeout in milliseconds (0 = no timeout)
+    /// @return true if engine became READY, false if timeout occurred
+    bool waitForReady(uint32_t timeoutMs = 1000);
+    bool waitForReadyOrDraining(uint32_t timeoutMs = 1000);
+
     /// @brief Virtual destructor
     virtual ~IChannelEngine() = default;
 
@@ -135,6 +141,9 @@ protected:
     IChannelEngine& operator=(const IChannelEngine&) = delete;
     IChannelEngine(IChannelEngine&&) = delete;
     IChannelEngine& operator=(IChannelEngine&&) = delete;
+
+    template<typename Condition>
+    bool waitForCondition(Condition condition, u32 timeoutMs = 1000);
 };
 
 }  // namespace fl

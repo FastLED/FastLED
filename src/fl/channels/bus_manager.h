@@ -40,12 +40,11 @@ struct DriverInfo {
 
 /// @brief Unified channel bus manager with priority-based engine selection
 ///
-/// This manager inherits from IChannelEngine and acts as a transparent proxy
-/// to concrete engine implementations (RMT, SPI, PARLIO). Strip drivers use
-/// it polymorphically through the IChannelEngine interface.
+/// This manager acts as a registry for concrete engine implementations (RMT, SPI, PARLIO).
+/// Channels select engines via selectEngineForChannel() and bind directly to them via weak_ptr.
 ///
 /// Platform-specific code registers engines during static initialization.
-class ChannelBusManager : public IChannelEngine, public EngineEvents::Listener {
+class ChannelBusManager : public EngineEvents::Listener {
 public:
     /// @brief Get the global singleton instance
     /// @return Reference to the singleton ChannelBusManager
@@ -131,37 +130,29 @@ public:
 
     /// @brief Get engine by name for affinity binding
     /// @param name Engine name to look up (case-sensitive, e.g., "RMT", "SPI", "PARLIO")
-    /// @return Pointer to engine if found and enabled, nullptr otherwise
+    /// @return Shared pointer to engine if found and enabled, nullptr otherwise
     /// @note Used by Channel affinity system to bind channels to specific engines
-    IChannelEngine* getEngineByName(const fl::string& name) const;
+    fl::shared_ptr<IChannelEngine> getEngineByName(const fl::string& name) const;
 
-    /// @brief Get capabilities of all registered engines (OR'd together)
-    /// @return Capabilities struct with bool flags set if ANY engine supports that protocol
-    /// @note Bus manager aggregates capabilities from all engines
-    Capabilities getCapabilities() const override;
+    /// @brief Select best engine for channel data (used by Channel::showPixels)
+    /// @param data Channel data to route (chipset configuration)
+    /// @param affinity Engine affinity name (empty = no affinity, dynamic selection)
+    /// @return Shared pointer to selected engine, or nullptr if none compatible
+    /// @note Iterates engines by priority (already sorted descending) and returns first that canHandle()
+    /// @note This is called lazily in Channel::showPixels() if no engine is bound
+    fl::shared_ptr<IChannelEngine> selectEngineForChannel(const ChannelDataPtr& data, const fl::string& affinity);
 
-    /// @brief Check if manager can handle channel data (always true - proxy pattern)
-    /// @param data Channel data to check (unused)
-    /// @return Always true - manager accepts all channel types and delegates to registered engines
-    /// @note Bus manager is a proxy that delegates to compatible engines based on canHandle()
-    bool canHandle(const ChannelDataPtr& data) const override;
-
-    /// @brief Enqueue channel data for transmission
-    /// @param channelData Channel data to transmit
-    /// @note Selects engine on first call, then batches channel data
-    void enqueue(ChannelDataPtr channelData) override;
-
-    /// @brief Trigger transmission of enqueued data
-    void show() override;
-
-    /// @brief Query engine state and perform maintenance
-    /// @return Current engine state (READY, BUSY, DRAINING, or ERROR)
-    EngineState poll() override;
+    /// @brief Poll all registered engines and return aggregate state
+    /// @return Aggregate state (READY if all ready, BUSY if any busy, ERROR if any error)
+    /// @note This is NOT an IChannelEngine override - it's a diagnostic/test helper
+    /// @note Polls all engines and returns the "worst" state (ERROR > BUSY > READY)
+    IChannelEngine::EngineState poll();
 
     /// @brief Wait for all engines to become READY
     /// @note Polls engines in a loop, calling async_run() and yielding with minimal delay
     /// @note Uses time-based delays to avoid busy-waiting while allowing async tasks to run
-    void wait();
+    bool waitForReady(u32 timeoutMs = 1000);
+    bool waitForReadyOrDraining(u32 timeoutMs = 1000);
 
     /// @brief Poll engines before frame starts to clear previous frame state
     /// @note Called at the beginning of each frame to ensure buffers from previous frame are released
@@ -176,11 +167,6 @@ public:
     void reset();
 
 private:
-    /// @brief Begin transmission using active engine with fallback
-    /// @param channelData Span of channel data to transmit
-    /// @note Tries active engine, falls back to next priority on failure
-    void beginTransmission(fl::span<const ChannelDataPtr> channelData);
-
     /// @brief Wait until a condition is met, with check-pump-delay logic
     /// @param condition Function that returns true when waiting should stop
     /// @param timeoutMs Optional timeout in milliseconds (0 = no timeout)
@@ -215,13 +201,6 @@ private:
     /// @note Each entry contains priority value and shared_ptr to engine
     fl::vector<EngineEntry> mEngines;
 
-    /// @brief Internal state management for IChannelEngine interface
-    fl::vector<ChannelDataPtr> mEnqueuedChannels;  ///< Channels enqueued via enqueue(), waiting for show()
-    fl::vector<ChannelDataPtr> mTransmittingChannels;  ///< Channels currently transmitting (for cleanup)
-
-    /// @brief Error message storage
-    fl::string mLastError;
-
     /// @brief Cached driver info for getDriverInfos() to avoid allocations
     /// @note Marked mutable to allow caching in const method
     mutable fl::vector<DriverInfo> mCachedDriverInfo;
@@ -229,10 +208,6 @@ private:
     /// @brief Exclusive driver name (empty if no exclusive mode)
     /// @note When non-empty, new engines are auto-disabled if name doesn't match
     fl::string mExclusiveDriver;
-
-    /// @brief Last selected engine name (for logging deduplication)
-    /// @note Used to avoid spamming logs when the same engine is selected repeatedly
-    fl::string mLastSelectedEngine;
 
     // Non-copyable, non-movable
     ChannelBusManager(const ChannelBusManager&) = delete;

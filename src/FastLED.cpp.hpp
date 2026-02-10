@@ -567,7 +567,7 @@ void CFastLED::wait() {
 	fl::ChannelBusManager& manager = fl::channelBusManager();
 	// Wait for all engines to become READY
 	// Calls async_run() and uses time-based delays to avoid busy-waiting
-	manager.wait();
+	manager.waitForReady();
 }
 
 // ============================================================================

@@ -8,12 +8,22 @@
 
 using namespace fl;
 
+FL_TEST_CASE("Stub engine is registered") {
+    // Verify the stub engine is properly registered in ChannelBusManager
+    auto& manager = fl::ChannelBusManager::instance();
+    FL_CHECK_GT(manager.getDriverCount(), 0);
+
+    auto stubEngine = manager.getEngineByName("STUB");
+    FL_REQUIRE(stubEngine != nullptr);
+}
+
 FL_TEST_CASE("ClocklessController - LED Data Capture") {
     FL_SUBCASE("Basic LED capture with single strip") {
         const int NUM_LEDS = 10;
         CRGB leds[NUM_LEDS];
 
-        // Reset tracker state for clean test
+        // Reset tracker state and clear old controllers for clean test
+        FastLED.clear(true);
         ActiveStripTracker::resetForTesting();
 
         // Initialize FastLED
@@ -67,6 +77,8 @@ FL_TEST_CASE("ClocklessController - LED Data Capture") {
         const int NUM_LEDS = 5;
         CRGB leds[NUM_LEDS];
 
+        // Reset tracker state and clear old controllers for clean test
+        FastLED.clear(true);
         ActiveStripTracker::resetForTesting();
         FastLED.addLeds<WS2812, 2>(leds, NUM_LEDS);
         FastLED.setBrightness(255); // Ensure full brightness for accurate capture
@@ -101,6 +113,8 @@ FL_TEST_CASE("ClocklessController - LED Data Capture") {
         CRGB leds1[NUM_LEDS];
         CRGB leds2[NUM_LEDS];
 
+        // Reset tracker state and clear old controllers for clean test
+        FastLED.clear(true);
         ActiveStripTracker::resetForTesting();
         FastLED.addLeds<WS2812, 3>(leds1, NUM_LEDS);
         FastLED.addLeds<WS2812, 4>(leds2, NUM_LEDS);

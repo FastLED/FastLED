@@ -103,7 +103,6 @@ FL_TEST_CASE("Channel basic operations") {
     FL_REQUIRE(channel != nullptr);
     FL_CHECK(channel->getPin() == 1);
     FL_CHECK(channel->size() == 10);
-    FL_CHECK(channel->getChannelEngine() == mockEngine.get());
 
     // Clean up: disable mock engine after test
     manager.setDriverEnabled("MOCK_1", false);  // Match engine name
@@ -216,19 +215,25 @@ FL_TEST_CASE("Channel Engine: 8 channels → exactly 8 enqueues (no accumulation
     // Reset counter before show
     mockEngine->enqueueCount = 0;
     mockEngine->mEnqueuedChannels.clear();
+    mockEngine->mTransmittingChannels.clear();
 
     // Trigger show (enqueues all channels to engine)
+    // FastLED.show() internally calls engine->show() and engine->poll()
+    // This completes the full transmission cycle
     FastLED.show();
 
     // Verify EXACTLY 8 enqueues happened (one per channel, no accumulation)
     FL_CHECK_EQ(mockEngine->enqueueCount, NUM_CHANNELS);
-    FL_CHECK_EQ(mockEngine->mEnqueuedChannels.size(), NUM_CHANNELS);
+    // Verify transmission happened with the correct channel count
+    FL_CHECK_EQ(mockEngine->lastChannelCount, static_cast<int>(NUM_CHANNELS));
+    FL_CHECK_EQ(mockEngine->transmitCount, 1);
 
     // Cleanup
     for (auto& channel : channels) {
         FastLED.remove(channel);
     }
-    manager.setDriverEnabled("ENQUEUE_TEST_1", false);
+    mockEngine->poll();  // Clear transmitting channels
+    manager.removeEngine(mockEngine);
 }
 
 FL_TEST_CASE("Channel Engine: Multiple show() calls don't accumulate channels") {
@@ -264,25 +269,32 @@ FL_TEST_CASE("Channel Engine: Multiple show() calls don't accumulate channels") 
     // Call show() THREE times - should get same channel count each time
     for (size_t iteration = 0; iteration < 3; iteration++) {
         mockEngine->enqueueCount = 0;
+        mockEngine->transmitCount = 0;
         mockEngine->mEnqueuedChannels.clear();
+        mockEngine->mTransmittingChannels.clear();
 
+        // FastLED.show() internally calls engine->show() and engine->poll()
+        // This completes the full transmission cycle
         FastLED.show();
 
         // Each iteration should enqueue exactly NUM_CHANNELS (no accumulation)
-        size_t expectedCount = NUM_CHANNELS;
+        int expectedCount = static_cast<int>(NUM_CHANNELS);
         if (mockEngine->enqueueCount != expectedCount) {
             FL_WARN("Iteration " << iteration << ": Enqueued " << mockEngine->enqueueCount
                     << " channels (expected " << expectedCount << ") - accumulation bug detected!");
         }
         FL_CHECK_EQ(mockEngine->enqueueCount, expectedCount);
-        FL_CHECK_EQ(mockEngine->mEnqueuedChannels.size(), expectedCount);
+        // Verify transmission happened with the correct channel count
+        FL_CHECK_EQ(mockEngine->lastChannelCount, expectedCount);
+        FL_CHECK_EQ(mockEngine->transmitCount, 1);
     }
 
     // Cleanup
     for (auto& channel : channels) {
         FastLED.remove(channel);
     }
-    manager.setDriverEnabled("ENQUEUE_TEST_2", false);
+    mockEngine->poll();  // Clear transmitting channels
+    manager.removeEngine(mockEngine);
 }
 
 FL_TEST_CASE("Channel Engine: Adding/removing channels updates enqueue count correctly") {
@@ -358,15 +370,8 @@ FL_TEST_CASE("Channel Engine: ChannelData isInUse flag managed correctly") {
     // First show() should succeed (data not in use)
     FastLED.show();
 
-    // Poll until transmission completes
-    size_t max_polls = 100;
-    for (size_t i = 0; i < max_polls; i++) {
-        auto state = manager.poll();
-        if (state == fl::IChannelEngine::EngineState::READY) {
-            break;
-        }
-        fl::delayMicroseconds(100);
-    }
+    // Wait for transmission to complete
+    manager.waitForReady();
 
     // After poll() returns READY, data should be marked as not in use
     // So calling show() again should succeed (no assertion failure)
@@ -378,6 +383,97 @@ FL_TEST_CASE("Channel Engine: ChannelData isInUse flag managed correctly") {
 
     // If we got here without assertion failures, the isInUse flag is managed correctly
     FL_CHECK(true);  // Test passed
+}
+
+FL_TEST_CASE("Channel Events: onChannelDataEncoded fires after encoding") {
+    // Setup mock engine
+    auto mockEngine = fl::make_shared<MockEngine>("EVENT_ENCODED_TEST");
+    ChannelBusManager& manager = ChannelBusManager::instance();
+    manager.addEngine(2007, mockEngine);
+
+    static constexpr size_t NUM_LEDS = 10;
+    static CRGB leds[NUM_LEDS];
+    fl::fill_solid(leds, NUM_LEDS, CRGB::Red);
+
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelOptions opts;
+    opts.mAffinity = "EVENT_ENCODED_TEST";
+
+    ChannelConfig config(5, timing, fl::span<CRGB>(leds, NUM_LEDS), GRB, opts);
+    auto channel = Channel::create(config);
+
+    // Register event listener
+    bool eventFired = false;
+    size_t encodedDataSize = 0;
+    auto& events = ChannelEvents::instance();
+    int listenerId = events.onChannelDataEncoded.add([&](const Channel& ch, const ChannelData& chData) {
+        eventFired = true;
+        encodedDataSize = chData.getData().size();
+        FL_CHECK(&ch == channel.get());  // Verify channel reference is correct
+    });
+
+    // Add channel and trigger encoding
+    FastLED.add(channel);
+    FastLED.show();
+
+    // Verify event fired
+    FL_CHECK(eventFired);
+    FL_CHECK(encodedDataSize > 0);  // Should have encoded some data
+
+    // Cleanup
+    FastLED.remove(channel);
+    events.onChannelDataEncoded.remove(listenerId);
+    manager.setDriverEnabled("EVENT_ENCODED_TEST", false);
+}
+
+FL_TEST_CASE("Channel: Guard against double-encoding within single FastLED.show()") {
+    // This test guards against a degenerate behavior where a single call to
+    // FastLED.show() could cause the same channel to encode its data twice.
+    //
+    // This could happen if:
+    // - Channel is accidentally added to controller list twice
+    // - showPixels() is called recursively
+    // - Some other bug causes double-encoding
+    //
+    // Expected: Within ONE FastLED.show() call, each channel encodes exactly ONCE.
+
+    // Setup mock engine
+    auto mockEngine = fl::make_shared<MockEngine>("DOUBLE_ENCODE_TEST");
+    ChannelBusManager& manager = ChannelBusManager::instance();
+    manager.addEngine(2008, mockEngine);
+
+    static constexpr size_t NUM_LEDS = 10;
+    static CRGB leds[NUM_LEDS];
+    fl::fill_solid(leds, NUM_LEDS, CRGB::Blue);
+
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelOptions opts;
+    opts.mAffinity = "DOUBLE_ENCODE_TEST";
+
+    ChannelConfig config(5, timing, fl::span<CRGB>(leds, NUM_LEDS), GRB, opts);
+    auto channel = Channel::create(config);
+    FastLED.add(channel);
+
+    // Track how many times encoding happens
+    int encodeCount = 0;
+    auto& events = ChannelEvents::instance();
+    int listenerId = events.onChannelDataEncoded.add([&](const Channel&, const ChannelData&) {
+        encodeCount++;
+    });
+
+    // Call FastLED.show() ONCE - should encode exactly once
+    FastLED.show();
+
+    // Verify encoding happened exactly once (not zero, not two or more)
+    FL_CHECK_EQ(encodeCount, 1);  // Should encode exactly once
+
+    // Verify enqueued exactly once
+    FL_CHECK_EQ(mockEngine->enqueueCount, 1);  // Should enqueue exactly once
+
+    // Cleanup
+    FastLED.remove(channel);
+    events.onChannelDataEncoded.remove(listenerId);
+    manager.setDriverEnabled("DOUBLE_ENCODE_TEST", false);
 }
 
 } // namespace channel_engine_test

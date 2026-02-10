@@ -40,41 +40,13 @@ fl::string Channel::makeName(i32 id, const fl::optional<fl::string>& configName)
 }
 
 ChannelPtr Channel::create(const ChannelConfig &config) {
-    // Select engine based on chipset type
-    IChannelEngine* selectedEngine = nullptr;
-
-    // Handle affinity binding if specified
-    if (!config.options.mAffinity.empty()) {
-        selectedEngine = ChannelBusManager::instance().getEngineByName(config.options.mAffinity);
-        if (selectedEngine) {
-            FL_DBG("Channel: Bound to engine '" << config.options.mAffinity << "' via affinity");
-        } else {
-            FL_ERROR("Channel: Affinity engine '" << config.options.mAffinity << "' not found - using ChannelBusManager");
-        }
-    }
-
-    // If no affinity or not found, select engine based on chipset type
-    if (!selectedEngine) {
-        if (config.chipset.is<SpiChipsetConfig>()) {
-            // For SPI chipsets, try to get SPI engine first
-            IChannelEngine* spiEngine = ChannelBusManager::instance().getEngineByName("SPI");
-            if (spiEngine) {
-                selectedEngine = spiEngine;
-                FL_DBG("Channel (SPI): Using SPI engine");
-            } else {
-                // Fall back to ChannelBusManager
-                selectedEngine = &ChannelBusManager::instance();
-                FL_DBG("Channel (SPI): SPI engine not available, using ChannelBusManager");
-            }
-        } else {
-            // Clockless chipsets use ChannelBusManager
-            selectedEngine = &ChannelBusManager::instance();
-            FL_DBG("Channel (clockless): Using ChannelBusManager for engine selection");
-        }
-    }
+    // Late binding strategy: Always create with empty engine
+    // Engine binding happens on first showPixels() call:
+    // - Affinity channels: Look up by name and cache
+    // - Non-affinity channels: Select dynamically each frame
 
     auto channel = fl::make_shared<Channel>(config.chipset, config.mLeds,
-                                              config.rgb_order, selectedEngine, config.options);
+                                              config.rgb_order, config.options);
     channel->mName = makeName(channel->mId, config.mName);
     auto& events = ChannelEvents::instance();
     events.onChannelCreated(*channel);
@@ -82,13 +54,14 @@ ChannelPtr Channel::create(const ChannelConfig &config) {
 }
 
 Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
-                 EOrder rgbOrder, IChannelEngine* engine, const ChannelOptions& options)
+                 EOrder rgbOrder, const ChannelOptions& options)
     : CPixelLEDController<RGB>(RegistrationMode::DeferRegister)  // Defer registration until FastLED.add()
     , mChipset(chipset)
     , mPin(getDataPinFromChipset(chipset))
     , mTiming(getTimingFromChipset(chipset))
     , mRgbOrder(rgbOrder)
-    , mEngine(engine)
+    , mEngine()  // Empty weak_ptr - late binding on first showPixels()
+    , mAffinity(options.mAffinity)  // Get affinity from ChannelOptions
     , mId(nextId())
     , mName(makeName(mId)) {
 #ifdef FL_IS_ESP32
@@ -118,13 +91,14 @@ Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
 
 // Backwards-compatible constructor (deprecated)
 Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
-                 EOrder rgbOrder, IChannelEngine* engine, const ChannelOptions& options)
+                 EOrder rgbOrder, const ChannelOptions& options)
     : CPixelLEDController<RGB>(RegistrationMode::DeferRegister)  // Defer registration until FastLED.add()
     , mChipset(ClocklessChipset(pin, timing))  // Convert to variant
     , mPin(pin)
     , mTiming(timing)
     , mRgbOrder(rgbOrder)
-    , mEngine(engine)
+    , mEngine()  // Empty weak_ptr - late binding on first showPixels()
+    , mAffinity(options.mAffinity)  // Get affinity from ChannelOptions
     , mId(nextId())
     , mName(makeName(mId)) {
 #ifdef FL_IS_ESP32
@@ -177,7 +151,25 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
 
     // Safety check: don't modify buffer if engine is currently transmitting it
     if (mChannelData->isInUse()) {
-        FL_ASSERT(false, "Channel " << mId << ": Skipping update - buffer in use by engine");
+        FL_WARN("Channel '" << mName << "': showPixels() called while mChannelData is in use by engine, attempting to wait");
+        auto engine = mEngine.lock();
+        if (!engine) {
+            FL_ERROR("Channel '" << mName << "': No engine bound yet the mChannelData is in use - cannot transmit");
+            return;
+        }
+        // wait until the engine is in a READY state.
+        bool ok = engine->waitForReady();
+        if (!ok) {
+            FL_ERROR("Channel '" << mName << "': Timeout occurred while waiting for engine to become READY");
+            return;
+        }
+        FL_WARN("Channel '" << mName << "': Engine became READY after waiting");
+    }
+
+    auto engine = ChannelBusManager::instance().selectEngineForChannel(mChannelData, mAffinity);
+    mEngine = engine;
+    if (!engine) {
+        FL_ERROR("Channel '" << mName << "': No compatible engine found - cannot transmit");
         return;
     }
 
@@ -251,12 +243,18 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
         // No default case - compiler will error if any enum value is missing
     }
 
-    // Enqueue for transmission (will be sent when engine->show() is called)
-    if (mEngine) {
-        mEngine->enqueue(mChannelData);
+    // Fire event after encoding completes
+    {
         auto& events = ChannelEvents::instance();
-        events.onChannelEnqueued(*this, mEngine->getName());
+        events.onChannelDataEncoded(*this, *mChannelData);
     }
+
+
+
+    // Enqueue for transmission (will be sent when engine->show() is called)
+    engine->enqueue(mChannelData);
+    auto& events = ChannelEvents::instance();
+    events.onChannelEnqueued(*this, engine->getName());
 }
 
 void Channel::init() {
@@ -309,6 +307,10 @@ IChannelEngine* getStubChannelEngine() {
 
 // Re-exposed protected base class methods
 void Channel::addToDrawList() {
+    if (isInList()) {
+        FL_WARN("Channel '" << mName << "': Skipping addToDrawList() - already in draw list");
+        return;
+    }
     CPixelLEDController<RGB>::addToList();
     // Fire event after adding to draw list (detectable even if user bypasses FastLED.add())
     auto& events = ChannelEvents::instance();
@@ -316,10 +318,17 @@ void Channel::addToDrawList() {
 }
 
 void Channel::removeFromDrawList() {
+    if (!isInList()) {
+        FL_WARN("Channel '" << mName << "': Skipping removeFromDrawList() - not in draw list");
+        return;
+    }
     CPixelLEDController<RGB>::removeFromDrawList();
     // Fire event after removing from draw list (detectable even if user bypasses FastLED.remove())
     auto& events = ChannelEvents::instance();
     events.onChannelRemoved(*this);
+
+    // Clear engine weak_ptr when removed from draw list
+    mEngine.reset();
 }
 
 int Channel::size() const {
@@ -356,6 +365,15 @@ u8 Channel::getDither() {
 
 Rgbw Channel::getRgbw() const {
     return CPixelLEDController<RGB>::getRgbw();
+}
+
+fl::string Channel::getEngineName() const {
+    // Lock the weak_ptr to get a shared_ptr
+    auto engine = mEngine.lock();
+    if (engine) {
+        return engine->getName();
+    }
+    return fl::string();  // Return empty string if no engine bound
 }
 
 } // namespace fl

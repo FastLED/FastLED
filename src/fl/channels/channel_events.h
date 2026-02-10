@@ -8,6 +8,7 @@ namespace fl {
 
 class Channel;
 class IChannelEngine;
+class ChannelData;
 struct ChannelConfig;
 
 /// @brief Singleton event router for Channel lifecycle events
@@ -60,6 +61,11 @@ struct ChannelEvents {
     fl::function_list<void(const Channel&, const ChannelConfig&)> onChannelConfigured;
 
     // -- Rendering events --
+
+    /// Fired after pixel data is encoded into byte stream (before enqueuing)
+    /// Second parameter is the encoded channel data
+    /// @note This event fires after writeWS2812/writeAPA102/etc. encoding completes
+    fl::function_list<void(const Channel&, const ChannelData&)> onChannelDataEncoded;
 
     /// Fired after channel data is enqueued to an engine
     /// Second parameter is the engine name (empty string for unnamed engines)

@@ -190,9 +190,9 @@ FL_TEST_CASE("Channel API: Mock engine workflow (GitHub issue #2167)") {
     manager.addEngine(1000, mockEngine);  // High priority
 
     // Verify registration
-    auto* registeredEngine = manager.getEngineByName("MOCK");
+    auto registeredEngine = manager.getEngineByName("MOCK");
     FL_REQUIRE(registeredEngine != nullptr);
-    FL_CHECK(registeredEngine == mockEngine.get());
+    FL_CHECK(registeredEngine.get() == mockEngine.get());
 
     // Step 3: Create channel with affinity "MOCK"
     static CRGB leds[10];
@@ -207,7 +207,6 @@ FL_TEST_CASE("Channel API: Mock engine workflow (GitHub issue #2167)") {
     // Create channel
     auto channel = fl::Channel::create(config);
     FL_REQUIRE(channel != nullptr);
-    FL_CHECK(channel->getChannelEngine() == mockEngine.get());
 
     // Verify channel is NOT in controller list yet (deferred registration)
     FL_CHECK(!channel->isInDrawList());
@@ -329,7 +328,6 @@ FL_TEST_CASE("Channel API: Add and remove symmetry") {
     // Verify channel object is still valid (not destroyed)
     FL_CHECK(channel->size() == 8);
     FL_CHECK(channel->getPin() == 12);
-    FL_CHECK(channel->getChannelEngine() == mockEngine.get());
 
     // Can re-add if needed
     FastLED.add(channel);
@@ -429,9 +427,9 @@ FL_TEST_CASE("Legacy API: 4 parallel strips using FastLED.addLeds<>()") {
     manager.addEngine(1000, mockEngine);
 
     // Verify registration
-    auto* registeredEngine = manager.getEngineByName("MOCK_LEGACY");
+    auto registeredEngine = manager.getEngineByName("MOCK_LEGACY");
     FL_REQUIRE(registeredEngine != nullptr);
-    FL_CHECK(registeredEngine == mockEngine.get());
+    FL_CHECK(registeredEngine.get() == mockEngine.get());
 
     // Create 4 LED strips using legacy template API (no affinity, no explicit channel)
     #define NUM_LEDS 60
@@ -1651,4 +1649,281 @@ FL_TEST_CASE("Arduino macro undefs: Comprehensive round-trip test") {
             FL_CHECK(clamped <= clampMax);
         }
     }
+}
+
+FL_TEST_CASE("Channel API: Affinity binds to low priority engine, empty affinity binds to high priority") {
+    // Create two mock engines with different priorities
+    auto lowPriorityEngine = fl::make_shared<ChannelEngineMock>("LOW_PRIORITY");
+    auto highPriorityEngine = fl::make_shared<ChannelEngineMock>("HIGH_PRIORITY");
+    lowPriorityEngine->reset();
+    highPriorityEngine->reset();
+
+    // Register both engines with ChannelBusManager
+    fl::ChannelBusManager& manager = fl::ChannelBusManager::instance();
+    manager.addEngine(10, lowPriorityEngine);   // Low priority
+    manager.addEngine(100, highPriorityEngine); // High priority
+
+    // Verify both engines are registered
+    auto lowEngine = manager.getEngineByName("LOW_PRIORITY");
+    auto highEngine = manager.getEngineByName("HIGH_PRIORITY");
+    FL_REQUIRE(lowEngine != nullptr);
+    FL_REQUIRE(highEngine != nullptr);
+
+    // Test 1: Channel WITH affinity="LOW_PRIORITY" should bind to low priority engine
+    {
+        static CRGB leds1[10];
+        fl::fill_solid(leds1, 10, CRGB::Red);
+
+        auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+        fl::ChannelOptions opts;
+        opts.mAffinity = "LOW_PRIORITY";  // Explicit affinity to low priority
+
+        fl::ChannelConfig config(5, timing, fl::span<CRGB>(leds1, 10), GRB, opts);
+        auto channel1 = fl::Channel::create(config);
+        FL_REQUIRE(channel1 != nullptr);
+
+        // Add to FastLED and trigger show
+        FastLED.add(channel1);
+
+        // Reset counters before show
+        lowPriorityEngine->reset();
+        highPriorityEngine->reset();
+
+        FastLED.show();
+
+        // Verify: LOW priority engine should receive data (affinity binding)
+        FL_CHECK(lowPriorityEngine->mEnqueueCount == 1);
+        FL_CHECK(highPriorityEngine->mEnqueueCount == 0);  // Should NOT receive data
+
+        // Cleanup
+        FastLED.remove(channel1);
+    }
+
+    // Test 2: Channel WITHOUT affinity should bind to high priority engine
+    {
+        static CRGB leds2[10];
+        fl::fill_solid(leds2, 10, CRGB::Green);
+
+        auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+        fl::ChannelOptions opts;
+        // No affinity set (empty string)
+
+        fl::ChannelConfig config(6, timing, fl::span<CRGB>(leds2, 10), GRB, opts);
+        auto channel2 = fl::Channel::create(config);
+        FL_REQUIRE(channel2 != nullptr);
+
+        // Add to FastLED and trigger show
+        FastLED.add(channel2);
+
+        // Reset counters before show
+        lowPriorityEngine->reset();
+        highPriorityEngine->reset();
+
+        FastLED.show();
+
+        // Verify: HIGH priority engine should receive data (no affinity, highest priority wins)
+        FL_CHECK(highPriorityEngine->mEnqueueCount == 1);
+        FL_CHECK(lowPriorityEngine->mEnqueueCount == 0);  // Should NOT receive data
+
+        // Cleanup
+        FastLED.remove(channel2);
+    }
+
+    // Cleanup engines
+    manager.setDriverEnabled("LOW_PRIORITY", false);
+    manager.setDriverEnabled("HIGH_PRIORITY", false);
+}
+
+FL_TEST_CASE("Channel API: Non-affinity channel re-binds when engine priorities swap") {
+    // Create two mock engines with different priorities
+    auto engine1 = fl::make_shared<ChannelEngineMock>("ENGINE_1");
+    auto engine2 = fl::make_shared<ChannelEngineMock>("ENGINE_2");
+    engine1->reset();
+    engine2->reset();
+
+    // Register both engines with ChannelBusManager
+    fl::ChannelBusManager& manager = fl::ChannelBusManager::instance();
+    manager.addEngine(100, engine1);  // ENGINE_1 starts with high priority
+    manager.addEngine(10, engine2);   // ENGINE_2 starts with low priority
+
+    // Verify both engines are registered
+    auto eng1 = manager.getEngineByName("ENGINE_1");
+    auto eng2 = manager.getEngineByName("ENGINE_2");
+    FL_REQUIRE(eng1 != nullptr);
+    FL_REQUIRE(eng2 != nullptr);
+
+    // Create channel WITHOUT affinity (should bind to highest priority)
+    static CRGB leds[10];
+    fl::fill_solid(leds, 10, CRGB::Red);
+
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::ChannelOptions opts;
+    // No affinity set - should dynamically select highest priority engine
+
+    fl::ChannelConfig config(5, timing, fl::span<CRGB>(leds, 10), GRB, opts);
+    auto channel = fl::Channel::create(config);
+    FL_REQUIRE(channel != nullptr);
+
+    // Add to FastLED
+    FastLED.add(channel);
+
+    // Reset counters before first show
+    engine1->reset();
+    engine2->reset();
+
+    // First show() - should bind to ENGINE_1 (priority 100)
+    FastLED.show();
+
+    // Verify: ENGINE_1 should receive data (highest priority)
+    FL_CHECK(engine1->mEnqueueCount == 1);
+    FL_CHECK(engine2->mEnqueueCount == 0);
+    FL_CHECK(channel->getEngineName() == "ENGINE_1");
+
+    // Now swap priorities: ENGINE_2 becomes highest priority
+    manager.setDriverPriority("ENGINE_1", 10);   // Lower ENGINE_1's priority
+    manager.setDriverPriority("ENGINE_2", 100);  // Raise ENGINE_2's priority
+
+    // Reset counters before second show
+    engine1->reset();
+    engine2->reset();
+
+    // Second show() - channel should re-select and bind to ENGINE_2 (new highest priority)
+    FastLED.show();
+
+    // Verify: ENGINE_2 should now receive data (new highest priority)
+    FL_CHECK(engine1->mEnqueueCount == 0);  // ENGINE_1 should NOT receive data
+    FL_CHECK(engine2->mEnqueueCount == 1);  // ENGINE_2 should receive data
+    FL_CHECK(channel->getEngineName() == "ENGINE_2");
+
+    // Swap priorities back
+    manager.setDriverPriority("ENGINE_1", 100);  // Raise ENGINE_1's priority again
+    manager.setDriverPriority("ENGINE_2", 10);   // Lower ENGINE_2's priority
+
+    // Reset counters before third show
+    engine1->reset();
+    engine2->reset();
+
+    // Third show() - channel should re-select and bind back to ENGINE_1
+    FastLED.show();
+
+    // Verify: ENGINE_1 should receive data again (back to highest priority)
+    FL_CHECK(engine1->mEnqueueCount == 1);
+    FL_CHECK(engine2->mEnqueueCount == 0);
+    FL_CHECK(channel->getEngineName() == "ENGINE_1");
+
+    // Cleanup
+    FastLED.remove(channel);
+    manager.setDriverEnabled("ENGINE_1", false);
+    manager.setDriverEnabled("ENGINE_2", false);
+}
+
+FL_TEST_CASE("Channel API: removeFromDrawList() clears engine weak_ptr") {
+    // Create mock engine
+    auto engine = fl::make_shared<ChannelEngineMock>("CLEAR_TEST");
+    engine->reset();
+
+    // Register engine with ChannelBusManager
+    fl::ChannelBusManager& manager = fl::ChannelBusManager::instance();
+    manager.addEngine(50, engine);
+
+    // Create channel with affinity (so it caches the engine)
+    static CRGB leds[10];
+    fl::fill_solid(leds, 10, CRGB::Blue);
+
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::ChannelOptions opts;
+    opts.mAffinity = "CLEAR_TEST";  // Set affinity to bind to engine
+
+    fl::ChannelConfig config(5, timing, fl::span<CRGB>(leds, 10), GRB, opts);
+    auto channel = fl::Channel::create(config);
+    FL_REQUIRE(channel != nullptr);
+
+    // Add to FastLED
+    FastLED.add(channel);
+
+    // Call show() to bind the engine
+    FastLED.show();
+
+    // Verify engine is bound (getEngineName() should return "CLEAR_TEST")
+    FL_CHECK(channel->getEngineName() == "CLEAR_TEST");
+
+    // Remove from draw list
+    FastLED.remove(channel);
+
+    // Verify engine weak_ptr was cleared (getEngineName() should return empty string)
+    FL_CHECK(channel->getEngineName().empty());
+
+    // Cleanup
+    manager.setDriverEnabled("CLEAR_TEST", false);
+}
+
+FL_TEST_CASE("Channel API: Late binding - engine name empty after construction") {
+    // Create mock engines
+    auto engine1 = fl::make_shared<ChannelEngineMock>("LATE_BIND_AFFINITY");
+    auto engine2 = fl::make_shared<ChannelEngineMock>("LATE_BIND_NO_AFFINITY");
+    engine1->reset();
+    engine2->reset();
+
+    // Register engines
+    fl::ChannelBusManager& manager = fl::ChannelBusManager::instance();
+    manager.addEngine(100, engine1);
+    manager.addEngine(50, engine2);
+
+    // Test 1: Affinity channel - late binding
+    {
+        static CRGB leds1[10];
+        fl::fill_solid(leds1, 10, CRGB::Red);
+
+        auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+        fl::ChannelOptions opts;
+        opts.mAffinity = "LATE_BIND_AFFINITY";
+
+        fl::ChannelConfig config(5, timing, fl::span<CRGB>(leds1, 10), GRB, opts);
+        auto channel = fl::Channel::create(config);
+        FL_REQUIRE(channel != nullptr);
+
+        // VERIFY: Immediately after construction, engine name is empty (late binding)
+        FL_CHECK(channel->getEngineName().empty());
+
+        // Add to FastLED and show
+        FastLED.add(channel);
+        FastLED.show();
+
+        // VERIFY: After show(), engine is bound
+        FL_CHECK(channel->getEngineName() == "LATE_BIND_AFFINITY");
+
+        // Cleanup
+        FastLED.remove(channel);
+    }
+
+    // Test 2: Non-affinity channel - late binding
+    {
+        static CRGB leds2[10];
+        fl::fill_solid(leds2, 10, CRGB::Green);
+
+        auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+        fl::ChannelOptions opts;
+        // No affinity set
+
+        fl::ChannelConfig config(5, timing, fl::span<CRGB>(leds2, 10), GRB, opts);
+        auto channel = fl::Channel::create(config);
+        FL_REQUIRE(channel != nullptr);
+
+        // VERIFY: Immediately after construction, engine name is empty (late binding)
+        FL_CHECK(channel->getEngineName().empty());
+
+        // Add to FastLED and show
+        FastLED.add(channel);
+        FastLED.show();
+
+        // VERIFY: After show(), engine is bound (should select highest priority)
+        FL_CHECK(channel->getEngineName() == "LATE_BIND_AFFINITY");  // Priority 100
+
+        // Cleanup
+        FastLED.remove(channel);
+    }
+
+    // Cleanup
+    manager.setDriverEnabled("LATE_BIND_AFFINITY", false);
+    manager.setDriverEnabled("LATE_BIND_NO_AFFINITY", false);
 }

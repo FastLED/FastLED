@@ -15,6 +15,7 @@
 #include "cpixel_ledcontroller.h"
 #include "pixel_controller.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/weak_ptr.h"
 #include "fl/stl/stdint.h"
 #include "fl/string.h"
 #include "fl/singleton.h"
@@ -83,14 +84,6 @@ public:
     /// @brief Check if this is an SPI chipset
     bool isSpi() const { return mChipset.is<SpiChipsetConfig>(); }
 
-    /// @brief Get the channel engine this channel belongs to
-    /// @return Pointer to the IChannelEngine, or nullptr if not set
-    IChannelEngine* getChannelEngine() const { return mEngine; }
-
-    /// @brief Set the channel engine this channel belongs to
-    /// @param engine Pointer to the IChannelEngine (singleton, not owned)
-    void setChannelEngine(IChannelEngine* engine) { mEngine = engine; }
-
     /// @brief Apply reconfigurable settings from a ChannelConfig
     /// @param config The configuration to apply
     /// @note Does NOT change: mPin, mTiming, mChipset, mEngine, mId
@@ -134,6 +127,10 @@ public:
     /// @brief Get the RGBW conversion mode
     Rgbw getRgbw() const;
 
+    /// @brief Get the name of the currently bound engine (if any)
+    /// @return Engine name, or empty string if no engine is bound or engine has expired
+    fl::string getEngineName() const;
+
 private:
     // CPixelLEDController interface implementation
     virtual void showPixels(PixelController<RGB, 1, 0xFFFFFFFF>& pixels) override;
@@ -147,15 +144,14 @@ private:
     /// @param chipset Chipset configuration (clockless or SPI)
     /// @param leds LED data array
     /// @param rgbOrder RGB channel ordering
-    /// @param engine Channel engine pointer
-    /// @param options Channel options (correction, temperature, dither, rgbw)
+    /// @param options Channel options (correction, temperature, dither, rgbw, affinity)
     Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
-            EOrder rgbOrder, IChannelEngine* engine, const ChannelOptions& options);
+            EOrder rgbOrder, const ChannelOptions& options);
 
     /// @brief Backwards-compatible constructor (deprecated)
     /// @deprecated Use variant-based constructor instead
     Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
-            EOrder rgbOrder, IChannelEngine* engine, const ChannelOptions& options);
+            EOrder rgbOrder, const ChannelOptions& options);
 
     // Non-copyable, non-movable
     Channel(const Channel&) = delete;
@@ -170,7 +166,8 @@ private:
     int mPin;                        // Data pin (backwards compatibility)
     ChipsetTimingConfig mTiming;     // Timing (backwards compatibility, clockless only)
     EOrder mRgbOrder;
-    IChannelEngine* mEngine;         // Singleton pointer, not owned
+    fl::weak_ptr<IChannelEngine> mEngine;  // Weak reference to engine (prevents dangling pointers)
+    fl::string mAffinity;            // Engine affinity name (empty = no affinity, dynamic selection)
     const i32 mId;
     fl::string mName;               // User-specified or auto-generated name
     ChannelDataPtr mChannelData;
