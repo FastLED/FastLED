@@ -867,7 +867,9 @@ void ValidationRemoteControl::registerFunctions(
             tested_pairs.push_back(pair);
         }
 
-        response.set("testedPairs", tested_pairs);
+        // NOTE: testedPairs array omitted - causes heap exhaustion on ESP32 (21+ objects = ~1500 bytes)
+        // Validation script doesn't use this data, only needs {found, txPin, rxPin}
+        // response.set("testedPairs", tested_pairs);
         fl::Json search_range = fl::Json::array();
         search_range.push_back(static_cast<int64_t>(start_pin));
         search_range.push_back(static_cast<int64_t>(end_pin));

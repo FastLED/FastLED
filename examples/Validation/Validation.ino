@@ -275,6 +275,9 @@ uint32_t frame_counter = 0;
 
 
 void setup() {
+    // Increase Serial TX buffer to handle large JSON responses (e.g., 21+ object arrays)
+    // Must be called BEFORE Serial.begin()
+    Serial.setTxBufferSize(4096);  // 4KB buffer (default is 256 bytes)
     Serial.begin(115200);
     // Initialize watchdog with 5 second timeout (ESP32 only)
     // Provides automatic proof-of-life monitoring and USB disconnect fix for Windows
