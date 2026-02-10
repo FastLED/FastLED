@@ -117,32 +117,39 @@ struct perlin_s16x16 {
     static inline fl::s16x16 pnoise2d(fl::s16x16 fx, fl::s16x16 fy,
                                       const fl::i32 *fade_lut,
                                       const fl::u8 *perm) {
-        auto P = [perm](int x) -> int { return perm[x & 255]; };
+        return fl::s16x16::from_raw(
+            pnoise2d_raw(fx.raw(), fy.raw(), fade_lut, perm));
+    }
 
+    // Raw i32 version: takes s16x16 raw values, returns s16x16 raw value.
+    // Avoids from_raw/raw() round-trips when caller already has raw values.
+    static inline fl::i32 pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
+                                        const fl::i32 *fade_lut,
+                                        const fl::u8 *perm) {
         int X, Y;
         fl::i32 x, y;
-        floor_frac(fx.raw(), X, x);
-        floor_frac(fy.raw(), Y, y);
+        floor_frac(fx_raw, X, x);
+        floor_frac(fy_raw, Y, y);
         X &= 255;
         Y &= 255;
 
         fl::i32 u = fade(x, fade_lut);
         fl::i32 v = fade(y, fade_lut);
 
-        int A  = P(X)     + Y;
-        int AA = P(A);
-        int AB = P(A + 1);
-        int B  = P(X + 1) + Y;
-        int BA = P(B);
-        int BB = P(B + 1);
+        int A  = perm[X & 255]       + Y;
+        int AA = perm[A & 255];
+        int AB = perm[(A + 1) & 255];
+        int B  = perm[(X + 1) & 255] + Y;
+        int BA = perm[B & 255];
+        int BB = perm[(B + 1) & 255];
 
         fl::i32 result = lerp(v,
-            lerp(u, grad(P(AA), x,          y),
-                    grad(P(BA), x - HP_ONE, y)),
-            lerp(u, grad(P(AB), x,          y - HP_ONE),
-                    grad(P(BB), x - HP_ONE, y - HP_ONE)));
+            lerp(u, grad(perm[AA & 255], x,          y),
+                    grad(perm[BA & 255], x - HP_ONE, y)),
+            lerp(u, grad(perm[AB & 255], x,          y - HP_ONE),
+                    grad(perm[BB & 255], x - HP_ONE, y - HP_ONE)));
 
-        return fl::s16x16::from_raw(result >> (HP_BITS - fl::s16x16::FRAC_BITS));
+        return result >> (HP_BITS - fl::s16x16::FRAC_BITS);
     }
 
   private:
@@ -182,6 +189,215 @@ struct perlin_s16x16 {
         };
         const GradCoeff &g = lut[hash & 15];
         return g.cx * x + g.cy * y;
+    }
+};
+
+// Q16 variant: Uses 16 fractional bits instead of 24 for faster arithmetic.
+// Trades internal precision for speed: i32 ops instead of i64, smaller LUT.
+struct perlin_q16 {
+    static constexpr int HP_BITS = 16;
+    static constexpr fl::i32 HP_ONE = 1 << HP_BITS; // 65536 = 1.0
+
+    // Build 257-entry Perlin fade LUT in Q16 format (16 fractional bits).
+    static inline void init_fade_lut(fl::i32 *table) {
+        for (int i = 0; i <= 256; i++) {
+            fl::i32 t = (i * HP_ONE) / 256;
+            fl::i32 t2 = static_cast<fl::i32>((static_cast<fl::i64>(t) * t) >> HP_BITS);
+            fl::i32 t3 = static_cast<fl::i32>((static_cast<fl::i64>(t2) * t) >> HP_BITS);
+            fl::i32 inner = static_cast<fl::i32>((static_cast<fl::i64>(t) * (6 * HP_ONE)) >> HP_BITS);
+            inner -= 15 * HP_ONE;
+            inner = static_cast<fl::i32>((static_cast<fl::i64>(t) * inner) >> HP_BITS);
+            inner += 10 * HP_ONE;
+            table[i] = static_cast<fl::i32>((static_cast<fl::i64>(t3) * inner) >> HP_BITS);
+        }
+    }
+
+    // 2D Perlin noise. Input s16x16, output s16x16 approx [-1, 1].
+    static inline fl::s16x16 pnoise2d(fl::s16x16 fx, fl::s16x16 fy,
+                                      const fl::i32 *fade_lut,
+                                      const fl::u8 *perm) {
+        return fl::s16x16::from_raw(
+            pnoise2d_raw(fx.raw(), fy.raw(), fade_lut, perm));
+    }
+
+    // Raw i32 version using Q16 internal precision.
+    static inline fl::i32 pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
+                                        const fl::i32 *fade_lut,
+                                        const fl::u8 *perm) {
+        int X, Y;
+        fl::i32 x, y;
+        floor_frac(fx_raw, X, x);
+        floor_frac(fy_raw, Y, y);
+        X &= 255;
+        Y &= 255;
+
+        fl::i32 u = fade(x, fade_lut);
+        fl::i32 v = fade(y, fade_lut);
+
+        int A  = perm[X & 255]       + Y;
+        int AA = perm[A & 255];
+        int AB = perm[(A + 1) & 255];
+        int B  = perm[(X + 1) & 255] + Y;
+        int BA = perm[B & 255];
+        int BB = perm[(B + 1) & 255];
+
+        fl::i32 result = lerp(v,
+            lerp(u, grad(perm[AA & 255], x,          y),
+                    grad(perm[BA & 255], x - HP_ONE, y)),
+            lerp(u, grad(perm[AB & 255], x,          y - HP_ONE),
+                    grad(perm[BB & 255], x - HP_ONE, y - HP_ONE)));
+
+        // No shift needed: already in Q16 format, matches s16x16::FRAC_BITS
+        return result;
+    }
+
+  private:
+    static constexpr int FP_BITS = fl::s16x16::FRAC_BITS;
+    static constexpr fl::i32 FP_ONE = 1 << FP_BITS;
+
+    // Decompose s16x16 raw value into integer floor and Q16 fractional part.
+    static FASTLED_FORCE_INLINE void floor_frac(fl::i32 fp16, int &ifloor,
+                                                fl::i32 &frac16) {
+        ifloor = fp16 >> FP_BITS;
+        frac16 = fp16 & (FP_ONE - 1); // Already Q16, no shift needed
+    }
+
+    // LUT fade: 1 lookup + 1 lerp replaces 5 multiplies.
+    static FASTLED_FORCE_INLINE fl::i32 fade(fl::i32 t, const fl::i32 *table) {
+        fl::u32 idx = static_cast<fl::u32>(t) >> 8; // Q16 → 8-bit index
+        fl::i32 frac = t & 0xFF;
+        fl::i32 a = table[idx];
+        fl::i32 b = table[idx + 1];
+        // Lerp in Q16: frac is 8 bits, expand to 16 for precision
+        return a + static_cast<fl::i32>(
+            (static_cast<fl::i32>(frac << 8) * (b - a)) >> 16);
+    }
+
+    static FASTLED_FORCE_INLINE fl::i32 lerp(fl::i32 t, fl::i32 a, fl::i32 b) {
+        // All values in Q16, result stays Q16
+        return a + static_cast<fl::i32>(
+            (static_cast<fl::i64>(t) * (b - a)) >> HP_BITS);
+    }
+
+    // z=0 gradient via branchless coefficient LUT (Q16 format).
+    static FASTLED_FORCE_INLINE fl::i32 grad(int hash, fl::i32 x, fl::i32 y) {
+        struct GradCoeff { fl::i8 cx; fl::i8 cy; };
+        constexpr GradCoeff lut[16] = {
+            { 1,  1}, {-1,  1}, { 1, -1}, {-1, -1},
+            { 1,  0}, {-1,  0}, { 1,  0}, {-1,  0},
+            { 0,  1}, { 0, -1}, { 0,  1}, { 0, -1},
+            { 1,  1}, { 0, -1}, {-1,  1}, { 0, -1},
+        };
+        const GradCoeff &g = lut[hash & 15];
+        return g.cx * x + g.cy * y;
+    }
+};
+
+// i16-optimized Perlin: Uses i16 for lerp/grad hot path (2x faster multiplies)
+// Coordinates stay as i32 (s16x16) externally but convert to i16 for interpolation
+struct perlin_i16_optimized {
+    static constexpr int HP_BITS = 16;
+    static constexpr fl::i32 HP_ONE = 1 << HP_BITS;
+
+    // Build fade LUT - still i32 for API compatibility
+    static inline void init_fade_lut(fl::i32 *table) {
+        for (int i = 0; i <= 256; i++) {
+            fl::i32 t = (i * HP_ONE) / 256;
+            fl::i32 t2 = static_cast<fl::i32>((static_cast<fl::i64>(t) * t) >> HP_BITS);
+            fl::i32 t3 = static_cast<fl::i32>((static_cast<fl::i64>(t2) * t) >> HP_BITS);
+            fl::i32 inner = static_cast<fl::i32>((static_cast<fl::i64>(t) * (6 * HP_ONE)) >> HP_BITS);
+            inner -= 15 * HP_ONE;
+            inner = static_cast<fl::i32>((static_cast<fl::i64>(t) * inner) >> HP_BITS);
+            inner += 10 * HP_ONE;
+            table[i] = static_cast<fl::i32>((static_cast<fl::i64>(t3) * inner) >> HP_BITS);
+        }
+    }
+
+    // Public API: accepts s16x16 raw values
+    static inline fl::s16x16 pnoise2d(fl::s16x16 fx, fl::s16x16 fy,
+                                      const fl::i32 *fade_lut,
+                                      const fl::u8 *perm) {
+        return fl::s16x16::from_raw(
+            pnoise2d_raw(fx.raw(), fy.raw(), fade_lut, perm));
+    }
+
+    // Hot path: uses i16 arithmetic for lerp/grad after extracting fractional part
+    static inline fl::i32 pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
+                                        const fl::i32 *fade_lut,
+                                        const fl::u8 *perm) {
+        int X, Y;
+        fl::i16 x16, y16;  // i16 fractional parts!
+        floor_frac_i16(fx_raw, X, x16);
+        floor_frac_i16(fy_raw, Y, y16);
+        X &= 255;
+        Y &= 255;
+
+        // Fade values can be up to 65536, need to stay i32
+        // But we can still optimize grad and internal lerp to use i16
+        fl::i32 u = fade(x16, fade_lut);
+        fl::i32 v = fade(y16, fade_lut);
+
+        int A  = perm[X & 255]       + Y;
+        int AA = perm[A & 255];
+        int AB = perm[(A + 1) & 255];
+        int B  = perm[(X + 1) & 255] + Y;
+        int BA = perm[B & 255];
+        int BB = perm[(B + 1) & 255];
+
+        // grad returns i16 (coordinates are i16), lerp takes i32 fade values
+        fl::i32 g00 = grad_i16(perm[AA & 255], x16,              y16);
+        fl::i32 g10 = grad_i16(perm[BA & 255], x16 - HP_ONE_I16, y16);
+        fl::i32 g01 = grad_i16(perm[AB & 255], x16,              y16 - HP_ONE_I16);
+        fl::i32 g11 = grad_i16(perm[BB & 255], x16 - HP_ONE_I16, y16 - HP_ONE_I16);
+
+        // Lerp with i32 (grad results fit in i16 range but lerp needs i32 for fade values)
+        fl::i32 lerp0 = lerp(u, g00, g10);
+        fl::i32 lerp1 = lerp(u, g01, g11);
+        fl::i32 result = lerp(v, lerp0, lerp1);
+
+        return result;
+    }
+
+  private:
+    static constexpr int FP_BITS = fl::s16x16::FRAC_BITS;
+    static constexpr fl::i32 FP_ONE = 1 << FP_BITS;
+    // For i16 coordinates: use full 16-bit value (no room for 1.0 in i16)
+    // Coordinates are fractional parts only (0-65535), HP_ONE stays as i32
+    static constexpr fl::i32 HP_ONE_I16 = HP_ONE;
+
+    // Extract fractional part as i16 (range 0-65535)
+    static FASTLED_FORCE_INLINE void floor_frac_i16(fl::i32 fp16, int &ifloor, fl::i16 &frac16) {
+        ifloor = fp16 >> FP_BITS;
+        frac16 = static_cast<fl::i16>(fp16 & (FP_ONE - 1));  // Cast to i16
+    }
+
+    // Fade optimized for i16 input (coordinates), returns i32 (can be 0-65536)
+    static FASTLED_FORCE_INLINE fl::i32 fade(fl::i16 t, const fl::i32 *table) {
+        fl::u32 idx = static_cast<fl::u32>(t) >> 8;  // i16 → 8-bit index
+        fl::i32 frac = t & 0xFF;
+        fl::i32 a = table[idx];
+        fl::i32 b = table[idx + 1];
+        return a + ((static_cast<fl::i32>(frac << 8) * (b - a)) >> 16);
+    }
+
+    // Standard lerp (i32), but benefits from smaller grad results
+    static FASTLED_FORCE_INLINE fl::i32 lerp(fl::i32 t, fl::i32 a, fl::i32 b) {
+        return a + static_cast<fl::i32>(
+            (static_cast<fl::i64>(t) * (b - a)) >> HP_BITS);
+    }
+
+    // i16 grad: Takes i16 coordinates (faster than i32), returns i32
+    static FASTLED_FORCE_INLINE fl::i32 grad_i16(int hash, fl::i16 x, fl::i16 y) {
+        struct GradCoeff { fl::i8 cx; fl::i8 cy; };
+        constexpr GradCoeff lut[16] = {
+            { 1,  1}, {-1,  1}, { 1, -1}, {-1, -1},
+            { 1,  0}, {-1,  0}, { 1,  0}, {-1,  0},
+            { 0,  1}, { 0, -1}, { 0,  1}, { 0, -1},
+            { 1,  1}, { 0, -1}, {-1,  1}, { 0, -1},
+        };
+        const GradCoeff &g = lut[hash & 15];
+        // i8 × i16 → i32 (safe, result in range ±65535)
+        return static_cast<fl::i32>(g.cx * x) + static_cast<fl::i32>(g.cy * y);
     }
 };
 
@@ -3569,7 +3785,7 @@ inline void Fluffy_Blobs(Context &ctx) {
 // Q31 optimized Chasing_Spirals extracted to its own file.
 // Included after main namespace so all types are defined.
 #define ANIMARTRIX2_CHASING_SPIRALS_INTERNAL
-#include "fl/fx/2d/chasing_spirals.hpp" // allow-include-after-namespace
+#include "fl/fx/2d/animartrix2_detail/chasing_spirals.hpp" // allow-include-after-namespace
 
 #if FL_ANIMARTRIX_USES_FAST_MATH
 FL_OPTIMIZATION_LEVEL_O3_END

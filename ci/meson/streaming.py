@@ -266,6 +266,13 @@ def stream_compile_and_run_tests(
                             if test_name in ("runner", "test_runner", "example_runner"):
                                 continue  # Skip these infrastructure executables
 
+                            # Skip profile tests (standalone benchmarking binaries)
+                            if (
+                                "tests/profile/" in rel_path
+                                or "tests\\profile\\" in rel_path
+                            ):
+                                continue  # Profile tests are run via 'bash profile <function>', not as unit tests
+
                             # Skip DLL/shared library files
                             if test_path.suffix.lower() in (".dll", ".so", ".dylib"):
                                 continue  # Skip DLL/shared library files

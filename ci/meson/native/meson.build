@@ -102,8 +102,17 @@ elif build_mode == 'release'
     '-O2',                      # Standard optimization (good performance, reasonable compile time)
     '-DNDEBUG',                 # Disable assertions
   ]
+elif build_mode == 'profile'
+  # Profile mode: Size-optimized with debug symbols for callgrind profiling
+  # Matches embedded target optimization (-Os) while preserving function names
+  # -gdwarf-4: Force DWARF4 for compatibility with Valgrind 3.19 (Debian Bookworm)
+  base_optimization = base_common + [
+    '-Os',                      # Size optimization (matches embedded targets)
+    '-g',                       # Standard debug symbols (function names + lines)
+    '-gdwarf-4',                # DWARF4 format (compatible with Valgrind 3.19)
+  ]
 else
-  error('Invalid build_mode: @0@. Must be one of: debug, quick, release'.format(build_mode))
+  error('Invalid build_mode: @0@. Must be one of: debug, quick, release, profile'.format(build_mode))
 endif
 
 # Windows-specific workaround for Clang 19 AVX-512 intrinsics bugs
@@ -283,6 +292,12 @@ elif build_mode == 'release'
   runner_cpp_args += [
     '-O2',
     '-DNDEBUG',
+  ]
+elif build_mode == 'profile'
+  runner_cpp_args += [
+    '-Os',
+    '-g',
+    '-gdwarf-4',
   ]
 endif
 

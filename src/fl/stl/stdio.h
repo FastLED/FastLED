@@ -194,31 +194,17 @@ void format_arg(sstream& stream, const FormatSpec& spec, const T& arg) {
         case 'd':
         case 'i':
             if (fl::is_integral<T>::value) {
-                stream << static_cast<int>(arg);
+                // Let sstream handle all integer types (including int64_t) via int_cast_detail::cast_target
+                stream << arg;
             } else {
                 stream << "<type_error>";
             }
             break;
-            
+
         case 'u':
             if (fl::is_integral<T>::value) {
-                // Convert unsigned manually since sstream treats all as signed
-                unsigned int val = static_cast<unsigned int>(arg);
-                if (val == 0) {
-                    stream << "0";
-                } else {
-                    fl::string result;
-                    while (val > 0) {
-                        char digit = '0' + (val % 10);
-                        char temp_str[2] = {digit, '\0'};
-                        fl::string digit_str(temp_str);
-                        fl::string temp = digit_str;
-                        temp += result;
-                        result = temp;
-                        val /= 10;
-                    }
-                    stream << result;
-                }
+                // Let sstream handle all integer types (including uint64_t) via int_cast_detail::cast_target
+                stream << arg;
             } else {
                 stream << "<type_error>";
             }

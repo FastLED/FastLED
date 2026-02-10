@@ -1,25 +1,25 @@
 # FastLED CI/Build System Agent Guidelines
 
-## 🔧 Python Build System
+## 📚 Main Documentation
 
-### Core Architecture
-FastLED uses a high-performance Python-based build system:
+**For comprehensive guidelines, read these files:**
 
-**Key Components:**
-- `ci/compiler/clang_compiler.py` - Core compiler with PCH and fingerprint cache
-- `ci/ci/fingerprint_cache.py` - 99% faster PCH rebuilds through intelligent caching
-- `ci/util/build_flags.py` - TOML-based build configuration management
-- `ci/compiler/test_example_compilation.py` - Example compilation system
+| Topic | Read |
+|-------|------|
+| Build commands and restrictions | `docs/agents/build-system.md` |
+| Python coding standards | `docs/agents/python-standards.md` |
+| Testing commands | `docs/agents/testing-commands.md` |
+| MCP server tools | `docs/agents/mcp-tools.md` |
+| Debugging strategies | `docs/agents/debugging.md` |
 
-**Performance Features:**
-- **PCH (Precompiled Headers)** - Dramatically faster compilation
-- **Fingerprint Cache** - 99% time reduction for unchanged dependencies
-- **Parallel Compilation** - Automatic CPU-optimized parallel builds
-- **Smart Rebuilds** - Only rebuild when source files actually change
+**This file contains only CI-directory-specific guidelines.**
 
-### 🚨 Command Execution Rules
+---
 
-#### FOREGROUND AGENTS (Interactive Development)
+## 🔧 Python Code Execution (CI Directory)
+
+### FOREGROUND AGENTS (Interactive Development)
+
 **Python Code Execution:**
 - ✅ **Create/modify tmp.py** in project root (NOT subdirectories)
 - ✅ **Always run: `uv run python tmp.py`** (never just `python`)
@@ -36,85 +36,15 @@ print(result.stdout)
 ```
 Then run: `uv run python tmp.py`
 
-#### BACKGROUND AGENTS (Automated/CI Environments)
+### BACKGROUND AGENTS (Automated/CI Environments)
+
 **Restrictions:**
 - ❌ **NO tmp.py files** (forbidden for background agents)
 - ✅ **Use existing scripts:** `uv run python ci/ci-compile.py uno --examples Blink`
 - ✅ **Use MCP server tools** for programmatic operations
 - ✅ **Always use `uv run python`** with existing scripts
 
-### 🚨 Build Command Restrictions
-
-**ALWAYS use bash wrapper scripts for standard builds:**
-
-```bash
-# ✅ CORRECT - Use bash wrapper scripts (ALWAYS PREFER THESE)
-bash test                           # Run all tests
-bash test <test_name>               # Run specific test
-bash compile <platform>             # Compile for platforms
-bash lint                           # Run linting
-
-# ⚠️ AVOID - Only when bash scripts don't provide needed functionality
-uv run test.py <test_name>          # Direct Python script
-uv run ci/ci-compile.py <platform>  # Direct Python script
-
-# ❌ FORBIDDEN - Never use these for standard builds
-uv run python test.py               # WRONG - never "uv run python"
-meson setup builddir                # WRONG - use bash scripts
-ninja -C builddir                   # WRONG - use bash scripts
-clang++ main.cpp -o main            # WRONG - use bash scripts
-gcc main.c -o main                  # WRONG - use bash scripts
-CXX=... CC=... meson setup builddir # WRONG - use bash scripts
-```
-
-**Exceptions (ONLY when allowed):**
-- ✅ Runtime debugging: `uv run clang-tool-chain-lldb .build/runner.exe`
-- ✅ Compiler feature testing: `clang++ -std=c++17 test_feature.cpp -o test`
-- ✅ Build system development: `meson introspect builddir --targets`
-
-**Rationale:** Bash scripts handle platform differences, environment setup, and proper build system invocation. Direct meson/ninja or Python calls bypass critical infrastructure.
-
-See `docs/agents/build-system.md` for complete details.
-
-## 🤖 MCP Server Configuration
-
-**Start server:** `uv run mcp_server.py`
-
-**Available Tools:**
-- Running tests with various options
-- Compiling examples for different platforms
-- Code fingerprinting and change detection
-- Linting and formatting
-- **Build info analysis** for platform-specific defines, compiler flags, toolchain information
-- **Symbol analysis** for binary optimization (all platforms)
-- Stack trace setup for enhanced debugging
-- **🌐 FastLED Web Compiler** with Playwright (FOREGROUND AGENTS ONLY)
-- **🚨 `validate_completion` tool** (MANDATORY for background agents)
-
-### FastLED Web Compiler (FOREGROUND AGENTS ONLY)
-
-**Prerequisites:**
-- `pip install fastled` - FastLED web compiler
-- `pip install playwright` - Browser automation
-- Docker (optional, for faster compilation)
-
-**Usage via MCP Server:**
-```python
-# Basic usage
-use run_fastled_web_compiler tool with:
-- example_path: "examples/Audio"
-- capture_duration: 30
-- headless: false
-- save_screenshot: true
-```
-
-**Key Features:**
-- Compiles Arduino sketches to WASM for browser execution
-- Captures console.log output with playwright automation
-- Takes screenshots of running visualizations
-- Monitors FastLED_onFrame calls to verify proper initialization
-
-**🚫 BACKGROUND AGENT RESTRICTION:** This tool is COMPLETELY DISABLED for background agents and CI environments.
+---
 
 ## 🤖 Linting Guidelines
 
@@ -139,50 +69,125 @@ Background agents may use individual linting scripts when needed:
 
 **BUT STILL PREFER `bash lint` FOR COMPREHENSIVE CHECKING**
 
-## Build System Commands
+---
 
-**Unit Test Compilation:**
+## Performance Profiling & Optimization
+
+### When to Profile
+- Function is performance-critical (hot path in rendering/effects)
+- User requests "optimize" or "profile-guided optimization"
+- Making algorithmic changes that affect speed
+- Comparing performance of different implementations
+
+### Profiling Workflow
+
+**1. Generate Profiler** (if doesn't exist):
 ```bash
-# Fast Python API (default)
-bash test --unit --verbose  # Uses PCH optimization
-
-# Disable PCH if needed
-bash test --unit --no-pch --verbose  
+bash profile <function>
+# Example: bash profile sincos16
 ```
 
-**Available Build Options:**
-- `--no-pch` - Disable precompiled headers
-- `--clang` - Use Clang compiler (default, always enabled via clang-tool-chain)
-- `--clean` - Force full rebuild
-- `--verbose` - Show detailed compilation output
+This creates `tests/profile/profile_<function>.cpp` - a TEMPLATE that must be customized:
+- Add appropriate test inputs for your function
+- Ensure benchmark calls target function correctly
+- Edit the generated file before building
 
-**Platform Compilation:**
+**2. Customize Profiler:**
+Edit `tests/profile/profile_<function>.cpp` to:
+- Define realistic test inputs
+- Call the target function properly
+- Ensure `volatile` prevents optimization
+
+**3. Build & Run Benchmarks:**
 ```bash
-# Compile Blink (default) for specific platforms
-uv run ci/ci-compile.py uno
-uv run ci/ci-compile.py esp32dev
-uv run ci/ci-compile.py teensy31
+# Local (20 iterations, release mode)
+bash profile <function>
 
-# Compile specific examples
-uv run ci/ci-compile.py uno --examples ColorPalette
-uv run ci/ci-compile.py esp32dev --examples Blink,Apa102HD
+# Docker (consistent environment, recommended)
+bash profile <function> --docker
 
-# Compile ALL examples (use 'all' keyword)
-uv run ci/ci-compile.py uno all
-uv run ci/ci-compile.py esp32dev all
+# More iterations for better statistics
+bash profile <function> --docker --iterations 50
+
+# With callgrind analysis (requires valgrind)
+bash profile <function> --docker --callgrind
 ```
 
-**WASM Compilation:**
-```bash
-# Compile any sketch directory to WASM
-uv run ci/wasm_compile.py path/to/your/sketch
+**4. Analyze Results:**
+Results are automatically parsed and saved:
+- `profile_<function>_results.json` - Raw data (all iterations)
+- `profile_<function>_results.ai.json` - Statistical summary
 
-# Quick compile test (compile only, no browser)
-uv run ci/wasm_compile.py examples/Blink --just-compile
+Read the `.ai.json` file for:
+- Best/median/worst/stdev timing
+- Calls per second
+- Performance recommendations
 
-# Compile and open browser
-uv run ci/wasm_compile.py examples/Blink -b --open
+**5. Create Optimization Variant:**
+- Implement optimized version (e.g., `sincos16_optimized`)
+- Generate profiler for optimized version
+- Re-run benchmarks
+- Compare results (speedup percentage)
+
+**6. Validate Accuracy:**
+- Generate accuracy tests comparing original vs optimized
+- Ensure max error is within acceptable tolerance
+- Run tests to verify correctness
+
+**7. Report Recommendation:**
+- Speedup percentage (e.g., "20% faster")
+- Accuracy validation results
+- Memory impact (if any)
+- Trade-offs (if any)
+
+### Example AI Workflow
+
 ```
+User: "Optimize sincos16 with profile-guided optimization"
+
+AI Steps:
+1. bash profile sincos16 --docker --iterations 30
+2. [Reads profile_sincos16_results.ai.json]
+   → Median: 47.8 ns/call
+3. [Analyzes bottlenecks - maybe via callgrind]
+   → LUT bandwidth bottleneck identified
+4. [Creates sincos16_optimized with smaller LUT]
+5. bash profile sincos16_optimized --docker --iterations 30
+6. [Results: 38.1 ns/call]
+   → Speedup: 20% faster (47.8 → 38.1 ns/call)
+7. [Validates accuracy with generated tests]
+   → Max error: 1 (within tolerance)
+8. [Recommends: Apply optimization]
+   → Performance: 20% faster
+   → Accuracy: Preserved
+   → Memory: Reduced 50% (1KB → 0.5KB LUT)
+```
+
+### Profile Test Architecture
+
+**Directory:** `tests/profile/`
+- `profile_<function>.cpp` - Generated profiler (template, needs customization)
+- Built as standalone executables (NOT unit tests)
+- No doctest, no test runner
+- Produce structured JSON output for parsing
+
+**Build Integration:**
+- Profile tests excluded from regular test discovery (see `tests/test_config.py`)
+- Built via meson with separate `tests/profile/meson.build`
+- Compiled with release flags for accurate performance measurement
+
+**Manual Build:**
+```bash
+# Build without running
+uv run test.py profile_<function> --cpp --build-mode release --build
+
+# Run manually
+.build/meson-release/tests/profile_<function>.exe baseline
+```
+
+**⚠️ Don't use `bash test` for profilers** - profile tests are NOT unit tests and should be run via `bash profile`.
+
+---
 
 ## Build Troubleshooting
 
@@ -201,11 +206,13 @@ uv run ci/wasm_compile.py examples/Blink -b --open
 2. Review LTO settings
 3. Verify linker selection (mold, lld, default)
 
+---
+
 ## 🚨 Critical User Feedback Corrections
 
 **Always Use `uv run python` - NEVER just `python` or `uv run`:**
 - ❌ **WRONG**: `python -c "..."`
-- ❌ **WRONG**: `uv run -c "..."`  
+- ❌ **WRONG**: `uv run -c "..."`
 - ✅ **CORRECT**: `uv run python -c "..."`
 
 **Correct Import Paths:**
@@ -222,61 +229,7 @@ Use leading space for git-bash compatibility:
 - ✅ **CORRECT**: ` bash test` (note the leading space)
 - ❌ **INCORRECT**: `bash test` (may get truncated to `ash test`)
 
-## Platform Build Information Analysis
-
-**Generate Build Info:**
-```bash
-# Compile a platform to generate build_info.json (Blink is compiled by default)
-uv run ci/ci-compile.py uno
-uv run ci/ci-compile.py esp32dev
-```
-
-**Analyze Platform Defines:**
-```bash
-# Command line tool
-python3 ci/ci/build_info_analyzer.py --board uno --show-defines
-
-# Via MCP server
-uv run mcp_server.py
-# Use build_info_analysis tool with: board="uno", show_defines=true
-```
-
-**Compare Platforms:**
-```bash
-# Command line
-python3 ci/ci/build_info_analyzer.py --compare uno esp32dev
-
-# Via MCP 
-# Use build_info_analysis tool with: board="uno", compare_with="esp32dev"
-```
-
-## Symbol Analysis for Binary Optimization
-
-**Analyze specific platform:**
-```bash
-uv run ci/ci/symbol_analysis.py --board uno
-uv run ci/ci/symbol_analysis.py --board esp32dev
-uv run ci/ci/symbol_analysis.py --board teensy31
-```
-
-**Analyze all available platforms:**
-```bash
-uv run ci/demo_symbol_analysis.py
-```
-
-**Using MCP Server:**
-```bash
-# Use MCP server tools
-uv run mcp_server.py
-# Then use symbol_analysis tool with board: "uno" or "auto"
-# Or use symbol_analysis tool with run_all_platforms: true
-```
-
-**JSON Output:**
-```bash
-uv run symbol_analysis.py --board esp32dev --output-json
-# Results saved to: .build/esp32dev_symbol_analysis.json
-```
+---
 
 ## Memory Refresh Rule
-**🚨 ALL AGENTS: Read ci/AGENTS.md before concluding CI/build work to refresh memory about current Python build system rules and MCP server requirements.**
+**🚨 ALL AGENTS: Read relevant docs/agents/*.md files before concluding CI/build work to refresh memory about current build system rules and requirements.**

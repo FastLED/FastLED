@@ -7,6 +7,21 @@
 // Adapted to FastLED by Zach Vorhies 2024.
 // Refactored to Animartrix2 (Context + free functors) 2026.
 
+//
+// ⚠️  WARNING: EXPERIMENTAL API - NOT FOR PUBLIC CONSUMPTION ⚠️
+//
+// Animartrix2 is a performance-focused rewrite of Animartrix that transitions
+// from floating-point to fixed-point math for a 4-16x speedup in rendering.
+//
+// This API is currently UGLY by design - it's optimized for performance tuning
+// and experimentation, not for user-facing elegance. The interface WILL change
+// drastically as optimizations are completed and tested.
+//
+// Once optimization is complete and the API is made beautiful, Animartrix2 will
+// replace the original Animartrix. Until then, use animartrix.hpp for stable,
+// public-facing work.
+//
+
 #include "crgb.h"
 #include "fl/dbg.h"
 #include "fl/stl/memory.h"
@@ -114,7 +129,7 @@ static const Animartrix2Entry ANIMATION2_TABLE[] = {
     {ANIM2_DISTANCE_EXPERIMENT, "DISTANCE_EXPERIMENT", &animartrix2_detail::Distance_Experiment},
     {ANIM2_CENTER_FIELD, "CENTER_FIELD", &animartrix2_detail::Center_Field},
     {ANIM2_WAVES, "WAVES", &animartrix2_detail::Waves},
-    {ANIM2_CHASING_SPIRALS, "CHASING_SPIRALS", &animartrix2_detail::q31::Chasing_Spirals_Q31},
+    {ANIM2_CHASING_SPIRALS, "CHASING_SPIRALS", &animartrix2_detail::q31::Chasing_Spirals_Q31_Batch4}, // Optimized: 4-pixel batching
     {ANIM2_ROTATING_BLOB, "ROTATING_BLOB", &animartrix2_detail::Rotating_Blob},
     {ANIM2_RINGS, "RINGS", &animartrix2_detail::Rings},
     {ANIM2_COMPLEX_KALEIDO, "COMPLEX_KALEIDO", &animartrix2_detail::Complex_Kaleido},

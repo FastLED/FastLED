@@ -340,7 +340,7 @@ def run_meson_examples(
         build_mode = "debug" if debug else "quick"
 
     # Validate build mode
-    valid_modes = ["quick", "debug", "release"]
+    valid_modes = ["quick", "debug", "release", "profile"]
     if build_mode not in valid_modes:
         _ts_print(
             f"[MESON] Error: Invalid build mode: {build_mode}. "
@@ -467,7 +467,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--build-mode",
         type=str,
-        choices=["quick", "debug", "release"],
+        choices=["quick", "debug", "release", "profile"],
         default=None,
         help="Override build mode (default: quick, or debug if --debug flag set)",
     )

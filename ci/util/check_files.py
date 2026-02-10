@@ -316,6 +316,10 @@ def collect_files_to_check(
     for directory in test_directories:
         if os.path.exists(directory):
             for root, _, files in os.walk(directory):
+                # Skip directories with .cpp_no_lint marker file
+                if os.path.exists(os.path.join(root, ".cpp_no_lint")):
+                    continue
+
                 for file in files:
                     if any(file.endswith(ext) for ext in extensions):
                         file_path = os.path.join(root, file)

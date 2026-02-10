@@ -195,6 +195,24 @@ void renderChasingSpiralQ31(CRGB *leds, uint32_t timeMs) {
     fx.draw(ctx);
 }
 
+// Render Chasing_Spirals using Q16 integer path (reduced precision Perlin)
+void renderChasingSpiralQ16(CRGB *leds, uint32_t timeMs) {
+    XYMap xy = XYMap::constructRectangularGrid(W, H);
+
+    // Create context and call Q16 variant directly
+    animartrix2_detail::Context ctx;
+    ctx.leds = leds;
+    ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
+        XYMap *map = static_cast<XYMap*>(userData);
+        return map->mapToIndex(x, y);
+    };
+    ctx.xyMapUserData = &xy;
+
+    animartrix2_detail::init(ctx, W, H);
+    animartrix2_detail::setTime(ctx, timeMs);
+    animartrix2_detail::q16::Chasing_Spirals_Q16_Batch4_ColorGrouped(ctx);
+}
+
 // Count mismatched pixels between two buffers
 int countMismatches(const CRGB *a, const CRGB *b, uint16_t count) {
     int mismatches = 0;
@@ -353,4 +371,77 @@ FL_TEST_CASE("Chasing_Spirals Q31 - timing benchmark") {
     // The real speedup shows on embedded targets without hardware FPU.
     FL_CHECK_MESSAGE(q31_us > 0, "Q31 benchmark produced valid timing");
     FL_CHECK_MESSAGE(float_us > 0, "Float benchmark produced valid timing");
+}
+
+// =============================================================================
+// Q16 Accuracy Tests (reduced precision: 16 fractional bits instead of 24)
+// =============================================================================
+
+FL_TEST_CASE("Chasing_Spirals Q16 - low error at t=1000") {
+    CRGB leds_float[N] = {};
+    CRGB leds_q16[N] = {};
+
+    renderChasingSpiralFloat(leds_float, 1000);
+    renderChasingSpiralQ16(leds_q16, 1000);
+
+    int mismatches = countMismatches(leds_float, leds_q16, N);
+    float avg_err = computeAvgError(leds_float, leds_q16, N);
+    int max_err = computeMaxError(leds_float, leds_q16, N);
+
+    FL_MESSAGE("Q16 t=1000: mismatches=", mismatches, "/", N,
+            " avg_err=", avg_err, " max_err=", max_err);
+
+    // Print first few mismatches for debugging
+    int printed = 0;
+    for (uint16_t i = 0; i < N && printed < 10; i++) {
+        if (leds_float[i] != leds_q16[i]) {
+            FL_MESSAGE("  pixel[", i, "]: float=(", int(leds_float[i].r), ",",
+                    int(leds_float[i].g), ",", int(leds_float[i].b),
+                    ") q16=(", int(leds_q16[i].r), ",",
+                    int(leds_q16[i].g), ",", int(leds_q16[i].b), ")");
+            printed++;
+        }
+    }
+
+    float error_pct = avg_err / 255.0f * 100.0f;
+    FL_MESSAGE("Q16 average error at t=1000: ", error_pct, "%");
+
+    // Q16 uses 16 fractional bits instead of 24, so expect slightly higher error
+    // Still should be well under 1.5% at low time values
+    FL_CHECK_MESSAGE(error_pct < 1.5f,
+                  "Q16 Chasing_Spirals average error should be < 1.5% at t=1000");
+    FL_CHECK_MESSAGE(max_err <= 8,
+                  "Q16 Chasing_Spirals max per-channel error should be <= 8 at t=1000");
+}
+
+FL_TEST_CASE("Chasing_Spirals Q16 - approximate at high time") {
+    // Test multiple high time values to verify stability with reduced precision
+    const uint32_t times[] = {
+        1000000,     // ~16 minutes
+        100000000,   // ~27 hours
+        2000000000,  // ~23 days
+    };
+
+    for (uint32_t high_time : times) {
+        CRGB leds_float[N] = {};
+        CRGB leds_q16[N] = {};
+
+        renderChasingSpiralFloat(leds_float, high_time);
+        renderChasingSpiralQ16(leds_q16, high_time);
+
+        int mismatches = countMismatches(leds_float, leds_q16, N);
+        float avg_err = computeAvgError(leds_float, leds_q16, N);
+        int max_err = computeMaxError(leds_float, leds_q16, N);
+
+        float error_pct = avg_err / 255.0f * 100.0f;
+        FL_MESSAGE("Q16 t=", high_time, ": mismatches=", mismatches, "/", N,
+                " avg_err=", avg_err, " max_err=", max_err,
+                " error_pct=", error_pct, "%");
+
+        // Q16 should maintain < 4% error even at high time values
+        FL_CHECK_MESSAGE(error_pct < 4.0f,
+                      "Q16 Chasing_Spirals average error should be < 4% at high time values");
+        FL_CHECK_MESSAGE(max_err <= 12,
+                      "Q16 Chasing_Spirals max per-channel error should be <= 12 at high time values");
+    }
 }

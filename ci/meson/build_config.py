@@ -196,7 +196,7 @@ def setup_meson_build(
     # Ensure debug flag matches build_mode for consistency
     if build_mode == "debug":
         debug = True
-    elif build_mode in ("quick", "release"):
+    elif build_mode in ("quick", "release", "profile"):
         debug = False
     # Create build directory if it doesn't exist
     build_dir.mkdir(parents=True, exist_ok=True)

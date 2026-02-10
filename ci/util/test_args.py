@@ -132,7 +132,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
     parser.add_argument(
         "--build-mode",
         type=str,
-        choices=["quick", "debug", "release"],
+        choices=["quick", "debug", "release", "profile"],
         default=None,
         help="Override build mode for unit tests and examples (default: quick, or debug if --debug flag set)",
     )

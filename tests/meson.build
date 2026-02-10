@@ -6,6 +6,9 @@
 # files for identical compilation settings. This manual approach builds test.h
 # once and shares it across all test executables.
 
+# Import filesystem module for directory checks
+fs = import('fs')
+
 # Find uv for running Zig compiler
 uv = find_program('uv')
 
@@ -222,3 +225,30 @@ endforeach
 alias_target('all_tests', all_test_dlls + all_test_runners)
 
 message('Individual test DLL build enabled: ' + test_names.length().to_string() + ' test DLLs + runners')
+
+# ============================================================================
+# PROFILING BINARIES (standalone, not tests)
+# ============================================================================
+# Standalone executables for performance benchmarking and profiling.
+# NOT registered as tests - build only, run via 'bash profile <function>'.
+
+# Legacy profile binary for Chasing Spirals (only in profile mode)
+if build_mode == 'profile'
+  profile_chasing_spirals = executable('profile_chasing_spirals',
+    'fx/profile_chasing_spirals.cpp',
+    include_directories: [src_dir, stub_dir, tests_dir],
+    cpp_args: unit_test_compile_args,
+    link_args: runner_link_args,
+    link_with: [fastled_lib, crash_handler_lib],
+    install: false,
+    build_by_default: false  # Only build when explicitly requested via 'bash profile <function>'
+  )
+  message('Profile binary enabled: profile_chasing_spirals')
+endif
+
+# Generic profile test framework (tests/profile/)
+# Profile tests are auto-generated via ci/profile/generate_profile_test.py
+# and built as standalone executables for benchmarking
+if fs.is_dir('profile')
+  subdir('profile')
+endif

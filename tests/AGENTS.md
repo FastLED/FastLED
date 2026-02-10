@@ -1,5 +1,22 @@
 # FastLED Testing Agent Guidelines
 
+## 📚 Main Documentation
+
+**For comprehensive guidelines, read these files:**
+
+| Topic | Read |
+|-------|------|
+| Test commands and execution | `docs/agents/testing-commands.md` |
+| Build system restrictions | `docs/agents/build-system.md` |
+| C++ coding standards | `docs/agents/cpp-standards.md` |
+| MCP server tools | `docs/agents/mcp-tools.md` |
+| Debugging strategies | `docs/agents/debugging.md` |
+| LLDB debugging guide | `docs/agents/lldb-debugging.md` |
+
+**This file contains only test-directory-specific conventions.**
+
+---
+
 ## 🚨 CRITICAL REQUIREMENTS FOR BACKGROUND AGENTS
 
 ### MANDATORY PRE-COMPLETION VALIDATION
@@ -29,72 +46,7 @@
 
 **FAILURE TO FOLLOW THESE REQUIREMENTS WILL RESULT IN BROKEN CODE SUBMISSIONS.**
 
-## Test System Overview
-
-The project uses a comprehensive test suite including:
-- C++ unit tests
-- Platform compilation tests  
-- Code quality checks (ruff, clang-format)
-- Example compilation verification
-
-## Test Execution Format
-
-**🚨 CRITICAL: Always use the correct test execution format:**
-- ✅ **CORRECT**: `bash test <test_name>` (e.g., `bash test audio_json_parsing`)
-- ❌ **INCORRECT**: `./.build/bin/test_<test_name>.exe`
-- ❌ **INCORRECT**: Running executables directly
-
-**Examples:**
-- `bash test` - Run all tests (includes debug symbols)
-- `bash test audio_json_parsing` - Run specific test
-- `bash test xypath` - Run test_xypath.cpp
-- `bash compile uno --examples Blink` - Compile examples
-
-**Quick Build Options:**
-- `bash test --quick --cpp` - Quick C++ tests only (when no *.py changes)
-- `bash test --quick` - Quick tests including Python (when *.py changes)
-
-**Why:** The `bash test` wrapper handles platform differences, environment setup, and proper test execution across all supported systems.
-
-## 🚨 Build Command Restrictions
-
-**ALWAYS use bash wrapper scripts for standard test builds:**
-
-```bash
-# ✅ CORRECT - Use bash wrapper scripts (ALWAYS PREFER THESE)
-bash test                           # Run all tests
-bash test <test_name>               # Run specific test
-bash test --cpp                     # C++ tests only
-bash test --quick                   # Quick mode
-
-# ⚠️ AVOID - Only when bash scripts don't provide needed functionality
-uv run test.py <test_name>          # Direct Python script
-
-# ❌ FORBIDDEN - Never use these for standard builds
-uv run python test.py               # WRONG - never "uv run python"
-meson setup builddir                # WRONG - use bash scripts
-ninja -C builddir                   # WRONG - use bash scripts
-clang++ test.cpp -o test            # WRONG - use bash scripts
-gcc test.c -o test                  # WRONG - use bash scripts
-```
-
-**Allowed exceptions:**
-- ✅ Runtime debugging: `uv run clang-tool-chain-lldb .build/meson-debug/tests/runner.exe`
-- ✅ Compiler feature testing: `clang++ -std=c++17 feature_test.cpp -o test && ./test`
-- ✅ Build system development: Modifying meson.build or investigating build internals
-
-**Rationale:** Bash wrapper scripts handle:
-- Platform differences (Windows/Linux/macOS)
-- Environment variable setup
-- Compiler configuration (clang-tool-chain with sccache)
-- Build directory management and caching
-- Precompiled headers (PCH) for fast builds
-- Platform-specific flags and dependencies
-- Sanitizers (ASAN/LSAN) in debug mode
-
-Direct Python or meson/ninja calls bypass this infrastructure and will fail or produce incorrect builds.
-
-See `docs/agents/build-system.md` for complete details.
+---
 
 ## Test Assertion Macros
 
@@ -149,6 +101,8 @@ CHECK("expected" == actual_string);     // Wrong comparison type
 - **Clearer intent** about what is being tested
 - **Consistent debugging** across all test failures
 - **Type safety** for different comparison types
+
+---
 
 ## Test Macro Naming Standards
 
@@ -287,43 +241,7 @@ FL_REQUIRE_LT((map_range<int, int, long>(x, 0, 100, 0, 1000)), max_value)
 - Function calls with multiple arguments: `FL_CHECK_EQ(func(a, b, c), expected)` ✅ (commas are function args)
 - Initializer lists: `FL_CHECK_EQ(vec, {1, 2, 3})` ✅ (braces protect commas)
 
-### Verification Commands
-
-**Check for unconverted macros:**
-```bash
-# Should return zero results (or only comments/CHECK_CLOSE)
-rg tests/ "\bCHECK\b" | grep -v "FL_CHECK" | grep -v "CHECK_CLOSE" | grep -v "TEST_CASE"
-rg tests/ "\bREQUIRE\b" | grep -v "FL_REQUIRE" | grep -v "REQUIRE_CLOSE"
-```
-
-**Count trampoline usage:**
-```bash
-# Should return 10,000+ matches across test suite
-rg tests/ "\bFL_CHECK" | wc -l
-rg tests/ "\bFL_REQUIRE" | wc -l
-```
-
-### Why Use Trampolines?
-
-**Benefits of the trampoline layer:**
-1. **Abstraction** - Can swap test frameworks without changing test code
-2. **Consistency** - Single naming convention across entire codebase
-3. **Flexibility** - Can add custom behavior (logging, metrics) at trampoline layer
-4. **Clarity** - `FL_` prefix clearly identifies FastLED test assertions
-5. **Maintainability** - Centralized macro definitions in `tests/test.h`
-
-### Migration Notes
-
-**This project has fully migrated to FL_ trampolines:**
-- ✅ 182 test files converted (14,495 macro invocations)
-- ✅ 35+ trampoline macros defined in `tests/test.h`
-- ✅ Zero bare CHECK/REQUIRE macros remain (except allowed exceptions)
-- ✅ All tests compile and pass with trampolines
-
-**For new test files:**
-- Always include `test.h` (not `doctest.h` directly)
-- Always use `FL_CHECK` / `FL_REQUIRE` prefix
-- Follow template wrapping guidelines for comma-containing expressions
+---
 
 ## Test File Creation Guidelines
 
@@ -363,6 +281,8 @@ rg tests/ "\bFL_REQUIRE" | wc -l
 - **Faster builds** - fewer compilation units
 - **Cleaner repository** - less file clutter
 - **Improved discoverability** - easier to find existing test coverage
+
+---
 
 ## Test Simplicity Principle
 
@@ -430,6 +350,8 @@ When updating existing tests that violate these principles:
 
 **Remember:** A simple test that catches real bugs is infinitely more valuable than a complex test suite that's hard to maintain.
 
+---
+
 ## Blank Test Template
 
 **✅ CORRECT blank test file structure:**
@@ -454,6 +376,8 @@ TEST_CASE("New test - fill in") {
 - Missing `using namespace fl;` declaration
 - Empty or non-descriptive test case names
 - Inconsistent formatting and spacing
+
+---
 
 ## Test Namespace Convention
 
@@ -495,94 +419,7 @@ TEST_CASE("UCS7604 - feature test") {
 - ❌ Don't create named namespaces in test files (e.g., `namespace test_ucs7604 { ... }`)
 - ❌ Don't leave test helpers in global scope
 
-## Debugging and Stack Traces
-
-### Stack Trace Setup
-The FastLED project supports enhanced debugging through stack trace functionality for crash analysis and debugging.
-
-**For Background Agents**: Use the MCP server tool `setup_stack_traces` to automatically install and configure stack trace support:
-
-```bash
-# Via MCP server (recommended for background agents)
-uv run mcp_server.py
-# Then use setup_stack_traces tool with method: "auto"
-```
-
-**Manual Installation**:
-
-**Ubuntu/Debian**:
-```bash
-sudo apt-get update
-sudo apt-get install -y libunwind-dev build-essential
-```
-
-**CentOS/RHEL/Fedora**:
-```bash
-sudo yum install -y libunwind-devel  # CentOS/RHEL
-sudo dnf install -y libunwind-devel  # Fedora
-```
-
-**macOS**:
-```bash
-brew install libunwind
-```
-
-### Available Stack Trace Methods
-1. **LibUnwind** (Recommended) - Enhanced stack traces with symbol resolution
-2. **Execinfo** (Fallback) - Basic stack traces using standard glibc
-3. **Windows** (On Windows) - Windows-specific debugging APIs
-4. **No-op** (Last resort) - Minimal crash handling
-
-The build system automatically detects and configures the best available option.
-
-### Testing Stack Traces
-Stack trace testing is integrated into the main test suite. Use the crash handler tests via the standard test runner:
-
-```bash
-bash test crash_test  # Run crash handler tests
-```
-
-### Using in Code
-```cpp
-#include "tests/crash_handler.h"
-
-int main() {
-    setup_crash_handler();  // Enable crash handling
-    // Your code here...
-    return 0;
-}
-```
-
-## Testing Infrastructure
-
-**Test Configuration**: Python-based build system in `ci/compiler/`
-- Defines test targets and dependencies
-- Configures test execution parameters
-- Sets up coverage and profiling
-
-**Test Execution**:
-- `bash test` - Comprehensive test runner (preferred)
-- `uv run test.py` - Python test interface
-- Individual test executables in `.build/bin/`
-
-## Python Build System Commands for Testing
-
-**Unit Test Compilation:**
-```bash
-# Fast Python API (default)
-bash test --unit --verbose  # Uses PCH optimization
-
-# Disable PCH if needed  
-bash test --unit --no-pch --verbose
-
-# Note: --legacy flag removed (no longer supported)  
-```
-
-**Available Build Options:**
-- `--no-pch` - Disable precompiled headers
-- `--clang` - Use Clang compiler (default, always enabled via clang-tool-chain)
-- `--clean` - Force full rebuild
-- `--verbose` - Show detailed compilation output
+---
 
 ## Memory Refresh Rule
-**🚨 ALL AGENTS: Read tests/AGENTS.md before concluding testing work to refresh memory about current test execution requirements and validation rules.**
+**🚨 ALL AGENTS: Read docs/agents/testing-commands.md and relevant docs/agents/*.md files before concluding testing work to refresh memory about test execution requirements and validation rules.**

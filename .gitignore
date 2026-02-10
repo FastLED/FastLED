@@ -6,10 +6,16 @@ components/
 
 # Build outputs
 .build/
+.profile-results/
 build/
 out/
 emscripten/
 *.o
+
+# Profile test results
+profile_*_results.json
+profile_*_results.ai.json
+callgrind.out.profile
 # Misc
 .DS_Store
 Thumbs.db

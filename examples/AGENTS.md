@@ -1,5 +1,21 @@
 # FastLED Examples Agent Guidelines
 
+## 📚 Main Documentation
+
+**For comprehensive guidelines, read these files:**
+
+| Topic | Read |
+|-------|------|
+| C++ coding standards | `docs/agents/cpp-standards.md` |
+| Build commands | `docs/agents/build-system.md` |
+| Testing commands | `docs/agents/testing-commands.md` |
+| Debugging strategies | `docs/agents/debugging.md` |
+| LLDB debugging guide | `docs/agents/lldb-debugging.md` |
+
+**This file contains only example-directory-specific guidelines.**
+
+---
+
 ## 🚨 CRITICAL: .INO FILE CREATION RULES
 
 ### ⚠️ THINK BEFORE CREATING .INO FILES ⚠️
@@ -60,7 +76,7 @@
 
 **For Feature Examples (.ino files that stay):**
 - ✅ **Demonstrates complete, real-world usage patterns**
-- ✅ **Covers multiple aspects of the feature comprehensively**  
+- ✅ **Covers multiple aspects of the feature comprehensively**
 - ✅ **Provides educational value for users**
 - ✅ **Shows best practices and common use cases**
 - ✅ **Is likely to be referenced by multiple users**
@@ -73,7 +89,7 @@
 
 ### ❌ EXAMPLES OF WHAT NOT TO CREATE:
 - `test_basic_led.ino` - Use existing Blink example
-- `debug_colors.ino` - Use existing ColorPalette example  
+- `debug_colors.ino` - Use existing ColorPalette example
 - `quick_brightness.ino` - Use unit tests or modify existing example
 - `validate_pins.ino` - Use PinTest example or unit tests
 
@@ -89,63 +105,9 @@
 
 **Remember: The examples directory is user-facing documentation. Every .ino file should provide clear value to FastLED users.**
 
+---
+
 ## Code Standards for Examples
-
-### Use fl:: Namespace (Not std::)
-**DO NOT use `std::` prefixed functions or headers in examples.** This project provides its own STL-equivalent implementations under the `fl::` namespace.
-
-**Examples of what to avoid and use instead:**
-
-**Headers:**
-- ❌ `#include <vector>` → ✅ `#include "fl/vector.h"`
-- ❌ `#include <string>` → ✅ `#include "fl/string.h"`
-- ❌ `#include <optional>` → ✅ `#include "fl/optional.h"`
-- ❌ `#include <memory>` → ✅ `#include "fl/stl/scoped_ptr.h"` or `#include "fl/stl/shared_ptr.h"`
-
-**Functions and classes:**
-- ❌ `std::move()` → ✅ `fl::move()`
-- ❌ `std::vector` → ✅ `fl::vector`
-- ❌ `std::string` → ✅ `fl::string`
-
-**Why:** The project maintains its own implementations to ensure compatibility across all supported platforms and to avoid bloating the library with unnecessary STL dependencies.
-
-### Memory Management
-**🚨 CRITICAL: Always use proper RAII patterns - smart pointers, moveable objects, or wrapper classes instead of raw pointers for resource management.**
-
-**Resource Management Options:**
-- ✅ **PREFERRED**: `fl::shared_ptr<T>` for shared ownership (multiple references to same object)
-- ✅ **PREFERRED**: `fl::unique_ptr<T>` for exclusive ownership (single owner, automatic cleanup)
-- ✅ **PREFERRED**: Moveable wrapper objects (like `fl::promise<T>`) for safe copying and transferring of unique resources
-- ✅ **ACCEPTABLE**: `fl::vector<T>` storing objects by value when objects support move/copy semantics
-- ❌ **AVOID**: `fl::vector<T*>` storing raw pointers - use `fl::vector<fl::shared_ptr<T>>` or `fl::vector<fl::unique_ptr<T>>`
-- ❌ **AVOID**: Manual `new`/`delete` - use `fl::make_shared<T>()` or `fl::make_unique<T>()`
-
-**Examples:**
-```cpp
-// ✅ GOOD - Using smart pointers
-fl::vector<fl::shared_ptr<HttpClient>> mActiveClients;
-auto client = fl::make_shared<HttpClient>();
-mActiveClients.push_back(client);
-
-// ✅ GOOD - Using unique_ptr for exclusive ownership
-fl::unique_ptr<HttpClient> client = fl::make_unique<HttpClient>();
-
-// ✅ GOOD - Moveable wrapper objects (fl::promise example)
-fl::vector<fl::promise<Response>> mActivePromises;  // Copyable wrapper around unique future
-fl::promise<Response> promise = fetch.get(url).execute();
-mActivePromises.push_back(promise);  // Safe copy, shared internal state
-
-// ❌ BAD - Raw pointers require manual memory management
-fl::vector<Promise*> mActivePromises;  // Memory leaks possible
-Promise* promise = new Promise();      // Who calls delete?
-```
-
-### Debug Printing
-**Use `FL_WARN` for debug printing in examples.** This ensures consistent debug output that works in both unit tests and live application testing.
-
-**Usage:**
-- ✅ `FL_WARN("Debug message: " << message);`
-- ❌ `FL_WARN("Value: %d", value);`
 
 ### No Emoticons or Emojis
 **NO emoticons or emoji characters are allowed in C++ source files.** This ensures professional, maintainable code that works correctly across all platforms and development environments.
@@ -155,7 +117,7 @@ Promise* promise = new Promise();      // Who calls delete?
 // ❌ BAD - Emoticons in comments
 // 🎯 This function handles user input
 
-// ❌ BAD - Emoticons in log messages  
+// ❌ BAD - Emoticons in log messages
 FL_WARN("✅ Operation successful!");
 FL_WARN("❌ Error occurred: " << error_msg);
 
@@ -172,7 +134,7 @@ const char* status = "🔄 Processing...";
 FL_WARN("SUCCESS: Operation completed successfully!");
 FL_WARN("ERROR: Failed to process request: " << error_msg);
 
-// ✅ GOOD - Descriptive text in string literals  
+// ✅ GOOD - Descriptive text in string literals
 const char* status = "PROCESSING: Request in progress...";
 ```
 
@@ -204,304 +166,7 @@ int brightness = doc["config"]["brightness"].as<int>();  // Can crash if missing
 
 **📚 Reference Example:** See `examples/Json/Json.ino` for comprehensive usage patterns and API comparison.
 
-## 🚨 Build Command Requirements
-
-**CRITICAL: Use bash wrapper scripts for all build operations.**
-
-```bash
-# ✅ CORRECT - Use these bash scripts
-bash test --examples              # Compile and test all examples
-bash test --examples Blink        # Compile specific example
-bash compile uno --examples Blink # Platform compilation
-
-# ⚠️ AVOID - Only use when bash scripts don't provide needed functionality
-uv run test.py --examples         # Direct Python script (use bash test instead)
-uv run ci/ci-compile.py uno       # Direct Python script (use bash compile instead)
-
-# ❌ FORBIDDEN - Never use these for standard builds
-uv run python test.py             # WRONG - never use "uv run python"
-meson setup builddir              # WRONG - use bash scripts
-ninja -C builddir                 # WRONG - use bash scripts
-clang++ example.cpp -o example    # WRONG - use bash scripts
-```
-
-**Why bash scripts?**
-- Handle platform differences automatically
-- Set up correct environment variables
-- Manage build directories and caching
-- Provide consistent interface across all systems
-
-**Manual Python invocation (`uv run <script>`) is only for:**
-- Advanced debugging of build system internals
-- When bash wrapper doesn't expose needed functionality
-- Always use `uv run <script>`, NEVER `uv run python <script>`
-
-See `docs/agents/build-system.md` for complete details.
-
-## Example Compilation Commands
-
-### Host-Based Compilation with Build Modes
-
-FastLED examples support three build modes for host-based compilation, mirroring the unit test system:
-
-#### Quick Mode (Default)
-```bash
-# Compile all examples in quick mode (fastest)
-uv run test.py --examples
-
-# Compile specific examples in quick mode
-uv run test.py --examples Blink DemoReel100
-
-# Direct invocation (quick mode)
-uv run python ci/util/meson_example_runner.py Blink
-```
-
-**Characteristics:**
-- **Flags**: `-O0 -g1` (minimal debug info for stack traces)
-- **Use case**: Fast iteration and testing
-- **Build directory**: `.build/meson-quick/examples/`
-- **Compilation speed**: 80 examples in ~0.24s (394 examples/second with PCH)
-- **Binary size**: Baseline (e.g., Blink: 2.8M)
-
-#### Debug Mode
-```bash
-# Compile all examples with debug symbols and sanitizers
-uv run test.py --examples --debug
-
-# Compile specific examples in debug mode
-uv run test.py --examples Blink --debug
-
-# Compile and execute in debug mode
-uv run test.py --examples Blink --debug --full
-
-# Direct invocation (debug mode)
-uv run python ci/util/meson_example_runner.py Blink --debug
-```
-
-**Characteristics:**
-- **Flags**: `-O0 -g3 -fsanitize=address -fsanitize=undefined` (full debug info + sanitizers)
-- **Use case**: Debugging crashes, memory issues, undefined behavior
-- **Build directory**: `.build/meson-debug/examples/`
-- **Sanitizers**: AddressSanitizer (ASan) + UndefinedBehaviorSanitizer (UBSan)
-- **Binary size**: 3.3x larger than quick mode (e.g., Blink: 9.1M)
-- **Debug symbols**: Full DWARF debug info for LLDB debugging
-
-**Debug Mode Benefits:**
-- Detects heap buffer overflows
-- Detects use-after-free errors
-- Detects memory leaks
-- Detects integer overflow
-- Detects null pointer dereference
-- Detects misaligned memory access
-- Full source-level debugging with LLDB
-- Built-in crash handlers provide automatic stack traces
-
-#### Release Mode
-```bash
-# Compile all examples optimized for performance
-uv run test.py --examples --build-mode release
-
-# Compile specific examples in release mode
-uv run test.py --examples Blink --build-mode release
-
-# Direct invocation (release mode)
-uv run python ci/util/meson_example_runner.py Blink --build-mode release
-```
-
-**Characteristics:**
-- **Flags**: `-O0 -g1` (optimized, minimal debug info)
-- **Use case**: Performance testing and production builds
-- **Build directory**: `.build/meson-release/examples/`
-- **Binary size**: Smallest (e.g., Blink: 2.3M, 20% smaller than quick mode)
-
-### Mode-Specific Build Directories
-
-Examples use separate build directories per mode to enable caching and prevent flag conflicts:
-
-```
-.build/
-├── meson-quick/examples/    # Quick mode (80 DLLs)
-├── meson-debug/examples/    # Debug mode (80 DLLs)
-└── meson-release/examples/  # Release mode (80 DLLs)
-```
-
-**Benefits:**
-- All three modes can coexist simultaneously
-- Switching modes does not invalidate other mode's cache
-- No cleanup overhead when switching modes
-- Instant mode switching (just change directory)
-- Each mode maintains independent build cache
-
-**Marker Files:**
-Each build directory contains a `.debug_config` marker file that tracks the debug mode state:
-```
-.build/meson-quick/.debug_config   → False
-.build/meson-debug/.debug_config   → True
-.build/meson-release/.debug_config → False
-```
-
-### Debugging Workflow
-
-**Step 1: Identify problematic example**
-```bash
-# Compile and run in quick mode (fast iteration)
-uv run test.py --examples ExampleName
-```
-
-**Step 2: Compile with debug symbols and sanitizers**
-```bash
-# Enable full debug mode with sanitizers
-uv run test.py --examples ExampleName --debug --full
-```
-
-**Step 3: Analyze sanitizer output**
-Sanitizers will print detailed error messages when memory errors or undefined behavior are detected:
-```
-=================================================================
-==12345==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x...
-    #0 0x... in function_name example-ExampleName.cpp:42
-=================================================================
-```
-
-**Step 4: Use LLDB for deeper investigation** (if needed)
-
-**Note:** FastLED includes built-in crash handlers that automatically provide excellent stack traces. For most debugging, the automatic crash output is sufficient.
-
-```bash
-# Load example in LLDB
-uv run clang-tool-chain-lldb .build/meson-debug/examples/example-ExampleName.exe
-
-# Common LLDB commands
-(lldb) run                    # Execute program
-(lldb) bt                     # Show backtrace when crashed
-(lldb) bt all                 # Show backtrace of all threads
-(lldb) frame select 3         # Switch to frame 3
-(lldb) print variable_name    # Print variable value
-(lldb) frame variable         # Show all local variables
-(lldb) breakpoint set -n main # Set breakpoint at main
-```
-
-For detailed LLDB usage, see `docs/agents/lldb-debugging.md`.
-
-### Performance Comparison
-
-| Mode    | Examples | Compilation | Binary Size | Debug Info | Sanitizers | Success Rate |
-|---------|----------|-------------|-------------|------------|------------|--------------|
-| Quick   | 80/80    | ~0.24s      | Baseline    | Minimal    | None       | 100%         |
-| Debug   | 80/80    | Slower      | 3.3x larger | Full (-g3) | ASan+UBSan | 100%         |
-| Release | 80/80    | ~0.24s      | 0.8x        | Minimal    | None       | 100%         |
-
-**Notes:**
-- Debug mode binaries are significantly larger due to debug symbols and sanitizer instrumentation
-- Release mode produces smallest binaries (20% smaller than quick mode)
-- All modes successfully compile 100% of examples (80 out of 80)
-- PCH (precompiled headers) dramatically speeds compilation in all modes
-
-### Platform Compilation
-```bash
-# Compile examples for specific platforms
-uv run ci/ci-compile.py uno --examples Blink
-uv run ci/ci-compile.py esp32dev --examples Blink
-uv run ci/ci-compile.py teensy31 --examples Blink
-bash compile uno --examples Blink
-```
-
-### WASM Compilation
-**🎯 HOW TO COMPILE ANY ARDUINO SKETCH TO WASM:**
-
-**Basic Compilation Commands:**
-```bash
-# Compile any sketch directory to WASM
-uv run ci/wasm_compile.py path/to/your/sketch
-
-# Quick compile test (compile only, no browser)
-uv run ci/wasm_compile.py path/to/your/sketch --just-compile
-
-# Compile examples/Blink to WASM
-uv run ci/wasm_compile.py examples/Blink --just-compile
-
-# Compile examples/NetTest to WASM (test fetch API)
-uv run ci/wasm_compile.py examples/NetTest --just-compile
-
-# Compile examples/DemoReel100 to WASM  
-uv run ci/wasm_compile.py examples/DemoReel100 --just-compile
-```
-
-**Output:** Creates `fastled_js/` folder with:
-- `fastled.js` - JavaScript loader
-- `fastled.wasm` - WebAssembly binary
-- `index.html` - HTML page to run the sketch
-
-**Run in Browser:**
-```bash
-# Simple HTTP server to test
-cd fastled_js
-python -m http.server 8000
-# Open http://localhost:8000
-```
-
-**🚨 REQUIREMENTS:**
-- **Docker must be installed and running**
-- **Internet connection** (for Docker image download on first run)
-- **~1GB RAM** for Docker container during compilation
-
-### WASM Testing Requirements
-
-**🚨 MANDATORY: Always test WASM compilation after platform file changes**
-
-**Platform Testing Commands:**
-```bash
-# Test WASM platform changes (for platform developers)
-uv run ci/wasm_compile.py examples/wasm --just-compile
-
-# Quick compile test for any sketch (compile only, no browser)
-uv run ci/wasm_compile.py examples/Blink --just-compile
-
-# Quick compile test for NetTest example  
-uv run ci/wasm_compile.py examples/NetTest --just-compile
-
-# Quick test without full build
-uv run ci/wasm_compile.py examples/wasm --quick
-```
-
-**Watch For These Error Patterns:**
-- `error: conflicting types for 'function_name'`
-- `error: redefinition of 'function_name'`  
-- `warning: attribute declaration must precede definition`
-- `RuntimeError: unreachable` (often async-related)
-
-**MANDATORY RULES:**
-- **ALWAYS test WASM compilation** after modifying any WASM platform files
-- **USE `uv run ci/wasm_compile.py` for validation**
-- **WATCH for unified build conflicts** in compilation output
-- **VERIFY async operations work properly** in browser environment
-
-## Compiler Warning Suppression
-
-**ALWAYS use the FastLED compiler control macros from `fl/compiler_control.h` for warning suppression.** This ensures consistent cross-compiler support and proper handling of platform differences.
-
-**Correct Warning Suppression Pattern:**
-```cpp
-#include "fl/compiler_control.h"
-
-// Suppress specific warning around problematic code
-FL_DISABLE_WARNING_PUSH
-FL_DISABLE_FORMAT_TRUNCATION  // Use specific warning macros
-// ... code that triggers warnings ...
-FL_DISABLE_WARNING_POP
-```
-
-**Available Warning Suppression Macros:**
-- ✅ `FL_DISABLE_WARNING_PUSH` / `FL_DISABLE_WARNING_POP` - Standard push/pop pattern
-- ✅ `FL_DISABLE_WARNING(warning_name)` - Generic warning suppression (use sparingly)
-- ✅ `FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS` - Clang global constructor warnings
-- ✅ `FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED` - Clang self-assignment warnings  
-- ✅ `FL_DISABLE_FORMAT_TRUNCATION` - GCC format truncation warnings
-
-**What NOT to do:**
-- ❌ **NEVER use raw `#pragma` directives** - they don't handle compiler differences
-- ❌ **NEVER write manual `#ifdef __clang__` / `#ifdef __GNUC__` blocks** - use the macros
-- ❌ **NEVER ignore warnings without suppression** - fix the issue or suppress appropriately
+---
 
 ## Exception Handling
 
@@ -543,5 +208,69 @@ void processData(const uint8_t* data, size_t len) {
 }
 ```
 
+---
+
+## Compiler Warning Suppression
+
+**ALWAYS use the FastLED compiler control macros from `fl/compiler_control.h` for warning suppression.** This ensures consistent cross-compiler support and proper handling of platform differences.
+
+**Correct Warning Suppression Pattern:**
+```cpp
+#include "fl/compiler_control.h"
+
+// Suppress specific warning around problematic code
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_FORMAT_TRUNCATION  // Use specific warning macros
+// ... code that triggers warnings ...
+FL_DISABLE_WARNING_POP
+```
+
+**Available Warning Suppression Macros:**
+- ✅ `FL_DISABLE_WARNING_PUSH` / `FL_DISABLE_WARNING_POP` - Standard push/pop pattern
+- ✅ `FL_DISABLE_WARNING(warning_name)` - Generic warning suppression (use sparingly)
+- ✅ `FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS` - Clang global constructor warnings
+- ✅ `FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED` - Clang self-assignment warnings
+- ✅ `FL_DISABLE_FORMAT_TRUNCATION` - GCC format truncation warnings
+
+**What NOT to do:**
+- ❌ **NEVER use raw `#pragma` directives** - they don't handle compiler differences
+- ❌ **NEVER write manual `#ifdef __clang__` / `#ifdef __GNUC__` blocks** - use the macros
+- ❌ **NEVER ignore warnings without suppression** - fix the issue or suppress appropriately
+
+---
+
+## WASM Testing Requirements
+
+**🚨 MANDATORY: Always test WASM compilation after platform file changes**
+
+**Platform Testing Commands:**
+```bash
+# Test WASM platform changes (for platform developers)
+uv run ci/wasm_compile.py examples/wasm --just-compile
+
+# Quick compile test for any sketch (compile only, no browser)
+uv run ci/wasm_compile.py examples/Blink --just-compile
+
+# Quick compile test for NetTest example
+uv run ci/wasm_compile.py examples/NetTest --just-compile
+
+# Quick test without full build
+uv run ci/wasm_compile.py examples/wasm --quick
+```
+
+**Watch For These Error Patterns:**
+- `error: conflicting types for 'function_name'`
+- `error: redefinition of 'function_name'`
+- `warning: attribute declaration must precede definition`
+- `RuntimeError: unreachable` (often async-related)
+
+**MANDATORY RULES:**
+- **ALWAYS test WASM compilation** after modifying any WASM platform files
+- **USE `uv run ci/wasm_compile.py` for validation**
+- **WATCH for unified build conflicts** in compilation output
+- **VERIFY async operations work properly** in browser environment
+
+---
+
 ## Memory Refresh Rule
-**🚨 ALL AGENTS: Read examples/AGENTS.md before concluding example work to refresh memory about .ino file creation rules and example coding standards.**
+**🚨 ALL AGENTS: Read docs/agents/cpp-standards.md and relevant docs/agents/*.md files before concluding example work to refresh memory about .ino file creation rules and example coding standards.**

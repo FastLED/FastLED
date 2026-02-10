@@ -176,9 +176,9 @@ def run_meson_build_and_test(
         build_mode = "debug" if debug else "quick"
 
     # Validate build_mode
-    if build_mode not in ["quick", "debug", "release"]:
+    if build_mode not in ["quick", "debug", "release", "profile"]:
         _ts_print(
-            f"[MESON] Error: Invalid build_mode '{build_mode}'. Must be 'quick', 'debug', or 'release'",
+            f"[MESON] Error: Invalid build_mode '{build_mode}'. Must be 'quick', 'debug', 'release', or 'profile'",
             file=sys.stderr,
         )
         return MesonTestResult(
@@ -646,13 +646,30 @@ def run_meson_build_and_test(
         # Tests can be either:
         # 1. A copied runner .exe (e.g., fl_async.exe) - legacy naming
         # 2. A DLL loaded by the shared runner.exe (e.g., fl_fixed_point_s16x16.dll)
-        test_exe_path = build_dir / "tests" / f"{meson_test_name}.exe"
+        # 3. A profile test in tests/profile/ subdirectory
         test_cmd: list[str] = []
 
-        if test_exe_path.exists():
-            # Found copied runner .exe
-            test_cmd = [str(test_exe_path)]
-        else:
+        # Check for profile tests first (in tests/profile/ subdirectory)
+        if meson_test_name.startswith("profile_"):
+            profile_exe_path = (
+                build_dir / "tests" / "profile" / f"{meson_test_name}.exe"
+            )
+            if profile_exe_path.exists():
+                test_cmd = [str(profile_exe_path)]
+            else:
+                # Try Unix variant (no .exe extension)
+                profile_exe_unix = build_dir / "tests" / "profile" / meson_test_name
+                if profile_exe_unix.exists():
+                    test_cmd = [str(profile_exe_unix)]
+
+        # If not a profile test, check standard locations
+        if not test_cmd:
+            test_exe_path = build_dir / "tests" / f"{meson_test_name}.exe"
+            if test_exe_path.exists():
+                # Found copied runner .exe
+                test_cmd = [str(test_exe_path)]
+
+        if not test_cmd:
             # Try Unix variant (no .exe extension)
             test_exe_unix = build_dir / "tests" / meson_test_name
             if test_exe_unix.exists():
@@ -767,8 +784,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--build-mode",
-        choices=["quick", "debug", "release"],
-        help="Build mode (quick, debug, release)",
+        choices=["quick", "debug", "release", "profile"],
+        help="Build mode (quick, debug, release, profile)",
     )
     parser.add_argument(
         "--check", action="store_true", help="Enable IWYU static analysis"
