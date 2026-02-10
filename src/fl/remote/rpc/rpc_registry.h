@@ -10,7 +10,7 @@
 #include "fl/stl/function.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/unordered_map.h"
-#include "fl/detail/rpc/rpc_invokers.h"
+#include "fl/remote/rpc/rpc_invokers.h"
 
 namespace fl {
 namespace detail {

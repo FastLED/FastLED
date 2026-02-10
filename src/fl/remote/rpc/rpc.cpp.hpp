@@ -1,6 +1,4 @@
-#include "fl/rpc.h"
-
-#if FASTLED_ENABLE_JSON
+#include "fl/remote/rpc/rpc.h"
 
 namespace fl {
 
@@ -20,11 +18,11 @@ Json Rpc::handle(const Json& request) {
     }
     fl::string methodName = methodOpt.value();
 
-    // Handle built-in rpc.discover if enabled
-    if (mDiscoverEnabled && methodName == "rpc.discover") {
+    // Handle built-in rpc.discover method
+    if (methodName == "rpc.discover") {
         Json response = Json::object();
         response.set("jsonrpc", "2.0");
-        response.set("result", schema(mSchemaTitle.c_str(), mSchemaVersion.c_str()));
+        response.set("result", schema("RPC API", "1.0.0"));
         if (request.contains("id")) {
             response.set("id", request["id"]);
         }
@@ -181,5 +179,3 @@ fl::vector<fl::string> Rpc::tags() const {
 }
 
 } // namespace fl
-
-#endif // FASTLED_ENABLE_JSON

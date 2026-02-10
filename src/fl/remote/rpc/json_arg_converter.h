@@ -8,8 +8,8 @@
 #include "fl/stl/string.h"
 #include "fl/stl/tuple.h"
 #include "fl/stl/type_traits.h"
-#include "fl/detail/rpc/type_conversion_result.h"
-#include "fl/detail/rpc/json_to_type.h"
+#include "fl/remote/rpc/type_conversion_result.h"
+#include "fl/remote/rpc/json_to_type.h"
 
 namespace fl {
 

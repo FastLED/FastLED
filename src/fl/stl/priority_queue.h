@@ -109,28 +109,28 @@ class PriorityQueue {
  *
  * Template Parameters:
  * - T: Element type (must be copyable)
- * - Compare: Comparison function (default: fl::greater<T> for min-heap behavior)
+ * - Compare: Comparison function (default: fl::less<T> for max-heap behavior)
  *
- * By default, this creates a MIN-HEAP (smallest element has highest priority).
- * For custom types with special priority ordering, define operator< and use fl::less<T>:
+ * By default, this creates a MAX-HEAP (largest element has highest priority).
+ * For custom types with special priority ordering, define operator< and use fl::greater<T>:
  * @code
  * struct Task {
  *     int priority;
- *     bool operator<(const Task& o) const { return priority > o.priority; }  // Invert for min-heap
+ *     bool operator<(const Task& o) const { return priority > o.priority; }  // Invert for max-heap
  * };
- * fl::priority_queue_stable<Task, fl::less<Task>> queue;  // Use less with inverted operator<
+ * fl::priority_queue_stable<Task, fl::greater<Task>> queue;  // Use greater with inverted operator<
  * @endcode
  *
- * Example (default min-heap for integers):
+ * Example (default max-heap for integers):
  * @code
  * fl::priority_queue_stable<int> queue;
  * queue.push(3);
  * queue.push(1);
  * queue.push(3);  // Same priority as first 3
- * // Pop order: 1, 3 (first), 3 (second) - FIFO for equal priorities
+ * // Pop order: 3 (first), 3 (second), 1 - FIFO for equal priorities
  * @endcode
  */
-template<typename T, typename Compare = fl::greater<T>>
+template<typename T, typename Compare = fl::less<T>>
 class priority_queue_stable {
 private:
     struct StableElement {

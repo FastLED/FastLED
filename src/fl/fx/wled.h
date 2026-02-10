@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/remote.h"
+#include "fl/remote/remote.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/span.h"
 #include "fl/stl/memory.h"

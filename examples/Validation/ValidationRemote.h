@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "fl/remote.h"
+#include "fl/remote/remote.h"
 #include "fl/json.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/string.h"

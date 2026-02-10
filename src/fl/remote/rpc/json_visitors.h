@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/json.h"
-#include "fl/detail/rpc/type_conversion_result.h"
+#include "fl/remote/rpc/type_conversion_result.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"

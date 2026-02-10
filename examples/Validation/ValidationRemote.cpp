@@ -132,7 +132,7 @@ void ValidationRemoteControl::registerFunctions(
     mRxFactory = rx_factory;
 
     // Register "status" function - device readiness check
-    mRemote->registerFunctionWithReturn("status", [this](const fl::Json& args) -> fl::Json {
+    mRemote->bind("status", [this](const fl::Json& args) -> fl::Json {
         fl::Json status = fl::Json::object();
         status.set("ready", true);
         status.set("pinTx", static_cast<int64_t>(*mpPinTx));
@@ -141,7 +141,7 @@ void ValidationRemoteControl::registerFunctions(
     });
 
     // Register "drivers" function - list available drivers
-    mRemote->registerFunctionWithReturn("drivers", [this](const fl::Json& args) -> fl::Json {
+    mRemote->bind("drivers", [this](const fl::Json& args) -> fl::Json {
         fl::Json drivers = fl::Json::array();
         for (fl::size i = 0; i < mpDriversAvailable->size(); i++) {
             fl::Json driver = fl::Json::object();
@@ -155,7 +155,7 @@ void ValidationRemoteControl::registerFunctions(
 
     // Returns: {success, passed, totalTests, passedTests, duration_ms, driver,
     //          laneCount, laneSizes, pattern, firstFailure?}
-    mRemote->registerFunctionWithReturn("runSingleTest", [this](const fl::Json& args) -> fl::Json {
+    mRemote->bind("runSingleTest", [this](const fl::Json& args) -> fl::Json {
         fl::Json response = fl::Json::object();
 
         // Validate args is an array with single config object
@@ -419,7 +419,7 @@ void ValidationRemoteControl::registerFunctions(
     // ========================================================================
 
     // Register "ping" function - health check with timestamp
-    mRemote->registerFunctionWithReturn("ping", [this](const fl::Json& args) -> fl::Json {
+    mRemote->bind("ping", [this](const fl::Json& args) -> fl::Json {
         uint32_t now = millis();
 
         fl::Json response = fl::Json::object();
@@ -432,7 +432,7 @@ void ValidationRemoteControl::registerFunctions(
 
     // Register "testGpioConnection" function - test if TX and RX pins are electrically connected
     // This is a pre-test to diagnose hardware connection issues before running validation
-    mRemote->registerFunctionWithReturn("testGpioConnection", [](const fl::Json& args) -> fl::Json {
+    mRemote->bind("testGpioConnection", [](const fl::Json& args) -> fl::Json {
         fl::Json response = fl::Json::object();
 
         // Validate args: expects [txPin, rxPin]
@@ -504,7 +504,7 @@ void ValidationRemoteControl::registerFunctions(
     // ========================================================================
 
     // Register "getPins" function - query current and default pin configuration
-    mRemote->registerFunctionWithReturn("getPins", [this](const fl::Json& args) -> fl::Json {
+    mRemote->bind("getPins", [this](const fl::Json& args) -> fl::Json {
         fl::Json response = fl::Json::object();
         response.set("success", true);
         response.set("txPin", static_cast<int64_t>(*mpPinTx));
@@ -531,7 +531,7 @@ void ValidationRemoteControl::registerFunctions(
     });
 
     // Register "setTxPin" function - set TX pin (regenerates test cases)
-    mRemote->registerFunctionWithReturn("setTxPin", [this](const fl::Json& args) -> fl::Json {
+    mRemote->bind("setTxPin", [this](const fl::Json& args) -> fl::Json {
         fl::Json response = fl::Json::object();
 
         if (!args.is_array() || args.size() != 1 || !args[0].is_int()) {
@@ -561,7 +561,7 @@ void ValidationRemoteControl::registerFunctions(
     });
 
     // Register "setRxPin" function - set RX pin (recreates RX channel)
-    mRemote->registerFunctionWithReturn("setRxPin", [this](const fl::Json& args) -> fl::Json {
+    mRemote->bind("setRxPin", [this](const fl::Json& args) -> fl::Json {
         fl::Json response = fl::Json::object();
 
         if (!args.is_array() || args.size() != 1 || !args[0].is_int()) {
@@ -616,7 +616,7 @@ void ValidationRemoteControl::registerFunctions(
     });
 
     // Register "setPins" function - set both TX and RX pins atomically
-    mRemote->registerFunctionWithReturn("setPins", [this](const fl::Json& args) -> fl::Json {
+    mRemote->bind("setPins", [this](const fl::Json& args) -> fl::Json {
         fl::Json response = fl::Json::object();
 
         // Accept either {txPin, rxPin} object or [txPin, rxPin] array
@@ -708,7 +708,7 @@ void ValidationRemoteControl::registerFunctions(
 
     // Register "findConnectedPins" function - probe adjacent pin pairs to find a jumper wire connection
     // This allows automatic discovery of TX/RX pin pair without requiring user to specify them
-    mRemote->registerFunctionWithReturn("findConnectedPins", [this](const fl::Json& args) -> fl::Json {
+    mRemote->bind("findConnectedPins", [this](const fl::Json& args) -> fl::Json {
         fl::Json response = fl::Json::object();
 
         // Parse optional arguments: [{startPin: int, endPin: int, autoApply: bool}]
@@ -862,7 +862,7 @@ void ValidationRemoteControl::registerFunctions(
     });
 
     // Register "help" function - list all RPC functions with descriptions
-    mRemote->registerFunctionWithReturn("help", [this](const fl::Json& args) -> fl::Json {
+    mRemote->bind("help", [this](const fl::Json& args) -> fl::Json {
         fl::Json functions = fl::Json::array();
 
         // Phase 1: Basic Control
@@ -1054,7 +1054,7 @@ void ValidationRemoteControl::registerFunctions(
     });
 
     // Register "testSimd" function - test SIMD operations
-    mRemote->registerFunctionWithReturn("testSimd", [](const fl::Json& args) -> fl::Json {
+    mRemote->bind("testSimd", [](const fl::Json& args) -> fl::Json {
         fl::Json response = fl::Json::object();
 
         // Test data: 16 bytes each
@@ -1123,14 +1123,22 @@ bool ValidationRemoteControl::processSerialInput() {
 
         // JSON RPC command (starts with '{')
         if (!input.empty() && input[0] == '{') {
-            fl::Json result;
-            auto err = mRemote->processRpc(input, result);
+            // Parse JSON and create RpcRequest
+            fl::Json doc = fl::Json::parse(input);
+            auto response = mRemote->processRpc(fl::Remote::RpcRequest{
+                doc["function"] | fl::string(""),
+                doc["args"],
+                static_cast<fl::u32>(doc["timestamp"] | 0)
+            });
 
-            FL_PRINT("[RPC] processRpc() returned, error code: " << static_cast<int>(err));
-            FL_PRINT("[RPC] result.has_value(): " << result.has_value());
+            FL_PRINT("[RPC] processRpc() returned, ok: " << response.ok());
+            if (response.ok()) {
+                FL_PRINT("[RPC] result.has_value(): " << response.value().has_value());
+            }
 
-            if (err == fl::Remote::Error::None) {
+            if (response.ok()) {
                 // If function returned a value, print it
+                fl::Json result = response.value();
                 if (result.has_value()) {
                     FL_PRINT("[RPC] About to printJson...");
                     printJsonRaw(result);
@@ -1140,6 +1148,7 @@ bool ValidationRemoteControl::processSerialInput() {
                 }
             } else {
                 // Print error response
+                auto err = response.error();
                 fl::Json errorObj = fl::Json::object();
                 switch (err) {
                     case fl::Remote::Error::InvalidJson:

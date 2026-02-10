@@ -81,6 +81,9 @@ public:
     /// @brief Check if operation succeeded
     bool ok() const { return mData.template is<T>(); }
 
+    /// @brief Check if operation succeeded (alias for ok())
+    bool has_value() const { return ok(); }
+
     /// @brief Get error code (only meaningful if !ok())
     E error() const {
         auto* err = mData.template ptr<ErrorInfo<E>>();

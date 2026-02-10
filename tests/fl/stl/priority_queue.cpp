@@ -346,14 +346,14 @@ FL_TEST_CASE("priority_queue_stable: ordering") {
     queue.push(4);
     queue.push(2);
 
-    // Should pop in ascending order (min-heap)
-    FL_REQUIRE_EQ(queue.top(), 1);
-    queue.pop();
-    FL_REQUIRE_EQ(queue.top(), 2);
+    // Should pop in descending order (max-heap with fl::less default)
+    FL_REQUIRE_EQ(queue.top(), 4);
     queue.pop();
     FL_REQUIRE_EQ(queue.top(), 3);
     queue.pop();
-    FL_REQUIRE_EQ(queue.top(), 4);
+    FL_REQUIRE_EQ(queue.top(), 2);
+    queue.pop();
+    FL_REQUIRE_EQ(queue.top(), 1);
     queue.pop();
     FL_REQUIRE(queue.empty());
 }
@@ -381,21 +381,22 @@ struct ScheduledCall {
     int mId;  // Used to track FIFO order
 
     // Comparison operator for min-heap (earlier times have higher priority)
-    // priority_queue_stable uses fl::greater by default, so use natural comparison
+    // priority_queue_stable uses fl::less by default (max-heap), so invert comparison
+    // Inverted: earlier (smaller) times should be "greater" for higher priority
     bool operator<(const ScheduledCall& other) const {
-        return mExecuteAt < other.mExecuteAt;  // Natural: smaller time = higher priority
+        return mExecuteAt > other.mExecuteAt;  // Inverted: smaller time = higher priority
     }
 };
 
 FL_TEST_CASE("priority_queue_stable: scheduled calls with different times") {
-    fl::priority_queue_stable<ScheduledCall> queue;  // Uses default fl::greater for min-heap
+    fl::priority_queue_stable<ScheduledCall> queue;  // Uses default fl::less for max-heap
 
     // Schedule calls at different times
     queue.push({1000, 1});
     queue.push({3000, 2});
     queue.push({2000, 3});
 
-    // Should execute in time order
+    // Should execute in time order (earlier first)
     FL_REQUIRE_EQ(queue.top().mExecuteAt, 1000u);
     FL_REQUIRE_EQ(queue.top().mId, 1);
     queue.pop();
@@ -412,7 +413,7 @@ FL_TEST_CASE("priority_queue_stable: scheduled calls with different times") {
 }
 
 FL_TEST_CASE("priority_queue_stable: scheduled calls with same time (FIFO)") {
-    fl::priority_queue_stable<ScheduledCall> queue;  // Uses default fl::greater for min-heap
+    fl::priority_queue_stable<ScheduledCall> queue;  // Uses default fl::less for max-heap
 
     // Schedule multiple calls at the same timestamp - should execute in FIFO order
     queue.push({1000, 1});
@@ -434,7 +435,7 @@ FL_TEST_CASE("priority_queue_stable: scheduled calls with same time (FIFO)") {
 }
 
 FL_TEST_CASE("priority_queue_stable: mixed times") {
-    fl::priority_queue_stable<ScheduledCall> queue;  // Uses default fl::greater for min-heap
+    fl::priority_queue_stable<ScheduledCall> queue;  // Uses default fl::less for max-heap
 
     // Mix of same and different times
     queue.push({1000, 1});

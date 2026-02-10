@@ -8,9 +8,9 @@
 #include "fl/stl/tuple.h"
 #include "fl/stl/function.h"
 #include "fl/stl/type_traits.h"
-#include "fl/detail/rpc/type_conversion_result.h"
-#include "fl/detail/rpc/type_to_json.h"
-#include "fl/detail/rpc/json_arg_converter.h"
+#include "fl/remote/rpc/type_conversion_result.h"
+#include "fl/remote/rpc/type_to_json.h"
+#include "fl/remote/rpc/json_arg_converter.h"
 
 namespace fl {
 

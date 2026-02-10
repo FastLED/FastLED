@@ -7,7 +7,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/initializer_list.h"
-#include "fl/detail/rpc/rpc_handle.h"
+#include "fl/remote/rpc/rpc_handle.h"
 
 namespace fl {
 
@@ -52,7 +52,7 @@ public:
 
     // Finalize and register the method
     // Implementation is in rpc.h after Rpc is fully defined
-    RpcHandle<Sig> done();
+    void done();
 
     // Accessors for done() implementation
     Rpc* factory() const { return mFactory; }

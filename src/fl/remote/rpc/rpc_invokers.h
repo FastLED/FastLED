@@ -9,9 +9,9 @@
 #include "fl/stl/function.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/string.h"
-#include "fl/detail/rpc/type_conversion_result.h"
-#include "fl/detail/rpc/typed_rpc_binding.h"
-#include "fl/detail/rpc/type_schema.h"
+#include "fl/remote/rpc/type_conversion_result.h"
+#include "fl/remote/rpc/typed_rpc_binding.h"
+#include "fl/remote/rpc/type_schema.h"
 
 namespace fl {
 namespace detail {

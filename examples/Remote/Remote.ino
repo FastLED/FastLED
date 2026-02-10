@@ -1,14 +1,13 @@
 // @filter: (memory is high)
 
 /// @file Remote.ino
-/// @brief Example demonstrating fl::Remote RPC system for JSON-based remote function calls
+/// @brief Example demonstrating fl::Remote RPC system with callback-based I/O
 ///
 /// This example shows how to:
 /// - Register functions that can be called remotely via JSON
+/// - Use callback-based I/O with RequestSource/ResponseSink
 /// - Execute functions immediately or schedule them for later
 /// - Query system state and return JSON values
-/// - Track execution timing with metadata
-/// - Use FASTLED_REMOTE_PREFIX for host-side output filtering
 ///
 /// Send JSON commands via serial, for example:
 ///   Commands (no return):
@@ -20,17 +19,7 @@
 ///     {"function":"getStatus","args":[]} -> returns system status
 ///     {"function":"getLed","args":[0]} -> returns LED color
 ///
-/// Host-side filtering:
-///   All structured JSON output is prefixed with "REMOTE: " (configurable via FASTLED_REMOTE_PREFIX).
-///   This allows easy filtering on the host side to separate structured data from debug output:
-///
-///   # Read only structured JSON responses (filter out debug noise):
-///   grep "^REMOTE: " /dev/ttyUSB0 | sed 's/^REMOTE: //' | jq .
-///
-///   # Disable prefix (define empty string):
-///   build_flags = -DFASTLED_REMOTE_PREFIX=\"\"
-///
-/// @see fl/remote.h for full API documentation
+/// @see fl/remote/remote.h for full API documentation
 
 #include <FastLED.h>
 
@@ -38,7 +27,27 @@
 #define DATA_PIN 3
 
 CRGB leds[NUM_LEDS];
-fl::Remote remote;
+
+// Request/Response queues for callback-based I/O
+fl::vector<fl::Remote::RpcRequest> requestQueue;
+fl::vector<fl::Remote::Response> responseQueue;
+
+// Remote with callback-based I/O
+fl::Remote remote(
+    // RequestSource: pull from queue
+    []() -> fl::optional<fl::Remote::RpcRequest> {
+        if (requestQueue.empty()) {
+            return fl::nullopt;
+        }
+        auto req = fl::move(requestQueue[0]);
+        requestQueue.erase(requestQueue.begin());
+        return req;
+    },
+    // ResponseSink: push to queue
+    [](const fl::Remote::Response& response) {
+        responseQueue.push_back(response);
+    }
+);
 
 // Forward declaration
 fl::string readSerialJson();
@@ -52,42 +61,34 @@ void setup() {
     FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
 
     // Register RPC functions (commands - no return value)
-    remote.registerFunction("setLed", [](const fl::Json& args) {
-        int index = args[0] | 0;
-        int r = args[1] | 0;
-        int g = args[2] | 0;
-        int b = args[3] | 0;
+    remote.bind("setLed", [](int index, int r, int g, int b) {
         if (index >= 0 && index < NUM_LEDS) {
             leds[index] = CRGB(r, g, b);
             FL_DBG("Set LED " << index << " to RGB(" << r << ", " << g << ", " << b << ")");
         }
     });
 
-    remote.registerFunction("fill", [](const fl::Json& args) {
-        int r = args[0] | 0;
-        int g = args[1] | 0;
-        int b = args[2] | 0;
+    remote.bind("fill", [](int r, int g, int b) {
         fill_solid(leds, NUM_LEDS, CRGB(r, g, b));
         FL_DBG("Filled all LEDs with RGB(" << r << ", " << g << ", " << b << ")");
     });
 
-    remote.registerFunction("setBrightness", [](const fl::Json& args) {
-        int brightness = args[0] | 128;
+    remote.bind("setBrightness", [](int brightness) {
         FastLED.setBrightness(brightness);
         FL_DBG("Set brightness to " << brightness);
     });
 
     // Register RPC query functions (with return values)
     // Match Arduino function names for consistency
-    remote.registerFunctionWithReturn("millis", [](const fl::Json& args) -> fl::Json {
-        return fl::Json(static_cast<int64_t>(millis()));
+    remote.bind("millis", []() -> int64_t {
+        return static_cast<int64_t>(millis());
     });
 
-    remote.registerFunctionWithReturn("micros", [](const fl::Json& args) -> fl::Json {
-        return fl::Json(static_cast<int64_t>(micros()));
+    remote.bind("micros", []() -> int64_t {
+        return static_cast<int64_t>(micros());
     });
 
-    remote.registerFunctionWithReturn("getStatus", [](const fl::Json& args) -> fl::Json {
+    remote.bind("getStatus", []() -> fl::Json {
         fl::Json result = fl::Json::object();
         result.set("numLeds", NUM_LEDS);
         result.set("brightness", FastLED.getBrightness());
@@ -95,8 +96,7 @@ void setup() {
         return result;
     });
 
-    remote.registerFunctionWithReturn("getLed", [](const fl::Json& args) -> fl::Json {
-        int index = args[0] | 0;
+    remote.bind("getLed", [](int index) -> fl::Json {
         fl::Json result = fl::Json::object();
         if (index >= 0 && index < NUM_LEDS) {
             result.set("r", leds[index].r);
@@ -120,61 +120,28 @@ void setup() {
 }
 
 void loop() {
-    // Process scheduled RPC calls
-    remote.tick(millis());
-
-    // Check for executed function results (includes timing metadata)
-    // Output as prefixed single-line JSON for easy host-side filtering
-    auto results = remote.getResults();
-    for (const auto& r : results) {
-        // Serialize result to JSON with all metadata (timing, return value, etc.)
-        fl::Remote::printJson(r.to_json());
-    }
-
-    // Check for incoming JSON RPC via serial
+    // Check for incoming JSON RPC via serial and queue it
     if (Serial.available()) {
         fl::string jsonRpc = readSerialJson();
 
-        fl::Json result;
-        auto err = remote.processRpc(jsonRpc, result);
+        // Parse JSON and create RpcRequest
+        fl::Json doc = fl::Json::parse(jsonRpc);
+        requestQueue.push_back(fl::Remote::RpcRequest{
+            doc["function"] | fl::string(""),
+            doc["args"],
+            static_cast<fl::u32>(doc["timestamp"] | 0)
+        });
+    }
 
-        // Build structured JSON response for all cases
-        fl::Json response = fl::Json::object();
+    // Process all queued requests: pull + tick + push
+    remote.update(millis());
 
-        switch (err) {
-            case fl::Remote::Error::None:
-                response.set("status", "ok");
-                if (result.has_value()) {
-                    response.set("result", result);
-                }
-                break;
-            case fl::Remote::Error::InvalidJson:
-                response.set("status", "error");
-                response.set("error", "Invalid JSON");
-                break;
-            case fl::Remote::Error::MissingFunction:
-                response.set("status", "error");
-                response.set("error", "Missing function field");
-                break;
-            case fl::Remote::Error::UnknownFunction:
-                response.set("status", "error");
-                response.set("error", "Unknown function");
-                break;
-            case fl::Remote::Error::InvalidTimestamp:
-                response.set("status", "warning");
-                response.set("warning", "Invalid timestamp, executed immediately");
-                if (result.has_value()) {
-                    response.set("result", result);
-                }
-                break;
-            case fl::Remote::Error::InvalidParams:
-                response.set("status", "error");
-                response.set("error", "Invalid parameters for typed RPC method");
-                break;
-        }
-
-        // Output prefixed single-line JSON response
-        fl::Remote::printJson(response);
+    // Drain response queue and output to serial
+    while (!responseQueue.empty()) {
+        const auto& response = responseQueue[0];
+        fl::Json json = response.to_json();
+        Serial.println(json.to_string().c_str());
+        responseQueue.erase(responseQueue.begin());
     }
 
     FastLED.show();
