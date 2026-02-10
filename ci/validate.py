@@ -98,13 +98,10 @@ init(autoreset=True)
 # Validation-Specific Configuration
 # ============================================================
 
-# Default expect patterns - simplified to essential checks only
-# Note: PARLIO is NOT available on ESP32-S3 (it has I2S LCD_CAM instead)
-# JSON-RPC orchestration: Text patterns only used for debugging/diagnostics
-DEFAULT_EXPECT_PATTERNS = [
-    "TX Pin: 1",  # Hardware setup verification (PIN_TX = 1 in firmware)
-    "RX Pin: 2",  # Hardware setup verification (PIN_RX = 2 in firmware)
-]
+# No legacy expect patterns - JSON-RPC test_complete is the authoritative
+# completion signal. Text pattern matching is obsolete now that we have
+# full JSON-RPC orchestration.
+DEFAULT_EXPECT_PATTERNS: list[str] = []
 
 # Stop pattern - early exit when test suite completes successfully
 # Firmware emits: RESULT: {"type":"test_complete",...} after runTest() RPC completes
