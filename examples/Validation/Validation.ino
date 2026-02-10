@@ -130,10 +130,6 @@
 // (Serial printing inside ISR exceeds watchdog threshold - must disable at translation unit level)
 // #undef FASTLED_LOG_PARLIO_ENABLED  // COMMENTED OUT: Agent loop instructions require FL_LOG_PARLIO_ENABLED to be kept enabled
 
-// ⚠️ IMPORTANT: Test matrix configuration moved to ValidationConfig.h
-// This ensures consistent configuration across all compilation units (.ino and .cpp files)
-#include "ValidationConfig.h"
-
 // ============================================================================
 // Test Matrix Configuration - Multi-Driver, Multi-Lane, Variable Strip Size
 // ============================================================================
@@ -180,8 +176,6 @@
 //
 // ============================================================================
 
-// Configuration is now in ValidationConfig.h (included above)
-// Includes:
 #include <Arduino.h>
 #include <FastLED.h>
 #include "fl/stl/sstream.h"

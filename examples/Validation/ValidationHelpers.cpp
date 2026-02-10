@@ -1,6 +1,5 @@
 // ValidationHelpers.cpp - Helper function implementations
 
-#include "ValidationConfig.h"  // Must be included BEFORE ValidationHelpers.h to set config macros
 #include "ValidationHelpers.h"
 #include "fl/stl/sstream.h"
 #include "fl/pin.h"  // Platform-independent pin API
