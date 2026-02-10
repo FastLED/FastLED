@@ -104,8 +104,8 @@ class ProfileGenerator:
 
 #include "FastLED.h"
 {header_include}
-#include <chrono>
-#include <cstdio>
+#include "fl/stl/cstring.h"
+#include "fl/stl/stdio.h"
 
 using namespace fl;
 
@@ -135,11 +135,11 @@ int main(int argc, char *argv[]) {{
     bool do_baseline = true;
 
     if (argc > 1) {{
-        if (::strcmp(argv[1], "baseline") == 0) {{
+        if (fl::strcmp(argv[1], "baseline") == 0) {{
             do_baseline = true;
-        }} else if (::strcmp(argv[1], "optimized") == 0) {{
+        }} else if (fl::strcmp(argv[1], "optimized") == 0) {{
             do_baseline = false;
-            printf("Error: Optimized variant not implemented yet\\n");
+            fl::printf("Error: Optimized variant not implemented yet\\n");
             return 1;
         }}
     }}
@@ -151,21 +151,22 @@ int main(int argc, char *argv[]) {{
 
     // Benchmark baseline
     if (do_baseline) {{
-        auto t0 = std::chrono::high_resolution_clock::now();
+        fl::u32 t0 = ::micros();
         benchmarkBaseline();
-        auto t1 = std::chrono::high_resolution_clock::now();
-        auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
-        double ns_per_call = (double)elapsed_ns / PROFILE_ITERATIONS;
+        fl::u32 t1 = ::micros();
+        fl::u32 elapsed_us = t1 - t0;
+        fl::i64 elapsed_ns = static_cast<fl::i64>(elapsed_us) * 1000LL;
+        double ns_per_call = static_cast<double>(elapsed_ns) / PROFILE_ITERATIONS;
 
         // Structured output for AI parsing
-        printf("PROFILE_RESULT:{{\\n");
-        printf("  \\"variant\\": \\"baseline\\",\\n");
-        printf("  \\"target\\": \\"{self.target}\\",\\n");
-        printf("  \\"total_calls\\": %d,\\n", PROFILE_ITERATIONS);
-        printf("  \\"total_time_ns\\": %lld,\\n", (long long)elapsed_ns);
-        printf("  \\"ns_per_call\\": %.2f,\\n", ns_per_call);
-        printf("  \\"calls_per_sec\\": %.0f\\n", 1e9 / ns_per_call);
-        printf("}}\\n");
+        fl::printf("PROFILE_RESULT:{{\\n");
+        fl::printf("  \\"variant\\": \\"baseline\\",\\n");
+        fl::printf("  \\"target\\": \\"{self.target}\\",\\n");
+        fl::printf("  \\"total_calls\\": %d,\\n", PROFILE_ITERATIONS);
+        fl::printf("  \\"total_time_ns\\": %lld,\\n", static_cast<long long>(elapsed_ns));
+        fl::printf("  \\"ns_per_call\\": %.2f,\\n", ns_per_call);
+        fl::printf("  \\"calls_per_sec\\": %.0f\\n", 1e9 / ns_per_call);
+        fl::printf("}}\\n");
     }}
 
     return 0;

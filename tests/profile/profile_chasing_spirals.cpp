@@ -17,14 +17,8 @@
 #include "fl/fx/2d/animartrix2.hpp"
 #include "fl/fx/2d/animartrix2_detail/chasing_spirals.hpp"
 #include "fl/json.h"
-
-#include <chrono> // ok include - for timing benchmarks
-#include <cinttypes> // ok include - for PRId64 format macro
-#include <cstdio> // ok include - for printf
-#include <cstring> // ok include - for strcmp
-
-// No callgrind toggle macros - we profile the entire execution.
-// The warmup frames add negligible noise since they're only 10% of total.
+#include "fl/stl/cstring.h"
+#include "fl/stl/stdio.h"
 
 using namespace fl;
 
@@ -79,7 +73,7 @@ int main(int argc, char *argv[]) {
 
     if (argc > 1) {
         // Check for "baseline" argument (profile framework mode)
-        if (::strcmp(argv[1], "baseline") == 0) {
+        if (fl::strcmp(argv[1], "baseline") == 0) {
             json_output = true;
             // Run best performing variant (Q31 Batch8) for baseline measurements
             do_float = false;
@@ -99,19 +93,19 @@ int main(int argc, char *argv[]) {
             do_q16 = false;
             do_i16 = false;
 
-            if (::strcmp(argv[1], "float") == 0) {
+            if (fl::strcmp(argv[1], "float") == 0) {
                 do_float = true;
-            } else if (::strcmp(argv[1], "q31") == 0) {
+            } else if (fl::strcmp(argv[1], "q31") == 0) {
                 do_q31 = true;
-            } else if (::strcmp(argv[1], "batch4") == 0) {
+            } else if (fl::strcmp(argv[1], "batch4") == 0) {
                 do_batch4 = true;
-            } else if (::strcmp(argv[1], "batch4_color") == 0) {
+            } else if (fl::strcmp(argv[1], "batch4_color") == 0) {
                 do_batch4_color = true;
-            } else if (::strcmp(argv[1], "batch8") == 0) {
+            } else if (fl::strcmp(argv[1], "batch8") == 0) {
                 do_batch8 = true;
-            } else if (::strcmp(argv[1], "q16") == 0) {
+            } else if (fl::strcmp(argv[1], "q16") == 0) {
                 do_q16 = true;
-            } else if (::strcmp(argv[1], "i16") == 0) {
+            } else if (fl::strcmp(argv[1], "i16") == 0) {
                 do_i16 = true;
             } else {
                 // Unknown argument - enable all
@@ -139,13 +133,13 @@ int main(int argc, char *argv[]) {
         renderFloat(fx, leds, WARMUP_FRAMES, 0);
 
         // Profile
-        auto t0 = std::chrono::high_resolution_clock::now(); // okay std namespace
+        u32 t0 = ::micros();
         renderFloat(fx, leds, PROFILE_FRAMES, WARMUP_FRAMES);
-        auto t1 = std::chrono::high_resolution_clock::now(); // okay std namespace
+        u32 t1 = ::micros();
 
-        auto elapsed_us = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count(); // okay std namespace
-        printf("Float:              %d frames in %.0f us (%.1f us/frame)\n",
-               PROFILE_FRAMES, static_cast<double>(elapsed_us),
+        u32 elapsed_us = t1 - t0;
+        printf("Float:              %d frames in %lu us (%.1f us/frame)\n",
+               PROFILE_FRAMES, static_cast<unsigned long>(elapsed_us),
                static_cast<double>(elapsed_us) / PROFILE_FRAMES);
     }
 
@@ -170,13 +164,13 @@ int main(int argc, char *argv[]) {
         renderQ31_Direct(&animartrix2_detail::q31::Chasing_Spirals_Q31, ctx, WARMUP_FRAMES, 0);
 
         // Profile
-        auto t0 = std::chrono::high_resolution_clock::now(); // okay std namespace
+        u32 t0 = ::micros();
         renderQ31_Direct(&animartrix2_detail::q31::Chasing_Spirals_Q31, ctx, PROFILE_FRAMES, WARMUP_FRAMES);
-        auto t1 = std::chrono::high_resolution_clock::now(); // okay std namespace
+        u32 t1 = ::micros();
 
-        auto elapsed_us = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count(); // okay std namespace
-        printf("Q31 (original):     %d frames in %.0f us (%.1f us/frame)\n",
-               PROFILE_FRAMES, static_cast<double>(elapsed_us),
+        u32 elapsed_us = t1 - t0;
+        printf("Q31 (original):     %d frames in %lu us (%.1f us/frame)\n",
+               PROFILE_FRAMES, static_cast<unsigned long>(elapsed_us),
                static_cast<double>(elapsed_us) / PROFILE_FRAMES);
     }
 
@@ -201,13 +195,13 @@ int main(int argc, char *argv[]) {
         renderQ31_Direct(&animartrix2_detail::q31::Chasing_Spirals_Q31_Batch4, ctx, WARMUP_FRAMES, 0);
 
         // Profile
-        auto t0 = std::chrono::high_resolution_clock::now(); // okay std namespace
+        u32 t0 = ::micros();
         renderQ31_Direct(&animartrix2_detail::q31::Chasing_Spirals_Q31_Batch4, ctx, PROFILE_FRAMES, WARMUP_FRAMES);
-        auto t1 = std::chrono::high_resolution_clock::now(); // okay std namespace
+        u32 t1 = ::micros();
 
-        auto elapsed_us = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count(); // okay std namespace
-        printf("Q31 Batch4:         %d frames in %.0f us (%.1f us/frame)\n",
-               PROFILE_FRAMES, static_cast<double>(elapsed_us),
+        u32 elapsed_us = t1 - t0;
+        printf("Q31 Batch4:         %d frames in %lu us (%.1f us/frame)\n",
+               PROFILE_FRAMES, static_cast<unsigned long>(elapsed_us),
                static_cast<double>(elapsed_us) / PROFILE_FRAMES);
     }
 
@@ -232,13 +226,13 @@ int main(int argc, char *argv[]) {
         renderQ31_Direct(&animartrix2_detail::q31::Chasing_Spirals_Q31_Batch4_ColorGrouped, ctx, WARMUP_FRAMES, 0);
 
         // Profile
-        auto t0 = std::chrono::high_resolution_clock::now(); // okay std namespace
+        u32 t0 = ::micros();
         renderQ31_Direct(&animartrix2_detail::q31::Chasing_Spirals_Q31_Batch4_ColorGrouped, ctx, PROFILE_FRAMES, WARMUP_FRAMES);
-        auto t1 = std::chrono::high_resolution_clock::now(); // okay std namespace
+        u32 t1 = ::micros();
 
-        auto elapsed_us = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count(); // okay std namespace
-        printf("Q31 Batch4 Color:   %d frames in %.0f us (%.1f us/frame)\n",
-               PROFILE_FRAMES, static_cast<double>(elapsed_us),
+        u32 elapsed_us = t1 - t0;
+        printf("Q31 Batch4 Color:   %d frames in %lu us (%.1f us/frame)\n",
+               PROFILE_FRAMES, static_cast<unsigned long>(elapsed_us),
                static_cast<double>(elapsed_us) / PROFILE_FRAMES);
     }
 
@@ -263,23 +257,23 @@ int main(int argc, char *argv[]) {
         renderQ31_Direct(&animartrix2_detail::q31::Chasing_Spirals_Q31_Batch8, ctx, WARMUP_FRAMES, 0);
 
         // Profile
-        auto t0 = std::chrono::high_resolution_clock::now(); // okay std namespace
+        u32 t0 = ::micros();
         renderQ31_Direct(&animartrix2_detail::q31::Chasing_Spirals_Q31_Batch8, ctx, PROFILE_FRAMES, WARMUP_FRAMES);
-        auto t1 = std::chrono::high_resolution_clock::now(); // okay std namespace
+        u32 t1 = ::micros();
 
-        auto elapsed_us = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count(); // okay std namespace
+        u32 elapsed_us = t1 - t0;
 
         if (json_output) {
-            // Profile framework JSON output using fl::Json
-            int64_t elapsed_ns = static_cast<int64_t>(elapsed_us) * 1000LL;
+            // Profile framework JSON output using Json
+            i64 elapsed_ns = static_cast<i64>(elapsed_us) * 1000LL;
             double ns_per_frame = static_cast<double>(elapsed_ns) / PROFILE_FRAMES;
             double frames_per_sec = 1e9 / ns_per_frame;
 
-            fl::Json result = fl::Json::object();
+            Json result = Json::object();
             result.set("variant", "q31_batch8");
             result.set("target", "chasing_spirals");
             result.set("total_calls", PROFILE_FRAMES);
-            result.set("total_time_ns", elapsed_ns);  // Use int64_t directly
+            result.set("total_time_ns", elapsed_ns);  // Use i64 directly
             result.set("ns_per_call", ns_per_frame);
             result.set("calls_per_sec", frames_per_sec);
 
@@ -287,8 +281,8 @@ int main(int argc, char *argv[]) {
             printf("PROFILE_RESULT:%s\n", result.to_string().c_str());
         } else {
             // Human-readable output
-            printf("Q31 Batch8:         %d frames in %.0f us (%.1f us/frame)\n",
-                   PROFILE_FRAMES, static_cast<double>(elapsed_us),
+            printf("Q31 Batch8:         %d frames in %lu us (%.1f us/frame)\n",
+                   PROFILE_FRAMES, static_cast<unsigned long>(elapsed_us),
                    static_cast<double>(elapsed_us) / PROFILE_FRAMES);
         }
     }
@@ -314,13 +308,13 @@ int main(int argc, char *argv[]) {
         renderQ31_Direct(&animartrix2_detail::q16::Chasing_Spirals_Q16_Batch4_ColorGrouped, ctx, WARMUP_FRAMES, 0);
 
         // Profile
-        auto t0 = std::chrono::high_resolution_clock::now(); // okay std namespace
+        u32 t0 = ::micros();
         renderQ31_Direct(&animartrix2_detail::q16::Chasing_Spirals_Q16_Batch4_ColorGrouped, ctx, PROFILE_FRAMES, WARMUP_FRAMES);
-        auto t1 = std::chrono::high_resolution_clock::now(); // okay std namespace
+        u32 t1 = ::micros();
 
-        auto elapsed_us = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count(); // okay std namespace
-        printf("Q16 Batch4 Color:   %d frames in %.0f us (%.1f us/frame)\n",
-               PROFILE_FRAMES, static_cast<double>(elapsed_us),
+        u32 elapsed_us = t1 - t0;
+        printf("Q16 Batch4 Color:   %d frames in %lu us (%.1f us/frame)\n",
+               PROFILE_FRAMES, static_cast<unsigned long>(elapsed_us),
                static_cast<double>(elapsed_us) / PROFILE_FRAMES);
     }
 
@@ -345,13 +339,13 @@ int main(int argc, char *argv[]) {
         renderQ31_Direct(&animartrix2_detail::i16_opt::Chasing_Spirals_i16_Batch4_ColorGrouped, ctx, WARMUP_FRAMES, 0);
 
         // Profile
-        auto t0 = std::chrono::high_resolution_clock::now(); // okay std namespace
+        u32 t0 = ::micros();
         renderQ31_Direct(&animartrix2_detail::i16_opt::Chasing_Spirals_i16_Batch4_ColorGrouped, ctx, PROFILE_FRAMES, WARMUP_FRAMES);
-        auto t1 = std::chrono::high_resolution_clock::now(); // okay std namespace
+        u32 t1 = ::micros();
 
-        auto elapsed_us = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count(); // okay std namespace
-        printf("i16 Batch4 Color:   %d frames in %.0f us (%.1f us/frame)\n",
-               PROFILE_FRAMES, static_cast<double>(elapsed_us),
+        u32 elapsed_us = t1 - t0;
+        printf("i16 Batch4 Color:   %d frames in %lu us (%.1f us/frame)\n",
+               PROFILE_FRAMES, static_cast<unsigned long>(elapsed_us),
                static_cast<double>(elapsed_us) / PROFILE_FRAMES);
     }
 
