@@ -86,7 +86,7 @@ public:
     u8* allocateDma(size_t size) override = 0;
     void freeDma(u8* buffer) override = 0;
     void delay(u32 ms) override = 0;
-    uint64_t getMicroseconds() override = 0;
+    u64 getMicroseconds() override = 0;
 
 protected:
     /// @brief Protected constructor for singleton

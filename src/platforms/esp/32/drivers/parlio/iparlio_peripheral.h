@@ -388,7 +388,7 @@ public:
     ///
     /// Used for debug timestamps and performance measurement. Monotonic clock
     /// (does not jump backwards). Precision varies by platform (ESP32: ~1µs).
-    virtual uint64_t getMicroseconds() = 0;
+    virtual u64 getMicroseconds() = 0;
 
     //=========================================================================
     // Memory Management

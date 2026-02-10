@@ -26,7 +26,7 @@ void WLED::setState(const fl::Json& wledState) {
     // Extract "bri" field (0-255) - optional, keep existing if missing
     if (wledState.contains("bri")) {
         if (wledState["bri"].is_int()) {
-            int64_t briInt = wledState["bri"] | static_cast<int64_t>(mWledBri);
+            i64 briInt = wledState["bri"] | static_cast<i64>(mWledBri);
             // Clamp to valid range 0-255
             if (briInt < 0) {
                 FL_WARN("WLED: brightness " << briInt << " out of range, clamping to 0");
@@ -48,7 +48,7 @@ void WLED::setState(const fl::Json& wledState) {
     // Extract "transition" field (0-65535) - optional, keep existing if missing
     if (wledState.contains("transition")) {
         if (wledState["transition"].is_int()) {
-            int64_t transInt = wledState["transition"] | static_cast<int64_t>(mTransition);
+            i64 transInt = wledState["transition"] | static_cast<i64>(mTransition);
             // Clamp to valid range 0-65535
             if (transInt < 0) {
                 FL_WARN("WLED: transition " << transInt << " out of range, clamping to 0");
@@ -70,7 +70,7 @@ void WLED::setState(const fl::Json& wledState) {
     // Extract "ps" field (preset ID: -1 to 250) - optional, keep existing if missing
     if (wledState.contains("ps")) {
         if (wledState["ps"].is_int()) {
-            int64_t psInt = wledState["ps"] | static_cast<int64_t>(mPreset);
+            i64 psInt = wledState["ps"] | static_cast<i64>(mPreset);
             // Clamp to valid range -1 to 250
             if (psInt < -1) {
                 FL_WARN("WLED: preset " << psInt << " out of range, clamping to -1");
@@ -92,7 +92,7 @@ void WLED::setState(const fl::Json& wledState) {
     // Extract "pl" field (playlist ID: -1 to 250) - optional, keep existing if missing
     if (wledState.contains("pl")) {
         if (wledState["pl"].is_int()) {
-            int64_t plInt = wledState["pl"] | static_cast<int64_t>(mPlaylist);
+            i64 plInt = wledState["pl"] | static_cast<i64>(mPlaylist);
             // Clamp to valid range -1 to 250
             if (plInt < -1) {
                 FL_WARN("WLED: playlist " << plInt << " out of range, clamping to -1");
@@ -114,7 +114,7 @@ void WLED::setState(const fl::Json& wledState) {
     // Extract "lor" field (live override: 0-2) - optional, keep existing if missing
     if (wledState.contains("lor")) {
         if (wledState["lor"].is_int()) {
-            int64_t lorInt = wledState["lor"] | static_cast<int64_t>(mLiveOverride);
+            i64 lorInt = wledState["lor"] | static_cast<i64>(mLiveOverride);
             // Clamp to valid range 0-2
             if (lorInt < 0) {
                 FL_WARN("WLED: live override " << lorInt << " out of range, clamping to 0");
@@ -136,7 +136,7 @@ void WLED::setState(const fl::Json& wledState) {
     // Extract "mainseg" field (main segment: 0-255) - optional, keep existing if missing
     if (wledState.contains("mainseg")) {
         if (wledState["mainseg"].is_int()) {
-            int64_t mainsegInt = wledState["mainseg"] | static_cast<int64_t>(mMainSegment);
+            i64 mainsegInt = wledState["mainseg"] | static_cast<i64>(mMainSegment);
             // Clamp to valid range 0-255
             if (mainsegInt < 0) {
                 FL_WARN("WLED: main segment " << mainsegInt << " out of range, clamping to 0");
@@ -172,7 +172,7 @@ void WLED::setState(const fl::Json& wledState) {
             // Extract "dur" field (1-255 minutes)
             if (nl.contains("dur")) {
                 if (nl["dur"].is_int()) {
-                    int64_t durInt = nl["dur"] | static_cast<int64_t>(mNightlightDuration);
+                    i64 durInt = nl["dur"] | static_cast<i64>(mNightlightDuration);
                     // Clamp to valid range 1-255
                     if (durInt < 1) {
                         FL_WARN("WLED: nl.dur " << durInt << " out of range, clamping to 1");
@@ -194,7 +194,7 @@ void WLED::setState(const fl::Json& wledState) {
             // Extract "mode" field (0-3)
             if (nl.contains("mode")) {
                 if (nl["mode"].is_int()) {
-                    int64_t modeInt = nl["mode"] | static_cast<int64_t>(mNightlightMode);
+                    i64 modeInt = nl["mode"] | static_cast<i64>(mNightlightMode);
                     // Clamp to valid range 0-3
                     if (modeInt < 0) {
                         FL_WARN("WLED: nl.mode " << modeInt << " out of range, clamping to 0");
@@ -216,7 +216,7 @@ void WLED::setState(const fl::Json& wledState) {
             // Extract "tbri" field (0-255 target brightness)
             if (nl.contains("tbri")) {
                 if (nl["tbri"].is_int()) {
-                    int64_t tbriInt = nl["tbri"] | static_cast<int64_t>(mNightlightTargetBrightness);
+                    i64 tbriInt = nl["tbri"] | static_cast<i64>(mNightlightTargetBrightness);
                     // Clamp to valid range 0-255
                     if (tbriInt < 0) {
                         FL_WARN("WLED: nl.tbri " << tbriInt << " out of range, clamping to 0");
@@ -276,7 +276,7 @@ void WLED::setState(const fl::Json& wledState) {
                 mPlaylistPresets.clear();
                 for (size_t i = 0; i < pl["ps"].size(); i++) {
                     if (pl["ps"][i].is_int()) {
-                        int64_t psInt = pl["ps"][i] | -1;
+                        i64 psInt = pl["ps"][i] | -1;
                         // Clamp to valid range -1 to 250
                         if (psInt < -1) psInt = -1;
                         if (psInt > 250) psInt = 250;
@@ -291,7 +291,7 @@ void WLED::setState(const fl::Json& wledState) {
                 mPlaylistDurations.clear();
                 for (size_t i = 0; i < pl["dur"].size(); i++) {
                     if (pl["dur"][i].is_int()) {
-                        int64_t durInt = pl["dur"][i] | 0;
+                        i64 durInt = pl["dur"][i] | 0;
                         if (durInt < 0) durInt = 0;
                         if (durInt > 65535) durInt = 65535;
                         mPlaylistDurations.push_back(static_cast<u16>(durInt));
@@ -304,7 +304,7 @@ void WLED::setState(const fl::Json& wledState) {
                 mPlaylistTransitions.clear();
                 for (size_t i = 0; i < pl["transition"].size(); i++) {
                     if (pl["transition"][i].is_int()) {
-                        int64_t transInt = pl["transition"][i] | 0;
+                        i64 transInt = pl["transition"][i] | 0;
                         if (transInt < 0) transInt = 0;
                         if (transInt > 65535) transInt = 65535;
                         mPlaylistTransitions.push_back(static_cast<u16>(transInt));
@@ -314,7 +314,7 @@ void WLED::setState(const fl::Json& wledState) {
 
             // Extract "repeat" field
             if (pl.contains("repeat") && pl["repeat"].is_int()) {
-                int64_t repeatInt = pl["repeat"] | 0;
+                i64 repeatInt = pl["repeat"] | 0;
                 if (repeatInt < 0) repeatInt = 0;
                 if (repeatInt > 65535) repeatInt = 65535;
                 mPlaylistRepeat = static_cast<u16>(repeatInt);
@@ -323,7 +323,7 @@ void WLED::setState(const fl::Json& wledState) {
 
             // Extract "end" field
             if (pl.contains("end") && pl["end"].is_int()) {
-                int64_t endInt = pl["end"] | -1;
+                i64 endInt = pl["end"] | -1;
                 if (endInt < -1) endInt = -1;
                 if (endInt > 250) endInt = 250;
                 mPlaylistEnd = static_cast<i16>(endInt);
@@ -353,7 +353,7 @@ void WLED::setState(const fl::Json& wledState) {
                 // Extract segment ID (required for updates)
                 u8 segId = 0;
                 if (segJson.contains("id") && segJson["id"].is_int()) {
-                    int64_t idInt = segJson["id"] | 0;
+                    i64 idInt = segJson["id"] | 0;
                     if (idInt < 0) idInt = 0;
                     if (idInt > 255) idInt = 255;
                     segId = static_cast<u8>(idInt);
@@ -390,19 +390,19 @@ void WLED::setState(const fl::Json& wledState) {
 fl::Json WLED::getState() const {
     fl::Json state = fl::Json::object();
     state.set("on", mWledOn);
-    state.set("bri", static_cast<int64_t>(mWledBri));
-    state.set("transition", static_cast<int64_t>(mTransition));
-    state.set("ps", static_cast<int64_t>(mPreset));
-    state.set("pl", static_cast<int64_t>(mPlaylist));
-    state.set("lor", static_cast<int64_t>(mLiveOverride));
-    state.set("mainseg", static_cast<int64_t>(mMainSegment));
+    state.set("bri", static_cast<i64>(mWledBri));
+    state.set("transition", static_cast<i64>(mTransition));
+    state.set("ps", static_cast<i64>(mPreset));
+    state.set("pl", static_cast<i64>(mPlaylist));
+    state.set("lor", static_cast<i64>(mLiveOverride));
+    state.set("mainseg", static_cast<i64>(mMainSegment));
 
     // Nightlight object
     fl::Json nl = fl::Json::object();
     nl.set("on", mNightlightOn);
-    nl.set("dur", static_cast<int64_t>(mNightlightDuration));
-    nl.set("mode", static_cast<int64_t>(mNightlightMode));
-    nl.set("tbri", static_cast<int64_t>(mNightlightTargetBrightness));
+    nl.set("dur", static_cast<i64>(mNightlightDuration));
+    nl.set("mode", static_cast<i64>(mNightlightMode));
+    nl.set("tbri", static_cast<i64>(mNightlightTargetBrightness));
     state.set("nl", nl);
 
     // UDP sync settings
@@ -422,25 +422,25 @@ fl::Json WLED::getState() const {
         for (const auto& seg : mSegments) {
             fl::Json segJson = fl::Json::object();
 
-            segJson.set("id", static_cast<int64_t>(seg.mId));
-            segJson.set("start", static_cast<int64_t>(seg.mStart));
-            segJson.set("stop", static_cast<int64_t>(seg.mStop));
-            segJson.set("len", static_cast<int64_t>(seg.mLen));
-            segJson.set("grp", static_cast<int64_t>(seg.mGrp));
-            segJson.set("spc", static_cast<int64_t>(seg.mSpc));
-            segJson.set("of", static_cast<int64_t>(seg.mOf));
+            segJson.set("id", static_cast<i64>(seg.mId));
+            segJson.set("start", static_cast<i64>(seg.mStart));
+            segJson.set("stop", static_cast<i64>(seg.mStop));
+            segJson.set("len", static_cast<i64>(seg.mLen));
+            segJson.set("grp", static_cast<i64>(seg.mGrp));
+            segJson.set("spc", static_cast<i64>(seg.mSpc));
+            segJson.set("of", static_cast<i64>(seg.mOf));
             segJson.set("on", seg.mOn);
-            segJson.set("bri", static_cast<int64_t>(seg.mBri));
-            segJson.set("cct", static_cast<int64_t>(seg.mCct));
+            segJson.set("bri", static_cast<i64>(seg.mBri));
+            segJson.set("cct", static_cast<i64>(seg.mCct));
 
             // Effect properties
-            segJson.set("fx", static_cast<int64_t>(seg.mFx));
-            segJson.set("sx", static_cast<int64_t>(seg.mSx));
-            segJson.set("ix", static_cast<int64_t>(seg.mIx));
-            segJson.set("pal", static_cast<int64_t>(seg.mPal));
-            segJson.set("c1", static_cast<int64_t>(seg.mC1));
-            segJson.set("c2", static_cast<int64_t>(seg.mC2));
-            segJson.set("c3", static_cast<int64_t>(seg.mC3));
+            segJson.set("fx", static_cast<i64>(seg.mFx));
+            segJson.set("sx", static_cast<i64>(seg.mSx));
+            segJson.set("ix", static_cast<i64>(seg.mIx));
+            segJson.set("pal", static_cast<i64>(seg.mPal));
+            segJson.set("c1", static_cast<i64>(seg.mC1));
+            segJson.set("c2", static_cast<i64>(seg.mC2));
+            segJson.set("c3", static_cast<i64>(seg.mC3));
 
             // Boolean flags
             segJson.set("sel", seg.mSel);
@@ -449,8 +449,8 @@ fl::Json WLED::getState() const {
             segJson.set("o1", seg.mO1);
             segJson.set("o2", seg.mO2);
             segJson.set("o3", seg.mO3);
-            segJson.set("si", static_cast<int64_t>(seg.mSi));
-            segJson.set("m12", static_cast<int64_t>(seg.mM12));
+            segJson.set("si", static_cast<i64>(seg.mSi));
+            segJson.set("m12", static_cast<i64>(seg.mM12));
             segJson.set("rpt", seg.mRpt);
 
             if (!seg.mName.empty()) {
@@ -464,7 +464,7 @@ fl::Json WLED::getState() const {
                     if (color.size() >= 3) {
                         fl::Json colorArray = fl::Json::array();
                         for (size_t i = 0; i < color.size(); i++) {
-                            colorArray.push_back(fl::Json(static_cast<int64_t>(color[i])));
+                            colorArray.push_back(fl::Json(static_cast<i64>(color[i])));
                         }
                         colors.push_back(colorArray);
                     }
@@ -499,7 +499,7 @@ fl::Json WLED::getPlaylistConfig() const {
     if (!mPlaylistPresets.empty()) {
         fl::Json ps = fl::Json::array();
         for (const auto& preset : mPlaylistPresets) {
-            ps.push_back(fl::Json(static_cast<int64_t>(preset)));
+            ps.push_back(fl::Json(static_cast<i64>(preset)));
         }
         playlist.set("ps", ps);
     }
@@ -508,7 +508,7 @@ fl::Json WLED::getPlaylistConfig() const {
     if (!mPlaylistDurations.empty()) {
         fl::Json dur = fl::Json::array();
         for (const auto& duration : mPlaylistDurations) {
-            dur.push_back(fl::Json(static_cast<int64_t>(duration)));
+            dur.push_back(fl::Json(static_cast<i64>(duration)));
         }
         playlist.set("dur", dur);
     }
@@ -517,14 +517,14 @@ fl::Json WLED::getPlaylistConfig() const {
     if (!mPlaylistTransitions.empty()) {
         fl::Json trans = fl::Json::array();
         for (const auto& transition : mPlaylistTransitions) {
-            trans.push_back(fl::Json(static_cast<int64_t>(transition)));
+            trans.push_back(fl::Json(static_cast<i64>(transition)));
         }
         playlist.set("transition", trans);
     }
 
     // Other properties
-    playlist.set("repeat", static_cast<int64_t>(mPlaylistRepeat));
-    playlist.set("end", static_cast<int64_t>(mPlaylistEnd));
+    playlist.set("repeat", static_cast<i64>(mPlaylistRepeat));
+    playlist.set("end", static_cast<i64>(mPlaylistEnd));
     playlist.set("r", mPlaylistRandomize);
 
     return playlist;

@@ -259,10 +259,10 @@ bool UartPeripheralEsp::waitTxDone(u32 timeout_ms) {
         // Since we don't track byte count here, use a conservative estimate
         // Minimum reset period is 50us (WS2812 requirement)
         // Use a fixed reset period of 1000us (1ms) to ensure complete channel draining
-        const uint64_t MIN_RESET_DURATION_US = 50;
-        const uint64_t DEFAULT_RESET_DURATION_US = 1000;
+        const u64 MIN_RESET_DURATION_US = 50;
+        const u64 DEFAULT_RESET_DURATION_US = 1000;
 
-        const uint64_t reset_duration = (mConfig.mBaudRate > 0) ? DEFAULT_RESET_DURATION_US : MIN_RESET_DURATION_US;
+        const u64 reset_duration = (mConfig.mBaudRate > 0) ? DEFAULT_RESET_DURATION_US : MIN_RESET_DURATION_US;
         mResetExpireTime = fl::micros() + reset_duration;
     }
 
@@ -276,7 +276,7 @@ bool UartPeripheralEsp::isBusy() const {
     }
 
     // Check reset period FIRST (channel draining)
-    const uint64_t now = fl::micros();
+    const u64 now = fl::micros();
     if (now < mResetExpireTime) {
         return true;  // Still in reset period
     }

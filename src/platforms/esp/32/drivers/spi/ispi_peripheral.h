@@ -340,7 +340,7 @@ public:
     /// Maps to:
     /// - ESP32: esp_timer_get_time()
     /// - Mock: std::chrono::high_resolution_clock or simulated time
-    virtual uint64_t getMicroseconds() = 0;
+    virtual u64 getMicroseconds() = 0;
 };
 
 } // namespace detail

@@ -112,7 +112,7 @@ public:
     u8* allocateDmaBuffer(size_t size) override = 0;
     void freeDmaBuffer(u8* buffer) override = 0;
     void delay(u32 ms) override = 0;
-    uint64_t getMicroseconds() override = 0;
+    u64 getMicroseconds() override = 0;
     void freeDmaBuffer(void* ptr) override = 0;
 
     //=========================================================================
@@ -124,7 +124,7 @@ public:
         fl::vector<u8> buffer_copy;  ///< Copy of transmitted buffer
         size_t bit_count;                  ///< Number of bits transmitted
         u16 idle_value;               ///< Idle value used
-        uint64_t timestamp_us;             ///< Simulated timestamp (microseconds)
+        u64 timestamp_us;             ///< Simulated timestamp (microseconds)
     };
 
     //-------------------------------------------------------------------------

@@ -167,8 +167,8 @@ void ChannelEnginePARLIOImpl::show() {
 
                      // Calculate transmission time: LED count * bit period
                      // Note: Using 64-bit to avoid overflow (max ~4 billion ns)
-                     uint64_t transmissionTimeA = static_cast<uint64_t>(maxSizeA) * a.mTiming.total_period_ns();
-                     uint64_t transmissionTimeB = static_cast<uint64_t>(maxSizeB) * b.mTiming.total_period_ns();
+                     u64 transmissionTimeA = static_cast<u64>(maxSizeA) * a.mTiming.total_period_ns();
+                     u64 transmissionTimeB = static_cast<u64>(maxSizeB) * b.mTiming.total_period_ns();
 
                      // Sort by transmission time ascending (faster groups first)
                      return transmissionTimeA < transmissionTimeB;

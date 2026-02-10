@@ -127,19 +127,19 @@ fl::u16 snoise16(fl::u32 x) {
 
 // 2D simplex noise.
 fl::u16 snoise16(fl::u32 x, fl::u32 y) {
-    const uint64_t F2 = 1572067135; // .32: F2 = 0.5*(sqrt(3.0)-1.0)
-    const uint64_t G2 = 907633384;  // .32: G2 = (3.0-Math.sqrt(3.0))/6.0
+    const u64 F2 = 1572067135; // .32: F2 = 0.5*(sqrt(3.0)-1.0)
+    const u64 G2 = 907633384;  // .32: G2 = (3.0-Math.sqrt(3.0))/6.0
 
     // Skew the input space to determine which simplex cell we're in
-    fl::u32 s = (((uint64_t)x + (uint64_t)y) * F2) >> 32; // (.12 + .12) * .32 = .12: Hairy factor for 2D
+    fl::u32 s = (((u64)x + (u64)y) * F2) >> 32; // (.12 + .12) * .32 = .12: Hairy factor for 2D
     fl::u32 i = ((x>>1) + (s>>1)) >> 11;                  // .0
     fl::u32 j = ((y>>1) + (s>>1)) >> 11;                  // .0
 
-    uint64_t t = ((uint64_t)i + (uint64_t)j) * G2; // .32
-    uint64_t X0 = ((uint64_t)i<<32) - t;           // .32: Unskew the cell origin back to (x,y) space
-    uint64_t Y0 = ((uint64_t)j<<32) - t;           // .32
-    fl::i32 x0 = ((uint64_t)x<<2) - (X0>>18);      // .14: The x,y distances from the cell origin
-    fl::i32 y0 = ((uint64_t)y<<2) - (Y0>>18);      // .14
+    u64 t = ((u64)i + (u64)j) * G2; // .32
+    u64 X0 = ((u64)i<<32) - t;           // .32: Unskew the cell origin back to (x,y) space
+    u64 Y0 = ((u64)j<<32) - t;           // .32
+    fl::i32 x0 = ((u64)x<<2) - (X0>>18);      // .14: The x,y distances from the cell origin
+    fl::i32 y0 = ((u64)y<<2) - (Y0>>18);      // .14
 
     // For the 2D case, the simplex shape is an equilateral triangle.
     // Determine which simplex we are in.
@@ -195,22 +195,22 @@ fl::u16 snoise16(fl::u32 x, fl::u32 y) {
 // 3D simplex noise.
 fl::u16 snoise16(fl::u32 x, fl::u32 y, fl::u32 z) {
     // Simple skewing factors for the 3D case
-    const uint64_t F3 = 1431655764; // .32: 0.333333333
-    const uint64_t G3 = 715827884;  // .32: 0.166666667
+    const u64 F3 = 1431655764; // .32: 0.333333333
+    const u64 G3 = 715827884;  // .32: 0.166666667
 
     // Skew the input space to determine which simplex cell we're in
-    fl::u32 s = (((uint64_t)x + (uint64_t)y + (uint64_t)z) * F3) >> 32; // .12 + .32 = .12: Very nice and simple skew factor for 3D
+    fl::u32 s = (((u64)x + (u64)y + (u64)z) * F3) >> 32; // .12 + .32 = .12: Very nice and simple skew factor for 3D
     fl::u32 i = ((x>>1) + (s>>1)) >> 11;                                // .0
     fl::u32 j = ((y>>1) + (s>>1)) >> 11;                                // .0
     fl::u32 k = ((z>>1) + (s>>1)) >> 11;                                // .0
 
-    uint64_t t = ((uint64_t)i + (uint64_t)j + (uint64_t)k) * G3; // .32
-    uint64_t X0 = ((uint64_t)i<<32) - t;                         // .32: Unskew the cell origin back to (x,y) space
-    uint64_t Y0 = ((uint64_t)j<<32) - t;                         // .32
-    uint64_t Z0 = ((uint64_t)k<<32) - t;                         // .32
-    fl::i32 x0 = ((uint64_t)x<<2) - (X0>>18);                    // .14: The x,y distances from the cell origin
-    fl::i32 y0 = ((uint64_t)y<<2) - (Y0>>18);                    // .14
-    fl::i32 z0 = ((uint64_t)z<<2) - (Z0>>18);                    // .14
+    u64 t = ((u64)i + (u64)j + (u64)k) * G3; // .32
+    u64 X0 = ((u64)i<<32) - t;                         // .32: Unskew the cell origin back to (x,y) space
+    u64 Y0 = ((u64)j<<32) - t;                         // .32
+    u64 Z0 = ((u64)k<<32) - t;                         // .32
+    fl::i32 x0 = ((u64)x<<2) - (X0>>18);                    // .14: The x,y distances from the cell origin
+    fl::i32 y0 = ((u64)y<<2) - (Y0>>18);                    // .14
+    fl::i32 z0 = ((u64)z<<2) - (Z0>>18);                    // .14
 
     // For the 3D case, the simplex shape is a slightly irregular tetrahedron.
     // Determine which simplex we are in.
@@ -327,26 +327,26 @@ fl::u16 snoise16(fl::u32 x, fl::u32 y, fl::u32 z) {
 // 4D simplex noise.
 fl::u16 snoise16(fl::u32 x, fl::u32 y, fl::u32 z, fl::u32 w) {
     // The skewing and unskewing factors are hairy again for the 4D case
-    const uint64_t F4 = 331804471; // .30: (Math.sqrt(5.0)-1.0)/4.0 = 0.30901699437494745
-    const uint64_t G4 = 593549882; // .32: (5.0-Math.sqrt(5.0))/20.0 = 0.1381966011250105
+    const u64 F4 = 331804471; // .30: (Math.sqrt(5.0)-1.0)/4.0 = 0.30901699437494745
+    const u64 G4 = 593549882; // .32: (5.0-Math.sqrt(5.0))/20.0 = 0.1381966011250105
 
     // Skew the (x,y,z,w) space to determine which cell of 24 simplices we're
     // in.
-    fl::u32 s = (((uint64_t)x + (uint64_t)y + (uint64_t)z + (uint64_t)w) * F4) >> 32; // .12 + .30 = .10: Factor for 4D skewing.
+    fl::u32 s = (((u64)x + (u64)y + (u64)z + (u64)w) * F4) >> 32; // .12 + .30 = .10: Factor for 4D skewing.
     fl::u32 i = ((x>>2) + s) >> 10;                                                   // .0
     fl::u32 j = ((y>>2) + s) >> 10;                                                   // .0
     fl::u32 k = ((z>>2) + s) >> 10;                                                   // .0
     fl::u32 l = ((w>>2) + s) >> 10;                                                   // .0
 
-    uint64_t t = (((uint64_t)i + (uint64_t)j + (uint64_t)k + (uint64_t)l) * G4) >> 18; // .14
-    uint64_t X0 = ((uint64_t)i<<14) - t;                                               // .14: Unskew the cell origin back to (x,y,z,w) space
-    uint64_t Y0 = ((uint64_t)j<<14) - t;                                               // .14
-    uint64_t Z0 = ((uint64_t)k<<14) - t;                                               // .14
-    uint64_t W0 = ((uint64_t)l<<14) - t;                                               // .14
-    fl::i32 x0 = ((uint64_t)x<<2) - X0;                                                // .14: The x,y,z,w distances from the cell origin
-    fl::i32 y0 = ((uint64_t)y<<2) - Y0;                                                // .14
-    fl::i32 z0 = ((uint64_t)z<<2) - Z0;                                                // .14
-    fl::i32 w0 = ((uint64_t)w<<2) - W0;                                                // .14
+    u64 t = (((u64)i + (u64)j + (u64)k + (u64)l) * G4) >> 18; // .14
+    u64 X0 = ((u64)i<<14) - t;                                               // .14: Unskew the cell origin back to (x,y,z,w) space
+    u64 Y0 = ((u64)j<<14) - t;                                               // .14
+    u64 Z0 = ((u64)k<<14) - t;                                               // .14
+    u64 W0 = ((u64)l<<14) - t;                                               // .14
+    fl::i32 x0 = ((u64)x<<2) - X0;                                                // .14: The x,y,z,w distances from the cell origin
+    fl::i32 y0 = ((u64)y<<2) - Y0;                                                // .14
+    fl::i32 z0 = ((u64)z<<2) - Z0;                                                // .14
+    fl::i32 w0 = ((u64)w<<2) - W0;                                                // .14
 
     // For the 4D case, the simplex is a 4D shape I won't even try to describe.
     // To find out which of the 24 possible simplices we're in, we need to

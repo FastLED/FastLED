@@ -54,7 +54,7 @@ public:
     u8* allocateDma(size_t size) override;
     void freeDma(u8* buffer) override;
     void delay(u32 ms) override;
-    uint64_t getMicroseconds() override;
+    u64 getMicroseconds() override;
 
 private:
     ::spi_host_device_t mHost;           ///< SPI host (SPI2_HOST or SPI3_HOST)
@@ -339,7 +339,7 @@ void SpiPeripheralESPImpl::delay(u32 ms) {
     ::vTaskDelay(pdMS_TO_TICKS(ms));
 }
 
-uint64_t SpiPeripheralESPImpl::getMicroseconds() {
+u64 SpiPeripheralESPImpl::getMicroseconds() {
     return ::esp_timer_get_time();
 }
 

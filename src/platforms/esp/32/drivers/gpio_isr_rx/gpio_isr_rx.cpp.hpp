@@ -583,12 +583,12 @@ public:
         FL_LOG_RX("wait(): buffer_size=" << mBufferSize << ", timeout_ms=" << timeout_ms);
 
         // Convert timeout to microseconds for comparison
-        int64_t timeout_us = static_cast<int64_t>(timeout_ms) * 1000;
+        i64 timeout_us = static_cast<i64>(timeout_ms) * 1000;
 
         // Busy-wait with yield (using ESP-IDF native functions)
-        int64_t wait_start_us = esp_timer_get_time();
+        i64 wait_start_us = esp_timer_get_time();
         while (!finished()) {
-            int64_t elapsed_us = esp_timer_get_time() - wait_start_us;
+            i64 elapsed_us = esp_timer_get_time() - wait_start_us;
 
             // Check if buffer filled (success condition)
             if (mIsrCtx.edgesCounter >= mBufferSize) {

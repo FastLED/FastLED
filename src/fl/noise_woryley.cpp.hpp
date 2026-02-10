@@ -9,7 +9,7 @@ constexpr i32 Q15_ONE = 32768; // 1.0 in Q15
 
 // Helper: multiply two Q15 numbers (result in Q15)
 // i32 q15_mul(i32 a, i32 b) {
-//     return (i32)(((int64_t)a * b) >> 15);
+//     return (i32)(((i64)a * b) >> 15);
 // }
 
 // Helper: absolute difference

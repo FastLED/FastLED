@@ -1554,11 +1554,11 @@ plm_packet_t *plm_demux_decode(plm_demux_t *self) {
 }
 
 double plm_demux_decode_time(plm_demux_t *self) {
-	int64_t clock = (int64_t)plm_buffer_read(self->buffer, 3) << 30;
+	i64 clock = (i64)plm_buffer_read(self->buffer, 3) << 30;
 	plm_buffer_skip(self->buffer, 1);
-	clock |= (int64_t)plm_buffer_read(self->buffer, 15) << 15;
+	clock |= (i64)plm_buffer_read(self->buffer, 15) << 15;
 	plm_buffer_skip(self->buffer, 1);
-	clock |= (int64_t)plm_buffer_read(self->buffer, 15);
+	clock |= (i64)plm_buffer_read(self->buffer, 15);
 	plm_buffer_skip(self->buffer, 1);
 	return (double)clock / 90000.0;
 }

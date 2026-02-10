@@ -262,18 +262,18 @@ class s16x16 {
         // 4-term minimax coefficients for log2(1+t), t in [0,1).
         // Stored as i64 with 24 fractional bits. Max product ~2^49, fits i64.
         constexpr int IFRAC = 24;
-        constexpr int64_t c0 = 24189248LL;  // 1.44179 * 2^24
-        constexpr int64_t c1 = -11728384LL; // -0.69907 * 2^24
-        constexpr int64_t c2 = 6098176LL;   // 0.36348 * 2^24
-        constexpr int64_t c3 = -1788416LL;  // -0.10660 * 2^24
+        constexpr i64 c0 = 24189248LL;  // 1.44179 * 2^24
+        constexpr i64 c1 = -11728384LL; // -0.69907 * 2^24
+        constexpr i64 c2 = 6098176LL;   // 0.36348 * 2^24
+        constexpr i64 c3 = -1788416LL;  // -0.10660 * 2^24
         // Extend t from 16 to 24 frac bits.
-        int64_t t24 = static_cast<int64_t>(t) << (IFRAC - FRAC_BITS);
+        i64 t24 = static_cast<i64>(t) << (IFRAC - FRAC_BITS);
         // Horner: t * (c0 + t * (c1 + t * (c2 + t * c3)))
-        int64_t acc = c3;
+        i64 acc = c3;
         acc = c2 + ((acc * t24) >> IFRAC);
         acc = c1 + ((acc * t24) >> IFRAC);
         acc = c0 + ((acc * t24) >> IFRAC);
-        int64_t frac_part = (acc * t24) >> IFRAC;
+        i64 frac_part = (acc * t24) >> IFRAC;
         // Convert from 24 frac bits back to 16.
         i32 frac16 = static_cast<i32>(frac_part >> (IFRAC - FRAC_BITS));
         return from_raw((int_part << FRAC_BITS) + frac16);
@@ -297,23 +297,23 @@ class s16x16 {
         // 4-term minimax coefficients for 2^t - 1, t in [0,1).
         // Stored as i64 with 24 fractional bits. Max product ~2^48, fits i64.
         constexpr int IFRAC = 24;
-        constexpr int64_t d0 = 11629376LL;  // 0.69316 * 2^24
-        constexpr int64_t d1 = 4038400LL;   // 0.24071 * 2^24
-        constexpr int64_t d2 = 895232LL;    // 0.05336 * 2^24
-        constexpr int64_t d3 = 214016LL;    // 0.01276 * 2^24
+        constexpr i64 d0 = 11629376LL;  // 0.69316 * 2^24
+        constexpr i64 d1 = 4038400LL;   // 0.24071 * 2^24
+        constexpr i64 d2 = 895232LL;    // 0.05336 * 2^24
+        constexpr i64 d3 = 214016LL;    // 0.01276 * 2^24
         // Extend fr from 16 to 24 frac bits.
-        int64_t fr24 = static_cast<int64_t>(fr.mValue) << (IFRAC - FRAC_BITS);
+        i64 fr24 = static_cast<i64>(fr.mValue) << (IFRAC - FRAC_BITS);
         // Horner: 1 + fr * (d0 + fr * (d1 + fr * (d2 + fr * d3)))
-        int64_t acc = d3;
+        i64 acc = d3;
         acc = d2 + ((acc * fr24) >> IFRAC);
         acc = d1 + ((acc * fr24) >> IFRAC);
         acc = d0 + ((acc * fr24) >> IFRAC);
-        constexpr int64_t one24 = 1LL << IFRAC;
-        int64_t frac_pow24 = one24 + ((acc * fr24) >> IFRAC);
+        constexpr i64 one24 = 1LL << IFRAC;
+        i64 frac_pow24 = one24 + ((acc * fr24) >> IFRAC);
         // Convert from 24 frac bits to 16 frac bits, then scale by int_pow.
         i32 frac_pow16 = static_cast<i32>(frac_pow24 >> (IFRAC - FRAC_BITS));
-        int64_t result =
-            (static_cast<int64_t>(int_pow) * frac_pow16) >> FRAC_BITS;
+        i64 result =
+            (static_cast<i64>(int_pow) * frac_pow16) >> FRAC_BITS;
         return from_raw(static_cast<i32>(result));
     }
 

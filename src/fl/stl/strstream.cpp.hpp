@@ -78,14 +78,14 @@ void sstream::appendFormatted(fl::i64 val) {
     int len;
     if (mBase == 16 || mBase == 8) {
         // For hex/oct, treat as unsigned bit pattern
-        len = fl::utoa64(static_cast<uint64_t>(val), buf, mBase);
+        len = fl::utoa64(static_cast<u64>(val), buf, mBase);
     } else {
         // For decimal, handle negative sign manually
         if (val < 0) {
             mStr.append("-", 1);
-            len = fl::utoa64(static_cast<uint64_t>(-val), buf, mBase);
+            len = fl::utoa64(static_cast<u64>(-val), buf, mBase);
         } else {
-            len = fl::utoa64(static_cast<uint64_t>(val), buf, mBase);
+            len = fl::utoa64(static_cast<u64>(val), buf, mBase);
         }
     }
     mStr.append(buf, len);

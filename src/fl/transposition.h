@@ -386,15 +386,15 @@ inline void transpose_8lane_inline(
     for (size_t byte_idx = 0; byte_idx < num_bytes; byte_idx++) {
         // Pack 8 bytes into a single 64-bit register
         // This reduces register pressure and enables parallel bit extraction
-        uint64_t packed =
-            ((uint64_t)lanes[0][byte_idx] << 0)  |
-            ((uint64_t)lanes[1][byte_idx] << 8)  |
-            ((uint64_t)lanes[2][byte_idx] << 16) |
-            ((uint64_t)lanes[3][byte_idx] << 24) |
-            ((uint64_t)lanes[4][byte_idx] << 32) |
-            ((uint64_t)lanes[5][byte_idx] << 40) |
-            ((uint64_t)lanes[6][byte_idx] << 48) |
-            ((uint64_t)lanes[7][byte_idx] << 56);
+        u64 packed =
+            ((u64)lanes[0][byte_idx] << 0)  |
+            ((u64)lanes[1][byte_idx] << 8)  |
+            ((u64)lanes[2][byte_idx] << 16) |
+            ((u64)lanes[3][byte_idx] << 24) |
+            ((u64)lanes[4][byte_idx] << 32) |
+            ((u64)lanes[5][byte_idx] << 40) |
+            ((u64)lanes[6][byte_idx] << 48) |
+            ((u64)lanes[7][byte_idx] << 56);
 
         u8* dest = &output[byte_idx * 8];
 
@@ -420,26 +420,26 @@ inline void transpose_16lane_inline(
 ) {
     for (size_t byte_idx = 0; byte_idx < num_bytes; byte_idx++) {
         // Pack lanes 0-7 into first 64-bit register
-        uint64_t packed_lo =
-            ((uint64_t)lanes[0][byte_idx] << 0)  |
-            ((uint64_t)lanes[1][byte_idx] << 8)  |
-            ((uint64_t)lanes[2][byte_idx] << 16) |
-            ((uint64_t)lanes[3][byte_idx] << 24) |
-            ((uint64_t)lanes[4][byte_idx] << 32) |
-            ((uint64_t)lanes[5][byte_idx] << 40) |
-            ((uint64_t)lanes[6][byte_idx] << 48) |
-            ((uint64_t)lanes[7][byte_idx] << 56);
+        u64 packed_lo =
+            ((u64)lanes[0][byte_idx] << 0)  |
+            ((u64)lanes[1][byte_idx] << 8)  |
+            ((u64)lanes[2][byte_idx] << 16) |
+            ((u64)lanes[3][byte_idx] << 24) |
+            ((u64)lanes[4][byte_idx] << 32) |
+            ((u64)lanes[5][byte_idx] << 40) |
+            ((u64)lanes[6][byte_idx] << 48) |
+            ((u64)lanes[7][byte_idx] << 56);
 
         // Pack lanes 8-15 into second 64-bit register
-        uint64_t packed_hi =
-            ((uint64_t)lanes[8][byte_idx]  << 0)  |
-            ((uint64_t)lanes[9][byte_idx]  << 8)  |
-            ((uint64_t)lanes[10][byte_idx] << 16) |
-            ((uint64_t)lanes[11][byte_idx] << 24) |
-            ((uint64_t)lanes[12][byte_idx] << 32) |
-            ((uint64_t)lanes[13][byte_idx] << 40) |
-            ((uint64_t)lanes[14][byte_idx] << 48) |
-            ((uint64_t)lanes[15][byte_idx] << 56);
+        u64 packed_hi =
+            ((u64)lanes[8][byte_idx]  << 0)  |
+            ((u64)lanes[9][byte_idx]  << 8)  |
+            ((u64)lanes[10][byte_idx] << 16) |
+            ((u64)lanes[11][byte_idx] << 24) |
+            ((u64)lanes[12][byte_idx] << 32) |
+            ((u64)lanes[13][byte_idx] << 40) |
+            ((u64)lanes[14][byte_idx] << 48) |
+            ((u64)lanes[15][byte_idx] << 56);
 
         u8* dest = &output[byte_idx * 16];
 
@@ -857,15 +857,15 @@ FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION size_t transpose_wave8byte_par
         for (size_t bit_pos = 0; bit_pos < 8; bit_pos++) {
             // Pack 8 wave8_byte values into a single 64-bit register for parallel extraction
             // This packing is done once per bit_pos (8 times) instead of 64 times
-            uint64_t packed =
-                ((uint64_t)laneWaveforms[0 * bytes_per_lane + bit_pos] << 0)  |
-                ((uint64_t)laneWaveforms[1 * bytes_per_lane + bit_pos] << 8)  |
-                ((uint64_t)laneWaveforms[2 * bytes_per_lane + bit_pos] << 16) |
-                ((uint64_t)laneWaveforms[3 * bytes_per_lane + bit_pos] << 24) |
-                ((uint64_t)laneWaveforms[4 * bytes_per_lane + bit_pos] << 32) |
-                ((uint64_t)laneWaveforms[5 * bytes_per_lane + bit_pos] << 40) |
-                ((uint64_t)laneWaveforms[6 * bytes_per_lane + bit_pos] << 48) |
-                ((uint64_t)laneWaveforms[7 * bytes_per_lane + bit_pos] << 56);
+            u64 packed =
+                ((u64)laneWaveforms[0 * bytes_per_lane + bit_pos] << 0)  |
+                ((u64)laneWaveforms[1 * bytes_per_lane + bit_pos] << 8)  |
+                ((u64)laneWaveforms[2 * bytes_per_lane + bit_pos] << 16) |
+                ((u64)laneWaveforms[3 * bytes_per_lane + bit_pos] << 24) |
+                ((u64)laneWaveforms[4 * bytes_per_lane + bit_pos] << 32) |
+                ((u64)laneWaveforms[5 * bytes_per_lane + bit_pos] << 40) |
+                ((u64)laneWaveforms[6 * bytes_per_lane + bit_pos] << 48) |
+                ((u64)laneWaveforms[7 * bytes_per_lane + bit_pos] << 56);
 
             // Inner loop: extract 8 pulses from the packed data
             for (size_t pulse_bit = 0; pulse_bit < 8; pulse_bit++) {
@@ -924,45 +924,45 @@ FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION size_t transpose_wave8byte_par
         for (size_t bit_pos = 0; bit_pos < 8; bit_pos += 2) {
             // Pack 16 wave8_byte values for TWO bit positions simultaneously
             // This enables instruction-level parallelism and better register utilization
-            uint64_t packed_lo_0 =
-                ((uint64_t)laneWaveforms[0 * bytes_per_lane + bit_pos + 0] << 0)  |
-                ((uint64_t)laneWaveforms[1 * bytes_per_lane + bit_pos + 0] << 8)  |
-                ((uint64_t)laneWaveforms[2 * bytes_per_lane + bit_pos + 0] << 16) |
-                ((uint64_t)laneWaveforms[3 * bytes_per_lane + bit_pos + 0] << 24) |
-                ((uint64_t)laneWaveforms[4 * bytes_per_lane + bit_pos + 0] << 32) |
-                ((uint64_t)laneWaveforms[5 * bytes_per_lane + bit_pos + 0] << 40) |
-                ((uint64_t)laneWaveforms[6 * bytes_per_lane + bit_pos + 0] << 48) |
-                ((uint64_t)laneWaveforms[7 * bytes_per_lane + bit_pos + 0] << 56);
+            u64 packed_lo_0 =
+                ((u64)laneWaveforms[0 * bytes_per_lane + bit_pos + 0] << 0)  |
+                ((u64)laneWaveforms[1 * bytes_per_lane + bit_pos + 0] << 8)  |
+                ((u64)laneWaveforms[2 * bytes_per_lane + bit_pos + 0] << 16) |
+                ((u64)laneWaveforms[3 * bytes_per_lane + bit_pos + 0] << 24) |
+                ((u64)laneWaveforms[4 * bytes_per_lane + bit_pos + 0] << 32) |
+                ((u64)laneWaveforms[5 * bytes_per_lane + bit_pos + 0] << 40) |
+                ((u64)laneWaveforms[6 * bytes_per_lane + bit_pos + 0] << 48) |
+                ((u64)laneWaveforms[7 * bytes_per_lane + bit_pos + 0] << 56);
 
-            uint64_t packed_hi_0 =
-                ((uint64_t)laneWaveforms[8  * bytes_per_lane + bit_pos + 0] << 0)  |
-                ((uint64_t)laneWaveforms[9  * bytes_per_lane + bit_pos + 0] << 8)  |
-                ((uint64_t)laneWaveforms[10 * bytes_per_lane + bit_pos + 0] << 16) |
-                ((uint64_t)laneWaveforms[11 * bytes_per_lane + bit_pos + 0] << 24) |
-                ((uint64_t)laneWaveforms[12 * bytes_per_lane + bit_pos + 0] << 32) |
-                ((uint64_t)laneWaveforms[13 * bytes_per_lane + bit_pos + 0] << 40) |
-                ((uint64_t)laneWaveforms[14 * bytes_per_lane + bit_pos + 0] << 48) |
-                ((uint64_t)laneWaveforms[15 * bytes_per_lane + bit_pos + 0] << 56);
+            u64 packed_hi_0 =
+                ((u64)laneWaveforms[8  * bytes_per_lane + bit_pos + 0] << 0)  |
+                ((u64)laneWaveforms[9  * bytes_per_lane + bit_pos + 0] << 8)  |
+                ((u64)laneWaveforms[10 * bytes_per_lane + bit_pos + 0] << 16) |
+                ((u64)laneWaveforms[11 * bytes_per_lane + bit_pos + 0] << 24) |
+                ((u64)laneWaveforms[12 * bytes_per_lane + bit_pos + 0] << 32) |
+                ((u64)laneWaveforms[13 * bytes_per_lane + bit_pos + 0] << 40) |
+                ((u64)laneWaveforms[14 * bytes_per_lane + bit_pos + 0] << 48) |
+                ((u64)laneWaveforms[15 * bytes_per_lane + bit_pos + 0] << 56);
 
-            uint64_t packed_lo_1 =
-                ((uint64_t)laneWaveforms[0 * bytes_per_lane + bit_pos + 1] << 0)  |
-                ((uint64_t)laneWaveforms[1 * bytes_per_lane + bit_pos + 1] << 8)  |
-                ((uint64_t)laneWaveforms[2 * bytes_per_lane + bit_pos + 1] << 16) |
-                ((uint64_t)laneWaveforms[3 * bytes_per_lane + bit_pos + 1] << 24) |
-                ((uint64_t)laneWaveforms[4 * bytes_per_lane + bit_pos + 1] << 32) |
-                ((uint64_t)laneWaveforms[5 * bytes_per_lane + bit_pos + 1] << 40) |
-                ((uint64_t)laneWaveforms[6 * bytes_per_lane + bit_pos + 1] << 48) |
-                ((uint64_t)laneWaveforms[7 * bytes_per_lane + bit_pos + 1] << 56);
+            u64 packed_lo_1 =
+                ((u64)laneWaveforms[0 * bytes_per_lane + bit_pos + 1] << 0)  |
+                ((u64)laneWaveforms[1 * bytes_per_lane + bit_pos + 1] << 8)  |
+                ((u64)laneWaveforms[2 * bytes_per_lane + bit_pos + 1] << 16) |
+                ((u64)laneWaveforms[3 * bytes_per_lane + bit_pos + 1] << 24) |
+                ((u64)laneWaveforms[4 * bytes_per_lane + bit_pos + 1] << 32) |
+                ((u64)laneWaveforms[5 * bytes_per_lane + bit_pos + 1] << 40) |
+                ((u64)laneWaveforms[6 * bytes_per_lane + bit_pos + 1] << 48) |
+                ((u64)laneWaveforms[7 * bytes_per_lane + bit_pos + 1] << 56);
 
-            uint64_t packed_hi_1 =
-                ((uint64_t)laneWaveforms[8  * bytes_per_lane + bit_pos + 1] << 0)  |
-                ((uint64_t)laneWaveforms[9  * bytes_per_lane + bit_pos + 1] << 8)  |
-                ((uint64_t)laneWaveforms[10 * bytes_per_lane + bit_pos + 1] << 16) |
-                ((uint64_t)laneWaveforms[11 * bytes_per_lane + bit_pos + 1] << 24) |
-                ((uint64_t)laneWaveforms[12 * bytes_per_lane + bit_pos + 1] << 32) |
-                ((uint64_t)laneWaveforms[13 * bytes_per_lane + bit_pos + 1] << 40) |
-                ((uint64_t)laneWaveforms[14 * bytes_per_lane + bit_pos + 1] << 48) |
-                ((uint64_t)laneWaveforms[15 * bytes_per_lane + bit_pos + 1] << 56);
+            u64 packed_hi_1 =
+                ((u64)laneWaveforms[8  * bytes_per_lane + bit_pos + 1] << 0)  |
+                ((u64)laneWaveforms[9  * bytes_per_lane + bit_pos + 1] << 8)  |
+                ((u64)laneWaveforms[10 * bytes_per_lane + bit_pos + 1] << 16) |
+                ((u64)laneWaveforms[11 * bytes_per_lane + bit_pos + 1] << 24) |
+                ((u64)laneWaveforms[12 * bytes_per_lane + bit_pos + 1] << 32) |
+                ((u64)laneWaveforms[13 * bytes_per_lane + bit_pos + 1] << 40) |
+                ((u64)laneWaveforms[14 * bytes_per_lane + bit_pos + 1] << 48) |
+                ((u64)laneWaveforms[15 * bytes_per_lane + bit_pos + 1] << 56);
 
             // Inner loop: interleave extraction from both bit positions
             // This allows CPU to execute independent operations in parallel

@@ -327,7 +327,7 @@ template <fl::u32 N> class BitsetFixed {
 };
 
 /// A Bitset implementation with inline storage that can grow if needed.
-/// T is the storage type (u8, u16, u32, uint64_t)
+/// T is the storage type (u8, u16, u32, u64)
 /// N is the initial number of bits to store inline
 template <fl::u32 N = 16> // Default size is 16 bits, or 2 bytes
 class BitsetInlined {

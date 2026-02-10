@@ -207,7 +207,7 @@ inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_ha
     // Using divider=8 gives 10MHz timer clock (0.1us resolution)
 
     u16 divider;
-    uint64_t alarm_value;
+    u64 alarm_value;
 
     if (config.frequency_hz > 1000000) {
         // For high frequencies, use smaller divider for better resolution

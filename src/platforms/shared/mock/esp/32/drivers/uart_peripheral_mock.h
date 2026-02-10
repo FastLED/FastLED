@@ -169,7 +169,7 @@ public:
     /// Returns the reset duration that the mock calculated for the last
     /// transmission. This is based on transmission time and WS2812 requirements.
     /// Use this to verify reset timing logic without wall-clock measurements.
-    uint64_t getLastCalculatedResetDurationUs() const;
+    u64 getLastCalculatedResetDurationUs() const;
 
     //-------------------------------------------------------------------------
     // Virtual Time Control (for deterministic testing)
@@ -188,20 +188,20 @@ public:
     ///
     /// Only has effect when virtual time mode is enabled.
     /// Use this instead of std::this_thread::sleep_for() for deterministic testing.
-    void advanceTime(uint64_t microseconds);
+    void advanceTime(u64 microseconds);
 
     /// @brief Pump virtual time forward (semantic alias for advanceTime)
     /// @param microseconds Amount to advance virtual time
     ///
     /// Convenience method for test readability. Equivalent to advanceTime().
     /// Use this in test code to make time advancement explicit.
-    void pumpTime(uint64_t microseconds);
+    void pumpTime(u64 microseconds);
 
     /// @brief Get current virtual time
     /// @return Current virtual time in microseconds
     ///
     /// Returns 0 if virtual time mode is disabled.
-    uint64_t getVirtualTime() const;
+    u64 getVirtualTime() const;
 
     //-------------------------------------------------------------------------
     // Timing Inspection (for deterministic testing)
@@ -212,26 +212,26 @@ public:
     ///
     /// Returns the transmission delay calculated based on baud rate and byte count.
     /// Useful for tests that need to pump time forward by exact amounts.
-    uint64_t getTransmissionDuration() const;
+    u64 getTransmissionDuration() const;
 
     /// @brief Get calculated reset period duration
     /// @return Reset duration in microseconds
     ///
     /// Returns the reset period duration (minimum 50μs for WS2812 compatibility).
     /// The reset period equals transmission duration or 50μs, whichever is larger.
-    uint64_t getResetDuration() const;
+    u64 getResetDuration() const;
 
     /// @brief Get time remaining until transmission complete
     /// @return Microseconds until transmission finishes (0 if not transmitting)
     ///
     /// Returns time remaining in transmission phase (before reset period).
-    uint64_t getRemainingTransmissionTime() const;
+    u64 getRemainingTransmissionTime() const;
 
     /// @brief Get time remaining until reset period complete
     /// @return Microseconds until reset expires (0 if not in reset)
     ///
     /// Returns time remaining in reset period (after transmission).
-    uint64_t getRemainingResetTime() const;
+    u64 getRemainingResetTime() const;
 
     //-------------------------------------------------------------------------
     // Waveform Extraction (for validation)
@@ -276,11 +276,11 @@ private:
     fl::vector<u8> mCapturedData;     ///< Captured byte history
     u32 mTransmissionDelayUs;         ///< Simulated TX delay (microseconds)
     bool mManualDelaySet;                  ///< True if delay was manually set via setTransmissionDelay()
-    uint64_t mLastWriteTimestamp;          ///< Timestamp of last writeBytes() call
-    uint64_t mResetExpireTime;             ///< Timestamp when reset period expires
-    uint64_t mLastCalculatedResetDuration; ///< Calculated reset duration (for testing)
+    u64 mLastWriteTimestamp;          ///< Timestamp of last writeBytes() call
+    u64 mResetExpireTime;             ///< Timestamp when reset period expires
+    u64 mLastCalculatedResetDuration; ///< Calculated reset duration (for testing)
     bool mVirtualTimeEnabled;              ///< True if using virtual time instead of wall-clock
-    uint64_t mVirtualTime;                 ///< Current virtual time in microseconds
+    u64 mVirtualTime;                 ///< Current virtual time in microseconds
 
     //=========================================================================
     // Internal Helpers
@@ -288,7 +288,7 @@ private:
 
     /// @brief Get current simulated timestamp in microseconds
     /// @return Monotonic timestamp (microseconds)
-    uint64_t getCurrentTimestamp() const;
+    u64 getCurrentTimestamp() const;
 
     /// @brief Check if transmission is complete based on timing
     /// @return true if enough time has elapsed, false otherwise

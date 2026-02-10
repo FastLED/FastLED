@@ -188,8 +188,8 @@ typedef fl::i16 int16_t;
 // This ensures we match the platform's type sizes correctly
 typedef fl::u32 uint32_t;
 typedef fl::i32 int32_t;
-typedef fl::u64 uint64_t;
-typedef fl::i64 int64_t;
+typedef fl::u64 u64;
+typedef fl::i64 i64;
 typedef fl::size size_t;
 typedef fl::uptr uintptr_t;
 typedef fl::iptr intptr_t;

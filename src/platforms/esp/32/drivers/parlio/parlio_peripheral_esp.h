@@ -87,7 +87,7 @@ public:
     u8* allocateDmaBuffer(size_t size) override = 0;
     void freeDmaBuffer(u8* buffer) override = 0;
     void delay(u32 ms) override = 0;
-    uint64_t getMicroseconds() override = 0;
+    u64 getMicroseconds() override = 0;
     void freeDmaBuffer(void* ptr) override = 0;
 
 protected:

@@ -229,7 +229,7 @@ public:
      *
      * Example (query system time):
      *   remote.registerFunctionWithReturn("millis", [](const fl::Json& args) -> fl::Json {
-     *       return fl::Json(static_cast<int64_t>(millis()));
+     *       return fl::Json(static_cast<i64>(millis()));
      *   });
      *
      * Call with: {"function":"millis","args":[]}
@@ -293,7 +293,7 @@ public:
      *   fl::Json result;
      *   auto err = remote.processRpc(R"({"function":"millis"})", result);
      *   if (err == fl::Remote::Error::None && result.has_value()) {
-     *       int64_t time = result.as_int() | 0;
+     *       i64 time = result.as_int() | 0;
      *   }
      */
     Error processRpc(const fl::string& jsonStr, fl::Json& outResult);

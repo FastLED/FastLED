@@ -54,7 +54,7 @@ float SoundUtil::rms_to_dB(enum MicType type, float rms_loudness) {
 
 
 float SoundUtil::rms(const i16 *samples, size_t num_samples) {
-    uint64_t sum_of_squares = 0;
+    u64 sum_of_squares = 0;
     for (size_t i = 0; i < num_samples; ++i) {
         sum_of_squares += samples[i] * samples[i];
     }

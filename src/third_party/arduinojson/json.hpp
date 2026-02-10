@@ -1630,7 +1630,7 @@ template <typename T, size_t = sizeof(T)>
 struct FloatTraits {};
 template <typename T>
 struct FloatTraits<T, 8 /*64bits*/> {
-  typedef uint64_t mantissa_type;
+  typedef u64 mantissa_type;
   static const short mantissa_bits = 52;
   static const mantissa_type mantissa_max =
       (mantissa_type(1) << mantissa_bits) - 1;
@@ -1638,7 +1638,7 @@ struct FloatTraits<T, 8 /*64bits*/> {
   static const exponent_type exponent_max = 308;
   static pgm_ptr<T> positiveBinaryPowersOfTen() {
     ARDUINOJSON_DEFINE_PROGMEM_ARRAY(  //
-        uint64_t, factors,
+        u64, factors,
         {
             0x4024000000000000,  // 1e1
             0x4059000000000000,  // 1e2
@@ -1654,7 +1654,7 @@ struct FloatTraits<T, 8 /*64bits*/> {
   }
   static pgm_ptr<T> negativeBinaryPowersOfTen() {
     ARDUINOJSON_DEFINE_PROGMEM_ARRAY(  //
-        uint64_t, factors,
+        u64, factors,
         {
             0x3FB999999999999A,  // 1e-1
             0x3F847AE147AE147B,  // 1e-2
@@ -1677,14 +1677,14 @@ struct FloatTraits<T, 8 /*64bits*/> {
   static T highest() {
     return forge(0x7FEFFFFFFFFFFFFF);
   }
-  template <typename TOut>  // int64_t
+  template <typename TOut>  // i64
   static T highest_for(
       enable_if_t<is_integral<TOut>::value && is_signed<TOut>::value &&
                       sizeof(TOut) == 8,
                   signed>* = 0) {
     return forge(0x43DFFFFFFFFFFFFF);  //  9.2233720368547748e+18
   }
-  template <typename TOut>  // uint64_t
+  template <typename TOut>  // u64
   static T highest_for(
       enable_if_t<is_integral<TOut>::value && is_unsigned<TOut>::value &&
                       sizeof(TOut) == 8,
@@ -1694,7 +1694,7 @@ struct FloatTraits<T, 8 /*64bits*/> {
   static T lowest() {
     return forge(0xFFEFFFFFFFFFFFFF);
   }
-  static T forge(uint64_t bits) {
+  static T forge(u64 bits) {
     return alias_cast<T>(bits);
   }
 };
@@ -1756,14 +1756,14 @@ struct FloatTraits<T, 4 /*32bits*/> {
                   unsigned>* = 0) {
     return forge(0x4F7FFFFF);  // 4.29496704E9
   }
-  template <typename TOut>  // int64_t
+  template <typename TOut>  // i64
   static T highest_for(
       enable_if_t<is_integral<TOut>::value && is_signed<TOut>::value &&
                       sizeof(TOut) == 8,
                   signed>* = 0) {
     return forge(0x5EFFFFFF);  // 9.22337148709896192E18
   }
-  template <typename TOut>  // uint64_t
+  template <typename TOut>  // u64
   static T highest_for(
       enable_if_t<is_integral<TOut>::value && is_unsigned<TOut>::value &&
                       sizeof(TOut) == 8,
@@ -2010,8 +2010,8 @@ class ArrayData : public CollectionData {
 ARDUINOJSON_END_PRIVATE_NAMESPACE
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 #if ARDUINOJSON_USE_LONG_LONG
-typedef int64_t JsonInteger;
-typedef uint64_t JsonUInt;
+typedef i64 JsonInteger;
+typedef u64 JsonUInt;
 #else
 typedef long JsonInteger;
 typedef unsigned long JsonUInt;
@@ -2117,8 +2117,8 @@ union VariantContent {
 #if ARDUINOJSON_USE_EXTENSIONS
 union VariantExtension {
 #  if ARDUINOJSON_USE_LONG_LONG
-  uint64_t asUint64;
-  int64_t asInt64;
+  u64 asUint64;
+  i64 asInt64;
 #  endif
 #  if ARDUINOJSON_USE_DOUBLE
   double asDouble;
@@ -7631,8 +7631,8 @@ class MsgPackDeserializer {
     if (err)
       return err;
     union {
-      int64_t signedValue;
-      uint64_t unsignedValue;
+      i64 signedValue;
+      u64 unsignedValue;
     };
     if (isSigned)
       signedValue = static_cast<int8_t>(buffer[0]);  // propagate sign bit
@@ -8054,7 +8054,7 @@ class MsgPackSerializer : public VariantDataVisitor<size_t> {
 #if ARDUINOJSON_USE_LONG_LONG
     else {
       writeByte(0xD3);
-      writeInteger(int64_t(value));
+      writeInteger(i64(value));
     }
 #endif
     return bytesWritten();
@@ -8081,7 +8081,7 @@ class MsgPackSerializer : public VariantDataVisitor<size_t> {
 #if ARDUINOJSON_USE_LONG_LONG
     else {
       writeByte(0xCF);
-      writeInteger(uint64_t(value));
+      writeInteger(u64(value));
     }
 #endif
     return bytesWritten();

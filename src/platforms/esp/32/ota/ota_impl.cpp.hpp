@@ -916,7 +916,7 @@ private:
         u32 seed = esp_random();
         mbedtls_sha256_update(&ctx, (unsigned char*)&seed, sizeof(seed));
 
-        int64_t time_us = esp_timer_get_time();
+        i64 time_us = esp_timer_get_time();
         mbedtls_sha256_update(&ctx, (unsigned char*)&time_us, sizeof(time_us));
 
         mbedtls_sha256_finish(&ctx, hash);

@@ -4,9 +4,9 @@
 // Desktop/generic platform integer type definitions
 // Dispatches to platform-specific files for macOS, Linux, Windows, etc.
 //
-// IMPORTANT: macOS and Linux LP64 systems define uint64_t differently:
-// - macOS: uint64_t is 'unsigned long long' (even in 64-bit mode)
-// - Linux: uint64_t is 'unsigned long' (in 64-bit LP64 mode)
+// IMPORTANT: macOS and Linux LP64 systems define u64 differently:
+// - macOS: u64 is 'unsigned long long' (even in 64-bit mode)
+// - Linux: u64 is 'unsigned long' (in 64-bit LP64 mode)
 //
 // See individual platform files for details.
 

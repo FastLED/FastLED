@@ -663,8 +663,8 @@ private:
     }
 
     esp_err_t initialize(const ChipsetTiming& timing, u32 resolution_hz) {
-        const uint64_t ns_per_tick = 1000000000ULL / resolution_hz;
-        const uint64_t half_ns_per_tick = ns_per_tick / 2;
+        const u64 ns_per_tick = 1000000000ULL / resolution_hz;
+        const u64 half_ns_per_tick = ns_per_tick / 2;
 
         // WS2812 3-phase to 4-phase conversion:
         // Bit 0: T0H = T1 (high), T0L = T2 + T3 (low)

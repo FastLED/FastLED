@@ -569,7 +569,7 @@ public:
     const detail::I2sLcdCamConfig& getConfig() const override {
         return mImpl.getConfig();
     }
-    uint64_t getMicroseconds() override { return mImpl.getMicroseconds(); }
+    u64 getMicroseconds() override { return mImpl.getMicroseconds(); }
     void delay(u32 ms) override { mImpl.delay(ms); }
 
 private:

@@ -36,7 +36,7 @@ fl::string Channel::makeName(i32 id, const fl::optional<fl::string>& configName)
     if (configName.has_value()) {
         return configName.value();
     }
-    return "Channel_" + fl::to_string(static_cast<int64_t>(id));
+    return "Channel_" + fl::to_string(static_cast<i64>(id));
 }
 
 ChannelPtr Channel::create(const ChannelConfig &config) {

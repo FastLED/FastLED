@@ -173,7 +173,7 @@ static u8 map_priority_to_nvic(u8 isr_priority) {
 // =============================================================================
 
 // Repeating alarm callback wrapper
-static int64_t alarm_callback_wrapper(alarm_id_t id, void* user_data) {
+static i64 alarm_callback_wrapper(alarm_id_t id, void* user_data) {
     rp2350_isr_handle_data* handle = static_cast<rp2350_isr_handle_data*>(user_data);
 
     if (handle && handle->user_handler && handle->is_enabled) {
@@ -256,7 +256,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
     alarm_handles[alarm_num] = handle_data;
 
     // Calculate interval in microseconds
-    int64_t interval_us = 1000000 / config.frequency_hz;
+    i64 interval_us = 1000000 / config.frequency_hz;
 
     // Add repeating timer using Pico SDK
     handle_data->alarm_id = add_alarm_in_us(interval_us, alarm_callback_wrapper,
@@ -429,7 +429,7 @@ int enable_handler(const isr_handle_t& handle) {
 
     if (handle_data->is_timer) {
         // For timer, we need to recreate the alarm
-        int64_t interval_us = 1000000 / handle_data->frequency_hz;
+        i64 interval_us = 1000000 / handle_data->frequency_hz;
         handle_data->alarm_id = add_alarm_in_us(interval_us, alarm_callback_wrapper,
                                                  handle_data, true);
         if (handle_data->alarm_id == 0 || handle_data->alarm_id == -1) {

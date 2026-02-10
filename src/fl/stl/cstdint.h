@@ -31,8 +31,8 @@ typedef fl::u32 uint32_t;
 typedef fl::i32 int32_t;
 
 // 64-bit types use platform-specific base types
-typedef fl::u64 uint64_t;
-typedef fl::i64 int64_t;
+typedef fl::u64 u64;
+typedef fl::i64 i64;
 
 // Pointer and size types for C code
 // These are defined here directly for C language support (no C++ namespace needed)

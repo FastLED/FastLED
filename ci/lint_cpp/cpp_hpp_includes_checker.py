@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false
-"""Checker to ensure *.cpp.hpp files do not include other *.cpp.hpp files.
+"""Checker to ensure *.cpp.hpp files are only included by _build.hpp files.
 
 *.cpp.hpp files are implementation files that should ONLY be included by _build.hpp files.
-They should never include other *.cpp.hpp files themselves.
+Regular .h, .hpp, and .cpp files should NEVER include *.cpp.hpp files.
+This ensures proper separation between interface (.h/.hpp) and implementation (.cpp.hpp).
 """
 
 import re
@@ -16,19 +17,23 @@ SRC_ROOT = PROJECT_ROOT / "src"
 
 
 class CppHppIncludesChecker(FileContentChecker):
-    """Checker class for *.cpp.hpp files including other *.cpp.hpp files."""
+    """Checker class to ensure *.cpp.hpp files are only included by _build.hpp files."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.violations: dict[str, list[tuple[int, str]]] = {}
 
     def should_process_file(self, file_path: str) -> bool:
         """Check if file should be processed."""
-        # Only check *.cpp.hpp files in src/ directory
+        # Only check files in src/ directory
         if not file_path.startswith(str(SRC_ROOT)):
             return False
 
-        # Only check *.cpp.hpp files (not .cpp, .hpp, or .h)
-        if not file_path.endswith(".cpp.hpp"):
+        # Check all C++ source and header files (including .cpp.hpp)
+        if not file_path.endswith((".cpp", ".h", ".hpp", ".cpp.hpp")):
+            return False
+
+        # _build.hpp files are ALLOWED to include .cpp.hpp files (that's their purpose)
+        if file_path.endswith("_build.hpp"):
             return False
 
         return True
@@ -72,10 +77,12 @@ class CppHppIncludesChecker(FileContentChecker):
             # Check for *.cpp.hpp includes in code portion
             match = cpp_hpp_include_pattern.search(code_part)
             if match and not has_exception:
+                included_file = match.group(1)
                 violations.append(
                     (
                         line_number,
-                        f"{line.strip()} - *.cpp.hpp files should only be included by _build.hpp files, not by other *.cpp.hpp files. "
+                        f"{line.strip()} - *.cpp.hpp files should ONLY be included by _build.hpp files. "
+                        f"Found include of '{included_file}' in non-build file. "
                         f"Move this include to the appropriate _build.hpp file. "
                         f"Add '// ok include cpp.hpp' comment to suppress.",
                     )
@@ -96,8 +103,8 @@ def main() -> None:
     run_checker_standalone(
         checker,
         [str(SRC_ROOT)],
-        "Found *.cpp.hpp files including other *.cpp.hpp files",
-        extensions=[".cpp.hpp"],
+        "Found *.cpp.hpp includes in non-_build.hpp files (*.cpp.hpp should only be included by _build.hpp)",
+        extensions=[".cpp", ".h", ".hpp", ".cpp.hpp"],
     )
 
 

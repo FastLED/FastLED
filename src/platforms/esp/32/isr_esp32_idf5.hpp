@@ -140,7 +140,7 @@ inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_ha
         // IMPORTANT: ESP32 timer hardware requires clock divider >= 2
         // With 80MHz source clock, max resolution is 40MHz (80MHz / 2 = 40MHz)
         u32 timer_resolution_hz;
-        uint64_t alarm_count;
+        u64 alarm_count;
 
         if (config.frequency_hz > 1000000) {
             // For frequencies > 1MHz, use higher resolution

@@ -56,7 +56,7 @@ public:
     bool registerDrawCallback(void* callback, void* user_ctx) override;
     const LcdRgbPeripheralConfig& getConfig() const override;
 
-    uint64_t getMicroseconds() override;
+    u64 getMicroseconds() override;
     void delay(u32 ms) override;
 
 private:

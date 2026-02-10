@@ -100,9 +100,9 @@ bool UartPeripheralMock::writeBytes(const u8* data, size_t length) {
     if (!mManualDelaySet) {
         if (mConfig.mBaudRate > 0) {
             const size_t bits_per_frame = 10 + (mConfig.mStopBits == 2 ? 1 : 0);  // 10 (8N1) or 11 (8N2)
-            const uint64_t total_bits = static_cast<uint64_t>(length) * bits_per_frame;
+            const u64 total_bits = static_cast<u64>(length) * bits_per_frame;
             // Calculate transmission time in microseconds
-            uint64_t transmission_time_us = (total_bits * 1000000ULL) / mConfig.mBaudRate;
+            u64 transmission_time_us = (total_bits * 1000000ULL) / mConfig.mBaudRate;
             // Add small overhead for buffer switching (10 microseconds)
             mTransmissionDelayUs = static_cast<u32>(transmission_time_us) + 10;
         } else {
@@ -134,8 +134,8 @@ bool UartPeripheralMock::waitTxDone(u32 timeout_ms) {
     }
 
     // Wall-clock mode: busy-wait until complete or timeout
-    const uint64_t start_time = getCurrentTimestamp();
-    const uint64_t timeout_us = timeout_ms * 1000ULL;
+    const u64 start_time = getCurrentTimestamp();
+    const u64 timeout_us = timeout_ms * 1000ULL;
 
     while (mBusy) {
         // Update state based on elapsed time
@@ -145,7 +145,7 @@ bool UartPeripheralMock::waitTxDone(u32 timeout_ms) {
         }
 
         // Check timeout
-        const uint64_t elapsed = getCurrentTimestamp() - start_time;
+        const u64 elapsed = getCurrentTimestamp() - start_time;
         if (elapsed >= timeout_us) {
             return false;  // Timeout
         }
@@ -163,7 +163,7 @@ bool UartPeripheralMock::isBusy() const {
     }
 
     // Check reset period FIRST
-    const uint64_t now = getCurrentTimestamp();
+    const u64 now = getCurrentTimestamp();
     if (now < mResetExpireTime) {
         return true;  // Still in reset period (channel draining)
     }
@@ -171,7 +171,7 @@ bool UartPeripheralMock::isBusy() const {
     // Then check if transmission is still in progress
     if (mBusy) {
         // Pure query - check elapsed time without side effects
-        const uint64_t elapsed = now - mLastWriteTimestamp;
+        const u64 elapsed = now - mLastWriteTimestamp;
         return elapsed < mTransmissionDelayUs;
     }
 
@@ -222,7 +222,7 @@ void UartPeripheralMock::resetCapturedData() {
     mCapturedData.clear();
 }
 
-uint64_t UartPeripheralMock::getLastCalculatedResetDurationUs() const {
+u64 UartPeripheralMock::getLastCalculatedResetDurationUs() const {
     return mLastCalculatedResetDuration;
 }
 
@@ -234,7 +234,7 @@ void UartPeripheralMock::setVirtualTimeMode(bool enabled) {
     }
 }
 
-void UartPeripheralMock::advanceTime(uint64_t microseconds) {
+void UartPeripheralMock::advanceTime(u64 microseconds) {
     if (mVirtualTimeEnabled) {
         mVirtualTime += microseconds;
         // Update transmission state after advancing time
@@ -242,36 +242,36 @@ void UartPeripheralMock::advanceTime(uint64_t microseconds) {
     }
 }
 
-void UartPeripheralMock::pumpTime(uint64_t microseconds) {
+void UartPeripheralMock::pumpTime(u64 microseconds) {
     advanceTime(microseconds);
     // Note: advanceTime() already calls updateTransmissionState()
 }
 
-uint64_t UartPeripheralMock::getVirtualTime() const {
+u64 UartPeripheralMock::getVirtualTime() const {
     return mVirtualTimeEnabled ? mVirtualTime : 0;
 }
 
-uint64_t UartPeripheralMock::getTransmissionDuration() const {
+u64 UartPeripheralMock::getTransmissionDuration() const {
     return mTransmissionDelayUs;
 }
 
-uint64_t UartPeripheralMock::getResetDuration() const {
-    const uint64_t MIN_RESET_DURATION_US = 50;
+u64 UartPeripheralMock::getResetDuration() const {
+    const u64 MIN_RESET_DURATION_US = 50;
     return (mTransmissionDelayUs > MIN_RESET_DURATION_US) ?
            mTransmissionDelayUs : MIN_RESET_DURATION_US;
 }
 
-uint64_t UartPeripheralMock::getRemainingTransmissionTime() const {
+u64 UartPeripheralMock::getRemainingTransmissionTime() const {
     if (!mBusy) {
         return 0;
     }
-    const uint64_t now = getCurrentTimestamp();
-    const uint64_t target = mLastWriteTimestamp + mTransmissionDelayUs;
+    const u64 now = getCurrentTimestamp();
+    const u64 target = mLastWriteTimestamp + mTransmissionDelayUs;
     return (now < target) ? (target - now) : 0;
 }
 
-uint64_t UartPeripheralMock::getRemainingResetTime() const {
-    const uint64_t now = getCurrentTimestamp();
+u64 UartPeripheralMock::getRemainingResetTime() const {
+    const u64 now = getCurrentTimestamp();
     return (now < mResetExpireTime) ? (mResetExpireTime - now) : 0;
 }
 
@@ -340,7 +340,7 @@ bool UartPeripheralMock::verifyStartStopBits() const {
 // Internal Helpers
 //=============================================================================
 
-uint64_t UartPeripheralMock::getCurrentTimestamp() const {
+u64 UartPeripheralMock::getCurrentTimestamp() const {
     if (mVirtualTimeEnabled) {
         return mVirtualTime;
     }
@@ -358,8 +358,8 @@ bool UartPeripheralMock::isTransmissionComplete() const {
     }
 
     // Check if enough time has elapsed
-    const uint64_t now = getCurrentTimestamp();
-    const uint64_t elapsed = now - mLastWriteTimestamp;
+    const u64 now = getCurrentTimestamp();
+    const u64 elapsed = now - mLastWriteTimestamp;
 
     return elapsed >= mTransmissionDelayUs;
 }
@@ -378,17 +378,17 @@ void UartPeripheralMock::updateTransmissionState() {
         // Make reset duration equal to transmission time for more realistic testing
         // This simulates the time needed for the channel to drain/settle
         if (mResetExpireTime == 0) {
-            const uint64_t MIN_RESET_DURATION_US = 50;  // Minimum for WS2812
+            const u64 MIN_RESET_DURATION_US = 50;  // Minimum for WS2812
             // Reset period equals transmission time (simulating channel drain time)
             // IMPORTANT: Use the current transmission delay, not a future one
             // (mTransmissionDelayUs can be overwritten by subsequent writeBytes() calls)
-            const uint64_t current_tx_delay = mTransmissionDelayUs;
-            const uint64_t reset_duration = (current_tx_delay > MIN_RESET_DURATION_US) ?
+            const u64 current_tx_delay = mTransmissionDelayUs;
+            const u64 reset_duration = (current_tx_delay > MIN_RESET_DURATION_US) ?
                                            current_tx_delay : MIN_RESET_DURATION_US;
             // CRITICAL: Set reset expiry based on TRANSMISSION COMPLETION TIME,
             // not current time. This ensures correct behavior when time is pumped
             // past the transmission completion point in one go.
-            const uint64_t transmission_complete_time = mLastWriteTimestamp + mTransmissionDelayUs;
+            const u64 transmission_complete_time = mLastWriteTimestamp + mTransmissionDelayUs;
             mResetExpireTime = transmission_complete_time + reset_duration;
             mLastCalculatedResetDuration = reset_duration;
         }

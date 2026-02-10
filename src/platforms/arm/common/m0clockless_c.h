@@ -323,7 +323,7 @@ FL_BEGIN_OPTIMIZE_FOR_EXACT_TIMING
 
 
 static constexpr fl::u32 ns_to_cycles(fl::u32 ns) {
-  return (fl::u32)(((uint64_t)ns * (uint64_t)F_CPU + 999'999'999ULL) / 1'000'000'000ULL);
+  return (fl::u32)(((u64)ns * (u64)F_CPU + 999'999'999ULL) / 1'000'000'000ULL);
 }
 
 template<int HI_OFFSET, int LO_OFFSET, typename TIMING, EOrder RGB_ORDER, int WAIT_TIME>

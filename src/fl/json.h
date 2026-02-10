@@ -279,7 +279,7 @@ struct DefaultValueVisitor {
 };
 
 // Visitor for converting values to int
-template<typename IntType = int64_t>
+template<typename IntType = i64>
 struct IntConversionVisitor {
     fl::optional<IntType> result;
     
@@ -289,17 +289,17 @@ struct IntConversionVisitor {
         (*this)(value);
     }
     
-    // Special handling to avoid conflict when IntType is int64_t
+    // Special handling to avoid conflict when IntType is i64
     template<typename T = IntType>
-    typename fl::enable_if<!fl::is_same<T, int64_t>::value && !fl::is_same<T, double>::value, void>::type
+    typename fl::enable_if<!fl::is_same<T, i64>::value && !fl::is_same<T, double>::value, void>::type
     operator()(const IntType& value) {
         result = value;
     }
     
-    // Special handling for int64_t case
+    // Special handling for i64 case
     template<typename T = IntType>
-    typename fl::enable_if<fl::is_same<T, int64_t>::value, void>::type
-    operator()(const int64_t& value) {
+    typename fl::enable_if<fl::is_same<T, i64>::value, void>::type
+    operator()(const i64& value) {
         result = value;
     }
     
@@ -310,10 +310,10 @@ struct IntConversionVisitor {
         result = value;
     }
     
-    // Special handling to avoid conflict when IntType is int64_t
+    // Special handling to avoid conflict when IntType is i64
     template<typename T = IntType>
-    typename fl::enable_if<!fl::is_same<T, int64_t>::value, void>::type
-    operator()(const int64_t& value) {
+    typename fl::enable_if<!fl::is_same<T, i64>::value, void>::type
+    operator()(const i64& value) {
         result = static_cast<IntType>(value);
     }
     
@@ -362,10 +362,10 @@ struct IntConversionVisitor {
     }
 };
 
-// Specialization for int64_t to avoid template conflicts
+// Specialization for i64 to avoid template conflicts
 template<>
-struct IntConversionVisitor<int64_t> {
-    fl::optional<int64_t> result;
+struct IntConversionVisitor<i64> {
+    fl::optional<i64> result;
     
     template<typename U>
     void accept(const U& value) {
@@ -373,7 +373,7 @@ struct IntConversionVisitor<int64_t> {
         (*this)(value);
     }
     
-    void operator()(const int64_t& value) {
+    void operator()(const i64& value) {
         result = value;
     }
     
@@ -383,7 +383,7 @@ struct IntConversionVisitor<int64_t> {
     
     void operator()(const double& value) {
         // NEW INSTRUCTIONS: AUTO CONVERT FLOAT TO INT
-        result = static_cast<int64_t>(value);
+        result = static_cast<i64>(value);
     }
     
     void operator()(const fl::string& str) {
@@ -409,7 +409,7 @@ struct IntConversionVisitor<int64_t> {
         // If it looks like a valid integer, try to parse it
         if (isValidInt && str.length() > 0) {
             int parsed = fl::parseInt(str.c_str(), str.length());
-            result = static_cast<int64_t>(parsed);
+            result = static_cast<i64>(parsed);
         }
     }
     
@@ -448,7 +448,7 @@ struct FloatConversionVisitor {
         result = static_cast<FloatType>(value);
     }
     
-    void operator()(const int64_t& value) {
+    void operator()(const i64& value) {
         // NEW INSTRUCTIONS: AUTO CONVERT INT TO FLOAT
         result = static_cast<FloatType>(value);
     }
@@ -536,7 +536,7 @@ struct FloatConversionVisitor<double> {
         result = static_cast<double>(value);
     }
     
-    void operator()(const int64_t& value) {
+    void operator()(const i64& value) {
         // NEW INSTRUCTIONS: AUTO CONVERT INT TO FLOAT
         result = static_cast<double>(value);
     }
@@ -619,7 +619,7 @@ struct StringConversionVisitor {
         result = value;
     }
 
-    void operator()(const int64_t& value) {
+    void operator()(const i64& value) {
         // Convert integer to string
         result = fl::to_string(value);
     }
@@ -669,7 +669,7 @@ struct SizeVisitor {
     // Generic fallback for other types (primitives, null)
     void operator()(const fl::nullptr_t&) { result = 0; }
     void operator()(const bool&) { result = 0; }
-    void operator()(const int64_t&) { result = 0; }
+    void operator()(const i64&) { result = 0; }
     void operator()(const float&) { result = 0; }
     void operator()(const fl::string&) { result = 0; }
 };
@@ -688,7 +688,7 @@ struct JsonValue {
     using variant_t = fl::variant<
         fl::nullptr_t,   // null
         bool,            // true/false
-        int64_t,         // integer
+        i64,         // integer
         float,           // floating-point (changed from double to float)
         fl::string,      // string
         JsonArray,           // array
@@ -707,7 +707,7 @@ struct JsonValue {
     JsonValue() noexcept : data(nullptr) {}
     JsonValue(fl::nullptr_t) noexcept : data(nullptr) {}
     JsonValue(bool b) noexcept : data(b) {}
-    JsonValue(int64_t i) noexcept : data(i) {}
+    JsonValue(i64 i) noexcept : data(i) {}
     JsonValue(float f) noexcept : data(f) {}  // Changed from double to float
     JsonValue(const fl::string& s) : data(s) {
     }
@@ -771,7 +771,7 @@ struct JsonValue {
         return *this;
     }
 
-    JsonValue& operator=(int64_t i) {
+    JsonValue& operator=(i64 i) {
         data = i;
         return *this;
     }
@@ -840,7 +840,7 @@ struct JsonValue {
     }
     bool is_int() const noexcept { 
         //FASTLED_WARN("is_int called, tag=" << data.tag());
-        return data.is<int64_t>() || data.is<bool>(); 
+        return data.is<i64>() || data.is<bool>(); 
     }
     bool is_double() const noexcept { 
         //FASTLED_WARN("is_double called, tag=" << data.tag());
@@ -929,13 +929,13 @@ struct JsonValue {
         return ptr ? fl::optional<bool>(*ptr) : fl::nullopt;
     }
     
-    fl::optional<int64_t> as_int() {
+    fl::optional<i64> as_int() {
         // Check if we have a valid value first
         if (data.empty()) {
             return fl::nullopt;
         }
         
-        IntConversionVisitor<int64_t> visitor;
+        IntConversionVisitor<i64> visitor;
         data.visit(visitor);
         return visitor.result;
     }
@@ -999,7 +999,7 @@ struct JsonValue {
             auto audioPtr = data.ptr<fl::vector<i16>>();
             JsonArray result;
             for (const auto& item : *audioPtr) {
-                result.push_back(fl::make_shared<JsonValue>(static_cast<int64_t>(item)));
+                result.push_back(fl::make_shared<JsonValue>(static_cast<i64>(item)));
             }
             return fl::optional<JsonArray>(result);
         }
@@ -1008,7 +1008,7 @@ struct JsonValue {
             auto bytePtr = data.ptr<fl::vector<u8>>();
             JsonArray result;
             for (const auto& item : *bytePtr) {
-                result.push_back(fl::make_shared<JsonValue>(static_cast<int64_t>(item)));
+                result.push_back(fl::make_shared<JsonValue>(static_cast<i64>(item)));
             }
             return fl::optional<JsonArray>(result);
         }
@@ -1051,13 +1051,13 @@ struct JsonValue {
         return ptr ? fl::optional<bool>(*ptr) : fl::nullopt;
     }
     
-    fl::optional<int64_t> as_int() const {
+    fl::optional<i64> as_int() const {
         // Check if we have a valid value first
         if (data.empty()) {
             return fl::nullopt;
         }
         
-        IntConversionVisitor<int64_t> visitor;
+        IntConversionVisitor<i64> visitor;
         data.visit(visitor);
         return visitor.result;
     }
@@ -1110,7 +1110,7 @@ struct JsonValue {
             auto audioPtr = data.ptr<fl::vector<i16>>();
             JsonArray result;
             for (const auto& item : *audioPtr) {
-                result.push_back(fl::make_shared<JsonValue>(static_cast<int64_t>(item)));
+                result.push_back(fl::make_shared<JsonValue>(static_cast<i64>(item)));
             }
             return fl::optional<JsonArray>(result);
         }
@@ -1119,7 +1119,7 @@ struct JsonValue {
             auto bytePtr = data.ptr<fl::vector<u8>>();
             JsonArray result;
             for (const auto& item : *bytePtr) {
-                result.push_back(fl::make_shared<JsonValue>(static_cast<int64_t>(item)));
+                result.push_back(fl::make_shared<JsonValue>(static_cast<i64>(item)));
             }
             return fl::optional<JsonArray>(result);
         }
@@ -1634,8 +1634,8 @@ public:
     Json() : m_value() {}  // Default initialize to nullptr
     Json(fl::nullptr_t) : m_value(fl::make_shared<JsonValue>(nullptr)) {}
     Json(bool b) : m_value(fl::make_shared<JsonValue>(b)) {}
-    Json(int i) : m_value(fl::make_shared<JsonValue>(static_cast<int64_t>(i))) {}
-    Json(int64_t i) : m_value(fl::make_shared<JsonValue>(i)) {}
+    Json(int i) : m_value(fl::make_shared<JsonValue>(static_cast<i64>(i))) {}
+    Json(i64 i) : m_value(fl::make_shared<JsonValue>(i)) {}
     Json(float f) : m_value(fl::make_shared<JsonValue>(f)) {}  // Use float directly
     Json(double d) : m_value(fl::make_shared<JsonValue>(static_cast<float>(d))) {}  // Convert double to float
     Json(const fl::string& s) : m_value(fl::make_shared<JsonValue>(s)) {}
@@ -1698,7 +1698,7 @@ public:
     }
     
     Json& operator=(int value) {
-        m_value = fl::make_shared<JsonValue>(static_cast<int64_t>(value));
+        m_value = fl::make_shared<JsonValue>(static_cast<i64>(value));
         return *this;
     }
     
@@ -1752,7 +1752,7 @@ public:
 
     // Safe extractors
     fl::optional<bool> as_bool() const { return m_value ? m_value->as_bool() : fl::nullopt; }
-    fl::optional<int64_t> as_int() const { 
+    fl::optional<i64> as_int() const { 
         if (!m_value) return fl::nullopt;
         return m_value->as_int(); 
     }
@@ -2179,7 +2179,7 @@ public:
     
     void set(const fl::string& key, bool value) { set(key, Json(value)); }
     void set(const fl::string& key, int value) { set(key, Json(value)); }
-    void set(const fl::string& key, int64_t value) { set(key, Json(value)); }
+    void set(const fl::string& key, i64 value) { set(key, Json(value)); }
     void set(const fl::string& key, float value) { set(key, Json(value)); }
     void set(const fl::string& key, double value) { set(key, Json(value)); }
     void set(const fl::string& key, const fl::string& value) { set(key, Json(value)); }

@@ -1,7 +1,7 @@
 #pragma once
 
 // macOS LP64 integer type definitions
-// macOS differs from Linux LP64: uint64_t is 'unsigned long long', not 'unsigned long'
+// macOS differs from Linux LP64: u64 is 'unsigned long long', not 'unsigned long'
 
 namespace fl {
     // 16-bit and 32-bit types (same across platforms)
@@ -10,8 +10,8 @@ namespace fl {
     typedef int i32;
     typedef unsigned int u32;
 
-    // 64-bit types on macOS: use 'long long' to match system uint64_t
-    // macOS defines uint64_t as 'unsigned long long' even in 64-bit mode
+    // 64-bit types on macOS: use 'long long' to match system u64
+    // macOS defines u64 as 'unsigned long long' even in 64-bit mode
     typedef long long i64;
     typedef unsigned long long u64;
 

@@ -146,7 +146,7 @@ private:
         if (Index < names.size() && !names[Index].empty()) {
             param.set("name", names[Index].c_str());
         } else {
-            param.set("name", "arg" + fl::to_string(static_cast<int64_t>(Index)));
+            param.set("name", "arg" + fl::to_string(static_cast<i64>(Index)));
         }
         param.set("schema", TypeSchema<First>::schema());
         param.set("required", true);
@@ -194,7 +194,7 @@ private:
         if (Index < names.size() && !names[Index].empty()) {
             param.set("name", names[Index].c_str());
         } else {
-            param.set("name", "arg" + fl::to_string(static_cast<int64_t>(Index)));
+            param.set("name", "arg" + fl::to_string(static_cast<i64>(Index)));
         }
         param.set("schema", TypeSchema<First>::schema());
         param.set("required", true);

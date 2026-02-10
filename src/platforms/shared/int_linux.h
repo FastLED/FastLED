@@ -1,7 +1,7 @@
 #pragma once
 
 // Linux LP64 integer type definitions
-// Linux LP64: uint64_t is 'unsigned long' (differs from macOS)
+// Linux LP64: u64 is 'unsigned long' (differs from macOS)
 
 namespace fl {
     // 16-bit and 32-bit types (same across platforms)
@@ -10,7 +10,7 @@ namespace fl {
     typedef int i32;
     typedef unsigned int u32;
 
-    // 64-bit types on Linux LP64: use 'long' to match system uint64_t
+    // 64-bit types on Linux LP64: use 'long' to match system u64
     typedef long i64;
     typedef unsigned long u64;
 

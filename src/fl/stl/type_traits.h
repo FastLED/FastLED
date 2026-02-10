@@ -566,7 +566,7 @@ template <> struct is_signed<double> {
 template <> struct is_signed<long double> {
     enum : bool { value = true };
 };
-// Note: sized integer types (i8, i16, i32, int64_t) are typedefs
+// Note: sized integer types (i8, i16, i32, i64) are typedefs
 // for the basic types above, so they automatically inherit these specializations
 
 //-------------------------------------------------------------------------------
@@ -653,7 +653,7 @@ template <> struct type_rank<double> {
 template <> struct type_rank<long double> {
     static constexpr int value = 12;
 };
-// Note: sized integer types (i8, i16, i32, int64_t) are typedefs
+// Note: sized integer types (i8, i16, i32, i64) are typedefs
 // for the basic types above, so they automatically inherit these specializations
 
 //-------------------------------------------------------------------------------

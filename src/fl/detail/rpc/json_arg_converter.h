@@ -38,8 +38,8 @@ public:
         fl::size count = jsonArgs.size();
         if (count != sizeof...(Args)) {
             result.setError("argument count mismatch: expected " +
-                           fl::to_string(static_cast<int64_t>(sizeof...(Args))) +
-                           ", got " + fl::to_string(static_cast<int64_t>(count)));
+                           fl::to_string(static_cast<i64>(sizeof...(Args))) +
+                           ", got " + fl::to_string(static_cast<i64>(count)));
             return fl::make_tuple(tuple, result);
         }
 
@@ -70,10 +70,10 @@ private:
 
         // Add argument index to warnings/errors
         for (fl::size i = 0; i < convResult.warnings().size(); i++) {
-            result.addWarning("arg " + fl::to_string(static_cast<int64_t>(I)) + ": " + convResult.warnings()[i]);
+            result.addWarning("arg " + fl::to_string(static_cast<i64>(I)) + ": " + convResult.warnings()[i]);
         }
         if (convResult.hasError()) {
-            result.setError("arg " + fl::to_string(static_cast<int64_t>(I)) + ": " + convResult.errorMessage());
+            result.setError("arg " + fl::to_string(static_cast<i64>(I)) + ": " + convResult.errorMessage());
         }
     }
 };
@@ -96,7 +96,7 @@ public:
 
         if (jsonArgs.size() != 0) {
             result.setError("argument count mismatch: expected 0, got " +
-                           fl::to_string(static_cast<int64_t>(jsonArgs.size())));
+                           fl::to_string(static_cast<i64>(jsonArgs.size())));
         }
 
         return fl::make_tuple(tuple, result);

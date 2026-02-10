@@ -101,7 +101,7 @@ public:
     }
 
     // Timing simulation
-    uint64_t estimateTransmissionTimeMicros(size_t buffer_size) const {
+    u64 estimateTransmissionTimeMicros(size_t buffer_size) const {
         // Calculate based on clock speed
         // Time = (bytes * 8 bits/byte) / (clock_hz) * 1,000,000 us/s
         return (buffer_size * 8 * 1000000ULL) / mClockSpeed;

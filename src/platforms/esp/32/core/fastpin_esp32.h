@@ -162,7 +162,7 @@ public:
 
 
 // Define mask of valid pins.  Start with the list of valid output pins from ESPIDF and remove unusable pins
-#define _FL_VALID_PIN_MASK (uint64_t(SOC_GPIO_VALID_OUTPUT_GPIO_MASK) & ~FASTLED_UNUSABLE_PIN_MASK)
+#define _FL_VALID_PIN_MASK (u64(SOC_GPIO_VALID_OUTPUT_GPIO_MASK) & ~FASTLED_UNUSABLE_PIN_MASK)
 
 #define _FL_PIN_VALID(PIN) ((_FL_VALID_PIN_MASK & (1ULL << PIN)) != 0)
 

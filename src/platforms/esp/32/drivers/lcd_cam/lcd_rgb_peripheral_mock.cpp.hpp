@@ -59,7 +59,7 @@ public:
     bool registerDrawCallback(void* callback, void* user_ctx) override;
     const LcdRgbPeripheralConfig& getConfig() const override;
 
-    uint64_t getMicroseconds() override;
+    u64 getMicroseconds() override;
     void delay(u32 ms) override;
 
     //=========================================================================
@@ -105,7 +105,7 @@ private:
 
     // Per-draw tracking for simulation thread
     struct PendingDraw {
-        uint64_t completion_time_us;
+        u64 completion_time_us;
     };
     fl::vector<PendingDraw> mPendingQueue;
 
@@ -248,7 +248,7 @@ bool LcdRgbPeripheralMockImpl::drawFrame(const u16* buffer, size_t size_bytes) {
         // Pixels = size_bytes / 2 (16-bit pixels)
         size_t pixels = size_bytes / 2;
         // Time = pixels / pclk_hz (seconds) * 1000000 (microseconds)
-        uint64_t draw_time_us = (static_cast<uint64_t>(pixels) * 1000000ULL) / mConfig.pclk_hz;
+        u64 draw_time_us = (static_cast<u64>(pixels) * 1000000ULL) / mConfig.pclk_hz;
         draw_delay_us = static_cast<u32>(draw_time_us) + 10;
         mDrawDelayUs = draw_delay_us;
     } else {
@@ -351,7 +351,7 @@ const LcdRgbPeripheralConfig& LcdRgbPeripheralMockImpl::getConfig() const {
     return mConfig;
 }
 
-uint64_t LcdRgbPeripheralMockImpl::getMicroseconds() {
+u64 LcdRgbPeripheralMockImpl::getMicroseconds() {
     return fl::micros();
 }
 
@@ -468,7 +468,7 @@ void LcdRgbPeripheralMockImpl::simulationThreadFunc() {
         }
 
         // Check if first draw has completed
-        uint64_t now_us = fl::micros();
+        u64 now_us = fl::micros();
 
         if (now_us >= mPendingQueue[0].completion_time_us) {
             // Remove from queue
@@ -501,7 +501,7 @@ void LcdRgbPeripheralMockImpl::simulationThreadFunc() {
             mCallbackExecuting.store(false, fl::memory_order_release);
         } else {
             // Wait until next completion time
-            uint64_t wait_us = mPendingQueue[0].completion_time_us - now_us;
+            u64 wait_us = mPendingQueue[0].completion_time_us - now_us;
             mCondVar.wait_for(lock, std::chrono::microseconds(wait_us));  // okay std namespace
         }
     }

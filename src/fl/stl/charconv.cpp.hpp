@@ -9,7 +9,7 @@
 namespace fl {
 namespace detail {
 
-fl::string hex(uint64_t value, HexIntWidth width, bool is_negative, bool uppercase, bool pad_to_width) {
+fl::string hex(u64 value, HexIntWidth width, bool is_negative, bool uppercase, bool pad_to_width) {
     // Determine target width in hex characters based on integer bit width
     size_t target_width = 0;
     switch (width) {
@@ -23,7 +23,7 @@ fl::string hex(uint64_t value, HexIntWidth width, bool is_negative, bool upperca
     const char* digits = uppercase ? "0123456789ABCDEF" : "0123456789abcdef";
 
     // Convert value to hex string (minimal representation)
-    uint64_t temp_value = value;
+    u64 temp_value = value;
     if (temp_value == 0) {
         // Special case: zero should be "0" not empty string
         result = fl::string("0");
@@ -100,17 +100,17 @@ int itoa(i32 value, char *sp, int radix) {
     return len;
 }
 
-int itoa64(int64_t value, char *sp, int radix) {
+int itoa64(i64 value, char *sp, int radix) {
     char tmp[32]; // Buffer for 64-bit integer (max 65 chars for base 2 + sign)
     char *tp = tmp;
     int i;
-    uint64_t v;
+    u64 v;
 
     int sign = (radix == 10 && value < 0);
     if (sign)
         v = -value;
     else
-        v = (uint64_t)value;
+        v = (u64)value;
 
     while (v || tp == tmp) {
         i = v % radix;
@@ -159,11 +159,11 @@ int utoa32(u32 value, char *sp, int radix) {
     return len;
 }
 
-int utoa64(uint64_t value, char *sp, int radix) {
+int utoa64(u64 value, char *sp, int radix) {
     char tmp[32]; // larger buffer for 64-bit values
     char *tp = tmp;
     int i;
-    uint64_t v = value;
+    u64 v = value;
 
     while (v || tp == tmp) {
         i = v % radix;

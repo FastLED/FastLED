@@ -116,7 +116,7 @@ public:
     u8* allocateDma(size_t size) override = 0;
     void freeDma(u8* buffer) override = 0;
     void delay(u32 ms) override = 0;
-    uint64_t getMicroseconds() override = 0;
+    u64 getMicroseconds() override = 0;
 
     //=========================================================================
     // Mock-Specific API (for unit tests)
@@ -128,7 +128,7 @@ public:
         size_t length_bits;                ///< Number of bits transmitted
         u32 flags;                    ///< Transaction flags
         void* user;                        ///< User context pointer
-        uint64_t timestamp_us;             ///< Simulated timestamp (microseconds)
+        u64 timestamp_us;             ///< Simulated timestamp (microseconds)
     };
 
     //-------------------------------------------------------------------------

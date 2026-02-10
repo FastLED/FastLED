@@ -82,8 +82,8 @@ FL_MAYBE_UNUSED static void test_strstream_integer_operators() {
     u16 u16_std = 23; ss << u16_std; fss << u16_std;
     i32 i32_std = 24; ss << i32_std; fss << i32_std;
     u32 u32_std = 25; ss << u32_std; fss << u32_std;
-    int64_t i64_std = 26; ss << i64_std; fss << i64_std;
-    uint64_t u64_std = 27; ss << u64_std; fss << u64_std;
+    i64 i64_std = 26; ss << i64_std; fss << i64_std;
+    u64 u64_std = 27; ss << u64_std; fss << u64_std;
 }
 
 // This file contains only compile-time tests.

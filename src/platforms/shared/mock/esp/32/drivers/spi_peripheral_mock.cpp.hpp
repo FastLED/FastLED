@@ -61,7 +61,7 @@ public:
     u8* allocateDma(size_t size) override;
     void freeDma(u8* buffer) override;
     void delay(u32 ms) override;
-    uint64_t getMicroseconds() override;
+    u64 getMicroseconds() override;
 
     //=========================================================================
     // Mock-Specific API
@@ -377,7 +377,7 @@ void SpiPeripheralMockImpl::delay(u32 ms) {
     fl::delay(ms);
 }
 
-uint64_t SpiPeripheralMockImpl::getMicroseconds() {
+u64 SpiPeripheralMockImpl::getMicroseconds() {
     // Use the same timestamp source as queueTransaction() for consistency
     return fl::micros();
 }

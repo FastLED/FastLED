@@ -59,7 +59,7 @@ public:
     bool registerTransmitCallback(void* callback, void* user_ctx) override;
     const I2sLcdCamConfig& getConfig() const override;
 
-    uint64_t getMicroseconds() override;
+    u64 getMicroseconds() override;
     void delay(u32 ms) override;
 
     //=========================================================================
@@ -105,7 +105,7 @@ private:
 
     // Per-transmit tracking for simulation thread
     struct PendingTransmit {
-        uint64_t completion_time_us;
+        u64 completion_time_us;
     };
     fl::vector<PendingTransmit> mPendingQueue;
 
@@ -248,7 +248,7 @@ bool I2sLcdCamPeripheralMockImpl::transmit(const u16* buffer, size_t size_bytes)
         // Pixels = size_bytes / 2 (16-bit pixels)
         size_t pixels = size_bytes / 2;
         // Time = pixels / pclk_hz (seconds) * 1000000 (microseconds)
-        uint64_t transmit_time_us = (static_cast<uint64_t>(pixels) * 1000000ULL) / mConfig.pclk_hz;
+        u64 transmit_time_us = (static_cast<u64>(pixels) * 1000000ULL) / mConfig.pclk_hz;
         transmit_delay_us = static_cast<u32>(transmit_time_us) + 10;
         mTransmitDelayUs = transmit_delay_us;
     } else {
@@ -351,7 +351,7 @@ const I2sLcdCamConfig& I2sLcdCamPeripheralMockImpl::getConfig() const {
     return mConfig;
 }
 
-uint64_t I2sLcdCamPeripheralMockImpl::getMicroseconds() {
+u64 I2sLcdCamPeripheralMockImpl::getMicroseconds() {
     return fl::micros();
 }
 
@@ -468,7 +468,7 @@ void I2sLcdCamPeripheralMockImpl::simulationThreadFunc() {
         }
 
         // Check if first transmit has completed
-        uint64_t now_us = fl::micros();
+        u64 now_us = fl::micros();
 
         if (now_us >= mPendingQueue[0].completion_time_us) {
             // Remove from queue
@@ -501,7 +501,7 @@ void I2sLcdCamPeripheralMockImpl::simulationThreadFunc() {
             mCallbackExecuting.store(false, fl::memory_order_release);
         } else {
             // Wait until next completion time
-            uint64_t wait_us = mPendingQueue[0].completion_time_us - now_us;
+            u64 wait_us = mPendingQueue[0].completion_time_us - now_us;
             mCondVar.wait_for(lock, std::chrono::microseconds(wait_us));  // okay std namespace
         }
     }

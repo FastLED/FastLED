@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/stl/stdint.h"                 // for uint64_t
+#include "fl/stl/stdint.h"                 // for u64
 #include "fl/stl/vector.h"                 // for vector
 #include "fl/stl/move.h"                   // for remove_reference
 #include "fl/stl/utility.h"                // for greater, less
@@ -135,7 +135,7 @@ class priority_queue_stable {
 private:
     struct StableElement {
         T mValue;
-        uint64_t mSequence;
+        u64 mSequence;
 
         // Comparison: primary by value, secondary by sequence (FIFO)
         bool operator<(const StableElement& other) const {
@@ -210,7 +210,7 @@ public:
 
 private:
     fl::PriorityQueue<StableElement> mQueue;
-    uint64_t mNextSequence;
+    u64 mNextSequence;
 };
 
 } // namespace fl

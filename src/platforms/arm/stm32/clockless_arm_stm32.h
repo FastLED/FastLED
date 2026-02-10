@@ -56,10 +56,10 @@ protected:
         u32 cpu_freq = F_CPU;
 
         // Convert nanoseconds to clock cycles: cycles = nanoseconds * frequency / 1e9
-        // Use uint64_t to avoid overflow (e.g., 900ns * 180MHz = 162 billion)
-        u32 t1_clocks = static_cast<uint64_t>(TIMING::T1) * cpu_freq / 1000000000ULL;
-        u32 t2_clocks = static_cast<uint64_t>(TIMING::T2) * cpu_freq / 1000000000ULL;
-        u32 t3_clocks = static_cast<uint64_t>(TIMING::T3) * cpu_freq / 1000000000ULL;
+        // Use u64 to avoid overflow (e.g., 900ns * 180MHz = 162 billion)
+        u32 t1_clocks = static_cast<u64>(TIMING::T1) * cpu_freq / 1000000000ULL;
+        u32 t2_clocks = static_cast<u64>(TIMING::T2) * cpu_freq / 1000000000ULL;
+        u32 t3_clocks = static_cast<u64>(TIMING::T3) * cpu_freq / 1000000000ULL;
 
         // Clocks per microsecond for interrupt timeout checks
         u32 clks_per_us = cpu_freq / 1000000;

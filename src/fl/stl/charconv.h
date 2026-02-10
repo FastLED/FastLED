@@ -9,7 +9,7 @@
 // All functions are in the fl:: namespace.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "fl/stl/stdint.h"  // For uint64_t, uint8_t
+#include "fl/stl/stdint.h"  // For u64, uint8_t
 #include "fl/stl/cstddef.h" // For fl::size_t
 
 namespace fl {
@@ -51,7 +51,7 @@ enum class HexIntWidth : u8 {
 /// @param uppercase If true, use uppercase hex digits (A-F), otherwise lowercase (a-f)
 /// @param pad_to_width If true, pad with leading zeros to full type width
 /// @return Hexadecimal string representation
-fl::string hex(uint64_t value, HexIntWidth width, bool is_negative, bool uppercase, bool pad_to_width);
+fl::string hex(u64 value, HexIntWidth width, bool is_negative, bool uppercase, bool pad_to_width);
 
 /// @brief Compile-time integer width determination (default - triggers error)
 template<size_t Size>
@@ -78,7 +78,7 @@ constexpr HexIntWidth get_hex_int_width<4>() {
     return HexIntWidth::Width32;
 }
 
-/// @brief Specialization for 8-byte types (int64_t, uint64_t, long long, etc.)
+/// @brief Specialization for 8-byte types (i64, u64, long long, etc.)
 template<>
 constexpr HexIntWidth get_hex_int_width<8>() {
     return HexIntWidth::Width64;
@@ -101,7 +101,7 @@ int itoa(i32 value, char *buffer, int radix);
 /// @param buffer Output buffer (must be at least 66 bytes for base 2 with sign, 21 for base 10)
 /// @param radix Number base (2-36, typically 10 for decimal, 16 for hex, 8 for octal)
 /// @return Number of characters written (excluding null terminator)
-int itoa64(int64_t value, char *buffer, int radix);
+int itoa64(i64 value, char *buffer, int radix);
 
 /// @brief Convert unsigned 32-bit integer to string buffer in given radix
 /// @param value The unsigned integer value to convert
@@ -115,7 +115,7 @@ int utoa32(u32 value, char *buffer, int radix);
 /// @param buffer Output buffer (must be at least 65 bytes for base 2, 21 for base 10, 17 for base 16)
 /// @param radix Number base (2-36, typically 10 for decimal, 16 for hex, 8 for octal)
 /// @return Number of characters written (excluding null terminator)
-int utoa64(uint64_t value, char *buffer, int radix);
+int utoa64(u64 value, char *buffer, int radix);
 
 /// @brief Convert floating point number to string buffer
 /// @param value The float value to convert

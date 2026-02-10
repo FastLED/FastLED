@@ -63,7 +63,7 @@ public:
     u8* allocateDmaBuffer(size_t size) override;
     void freeDmaBuffer(u8* buffer) override;
     void delay(u32 ms) override;
-    uint64_t getMicroseconds() override;
+    u64 getMicroseconds() override;
     void freeDmaBuffer(void* ptr) override;
 
 private:
@@ -434,7 +434,7 @@ void ParlioPeripheralESPImpl::delay(u32 ms) {
 // Timer methods removed. Use fl::isr::attachTimerHandler() and related
 // functions from fl/isr.h instead.
 
-uint64_t ParlioPeripheralESPImpl::getMicroseconds() {
+u64 ParlioPeripheralESPImpl::getMicroseconds() {
     return esp_timer_get_time();
 }
 

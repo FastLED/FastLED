@@ -137,7 +137,7 @@ public:
         ChipsetTiming timing;              ///< LED chipset timing
         u32 resolution_hz;            ///< Channel clock resolution
         bool used_dma;                     ///< Whether DMA was enabled
-        uint64_t timestamp_us;             ///< Simulated timestamp (microseconds)
+        u64 timestamp_us;             ///< Simulated timestamp (microseconds)
     };
 
     //-------------------------------------------------------------------------

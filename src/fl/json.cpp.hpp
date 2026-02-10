@@ -91,15 +91,15 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                 return fl::make_shared<JsonValue>(nullptr);
             } else if (src.is<bool>()) {
                 return fl::make_shared<JsonValue>(src.as<bool>());
-            } else if (src.is<int64_t>()) {
+            } else if (src.is<i64>()) {
                 // Handle 64-bit integers
-                return fl::make_shared<JsonValue>(src.as<int64_t>());
+                return fl::make_shared<JsonValue>(src.as<i64>());
             } else if (src.is<i32>()) {
                 // Handle 32-bit integers explicitly for platform compatibility
-                return fl::make_shared<JsonValue>(static_cast<int64_t>(src.as<i32>()));
+                return fl::make_shared<JsonValue>(static_cast<i64>(src.as<i32>()));
             } else if (src.is<u32>()) {
                 // Handle unsigned 32-bit integers
-                return fl::make_shared<JsonValue>(static_cast<int64_t>(src.as<u32>()));
+                return fl::make_shared<JsonValue>(static_cast<i64>(src.as<u32>()));
             } else if (src.is<double>()) {
                 // Handle double precision floats - convert to float
                 return fl::make_shared<JsonValue>(static_cast<float>(src.as<double>()));
@@ -151,7 +151,7 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                         }
                     }
                     
-                    void checkIntegerValue(int64_t val) {
+                    void checkIntegerValue(i64 val) {
                         // Check all ranges in one pass
                         // Use (max)()/(min)() to prevent macro expansion by Arduino.h's min/max macros
                         if (val < 0 || val > (fl::numeric_limits<u8>::max)()) {
@@ -181,7 +181,7 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                 
                 for (const auto& item : arr) {
                     // Check if all items are numeric
-                    if (!item.is<i32>() && !item.is<int64_t>() && !item.is<double>()) {
+                    if (!item.is<i32>() && !item.is<i64>() && !item.is<double>()) {
                         typeInfo.disableAll();
                         #if FASTLED_DEBUG_LEVEL >= 2
                         FASTLED_WARN("Non-numeric value found, no optimization possible");
@@ -194,7 +194,7 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                         double val = item.as<double>();
                         typeInfo.checkNumericValue(val);
                     } else {
-                        int64_t val = item.is<i32>() ? item.as<i32>() : item.as<int64_t>();
+                        i64 val = item.is<i32>() ? item.as<i32>() : item.as<i64>();
                         typeInfo.checkIntegerValue(val);
                     }
                 }
@@ -211,7 +211,7 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                             if (item.is<double>()) {
                                 byteData.push_back(static_cast<u8>(item.as<double>()));
                             } else {
-                                int64_t val = item.is<i32>() ? item.as<i32>() : item.as<int64_t>();
+                                i64 val = item.is<i32>() ? item.as<i32>() : item.as<i64>();
                                 byteData.push_back(static_cast<u8>(val));
                             }
                         }
@@ -224,7 +224,7 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                             if (item.is<double>()) {
                                 intData.push_back(static_cast<i16>(item.as<double>()));
                             } else {
-                                int64_t val = item.is<i32>() ? item.as<i32>() : item.as<int64_t>();
+                                i64 val = item.is<i32>() ? item.as<i32>() : item.as<i64>();
                                 intData.push_back(static_cast<i16>(val));
                             }
                         }
@@ -237,7 +237,7 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                             if (item.is<double>()) {
                                 floatData.push_back(static_cast<float>(item.as<double>()));
                             } else {
-                                int64_t val = item.is<i32>() ? item.as<i32>() : item.as<int64_t>();
+                                i64 val = item.is<i32>() ? item.as<i32>() : item.as<i64>();
                                 floatData.push_back(static_cast<float>(val));
                             }
                         }

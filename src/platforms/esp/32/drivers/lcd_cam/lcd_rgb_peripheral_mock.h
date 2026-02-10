@@ -96,7 +96,7 @@ public:
     bool registerDrawCallback(void* callback, void* user_ctx) override = 0;
     const LcdRgbPeripheralConfig& getConfig() const override = 0;
 
-    uint64_t getMicroseconds() override = 0;
+    u64 getMicroseconds() override = 0;
     void delay(u32 ms) override = 0;
 
     //=========================================================================
@@ -107,7 +107,7 @@ public:
     struct FrameRecord {
         fl::vector<u16> buffer_copy;  ///< Copy of frame buffer
         size_t size_bytes;                  ///< Size in bytes
-        uint64_t timestamp_us;              ///< Capture timestamp
+        u64 timestamp_us;              ///< Capture timestamp
     };
 
     //-------------------------------------------------------------------------

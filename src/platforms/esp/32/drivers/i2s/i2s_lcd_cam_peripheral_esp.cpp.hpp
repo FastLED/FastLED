@@ -317,7 +317,7 @@ const I2sLcdCamConfig& I2sLcdCamPeripheralEsp::getConfig() const {
 // Platform Utilities
 //=============================================================================
 
-uint64_t I2sLcdCamPeripheralEsp::getMicroseconds() {
+u64 I2sLcdCamPeripheralEsp::getMicroseconds() {
     return esp_timer_get_time();
 }
 

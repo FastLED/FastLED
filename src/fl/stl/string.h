@@ -601,13 +601,13 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         return write(buf, len);
     }
 
-    fl::size write(const uint64_t &val) {
+    fl::size write(const u64 &val) {
         char buf[64] = {0};
         int len = fl::utoa64(val, buf, 10);
         return write(buf, len);
     }
 
-    fl::size write(const int64_t &val) {
+    fl::size write(const i64 &val) {
         char buf[64] = {0};
         int len = fl::itoa64(val, buf, 10);
         return write(buf, len);
@@ -2553,7 +2553,7 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     // Handles all multi-byte integer types (excludes char types)
     // Converts to appropriate target type based on size/signedness
     // This is needed because on some platforms type(int) is not one of the standard
-    // integral types like i8, i16, i32, int64_t etc.
+    // integral types like i8, i16, i32, i64 etc.
     template <typename T>
     typename fl::enable_if<fl::is_multi_byte_integer<T>::value, string&>::type
     append(const T &val) {
@@ -2627,14 +2627,14 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     }
 
     // 64-bit integer append methods
-    string &append(const int64_t &val) {
+    string &append(const i64 &val) {
         char buf[64] = {0};
         int len = fl::itoa64(val, buf, 10);
         write(buf, len);
         return *this;
     }
 
-    string &append(const uint64_t &val) {
+    string &append(const u64 &val) {
         char buf[64] = {0};
         int len = fl::utoa64(val, buf, 10);
         write(buf, len);
@@ -2742,13 +2742,13 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         write(buf, len);
         return *this;
     }
-    string &appendHex(int64_t val) {
+    string &appendHex(i64 val) {
         char buf[64] = {0};
-        int len = fl::utoa64(static_cast<uint64_t>(val), buf, 16);
+        int len = fl::utoa64(static_cast<u64>(val), buf, 16);
         write(buf, len);
         return *this;
     }
-    string &appendHex(uint64_t val) {
+    string &appendHex(u64 val) {
         char buf[64] = {0};
         int len = fl::utoa64(val, buf, 16);
         write(buf, len);
@@ -2792,13 +2792,13 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         write(buf, len);
         return *this;
     }
-    string &appendOct(int64_t val) {
+    string &appendOct(i64 val) {
         char buf[64] = {0};
-        int len = fl::utoa64(static_cast<uint64_t>(val), buf, 8);
+        int len = fl::utoa64(static_cast<u64>(val), buf, 8);
         write(buf, len);
         return *this;
     }
-    string &appendOct(uint64_t val) {
+    string &appendOct(u64 val) {
         char buf[64] = {0};
         int len = fl::utoa64(val, buf, 8);
         write(buf, len);
@@ -3004,16 +3004,16 @@ fl::string to_hex(T value, bool uppercase, bool pad_to_width) {
 
     // Handle signed types
     bool is_negative = false;
-    uint64_t unsigned_value;
+    u64 unsigned_value;
 
     // Check if type is signed and value is negative
-    if (static_cast<int64_t>(value) < 0 && sizeof(T) <= 8) {
-        // Only handle negative for types that fit in int64_t
+    if (static_cast<i64>(value) < 0 && sizeof(T) <= 8) {
+        // Only handle negative for types that fit in i64
         is_negative = true;
         // Convert to positive value for hex conversion
-        unsigned_value = static_cast<uint64_t>(-static_cast<int64_t>(value));
+        unsigned_value = static_cast<u64>(-static_cast<i64>(value));
     } else {
-        unsigned_value = static_cast<uint64_t>(value);
+        unsigned_value = static_cast<u64>(value);
     }
 
     return detail::hex(unsigned_value, width, is_negative, uppercase, pad_to_width);

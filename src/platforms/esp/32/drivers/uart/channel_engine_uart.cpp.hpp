@@ -132,11 +132,11 @@ void ChannelEngineUART::show() {
                      }
 
                      // Calculate transmission time: LED count * bit period
-                     uint64_t transmissionTimeA =
-                         static_cast<uint64_t>(maxSizeA) *
+                     u64 transmissionTimeA =
+                         static_cast<u64>(maxSizeA) *
                          a.mTiming.total_period_ns();
-                     uint64_t transmissionTimeB =
-                         static_cast<uint64_t>(maxSizeB) *
+                     u64 transmissionTimeB =
+                         static_cast<u64>(maxSizeB) *
                          b.mTiming.total_period_ns();
 
                      return transmissionTimeA < transmissionTimeB;

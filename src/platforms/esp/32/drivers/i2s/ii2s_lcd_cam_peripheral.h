@@ -229,7 +229,7 @@ public:
 
     /// @brief Get current timestamp in microseconds
     /// @return Current timestamp (monotonic clock)
-    virtual uint64_t getMicroseconds() = 0;
+    virtual u64 getMicroseconds() = 0;
 
     /// @brief Portable delay
     /// @param ms Delay duration in milliseconds

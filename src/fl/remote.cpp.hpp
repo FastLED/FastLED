@@ -14,9 +14,9 @@ fl::Json Remote::RpcResult::to_json() const {
     fl::Json obj = fl::Json::object();
     obj.set("function", functionName);
     obj.set("result", result);
-    obj.set("scheduledAt", static_cast<int64_t>(scheduledAt));
-    obj.set("receivedAt", static_cast<int64_t>(receivedAt));
-    obj.set("executedAt", static_cast<int64_t>(executedAt));
+    obj.set("scheduledAt", static_cast<i64>(scheduledAt));
+    obj.set("receivedAt", static_cast<i64>(receivedAt));
+    obj.set("executedAt", static_cast<i64>(executedAt));
     obj.set("wasScheduled", wasScheduled);
     return obj;
 }
@@ -142,7 +142,7 @@ Remote::Error Remote::processRpc(const fl::string& jsonStr, fl::Json& outResult)
 
     if (doc.contains("timestamp")) {
         if (doc["timestamp"].is_int()) {
-            int64_t ts = doc["timestamp"] | 0;
+            i64 ts = doc["timestamp"] | 0;
             if (ts < 0) {
                 FL_WARN("RPC: Invalid timestamp (negative), using immediate execution");
                 timestamp = 0;

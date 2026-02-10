@@ -89,8 +89,8 @@
         // AVR (8-bit): No alignment required, make it a no-op to save RAM
         #define FL_ALIGN_AS_T(expr) /* nothing */
     #else
-        // ARM/32-bit platforms: Use 8-byte alignment (safe for double/int64_t)
-        // ARM Cortex-M (STM32): Max alignment is 8 bytes (double/int64_t)
+        // ARM/32-bit platforms: Use 8-byte alignment (safe for double/i64)
+        // ARM Cortex-M (STM32): Max alignment is 8 bytes (double/i64)
         // ESP32/ESP8266: Max alignment is 4-8 bytes (wastes 0-4 bytes, acceptable)
         #define FL_ALIGN_AS_T(expr) __attribute__((aligned(8)))
     #endif

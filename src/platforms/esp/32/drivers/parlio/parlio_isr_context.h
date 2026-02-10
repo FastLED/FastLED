@@ -75,13 +75,13 @@ struct alignas(64) ParlioIsrContext {
     u32 mBytesTransmitted;
     u32 mChunksCompleted;
     bool mTransmissionActive;
-    uint64_t mEndTimeUs;
+    u64 mEndTimeUs;
 
     // === Debug Counters (volatile for ISR access) ===
     volatile u32 mDebugTxDoneCount;       // Count of txDoneCallback invocations
     volatile u32 mDebugWorkerIsrCount;    // Count of workerIsrCallback invocations
-    volatile uint64_t mDebugLastTxDoneTime;    // esp_timer_get_time() at last txDone
-    volatile uint64_t mDebugLastWorkerIsrTime; // esp_timer_get_time() at last worker ISR
+    volatile u64 mDebugLastTxDoneTime;    // esp_timer_get_time() at last txDone
+    volatile u64 mDebugLastWorkerIsrTime; // esp_timer_get_time() at last worker ISR
 
     ParlioIsrContext()
         : mStreamComplete(false), mTransmitting(false), mCurrentByte(0),

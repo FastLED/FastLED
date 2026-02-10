@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Checker to ensure stdint types (uint32_t, etc.) are not used in platform files.
+"""Checker to ensure stdint types (uint8_t, uint16_t, uint32_t, uint64_t, etc.) are not used.
 
-Use FastLED's own integer types (u32, u16, etc.) instead of stdint types
-in src/platforms/** to maintain consistency.
+Use FastLED's own integer types (u8, u16, u32, u64, i8, i16, i32, i64) from fl/int.h
+instead of stdint types to maintain consistency across the codebase.
 """
 
 from ci.util.check_files import FileContent, FileContentChecker
@@ -25,9 +25,11 @@ STDINT_TO_FL: dict[str, str] = {
     "uint8_t": "u8",
     "uint16_t": "u16",
     "uint32_t": "u32",
+    "uint64_t": "u64",
     "int8_t": "i8",
     "int16_t": "i16",
     "int32_t": "i32",
+    "int64_t": "i64",
 }
 
 # Word boundary characters for manual boundary checking
@@ -45,8 +47,9 @@ def _find_stdint_matches(code_part: str) -> list[str]:
     """Find all stdint type matches in a code string using tree-match.
 
     Uses a single str.find("int") scan and branches on the suffix character
-    to identify which of the 6 types matched. ~10x faster than the original
-    6-regex approach, ~13% faster than a combined regex alternation.
+    to identify which of the 8 types matched (u8/u16/u32/u64/i8/i16/i32/i64).
+    ~10x faster than the original regex approach, ~13% faster than a combined
+    regex alternation.
 
     Phase 1 (fast, false positives OK): str.find("int") locates candidates.
     Phase 2 (exact, no false positives): suffix check + word boundary verification.
@@ -61,7 +64,7 @@ def _find_stdint_matches(code_part: str) -> list[str]:
         if idx == -1:
             break
 
-        # Phase 1 found "int" at idx. Now check suffix for [u]int{8,16,32}_t
+        # Phase 1 found "int" at idx. Now check suffix for [u]int{8,16,32,64}_t
         after = idx + 3  # position right after "int"
         matched_type = ""
         start = idx
@@ -108,6 +111,19 @@ def _find_stdint_matches(code_part: str) -> list[str]:
                 else:
                     end = idx + 7
                     matched_type = "int32_t"
+            elif (
+                c == "6"
+                and after + 4 <= cp_len
+                and code_part[after : after + 4] == "64_t"
+            ):
+                # int64_t (7 chars) or uint64_t (8 chars)
+                if idx > 0 and code_part[idx - 1] == "u":
+                    start = idx - 1
+                    end = start + 8
+                    matched_type = "uint64_t"
+                else:
+                    end = idx + 7
+                    matched_type = "int64_t"
 
         if matched_type:
             # Phase 2: exact word boundary verification
@@ -214,7 +230,7 @@ class StdintTypeChecker(FileContentChecker):
                     violations.append(
                         (
                             line_number,
-                            f"Use '{fl_type}' instead of '{match}': {stripped}",
+                            f"Use '{fl_type}' from fl/int.h instead of '{match}': {stripped}",
                         )
                     )
 
@@ -234,7 +250,7 @@ def main() -> None:
     run_checker_standalone(
         checker,
         target_dirs,
-        "Found stdint types in checked files (use u8/u16/u32/i8/i16/i32 instead)",
+        "Found stdint types in checked files (use u8/u16/u32/u64/i8/i16/i32/i64 from fl/int.h instead)",
     )
 
 

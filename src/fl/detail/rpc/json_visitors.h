@@ -27,20 +27,20 @@ struct JsonToIntegerVisitor {
         (*this)(value);
     }
 
-    // Exact match: int64_t
-    void operator()(const int64_t& raw) {
+    // Exact match: i64
+    void operator()(const i64& raw) {
         mValue = static_cast<T>(raw);
         // Check for overflow/truncation
-        if (static_cast<int64_t>(mValue) != raw) {
+        if (static_cast<i64>(mValue) != raw) {
             mResult.addWarning("integer overflow/truncation: " + fl::to_string(raw) +
-                              " converted to " + fl::to_string(static_cast<int64_t>(mValue)));
+                              " converted to " + fl::to_string(static_cast<i64>(mValue)));
         }
     }
 
     // Boolean to integer
     void operator()(const bool& b) {
         mValue = b ? T(1) : T(0);
-        mResult.addWarning("bool converted to int " + fl::to_string(static_cast<int64_t>(mValue)));
+        mResult.addWarning("bool converted to int " + fl::to_string(static_cast<i64>(mValue)));
     }
 
     // Float to integer
@@ -49,7 +49,7 @@ struct JsonToIntegerVisitor {
         double rawDouble = static_cast<double>(raw);
         if (rawDouble != static_cast<double>(mValue)) {
             mResult.addWarning("float " + fl::to_string(rawDouble) +
-                              " truncated to int " + fl::to_string(static_cast<int64_t>(mValue)));
+                              " truncated to int " + fl::to_string(static_cast<i64>(mValue)));
         }
     }
 
@@ -59,7 +59,7 @@ struct JsonToIntegerVisitor {
         long parsed = fl::strtol(str.c_str(), &end, 10);
         if (end != str.c_str() && *end == '\0') {
             mValue = static_cast<T>(parsed);
-            mResult.addWarning("string '" + str + "' parsed to int " + fl::to_string(static_cast<int64_t>(mValue)));
+            mResult.addWarning("string '" + str + "' parsed to int " + fl::to_string(static_cast<i64>(mValue)));
         } else {
             mResult.setError("cannot parse string '" + str + "' as integer");
         }
@@ -114,7 +114,7 @@ struct JsonToBoolVisitor {
     }
 
     // Integer to bool
-    void operator()(const int64_t& raw) {
+    void operator()(const i64& raw) {
         mValue = raw != 0;
         mResult.addWarning("int " + fl::to_string(raw) + " converted to bool " + (mValue ? "true" : "false"));
     }
@@ -188,7 +188,7 @@ struct JsonToFloatVisitor {
     }
 
     // Integer to float
-    void operator()(const int64_t& raw) {
+    void operator()(const i64& raw) {
         mValue = static_cast<T>(raw);
         // Large integers may lose precision when converted to float
         if (sizeof(T) < 8 && (raw > 16777216 || raw < -16777216)) {
@@ -263,7 +263,7 @@ struct JsonToStringVisitor {
     }
 
     // Integer to string
-    void operator()(const int64_t& raw) {
+    void operator()(const i64& raw) {
         mValue = fl::to_string(raw);
         mResult.addWarning("int " + mValue + " converted to string");
     }

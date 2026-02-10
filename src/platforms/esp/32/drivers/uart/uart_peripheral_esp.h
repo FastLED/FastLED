@@ -108,7 +108,7 @@ public:
 private:
     UartPeripheralConfig mConfig;        ///< Stored configuration
     bool mInitialized;         ///< Initialization state
-    uint64_t mResetExpireTime; ///< Timestamp when reset period ends (microseconds)
+    u64 mResetExpireTime; ///< Timestamp when reset period ends (microseconds)
 };
 
 } // namespace fl

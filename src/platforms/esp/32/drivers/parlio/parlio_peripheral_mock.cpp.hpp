@@ -145,7 +145,7 @@ public:
     u8* allocateDmaBuffer(size_t size) override;
     void freeDmaBuffer(u8* buffer) override;
     void delay(u32 ms) override;
-    uint64_t getMicroseconds() override;
+    u64 getMicroseconds() override;
     void freeDmaBuffer(void* ptr) override;
 
     //=========================================================================
@@ -197,7 +197,7 @@ private:
 
     // Per-transmission tracking for simulation thread
     struct PendingTransmission {
-        uint64_t completion_time_us;  // When this transmission should complete
+        u64 completion_time_us;  // When this transmission should complete
     };
     fl::vector<PendingTransmission> mPendingQueue;
 
@@ -351,7 +351,7 @@ bool ParlioPeripheralMockImpl::transmit(const u8* buffer, size_t bit_count, u16 
     u32 transmission_delay_us;
     if (mConfig.clock_freq_hz > 0) {
         // Calculate transmission time in microseconds
-        uint64_t transmission_time_us = (static_cast<uint64_t>(bit_count) * 1000000ULL) / mConfig.clock_freq_hz;
+        u64 transmission_time_us = (static_cast<u64>(bit_count) * 1000000ULL) / mConfig.clock_freq_hz;
         // Add small overhead for buffer switching (10 microseconds)
         transmission_delay_us = static_cast<u32>(transmission_time_us) + 10;
     } else {
@@ -530,7 +530,7 @@ void ParlioPeripheralMockImpl::delay(u32 ms) {
     fl::delay(ms);
 }
 
-uint64_t ParlioPeripheralMockImpl::getMicroseconds() {
+u64 ParlioPeripheralMockImpl::getMicroseconds() {
     // Use the same timestamp source as transmit() for consistency
     return fl::micros();
 }
@@ -704,7 +704,7 @@ void ParlioPeripheralMockImpl::simulationThreadFunc() {
         // Check if there are pending transmissions in the queue
         if (!mPendingQueue.empty()) {
             // Get current time
-            uint64_t now_us = fl::micros();
+            u64 now_us = fl::micros();
 
             // Check if the first transmission has completed
             if (now_us >= mPendingQueue[0].completion_time_us) {
@@ -750,7 +750,7 @@ void ParlioPeripheralMockImpl::simulationThreadFunc() {
                 continue;
             } else {
                 // Wait efficiently until next transmission should complete
-                uint64_t time_until_next = mPendingQueue[0].completion_time_us - now_us;
+                u64 time_until_next = mPendingQueue[0].completion_time_us - now_us;
 
                 // Use condition variable with timeout for efficient waiting
                 // This avoids busy-polling while still waking up when the transmission should complete

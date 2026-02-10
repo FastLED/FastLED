@@ -810,12 +810,12 @@ class RmtRxChannelImpl : public RmtRxChannel {
         }
 
         // Convert timeout to microseconds for comparison
-        int64_t timeout_us = static_cast<int64_t>(timeout_ms) * 1000;
+        i64 timeout_us = static_cast<i64>(timeout_ms) * 1000;
 
         // Busy-wait with yield (using ESP-IDF native functions)
-        int64_t start_time_us = esp_timer_get_time();
+        i64 start_time_us = esp_timer_get_time();
         while (!finished()) {
-            int64_t elapsed_us = esp_timer_get_time() - start_time_us;
+            i64 elapsed_us = esp_timer_get_time() - start_time_us;
 
             // Check if buffer filled (success condition)
             if (mSymbolsReceived >= mBufferSize) {
@@ -1064,11 +1064,11 @@ class RmtRxChannelImpl : public RmtRxChannel {
             // Wait for receive to complete (with timeout)
             constexpr u32 SKIP_TIMEOUT_MS =
                 5000; // 5 second timeout per chunk
-            int64_t start_time_us = esp_timer_get_time();
-            int64_t timeout_us = SKIP_TIMEOUT_MS * 1000;
+            i64 start_time_us = esp_timer_get_time();
+            i64 timeout_us = SKIP_TIMEOUT_MS * 1000;
 
             while (!mReceiveDone) {
-                int64_t elapsed_us = esp_timer_get_time() - start_time_us;
+                i64 elapsed_us = esp_timer_get_time() - start_time_us;
                 if (elapsed_us >= timeout_us) {
                     FL_WARN("handleSkipPhase(): timeout waiting for symbols");
                     return false;

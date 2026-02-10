@@ -14,8 +14,8 @@ namespace detail {
 //=============================================================================
 
 struct ParlioDebugMetrics {
-    uint64_t mStartTimeUs;
-    uint64_t mEndTimeUs;
+    u64 mStartTimeUs;
+    u64 mEndTimeUs;
     u32 mIsrCount;
     u32 mChunksQueued;
     u32 mChunksCompleted;

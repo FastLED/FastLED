@@ -55,7 +55,7 @@ public:
     bool registerTransmitCallback(void* callback, void* user_ctx) override;
     const I2sLcdCamConfig& getConfig() const override;
 
-    uint64_t getMicroseconds() override;
+    u64 getMicroseconds() override;
     void delay(u32 ms) override;
 
 private:

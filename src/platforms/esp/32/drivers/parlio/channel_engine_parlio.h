@@ -362,7 +362,7 @@ struct alignas(64) ParlioIsrContext {
 
     // Diagnostic fields (written by ISR, read by main thread after barrier)
     bool transmission_active;       ///< Debug: Transmission currently active
-    uint64_t end_time_us;           ///< Debug: Transmission end timestamp (microseconds)
+    u64 end_time_us;           ///< Debug: Transmission end timestamp (microseconds)
 
     // Debug: DMA buffer output tracking (main thread writes, Validation.ino reads)
     fl::deque<u8> mDebugDmaOutput; ///< Copy of all DMA buffer data for validation (uses deque to avoid large contiguous allocation)
@@ -628,9 +628,9 @@ class ChannelEnginePARLIO : public IChannelEngine {
 
 /// @brief Debug metrics structure for PARLIO transmission analysis
 struct ParlioDebugMetrics {
-    uint64_t
+    u64
         mStartTimeUs; ///< Timestamp when transmission begins (microseconds)
-    uint64_t
+    u64
         mEndTimeUs; ///< Timestamp when transmission completes (microseconds)
     u32 mIsrCount;        ///< Number of ISR callbacks fired
     u32 mChunksQueued;    ///< Number of chunks queued for transmission

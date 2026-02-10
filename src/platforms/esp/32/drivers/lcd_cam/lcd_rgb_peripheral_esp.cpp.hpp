@@ -306,7 +306,7 @@ const LcdRgbPeripheralConfig& LcdRgbPeripheralEsp::getConfig() const {
 // Platform Utilities
 //=============================================================================
 
-uint64_t LcdRgbPeripheralEsp::getMicroseconds() {
+u64 LcdRgbPeripheralEsp::getMicroseconds() {
     return esp_timer_get_time();
 }
 

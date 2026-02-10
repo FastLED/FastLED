@@ -118,11 +118,11 @@ FL_ALWAYS_INLINE u32 scale32by8(u32 i, fract8 scale) {
     }
 #if FASTLED_SCALE8_FIXED == 1
     u32 result;
-    result = (((uint64_t)(i) * (1 + ((uint64_t)scale))) >> 8);
+    result = (((u64)(i) * (1 + ((u64)scale))) >> 8);
     return result;
 #else
     u32 result;
-    result = (((uint64_t)i * (uint64_t)scale) >> 8);
+    result = (((u64)i * (u64)scale) >> 8);
     return result;
 #endif
 }

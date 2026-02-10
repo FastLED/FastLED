@@ -44,7 +44,7 @@ struct stub_isr_handle_data {
     isr_handler_t mUserHandler;                // User handler function
     void* mUserData;                           // User context
     u32 mFrequencyHz;                     // Timer frequency
-    uint64_t mNextTickUs;                      // Next scheduled tick (microseconds since epoch)
+    u64 mNextTickUs;                      // Next scheduled tick (microseconds since epoch)
     bool mIsOneShot;                           // One-shot vs auto-reload
     bool mIsTimer;                             // true = timer, false = external
     u32 mHandleId;                        // Unique ID for this handler
@@ -113,7 +113,7 @@ public:
 
         // Calculate initial tick time
         auto now = get_time_us();
-        uint64_t period_us = handler->mFrequencyHz > 0 ? (1000000ULL / handler->mFrequencyHz) : 0;
+        u64 period_us = handler->mFrequencyHz > 0 ? (1000000ULL / handler->mFrequencyHz) : 0;
         handler->mNextTickUs = now + period_us;
 
         mHandlers.push_back(handler);
@@ -130,8 +130,8 @@ public:
 
     void reschedule_handler(stub_isr_handle_data* handler) {
         fl::unique_lock<fl::mutex> lock(mMutex);
-        uint64_t now = get_time_us();
-        uint64_t period_us = handler->mFrequencyHz > 0 ? (1000000ULL / handler->mFrequencyHz) : 0;
+        u64 now = get_time_us();
+        u64 period_us = handler->mFrequencyHz > 0 ? (1000000ULL / handler->mFrequencyHz) : 0;
         handler->mNextTickUs = now + period_us;
         // Wake up the timer thread to process the rescheduled handler
         mCondVar.notify_one();
@@ -178,7 +178,7 @@ private:
     TimerThreadManager(const TimerThreadManager&) = delete;
     TimerThreadManager& operator=(const TimerThreadManager&) = delete;
 
-    static uint64_t get_time_us() {
+    static u64 get_time_us() {
         using clock = std::chrono::high_resolution_clock;  // okay std namespace
         auto now = clock::now();
         auto duration = now.time_since_epoch();
@@ -189,8 +189,8 @@ private:
         fl::unique_lock<fl::mutex> lock(mMutex);
 
         while (!mShouldStop) {
-            uint64_t now = get_time_us();
-            uint64_t next_wake = fl::numeric_limits<uint64_t>::max();  // Initialize to max value
+            u64 now = get_time_us();
+            u64 next_wake = fl::numeric_limits<u64>::max();  // Initialize to max value
             bool has_enabled_handlers = false;
 
             // Check global interrupt state
@@ -221,7 +221,7 @@ private:
                     if (handler->mIsOneShot) {
                         handler->mIsEnabled.store(false, fl::memory_order_release);
                     } else {
-                        uint64_t period_us = 1000000ULL / handler->mFrequencyHz;
+                        u64 period_us = 1000000ULL / handler->mFrequencyHz;
                         // TIMING FIX: Maintain original schedule to prevent drift under heavy load
                         // Instead of: handler->mNextTickUs = now + period_us;
                         // We increment from the last scheduled time to avoid cumulative drift
@@ -245,7 +245,7 @@ private:
             if (has_enabled_handlers && next_wake > now) {
                 // Wait for exact duration until next handler fires
                 // Will wake immediately if notify_one() is called (handler added/removed/rescheduled)
-                uint64_t sleep_us = next_wake - now;
+                u64 sleep_us = next_wake - now;
                 mCondVar.wait_for(lock, std::chrono::microseconds(sleep_us));  // okay std namespace
             } else if (!has_enabled_handlers) {
                 // No enabled handlers - wait indefinitely until notified (handler added/rescheduled)
