@@ -152,6 +152,8 @@
 #include "fl/stl/functional.h"
 #include "fl/stl/cctype.h"
 #include "fl/stl/charconv.h"
+#include "fl/stl/limits.h"
+#include "fl/log.h"
 #include "fl/promise.h" // For Error type
 
 #include "fl/sketch_macros.h"
@@ -311,9 +313,24 @@ struct IntConversionVisitor {
     }
     
     // Special handling to avoid conflict when IntType is i64
+    // With overflow detection and logging
     template<typename T = IntType>
     typename fl::enable_if<!fl::is_same<T, i64>::value, void>::type
     operator()(const i64& value) {
+        // Check for overflow before casting
+        // For signed types: check if value is within [min, max] range
+        // For unsigned types: check if value is non-negative and within [0, max] range
+        // Use parentheses around min/max to protect against Arduino min/max macros
+        const i64 min_val = static_cast<i64>((fl::numeric_limits<IntType>::min)());
+        const i64 max_val = static_cast<i64>((fl::numeric_limits<IntType>::max)());
+
+        if (value < min_val || value > max_val) {
+            // Log overflow error but still perform conversion (value will be truncated)
+            FL_ERROR("JSON integer overflow: value " << value << " does not fit in target type (range: "
+                     << min_val << " to " << max_val << "), truncating");
+        }
+
+        // Always perform conversion, even if overflow detected
         result = static_cast<IntType>(value);
     }
     
@@ -2186,6 +2203,22 @@ public:
     void set(const fl::string& key, const char* value) { set(key, Json(value)); }
     template<typename T, typename = fl::enable_if_t<fl::is_same<T, char>::value>>
     void set(const fl::string& key, T value) { set(key, Json(value)); }
+
+    // Generic setter for all integer types (excluding bool, int, and i64 which have explicit overloads)
+    // Converts to i64 for internal storage
+    template<typename IntType>
+    typename fl::enable_if<
+        fl::is_integral<IntType>::value &&
+        !fl::is_same<IntType, bool>::value &&
+        !fl::is_same<IntType, int>::value &&
+        !fl::is_same<IntType, i64>::value &&
+        !fl::is_same<IntType, char>::value,
+        void
+    >::type
+    set(const fl::string& key, IntType value) {
+        // Convert to i64 for storage
+        set(key, Json(static_cast<i64>(value)));
+    }
     
     // Array push_back methods
     void push_back(const Json& value) {
