@@ -97,10 +97,11 @@ elif build_mode == 'quick'
     '-g1',                      # Minimal debug info (function names + line numbers)
   ]
 elif build_mode == 'release'
-  # Release mode: Optimized production build (no stack trace preservation)
+  # Release mode: Optimized production build with thin LTO (no stack trace preservation)
   base_optimization = base_common + [
     '-O2',                      # Standard optimization (good performance, reasonable compile time)
     '-DNDEBUG',                 # Disable assertions
+    '-flto=thin',               # Thin LTO for smaller binaries and better cross-module optimization
   ]
 elif build_mode == 'profile'
   # Profile mode: Size-optimized with debug symbols for callgrind profiling
@@ -198,6 +199,10 @@ if is_clang_tool_chain
 endif
 if build_mode != 'debug'
   core_link_args += ['-Wl,--no-undefined']
+endif
+if build_mode == 'release'
+  # Enable thin LTO at link time for release builds
+  core_link_args += ['-flto=thin']
 endif
 
 # Sanitizer link flags (used in debug mode)
