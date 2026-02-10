@@ -37,9 +37,6 @@ RmtController5LowLevel::RmtController5LowLevel(
     const ChipsetTiming& timing
 )
 {
-    // Get the ChannelBusManager singleton instance (which manages RMT/SPI engines)
-    mEngine = &channelBusManager();
-
     // Create ChipsetTimingConfig from ChipsetTiming
     ChipsetTimingConfig timingConfig(
         timing.T1,
@@ -51,6 +48,10 @@ RmtController5LowLevel::RmtController5LowLevel(
 
     // Create ChannelData for this controller
     mChannelData = ChannelData::create(pin, timingConfig);
+
+    // Get RMT engine from ChannelBusManager by name
+    auto& manager = channelBusManager();
+    mEngine = manager.getEngineByName("RMT");
 }
 
 RmtController5LowLevel::~RmtController5LowLevel() {
@@ -74,10 +75,18 @@ void RmtController5LowLevel::loadPixelData(PixelIterator& pixels) {
 }
 
 void RmtController5LowLevel::showPixels() {
-    // Enqueue channel data to engine
-    mEngine->enqueue(mChannelData);
+    // Get RMT engine if not already set
+    if (!mEngine) {
+        auto& manager = channelBusManager();
+        mEngine = manager.getEngineByName("RMT");
+    }
 
-
+    // Enqueue channel data to RMT engine if available
+    if (mEngine) {
+        mEngine->enqueue(mChannelData);
+    } else {
+        FL_WARN("RMT5 Controller: RMT engine not available for showPixels()");
+    }
 }
 
 } // namespace fl

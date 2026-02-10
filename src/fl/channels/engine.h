@@ -127,8 +127,8 @@ public:
     /// @brief Wait for engine to become READY
     /// @param timeoutMs Optional timeout in milliseconds (0 = no timeout)
     /// @return true if engine became READY, false if timeout occurred
-    bool waitForReady(uint32_t timeoutMs = 1000);
-    bool waitForReadyOrDraining(uint32_t timeoutMs = 1000);
+    bool waitForReady(u32 timeoutMs = 1000);
+    bool waitForReadyOrDraining(u32 timeoutMs = 1000);
 
     /// @brief Virtual destructor
     virtual ~IChannelEngine() = default;

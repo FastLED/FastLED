@@ -58,7 +58,7 @@ private:
     ChannelDataPtr mChannelData;
 
     // Channel engine for RMT transmission
-    IChannelEngine* mEngine;
+    fl::shared_ptr<IChannelEngine> mEngine;
 };
 
 } // namespace fl
