@@ -139,75 +139,40 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
         FL_WARN("[CAPTURE] " << driver_name << " TX -> RMT RX: External GPIO wire (io_loop_back=false)");
     }
 
-    // ESP32-S3 WORKAROUND EXPERIMENT:
-    // On ESP32-S3, RMT TX GPIO output is blocked when RMT RX is active.
-    // Try: Start TX first WITHOUT RX armed, then arm RX after a brief delay
-    // to catch the majority of the transmission.
+    // Driver-aware capture strategy:
+    // - RMT: Two-TX approach (ESP32-S3 workaround - TX GPIO blocked when RX active)
+    // - PARLIO/SPI/other: Single-TX approach (arm RX first, then TX)
 
-    int rx_pin = rx_channel->getPin();
+    if (is_rmt_driver) {
+        // RMT: Two-TX approach for ESP32-S3 compatibility
+        // First TX without RX armed (diagnostics), then arm RX, then second TX
+        FL_WARN("[CAPTURE] RMT: Two-TX approach (ESP32-S3 workaround)");
+        FastLED.show();
+        FastLED.wait();
 
-    // DEBUG: Log when we're about to call FastLED.show() for RMT validation
-    FL_WARN("[CAPTURE] Calling FastLED.show() - TX first, then arm RX...");
+        // Arm RX for capture
+        if (!rx_channel->begin(rx_config)) {
+            FL_ERROR("Failed to arm RX receiver");
+            return 0;
+        }
+        // Second TX with RX armed
+        FastLED.show();
+        FastLED.wait();
+    } else {
+        // Non-RMT (PARLIO, SPI, etc.): Single-TX approach
+        // Arm RX first, then TX - avoids double-transmission issues with streaming engines
+        FL_WARN("[CAPTURE] " << driver_name << ": Single-TX approach (arm RX first)");
 
-    // Sample GPIO before TX (should be LOW - idle state)
-    int gpio_before_tx = gpio_get_level(static_cast<gpio_num_t>(rx_pin));
+        if (!rx_channel->begin(rx_config)) {
+            FL_ERROR("Failed to arm RX receiver");
+            return 0;
+        }
 
-    // Start TX transmission (RX is NOT armed yet)
-    uint32_t tx_start = micros();
-    FastLED.show();  // This starts TX asynchronously on some drivers, blocks on others
-    FastLED.wait();  // Wait for transmission to complete before proceeding
-    uint32_t tx_end = micros();
-
-    // Sample GPIO after TX to verify signal was output
-    int gpio_samples_high = 0;
-    int gpio_samples_low = 0;
-    for (int i = 0; i < 20; i++) {
-        int level = gpio_get_level(static_cast<gpio_num_t>(rx_pin));
-        if (level) gpio_samples_high++; else gpio_samples_low++;
-        fl::delayMicroseconds(5);
+        FastLED.show();
+        FastLED.wait();
     }
 
-    FL_WARN("[CAPTURE] TX completed in " << (tx_end - tx_start) << "us");
-    FL_WARN("[CAPTURE] RX GPIO " << rx_pin << " diagnostic: before_tx=" << gpio_before_tx
-            << ", samples_high=" << gpio_samples_high << ", samples_low=" << gpio_samples_low);
 
-    // Now arm RX for the NEXT transmission
-    // This approach means we need to do TWO transmissions:
-    // 1. First TX: Outputs to GPIO (RX not armed) - for diagnostics
-    // 2. Second TX: RX armed but GPIO might be blocked (ESP32-S3 limitation)
-
-    // Arm RX for capture
-    if (!rx_channel->begin(rx_config)) {
-        FL_ERROR("Failed to arm RX receiver");
-        return 0;
-    }
-
-    // Allow RX to fully arm
-    fl::delayMicroseconds(50);
-
-    // Second TX with RX armed - this is where we capture
-    FL_WARN("[CAPTURE] Second TX with RX armed...");
-    uint32_t tx2_start = micros();
-    FastLED.show();
-    FastLED.wait();  // Wait for transmission to complete before RX processing
-    uint32_t tx2_end = micros();
-
-    // Sample GPIO during/after second TX (with RX armed)
-    int gpio2_high = 0;
-    int gpio2_low = 0;
-    for (int i = 0; i < 20; i++) {
-        int level = gpio_get_level(static_cast<gpio_num_t>(rx_pin));
-        if (level) gpio2_high++; else gpio2_low++;
-        fl::delayMicroseconds(5);
-    }
-
-    FL_WARN("[CAPTURE] Second TX completed in " << (tx2_end - tx2_start) << "us");
-    FL_WARN("[CAPTURE] Second TX GPIO diagnostic: samples_high=" << gpio2_high << ", samples_low=" << gpio2_low);
-
-    // Small delay to ensure SPI data has been fully output to GPIO
-    // The SPI transaction callback fires when DMA completes, but there may be
-    // additional latency before the last bits appear on the MOSI pin
-    fl::delayMicroseconds(100);  // TODO: AI put this in - seems way to large.
 
 
     // Wait for RX completion (150ms timeout for 3000 LEDs @ WS2812B timing)
@@ -352,16 +317,8 @@ void runTest(const char* test_name,
 
         size_t bytes_expected = num_leds * 3;
 
-        // Phase 1 Iteration 9: Account for front padding in RX buffer (PARLIO ONLY)
-        // PARLIO TX sends: [front_pad (8 bytes)] + [LED_data] + [back_pad (8 bytes)] + [reset]
-        // RX decoder captures EVERYTHING, so rx_buffer layout is:
-        //   rx_buffer[0-7] = front padding (decoded to zeros)
-        //   rx_buffer[8...] = actual LED data
-        // We need to skip the first 8 bytes (1 Wave8Byte per lane) when validating
-        //
-        // RMT/SPI/UART/I2S do NOT use front padding - data starts at offset 0
-        const bool is_parlio = (fl::strcmp(ctx.driver_name, "PARLIO") == 0);
-        const size_t front_padding_bytes = is_parlio ? 8 : 0; // 1 Wave8Byte = 8 bytes per lane (PARLIO only)
+        // NEVER EVER CHANGE THIS!!!!!
+        const size_t front_padding_bytes = 0; // No front padding: PARLIO FRONT_PAD_BYTES=0
         const size_t rx_buffer_offset = front_padding_bytes;
 
         if (bytes_captured > bytes_expected + front_padding_bytes) {
@@ -473,8 +430,7 @@ void runMultiTest(const char* test_name,
             size_t bytes_expected = num_leds * 3;
 
             // Determine front padding offset (PARLIO only)
-            const bool is_parlio = (fl::strcmp(config.driver_name, "PARLIO") == 0);
-            const size_t rx_buffer_offset = is_parlio ? 8 : 0;
+            const size_t rx_buffer_offset = 0; // No front padding: PARLIO FRONT_PAD_BYTES=0
 
             // DEBUG: Print first 24 bytes of captured data (first LED)
             FL_WARN("[RUN " << run << "] Driver=" << config.driver_name << ", offset=" << rx_buffer_offset << ", bytes_captured=" << bytes_captured);
@@ -652,15 +608,6 @@ void validateChipsetTiming(fl::ValidationConfig& config,
     // Without this delay, the RX will capture the pre-initialization BLACK frame instead of the test pattern
     // PARLIO is a streaming engine with ring buffers - need time to drain the initial frame
     delay(5);  // Reduced from 100ms - just enough for buffer drain
-
-    // DIAGNOSTIC: Second TX before RX is armed - verify GPIO still works
-    FL_WARN("[PREINIT] Second FastLED.show() - RX STILL not armed");
-    for (size_t i = 0; i < config.tx_configs.size(); i++) {
-        fill_solid(config.tx_configs[i].mLeds.data(), config.tx_configs[i].mLeds.size(), CRGB::Red);
-    }
-    FastLED.show();
-    FastLED.wait();  // Wait for transmission to complete
-    delay(5);
 
     // Run test patterns (mixed bit patterns to test MSB vs LSB handling)
     int total = 0;
