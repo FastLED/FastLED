@@ -99,8 +99,59 @@ fl::Json makeResponse(bool success, ReturnCode returnCode, const char* message,
 
 ValidationRemoteControl::ValidationRemoteControl()
     : mRemote(fl::make_unique<fl::Remote>(
-        []() -> fl::optional<fl::Json> { return fl::nullopt; },  // No auto-pull
-        [](const fl::Json&) {}  // No auto-push
+        []() -> fl::optional<fl::Json> {  // RequestSource: read and parse from Serial
+            if (Serial.available() > 0) {
+                String _input = Serial.readStringUntil('\n');
+                fl::string input = _input.c_str();
+                input.trim();
+
+                if (!input.empty() && input[0] == '{') {
+                    // Parse JSON
+                    fl::Json doc = fl::Json::parse(input);
+
+                    // Build JSON-RPC 2.0 request
+                    // Old format: {"function": "test", "args": {...}, "timestamp": 0}
+                    // New format: {"method": "test", "params": {...}, "id": 1, "timestamp": 0}
+                    fl::Json request = fl::Json::object();
+
+                    // Map "function" to "method" (with fallback)
+                    if (doc.contains("method")) {
+                        request.set("method", doc["method"]);
+                    } else if (doc.contains("function")) {
+                        request.set("method", doc["function"]);
+                    } else {
+                        request.set("method", "");
+                    }
+
+                    // Map "args" to "params" (with fallback)
+                    if (doc.contains("params")) {
+                        request.set("params", doc["params"]);
+                    } else if (doc.contains("args")) {
+                        request.set("params", doc["args"]);
+                    } else {
+                        request.set("params", fl::Json::array());
+                    }
+
+                    // Add id field (required for JSON-RPC 2.0)
+                    if (doc.contains("id")) {
+                        request.set("id", doc["id"]);
+                    } else {
+                        request.set("id", 1);
+                    }
+
+                    // Add timestamp if present (for scheduled execution)
+                    if (doc.contains("timestamp")) {
+                        request.set("timestamp", doc["timestamp"]);
+                    }
+
+                    return request;
+                }
+            }
+            return fl::nullopt;
+        },
+        [](const fl::Json& response) {  // ResponseSink: prepend REMOTE: prefix
+            printJsonRaw(response, "REMOTE: ");
+        }
     ))
     , mpDriversAvailable(nullptr)
     , mpRxChannel(nullptr)
@@ -1114,76 +1165,7 @@ void ValidationRemoteControl::registerFunctions(
 
 void ValidationRemoteControl::tick(uint32_t current_millis) {
     if (mRemote) {
-        mRemote->tick(current_millis);
+        // Remote::update() does pull + tick + push
+        mRemote->update(current_millis);
     }
-}
-
-bool ValidationRemoteControl::processSerialInput() {
-    if (!mRemote) {
-        return false;  // Not initialized yet
-    }
-
-    // Read any available serial data
-    while (Serial.available() > 0) {
-        String _input = Serial.readStringUntil('\n');
-        fl::string input = _input.c_str();
-        input.trim();
-
-        // JSON RPC command (starts with '{')
-        if (!input.empty() && input[0] == '{') {
-            // Parse JSON
-            fl::Json doc = fl::Json::parse(input);
-
-            // Build JSON-RPC 2.0 request
-            // Old format: {"function": "test", "args": {...}, "timestamp": 0}
-            // New format: {"method": "test", "params": {...}, "id": 1, "timestamp": 0}
-            fl::Json request = fl::Json::object();
-
-            // Map "function" to "method" (with fallback)
-            if (doc.contains("method")) {
-                request.set("method", doc["method"]);
-            } else if (doc.contains("function")) {
-                request.set("method", doc["function"]);
-            } else {
-                request.set("method", "");
-            }
-
-            // Map "args" to "params" (with fallback)
-            if (doc.contains("params")) {
-                request.set("params", doc["params"]);
-            } else if (doc.contains("args")) {
-                request.set("params", doc["args"]);
-            } else {
-                request.set("params", fl::Json::array());
-            }
-
-            // Add id field (required for JSON-RPC 2.0)
-            if (doc.contains("id")) {
-                request.set("id", doc["id"]);
-            } else {
-                request.set("id", 1);
-            }
-
-            // Add timestamp if present (for scheduled execution)
-            if (doc.contains("timestamp")) {
-                request.set("timestamp", doc["timestamp"]);
-            }
-
-            // Process RPC - returns JSON with "result" or "error" field
-            fl::Json response = mRemote->processRpc(request);
-
-            FL_PRINT("[RPC] processRpc() returned");
-
-            // Print response directly (already in correct format)
-            if (response.has_value()) {
-                FL_PRINT("[RPC] About to printJson...");
-                printJsonRaw(response);
-                FL_PRINT("[RPC] printJson() completed");
-            } else {
-                FL_WARN("[RPC] processRpc returned empty response");
-            }
-        }
-    }
-
-    return false;
 }

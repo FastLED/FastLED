@@ -243,7 +243,11 @@ class RpcClient:
 
         assert self._monitor is not None
 
-        cmd = {"function": function, "args": args or []}
+        # Wrap args in array to pass as single Json parameter to RPC functions
+        # RPC functions expect signature: (const fl::Json& args)
+        # So we need to pass the entire args as one parameter
+        wrapped_args = [args] if args is not None else [{}]
+        cmd = {"function": function, "args": wrapped_args}
         cmd_str = json.dumps(cmd, separators=(",", ":"))
 
         effective_timeout = timeout if timeout is not None else self.timeout
@@ -298,7 +302,11 @@ class RpcClient:
 
         assert self._monitor is not None
 
-        cmd = {"function": function, "args": args or []}
+        # Wrap args in array to pass as single Json parameter to RPC functions
+        # RPC functions expect signature: (const fl::Json& args)
+        # So we need to pass the entire args as one parameter
+        wrapped_args = [args] if args is not None else [{}]
+        cmd = {"function": function, "args": wrapped_args}
         cmd_str = json.dumps(cmd, separators=(",", ":"))
 
         effective_timeout = timeout if timeout is not None else self.timeout
@@ -319,10 +327,33 @@ class RpcClient:
                         json_str = line[len(self.RESPONSE_PREFIX) :]
                         try:
                             data = json.loads(json_str)
-                            if match_key is None or match_key in data:
+                            # Check if match_key is present
+                            # For JSON-RPC 2.0 responses, check inside "result" field
+                            match_found = False
+                            if match_key is None:
+                                match_found = True
+                            elif match_key in data:
+                                match_found = True
+                            elif (
+                                "result" in data
+                                and isinstance(data["result"], dict)
+                                and match_key in data["result"]
+                            ):
+                                match_found = True
+
+                            if match_found:
+                                # Extract result field for JSON-RPC 2.0 responses
+                                # This allows validation code to use response.get("key") directly
+                                response_data = (
+                                    data.get("result", data)
+                                    if "result" in data
+                                    else data
+                                )
                                 return RpcResponse(
-                                    success=data.get("success", True),
-                                    data=data,
+                                    success=data.get("success", True)
+                                    if "success" in data
+                                    else response_data.get("success", True),
+                                    data=response_data,
                                     raw_line=line,
                                 )
                         except json.JSONDecodeError:
@@ -366,9 +397,16 @@ class RpcClient:
                     json_str = line[len(self.RESPONSE_PREFIX) :]
                     try:
                         data = json.loads(json_str)
+                        # Extract result field for JSON-RPC 2.0 responses
+                        # This allows validation code to use response.get("key") directly
+                        response_data = (
+                            data.get("result", data) if "result" in data else data
+                        )
                         return RpcResponse(
-                            success=data.get("success", True),
-                            data=data,
+                            success=data.get("success", True)
+                            if "success" in data
+                            else response_data.get("success", True),
+                            data=response_data,
                             raw_line=line,
                         )
                     except json.JSONDecodeError:

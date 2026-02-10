@@ -34,8 +34,7 @@ inline fl::task setupRpcAsyncTask(ValidationRemoteControl& remote_control, int i
     return fl::task::every_ms(interval_ms, FL_TRACE)
         .then([&remote_control]() {
             uint32_t current_time = millis();
-            remote_control.tick(current_time);
-            remote_control.processSerialInput();
+            remote_control.tick(current_time);  // Calls Remote::update() which does pull + tick + push
         });
 }
 
