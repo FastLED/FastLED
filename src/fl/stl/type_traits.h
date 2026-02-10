@@ -212,6 +212,11 @@ template <typename T> struct is_rvalue_reference<T &&> {
     enum : bool { value = true };
 };
 
+// Define is_reference trait (true for both lvalue and rvalue references)
+template <typename T> struct is_reference {
+    enum : bool { value = is_lvalue_reference<T>::value || is_rvalue_reference<T>::value };
+};
+
 // Define is_void trait
 template <typename T> struct is_void {
     enum : bool { value = false };

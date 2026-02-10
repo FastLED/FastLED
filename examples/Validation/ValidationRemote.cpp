@@ -98,7 +98,10 @@ fl::Json makeResponse(bool success, ReturnCode returnCode, const char* message,
 // No forward declarations needed - using one-test-per-RPC architecture
 
 ValidationRemoteControl::ValidationRemoteControl()
-    : mRemote(fl::make_unique<fl::Remote>())
+    : mRemote(fl::make_unique<fl::Remote>(
+        []() -> fl::optional<fl::Json> { return fl::nullopt; },  // No auto-pull
+        [](const fl::Json&) {}  // No auto-push
+    ))
     , mpDriversAvailable(nullptr)
     , mpRxChannel(nullptr)
     , mRxBuffer(nullptr, 0)
@@ -130,6 +133,11 @@ void ValidationRemoteControl::registerFunctions(
     mDefaultPinTx = default_pin_tx;
     mDefaultPinRx = default_pin_rx;
     mRxFactory = rx_factory;
+
+    // NOTE: All RPC callbacks use const fl::Json& for efficient parameter passing.
+    // The RPC system strips const/reference qualifiers and stores values in the tuple,
+    // then passes them as references to the function. This avoids copies while
+    // maintaining clean const-correct API.
 
     // Register "status" function - device readiness check
     mRemote->bind("status", [this](const fl::Json& args) -> fl::Json {
@@ -1123,56 +1131,56 @@ bool ValidationRemoteControl::processSerialInput() {
 
         // JSON RPC command (starts with '{')
         if (!input.empty() && input[0] == '{') {
-            // Parse JSON and create RpcRequest
+            // Parse JSON
             fl::Json doc = fl::Json::parse(input);
-            auto response = mRemote->processRpc(fl::Remote::RpcRequest{
-                doc["function"] | fl::string(""),
-                doc["args"],
-                static_cast<fl::u32>(doc["timestamp"] | 0)
-            });
 
-            FL_PRINT("[RPC] processRpc() returned, ok: " << response.ok());
-            if (response.ok()) {
-                FL_PRINT("[RPC] result.has_value(): " << response.value().has_value());
+            // Build JSON-RPC 2.0 request
+            // Old format: {"function": "test", "args": {...}, "timestamp": 0}
+            // New format: {"method": "test", "params": {...}, "id": 1, "timestamp": 0}
+            fl::Json request = fl::Json::object();
+
+            // Map "function" to "method" (with fallback)
+            if (doc.contains("method")) {
+                request.set("method", doc["method"]);
+            } else if (doc.contains("function")) {
+                request.set("method", doc["function"]);
+            } else {
+                request.set("method", "");
             }
 
-            if (response.ok()) {
-                // If function returned a value, print it
-                fl::Json result = response.value();
-                if (result.has_value()) {
-                    FL_PRINT("[RPC] About to printJson...");
-                    printJsonRaw(result);
-                    FL_PRINT("[RPC] printJson() completed");
-                } else {
-                    FL_WARN("[RPC] Function executed but result.has_value() is false");
-                }
+            // Map "args" to "params" (with fallback)
+            if (doc.contains("params")) {
+                request.set("params", doc["params"]);
+            } else if (doc.contains("args")) {
+                request.set("params", doc["args"]);
             } else {
-                // Print error response
-                auto err = response.error();
-                fl::Json errorObj = fl::Json::object();
-                switch (err) {
-                    case fl::Remote::Error::InvalidJson:
-                        errorObj.set("error", "InvalidJson");
-                        errorObj.set("message", "Failed to parse JSON");
-                        break;
-                    case fl::Remote::Error::MissingFunction:
-                        errorObj.set("error", "MissingFunction");
-                        errorObj.set("message", "Missing 'function' field in JSON");
-                        break;
-                    case fl::Remote::Error::UnknownFunction:
-                        errorObj.set("error", "UnknownFunction");
-                        errorObj.set("message", "Function not registered");
-                        break;
-                    case fl::Remote::Error::InvalidTimestamp:
-                        errorObj.set("error", "InvalidTimestamp");
-                        errorObj.set("message", "Invalid timestamp type");
-                        break;
-                    default:
-                        errorObj.set("error", "Unknown");
-                        errorObj.set("message", "Unknown error");
-                        break;
-                }
-                printJsonRaw(errorObj);
+                request.set("params", fl::Json::array());
+            }
+
+            // Add id field (required for JSON-RPC 2.0)
+            if (doc.contains("id")) {
+                request.set("id", doc["id"]);
+            } else {
+                request.set("id", 1);
+            }
+
+            // Add timestamp if present (for scheduled execution)
+            if (doc.contains("timestamp")) {
+                request.set("timestamp", doc["timestamp"]);
+            }
+
+            // Process RPC - returns JSON with "result" or "error" field
+            fl::Json response = mRemote->processRpc(request);
+
+            FL_PRINT("[RPC] processRpc() returned");
+
+            // Print response directly (already in correct format)
+            if (response.has_value()) {
+                FL_PRINT("[RPC] About to printJson...");
+                printJsonRaw(response);
+                FL_PRINT("[RPC] printJson() completed");
+            } else {
+                FL_WARN("[RPC] processRpc returned empty response");
             }
         }
     }

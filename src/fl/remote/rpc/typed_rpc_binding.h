@@ -27,13 +27,14 @@ class TypedRpcBinding<void(Args...)> {
 public:
     using FunctionType = fl::function<void(Args...)>;
     using Converter = JsonArgConverter<void(Args...)>;
+    using StorageTuple = typename Converter::args_tuple;  // Stripped types for storage
 
     TypedRpcBinding(FunctionType fn) : mFunction(fn) {}
 
     TypeConversionResult invoke(const Json& jsonArgs) {
         // C++11 compatible: avoid structured bindings
-        fl::tuple<fl::tuple<Args...>, TypeConversionResult> convTuple = Converter::convert(jsonArgs);
-        fl::tuple<Args...> tuple = fl::get<0>(convTuple);
+        fl::tuple<StorageTuple, TypeConversionResult> convTuple = Converter::convert(jsonArgs);
+        StorageTuple tuple = fl::get<0>(convTuple);
         TypeConversionResult result = fl::get<1>(convTuple);
         if (!result.ok()) {
             return result;
@@ -44,7 +45,8 @@ public:
 
 private:
     template <fl::size... Is>
-    void invokeImpl(fl::tuple<Args...>& args, index_sequence<Is...>) {
+    void invokeImpl(StorageTuple& args, index_sequence<Is...>) {
+        // fl::get returns T& from tuple<T>, which converts to const T& for const ref parameters
         mFunction(fl::get<Is>(args)...);
     }
 
@@ -57,13 +59,14 @@ class TypedRpcBinding<R(Args...)> {
 public:
     using FunctionType = fl::function<R(Args...)>;
     using Converter = JsonArgConverter<R(Args...)>;
+    using StorageTuple = typename Converter::args_tuple;  // Stripped types for storage
 
     TypedRpcBinding(FunctionType fn) : mFunction(fn) {}
 
     TypeConversionResult invoke(const Json& jsonArgs) {
         // C++11 compatible: avoid structured bindings
-        fl::tuple<fl::tuple<Args...>, TypeConversionResult> convTuple = Converter::convert(jsonArgs);
-        fl::tuple<Args...> tuple = fl::get<0>(convTuple);
+        fl::tuple<StorageTuple, TypeConversionResult> convTuple = Converter::convert(jsonArgs);
+        StorageTuple tuple = fl::get<0>(convTuple);
         TypeConversionResult result = fl::get<1>(convTuple);
         if (!result.ok()) {
             return result;
@@ -74,8 +77,8 @@ public:
 
     fl::tuple<TypeConversionResult, Json> invokeWithReturn(const Json& jsonArgs) {
         // C++11 compatible: avoid structured bindings
-        fl::tuple<fl::tuple<Args...>, TypeConversionResult> convTuple = Converter::convert(jsonArgs);
-        fl::tuple<Args...> tuple = fl::get<0>(convTuple);
+        fl::tuple<StorageTuple, TypeConversionResult> convTuple = Converter::convert(jsonArgs);
+        StorageTuple tuple = fl::get<0>(convTuple);
         TypeConversionResult result = fl::get<1>(convTuple);
         if (!result.ok()) {
             return fl::make_tuple(result, Json(nullptr));
@@ -87,12 +90,14 @@ public:
 
 private:
     template <fl::size... Is>
-    void invokeImpl(fl::tuple<Args...>& args, index_sequence<Is...>) {
+    void invokeImpl(StorageTuple& args, index_sequence<Is...>) {
+        // fl::get returns T& from tuple<T>, which converts to const T& for const ref parameters
         mFunction(fl::get<Is>(args)...);
     }
 
     template <fl::size... Is>
-    R invokeImplWithReturn(fl::tuple<Args...>& args, index_sequence<Is...>) {
+    R invokeImplWithReturn(StorageTuple& args, index_sequence<Is...>) {
+        // fl::get returns T& from tuple<T>, which converts to const T& for const ref parameters
         return mFunction(fl::get<Is>(args)...);
     }
 

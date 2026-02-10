@@ -24,8 +24,12 @@ struct tuple<Head, Tail...> {
     tuple(const Head& h, const Tail&... t)
       : head(h), tail(t...) {}
 
-    tuple(Head&& h, Tail&&... t)
-      : head(fl::move(h)), tail(fl::forward<Tail>(t)...) {}
+    // Only enable rvalue constructor when Head is not a reference
+    // (prevents overload ambiguity when Head = const T&)
+    template<typename H = Head, typename... T,
+             typename = typename enable_if<!is_reference<H>::value>::type>
+    tuple(H&& h, T&&... t)
+      : head(fl::forward<H>(h)), tail(fl::forward<T>(t)...) {}
 };
 
 // tuple_size

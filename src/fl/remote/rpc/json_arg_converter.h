@@ -10,8 +10,55 @@
 #include "fl/stl/type_traits.h"
 #include "fl/remote/rpc/type_conversion_result.h"
 #include "fl/remote/rpc/json_to_type.h"
+#include "fl/span.h"
 
 namespace fl {
+
+// Type mapper for RPC parameters:
+// - const char* / char* → ConstCharPtrWrapper (stores string, converts to ptr)
+// - span<const T> → ConstSpanWrapper<T> (stores vector, provides span view)
+// - Other types → strip const/reference
+template <typename T>
+struct rpc_storage_type {
+    using type = typename fl::remove_cv<typename fl::remove_reference<T>::type>::type;
+};
+
+template <>
+struct rpc_storage_type<const char*> {
+    using type = ConstCharPtrWrapper;
+};
+
+template <>
+struct rpc_storage_type<char*> {
+    using type = ConstCharPtrWrapper;
+};
+
+// Specializations for span<const T>
+template <typename T>
+struct rpc_storage_type<fl::span<const T>> {
+    using type = fl::ConstSpanWrapper<T>;
+};
+
+// Common span specializations for explicit types
+template <>
+struct rpc_storage_type<fl::span<const int>> {
+    using type = fl::ConstSpanWrapper<int>;
+};
+
+template <>
+struct rpc_storage_type<fl::span<const float>> {
+    using type = fl::ConstSpanWrapper<float>;
+};
+
+template <>
+struct rpc_storage_type<fl::span<const double>> {
+    using type = fl::ConstSpanWrapper<double>;
+};
+
+template <>
+struct rpc_storage_type<fl::span<const fl::string>> {
+    using type = fl::ConstSpanWrapper<fl::string>;
+};
 
 // =============================================================================
 // JsonArgConverter - Convert JSON array to typed tuple
@@ -23,7 +70,8 @@ class JsonArgConverter;
 template <typename R, typename... Args>
 class JsonArgConverter<R(Args...)> {
 public:
-    using args_tuple = fl::tuple<Args...>;
+    // Map Args to storage types (handles const char* → ConstCharPtrWrapper)
+    using args_tuple = fl::tuple<typename rpc_storage_type<Args>::type...>;
     static constexpr fl::size argCount() { return sizeof...(Args); }
 
     static fl::tuple<args_tuple, TypeConversionResult> convert(const Json& jsonArgs) {
@@ -60,10 +108,11 @@ private:
     static void convertArg(const Json& jsonArgs, args_tuple& tuple, TypeConversionResult& result) {
         if (result.hasError()) return;
 
-        using ArgType = typename fl::tuple_element<I, args_tuple>::type;
+        // Use the stripped type (no const/ref) for conversion and storage
+        using StorageType = typename fl::tuple_element<I, args_tuple>::type;
         // C++11 compatible: avoid structured bindings
-        fl::tuple<ArgType, TypeConversionResult> convTuple = detail::JsonToType<ArgType>::convert(jsonArgs[I]);
-        ArgType value = fl::get<0>(convTuple);
+        fl::tuple<StorageType, TypeConversionResult> convTuple = detail::JsonToType<StorageType>::convert(jsonArgs[I]);
+        StorageType value = fl::get<0>(convTuple);
         TypeConversionResult convResult = fl::get<1>(convTuple);
 
         fl::get<I>(tuple) = value;
