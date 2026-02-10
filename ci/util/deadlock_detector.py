@@ -22,9 +22,8 @@ def find_debugger() -> tuple[Optional[str], str]:
     Returns:
         Tuple of (debugger_path, debugger_name) or (None, "none")
     """
-    # Try system lldb first (preferred for process attachment)
-    # Note: clang-tool-chain-lldb wrapper doesn't support --batch/--attach-pid flags
-    lldb = shutil.which("lldb")
+    # Try clang-tool-chain-lldb first (preferred, supports --batch/--attach-pid)
+    lldb = shutil.which("clang-tool-chain-lldb")
     if lldb:
         return (lldb, "lldb")
 
@@ -57,9 +56,11 @@ def dump_stack_trace_lldb(pid: int, test_name: str) -> Optional[str]:
     debugger, debugger_type = find_debugger()
 
     if not debugger or debugger_type == "none":
-        ts_print("⚠️  No debugger found (lldb or gdb required for stack traces)")
         ts_print(
-            "   Install lldb: winget install LLVM.LLVM (Windows) or brew install llvm (Mac)"
+            "⚠️  No debugger found (clang-tool-chain-lldb or gdb required for stack traces)"
+        )
+        ts_print(
+            "   LLDB is bundled with clang-tool-chain (already installed via pyproject.toml)"
         )
         return None
 

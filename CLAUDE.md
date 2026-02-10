@@ -320,7 +320,7 @@ uv run test.py profile_sincos16 --cpp --build-mode release --build
 - **NEVER use low-level build commands directly**: Do NOT run `meson`, `ninja`, `clang++`, or `gcc` for standard builds
   - Use: `bash test`, `bash compile`, `bash lint` instead
   - Never use: `meson setup builddir`, `ninja -C builddir`, `clang++ main.cpp -o main`
-  - Exception: Runtime debugging of already-built executables (e.g., `lldb .build/runner.exe`) is allowed
+  - Exception: Runtime debugging of already-built executables (e.g., `clang-tool-chain-lldb .build/runner.exe`) is allowed
   - Exception: Compiler feature testing is allowed, but MUST use clang-tool-chain wrappers:
     - ✅ Use: `clang-tool-chain-clant test.cpp -o test.exe` (C++)
     - ✅ Use: `clang-tool-chain-lldb test.exe` (debugger)
