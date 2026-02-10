@@ -190,7 +190,6 @@
 #include "ValidationHelpers.h"
 #include "ValidationRemote.h"
 #include "ValidationAsync.h"
-#include "SketchHalt.h"
 #include "platforms/esp/32/watchdog_esp32.h"  // For fl::watchdog_setup()
 
 // ============================================================================
@@ -262,11 +261,8 @@ fl::shared_ptr<fl::RxDevice> createRxDevice(int pin) {
 }
 
 // ============================================================================
-// Global Error Tracking and Halt Control
+// Global State
 // ============================================================================
-
-// Sketch halt controller - handles safe halting without watchdog timer resets
-SketchHalt halt;
 
 // Remote RPC system for dynamic test control via JSON commands
 // Using Singleton pattern for thread-safe lazy initialization
@@ -274,29 +270,14 @@ using RemoteControlSingleton = fl::Singleton<ValidationRemoteControl>;
 
 
 // ============================================================================
-// Global Test Matrix State
+// Global Validation State (Simplified - No Test Matrix)
 // ============================================================================
 
 // Available drivers discovered in setup()
 fl::vector<fl::DriverInfo> drivers_available;
 
-// Test matrix configuration (built from defines and available drivers)
-fl::TestMatrixConfig test_matrix;
-
-// All test cases generated from matrix configuration
-fl::vector<fl::TestCaseConfig> test_cases;
-
-// Test case results (one per test case)
-fl::vector<fl::TestCaseResult> test_results;
-
-// Frame counter - tracks which iteration of loop() we're on
+// Frame counter - tracks which iteration of loop() we're on (diagnostic)
 uint32_t frame_counter = 0;
-
-// Test completion flag - set to true after first test matrix run
-bool test_matrix_complete = false;
-
-// Test start flag - set to true when start() JSON-RPC command is called
-bool start_command_received = false;
 
 
 void setup() {
@@ -363,7 +344,7 @@ void setup() {
         ss << "[RX SETUP]: Failed to create RX channel\n";
         ss << "[RX SETUP]: Check that RMT peripheral is available and not in use";
         FL_ERROR(ss.str());
-        halt.error("Sanity check failed - RX channel creation failed");
+        FL_ERROR("Sanity check failed - RX channel creation failed");
         return;
     }
 
@@ -384,16 +365,8 @@ void setup() {
     FL_PRINT(ss.str());
 
     // Initialize RemoteControl singleton and register all RPC functions
-    // Note: Global variables (drivers_available, test_matrix, etc.) are empty at this point
-    // but are passed by reference, so RPC functions will access current values when called.
     RemoteControlSingleton::instance().registerFunctions(
         drivers_available,
-        test_matrix,
-        test_cases,
-        test_results,
-        start_command_received,
-        test_matrix_complete,
-        frame_counter,
         rx_channel,
         rx_buffer,
         g_pin_tx,
@@ -428,7 +401,7 @@ void setup() {
         FL_ERROR("  1. GPIO " << PIN_TX << " and GPIO " << PIN_RX << " are not physically connected");
         FL_ERROR("  2. RX channel initialization failed");
         FL_ERROR("  3. GPIO conflict with other peripherals (USB Serial JTAG on C6 uses certain GPIOs)");
-        halt.error("GPIO baseline test failed - check hardware connections");
+        FL_ERROR("GPIO baseline test failed - check hardware connections");
         return;
     }
 
@@ -451,203 +424,18 @@ void setup() {
     // Validate that expected engines are available for this platform
     validateExpectedEngines();
 
-    // Test matrix configuration
-    ss.clear();
-    ss << "\n[TEST MATRIX CONFIGURATION]\n";
-
-    // Driver filtering
-    #if defined(JUST_PARLIO)
-        ss << "  Driver Filter: JUST_PARLIO (testing PARLIO only)\n";
-    #elif defined(JUST_RMT)
-        ss << "  Driver Filter: JUST_RMT (testing RMT only)\n";
-    #elif defined(JUST_SPI)
-        ss << "  Driver Filter: JUST_SPI (testing SPI only)\n";
-    #elif defined(JUST_UART)
-        ss << "  Driver Filter: JUST_UART (testing UART only)\n";
-    #else
-        ss << "  Driver Filter: None (testing all available drivers)\n";
-    #endif
-
-    // Build test matrix and show which drivers will be tested
-    test_matrix = buildTestMatrix(drivers_available);
-    ss << "  Drivers to Test (" << test_matrix.enabled_drivers.size() << "):\n";
-
-    // Machine-parseable driver validation prints (for --expect flags)
-    for (fl::size i = 0; i < test_matrix.enabled_drivers.size(); i++) {
-        const char* driver_name = test_matrix.enabled_drivers[i].c_str();
-        ss << "    → " << driver_name << "\n";
-        // Explicit validation print: "DRIVER_ENABLED: <name>"
-        ss << "  DRIVER_ENABLED: " << driver_name << "\n";
-    }
-    FL_PRINT(ss.str());
-
-    // Lane range - machine-parseable for --expect validation (runtime configured)
-    ss.clear();
-    ss << "  Lane Range: " << test_matrix.min_lanes << "-" << test_matrix.max_lanes << " lanes\n";
-    ss << "    → Lane N has base_size - N LEDs (decreasing pattern)\n";
-    ss << "    → Multi-lane: Only Lane 0 validated (hardware limitation)\n";
-    // Explicit validation prints: "LANE_MIN: X" and "LANE_MAX: Y"
-    ss << "  LANE_MIN: " << test_matrix.min_lanes << "\n";
-    ss << "  LANE_MAX: " << test_matrix.max_lanes << "\n";
-
-    // Strip sizes - machine-parseable for --expect validation (runtime configured)
-    if (test_matrix.strip_sizes.empty()) {
-        ss << "  Strip Sizes: None (ERROR: no strip sizes configured)\n";
-    } else {
-        ss << "  Strip Sizes: [";
-        for (fl::size i = 0; i < test_matrix.strip_sizes.size(); i++) {
-            if (i > 0) ss << ", ";
-            ss << test_matrix.strip_sizes[i];
-        }
-        ss << "] LEDs\n";
-        // Emit STRIP_SIZE_TESTED for each size (for --expect validation)
-        for (fl::size i = 0; i < test_matrix.strip_sizes.size(); i++) {
-            ss << "  STRIP_SIZE_TESTED: " << test_matrix.strip_sizes[i] << "\n";
-        }
-    }
-
-    // Bit patterns
-    ss << "  Bit Patterns: 4 mixed RGB patterns (MSB/LSB testing)\n";
-    ss << "    → Pattern A: R=0xF0, G=0x0F, B=0xAA\n";
-    ss << "    → Pattern B: R=0x55, G=0xFF, B=0x00\n";
-    ss << "    → Pattern C: R=0x0F, G=0xAA, B=0xF0\n";
-    ss << "    → Pattern D: RGB Solid Alternating\n";
-
-    // Total test cases
-    int total_test_cases = test_matrix.getTotalTestCases();
-    int total_validation_tests = total_test_cases * 4;  // 4 bit patterns per test case
-    ss << "  Total Test Cases: " << total_test_cases << "\n";
-    ss << "  Total Validation Tests: " << total_validation_tests << " (" << total_test_cases << " cases × 4 patterns)";
-    FL_PRINT(ss.str());
-
-    ss.clear();
-    ss << "\n⚠️  [HARDWARE SETUP REQUIRED]\n";
-    ss << "  If using non-RMT peripherals for TX (e.g., SPI, ParallelIO):\n";
-    ss << "  → Connect GPIO " << PIN_TX << " (Lane 0 TX) to GPIO " << PIN_RX << " (RX) with a physical jumper wire\n";
-    ss << "  → Multi-lane: Only Lane 0 is validated via RX (other lanes transmit but not verified)\n";
-    ss << "  → ESP32 GPIO matrix cannot route other peripheral outputs to RMT input\n";
-    ss << "\n";
-    ss << "  ESP32-S3 IMPORTANT: Use GPIO 11 (MOSI) for best performance\n";
-    ss << "  → GPIO 11 is SPI2 IO_MUX pin (bypasses GPIO matrix for 80MHz speed)\n";
-    ss << "  → Other GPIOs use GPIO matrix routing (limited to 26MHz, may see timing issues)\n";
-    FL_PRINT(ss.str());
-
-    // Generate all test cases from the matrix
-    test_cases = generateTestCases(test_matrix, PIN_TX, PIN_RX);
-    ss.clear();
-    ss << "\n[TEST CASE GENERATION]\n";
-    ss << "  Generated " << test_cases.size() << " test case(s)\n";
-    // Machine-parseable: "TEST_CASES_GENERATED: X"
-    ss << "  TEST_CASES_GENERATED: " << test_cases.size();
-    FL_PRINT(ss.str());
-
-    // Initialize result tracking for each test case
-    for (fl::size i = 0; i < test_cases.size(); i++) {
-        const auto& test_case = test_cases[i];
-        test_results.push_back(fl::TestCaseResult(
-            test_case.driver_name.c_str(),
-            test_case.lane_count,
-            test_case.base_strip_size
-        ));
-    }
-
-    // Note: RPC functions already registered early in setup() (before GPIO baseline test)
-    // This allows testGpioConnection to work even if setup() fails early.
-
     // Emit JSON-RPC ready event for Python orchestration
     fl::Json readyData = fl::Json::object();
     readyData.set("ready", true);
     readyData.set("setupTimeMs", static_cast<int64_t>(millis()));
-    readyData.set("testCases", static_cast<int64_t>(test_cases.size()));
-    readyData.set("drivers", static_cast<int64_t>(test_matrix.enabled_drivers.size()));
+    readyData.set("drivers", static_cast<int64_t>(drivers_available.size()));
+    readyData.set("pinTx", static_cast<int64_t>(PIN_TX));
+    readyData.set("pinRx", static_cast<int64_t>(PIN_RX));
     printStreamRaw("ready", readyData);
 
     // Human-readable diagnostics (not machine-parsed)
     FL_PRINT("\n[SETUP COMPLETE] Validation ready - awaiting JSON-RPC commands");
     delay(2000);
-}
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-/// @brief Run a single test case (one driver × lane count × strip size combination)
-/// @param test_case Test case configuration (driver, lanes, strip sizes)
-/// @param test_result Test result tracker (modified with pass/fail counts)
-/// @param timing_config Chipset timing to test
-/// @param rx_channel RX channel for loopback validation
-/// @param rx_buffer RX buffer for capture
-void runSingleTestCase(
-    fl::TestCaseConfig& test_case,
-    fl::TestCaseResult& test_result,
-    const fl::NamedTimingConfig& timing_config,
-    fl::shared_ptr<fl::RxDevice> rx_channel,
-    fl::span<uint8_t> rx_buffer) {
-
-    fl::sstream ss;
-    ss << "\n╔════════════════════════════════════════════════════════════════╗\n";
-    ss << "║ TEST CASE: " << test_case.driver_name.c_str()
-       << " | " << test_case.lane_count << " lane(s)"
-       << " | " << test_case.base_strip_size << " LEDs\n";
-    ss << "╚════════════════════════════════════════════════════════════════╝";
-    FL_PRINT(ss.str());
-
-    // Set this driver as exclusive for testing
-    if (!FastLED.setExclusiveDriver(test_case.driver_name.c_str())) {
-        FL_ERROR("Failed to set " << test_case.driver_name.c_str() << " as exclusive driver");
-        test_result.skipped = true;
-        return;
-    }
-    FL_PRINT(test_case.driver_name.c_str() << " driver enabled exclusively");
-
-    // Build TX channel configs for all lanes
-    fl::vector<fl::ChannelConfig> tx_configs;
-    for (int lane_idx = 0; lane_idx < test_case.lane_count; lane_idx++) {
-        auto& lane = test_case.lanes[lane_idx];
-        FL_PRINT("[Lane " << lane_idx << "] Pin: " << lane.pin << ", LEDs: " << lane.num_leds);
-
-        // Create channel config for this lane
-        tx_configs.push_back(fl::ChannelConfig(
-            lane.pin,
-            timing_config.timing,
-            lane.leds,
-            COLOR_ORDER
-        ));
-    }
-
-    // Create validation configuration
-    fl::ValidationConfig validation_config(
-        timing_config.timing,
-        timing_config.name,
-        tx_configs,
-        test_case.driver_name.c_str(),
-        rx_channel,
-        rx_buffer,
-        test_case.base_strip_size,
-        RX_TYPE
-    );
-
-    // Run warm-up frame (discard results)
-    FL_PRINT("\n[INFO] Running warm-up frame (results will be discarded)");
-    int warmup_total = 0, warmup_passed = 0;
-    validateChipsetTiming(validation_config, warmup_total, warmup_passed);
-    FL_PRINT("[INFO] Warm-up complete (" << warmup_passed << "/" << warmup_total << " passed - discarding)");
-
-    // Run actual test frame (keep results)
-    FL_PRINT("\n[INFO] Running actual test frame");
-    validateChipsetTiming(validation_config, test_result.total_tests, test_result.passed_tests);
-
-    // Log test case result
-    if (test_result.allPassed()) {
-        FL_PRINT("\n[PASS] Test case " << test_case.driver_name.c_str()
-                << " (" << test_case.lane_count << " lanes, "
-                << test_case.base_strip_size << " LEDs) completed successfully");
-    } else {
-        FL_ERROR("[FAIL] Test case " << test_case.driver_name.c_str()
-                << " (" << test_case.lane_count << " lanes, "
-                << test_case.base_strip_size << " LEDs) FAILED: "
-                << test_result.passed_tests << "/" << test_result.total_tests << " tests passed");
-    }
 }
 
 // ============================================================================
@@ -672,9 +460,6 @@ void loop() {
         fl::async_run();
     }
 
-    // Check halt state after async pumping (allows reset to work)
-    if (halt.check()) return;
-
     // Emit periodic ready status (every 5 seconds) for Python connection detection
     static uint32_t last_status_ms = 0;
     uint32_t now = millis();
@@ -682,7 +467,6 @@ void loop() {
         fl::Json status = fl::Json::object();
         status.set("ready", true);
         status.set("uptimeMs", static_cast<int64_t>(now));
-        status.set("testCases", static_cast<int64_t>(test_cases.size()));
         printStreamRaw("status", status);
         last_status_ms = now;
     }

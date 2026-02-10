@@ -40,6 +40,10 @@ exclude = [
 #   documentation and cross-checker compatibility, even though ty
 #   doesn't understand mypy error codes
 
+[rules]
+# Make possibly-missing-attribute a hard error instead of warning
+possibly-missing-attribute = "error"
+
 [rules.unused-type-ignore-comment.ignore]
 # Allow mypy-style type ignore comments with error codes
 # ty doesn't understand mypy error codes like [arg-type], [misc], etc.

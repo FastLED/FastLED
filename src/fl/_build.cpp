@@ -16,6 +16,7 @@
 #include "fl/channels/_build.hpp"
 #include "fl/font/_build.hpp"
 #include "fl/channels/adapters/_build.hpp"
+#include "fl/channels/detail/validation/_build.hpp"
 #include "fl/chipsets/_build.hpp"
 #include "fl/codec/_build.hpp"
 #include "fl/detail/_build.hpp"

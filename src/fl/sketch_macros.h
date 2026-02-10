@@ -36,13 +36,20 @@
 // They caused watchdog timer resets on ESP32-C6 due to the infinite while(1) loop
 // preventing loop() from returning.
 //
-// Replacement: Use a SketchHalt helper class (see examples/Validation/SketchHalt.h
-// or examples/RX/SketchHalt.h for reference implementation).
+// Replacement: Use a static flag to run tests once:
 //
 // Pattern:
-//   1. Create a local SketchHalt.h header in your sketch directory
-//   2. Include it and create a global halt object
-//   3. First line of loop() MUST be: if (halt.check()) return;
-//   4. Call halt.error("message") or halt.finish("message") to halt
+//   static bool tests_run = false;
+//
+//   void loop() {
+//       if (tests_run) {
+//           delay(1000);
+//           return;
+//       }
+//       tests_run = true;
+//
+//       // ... your test code here ...
+//       FL_PRINT("Tests complete");
+//   }
 //
 // This allows loop() to return normally, preventing watchdog timer resets.

@@ -13,18 +13,11 @@ JSON-RPC Workflow (Fail-Fast Model):
        → Returns: {connected: true/false, rxWhenTxLow, rxWhenTxHigh}
        → Fail-fast: Exit if connection test fails
 
-    3. runTest({drivers, laneRange?, stripSizes?}) - Configure and execute test matrix
-       → Args: Named config object with drivers (required), laneRange (optional), stripSizes (optional)
-       → Streams: test_start, case_result, test_complete events
-       → Emits: "TEST_COMPLETED_EXIT_OK" (all passed) or "TEST_COMPLETED_EXIT_ERROR" (some failed)
-       → Validate script then queries getTestSummary() for full results
-       → Returns: {success, passedTests, totalTests}
-       → Replaces: setDrivers + setLaneRange + setStripSizes + runTest (legacy multi-call format)
-
-    4. getTestSummary() - Get abbreviated summary of all test results
-       → Called by validate script after stop word detection
-       → Returns: {allPassed, totalTests, passedTests, successRate, results: [...]}
-       → Each result contains: {driver, lanes, leds, passed, total, successPct, ok}
+    3. runSingleTest({driver, laneSizes, pattern?, iterations?}) - Run one validation test
+       → Args: Single test configuration with driver (required), laneSizes (required), pattern (optional), iterations (optional)
+       → Returns: {success, passed, totalTests, passedTests, duration_ms, driver, laneCount, laneSizes, pattern}
+       → Python orchestrates test matrix by calling runSingleTest multiple times
+       → Replaces legacy runTest() batch operation (one-test-per-RPC architecture)
 
 Legacy Text Patterns:
     - Text output is for human diagnostics ONLY
@@ -128,7 +121,7 @@ EXIT_ON_ERROR_PATTERNS = [
 
 # Input-on-trigger configuration
 # Wait for VALIDATION_READY pattern before proceeding
-# NOTE: Tests are triggered via runTest RPC command (in json_rpc_commands), not via "START"
+# NOTE: Tests are triggered via runSingleTest RPC commands (in json_rpc_commands)
 INPUT_ON_TRIGGER = None  # No legacy START command needed
 
 # GPIO pin definitions (must match Validation.ino)
@@ -896,7 +889,7 @@ def run(args: Args | None = None) -> int:
             return 1
 
     # Build JSON-RPC command with named arguments (NEW consolidated format)
-    # Single runTest call replaces: setDrivers + setLaneRange + setStripSizes + runTest
+    # Generate multiple runSingleTest calls (one per test configuration)
     config: dict[str, Any] = {}
 
     # Drivers (required)
@@ -978,14 +971,29 @@ def run(args: Args | None = None) -> int:
             "⚠️  Note: setSolidColor RPC command requires firmware support (may need implementation)"
         )
 
-    # Add start command first (required to enable RPC processing)
-    start_cmd = {"function": "start", "args": []}
-    rpc_commands_list.append(start_cmd)
+    # Generate runSingleTest commands for each test configuration
+    # New API: one test per RPC call (no matrix, no batch operations)
+    drivers_list = config["drivers"]
+    lane_range = config.get("laneRange", {"min": 1, "max": 1})
+    strip_sizes = config.get("stripSizes", [100])
 
-    # Add runTest command with config
-    # Result: {"function":"runTest","args":{"drivers":["I2S"],"laneRange":{"min":2,"max":2},"stripSizes":[100,300]}}
-    rpc_command = {"function": "runTest", "args": config}
-    rpc_commands_list.append(rpc_command)
+    # Generate test configurations: drivers × lane counts × strip sizes
+    for driver in drivers_list:
+        for lane_count in range(lane_range["min"], lane_range["max"] + 1):
+            for strip_size in strip_sizes:
+                # Create lane sizes array (all lanes have same LED count)
+                lane_sizes = [strip_size] * lane_count
+
+                # Build runSingleTest command
+                # Format: {"function":"runSingleTest","args":[{"driver":"PARLIO","laneSizes":[100,100],"pattern":"MSB_LSB_A","iterations":1}]}
+                test_config = {
+                    "driver": driver,
+                    "laneSizes": lane_sizes,
+                    "pattern": "MSB_LSB_A",  # Default pattern
+                    "iterations": 1,  # Default iterations
+                }
+                rpc_command = {"function": "runSingleTest", "args": [test_config]}
+                rpc_commands_list.append(rpc_command)
 
     # Convert to JSON string
     json_rpc_cmd_str = json.dumps(rpc_commands_list)
@@ -1545,15 +1553,15 @@ def run(args: Args | None = None) -> int:
             drain_start = time.time()
             while time.time() - drain_start < 2.0:
                 if args.no_fbuild:
-                    if monitor.in_waiting:
+                    if monitor.in_waiting:  # ty: ignore[possibly-missing-attribute]
                         line = (
-                            monitor.readline().decode("utf-8", errors="replace").strip()
+                            monitor.readline().decode("utf-8", errors="replace").strip()  # ty: ignore[possibly-missing-attribute]
                         )
                         if line:
                             boot_lines += 1
                 else:
                     try:
-                        for line in monitor.read_lines(timeout=0.5):
+                        for line in monitor.read_lines(timeout=0.5):  # ty: ignore[possibly-missing-attribute]
                             boot_lines += 1
                             break
                     except KeyboardInterrupt:
@@ -1593,13 +1601,13 @@ def run(args: Args | None = None) -> int:
                 # Read line
                 line = None
                 if args.no_fbuild:
-                    if monitor.in_waiting:
+                    if monitor.in_waiting:  # ty: ignore[possibly-missing-attribute]
                         line = (
-                            monitor.readline().decode("utf-8", errors="replace").strip()
+                            monitor.readline().decode("utf-8", errors="replace").strip()  # ty: ignore[possibly-missing-attribute]
                         )
                 else:
                     try:
-                        for read_line in monitor.read_lines(timeout=0.1):
+                        for read_line in monitor.read_lines(timeout=0.1):  # ty: ignore[possibly-missing-attribute]
                             line = read_line
                             break
                     except KeyboardInterrupt:
@@ -1648,7 +1656,7 @@ def run(args: Args | None = None) -> int:
         finally:
             # Close serial connection
             if args.no_fbuild:
-                monitor.close()
+                monitor.close()  # ty: ignore[possibly-missing-attribute]
             else:
                 monitor.__exit__(None, None, None)
             print(f"\n✅ Serial connection closed")

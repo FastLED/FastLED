@@ -96,28 +96,11 @@ fl::Json makeResponse(bool success, ReturnCode returnCode, const char* message,
     return r;
 }
 
-// Forward declarations
-fl::vector<fl::TestCaseConfig> generateTestCases(
-    const fl::TestMatrixConfig& matrix,
-    int pin_tx);
-
-// Forward declaration for runSingleTestCase (defined in Validation.ino)
-void runSingleTestCase(
-    fl::TestCaseConfig& test_case,
-    fl::TestCaseResult& test_result,
-    const fl::NamedTimingConfig& timing_config,
-    fl::shared_ptr<fl::RxDevice> rx_channel,
-    fl::span<uint8_t> rx_buffer);
+// No forward declarations needed - using one-test-per-RPC architecture
 
 ValidationRemoteControl::ValidationRemoteControl()
     : mRemote(fl::make_unique<fl::Remote>())
     , mpDriversAvailable(nullptr)
-    , mpTestMatrix(nullptr)
-    , mpTestCases(nullptr)
-    , mpTestResults(nullptr)
-    , mpStartCommandReceived(nullptr)
-    , mpTestMatrixComplete(nullptr)
-    , mpFrameCounter(nullptr)
     , mpRxChannel(nullptr)
     , mRxBuffer(nullptr, 0)
     , mpPinTx(nullptr)
@@ -131,12 +114,6 @@ ValidationRemoteControl::~ValidationRemoteControl() = default;
 
 void ValidationRemoteControl::registerFunctions(
     fl::vector<fl::DriverInfo>& drivers_available,
-    fl::TestMatrixConfig& test_matrix,
-    fl::vector<fl::TestCaseConfig>& test_cases,
-    fl::vector<fl::TestCaseResult>& test_results,
-    bool& start_command_received,
-    bool& test_matrix_complete,
-    uint32_t& frame_counter,
     fl::shared_ptr<fl::RxDevice>& rx_channel,
     fl::span<uint8_t> rx_buffer,
     int& pin_tx,
@@ -147,12 +124,6 @@ void ValidationRemoteControl::registerFunctions(
 
     // Store references to external state
     mpDriversAvailable = &drivers_available;
-    mpTestMatrix = &test_matrix;
-    mpTestCases = &test_cases;
-    mpTestResults = &test_results;
-    mpStartCommandReceived = &start_command_received;
-    mpTestMatrixComplete = &test_matrix_complete;
-    mpFrameCounter = &frame_counter;
     mpRxChannel = &rx_channel;  // Pointer to shared_ptr for RX recreation
     mRxBuffer = rx_buffer;
     mpPinTx = &pin_tx;
@@ -161,60 +132,12 @@ void ValidationRemoteControl::registerFunctions(
     mDefaultPinRx = default_pin_rx;
     mRxFactory = rx_factory;
 
-    // Helper to serialize test results
-    auto serializeTestResult = [](const fl::TestCaseResult& result) -> fl::Json {
-        fl::Json obj = fl::Json::object();
-        obj.set("driver", result.driver_name);
-        obj.set("lanes", static_cast<int64_t>(result.lane_count));
-        obj.set("stripSize", static_cast<int64_t>(result.base_strip_size));
-        obj.set("totalTests", static_cast<int64_t>(result.total_tests));
-        obj.set("passedTests", static_cast<int64_t>(result.passed_tests));
-        obj.set("passed", result.allPassed());
-        obj.set("skipped", result.skipped);
-        return obj;
-    };
-
-    // Helper to regenerate test cases
-    auto regenerateTestCasesLocal = [this]() {
-        FL_PRINT("[REGEN] Regenerating test cases from modified configuration");
-
-        // Rebuild test cases from current test_matrix
-        *mpTestCases = generateTestCases(*mpTestMatrix, *mpPinTx, *mpPinRx);  // Use configured TX pin
-
-        // Clear and rebuild test results to match new test cases
-        mpTestResults->clear();
-        for (fl::size i = 0; i < mpTestCases->size(); i++) {
-            const auto& test_case = (*mpTestCases)[i];
-            mpTestResults->push_back(fl::TestCaseResult(
-                test_case.driver_name.c_str(),
-                test_case.lane_count,
-                test_case.base_strip_size
-            ));
-        }
-
-        FL_PRINT("[REGEN] Generated " << mpTestCases->size() << " test case(s)");
-    };
-
-    // Register "start" function - triggers test matrix execution
-    // UPGRADED: Using typed method() API for simple void function
-    mRemote->method("start", [this]() {
-        FL_PRINT("[RPC] start() - Triggering test matrix execution");
-        *mpStartCommandReceived = true;
-    });
-
-    // Register "status" function - query current test state
+    // Register "status" function - device readiness check
     mRemote->registerFunctionWithReturn("status", [this](const fl::Json& args) -> fl::Json {
         fl::Json status = fl::Json::object();
-        status.set("startReceived", *mpStartCommandReceived);
-        status.set("testComplete", *mpTestMatrixComplete);
-        status.set("frameCounter", static_cast<int64_t>(*mpFrameCounter));
-        if (*mpTestMatrixComplete) {
-            status.set("state", "complete");
-        } else if (*mpStartCommandReceived) {
-            status.set("state", "running");
-        } else {
-            status.set("state", "idle");
-        }
+        status.set("ready", true);
+        status.set("pinTx", static_cast<int64_t>(*mpPinTx));
+        status.set("pinRx", static_cast<int64_t>(*mpPinRx));
         return status;
     });
 
@@ -231,1464 +154,270 @@ void ValidationRemoteControl::registerFunctions(
         return drivers;
     });
 
-    // Register "getConfig" function - query current test matrix configuration
-    mRemote->registerFunctionWithReturn("getConfig", [this](const fl::Json& args) -> fl::Json {
-        fl::Json config = fl::Json::object();
-
-        // Drivers array
-        fl::Json drivers_array = fl::Json::array();
-        for (fl::size i = 0; i < mpTestMatrix->enabled_drivers.size(); i++) {
-            drivers_array.push_back(mpTestMatrix->enabled_drivers[i].c_str());
-        }
-        config.set("drivers", drivers_array);
-
-        // Lane range
-        fl::Json lane_range = fl::Json::array();
-        lane_range.push_back(static_cast<int64_t>(mpTestMatrix->min_lanes));
-        lane_range.push_back(static_cast<int64_t>(mpTestMatrix->max_lanes));
-        config.set("laneRange", lane_range);
-
-        // Strip sizes (runtime-configurable list of LED counts)
-        fl::Json strip_sizes = fl::Json::array();
-        for (fl::size i = 0; i < mpTestMatrix->strip_sizes.size(); i++) {
-            strip_sizes.push_back(static_cast<int64_t>(mpTestMatrix->strip_sizes[i]));
-        }
-        config.set("stripSizes", strip_sizes);
-
-        // Total test cases
-        config.set("totalTestCases", static_cast<int64_t>(mpTestMatrix->getTotalTestCases()));
-
-        return config;
-    });
-
-    // Register "setDrivers" function - configure enabled drivers
-    mRemote->registerFunctionWithReturn("setDrivers", [this, regenerateTestCasesLocal](const fl::Json& args) -> fl::Json {
+    // Returns: {success, passed, totalTests, passedTests, duration_ms, driver,
+    //          laneCount, laneSizes, pattern, firstFailure?}
+    mRemote->registerFunctionWithReturn("runSingleTest", [this](const fl::Json& args) -> fl::Json {
         fl::Json response = fl::Json::object();
 
-        // Validate args is an array
-        if (!args.is_array() || args.size() == 0) {
-            response.set("error", "InvalidArgs");
-            response.set("message", "Expected non-empty array of driver names");
-            return response;
-        }
-
-        // Build new driver list and validate each name
-        fl::vector<fl::string> new_drivers;
-        for (fl::size i = 0; i < args.size(); i++) {
-            if (!args[i].is_string()) {
-                response.set("error", "InvalidDriverType");
-                response.set("message", "All driver names must be strings");
-                return response;
-            }
-
-            auto driver_name_opt = args[i].as_string();
-            if (!driver_name_opt.has_value()) {
-                response.set("error", "InvalidDriverType");
-                response.set("message", "Failed to extract driver name as string");
-                return response;
-            }
-            fl::string driver_name = driver_name_opt.value();
-
-            // Validate driver exists in drivers_available
-            bool found = false;
-            for (fl::size j = 0; j < mpDriversAvailable->size(); j++) {
-                if ((*mpDriversAvailable)[j].name == driver_name) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) {
-                response.set("error", "InvalidDriverName");
-                fl::sstream msg;
-                msg << "Driver '" << driver_name.c_str() << "' not found in available drivers";
-                response.set("message", msg.str().c_str());
-                return response;
-            }
-
-            new_drivers.push_back(driver_name);
-        }
-
-        // Update test matrix
-        mpTestMatrix->enabled_drivers = new_drivers;
-        regenerateTestCasesLocal();
-
-        response.set("success", true);
-        response.set("driversSet", static_cast<int64_t>(new_drivers.size()));
-        response.set("testCases", static_cast<int64_t>(mpTestCases->size()));
-        return response;
-    });
-
-    // Register "setLaneRange" function - configure lane range
-    mRemote->registerFunctionWithReturn("setLaneRange", [this, regenerateTestCasesLocal](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
-
-        // Validate args is an array with 2 elements
-        if (!args.is_array() || args.size() != 2) {
-            response.set("error", "InvalidArgs");
-            response.set("message", "Expected array with [min_lanes, max_lanes]");
-            return response;
-        }
-
-        // Extract min and max
-        if (!args[0].is_int() || !args[1].is_int()) {
-            response.set("error", "InvalidLaneType");
-            response.set("message", "Lane values must be integers");
-            return response;
-        }
-
-        auto min_opt = args[0].as_int();
-        auto max_opt = args[1].as_int();
-        if (!min_opt.has_value() || !max_opt.has_value()) {
-            response.set("error", "InvalidLaneType");
-            response.set("message", "Failed to extract lane values as integers");
-            return response;
-        }
-
-        int min_lanes = static_cast<int>(min_opt.value());
-        int max_lanes = static_cast<int>(max_opt.value());
-
-        // Validate range (1-8)
-        if (min_lanes < 1 || min_lanes > 8 || max_lanes < 1 || max_lanes > 8) {
-            response.set("error", "InvalidLaneRange");
-            response.set("message", "Lane values must be between 1 and 8");
-            return response;
-        }
-
-        if (min_lanes > max_lanes) {
-            response.set("error", "InvalidLaneRange");
-            response.set("message", "min_lanes must be <= max_lanes");
-            return response;
-        }
-
-        // Update test matrix
-        mpTestMatrix->min_lanes = min_lanes;
-        mpTestMatrix->max_lanes = max_lanes;
-        regenerateTestCasesLocal();
-
-        response.set("success", true);
-        response.set("minLanes", static_cast<int64_t>(min_lanes));
-        response.set("maxLanes", static_cast<int64_t>(max_lanes));
-        response.set("testCases", static_cast<int64_t>(mpTestCases->size()));
-        return response;
-    });
-
-    // Register "setStripSizes" function - set LED counts to test
-    mRemote->registerFunctionWithReturn("setStripSizes", [this, regenerateTestCasesLocal](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
-
-        // Validate args is an array of integers
-        if (!args.is_array()) {
-            response.set("error", "InvalidArgs");
-            response.set("message", "Expected array of LED counts, e.g., [100, 300, 1000]");
-            return response;
-        }
-
-        // Extract and validate LED counts
-        fl::vector<int> sizes;
-        const int max_leds = mRxBuffer.size() / 32;
-
-        for (fl::size i = 0; i < args.size(); i++) {
-            if (!args[i].is_int()) {
-                response.set("error", "InvalidSizeType");
-                fl::sstream msg;
-                msg << "Element " << i << " is not an integer";
-                response.set("message", msg.str().c_str());
-                return response;
-            }
-
-            int size = static_cast<int>(args[i].as_int().value());
-
-            // Validate size > 0
-            if (size <= 0) {
-                response.set("error", "InvalidSize");
-                fl::sstream msg;
-                msg << "Element " << i << " (" << size << ") must be > 0";
-                response.set("message", msg.str().c_str());
-                return response;
-            }
-
-            // Validate against RX buffer capacity
-            if (size > max_leds) {
-                response.set("error", "SizeTooLarge");
-                fl::sstream msg;
-                msg << "Element " << i << " (" << size << ") exceeds RX buffer capacity (max ~" << max_leds << " LEDs)";
-                response.set("message", msg.str().c_str());
-                return response;
-            }
-
-            sizes.push_back(size);
-        }
-
-        // Update configuration
-        mpTestMatrix->strip_sizes.clear();
-        for (int size : sizes) {
-            mpTestMatrix->strip_sizes.push_back(size);
-        }
-
-        regenerateTestCasesLocal();
-
-        // Build response with configured sizes
-        fl::Json sizes_response = fl::Json::array();
-        for (int size : mpTestMatrix->strip_sizes) {
-            sizes_response.push_back(static_cast<int64_t>(size));
-        }
-
-        response.set("success", true);
-        response.set("stripSizes", sizes_response);
-        response.set("testCases", static_cast<int64_t>(mpTestCases->size()));
-        return response;
-    });
-
-    // Register "runTestCase" function - run single test case by index
-    mRemote->registerFunctionWithReturn("runTestCase", [this, serializeTestResult](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
-
-        // Validate args is an array with 1 element
-        if (!args.is_array() || args.size() != 1) {
-            response.set("error", "InvalidArgs");
-            response.set("message", "Expected array with [testCaseIndex]");
-            return response;
-        }
-
-        // Extract index
-        if (!args[0].is_int()) {
-            response.set("error", "InvalidIndexType");
-            response.set("message", "Test case index must be an integer");
-            return response;
-        }
-
-        auto index_opt = args[0].as_int();
-        if (!index_opt.has_value()) {
-            response.set("error", "InvalidIndexType");
-            response.set("message", "Failed to extract index as integer");
-            return response;
-        }
-
-        int64_t index = index_opt.value();
-
-        // Validate index range
-        if (index < 0 || static_cast<fl::size>(index) >= mpTestCases->size()) {
-            response.set("error", "IndexOutOfRange");
-            fl::sstream msg;
-            msg << "Test case index " << index << " out of range (0-" << (mpTestCases->size() - 1) << ")";
-            response.set("message", msg.str().c_str());
-            return response;
-        }
-
-        fl::size idx = static_cast<fl::size>(index);
-
-        // Run the test case (no debug print - case_start event provides info)
-
-        // Get timing configuration (WS2812B-V5)
-        fl::NamedTimingConfig timing_config(fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(), "WS2812B-V5");
-
-        // Reset result for this test case
-        (*mpTestResults)[idx].total_tests = 0;
-        (*mpTestResults)[idx].passed_tests = 0;
-        (*mpTestResults)[idx].skipped = false;
-
-        // Emit case_start event
-        {
-            fl::Json data = fl::Json::object();
-            data.set("caseIndex", index);
-            data.set("driver", (*mpTestCases)[idx].driver_name.c_str());
-            data.set("laneCount", static_cast<int64_t>((*mpTestCases)[idx].lane_count));
-            printStreamRaw("case_start", data);
-        }
-
-        // Run the test case with debug output suppressed
-        {
-            fl::ScopedLogDisable logGuard;  // Suppress FL_DBG/FL_PRINT during test
-            runSingleTestCase(
-                (*mpTestCases)[idx],
-                (*mpTestResults)[idx],
-                timing_config,
-                *mpRxChannel,
-                mRxBuffer
-            );
-        }  // logGuard destroyed, logging restored
-
-        // Emit case_result event
-        {
-            fl::Json result = serializeTestResult((*mpTestResults)[idx]);
-            result.set("caseIndex", index);
-            printStreamRaw("case_result", result);
-        }
-
-        // Return simple success response
-        response.set("success", true);
-        response.set("streamMode", true);
-        return response;
-    });
-
-    // Register "runDriver" function - run all tests for specific driver with JSONL streaming
-    mRemote->registerFunctionWithReturn("runDriver", [this, serializeTestResult](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
-
-        // Validate args is an array with 1 element
-        if (!args.is_array() || args.size() != 1) {
-            response.set("error", "InvalidArgs");
-            response.set("message", "Expected array with [driverName]");
-            return response;
-        }
-
-        // Extract driver name
-        if (!args[0].is_string()) {
-            response.set("error", "InvalidDriverType");
-            response.set("message", "Driver name must be a string");
-            return response;
-        }
-
-        auto driver_name_opt = args[0].as_string();
-        if (!driver_name_opt.has_value()) {
-            response.set("error", "InvalidDriverType");
-            response.set("message", "Failed to extract driver name as string");
-            return response;
-        }
-        fl::string driver_name = driver_name_opt.value();
-
-        // Count matching test cases (no debug print - rundriver_start event provides info)
-        int tests_to_run = 0;
-        for (fl::size i = 0; i < mpTestCases->size(); i++) {
-            if ((*mpTestCases)[i].driver_name == driver_name) {
-                tests_to_run++;
-            }
-        }
-
-        if (tests_to_run == 0) {
-            response.set("error", "NoTestCases");
-            fl::sstream msg;
-            msg << "No test cases found for driver '" << driver_name.c_str() << "'";
-            response.set("message", msg.str().c_str());
-            return response;
-        }
-
-        // Emit rundriver_start event
-        {
-            fl::Json data = fl::Json::object();
-            data.set("driver", driver_name.c_str());
-            data.set("totalCases", static_cast<int64_t>(tests_to_run));
-            printStreamRaw("rundriver_start", data);
-        }
-
-        // Get timing configuration (WS2812B-V5)
-        fl::NamedTimingConfig timing_config(fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(), "WS2812B-V5");
-
-        // Find and run all test cases for this driver with streaming
-        int tests_run = 0;
-        for (fl::size i = 0; i < mpTestCases->size(); i++) {
-            if ((*mpTestCases)[i].driver_name == driver_name) {
-                // Reset result for this test case
-                (*mpTestResults)[i].total_tests = 0;
-                (*mpTestResults)[i].passed_tests = 0;
-                (*mpTestResults)[i].skipped = false;
-
-                // Emit case_start event
-                {
-                    fl::Json data = fl::Json::object();
-                    data.set("caseIndex", static_cast<int64_t>(i));
-                    data.set("driver", driver_name.c_str());
-                    data.set("laneCount", static_cast<int64_t>((*mpTestCases)[i].lane_count));
-                    printStreamRaw("case_start", data);
-                }
-
-                // Run the test case with debug output suppressed
-                {
-                    fl::ScopedLogDisable logGuard;  // Suppress FL_DBG/FL_PRINT during test
-                    runSingleTestCase(
-                        (*mpTestCases)[i],
-                        (*mpTestResults)[i],
-                        timing_config,
-                        *mpRxChannel,
-                        mRxBuffer
-                    );
-                }  // logGuard destroyed, logging restored
-
-                // Emit case_result event
-                {
-                    fl::Json result = serializeTestResult((*mpTestResults)[i]);
-                    result.set("caseIndex", static_cast<int64_t>(i));
-                    printStreamRaw("case_result", result);
-                }
-
-                tests_run++;
-            }
-        }
-
-        // Emit rundriver_complete event
-        {
-            fl::Json data = fl::Json::object();
-            data.set("driver", driver_name.c_str());
-            data.set("testsRun", static_cast<int64_t>(tests_run));
-            printStreamRaw("rundriver_complete", data);
-        }
-
-        // Return simple success response
-        response.set("success", true);
-        response.set("streamMode", true);
-        return response;
-    });
-
-    // Register "runAll" function - run full test matrix with JSONL streaming
-    mRemote->registerFunctionWithReturn("runAll", [this, serializeTestResult](const fl::Json& args) -> fl::Json {
-        // Emit runall_start event (no debug print - event provides info)
-        {
-            fl::Json data = fl::Json::object();
-            data.set("totalCases", static_cast<int64_t>(mpTestCases->size()));
-            printStreamRaw("runall_start", data);
-        }
-
-        // Get timing configuration (WS2812B-V5)
-        fl::NamedTimingConfig timing_config(fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(), "WS2812B-V5");
-
-        // Reset all test results
-        for (fl::size i = 0; i < mpTestResults->size(); i++) {
-            (*mpTestResults)[i].total_tests = 0;
-            (*mpTestResults)[i].passed_tests = 0;
-            (*mpTestResults)[i].skipped = false;
-        }
-
-        // Run all test cases with streaming progress
-        for (fl::size i = 0; i < mpTestCases->size(); i++) {
-            // Emit case_start event
-            {
-                fl::Json data = fl::Json::object();
-                data.set("caseIndex", static_cast<int64_t>(i));
-                data.set("driver", (*mpTestCases)[i].driver_name.c_str());
-                data.set("laneCount", static_cast<int64_t>((*mpTestCases)[i].lane_count));
-                printStreamRaw("case_start", data);
-            }
-
-            // Run the test case with debug output suppressed
-            {
-                fl::ScopedLogDisable logGuard;  // Suppress FL_DBG/FL_PRINT during test
-                runSingleTestCase(
-                    (*mpTestCases)[i],
-                    (*mpTestResults)[i],
-                    timing_config,
-                    *mpRxChannel,
-                    mRxBuffer
-                );
-            }  // logGuard destroyed, logging restored
-
-            // Emit case_result event with detailed result
-            {
-                fl::Json result = serializeTestResult((*mpTestResults)[i]);
-                result.set("caseIndex", static_cast<int64_t>(i));
-                printStreamRaw("case_result", result);
-            }
-        }
-
-        // Calculate summary statistics
-        int total_cases = mpTestResults->size();
-        int passed_cases = 0;
-        int skipped_cases = 0;
-        for (fl::size i = 0; i < mpTestResults->size(); i++) {
-            if ((*mpTestResults)[i].allPassed()) passed_cases++;
-            if ((*mpTestResults)[i].skipped) skipped_cases++;
-        }
-
-        // Emit runall_complete event
-        {
-            fl::Json data = fl::Json::object();
-            data.set("totalCases", static_cast<int64_t>(total_cases));
-            data.set("passedCases", static_cast<int64_t>(passed_cases));
-            data.set("skippedCases", static_cast<int64_t>(skipped_cases));
-            printStreamRaw("runall_complete", data);
-        }
-
-        // Return simple success response
-        fl::Json response = fl::Json::object();
-        response.set("success", true);
-        response.set("streamMode", true);
-        return response;
-    });
-
-    // Register "getResults" function - stream all test results as JSONL
-    mRemote->registerFunctionWithReturn("getResults", [this, serializeTestResult](const fl::Json& args) -> fl::Json {
-        // Emit results_start event
-        {
-            fl::Json data = fl::Json::object();
-            data.set("totalResults", static_cast<int64_t>(mpTestResults->size()));
-            printStreamRaw("results_start", data);
-        }
-
-        // Stream each result
-        for (fl::size i = 0; i < mpTestResults->size(); i++) {
-            fl::Json result = serializeTestResult((*mpTestResults)[i]);
-            result.set("resultIndex", static_cast<int64_t>(i));
-            printStreamRaw("result_item", result);
-        }
-
-        // Emit results_complete event
-        {
-            fl::Json data = fl::Json::object();
-            data.set("totalResults", static_cast<int64_t>(mpTestResults->size()));
-            printStreamRaw("results_complete", data);
-        }
-
-        // Return simple success response
-        fl::Json response = fl::Json::object();
-        response.set("success", true);
-        response.set("streamMode", true);
-        return response;
-    });
-
-    // Register "getResult" function - return specific test case result by index
-    mRemote->registerFunctionWithReturn("getResult", [this, serializeTestResult](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
-
-        // Validate args is an array with 1 element
-        if (!args.is_array() || args.size() != 1) {
-            response.set("error", "InvalidArgs");
-            response.set("message", "Expected array with [testCaseIndex]");
-            return response;
-        }
-
-        // Extract index
-        if (!args[0].is_int()) {
-            response.set("error", "InvalidIndexType");
-            response.set("message", "Test case index must be an integer");
-            return response;
-        }
-
-        auto index_opt = args[0].as_int();
-        if (!index_opt.has_value()) {
-            response.set("error", "InvalidIndexType");
-            response.set("message", "Failed to extract index as integer");
-            return response;
-        }
-
-        int64_t index = index_opt.value();
-
-        // Validate index range
-        if (index < 0 || static_cast<fl::size>(index) >= mpTestResults->size()) {
-            response.set("error", "IndexOutOfRange");
-            fl::sstream msg;
-            msg << "Test case index " << index << " out of range (0-" << (mpTestResults->size() - 1) << ")";
-            response.set("message", msg.str().c_str());
-            return response;
-        }
-
-        // Stream the result
-        fl::Json result = serializeTestResult((*mpTestResults)[static_cast<fl::size>(index)]);
-        result.set("resultIndex", index);
-        printStreamRaw("result_item", result);
-
-        // Return simple success response
-        response.set("success", true);
-        response.set("streamMode", true);
-        return response;
-    });
-
-    // Register "getTestSummary" function - return abbreviated summary of all test results
-    // Used by bash validate script after TEST_COMPLETED_EXIT_OK/ERROR
-    mRemote->registerFunctionWithReturn("getTestSummary", [this](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
-
-        // Calculate overall statistics
-        int total_tests = 0, passed_tests = 0;
-        int total_cases = static_cast<int>(mpTestResults->size());
-        int passed_cases = 0;
-
-        for (fl::size i = 0; i < mpTestResults->size(); i++) {
-            const auto& result = (*mpTestResults)[i];
-            total_tests += result.total_tests;
-            passed_tests += result.passed_tests;
-            if (result.allPassed() && !result.skipped) {
-                passed_cases++;
-            }
-        }
-
-        bool all_passed = (passed_tests == total_tests);
-        float success_rate = total_tests > 0 ? (100.0f * passed_tests / total_tests) : 0.0f;
-
-        // Build summary object
-        response.set("success", true);
-        response.set("allPassed", all_passed);
-        response.set("totalTests", static_cast<int64_t>(total_tests));
-        response.set("passedTests", static_cast<int64_t>(passed_tests));
-        response.set("failedTests", static_cast<int64_t>(total_tests - passed_tests));
-        response.set("totalCases", static_cast<int64_t>(total_cases));
-        response.set("passedCases", static_cast<int64_t>(passed_cases));
-        response.set("successRate", static_cast<int64_t>(success_rate * 100) / 100.0); // Round to 2 decimals
-
-        // Build abbreviated test results array
-        fl::Json results = fl::Json::array();
-        for (fl::size i = 0; i < mpTestResults->size(); i++) {
-            const auto& result = (*mpTestResults)[i];
-
-            fl::Json item = fl::Json::object();
-            item.set("driver", result.driver_name);
-            item.set("lanes", static_cast<int64_t>(result.lane_count));
-            item.set("leds", static_cast<int64_t>(result.base_strip_size));
-            item.set("passed", static_cast<int64_t>(result.passed_tests));
-            item.set("total", static_cast<int64_t>(result.total_tests));
-
-            // Calculate per-case success rate
-            float case_success = result.total_tests > 0 ?
-                (100.0f * result.passed_tests / result.total_tests) : 0.0f;
-            item.set("successPct", static_cast<int64_t>(case_success * 100) / 100.0);
-
-            item.set("ok", result.allPassed() && !result.skipped);
-            item.set("skipped", result.skipped);
-
-            results.push_back(item);
-        }
-
-        response.set("results", results);
-
-        return response;
-    });
-
-    // ========================================================================
-    // NEW Phase: Variable Lane Size Support (per LOOP.md design)
-    // ========================================================================
-
-    // Register "setLaneSizes" function - PRIMARY lane configuration
-    mRemote->registerFunctionWithReturn("setLaneSizes", [this, regenerateTestCasesLocal](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
-
-        if (!args.is_array() || args.size() != 1 || !args[0].is_array()) {
-            response.set("error", "InvalidArgs");
-            response.set("message", "Expected [[size1, size2, ...]] array of lane sizes");
-            return response;
-        }
-
-        fl::Json sizes_array = args[0];
-
-        // Validate lane count (1-8)
-        if (sizes_array.size() < 1 || sizes_array.size() > 8) {
-            response.set("error", "InvalidLaneCount");
-            response.set("message", "Lane count must be 1-8");
-            return response;
-        }
-
-        // Extract and validate sizes
-        fl::vector<int> new_sizes;
-        int total_leds = 0;
-        const int max_total = mRxBuffer.size() / 32;  // RX buffer capacity
-
-        for (fl::size i = 0; i < sizes_array.size(); i++) {
-            if (!sizes_array[i].is_int()) {
-                response.set("error", "InvalidSizeType");
-                response.set("message", "All lane sizes must be integers");
-                return response;
-            }
-
-            int size = static_cast<int>(sizes_array[i].as_int().value());
-            if (size <= 0) {
-                response.set("error", "InvalidSize");
-                fl::sstream msg;
-                msg << "Lane " << i << " size must be > 0, got " << size;
-                response.set("message", msg.str().c_str());
-                return response;
-            }
-
-            total_leds += size;
-            new_sizes.push_back(size);
-        }
-
-        // Validate total fits in RX buffer
-        if (total_leds > max_total) {
-            response.set("error", "TotalSizeTooLarge");
-            fl::sstream msg;
-            msg << "Total LEDs (" << total_leds << ") exceeds RX buffer capacity (" << max_total << ")";
-            response.set("message", msg.str().c_str());
-            return response;
-        }
-
-        // Update configuration
-        mpTestMatrix->lane_sizes = new_sizes;
-        regenerateTestCasesLocal();
-
-        // Build response with lane sizes array
-        fl::Json sizes_response = fl::Json::array();
-        for (int size : new_sizes) {
-            sizes_response.push_back(static_cast<int64_t>(size));
-        }
-
-        response.set("success", true);
-        response.set("laneSizes", sizes_response);
-        response.set("laneCount", static_cast<int64_t>(new_sizes.size()));
-        response.set("totalLeds", static_cast<int64_t>(total_leds));
-        return response;
-    });
-
-    // Register "setLedCount" function - convenience wrapper for uniform sizes
-    mRemote->registerFunctionWithReturn("setLedCount", [this, regenerateTestCasesLocal](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
-
-        if (!args.is_array() || args.size() != 1 || !args[0].is_int()) {
-            response.set("error", "InvalidArgs");
-            response.set("message", "Expected [ledCount: int]");
-            return response;
-        }
-
-        int led_count = static_cast<int>(args[0].as_int().value());
-
-        // Validate against RX buffer capacity
-        const int max_leds = mRxBuffer.size() / 32;
-        if (led_count <= 0 || led_count > max_leds) {
-            response.set("error", "InvalidLedCount");
-            fl::sstream msg;
-            msg << "LED count must be 1-" << max_leds;
-            response.set("message", msg.str().c_str());
-            return response;
-        }
-
-        // Update configuration
-        mpTestMatrix->custom_led_count = led_count;
-
-        // Build uniform lane_sizes array based on current lane count
-        int lane_count = mpTestMatrix->getLaneCount();
-        mpTestMatrix->lane_sizes.clear();
-        for (int i = 0; i < lane_count; i++) {
-            mpTestMatrix->lane_sizes.push_back(led_count);
-        }
-
-        regenerateTestCasesLocal();
-
-        // Build response with lane sizes array
-        fl::Json sizes_response = fl::Json::array();
-        for (int size : mpTestMatrix->lane_sizes) {
-            sizes_response.push_back(static_cast<int64_t>(size));
-        }
-
-        response.set("success", true);
-        response.set("ledCount", static_cast<int64_t>(led_count));
-        response.set("laneSizes", sizes_response);
-        response.set("testCases", static_cast<int64_t>(mpTestCases->size()));
-        return response;
-    });
-
-    // Register "setPattern" function
-    mRemote->registerFunctionWithReturn("setPattern", [this](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
-
-        if (!args.is_array() || args.size() != 1 || !args[0].is_string()) {
-            response.set("error", "InvalidArgs");
-            response.set("message", "Expected [pattern: string]");
-            return response;
-        }
-
-        fl::string pattern = args[0].as_string().value();
-
-        // For now, just store the pattern name - validation can be added later
-        mpTestMatrix->test_pattern = pattern;
-
-        response.set("success", true);
-        response.set("pattern", pattern.c_str());
-        response.set("description", "Pattern updated");
-        return response;
-    });
-
-    // Register "setLaneCount" function - adjusts lane count while preserving LED count
-    mRemote->registerFunctionWithReturn("setLaneCount", [this, regenerateTestCasesLocal](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
-
-        if (!args.is_array() || args.size() != 1 || !args[0].is_int()) {
-            response.set("error", "InvalidArgs");
-            response.set("message", "Expected [laneCount: int]");
-            return response;
-        }
-
-        int lane_count = static_cast<int>(args[0].as_int().value());
-
-        if (lane_count < 1 || lane_count > 8) {
-            response.set("error", "InvalidLaneCount");
-            response.set("message", "Lane count must be 1-8");
-            return response;
-        }
-
-        // Update configuration with uniform lane sizes
-        int led_count_per_lane = mpTestMatrix->custom_led_count;
-        mpTestMatrix->lane_sizes.clear();
-        for (int i = 0; i < lane_count; i++) {
-            mpTestMatrix->lane_sizes.push_back(led_count_per_lane);
-        }
-
-        regenerateTestCasesLocal();
-
-        // Build response with lane sizes array
-        fl::Json sizes_response = fl::Json::array();
-        for (int size : mpTestMatrix->lane_sizes) {
-            sizes_response.push_back(static_cast<int64_t>(size));
-        }
-
-        response.set("success", true);
-        response.set("laneCount", static_cast<int64_t>(lane_count));
-        response.set("laneSizes", sizes_response);
-        response.set("testCases", static_cast<int64_t>(mpTestCases->size()));
-        return response;
-    });
-
-    // Register "setTestIterations" function
-    mRemote->registerFunctionWithReturn("setTestIterations", [this](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
-
-        if (!args.is_array() || args.size() != 1 || !args[0].is_int()) {
-            response.set("error", "InvalidArgs");
-            response.set("message", "Expected [count: int]");
-            return response;
-        }
-
-        int count = static_cast<int>(args[0].as_int().value());
-
-        if (count <= 0) {
-            response.set("error", "InvalidCount");
-            response.set("message", "Iteration count must be > 0");
-            return response;
-        }
-
-        mpTestMatrix->test_iterations = count;
-
-        response.set("success", true);
-        response.set("iterations", static_cast<int64_t>(count));
-        return response;
-    });
-
-    // Register "configure" function - complete configuration in one call
-    // Supports laneSizes array, ledCount/laneCount, strip sizes, lane range, etc.
-    mRemote->registerFunctionWithReturn("configure", [this, regenerateTestCasesLocal](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
-
+        // Validate args is an array with single config object
         if (!args.is_array() || args.size() != 1 || !args[0].is_object()) {
-            response.set("error", "InvalidArgs");
-            response.set("message", "Expected [{driver, laneSizes, pattern, iterations, stripSizes?, ...}]");
-            return response;
-        }
-
-        fl::Json config = args[0];
-
-        // Apply driver
-        if (config.contains("driver")) {
-            fl::string driver = config["driver"].as_string().value();
-            mpTestMatrix->enabled_drivers.clear();
-            mpTestMatrix->enabled_drivers.push_back(driver);
-        }
-
-        // Apply strip sizes (array of LED counts to test)
-        if (config.contains("stripSizes") && config["stripSizes"].is_array()) {
-            fl::Json sizes_array = config["stripSizes"];
-            mpTestMatrix->strip_sizes.clear();
-            for (fl::size i = 0; i < sizes_array.size(); i++) {
-                if (sizes_array[i].is_int()) {
-                    mpTestMatrix->strip_sizes.push_back(static_cast<int>(sizes_array[i].as_int().value()));
-                }
-            }
-        }
-
-        // Apply lane range (NEW)
-        if (config.contains("minLanes") && config["minLanes"].is_int()) {
-            mpTestMatrix->min_lanes = static_cast<int>(config["minLanes"].as_int().value());
-        }
-        if (config.contains("maxLanes") && config["maxLanes"].is_int()) {
-            mpTestMatrix->max_lanes = static_cast<int>(config["maxLanes"].as_int().value());
-        }
-
-        // Apply lane sizes - PRIORITY: laneSizes takes precedence over ledCount/laneCount
-        if (config.contains("laneSizes")) {
-            // Per-lane sizing (preferred)
-            fl::Json sizes_array = config["laneSizes"];
-            if (sizes_array.is_array()) {
-                fl::vector<int> new_sizes;
-                for (fl::size i = 0; i < sizes_array.size(); i++) {
-                    new_sizes.push_back(static_cast<int>(sizes_array[i].as_int().value()));
-                }
-                mpTestMatrix->lane_sizes = new_sizes;
-            }
-        } else if (config.contains("ledCount") && config.contains("laneCount")) {
-            // Legacy: uniform sizing
-            int led_count = static_cast<int>(config["ledCount"].as_int().value());
-            int lane_count = static_cast<int>(config["laneCount"].as_int().value());
-            mpTestMatrix->lane_sizes.clear();
-            for (int i = 0; i < lane_count; i++) {
-                mpTestMatrix->lane_sizes.push_back(led_count);
-            }
-            mpTestMatrix->custom_led_count = led_count;
-        } else if (config.contains("ledCount")) {
-            // Update LED count but keep lane count
-            int led_count = static_cast<int>(config["ledCount"].as_int().value());
-            mpTestMatrix->custom_led_count = led_count;
-            // Update all lanes to new size
-            for (fl::size i = 0; i < mpTestMatrix->lane_sizes.size(); i++) {
-                mpTestMatrix->lane_sizes[i] = led_count;
-            }
-        }
-
-        // Apply pattern
-        if (config.contains("pattern")) {
-            mpTestMatrix->test_pattern = config["pattern"].as_string().value();
-        }
-
-        // Apply iterations
-        if (config.contains("iterations")) {
-            mpTestMatrix->test_iterations = static_cast<int>(config["iterations"].as_int().value());
-        }
-
-        regenerateTestCasesLocal();
-
-        // Build confirmed configuration
-        fl::Json confirmed = fl::Json::object();
-        if (!mpTestMatrix->enabled_drivers.empty()) {
-            confirmed.set("driver", mpTestMatrix->enabled_drivers[0].c_str());
-        }
-
-        // Strip sizes configuration
-        fl::Json strip_sizes_response = fl::Json::array();
-        for (int size : mpTestMatrix->strip_sizes) {
-            strip_sizes_response.push_back(static_cast<int64_t>(size));
-        }
-        confirmed.set("stripSizes", strip_sizes_response);
-
-        // Lane range
-        confirmed.set("minLanes", static_cast<int64_t>(mpTestMatrix->min_lanes));
-        confirmed.set("maxLanes", static_cast<int64_t>(mpTestMatrix->max_lanes));
-
-        // Build laneSizes array
-        fl::Json sizes_response = fl::Json::array();
-        int total_leds = 0;
-        for (int size : mpTestMatrix->lane_sizes) {
-            sizes_response.push_back(static_cast<int64_t>(size));
-            total_leds += size;
-        }
-        confirmed.set("laneSizes", sizes_response);
-        confirmed.set("laneCount", static_cast<int64_t>(mpTestMatrix->lane_sizes.size()));
-        confirmed.set("totalLeds", static_cast<int64_t>(total_leds));
-        confirmed.set("pattern", mpTestMatrix->test_pattern.c_str());
-        confirmed.set("iterations", static_cast<int64_t>(mpTestMatrix->test_iterations));
-        confirmed.set("testCases", static_cast<int64_t>(mpTestCases->size()));
-
-        // Emit config_complete event (JSONL streaming)
-        printStreamRaw("config_complete", confirmed);
-
-        // Return simple success response
-        response.set("success", true);
-        response.set("streamMode", true);
-        return response;
-    });
-
-    // Register "runTest" function - run configured test with optional named arguments
-    // Supports both legacy format (empty array uses current state) and new format (named config object)
-    mRemote->registerFunctionWithReturn("runTest", [this, serializeTestResult, regenerateTestCasesLocal](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
-
-        // DEBUG: Log received args to diagnose driver filter issue
-        FL_WARN("[RPC DEBUG] runTest received args type: " << (args.is_object() ? "object" : (args.is_array() ? "array" : "other")));
-        if (args.is_object() || args.is_array()) {
-            fl::string args_json = args.serialize();
-            FL_WARN("[RPC DEBUG] runTest args content: " << args_json.c_str());
-        }
-
-        // NEW FORMAT: args is config object directly
-        // Format: {"drivers":["PARLIO","RMT"], "laneRange":{"min":1,"max":4}, "stripSizes":[100,300]}
-        if (args.is_object()) {
-            // 1. Validate and extract drivers (required)
-            if (!args.contains("drivers")) {
-                response.set("success", false);
-                response.set("error", "MissingDrivers");
-                response.set("message", "Required field 'drivers' missing");
-                return response;
-            }
-
-            fl::Json drivers_json = args["drivers"];
-            if (!drivers_json.is_array() || drivers_json.size() == 0) {
-                response.set("success", false);
-                response.set("error", "InvalidDrivers");
-                response.set("message", "Field 'drivers' must be non-empty array");
-                return response;
-            }
-
-            fl::vector<fl::string> drivers;
-            for (fl::size i = 0; i < drivers_json.size(); i++) {
-                auto driver_opt = drivers_json[i].as_string();
-                if (!driver_opt.has_value()) {
-                    response.set("success", false);
-                    response.set("error", "InvalidDriverType");
-                    response.set("message", "Driver names must be strings");
-                    return response;
-                }
-                fl::string driver_name = driver_opt.value();
-
-                // Validate driver exists
-                bool found = false;
-                for (fl::size j = 0; j < mpDriversAvailable->size(); j++) {
-                    if ((*mpDriversAvailable)[j].name == driver_name) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    response.set("success", false);
-                    response.set("error", "UnknownDriver");
-                    fl::sstream msg;
-                    msg << "Driver '" << driver_name.c_str() << "' not available";
-                    response.set("message", msg.str().c_str());
-                    return response;
-                }
-
-                drivers.push_back(driver_name);
-            }
-
-            // 2. Extract optional laneRange
-            int min_lanes = 1;
-            int max_lanes = 8;
-            if (args.contains("laneRange")) {
-                fl::Json lane_range = args["laneRange"];
-                if (!lane_range.is_object()) {
-                    response.set("success", false);
-                    response.set("error", "InvalidLaneRange");
-                    response.set("message", "Field 'laneRange' must be object with 'min' and 'max'");
-                    return response;
-                }
-
-                if (lane_range.contains("min")) {
-                    auto min_opt = lane_range["min"].as_int();
-                    if (!min_opt.has_value()) {
-                        response.set("success", false);
-                        response.set("error", "InvalidLaneMin");
-                        response.set("message", "Field 'laneRange.min' must be integer");
-                        return response;
-                    }
-                    min_lanes = static_cast<int>(min_opt.value());
-                }
-
-                if (lane_range.contains("max")) {
-                    auto max_opt = lane_range["max"].as_int();
-                    if (!max_opt.has_value()) {
-                        response.set("success", false);
-                        response.set("error", "InvalidLaneMax");
-                        response.set("message", "Field 'laneRange.max' must be integer");
-                        return response;
-                    }
-                    max_lanes = static_cast<int>(max_opt.value());
-                }
-
-                // Validate range
-                if (min_lanes < 1 || min_lanes > 8 || max_lanes < 1 || max_lanes > 8) {
-                    response.set("success", false);
-                    response.set("error", "InvalidLaneRange");
-                    response.set("message", "Lane range must be 1-8");
-                    return response;
-                }
-                if (min_lanes > max_lanes) {
-                    response.set("success", false);
-                    response.set("error", "InvalidLaneRange");
-                    response.set("message", "min_lanes cannot exceed max_lanes");
-                    return response;
-                }
-            }
-
-            // 3. Extract optional stripSizes
-            fl::vector<int> strip_sizes;
-            if (args.contains("stripSizes")) {
-                fl::Json sizes_json = args["stripSizes"];
-                if (!sizes_json.is_array()) {
-                    response.set("success", false);
-                    response.set("error", "InvalidStripSizes");
-                    response.set("message", "Field 'stripSizes' must be array of integers");
-                    return response;
-                }
-
-                const int max_leds = mRxBuffer.size() / 32;
-                for (fl::size i = 0; i < sizes_json.size(); i++) {
-                    auto size_opt = sizes_json[i].as_int();
-                    if (!size_opt.has_value()) {
-                        response.set("success", false);
-                        response.set("error", "InvalidStripSize");
-                        fl::sstream msg;
-                        msg << "Strip size at index " << i << " must be integer";
-                        response.set("message", msg.str().c_str());
-                        return response;
-                    }
-                    int size = static_cast<int>(size_opt.value());
-                    if (size <= 0) {
-                        response.set("success", false);
-                        response.set("error", "InvalidStripSize");
-                        fl::sstream msg;
-                        msg << "Strip size " << size << " must be > 0";
-                        response.set("message", msg.str().c_str());
-                        return response;
-                    }
-                    if (size > max_leds) {
-                        response.set("success", false);
-                        response.set("error", "StripSizeTooLarge");
-                        fl::sstream msg;
-                        msg << "Strip size " << size << " exceeds max " << max_leds;
-                        response.set("message", msg.str().c_str());
-                        return response;
-                    }
-                    strip_sizes.push_back(size);
-                }
-            }
-
-            // 4. Apply configuration to internal state
-            FL_PRINT("[RPC] runTest with config: drivers=" << drivers.size()
-                     << ", lanes=" << min_lanes << "-" << max_lanes
-                     << ", stripSizes=" << strip_sizes.size());
-
-            // Update drivers in both mpDriversAvailable (for FastLED) and mpTestMatrix (for test generation)
-            for (fl::size i = 0; i < mpDriversAvailable->size(); i++) {
-                bool should_enable = false;
-                for (fl::size j = 0; j < drivers.size(); j++) {
-                    if ((*mpDriversAvailable)[i].name == drivers[j]) {
-                        should_enable = true;
-                        break;
-                    }
-                }
-                (*mpDriversAvailable)[i].enabled = should_enable;
-            }
-
-            mpTestMatrix->enabled_drivers = drivers;
-
-            // Update lane range
-            mpTestMatrix->min_lanes = min_lanes;
-            mpTestMatrix->max_lanes = max_lanes;
-
-            // Update strip sizes if provided
-            if (!strip_sizes.empty()) {
-                mpTestMatrix->strip_sizes = strip_sizes;
-            }
-
-            // Regenerate test cases with new config
-            regenerateTestCasesLocal();
-
-            // Fall through to run test with updated config
-        }
-        // LEGACY FORMAT: Empty array uses current state
-        else if (args.is_array() && args.size() == 0) {
-            FL_PRINT("[RPC] runTest (legacy mode - using current state)");
-            // Use existing state from previous setDrivers/setLaneRange/setStripSizes calls
-        }
-        else {
             response.set("success", false);
             response.set("error", "InvalidArgs");
-            response.set("message", "Expected config object or empty array (legacy)");
+            response.set("message", "Expected [{driver, laneSizes, pattern?, iterations?, pinTx?, pinRx?, timing?}]");
             return response;
-        }
-
-        // ========================================================================
-        // Run the test (common code for both legacy and new format)
-        // ========================================================================
-        uint32_t start_ms = millis();
-
-        // Emit test_start event (JSONL streaming)
-        {
-            fl::Json data = fl::Json::object();
-            data.set("timestamp", static_cast<int64_t>(start_ms));
-            data.set("testCases", static_cast<int64_t>(mpTestCases->size()));
-            data.set("iterations", static_cast<int64_t>(mpTestMatrix->test_iterations));
-            printStreamRaw("test_start", data);
-        }
-
-        // Get timing configuration (WS2812B-V5)
-        fl::NamedTimingConfig timing_config(fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(), "WS2812B-V5");
-
-        // Reset all test results
-        for (fl::size i = 0; i < mpTestResults->size(); i++) {
-            (*mpTestResults)[i].total_tests = 0;
-            (*mpTestResults)[i].passed_tests = 0;
-            (*mpTestResults)[i].skipped = false;
-        }
-
-        // Run test iterations
-        for (int iter = 0; iter < mpTestMatrix->test_iterations; iter++) {
-            // Emit iteration_start event
-            {
-                fl::Json data = fl::Json::object();
-                data.set("iteration", static_cast<int64_t>(iter + 1));
-                data.set("totalIterations", static_cast<int64_t>(mpTestMatrix->test_iterations));
-                printStreamRaw("iteration_start", data);
-            }
-
-            for (fl::size i = 0; i < mpTestCases->size(); i++) {
-                // Emit test_case_start event
-                {
-                    fl::Json data = fl::Json::object();
-                    data.set("caseIndex", static_cast<int64_t>(i));
-                    data.set("driver", (*mpTestCases)[i].driver_name.c_str());
-                    data.set("laneCount", static_cast<int64_t>((*mpTestCases)[i].lane_count));
-                    printStreamRaw("test_case_start", data);
-                }
-
-                runSingleTestCase(
-                    (*mpTestCases)[i],
-                    (*mpTestResults)[i],
-                    timing_config,
-                    *mpRxChannel,
-                    mRxBuffer
-                );
-
-                // Emit test_case_result event
-                {
-                    fl::Json data = fl::Json::object();
-                    data.set("caseIndex", static_cast<int64_t>(i));
-                    data.set("passed", (*mpTestResults)[i].allPassed());
-                    data.set("totalTests", static_cast<int64_t>((*mpTestResults)[i].total_tests));
-                    data.set("passedTests", static_cast<int64_t>((*mpTestResults)[i].passed_tests));
-                    printStreamRaw("test_case_result", data);
-                }
-            }
-
-            // Emit iteration_complete event
-            {
-                fl::Json data = fl::Json::object();
-                data.set("iteration", static_cast<int64_t>(iter + 1));
-                printStreamRaw("iteration_complete", data);
-            }
-        }
-
-        uint32_t end_ms = millis();
-
-        // Calculate totals
-        int total_tests = 0, passed_tests = 0;
-        for (fl::size i = 0; i < mpTestResults->size(); i++) {
-            total_tests += (*mpTestResults)[i].total_tests;
-            passed_tests += (*mpTestResults)[i].passed_tests;
-        }
-
-        // Calculate success status
-        bool all_passed = (passed_tests == total_tests);
-
-        // Emit test_complete event (JSONL streaming)
-        {
-            fl::Json data = fl::Json::object();
-            data.set("timestamp", static_cast<int64_t>(end_ms));
-            data.set("totalTests", static_cast<int64_t>(total_tests));
-            data.set("passedTests", static_cast<int64_t>(passed_tests));
-            data.set("passed", all_passed);
-            data.set("durationMs", static_cast<int64_t>(end_ms - start_ms));
-            printStreamRaw("test_complete", data);
-        }
-
-        // Emit stop word for bash validate script detection (pass/fail)
-        if (all_passed) {
-            Serial.println("TEST_COMPLETED_EXIT_OK");
-        } else {
-            Serial.println("TEST_COMPLETED_EXIT_ERROR");
-        }
-
-        // Return minimal response (full details streamed above)
-        response.set("success", true);
-        response.set("streamMode", true);
-        return response;
-    });
-
-    // ========================================================================
-    // Phase 5: Fast Single-Test RPC Command (runQuickTest)
-    // ========================================================================
-    // Optimized for Python orchestration - minimal overhead, no streaming
-    // Args: {driver: str, ledCount: int, laneCount: int, pattern: int (optional)}
-    // Returns: {success, returnCode, message, data: {passed, mismatches, durationMs}}
-    mRemote->registerFunctionWithReturn("runQuickTest", [this](const fl::Json& args) -> fl::Json {
-        // Validate args
-        if (!args.is_array() || args.size() != 1 || !args[0].is_object()) {
-            return makeResponse(false, ReturnCode::INVALID_ARGS,
-                               "Expected [{driver, ledCount, laneCount, pattern?}]");
         }
 
         fl::Json config = args[0];
 
-        // Extract required parameters
+        // ========== REQUIRED PARAMETERS ==========
+
+        // 1. Extract driver (required)
         if (!config.contains("driver") || !config["driver"].is_string()) {
-            return makeResponse(false, ReturnCode::INVALID_ARGS, "Missing 'driver' (string)");
+            response.set("success", false);
+            response.set("error", "MissingDriver");
+            response.set("message", "Required field 'driver' (string) missing");
+            return response;
         }
-        if (!config.contains("ledCount") || !config["ledCount"].is_int()) {
-            return makeResponse(false, ReturnCode::INVALID_ARGS, "Missing 'ledCount' (int)");
+        fl::string driver_name = config["driver"].as_string().value();
+
+        // Validate driver exists
+        bool driver_found = false;
+        for (fl::size i = 0; i < mpDriversAvailable->size(); i++) {
+            if ((*mpDriversAvailable)[i].name == driver_name) {
+                driver_found = true;
+                break;
+            }
         }
-        if (!config.contains("laneCount") || !config["laneCount"].is_int()) {
-            return makeResponse(false, ReturnCode::INVALID_ARGS, "Missing 'laneCount' (int)");
+        if (!driver_found) {
+            response.set("success", false);
+            response.set("error", "UnknownDriver");
+            fl::sstream msg;
+            msg << "Driver '" << driver_name.c_str() << "' not available";
+            response.set("message", msg.str().c_str());
+            return response;
         }
 
-        fl::string driver = config["driver"].as_string().value();
-        int led_count = static_cast<int>(config["ledCount"].as_int().value());
-        int lane_count = static_cast<int>(config["laneCount"].as_int().value());
-        int pattern_id = config.contains("pattern") && config["pattern"].is_int()
-                         ? static_cast<int>(config["pattern"].as_int().value())
-                         : 0;  // Default to pattern A
-
-        // Validate ranges
-        if (led_count <= 0 || led_count > 3000) {
-            return makeResponse(false, ReturnCode::INVALID_ARGS, "ledCount must be 1-3000");
-        }
-        if (lane_count <= 0 || lane_count > 8) {
-            return makeResponse(false, ReturnCode::INVALID_ARGS, "laneCount must be 1-8");
-        }
-        if (pattern_id < 0 || pattern_id > 3) {
-            return makeResponse(false, ReturnCode::INVALID_ARGS, "pattern must be 0-3");
+        // 2. Extract laneSizes (required)
+        if (!config.contains("laneSizes") || !config["laneSizes"].is_array()) {
+            response.set("success", false);
+            response.set("error", "MissingLaneSizes");
+            response.set("message", "Required field 'laneSizes' (array) missing");
+            return response;
         }
 
-        // Configure test matrix for this single test
-        mpTestMatrix->enabled_drivers.clear();
-        mpTestMatrix->enabled_drivers.push_back(driver);
-        mpTestMatrix->lane_sizes.clear();
-        for (int i = 0; i < lane_count; i++) {
-            mpTestMatrix->lane_sizes.push_back(led_count);
-        }
-        mpTestMatrix->test_iterations = 1;
-
-        // Regenerate test cases (should produce exactly 1 test case)
-        *mpTestCases = generateTestCases(*mpTestMatrix, *mpPinTx, *mpPinRx);
-
-        if (mpTestCases->empty()) {
-            return makeResponse(false, ReturnCode::HARDWARE_ERROR,
-                               "Failed to generate test case - driver may not be available");
+        fl::Json lane_sizes_json = config["laneSizes"];
+        if (lane_sizes_json.size() == 0 || lane_sizes_json.size() > 8) {
+            response.set("success", false);
+            response.set("error", "InvalidLaneCount");
+            response.set("message", "laneSizes must have 1-8 elements");
+            return response;
         }
 
-        // Initialize result
-        mpTestResults->clear();
-        mpTestResults->push_back(fl::TestCaseResult(
-            (*mpTestCases)[0].driver_name.c_str(),
-            (*mpTestCases)[0].lane_count,
-            (*mpTestCases)[0].base_strip_size
-        ));
+        fl::vector<int> lane_sizes;
+        const int max_leds_per_lane = mRxBuffer.size() / 32;
+        for (fl::size i = 0; i < lane_sizes_json.size(); i++) {
+            if (!lane_sizes_json[i].is_int()) {
+                response.set("success", false);
+                response.set("error", "InvalidLaneSizeType");
+                fl::sstream msg;
+                msg << "laneSizes[" << i << "] must be integer";
+                response.set("message", msg.str().c_str());
+                return response;
+            }
+            int size = static_cast<int>(lane_sizes_json[i].as_int().value());
+            if (size <= 0) {
+                response.set("success", false);
+                response.set("error", "InvalidLaneSize");
+                fl::sstream msg;
+                msg << "laneSizes[" << i << "] = " << size << " must be > 0";
+                response.set("message", msg.str().c_str());
+                return response;
+            }
+            if (size > max_leds_per_lane) {
+                response.set("success", false);
+                response.set("error", "LaneSizeTooLarge");
+                fl::sstream msg;
+                msg << "laneSizes[" << i << "] = " << size << " exceeds max " << max_leds_per_lane;
+                response.set("message", msg.str().c_str());
+                return response;
+            }
+            lane_sizes.push_back(size);
+        }
 
-        // Get timing configuration
-        fl::NamedTimingConfig timing_config(fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(), "WS2812B-V5");
+        // ========== OPTIONAL PARAMETERS ==========
+
+        // 3. Extract pattern (optional, default: "MSB_LSB_A")
+        fl::string pattern = "MSB_LSB_A";
+        if (config.contains("pattern") && config["pattern"].is_string()) {
+            pattern = config["pattern"].as_string().value();
+        }
+
+        // 4. Extract iterations (optional, default: 1)
+        int iterations = 1;
+        if (config.contains("iterations") && config["iterations"].is_int()) {
+            iterations = static_cast<int>(config["iterations"].as_int().value());
+            if (iterations < 1) {
+                response.set("success", false);
+                response.set("error", "InvalidIterations");
+                response.set("message", "iterations must be >= 1");
+                return response;
+            }
+        }
+
+        // 5. Extract pinTx (optional, default: use mpPinTx)
+        int pin_tx = *mpPinTx;
+        if (config.contains("pinTx") && config["pinTx"].is_int()) {
+            pin_tx = static_cast<int>(config["pinTx"].as_int().value());
+            if (pin_tx < 0 || pin_tx > 48) {
+                response.set("success", false);
+                response.set("error", "InvalidPinTx");
+                response.set("message", "pinTx must be 0-48");
+                return response;
+            }
+        }
+
+        // 6. Extract pinRx (optional, default: use mpPinRx)
+        int pin_rx = *mpPinRx;
+        if (config.contains("pinRx") && config["pinRx"].is_int()) {
+            pin_rx = static_cast<int>(config["pinRx"].as_int().value());
+            if (pin_rx < 0 || pin_rx > 48) {
+                response.set("success", false);
+                response.set("error", "InvalidPinRx");
+                response.set("message", "pinRx must be 0-48");
+                return response;
+            }
+        }
+
+        // 7. Extract timing (optional, default: "WS2812B-V5")
+        fl::string timing_name = "WS2812B-V5";
+        if (config.contains("timing") && config["timing"].is_string()) {
+            timing_name = config["timing"].as_string().value();
+        }
+
+        // ========== EXECUTION ==========
 
         uint32_t start_ms = millis();
 
-        // Run the single test case (silenced - no streaming)
-        {
-            fl::ScopedLogDisable logGuard;
-            runSingleTestCase(
-                (*mpTestCases)[0],
-                (*mpTestResults)[0],
-                timing_config,
-                *mpRxChannel,
-                mRxBuffer
-            );
+        // Set driver as exclusive
+        if (!FastLED.setExclusiveDriver(driver_name.c_str())) {
+            response.set("success", false);
+            response.set("error", "DriverSetupFailed");
+            fl::sstream msg;
+            msg << "Failed to set " << driver_name.c_str() << " as exclusive driver";
+            response.set("message", msg.str().c_str());
+            return response;
         }
 
-        uint32_t end_ms = millis();
+        // Get timing configuration (currently hardcoded to WS2812B-V5)
+        fl::NamedTimingConfig timing_config(
+            fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(),
+            timing_name.c_str()
+        );
 
-        // Build result data
-        fl::Json data = fl::Json::object();
-        bool passed = (*mpTestResults)[0].allPassed();
-        int mismatches = (*mpTestResults)[0].total_tests - (*mpTestResults)[0].passed_tests;
+        // Dynamically allocate LED arrays for each lane
+        fl::vector<fl::unique_ptr<fl::vector<CRGB>>> led_arrays;
+        fl::vector<fl::ChannelConfig> tx_configs;
 
-        data.set("passed", passed);
-        data.set("totalTests", static_cast<int64_t>((*mpTestResults)[0].total_tests));
-        data.set("passedTests", static_cast<int64_t>((*mpTestResults)[0].passed_tests));
-        data.set("mismatches", static_cast<int64_t>(mismatches));
-        data.set("durationMs", static_cast<int64_t>(end_ms - start_ms));
-        data.set("driver", driver.c_str());
-        data.set("ledCount", static_cast<int64_t>(led_count));
-        data.set("laneCount", static_cast<int64_t>(lane_count));
-        data.set("pattern", static_cast<int64_t>(pattern_id));
+        for (fl::size i = 0; i < lane_sizes.size(); i++) {
+            // Allocate LED array
+            auto leds = fl::make_unique<fl::vector<CRGB>>(lane_sizes[i]);
 
-        if (passed) {
-            return makeResponse(true, ReturnCode::SUCCESS, "Test passed", data);
-        } else {
-            return makeResponse(false, ReturnCode::TEST_FAILED, "Test failed - mismatches detected", data);
-        }
-    });
+            // Create channel config
+            tx_configs.push_back(fl::ChannelConfig(
+                pin_tx + i,  // Consecutive pins for multi-lane
+                timing_config.timing,
+                fl::span<CRGB>(leds->data(), leds->size()),
+                RGB  // Default color order
+            ));
 
-    // Register "getState" function - query without running
-    mRemote->registerFunctionWithReturn("getState", [this](const fl::Json& args) -> fl::Json {
-        fl::Json state = fl::Json::object();
-
-        if (*mpTestMatrixComplete) {
-            state.set("phase", "complete");
-        } else if (*mpStartCommandReceived) {
-            state.set("phase", "running");
-        } else {
-            state.set("phase", "idle");
+            // Store array to keep it alive
+            led_arrays.push_back(fl::move(leds));
         }
 
-        // Current config
-        fl::Json config = fl::Json::object();
-        if (!mpTestMatrix->enabled_drivers.empty()) {
-            config.set("driver", mpTestMatrix->enabled_drivers[0].c_str());
-        }
+        // Create temporary RX channel if pinRx differs from default
+        fl::shared_ptr<fl::RxDevice> rx_channel_to_use = *mpRxChannel;
+        bool created_temp_rx = false;
 
-        // Strip sizes configuration
-        fl::Json strip_sizes_json = fl::Json::array();
-        for (int size : mpTestMatrix->strip_sizes) {
-            strip_sizes_json.push_back(static_cast<int64_t>(size));
-        }
-        config.set("stripSizes", strip_sizes_json);
-
-        // Lane range
-        config.set("minLanes", static_cast<int64_t>(mpTestMatrix->min_lanes));
-        config.set("maxLanes", static_cast<int64_t>(mpTestMatrix->max_lanes));
-
-        // Build laneSizes array
-        fl::Json sizes_response = fl::Json::array();
-        int total_leds = 0;
-        for (int size : mpTestMatrix->lane_sizes) {
-            sizes_response.push_back(static_cast<int64_t>(size));
-            total_leds += size;
-        }
-        config.set("laneSizes", sizes_response);
-        config.set("laneCount", static_cast<int64_t>(mpTestMatrix->lane_sizes.size()));
-        config.set("totalLeds", static_cast<int64_t>(total_leds));
-        config.set("pattern", mpTestMatrix->test_pattern.c_str());
-        config.set("iterations", static_cast<int64_t>(mpTestMatrix->test_iterations));
-        state.set("config", config);
-
-        // Last results (if any)
-        if (mpTestResults->size() > 0 && (*mpTestResults)[0].total_tests > 0) {
-            fl::Json last_results = fl::Json::object();
-            int total = 0, passed = 0;
-            for (fl::size i = 0; i < mpTestResults->size(); i++) {
-                total += (*mpTestResults)[i].total_tests;
-                passed += (*mpTestResults)[i].passed_tests;
+        if (pin_rx != *mpPinRx && mRxFactory) {
+            rx_channel_to_use = mRxFactory(pin_rx);
+            if (!rx_channel_to_use) {
+                response.set("success", false);
+                response.set("error", "RxChannelCreationFailed");
+                response.set("message", "Failed to create RX channel on custom pin");
+                return response;
             }
-            last_results.set("totalTests", static_cast<int64_t>(total));
-            last_results.set("passedTests", static_cast<int64_t>(passed));
-            last_results.set("passed", passed == total);
-            state.set("lastResults", last_results);
+            created_temp_rx = true;
         }
 
-        return state;
+        // Create validation configuration
+        fl::ValidationConfig validation_config(
+            timing_config.timing,
+            timing_config.name,
+            tx_configs,
+            driver_name.c_str(),
+            rx_channel_to_use,
+            mRxBuffer,
+            lane_sizes[0],  // base_strip_size (used for logging)
+            fl::RxDeviceType::RMT  // Default RX device type
+        );
+
+        // Run test with debug output suppressed
+        int total_tests = 0;
+        int passed_tests = 0;
+        bool passed = false;
+
+        {
+            fl::ScopedLogDisable logGuard;  // Suppress FL_DBG/FL_PRINT during test
+
+            // Run warm-up iteration (discard results)
+            int warmup_total = 0, warmup_passed = 0;
+            validateChipsetTiming(validation_config, warmup_total, warmup_passed);
+
+            // Run actual test iterations
+            for (int iter = 0; iter < iterations; iter++) {
+                int iter_total = 0, iter_passed = 0;
+                validateChipsetTiming(validation_config, iter_total, iter_passed);
+                total_tests += iter_total;
+                passed_tests += iter_passed;
+            }
+
+            passed = (total_tests > 0) && (passed_tests == total_tests);
+        }  // logGuard destroyed, logging restored
+
+        uint32_t duration_ms = millis() - start_ms;
+
+        // ========== RESPONSE ==========
+
+        response.set("success", true);
+        response.set("passed", passed);
+        response.set("totalTests", static_cast<int64_t>(total_tests));
+        response.set("passedTests", static_cast<int64_t>(passed_tests));
+        response.set("duration_ms", static_cast<int64_t>(duration_ms));
+        response.set("driver", driver_name.c_str());
+        response.set("laneCount", static_cast<int64_t>(lane_sizes.size()));
+
+        // Add laneSizes array to response
+        fl::Json sizes_response = fl::Json::array();
+        for (int size : lane_sizes) {
+            sizes_response.push_back(static_cast<int64_t>(size));
+        }
+        response.set("laneSizes", sizes_response);
+        response.set("pattern", pattern.c_str());
+
+        // Add first failure info if test failed
+        if (!passed) {
+            fl::Json failure = fl::Json::object();
+            failure.set("pattern", pattern.c_str());
+            failure.set("details", "Validation mismatch detected");
+            response.set("firstFailure", failure);
+        }
+
+        return response;
     });
 
     // ========================================================================
     // Phase 4 Functions: Utility and Control
     // ========================================================================
-
-    // Register "reset" function - reset test state without device reboot
-    mRemote->registerFunctionWithReturn("reset", [this](const fl::Json& args) -> fl::Json {
-        FL_PRINT("[RPC] reset() - Resetting test state");
-
-        // Reset start command flag
-        *mpStartCommandReceived = false;
-
-        // Reset completion flag
-        *mpTestMatrixComplete = false;
-
-        // Reset frame counter
-        *mpFrameCounter = 0;
-
-        // Reset all test results
-        for (fl::size i = 0; i < mpTestResults->size(); i++) {
-            (*mpTestResults)[i].total_tests = 0;
-            (*mpTestResults)[i].passed_tests = 0;
-            (*mpTestResults)[i].skipped = false;
-        }
-
-        fl::Json response = fl::Json::object();
-        response.set("success", true);
-        response.set("message", "Test state reset successfully");
-        response.set("testCasesCleared", static_cast<int64_t>(mpTestResults->size()));
-        return response;
-    });
-
-    // Register "halt" function - trigger sketch halt
-    mRemote->registerFunctionWithReturn("halt", [this](const fl::Json& args) -> fl::Json {
-        FL_PRINT("[RPC] halt() - Triggering sketch halt");
-
-        // Mark test matrix as complete to trigger halt in loop()
-        *mpTestMatrixComplete = true;
-
-        fl::Json response = fl::Json::object();
-        response.set("success", true);
-        response.set("message", "Sketch halt triggered (will halt on next loop iteration)");
-        return response;
-    });
 
     // Register "ping" function - health check with timestamp
     mRemote->registerFunctionWithReturn("ping", [this](const fl::Json& args) -> fl::Json {
@@ -1699,7 +428,6 @@ void ValidationRemoteControl::registerFunctions(
         response.set("message", "pong");
         response.set("timestamp", static_cast<int64_t>(now));
         response.set("uptimeMs", static_cast<int64_t>(now));
-        response.set("frameCounter", static_cast<int64_t>(*mpFrameCounter));
         return response;
     });
 
@@ -1804,7 +532,7 @@ void ValidationRemoteControl::registerFunctions(
     });
 
     // Register "setTxPin" function - set TX pin (regenerates test cases)
-    mRemote->registerFunctionWithReturn("setTxPin", [this, regenerateTestCasesLocal](const fl::Json& args) -> fl::Json {
+    mRemote->registerFunctionWithReturn("setTxPin", [this](const fl::Json& args) -> fl::Json {
         fl::Json response = fl::Json::object();
 
         if (!args.is_array() || args.size() != 1 || !args[0].is_int()) {
@@ -1825,15 +553,11 @@ void ValidationRemoteControl::registerFunctions(
         int old_pin = *mpPinTx;
         *mpPinTx = new_pin;
 
-        // Regenerate test cases with new TX pin
-        regenerateTestCasesLocal();
-
         FL_PRINT("[RPC] setTxPin(" << new_pin << ") - TX pin changed from " << old_pin << " to " << new_pin);
 
         response.set("success", true);
         response.set("txPin", static_cast<int64_t>(new_pin));
         response.set("previousTxPin", static_cast<int64_t>(old_pin));
-        response.set("testCases", static_cast<int64_t>(mpTestCases->size()));
         return response;
     });
 
@@ -1893,7 +617,7 @@ void ValidationRemoteControl::registerFunctions(
     });
 
     // Register "setPins" function - set both TX and RX pins atomically
-    mRemote->registerFunctionWithReturn("setPins", [this, regenerateTestCasesLocal](const fl::Json& args) -> fl::Json {
+    mRemote->registerFunctionWithReturn("setPins", [this](const fl::Json& args) -> fl::Json {
         fl::Json response = fl::Json::object();
 
         // Accept either {txPin, rxPin} object or [txPin, rxPin] array
@@ -1971,9 +695,6 @@ void ValidationRemoteControl::registerFunctions(
             *mpPinRx = new_rx_pin;
         }
 
-        // Regenerate test cases with new TX pin
-        regenerateTestCasesLocal();
-
         FL_PRINT("[RPC] setPins - TX: " << old_tx_pin << " → " << new_tx_pin
                 << ", RX: " << old_rx_pin << " → " << new_rx_pin);
 
@@ -1983,13 +704,12 @@ void ValidationRemoteControl::registerFunctions(
         response.set("previousTxPin", static_cast<int64_t>(old_tx_pin));
         response.set("previousRxPin", static_cast<int64_t>(old_rx_pin));
         response.set("rxChannelRecreated", rx_recreated);
-        response.set("testCases", static_cast<int64_t>(mpTestCases->size()));
         return response;
     });
 
     // Register "findConnectedPins" function - probe adjacent pin pairs to find a jumper wire connection
     // This allows automatic discovery of TX/RX pin pair without requiring user to specify them
-    mRemote->registerFunctionWithReturn("findConnectedPins", [this, regenerateTestCasesLocal](const fl::Json& args) -> fl::Json {
+    mRemote->registerFunctionWithReturn("findConnectedPins", [this](const fl::Json& args) -> fl::Json {
         fl::Json response = fl::Json::object();
 
         // Parse optional arguments: [{startPin: int, endPin: int, autoApply: bool}]
@@ -2125,14 +845,10 @@ void ValidationRemoteControl::registerFunctions(
                     }
                 }
 
-                // Regenerate test cases
-                regenerateTestCasesLocal();
-
                 FL_PRINT("[PIN PROBE] Auto-applied pins: TX=" << found_tx << ", RX=" << found_rx);
                 response.set("autoApplied", true);
                 response.set("previousTxPin", static_cast<int64_t>(old_tx));
                 response.set("previousRxPin", static_cast<int64_t>(old_rx));
-                response.set("testCases", static_cast<int64_t>(mpTestCases->size()));
             } else {
                 response.set("autoApplied", false);
                 response.set("message", "Use setPins to apply the found pins");
@@ -2396,7 +1112,7 @@ void ValidationRemoteControl::tick(uint32_t current_millis) {
 }
 
 bool ValidationRemoteControl::processSerialInput() {
-    if (!mpStartCommandReceived || !mRemote) {
+    if (!mRemote) {
         return false;  // Not initialized yet
     }
 

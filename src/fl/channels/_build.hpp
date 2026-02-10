@@ -7,4 +7,5 @@
 #include "fl/channels/channel_events.cpp.hpp"
 #include "fl/channels/config.cpp.hpp"
 #include "fl/channels/data.cpp.hpp"
+#include "fl/channels/validation.cpp.hpp"
 #include "fl/channels/wave8.cpp.hpp"

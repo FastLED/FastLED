@@ -21,9 +21,6 @@
 
 // Forward declarations
 namespace fl {
-    struct TestMatrixConfig;
-    struct TestCaseConfig;
-    struct TestCaseResult;
     struct DriverInfo;
     struct RxDevice;
     struct NamedTimingConfig;
@@ -57,12 +54,6 @@ public:
 
     /// @brief Register all RPC functions with external state references
     /// @param drivers_available Reference to available drivers vector
-    /// @param test_matrix Reference to test matrix configuration
-    /// @param test_cases Reference to test cases vector
-    /// @param test_results Reference to test results vector
-    /// @param start_command_received Reference to start command flag
-    /// @param test_matrix_complete Reference to completion flag
-    /// @param frame_counter Reference to frame counter
     /// @param rx_channel Reference to RX channel (may be recreated on pin change)
     /// @param rx_buffer RX buffer span
     /// @param pin_tx Reference to TX pin variable (runtime configurable)
@@ -72,12 +63,6 @@ public:
     /// @param rx_factory Factory function for creating RxDevice instances
     void registerFunctions(
         fl::vector<fl::DriverInfo>& drivers_available,
-        fl::TestMatrixConfig& test_matrix,
-        fl::vector<fl::TestCaseConfig>& test_cases,
-        fl::vector<fl::TestCaseResult>& test_results,
-        bool& start_command_received,
-        bool& test_matrix_complete,
-        uint32_t& frame_counter,
         fl::shared_ptr<fl::RxDevice>& rx_channel,
         fl::span<uint8_t> rx_buffer,
         int& pin_tx,
@@ -105,12 +90,6 @@ private:
 
     // External state references (set by registerFunctions)
     fl::vector<fl::DriverInfo>* mpDriversAvailable;
-    fl::TestMatrixConfig* mpTestMatrix;
-    fl::vector<fl::TestCaseConfig>* mpTestCases;
-    fl::vector<fl::TestCaseResult>* mpTestResults;
-    bool* mpStartCommandReceived;
-    bool* mpTestMatrixComplete;
-    uint32_t* mpFrameCounter;
     fl::shared_ptr<fl::RxDevice>* mpRxChannel;  // Pointer to shared_ptr (for RX recreation)
     fl::span<uint8_t> mRxBuffer;
 

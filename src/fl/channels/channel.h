@@ -104,10 +104,10 @@ public:
     void removeFromDrawList();
 
     /// @brief Get the number of LEDs in this channel
-    int size() const;
+    int size() const override;
 
     /// @brief Show the LEDs with optional brightness scaling
-    void showLeds(u8 brightness = 255);
+    void showLeds(u8 brightness = 255) override;
 
     /// @brief Check if this channel is in the controller draw list
     bool isInDrawList() const;

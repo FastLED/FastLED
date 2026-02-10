@@ -55,7 +55,6 @@
 #include <FastLED.h>
 #include "fl/simd.h"
 #include "fl/dbg.h"
-#include "SketchHalt.h"
 
 // Test framework headers
 #include "test_result.h"
@@ -67,9 +66,6 @@ using namespace simd_test;
 // ============================================================================
 // Global Test State
 // ============================================================================
-
-// Halt mechanism
-SketchHalt halt;
 
 // Test results storage
 fl::vector<TestResult> test_results;
@@ -177,10 +173,16 @@ void setup() {
     }
 }
 
-void loop() {
-    // Check if halted and return if so
-    if (halt.check()) return;
+// Test runs once flag
+static bool tests_run = false;
 
-    // Halt after running tests once
-    halt.error("SIMD test suite complete - halting");
+void loop() {
+    // Run tests only once
+    if (tests_run) {
+        delay(1000);
+        return;
+    }
+
+    tests_run = true;
+    FL_PRINT("SIMD test suite complete");
 }
