@@ -325,30 +325,18 @@ def get_best_match_or_prompt(
             print("  - Use a longer query string")
             if filter_type == "unit_test":
                 print("  - Use path-based query (e.g., 'tests/fl/async')")
-                print(
-                    "  - Run 'uv run test.py --list-tests' to see all available tests"
-                )
-                print(
-                    "  - Run 'uv run test.py --list-tests --cpp' to see only unit tests"
-                )
+                print("  - Run 'uv run test.py --list' to see all available tests")
+                print("  - Run 'uv run test.py --list --cpp' to see only unit tests")
             elif filter_type == "example":
                 print("  - Use path-based query (e.g., 'examples/Blink')")
-                print(
-                    "  - Run 'uv run test.py --list-tests --examples' to see all examples"
-                )
+                print("  - Run 'uv run test.py --list --examples' to see all examples")
             else:
                 print(
                     "  - Use path-based query (e.g., 'tests/fl/async' or 'examples/Blink')"
                 )
-                print(
-                    "  - Run 'uv run test.py --list-tests' to see all available tests"
-                )
-                print(
-                    "  - Run 'uv run test.py --list-tests --cpp' to see only unit tests"
-                )
-                print(
-                    "  - Run 'uv run test.py --list-tests --examples' to see only examples"
-                )
+                print("  - Run 'uv run test.py --list' to see all available tests")
+                print("  - Run 'uv run test.py --list --cpp' to see only unit tests")
+                print("  - Run 'uv run test.py --list --examples' to see only examples")
             return None
 
         # Multiple matches - need disambiguation

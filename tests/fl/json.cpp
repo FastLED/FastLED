@@ -1445,6 +1445,410 @@ FL_TEST_CASE("Json generic integer setter comprehensive test") {
     }
 }
 
+FL_TEST_CASE("Json Cross-Type Numeric Conversions") {
+    // Test storing one numeric type and reading as another type
+
+    FL_SUBCASE("Store int, read as float/double") {
+        Json obj = Json::object();
+
+        // Store integer value
+        obj.set("int_value", i32(42));
+        FL_CHECK(obj["int_value"].is_int());
+        FL_CHECK_FALSE(obj["int_value"].is_float());
+
+        // Read as float
+        fl::optional<float> as_float = obj["int_value"].as<float>();
+        FL_REQUIRE(as_float.has_value());
+        FL_CHECK_CLOSE(*as_float, 42.0f, 0.001f);
+
+        // Read as double
+        fl::optional<double> as_double = obj["int_value"].as<double>();
+        FL_REQUIRE(as_double.has_value());
+        FL_CHECK_CLOSE(*as_double, 42.0, 0.001);
+
+        // Test with negative integer
+        obj.set("negative_int", i32(-100));
+        FL_CHECK_CLOSE(obj["negative_int"].as<float>().value_or(0.0f), -100.0f, 0.001f);
+        FL_CHECK_CLOSE(obj["negative_int"].as<double>().value_or(0.0), -100.0, 0.001);
+
+        // Test with zero
+        obj.set("zero", i32(0));
+        FL_CHECK_EQ(obj["zero"].as<float>().value_or(1.0f), 0.0f);
+        FL_CHECK_EQ(obj["zero"].as<double>().value_or(1.0), 0.0);
+
+        // Test with large integer (may lose precision in float)
+        obj.set("large_int", i64(1234567890));
+        auto large_as_float = obj["large_int"].as<float>();
+        auto large_as_double = obj["large_int"].as<double>();
+        FL_REQUIRE(large_as_float.has_value());
+        FL_REQUIRE(large_as_double.has_value());
+        // Double should maintain precision better than float
+        FL_CHECK_CLOSE(*large_as_double, 1234567890.0, 1.0);
+    }
+
+    FL_SUBCASE("Store float/double, read as int") {
+        Json obj = Json::object();
+
+        // Store float value (whole number)
+        obj.set("float_value", 42.0f);
+        FL_CHECK(obj["float_value"].is_float());
+        FL_CHECK_FALSE(obj["float_value"].is_int());
+
+        // Read as various integer types
+        fl::optional<i8> as_i8 = obj["float_value"].as<i8>();
+        FL_REQUIRE(as_i8.has_value());
+        FL_CHECK_EQ(*as_i8, 42);
+
+        fl::optional<i16> as_i16 = obj["float_value"].as<i16>();
+        FL_REQUIRE(as_i16.has_value());
+        FL_CHECK_EQ(*as_i16, 42);
+
+        fl::optional<i32> as_i32 = obj["float_value"].as<i32>();
+        FL_REQUIRE(as_i32.has_value());
+        FL_CHECK_EQ(*as_i32, 42);
+
+        fl::optional<i64> as_i64 = obj["float_value"].as<i64>();
+        FL_REQUIRE(as_i64.has_value());
+        FL_CHECK_EQ(*as_i64, 42);
+
+        // Test with fractional float (truncates to int)
+        obj.set("fractional", 42.7f);
+        FL_CHECK_EQ(obj["fractional"].as<i32>().value_or(0), 42); // Truncates to 42
+
+        // Test with negative float
+        obj.set("negative_float", -100.5f);
+        FL_CHECK_EQ(obj["negative_float"].as<i32>().value_or(0), -100); // Truncates to -100
+
+        // Test with zero
+        obj.set("zero_float", 0.0f);
+        FL_CHECK_EQ(obj["zero_float"].as<i32>().value_or(1), 0);
+    }
+
+    FL_SUBCASE("Round-trip through JSON serialization/deserialization - int to float") {
+        // Create JSON with integer, serialize, parse, read as float
+        Json original = Json::object();
+        original.set("value", i32(123));
+
+        // Serialize to string
+        fl::string serialized = original.to_string();
+
+        // Parse back
+        Json parsed = Json::parse(serialized);
+        FL_REQUIRE(parsed.has_value());
+        FL_CHECK(parsed["value"].is_int());
+
+        // Read as float from parsed JSON
+        fl::optional<float> value_as_float = parsed["value"].as<float>();
+        FL_REQUIRE(value_as_float.has_value());
+        FL_CHECK_CLOSE(*value_as_float, 123.0f, 0.001f);
+
+        // Read as double from parsed JSON
+        fl::optional<double> value_as_double = parsed["value"].as<double>();
+        FL_REQUIRE(value_as_double.has_value());
+        FL_CHECK_CLOSE(*value_as_double, 123.0, 0.001);
+    }
+
+    FL_SUBCASE("Round-trip through JSON serialization/deserialization - float to int") {
+        // Create JSON with float, serialize, parse, read as int
+        Json original = Json::object();
+        original.set("value", 456.0f); // Store whole number as float
+
+        // Serialize to string
+        fl::string serialized = original.to_string();
+
+        // Parse back
+        Json parsed = Json::parse(serialized);
+        FL_REQUIRE(parsed.has_value());
+        // After parsing, JSON may represent this as either int or float depending on format
+
+        // Read as int from parsed JSON (should work regardless)
+        fl::optional<i32> value_as_int = parsed["value"].as<i32>();
+        FL_REQUIRE(value_as_int.has_value());
+        FL_CHECK_EQ(*value_as_int, 456);
+
+        // Also test with fractional float
+        Json fractional = Json::object();
+        fractional.set("value", 456.7f);
+        fl::string frac_serialized = fractional.to_string();
+        Json frac_parsed = Json::parse(frac_serialized);
+
+        fl::optional<i32> frac_as_int = frac_parsed["value"].as<i32>();
+        FL_REQUIRE(frac_as_int.has_value());
+        FL_CHECK_EQ(*frac_as_int, 456); // Should truncate
+    }
+
+    FL_SUBCASE("Type conversion with ergonomic API") {
+        Json obj = Json::object();
+
+        // Test value<T>() API - int to float
+        obj.set("int_val", i32(99));
+        float float_val = obj["int_val"].value<float>();
+        FL_CHECK_CLOSE(float_val, 99.0f, 0.001f);
+
+        // Test value<T>() API - float to int
+        obj.set("float_val", 88.5f);
+        i32 int_val = obj["float_val"].value<i32>();
+        FL_CHECK_EQ(int_val, 88); // Truncates
+
+        // Test as_or<T>() API - int to float with default
+        obj.set("another_int", i32(77));
+        float float_with_default = obj["another_int"].as_or<float>(0.0f);
+        FL_CHECK_CLOSE(float_with_default, 77.0f, 0.001f);
+
+        // Test as_or<T>() API - float to int with default
+        obj.set("another_float", 66.9f);
+        i32 int_with_default = obj["another_float"].as_or<i32>(0);
+        FL_CHECK_EQ(int_with_default, 66); // Truncates
+
+        // Test with missing key (should use default)
+        float missing_as_float = obj["nonexistent"].as_or<float>(123.4f);
+        FL_CHECK_CLOSE(missing_as_float, 123.4f, 0.001f);
+
+        i32 missing_as_int = obj["nonexistent"].as_or<i32>(999);
+        FL_CHECK_EQ(missing_as_int, 999);
+    }
+
+    FL_SUBCASE("Edge cases and boundary testing") {
+        Json obj = Json::object();
+
+        // Test MAX_INT as float
+        obj.set("max_int", numeric_limits<i32>::max());
+        auto max_as_float = obj["max_int"].as<float>();
+        FL_REQUIRE(max_as_float.has_value());
+        // Float may lose some precision for large ints
+        FL_CHECK(*max_as_float > 2.0e9f);
+
+        // Test MIN_INT as float
+        obj.set("min_int", numeric_limits<i32>::min());
+        auto min_as_float = obj["min_int"].as<float>();
+        FL_REQUIRE(min_as_float.has_value());
+        FL_CHECK(*min_as_float < -2.0e9f);
+
+        // Test very small float as int (should be 0)
+        obj.set("small_float", 0.001f);
+        FL_CHECK_EQ(obj["small_float"].as<i32>().value_or(999), 0);
+
+        // Test float just under 1.0 as int
+        obj.set("almost_one", 0.999f);
+        FL_CHECK_EQ(obj["almost_one"].as<i32>().value_or(999), 0);
+
+        // Test float just over 1.0 as int
+        obj.set("just_over_one", 1.001f);
+        FL_CHECK_EQ(obj["just_over_one"].as<i32>().value_or(999), 1);
+    }
+}
+
+FL_TEST_CASE("Json Bool Conversions") {
+    // Test converting between bool and other types
+
+    FL_SUBCASE("Store bool, read as int/float") {
+        Json obj = Json::object();
+
+        // Store true
+        obj.set("true_val", true);
+        FL_CHECK(obj["true_val"].is_bool());
+
+        // Read as int types
+        FL_CHECK_EQ(obj["true_val"].as<i8>().value_or(99), 1);
+        FL_CHECK_EQ(obj["true_val"].as<i16>().value_or(99), 1);
+        FL_CHECK_EQ(obj["true_val"].as<i32>().value_or(99), 1);
+        FL_CHECK_EQ(obj["true_val"].as<i64>().value_or(99), 1);
+
+        // Read as float types
+        FL_CHECK_CLOSE(obj["true_val"].as<float>().value_or(99.0f), 1.0f, 0.001f);
+        FL_CHECK_CLOSE(obj["true_val"].as<double>().value_or(99.0), 1.0, 0.001);
+
+        // Store false
+        obj.set("false_val", false);
+        FL_CHECK(obj["false_val"].is_bool());
+
+        // Read as int types
+        FL_CHECK_EQ(obj["false_val"].as<i8>().value_or(99), 0);
+        FL_CHECK_EQ(obj["false_val"].as<i16>().value_or(99), 0);
+        FL_CHECK_EQ(obj["false_val"].as<i32>().value_or(99), 0);
+        FL_CHECK_EQ(obj["false_val"].as<i64>().value_or(99), 0);
+
+        // Read as float types
+        FL_CHECK_EQ(obj["false_val"].as<float>().value_or(99.0f), 0.0f);
+        FL_CHECK_EQ(obj["false_val"].as<double>().value_or(99.0), 0.0);
+    }
+
+    FL_SUBCASE("Store int, read as bool") {
+        Json obj = Json::object();
+
+        // Zero → false
+        obj.set("zero", i32(0));
+        FL_CHECK(obj["zero"].is_int());
+        auto zero_bool = obj["zero"].as<bool>();
+        FL_REQUIRE(zero_bool.has_value());
+        FL_CHECK_EQ(*zero_bool, false);
+
+        // Non-zero positive → true
+        obj.set("positive", i32(1));
+        auto pos_bool = obj["positive"].as<bool>();
+        FL_REQUIRE(pos_bool.has_value());
+        FL_CHECK_EQ(*pos_bool, true);
+
+        obj.set("large_positive", i32(42));
+        auto large_pos_bool = obj["large_positive"].as<bool>();
+        FL_REQUIRE(large_pos_bool.has_value());
+        FL_CHECK_EQ(*large_pos_bool, true);
+
+        // Non-zero negative → true
+        obj.set("negative", i32(-1));
+        auto neg_bool = obj["negative"].as<bool>();
+        FL_REQUIRE(neg_bool.has_value());
+        FL_CHECK_EQ(*neg_bool, true);
+
+        obj.set("large_negative", i32(-42));
+        auto large_neg_bool = obj["large_negative"].as<bool>();
+        FL_REQUIRE(large_neg_bool.has_value());
+        FL_CHECK_EQ(*large_neg_bool, true);
+    }
+
+    FL_SUBCASE("Store float, read as bool") {
+        Json obj = Json::object();
+
+        // Zero → false
+        obj.set("zero_float", 0.0f);
+        FL_CHECK(obj["zero_float"].is_float());
+        auto zero_bool = obj["zero_float"].as<bool>();
+        FL_REQUIRE(zero_bool.has_value());
+        FL_CHECK_EQ(*zero_bool, false);
+
+        // Non-zero positive → true
+        obj.set("positive_float", 1.0f);
+        auto pos_bool = obj["positive_float"].as<bool>();
+        FL_REQUIRE(pos_bool.has_value());
+        FL_CHECK_EQ(*pos_bool, true);
+
+        obj.set("small_positive", 0.001f);
+        auto small_pos_bool = obj["small_positive"].as<bool>();
+        FL_REQUIRE(small_pos_bool.has_value());
+        FL_CHECK_EQ(*small_pos_bool, true);
+
+        // Non-zero negative → true
+        obj.set("negative_float", -1.0f);
+        auto neg_bool = obj["negative_float"].as<bool>();
+        FL_REQUIRE(neg_bool.has_value());
+        FL_CHECK_EQ(*neg_bool, true);
+
+        obj.set("small_negative", -0.001f);
+        auto small_neg_bool = obj["small_negative"].as<bool>();
+        FL_REQUIRE(small_neg_bool.has_value());
+        FL_CHECK_EQ(*small_neg_bool, true);
+    }
+
+    FL_SUBCASE("Store string, read as bool") {
+        Json obj = Json::object();
+
+        // True values (case insensitive)
+        fl::vector<fl::string> true_strings = {"true", "TRUE", "True", "1", "yes", "YES", "Yes", "on", "ON", "On"};
+        for (fl::size i = 0; i < true_strings.size(); i++) {
+            fl::string key = fl::string("str_") + fl::to_string(static_cast<int>(i));
+            obj.set(key, true_strings[i]);
+            auto bool_val = obj[key].as<bool>();
+            FL_REQUIRE(bool_val.has_value());
+            FL_CHECK_EQ(*bool_val, true);
+        }
+
+        // False values (case insensitive)
+        fl::vector<fl::string> false_strings = {"false", "FALSE", "False", "0", "no", "NO", "No", "off", "OFF", "Off"};
+        for (fl::size i = 0; i < false_strings.size(); i++) {
+            fl::string key = fl::string("str_false_") + fl::to_string(static_cast<int>(i));
+            obj.set(key, false_strings[i]);
+            auto bool_val = obj[key].as<bool>();
+            FL_REQUIRE(bool_val.has_value());
+            FL_CHECK_EQ(*bool_val, false);
+        }
+
+        // Empty string → false
+        obj.set("empty", fl::string(""));
+        auto empty_bool = obj["empty"].as<bool>();
+        FL_REQUIRE(empty_bool.has_value());
+        FL_CHECK_EQ(*empty_bool, false);
+
+        // Invalid string → nullopt
+        obj.set("invalid", fl::string("not_a_bool"));
+        auto invalid_bool = obj["invalid"].as<bool>();
+        FL_CHECK_FALSE(invalid_bool.has_value());
+    }
+
+    FL_SUBCASE("Round-trip through JSON serialization - bool to int") {
+        Json original = Json::object();
+        original.set("true_val", true);
+        original.set("false_val", false);
+
+        // Serialize
+        fl::string serialized = original.to_string();
+
+        // Parse
+        Json parsed = Json::parse(serialized);
+        FL_REQUIRE(parsed.has_value());
+
+        // Read as int
+        FL_CHECK_EQ(parsed["true_val"].as<i32>().value_or(99), 1);
+        FL_CHECK_EQ(parsed["false_val"].as<i32>().value_or(99), 0);
+
+        // Read as float
+        FL_CHECK_EQ(parsed["true_val"].as<float>().value_or(99.0f), 1.0f);
+        FL_CHECK_EQ(parsed["false_val"].as<float>().value_or(99.0f), 0.0f);
+    }
+
+    FL_SUBCASE("Round-trip through JSON serialization - int to bool") {
+        Json original = Json::object();
+        original.set("zero", i32(0));
+        original.set("one", i32(1));
+        original.set("large", i32(42));
+
+        // Serialize
+        fl::string serialized = original.to_string();
+
+        // Parse
+        Json parsed = Json::parse(serialized);
+        FL_REQUIRE(parsed.has_value());
+
+        // Read as bool
+        FL_CHECK_EQ(parsed["zero"].as<bool>().value_or(true), false);
+        FL_CHECK_EQ(parsed["one"].as<bool>().value_or(false), true);
+        FL_CHECK_EQ(parsed["large"].as<bool>().value_or(false), true);
+    }
+
+    FL_SUBCASE("Ergonomic API with bool conversions") {
+        Json obj = Json::object();
+
+        // Test value<bool>() with int
+        obj.set("int_zero", i32(0));
+        obj.set("int_one", i32(1));
+        FL_CHECK_EQ(obj["int_zero"].value<bool>(), false);
+        FL_CHECK_EQ(obj["int_one"].value<bool>(), true);
+
+        // Test as_or<bool>() with float
+        obj.set("float_zero", 0.0f);
+        obj.set("float_nonzero", 3.14f);
+        FL_CHECK_EQ(obj["float_zero"].as_or<bool>(true), false);
+        FL_CHECK_EQ(obj["float_nonzero"].as_or<bool>(false), true);
+
+        // Test as_or<bool>() with string
+        obj.set("str_true", fl::string("true"));
+        obj.set("str_false", fl::string("false"));
+        obj.set("str_invalid", fl::string("invalid"));
+        FL_CHECK_EQ(obj["str_true"].as_or<bool>(false), true);
+        FL_CHECK_EQ(obj["str_false"].as_or<bool>(true), false);
+        FL_CHECK_EQ(obj["str_invalid"].as_or<bool>(true), true); // Uses default
+
+        // Test value<int>() from bool
+        obj.set("bool_true", true);
+        obj.set("bool_false", false);
+        FL_CHECK_EQ(obj["bool_true"].value<i32>(), 1);
+        FL_CHECK_EQ(obj["bool_false"].value<i32>(), 0);
+
+        // Test value<float>() from bool
+        FL_CHECK_EQ(obj["bool_true"].value<float>(), 1.0f);
+        FL_CHECK_EQ(obj["bool_false"].value<float>(), 0.0f);
+    }
+}
+
 FL_TEST_CASE("Json NEW ergonomic API - try_as<T>(), value<T>(), as_or<T>()") {
     // Test the THREE distinct ergonomic conversion methods
 

@@ -337,7 +337,13 @@ struct IntConversionVisitor {
     void operator()(const bool& value) {
         result = static_cast<IntType>(value ? 1 : 0);
     }
-    
+
+    // Special handling for float to int conversion
+    void operator()(const float& value) {
+        // NEW INSTRUCTIONS: AUTO CONVERT FLOAT TO INT
+        result = static_cast<IntType>(value);
+    }
+
     // Special handling for double to int conversion
     template<typename T = IntType>
     typename fl::enable_if<!fl::is_same<T, double>::value, void>::type
@@ -345,7 +351,7 @@ struct IntConversionVisitor {
         // NEW INSTRUCTIONS: AUTO CONVERT FLOAT TO INT
         result = static_cast<IntType>(value);
     }
-    
+
     void operator()(const fl::string& str) {
         // NEW INSTRUCTIONS: AUTO CONVERT STRING TO INT
         // Try to parse the string as an integer using FastLED's StringFormatter
@@ -397,12 +403,17 @@ struct IntConversionVisitor<i64> {
     void operator()(const bool& value) {
         result = value ? 1 : 0;
     }
-    
+
+    void operator()(const float& value) {
+        // NEW INSTRUCTIONS: AUTO CONVERT FLOAT TO INT
+        result = static_cast<i64>(value);
+    }
+
     void operator()(const double& value) {
         // NEW INSTRUCTIONS: AUTO CONVERT FLOAT TO INT
         result = static_cast<i64>(value);
     }
-    
+
     void operator()(const fl::string& str) {
         // NEW INSTRUCTIONS: AUTO CONVERT STRING TO INT
         // Try to parse the string as an integer using FastLED's StringFormatter
@@ -433,6 +444,77 @@ struct IntConversionVisitor<i64> {
     template<typename T>
     void operator()(const T&) {
         // Do nothing for other types
+    }
+};
+
+// Visitor for converting values to bool
+struct BoolConversionVisitor {
+    fl::optional<bool> result;
+
+    template<typename U>
+    void accept(const U& value) {
+        // Dispatch to the correct operator() overload
+        (*this)(value);
+    }
+
+    void operator()(const bool& value) {
+        result = value;
+    }
+
+    void operator()(const i64& value) {
+        // NEW INSTRUCTIONS: AUTO CONVERT INT TO BOOL
+        // 0 → false, non-zero → true
+        result = (value != 0);
+    }
+
+    void operator()(const float& value) {
+        // NEW INSTRUCTIONS: AUTO CONVERT FLOAT TO BOOL
+        // 0.0 → false, non-zero → true
+        result = (value != 0.0f);
+    }
+
+    void operator()(const double& value) {
+        // NEW INSTRUCTIONS: AUTO CONVERT DOUBLE TO BOOL
+        // 0.0 → false, non-zero → true
+        result = (value != 0.0);
+    }
+
+    void operator()(const fl::string& str) {
+        // NEW INSTRUCTIONS: AUTO CONVERT STRING TO BOOL
+        // "true", "1", "yes", "on" (case insensitive) → true
+        // "false", "0", "no", "off" (case insensitive) → false
+        // Empty string → false
+        // Invalid string → nullopt
+
+        if (str.empty()) {
+            result = false;
+            return;
+        }
+
+        // Convert to lowercase for case-insensitive comparison
+        fl::string lower = str;
+        for (fl::size i = 0; i < lower.length(); i++) {
+            lower[i] = fl::tolower(lower[i]);
+        }
+
+        // Check for true values
+        if (lower == "true" || lower == "1" || lower == "yes" || lower == "on") {
+            result = true;
+            return;
+        }
+
+        // Check for false values
+        if (lower == "false" || lower == "0" || lower == "no" || lower == "off") {
+            result = false;
+            return;
+        }
+
+        // Invalid string - don't set result (leave as nullopt)
+    }
+
+    template<typename T>
+    void operator()(const T&) {
+        // Do nothing for other types (arrays, objects, null)
     }
 };
 
@@ -942,8 +1024,14 @@ struct JsonValue {
 
     // Safe extractors (return optional values, not references)
     fl::optional<bool> as_bool() {
-        auto ptr = data.ptr<bool>();
-        return ptr ? fl::optional<bool>(*ptr) : fl::nullopt;
+        // Check if we have a valid value first
+        if (data.empty()) {
+            return fl::nullopt;
+        }
+
+        BoolConversionVisitor visitor;
+        data.visit(visitor);
+        return visitor.result;
     }
     
     fl::optional<i64> as_int() {
@@ -1064,8 +1152,14 @@ struct JsonValue {
 
     // Const overloads
     fl::optional<bool> as_bool() const {
-        auto ptr = data.ptr<bool>();
-        return ptr ? fl::optional<bool>(*ptr) : fl::nullopt;
+        // Check if we have a valid value first
+        if (data.empty()) {
+            return fl::nullopt;
+        }
+
+        BoolConversionVisitor visitor;
+        data.visit(visitor);
+        return visitor.result;
     }
     
     fl::optional<i64> as_int() const {
