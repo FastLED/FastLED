@@ -41,10 +41,13 @@ if [ $# -eq 0 ]; then
     echo "  --build-mode MODE     Build mode: quick, debug, release, profile (default: release)"
     echo "  --no-generate         Skip test generation (use existing profiler)"
     echo "  --callgrind           Run callgrind analysis (slower)"
+    echo "  --debuggable          Enable stack traces for deadlock debugging (~1-5% slower)"
     echo ""
     echo "Examples:"
-    echo "  bash profile sincos16 --docker"
-    echo "  bash profile sincos16 --iterations 50 --build-mode release"
+    echo "  bash profile sincos16                    # Fast benchmarking (release mode)"
+    echo "  bash profile sincos16 --debuggable       # With stack traces (quick mode)"
+    echo "  bash profile sincos16 --docker           # In Docker container"
+    echo "  bash profile sincos16 --iterations 50    # More iterations"
     echo "  bash profile 'fl::Perlin::pnoise2d' --docker --callgrind"
     exit 0
 fi

@@ -21,23 +21,25 @@ import sys
 source_dir = sys.argv[1] if len(sys.argv) > 1 else "."
 files = glob.glob(os.path.join(source_dir, "tests/profile/profile_*.cpp"))
 if files:
-    print("\\n".join(files))
+    # Use semicolon as separator to avoid newline issues on Windows
+    print(";".join(files))
   ''',
   meson.project_source_root(),
   check: false
 ).stdout().strip()
 
 if profile_test_files != ''
-  foreach profile_file : profile_test_files.split('\n')
+  foreach profile_file : profile_test_files.split(';')
     # Extract test name from file path: tests/profile/profile_sincos16.cpp → sincos16
     profile_basename = fs.name(profile_file)  # profile_sincos16.cpp
     profile_name = profile_basename.substring(8, -4)  # Remove 'profile_' prefix and '.cpp' suffix
 
     # Build as standalone executable (no PCH, no doctest, no runner)
+    # Uses profile_test_compile_args for readable stack traces (frame pointers + debug symbols)
     executable('profile_' + profile_name,
       profile_file,
       include_directories: [src_dir, stub_dir],
-      cpp_args: unit_test_compile_args,
+      cpp_args: profile_test_compile_args,
       link_args: unit_test_link_args,
       link_with: [fastled_lib],
       install: false,
@@ -45,7 +47,7 @@ if profile_test_files != ''
     )
   endforeach
 
-  message('Profile tests found: ' + profile_test_files.split('\n').length().to_string() + ' benchmarks')
+  message('Profile tests found: ' + profile_test_files.split(';').length().to_string() + ' benchmarks')
 else
   message('No profile tests found (tests/profile/profile_*.cpp)')
 endif

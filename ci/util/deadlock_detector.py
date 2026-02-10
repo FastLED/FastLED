@@ -22,7 +22,8 @@ def find_debugger() -> tuple[Optional[str], str]:
     Returns:
         Tuple of (debugger_path, debugger_name) or (None, "none")
     """
-    # Try lldb first (preferred for better output)
+    # Try system lldb first (preferred for process attachment)
+    # Note: clang-tool-chain-lldb wrapper doesn't support --batch/--attach-pid flags
     lldb = shutil.which("lldb")
     if lldb:
         return (lldb, "lldb")

@@ -136,8 +136,28 @@ test_specific_args = [
   '-DFASTLED_DEBUG_STACK_TRACE',
 ]
 
+# Profile test-specific compilation flags
+# Stack trace preservation for debugger attachment (deadlock detector)
+# Note: These flags have ~1-5% performance overhead but are critical for debugging hung tests.
+# The overhead affects absolute timings but relative comparisons remain valid.
+profile_stacktrace_args = [
+  '-fno-omit-frame-pointer',      # Preserve frame pointers for complete backtraces (~1-3% overhead)
+  '-fno-optimize-sibling-calls',  # Preserve tail call frames in stack traces (~0.5-1% overhead)
+]
+
+# Profile test compilation flags
+# Always include debug symbols (-g) for function names in stack traces
+# Conditionally include stack trace preservation flags in debug/quick modes only
+profile_specific_args = ['-g']  # Always on: function names + line numbers
+if build_mode == 'debug' or build_mode == 'quick'
+  # Debug/quick modes: Add stack trace preservation (helps deadlock detector)
+  profile_specific_args += profile_stacktrace_args
+endif
+# Release/profile modes: Skip stack trace flags for accurate performance measurement
+
 # Construct final compile args for tests and examples
 unit_test_compile_args = base_compile_args + test_specific_args
+profile_test_compile_args = base_compile_args + profile_specific_args
 example_compile_args = base_compile_args
 
 # ============================================================================

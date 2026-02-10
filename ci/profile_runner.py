@@ -11,7 +11,10 @@ import argparse
 import json
 import subprocess
 import sys
+import time
 from pathlib import Path
+
+from ci.util.deadlock_detector import handle_hung_test
 
 
 class ProfileRunner:
@@ -23,13 +26,22 @@ class ProfileRunner:
         use_docker: bool = False,
         skip_generate: bool = False,
         use_callgrind: bool = False,
+        debuggable: bool = False,
     ):
         self.target = target
         self.iterations = iterations
-        self.build_mode = build_mode
+        # If debuggable mode requested, override to 'quick' for stack traces
+        if debuggable and build_mode == "release":
+            self.build_mode = "quick"
+            print(
+                "ℹ️  Debuggable mode: Using 'quick' build mode for stack trace preservation"
+            )
+        else:
+            self.build_mode = build_mode
         self.use_docker = use_docker
         self.skip_generate = skip_generate
         self.use_callgrind = use_callgrind
+        self.debuggable = debuggable
         self.test_name = "profile_" + self._sanitize_name(
             target
         )  # Include "profile_" prefix
@@ -126,9 +138,69 @@ class ProfileRunner:
 
         return binary_path
 
+    def _run_with_timeout(
+        self, cmd: list[str], timeout_seconds: int = 120
+    ) -> tuple[bool, str, int | None]:
+        """
+        Run command with timeout and deadlock detection.
+
+        Returns:
+            Tuple of (success, output, pid_if_timeout)
+        """
+        # Start process without built-in timeout (we monitor manually)
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+
+        start_time = time.time()
+
+        # Poll process with timeout monitoring
+        while True:
+            retcode = proc.poll()
+
+            # Process finished normally
+            if retcode is not None:
+                stdout, stderr = proc.communicate()
+                output = stdout + stderr
+
+                if retcode == 0:
+                    return (True, output, None)
+                else:
+                    return (False, output, None)
+
+            # Check timeout
+            elapsed = time.time() - start_time
+            if elapsed > timeout_seconds:
+                # Timeout! Attach debugger before killing
+                pid = proc.pid
+                print(f"\n🚨 TIMEOUT EXCEEDED after {elapsed:.1f}s!")
+                print(f"📍 Attaching debugger to PID {pid}...")
+
+                # Dump stack trace before killing
+                handle_hung_test(pid, self.test_name, timeout_seconds)
+
+                # Now kill the process
+                proc.kill()
+                proc.wait()
+
+                return (False, "TIMEOUT", pid)
+
+            # Sleep briefly before next check
+            time.sleep(0.1)
+
     def run_benchmark(self) -> bool:
         """Run benchmark iterations and collect results"""
         print(f"Running {self.iterations} iterations...")
+        print(f"⏱️  Timeout: 120 seconds per iteration (deadlock detector enabled)")
+        if self.debuggable or self.build_mode in ["debug", "quick"]:
+            print(f"🐛 Stack traces enabled (build mode: {self.build_mode})")
+        else:
+            print(
+                f"⚡ Performance mode (build mode: {self.build_mode}) - limited stack traces"
+            )
 
         binary_path = self.get_binary_path()
         if not binary_path.exists():
@@ -142,7 +214,7 @@ class ProfileRunner:
 
             try:
                 if self.use_docker:
-                    # Run in Docker container
+                    # Docker: Use built-in timeout (can't attach debugger inside container easily)
                     result = subprocess.run(
                         [
                             "docker",
@@ -158,18 +230,27 @@ class ProfileRunner:
                         capture_output=True,
                         text=True,
                         check=True,
+                        timeout=120,
                     )
+                    output = result.stdout + result.stderr
                 else:
-                    # Run locally
-                    result = subprocess.run(
-                        [str(binary_path), "baseline"],
-                        capture_output=True,
-                        text=True,
-                        check=True,
+                    # Local: Use custom timeout with debugger attachment
+                    cmd = [str(binary_path), "baseline"]
+                    success, output, pid = self._run_with_timeout(
+                        cmd, timeout_seconds=120
                     )
 
+                    if not success:
+                        if pid is not None:
+                            # Timeout occurred - stack trace already dumped
+                            return False
+                        else:
+                            # Process failed normally
+                            print(f"ERROR: Process exited with error")
+                            print(f"Output: {output}")
+                            return False
+
                 # Parse structured output (check both stdout and stderr)
-                output = result.stdout + result.stderr
                 if "PROFILE_RESULT:" in output:
                     json_start = output.find("{")
                     json_end = output.rfind("}") + 1
@@ -183,6 +264,12 @@ class ProfileRunner:
                 else:
                     print("ERROR: No PROFILE_RESULT in output")
                     return False
+
+            except subprocess.TimeoutExpired:
+                # Docker timeout (no debugger attachment possible)
+                print("\n🚨 DOCKER TIMEOUT EXCEEDED!")
+                print("⚠️  Cannot attach debugger inside Docker container")
+                return False
 
             except subprocess.CalledProcessError as e:
                 print(f"ERROR: {e}")
@@ -306,6 +393,11 @@ Examples:
         action="store_true",
         help="Run callgrind analysis (slower)",
     )
+    parser.add_argument(
+        "--debuggable",
+        action="store_true",
+        help="Enable stack trace preservation for deadlock debugging (uses 'quick' mode, ~1-5%% slower)",
+    )
 
     args = parser.parse_args()
 
@@ -316,6 +408,7 @@ Examples:
         use_docker=args.docker,
         skip_generate=args.no_generate,
         use_callgrind=args.callgrind,
+        debuggable=args.debuggable,
     )
 
     return runner.run()
