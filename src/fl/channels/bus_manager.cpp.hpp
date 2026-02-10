@@ -1,7 +1,12 @@
 /// @file bus_manager.cpp
 /// @brief Implementation of unified channel bus manager
 
+
+
 #include "fl/channels/bus_manager.h"
+#include "fl/channels/channel.h"
+#include "fl/channels/channel_events.h"
+#include "fl/fastled.h"
 #include "fl/singleton.h"
 #include "fl/dbg.h"
 #include "fl/warn.h"
@@ -14,6 +19,10 @@
 #include "fl/trace.h"
 #include "fl/async.h"
 #include "platforms/init_channel_engine.h"
+
+// Forward declarations for FastLED accessor functions (defined in FastLED.cpp.hpp)
+fl::u8 get_brightness();
+fl::u16 get_fps();
 
 namespace fl {
 
@@ -47,7 +56,7 @@ ChannelBusManager::~ChannelBusManager() {
 
 void ChannelBusManager::addEngine(int priority, fl::shared_ptr<IChannelEngine> engine) {
     if (!engine) {
-        FL_WARN("ChannelBusManager::addEngine() - Null engine provided");
+        FL_ERROR("ChannelBusManager::addEngine() - Null engine provided (programmer error)");
         return;
     }
 
@@ -56,7 +65,7 @@ void ChannelBusManager::addEngine(int priority, fl::shared_ptr<IChannelEngine> e
 
     // Reject engines with empty names
     if (engineName.empty()) {
-        FL_WARN("ChannelBusManager::addEngine() - Engine has empty name (engine->getName() returned empty string)");
+        FL_ERROR("ChannelBusManager::addEngine() - Engine has empty name (invalid engine implementation)");
         return;
     }
 
@@ -302,12 +311,24 @@ bool ChannelBusManager::canHandle(const ChannelDataPtr& data) const {
 // IChannelEngine interface implementation
 void ChannelBusManager::enqueue(ChannelDataPtr channelData) {
     if (!channelData) {
-        FL_WARN("ChannelBusManager::enqueue() - Null channel data provided");
+        FL_ERROR("ChannelBusManager::enqueue() - Null channel data provided (programmer error)");
         return;
     }
 
     // Batch the channel data for later transmission
-    mEnqueuedChannels.push_back(channelData);
+    // Note: Channel pointer is nullptr when called externally (backwards compatibility)
+    mEnqueuedChannels.push_back({nullptr, channelData});
+}
+
+// Internal enqueue with channel association (for event firing)
+void ChannelBusManager::enqueueWithChannel(Channel* channel, ChannelDataPtr channelData) {
+    if (!channelData) {
+        FL_ERROR("ChannelBusManager::enqueueWithChannel() - Null channel data provided (programmer error)");
+        return;
+    }
+
+    // Batch the channel data with channel association
+    mEnqueuedChannels.push_back({channel, channelData});
 }
 
 void ChannelBusManager::show() {
@@ -318,7 +339,7 @@ void ChannelBusManager::show() {
         mEnqueuedChannels.clear();
 
         // Begin transmission
-        beginTransmission(fl::span<const ChannelDataPtr>(mTransmittingChannels.data(), mTransmittingChannels.size()));
+        beginTransmission(fl::span<const ChannelDataEntry>(mTransmittingChannels.data(), mTransmittingChannels.size()));
     }
 }
 
@@ -329,12 +350,12 @@ IChannelEngine::EngineState ChannelBusManager::poll() {
     bool anyBusy = false;
     fl::string firstError;
     for (auto& entry : mEngines) {
-        EngineState result = entry.engine->poll();
-        if (result.state == EngineState::BUSY) {
+        IChannelEngine::EngineState result = entry.engine->poll();
+        if (result.state == IChannelEngine::EngineState::BUSY) {
             anyBusy = true;
         }
         // Capture first error encountered
-        if (result.state == EngineState::ERROR && firstError.empty()) {
+        if (result.state == IChannelEngine::EngineState::ERROR && firstError.empty()) {
             firstError = result.error;
         }
     }
@@ -346,10 +367,10 @@ IChannelEngine::EngineState ChannelBusManager::poll() {
 
     // Return error if any engine reported error
     if (!firstError.empty()) {
-        return EngineState(EngineState::ERROR, firstError);
+        return IChannelEngine::EngineState(IChannelEngine::EngineState::ERROR, firstError);
     }
 
-    return EngineState(anyBusy ? EngineState::BUSY : EngineState::READY);
+    return IChannelEngine::EngineState(anyBusy ? IChannelEngine::EngineState::BUSY : IChannelEngine::EngineState::READY);
 }
 
 template<typename Condition>
@@ -383,22 +404,67 @@ bool ChannelBusManager::waitForCondition(Condition condition, u32 timeoutMs) {
 }
 
 void ChannelBusManager::wait() {
-    waitForCondition([this]() { return poll() == EngineState::READY; });
+    waitForCondition([this]() { return poll() == IChannelEngine::EngineState::READY; });
 }
 
 
 void ChannelBusManager::onBeginFrame() {
     // CRITICAL: Poll engines before the frame starts to release buffers from previous frame
-    // This ensures that ChannelData::mInUse flags are cleared before Channel::showPixels() is called
+    // This ensures that ChannelData::mInUse flags are cleared before encoding
     // Sequence:
     //   1. Frame N transmission completes (ISR sets transmissionComplete)
     //   2. onBeginFrame() called (this method)
-    //   3. poll() clears mInUse flags via ChannelEngineRMT::poll()
-    //   4. Channel::showPixels() called for Frame N+1 (can now encode safely)
+    //   3. poll() clears mInUse flags via engine poll()
     poll();
+
+    // Note: encodeTrackedChannels() moved to onEndFrame() to synchronize dither state
+    // with legacy controllers (both encode in the same frame, using consecutive R values)
 }
 
-void ChannelBusManager::beginTransmission(fl::span<const ChannelDataPtr> channelData) {
+void ChannelBusManager::encodeTrackedChannels() {
+    // Top-down encoding: ChannelBusManager drives encoding instead of CLEDController draw loop
+    // This ensures proper attribute application (dither, brightness, etc.) before encoding
+    if (mChannels.empty()) {
+        return;
+    }
+
+    // Fetch brightness and FPS from FastLED singleton (reduces AVR binary size)
+    u8 brightness = get_brightness();
+    u16 fps = get_fps();
+
+    // Apply dither logic from legacy system: if FPS < 100, disable dither
+    // Note: Only disable if FPS is being actively tracked (fps > 0)
+    // FPS = 0 means FPS tracking hasn't started, so respect user's dither setting
+    bool disableDither = (fps > 0 && fps < 100);
+
+    for (const fl::ChannelPtr& channel : mChannels) {
+        if (!channel) {
+            continue;
+        }
+
+        // All channels in mChannels are enabled for rendering
+        // The draw list is now managed by ChannelBusManager
+
+        // Save and apply dither setting (matches legacy FastLED.show() logic)
+        u8 savedDither = channel->getDither();
+        if (disableDither) {
+            channel->setDither(0);
+        }
+
+        // Encode pixels and get the channel data
+        ChannelDataPtr data = channel->encodePixels(brightness);
+
+        // Restore dither setting
+        channel->setDither(savedDither);
+
+        // Enqueue encoded data if encoding succeeded
+        if (data) {
+            enqueueWithChannel(channel.get(), data);
+        }
+    }
+}
+
+void ChannelBusManager::beginTransmission(fl::span<const ChannelDataEntry> channelData) {
     FL_SCOPED_TRACE;
     if (channelData.size() == 0) {
         return;
@@ -406,9 +472,9 @@ void ChannelBusManager::beginTransmission(fl::span<const ChannelDataPtr> channel
 
     // Select engine for this transmission
     // Use first channel data for predicate filtering (all channels should be compatible)
-    IChannelEngine* engine = selectEngine(channelData.size() > 0 ? channelData[0] : nullptr);
+    IChannelEngine* engine = selectEngine(channelData.size() > 0 ? channelData[0].data : nullptr);
     if (!engine) {
-        FL_WARN("ChannelBusManager::beginTransmission() - No compatible engines available");
+        FL_ERROR("ChannelBusManager::beginTransmission() - No compatible engines available (system misconfiguration)");
         mLastError = "No compatible engines available";
         return;
     }
@@ -416,11 +482,20 @@ void ChannelBusManager::beginTransmission(fl::span<const ChannelDataPtr> channel
     // Forward channel data to selected engine by enqueueing and showing
     // Wait until engine is ready for new data (with check-pump-delay logic)
     if (engine) {
-        waitForCondition([engine]() { return engine->poll() == EngineState::READY; });
+        waitForCondition([engine]() { return engine->poll() == IChannelEngine::EngineState::READY; });
     }
 
-    for (const auto& channel : channelData) {
-        engine->enqueue(channel);
+    // Fire onChannelEnqueued events with actual selected engine name
+    auto& events = ChannelEvents::instance();
+    fl::string engineName = engine->getName();
+
+    for (const auto& entry : channelData) {
+        engine->enqueue(entry.data);
+
+        // Fire event with accurate engine name (after engine selection)
+        if (entry.channel) {
+            events.onChannelEnqueued(*entry.channel, engineName);
+        }
     }
 
     engine->show();
@@ -429,6 +504,10 @@ void ChannelBusManager::beginTransmission(fl::span<const ChannelDataPtr> channel
 }
 
 void ChannelBusManager::onEndFrame() {
+    // Encode tracked channels (after legacy controllers have encoded)
+    // Dither sync now handled in Channel::encodePixels() between the two PixelController creations
+    encodeTrackedChannels();
+
     // Trigger transmission of all batched channel data
     show();
 }
@@ -440,6 +519,47 @@ void ChannelBusManager::reset() {
     // Allow all channel engines to clean up
     wait();
     FL_DBG("ChannelBusManager: reset() - cleared all channels");
+}
+
+void ChannelBusManager::registerChannel(fl::ChannelPtr channel) {
+    if (!channel) {
+        return;
+    }
+
+    // Check if already registered (uses shared_ptr equality)
+    for (const auto& ch : mChannels) {
+        if (ch == channel) {
+            FL_WARN("ChannelBusManager::registerChannel() - Channel already registered");
+            return;
+        }
+    }
+
+    mChannels.push_back(channel);
+    FL_DBG("ChannelBusManager: Registered channel (id=" << channel->id() << ", name='" << channel->name().c_str() << "')");
+
+    // Fire event after adding to tracked list
+    auto& events = ChannelEvents::instance();
+    events.onChannelAdded(*channel);
+}
+
+void ChannelBusManager::unregisterChannel(fl::ChannelPtr channel) {
+    if (!channel) {
+        return;
+    }
+
+    for (auto it = mChannels.begin(); it != mChannels.end(); ++it) {
+        if (*it == channel) {
+            // Fire event before removing from tracked list
+            auto& events = ChannelEvents::instance();
+            events.onChannelRemoved(*channel);
+
+            mChannels.erase(it);
+            FL_DBG("ChannelBusManager: Unregistered channel (id=" << channel->id() << ")");
+            return;
+        }
+    }
+
+    FL_WARN("ChannelBusManager::unregisterChannel() - Channel not found in tracked list");
 }
 
 IChannelEngine* ChannelBusManager::selectEngine(const ChannelDataPtr& data) {

@@ -83,34 +83,17 @@ public:
     /// @brief Check if this is an SPI chipset
     bool isSpi() const { return mChipset.is<SpiChipsetConfig>(); }
 
-    /// @brief Get the channel engine this channel belongs to
-    /// @return Pointer to the IChannelEngine, or nullptr if not set
-    IChannelEngine* getChannelEngine() const { return mEngine; }
-
-    /// @brief Set the channel engine this channel belongs to
-    /// @param engine Pointer to the IChannelEngine (singleton, not owned)
-    void setChannelEngine(IChannelEngine* engine) { mEngine = engine; }
-
     /// @brief Apply reconfigurable settings from a ChannelConfig
     /// @param config The configuration to apply
-    /// @note Does NOT change: mPin, mTiming, mChipset, mEngine, mId
+    /// @note Does NOT change: mPin, mTiming, mChipset, mId
     void applyConfig(const ChannelConfig& config);
 
     // Re-expose protected base class methods for external access
-    /// @brief Add this channel to the global controller draw list
-    void addToDrawList();
-
-    /// @brief Remove this channel from the global controller draw list
-    void removeFromDrawList();
-
     /// @brief Get the number of LEDs in this channel
     int size() const override;
 
     /// @brief Show the LEDs with optional brightness scaling
     void showLeds(u8 brightness = 255) override;
-
-    /// @brief Check if this channel is in the controller draw list
-    bool isInDrawList() const;
 
     /// @brief Get pointer to base CLEDController for linked list traversal
     CLEDController* asController() { return static_cast<CLEDController*>(this); }
@@ -131,8 +114,23 @@ public:
     /// @brief Get the dither mode
     u8 getDither();
 
+    /// @brief Set the dither mode
+    /// @param ditherMode Dither mode (BINARY_DITHER or DISABLE_DITHER)
+    void setDither(u8 ditherMode);
+
     /// @brief Get the RGBW conversion mode
     Rgbw getRgbw() const;
+
+    /// @brief Encode pixels with given brightness
+    /// @param brightness Global brightness scaling (0-255)
+    /// @return Channel data ready for enqueuing, or nullptr if encoding skipped
+    /// @note This method is called by ChannelBusManager::onBeginFrame() for top-down control
+    ChannelDataPtr encodePixels(u8 brightness);
+
+    /// @brief Get the channel data for testing/debugging
+    /// @return Shared pointer to channel data
+    /// @note Primarily for test verification, enqueuing should use callback in encodePixels()
+    ChannelDataPtr getChannelData() const { return mChannelData; }
 
 private:
     // CPixelLEDController interface implementation
@@ -147,15 +145,14 @@ private:
     /// @param chipset Chipset configuration (clockless or SPI)
     /// @param leds LED data array
     /// @param rgbOrder RGB channel ordering
-    /// @param engine Channel engine pointer
     /// @param options Channel options (correction, temperature, dither, rgbw)
     Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
-            EOrder rgbOrder, IChannelEngine* engine, const ChannelOptions& options);
+            EOrder rgbOrder, const ChannelOptions& options);
 
     /// @brief Backwards-compatible constructor (deprecated)
     /// @deprecated Use variant-based constructor instead
     Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
-            EOrder rgbOrder, IChannelEngine* engine, const ChannelOptions& options);
+            EOrder rgbOrder, const ChannelOptions& options);
 
     // Non-copyable, non-movable
     Channel(const Channel&) = delete;
@@ -170,7 +167,6 @@ private:
     int mPin;                        // Data pin (backwards compatibility)
     ChipsetTimingConfig mTiming;     // Timing (backwards compatibility, clockless only)
     EOrder mRgbOrder;
-    IChannelEngine* mEngine;         // Singleton pointer, not owned
     const i32 mId;
     fl::string mName;               // User-specified or auto-generated name
     ChannelDataPtr mChannelData;

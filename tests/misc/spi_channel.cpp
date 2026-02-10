@@ -273,7 +273,9 @@ FL_TEST_CASE("SPI chipset - mock engine integration") {
 
     auto channel = Channel::create(config);
     FL_REQUIRE(channel != nullptr);
-    FL_CHECK_EQ(channel->getChannelEngine(), mockEngine.get());
+
+    // Note: channel->getChannelEngine() was removed as part of GitHub #2167 fix
+    // Channels no longer store direct engine pointers (top-down architecture)
 
     // Add channel to FastLED
     FastLED.add(channel);
@@ -296,7 +298,7 @@ FL_TEST_CASE("SPI chipset - mock engine integration") {
     FL_CHECK_GE(mockEngine->mLastTransmittedData.size(), minExpectedSize);
 
     // Clean up
-    channel->removeFromDrawList();
+    FastLED.remove(channel);
     manager.setDriverEnabled("MOCK_SPI", false);
 }
 

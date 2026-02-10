@@ -31,6 +31,10 @@
 
 namespace fl {
 
+// Forward declarations
+class Channel;
+FASTLED_SHARED_PTR(Channel);
+
 /// @brief Driver state information for channel bus manager
 struct DriverInfo {
     fl::string name;  ///< Driver name (empty for unnamed engines)
@@ -40,13 +44,16 @@ struct DriverInfo {
 
 /// @brief Unified channel bus manager with priority-based engine selection
 ///
-/// This manager inherits from IChannelEngine and acts as a transparent proxy
-/// to concrete engine implementations (RMT, SPI, PARLIO). Strip drivers use
-/// it polymorphically through the IChannelEngine interface.
+/// This manager coordinates channel encoding and delegates to concrete engine
+/// implementations (RMT, SPI, PARLIO). Channels are tracked via shared_ptr.
 ///
 /// Platform-specific code registers engines during static initialization.
-class ChannelBusManager : public IChannelEngine, public EngineEvents::Listener {
+class ChannelBusManager : public EngineEvents::Listener {
 public:
+    /// TODO: Many of these functions were holdovers when ChannelBusManager was an IEngine interface
+    /// but that is no longer true and some of these functions should be removed.
+
+
     /// @brief Get the global singleton instance
     /// @return Reference to the singleton ChannelBusManager
     /// @note Thread-safe singleton initialization
@@ -138,25 +145,25 @@ public:
     /// @brief Get capabilities of all registered engines (OR'd together)
     /// @return Capabilities struct with bool flags set if ANY engine supports that protocol
     /// @note Bus manager aggregates capabilities from all engines
-    Capabilities getCapabilities() const override;
+    IChannelEngine::Capabilities getCapabilities() const;
 
     /// @brief Check if manager can handle channel data (always true - proxy pattern)
     /// @param data Channel data to check (unused)
     /// @return Always true - manager accepts all channel types and delegates to registered engines
     /// @note Bus manager is a proxy that delegates to compatible engines based on canHandle()
-    bool canHandle(const ChannelDataPtr& data) const override;
+    bool canHandle(const ChannelDataPtr& data) const;
 
     /// @brief Enqueue channel data for transmission
     /// @param channelData Channel data to transmit
     /// @note Selects engine on first call, then batches channel data
-    void enqueue(ChannelDataPtr channelData) override;
+    void enqueue(ChannelDataPtr channelData);
 
     /// @brief Trigger transmission of enqueued data
-    void show() override;
+    void show();
 
     /// @brief Query engine state and perform maintenance
     /// @return Current engine state (READY, BUSY, DRAINING, or ERROR)
-    EngineState poll() override;
+    IChannelEngine::EngineState poll();
 
     /// @brief Wait for all engines to become READY
     /// @note Polls engines in a loop, calling async_run() and yielding with minimal delay
@@ -167,6 +174,11 @@ public:
     /// @note Called at the beginning of each frame to ensure buffers from previous frame are released
     void onBeginFrame() override;
 
+    /// @brief Encode all tracked channels (fetches brightness/FPS from FastLED)
+    /// @note Called by CFastLED::show() to trigger top-down encoding
+    /// @note Brightness and FPS are fetched from FastLED singleton to reduce AVR binary size
+    void encodeTrackedChannels();
+
     /// @brief Trigger transmission of batched channel data
     /// @note Called at frame boundaries to flush enqueued channels
     void onEndFrame() override;
@@ -175,11 +187,38 @@ public:
     /// @note Call this between test cases or when reinitializing the LED system
     void reset();
 
+    /// @brief Register a channel for top-down encoding
+    /// @param channel Shared pointer to channel (extends lifetime)
+    /// @note Called by CFastLED::add() when channel uses ChannelBusManager
+    void registerChannel(fl::ChannelPtr channel);
+
+    /// @brief Unregister a channel
+    /// @param channel Shared pointer to channel to stop tracking
+    /// @note Called by CFastLED::remove()
+    void unregisterChannel(fl::ChannelPtr channel);
+
+    /// @brief Get all tracked channels (for iteration/cleanup)
+    /// @return Vector of channel shared pointers
+    /// @note Returns a copy to allow safe iteration during modification
+    fl::vector<fl::ChannelPtr> getChannels() const { return mChannels; }
+
 private:
+    /// @brief Channel-data association for event firing
+    struct ChannelDataEntry {
+        Channel* channel;  ///< Raw pointer to channel (lifetime managed by mChannels vector)
+        ChannelDataPtr data;  ///< Shared pointer to channel data
+    };
+
+    /// @brief Internal enqueue with channel association (for event firing)
+    /// @param channel Raw pointer to channel (lifetime managed by mChannels vector)
+    /// @param channelData Channel data to transmit
+    /// @note This method is used internally by encodeTrackedChannels() to maintain channel association
+    void enqueueWithChannel(Channel* channel, ChannelDataPtr channelData);
+
     /// @brief Begin transmission using active engine with fallback
-    /// @param channelData Span of channel data to transmit
+    /// @param channelData Span of channel data entries to transmit
     /// @note Tries active engine, falls back to next priority on failure
-    void beginTransmission(fl::span<const ChannelDataPtr> channelData);
+    void beginTransmission(fl::span<const ChannelDataEntry> channelData);
 
     /// @brief Wait until a condition is met, with check-pump-delay logic
     /// @param condition Function that returns true when waiting should stop
@@ -188,8 +227,6 @@ private:
     /// @note Runs async_run() on each iteration and delays intelligently to avoid busy-waiting
     template<typename Condition>
     bool waitForCondition(Condition condition, u32 timeoutMs = 1000);
-
-private:
     /// @brief Engine registry entry (priority + shared pointer + runtime control)
     struct EngineEntry {
         int priority;
@@ -216,8 +253,12 @@ private:
     fl::vector<EngineEntry> mEngines;
 
     /// @brief Internal state management for IChannelEngine interface
-    fl::vector<ChannelDataPtr> mEnqueuedChannels;  ///< Channels enqueued via enqueue(), waiting for show()
-    fl::vector<ChannelDataPtr> mTransmittingChannels;  ///< Channels currently transmitting (for cleanup)
+    fl::vector<ChannelDataEntry> mEnqueuedChannels;  ///< Channels enqueued via enqueue(), waiting for show()
+    fl::vector<ChannelDataEntry> mTransmittingChannels;  ///< Channels currently transmitting (for cleanup)
+
+    /// @brief Tracked channels for top-down encoding (shared ownership)
+    /// @note Channels are registered via registerChannel() when added to FastLED
+    fl::vector<fl::ChannelPtr> mChannels;
 
     /// @brief Error message storage
     fl::string mLastError;

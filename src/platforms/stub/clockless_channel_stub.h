@@ -32,15 +32,12 @@ private:
     ChannelDataPtr mChannelData;
 
     // Channel engine reference (manager provides best available engine)
-    IChannelEngine* mEngine;
-
     // LED capture tracker for simulation/testing
     ActiveStripTracker mTracker;
     fl::vector<u8> mCaptureData;
 
 public:
     ClocklessController()
-        : mEngine(&channelBusManager())
     {
         // Create channel data with pin and timing configuration
         ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
@@ -57,7 +54,7 @@ protected:
         u32 startTime = fl::millis();
         u32 lastWarnTime = startTime;
         while (mChannelData->isInUse()) {
-            mEngine->poll();  // Keep polling until buffer is released
+            channelBusManager().poll();  // Keep polling until buffer is released
 
             // Warn every second if still waiting (possible deadlock or hardware issue)
             u32 elapsed = fl::millis() - startTime;
@@ -88,7 +85,7 @@ protected:
         iterator.writeWS2812(&data);
 
         // Enqueue for transmission (will be sent when engine->show() is called)
-        mEngine->enqueue(mChannelData);
+        channelBusManager().enqueue(mChannelData);
     }
 };
 

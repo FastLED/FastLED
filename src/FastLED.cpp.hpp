@@ -52,6 +52,7 @@ extern "C" void yield(void) { }
 // Implementation of cled_contoller_size() moved to src/fl/fastled_internal.cpp
 
 fl::u8 get_brightness();
+fl::u16 get_fps();
 
 /// Pointer to the matrix object when using the Smart Matrix Library
 /// @see https://github.com/pixelmatix/SmartMatrix
@@ -116,31 +117,25 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 	return *pLed;
 }
 
-fl::vector<fl::ChannelPtr> CFastLED::mChannels;
-
 void CFastLED::add(fl::ChannelPtr channel) {
 	if (!channel) {
 		return;
 	}
-	// Protect against double-add
-	if (mChannels.has(channel)) {
-		return;
-	}
-	mChannels.push_back(channel);
-	// Add channel to the CLEDController linked list
-	// Channel uses DeferRegister mode, so explicit addToDrawList() call is required
-	// Note: addToDrawList() now fires onChannelAdded event
-	channel->addToDrawList();
+
+	// Register with ChannelBusManager for top-down encoding
+	// All channels use ChannelBusManager (no direct engine binding anymore)
+	// Note: ChannelBusManager::registerChannel() fires onChannelAdded event
+	fl::ChannelBusManager::instance().registerChannel(channel);
 }
 
 void CFastLED::remove(fl::ChannelPtr channel) {
 	if (!channel) {
 		return;
 	}
-	// Note: removeFromDrawList() now fires onChannelRemoved event
-	channel->removeFromDrawList();
-	// Remove from internal storage (safe if not found - erase is a no-op)
-	mChannels.erase(channel);
+
+	// Unregister from ChannelBusManager
+	// Note: ChannelBusManager::unregisterChannel() fires onChannelRemoved event
+	fl::ChannelBusManager::instance().unregisterChannel(channel);
 }
 
 void CFastLED::reset(ResetFlags flags) {
@@ -175,24 +170,29 @@ void CFastLED::reset(ResetFlags flags) {
 		FastLED.m_nFPS = 0;
 	}
 
-	// Reset CHANNELS - remove all channels from controller list
+	// Reset CHANNELS - remove all channels AND legacy controllers from controller list
 	if (clearFlag(ResetFlags::CHANNELS)) {
 		// Always wait for all channel bus transmissions to complete first
 		FastLED.wait();
 
-		// Remove all channels by iterating through a copy of the vector
-		// (we make a copy because remove() modifies mChannels)
-		fl::vector<fl::ChannelPtr> channelsCopy = mChannels;
+		// Get channel list from ChannelBusManager and remove all channels
+		fl::ChannelBusManager& manager = fl::channelBusManager();
+
+		// Make a copy of the channel list because unregisterChannel() modifies it
+		fl::vector<fl::ChannelPtr> channelsCopy = manager.getChannels();
 		for (auto& channel : channelsCopy) {
 			remove(channel);
 		}
 
 		// Reset bus manager state (clear enqueued and transmitting channels)
-		fl::ChannelBusManager& manager = fl::channelBusManager();
 		manager.reset();
 
-		// Clear the internal storage (should already be empty, but ensure it)
-		mChannels.clear();
+		// Also remove ALL legacy CLEDControllers from the linked list
+		// This handles controllers created with FastLED.addLeds<>() which are not
+		// registered as Channel objects in ChannelBusManager
+		while (CLEDController* head = CLEDController::head()) {
+			head->removeFromDrawList();
+		}
 	}
 
 	// Reset CHANNEL_ENGINES - clear all registered channel engines
@@ -237,7 +237,9 @@ FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 			gControllersData[length] = nullptr;
 		}
 		length++;
-		if (m_nFPS < 100) { pCur->setDither(0); }
+		// Only disable dither if FPS is actively being tracked (fps > 0)
+		// FPS = 0 means FPS tracking hasn't started, so respect user's dither setting
+		if (m_nFPS > 0 && m_nFPS < 100) { pCur->setDither(0); }
 		pCur = pCur->next();
 	}
 
@@ -315,7 +317,9 @@ void CFastLED::showColor(const CRGB & color, fl::u8 scale) {
 
 	pCur = CLEDController::head();
 	while(pCur && length < MAX_CLED_CONTROLLERS) {
-		if(m_nFPS < 100) { pCur->setDither(0); }
+		// Only disable dither if FPS is actively being tracked (fps > 0)
+		// FPS = 0 means FPS tracking hasn't started, so respect user's dither setting
+		if(m_nFPS > 0 && m_nFPS < 100) { pCur->setDither(0); }
 		if (pCur->getEnabled()) {
 			pCur->showColorInternal(color, scale);
 		}
@@ -498,6 +502,10 @@ void CFastLED::setMaxRefreshRate(fl::u16 refresh, bool constrain) {
 
 fl::u8 get_brightness() {
 	return FastLED.getBrightness();
+}
+
+fl::u16 get_fps() {
+	return FastLED.getFPS();
 }
 
 // ============================================================================

@@ -7,6 +7,7 @@
 #include "fl/channels/engine.h"
 #include "fl/channels/data.h"
 #include "fl/channels/bus_manager.h"
+#include "fl/channels/channel_events.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/move.h"
@@ -103,10 +104,12 @@ FL_TEST_CASE("Channel basic operations") {
     FL_REQUIRE(channel != nullptr);
     FL_CHECK(channel->getPin() == 1);
     FL_CHECK(channel->size() == 10);
-    FL_CHECK(channel->getChannelEngine() == mockEngine.get());
+
+    // Note: channel->getChannelEngine() was removed as part of GitHub #2167 fix
+    // Channels no longer store direct engine pointers (top-down architecture)
 
     // Clean up: disable mock engine after test
-    manager.setDriverEnabled("MOCK_1", false);  // Match engine name
+    manager.removeEngine(mockEngine);
 }
 
 FL_TEST_CASE("Channel transmission") {
@@ -135,7 +138,7 @@ FL_TEST_CASE("Channel transmission") {
     FL_CHECK(mockEngine->lastChannelCount == 1);
 
     // Clean up: disable mock engine after test
-    manager.setDriverEnabled("MOCK_TX", false);
+    manager.removeEngine(mockEngine);
 }
 
 FL_TEST_CASE("FastLED.show() with channels") {
@@ -175,8 +178,8 @@ FL_TEST_CASE("FastLED.show() with channels") {
     FL_CHECK(mockEngine->transmitCount > before);
 
     // Clean up
-    channel->removeFromDrawList();
-    manager.setDriverEnabled("MOCK_FASTLED", false);
+    FastLED.remove(channel);
+    manager.removeEngine(mockEngine);
 }
 
 //=============================================================================
@@ -228,7 +231,7 @@ FL_TEST_CASE("Channel Engine: 8 channels → exactly 8 enqueues (no accumulation
     for (auto& channel : channels) {
         FastLED.remove(channel);
     }
-    manager.setDriverEnabled("ENQUEUE_TEST_1", false);
+    manager.removeEngine(mockEngine);
 }
 
 FL_TEST_CASE("Channel Engine: Multiple show() calls don't accumulate channels") {
@@ -282,7 +285,7 @@ FL_TEST_CASE("Channel Engine: Multiple show() calls don't accumulate channels") 
     for (auto& channel : channels) {
         FastLED.remove(channel);
     }
-    manager.setDriverEnabled("ENQUEUE_TEST_2", false);
+    manager.removeEngine(mockEngine);
 }
 
 FL_TEST_CASE("Channel Engine: Adding/removing channels updates enqueue count correctly") {
@@ -334,7 +337,7 @@ FL_TEST_CASE("Channel Engine: Adding/removing channels updates enqueue count cor
     // Cleanup
     FastLED.remove(ch1);
     FastLED.remove(ch3);
-    manager.setDriverEnabled("ENQUEUE_TEST_3", false);
+    manager.removeEngine(mockEngine);
 }
 
 FL_TEST_CASE("Channel Engine: ChannelData isInUse flag managed correctly") {
@@ -374,10 +377,182 @@ FL_TEST_CASE("Channel Engine: ChannelData isInUse flag managed correctly") {
 
     // Cleanup
     FastLED.remove(channel);
-    manager.setDriverEnabled("ENQUEUE_TEST_4", false);
+    manager.removeEngine(mockEngine);
 
     // If we got here without assertion failures, the isInUse flag is managed correctly
     FL_CHECK(true);  // Test passed
+}
+
+//=============================================================================
+// Test Suite: Engine Event Firing (GitHub #2167 fix verification)
+//=============================================================================
+
+FL_TEST_CASE("Channel Engine: onChannelEnqueued event fires with resolved engine name") {
+    // Verify that after GitHub #2167 fix, onChannelEnqueued event shows
+    // the actual resolved engine name, not empty string
+    auto mockEngine = fl::make_shared<MockEngine>("RMT_EXPOSE_TEST");
+    ChannelBusManager& manager = ChannelBusManager::instance();
+    manager.addEngine(2000, mockEngine);  // High priority
+
+    static CRGB leds[10];
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelOptions options;
+    options.mAffinity = "";  // Automatic affinity - should resolve to "RMT_EXPOSE_TEST"
+
+    ChannelConfig config(5, timing, fl::span<CRGB>(leds, 10), GRB, options);
+    auto channel = Channel::create(config);
+
+    // Register event listener before adding channel
+    fl::string enqueuedEngineName;
+    auto& events = ChannelEvents::instance();
+    int listenerId = events.onChannelEnqueued.add([&enqueuedEngineName](const Channel&, const fl::string& name) {
+        enqueuedEngineName = name;
+    });
+
+    FastLED.add(channel);
+
+    // Trigger engine selection by calling show
+    fl::fill_solid(leds, 10, CRGB::Blue);
+    FastLED.show();
+
+    // FIXED: Event now fires from beginTransmission() with actual engine name
+    FL_CHECK(enqueuedEngineName == "RMT_EXPOSE_TEST");
+    FL_INFO("✅ FIXED: Event shows actual engine: '" << enqueuedEngineName.c_str() << "'");
+
+    // Cleanup
+    FastLED.remove(channel);
+    events.onChannelEnqueued.remove(listenerId);
+    manager.removeEngine(mockEngine);
+}
+
+FL_TEST_CASE("Channel Engine: Explicit affinity fires event with correct engine name") {
+    // Verify that explicit affinity binding also fires events correctly
+    auto mockEngine = fl::make_shared<MockEngine>("I2S_TEST");
+    ChannelBusManager& manager = ChannelBusManager::instance();
+    manager.addEngine(1000, mockEngine);
+
+    static CRGB leds[10];
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelOptions options;
+    options.mAffinity = "I2S_TEST";  // Explicit affinity
+
+    ChannelConfig config(5, timing, fl::span<CRGB>(leds, 10), GRB, options);
+    auto channel = Channel::create(config);
+
+    FL_REQUIRE(channel != nullptr);
+
+    // Verify the event fires correctly
+    fl::string enqueuedEngineName;
+    auto& events = ChannelEvents::instance();
+    int listenerId = events.onChannelEnqueued.add([&enqueuedEngineName](const Channel&, const fl::string& name) {
+        enqueuedEngineName = name;
+    });
+
+    FastLED.add(channel);
+    fl::fill_solid(leds, 10, CRGB::Green);
+    FastLED.show();
+
+    FL_CHECK(enqueuedEngineName == "I2S_TEST");
+    FL_INFO("✅ Event also shows: '" << enqueuedEngineName.c_str() << "'");
+
+    // Cleanup
+    FastLED.remove(channel);
+    events.onChannelEnqueued.remove(listenerId);
+    manager.removeEngine(mockEngine);
+}
+
+//=============================================================================
+// Test Suite: FastLED.show() Encoding (double draw prevention)
+//=============================================================================
+
+FL_TEST_CASE("Channel Engine: FastLED.show() encodes channels via engine events") {
+    FL_DBG("Starting FastLED.show() encoding test");
+
+    auto mockEngine = fl::make_shared<MockEngine>("ENCODE_TEST");
+    ChannelBusManager& manager = ChannelBusManager::instance();
+    manager.addEngine(1500, mockEngine);
+
+    // Setup: Create channel with LED data
+    static CRGB leds[10];
+    fl::fill_solid(leds, 10, CRGB::Red);
+
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelOptions options;
+    options.mAffinity = "ENCODE_TEST";
+    ChannelConfig config(5, timing, fl::span<CRGB>(leds, 10), GRB, options);
+    auto channel = Channel::create(config);
+
+    // Add channel to FastLED (registers with ChannelBusManager)
+    FastLED.add(channel);
+
+    // Get channel data to verify encoding
+    auto channelData = channel->getChannelData();
+
+    // Before show(): data should be empty
+    size_t sizeBefore = channelData->getData().size();
+    FL_INFO("Channel data size before show(): " << sizeBefore);
+
+    // Act: Call FastLED.show() - should trigger encoding via engine events
+    // Flow: FastLED.show() → onBeginFrame() → ChannelBusManager::onBeginFrame()
+    //       → encodeTrackedChannels() → channel->encodePixels()
+    FastLED.show();
+
+    // After show(): data should be encoded (non-empty)
+    size_t sizeAfter = channelData->getData().size();
+    FL_INFO("Channel data size after show(): " << sizeAfter);
+
+    FL_CHECK(sizeAfter > 0);  // Channel data should be encoded after FastLED.show()
+    FL_CHECK(sizeAfter > sizeBefore);  // Channel data size should increase after encoding
+
+    // Cleanup
+    FastLED.remove(channel);
+    manager.removeEngine(mockEngine);
+
+    FL_DBG("FastLED.show() encoding test complete");
+}
+
+FL_TEST_CASE("Channel Engine: Multiple channels all get encoded") {
+    FL_DBG("Starting multiple channels test");
+
+    auto mockEngine = fl::make_shared<MockEngine>("MULTI_ENCODE");
+    ChannelBusManager& manager = ChannelBusManager::instance();
+    manager.addEngine(1600, mockEngine);
+
+    // Setup: Create multiple channels
+    static CRGB leds1[5];
+    static CRGB leds2[5];
+    fl::fill_solid(leds1, 5, CRGB::Red);
+    fl::fill_solid(leds2, 5, CRGB::Blue);
+
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelOptions options;
+    options.mAffinity = "MULTI_ENCODE";
+
+    ChannelConfig config1(5, timing, fl::span<CRGB>(leds1, 5), RGB, options);
+    auto channel1 = Channel::create(config1);
+
+    ChannelConfig config2(6, timing, fl::span<CRGB>(leds2, 5), RGB, options);
+    auto channel2 = Channel::create(config2);
+
+    FastLED.add(channel1);
+    FastLED.add(channel2);
+
+    // Act: Call FastLED.show()
+    FastLED.show();
+
+    // Verify both channels were encoded
+    size_t size1 = channel1->getChannelData()->getData().size();
+    size_t size2 = channel2->getChannelData()->getData().size();
+
+    FL_CHECK(size1 > 0);  // Channel 1 should be encoded
+    FL_CHECK(size2 > 0);  // Channel 2 should be encoded
+
+    // Cleanup
+    FastLED.remove(channel1);
+    FastLED.remove(channel2);
+    manager.removeEngine(mockEngine);
+
+    FL_DBG("Multiple channels test complete");
 }
 
 } // namespace channel_engine_test

@@ -40,55 +40,26 @@ fl::string Channel::makeName(i32 id, const fl::optional<fl::string>& configName)
 }
 
 ChannelPtr Channel::create(const ChannelConfig &config) {
-    // Select engine based on chipset type
-    IChannelEngine* selectedEngine = nullptr;
-
-    // Handle affinity binding if specified
-    if (!config.options.mAffinity.empty()) {
-        selectedEngine = ChannelBusManager::instance().getEngineByName(config.options.mAffinity);
-        if (selectedEngine) {
-            FL_DBG("Channel: Bound to engine '" << config.options.mAffinity << "' via affinity");
-        } else {
-            FL_ERROR("Channel: Affinity engine '" << config.options.mAffinity << "' not found - using ChannelBusManager");
-        }
-    }
-
-    // If no affinity or not found, select engine based on chipset type
-    if (!selectedEngine) {
-        if (config.chipset.is<SpiChipsetConfig>()) {
-            // For SPI chipsets, try to get SPI engine first
-            IChannelEngine* spiEngine = ChannelBusManager::instance().getEngineByName("SPI");
-            if (spiEngine) {
-                selectedEngine = spiEngine;
-                FL_DBG("Channel (SPI): Using SPI engine");
-            } else {
-                // Fall back to ChannelBusManager
-                selectedEngine = &ChannelBusManager::instance();
-                FL_DBG("Channel (SPI): SPI engine not available, using ChannelBusManager");
-            }
-        } else {
-            // Clockless chipsets use ChannelBusManager
-            selectedEngine = &ChannelBusManager::instance();
-            FL_DBG("Channel (clockless): Using ChannelBusManager for engine selection");
-        }
-    }
-
+    // Create channel without engine binding (engine pointer removed from architecture)
     auto channel = fl::make_shared<Channel>(config.chipset, config.mLeds,
-                                              config.rgb_order, selectedEngine, config.options);
+                                              config.rgb_order, config.options);
     channel->mName = makeName(channel->mId, config.mName);
+
+    // Note: Registration with ChannelBusManager happens in CFastLED::add()
+    // This ensures proper lifetime management via shared_ptr
+
     auto& events = ChannelEvents::instance();
     events.onChannelCreated(*channel);
     return channel;
 }
 
 Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
-                 EOrder rgbOrder, IChannelEngine* engine, const ChannelOptions& options)
+                 EOrder rgbOrder, const ChannelOptions& options)
     : CPixelLEDController<RGB>(RegistrationMode::DeferRegister)  // Defer registration until FastLED.add()
     , mChipset(chipset)
     , mPin(getDataPinFromChipset(chipset))
     , mTiming(getTimingFromChipset(chipset))
     , mRgbOrder(rgbOrder)
-    , mEngine(engine)
     , mId(nextId())
     , mName(makeName(mId)) {
 #ifdef FL_IS_ESP32
@@ -118,13 +89,12 @@ Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
 
 // Backwards-compatible constructor (deprecated)
 Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
-                 EOrder rgbOrder, IChannelEngine* engine, const ChannelOptions& options)
+                 EOrder rgbOrder, const ChannelOptions& options)
     : CPixelLEDController<RGB>(RegistrationMode::DeferRegister)  // Defer registration until FastLED.add()
     , mChipset(ClocklessChipset(pin, timing))  // Convert to variant
     , mPin(pin)
     , mTiming(timing)
     , mRgbOrder(rgbOrder)
-    , mEngine(engine)
     , mId(nextId())
     , mName(makeName(mId)) {
 #ifdef FL_IS_ESP32
@@ -148,6 +118,9 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
 Channel::~Channel() {
     auto& events = ChannelEvents::instance();
     events.onChannelBeginDestroy(*this);
+
+    // Note: Unregistration from ChannelBusManager now happens in CFastLED::remove()
+    // This ensures proper cleanup via shared_ptr
 }
 
 void Channel::applyConfig(const ChannelConfig& config) {
@@ -172,7 +145,7 @@ int Channel::getClockPin() const {
 }
 
 
-void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
+ChannelDataPtr Channel::encodePixels(u8 brightness) {
     FL_SCOPED_TRACE;
 
     // Safety check: don't modify buffer if engine is currently transmitting it
@@ -182,7 +155,9 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     }
 
     // Create pixel iterator with color order and RGBW conversion
+    // PixelIteratorAny creates a second PixelController via copy constructor (doesn't increment R)
     PixelIteratorAny any(pixels, mRgbOrder, mSettings.mRgbw);
+
     PixelIterator& pixelIterator = any;
 
     // Encode pixels based on chipset type
@@ -251,12 +226,18 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
         // No default case - compiler will error if any enum value is missing
     }
 
-    // Enqueue for transmission (will be sent when engine->show() is called)
-    if (mEngine) {
-        mEngine->enqueue(mChannelData);
-        auto& events = ChannelEvents::instance();
-        events.onChannelEnqueued(*this, mEngine->getName());
-    }
+    // Return encoded data for enqueuing by caller (ChannelBusManager)
+    return mChannelData;
+}
+
+void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
+    FL_SCOPED_TRACE;
+
+    // Architecture change (GitHub #2167): All encoding happens top-down via ChannelBusManager
+    // Channel no longer stores engine pointer or handles enqueuing
+    // This method is a no-op - encoding is triggered by ChannelBusManager::encodeTrackedChannels()
+
+    (void)pixels;  // Suppress unused parameter warning
 }
 
 void Channel::init() {
@@ -308,30 +289,12 @@ IChannelEngine* getStubChannelEngine() {
 }
 
 // Re-exposed protected base class methods
-void Channel::addToDrawList() {
-    CPixelLEDController<RGB>::addToList();
-    // Fire event after adding to draw list (detectable even if user bypasses FastLED.add())
-    auto& events = ChannelEvents::instance();
-    events.onChannelAdded(*this);
-}
-
-void Channel::removeFromDrawList() {
-    CPixelLEDController<RGB>::removeFromDrawList();
-    // Fire event after removing from draw list (detectable even if user bypasses FastLED.remove())
-    auto& events = ChannelEvents::instance();
-    events.onChannelRemoved(*this);
-}
-
 int Channel::size() const {
     return CPixelLEDController<RGB>::size();
 }
 
 void Channel::showLeds(u8 brightness) {
     CPixelLEDController<RGB>::showLeds(brightness);
-}
-
-bool Channel::isInDrawList() const {
-    return CPixelLEDController<RGB>::isInList();
 }
 
 fl::span<CRGB> Channel::leds() {
@@ -352,6 +315,10 @@ CRGB Channel::getTemperature() {
 
 u8 Channel::getDither() {
     return CPixelLEDController<RGB>::getDither();
+}
+
+void Channel::setDither(u8 ditherMode) {
+    CPixelLEDController<RGB>::setDither(ditherMode);
 }
 
 Rgbw Channel::getRgbw() const {

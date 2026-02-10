@@ -527,7 +527,6 @@ class CFastLED {
 	fl::u32 m_nMinMicros;    ///< minimum µs between frames, used for capping frame rates
 	fl::u32 m_nPowerData;    ///< max power use parameter
 	power_func m_pPowerFunc;  ///< function for overriding brightness when using FastLED.show();
-	static fl::vector<fl::ChannelPtr> mChannels; ///< stored ChannelPtrs to keep them alive
 
 public:
 	CFastLED();
