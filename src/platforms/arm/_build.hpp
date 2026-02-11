@@ -8,5 +8,6 @@
 #include "platforms/arm/mgm240/_build.hpp"
 #include "platforms/arm/nrf52/_build.hpp"
 #include "platforms/arm/rp/_build.hpp"
+#include "platforms/arm/sam/_build.hpp"
 #include "platforms/arm/stm32/_build.hpp"
 #include "platforms/arm/teensy/_build.hpp"
