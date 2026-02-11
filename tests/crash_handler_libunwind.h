@@ -8,6 +8,7 @@
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 namespace crash_handler_libunwind {
 
