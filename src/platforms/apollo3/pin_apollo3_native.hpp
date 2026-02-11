@@ -50,7 +50,7 @@ static ADCState g_adc_state;
 // PWM state - track which pins are configured for PWM
 struct PWMState {
     u8 timer_num;
-    u8 segment;
+    u32 segment;  // Must be u32 to hold AM_HAL_CTIMER_TIMERA/TIMERB values
     u32 period;
     bool active;
 };
@@ -283,11 +283,11 @@ inline void analogWrite(int pin, u16 val) {
     // Each pin can map to different timers/segments via alternate functions
     // This is a simplified mapping - full implementation would query pinmux
     u8 timer_num = 0;
-    u8 segment = 0;
+    u32 segment = 0;  // Must be u32 to hold AM_HAL_CTIMER_TIMERA/TIMERB values
     u32 output_cfg = 0;
 
     // Map common pins to timers (simplified - actual mapping more complex)
-    // Timer segment: 0 = A, 1 = B
+    // Timer segment values: AM_HAL_CTIMER_TIMERA (0x0000FFFF), AM_HAL_CTIMER_TIMERB (0xFFFF0000)
     switch (pin) {
         case 5:  timer_num = 0; segment = AM_HAL_CTIMER_TIMERB; output_cfg = AM_HAL_CTIMER_OUTPUT_NORMAL; break;
         case 6:  timer_num = 1; segment = AM_HAL_CTIMER_TIMERA; output_cfg = AM_HAL_CTIMER_OUTPUT_NORMAL; break;
