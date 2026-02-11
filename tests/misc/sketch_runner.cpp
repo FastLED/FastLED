@@ -12,14 +12,14 @@ bool test_mode = false;
 void setup() {
     if (test_mode) {
         setup_call_count++;
-        printf("SKETCH: setup() called (count: %d)\n", setup_call_count);
+        fl::printf("SKETCH: setup() called (count: %d)\n", setup_call_count);
     }
 }
 
 void loop() {
     if (test_mode) {
         loop_call_count++;
-        printf("SKETCH: loop() called (count: %d)\n", loop_call_count);
+        fl::printf("SKETCH: loop() called (count: %d)\n", loop_call_count);
     }
 }
 } // anonymous namespace
@@ -45,23 +45,23 @@ FL_TEST_CASE("Sketch Runner - Basic Functionality") {
     loop_call_count = 0;
     test_mode = true;
     
-    printf("RUNNER: Starting sketch runner test\n");
-    
+    fl::printf("RUNNER: Starting sketch runner test\n");
+
     // Call sketch_setup() once
-    printf("RUNNER: Calling sketch_setup()\n");
+    fl::printf("RUNNER: Calling sketch_setup()\n");
     sketch_setup();
     
     FL_CHECK_EQ(setup_call_count, 1);
     
     // Call sketch_loop() five times
     for (int i = 1; i <= 5; i++) {
-        printf("RUNNER: Calling sketch_loop() - iteration %d\n", i);
+        fl::printf("RUNNER: Calling sketch_loop() - iteration %d\n", i);
         sketch_loop();
         FL_CHECK_EQ(loop_call_count, i);
     }
     
-    printf("RUNNER: Test completed successfully\n");
-    printf("RUNNER: Final state - setup called %d times, loop called %d times\n", 
+    fl::printf("RUNNER: Test completed successfully\n");
+    fl::printf("RUNNER: Final state - setup called %d times, loop called %d times\n",
            setup_call_count, loop_call_count);
     
     // Verify final state
