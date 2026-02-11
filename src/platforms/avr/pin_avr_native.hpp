@@ -385,12 +385,25 @@ static const u8 PROGMEM analog_pin_to_channel_PGM[] = { 0, 1, 2, 3 };
 static u8 analog_reference = DEFAULT;
 
 // Helper macros to read from PROGMEM tables
+// Only define if not already defined by Arduino core
+#ifndef digitalPinToPort
 #define digitalPinToPort(P) ( pgm_read_byte( digital_pin_to_port_PGM + (P) ) )
+#endif
+#ifndef digitalPinToBitMask
 #define digitalPinToBitMask(P) ( pgm_read_byte( digital_pin_to_bit_mask_PGM + (P) ) )
+#endif
+#ifndef portModeRegister
 #define portModeRegister(P) ( (volatile u8 *)( pgm_read_word( port_to_mode_PGM + (P) ) ) )
+#endif
+#ifndef portOutputRegister
 #define portOutputRegister(P) ( (volatile u8 *)( pgm_read_word( port_to_output_PGM + (P) ) ) )
+#endif
+#ifndef portInputRegister
 #define portInputRegister(P) ( (volatile u8 *)( pgm_read_word( port_to_input_PGM + (P) ) ) )
+#endif
+#ifndef analogPinToChannel
 #define analogPinToChannel(P) ( pgm_read_byte( analog_pin_to_channel_PGM + (P) ) )
+#endif
 
 // ============================================================================
 // GPIO Functions - Native AVR Implementation
