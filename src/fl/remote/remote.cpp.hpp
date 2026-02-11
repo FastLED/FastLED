@@ -1,5 +1,7 @@
 #include "fl/remote/remote.h"
 
+#if FASTLED_ENABLE_JSON
+
 #include "fl/stl/time.h"
 #include "fl/stl/cstdio.h"
 #include "fl/remote/rpc/type_conversion_result.h"
@@ -216,3 +218,5 @@ fl::vector<Remote::MethodInfo> Remote::methods() const {
 }
 
 } // namespace fl
+
+#endif // FASTLED_ENABLE_JSON

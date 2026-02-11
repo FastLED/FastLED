@@ -2,6 +2,8 @@
 
 #include "fl/json.h"
 
+#if FASTLED_ENABLE_JSON
+
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "fl/stl/allocator.h"
@@ -154,3 +156,5 @@ protected:
 };
 
 } // namespace fl
+
+#endif // FASTLED_ENABLE_JSON

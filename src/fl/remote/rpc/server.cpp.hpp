@@ -1,5 +1,7 @@
 #include "fl/remote/rpc/server.h"
 
+#if FASTLED_ENABLE_JSON
+
 namespace fl {
 
 Server::Server()
@@ -74,3 +76,5 @@ size_t Server::push() {
 }
 
 } // namespace fl
+
+#endif // FASTLED_ENABLE_JSON

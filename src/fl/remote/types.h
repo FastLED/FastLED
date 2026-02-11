@@ -2,6 +2,8 @@
 
 #include "fl/json.h"
 
+#if FASTLED_ENABLE_JSON
+
 #include "fl/stl/stdint.h"
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
@@ -53,3 +55,5 @@ inline bool operator!(ClearFlags flags) {
 }
 
 } // namespace fl
+
+#endif // FASTLED_ENABLE_JSON

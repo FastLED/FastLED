@@ -2,6 +2,8 @@
 
 #include "fl/json.h"
 
+#if FASTLED_ENABLE_JSON
+
 #include "fl/stl/function.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/vector.h"
@@ -93,3 +95,5 @@ protected:
 };
 
 } // namespace fl
+
+#endif // FASTLED_ENABLE_JSON

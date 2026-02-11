@@ -1,5 +1,7 @@
 #include "fl/remote/rpc/rpc.h"
 
+#if FASTLED_ENABLE_JSON
+
 namespace fl {
 
 // =============================================================================
@@ -184,3 +186,5 @@ fl::vector<fl::string> Rpc::tags() const {
 }
 
 } // namespace fl
+
+#endif // FASTLED_ENABLE_JSON

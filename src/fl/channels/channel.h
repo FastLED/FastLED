@@ -21,6 +21,7 @@
 #include "fl/singleton.h"
 #include "pixeltypes.h"
 #include "fl/channels/config.h"
+#include "fl/virtual_if_not_avr.h"
 
 namespace fl {
 
@@ -100,7 +101,7 @@ public:
     int size() const override;
 
     /// @brief Show the LEDs with optional brightness scaling
-    void showLeds(u8 brightness = 255) override;
+    void showLeds(u8 brightness = 255) OVERRIDE_IF_NOT_AVR;
 
     /// @brief Check if this channel is in the controller draw list
     bool isInDrawList() const;
