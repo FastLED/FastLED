@@ -28,12 +28,12 @@ private:
     // Channel data for transmission
     ChannelDataPtr mChannelData;
 
-    // Channel engine reference (manager provides best available engine)
-    IChannelEngine* mEngine;
+    // Channel engine reference (selected dynamically from bus manager)
+    fl::shared_ptr<IChannelEngine> mEngine;
 
 public:
     ClocklessSPI()
-        : mEngine(&channelBusManager())
+        : mEngine(getStubSpiEngine())
     {
         // Create channel data with pin and timing configuration
         ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
@@ -44,21 +44,27 @@ public:
     virtual u16 getMaxRefreshRate() const { return 800; }
 
 protected:
-    // Prepares data for the draw.
+    // -- Show pixels
+    //    This is the main entry point for the controller.
     virtual void showPixels(PixelController<RGB_ORDER>& pixels) override
     {
+        if (!mEngine) {
+            FL_WARN_EVERY(100, "No Engine");
+            return;
+        }
         // Wait for previous transmission to complete and release buffer
         // This prevents race conditions when show() is called faster than hardware can transmit
         u32 startTime = fl::millis();
         u32 lastWarnTime = startTime;
-        while (mChannelData->isInUse()) {
-            mEngine->poll();  // Keep polling until buffer is released
+        if (mChannelData->isInUse()) {
 
-            // Warn every second if still waiting (possible deadlock or hardware issue)
-            u32 elapsed = fl::millis() - startTime;
-            if (elapsed > 1000 && (fl::millis() - lastWarnTime) >= 1000) {
-                FL_WARN("ClocklessSPI(stub): Buffer still busy after " << elapsed << "ms total - possible deadlock or slow hardware");
-                lastWarnTime = fl::millis();
+                FL_WARN_EVERY(100, "ClocklessSPI(stub): engine should have finished transmitting by now - waiting");
+                bool finished = mEngine->waitForReady();
+                if (!finished) {
+                    FL_ERROR("ClocklessSPI(stub): Engine still busy after " << fl::millis() - startTime << "ms");
+                    return;
+                }
+
             }
         }
 
@@ -70,6 +76,10 @@ protected:
 
         // Enqueue for transmission (will be sent when engine->show() is called)
         mEngine->enqueue(mChannelData);
+    }
+
+    static fl::shared_ptr<IChannelEngine> getStubSpiEngine() {
+        return ChannelBusManager::instance().getEngineByName("SPI");
     }
 };
 

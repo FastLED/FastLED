@@ -26,15 +26,15 @@ private:
     // Channel data for transmission
     ChannelDataPtr mChannelData;
 
-    // Channel engine reference (manager provides best available engine)
-    IChannelEngine* mEngine;
+    // Channel engine reference (selected dynamically from bus manager)
+    fl::shared_ptr<IChannelEngine> mEngine;
 
     // -- Verify that the pin is valid
     static_assert(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
 public:
     ClocklessSPI()
-        : mEngine(&channelBusManager())
+        : mEngine(getClocklessSpiEngine())
     {
         // Create channel data with pin and timing configuration
         ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
@@ -45,22 +45,24 @@ public:
     virtual u16 getMaxRefreshRate() const { return 800; }
 
 protected:
-
-    // Prepares data for the draw.
+    // -- Show pixels
+    //    This is the main entry point for the controller.
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) override
     {
+        if (!mEngine) {
+            FL_WARN_EVERY(100, "No Engine");
+            return;
+        }
         // Wait for previous transmission to complete and release buffer
         // This prevents race conditions when show() is called faster than hardware can transmit
         u32 startTime = fl::millis();
         u32 lastWarnTime = startTime;
-        while (mChannelData->isInUse()) {
-            mEngine->poll();  // Keep polling until buffer is released
-
-            // Warn every second if still waiting (possible deadlock or hardware issue)
-            u32 elapsed = fl::millis() - startTime;
-            if (elapsed > 1000 && (fl::millis() - lastWarnTime) >= 1000) {
-                FL_WARN("ClocklessSPI: Buffer still busy after " << elapsed << "ms total - possible deadlock or slow hardware");
-                lastWarnTime = fl::millis();
+        if (mChannelData->isInUse()) {
+            FL_WARN_EVERY(100, "ClocklessSPI: engine should have finished transmitting by now - waiting");
+            bool finished = mEngine->waitForReady();
+            if (!finished) {
+                FL_ERROR("ClocklessSPI: Engine still busy after " << fl::millis() - startTime << "ms");
+                return;
             }
         }
 
@@ -72,6 +74,10 @@ protected:
 
         // Enqueue for transmission (will be sent when engine->show() is called)
         mEngine->enqueue(mChannelData);
+    }
+
+    static fl::shared_ptr<IChannelEngine> getClocklessSpiEngine() {
+        return ChannelBusManager::instance().getEngineByName("SPI");
     }
 };
 }  // namespace fl
