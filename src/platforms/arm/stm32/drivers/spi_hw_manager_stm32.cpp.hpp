@@ -133,7 +133,7 @@ namespace platforms {
 /// - STM32F2/F4/F7/H7/L4: All three (stream-based DMA)
 /// - STM32F1/G4/U5: None (channel-based DMA not yet implemented)
 #if defined(FL_STM32_HAS_SPI_HW_2) || defined(FL_STM32_HAS_SPI_HW_4) || defined(FL_STM32_HAS_SPI_HW_8)
-inline void initSpiHardware() {
+void initSpiHardware() {
     FL_DBG("STM32: Initializing SPI hardware");
 
     // Register in priority order (highest to lowest)
@@ -146,7 +146,7 @@ inline void initSpiHardware() {
 #else
 // Stub implementation for STM32 platforms without hardware SPI support
 // (e.g., Mbed framework, channel-based DMA not yet implemented)
-inline void initSpiHardware() {
+void initSpiHardware() {
     // No-op: Hardware SPI not available on this STM32 configuration
     // FastLED will fall back to software bitbang implementation
 }

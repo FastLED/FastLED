@@ -79,7 +79,7 @@ namespace platforms {
 /// Platform availability:
 /// - nRF52832: SpiHw2 only (via Timer/PPI peripherals)
 /// - nRF52840/52833: Both SpiHw2 and SpiHw4 (via Timer/PPI peripherals)
-inline void initSpiHardware() {
+void initSpiHardware() {
     FL_DBG("nRF52: Initializing SPI hardware");
 
     // Register in priority order (highest to lowest)
