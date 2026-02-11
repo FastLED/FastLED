@@ -29,13 +29,13 @@
 CRGB leds[NUM_LEDS];
 
 // Request/Response queues for callback-based I/O
-fl::vector<fl::Remote::RpcRequest> requestQueue;
-fl::vector<fl::Remote::Response> responseQueue;
+fl::vector<fl::Json> requestQueue;
+fl::vector<fl::Json> responseQueue;
 
 // Remote with callback-based I/O
 fl::Remote remote(
     // RequestSource: pull from queue
-    []() -> fl::optional<fl::Remote::RpcRequest> {
+    []() -> fl::optional<fl::Json> {
         if (requestQueue.empty()) {
             return fl::nullopt;
         }
@@ -44,7 +44,7 @@ fl::Remote remote(
         return req;
     },
     // ResponseSink: push to queue
-    [](const fl::Remote::Response& response) {
+    [](const fl::Json& response) {
         responseQueue.push_back(response);
     }
 );
@@ -124,13 +124,9 @@ void loop() {
     if (Serial.available()) {
         fl::string jsonRpc = readSerialJson();
 
-        // Parse JSON and create RpcRequest
+        // Parse JSON and queue the request
         fl::Json doc = fl::Json::parse(jsonRpc);
-        requestQueue.push_back(fl::Remote::RpcRequest{
-            doc["function"] | fl::string(""),
-            doc["args"],
-            static_cast<fl::u32>(doc["timestamp"] | 0)
-        });
+        requestQueue.push_back(doc);
     }
 
     // Process all queued requests: pull + tick + push
@@ -139,8 +135,7 @@ void loop() {
     // Drain response queue and output to serial
     while (!responseQueue.empty()) {
         const auto& response = responseQueue[0];
-        fl::Json json = response.to_json();
-        Serial.println(json.to_string().c_str());
+        Serial.println(response.to_string().c_str());
         responseQueue.erase(responseQueue.begin());
     }
 
