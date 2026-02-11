@@ -3,7 +3,7 @@
 
 #include "fl/chipsets/timing_traits.h"
 #include "fastled_delay.h"
-#include "is_teensy.h"
+#include "platforms/is_platform.h"
 
 namespace fl {
 // Definition for a single channel clockless controller for the teensy4

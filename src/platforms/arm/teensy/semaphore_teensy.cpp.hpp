@@ -1,7 +1,7 @@
 /// @file semaphore_teensy.cpp
 /// @brief Teensy interrupt-based semaphore platform implementation
 
-#include "is_teensy.h"
+#include "platforms/arm/teensy/is_teensy.h"
 
 #ifdef FL_IS_TEENSY
 

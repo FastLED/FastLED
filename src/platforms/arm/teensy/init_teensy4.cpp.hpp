@@ -5,7 +5,7 @@
 /// It initializes the ObjectFLED registry for parallel LED output support.
 
 #include "fl/compiler_control.h"
-#include "is_teensy.h"
+#include "platforms/arm/teensy/is_teensy.h"
 
 #ifdef FL_IS_TEENSY_4X
 

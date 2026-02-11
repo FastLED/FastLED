@@ -315,7 +315,16 @@ def collect_files_to_check(
     # Search each directory
     for directory in test_directories:
         if os.path.exists(directory):
-            for root, _, files in os.walk(directory):
+            for root, dirs, files in os.walk(directory):
+                # Skip build artifact directories (.build*, build, .venv, .cache, __pycache__)
+                dirs[:] = [
+                    d
+                    for d in dirs
+                    if not d.startswith(".build")
+                    and d
+                    not in {"build", ".venv", ".cache", "__pycache__", "node_modules"}
+                ]
+
                 # Skip directories with .cpp_no_lint marker file
                 if os.path.exists(os.path.join(root, ".cpp_no_lint")):
                     continue

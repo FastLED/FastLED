@@ -8,7 +8,7 @@
 
 // Definition for a single channel clockless controller for the k66 family of chips, like that used in the teensy 3.6
 // See clockless.h for detailed info on how the template parameters are used.
-#include "is_teensy.h"
+#include "platforms/arm/teensy/is_teensy.h"
 
 #if defined(FL_IS_TEENSY_3X)
 #define FASTLED_HAS_BLOCKLESS 1

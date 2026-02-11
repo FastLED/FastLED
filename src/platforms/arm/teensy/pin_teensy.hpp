@@ -1,6 +1,6 @@
 #pragma once
 
-#include "is_teensy.h"
+#include "platforms/arm/teensy/is_teensy.h"
 
 /// @file platforms/arm/teensy/pin_teensy.hpp
 /// Teensy (3.x, 4.x, etc.) pin implementation (header-only)

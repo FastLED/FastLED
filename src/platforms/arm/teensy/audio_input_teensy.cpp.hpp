@@ -1,5 +1,5 @@
 #include "audio_input_teensy.h"
-#include "is_teensy.h"
+#include "platforms/arm/teensy/is_teensy.h"
 
 namespace fl {
 

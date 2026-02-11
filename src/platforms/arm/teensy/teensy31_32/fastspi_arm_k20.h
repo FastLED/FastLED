@@ -3,7 +3,7 @@
 
 #include "fastspi_types.h"
 #include "fl/delay.h"
-#include "is_teensy.h"
+#include "platforms/arm/teensy/is_teensy.h"
 
 namespace fl {
 

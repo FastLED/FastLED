@@ -4,7 +4,7 @@
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/vector.h"
 #include "fastled_delay.h"
-#include "is_teensy.h"
+#include "platforms/arm/teensy/is_teensy.h"
 
 namespace fl {
 // Definition for a single channel clockless controller for the k20 family of chips, like that used in the teensy 3.0/3.1
