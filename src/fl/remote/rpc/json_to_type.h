@@ -9,7 +9,7 @@
 #include "fl/stl/move.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/set.h"
-#include "fl/span.h"
+#include "fl/stl/span.h"
 
 #if FASTLED_ENABLE_JSON
 

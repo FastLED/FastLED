@@ -10,7 +10,7 @@
 #include "fl/stl/type_traits.h"
 #include "fl/remote/rpc/type_conversion_result.h"
 #include "fl/remote/rpc/json_to_type.h"
-#include "fl/span.h"
+#include "fl/stl/span.h"
 
 namespace fl {
 
