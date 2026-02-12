@@ -3,3 +3,4 @@
 /// Includes all implementation files in alphabetical order
 
 #include "fl/audio/audio_context.cpp.hpp"
+#include "fl/audio/synth.cpp.hpp"

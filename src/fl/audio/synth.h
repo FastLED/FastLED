@@ -1,13 +1,17 @@
 #pragma once
 
-/// @file hexwave.h
-/// @brief High-level API for hexwave bandlimited audio oscillator
+/// @file synth.h
+/// @brief Bandlimited audio synthesizer - waveform oscillator module
 ///
-/// HexWave is a flexible anti-aliased (bandlimited) digital audio oscillator
-/// that generates waveforms made of line segments. It uses BLEP (Band-Limited
+/// Provides a flexible anti-aliased (bandlimited) digital audio oscillator
+/// that generates waveforms made of line segments. Uses BLEP (Band-Limited
 /// Step) and BLAMP (Band-Limited Ramp) techniques to eliminate aliasing.
 ///
-/// The library now supports multiple independent engine instances, allowing
+/// This is the foundation oscillator module for a planned full audio synthesizer.
+/// Currently provides basic waveform generation. Future versions will expand to
+/// include envelopes (ADSR), filters, LFOs, effects, and polyphony management.
+///
+/// The library supports multiple independent engine instances, allowing
 /// different oscillators to use different quality settings.
 ///
 /// Classic waveforms:
@@ -20,17 +24,22 @@
 /// Usage:
 /// @code
 ///   // Create an engine (shared among oscillators with same settings)
-///   auto engine = IHexWaveEngine::create(32, 16);
+///   auto engine = ISynthEngine::create(32, 16);
 ///
 ///   // Create oscillators using the engine
-///   auto osc1 = IHexWaveOscillator::create(engine, HexWaveShape::Sawtooth);
-///   auto osc2 = IHexWaveOscillator::create(engine, HexWaveShape::Square);
+///   auto osc1 = ISynthOscillator::create(engine, SynthShape::Sawtooth);
+///   auto osc2 = ISynthOscillator::create(engine, SynthShape::Square);
 ///
 ///   // Generate samples
 ///   float buffer[256];
 ///   float freq = 440.0f / 44100.0f;  // 440 Hz at 44.1 kHz sample rate
 ///   osc1->generateSamples(buffer, 256, freq);
 /// @endcode
+///
+/// @note This API is currently focused on the oscillator. Future versions will
+/// add envelope generators, filters, and other synthesizer components. The
+/// interface is expected to evolve but maintain backward compatibility where
+/// practical.
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/span.h"
@@ -39,13 +48,13 @@
 namespace fl {
 
 // Forward declarations
-class IHexWaveOscillator;
-class IHexWaveEngine;
-FASTLED_SHARED_PTR(IHexWaveOscillator);
-FASTLED_SHARED_PTR(IHexWaveEngine);
+class ISynthOscillator;
+class ISynthEngine;
+FASTLED_SHARED_PTR(ISynthOscillator);
+FASTLED_SHARED_PTR(ISynthEngine);
 
-/// Predefined waveform shapes for HexWave oscillator
-enum class HexWaveShape {
+/// Predefined waveform shapes for synth oscillator
+enum class SynthShape {
     Sawtooth,        // Classic sawtooth wave (reflect=1, peak=0, half=0, wait=0)
     Square,          // Classic square wave (reflect=1, peak=0, half=1, wait=0)
     Triangle,        // Classic triangle wave (reflect=1, peak=0.5, half=0, wait=0)
@@ -54,37 +63,37 @@ enum class HexWaveShape {
 };
 
 /// Waveform parameters for custom waveforms
-struct HexWaveParams {
+struct SynthParams {
     i32 reflect = 1;      ///< Mirror second half of waveform (0 or 1)
     float peakTime = 0.0f;    ///< Position of peak in cycle [0..1]
     float halfHeight = 0.0f;  ///< Height at half-cycle point
     float zeroWait = 0.0f;    ///< Wait time at zero [0..1]
 
     /// Default constructor - sawtooth wave
-    HexWaveParams() = default;
+    SynthParams() = default;
 
     /// Full parameter constructor
-    HexWaveParams(i32 reflect, float peakTime, float halfHeight, float zeroWait)
+    SynthParams(i32 reflect, float peakTime, float halfHeight, float zeroWait)
         : reflect(reflect), peakTime(peakTime), halfHeight(halfHeight), zeroWait(zeroWait) {}
 
     /// Create parameters for a predefined shape
-    static HexWaveParams fromShape(HexWaveShape shape);
+    static SynthParams fromShape(SynthShape shape);
 };
 
-/// Interface for HexWave engine that holds BLEP/BLAMP tables
+/// Interface for synth engine that holds BLEP/BLAMP tables
 ///
-/// IHexWaveEngine encapsulates the precomputed tables needed for
+/// ISynthEngine encapsulates the precomputed tables needed for
 /// anti-aliased waveform generation. You can create multiple engines
 /// with different quality settings.
-class IHexWaveEngine {
+class ISynthEngine {
 public:
     /// Factory function to create an engine with the specified quality settings
     /// @param width BLEP width (4..64), larger = better quality, more CPU
     /// @param oversample Oversampling factor (2+), larger = less noise
     /// @return Shared pointer to the engine
-    static IHexWaveEnginePtr create(i32 width = 32, i32 oversample = 16);
+    static ISynthEnginePtr create(i32 width = 32, i32 oversample = 16);
 
-    virtual ~IHexWaveEngine() = default;
+    virtual ~ISynthEngine() = default;
 
     /// Check if engine was initialized successfully
     virtual bool isValid() const = 0;
@@ -96,25 +105,28 @@ public:
     virtual i32 getOversample() const = 0;
 };
 
-/// Interface class for HexWave oscillator
+/// Interface class for synth oscillator
 ///
-/// This interface provides a clean API for HexWave oscillator functionality.
+/// This interface provides a clean API for waveform synthesis.
 /// Use the static create() factory function to obtain an instance.
-class IHexWaveOscillator {
+///
+/// @note Future versions will expand this interface with envelope generators,
+/// filters, and modulation sources as the synthesizer grows.
+class ISynthOscillator {
 public:
     /// Factory function to create an oscillator with specified engine and parameters
     /// @param engine Shared pointer to the engine to use (keeps engine alive)
     /// @param params Waveform parameters
     /// @return Shared pointer to the oscillator
-    static IHexWaveOscillatorPtr create(IHexWaveEnginePtr engine, const HexWaveParams& params);
+    static ISynthOscillatorPtr create(ISynthEnginePtr engine, const SynthParams& params);
 
     /// Factory function to create an oscillator with specified engine and shape
     /// @param engine Shared pointer to the engine to use (keeps engine alive)
     /// @param shape Predefined waveform shape
     /// @return Shared pointer to the oscillator
-    static IHexWaveOscillatorPtr create(IHexWaveEnginePtr engine, HexWaveShape shape = HexWaveShape::Sawtooth);
+    static ISynthOscillatorPtr create(ISynthEnginePtr engine, SynthShape shape = SynthShape::Sawtooth);
 
-    virtual ~IHexWaveOscillator() = default;
+    virtual ~ISynthOscillator() = default;
 
     /// Generate audio samples
     /// @param output Buffer to fill with samples
@@ -129,20 +141,20 @@ public:
 
     /// Change waveform shape (takes effect at next cycle boundary)
     /// @param shape Predefined waveform shape
-    virtual void setShape(HexWaveShape shape) = 0;
+    virtual void setShape(SynthShape shape) = 0;
 
     /// Change waveform parameters (takes effect at next cycle boundary)
     /// @param params Custom waveform parameters
-    virtual void setParams(const HexWaveParams& params) = 0;
+    virtual void setParams(const SynthParams& params) = 0;
 
     /// Get current waveform parameters
-    virtual HexWaveParams getParams() const = 0;
+    virtual SynthParams getParams() const = 0;
 
     /// Reset oscillator to beginning of cycle
     virtual void reset() = 0;
 
     /// Get the engine this oscillator uses
-    virtual IHexWaveEnginePtr getEngine() const = 0;
+    virtual ISynthEnginePtr getEngine() const = 0;
 };
 
 } // namespace fl

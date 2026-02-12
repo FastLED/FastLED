@@ -1,8 +1,8 @@
-/// @file hexwave.cpp
-/// @brief Tests for HexWave bandlimited audio oscillator
+/// @file synth.cpp
+/// @brief Tests for bandlimited audio synthesizer oscillator
 
 #include "test.h"
-#include "fl/hexwave.h"
+#include "fl/audio/synth.h"
 #include "fl/stl/math.h"
 
 using namespace fl;
@@ -36,11 +36,11 @@ bool hasVariation(const float* samples, int32_t count) {
 
 }  // anonymous namespace
 
-FL_TEST_CASE("HexWave - basic initialization and generation") {
-    auto engine = IHexWaveEngine::create(32, 16);
+FL_TEST_CASE("Synth - basic initialization and generation") {
+    auto engine = ISynthEngine::create(32, 16);
     FL_CHECK_TRUE(engine->isValid());
 
-    auto osc = IHexWaveOscillator::create(engine, HexWaveShape::Sawtooth);
+    auto osc = ISynthOscillator::create(engine, SynthShape::Sawtooth);
     FL_CHECK_TRUE(osc != nullptr);
 
     // Generate some samples
@@ -53,42 +53,42 @@ FL_TEST_CASE("HexWave - basic initialization and generation") {
     FL_CHECK_TRUE(hasVariation(samples, 256));
 }
 
-FL_TEST_CASE("HexWave - waveform shapes") {
-    auto engine = IHexWaveEngine::create();
+FL_TEST_CASE("Synth - waveform shapes") {
+    auto engine = ISynthEngine::create();
 
     float samples[512];
     float freq = 100.0f / 44100.0f;  // Low frequency for clearer waveform
 
     // Test all predefined shapes generate valid output
-    auto saw = IHexWaveOscillator::create(engine, HexWaveShape::Sawtooth);
+    auto saw = ISynthOscillator::create(engine, SynthShape::Sawtooth);
     FL_CHECK_TRUE(saw != nullptr);
     saw->generateSamples(samples, 512, freq);
     FL_CHECK_TRUE(samplesInRange(samples, 512));
     FL_CHECK_TRUE(hasVariation(samples, 512));
 
-    auto square = IHexWaveOscillator::create(engine, HexWaveShape::Square);
+    auto square = ISynthOscillator::create(engine, SynthShape::Square);
     FL_CHECK_TRUE(square != nullptr);
     square->generateSamples(samples, 512, freq);
     FL_CHECK_TRUE(samplesInRange(samples, 512));
     FL_CHECK_TRUE(hasVariation(samples, 512));
 
-    auto triangle = IHexWaveOscillator::create(engine, HexWaveShape::Triangle);
+    auto triangle = ISynthOscillator::create(engine, SynthShape::Triangle);
     FL_CHECK_TRUE(triangle != nullptr);
     triangle->generateSamples(samples, 512, freq);
     FL_CHECK_TRUE(samplesInRange(samples, 512));
     FL_CHECK_TRUE(hasVariation(samples, 512));
 }
 
-FL_TEST_CASE("HexWave - custom parameters") {
-    auto engine = IHexWaveEngine::create();
+FL_TEST_CASE("Synth - custom parameters") {
+    auto engine = ISynthEngine::create();
 
     // Create with custom parameters
-    HexWaveParams params(1, 0.3f, 0.5f, 0.1f);
-    auto osc = IHexWaveOscillator::create(engine, params);
+    SynthParams params(1, 0.3f, 0.5f, 0.1f);
+    auto osc = ISynthOscillator::create(engine, params);
     FL_CHECK_TRUE(osc != nullptr);
 
     // Verify params are stored correctly
-    HexWaveParams retrieved = osc->getParams();
+    SynthParams retrieved = osc->getParams();
     FL_CHECK_EQ(retrieved.reflect, 1);
     FL_CHECK_EQ(retrieved.peakTime, 0.3f);
     FL_CHECK_EQ(retrieved.halfHeight, 0.5f);
@@ -100,10 +100,10 @@ FL_TEST_CASE("HexWave - custom parameters") {
     FL_CHECK_TRUE(samplesInRange(samples, 256));
 }
 
-FL_TEST_CASE("HexWave - shape change at runtime") {
-    auto engine = IHexWaveEngine::create();
+FL_TEST_CASE("Synth - shape change at runtime") {
+    auto engine = ISynthEngine::create();
 
-    auto osc = IHexWaveOscillator::create(engine, HexWaveShape::Sawtooth);
+    auto osc = ISynthOscillator::create(engine, SynthShape::Sawtooth);
     FL_CHECK_TRUE(osc != nullptr);
 
     float samples[256];
@@ -114,20 +114,20 @@ FL_TEST_CASE("HexWave - shape change at runtime") {
     FL_CHECK_TRUE(hasVariation(samples, 256));
 
     // Change to square and generate more
-    osc->setShape(HexWaveShape::Square);
+    osc->setShape(SynthShape::Square);
     osc->generateSamples(samples, 256, freq);
     FL_CHECK_TRUE(hasVariation(samples, 256));
 
     // Change to triangle and generate more
-    osc->setShape(HexWaveShape::Triangle);
+    osc->setShape(SynthShape::Triangle);
     osc->generateSamples(samples, 256, freq);
     FL_CHECK_TRUE(hasVariation(samples, 256));
 }
 
-FL_TEST_CASE("HexWave - span interface") {
-    auto engine = IHexWaveEngine::create();
+FL_TEST_CASE("Synth - span interface") {
+    auto engine = ISynthEngine::create();
 
-    auto osc = IHexWaveOscillator::create(engine, HexWaveShape::Triangle);
+    auto osc = ISynthOscillator::create(engine, SynthShape::Triangle);
     FL_CHECK_TRUE(osc != nullptr);
 
     float buffer[128];
@@ -138,10 +138,10 @@ FL_TEST_CASE("HexWave - span interface") {
     FL_CHECK_TRUE(hasVariation(buffer, 128));
 }
 
-FL_TEST_CASE("HexWave - reset functionality") {
-    auto engine = IHexWaveEngine::create();
+FL_TEST_CASE("Synth - reset functionality") {
+    auto engine = ISynthEngine::create();
 
-    auto osc = IHexWaveOscillator::create(engine, HexWaveShape::Sawtooth);
+    auto osc = ISynthOscillator::create(engine, SynthShape::Sawtooth);
     FL_CHECK_TRUE(osc != nullptr);
 
     float samples1[64];
@@ -167,10 +167,10 @@ FL_TEST_CASE("HexWave - reset functionality") {
     FL_CHECK_TRUE(similar);
 }
 
-FL_TEST_CASE("HexWave - multiple engines") {
+FL_TEST_CASE("Synth - multiple engines") {
     // Create two separate engines with different settings
-    auto engine1 = IHexWaveEngine::create(32, 16);
-    auto engine2 = IHexWaveEngine::create(16, 8);
+    auto engine1 = ISynthEngine::create(32, 16);
+    auto engine2 = ISynthEngine::create(16, 8);
 
     FL_CHECK_TRUE(engine1->isValid());
     FL_CHECK_TRUE(engine2->isValid());
@@ -178,8 +178,8 @@ FL_TEST_CASE("HexWave - multiple engines") {
     FL_CHECK_EQ(engine2->getWidth(), 16);
 
     // Create oscillators from each engine
-    auto osc1 = IHexWaveOscillator::create(engine1, HexWaveShape::Sawtooth);
-    auto osc2 = IHexWaveOscillator::create(engine2, HexWaveShape::Square);
+    auto osc1 = ISynthOscillator::create(engine1, SynthShape::Sawtooth);
+    auto osc2 = ISynthOscillator::create(engine2, SynthShape::Square);
 
     FL_CHECK_TRUE(osc1 != nullptr);
     FL_CHECK_TRUE(osc2 != nullptr);
@@ -208,15 +208,15 @@ FL_TEST_CASE("HexWave - multiple engines") {
     FL_CHECK_TRUE(different);
 }
 
-FL_TEST_CASE("HexWave - oscillator keeps engine alive") {
-    IHexWaveOscillatorPtr osc;
+FL_TEST_CASE("Synth - oscillator keeps engine alive") {
+    ISynthOscillatorPtr osc;
     {
         // Create engine in inner scope
-        auto engine = IHexWaveEngine::create(32, 16);
+        auto engine = ISynthEngine::create(32, 16);
         FL_CHECK_TRUE(engine->isValid());
 
         // Create oscillator that holds reference to engine
-        osc = IHexWaveOscillator::create(engine, HexWaveShape::Triangle);
+        osc = ISynthOscillator::create(engine, SynthShape::Triangle);
         FL_CHECK_TRUE(osc != nullptr);
     }
     // Engine should still be alive through oscillator's reference

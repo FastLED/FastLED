@@ -26,7 +26,6 @@
 #include "fl/fltest.cpp.hpp"
 #include "fl/gamma.cpp.hpp"
 #include "fl/gradient.cpp.hpp"
-#include "fl/hexwave.cpp.hpp"
 #include "fl/hsv16.cpp.hpp"
 #include "fl/id_tracker.cpp.hpp"
 #include "fl/isr.cpp.hpp"

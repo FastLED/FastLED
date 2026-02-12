@@ -1,9 +1,9 @@
-// hexwave.cpp.hpp - Implementation of high-level HexWave oscillator API
+// synth.cpp.hpp - Implementation of bandlimited audio synthesizer oscillator
 //
-// This file implements the fl::IHexWaveOscillator interface and related APIs
+// This file implements the fl::ISynthOscillator interface and related APIs
 // that wrap the low-level stb_hexwave library.
 
-#include "fl/hexwave.h"
+#include "synth.h"
 #include "fl/stl/cstring.h"
 #include "third_party/stb/hexwave/stb_hexwave.h"
 
@@ -20,24 +20,24 @@ using fl::third_party::hexwave::hexwave_generate_samples;
 
 
 //////////////////////////////////////////////////////////////////////////////
-// HexWaveEngineImpl - Implementation of IHexWaveEngine interface
+// SynthEngineImpl - Implementation of ISynthEngine interface
 //////////////////////////////////////////////////////////////////////////////
 
-class HexWaveEngineImpl : public IHexWaveEngine {
+class SynthEngineImpl : public ISynthEngine {
 public:
-    HexWaveEngineImpl(i32 width, i32 oversample);
-    ~HexWaveEngineImpl() override;
+    SynthEngineImpl(i32 width, i32 oversample);
+    ~SynthEngineImpl() override;
 
     // Non-copyable
-    HexWaveEngineImpl(const HexWaveEngineImpl&) = delete;
-    HexWaveEngineImpl& operator=(const HexWaveEngineImpl&) = delete;
+    SynthEngineImpl(const SynthEngineImpl&) = delete;
+    SynthEngineImpl& operator=(const SynthEngineImpl&) = delete;
 
-    // IHexWaveEngine interface
+    // ISynthEngine interface
     bool isValid() const override;
     i32 getWidth() const override { return mWidth; }
     i32 getOversample() const override { return mOversample; }
 
-    // Internal access for HexWaveOscillatorImpl (same compilation unit)
+    // Internal access for SynthOscillatorImpl (same compilation unit)
     HexWaveEngine* getEngineInternal() const { return mEngine; }
 
 private:
@@ -47,63 +47,63 @@ private:
 };
 
 //////////////////////////////////////////////////////////////////////////////
-// HexWaveOscillatorImpl - Implementation of IHexWaveOscillator interface
+// SynthOscillatorImpl - Implementation of ISynthOscillator interface
 //////////////////////////////////////////////////////////////////////////////
 
-class HexWaveOscillatorImpl : public IHexWaveOscillator {
+class SynthOscillatorImpl : public ISynthOscillator {
 public:
-    HexWaveOscillatorImpl(fl::shared_ptr<HexWaveEngineImpl> engine, const HexWaveParams& params);
-    ~HexWaveOscillatorImpl() override;
+    SynthOscillatorImpl(fl::shared_ptr<SynthEngineImpl> engine, const SynthParams& params);
+    ~SynthOscillatorImpl() override;
 
     // Non-copyable
-    HexWaveOscillatorImpl(const HexWaveOscillatorImpl&) = delete;
-    HexWaveOscillatorImpl& operator=(const HexWaveOscillatorImpl&) = delete;
+    SynthOscillatorImpl(const SynthOscillatorImpl&) = delete;
+    SynthOscillatorImpl& operator=(const SynthOscillatorImpl&) = delete;
 
-    // IHexWaveOscillator interface
+    // ISynthOscillator interface
     void generateSamples(float* output, i32 numSamples, float freq) override;
     void generateSamples(fl::span<float> output, float freq) override;
-    void setShape(HexWaveShape shape) override;
-    void setParams(const HexWaveParams& params) override;
-    HexWaveParams getParams() const override;
+    void setShape(SynthShape shape) override;
+    void setParams(const SynthParams& params) override;
+    SynthParams getParams() const override;
     void reset() override;
-    IHexWaveEnginePtr getEngine() const override { return mEngine; }
+    ISynthEnginePtr getEngine() const override { return mEngine; }
 
 private:
-    fl::shared_ptr<HexWaveEngineImpl> mEngine;  // Shared pointer to engine (keeps it alive)
-    HexWave* mHexWave = nullptr;                // Typed pointer to HexWave structure
-    HexWaveParams mCurrentParams;
+    fl::shared_ptr<SynthEngineImpl> mEngine;  // Shared pointer to engine (keeps it alive)
+    HexWave* mHexWave = nullptr;              // Typed pointer to HexWave structure
+    SynthParams mCurrentParams;
 };
 
-// HexWaveParams implementation
-HexWaveParams HexWaveParams::fromShape(HexWaveShape shape) {
+// SynthParams implementation
+SynthParams SynthParams::fromShape(SynthShape shape) {
     switch (shape) {
-        case HexWaveShape::Sawtooth:
-            return HexWaveParams(1, 0.0f, 0.0f, 0.0f);
-        case HexWaveShape::Square:
-            return HexWaveParams(1, 0.0f, 1.0f, 0.0f);
-        case HexWaveShape::Triangle:
-            return HexWaveParams(1, 0.5f, 0.0f, 0.0f);
-        case HexWaveShape::AlternatingSaw:
-            return HexWaveParams(0, 0.0f, 0.0f, 0.0f);
-        case HexWaveShape::Custom:
+        case SynthShape::Sawtooth:
+            return SynthParams(1, 0.0f, 0.0f, 0.0f);
+        case SynthShape::Square:
+            return SynthParams(1, 0.0f, 1.0f, 0.0f);
+        case SynthShape::Triangle:
+            return SynthParams(1, 0.5f, 0.0f, 0.0f);
+        case SynthShape::AlternatingSaw:
+            return SynthParams(0, 0.0f, 0.0f, 0.0f);
+        case SynthShape::Custom:
         default:
-            return HexWaveParams();  // Default to sawtooth
+            return SynthParams();  // Default to sawtooth
     }
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// IHexWaveEngine static factory method
+// ISynthEngine static factory method
 //////////////////////////////////////////////////////////////////////////////
 
-IHexWaveEnginePtr IHexWaveEngine::create(i32 width, i32 oversample) {
-    return fl::make_shared<HexWaveEngineImpl>(width, oversample);
+ISynthEnginePtr ISynthEngine::create(i32 width, i32 oversample) {
+    return fl::make_shared<SynthEngineImpl>(width, oversample);
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// HexWaveEngineImpl implementation
+// SynthEngineImpl implementation
 //////////////////////////////////////////////////////////////////////////////
 
-HexWaveEngineImpl::HexWaveEngineImpl(i32 width, i32 oversample)
+SynthEngineImpl::SynthEngineImpl(i32 width, i32 oversample)
     : mWidth(width), mOversample(oversample) {
     // Clamp width to valid range
     if (mWidth < 4) mWidth = 4;
@@ -115,39 +115,39 @@ HexWaveEngineImpl::HexWaveEngineImpl(i32 width, i32 oversample)
     mEngine = hexwave_engine_create(mWidth, mOversample, nullptr);
 }
 
-HexWaveEngineImpl::~HexWaveEngineImpl() {
+SynthEngineImpl::~SynthEngineImpl() {
     if (mEngine) {
         hexwave_engine_destroy(mEngine);
         mEngine = nullptr;
     }
 }
 
-bool HexWaveEngineImpl::isValid() const {
+bool SynthEngineImpl::isValid() const {
     return mEngine != nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// IHexWaveOscillator static factory methods
+// ISynthOscillator static factory methods
 //////////////////////////////////////////////////////////////////////////////
 
-IHexWaveOscillatorPtr IHexWaveOscillator::create(IHexWaveEnginePtr engine, HexWaveShape shape) {
-    return create(engine, HexWaveParams::fromShape(shape));
+ISynthOscillatorPtr ISynthOscillator::create(ISynthEnginePtr engine, SynthShape shape) {
+    return create(engine, SynthParams::fromShape(shape));
 }
 
-IHexWaveOscillatorPtr IHexWaveOscillator::create(IHexWaveEnginePtr engine, const HexWaveParams& params) {
+ISynthOscillatorPtr ISynthOscillator::create(ISynthEnginePtr engine, const SynthParams& params) {
     if (!engine || !engine->isValid()) {
         return nullptr;
     }
     // Safe downcast - we control the factory, so we know the concrete type
-    auto engineImpl = fl::static_pointer_cast<HexWaveEngineImpl>(engine);
-    return fl::make_shared<HexWaveOscillatorImpl>(engineImpl, params);
+    auto engineImpl = fl::static_pointer_cast<SynthEngineImpl>(engine);
+    return fl::make_shared<SynthOscillatorImpl>(engineImpl, params);
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// HexWaveOscillatorImpl implementation
+// SynthOscillatorImpl implementation
 //////////////////////////////////////////////////////////////////////////////
 
-HexWaveOscillatorImpl::HexWaveOscillatorImpl(fl::shared_ptr<HexWaveEngineImpl> engine, const HexWaveParams& params)
+SynthOscillatorImpl::SynthOscillatorImpl(fl::shared_ptr<SynthEngineImpl> engine, const SynthParams& params)
     : mEngine(engine), mCurrentParams(params) {
     // Allocate HexWave structure
     mHexWave = static_cast<HexWave*>(fl::malloc(sizeof(HexWave)));
@@ -164,28 +164,28 @@ HexWaveOscillatorImpl::HexWaveOscillatorImpl(fl::shared_ptr<HexWaveEngineImpl> e
     );
 }
 
-HexWaveOscillatorImpl::~HexWaveOscillatorImpl() {
+SynthOscillatorImpl::~SynthOscillatorImpl() {
     if (mHexWave) {
         fl::free(mHexWave);
         mHexWave = nullptr;
     }
 }
 
-void HexWaveOscillatorImpl::generateSamples(float* output, i32 numSamples, float freq) {
+void SynthOscillatorImpl::generateSamples(float* output, i32 numSamples, float freq) {
     if (mHexWave && output && numSamples > 0) {
         hexwave_generate_samples(output, numSamples, mHexWave, freq);
     }
 }
 
-void HexWaveOscillatorImpl::generateSamples(fl::span<float> output, float freq) {
+void SynthOscillatorImpl::generateSamples(fl::span<float> output, float freq) {
     generateSamples(output.data(), static_cast<i32>(output.size()), freq);
 }
 
-void HexWaveOscillatorImpl::setShape(HexWaveShape shape) {
-    setParams(HexWaveParams::fromShape(shape));
+void SynthOscillatorImpl::setShape(SynthShape shape) {
+    setParams(SynthParams::fromShape(shape));
 }
 
-void HexWaveOscillatorImpl::setParams(const HexWaveParams& params) {
+void SynthOscillatorImpl::setParams(const SynthParams& params) {
     if (mHexWave) {
         mCurrentParams = params;
         hexwave_change(
@@ -198,11 +198,11 @@ void HexWaveOscillatorImpl::setParams(const HexWaveParams& params) {
     }
 }
 
-HexWaveParams HexWaveOscillatorImpl::getParams() const {
+SynthParams SynthOscillatorImpl::getParams() const {
     return mCurrentParams;
 }
 
-void HexWaveOscillatorImpl::reset() {
+void SynthOscillatorImpl::reset() {
     if (mHexWave && mEngine) {
         // Re-create the oscillator with current parameters
         hexwave_create(
