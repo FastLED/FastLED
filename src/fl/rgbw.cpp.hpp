@@ -61,7 +61,7 @@ void rgb_2_rgbw_max_brightness(u16 w_color_temperature, u8 r,
     *out_r = scale8(r, r_scale);
     *out_g = scale8(g, g_scale);
     *out_b = scale8(b, b_scale);
-    *out_w = min3(r, g, b);
+    *out_w = min3(*out_r, *out_g, *out_b);
 }
 
 void rgb_2_rgbw_null_white_pixel(u16 w_color_temperature, u8 r,
