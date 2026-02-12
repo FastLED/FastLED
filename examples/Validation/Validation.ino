@@ -255,6 +255,18 @@ fl::shared_ptr<fl::RxDevice> createRxDevice(int pin) {
 }
 
 // ============================================================================
+// Serial Initialization Helper
+// ============================================================================
+
+// Initialize serial buffers with platform-specific configuration
+// Note: Some boards (ESP32S2) don't support setTxBufferSize() on USBCDC interface
+void init_serial_buffers() {
+#if !defined(FL_IS_ESP_32S2)
+    Serial.setTxBufferSize(4096);  // 4KB buffer (default is 256 bytes)
+#endif
+}
+
+// ============================================================================
 // Global State
 // ============================================================================
 
@@ -275,9 +287,9 @@ uint32_t frame_counter = 0;
 
 
 void setup() {
-    // Increase Serial TX buffer to handle large JSON responses (e.g., 21+ object arrays)
+    // Initialize serial buffers with platform-specific configuration
     // Must be called BEFORE Serial.begin()
-    Serial.setTxBufferSize(4096);  // 4KB buffer (default is 256 bytes)
+    init_serial_buffers();
     Serial.begin(115200);
     // Initialize watchdog with 5 second timeout (ESP32 only)
     // Provides automatic proof-of-life monitoring and USB disconnect fix for Windows
