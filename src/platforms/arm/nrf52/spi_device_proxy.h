@@ -5,10 +5,10 @@
 ///
 /// This proxy sits between LED controllers (APA102, SK9822, etc.) and the actual
 /// SPI hardware. It intelligently routes SPI operations to:
-/// - Hardware Single-SPI (NRF52SPIOutput) for single strips
+/// - Hardware Single-SPI (NRF52HardwareSPIOutput) for single strips
 /// - Hardware Multi-lane SPI (SpiHw2/SpiHw4/SpiHw8 via SPIBusManager) for parallel strips
 ///
-/// The proxy provides a transparent interface that mirrors NRF52SPIOutput,
+/// The proxy provides a transparent interface that mirrors NRF52HardwareSPIOutput,
 /// allowing chipset controllers to work without modification.
 ///
 /// ## NRF52 Hardware Approach
@@ -47,13 +47,13 @@ namespace fl {
 ///
 /// @tparam DATA_PIN GPIO pin for SPI data (MOSI)
 /// @tparam CLOCK_PIN GPIO pin for SPI clock (SCK)
-/// @tparam SPI_CLOCK_DIVIDER SPI clock divider (see NRF52SPIOutput for details)
+/// @tparam SPI_CLOCK_DIVIDER SPI clock divider (see NRF52HardwareSPIOutput for details)
 template<u8 DATA_PIN, u8 CLOCK_PIN, u32 SPI_CLOCK_DIVIDER>
 class SPIDeviceProxy {
 private:
     SPIBusHandle mHandle;                    // Handle from SPIBusManager
     SPIBusManager* mBusManager;              // Pointer to global bus manager
-    NRF52SPIOutput<DATA_PIN, CLOCK_PIN, SPI_CLOCK_DIVIDER>* mSingleSPI;  // Owned single-SPI backend
+    NRF52HardwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_CLOCK_DIVIDER>* mSingleSPI;  // Owned single-SPI backend
     fl::vector<u8> mWriteBuffer;        // Buffered writes (for multi-lane SPI)
     bool mInitialized;                       // Whether init() was called
     bool mInTransaction;                     // Whether select() was called
@@ -97,7 +97,8 @@ public:
         // Register with bus manager
         // NOTE: Bus manager will determine if we use Single/Dual/Quad/Octal SPI
         // based on how many devices share our clock pin
-        mHandle = mBusManager->registerDevice(CLOCK_PIN, DATA_PIN, SPI_SPEED, this);
+        // NOTE: NRF52 uses SPI_CLOCK_DIVIDER instead of SPI_SPEED (hardware limitation)
+        mHandle = mBusManager->registerDevice(CLOCK_PIN, DATA_PIN, SPI_CLOCK_DIVIDER, this);
 
         if (!mHandle.is_valid) {
             FL_WARN("SPIDeviceProxy: Failed to register with bus manager (pin "
@@ -111,8 +112,8 @@ public:
         // Check what backend we were assigned
         const SPIBusInfo* bus = mBusManager->getBusInfo(mHandle.bus_id);
         if (bus && bus->bus_type == SPIBusType::SINGLE_SPI) {
-            // We're using single-SPI - create owned NRF52SPIOutput instance
-            mSingleSPI = new NRF52SPIOutput<DATA_PIN, CLOCK_PIN, SPI_CLOCK_DIVIDER>();
+            // We're using single-SPI - create owned NRF52HardwareSPIOutput instance
+            mSingleSPI = new NRF52HardwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_CLOCK_DIVIDER>();
             mSingleSPI->init();
         }
         // For multi-lane SPI, bus manager handles hardware - we just buffer writes
@@ -121,7 +122,7 @@ public:
     }
 
     /// Begin SPI transaction
-    /// Mirrors NRF52SPIOutput::select()
+    /// Mirrors NRF52HardwareSPIOutput::select()
     void select() {
         if (!mInitialized) {
             return;
@@ -138,7 +139,7 @@ public:
     }
 
     /// End SPI transaction
-    /// Mirrors NRF52SPIOutput::release()
+    /// Mirrors NRF52HardwareSPIOutput::release()
     void release() {
         if (!mInitialized || !mInTransaction) {
             return;
@@ -154,7 +155,7 @@ public:
     }
 
     /// Write single byte
-    /// Mirrors NRF52SPIOutput::writeByte()
+    /// Mirrors NRF52HardwareSPIOutput::writeByte()
     void writeByte(u8 b) {
         if (!mInitialized || !mInTransaction) {
             return;
@@ -171,7 +172,7 @@ public:
     }
 
     /// Write 16-bit word (big-endian)
-    /// Mirrors NRF52SPIOutput::writeWord()
+    /// Mirrors NRF52HardwareSPIOutput::writeWord()
     void writeWord(u16 w) {
         if (!mInitialized || !mInTransaction) {
             return;
@@ -189,7 +190,7 @@ public:
     }
 
     /// Write byte values (repeated value)
-    /// Mirrors NRF52SPIOutput::writeBytesValue()
+    /// Mirrors NRF52HardwareSPIOutput::writeBytesValue()
     void writeBytesValue(u8 value, int len) {
         if (!mInitialized) {
             return;
@@ -212,7 +213,7 @@ public:
     }
 
     /// Write byte buffer
-    /// Mirrors NRF52SPIOutput::writeBytes()
+    /// Mirrors NRF52HardwareSPIOutput::writeBytes()
     void writeBytes(u8* data, int len) {
         if (!mInitialized) {
             return;
@@ -235,7 +236,7 @@ public:
     }
 
     /// Write byte buffer with adjustment
-    /// Mirrors NRF52SPIOutput::writeBytes<D>()
+    /// Mirrors NRF52HardwareSPIOutput::writeBytes<D>()
     template<class D>
     void writeBytes(u8* data, int len) {
         if (!mInitialized) {
@@ -245,7 +246,7 @@ public:
         // Route based on backend type
         if (mSingleSPI) {
             // Direct passthrough to single-SPI hardware
-            mSingleSPI->writeBytes<D>(data, len);
+            mSingleSPI->template writeBytes<D>(data, len);
         } else {
             // Must be in transaction for buffered writes
             if (!mInTransaction) {
@@ -260,7 +261,7 @@ public:
     }
 
     /// Write a single bit
-    /// Mirrors NRF52SPIOutput::writeBit()
+    /// Mirrors NRF52HardwareSPIOutput::writeBit()
     template <u8 BIT>
     void writeBit(u8 b) {
         if (!mInitialized || !mInTransaction) {
@@ -270,7 +271,7 @@ public:
         // Route based on backend type
         if (mSingleSPI) {
             // Direct passthrough to single-SPI hardware
-            mSingleSPI->writeBit<BIT>(b);
+            mSingleSPI->template writeBit<BIT>(b);
         } else {
             // Multi-lane SPI doesn't support bit-level operations
             // This is typically only used for specific LED protocols
@@ -290,7 +291,7 @@ public:
     }
 
     /// Raw byte write value (static for use by adjustment classes)
-    /// Mirrors NRF52SPIOutput::writeBytesValueRaw()
+    /// Mirrors NRF52HardwareSPIOutput::writeBytesValueRaw()
     static void writeBytesValueRaw(u8 value, int len) {
         // This is a static method used by adjustment classes
         // For the proxy, we can't easily support this in multi-lane mode
