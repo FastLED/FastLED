@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
         // No explicit path: infer from exe name
         std::string full_exe_path;
         char path_buf[1024];
-        fl::u32 buf_size = sizeof(path_buf);
+        uint32_t buf_size = sizeof(path_buf);
         if (_NSGetExecutablePath(path_buf, &buf_size) == 0) {
             full_exe_path = path_buf;
         } else {
