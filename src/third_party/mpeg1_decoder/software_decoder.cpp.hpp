@@ -171,10 +171,8 @@ bool SoftwareMpeg1Decoder::begin(fl::ByteStreamPtr stream) {
 }
 
 void SoftwareMpeg1Decoder::end() {
-    if (ready_) {
-        cleanupDecoder();
-        ready_ = false;
-    }
+    cleanupDecoder();
+    ready_ = false;
     stream_.reset();
 }
 

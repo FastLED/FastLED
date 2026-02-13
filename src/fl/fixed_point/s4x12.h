@@ -46,7 +46,7 @@ class s4x12 {
 
     FASTLED_FORCE_INLINE s4x12 operator/(s4x12 b) const {
         return from_raw(static_cast<i16>(
-            (static_cast<i32>(mValue) << FRAC_BITS) / b.mValue));
+            (static_cast<i32>(mValue) * (static_cast<i32>(1) << FRAC_BITS)) / b.mValue));
     }
 
     FASTLED_FORCE_INLINE s4x12 operator+(s4x12 b) const {
