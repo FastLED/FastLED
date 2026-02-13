@@ -6,6 +6,23 @@
 
 namespace fl {
 
+// WLED Constructor and Stub Implementations
+
+WLED::WLED()
+    : Remote(
+        [this]() { return stubRequestSource(); },
+        [this](const fl::Json& response) { stubResponseSink(response); }
+    ) {}
+
+fl::optional<fl::Json> WLED::stubRequestSource() {
+    FL_ERROR("WLED::stubRequestSource: Not implemented - provide a real RequestSource callback");
+    return fl::nullopt;
+}
+
+void WLED::stubResponseSink(const fl::Json& response) {
+    FL_ERROR("WLED::stubResponseSink: Not implemented - provide a real ResponseSink callback");
+}
+
 // WLED State Management
 
 void WLED::setState(const fl::Json& wledState) {

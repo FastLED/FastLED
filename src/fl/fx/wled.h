@@ -246,7 +246,29 @@ namespace fl {
  */
 class WLED : public Remote {
 public:
-    WLED() = default;
+    /**
+     * @brief Construct WLED with default stub I/O callbacks
+     *
+     * Uses stubRequestSource() and stubResponseSink() which log FL_ERROR
+     * and serve as placeholders for real I/O implementation.
+     *
+     * Example:
+     *   fl::WLED wled;
+     */
+    WLED();
+
+    /**
+     * @brief Construct WLED with custom I/O callbacks
+     * @param source Function that returns next JSON-RPC request (or nullopt if none)
+     * @param sink Function that handles outgoing JSON-RPC responses
+     *
+     * Example:
+     *   fl::WLED wled(
+     *       [&]() { return parseJsonRpcFromSerial(); },
+     *       [](const fl::Json& r) { writeJsonRpcToSerial(r); }
+     *   );
+     */
+    WLED(RequestSource source, ResponseSink sink) : Remote(source, sink) {}
 
     /**
      * @brief Set WLED state from JSON object
@@ -389,6 +411,24 @@ public:
     const WLEDSegment* findSegmentById(u8 id) const;
 
 private:
+    /**
+     * @brief Stub request source callback
+     * @return nullopt (no request available)
+     *
+     * Called when Remote needs to check for incoming requests.
+     * Logs FL_ERROR to indicate this needs to be implemented.
+     */
+    fl::optional<fl::Json> stubRequestSource();
+
+    /**
+     * @brief Stub response sink callback
+     * @param response JSON-RPC response to send
+     *
+     * Called when Remote has a response to send.
+     * Logs FL_ERROR to indicate this needs to be implemented.
+     */
+    void stubResponseSink(const fl::Json& response);
+
     // WLED state (runtime-only, no persistence)
     bool mWledOn = false;           // WLED on/off state
     u8 mWledBri = 255;         // WLED brightness (0-255)
