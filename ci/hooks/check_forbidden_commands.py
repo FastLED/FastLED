@@ -8,6 +8,15 @@ which can bypass FastLED's build system safety checks and caching.
 Exit codes:
 - 0: Allow command
 - 2: Block command (error message sent to Claude)
+
+Override mechanism:
+The hook can be bypassed by setting FL_AGENT_ALLOW_ALL_CMDS=1 in either:
+  1. Command string: FL_AGENT_ALLOW_ALL_CMDS=1 ninja --version
+  2. Process environment: export FL_AGENT_ALLOW_ALL_CMDS=1
+
+The hook parses environment variables from the command string before checking
+the process environment, making it easy for AI agents to bypass the hook for
+legitimate use cases (e.g., compiler feature testing).
 """
 
 import json
@@ -114,22 +123,63 @@ def check_forbidden_pattern(command: str) -> tuple[bool, str] | None:
     return None
 
 
-def check_forbidden_env_vars(command: str) -> tuple[bool, str] | None:
+def check_forbidden_env_vars(command: str) -> tuple[bool, str, str] | None:
     """
     Check if command sets forbidden environment variables.
 
-    Returns (True, error_message) if forbidden env var found, None otherwise.
+    Returns (True, env_var_name, base_error) if forbidden env var found, None otherwise.
     """
     for env_var in FORBIDDEN_ENV_VARS:
         # Match VAR=value or VAR=value command
         pattern = rf"\b{re.escape(env_var)}="
         if re.search(pattern, command):
-            error_msg = (
-                f"Setting {env_var} is forbidden. "
-                f'If you really want to set this, use environment variable "{OVERRIDE_ENV_VAR}"'
-            )
-            return (True, error_msg)
+            base_error = f"Setting {env_var} is forbidden (disables critical performance optimization)"
+            return (True, env_var, base_error)
     return None
+
+
+def parse_env_vars_from_command(command: str) -> dict[str, str]:
+    """
+    Parse environment variables from command string.
+
+    Extracts VAR=value pairs from the beginning of the command.
+    Handles quoted values and stops at the first non-env-var token.
+
+    Examples:
+        "FOO=bar command" -> {"FOO": "bar"}
+        "FOO=bar BAZ=qux command" -> {"FOO": "bar", "BAZ": "qux"}
+        "FOO='bar baz' command" -> {"FOO": "bar baz"}
+        'FOO="bar baz" command' -> {"FOO": "bar baz"}
+
+    Returns: dict of env var names to values
+    """
+    env_vars = {}
+    command = command.strip()
+
+    # Pattern to match: VAR=value (with optional quotes)
+    # Matches at word boundaries to avoid partial matches
+    env_pattern = r'^([A-Z_][A-Z0-9_]*)=((?:[^\s"\']|"[^"]*"|\'[^\']*\')+)'
+
+    while True:
+        match = re.match(env_pattern, command)
+        if not match:
+            break
+
+        var_name = match.group(1)
+        var_value = match.group(2)
+
+        # Remove quotes if present
+        if var_value.startswith('"') and var_value.endswith('"'):
+            var_value = var_value[1:-1]
+        elif var_value.startswith("'") and var_value.endswith("'"):
+            var_value = var_value[1:-1]
+
+        env_vars[var_name] = var_value
+
+        # Remove the matched part and continue
+        command = command[match.end() :].lstrip()
+
+    return env_vars
 
 
 def main():
@@ -156,7 +206,17 @@ def main():
     assert command is not None
 
     # Check for override environment variable
-    override_enabled = bool(os.environ.get(OVERRIDE_ENV_VAR))
+    # First check if it's set in the command string (e.g., FL_AGENT_ALLOW_ALL_CMDS=1 ninja)
+    command_env_vars = parse_env_vars_from_command(command)
+    override_in_command = OVERRIDE_ENV_VAR in command_env_vars and command_env_vars[
+        OVERRIDE_ENV_VAR
+    ] in ("1", "true", "True", "TRUE")
+
+    # Then check if it's set in the process environment
+    override_in_env = bool(os.environ.get(OVERRIDE_ENV_VAR))
+
+    # Override is enabled if set in either location
+    override_enabled = override_in_command or override_in_env
 
     # Check 1: Forbidden commands
     forbidden_result = is_forbidden_command(command)
@@ -171,7 +231,11 @@ def main():
                 )
             sys.exit(0)
 
-        error_msg = f"{forbidden_cmd} is forbidden - {recommendation}"
+        # Comprehensive error message: what's forbidden, why, alternative, and override
+        error_msg = (
+            f"{forbidden_cmd} is forbidden - {recommendation}. "
+            f"To override this check, use: {OVERRIDE_ENV_VAR}=1 {command}"
+        )
 
         if DRY_RUN:
             print(f"[DRY-RUN] Would block: {error_msg}", file=sys.stderr)
@@ -191,7 +255,10 @@ def main():
                 )
             sys.exit(0)
 
-        _, error_msg = pattern_result
+        _, base_error_msg = pattern_result
+        # Add override instructions to pattern error messages
+        error_msg = f"{base_error_msg}. To override this check, use: {OVERRIDE_ENV_VAR}=1 {command}"
+
         if DRY_RUN:
             print(f"[DRY-RUN] Would block: {error_msg}", file=sys.stderr)
             sys.exit(0)
@@ -210,7 +277,12 @@ def main():
                 )
             sys.exit(0)
 
-        _, error_msg = env_var_result
+        _, _env_var_name, base_error = env_var_result
+        # Comprehensive error message with override instructions
+        error_msg = (
+            f"{base_error}. To override this check, use: {OVERRIDE_ENV_VAR}=1 {command}"
+        )
+
         if DRY_RUN:
             print(f"[DRY-RUN] Would block: {error_msg}", file=sys.stderr)
             sys.exit(0)

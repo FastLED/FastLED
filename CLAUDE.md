@@ -321,12 +321,18 @@ uv run test.py profile_sincos16 --cpp --build-mode release --build
   - Use: `bash test`, `bash compile`, `bash lint` instead
   - Never use: `meson setup builddir`, `ninja -C builddir`, `clang++ main.cpp -o main`
   - Exception: Runtime debugging of already-built executables (e.g., `clang-tool-chain-lldb .build/runner.exe`) is allowed
-  - Exception: Compiler feature testing is allowed, but MUST use clang-tool-chain wrappers:
-    - ✅ Use: `clang-tool-chain-clant test.cpp -o test.exe` (C++)
-    - ✅ Use: `clang-tool-chain-lldb test.exe` (debugger)
-    - ❌ NEVER: `clang++`, `clang`, `gcc`, `g++`, `lldb`, `gdb` (bare toolchain commands)
-    - ❌ NEVER: `uv run clang-tool-chain clang++` (wrong invocation)
-    - Rationale: clang-tool-chain wrappers ensure consistent compiler versions and settings
+  - Exception: Compiler feature testing is allowed with override mechanism:
+    - ✅ **Recommended**: Use clang-tool-chain wrappers (no override needed)
+      - `clang-tool-chain-clang++ test.cpp -o test.exe` (C++)
+      - `clang-tool-chain-lldb test.exe` (debugger)
+    - ✅ **Alternative**: Use override for bare compiler commands
+      - `FL_AGENT_ALLOW_ALL_CMDS=1 clang++ test.cpp -o test.exe`
+      - `FL_AGENT_ALLOW_ALL_CMDS=1 ninja --version`
+    - ❌ NEVER: Bare toolchain commands without override (`clang++`, `gcc`, `lldb`, etc.)
+    - ❌ NEVER: Wrong invocation (`uv run clang-tool-chain clang++`)
+    - **Override mechanism**: Prefix command with `FL_AGENT_ALLOW_ALL_CMDS=1` to bypass forbidden command checks
+    - **When to use override**: Compiler feature testing, debugging build system issues, or when clang-tool-chain wrappers don't provide needed functionality
+    - Rationale: clang-tool-chain wrappers ensure consistent compiler versions; override allows flexibility for legitimate use cases
   - Rationale: FastLED build system handles configuration, caching, dependencies, and platform-specific setup
   - See: `docs/agents/build-system.md` for details
 - **NEVER manually delete build caches**: Do NOT use `rm -rf .build/` or delete build directories
@@ -343,6 +349,40 @@ uv run test.py profile_sincos16 --cpp --build-mode release --build
   - See: `docs/agents/build-system.md` for details
 - **Platform compilation timeout**: Use minimum 15 minute timeout for platform builds (e.g., `bash compile --docker esp32s3`)
 - **NEVER disable sccache**: Do NOT set `SCCACHE_DISABLE=1` or disable sccache in any way (see `docs/agents/build-system.md`)
+
+### Override Mechanism for Forbidden Commands
+
+**⚠️ Use with caution - only for legitimate debugging and testing**
+
+All forbidden commands and patterns can be bypassed using the `FL_AGENT_ALLOW_ALL_CMDS=1` environment variable:
+
+**Usage:**
+- **Prefix command (recommended for AI agents):** `FL_AGENT_ALLOW_ALL_CMDS=1 <command>`
+- **Set in environment (for multiple commands):** `export FL_AGENT_ALLOW_ALL_CMDS=1`
+
+**Examples:**
+```bash
+# Compiler feature testing
+FL_AGENT_ALLOW_ALL_CMDS=1 clang++ test.cpp -o test.exe
+
+# Build system debugging
+FL_AGENT_ALLOW_ALL_CMDS=1 ninja --version
+FL_AGENT_ALLOW_ALL_CMDS=1 meson introspect .build/meson-quick
+
+# Cache debugging (still highly discouraged)
+FL_AGENT_ALLOW_ALL_CMDS=1 rm -rf .build/meson-quick
+```
+
+**When to use:**
+- ✅ Compiler feature testing (e.g., checking C++ standard support)
+- ✅ Build system debugging (e.g., inspecting build configuration)
+- ✅ Investigating specific build failures that require low-level access
+- ❌ **NOT for regular development** - always prefer bash wrapper scripts
+
+**How it works:**
+- Pre-command hook (`ci/hooks/check_forbidden_commands.py`) parses the environment variable from the command string
+- If `FL_AGENT_ALLOW_ALL_CMDS=1` is found, the forbidden command is allowed to proceed
+- See `ci/hooks/README.md` for complete documentation
 
 ### JavaScript Code Standards
 - **After modifying any JavaScript files**: Always run `bash lint --js` to ensure proper formatting

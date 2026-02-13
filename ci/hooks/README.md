@@ -58,12 +58,26 @@ The hook also blocks dangerous patterns:
 
 ### Override Mechanism
 
-To bypass the hook for legitimate reasons, set the environment variable:
+To bypass the hook for legitimate reasons, set the environment variable `FL_AGENT_ALLOW_ALL_CMDS=1`:
 
+**Option 1: Set in command (recommended for one-off commands):**
 ```bash
 FL_AGENT_ALLOW_ALL_CMDS=1 ninja --version
 FL_AGENT_ALLOW_ALL_CMDS=1 rm -rf .build/meson-quick
+FL_AGENT_ALLOW_ALL_CMDS=1 clang++ test.cpp -o test.exe
 ```
+
+**Option 2: Set in shell environment (for multiple commands):**
+```bash
+export FL_AGENT_ALLOW_ALL_CMDS=1
+ninja --version
+clang++ test.cpp -o test.exe
+```
+
+**How it works:**
+- The hook first checks if `FL_AGENT_ALLOW_ALL_CMDS=1` is set in the command string
+- If not found, it checks the Claude Code process environment
+- If set in either location, the command is allowed
 
 **Warning:** Only use the override when you have a specific, documented reason to run these commands directly.
 
