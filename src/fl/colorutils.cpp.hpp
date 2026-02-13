@@ -293,7 +293,8 @@ CRGB ColorFromPaletteExtended(const CRGBPalette32 &pal, fl::u16 index,
         blue1 += blue2;
     }
     if (brightness != 255) {
-        nscale8x3_video(red1, green1, blue1, brightness);
+        // nscale8x3_video(red1, green1, blue1, brightness);
+        nscale8x3(red1, green1, blue1, brightness);
     }
     return CRGB(red1, green1, blue1);
 }
@@ -419,6 +420,102 @@ CRGB ColorFromPaletteExtended(const CRGBPalette16 &pal, fl::u16 index,
         fl::u8 red2 = entry->red;
         fl::u8 green2 = entry->green;
         fl::u8 blue2 = entry->blue;
+        red2 = scale8_LEAVING_R1_DIRTY(red2, offset);
+        green2 = scale8_LEAVING_R1_DIRTY(green2, offset);
+        blue2 = scale8_LEAVING_R1_DIRTY(blue2, offset);
+        cleanup_R1();
+
+        // These sums can't overflow, so no qadd8 needed.
+        red1 += red2;
+        green1 += green2;
+        blue1 += blue2;
+    }
+    if (brightness != 255) {
+        // nscale8x3_video(red1, green1, blue1, brightness);
+        nscale8x3(red1, green1, blue1, brightness);
+    }
+    return CRGB(red1, green1, blue1);
+}
+
+CRGB ColorFromPaletteExtended(const TProgmemRGBPalette16 &pal, fl::u16 index,
+                              fl::u8 brightness, TBlendType blendType) {
+    // Extract the four most significant bits of the index as a palette index.
+    fl::u8 index_4bit = index >> 12;
+    // Calculate the 8-bit offset from the palette index.
+    fl::u8 offset = (fl::u8)(index >> 4);
+    // Get the palette entry from the 4-bit index
+    CRGB entry(FL_PGM_READ_DWORD_NEAR(&(pal[0]) + index_4bit));
+    fl::u8 red1 = entry.red;
+    fl::u8 green1 = entry.green;
+    fl::u8 blue1 = entry.blue;
+
+    fl::u8 blend = offset && (blendType != NOBLEND);
+    if (blend) {
+        if (index_4bit == 15) {
+            entry = FL_PGM_READ_DWORD_NEAR(&(pal[0]));
+        } else {
+            entry = FL_PGM_READ_DWORD_NEAR(&(pal[1]) + index_4bit);
+        }
+
+        // Calculate the scaling factor and scaled values for the lower palette
+        // value.
+        fl::u8 f1 = 255 - offset;
+        red1 = scale8_LEAVING_R1_DIRTY(red1, f1);
+        green1 = scale8_LEAVING_R1_DIRTY(green1, f1);
+        blue1 = scale8_LEAVING_R1_DIRTY(blue1, f1);
+
+        // Calculate the scaled values for the neighbouring palette value.
+        fl::u8 red2 = entry.red;
+        fl::u8 green2 = entry.green;
+        fl::u8 blue2 = entry.blue;
+        red2 = scale8_LEAVING_R1_DIRTY(red2, offset);
+        green2 = scale8_LEAVING_R1_DIRTY(green2, offset);
+        blue2 = scale8_LEAVING_R1_DIRTY(blue2, offset);
+        cleanup_R1();
+
+        // These sums can't overflow, so no qadd8 needed.
+        red1 += red2;
+        green1 += green2;
+        blue1 += blue2;
+    }
+    if (brightness != 255) {
+        // nscale8x3_video(red1, green1, blue1, brightness);
+        nscale8x3(red1, green1, blue1, brightness);
+    }
+    return CRGB(red1, green1, blue1);
+}
+
+CRGB ColorFromPaletteExtended(const TProgmemRGBPalette32 &pal, fl::u16 index,
+                              fl::u8 brightness, TBlendType blendType) {
+    // Extract the five most significant bits of the index as a palette index.
+    fl::u8 index_5bit = (index >> 11);
+    // Calculate the 8-bit offset from the palette index.
+    fl::u8 offset = (fl::u8)(index >> 3);
+    // Get the palette entry from the 5-bit index
+    CRGB entry(FL_PGM_READ_DWORD_NEAR(&(pal[0]) + index_5bit));
+    fl::u8 red1 = entry.red;
+    fl::u8 green1 = entry.green;
+    fl::u8 blue1 = entry.blue;
+
+    fl::u8 blend = offset && (blendType != NOBLEND);
+    if (blend) {
+        if (index_5bit == 31) {
+            entry = FL_PGM_READ_DWORD_NEAR(&(pal[0]));
+        } else {
+            entry = FL_PGM_READ_DWORD_NEAR(&(pal[1]) + index_5bit);
+        }
+
+        // Calculate the scaling factor and scaled values for the lower palette
+        // value.
+        fl::u8 f1 = 255 - offset;
+        red1 = scale8_LEAVING_R1_DIRTY(red1, f1);
+        green1 = scale8_LEAVING_R1_DIRTY(green1, f1);
+        blue1 = scale8_LEAVING_R1_DIRTY(blue1, f1);
+
+        // Calculate the scaled values for the neighbouring palette value.
+        fl::u8 red2 = entry.red;
+        fl::u8 green2 = entry.green;
+        fl::u8 blue2 = entry.blue;
         red2 = scale8_LEAVING_R1_DIRTY(red2, offset);
         green2 = scale8_LEAVING_R1_DIRTY(green2, offset);
         blue2 = scale8_LEAVING_R1_DIRTY(blue2, offset);

@@ -1695,6 +1695,16 @@ CRGB ColorFromPaletteExtended(const CRGBPalette16 &pal, fl::u16 index,
 CRGB ColorFromPaletteExtended(const CRGBPalette32 &pal, fl::u16 index,
                               fl::u8 brightness, TBlendType blendType);
 
+/// @copydoc ColorFromPaletteExtended(const CRGBPalette16&, fl::u16, fl::u8, TBlendType)
+CRGB ColorFromPaletteExtended(const TProgmemRGBPalette16 &pal, fl::u16 index,
+                              fl::u8 brightness = 255,
+                              TBlendType blendType = LINEARBLEND);
+
+/// @copydoc ColorFromPaletteExtended(const CRGBPalette32&, fl::u16, fl::u8, TBlendType)
+CRGB ColorFromPaletteExtended(const TProgmemRGBPalette32 &pal, fl::u16 index,
+                              fl::u8 brightness = 255,
+                              TBlendType blendType = LINEARBLEND);
+
 /// @copydoc ColorFromPalette(const CRGBPalette16&, fl::u8, fl::u8,
 /// TBlendType)
 CRGB ColorFromPalette(const TProgmemRGBPalette16 &pal, fl::u8 index,
