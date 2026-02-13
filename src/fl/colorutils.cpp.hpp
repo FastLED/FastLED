@@ -293,7 +293,8 @@ CRGB ColorFromPaletteExtended(const CRGBPalette32 &pal, fl::u16 index,
         blue1 += blue2;
     }
     if (brightness != 255) {
-        nscale8x3_video(red1, green1, blue1, brightness);
+        // nscale8x3_video(red1, green1, blue1, brightness);
+        nscale8x3(red1, green1, blue1, brightness);
     }
     return CRGB(red1, green1, blue1);
 }
@@ -526,7 +527,8 @@ CRGB ColorFromPaletteExtended(const TProgmemRGBPalette32 &pal, fl::u16 index,
         blue1 += blue2;
     }
     if (brightness != 255) {
-        nscale8x3_video(red1, green1, blue1, brightness);
+        // nscale8x3_video(red1, green1, blue1, brightness);
+        nscale8x3(red1, green1, blue1, brightness);
     }
     return CRGB(red1, green1, blue1);
 }
