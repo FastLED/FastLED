@@ -71,6 +71,10 @@ FL_TEST_CASE("ClocklessController - LED Data Capture") {
                 FL_CHECK_GT(data[8], 100);  // B should be high
             }
         }
+
+        // Cleanup before leds[] goes out of scope
+        FastLED.clear(true);
+        ActiveStripTracker::resetForTesting();
     }
 
     FL_SUBCASE("LED capture updates on each show()") {
@@ -106,6 +110,10 @@ FL_TEST_CASE("ClocklessController - LED Data Capture") {
         FL_CHECK_LT(data[0], 50);  // Red should be low
         FL_CHECK_GT(data[1], 100); // Green should be high
         FL_CHECK_LT(data[2], 50);  // Blue should be low
+
+        // Cleanup before leds[] goes out of scope
+        FastLED.clear(true);
+        ActiveStripTracker::resetForTesting();
     }
 
     FL_SUBCASE("Multiple strips captured independently") {
@@ -146,5 +154,9 @@ FL_TEST_CASE("ClocklessController - LED Data Capture") {
             FL_CHECK_LT(data2[1], 50);  // G should be low
             FL_CHECK_GT(data2[2], 100); // B should be high
         }
+
+        // Cleanup before leds[] goes out of scope
+        FastLED.clear(true);
+        ActiveStripTracker::resetForTesting();
     }
 }
