@@ -27,6 +27,10 @@ struct integral_constant {
 using true_type = integral_constant<bool, true>;
 using false_type = integral_constant<bool, false>;
 
+// Define bool_constant for tag dispatch (C++17 compatibility)
+template <bool B>
+using bool_constant = integral_constant<bool, B>;
+
 // Define identity trait - prevents template argument deduction
 template <typename T> struct identity {
     using type = T;

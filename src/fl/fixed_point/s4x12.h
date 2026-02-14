@@ -23,7 +23,7 @@ class s4x12 {
     constexpr s4x12() = default;
 
     explicit constexpr s4x12(float f)
-        : mValue(static_cast<i16>(f * (1 << FRAC_BITS))) {}
+        : mValue(static_cast<i16>(f * (static_cast<i16>(1) << FRAC_BITS))) {}
 
     static FASTLED_FORCE_INLINE s4x12 from_raw(i16 raw) {
         s4x12 r;
@@ -35,7 +35,7 @@ class s4x12 {
 
     i16 raw() const { return mValue; }
     i16 to_int() const { return mValue >> FRAC_BITS; }
-    float to_float() const { return static_cast<float>(mValue) / (1 << FRAC_BITS); }
+    float to_float() const { return static_cast<float>(mValue) / (static_cast<i16>(1) << FRAC_BITS); }
 
     // ---- Fixed-point arithmetic --------------------------------------------
 
@@ -111,12 +111,10 @@ class s4x12 {
         return from_raw(x.mValue < 0 ? -x.mValue : x.mValue);
     }
 
-    static FASTLED_FORCE_INLINE s4x12 sign(s4x12 x) {
-        constexpr s4x12 pos_one(1.0f);
-        constexpr s4x12 neg_one(-1.0f);
-        if (x.mValue > 0) return pos_one;
-        if (x.mValue < 0) return neg_one;
-        return s4x12();
+    static FASTLED_FORCE_INLINE int sign(s4x12 x) {
+        if (x.mValue > 0) return 1;
+        if (x.mValue < 0) return -1;
+        return 0;
     }
 
     static FASTLED_FORCE_INLINE s4x12 lerp(s4x12 a, s4x12 b, s4x12 t) {
@@ -206,6 +204,56 @@ class s4x12 {
         if (exp.mValue == 0) return one;
         if (base == one) return one;
         return exp2_fp(exp * log2_fp(base));
+    }
+
+    // ---- Member function versions (operate on *this) -----------------------
+
+    FASTLED_FORCE_INLINE s4x12 floor() const {
+        return floor(*this);
+    }
+
+    FASTLED_FORCE_INLINE s4x12 ceil() const {
+        return ceil(*this);
+    }
+
+    FASTLED_FORCE_INLINE s4x12 fract() const {
+        return fract(*this);
+    }
+
+    FASTLED_FORCE_INLINE s4x12 abs() const {
+        return abs(*this);
+    }
+
+    FASTLED_FORCE_INLINE int sign() const {
+        return sign(*this);
+    }
+
+    FASTLED_FORCE_INLINE s4x12 sin() const {
+        return sin(*this);
+    }
+
+    FASTLED_FORCE_INLINE s4x12 cos() const {
+        return cos(*this);
+    }
+
+    FASTLED_FORCE_INLINE s4x12 atan() const {
+        return atan(*this);
+    }
+
+    FASTLED_FORCE_INLINE s4x12 asin() const {
+        return asin(*this);
+    }
+
+    FASTLED_FORCE_INLINE s4x12 acos() const {
+        return acos(*this);
+    }
+
+    FASTLED_FORCE_INLINE s4x12 sqrt() const {
+        return sqrt(*this);
+    }
+
+    FASTLED_FORCE_INLINE s4x12 rsqrt() const {
+        return rsqrt(*this);
     }
 
     // ---- Trigonometry ------------------------------------------------------
