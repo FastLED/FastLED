@@ -115,13 +115,14 @@ def run_cpp_lint(no_fingerprint: bool, run_full: bool, run_iwyu: bool) -> bool:
     return True
 
 
-def run_iwyu_analysis(run_full: bool, run_iwyu: bool) -> bool:
+def run_iwyu_analysis(run_full: bool, run_iwyu: bool, run_strict: bool = False) -> bool:
     """
     Run IWYU (Include-What-You-Use) analysis.
 
     Args:
         run_full: Run full analysis
         run_iwyu: Run IWYU only
+        run_strict: Run IWYU with --strict flag
 
     Returns:
         True if analysis passed, False otherwise
@@ -130,7 +131,7 @@ def run_iwyu_analysis(run_full: bool, run_iwyu: bool) -> bool:
     print("🔍 INCLUDE-WHAT-YOU-USE ANALYSIS")
     print("---------------------------------")
 
-    if run_full or run_iwyu:
+    if run_full or run_iwyu or run_strict:
         print("Running IWYU on C++ test suite...")
         result = subprocess.run(
             ["uv", "run", "python", "ci/ci-iwyu.py", "--quiet"],
@@ -445,30 +446,94 @@ def run_python_pipeline(no_fingerprint: bool, run_pyright_flag: bool) -> bool:
     return True
 
 
-def run_cpp_lint_single_file(file_path: str) -> bool:
-    """Run C++ linting on a single file.
+def run_cpp_lint_single_file(file_path: str, strict: bool = False) -> bool:
+    """Run C++ linting on a single file (checkers + optional IWYU).
 
     Delegates to run_all_checkers.py which already supports single-file mode.
+    When strict=True, also runs IWYU analysis on the file.
 
     Args:
         file_path: Absolute path to the C++ file
+        strict: If True, also run IWYU analysis on the file
 
     Returns:
         True if linting passed, False otherwise
     """
     print(f"🔧 C++ lint: {os.path.relpath(file_path)}")
 
+    # Run standard C++ checkers
     result = subprocess.run(
         ["uv", "run", "python", "ci/lint_cpp/run_all_checkers.py", file_path],
         capture_output=False,
     )
 
-    if result.returncode == 0:
-        print(f"  ✅ passed")
-        return True
-    else:
+    if result.returncode != 0:
         print(f"  ❌ failed")
         return False
+
+    # Run IWYU analysis (optional with --strict)
+    if strict:
+        if not run_iwyu_single_file(file_path):
+            print(f"  ❌ IWYU failed")
+            return False
+
+    print(f"  ✅ passed")
+    return True
+
+
+def run_iwyu_single_file(file_path: str) -> bool:
+    """Run IWYU analysis on a single C++ file.
+
+    Args:
+        file_path: Absolute path to the C++ file
+
+    Returns:
+        True if IWYU passed (no violations), False otherwise
+    """
+    # Get compiler path
+    compiler = os.environ.get("CXX", "clang-tool-chain-sccache-cpp")
+
+    # Build minimal compiler args for IWYU
+    # These match the base flags from meson.build
+    project_root = Path(__file__).parent.parent.parent
+    compiler_args = [
+        compiler,
+        "-std=gnu++11",
+        "-DSTUB_PLATFORM",
+        "-DARDUINO=10808",
+        "-DFASTLED_USE_STUB_ARDUINO",
+        "-DFASTLED_STUB_IMPL",
+        "-DFASTLED_TESTING",
+        "-DFASTLED_UNIT_TEST=1",
+        f"-I{project_root / 'src'}",
+        f"-I{project_root / 'src' / 'platforms' / 'stub'}",
+        "-c",  # Compile only (don't link)
+        file_path,
+    ]
+
+    # Call IWYU wrapper
+    # Format: iwyu_wrapper.py [iwyu-args] -- compiler [compiler-args] file.cpp
+    iwyu_cmd = [
+        sys.executable,
+        str(project_root / "ci" / "iwyu_wrapper.py"),
+        "--",  # Separator
+    ] + compiler_args
+
+    result = subprocess.run(
+        iwyu_cmd,
+        capture_output=True,
+        text=True,
+    )
+
+    # IWYU returns non-zero if it has suggestions
+    # We treat suggestions as failures (need to fix includes)
+    if result.returncode != 0:
+        # Print IWYU output (suggestions)
+        if result.stderr:
+            print(result.stderr, file=sys.stderr)
+        return False
+
+    return True
 
 
 def run_python_lint_single_file(file_path: str, strict: bool = False) -> bool:

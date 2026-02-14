@@ -73,11 +73,7 @@
   
   # Third-party headers should not be suggested for user code
   { include: ['"third_party/*/*"', 'private', '"FastLED.h"', 'public'] },
-  
-  # Arduino-specific headers
-  { include: ['<Arduino.h>', 'public', '<Arduino.h>', 'public'] },
-  { include: ['<avr/pgmspace.h>', 'public', '<avr/pgmspace.h>', 'public'] },
-  
+
   # Chipset-specific headers redirect to main header
   { include: ['"chipsets.h"', 'private', '"FastLED.h"', 'public'] },
   { include: ['"ws2812_controller.h"', 'private', '"FastLED.h"', 'public'] },
@@ -98,4 +94,63 @@
   # This redirects libc++'s __new/placement_new_delete.h to our platform abstraction
   { include: ['"__new/placement_new_delete.h"', 'private', '"fl/stl/new.h"', 'public'] },
   { include: ['<new>', 'public', '"fl/stl/new.h"', 'public'] },
+
+  # ========================================================================
+  # Platform-Specific Headers (Not Available on Host Platform)
+  # ========================================================================
+  # These headers are only available when compiling for specific platforms
+  # (Arduino, ESP32, AVR, ARM, etc.). When IWYU runs on the host (stub)
+  # platform, these headers don't exist. We mark them as 'private' so IWYU
+  # doesn't suggest them, but allows them when behind #ifdef guards.
+
+  # Arduino Core Headers
+  # Arduino.h exists on stub platform (src/platforms/stub/Arduino.h), so it's available to IWYU
+  { include: ['<Arduino.h>', 'public', '<Arduino.h>', 'public'] },
+
+  # AVR Platform Headers
+  # These don't exist on stub - map to FastLED's progmem abstraction
+  # Note: fastled_progmem.h itself is private (line 51), so we mark it private here too
+  { include: ['<avr/pgmspace.h>', 'private', '"fastled_progmem.h"', 'private'] },
+  { include: ['<avr/io.h>', 'private', '"FastLED.h"', 'public'] },
+  { include: ['<avr/interrupt.h>', 'private', '"FastLED.h"', 'public'] },
+  { include: ['<avr/wdt.h>', 'private', '"FastLED.h"', 'public'] },
+
+  # ESP32 Arduino HAL Headers
+  { include: ['<esp32-hal.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
+  { include: ['<esp32-hal-gpio.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
+
+  # ESP-IDF Framework Headers (driver/*)
+  { include: ['<driver/gpio.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
+  { include: ['<driver/spi_master.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
+  { include: ['<driver/i2s.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
+  { include: ['<driver/rmt.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
+  { include: ['<driver/periph_ctrl.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
+
+  # ESP-IDF Framework Headers (esp_*)
+  { include: ['<esp_heap_caps.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
+  { include: ['<esp_intr_alloc.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
+  { include: ['<esp_system.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
+  { include: ['<esp_log.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
+  { include: ['<esp_cpu.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
+  { include: ['<esp_lcd_panel_io.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
+  { include: ['<esp_lcd_panel_ops.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
+  { include: ['<esp_private/periph_ctrl.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
+  { include: ['<esp_intr.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
+
+  # FreeRTOS Headers (used by ESP32 and some ARM platforms)
+  { include: ['<freertos/FreeRTOS.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
+  { include: ['<freertos/task.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
+  { include: ['<freertos/semphr.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
+  { include: ['<freertos/queue.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
+
+  # ARM/Teensy Platform Headers
+  { include: ['<kinetis.h>', 'private', '"FastLED.h"', 'public'] },
+  { include: ['<imxrt.h>', 'private', '"FastLED.h"', 'public'] },
+  { include: ['<nrf.h>', 'private', '"FastLED.h"', 'public'] },
+  { include: ['<sam.h>', 'private', '"FastLED.h"', 'public'] },
+
+  # Raspberry Pi Pico SDK Headers
+  { include: ['<pico/stdlib.h>', 'private', '"FastLED.h"', 'public'] },
+  { include: ['<hardware/gpio.h>', 'private', '"FastLED.h"', 'public'] },
+  { include: ['<hardware/pio.h>', 'private', '"FastLED.h"', 'public'] },
 ]

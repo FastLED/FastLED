@@ -38,13 +38,13 @@ def run_single_file_mode(files: list[str], strict: bool = False) -> bool:
 
     Args:
         files: List of absolute file paths to lint
-        strict: If True, run pyright on Python files
+        strict: If True, run pyright on Python files and IWYU on C++ files
     """
     success = True
     for file_path in files:
         ext = Path(file_path).suffix.lower()
         if ext in CPP_EXTENSIONS:
-            if not run_cpp_lint_single_file(file_path):
+            if not run_cpp_lint_single_file(file_path, strict=strict):
                 success = False
         elif ext in PYTHON_EXTENSIONS:
             if not run_python_lint_single_file(file_path, strict=strict):
@@ -102,7 +102,7 @@ def print_ai_hints() -> None:
     print("💡 FOR AI AGENTS:")
     print("  - Use 'bash lint' for comprehensive linting (Python, C++, and JavaScript)")
     print(
-        "  - Use 'bash lint --strict' to also run pyright (strict type checking, adds ~12s)"
+        "  - Use 'bash lint --strict' to also run pyright + IWYU (strict type & include checking)"
     )
     print("  - Use 'bash lint --js' for JavaScript linting only")
     print("  - Use 'bash lint --cpp' for C++ linting only")
@@ -111,7 +111,7 @@ def print_ai_hints() -> None:
     print("  - Python linting includes: ruff (lint + format) + KBI checker + ty")
     print("  - Use --strict to also run pyright (strict type checking)")
     print("  - C++ linting includes: clang-format and custom checkers")
-    print("  - IWYU runs ONLY with --full or --iwyu flags")
+    print("  - IWYU runs with --full, --iwyu, or --strict flags")
     print("  - JavaScript linting: FAST ONLY (no slow fallback)")
     print("  - To enable fast JavaScript linting: uv run ci/setup-js-linting-fast.py")
     print("  - Use 'bash lint --help' for usage information")
@@ -147,7 +147,7 @@ def create_stages(args: LintArgs) -> list[LintStage]:
             """Run C++ linting and IWYU analysis together."""
             if not run_cpp_lint(args.no_fingerprint, args.run_full, args.run_iwyu):
                 return False
-            if not run_iwyu_analysis(args.run_full, args.run_iwyu):
+            if not run_iwyu_analysis(args.run_full, args.run_iwyu, args.run_pyright):
                 return False
             return True
 

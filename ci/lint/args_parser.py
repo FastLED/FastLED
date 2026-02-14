@@ -41,19 +41,20 @@ Python linting includes:
 
 C++ linting includes:
   - clang-format and custom checkers
-  - IWYU (Include-What-You-Use) runs ONLY with --full or --iwyu flags
+  - IWYU (Include-What-You-Use) runs with --full, --iwyu, or --strict
 
 JavaScript linting:
   - FAST ONLY (skips if not available)
 
 Examples:
   bash lint                    # Run all linters (Python, C++, JavaScript)
-  bash lint --strict           # Also run pyright (strict type checking)
+  bash lint --strict           # Also run pyright + IWYU on single files (strict mode)
   bash lint --js               # JavaScript linting only
   bash lint --cpp              # C++ linting only
-  bash lint --full             # Include IWYU (Include-What-You-Use)
+  bash lint --full             # Include IWYU (Include-What-You-Use) on all files
   bash lint --iwyu             # Run IWYU only
   bash lint --no-fingerprint   # Force re-run all linters
+  bash lint --strict file.cpp  # Single file with IWYU enabled
 """,
     )
 
@@ -90,7 +91,7 @@ Examples:
     parser.add_argument(
         "--strict",
         action="store_true",
-        help="Also run pyright (slow strict type checker, ~12s)",
+        help="Also run pyright on Python files + IWYU on C++ files (strict type & include checking)",
     )
 
     parser.add_argument(
