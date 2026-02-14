@@ -1,6 +1,5 @@
 // ok standalone
 #include "test.h"
-#include "FastLED.h"
 #include "fl/audio.h"
 #include "fl/audio/audio_context.h"
 #include "fl/fft.h"
@@ -13,6 +12,10 @@
 #include "fl/fx/audio/detectors/tempo_analyzer.h"
 #include "fl/fx/audio/detectors/frequency_bands.h"
 #include "fl/fx/audio/detectors/vocal.h"
+#include "fl/int.h"
+#include "fl/stl/function.h"
+#include "fl/stl/span.h"
+#include "fl/stl/strstream.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/math.h"
 #include "fl/stl/shared_ptr.h"
@@ -278,7 +281,7 @@ FL_TEST_CASE("Adversarial - BeatDetector cooldown enforced") {
     detector.setThreshold(0.01f);  // Very low threshold
 
     fl::vector<u32> beatTimestamps;
-    detector.onBeat.add([&beatTimestamps, &detector]() {
+    detector.onBeat.add([&beatTimestamps]() {
         // We can't easily get timestamp in callback, just count
         beatTimestamps.push_back(static_cast<u32>(beatTimestamps.size()));
     });
