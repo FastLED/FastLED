@@ -11,6 +11,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/fastpin_base.h"
+#include "fl/pin.h"  // For PinMode, PinValue enums
 
 // Arduino constants for pinMode()
 // These are typically provided by Arduino.h, but we define them here
@@ -34,8 +35,8 @@ public:
   typedef volatile u32 * port_ptr_t;
   typedef u32 port_t;
 
-  inline static void setOutput() { pinMode(PIN, OUTPUT); }
-  inline static void setInput() { pinMode(PIN, INPUT); }
+  inline static void setOutput() { pinMode(PIN, PinMode::Output); }
+  inline static void setInput() { pinMode(PIN, PinMode::Input); }
 
   inline static void hi() __attribute__ ((always_inline)) { _GPIO::r()->BSRR = _MASK; }
   inline static void lo() __attribute__ ((always_inline)) { _GPIO::r()->BRR = _MASK; }

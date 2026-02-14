@@ -97,6 +97,7 @@
 #include "fl/stl/array.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/cstring.h"
+#include "fl/pin.h"
 
 
 #include "fl/force_inline.h"
@@ -144,6 +145,12 @@
 #include "dmx.h"
 
 #include "platforms.h"
+
+// PlatformIO Library Dependency Finder (LDF) hint headers
+// These headers use #if 0 blocks to hint library dependencies to PlatformIO's LDF scanner
+// without actually compiling the code. This works around LDF's limitation of scanning
+// headers without evaluating preprocessor paths.
+#include "platforms/ldf_headers.h"
 
 // Arduino.h defines min, max, abs, map, radians, degrees as macros
 // These macros cause problems with C++ code (double evaluation, no type safety)

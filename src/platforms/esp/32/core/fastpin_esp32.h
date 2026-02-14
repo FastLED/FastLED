@@ -31,9 +31,9 @@ public:
 
   inline static void setOutput() {
       static_assert(validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
-      pinMode(PIN, OUTPUT);
+      pinMode(PIN, PinMode::Output);
   }
-  inline static void setInput() { pinMode(PIN, INPUT); }
+  inline static void setInput() { pinMode(PIN, PinMode::Input); }
 
   inline static void hi() __attribute__ ((always_inline)) {
       *sport() = MASK;

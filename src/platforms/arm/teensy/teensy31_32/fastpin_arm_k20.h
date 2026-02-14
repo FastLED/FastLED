@@ -3,6 +3,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/force_inline.h"
 #include "fl/fastpin_base.h"
+#include "fl/pin.h"  // For PinMode, PinValue enums
 namespace fl {
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be slightly slower."
@@ -24,8 +25,8 @@ public:
 	/// Check if this pin is valid for I/O operations
 	static constexpr bool validpin() { return true; }
 
-	inline static void setOutput() { pinMode(PIN, OUTPUT); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
-	inline static void setInput() { pinMode(PIN, INPUT); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
+	inline static void setOutput() { pinMode(PIN, PinMode::Output); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
+	inline static void setInput() { pinMode(PIN, PinMode::Input); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
 
 	inline static void hi() __attribute__ ((always_inline)) { _PSOR::r() = _MASK; }
 	inline static void lo() __attribute__ ((always_inline)) { _PCOR::r() = _MASK; }
@@ -57,8 +58,8 @@ public:
 	/// Check if this pin is valid for I/O operations
 	static constexpr bool validpin() { return true; }
 
-	inline static void setOutput() { pinMode(PIN, OUTPUT); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
-	inline static void setInput() { pinMode(PIN, INPUT); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
+	inline static void setOutput() { pinMode(PIN, PinMode::Output); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
+	inline static void setInput() { pinMode(PIN, PinMode::Input); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
 
 	inline static void hi() __attribute__ ((always_inline)) { *_PDOR::template rx<_BIT>() = 1; }
 	inline static void lo() __attribute__ ((always_inline)) { *_PDOR::template rx<_BIT>() = 0; }

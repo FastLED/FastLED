@@ -31,6 +31,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/fastpin_base.h"
+#include "fl/pin.h"  // For PinMode, PinValue enums
 
 namespace fl {
 
@@ -41,8 +42,8 @@ public:
   typedef volatile u32 * port_ptr_t;
   typedef u32 port_t;
 
-  inline static void setOutput() { pinMode(PIN, OUTPUT); }
-  inline static void setInput() { pinMode(PIN, INPUT); }
+  inline static void setOutput() { pinMode(PIN, PinMode::Output); }
+  inline static void setInput() { pinMode(PIN, PinMode::Input); }
 
   // Set pin HIGH - use BSRR lower 16 bits (same as F1)
   inline static void hi() __attribute__ ((always_inline)) {

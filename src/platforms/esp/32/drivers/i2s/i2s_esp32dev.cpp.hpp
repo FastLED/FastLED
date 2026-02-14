@@ -25,6 +25,7 @@
 // Patches the i2s driver for compatibility with ESP-IDF v5.0.
 // This has only been compile tested. If there are issues then please file a bug.
 #include "soc/gpio_periph.h"
+#include "fl/pin.h"  // For PinMode, PinValue enums
 #define gpio_matrix_out esp_rom_gpio_connect_out_signal
 #endif
 namespace fl {
@@ -520,7 +521,7 @@ void i2s_setup_pin(int _pin, int offset) {
     gpio_num_t pin = (gpio_num_t)_pin;
     PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[pin], PIN_FUNC_GPIO);
     gpio_set_direction(pin, (gpio_mode_t)GPIO_MODE_DEF_OUTPUT);
-    pinMode(pin, OUTPUT);
+    pinMode(pin, PinMode::Output);
     gpio_matrix_out(pin, i2s_base_pin_index + offset, false, false);
 }
 

@@ -2,6 +2,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/fastpin_base.h"
+#include "fl/pin.h"  // For PinMode, PinValue enums
 namespace fl {
 struct FASTLED_ESP_IO {
     volatile u32 _GPO;
@@ -17,8 +18,8 @@ public:
     typedef volatile u32 * port_ptr_t;
     typedef u32 port_t;
 
-    inline static void setOutput() { pinMode(PIN, OUTPUT); }
-    inline static void setInput() { pinMode(PIN, INPUT); }
+    inline static void setOutput() { pinMode(PIN, PinMode::Output); }
+    inline static void setInput() { pinMode(PIN, PinMode::Input); }
 
     inline static void hi() __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPOS = MASK; } else { GP16O = 1; } }
     inline static void lo() __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPOC = MASK; } else { GP16O = 0; } }

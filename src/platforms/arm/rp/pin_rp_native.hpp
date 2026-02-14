@@ -165,5 +165,120 @@ inline void setAdcRange(AdcRange /*range*/) {
     // No-op: RP2040/RP2350 ADC uses fixed 3.3V reference
 }
 
+// ============================================================================
+// PWM Frequency Control
+// ============================================================================
+
+namespace {
+    struct Rp2040PwmFreq {
+        int pin;        // -1 = unused
+        u32 freq_hz;
+    };
+    constexpr int MAX_RP_PWM_PINS = 30;  // RP2040 has GPIO 0-29
+    // Zero-initialized: pin=0 and freq_hz=0 means "not configured"
+    // We use freq_hz==0 to indicate unconfigured rather than pin==-1,
+    // since zero-init gives us pin=0 which is a valid GPIO.
+    inline Rp2040PwmFreq* rp_pwm_freq_table() {
+        static Rp2040PwmFreq g_rp_pwm[MAX_RP_PWM_PINS] = {};
+        return g_rp_pwm;
+    }
+}  // anonymous namespace
+
+/// @brief Check if a frequency requires ISR-based fallback
+/// @param pin GPIO pin number (unused — RP2040 PWM capability is uniform)
+/// @param frequency_hz Desired PWM frequency in Hz
+/// @return false if RP2040 hardware PWM can handle the frequency, true otherwise
+///
+/// RP2040 PWM supports ~8 Hz to 62.5 MHz natively.
+/// Minimum: 125 MHz / (255.9375 * 65536) ≈ 7.5 Hz
+/// Maximum: 125 MHz / (1 * 2) = 62.5 MHz (wrap=1, divider=1)
+inline bool needsPwmIsrFallback(int /*pin*/, u32 frequency_hz) {
+    if (frequency_hz == 0) {
+        return true;
+    }
+    // RP2040 system clock = 125 MHz
+    // Max frequency: 125 MHz / (1 * (1+1)) = 62,500,000 Hz
+    // Min frequency: 125 MHz / (255.9375 * 65536) ≈ 7.5 Hz, so 8 Hz is safe
+    constexpr u32 MIN_NATIVE_FREQ = 8;
+    constexpr u32 MAX_NATIVE_FREQ = 62500000;
+    return (frequency_hz < MIN_NATIVE_FREQ || frequency_hz > MAX_NATIVE_FREQ);
+}
+
+/// @brief Set PWM frequency using RP2040 hardware PWM
+/// @param pin GPIO pin number (0-29)
+/// @param frequency_hz Desired PWM frequency in Hz
+/// @return 0 on success, negative error code on failure
+///   -1: invalid pin
+///   -2: frequency is 0
+///   -3: frequency too high (> 62.5 MHz)
+///   -4: frequency too low (divider exceeds 255.9375)
+///
+/// Configures the PWM slice for the given pin but does NOT enable it.
+/// The PWM output is enabled when analogWrite() or setPwm16() is called.
+inline int setPwmFrequencyNative(int pin, u32 frequency_hz) {
+    // Validate pin
+    if (pin < 0 || pin >= NUM_BANK0_GPIOS) {
+        return -1;
+    }
+
+    if (frequency_hz == 0) {
+        return -2;
+    }
+
+    constexpr u32 SYS_CLK = 125000000u;
+
+    // Get PWM slice for this pin
+    uint slice = pwm_gpio_to_slice_num(pin);
+
+    // Calculate divider and wrap
+    // frequency = SYS_CLK / (divider * (wrap + 1))
+    // Strategy: maximize wrap for best duty cycle resolution
+    // Start with wrap = 65535 (16-bit max), calculate divider
+    float divider;
+    u32 wrap;
+
+    // Try maximum wrap first for best resolution
+    divider = (float)SYS_CLK / ((float)frequency_hz * 65536.0f);
+
+    if (divider < 1.0f) {
+        // Frequency too high for max wrap — reduce wrap, use divider = 1
+        divider = 1.0f;
+        wrap = SYS_CLK / frequency_hz - 1;
+        if (wrap < 1) {
+            return -3;  // Frequency too high
+        }
+    } else if (divider > 255.9375f) {
+        // Frequency too low — divider exceeds RP2040 maximum
+        return -4;
+    } else {
+        wrap = 65535;
+    }
+
+    // Configure the PWM slice
+    pwm_set_clkdiv(slice, divider);
+    pwm_set_wrap(slice, (u16)wrap);
+
+    // Configure GPIO for PWM function
+    gpio_set_function(pin, GPIO_FUNC_PWM);
+
+    // Track the configured frequency
+    Rp2040PwmFreq* table = rp_pwm_freq_table();
+    table[pin].pin = pin;
+    table[pin].freq_hz = frequency_hz;
+
+    return 0;
+}
+
+/// @brief Get the configured PWM frequency for a pin
+/// @param pin GPIO pin number (0-29)
+/// @return Configured frequency in Hz, or 0 if not configured
+inline u32 getPwmFrequencyNative(int pin) {
+    if (pin < 0 || pin >= NUM_BANK0_GPIOS) {
+        return 0;
+    }
+    Rp2040PwmFreq* table = rp_pwm_freq_table();
+    return table[pin].freq_hz;
+}
+
 }  // namespace platforms
 }  // namespace fl

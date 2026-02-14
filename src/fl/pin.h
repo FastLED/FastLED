@@ -111,4 +111,25 @@ inline void analogWrite16(int pin, u16 val) {
 /// @note Not all ranges supported on all platforms (no-op for unsupported values)
 void setAdcRange(AdcRange range);
 
+// ============================================================================
+// PWM Frequency Control
+// ============================================================================
+
+/// Set PWM frequency for a pin. Subsequent analogWrite()/setPwm16() calls use this frequency.
+/// Automatically selects native hardware PWM or ISR-based software PWM depending on platform.
+/// @param pin Pin number (platform-specific numbering)
+/// @param frequency_hz Desired PWM frequency in Hz (1-500 Hz for ISR, platform-dependent for native HW)
+/// @return 0 on success, negative error code on failure (-1: invalid freq, -2: all channels in use, -3: ISR setup failed, -4: native HW failed)
+int setPwmFrequency(int pin, u32 frequency_hz);
+
+/// Query the configured PWM frequency for a pin.
+/// @param pin Pin number (platform-specific numbering)
+/// @return Frequency in Hz, or 0 if not configured
+u32 getPwmFrequency(int pin);
+
+/// Release PWM channel and stop output on a pin.
+/// @param pin Pin number (platform-specific numbering)
+/// @return 0 on success, -1 if not initialized
+int pwmEnd(int pin);
+
 }  // namespace fl

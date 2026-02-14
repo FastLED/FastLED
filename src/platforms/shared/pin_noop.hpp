@@ -57,5 +57,21 @@ inline void setAdcRange(AdcRange /*range*/) {
     // No-op: Host builds don't have physical pins
 }
 
+// ============================================================================
+// PWM Frequency Control
+// ============================================================================
+
+inline bool needsPwmIsrFallback(int /*pin*/, u32 /*frequency_hz*/) {
+    return true;
+}
+
+inline int setPwmFrequencyNative(int /*pin*/, u32 /*frequency_hz*/) {
+    return -4;
+}
+
+inline u32 getPwmFrequencyNative(int /*pin*/) {
+    return 0;
+}
+
 }  // namespace platforms
 }  // namespace fl

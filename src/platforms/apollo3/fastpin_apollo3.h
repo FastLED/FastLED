@@ -7,6 +7,7 @@
 // Include Arduino core to get Apollo3 HAL function declarations
 #ifdef ARDUINO
 #include "Arduino.h"
+#include "fl/pin.h"  // For PinMode, PinValue enums
 #endif
 
 namespace fl {
@@ -22,8 +23,8 @@ public:
     typedef volatile u32 * port_ptr_t;
     typedef u32 port_t;
 
-    inline static void setOutput() { pinMode(PIN, OUTPUT); am_hal_gpio_fastgpio_enable(PAD); }
-    inline static void setInput() { am_hal_gpio_fastgpio_disable(PAD); pinMode(PIN, INPUT); }
+    inline static void setOutput() { pinMode(PIN, PinMode::Output); am_hal_gpio_fastgpio_enable(PAD); }
+    inline static void setInput() { am_hal_gpio_fastgpio_disable(PAD); pinMode(PIN, PinMode::Input); }
 
     inline static void hi() __attribute__ ((always_inline)) { am_hal_gpio_fastgpio_set(PAD); }
     inline static void lo() __attribute__ ((always_inline)) { am_hal_gpio_fastgpio_clr(PAD); }

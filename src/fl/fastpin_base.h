@@ -80,7 +80,7 @@ public:
 	typedef RwReg port_t;  ///< @copydoc Pin::port_t
 
 	/// @copydoc Pin::setOutput()
-	inline static void setOutput() { _init(); pinMode(PIN, OUTPUT); }
+	inline static void setOutput() { _init(); pinMode(PIN, PinMode::Output); }
 	/// @copydoc Pin::setInput()
 	inline static void setInput() { _init(); pinMode(PIN, INPUT); }
 

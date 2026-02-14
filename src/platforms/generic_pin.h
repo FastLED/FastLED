@@ -11,6 +11,7 @@
 // Note: This must be included before using Selectable as a base class
 #include "fl/fastpin_base.h"
 #include "fl/unused.h"
+#include "fl/pin.h"  // For PinMode, PinValue enums and pinMode/digitalWrite/digitalRead functions
 
 namespace fl {
 
@@ -49,12 +50,12 @@ public:
 	typedef RwReg port_t;  ///< type for a pin read/write register, non-volatile
 
 	/// Set the pin mode as `OUTPUT`
-	inline void setOutput() { pinMode(mPin, OUTPUT); }
+	inline void setOutput() { pinMode(mPin, PinMode::Output); }
 
 	/// Set the pin mode as `INPUT`
-	inline void setInput() { pinMode(mPin, INPUT); }
+	inline void setInput() { pinMode(mPin, PinMode::Input); }
 
-	inline void setInputPullup() { pinMode(mPin, INPUT_PULLUP); }
+	inline void setInputPullup() { pinMode(mPin, PinMode::InputPullup); }
 
 	/// Set the pin state to `HIGH`
 	FL_DISABLE_WARNING_PUSH
@@ -62,12 +63,12 @@ public:
 	FL_DISABLE_WARNING_VOLATILE
 	inline void hi() __attribute__ ((always_inline)) {
 		if (mPort) { *mPort |= mPinMask; }
-		else { digitalWrite(mPin, HIGH); }
+		else { digitalWrite(mPin, PinValue::High); }
 	}
 	/// Set the pin state to `LOW`
 	inline void lo() __attribute__ ((always_inline)) {
 		if (mPort) { *mPort &= ~mPinMask; }
-		else { digitalWrite(mPin, LOW); }
+		else { digitalWrite(mPin, PinValue::Low); }
 	}
 	FL_DISABLE_WARNING_POP
 
@@ -77,7 +78,10 @@ public:
 	/// If the pin was high, set it low. If was low, set it high.
 	inline void toggle() __attribute__ ((always_inline)) {
 		if (mInPort) { *mInPort = mPinMask; }
-		else { digitalWrite(mPin, !digitalRead(mPin)); }
+		else {
+			PinValue current = digitalRead(mPin);
+			digitalWrite(mPin, current == PinValue::High ? PinValue::Low : PinValue::High);
+		}
 	}
 
 	/// Set the same pin on another port to `HIGH`
@@ -106,7 +110,7 @@ public:
 	FL_DISABLE_WARNING_VOLATILE
 	volatile port_t hival() __attribute__ ((always_inline)) {
 		if (mPort) { return *mPort | mPinMask; }
-		else { return HIGH; }
+		else { return 1; }  // Return 1 (HIGH equivalent)
 	}
 	FL_DISABLE_WARNING_POP
 	/// Gets the state of the port with this pin `LOW`
@@ -114,7 +118,7 @@ public:
 	FL_DISABLE_WARNING_VOLATILE
 	volatile port_t loval() __attribute__ ((always_inline)) {
 		if (mPort) { return *mPort & ~mPinMask; }
-		else { return LOW; }
+		else { return 0; }  // Return 0 (LOW equivalent)
 	}
 	FL_DISABLE_WARNING_POP
 	/// Get the output state of the port
@@ -133,7 +137,7 @@ public:
 	/// Checks if the pin is currently `HIGH`
 	virtual bool isSelected() override {
 		if (mPort) { return (*mPort & mPinMask) == mPinMask; }
-		else { return digitalRead(mPin) == HIGH; }
+		else { return digitalRead(mPin) == PinValue::High; }
 	}
 };
 

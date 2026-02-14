@@ -109,6 +109,69 @@ inline void setAdcRange(fl::AdcRange range) {
 #endif
 }
 
+// ============================================================================
+// PWM Frequency Control
+// ============================================================================
+
+namespace {
+    struct TeensyPwmFreq {
+        int pin;      // -1 = unused
+        u32 freq_hz;
+    };
+    constexpr int MAX_TEENSY_PWM_PINS = 40;
+    inline TeensyPwmFreq* getTeensyPwmTable() {
+        static TeensyPwmFreq table[MAX_TEENSY_PWM_PINS] = {
+            {-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},
+            {-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},
+            {-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},
+            {-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},
+            {-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}
+        };
+        return table;
+    }
+}  // anonymous namespace
+
+inline bool needsPwmIsrFallback(int /*pin*/, u32 frequency_hz) {
+    // Teensy FlexPWM/QuadTimer supports 1 Hz - 200 kHz natively
+    if (frequency_hz >= 1 && frequency_hz <= 200000) {
+        return false;
+    }
+    return true;
+}
+
+inline int setPwmFrequencyNative(int pin, u32 frequency_hz) {
+    ::analogWriteFrequency(pin, frequency_hz);
+    // Track the frequency per pin
+    TeensyPwmFreq* table = getTeensyPwmTable();
+    // Look for existing entry for this pin
+    for (int i = 0; i < MAX_TEENSY_PWM_PINS; ++i) {
+        if (table[i].pin == pin) {
+            table[i].freq_hz = frequency_hz;
+            return 0;
+        }
+    }
+    // Find an unused slot
+    for (int i = 0; i < MAX_TEENSY_PWM_PINS; ++i) {
+        if (table[i].pin == -1) {
+            table[i].pin = pin;
+            table[i].freq_hz = frequency_hz;
+            return 0;
+        }
+    }
+    // No free slot available (should not happen with 40 slots on Teensy 4.x)
+    return -4;
+}
+
+inline u32 getPwmFrequencyNative(int pin) {
+    TeensyPwmFreq* table = getTeensyPwmTable();
+    for (int i = 0; i < MAX_TEENSY_PWM_PINS; ++i) {
+        if (table[i].pin == pin) {
+            return table[i].freq_hz;
+        }
+    }
+    return 0;
+}
+
 }  // namespace platforms
 }  // namespace fl
 

@@ -3,6 +3,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/fastpin_base.h"
 #include "platforms/arm/stm32/is_stm32.h"
+#include "fl/pin.h"  // For PinMode, PinValue enums
 
 namespace fl {
 
@@ -32,8 +33,8 @@ public:
     inline static void setInput() { /* TODO */ } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
     #endif
 
-    inline static void setOutput() { pinMode(PIN, OUTPUT); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
-    inline static void setInput() { pinMode(PIN, INPUT); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
+    inline static void setOutput() { pinMode(PIN, PinMode::Output); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
+    inline static void setInput() { pinMode(PIN, PinMode::Input); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
 
 #if defined(FL_IS_STM32_F2)
     inline static void hi() __attribute__ ((always_inline)) { _GPIO::r()->BSRRL = _MASK; }

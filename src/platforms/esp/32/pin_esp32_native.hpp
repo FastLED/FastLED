@@ -17,6 +17,7 @@
 
 FL_EXTERN_C_BEGIN
 #include "driver/gpio.h"
+#include "driver/ledc.h"
 #include "esp_err.h"
 
 #if ESP_IDF_VERSION_5_OR_HIGHER
@@ -192,6 +193,153 @@ inline void setAdcRange(AdcRange range) {
     // This would need to be implemented per-channel in analogRead
     // For now, this is a stub implementation - no-op
     (void)range;
+}
+
+// ============================================================================
+// PWM Frequency Control (LEDC hardware backend)
+// ============================================================================
+
+// LEDC speed mode: original ESP32 has both high-speed and low-speed modes,
+// all other variants (S2, S3, C3, C6, H2, P4, etc.) only have low-speed mode.
+#if defined(SOC_LEDC_SUPPORT_HS_MODE) && SOC_LEDC_SUPPORT_HS_MODE
+#define FL_LEDC_SPEED_MODE LEDC_HIGH_SPEED_MODE
+#else
+#define FL_LEDC_SPEED_MODE LEDC_LOW_SPEED_MODE
+#endif
+
+// Maximum number of LEDC channels we manage (ESP32 has up to 8 per speed mode)
+#define FL_LEDC_MAX_CHANNELS 8
+
+struct LedcPinAlloc {
+    int pin;                    // -1 = free
+    ledc_channel_t channel;
+    ledc_timer_t timer;
+    u32 frequency_hz;
+};
+
+// okay static in header
+static LedcPinAlloc g_ledc_alloc[FL_LEDC_MAX_CHANNELS] = {
+    {-1, LEDC_CHANNEL_0, LEDC_TIMER_0, 0},
+    {-1, LEDC_CHANNEL_1, LEDC_TIMER_0, 0},
+    {-1, LEDC_CHANNEL_2, LEDC_TIMER_1, 0},
+    {-1, LEDC_CHANNEL_3, LEDC_TIMER_1, 0},
+    {-1, LEDC_CHANNEL_4, LEDC_TIMER_2, 0},
+    {-1, LEDC_CHANNEL_5, LEDC_TIMER_2, 0},
+    {-1, LEDC_CHANNEL_6, LEDC_TIMER_3, 0},
+    {-1, LEDC_CHANNEL_7, LEDC_TIMER_3, 0},
+};
+
+inline bool needsPwmIsrFallback(int /*pin*/, u32 frequency_hz) {
+    // LEDC peripheral supports roughly 10 Hz to 40 MHz.
+    // Anything outside that range needs the ISR software fallback.
+    if (frequency_hz < 10 || frequency_hz > 40000000UL) {
+        return true;
+    }
+    return false;
+}
+
+inline int setPwmFrequencyNative(int pin, u32 frequency_hz) {
+    if (pin < 0 || pin >= GPIO_NUM_MAX) {
+        return -1;  // Invalid pin
+    }
+
+    // Check if this pin is already allocated — reconfigure it
+    int slot = -1;
+    for (int i = 0; i < FL_LEDC_MAX_CHANNELS; i++) {
+        if (g_ledc_alloc[i].pin == pin) {
+            slot = i;
+            break;
+        }
+    }
+
+    // If not found, allocate a free slot
+    if (slot < 0) {
+        for (int i = 0; i < FL_LEDC_MAX_CHANNELS; i++) {
+            if (g_ledc_alloc[i].pin < 0) {
+                slot = i;
+                break;
+            }
+        }
+    }
+
+    if (slot < 0) {
+        return -2;  // No free LEDC channels
+    }
+
+    LedcPinAlloc& alloc = g_ledc_alloc[slot];
+
+    // Determine the best duty resolution for the requested frequency.
+    // LEDC supports 1-20 bit resolution depending on the clock and frequency.
+#if ESP_IDF_VERSION_5_OR_HIGHER
+    // ESP-IDF v5+ provides a helper to find the best resolution
+    // For ESP32 with LEDC_AUTO_CLK, typical source clock is 80MHz APB clock
+    const u32 ledc_src_clk_hz = 80000000;  // 80MHz APB clock
+    u32 resolution = ledc_find_suitable_duty_resolution(
+        ledc_src_clk_hz, static_cast<u32>(frequency_hz));
+    if (resolution == 0) {
+        return -3;  // Could not find a suitable resolution
+    }
+#else
+    // ESP-IDF v4.x: calculate manually.
+    // resolution = floor(log2(APB_CLK_FREQ / frequency))
+    // APB_CLK_FREQ is typically 80 MHz.
+    u32 ratio = APB_CLK_FREQ / frequency_hz;
+    u32 resolution = 0;
+    while (ratio > 1) {
+        ratio >>= 1;
+        resolution++;
+    }
+    // Clamp resolution to valid range [1, 16] for v4.x
+    if (resolution < 1) {
+        resolution = 1;
+    }
+    if (resolution > 16) {
+        resolution = 16;
+    }
+#endif
+
+    // Configure the LEDC timer
+    ledc_timer_config_t timer_cfg = {};
+    timer_cfg.speed_mode = FL_LEDC_SPEED_MODE;
+    timer_cfg.timer_num = alloc.timer;
+    timer_cfg.duty_resolution = static_cast<ledc_timer_bit_t>(resolution);
+    timer_cfg.freq_hz = frequency_hz;
+    timer_cfg.clk_cfg = LEDC_AUTO_CLK;
+
+    esp_err_t err = ledc_timer_config(&timer_cfg);
+    if (err != ESP_OK) {
+        return -4;  // Timer configuration failed
+    }
+
+    // Configure the LEDC channel
+    ledc_channel_config_t ch_cfg = {};
+    ch_cfg.speed_mode = FL_LEDC_SPEED_MODE;
+    ch_cfg.channel = alloc.channel;
+    ch_cfg.timer_sel = alloc.timer;
+    ch_cfg.intr_type = LEDC_INTR_DISABLE;
+    ch_cfg.gpio_num = pin;
+    ch_cfg.duty = 0;
+    ch_cfg.hpoint = 0;
+
+    err = ledc_channel_config(&ch_cfg);
+    if (err != ESP_OK) {
+        return -5;  // Channel configuration failed
+    }
+
+    // Record the allocation
+    alloc.pin = pin;
+    alloc.frequency_hz = frequency_hz;
+
+    return 0;
+}
+
+inline u32 getPwmFrequencyNative(int pin) {
+    for (int i = 0; i < FL_LEDC_MAX_CHANNELS; i++) {
+        if (g_ledc_alloc[i].pin == pin) {
+            return g_ledc_alloc[i].frequency_hz;
+        }
+    }
+    return 0;  // Not configured
 }
 
 }  // namespace platforms

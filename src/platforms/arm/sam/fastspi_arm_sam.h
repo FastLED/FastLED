@@ -13,6 +13,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <wiring_private.h>
+#include "fl/pin.h"  // For PinMode, PinValue enums
 #endif
 
 #if defined(FL_IS_SAM)
@@ -325,17 +326,17 @@ public:
 		// For bit-banging, we need to temporarily disable SPI and use GPIO
 		::SPI.endTransaction();
 
-		pinMode(_DATA_PIN, OUTPUT);
-		pinMode(_CLOCK_PIN, OUTPUT);
+		pinMode(_DATA_PIN, PinMode::Output);
+		pinMode(_CLOCK_PIN, PinMode::Output);
 
 		if(b & (1 << BIT)) {
-			digitalWrite(_DATA_PIN, HIGH);
+			digitalWrite(_DATA_PIN, PinValue::High);
 		} else {
-			digitalWrite(_DATA_PIN, LOW);
+			digitalWrite(_DATA_PIN, PinValue::Low);
 		}
 
-		digitalWrite(_CLOCK_PIN, HIGH);
-		digitalWrite(_CLOCK_PIN, LOW);
+		digitalWrite(_CLOCK_PIN, PinValue::High);
+		digitalWrite(_CLOCK_PIN, PinValue::Low);
 
 		// Re-initialize pins for SPI
 		::SPI.begin();

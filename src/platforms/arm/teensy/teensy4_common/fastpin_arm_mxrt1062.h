@@ -5,6 +5,7 @@
 // Include fastpin_base.h for reg32_t and ptr_reg32_t typedefs
 // This reopens namespace fl but typedefs will still be in scope
 #include "fl/fastpin_base.h"
+#include "fl/pin.h"  // For PinMode enum and pinMode function
 namespace fl {
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be slightly slower."
@@ -21,8 +22,8 @@ public:
 	typedef volatile u32 * port_ptr_t;
 	typedef u32 port_t;
 
-	inline static void setOutput() { pinMode(PIN, OUTPUT); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
-	inline static void setInput() { pinMode(PIN, INPUT); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
+	inline static void setOutput() { pinMode(PIN, PinMode::Output); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
+	inline static void setInput() { pinMode(PIN, PinMode::Input); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
 
 	inline static void hi() __attribute__ ((always_inline)) { _GPIO_DR_SET::r() = _MASK; }
 	inline static void lo() __attribute__ ((always_inline)) { _GPIO_DR_CLEAR::r() = _MASK; }
