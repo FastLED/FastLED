@@ -36,6 +36,18 @@
   { include: ['"platforms/avr/init_avr.h"', 'private', '"platforms/init.h"', 'public'] },
   { include: ['"platforms/posix/init_posix.h"', 'private', '"platforms/init.h"', 'public'] },
 
+  # Mutex platform abstraction - all platform-specific mutex headers redirect to public API
+  { include: ['"platforms/mutex.h"', 'private', '"fl/stl/mutex.h"', 'public'] },
+  { include: ['"platforms/stub/mutex_stub.h"', 'private', '"fl/stl/mutex.h"', 'public'] },
+  { include: ['"platforms/stub/mutex_stub_stl.h"', 'private', '"fl/stl/mutex.h"', 'public'] },
+  { include: ['"platforms/stub/mutex_stub_noop.h"', 'private', '"fl/stl/mutex.h"', 'public'] },
+  { include: ['"mutex_stub_stl.h"', 'private', '"fl/stl/mutex.h"', 'public'] },
+  { include: ['"mutex_stub_noop.h"', 'private', '"fl/stl/mutex.h"', 'public'] },
+  { include: ['"platforms/esp/32/mutex_esp32.h"', 'private', '"fl/stl/mutex.h"', 'public'] },
+  { include: ['"platforms/arm/rp/mutex_rp.h"', 'private', '"fl/stl/mutex.h"', 'public'] },
+  { include: ['"platforms/arm/stm32/mutex_stm32.h"', 'private', '"fl/stl/mutex.h"', 'public'] },
+  { include: ['"platforms/arm/d21/mutex_samd.h"', 'private', '"fl/stl/mutex.h"', 'public'] },
+
   # Platform-specific headers should not be suggested directly
   { include: ['"platforms/*/fastled_*.h"', 'private', '"FastLED.h"', 'public'] },
   { include: ['"platforms/*/clockless_*.h"', 'private', '"FastLED.h"', 'public'] },
@@ -94,6 +106,15 @@
   # This redirects libc++'s __new/placement_new_delete.h to our platform abstraction
   { include: ['"__new/placement_new_delete.h"', 'private', '"fl/stl/new.h"', 'public'] },
   { include: ['<new>', 'public', '"fl/stl/new.h"', 'public'] },
+
+  # ========================================================================
+  # Platform Integer Type Headers (Internal Implementation)
+  # ========================================================================
+  # Platform-specific integer type headers are internal implementation details.
+  # All code should use the public API: fl/int.h
+  { include: ['"platforms/shared/int_windows.h"', 'private', '"fl/int.h"', 'public'] },
+  { include: ['"platforms/shared/int.h"', 'private', '"fl/int.h"', 'public'] },
+  { include: ['"platforms/*/int*.h"', 'private', '"fl/int.h"', 'public'] },
 
   # ========================================================================
   # Platform-Specific Headers (Not Available on Host Platform)

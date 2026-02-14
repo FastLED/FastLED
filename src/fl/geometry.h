@@ -3,6 +3,7 @@
 #include "fl/int.h"
 #include "fl/stl/math.h"
 #include "fl/math_macros.h"
+#include "fl/compiler_control.h"
 
 
 FL_DISABLE_WARNING_PUSH

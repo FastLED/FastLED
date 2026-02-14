@@ -47,13 +47,12 @@
 #include "fl/singleton.h"
 #include "fl/task.h"
 #include "platforms/await.h"
-#include "fl/stl/allocator.h"   // for allocator
 #include "fl/stl/atomic.h"      // for atomic
 #include "fl/stl/cstddef.h"     // for size_t
-#include "fl/stl/string.h"      // for string
 #include "fl/stl/vector.h"
 
 namespace fl {
+class string;  // Forward declaration
 
 namespace detail {
 /// @brief Get reference to thread-local await recursion depth

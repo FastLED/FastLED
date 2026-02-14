@@ -6,7 +6,7 @@
 #include "fastled_config.h"
 
 // Include ARM platform detection before any ARM headers
-#include "platforms/arm/is_arm.h"
+#include "platforms/arm/is_arm.h"  // ok platform headers
 
 // Arduino.h needed for convenience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
 #if defined(ARDUINO) && !defined(__EMSCRIPTEN__)
@@ -17,52 +17,52 @@
 /// Determines which platform system definitions to include
 
 #if defined(NRF51) || defined(__RFduino__) || defined (__Simblee__)
-#include "platforms/arm/nrf51/led_sysdefs_arm_nrf51.h"
+#include "platforms/arm/nrf51/led_sysdefs_arm_nrf51.h"  // ok platform headers
 #elif defined(NRF52_SERIES) || defined(NRF52840_XXAA)
-#include "platforms/arm/nrf52/led_sysdefs_arm_nrf52.h"
+#include "platforms/arm/nrf52/led_sysdefs_arm_nrf52.h"  // ok platform headers
 #elif defined(__MK20DX128__) || defined(__MK20DX256__)
 // Teensy 3.0/3.1/3.2 (MK20DX Cortex-M4)
-#include "platforms/arm/teensy/teensy31_32/led_sysdefs_arm_k20.h"
+#include "platforms/arm/teensy/teensy31_32/led_sysdefs_arm_k20.h"  // ok platform headers
 #elif defined(__MK66FX1M0__) || defined(__MK64FX512__)
 // Teensy 3.5/3.6 (MK64/MK66 Cortex-M4)
-#include "platforms/arm/teensy/teensy36/led_sysdefs_arm_k66.h"
+#include "platforms/arm/teensy/teensy36/led_sysdefs_arm_k66.h"  // ok platform headers
 #elif defined(__MKL26Z64__)
 // Teensy LC (MKL26Z64 Cortex-M0+)
-#include "platforms/arm/teensy/teensy_lc/led_sysdefs_arm_kl26.h"
+#include "platforms/arm/teensy/teensy_lc/led_sysdefs_arm_kl26.h"  // ok platform headers
 #elif defined(__IMXRT1062__)
 // Teensy 4.0/4.1 (IMXRT1062 Cortex-M7)
-#include "platforms/arm/teensy/teensy4_common/led_sysdefs_arm_mxrt1062.h"
+#include "platforms/arm/teensy/teensy4_common/led_sysdefs_arm_mxrt1062.h"  // ok platform headers
 #elif defined(__SAM3X8E__)
 // Include sam/due headers
-#include "platforms/arm/sam/led_sysdefs_arm_sam.h"
+#include "platforms/arm/sam/led_sysdefs_arm_sam.h"  // ok platform headers
 #elif defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F1xx) || defined(STM32F2XX) || defined(STM32F4)
-#include "platforms/arm/stm32/led_sysdefs_arm_stm32.h"
+#include "platforms/arm/stm32/led_sysdefs_arm_stm32.h"  // ok platform headers
 #elif defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || defined(__SAMD21E18A__)
-#include "platforms/arm/d21/led_sysdefs_arm_d21.h"
+#include "platforms/arm/d21/led_sysdefs_arm_d21.h"  // ok platform headers
 #elif defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
-#include "platforms/arm/d51/led_sysdefs_arm_d51.h"
+#include "platforms/arm/d51/led_sysdefs_arm_d51.h"  // ok platform headers
 #elif defined(ARDUINO_ARCH_RP2350) || defined(PICO_RP2350)
-#include "platforms/arm/rp/rp2350/led_sysdefs_arm_rp2350.h"
+#include "platforms/arm/rp/rp2350/led_sysdefs_arm_rp2350.h"  // ok platform headers
 #elif defined(ARDUINO_ARCH_RP2040) // not sure a pico-sdk define for this
 // RP2040 (Raspberry Pi Pico etc)
-#include "platforms/arm/rp/rp2040/led_sysdefs_arm_rp2040.h"
+#include "platforms/arm/rp/rp2040/led_sysdefs_arm_rp2040.h"  // ok platform headers
 #elif defined(ESP8266)
-#include "platforms/esp/8266/led_sysdefs_esp8266.h"
+#include "platforms/esp/8266/led_sysdefs_esp8266.h"  // ok platform headers
 #elif defined(ESP32)
-#include "platforms/esp/32/core/led_sysdefs_esp32.h"
+#include "platforms/esp/32/core/led_sysdefs_esp32.h"  // ok platform headers
 #elif defined(__AVR__) || defined(__AVR_ATmega4809__)
 // AVR platforms
-#include "platforms/avr/led_sysdefs_avr.h"
+#include "platforms/avr/led_sysdefs_avr.h"  // ok platform headers
 #elif defined(ARDUINO_ARCH_APOLLO3)
 // Apollo3 platforms (e.g. the Ambiq Micro Apollo3 Blue as used by the SparkFun Artemis platforms)
-#include "platforms/apollo3/led_sysdefs_apollo3.h"
+#include "platforms/apollo3/led_sysdefs_apollo3.h"  // ok platform headers
 #elif defined(ARDUINO_ARCH_RENESAS) || defined(ARDUINO_ARCH_RENESAS_UNO) || defined(ARDUINO_ARCH_RENESAS_PORTENTA)
-#include "platforms/arm/renesas/led_sysdef_arm_renesas.h"
+#include "platforms/arm/renesas/led_sysdef_arm_renesas.h"  // ok platform headers
 #elif defined(ARDUINO_GIGA)|| defined(ARDUINO_GIGA_M7)
-#include "platforms/arm/giga/led_sysdef_arm_giga.h"
+#include "platforms/arm/giga/led_sysdef_arm_giga.h"  // ok platform headers
 #elif defined(ARDUINO_ARCH_SILABS)
 // Silicon Labs MGM240 (Arduino Nano Matter, SparkFun Thing Plus Matter)
-#include "platforms/arm/mgm240/led_sysdefs_arm_mgm240.h"
+#include "platforms/arm/mgm240/led_sysdefs_arm_mgm240.h"  // ok platform headers
 #elif defined(__x86_64__) || defined(FASTLED_STUB_IMPL) || defined(__APPLE__) || defined(__linux__) || defined(__unix__) || defined(__EMSCRIPTEN__)
 // Not on a microcontroller
 //#    ifdef FASTLED_HAS_PRAGMA_MESSAGE
@@ -70,7 +70,7 @@
 //#    else
 //#      warning "Using stub, no data will be written to pins"
 //#    endif
-#include "platforms/stub/led_sysdefs_stub.h"
+#include "platforms/stub/led_sysdefs_stub.h"  // ok platform headers
 #else
 //
 // We got here because we don't recognize the platform that you're

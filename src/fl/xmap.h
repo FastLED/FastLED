@@ -1,10 +1,8 @@
 #pragma once
 
-#include "fl/stl/stdint.h"
-
 #include "fl/force_inline.h"
 #include "fl/lut.h"
-#include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "fl/int.h"
 
 namespace fl {
 

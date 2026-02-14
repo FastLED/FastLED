@@ -22,6 +22,7 @@ from ci.lint_cpp.banned_headers_checker import (
 
 # Import all checker classes
 from ci.lint_cpp.check_namespace_includes import NamespaceIncludesChecker
+from ci.lint_cpp.check_platform_includes import PlatformTrampolineChecker
 from ci.lint_cpp.check_platforms_fl_namespace import PlatformsFlNamespaceChecker
 from ci.lint_cpp.check_using_namespace import UsingNamespaceChecker
 from ci.lint_cpp.cpp_hpp_includes_checker import CppHppIncludesChecker
@@ -133,6 +134,7 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
         StaticInHeaderChecker(),
         LoggingInIramChecker(),
         PlatformIncludesChecker(),
+        PlatformTrampolineChecker(),  # Enforce trampoline architecture in src/fl/** and root src/
         WeakAttributeChecker(),
         AttributeChecker(),  # Checks all C++ standard attributes (replaces MaybeUnusedChecker)
         FlIsDefinedChecker(),

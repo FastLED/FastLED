@@ -30,7 +30,7 @@
 #endif
 // ESP32 I2S Driver compatibility warning
 #if defined(FASTLED_ESP32_I2S) && !defined(FASTLED_INTERNAL)
-#include "platforms/esp/esp_version.h"
+#include "platforms/esp/esp_version.h"  // ok platform headers
 #if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR >= 5
 #warning "ESP32 I2S Driver: ESP-IDF 5.x detected. This driver may not work reliably with ESP-IDF 5.x+. Consider using RMT driver instead or staying on ESP-IDF 4.x. See ESP32_I2S_ISSUES.md for details. Report issues at: https://github.com/FastLED/FastLED/issues"
 #endif
@@ -44,8 +44,8 @@
 // Only applies to platforms that actually have RMT hardware (excludes ESP32-C2 which lacks RMT).
 // Reference: https://github.com/espressif/arduino-esp32/issues/9866
 #if defined(FL_IS_ESP32)
-#include "platforms/esp/esp_version.h"
-#include "platforms/esp/32/feature_flags/enabled.h"
+#include "platforms/esp/esp_version.h"  // ok platform headers
+#include "platforms/esp/32/feature_flags/enabled.h"  // ok platform headers
 #if FASTLED_RMT5 == 0 && FASTLED_ESP32_HAS_RMT && !defined(ESP32_ARDUINO_NO_RGB_BUILTIN)
 #error "ESP-IDF 5.x+ with legacy RMT4 driver detected: Please define ESP32_ARDUINO_NO_RGB_BUILTIN=1 to prevent conflicts with Arduino's neopixelWrite() function. Add '-DESP32_ARDUINO_NO_RGB_BUILTIN=1' to your build flags or use '-DFASTLED_RMT5=1' to enable RMT5 driver."
 #endif
@@ -68,10 +68,10 @@
 #endif
 
 #ifdef FL_IS_WASM
-#include "platforms/wasm/js.h"
-#include "platforms/wasm/led_sysdefs_wasm.h"
-#include "platforms/wasm/compiler/Arduino.h"
-#include "platforms/wasm/js_fetch.h"
+#include "platforms/wasm/js.h"  // ok platform headers
+#include "platforms/wasm/led_sysdefs_wasm.h"  // ok platform headers
+#include "platforms/wasm/compiler/Arduino.h"  // ok platform headers
+#include "platforms/wasm/js_fetch.h"  // ok platform headers
 #endif
 
 #ifdef SmartMatrix_h

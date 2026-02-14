@@ -484,12 +484,25 @@ def run_cpp_lint_single_file(file_path: str, strict: bool = False) -> bool:
 def run_iwyu_single_file(file_path: str) -> bool:
     """Run IWYU analysis on a single C++ file.
 
+    Note: .ino files are skipped as they require special compilation through
+    a wrapper template. For .ino files, use `bash lint --iwyu` to check all
+    examples via the full build system.
+
     Args:
         file_path: Absolute path to the C++ file
 
     Returns:
         True if IWYU passed (no violations), False otherwise
     """
+    # Skip .ino files - they need to be compiled through the wrapper template
+    # For full IWYU analysis on .ino files, use the full build system:
+    # `bash lint --iwyu` or `uv run test.py --examples --check --build`
+    if file_path.endswith(".ino"):
+        print(
+            "  ⏭️  IWYU skipped for .ino file (use 'bash lint --iwyu' for full example checking)"
+        )
+        return True
+
     # Get compiler path
     compiler = os.environ.get("CXX", "clang-tool-chain-sccache-cpp")
 
@@ -516,6 +529,8 @@ def run_iwyu_single_file(file_path: str) -> bool:
     iwyu_cmd = [
         sys.executable,
         str(project_root / "ci" / "iwyu_wrapper.py"),
+        "-Xiwyu",
+        "--error",
         "--",  # Separator
     ] + compiler_args
 

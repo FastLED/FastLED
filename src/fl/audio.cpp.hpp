@@ -1,8 +1,15 @@
 
 #include "audio.h"
+#include "fl/fft.h"
 #include "fl/thread_local.h"
-#include "fl/int.h"
+#include "fl/math_macros.h"
+#include "fl/stl/math.h"
+#include "fl/stl/move.h"
 #include "fl/stl/mutex.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/span.h"
+#include "fl/stl/vector.h"
+#include "fl/int.h"
 
 namespace fl {
 

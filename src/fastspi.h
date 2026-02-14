@@ -32,7 +32,7 @@
 #include "controller.h"
 #include "lib8tion.h"
 #include "fastspi_types.h"
-#include "platforms/shared/spi_bitbang/generic_software_spi.h"
+#include "platforms/shared/spi_bitbang/generic_software_spi.h"  // ok platform headers
 #include "fl/int.h"
 #include "platforms/cpu_frequency.h"
 

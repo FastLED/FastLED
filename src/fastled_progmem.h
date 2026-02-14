@@ -6,9 +6,9 @@
 #if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
 #include "platforms/null_progmem.h"
 #elif defined(ESP8266)
-#include "platforms/esp/8266/progmem_esp8266.h"
+#include "platforms/esp/8266/progmem_esp8266.h"  // ok platform headers
 #elif defined(FL_IS_STM32)
-#include "platforms/arm/stm32/progmem_stm32.h"
+#include "platforms/arm/stm32/progmem_stm32.h"  // ok platform headers
 #else
 
 

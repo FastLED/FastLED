@@ -118,15 +118,15 @@ def check_iwyu_available() -> tuple[bool, str]:
 
 
 def run_iwyu_on_cpp_tests(args: argparse.Namespace) -> int:
-    """Run IWYU on the C++ test suite"""
+    """Run IWYU on the C++ test suite and examples"""
     here = Path(__file__).parent
     project_root = here.parent
 
     if not args.quiet:
-        print("Running include-what-you-use on C++ test suite...")
+        print("Running include-what-you-use on C++ test suite and examples...")
 
-    # Use the existing test infrastructure with --check flag
-    cmd = [
+    # Run IWYU on C++ tests
+    cmd_tests = [
         "uv",
         "run",
         "test.py",
@@ -138,13 +138,31 @@ def run_iwyu_on_cpp_tests(args: argparse.Namespace) -> int:
     ]
 
     if args.verbose:
-        cmd.append("--verbose")
+        cmd_tests.append("--verbose")
+
+    # Run IWYU on examples
+    cmd_examples = [
+        "uv",
+        "run",
+        "test.py",
+        "--examples",
+        "--check",  # This enables IWYU
+        "--clang",
+        "--no-interactive",
+        "--no-fingerprint",  # Force re-run to ensure IWYU checks all files
+        "--build",  # Only build, don't execute
+    ]
+
+    if args.verbose:
+        cmd_examples.append("--verbose")
 
     try:
-        # Suppress output in quiet mode
+        # Run C++ tests first
+        if not args.quiet:
+            print("\n=== Checking C++ tests ===")
         if args.quiet:
-            result = subprocess.run(
-                cmd,
+            result_tests = subprocess.run(
+                cmd_tests,
                 cwd=project_root,
                 capture_output=True,
                 text=True,
@@ -152,14 +170,39 @@ def run_iwyu_on_cpp_tests(args: argparse.Namespace) -> int:
                 errors="replace",
             )
             # Only show output if there was an error
-            if result.returncode != 0:
-                if result.stdout:
-                    print(result.stdout)
-                if result.stderr:
-                    print(result.stderr, file=sys.stderr)
+            if result_tests.returncode != 0:
+                if result_tests.stdout:
+                    print(result_tests.stdout)
+                if result_tests.stderr:
+                    print(result_tests.stderr, file=sys.stderr)
         else:
-            result = subprocess.run(cmd, cwd=project_root)
-        return result.returncode
+            result_tests = subprocess.run(cmd_tests, cwd=project_root)
+
+        if result_tests.returncode != 0:
+            return result_tests.returncode
+
+        # Run examples
+        if not args.quiet:
+            print("\n=== Checking examples ===")
+        if args.quiet:
+            result_examples = subprocess.run(
+                cmd_examples,
+                cwd=project_root,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+            )
+            # Only show output if there was an error
+            if result_examples.returncode != 0:
+                if result_examples.stdout:
+                    print(result_examples.stdout)
+                if result_examples.stderr:
+                    print(result_examples.stderr, file=sys.stderr)
+        else:
+            result_examples = subprocess.run(cmd_examples, cwd=project_root)
+
+        return result_examples.returncode
     except subprocess.CalledProcessError as e:
         if not args.quiet:
             print(f"IWYU analysis failed with return code {e.returncode}")

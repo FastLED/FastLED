@@ -8,11 +8,10 @@ expensive trig functions are needed. Same with scale and offset.
 
 */
 
-#include "fl/lut.h"
+#include "fl/geometry.h"
 #include "fl/math_macros.h"
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
-#include "fl/xymap.h"
-#include "lib8tion/types.h"
+#include "fl/int.h"
 
 namespace fl {
 

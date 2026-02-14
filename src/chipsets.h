@@ -24,7 +24,7 @@
 // Include legacy AVR-specific timing definitions (FMUL-based)
 // Used for backward compatibility with existing AVR clockless drivers
 #ifdef FL_IS_AVR
-#include "platforms/avr/led_timing_legacy_avr.h"
+#include "platforms/avr/led_timing_legacy_avr.h"  // ok platform headers
 #endif
 
 // Platform-specific clockless controller dispatch
@@ -36,7 +36,7 @@
 #include "fl/chipsets/encoders/ws2816.h"
 
 // Include platform-independent SPI utilities
-#include "platforms/shared/spi_pixel_writer.h"
+#include "platforms/shared/spi_pixel_writer.h"  // ok platform headers
 
 // Platform-specific SPI output template dispatch
 // Includes the appropriate SPIOutput template implementation for the target platform
@@ -680,7 +680,7 @@ private:
 
 #if defined(FL_IS_SILABS)
 
-#include "platforms/arm/mgm240/clockless_ezws2812_gpio.h"
+#include "platforms/arm/mgm240/clockless_ezws2812_gpio.h"  // ok platform headers
 
 /// Silicon Labs ezWS2812 GPIO controller (always available)
 /// @tparam DATA_PIN the pin to write data out on
@@ -698,7 +698,7 @@ using EZWS2812_GPIO = fl::ClocklessController_ezWS2812_GPIO_Auto<DATA_PIN, RGB_O
 
 #ifdef FASTLED_USES_EZWS2812_SPI
 
-#include "platforms/arm/mgm240/clockless_ezws2812_spi.h"
+#include "platforms/arm/mgm240/clockless_ezws2812_spi.h"  // ok platform headers
 
 /// Silicon Labs ezWS2812 SPI controller (requires FASTLED_USES_EZWS2812_SPI)
 /// @tparam RGB_ORDER the RGB ordering for these LEDs (typically GRB for WS2812)
