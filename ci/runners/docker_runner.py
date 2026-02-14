@@ -60,19 +60,20 @@ def _get_container_name(project_root: Path) -> str:
     return f"fastled-unit-tests-{path_hash}"
 
 
-def _get_volume_names(project_root: Path) -> tuple[str, str]:
+def _get_volume_names(project_root: Path) -> tuple[str, str, str]:
     """Get unique volume names based on project path.
 
     Args:
         project_root: Path to the project root
 
     Returns:
-        Tuple of (venv_volume_name, build_volume_name)
+        Tuple of (venv_volume_name, build_volume_name, cache_volume_name)
     """
     path_hash = _get_path_hash(project_root)
     return (
         f"fastled-docker-venv-{path_hash}",
         f"fastled-docker-build-{path_hash}",
+        f"fastled-docker-cache-{path_hash}",
     )
 
 
@@ -268,12 +269,12 @@ def run_docker_tests(args: TestArgs) -> int:
 
     # Get unique container and volume names based on project path
     container_name = _get_container_name(project_root)
-    venv_volume, build_volume = _get_volume_names(project_root)
+    venv_volume, build_volume, cache_volume = _get_volume_names(project_root)
     path_hash = _get_path_hash(project_root)
 
     ts_print(f"Project path hash: {path_hash}")
     ts_print(f"Container: {container_name}")
-    ts_print(f"Volumes: {venv_volume}, {build_volume}")
+    ts_print(f"Volumes: {venv_volume}, {build_volume}, {cache_volume}")
 
     # Run garbage collection (non-blocking, best-effort)
     _run_garbage_collection()
@@ -331,6 +332,8 @@ def run_docker_tests(args: TestArgs) -> int:
         f"{venv_volume}:/fastled/.venv",
         "-v",
         f"{build_volume}:/fastled/.build",
+        "-v",
+        f"{cache_volume}:/root/.cache",  # Persist compiler/tool caches (uv, sccache, clang modules)
         "-w",
         "/fastled",
         # Pass through terminal for colors
@@ -341,13 +344,11 @@ def run_docker_tests(args: TestArgs) -> int:
         "fastled-unit-tests",
         "bash",
         "-c",
-        # Pre-warm clang toolchain before running tests (without sccache)
-        # First call downloads clang toolchain (~190MB, takes ~30-60s)
-        # sccache is disabled in Docker via FASTLED_DOCKER=1 to avoid 80+ second daemon startup
-        f"uv sync && export PATH=/fastled/.venv/bin:$PATH && "
-        f"echo 'Pre-warming clang toolchain (first run downloads ~190MB)...' && "
-        f"(clang-tool-chain-cpp --version || true) && "
-        f"echo 'Pre-warm complete.' && {test_cmd_str}",
+        # Skip uv sync - all dependencies pre-installed in Dockerfile
+        # Just set PATH and PYTHONPATH for importing ci modules
+        f"export PATH=/fastled/.venv/bin:$PATH && "
+        f"export PYTHONPATH=/fastled:$PYTHONPATH && "
+        f"{test_cmd_str}",
     ]
 
     try:

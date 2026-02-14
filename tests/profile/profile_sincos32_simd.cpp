@@ -2,12 +2,11 @@
 #include "FastLED.h"
 #include "fl/align.h"
 #include "fl/int.h"
-#include "fl/simd.h"
+#include "fl/simd.h"  // Platform-dispatched SIMD (gets correct impl automatically)
 #include "fl/sin32.h"
 #include "fl/stl/cstdint.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/stdio.h"
-#include "platforms/shared/simd_noop.hpp"
 #include "tests/profile/profile_result.h"
 
 using namespace fl;

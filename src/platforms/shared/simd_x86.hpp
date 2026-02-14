@@ -235,20 +235,47 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sub_i32_4(simd_u32x4 a, simd_u32x4 b) no
 }
 
 // Multiply i32 and return high 32 bits (for fixed-point Q16.16 math)
+// Result: ((i64)a * (i64)b) >> 16, for each of 4 lanes
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
-    // SSE2 doesn't have direct i32 multiply-high, so we use scalar fallback
-    i32 a_arr[4];
-    i32 b_arr[4];
-    _mm_storeu_si128(reinterpret_cast<__m128i*>(a_arr), a); // ok reinterpret cast
-    _mm_storeu_si128(reinterpret_cast<__m128i*>(b_arr), b); // ok reinterpret cast
+    // SSE2 strategy: use _mm_mul_epu32() which multiplies pairs [0,2] as unsigned
+    // and produces 64-bit results in lanes 0 and 1.
+    // We need to handle signed multiplication with proper sign extension.
 
-    i32 result_arr[4];
-    for (int i = 0; i < 4; ++i) {
-        i64 prod = static_cast<i64>(a_arr[i]) * static_cast<i64>(b_arr[i]);
-        result_arr[i] = static_cast<i32>(prod >> 16);
-    }
+    // Extract sign bits to handle signed multiplication
+    __m128i a_neg = _mm_srai_epi32(a, 31);  // Sign extend: 0xFFFFFFFF if negative, 0 if positive
+    __m128i b_neg = _mm_srai_epi32(b, 31);
 
-    return _mm_loadu_si128(reinterpret_cast<const __m128i*>(result_arr)); // ok reinterpret cast
+    // Compute absolute values for unsigned multiplication
+    __m128i a_abs = _mm_sub_epi32(_mm_xor_si128(a, a_neg), a_neg);  // (a ^ sign) - sign = abs(a)
+    __m128i b_abs = _mm_sub_epi32(_mm_xor_si128(b, b_neg), b_neg);
+
+    // Multiply even lanes (0, 2) - _mm_mul_epu32 takes i32[0] * i32[0] -> i64 in result[0:1]
+    __m128i prod_even = _mm_mul_epu32(a_abs, b_abs);  // [a0*b0 as i64, a2*b2 as i64]
+
+    // Multiply odd lanes (1, 3) - shuffle to bring odd elements to even positions
+    __m128i a_odd = _mm_shuffle_epi32(a_abs, _MM_SHUFFLE(3, 3, 1, 1));  // [a1, a1, a3, a3]
+    __m128i b_odd = _mm_shuffle_epi32(b_abs, _MM_SHUFFLE(3, 3, 1, 1));
+    __m128i prod_odd = _mm_mul_epu32(a_odd, b_odd);  // [a1*b1 as i64, a3*b3 as i64]
+
+    // Shift right by 16 to get high 48 bits (we want bits [47:16] of the 64-bit product)
+    __m128i shifted_even = _mm_srli_epi64(prod_even, 16);  // >> 16 in each 64-bit lane
+    __m128i shifted_odd = _mm_srli_epi64(prod_odd, 16);
+
+    // Extract low 32 bits from each 64-bit result and interleave
+    // Use shuffle to pack: [even0_low32, odd0_low32, even1_low32, odd1_low32]
+    __m128i result_even = _mm_shuffle_epi32(shifted_even, _MM_SHUFFLE(0, 2, 0, 0));  // [e0, _, e2, _]
+    __m128i result_odd = _mm_shuffle_epi32(shifted_odd, _MM_SHUFFLE(0, 2, 0, 0));    // [o0, _, o2, _]
+
+    // Interleave: result = [e0, o0, e2, o2] where e=even lane result, o=odd lane result
+    __m128i result_lo = _mm_unpacklo_epi32(result_even, result_odd);  // [e0, o0, ?, ?]
+    __m128i result_hi = _mm_unpackhi_epi32(result_even, result_odd);  // [e2, o2, ?, ?]
+    __m128i result_unsigned = _mm_unpacklo_epi64(result_lo, result_hi);  // [e0, o0, e2, o2]
+
+    // Apply sign correction: result is negative if sign(a) != sign(b)
+    __m128i sign_xor = _mm_xor_si128(a_neg, b_neg);  // 0xFFFFFFFF if signs differ
+    __m128i result_signed = _mm_sub_epi32(_mm_xor_si128(result_unsigned, sign_xor), sign_xor);
+
+    return result_signed;
 }
 
 // Shift right logical (zero-fill) - for unsigned angle decomposition

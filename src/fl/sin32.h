@@ -4,8 +4,7 @@
 #include "fl/int.h"
 #include "force_inline.h"
 #include "platforms/null_progmem.h"
-#include "platforms/shared/simd_noop.hpp" // ok platform headers
-#include "fl/simd.h"
+#include "fl/simd.h"  // Platform-dispatched SIMD (SSE2/NEON/scalar)
 #include "fl/align.h"
 
 namespace fl {

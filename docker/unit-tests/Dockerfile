@@ -6,20 +6,23 @@ FROM debian:bookworm-slim
 ENV DEBIAN_FRONTEND=noninteractive
 
 # ============================================================================
-# OPTIMIZED LAYER STRUCTURE FOR FAST REBUILDS
+# OPTIMIZED LAYER STRUCTURE FOR MAXIMUM CACHING
 # ============================================================================
 # Layer 1: System packages (rarely changes)
 # Layer 2: uv installation (rarely changes)
 # Layer 3: pyproject.toml copy (changes when dependencies change)
 # Layer 4: Python dependency installation (cached unless pyproject.toml changes)
 # Layer 5: Clang toolchain pre-installation (cached unless versions change)
-# Layer 6: Source code copy (changes frequently, but all deps already cached)
-# Layer 7: Local package installation (fast since deps cached)
+#
+# Source code is NOT included in the image - it's volume-mounted at runtime.
 #
 # This structure ensures that:
-# - Source code changes only invalidate layers 6-7 (fast rebuild)
-# - Dependency changes invalidate layers 4-7 (medium rebuild)
-# - System package changes invalidate layers 2-7 (full rebuild)
+# - Source code changes NEVER invalidate Docker layers (instant)
+# - Dependency changes only invalidate layers 4-5 (medium rebuild)
+# - System package changes invalidate layers 2-5 (full rebuild)
+#
+# The image acts as a pre-warmed environment with all tools and dependencies
+# cached, while the actual source code comes from the host filesystem.
 
 # ============================================================================
 # LAYER 1: System packages (cached until package list changes)
@@ -76,15 +79,16 @@ RUN uv sync --no-install-project
 RUN uv run clang-tool-chain-cpp --version
 
 # ============================================================================
-# LAYER 6: Copy source code (invalidates when source changes)
+# NOTE: Source code is NOT copied into the image
 # ============================================================================
-COPY ci/ ./ci/
-COPY src/ ./src/
-
-# ============================================================================
-# LAYER 7: Install local 'ci' package (fast, deps already cached)
-# ============================================================================
-RUN uv sync
+# Source code (src/, ci/, tests/, examples/) is volume-mounted at runtime
+# by docker_runner.py. This ensures that:
+# 1. Source code changes don't invalidate Docker image layers
+# 2. The Docker image stays small and builds fast
+# 3. Local edits are immediately visible in the container
+#
+# The 'ci' package installation happens at runtime via `uv sync` in the
+# docker run command (after source code is volume-mounted).
 
 # Default command
 CMD ["/bin/bash"]

@@ -14,22 +14,13 @@
 // Each platform defines types and functions in fl::simd::platform namespace
 
 
-// All simd operations are disabled for now. If you want to test these simd
-// operations, then please test them and send fastled issues a pull request.
-#include "platforms/shared/simd_noop.hpp"
-
-// #include "platforms/is_platform.h"
-// #if defined(ESP32)
-//     // ESP32 family dispatcher (routes to Xtensa or RISC-V implementations)
-//     #include "platforms/esp/32/simd_esp32.hpp"
-// #elif defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || defined(_M_IX86)
-//     // x86/x64 platforms (SSE2/AVX intrinsics)
-//     #include "platforms/shared/simd_x86.hpp"
-// #elif defined(__ARM_NEON) || defined(__ARM_NEON__)
-//     // ARM platforms with NEON support
-//     #include "platforms/arm/simd_arm_neon.hpp"
-// #else
-//     // No SIMD support - use scalar fallback
-//     // Covers: AVR, ESP8266, ARM without NEON, WASM, and other platforms
-//     #include "platforms/shared/simd_noop.hpp"
-// #endif
+// Platform-specific SIMD enabled for performance optimization
+#include "platforms/is_platform.h"
+#if defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || defined(_M_IX86)
+    // x86/x64 platforms (SSE2/AVX intrinsics)
+    #include "platforms/shared/simd_x86.hpp"
+#else
+    // No SIMD support - use scalar fallback
+    // Covers: AVR, ESP8266, ARM without NEON, WASM, and other platforms
+    #include "platforms/shared/simd_noop.hpp"
+#endif
