@@ -259,14 +259,6 @@ class ProfileRunner:
                 json.dump([minimal_result], f, indent=2)
             return True
 
-        if self.use_docker:
-            print("⚠️  Docker benchmark iterations not yet fully supported")
-            print("   (Binary is in Docker volume, not accessible from host)")
-            print(
-                "   Use --callgrind for Docker-based analysis, or run without --docker"
-            )
-            return False
-
         print(f"Running {self.iterations} iterations...")
         print(f"⏱️  Timeout: 120 seconds per iteration (deadlock detector enabled)")
         if self.debuggable or self.build_mode in ["debug", "quick"]:
@@ -276,8 +268,13 @@ class ProfileRunner:
                 f"⚡ Performance mode (build mode: {self.build_mode}) - limited stack traces"
             )
 
+        if self.use_docker:
+            print(
+                f"🐳 Running in Docker (volume: fastled-docker-build-{self._get_project_hash()})"
+            )
+
         binary_path = self.get_binary_path()
-        if not binary_path.exists():
+        if not self.use_docker and not binary_path.exists():
             print(f"Error: Binary not found at {binary_path}")
             return False
 
@@ -288,20 +285,21 @@ class ProfileRunner:
 
             try:
                 if self.use_docker:
-                    # Docker: Run binary inside the same container used for building
-                    # The binary is in the Docker build volume, not the host filesystem
+                    # Docker: Run binary inside container with access to build volume
+                    docker_cmd = [
+                        "docker",
+                        "run",
+                        "--rm",
+                        "-v",
+                        f"{Path.cwd().as_posix()}:/fastled",
+                        "-v",
+                        f"fastled-docker-build-{self._get_project_hash()}:/fastled/.build",
+                        "fastled-unit-tests",
+                        f"/fastled/.build/meson-{self.build_mode}/tests/profile/{self.test_name}",
+                        "baseline",
+                    ]
                     result = subprocess.run(
-                        [
-                            "uv",
-                            "run",
-                            "python",
-                            "test.py",
-                            self.test_name,
-                            "--cpp",
-                            "--docker",
-                            "--build-mode",
-                            self.build_mode,
-                        ],
+                        docker_cmd,
                         capture_output=True,
                         text=True,
                         check=True,
@@ -325,29 +323,50 @@ class ProfileRunner:
                             print(f"Output: {output}")
                             return False
 
-                # Parse structured output (check both stdout and stderr)
-                if "PROFILE_RESULT:" in output:
-                    json_start = output.find("{")
-                    json_end = output.rfind("}") + 1
-                    if json_start != -1 and json_end > json_start:
-                        profile_data = json.loads(output[json_start:json_end])
-                        results.append(profile_data)
-                        print(f"{profile_data['ns_per_call']:.2f} ns/call")
-                    else:
-                        print("ERROR: Could not parse JSON output")
-                        return False
-                else:
+                # Parse structured output - handle multiple PROFILE_RESULT lines
+                # (comparison tests output multiple results per run)
+                iteration_results: list[dict[str, Any]] = []
+                for line in output.splitlines():
+                    if "PROFILE_RESULT:" in line:
+                        json_start = line.find("{")
+                        json_end = line.rfind("}") + 1
+                        if json_start != -1 and json_end > json_start:
+                            profile_data: dict[str, Any] = json.loads(
+                                line[json_start:json_end]
+                            )
+                            iteration_results.append(profile_data)
+
+                if not iteration_results:
                     print("ERROR: No PROFILE_RESULT in output")
+                    print(f"Output: {output[:500]}...")  # Show first 500 chars
                     return False
 
+                # Add all results from this iteration
+                results.extend(iteration_results)
+
+                # Display summary for this iteration
+                if len(iteration_results) == 1:
+                    print(f"{iteration_results[0]['ns_per_call']:.2f} ns/call")
+                else:
+                    # Multiple variants - show all
+                    summary = ", ".join(
+                        f"{r['variant']}: {r['ns_per_call']:.2f} ns"
+                        for r in iteration_results
+                    )
+                    print(summary)
+
             except subprocess.TimeoutExpired:
-                # Docker timeout (no debugger attachment possible)
-                print("\n🚨 DOCKER TIMEOUT EXCEEDED!")
-                print("⚠️  Cannot attach debugger inside Docker container")
+                if self.use_docker:
+                    print("\n🚨 DOCKER TIMEOUT EXCEEDED!")
+                    print("⚠️  Cannot attach debugger inside Docker container")
+                else:
+                    print("\n🚨 TIMEOUT EXCEEDED!")
                 return False
 
             except subprocess.CalledProcessError as e:
                 print(f"ERROR: {e}")
+                if self.use_docker:
+                    print("Docker stderr:", e.stderr if hasattr(e, "stderr") else "N/A")
                 return False
 
         # Save results

@@ -28,6 +28,7 @@ class ResultAnalyzer:
     def __init__(self, results_file: Path):
         self.results_file = results_file
         self.results: list[ProfileResult] = []
+        self.variants: dict[str, list[ProfileResult]] = {}
 
     def load_results(self) -> None:
         """Load and parse JSON results"""
@@ -35,11 +36,21 @@ class ResultAnalyzer:
             data = json.load(f)
 
         for entry in data:
-            self.results.append(ProfileResult(**entry))
+            result = ProfileResult(**entry)
+            self.results.append(result)
+            # Group by variant for comparison tests
+            if result.variant not in self.variants:
+                self.variants[result.variant] = []
+            self.variants[result.variant].append(result)
 
-    def compute_statistics(self) -> dict[str, float]:
-        """Compute best/median/worst/stdev"""
-        if not self.results:
+    def compute_statistics(
+        self, results: list[ProfileResult] | None = None
+    ) -> dict[str, float]:
+        """Compute best/median/worst/stdev for a set of results"""
+        if results is None:
+            results = self.results
+
+        if not results:
             return {
                 "best": 0,
                 "median": 0,
@@ -48,7 +59,7 @@ class ResultAnalyzer:
                 "count": 0,
             }
 
-        ns_per_call = [r.ns_per_call for r in self.results]
+        ns_per_call = [r.ns_per_call for r in results]
 
         return {
             "best": min(ns_per_call),
@@ -60,8 +71,17 @@ class ResultAnalyzer:
 
     def generate_report(self) -> str:
         """Generate markdown report for AI consumption"""
-        stats = self.compute_statistics()
         target = self.results[0].target if self.results else "unknown"
+
+        # Check if this is a comparison test (multiple variants)
+        if len(self.variants) > 1:
+            return self._generate_comparison_report(target)
+        else:
+            return self._generate_single_variant_report(target)
+
+    def _generate_single_variant_report(self, target: str) -> str:
+        """Generate report for single-variant tests"""
+        stats = self.compute_statistics()
 
         report = f"""
 # Performance Profile: {target}
@@ -106,17 +126,100 @@ class ResultAnalyzer:
 
         return report
 
+    def _generate_comparison_report(self, target: str) -> str:
+        """Generate report for comparison tests with multiple variants"""
+        report = f"""
+# Performance Comparison: {target}
+
+"""
+
+        # Compute statistics for each variant
+        variant_stats: dict[str, dict[str, float]] = {}
+        for variant_name, variant_results in self.variants.items():
+            variant_stats[variant_name] = self.compute_statistics(variant_results)
+
+        # Display table for each variant
+        report += "## Variant Performance\n\n"
+        for variant_name in sorted(self.variants.keys()):
+            stats = variant_stats[variant_name]
+            report += f"### {variant_name} ({stats['count']} iterations)\n\n"
+            report += "| Metric | Value |\n"
+            report += "|--------|-------|\n"
+            report += f"| **Best** | {stats['best']:.2f} ns/call |\n"
+            report += f"| **Median** | {stats['median']:.2f} ns/call |\n"
+            report += f"| **Worst** | {stats['worst']:.2f} ns/call |\n"
+            report += f"| **StdDev** | {stats['stdev']:.2f} ns |\n"
+            report += f"| **Calls/sec** | {1e9 / stats['median']:.0f} |\n\n"
+
+        # Comparison analysis
+        report += "## Comparison\n\n"
+
+        # Find fastest and slowest
+        sorted_variants = sorted(variant_stats.items(), key=lambda x: x[1]["median"])
+        fastest = sorted_variants[0]
+        slowest = sorted_variants[-1]
+
+        report += f"**Fastest**: {fastest[0]} ({fastest[1]['median']:.2f} ns/call)\n\n"
+        report += f"**Slowest**: {slowest[0]} ({slowest[1]['median']:.2f} ns/call)\n\n"
+
+        if len(sorted_variants) >= 2:
+            speedup = slowest[1]["median"] / fastest[1]["median"]
+            report += (
+                f"**Speedup**: {speedup:.2f}x faster ({fastest[0]} vs {slowest[0]})\n\n"
+            )
+
+        # Relative performance table
+        report += "| Variant | Median (ns) | Relative | Speedup |\n"
+        report += "|---------|-------------|----------|----------|\n"
+        baseline_median = fastest[1]["median"]
+        for variant_name, stats in sorted_variants:
+            relative = stats["median"] / baseline_median
+            speedup = baseline_median / stats["median"]
+            if relative == 1.0:
+                report += f"| **{variant_name}** | {stats['median']:.2f} | 1.00x (baseline) | - |\n"
+            else:
+                report += f"| {variant_name} | {stats['median']:.2f} | {relative:.2f}x | {speedup:.2f}x |\n"
+
+        return report
+
     def export_for_ai(self) -> dict[str, Any]:
         """Export structured data for AI consumption"""
-        stats = self.compute_statistics()
-        return {
-            "target": self.results[0].target if self.results else "unknown",
-            "statistics": stats,
-            "raw_results": [
-                {"ns_per_call": r.ns_per_call, "calls_per_sec": r.calls_per_sec}
-                for r in self.results
-            ],
-        }
+        target = self.results[0].target if self.results else "unknown"
+
+        # Handle comparison tests
+        if len(self.variants) > 1:
+            variant_stats: dict[str, Any] = {}
+            for variant_name, variant_results in self.variants.items():
+                variant_stats[variant_name] = self.compute_statistics(variant_results)
+
+            # Compute speedup
+            sorted_variants = sorted(
+                variant_stats.items(), key=lambda x: x[1]["median"]
+            )
+            fastest = sorted_variants[0]
+            slowest = sorted_variants[-1]
+            speedup = slowest[1]["median"] / fastest[1]["median"]
+
+            return {
+                "target": target,
+                "comparison": True,
+                "variants": variant_stats,
+                "fastest": fastest[0],
+                "slowest": slowest[0],
+                "speedup": round(speedup, 2),
+            }
+        else:
+            # Single variant
+            stats = self.compute_statistics()
+            return {
+                "target": target,
+                "comparison": False,
+                "statistics": stats,
+                "raw_results": [
+                    {"ns_per_call": r.ns_per_call, "calls_per_sec": r.calls_per_sec}
+                    for r in self.results
+                ],
+            }
 
 
 def main() -> int:
