@@ -152,6 +152,7 @@ def run_meson_build_and_test(
     debug: bool = False,
     build_mode: Optional[str] = None,
     check: bool = False,
+    exclude_suites: Optional[list[str]] = None,
 ) -> MesonTestResult:
     """
     Complete Meson build and test workflow.
@@ -165,6 +166,7 @@ def run_meson_build_and_test(
         debug: Enable debug mode with full symbols and sanitizers (default: False)
         build_mode: Build mode override ("quick", "debug", "release"). If None, uses debug parameter.
         check: Enable IWYU static analysis (default: False)
+        exclude_suites: Optional list of test suites to exclude (e.g., ['examples'])
 
     Returns:
         MesonTestResult with success status, duration, and test counts
@@ -462,7 +464,12 @@ def run_meson_build_and_test(
                             "[MESON] Build up-to-date, running existing tests..."
                         )
                     # Note: run_meson_test already prints the RUNNING TESTS banner
-                    result = run_meson_test(build_dir, test_name=None, verbose=verbose)
+                    result = run_meson_test(
+                        build_dir,
+                        test_name=None,
+                        verbose=verbose,
+                        exclude_suites=exclude_suites,
+                    )
                     return result
 
                 if not overall_success:
@@ -768,7 +775,9 @@ def run_meson_build_and_test(
             )
     else:
         # No specific test - use Meson's test runner for all tests
-        return run_meson_test(build_dir, test_name=None, verbose=verbose)
+        return run_meson_test(
+            build_dir, test_name=None, verbose=verbose, exclude_suites=exclude_suites
+        )
 
 
 def main() -> None:

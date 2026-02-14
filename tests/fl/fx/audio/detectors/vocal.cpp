@@ -1,11 +1,11 @@
 // Unit tests for VocalDetector
-// standalone test
 
 #include "test.h"
 #include "FastLED.h"
 #include "fl/audio.h"
 #include "fl/audio/audio_context.h"
 #include "fl/fx/audio/detectors/vocal.h"
+#include "../../../audio/test_helpers.hpp"
 #include "fl/stl/vector.h"
 #include "fl/stl/math.h"
 #include "fl/stl/shared_ptr.h"
@@ -13,20 +13,7 @@
 #include "fl/math_macros.h"
 
 using namespace fl;
-
-namespace { // vocal_detector
-
-AudioSample makeSample(float freq, fl::u32 timestamp, float amplitude = 16000.0f) {
-    fl::vector<fl::i16> data;
-    data.reserve(512);
-    for (int i = 0; i < 512; ++i) {
-        float phase = 2.0f * FL_M_PI * freq * i / 44100.0f;
-        data.push_back(static_cast<fl::i16>(amplitude * fl::sinf(phase)));
-    }
-    return AudioSample(fl::span<const fl::i16>(data.data(), data.size()), timestamp);
-}
-
-} // anonymous namespace
+using namespace fl::test;
 
 FL_TEST_CASE("VocalDetector - pure sine is not vocal") {
     VocalDetector detector;

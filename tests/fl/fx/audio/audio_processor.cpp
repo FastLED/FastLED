@@ -1,5 +1,4 @@
 // Unit tests for AudioProcessor
-// standalone test
 
 #include "test.h"
 #include "FastLED.h"

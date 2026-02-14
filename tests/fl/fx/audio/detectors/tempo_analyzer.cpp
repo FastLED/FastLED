@@ -1,5 +1,5 @@
 // Unit tests for TempoAnalyzer
-// standalone test
+#include "../../../audio/test_helpers.hpp"
 
 #include "test.h"
 #include "FastLED.h"
@@ -13,25 +13,7 @@
 #include "fl/math_macros.h"
 
 using namespace fl;
-
-namespace { // tempo_analyzer
-
-AudioSample makeSample(float freq, fl::u32 timestamp, float amplitude = 16000.0f) {
-    fl::vector<fl::i16> data;
-    data.reserve(512);
-    for (int i = 0; i < 512; ++i) {
-        float phase = 2.0f * FL_M_PI * freq * i / 44100.0f;
-        data.push_back(static_cast<fl::i16>(amplitude * fl::sinf(phase)));
-    }
-    return AudioSample(fl::span<const fl::i16>(data.data(), data.size()), timestamp);
-}
-
-AudioSample makeSilence(fl::u32 timestamp) {
-    fl::vector<fl::i16> data(512, 0);
-    return AudioSample(fl::span<const fl::i16>(data.data(), data.size()), timestamp);
-}
-
-} // anonymous namespace
+using namespace fl::test;
 
 FL_TEST_CASE("TempoAnalyzer - initial state") {
     TempoAnalyzer analyzer;

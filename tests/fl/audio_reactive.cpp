@@ -1,14 +1,16 @@
 #include "fl/audio_reactive.h"
-#include "fl/stl/math.h"
-#include "fl/circular_buffer.h"
-#include "fl/stl/stdint.h"
-#include "fl/stl/new.h"
-#include "test.h"
+#include "audio/test_helpers.hpp"
 #include "fl/audio.h"
+#include "fl/circular_buffer.h"
 #include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/span.h"
+#include "fl/stl/stdint.h"
+#include "test.h"
 
 using namespace fl;
+using namespace fl::test;
 
 FL_TEST_CASE("AudioReactive basic functionality") {
     // Test basic initialization
@@ -445,4 +447,714 @@ FL_TEST_CASE("AudioSample - copy and equality") {
 
     AudioSample empty;
     FL_CHECK(original != empty);
+}
+FL_TEST_CASE("AudioReactive - full pipeline DC removal and gain") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    config.sampleRate = 22050;
+    config.enableSignalConditioning = true;
+    config.enableAutoGain = true;
+    config.enableNoiseFloorTracking = true;
+    config.enableLogBinSpacing = true;
+
+    audio.begin(config);
+
+    // Signal: 500 amplitude sine at 1kHz with 3000 DC offset
+    for (int iter = 0; iter < 20; ++iter) {
+        vector<i16> samples;
+        samples.reserve(512);
+        for (size i = 0; i < 512; ++i) {
+            float phase = 2.0f * FL_M_PI * 1000.0f * static_cast<float>(i) / 22050.0f;
+            i32 val = static_cast<i32>(500.0f * fl::sinf(phase)) + 3000;
+            if (val > 32767) val = 32767;
+            if (val < -32768) val = -32768;
+            samples.push_back(static_cast<i16>(val));
+        }
+        AudioSample audioSample = createSample(samples, iter * 100);
+        audio.processSample(audioSample);
+    }
+
+    // Signal conditioning should have removed DC and processed signal
+    const auto& scStats = audio.getSignalConditionerStats();
+    FL_CHECK_GT(scStats.samplesProcessed, 0u);
+
+    // Auto gain should have processed samples
+    const auto& agStats = audio.getAutoGainStats();
+    FL_CHECK_GT(agStats.samplesProcessed, 0u);
+
+    // Volume should be measurable
+    const auto& data = audio.getData();
+    FL_CHECK_GT(data.volume, 0.0f);
+}
+
+// INT-2: Pipeline with silence - no NaN, no crash
+FL_TEST_CASE("AudioReactive - silence pipeline no NaN") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    config.sampleRate = 22050;
+    config.enableSignalConditioning = true;
+    config.enableAutoGain = true;
+    config.enableNoiseFloorTracking = true;
+    audio.begin(config);
+
+    // Feed 20 frames of silence
+    for (int iter = 0; iter < 20; ++iter) {
+        vector<i16> silence(512, 0);
+        AudioSample audioSample = createSample(silence, iter * 100);
+        audio.processSample(audioSample);
+    }
+
+    // Should not crash, volume should be zero or near-zero
+    const auto& data = audio.getData();
+    FL_CHECK_LT(data.volume, 100.0f);
+    FL_CHECK_FALSE(data.volume != data.volume); // NaN check
+}
+
+// INT-3: Musical beat detection actually processes audio
+FL_TEST_CASE("AudioReactive - musical beat detection processes audio") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    config.sampleRate = 22050;
+    config.enableMusicalBeatDetection = true;
+    config.enableSpectralFlux = true;
+    config.musicalBeatMinBPM = 60.0f;
+    config.musicalBeatMaxBPM = 180.0f;
+    config.musicalBeatConfidence = 0.3f;
+    audio.begin(config);
+
+    // Feed actual audio signal (not just config check!)
+    // Process 20 frames of a 440 Hz tone with varying amplitude
+    for (int iter = 0; iter < 20; ++iter) {
+        float amplitude = (iter % 4 == 0) ? 15000.0f : 1000.0f;
+        vector<i16> samples = generateSineWave(512, 440.0f, 22050.0f,
+                                               static_cast<i16>(amplitude));
+        AudioSample audioSample = createSample(samples, iter * 23);
+        audio.processSample(audioSample);
+    }
+
+    // Verify actual processing happened (not just config)
+    const auto& data = audio.getData();
+    FL_CHECK_GT(data.volume, 0.0f);
+
+    // Frequency bins should have energy from the 440 Hz tone
+    bool hasBinData = false;
+    for (int i = 0; i < 16; ++i) {
+        if (data.frequencyBins[i] > 0.0f) {
+            hasBinData = true;
+            break;
+        }
+    }
+    FL_CHECK(hasBinData);
+}
+
+// INT-4: Multi-band beat detection actually processes audio
+FL_TEST_CASE("AudioReactive - multi-band beat detection processes audio") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    config.sampleRate = 22050;
+    config.enableMultiBandBeats = true;
+    config.enableSpectralFlux = true;
+    config.bassThreshold = 0.15f;
+    config.midThreshold = 0.12f;
+    config.trebleThreshold = 0.08f;
+    audio.begin(config);
+
+    // Feed bass-heavy signal alternating with silence (simulating kick drum)
+    for (int iter = 0; iter < 20; ++iter) {
+        vector<i16> samples;
+        if (iter % 5 == 0) {
+            // Bass burst
+            samples = generateSineWave(512, 100.0f, 22050.0f, 15000);
+        } else {
+            // Quiet
+            samples = generateSineWave(512, 100.0f, 22050.0f, 500);
+        }
+        AudioSample audioSample = createSample(samples, iter * 23);
+        audio.processSample(audioSample);
+    }
+
+    // Verify actual processing (not just config check)
+    const auto& data = audio.getData();
+    FL_CHECK_GT(data.volume, 0.0f);
+
+    // Bass energy should be present
+    FL_CHECK_GT(data.bassEnergy, 0.0f);
+}
+
+// Keep: Pipeline with all middleware enabled (tightened)
+FL_TEST_CASE("AudioReactive - all middleware enabled processes correctly") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    config.sampleRate = 22050;
+    config.enableLogBinSpacing = true;
+    config.enableSpectralEqualizer = true;
+    config.enableSignalConditioning = true;
+    config.enableAutoGain = true;
+    config.enableNoiseFloorTracking = true;
+    audio.begin(config);
+
+    // Process 10 frames of 1kHz sine
+    for (int iter = 0; iter < 10; ++iter) {
+        vector<i16> samples = generateSineWave(512, 1000.0f, 22050.0f, 5000);
+        AudioSample audioSample = createSample(samples, iter * 100);
+        audio.processSample(audioSample);
+    }
+
+    const auto& data = audio.getData();
+    FL_CHECK_GT(data.volume, 0.0f);
+    FL_CHECK_GT(data.midEnergy, 0.0f);
+
+    // All stats should show processing occurred
+    const auto& scStats = audio.getSignalConditionerStats();
+    FL_CHECK_GT(scStats.samplesProcessed, 0u);
+
+    const auto& agStats = audio.getAutoGainStats();
+    FL_CHECK_GT(agStats.samplesProcessed, 0u);
+
+    const auto& nfStats = audio.getNoiseFloorStats();
+    FL_CHECK_GT(nfStats.samplesProcessed, 0u);
+}
+
+FL_TEST_CASE("AudioReactive - FrequencyBinMapper is always active") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+
+    // Verify log bin spacing is enabled by default
+    FL_CHECK(config.enableLogBinSpacing == true);
+
+    // Begin with default config
+    audio.begin(config);
+
+    // Process a sample to verify mapper works
+    vector<i16> samples = generateSineWave(512, 1000.0f, 22050.0f, 8000);
+    AudioSample audioSample = createSample(samples, 1000);
+    audio.processSample(audioSample);
+
+    // Verify frequency bins are populated
+    const auto& data = audio.getData();
+    FL_CHECK(data.volume > 0.0f);
+
+    // Verify frequency bins contain energy from the 1kHz sine
+    bool hasBinData = false;
+    for (int i = 0; i < 16; ++i) {
+        if (data.frequencyBins[i] > 0.0f) {
+            hasBinData = true;
+            break;
+        }
+    }
+    FL_CHECK(hasBinData);
+}
+
+FL_TEST_CASE("AudioReactive - SpectralEqualizer disabled by default") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+
+    // Verify spectral equalizer is disabled by default
+    FL_CHECK_FALSE(config.enableSpectralEqualizer);
+
+    audio.begin(config);
+
+    // Process a sample - should work without EQ
+    vector<i16> samples = generateSineWave(512, 1000.0f, 22050.0f, 8000);
+    AudioSample audioSample = createSample(samples, 1000);
+    audio.processSample(audioSample);
+
+    const auto& data = audio.getData();
+    FL_CHECK(data.volume > 0.0f);
+
+    bool hasBinData = false;
+    for (int i = 0; i < 16; ++i) {
+        if (data.frequencyBins[i] > 0.0f) {
+            hasBinData = true;
+            break;
+        }
+    }
+    FL_CHECK(hasBinData);
+}
+
+FL_TEST_CASE("AudioReactive - Log bin spacing uses sample rate") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    config.sampleRate = 16000;
+    config.enableLogBinSpacing = true;
+
+    audio.begin(config);
+
+    // Generate a sine wave in the mid-frequency range (500 Hz)
+    vector<i16> samples = generateSineWave(512, 500.0f, 16000.0f, 10000);
+    AudioSample audioSample = createSample(samples, 2000);
+    audio.processSample(audioSample);
+
+    // Verify frequency bins are populated
+    const auto& data = audio.getData();
+    FL_CHECK(data.volume > 0.0f);
+
+    // Check that at least some bins are non-zero
+    bool hasBinData = false;
+    for (int i = 0; i < 16; ++i) {
+        if (data.frequencyBins[i] > 0.0f) {
+            hasBinData = true;
+            break;
+        }
+    }
+    FL_CHECK(hasBinData);
+}
+
+FL_TEST_CASE("AudioReactive - Linear bin spacing fallback") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    config.sampleRate = 22050;
+    config.enableLogBinSpacing = false;  // Use linear spacing
+
+    audio.begin(config);
+
+    // Generate a sine wave
+    vector<i16> samples = generateSineWave(512, 1000.0f, 22050.0f, 8000);
+    AudioSample audioSample = createSample(samples, 3000);
+    audio.processSample(audioSample);
+
+    // Verify frequency bins are populated
+    const auto& data = audio.getData();
+    FL_CHECK(data.volume > 0.0f);
+
+    // Check that bins contain data
+    bool hasBinData = false;
+    for (int i = 0; i < 16; ++i) {
+        if (data.frequencyBins[i] > 0.0f) {
+            hasBinData = true;
+            break;
+        }
+    }
+    FL_CHECK(hasBinData);
+}
+
+FL_TEST_CASE("AudioReactive - SpectralEqualizer integration") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    config.sampleRate = 22050;
+    config.enableSpectralEqualizer = true;  // Enable EQ
+
+    audio.begin(config);
+
+    // Generate a sine wave
+    vector<i16> samples = generateSineWave(512, 1000.0f, 22050.0f, 8000);
+    AudioSample audioSample = createSample(samples, 4000);
+    audio.processSample(audioSample);
+
+    // Verify frequency bins are populated (EQ modifies values but doesn't zero them out)
+    const auto& data = audio.getData();
+    FL_CHECK(data.volume > 0.0f);
+
+    bool hasBinData = false;
+    for (int i = 0; i < 16; ++i) {
+        if (data.frequencyBins[i] > 0.0f) {
+            hasBinData = true;
+            break;
+        }
+    }
+    FL_CHECK(hasBinData);
+}
+
+FL_TEST_CASE("AudioReactive - SpectralEqualizer lazy creation") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    config.sampleRate = 22050;
+    config.enableSpectralEqualizer = false;  // Start with EQ disabled
+
+    audio.begin(config);
+
+    // Process a sample without EQ
+    vector<i16> samples1 = generateSineWave(512, 1000.0f, 22050.0f, 8000);
+    AudioSample audioSample1 = createSample(samples1, 5000);
+    audio.processSample(audioSample1);
+
+    const auto& data1 = audio.getData();
+    FL_CHECK(data1.volume > 0.0f);
+
+    // Now reconfigure with EQ enabled
+    config.enableSpectralEqualizer = true;
+    audio.begin(config);
+
+    // Process another sample with EQ
+    vector<i16> samples2 = generateSineWave(512, 1000.0f, 22050.0f, 8000);
+    AudioSample audioSample2 = createSample(samples2, 6000);
+    audio.processSample(audioSample2);
+
+    const auto& data2 = audio.getData();
+    FL_CHECK(data2.volume > 0.0f);
+
+    bool hasBinData = false;
+    for (int i = 0; i < 16; ++i) {
+        if (data2.frequencyBins[i] > 0.0f) {
+            hasBinData = true;
+            break;
+        }
+    }
+    FL_CHECK(hasBinData);
+}
+
+FL_TEST_CASE("AudioReactive - Band energies use mapper") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    config.sampleRate = 22050;
+    config.enableLogBinSpacing = true;
+
+    audio.begin(config);
+
+    // Generate a low-frequency sine wave (100 Hz) with high amplitude
+    // This should produce energy in the bass range
+    vector<i16> samples = generateSineWave(512, 100.0f, 22050.0f, 15000);
+    AudioSample audioSample = createSample(samples, 7000);
+    audio.processSample(audioSample);
+
+    // Check that bassEnergy > 0
+    const auto& data = audio.getData();
+    FL_CHECK(data.bassEnergy > 0.0f);
+
+    // Check that getData() contains valid band energies
+    // Bass bins (0-1) should have energy
+    bool hasBassData = false;
+    for (int i = 0; i < 2; ++i) {
+        if (data.frequencyBins[i] > 0.0f) {
+            hasBassData = true;
+            break;
+        }
+    }
+    FL_CHECK(hasBassData);
+}
+
+FL_TEST_CASE("AudioReactive - Multiple frequency ranges") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    config.sampleRate = 22050;
+    config.enableLogBinSpacing = true;
+
+    audio.begin(config);
+
+    // Process bass frequency (100 Hz)
+    vector<i16> bassSamples = generateSineWave(512, 100.0f, 22050.0f, 10000);
+    AudioSample bassAudio = createSample(bassSamples, 8000);
+    audio.processSample(bassAudio);
+
+    const auto& bassData = audio.getData();
+    float bassEnergy1 = bassData.bassEnergy;
+    FL_CHECK(bassEnergy1 > 0.0f);
+
+    // Process mid frequency (1000 Hz)
+    vector<i16> midSamples = generateSineWave(512, 1000.0f, 22050.0f, 10000);
+    AudioSample midAudio = createSample(midSamples, 9000);
+    audio.processSample(midAudio);
+
+    const auto& midData = audio.getData();
+    float midEnergy = midData.midEnergy;
+    FL_CHECK(midEnergy > 0.0f);
+
+    // Process treble frequency (8000 Hz)
+    vector<i16> trebleSamples = generateSineWave(512, 8000.0f, 22050.0f, 10000);
+    AudioSample trebleAudio = createSample(trebleSamples, 10000);
+    audio.processSample(trebleAudio);
+
+    const auto& trebleData = audio.getData();
+    float trebleEnergy = trebleData.trebleEnergy;
+    FL_CHECK(trebleEnergy > 0.0f);
+}
+
+FL_TEST_CASE("AudioReactive - Frequency bin consistency with mapper") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    config.sampleRate = 22050;
+    config.enableLogBinSpacing = true;
+
+    audio.begin(config);
+
+    // Process a full-spectrum signal (mix of frequencies)
+    vector<i16> complexSamples = generateSineWave(512, 100.0f, 22050.0f, 3000);
+    vector<i16> mid = generateSineWave(512, 1000.0f, 22050.0f, 3000);
+    vector<i16> treble = generateSineWave(512, 5000.0f, 22050.0f, 3000);
+
+    // Mix signals
+    for (size i = 0; i < 512; ++i) {
+        i32 mixed = static_cast<i32>(complexSamples[i]) +
+                    static_cast<i32>(mid[i]) +
+                    static_cast<i32>(treble[i]);
+        // Clamp to i16 range
+        if (mixed > 32767) mixed = 32767;
+        if (mixed < -32768) mixed = -32768;
+        complexSamples[i] = static_cast<i16>(mixed);
+    }
+
+    AudioSample complexAudio = createSample(complexSamples, 11000);
+    audio.processSample(complexAudio);
+
+    // Verify all frequency bands have energy
+    const auto& data = audio.getData();
+    FL_CHECK(data.bassEnergy > 0.0f);
+    FL_CHECK(data.midEnergy > 0.0f);
+    FL_CHECK(data.trebleEnergy > 0.0f);
+
+    // Verify frequency bins are populated across the spectrum
+    int nonZeroBins = 0;
+    for (int i = 0; i < 16; ++i) {
+        if (data.frequencyBins[i] > 0.0f) {
+            nonZeroBins++;
+        }
+    }
+    FL_CHECK(nonZeroBins > 0);
+}
+
+FL_TEST_CASE("AudioReactive - Pipeline with all middleware enabled") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    config.sampleRate = 22050;
+    config.enableLogBinSpacing = true;
+    config.enableSpectralEqualizer = true;
+    config.enableSignalConditioning = true;
+    config.enableAutoGain = true;
+    config.enableNoiseFloorTracking = true;
+
+    audio.begin(config);
+
+    // Process multiple samples to let middleware converge
+    for (int iter = 0; iter < 10; ++iter) {
+        vector<i16> samples = generateSineWave(512, 1000.0f, 22050.0f, 5000);
+        AudioSample audioSample = createSample(samples, iter * 100);
+        audio.processSample(audioSample);
+    }
+
+    // Verify all components are active
+    const auto& data = audio.getData();
+    FL_CHECK(data.volume > 0.0f);
+
+    // With a 1kHz sine, mid energy should be dominant
+    FL_CHECK(data.midEnergy > 0.0f);
+
+    // Check signal conditioning stats
+    const auto& scStats = audio.getSignalConditionerStats();
+    FL_CHECK(scStats.samplesProcessed > 0);
+
+    const auto& agStats = audio.getAutoGainStats();
+    FL_CHECK(agStats.samplesProcessed > 0);
+
+    const auto& nfStats = audio.getNoiseFloorStats();
+    FL_CHECK(nfStats.samplesProcessed > 0);
+
+    // Check frequency bins
+    bool hasBinData = false;
+    for (int i = 0; i < 16; ++i) {
+        if (data.frequencyBins[i] > 0.0f) {
+            hasBinData = true;
+            break;
+        }
+    }
+    FL_CHECK(hasBinData);
+}
+FL_TEST_CASE("AudioReactive - Signal conditioning integration enabled by default") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    // Signal conditioning should be enabled by default
+    FL_CHECK(config.enableSignalConditioning == true);
+    FL_CHECK(config.enableAutoGain == true);
+    FL_CHECK(config.enableNoiseFloorTracking == true);
+
+    audio.begin(config);
+
+    // Process a sample - should work without signal conditioning
+    vector<i16> samples = generateSineWave(1000, 1000.0f, 22050.0f, 8000);
+    AudioSample audioSample = createSample(samples, 1000);
+    audio.processSample(audioSample);
+
+    const auto& data = audio.getData();
+    FL_CHECK(data.volume > 0.0f);
+}
+
+FL_TEST_CASE("AudioReactive - Enable signal conditioning") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    config.enableSignalConditioning = true;
+    config.enableAutoGain = false;
+    config.enableNoiseFloorTracking = false;
+    audio.begin(config);
+
+    // Create sample with DC bias
+    vector<i16> biasedSamples = generateSineWave(1000, 1000.0f, 22050.0f, 5000);
+    for (size i = 0; i < biasedSamples.size(); ++i) {
+        i32 biased = static_cast<i32>(biasedSamples[i]) + 2000; // Add DC bias
+        if (biased > 32767) biased = 32767;
+        if (biased < -32768) biased = -32768;
+        biasedSamples[i] = static_cast<i16>(biased);
+    }
+
+    AudioSample biasedAudio = createSample(biasedSamples, 2000);
+    audio.processSample(biasedAudio);
+
+    // Signal conditioning should have removed DC bias
+    const auto& scStats = audio.getSignalConditionerStats();
+    FL_CHECK(scStats.samplesProcessed > 0);
+
+    // Audio should still be processed
+    const auto& data = audio.getData();
+    FL_CHECK(data.volume > 0.0f);
+}
+
+FL_TEST_CASE("AudioReactive - Enable auto gain") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    config.enableSignalConditioning = false;
+    config.enableAutoGain = true;
+    config.enableNoiseFloorTracking = false;
+    audio.begin(config);
+
+    // Process several quiet samples to let AGC converge
+    for (int i = 0; i < 10; ++i) {
+        vector<i16> quietSamples = generateSineWave(500, 1000.0f, 22050.0f, 1000);
+        AudioSample quietAudio = createSample(quietSamples, i * 100);
+        audio.processSample(quietAudio);
+    }
+
+    const auto& agStats = audio.getAutoGainStats();
+    FL_CHECK(agStats.samplesProcessed > 0);
+    FL_CHECK(agStats.currentGain > 0.0f);
+
+    // Audio should be processed and potentially amplified
+    const auto& data = audio.getData();
+    FL_CHECK(data.volume >= 0.0f);
+}
+
+FL_TEST_CASE("AudioReactive - Enable noise floor tracking") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    config.enableSignalConditioning = false;
+    config.enableAutoGain = false;
+    config.enableNoiseFloorTracking = true;
+    audio.begin(config);
+
+    // Process several samples to build noise floor estimate
+    for (int i = 0; i < 10; ++i) {
+        vector<i16> samples = generateSineWave(500, 1000.0f, 22050.0f, 3000);
+        AudioSample audioSample = createSample(samples, i * 100);
+        audio.processSample(audioSample);
+    }
+
+    const auto& nfStats = audio.getNoiseFloorStats();
+    FL_CHECK(nfStats.samplesProcessed > 0);
+    FL_CHECK(nfStats.currentFloor > 0.0f);
+
+    // Audio should be processed
+    const auto& data = audio.getData();
+    FL_CHECK(data.volume > 0.0f);
+}
+
+FL_TEST_CASE("AudioReactive - Full signal conditioning pipeline") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    config.enableSignalConditioning = true;
+    config.enableAutoGain = true;
+    config.enableNoiseFloorTracking = true;
+    audio.begin(config);
+
+    // Create complex test signal:
+    // - Sine wave with DC bias
+    // - Varying amplitude
+    for (int iter = 0; iter < 20; ++iter) {
+        i16 amplitude = static_cast<i16>(2000 + iter * 200); // Gradually increasing
+        vector<i16> samples = generateSineWave(500, 1000.0f, 22050.0f, amplitude);
+
+        // Add DC bias
+        for (size i = 0; i < samples.size(); ++i) {
+            i32 biased = static_cast<i32>(samples[i]) + 1000;
+            if (biased > 32767) biased = 32767;
+            if (biased < -32768) biased = -32768;
+            samples[i] = static_cast<i16>(biased);
+        }
+
+        AudioSample audioSample = createSample(samples, iter * 100);
+        audio.processSample(audioSample);
+    }
+
+    // Verify all components processed the signal
+    const auto& scStats = audio.getSignalConditionerStats();
+    FL_CHECK(scStats.samplesProcessed > 0);
+
+    const auto& agStats = audio.getAutoGainStats();
+    FL_CHECK(agStats.samplesProcessed > 0);
+
+    const auto& nfStats = audio.getNoiseFloorStats();
+    FL_CHECK(nfStats.samplesProcessed > 0);
+
+    // Audio should be processed
+    const auto& data = audio.getData();
+    FL_CHECK(data.volume > 0.0f);
+
+    // Verify signal conditioning stats
+    FL_CHECK(scStats.dcOffset != 0);  // Should have detected DC offset
+}
+
+FL_TEST_CASE("AudioReactive - Stats pointers null when disabled") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    config.enableSignalConditioning = false;
+    config.enableAutoGain = false;
+    config.enableNoiseFloorTracking = false;
+    audio.begin(config);
+
+    // Process a sample
+    vector<i16> samples = generateSineWave(500, 1000.0f, 22050.0f, 5000);
+    AudioSample audioSample = createSample(samples, 1000);
+    audio.processSample(audioSample);
+
+    // Stats should still be available (components exist but are disabled)
+    const auto& scStats = audio.getSignalConditionerStats();
+    const auto& agStats = audio.getAutoGainStats();
+    const auto& nfStats = audio.getNoiseFloorStats();
+
+    // Components are disabled so they shouldn't have processed samples
+    FL_CHECK_EQ(scStats.samplesProcessed, 0u);
+    FL_CHECK_EQ(agStats.samplesProcessed, 0u);
+    FL_CHECK_EQ(nfStats.samplesProcessed, 0u);
+}
+
+FL_TEST_CASE("AudioReactive - Signal conditioning with spikes") {
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    config.enableSignalConditioning = true;
+    audio.begin(config);
+
+    // Create signal with injected spikes
+    vector<i16> samples = generateSineWave(1000, 1000.0f, 22050.0f, 3000);
+    for (size i = 0; i < 100; i += 10) {
+        samples[i] = 25000;  // Inject spikes
+    }
+
+    AudioSample audioSample = createSample(samples, 3000);
+    audio.processSample(audioSample);
+
+    // Verify spikes were detected and rejected
+    const auto& scStats = audio.getSignalConditionerStats();
+    FL_CHECK(scStats.spikesRejected > 0);
+
+    // Audio should still be processed (spikes filtered out)
+    const auto& data = audio.getData();
+    FL_CHECK(data.volume > 0.0f);
+}
+
+FL_TEST_CASE("AudioReactive - Backward compatibility") {
+    // Test that existing code without signal conditioning still works
+
+    AudioReactive audio;
+    AudioReactiveConfig config;
+    config.sampleRate = 22050;
+    config.gain = 128;
+    config.agcEnabled = false;  // Use old AGC, not new AutoGain
+    // Don't enable new signal conditioning features
+    audio.begin(config);
+
+    // Process samples the old way
+    vector<i16> samples = generateSineWave(1000, 1000.0f, 22050.0f, 8000);
+    AudioSample audioSample = createSample(samples, 4000);
+    audio.processSample(audioSample);
+
+    // Should work exactly as before
+    const auto& data = audio.getData();
+    FL_CHECK(data.volume > 0.0f);
+    FL_CHECK(data.frequencyBins[0] >= 0.0f);
 }

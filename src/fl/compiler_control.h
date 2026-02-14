@@ -525,27 +525,8 @@ FL_DISABLE_WARNING_POP
   #define FL_NORETURN
 #endif
 
-// Mark symbols (functions, types, variables) as deprecated
-// Generates compiler warnings when deprecated symbols are used.
-//
-// Usage:
-//   FL_DEPRECATED void old_function();
-//   struct FL_DEPRECATED OldClass { };
-//
-// This macro is portable across C++11/14/17 compilers.
-#if __cplusplus >= 201402L
-  // C++14+: Use standard [[deprecated]] attribute
-  #define FL_DEPRECATED [[deprecated]]
-#elif defined(FL_IS_GCC) || defined(FL_IS_CLANG)
-  // GCC/Clang: Use deprecated attribute
-  #define FL_DEPRECATED __attribute__((deprecated))
-#elif defined(FL_IS_WIN_MSVC)
-  // MSVC: Use __declspec(deprecated)
-  #define FL_DEPRECATED __declspec(deprecated)
-#else
-  // Unsupported compiler: no-op
-  #define FL_DEPRECATED
-#endif
+// FL_DEPRECATED macro is defined in fl/deprecated.h
+// That file provides FL_DEPRECATED(msg) with message support for better compatibility
 
 // Branch prediction hints for hot paths (C++20 [[likely]] / [[unlikely]])
 // Helps the compiler optimize for the common case.

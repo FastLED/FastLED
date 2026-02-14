@@ -1,4 +1,4 @@
-// standalone test
+// ok standalone
 /// @file audio_deficiencies.cpp
 /// @brief TDD tests for FastLED audio library deficiencies.
 ///

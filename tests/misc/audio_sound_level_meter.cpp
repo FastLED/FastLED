@@ -1,5 +1,5 @@
 // Unit tests for SoundLevelMeter
-// standalone test
+// ok standalone
 
 #include "test.h"
 #include "FastLED.h"

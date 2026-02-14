@@ -43,7 +43,10 @@ class MesonTestResult:
 
 
 def run_meson_test(
-    build_dir: Path, test_name: Optional[str] = None, verbose: bool = False
+    build_dir: Path,
+    test_name: Optional[str] = None,
+    verbose: bool = False,
+    exclude_suites: Optional[list[str]] = None,
 ) -> MesonTestResult:
     """
     Run tests using Meson.
@@ -52,6 +55,7 @@ def run_meson_test(
         build_dir: Meson build directory
         test_name: Specific test to run (None = all)
         verbose: Enable verbose test output
+        exclude_suites: Optional list of test suites to exclude (e.g., ['examples'])
 
     Returns:
         MesonTestResult with success status, duration, and test counts
@@ -72,6 +76,11 @@ def run_meson_test(
 
     if test_name:
         cmd.append(test_name)
+
+    # Add --no-suite flags to exclude specified suites
+    if exclude_suites:
+        for suite in exclude_suites:
+            cmd.extend(["--no-suite", suite])
         _print_banner("Test", "▶️", verbose=verbose)
         print(f"Running: {test_name}")
     else:

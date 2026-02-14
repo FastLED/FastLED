@@ -1547,6 +1547,9 @@ def runner(
                 debug=args.debug,
                 build_mode=args.build_mode,
                 check=args.check,
+                exclude_suites=[
+                    "fastled:examples"
+                ],  # Exclude examples in unit-test-only mode
             )
 
             if not result.success:

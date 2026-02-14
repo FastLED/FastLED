@@ -1,14 +1,16 @@
 #pragma once
 
-#if defined(__clang__)
+#include "platforms/is_platform.h"
+
+#if defined(FL_IS_CLANG)
 // Clang: Do not mark classes as deprecated
   #define FASTLED_DEPRECATED_CLASS(msg)
   #ifndef FASTLED_DEPRECATED
     #define FASTLED_DEPRECATED(msg) __attribute__((deprecated(msg)))
   #endif
-#elif defined(__GNUC__) // GCC (but not Clang)
+#elif defined(FL_IS_GCC) // GCC (but not Clang)
   #ifndef FASTLED_DEPRECATED
-    #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)
+    #if FL_GCC_VERSION >= 405
       #define FASTLED_DEPRECATED(msg) __attribute__((deprecated(msg)))
       #define FASTLED_DEPRECATED_CLASS(msg) __attribute__((deprecated(msg)))
     #else
@@ -24,5 +26,10 @@
 #endif
 
 
+#ifndef FL_DEPRECATED
 #define FL_DEPRECATED(msg) FASTLED_DEPRECATED(msg)
+#endif
+
+#ifndef FL_DEPRECATED_CLASS
 #define FL_DEPRECATED_CLASS(msg) FASTLED_DEPRECATED_CLASS(msg)
+#endif

@@ -60,9 +60,9 @@ class TestPathStructureChecker(FileContentChecker):
     def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check if test file path matches the source file directory structure.
 
-        Rule: tests/**/file.cpp must match src/**/file.{h,cpp,cpp.hpp}
+        Rule: tests/**/file.cpp must match src/**/file.h or src/**/file.hpp
         Exception: Tests in tests/misc/ are exempt (don't need to match).
-        Exception: Tests with '// standalone test' comment are exempt.
+        Exception: Tests with '// ok standalone' comment are exempt.
         """
         test_path = Path(file_content.path)
 
@@ -70,14 +70,14 @@ class TestPathStructureChecker(FileContentChecker):
         rel_from_tests = test_path.relative_to(TESTS_ROOT)
         test_name_no_ext = rel_from_tests.with_suffix("")  # Remove .cpp
 
-        # Check for source file at exact matching path with various extensions
-        source_extensions = [".h", ".cpp", ".cpp.hpp", ".hpp"]
-        expected_source_base = SRC_ROOT / test_name_no_ext
+        # Check for source file at exact matching path
+        # Check for .h or .hpp header files
+        expected_source_h = SRC_ROOT / test_name_no_ext.with_suffix(".h")
+        expected_source_hpp = SRC_ROOT / test_name_no_ext.with_suffix(".hpp")
 
-        # If any matching source file exists at the expected location, no issue
-        for ext in source_extensions:
-            if expected_source_base.with_suffix(ext).exists():
-                return []
+        # If matching source file exists at the expected location, no issue
+        if expected_source_h.exists() or expected_source_hpp.exists():
+            return []
 
         # Check if file has "// ok standalone" comment in first few lines
         for line in file_content.lines[:5]:  # Check first 5 lines
@@ -91,14 +91,15 @@ class TestPathStructureChecker(FileContentChecker):
         message = (
             f"Test file has no corresponding source file at matching path. "
             f"Test is at '{rel_current_test}' but no source file found at "
-            f"'src/{rel_from_tests.with_suffix('')}.{{h,cpp,cpp.hpp}}'. "
+            f"'src/{rel_from_tests.with_suffix('.h')}' or 'src/{rel_from_tests.with_suffix('.hpp')}'. "
             f"\n\n"
             f"REQUIRED ACTIONS (in order of preference):\n"
             f"  1. RENAME the test to match the source file it's testing (best option)\n"
             f"  2. MERGE this test into an existing test file if it tests the same source\n"
             f"  3. MOVE to 'tests/misc/{test_path.name}' if this truly doesn't test a specific source file\n"
             f"  4. ONLY as a last resort: add '// ok standalone' comment at the top if this absolutely cannot be organized otherwise\n\n"
-            f"Test organization should mirror source organization for maintainability."
+            f"Test organization should mirror source organization for maintainability.\n"
+            f"Note: Source matcher checks .h and .hpp header files, not .cpp.hpp implementation files."
         )
 
         self.violations[file_content.path] = [(1, message)]
