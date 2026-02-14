@@ -118,6 +118,12 @@ class BuildLock:
         if self._is_acquired:
             return True  # Already acquired
 
+        # IMPORTANT: Check for stale lock BEFORE attempting acquisition
+        # This prevents immediate blocking on locks from killed processes
+        if self.lock_file.exists():
+            if self._check_stale_lock():
+                print(f"Removed stale lock before acquisition: {self.lock_file}")
+
         # Create InterProcessLock instance
         self._lock = fasteners.InterProcessLock(str(self.lock_file))
 

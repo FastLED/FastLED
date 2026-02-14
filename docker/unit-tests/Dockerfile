@@ -36,6 +36,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 #   - libxml2: Required by clang-tool-chain's bundled ld.lld
 #   - valgrind: For callgrind profiling and analysis
 #   - binutils: Provides strip command for removing debug symbols
+#   - rsync: For content-based file syncing (prevents timestamp rebuild issues)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
@@ -45,6 +46,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxml2 \
     valgrind \
     binutils \
+    rsync \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 

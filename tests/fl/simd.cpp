@@ -525,6 +525,89 @@ FL_TEST_CASE("mulhi_i32_4 handles fractional multiplication") {
     FL_REQUIRE(dst[3] == 0x00010000);  // 2.0 * 0.5 = 1.0
 }
 
+FL_TEST_CASE("mulhi_i32_4 vs scalar reference with signed values") {
+    // Scalar reference implementation
+    auto scalar_mulhi = [](int32_t a, int32_t b) -> int32_t {
+        int64_t prod = static_cast<int64_t>(a) * static_cast<int64_t>(b);
+        return static_cast<int32_t>(prod >> 16);
+    };
+
+    // Test with mix of positive, negative, and edge cases
+    int32_t a_vals[4] = {1000, -2000, 65536, -65536};
+    int32_t b_vals[4] = {5000, 6000, -7000, -8000};
+
+    // Compute scalar reference
+    int32_t expected[4];
+    for (int i = 0; i < 4; i++) {
+        expected[i] = scalar_mulhi(a_vals[i], b_vals[i]);
+    }
+
+    // Compute SIMD version
+    auto va = simd::load_u32_4(reinterpret_cast<uint32_t*>(a_vals));
+    auto vb = simd::load_u32_4(reinterpret_cast<uint32_t*>(b_vals));
+    auto result = simd::mulhi_i32_4(va, vb);
+
+    int32_t simd_result[4];
+    simd::store_u32_4(reinterpret_cast<uint32_t*>(simd_result), result);
+
+    // Verify SIMD matches scalar
+    for (int i = 0; i < 4; i++) {
+        FL_REQUIRE_EQ(simd_result[i], expected[i]);
+    }
+}
+
+FL_TEST_CASE("mulhi_i32_4 comprehensive signed test") {
+    // Scalar reference implementation
+    auto scalar_mulhi = [](int32_t a, int32_t b) -> int32_t {
+        int64_t prod = static_cast<int64_t>(a) * static_cast<int64_t>(b);
+        return static_cast<int32_t>(prod >> 16);
+    };
+
+    // Test multiple cases systematically
+    struct TestCase {
+        int32_t a[4];
+        int32_t b[4];
+    };
+
+    TestCase cases[] = {
+        // Positive * Positive
+        {{100, 1000, 10000, 100000}, {200, 2000, 20000, 200000}},
+        // Negative * Positive
+        {{-100, -1000, -10000, -100000}, {200, 2000, 20000, 200000}},
+        // Positive * Negative
+        {{100, 1000, 10000, 100000}, {-200, -2000, -20000, -200000}},
+        // Negative * Negative
+        {{-100, -1000, -10000, -100000}, {-200, -2000, -20000, -200000}},
+        // Mixed signs
+        {{100, -1000, 10000, -100000}, {-200, 2000, -20000, 200000}},
+        // Edge cases
+        {{0, -1, 1, 2147483647}, {0, -1, -1, 2}},
+    };
+
+    for (size_t test_idx = 0; test_idx < sizeof(cases) / sizeof(TestCase); test_idx++) {
+        const TestCase& tc = cases[test_idx];
+
+        // Compute scalar reference
+        int32_t expected[4];
+        for (int i = 0; i < 4; i++) {
+            expected[i] = scalar_mulhi(tc.a[i], tc.b[i]);
+        }
+
+        // Compute SIMD version
+        auto va = simd::load_u32_4(reinterpret_cast<const uint32_t*>(tc.a));
+        auto vb = simd::load_u32_4(reinterpret_cast<const uint32_t*>(tc.b));
+        auto result = simd::mulhi_i32_4(va, vb);
+
+        int32_t simd_result[4];
+        simd::store_u32_4(reinterpret_cast<uint32_t*>(simd_result), result);
+
+        // Verify SIMD matches scalar
+        for (int i = 0; i < 4; i++) {
+            FL_REQUIRE_EQ(simd_result[i], expected[i]);
+        }
+    }
+}
+
 FL_TEST_CASE("srl_u32_4 compiles and executes") {
     uint32_t src[4] = {0x12345678, 0xABCDEF00, 0xFFFFFFFF, 0x80000000};
     uint32_t dst[4];

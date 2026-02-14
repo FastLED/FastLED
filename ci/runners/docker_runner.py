@@ -126,9 +126,6 @@ def _build_docker_image(project_root: Path, rebuild: bool = False) -> bool:
     ts_print("This may take a few minutes on first run...")
     ts_print("")
 
-    # Use the Dockerfile directory as build context (minimal context since no COPY)
-    dockerfile_dir = dockerfile_path.parent
-
     try:
         result = subprocess.run(
             [
@@ -139,7 +136,7 @@ def _build_docker_image(project_root: Path, rebuild: bool = False) -> bool:
                 str(dockerfile_path),
                 "-t",
                 image_name,
-                str(dockerfile_dir),  # Minimal build context (just Dockerfile dir)
+                str(project_root),  # Build context is project root (for pyproject.toml)
             ],
             cwd=project_root,
             timeout=600,  # 10 minute timeout for build
@@ -241,6 +238,90 @@ def _run_garbage_collection() -> None:
         ts_print(f"Warning: Garbage collection failed: {e}")
 
 
+def _build_sync_script() -> str:
+    """Build rsync script for syncing source files from /host to /fastled.
+
+    Uses content-based comparison (MD5) and preserves source timestamps to avoid
+    spurious rebuilds when files haven't actually changed.
+    """
+    return """
+# Sync host directories to container working directory
+if command -v rsync &> /dev/null; then
+    echo "Syncing source files from /host to /fastled..."
+
+    # rsync flags:
+    # -a: Archive mode (includes -rlptgoD - recursive, links, perms, times, group, owner, devices)
+    # --checksum: Compare MD5 checksums instead of size+mtime (detects real changes)
+    # --delete: Remove destination files that don't exist in source
+    #
+    # By preserving timestamps (-t in -a), Meson won't see files as modified
+    # when they haven't actually changed (avoids spurious reconfiguration).
+
+    # Sync directories in parallel for speed
+    if [ -d "/host/src" ]; then
+        echo "  → syncing src/..."
+        rsync -a --checksum --delete /host/src/ /fastled/src/ &
+    fi
+
+    if [ -d "/host/tests" ]; then
+        echo "  → syncing tests/..."
+        rsync -a --checksum --delete /host/tests/ /fastled/tests/ &
+    fi
+
+    if [ -d "/host/examples" ]; then
+        echo "  → syncing examples/..."
+        rsync -a --checksum --delete /host/examples/ /fastled/examples/ &
+    fi
+
+    if [ -d "/host/ci" ]; then
+        echo "  → syncing ci/..."
+        rsync -a --checksum --delete /host/ci/ /fastled/ci/ &
+    fi
+
+    if [ -d "/host/lint_plugins" ]; then
+        echo "  → syncing lint_plugins/..."
+        rsync -a --checksum --delete /host/lint_plugins/ /fastled/lint_plugins/ &
+    fi
+
+    # Sync individual files (preserving timestamps prevents Meson reconfiguration)
+    if [ -f "/host/pyproject.toml" ]; then
+        rsync -a --checksum /host/pyproject.toml /fastled/ &
+    fi
+
+    if [ -f "/host/uv.lock" ]; then
+        rsync -a --checksum /host/uv.lock /fastled/ &
+    fi
+
+    if [ -f "/host/test.py" ]; then
+        rsync -a --checksum /host/test.py /fastled/ &
+    fi
+
+    if [ -f "/host/meson.build" ]; then
+        rsync -a --checksum /host/meson.build /fastled/ &
+    fi
+
+    if [ -f "/host/meson.options" ]; then
+        rsync -a --checksum /host/meson.options /fastled/ &
+    fi
+
+    if [ -f "/host/README.md" ]; then
+        rsync -a --checksum /host/README.md /fastled/ &
+    fi
+
+    # Wait for all parallel syncs to complete
+    wait
+
+    echo "  ✓ Source sync complete"
+
+    # Clean Python bytecode cache to ensure latest code is used
+    find /fastled/ci -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+    find /fastled/ci -type f -name "*.pyc" -delete 2>/dev/null || true
+else
+    echo "Warning: rsync not available, skipping directory sync"
+fi
+"""
+
+
 def run_docker_tests(args: TestArgs) -> int:
     """Run tests inside Docker container.
 
@@ -295,38 +376,21 @@ def run_docker_tests(args: TestArgs) -> int:
         if not success:
             ts_print(f"Warning: Failed to remove existing container: {error_msg}")
 
+    # Build rsync script for syncing host files to container
+    sync_script = _build_sync_script()
+
     # Run tests in Docker
     # Use named volumes unique to this project path for .venv and .build
-    # Mount source directories individually to avoid .venv conflicts
+    # Mount source root as read-only at /host, then rsync into /fastled
     docker_cmd = [
         "docker",
         "run",
         "--rm",
         "--name",
         container_name,
-        # Mount source code (read-only where possible)
+        # Mount entire project root as read-only at /host
         "-v",
-        f"{project_root}/src:/fastled/src:ro",
-        "-v",
-        f"{project_root}/tests:/fastled/tests:ro",
-        "-v",
-        f"{project_root}/examples:/fastled/examples:ro",
-        "-v",
-        f"{project_root}/ci:/fastled/ci:ro",
-        "-v",
-        f"{project_root}/pyproject.toml:/fastled/pyproject.toml:ro",
-        "-v",
-        f"{project_root}/uv.lock:/fastled/uv.lock:ro",
-        "-v",
-        f"{project_root}/test.py:/fastled/test.py:ro",
-        "-v",
-        f"{project_root}/meson.build:/fastled/meson.build:ro",
-        "-v",
-        f"{project_root}/meson.options:/fastled/meson.options:ro",
-        "-v",
-        f"{project_root}/README.md:/fastled/README.md:ro",
-        "-v",
-        f"{project_root}/lint_plugins:/fastled/lint_plugins:ro",
+        f"{project_root}:/host:ro",
         # Use named volumes unique to this project path (persistent across runs)
         "-v",
         f"{venv_volume}:/fastled/.venv",
@@ -341,11 +405,13 @@ def run_docker_tests(args: TestArgs) -> int:
         # Set environment to indicate Docker execution
         "-e",
         "FASTLED_DOCKER=1",
+        "-e",
+        "DOCKER_CONTAINER=1",  # Enables rsync --checksum mode
         "fastled-unit-tests",
         "bash",
         "-c",
-        # Skip uv sync - all dependencies pre-installed in Dockerfile
-        # Just set PATH and PYTHONPATH for importing ci modules
+        # Sync files from /host to /fastled, then run tests
+        f"{sync_script}\n\n"
         f"export PATH=/fastled/.venv/bin:$PATH && "
         f"export PYTHONPATH=/fastled:$PYTHONPATH && "
         f"{test_cmd_str}",

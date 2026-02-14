@@ -150,20 +150,27 @@ def is_lock_stale(lock_file_path: Path) -> bool:
     metadata = _read_lock_metadata(lock_file_path)
     if metadata is None:
         # ⚠️ WARNING: Lock has no metadata (foreign lock or corrupted)
-        # Use age-based heuristic: locks older than 30 minutes are considered stale
-        # This prevents immortal locks from PlatformIO or other systems
+        # This typically happens when a process is killed between acquiring the lock
+        # and writing the PID metadata file. Use age-based heuristic as fallback.
+        #
+        # REDUCED THRESHOLD: 2 minutes (was 30 minutes) for faster recovery from
+        # killed processes that didn't write metadata
         try:
             age_seconds = time.time() - lock_file_path.stat().st_mtime
             age_minutes = age_seconds / 60
 
-            if age_seconds > 1800:  # 30 minutes
+            # 2 minutes threshold (120 seconds) - much more aggressive than before
+            # This helps recover from Ctrl+C / process kill scenarios faster
+            if age_seconds > 120:  # 2 minutes
                 logger.warning(
-                    f"Lock {lock_file_path} has no metadata and is {age_minutes:.1f} minutes old, treating as STALE"
+                    f"Lock {lock_file_path} has no metadata and is {age_minutes:.1f} minutes old "
+                    f"(threshold: 2 min), treating as STALE. Likely from killed process."
                 )
                 return True
             else:
-                logger.warning(
-                    f"Lock {lock_file_path} has no metadata but is recent ({age_minutes:.1f} minutes old), assuming active"
+                logger.debug(
+                    f"Lock {lock_file_path} has no metadata but is recent ({age_minutes:.1f} minutes old), "
+                    f"assuming active (threshold: 2 min)"
                 )
                 return False
         except OSError as e:
@@ -181,7 +188,10 @@ def is_lock_stale(lock_file_path: Path) -> bool:
     alive = is_process_alive(pid)
 
     if not alive:
-        logger.info(f"Lock {lock_file_path} is stale (PID {pid} not running)")
+        logger.info(
+            f"Lock {lock_file_path} is stale (PID {pid} not running). "
+            f"Process likely crashed or was killed."
+        )
 
     return not alive
 
