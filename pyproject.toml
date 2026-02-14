@@ -34,7 +34,7 @@ dependencies = [
     "emoji>=2.14.1",
     "pydantic[email]>=2.0.0",
     "dirsync>=2.2.6",
-    "fasteners>=0.20",
+
     "esptool>=5.0.2",
     "docker>=7.0.0",
     "pillow>=11.3.0",

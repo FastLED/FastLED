@@ -1,14 +1,16 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 
-#!/usr/bin/env python3
 """
 File Locking API Wrapper with Stale Lock Detection
 
 Provides a unified, simplified API for inter-process file locking.
-Wraps the fasteners library with PID-based stale lock detection and auto-recovery.
+Uses a centralized SQLite database for lock state with PID-based stale
+lock detection and auto-recovery.
 
 Features:
+- True reader-writer lock semantics (multiple concurrent readers, exclusive writer)
+- Atomic lock operations (SQLite transactions)
 - Fine-grained per-resource locking
 - 5-second default timeout for download operations
 - PID tracking to detect crashed processes
@@ -16,220 +18,114 @@ Features:
 - Cross-platform (Windows/Linux/macOS)
 """
 
-import json
 import logging
 import os
 import platform
 import time
-from datetime import datetime
 from pathlib import Path
 from types import TracebackType
 from typing import Any
 
-import fasteners
+from ci.util.file_lock_rw_util import is_process_alive
+from ci.util.lock_database import LockDatabase, get_lock_database
 
 
 logger = logging.getLogger(__name__)
 
-
-def is_process_alive(pid: int) -> bool:
-    """
-    Check if a process with given PID is still running (cross-platform).
-
-    Args:
-        pid: Process ID to check
-
-    Returns:
-        True if process exists, False otherwise
-    """
-    if pid <= 0:
-        return False
-
-    try:
-        # Unix/Linux/macOS: send signal 0 (doesn't actually send signal, just checks)
-        if platform.system() != "Windows":
-            os.kill(pid, 0)
-            return True
-        else:
-            # Windows: Try to open process handle
-            import ctypes
-
-            windll = getattr(ctypes, "windll")
-            kernel32 = windll.kernel32
-            PROCESS_QUERY_INFORMATION = 0x0400
-            handle = kernel32.OpenProcess(PROCESS_QUERY_INFORMATION, False, pid)
-            if handle:
-                kernel32.CloseHandle(handle)
-                return True
-            return False
-    except (OSError, ProcessLookupError):
-        return False
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
-        raise
-    except Exception as e:
-        logger.warning(f"Error checking if PID {pid} is alive: {e}")
-        return False  # Assume dead if we can't check
+# Re-export is_process_alive so existing callers don't break
+__all__ = [
+    "is_process_alive",
+    "is_lock_stale",
+    "break_stale_lock",
+    "FileLock",
+    "write_lock",
+    "read_lock",
+    "custom_lock",
+    "download_lock",
+    "_write_lock_metadata",
+    "_read_lock_metadata",
+    "_remove_lock_metadata",
+]
 
 
 def _write_lock_metadata(lock_file_path: Path, operation: str = "lock") -> None:
-    """
-    Write metadata for lock file (PID, timestamp, operation).
+    """No-op: metadata is stored in the SQLite database.
 
-    Args:
-        lock_file_path: Path to the lock file
-        operation: Description of the operation holding the lock
+    Kept for backward compatibility with callers that reference this function.
     """
-    metadata_file = lock_file_path.with_suffix(lock_file_path.suffix + ".pid")
-    metadata = {
-        "pid": os.getpid(),
-        "timestamp": datetime.now().isoformat(),
-        "operation": operation,
-        "hostname": platform.node(),
-    }
-
-    try:
-        with open(metadata_file, "w") as f:
-            json.dump(metadata, f, indent=2)
-    except OSError as e:
-        logger.warning(f"Failed to write lock metadata {metadata_file}: {e}")
+    pass
 
 
 def _read_lock_metadata(lock_file_path: Path) -> dict[str, Any] | None:
-    """
-    Read metadata from lock file.
+    """Read metadata from lock database for backward compatibility.
 
     Args:
         lock_file_path: Path to the lock file
 
     Returns:
-        Dictionary with metadata, or None if file doesn't exist
+        Dictionary with metadata, or None if no lock is held
     """
-    metadata_file = lock_file_path.with_suffix(lock_file_path.suffix + ".pid")
-
-    if not metadata_file.exists():
+    db = get_lock_database(lock_file_path)
+    lock_name = str(lock_file_path)
+    holders = db.get_lock_info(lock_name)
+    if not holders:
         return None
 
-    try:
-        with open(metadata_file, "r") as f:
-            return json.load(f)
-    except (json.JSONDecodeError, OSError) as e:
-        logger.warning(f"Failed to read lock metadata {metadata_file}: {e}")
-        return None
+    # Return first holder's info in the legacy format
+    holder = holders[0]
+    return {
+        "pid": holder["owner_pid"],
+        "timestamp": str(holder["acquired_at"]),
+        "operation": holder["operation"],
+        "hostname": holder["hostname"],
+    }
 
 
 def _remove_lock_metadata(lock_file_path: Path) -> None:
-    """
-    Remove metadata file for lock.
+    """No-op: metadata cleanup is handled by release().
 
-    Args:
-        lock_file_path: Path to the lock file
+    Kept for backward compatibility with callers that reference this function.
     """
-    metadata_file = lock_file_path.with_suffix(lock_file_path.suffix + ".pid")
-
-    try:
-        if metadata_file.exists():
-            metadata_file.unlink()
-    except OSError as e:
-        logger.warning(f"Failed to remove lock metadata {metadata_file}: {e}")
+    pass
 
 
 def is_lock_stale(lock_file_path: Path) -> bool:
     """
-    Check if a lock file is stale (owner process is dead).
+    Check if a lock is stale (all holder processes are dead).
 
     Args:
         lock_file_path: Path to the lock file
 
     Returns:
-        True if lock is stale, False if still active or can't determine
+        True if lock is stale, False if still active or no lock exists
     """
-    if not lock_file_path.exists():
-        return False  # No lock file = not stale, just absent
-
-    metadata = _read_lock_metadata(lock_file_path)
-    if metadata is None:
-        # ⚠️ WARNING: Lock has no metadata (foreign lock or corrupted)
-        # This typically happens when a process is killed between acquiring the lock
-        # and writing the PID metadata file. Use age-based heuristic as fallback.
-        #
-        # REDUCED THRESHOLD: 2 minutes (was 30 minutes) for faster recovery from
-        # killed processes that didn't write metadata
-        try:
-            age_seconds = time.time() - lock_file_path.stat().st_mtime
-            age_minutes = age_seconds / 60
-
-            # 2 minutes threshold (120 seconds) - much more aggressive than before
-            # This helps recover from Ctrl+C / process kill scenarios faster
-            if age_seconds > 120:  # 2 minutes
-                logger.warning(
-                    f"Lock {lock_file_path} has no metadata and is {age_minutes:.1f} minutes old "
-                    f"(threshold: 2 min), treating as STALE. Likely from killed process."
-                )
-                return True
-            else:
-                logger.debug(
-                    f"Lock {lock_file_path} has no metadata but is recent ({age_minutes:.1f} minutes old), "
-                    f"assuming active (threshold: 2 min)"
-                )
-                return False
-        except OSError as e:
-            logger.warning(
-                f"Failed to stat lock file {lock_file_path}: {e}, assuming active"
-            )
-            return False
-
-    pid = metadata.get("pid")
-    if pid is None:
-        logger.warning(f"Lock {lock_file_path} has no PID in metadata")
-        return False
-
-    # Check if process is alive
-    alive = is_process_alive(pid)
-
-    if not alive:
-        logger.info(
-            f"Lock {lock_file_path} is stale (PID {pid} not running). "
-            f"Process likely crashed or was killed."
-        )
-
-    return not alive
+    db = get_lock_database(lock_file_path)
+    lock_name = str(lock_file_path)
+    return db.is_lock_stale(lock_name)
 
 
 def break_stale_lock(lock_file_path: Path) -> bool:
     """
-    Remove a stale lock file and its metadata.
+    Remove stale lock entries (dead PIDs) from the database.
 
     Args:
         lock_file_path: Path to the lock file
 
     Returns:
-        True if lock was broken, False if failed or lock is not stale
+        True if stale lock was broken, False otherwise
     """
-    if not is_lock_stale(lock_file_path):
-        return False
-
-    try:
-        # Remove lock file
-        if lock_file_path.exists():
-            lock_file_path.unlink()
-            logger.info(f"Broke stale lock: {lock_file_path}")
-
-        # Remove metadata
-        _remove_lock_metadata(lock_file_path)
-
-        return True
-    except OSError as e:
-        logger.error(f"Failed to break stale lock {lock_file_path}: {e}")
-        return False
+    db = get_lock_database(lock_file_path)
+    lock_name = str(lock_file_path)
+    return db.break_stale_lock(lock_name)
 
 
 class FileLock:
     """
-    Inter-process file lock wrapper with stale lock detection.
+    Inter-process file lock wrapper backed by SQLite database.
 
     Provides a context manager for acquiring/releasing locks safely.
     Automatically detects and breaks stale locks (dead processes).
+    Supports both read and write lock modes.
     """
 
     def __init__(
@@ -237,76 +133,80 @@ class FileLock:
         lock_file_path: Path,
         timeout: float | None = None,
         operation: str = "lock",
+        mode: str = "write",
     ):
         """
         Initialize file lock.
 
         Args:
-            lock_file_path: Path to the lock file
+            lock_file_path: Path to the lock file (used as lock name)
             timeout: Optional timeout in seconds (None = block indefinitely)
             operation: Description of the operation (for debugging)
+            mode: Lock mode - 'read' or 'write' (default: 'write')
         """
         self.lock_file_path = Path(lock_file_path)
         self.timeout = timeout
         self.operation = operation
-        self._lock: fasteners.InterProcessLock | None = None
+        self._mode = mode
+        self._lock_name = str(self.lock_file_path)
+        self._db: LockDatabase = get_lock_database(self.lock_file_path)
+        self._acquired = False
 
     def __enter__(self) -> "FileLock":
         """Acquire the lock with stale lock detection and retry."""
-        # Ensure lock file directory exists
-        self.lock_file_path.parent.mkdir(parents=True, exist_ok=True)
+        from ci.util.global_interrupt_handler import is_interrupted
 
-        # Create and acquire lock
-        self._lock = fasteners.InterProcessLock(str(self.lock_file_path))
+        my_pid = os.getpid()
+        hostname = platform.node()
+        start_time = time.time()
+        stale_check_done = False
 
-        if self.timeout is not None:
-            # Try to acquire with timeout
-            acquired = self._lock.acquire(blocking=True, timeout=self.timeout)
+        while True:
+            if is_interrupted():
+                raise KeyboardInterrupt()
 
-            if not acquired:
-                # Timeout - check if lock is stale
-                logger.info(
-                    f"Lock acquisition timed out after {self.timeout}s, checking for stale lock"
-                )
+            # Try to acquire
+            acquired = self._db.try_acquire(
+                self._lock_name, my_pid, hostname, self.operation, mode=self._mode
+            )
 
-                if is_lock_stale(self.lock_file_path):
-                    # Break stale lock and retry once
+            if acquired:
+                self._acquired = True
+                return self
+
+            # Check for stale locks (once per acquisition attempt cycle)
+            if not stale_check_done:
+                if self._db.is_lock_stale(self._lock_name):
                     logger.info("Detected stale lock, breaking and retrying")
-                    if break_stale_lock(self.lock_file_path):
-                        # Retry acquisition
-                        acquired = self._lock.acquire(
-                            blocking=True, timeout=self.timeout
-                        )
-                        if not acquired:
-                            raise TimeoutError(
-                                f"Failed to acquire lock {self.lock_file_path} even after breaking stale lock"
-                            )
-                    else:
+                    self._db.break_stale_lock(self._lock_name)
+                    stale_check_done = True
+                    continue  # Retry immediately after breaking stale lock
+
+            # Check timeout
+            if self.timeout is not None:
+                elapsed = time.time() - start_time
+                if elapsed >= self.timeout:
+                    # Build informative error message
+                    holders = self._db.get_lock_info(self._lock_name)
+                    if holders:
+                        holder = holders[0]
                         raise TimeoutError(
-                            f"Failed to break stale lock {self.lock_file_path}"
-                        )
-                else:
-                    # Lock is held by active process
-                    metadata = _read_lock_metadata(self.lock_file_path)
-                    if metadata:
-                        pid = metadata.get("pid", "unknown")
-                        operation = metadata.get("operation", "unknown")
-                        raise TimeoutError(
-                            f"Failed to acquire lock {self.lock_file_path} within {self.timeout}s. "
-                            f"Lock held by active process (PID {pid}, operation: {operation})"
+                            f"Failed to acquire lock {self._lock_name} within {self.timeout}s. "
+                            f"Lock held by active process (PID {holder['owner_pid']}, "
+                            f"operation: {holder['operation']})"
                         )
                     else:
                         raise TimeoutError(
-                            f"Failed to acquire lock {self.lock_file_path} within {self.timeout}s"
+                            f"Failed to acquire lock {self._lock_name} within {self.timeout}s"
                         )
-        else:
-            # No timeout - block indefinitely
-            self._lock.acquire()
 
-        # Write PID metadata after acquiring lock
-        _write_lock_metadata(self.lock_file_path, self.operation)
+            # Periodically check for stale locks
+            elapsed = time.time() - start_time
+            if elapsed > 1.0:
+                stale_check_done = False  # Re-enable stale checks
 
-        return self
+            # Small sleep to prevent busy-waiting
+            time.sleep(0.1)
 
     def __exit__(
         self,
@@ -314,13 +214,10 @@ class FileLock:
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> bool:
-        """Release the lock and clean up metadata."""
-        if self._lock:
-            # Remove metadata before releasing lock
-            _remove_lock_metadata(self.lock_file_path)
-
-            # Release lock
-            self._lock.release()
+        """Release the lock."""
+        if self._acquired:
+            self._db.release(self._lock_name, os.getpid())
+            self._acquired = False
 
         return False
 
@@ -346,7 +243,7 @@ def write_lock(
                 json.dump(data, f)
     """
     lock_file = file_path.parent / f".{file_path.name}.lock"
-    return FileLock(lock_file, timeout=timeout, operation=operation)
+    return FileLock(lock_file, timeout=timeout, operation=operation, mode="write")
 
 
 def read_lock(
@@ -355,8 +252,7 @@ def read_lock(
     """
     Create a read lock for a file.
 
-    Note: fasteners only provides exclusive locks, so this behaves
-    identically to write_lock(). Provided for API compatibility.
+    Allows multiple concurrent readers. Blocks only if a writer holds the lock.
 
     Args:
         file_path: Path to the file to lock
@@ -372,9 +268,8 @@ def read_lock(
             with open("data.json", "r") as f:
                 data = json.load(f)
     """
-    # Note: fasteners.InterProcessLock is exclusive, so read/write are the same
     lock_file = file_path.parent / f".{file_path.name}.lock"
-    return FileLock(lock_file, timeout=timeout, operation=operation)
+    return FileLock(lock_file, timeout=timeout, operation=operation, mode="read")
 
 
 def custom_lock(

@@ -262,7 +262,7 @@ cache = TwoLayerFingerprintCache(config.cache_dir, config.name)
 
 Both `TwoLayerFingerprintCache` and `HashFingerprintCache` support concurrent access:
 
-- **File locking**: Uses `fasteners.InterProcessLock`
+- **File locking**: Uses SQLite-backed `LockDatabase` for inter-process locking
 - **Pending pattern**: Temporary `.pending` files prevent corruption
 - **Atomic updates**: Compare-and-swap prevents race conditions
 

@@ -31,7 +31,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
-import fasteners
 import httpx
 from running_process import RunningProcess
 
@@ -398,11 +397,11 @@ class PlatformIOCache:
         artifact_dir.mkdir(parents=True, exist_ok=True)
         cached_path = artifact_dir / "artifact.zip"
 
-        # Use read-write locking for concurrent safety
-        # Start with write lock for downloading, can upgrade to read if cache hit
-        lock_path = str(artifact_dir / "artifact.lock")
-        rw_lock = fasteners.InterProcessReaderWriterLock(lock_path)
-        with rw_lock.write_lock():
+        # Use write locking for concurrent safety
+        from ci.util.file_lock_rw import custom_lock
+
+        lock_path = artifact_dir / "artifact.lock"
+        with custom_lock(lock_path, timeout=60.0, operation="artifact_download"):
             if cached_path.exists():
                 # Check if processing was completed successfully
                 status_file = _get_status_file(artifact_dir, cache_key)
@@ -492,6 +491,10 @@ class PlatformIOCache:
                 if temp_path.exists():
                     temp_path.unlink()
                 raise
+
+        raise RuntimeError(
+            "Unreachable: download_artifact with block must return or raise"
+        )
 
 
 def _is_zip_web_url(value: str) -> bool:

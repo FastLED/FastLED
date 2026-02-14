@@ -46,28 +46,24 @@ if self.lock_file.exists():
 
 ## How It Works
 
-### Lock Metadata Files
+### Lock Database
 
-Each lock has two files:
-- **`.lock`** - Actual lock file (managed by fasteners library)
-- **`.lock.pid`** - PID metadata (JSON with PID, timestamp, operation, hostname)
+Lock state is stored in a centralized SQLite database (`.cache/locks.db` or `~/.fastled/locks.db`).
+Each lock record contains: lock name, owner PID, lock mode (read/write), operation, hostname, timestamp.
 
 ### Stale Detection Logic
 
-1. **With PID metadata:** Check if process with that PID is still alive
+1. **Check all holders:** Query DB for processes holding the lock
+2. **PID liveness check:** For each holder, check if process is still alive
    - Uses `os.kill(pid, 0)` on Unix
    - Uses `OpenProcess()` on Windows
-   - If process is dead → lock is stale
-
-2. **Without PID metadata:** Use age-based heuristic
-   - Lock older than 2 minutes → stale (likely from killed process)
-   - Lock younger than 2 minutes → assume active (may be in progress)
+3. **If ALL holder PIDs are dead → lock is stale**
 
 ### Recovery Process
 
 1. **At acquisition start:** Check if lock exists and is stale
 2. **During acquisition wait:** Check periodically (every 1 second)
-3. **If stale detected:** Remove `.lock` and `.lock.pid` files
+3. **If stale detected:** Remove dead-PID rows from database
 4. **Retry acquisition:** Attempt to acquire immediately after removal
 
 ## Testing
@@ -85,7 +81,7 @@ uv run python test_stale_lock.py
 
 **Test 2:** Recent lock (30 seconds old, no metadata)
 - ✅ Acquirable if no process holds it (OS-level lock released)
-- ✅ Correct behavior - fasteners handles OS locks properly
+- ✅ Correct behavior - SQLite DB tracks lock state properly
 
 ## Real-World Scenario
 
@@ -110,12 +106,11 @@ bash test
 
 ## Edge Cases Handled
 
-1. **No metadata, recent lock:** Assume active (2-minute grace period)
-2. **No metadata, old lock:** Treat as stale (likely orphaned)
-3. **Has metadata, dead PID:** Stale (process crashed)
-4. **Has metadata, alive PID:** Active (legitimate lock)
-5. **Can't check PID:** Assume active (fail safe)
-6. **OS-level lock released:** Acquirable immediately (fasteners handles this)
+1. **All holder PIDs dead:** Stale (processes crashed)
+2. **Any holder PID alive:** Active (legitimate lock)
+3. **No holders in DB:** Not locked (available)
+4. **Can't check PID:** Assume active (fail safe)
+5. **Multiple readers, one dead:** Remove dead reader only (others remain)
 
 ## Performance Impact
 

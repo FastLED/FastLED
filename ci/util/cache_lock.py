@@ -1,24 +1,20 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 
-#!/usr/bin/env python3
 """
 Cache-Specific Locking API
 
 Provides higher-level locking functions specifically for cache operations.
 Handles fine-grained per-artifact locking for concurrent downloads.
+Uses SQLite-backed lock database for centralized lock management.
 """
 
 import logging
 from dataclasses import dataclass
 from pathlib import Path
 
-from ci.util.file_lock_rw import (
-    FileLock,
-    _read_lock_metadata,
-    break_stale_lock,
-    is_lock_stale,
-)
+from ci.util.file_lock_rw import FileLock
+from ci.util.lock_database import get_lock_database
 from ci.util.url_utils import sanitize_url_for_path
 
 
@@ -84,31 +80,36 @@ def force_unlock_cache(cache_dir: Path) -> int:
     """
     Break ALL locks in cache directory (manual recovery).
 
-    Use this for recovery after system crashes or when locks are stuck.
-    Does NOT check if processes are alive - breaks all locks unconditionally.
+    Uses the SQLite database to clear locks, plus scans for legacy .lock files.
 
     Args:
         cache_dir: Global cache directory
 
     Returns:
         Number of locks broken
-
-    Example:
-        broken = force_unlock_cache(Path("~/.platformio/global_cache"))
-        logger.info(f"Broke {broken} locks")
     """
     if not cache_dir.exists():
         return 0
 
     broken_count = 0
 
-    # Find all .lock files recursively
+    # Clear locks from the database
+    db = get_lock_database()
+    all_locks = db.list_all_locks()
+    for lock in all_locks:
+        lock_name = lock["lock_name"]
+        # Only clear locks that relate to paths under this cache_dir
+        if str(cache_dir) in lock_name:
+            db.force_break(lock_name)
+            broken_count += 1
+            logger.info(f"Force-broke lock: {lock_name}")
+
+    # Also clean up any legacy .lock files on disk
     for lock_file in cache_dir.rglob("*.lock"):
         try:
-            # Remove lock file
             if lock_file.exists():
                 lock_file.unlink()
-                logger.info(f"Force-broke lock: {lock_file}")
+                logger.info(f"Removed legacy lock file: {lock_file}")
                 broken_count += 1
 
             # Remove associated .pid file
@@ -133,21 +134,24 @@ def cleanup_stale_locks(cache_dir: Path) -> int:
 
     Returns:
         Number of stale locks cleaned
-
-    Example:
-        cleaned = cleanup_stale_locks(Path("~/.platformio/global_cache"))
-        logger.info(f"Cleaned {cleaned} stale locks")
     """
     if not cache_dir.exists():
         return 0
 
-    cleaned_count = 0
+    # Clean stale locks from the database
+    db = get_lock_database()
+    cleaned_count = db.cleanup_stale_locks()
 
-    # Find all .lock files recursively
+    # Also clean up any legacy .lock files on disk
+    from ci.util.file_lock_rw import break_stale_lock as _break_stale_lock_legacy
+
     for lock_file in cache_dir.rglob("*.lock"):
         try:
-            if break_stale_lock(lock_file):
-                cleaned_count += 1
+            # Check for legacy .lock.pid metadata files
+            pid_file = lock_file.with_suffix(lock_file.suffix + ".pid")
+            if pid_file.exists():
+                if _break_stale_lock_legacy(lock_file):
+                    cleaned_count += 1
         except KeyboardInterrupt:
             handle_keyboard_interrupt_properly()
             raise
@@ -165,61 +169,35 @@ def list_active_locks(cache_dir: Path) -> list[LockInfo]:
         cache_dir: Global cache directory
 
     Returns:
-        List of LockInfo objects containing:
-        - path: Path to lock file
-        - pid: Process ID holding lock (None if unknown)
-        - operation: Operation name
-        - timestamp: When lock was acquired (None if unknown)
-        - is_stale: Whether lock is from dead process
-        - hostname: Host where lock was created (None if unknown)
-
-    Example:
-        locks = list_active_locks(Path("~/.platformio/global_cache"))
-        for lock in locks:
-            print(lock)  # Uses LockInfo.__str__ for formatting
+        List of LockInfo objects
     """
     if not cache_dir.exists():
         return []
 
     locks: list[LockInfo] = []
 
-    # Find all .lock files recursively
-    for lock_file in cache_dir.rglob("*.lock"):
-        try:
-            metadata = _read_lock_metadata(lock_file)
-            if metadata is None:
-                # Lock exists but no metadata
-                locks.append(
-                    LockInfo(
-                        path=str(lock_file),
-                        pid=None,
-                        operation="unknown",
-                        timestamp=None,
-                        is_stale=False,  # Can't determine, assume active
-                        hostname=None,
-                    )
-                )
-                continue
+    # Query database for all locks
+    db = get_lock_database()
+    all_db_locks = db.list_all_locks()
 
-            # Check if stale
-            stale = is_lock_stale(lock_file)
+    from ci.util.file_lock_rw_util import is_process_alive
 
+    for lock in all_db_locks:
+        # Filter to locks relevant to this cache_dir
+        lock_name = lock["lock_name"]
+        if str(cache_dir) in lock_name:
+            pid = lock["owner_pid"]
+            stale = not is_process_alive(pid)
             locks.append(
                 LockInfo(
-                    path=str(lock_file),
-                    pid=metadata.get("pid"),
-                    operation=metadata.get("operation", "unknown"),
-                    timestamp=metadata.get("timestamp"),
+                    path=lock_name,
+                    pid=pid,
+                    operation=lock["operation"],
+                    timestamp=str(lock["acquired_at"]),
                     is_stale=stale,
-                    hostname=metadata.get("hostname"),
+                    hostname=lock["hostname"],
                 )
             )
-
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
-            raise
-        except Exception as e:
-            logger.warning(f"Error reading lock {lock_file}: {e}")
 
     return locks
 
@@ -239,11 +217,15 @@ def is_artifact_locked(cache_dir: Path, url: str) -> bool:
     artifact_dir = cache_dir / cache_key
     lock_file = artifact_dir / ".download.lock"
 
-    if not lock_file.exists():
+    db = get_lock_database(lock_file)
+    lock_name = str(lock_file)
+
+    # Check if held in database
+    if not db.is_held(lock_name):
         return False
 
-    # Check if lock is stale
-    if is_lock_stale(lock_file):
-        return False  # Stale lock = not actively locked
+    # Check if it's stale
+    if db.is_lock_stale(lock_name):
+        return False
 
     return True

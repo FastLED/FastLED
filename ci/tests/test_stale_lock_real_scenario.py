@@ -23,47 +23,40 @@ import pytest
 from ci.util.build_lock import BuildLock
 from ci.util.file_lock_rw import FileLock, is_lock_stale, is_process_alive
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.lock_database import LockDatabase
 
 
 class TestRealStaleLockScenario(unittest.TestCase):
     """Test suite for real stale lock scenarios with actual process killing."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Create temporary directory for test locks."""
         self.temp_dir = Path(tempfile.mkdtemp())
         self.lock_path = self.temp_dir / "test.lock"
+        self.db_path = self.temp_dir / "test_locks.db"
+        self.db = LockDatabase(self.db_path)
+        os.environ["FASTLED_LOCK_DB_PATH"] = str(self.db_path)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up test files."""
-        # Clean up lock files
-        if self.lock_path.exists():
-            try:
-                self.lock_path.unlink()
-            except OSError:
-                pass
+        import shutil
 
-        metadata_file = self.lock_path.with_suffix(".lock.pid")
-        if metadata_file.exists():
-            try:
-                metadata_file.unlink()
-            except OSError:
-                pass
+        os.environ.pop("FASTLED_LOCK_DB_PATH", None)
+        from ci.util.lock_database import _db_cache
 
-        # Clean up temp directory
-        try:
-            self.temp_dir.rmdir()
-        except OSError:
-            pass
+        _db_cache.clear()
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def _create_lock_holder_script(self) -> Path:
         """
         Create a standalone Python script that holds a lock.
 
         This script:
-        1. Acquires a lock
-        2. Prints its own PID to stdout (for parent to kill)
-        3. Prints "READY" to signal lock acquisition
-        4. Sleeps forever (until killed)
+        1. Sets the DB path environment variable
+        2. Acquires a lock
+        3. Prints its own PID to stdout (for parent to kill)
+        4. Prints "READY" to signal lock acquisition
+        5. Sleeps forever (until killed)
 
         Returns:
             Path to the created script
@@ -78,6 +71,9 @@ from pathlib import Path
 
 # Add project root to path
 sys.path.insert(0, r'{Path(__file__).parent.parent.parent.resolve()}')
+
+# Use the test database
+os.environ["FASTLED_LOCK_DB_PATH"] = r'{self.db_path}'
 
 from ci.util.file_lock_rw import FileLock
 
@@ -97,14 +93,14 @@ with FileLock(lock_path, operation="real_test_scenario"):
 
     @pytest.mark.serial  # Can't run in parallel (process killing)
     @pytest.mark.slow  # This test is slower due to process spawning
-    def test_real_force_kill_and_auto_recovery(self):
+    def test_real_force_kill_and_auto_recovery(self) -> None:
         """
         REAL SCENARIO: Force-kill a process holding a lock, verify auto-recovery.
 
         This test demonstrates the actual bug:
         1. Process acquires lock
         2. Process is force-killed (SIGKILL/Ctrl+C/task manager)
-        3. Lock file remains on disk (stale lock)
+        3. Lock record remains in DB (stale lock)
         4. Next process should auto-recover (break stale lock and continue)
         """
         # Create lock holder script
@@ -133,16 +129,15 @@ with FileLock(lock_path, operation="real_test_scenario"):
             self.assertEqual(ready_line.strip(), "READY", "Lock not acquired by child")
             print(f"[TEST] Child acquired lock successfully")
 
-            # Give it a moment to fully write metadata
+            # Give it a moment for DB to be fully written
             time.sleep(0.2)
 
-            # Verify lock file and metadata exist
-            metadata_file = self.lock_path.with_suffix(".lock.pid")
-            self.assertTrue(self.lock_path.exists(), "Lock file should exist")
+            # Verify lock is held in DB
             self.assertTrue(
-                metadata_file.exists(), "Metadata file should exist after lock acquired"
+                self.db.is_held(str(self.lock_path)),
+                "Lock should be held in DB after child acquired it",
             )
-            print(f"[TEST] Lock files verified: {self.lock_path}")
+            print(f"[TEST] Lock verified in DB: {self.lock_path}")
 
             # Verify child process is alive BEFORE killing
             self.assertTrue(
@@ -185,26 +180,19 @@ with FileLock(lock_path, operation="real_test_scenario"):
             # ====================================================================
             print(f"[TEST] Verifying stale lock condition...")
 
-            # Lock file should still exist (not cleaned up due to force-kill)
+            # Lock record should still exist in DB (not cleaned up due to force-kill)
             self.assertTrue(
-                self.lock_path.exists(),
-                "Lock file should remain after force-kill (this is the bug!)",
+                self.db.is_held(str(self.lock_path)),
+                "Lock should remain in DB after force-kill (this is the bug!)",
             )
-            print(f"[TEST] ✓ Lock file remains after kill: {self.lock_path}")
-
-            # Metadata should still exist
-            self.assertTrue(
-                metadata_file.exists(),
-                "Metadata should remain after force-kill (this is the bug!)",
-            )
-            print(f"[TEST] ✓ Metadata remains after kill: {metadata_file}")
+            print(f"[TEST] Lock record remains in DB after kill")
 
             # Process should be dead (verify kill worked)
             max_retries = 10
             for retry in range(max_retries):
                 if not is_process_alive(child_pid):
                     print(
-                        f"[TEST] ✓ Child process {child_pid} confirmed dead (retry {retry + 1})"
+                        f"[TEST] Child process {child_pid} confirmed dead (retry {retry + 1})"
                     )
                     break
                 print(
@@ -215,7 +203,6 @@ with FileLock(lock_path, operation="real_test_scenario"):
                 # Last attempt
                 if is_process_alive(child_pid):
                     # On Windows, PID might be reused very quickly
-                    # This is acceptable - the stale lock detection will still work
                     print(
                         f"[TEST] WARNING: PID {child_pid} still appears alive (may be reused)"
                     )
@@ -226,9 +213,9 @@ with FileLock(lock_path, operation="real_test_scenario"):
             # Lock should be detected as stale
             is_stale = is_lock_stale(self.lock_path)
             if is_stale:
-                print(f"[TEST] ✓ Lock correctly detected as STALE")
+                print(f"[TEST] Lock correctly detected as STALE")
             else:
-                print(f"[TEST] ⚠️  Lock NOT detected as stale (may indicate PID reuse)")
+                print(f"[TEST] Lock NOT detected as stale (may indicate PID reuse)")
                 # This is acceptable on Windows - auto-recovery will still trigger on timeout
 
             # ====================================================================
@@ -247,19 +234,20 @@ with FileLock(lock_path, operation="real_test_scenario"):
                     acquisition_succeeded = True
                     elapsed = time.time() - start_time
                     print(
-                        f"[TEST] ✅ SUCCESS: Lock acquired after {elapsed:.2f}s (auto-recovery worked!)"
+                        f"[TEST] SUCCESS: Lock acquired after {elapsed:.2f}s (auto-recovery worked!)"
                     )
 
-                    # Verify we actually hold the lock
+                    # Verify we actually hold the lock in DB
                     self.assertTrue(
-                        self.lock_path.exists(), "Lock should exist while we hold it"
+                        self.db.is_held(str(self.lock_path)),
+                        "Lock should be held in DB while we hold it",
                     )
-                    print(f"[TEST] ✓ Verified we now hold the lock")
+                    print(f"[TEST] Verified we now hold the lock in DB")
 
             except TimeoutError as e:
                 elapsed = time.time() - start_time
                 self.fail(
-                    f"❌ FAILED: Auto-recovery did not work! Lock acquisition timed out after {elapsed:.2f}s. "
+                    f"FAILED: Auto-recovery did not work! Lock acquisition timed out after {elapsed:.2f}s. "
                     f"Error: {e}"
                 )
 
@@ -269,15 +257,15 @@ with FileLock(lock_path, operation="real_test_scenario"):
                 "Lock acquisition should succeed via auto-recovery",
             )
 
-            # After releasing lock, files should be cleaned up
+            # After releasing lock, DB entry should be cleaned up
             print(f"[TEST] Verifying cleanup after lock release...")
             self.assertFalse(
-                metadata_file.exists(),
-                "Metadata should be removed after normal lock release",
+                self.db.is_held(str(self.lock_path)),
+                "Lock should be removed from DB after normal lock release",
             )
-            print(f"[TEST] ✓ Metadata cleaned up after release")
+            print(f"[TEST] Lock cleaned up from DB after release")
 
-            print(f"\n[TEST] ✅ ALL CHECKS PASSED - Auto-recovery works correctly!")
+            print(f"\n[TEST] ALL CHECKS PASSED - Auto-recovery works correctly!")
 
         finally:
             # Cleanup: ensure child process is dead
@@ -298,7 +286,7 @@ with FileLock(lock_path, operation="real_test_scenario"):
 
     @pytest.mark.serial
     @pytest.mark.slow
-    def test_buildlock_auto_recovery(self):
+    def test_buildlock_auto_recovery(self) -> None:
         """
         Test BuildLock auto-recovery with real process killing.
 
@@ -307,9 +295,7 @@ with FileLock(lock_path, operation="real_test_scenario"):
         """
         print("\n[TEST] Testing BuildLock auto-recovery...")
 
-        # Create a BuildLock instance
         lock_name = "test_buildlock_recovery"
-        build_lock = BuildLock(lock_name=lock_name, use_global=False)
 
         # Create script that holds BuildLock
         script_path = self.temp_dir / "buildlock_holder.py"
@@ -321,6 +307,9 @@ from pathlib import Path
 
 # Add project root to path
 sys.path.insert(0, r'{Path(__file__).parent.parent.parent.resolve()}')
+
+# Use the test database
+os.environ["FASTLED_LOCK_DB_PATH"] = r'{self.db_path}'
 
 from ci.util.build_lock import BuildLock
 
@@ -371,12 +360,13 @@ else:
             time.sleep(1.0)
             print(f"[TEST] Killed child process {child_pid}")
 
-            # Verify lock file exists (stale)
+            # Verify lock is still held in DB (stale)
+            build_lock_name = f"build:{lock_name}"
             self.assertTrue(
-                build_lock.lock_file.exists(),
-                "BuildLock file should remain after force-kill",
+                self.db.is_held(build_lock_name),
+                "BuildLock should remain in DB after force-kill",
             )
-            print(f"[TEST] ✓ BuildLock file remains: {build_lock.lock_file}")
+            print(f"[TEST] BuildLock entry remains in DB: {build_lock_name}")
 
             # Try to acquire - should succeed via auto-recovery
             print(f"[TEST] Attempting to acquire BuildLock (auto-recovery)...")
@@ -390,15 +380,15 @@ else:
 
             if success:
                 print(
-                    f"[TEST] ✅ BuildLock acquired after {elapsed:.2f}s (auto-recovery worked!)"
+                    f"[TEST] BuildLock acquired after {elapsed:.2f}s (auto-recovery worked!)"
                 )
                 new_lock.release()
             else:
                 self.fail(
-                    f"❌ BuildLock auto-recovery failed - could not acquire after {elapsed:.2f}s"
+                    f"BuildLock auto-recovery failed - could not acquire after {elapsed:.2f}s"
                 )
 
-            print(f"[TEST] ✅ BuildLock auto-recovery works correctly!")
+            print(f"[TEST] BuildLock auto-recovery works correctly!")
 
         finally:
             # Cleanup
@@ -418,7 +408,7 @@ else:
 
     @pytest.mark.serial
     @pytest.mark.slow
-    def test_multiple_sequential_recoveries(self):
+    def test_multiple_sequential_recoveries(self) -> None:
         """
         Test that auto-recovery works multiple times in sequence.
 
@@ -462,9 +452,10 @@ else:
                 time.sleep(0.5)
                 print(f"[TEST] Killed child PID {child_pid}")
 
-                # Verify stale lock
+                # Verify stale lock in DB
                 self.assertTrue(
-                    self.lock_path.exists(), "Lock should remain after kill"
+                    self.db.is_held(str(self.lock_path)),
+                    "Lock should remain in DB after kill",
                 )
 
                 # Acquire and release (triggers recovery)
@@ -472,9 +463,9 @@ else:
                 with FileLock(
                     self.lock_path, timeout=15.0, operation=f"iter_{iteration}"
                 ):
-                    print(f"[TEST] ✓ Lock acquired successfully")
+                    print(f"[TEST] Lock acquired successfully")
 
-                print(f"[TEST] ✓ Lock released successfully")
+                print(f"[TEST] Lock released successfully")
 
             finally:
                 if proc.poll() is None:
@@ -491,7 +482,7 @@ else:
                 except OSError:
                     pass
 
-        print(f"\n[TEST] ✅ All {3} sequential recoveries succeeded!")
+        print(f"\n[TEST] All {3} sequential recoveries succeeded!")
 
 
 if __name__ == "__main__":

@@ -1,43 +1,36 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 
-#!/usr/bin/env python3
 """
 Build lock utility for coordinating concurrent build operations.
 
-This module provides file-based locking to prevent concurrent build operations
+This module provides SQLite-backed locking to prevent concurrent build operations
 from conflicting. Used for project-local locks (e.g., libfastled_build).
 
 Note: Device locking is now handled by fbuild (daemon-based).
 
-Uses fasteners for locking with PID-based stale lock detection for robust recovery.
+Uses a centralized SQLite database with PID-based stale lock detection for robust recovery.
 """
 
+import os
+import platform
 import time
 from contextlib import contextmanager
 from pathlib import Path
 from types import TracebackType
 from typing import Generator, Optional
 
-import fasteners
-
-from ci.util.file_lock_rw import (
-    _read_lock_metadata,
-    _remove_lock_metadata,
-    _write_lock_metadata,
-    break_stale_lock,
-    is_lock_stale,
-)
+from ci.util.lock_database import LockDatabase
 
 
 class BuildLock:
     """
-    File-based lock for coordinating operations using FileLock with PID tracking.
+    SQLite-backed lock for coordinating operations with PID tracking.
 
-    Provides cross-platform file locking with PID-based stale lock detection.
-    Automatically recovers from crashed processes via FileLock's auto-recovery.
-    Supports both project-local locks (.build/locks) and system-wide global
-    locks (~/.fastled/locks) depending on the use case.
+    Provides cross-platform locking with PID-based stale lock detection.
+    Automatically recovers from crashed processes via stale lock breaking.
+    Supports both project-local locks (.cache/locks.db) and system-wide global
+    locks (~/.fastled/locks.db) depending on the use case.
     """
 
     def __init__(self, lock_name: str = "libfastled_build", use_global: bool = False):
@@ -45,52 +38,42 @@ class BuildLock:
         Initialize build lock.
 
         Args:
-            lock_name: Name of the lock (creates .lock file with this name)
-            use_global: If True, use ~/.fastled/locks (system-wide). If False, use .build/locks (project-local)
+            lock_name: Name of the lock
+            use_global: If True, use ~/.fastled/locks.db (system-wide). If False, use .cache/locks.db (project-local)
         """
         if use_global:
-            # Global lock (system-wide)
             home_dir = Path.home()
-            lock_dir = home_dir / ".fastled" / "locks"
+            db_path = home_dir / ".fastled" / "locks.db"
         else:
-            # Project-local lock (project-specific resource like build cache)
             project_root = Path(__file__).parent.parent.parent
-            lock_dir = project_root / ".build" / "locks"
+            db_path = project_root / ".cache" / "locks.db"
 
-        lock_dir.mkdir(parents=True, exist_ok=True)
-
-        self.lock_file = lock_dir / f"{lock_name}.lock"
+        self._db = LockDatabase(db_path)
+        self._lock_name = f"build:{lock_name}"
         self.lock_name = lock_name
-        self._lock: Optional[fasteners.InterProcessLock] = None
+        # Keep lock_file attribute for backward compatibility (logging/display)
+        self.lock_file = db_path
         self._is_acquired = False
 
     _stale_lock_warned: bool = False
 
     def _check_stale_lock(self) -> bool:
-        """Check if lock file is stale (dead process) and remove if stale.
-
-        Uses PID-based detection for accurate staleness checking.
-        Automatically breaks stale locks from force-killed processes.
+        """Check if lock is stale (dead process) and remove if stale.
 
         Returns:
             True if lock was stale and removed, False otherwise
         """
-        if not self.lock_file.exists():
-            return False
-
         try:
-            # Check if lock is stale using PID-based detection
-            if is_lock_stale(self.lock_file):
+            if self._db.is_lock_stale(self._lock_name):
                 if not BuildLock._stale_lock_warned:
                     BuildLock._stale_lock_warned = True
                     print(
-                        f"Detected stale lock at {self.lock_file} (process dead). Attempting removal..."
+                        f"Detected stale lock '{self._lock_name}' (process dead). Attempting removal..."
                     )
 
-                # Break stale lock
-                if break_stale_lock(self.lock_file):
-                    print(f"Removed stale lock file: {self.lock_file}")
-                    BuildLock._stale_lock_warned = False  # Reset for next time
+                if self._db.break_stale_lock(self._lock_name):
+                    print(f"Removed stale lock: {self._lock_name}")
+                    BuildLock._stale_lock_warned = False
                     return True
 
             return False
@@ -118,21 +101,16 @@ class BuildLock:
         if self._is_acquired:
             return True  # Already acquired
 
-        # IMPORTANT: Check for stale lock BEFORE attempting acquisition
-        # This prevents immediate blocking on locks from killed processes
-        if self.lock_file.exists():
-            if self._check_stale_lock():
-                print(f"Removed stale lock before acquisition: {self.lock_file}")
+        # Check for stale lock BEFORE attempting acquisition
+        self._check_stale_lock()
 
-        # Create InterProcessLock instance
-        self._lock = fasteners.InterProcessLock(str(self.lock_file))
-
+        my_pid = os.getpid()
+        hostname = platform.node()
         start_time = time.time()
         warning_shown = False
         last_stale_check = 0.0
 
         while True:
-            # Check for keyboard interrupt
             if is_interrupted():
                 print("\nKeyboardInterrupt: Aborting lock acquisition")
                 raise KeyboardInterrupt()
@@ -142,62 +120,53 @@ class BuildLock:
             # Check for stale lock periodically (every ~1 second)
             if elapsed - last_stale_check >= 1.0:
                 if self._check_stale_lock():
-                    # Stale lock was removed, try to acquire immediately
                     print("Stale lock removed, retrying acquisition...")
                 last_stale_check = elapsed
 
-            # Try to acquire with very short timeout (non-blocking)
+            # Try to acquire
             try:
-                success = self._lock.acquire(blocking=True, timeout=0.1)
+                success = self._db.try_acquire(
+                    self._lock_name,
+                    my_pid,
+                    hostname,
+                    f"build:{self.lock_name}",
+                    mode="write",
+                )
                 if success:
                     self._is_acquired = True
-                    # Write PID metadata after acquiring lock
-                    _write_lock_metadata(
-                        self.lock_file, operation=f"build:{self.lock_name}"
-                    )
                     return True
             except KeyboardInterrupt:
                 handle_keyboard_interrupt_properly()
                 raise
-                raise  # MANDATORY: Always re-raise KeyboardInterrupt
             except Exception:
-                # Handle timeout or other exceptions as failed acquisition (continue loop)
-                pass  # Continue the loop to check elapsed time and try again
+                pass  # Continue the loop
 
-            # Check if we should show warning (after 2 seconds)
+            # Show warning after 2 seconds
             if not warning_shown and elapsed >= 2.0:
                 yellow = "\033[33m"
                 reset = "\033[0m"
-                print(f"{yellow}Waiting to acquire lock at {self.lock_file}...{reset}")
+                print(f"{yellow}Waiting to acquire lock '{self._lock_name}'...{reset}")
                 warning_shown = True
 
             # Check for timeout
             if elapsed >= timeout:
                 return False
 
-            # Small sleep to prevent excessive CPU usage while allowing interrupts
             time.sleep(0.1)
 
     def release(self) -> None:
         """Release the lock."""
         if not self._is_acquired:
-            return  # Not acquired
+            return
 
-        if self._lock is not None:
-            try:
-                # Remove PID metadata before releasing lock
-                _remove_lock_metadata(self.lock_file)
-
-                # Release lock
-                self._lock.release()
-                self._is_acquired = False
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
-                raise
-            except Exception:
-                pass
-            finally:
-                self._lock = None
+        try:
+            self._db.release(self._lock_name, os.getpid())
+            self._is_acquired = False
+        except KeyboardInterrupt:
+            handle_keyboard_interrupt_properly()
+            raise
+        except Exception:
+            pass
 
     def __enter__(self) -> "BuildLock":
         """Context manager entry."""
@@ -244,8 +213,6 @@ def libfastled_build_lock(timeout: float = 300.0) -> Generator[BuildLock, None, 
 
     lock = BuildLock("libfastled_build")
 
-    # Only show lock messages when there's contention (acquisition takes > 1s)
-    # This reduces output noise during normal operation
     lock_start = _time.time()
     if not lock.acquire(timeout=timeout):
         raise TimeoutError(

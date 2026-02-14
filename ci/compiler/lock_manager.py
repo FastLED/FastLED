@@ -13,15 +13,16 @@ Lock management for FastLED PlatformIO builds.
    See ci/debug_attached.py for usage example.
 """
 
+import os
+import platform
 import time
 import warnings
 from pathlib import Path
 from typing import Optional
 
-import fasteners
-
 from ci.compiler.path_manager import FastLEDPaths
 from ci.util.global_interrupt_handler import is_interrupted
+from ci.util.lock_database import LockDatabase
 
 
 class GlobalPackageLock:
@@ -32,46 +33,27 @@ class GlobalPackageLock:
 
         # Use centralized path management
         self.paths = FastLEDPaths(platform_name)
+        # Use global lock DB (~/.fastled/locks.db)
+        home_dir = Path.home()
+        db_path = home_dir / ".fastled" / "locks.db"
+        self._db = LockDatabase(db_path)
+        self._lock_name = f"global_package:{platform_name}"
+        # Keep lock_file for backward compatibility
         self.lock_file = self.paths.global_package_lock_file
-        self._file_lock = fasteners.InterProcessLock(str(self.lock_file))
         self._is_acquired = False
 
     def _check_stale_lock(self) -> bool:
-        """Check if lock file is stale (no process holding it) and remove if stale.
+        """Check if lock is stale (dead process) and remove if stale.
 
         Returns:
             True if lock was stale and removed, False otherwise
         """
-        from ci.util.lock_handler import (
-            find_processes_locking_path,
-            is_psutil_available,
-        )
-
-        if not self.lock_file.exists():
-            return False
-
-        if not is_psutil_available():
-            return False  # Can't check, assume not stale
-
         try:
-            # Check if any process has the lock file open
-            locking_pids = find_processes_locking_path(self.lock_file)
-
-            if not locking_pids:
-                # No process holds the lock, it's stale
-                print(
-                    f"Detected stale lock file for {self.platform_name} at {self.lock_file}. Removing..."
-                )
-                try:
-                    self.lock_file.unlink()
-                    print(f"Removed stale lock file: {self.lock_file}")
+            if self._db.is_lock_stale(self._lock_name):
+                print(f"Detected stale lock for {self.platform_name}. Removing...")
+                if self._db.break_stale_lock(self._lock_name):
+                    print(f"Removed stale lock for {self.platform_name}")
                     return True
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
-                    raise
-                except Exception as e:
-                    print(f"Warning: Could not remove stale lock file: {e}")
-                    return False
             return False
         except KeyboardInterrupt:
             handle_keyboard_interrupt_properly()
@@ -85,6 +67,8 @@ class GlobalPackageLock:
         if self._is_acquired:
             return  # Already acquired
 
+        my_pid = os.getpid()
+        hostname = platform.node()
         start_time = time.time()
         warning_shown = False
         last_stale_check = 0.0
@@ -102,13 +86,18 @@ class GlobalPackageLock:
             # Check for stale lock periodically (every ~1 second)
             if elapsed - last_stale_check >= 1.0:
                 if self._check_stale_lock():
-                    # Stale lock was removed, try to acquire immediately
                     print("Stale lock removed, retrying acquisition...")
                 last_stale_check = elapsed
 
-            # Try to acquire with very short timeout (non-blocking)
+            # Try to acquire
             try:
-                success = self._file_lock.acquire(blocking=True, timeout=0.1)
+                success = self._db.try_acquire(
+                    self._lock_name,
+                    my_pid,
+                    hostname,
+                    f"global_package:{self.platform_name}",
+                    mode="write",
+                )
                 if success:
                     self._is_acquired = True
                     print(
@@ -117,17 +106,16 @@ class GlobalPackageLock:
                     return
             except KeyboardInterrupt:
                 handle_keyboard_interrupt_properly()
-                raise  # MANDATORY: Always re-raise KeyboardInterrupt
+                raise
             except Exception:
-                # Handle timeout or other exceptions as failed acquisition (continue loop)
-                pass  # Continue the loop to check elapsed time and try again
+                pass  # Continue the loop
 
             # Check if we should show warning (after 1 second)
             if not warning_shown and elapsed >= 1.0:
                 yellow = "\033[33m"
                 reset = "\033[0m"
                 print(
-                    f"{yellow}Platform {self.platform_name} is waiting to acquire global package lock at {self.lock_file.parent}{reset}"
+                    f"{yellow}Platform {self.platform_name} is waiting to acquire global package lock{reset}"
                 )
                 warning_shown = True
 
@@ -135,20 +123,18 @@ class GlobalPackageLock:
             if elapsed >= 5.0:
                 raise TimeoutError(
                     f"Failed to acquire global package lock for platform {self.platform_name} within 5 seconds. "
-                    f"Lock file: {self.lock_file}. "
                     f"This may indicate another process is installing packages or a deadlock occurred."
                 )
 
-            # Small sleep to prevent excessive CPU usage while allowing interrupts
             time.sleep(0.1)
 
     def release(self) -> None:
         """Release the global package installation lock."""
         if not self._is_acquired:
-            return  # Not acquired
+            return
 
         try:
-            self._file_lock.release()
+            self._db.release(self._lock_name, os.getpid())
             self._is_acquired = False
             print(f"Released global package lock for platform {self.platform_name}")
         except KeyboardInterrupt:
@@ -185,7 +171,7 @@ class GlobalPackageLock:
             handle_keyboard_interrupt_properly()
             raise
         except Exception:
-            pass  # Ignore errors during cleanup
+            pass
 
 
 class PlatformLock:
@@ -193,45 +179,27 @@ class PlatformLock:
 
     def __init__(self, lock_file: Path) -> None:
         self.lock_file_path = lock_file
-        self.lock = fasteners.InterProcessLock(str(self.lock_file_path))
+        # Use global lock DB for platform locks
+        home_dir = Path.home()
+        db_path = home_dir / ".fastled" / "locks.db"
+        self._db = LockDatabase(db_path)
+        self._lock_name = f"platform:{lock_file}"
         self.is_locked = False
 
     def _check_stale_lock(self) -> bool:
-        """Check if lock file is stale (no process holding it) and remove if stale.
+        """Check if lock is stale (dead process) and remove if stale.
 
         Returns:
             True if lock was stale and removed, False otherwise
         """
-        from ci.util.lock_handler import (
-            find_processes_locking_path,
-            is_psutil_available,
-        )
-
-        if not self.lock_file_path.exists():
-            return False
-
-        if not is_psutil_available():
-            return False  # Can't check, assume not stale
-
         try:
-            # Check if any process has the lock file open
-            locking_pids = find_processes_locking_path(self.lock_file_path)
-
-            if not locking_pids:
-                # No process holds the lock, it's stale
+            if self._db.is_lock_stale(self._lock_name):
                 print(
-                    f"Detected stale platform lock file at {self.lock_file_path}. Removing..."
+                    f"Detected stale platform lock at {self.lock_file_path}. Removing..."
                 )
-                try:
-                    self.lock_file_path.unlink()
+                if self._db.break_stale_lock(self._lock_name):
                     print(f"Removed stale lock file: {self.lock_file_path}")
                     return True
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
-                    raise
-                except Exception as e:
-                    print(f"Warning: Could not remove stale lock file: {e}")
-                    return False
             return False
         except KeyboardInterrupt:
             handle_keyboard_interrupt_properly()
@@ -245,6 +213,8 @@ class PlatformLock:
         if self.is_locked:
             return  # Already acquired
 
+        my_pid = os.getpid()
+        hostname = platform.node()
         start_time = time.time()
         warning_shown = False
         last_stale_check = 0.0
@@ -260,13 +230,18 @@ class PlatformLock:
             # Check for stale lock periodically (every ~1 second)
             if elapsed - last_stale_check >= 1.0:
                 if self._check_stale_lock():
-                    # Stale lock was removed, try to acquire immediately
                     print("Stale platform lock removed, retrying acquisition...")
                 last_stale_check = elapsed
 
-            # Try to acquire with very short timeout (non-blocking)
+            # Try to acquire
             try:
-                success = self.lock.acquire(blocking=True, timeout=0.1)
+                success = self._db.try_acquire(
+                    self._lock_name,
+                    my_pid,
+                    hostname,
+                    f"platform:{self.lock_file_path}",
+                    mode="write",
+                )
                 if success:
                     self.is_locked = True
                     print(f"Acquired platform lock: {self.lock_file_path}")
@@ -274,10 +249,8 @@ class PlatformLock:
             except KeyboardInterrupt:
                 handle_keyboard_interrupt_properly()
                 raise
-                raise  # MANDATORY: Always re-raise KeyboardInterrupt
             except Exception:
-                # Handle timeout or other exceptions as failed acquisition (continue loop)
-                pass  # Continue the loop to check elapsed time and try again
+                pass  # Continue the loop
 
             # Check if we should show warning (after 1 second)
             if not warning_shown and elapsed >= 1.0:
@@ -292,18 +265,17 @@ class PlatformLock:
             if elapsed >= 5.0:
                 raise TimeoutError(
                     f"Failed to acquire platform lock within 5 seconds. "
-                    f"Lock file: {self.lock_file_path}. "
+                    f"Lock: {self.lock_file_path}. "
                     f"This may indicate another process is holding the lock or a deadlock occurred."
                 )
 
-            # Small sleep to prevent excessive CPU usage while allowing interrupts
             time.sleep(0.1)
 
     def release(self) -> None:
         """Release the platform lock."""
         if self.is_locked:
             try:
-                self.lock.release()
+                self._db.release(self._lock_name, os.getpid())
                 self.is_locked = False
                 print(f"Released platform lock: {self.lock_file_path}")
             except KeyboardInterrupt:
@@ -330,10 +302,10 @@ class PlatformLock:
         """Ensure lock is released on deletion."""
         if self.is_locked:
             try:
-                self.lock.release()
+                self._db.release(self._lock_name, os.getpid())
                 self.is_locked = False
             except KeyboardInterrupt:
                 handle_keyboard_interrupt_properly()
                 raise
             except Exception:
-                pass  # Ignore errors during cleanup
+                pass

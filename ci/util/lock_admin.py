@@ -1,7 +1,6 @@
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 
-#!/usr/bin/env python3
 """
 Lock Administration CLI
 
@@ -12,7 +11,7 @@ Usage:
     uv run python -m ci.util.lock_admin --list
     uv run python -m ci.util.lock_admin --clean-stale
     uv run python -m ci.util.lock_admin --force-unlock-all
-    uv run python -m ci.util.lock_admin --check <lock-file>
+    uv run python -m ci.util.lock_admin --check <lock-name>
 """
 
 import argparse
@@ -24,27 +23,29 @@ from ci.util.cache_lock import (
     force_unlock_cache,
     list_active_locks,
 )
-from ci.util.file_lock_rw import (
-    _read_lock_metadata,
-    break_stale_lock,
-    is_process_alive,
-)
+from ci.util.file_lock_rw import is_process_alive
+from ci.util.lock_database import get_lock_database
 
 
 def list_locks(cache_dir: Path) -> int:
     """List all locks in cache directory with status."""
     locks = list_active_locks(cache_dir)
 
-    if not locks:
-        print("No locks found in cache directory")
+    # Also show all locks from the database
+    db = get_lock_database()
+    all_db_locks = db.list_all_locks()
+
+    if not locks and not all_db_locks:
+        print("No locks found")
         return 0
 
-    print(f"\n📋 ACTIVE LOCKS IN {cache_dir}")
+    print(f"\n📋 ACTIVE LOCKS")
     print("=" * 80)
 
     active_count = 0
     stale_count = 0
 
+    # Show locks from cache_dir filtering
     for lock in locks:
         status_icon = "🔴 STALE" if lock.is_stale else "🟢 ACTIVE"
         pid = lock.pid if lock.pid else "unknown"
@@ -58,26 +59,54 @@ def list_locks(cache_dir: Path) -> int:
             active_count += 1
 
         print(f"\n{status_icon}")
-        print(f"  Path: {lock.path}")
+        print(f"  Lock: {lock.path}")
         print(f"  PID: {pid}")
         print(f"  Operation: {operation}")
         print(f"  Timestamp: {timestamp}")
         print(f"  Hostname: {hostname}")
 
+    # Show any DB locks not already shown
+    shown_names = {lock.path for lock in locks}
+    for db_lock in all_db_locks:
+        lock_name = db_lock["lock_name"]
+        if lock_name not in shown_names:
+            pid = db_lock["owner_pid"]
+            alive = is_process_alive(pid)
+            status_icon = "🟢 ACTIVE" if alive else "🔴 STALE"
+
+            if alive:
+                active_count += 1
+            else:
+                stale_count += 1
+
+            print(f"\n{status_icon}")
+            print(f"  Lock: {lock_name}")
+            print(f"  PID: {pid}")
+            print(f"  Operation: {db_lock['operation']}")
+            print(f"  Mode: {db_lock['lock_mode']}")
+            print(f"  Hostname: {db_lock['hostname']}")
+
     print("\n" + "=" * 80)
-    print(f"Total: {len(locks)} locks ({active_count} active, {stale_count} stale)")
+    total = active_count + stale_count
+    print(f"Total: {total} locks ({active_count} active, {stale_count} stale)")
 
     return 0
 
 
 def clean_stale(cache_dir: Path) -> int:
     """Clean only stale locks (safe operation)."""
-    print(f"🧹 Cleaning stale locks in {cache_dir}...")
+    print(f"🧹 Cleaning stale locks...")
 
-    cleaned = cleanup_stale_locks(cache_dir)
+    # Clean from database
+    db = get_lock_database()
+    db_cleaned = db.cleanup_stale_locks()
 
-    if cleaned > 0:
-        print(f"✅ Cleaned {cleaned} stale lock(s)")
+    # Clean from cache_dir (legacy files)
+    cache_cleaned = cleanup_stale_locks(cache_dir)
+
+    total = db_cleaned + cache_cleaned
+    if total > 0:
+        print(f"✅ Cleaned {total} stale lock(s)")
     else:
         print("✅ No stale locks found")
 
@@ -86,7 +115,7 @@ def clean_stale(cache_dir: Path) -> int:
 
 def force_unlock_all(cache_dir: Path) -> int:
     """Force break all locks (destructive operation)."""
-    print(f"⚠️  WARNING: Forcing unlock of ALL locks in {cache_dir}")
+    print(f"⚠️  WARNING: Forcing unlock of ALL locks")
     print("This will break locks from active processes!")
 
     response = input("Are you sure? (yes/no): ")
@@ -95,64 +124,67 @@ def force_unlock_all(cache_dir: Path) -> int:
         print("Cancelled")
         return 1
 
-    broken = force_unlock_cache(cache_dir)
+    # Force break all in database
+    db = get_lock_database()
+    db_broken = db.force_break_all()
 
-    if broken > 0:
-        print(f"✅ Broke {broken} lock(s)")
+    # Force break in cache_dir (legacy files)
+    cache_broken = force_unlock_cache(cache_dir)
+
+    total = db_broken + cache_broken
+    if total > 0:
+        print(f"✅ Broke {total} lock(s)")
     else:
         print("✅ No locks found")
 
     return 0
 
 
-def check_lock(lock_file: Path) -> int:
-    """Check status of a specific lock file."""
-    if not lock_file.exists():
-        print(f"❌ Lock file does not exist: {lock_file}")
-        return 1
-
-    print(f"\n🔍 LOCK INFORMATION: {lock_file}")
+def check_lock(lock_name: str) -> int:
+    """Check status of a specific lock."""
+    print(f"\n🔍 LOCK INFORMATION: {lock_name}")
     print("=" * 80)
 
-    # Read metadata
-    metadata = _read_lock_metadata(lock_file)
+    db = get_lock_database()
+    holders = db.get_lock_info(lock_name)
 
-    if metadata:
-        pid = metadata.get("pid")
-        operation = metadata.get("operation", "unknown")
-        timestamp = metadata.get("timestamp", "unknown")
-        hostname = metadata.get("hostname", "unknown")
+    if not holders:
+        print(f"❌ No lock found with name: {lock_name}")
+        return 1
+
+    for holder in holders:
+        pid = holder["owner_pid"]
+        operation = holder["operation"]
+        hostname = holder["hostname"]
+        mode = holder["lock_mode"]
+        acquired_at = holder["acquired_at"]
 
         print(f"PID: {pid}")
         print(f"Operation: {operation}")
-        print(f"Timestamp: {timestamp}")
+        print(f"Mode: {mode}")
+        print(f"Acquired at: {acquired_at}")
         print(f"Hostname: {hostname}")
 
-        if pid:
-            if is_process_alive(pid):
-                print(f"Process status: 🟢 ALIVE (PID {pid} is running)")
-                print("Lock status: ACTIVE")
-            else:
-                print(f"Process status: 🔴 DEAD (PID {pid} not found)")
-                print("Lock status: STALE")
-    else:
-        print("⚠️  No metadata found for this lock")
-        print("Lock may be from an old version or corrupted")
+        if is_process_alive(pid):
+            print(f"Process status: 🟢 ALIVE (PID {pid} is running)")
+            print("Lock status: ACTIVE")
+        else:
+            print(f"Process status: 🔴 DEAD (PID {pid} not found)")
+            print("Lock status: STALE")
 
     print("=" * 80)
 
     # Offer to break stale lock
-    if metadata:
-        pid = metadata.get("pid")
-        if pid is not None and isinstance(pid, int) and not is_process_alive(pid):
-            response = input("\nThis lock is stale. Break it? (yes/no): ")
-            if response.lower() == "yes":
-                if break_stale_lock(lock_file):
-                    print("✅ Lock broken successfully")
-                    return 0
-                else:
-                    print("❌ Failed to break lock")
-                    return 1
+    stale_holders = [h for h in holders if not is_process_alive(h["owner_pid"])]
+    if stale_holders:
+        response = input("\nStale holder(s) found. Break them? (yes/no): ")
+        if response.lower() == "yes":
+            if db.break_stale_lock(lock_name):
+                print("✅ Stale lock(s) broken successfully")
+                return 0
+            else:
+                print("❌ Failed to break stale lock(s)")
+                return 1
 
     return 0
 
@@ -173,8 +205,8 @@ Examples:
   # Force unlock everything (DANGEROUS!)
   uv run python -m ci.util.lock_admin --force-unlock-all
 
-  # Check specific lock file
-  uv run python -m ci.util.lock_admin --check ~/.platformio/global_cache/toolchain-xyz/.download.lock
+  # Check specific lock
+  uv run python -m ci.util.lock_admin --check "build:libfastled_build"
         """,
     )
 
@@ -205,9 +237,9 @@ Examples:
 
     parser.add_argument(
         "--check",
-        type=Path,
-        metavar="LOCK_FILE",
-        help="Check status of specific lock file",
+        type=str,
+        metavar="LOCK_NAME",
+        help="Check status of specific lock (by name)",
     )
 
     args = parser.parse_args()
@@ -234,8 +266,6 @@ Examples:
     except KeyboardInterrupt:
         handle_keyboard_interrupt_properly()
         raise
-        print("\n❌ Interrupted by user")
-        return 130
     except Exception as e:
         print(f"❌ Error: {e}")
         return 1

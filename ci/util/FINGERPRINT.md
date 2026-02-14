@@ -219,7 +219,7 @@ fingerprint_manager.save_all("success")  # or "failure"
 
 The system supports concurrent access via:
 
-1. **File locking**: `fasteners.InterProcessLock` prevents race conditions
+1. **File locking**: SQLite-backed `LockDatabase` prevents race conditions
 2. **Pending pattern**: Fingerprints stored in `.pending` files before processing
 3. **Atomic updates**: Compare-and-swap prevents cache corruption
 

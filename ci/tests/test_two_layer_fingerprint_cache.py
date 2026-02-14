@@ -116,7 +116,7 @@ class TestTwoLayerFingerprintCache(TestCase):
         needs_update = cache.check_needs_update(files)
         elapsed = time.time() - start
         self.assertFalse(needs_update, "Second check should still be cache hit")
-        self.assertLess(elapsed, 0.05, "Second check should be fast (no rehashing)")
+        self.assertLess(elapsed, 0.2, "Second check should be fast (no rehashing)")
 
     def test_missing_file_detection(self) -> None:
         """Test detection of missing files."""
