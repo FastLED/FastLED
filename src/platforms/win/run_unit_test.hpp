@@ -16,11 +16,22 @@
 
 #ifdef FL_IS_WIN
 
+#include <chrono>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cstddef>
 #include <windef.h>
 #include <libloaderapi.h>
 #include "errhandlingapi.h"
 #include "minwindef.h"
 #include "winbase.h"
+
+// Crash handler setup (defined in crash_handler_main.cpp)
+extern "C" void runner_setup_crash_handler();
+
+// Function signature for the test entry point exported by test DLLs/SOs
+typedef int (*RunTestsFunc)(int argc, const char** argv);
 
 int main(int argc, char** argv) {
     // Setup crash handler BEFORE loading any DLLs

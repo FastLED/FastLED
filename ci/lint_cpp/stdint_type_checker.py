@@ -18,6 +18,7 @@ _EXCLUDED_DIRS = [
 _EXCLUDED_FILENAMES = {
     "stdint.h",  # fl/stl/stdint.h - defines uint8_t as typedef of fl::u8
     "cstdint.h",  # fl/stl/cstdint.h - C language type definitions
+    "run_unit_test.hpp",  # Platform runners use std:: types to avoid FastLED dependencies
 }
 
 # Mapping of stdint types to FastLED equivalents

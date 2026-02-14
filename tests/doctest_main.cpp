@@ -50,6 +50,7 @@
 #include "fl/stl/iostream.h"  // For debug output
 #include "fl/stl/algorithm.h"
 #include "fl/stl/ostream.h"
+#include <chrono>              // For test case timing
 
 // This file contains the main function for doctest
 // It will be compiled once and linked to all test executables
@@ -58,6 +59,52 @@
 // instead of defining main()
 
 namespace testing_detail {
+
+// Custom reporter that warns about slow test cases
+struct TimingReporter : public doctest::IReporter {
+    std::chrono::steady_clock::time_point start_time;
+    const doctest::TestCaseData* current_test = nullptr;
+    const doctest::ContextOptions& opt;
+
+    explicit TimingReporter(const doctest::ContextOptions& in) : opt(in) {}
+
+    void report_query(const doctest::QueryData&) override {}
+    void test_run_start() override {}
+    void test_run_end(const doctest::TestRunStats&) override {}
+
+    void test_case_start(const doctest::TestCaseData& data) override {
+        current_test = &data;
+        start_time = std::chrono::steady_clock::now();
+    }
+
+    void test_case_reenter(const doctest::TestCaseData&) override {}
+
+    void test_case_end(const doctest::CurrentTestCaseStats&) override {
+        auto end_time = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+
+        // Warn if test case took longer than 1 second
+        constexpr int WARNING_THRESHOLD_MS = 1000;
+        if (duration.count() > WARNING_THRESHOLD_MS && current_test) {
+            std::cout << "WARNING: Test case '"
+                      << current_test->m_file << ":" << current_test->m_line
+                      << " - " << current_test->m_name
+                      << "' took " << (duration.count() / 1000.0) << " seconds to run "
+                      << "(threshold: " << (WARNING_THRESHOLD_MS / 1000.0) << " second)"
+                      << std::endl;
+        }
+    }
+
+    void test_case_exception(const doctest::TestCaseException&) override {}
+    void subcase_start(const doctest::SubcaseSignature&) override {}
+    void subcase_end() override {}
+    void log_assert(const doctest::AssertData&) override {}
+    void log_message(const doctest::MessageData&) override {}
+    void test_case_skipped(const doctest::TestCaseData&) override {}
+};
+
+// Register the custom reporter
+DOCTEST_REGISTER_REPORTER("timing", 0, TimingReporter);
 
 void fl_cleanup() {
     // Clean up all background threads before DLL unload to prevent access violations
@@ -77,8 +124,14 @@ int fl_run_tests(int argc, const char** argv) {
     std::cout << "Pre-initializing CoroutineRunner singleton" << std::endl;
     fl::detail::CoroutineRunner::instance();
     std::cout << "CoroutineRunner singleton pre-initialized successfully" << std::endl;
-    // Run doctest
+
+    // Run doctest with timing reporter
     doctest::Context context(argc, argv);
+
+    // Register timing reporter to warn about slow test cases
+    context.addFilter("reporters", "timing");
+    context.setOption("no-colors", false);  // Enable colors for warnings
+
     int result = context.run();
     fl_cleanup();
     return result;
@@ -88,7 +141,15 @@ int fl_main(int argc, char** argv) {
 #ifdef ENABLE_CRASH_HANDLER
     setup_crash_handler();
 #endif
-    int result = doctest::Context(argc, argv).run();
+
+    // Run doctest with timing reporter
+    doctest::Context context(argc, argv);
+
+    // Register timing reporter to warn about slow test cases
+    context.addFilter("reporters", "timing");
+    context.setOption("no-colors", false);  // Enable colors for warnings
+
+    int result = context.run();
     fl_cleanup();
     return result;
 }

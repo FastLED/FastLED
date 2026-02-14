@@ -17,8 +17,19 @@
 
 #if !defined(FL_IS_WIN) && !defined(FL_IS_APPLE)
 
+#include <chrono>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cstddef>
 #include <dlfcn.h>  // For dlopen, dlsym, dlclose
 #include <unistd.h> // For readlink
+
+// Crash handler setup (defined in crash_handler_main.cpp)
+extern "C" void runner_setup_crash_handler();
+
+// Function signature for the test entry point exported by test DLLs/SOs
+typedef int (*RunTestsFunc)(int argc, const char** argv);
 
 int main(int argc, char** argv) {
     // Setup crash handler BEFORE loading any shared libraries

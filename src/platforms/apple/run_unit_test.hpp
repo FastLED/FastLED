@@ -16,8 +16,20 @@
 
 #ifdef FL_IS_APPLE
 
+#include <chrono>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cstddef>
+#include <cstdint>
 #include <dlfcn.h>       // For dlopen, dlsym, dlclose
 #include <mach-o/dyld.h> // For _NSGetExecutablePath
+
+// Crash handler setup (defined in crash_handler_main.cpp)
+extern "C" void runner_setup_crash_handler();
+
+// Function signature for the test entry point exported by test DLLs/SOs
+typedef int (*RunTestsFunc)(int argc, const char** argv);
 
 int main(int argc, char** argv) {
     // Setup crash handler BEFORE loading any shared libraries
@@ -34,7 +46,7 @@ int main(int argc, char** argv) {
         // No explicit path: infer from exe name
         std::string full_exe_path;
         char path_buf[1024];
-        fl::u32 buf_size = sizeof(path_buf);
+        uint32_t buf_size = sizeof(path_buf);
         if (_NSGetExecutablePath(path_buf, &buf_size) == 0) {
             full_exe_path = path_buf;
         } else {
