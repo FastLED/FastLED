@@ -13,6 +13,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 from ci.util.global_interrupt_handler import notify_main_thread
 
@@ -33,7 +34,7 @@ class ProfileGenerator:
             .lower()
         )
 
-    def _detect_signature(self) -> dict | None:
+    def _detect_signature(self) -> dict[str, Any] | None:
         """
         Search codebase for function signature.
         Returns: {
@@ -89,7 +90,7 @@ class ProfileGenerator:
 
         return None
 
-    def _generate_profiler(self, signature: dict | None) -> str:
+    def _generate_profiler(self, signature: dict[str, Any] | None) -> str:
         """Generate C++ profiler code from template"""
         if signature:
             target_call = f"{signature['namespace']}::{signature['function_name']}"

@@ -19,7 +19,7 @@ Usage:
 
 import json
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional, cast
 
 import serial
 from pydantic import BaseModel, ValidationError
@@ -80,7 +80,7 @@ class RpcSchemaValidator:
                 ser.reset_input_buffer()
 
                 # Send rpc.discover request (built-in RPC schema method)
-                request = {
+                request: dict[str, Any] = {
                     "method": "rpc.discover",
                     "params": [],
                     "id": 1,
@@ -129,7 +129,9 @@ class RpcSchemaValidator:
         except Exception as e:
             raise RuntimeError(f"Failed to fetch RPC schema: {e}")
 
-    def validate_request(self, method: str, args: Any) -> None:
+    def validate_request(
+        self, method: str, args: dict[str, Any] | list[Any] | Any
+    ) -> None:
         """
         Validate RPC request parameters against schema.
 
@@ -158,15 +160,18 @@ class RpcSchemaValidator:
                 f"Expected object for {method}, got {type(args).__name__}"
             )
 
+        # Type narrowing: after isinstance check, args is guaranteed to be dict
+        args_dict = cast(dict[str, Any], args)
+
         # Check required parameters
-        expected_params = {p.name for p in method_info.params}
-        provided_params = set(args.keys())
+        expected_params: set[str] = {p.name for p in method_info.params}
+        provided_params: set[str] = set(args_dict.keys())
 
         # For now, just warn about mismatches (can be made stricter)
-        missing = expected_params - provided_params
-        extra = provided_params - expected_params
+        missing: set[str] = expected_params - provided_params
+        extra: set[str] = provided_params - expected_params
 
-        errors = []
+        errors: list[str] = []
         if missing:
             errors.append(f"Missing required parameters: {missing}")
         if extra:

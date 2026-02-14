@@ -246,8 +246,8 @@ class RpcClient:
         # Wrap args in array to pass as single Json parameter to RPC functions
         # RPC functions expect signature: (const fl::Json& args)
         # So we need to pass the entire args as one parameter
-        wrapped_args = [args] if args is not None else [{}]
-        cmd = {"function": function, "args": wrapped_args}
+        wrapped_args: list[Any] = [args] if args is not None else [{}]
+        cmd: dict[str, Any] = {"function": function, "args": wrapped_args}
         cmd_str = json.dumps(cmd, separators=(",", ":"))
 
         effective_timeout = timeout if timeout is not None else self.timeout
@@ -305,8 +305,8 @@ class RpcClient:
         # Wrap args in array to pass as single Json parameter to RPC functions
         # RPC functions expect signature: (const fl::Json& args)
         # So we need to pass the entire args as one parameter
-        wrapped_args = [args] if args is not None else [{}]
-        cmd = {"function": function, "args": wrapped_args}
+        wrapped_args: list[Any] = [args] if args is not None else [{}]
+        cmd: dict[str, Any] = {"function": function, "args": wrapped_args}
         cmd_str = json.dumps(cmd, separators=(",", ":"))
 
         effective_timeout = timeout if timeout is not None else self.timeout

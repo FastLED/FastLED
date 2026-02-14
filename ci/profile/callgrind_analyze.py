@@ -9,6 +9,7 @@ Usage:
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 
 class CallgrindAnalyzer:
@@ -38,7 +39,7 @@ class CallgrindAnalyzer:
             print("  On macOS: brew install valgrind")
             return False
 
-    def analyze_hotspots(self) -> list[dict]:
+    def analyze_hotspots(self) -> list[dict[str, Any]]:
         """Parse callgrind output and identify hot functions"""
         cmd = ["callgrind_annotate", str(self.callgrind_out)]
 
@@ -52,7 +53,7 @@ class CallgrindAnalyzer:
             return []
 
         # Parse output to find functions consuming >5% of time
-        hotspots = []
+        hotspots: list[dict[str, Any]] = []
         for line in result.stdout.split("\n"):
             if "%" in line and "PROGRAM TOTALS" not in line:
                 parts = line.split()
@@ -67,7 +68,7 @@ class CallgrindAnalyzer:
 
         return sorted(hotspots, key=lambda x: x["percentage"], reverse=True)
 
-    def generate_report(self, hotspots: list[dict]) -> str:
+    def generate_report(self, hotspots: list[dict[str, Any]]) -> str:
         """Generate markdown report of hotspots"""
         report = "# Callgrind Hotspot Analysis\n\n"
 

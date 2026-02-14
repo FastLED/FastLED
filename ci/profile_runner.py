@@ -13,6 +13,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 from ci.util.deadlock_detector import handle_hung_test
 
@@ -207,7 +208,7 @@ class ProfileRunner:
             print(f"Error: Binary not found at {binary_path}")
             return False
 
-        results = []
+        results: list[dict[str, Any]] = []
 
         for i in range(1, self.iterations + 1):
             print(f"  Iteration {i}/{self.iterations}...", end=" ", flush=True)

@@ -432,10 +432,12 @@ def _convert_violations_to_results(violations: Any) -> CheckerResults:
     results = CheckerResults()
     for file_path, violation_list in violations.items():
         if isinstance(violation_list, list):
-            for item in violation_list:
-                if isinstance(item, tuple) and len(item) >= 2:
-                    line_num = int(item[0])
-                    content = str(item[1])
+            for item in violation_list:  # type: ignore[reportUnknownVariableType]
+                if isinstance(item, tuple) and len(item) >= 2:  # type: ignore[reportUnknownArgumentType]
+                    # Type narrowing: item is a tuple with at least 2 elements
+                    line_num_raw, content_raw = item[0], item[1]  # type: ignore[reportUnknownVariableType]
+                    line_num = int(line_num_raw)  # type: ignore[reportUnknownArgumentType]
+                    content = str(content_raw)  # type: ignore[reportUnknownArgumentType]
                     results.add_violation(file_path, line_num, content)
         elif isinstance(violation_list, str):
             results.add_violation(file_path, 0, violation_list)

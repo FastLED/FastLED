@@ -23,6 +23,7 @@ import json
 import os
 import re
 import sys
+from typing import Any
 
 
 # DRY_RUN: Set to True to test without blocking commands
@@ -84,7 +85,7 @@ FORBIDDEN_ENV_VARS = [
 OVERRIDE_ENV_VAR = "FL_AGENT_ALLOW_ALL_CMDS"
 
 
-def extract_command(tool_input: dict) -> str | None:
+def extract_command(tool_input: dict[str, Any]) -> str | None:
     """Extract the command string from tool input."""
     return tool_input.get("command")
 
@@ -153,7 +154,7 @@ def parse_env_vars_from_command(command: str) -> dict[str, str]:
 
     Returns: dict of env var names to values
     """
-    env_vars = {}
+    env_vars: dict[str, str] = {}
     command = command.strip()
 
     # Pattern to match: VAR=value (with optional quotes)

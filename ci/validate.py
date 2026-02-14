@@ -742,7 +742,7 @@ def _should_use_fbuild(
 # ============================================================
 
 
-def run(args: Args | None = None) -> int:
+def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneralTypeIssues]
     """Main entry point."""
     # Install signal handler for proper Ctrl+C handling on Windows
     install_signal_handler()

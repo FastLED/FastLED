@@ -497,7 +497,7 @@ def compile_meson(
             or seen_any_test
         ):
             # Report cached core libraries
-            cached_libs = []
+            cached_libs: list[str] = []
             if not seen_libfastled:
                 cached_libs.append("libfastled.a")
             if not seen_libplatforms_shared:

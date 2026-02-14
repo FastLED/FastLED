@@ -11,6 +11,7 @@ import statistics
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 
 @dataclass
@@ -36,7 +37,7 @@ class ResultAnalyzer:
         for entry in data:
             self.results.append(ProfileResult(**entry))
 
-    def compute_statistics(self) -> dict:
+    def compute_statistics(self) -> dict[str, float]:
         """Compute best/median/worst/stdev"""
         if not self.results:
             return {
@@ -105,7 +106,7 @@ class ResultAnalyzer:
 
         return report
 
-    def export_for_ai(self) -> dict:
+    def export_for_ai(self) -> dict[str, Any]:
         """Export structured data for AI consumption"""
         stats = self.compute_statistics()
         return {
