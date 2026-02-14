@@ -16,7 +16,7 @@ class LintArgs:
     run_full: bool = False
     run_iwyu: bool = False
     run_pyright: bool = False
-    files: list[str] = field(default_factory=list)
+    files: list[str] = field(default_factory=lambda: list[str]())
 
 
 def parse_lint_args(argv: list[str] | None = None) -> LintArgs:
@@ -105,12 +105,17 @@ Examples:
 
     args = parser.parse_args(argv)
 
+    files = [str(Path(f).resolve()) for f in args.files]
+
+    # Single-file mode must never use fingerprint cache — always lint the file
+    no_fingerprint = args.no_fingerprint or bool(files)
+
     return LintArgs(
         js_only=args.js,
         cpp_only=args.cpp,
-        no_fingerprint=args.no_fingerprint,
+        no_fingerprint=no_fingerprint,
         run_full=args.full,
         run_iwyu=args.iwyu,
         run_pyright=args.strict,
-        files=[str(Path(f).resolve()) for f in args.files],
+        files=files,
     )
