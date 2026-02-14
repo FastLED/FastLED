@@ -11,19 +11,18 @@
 
 #pragma once
 
-#include "fl/remote/remote.h"
-#include "fl/json.h"
-#include "fl/stl/vector.h"
-#include "fl/stl/string.h"
+#include "fl/stl/stdint.h"  // for uint32_t, uint8_t
+#include "fl/channels/bus_manager.h"  // for DriverInfo
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/span.h"
 #include "fl/stl/unique_ptr.h"
-#include "fl/stl/cstdio.h"  // For ScopedLogDisable
+#include "fl/stl/vector.h"
 
 // Forward declarations
 namespace fl {
-    struct DriverInfo;
+    class Json;
+    class Remote;
     struct RxDevice;
-    struct NamedTimingConfig;
 }
 
 /// @brief Factory function type for creating RxDevice instances
@@ -41,6 +40,7 @@ struct ValidationState {
     int default_pin_tx;
     int default_pin_rx;
     RxDeviceFactory rx_factory;
+    bool gpio_baseline_test_done = false;  // Track whether GPIO baseline test has run in loop()
 };
 
 /// @brief Print JSON directly to Serial, bypassing fl::println and ScopedLogDisable

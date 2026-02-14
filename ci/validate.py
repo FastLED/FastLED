@@ -169,12 +169,37 @@ async def run_gpio_pretest(
         print("  Waiting for device to boot...")
         # Create client and manually connect with longer boot_wait for slower platforms
         # ESP32-C6 RISC-V platform needs extra time for channel engine initialization
-        client = RpcClient(port, timeout=timeout, use_pyserial=use_pyserial)
+        print("\n" + "=" * 60)
+        print("RPC CLIENT DEBUG OUTPUT")
+        print("=" * 60)
+        client = RpcClient(
+            port, timeout=timeout, use_pyserial=use_pyserial, verbose=True
+        )
         await client.connect(
             boot_wait=15.0, drain_boot=False
         )  # Wait 15s for initialization, don't drain to preserve RESULT JSON
         try:
             print()
+            print("=" * 60)
+            print("PING TEST (verify basic RPC works)")
+            print("=" * 60)
+            try:
+                ping_response = await client.send("ping", retries=3)
+                print(f"✅ Ping successful: {ping_response.data}")
+            except KeyboardInterrupt:
+                handle_keyboard_interrupt_properly()
+                raise
+            except Exception as e:
+                print(f"❌ Ping failed: {e}")
+                print(
+                    "   RPC communication is not working - device may not be responding"
+                )
+                return False
+
+            print()
+            print("=" * 60)
+            print("GPIO CONNECTIVITY TEST")
+            print("=" * 60)
             print("  Sending GPIO test command...")
 
             response = await client.send_and_match(
@@ -280,10 +305,33 @@ async def run_pin_discovery(
 
     try:
         print("  Waiting for device to boot...")
+        print("\n" + "=" * 60)
+        print("RPC CLIENT DEBUG OUTPUT")
+        print("=" * 60)
         async with RpcClient(
-            port, timeout=timeout, use_pyserial=use_pyserial
+            port, timeout=timeout, use_pyserial=use_pyserial, verbose=True
         ) as client:
             print()
+            print("=" * 60)
+            print("PING TEST (verify basic RPC works)")
+            print("=" * 60)
+            try:
+                ping_response = await client.send("ping", retries=3)
+                print(f"✅ Ping successful: {ping_response.data}")
+            except KeyboardInterrupt:
+                handle_keyboard_interrupt_properly()
+                raise
+            except Exception as e:
+                print(f"❌ Ping failed: {e}")
+                print(
+                    "   RPC communication is not working - device may not be responding"
+                )
+                return (False, None, None)
+
+            print()
+            print("=" * 60)
+            print("PIN DISCOVERY")
+            print("=" * 60)
             print("  Probing adjacent pin pairs for jumper wire connection...")
 
             response = await client.send_and_match(
@@ -1685,6 +1733,7 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
 
             # Send RPC commands
             print(f"🔧 Sending {len(json_rpc_commands)} JSON-RPC command(s)...")
+            rpc_send_start = time.time()
             for i, cmd in enumerate(json_rpc_commands, 1):
                 cmd_str = json.dumps(cmd, separators=(",", ":"))
                 if args.no_fbuild:
@@ -1692,7 +1741,7 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                 else:
                     monitor.write(cmd_str + "\n")
                 print(
-                    f"   ✓ Sent command {i}/{len(json_rpc_commands)}: {cmd['function']}()"
+                    f"   ✓ Sent command {i}/{len(json_rpc_commands)}: {cmd['method']}()"
                 )
                 time.sleep(0.1)  # Brief delay between commands
 
@@ -1700,12 +1749,36 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
             print(f"\n👀 Monitoring output (timeout: {timeout_seconds}s)...")
             print("─" * 60)
 
+            # Track if we've received any response from the test
+            test_started = False
+            test_start_timeout = 30.0  # 30 second timeout for test to start
+            last_response_time = rpc_send_start
+
             while True:
                 # Check timeout
                 elapsed = time.time() - start_time
                 if elapsed >= timeout_seconds:
                     print(f"\n⏱️  Timeout after {timeout_seconds}s")
                     break
+
+                # Check if test hasn't started within 30 seconds of sending commands
+                if not test_started:
+                    time_since_rpc = time.time() - last_response_time
+                    if time_since_rpc >= test_start_timeout:
+                        print(
+                            f"\n{Fore.RED}❌ ERROR: Test did not start within {test_start_timeout}s{Style.RESET_ALL}"
+                        )
+                        print(
+                            f"   No response received from device after sending RPC commands"
+                        )
+                        print(f"   Possible causes:")
+                        print(
+                            f"   1. Device is not responding (check serial connection)"
+                        )
+                        print(f"   2. Firmware is not running (check device reboot)")
+                        print(f"   3. RPC system initialization failed")
+                        test_failed = True
+                        break
 
                 # Check interrupt
                 if is_interrupted():
@@ -1733,6 +1806,11 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
 
                 # Store line
                 output_lines.append(line)
+
+                # Mark test as started if we receive any output (indicates device is running)
+                if not test_started:
+                    test_started = True
+                    last_response_time = time.time()
 
                 # Check for JSON-RPC responses (RPC-based validation)
                 if line.startswith("REMOTE:"):

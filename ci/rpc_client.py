@@ -112,6 +112,7 @@ class RpcClient:
         timeout: float = 10.0,
         read_timeout: float = 0.5,
         use_pyserial: bool = False,
+        verbose: bool = False,
     ):
         """Initialize RPC client.
 
@@ -121,12 +122,14 @@ class RpcClient:
             timeout: Default timeout for RPC operations in seconds
             read_timeout: Timeout for individual serial reads (unused with fbuild)
             use_pyserial: If True, use pyserial directly instead of fbuild (for --no-fbuild)
+            verbose: If True, enable detailed RPC logging
         """
         self.port = port
         self.baudrate = baudrate
         self.timeout = timeout
         self.read_timeout = read_timeout
         self.use_pyserial = use_pyserial
+        self.verbose = verbose
         self._monitor: Any = None  # SerialMonitor (fbuild or pyserial)
         self._next_id: int = (
             1  # Request ID counter for JSON-RPC 2.0 correlation (uint32 range)
@@ -148,6 +151,12 @@ class RpcClient:
         """
         if self.is_connected:
             return
+
+        if self.verbose:
+            print(f"🔌 [RPC] Connecting to {self.port} @ {self.baudrate} baud...")
+            print(
+                f"🔌 [RPC] Using {'pyserial' if self.use_pyserial else 'fbuild'} backend"
+            )
 
         # Select appropriate SerialMonitor implementation
         if self.use_pyserial:
@@ -172,7 +181,12 @@ class RpcClient:
         # Attach to serial session (works for both implementations)
         self._monitor.__enter__()
 
+        if self.verbose:
+            print(f"✅ [RPC] Serial connection established")
+
         if boot_wait > 0:
+            if self.verbose:
+                print(f"⏳ [RPC] Waiting {boot_wait}s for device boot...")
             # Use async sleep to allow other tasks to run
             # Poll in small increments for interrupt checking
             start = time.time()
@@ -181,7 +195,11 @@ class RpcClient:
                 await asyncio.sleep(0.05)  # Async sleep, check interrupt every 50ms
 
         if drain_boot:
-            await self.drain_boot_output()
+            if self.verbose:
+                print(f"📥 [RPC] Draining boot output...")
+            lines_drained = await self.drain_boot_output(verbose=self.verbose)
+            if self.verbose:
+                print(f"📥 [RPC] Drained {lines_drained} boot lines")
 
     async def close(self) -> None:
         """Close serial connection (async)."""
@@ -276,6 +294,9 @@ class RpcClient:
         }
         cmd_str = json.dumps(cmd, separators=(",", ":"))
 
+        if self.verbose:
+            print(f"📤 [RPC] Sending: {cmd_str}")
+
         effective_timeout = timeout if timeout is not None else self.timeout
         attempt_timeout = effective_timeout / max(retries, 1)
 
@@ -346,6 +367,9 @@ class RpcClient:
         }
         cmd_str = json.dumps(cmd, separators=(",", ":"))
 
+        if self.verbose:
+            print(f"📤 [RPC] Sending: {cmd_str}")
+
         effective_timeout = timeout if timeout is not None else self.timeout
         attempt_timeout = effective_timeout / max(retries, 1)
 
@@ -400,9 +424,9 @@ class RpcClient:
 
                                 # Determine success: void functions return null, treat as success
                                 if "success" in data:
-                                    success = data.get("success", True)
+                                    success = data.get("success", True)  # type: ignore[assignment]
                                 elif isinstance(response_data, dict):
-                                    success = response_data.get("success", True)
+                                    success = response_data.get("success", True)  # type: ignore[assignment]
                                 else:
                                     # Void functions return null - treat as successful execution
                                     success = True
@@ -414,8 +438,8 @@ class RpcClient:
                                     response_data = {}
 
                                 return RpcResponse(
-                                    success=success,
-                                    data=response_data,
+                                    success=success,  # type: ignore[arg-type]
+                                    data=response_data,  # type: ignore[arg-type]
                                     raw_line=line,
                                     _id=response_id,  # ID is always present
                                 )
@@ -473,32 +497,58 @@ class RpcClient:
                             # Skip responses that don't match our expected request ID
                             continue
 
-                        # Extract result/error field for JSON-RPC 2.0 responses
-                        # Priority: result > error > empty dict (no protocol fields)
+                        # JSON-RPC 2.0: "error" and "result" are mutually exclusive
+                        # If "error" is present, raise RpcError immediately
+                        if "error" in data:
+                            error_obj = data["error"]
+
+                            # Extract error details (code and message are standard fields)
+                            if isinstance(error_obj, dict):
+                                error_code = error_obj.get("code")  # type: ignore[assignment]
+                                error_message = error_obj.get(  # type: ignore[assignment]
+                                    "message", "Unknown error"
+                                )
+                                error_data = error_obj.get("data")  # type: ignore[assignment]
+
+                                # Build detailed error message
+                                msg = f"RPC Error {error_code}: {error_message}"
+                                if error_data:
+                                    import json as json_module
+
+                                    msg += f" (data: {json_module.dumps(error_data)})"
+
+                                raise RpcError(msg)
+                            else:
+                                # Malformed error object (should be dict)
+                                raise RpcError(f"Malformed error object: {error_obj}")
+
+                        # Extract result field for JSON-RPC 2.0 responses
                         if "result" in data:
                             response_data = data["result"]
-                        elif "error" in data:
-                            response_data = data["error"]
                         else:
                             # No result or error - empty response
                             response_data = {}
 
                         # Determine success: void functions return null, treat as success
+                        success: bool  # Explicit type declaration
                         if "success" in data:
-                            success = data.get("success", True)
+                            success = bool(data.get("success", True))
                         elif isinstance(response_data, dict):
-                            success = response_data.get("success", True)
+                            success = bool(response_data.get("success", True))  # type: ignore[arg-type]
                         else:
                             # Void functions return null - treat as successful execution
                             success = True
 
                         # Ensure response_data is always a dict for consistent API
+                        final_response_data: dict[str, Any]
                         if response_data is None or not isinstance(response_data, dict):
-                            response_data = {}
+                            final_response_data = {}
+                        else:
+                            final_response_data = response_data  # type: ignore[assignment]
 
                         return RpcResponse(
                             success=success,
-                            data=response_data,
+                            data=final_response_data,
                             raw_line=line,
                             _id=response_id,  # ID is always present
                         )
@@ -512,9 +562,15 @@ class RpcClient:
         except KeyboardInterrupt:
             notify_main_thread()
             raise
-        except Exception:
+        except Exception as e:
+            if self.verbose:
+                print(f"⚠️  [RPC] Exception during read_lines: {e}")
             pass  # Timeout or other error
 
+        if self.verbose:
+            print(
+                f"❌ [RPC] Timeout: No response with ID {expected_id} within {timeout}s"
+            )
         raise RpcTimeoutError(f"No response with ID {expected_id} within {timeout}s")
 
     def _check_interrupt(self) -> None:

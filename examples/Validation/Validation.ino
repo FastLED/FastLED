@@ -389,22 +389,9 @@ void setup() {
     ss << "\n[GPIO BASELINE TEST] Testing GPIO " << PIN_TX << " → GPIO " << PIN_RX << " connectivity";
     FL_PRINT(ss.str());
 
-    // Test RX channel with manual GPIO toggle to confirm hardware path works
-    // This isolates GPIO/hardware issues from PARLIO driver issues
-    // Buffer size = 100 symbols, hz = 40MHz (same as LED validation)
-    if (!testRxChannel(g_validation_state->rx_channel, PIN_TX, PIN_RX, 40000000, 100)) {
-        FL_ERROR("[GPIO BASELINE TEST] FAILED - RX did not capture manual GPIO toggles");
-        FL_ERROR("[GPIO BASELINE TEST] Possible causes:");
-        FL_ERROR("  1. GPIO " << PIN_TX << " and GPIO " << PIN_RX << " are not physically connected");
-        FL_ERROR("  2. RX channel initialization failed");
-        FL_ERROR("  3. GPIO conflict with other peripherals (USB Serial JTAG on C6 uses certain GPIOs)");
-        FL_ERROR("GPIO baseline test failed - check hardware connections");
-        return;
-    }
-
-    FL_WARN("\n[GPIO BASELINE TEST] ✓ PASSED - GPIO path confirmed working");
-    FL_WARN("[GPIO BASELINE TEST] ✓ RX successfully captured manual GPIO toggles");
-    FL_WARN("[GPIO BASELINE TEST] ✓ Hardware connectivity verified (GPIO " << PIN_TX << " → GPIO " << PIN_RX << ")");
+    // GPIO baseline test moved to loop() - wait for RPC start signal before testing
+    // This allows JSON-RPC commands (testGpioConnection, findConnectedPins) to run first
+    FL_WARN("[GPIO BASELINE TEST] Deferred to loop() - waiting for RPC start signal");
 
     // List all available drivers and store globally
     g_validation_state->drivers_available = FastLED.getDriverInfos();
@@ -455,6 +442,33 @@ void loop() {
     // This ensures RPC commands are processed frequently even without delay() calls
     for (int i = 0; i < 100; i++) {
         fl::async_run();
+    }
+
+    // Run GPIO baseline test once after device is ready (allows JSON-RPC to be operational first)
+    // This test is informational only - we continue regardless of pass/fail
+    if (!g_validation_state->gpio_baseline_test_done) {
+        // Wait 500ms after boot to ensure JSON-RPC is fully operational
+        if (millis() > 500) {
+            g_validation_state->gpio_baseline_test_done = true;
+
+            FL_PRINT("\n[GPIO BASELINE TEST] Testing GPIO " << PIN_TX << " → GPIO " << PIN_RX << " connectivity");
+
+            // Test RX channel with manual GPIO toggle to confirm hardware path works
+            // This isolates GPIO/hardware issues from PARLIO driver issues
+            // Buffer size = 100 symbols, hz = 40MHz (same as LED validation)
+            if (!testRxChannel(g_validation_state->rx_channel, PIN_TX, PIN_RX, 40000000, 100)) {
+                FL_WARN("[GPIO BASELINE TEST] FAILED - RX did not capture manual GPIO toggles");
+                FL_WARN("[GPIO BASELINE TEST] Possible causes:");
+                FL_WARN("  1. GPIO " << PIN_TX << " and GPIO " << PIN_RX << " are not physically connected");
+                FL_WARN("  2. RX channel initialization failed");
+                FL_WARN("  3. GPIO conflict with other peripherals (USB Serial JTAG on C6 uses certain GPIOs)");
+                FL_WARN("[GPIO BASELINE TEST] Continuing - JSON-RPC pin discovery/testing available");
+            } else {
+                FL_WARN("\n[GPIO BASELINE TEST] ✓ PASSED - GPIO path confirmed working");
+                FL_WARN("[GPIO BASELINE TEST] ✓ RX successfully captured manual GPIO toggles");
+                FL_WARN("[GPIO BASELINE TEST] ✓ Hardware connectivity verified (GPIO " << PIN_TX << " → GPIO " << PIN_RX << ")");
+            }
+        }
     }
 
     // Emit periodic ready status (every 5 seconds) for Python connection detection

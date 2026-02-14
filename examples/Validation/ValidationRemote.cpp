@@ -705,6 +705,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     // Register "testGpioConnection" function - test if TX and RX pins are electrically connected
     // This is a pre-test to diagnose hardware connection issues before running validation
     mRemote->bind("testGpioConnection", [](const fl::Json& args) -> fl::Json {
+        FL_WARN("[RPC DEBUG] testGpioConnection: Entry");
         fl::Json response = fl::Json::object();
 
         // Validate args: expects [txPin, rxPin]
@@ -724,31 +725,43 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         int rx_pin = static_cast<int>(args[1].as_int().value());
 
         FL_PRINT("[GPIO TEST] Testing connection: TX=" << tx_pin << " → RX=" << rx_pin);
+        FL_WARN("[RPC DEBUG] testGpioConnection: Starting GPIO test");
 
         // Test 1: TX drives LOW, RX has pullup → RX should read LOW if connected
         pinMode(tx_pin, OUTPUT);
+        FL_WARN("[RPC DEBUG] testGpioConnection: pinMode TX done");
         pinMode(rx_pin, INPUT_PULLUP);
+        FL_WARN("[RPC DEBUG] testGpioConnection: pinMode RX done");
         digitalWrite(tx_pin, LOW);
+        FL_WARN("[RPC DEBUG] testGpioConnection: digitalWrite LOW done");
         delay(5);  // Allow signal to settle
+        FL_WARN("[RPC DEBUG] testGpioConnection: delay 1 done");
         int rx_when_tx_low = digitalRead(rx_pin);
+        FL_WARN("[RPC DEBUG] testGpioConnection: digitalRead LOW done");
 
         // Test 2: TX drives HIGH → RX should read HIGH if connected
         digitalWrite(tx_pin, HIGH);
+        FL_WARN("[RPC DEBUG] testGpioConnection: digitalWrite HIGH done");
         delay(5);  // Allow signal to settle
+        FL_WARN("[RPC DEBUG] testGpioConnection: delay 2 done");
         int rx_when_tx_high = digitalRead(rx_pin);
+        FL_WARN("[RPC DEBUG] testGpioConnection: digitalRead HIGH done");
 
         // Restore pins to safe state
         pinMode(tx_pin, INPUT);
         pinMode(rx_pin, INPUT);
+        FL_WARN("[RPC DEBUG] testGpioConnection: Pins restored");
 
         // Analyze results
         bool connected = (rx_when_tx_low == LOW) && (rx_when_tx_high == HIGH);
+        FL_WARN("[RPC DEBUG] testGpioConnection: Results analyzed");
 
         response.set("txPin", static_cast<int64_t>(tx_pin));
         response.set("rxPin", static_cast<int64_t>(rx_pin));
         response.set("rxWhenTxLow", rx_when_tx_low == LOW ? "LOW" : "HIGH");
         response.set("rxWhenTxHigh", rx_when_tx_high == HIGH ? "HIGH" : "LOW");
         response.set("connected", connected);
+        FL_WARN("[RPC DEBUG] testGpioConnection: Response fields set");
 
         if (connected) {
             response.set("success", true);
@@ -768,6 +781,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
             }
         }
 
+        FL_WARN("[RPC DEBUG] testGpioConnection: About to return response");
         return response;
     });
 

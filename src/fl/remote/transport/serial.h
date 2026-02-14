@@ -8,21 +8,21 @@
 
 #if FASTLED_ENABLE_JSON
 
-#include "fl/stl/optional.h"
-#include "fl/stl/string.h"
+#include "fl/delay.h"
+#include "fl/int.h"
+#include "fl/log.h"
+#include "fl/stl/cctype.h"
+#include "fl/stl/chrono.h"
+#include "fl/stl/cstdio.h"
+#include "fl/stl/cstring.h"
 #include "fl/stl/function.h"
-#include "fl/stl/cstdio.h"  // For fl::available, fl::read, fl::print, fl::println
-#include "fl/stl/chrono.h"  // For fl::millis()
-
-// Forward declare delay to avoid Arduino conflict
-namespace fl {
-    void delay(u32 ms, bool run_async);
-}
+#include "fl/stl/optional.h"
+#include "fl/stl/pair.h"
+#include "fl/stl/string.h"
+#include "fl/stl/strstream.h"
+#include "fl/string_view.h"
 
 namespace fl {
-
-// Forward declare Remote's callback types (defined in fl/remote/rpc/server.h)
-class Server;
 
 // =============================================================================
 // Core Serialization Functions (Pure, No I/O)
@@ -105,7 +105,8 @@ createSerialRequestSource(const char* prefix = "") {
     return [prefix]() -> fl::optional<fl::Json> {
         // Transport layer: Read line from serial
         SerialReader serial;
-        auto line = readSerialLine(serial);
+        // Use 1ms timeout for non-blocking reads (async task runs every 10ms)
+        auto line = readSerialLine(serial, '\n', 1);
         if (!line.has_value()) {
             return fl::nullopt;
         }

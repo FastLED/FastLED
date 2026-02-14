@@ -2,6 +2,20 @@
 
 #if FASTLED_ENABLE_JSON
 
+#include "fl/int.h"
+#include "fl/json.h"
+#include "fl/log.h"
+#include "fl/remote/rpc/rpc_invokers.h"
+#include "fl/remote/rpc/rpc_registry.h"
+#include "fl/remote/rpc/type_conversion_result.h"
+#include "fl/stl/optional.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/string.h"
+#include "fl/stl/strstream.h"
+#include "fl/stl/tuple.h"
+#include "fl/stl/unordered_map.h"
+#include "fl/stl/vector.h"
+
 namespace fl {
 
 // =============================================================================
@@ -9,6 +23,8 @@ namespace fl {
 // =============================================================================
 
 Json Rpc::handle(const Json& request) {
+    FL_WARN("[RPC DEBUG] Rpc::handle(): Entry");
+
     // Extract method name
     if (!request.contains("method")) {
         FL_ERROR("RPC: Invalid Request - missing 'method' field");
@@ -21,6 +37,7 @@ Json Rpc::handle(const Json& request) {
         return detail::makeJsonRpcError(-32600, "Invalid Request: 'method' must be a string", request["id"]);
     }
     fl::string methodName = methodOpt.value();
+    FL_WARN("[RPC DEBUG] Rpc::handle(): method=" << methodName.c_str());
 
     // Handle built-in rpc.discover method
     if (methodName == "rpc.discover") {
@@ -34,11 +51,13 @@ Json Rpc::handle(const Json& request) {
     }
 
     // Look up the method
+    FL_WARN("[RPC DEBUG] Rpc::handle(): Looking up method in registry");
     auto it = mRegistry.find(methodName);
     if (it == mRegistry.end()) {
         FL_ERROR("RPC: Method not found: " << methodName.c_str());
         return detail::makeJsonRpcError(-32601, "Method not found: " + methodName, request["id"]);
     }
+    FL_WARN("[RPC DEBUG] Rpc::handle(): Method found");
 
     // Extract params (default to empty array)
     Json params = request.contains("params") ? request["params"] : Json::parse("[]");
@@ -46,9 +65,12 @@ Json Rpc::handle(const Json& request) {
         FL_ERROR("RPC: Invalid params - must be an array for method: " << methodName.c_str());
         return detail::makeJsonRpcError(-32602, "Invalid params: must be an array", request["id"]);
     }
+    FL_WARN("[RPC DEBUG] Rpc::handle(): Params validated, invoking method");
 
     // Invoke the method
     fl::tuple<TypeConversionResult, Json> resultTuple = it->second.mInvoker->invoke(params);
+    FL_WARN("[RPC DEBUG] Rpc::handle(): Method invocation returned");
+
     TypeConversionResult convResult = fl::get<0>(resultTuple);
     Json returnVal = fl::get<1>(resultTuple);
 
@@ -58,6 +80,7 @@ Json Rpc::handle(const Json& request) {
         return detail::makeJsonRpcError(-32602, "Invalid params: " + convResult.errorMessage(), request["id"]);
     }
 
+    FL_WARN("[RPC DEBUG] Rpc::handle(): Building response");
     // Build success response
     Json response = Json::object();
     response.set("jsonrpc", "2.0");
@@ -77,6 +100,7 @@ Json Rpc::handle(const Json& request) {
         response.set("warnings", warnings);
     }
 
+    FL_WARN("[RPC DEBUG] Rpc::handle(): Returning response");
     return response;
 }
 
