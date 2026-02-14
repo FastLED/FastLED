@@ -9,7 +9,7 @@
 
 #include "ValidationRemote.h"
 #include "fl/remote/transport/serial.h"
-#include "fl/remote/rpc/protocol.h"
+#include "fl/memory.h"
 #include "Common.h"
 #include "ValidationTest.h"
 #include "ValidationHelpers.h"
@@ -26,11 +26,8 @@
 // ============================================================================
 
 void printJsonRaw(const fl::Json& json, const char* prefix) {
-    // Filter schema responses to prevent stack overflow on constrained platforms
-    fl::Json filtered = fl::filterSchemaResponse(json);
-
     // Serialize and print response
-    fl::string formatted = fl::formatJsonResponse(filtered, prefix);
+    fl::string formatted = fl::formatJsonResponse(json, prefix);
     fl::println(formatted.c_str());
     fl::flush();
 }
@@ -90,11 +87,7 @@ fl::Json makeResponse(bool success, ReturnCode returnCode, const char* message,
 fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     Serial.println("[DEBUG] runSingleTest called");
     Serial.print("[DEBUG] Free heap: ");
-    fl::HeapInfo heap = fl::getFreeHeap();
-    Serial.print(heap.free_sram);
-    Serial.print(" SRAM, ");
-    Serial.print(heap.free_psram);
-    Serial.println(" PSRAM");
+    Serial.println(fl::getFreeHeap().total());
     Serial.flush();
 
     fl::Json response = fl::Json::object();
@@ -127,8 +120,8 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
 
     // Validate driver exists
     bool driver_found = false;
-    for (fl::size i = 0; i < &mState->drivers_available->size(); i++) {
-        if ((*&mState->drivers_available)[i].name == driver_name) {
+    for (fl::size i = 0; i < mState->drivers_available.size(); i++) {
+        if (mState->drivers_available[i].name == driver_name) {
             driver_found = true;
             break;
         }
@@ -244,11 +237,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     Serial.print("[DEBUG] runSingleTest starting - driver: ");
     Serial.println(driver_name.c_str());
     Serial.print("[DEBUG] Free heap: ");
-    fl::HeapInfo heap = fl::getFreeHeap();
-    Serial.print(heap.free_sram);
-    Serial.print(" SRAM, ");
-    Serial.print(heap.free_psram);
-    Serial.println(" PSRAM");
+    Serial.println(fl::getFreeHeap().total());
     Serial.flush();
 
     uint32_t start_ms = millis();
@@ -281,11 +270,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     Serial.print("[DEBUG] Allocating LED arrays - lanes: ");
     Serial.println(lane_sizes.size());
     Serial.print("[DEBUG] Free heap: ");
-    fl::HeapInfo heap = fl::getFreeHeap();
-    Serial.print(heap.free_sram);
-    Serial.print(" SRAM, ");
-    Serial.print(heap.free_psram);
-    Serial.println(" PSRAM");
+    Serial.println(fl::getFreeHeap().total());
     Serial.flush();
 
     fl::vector<fl::unique_ptr<fl::vector<CRGB>>> led_arrays;
@@ -298,11 +283,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         Serial.print(lane_sizes[i]);
         Serial.println(" LEDs");
         Serial.print("[DEBUG] Free heap: ");
-        fl::HeapInfo heap = fl::getFreeHeap();
-    Serial.print(heap.free_sram);
-    Serial.print(" SRAM, ");
-    Serial.print(heap.free_psram);
-    Serial.println(" PSRAM");
+        Serial.println(fl::getFreeHeap().total());
         Serial.flush();
 
         // Allocate LED array
@@ -327,30 +308,18 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         Serial.print("[DEBUG] Lane ");
         Serial.print(i);
         Serial.print(" complete, free heap: ");
-        fl::HeapInfo heap = fl::getFreeHeap();
-    Serial.print(heap.free_sram);
-    Serial.print(" SRAM, ");
-    Serial.print(heap.free_psram);
-    Serial.println(" PSRAM");
+        Serial.println(fl::getFreeHeap().total());
         Serial.flush();
     }
 
     Serial.print("[DEBUG] All lanes allocated, free heap: ");
-    fl::HeapInfo heap = fl::getFreeHeap();
-    Serial.print(heap.free_sram);
-    Serial.print(" SRAM, ");
-    Serial.print(heap.free_psram);
-    Serial.println(" PSRAM");
+    Serial.println(fl::getFreeHeap().total());
     Serial.flush();
 
     // Create temporary RX channel if pinRx differs from default
     Serial.println("[DEBUG] Setting up RX channel");
     Serial.print("[DEBUG] Free heap: ");
-    fl::HeapInfo heap = fl::getFreeHeap();
-    Serial.print(heap.free_sram);
-    Serial.print(" SRAM, ");
-    Serial.print(heap.free_psram);
-    Serial.println(" PSRAM");
+    Serial.println(fl::getFreeHeap().total());
     Serial.flush();
 
     fl::shared_ptr<fl::RxDevice> rx_channel_to_use = mState->rx_channel;
@@ -374,11 +343,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     }
 
     Serial.print("[DEBUG] Free heap after RX: ");
-    fl::HeapInfo heap = fl::getFreeHeap();
-    Serial.print(heap.free_sram);
-    Serial.print(" SRAM, ");
-    Serial.print(heap.free_psram);
-    Serial.println(" PSRAM");
+    Serial.println(fl::getFreeHeap().total());
     Serial.flush();
 
     // Create validation configuration
@@ -396,22 +361,14 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     );
 
     Serial.print("[DEBUG] Validation config created, free heap: ");
-    fl::HeapInfo heap = fl::getFreeHeap();
-    Serial.print(heap.free_sram);
-    Serial.print(" SRAM, ");
-    Serial.print(heap.free_psram);
-    Serial.println(" PSRAM");
+    Serial.println(fl::getFreeHeap().total());
     Serial.flush();
 
     // Run test with debug output suppressed
     Serial.print("[DEBUG] Starting test - iterations: ");
     Serial.println(iterations);
     Serial.print("[DEBUG] Free heap: ");
-    fl::HeapInfo heap = fl::getFreeHeap();
-    Serial.print(heap.free_sram);
-    Serial.print(" SRAM, ");
-    Serial.print(heap.free_psram);
-    Serial.println(" PSRAM");
+    Serial.println(fl::getFreeHeap().total());
     Serial.flush();
 
     int total_tests = 0;
@@ -430,11 +387,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         int warmup_total = 0, warmup_passed = 0;
         validateChipsetTiming(validation_config, warmup_total, warmup_passed);
         Serial.print("[DEBUG] Warmup done, heap: ");
-        fl::HeapInfo heap = fl::getFreeHeap();
-    Serial.print(heap.free_sram);
-    Serial.print(" SRAM, ");
-    Serial.print(heap.free_psram);
-    Serial.println(" PSRAM");
+        Serial.println(fl::getFreeHeap().total());
         Serial.flush();
 
         // Run actual test iterations
@@ -442,11 +395,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
             Serial.print("[DEBUG] Iteration ");
             Serial.println(iter + 1);
             Serial.print("[DEBUG] Free heap: ");
-            fl::HeapInfo heap = fl::getFreeHeap();
-    Serial.print(heap.free_sram);
-    Serial.print(" SRAM, ");
-    Serial.print(heap.free_psram);
-    Serial.println(" PSRAM");
+            Serial.println(fl::getFreeHeap().total());
             Serial.flush();
 
             int iter_total = 0, iter_passed = 0;
@@ -466,11 +415,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     Serial.print("[DEBUG] Test complete - passed: ");
     Serial.println(passed);
     Serial.print("[DEBUG] Free heap: ");
-    fl::HeapInfo heap = fl::getFreeHeap();
-    Serial.print(heap.free_sram);
-    Serial.print(" SRAM, ");
-    Serial.print(heap.free_psram);
-    Serial.println(" PSRAM");
+    Serial.println(fl::getFreeHeap().total());
     Serial.flush();
 
     uint32_t duration_ms = millis() - start_ms;
@@ -479,11 +424,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
 
     Serial.println("[DEBUG] Building response");
     Serial.print("[DEBUG] Free heap: ");
-    fl::HeapInfo heap = fl::getFreeHeap();
-    Serial.print(heap.free_sram);
-    Serial.print(" SRAM, ");
-    Serial.print(heap.free_psram);
-    Serial.println(" PSRAM");
+    Serial.println(fl::getFreeHeap().total());
     Serial.flush();
 
     response.set("success", true);
@@ -515,11 +456,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     }
 
     Serial.print("[DEBUG] Response built, heap: ");
-    fl::HeapInfo heap = fl::getFreeHeap();
-    Serial.print(heap.free_sram);
-    Serial.print(" SRAM, ");
-    Serial.print(heap.free_psram);
-    Serial.println(" PSRAM");
+    Serial.println(fl::getFreeHeap().total());
     Serial.println("[DEBUG] Returning response");
     Serial.flush();
 
@@ -733,11 +670,11 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     // Register "drivers" function - list available drivers
     mRemote->bind("drivers", [this](const fl::Json& args) -> fl::Json {
         fl::Json drivers = fl::Json::array();
-        for (fl::size i = 0; i < &mState->drivers_available->size(); i++) {
+        for (fl::size i = 0; i < mState->drivers_available.size(); i++) {
             fl::Json driver = fl::Json::object();
-            driver.set("name", (*&mState->drivers_available)[i].name.c_str());
-            driver.set("priority", static_cast<int64_t>((*&mState->drivers_available)[i].priority));
-            driver.set("enabled", (*&mState->drivers_available)[i].enabled);
+            driver.set("name", mState->drivers_available[i].name.c_str());
+            driver.set("priority", static_cast<int64_t>(mState->drivers_available[i].priority));
+            driver.set("enabled", mState->drivers_available[i].enabled);
             drivers.push_back(driver);
         }
         return drivers;

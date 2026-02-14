@@ -285,7 +285,7 @@ void setup() {
     // Provides automatic proof-of-life monitoring and USB disconnect fix for Windows
     // DISABLED FOR DEBUGGING: Investigating if watchdog causes crash at 7.69s
     // fl::watchdog_setup(5000);
-    while (!Serial && millis() < 10000);  // Wait max 10 seconds for serial
+    while (!Serial && millis() < SERIAL_TIMEOUT_MS);  // Wait for serial monitor (early exits when connected)
 
     FL_WARN("[SETUP] Validation sketch starting - serial output active");
 

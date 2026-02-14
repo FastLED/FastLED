@@ -144,7 +144,7 @@ bool readStringUntil(sstream& out, char delimiter, char skipChar, fl::optional<u
         // Keep trying until timeout (or forever if no timeout set)
         if (c == -1) {
             // Yield briefly to prevent busy loop
-            fl::delay(1);
+            fl::delay(1, false);
             continue;
         }
 

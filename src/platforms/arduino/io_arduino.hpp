@@ -13,10 +13,12 @@ void begin(u32 baudRate) {
 
 // Print functions
 void print(const char* str) {
+    if (!Serial) return;  // Non-blocking: skip if USB disconnected
     Serial.print(str);
 }
 
 void println(const char* str) {
+    if (!Serial) return;  // Non-blocking: skip if USB disconnected
     Serial.println(str);
 }
 

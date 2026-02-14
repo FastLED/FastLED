@@ -167,9 +167,13 @@ async def run_gpio_pretest(
 
     try:
         print("  Waiting for device to boot...")
-        async with RpcClient(
-            port, timeout=timeout, use_pyserial=use_pyserial
-        ) as client:
+        # Create client and manually connect with longer boot_wait for slower platforms
+        # ESP32-C6 RISC-V platform needs extra time for channel engine initialization
+        client = RpcClient(port, timeout=timeout, use_pyserial=use_pyserial)
+        await client.connect(
+            boot_wait=15.0, drain_boot=False
+        )  # Wait 15s for initialization, don't drain to preserve RESULT JSON
+        try:
             print()
             print("  Sending GPIO test command...")
 
@@ -206,6 +210,8 @@ async def run_gpio_pretest(
                 print(f"     RX when TX=HIGH: {response.get('rxWhenTxHigh', '?')}")
                 print()
                 return False
+        finally:
+            await client.close()
 
     except RpcTimeoutError:
         print()

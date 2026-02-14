@@ -13,6 +13,7 @@
 /// - PinMode::InputPulldown (3) = INPUT_PULLDOWN (GPIO_MODE_INPUT with pull-down)
 
 #include "fl/compiler_control.h"
+#include "platforms/esp/is_esp.h"
 #include "platforms/esp/esp_version.h"
 
 FL_EXTERN_C_BEGIN
@@ -207,8 +208,13 @@ inline void setAdcRange(AdcRange range) {
 #define FL_LEDC_SPEED_MODE LEDC_LOW_SPEED_MODE
 #endif
 
-// Maximum number of LEDC channels we manage (ESP32 has up to 8 per speed mode)
+// Maximum number of LEDC channels we manage
+// ESP32-C6 and ESP32-H2 have 6 channels, others have 8
+#if defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2)
+#define FL_LEDC_MAX_CHANNELS 6
+#else
 #define FL_LEDC_MAX_CHANNELS 8
+#endif
 
 struct LedcPinAlloc {
     int pin;                    // -1 = free
@@ -225,8 +231,10 @@ static LedcPinAlloc g_ledc_alloc[FL_LEDC_MAX_CHANNELS] = {
     {-1, LEDC_CHANNEL_3, LEDC_TIMER_1, 0},
     {-1, LEDC_CHANNEL_4, LEDC_TIMER_2, 0},
     {-1, LEDC_CHANNEL_5, LEDC_TIMER_2, 0},
+#if FL_LEDC_MAX_CHANNELS >= 8
     {-1, LEDC_CHANNEL_6, LEDC_TIMER_3, 0},
     {-1, LEDC_CHANNEL_7, LEDC_TIMER_3, 0},
+#endif
 };
 
 inline bool needsPwmIsrFallback(int /*pin*/, u32 frequency_hz) {

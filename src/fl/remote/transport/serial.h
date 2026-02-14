@@ -204,7 +204,7 @@ fl::optional<fl::string> readSerialStringUntil(SerialIn& serial, char delimiter,
         // Keep trying until timeout (or forever if no timeout set)
         if (c == -1) {
             // Yield briefly to prevent busy loop
-            fl::delay(1);
+            fl::delay(1, false);
             continue;
         }
 
