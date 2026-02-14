@@ -537,6 +537,11 @@ def run_iwyu_single_file(file_path: str) -> bool:
     if is_test_file:
         compiler_args.append(f"-I{project_root / 'tests'}")
 
+    # Explicitly specify language for header files to avoid deprecated warning
+    # clang++ defaults .h to C, then infers C++ from content (deprecated)
+    if file_path.endswith((".h", ".hpp", ".hh", ".hxx")):
+        compiler_args.extend(["-x", "c++-header"])
+
     compiler_args.extend(
         [
             "-c",  # Compile only (don't link)
