@@ -61,6 +61,7 @@
   { include: ['"fastled_config.h"', 'private', '"fl/detail/private.h"', 'public'] },
   { include: ['"fastled_delay.h"', 'private', '"fl/detail/private.h"', 'public'] },
   { include: ['"fastled_progmem.h"', 'public', '"fastled_progmem.h"', 'public'] },
+  { include: ['"platforms/null_progmem.h"', 'private', '"fastled_progmem.h"', 'public'] },
   { include: ['"power_mgt.h"', 'private', '"fl/detail/private.h"', 'public'] },
   
   # fl/ namespace headers - the modern FastLED API
@@ -140,8 +141,7 @@
 
   # AVR Platform Headers
   # These don't exist on stub - map to FastLED's progmem abstraction
-  # Note: fastled_progmem.h itself is private (line 51), so we mark it private here too
-  { include: ['<avr/pgmspace.h>', 'private', '"fastled_progmem.h"', 'private'] },
+  { include: ['<avr/pgmspace.h>', 'private', '"fastled_progmem.h"', 'public'] },
   { include: ['<avr/io.h>', 'private', '"fl/detail/private.h"', 'public'] },
   { include: ['<avr/interrupt.h>', 'private', '"fl/detail/private.h"', 'public'] },
   { include: ['<avr/wdt.h>', 'private', '"fl/detail/private.h"', 'public'] },

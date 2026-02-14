@@ -445,7 +445,7 @@ FL_TEST_CASE("fl::sincos32_simd equivalence") {
         // Test with deterministic "random" values (using LCG for reproducibility)
         u32 seed = 0x12345678;
 
-        for (int test = 0; test < 100; test++) {
+        for (int test = 0; test < 2500; test++) {  // 2500 * 4 = 10000 angles
             // Generate 4 random angles using simple LCG
             u32 angles[4];
             for (int i = 0; i < 4; i++) {
@@ -464,11 +464,9 @@ FL_TEST_CASE("fl::sincos32_simd equivalence") {
             simd::store_u32_4(reinterpret_cast<u32*>(simd_sins), simd_result.sin_vals); // ok reinterpret cast
             simd::store_u32_4(reinterpret_cast<u32*>(simd_coss), simd_result.cos_vals); // ok reinterpret cast
 
-            // Compare with scalar version for each angle
+            // Compare with scalar version for each angle (exact match)
             for (int i = 0; i < 4; i++) {
                 SinCos32 scalar_result = sincos32(angles[i]);
-
-                // SIMD and scalar must match exactly (same algorithm)
                 FL_CHECK_EQ(simd_sins[i], scalar_result.sin_val);
                 FL_CHECK_EQ(simd_coss[i], scalar_result.cos_val);
             }

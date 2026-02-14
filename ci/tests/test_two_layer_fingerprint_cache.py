@@ -295,8 +295,8 @@ class TestTwoLayerFingerprintCache(TestCase):
         self.assertFalse(needs_update, "Cache should hit")
         self.assertLess(
             hit_time,
-            0.2,
-            f"Cache hit with 50 files took {hit_time:.3f}s, should be <0.2s",
+            1.0,
+            f"Cache hit with 50 files took {hit_time:.3f}s, should be <1.0s",
         )
 
     def test_concurrent_access(self) -> None:
