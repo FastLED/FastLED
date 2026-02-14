@@ -117,15 +117,20 @@
   # All code should use the public API: fl/simd.h
   { include: ['"platforms/shared/simd_x86.hpp"', 'private', '"fl/simd.h"', 'public'] },
   { include: ['"platforms/shared/simd_noop.hpp"', 'private', '"fl/simd.h"', 'public'] },
+  { include: ['"platforms/simd.h"', 'private', '"fl/simd.h"', 'public'] },
 
   # ========================================================================
   # Platform Integer Type Headers (Internal Implementation)
   # ========================================================================
   # Platform-specific integer type headers are internal implementation details.
-  # All code should use the public API: fl/int.h
+  # All code should use the public API: fl/int.h or fl/stl/stdint.h
+  #
   { include: ['"platforms/shared/int_windows.h"', 'private', '"fl/int.h"', 'public'] },
   { include: ['"platforms/shared/int.h"', 'private', '"fl/int.h"', 'public'] },
+  { include: ['"platforms/int.h"', 'private', '"fl/int.h"', 'public'] },
   { include: ['@"platforms/.*/int.*\\.h"', 'private', '"fl/int.h"', 'public'] },
+  # fl/stl/stdint.h re-exports fl/int.h (via IWYU pragma: export in source).
+  # This means files including fl/stl/stdint.h don't need fl/int.h separately.
 
   # ========================================================================
   # Platform-Specific Headers (Not Available on Host Platform)
@@ -184,6 +189,22 @@
   { include: ['<pico/stdlib.h>', 'private', '"fl/detail/private.h"', 'public'] },
   { include: ['<hardware/gpio.h>', 'private', '"fl/detail/private.h"', 'public'] },
   { include: ['<hardware/pio.h>', 'private', '"fl/detail/private.h"', 'public'] },
+
+  # ========================================================================
+  # SSE Include Chain
+  # ========================================================================
+  # emmintrin.h (SSE2) transitively includes xmmintrin.h (SSE1).
+  # IWYU doesn't track this transitive include, so it falsely suggests
+  # adding xmmintrin.h when emmintrin.h is already included.
+  { include: ['<xmmintrin.h>', 'public', '<emmintrin.h>', 'public'] },
+  { include: ['"xmmintrin.h"', 'public', '<emmintrin.h>', 'public'] },
+
+  # ========================================================================
+  # MinGW Internal Headers (compiler-defined macros)
+  # ========================================================================
+  # _mingw_mac.h: IWYU traces _M_X64 here, but it's a compiler builtin.
+  # Cannot map to a public header (would create false suggestion).
+  # Fix: use "// IWYU pragma: no_include" in source files instead.
 
   # ========================================================================
   # CATCH-ALL: *.cpp.hpp files are private (unity build implementation files)
