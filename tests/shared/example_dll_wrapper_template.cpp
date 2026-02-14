@@ -1,4 +1,4 @@
-// standalone test
+// ok standalone
 // Static wrapper template for Arduino example DLLs
 // This file replaces dynamically generated wrappers with a compile-time approach
 //

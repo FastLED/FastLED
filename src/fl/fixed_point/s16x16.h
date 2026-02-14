@@ -25,6 +25,18 @@ class s16x16 {
     explicit constexpr s16x16(float f)
         : mValue(static_cast<i32>(f * (static_cast<i32>(1) << FRAC_BITS))) {}
 
+    // Auto-promotion from other fixed-point types
+    // Enabled only when both INT_BITS and FRAC_BITS can be promoted (no demotion)
+    template <typename OtherFP>
+    constexpr s16x16(const OtherFP& other,
+                     typename fl::enable_if<
+                         (OtherFP::INT_BITS <= INT_BITS) &&
+                         (OtherFP::FRAC_BITS <= FRAC_BITS) &&
+                         (OtherFP::INT_BITS != INT_BITS || OtherFP::FRAC_BITS != FRAC_BITS),
+                         int>::type = 0)
+        : mValue(static_cast<i32>(
+            static_cast<i64>(other.raw()) << (FRAC_BITS - OtherFP::FRAC_BITS))) {}
+
     static FASTLED_FORCE_INLINE s16x16 from_raw(i32 raw) {
         s16x16 r;
         r.mValue = raw;
@@ -271,7 +283,7 @@ class s16x16 {
     static FASTLED_FORCE_INLINE void sincos(s16x16 angle, s16x16 &out_sin,
                                             s16x16 &out_cos) {
         u32 a24 = angle_to_a24(angle);
-        SinCos32 sc = fl::sincos32(a24);
+        fl::SinCos32 sc = fl::sincos32(a24);
         out_sin = from_raw(sc.sin_val >> 15);
         out_cos = from_raw(sc.cos_val >> 15);
     }

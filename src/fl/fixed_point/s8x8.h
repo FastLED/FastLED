@@ -25,6 +25,17 @@ class s8x8 {
     explicit constexpr s8x8(float f)
         : mValue(static_cast<i16>(f * (static_cast<i16>(1) << FRAC_BITS))) {}
 
+    // Auto-promotion from other fixed-point types
+    template <typename OtherFP>
+    constexpr s8x8(const OtherFP& other,
+                   typename fl::enable_if<
+                       (OtherFP::INT_BITS <= INT_BITS) &&
+                       (OtherFP::FRAC_BITS <= FRAC_BITS) &&
+                       (OtherFP::INT_BITS != INT_BITS || OtherFP::FRAC_BITS != FRAC_BITS),
+                       int>::type = 0)
+        : mValue(static_cast<i16>(
+            static_cast<i32>(other.raw()) << (FRAC_BITS - OtherFP::FRAC_BITS))) {}
+
     static FASTLED_FORCE_INLINE s8x8 from_raw(i16 raw) {
         s8x8 r;
         r.mValue = raw;
