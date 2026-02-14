@@ -239,6 +239,21 @@ using platforms::sub_i32_4;
 /// @return High 32 bits of 64-bit product, shifted right by 16
 using platforms::mulhi_i32_4;
 
+/// Multiply uint32 and return high 32 bits (for Q16.16 fixed-point, unsigned)
+/// @param a First operand (4 uint32)
+/// @param b Second operand (4 uint32)
+/// @return High 32 bits of 64-bit unsigned product, shifted right by 16
+/// On SSE2 this is 8 ops vs 14 for signed mulhi_i32_4
+using platforms::mulhi_u32_4;
+
+/// Multiply signed i32 by unsigned-positive u32, return >> 16 (Q16.16 fixed-point)
+/// @param a First operand (4 int32, signed)
+/// @param b Second operand (4 uint32, MUST be non-negative)
+/// @return ((i64)(i32)a * (u64)(u32)b) >> 16 for each lane
+/// On SSE2 this is 11 ops (vs 14 for mulhi_i32_4) — skips b's sign correction.
+/// Produces bit-identical results to mulhi_i32_4 when b >= 0.
+using platforms::mulhi_su32_4;
+
 /// Shift right logical (zero-fill) - for unsigned angle decomposition
 /// @param vec Input vector (4 uint32)
 /// @param shift Number of bits to shift right
@@ -250,6 +265,24 @@ using platforms::srl_u32_4;
 /// @param b Second operand (4 uint32)
 /// @return Bitwise AND result
 using platforms::and_u32_4;
+
+/// Extract a single u32 lane from a SIMD vector
+/// @param vec Input vector (4 uint32)
+/// @param lane Lane index (0-3)
+/// @return The u32 value at the specified lane
+using platforms::extract_u32_4;
+
+/// Interleave low 32-bit elements: {a0, b0, a1, b1}
+using platforms::unpacklo_u32_4;
+
+/// Interleave high 32-bit elements: {a2, b2, a3, b3}
+using platforms::unpackhi_u32_4;
+
+/// Interleave low 64-bit halves (as u32x4): {a0, a1, b0, b1}
+using platforms::unpacklo_u64_as_u32_4;
+
+/// Interleave high 64-bit halves (as u32x4): {a2, a3, b2, b3}
+using platforms::unpackhi_u64_as_u32_4;
 
 }  // namespace simd
 }  // namespace fl

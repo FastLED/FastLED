@@ -136,135 +136,146 @@ struct FL_ALIGNAS(16) SinCos32_simd {
 };
 
 /// Process 4 angles simultaneously, returning vectorized sin/cos values
-/// SIMD-optimized implementation with sequential LUT access and vectorized arithmetic
+/// SIMD-optimized: vectorized angle decomposition, vector LUT loads with
+/// 4x4 transpose (AoS→SoA), and vectorized quadratic interpolation.
 ///
 /// @param angles 4 u32 angles (0 to 16777216 per angle is a full circle)
 /// @return SinCos32_simd with raw i32 values (range: -2147418112 to 2147418112)
 FASTLED_FORCE_INLINE SinCos32_simd sincos32_simd(simd::simd_u32x4 angles) {
-    // Phase 1a: SIMD angle decomposition (extract components vectorially)
-    // Extract angle256 (top 8 bits) using vectorized right shift
+    // ========== Phase 1a: SIMD angle decomposition ==========
+    // Break down each of the 4 angles into components needed for LUT lookup
+
+    // Extract high 8 bits (angle >> 16) → 0..255 range for quadrant + position
     simd::simd_u32x4 angle256_vec = simd::srl_u32_4(angles, 16);
 
-    // Extract t (fractional part, bottom 16 bits) using vectorized AND
+    // Extract low 16 bits → fractional part for interpolation (0..65535)
     simd::simd_u32x4 t_vec = simd::and_u32_4(angles, simd::set1_u32_4(0xFFFF));
 
-    // Extract quadrant (top 2 bits of angle256) using vectorized shift
+    // Determine quadrant (0=0°-90°, 1=90°-180°, 2=180°-270°, 3=270°-360°)
     simd::simd_u32x4 quadrant_vec = simd::srl_u32_4(angle256_vec, 6);
 
-    // Extract pos (bottom 6 bits of angle256) using vectorized AND
+    // Position within quadrant (0..63) → maps to LUT indices 0..63
     simd::simd_u32x4 pos_vec = simd::and_u32_4(angle256_vec, simd::set1_u32_4(0x3F));
 
-    // Extract mirror_s (LSB of quadrant) using vectorized AND
+    // Mirror flag: quadrants 1 and 3 need mirrored LUT access
     simd::simd_u32x4 mirror_s_vec = simd::and_u32_4(quadrant_vec, simd::set1_u32_4(1));
 
-    // Store vectorized results for scalar processing
-    u32 pos_array[4], mirror_s_array[4], quadrant_array[4];
-    simd::store_u32_4(pos_array, pos_vec);
-    simd::store_u32_4(mirror_s_array, mirror_s_vec);
-    simd::store_u32_4(quadrant_array, quadrant_vec);
+    // ========== Phase 1b: SIMD mask computation ==========
+    // Compute masks for branchless conditional negation in interpolation and sign application
 
-    // Phase 1b: SIMD mask computation (fully parallelizable)
-    // Compute all masks in SIMD before scalar quarter-wave mapping
+    // Sin derivative mask: 0x00000000 (direct) or 0xFFFFFFFF (negate derivative in mirrored quadrants)
+    simd::simd_u32x4 sdmask_vec = simd::sub_i32_4(simd::set1_u32_4(0), mirror_s_vec);
 
-    // Derivative masks: sdmask = -mirror_s, cdmask = ~sdmask
-    simd::simd_u32x4 sdmask_vec = simd::sub_i32_4(simd::set1_u32_4(0), mirror_s_vec);  // 0 - mirror_s = -mirror_s
-    simd::simd_u32x4 cdmask_vec = simd::xor_u32_4(sdmask_vec, simd::set1_u32_4(0xFFFFFFFF));  // ~sdmask
+    // Cos derivative mask: opposite of sin (cos mirrors opposite direction)
+    simd::simd_u32x4 cdmask_vec = simd::xor_u32_4(sdmask_vec, simd::set1_u32_4(0xFFFFFFFF));
 
-    // Sign masks: extract bits and negate
-    simd::simd_u32x4 quadrant_bit1 = simd::and_u32_4(simd::srl_u32_4(quadrant_vec, 1), simd::set1_u32_4(1));  // (quadrant >> 1) & 1
-    simd::simd_u32x4 svmask_vec = simd::sub_i32_4(simd::set1_u32_4(0), quadrant_bit1);  // -bit
+    // Sin value sign mask: negative in quadrants 2 and 3 (bit 1 of quadrant)
+    simd::simd_u32x4 quadrant_bit1 = simd::and_u32_4(simd::srl_u32_4(quadrant_vec, 1), simd::set1_u32_4(1));
+    simd::simd_u32x4 svmask_vec = simd::sub_i32_4(simd::set1_u32_4(0), quadrant_bit1);
 
-    simd::simd_u32x4 quadrant_xor = simd::xor_u32_4(quadrant_vec, simd::srl_u32_4(quadrant_vec, 1));  // quadrant ^ (quadrant >> 1)
-    simd::simd_u32x4 quadrant_xor_bit0 = simd::and_u32_4(quadrant_xor, simd::set1_u32_4(1));  // & 1
-    simd::simd_u32x4 cvmask_vec = simd::sub_i32_4(simd::set1_u32_4(0), quadrant_xor_bit0);  // -bit
+    // Cos value sign mask: negative in quadrants 1 and 2 (XOR of quadrant bits 0 and 1)
+    simd::simd_u32x4 quadrant_xor = simd::xor_u32_4(quadrant_vec, simd::srl_u32_4(quadrant_vec, 1));
+    simd::simd_u32x4 quadrant_xor_bit0 = simd::and_u32_4(quadrant_xor, simd::set1_u32_4(1));
+    simd::simd_u32x4 cvmask_vec = simd::sub_i32_4(simd::set1_u32_4(0), quadrant_xor_bit0);
 
-    // Phase 1c: Vectorized quarter-wave index mapping (SIMD branchless bit manipulation)
-    // Compute all 4 LUT indices in parallel using SIMD operations
+    // ========== Phase 1c: Vectorized quarter-wave index mapping ==========
+    // Map position to LUT index using quarter-wave symmetry (branchless mirror logic)
 
-    // Compute qi_s vectorially: qi_s = pos + mirror_s * (64 - 2*pos)
-    // term = 64 - 2*pos = 64 - (pos + pos)
-    simd::simd_u32x4 two_pos = simd::add_i32_4(pos_vec, pos_vec);  // 2*pos
-    simd::simd_u32x4 term_vec = simd::sub_i32_4(simd::set1_u32_4(64), two_pos);  // 64 - 2*pos
-    simd::simd_u32x4 masked_term = simd::and_u32_4(term_vec, sdmask_vec);  // term & (-mirror_s), sdmask = -mirror_s
-    simd::simd_u32x4 qi_s_vec = simd::add_i32_4(pos_vec, masked_term);  // pos + masked_term
+    // Compute qi = pos + mirror * (64 - 2*pos)
+    // This mirrors the position for odd quadrants: pos 0→64, pos 63→1
+    simd::simd_u32x4 two_pos = simd::add_i32_4(pos_vec, pos_vec);
+    simd::simd_u32x4 term_vec = simd::sub_i32_4(simd::set1_u32_4(64), two_pos);
+    simd::simd_u32x4 masked_term = simd::and_u32_4(term_vec, sdmask_vec);  // Zero term if not mirrored
+    simd::simd_u32x4 qi_s_vec = simd::add_i32_4(pos_vec, masked_term);
 
-    // Compute qi_next_s vectorially: qi_next_s = qi_s + 1 - 2*mirror_s
-    simd::simd_u32x4 two_mirror_s = simd::add_i32_4(mirror_s_vec, mirror_s_vec);  // 2*mirror_s
-    simd::simd_u32x4 qi_next_s_vec = simd::sub_i32_4(simd::add_i32_4(qi_s_vec, simd::set1_u32_4(1)), two_mirror_s);  // qi_s + 1 - 2*mirror_s
+    // Compute qi_next = qi + 1 - 2*mirror
+    // Direct: qi_next = qi + 1 (forward), Mirrored: qi_next = qi - 1 (backward)
+    simd::simd_u32x4 two_mirror_s = simd::add_i32_4(mirror_s_vec, mirror_s_vec);
+    simd::simd_u32x4 qi_next_s_vec = simd::sub_i32_4(simd::add_i32_4(qi_s_vec, simd::set1_u32_4(1)), two_mirror_s);
 
-    // Store sin indices as u32 directly (no u8 conversion needed)
-    u32 qi_s_array[4], qi_next_s_array[4];
-    simd::store_u32_4(qi_s_array, qi_s_vec);
-    simd::store_u32_4(qi_next_s_array, qi_next_s_vec);
+    // ========== Phase 2: Vector LUT loads + 4x4 transpose (AoS → SoA) ==========
+    // Each LUT entry is 16 bytes: {y_sin, m_sin, y_cos, m_cos} (4 × i32)
+    // We load 4 full entries (one per angle) and transpose to separate vectors
+    // Input:  4 rows × 4 columns (AoS: each row is one angle's data)
+    // Output: 4 columns as separate vectors (SoA: each vector contains same field for 4 angles)
 
-    // Phase 2: LUT lookups using sinCosPairedLut (stride 4 per entry, 1040 bytes)
-    // Layout: [y_sin, m_sin, y_cos, m_cos] — all data colocated for cache locality
-    i32 y0_s[4], m0_s[4], y1_s[4];
-    i32 y0_c[4], m0_c[4], y1_c[4];
+    // Extract indices from SIMD registers for scalar LUT indexing
+    // (SIMD gather is not available on all platforms, so we use scalar indexing)
+    u32 qi0 = simd::extract_u32_4(qi_s_vec, 0);
+    u32 qi1 = simd::extract_u32_4(qi_s_vec, 1);
+    u32 qi2 = simd::extract_u32_4(qi_s_vec, 2);
+    u32 qi3 = simd::extract_u32_4(qi_s_vec, 3);
 
-    // Prefetch paired LUT entries (sin+cos colocated, stride 4)
-    __builtin_prefetch(&sinCosPairedLut[qi_s_array[0] * 4], 0, 0);
-    __builtin_prefetch(&sinCosPairedLut[qi_s_array[1] * 4], 0, 0);
-    __builtin_prefetch(&sinCosPairedLut[qi_s_array[2] * 4], 0, 0);
-    __builtin_prefetch(&sinCosPairedLut[qi_s_array[3] * 4], 0, 0);
+    u32 qn0 = simd::extract_u32_4(qi_next_s_vec, 0);
+    u32 qn1 = simd::extract_u32_4(qi_next_s_vec, 1);
+    u32 qn2 = simd::extract_u32_4(qi_next_s_vec, 2);
+    u32 qn3 = simd::extract_u32_4(qi_next_s_vec, 3);
 
-    // Unrolled LUT lookups: y_sin, m_sin, y_cos, m_cos per entry
-    y0_s[0] = read_sin32_lut(&sinCosPairedLut[qi_s_array[0] * 4]);
-    m0_s[0] = read_sin32_lut(&sinCosPairedLut[qi_s_array[0] * 4 + 1]);
-    y0_c[0] = read_sin32_lut(&sinCosPairedLut[qi_s_array[0] * 4 + 2]);
-    m0_c[0] = read_sin32_lut(&sinCosPairedLut[qi_s_array[0] * 4 + 3]);
-    y1_s[0] = read_sin32_lut(&sinCosPairedLut[qi_next_s_array[0] * 4]);
-    y1_c[0] = read_sin32_lut(&sinCosPairedLut[qi_next_s_array[0] * 4 + 2]);
+    // Load full 16-byte qi entries: {y_sin, m_sin, y_cos, m_cos}
+    // e0 = {y_s0, m_s0, y_c0, m_c0}, e1 = {y_s1, m_s1, y_c1, m_c1}, ...
+    simd::simd_u32x4 e0 = simd::load_u32_4(reinterpret_cast<const u32*>(&sinCosPairedLut[qi0 * 4])); // ok reinterpret cast
+    simd::simd_u32x4 e1 = simd::load_u32_4(reinterpret_cast<const u32*>(&sinCosPairedLut[qi1 * 4])); // ok reinterpret cast
+    simd::simd_u32x4 e2 = simd::load_u32_4(reinterpret_cast<const u32*>(&sinCosPairedLut[qi2 * 4])); // ok reinterpret cast
+    simd::simd_u32x4 e3 = simd::load_u32_4(reinterpret_cast<const u32*>(&sinCosPairedLut[qi3 * 4])); // ok reinterpret cast
 
-    y0_s[1] = read_sin32_lut(&sinCosPairedLut[qi_s_array[1] * 4]);
-    m0_s[1] = read_sin32_lut(&sinCosPairedLut[qi_s_array[1] * 4 + 1]);
-    y0_c[1] = read_sin32_lut(&sinCosPairedLut[qi_s_array[1] * 4 + 2]);
-    m0_c[1] = read_sin32_lut(&sinCosPairedLut[qi_s_array[1] * 4 + 3]);
-    y1_s[1] = read_sin32_lut(&sinCosPairedLut[qi_next_s_array[1] * 4]);
-    y1_c[1] = read_sin32_lut(&sinCosPairedLut[qi_next_s_array[1] * 4 + 2]);
+    // 4x4 transpose qi entries: AoS {y_s, m_s, y_c, m_c} → SoA
+    // Classic SIMD matrix transpose using interleaved unpacks
+    // Step 1: interleave pairs at 32-bit granularity
+    simd::simd_u32x4 t01lo = simd::unpacklo_u32_4(e0, e1);  // {y_s0, y_s1, m_s0, m_s1}
+    simd::simd_u32x4 t01hi = simd::unpackhi_u32_4(e0, e1);  // {y_c0, y_c1, m_c0, m_c1}
+    simd::simd_u32x4 t23lo = simd::unpacklo_u32_4(e2, e3);  // {y_s2, y_s3, m_s2, m_s3}
+    simd::simd_u32x4 t23hi = simd::unpackhi_u32_4(e2, e3);  // {y_c2, y_c3, m_c2, m_c3}
+    // Step 2: final interleave at 64-bit granularity → complete SoA vectors
+    simd::simd_u32x4 y0_s_v = simd::unpacklo_u64_as_u32_4(t01lo, t23lo);  // {y_s0, y_s1, y_s2, y_s3}
+    simd::simd_u32x4 m0_s_v = simd::unpackhi_u64_as_u32_4(t01lo, t23lo);  // {m_s0, m_s1, m_s2, m_s3}
+    simd::simd_u32x4 y0_c_v = simd::unpacklo_u64_as_u32_4(t01hi, t23hi);  // {y_c0, y_c1, y_c2, y_c3}
+    simd::simd_u32x4 m0_c_v = simd::unpackhi_u64_as_u32_4(t01hi, t23hi);  // {m_c0, m_c1, m_c2, m_c3}
 
-    y0_s[2] = read_sin32_lut(&sinCosPairedLut[qi_s_array[2] * 4]);
-    m0_s[2] = read_sin32_lut(&sinCosPairedLut[qi_s_array[2] * 4 + 1]);
-    y0_c[2] = read_sin32_lut(&sinCosPairedLut[qi_s_array[2] * 4 + 2]);
-    m0_c[2] = read_sin32_lut(&sinCosPairedLut[qi_s_array[2] * 4 + 3]);
-    y1_s[2] = read_sin32_lut(&sinCosPairedLut[qi_next_s_array[2] * 4]);
-    y1_c[2] = read_sin32_lut(&sinCosPairedLut[qi_next_s_array[2] * 4 + 2]);
+    // Load full 16-byte qi_next entries (only need y_sin and y_cos for interpolation endpoint)
+    simd::simd_u32x4 n0 = simd::load_u32_4(reinterpret_cast<const u32*>(&sinCosPairedLut[qn0 * 4])); // ok reinterpret cast
+    simd::simd_u32x4 n1 = simd::load_u32_4(reinterpret_cast<const u32*>(&sinCosPairedLut[qn1 * 4])); // ok reinterpret cast
+    simd::simd_u32x4 n2 = simd::load_u32_4(reinterpret_cast<const u32*>(&sinCosPairedLut[qn2 * 4])); // ok reinterpret cast
+    simd::simd_u32x4 n3 = simd::load_u32_4(reinterpret_cast<const u32*>(&sinCosPairedLut[qn3 * 4])); // ok reinterpret cast
 
-    y0_s[3] = read_sin32_lut(&sinCosPairedLut[qi_s_array[3] * 4]);
-    m0_s[3] = read_sin32_lut(&sinCosPairedLut[qi_s_array[3] * 4 + 1]);
-    y0_c[3] = read_sin32_lut(&sinCosPairedLut[qi_s_array[3] * 4 + 2]);
-    m0_c[3] = read_sin32_lut(&sinCosPairedLut[qi_s_array[3] * 4 + 3]);
-    y1_s[3] = read_sin32_lut(&sinCosPairedLut[qi_next_s_array[3] * 4]);
-    y1_c[3] = read_sin32_lut(&sinCosPairedLut[qi_next_s_array[3] * 4 + 2]);
+    // Partial transpose qi_next: only extract y_sin and y_cos (derivatives not needed)
+    simd::simd_u32x4 n01lo = simd::unpacklo_u32_4(n0, n1);  // {y_s0, y_s1, m_s0, m_s1}
+    simd::simd_u32x4 n01hi = simd::unpackhi_u32_4(n0, n1);  // {y_c0, y_c1, m_c0, m_c1}
+    simd::simd_u32x4 n23lo = simd::unpacklo_u32_4(n2, n3);  // {y_s2, y_s3, m_s2, m_s3}
+    simd::simd_u32x4 n23hi = simd::unpackhi_u32_4(n2, n3);  // {y_c2, y_c3, m_c2, m_c3}
+    simd::simd_u32x4 y1_s_v = simd::unpacklo_u64_as_u32_4(n01lo, n23lo);  // {y1_s0, y1_s1, y1_s2, y1_s3}
+    simd::simd_u32x4 y1_c_v = simd::unpacklo_u64_as_u32_4(n01hi, n23hi);  // {y1_c0, y1_c1, y1_c2, y1_c3}
 
-    // Load into SIMD registers
-    simd::simd_u32x4 y0_s_v = simd::load_u32_4(reinterpret_cast<const u32*>(y0_s)); // ok reinterpret cast
-    simd::simd_u32x4 y1_s_v = simd::load_u32_4(reinterpret_cast<const u32*>(y1_s)); // ok reinterpret cast
-    simd::simd_u32x4 y0_c_v = simd::load_u32_4(reinterpret_cast<const u32*>(y0_c)); // ok reinterpret cast
-    simd::simd_u32x4 y1_c_v = simd::load_u32_4(reinterpret_cast<const u32*>(y1_c)); // ok reinterpret cast
-    simd::simd_u32x4 m0_s_v = simd::load_u32_4(reinterpret_cast<const u32*>(m0_s)); // ok reinterpret cast
-    simd::simd_u32x4 m0_c_v = simd::load_u32_4(reinterpret_cast<const u32*>(m0_c)); // ok reinterpret cast
+    // ========== Phase 3: SIMD quadratic interpolation ==========
+    // Vectorized version of scalar interpolation formula from sin32_interp()
+    // P(t) = y0 + T*(m0 + T*(y1 - y0 - m0))  where T = t/65536
+    // Implemented as: c = y1 - y0 - m0; r = c*T + m0; result = r*T + y0
+    //
+    // Optimization: Uses mulhi_su32_4 (signed × unsigned-positive, 11 ops on SSE2)
+    // instead of mulhi_i32_4 (14 ops on SSE2). Safe because t_vec is always in [0, 65535].
 
-    // Phase 3: SIMD quadratic interpolation for sin
-    // m0 = (m0 ^ dmask) - dmask (conditional negate)
-    m0_s_v = simd::sub_i32_4(simd::xor_u32_4(m0_s_v, sdmask_vec), sdmask_vec);
-    // c = y1 - y0 - m0
+    // Sin interpolation
+    // Apply derivative mask: conditionally negate m0 for mirrored quadrants
+    m0_s_v = simd::sub_i32_4(simd::xor_u32_4(m0_s_v, sdmask_vec), sdmask_vec);  // (m0 ^ mask) - mask
+    // Compute quadratic coefficient: c = y1 - y0 - m0
     simd::simd_u32x4 c_s = simd::sub_i32_4(simd::sub_i32_4(y1_s_v, y0_s_v), m0_s_v);
-    // r = (c * t >> 16) + m0
-    simd::simd_u32x4 r_s = simd::add_i32_4(simd::mulhi_i32_4(c_s, t_vec), m0_s_v);
-    // result = (r * t >> 16) + y0
-    simd::simd_u32x4 s_raw = simd::add_i32_4(simd::mulhi_i32_4(r_s, t_vec), y0_s_v);
+    // First multiply: r = c*t/65536 + m0  (linear term + derivative)
+    simd::simd_u32x4 r_s = simd::add_i32_4(simd::mulhi_su32_4(c_s, t_vec), m0_s_v);
+    // Second multiply: result = r*t/65536 + y0  (quadratic interpolation complete)
+    simd::simd_u32x4 s_raw = simd::add_i32_4(simd::mulhi_su32_4(r_s, t_vec), y0_s_v);
 
-    // SIMD quadratic interpolation for cos
-    m0_c_v = simd::sub_i32_4(simd::xor_u32_4(m0_c_v, cdmask_vec), cdmask_vec);
-    simd::simd_u32x4 c_c = simd::sub_i32_4(simd::sub_i32_4(y1_c_v, y0_c_v), m0_c_v);
-    simd::simd_u32x4 r_c = simd::add_i32_4(simd::mulhi_i32_4(c_c, t_vec), m0_c_v);
-    simd::simd_u32x4 c_raw = simd::add_i32_4(simd::mulhi_i32_4(r_c, t_vec), y0_c_v);
+    // Cos interpolation (identical structure to sin, but uses cos-specific masks and data)
+    m0_c_v = simd::sub_i32_4(simd::xor_u32_4(m0_c_v, cdmask_vec), cdmask_vec);  // Conditionally negate m0
+    simd::simd_u32x4 c_c = simd::sub_i32_4(simd::sub_i32_4(y1_c_v, y0_c_v), m0_c_v);  // c = y1 - y0 - m0
+    simd::simd_u32x4 r_c = simd::add_i32_4(simd::mulhi_su32_4(c_c, t_vec), m0_c_v);   // r = c*t/65536 + m0
+    simd::simd_u32x4 c_raw = simd::add_i32_4(simd::mulhi_su32_4(r_c, t_vec), y0_c_v); // result = r*t/65536 + y0
 
-    // Apply sign masks (branchless negate: (val ^ mask) - mask)
+    // ========== Apply final sign masks ==========
+    // Use branchless negate: (val ^ mask) - mask
+    // If mask = 0x00000000: val unchanged
+    // If mask = 0xFFFFFFFF: val negated (two's complement)
     SinCos32_simd result;
-    result.sin_vals = simd::sub_i32_4(simd::xor_u32_4(s_raw, svmask_vec), svmask_vec);
-    result.cos_vals = simd::sub_i32_4(simd::xor_u32_4(c_raw, cvmask_vec), cvmask_vec);
+    result.sin_vals = simd::sub_i32_4(simd::xor_u32_4(s_raw, svmask_vec), svmask_vec);  // Negate if quadrant 2 or 3
+    result.cos_vals = simd::sub_i32_4(simd::xor_u32_4(c_raw, cvmask_vec), cvmask_vec);  // Negate if quadrant 1 or 2
     return result;
 }
 

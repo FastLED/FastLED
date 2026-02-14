@@ -15,12 +15,12 @@
 
 
 // Platform-specific SIMD enabled for performance optimization
-#include "platforms/is_platform.h"
+#include "platforms/is_platform.h"  // IWYU pragma: keep
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || defined(_M_IX86)
     // x86/x64 platforms (SSE2/AVX intrinsics)
-    #include "platforms/shared/simd_x86.hpp"
+    #include "platforms/shared/simd_x86.hpp"  // IWYU pragma: keep
 #else
     // No SIMD support - use scalar fallback
     // Covers: AVR, ESP8266, ARM without NEON, WASM, and other platforms
-    #include "platforms/shared/simd_noop.hpp"
+    #include "platforms/shared/simd_noop.hpp"  // IWYU pragma: keep
 #endif

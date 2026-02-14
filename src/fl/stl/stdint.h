@@ -170,8 +170,7 @@
 
 #ifdef __cplusplus
 
-#include "fl/int.h"
-#include "fl/stl/cstddef.h"
+#include "fl/int.h"  // IWYU pragma: export
 
 // Define standard integer type names for C++
 // This avoids the slow <stdint.h> include while maintaining compatibility

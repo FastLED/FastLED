@@ -6,6 +6,7 @@
 /// Provides atomic SIMD operations for x86/x64 processors.
 /// SSE2 baseline ensures compatibility with all x64 and most modern x86 processors.
 
+// IWYU pragma: no_include "_mingw_mac.h"
 #include "fl/stl/stdint.h"
 #include "fl/align.h"
 
@@ -13,7 +14,7 @@
 
 #include "fl/force_inline.h"
 #include "fl/compiler_control.h"
-#include "fl/stl/math.h"  // for sqrtf
+#include "fl/stl/math.h"  // IWYU pragma: keep (sqrtf used in #else scalar fallback)
 
 // SSE2 intrinsics (baseline for all x64, available on most x86)
 #if defined(__SSE2__) || defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
@@ -283,6 +284,58 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi_i32_4(simd_u32x4 a, simd_u32x4 b) 
 #endif
 }
 
+// Multiply u32 and return high 32 bits (for fixed-point Q16.16 math, unsigned)
+// Result: ((u64)a * (u64)b) >> 16, for each of 4 lanes
+// On SSE2 this is 8 ops (vs 14 for signed mulhi_i32_4)
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    // _mm_mul_epu32 multiplies lanes 0,2 as unsigned 32->64
+    __m128i prod02 = _mm_mul_epu32(a, b);
+    __m128i a_odd = _mm_srli_si128(a, 4);
+    __m128i b_odd = _mm_srli_si128(b, 4);
+    __m128i prod13 = _mm_mul_epu32(a_odd, b_odd);
+    __m128i sh02 = _mm_srli_epi64(prod02, 16);
+    __m128i sh13 = _mm_srli_epi64(prod13, 16);
+    __m128i p02 = _mm_shuffle_epi32(sh02, _MM_SHUFFLE(2, 0, 2, 0));
+    __m128i p13 = _mm_shuffle_epi32(sh13, _MM_SHUFFLE(2, 0, 2, 0));
+    return _mm_unpacklo_epi32(p02, p13);
+}
+
+// Multiply signed i32 by unsigned-positive u32, return >> 16 (Q16.16 fixed-point)
+// Result: ((i64)(i32)a * (u64)(u32)b) >> 16, for each of 4 lanes
+// Optimized for the case where b is known non-negative (e.g., interpolation fraction t).
+// On SSE2: 11 ops (vs 14 for mulhi_i32_4) — skips sign correction for b.
+// On SSE4.1: 8 ops (same as mulhi_i32_4, uses native signed multiply).
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi_su32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+#if FASTLED_X86_HAS_SSE41
+    // SSE4.1: native signed 32x32->64 handles both signs (8 ops)
+    __m128i prod02 = _mm_mul_epi32(a, b);
+    __m128i a_odd = _mm_srli_si128(a, 4);
+    __m128i b_odd = _mm_srli_si128(b, 4);
+    __m128i prod13 = _mm_mul_epi32(a_odd, b_odd);
+    __m128i sh02 = _mm_srli_epi64(prod02, 16);
+    __m128i sh13 = _mm_srli_epi64(prod13, 16);
+    __m128i sh13_aligned = _mm_slli_si128(sh13, 4);
+    return _mm_blend_epi16(sh02, sh13_aligned, 0xCC);
+#else
+    // SSE2: unsigned multiply with one-sided sign correction (11 ops)
+    // Since b is non-negative, only a's sign needs correction.
+    __m128i prod02 = _mm_mul_epu32(a, b);
+    __m128i a_odd = _mm_srli_si128(a, 4);
+    __m128i b_odd = _mm_srli_si128(b, 4);
+    __m128i prod13 = _mm_mul_epu32(a_odd, b_odd);
+    __m128i sh02 = _mm_srli_epi64(prod02, 16);
+    __m128i sh13 = _mm_srli_epi64(prod13, 16);
+    __m128i p02 = _mm_shuffle_epi32(sh02, _MM_SHUFFLE(2, 0, 2, 0));
+    __m128i p13 = _mm_shuffle_epi32(sh13, _MM_SHUFFLE(2, 0, 2, 0));
+    __m128i unsigned_result = _mm_unpacklo_epi32(p02, p13);
+    // One-sided sign correction: when a < 0, unsigned product has excess b*2^32,
+    // which after >>16 becomes b<<16. No correction needed for b (always positive).
+    __m128i sign_a = _mm_srai_epi32(a, 31);
+    __m128i corr_a = _mm_and_si128(sign_a, _mm_slli_epi32(b, 16));
+    return _mm_sub_epi32(unsigned_result, corr_a);
+#endif
+}
+
 // Shift right logical (zero-fill) - for unsigned angle decomposition
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 srl_u32_4(simd_u32x4 vec, int shift) noexcept {
     return _mm_srli_epi32(vec, shift);
@@ -291,6 +344,37 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 srl_u32_4(simd_u32x4 vec, int shift) noe
 // Bitwise AND of two u32 vectors
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 and_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
     return _mm_and_si128(a, b);
+}
+
+// Extract a single u32 lane from a SIMD vector
+FASTLED_FORCE_INLINE FL_IRAM u32 extract_u32_4(simd_u32x4 vec, int lane) noexcept {
+    switch (lane) {
+    case 0: return static_cast<u32>(_mm_cvtsi128_si32(vec));
+    case 1: return static_cast<u32>(_mm_cvtsi128_si32(_mm_shuffle_epi32(vec, _MM_SHUFFLE(1,1,1,1))));
+    case 2: return static_cast<u32>(_mm_cvtsi128_si32(_mm_shuffle_epi32(vec, _MM_SHUFFLE(2,2,2,2))));
+    case 3: return static_cast<u32>(_mm_cvtsi128_si32(_mm_shuffle_epi32(vec, _MM_SHUFFLE(3,3,3,3))));
+    default: return 0;
+    }
+}
+
+// Interleave low 32-bit elements: {a0, b0, a1, b1}
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 unpacklo_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    return _mm_unpacklo_epi32(a, b);
+}
+
+// Interleave high 32-bit elements: {a2, b2, a3, b3}
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 unpackhi_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    return _mm_unpackhi_epi32(a, b);
+}
+
+// Interleave low 64-bit halves (as u32x4): {a0, a1, b0, b1}
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 unpacklo_u64_as_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    return _mm_unpacklo_epi64(a, b);
+}
+
+// Interleave high 64-bit halves (as u32x4): {a2, a3, b2, b3}
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 unpackhi_u64_as_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    return _mm_unpackhi_epi64(a, b);
 }
 
 #else
@@ -579,6 +663,22 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi_i32_4(simd_u32x4 a, simd_u32x4 b) 
     return result;
 }
 
+// Multiply u32 and return high 32 bits (for fixed-point Q16.16 math, unsigned)
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        u64 prod = static_cast<u64>(a.data[i]) * static_cast<u64>(b.data[i]);
+        result.data[i] = static_cast<u32>(prod >> 16);
+    }
+    return result;
+}
+
+// Multiply signed i32 by unsigned-positive u32, return >> 16 (Q16.16 fixed-point)
+// Delegates to signed mulhi_i32_4 (scalar fallback has no unsigned advantage)
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi_su32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    return mulhi_i32_4(a, b);
+}
+
 // Shift right logical (zero-fill) - for unsigned angle decomposition
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 srl_u32_4(simd_u32x4 vec, int shift) noexcept {
     simd_u32x4 result;
@@ -594,6 +694,43 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 and_u32_4(simd_u32x4 a, simd_u32x4 b) no
     for (int i = 0; i < 4; ++i) {
         result.data[i] = a.data[i] & b.data[i];
     }
+    return result;
+}
+
+// Extract a single u32 lane from a SIMD vector
+FASTLED_FORCE_INLINE FL_IRAM u32 extract_u32_4(simd_u32x4 vec, int lane) noexcept {
+    return vec.data[lane];
+}
+
+// Interleave low 32-bit elements: {a0, b0, a1, b1}
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 unpacklo_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    result.data[0] = a.data[0]; result.data[1] = b.data[0];
+    result.data[2] = a.data[1]; result.data[3] = b.data[1];
+    return result;
+}
+
+// Interleave high 32-bit elements: {a2, b2, a3, b3}
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 unpackhi_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    result.data[0] = a.data[2]; result.data[1] = b.data[2];
+    result.data[2] = a.data[3]; result.data[3] = b.data[3];
+    return result;
+}
+
+// Interleave low 64-bit halves (as u32x4): {a0, a1, b0, b1}
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 unpacklo_u64_as_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    result.data[0] = a.data[0]; result.data[1] = a.data[1];
+    result.data[2] = b.data[0]; result.data[3] = b.data[1];
+    return result;
+}
+
+// Interleave high 64-bit halves (as u32x4): {a2, a3, b2, b3}
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 unpackhi_u64_as_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    result.data[0] = a.data[2]; result.data[1] = a.data[3];
+    result.data[2] = b.data[2]; result.data[3] = b.data[3];
     return result;
 }
 
