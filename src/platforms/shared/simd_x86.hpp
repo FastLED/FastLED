@@ -236,21 +236,38 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sub_i32_4(simd_u32x4 a, simd_u32x4 b) no
 
 // Multiply i32 and return high 32 bits (for fixed-point Q16.16 math)
 // Result: ((i64)a * (i64)b) >> 16, for each of 4 lanes
+// Uses SSE2 unsigned multiply (_mm_mul_epu32) with signed correction:
+//   signed_result = unsigned_mulhi(a, b) - (a<0 ? b<<16 : 0) - (b<0 ? a<<16 : 0)
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
-    // SSE2 doesn't have direct signed i32 multiply-high, use scalar fallback for correctness
-    // The SIMD implementation is complex and error-prone due to rounding subtleties
-    i32 a_arr[4];
-    i32 b_arr[4];
-    _mm_storeu_si128(reinterpret_cast<__m128i*>(a_arr), a); // ok reinterpret cast
-    _mm_storeu_si128(reinterpret_cast<__m128i*>(b_arr), b); // ok reinterpret cast
+    // Unsigned 32x32->64 multiply for even lanes (0, 2)
+    __m128i prod02 = _mm_mul_epu32(a, b);
+    // Shift odd lanes (1, 3) into even positions and multiply
+    __m128i a_odd = _mm_srli_si128(a, 4);
+    __m128i b_odd = _mm_srli_si128(b, 4);
+    __m128i prod13 = _mm_mul_epu32(a_odd, b_odd);
 
-    i32 result_arr[4];
-    for (int i = 0; i < 4; ++i) {
-        i64 prod = static_cast<i64>(a_arr[i]) * static_cast<i64>(b_arr[i]);
-        result_arr[i] = static_cast<i32>(prod >> 16);
-    }
+    // Logical right shift 64-bit products by 16
+    __m128i sh02 = _mm_srli_epi64(prod02, 16);
+    __m128i sh13 = _mm_srli_epi64(prod13, 16);
 
-    return _mm_loadu_si128(reinterpret_cast<const __m128i*>(result_arr)); // ok reinterpret cast
+    // Pack low 32 bits of each 64-bit lane into [r0, r1, r2, r3]
+    // sh02 as 4x32: [lo0, hi0, lo2, hi2] -> we want lo0, lo2
+    // sh13 as 4x32: [lo1, hi1, lo3, hi3] -> we want lo1, lo3
+    __m128i p02 = _mm_shuffle_epi32(sh02, _MM_SHUFFLE(2, 0, 2, 0)); // [lo0, lo2, lo0, lo2]
+    __m128i p13 = _mm_shuffle_epi32(sh13, _MM_SHUFFLE(2, 0, 2, 0)); // [lo1, lo3, lo1, lo3]
+    __m128i unsigned_result = _mm_unpacklo_epi32(p02, p13);          // [lo0, lo1, lo2, lo3]
+
+    // Signed correction: when a < 0, unsigned product has excess b*2^32,
+    // which after >>16 becomes b<<16. Same for b < 0.
+    __m128i sign_a = _mm_srai_epi32(a, 31); // 0xFFFFFFFF if a<0, else 0
+    __m128i sign_b = _mm_srai_epi32(b, 31); // 0xFFFFFFFF if b<0, else 0
+    __m128i b_shl16 = _mm_slli_epi32(b, 16);
+    __m128i a_shl16 = _mm_slli_epi32(a, 16);
+    __m128i corr_a = _mm_and_si128(sign_a, b_shl16); // b<<16 where a<0
+    __m128i corr_b = _mm_and_si128(sign_b, a_shl16); // a<<16 where b<0
+    __m128i correction = _mm_add_epi32(corr_a, corr_b);
+
+    return _mm_sub_epi32(unsigned_result, correction);
 }
 
 // Shift right logical (zero-fill) - for unsigned angle decomposition
