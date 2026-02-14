@@ -74,10 +74,15 @@ struct RunResult {
     int run_number;                 ///< Run iteration number (1-based)
     int total_leds;                 ///< Total LEDs tested
     int mismatches;                 ///< Number of LED mismatches
-    fl::vector<LEDError> errors;    ///< First few errors (up to 5)
+    int totalBytes;                 ///< Total bytes compared (num_leds * 3)
+    int mismatchedBytes;            ///< Number of individual bytes that differ
+    int lsbOnlyErrors;              ///< Bytes where (expected ^ actual) == 0x01
+    fl::vector<LEDError> errors;    ///< First few errors (up to 10)
     bool passed;                    ///< True if no errors
 
-    RunResult() : run_number(0), total_leds(0), mismatches(0), passed(false) {}
+    RunResult() : run_number(0), total_leds(0), mismatches(0),
+                  totalBytes(0), mismatchedBytes(0), lsbOnlyErrors(0),
+                  passed(false) {}
 };
 
 /// @brief Multi-run test configuration
@@ -141,18 +146,22 @@ void runTest(const char* test_name,
 // @param multi_config Multi-run configuration (num runs, print settings)
 // @param total Output parameter - total tests run (incremented)
 // @param passed Output parameter - tests passed (incremented)
+// @param out_results Optional output for per-run results with LED error details
 void runMultiTest(const char* test_name,
                   fl::ValidationConfig& config,
                   const fl::MultiRunConfig& multi_config,
-                  int& total, int& passed);
+                  int& total, int& passed,
+                  fl::vector<fl::RunResult>* out_results = nullptr);
 
 // Validate a specific chipset timing configuration
 // Creates channels, runs tests, destroys channels
 // @param config All validation configuration (timing, channels, driver, RX, buffer) - non-const for LED manipulation
 // @param total Output parameter - total tests run (incremented)
 // @param passed Output parameter - tests passed (incremented)
+// @param out_results Optional output for per-pattern results with LED error details
 void validateChipsetTiming(fl::ValidationConfig& config,
-                           int& total, int& passed);
+                           int& total, int& passed,
+                           fl::vector<fl::RunResult>* out_results = nullptr);
 
 // Set mixed RGB bit patterns to test MSB vs LSB handling
 // @param leds LED array to fill with pattern

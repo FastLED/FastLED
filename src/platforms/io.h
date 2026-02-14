@@ -20,6 +20,16 @@ int available();
 int peek();
 int read();
 
+// High-level line reading using platform's native Serial.readStringUntil()
+// On Arduino, this delegates to Serial.readStringUntil() which handles
+// USB CDC multi-packet transfers correctly via Stream::timedRead().
+// On non-Arduino platforms, returns false (caller should use fl::readStringUntil fallback).
+// @param delimiter Character to read until
+// @param out Buffer to write the line into (allocated by caller)
+// @param outLen Max buffer size
+// @return Number of characters read, or -1 if not supported on this platform
+int readLineNative(char delimiter, char* out, int outLen);
+
 // Utility functions
 bool flush(u32 timeoutMs = 1000);
 size_t write_bytes(const u8* buffer, size_t size);

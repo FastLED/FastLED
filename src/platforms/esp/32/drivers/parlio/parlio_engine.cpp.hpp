@@ -15,6 +15,7 @@
 
 #include "fl/compiler_control.h"
 #include "fl/unused.h"
+#include "platforms/memory_barrier.h"  // For FL_MEMORY_BARRIER
 
 #include "parlio_engine.h"
 #include "fl/channels/detail/wave8.hpp"

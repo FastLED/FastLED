@@ -35,6 +35,18 @@ int read() {
     return Serial.read();
 }
 
+// High-level line reading using Arduino's Serial.readStringUntil()
+// This handles USB CDC multi-packet transfers correctly via Stream::timedRead()
+// which uses yield() (immediate context switch) instead of delay(1) (1ms sleep).
+int readLineNative(char delimiter, char* out, int outLen) {
+    String line = Serial.readStringUntil(delimiter);
+    int len = line.length();
+    if (len > outLen - 1) len = outLen - 1;
+    memcpy(out, line.c_str(), len);
+    out[len] = '\0';
+    return len;
+}
+
 // Utility functions
 bool flush(u32 timeoutMs) {
     Serial.flush();

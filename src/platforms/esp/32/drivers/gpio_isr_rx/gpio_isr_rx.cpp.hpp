@@ -15,7 +15,8 @@
 #include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h"
 #include "platforms/esp/32/core/delaycycles.h"  // For get_ccount() - force-inlined cycle counter
 #include "platforms/esp/32/core/fastpin_esp32.h"  // For pin validation macros
-#include "fl/compiler_control.h"  // For FL_MEMORY_BARRIER
+#include "fl/compiler_control.h"
+#include "platforms/memory_barrier.h"  // For FL_MEMORY_BARRIER
 #include "fl/align.h"
 
 // RX device logging: Disabled by default to reduce noise

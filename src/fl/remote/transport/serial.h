@@ -103,16 +103,22 @@ struct SerialWriter {
 inline fl::function<fl::optional<fl::Json>()>
 createSerialRequestSource(const char* prefix = "") {
     return [prefix]() -> fl::optional<fl::Json> {
-        // Transport layer: Read line from serial
-        SerialReader serial;
-        // Use 1ms timeout for non-blocking reads (async task runs every 10ms)
-        auto line = readSerialLine(serial, '\n', 1);
-        if (!line.has_value()) {
+        // Non-blocking check - any data available?
+        if (fl::available() <= 0) {
+            return fl::nullopt;
+        }
+
+        // Data available - read a complete line.
+        // On Arduino platforms, fl::readLine() delegates to Serial.readStringUntil()
+        // which uses yield() (immediate context switch) for fast USB CDC multi-packet
+        // assembly. On other platforms, falls back to character-by-character reading.
+        auto line = fl::readLine('\n', '\r', fl::optional<u32>(1000));
+        if (!line.has_value() || line->empty()) {
             return fl::nullopt;
         }
 
         // Use string_view for zero-copy prefix stripping and trimming
-        fl::string_view view = line.value();
+        fl::string_view view = *line;
 
         // Strip prefix if present
         if (prefix && prefix[0] != '\0') {
@@ -204,8 +210,8 @@ fl::optional<fl::string> readSerialStringUntil(SerialIn& serial, char delimiter,
         // Handle -1 (no data available) like Arduino's timedRead():
         // Keep trying until timeout (or forever if no timeout set)
         if (c == -1) {
-            // Yield briefly to prevent busy loop
-            fl::delay(1, false);
+            // Brief 1us yield instead of 1ms delay for fast USB CDC polling.
+            fl::delayMicroseconds(1);
             continue;
         }
 

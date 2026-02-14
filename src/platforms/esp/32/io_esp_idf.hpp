@@ -51,5 +51,10 @@ bool serial_is_buffered() {
     return EspIO::instance().isBufferedMode();
 }
 
+int readLineNative(char delimiter, char* out, int outLen) {
+    (void)delimiter; (void)out; (void)outLen;
+    return -1;  // Not supported on ESP-IDF (non-Arduino) builds
+}
+
 }  // namespace platforms
 }  // namespace fl

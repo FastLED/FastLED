@@ -70,6 +70,11 @@ bool serial_ready() {
     return true;
 }
 
+int readLineNative(char delimiter, char* out, int outLen) {
+    (void)delimiter; (void)out; (void)outLen;
+    return -1;  // Not supported on WASM
+}
+
 } // namespace platforms
 } // namespace fl
 

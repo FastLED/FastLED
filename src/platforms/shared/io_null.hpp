@@ -38,5 +38,10 @@ inline int read() {
     return -1;
 }
 
+inline int readLineNative(char delimiter, char* out, int outLen) {
+    (void)delimiter; (void)out; (void)outLen;
+    return -1;  // Not supported
+}
+
 } // namespace platforms
 } // namespace fl

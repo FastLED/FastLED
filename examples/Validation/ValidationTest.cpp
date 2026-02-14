@@ -377,7 +377,8 @@ void runTest(const char* test_name,
 void runMultiTest(const char* test_name,
                   fl::ValidationConfig& config,
                   const fl::MultiRunConfig& multi_config,
-                  int& total, int& passed) {
+                  int& total, int& passed,
+                  fl::vector<fl::RunResult>* out_results) {
 
     fl::sstream ss;
     ss << "\n╔════════════════════════════════════════════════════════════════╗\n";
@@ -411,6 +412,7 @@ void runMultiTest(const char* test_name,
             const auto& leds = config.tx_configs[config_idx].mLeds;
             size_t num_leds = leds.size();
             result.total_leds = num_leds;
+            result.totalBytes = num_leds * 3;
 
             // Capture RX data
             size_t bytes_captured = capture(config.rx_channel, config.rx_buffer, config.timing, config.driver_name);
@@ -453,7 +455,21 @@ void runMultiTest(const char* test_name,
                 uint8_t actual_g = config.rx_buffer[byte_offset + 1];
                 uint8_t actual_b = config.rx_buffer[byte_offset + 2];
 
-                if (expected_r != actual_r || expected_g != actual_g || expected_b != actual_b) {
+                // Per-byte comparison for byte-level stats
+                uint8_t exp_bytes[3] = {expected_r, expected_g, expected_b};
+                uint8_t act_bytes[3] = {actual_r, actual_g, actual_b};
+                bool led_mismatch = false;
+                for (int ch = 0; ch < 3; ch++) {
+                    if (exp_bytes[ch] != act_bytes[ch]) {
+                        result.mismatchedBytes++;
+                        if ((exp_bytes[ch] ^ act_bytes[ch]) == 0x01) {
+                            result.lsbOnlyErrors++;
+                        }
+                        led_mismatch = true;
+                    }
+                }
+
+                if (led_mismatch) {
                     // Print corruption context for first mismatch only
                     if (mismatches == 0) {
                         FL_WARN("\n[CORRUPTION @ LED " << static_cast<int>(i) << ", Run " << run << "]");
@@ -545,6 +561,13 @@ void runMultiTest(const char* test_name,
         FL_WARN(ss.str());
     }
 
+    // Copy results to caller if requested
+    if (out_results) {
+        for (const auto& r : run_results) {
+            out_results->push_back(r);
+        }
+    }
+
     // Update totals
     total++;
     if (total_failed == 0) {
@@ -558,7 +581,8 @@ void runMultiTest(const char* test_name,
 // Validate a specific chipset timing configuration
 // Creates channels, runs tests, destroys channels
 void validateChipsetTiming(fl::ValidationConfig& config,
-                           int& driver_total, int& driver_passed) {
+                           int& driver_total, int& driver_passed,
+                           fl::vector<fl::RunResult>* out_results) {
     fl::sstream ss;
     ss << "\n========================================\n";
     ss << "Testing: " << config.timing_name << "\n";
@@ -614,7 +638,7 @@ void validateChipsetTiming(fl::ValidationConfig& config,
     multi_config.num_runs = 1;            // Single run per pattern (Python orchestrates retries)
     multi_config.print_all_runs = false;  // Only print failed runs
     multi_config.print_per_led_errors = false;  // Errors reported via JSON-RPC
-    multi_config.max_errors_per_run = 5;  // Store first 5 errors for JSON response
+    multi_config.max_errors_per_run = 10;  // Store first 10 errors for JSON response
 
     // Test all 4 bit patterns (0-3)
     for (int pattern_id = 0; pattern_id < 4; pattern_id++) {

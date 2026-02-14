@@ -97,6 +97,7 @@ fl::Json makeResponse(bool success, ReturnCode returnCode, const char* message,
 // ============================================================================
 
 fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
+    Serial.println("[CHECKPOINT] runSingleTest ENTERED"); Serial.flush();
     DEBUG_PRINTLN("[DEBUG] runSingleTest called");
     DEBUG_PRINT("[DEBUG] Free heap: ");
     DEBUG_PRINTLN(fl::getFreeHeap().total());
@@ -255,6 +256,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     uint32_t start_ms = millis();
 
     // Set driver as exclusive
+    Serial.println("[CHECKPOINT] Before setExclusiveDriver"); Serial.flush();
     DEBUG_PRINTLN("[DEBUG] Setting exclusive driver...");
     Serial.flush();
     if (!FastLED.setExclusiveDriver(driver_name.c_str())) {
@@ -267,6 +269,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         Serial.flush();
         return response;
     }
+    Serial.println("[CHECKPOINT] After setExclusiveDriver OK"); Serial.flush();
     DEBUG_PRINTLN("[DEBUG] Exclusive driver set");
     Serial.flush();
 
@@ -386,6 +389,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     int total_tests = 0;
     int passed_tests = 0;
     bool passed = false;
+    fl::vector<fl::RunResult> run_results;
 
     {
         DEBUG_PRINTLN("[DEBUG] Entering test scope (log disable)");
@@ -394,10 +398,12 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         fl::ScopedLogDisable logGuard;  // Suppress FL_DBG/FL_PRINT during test
 
         // Run warm-up iteration (discard results)
+        Serial.println("[CHECKPOINT] Before warmup validateChipsetTiming"); Serial.flush();
         DEBUG_PRINTLN("[DEBUG] Running warmup");
         Serial.flush();
         int warmup_total = 0, warmup_passed = 0;
         validateChipsetTiming(validation_config, warmup_total, warmup_passed);
+        Serial.println("[CHECKPOINT] After warmup validateChipsetTiming"); Serial.flush();
         DEBUG_PRINT("[DEBUG] Warmup done, heap: ");
         DEBUG_PRINTLN(fl::getFreeHeap().total());
         Serial.flush();
@@ -411,7 +417,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
             Serial.flush();
 
             int iter_total = 0, iter_passed = 0;
-            validateChipsetTiming(validation_config, iter_total, iter_passed);
+            validateChipsetTiming(validation_config, iter_total, iter_passed, &run_results);
             total_tests += iter_total;
             passed_tests += iter_passed;
 
@@ -424,6 +430,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         passed = (total_tests > 0) && (passed_tests == total_tests);
     }  // logGuard destroyed, logging restored
 
+    Serial.println("[CHECKPOINT] Test complete, building response"); Serial.flush();
     DEBUG_PRINT("[DEBUG] Test complete - passed: ");
     DEBUG_PRINTLN(passed);
     DEBUG_PRINT("[DEBUG] Free heap: ");
@@ -456,6 +463,46 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     }
     response.set("laneSizes", sizes_response);
     response.set("pattern", pattern.c_str());
+
+    // Serialize per-pattern results with byte-level error details
+    if (!run_results.empty()) {
+        fl::Json patterns = fl::Json::array();
+        for (fl::size ri = 0; ri < run_results.size(); ri++) {
+            const auto& rr = run_results[ri];
+            fl::Json pat = fl::Json::object();
+            pat.set("name", getBitPatternName(rr.run_number - 1));
+            pat.set("totalLeds", static_cast<int64_t>(rr.total_leds));
+            pat.set("mismatchedLeds", static_cast<int64_t>(rr.mismatches));
+            pat.set("totalBytes", static_cast<int64_t>(rr.totalBytes));
+            pat.set("mismatchedBytes", static_cast<int64_t>(rr.mismatchedBytes));
+            pat.set("lsbOnlyErrors", static_cast<int64_t>(rr.lsbOnlyErrors));
+            pat.set("passed", rr.passed);
+
+            // Serialize first N LED errors
+            if (!rr.errors.empty()) {
+                fl::Json errs = fl::Json::array();
+                for (fl::size ei = 0; ei < rr.errors.size(); ei++) {
+                    const auto& e = rr.errors[ei];
+                    fl::Json err = fl::Json::object();
+                    err.set("led", static_cast<int64_t>(e.led_index));
+                    fl::Json expected = fl::Json::array();
+                    expected.push_back(static_cast<int64_t>(e.expected_r));
+                    expected.push_back(static_cast<int64_t>(e.expected_g));
+                    expected.push_back(static_cast<int64_t>(e.expected_b));
+                    err.set("expected", expected);
+                    fl::Json actual = fl::Json::array();
+                    actual.push_back(static_cast<int64_t>(e.actual_r));
+                    actual.push_back(static_cast<int64_t>(e.actual_g));
+                    actual.push_back(static_cast<int64_t>(e.actual_b));
+                    err.set("actual", actual);
+                    errs.push_back(err);
+                }
+                pat.set("errors", errs);
+            }
+            patterns.push_back(pat);
+        }
+        response.set("patterns", patterns);
+    }
 
     // Add first failure info if test failed
     if (!passed) {

@@ -35,8 +35,6 @@ bool Remote::has(const fl::string& name) const {
 // RPC Processing
 
 fl::Json Remote::processRpc(const fl::Json& request) {
-    FL_WARN("[RPC DEBUG] processRpc(): Entry");
-
     // Extract optional timestamp field (0 = immediate, >0 = scheduled)
     u32 timestamp = 0;
     if (request.contains("timestamp") && request["timestamp"].is_int()) {
@@ -44,14 +42,11 @@ fl::Json Remote::processRpc(const fl::Json& request) {
     }
 
     u32 receivedAt = fl::millis();
-    FL_WARN("[RPC DEBUG] processRpc(): timestamp=" << timestamp);
 
     // Execute or schedule
     if (timestamp == 0) {
         // Immediate execution - pass directly to Rpc
-        FL_WARN("[RPC DEBUG] processRpc(): Calling mRpc.handle()");
         fl::Json response = mRpc.handle(request);
-        FL_WARN("[RPC DEBUG] processRpc(): mRpc.handle() returned");
 
         // Record result if successful
         if (response.contains("result") && request.contains("method")) {
@@ -59,7 +54,6 @@ fl::Json Remote::processRpc(const fl::Json& request) {
             recordResult(funcName, response["result"], 0, receivedAt, receivedAt, false);
         }
 
-        FL_WARN("[RPC DEBUG] processRpc(): Returning response");
         return response;
     } else {
         // Scheduled execution - result will be pushed to ResponseSink after execution

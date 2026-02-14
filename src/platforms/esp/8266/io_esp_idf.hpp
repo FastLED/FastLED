@@ -42,5 +42,10 @@ int read() {
     return -1;
 }
 
+int readLineNative(char delimiter, char* out, int outLen) {
+    (void)delimiter; (void)out; (void)outLen;
+    return -1;  // Not supported on ESP8266 (non-Arduino) builds
+}
+
 } // namespace platforms
 } // namespace fl

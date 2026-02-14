@@ -131,6 +131,108 @@ PIN_TX = 1  # TX pin used by FastLED drivers
 PIN_RX = 0  # RX pin used by RMT receiver (ESP32-C6 default; ESP32 uses 2)
 
 
+def display_pattern_details(result: dict[str, Any]) -> None:
+    """Display per-pattern error details from enriched RPC response.
+
+    Parses the 'patterns' array from runSingleTest response and displays
+    byte-level corruption stats, LSB error analysis, and first N error examples.
+    """
+    patterns = result.get("patterns")
+    if not patterns:
+        return
+
+    driver = result.get("driver", "?")
+    lane_count = result.get("laneCount", 0)
+    lane_sizes = result.get("laneSizes", [])
+    total_leds = sum(lane_sizes) if lane_sizes else 0
+
+    print()
+    print("=" * 62)
+    print(f"{driver} — {lane_count} lane(s), {total_leds} LEDs")
+    print("=" * 62)
+
+    agg_total_bytes = 0
+    agg_mismatched_bytes = 0
+    agg_lsb_only = 0
+
+    for pat in patterns:
+        name = pat.get("name", "Unknown")
+        passed = pat.get("passed", False)
+        status = (
+            f"{Fore.GREEN}PASS{Style.RESET_ALL}"
+            if passed
+            else f"{Fore.RED}FAIL{Style.RESET_ALL}"
+        )
+
+        print(f"\n  {name}  {status}")
+
+        if passed:
+            num_leds = pat.get("totalLeds", 0)
+            print(f"    All {num_leds} LEDs match")
+            agg_total_bytes += pat.get("totalBytes", num_leds * 3)
+            continue
+
+        num_leds = pat.get("totalLeds", 0)
+        mismatched_leds = pat.get("mismatchedLeds", 0)
+        total_bytes = pat.get("totalBytes", num_leds * 3)
+        mismatched_bytes = pat.get("mismatchedBytes", 0)
+        lsb_only = pat.get("lsbOnlyErrors", 0)
+
+        agg_total_bytes += total_bytes
+        agg_mismatched_bytes += mismatched_bytes
+        agg_lsb_only += lsb_only
+
+        byte_pct = 100.0 * mismatched_bytes / total_bytes if total_bytes > 0 else 0.0
+        lsb_pct = 100.0 * lsb_only / mismatched_bytes if mismatched_bytes > 0 else 0.0
+
+        print(f"    Mismatched LEDs:  {mismatched_leds}/{num_leds}")
+        print(
+            f"    Byte corruption:  {mismatched_bytes}/{total_bytes} bytes ({byte_pct:.1f}%)"
+        )
+        print(
+            f"    1-bit LSB errors: {lsb_only}/{mismatched_bytes} mismatched ({lsb_pct:.1f}%)"
+        )
+
+        errors = pat.get("errors", [])
+        if errors:
+            print(f"    First {len(errors)} errors:")
+            for e in errors:
+                led_idx = e.get("led", 0)
+                exp = e.get("expected", [0, 0, 0])
+                act = e.get("actual", [0, 0, 0])
+                xor_vals = [exp[i] ^ act[i] for i in range(3)]
+                print(
+                    f"      LED[{led_idx}]  "
+                    f"expected (0x{exp[0]:02X},0x{exp[1]:02X},0x{exp[2]:02X}) "
+                    f"got (0x{act[0]:02X},0x{act[1]:02X},0x{act[2]:02X})  "
+                    f"XOR (0x{xor_vals[0]:02X},0x{xor_vals[1]:02X},0x{xor_vals[2]:02X})"
+                )
+
+    # Aggregate summary
+    print()
+    print("-" * 62)
+    print("  AGGREGATE")
+    if agg_total_bytes > 0:
+        agg_byte_pct = 100.0 * agg_mismatched_bytes / agg_total_bytes
+        print(
+            f"    Byte corruption: {agg_byte_pct:.1f}% ({agg_mismatched_bytes}/{agg_total_bytes} total bytes)"
+        )
+    if agg_mismatched_bytes > 0:
+        agg_lsb_pct = 100.0 * agg_lsb_only / agg_mismatched_bytes
+        print(
+            f"    1-bit LSB errors: {agg_lsb_pct:.1f}% of mismatches ({agg_lsb_only}/{agg_mismatched_bytes})"
+        )
+        if agg_lsb_pct == 100.0:
+            print(f"    Diagnosis: All corrupted bits are LSB 0->1 flips")
+        elif agg_lsb_pct > 90.0:
+            print(f"    Diagnosis: Predominantly LSB corruption ({agg_lsb_pct:.1f}%)")
+        else:
+            print(f"    Diagnosis: Mixed corruption pattern")
+    elif agg_total_bytes > 0:
+        print(f"    No byte-level corruption detected")
+    print("-" * 62)
+
+
 # ============================================================
 # GPIO Connectivity Pre-Test
 # ============================================================
@@ -1660,10 +1762,10 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
             # Open serial connection (stays open until we're done)
             print(f"📡 Connecting to {upload_port}...")
             if args.no_fbuild:
-                import serial
+                from ci.util.pyserial_monitor import SerialMonitor as PySerialMonitor
 
-                ser = serial.Serial(upload_port, 115200, timeout=0.1)
-                monitor = ser
+                monitor = PySerialMonitor(upload_port, baud_rate=115200)
+                monitor.__enter__()
             else:
                 from fbuild.api import SerialMonitor as FbuildSerialMonitor
 
@@ -1682,40 +1784,26 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
             max_drain_time = 120.0  # Wait up to 120 seconds for device to be ready
 
             while time.time() - drain_start < max_drain_time:
-                if args.no_fbuild:
-                    if monitor.in_waiting:  # ty: ignore[possibly-missing-attribute]
-                        line = (
-                            monitor.readline().decode("utf-8", errors="replace").strip()  # ty: ignore[possibly-missing-attribute]
-                        )
-                        if line:
-                            boot_lines += 1
-                            # Check for ready signal: RESULT: {"ready":true...}
-                            if line.startswith("RESULT:") and '"ready":true' in line:
-                                device_ready = True
-                                print(f"   ✓ Device ready signal received")
-                                break
-                            # Also check for legacy ready message
-                            if "[SETUP COMPLETE]" in line or "Validation ready" in line:
-                                device_ready = True
-                                print(f"   ✓ Device ready message received")
-                                break
-                else:
-                    try:
-                        for line in monitor.read_lines(timeout=0.5):  # ty: ignore[possibly-missing-attribute]
-                            boot_lines += 1
-                            # Check for ready signal
-                            if "RESULT:" in line and '"ready":true' in line:
-                                device_ready = True
-                                print(f"   ✓ Device ready signal received")
-                                break
-                            if "[SETUP COMPLETE]" in line or "Validation ready" in line:
-                                device_ready = True
-                                print(f"   ✓ Device ready message received")
-                                break
-                    except KeyboardInterrupt:
-                        handle_keyboard_interrupt_properly()
-                    except Exception:
-                        break
+                try:
+                    for line in monitor.read_lines(timeout=0.5):
+                        boot_lines += 1
+                        # Check for ready signal: RESULT: {"ready":true...}
+                        if "RESULT:" in line and '"ready":true' in line:
+                            device_ready = True
+                            print(f"   ✓ Device ready signal received")
+                            break
+                        # Also check for legacy ready message
+                        if "[SETUP COMPLETE]" in line or "Validation ready" in line:
+                            device_ready = True
+                            print(f"   ✓ Device ready message received")
+                            break
+                except KeyboardInterrupt:
+                    handle_keyboard_interrupt_properly()
+                except Exception:
+                    break
+
+                if device_ready:
+                    break
 
                 # Small delay to avoid busy-waiting
                 time.sleep(0.01)
@@ -1736,10 +1824,7 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
             rpc_send_start = time.time()
             for i, cmd in enumerate(json_rpc_commands, 1):
                 cmd_str = json.dumps(cmd, separators=(",", ":"))
-                if args.no_fbuild:
-                    monitor.write((cmd_str + "\n").encode())
-                else:
-                    monitor.write(cmd_str + "\n")
+                monitor.write(cmd_str + "\n")
                 print(
                     f"   ✓ Sent command {i}/{len(json_rpc_commands)}: {cmd['method']}()"
                 )
@@ -1786,20 +1871,14 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
 
                 # Read line
                 line = None
-                if args.no_fbuild:
-                    if monitor.in_waiting:  # ty: ignore[possibly-missing-attribute]
-                        line = (
-                            monitor.readline().decode("utf-8", errors="replace").strip()  # ty: ignore[possibly-missing-attribute]
-                        )
-                else:
-                    try:
-                        for read_line in monitor.read_lines(timeout=0.1):  # ty: ignore[possibly-missing-attribute]
-                            line = read_line
-                            break
-                    except KeyboardInterrupt:
-                        handle_keyboard_interrupt_properly()
-                    except Exception:
-                        continue
+                try:
+                    for read_line in monitor.read_lines(timeout=0.1):
+                        line = read_line
+                        break
+                except KeyboardInterrupt:
+                    handle_keyboard_interrupt_properly()
+                except Exception:
+                    continue
 
                 if not line:
                     continue
@@ -1848,6 +1927,9 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                                         print(
                                             f"\n{Fore.GREEN}✓ RPC command completed{Style.RESET_ALL}"
                                         )
+                                    # Display per-pattern error details if available
+                                    if "patterns" in result:
+                                        display_pattern_details(result)
                                 else:
                                     # Non-dict result (simple return value)
                                     stop_word_found = "OK"
@@ -1905,10 +1987,7 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
             return 1
         finally:
             # Close serial connection
-            if args.no_fbuild:
-                monitor.close()  # ty: ignore[possibly-missing-attribute]
-            else:
-                monitor.__exit__(None, None, None)
+            monitor.__exit__(None, None, None)
             print(f"\n✅ Serial connection closed")
 
         print("─" * 60)

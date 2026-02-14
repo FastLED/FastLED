@@ -81,6 +81,11 @@ bool serial_is_buffered() {
     return true;
 }
 
+int readLineNative(char delimiter, char* out, int outLen) {
+    (void)delimiter; (void)out; (void)outLen;
+    return -1;  // Not supported on POSIX host builds
+}
+
 } // namespace platforms
 } // namespace fl
 
