@@ -16,12 +16,45 @@ from ci.lint.duration_tracker import DurationTracker
 from ci.lint.orchestrator import LintOrchestrator
 from ci.lint.stage_impls import (
     run_cpp_lint,
+    run_cpp_lint_single_file,
     run_iwyu_analysis,
     run_js_lint,
+    run_js_lint_single_file,
+    run_python_lint_single_file,
     run_python_pipeline,
 )
 from ci.lint.stages import LintStage
 from ci.util.global_interrupt_handler import install_signal_handler, wait_for_cleanup
+
+
+# File extension mappings for single-file mode
+CPP_EXTENSIONS = {".cpp", ".h", ".hpp", ".hxx", ".hh", ".ino"}
+PYTHON_EXTENSIONS = {".py"}
+JS_EXTENSIONS = {".js", ".ts"}
+
+
+def run_single_file_mode(files: list[str], strict: bool = False) -> bool:
+    """Run linting on specific files, auto-detecting type by extension.
+
+    Args:
+        files: List of absolute file paths to lint
+        strict: If True, run pyright on Python files
+    """
+    success = True
+    for file_path in files:
+        ext = Path(file_path).suffix.lower()
+        if ext in CPP_EXTENSIONS:
+            if not run_cpp_lint_single_file(file_path):
+                success = False
+        elif ext in PYTHON_EXTENSIONS:
+            if not run_python_lint_single_file(file_path, strict=strict):
+                success = False
+        elif ext in JS_EXTENSIONS:
+            if not run_js_lint_single_file(file_path):
+                success = False
+        else:
+            print(f"⚠️  Unknown file type: {file_path} (skipping)")
+    return success
 
 
 def cleanup_visual_studio_files() -> None:
@@ -148,6 +181,14 @@ def main() -> int:
 
     # Unset VIRTUAL_ENV to avoid warnings
     os.environ.pop("VIRTUAL_ENV", None)
+
+    # Single-file mode
+    if args.files:
+        print(f"🔍 Single-file lint mode ({len(args.files)} file(s))")
+        print("=" * 50)
+        install_signal_handler()
+        success = run_single_file_mode(args.files, strict=args.run_pyright)
+        return 0 if success else 1
 
     # Cleanup Visual Studio files
     cleanup_visual_studio_files()

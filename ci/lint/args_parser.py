@@ -2,7 +2,8 @@
 
 import argparse
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from pathlib import Path
 
 
 @dataclass
@@ -15,6 +16,7 @@ class LintArgs:
     run_full: bool = False
     run_iwyu: bool = False
     run_pyright: bool = False
+    files: list[str] = field(default_factory=list)
 
 
 def parse_lint_args(argv: list[str] | None = None) -> LintArgs:
@@ -91,6 +93,13 @@ Examples:
         help="Also run pyright (slow strict type checker, ~12s)",
     )
 
+    parser.add_argument(
+        "files",
+        nargs="*",
+        default=[],
+        help="Optional: specific file(s) to lint (auto-detects type by extension)",
+    )
+
     if argv is None:
         argv = sys.argv[1:]
 
@@ -103,4 +112,5 @@ Examples:
         run_full=args.full,
         run_iwyu=args.iwyu,
         run_pyright=args.strict,
+        files=[str(Path(f).resolve()) for f in args.files],
     )

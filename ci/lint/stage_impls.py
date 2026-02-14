@@ -443,3 +443,132 @@ def run_python_pipeline(no_fingerprint: bool, run_pyright_flag: bool) -> bool:
         print("⏭️  pyright skipped (use --strict to enable)")
 
     return True
+
+
+def run_cpp_lint_single_file(file_path: str) -> bool:
+    """Run C++ linting on a single file.
+
+    Delegates to run_all_checkers.py which already supports single-file mode.
+
+    Args:
+        file_path: Absolute path to the C++ file
+
+    Returns:
+        True if linting passed, False otherwise
+    """
+    print(f"🔧 C++ lint: {os.path.relpath(file_path)}")
+
+    result = subprocess.run(
+        ["uv", "run", "python", "ci/lint_cpp/run_all_checkers.py", file_path],
+        capture_output=False,
+    )
+
+    if result.returncode == 0:
+        print(f"  ✅ passed")
+        return True
+    else:
+        print(f"  ❌ failed")
+        return False
+
+
+def run_python_lint_single_file(file_path: str, strict: bool = False) -> bool:
+    """Run Python linting on a single file (ruff check + format + optional pyright).
+
+    Args:
+        file_path: Absolute path to the Python file
+        strict: If True, also run pyright type checking on the file
+
+    Returns:
+        True if linting passed, False otherwise
+    """
+    print(f"🐍 Python lint: {os.path.relpath(file_path)}")
+
+    # Run ruff check with auto-fix
+    result = subprocess.run(
+        ["uv", "run", "ruff", "check", "--fix", file_path],
+        capture_output=False,
+    )
+    if result.returncode != 0:
+        print("  ❌ ruff check failed")
+        return False
+
+    # Run ruff format
+    result = subprocess.run(
+        ["uv", "run", "ruff", "format", file_path],
+        capture_output=False,
+    )
+    if result.returncode != 0:
+        print("  ❌ ruff format failed")
+        return False
+
+    # Run pyright strict type checking (optional)
+    if strict:
+        result = subprocess.run(
+            ["uv", "run", "pyright", file_path],
+            capture_output=False,
+        )
+        if result.returncode != 0:
+            print("  ❌ pyright failed")
+            return False
+
+    print("  ✅ passed")
+    return True
+
+
+def run_js_lint_single_file(file_path: str) -> bool:
+    """Run JavaScript/TypeScript linting on a single file (ESLint).
+
+    ESLint must be run from .cache/js-tools/ with its local config,
+    matching the behavior of ci/lint-js-fast.
+
+    Args:
+        file_path: Absolute path to the JS/TS file
+
+    Returns:
+        True if linting passed, False otherwise
+    """
+    print(f"🌐 JS lint: {os.path.relpath(file_path)}")
+
+    # ESLint runs from .cache/js-tools/ with its local config
+    js_tools_dir = Path(".cache/js-tools").resolve()
+    if sys.platform in ("win32", "cygwin", "msys"):
+        eslint_exe = js_tools_dir / "node_modules" / ".bin" / "eslint.cmd"
+    else:
+        eslint_exe = js_tools_dir / "node_modules" / ".bin" / "eslint"
+
+    if not eslint_exe.exists():
+        print(
+            "  ⚠️  ESLint not available (run 'uv run ci/setup-js-linting-fast.py' to set up)"
+        )
+        print("  ⏭️  skipped")
+        return True  # Don't fail if eslint isn't set up
+
+    eslint_config = js_tools_dir / ".eslintrc.js"
+    if not eslint_config.exists():
+        print("  ⚠️  ESLint config not found (.cache/js-tools/.eslintrc.js)")
+        print("  ⏭️  skipped")
+        return True
+
+    # Compute path relative to .cache/js-tools/ (where eslint runs from)
+    abs_file = Path(file_path).resolve()
+    rel_file = os.path.relpath(str(abs_file), str(js_tools_dir))
+
+    result = subprocess.run(
+        [
+            str(eslint_exe),
+            "--no-eslintrc",
+            "--no-inline-config",
+            "-c",
+            ".eslintrc.js",
+            rel_file,
+        ],
+        capture_output=False,
+        cwd=str(js_tools_dir),
+    )
+
+    if result.returncode == 0:
+        print("  ✅ passed")
+        return True
+    else:
+        print("  ❌ eslint failed")
+        return False

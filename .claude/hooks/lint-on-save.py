@@ -1,31 +1,32 @@
 #!/usr/bin/env python3
 """
-Claude Code hook script for linting C++ files on save.
+Claude Code hook script for linting source files on save.
 
-This hook runs after Edit/Write operations and checks the modified file
-against the project's C++ linting rules using the unified single-file linter.
+Supports C++, Python, and JavaScript/TypeScript files.
+Delegates to lint.py in single-file mode which auto-detects file type.
+Python files always use --strict mode (pyright) since single-file is fast.
 
 Usage: Receives JSON on stdin from Claude Code PostToolUse hook.
 Exit codes:
-  0 - Success (no violations or non-C++ file)
+  0 - Success (no violations or unsupported file type)
   2 - Violations found (stderr fed back to Claude)
 """
 
 import json
 import os
+import subprocess
 import sys
 from pathlib import Path
 
-# Add project root to path for imports
+
 SCRIPT_DIR = Path(__file__).parent.resolve()
 PROJECT_ROOT = SCRIPT_DIR.parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
 
-from ci.lint_cpp.run_all_checkers import (
-    create_checkers,
-    run_checkers_on_single_file,
-)
-from ci.util.check_files import is_excluded_file
+# Supported file extensions (must match lint.py's extension sets)
+CPP_EXTENSIONS = {".cpp", ".h", ".hpp", ".hxx", ".hh", ".ino"}
+PYTHON_EXTENSIONS = {".py"}
+JS_EXTENSIONS = {".js", ".ts"}
+SUPPORTED_EXTENSIONS = CPP_EXTENSIONS | PYTHON_EXTENSIONS | JS_EXTENSIONS
 
 
 def get_file_path_from_hook_input() -> str | None:
@@ -39,10 +40,9 @@ def get_file_path_from_hook_input() -> str | None:
         return None
 
 
-def is_cpp_file(file_path: str) -> bool:
-    """Check if file is a C++ file that should be linted."""
-    cpp_extensions = (".cpp", ".h", ".hpp", ".ino", ".cpp.hpp", ".hxx", ".hh")
-    return file_path.endswith(cpp_extensions)
+def is_supported_file(file_path: str) -> bool:
+    """Check if file is a supported type for linting."""
+    return Path(file_path).suffix.lower() in SUPPORTED_EXTENSIONS
 
 
 def main() -> int:
@@ -50,44 +50,43 @@ def main() -> int:
     file_path = get_file_path_from_hook_input()
 
     if not file_path:
-        # No file path in input, skip silently
         return 0
 
     # Resolve to absolute path
     if not os.path.isabs(file_path):
         file_path = os.path.join(PROJECT_ROOT, file_path)
 
-    # Skip non-C++ files
-    if not is_cpp_file(file_path):
-        return 0
-
-    # Skip excluded files
-    if is_excluded_file(file_path):
+    # Skip unsupported file types
+    if not is_supported_file(file_path):
         return 0
 
     # Skip if file doesn't exist (might have been deleted)
     if not os.path.exists(file_path):
         return 0
 
-    # Run linting using the unified single-file linter
-    checkers_by_scope = create_checkers()
-    results = run_checkers_on_single_file(str(Path(file_path).resolve()), checkers_by_scope)
+    # Delegate to lint.py in single-file mode
+    # Always use --strict for Python files (pyright on single file is fast)
+    cmd = ["uv", "run", "ci/lint.py", "--strict", file_path]
 
-    if results:
-        # Format violations
+    result = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        cwd=str(PROJECT_ROOT),
+    )
+
+    if result.returncode != 0:
+        # Send lint output to stderr (fed back to Claude)
         rel_path = os.path.relpath(file_path, PROJECT_ROOT)
-        print(f"C++ lint violations in {rel_path}:", file=sys.stderr)
-
-        for checker_name, checker_results in sorted(results.items()):
-            if checker_results.has_violations():
-                for file_path_key, file_violations in checker_results.violations.items():
-                    for violation in file_violations.violations:
-                        print(
-                            f"  [{checker_name}] Line {violation.line_number}: {violation.content}",
-                            file=sys.stderr,
-                        )
-
-        return 2  # Exit 2 = blocking error, stderr fed back to Claude
+        print(f"Lint violations in {rel_path}:", file=sys.stderr)
+        # Include both stdout and stderr from lint.py
+        if result.stdout.strip():
+            print(result.stdout.strip(), file=sys.stderr)
+        if result.stderr.strip():
+            print(result.stderr.strip(), file=sys.stderr)
+        return 2
 
     return 0
 
