@@ -1923,6 +1923,17 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
             print(
                 f"\n{Fore.YELLOW}⚠️  No completion stop word found within timeout{Style.RESET_ALL}"
             )
+            # Save output for debugging
+            debug_file = f"validation_timeout_debug.txt"
+            with open(debug_file, "w", encoding="utf-8") as f:
+                f.write(f"=== VALIDATION TIMEOUT DEBUG OUTPUT ===\n")
+                f.write(f"Environment: {final_environment}\n")
+                f.write(f"Timeout: {timeout_seconds}s\n")
+                f.write(f"Lines captured: {len(output_lines)}\n")
+                f.write(f"\n=== DEVICE OUTPUT ===\n")
+                for line in output_lines:
+                    f.write(line + "\n")
+            print(f"\n💾 Debug output saved to: {debug_file}")
             return 1
 
         # If stop word found, parse test summary from captured output

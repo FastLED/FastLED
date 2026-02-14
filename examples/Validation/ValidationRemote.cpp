@@ -7,6 +7,18 @@
 // - Test execution wrapped in fl::ScopedLogDisable to suppress debug noise
 // - This provides clean, parseable JSON output without FL_DBG/FL_PRINT spam
 
+// Disable debug logging - it overwhelms the serial connection and causes timeouts
+// Uncomment to enable debug output for troubleshooting
+// #define VALIDATION_DEBUG_ENABLED
+
+#ifdef VALIDATION_DEBUG_ENABLED
+#define DEBUG_PRINT(x) Serial.print(x)
+#define DEBUG_PRINTLN(x) Serial.println(x)
+#else
+#define DEBUG_PRINT(x) do {} while(0)
+#define DEBUG_PRINTLN(x) do {} while(0)
+#endif
+
 #include "ValidationRemote.h"
 #include "fl/remote/transport/serial.h"
 #include "fl/memory.h"
@@ -85,16 +97,16 @@ fl::Json makeResponse(bool success, ReturnCode returnCode, const char* message,
 // ============================================================================
 
 fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
-    Serial.println("[DEBUG] runSingleTest called");
-    Serial.print("[DEBUG] Free heap: ");
-    Serial.println(fl::getFreeHeap().total());
+    DEBUG_PRINTLN("[DEBUG] runSingleTest called");
+    DEBUG_PRINT("[DEBUG] Free heap: ");
+    DEBUG_PRINTLN(fl::getFreeHeap().total());
     Serial.flush();
 
     fl::Json response = fl::Json::object();
 
     // RPC system unwraps single-element arrays, so args is the config object directly
     if (!args.is_object()) {
-        Serial.println("[DEBUG] Args validation failed - not an object");
+        DEBUG_PRINTLN("[DEBUG] Args validation failed - not an object");
         Serial.flush();
         response.set("success", false);
         response.set("error", "InvalidArgs");
@@ -102,7 +114,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         return response;
     }
 
-    Serial.println("[DEBUG] Args validation passed");
+    DEBUG_PRINTLN("[DEBUG] Args validation passed");
     Serial.flush();
 
     fl::Json config = args;
@@ -234,16 +246,16 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
 
     // ========== EXECUTION ==========
 
-    Serial.print("[DEBUG] runSingleTest starting - driver: ");
-    Serial.println(driver_name.c_str());
-    Serial.print("[DEBUG] Free heap: ");
-    Serial.println(fl::getFreeHeap().total());
+    DEBUG_PRINT("[DEBUG] runSingleTest starting - driver: ");
+    DEBUG_PRINTLN(driver_name.c_str());
+    DEBUG_PRINT("[DEBUG] Free heap: ");
+    DEBUG_PRINTLN(fl::getFreeHeap().total());
     Serial.flush();
 
     uint32_t start_ms = millis();
 
     // Set driver as exclusive
-    Serial.println("[DEBUG] Setting exclusive driver...");
+    DEBUG_PRINTLN("[DEBUG] Setting exclusive driver...");
     Serial.flush();
     if (!FastLED.setExclusiveDriver(driver_name.c_str())) {
         response.set("success", false);
@@ -251,15 +263,15 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         fl::sstream msg;
         msg << "Failed to set " << driver_name.c_str() << " as exclusive driver";
         response.set("message", msg.str().c_str());
-        Serial.println("[DEBUG] Failed to set exclusive driver");
+        DEBUG_PRINTLN("[DEBUG] Failed to set exclusive driver");
         Serial.flush();
         return response;
     }
-    Serial.println("[DEBUG] Exclusive driver set");
+    DEBUG_PRINTLN("[DEBUG] Exclusive driver set");
     Serial.flush();
 
     // Get timing configuration (currently hardcoded to WS2812B-V5)
-    Serial.println("[DEBUG] Creating timing config");
+    DEBUG_PRINTLN("[DEBUG] Creating timing config");
     Serial.flush();
     fl::NamedTimingConfig timing_config(
         fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(),
@@ -267,31 +279,31 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     );
 
     // Dynamically allocate LED arrays for each lane
-    Serial.print("[DEBUG] Allocating LED arrays - lanes: ");
-    Serial.println(lane_sizes.size());
-    Serial.print("[DEBUG] Free heap: ");
-    Serial.println(fl::getFreeHeap().total());
+    DEBUG_PRINT("[DEBUG] Allocating LED arrays - lanes: ");
+    DEBUG_PRINTLN(lane_sizes.size());
+    DEBUG_PRINT("[DEBUG] Free heap: ");
+    DEBUG_PRINTLN(fl::getFreeHeap().total());
     Serial.flush();
 
     fl::vector<fl::unique_ptr<fl::vector<CRGB>>> led_arrays;
     fl::vector<fl::ChannelConfig> tx_configs;
 
     for (fl::size i = 0; i < lane_sizes.size(); i++) {
-        Serial.print("[DEBUG] Lane ");
-        Serial.print(i);
-        Serial.print(" - allocating ");
-        Serial.print(lane_sizes[i]);
-        Serial.println(" LEDs");
-        Serial.print("[DEBUG] Free heap: ");
-        Serial.println(fl::getFreeHeap().total());
+        DEBUG_PRINT("[DEBUG] Lane ");
+        DEBUG_PRINT(i);
+        DEBUG_PRINT(" - allocating ");
+        DEBUG_PRINT(lane_sizes[i]);
+        DEBUG_PRINTLN(" LEDs");
+        DEBUG_PRINT("[DEBUG] Free heap: ");
+        DEBUG_PRINTLN(fl::getFreeHeap().total());
         Serial.flush();
 
         // Allocate LED array
         auto leds = fl::make_unique<fl::vector<CRGB>>(lane_sizes[i]);
 
-        Serial.print("[DEBUG] Lane ");
-        Serial.print(i);
-        Serial.println(" - creating channel config");
+        DEBUG_PRINT("[DEBUG] Lane ");
+        DEBUG_PRINT(i);
+        DEBUG_PRINTLN(" - creating channel config");
         Serial.flush();
 
         // Create channel config
@@ -305,49 +317,49 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         // Store array to keep it alive
         led_arrays.push_back(fl::move(leds));
 
-        Serial.print("[DEBUG] Lane ");
-        Serial.print(i);
-        Serial.print(" complete, free heap: ");
-        Serial.println(fl::getFreeHeap().total());
+        DEBUG_PRINT("[DEBUG] Lane ");
+        DEBUG_PRINT(i);
+        DEBUG_PRINT(" complete, free heap: ");
+        DEBUG_PRINTLN(fl::getFreeHeap().total());
         Serial.flush();
     }
 
-    Serial.print("[DEBUG] All lanes allocated, free heap: ");
-    Serial.println(fl::getFreeHeap().total());
+    DEBUG_PRINT("[DEBUG] All lanes allocated, free heap: ");
+    DEBUG_PRINTLN(fl::getFreeHeap().total());
     Serial.flush();
 
     // Create temporary RX channel if pinRx differs from default
-    Serial.println("[DEBUG] Setting up RX channel");
-    Serial.print("[DEBUG] Free heap: ");
-    Serial.println(fl::getFreeHeap().total());
+    DEBUG_PRINTLN("[DEBUG] Setting up RX channel");
+    DEBUG_PRINT("[DEBUG] Free heap: ");
+    DEBUG_PRINTLN(fl::getFreeHeap().total());
     Serial.flush();
 
     fl::shared_ptr<fl::RxDevice> rx_channel_to_use = mState->rx_channel;
     bool created_temp_rx = false;
 
     if (pin_rx != mState->pin_rx && mState->rx_factory) {
-        Serial.println("[DEBUG] Creating temp RX channel");
+        DEBUG_PRINTLN("[DEBUG] Creating temp RX channel");
         Serial.flush();
         rx_channel_to_use = mState->rx_factory(pin_rx);
         if (!rx_channel_to_use) {
             response.set("success", false);
             response.set("error", "RxChannelCreationFailed");
             response.set("message", "Failed to create RX channel on custom pin");
-            Serial.println("[DEBUG] RX channel creation failed");
+            DEBUG_PRINTLN("[DEBUG] RX channel creation failed");
             Serial.flush();
             return response;
         }
         created_temp_rx = true;
-        Serial.println("[DEBUG] Temp RX channel created");
+        DEBUG_PRINTLN("[DEBUG] Temp RX channel created");
         Serial.flush();
     }
 
-    Serial.print("[DEBUG] Free heap after RX: ");
-    Serial.println(fl::getFreeHeap().total());
+    DEBUG_PRINT("[DEBUG] Free heap after RX: ");
+    DEBUG_PRINTLN(fl::getFreeHeap().total());
     Serial.flush();
 
     // Create validation configuration
-    Serial.println("[DEBUG] Creating validation config");
+    DEBUG_PRINTLN("[DEBUG] Creating validation config");
     Serial.flush();
     fl::ValidationConfig validation_config(
         timing_config.timing,
@@ -360,15 +372,15 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         fl::RxDeviceType::RMT  // Default RX device type
     );
 
-    Serial.print("[DEBUG] Validation config created, free heap: ");
-    Serial.println(fl::getFreeHeap().total());
+    DEBUG_PRINT("[DEBUG] Validation config created, free heap: ");
+    DEBUG_PRINTLN(fl::getFreeHeap().total());
     Serial.flush();
 
     // Run test with debug output suppressed
-    Serial.print("[DEBUG] Starting test - iterations: ");
-    Serial.println(iterations);
-    Serial.print("[DEBUG] Free heap: ");
-    Serial.println(fl::getFreeHeap().total());
+    DEBUG_PRINT("[DEBUG] Starting test - iterations: ");
+    DEBUG_PRINTLN(iterations);
+    DEBUG_PRINT("[DEBUG] Free heap: ");
+    DEBUG_PRINTLN(fl::getFreeHeap().total());
     Serial.flush();
 
     int total_tests = 0;
@@ -376,26 +388,26 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     bool passed = false;
 
     {
-        Serial.println("[DEBUG] Entering test scope (log disable)");
+        DEBUG_PRINTLN("[DEBUG] Entering test scope (log disable)");
         Serial.flush();
 
         fl::ScopedLogDisable logGuard;  // Suppress FL_DBG/FL_PRINT during test
 
         // Run warm-up iteration (discard results)
-        Serial.println("[DEBUG] Running warmup");
+        DEBUG_PRINTLN("[DEBUG] Running warmup");
         Serial.flush();
         int warmup_total = 0, warmup_passed = 0;
         validateChipsetTiming(validation_config, warmup_total, warmup_passed);
-        Serial.print("[DEBUG] Warmup done, heap: ");
-        Serial.println(fl::getFreeHeap().total());
+        DEBUG_PRINT("[DEBUG] Warmup done, heap: ");
+        DEBUG_PRINTLN(fl::getFreeHeap().total());
         Serial.flush();
 
         // Run actual test iterations
         for (int iter = 0; iter < iterations; iter++) {
-            Serial.print("[DEBUG] Iteration ");
-            Serial.println(iter + 1);
-            Serial.print("[DEBUG] Free heap: ");
-            Serial.println(fl::getFreeHeap().total());
+            DEBUG_PRINT("[DEBUG] Iteration ");
+            DEBUG_PRINTLN(iter + 1);
+            DEBUG_PRINT("[DEBUG] Free heap: ");
+            DEBUG_PRINTLN(fl::getFreeHeap().total());
             Serial.flush();
 
             int iter_total = 0, iter_passed = 0;
@@ -403,28 +415,28 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
             total_tests += iter_total;
             passed_tests += iter_passed;
 
-            Serial.print("[DEBUG] Iteration ");
-            Serial.print(iter + 1);
-            Serial.println(" done");
+            DEBUG_PRINT("[DEBUG] Iteration ");
+            DEBUG_PRINT(iter + 1);
+            DEBUG_PRINTLN(" done");
             Serial.flush();
         }
 
         passed = (total_tests > 0) && (passed_tests == total_tests);
     }  // logGuard destroyed, logging restored
 
-    Serial.print("[DEBUG] Test complete - passed: ");
-    Serial.println(passed);
-    Serial.print("[DEBUG] Free heap: ");
-    Serial.println(fl::getFreeHeap().total());
+    DEBUG_PRINT("[DEBUG] Test complete - passed: ");
+    DEBUG_PRINTLN(passed);
+    DEBUG_PRINT("[DEBUG] Free heap: ");
+    DEBUG_PRINTLN(fl::getFreeHeap().total());
     Serial.flush();
 
     uint32_t duration_ms = millis() - start_ms;
 
     // ========== RESPONSE ==========
 
-    Serial.println("[DEBUG] Building response");
-    Serial.print("[DEBUG] Free heap: ");
-    Serial.println(fl::getFreeHeap().total());
+    DEBUG_PRINTLN("[DEBUG] Building response");
+    DEBUG_PRINT("[DEBUG] Free heap: ");
+    DEBUG_PRINTLN(fl::getFreeHeap().total());
     Serial.flush();
 
     response.set("success", true);
@@ -435,7 +447,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     response.set("driver", driver_name.c_str());
     response.set("laneCount", static_cast<int64_t>(lane_sizes.size()));
 
-    Serial.println("[DEBUG] Building laneSizes array");
+    DEBUG_PRINTLN("[DEBUG] Building laneSizes array");
     Serial.flush();
     // Add laneSizes array to response
     fl::Json sizes_response = fl::Json::array();
@@ -447,7 +459,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
 
     // Add first failure info if test failed
     if (!passed) {
-        Serial.println("[DEBUG] Adding failure info");
+        DEBUG_PRINTLN("[DEBUG] Adding failure info");
         Serial.flush();
         fl::Json failure = fl::Json::object();
         failure.set("pattern", pattern.c_str());
@@ -455,9 +467,9 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         response.set("firstFailure", failure);
     }
 
-    Serial.print("[DEBUG] Response built, heap: ");
-    Serial.println(fl::getFreeHeap().total());
-    Serial.println("[DEBUG] Returning response");
+    DEBUG_PRINT("[DEBUG] Response built, heap: ");
+    DEBUG_PRINTLN(fl::getFreeHeap().total());
+    DEBUG_PRINTLN("[DEBUG] Returning response");
     Serial.flush();
 
     return response;
@@ -652,13 +664,13 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
 
     // Register "debugTest" function - test RPC argument passing
     mRemote->bind("debugTest", [](const fl::Json& args) -> fl::Json {
-        Serial.println("[DEBUG] debugTest called!");
-        Serial.print("[DEBUG] args type: ");
-        if (args.is_array()) Serial.println("array");
-        else if (args.is_object()) Serial.println("object");
-        else Serial.println("other");
-        Serial.print("[DEBUG] args toString: ");
-        Serial.println(args.to_string().c_str());
+        DEBUG_PRINTLN("[DEBUG] debugTest called!");
+        DEBUG_PRINT("[DEBUG] args type: ");
+        if (args.is_array()) DEBUG_PRINTLN("array");
+        else if (args.is_object()) DEBUG_PRINTLN("object");
+        else DEBUG_PRINTLN("other");
+        DEBUG_PRINT("[DEBUG] args toString: ");
+        DEBUG_PRINTLN(args.to_string().c_str());
         Serial.flush();
 
         fl::Json response = fl::Json::object();
