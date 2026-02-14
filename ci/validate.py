@@ -776,12 +776,12 @@ See Also:
         parser.add_argument(
             "--use-fbuild",
             action="store_true",
-            help="Use fbuild for compile and upload instead of PlatformIO (default for esp32s3/esp32c6)",
+            help="Use fbuild for compile and upload instead of PlatformIO (default for esp32s3)",
         )
         parser.add_argument(
             "--no-fbuild",
             action="store_true",
-            help="Force PlatformIO even for esp32s3/esp32c6 (disables fbuild default)",
+            help="Force PlatformIO even for esp32s3 (disables fbuild default)",
         )
 
         # Strip size configuration (NEW - Phase 8)
@@ -871,7 +871,7 @@ def _should_use_fbuild(
 ) -> bool:
     """Determine if fbuild should be used for compilation and upload.
 
-    fbuild is the default for esp32s3 and esp32c6 (RISC-V) environments.
+    fbuild is the default for esp32s3 environments only.
 
     Args:
         environment: PlatformIO environment name (e.g., "esp32s3", "esp32c6")
@@ -889,10 +889,10 @@ def _should_use_fbuild(
     if use_fbuild_flag:
         return True
 
-    # Default: use fbuild for esp32s3 and esp32c6
+    # Default: use fbuild for esp32s3 only (esp32c6 uses PlatformIO)
     if environment:
         env_lower = environment.lower()
-        if "esp32s3" in env_lower or "esp32c6" in env_lower:
+        if "esp32s3" in env_lower:
             return True
 
     return False
@@ -1426,7 +1426,7 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
         # ============================================================
         # PHASE 2: Compile (NO LOCK - parallelizable)
         # ============================================================
-        # Determine if fbuild should be used (default for esp32s3/esp32c6)
+        # Determine if fbuild should be used (default for esp32s3 only)
         use_fbuild = _should_use_fbuild(
             final_environment, args.use_fbuild, args.no_fbuild
         )
@@ -1434,7 +1434,7 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
             if args.use_fbuild:
                 print("📦 Using fbuild (--use-fbuild specified)")
             else:
-                print("📦 Using fbuild (default for esp32s3/esp32c6)")
+                print("📦 Using fbuild (default for esp32s3)")
         else:
             if args.no_fbuild:
                 print("📦 Using PlatformIO (--no-fbuild specified)")
