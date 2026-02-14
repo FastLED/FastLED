@@ -41,6 +41,7 @@
 #include "fl/isr.h"
 #include "fl/unused.h"
 #include "platforms/memory_barrier.h"
+#include "fl/align.h"
 
 namespace fl {
 namespace detail {
@@ -56,7 +57,7 @@ namespace detail {
 /// - Main thread reads volatile fields directly (compiler ensures fresh read)
 /// - After detecting mStreamComplete==true, main executes memory barrier
 /// - Memory barrier ensures all ISR writes visible before reading non-volatile fields
-struct alignas(64) ParlioIsrContext {
+struct FL_ALIGNAS(64) ParlioIsrContext {
     // === Volatile Fields (ISR writes, main reads) ===
     volatile bool mStreamComplete;
     volatile bool mTransmitting;

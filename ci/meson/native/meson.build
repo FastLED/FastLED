@@ -53,6 +53,11 @@ base_warnings = [
   '-Werror=c++17-extensions',  # Enforce C++11 compatibility
   '-Werror=unused-result',     # Treat ignored FL_NODISCARD return values as errors
   '-Werror=switch',            # Treat missing switch cases as errors
+  '-Werror=shift-negative-value',  # Treat negative left shifts as errors (undefined behavior)
+  '-Werror=shift-count-overflow',  # Shift count >= type width (undefined on AVR/8-bit)
+  '-Werror=shift-count-negative',  # Negative shift count (undefined behavior)
+  '-Werror=division-by-zero',      # Division by zero (undefined behavior)
+  '-Werror=return-type',           # Missing return statements (undefined behavior)
 ]
 
 # Add GCC-specific warnings (maybe-uninitialized is GCC-only, not available in Clang)

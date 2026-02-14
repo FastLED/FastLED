@@ -7,6 +7,7 @@
 /// Currently uses scalar fallback - PIE intrinsics to be added later.
 
 #include "fl/stl/stdint.h"
+#include "fl/align.h"
 
 #if defined(__XTENSA__)
 
@@ -35,15 +36,15 @@ namespace platforms {
 //==============================================================================
 
 // For Xtensa, use simple struct until PIE intrinsics are verified
-struct simd_u8x16 {
+struct FL_ALIGNAS(16) simd_u8x16 {
     u8 data[16];
 };
 
-struct simd_u32x4 {
+struct FL_ALIGNAS(16) simd_u32x4 {
     u32 data[4];
 };
 
-struct simd_f32x4 {
+struct FL_ALIGNAS(16) simd_f32x4 {
     float data[4];
 };
 
@@ -302,6 +303,64 @@ FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 max_f32_4(simd_f32x4 a, simd_f32x4 b) no
     return result;
 }
 
+//==============================================================================
+// Int32 SIMD Operations (Scalar Fallback)
+//==============================================================================
+
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 xor_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        result.data[i] = a.data[i] ^ b.data[i];
+    }
+    return result;
+}
+
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 add_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        i32 a_i = static_cast<i32>(a.data[i]);
+        i32 b_i = static_cast<i32>(b.data[i]);
+        result.data[i] = static_cast<u32>(a_i + b_i);
+    }
+    return result;
+}
+
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sub_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        i32 a_i = static_cast<i32>(a.data[i]);
+        i32 b_i = static_cast<i32>(b.data[i]);
+        result.data[i] = static_cast<u32>(a_i - b_i);
+    }
+    return result;
+}
+
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        i32 a_i = static_cast<i32>(a.data[i]);
+        i32 b_i = static_cast<i32>(b.data[i]);
+        i64 prod = static_cast<i64>(a_i) * static_cast<i64>(b_i);
+        result.data[i] = static_cast<u32>(static_cast<i32>(prod >> 16));
+    }
+    return result;
+}
+
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 srl_u32_4(simd_u32x4 vec, int shift) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        result.data[i] = vec.data[i] >> shift;
+    }
+    return result;
+}
+
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 and_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        result.data[i] = a.data[i] & b.data[i];
+    }
+    return result;
+}
 
 }  // namespace platforms
 }  // namespace simd

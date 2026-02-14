@@ -211,5 +211,45 @@ using platforms::min_f32_4;
 /// @return Element-wise maximum
 using platforms::max_f32_4;
 
+//==============================================================================
+// Int32 SIMD Operations
+//==============================================================================
+
+/// Bitwise XOR of two uint32 vectors
+/// @param a First operand (4 uint32)
+/// @param b Second operand (4 uint32)
+/// @return Bitwise XOR result
+using platforms::xor_u32_4;
+
+/// Add two int32 vectors (treating u32x4 as i32x4)
+/// @param a First operand (4 int32)
+/// @param b Second operand (4 int32)
+/// @return Element-wise addition result
+using platforms::add_i32_4;
+
+/// Subtract two int32 vectors (treating u32x4 as i32x4)
+/// @param a First operand (4 int32)
+/// @param b Second operand (4 int32)
+/// @return Element-wise subtraction result
+using platforms::sub_i32_4;
+
+/// Multiply int32 and return high 32 bits (for Q16.16 fixed-point)
+/// @param a First operand (4 int32)
+/// @param b Second operand (4 int32)
+/// @return High 32 bits of 64-bit product, shifted right by 16
+using platforms::mulhi_i32_4;
+
+/// Shift right logical (zero-fill) - for unsigned angle decomposition
+/// @param vec Input vector (4 uint32)
+/// @param shift Number of bits to shift right
+/// @return Vector shifted right by specified bits
+using platforms::srl_u32_4;
+
+/// Bitwise AND of two uint32 vectors
+/// @param a First operand (4 uint32)
+/// @param b Second operand (4 uint32)
+/// @return Bitwise AND result
+using platforms::and_u32_4;
+
 }  // namespace simd
 }  // namespace fl

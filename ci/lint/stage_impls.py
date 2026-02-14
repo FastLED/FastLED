@@ -509,6 +509,17 @@ def run_iwyu_single_file(file_path: str) -> bool:
     # Build minimal compiler args for IWYU
     # These match the base flags from meson.build
     project_root = Path(__file__).parent.parent.parent
+    file_path_obj = Path(file_path)
+
+    # Check if file is in tests/ directory
+    is_test_file = False
+    try:
+        file_path_obj.relative_to(project_root / "tests")
+        is_test_file = True
+    except ValueError:
+        # File is not under tests/ directory
+        is_test_file = False
+
     compiler_args = [
         compiler,
         "-std=gnu++11",
@@ -520,9 +531,18 @@ def run_iwyu_single_file(file_path: str) -> bool:
         "-DFASTLED_UNIT_TEST=1",
         f"-I{project_root / 'src'}",
         f"-I{project_root / 'src' / 'platforms' / 'stub'}",
-        "-c",  # Compile only (don't link)
-        file_path,
     ]
+
+    # Add tests/ include path for test files
+    if is_test_file:
+        compiler_args.append(f"-I{project_root / 'tests'}")
+
+    compiler_args.extend(
+        [
+            "-c",  # Compile only (don't link)
+            file_path,
+        ]
+    )
 
     # Call IWYU wrapper
     # Format: iwyu_wrapper.py [iwyu-args] -- compiler [compiler-args] file.cpp

@@ -7,6 +7,7 @@
 /// SSE2 baseline ensures compatibility with all x64 and most modern x86 processors.
 
 #include "fl/stl/stdint.h"
+#include "fl/align.h"
 
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || defined(_M_IX86)
 
@@ -92,7 +93,7 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 scale_u8_16(simd_u8x16 vec, u8 scale) no
     // SSE2 approach: unpack bytes to 16-bit, multiply, shift, pack
     // For simplicity in initial implementation, use scalar loop
     // TODO: Optimize with proper SSE2 unpack/multiply/pack sequence
-    alignas(16) u8 data[16];
+    FL_ALIGNAS(16) u8 data[16];
     _mm_store_si128(reinterpret_cast<__m128i*>(data), vec); // ok reinterpret cast
 
     for (int i = 0; i < 16; ++i) {
@@ -217,21 +218,64 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 andnot_u8_16(simd_u8x16 a, simd_u8x16 b)
     return _mm_andnot_si128(a, b);
 }
 
+//==============================================================================
+// Int32 SIMD Operations (SSE2)
+//==============================================================================
+
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 xor_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    return _mm_xor_si128(a, b);
+}
+
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 add_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    return _mm_add_epi32(a, b);
+}
+
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sub_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    return _mm_sub_epi32(a, b);
+}
+
+// Multiply i32 and return high 32 bits (for fixed-point Q16.16 math)
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    // SSE2 doesn't have direct i32 multiply-high, so we use scalar fallback
+    i32 a_arr[4];
+    i32 b_arr[4];
+    _mm_storeu_si128(reinterpret_cast<__m128i*>(a_arr), a); // ok reinterpret cast
+    _mm_storeu_si128(reinterpret_cast<__m128i*>(b_arr), b); // ok reinterpret cast
+
+    i32 result_arr[4];
+    for (int i = 0; i < 4; ++i) {
+        i64 prod = static_cast<i64>(a_arr[i]) * static_cast<i64>(b_arr[i]);
+        result_arr[i] = static_cast<i32>(prod >> 16);
+    }
+
+    return _mm_loadu_si128(reinterpret_cast<const __m128i*>(result_arr)); // ok reinterpret cast
+}
+
+// Shift right logical (zero-fill) - for unsigned angle decomposition
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 srl_u32_4(simd_u32x4 vec, int shift) noexcept {
+    return _mm_srli_epi32(vec, shift);
+}
+
+// Bitwise AND of two u32 vectors
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 and_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    return _mm_and_si128(a, b);
+}
+
 #else
 
 //==============================================================================
 // SIMD Register Types (Scalar Fallback)
 //==============================================================================
 
-struct simd_u8x16 {
+struct FL_ALIGNAS(16) simd_u8x16 {
     u8 data[16];
 };
 
-struct simd_u32x4 {
+struct FL_ALIGNAS(16) simd_u32x4 {
     u32 data[4];
 };
 
-struct simd_f32x4 {
+struct FL_ALIGNAS(16) simd_f32x4 {
     float data[4];
 };
 
@@ -460,7 +504,68 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 andnot_u8_16(simd_u8x16 a, simd_u8x16 b)
     return result;
 }
 
-#endif
+//==============================================================================
+// Int32 SIMD Operations
+//==============================================================================
+
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 xor_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        result.data[i] = a.data[i] ^ b.data[i];
+    }
+    return result;
+}
+
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 add_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        i32 a_i = static_cast<i32>(a.data[i]);
+        i32 b_i = static_cast<i32>(b.data[i]);
+        result.data[i] = static_cast<u32>(a_i + b_i);
+    }
+    return result;
+}
+
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sub_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        i32 a_i = static_cast<i32>(a.data[i]);
+        i32 b_i = static_cast<i32>(b.data[i]);
+        result.data[i] = static_cast<u32>(a_i - b_i);
+    }
+    return result;
+}
+
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        i32 a_i = static_cast<i32>(a.data[i]);
+        i32 b_i = static_cast<i32>(b.data[i]);
+        i64 prod = static_cast<i64>(a_i) * static_cast<i64>(b_i);
+        result.data[i] = static_cast<u32>(static_cast<i32>(prod >> 16));
+    }
+    return result;
+}
+
+// Shift right logical (zero-fill) - for unsigned angle decomposition
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 srl_u32_4(simd_u32x4 vec, int shift) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        result.data[i] = vec.data[i] >> shift;
+    }
+    return result;
+}
+
+// Bitwise AND of two u32 vectors
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 and_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        result.data[i] = a.data[i] & b.data[i];
+    }
+    return result;
+}
+
+#endif  // FASTLED_X86_HAS_SSE2
 
 }  // namespace platforms
 }  // namespace simd

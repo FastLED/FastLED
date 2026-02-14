@@ -439,3 +439,135 @@ FL_TEST_CASE("fl::sin16lut and cos16lut pythagorean identity") {
         }
     }
 }
+
+FL_TEST_CASE("fl::sincos32_simd equivalence") {
+    FL_SUBCASE("matches scalar sincos32 with random values") {
+        // Test with deterministic "random" values (using LCG for reproducibility)
+        u32 seed = 0x12345678;
+
+        for (int test = 0; test < 100; test++) {
+            // Generate 4 random angles using simple LCG
+            u32 angles[4];
+            for (int i = 0; i < 4; i++) {
+                seed = seed * 1103515245u + 12345u;
+                angles[i] = seed & 0xFFFFFFu;  // Limit to valid angle range [0, 16777216)
+            }
+
+            // Load angles into SIMD vector
+            simd::simd_u32x4 angles_v = simd::load_u32_4(angles);
+
+            // Call SIMD version
+            SinCos32_simd simd_result = sincos32_simd(angles_v);
+
+            // Extract SIMD results
+            i32 simd_sins[4], simd_coss[4];
+            simd::store_u32_4(reinterpret_cast<u32*>(simd_sins), simd_result.sin_vals); // ok reinterpret cast
+            simd::store_u32_4(reinterpret_cast<u32*>(simd_coss), simd_result.cos_vals); // ok reinterpret cast
+
+            // Compare with scalar version for each angle
+            for (int i = 0; i < 4; i++) {
+                SinCos32 scalar_result = sincos32(angles[i]);
+
+                // SIMD and scalar must match exactly (same algorithm)
+                FL_CHECK_EQ(simd_sins[i], scalar_result.sin_val);
+                FL_CHECK_EQ(simd_coss[i], scalar_result.cos_val);
+            }
+        }
+    }
+
+    FL_SUBCASE("key angles in SIMD") {
+        // Test known angles: 0°, 30°, 45°, 60°, 90°, 180°, 270°, 360°
+        u32 angles[4] = {0, 1398101, 2097152, 2796202};  // 0°, 30°, 45°, 60°
+        simd::simd_u32x4 angles_v = simd::load_u32_4(angles);
+        SinCos32_simd result = sincos32_simd(angles_v);
+
+        i32 sins[4], coss[4];
+        simd::store_u32_4(reinterpret_cast<u32*>(sins), result.sin_vals); // ok reinterpret cast
+        simd::store_u32_4(reinterpret_cast<u32*>(coss), result.cos_vals); // ok reinterpret cast
+
+        // 0°: sin=0, cos=max
+        FL_CHECK_EQ(sins[0], 0);
+        FL_CHECK(coss[0] > 2147000000);
+
+        // 30°: sin≈0.5, cos≈0.866
+        FL_CHECK(sins[1] > 1060000000);
+        FL_CHECK(sins[1] < 1090000000);
+        FL_CHECK(coss[1] > 1850000000);
+        FL_CHECK(coss[1] < 1870000000);
+
+        // 45°: sin≈0.707, cos≈0.707
+        FL_CHECK(sins[2] > 1510000000);
+        FL_CHECK(sins[2] < 1530000000);
+        FL_CHECK(coss[2] > 1510000000);
+        FL_CHECK(coss[2] < 1530000000);
+
+        // 60°: sin≈0.866, cos≈0.5
+        FL_CHECK(sins[3] > 1850000000);
+        FL_CHECK(sins[3] < 1870000000);
+        FL_CHECK(coss[3] > 1060000000);
+        FL_CHECK(coss[3] < 1090000000);
+    }
+
+    FL_SUBCASE("full angle range sweep") {
+        // Test systematic coverage of full angle range
+        for (u32 base_angle = 0; base_angle < 16777216; base_angle += 1048576) {  // 16 steps around circle
+            u32 angles[4] = {
+                base_angle,
+                (base_angle + 262144u) & 0xFFFFFFu,   // +15°
+                (base_angle + 524288u) & 0xFFFFFFu,   // +30°
+                (base_angle + 1048576u) & 0xFFFFFFu   // +60°
+            };
+
+            simd::simd_u32x4 angles_v = simd::load_u32_4(angles);
+            SinCos32_simd simd_result = sincos32_simd(angles_v);
+
+            i32 simd_sins[4], simd_coss[4];
+            simd::store_u32_4(reinterpret_cast<u32*>(simd_sins), simd_result.sin_vals); // ok reinterpret cast
+            simd::store_u32_4(reinterpret_cast<u32*>(simd_coss), simd_result.cos_vals); // ok reinterpret cast
+
+            for (int i = 0; i < 4; i++) {
+                SinCos32 scalar_result = sincos32(angles[i]);
+                FL_CHECK_EQ(simd_sins[i], scalar_result.sin_val);
+                FL_CHECK_EQ(simd_coss[i], scalar_result.cos_val);
+            }
+        }
+    }
+
+    FL_SUBCASE("pythagorean identity SIMD") {
+        // Test sin^2 + cos^2 = 1 for SIMD version
+        u32 seed = 0x87654321;
+
+        for (int test = 0; test < 50; test++) {
+            u32 angles[4];
+            for (int i = 0; i < 4; i++) {
+                seed = seed * 1103515245u + 12345u;
+                angles[i] = seed & 0xFFFFFFu;
+            }
+
+            simd::simd_u32x4 angles_v = simd::load_u32_4(angles);
+            SinCos32_simd result = sincos32_simd(angles_v);
+
+            i32 sins[4], coss[4];
+            simd::store_u32_4(reinterpret_cast<u32*>(sins), result.sin_vals); // ok reinterpret cast
+            simd::store_u32_4(reinterpret_cast<u32*>(coss), result.cos_vals); // ok reinterpret cast
+
+            for (int i = 0; i < 4; i++) {
+                double sn = static_cast<double>(sins[i]) / 2147418112.0;
+                double cn = static_cast<double>(coss[i]) / 2147418112.0;
+                double sum = sn * sn + cn * cn;
+                FL_CHECK(sum > 0.99);
+                FL_CHECK(sum < 1.01);
+            }
+        }
+    }
+}
+
+FL_TEST_CASE("SinCos32_simd alignment") {
+    FL_CHECK_EQ(alignof(SinCos32_simd), 16);
+    SinCos32_simd result;
+    FL_CHECK_EQ(reinterpret_cast<uintptr_t>(&result) % 16, 0);
+
+    // Verify members are aligned
+    FL_CHECK_EQ(reinterpret_cast<uintptr_t>(&result.sin_vals) % 16, 0);
+    FL_CHECK_EQ(reinterpret_cast<uintptr_t>(&result.cos_vals) % 16, 0);
+}

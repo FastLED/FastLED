@@ -6,6 +6,7 @@
 #include "fl/simd.h"
 #include "fl/fixed_point/s16x16.h"
 #include "fl/force_inline.h"
+#include "fl/align.h"
 
 namespace fl {
 
@@ -46,9 +47,9 @@ struct s16x16x4 {
 
     FASTLED_FORCE_INLINE s16x16x4 operator+(s16x16x4 b) const {
         // Scalar fallback until platform add_u32_4 is implemented
-        alignas(16) i32 a_arr[4];
-        alignas(16) i32 b_arr[4];
-        alignas(16) i32 result[4];
+        FL_ALIGNAS(16) i32 a_arr[4];
+        FL_ALIGNAS(16) i32 b_arr[4];
+        FL_ALIGNAS(16) i32 result[4];
 
         simd::platforms::store_u32_4(reinterpret_cast<u32*>(a_arr), raw); // ok reinterpret cast
         simd::platforms::store_u32_4(reinterpret_cast<u32*>(b_arr), b.raw); // ok reinterpret cast
@@ -62,9 +63,9 @@ struct s16x16x4 {
 
     FASTLED_FORCE_INLINE s16x16x4 operator-(s16x16x4 b) const {
         // Scalar fallback until platform sub_u32_4 is implemented
-        alignas(16) i32 a_arr[4];
-        alignas(16) i32 b_arr[4];
-        alignas(16) i32 result[4];
+        FL_ALIGNAS(16) i32 a_arr[4];
+        FL_ALIGNAS(16) i32 b_arr[4];
+        FL_ALIGNAS(16) i32 result[4];
 
         simd::platforms::store_u32_4(reinterpret_cast<u32*>(a_arr), raw); // ok reinterpret cast
         simd::platforms::store_u32_4(reinterpret_cast<u32*>(b_arr), b.raw); // ok reinterpret cast

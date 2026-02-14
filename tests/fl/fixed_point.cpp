@@ -564,8 +564,8 @@ void test_floor_ceil_impl() {
 
     // Negative values
     T neg(-1.25f);
-    FL_CHECK_EQ(T::floor(neg).raw(), R(-2) << T::FRAC_BITS);
-    FL_CHECK_EQ(T::ceil(neg).raw(), R(-1) << T::FRAC_BITS);
+    FL_CHECK_EQ(T::floor(neg).raw(), R(-2) * (R(1) << T::FRAC_BITS));
+    FL_CHECK_EQ(T::ceil(neg).raw(), R(-1) * (R(1) << T::FRAC_BITS));
 
     // Integer values (no change)
     T whole(3.0f);
@@ -4478,6 +4478,25 @@ FL_TEST_CASE("u24x8 - large value arithmetic") {
     FL_CHECK_CLOSE((a + b).to_float(), 1500.0f, 1.0f);
     FL_CHECK_CLOSE((a - b).to_float(), 500.0f, 1.0f);
     FL_CHECK_CLOSE((a / b).to_float(), 2.0f, 0.01f);
+}
+
+// =============================================================================
+// Fixed-Point Scalar Type Alignment Tests
+// =============================================================================
+
+FL_TEST_CASE("fixed-point scalar type alignment") {
+    FL_SUBCASE("s0x32 alignment") {
+        // Scalar fixed-point types don't need special alignment
+        FL_CHECK(alignof(s0x32) <= 8);  // Should be natural alignment (4 bytes for i32)
+        s0x32 val = s0x32::from_raw(1073741824);  // 0.5 in Q31 format
+        (void)val;  // Silence unused warning
+    }
+
+    FL_SUBCASE("s16x16 alignment") {
+        FL_CHECK(alignof(s16x16) <= 8);
+        s16x16 val = s16x16::from_raw(32768);  // 0.5 in Q16.16 format
+        (void)val;
+    }
 }
 
 } // anonymous namespace

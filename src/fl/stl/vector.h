@@ -27,7 +27,7 @@ template <typename T, fl::size Extent> class span;
 // Aligned memory block for inlined data structures.
 // Must be aligned to at least the alignment of T, but not less than the natural alignment
 template <typename T, fl::size N>
-struct alignas(alignof(T) > alignof(fl::uptr) ? alignof(T) : alignof(fl::uptr)) InlinedMemoryBlock {
+struct FL_ALIGNAS(alignof(T) > alignof(fl::uptr) ? alignof(T) : alignof(fl::uptr)) InlinedMemoryBlock {
     // using MemoryType = uinptr_t;
     typedef fl::uptr MemoryType;
     enum {

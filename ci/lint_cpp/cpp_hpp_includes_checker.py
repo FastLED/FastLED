@@ -69,22 +69,17 @@ class CppHppIncludesChecker(FileContentChecker):
 
             # Split line to separate code from inline comments
             code_part = line.split("//")[0]
-            comment_part = line.split("//", 1)[1] if "//" in line else ""
 
-            # Check if exception comment is present
-            has_exception = "ok include cpp.hpp" in comment_part.lower()
-
-            # Check for *.cpp.hpp includes in code portion
+            # Check for *.cpp.hpp includes in code portion (no exceptions allowed)
             match = cpp_hpp_include_pattern.search(code_part)
-            if match and not has_exception:
+            if match:
                 included_file = match.group(1)
                 violations.append(
                     (
                         line_number,
                         f"{line.strip()} - *.cpp.hpp files should ONLY be included by _build.hpp files. "
                         f"Found include of '{included_file}' in non-build file. "
-                        f"Move this include to the appropriate _build.hpp file. "
-                        f"Add '// ok include cpp.hpp' comment to suppress.",
+                        f"Move this include to the appropriate _build.hpp file.",
                     )
                 )
 

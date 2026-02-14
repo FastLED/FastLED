@@ -16,6 +16,7 @@
 #include "platforms/esp/32/core/delaycycles.h"  // For get_ccount() - force-inlined cycle counter
 #include "platforms/esp/32/core/fastpin_esp32.h"  // For pin validation macros
 #include "fl/compiler_control.h"  // For FL_MEMORY_BARRIER
+#include "fl/align.h"
 
 // RX device logging: Disabled by default to reduce noise
 // Enable with: #define FASTLED_RX_LOG_ENABLED 1
@@ -302,7 +303,7 @@ fl::Result<u32, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase &tim
  * Alignment: 64-byte aligned to fit in single cache line on ESP32
  * Member ordering: Hot path variables first (most frequently accessed)
  */
-struct alignas(64) IsrContext {
+struct FL_ALIGNAS(64) IsrContext {
     // Hot path - accessed on EVERY ISR invocation (highest priority)
     EdgeTimestamp* writePtr;             ///< Current write position (read/write every edge)
     EdgeTimestamp* endPtr;                ///< End of buffer (read every edge for overflow check)

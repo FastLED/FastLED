@@ -16,7 +16,7 @@
 
 // All simd operations are disabled for now. If you want to test these simd
 // operations, then please test them and send fastled issues a pull request.
-#include "platforms/shared/simd_stub.hpp"
+#include "platforms/shared/simd_noop.hpp"
 
 // #include "platforms/is_platform.h"
 // #if defined(ESP32)
@@ -31,5 +31,5 @@
 // #else
 //     // No SIMD support - use scalar fallback
 //     // Covers: AVR, ESP8266, ARM without NEON, WASM, and other platforms
-//     #include "platforms/shared/simd_stub.hpp"
+//     #include "platforms/shared/simd_noop.hpp"
 // #endif

@@ -119,7 +119,7 @@ FL_TEST_CASE("FL_ALIGN_AS") {
     }
 
     FL_SUBCASE("align to custom struct") {
-        struct alignas(16) CustomAligned {
+        struct FL_ALIGNAS(16) CustomAligned {
             int x, y, z, w;
         };
 

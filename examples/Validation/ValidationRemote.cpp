@@ -1183,11 +1183,11 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         fl::Json response = fl::Json::object();
 
         // Test data: 16 bytes each
-        alignas(16) uint8_t a[16] = {200, 200, 200, 200, 200, 200, 200, 200,
+        FL_ALIGNAS(16) uint8_t a[16] = {200, 200, 200, 200, 200, 200, 200, 200,
                                       100, 100, 100, 100, 100, 100, 100, 100};
-        alignas(16) uint8_t b[16] = {100, 100, 100, 100, 100, 100, 100, 100,
+        FL_ALIGNAS(16) uint8_t b[16] = {100, 100, 100, 100, 100, 100, 100, 100,
                                       200, 200, 200, 200, 200, 200, 200, 200};
-        alignas(16) uint8_t result[16] = {0};
+        FL_ALIGNAS(16) uint8_t result[16] = {0};
 
         // Expected: saturating add clamps at 255
         // First 8: 200+100=255 (clamped), Last 8: 100+200=255 (clamped)

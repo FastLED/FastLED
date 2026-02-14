@@ -92,6 +92,7 @@
   { include: ['"apa102_controller.h"', 'private', '"FastLED.h"', 'public'] },
   
   # Testing headers - keep as-is for test files
+  { include: ['"test.h"', 'public', '"test.h"', 'public'] },
   { include: ['"test_*.h"', 'public', '"test_*.h"', 'public'] },
   { include: ['"doctest.h"', 'public', '"doctest.h"', 'public'] },
 

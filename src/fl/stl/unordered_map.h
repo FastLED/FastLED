@@ -841,7 +841,8 @@ class FL_ALIGN unordered_map {
         _deleted.reset(idx);
     }
 
-    struct alignas(fl::max_align<Key, T>::value) Entry {
+    using EntryAlign = max_align<Key, T>;
+    struct FL_ALIGN_AS_T(EntryAlign::value) Entry {
         Key key;
         T value;
         void swap(Entry &other) {

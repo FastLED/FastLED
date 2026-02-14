@@ -3,6 +3,9 @@
 #include "fl/stl/stdint.h"
 #include "fl/int.h"
 #include "fastled_progmem.h"
+#include "fl/force_inline.h"
+#include "fl/simd.h"
+#include "fl/sin32.h"
 
 namespace fl {
 

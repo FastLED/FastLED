@@ -5,6 +5,7 @@
 
 #include "fl/fixed_point/s0x32x4.h"
 #include "fl/fixed_point/s16x16x4.h"
+#include "fl/align.h"
 
 namespace fl {
 
@@ -12,9 +13,9 @@ namespace fl {
 FASTLED_FORCE_INLINE s16x16x4 s0x32x4::operator*(s16x16x4 b) const {
     // Scalar fallback: Process each lane separately
     // Q31 × Q16 = Q47 → shift right 31 → Q16
-    alignas(16) i32 a_arr[4];
-    alignas(16) i32 b_arr[4];
-    alignas(16) i32 result[4];
+    FL_ALIGNAS(16) i32 a_arr[4];
+    FL_ALIGNAS(16) i32 b_arr[4];
+    FL_ALIGNAS(16) i32 result[4];
 
     simd::platforms::store_u32_4(reinterpret_cast<u32*>(a_arr), raw); // ok reinterpret cast
     simd::platforms::store_u32_4(reinterpret_cast<u32*>(b_arr), b.raw); // ok reinterpret cast

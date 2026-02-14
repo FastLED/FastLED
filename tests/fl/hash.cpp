@@ -13,7 +13,7 @@ FL_TEST_CASE("fl::MurmurHash3_x86_32 basic functionality") {
 
     FL_SUBCASE("integer data with proper alignment") {
         // Use aligned integer array
-        alignas(4) i32 data[] = {1, 2, 3, 4, 5};
+        FL_ALIGNAS(4) i32 data[] = {1, 2, 3, 4, 5};
         u32 hash = MurmurHash3_x86_32(data, sizeof(data));
         FL_CHECK(hash != 0);
 

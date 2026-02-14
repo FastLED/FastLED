@@ -180,6 +180,7 @@
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 
+#include "fl/align.h"
 #include "fl/channels/data.h"
 #include "fl/channels/engine.h"
 #include "fl/channels/wave8.h"
@@ -318,7 +319,7 @@ inline size_t calculateChunkSize(size_t data_width) {
 // - After detecting stream_complete==true, main thread executes memory barrier
 // - Memory barrier ensures all ISR writes visible before reading other fields
 // - Non-volatile fields (isr_count, etc.) read after barrier are guaranteed consistent
-struct alignas(64) ParlioIsrContext {
+struct FL_ALIGNAS(64) ParlioIsrContext {
     // === Volatile Fields (shared between ISR and main thread) ===
     // These fields are written by ISR, read by main thread
     // Marked volatile to prevent compiler optimizations that would cache values

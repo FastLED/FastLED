@@ -13,6 +13,9 @@ Standard attributes checked:
 - [[likely]] (C++20) -> FL_LIKELY
 - [[unlikely]] (C++20) -> FL_UNLIKELY
 - [[no_unique_address]] (C++20) -> FL_NO_UNIQUE_ADDRESS
+
+Alignment specifiers checked:
+- alignas(N) (C++11) -> FL_ALIGNAS(N)
 """
 
 import re
@@ -35,6 +38,10 @@ ATTRIBUTE_MAPPINGS = {
 
 # Pattern to match any C++ standard attribute: [[attribute_name]]
 ATTRIBUTE_PATTERN = re.compile(r"\[\[\s*([a-z_]+)\s*\]\]")
+
+# Pattern to match alignas keyword (C++11 alignment specifier)
+# Matches: alignas(N) or alignas(type)
+ALIGNAS_PATTERN = re.compile(r"\balignas\s*\(")
 
 
 class AttributeChecker(FileContentChecker):
@@ -104,6 +111,17 @@ class AttributeChecker(FileContentChecker):
                         (
                             line_number,
                             f"Use {fl_macro} instead of [[{attr_name}]]: {stripped}",
+                        )
+                    )
+
+            # Check for alignas keyword (C++11 alignment specifier)
+            if ALIGNAS_PATTERN.search(code_part):
+                # Skip if it's already using FL_ALIGNAS
+                if "FL_ALIGNAS" not in code_part:
+                    violations.append(
+                        (
+                            line_number,
+                            f"Use FL_ALIGNAS instead of alignas: {stripped}",
                         )
                     )
 

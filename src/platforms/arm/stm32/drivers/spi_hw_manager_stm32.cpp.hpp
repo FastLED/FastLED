@@ -25,19 +25,8 @@
 #include "fl/dbg.h"
 #include "fl/warn.h"
 
-// Include SPI implementation files BEFORE opening fl::detail namespace
-// to avoid nested namespace issues in unity build
-#ifdef FL_STM32_HAS_SPI_HW_2
-    #include "platforms/arm/stm32/drivers/spi_hw_2_stm32.cpp.hpp"  // ok include cpp.hpp
-#endif
-
-#ifdef FL_STM32_HAS_SPI_HW_4
-    #include "platforms/arm/stm32/drivers/spi_hw_4_stm32.cpp.hpp"  // ok include cpp.hpp
-#endif
-
-#ifdef FL_STM32_HAS_SPI_HW_8
-    #include "platforms/arm/stm32/drivers/spi_hw_8_stm32.cpp.hpp"  // ok include cpp.hpp
-#endif
+// SPI implementation files are included by drivers/_build.hpp
+// to satisfy the linting rule that only _build.hpp files can include *.cpp.hpp files
 
 namespace fl {
 
