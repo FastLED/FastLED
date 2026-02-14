@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_1_stub.cpp
 /// @brief Stub/Mock Single-SPI implementation for testing
 

@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 // Implementation of RISC-V interrupt helpers for ESP32-C3/C6
 //
 // This file implements the interrupt installation and RMT integration functions

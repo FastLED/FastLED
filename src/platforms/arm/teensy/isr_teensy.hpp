@@ -15,6 +15,8 @@
 /// - Teensy 3.x (Kinetis): Each timer has separate NVIC slot, individual priorities work
 
 #pragma once
+
+// IWYU pragma: private
 #include "platforms/arm/teensy/is_teensy.h"
 
 #if defined(FL_IS_TEENSY)

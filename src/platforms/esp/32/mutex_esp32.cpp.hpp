@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file mutex_esp32.cpp
 /// @brief ESP32 FreeRTOS mutex platform implementation
 

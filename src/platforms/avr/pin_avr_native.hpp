@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/avr/pin_avr_native.hpp
 /// Native AVR register-based GPIO implementation (non-Arduino path)
 ///

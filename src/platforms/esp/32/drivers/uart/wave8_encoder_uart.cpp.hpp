@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file wave8_encoder_uart.cpp
 /// @brief Implementation of wave8 UART encoder
 ///

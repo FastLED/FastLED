@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file mutex_stm32.cpp
 /// @brief STM32 FreeRTOS mutex platform implementation
 

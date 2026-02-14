@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file init_channel_engine_rp.cpp.hpp
 /// @brief RP2040/RP2350-specific channel engine initialization
 ///

@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 // Definition file for clockless_blocking.h
 // This file contains static variable definitions that cannot be in the header
 // due to Teensy 3.0/3.1/3.2 __cxa_guard linkage issues.

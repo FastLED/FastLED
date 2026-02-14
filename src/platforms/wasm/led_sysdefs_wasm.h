@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 #ifndef FASTLED_STUB_IMPL
 #define FASTLED_STUB_IMPL
 #endif

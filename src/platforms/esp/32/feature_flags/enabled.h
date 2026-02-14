@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/is_platform.h"
 #if defined(FL_IS_ESP32)
 #include "sdkconfig.h"

@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file init_wasm.cpp
 /// @brief WebAssembly platform initialization implementation
 ///

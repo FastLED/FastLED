@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // ATmega32U4 family pin mappings
 // Includes: ATmega32U4
 // Used in: Arduino Leonardo, Arduino Pro Micro, Teensy 2.0

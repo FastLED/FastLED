@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/force_inline.h"
 #include "platforms/arm/stm32/armpin.h"
 

@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file clockless.h
 /// NeoPixelBus-based clockless controller implementation
 /// 

@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file i2s_lcd_cam_peripheral_esp.cpp
 /// @brief ESP32-S3 I2S LCD_CAM peripheral implementation
 

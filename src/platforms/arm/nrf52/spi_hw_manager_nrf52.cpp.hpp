@@ -16,6 +16,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/arm/nrf52/is_nrf52.h"
 
 #ifdef FL_IS_NRF52

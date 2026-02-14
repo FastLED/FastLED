@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #include "fl/json.h"
 #include "fl/json.h"
 #include "platforms/shared/ui/json/button.h"

@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/teensy/init_teensy4.h
 /// @brief Teensy 4.x platform initialization
 ///

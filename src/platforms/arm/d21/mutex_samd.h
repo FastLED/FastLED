@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/d21/mutex_samd.h
 /// @brief SAMD21/SAMD51 interrupt-based mutex implementation
 ///

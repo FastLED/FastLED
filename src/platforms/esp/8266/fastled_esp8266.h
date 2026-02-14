@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 #include "fastpin_esp8266.h"
 
 #ifdef FASTLED_ALL_PINS_HARDWARE_SPI

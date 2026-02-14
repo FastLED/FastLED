@@ -11,6 +11,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/isr.h"
 #include "fl/compiler_control.h"
 #include "platforms/arm/sam/is_sam.h"

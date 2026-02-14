@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file lcd_rgb_peripheral_esp.cpp
 /// @brief ESP32-P4 LCD RGB peripheral implementation
 

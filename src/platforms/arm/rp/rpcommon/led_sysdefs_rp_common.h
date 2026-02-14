@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 // ok no namespace fl
 #ifndef __INC_LED_SYSDEFS_RP_COMMON_H
 #define __INC_LED_SYSDEFS_RP_COMMON_H

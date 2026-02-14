@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/stl/stdint.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/span.h"

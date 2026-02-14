@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // macOS LP64 integer type definitions
 // macOS differs from Linux LP64: u64 is 'unsigned long long', not 'unsigned long'
 

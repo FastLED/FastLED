@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file i2s_lcd_cam_peripheral_mock.cpp
 /// @brief Mock I2S LCD_CAM peripheral implementation for unit testing
 

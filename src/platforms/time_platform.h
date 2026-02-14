@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: public
+
 #include "fl/stl/stdint.h"
 
 namespace fl {

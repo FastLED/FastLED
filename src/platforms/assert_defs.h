@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: public
+
 /// @file platforms/assert_defs.h
 /// @brief Minimal assertion macros that avoid circular dependencies
 ///

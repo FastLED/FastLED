@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_hw_manager_rp.cpp.hpp
 /// @brief RP2040/RP2350 SPI Hardware Manager - Unified initialization
 ///

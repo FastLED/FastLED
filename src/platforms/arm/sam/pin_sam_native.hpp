@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/sam/pin_sam_native.hpp
 /// Native SAM pin system implementation using direct GPIO register access
 ///

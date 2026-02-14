@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // Atomic operations using GCC/Clang compiler intrinsics
 // This implementation uses __atomic builtins which are supported by:
 // - GCC 4.7+

@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file rmt5_peripheral_esp.cpp
 /// @brief Real ESP32 RMT5 peripheral implementation
 ///

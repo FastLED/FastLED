@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/renesas/init_renesas.h
 /// @brief Renesas platform initialization
 ///

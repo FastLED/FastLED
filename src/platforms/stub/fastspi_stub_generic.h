@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #ifndef FASTLED_STUB_IMPL
 #error "why is this being included?"
 #endif

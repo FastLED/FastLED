@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/esp/32/pin_esp32.hpp
 /// ESP32 pin implementation using native ESP-IDF GPIO drivers
 ///

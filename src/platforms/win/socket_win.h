@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/win/is_win.h"
 
 #ifdef FASTLED_HAS_NETWORKING && 0

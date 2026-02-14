@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file progmem_stm32.h
 /// PROGMEM trampoline for STM32 platforms
 ///

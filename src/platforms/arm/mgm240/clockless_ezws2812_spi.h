@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file clockless_ezws2812_spi.h
 /// @brief FastLED ezWS2812 SPI controller for Silicon Labs MGM240/MG24
 ///

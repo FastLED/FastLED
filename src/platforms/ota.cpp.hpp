@@ -1,3 +1,5 @@
+// IWYU pragma: public
+
 /// @file platforms/ota.cpp
 /// Platform-agnostic OTA implementation and null/default implementation
 

@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #ifndef __FASTPIN_ARM_K20_H
 #define __FASTPIN_ARM_K20_H
 #include "fl/stl/stdint.h"

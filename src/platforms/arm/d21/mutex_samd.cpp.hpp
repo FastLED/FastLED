@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file mutex_samd.cpp
 /// @brief SAMD21/SAMD51 interrupt-based mutex platform implementation
 

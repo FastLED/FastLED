@@ -1,4 +1,6 @@
 #pragma once
+
+// IWYU pragma: private
 // ok no namespace fl
 
 #include "platforms/arm/teensy/is_teensy.h"

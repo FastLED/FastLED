@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/compiler_control.h"
 #include "is_avr.h"
 // Defines a timer_millis for led_sysdefs_avr.h

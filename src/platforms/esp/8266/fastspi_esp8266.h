@@ -1,4 +1,6 @@
 #pragma once
+
+// IWYU pragma: private
 #pragma message "ESP8266 Hardware SPI support added"
 
 #include <SPI.h>

@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 // NOTE: If you work on a platform in this file then please split it into it's own file
 // like fastpin_avr_nano_every.h here. It turns out that AI is pretty good at finding
 // what the correct AVR pin settings but wants to have small files to work with.

@@ -41,6 +41,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 // This interface is platform-agnostic (no ESP32 guard)
 // - Rmt5PeripheralESP requires ESP32 (real hardware)
 // - Rmt5PeripheralMock works on all platforms (testing)

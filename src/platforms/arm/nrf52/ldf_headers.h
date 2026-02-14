@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // ok no namespace fl
 
 /// @file platforms/arm/nrf52/ldf_headers.h

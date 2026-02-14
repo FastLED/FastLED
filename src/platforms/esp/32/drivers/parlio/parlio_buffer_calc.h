@@ -6,6 +6,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/esp/is_esp.h"
 
 #include "fl/compiler_control.h"

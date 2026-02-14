@@ -2,6 +2,8 @@
 /// @brief STM32 ISR timer implementation using STM32 HAL
 
 #pragma once
+
+// IWYU pragma: private
 #include "is_stm32.h"
 
 #ifdef FL_IS_STM32

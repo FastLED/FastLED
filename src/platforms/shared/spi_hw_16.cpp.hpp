@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_hw_16.cpp
 /// @brief Implementation of 16-lane hardware SPI registry
 ///

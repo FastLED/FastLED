@@ -11,6 +11,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/arm/samd/is_samd.h"
 
 #if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)

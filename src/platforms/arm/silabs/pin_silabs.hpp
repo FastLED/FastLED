@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/silabs/pin_silabs.hpp
 /// Silicon Labs (MGM240/EFR32) pin implementation (header-only)
 ///

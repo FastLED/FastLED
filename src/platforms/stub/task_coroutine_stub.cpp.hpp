@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file task_coroutine_stub.cpp
 /// @brief Concrete implementation of TaskCoroutineStub using std::thread
 

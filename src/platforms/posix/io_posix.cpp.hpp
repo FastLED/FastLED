@@ -1,4 +1,6 @@
 #pragma once
+
+// IWYU pragma: private
 #include "platforms/posix/is_posix.h"
 
 #ifdef FL_IS_POSIX

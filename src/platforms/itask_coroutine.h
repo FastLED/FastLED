@@ -6,6 +6,8 @@
 
 #pragma once
 
+// IWYU pragma: public
+
 #include "fl/stl/string.h"
 #include "fl/stl/function.h"
 

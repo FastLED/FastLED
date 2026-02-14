@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file progmem_stm32_particle.h
 /// PROGMEM definitions for Particle (Photon/Electron) devices
 ///

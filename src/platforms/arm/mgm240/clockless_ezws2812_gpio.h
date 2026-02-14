@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file clockless_ezws2812_gpio.h
 /// @brief FastLED ezWS2812 GPIO controller with automatic frequency selection
 ///

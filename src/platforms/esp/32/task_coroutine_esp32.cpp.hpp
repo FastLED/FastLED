@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file task_coroutine_esp32.cpp
 /// @brief ESP32 FreeRTOS TaskCoroutine platform implementation
 

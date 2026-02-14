@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/json.h"
 #include "fl/str.h"
 #include "platforms/shared/ui/json/ui_internal.h"

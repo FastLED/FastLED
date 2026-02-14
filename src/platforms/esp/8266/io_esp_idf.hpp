@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 // ESP8266 I/O implementation - ROM UART functions backend
 // This file is included by io_esp_idf.hpp for ESP8266 platforms
 // Uses ROM ets_putc function for character-by-character output

@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 // ok no namespace fl
 #ifndef _FASTLED_ESP32_H
 #define _FASTLED_ESP32_H

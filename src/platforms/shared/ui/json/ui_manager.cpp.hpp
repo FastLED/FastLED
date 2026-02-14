@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #include "fl/json.h"
 #include "fl/json.h"
 #include "fl/stl/map.h"

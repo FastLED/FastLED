@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file spi_hw_1.h
 /// @brief Platform-agnostic 1-lane hardware SPI interface
 ///

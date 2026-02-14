@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #ifndef __INC_CLOCKLESS_BLOCK_ESP8266_H
 #define __INC_CLOCKLESS_BLOCK_ESP8266_H
 

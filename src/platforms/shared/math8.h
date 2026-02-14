@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/math8_config.h"
 #include "lib8tion/scale8.h"
 #include "lib8tion/lib8static.h"

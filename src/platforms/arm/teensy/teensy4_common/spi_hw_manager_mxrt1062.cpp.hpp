@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_hw_manager_mxrt1062.cpp.hpp
 /// @brief Teensy 4.x (IMXRT1062) SPI Hardware Manager - Unified initialization
 ///

@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/wasm/init_wasm.h
 /// @brief WebAssembly platform initialization
 ///

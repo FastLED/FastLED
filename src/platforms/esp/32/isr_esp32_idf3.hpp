@@ -14,6 +14,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 // This file should only be included from isr_esp32.hpp (which does the version check)
 // Do not include this file directly - use isr_esp32.hpp instead
 

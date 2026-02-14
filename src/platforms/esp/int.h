@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // For ESP32 IDF < 4.0, we need to include system headers early to get __int32_t/__uint32_t
 // This must happen before we define fl:: types to avoid typedef conflicts
 #include "platforms/esp/is_esp.h"

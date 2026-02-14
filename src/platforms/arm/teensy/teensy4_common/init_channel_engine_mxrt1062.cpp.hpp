@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file init_channel_engine_mxrt1062.cpp.hpp
 /// @brief Teensy 4.x-specific channel engine initialization
 ///

@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file semaphore_esp32.cpp
 /// @brief ESP32 FreeRTOS semaphore platform implementation
 

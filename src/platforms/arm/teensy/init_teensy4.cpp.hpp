@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file init_teensy4.cpp
 /// @brief Teensy 4.x platform initialization implementation
 ///

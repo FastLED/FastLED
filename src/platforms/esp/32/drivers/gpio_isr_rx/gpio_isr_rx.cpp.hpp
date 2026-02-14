@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #include "gpio_isr_rx.h"
 
 #include "platforms/is_platform.h"

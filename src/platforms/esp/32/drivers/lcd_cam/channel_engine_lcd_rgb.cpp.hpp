@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file channel_engine_lcd_rgb.cpp
 /// @brief LCD RGB channel engine implementation for ESP32-P4
 

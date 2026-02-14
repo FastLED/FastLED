@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file init_channel_engine.h
 /// @brief Teensy 4.x-specific channel engine initialization
 ///

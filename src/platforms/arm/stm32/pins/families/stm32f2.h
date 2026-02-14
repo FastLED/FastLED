@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // STM32F2 family variant using unified template
 // STM32F2 does NOT have BRR register (removed in F2/F4/F7/H7 families)
 //

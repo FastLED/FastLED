@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file platforms/esp/32/drivers/cled.cpp
 /// ESP32 Custom LED (CLED) driver implementation
 

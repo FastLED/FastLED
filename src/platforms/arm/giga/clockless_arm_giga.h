@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #ifndef __INC_CLOCKLESS_ARM_GIGA
 #define __INC_CLOCKLESS_ARM_GIGA
 

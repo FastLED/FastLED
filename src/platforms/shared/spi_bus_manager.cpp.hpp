@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #include "spi_bus_manager.h"
 #include "platforms/is_platform.h"
 

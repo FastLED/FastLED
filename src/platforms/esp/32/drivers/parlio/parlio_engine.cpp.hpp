@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file parlio_engine.cpp
 /// @brief PARLIO hardware abstraction layer (HAL) implementation for ESP32
 ///

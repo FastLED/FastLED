@@ -22,6 +22,8 @@
 
 #pragma once
 
+// IWYU pragma: public
+
 #include "lib8tion/lib8static.h"
 #include "fl/stl/stdint.h"
 #include "fl/sketch_macros.h"

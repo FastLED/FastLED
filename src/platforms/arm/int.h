@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 namespace fl {
     // ARM platforms (32-bit): short is 16-bit, long is 32-bit
     // uint32_t resolves to 'unsigned long' on most ARM toolchains

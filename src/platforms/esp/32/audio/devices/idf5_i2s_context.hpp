@@ -2,6 +2,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include <driver/gpio.h>
 #include <driver/i2s_std.h>
 

@@ -1,4 +1,6 @@
 #pragma once
+
+// IWYU pragma: private
 // ok no namespace fl
 #include "is_avr.h"
 

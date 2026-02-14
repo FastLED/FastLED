@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/rp/pin_rp.hpp
 /// RP2040/RP2350 (Raspberry Pi Pico) pin implementation (header-only)
 ///

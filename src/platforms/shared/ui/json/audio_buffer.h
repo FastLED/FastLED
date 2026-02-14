@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/stl/vector.h"
 #include "fl/stl/stdint.h"
 

@@ -6,6 +6,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/unused.h"
 #include "fl/register.h"
 

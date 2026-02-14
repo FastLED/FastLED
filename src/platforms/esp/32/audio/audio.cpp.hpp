@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 // ok no namespace fl
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32

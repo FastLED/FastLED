@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/avr/is_avr.h"
 
 // Dispatcher for legacy AVR pin mappings (DDR/PORT/PIN architecture)

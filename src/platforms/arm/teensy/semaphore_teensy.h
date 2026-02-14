@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/teensy/semaphore_teensy.h
 /// @brief Teensy interrupt-based semaphore implementation
 ///

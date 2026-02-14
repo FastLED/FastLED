@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file semaphore_samd.cpp
 /// @brief SAMD21/SAMD51 interrupt-based semaphore platform implementation
 

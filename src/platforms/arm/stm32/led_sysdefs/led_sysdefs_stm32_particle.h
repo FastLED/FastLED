@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file led_sysdefs_stm32_particle.h
 /// LED system definitions for Particle (Photon/Electron) devices
 /// Hardware: STM32F205RGY6 (STM32F2 family, 120 MHz)

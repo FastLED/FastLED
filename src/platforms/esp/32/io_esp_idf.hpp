@@ -1,6 +1,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 
 // Use ESP-IDF UART + USB-Serial JTAG driver via fl::platforms wrapper
 // Note: Implementation files are included via drivers/_build.hpp

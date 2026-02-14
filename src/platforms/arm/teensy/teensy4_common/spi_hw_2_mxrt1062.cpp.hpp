@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_hw_2_mxrt1062.cpp
 /// @brief Teensy 4.x (IMXRT1062) implementation of 2-lane (Dual) SPI
 ///

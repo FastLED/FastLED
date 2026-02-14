@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_hw_manager_stm32.cpp.hpp
 /// @brief STM32 SPI Hardware Manager - Unified initialization
 ///

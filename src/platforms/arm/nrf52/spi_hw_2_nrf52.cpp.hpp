@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_hw_2_nrf52.cpp
 /// @brief NRF52 implementation of Dual-SPI
 ///

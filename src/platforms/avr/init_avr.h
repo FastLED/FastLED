@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/avr/init_avr.h
 /// @brief AVR platform initialization (no-op)
 ///

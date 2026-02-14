@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #ifndef __INC_FASTPIN_APOLLO3_H
 #define __INC_FASTPIN_APOLLO3_H
 

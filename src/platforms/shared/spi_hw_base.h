@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file spi_hw_base.h
 /// @brief Abstract base interface for all SPI hardware controllers
 ///

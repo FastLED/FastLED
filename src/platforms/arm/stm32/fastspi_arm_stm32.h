@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #ifndef FASTLED_FORCE_SOFTWARE_SPI
 
 // Check if STM32 HAL is available

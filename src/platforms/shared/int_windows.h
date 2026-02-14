@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // Windows LLP64 integer type definitions
 // Windows x86_64 uses LLP64 model: long is 32-bit, long long is 64-bit
 

@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_hw_4_samd51.cpp
 /// @brief SAMD51 implementation of Quad-SPI using native QSPI peripheral
 ///

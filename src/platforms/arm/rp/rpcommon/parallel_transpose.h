@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file parallel_transpose.h
 /// @brief Bit transposition functions for parallel LED output on RP2040/RP2350
 ///

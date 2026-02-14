@@ -9,6 +9,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 // Teensy LC (ARM Cortex-M0+, 48 MHz, MKL26Z64)
 #if defined(ARDUINO_TEENSYLC) || defined(__MKL26Z64__)
     #define FL_IS_TEENSY_LC

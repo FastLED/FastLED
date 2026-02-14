@@ -14,6 +14,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 // ok no namespace fl
 
 #include "platforms/is_platform.h"

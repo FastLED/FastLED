@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #include "platforms/shared/ui/json/audio_internal.h"
 #include "fl/warn.h"
 #include "platforms/shared/ui/json/audio_buffer.h"

@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file _build.hpp
 /// @brief Unity build header for platforms/shared/ui/ directory
 /// Includes all implementation files

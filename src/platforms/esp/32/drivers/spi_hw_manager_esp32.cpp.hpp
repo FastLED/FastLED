@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_hw_manager_esp32.cpp.hpp
 /// @brief ESP32-specific SPI hardware initialization
 ///

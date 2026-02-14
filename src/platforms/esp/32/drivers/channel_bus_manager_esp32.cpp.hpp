@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file channel_bus_manager_esp32.cpp
 /// @brief ESP32-specific channel engine initialization
 ///

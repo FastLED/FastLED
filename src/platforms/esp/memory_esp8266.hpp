@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file platforms/esp/memory_esp8266.hpp
 /// ESP8266 memory statistics implementation
 

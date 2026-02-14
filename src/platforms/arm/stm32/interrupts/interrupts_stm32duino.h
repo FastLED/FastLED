@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file interrupts_stm32duino.h
 /// Interrupt control for STM32duino (Official STMicroelectronics Core)
 /// Modern, actively maintained core

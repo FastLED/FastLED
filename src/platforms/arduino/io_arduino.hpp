@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // arduino_before.h saves Serial macro as ArduinoSerial_Save before undefining it
 #include <Arduino.h>
 

@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file channel_engine_rmt.cpp
 /// @brief RMT5 ChannelEngine implementation
 ///

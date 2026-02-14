@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 // Some attiny boards are missing a timer implementation. We provide two options
 // which is to just link in a weak symbol that will resolve the timer_millis
 // missing feature, or else implement it ourselves.

@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file progmem_stm32_libmaple.h
 /// PROGMEM definitions for Arduino_STM32 (Roger Clark libmaple core)
 ///

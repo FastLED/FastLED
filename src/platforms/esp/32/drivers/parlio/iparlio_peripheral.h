@@ -41,6 +41,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 // This interface is platform-agnostic (no ESP32 guard)
 // - ParlioPeripheralESP requires ESP32 (real hardware)
 // - ParlioPeripheralMock works on all platforms (testing)

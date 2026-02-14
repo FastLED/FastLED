@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file simd_noop.hpp
 /// No-op (scalar) SIMD implementations for platforms without hardware SIMD
 ///

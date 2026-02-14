@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #define FASTLED_INTERNAL  
 #include "FastLED.h"
 

@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 // Only compile MGM240 code when building for MGM240 targets
 #if defined(ARDUINO_ARCH_SILABS)
 

@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file spi_device_proxy.h
 /// @brief SAMD21/SAMD51 SPI device proxy for transparent Single/Dual/Quad-SPI routing
 ///

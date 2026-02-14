@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 #define PROGMEM
 #define FL_PROGMEM
 

@@ -7,6 +7,8 @@
 
 #pragma once
 
+// IWYU pragma: public
+
 // Include base class definitions (includes Selectable and register.h)
 // Note: This must be included before using Selectable as a base class
 #include "fl/fastpin_base.h"

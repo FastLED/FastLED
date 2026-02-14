@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 namespace fl {
     // ARM Teensy 4.0/4.1 (IMXRT1062 Cortex-M7): 32-bit platform
     // 

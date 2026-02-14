@@ -1,5 +1,7 @@
 // ok no namespace fl
 #pragma once
+
+// IWYU pragma: private
 #include "teensy/is_teensy.h"
 
 // ARM placement new operator - in global namespace

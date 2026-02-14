@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_peripheral_mock.cpp
 /// @brief Mock SPI peripheral implementation for unit testing
 ///

@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file led_sysdefs_arm_mgm240.h
 /// @brief System definitions for Silicon Labs MGM240 ARM Cortex-M33 microcontroller
 ///

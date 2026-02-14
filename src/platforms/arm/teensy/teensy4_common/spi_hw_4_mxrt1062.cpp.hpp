@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_hw_4_mxrt1062.cpp
 /// @brief Teensy 4.x (IMXRT1062) implementation of 4-lane (Quad) SPI
 ///

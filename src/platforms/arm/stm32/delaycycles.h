@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/cycle_type.h"
 #include "fl/force_inline.h"
 

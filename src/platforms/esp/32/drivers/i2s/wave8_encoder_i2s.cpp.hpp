@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file wave8_encoder_i2s.cpp
 /// @brief Implementation of wave8 encoding for ESP32-S3 I2S LCD_CAM
 

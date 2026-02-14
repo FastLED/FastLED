@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/apollo3/pin_apollo3_native.hpp
 /// Apollo3 (Ambiq) native HAL GPIO implementation (non-Arduino path)
 ///

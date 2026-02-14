@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #ifndef __INC_CLOCKLESS_ATTINY_H
 #define __INC_CLOCKLESS_ATTINY_H
 

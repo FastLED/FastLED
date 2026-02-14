@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 // Network Detection API Implementation
 // Uses weak symbol fallback pattern to gracefully handle builds without
 // network components (WiFi, Ethernet, Bluetooth)

@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file uart_peripheral_esp.cpp
 /// @brief Real ESP32 UART peripheral implementation
 ///

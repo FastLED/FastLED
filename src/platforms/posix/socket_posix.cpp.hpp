@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #if defined(FASTLED_HAS_NETWORKING) && 0
 #include "platforms/wasm/is_wasm.h"
 #include "platforms/win/is_win.h"

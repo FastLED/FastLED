@@ -29,6 +29,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/itask_coroutine.h"
 
 namespace fl {

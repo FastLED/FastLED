@@ -3,6 +3,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/rx_device.h"
 #include "fl/warn.h"
 #include "fl/error.h"

@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // Opt-in UART WS2812 driver for ESP8266 (UART1 / GPIO2).
 // Requires: #define FASTLED_ESP8266_UART before including <FastLED.h>
 // or add the controller explicitly via FastLED.addLeds<UARTController_ESP8266<GRB>>(...) .

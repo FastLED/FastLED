@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: public
+
 #include "platforms/esp/is_esp.h"
 
 // The WS2812 family of chipsets is special! Why?

@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #ifndef __INC_FASTSPI_AVR_H
 #define __INC_FASTSPI_AVR_H
 

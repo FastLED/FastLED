@@ -14,6 +14,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 // ok no namespace fl - dispatch header includes platform-specific implementations
 
 #include "platforms/esp/is_esp.h"

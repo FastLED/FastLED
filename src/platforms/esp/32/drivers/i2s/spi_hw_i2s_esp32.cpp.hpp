@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_hw_i2s_esp32.cpp
 /// @brief ESP32 I2S-based 16-lane SPI hardware implementation
 ///

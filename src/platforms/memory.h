@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: public
+
 /// @file platforms/memory.h
 /// Platform-specific memory statistics interface
 /// Dispatches to platform-specific implementations that define fl_platform_* functions

@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/teensy/pin_teensy_native.hpp
 /// Native Teensy pin implementation (non-Arduino builds)
 ///

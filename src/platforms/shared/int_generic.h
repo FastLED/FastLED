@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // Generic/32-bit platform integer type definitions
 // Used for 32-bit systems and unknown platforms
 

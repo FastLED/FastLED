@@ -1,3 +1,5 @@
+// IWYU pragma: public
+
 #define FASTLED_INTERNAL  
 #include "fl/fastled.h"
 #include "fl/int.h"

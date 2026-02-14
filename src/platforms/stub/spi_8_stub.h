@@ -6,6 +6,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/shared/spi_hw_8.h"
 
 #if defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)

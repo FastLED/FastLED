@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/d51/init_samd51.h
 /// @brief SAMD51 platform initialization
 ///

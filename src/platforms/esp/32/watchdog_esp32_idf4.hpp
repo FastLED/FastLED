@@ -8,6 +8,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "watchdog_esp32.h"
 
 #include "platforms/esp/is_esp.h"

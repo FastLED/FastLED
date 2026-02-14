@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file run_unit_test.hpp
 /// Windows implementation of unit test runner
 ///

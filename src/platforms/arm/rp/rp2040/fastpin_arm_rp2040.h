@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #ifndef __FASTPIN_ARM_RP2040_H
 #define __FASTPIN_ARM_RP2040_H
 

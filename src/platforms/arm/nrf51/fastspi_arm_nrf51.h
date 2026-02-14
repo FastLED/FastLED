@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 // ok no namespace fl
 #ifndef __INC_FASTSPI_NRF_H
 #define __INC_FASTSPI_NRF_H

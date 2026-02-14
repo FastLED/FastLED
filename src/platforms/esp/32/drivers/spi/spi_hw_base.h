@@ -6,6 +6,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 // ok no namespace fl
 
 #include "platforms/esp/is_esp.h"

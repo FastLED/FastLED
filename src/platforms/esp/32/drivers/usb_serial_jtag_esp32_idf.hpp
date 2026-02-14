@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 // ESP32 USB-Serial JTAG Driver Implementation - Full Feature Support
 
 #include "platforms/is_platform.h"

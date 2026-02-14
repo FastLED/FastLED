@@ -1,4 +1,6 @@
 #pragma once
+
+// IWYU pragma: private
 #include "is_sam.h"
 
 // ok no namespace fl

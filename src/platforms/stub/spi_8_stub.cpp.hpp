@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_8_stub.cpp
 /// @brief Stub/Mock implementation of 8-lane (Octal) SPI for testing
 ///

@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // Channel-based clockless controller for stub platform
 // Models ESP32's channel-based clockless architecture for testing
 

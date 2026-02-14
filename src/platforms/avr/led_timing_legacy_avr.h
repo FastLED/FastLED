@@ -12,6 +12,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/stl/stdint.h"
 
 namespace fl {

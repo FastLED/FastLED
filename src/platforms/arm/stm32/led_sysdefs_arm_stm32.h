@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file led_sysdefs_arm_stm32.h
 /// LED system definitions trampoline for STM32 platforms
 ///

@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_hw_4_rp.cpp
 /// @brief RP2040/RP2350 implementation of Quad-SPI using PIO
 ///

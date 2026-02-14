@@ -50,6 +50,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/compiler_control.h"
 #include "fl/force_inline.h"
 #include "fl/isr.h"

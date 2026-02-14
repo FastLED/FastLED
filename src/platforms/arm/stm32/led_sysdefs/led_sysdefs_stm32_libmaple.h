@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file led_sysdefs_stm32_libmaple.h
 /// LED system definitions for Arduino_STM32 (Roger Clark libmaple core)
 /// Legacy core - "break/fix level only", "adequate for hobby use"

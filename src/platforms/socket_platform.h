@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: public
+
 /// Socket Platform Delegation Header
 /// 
 /// This header provides platform-specific socket implementation delegation

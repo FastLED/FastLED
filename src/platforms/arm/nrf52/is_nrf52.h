@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // ok no namespace fl
 
 /// @file is_nrf52.h

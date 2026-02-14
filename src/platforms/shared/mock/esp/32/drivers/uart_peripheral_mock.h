@@ -74,6 +74,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 // Mock implementation has no platform guards - runs on all platforms for testing
 #include "platforms/esp/32/drivers/uart/iuart_peripheral.h"
 #include "fl/stl/vector.h"

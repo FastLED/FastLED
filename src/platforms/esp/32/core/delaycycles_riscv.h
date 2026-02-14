@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 #ifndef __INC_FASTLED_PLATFORMS_ESP32_DELAYCYCLES_RISCV_H
 #define __INC_FASTLED_PLATFORMS_ESP32_DELAYCYCLES_RISCV_H
 

@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // ⚠️⚠️⚠️ CRITICAL WARNING: C++ ↔ JavaScript ASYNC BINDING HEADER - HANDLE WITH EXTREME CARE! ⚠️⚠️⚠️
 //
 // 🚨 THIS HEADER DECLARES C++ TO JAVASCRIPT ASYNC BINDING FUNCTIONS 🚨

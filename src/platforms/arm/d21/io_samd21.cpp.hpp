@@ -1,4 +1,6 @@
 #pragma once
+
+// IWYU pragma: private
 #include "platforms/arm/samd/is_samd.h"
 
 // ok no namespace fl

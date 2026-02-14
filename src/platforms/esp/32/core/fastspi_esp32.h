@@ -1,4 +1,6 @@
 #pragma once
+
+// IWYU pragma: private
 // ESP32 Hardware SPI Dispatch Header
 //
 // This file follows the FastLED dispatch header pattern (see src/platforms/README.md).

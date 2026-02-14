@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file uart_peripheral_mock.cpp
 /// @brief Mock UART peripheral implementation for unit testing
 

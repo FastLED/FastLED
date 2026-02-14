@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #ifndef __FASTSPI_ARM_NRF52_H
 #define __FASTSPI_ARM_NRF52_H
 

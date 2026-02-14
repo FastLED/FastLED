@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/posix/init_posix.h
 /// @brief POSIX platform initialization (no-op)
 ///

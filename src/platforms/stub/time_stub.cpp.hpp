@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 
 // ok no namespace fl
 #ifdef FASTLED_STUB_IMPL  // Only use this if explicitly defined.

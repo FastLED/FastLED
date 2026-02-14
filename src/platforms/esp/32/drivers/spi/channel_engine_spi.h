@@ -28,6 +28,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/compiler_control.h"
 #include "platforms/is_platform.h"
 

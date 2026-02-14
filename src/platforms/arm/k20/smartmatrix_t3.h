@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #ifndef __INC_SMARTMATRIX_T3_H
 #define __INC_SMARTMATRIX_T3_H
 

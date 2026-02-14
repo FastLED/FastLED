@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "is_wasm.h"
 #ifndef FL_IS_WASM
 #error "This file should only be included in an Emscripten build"

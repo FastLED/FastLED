@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/esp/32/drivers/cled.h
 /// ESP32 Custom LED (CLED) driver for high-resolution PWM control
 ///

@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #ifdef FASTLED_TESTING
 // Test filesystem implementation for stub platform
 // Maps SD card operations to real hard drive paths for testing

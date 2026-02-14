@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/singleton.h"
 
 #include "fl/stl/map.h"

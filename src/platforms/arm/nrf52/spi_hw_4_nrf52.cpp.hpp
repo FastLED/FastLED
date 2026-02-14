@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_hw_4_nrf52.cpp
 /// @brief NRF52840 implementation of Quad-SPI
 ///

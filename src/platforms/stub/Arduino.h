@@ -4,6 +4,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 // Standard Arduino define - indicates Arduino environment and version
 // Using a modern Arduino IDE version number (1.8.19 = 10819)
 #ifndef ARDUINO

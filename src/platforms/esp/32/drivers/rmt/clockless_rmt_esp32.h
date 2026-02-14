@@ -27,6 +27,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/esp/esp_version.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
 

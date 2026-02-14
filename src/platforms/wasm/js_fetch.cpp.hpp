@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #include "js_fetch.h"
 #include "fl/fetch.h"  // Include for fl::response definition
 #include "fl/warn.h"

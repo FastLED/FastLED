@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/rp/pin_rp_native.hpp
 /// RP2040/RP2350 Pico SDK GPIO implementation
 ///

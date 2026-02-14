@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/compiler_control.h"
 
 // Defines a weak (or strong for some attiny x/y parts) symbol for timer_millis

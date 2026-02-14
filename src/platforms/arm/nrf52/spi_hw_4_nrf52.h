@@ -22,6 +22,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/arm/nrf52/is_nrf52.h"
 
 // Only compile on nRF52840/52833 (requires SPIM3 for quad-lane operation)

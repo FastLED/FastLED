@@ -4,5 +4,7 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 // Include the shared stub Arduino.h implementation
 #include "platforms/stub/Arduino.h"

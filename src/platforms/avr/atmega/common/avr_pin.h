@@ -3,6 +3,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/stl/stdint.h"
 #include "fl/compiler_control.h"
 

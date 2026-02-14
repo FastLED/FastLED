@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: public
+
 /// @file platforms/await.h
 /// @brief Platform dispatch for coroutine-based await() implementations
 ///

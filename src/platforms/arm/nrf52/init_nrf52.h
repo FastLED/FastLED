@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/nrf52/init_nrf52.h
 /// @brief nRF52 platform initialization
 ///

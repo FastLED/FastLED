@@ -30,6 +30,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 

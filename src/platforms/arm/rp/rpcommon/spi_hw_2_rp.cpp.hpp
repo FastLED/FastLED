@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_hw_2_rp.cpp
 /// @brief RP2040/RP2350 implementation of Dual-SPI using PIO
 ///

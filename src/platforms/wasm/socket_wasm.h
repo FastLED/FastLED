@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #ifdef FASTLED_HAS_NETWORKING
 
 #include "fl/networking.h"  // For SocketError enum

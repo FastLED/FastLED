@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file condition_variable_esp32.cpp
 /// @brief ESP32 FreeRTOS condition variable platform implementation
 

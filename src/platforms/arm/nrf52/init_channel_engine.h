@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file init_channel_engine.h
 /// @brief NRF52-specific channel engine initialization
 ///

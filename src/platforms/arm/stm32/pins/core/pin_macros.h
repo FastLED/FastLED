@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // Pin definition macros for STM32 families
 // Provides uniform FastPin<> instantiation for all variants
 //

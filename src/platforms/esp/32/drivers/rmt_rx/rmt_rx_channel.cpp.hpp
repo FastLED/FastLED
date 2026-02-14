@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #include "rmt_rx_channel.h"
 
 #include "platforms/is_platform.h"

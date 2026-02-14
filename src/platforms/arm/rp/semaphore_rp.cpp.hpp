@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file semaphore_rp.cpp
 /// @brief RP2040/RP2350 Pico SDK semaphore platform implementation
 

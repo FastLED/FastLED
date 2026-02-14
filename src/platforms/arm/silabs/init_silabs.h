@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/silabs/init_silabs.h
 /// @brief Silicon Labs (general) platform initialization
 ///

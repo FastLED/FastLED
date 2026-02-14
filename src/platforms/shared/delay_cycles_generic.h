@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #ifndef __INC_FASTLED_PLATFORMS_DELAY_CYCLES_GENERIC_H
 #define __INC_FASTLED_PLATFORMS_DELAY_CYCLES_GENERIC_H
 

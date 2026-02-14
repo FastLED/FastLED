@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 // WebAssembly placement new operator - in global namespace
 // WASM/Emscripten has full C++ standard library support
 

@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/esp/32/feature_flags/enabled.h"
 
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI

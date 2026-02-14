@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file init_channel_engine.h
 /// @brief ESP32-specific channel engine initialization
 ///

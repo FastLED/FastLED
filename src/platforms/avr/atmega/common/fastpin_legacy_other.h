@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // Other ATmega variants pin mappings
 // Includes: ATmega1284P, ATmega644P, ATmega32, ATmega16, AT90USB646, AT90USB1286,
 //           ATmega32U2, ATmega16U2, ATmega8U2, AT90USB82, AT90USB162,

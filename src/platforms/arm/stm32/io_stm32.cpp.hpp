@@ -1,4 +1,6 @@
 #pragma once
+
+// IWYU pragma: private
 #include "is_stm32.h"
 
 // ok no namespace fl

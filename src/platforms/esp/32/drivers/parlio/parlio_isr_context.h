@@ -36,6 +36,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/compiler_control.h"
 
 #include "fl/isr.h"

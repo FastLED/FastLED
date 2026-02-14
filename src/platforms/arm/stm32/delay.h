@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/cycle_type.h"
 #include "fl/force_inline.h"
 #include "platforms/arm/stm32/core_detection.h"

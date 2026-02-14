@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/stub/semaphore_stub.h
 /// @brief Stub platform semaphore implementation trampoline
 ///

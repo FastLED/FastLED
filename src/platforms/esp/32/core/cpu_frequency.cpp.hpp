@@ -3,6 +3,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/int.h"
 #include "platforms/esp/is_esp.h"
 

@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file interrupts_stm32_inline.h
 /// @brief Lightweight inline interrupt control for STM32 (ARM Cortex-M)
 ///

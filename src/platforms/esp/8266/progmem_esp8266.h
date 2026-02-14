@@ -3,6 +3,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 #include <pgmspace.h>  // ok platform headers
 #include "fl/int.h"  // ok platform headers
 

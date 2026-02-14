@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/avr/is_avr.h"
 
 // ATmega328P family pin mappings

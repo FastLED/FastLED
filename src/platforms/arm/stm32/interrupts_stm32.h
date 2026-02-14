@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file interrupts_stm32.h
 /// Interrupt control trampoline for STM32 platforms
 ///

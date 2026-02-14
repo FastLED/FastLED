@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/stm32/init_stm32.h
 /// @brief STM32 platform initialization
 ///

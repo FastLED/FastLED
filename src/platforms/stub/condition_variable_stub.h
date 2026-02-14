@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/stub/condition_variable_stub.h
 /// @brief Stub/fallback condition variable implementation
 ///

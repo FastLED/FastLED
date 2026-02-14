@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/stub/thread_stub_noop.h
 /// @brief Fake thread implementation for single-threaded platforms
 ///

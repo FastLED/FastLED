@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/engine_events.h"
 #include "fl/stl/map.h"
 #include "fl/screenmap.h"

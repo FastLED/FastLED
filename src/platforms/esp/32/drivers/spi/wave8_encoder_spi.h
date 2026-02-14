@@ -20,6 +20,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/channels/wave8.h"
 #include "fl/channels/detail/wave8.hpp"
 #include "fl/chipsets/led_timing.h"

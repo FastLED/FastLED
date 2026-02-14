@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file mutex_stm32_rtos.h
 /// STM32 CMSIS-RTOS mutex wrapper for FastLED
 ///

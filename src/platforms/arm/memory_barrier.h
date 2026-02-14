@@ -9,6 +9,8 @@
 // ok no namespace fl
 
 #pragma once
+
+// IWYU pragma: private
 #include "is_arm.h"
 
 #ifdef FL_IS_ARM

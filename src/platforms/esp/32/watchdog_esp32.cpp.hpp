@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 // src/platforms/esp/32/watchdog_esp32.cpp
 //
 // ESP32 Watchdog Timer Implementation - Trampoline Dispatcher

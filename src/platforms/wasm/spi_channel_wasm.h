@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // Channel-based SPI controller for WASM platform
 // Models stub platform's SPI channel architecture for web builds
 

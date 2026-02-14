@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // Unified STM32 ARM pin template for all families
 // Single source of truth - eliminates 90% duplication between F1/F4/F2/F7/H7/L4
 //

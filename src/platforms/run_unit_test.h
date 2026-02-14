@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: public
+
 /// @file run_unit_test.h
 /// Platform dispatch header for unit test runner
 ///

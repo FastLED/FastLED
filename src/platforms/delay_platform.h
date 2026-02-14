@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: public
+
 // Backward compatibility: delay_platform.h is deprecated
 // Include time_platform.h which contains all timing functions
 #include "platforms/time_platform.h"

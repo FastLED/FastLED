@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file spi_device_proxy.h
 /// @brief NRF52-specific SPI device proxy for transparent Single/Dual/Quad/Octal-SPI routing
 ///

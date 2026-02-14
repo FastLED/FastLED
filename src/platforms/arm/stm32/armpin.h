@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/stl/stdint.h"
 #include "fl/fastpin_base.h"
 #include "platforms/arm/stm32/is_stm32.h"

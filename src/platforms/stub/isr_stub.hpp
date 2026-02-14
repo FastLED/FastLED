@@ -8,6 +8,8 @@
 */
 
 #pragma once
+
+// IWYU pragma: private
 #include "platforms/wasm/is_wasm.h"
 
 // Only compile this implementation for stub/host/WASM platform builds

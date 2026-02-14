@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // Mock Quad-SPI driver for testing without real ESP32 hardware
 // This simulates DMA transmission and provides inspection methods for validation
 

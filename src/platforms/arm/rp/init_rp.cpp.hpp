@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file init_rp.cpp
 /// @brief RP2040/RP2350 platform initialization implementation
 ///

@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/apollo3/init_apollo3.h
 /// @brief Apollo3 platform initialization (no-op)
 ///

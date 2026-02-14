@@ -6,6 +6,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/esp/is_esp.h"
 
 // Only compile for ESP32-P4 with RGB LCD support

@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/avr/is_avr.h"
 #include "fl/stl/stdint.h"
 #include "lib8tion/lib8static.h"

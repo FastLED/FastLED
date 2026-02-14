@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
  #ifndef __INC_BLOCK_CLOCKLESS_H
 #define __INC_BLOCK_CLOCKLESS_H
 

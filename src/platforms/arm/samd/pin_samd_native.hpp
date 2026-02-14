@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/samd/pin_samd_native.hpp
 /// Native SAMD pin system implementation using direct PORT register access
 ///

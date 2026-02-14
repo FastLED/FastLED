@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file channel_engine_spi.cpp
 /// @brief Clockless-over-SPI ChannelEngine implementation for ESP32
 ///

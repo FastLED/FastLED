@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file _build.hpp
 /// @brief Unity build header for platforms\arm\teensy\teensy4_common/ directory
 /// Includes all implementation files in alphabetical order

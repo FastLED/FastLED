@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #include "fl/stl/stdio.h"
 #include "fl/stl/atomic.h"
 #include "fl/compiler_control.h"

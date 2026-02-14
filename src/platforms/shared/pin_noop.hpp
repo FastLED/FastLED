@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/shared/pin_noop.hpp
 /// No-op pin implementation for non-Arduino builds (host tests, simulators, etc.)
 ///

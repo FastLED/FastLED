@@ -28,6 +28,8 @@
 */
 
 #pragma once
+
+// IWYU pragma: private
 #include "is_nrf52.h"
 
 #if defined(FL_IS_NRF52)

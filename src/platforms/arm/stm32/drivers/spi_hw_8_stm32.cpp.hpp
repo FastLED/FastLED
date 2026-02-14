@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_hw_8_stm32.cpp
 /// @brief STM32 implementation of Octal-SPI using GPIO + Timer + DMA
 ///

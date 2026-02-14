@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/engine_events.h"
 #include "fl/str.h"
 #include "fl/stl/vector.h"

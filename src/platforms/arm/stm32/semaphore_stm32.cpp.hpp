@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file semaphore_stm32.cpp
 /// @brief STM32 FreeRTOS semaphore platform implementation
 

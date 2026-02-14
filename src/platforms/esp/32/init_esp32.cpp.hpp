@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file init_esp32.cpp
 /// @brief ESP32-specific platform initialization implementation
 ///

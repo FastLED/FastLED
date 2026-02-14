@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/mgm240/init_mgm240.h
 /// @brief Silicon Labs MGM240 platform initialization
 ///

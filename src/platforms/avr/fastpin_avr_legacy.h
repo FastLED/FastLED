@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // ok no namespace fl
 
 // Backward compatibility shim for fastpin_avr_legacy.h

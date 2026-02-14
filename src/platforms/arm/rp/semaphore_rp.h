@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/rp/semaphore_rp.h
 /// @brief RP2040/RP2350 Pico SDK semaphore implementation
 ///

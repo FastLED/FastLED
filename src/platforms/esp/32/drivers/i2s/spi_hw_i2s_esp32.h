@@ -1,4 +1,6 @@
 #pragma once
+
+// IWYU pragma: private
 #include "platforms/esp/is_esp.h"
 
 // The I2S parallel mode driver only works on ESP32 and ESP32-S2

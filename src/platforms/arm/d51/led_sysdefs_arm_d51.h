@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #include "platforms/arm/is_arm.h"
 
 // ok no namespace fl

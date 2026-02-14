@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 // Shared/default placement new operator - in global namespace
 // For desktop/generic platforms with standard library support
 

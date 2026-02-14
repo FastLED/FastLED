@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_peripheral_esp.cpp
 /// @brief Real ESP32 SPI peripheral implementation
 ///

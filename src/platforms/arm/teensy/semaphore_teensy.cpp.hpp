@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file semaphore_teensy.cpp
 /// @brief Teensy interrupt-based semaphore platform implementation
 

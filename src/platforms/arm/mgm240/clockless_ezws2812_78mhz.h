@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file clockless_ezws2812_78mhz.h
 /// @brief FastLED ezWS2812 GPIO controller optimized for 78MHz Silicon Labs MGM240/MG24
 ///

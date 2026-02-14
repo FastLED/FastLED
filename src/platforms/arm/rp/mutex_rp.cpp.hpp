@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file mutex_rp.cpp
 /// @brief RP2040/RP2350 Pico SDK mutex platform implementation
 

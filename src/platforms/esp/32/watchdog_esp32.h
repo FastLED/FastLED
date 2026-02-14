@@ -19,6 +19,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/stl/cstdint.h"
 
 namespace fl {

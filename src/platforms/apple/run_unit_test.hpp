@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file run_unit_test.hpp
 /// Apple/macOS implementation of unit test runner
 ///

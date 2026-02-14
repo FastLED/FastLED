@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_hw_4_stm32.cpp
 /// @brief STM32 implementation of Quad-SPI using GPIO + Timer + DMA
 ///

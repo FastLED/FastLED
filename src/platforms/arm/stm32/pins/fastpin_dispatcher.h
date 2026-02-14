@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // ok no namespace fl
 // Main dispatcher for STM32 variant-specific pin definitions
 // Explicit board registry - single place to see all supported boards

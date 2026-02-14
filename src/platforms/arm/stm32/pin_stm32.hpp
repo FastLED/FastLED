@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/stm32/pin_stm32.hpp
 /// STM32 pin implementation (header-only)
 ///

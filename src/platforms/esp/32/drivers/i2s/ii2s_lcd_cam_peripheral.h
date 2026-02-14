@@ -32,6 +32,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 // This interface is platform-agnostic (no ESP32 guard)
 // - I2sLcdCamPeripheralEsp requires ESP32-S3 (real hardware)
 // - I2sLcdCamPeripheralMock works on all platforms (testing)

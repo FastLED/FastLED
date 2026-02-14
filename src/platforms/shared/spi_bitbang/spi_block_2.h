@@ -1,6 +1,8 @@
 // spi_block_2.h — 2-way Dual-SPI Blocking driver (inline bit-banging, platform-agnostic)
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/stl/stdint.h"
 #include "spi_isr_engine.h"
 #include "spi_platform.h"

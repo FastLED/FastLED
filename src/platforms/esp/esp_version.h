@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 // FastLED ESP-IDF version normalization
 // -------------------------------------
 // Goal: Provide a single, consistent set of ESP-IDF version macros across

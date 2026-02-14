@@ -3,6 +3,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/esp/is_esp.h"
 
 #include "sdkconfig.h"

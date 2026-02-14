@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #ifndef __INC_WS2812SERIAL_CONTROLLER_H
 #define __INC_WS2812SERIAL_CONTROLLER_H
 

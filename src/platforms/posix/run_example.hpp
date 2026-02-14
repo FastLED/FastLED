@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file run_example.hpp
 /// Linux/POSIX implementation of example runner
 ///

@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file spi_pixel_writer.h
 /// @brief Generic SPI pixel-to-byte conversion utility
 ///

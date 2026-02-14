@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file clockless.cpp
 /// Implementation of IAdafruitNeoPixelDriver
 /// 

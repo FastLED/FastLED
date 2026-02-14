@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 // Desktop/generic platform integer type definitions
 // Dispatches to platform-specific files for macOS, Linux, Windows, etc.
 //

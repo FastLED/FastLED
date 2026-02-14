@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // Only compile for WASM platform
 #include "is_wasm.h"
 

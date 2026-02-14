@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #include "platforms/shared/ui/json/ui.h"
 #include "platforms/shared/ui/json/ui_internal.h"
 #include "platforms/shared/ui/json/ui_manager.h"

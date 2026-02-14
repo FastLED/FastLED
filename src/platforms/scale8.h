@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: public
+
 #include "platforms/math8_config.h"
 #include "crgb.h"
 #include "fastled_config.h"

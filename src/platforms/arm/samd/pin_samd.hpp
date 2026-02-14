@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/samd/pin_samd.hpp
 /// SAMD (Arduino Zero, M0, M4, etc.) pin implementation (header-only)
 ///

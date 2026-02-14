@@ -4,6 +4,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include <avr/io.h>
 #include "platforms/avr/atmega/common/avr_pin.h"
 

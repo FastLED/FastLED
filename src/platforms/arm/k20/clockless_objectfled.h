@@ -21,6 +21,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "cpixel_ledcontroller.h"
 #include "pixel_iterator.h"
 #include "fl/stl/vector.h"

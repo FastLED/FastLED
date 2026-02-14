@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/esp/is_esp.h"
 
 /// @file simd_riscv.hpp

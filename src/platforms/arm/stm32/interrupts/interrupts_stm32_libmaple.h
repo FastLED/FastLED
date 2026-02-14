@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file interrupts_stm32_libmaple.h
 /// Interrupt control for Arduino_STM32 (Roger Clark libmaple core)
 /// Legacy core - "break/fix level only", "adequate for hobby use"

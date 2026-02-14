@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/esp/32/audio/devices/i2s.hpp"
 #include "platforms/audio_input_null.hpp"
 

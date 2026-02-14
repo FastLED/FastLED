@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // Only compile for real Arduino platforms (not stub, not WASM)
 #include "platforms/wasm/is_wasm.h"
 

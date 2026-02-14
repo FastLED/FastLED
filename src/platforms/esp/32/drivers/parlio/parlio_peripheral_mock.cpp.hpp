@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file parlio_peripheral_mock.cpp
 /// @brief Mock PARLIO peripheral implementation for unit testing
 

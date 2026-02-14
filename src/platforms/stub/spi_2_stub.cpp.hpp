@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_2_stub.cpp
 /// @brief Stub/Mock Dual-SPI implementation for testing
 

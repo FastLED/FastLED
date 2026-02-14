@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #include "platforms/arm/teensy/is_teensy.h"
 
 #if defined(FL_IS_TEENSY_4X) // Teensy 4.0/4.1 only.

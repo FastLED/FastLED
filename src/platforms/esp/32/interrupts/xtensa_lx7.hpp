@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/compiler_control.h"
 // Assembly Shims for High-Priority Interrupts on ESP32-S3 (Xtensa LX7)
 //

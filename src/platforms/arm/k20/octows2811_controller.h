@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #ifndef __INC_OCTOWS2811_CONTROLLER_H
 #define __INC_OCTOWS2811_CONTROLLER_H
 

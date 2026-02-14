@@ -6,6 +6,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 #if defined(ESP32)
     #include "platforms/esp/32/core/fastpin_esp32.h"
 #elif defined(ESP8266)

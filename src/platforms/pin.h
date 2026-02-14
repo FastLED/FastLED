@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: public
+
 // ok no namespace fl
 
 /// @file platforms/pin.h

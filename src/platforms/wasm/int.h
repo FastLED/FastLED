@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 namespace fl {
     // WebAssembly / Emscripten: Use compiler builtins to match system headers exactly
     // This prevents typedef conflicts with Emscripten's C++ standard library

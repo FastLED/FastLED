@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file init_spi_hw.h
 /// @brief ARM platform SPI hardware initialization dispatch
 ///

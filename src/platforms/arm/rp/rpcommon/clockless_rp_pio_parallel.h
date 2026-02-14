@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file clockless_rp_mPioparallel.h
 /// @brief Parallel clockless LED output controller for RP2040/RP2350 using PIO
 ///

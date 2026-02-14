@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/sam/pin_sam.hpp
 /// SAM (Arduino Due, SAM3X8E) pin implementation (header-only)
 ///

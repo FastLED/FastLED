@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file platforms/esp/memory_esp32.hpp
 /// ESP32 memory statistics implementation
 

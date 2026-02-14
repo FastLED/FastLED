@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file simd_x86.hpp
 /// x86/x64 SIMD implementations using SSE2/AVX intrinsics
 ///

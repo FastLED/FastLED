@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/esp/clockless.h
 /// @brief ESP32/ESP8266 platform-specific clockless controller dispatch
 ///

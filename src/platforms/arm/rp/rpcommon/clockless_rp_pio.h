@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #ifndef __INC_CLOCKLESS_RP_PIO_COMMON
 #define __INC_CLOCKLESS_RP_PIO_COMMON
 

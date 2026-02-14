@@ -1,6 +1,8 @@
 // spi_isr_4.h — 4-way Quad-SPI ISR wrapper (platform-agnostic bitbanging)
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/stl/stdint.h"
 #include "fl/stl/bit_cast.h"
 #include "spi_isr_engine.h"

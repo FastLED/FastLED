@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/arm/teensy/is_teensy.h"
 
 /// @file platforms/arm/teensy/pin_teensy.hpp

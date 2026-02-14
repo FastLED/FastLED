@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file platforms/shared/memory_noop.hpp
 /// No-op memory statistics implementation for platforms without heap tracking
 

@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: public
+
 namespace fl {
 
 inline void print_arduino(const char* str) {

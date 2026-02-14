@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 // ok no namespace fl
 #ifndef __INC_M0_CLOCKLESS_H
 #define __INC_M0_CLOCKLESS_H

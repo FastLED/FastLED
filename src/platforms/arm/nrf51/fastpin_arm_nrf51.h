@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 // ok no namespace fl
 #ifndef __FASTPIN_ARM_NRF51_H
 #define __FASTPIN_ARM_NRF51_H

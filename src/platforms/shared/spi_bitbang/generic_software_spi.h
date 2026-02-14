@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file generic_software_spi.h
 /// Generic cross-platform software SPI (bit-banging) implementation
 ///

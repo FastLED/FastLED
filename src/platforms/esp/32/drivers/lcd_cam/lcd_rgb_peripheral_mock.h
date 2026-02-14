@@ -43,6 +43,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 // Mock implementation has no platform guards - runs on all platforms for testing
 #include "platforms/esp/32/drivers/lcd_cam/ilcd_rgb_peripheral.h"
 #include "fl/stl/vector.h"

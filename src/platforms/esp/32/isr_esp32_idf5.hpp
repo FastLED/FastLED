@@ -11,6 +11,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/esp/is_esp.h"
 
 // This file should only be included from isr_esp32.hpp (which does the version check)

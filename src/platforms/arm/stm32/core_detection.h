@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file core_detection.h
 /// STM32 Arduino core differentiation and detection
 ///

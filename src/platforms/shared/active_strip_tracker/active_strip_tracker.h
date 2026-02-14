@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/stl/span.h"
 #include "fl/stl/map.h"
 #include "fl/stl/atomic.h"

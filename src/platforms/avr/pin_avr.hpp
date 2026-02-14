@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/avr/pin_avr.hpp
 /// AVR (Arduino Uno, Mega, etc.) pin implementation (header-only)
 ///

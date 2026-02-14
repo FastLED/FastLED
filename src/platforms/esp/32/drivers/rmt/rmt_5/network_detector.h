@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // Network Detection API for RMT Network-Aware Dynamic Configuration
 // Provides runtime network activity detection (WiFi, Ethernet, Bluetooth)
 // with graceful fallback for builds without network components linked.

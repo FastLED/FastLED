@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file init_stm32.cpp
 /// @brief STM32 platform initialization implementation
 ///

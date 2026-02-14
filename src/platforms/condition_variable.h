@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: public
+
 /// @file platforms/condition_variable.h
 /// @brief Platform dispatch for condition variable support
 ///

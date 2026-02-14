@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 // ESP32/ESP8266 placement new operator - in global namespace
 // ESP platforms typically have <new> header available
 

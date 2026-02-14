@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // ATtiny family pin mappings
 // Includes: Classic ATtiny (25/45/85, 24/44/84, 13, 4313, 48/88, 841/441, 167/87)
 //           Modern tinyAVR (202, 204, 212, 214, 402, 404, 406, 407, 412, 414, 416, 417)

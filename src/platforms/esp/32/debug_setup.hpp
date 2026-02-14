@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file debug_setup.hpp
 /// Debug initialization for ESP32 platforms
 ///

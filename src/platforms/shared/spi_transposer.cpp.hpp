@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_transposer.cpp
 /// @brief Implementation of SPI bit-interleaving transposer
 ///

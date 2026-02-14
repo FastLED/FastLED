@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // ATmega2560 family pin mappings
 // Includes: ATmega2560, ATmega1280
 // Used in: Arduino MEGA 2560

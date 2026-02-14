@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_hw_2_samd51.cpp
 /// @brief SAMD51 implementation of Dual-SPI using SERCOM
 ///

@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/esp/32/semaphore_esp32.h
 /// @brief ESP32 FreeRTOS semaphore implementation
 ///

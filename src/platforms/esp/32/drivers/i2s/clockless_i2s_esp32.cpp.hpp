@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 // Thread-local storage implementation for ClocklessI2S RGBW conversion buffer
 
 #include "platforms/is_platform.h"

@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/stl/function.h"
 #include "fl/json.h"
 #include "fl/stl/memory.h"

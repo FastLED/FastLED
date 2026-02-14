@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: public
+
 #ifndef FASTLED_USE_JSON_UI
 // Enable JSON UI for WASM or stub platform (but not both checks - WASM has priority)
 #if defined(__EMSCRIPTEN__) || defined(FASTLED_STUB_IMPL)

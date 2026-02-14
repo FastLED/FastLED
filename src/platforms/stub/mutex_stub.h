@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/stub/mutex_stub.h
 /// @brief Stub platform mutex implementation trampoline
 ///

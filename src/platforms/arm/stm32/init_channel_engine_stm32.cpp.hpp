@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file init_channel_engine_stm32.cpp.hpp
 /// @brief STM32-specific channel engine initialization
 ///

@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_hw_manager_samd51.cpp.hpp
 /// @brief SAMD51 SPI Hardware Manager - Unified initialization
 ///

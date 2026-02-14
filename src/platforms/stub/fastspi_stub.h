@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 
 #include "platforms/wasm/is_wasm.h"
 #ifdef FL_IS_WASM

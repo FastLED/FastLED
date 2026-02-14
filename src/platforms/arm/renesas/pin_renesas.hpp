@@ -1,4 +1,6 @@
 #pragma once
+
+// IWYU pragma: private
 #include "is_renesas.h"
 
 /// @file platforms/arm/renesas/pin_renesas.hpp

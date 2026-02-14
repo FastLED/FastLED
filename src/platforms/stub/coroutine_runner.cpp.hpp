@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file coroutine_runner.cpp
 /// @brief Implementation of coroutine runner for stub platform
 

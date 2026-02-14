@@ -5,6 +5,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/itask_coroutine.h"
 #include "fl/stl/string.h"
 #include "fl/stl/functional.h"

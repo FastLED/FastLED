@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // Channel-based clockless controller for WASM platform
 // Models stub platform's channel engine integration for web builds
 

@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file lcd_rgb_peripheral_mock.cpp
 /// @brief Mock LCD RGB peripheral implementation for unit testing
 

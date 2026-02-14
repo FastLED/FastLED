@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_esp32_init.cpp
 /// @brief Centralized initialization for ESP32 SPI controllers (1/2/4/8-way)
 ///

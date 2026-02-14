@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 // ⚠️⚠️⚠️ DEPRECATED: WASM-SPECIFIC ACTIVE STRIP DATA HEADER ⚠️⚠️⚠️
 //
 // This file is now a compatibility wrapper. The actual ActiveStripData

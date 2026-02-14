@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file spi_output_template.h
 /// @brief SAM SPIOutput template definition
 

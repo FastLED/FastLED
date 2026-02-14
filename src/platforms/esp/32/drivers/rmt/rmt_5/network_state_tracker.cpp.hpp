@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file network_state_tracker.cpp
 /// @brief Singleton tracker for network state changes implementation
 

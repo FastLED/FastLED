@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/rp/init_rp.h
 /// @brief RP2040/RP2350 platform initialization
 ///

@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file _build.hpp
 /// @brief Unity build header for platforms\arm\d51/ directory
 /// Includes all implementation files in alphabetical order

@@ -22,6 +22,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 // This interface is platform-agnostic (no ESP32 guard)
 // - LcdRgbPeripheralEsp requires ESP32-P4 (real hardware)
 // - LcdRgbPeripheralMock works on all platforms (testing)

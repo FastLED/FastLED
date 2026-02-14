@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // GPIO port initialization macros for STM32 families
 // Provides uniform port registration for all STM32 variants
 //

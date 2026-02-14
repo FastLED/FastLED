@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // Include required FastLED headers
 #include "eorder.h"
 #include "fastled_delay.h"

@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/stl/function.h"
 #include "fl/str.h"
 #include "fl/stl/unordered_map.h"

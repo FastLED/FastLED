@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file init_channel_engine_nrf52.cpp.hpp
 /// @brief NRF52-specific channel engine initialization
 ///

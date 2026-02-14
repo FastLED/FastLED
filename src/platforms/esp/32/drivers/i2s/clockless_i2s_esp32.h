@@ -99,6 +99,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #ifdef FASTLED_INTERNAL
 #error "This should only be active for includion of FastLED.h in a sketch."
 #endif

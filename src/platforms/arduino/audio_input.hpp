@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/audio_input.h"
 #include "fl/warn.h"
 #include "fl/stl/assert.h"

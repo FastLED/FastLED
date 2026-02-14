@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_16_stub.cpp
 /// @brief Stub/Mock implementation of 16-lane (Hexadeca) SPI for testing
 ///

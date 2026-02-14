@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file channel_engine_uart.cpp
 /// @brief UART implementation of ChannelEngine for ESP32-C3/S3
 ///

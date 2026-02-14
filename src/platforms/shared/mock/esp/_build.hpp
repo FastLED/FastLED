@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file _build.hpp
 /// @brief Unity build header for platforms/shared/mock/esp/ directory
 /// Includes all implementation files

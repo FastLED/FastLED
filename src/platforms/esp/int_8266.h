@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 ///////////////////////////////////////////////////////////////////////////////
 // ESP8266 Platform Integer Type Definitions (Xtensa LX106 toolchain)
 //

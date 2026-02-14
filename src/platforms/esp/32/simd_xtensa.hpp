@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file simd_xtensa.hpp
 /// Xtensa-specific SIMD implementations for ESP32 variants (ESP32, S2, S3)
 ///

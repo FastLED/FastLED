@@ -1,4 +1,6 @@
 #pragma once
+
+// IWYU pragma: private
 // allow-include-after-namespace
 
 #warning "fastpin_stm32f4.h is deprecated. Use fastpin_dispatcher.h instead. See src/platforms/arm/stm32/pins/README.md for migration guide."

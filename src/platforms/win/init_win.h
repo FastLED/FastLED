@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/win/init_win.h
 /// @brief Windows platform initialization
 ///

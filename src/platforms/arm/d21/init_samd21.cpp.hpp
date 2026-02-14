@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file init_samd21.cpp
 /// @brief SAMD21 platform initialization implementation
 ///

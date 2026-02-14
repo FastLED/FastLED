@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 // STM32F1 family variant using unified template
 // STM32F1 HAS BRR register at offset 0x28 (unlike F2/F4/F7/H7)
 //

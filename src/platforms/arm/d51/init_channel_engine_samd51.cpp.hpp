@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file init_channel_engine_samd51.cpp.hpp
 /// @brief SAMD51-specific channel engine initialization
 ///

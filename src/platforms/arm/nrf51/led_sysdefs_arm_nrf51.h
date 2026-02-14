@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 // ok no namespace fl
 #ifndef __LED_SYSDEFS_ARM_NRF51
 #define __LED_SYSDEFS_ARM_NRF51

@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #define FASTLED_CLOCKLESS_STUB_DEFINED
 
 #include "eorder.h"

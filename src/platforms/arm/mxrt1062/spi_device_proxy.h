@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file spi_device_proxy.h
 /// @brief Teensy 4.x (IMXRT1062) SPI device proxy for transparent Single/Dual/Quad-SPI routing
 ///

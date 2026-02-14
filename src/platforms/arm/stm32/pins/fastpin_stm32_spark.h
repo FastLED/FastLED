@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 #warning "fastpin_stm32_spark.h is deprecated. Use fastpin_dispatcher.h instead. See src/platforms/arm/stm32/pins/README.md for migration guide."
 
 // DEPRECATED: This file is deprecated in favor of the new unified architecture

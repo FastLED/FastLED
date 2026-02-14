@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #ifndef __FASTPIN_ARM_MXRT1062_H
 #define __FASTPIN_ARM_MXRT1062_H
 

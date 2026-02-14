@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file channel_engine_parlio.cpp
 /// @brief Parallel IO implementation of ChannelEngine for ESP32-P4/C6/H2/C5
 ///

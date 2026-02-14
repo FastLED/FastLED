@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #include "platforms/esp/is_esp.h"
 
 #if defined(FL_IS_ESP8266)

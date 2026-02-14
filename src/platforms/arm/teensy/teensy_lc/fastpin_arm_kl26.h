@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #ifndef __FASTPIN_ARM_KL26_H
 #define __FASTPIN_ARM_KL26_H
 

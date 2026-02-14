@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file is_stm32.h
 /// STM32 platform detection header
 ///

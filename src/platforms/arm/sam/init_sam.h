@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/sam/init_sam.h
 /// @brief SAM platform initialization (no-op)
 ///

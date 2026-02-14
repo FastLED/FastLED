@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #include "is_wasm.h"
 
 #if defined(FL_IS_WASM)

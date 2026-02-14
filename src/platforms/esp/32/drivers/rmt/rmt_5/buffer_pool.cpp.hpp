@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #include "buffer_pool.h"
 
 #if FASTLED_RMT5

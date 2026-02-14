@@ -7,6 +7,8 @@
 
 #pragma once
 
+// IWYU pragma: public
+
 #include "fl/stl/stdint.h"
 #include "fl/stl/function.h"
 #include "fl/stl/shared_ptr.h"

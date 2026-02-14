@@ -1,4 +1,6 @@
 #pragma once
+
+// IWYU pragma: private
 // ok no namespace fl
 
 /// @file platforms/apollo3/pin_apollo3.hpp

@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 // ok no namespace fl
 #ifndef __INC_FASTLED_ARM_K20_H
 #define __INC_FASTLED_ARM_K20_H

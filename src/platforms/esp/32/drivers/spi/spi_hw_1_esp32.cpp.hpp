@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_single_esp32.cpp
 /// @brief ESP32 implementation of Single-SPI
 ///

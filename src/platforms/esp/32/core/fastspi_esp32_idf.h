@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/esp/is_esp.h"
 
 // ESP32 Hardware SPI implementation using native ESP-IDF driver

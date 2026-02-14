@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 #ifndef __INC_FASTLED_PLATFORMS_SAMD_DELAYCYCLES_H
 #define __INC_FASTLED_PLATFORMS_SAMD_DELAYCYCLES_H
 

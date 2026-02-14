@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file cm3_regs.h
 /// ARM Cortex-M Debug Watch and Trace (DWT) and CoreDebug register definitions.
 ///

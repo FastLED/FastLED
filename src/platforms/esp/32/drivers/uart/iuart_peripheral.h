@@ -41,6 +41,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 // This interface is platform-agnostic (no ESP32 guard)
 // - UartPeripheralEsp requires ESP32 (real hardware)
 // - UartPeripheralMock works on all platforms (testing)

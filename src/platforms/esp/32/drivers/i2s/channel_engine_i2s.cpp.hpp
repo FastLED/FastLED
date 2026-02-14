@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file channel_engine_i2s.cpp
 /// @brief I2S LCD_CAM channel engine implementation for ESP32-S3
 

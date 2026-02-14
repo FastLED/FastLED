@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file channel_engine_rmt4.cpp
 /// @brief RMT4 implementation of ChannelEngine for ESP32 (IDF 4.x)
 

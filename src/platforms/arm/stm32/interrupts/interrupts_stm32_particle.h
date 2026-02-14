@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file interrupts_stm32_particle.h
 /// Interrupt control for Particle (Photon/Electron) devices
 /// Hardware: STM32F205RGY6 (STM32F2 family, 120 MHz)

@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file spi_transposer.h
 /// @brief Unified bit-interleaving transpose logic for multi-lane SPI parallel LED control
 ///

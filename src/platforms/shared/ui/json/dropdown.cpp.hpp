@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #include "platforms/shared/ui/json/dropdown.h"
 #include "fl/json.h"
 #include "fl/json.h"

@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file stm32_gpio_timer_helpers.cpp
 /// @brief Shared GPIO and Timer helper implementations for STM32
 ///

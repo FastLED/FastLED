@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file init_nrf52.cpp
 /// @brief nRF52 platform initialization implementation
 ///

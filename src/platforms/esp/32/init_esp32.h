@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/esp/32/init_esp32.h
 /// @brief ESP32-specific platform initialization
 ///

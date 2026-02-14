@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 // ok no namespace fl
 
 #include "platforms/wasm/is_wasm.h"

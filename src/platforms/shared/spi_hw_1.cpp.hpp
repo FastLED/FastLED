@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_hw_1.cpp
 /// @brief Direct instance injection for 1-lane hardware SPI
 ///

@@ -1,6 +1,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/esp/is_esp.h"
 
 #include "fl/warn.h"

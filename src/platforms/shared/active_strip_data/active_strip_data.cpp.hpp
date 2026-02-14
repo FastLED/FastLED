@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #include "active_strip_data.h"
 
 #include "fl/stl/map.h"

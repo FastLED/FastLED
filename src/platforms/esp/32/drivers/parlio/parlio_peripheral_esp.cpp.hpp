@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file parlio_peripheral_esp.cpp
 /// @brief Real ESP32 PARLIO peripheral implementation
 ///

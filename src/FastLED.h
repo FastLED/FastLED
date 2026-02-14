@@ -1,4 +1,6 @@
 #pragma once
+
+// IWYU pragma: private  // no IWYU recommend for internal apis, obviously you can use this
 #ifndef __INC_FASTSPI_LED2_H
 #define __INC_FASTSPI_LED2_H
 

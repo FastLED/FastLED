@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file rmt_memory_manager.cpp
 /// @brief RMT memory allocation manager implementation
 

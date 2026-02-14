@@ -7,6 +7,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 #if defined(NRF51)
     #include "platforms/arm/nrf51/fastpin_arm_nrf51.h"
 #elif defined(NRF52_SERIES)

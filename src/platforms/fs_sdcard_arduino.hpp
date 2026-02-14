@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: public
+
 // fs card arduino implementation.
 
 #include "fs.h"

@@ -1,6 +1,8 @@
 // spi_isr_32.h — 32-way parallel soft-SPI ISR wrapper (platform-agnostic bitbanging)
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/bit_cast.h"

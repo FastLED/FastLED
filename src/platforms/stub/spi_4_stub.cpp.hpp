@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_4_stub.cpp
 /// @brief Stub/Mock implementation of Quad-SPI for testing
 ///

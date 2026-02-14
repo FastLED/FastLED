@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_hw_2_stm32.cpp
 /// @brief STM32 implementation of Dual-SPI using GPIO + Timer + DMA
 ///

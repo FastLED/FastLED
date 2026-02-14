@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: public
+
 /// @file quad_spi_platform.h
 /// @brief Simple platform detection for Quad-SPI examples
 ///

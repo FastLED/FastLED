@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file simd_arm_neon.hpp
 /// ARM NEON SIMD implementations using NEON intrinsics
 ///

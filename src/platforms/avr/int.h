@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 namespace fl {
     // On AVR: int is 16-bit, long is 32-bit — match stdint sizes manually
     typedef int i16;

@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/sketch_macros.h"
 
 // ESP32 Logging Control for FastLED

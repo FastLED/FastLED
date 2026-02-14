@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file spi_hw_manager_stub.cpp.hpp
 /// @brief Stub platform SPI hardware initialization
 ///

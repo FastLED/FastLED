@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/vector.h"
 #include "fastled_delay.h"

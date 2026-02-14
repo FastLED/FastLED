@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file simd_esp32.hpp
 /// ESP32 platform dispatcher for SIMD implementations
 ///

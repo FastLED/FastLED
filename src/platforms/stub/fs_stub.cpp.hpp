@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #include "fs_stub.hpp"
 
 #ifdef FASTLED_TESTING

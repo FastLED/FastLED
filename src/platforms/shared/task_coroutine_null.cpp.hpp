@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file task_coroutine_null.cpp
 /// @brief Concrete no-op implementation of TaskCoroutineNull
 

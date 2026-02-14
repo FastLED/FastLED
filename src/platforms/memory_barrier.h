@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: public
+
 // Platform-specific memory barrier operations
 // This file dispatches to the appropriate platform-specific memory_barrier.h file
 // which defines FL_PLATFORMS_MEMORY_BARRIER, then defines FL_MEMORY_BARRIER from it.

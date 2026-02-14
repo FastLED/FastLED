@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/esp/8266/pin_esp8266_native.hpp
 /// ESP8266 SDK native GPIO implementation
 ///

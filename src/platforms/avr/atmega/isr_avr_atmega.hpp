@@ -22,6 +22,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "platforms/avr/is_avr.h"
 
 // Only compile this implementation for ATmega chips with Timer1 hardware.

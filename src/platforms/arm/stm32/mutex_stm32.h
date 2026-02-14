@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/stm32/mutex_stm32.h
 /// @brief STM32 FreeRTOS mutex implementation
 ///

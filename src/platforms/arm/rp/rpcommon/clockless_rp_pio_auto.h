@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file clockless_rp_pio_auto.h
 /// @brief Automatic parallel grouping clockless LED driver for RP2040/RP2350
 ///

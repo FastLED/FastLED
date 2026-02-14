@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 #ifdef FASTLED_STUB_IMPL
 
 #define FASTLED_INTERNAL

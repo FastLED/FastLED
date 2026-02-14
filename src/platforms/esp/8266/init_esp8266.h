@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/esp/8266/init_esp8266.h
 /// @brief ESP8266 platform initialization
 ///

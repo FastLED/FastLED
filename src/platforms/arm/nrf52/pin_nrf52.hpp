@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/arm/nrf52/pin_nrf52.hpp
 /// Nordic nRF52 (Adafruit Feather nRF52, etc.) pin implementation (header-only)
 ///

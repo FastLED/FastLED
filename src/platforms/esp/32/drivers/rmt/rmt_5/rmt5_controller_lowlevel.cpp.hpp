@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 // This "low level" code uset to be large, but through the refactor
 // to a channel bus manager this has become a thin stub of it's former self
 // and is pending deletion.

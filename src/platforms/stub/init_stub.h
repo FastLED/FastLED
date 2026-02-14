@@ -2,6 +2,8 @@
 // allow-include-after-namespace
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/stub/init_stub.h
 /// @brief Stub platform initialization (no-op)
 ///

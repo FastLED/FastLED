@@ -19,6 +19,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #ifdef FASTLED_STUB_IMPL
 
 #include "fl/stl/shared_ptr.h"

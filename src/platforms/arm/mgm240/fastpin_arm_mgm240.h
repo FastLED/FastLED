@@ -12,6 +12,8 @@
 
 #pragma once
 
+// IWYU pragma: private
+
 #include "fl/stl/stdint.h"
 
 // Include Silicon Labs EMLIB GPIO for direct register access

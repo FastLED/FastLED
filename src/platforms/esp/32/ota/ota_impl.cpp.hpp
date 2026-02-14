@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file platforms/esp/32/ota/ota_impl.cpp
 /// ESP32-specific OTA implementation
 
