@@ -216,16 +216,18 @@
   # ========================================================================
   # Platform infrastructure headers (public within platform code)
   # ========================================================================
-  # These headers are used directly by platform driver files and must not be
-  # mapped to fl/detail/private.h by the catch-all rule below.
-  { include: ['"platforms/is_platform.h"', 'public', '"platforms/is_platform.h"', 'public'] },
-  { include: ['"platforms/memory_barrier.h"', 'public', '"platforms/memory_barrier.h"', 'public'] },
+  # These headers are used directly by platform driver files and should remain
+  # accessible without redirection to fl/detail/private.h. Mark as private but
+  # don't redirect to avoid visibility conflicts with the catch-all rule below.
+  { include: ['"platforms/is_platform.h"', 'private', '"platforms/is_platform.h"', 'private'] },
+  { include: ['"platforms/memory_barrier.h"', 'private', '"platforms/memory_barrier.h"', 'private'] },
 
   # ========================================================================
-  # CATCH-ALL: All platform headers are private
+  # CATCH-ALL: All other platform headers are private and redirect
   # ========================================================================
   # This must be LAST so specific rules above take priority.
-  # Matches any header under platforms/ at any depth and marks it private.
-  # IWYU will never recommend including a platforms/ header directly.
+  # Matches any header under platforms/ at any depth (except those listed above)
+  # and redirects to fl/detail/private.h.
+  # Note: Headers marked above will be processed first and won't be redirected.
   { include: ['@"platforms/.*"', 'private', '"fl/detail/private.h"', 'public'] },
 ]

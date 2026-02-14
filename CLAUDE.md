@@ -51,10 +51,13 @@
 - `uv run ci/wasm_compile.py examples/Blink --just-compile` - WASM compilation
 - `uv run mcp_server.py` - Start MCP server
 
-**🚨 FORBIDDEN (unless explicit evidence of fingerprint cache bug):**
-- `uv run test.py --no-fingerprint` - **STRONGLY DISCOURAGED**: Disables fingerprint caching, makes builds 10-100x slower
+**🚨 FORBIDDEN (unless directly requested by user or explicit evidence of fingerprint cache bug):**
+- `--no-fingerprint` flag - **STRONGLY DISCOURAGED**: Disables fingerprint caching, makes builds 10-100x slower
   - Use `bash test --clean` instead if you suspect cache issues
-  - Only use if you have concrete evidence that fingerprint caching itself is broken (extremely rare)
+  - Only use if:
+    - User explicitly requests it (e.g., "run with --no-fingerprint")
+    - You have concrete evidence that fingerprint caching itself is broken (extremely rare)
+  - When user requests it, use override: `FL_AGENT_ALLOW_ALL_CMDS=1 bash test --no-fingerprint`
 
 **NEVER use:** `uv run python test.py` (always use `bash test` or `uv run test.py`)
 
@@ -341,11 +344,14 @@ uv run test.py profile_sincos16 --cpp --build-mode release --build
   - Rationale: Build system is self-healing and has special cache invalidation code
   - **HIGHLY DISCOURAGED**: The build system will revalidate and self-heal on its own
   - See: `docs/agents/build-system.md` for details
-- **NEVER disable fingerprint caching**: Do NOT use `--no-fingerprint` flag
+- **NEVER disable fingerprint caching (unless directly requested)**: Do NOT use `--no-fingerprint` flag
   - Use: `bash test --clean` if you suspect cache issues
-  - Never use: `uv run test.py --no-fingerprint` (makes builds 10-100x slower)
+  - Never use: `--no-fingerprint` (makes builds 10-100x slower)
   - Rationale: Fingerprint caching is critical performance optimization that tracks file changes correctly
-  - **STRONGLY DISCOURAGED**: Only use if you have concrete evidence fingerprint caching itself is broken (extremely rare)
+  - **STRONGLY DISCOURAGED**: Only use if:
+    - User explicitly requests it (e.g., "run with --no-fingerprint")
+    - You have concrete evidence fingerprint caching itself is broken (extremely rare)
+  - When user requests it, use override: `FL_AGENT_ALLOW_ALL_CMDS=1 bash test --no-fingerprint`
   - See: `docs/agents/build-system.md` for details
 - **Platform compilation timeout**: Use minimum 15 minute timeout for platform builds (e.g., `bash compile --docker esp32s3`)
 - **NEVER disable sccache**: Do NOT set `SCCACHE_DISABLE=1` or disable sccache in any way (see `docs/agents/build-system.md`)
