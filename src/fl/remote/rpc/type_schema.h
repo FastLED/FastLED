@@ -19,12 +19,6 @@ namespace detail {
 // Primary template - unknown types
 template <typename T, typename Enable = void>
 struct TypeSchema {
-    static Json schema() {
-        Json s = Json::object();
-        s.set("type", "unknown");
-        return s;
-    }
-
     static const char* typeName() {
         return "unknown";
     }
@@ -35,12 +29,6 @@ template <typename T>
 struct TypeSchema<T, typename fl::enable_if<
     fl::is_integral<T>::value && !fl::is_same<T, bool>::value
 >::type> {
-    static Json schema() {
-        Json s = Json::object();
-        s.set("type", "integer");
-        return s;
-    }
-
     static const char* typeName() {
         return "integer";
     }
@@ -49,12 +37,6 @@ struct TypeSchema<T, typename fl::enable_if<
 // Boolean type
 template <>
 struct TypeSchema<bool, void> {
-    static Json schema() {
-        Json s = Json::object();
-        s.set("type", "boolean");
-        return s;
-    }
-
     static const char* typeName() {
         return "boolean";
     }
@@ -63,12 +45,6 @@ struct TypeSchema<bool, void> {
 // Floating point types
 template <typename T>
 struct TypeSchema<T, typename fl::enable_if<fl::is_floating_point<T>::value>::type> {
-    static Json schema() {
-        Json s = Json::object();
-        s.set("type", "number");
-        return s;
-    }
-
     static const char* typeName() {
         return "number";
     }
@@ -77,12 +53,6 @@ struct TypeSchema<T, typename fl::enable_if<fl::is_floating_point<T>::value>::ty
 // String type
 template <>
 struct TypeSchema<fl::string, void> {
-    static Json schema() {
-        Json s = Json::object();
-        s.set("type", "string");
-        return s;
-    }
-
     static const char* typeName() {
         return "string";
     }
@@ -91,10 +61,6 @@ struct TypeSchema<fl::string, void> {
 // Void type (for return types)
 template <>
 struct TypeSchema<void, void> {
-    static Json schema() {
-        return Json(nullptr);  // No schema for void
-    }
-
     static const char* typeName() {
         return "void";
     }
@@ -110,25 +76,15 @@ struct MethodSchema;
 // Specialization for non-void return
 template <typename R, typename... Args>
 struct MethodSchema<R(Args...)> {
-    static Json params() {
-        Json arr = Json::array();
-        fl::vector<fl::string> empty;
-        addParams<0, Args...>(arr, empty);
-        return arr;
-    }
-
-    static Json paramsWithNames(const fl::vector<fl::string>& names) {
+    // Flat params: [["name", "type"], ...] optimized for low-memory devices
+    static Json params(const fl::vector<fl::string>& names) {
         Json arr = Json::array();
         addParams<0, Args...>(arr, names);
         return arr;
     }
 
-    static Json result() {
-        return TypeSchema<R>::schema();
-    }
-
-    static bool hasResult() {
-        return true;
+    static const char* resultTypeName() {
+        return TypeSchema<R>::typeName();
     }
 
 private:
@@ -141,15 +97,15 @@ private:
 
     template <fl::size Index, typename First, typename... Rest>
     static void addParams(Json& arr, const fl::vector<fl::string>& names) {
-        Json param = Json::object();
-        // Use provided name if available, otherwise default to "argN"
+        Json param = Json::array();
+        // Name
         if (Index < names.size() && !names[Index].empty()) {
-            param.set("name", names[Index].c_str());
+            param.push_back(names[Index].c_str());
         } else {
-            param.set("name", "arg" + fl::to_string(static_cast<i64>(Index)));
+            param.push_back("arg" + fl::to_string(static_cast<i64>(Index)));
         }
-        param.set("schema", TypeSchema<First>::schema());
-        param.set("required", true);
+        // Type name
+        param.push_back(TypeSchema<First>::typeName());
         arr.push_back(param);
         addParams<Index + 1, Rest...>(arr, names);
     }
@@ -158,25 +114,15 @@ private:
 // Specialization for void return
 template <typename... Args>
 struct MethodSchema<void(Args...)> {
-    static Json params() {
-        Json arr = Json::array();
-        fl::vector<fl::string> empty;
-        addParams<0, Args...>(arr, empty);
-        return arr;
-    }
-
-    static Json paramsWithNames(const fl::vector<fl::string>& names) {
+    // Flat params: [["name", "type"], ...] optimized for low-memory devices
+    static Json params(const fl::vector<fl::string>& names) {
         Json arr = Json::array();
         addParams<0, Args...>(arr, names);
         return arr;
     }
 
-    static Json result() {
-        return Json(nullptr);
-    }
-
-    static bool hasResult() {
-        return false;
+    static const char* resultTypeName() {
+        return TypeSchema<void>::typeName();
     }
 
 private:
@@ -189,15 +135,15 @@ private:
 
     template <fl::size Index, typename First, typename... Rest>
     static void addParams(Json& arr, const fl::vector<fl::string>& names) {
-        Json param = Json::object();
-        // Use provided name if available, otherwise default to "argN"
+        Json param = Json::array();
+        // Name
         if (Index < names.size() && !names[Index].empty()) {
-            param.set("name", names[Index].c_str());
+            param.push_back(names[Index].c_str());
         } else {
-            param.set("name", "arg" + fl::to_string(static_cast<i64>(Index)));
+            param.push_back("arg" + fl::to_string(static_cast<i64>(Index)));
         }
-        param.set("schema", TypeSchema<First>::schema());
-        param.set("required", true);
+        // Type name
+        param.push_back(TypeSchema<First>::typeName());
         arr.push_back(param);
         addParams<Index + 1, Rest...>(arr, names);
     }

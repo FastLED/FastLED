@@ -23,18 +23,39 @@
 // ============================================================================
 
 void printJsonRaw(const fl::Json& json, const char* prefix) {
-    Serial.println("[DEBUG] printJsonRaw start");
-    Serial.print("[DEBUG] Free heap: ");
-    Serial.println(ESP.getFreeHeap());
-    Serial.flush();
+    // ESP32-C6 SAFETY: Check if this is a schema response (rpc.discover)
+    // These can cause stack overflow during serialization on constrained platforms
+    // The validation script already skips schema validation on constrained platforms
+    if (json.contains("result")) {
+        fl::Json result = json["result"];
+        if (result.is_object()) {
+            // Check for schema responses (has "schema" key or "openrpc" key)
+            if (result.contains("schema") || result.contains("openrpc") || result.contains("methods")) {
+                // Return minimal response to avoid stack overflow
+                fl::Json minimal = fl::Json::object();
+                minimal.set("jsonrpc", "2.0");
+                if (json.contains("id")) {
+                    minimal.set("id", json["id"]);
+                }
+                fl::Json minimalResult = fl::Json::object();
+                minimalResult.set("message", "Schema too large for ESP32-C6 - use local client-side schema");
+                minimalResult.set("methodCount", result.contains("schema") ? static_cast<int64_t>(result["schema"].size()) : 0);
+                minimal.set("result", minimalResult);
 
+                // Serialize minimal response
+                fl::string jsonStr = minimal.to_string();
+                if (prefix && prefix[0] != '\0') {
+                    Serial.print(prefix);
+                }
+                Serial.println(jsonStr.c_str());
+                Serial.flush();
+                return;
+            }
+        }
+    }
+
+    // Normal JSON responses (safe for ESP32-C6)
     fl::string jsonStr = json.to_string();
-
-    Serial.print("[DEBUG] JSON string length: ");
-    Serial.println(jsonStr.size());
-    Serial.print("[DEBUG] Free heap: ");
-    Serial.println(ESP.getFreeHeap());
-    Serial.flush();
 
     // Ensure single-line (replace any newlines/carriage returns with spaces)
     for (size_t i = 0; i < jsonStr.size(); ++i) {
@@ -43,18 +64,11 @@ void printJsonRaw(const fl::Json& json, const char* prefix) {
         }
     }
 
-    Serial.println("[DEBUG] Sending JSON to Serial");
-    Serial.flush();
-
     // Output directly to Serial, bypassing fl::println
     if (prefix && prefix[0] != '\0') {
         Serial.print(prefix);
     }
     Serial.println(jsonStr.c_str());
-
-    Serial.println("[DEBUG] printJsonRaw done");
-    Serial.print("[DEBUG] Free heap: ");
-    Serial.println(ESP.getFreeHeap());
     Serial.flush();
 }
 

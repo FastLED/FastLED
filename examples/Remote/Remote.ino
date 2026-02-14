@@ -109,6 +109,18 @@ void setup() {
     });
 
     Serial.println("Remote RPC example ready");
+    Serial.println();
+
+    // Show schema (flat tuple format optimized for low-memory devices)
+    Serial.println("=== RPC Schema ===");
+    fl::Json schema = remote.schema();
+    fl::string schemaStr = schema.to_string();
+
+    Serial.print("Schema size: ");
+    Serial.print(schemaStr.size());
+    Serial.println(" bytes (flat tuple format)");
+    Serial.println();
+
     Serial.println("Send JSON over serial, e.g.:");
     Serial.println("  Commands (no return):");
     Serial.println(R"(    {"function":"fill","args":[255,0,0]})");
@@ -117,6 +129,8 @@ void setup() {
     Serial.println(R"(    {"function":"millis","args":[]})");
     Serial.println(R"(    {"function":"getStatus","args":[]})");
     Serial.println(R"(    {"function":"getLed","args":[0]})");
+    Serial.println("  Schema:");
+    Serial.println(R"raw(    {"method":"rpc.discover","id":1})raw"  " // Get RPC schema");
 }
 
 void loop() {

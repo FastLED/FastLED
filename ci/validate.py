@@ -1615,11 +1615,14 @@ def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneralTypeIs
             print("⏳ Waiting for device boot...")
             time.sleep(3.0)
 
-            # Drain boot output
+            # Drain boot output and wait for ready signal
             print("📥 Draining boot output...")
             boot_lines = 0
+            device_ready = False
             drain_start = time.time()
-            while time.time() - drain_start < 2.0:
+            max_drain_time = 120.0  # Wait up to 120 seconds for device to be ready
+
+            while time.time() - drain_start < max_drain_time:
                 if args.no_fbuild:
                     if monitor.in_waiting:  # ty: ignore[possibly-missing-attribute]
                         line = (
@@ -1627,16 +1630,47 @@ def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneralTypeIs
                         )
                         if line:
                             boot_lines += 1
+                            # Check for ready signal: RESULT: {"ready":true...}
+                            if line.startswith("RESULT:") and '"ready":true' in line:
+                                device_ready = True
+                                print(f"   ✓ Device ready signal received")
+                                break
+                            # Also check for legacy ready message
+                            if "[SETUP COMPLETE]" in line or "Validation ready" in line:
+                                device_ready = True
+                                print(f"   ✓ Device ready message received")
+                                break
                 else:
                     try:
                         for line in monitor.read_lines(timeout=0.5):  # ty: ignore[possibly-missing-attribute]
                             boot_lines += 1
-                            break
+                            # Check for ready signal
+                            if "RESULT:" in line and '"ready":true' in line:
+                                device_ready = True
+                                print(f"   ✓ Device ready signal received")
+                                break
+                            if "[SETUP COMPLETE]" in line or "Validation ready" in line:
+                                device_ready = True
+                                print(f"   ✓ Device ready message received")
+                                break
                     except KeyboardInterrupt:
                         handle_keyboard_interrupt_properly()
                     except Exception:
                         break
+
+                # Small delay to avoid busy-waiting
+                time.sleep(0.01)
+
             print(f"   Drained {boot_lines} boot lines")
+
+            if not device_ready:
+                print(
+                    f"⚠️  Warning: Device ready signal not detected after {max_drain_time}s"
+                )
+                print(f"   Proceeding anyway, but RPC commands may fail...")
+            else:
+                # Give device a brief moment to finish initialization
+                time.sleep(0.5)
 
             # Send RPC commands
             print(f"🔧 Sending {len(json_rpc_commands)} JSON-RPC command(s)...")
@@ -1689,7 +1723,66 @@ def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneralTypeIs
                 # Store line
                 output_lines.append(line)
 
-                # Check for stop words
+                # Check for JSON-RPC responses (RPC-based validation)
+                if line.startswith("REMOTE:"):
+                    try:
+                        json_str = line[7:].strip()  # Remove "REMOTE: " prefix
+                        response = json.loads(json_str)
+
+                        # Check if this is a response (has result or error field)
+                        if "result" in response or "error" in response:
+                            # RPC command completed - extract success status
+                            if "result" in response:
+                                result = response["result"]
+                                # Check if result indicates test success/failure
+                                if isinstance(result, dict):
+                                    if result.get("success") and result.get("passed"):
+                                        stop_word_found = "OK"
+                                        print(
+                                            f"\n{Fore.GREEN}✓ RPC test passed{Style.RESET_ALL}"
+                                        )
+                                    elif result.get("success") and not result.get(
+                                        "passed"
+                                    ):
+                                        stop_word_found = "ERROR"
+                                        print(
+                                            f"\n{Fore.RED}✗ RPC test failed{Style.RESET_ALL}"
+                                        )
+                                    elif result.get("success") is False:
+                                        stop_word_found = "ERROR"
+                                        print(
+                                            f"\n{Fore.RED}✗ RPC command failed{Style.RESET_ALL}"
+                                        )
+                                    else:
+                                        # Generic success response (e.g., ping, status)
+                                        stop_word_found = "OK"
+                                        print(
+                                            f"\n{Fore.GREEN}✓ RPC command completed{Style.RESET_ALL}"
+                                        )
+                                else:
+                                    # Non-dict result (simple return value)
+                                    stop_word_found = "OK"
+                                    print(
+                                        f"\n{Fore.GREEN}✓ RPC command completed{Style.RESET_ALL}"
+                                    )
+                            else:
+                                # Error response
+                                stop_word_found = "ERROR"
+                                error = response.get("error", {})
+                                error_msg = (
+                                    error.get("message", "Unknown error")
+                                    if isinstance(error, dict)
+                                    else str(error)
+                                )
+                                print(
+                                    f"\n{Fore.RED}✗ RPC error: {error_msg}{Style.RESET_ALL}"
+                                )
+                            break
+                    except json.JSONDecodeError:
+                        # Not valid JSON, continue monitoring
+                        pass
+
+                # Check for stop words (legacy text-based validation)
                 if "TEST_COMPLETED_EXIT_OK" in line:
                     stop_word_found = "OK"
                     print(f"\n{Fore.GREEN}✓ TEST_COMPLETED_EXIT_OK{Style.RESET_ALL}")

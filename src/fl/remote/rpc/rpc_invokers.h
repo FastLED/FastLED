@@ -45,10 +45,11 @@ public:
 class ErasedSchemaGenerator {
 public:
     virtual ~ErasedSchemaGenerator() = default;
-    virtual Json params() const = 0;
-    virtual Json result() const = 0;
-    virtual bool hasResult() const = 0;
     virtual void setParamNames(const fl::vector<fl::string>& names) = 0;
+
+    // Flat tuple format: [["name", "type"], ...] optimized for low-memory devices
+    virtual Json params() const = 0;
+    virtual const char* resultTypeName() const = 0;
 };
 
 // =============================================================================
@@ -58,20 +59,17 @@ public:
 template<typename Sig>
 class TypedSchemaGenerator : public ErasedSchemaGenerator {
 public:
-    Json params() const override {
-        return MethodSchema<Sig>::paramsWithNames(mParamNames);
-    }
-
-    Json result() const override {
-        return MethodSchema<Sig>::result();
-    }
-
-    bool hasResult() const override {
-        return MethodSchema<Sig>::hasResult();
-    }
-
     void setParamNames(const fl::vector<fl::string>& names) override {
         mParamNames = names;
+    }
+
+    // Flat tuple format: [["name", "type"], ...] optimized for low-memory devices
+    Json params() const override {
+        return MethodSchema<Sig>::params(mParamNames);
+    }
+
+    const char* resultTypeName() const override {
+        return MethodSchema<Sig>::resultTypeName();
     }
 
 private:

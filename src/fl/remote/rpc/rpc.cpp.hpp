@@ -26,7 +26,7 @@ Json Rpc::handle(const Json& request) {
     if (methodName == "rpc.discover") {
         Json response = Json::object();
         response.set("jsonrpc", "2.0");
-        response.set("result", schema("RPC API", "1.0.0"));
+        response.set("result", schema());
         if (request.contains("id")) {
             response.set("id", request["id"]);
         }
@@ -108,61 +108,6 @@ fl::optional<Json> Rpc::handle_maybe(const Json& request) {
 }
 
 // =============================================================================
-// Rpc::methods() - Returns array of method schemas
-// =============================================================================
-
-Json Rpc::methods() const {
-    Json arr = Json::array();
-    for (auto it = mRegistry.begin(); it != mRegistry.end(); ++it) {
-        Json methodObj = Json::object();
-        methodObj.set("name", it->first.c_str());
-
-        // Add description if present
-        if (!it->second.mDescription.empty()) {
-            methodObj.set("description", it->second.mDescription.c_str());
-        }
-
-        // Add tags if present (OpenRPC tags for grouping)
-        if (!it->second.mTags.empty()) {
-            Json tagsArr = Json::array();
-            for (fl::size i = 0; i < it->second.mTags.size(); ++i) {
-                Json tagObj = Json::object();
-                tagObj.set("name", it->second.mTags[i].c_str());
-                tagsArr.push_back(tagObj);
-            }
-            methodObj.set("tags", tagsArr);
-        }
-
-        methodObj.set("params", it->second.mSchemaGenerator->params());
-        if (it->second.mSchemaGenerator->hasResult()) {
-            methodObj.set("result", it->second.mSchemaGenerator->result());
-        }
-        arr.push_back(methodObj);
-    }
-    return arr;
-}
-
-// =============================================================================
-// Rpc::schema() - Returns full OpenRPC document
-// =============================================================================
-
-Json Rpc::schema(const char* title, const char* version) const {
-    Json doc = Json::object();
-    doc.set("openrpc", "1.3.2");
-
-    // Info object
-    Json info = Json::object();
-    info.set("title", title);
-    info.set("version", version);
-    doc.set("info", info);
-
-    // Methods array
-    doc.set("methods", methods());
-
-    return doc;
-}
-
-// =============================================================================
 // Rpc::tags() - Returns list of unique tags
 // =============================================================================
 
@@ -183,6 +128,33 @@ fl::vector<fl::string> Rpc::tags() const {
         }
     }
     return result;
+}
+
+// =============================================================================
+// Rpc::methods() - Returns flat method array
+// =============================================================================
+
+Json Rpc::methods() const {
+    Json arr = Json::array();
+    for (auto it = mRegistry.begin(); it != mRegistry.end(); ++it) {
+        // Format: ["methodName", "returnType", [["param1", "type1"], ["param2", "type2"]]]
+        Json methodTuple = Json::array();
+        methodTuple.push_back(it->first.c_str());  // Method name
+        methodTuple.push_back(it->second.mSchemaGenerator->resultTypeName());  // Return type
+        methodTuple.push_back(it->second.mSchemaGenerator->params());  // Params array
+        arr.push_back(methodTuple);
+    }
+    return arr;
+}
+
+// =============================================================================
+// Rpc::schema() - Returns flat schema
+// =============================================================================
+
+Json Rpc::schema() const {
+    Json doc = Json::object();
+    doc.set("schema", methods());
+    return doc;
 }
 
 } // namespace fl

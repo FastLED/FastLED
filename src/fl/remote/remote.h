@@ -134,6 +134,12 @@ public:
     /// Get method information for all registered methods
     fl::vector<MethodInfo> methods() const;
 
+    /// Returns flat schema document
+    /// Format: {"schema": [["methodName", "returnType", [["param1", "type1"], ...]], ...]}
+    fl::Json schema() const {
+        return mRpc.schema();
+    }
+
     /// Get number of registered methods
     fl::size count() const {
         return mRpc.count();

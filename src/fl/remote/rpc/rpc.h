@@ -60,13 +60,13 @@
 //   fl::Json request = fl::Json::parse(R"({"method":"add","params":[6,7],"id":1})");
 //   fl::Json response = rpc.handle(request);
 //
-//   // Schema generation (OpenRPC format) - always available
-//   fl::Json schema = rpc.schema();      // Full OpenRPC document
-//   fl::Json methods = rpc.methods();    // Just method list
+//   // Schema generation (flat tuple format) - always available
+//   fl::Json schema = rpc.schema();      // Flat schema document
+//   fl::Json methods = rpc.methods();    // Flat method array
 //
 //   // Built-in rpc.discover method (always available)
 //   fl::Json request = fl::Json::parse(R"({"method":"rpc.discover","id":1})");
-//   fl::Json response = rpc.handle(request);  // Returns full schema
+//   fl::Json response = rpc.handle(request);  // Returns flat schema
 //
 // =============================================================================
 
@@ -294,13 +294,15 @@ public:
     // Schema and Discovery
     // =========================================================================
 
-    /// Returns array of method schemas.
+    /// Returns flat method array: [["name", "returnType", [["param1", "type1"], ...]], ...]
+    /// Format: Array of method tuples optimized for low-memory devices.
+    /// Each method is represented as: ["methodName", "returnType", [["param1", "type1"], ...]]
     Json methods() const;
 
-    /// Returns full OpenRPC document.
-    /// See: https://spec.open-rpc.org/
-    /// The built-in "rpc.discover" method always returns this schema.
-    Json schema(const char* title = "RPC API", const char* version = "1.0.0") const;
+    /// Returns flat schema document.
+    /// Format: {"schema": [["methodName", "returnType", [["param1", "type1"], ...]], ...]}
+    /// The built-in "rpc.discover" method returns this schema.
+    Json schema() const;
 
     /// Returns number of registered methods.
     fl::size count() const {

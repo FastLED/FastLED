@@ -150,66 +150,47 @@ size_t Remote::update(u32 currentTimeMs) {
 fl::vector<Remote::MethodInfo> Remote::methods() const {
     fl::vector<MethodInfo> result;
 
-    // Get JSON schema from underlying RPC
+    // Get flat JSON schema from underlying RPC
+    // Format: [["methodName", "returnType", [["param1", "type1"], ...]], ...]
     fl::Json jsonMethods = mRpc.methods();
 
     if (!jsonMethods.is_array()) {
         return result;
     }
 
-    // Convert each JSON method to MethodInfo struct
+    // Convert each flat method array to MethodInfo struct
     for (fl::size i = 0; i < jsonMethods.size(); i++) {
         fl::Json method = jsonMethods[i];
 
-        MethodInfo info;
-        info.name = method["name"].as_string().value_or("");
+        if (!method.is_array() || method.size() < 3) {
+            continue;  // Invalid method format
+        }
 
-        // Extract parameters
-        if (method.contains("params") && method["params"].is_array()) {
-            fl::Json params = method["params"];
+        MethodInfo info;
+
+        // method[0] = method name
+        info.name = method[0].as_string().value_or("");
+
+        // method[1] = return type
+        info.returnType = method[1].as_string().value_or("void");
+
+        // method[2] = params array: [["param1", "type1"], ["param2", "type2"], ...]
+        if (method[2].is_array()) {
+            fl::Json params = method[2];
             for (fl::size j = 0; j < params.size(); j++) {
                 fl::Json param = params[j];
-                ParamInfo paramInfo;
-                paramInfo.name = param["name"].as_string().value_or("");
-
-                // Get type from schema
-                if (param.contains("schema") && param["schema"].is_object()) {
-                    fl::Json schema = param["schema"];
-                    paramInfo.type = schema["type"].as_string().value_or("unknown");
-                } else {
-                    paramInfo.type = "unknown";
-                }
-
-                info.params.push_back(fl::move(paramInfo));
-            }
-        }
-
-        // Extract return type
-        if (method.contains("result") && method["result"].is_object()) {
-            fl::Json resultSchema = method["result"];
-            if (resultSchema.contains("schema") && resultSchema["schema"].is_object()) {
-                fl::Json schema = resultSchema["schema"];
-                info.returnType = schema["type"].as_string().value_or("void");
-            } else {
-                info.returnType = "void";
-            }
-        } else {
-            info.returnType = "void";
-        }
-
-        // Extract description
-        info.description = method["description"].as_string().value_or("");
-
-        // Extract tags
-        if (method.contains("tags") && method["tags"].is_array()) {
-            fl::Json tags = method["tags"];
-            for (fl::size j = 0; j < tags.size(); j++) {
-                fl::string tag = tags[j].as_string().value_or("");
-                if (!tag.empty()) {
-                    info.tags.push_back(fl::move(tag));
+                if (param.is_array() && param.size() >= 2) {
+                    ParamInfo paramInfo;
+                    paramInfo.name = param[0].as_string().value_or("");
+                    paramInfo.type = param[1].as_string().value_or("unknown");
+                    info.params.push_back(fl::move(paramInfo));
                 }
             }
         }
+
+        // Flat schema doesn't include description/tags
+        info.description = "";
+        info.tags.clear();
 
         result.push_back(fl::move(info));
     }

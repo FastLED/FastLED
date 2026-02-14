@@ -424,10 +424,13 @@ FL_TEST_CASE("Remote: Methods returns schema info") {
     auto methods = remote.methods();
     FL_REQUIRE(methods.size() == 1);
     FL_REQUIRE(methods[0].name == "add");
+    FL_REQUIRE(methods[0].returnType == "integer");
     FL_REQUIRE(methods[0].params.size() == 2);
     FL_REQUIRE(methods[0].params[0].name == "a");
+    FL_REQUIRE(methods[0].params[0].type == "integer");
     FL_REQUIRE(methods[0].params[1].name == "b");
-    FL_REQUIRE(methods[0].description == "Adds two integers");
+    FL_REQUIRE(methods[0].params[1].type == "integer");
+    // Note: Flat schema format doesn't include description/tags
 }
 
 FL_TEST_CASE("Remote: Count returns number of methods") {
@@ -444,6 +447,268 @@ FL_TEST_CASE("Remote: Count returns number of methods") {
 
     remote.bind("test2", []() {});
     FL_REQUIRE(remote.count() == 2);
+}
+
+// =============================================================================
+// Flat Schema Tests
+// =============================================================================
+
+FL_TEST_CASE("Remote: schema returns minimal schema") {
+    TestIO io;
+    fl::Remote remote(
+        [&io]() { return io.pullRequest(); },
+        [&io](const fl::Json& r) { io.pushResponse(r); }
+    );
+
+    auto addFn = [](int a, int b) { return a + b; };
+    remote.bind(fl::Rpc::Config<decltype(addFn)>{
+        "add",
+        addFn,
+        {"a", "b"},
+        "Adds two integers"
+    });
+
+    auto voidFn = []() {};
+    remote.bind("test", voidFn);
+
+    // Get flat schema
+    fl::Json schema = remote.schema();
+
+    // Should have "schema" key
+    FL_REQUIRE(schema.contains("schema"));
+    FL_REQUIRE(schema["schema"].is_array());
+
+    // Should have 2 methods
+    fl::Json methods = schema["schema"];
+    FL_REQUIRE(methods.size() == 2);
+
+    // Find add method
+    fl::Json addMethod;
+    bool found_add = false;
+    for (fl::size i = 0; i < methods.size(); i++) {
+        if (methods[i][0].as_string().value() == "add") {
+            addMethod = methods[i];
+            found_add = true;
+            break;
+        }
+    }
+    FL_REQUIRE(found_add);
+
+    // Verify format: ["methodName", "returnType", [["param1", "type1"], ...]]
+    FL_REQUIRE(addMethod.is_array());
+    FL_REQUIRE(addMethod.size() == 3);
+
+    // Method name
+    FL_REQUIRE(addMethod[0].is_string());
+    FL_REQUIRE(addMethod[0].as_string().value() == "add");
+
+    // Return type
+    FL_REQUIRE(addMethod[1].is_string());
+    FL_REQUIRE(addMethod[1].as_string().value() == "integer");
+
+    // Params array
+    FL_REQUIRE(addMethod[2].is_array());
+    FL_REQUIRE(addMethod[2].size() == 2);
+
+    // First param: ["a", "integer"]
+    FL_REQUIRE(addMethod[2][0].is_array());
+    FL_REQUIRE(addMethod[2][0].size() == 2);
+    FL_REQUIRE(addMethod[2][0][0].as_string().value() == "a");
+    FL_REQUIRE(addMethod[2][0][1].as_string().value() == "integer");
+
+    // Second param: ["b", "integer"]
+    FL_REQUIRE(addMethod[2][1].is_array());
+    FL_REQUIRE(addMethod[2][1].size() == 2);
+    FL_REQUIRE(addMethod[2][1][0].as_string().value() == "b");
+    FL_REQUIRE(addMethod[2][1][1].as_string().value() == "integer");
+
+    // Find void method
+    fl::Json voidMethod;
+    bool found_void = false;
+    for (fl::size i = 0; i < methods.size(); i++) {
+        if (methods[i][0].as_string().value() == "test") {
+            voidMethod = methods[i];
+            found_void = true;
+            break;
+        }
+    }
+    FL_REQUIRE(found_void);
+
+    // Verify void return type
+    FL_REQUIRE(voidMethod[1].as_string().value() == "void");
+    FL_REQUIRE(voidMethod[2].is_array());
+    FL_REQUIRE(voidMethod[2].size() == 0);  // No params
+}
+
+FL_TEST_CASE("Remote: rpc.discover built-in method") {
+    TestIO io;
+    fl::Remote remote(
+        [&io]() { return io.pullRequest(); },
+        [&io](const fl::Json& r) { io.pushResponse(r); }
+    );
+
+    remote.bind("test", [](int x) { return x * 2; });
+
+    // Call rpc.discover
+    fl::Json request = makeRequest("rpc.discover");
+    fl::Json response = remote.processRpc(request);
+
+    // Should succeed
+    FL_REQUIRE(response.contains("result"));
+    FL_REQUIRE(response["result"].is_object());
+
+    // Result should have "schema" key
+    fl::Json result = response["result"];
+    FL_REQUIRE(result.contains("schema"));
+    FL_REQUIRE(result["schema"].is_array());
+
+    // Should have at least 1 method (our "test" method)
+    FL_REQUIRE(result["schema"].size() >= 1);
+}
+
+FL_TEST_CASE("Remote: Schema is compact array format") {
+    TestIO io;
+    fl::Remote remote(
+        [&io]() { return io.pullRequest(); },
+        [&io](const fl::Json& r) { io.pushResponse(r); }
+    );
+
+    // Register several methods
+    remote.bind("method1", [](int a, int b, int c) { return a + b + c; });
+    remote.bind("method2", [](fl::string s) -> int { return static_cast<int>(s.length()); });
+    remote.bind("method3", [](bool flag) {});
+    remote.bind("method4", [](float x, float y) -> float { return x * y; });
+
+    // Get schema
+    fl::Json schema = remote.schema();
+
+    // Verify it has "schema" key with array
+    FL_REQUIRE(schema.contains("schema"));
+    FL_REQUIRE(schema["schema"].is_array());
+    FL_REQUIRE(schema["schema"].size() == 4);
+
+    // Verify it's compact (each method is an array, not an object)
+    fl::Json methods = schema["schema"];
+    for (fl::size i = 0; i < methods.size(); i++) {
+        FL_REQUIRE(methods[i].is_array());
+        FL_REQUIRE(methods[i].size() == 3);  // [name, returnType, params]
+    }
+}
+
+FL_TEST_CASE("Remote: Flat schema type mappings") {
+    TestIO io;
+    fl::Remote remote(
+        [&io]() { return io.pullRequest(); },
+        [&io](const fl::Json& r) { io.pushResponse(r); }
+    );
+
+    // Register methods with different types
+    remote.bind("voidFunc", []() {});
+    remote.bind("intFunc", [](int x) -> int { return x; });
+    remote.bind("boolFunc", [](bool b) -> bool { return b; });
+    remote.bind("floatFunc", [](float f) -> float { return f; });
+    remote.bind("stringFunc", [](fl::string s) -> fl::string { return s; });
+    remote.bind("jsonFunc", [](fl::Json j) -> fl::Json { return j; });
+
+    fl::Json schema = remote.schema();
+    fl::Json methods = schema["schema"];
+
+    // Helper to find method
+    auto findMethod = [&methods](const char* name) -> fl::Json {
+        for (fl::size i = 0; i < methods.size(); i++) {
+            if (methods[i][0].as_string().value() == name) {
+                return methods[i];
+            }
+        }
+        return fl::Json();
+    };
+
+    // Verify type mappings
+    FL_REQUIRE(findMethod("voidFunc")[1].as_string().value() == "void");
+    FL_REQUIRE(findMethod("intFunc")[1].as_string().value() == "integer");
+    FL_REQUIRE(findMethod("boolFunc")[1].as_string().value() == "boolean");
+    FL_REQUIRE(findMethod("floatFunc")[1].as_string().value() == "number");
+    FL_REQUIRE(findMethod("stringFunc")[1].as_string().value() == "string");
+
+    // JSON can be object or array or unknown
+    fl::string jsonType = findMethod("jsonFunc")[1].as_string().value();
+    bool validJsonType = (jsonType == "object") || (jsonType == "array") || (jsonType == "unknown");
+    FL_REQUIRE(validJsonType);
+
+    // Verify parameter types
+    FL_REQUIRE(findMethod("intFunc")[2][0][1].as_string().value() == "integer");
+    FL_REQUIRE(findMethod("boolFunc")[2][0][1].as_string().value() == "boolean");
+    FL_REQUIRE(findMethod("floatFunc")[2][0][1].as_string().value() == "number");
+    FL_REQUIRE(findMethod("stringFunc")[2][0][1].as_string().value() == "string");
+}
+
+FL_TEST_CASE("Remote: Flat schema with no parameters") {
+    TestIO io;
+    fl::Remote remote(
+        [&io]() { return io.pullRequest(); },
+        [&io](const fl::Json& r) { io.pushResponse(r); }
+    );
+
+    remote.bind("noParams", []() -> int { return 42; });
+
+    fl::Json schema = remote.schema();
+    fl::Json methods = schema["schema"];
+
+    FL_REQUIRE(methods.size() == 1);
+    FL_REQUIRE(methods[0][0].as_string().value() == "noParams");
+    FL_REQUIRE(methods[0][1].as_string().value() == "integer");
+    FL_REQUIRE(methods[0][2].is_array());
+    FL_REQUIRE(methods[0][2].size() == 0);  // Empty params array
+}
+
+FL_TEST_CASE("Remote: Flat schema with many parameters") {
+    TestIO io;
+    fl::Remote remote(
+        [&io]() { return io.pullRequest(); },
+        [&io](const fl::Json& r) { io.pushResponse(r); }
+    );
+
+    // Method with 5 parameters
+    remote.bind("manyParams", [](int a, int b, int c, int d, int e) -> int {
+        return a + b + c + d + e;
+    });
+
+    fl::Json schema = remote.schema();
+    fl::Json methods = schema["schema"];
+    fl::Json params = methods[0][2];
+
+    FL_REQUIRE(params.size() == 5);
+    for (fl::size i = 0; i < 5; i++) {
+        FL_REQUIRE(params[i].is_array());
+        FL_REQUIRE(params[i].size() == 2);
+        FL_REQUIRE(params[i][1].as_string().value() == "integer");
+    }
+}
+
+FL_TEST_CASE("Remote: Flat schema via JSON-RPC with ID") {
+    TestIO io;
+    fl::Remote remote(
+        [&io]() { return io.pullRequest(); },
+        [&io](const fl::Json& r) { io.pushResponse(r); }
+    );
+
+    remote.bind("test", []() {});
+
+    // Call with explicit ID
+    fl::Json request = makeRequest("rpc.discover", fl::Json::array(), 42);
+    fl::Json response = remote.processRpc(request);
+
+    // Response should have matching ID
+    FL_REQUIRE(response.contains("id"));
+    FL_REQUIRE(response["id"].as_int().value() == 42);
+
+    // Should have jsonrpc field
+    FL_REQUIRE(response.contains("jsonrpc"));
+    FL_REQUIRE(response["jsonrpc"].as_string().value() == "2.0");
+
+    // Should have result with schema
+    FL_REQUIRE(response.contains("result"));
+    FL_REQUIRE(response["result"].contains("schema"));
 }
 
 // =============================================================================
