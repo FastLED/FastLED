@@ -37,7 +37,9 @@ BANNED_HEADERS_COMMON = [
     "vector",
     "list",
     "map",
+    "unordered_map",
     "set",
+    "unordered_set",
     "queue",
     "deque",
     "algorithm",
@@ -95,7 +97,9 @@ HEADER_RECOMMENDATIONS = {
     "vector": "fl/stl/vector.h",
     "list": "fl/stl/list.h or fl/stl/vector.h",
     "map": "fl/stl/map.h (check fl/stl/hash_map.h for hash-based)",
+    "unordered_map": "fl/stl/unordered_map.h",
     "set": "fl/stl/set.h",
+    "unordered_set": "fl/stl/unordered_set.h",
     "queue": "fl/stl/queue.h or fl/stl/vector.h with manual queue semantics",
     "deque": "fl/stl/deque.h",
     "algorithm": "fl/stl/algorithm.h",
@@ -157,6 +161,7 @@ PRIVATE_LIBCPP_HEADER_MAPPINGS = {
     "__vector": '"fl/stl/vector.h"',
     "__hash_table": '"fl/stl/unordered_map.h"',
     "__tree": '"fl/stl/map.h"',
+    "__node_handle": '"fl/stl/unordered_map.h"',
 }
 
 

@@ -1,12 +1,8 @@
 #include "fl/stl/unordered_set.h"
 
 #include "fl/stl/set.h"
-#include <unordered_set>
 #include "fl/stl/unordered_map.h"
-#include "fl/stl/new.h"
-#include "fl/stl/map.h"
 #include "test.h"
-#include "fl/stl/bit_cast.h"
 #include "fl/stl/string.h"
 
 
@@ -301,42 +297,6 @@ FL_TEST_CASE("Custom hash and equality") {
 }
 #endif
 
-FL_TEST_CASE("Equivalence with std::unordered_set for basic operations") {  // okay std namespace - testing compatibility
-    fl::unordered_set<int> custom_set;
-    std::unordered_set<int> std_set;  // okay std namespace - testing compatibility
-    
-    // Test insertion
-    for (int i = 1; i <= 10; ++i) {
-        custom_set.insert(i);
-        std_set.insert(i);
-    }
-    
-    FL_REQUIRE_EQ(custom_set.size(), std_set.size());
-    
-    // Test lookup
-    for (int i = 1; i <= 10; ++i) {
-        bool custom_found = custom_set.find(i) != custom_set.end();
-        bool std_found = std_set.find(i) != std_set.end();
-        FL_REQUIRE_EQ(custom_found, std_found);
-    }
-    
-    // Test non-existent element
-    FL_REQUIRE_EQ(custom_set.find(99) == custom_set.end(), 
-               std_set.find(99) == std_set.end());
-    
-    // Test erase
-    custom_set.erase(5);
-    std_set.erase(5);
-    FL_REQUIRE_EQ(custom_set.size(), std_set.size());
-    FL_REQUIRE_EQ(custom_set.find(5) == custom_set.end(),
-               std_set.find(5) == std_set.end());
-    
-    // Test clear
-    custom_set.clear();
-    std_set.clear();
-    FL_REQUIRE_EQ(custom_set.size(), std_set.size());
-    FL_REQUIRE_EQ(custom_set.size(), 0u);
-}
 
 FL_TEST_CASE("Edge cases") {
     fl::unordered_set<int> s;

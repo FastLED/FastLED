@@ -49,11 +49,11 @@
 
   # Platform-specific headers should not be suggested directly
   # Use @"regex" syntax (IWYU does not support shell globs - * is literal)
-  { include: ['@"platforms/.*/fastled_.*\\.h"' is now marked with pragma,
-  
+  # Note: platforms/.*/fastled_.*\.h is now marked with pragma in source files
+
   # Internal headers should redirect to public API
   { include: ['"platforms/null_progmem.h"', 'private', '"fastled_progmem.h"', 'public'] },
-  { include: ['"power_mgt.h"' is now marked with pragma,
+  # Note: power_mgt.h is now marked with pragma in source files
   
   # fl/ namespace headers - the modern FastLED API
   { include: ['"fl/vector.h"', 'public', '"fl/vector.h"', 'public'] },
@@ -75,7 +75,7 @@
   { include: ['@"fx/detail/.*"', 'private', '"fl/fx/fx.h"', 'public'] },
   
   # Third-party headers should not be suggested for user code
-  { include: ['@"third_party/.*"' is now marked with pragma,
+  # Note: third_party/.* is now marked with pragma in source files
 
   # Chipset-specific headers redirect to main header
   
@@ -133,7 +133,7 @@
   # AVR Platform Headers
   # These don't exist on stub - map to FastLED's progmem abstraction
   { include: ['<avr/pgmspace.h>', 'private', '"fastled_progmem.h"', 'public'] },
-  { include: ['<avr/io.h>' is now marked with pragma,
+  # Note: <avr/io.h> is now marked with pragma in source files
 
   # ESP32 Arduino HAL Headers
   { include: ['<esp32-hal-gpio.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
@@ -163,7 +163,7 @@
   { include: ['<freertos/queue.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
 
   # ARM/Teensy Platform Headers
-  { include: ['<kinetis.h>' is now marked with pragma,
+  # Note: <kinetis.h> is now marked with pragma in source files
 
   # Raspberry Pi Pico SDK Headers
 
@@ -187,7 +187,7 @@
   # ========================================================================
   # These are implementation files, not headers. IWYU should never recommend them.
   # Only _build.cpp.hpp files include them (enforced by a separate linter).
-  { include: ['@".*\\.cpp\\.hpp"' is now marked with pragma,
+  # Note: .*\.cpp\.hpp is now marked with pragma in source files
 
   # ========================================================================
   # Platform infrastructure headers (public within platform code)
@@ -204,5 +204,5 @@
   # Matches any header under platforms/ at any depth (except those listed above)
   # and redirects to fl/detail/private.h.
   # Note: Headers marked above will be processed first and won't be redirected.
-  { include: ['@"platforms/.*"' is now marked with pragma,
+  # Note: platforms/.* is now marked with pragma in source files
 ]
