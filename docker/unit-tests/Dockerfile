@@ -6,36 +6,33 @@ FROM debian:bookworm-slim
 ENV DEBIAN_FRONTEND=noninteractive
 
 # ============================================================================
-# OPTIMIZED DEPENDENCY LIST - Iteration 4
+# OPTIMIZED LAYER STRUCTURE FOR FAST REBUILDS
 # ============================================================================
-# The clang-tool-chain Python package provides the LLVM/Clang compiler,
-# but we still need some system packages for linking and building.
+# Layer 1: System packages (rarely changes)
+# Layer 2: uv installation (rarely changes)
+# Layer 3: pyproject.toml copy (changes when dependencies change)
+# Layer 4: Python dependency installation (cached unless pyproject.toml changes)
+# Layer 5: Clang toolchain pre-installation (cached unless versions change)
+# Layer 6: Source code copy (changes frequently, but all deps already cached)
+# Layer 7: Local package installation (fast since deps cached)
 #
-# REMOVED (provided by uv/Python packages):
-#   - python3, python3-pip, python3-venv (uv provides Python)
-#   - cmake (meson/ninja handles builds)
-#   - ninja-build (Python ninja package provides this)
-#   - clang (clang-tool-chain provides this)
-#   - pkg-config (not used by our meson builds)
-#   - git (not required for uv sync or clang-tool-chain)
-#
-# REQUIRED (confirmed through testing):
+# This structure ensures that:
+# - Source code changes only invalidate layers 6-7 (fast rebuild)
+# - Dependency changes invalidate layers 4-7 (medium rebuild)
+# - System package changes invalidate layers 2-7 (full rebuild)
+
+# ============================================================================
+# LAYER 1: System packages (cached until package list changes)
+# ============================================================================
+# REQUIRED packages:
 #   - curl: for fetching uv installer
 #   - ca-certificates: HTTPS support for curl
 #   - libc6-dev: C runtime libraries (crt1.o, crti.o, libc, etc.)
 #   - libstdc++-12-dev: C++ standard library
 #   - libgcc-12-dev: GCC runtime library (libgcc_s)
 #   - libxml2: Required by clang-tool-chain's bundled ld.lld
-#
-# NOT REQUIRED (clang-tool-chain provides these):
-#   - lld: clang-tool-chain bundles ld.lld
-#
-# NOTE: First run will be slow due to:
-#   - Python download by uv (~35 MB)
-#   - Package installation (~150 packages)
-#   - Clang toolchain download by clang-tool-chain (~190 MB)
-#
-# Install all required packages in a single layer to minimize image size
+#   - valgrind: For callgrind profiling and analysis
+#   - binutils: Provides strip command for removing debug symbols
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
@@ -43,21 +40,51 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libstdc++-12-dev \
     libgcc-12-dev \
     libxml2 \
+    valgrind \
+    binutils \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
-# Install uv (Python package manager) - this also provides Python!
+# ============================================================================
+# LAYER 2: Install uv (cached until uv version changes)
+# ============================================================================
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Add uv to PATH
 ENV PATH="/root/.local/bin:${PATH}"
 
 # Set working directory
 WORKDIR /fastled
 
-# NOTE: Files are NOT copied into the image.
-# Source code is mounted via volume at runtime for faster builds.
-# The .venv and .build directories use named volumes for persistence.
+# ============================================================================
+# LAYER 3: Copy dependency specification (cached until pyproject.toml changes)
+# ============================================================================
+COPY pyproject.toml README.md ./
+
+# ============================================================================
+# LAYER 4: Install Python dependencies (cached unless pyproject.toml changes)
+# ============================================================================
+# Use --no-install-project to skip installing local 'ci' package
+# (source code not copied yet, will be installed in Layer 7)
+RUN uv sync --no-install-project
+
+# ============================================================================
+# LAYER 5: Pre-install clang-tool-chain (~190MB download, cached)
+# ============================================================================
+# Trigger clang installation to cache the download (~190MB)
+# This layer is only invalidated if the clang-tool-chain version changes
+# NOTE: LLDB pre-install skipped due to upstream 404 error for lldb-21.1.5
+#       LLDB will be installed on-demand if needed (not required for builds)
+RUN uv run clang-tool-chain-cpp --version
+
+# ============================================================================
+# LAYER 6: Copy source code (invalidates when source changes)
+# ============================================================================
+COPY ci/ ./ci/
+COPY src/ ./src/
+
+# ============================================================================
+# LAYER 7: Install local 'ci' package (fast, deps already cached)
+# ============================================================================
+RUN uv sync
 
 # Default command
 CMD ["/bin/bash"]

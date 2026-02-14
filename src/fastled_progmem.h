@@ -1,10 +1,10 @@
 #pragma once
 
-#include "platforms/is_platform.h"
-#include "fl/int.h"
+#include "platforms/is_platform.h"  // ok platform headers
+#include "fl/int.h"  // ok platform headers
 
 #if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
-#include "platforms/null_progmem.h"
+#include "platforms/null_progmem.h"  // ok platform headers
 #elif defined(ESP8266)
 #include "platforms/esp/8266/progmem_esp8266.h"  // ok platform headers
 #elif defined(FL_IS_STM32)
@@ -95,21 +95,31 @@
 
 #endif
 
-/// @def FL_ALIGN_PROGMEM
-/// Helps to force 4-byte alignment for platforms with unaligned access
+/// @def FL_ALIGN_PROGMEM(N)
+/// Force N-byte alignment for platforms with unaligned access or cache-line optimization
 ///
 /// On some platforms, most notably ARM M0, unaligned access
 /// to 'PROGMEM' for multibyte values (e.g. read dword) is
 /// not allowed and causes a crash.  This macro can help
-/// force 4-byte alignment as needed.  The FastLED gradient
+/// force alignment as needed.  The FastLED gradient
 /// palette code uses 'read dword', and now uses this macro
 /// to make sure that gradient palettes are 4-byte aligned.
+///
+/// Usage: FL_ALIGN_PROGMEM(N) where N is the alignment in bytes
+/// - FL_ALIGN_PROGMEM(4):  4-byte alignment (safe default for all platforms)
+/// - FL_ALIGN_PROGMEM(64): Cache-line optimization on x86/ARM/ESP
+///
+/// Platform-specific behavior:
+/// - x86/WASM: Uses __attribute__((aligned(N))) for cache-line optimization
+/// - AVR: Caps at 4 bytes (flash PROGMEM doesn't benefit from larger alignment)
+/// - ESP32/ESP8266: Supports full alignment (cache-line optimization)
+/// - ARM: Supports full alignment
 
 #ifndef FL_ALIGN_PROGMEM
 #if defined(FL_IS_ARM) || defined(ESP32) || defined(FASTLED_DOXYGEN)
-#define FL_ALIGN_PROGMEM  __attribute__ ((aligned (4)))
+#define FL_ALIGN_PROGMEM(N)  __attribute__ ((aligned (N)))
 #else
-#define FL_ALIGN_PROGMEM
+#define FL_ALIGN_PROGMEM(N)
 #endif
 #endif
 

@@ -6,6 +6,7 @@ Usage:
     python ci/profile/callgrind_analyze.py profile_sincos16
 """
 
+import platform
 import subprocess
 import sys
 from pathlib import Path
@@ -19,6 +20,18 @@ class CallgrindAnalyzer:
 
     def run_callgrind(self) -> bool:
         """Run profiler under callgrind"""
+        # Check if running on Windows
+        if platform.system() == "Windows":
+            print("⚠️  ERROR: Callgrind (valgrind) is not available on Windows.")
+            print()
+            print("🐳 SOLUTION: Use Docker for callgrind profiling:")
+            print("   bash profile <target> --docker --callgrind")
+            print()
+            print("   Example: bash profile sincos32_comparison --docker --callgrind")
+            print()
+            print("💡 AI AGENTS: Always use --docker flag when requesting callgrind on Windows")
+            return False
+
         cmd = [
             "valgrind",
             "--tool=callgrind",

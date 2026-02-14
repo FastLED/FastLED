@@ -8,6 +8,7 @@ Usage:
 """
 
 import argparse
+import hashlib
 import json
 import subprocess
 import sys
@@ -15,7 +16,11 @@ import time
 from pathlib import Path
 from typing import Any
 
+from running_process import RunningProcess
+from running_process.process_output_reader import EndOfStream
+
 from ci.util.deadlock_detector import handle_hung_test
+from ci.util.docker_helper import attempt_start_docker
 
 
 class ProfileRunner:
@@ -26,13 +31,22 @@ class ProfileRunner:
         build_mode: str = "release",
         use_docker: bool = False,
         skip_generate: bool = False,
+        force_regenerate: bool = False,
         use_callgrind: bool = False,
         debuggable: bool = False,
     ):
         self.target = target
         self.iterations = iterations
-        # If debuggable mode requested, override to 'quick' for stack traces
-        if debuggable and build_mode == "release":
+        # Auto-select build mode based on flags
+        # Priority: callgrind > debuggable > user-specified
+        if use_callgrind and build_mode == "release":
+            # Callgrind needs DWARF4 debug symbols (Valgrind 3.19 compatibility)
+            self.build_mode = "profile"
+            print(
+                "ℹ️  Callgrind mode: Using 'profile' build mode (DWARF4 for Valgrind 3.19)"
+            )
+        elif debuggable and build_mode == "release":
+            # Debuggable mode needs stack traces
             self.build_mode = "quick"
             print(
                 "ℹ️  Debuggable mode: Using 'quick' build mode for stack trace preservation"
@@ -41,6 +55,7 @@ class ProfileRunner:
             self.build_mode = build_mode
         self.use_docker = use_docker
         self.skip_generate = skip_generate
+        self.force_regenerate = force_regenerate
         self.use_callgrind = use_callgrind
         self.debuggable = debuggable
         self.test_name = "profile_" + self._sanitize_name(
@@ -60,18 +75,28 @@ class ProfileRunner:
         )
 
     def generate_profiler(self) -> bool:
-        """Generate profiler test if it doesn't exist"""
-        if self.skip_generate and self.test_path.exists():
-            print(f"Using existing profiler: {self.test_path}")
+        """Generate profiler test with smart defaults (no interactive prompts)"""
+        # Case 1: Profiler exists and we're not forcing regeneration
+        if self.test_path.exists() and not self.force_regenerate:
+            if self.skip_generate:
+                print(f"Using existing profiler: {self.test_path}")
+            else:
+                print(f"Using existing profiler: {self.test_path}")
+                print("  (Use --regenerate to recreate from template)")
             return True
 
-        if self.test_path.exists() and not self.skip_generate:
-            print(f"Profiler already exists: {self.test_path}")
-            response = input("Regenerate? [y/N]: ").strip().lower()
-            if response != "y":
-                return True
+        # Case 2: Profiler doesn't exist but generation is disabled
+        if not self.test_path.exists() and self.skip_generate:
+            print(f"❌ Profiler not found: {self.test_path}")
+            print("  Remove --no-generate flag to auto-generate, or create it manually")
+            return False
 
-        print(f"Generating profiler for {self.target}...")
+        # Case 3: Generate profiler (either doesn't exist or --regenerate was used)
+        if self.force_regenerate:
+            print(f"Regenerating profiler for {self.target}...")
+        else:
+            print(f"Generating profiler for {self.target}...")
+
         try:
             subprocess.run(
                 [
@@ -89,17 +114,19 @@ class ProfileRunner:
             return False
 
     def build_profiler(self) -> bool:
-        """Build profiler binary directly using meson/ninja"""
+        """Build profiler binary using test system (supports Docker)"""
         print(f"Building profiler (mode: {self.build_mode})...")
 
-        # Use ci/meson/compile.py to build the specific target
-        # This handles meson setup, configuration, and building
+        # Use test system which properly handles Docker builds
+        # test.py wraps the Meson build system and supports Docker
         cmd = [
             "uv",
             "run",
             "python",
-            "ci/meson/compile.py",
-            self.test_name,  # Build only this specific target
+            "test.py",
+            self.test_name,
+            "--cpp",
+            "--build",  # Build-only mode
             "--build-mode",
             self.build_mode,
         ]
@@ -108,36 +135,52 @@ class ProfileRunner:
             cmd.append("--docker")
 
         try:
-            subprocess.run(cmd, check=True, capture_output=True)
-            print(f"✓ Built {self.test_name}")
-            return True
-        except subprocess.CalledProcessError as e:
+            # Use RunningProcess to stream output and avoid buffer deadlock
+            # test.py can produce lots of output (multiple MB), so we must stream
+            proc = RunningProcess(
+                cmd,
+                auto_run=True,
+                timeout=600,  # 10 minute timeout for Docker builds
+            )
+
+            # Stream all output to console
+            while line := proc.get_next_line(timeout=600):
+                if isinstance(line, EndOfStream):
+                    break
+                # Print build output in real-time
+                print(line, end="")
+
+            # Check exit code
+            exit_code = proc.wait()
+            if exit_code == 0:
+                print(f"✓ Built {self.test_name}")
+                return True
+            else:
+                print(f"Error: Build failed with exit code {exit_code}")
+                return False
+
+        except Exception as e:
             print(f"Error building profiler: {e}")
-            if e.stderr:
-                print(
-                    f"stderr: {e.stderr.decode() if isinstance(e.stderr, bytes) else e.stderr}"
-                )
             return False
 
     def get_binary_path(self) -> Path:
         """Get path to built profiler binary"""
-        if self.use_docker:
-            # Docker builds go to .build/meson-docker-<mode>/tests/profile/
-            binary_path = Path(
-                f".build/meson-docker-{self.build_mode}/tests/profile/{self.test_name}"
-            )
-        else:
-            # Local builds go to .build/meson-<mode>/tests/profile/
-            binary_path = Path(
-                f".build/meson-{self.build_mode}/tests/profile/{self.test_name}"
-            )
-            if not binary_path.exists():
-                # Windows adds .exe extension
-                binary_path = Path(
-                    f".build/meson-{self.build_mode}/tests/profile/{self.test_name}.exe"
-                )
+        # Both Docker and local builds use the same .build/meson-<mode>/ directory
+        # Docker mounts the host's .build directory, so binaries are in the same location
+        base_path = f".build/meson-{self.build_mode}/tests/profile/{self.test_name}"
 
-        return binary_path
+        # Try without extension first (Linux/Docker)
+        binary_path = Path(base_path)
+        if binary_path.exists():
+            return binary_path
+
+        # Try with .exe extension (Windows local builds)
+        binary_path_exe = Path(f"{base_path}.exe")
+        if binary_path_exe.exists():
+            return binary_path_exe
+
+        # Return the expected path even if it doesn't exist (for error messages)
+        return Path(base_path)
 
     def _run_with_timeout(
         self, cmd: list[str], timeout_seconds: int = 120
@@ -194,6 +237,32 @@ class ProfileRunner:
 
     def run_benchmark(self) -> bool:
         """Run benchmark iterations and collect results"""
+        # Docker mode: Binary is in Docker volume, not accessible from host
+        # For Docker+callgrind, we skip iterations and rely on callgrind analysis
+        if self.use_docker and self.use_callgrind:
+            print("🐳 Docker + Callgrind mode: Skipping benchmark iterations")
+            print("   (Callgrind provides deterministic instruction counts)")
+            # Create minimal results file for callgrind
+            minimal_result = {
+                "variant": "docker_build",
+                "target": self.target,
+                "total_calls": 1,
+                "total_time_ns": 0,
+                "ns_per_call": 0,
+                "calls_per_sec": 0,
+            }
+            with open(self.results_file, "w") as f:
+                json.dump([minimal_result], f, indent=2)
+            return True
+
+        if self.use_docker:
+            print("⚠️  Docker benchmark iterations not yet fully supported")
+            print("   (Binary is in Docker volume, not accessible from host)")
+            print(
+                "   Use --callgrind for Docker-based analysis, or run without --docker"
+            )
+            return False
+
         print(f"Running {self.iterations} iterations...")
         print(f"⏱️  Timeout: 120 seconds per iteration (deadlock detector enabled)")
         if self.debuggable or self.build_mode in ["debug", "quick"]:
@@ -215,18 +284,19 @@ class ProfileRunner:
 
             try:
                 if self.use_docker:
-                    # Docker: Use built-in timeout (can't attach debugger inside container easily)
+                    # Docker: Run binary inside the same container used for building
+                    # The binary is in the Docker build volume, not the host filesystem
                     result = subprocess.run(
                         [
-                            "docker",
+                            "uv",
                             "run",
-                            "-it",
-                            "--rm",
-                            "-v",
-                            f"{Path.cwd()}:/workspace",
-                            "fastled-test",
-                            f"/workspace/{binary_path}",
-                            "baseline",
+                            "python",
+                            "test.py",
+                            self.test_name,
+                            "--cpp",
+                            "--docker",
+                            "--build-mode",
+                            self.build_mode,
                         ],
                         capture_output=True,
                         text=True,
@@ -303,33 +373,141 @@ class ProfileRunner:
             print(f"Error analyzing results: {e}")
             return False
 
+    def _get_project_hash(self) -> str:
+        """Generate a short hash from the project path for Docker volume naming.
+
+        Returns:
+            8-character hex hash of the path
+        """
+        # Normalize path (resolve symlinks, convert to absolute)
+        normalized_path = str(Path.cwd().resolve()).lower()
+        # Use SHA256 and take first 8 characters
+        return hashlib.sha256(normalized_path.encode()).hexdigest()[:8]
+
+    def ensure_docker_running(self) -> bool:
+        """Ensure Docker is running if Docker mode is enabled.
+
+        Returns:
+            True if Docker is ready (or not needed), False if Docker failed to start
+        """
+        if not self.use_docker:
+            return True  # Docker not needed
+
+        print("🐳 Checking Docker availability...")
+        success, message = attempt_start_docker()
+
+        if success:
+            print(f"✓ {message}")
+            return True
+        else:
+            print(f"❌ Docker Error: {message}")
+            print()
+            print("Unable to start Docker automatically.")
+            print("Please start Docker Desktop manually and try again.")
+            return False
+
     def run_callgrind(self) -> bool:
         """Run callgrind analysis"""
         print("\nRunning callgrind analysis...")
 
-        binary_path = self.get_binary_path()
-        if not binary_path.exists():
-            print(f"Error: Binary not found at {binary_path}")
-            return False
+        if self.use_docker:
+            # Docker mode: Run callgrind using test system infrastructure
+            # The test system uses Docker volumes, so we need to use test.py to access them
+            print("🐳 Running callgrind inside Docker container...")
+            try:
+                # Run a custom callgrind wrapper script inside Docker
+                # Use test.py's Docker infrastructure to ensure volume access
+                callgrind_script = f"""
+#!/bin/bash
+set -e
+cd /fastled
+BINARY=.build/meson-{self.build_mode}/tests/profile/{self.test_name}
+if [ ! -f "$BINARY" ]; then
+    echo "Error: Binary not found at $BINARY"
+    ls -la .build/meson-{self.build_mode}/tests/profile/ || true
+    exit 1
+fi
+echo "Running callgrind on $BINARY..."
+echo "Build mode: {self.build_mode} (DWARF4 debug symbols for Valgrind 3.19 compatibility)"
+# Run callgrind directly on binary with DWARF4 symbols
+valgrind --tool=callgrind \\
+    --callgrind-out-file=/fastled/callgrind.out \\
+    "$BINARY" baseline
+echo "Callgrind complete! Output: callgrind.out"
+ls -lh /fastled/callgrind.out
+"""
+                # Write script to temp file with Unix line endings (LF only)
+                script_path = Path("_callgrind_temp.sh")
+                script_path.write_text(callgrind_script, newline="\n")
 
-        try:
-            subprocess.run(
-                [
-                    "uv",
-                    "run",
-                    "python",
-                    "ci/profile/callgrind_analyze.py",
-                    str(binary_path),
-                ],
-                check=True,
-            )
-            return True
-        except subprocess.CalledProcessError as e:
-            print(f"Error running callgrind: {e}")
-            return False
+                # Run via Docker with same volumes as test system
+                print(
+                    f"   Docker volume: fastled-docker-build-{self._get_project_hash()}"
+                )
+                result = subprocess.run(
+                    [
+                        "docker",
+                        "run",
+                        "--rm",
+                        "-v",
+                        f"{Path.cwd().as_posix()}:/fastled",
+                        "-v",
+                        f"fastled-docker-build-{self._get_project_hash()}:/fastled/.build",
+                        "fastled-unit-tests",
+                        "bash",
+                        "/fastled/_callgrind_temp.sh",
+                    ],
+                    capture_output=False,  # Show output in real-time
+                    check=False,
+                )
+
+                # Cleanup temp script (keep on error for debugging)
+                if result.returncode == 0:
+                    script_path.unlink(missing_ok=True)
+
+                if result.returncode == 0:
+                    print("\n✓ Callgrind analysis complete")
+                    print("📊 Callgrind output: callgrind.out")
+                    print("   View with: callgrind_annotate callgrind.out")
+                    return True
+                else:
+                    print(f"\n⚠️  Callgrind exited with code {result.returncode}")
+                    print(f"   Debug script saved: _callgrind_temp.sh")
+                    print("   Check output above for details")
+                    return False
+
+            except Exception as e:
+                print(f"Error running callgrind in Docker: {e}")
+                return False
+        else:
+            # Local mode: Run callgrind directly
+            binary_path = self.get_binary_path()
+            if not binary_path.exists():
+                print(f"Error: Binary not found at {binary_path}")
+                return False
+
+            try:
+                subprocess.run(
+                    [
+                        "uv",
+                        "run",
+                        "python",
+                        "ci/profile/callgrind_analyze.py",
+                        str(binary_path),
+                    ],
+                    check=True,
+                )
+                return True
+            except subprocess.CalledProcessError as e:
+                print(f"Error running callgrind: {e}")
+                return False
 
     def run(self) -> int:
         """Run complete profiling workflow"""
+        # Step 0: Ensure Docker is running (if needed)
+        if not self.ensure_docker_running():
+            return 1
+
         # Step 1: Generate profiler
         if not self.generate_profiler():
             return 1
@@ -338,13 +516,14 @@ class ProfileRunner:
         if not self.build_profiler():
             return 1
 
-        # Step 3: Run benchmarks
+        # Step 3: Run benchmarks (skipped for Docker+callgrind)
         if not self.run_benchmark():
             return 1
 
-        # Step 4: Analyze results
-        if not self.analyze_results():
-            return 1
+        # Step 4: Analyze results (skip for Docker+callgrind mode)
+        if not (self.use_docker and self.use_callgrind):
+            if not self.analyze_results():
+                return 1
 
         # Step 5: Optional callgrind analysis
         if self.use_callgrind:
@@ -390,6 +569,11 @@ Examples:
         help="Skip test generation (use existing profiler)",
     )
     parser.add_argument(
+        "--regenerate",
+        action="store_true",
+        help="Force regeneration of profiler (overwrite existing)",
+    )
+    parser.add_argument(
         "--callgrind",
         action="store_true",
         help="Run callgrind analysis (slower)",
@@ -408,6 +592,7 @@ Examples:
         build_mode=args.build_mode,
         use_docker=args.docker,
         skip_generate=args.no_generate,
+        force_regenerate=args.regenerate,
         use_callgrind=args.callgrind,
         debuggable=args.debuggable,
     )

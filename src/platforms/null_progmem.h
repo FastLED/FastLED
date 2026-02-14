@@ -45,7 +45,10 @@ static inline fl::u32 fl_pgm_read_dword_near_safe(const void* addr) {
 #define FL_PGM_READ_BYTE_NEAR(x) (fl_pgm_read_byte_near_safe(x))
 #define FL_PGM_READ_WORD_NEAR(x) (fl_pgm_read_word_near_safe(x))
 #define FL_PGM_READ_DWORD_NEAR(x) (fl_pgm_read_dword_near_safe(x))
-#define FL_ALIGN_PROGMEM
+
+// On x86/WASM (platforms without PROGMEM), alignment is useful for cache-line optimization
+// Use alignas(N) in C++ or __attribute__((aligned(N))) for maximum compatibility
+#define FL_ALIGN_PROGMEM(N) __attribute__((aligned(N)))
 
 // Aligned 4-byte PROGMEM read. On non-AVR/non-flash platforms, data lives in
 // normal memory. Uses __builtin_memcpy (compiler intrinsic) which always lowers

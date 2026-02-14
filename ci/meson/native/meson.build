@@ -154,7 +154,10 @@ profile_stacktrace_args = [
 # Profile test compilation flags
 # Always include debug symbols (-g) for function names in stack traces
 # Conditionally include stack trace preservation flags in debug/quick modes only
-profile_specific_args = ['-g']  # Always on: function names + line numbers
+profile_specific_args = [
+  '-g',  # Always on: function names + line numbers
+  '-DFL_DISABLE_OPTIMIZATION',  # Disable FastLED optimization macros for accurate profiling
+]
 if build_mode == 'debug' or build_mode == 'quick'
   # Debug/quick modes: Add stack trace preservation (helps deadlock detector)
   profile_specific_args += profile_stacktrace_args

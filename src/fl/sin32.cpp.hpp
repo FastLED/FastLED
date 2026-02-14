@@ -20,7 +20,7 @@ namespace fl {
 // Quadratic interpolation uses val+deriv pairs for O(h^3) accuracy.
 // Quarter-wave symmetry reconstructs the full sine wave at runtime.
 
-FL_ALIGN_PROGMEM const i32 FL_PROGMEM sinQuarterLut[] = {
+FL_ALIGN_PROGMEM(64) const i32 FL_PROGMEM sinQuarterLut[] = {
                0,   52705570,  // [ 0]   0.00 deg
         52700279,   52689696,  // [ 1]   1.41 deg
        105368813,   52642084,  // [ 2]   2.81 deg

@@ -3,6 +3,8 @@
 #include "fl/int.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/optional.h"
+#include "fl/stl/string.h"
+#include "fl/stl/chrono.h"  // For fl::millis()
 
 #ifdef FASTLED_TESTING
 #include "fl/stl/function.h"
@@ -169,7 +171,7 @@ bool serial_ready();
 // =============================================================================
 // Timing Functions
 // =============================================================================
-// Note: fl::millis() is provided by fl/stl/time.h
+// Note: fl::millis() is provided by fl/stl/chrono.h
 // Note: fl::delay() is provided by fl/delay.h
 
 #ifdef FASTLED_TESTING

@@ -119,12 +119,12 @@ using fl::LINEARBLEND_NOWRAP;
 #pragma GCC diagnostic ignored "-Wpedantic"
 
 #define DEFINE_GRADIENT_PALETTE(X) \
-  FL_ALIGN_PROGMEM \
+  FL_ALIGN_PROGMEM(4) \
   extern const TProgmemRGBGradientPalette_byte X[] FL_PROGMEM =
 
 /// Forward-declaration macro for DEFINE_GRADIENT_PALETTE(X)
 #define DECLARE_GRADIENT_PALETTE(X) \
-  FL_ALIGN_PROGMEM \
+  FL_ALIGN_PROGMEM(4) \
   extern const TProgmemRGBGradientPalette_byte X[] FL_PROGMEM
 
 #pragma GCC diagnostic pop

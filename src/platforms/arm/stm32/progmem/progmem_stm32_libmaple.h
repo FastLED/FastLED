@@ -21,7 +21,9 @@
 #define FL_PGM_READ_BYTE_NEAR(x) (*((const fl::u8 *)(x)))
 #define FL_PGM_READ_WORD_NEAR(x) (*((const fl::u16 *)(x)))
 #define FL_PGM_READ_DWORD_NEAR(x) (*((const fl::u32 *)(x)))
-#define FL_ALIGN_PROGMEM
+
+// STM32 can benefit from cache-line alignment for large lookup tables
+#define FL_ALIGN_PROGMEM(N) __attribute__((aligned(N)))
 
 // Aligned 4-byte PROGMEM read. STM32 has flat memory — direct dereference.
 #define FL_PGM_READ_DWORD_ALIGNED(addr) (*((const fl::u32*)(addr)))

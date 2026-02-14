@@ -60,12 +60,11 @@ examples/
 **/tmp
 **/*.log
 
-# UV virtual environment
+# UV virtual environment (will be created during build)
 .venv/
 venv/
 
-# FastLED source (will be cloned fresh in Docker)
-src/
-*.h
-*.cpp
+# Allow ci/ and src/ directories for Docker layer caching
 !ci/**
+!src/**
+!pyproject.toml

@@ -3,7 +3,8 @@
 
 #include "fl/int.h"
 #include "force_inline.h"
-#include "fastled_progmem.h"
+#include "platforms/null_progmem.h"
+#include "platforms/shared/simd_noop.hpp" // ok platform headers
 #include "fl/simd.h"
 #include "fl/align.h"
 
@@ -54,7 +55,10 @@ FASTLED_FORCE_INLINE static i32 sin32_interp(u8 qi, u8 qi_next, i32 dmask, u32 t
 // output is between -2147418112 and 2147418112
 // Branchless quarter-wave lookup with quadratic interpolation.
 // Cost: 3 table loads, 2 i64 multiplies, no branches.
-FASTLED_FORCE_INLINE static i32 sin32(u32 angle) {
+#ifndef FL_DISABLE_OPTIMIZATION
+FASTLED_FORCE_INLINE
+#endif
+static i32 sin32(u32 angle) {
     u8 angle256 = static_cast<u8>(angle >> 16);  // 0..255
     u32 t = angle & 0xFFFF;                       // 0..65535
 
@@ -76,7 +80,10 @@ FASTLED_FORCE_INLINE static i32 sin32(u32 angle) {
 
 // 0 to 16777216 is a full circle
 // output is between -2147418112 and 2147418112
-FASTLED_FORCE_INLINE static i32 cos32(u32 angle) {
+#ifndef FL_DISABLE_OPTIMIZATION
+FASTLED_FORCE_INLINE
+#endif
+static i32 cos32(u32 angle) {
     return sin32(angle + 4194304u);
 }
 
@@ -84,7 +91,10 @@ FASTLED_FORCE_INLINE static i32 cos32(u32 angle) {
 // Shares angle decomposition; derives cos table index from sin's (cos_qi = 64 - sin_qi).
 // Cost: 6 table loads, 4 i64 multiplies, no branches.
 // (vs 2 separate calls: 6 loads, 4 muls, but duplicate angle decomposition)
-FASTLED_FORCE_INLINE static SinCos32 sincos32(u32 angle) {
+#ifndef FL_DISABLE_OPTIMIZATION
+FASTLED_FORCE_INLINE
+#endif
+static SinCos32 sincos32(u32 angle) {
     u8 angle256 = static_cast<u8>(angle >> 16);
     u32 t = angle & 0xFFFF;
 
@@ -146,7 +156,10 @@ struct FL_ALIGNAS(16) SinCos32_simd {
 ///
 /// @param angles 4 u32 angles (0 to 16777216 per angle is a full circle)
 /// @return SinCos32_simd with raw i32 values (range: -2147418112 to 2147418112)
-FASTLED_FORCE_INLINE SinCos32_simd sincos32_simd(simd::simd_u32x4 angles) {
+#ifndef FL_DISABLE_OPTIMIZATION
+FASTLED_FORCE_INLINE
+#endif
+SinCos32_simd sincos32_simd(simd::simd_u32x4 angles) {
     // Phase 1a: SIMD angle decomposition (extract components vectorially)
     // Extract angle256 (top 8 bits) using vectorized right shift
     simd::simd_u32x4 angle256_vec = simd::srl_u32_4(angles, 16);
@@ -184,53 +197,93 @@ FASTLED_FORCE_INLINE SinCos32_simd sincos32_simd(simd::simd_u32x4 angles) {
     simd::simd_u32x4 quadrant_xor_bit0 = simd::and_u32_4(quadrant_xor, simd::set1_u32_4(1));  // & 1
     simd::simd_u32x4 cvmask_vec = simd::sub_i32_4(simd::set1_u32_4(0), quadrant_xor_bit0);  // -bit
 
-    // Phase 1c: Scalar quarter-wave index mapping (branchless bit manipulation)
-    // Arrays for LUT indices
+    // Phase 1c: Vectorized quarter-wave index mapping (SIMD branchless bit manipulation)
+    // Compute all 4 LUT indices in parallel using SIMD operations
+
+    // Compute qi_s vectorially: qi_s = pos + mirror_s * (64 - 2*pos)
+    // term = 64 - 2*pos = 64 - (pos + pos)
+    simd::simd_u32x4 two_pos = simd::add_i32_4(pos_vec, pos_vec);  // 2*pos
+    simd::simd_u32x4 term_vec = simd::sub_i32_4(simd::set1_u32_4(64), two_pos);  // 64 - 2*pos
+    simd::simd_u32x4 masked_term = simd::and_u32_4(term_vec, sdmask_vec);  // term & (-mirror_s), sdmask = -mirror_s
+    simd::simd_u32x4 qi_s_vec = simd::add_i32_4(pos_vec, masked_term);  // pos + masked_term
+
+    // Compute qi_next_s vectorially: qi_next_s = qi_s + 1 - 2*mirror_s
+    simd::simd_u32x4 two_mirror_s = simd::add_i32_4(mirror_s_vec, mirror_s_vec);  // 2*mirror_s
+    simd::simd_u32x4 qi_next_s_vec = simd::sub_i32_4(simd::add_i32_4(qi_s_vec, simd::set1_u32_4(1)), two_mirror_s);  // qi_s + 1 - 2*mirror_s
+
+    // Compute qi_c and qi_next_c vectorially: qi_c = 64 - qi_s, qi_next_c = 64 - qi_next_s
+    simd::simd_u32x4 sixty_four = simd::set1_u32_4(64);
+    simd::simd_u32x4 qi_c_vec = simd::sub_i32_4(sixty_four, qi_s_vec);
+    simd::simd_u32x4 qi_next_c_vec = simd::sub_i32_4(sixty_four, qi_next_s_vec);
+
+    // Store all indices once (Phase 2 still needs scalar access for LUT)
     u8 qi_s_array[4], qi_next_s_array[4];  // sin LUT indices
     u8 qi_c_array[4], qi_next_c_array[4];  // cos LUT indices
 
+    u32 qi_s_temp[4], qi_next_s_temp[4], qi_c_temp[4], qi_next_c_temp[4];
+    simd::store_u32_4(qi_s_temp, qi_s_vec);
+    simd::store_u32_4(qi_next_s_temp, qi_next_s_vec);
+    simd::store_u32_4(qi_c_temp, qi_c_vec);
+    simd::store_u32_4(qi_next_c_temp, qi_next_c_vec);
+
+    // Convert to u8 indices
     for (int i = 0; i < 4; i++) {
-        u32 pos = pos_array[i];
-        u32 mirror_s = mirror_s_array[i];  // 0 or 1
-
-        // Branchless quarter-wave mapping using bit masks
-        // mirror_s * term ≡ term & (-mirror_s) where mirror_s ∈ {0, 1}
-        // -mirror_s creates: 0 → 0x00000000, 1 → 0xFFFFFFFF (perfect mask)
-
-        // qi_s = pos + mirror_s * (64 - 2*pos)
-        u32 term = 64 - (pos << 1);              // 64 - 2*pos
-        i32 mask = -static_cast<i32>(mirror_s);  // 0 or 0xFFFFFFFF
-        u8 qi_s = static_cast<u8>(pos + (term & mask));
-
-        // qi_next_s = qi_s + 1 - 2*mirror_s
-        u8 qi_next_s = static_cast<u8>(qi_s + 1 - (mirror_s << 1));
-
-        // Cos quarter-wave mapping (always branchless)
-        u8 qi_c = static_cast<u8>(64 - qi_s);
-        u8 qi_next_c = static_cast<u8>(64 - qi_next_s);
-
-        // Store indices for LUT access
-        qi_s_array[i] = qi_s;
-        qi_next_s_array[i] = qi_next_s;
-        qi_c_array[i] = qi_c;
-        qi_next_c_array[i] = qi_next_c;
+        qi_s_array[i] = static_cast<u8>(qi_s_temp[i]);
+        qi_next_s_array[i] = static_cast<u8>(qi_next_s_temp[i]);
+        qi_c_array[i] = static_cast<u8>(qi_c_temp[i]);
+        qi_next_c_array[i] = static_cast<u8>(qi_next_c_temp[i]);
     }
 
-    // Phase 2: Sequential LUT lookups (cannot be vectorized)
+    // Phase 2: LUT lookups (manually unrolled for better performance)
     i32 y0_s[4], m0_s[4], y1_s[4];  // sin LUT values
     i32 y0_c[4], m0_c[4], y1_c[4];  // cos LUT values
 
-    for (int i = 0; i < 4; i++) {
-        // Sin LUT lookups
-        y0_s[i] = read_sin32_lut(&sinQuarterLut[qi_s_array[i] * 2]);
-        m0_s[i] = read_sin32_lut(&sinQuarterLut[qi_s_array[i] * 2 + 1]);
-        y1_s[i] = read_sin32_lut(&sinQuarterLut[qi_next_s_array[i] * 2]);
+    // Prefetch LUT data to hide memory latency
+    __builtin_prefetch(&sinQuarterLut[qi_s_array[0] * 2], 0, 0);
+    __builtin_prefetch(&sinQuarterLut[qi_s_array[1] * 2], 0, 0);
+    __builtin_prefetch(&sinQuarterLut[qi_s_array[2] * 2], 0, 0);
+    __builtin_prefetch(&sinQuarterLut[qi_s_array[3] * 2], 0, 0);
 
-        // Cos LUT lookups
-        y0_c[i] = read_sin32_lut(&sinQuarterLut[qi_c_array[i] * 2]);
-        m0_c[i] = read_sin32_lut(&sinQuarterLut[qi_c_array[i] * 2 + 1]);
-        y1_c[i] = read_sin32_lut(&sinQuarterLut[qi_next_c_array[i] * 2]);
-    }
+    // Fully unroll loop to eliminate loop overhead and improve ILP
+    // Sin LUT lookups - iteration 0
+    y0_s[0] = read_sin32_lut(&sinQuarterLut[qi_s_array[0] * 2]);
+    m0_s[0] = read_sin32_lut(&sinQuarterLut[qi_s_array[0] * 2 + 1]);
+    y1_s[0] = read_sin32_lut(&sinQuarterLut[qi_next_s_array[0] * 2]);
+
+    // Cos LUT lookups - iteration 0
+    y0_c[0] = read_sin32_lut(&sinQuarterLut[qi_c_array[0] * 2]);
+    m0_c[0] = read_sin32_lut(&sinQuarterLut[qi_c_array[0] * 2 + 1]);
+    y1_c[0] = read_sin32_lut(&sinQuarterLut[qi_next_c_array[0] * 2]);
+
+    // Sin LUT lookups - iteration 1
+    y0_s[1] = read_sin32_lut(&sinQuarterLut[qi_s_array[1] * 2]);
+    m0_s[1] = read_sin32_lut(&sinQuarterLut[qi_s_array[1] * 2 + 1]);
+    y1_s[1] = read_sin32_lut(&sinQuarterLut[qi_next_s_array[1] * 2]);
+
+    // Cos LUT lookups - iteration 1
+    y0_c[1] = read_sin32_lut(&sinQuarterLut[qi_c_array[1] * 2]);
+    m0_c[1] = read_sin32_lut(&sinQuarterLut[qi_c_array[1] * 2 + 1]);
+    y1_c[1] = read_sin32_lut(&sinQuarterLut[qi_next_c_array[1] * 2]);
+
+    // Sin LUT lookups - iteration 2
+    y0_s[2] = read_sin32_lut(&sinQuarterLut[qi_s_array[2] * 2]);
+    m0_s[2] = read_sin32_lut(&sinQuarterLut[qi_s_array[2] * 2 + 1]);
+    y1_s[2] = read_sin32_lut(&sinQuarterLut[qi_next_s_array[2] * 2]);
+
+    // Cos LUT lookups - iteration 2
+    y0_c[2] = read_sin32_lut(&sinQuarterLut[qi_c_array[2] * 2]);
+    m0_c[2] = read_sin32_lut(&sinQuarterLut[qi_c_array[2] * 2 + 1]);
+    y1_c[2] = read_sin32_lut(&sinQuarterLut[qi_next_c_array[2] * 2]);
+
+    // Sin LUT lookups - iteration 3
+    y0_s[3] = read_sin32_lut(&sinQuarterLut[qi_s_array[3] * 2]);
+    m0_s[3] = read_sin32_lut(&sinQuarterLut[qi_s_array[3] * 2 + 1]);
+    y1_s[3] = read_sin32_lut(&sinQuarterLut[qi_next_s_array[3] * 2]);
+
+    // Cos LUT lookups - iteration 3
+    y0_c[3] = read_sin32_lut(&sinQuarterLut[qi_c_array[3] * 2]);
+    m0_c[3] = read_sin32_lut(&sinQuarterLut[qi_c_array[3] * 2 + 1]);
+    y1_c[3] = read_sin32_lut(&sinQuarterLut[qi_next_c_array[3] * 2]);
 
     // Load into SIMD registers for vectorized arithmetic
     simd::simd_u32x4 y0_s_v = simd::load_u32_4(reinterpret_cast<const u32*>(y0_s)); // ok reinterpret cast
