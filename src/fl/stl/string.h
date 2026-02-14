@@ -5,7 +5,6 @@
 
 
 #include "fl/int.h"
-#include "fl/has_include.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/detail/string_holder.h"
 #include "fl/stl/cctype.h"
@@ -16,19 +15,21 @@
 #include <string>
 #endif
 
-#include "fl/geometry.h"
 #include "fl/math_macros.h"
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macro
 #include "fl/stl/optional.h"
 #include "fl/stl/type_traits.h"
-#include "fl/stl/vector.h"
 #include "fl/stl/span.h"
+#include "fl/stl/vector.h"  // IWYU pragma: keep
 #include "fl/stl/variant.h"
-#include "fl/force_inline.h"
 #include "fl/deprecated.h"
 #include "fl/compiler_control.h"
 #include "fl/string_view.h"
 #include "fl/stl/iterator.h"
+#include "fl/bitset_dynamic.h"
+#include "fl/stl/bit_cast.h"
+#include "fl/stl/cstddef.h"
+#include "fl/stl/move.h"
 
 #ifndef FASTLED_STR_INLINED_SIZE
 #define FASTLED_STR_INLINED_SIZE 64
@@ -463,18 +464,19 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
     template <fl::size M> void copy(const StrN<M> &other) {
         fl::size len = other.size();
-        if (len + 1 <= SIZE) {
+        // If source has heap data, share it (preserve heap allocation for interned strings)
+        if (other.hasHeapData()) {
+            heapData() = other.heapData();
+        } else if (len + 1 <= SIZE) {
+            // Small string - use inline storage
             // Ensure we're using inline storage before copying
             if (!mStorage.template is<InlinedBuffer>()) {
                 mStorage = InlinedBuffer{};
             }
             fl::memcpy(inlineData(), other.c_str(), len + 1);
         } else {
-            if (other.hasHeapData()) {
-                heapData() = other.heapData();
-            } else {
-                heapData() = fl::make_shared<StringHolder>(other.c_str());
-            }
+            // Large string from literal/view - allocate new heap storage
+            heapData() = fl::make_shared<StringHolder>(other.c_str());
         }
         mLength = len;
     }
@@ -2398,6 +2400,51 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     // Create a string that references a string_view without copying.
     static string from_view(const string_view& sv) {
         return from_view(sv.data(), sv.size());
+    }
+
+    // ======= FACTORY METHOD FOR INTERNED STRINGS =======
+    // Create a heap-allocated string suitable for interning.
+    // Forces heap allocation even for small strings to ensure stable pointers
+    // for string interning. The string is reference-counted via shared_ptr,
+    // making copies cheap (just pointer + refcount increment).
+    // Usage: auto s = string::interned("hello");
+    static string interned(const char* str, fl::size len) {
+        string result;
+        if (!str || len == 0) {
+            return result;
+        }
+
+        // Force heap allocation by creating a StringHolder
+        // This ensures the string data pointer is stable across copies
+        auto holder = fl::make_shared<StringHolder>(str, len);
+        result.mLength = len;
+        result.mStorage = NotNullStringHolderPtr(holder);
+        return result;
+    }
+
+    static string interned(const char* str) {
+        if (!str) return string();
+        return interned(str, fl::strlen(str));
+    }
+
+    static string interned(const string_view& sv) {
+        return interned(sv.data(), sv.size());
+    }
+
+    // ======= COPY WITH MATERIALIZATION =======
+    // Create a copy of the string, ensuring it's not a view (materializes if needed).
+    // The result will use inline storage for small strings or heap for large ones.
+    // This is useful for StringInterner to ensure stored strings don't reference
+    // external memory that might become invalid.
+    static string copy_no_view(const string& str) {
+        if (str.is_referencing()) {
+            // String is a view or literal - copy the data to own it
+            string result;
+            result.copy(str.c_str(), str.size());
+            return result;
+        }
+        // String already owns its data (inline or heap) - safe to copy
+        return str;
     }
 
     static int strcmp(const string& a, const string& b);

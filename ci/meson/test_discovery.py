@@ -46,7 +46,64 @@ def get_fuzzy_test_candidates(build_dir: Path, test_name: str) -> list[str]:
             check=False,
         )
 
+        # SELF-HEALING: Detect missing/corrupted intro files
+        # When intro-targets.json, intro-tests.json or other introspection files are missing,
+        # meson introspect fails with "is missing! Directory is not configured yet?"
+        # This indicates the build directory is in a corrupted state.
         if result.returncode != 0:
+            stderr_output = result.stderr.lower()
+            stdout_output = result.stdout.lower()
+
+            # Check for missing intro files error patterns
+            missing_intro_patterns = [
+                "intro-targets.json",
+                "intro-tests.json",
+                "is missing",
+                "directory is not configured",
+                "not a valid build directory",
+                "introspection file",
+            ]
+
+            if any(
+                pattern in stderr_output or pattern in stdout_output
+                for pattern in missing_intro_patterns
+            ):
+                _ts_print("")
+                _ts_print("=" * 80)
+                _ts_print(
+                    "[MESON] ⚠️  BUILD DIRECTORY CORRUPTION DETECTED - AUTO-HEALING"
+                )
+                _ts_print("=" * 80)
+                _ts_print("[MESON] Missing or corrupted Meson introspection files:")
+                if result.stderr.strip():
+                    # Show first 200 chars of error
+                    error_preview = result.stderr.strip()[:200]
+                    _ts_print(f"[MESON]   {error_preview}")
+                _ts_print("[MESON]")
+                _ts_print("[MESON] This typically happens when:")
+                _ts_print("[MESON]   1. Build directory was partially created/deleted")
+                _ts_print("[MESON]   2. Meson setup was interrupted mid-execution")
+                _ts_print(
+                    "[MESON]   3. File system errors during build directory creation"
+                )
+                _ts_print("[MESON]")
+                _ts_print(
+                    "[MESON] 🔧 Auto-fix: Forcing reconfiguration to rebuild intro files"
+                )
+                _ts_print("=" * 80)
+                _ts_print("")
+
+                # Create marker file to trigger reconfiguration
+                # The setup code in build_config.py will detect this and reconfigure
+                intro_corruption_marker = build_dir / ".intro_corruption_detected"
+                try:
+                    intro_corruption_marker.touch()
+                    _ts_print("[MESON] ✅ Created corruption marker for auto-healing")
+                except (OSError, IOError) as e:
+                    _ts_print(
+                        f"[MESON] Warning: Could not create corruption marker: {e}"
+                    )
+
             return []
 
         # Parse JSON output

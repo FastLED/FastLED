@@ -19,5 +19,6 @@
 #include "fl/stl/random.cpp.hpp"
 #include "fl/stl/shared_ptr.cpp.hpp"
 #include "fl/stl/string.cpp.hpp"
+#include "fl/stl/string_interner.cpp.hpp"
 #include "fl/stl/strstream.cpp.hpp"
 #include "fl/stl/type_traits.cpp.hpp"

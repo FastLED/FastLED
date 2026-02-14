@@ -1,15 +1,17 @@
 #pragma once
 
-#include "fl/stl/stdint.h"
+#include "fl/int.h"
+#include "fl/stl/cstddef.h"
 #include "fl/stl/optional.h"
-#include "fl/stl/string.h"
-#include "fl/stl/chrono.h"  // IWYU pragma: keep (for fl::millis())
 
 #ifdef FASTLED_TESTING
 #include "fl/stl/function.h"
 #endif
 
 namespace fl {
+
+class string;
+class sstream;
 
 // =============================================================================
 // Global Log Level Control

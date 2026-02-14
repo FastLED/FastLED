@@ -336,6 +336,51 @@ def setup_meson_build(
     last_build_mode: Optional[str] = None
 
     if already_configured:
+        # ============================================================================
+        # SELF-HEALING: Check for corrupted introspection files marker
+        # ============================================================================
+        # When meson introspect fails due to missing intro-*.json files, the
+        # test discovery code creates this marker to trigger auto-healing.
+        # This typically happens when the build directory is partially created/deleted
+        # or meson setup was interrupted mid-execution.
+        # ============================================================================
+        intro_corruption_marker = build_dir / ".intro_corruption_detected"
+        if intro_corruption_marker.exists():
+            _ts_print("")
+            _ts_print("=" * 80)
+            _ts_print(
+                "[MESON] ⚠️  INTROSPECTION FILE CORRUPTION DETECTED - AUTO-HEALING"
+            )
+            _ts_print("=" * 80)
+            _ts_print("[MESON] Corruption marker detected (created by test discovery)")
+            _ts_print("[MESON]")
+            _ts_print(
+                "[MESON] The build directory has corrupted or missing intro-*.json files."
+            )
+            _ts_print(
+                "[MESON] These files are required for Meson introspection (test discovery, etc)."
+            )
+            _ts_print("[MESON]")
+            _ts_print(
+                "[MESON] 🔧 Auto-fix: Forcing reconfiguration to regenerate intro files"
+            )
+            _ts_print("=" * 80)
+            _ts_print("")
+
+            # Delete the marker file so we don't reconfigure repeatedly
+            try:
+                intro_corruption_marker.unlink()
+                _ts_print("[MESON] ✅ Removed corruption marker")
+            except (OSError, IOError) as e:
+                _ts_print(f"[MESON] Warning: Could not remove corruption marker: {e}")
+
+            # Force reconfigure
+            force_reconfigure = True
+            force_reconfigure_reason = "introspection files corrupted (auto-healing)"
+            reconfigure_reasons.append("introspection files corrupted")
+
+            # Continue to other marker checks (they might also need attention)
+
         # Check if thin archive setting has changed since last configure
         if thin_archive_marker.exists():
             try:
