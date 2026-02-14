@@ -28,7 +28,7 @@
 #include "fl/warn.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/assert.h"
-#include "fl/stl/time.h"
+#include "fl/stl/chrono.h"
 
 #ifdef FASTLED_STUB_IMPL
 #include "parlio_peripheral_mock.h"

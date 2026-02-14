@@ -2,7 +2,7 @@
 
 #if FASTLED_ENABLE_JSON
 
-#include "fl/stl/time.h"
+#include "fl/stl/chrono.h"
 #include "fl/stl/cstdio.h"
 #include "fl/remote/rpc/type_conversion_result.h"
 

@@ -34,7 +34,7 @@
 
 #include "platforms/shared/spi_hw_4.h"
 #include "fl/warn.h"
-#include "fl/stl/time.h"
+#include "fl/stl/chrono.h"
 #include "fl/numeric_limits.h"
 #include <Arduino.h>  // ok include
 #include <wiring_private.h>

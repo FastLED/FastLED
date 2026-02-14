@@ -2,7 +2,7 @@
 
 #include "fl/sketch_macros.h"
 #include "fl/stl/strstream.h"  // IWYU pragma: keep - Required by FL_WARN/FL_ERROR/FL_DBG macros
-#include "fl/stl/time.h"       // IWYU pragma: keep - Required by FL_WARN_EVERY/FL_DBG_EVERY/FL_PRINT_EVERY macros
+#include "fl/stl/chrono.h"       // IWYU pragma: keep - Required by FL_WARN_EVERY/FL_DBG_EVERY/FL_PRINT_EVERY macros
 
 // Conditional include for async logger functions (only when logging features are enabled)
 #if defined(FASTLED_LOG_SPI_ENABLED) || defined(FASTLED_LOG_RMT_ENABLED) || defined(FASTLED_LOG_PARLIO_ENABLED) || defined(FASTLED_LOG_AUDIO_ENABLED) || defined(FASTLED_LOG_INTERRUPT_ENABLED)

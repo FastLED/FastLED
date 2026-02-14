@@ -19,7 +19,7 @@
 #include "fl/numeric_limits.h"
 #include <cstring> // ok include
 #include "fl/stl/cstring.h"
-#include "fl/stl/time.h"
+#include "fl/stl/chrono.h"
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 
 namespace fl {

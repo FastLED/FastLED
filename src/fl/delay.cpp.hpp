@@ -9,7 +9,7 @@
 #include "platforms/cycle_type.h"
 #include "fl/compiler_control.h"
 #include "fl/sketch_macros.h"
-#include "fl/stl/time.h"
+#include "fl/stl/chrono.h"
 
 // ============================================================================
 // Platform-specific includes
