@@ -36,6 +36,9 @@ public:
     void setMaxBPM(float maxBPM) { mMaxBPM = maxBPM; }
     void setStabilityThreshold(float threshold) { mStabilityThreshold = threshold; }
 
+    // Scoring (public for testability)
+    float calculateIntervalScore(u32 interval);
+
 private:
     // Current tempo state
     float mCurrentBPM;
@@ -59,7 +62,8 @@ private:
     // Onset detection state
     vector<u32> mOnsetTimes;
     static constexpr size MAX_ONSET_HISTORY = 50;
-    float mPreviousFlux;
+    vector<float> mPreviousMagnitudes;  // Per-bin magnitudes for spectral flux
+    float mPreviousFlux;                // Previous frame's total flux (for threshold)
     float mAdaptiveThreshold;
     vector<float> mFluxHistory;
     static constexpr size FLUX_HISTORY_SIZE = 43;  // ~1 second at 43fps
@@ -82,7 +86,6 @@ private:
     void pruneHypotheses();
     void updateCurrentTempo();
     void updateStability();
-    float calculateIntervalScore(u32 interval);
     float calculateTempoConfidence(const TempoHypothesis& hyp);
 };
 

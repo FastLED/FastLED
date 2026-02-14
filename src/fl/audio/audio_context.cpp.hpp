@@ -13,7 +13,7 @@ AudioContext::AudioContext(const AudioSample& sample)
 AudioContext::~AudioContext() = default;
 
 const FFTBins& AudioContext::getFFT(int bands, float fmin, float fmax) {
-    FFT_Args args(mSample.size(), bands, fmin, fmax, 44100);
+    FFT_Args args(mSample.size(), bands, fmin, fmax, mSampleRate);
 
     // Check if we need to recompute
     if (!mFFTComputed || mFFTArgs != args) {
@@ -51,7 +51,8 @@ void AudioContext::setSample(const AudioSample& sample) {
     if (mFFTComputed && mFFTHistoryDepth > 0) {
         if (static_cast<int>(mFFTHistory.size()) < mFFTHistoryDepth) {
             mFFTHistory.push_back(mFFT);
-            mFFTHistoryIndex = static_cast<int>(mFFTHistory.size());
+            // When the history fills up, wrap index to 0 for ring buffer mode
+            mFFTHistoryIndex = static_cast<int>(mFFTHistory.size()) % mFFTHistoryDepth;
         } else {
             mFFTHistory[mFFTHistoryIndex] = mFFT;
             mFFTHistoryIndex = (mFFTHistoryIndex + 1) % mFFTHistoryDepth;

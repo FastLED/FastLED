@@ -34,6 +34,8 @@ public:
     bool isVocal() const { return mVocalActive; }
     float getConfidence() const { return mConfidence; }
     void setThreshold(float threshold) { mThreshold = threshold; }
+    void setSampleRate(int sampleRate) { mSampleRate = sampleRate; }
+    int getNumBins() const { return mNumBins; }
 
 private:
     bool mVocalActive;
@@ -43,6 +45,8 @@ private:
     float mSpectralCentroid;
     float mSpectralRolloff;
     float mFormantRatio;
+    int mSampleRate = 44100;
+    int mNumBins = 128;
 
     // Analysis methods
     float calculateSpectralCentroid(const FFTBins& fft);

@@ -21,6 +21,7 @@ public:
     function_list<void(float rms)> onEnergy;
     function_list<void(float peak)> onPeak;
     function_list<void(float avgEnergy)> onAverageEnergy;
+    function_list<void(float normalizedRms)> onNormalizedEnergy;  // 0-1 range
 
     // State access
     float getRMS() const { return mCurrentRMS; }
@@ -28,6 +29,7 @@ public:
     float getAverageEnergy() const { return mAverageEnergy; }
     float getMinEnergy() const { return mMinEnergy; }
     float getMaxEnergy() const { return mMaxEnergy; }
+    float getNormalizedRMS() const { return mNormalizedRMS; }  // 0-1 range
 
     // Configuration
     void setPeakDecay(float decay) { mPeakDecay = decay; }
@@ -39,6 +41,11 @@ private:
     float mAverageEnergy;
     float mMinEnergy;
     float mMaxEnergy;
+    float mNormalizedRMS = 0.0f;
+
+    // Adaptive range tracking for normalization
+    float mRunningMax = 1.0f;        // Adaptive ceiling (decays slowly)
+    static constexpr float MAX_DECAY = 0.999f;  // Slow decay for ceiling
 
     // Peak tracking
     float mPeakDecay;

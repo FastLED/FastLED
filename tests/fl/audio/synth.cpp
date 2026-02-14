@@ -227,3 +227,33 @@ FL_TEST_CASE("Synth - oscillator keeps engine alive") {
     FL_CHECK_TRUE(samplesInRange(samples, 64));
     FL_CHECK_TRUE(hasVariation(samples, 64));
 }
+
+FL_TEST_CASE("Synth - SynthParams::fromShape returns correct values") {
+    // Sawtooth: reflect=1, peak=0, half=0, wait=0
+    SynthParams saw = SynthParams::fromShape(SynthShape::Sawtooth);
+    FL_CHECK_EQ(saw.reflect, 1);
+    FL_CHECK_EQ(saw.peakTime, 0.0f);
+    FL_CHECK_EQ(saw.halfHeight, 0.0f);
+    FL_CHECK_EQ(saw.zeroWait, 0.0f);
+
+    // Square: reflect=1, peak=0, half=1, wait=0
+    SynthParams sq = SynthParams::fromShape(SynthShape::Square);
+    FL_CHECK_EQ(sq.reflect, 1);
+    FL_CHECK_EQ(sq.peakTime, 0.0f);
+    FL_CHECK_EQ(sq.halfHeight, 1.0f);
+    FL_CHECK_EQ(sq.zeroWait, 0.0f);
+
+    // Triangle: reflect=1, peak=0.5, half=0, wait=0
+    SynthParams tri = SynthParams::fromShape(SynthShape::Triangle);
+    FL_CHECK_EQ(tri.reflect, 1);
+    FL_CHECK_EQ(tri.peakTime, 0.5f);
+    FL_CHECK_EQ(tri.halfHeight, 0.0f);
+    FL_CHECK_EQ(tri.zeroWait, 0.0f);
+
+    // AlternatingSaw: reflect=0, peak=0, half=0, wait=0
+    SynthParams altSaw = SynthParams::fromShape(SynthShape::AlternatingSaw);
+    FL_CHECK_EQ(altSaw.reflect, 0);
+    FL_CHECK_EQ(altSaw.peakTime, 0.0f);
+    FL_CHECK_EQ(altSaw.halfHeight, 0.0f);
+    FL_CHECK_EQ(altSaw.zeroWait, 0.0f);
+}

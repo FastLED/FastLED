@@ -37,6 +37,18 @@ void EnergyAnalyzer::update(shared_ptr<AudioContext> context) {
         mMaxEnergy = fl::fl_max(mMaxEnergy, mCurrentRMS);
     }
 
+    // Compute normalized 0-1 RMS using adaptive range tracking
+    if (mCurrentRMS > mRunningMax) {
+        mRunningMax = mCurrentRMS;  // Instant attack
+    } else {
+        mRunningMax *= MAX_DECAY;   // Slow decay
+        // Ensure running max doesn't decay below a minimum threshold
+        if (mRunningMax < 1.0f) {
+            mRunningMax = 1.0f;
+        }
+    }
+    mNormalizedRMS = fl::fl_min(1.0f, mCurrentRMS / mRunningMax);
+
     // Fire callbacks
     if (onEnergy) {
         onEnergy(mCurrentRMS);
@@ -47,6 +59,9 @@ void EnergyAnalyzer::update(shared_ptr<AudioContext> context) {
     if (onAverageEnergy) {
         onAverageEnergy(mAverageEnergy);
     }
+    if (onNormalizedEnergy) {
+        onNormalizedEnergy(mNormalizedRMS);
+    }
 }
 
 void EnergyAnalyzer::reset() {
@@ -55,6 +70,8 @@ void EnergyAnalyzer::reset() {
     mAverageEnergy = 0.0f;
     mMinEnergy = 1e6f;
     mMaxEnergy = 0.0f;
+    mNormalizedRMS = 0.0f;
+    mRunningMax = 1.0f;
     mLastPeakTime = 0;
     mEnergyHistory.clear();
     mHistoryIndex = 0;

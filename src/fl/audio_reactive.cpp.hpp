@@ -1,4 +1,6 @@
 #include "fl/audio_reactive.h"
+#include "fl/audio/musical_beat_detector.h"
+#include "fl/audio/multiband_beat_detector.h"
 #include "fl/stl/math.h"
 #include "fl/stl/span.h"
 #include "fl/int.h"
@@ -12,7 +14,7 @@ AudioReactive::AudioReactive()
     // Initialize enhanced beat detection components
     mSpectralFluxDetector = fl::make_unique<SpectralFluxDetector>();
     mPerceptualWeighting = fl::make_unique<PerceptualWeighting>();
-    
+
     // Initialize previous magnitudes array to zero
     for (fl::size i = 0; i < mPreviousMagnitudes.size(); ++i) {
         mPreviousMagnitudes[i] = 0.0f;
@@ -23,7 +25,7 @@ AudioReactive::~AudioReactive() = default;
 
 void AudioReactive::begin(const AudioReactiveConfig& config) {
     setConfig(config);
-    
+
     // Reset state
     mCurrentData = AudioData{};
     mSmoothedData = AudioData{};
@@ -32,13 +34,86 @@ void AudioReactive::begin(const AudioReactiveConfig& config) {
     mAGCMultiplier = 1.0f;
     mMaxSample = 0.0f;
     mAverageLevel = 0.0f;
-    
+
+    // Configure signal conditioning components (Phase 1 middleware)
+    SignalConditionerConfig scConfig;
+    scConfig.enableDCRemoval = config.enableSignalConditioning;
+    scConfig.enableSpikeFilter = config.enableSignalConditioning;
+    scConfig.enableNoiseGate = config.noiseGate && config.enableSignalConditioning;
+    mSignalConditioner.configure(scConfig);
+    mSignalConditioner.reset();
+
+    AutoGainConfig agConfig;
+    agConfig.enabled = config.enableAutoGain;
+    mAutoGain.configure(agConfig);
+    mAutoGain.reset();
+
+    NoiseFloorTrackerConfig nfConfig;
+    nfConfig.enabled = config.enableNoiseFloorTracking;
+    mNoiseFloorTracker.configure(nfConfig);
+    mNoiseFloorTracker.reset();
+
+    // Configure frequency bin mapper (obligatory - fixes hardcoded sample rate)
+    FrequencyBinMapperConfig fbmConfig;
+    fbmConfig.mode = FrequencyBinMode::Bins16;
+    fbmConfig.sampleRate = config.sampleRate;
+    fbmConfig.useLogSpacing = config.enableLogBinSpacing;
+    fbmConfig.minFrequency = 20.0f;
+    fbmConfig.maxFrequency = static_cast<float>(config.sampleRate) / 2.0f;  // Nyquist
+    // fftBinCount will be set when we know the FFT size (after first processSample)
+    fbmConfig.fftBinCount = 256;  // Default, overridden when actual FFT size known
+    mFrequencyBinMapper.configure(fbmConfig);
+
     // Reset enhanced beat detection components
     if (mSpectralFluxDetector) {
         mSpectralFluxDetector->reset();
         mSpectralFluxDetector->setThreshold(config.spectralFluxThreshold);
     }
-    
+
+    // Configure musical beat detection (Phase 3 middleware - lazy creation)
+    if (config.enableMusicalBeatDetection) {
+        if (!mMusicalBeatDetector) {
+            mMusicalBeatDetector = fl::make_unique<MusicalBeatDetector>();
+        }
+        MusicalBeatDetectorConfig mbdConfig;
+        mbdConfig.minBPM = config.musicalBeatMinBPM;
+        mbdConfig.maxBPM = config.musicalBeatMaxBPM;
+        mbdConfig.minBeatConfidence = config.musicalBeatConfidence;
+        mbdConfig.sampleRate = config.sampleRate;
+        mbdConfig.samplesPerFrame = 512;  // Typical FFT frame size
+        mMusicalBeatDetector->configure(mbdConfig);
+        mMusicalBeatDetector->reset();
+    } else {
+        mMusicalBeatDetector.reset();
+    }
+
+    if (config.enableMultiBandBeats) {
+        if (!mMultiBandBeatDetector) {
+            mMultiBandBeatDetector = fl::make_unique<MultiBandBeatDetector>();
+        }
+        MultiBandBeatDetectorConfig mbbdConfig;
+        mbbdConfig.bassThreshold = config.bassThreshold;
+        mbbdConfig.midThreshold = config.midThreshold;
+        mbbdConfig.trebleThreshold = config.trebleThreshold;
+        mMultiBandBeatDetector->configure(mbbdConfig);
+        mMultiBandBeatDetector->reset();
+    } else {
+        mMultiBandBeatDetector.reset();
+    }
+
+    // Configure spectral equalizer (optional - lazy creation)
+    if (config.enableSpectralEqualizer) {
+        if (!mSpectralEqualizer) {
+            mSpectralEqualizer = fl::make_unique<SpectralEqualizer>();
+        }
+        SpectralEqualizerConfig seConfig;
+        seConfig.curve = EqualizationCurve::AWeighting;
+        seConfig.numBands = 16;
+        mSpectralEqualizer->configure(seConfig);
+    } else {
+        mSpectralEqualizer.reset();
+    }
+
     // Reset previous magnitudes
     for (fl::size i = 0; i < mPreviousMagnitudes.size(); ++i) {
         mPreviousMagnitudes[i] = 0.0f;
@@ -53,29 +128,62 @@ void AudioReactive::processSample(const AudioSample& sample) {
     if (!sample.isValid()) {
         return; // Invalid sample, ignore
     }
-    
+
     // Extract timestamp from the AudioSample
     fl::u32 currentTimeMs = sample.timestamp();
-    
-    // Process the AudioSample immediately - timing is gated by sample availability
-    processFFT(sample);
-    updateVolumeAndPeak(sample);
-    
+
+    // Phase 1: Signal conditioning pipeline
+    AudioSample processedSample = sample;
+
+    // Step 1: Signal conditioning (DC removal, spike filtering, noise gate)
+    if (mConfig.enableSignalConditioning) {
+        processedSample = mSignalConditioner.processSample(processedSample);
+        if (!processedSample.isValid()) {
+            return; // Signal was completely filtered out
+        }
+    }
+
+    // Step 2: Automatic gain control
+    if (mConfig.enableAutoGain) {
+        processedSample = mAutoGain.process(processedSample);
+        if (!processedSample.isValid()) {
+            return;
+        }
+    }
+
+    // Step 3: Noise floor tracking (update tracker, but don't modify signal)
+    if (mConfig.enableNoiseFloorTracking) {
+        float rms = processedSample.rms();
+        mNoiseFloorTracker.update(rms);
+    }
+
+    // Process the conditioned AudioSample - timing is gated by sample availability
+    processFFT(processedSample);
+    updateVolumeAndPeak(processedSample);
+
     // Enhanced processing pipeline
+    applySpectralEqualization();
     calculateBandEnergies();
+
+    // Apply pink noise compensation AFTER band energy calculation
+    // so that bassEnergy/midEnergy/trebleEnergy reflect actual spectral content
+    for (int i = 0; i < 16; ++i) {
+        mCurrentData.frequencyBins[i] *= PINK_NOISE_COMPENSATION[i];
+    }
+
     updateSpectralFlux();
-    
+
     // Enhanced beat detection (includes original)
     detectBeat(currentTimeMs);
     detectEnhancedBeats(currentTimeMs);
-    
+
     // Apply perceptual weighting if enabled
     applyPerceptualWeighting();
-    
+
     applyGain();
     applyScaling();
     smoothResults();
-    
+
     mCurrentData.timestamp = currentTimeMs;
 }
 
@@ -99,21 +207,33 @@ void AudioReactive::processFFT(const AudioSample& sample) {
 }
 
 void AudioReactive::mapFFTBinsToFrequencyChannels() {
-    // Copy FFT results to frequency bins array
+    // AudioSample::fft() returns CQ-kernel bins that are already
+    // frequency-mapped (linearly spaced from fmin to fmax). Copy them
+    // directly instead of re-mapping through FrequencyBinMapper, which
+    // incorrectly treats CQ bins as raw DFT bins.
+    const auto& rawBins = mFFTBins.bins_raw;
+    if (rawBins.empty()) {
+        for (int i = 0; i < 16; ++i) {
+            mCurrentData.frequencyBins[i] = 0.0f;
+        }
+        return;
+    }
+
+    // Copy CQ bins directly to frequency bins (already frequency-mapped)
     for (int i = 0; i < 16; ++i) {
-        if (i < static_cast<int>(mFFTBins.bins_raw.size())) {
-            mCurrentData.frequencyBins[i] = mFFTBins.bins_raw[i];
+        if (i < static_cast<int>(rawBins.size())) {
+            mCurrentData.frequencyBins[i] = rawBins[i];
         } else {
             mCurrentData.frequencyBins[i] = 0.0f;
         }
     }
-    
-    // Apply pink noise compensation (from WLED)
-    for (int i = 0; i < 16; ++i) {
-        mCurrentData.frequencyBins[i] *= PINK_NOISE_COMPENSATION[i];
-    }
-    
-    // Find dominant frequency
+
+    // Note: Pink noise compensation is applied later in processSample(),
+    // AFTER band energies are calculated from the raw CQ bins.
+    // This ensures bassEnergy/midEnergy/trebleEnergy reflect actual
+    // spectral content, not display-oriented compensation.
+
+    // Find dominant frequency bin
     float maxMagnitude = 0.0f;
     int maxBin = 0;
     for (int i = 0; i < 16; ++i) {
@@ -122,29 +242,13 @@ void AudioReactive::mapFFTBinsToFrequencyChannels() {
             maxBin = i;
         }
     }
-    
-    // Convert bin index to approximate frequency
-    // Rough approximation based on WLED frequency mapping
-    const float binCenterFrequencies[16] = {
-        64.5f,   // Bin 0: 43-86 Hz
-        107.5f,  // Bin 1: 86-129 Hz  
-        172.5f,  // Bin 2: 129-216 Hz
-        258.5f,  // Bin 3: 216-301 Hz
-        365.5f,  // Bin 4: 301-430 Hz
-        495.0f,  // Bin 5: 430-560 Hz
-        689.0f,  // Bin 6: 560-818 Hz
-        969.0f,  // Bin 7: 818-1120 Hz
-        1270.5f, // Bin 8: 1120-1421 Hz
-        1658.0f, // Bin 9: 1421-1895 Hz
-        2153.5f, // Bin 10: 1895-2412 Hz
-        2713.5f, // Bin 11: 2412-3015 Hz
-        3359.5f, // Bin 12: 3015-3704 Hz
-        4091.5f, // Bin 13: 3704-4479 Hz
-        5792.5f, // Bin 14: 4479-7106 Hz
-        8182.5f  // Bin 15: 7106-9259 Hz
-    };
-    
-    mCurrentData.dominantFrequency = binCenterFrequencies[maxBin];
+
+    // CQ bins span linearly from fmin to fmax (default: 174.6-4698.3 Hz)
+    const float fmin = FFT_Args::DefaultMinFrequency();
+    const float fmax = FFT_Args::DefaultMaxFrequency();
+    const float deltaF = (fmax - fmin) / 16.0f;
+    float dominantFreqStart = fmin + static_cast<float>(maxBin) * deltaF;
+    mCurrentData.dominantFrequency = dominantFreqStart + deltaF * 0.5f;
     mCurrentData.magnitude = maxMagnitude;
 }
 
@@ -438,14 +542,27 @@ fl::u8 AudioReactive::frequencyToScale255(fl::u8 binIndex) const {
 
 // Enhanced beat detection methods
 void AudioReactive::calculateBandEnergies() {
-    // Calculate energy for bass frequencies (bins 0-1)
-    mCurrentData.bassEnergy = (mCurrentData.frequencyBins[0] + mCurrentData.frequencyBins[1]) / 2.0f;
-    
-    // Calculate energy for mid frequencies (bins 6-7)
-    mCurrentData.midEnergy = (mCurrentData.frequencyBins[6] + mCurrentData.frequencyBins[7]) / 2.0f;
-    
-    // Calculate energy for treble frequencies (bins 14-15)
-    mCurrentData.trebleEnergy = (mCurrentData.frequencyBins[14] + mCurrentData.frequencyBins[15]) / 2.0f;
+    span<const float> bins(mCurrentData.frequencyBins, 16);
+    mCurrentData.bassEnergy = mFrequencyBinMapper.getBassEnergy(bins);
+    mCurrentData.midEnergy = mFrequencyBinMapper.getMidEnergy(bins);
+    mCurrentData.trebleEnergy = mFrequencyBinMapper.getTrebleEnergy(bins);
+}
+
+void AudioReactive::applySpectralEqualization() {
+    if (!mConfig.enableSpectralEqualizer) {
+        return;
+    }
+
+    // Apply spectral EQ in-place on the frequency bins
+    float equalizedBins[16];
+    span<const float> inputSpan(mCurrentData.frequencyBins, 16);
+    span<float> outputSpan(equalizedBins, 16);
+    mSpectralEqualizer->apply(inputSpan, outputSpan);
+
+    // Copy back
+    for (int i = 0; i < 16; ++i) {
+        mCurrentData.frequencyBins[i] = equalizedBins[i];
+    }
 }
 
 void AudioReactive::updateSpectralFlux() {
@@ -471,43 +588,70 @@ void AudioReactive::detectEnhancedBeats(fl::u32 currentTimeMs) {
     mCurrentData.bassBeatDetected = false;
     mCurrentData.midBeatDetected = false;
     mCurrentData.trebleBeatDetected = false;
-    
+
     // Skip if enhanced beat detection is disabled
-    if (!mConfig.enableSpectralFlux && !mConfig.enableMultiBand) {
+    if (!mConfig.enableSpectralFlux && !mConfig.enableMultiBand &&
+        !mConfig.enableMusicalBeatDetection && !mConfig.enableMultiBandBeats) {
         return;
     }
-    
+
     // Need minimum time since last beat for enhanced detection too
     if (currentTimeMs - mLastBeatTime < BEAT_COOLDOWN) {
         return;
     }
-    
-    // Spectral flux-based beat detection
+
+    // Spectral flux-based onset detection (preliminary)
+    bool onsetDetected = false;
+    float onsetStrength = 0.0f;
+
     if (mConfig.enableSpectralFlux && mSpectralFluxDetector) {
-        bool onsetDetected = mSpectralFluxDetector->detectOnset(
+        onsetDetected = mSpectralFluxDetector->detectOnset(
             mCurrentData.frequencyBins,
             mPreviousMagnitudes.data()
         );
-        
+
         if (onsetDetected) {
-            // Enhance the traditional beat detection when spectral flux confirms
+            onsetStrength = mSpectralFluxDetector->calculateSpectralFlux(
+                mCurrentData.frequencyBins,
+                mPreviousMagnitudes.data()
+            );
+        }
+    }
+
+    // Phase 3: Musical beat detection - validates onsets as true musical beats
+    if (mConfig.enableMusicalBeatDetection) {
+        mMusicalBeatDetector->processSample(onsetDetected, onsetStrength);
+
+        if (mMusicalBeatDetector->isBeat()) {
+            // This is a validated musical beat, not just a random onset
             mCurrentData.beatDetected = true;
             mLastBeatTime = currentTimeMs;
         }
+    } else if (onsetDetected) {
+        // Fall back to simple onset detection if musical beat detection disabled
+        mCurrentData.beatDetected = true;
+        mLastBeatTime = currentTimeMs;
     }
-    
-    // Multi-band beat detection
-    if (mConfig.enableMultiBand) {
+
+    // Phase 3: Multi-band beat detection - per-frequency beat tracking
+    if (mConfig.enableMultiBandBeats) {
+        mMultiBandBeatDetector->detectBeats(mCurrentData.frequencyBins);
+
+        mCurrentData.bassBeatDetected = mMultiBandBeatDetector->isBassBeat();
+        mCurrentData.midBeatDetected = mMultiBandBeatDetector->isMidBeat();
+        mCurrentData.trebleBeatDetected = mMultiBandBeatDetector->isTrebleBeat();
+    } else if (mConfig.enableMultiBand) {
+        // Fall back to simple threshold-based detection if multi-band disabled
         // Bass beat detection (bins 0-1)
         if (mCurrentData.bassEnergy > mConfig.bassThreshold) {
             mCurrentData.bassBeatDetected = true;
         }
-        
+
         // Mid beat detection (bins 6-7)
         if (mCurrentData.midEnergy > mConfig.midThreshold) {
             mCurrentData.midBeatDetected = true;
         }
-        
+
         // Treble beat detection (bins 14-15)
         if (mCurrentData.trebleEnergy > mConfig.trebleThreshold) {
             mCurrentData.trebleBeatDetected = true;
@@ -753,6 +897,27 @@ void PerceptualWeighting::applyLoudnessCompensation(AudioData& data, float refer
     // Store in history for future adaptive compensation (not implemented yet)
     // This would be used for more sophisticated dynamic range compensation
 #endif
+}
+
+// Signal conditioning stats accessors (Phase 1 middleware)
+const SignalConditioner::Stats& AudioReactive::getSignalConditionerStats() const {
+    return mSignalConditioner.getStats();
+}
+
+const AutoGain::Stats& AudioReactive::getAutoGainStats() const {
+    return mAutoGain.getStats();
+}
+
+const NoiseFloorTracker::Stats& AudioReactive::getNoiseFloorStats() const {
+    return mNoiseFloorTracker.getStats();
+}
+
+bool AudioReactive::isSpectralEqualizerEnabled() const {
+    return mConfig.enableSpectralEqualizer;
+}
+
+const SpectralEqualizer::Stats& AudioReactive::getSpectralEqualizerStats() const {
+    return mSpectralEqualizer->getStats();
 }
 
 } // namespace fl

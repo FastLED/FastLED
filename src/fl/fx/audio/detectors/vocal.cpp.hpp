@@ -20,7 +20,9 @@ VocalDetector::VocalDetector()
 VocalDetector::~VocalDetector() = default;
 
 void VocalDetector::update(shared_ptr<AudioContext> context) {
-    const FFTBins& fft = context->getFFT(16);
+    mSampleRate = context->getSampleRate();
+    const FFTBins& fft = context->getFFT(128);
+    mNumBins = static_cast<int>(fft.bins_raw.size());
 
     // Calculate spectral features
     mSpectralCentroid = calculateSpectralCentroid(fft);
@@ -89,15 +91,28 @@ float VocalDetector::calculateSpectralRolloff(const FFTBins& fft) {
 float VocalDetector::estimateFormantRatio(const FFTBins& fft) {
     if (fft.bins_raw.size() < 8) return 0.0f;
 
-    // F1 range (bins 2-4) - typically 500-900 Hz for vocals
+    // Calculate bin-to-frequency mapping from actual sample rate
+    const float nyquist = static_cast<float>(mSampleRate) / 2.0f;
+    const int numBins = static_cast<int>(fft.bins_raw.size());
+    const float hzPerBin = nyquist / static_cast<float>(numBins);
+
+    // F1 range: 500-900 Hz (first vocal formant)
+    const int f1MinBin = fl::fl_max(0, static_cast<int>(500.0f / hzPerBin));
+    const int f1MaxBin = fl::fl_min(numBins - 1, static_cast<int>(900.0f / hzPerBin));
+
+    // F2 range: 1200-2400 Hz (second vocal formant)
+    const int f2MinBin = fl::fl_max(0, static_cast<int>(1200.0f / hzPerBin));
+    const int f2MaxBin = fl::fl_min(numBins - 1, static_cast<int>(2400.0f / hzPerBin));
+
+    // Find peak energy in F1 range
     float f1Energy = 0.0f;
-    for (int i = 2; i <= 4 && i < static_cast<int>(fft.bins_raw.size()); i++) {
+    for (int i = f1MinBin; i <= f1MaxBin && i < numBins; i++) {
         f1Energy = fl::fl_max(f1Energy, fft.bins_raw[i]);
     }
 
-    // F2 range (bins 4-8) - typically 1200-2400 Hz for vocals
+    // Find peak energy in F2 range
     float f2Energy = 0.0f;
-    for (int i = 4; i <= 7 && i < static_cast<int>(fft.bins_raw.size()); i++) {
+    for (int i = f2MinBin; i <= f2MaxBin && i < numBins; i++) {
         f2Energy = fl::fl_max(f2Energy, fft.bins_raw[i]);
     }
 
@@ -105,8 +120,8 @@ float VocalDetector::estimateFormantRatio(const FFTBins& fft) {
 }
 
 bool VocalDetector::detectVocal(float centroid, float rolloff, float formantRatio) {
-    // Normalize centroid to 0-1 range
-    float normalizedCentroid = centroid / 16.0f;
+    // Normalize centroid to 0-1 range using actual bin count
+    float normalizedCentroid = centroid / static_cast<float>(mNumBins);
 
     // Check if features fall within vocal ranges
     // Human voice typically has:

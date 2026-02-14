@@ -3,6 +3,9 @@
 #include "fl/audio.h"
 #include "fl/audio/audio_context.h"
 #include "fl/audio/audio_detector.h"
+#include "fl/audio/signal_conditioner.h"
+#include "fl/audio/auto_gain.h"
+#include "fl/audio/noise_floor_tracker.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/function.h"
 
@@ -60,6 +63,7 @@ public:
 
     // ----- Energy/Level Events -----
     void onEnergy(function<void(float rms)> callback);
+    void onNormalizedEnergy(function<void(float normalizedRms)> callback);
     void onPeak(function<void(float peak)> callback);
     void onAverageEnergy(function<void(float avgEnergy)> callback);
 
@@ -140,12 +144,46 @@ public:
     void onDropEvent(function<void(const Drop&)> callback);
     void onDropImpact(function<void(float impact)> callback);
 
+    // ----- Configuration -----
+    /// Set the sample rate for all frequency-based calculations.
+    /// This propagates to AudioContext and all detectors.
+    /// Default is 44100 Hz. Common values: 16000, 22050, 44100.
+    void setSampleRate(int sampleRate);
+    int getSampleRate() const;
+
+    // ----- Signal Conditioning -----
+    /// Enable/disable signal conditioning pipeline (DC removal, spike filter, noise gate)
+    void setSignalConditioningEnabled(bool enabled);
+    /// Enable/disable automatic gain control
+    void setAutoGainEnabled(bool enabled);
+    /// Enable/disable noise floor tracking
+    void setNoiseFloorTrackingEnabled(bool enabled);
+
+    /// Configure signal conditioner
+    void configureSignalConditioner(const SignalConditionerConfig& config);
+    /// Configure auto gain
+    void configureAutoGain(const AutoGainConfig& config);
+    /// Configure noise floor tracker
+    void configureNoiseFloorTracker(const NoiseFloorTrackerConfig& config);
+
+    /// Access signal conditioning statistics
+    const SignalConditioner::Stats& getSignalConditionerStats() const { return mSignalConditioner.getStats(); }
+    const AutoGain::Stats& getAutoGainStats() const { return mAutoGain.getStats(); }
+    const NoiseFloorTracker::Stats& getNoiseFloorStats() const { return mNoiseFloorTracker.getStats(); }
+
     // ----- State Access -----
     shared_ptr<AudioContext> getContext() const { return mContext; }
     const AudioSample& getSample() const;
     void reset();
 
 private:
+    int mSampleRate = 44100;
+    bool mSignalConditioningEnabled = true;
+    bool mAutoGainEnabled = false;
+    bool mNoiseFloorTrackingEnabled = false;
+    SignalConditioner mSignalConditioner;
+    AutoGain mAutoGain;
+    NoiseFloorTracker mNoiseFloorTracker;
     shared_ptr<AudioContext> mContext;
 
     // Lazy detector storage

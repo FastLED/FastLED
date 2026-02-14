@@ -70,14 +70,23 @@ float BeatDetector::calculateSpectralFlux(const FFTBins& fft) {
     float flux = 0.0f;
     size numBins = fl::fl_min(fft.bins_raw.size(), mPreviousMagnitudes.size());
 
-    for (size i = 0; i < numBins; i++) {
+    // Only consider the bass quarter of FFT bins for beat detection.
+    // Musical beats (kick drums) are characterized by bass/low-mid energy.
+    // With 16 bins at 44100 Hz, bins 0-3 cover 0-5512 Hz (bass + low-mid).
+    // Treble transients (hi-hats, cymbals) in higher bins are excluded.
+    size bassBins = numBins / 4;
+    if (bassBins < 1) bassBins = 1;
+
+    size count = 0;
+    for (size i = 0; i < bassBins; i++) {
         float diff = fft.bins_raw[i] - mPreviousMagnitudes[i];
         if (diff > 0.0f) {
             flux += diff;
+            count++;
         }
     }
 
-    return flux / static_cast<float>(numBins);
+    return (count > 0) ? flux / static_cast<float>(bassBins) : 0.0f;
 }
 
 void BeatDetector::updateAdaptiveThreshold() {
@@ -100,8 +109,14 @@ void BeatDetector::updateAdaptiveThreshold() {
 }
 
 bool BeatDetector::detectBeat(u32 timestamp) {
-    // Check if flux exceeds adaptive threshold
-    if (mSpectralFlux <= mAdaptiveThreshold) {
+    // Use adaptive threshold with a minimum floor to prevent triggering
+    // on spectral leakage when the threshold is near zero (e.g., after silence).
+    // CQ kernel magnitudes are in Q15 scale, so meaningful flux is typically 100+.
+    static constexpr float MIN_FLUX_THRESHOLD = 100.0f;
+    float effectiveThreshold = fl::fl_max(mAdaptiveThreshold, MIN_FLUX_THRESHOLD);
+
+    // Check if flux exceeds effective threshold
+    if (mSpectralFlux <= effectiveThreshold) {
         return false;
     }
 

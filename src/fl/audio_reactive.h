@@ -3,6 +3,11 @@
 #include "fl/fft.h"
 #include "fl/int.h"
 #include "fl/audio.h"
+#include "fl/audio/signal_conditioner.h"
+#include "fl/audio/auto_gain.h"
+#include "fl/audio/noise_floor_tracker.h"
+#include "fl/audio/frequency_bin_mapper.h"
+#include "fl/audio/spectral_equalizer.h"
 #include "fl/stl/array.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/sketch_macros.h"
@@ -15,6 +20,8 @@ namespace fl {
 // Forward declarations for enhanced beat detection
 class SpectralFluxDetector;
 class PerceptualWeighting;
+class MusicalBeatDetector;
+class MultiBandBeatDetector;
 
 // Audio data structure - matches original WLED output with extensions
 struct AudioData {
@@ -54,6 +61,24 @@ struct AudioReactiveConfig {
     float bassThreshold = 0.15f;        // Threshold for bass beat detection
     float midThreshold = 0.12f;         // Threshold for mid beat detection
     float trebleThreshold = 0.08f;      // Threshold for treble beat detection
+
+    // Signal conditioning configuration (Phase 1 middleware)
+    bool enableSignalConditioning = true;  // Enable DC removal, spike filter, noise gate
+    bool enableAutoGain = true;             // Enable adaptive gain control
+    bool enableNoiseFloorTracking = true;   // Enable noise floor tracking
+
+    // Frequency bin mapping configuration
+    bool enableLogBinSpacing = true;       // Use logarithmic frequency bin spacing (vs linear)
+
+    // Spectral equalizer configuration (optional middleware)
+    bool enableSpectralEqualizer = false;  // Enable spectral EQ (A-weighting, custom curves)
+
+    // Musical beat detection configuration (Phase 3 middleware)
+    bool enableMusicalBeatDetection = false; // Enable advanced beat tracking with BPM
+    bool enableMultiBandBeats = false;       // Enable per-band beat detection
+    float musicalBeatMinBPM = 60.0f;        // Minimum BPM for musical beats
+    float musicalBeatMaxBPM = 180.0f;       // Maximum BPM for musical beats
+    float musicalBeatConfidence = 0.5f;     // Minimum confidence for beat validation
 };
 
 class AudioReactive {
@@ -96,6 +121,15 @@ public:
     CRGB volumeToColor(const CRGBPalette16& palette) const;
     fl::u8 frequencyToScale255(fl::u8 binIndex) const;
 
+    // Signal conditioning stats (Phase 1 middleware)
+    const SignalConditioner::Stats& getSignalConditionerStats() const;
+    const AutoGain::Stats& getAutoGainStats() const;
+    const NoiseFloorTracker::Stats& getNoiseFloorStats() const;
+
+    // Spectral equalizer stats (optional middleware - must be enabled first)
+    bool isSpectralEqualizerEnabled() const;
+    const SpectralEqualizer::Stats& getSpectralEqualizerStats() const;
+
 private:
     // Internal processing methods
     void processFFT(const AudioSample& sample);
@@ -111,6 +145,7 @@ private:
     void calculateBandEnergies();
     void updateSpectralFlux();
     void applyPerceptualWeighting();
+    void applySpectralEqualization();
     
     // Helper methods
     float mapFrequencyBin(int fromBin, int toBin);
@@ -145,11 +180,22 @@ private:
     float mAGCMultiplier = 1.0f;
     float mMaxSample = 0.0f;
     float mAverageLevel = 0.0f;
-    
+
+    // Signal conditioning components (Phase 1 middleware)
+    SignalConditioner mSignalConditioner;
+    AutoGain mAutoGain;
+    NoiseFloorTracker mNoiseFloorTracker;
+    FrequencyBinMapper mFrequencyBinMapper;
+
     // Enhanced beat detection components
     fl::unique_ptr<SpectralFluxDetector> mSpectralFluxDetector;
     fl::unique_ptr<PerceptualWeighting> mPerceptualWeighting;
-    
+
+    // Musical beat detection components (Phase 3 middleware)
+    fl::unique_ptr<MusicalBeatDetector> mMusicalBeatDetector;
+    fl::unique_ptr<MultiBandBeatDetector> mMultiBandBeatDetector;
+    fl::unique_ptr<SpectralEqualizer> mSpectralEqualizer;
+
     // Enhanced beat detection state
     fl::array<float, 16> mPreviousMagnitudes;
 };

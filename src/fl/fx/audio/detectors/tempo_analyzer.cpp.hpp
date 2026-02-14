@@ -1,6 +1,7 @@
 #include "fl/fx/audio/detectors/tempo_analyzer.h"
 #include "fl/audio/audio_context.h"
 #include "fl/stl/math.h"
+#include "fl/stl/algorithm.h"
 
 namespace fl {
 
@@ -16,6 +17,7 @@ TempoAnalyzer::TempoAnalyzer()
     , mAdaptiveThreshold(0.0f)
     , mStableFrameCount(0)
 {
+    mPreviousMagnitudes.resize(8, 0.0f);  // Track first 8 bins for spectral flux
     mHypotheses.reserve(MAX_HYPOTHESES);
     mOnsetTimes.reserve(MAX_ONSET_HISTORY);
     mFluxHistory.reserve(FLUX_HISTORY_SIZE);
@@ -46,6 +48,12 @@ void TempoAnalyzer::update(shared_ptr<AudioContext> context) {
     }
 
     mPreviousFlux = flux;
+
+    // Update per-bin magnitudes for next frame's spectral flux calculation
+    size numBins = fl::fl_min(static_cast<size>(8), fft.bins_raw.size());
+    for (size i = 0; i < numBins && i < mPreviousMagnitudes.size(); i++) {
+        mPreviousMagnitudes[i] = fft.bins_raw[i];
+    }
 
     // Prune weak hypotheses
     pruneHypotheses();
@@ -90,6 +98,7 @@ void TempoAnalyzer::reset() {
     mPreviousFlux = 0.0f;
     mAdaptiveThreshold = 0.0f;
     mStableFrameCount = 0;
+    fl::fill(mPreviousMagnitudes.begin(), mPreviousMagnitudes.end(), 0.0f);
     mHypotheses.clear();
     mOnsetTimes.clear();
     mFluxHistory.clear();
@@ -100,9 +109,10 @@ float TempoAnalyzer::calculateSpectralFlux(const FFTBins& fft) {
     // Focus on low-to-mid frequencies for beat detection
     float flux = 0.0f;
     size numBins = fl::fl_min(static_cast<size>(8), fft.bins_raw.size());
+    numBins = fl::fl_min(numBins, mPreviousMagnitudes.size());
 
     for (size i = 0; i < numBins; i++) {
-        float diff = fft.bins_raw[i] - mPreviousFlux;
+        float diff = fft.bins_raw[i] - mPreviousMagnitudes[i];
         if (diff > 0.0f) {
             flux += diff;
         }
@@ -279,14 +289,23 @@ void TempoAnalyzer::updateStability() {
 }
 
 float TempoAnalyzer::calculateIntervalScore(u32 interval) {
-    // Higher score for intervals in typical music range (60-140 BPM)
     float bpm = 60000.0f / static_cast<float>(interval);
 
-    float targetBPM = (mMinBPM + mMaxBPM) * 0.5f;
-    float diff = fl::fl_abs(bpm - targetBPM);
-    float normalizedDiff = diff / (mMaxBPM - mMinBPM);
+    // All BPM values within the valid range score equally
+    if (bpm >= mMinBPM && bpm <= mMaxBPM) {
+        return 1.0f;
+    }
 
-    return fl::fl_max(0.1f, 1.0f - normalizedDiff);
+    // Outside the range, penalize based on distance from nearest boundary
+    float distOutside;
+    if (bpm < mMinBPM) {
+        distOutside = mMinBPM - bpm;
+    } else {
+        distOutside = bpm - mMaxBPM;
+    }
+    float range = mMaxBPM - mMinBPM;
+    float normalizedDist = distOutside / range;
+    return fl::fl_max(0.1f, 1.0f - normalizedDist);
 }
 
 float TempoAnalyzer::calculateTempoConfidence(const TempoHypothesis& hyp) {

@@ -2,6 +2,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
+#include "fl/fft.h"
 #include "fl/stl/function.h"
 
 namespace fl {
@@ -35,7 +36,12 @@ public:
     // Smoothing factor (0.0 = no smoothing, 1.0 = maximum smoothing)
     void setSmoothing(float smoothing) { mSmoothing = smoothing; }
 
+    // Sample rate configuration (default 44100 Hz)
+    void setSampleRate(int sampleRate) { mSampleRate = sampleRate; }
+    int getSampleRate() const { return mSampleRate; }
+
 private:
+    int mSampleRate = 44100;
     float mBass;
     float mMid;
     float mTreble;
@@ -51,7 +57,12 @@ private:
     // Smoothing
     float mSmoothing;
 
-    float calculateBandEnergy(const FFTBins& fft, float minFreq, float maxFreq, int numBands);
+    // Own FFT instance for computing with the correct frequency range
+    FFT mFFT;
+    FFTBins mFFTBins;
+
+    float calculateBandEnergy(const FFTBins& fft, float minFreq, float maxFreq,
+                              float fftMinFreq, float fftMaxFreq);
 };
 
 } // namespace fl

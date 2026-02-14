@@ -27,7 +27,31 @@ AudioProcessor::AudioProcessor()
 AudioProcessor::~AudioProcessor() = default;
 
 void AudioProcessor::update(const AudioSample& sample) {
-    mContext->setSample(sample);
+    // Signal conditioning pipeline: raw sample → conditioned sample
+    AudioSample conditioned = sample;
+
+    // Stage 1: Signal conditioning (DC removal, spike filtering, noise gate)
+    if (mSignalConditioningEnabled && conditioned.isValid()) {
+        conditioned = mSignalConditioner.processSample(conditioned);
+        if (!conditioned.isValid()) {
+            return;  // Signal was entirely filtered out
+        }
+    }
+
+    // Stage 2: Automatic gain control
+    if (mAutoGainEnabled && conditioned.isValid()) {
+        conditioned = mAutoGain.process(conditioned);
+        if (!conditioned.isValid()) {
+            return;
+        }
+    }
+
+    // Stage 3: Noise floor tracking (passive — updates estimate but doesn't modify signal)
+    if (mNoiseFloorTrackingEnabled && conditioned.isValid()) {
+        mNoiseFloorTracker.update(conditioned.rms());
+    }
+
+    mContext->setSample(conditioned);
 
     if (mBeatDetector) {
         mBeatDetector->update(mContext);
@@ -148,6 +172,11 @@ void AudioProcessor::onFrequencyBands(function<void(float, float, float)> callba
 void AudioProcessor::onEnergy(function<void(float)> callback) {
     auto detector = getEnergyAnalyzer();
     detector->onEnergy.add(callback);
+}
+
+void AudioProcessor::onNormalizedEnergy(function<void(float)> callback) {
+    auto detector = getEnergyAnalyzer();
+    detector->onNormalizedEnergy.add(callback);
 }
 
 void AudioProcessor::onPeak(function<void(float)> callback) {
@@ -411,11 +440,58 @@ void AudioProcessor::onDropImpact(function<void(float)> callback) {
     detector->onDropImpact.add(callback);
 }
 
+void AudioProcessor::setSampleRate(int sampleRate) {
+    mSampleRate = sampleRate;
+    mContext->setSampleRate(sampleRate);
+
+    // Propagate to all active detectors that are sample-rate-aware
+    if (mFrequencyBands) {
+        mFrequencyBands->setSampleRate(sampleRate);
+    }
+    if (mVocalDetector) {
+        mVocalDetector->setSampleRate(sampleRate);
+    }
+}
+
+int AudioProcessor::getSampleRate() const {
+    return mSampleRate;
+}
+
+void AudioProcessor::setSignalConditioningEnabled(bool enabled) {
+    mSignalConditioningEnabled = enabled;
+}
+
+void AudioProcessor::setAutoGainEnabled(bool enabled) {
+    mAutoGainEnabled = enabled;
+}
+
+void AudioProcessor::setNoiseFloorTrackingEnabled(bool enabled) {
+    mNoiseFloorTrackingEnabled = enabled;
+}
+
+void AudioProcessor::configureSignalConditioner(const SignalConditionerConfig& config) {
+    mSignalConditioner.configure(config);
+    mSignalConditioningEnabled = true;
+}
+
+void AudioProcessor::configureAutoGain(const AutoGainConfig& config) {
+    mAutoGain.configure(config);
+    mAutoGainEnabled = config.enabled;
+}
+
+void AudioProcessor::configureNoiseFloorTracker(const NoiseFloorTrackerConfig& config) {
+    mNoiseFloorTracker.configure(config);
+    mNoiseFloorTrackingEnabled = config.enabled;
+}
+
 const AudioSample& AudioProcessor::getSample() const {
     return mContext->getSample();
 }
 
 void AudioProcessor::reset() {
+    mSignalConditioner.reset();
+    mAutoGain.reset();
+    mNoiseFloorTracker.reset();
     mContext->clearCache();
     if (mBeatDetector) {
         mBeatDetector->reset();

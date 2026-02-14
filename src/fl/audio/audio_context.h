@@ -33,11 +33,16 @@ public:
     bool hasFFTHistory() const { return mFFTHistoryDepth > 0; }
     const FFTBins* getHistoricalFFT(int framesBack) const;
 
+    // ----- Sample Rate -----
+    void setSampleRate(int sampleRate) { mSampleRate = sampleRate; }
+    int getSampleRate() const { return mSampleRate; }
+
     // ----- Update & Reset -----
     void setSample(const AudioSample& sample);
     void clearCache();
 
 private:
+    int mSampleRate = 44100;
     AudioSample mSample;
     mutable FFTBins mFFT;
     mutable bool mFFTComputed;
