@@ -21,7 +21,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional, cast
 
-import fasteners
+from ci.util.file_lock_rw import FileLock
 
 
 # ==============================================================================
@@ -329,7 +329,7 @@ class TwoLayerFingerprintCache:
 
         # Cache and lock file paths
         self.cache_file = self.fingerprint_dir / f"{subpath}.json"
-        self.lock_file = str(self.fingerprint_dir / f"{subpath}.lock")
+        self.lock_file = self.fingerprint_dir / f"{subpath}.lock"
 
         # Pending fingerprint data (stored before linting starts)
         self._pending_fingerprint: (
@@ -453,8 +453,9 @@ class TwoLayerFingerprintCache:
         Returns:
             True if processing is needed, False if cache is valid
         """
-        lock = fasteners.InterProcessLock(self.lock_file)
-        with lock:
+        with FileLock(
+            self.lock_file, timeout=30.0, operation=f"fingerprint:{self.subpath}:check"
+        ):
             cache_data = self._read_cache_data()
             needs_update = False
             updated_cache = cache_data.copy()
@@ -556,8 +557,11 @@ class TwoLayerFingerprintCache:
                 "mark_success() called without prior check_needs_update()"
             )
 
-        lock = fasteners.InterProcessLock(self.lock_file)
-        with lock:
+        with FileLock(
+            self.lock_file,
+            timeout=30.0,
+            operation=f"fingerprint:{self.subpath}:mark_success",
+        ):
             files_data_raw: Any = fingerprint_data.get("files", {})
             # Type-safe extraction - ensure it's the right type
             if isinstance(files_data_raw, dict):
@@ -573,8 +577,11 @@ class TwoLayerFingerprintCache:
 
         This forces the next validation to return True (needs update).
         """
-        lock = fasteners.InterProcessLock(self.lock_file)
-        with lock:
+        with FileLock(
+            self.lock_file,
+            timeout=30.0,
+            operation=f"fingerprint:{self.subpath}:invalidate",
+        ):
             if self.cache_file.exists():
                 try:
                     self.cache_file.unlink()
@@ -590,8 +597,11 @@ class TwoLayerFingerprintCache:
         Returns:
             Dict with cache information or None if no cache exists
         """
-        lock = fasteners.InterProcessLock(self.lock_file)
-        with lock:
+        with FileLock(
+            self.lock_file,
+            timeout=30.0,
+            operation=f"fingerprint:{self.subpath}:get_cache_info",
+        ):
             cache_data = self._read_cache_data()
             if not cache_data:
                 return None
@@ -641,7 +651,7 @@ class HashFingerprintCache:
 
         # Cache and lock file paths
         self.cache_file = self.fingerprint_dir / f"{subpath}.json"
-        self.lock_file = str(self.fingerprint_dir / f"{subpath}.lock")
+        self.lock_file = self.fingerprint_dir / f"{subpath}.lock"
 
     def _get_file_hash_data(self, file_paths: list[Path]) -> str:
         """
@@ -819,8 +829,11 @@ class HashFingerprintCache:
         current_hash = self.get_current_hash(file_paths)
 
         # Use read lock for validation
-        lock = fasteners.InterProcessLock(self.lock_file)
-        with lock:
+        with FileLock(
+            self.lock_file,
+            timeout=30.0,
+            operation=f"fingerprint:{self.subpath}:is_valid",
+        ):
             cache_data = self._read_cache_data()
             if cache_data is None:
                 return False
@@ -846,8 +859,11 @@ class HashFingerprintCache:
         current_time = time.time()
 
         # Check if cache is valid
-        lock = fasteners.InterProcessLock(self.lock_file)
-        with lock:
+        with FileLock(
+            self.lock_file,
+            timeout=30.0,
+            operation=f"fingerprint:{self.subpath}:check_needs_update",
+        ):
             cache_data = self._read_cache_data()
             if cache_data is None:
                 # No cache - store pending fingerprint and return needs update
@@ -890,8 +906,11 @@ class HashFingerprintCache:
             )
 
         # Save using write lock
-        lock = fasteners.InterProcessLock(self.lock_file)
-        with lock:
+        with FileLock(
+            self.lock_file,
+            timeout=30.0,
+            operation=f"fingerprint:{self.subpath}:mark_success",
+        ):
             self._write_cache_data(fingerprint_data)
 
             # Write timestamp file if configured
@@ -913,8 +932,11 @@ class HashFingerprintCache:
 
         This forces the next validation to return False.
         """
-        lock = fasteners.InterProcessLock(self.lock_file)
-        with lock:
+        with FileLock(
+            self.lock_file,
+            timeout=30.0,
+            operation=f"fingerprint:{self.subpath}:invalidate",
+        ):
             if self.cache_file.exists():
                 try:
                     self.cache_file.unlink()
@@ -930,8 +952,11 @@ class HashFingerprintCache:
         Returns:
             Dict with cache information or None if no cache exists
         """
-        lock = fasteners.InterProcessLock(self.lock_file)
-        with lock:
+        with FileLock(
+            self.lock_file,
+            timeout=30.0,
+            operation=f"fingerprint:{self.subpath}:get_cache_info",
+        ):
             cache_data = self._read_cache_data()
             if cache_data is None:
                 return None

@@ -10,7 +10,7 @@ from conflicting. Used for project-local locks (e.g., libfastled_build).
 
 Note: Device locking is now handled by fbuild (daemon-based).
 
-Uses the 'fasteners' library for cross-platform file locking.
+Uses fasteners for locking with PID-based stale lock detection for robust recovery.
 """
 
 import time
@@ -21,12 +21,21 @@ from typing import Generator, Optional
 
 import fasteners
 
+from ci.util.file_lock_rw import (
+    _read_lock_metadata,
+    _remove_lock_metadata,
+    _write_lock_metadata,
+    break_stale_lock,
+    is_lock_stale,
+)
+
 
 class BuildLock:
     """
-    File-based lock for coordinating operations using the fasteners library.
+    File-based lock for coordinating operations using FileLock with PID tracking.
 
-    Provides cross-platform file locking via the fasteners InterProcessLock.
+    Provides cross-platform file locking with PID-based stale lock detection.
+    Automatically recovers from crashed processes via FileLock's auto-recovery.
     Supports both project-local locks (.build/locks) and system-wide global
     locks (~/.fastled/locks) depending on the use case.
     """
@@ -51,17 +60,17 @@ class BuildLock:
         lock_dir.mkdir(parents=True, exist_ok=True)
 
         self.lock_file = lock_dir / f"{lock_name}.lock"
+        self.lock_name = lock_name
         self._lock: Optional[fasteners.InterProcessLock] = None
         self._is_acquired = False
 
     _stale_lock_warned: bool = False
 
     def _check_stale_lock(self) -> bool:
-        """Check if lock file is stale (no process holding it) and remove if stale.
+        """Check if lock file is stale (dead process) and remove if stale.
 
-        Uses a fast approach: skip expensive process scanning and instead rely on
-        file age heuristics. Locks older than 10 minutes with no activity are
-        considered stale.
+        Uses PID-based detection for accurate staleness checking.
+        Automatically breaks stale locks from force-killed processes.
 
         Returns:
             True if lock was stale and removed, False otherwise
@@ -70,29 +79,20 @@ class BuildLock:
             return False
 
         try:
-            # Check lock file age - if older than 10 minutes, consider it stale
-            lock_mtime = self.lock_file.stat().st_mtime
-            lock_age = time.time() - lock_mtime
-            max_lock_age = 600  # 10 minutes
-
-            if lock_age > max_lock_age:
+            # Check if lock is stale using PID-based detection
+            if is_lock_stale(self.lock_file):
                 if not BuildLock._stale_lock_warned:
                     BuildLock._stale_lock_warned = True
                     print(
-                        f"Detected stale lock at {self.lock_file} (age: {lock_age:.0f}s). Attempting removal..."
+                        f"Detected stale lock at {self.lock_file} (process dead). Attempting removal..."
                     )
-                try:
-                    self.lock_file.unlink()
+
+                # Break stale lock
+                if break_stale_lock(self.lock_file):
                     print(f"Removed stale lock file: {self.lock_file}")
                     BuildLock._stale_lock_warned = False  # Reset for next time
                     return True
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
-                    raise
-                except Exception:
-                    # Silently fail - the lock is held by another process
-                    # which will release it when done
-                    return False
+
             return False
         except KeyboardInterrupt:
             handle_keyboard_interrupt_properly()
@@ -145,6 +145,10 @@ class BuildLock:
                 success = self._lock.acquire(blocking=True, timeout=0.1)
                 if success:
                     self._is_acquired = True
+                    # Write PID metadata after acquiring lock
+                    _write_lock_metadata(
+                        self.lock_file, operation=f"build:{self.lock_name}"
+                    )
                     return True
             except KeyboardInterrupt:
                 handle_keyboard_interrupt_properly()
@@ -175,6 +179,10 @@ class BuildLock:
 
         if self._lock is not None:
             try:
+                # Remove PID metadata before releasing lock
+                _remove_lock_metadata(self.lock_file)
+
+                # Release lock
                 self._lock.release()
                 self._is_acquired = False
             except KeyboardInterrupt:
