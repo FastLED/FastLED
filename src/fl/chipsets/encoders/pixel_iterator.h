@@ -6,7 +6,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/string.h"
 #include "fl/stl/iterator.h"
-#include "fl/deprecated.h"
+#include "fl/compiler_control.h"
 #include "fl/gamma.h"
 #include "fl/rgbw.h"
 #include "crgb.h"

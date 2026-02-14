@@ -1,7 +1,6 @@
 /// @file synth.cpp
 /// @brief Tests for bandlimited audio synthesizer oscillator
 
-#include "test.h"
 #include "fl/audio/synth.h"
 #include "fl/stl/math.h"
 
@@ -10,7 +9,7 @@ using namespace fl;
 namespace {
 
 // Helper to check if samples are within valid range [-1.0, 1.0] with some tolerance
-bool samplesInRange(const float* samples, int32_t count, float tolerance = 1.5f) {
+static bool samplesInRange(const float* samples, int32_t count, float tolerance = 1.5f) {
     for (int32_t i = 0; i < count; ++i) {
         if (samples[i] < -tolerance || samples[i] > tolerance) {
             return false;
@@ -20,7 +19,7 @@ bool samplesInRange(const float* samples, int32_t count, float tolerance = 1.5f)
 }
 
 // Helper to check if waveform has significant variation (not all zeros or constant)
-bool hasVariation(const float* samples, int32_t count) {
+static bool hasVariation(const float* samples, int32_t count) {
     if (count < 2) return false;
 
     float minVal = samples[0];

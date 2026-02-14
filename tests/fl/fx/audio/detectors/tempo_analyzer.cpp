@@ -1,11 +1,10 @@
 // Unit tests for TempoAnalyzer
-#include "../../../audio/test_helpers.hpp"
 
 #include "test.h"
-#include "FastLED.h"
 #include "fl/audio.h"
 #include "fl/audio/audio_context.h"
 #include "fl/fx/audio/detectors/tempo_analyzer.h"
+#include "../../../audio/test_helpers.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/math.h"
 #include "fl/stl/shared_ptr.h"
@@ -13,7 +12,20 @@
 #include "fl/math_macros.h"
 
 using namespace fl;
-using namespace fl::test;
+using fl::audio::test::makeSample;
+using fl::audio::test::makeSilence;
+
+namespace {
+
+static AudioSample makeSample_TempoAnalyzer(float freq, fl::u32 timestamp, float amplitude = 16000.0f) {
+    return makeSample(freq, timestamp, amplitude);
+}
+
+static AudioSample makeSilence_TempoAnalyzer(fl::u32 timestamp) {
+    return makeSilence(timestamp);
+}
+
+} // anonymous namespace
 
 FL_TEST_CASE("TempoAnalyzer - initial state") {
     TempoAnalyzer analyzer;
@@ -65,11 +77,11 @@ FL_TEST_CASE("TempoAnalyzer - out-of-range BPM scores less than 1") {
 
 FL_TEST_CASE("TempoAnalyzer - reset clears state") {
     TempoAnalyzer analyzer;
-    auto ctx = fl::make_shared<AudioContext>(makeSilence(0));
+    auto ctx = fl::make_shared<AudioContext>(makeSilence_TempoAnalyzer(0));
     ctx->setSampleRate(44100);
 
     for (int i = 0; i < 10; ++i) {
-        ctx->setSample(makeSample(200.0f, i * 23));
+        ctx->setSample(makeSample_TempoAnalyzer(200.0f, i * 23));
         analyzer.update(ctx);
     }
 

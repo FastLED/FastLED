@@ -1,11 +1,10 @@
 // Unit tests for VocalDetector
 
 #include "test.h"
-#include "FastLED.h"
 #include "fl/audio.h"
 #include "fl/audio/audio_context.h"
 #include "fl/fx/audio/detectors/vocal.h"
-#include "../../../audio/test_helpers.hpp"
+#include "../../../audio/test_helpers.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/math.h"
 #include "fl/stl/shared_ptr.h"
@@ -13,13 +12,21 @@
 #include "fl/math_macros.h"
 
 using namespace fl;
-using namespace fl::test;
+using fl::audio::test::makeSample;
+
+namespace {
+
+static AudioSample makeSample_VocalDetector(float freq, fl::u32 timestamp, float amplitude = 16000.0f) {
+    return makeSample(freq, timestamp, amplitude);
+}
+
+} // anonymous namespace
 
 FL_TEST_CASE("VocalDetector - pure sine is not vocal") {
     VocalDetector detector;
     detector.setSampleRate(44100);
 
-    auto ctx = fl::make_shared<AudioContext>(makeSample(440.0f, 1000));
+    auto ctx = fl::make_shared<AudioContext>(makeSample_VocalDetector(440.0f, 1000));
     ctx->setSampleRate(44100);
     detector.update(ctx);
 
@@ -31,7 +38,7 @@ FL_TEST_CASE("VocalDetector - confidence in valid range") {
     VocalDetector detector;
     detector.setSampleRate(44100);
 
-    auto ctx = fl::make_shared<AudioContext>(makeSample(440.0f, 1000));
+    auto ctx = fl::make_shared<AudioContext>(makeSample_VocalDetector(440.0f, 1000));
     ctx->setSampleRate(44100);
     detector.update(ctx);
 
@@ -48,7 +55,7 @@ FL_TEST_CASE("VocalDetector - reset clears state") {
     VocalDetector detector;
     detector.setSampleRate(44100);
 
-    auto ctx = fl::make_shared<AudioContext>(makeSample(440.0f, 1000));
+    auto ctx = fl::make_shared<AudioContext>(makeSample_VocalDetector(440.0f, 1000));
     ctx->setSampleRate(44100);
     detector.update(ctx);
 
@@ -68,7 +75,7 @@ FL_TEST_CASE("VocalDetector - callbacks don't crash") {
         lastActiveState = active;
     });
 
-    auto ctx = fl::make_shared<AudioContext>(makeSample(440.0f, 1000));
+    auto ctx = fl::make_shared<AudioContext>(makeSample_VocalDetector(440.0f, 1000));
     ctx->setSampleRate(44100);
     detector.update(ctx);
 
@@ -104,7 +111,7 @@ FL_TEST_CASE("VocalDetector - onVocalStart and onVocalEnd callbacks") {
     // Use a complex multi-harmonic signal that resembles vocal formants
     for (int round = 0; round < 3; ++round) {
         // Complex signal with multiple harmonics (vocal-like)
-        auto ctx = fl::make_shared<AudioContext>(makeSample(300.0f, round * 1000, 15000.0f));
+        auto ctx = fl::make_shared<AudioContext>(makeSample_VocalDetector(300.0f, round * 1000, 15000.0f));
         ctx->setSampleRate(44100);
         ctx->getFFT(128);  // High bin count for formant resolution
         detector.update(ctx);

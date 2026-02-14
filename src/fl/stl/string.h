@@ -22,7 +22,6 @@
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"  // IWYU pragma: keep
 #include "fl/stl/variant.h"
-#include "fl/deprecated.h"
 #include "fl/compiler_control.h"
 #include "fl/string_view.h"
 #include "fl/stl/iterator.h"

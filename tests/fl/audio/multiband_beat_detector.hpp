@@ -1,8 +1,9 @@
 #include "fl/audio/multiband_beat_detector.h"
 #include "fl/stl/array.h"
-#include "test.h"
 
 using namespace fl;
+
+namespace {
 
 // Helper: Create 16-element frequency bin array with specified band energies
 static array<float, 16> createFrequencyBins(float bassLevel, float midLevel, float trebleLevel) {
@@ -23,6 +24,8 @@ static array<float, 16> createFrequencyBins(float bassLevel, float midLevel, flo
 
     return bins;
 }
+
+} // anonymous namespace
 
 FL_TEST_CASE("MultiBandBeatDetector - Basic configuration") {
     MultiBandBeatDetector detector;

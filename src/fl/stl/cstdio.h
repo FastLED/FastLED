@@ -11,6 +11,9 @@
 #endif
 
 namespace fl {
+class sstream;  // Forward declaration
+class string;   // Forward declaration
+template <typename> class function;  // Forward declaration for function template
 
 class string;
 class sstream;
@@ -145,7 +148,6 @@ int read();
 // @param skipChar Character to skip during reading (default: '\r' for cross-platform line endings)
 // @param timeoutMs Optional timeout in milliseconds (nullopt = wait forever)
 // @note Follows Arduino Serial.readStringUntil() API
-class sstream;  // Forward declare to avoid circular dependency
 bool readStringUntil(sstream& out, char delimiter = '\n', char skipChar = '\r', fl::optional<u32> timeoutMs = fl::nullopt);
 
 // Reads from input stream until delimiter is found, returning as string (blocking with optional timeout)

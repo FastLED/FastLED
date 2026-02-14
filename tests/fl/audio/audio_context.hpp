@@ -1,20 +1,19 @@
 // Unit tests for AudioContext
 
-#include "test.h"
-#include "FastLED.h"
 #include "fl/audio.h"
 #include "fl/audio/audio_context.h"
 #include "fl/fft.h"
-#include "fl/stl/vector.h"
-#include "fl/stl/math.h"
-#include "fl/stl/shared_ptr.h"
+#include "fl/int.h"
 #include "fl/math_macros.h"
+#include "fl/stl/math.h"
+#include "fl/stl/span.h"
+#include "fl/stl/vector.h"
 
 using namespace fl;
 
-namespace { // audio_context
+namespace {
 
-AudioSample makeSineAudioSample(float freq, fl::u32 timestamp) {
+static AudioSample makeSineAudioSample(float freq, fl::u32 timestamp) {
     fl::vector<fl::i16> data;
     data.reserve(512);
     for (int i = 0; i < 512; ++i) {

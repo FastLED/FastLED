@@ -1,7 +1,6 @@
 #pragma once
 
 #include "platforms/is_platform.h"
-#include "platforms/memory_barrier.h"
 
 // Stringify helper for pragma arguments
 #define FL_STRINGIFY2(x) #x
@@ -47,6 +46,7 @@
   // Clang doesn't have volatile warning, use no-op
   #define FL_DISABLE_WARNING_VOLATILE
   #define FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS FL_DISABLE_WARNING(deprecated-declarations)
+  #define FL_DISABLE_WARNING_DEPRECATED_REGISTER FL_DISABLE_WARNING(deprecated-register)
   // Clang doesn't have subobject-linkage warning, use no-op
   #define FL_DISABLE_WARNING_SUBOBJECT_LINKAGE
   // C++14/17 extension warnings (for compatibility when using SIMD intrinsic headers)
@@ -86,6 +86,7 @@
   #else
     #define FL_DISABLE_WARNING_VOLATILE FL_DISABLE_WARNING(volatile)
   #define FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS FL_DISABLE_WARNING(deprecated-declarations)
+  #define FL_DISABLE_WARNING_DEPRECATED_REGISTER FL_DISABLE_WARNING(deprecated-register)
   #endif
   // GCC has subobject-linkage warning (requires GCC >= 5.0)
   #if FL_GCC_VERSION >= 500
@@ -111,6 +112,8 @@
   #define FL_DISABLE_WARNING_VOLATILE
   #define FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
   #define FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS FL_DISABLE_WARNING(deprecated-declarations)
+  #define FL_DISABLE_WARNING_DEPRECATED_REGISTER
+  #define FL_DISABLE_WARNING_DEPRECATED_REGISTER FL_DISABLE_WARNING(deprecated-register)
   // Other compilers don't have subobject-linkage warning, use no-op
   #define FL_DISABLE_WARNING_SUBOBJECT_LINKAGE
   // Other compilers don't have C++14/17 extension warnings, use no-op
@@ -525,8 +528,41 @@ FL_DISABLE_WARNING_POP
   #define FL_NORETURN
 #endif
 
-// FL_DEPRECATED macro is defined in fl/deprecated.h
-// That file provides FL_DEPRECATED(msg) with message support for better compatibility
+// Mark symbols (functions, types, variables) as deprecated
+// Generates compiler warnings when deprecated symbols are used.
+//
+// Usage:
+//   FL_DEPRECATED("Use new_function() instead") void old_function();
+//   struct FL_DEPRECATED_CLASS("Replaced by NewClass") OldClass { };
+//
+// This macro is portable across C++11/14/17 compilers.
+#if defined(FL_IS_CLANG)
+  // Clang: Support deprecated with message
+  #define FL_DEPRECATED(msg) __attribute__((deprecated(msg)))
+  // Clang: Do not mark classes as deprecated (causes excessive warnings)
+  #define FL_DEPRECATED_CLASS(msg)
+#elif defined(FL_IS_GCC)
+  // GCC: Support deprecated with message (GCC 4.5+)
+  #if FL_GCC_VERSION >= 405
+    #define FL_DEPRECATED(msg) __attribute__((deprecated(msg)))
+    #define FL_DEPRECATED_CLASS(msg) __attribute__((deprecated(msg)))
+  #else
+    #define FL_DEPRECATED(msg) __attribute__((deprecated))
+    #define FL_DEPRECATED_CLASS(msg)
+  #endif
+#elif defined(FL_IS_WIN_MSVC)
+  // MSVC: Use __declspec(deprecated) with message
+  #define FL_DEPRECATED(msg) __declspec(deprecated(msg))
+  #define FL_DEPRECATED_CLASS(msg) __declspec(deprecated(msg))
+#else
+  // Unsupported compiler: no-op
+  #define FL_DEPRECATED(msg)
+  #define FL_DEPRECATED_CLASS(msg)
+#endif
+
+// Legacy macros for compatibility (deprecated, use FL_DEPRECATED instead)
+#define FASTLED_DEPRECATED(msg) FL_DEPRECATED(msg)
+#define FASTLED_DEPRECATED_CLASS(msg) FL_DEPRECATED_CLASS(msg)
 
 // Branch prediction hints for hot paths (C++20 [[likely]] / [[unlikely]])
 // Helps the compiler optimize for the common case.

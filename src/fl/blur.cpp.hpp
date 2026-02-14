@@ -9,7 +9,6 @@
 #include "fl/blur.h"
 #include "fl/colorutils_misc.h"
 #include "fl/compiler_control.h"
-#include "fl/deprecated.h"
 #include "fl/error.h"
 #include "fl/unused.h"
 #include "fl/xymap.h"

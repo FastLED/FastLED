@@ -158,10 +158,11 @@ def run_meson_test(
             # If test failed, show error context
             if returncode != 0:
                 # Create error-detecting filter with reasonable limit for test failures
-                # (compilation uses limit=3, test failures show more but still capped)
+                # Limit context to prevent overly long output (5 failures × 20 lines ≈ 100 lines)
+                # vs previous 15 failures × 40 lines ≈ 600 lines
                 error_filter: Callable[[str], None] = _create_error_context_filter(
-                    context_lines=20,
-                    max_unique_errors=15,  # Show first 15 unique failures
+                    context_lines=10,  # 10 lines before/after (reduced from 20)
+                    max_unique_errors=5,  # Show first 5 unique failures (reduced from 15)
                 )
 
                 # Process accumulated output to show error context

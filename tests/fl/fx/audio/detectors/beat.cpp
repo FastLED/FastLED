@@ -1,19 +1,31 @@
 // Unit tests for BeatDetector
-#include "../../../audio/test_helpers.hpp"
 
 #include "test.h"
-#include "FastLED.h"
 #include "fl/audio.h"
 #include "fl/audio/audio_context.h"
 #include "fl/fft.h"
 #include "fl/fx/audio/detectors/beat.h"
+#include "../../../audio/test_helpers.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/math.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/math_macros.h"
 
 using namespace fl;
-using namespace fl::test;
+using fl::audio::test::makeSample;
+using fl::audio::test::makeSilence;
+
+namespace {
+
+static AudioSample makeSample_BeatDetector(float freq, fl::u32 timestamp, float amplitude = 16000.0f) {
+    return makeSample(freq, timestamp, amplitude);
+}
+
+static AudioSample makeSilence_BeatDetector(fl::u32 timestamp) {
+    return makeSilence(timestamp);
+}
+
+} // anonymous namespace
 
 FL_TEST_CASE("BeatDetector - silence produces no beats") {
     BeatDetector detector;
@@ -21,7 +33,7 @@ FL_TEST_CASE("BeatDetector - silence produces no beats") {
     detector.onBeat.add([&beatCount]() { beatCount++; });
 
     for (int i = 0; i < 20; ++i) {
-        auto ctx = fl::make_shared<AudioContext>(makeSilence(i * 23));
+        auto ctx = fl::make_shared<AudioContext>(makeSilence_BeatDetector(i * 23));
         ctx->setSampleRate(44100);
         detector.update(ctx);
     }
@@ -36,17 +48,17 @@ FL_TEST_CASE("BeatDetector - strong bass onset after silence triggers beat") {
     int beatCount = 0;
     detector.onBeat.add([&beatCount]() { beatCount++; });
 
-    auto ctx = fl::make_shared<AudioContext>(makeSilence(0));
+    auto ctx = fl::make_shared<AudioContext>(makeSilence_BeatDetector(0));
     ctx->setSampleRate(44100);
 
     // Feed silence to establish baseline
     for (int i = 0; i < 20; ++i) {
-        ctx->setSample(makeSilence(i * 23));
+        ctx->setSample(makeSilence_BeatDetector(i * 23));
         detector.update(ctx);
     }
 
     // Now inject a strong bass signal (200 Hz, within CQ range)
-    ctx->setSample(makeSample(200.0f, 500, 20000.0f));
+    ctx->setSample(makeSample_BeatDetector(200.0f, 500, 20000.0f));
     detector.update(ctx);
 
     // Should have detected at least one beat (strong bass onset)
@@ -59,17 +71,17 @@ FL_TEST_CASE("BeatDetector - pure treble should not trigger beat") {
     int beatCount = 0;
     detector.onBeat.add([&beatCount]() { beatCount++; });
 
-    auto ctx = fl::make_shared<AudioContext>(makeSilence(0));
+    auto ctx = fl::make_shared<AudioContext>(makeSilence_BeatDetector(0));
     ctx->setSampleRate(44100);
 
     // Establish baseline with silence
     for (int i = 0; i < 20; ++i) {
-        ctx->setSample(makeSilence(i * 23));
+        ctx->setSample(makeSilence_BeatDetector(i * 23));
         detector.update(ctx);
     }
 
     // Inject pure treble (4kHz)
-    ctx->setSample(makeSample(4000.0f, 500, 20000.0f));
+    ctx->setSample(makeSample_BeatDetector(4000.0f, 500, 20000.0f));
     detector.update(ctx);
 
     // Treble transient should NOT trigger a beat
@@ -78,7 +90,7 @@ FL_TEST_CASE("BeatDetector - pure treble should not trigger beat") {
 
 FL_TEST_CASE("BeatDetector - getPhase returns valid range") {
     BeatDetector detector;
-    auto ctx = fl::make_shared<AudioContext>(makeSilence(0));
+    auto ctx = fl::make_shared<AudioContext>(makeSilence_BeatDetector(0));
     ctx->setSampleRate(44100);
     detector.update(ctx);
 
@@ -89,7 +101,7 @@ FL_TEST_CASE("BeatDetector - getPhase returns valid range") {
 
 FL_TEST_CASE("BeatDetector - getConfidence returns valid range") {
     BeatDetector detector;
-    auto ctx = fl::make_shared<AudioContext>(makeSilence(0));
+    auto ctx = fl::make_shared<AudioContext>(makeSilence_BeatDetector(0));
     ctx->setSampleRate(44100);
     detector.update(ctx);
 
@@ -100,12 +112,12 @@ FL_TEST_CASE("BeatDetector - getConfidence returns valid range") {
 
 FL_TEST_CASE("BeatDetector - reset clears state") {
     BeatDetector detector;
-    auto ctx = fl::make_shared<AudioContext>(makeSilence(0));
+    auto ctx = fl::make_shared<AudioContext>(makeSilence_BeatDetector(0));
     ctx->setSampleRate(44100);
 
     // Process some frames
     for (int i = 0; i < 10; ++i) {
-        ctx->setSample(makeSample(200.0f, i * 23));
+        ctx->setSample(makeSample_BeatDetector(200.0f, i * 23));
         detector.update(ctx);
     }
 

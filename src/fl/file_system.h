@@ -11,7 +11,7 @@
 #include "fl/screenmap.h"
 #include "fl/codec/jpeg.h"
 #include "fl/codec/mp3.h"
-#include "fl/deprecated.h"
+#include "fl/compiler_control.h"
 #include "crgb.h"
 
 namespace fl {

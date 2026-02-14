@@ -10,7 +10,6 @@
 #include "fastled_progmem.h"
 #include "fl/blur.h"
 #include "fl/colorutils_misc.h"
-#include "fl/deprecated.h"
 #include "fl/fill.h"
 #include "fl/xymap.h"
 #include "lib8tion/memmove.h"

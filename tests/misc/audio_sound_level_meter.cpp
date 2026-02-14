@@ -2,16 +2,11 @@
 // ok standalone
 
 #include "test.h"
-#include "FastLED.h"
 #include "fl/audio.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/math.h"
 
 using namespace fl;
-
-namespace { // sound_level_meter
-
-} // anonymous namespace
 
 FL_TEST_CASE("SoundLevelMeter - silence gives very negative dBFS") {
     SoundLevelMeter meter;

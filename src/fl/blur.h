@@ -4,7 +4,7 @@
 
 #include "fl/int.h"
 #include "crgb.h"
-#include "fl/deprecated.h"
+#include "fl/compiler_control.h"
 
 namespace fl {
 

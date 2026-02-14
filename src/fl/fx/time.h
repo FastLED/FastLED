@@ -2,7 +2,7 @@
 
 #include "fl/stl/stdint.h"
 
-#include "fl/deprecated.h"
+#include "fl/compiler_control.h"
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 
 namespace fl {

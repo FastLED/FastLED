@@ -22,7 +22,6 @@
 #include "pixel_iterator.h"
 #include "crgb.h"
 #include "fl/compiler_control.h"
-#include "fl/deprecated.h"
 #include "fl/stl/variant.h"  // for PixelControllerAny.
 
 FL_DISABLE_WARNING_PUSH

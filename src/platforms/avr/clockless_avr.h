@@ -641,8 +641,7 @@ protected:
 #define DADVANCE 3
 #define DUSE (0xFF - (DADVANCE-1))
 
-// Silence compiler warnings about switch/case that is explicitly intended to fall through.
-#define FL_FALLTHROUGH __attribute__ ((fallthrough));
+// FL_FALLTHROUGH is defined in compiler_control.h (included via lib8tion.h)
 
 	// ===== MAIN BIT-BANGING FUNCTION =====
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then

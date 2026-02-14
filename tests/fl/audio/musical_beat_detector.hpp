@@ -4,9 +4,12 @@
 #include "fl/audio/musical_beat_detector.h"
 #include "fl/stl/math.h"
 #include "fl/math_macros.h"
-#include "test.h"
 
 using namespace fl;
+
+namespace {
+// No helper functions needed in this file
+} // anonymous namespace
 
 // MB-1: Steady 120 BPM - Tight Validation
 FL_TEST_CASE("MusicalBeatDetector - steady 120 BPM tight") {

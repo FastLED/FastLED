@@ -15,7 +15,7 @@
 ///   6. FrequencyBands should produce comparable outputs for equal-energy input
 
 #include "test.h"
-#include "FastLED.h"
+#include "../fl/audio/test_helpers.h"
 #include "fl/audio.h"
 #include "fl/audio/audio_context.h"
 #include "fl/fft.h"
@@ -27,40 +27,13 @@
 #include "fl/stl/math.h"
 
 using namespace fl;
+using fl::audio::test::makeSample;
+using fl::audio::test::generateDC;
+using fl::audio::test::generateSine;
 
-namespace { // anonymous namespace for audio_deficiencies
+namespace {
 
 constexpr float PI = 3.14159265358979f;
-
-// Generate a sine wave as int16 PCM samples
-void generateSine(vector<i16> &out, int count, float freq, float sampleRate,
-                  float amplitude = 16000.0f, i16 dcOffset = 0) {
-    out.clear();
-    out.reserve(count);
-    for (int i = 0; i < count; ++i) {
-        float t = static_cast<float>(i) / sampleRate;
-        float val = amplitude * fl::sinf(2.0f * PI * freq * t);
-        i32 s = static_cast<i32>(val) + dcOffset;
-        if (s > 32767)
-            s = 32767;
-        if (s < -32768)
-            s = -32768;
-        out.push_back(static_cast<i16>(s));
-    }
-}
-
-// Generate silence / constant DC
-void generateDC(vector<i16> &out, int count, i16 dcOffset) {
-    out.clear();
-    out.reserve(count);
-    for (int i = 0; i < count; ++i) {
-        out.push_back(dcOffset);
-    }
-}
-
-AudioSample makeSample(const vector<i16> &pcm, u32 timestamp = 0) {
-    return AudioSample(span<const i16>(pcm.data(), pcm.size()), timestamp);
-}
 
 } // anonymous namespace
 
@@ -77,7 +50,12 @@ FL_TEST_CASE("Audio fix - DC offset removed by default") {
 
     // Sample with large DC offset (3000) — common with INMP441 MEMS mic
     vector<i16> pcm;
-    generateSine(pcm, 512, 440.0f, 44100.0f, 5000.0f, 3000);
+    generateSine(pcm, 512, 440.0f, 44100.0f, 5000);
+    // Add DC offset
+    for (auto& sample : pcm) {
+        i32 val = static_cast<i32>(sample) + 3000;
+        sample = static_cast<i16>(fl::max(-32768, fl::min(32767, val)));
+    }
 
     processor.update(makeSample(pcm, 1000));
 

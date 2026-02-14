@@ -1,5 +1,6 @@
 // ok standalone
 #include "test.h"
+#include "../fl/audio/test_helpers.h"
 #include "fl/audio.h"
 #include "fl/audio/audio_context.h"
 #include "fl/fft.h"
@@ -22,40 +23,19 @@
 #include "fl/math_macros.h"
 
 using namespace fl;
+using fl::audio::test::makeSample;
+using fl::audio::test::makeSilence;
+using fl::audio::test::makeDC;
+using fl::audio::test::makeMaxAmplitude;
 
-namespace { // adversarial_tests
+namespace {
 
-AudioSample makeSample(float freq, fl::u32 timestamp, float amplitude = 16000.0f) {
-    fl::vector<fl::i16> data;
-    data.reserve(512);
-    for (int i = 0; i < 512; ++i) {
-        float phase = 2.0f * FL_M_PI * freq * i / 44100.0f;
-        data.push_back(static_cast<fl::i16>(amplitude * fl::sinf(phase)));
-    }
-    return AudioSample(fl::span<const fl::i16>(data.data(), data.size()), timestamp);
-}
-
-AudioSample makeSilence(fl::u32 timestamp) {
-    fl::vector<fl::i16> data(512, 0);
-    return AudioSample(fl::span<const fl::i16>(data.data(), data.size()), timestamp);
-}
-
-AudioSample makeDC(fl::i16 dcValue, fl::u32 timestamp) {
-    fl::vector<fl::i16> data(512, dcValue);
-    return AudioSample(fl::span<const fl::i16>(data.data(), data.size()), timestamp);
-}
-
-AudioSample makeMaxAmplitude(fl::u32 timestamp) {
-    fl::vector<fl::i16> data;
-    data.reserve(512);
-    for (int i = 0; i < 512; ++i) {
-        data.push_back((i % 2 == 0) ? 32767 : -32768);
-    }
-    return AudioSample(fl::span<const fl::i16>(data.data(), data.size()), timestamp);
+static AudioSample makeSample_Adversarial(float freq, fl::u32 timestamp, float amplitude = 16000.0f) {
+    return makeSample(freq, timestamp, amplitude);
 }
 
 // Safe NaN check that doesn't rely on isnan
-bool isNaN(float x) {
+static bool isNaN(float x) {
     return !(x == x);
 }
 
@@ -265,7 +245,7 @@ FL_TEST_CASE("Adversarial - BeatDetector with constant loud signal doesn't spam 
 
     // Feed constant loud bass tone (no transients, just sustained)
     for (int i = 0; i < 100; ++i) {
-        ctx->setSample(makeSample(200.0f, i * 23, 20000.0f));
+        ctx->setSample(makeSample_Adversarial(200.0f, i * 23, 20000.0f));
         ctx->getFFT(16);
         ctx->getFFTHistory(4);
         detector.update(ctx);
@@ -293,7 +273,7 @@ FL_TEST_CASE("Adversarial - BeatDetector cooldown enforced") {
 
     // Rapid-fire bass bursts every frame (23ms apart, faster than cooldown)
     for (int i = 0; i < 50; ++i) {
-        ctx->setSample(makeSample(200.0f, i * 23, 20000.0f));
+        ctx->setSample(makeSample_Adversarial(200.0f, i * 23, 20000.0f));
         ctx->getFFT(16);
         detector.update(ctx);
     }
@@ -337,7 +317,7 @@ FL_TEST_CASE("Adversarial - EnergyAnalyzer min never exceeds max after silence")
     }
 
     // Now a real signal
-    auto ctx = fl::make_shared<AudioContext>(makeSample(440.0f, 700, 10000.0f));
+    auto ctx = fl::make_shared<AudioContext>(makeSample_Adversarial(440.0f, 700, 10000.0f));
     analyzer.update(ctx);
 
     float minE = analyzer.getMinEnergy();
@@ -360,7 +340,7 @@ FL_TEST_CASE("Adversarial - TempoAnalyzer with random noise doesn't crash") {
     for (int i = 0; i < 200; ++i) {
         timestamp += (i % 7) * 5 + 10;  // Irregular intervals
         float amplitude = static_cast<float>((i * 7 + 13) % 20000);
-        ctx->setSample(makeSample(200.0f + (i % 5) * 100.0f, timestamp, amplitude));
+        ctx->setSample(makeSample_Adversarial(200.0f + (i % 5) * 100.0f, timestamp, amplitude));
         ctx->getFFT(16);
         analyzer.update(ctx);
     }
@@ -416,15 +396,15 @@ FL_TEST_CASE("Adversarial - AudioProcessor rapid sample rate changes") {
 
     // Change sample rate between updates
     processor.setSampleRate(44100);
-    AudioSample s1 = makeSample(440.0f, 100);
+    AudioSample s1 = makeSample_Adversarial(440.0f, 100);
     processor.update(s1);
 
     processor.setSampleRate(22050);
-    AudioSample s2 = makeSample(440.0f, 200);
+    AudioSample s2 = makeSample_Adversarial(440.0f, 200);
     processor.update(s2);
 
     processor.setSampleRate(16000);
-    AudioSample s3 = makeSample(440.0f, 300);
+    AudioSample s3 = makeSample_Adversarial(440.0f, 300);
     processor.update(s3);
 
     // Should not crash, context should be valid
@@ -440,7 +420,7 @@ FL_TEST_CASE("Adversarial - AudioProcessor reset mid-processing") {
 
     // Process some frames
     for (int i = 0; i < 10; ++i) {
-        AudioSample s = makeSample(200.0f, i * 23, 15000.0f);
+        AudioSample s = makeSample_Adversarial(200.0f, i * 23, 15000.0f);
         processor.update(s);
     }
 
@@ -449,7 +429,7 @@ FL_TEST_CASE("Adversarial - AudioProcessor reset mid-processing") {
 
     // Continue processing - should not crash
     for (int i = 0; i < 10; ++i) {
-        AudioSample s = makeSample(200.0f, (10 + i) * 23, 15000.0f);
+        AudioSample s = makeSample_Adversarial(200.0f, (10 + i) * 23, 15000.0f);
         processor.update(s);
     }
 

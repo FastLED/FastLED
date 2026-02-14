@@ -6,25 +6,17 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/math.h"
 #include "fl/math_macros.h"
-#include "test.h"
+#include "test_helpers.h"
 
 using namespace fl;
+using fl::audio::test::generateConstantSignal;
 
-namespace { // auto_gain
+namespace {
 
-AudioSample createSample(const vector<i16>& samples, u32 timestamp = 0) {
+static AudioSample createSample_AutoGain(const vector<i16>& samples, u32 timestamp = 0) {
     AudioSampleImplPtr impl = fl::make_shared<AudioSampleImpl>();
     impl->assign(samples.begin(), samples.end(), timestamp);
     return AudioSample(impl);
-}
-
-vector<i16> generateConstantSignal(size count, i16 amplitude) {
-    vector<i16> samples;
-    samples.reserve(count);
-    for (size i = 0; i < count; ++i) {
-        samples.push_back((i % 2 == 0) ? amplitude : -amplitude);
-    }
-    return samples;
 }
 
 } // anonymous namespace
@@ -42,7 +34,7 @@ FL_TEST_CASE("AutoGain - amplification converges to target") {
 
     // Quiet signal: amplitude=500, RMS~500
     vector<i16> quiet = generateConstantSignal(1000, 500);
-    AudioSample audio = createSample(quiet, 1000);
+    AudioSample audio = createSample_AutoGain(quiet, 1000);
 
     for (int i = 0; i < 30; ++i) {
         agc.process(audio);
@@ -68,7 +60,7 @@ FL_TEST_CASE("AutoGain - attenuation converges to target") {
 
     // Loud signal: amplitude=20000, RMS~20000
     vector<i16> loud = generateConstantSignal(1000, 20000);
-    AudioSample audio = createSample(loud, 2000);
+    AudioSample audio = createSample_AutoGain(loud, 2000);
 
     for (int i = 0; i < 30; ++i) {
         agc.process(audio);
@@ -91,7 +83,7 @@ FL_TEST_CASE("AutoGain - percentile estimate converges tightly") {
 
     // Constant amplitude=10000 → RMS~10000. P90 of |samples| ≈ 10000
     vector<i16> samples = generateConstantSignal(500, 10000);
-    AudioSample audio = createSample(samples, 0);
+    AudioSample audio = createSample_AutoGain(samples, 0);
 
     for (int i = 0; i < 100; ++i) {
         agc.process(audio);
@@ -113,7 +105,7 @@ FL_TEST_CASE("AutoGain - silence produces no NaN") {
     agc.configure(config);
 
     vector<i16> silence(512, 0);
-    AudioSample audio = createSample(silence, 3000);
+    AudioSample audio = createSample_AutoGain(silence, 3000);
 
     for (int i = 0; i < 20; ++i) {
         AudioSample result = agc.process(audio);
@@ -145,7 +137,7 @@ FL_TEST_CASE("AutoGain - gain clamping bounds") {
         agc.configure(config);
 
         vector<i16> veryQuiet = generateConstantSignal(1000, 100);
-        AudioSample audio = createSample(veryQuiet, 4000);
+        AudioSample audio = createSample_AutoGain(veryQuiet, 4000);
         for (int i = 0; i < 30; ++i) agc.process(audio);
 
         FL_CHECK_LE(agc.getGain(), 2.0f);
@@ -163,7 +155,7 @@ FL_TEST_CASE("AutoGain - gain clamping bounds") {
         agc.configure(config);
 
         vector<i16> veryLoud = generateConstantSignal(1000, 30000);
-        AudioSample audio = createSample(veryLoud, 5000);
+        AudioSample audio = createSample_AutoGain(veryLoud, 5000);
         for (int i = 0; i < 30; ++i) agc.process(audio);
 
         FL_CHECK_GE(agc.getGain(), 0.5f);
@@ -182,13 +174,13 @@ FL_TEST_CASE("AutoGain - smoothing prevents gain jumps") {
 
     // Start quiet
     vector<i16> quiet = generateConstantSignal(1000, 500);
-    AudioSample quietAudio = createSample(quiet, 6000);
+    AudioSample quietAudio = createSample_AutoGain(quiet, 6000);
     for (int i = 0; i < 5; ++i) agc.process(quietAudio);
     float gainBeforeSwitch = agc.getGain();
 
     // Switch to loud
     vector<i16> loud = generateConstantSignal(1000, 20000);
-    AudioSample loudAudio = createSample(loud, 7000);
+    AudioSample loudAudio = createSample_AutoGain(loud, 7000);
     agc.process(loudAudio);
     float gainAfterOneFrame = agc.getGain();
 
@@ -206,7 +198,7 @@ FL_TEST_CASE("AutoGain - disabled passthrough") {
     agc.configure(config);
 
     vector<i16> samples = generateConstantSignal(1000, 5000);
-    AudioSample input = createSample(samples, 8000);
+    AudioSample input = createSample_AutoGain(samples, 8000);
     AudioSample output = agc.process(input);
 
     FL_CHECK(output.isValid());
@@ -220,14 +212,14 @@ FL_TEST_CASE("AutoGain - empty and invalid") {
     FL_CHECK_FALSE(agc.process(AudioSample()).isValid());
 
     vector<i16> empty;
-    FL_CHECK_FALSE(agc.process(createSample(empty, 0)).isValid());
+    FL_CHECK_FALSE(agc.process(createSample_AutoGain(empty, 0)).isValid());
 }
 
 // Keep: Timestamp
 FL_TEST_CASE("AutoGain - timestamp preserved") {
     AutoGain agc;
     vector<i16> samples = generateConstantSignal(500, 5000);
-    AudioSample output = agc.process(createSample(samples, 123456));
+    AudioSample output = agc.process(createSample_AutoGain(samples, 123456));
     FL_CHECK_EQ(output.timestamp(), 123456u);
 }
 
@@ -239,7 +231,7 @@ FL_TEST_CASE("AutoGain - reset clears state") {
     agc.configure(config);
 
     vector<i16> samples = generateConstantSignal(1000, 10000);
-    for (int i = 0; i < 10; ++i) agc.process(createSample(samples, i * 100));
+    for (int i = 0; i < 10; ++i) agc.process(createSample_AutoGain(samples, i * 100));
 
     FL_CHECK_GT(agc.getStats().samplesProcessed, 0u);
 
@@ -262,7 +254,7 @@ FL_TEST_CASE("AutoGain - no clipping on extreme amplification") {
         float phase = 2.0f * FL_M_PI * 1000.0f * static_cast<float>(i) / 22050.0f;
         quiet[i] = static_cast<i16>(1000 * fl::sinf(phase));
     }
-    AudioSample audio = createSample(quiet, 9000);
+    AudioSample audio = createSample_AutoGain(quiet, 9000);
 
     for (int i = 0; i < 20; ++i) {
         AudioSample result = agc.process(audio);
@@ -291,7 +283,7 @@ FL_TEST_CASE("AutoGain - P90 estimate higher than P50") {
     for (int i = 0; i < 50; ++i) {
         i16 amp = static_cast<i16>(5000 + 100 * i);
         vector<i16> s = generateConstantSignal(500, amp);
-        AudioSample a = createSample(s, i * 100);
+        AudioSample a = createSample_AutoGain(s, i * 100);
         agc50.process(a);
         agc90.process(a);
     }

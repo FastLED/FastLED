@@ -1,17 +1,13 @@
 #include "fl/audio/spectral_equalizer.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/math.h"
-#include "fl/math_macros.h"
-#include "test.h"
+#include "test_helpers.h"
 
 using namespace fl;
+using fl::audio::test::generateUniformBins;
 
-// Helper: Generate uniform frequency bins (white noise)
-static vector<float> generateUniformBins(size count, float magnitude) {
-    return vector<float>(count, magnitude);
-}
+namespace {
 
-// Helper: Calculate average of bins
 static float calculateAverage(span<const float> bins) {
     if (bins.size() == 0) {
         return 0.0f;
@@ -23,6 +19,8 @@ static float calculateAverage(span<const float> bins) {
     }
     return sum / static_cast<float>(bins.size());
 }
+
+} // anonymous namespace
 
 FL_TEST_CASE("SpectralEqualizer - Default flat configuration") {
     SpectralEqualizer eq;

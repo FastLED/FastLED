@@ -6,13 +6,12 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/math.h"
 #include "fl/math_macros.h"
-#include "test.h"
 
 using namespace fl;
 
-namespace { // signal_conditioner
+namespace {
 
-AudioSample createSample(const vector<i16>& samples, u32 timestamp = 0) {
+static AudioSample createSample_SignalConditioner(const vector<i16>& samples, u32 timestamp = 0) {
     AudioSampleImplPtr impl = fl::make_shared<AudioSampleImpl>();
     impl->assign(samples.begin(), samples.end(), timestamp);
     return AudioSample(impl);
@@ -31,7 +30,7 @@ FL_TEST_CASE("SignalConditioner - DC removal exact offset") {
 
     // Pure DC: all samples = 5000
     vector<i16> dcSamples(512, 5000);
-    AudioSample raw = createSample(dcSamples, 1000);
+    AudioSample raw = createSample_SignalConditioner(dcSamples, 1000);
     AudioSample cleaned = conditioner.processSample(raw);
 
     // Mean of all-5000 buffer = 5000, subtracted → all zero
@@ -68,7 +67,7 @@ FL_TEST_CASE("SignalConditioner - spike filter threshold boundary") {
     samples[3] = -10000; // -10000 > -10000 is false → SPIKE
     samples[4] = -9999;  // -9999 > -10000 is true → valid
 
-    AudioSample raw = createSample(samples, 2000);
+    AudioSample raw = createSample_SignalConditioner(samples, 2000);
     AudioSample cleaned = conditioner.processSample(raw);
 
     const auto& pcm = cleaned.pcm();
@@ -107,7 +106,7 @@ FL_TEST_CASE("SignalConditioner - noise gate hysteresis per-sample") {
     for (int i = 0; i < 128; ++i) samples.push_back(250);
     for (int i = 0; i < 128; ++i) samples.push_back(450);
 
-    AudioSample raw = createSample(samples, 3000);
+    AudioSample raw = createSample_SignalConditioner(samples, 3000);
     AudioSample cleaned = conditioner.processSample(raw);
     const auto& pcm = cleaned.pcm();
 
@@ -147,7 +146,7 @@ FL_TEST_CASE("SignalConditioner - DC removal excludes spikes from mean") {
     samples[100] = 30000;
     samples[200] = 30000;
 
-    AudioSample raw = createSample(samples, 4000);
+    AudioSample raw = createSample_SignalConditioner(samples, 4000);
     AudioSample cleaned = conditioner.processSample(raw);
     const auto& pcm = cleaned.pcm();
 
@@ -179,7 +178,7 @@ FL_TEST_CASE("SignalConditioner - empty and invalid samples") {
     FL_CHECK_FALSE(result1.isValid());
 
     vector<i16> emptyVec;
-    AudioSample zeroSizeSample = createSample(emptyVec, 5000);
+    AudioSample zeroSizeSample = createSample_SignalConditioner(emptyVec, 5000);
     AudioSample result2 = conditioner.processSample(zeroSizeSample);
     FL_CHECK_FALSE(result2.isValid());
 
@@ -199,7 +198,7 @@ FL_TEST_CASE("SignalConditioner - all spike buffer") {
 
     // All samples above spike threshold
     vector<i16> spikes(512, 32000);
-    AudioSample raw = createSample(spikes, 6000);
+    AudioSample raw = createSample_SignalConditioner(spikes, 6000);
     AudioSample cleaned = conditioner.processSample(raw);
     const auto& pcm = cleaned.pcm();
 
@@ -226,7 +225,7 @@ FL_TEST_CASE("SignalConditioner - config change affects spike count") {
     conditioner.configure(config1);
 
     vector<i16> samples(100, 8000);
-    conditioner.processSample(createSample(samples, 7000));
+    conditioner.processSample(createSample_SignalConditioner(samples, 7000));
     u32 spikes1 = conditioner.getStats().spikesRejected;
     FL_CHECK_EQ(spikes1, 0u); // 8000 < 10000, no spikes
 
@@ -239,7 +238,7 @@ FL_TEST_CASE("SignalConditioner - config change affects spike count") {
     config2.spikeThreshold = 5000;
     conditioner.configure(config2);
 
-    conditioner.processSample(createSample(samples, 7100));
+    conditioner.processSample(createSample_SignalConditioner(samples, 7100));
     u32 spikes2 = conditioner.getStats().spikesRejected;
     FL_CHECK_EQ(spikes2, 100u); // 8000 >= 5000, all spikes
 }
@@ -262,7 +261,7 @@ FL_TEST_CASE("SignalConditioner - noise gate reopening") {
     for (int i = 0; i < 128; ++i) samples.push_back(200);
     for (int i = 0; i < 128; ++i) samples.push_back(600);
 
-    AudioSample raw = createSample(samples, 8000);
+    AudioSample raw = createSample_SignalConditioner(samples, 8000);
     AudioSample cleaned = conditioner.processSample(raw);
     const auto& pcm = cleaned.pcm();
 
@@ -295,7 +294,7 @@ FL_TEST_CASE("SignalConditioner - full pipeline") {
         samples.push_back(static_cast<i16>(biased));
     }
 
-    AudioSample raw = createSample(samples, 9000);
+    AudioSample raw = createSample_SignalConditioner(samples, 9000);
     AudioSample cleaned = conditioner.processSample(raw);
     const auto& stats = conditioner.getStats();
 
@@ -309,7 +308,7 @@ FL_TEST_CASE("SignalConditioner - full pipeline") {
 FL_TEST_CASE("SignalConditioner - reset clears state") {
     SignalConditioner conditioner;
     vector<i16> samples(100, 20000);
-    conditioner.processSample(createSample(samples, 10000));
+    conditioner.processSample(createSample_SignalConditioner(samples, 10000));
     FL_CHECK_GT(conditioner.getStats().spikesRejected, 0u);
 
     conditioner.reset();
@@ -324,7 +323,7 @@ FL_TEST_CASE("SignalConditioner - reset clears state") {
 FL_TEST_CASE("SignalConditioner - timestamp preserved") {
     SignalConditioner conditioner;
     vector<i16> samples(500, 5000);
-    AudioSample raw = createSample(samples, 123456);
+    AudioSample raw = createSample_SignalConditioner(samples, 123456);
     AudioSample cleaned = conditioner.processSample(raw);
     FL_CHECK_EQ(cleaned.timestamp(), 123456u);
 }

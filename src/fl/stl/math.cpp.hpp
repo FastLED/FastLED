@@ -47,6 +47,12 @@ float exp_impl_float(float value) {
     if (value < -10.0f)
         return 0.0000453999297625f; // e^-10 approx
 
+    // For negative values, use exp(x) = 1/exp(-x) to keep the Taylor series
+    // input non-negative where it converges well with limited terms.
+    if (value < 0.0f) {
+        return 1.0f / exp_impl_float(-value);
+    }
+
     float result = 1.0f;
     float term = 1.0f;
     for (int i = 1; i < 10; ++i) {
@@ -61,6 +67,12 @@ double exp_impl_double(double value) {
         return 22026.465794806718; // e^10 approx
     if (value < -10.0)
         return 0.0000453999297625; // e^-10 approx
+
+    // For negative values, use exp(x) = 1/exp(-x) to keep the Taylor series
+    // input non-negative where it converges well with limited terms.
+    if (value < 0.0) {
+        return 1.0 / exp_impl_double(-value);
+    }
 
     double result = 1.0;
     double term = 1.0;
