@@ -60,7 +60,7 @@
   { include: ['"led_sysdefs_stub_generic.h"', 'private', '"fl/detail/private.h"', 'public'] },
   { include: ['"fastled_config.h"', 'private', '"fl/detail/private.h"', 'public'] },
   { include: ['"fastled_delay.h"', 'private', '"fl/detail/private.h"', 'public'] },
-  { include: ['"fastled_progmem.h"', 'private', '"fl/detail/private.h"', 'public'] },
+  { include: ['"fastled_progmem.h"', 'public', '"fastled_progmem.h"', 'public'] },
   { include: ['"power_mgt.h"', 'private', '"fl/detail/private.h"', 'public'] },
   
   # fl/ namespace headers - the modern FastLED API
@@ -108,6 +108,14 @@
   # This redirects libc++'s __new/placement_new_delete.h to our platform abstraction
   { include: ['"__new/placement_new_delete.h"', 'private', '"fl/stl/new.h"', 'public'] },
   { include: ['<new>', 'public', '"fl/stl/new.h"', 'public'] },
+
+  # ========================================================================
+  # SIMD Platform Dispatch (Internal Implementation)
+  # ========================================================================
+  # Platform-specific SIMD headers are internal implementation details.
+  # All code should use the public API: fl/simd.h
+  { include: ['"platforms/shared/simd_x86.hpp"', 'private', '"fl/simd.h"', 'public'] },
+  { include: ['"platforms/shared/simd_noop.hpp"', 'private', '"fl/simd.h"', 'public'] },
 
   # ========================================================================
   # Platform Integer Type Headers (Internal Implementation)
