@@ -18,6 +18,7 @@ from ci.lint.stage_impls import (
     run_cpp_lint,
     run_cpp_lint_single_file,
     run_iwyu_analysis,
+    run_iwyu_pragma_check,
     run_js_lint,
     run_js_lint_single_file,
     run_python_lint_single_file,
@@ -146,6 +147,8 @@ def create_stages(args: LintArgs) -> list[LintStage]:
         def run_cpp_and_iwyu() -> bool:
             """Run C++ linting and IWYU analysis together."""
             if not run_cpp_lint(args.no_fingerprint, args.run_full, args.run_iwyu):
+                return False
+            if not run_iwyu_pragma_check():
                 return False
             if not run_iwyu_analysis(args.run_full, args.run_iwyu, args.run_pyright):
                 return False

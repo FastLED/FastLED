@@ -3,7 +3,6 @@
 
 [
   # FastLED main headers - these are the public API
-  { include: ['"FastLED.h"', 'public', '"FastLED.h"', 'public'] },
   { include: ['"fastled.h"', 'public', '"FastLED.h"', 'public'] },
   
   # Core FastLED headers that should be included directly
@@ -50,22 +49,13 @@
 
   # Platform-specific headers should not be suggested directly
   # Use @"regex" syntax (IWYU does not support shell globs - * is literal)
-  { include: ['@"platforms/.*/fastled_.*\\.h"', 'private', '"fl/detail/private.h"', 'public'] },
-  { include: ['@"platforms/.*/clockless_.*\\.h"', 'private', '"fl/detail/private.h"', 'public'] },
+  { include: ['@"platforms/.*/fastled_.*\\.h"' is now marked with pragma,
   
   # Internal headers should redirect to public API
-  { include: ['"controller.h"', 'private', '"fl/detail/private.h"', 'public'] },
-  { include: ['"cled_controller.h"', 'private', '"fl/detail/private.h"', 'public'] },
-  { include: ['"led_sysdefs.h"', 'private', '"fl/detail/private.h"', 'public'] },
-  { include: ['"led_sysdefs_stub_generic.h"', 'private', '"fl/detail/private.h"', 'public'] },
-  { include: ['"fastled_config.h"', 'private', '"fl/detail/private.h"', 'public'] },
-  { include: ['"fastled_delay.h"', 'private', '"fl/detail/private.h"', 'public'] },
-  { include: ['"fastled_progmem.h"', 'public', '"fastled_progmem.h"', 'public'] },
   { include: ['"platforms/null_progmem.h"', 'private', '"fastled_progmem.h"', 'public'] },
-  { include: ['"power_mgt.h"', 'private', '"fl/detail/private.h"', 'public'] },
+  { include: ['"power_mgt.h"' is now marked with pragma,
   
   # fl/ namespace headers - the modern FastLED API
-  { include: ['"fl/ptr.h"', 'public', '"fl/ptr.h"', 'public'] },
   { include: ['"fl/vector.h"', 'public', '"fl/vector.h"', 'public'] },
   { include: ['"fl/allocator.h"', 'public', '"fl/allocator.h"', 'public'] },
   { include: ['"fl/math.h"', 'public', '"fl/math.h"', 'public'] },
@@ -85,15 +75,11 @@
   { include: ['@"fx/detail/.*"', 'private', '"fl/fx/fx.h"', 'public'] },
   
   # Third-party headers should not be suggested for user code
-  { include: ['@"third_party/.*"', 'private', '"fl/detail/private.h"', 'public'] },
+  { include: ['@"third_party/.*"' is now marked with pragma,
 
   # Chipset-specific headers redirect to main header
-  { include: ['"chipsets.h"', 'private', '"fl/detail/private.h"', 'public'] },
-  { include: ['"ws2812_controller.h"', 'private', '"fl/detail/private.h"', 'public'] },
-  { include: ['"apa102_controller.h"', 'private', '"fl/detail/private.h"', 'public'] },
   
   # Testing headers - keep as-is for test files
-  { include: ['"test.h"', 'public', '"test.h"', 'public'] },
   { include: ['@"test_.*\\.h"', 'public', '"test.h"', 'public'] },
   # doctest.h is private - IWYU should never recommend it
   { include: ['"doctest.h"', 'private', '"test.h"', 'public'] },
@@ -147,12 +133,9 @@
   # AVR Platform Headers
   # These don't exist on stub - map to FastLED's progmem abstraction
   { include: ['<avr/pgmspace.h>', 'private', '"fastled_progmem.h"', 'public'] },
-  { include: ['<avr/io.h>', 'private', '"fl/detail/private.h"', 'public'] },
-  { include: ['<avr/interrupt.h>', 'private', '"fl/detail/private.h"', 'public'] },
-  { include: ['<avr/wdt.h>', 'private', '"fl/detail/private.h"', 'public'] },
+  { include: ['<avr/io.h>' is now marked with pragma,
 
   # ESP32 Arduino HAL Headers
-  { include: ['<esp32-hal.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
   { include: ['<esp32-hal-gpio.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
 
   # ESP-IDF Framework Headers (driver/*)
@@ -180,15 +163,9 @@
   { include: ['<freertos/queue.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
 
   # ARM/Teensy Platform Headers
-  { include: ['<kinetis.h>', 'private', '"fl/detail/private.h"', 'public'] },
-  { include: ['<imxrt.h>', 'private', '"fl/detail/private.h"', 'public'] },
-  { include: ['<nrf.h>', 'private', '"fl/detail/private.h"', 'public'] },
-  { include: ['<sam.h>', 'private', '"fl/detail/private.h"', 'public'] },
+  { include: ['<kinetis.h>' is now marked with pragma,
 
   # Raspberry Pi Pico SDK Headers
-  { include: ['<pico/stdlib.h>', 'private', '"fl/detail/private.h"', 'public'] },
-  { include: ['<hardware/gpio.h>', 'private', '"fl/detail/private.h"', 'public'] },
-  { include: ['<hardware/pio.h>', 'private', '"fl/detail/private.h"', 'public'] },
 
   # ========================================================================
   # SSE Include Chain
@@ -196,7 +173,6 @@
   # emmintrin.h (SSE2) transitively includes xmmintrin.h (SSE1).
   # IWYU doesn't track this transitive include, so it falsely suggests
   # adding xmmintrin.h when emmintrin.h is already included.
-  { include: ['<xmmintrin.h>', 'public', '<emmintrin.h>', 'public'] },
   { include: ['"xmmintrin.h"', 'public', '<emmintrin.h>', 'public'] },
 
   # ========================================================================
@@ -211,7 +187,7 @@
   # ========================================================================
   # These are implementation files, not headers. IWYU should never recommend them.
   # Only _build.cpp.hpp files include them (enforced by a separate linter).
-  { include: ['@".*\\.cpp\\.hpp"', 'private', '"fl/detail/private.h"', 'public'] },
+  { include: ['@".*\\.cpp\\.hpp"' is now marked with pragma,
 
   # ========================================================================
   # Platform infrastructure headers (public within platform code)
@@ -219,7 +195,6 @@
   # These headers are used directly by platform driver files and should remain
   # accessible without redirection to fl/detail/private.h. Mark as private but
   # don't redirect to avoid visibility conflicts with the catch-all rule below.
-  { include: ['"platforms/is_platform.h"', 'private', '"platforms/is_platform.h"', 'private'] },
   { include: ['"platforms/memory_barrier.h"', 'private', '"platforms/memory_barrier.h"', 'private'] },
 
   # ========================================================================
@@ -229,5 +204,5 @@
   # Matches any header under platforms/ at any depth (except those listed above)
   # and redirects to fl/detail/private.h.
   # Note: Headers marked above will be processed first and won't be redirected.
-  { include: ['@"platforms/.*"', 'private', '"fl/detail/private.h"', 'public'] },
+  { include: ['@"platforms/.*"' is now marked with pragma,
 ]

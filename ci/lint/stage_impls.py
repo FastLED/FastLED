@@ -115,6 +115,28 @@ def run_cpp_lint(no_fingerprint: bool, run_full: bool, run_iwyu: bool) -> bool:
     return True
 
 
+def run_iwyu_pragma_check() -> bool:
+    """
+    Run IWYU pragma checker on platform headers.
+
+    Returns:
+        True if all platform headers have IWYU pragma markings, False otherwise
+    """
+    print("")
+    print("🔍 IWYU PRAGMA CHECK")
+    print("--------------------")
+
+    result = subprocess.run(
+        ["uv", "run", "python", "ci/lint_cpp/iwyu_pragma_check.py"],
+        capture_output=False,
+    )
+
+    if result.returncode == 0:
+        return True
+    else:
+        return False
+
+
 def run_iwyu_analysis(run_full: bool, run_iwyu: bool, run_strict: bool = False) -> bool:
     """
     Run IWYU (Include-What-You-Use) analysis.
@@ -471,6 +493,11 @@ def run_cpp_lint_single_file(file_path: str, strict: bool = False) -> bool:
         print(f"  ❌ failed")
         return False
 
+    # Run IWYU pragma check (always)
+    if not run_iwyu_pragma_check_single_file(file_path):
+        print(f"  ❌ IWYU pragma check failed")
+        return False
+
     # Run IWYU analysis (optional with --strict)
     if strict:
         if not run_iwyu_single_file(file_path):
@@ -478,6 +505,32 @@ def run_cpp_lint_single_file(file_path: str, strict: bool = False) -> bool:
             return False
 
     print(f"  ✅ passed")
+    return True
+
+
+def run_iwyu_pragma_check_single_file(file_path: str) -> bool:
+    """
+    Check IWYU pragma on a single file.
+
+    Args:
+        file_path: Absolute path to the file
+
+    Returns:
+        True if file has IWYU pragma or is not in platforms/, False otherwise
+    """
+    result = subprocess.run(
+        ["uv", "run", "python", "ci/lint_cpp/iwyu_pragma_check.py", file_path],
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+    if result.returncode != 0:
+        # Print the error message from the checker
+        if result.stdout:
+            print(result.stdout, end="")
+        return False
+
     return True
 
 
