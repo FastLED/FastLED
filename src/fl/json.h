@@ -161,6 +161,8 @@
 
 #include "fl/sketch_macros.h"
 
+// Note: fl/stl/stdint.h intentionally not included - types come from fl/int.h
+
 #ifndef FASTLED_ENABLE_JSON
 #define FASTLED_ENABLE_JSON SKETCH_HAS_LOTS_OF_MEMORY
 #endif
@@ -1629,7 +1631,7 @@ struct JsonValue {
     fl::string to_string() const;
     
     // Visitor-based serialization helper
-    friend class SerializerVisitor;
+    friend struct SerializerVisitor;
 
     // Parsing factory (FLArduinoJson implementation)
     static fl::shared_ptr<JsonValue> parse(const fl::string &txt);
@@ -2351,5 +2353,10 @@ public:
     // Helper function to normalize JSON string (remove whitespace)
     static fl::string normalizeJsonString(const char* jsonStr);
 };
+
+// JSON memory profiling support - defined in json.cpp.hpp
+// Set g_json_stack_base to a stack address to enable stack depth tracking
+extern volatile size_t g_json_stack_base;  // cast address to size_t
+extern volatile size_t g_json_max_stack_depth;
 
 } // namespace fl
