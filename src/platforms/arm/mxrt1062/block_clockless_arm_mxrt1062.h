@@ -3,6 +3,10 @@
 
 #include "fl/chipsets/timing_traits.h"
 #include "platforms/arm/teensy/is_teensy.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 namespace fl {
 // Definition for a single channel clockless controller for the teensy4
@@ -217,4 +221,7 @@ class __FIBCC : public FlexibleInlineBlockClocklessController<NUM_LANES,DATA_PIN
 
 #endif //defined(FASTLED_TEENSY4)
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP
+
 #endif

@@ -4,6 +4,10 @@
 #include "fl/chipsets/timing_traits.h"
 #include "fastled_delay.h"
 #include "platforms/is_platform.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 namespace fl {
 // Definition for a single channel clockless controller for the teensy4
@@ -138,4 +142,7 @@ protected:
 };
 #endif
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP
+
 #endif

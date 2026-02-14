@@ -8,6 +8,10 @@
 #ifdef ARDUINO
 #include "Arduino.h"
 #include "fl/pin.h"  // For PinMode, PinValue enums
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 #endif
 
 namespace fl {
@@ -84,5 +88,8 @@ _FL_DEFPIN(32, 32);
 #endif
 
 }
+
+
+FL_DISABLE_WARNING_POP
 
 #endif  // __INC_FASTPIN_APOLLO3_H

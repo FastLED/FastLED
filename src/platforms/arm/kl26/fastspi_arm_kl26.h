@@ -1,5 +1,9 @@
 #ifndef __INC_FASTSPI_ARM_KL26_H
 #define __INC_FASTSPI_ARM_KL26_h
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 namespace fl {
 template <int VAL> void getScalars(u8 & sppr, u8 & spr) {
   if(VAL > 4096) { sppr=7; spr=8; }
@@ -255,4 +259,7 @@ public:
 
 };
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP
+
 #endif

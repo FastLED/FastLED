@@ -10,6 +10,10 @@
 #include "fastled_delay.h"
 #include "platforms/shared/clockless_blocking.h"
 #include "platforms/is_platform.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 namespace fl {
 
@@ -861,4 +865,7 @@ protected:
 
 #endif
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP
+
 #endif

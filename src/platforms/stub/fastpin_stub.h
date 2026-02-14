@@ -11,6 +11,10 @@
 
 // Include base class definitions (includes Selectable)
 #include "fl/fastpin_base.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 namespace fl {
 
@@ -69,3 +73,5 @@ public:
 };
 
 } // namespace fl
+
+FL_DISABLE_WARNING_POP

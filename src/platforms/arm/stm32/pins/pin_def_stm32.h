@@ -12,6 +12,10 @@
 #include "fl/stl/stdint.h"
 #include "fl/fastpin_base.h"
 #include "fl/pin.h"  // For PinMode, PinValue enums
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 // Arduino constants for pinMode()
 // These are typically provided by Arduino.h, but we define them here
@@ -63,3 +67,5 @@ public:
 #define _DEFPIN_ARM(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, _R(GPIO ## L)> {};
 
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP

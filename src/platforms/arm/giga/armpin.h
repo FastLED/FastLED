@@ -2,6 +2,10 @@
 #include "fl/stl/stdint.h"
 #include "fl/fastpin_base.h"
 #include "fl/pin.h"  // For PinMode, PinValue enums
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 namespace fl {
 #define _R(T) struct __gen_struct_ ## T
 #define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, _R(GPIO ## L)> {};
@@ -43,3 +47,5 @@ public:
     inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP

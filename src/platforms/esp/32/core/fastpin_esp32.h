@@ -7,6 +7,10 @@
 #include "fl/register.h"
 #include "platforms/esp/esp_version.h"
 #include "fl/fastpin.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 namespace fl {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpragmas"
@@ -191,3 +195,5 @@ _FL_DEFPIN(60); _FL_DEFPIN(61); _FL_DEFPIN(62); _FL_DEFPIN(63);
 
 #pragma GCC diagnostic pop
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP

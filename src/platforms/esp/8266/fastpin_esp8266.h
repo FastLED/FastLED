@@ -3,6 +3,10 @@
 #include "fl/stl/stdint.h"
 #include "fl/fastpin_base.h"
 #include "fl/pin.h"  // For PinMode, PinValue enums
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 namespace fl {
 struct FASTLED_ESP_IO {
     volatile u32 _GPO;
@@ -104,3 +108,5 @@ _FL_DEFPIN(8,15); _FL_DEFPIN(9,3); _FL_DEFPIN(10,1);
 
 #define HAS_HARDWARE_PIN_SUPPORT
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP

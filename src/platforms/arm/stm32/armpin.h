@@ -4,6 +4,10 @@
 #include "fl/fastpin_base.h"
 #include "platforms/arm/stm32/is_stm32.h"
 #include "fl/pin.h"  // For PinMode, PinValue enums
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 namespace fl {
 
@@ -72,3 +76,5 @@ public:
 };
 
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP

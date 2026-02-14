@@ -36,6 +36,9 @@
 #include "fl/chipsets/timing_traits.h"
 #include "platforms/arm/is_arm.h"
 
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
+
 FL_EXTERN_C_BEGIN
 
 
@@ -938,5 +941,8 @@ showLedData(volatile fl::u32 *_port, fl::u32 _bitmask, const fl::u8 *_leds, fl::
  * Adding RGBW support requires significant restructuring to output 4 bytes
  * per pixel and adjust all timing calculations.
  ******************************************************************************/
+
+
+FL_DISABLE_WARNING_POP
 
 #endif

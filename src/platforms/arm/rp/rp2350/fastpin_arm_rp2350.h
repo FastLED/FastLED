@@ -5,6 +5,10 @@
 #include "hardware/gpio.h"
 #include "hardware/structs/sio.h"
 #include "fl/fastpin_base.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 namespace fl {
 // Forward declare FastPin template to support specializations below
 template<u8 PIN> class FastPin;
@@ -85,4 +89,7 @@ _FL_DEFPIN(44); _FL_DEFPIN(45); _FL_DEFPIN(46); _FL_DEFPIN(47);
 
 #endif // FASTLED_FORCE_SOFTWARE_PINS
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP
+
 #endif // __FASTPIN_ARM_RP2350_H

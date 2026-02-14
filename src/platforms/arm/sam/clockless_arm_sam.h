@@ -10,6 +10,10 @@
 
 #include "fl/chipsets/timing_traits.h"
 #include "fastled_delay.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 namespace fl {
 // Definition for a single channel clockless controller for the sam family of arm chips, like that used in the due and rfduino
 // See clockless.h for detailed info on how the template parameters are used.
@@ -133,4 +137,7 @@ using ClocklessController = ClocklessSAMHardware<DATA_PIN, TIMING, RGB_ORDER, XT
 #endif  // defined(FL_IS_SAM)
 
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP
+
 #endif  // __INC_CLOCKLESS_ARM_SAM_H

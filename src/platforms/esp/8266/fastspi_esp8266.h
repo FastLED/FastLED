@@ -2,6 +2,10 @@
 #pragma message "ESP8266 Hardware SPI support added"
 
 #include <SPI.h>
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 namespace fl {
 /*
  * ESP8266 Hardware SPI Driver
@@ -150,3 +154,5 @@ public:
 	}
 };
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP

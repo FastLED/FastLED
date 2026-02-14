@@ -14,6 +14,10 @@
 #include <SPI.h>
 #include <wiring_private.h>
 #include "fl/pin.h"  // For PinMode, PinValue enums
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 #endif
 
 #if defined(FL_IS_SAM)
@@ -379,5 +383,8 @@ public:
 
 }  // namespace fl
 #endif  // FL_IS_SAMD21 || FL_IS_SAMD51
+
+
+FL_DISABLE_WARNING_POP
 
 #endif

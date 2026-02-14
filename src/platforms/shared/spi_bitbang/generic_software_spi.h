@@ -20,6 +20,10 @@
 #include "fl/fastpin.h"
 #include "pixel_controller.h"
 #include "fastspi_types.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 namespace fl {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -437,3 +441,5 @@ public:
 };
 }  // namespace fl
 #endif
+
+FL_DISABLE_WARNING_POP

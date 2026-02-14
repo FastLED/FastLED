@@ -5,6 +5,10 @@
 #include "fl/stl/vector.h"
 #include "fastled_delay.h"
 #include "platforms/arm/teensy/is_teensy.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 namespace fl {
 // Definition for a single channel clockless controller for the k66 family of chips, like that used in the teensy 3.6
@@ -154,4 +158,7 @@ protected:
 };
 #endif
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP
+
 #endif

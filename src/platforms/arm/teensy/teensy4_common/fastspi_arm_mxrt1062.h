@@ -6,6 +6,10 @@
 #if defined(FL_IS_TEENSY_4X)
 #include <SPI.h>
 #include "fastspi_types.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 namespace fl {
 
@@ -149,4 +153,7 @@ public:
 
 #endif
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP
+
 #endif

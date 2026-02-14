@@ -5,6 +5,10 @@
 #include "fl/register.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fastled_delay.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 namespace fl {
 #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
 extern u32 _frame_cnt;
@@ -173,3 +177,5 @@ protected:
 	}
 };
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP

@@ -8,6 +8,10 @@
 #include "crgb.h"
 #include "fastspi_types.h"
 #include <SPI.h>
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 // NOTE: FASTLED_ALL_PINS_HARDWARE_SPI is deprecated on ESP32.
 // Hardware SPI is now enabled by default via GPIO matrix.
@@ -272,3 +276,5 @@ public:
 };
 
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP

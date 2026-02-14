@@ -4,6 +4,10 @@
 #include "fl/force_inline.h"
 #include "fl/fastpin_base.h"
 #include "fl/pin.h"  // For PinMode, PinValue enums
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 namespace fl {
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be slightly slower."
@@ -103,4 +107,7 @@ _FL_DEFPIN(52,26,9); _FL_DEFPIN(53,25,9); _FL_DEFPIN(54,29,9);
 
 #endif // FASTLED_FORCE_SOFTWARE_PINSs
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP
+
 #endif

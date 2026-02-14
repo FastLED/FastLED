@@ -9,6 +9,10 @@
 #include "transpose8x1_noinline.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fastled_delay.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 #define FASTLED_HAS_BLOCKLESS 1
 
@@ -169,4 +173,7 @@ public:
 	}
 };
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP
+
 #endif

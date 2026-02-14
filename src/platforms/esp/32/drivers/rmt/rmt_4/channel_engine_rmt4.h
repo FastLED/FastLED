@@ -58,6 +58,9 @@ FL_EXTERN_C_BEGIN
 #include "esp_flash.h"
 #else
 #include "esp_spi_flash.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 #endif
 #endif
 
@@ -544,3 +547,5 @@ private:
 #endif // !FASTLED_RMT5 and not RMT5-only chip
 
 #endif // FL_IS_ESP32
+
+FL_DISABLE_WARNING_POP

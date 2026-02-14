@@ -7,6 +7,10 @@
 
 #include "fastspi_types.h"
 #include "fl/delay.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 namespace fl {
 #if defined(FASTLED_APOLLO3)
@@ -137,4 +141,7 @@ public:
 
 #endif
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP
+
 #endif

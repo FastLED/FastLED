@@ -15,6 +15,10 @@ FL_EXTERN_C_BEGIN
 #include "driver/spi_master.h"
 #include "driver/gpio.h"
 #include "esp_heap_caps.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 FL_EXTERN_C_END
 
 namespace fl {
@@ -285,3 +289,5 @@ public:
 };
 
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP

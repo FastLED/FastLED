@@ -12,6 +12,10 @@
 
 #include "fastspi_types.h"
 #include "is_stm32.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 namespace fl {
 
@@ -316,3 +320,5 @@ public:
 }  // namespace fl
 
 #endif // #ifndef FASTLED_FORCE_SOFTWARE_SPI
+
+FL_DISABLE_WARNING_POP

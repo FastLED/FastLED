@@ -6,6 +6,10 @@
 // This reopens namespace fl but typedefs will still be in scope
 #include "fl/fastpin_base.h"
 #include "fl/pin.h"  // For PinMode enum and pinMode function
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 namespace fl {
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be slightly slower."
@@ -90,4 +94,7 @@ _FL_DEFPIN(36,13,8); _FL_DEFPIN(37,12,8); _FL_DEFPIN(38,17,8); _FL_DEFPIN(39,16,
 
 #endif // FASTLED_FORCE_SOFTWARE_PINS
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP
+
 #endif

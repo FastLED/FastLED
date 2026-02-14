@@ -4,6 +4,10 @@
 
 #include "fl/force_inline.h"
 #include "fl/fastpin_base.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 #if defined(NRF51)
 /// Template definition for teensy 3.0 style ARM pins, providing direct access to the various GPIO registers.  Note that this
@@ -119,5 +123,8 @@ _FL_DEFPIN(28); _FL_DEFPIN(29); _FL_DEFPIN(30); _FL_DEFPIN(31);
 #define HAS_HARDWARE_PIN_SUPPORT
 
 #endif
+
+
+FL_DISABLE_WARNING_POP
 
 #endif

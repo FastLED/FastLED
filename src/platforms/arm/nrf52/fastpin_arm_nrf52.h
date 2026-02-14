@@ -167,5 +167,12 @@ public:
 
 // Include variant-specific pin definitions
 #include "fastpin_arm_nrf52_variants.h" // allow-include-after-namespace
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
+
+
+FL_DISABLE_WARNING_POP
 
 #endif // #ifndef __FASTPIN_ARM_NRF52_H

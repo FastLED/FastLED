@@ -11,6 +11,9 @@
 #include "fl/unused.h"
 #include "fl/register.h"
 
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wignored-qualifiers"
 #ifdef FL_IS_ESP32
@@ -245,3 +248,5 @@ template<fl::u8 port> struct __FL_PORT_INFO {
 } // namespace fl
 
 #pragma GCC diagnostic pop
+
+FL_DISABLE_WARNING_POP

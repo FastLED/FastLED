@@ -9,6 +9,10 @@
 #if !defined(FASTLED_FORCE_SOFTWARE_PINS)
 #include "bsp_api.h"
 #include "fl/pin.h"  // For PinMode, PinValue enums
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 #endif
 
 namespace fl {
@@ -145,4 +149,7 @@ _FL_DEFPIN(21, BSP_IO_PORT_00_PIN_14, R_PORT0_BASE );_FL_DEFPIN(22, BSP_IO_PORT_
 
 #endif // FASTLED_FORCE_SOFTWARE_PINS
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP
+
 #endif // __INC_FASTPIN_ARM_RENESAS_H

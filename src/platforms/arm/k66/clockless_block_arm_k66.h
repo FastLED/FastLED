@@ -25,6 +25,10 @@
 #define USED_LANES ((FIRST_PIN!=15) ? FL_MIN(LANES,8) : FL_MIN(LANES,12))
 
 #include <kinetis.h>
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 namespace fl {
 /// @brief ARM K66 (Teensy 3.6) Block Clockless LED Controller
 /// @tparam LANES Number of parallel data lines
@@ -365,5 +369,8 @@ public:
 };
 }  // namespace fl
 #endif
+
+
+FL_DISABLE_WARNING_POP
 
 #endif

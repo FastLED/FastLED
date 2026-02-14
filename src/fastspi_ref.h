@@ -10,6 +10,10 @@
 #if FASTLED_DOXYGEN // guard against the arduino ide idiotically including every header file
 #include "fl/fastled.h"
 #include "fl/int.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 /// A skeletal implementation of hardware SPI support.  Fill in the necessary code for init, waiting, and writing.  The rest of
 /// the method implementations should provide a starting point, even if they're not the most efficient to start with
@@ -105,3 +109,5 @@ public:
 #endif
 
 #endif
+
+FL_DISABLE_WARNING_POP

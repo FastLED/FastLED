@@ -52,6 +52,8 @@
   // C++14/17 extension warnings (for compatibility when using SIMD intrinsic headers)
   #define FL_DISABLE_WARNING_C14_EXTENSIONS FL_DISABLE_WARNING(c++14-extensions)
   #define FL_DISABLE_WARNING_C17_EXTENSIONS FL_DISABLE_WARNING(c++17-extensions)
+  // Clang: 'register' deprecated in C++11, removed in C++17
+  #define FL_DISABLE_WARNING_DEPRECATED_REGISTER FL_DISABLE_WARNING(deprecated-register)
 #elif defined(FL_IS_GCC) && FL_GCC_VERSION >= 406
   // GCC doesn't have global-constructors warning, use no-op
   #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
@@ -97,6 +99,12 @@
   // GCC doesn't have C++14/17 extension warnings, use no-op
   #define FL_DISABLE_WARNING_C14_EXTENSIONS
   #define FL_DISABLE_WARNING_C17_EXTENSIONS
+  // GCC 7+: 'register' deprecated in C++11, removed in C++17 (-Wregister)
+  #if FL_GCC_VERSION >= 700
+    #define FL_DISABLE_WARNING_DEPRECATED_REGISTER FL_DISABLE_WARNING(register)
+  #else
+    #define FL_DISABLE_WARNING_DEPRECATED_REGISTER
+  #endif
 #else
   #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
   #define FL_DISABLE_WARNING_SELF_ASSIGN
@@ -119,6 +127,8 @@
   // Other compilers don't have C++14/17 extension warnings, use no-op
   #define FL_DISABLE_WARNING_C14_EXTENSIONS
   #define FL_DISABLE_WARNING_C17_EXTENSIONS
+  // Other compilers: no deprecated-register warning
+  #define FL_DISABLE_WARNING_DEPRECATED_REGISTER
 #endif
 
 // END WARNING SPECIFIC MACROS THAT MAY NOT BE UNIVERSAL.

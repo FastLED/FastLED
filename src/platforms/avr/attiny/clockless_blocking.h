@@ -15,6 +15,10 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fastled_delay.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 namespace fl {
 
@@ -616,5 +620,8 @@ protected:
 #endif  // defined(FL_IS_AVR_ATTINY)
 
 }  // namespace fl
+
+
+FL_DISABLE_WARNING_POP
 
 #endif  // __INC_CLOCKLESS_BLOCKING_ATTINY_H

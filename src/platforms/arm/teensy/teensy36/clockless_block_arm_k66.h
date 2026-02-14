@@ -25,6 +25,10 @@
 #define USED_LANES ((FIRST_PIN!=15) ? FL_MIN(LANES,8) : FL_MIN(LANES,12))
 
 #include <kinetis.h>
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 namespace fl {
 template <u8 LANES, int FIRST_PIN, typename TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false>
 class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, LANE_MASK> {
@@ -357,5 +361,8 @@ public:
 };
 }  // namespace fl
 #endif
+
+
+FL_DISABLE_WARNING_POP
 
 #endif

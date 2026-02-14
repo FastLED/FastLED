@@ -4,6 +4,10 @@
 #pragma once
 
 #include "fl/stl/stdint.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 template<fl::u8 PIN, fl::u8 _MASK, typename _PORT, typename _DDR, typename _PIN>
 class _AVRPIN {
@@ -34,3 +38,5 @@ public:
 
     static constexpr bool validpin() { return true; }
 };
+
+FL_DISABLE_WARNING_POP

@@ -10,6 +10,10 @@
 #include "fl/unused.h"
 #include "fl/register.h"
 #include "fl/stl/stdint.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 // Note: The two-parameter adjust(data, scale) method below requires fl::scale8,
 // but we cannot forward-declare it here due to linter rules (no 'namespace fl {}'
@@ -90,3 +94,5 @@ public:
 #define MAX_DATA_RATE 0
 
 #endif
+
+FL_DISABLE_WARNING_POP

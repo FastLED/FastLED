@@ -137,6 +137,10 @@ _IO32(A); _IO32(B); _IO32(C); _IO32(D); _IO32(E);
   #include "f407vg_disco.h"  // nolint
 #elif defined(ARDUINO_NUCLEO_F446RE)
   #include "f446re_nucleo.h"  // nolint
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 #else
   // Fallback for unsupported boards
   #warning "STM32F4: Board variant not recognized - FastPin support may be unavailable"
@@ -147,3 +151,5 @@ _IO32(A); _IO32(B); _IO32(C); _IO32(D); _IO32(E);
 #define HAS_HARDWARE_PIN_SUPPORT
 
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP
