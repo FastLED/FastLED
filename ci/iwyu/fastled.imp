@@ -193,6 +193,14 @@
   { include: ['@".*\\.cpp\\.hpp"', 'private', '"fl/detail/private.h"', 'public'] },
 
   # ========================================================================
+  # Platform infrastructure headers (public within platform code)
+  # ========================================================================
+  # These headers are used directly by platform driver files and must not be
+  # mapped to fl/detail/private.h by the catch-all rule below.
+  { include: ['"platforms/is_platform.h"', 'public', '"platforms/is_platform.h"', 'public'] },
+  { include: ['"platforms/memory_barrier.h"', 'public', '"platforms/memory_barrier.h"', 'public'] },
+
+  # ========================================================================
   # CATCH-ALL: All platform headers are private
   # ========================================================================
   # This must be LAST so specific rules above take priority.
