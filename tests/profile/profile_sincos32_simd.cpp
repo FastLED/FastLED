@@ -2,14 +2,13 @@
 #include "FastLED.h"
 #include "fl/align.h"
 #include "fl/int.h"
-#include "fl/json.h"
 #include "fl/simd.h"
 #include "fl/sin32.h"
 #include "fl/stl/cstdint.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/stdio.h"
-#include "fl/stl/string.h"
 #include "platforms/shared/simd_noop.hpp"
+#include "tests/profile/profile_result.h"
 
 using namespace fl;
 
@@ -90,19 +89,8 @@ int main(int argc, char *argv[]) {
     u32 elapsed_us = t1 - t0;
 
     if (json_output) {
-        i64 elapsed_ns = static_cast<i64>(elapsed_us) * 1000LL;
-        double ns_per_call = static_cast<double>(elapsed_ns) / PROFILE_CALLS;
-        double calls_per_sec = 1e9 / ns_per_call;
-
-        Json result = Json::object();
-        result.set("variant", "sincos32_simd");
-        result.set("target", "sincos32_simd");
-        result.set("total_calls", PROFILE_CALLS);
-        result.set("total_time_ns", elapsed_ns);
-        result.set("ns_per_call", ns_per_call);
-        result.set("calls_per_sec", calls_per_sec);
-
-        printf("PROFILE_RESULT:%s\n", result.to_string().c_str());
+        ProfileResultBuilder::print_result("sincos32_simd", "sincos32_simd",
+                                          PROFILE_CALLS, elapsed_us);
     } else {
         printf("sincos32_simd: %d calls in %lu us (%.1f ns/call, %.1f Mcalls/sec)\n",
                PROFILE_CALLS, static_cast<unsigned long>(elapsed_us),

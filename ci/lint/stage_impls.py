@@ -572,7 +572,7 @@ def run_iwyu_single_file(file_path: str) -> bool:
 
 
 def run_python_lint_single_file(file_path: str, strict: bool = False) -> bool:
-    """Run Python linting on a single file (ruff check + format + optional pyright).
+    """Run Python linting on a single file (ruff check + format + KBI + optional pyright).
 
     Args:
         file_path: Absolute path to the Python file
@@ -599,6 +599,21 @@ def run_python_lint_single_file(file_path: str, strict: bool = False) -> bool:
     )
     if result.returncode != 0:
         print("  ❌ ruff format failed")
+        return False
+
+    # Run keyboard interrupt checker
+    result = subprocess.run(
+        [
+            "uv",
+            "run",
+            "python",
+            "ci/lint_python/keyboard_interrupt_checker.py",
+            file_path,
+        ],
+        capture_output=False,
+    )
+    if result.returncode != 0:
+        print("  ❌ KeyboardInterrupt handler check failed")
         return False
 
     # Run pyright strict type checking (optional)

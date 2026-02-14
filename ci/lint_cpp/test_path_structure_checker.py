@@ -48,9 +48,10 @@ class TestPathStructureChecker(FileContentChecker):
             return False
 
         # Skip tests/misc/ directory (these tests don't need to match source structure)
+        # Skip tests/profile/ directory (standalone performance benchmarks)
         try:
             rel_path = test_path.relative_to(TESTS_ROOT)
-            if rel_path.parts[0] == "misc":
+            if rel_path.parts[0] in ("misc", "profile"):
                 return False
         except (ValueError, IndexError):
             pass

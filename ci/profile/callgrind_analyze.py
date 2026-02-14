@@ -29,7 +29,9 @@ class CallgrindAnalyzer:
             print()
             print("   Example: bash profile sincos32_comparison --docker --callgrind")
             print()
-            print("💡 AI AGENTS: Always use --docker flag when requesting callgrind on Windows")
+            print(
+                "💡 AI AGENTS: Always use --docker flag when requesting callgrind on Windows"
+            )
             return False
 
         cmd = [

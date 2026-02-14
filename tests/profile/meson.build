@@ -36,9 +36,11 @@ if profile_test_files != ''
 
     # Build as standalone executable (no PCH, no doctest, no runner)
     # Uses profile_test_compile_args for readable stack traces (frame pointers + debug symbols)
+    # Include project root for tests/profile/profile_result.h
+    project_root_dir = include_directories('../..')
     executable('profile_' + profile_name,
       profile_file,
-      include_directories: [src_dir, stub_dir],
+      include_directories: [src_dir, stub_dir, project_root_dir],
       cpp_args: profile_test_compile_args,
       link_args: unit_test_link_args,
       link_with: [fastled_lib],

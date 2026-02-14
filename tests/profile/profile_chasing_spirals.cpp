@@ -1,4 +1,4 @@
-// standalone test
+// ok standalone
 // Standalone profiling binary for Chasing Spirals: float (Animartrix) vs Q31 (Animartrix2)
 // Build with profile mode (-Os -g) and run under valgrind --tool=callgrind
 //
@@ -16,9 +16,9 @@
 #include "fl/fx/2d/animartrix.hpp"
 #include "fl/fx/2d/animartrix2.hpp"
 #include "fl/fx/2d/animartrix2_detail/chasing_spirals.hpp"
-#include "fl/json.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/stdio.h"
+#include "tests/profile/profile_result.h"
 
 using namespace fl;
 
@@ -264,21 +264,8 @@ int main(int argc, char *argv[]) {
         u32 elapsed_us = t1 - t0;
 
         if (json_output) {
-            // Profile framework JSON output using Json
-            i64 elapsed_ns = static_cast<i64>(elapsed_us) * 1000LL;
-            double ns_per_frame = static_cast<double>(elapsed_ns) / PROFILE_FRAMES;
-            double frames_per_sec = 1e9 / ns_per_frame;
-
-            Json result = Json::object();
-            result.set("variant", "q31_batch8");
-            result.set("target", "chasing_spirals");
-            result.set("total_calls", PROFILE_FRAMES);
-            result.set("total_time_ns", elapsed_ns);  // Use i64 directly
-            result.set("ns_per_call", ns_per_frame);
-            result.set("calls_per_sec", frames_per_sec);
-
-            // Output with marker for profile framework
-            printf("PROFILE_RESULT:%s\n", result.to_string().c_str());
+            ProfileResultBuilder::print_result("q31_batch8", "chasing_spirals",
+                                              PROFILE_FRAMES, elapsed_us);
         } else {
             // Human-readable output
             printf("Q31 Batch8:         %d frames in %lu us (%.1f us/frame)\n",

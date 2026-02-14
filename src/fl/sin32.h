@@ -27,7 +27,7 @@ struct SinCos32 {
 };
 
 // Read an i32 from the PROGMEM-qualified LUT.
-FASTLED_FORCE_INLINE static i32 read_sin32_lut(const i32* addr) {
+FASTLED_FORCE_INLINE i32 read_sin32_lut(const i32* addr) {
     return (i32)FL_PGM_READ_DWORD_ALIGNED(addr);
 }
 
@@ -36,7 +36,7 @@ FASTLED_FORCE_INLINE static i32 read_sin32_lut(const i32* addr) {
 // qi_next: adjacent index (qi+1 for direct, qi-1 for mirrored)
 // dmask: 0x00000000 (direct) or 0xFFFFFFFF (mirrored, negates derivative)
 // t: fraction in [0, 65535]
-FASTLED_FORCE_INLINE static i32 sin32_interp(u8 qi, u8 qi_next, i32 dmask, u32 t) {
+FASTLED_FORCE_INLINE i32 sin32_interp(u8 qi, u8 qi_next, i32 dmask, u32 t) {
     i32 y0 = read_sin32_lut(&sinQuarterLut[qi * 2]);
     i32 m0 = read_sin32_lut(&sinQuarterLut[qi * 2 + 1]);
     i32 y1 = read_sin32_lut(&sinQuarterLut[qi_next * 2]);
@@ -55,10 +55,7 @@ FASTLED_FORCE_INLINE static i32 sin32_interp(u8 qi, u8 qi_next, i32 dmask, u32 t
 // output is between -2147418112 and 2147418112
 // Branchless quarter-wave lookup with quadratic interpolation.
 // Cost: 3 table loads, 2 i64 multiplies, no branches.
-#ifndef FL_DISABLE_OPTIMIZATION
-FASTLED_FORCE_INLINE
-#endif
-static i32 sin32(u32 angle) {
+FASTLED_FORCE_INLINE i32 sin32(u32 angle) {
     u8 angle256 = static_cast<u8>(angle >> 16);  // 0..255
     u32 t = angle & 0xFFFF;                       // 0..65535
 
@@ -80,10 +77,7 @@ static i32 sin32(u32 angle) {
 
 // 0 to 16777216 is a full circle
 // output is between -2147418112 and 2147418112
-#ifndef FL_DISABLE_OPTIMIZATION
-FASTLED_FORCE_INLINE
-#endif
-static i32 cos32(u32 angle) {
+FASTLED_FORCE_INLINE i32 cos32(u32 angle) {
     return sin32(angle + 4194304u);
 }
 
@@ -91,10 +85,7 @@ static i32 cos32(u32 angle) {
 // Shares angle decomposition; derives cos table index from sin's (cos_qi = 64 - sin_qi).
 // Cost: 6 table loads, 4 i64 multiplies, no branches.
 // (vs 2 separate calls: 6 loads, 4 muls, but duplicate angle decomposition)
-#ifndef FL_DISABLE_OPTIMIZATION
-FASTLED_FORCE_INLINE
-#endif
-static SinCos32 sincos32(u32 angle) {
+FASTLED_FORCE_INLINE SinCos32 sincos32(u32 angle) {
     u8 angle256 = static_cast<u8>(angle >> 16);
     u32 t = angle & 0xFFFF;
 
@@ -133,14 +124,14 @@ static SinCos32 sincos32(u32 angle) {
 
 // 0 to 65536 is a full circle
 // output is between -32767 and 32767
-FASTLED_FORCE_INLINE static i16 sin16lut(u16 angle) {
+FASTLED_FORCE_INLINE i16 sin16lut(u16 angle) {
     u32 angle32 = static_cast<u32>(angle) << 8;
     return static_cast<i16>(sin32(angle32) >> 16);
 }
 
 // 0 to 65536 is a full circle
 // output is between -32767 and 32767
-FASTLED_FORCE_INLINE static i16 cos16lut(u16 angle) {
+FASTLED_FORCE_INLINE i16 cos16lut(u16 angle) {
     u32 angle32 = static_cast<u32>(angle) << 8;
     return static_cast<i16>(cos32(angle32) >> 16);
 }
@@ -156,10 +147,7 @@ struct FL_ALIGNAS(16) SinCos32_simd {
 ///
 /// @param angles 4 u32 angles (0 to 16777216 per angle is a full circle)
 /// @return SinCos32_simd with raw i32 values (range: -2147418112 to 2147418112)
-#ifndef FL_DISABLE_OPTIMIZATION
-FASTLED_FORCE_INLINE
-#endif
-SinCos32_simd sincos32_simd(simd::simd_u32x4 angles) {
+FASTLED_FORCE_INLINE SinCos32_simd sincos32_simd(simd::simd_u32x4 angles) {
     // Phase 1a: SIMD angle decomposition (extract components vectorially)
     // Extract angle256 (top 8 bits) using vectorized right shift
     simd::simd_u32x4 angle256_vec = simd::srl_u32_4(angles, 16);

@@ -98,6 +98,72 @@ bash profile sincos16_optimized --docker --iterations 30
 # Generate and run accuracy tests
 ```
 
+## JSON Output Format
+
+Profile tests must output results in a **specific JSON format** for automated analysis by `ci/profile_runner.py`.
+
+### Required Format
+
+```
+PROFILE_RESULT:{<json_object>}
+```
+
+The JSON object must contain these fields:
+
+```json
+{
+  "variant": "baseline",      // Variant name (e.g., "baseline", "optimized", "simd")
+  "target": "sincos32",       // Function/feature being profiled
+  "total_calls": 100000,      // Number of function calls executed
+  "total_time_ns": 674000,    // Total elapsed time in nanoseconds
+  "ns_per_call": 6.74,        // Average nanoseconds per call (total_time_ns / total_calls)
+  "calls_per_sec": 148367834  // Calls per second (1e9 / ns_per_call)
+}
+```
+
+### Using ProfileResultBuilder Helper
+
+To simplify creating correctly-formatted output, use the `ProfileResultBuilder` helper:
+
+```cpp
+#include "tests/profile/profile_result.h"
+
+int main(int argc, char *argv[]) {
+    bool json_output = (argc > 1 && fl::strcmp(argv[1], "baseline") == 0);
+
+    // Run benchmark
+    u32 t0 = ::micros();
+    benchmark_function(CALLS);
+    u32 t1 = ::micros();
+
+    if (json_output) {
+        // Automatically calculates ns_per_call and calls_per_sec
+        ProfileResultBuilder::print_result(
+            "baseline",           // variant
+            "function_name",      // target
+            CALLS,                // total_calls
+            t1 - t0              // elapsed_us
+        );
+    } else {
+        printf("Results: %lu us\n", t1 - t0);
+    }
+
+    return 0;
+}
+```
+
+**Benefits:**
+- Ensures correct JSON format (runner expects exact field names)
+- Automatic calculation of `ns_per_call` and `calls_per_sec`
+- Handles the `PROFILE_RESULT:` prefix automatically
+- Prevents common formatting errors
+
+### Example Output
+
+```
+PROFILE_RESULT:{"variant":"baseline","target":"sincos32","total_calls":100000,"total_time_ns":674000,"ns_per_call":6.74,"calls_per_sec":148367834.0}
+```
+
 ## Build Integration
 
 Profile tests are:
