@@ -1123,4 +1123,339 @@ FL_TEST_CASE("Remote: Bind method with vector<vector<int>> (nested) parameter") 
     FL_REQUIRE(result[5].as_int().value() == 6);
 }
 
+// =============================================================================
+// JSON I/O Pipeline Tests (In-Memory Streams)
+// =============================================================================
+
+// In-memory stream adapter for testing JSON input/output
+struct MemoryStream {
+    fl::vector<fl::string> inputLines;
+    fl::vector<fl::string> outputLines;
+    size_t inputIndex = 0;
+
+    // Input methods (SerialReader interface)
+    int available() const {
+        if (inputIndex >= inputLines.size()) return 0;
+        return 1;
+    }
+
+    int read() {
+        if (inputIndex >= inputLines.size()) return -1;
+        static size_t charIndex = 0;
+
+        const fl::string& currentLine = inputLines[inputIndex];
+        if (charIndex >= currentLine.size()) {
+            charIndex = 0;
+            inputIndex++;
+            return '\n';  // Return newline at end of line
+        }
+
+        return currentLine[charIndex++];
+    }
+
+    // Output methods (SerialWriter interface)
+    void println(const char* str) {
+        outputLines.push_back(fl::string(str));
+    }
+
+    // Test helpers
+    void addInput(const fl::string& line) {
+        inputLines.push_back(line);
+    }
+
+    void reset() {
+        inputLines.clear();
+        outputLines.clear();
+        inputIndex = 0;
+    }
+
+    fl::string getLastOutput() const {
+        if (outputLines.empty()) return fl::string();
+        return outputLines[outputLines.size() - 1];
+    }
+};
+
+FL_TEST_CASE("Remote: JSON input pipeline - parse valid request") {
+    // Test that valid JSON request is parsed correctly
+    MemoryStream stream;
+
+    // Add raw JSON string to input
+    stream.addInput(R"({"method":"add","params":[5,3],"id":1})");
+
+    // Create request source
+    auto requestSource = [&stream]() -> fl::optional<fl::Json> {
+        // Simulate readSerialLine
+        fl::string line;
+        while (true) {
+            int c = stream.read();
+            if (c == -1) return fl::nullopt;
+            if (c == '\n') break;
+            line += static_cast<char>(c);
+        }
+
+        // Parse JSON
+        return fl::Json::parse(line);
+    };
+
+    // Pull request
+    auto request = requestSource();
+    FL_REQUIRE(request.has_value());
+    FL_REQUIRE(request->contains("method"));
+    FL_REQUIRE(request->contains("params"));
+    FL_REQUIRE(request->contains("id"));
+    FL_REQUIRE(request.value()["method"].as_string().value() == "add");
+}
+
+FL_TEST_CASE("Remote: JSON output pipeline - format response") {
+    // Test that response is formatted correctly
+    MemoryStream stream;
+
+    // Create response
+    fl::Json response = fl::Json::object();
+    response.set("jsonrpc", "2.0");
+    response.set("result", 42);
+    response.set("id", 1);
+
+    // Create response sink
+    auto responseSink = [&stream](const fl::Json& r) {
+        fl::string formatted = r.to_string();
+        stream.println(formatted.c_str());
+    };
+
+    // Send response
+    responseSink(response);
+
+    // Verify output
+    FL_REQUIRE(stream.outputLines.size() == 1);
+    fl::string output = stream.outputLines[0];
+    FL_REQUIRE(output.find("\"result\"") != fl::string::npos);
+    FL_REQUIRE(output.find("42") != fl::string::npos);
+}
+
+FL_TEST_CASE("Remote: End-to-end JSON pipeline with prefix") {
+    // Test complete request/response cycle with prefix stripping
+    MemoryStream inputStream;
+    MemoryStream outputStream;
+
+    // Add request with prefix
+    inputStream.addInput(R"(REMOTE: {"method":"echo","params":["hello"],"id":1})");
+
+    // Create request source with prefix stripping
+    auto requestSource = [&inputStream]() -> fl::optional<fl::Json> {
+        fl::string line;
+        while (true) {
+            int c = inputStream.read();
+            if (c == -1) return fl::nullopt;
+            if (c == '\n') break;
+            line += static_cast<char>(c);
+        }
+
+        // Strip prefix using string_view (zero-copy)
+        fl::string_view view = line;
+        const char* prefix = "REMOTE: ";
+        if (view.starts_with(prefix)) {
+            view.remove_prefix(fl::strlen(prefix));
+        }
+
+        // Trim whitespace
+        while (!view.empty() && fl::isspace(view.front())) {
+            view.remove_prefix(1);
+        }
+        while (!view.empty() && fl::isspace(view.back())) {
+            view.remove_suffix(1);
+        }
+
+        // Parse JSON
+        fl::string cleaned(view);
+        return fl::Json::parse(cleaned);
+    };
+
+    // Create response sink with prefix
+    auto responseSink = [&outputStream](const fl::Json& r) {
+        fl::string formatted = "REMOTE: " + r.to_string();
+        outputStream.println(formatted.c_str());
+    };
+
+    // Create Remote with stream adapters
+    fl::Remote remote(requestSource, responseSink);
+    remote.bind("echo", [](const fl::string& msg) -> fl::string { return msg; });
+
+    // Process request
+    remote.pull();
+    remote.push();
+
+    // Verify output
+    FL_REQUIRE(outputStream.outputLines.size() == 1);
+    fl::string output = outputStream.outputLines[0];
+    FL_REQUIRE(output.starts_with("REMOTE: "));
+    FL_REQUIRE(output.find("\"result\"") != fl::string::npos);
+    FL_REQUIRE(output.find("\"hello\"") != fl::string::npos);
+}
+
+FL_TEST_CASE("Remote: Schema generation via JSON pipeline") {
+    // Test rpc.discover schema generation through JSON I/O
+    MemoryStream inputStream;
+    MemoryStream outputStream;
+
+    // Add schema request
+    inputStream.addInput(R"({"method":"rpc.discover","params":[],"id":1})");
+
+    // Create I/O adapters
+    auto requestSource = [&inputStream]() -> fl::optional<fl::Json> {
+        fl::string line;
+        while (true) {
+            int c = inputStream.read();
+            if (c == -1) return fl::nullopt;
+            if (c == '\n') break;
+            line += static_cast<char>(c);
+        }
+        return fl::Json::parse(line);
+    };
+
+    auto responseSink = [&outputStream](const fl::Json& r) {
+        outputStream.println(r.to_string().c_str());
+    };
+
+    // Create Remote and bind methods
+    fl::Remote remote(requestSource, responseSink);
+    remote.bind("add", [](int a, int b) -> int { return a + b; });
+    remote.bind("multiply", [](int a, int b) -> int { return a * b; });
+
+    // Process schema request
+    remote.pull();
+    remote.push();
+
+    // Parse output
+    FL_REQUIRE(outputStream.outputLines.size() == 1);
+    fl::Json response = fl::Json::parse(outputStream.outputLines[0]);
+
+    // Verify schema structure
+    FL_REQUIRE(response.contains("result"));
+    fl::Json result = response["result"];
+    FL_REQUIRE(result.contains("schema"));
+    FL_REQUIRE(result["schema"].is_array());
+
+    // Verify schema contains our methods
+    fl::Json schema = result["schema"];
+    FL_REQUIRE(schema.size() >= 2);  // At least add and multiply
+}
+
+FL_TEST_CASE("Remote: Multiple RPC calls via JSON pipeline") {
+    // Test multiple sequential RPC calls
+    MemoryStream inputStream;
+    MemoryStream outputStream;
+
+    // Add multiple requests
+    inputStream.addInput(R"({"method":"add","params":[5,3],"id":1})");
+    inputStream.addInput(R"({"method":"multiply","params":[4,7],"id":2})");
+    inputStream.addInput(R"({"method":"subtract","params":[10,6],"id":3})");
+
+    // Create I/O adapters
+    auto requestSource = [&inputStream]() -> fl::optional<fl::Json> {
+        fl::string line;
+        while (true) {
+            int c = inputStream.read();
+            if (c == -1) return fl::nullopt;
+            if (c == '\n') break;
+            line += static_cast<char>(c);
+        }
+        return fl::Json::parse(line);
+    };
+
+    auto responseSink = [&outputStream](const fl::Json& r) {
+        outputStream.println(r.to_string().c_str());
+    };
+
+    // Create Remote and bind methods
+    fl::Remote remote(requestSource, responseSink);
+    remote.bind("add", [](int a, int b) -> int { return a + b; });
+    remote.bind("multiply", [](int a, int b) -> int { return a * b; });
+    remote.bind("subtract", [](int a, int b) -> int { return a - b; });
+
+    // Process all requests
+    remote.pull();  // Pull all 3 requests
+    remote.push();  // Send all 3 responses
+
+    // Verify all responses
+    FL_REQUIRE(outputStream.outputLines.size() == 3);
+
+    // Parse and verify first response (add)
+    fl::Json r1 = fl::Json::parse(outputStream.outputLines[0]);
+    FL_REQUIRE(r1.contains("result"));
+    FL_REQUIRE(r1["result"].as_int().value() == 8);  // 5+3
+    FL_REQUIRE(r1["id"].as_int().value() == 1);
+
+    // Parse and verify second response (multiply)
+    fl::Json r2 = fl::Json::parse(outputStream.outputLines[1]);
+    FL_REQUIRE(r2.contains("result"));
+    FL_REQUIRE(r2["result"].as_int().value() == 28);  // 4*7
+    FL_REQUIRE(r2["id"].as_int().value() == 2);
+
+    // Parse and verify third response (subtract)
+    fl::Json r3 = fl::Json::parse(outputStream.outputLines[2]);
+    FL_REQUIRE(r3.contains("result"));
+    FL_REQUIRE(r3["result"].as_int().value() == 4);  // 10-6
+    FL_REQUIRE(r3["id"].as_int().value() == 3);
+}
+
+FL_TEST_CASE("Remote: Error handling via JSON pipeline") {
+    // Test error responses for unknown methods
+    MemoryStream inputStream;
+    MemoryStream outputStream;
+
+    // Add request for unknown method
+    inputStream.addInput(R"({"method":"unknownMethod","params":[],"id":42})");
+
+    // Create I/O adapters
+    auto requestSource = [&inputStream]() -> fl::optional<fl::Json> {
+        fl::string line;
+        while (true) {
+            int c = inputStream.read();
+            if (c == -1) return fl::nullopt;
+            if (c == '\n') break;
+            line += static_cast<char>(c);
+        }
+        return fl::Json::parse(line);
+    };
+
+    auto responseSink = [&outputStream](const fl::Json& r) {
+        outputStream.println(r.to_string().c_str());
+    };
+
+    // Create Remote (no methods bound)
+    fl::Remote remote(requestSource, responseSink);
+
+    // Process request
+    remote.pull();
+    remote.push();
+
+    // Verify error response
+    FL_REQUIRE(outputStream.outputLines.size() == 1);
+    fl::Json response = fl::Json::parse(outputStream.outputLines[0]);
+    FL_REQUIRE(response.contains("error"));
+    FL_REQUIRE(response["id"].as_int().value() == 42);
+}
+
+FL_TEST_CASE("Remote: Compact JSON output (no newlines)") {
+    // Test that JSON output is compact (single line)
+    MemoryStream outputStream;
+
+    // Create complex response
+    fl::Json response = fl::Json::object();
+    response.set("jsonrpc", "2.0");
+    fl::Json result = fl::Json::object();
+    result.set("value", 42);
+    result.set("status", "success");
+    response.set("result", result);
+    response.set("id", 1);
+
+    // Write to stream
+    outputStream.println(response.to_string().c_str());
+
+    // Verify output is single line (no newlines in JSON)
+    fl::string output = outputStream.outputLines[0];
+    FL_REQUIRE(output.find('\n') == fl::string::npos);
+    FL_REQUIRE(output.find('\r') == fl::string::npos);
+}
+
 #endif // FASTLED_ENABLE_JSON

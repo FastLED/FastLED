@@ -224,13 +224,9 @@ const fl::RxDeviceType RX_TYPE = fl::RxDeviceType::RMT;
     constexpr int DEFAULT_PIN_RX = 0;
 #endif
 
-// Runtime pin variables - can be modified via JSON-RPC
-int g_pin_tx = DEFAULT_PIN_TX;
-int g_pin_rx = DEFAULT_PIN_RX;
-
 // Legacy macros for backward compatibility in existing code
-#define PIN_TX g_pin_tx
-#define PIN_RX g_pin_rx
+#define PIN_TX g_validation_state->pin_tx
+#define PIN_RX g_validation_state->pin_rx
 
 #define CHIPSET WS2812B
 #define COLOR_ORDER RGB  // No reordering needed.
@@ -240,19 +236,16 @@ int g_pin_rx = DEFAULT_PIN_RX;
 // Maximum: 3000 LEDs (hardcoded for ESP32/S3 with PSRAM support)
 #define RX_BUFFER_SIZE (3000 * 32 + 100)  // LEDs × 32:1 expansion + headroom
 
-// Use PSRAM-backed vector for dynamic allocation (avoids DRAM overflow on ESP32S2)
-fl::vector_psram<uint8_t> rx_buffer;  // Shared RX buffer - initialized in setup()
-
-// ⚠️ CRITICAL: RMT RX channel - MUST persist across ALL loop iterations
-// Created ONCE in setup(), reused for all driver tests
-// DO NOT reset, destroy, or recreate this channel in loop()
-fl::shared_ptr<fl::RxDevice> rx_channel;
-
 // Factory function for creating RxDevice instances
 // This allows ValidationRemoteControl to recreate the RX channel when the pin changes
 fl::shared_ptr<fl::RxDevice> createRxDevice(int pin) {
     return fl::RxDevice::create<RX_TYPE>(pin);
 }
+
+// Global validation state (shared between main loop and RPC handlers)
+// Use PSRAM-backed vector for RX buffer to avoid DRAM overflow on ESP32S2
+fl::vector_psram<uint8_t> g_rx_buffer_storage;  // Actual buffer storage
+fl::shared_ptr<ValidationState> g_validation_state;  // Shared state pointer
 
 // ============================================================================
 // Serial Initialization Helper
@@ -279,9 +272,6 @@ using RemoteControlSingleton = fl::Singleton<ValidationRemoteControl>;
 // Global Validation State (Simplified - No Test Matrix)
 // ============================================================================
 
-// Available drivers discovered in setup()
-fl::vector<fl::DriverInfo> drivers_available;
-
 // Frame counter - tracks which iteration of loop() we're on (diagnostic)
 uint32_t frame_counter = 0;
 
@@ -300,9 +290,16 @@ void setup() {
     FL_WARN("[SETUP] Validation sketch starting - serial output active");
 
     // Initialize RX buffer dynamically (uses PSRAM if available, falls back to heap)
-    rx_buffer.resize(RX_BUFFER_SIZE);
+    g_rx_buffer_storage.resize(RX_BUFFER_SIZE);
 
-
+    // Initialize global validation state
+    g_validation_state = fl::make_shared<ValidationState>();
+    g_validation_state->pin_tx = DEFAULT_PIN_TX;
+    g_validation_state->pin_rx = DEFAULT_PIN_RX;
+    g_validation_state->default_pin_tx = DEFAULT_PIN_TX;
+    g_validation_state->default_pin_rx = DEFAULT_PIN_RX;
+    g_validation_state->rx_buffer = fl::span<uint8_t>(g_rx_buffer_storage.data(), g_rx_buffer_storage.size());
+    g_validation_state->rx_factory = createRxDevice;
 
     const char* loop_back_mode = PIN_TX == PIN_RX ? "INTERNAL" : "JUMPER WIRE";
 
@@ -346,9 +343,9 @@ void setup() {
        << " (" << (40000000 / 1000000) << "MHz, " << RX_BUFFER_SIZE << " symbols)";
     FL_PRINT(ss.str());
 
-    rx_channel = fl::RxDevice::create<RX_TYPE>(PIN_RX);
+    g_validation_state->rx_channel = fl::RxDevice::create<RX_TYPE>(PIN_RX);
 
-    if (!rx_channel) {
+    if (!g_validation_state->rx_channel) {
         ss.clear();
         ss << "[RX SETUP]: Failed to create RX channel\n";
         ss << "[RX SETUP]: Check that RMT peripheral is available and not in use";
@@ -374,16 +371,7 @@ void setup() {
     FL_PRINT(ss.str());
 
     // Initialize RemoteControl singleton and register all RPC functions
-    RemoteControlSingleton::instance().registerFunctions(
-        drivers_available,
-        rx_channel,
-        rx_buffer,
-        g_pin_tx,
-        g_pin_rx,
-        DEFAULT_PIN_TX,
-        DEFAULT_PIN_RX,
-        createRxDevice  // Factory function for RxDevice creation
-    );
+    RemoteControlSingleton::instance().registerFunctions(g_validation_state);
 
     FL_PRINT("[REMOTE RPC] ✓ RPC system initialized (testGpioConnection available)");
 
@@ -404,7 +392,7 @@ void setup() {
     // Test RX channel with manual GPIO toggle to confirm hardware path works
     // This isolates GPIO/hardware issues from PARLIO driver issues
     // Buffer size = 100 symbols, hz = 40MHz (same as LED validation)
-    if (!testRxChannel(rx_channel, PIN_TX, PIN_RX, 40000000, 100)) {
+    if (!testRxChannel(g_validation_state->rx_channel, PIN_TX, PIN_RX, 40000000, 100)) {
         FL_ERROR("[GPIO BASELINE TEST] FAILED - RX did not capture manual GPIO toggles");
         FL_ERROR("[GPIO BASELINE TEST] Possible causes:");
         FL_ERROR("  1. GPIO " << PIN_TX << " and GPIO " << PIN_RX << " are not physically connected");
@@ -419,14 +407,14 @@ void setup() {
     FL_WARN("[GPIO BASELINE TEST] ✓ Hardware connectivity verified (GPIO " << PIN_TX << " → GPIO " << PIN_RX << ")");
 
     // List all available drivers and store globally
-    drivers_available = FastLED.getDriverInfos();
+    g_validation_state->drivers_available = FastLED.getDriverInfos();
     ss.clear();
     ss << "\n[DRIVER DISCOVERY]\n";
-    ss << "  Found " << drivers_available.size() << " driver(s) available:\n";
-    for (fl::size i = 0; i < drivers_available.size(); i++) {
-        ss << "    " << (i+1) << ". " << drivers_available[i].name.c_str()
-           << " (priority: " << drivers_available[i].priority
-           << ", enabled: " << (drivers_available[i].enabled ? "yes" : "no") << ")\n";
+    ss << "  Found " << g_validation_state->drivers_available.size() << " driver(s) available:\n";
+    for (fl::size i = 0; i < g_validation_state->drivers_available.size(); i++) {
+        ss << "    " << (i+1) << ". " << g_validation_state->drivers_available[i].name.c_str()
+           << " (priority: " << g_validation_state->drivers_available[i].priority
+           << ", enabled: " << (g_validation_state->drivers_available[i].enabled ? "yes" : "no") << ")\n";
     }
     FL_PRINT(ss.str());
 
@@ -437,7 +425,7 @@ void setup() {
     fl::Json readyData = fl::Json::object();
     readyData.set("ready", true);
     readyData.set("setupTimeMs", static_cast<int64_t>(millis()));
-    readyData.set("drivers", static_cast<int64_t>(drivers_available.size()));
+    readyData.set("drivers", static_cast<int64_t>(g_validation_state->drivers_available.size()));
     readyData.set("pinTx", static_cast<int64_t>(PIN_TX));
     readyData.set("pinRx", static_cast<int64_t>(PIN_RX));
     printStreamRaw("ready", readyData);

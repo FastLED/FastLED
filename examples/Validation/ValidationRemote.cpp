@@ -8,6 +8,8 @@
 // - This provides clean, parseable JSON output without FL_DBG/FL_PRINT spam
 
 #include "ValidationRemote.h"
+#include "fl/remote/transport/serial.h"
+#include "fl/remote/rpc/protocol.h"
 #include "Common.h"
 #include "ValidationTest.h"
 #include "ValidationHelpers.h"
@@ -23,53 +25,13 @@
 // ============================================================================
 
 void printJsonRaw(const fl::Json& json, const char* prefix) {
-    // ESP32-C6 SAFETY: Check if this is a schema response (rpc.discover)
-    // These can cause stack overflow during serialization on constrained platforms
-    // The validation script already skips schema validation on constrained platforms
-    if (json.contains("result")) {
-        fl::Json result = json["result"];
-        if (result.is_object()) {
-            // Check for schema responses (has "schema" key or "openrpc" key)
-            if (result.contains("schema") || result.contains("openrpc") || result.contains("methods")) {
-                // Return minimal response to avoid stack overflow
-                fl::Json minimal = fl::Json::object();
-                minimal.set("jsonrpc", "2.0");
-                if (json.contains("id")) {
-                    minimal.set("id", json["id"]);
-                }
-                fl::Json minimalResult = fl::Json::object();
-                minimalResult.set("message", "Schema too large for ESP32-C6 - use local client-side schema");
-                minimalResult.set("methodCount", result.contains("schema") ? static_cast<int64_t>(result["schema"].size()) : 0);
-                minimal.set("result", minimalResult);
+    // Filter schema responses to prevent stack overflow on constrained platforms
+    fl::Json filtered = fl::filterSchemaResponse(json);
 
-                // Serialize minimal response
-                fl::string jsonStr = minimal.to_string();
-                if (prefix && prefix[0] != '\0') {
-                    Serial.print(prefix);
-                }
-                Serial.println(jsonStr.c_str());
-                Serial.flush();
-                return;
-            }
-        }
-    }
-
-    // Normal JSON responses (safe for ESP32-C6)
-    fl::string jsonStr = json.to_string();
-
-    // Ensure single-line (replace any newlines/carriage returns with spaces)
-    for (size_t i = 0; i < jsonStr.size(); ++i) {
-        if (jsonStr[i] == '\n' || jsonStr[i] == '\r') {
-            jsonStr[i] = ' ';
-        }
-    }
-
-    // Output directly to Serial, bypassing fl::println
-    if (prefix && prefix[0] != '\0') {
-        Serial.print(prefix);
-    }
-    Serial.println(jsonStr.c_str());
-    Serial.flush();
+    // Serialize and print response
+    fl::string formatted = fl::formatJsonResponse(filtered, prefix);
+    fl::println(formatted.c_str());
+    fl::flush();
 }
 
 void printStreamRaw(const char* messageType, const fl::Json& data) {
@@ -85,19 +47,9 @@ void printStreamRaw(const char* messageType, const fl::Json& data) {
         }
     }
 
-    // Serialize to compact JSON
-    fl::string jsonStr = output.to_string();
-
-    // Ensure single-line
-    for (size_t i = 0; i < jsonStr.size(); ++i) {
-        if (jsonStr[i] == '\n' || jsonStr[i] == '\r') {
-            jsonStr[i] = ' ';
-        }
-    }
-
-    // Output directly to Serial: RESULT: <json-with-type>
-    Serial.print("RESULT: ");
-    Serial.println(jsonStr.c_str());
+    // Use fl:: serial transport for consistent formatting
+    fl::string formatted = fl::formatJsonResponse(output, "RESULT: ");
+    fl::println(formatted.c_str());
 }
 
 // ============================================================================
@@ -130,93 +82,557 @@ fl::Json makeResponse(bool success, ReturnCode returnCode, const char* message,
 
 // No forward declarations needed - using one-test-per-RPC architecture
 
-ValidationRemoteControl::ValidationRemoteControl()
-    : mRemote(fl::make_unique<fl::Remote>(
-        []() -> fl::optional<fl::Json> {  // RequestSource: read and parse from Serial
-            if (Serial.available() > 0) {
-                String _input = Serial.readStringUntil('\n');
-                fl::string input = _input.c_str();
-                input.trim();
+// ============================================================================
+// ValidationRemoteControl Private Helper Functions
+// ============================================================================
 
-                if (!input.empty() && input[0] == '{') {
-                    // Parse JSON
-                    fl::Json doc = fl::Json::parse(input);
+fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
+    Serial.println("[DEBUG] runSingleTest called");
+    Serial.print("[DEBUG] Free heap: ");
+    Serial.println(ESP.getFreeHeap());
+    Serial.flush();
 
-                    // Build JSON-RPC 2.0 request
-                    // Old format: {"function": "test", "args": {...}, "timestamp": 0}
-                    // New format: {"method": "test", "params": {...}, "id": 1, "timestamp": 0}
-                    fl::Json request = fl::Json::object();
+    fl::Json response = fl::Json::object();
 
-                    // Map "function" to "method" (with fallback)
-                    if (doc.contains("method")) {
-                        request.set("method", doc["method"]);
-                    } else if (doc.contains("function")) {
-                        request.set("method", doc["function"]);
-                    } else {
-                        request.set("method", "");
-                    }
+    // RPC system unwraps single-element arrays, so args is the config object directly
+    if (!args.is_object()) {
+        Serial.println("[DEBUG] Args validation failed - not an object");
+        Serial.flush();
+        response.set("success", false);
+        response.set("error", "InvalidArgs");
+        response.set("message", "Expected {driver, laneSizes, pattern?, iterations?, pinTx?, pinRx?, timing?}");
+        return response;
+    }
 
-                    // Map "args" to "params" (with fallback)
-                    if (doc.contains("params")) {
-                        request.set("params", doc["params"]);
-                    } else if (doc.contains("args")) {
-                        request.set("params", doc["args"]);
-                    } else {
-                        request.set("params", fl::Json::array());
-                    }
+    Serial.println("[DEBUG] Args validation passed");
+    Serial.flush();
 
-                    // Add id field (required for JSON-RPC 2.0)
-                    if (doc.contains("id")) {
-                        request.set("id", doc["id"]);
-                    } else {
-                        request.set("id", 1);
-                    }
+    fl::Json config = args;
 
-                    // Add timestamp if present (for scheduled execution)
-                    if (doc.contains("timestamp")) {
-                        request.set("timestamp", doc["timestamp"]);
-                    }
+    // ========== REQUIRED PARAMETERS ==========
 
-                    return request;
+    // 1. Extract driver (required)
+    if (!config.contains("driver") || !config["driver"].is_string()) {
+        response.set("success", false);
+        response.set("error", "MissingDriver");
+        response.set("message", "Required field 'driver' (string) missing");
+        return response;
+    }
+    fl::string driver_name = config["driver"].as_string().value();
+
+    // Validate driver exists
+    bool driver_found = false;
+    for (fl::size i = 0; i < &mState->drivers_available->size(); i++) {
+        if ((*&mState->drivers_available)[i].name == driver_name) {
+            driver_found = true;
+            break;
+        }
+    }
+    if (!driver_found) {
+        response.set("success", false);
+        response.set("error", "UnknownDriver");
+        fl::sstream msg;
+        msg << "Driver '" << driver_name.c_str() << "' not available";
+        response.set("message", msg.str().c_str());
+        return response;
+    }
+
+    // 2. Extract laneSizes (required)
+    if (!config.contains("laneSizes") || !config["laneSizes"].is_array()) {
+        response.set("success", false);
+        response.set("error", "MissingLaneSizes");
+        response.set("message", "Required field 'laneSizes' (array) missing");
+        return response;
+    }
+
+    fl::Json lane_sizes_json = config["laneSizes"];
+    if (lane_sizes_json.size() == 0 || lane_sizes_json.size() > 8) {
+        response.set("success", false);
+        response.set("error", "InvalidLaneCount");
+        response.set("message", "laneSizes must have 1-8 elements");
+        return response;
+    }
+
+    fl::vector<int> lane_sizes;
+    const int max_leds_per_lane = mState->rx_buffer.size() / 32;
+    for (fl::size i = 0; i < lane_sizes_json.size(); i++) {
+        if (!lane_sizes_json[i].is_int()) {
+            response.set("success", false);
+            response.set("error", "InvalidLaneSizeType");
+            fl::sstream msg;
+            msg << "laneSizes[" << i << "] must be integer";
+            response.set("message", msg.str().c_str());
+            return response;
+        }
+        int size = static_cast<int>(lane_sizes_json[i].as_int().value());
+        if (size <= 0) {
+            response.set("success", false);
+            response.set("error", "InvalidLaneSize");
+            fl::sstream msg;
+            msg << "laneSizes[" << i << "] = " << size << " must be > 0";
+            response.set("message", msg.str().c_str());
+            return response;
+        }
+        if (size > max_leds_per_lane) {
+            response.set("success", false);
+            response.set("error", "LaneSizeTooLarge");
+            fl::sstream msg;
+            msg << "laneSizes[" << i << "] = " << size << " exceeds max " << max_leds_per_lane;
+            response.set("message", msg.str().c_str());
+            return response;
+        }
+        lane_sizes.push_back(size);
+    }
+
+    // ========== OPTIONAL PARAMETERS ==========
+
+    // 3. Extract pattern (optional, default: "MSB_LSB_A")
+    fl::string pattern = "MSB_LSB_A";
+    if (config.contains("pattern") && config["pattern"].is_string()) {
+        pattern = config["pattern"].as_string().value();
+    }
+
+    // 4. Extract iterations (optional, default: 1)
+    int iterations = 1;
+    if (config.contains("iterations") && config["iterations"].is_int()) {
+        iterations = static_cast<int>(config["iterations"].as_int().value());
+        if (iterations < 1) {
+            response.set("success", false);
+            response.set("error", "InvalidIterations");
+            response.set("message", "iterations must be >= 1");
+            return response;
+        }
+    }
+
+    // 5. Extract pinTx (optional, default: use mState->pin_tx)
+    int pin_tx = mState->pin_tx;
+    if (config.contains("pinTx") && config["pinTx"].is_int()) {
+        pin_tx = static_cast<int>(config["pinTx"].as_int().value());
+        if (pin_tx < 0 || pin_tx > 48) {
+            response.set("success", false);
+            response.set("error", "InvalidPinTx");
+            response.set("message", "pinTx must be 0-48");
+            return response;
+        }
+    }
+
+    // 6. Extract pinRx (optional, default: use mState->pin_rx)
+    int pin_rx = mState->pin_rx;
+    if (config.contains("pinRx") && config["pinRx"].is_int()) {
+        pin_rx = static_cast<int>(config["pinRx"].as_int().value());
+        if (pin_rx < 0 || pin_rx > 48) {
+            response.set("success", false);
+            response.set("error", "InvalidPinRx");
+            response.set("message", "pinRx must be 0-48");
+            return response;
+        }
+    }
+
+    // 7. Extract timing (optional, default: "WS2812B-V5")
+    fl::string timing_name = "WS2812B-V5";
+    if (config.contains("timing") && config["timing"].is_string()) {
+        timing_name = config["timing"].as_string().value();
+    }
+
+    // ========== EXECUTION ==========
+
+    Serial.print("[DEBUG] runSingleTest starting - driver: ");
+    Serial.println(driver_name.c_str());
+    Serial.print("[DEBUG] Free heap: ");
+    Serial.println(ESP.getFreeHeap());
+    Serial.flush();
+
+    uint32_t start_ms = millis();
+
+    // Set driver as exclusive
+    Serial.println("[DEBUG] Setting exclusive driver...");
+    Serial.flush();
+    if (!FastLED.setExclusiveDriver(driver_name.c_str())) {
+        response.set("success", false);
+        response.set("error", "DriverSetupFailed");
+        fl::sstream msg;
+        msg << "Failed to set " << driver_name.c_str() << " as exclusive driver";
+        response.set("message", msg.str().c_str());
+        Serial.println("[DEBUG] Failed to set exclusive driver");
+        Serial.flush();
+        return response;
+    }
+    Serial.println("[DEBUG] Exclusive driver set");
+    Serial.flush();
+
+    // Get timing configuration (currently hardcoded to WS2812B-V5)
+    Serial.println("[DEBUG] Creating timing config");
+    Serial.flush();
+    fl::NamedTimingConfig timing_config(
+        fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(),
+        timing_name.c_str()
+    );
+
+    // Dynamically allocate LED arrays for each lane
+    Serial.print("[DEBUG] Allocating LED arrays - lanes: ");
+    Serial.println(lane_sizes.size());
+    Serial.print("[DEBUG] Free heap: ");
+    Serial.println(ESP.getFreeHeap());
+    Serial.flush();
+
+    fl::vector<fl::unique_ptr<fl::vector<CRGB>>> led_arrays;
+    fl::vector<fl::ChannelConfig> tx_configs;
+
+    for (fl::size i = 0; i < lane_sizes.size(); i++) {
+        Serial.print("[DEBUG] Lane ");
+        Serial.print(i);
+        Serial.print(" - allocating ");
+        Serial.print(lane_sizes[i]);
+        Serial.println(" LEDs");
+        Serial.print("[DEBUG] Free heap: ");
+        Serial.println(ESP.getFreeHeap());
+        Serial.flush();
+
+        // Allocate LED array
+        auto leds = fl::make_unique<fl::vector<CRGB>>(lane_sizes[i]);
+
+        Serial.print("[DEBUG] Lane ");
+        Serial.print(i);
+        Serial.println(" - creating channel config");
+        Serial.flush();
+
+        // Create channel config
+        tx_configs.push_back(fl::ChannelConfig(
+            pin_tx + i,  // Consecutive pins for multi-lane
+            timing_config.timing,
+            fl::span<CRGB>(leds->data(), leds->size()),
+            RGB  // Default color order
+        ));
+
+        // Store array to keep it alive
+        led_arrays.push_back(fl::move(leds));
+
+        Serial.print("[DEBUG] Lane ");
+        Serial.print(i);
+        Serial.print(" complete, free heap: ");
+        Serial.println(ESP.getFreeHeap());
+        Serial.flush();
+    }
+
+    Serial.print("[DEBUG] All lanes allocated, free heap: ");
+    Serial.println(ESP.getFreeHeap());
+    Serial.flush();
+
+    // Create temporary RX channel if pinRx differs from default
+    Serial.println("[DEBUG] Setting up RX channel");
+    Serial.print("[DEBUG] Free heap: ");
+    Serial.println(ESP.getFreeHeap());
+    Serial.flush();
+
+    fl::shared_ptr<fl::RxDevice> rx_channel_to_use = mState->rx_channel;
+    bool created_temp_rx = false;
+
+    if (pin_rx != mState->pin_rx && mState->rx_factory) {
+        Serial.println("[DEBUG] Creating temp RX channel");
+        Serial.flush();
+        rx_channel_to_use = mState->rx_factory(pin_rx);
+        if (!rx_channel_to_use) {
+            response.set("success", false);
+            response.set("error", "RxChannelCreationFailed");
+            response.set("message", "Failed to create RX channel on custom pin");
+            Serial.println("[DEBUG] RX channel creation failed");
+            Serial.flush();
+            return response;
+        }
+        created_temp_rx = true;
+        Serial.println("[DEBUG] Temp RX channel created");
+        Serial.flush();
+    }
+
+    Serial.print("[DEBUG] Free heap after RX: ");
+    Serial.println(ESP.getFreeHeap());
+    Serial.flush();
+
+    // Create validation configuration
+    Serial.println("[DEBUG] Creating validation config");
+    Serial.flush();
+    fl::ValidationConfig validation_config(
+        timing_config.timing,
+        timing_config.name,
+        tx_configs,
+        driver_name.c_str(),
+        rx_channel_to_use,
+        mState->rx_buffer,
+        lane_sizes[0],  // base_strip_size (used for logging)
+        fl::RxDeviceType::RMT  // Default RX device type
+    );
+
+    Serial.print("[DEBUG] Validation config created, free heap: ");
+    Serial.println(ESP.getFreeHeap());
+    Serial.flush();
+
+    // Run test with debug output suppressed
+    Serial.print("[DEBUG] Starting test - iterations: ");
+    Serial.println(iterations);
+    Serial.print("[DEBUG] Free heap: ");
+    Serial.println(ESP.getFreeHeap());
+    Serial.flush();
+
+    int total_tests = 0;
+    int passed_tests = 0;
+    bool passed = false;
+
+    {
+        Serial.println("[DEBUG] Entering test scope (log disable)");
+        Serial.flush();
+
+        fl::ScopedLogDisable logGuard;  // Suppress FL_DBG/FL_PRINT during test
+
+        // Run warm-up iteration (discard results)
+        Serial.println("[DEBUG] Running warmup");
+        Serial.flush();
+        int warmup_total = 0, warmup_passed = 0;
+        validateChipsetTiming(validation_config, warmup_total, warmup_passed);
+        Serial.print("[DEBUG] Warmup done, heap: ");
+        Serial.println(ESP.getFreeHeap());
+        Serial.flush();
+
+        // Run actual test iterations
+        for (int iter = 0; iter < iterations; iter++) {
+            Serial.print("[DEBUG] Iteration ");
+            Serial.println(iter + 1);
+            Serial.print("[DEBUG] Free heap: ");
+            Serial.println(ESP.getFreeHeap());
+            Serial.flush();
+
+            int iter_total = 0, iter_passed = 0;
+            validateChipsetTiming(validation_config, iter_total, iter_passed);
+            total_tests += iter_total;
+            passed_tests += iter_passed;
+
+            Serial.print("[DEBUG] Iteration ");
+            Serial.print(iter + 1);
+            Serial.println(" done");
+            Serial.flush();
+        }
+
+        passed = (total_tests > 0) && (passed_tests == total_tests);
+    }  // logGuard destroyed, logging restored
+
+    Serial.print("[DEBUG] Test complete - passed: ");
+    Serial.println(passed);
+    Serial.print("[DEBUG] Free heap: ");
+    Serial.println(ESP.getFreeHeap());
+    Serial.flush();
+
+    uint32_t duration_ms = millis() - start_ms;
+
+    // ========== RESPONSE ==========
+
+    Serial.println("[DEBUG] Building response");
+    Serial.print("[DEBUG] Free heap: ");
+    Serial.println(ESP.getFreeHeap());
+    Serial.flush();
+
+    response.set("success", true);
+    response.set("passed", passed);
+    response.set("totalTests", static_cast<int64_t>(total_tests));
+    response.set("passedTests", static_cast<int64_t>(passed_tests));
+    response.set("duration_ms", static_cast<int64_t>(duration_ms));
+    response.set("driver", driver_name.c_str());
+    response.set("laneCount", static_cast<int64_t>(lane_sizes.size()));
+
+    Serial.println("[DEBUG] Building laneSizes array");
+    Serial.flush();
+    // Add laneSizes array to response
+    fl::Json sizes_response = fl::Json::array();
+    for (int size : lane_sizes) {
+        sizes_response.push_back(static_cast<int64_t>(size));
+    }
+    response.set("laneSizes", sizes_response);
+    response.set("pattern", pattern.c_str());
+
+    // Add first failure info if test failed
+    if (!passed) {
+        Serial.println("[DEBUG] Adding failure info");
+        Serial.flush();
+        fl::Json failure = fl::Json::object();
+        failure.set("pattern", pattern.c_str());
+        failure.set("details", "Validation mismatch detected");
+        response.set("firstFailure", failure);
+    }
+
+    Serial.print("[DEBUG] Response built, heap: ");
+    Serial.println(ESP.getFreeHeap());
+    Serial.println("[DEBUG] Returning response");
+    Serial.flush();
+
+    return response;
+}
+
+fl::Json ValidationRemoteControl::findConnectedPinsImpl(const fl::Json& args) {
+    fl::Json response = fl::Json::object();
+
+    // Parse optional arguments: [{startPin: int, endPin: int, autoApply: bool}]
+    int start_pin = 0;
+    int end_pin = 21;  // Default range: GPIO 0-21 covers most common pins
+    bool auto_apply = true;  // If true, automatically apply found pins
+
+    if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
+        fl::Json config = args[0];
+        if (config.contains("startPin") && config["startPin"].is_int()) {
+            start_pin = static_cast<int>(config["startPin"].as_int().value());
+        }
+        if (config.contains("endPin") && config["endPin"].is_int()) {
+            end_pin = static_cast<int>(config["endPin"].as_int().value());
+        }
+        if (config.contains("autoApply") && config["autoApply"].is_bool()) {
+            auto_apply = config["autoApply"].as_bool().value();
+        }
+    }
+
+    // Validate range
+    if (start_pin < 0 || start_pin > 48 || end_pin < 0 || end_pin > 48 || start_pin >= end_pin) {
+        response.set("error", "InvalidRange");
+        response.set("message", "Pin range must be 0-48 with startPin < endPin");
+        return response;
+    }
+
+    FL_PRINT("[PIN PROBE] Searching for connected pin pairs in range " << start_pin << "-" << end_pin);
+
+    // Helper lambda to test if two pins are connected
+    auto testPinPair = [](int tx, int rx) -> bool {
+        // Test 1: TX drives LOW, RX has pullup → RX should read LOW if connected
+        pinMode(tx, OUTPUT);
+        pinMode(rx, INPUT_PULLUP);
+        digitalWrite(tx, LOW);
+        delay(2);  // Allow signal to settle
+        int rx_when_tx_low = digitalRead(rx);
+
+        // Test 2: TX drives HIGH → RX should read HIGH if connected
+        digitalWrite(tx, HIGH);
+        delay(2);  // Allow signal to settle
+        int rx_when_tx_high = digitalRead(rx);
+
+        // Restore pins to safe state
+        pinMode(tx, INPUT);
+        pinMode(rx, INPUT);
+
+        return (rx_when_tx_low == LOW) && (rx_when_tx_high == HIGH);
+    };
+
+    // Search for connected adjacent pin pairs (n, n+1)
+    int found_tx = -1;
+    int found_rx = -1;
+    fl::Json tested_pairs = fl::Json::array();
+
+    for (int pin = start_pin; pin < end_pin; pin++) {
+        int tx_candidate = pin;
+        int rx_candidate = pin + 1;
+
+        // Skip certain pins known to cause issues
+        #if defined(FL_IS_ESP_32S3)
+        // Skip GPIO 0 as RX (boot mode issues), skip strapping pins
+        if (rx_candidate == 0 || tx_candidate == 0) continue;
+        if (tx_candidate >= 26 && tx_candidate <= 32) continue;  // Flash pins
+        if (rx_candidate >= 26 && rx_candidate <= 32) continue;
+        #endif
+
+        fl::Json pair = fl::Json::object();
+        pair.set("tx", static_cast<int64_t>(tx_candidate));
+        pair.set("rx", static_cast<int64_t>(rx_candidate));
+
+        // Test TX→RX direction
+        bool connected_forward = testPinPair(tx_candidate, rx_candidate);
+        if (connected_forward) {
+            pair.set("connected", true);
+            pair.set("direction", "forward");
+            tested_pairs.push_back(pair);
+            found_tx = tx_candidate;
+            found_rx = rx_candidate;
+            FL_PRINT("[PIN PROBE] ✓ Found connected pair: TX=" << found_tx << " → RX=" << found_rx);
+            break;
+        }
+
+        // Test RX→TX direction (reversed)
+        bool connected_reverse = testPinPair(rx_candidate, tx_candidate);
+        if (connected_reverse) {
+            pair.set("connected", true);
+            pair.set("direction", "reverse");
+            tested_pairs.push_back(pair);
+            found_tx = rx_candidate;  // Swap since reversed
+            found_rx = tx_candidate;
+            FL_PRINT("[PIN PROBE] ✓ Found connected pair (reversed): TX=" << found_tx << " → RX=" << found_rx);
+            break;
+        }
+
+        pair.set("connected", false);
+        tested_pairs.push_back(pair);
+    }
+
+    // NOTE: testedPairs array omitted - causes heap exhaustion on ESP32 (21+ objects = ~1500 bytes)
+    // Validation script doesn't use this data, only needs {found, txPin, rxPin}
+    // response.set("testedPairs", tested_pairs);
+    fl::Json search_range = fl::Json::array();
+    search_range.push_back(static_cast<int64_t>(start_pin));
+    search_range.push_back(static_cast<int64_t>(end_pin));
+    response.set("searchRange", search_range);
+
+    if (found_tx >= 0 && found_rx >= 0) {
+        response.set("success", true);
+        response.set("found", true);
+        response.set("txPin", static_cast<int64_t>(found_tx));
+        response.set("rxPin", static_cast<int64_t>(found_rx));
+
+        // Auto-apply the found pins if requested
+        if (auto_apply) {
+            int old_tx = mState->pin_tx;
+            int old_rx = mState->pin_rx;
+            bool rx_changed = (found_rx != old_rx);
+
+            mState->pin_tx = found_tx;
+            mState->pin_rx = found_rx;
+
+            // Recreate RX channel if pin changed
+            if (rx_changed && mState->rx_factory) {
+                mState->rx_channel.reset();
+                mState->rx_channel = mState->rx_factory(found_rx);
+                if (!mState->rx_channel) {
+                    FL_ERROR("[PIN PROBE] Failed to recreate RX channel on GPIO " << found_rx);
+                    // Restore old values
+                    mState->pin_tx = old_tx;
+                    mState->pin_rx = old_rx;
+                    response.set("error", "RxChannelCreationFailed");
+                    response.set("autoApplied", false);
+                    return response;
                 }
             }
-            return fl::nullopt;
-        },
-        [](const fl::Json& response) {  // ResponseSink: prepend REMOTE: prefix
-            printJsonRaw(response, "REMOTE: ");
+
+            FL_PRINT("[PIN PROBE] Auto-applied pins: TX=" << found_tx << ", RX=" << found_rx);
+            response.set("autoApplied", true);
+            response.set("previousTxPin", static_cast<int64_t>(old_tx));
+            response.set("previousRxPin", static_cast<int64_t>(old_rx));
+        } else {
+            response.set("autoApplied", false);
+            response.set("message", "Use setPins to apply the found pins");
         }
-    ))
-    , mpDriversAvailable(nullptr)
-    , mpRxChannel(nullptr)
-    , mRxBuffer(nullptr, 0)
-    , mpPinTx(nullptr)
-    , mpPinRx(nullptr)
-    , mDefaultPinTx(1)
-    , mDefaultPinRx(0)
-    , mRxFactory(nullptr) {
+    } else {
+        response.set("success", true);  // Function succeeded, just no pins found
+        response.set("found", false);
+        response.set("message", "No connected pin pairs found. Please connect a jumper wire between adjacent GPIO pins.");
+    }
+
+    return response;
+}
+
+ValidationRemoteControl::ValidationRemoteControl()
+    : mRemote(fl::make_unique<fl::Remote>(
+        fl::createSerialRequestSource(),
+        fl::createSerialResponseSink("REMOTE: ")
+    )) {
+    // mState will be set by registerFunctions()
 }
 
 ValidationRemoteControl::~ValidationRemoteControl() = default;
 
-void ValidationRemoteControl::registerFunctions(
-    fl::vector<fl::DriverInfo>& drivers_available,
-    fl::shared_ptr<fl::RxDevice>& rx_channel,
-    fl::span<uint8_t> rx_buffer,
-    int& pin_tx,
-    int& pin_rx,
-    int default_pin_tx,
-    int default_pin_rx,
-    RxDeviceFactory rx_factory) {
-
-    // Store references to external state
-    mpDriversAvailable = &drivers_available;
-    mpRxChannel = &rx_channel;  // Pointer to shared_ptr for RX recreation
-    mRxBuffer = rx_buffer;
-    mpPinTx = &pin_tx;
-    mpPinRx = &pin_rx;
-    mDefaultPinTx = default_pin_tx;
-    mDefaultPinRx = default_pin_rx;
-    mRxFactory = rx_factory;
+void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> state) {
+    // Store shared state
+    mState = state;
 
     // NOTE: All RPC callbacks use const fl::Json& for efficient parameter passing.
     // The RPC system strips const/reference qualifiers and stores values in the tuple,
@@ -227,8 +643,8 @@ void ValidationRemoteControl::registerFunctions(
     mRemote->bind("status", [this](const fl::Json& args) -> fl::Json {
         fl::Json status = fl::Json::object();
         status.set("ready", true);
-        status.set("pinTx", static_cast<int64_t>(*mpPinTx));
-        status.set("pinRx", static_cast<int64_t>(*mpPinRx));
+        status.set("pinTx", static_cast<int64_t>(mState->pin_tx));
+        status.set("pinRx", static_cast<int64_t>(mState->pin_rx));
         return status;
     });
 
@@ -256,11 +672,11 @@ void ValidationRemoteControl::registerFunctions(
     // Register "drivers" function - list available drivers
     mRemote->bind("drivers", [this](const fl::Json& args) -> fl::Json {
         fl::Json drivers = fl::Json::array();
-        for (fl::size i = 0; i < mpDriversAvailable->size(); i++) {
+        for (fl::size i = 0; i < &mState->drivers_available->size(); i++) {
             fl::Json driver = fl::Json::object();
-            driver.set("name", (*mpDriversAvailable)[i].name.c_str());
-            driver.set("priority", static_cast<int64_t>((*mpDriversAvailable)[i].priority));
-            driver.set("enabled", (*mpDriversAvailable)[i].enabled);
+            driver.set("name", (*&mState->drivers_available)[i].name.c_str());
+            driver.set("priority", static_cast<int64_t>((*&mState->drivers_available)[i].priority));
+            driver.set("enabled", (*&mState->drivers_available)[i].enabled);
             drivers.push_back(driver);
         }
         return drivers;
@@ -269,382 +685,7 @@ void ValidationRemoteControl::registerFunctions(
     // Returns: {success, passed, totalTests, passedTests, duration_ms, driver,
     //          laneCount, laneSizes, pattern, firstFailure?}
     mRemote->bind("runSingleTest", [this](const fl::Json& args) -> fl::Json {
-        Serial.println("[DEBUG] runSingleTest called");
-        Serial.print("[DEBUG] Free heap: ");
-        Serial.println(ESP.getFreeHeap());
-        Serial.flush();
-
-        fl::Json response = fl::Json::object();
-
-        // RPC system unwraps single-element arrays, so args is the config object directly
-        if (!args.is_object()) {
-            Serial.println("[DEBUG] Args validation failed - not an object");
-            Serial.flush();
-            response.set("success", false);
-            response.set("error", "InvalidArgs");
-            response.set("message", "Expected {driver, laneSizes, pattern?, iterations?, pinTx?, pinRx?, timing?}");
-            return response;
-        }
-
-        Serial.println("[DEBUG] Args validation passed");
-        Serial.flush();
-
-        fl::Json config = args;
-
-        // ========== REQUIRED PARAMETERS ==========
-
-        // 1. Extract driver (required)
-        if (!config.contains("driver") || !config["driver"].is_string()) {
-            response.set("success", false);
-            response.set("error", "MissingDriver");
-            response.set("message", "Required field 'driver' (string) missing");
-            return response;
-        }
-        fl::string driver_name = config["driver"].as_string().value();
-
-        // Validate driver exists
-        bool driver_found = false;
-        for (fl::size i = 0; i < mpDriversAvailable->size(); i++) {
-            if ((*mpDriversAvailable)[i].name == driver_name) {
-                driver_found = true;
-                break;
-            }
-        }
-        if (!driver_found) {
-            response.set("success", false);
-            response.set("error", "UnknownDriver");
-            fl::sstream msg;
-            msg << "Driver '" << driver_name.c_str() << "' not available";
-            response.set("message", msg.str().c_str());
-            return response;
-        }
-
-        // 2. Extract laneSizes (required)
-        if (!config.contains("laneSizes") || !config["laneSizes"].is_array()) {
-            response.set("success", false);
-            response.set("error", "MissingLaneSizes");
-            response.set("message", "Required field 'laneSizes' (array) missing");
-            return response;
-        }
-
-        fl::Json lane_sizes_json = config["laneSizes"];
-        if (lane_sizes_json.size() == 0 || lane_sizes_json.size() > 8) {
-            response.set("success", false);
-            response.set("error", "InvalidLaneCount");
-            response.set("message", "laneSizes must have 1-8 elements");
-            return response;
-        }
-
-        fl::vector<int> lane_sizes;
-        const int max_leds_per_lane = mRxBuffer.size() / 32;
-        for (fl::size i = 0; i < lane_sizes_json.size(); i++) {
-            if (!lane_sizes_json[i].is_int()) {
-                response.set("success", false);
-                response.set("error", "InvalidLaneSizeType");
-                fl::sstream msg;
-                msg << "laneSizes[" << i << "] must be integer";
-                response.set("message", msg.str().c_str());
-                return response;
-            }
-            int size = static_cast<int>(lane_sizes_json[i].as_int().value());
-            if (size <= 0) {
-                response.set("success", false);
-                response.set("error", "InvalidLaneSize");
-                fl::sstream msg;
-                msg << "laneSizes[" << i << "] = " << size << " must be > 0";
-                response.set("message", msg.str().c_str());
-                return response;
-            }
-            if (size > max_leds_per_lane) {
-                response.set("success", false);
-                response.set("error", "LaneSizeTooLarge");
-                fl::sstream msg;
-                msg << "laneSizes[" << i << "] = " << size << " exceeds max " << max_leds_per_lane;
-                response.set("message", msg.str().c_str());
-                return response;
-            }
-            lane_sizes.push_back(size);
-        }
-
-        // ========== OPTIONAL PARAMETERS ==========
-
-        // 3. Extract pattern (optional, default: "MSB_LSB_A")
-        fl::string pattern = "MSB_LSB_A";
-        if (config.contains("pattern") && config["pattern"].is_string()) {
-            pattern = config["pattern"].as_string().value();
-        }
-
-        // 4. Extract iterations (optional, default: 1)
-        int iterations = 1;
-        if (config.contains("iterations") && config["iterations"].is_int()) {
-            iterations = static_cast<int>(config["iterations"].as_int().value());
-            if (iterations < 1) {
-                response.set("success", false);
-                response.set("error", "InvalidIterations");
-                response.set("message", "iterations must be >= 1");
-                return response;
-            }
-        }
-
-        // 5. Extract pinTx (optional, default: use mpPinTx)
-        int pin_tx = *mpPinTx;
-        if (config.contains("pinTx") && config["pinTx"].is_int()) {
-            pin_tx = static_cast<int>(config["pinTx"].as_int().value());
-            if (pin_tx < 0 || pin_tx > 48) {
-                response.set("success", false);
-                response.set("error", "InvalidPinTx");
-                response.set("message", "pinTx must be 0-48");
-                return response;
-            }
-        }
-
-        // 6. Extract pinRx (optional, default: use mpPinRx)
-        int pin_rx = *mpPinRx;
-        if (config.contains("pinRx") && config["pinRx"].is_int()) {
-            pin_rx = static_cast<int>(config["pinRx"].as_int().value());
-            if (pin_rx < 0 || pin_rx > 48) {
-                response.set("success", false);
-                response.set("error", "InvalidPinRx");
-                response.set("message", "pinRx must be 0-48");
-                return response;
-            }
-        }
-
-        // 7. Extract timing (optional, default: "WS2812B-V5")
-        fl::string timing_name = "WS2812B-V5";
-        if (config.contains("timing") && config["timing"].is_string()) {
-            timing_name = config["timing"].as_string().value();
-        }
-
-        // ========== EXECUTION ==========
-
-        Serial.print("[DEBUG] runSingleTest starting - driver: ");
-        Serial.println(driver_name.c_str());
-        Serial.print("[DEBUG] Free heap: ");
-        Serial.println(ESP.getFreeHeap());
-        Serial.flush();
-
-        uint32_t start_ms = millis();
-
-        // Set driver as exclusive
-        Serial.println("[DEBUG] Setting exclusive driver...");
-        Serial.flush();
-        if (!FastLED.setExclusiveDriver(driver_name.c_str())) {
-            response.set("success", false);
-            response.set("error", "DriverSetupFailed");
-            fl::sstream msg;
-            msg << "Failed to set " << driver_name.c_str() << " as exclusive driver";
-            response.set("message", msg.str().c_str());
-            Serial.println("[DEBUG] Failed to set exclusive driver");
-            Serial.flush();
-            return response;
-        }
-        Serial.println("[DEBUG] Exclusive driver set");
-        Serial.flush();
-
-        // Get timing configuration (currently hardcoded to WS2812B-V5)
-        Serial.println("[DEBUG] Creating timing config");
-        Serial.flush();
-        fl::NamedTimingConfig timing_config(
-            fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(),
-            timing_name.c_str()
-        );
-
-        // Dynamically allocate LED arrays for each lane
-        Serial.print("[DEBUG] Allocating LED arrays - lanes: ");
-        Serial.println(lane_sizes.size());
-        Serial.print("[DEBUG] Free heap: ");
-        Serial.println(ESP.getFreeHeap());
-        Serial.flush();
-
-        fl::vector<fl::unique_ptr<fl::vector<CRGB>>> led_arrays;
-        fl::vector<fl::ChannelConfig> tx_configs;
-
-        for (fl::size i = 0; i < lane_sizes.size(); i++) {
-            Serial.print("[DEBUG] Lane ");
-            Serial.print(i);
-            Serial.print(" - allocating ");
-            Serial.print(lane_sizes[i]);
-            Serial.println(" LEDs");
-            Serial.print("[DEBUG] Free heap: ");
-            Serial.println(ESP.getFreeHeap());
-            Serial.flush();
-
-            // Allocate LED array
-            auto leds = fl::make_unique<fl::vector<CRGB>>(lane_sizes[i]);
-
-            Serial.print("[DEBUG] Lane ");
-            Serial.print(i);
-            Serial.println(" - creating channel config");
-            Serial.flush();
-
-            // Create channel config
-            tx_configs.push_back(fl::ChannelConfig(
-                pin_tx + i,  // Consecutive pins for multi-lane
-                timing_config.timing,
-                fl::span<CRGB>(leds->data(), leds->size()),
-                RGB  // Default color order
-            ));
-
-            // Store array to keep it alive
-            led_arrays.push_back(fl::move(leds));
-
-            Serial.print("[DEBUG] Lane ");
-            Serial.print(i);
-            Serial.print(" complete, free heap: ");
-            Serial.println(ESP.getFreeHeap());
-            Serial.flush();
-        }
-
-        Serial.print("[DEBUG] All lanes allocated, free heap: ");
-        Serial.println(ESP.getFreeHeap());
-        Serial.flush();
-
-        // Create temporary RX channel if pinRx differs from default
-        Serial.println("[DEBUG] Setting up RX channel");
-        Serial.print("[DEBUG] Free heap: ");
-        Serial.println(ESP.getFreeHeap());
-        Serial.flush();
-
-        fl::shared_ptr<fl::RxDevice> rx_channel_to_use = *mpRxChannel;
-        bool created_temp_rx = false;
-
-        if (pin_rx != *mpPinRx && mRxFactory) {
-            Serial.println("[DEBUG] Creating temp RX channel");
-            Serial.flush();
-            rx_channel_to_use = mRxFactory(pin_rx);
-            if (!rx_channel_to_use) {
-                response.set("success", false);
-                response.set("error", "RxChannelCreationFailed");
-                response.set("message", "Failed to create RX channel on custom pin");
-                Serial.println("[DEBUG] RX channel creation failed");
-                Serial.flush();
-                return response;
-            }
-            created_temp_rx = true;
-            Serial.println("[DEBUG] Temp RX channel created");
-            Serial.flush();
-        }
-
-        Serial.print("[DEBUG] Free heap after RX: ");
-        Serial.println(ESP.getFreeHeap());
-        Serial.flush();
-
-        // Create validation configuration
-        Serial.println("[DEBUG] Creating validation config");
-        Serial.flush();
-        fl::ValidationConfig validation_config(
-            timing_config.timing,
-            timing_config.name,
-            tx_configs,
-            driver_name.c_str(),
-            rx_channel_to_use,
-            mRxBuffer,
-            lane_sizes[0],  // base_strip_size (used for logging)
-            fl::RxDeviceType::RMT  // Default RX device type
-        );
-
-        Serial.print("[DEBUG] Validation config created, free heap: ");
-        Serial.println(ESP.getFreeHeap());
-        Serial.flush();
-
-        // Run test with debug output suppressed
-        Serial.print("[DEBUG] Starting test - iterations: ");
-        Serial.println(iterations);
-        Serial.print("[DEBUG] Free heap: ");
-        Serial.println(ESP.getFreeHeap());
-        Serial.flush();
-
-        int total_tests = 0;
-        int passed_tests = 0;
-        bool passed = false;
-
-        {
-            Serial.println("[DEBUG] Entering test scope (log disable)");
-            Serial.flush();
-
-            fl::ScopedLogDisable logGuard;  // Suppress FL_DBG/FL_PRINT during test
-
-            // Run warm-up iteration (discard results)
-            Serial.println("[DEBUG] Running warmup");
-            Serial.flush();
-            int warmup_total = 0, warmup_passed = 0;
-            validateChipsetTiming(validation_config, warmup_total, warmup_passed);
-            Serial.print("[DEBUG] Warmup done, heap: ");
-            Serial.println(ESP.getFreeHeap());
-            Serial.flush();
-
-            // Run actual test iterations
-            for (int iter = 0; iter < iterations; iter++) {
-                Serial.print("[DEBUG] Iteration ");
-                Serial.println(iter + 1);
-                Serial.print("[DEBUG] Free heap: ");
-                Serial.println(ESP.getFreeHeap());
-                Serial.flush();
-
-                int iter_total = 0, iter_passed = 0;
-                validateChipsetTiming(validation_config, iter_total, iter_passed);
-                total_tests += iter_total;
-                passed_tests += iter_passed;
-
-                Serial.print("[DEBUG] Iteration ");
-                Serial.print(iter + 1);
-                Serial.println(" done");
-                Serial.flush();
-            }
-
-            passed = (total_tests > 0) && (passed_tests == total_tests);
-        }  // logGuard destroyed, logging restored
-
-        Serial.print("[DEBUG] Test complete - passed: ");
-        Serial.println(passed);
-        Serial.print("[DEBUG] Free heap: ");
-        Serial.println(ESP.getFreeHeap());
-        Serial.flush();
-
-        uint32_t duration_ms = millis() - start_ms;
-
-        // ========== RESPONSE ==========
-
-        Serial.println("[DEBUG] Building response");
-        Serial.print("[DEBUG] Free heap: ");
-        Serial.println(ESP.getFreeHeap());
-        Serial.flush();
-
-        response.set("success", true);
-        response.set("passed", passed);
-        response.set("totalTests", static_cast<int64_t>(total_tests));
-        response.set("passedTests", static_cast<int64_t>(passed_tests));
-        response.set("duration_ms", static_cast<int64_t>(duration_ms));
-        response.set("driver", driver_name.c_str());
-        response.set("laneCount", static_cast<int64_t>(lane_sizes.size()));
-
-        Serial.println("[DEBUG] Building laneSizes array");
-        Serial.flush();
-        // Add laneSizes array to response
-        fl::Json sizes_response = fl::Json::array();
-        for (int size : lane_sizes) {
-            sizes_response.push_back(static_cast<int64_t>(size));
-        }
-        response.set("laneSizes", sizes_response);
-        response.set("pattern", pattern.c_str());
-
-        // Add first failure info if test failed
-        if (!passed) {
-            Serial.println("[DEBUG] Adding failure info");
-            Serial.flush();
-            fl::Json failure = fl::Json::object();
-            failure.set("pattern", pattern.c_str());
-            failure.set("details", "Validation mismatch detected");
-            response.set("firstFailure", failure);
-        }
-
-        Serial.print("[DEBUG] Response built, heap: ");
-        Serial.println(ESP.getFreeHeap());
-        Serial.println("[DEBUG] Returning response");
-        Serial.flush();
-
-        return response;
+        return runSingleTestImpl(args);
     });
 
     // ========================================================================
@@ -740,12 +781,12 @@ void ValidationRemoteControl::registerFunctions(
     mRemote->bind("getPins", [this](const fl::Json& args) -> fl::Json {
         fl::Json response = fl::Json::object();
         response.set("success", true);
-        response.set("txPin", static_cast<int64_t>(*mpPinTx));
-        response.set("rxPin", static_cast<int64_t>(*mpPinRx));
+        response.set("txPin", static_cast<int64_t>(mState->pin_tx));
+        response.set("rxPin", static_cast<int64_t>(mState->pin_rx));
 
         fl::Json defaults = fl::Json::object();
-        defaults.set("txPin", static_cast<int64_t>(mDefaultPinTx));
-        defaults.set("rxPin", static_cast<int64_t>(mDefaultPinRx));
+        defaults.set("txPin", static_cast<int64_t>(mState->default_pin_tx));
+        defaults.set("rxPin", static_cast<int64_t>(mState->default_pin_rx));
         response.set("defaults", defaults);
 
         #if defined(FL_IS_ESP_32S3)
@@ -757,7 +798,7 @@ void ValidationRemoteControl::registerFunctions(
         #elif defined(FL_IS_ESP_32C3)
             response.set("platform", "ESP32-C3");
         #else
-            response.set("platform", "ESP32");
+            response.set("platform", "unknown");
         #endif
 
         return response;
@@ -782,8 +823,8 @@ void ValidationRemoteControl::registerFunctions(
             return response;
         }
 
-        int old_pin = *mpPinTx;
-        *mpPinTx = new_pin;
+        int old_pin = mState->pin_tx;
+        mState->pin_tx = new_pin;
 
         FL_PRINT("[RPC] setTxPin(" << new_pin << ") - TX pin changed from " << old_pin << " to " << new_pin);
 
@@ -812,23 +853,23 @@ void ValidationRemoteControl::registerFunctions(
             return response;
         }
 
-        int old_pin = *mpPinRx;
+        int old_pin = mState->pin_rx;
         bool pin_changed = (new_pin != old_pin);
         bool rx_recreated = false;
 
         if (pin_changed) {
-            *mpPinRx = new_pin;
+            mState->pin_rx = new_pin;
 
             // Recreate RX channel with new pin
             FL_PRINT("[RPC] setRxPin(" << new_pin << ") - Recreating RX channel...");
 
             // Destroy old RX channel
-            mpRxChannel->reset();
+            mState->rx_channel.reset();
 
             // Create new RX channel on new pin using factory
-            *mpRxChannel = mRxFactory(new_pin);
+            mState->rx_channel = mState->rx_factory(new_pin);
 
-            if (*mpRxChannel) {
+            if (mState->rx_channel) {
                 FL_PRINT("[RPC] setRxPin - RX channel recreated on GPIO " << new_pin);
                 rx_recreated = true;
             } else {
@@ -836,7 +877,7 @@ void ValidationRemoteControl::registerFunctions(
                 response.set("error", "RxChannelCreationFailed");
                 response.set("message", "Failed to create RX channel on new pin");
                 // Restore old pin value
-                *mpPinRx = old_pin;
+                mState->pin_rx = old_pin;
                 return response;
             }
         }
@@ -891,40 +932,40 @@ void ValidationRemoteControl::registerFunctions(
             return response;
         }
 
-        int old_tx_pin = *mpPinTx;
-        int old_rx_pin = *mpPinRx;
+        int old_tx_pin = mState->pin_tx;
+        int old_rx_pin = mState->pin_rx;
         bool rx_pin_changed = (new_rx_pin != old_rx_pin);
         bool rx_recreated = false;
 
         // Update TX pin
-        *mpPinTx = new_tx_pin;
+        mState->pin_tx = new_tx_pin;
 
         // Update RX pin and recreate channel if changed
         if (rx_pin_changed) {
-            *mpPinRx = new_rx_pin;
+            mState->pin_rx = new_rx_pin;
 
             FL_PRINT("[RPC] setPins - Recreating RX channel on GPIO " << new_rx_pin << "...");
 
             // Destroy old RX channel
-            mpRxChannel->reset();
+            mState->rx_channel.reset();
 
             // Create new RX channel using factory
-            *mpRxChannel = mRxFactory(new_rx_pin);
+            mState->rx_channel = mState->rx_factory(new_rx_pin);
 
-            if (*mpRxChannel) {
+            if (mState->rx_channel) {
                 FL_PRINT("[RPC] setPins - RX channel recreated successfully");
                 rx_recreated = true;
             } else {
                 FL_ERROR("[RPC] setPins - Failed to create RX channel on GPIO " << new_rx_pin);
                 // Rollback both pins
-                *mpPinTx = old_tx_pin;
-                *mpPinRx = old_rx_pin;
+                mState->pin_tx = old_tx_pin;
+                mState->pin_rx = old_rx_pin;
                 response.set("error", "RxChannelCreationFailed");
                 response.set("message", "Failed to create RX channel - pins restored to previous values");
                 return response;
             }
         } else {
-            *mpPinRx = new_rx_pin;
+            mState->pin_rx = new_rx_pin;
         }
 
         FL_PRINT("[RPC] setPins - TX: " << old_tx_pin << " → " << new_tx_pin
@@ -942,158 +983,7 @@ void ValidationRemoteControl::registerFunctions(
     // Register "findConnectedPins" function - probe adjacent pin pairs to find a jumper wire connection
     // This allows automatic discovery of TX/RX pin pair without requiring user to specify them
     mRemote->bind("findConnectedPins", [this](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
-
-        // Parse optional arguments: [{startPin: int, endPin: int, autoApply: bool}]
-        int start_pin = 0;
-        int end_pin = 21;  // Default range: GPIO 0-21 covers most common pins
-        bool auto_apply = true;  // If true, automatically apply found pins
-
-        if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
-            fl::Json config = args[0];
-            if (config.contains("startPin") && config["startPin"].is_int()) {
-                start_pin = static_cast<int>(config["startPin"].as_int().value());
-            }
-            if (config.contains("endPin") && config["endPin"].is_int()) {
-                end_pin = static_cast<int>(config["endPin"].as_int().value());
-            }
-            if (config.contains("autoApply") && config["autoApply"].is_bool()) {
-                auto_apply = config["autoApply"].as_bool().value();
-            }
-        }
-
-        // Validate range
-        if (start_pin < 0 || start_pin > 48 || end_pin < 0 || end_pin > 48 || start_pin >= end_pin) {
-            response.set("error", "InvalidRange");
-            response.set("message", "Pin range must be 0-48 with startPin < endPin");
-            return response;
-        }
-
-        FL_PRINT("[PIN PROBE] Searching for connected pin pairs in range " << start_pin << "-" << end_pin);
-
-        // Helper lambda to test if two pins are connected
-        auto testPinPair = [](int tx, int rx) -> bool {
-            // Test 1: TX drives LOW, RX has pullup → RX should read LOW if connected
-            pinMode(tx, OUTPUT);
-            pinMode(rx, INPUT_PULLUP);
-            digitalWrite(tx, LOW);
-            delay(2);  // Allow signal to settle
-            int rx_when_tx_low = digitalRead(rx);
-
-            // Test 2: TX drives HIGH → RX should read HIGH if connected
-            digitalWrite(tx, HIGH);
-            delay(2);  // Allow signal to settle
-            int rx_when_tx_high = digitalRead(rx);
-
-            // Restore pins to safe state
-            pinMode(tx, INPUT);
-            pinMode(rx, INPUT);
-
-            return (rx_when_tx_low == LOW) && (rx_when_tx_high == HIGH);
-        };
-
-        // Search for connected adjacent pin pairs (n, n+1)
-        int found_tx = -1;
-        int found_rx = -1;
-        fl::Json tested_pairs = fl::Json::array();
-
-        for (int pin = start_pin; pin < end_pin; pin++) {
-            int tx_candidate = pin;
-            int rx_candidate = pin + 1;
-
-            // Skip certain pins known to cause issues
-            #if defined(FL_IS_ESP_32S3)
-            // Skip GPIO 0 as RX (boot mode issues), skip strapping pins
-            if (rx_candidate == 0 || tx_candidate == 0) continue;
-            if (tx_candidate >= 26 && tx_candidate <= 32) continue;  // Flash pins
-            if (rx_candidate >= 26 && rx_candidate <= 32) continue;
-            #endif
-
-            fl::Json pair = fl::Json::object();
-            pair.set("tx", static_cast<int64_t>(tx_candidate));
-            pair.set("rx", static_cast<int64_t>(rx_candidate));
-
-            // Test TX→RX direction
-            bool connected_forward = testPinPair(tx_candidate, rx_candidate);
-            if (connected_forward) {
-                pair.set("connected", true);
-                pair.set("direction", "forward");
-                tested_pairs.push_back(pair);
-                found_tx = tx_candidate;
-                found_rx = rx_candidate;
-                FL_PRINT("[PIN PROBE] ✓ Found connected pair: TX=" << found_tx << " → RX=" << found_rx);
-                break;
-            }
-
-            // Test RX→TX direction (reversed)
-            bool connected_reverse = testPinPair(rx_candidate, tx_candidate);
-            if (connected_reverse) {
-                pair.set("connected", true);
-                pair.set("direction", "reverse");
-                tested_pairs.push_back(pair);
-                found_tx = rx_candidate;  // Swap since reversed
-                found_rx = tx_candidate;
-                FL_PRINT("[PIN PROBE] ✓ Found connected pair (reversed): TX=" << found_tx << " → RX=" << found_rx);
-                break;
-            }
-
-            pair.set("connected", false);
-            tested_pairs.push_back(pair);
-        }
-
-        // NOTE: testedPairs array omitted - causes heap exhaustion on ESP32 (21+ objects = ~1500 bytes)
-        // Validation script doesn't use this data, only needs {found, txPin, rxPin}
-        // response.set("testedPairs", tested_pairs);
-        fl::Json search_range = fl::Json::array();
-        search_range.push_back(static_cast<int64_t>(start_pin));
-        search_range.push_back(static_cast<int64_t>(end_pin));
-        response.set("searchRange", search_range);
-
-        if (found_tx >= 0 && found_rx >= 0) {
-            response.set("success", true);
-            response.set("found", true);
-            response.set("txPin", static_cast<int64_t>(found_tx));
-            response.set("rxPin", static_cast<int64_t>(found_rx));
-
-            // Auto-apply the found pins if requested
-            if (auto_apply) {
-                int old_tx = *mpPinTx;
-                int old_rx = *mpPinRx;
-                bool rx_changed = (found_rx != old_rx);
-
-                *mpPinTx = found_tx;
-                *mpPinRx = found_rx;
-
-                // Recreate RX channel if pin changed
-                if (rx_changed && mRxFactory) {
-                    mpRxChannel->reset();
-                    *mpRxChannel = mRxFactory(found_rx);
-                    if (!*mpRxChannel) {
-                        FL_ERROR("[PIN PROBE] Failed to recreate RX channel on GPIO " << found_rx);
-                        // Restore old values
-                        *mpPinTx = old_tx;
-                        *mpPinRx = old_rx;
-                        response.set("error", "RxChannelCreationFailed");
-                        response.set("autoApplied", false);
-                        return response;
-                    }
-                }
-
-                FL_PRINT("[PIN PROBE] Auto-applied pins: TX=" << found_tx << ", RX=" << found_rx);
-                response.set("autoApplied", true);
-                response.set("previousTxPin", static_cast<int64_t>(old_tx));
-                response.set("previousRxPin", static_cast<int64_t>(old_rx));
-            } else {
-                response.set("autoApplied", false);
-                response.set("message", "Use setPins to apply the found pins");
-            }
-        } else {
-            response.set("success", true);  // Function succeeded, just no pins found
-            response.set("found", false);
-            response.set("message", "No connected pin pairs found. Please connect a jumper wire between adjacent GPIO pins.");
-        }
-
-        return response;
+        return findConnectedPinsImpl(args);
     });
 
     // Register "help" function - list all RPC functions with descriptions

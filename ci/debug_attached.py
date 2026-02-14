@@ -621,7 +621,7 @@ def run_monitor(
                         try:
                             mon.write(f"{cmd_str}\n")
                             print(
-                                f"   ✓ Sent command {i}/{len(json_rpc_commands)}: {cmd['function']}()"
+                                f"   ✓ Sent command {i}/{len(json_rpc_commands)}: {cmd['method']}()"
                             )
                         except KeyboardInterrupt:
                             handle_keyboard_interrupt_properly()
@@ -686,9 +686,11 @@ def run_monitor(
                             rpc_response = rpc_handler.process_line(formatted_line)
                             if rpc_response:
                                 rpc_responses_received += 1
-                                func_name = rpc_response.get("function", "unknown")
                                 result = rpc_response.get("result")
-                                print(f"   📡 RPC Response: {func_name}() → {result}")
+                                response_id = rpc_response.get("id", "unknown")
+                                print(
+                                    f"   📡 RPC Response (id={response_id}): {result}"
+                                )
                                 if (
                                     rpc_responses_received >= rpc_responses_needed
                                     and rpc_responses_needed > 0
@@ -1094,7 +1096,7 @@ Examples:
         "--json-rpc",
         type=str,
         metavar="COMMANDS",
-        help='JSON-RPC commands to send to device at startup. Accepts JSON string: \'{"function":"ping"}\' or \'[{"function":"setDrivers","args":["PARLIO"]}]\', or file path: @commands.json',
+        help='JSON-RPC commands to send to device at startup. Accepts JSON string: \'{"method":"ping"}\' or \'[{"method":"setDrivers","params":["PARLIO"]}]\', or file path: @commands.json',
     )
     parser.add_argument(
         "--use-fbuild",

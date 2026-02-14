@@ -146,7 +146,7 @@ class ValidationAgent:
         Raises:
             TimeoutError: If no response received within timeout
         """
-        cmd = {"function": function, "args": args or []}
+        cmd = {"method": function, "params": args or []}
         cmd_str = json.dumps(cmd, separators=(",", ":"))
 
         # Send command (no manual buffer clearing needed with SerialMonitor)
@@ -326,7 +326,7 @@ class ValidationAgent:
             TimeoutError: If test does not complete within timeout
         """
         # Send RPC command
-        cmd: dict[str, str | list[Any]] = {"function": "runTest", "args": []}
+        cmd: dict[str, str | list[Any]] = {"method": "runTest", "params": []}
         cmd_str = json.dumps(cmd, separators=(",", ":"))
 
         # Send command

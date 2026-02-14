@@ -17,7 +17,7 @@ Example Usage:
     >>>
     >>> # With write capability
     >>> with SerialMonitor(port='COM13') as mon:
-    ...     mon.write('{"function":"ping"}\\n')
+    ...     mon.write('{"method":"ping"}\\n')
     ...     for line in mon.read_lines(timeout=10.0):
     ...         if 'REMOTE:' in line:
     ...             print(f"Got response: {line}")

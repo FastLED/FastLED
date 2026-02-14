@@ -31,6 +31,18 @@ namespace fl {
 /// @return A shared_ptr to the created RxDevice, or nullptr on failure
 using RxDeviceFactory = fl::shared_ptr<fl::RxDevice>(*)(int pin);
 
+/// @brief Validation runtime state (shared between main loop and RPC handlers)
+struct ValidationState {
+    fl::vector<fl::DriverInfo> drivers_available;
+    fl::shared_ptr<fl::RxDevice> rx_channel;
+    fl::span<uint8_t> rx_buffer;
+    int pin_tx;
+    int pin_rx;
+    int default_pin_tx;
+    int default_pin_rx;
+    RxDeviceFactory rx_factory;
+};
+
 /// @brief Print JSON directly to Serial, bypassing fl::println and ScopedLogDisable
 /// This ensures RPC responses are always visible regardless of log level
 /// @param json JSON object to output
@@ -52,25 +64,9 @@ public:
     /// @brief Destructor
     ~ValidationRemoteControl();
 
-    /// @brief Register all RPC functions with external state references
-    /// @param drivers_available Reference to available drivers vector
-    /// @param rx_channel Reference to RX channel (may be recreated on pin change)
-    /// @param rx_buffer RX buffer span
-    /// @param pin_tx Reference to TX pin variable (runtime configurable)
-    /// @param pin_rx Reference to RX pin variable (runtime configurable)
-    /// @param default_pin_tx Default TX pin for this platform
-    /// @param default_pin_rx Default RX pin for this platform
-    /// @param rx_factory Factory function for creating RxDevice instances
-    void registerFunctions(
-        fl::vector<fl::DriverInfo>& drivers_available,
-        fl::shared_ptr<fl::RxDevice>& rx_channel,
-        fl::span<uint8_t> rx_buffer,
-        int& pin_tx,
-        int& pin_rx,
-        int default_pin_tx,
-        int default_pin_rx,
-        RxDeviceFactory rx_factory
-    );
+    /// @brief Register all RPC functions with shared validation state
+    /// @param state Shared pointer to validation runtime state
+    void registerFunctions(fl::shared_ptr<ValidationState> state);
 
     /// @brief Process RPC system (pull + tick + push)
     /// @param current_millis Current timestamp in milliseconds
@@ -82,18 +78,9 @@ public:
 
 private:
     fl::unique_ptr<fl::Remote> mRemote;  // Remote RPC system instance
+    fl::shared_ptr<ValidationState> mState;  // Shared validation state
 
-    // External state references (set by registerFunctions)
-    fl::vector<fl::DriverInfo>* mpDriversAvailable;
-    fl::shared_ptr<fl::RxDevice>* mpRxChannel;  // Pointer to shared_ptr (for RX recreation)
-    fl::span<uint8_t> mRxBuffer;
-
-    // Pin configuration (runtime modifiable via RPC)
-    int* mpPinTx;
-    int* mpPinRx;
-    int mDefaultPinTx;
-    int mDefaultPinRx;
-
-    // RxDevice factory for creating/recreating RX channels
-    RxDeviceFactory mRxFactory;
+    // Private helper functions for RPC implementation
+    fl::Json runSingleTestImpl(const fl::Json& args);
+    fl::Json findConnectedPinsImpl(const fl::Json& args);
 };

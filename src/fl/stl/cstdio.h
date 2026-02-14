@@ -1,6 +1,9 @@
 #pragma once
 
 #include "fl/stl/stdint.h"
+#include "fl/stl/optional.h"
+#include "fl/stl/string.h"
+#include "fl/stl/time.h"  // For fl::millis()
 
 #ifdef FASTLED_TESTING
 #include "fl/stl/function.h"
@@ -131,6 +134,26 @@ int peek();
 // Returns -1 if no data is available
 int read();
 
+// Reads from input stream until delimiter is found, writing to sstream (blocking with optional timeout)
+// Returns true when delimiter is found, false only if timeout occurs
+// @param out Output sstream to append characters to (delimiter not included)
+// @param delimiter Character to read until (default: '\n')
+// @param skipChar Character to skip during reading (default: '\r' for cross-platform line endings)
+// @param timeoutMs Optional timeout in milliseconds (nullopt = wait forever)
+// @note Follows Arduino Serial.readStringUntil() API
+class sstream;  // Forward declare to avoid circular dependency
+bool readStringUntil(sstream& out, char delimiter = '\n', char skipChar = '\r', fl::optional<u32> timeoutMs = fl::nullopt);
+
+// Reads from input stream until delimiter is found, returning as string (blocking with optional timeout)
+// Returns the string (without delimiter) when delimiter is found
+// Returns nullopt only if timeout occurs (when timeout is set)
+// @param delimiter Character to read until (default: '\n')
+// @param skipChar Character to skip during reading (default: '\r' for cross-platform line endings)
+// @param timeoutMs Optional timeout in milliseconds (nullopt = wait forever)
+// @note Follows Arduino Serial.readStringUntil() API
+// @note Delegates to readStringUntil(sstream&, ...) version
+fl::optional<fl::string> readLine(char delimiter = '\n', char skipChar = '\r', fl::optional<u32> timeoutMs = fl::nullopt);
+
 // Flush serial output buffer
 // Waits for all buffered data to be transmitted
 // Returns true if flush completed successfully, false on timeout
@@ -140,6 +163,12 @@ bool flush(u32 timeoutMs = 1000);
 // Check if serial port is ready for I/O
 // Returns true if serial is initialized and available
 bool serial_ready();
+
+// =============================================================================
+// Timing Functions
+// =============================================================================
+// Note: fl::millis() is provided by fl/stl/time.h
+// Note: fl::delay() is provided by fl/delay.h
 
 #ifdef FASTLED_TESTING
 

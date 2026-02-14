@@ -2,10 +2,16 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/compiler_control.h"
+#include "fl/stl/strstream.h"  // For sstream
 
 // Platform-specific I/O function declarations
 // Each platform provides implementations in their .cpp.hpp files
 #include "platforms/io.h"
+
+// Forward declare delay to avoid Arduino conflict
+namespace fl {
+    void delay(u32 ms, bool run_async);
+}
 
 // =============================================================================
 // Global Log Level Storage and API
@@ -117,6 +123,61 @@ int read() {
     return platforms::read();
 }
 
+bool readStringUntil(sstream& out, char delimiter, char skipChar, fl::optional<u32> timeoutMs) {
+    // Follows Arduino Serial.readStringUntil() API - blocks until delimiter found
+    u32 startTime = fl::millis();
+
+    // Read characters until we find delimiter or timeout
+    while (true) {
+        // Check timeout (only if timeout is set)
+        if (timeoutMs.has_value()) {
+            if (fl::millis() - startTime >= timeoutMs.value()) {
+                // Timeout occurred
+                return false;
+            }
+        }
+
+        // Try to read next character
+        int c = read();
+
+        // Handle -1 (no data available) like Arduino's timedRead():
+        // Keep trying until timeout (or forever if no timeout set)
+        if (c == -1) {
+            // Yield briefly to prevent busy loop
+            fl::delay(1);
+            continue;
+        }
+
+        // Found delimiter - complete
+        if (c == delimiter) {
+            break;
+        }
+
+        // Skip specified character (e.g., '\r' for cross-platform line endings)
+        if (c == skipChar) {
+            continue;
+        }
+
+        // Valid character - add to output stream
+        out << static_cast<char>(c);
+    }
+
+    // Successfully read until delimiter
+    return true;
+}
+
+fl::optional<fl::string> readLine(char delimiter, char skipChar, fl::optional<u32> timeoutMs) {
+    // Delegate to readStringUntil for efficient character accumulation
+    sstream buffer;
+    if (!readStringUntil(buffer, delimiter, skipChar, timeoutMs)) {
+        return fl::nullopt;  // Timeout occurred
+    }
+
+    // Convert to string and trim whitespace (trim() returns new StrN, convert to string)
+    fl::string result = buffer.str();
+    return fl::string(result.trim());
+}
+
 bool flush(u32 timeoutMs) {
     return platforms::flush(timeoutMs);
 }
@@ -133,6 +194,12 @@ void serial_begin(u32 baudRate) {
 bool serial_ready() {
     return platforms::serial_ready();
 }
+
+// =============================================================================
+// Timing Functions
+// =============================================================================
+// Note: fl::millis() is provided by fl/stl/time.h
+// Note: fl::delay() is provided by fl/delay.h
 
 #ifdef FASTLED_TESTING
 

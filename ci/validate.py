@@ -47,6 +47,7 @@ Architecture:
 """
 
 import argparse
+import asyncio
 import json
 import sys
 import time
@@ -135,14 +136,14 @@ PIN_RX = 0  # RX pin used by RMT receiver (ESP32-C6 default; ESP32 uses 2)
 # ============================================================
 
 
-def run_gpio_pretest(
+async def run_gpio_pretest(
     port: str,
     tx_pin: int = PIN_TX,
     rx_pin: int = PIN_RX,
     timeout: float = 15.0,
     use_pyserial: bool = False,
 ) -> bool:
-    """Test GPIO connectivity between TX and RX pins before running validation.
+    """Test GPIO connectivity between TX and RX pins before running validation (async).
 
     This pre-test uses a simple pullup/drive-low pattern to verify that
     the TX and RX pins are physically connected via a jumper wire.
@@ -166,11 +167,13 @@ def run_gpio_pretest(
 
     try:
         print("  Waiting for device to boot...")
-        with RpcClient(port, timeout=timeout, use_pyserial=use_pyserial) as client:
+        async with RpcClient(
+            port, timeout=timeout, use_pyserial=use_pyserial
+        ) as client:
             print()
             print("  Sending GPIO test command...")
 
-            response = client.send_and_match(
+            response = await client.send_and_match(
                 "testGpioConnection",
                 args=[tx_pin, rx_pin],
                 match_key="connected",
@@ -237,14 +240,14 @@ def run_gpio_pretest(
 # ============================================================
 
 
-def run_pin_discovery(
+async def run_pin_discovery(
     port: str,
     start_pin: int = 0,
     end_pin: int = 21,
     timeout: float = 15.0,
     use_pyserial: bool = False,
 ) -> tuple[bool, int | None, int | None]:
-    """Auto-discover connected pin pairs by probing adjacent GPIO pins.
+    """Auto-discover connected pin pairs by probing adjacent GPIO pins (async).
 
     This function calls the findConnectedPins RPC to search for a jumper wire
     connection between adjacent pin pairs.
@@ -271,11 +274,13 @@ def run_pin_discovery(
 
     try:
         print("  Waiting for device to boot...")
-        with RpcClient(port, timeout=timeout, use_pyserial=use_pyserial) as client:
+        async with RpcClient(
+            port, timeout=timeout, use_pyserial=use_pyserial
+        ) as client:
             print()
             print("  Probing adjacent pin pairs for jumper wire connection...")
 
-            response = client.send_and_match(
+            response = await client.send_and_match(
                 "findConnectedPins",
                 args=[{"startPin": start_pin, "endPin": end_pin, "autoApply": True}],
                 match_key="found",
@@ -742,7 +747,7 @@ def _should_use_fbuild(
 # ============================================================
 
 
-def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneralTypeIssues]
+async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneralTypeIssues]
     """Main entry point."""
     # Install signal handler for proper Ctrl+C handling on Windows
     install_signal_handler()
@@ -951,7 +956,7 @@ def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneralTypeIs
     # Add setLaneSizes command if per-lane counts are specified (NEW)
     if per_lane_counts is not None:
         # setLaneSizes command takes [[size1, size2, ...]] (array wrapped in array)
-        set_lane_sizes_cmd = {"function": "setLaneSizes", "args": [per_lane_counts]}
+        set_lane_sizes_cmd = {"method": "setLaneSizes", "params": [per_lane_counts]}
         rpc_commands_list.append(set_lane_sizes_cmd)
         print(
             f"ℹ️  Setting per-lane LED counts: {', '.join(str(c) for c in per_lane_counts)} ({len(per_lane_counts)} lanes)"
@@ -962,10 +967,10 @@ def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneralTypeIs
     # For now, we'll add a placeholder that the firmware can implement
     if custom_color is not None:
         r, g, b = custom_color
-        # Proposed RPC format: {"function": "setSolidColor", "args": [{"r": R, "g": G, "b": B}]}
+        # RPC format: {"method": "setSolidColor", "params": [{"r": R, "g": G, "b": B}]}
         set_color_cmd = {
-            "function": "setSolidColor",
-            "args": [{"r": r, "g": g, "b": b}],
+            "method": "setSolidColor",
+            "params": [{"r": r, "g": g, "b": b}],
         }
         rpc_commands_list.append(set_color_cmd)
         print(
@@ -986,14 +991,14 @@ def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneralTypeIs
                 lane_sizes = [strip_size] * lane_count
 
                 # Build runSingleTest command
-                # Format: {"function":"runSingleTest","args":[{"driver":"PARLIO","laneSizes":[100,100],"pattern":"MSB_LSB_A","iterations":1}]}
+                # Format: {"method":"runSingleTest","params":[{"driver":"PARLIO","laneSizes":[100,100],"pattern":"MSB_LSB_A","iterations":1}]}
                 test_config = {
                     "driver": driver,
                     "laneSizes": lane_sizes,
                     "pattern": "MSB_LSB_A",  # Default pattern
                     "iterations": 1,  # Default iterations
                 }
-                rpc_command = {"function": "runSingleTest", "args": [test_config]}
+                rpc_command = {"method": "runSingleTest", "params": [test_config]}
                 rpc_commands_list.append(rpc_command)
 
     # Convert to JSON string
@@ -1395,14 +1400,14 @@ def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneralTypeIs
 
                 validation_errors = []
                 for i, cmd in enumerate(json_rpc_commands):
-                    method = cmd.get("function") or cmd.get("method")
+                    method = cmd.get("method")
                     if not method:
                         validation_errors.append(
                             f"Command {i + 1}: Missing 'method' or 'function' field"
                         )
                         continue
 
-                    args = cmd.get("args", [])
+                    args = cmd.get("params", [])
 
                     # Unwrap single-element arrays (RPC system does this automatically)
                     if isinstance(args, list) and len(args) == 1:
@@ -1455,15 +1460,15 @@ def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneralTypeIs
             )
             # Add setPins RPC command
             set_pins_cmd = {
-                "function": "setPins",
-                "args": [{"txPin": effective_tx_pin, "rxPin": effective_rx_pin}],
+                "method": "setPins",
+                "params": [{"txPin": effective_tx_pin, "rxPin": effective_rx_pin}],
             }
             json_rpc_commands.insert(0, set_pins_cmd)
 
         # Auto-discover pins if enabled and no CLI override
         elif args.auto_discover_pins:
             print("\n🔍 Auto-discovery enabled - searching for connected pins...")
-            success, discovered_tx, discovered_rx = run_pin_discovery(
+            success, discovered_tx, discovered_rx = await run_pin_discovery(
                 upload_port, use_pyserial=args.no_fbuild
             )
 
@@ -1499,7 +1504,7 @@ def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneralTypeIs
             pass  # Already printed skip message above
         elif pins_discovered:
             print("\n✅ Skipping GPIO pre-test (pins verified during discovery)")
-        elif not run_gpio_pretest(
+        elif not await run_gpio_pretest(
             upload_port,
             effective_tx_pin or PIN_TX,
             effective_rx_pin or PIN_RX,
@@ -1537,13 +1542,13 @@ def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneralTypeIs
                 client = RpcClient(
                     upload_port, timeout=10.0, use_pyserial=args.no_fbuild
                 )
-                client.connect(
+                await client.connect(
                     boot_wait=1.0
                 )  # Reduced from 3.0s since we already waited
                 print(f" {Fore.GREEN}✓{Style.RESET_ALL}")
 
                 print("   📡 Sending test command...", end="", flush=True)
-                response = client.send_and_match(
+                response = await client.send_and_match(
                     "testSimd", match_key="passed", retries=3
                 )
                 print(f" {Fore.GREEN}✓{Style.RESET_ALL}")
@@ -1574,7 +1579,7 @@ def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneralTypeIs
                 return 1
             finally:
                 if client is not None:
-                    client.close()
+                    await client.close()
 
         # ============================================================
         # CUSTOM SERIAL MONITORING - Stay connected throughout
@@ -2005,7 +2010,7 @@ def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneralTypeIs
 
 
 def main() -> int:
-    return run()
+    return asyncio.run(run())
 
 
 if __name__ == "__main__":

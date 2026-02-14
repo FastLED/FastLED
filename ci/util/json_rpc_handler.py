@@ -71,7 +71,7 @@ class JsonRpcHandler:
             First matching response object, or None if not found
         """
         for response in self.responses:
-            if response.get("function") == function_name:
+            if response.get("method") == function_name:
                 return response
         return None
 
@@ -84,7 +84,7 @@ class JsonRpcHandler:
         Returns:
             List of matching response objects
         """
-        return [r for r in self.responses if r.get("function") == function_name]
+        return [r for r in self.responses if r.get("method") == function_name]
 
     def clear(self) -> None:
         """Clear all stored responses."""
@@ -96,8 +96,8 @@ def parse_json_rpc_commands(json_rpc_arg: str | None) -> list[dict[str, Any]]:
     """Parse JSON-RPC commands from CLI argument.
 
     Supports three formats:
-    1. JSON string: '{"function":"ping","args":[]}'
-    2. JSON array: '[{"function":"ping"},{"function":"getConfig"}]'
+    1. JSON string: '{"method":"ping","params":[]}'
+    2. JSON array: '[{"method":"ping"},{"method":"getConfig"}]'
     3. File path: '@commands.json' or '@/path/to/commands.json'
 
     Args:
@@ -154,12 +154,12 @@ def parse_json_rpc_commands(json_rpc_arg: str | None) -> list[dict[str, Any]]:
     for i, cmd in enumerate(commands):
         if not isinstance(cmd, dict):
             raise ValueError(f"Command {i} must be an object, got {type(cmd).__name__}")
-        if "function" not in cmd:
-            raise ValueError(f"Command {i} missing required field 'function'")
+        if "method" not in cmd:
+            raise ValueError(f"Command {i} missing required field 'method'")
 
-        # Add default empty args if not provided
-        if "args" not in cmd:
-            cmd["args"] = []
+        # Add default empty params if not provided
+        if "params" not in cmd:
+            cmd["params"] = []
 
     return commands
 
