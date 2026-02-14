@@ -28,6 +28,18 @@
   #define FASTLED_X86_HAS_SSE2 0
 #endif
 
+// SSE4.1 intrinsics (available on x64 since ~2008: Intel Penryn, AMD Bulldozer)
+// __SSE4_1__ is set by GCC/Clang with -msse4.1+; __AVX__ implies SSE4.1 on all compilers
+#if defined(__SSE4_1__) || defined(__AVX__)
+  FL_DIAGNOSTIC_PUSH
+  FL_DIAGNOSTIC_IGNORE_C14_EXTENSIONS
+  #include <smmintrin.h>  // SSE4.1
+  FL_DIAGNOSTIC_POP
+  #define FASTLED_X86_HAS_SSE41 1
+#else
+  #define FASTLED_X86_HAS_SSE41 0
+#endif
+
 //==============================================================================
 // Platform Implementation Namespace
 //==============================================================================
@@ -236,38 +248,39 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sub_i32_4(simd_u32x4 a, simd_u32x4 b) no
 
 // Multiply i32 and return high 32 bits (for fixed-point Q16.16 math)
 // Result: ((i64)a * (i64)b) >> 16, for each of 4 lanes
-// Uses SSE2 unsigned multiply (_mm_mul_epu32) with signed correction:
-//   signed_result = unsigned_mulhi(a, b) - (a<0 ? b<<16 : 0) - (b<0 ? a<<16 : 0)
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
-    // Unsigned 32x32->64 multiply for even lanes (0, 2)
+#if FASTLED_X86_HAS_SSE41
+    // SSE4.1: signed 32x32->64 multiply eliminates the correction block (8 vs 14 ops)
+    __m128i prod02 = _mm_mul_epi32(a, b);
+    __m128i a_odd = _mm_srli_si128(a, 4);
+    __m128i b_odd = _mm_srli_si128(b, 4);
+    __m128i prod13 = _mm_mul_epi32(a_odd, b_odd);
+    // Logical right shift is correct here: we extract low 32 bits of the 64-bit
+    // result, so logical vs arithmetic only differs in bits 48-63 (above our window).
+    __m128i sh02 = _mm_srli_epi64(prod02, 16);
+    __m128i sh13 = _mm_srli_epi64(prod13, 16);
+    // Pack: sh02=[r0, ?, r2, ?], align sh13 to [0, r1, ?, r3], then blend
+    __m128i sh13_aligned = _mm_slli_si128(sh13, 4);
+    return _mm_blend_epi16(sh02, sh13_aligned, 0xCC);
+#else
+    // SSE2 fallback: unsigned multiply with signed correction
     __m128i prod02 = _mm_mul_epu32(a, b);
-    // Shift odd lanes (1, 3) into even positions and multiply
     __m128i a_odd = _mm_srli_si128(a, 4);
     __m128i b_odd = _mm_srli_si128(b, 4);
     __m128i prod13 = _mm_mul_epu32(a_odd, b_odd);
-
-    // Logical right shift 64-bit products by 16
     __m128i sh02 = _mm_srli_epi64(prod02, 16);
     __m128i sh13 = _mm_srli_epi64(prod13, 16);
-
-    // Pack low 32 bits of each 64-bit lane into [r0, r1, r2, r3]
-    // sh02 as 4x32: [lo0, hi0, lo2, hi2] -> we want lo0, lo2
-    // sh13 as 4x32: [lo1, hi1, lo3, hi3] -> we want lo1, lo3
-    __m128i p02 = _mm_shuffle_epi32(sh02, _MM_SHUFFLE(2, 0, 2, 0)); // [lo0, lo2, lo0, lo2]
-    __m128i p13 = _mm_shuffle_epi32(sh13, _MM_SHUFFLE(2, 0, 2, 0)); // [lo1, lo3, lo1, lo3]
-    __m128i unsigned_result = _mm_unpacklo_epi32(p02, p13);          // [lo0, lo1, lo2, lo3]
-
-    // Signed correction: when a < 0, unsigned product has excess b*2^32,
-    // which after >>16 becomes b<<16. Same for b < 0.
-    __m128i sign_a = _mm_srai_epi32(a, 31); // 0xFFFFFFFF if a<0, else 0
-    __m128i sign_b = _mm_srai_epi32(b, 31); // 0xFFFFFFFF if b<0, else 0
-    __m128i b_shl16 = _mm_slli_epi32(b, 16);
-    __m128i a_shl16 = _mm_slli_epi32(a, 16);
-    __m128i corr_a = _mm_and_si128(sign_a, b_shl16); // b<<16 where a<0
-    __m128i corr_b = _mm_and_si128(sign_b, a_shl16); // a<<16 where b<0
-    __m128i correction = _mm_add_epi32(corr_a, corr_b);
-
-    return _mm_sub_epi32(unsigned_result, correction);
+    __m128i p02 = _mm_shuffle_epi32(sh02, _MM_SHUFFLE(2, 0, 2, 0));
+    __m128i p13 = _mm_shuffle_epi32(sh13, _MM_SHUFFLE(2, 0, 2, 0));
+    __m128i unsigned_result = _mm_unpacklo_epi32(p02, p13);
+    // Signed correction: unsigned product has excess b*2^32 when a<0 (and vice versa),
+    // which after >>16 becomes b<<16.
+    __m128i sign_a = _mm_srai_epi32(a, 31);
+    __m128i sign_b = _mm_srai_epi32(b, 31);
+    __m128i corr_a = _mm_and_si128(sign_a, _mm_slli_epi32(b, 16));
+    __m128i corr_b = _mm_and_si128(sign_b, _mm_slli_epi32(a, 16));
+    return _mm_sub_epi32(unsigned_result, _mm_add_epi32(corr_a, corr_b));
+#endif
 }
 
 // Shift right logical (zero-fill) - for unsigned angle decomposition
