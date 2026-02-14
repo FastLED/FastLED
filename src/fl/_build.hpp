@@ -34,6 +34,7 @@
 #include "fl/line_simplification.cpp.hpp"
 #include "fl/log.cpp.hpp"
 #include "fl/memfill.cpp.hpp"
+#include "fl/memory.cpp.hpp"
 #include "fl/noise.cpp.hpp"
 #include "fl/noise_woryley.cpp.hpp"
 #include "fl/ota.cpp.hpp"

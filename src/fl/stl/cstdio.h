@@ -3,7 +3,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/string.h"
-#include "fl/stl/time.h"  // For fl::millis()
+#include "fl/stl/chrono.h"  // IWYU pragma: keep (for fl::millis())
 
 #ifdef FASTLED_TESTING
 #include "fl/stl/function.h"

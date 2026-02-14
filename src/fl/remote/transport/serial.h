@@ -12,7 +12,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/function.h"
 #include "fl/stl/cstdio.h"  // For fl::available, fl::read, fl::print, fl::println
-#include "fl/stl/time.h"     // For fl::millis()
+#include "fl/stl/chrono.h"   // For fl::millis()
 
 // Forward declare delay to avoid Arduino conflict
 namespace fl {

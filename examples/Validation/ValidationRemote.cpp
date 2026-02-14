@@ -18,6 +18,7 @@
 #include "fl/stl/optional.h"
 #include "fl/json.h"
 #include "fl/simd.h"
+#include "fl/memory.h"
 #include <Arduino.h>
 
 // ============================================================================
@@ -89,7 +90,11 @@ fl::Json makeResponse(bool success, ReturnCode returnCode, const char* message,
 fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     Serial.println("[DEBUG] runSingleTest called");
     Serial.print("[DEBUG] Free heap: ");
-    Serial.println(ESP.getFreeHeap());
+    fl::HeapInfo heap = fl::getFreeHeap();
+    Serial.print(heap.free_sram);
+    Serial.print(" SRAM, ");
+    Serial.print(heap.free_psram);
+    Serial.println(" PSRAM");
     Serial.flush();
 
     fl::Json response = fl::Json::object();
@@ -239,7 +244,11 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     Serial.print("[DEBUG] runSingleTest starting - driver: ");
     Serial.println(driver_name.c_str());
     Serial.print("[DEBUG] Free heap: ");
-    Serial.println(ESP.getFreeHeap());
+    fl::HeapInfo heap = fl::getFreeHeap();
+    Serial.print(heap.free_sram);
+    Serial.print(" SRAM, ");
+    Serial.print(heap.free_psram);
+    Serial.println(" PSRAM");
     Serial.flush();
 
     uint32_t start_ms = millis();
@@ -272,7 +281,11 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     Serial.print("[DEBUG] Allocating LED arrays - lanes: ");
     Serial.println(lane_sizes.size());
     Serial.print("[DEBUG] Free heap: ");
-    Serial.println(ESP.getFreeHeap());
+    fl::HeapInfo heap = fl::getFreeHeap();
+    Serial.print(heap.free_sram);
+    Serial.print(" SRAM, ");
+    Serial.print(heap.free_psram);
+    Serial.println(" PSRAM");
     Serial.flush();
 
     fl::vector<fl::unique_ptr<fl::vector<CRGB>>> led_arrays;
@@ -285,7 +298,11 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         Serial.print(lane_sizes[i]);
         Serial.println(" LEDs");
         Serial.print("[DEBUG] Free heap: ");
-        Serial.println(ESP.getFreeHeap());
+        fl::HeapInfo heap = fl::getFreeHeap();
+    Serial.print(heap.free_sram);
+    Serial.print(" SRAM, ");
+    Serial.print(heap.free_psram);
+    Serial.println(" PSRAM");
         Serial.flush();
 
         // Allocate LED array
@@ -310,18 +327,30 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         Serial.print("[DEBUG] Lane ");
         Serial.print(i);
         Serial.print(" complete, free heap: ");
-        Serial.println(ESP.getFreeHeap());
+        fl::HeapInfo heap = fl::getFreeHeap();
+    Serial.print(heap.free_sram);
+    Serial.print(" SRAM, ");
+    Serial.print(heap.free_psram);
+    Serial.println(" PSRAM");
         Serial.flush();
     }
 
     Serial.print("[DEBUG] All lanes allocated, free heap: ");
-    Serial.println(ESP.getFreeHeap());
+    fl::HeapInfo heap = fl::getFreeHeap();
+    Serial.print(heap.free_sram);
+    Serial.print(" SRAM, ");
+    Serial.print(heap.free_psram);
+    Serial.println(" PSRAM");
     Serial.flush();
 
     // Create temporary RX channel if pinRx differs from default
     Serial.println("[DEBUG] Setting up RX channel");
     Serial.print("[DEBUG] Free heap: ");
-    Serial.println(ESP.getFreeHeap());
+    fl::HeapInfo heap = fl::getFreeHeap();
+    Serial.print(heap.free_sram);
+    Serial.print(" SRAM, ");
+    Serial.print(heap.free_psram);
+    Serial.println(" PSRAM");
     Serial.flush();
 
     fl::shared_ptr<fl::RxDevice> rx_channel_to_use = mState->rx_channel;
@@ -345,7 +374,11 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     }
 
     Serial.print("[DEBUG] Free heap after RX: ");
-    Serial.println(ESP.getFreeHeap());
+    fl::HeapInfo heap = fl::getFreeHeap();
+    Serial.print(heap.free_sram);
+    Serial.print(" SRAM, ");
+    Serial.print(heap.free_psram);
+    Serial.println(" PSRAM");
     Serial.flush();
 
     // Create validation configuration
@@ -363,14 +396,22 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     );
 
     Serial.print("[DEBUG] Validation config created, free heap: ");
-    Serial.println(ESP.getFreeHeap());
+    fl::HeapInfo heap = fl::getFreeHeap();
+    Serial.print(heap.free_sram);
+    Serial.print(" SRAM, ");
+    Serial.print(heap.free_psram);
+    Serial.println(" PSRAM");
     Serial.flush();
 
     // Run test with debug output suppressed
     Serial.print("[DEBUG] Starting test - iterations: ");
     Serial.println(iterations);
     Serial.print("[DEBUG] Free heap: ");
-    Serial.println(ESP.getFreeHeap());
+    fl::HeapInfo heap = fl::getFreeHeap();
+    Serial.print(heap.free_sram);
+    Serial.print(" SRAM, ");
+    Serial.print(heap.free_psram);
+    Serial.println(" PSRAM");
     Serial.flush();
 
     int total_tests = 0;
@@ -389,7 +430,11 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         int warmup_total = 0, warmup_passed = 0;
         validateChipsetTiming(validation_config, warmup_total, warmup_passed);
         Serial.print("[DEBUG] Warmup done, heap: ");
-        Serial.println(ESP.getFreeHeap());
+        fl::HeapInfo heap = fl::getFreeHeap();
+    Serial.print(heap.free_sram);
+    Serial.print(" SRAM, ");
+    Serial.print(heap.free_psram);
+    Serial.println(" PSRAM");
         Serial.flush();
 
         // Run actual test iterations
@@ -397,7 +442,11 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
             Serial.print("[DEBUG] Iteration ");
             Serial.println(iter + 1);
             Serial.print("[DEBUG] Free heap: ");
-            Serial.println(ESP.getFreeHeap());
+            fl::HeapInfo heap = fl::getFreeHeap();
+    Serial.print(heap.free_sram);
+    Serial.print(" SRAM, ");
+    Serial.print(heap.free_psram);
+    Serial.println(" PSRAM");
             Serial.flush();
 
             int iter_total = 0, iter_passed = 0;
@@ -417,7 +466,11 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     Serial.print("[DEBUG] Test complete - passed: ");
     Serial.println(passed);
     Serial.print("[DEBUG] Free heap: ");
-    Serial.println(ESP.getFreeHeap());
+    fl::HeapInfo heap = fl::getFreeHeap();
+    Serial.print(heap.free_sram);
+    Serial.print(" SRAM, ");
+    Serial.print(heap.free_psram);
+    Serial.println(" PSRAM");
     Serial.flush();
 
     uint32_t duration_ms = millis() - start_ms;
@@ -426,7 +479,11 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
 
     Serial.println("[DEBUG] Building response");
     Serial.print("[DEBUG] Free heap: ");
-    Serial.println(ESP.getFreeHeap());
+    fl::HeapInfo heap = fl::getFreeHeap();
+    Serial.print(heap.free_sram);
+    Serial.print(" SRAM, ");
+    Serial.print(heap.free_psram);
+    Serial.println(" PSRAM");
     Serial.flush();
 
     response.set("success", true);
@@ -458,7 +515,11 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     }
 
     Serial.print("[DEBUG] Response built, heap: ");
-    Serial.println(ESP.getFreeHeap());
+    fl::HeapInfo heap = fl::getFreeHeap();
+    Serial.print(heap.free_sram);
+    Serial.print(" SRAM, ");
+    Serial.print(heap.free_psram);
+    Serial.println(" PSRAM");
     Serial.println("[DEBUG] Returning response");
     Serial.flush();
 
