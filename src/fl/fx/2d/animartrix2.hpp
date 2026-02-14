@@ -129,7 +129,7 @@ static const Animartrix2Entry ANIMATION2_TABLE[] = {
     {ANIM2_DISTANCE_EXPERIMENT, "DISTANCE_EXPERIMENT", &animartrix2_detail::Distance_Experiment},
     {ANIM2_CENTER_FIELD, "CENTER_FIELD", &animartrix2_detail::Center_Field},
     {ANIM2_WAVES, "WAVES", &animartrix2_detail::Waves},
-    {ANIM2_CHASING_SPIRALS, "CHASING_SPIRALS", &animartrix2_detail::q31::Chasing_Spirals_Q31_Batch4}, // Optimized: 4-pixel batching
+    {ANIM2_CHASING_SPIRALS, "CHASING_SPIRALS", &animartrix2_detail::q31::Chasing_Spirals_Q31_SIMD}, // Optimized: SIMD sincos32
     {ANIM2_ROTATING_BLOB, "ROTATING_BLOB", &animartrix2_detail::Rotating_Blob},
     {ANIM2_RINGS, "RINGS", &animartrix2_detail::Rings},
     {ANIM2_COMPLEX_KALEIDO, "COMPLEX_KALEIDO", &animartrix2_detail::Complex_Kaleido},

@@ -112,8 +112,9 @@ elif build_mode == 'profile'
   # Profile mode: Size-optimized with debug symbols for callgrind profiling
   # Matches embedded target optimization (-Os) while preserving function names
   # -gdwarf-4: Force DWARF4 for compatibility with Valgrind 3.19 (Debian Bookworm)
-  base_optimization = base_common + [
-    '-Os',                      # Size optimization (matches embedded targets)
+  # Stack trace flags: Preserve frame pointers for accurate callgrind attribution
+  base_optimization = base_common + stack_trace_flags + [
+    '-O1',                      # Light optimization (better than -Os for callgrind attribution)
     '-g',                       # Standard debug symbols (function names + lines)
     '-gdwarf-4',                # DWARF4 format (compatible with Valgrind 3.19)
   ]

@@ -152,6 +152,59 @@ struct perlin_s16x16 {
         return result >> (HP_BITS - fl::s16x16::FRAC_BITS);
     }
 
+    // SIMD batch version: Process 4 Perlin evaluations in parallel
+    // Optimizes throughput by batching coordinate/fade/lerp operations
+    static inline void pnoise2d_raw_simd4(
+        const fl::i32 nx[4], const fl::i32 ny[4],
+        const fl::i32 *fade_lut, const fl::u8 *perm,
+        fl::i32 out[4])
+    {
+        // Extract integer floor and fractional parts for all 4 pixels
+        int X[4], Y[4];
+        fl::i32 x_frac[4], y_frac[4];
+        for (int i = 0; i < 4; i++) {
+            floor_frac(nx[i], X[i], x_frac[i]);
+            floor_frac(ny[i], Y[i], y_frac[i]);
+            X[i] &= 255;
+            Y[i] &= 255;
+        }
+
+        // Vectorized fade: Process 4 u values and 4 v values
+        fl::i32 u[4], v[4];
+        for (int i = 0; i < 4; i++) {
+            u[i] = fade(x_frac[i], fade_lut);
+            v[i] = fade(y_frac[i], fade_lut);
+        }
+
+        // Permutation lookups (scalar, memory-bound)
+        int A[4], AA[4], AB[4], B[4], BA[4], BB[4];
+        for (int i = 0; i < 4; i++) {
+            A[i]  = perm[X[i] & 255]       + Y[i];
+            AA[i] = perm[A[i] & 255];
+            AB[i] = perm[(A[i] + 1) & 255];
+            B[i]  = perm[(X[i] + 1) & 255] + Y[i];
+            BA[i] = perm[B[i] & 255];
+            BB[i] = perm[(B[i] + 1) & 255];
+        }
+
+        // Vectorized gradient computations (4x in parallel)
+        fl::i32 g_aa[4], g_ba[4], g_ab[4], g_bb[4];
+        for (int i = 0; i < 4; i++) {
+            g_aa[i] = grad(perm[AA[i] & 255], x_frac[i],           y_frac[i]);
+            g_ba[i] = grad(perm[BA[i] & 255], x_frac[i] - HP_ONE, y_frac[i]);
+            g_ab[i] = grad(perm[AB[i] & 255], x_frac[i],           y_frac[i] - HP_ONE);
+            g_bb[i] = grad(perm[BB[i] & 255], x_frac[i] - HP_ONE, y_frac[i] - HP_ONE);
+        }
+
+        // Vectorized lerp: 3 levels of interpolation for each pixel
+        fl::i32 lerp1[4], lerp2[4];
+        for (int i = 0; i < 4; i++) {
+            lerp1[i] = lerp(u[i], g_aa[i], g_ba[i]);
+            lerp2[i] = lerp(u[i], g_ab[i], g_bb[i]);
+            out[i] = lerp(v[i], lerp1[i], lerp2[i]) >> (HP_BITS - fl::s16x16::FRAC_BITS);
+        }
+    }
+
   private:
     static constexpr int FP_BITS = fl::s16x16::FRAC_BITS;
     static constexpr fl::i32 FP_ONE = 1 << FP_BITS;

@@ -491,7 +491,40 @@ ls -lh /fastled/callgrind.out
                 if result.returncode == 0:
                     print("\n✓ Callgrind analysis complete")
                     print("📊 Callgrind output: callgrind.out")
-                    print("   View with: callgrind_annotate callgrind.out")
+
+                    # Run callgrind_annotate to parse results
+                    print("\n📊 Parsing callgrind results...")
+                    annotate_result = subprocess.run(
+                        [
+                            "docker",
+                            "run",
+                            "--rm",
+                            "-v",
+                            f"{Path.cwd().as_posix()}:/fastled",
+                            "fastled-unit-tests",
+                            "callgrind_annotate",
+                            "--auto=yes",
+                            "/fastled/callgrind.out",
+                        ],
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                    )
+
+                    if annotate_result.returncode == 0:
+                        # Display first 100 lines of annotation
+                        lines = annotate_result.stdout.splitlines()
+                        display_lines = min(100, len(lines))
+                        print("\n".join(lines[:display_lines]))
+                        if len(lines) > 100:
+                            print(f"\n... ({len(lines) - 100} more lines)")
+                            print(
+                                "   View full output: callgrind_annotate --auto=yes callgrind.out"
+                            )
+                    else:
+                        print(f"⚠️  callgrind_annotate failed: {annotate_result.stderr}")
+                        print("   View manually with: callgrind_annotate callgrind.out")
+
                     return True
                 else:
                     print(f"\n⚠️  Callgrind exited with code {result.returncode}")

@@ -4,13 +4,9 @@
 //
 // Usage:
 //   ./profile_chasing_spirals                   # Profile all variants
-//   ./profile_chasing_spirals float             # Profile float path only
-//   ./profile_chasing_spirals q31               # Profile Q31 original only
-//   ./profile_chasing_spirals batch4            # Profile Batch4 only
-//   ./profile_chasing_spirals batch4_color      # Profile Batch4 color-grouped only
-//   ./profile_chasing_spirals batch8            # Profile Batch8 only
-//   ./profile_chasing_spirals q16               # Profile Q16 variant only
-//   ./profile_chasing_spirals i16               # Profile i16-optimized variant only
+//   ./profile_chasing_spirals float             # Profile float (Animartrix) only
+//   ./profile_chasing_spirals q31               # Profile Q31 (scalar fixed-point) only
+//   ./profile_chasing_spirals simd              # Profile Q31_SIMD (vectorized) only
 
 #include "FastLED.h"
 #include "fl/fx/2d/animartrix.hpp"
@@ -64,58 +60,34 @@ void renderQ31_Direct(void (*func)(animartrix2_detail::Context&),
 int main(int argc, char *argv[]) {
     bool do_float = true;
     bool do_q31 = true;
-    bool do_batch4 = true;
-    bool do_batch4_color = true;
-    bool do_batch8 = true;
-    bool do_q16 = true;
-    bool do_i16 = true;
+    bool do_q31_simd = true;
     bool json_output = false;  // Profile framework JSON output mode
 
     if (argc > 1) {
         // Check for "baseline" argument (profile framework mode)
         if (fl::strcmp(argv[1], "baseline") == 0) {
             json_output = true;
-            // Run best performing variant (Q31 Batch8) for baseline measurements
+            // Run best performing variant (Q31_SIMD) for baseline measurements
             do_float = false;
             do_q31 = false;
-            do_batch4 = false;
-            do_batch4_color = false;
-            do_batch8 = true;  // Best performance variant
-            do_q16 = false;
-            do_i16 = false;
+            do_q31_simd = true;  // Best performance variant
         } else {
             // Disable all by default if specific variant requested
             do_float = false;
             do_q31 = false;
-            do_batch4 = false;
-            do_batch4_color = false;
-            do_batch8 = false;
-            do_q16 = false;
-            do_i16 = false;
+            do_q31_simd = false;
 
             if (fl::strcmp(argv[1], "float") == 0) {
                 do_float = true;
             } else if (fl::strcmp(argv[1], "q31") == 0) {
                 do_q31 = true;
-            } else if (fl::strcmp(argv[1], "batch4") == 0) {
-                do_batch4 = true;
-            } else if (fl::strcmp(argv[1], "batch4_color") == 0) {
-                do_batch4_color = true;
-            } else if (fl::strcmp(argv[1], "batch8") == 0) {
-                do_batch8 = true;
-            } else if (fl::strcmp(argv[1], "q16") == 0) {
-                do_q16 = true;
-            } else if (fl::strcmp(argv[1], "i16") == 0) {
-                do_i16 = true;
+            } else if (fl::strcmp(argv[1], "simd") == 0 || fl::strcmp(argv[1], "q31_simd") == 0) {
+                do_q31_simd = true;
             } else {
                 // Unknown argument - enable all
                 do_float = true;
                 do_q31 = true;
-                do_batch4 = true;
-                do_batch4_color = true;
-                do_batch8 = true;
-                do_q16 = true;
-                do_i16 = true;
+                do_q31_simd = true;
             }
         }
     }
@@ -175,9 +147,9 @@ int main(int argc, char *argv[]) {
     }
 
     // ========================
-    // Q31 Batch4 (pixel order)
+    // Q31 SIMD (vectorized sincos)
     // ========================
-    if (do_batch4) {
+    if (do_q31_simd) {
         XYMap xy = XYMap::constructRectangularGrid(W, H);
 
         // Create context
@@ -192,148 +164,23 @@ int main(int argc, char *argv[]) {
         animartrix2_detail::init(ctx, W, H);
 
         // Warmup (not profiled)
-        renderQ31_Direct(&animartrix2_detail::q31::Chasing_Spirals_Q31_Batch4, ctx, WARMUP_FRAMES, 0);
+        renderQ31_Direct(&animartrix2_detail::q31::Chasing_Spirals_Q31_SIMD, ctx, WARMUP_FRAMES, 0);
 
         // Profile
         u32 t0 = ::micros();
-        renderQ31_Direct(&animartrix2_detail::q31::Chasing_Spirals_Q31_Batch4, ctx, PROFILE_FRAMES, WARMUP_FRAMES);
-        u32 t1 = ::micros();
-
-        u32 elapsed_us = t1 - t0;
-        printf("Q31 Batch4:         %d frames in %lu us (%.1f us/frame)\n",
-               PROFILE_FRAMES, static_cast<unsigned long>(elapsed_us),
-               static_cast<double>(elapsed_us) / PROFILE_FRAMES);
-    }
-
-    // ========================
-    // Q31 Batch4 Color-Grouped
-    // ========================
-    if (do_batch4_color) {
-        XYMap xy = XYMap::constructRectangularGrid(W, H);
-
-        // Create context
-        animartrix2_detail::Context ctx;
-        ctx.leds = leds;
-        ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
-            XYMap *map = static_cast<XYMap*>(userData);
-            return map->mapToIndex(x, y);
-        };
-        ctx.xyMapUserData = &xy;
-
-        animartrix2_detail::init(ctx, W, H);
-
-        // Warmup (not profiled)
-        renderQ31_Direct(&animartrix2_detail::q31::Chasing_Spirals_Q31_Batch4_ColorGrouped, ctx, WARMUP_FRAMES, 0);
-
-        // Profile
-        u32 t0 = ::micros();
-        renderQ31_Direct(&animartrix2_detail::q31::Chasing_Spirals_Q31_Batch4_ColorGrouped, ctx, PROFILE_FRAMES, WARMUP_FRAMES);
-        u32 t1 = ::micros();
-
-        u32 elapsed_us = t1 - t0;
-        printf("Q31 Batch4 Color:   %d frames in %lu us (%.1f us/frame)\n",
-               PROFILE_FRAMES, static_cast<unsigned long>(elapsed_us),
-               static_cast<double>(elapsed_us) / PROFILE_FRAMES);
-    }
-
-    // ========================
-    // Q31 Batch8
-    // ========================
-    if (do_batch8) {
-        XYMap xy = XYMap::constructRectangularGrid(W, H);
-
-        // Create context
-        animartrix2_detail::Context ctx;
-        ctx.leds = leds;
-        ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
-            XYMap *map = static_cast<XYMap*>(userData);
-            return map->mapToIndex(x, y);
-        };
-        ctx.xyMapUserData = &xy;
-
-        animartrix2_detail::init(ctx, W, H);
-
-        // Warmup (not profiled)
-        renderQ31_Direct(&animartrix2_detail::q31::Chasing_Spirals_Q31_Batch8, ctx, WARMUP_FRAMES, 0);
-
-        // Profile
-        u32 t0 = ::micros();
-        renderQ31_Direct(&animartrix2_detail::q31::Chasing_Spirals_Q31_Batch8, ctx, PROFILE_FRAMES, WARMUP_FRAMES);
+        renderQ31_Direct(&animartrix2_detail::q31::Chasing_Spirals_Q31_SIMD, ctx, PROFILE_FRAMES, WARMUP_FRAMES);
         u32 t1 = ::micros();
 
         u32 elapsed_us = t1 - t0;
 
         if (json_output) {
-            ProfileResultBuilder::print_result("q31_batch8", "chasing_spirals",
+            ProfileResultBuilder::print_result("q31_simd", "chasing_spirals",
                                               PROFILE_FRAMES, elapsed_us);
         } else {
-            // Human-readable output
-            printf("Q31 Batch8:         %d frames in %lu us (%.1f us/frame)\n",
+            printf("Q31 SIMD:           %d frames in %lu us (%.1f us/frame)\n",
                    PROFILE_FRAMES, static_cast<unsigned long>(elapsed_us),
                    static_cast<double>(elapsed_us) / PROFILE_FRAMES);
         }
-    }
-
-    // ========================
-    // Q16 Batch4 Color-Grouped
-    // ========================
-    if (do_q16) {
-        XYMap xy = XYMap::constructRectangularGrid(W, H);
-
-        // Create context
-        animartrix2_detail::Context ctx;
-        ctx.leds = leds;
-        ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
-            XYMap *map = static_cast<XYMap*>(userData);
-            return map->mapToIndex(x, y);
-        };
-        ctx.xyMapUserData = &xy;
-
-        animartrix2_detail::init(ctx, W, H);
-
-        // Warmup (not profiled)
-        renderQ31_Direct(&animartrix2_detail::q16::Chasing_Spirals_Q16_Batch4_ColorGrouped, ctx, WARMUP_FRAMES, 0);
-
-        // Profile
-        u32 t0 = ::micros();
-        renderQ31_Direct(&animartrix2_detail::q16::Chasing_Spirals_Q16_Batch4_ColorGrouped, ctx, PROFILE_FRAMES, WARMUP_FRAMES);
-        u32 t1 = ::micros();
-
-        u32 elapsed_us = t1 - t0;
-        printf("Q16 Batch4 Color:   %d frames in %lu us (%.1f us/frame)\n",
-               PROFILE_FRAMES, static_cast<unsigned long>(elapsed_us),
-               static_cast<double>(elapsed_us) / PROFILE_FRAMES);
-    }
-
-    // ========================
-    // i16-optimized Batch4 Color-Grouped
-    // ========================
-    if (do_i16) {
-        XYMap xy = XYMap::constructRectangularGrid(W, H);
-
-        // Create context
-        animartrix2_detail::Context ctx;
-        ctx.leds = leds;
-        ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
-            XYMap *map = static_cast<XYMap*>(userData);
-            return map->mapToIndex(x, y);
-        };
-        ctx.xyMapUserData = &xy;
-
-        animartrix2_detail::init(ctx, W, H);
-
-        // Warmup (not profiled)
-        renderQ31_Direct(&animartrix2_detail::i16_opt::Chasing_Spirals_i16_Batch4_ColorGrouped, ctx, WARMUP_FRAMES, 0);
-
-        // Profile
-        u32 t0 = ::micros();
-        renderQ31_Direct(&animartrix2_detail::i16_opt::Chasing_Spirals_i16_Batch4_ColorGrouped, ctx, PROFILE_FRAMES, WARMUP_FRAMES);
-        u32 t1 = ::micros();
-
-        u32 elapsed_us = t1 - t0;
-        printf("i16 Batch4 Color:   %d frames in %lu us (%.1f us/frame)\n",
-               PROFILE_FRAMES, static_cast<unsigned long>(elapsed_us),
-               static_cast<double>(elapsed_us) / PROFILE_FRAMES);
     }
 
     return 0;
