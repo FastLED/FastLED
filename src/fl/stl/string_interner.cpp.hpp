@@ -16,35 +16,26 @@ StringInterner::~StringInterner() {
     clear();
 }
 
-fl::string StringInterner::intern(const char* str) {
-    if (!str) return fl::string();
-    return intern(str, fl::strlen(str));
-}
-
-fl::string StringInterner::intern(const char* str, fl::size len) {
-    if (!str || len == 0) return fl::string();
+fl::string StringInterner::intern(const fl::string& str) {
+    if (str.empty()) return fl::string();
 
     // Linear search - simple and works reliably for small N
     // String interners typically have <1000 entries, so O(N) is acceptable
     for (const fl::string& entry : mEntries) {
-        if (entry.size() == len &&
-            fl::memcmp(entry.c_str(), str, len) == 0) {
+        if (entry.size() == str.size() &&
+            fl::memcmp(entry.c_str(), str.c_str(), str.size()) == 0) {
             return entry;  // Return existing (cheap copy via shared_ptr)
         }
     }
 
     // Use interned() to force heap allocation for stable pointers
     // This ensures all copies share the same StringHolder via shared_ptr
-    fl::string interned = fl::string::interned(str, len);
+    fl::string interned = fl::string::interned(str.c_str(), str.size());
 
     // Add to vector
     mEntries.push_back(interned);
 
     return interned;
-}
-
-fl::string StringInterner::intern(const string_view& sv) {
-    return intern(sv.data(), sv.size());
 }
 
 fl::string StringInterner::get(fl::size index) const {
@@ -88,13 +79,9 @@ StringInterner& global_interner() {
     return Singleton<StringInterner>::instance();
 }
 
-// Convenience functions for global interning
-fl::string intern(const char* str) {
+// Convenience function for global interning
+fl::string intern(const fl::string& str) {
     return global_interner().intern(str);
-}
-
-fl::string intern(const string_view& sv) {
-    return global_interner().intern(sv);
 }
 
 } // namespace fl

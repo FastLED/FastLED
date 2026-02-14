@@ -9,13 +9,13 @@
 // Copying interned strings is cheap (shared_ptr increment).
 // Outstanding strings survive interner.clear() due to reference counting.
 
-#include "fl/stl/cstring.h"
-#include "fl/stl/vector.h"
-#include "fl/string_view.h"
 #include "fl/int.h"
-#include "fl/stl/string.h"
+#include "fl/stl/vector.h"
 
 namespace fl {
+
+class string;
+class string_view;
 
 // StringInterner: Manages a pool of unique strings as fl::string instances.
 // Interned strings are heap-allocated and reference-counted, making copies cheap.
@@ -29,14 +29,7 @@ class StringInterner {
     // If the string already exists, returns the existing fl::string (cheap copy).
     // The returned fl::string is reference-counted via shared_ptr.
     // All interned strings use heap allocation to ensure stable pointers.
-    fl::string intern(const char* str);
-    fl::string intern(const char* str, fl::size len);
-    fl::string intern(const string_view& sv);
-
-    template <fl::size SIZE>
-    fl::string intern(const StrN<SIZE>& str) {
-        return intern(str.c_str(), str.size());
-    }
+    fl::string intern(const fl::string& str);
 
     // Get an interned string by index (O(1) lookup)
     // Returns empty fl::string if index is out of bounds
@@ -69,10 +62,9 @@ class StringInterner {
 // Usage: fl::global_interner().intern("my string")
 StringInterner& global_interner();
 
-// Convenience functions for global interning
+// Convenience function for global interning
 // Returns heap-allocated fl::string with stable pointer (cheap to copy via shared_ptr)
 // NOTE: Input is always deep-copied to ensure memory safety
-fl::string intern(const char* str);
-fl::string intern(const string_view& sv);
+fl::string intern(const fl::string& str);
 
 } // namespace fl
