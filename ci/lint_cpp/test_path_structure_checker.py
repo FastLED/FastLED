@@ -79,9 +79,9 @@ class TestPathStructureChecker(FileContentChecker):
             if expected_source_base.with_suffix(ext).exists():
                 return []
 
-        # Check if file has "// standalone test" comment in first few lines
+        # Check if file has "// ok standalone" comment in first few lines
         for line in file_content.lines[:5]:  # Check first 5 lines
-            if "// standalone test" in line.lower():
+            if "// ok standalone" in line.lower():
                 return []  # Exempt from path matching requirement
 
         # Source file doesn't exist at expected location
@@ -92,8 +92,13 @@ class TestPathStructureChecker(FileContentChecker):
             f"Test file has no corresponding source file at matching path. "
             f"Test is at '{rel_current_test}' but no source file found at "
             f"'src/{rel_from_tests.with_suffix('')}.{{h,cpp,cpp.hpp}}'. "
-            f"Either move the test to match an existing source file location, "
-            f"or add '// standalone test' comment if this test doesn't correspond to a single source file."
+            f"\n\n"
+            f"REQUIRED ACTIONS (in order of preference):\n"
+            f"  1. RENAME the test to match the source file it's testing (best option)\n"
+            f"  2. MERGE this test into an existing test file if it tests the same source\n"
+            f"  3. MOVE to 'tests/misc/{test_path.name}' if this truly doesn't test a specific source file\n"
+            f"  4. ONLY as a last resort: add '// ok standalone' comment at the top if this absolutely cannot be organized otherwise\n\n"
+            f"Test organization should mirror source organization for maintainability."
         )
 
         self.violations[file_content.path] = [(1, message)]
