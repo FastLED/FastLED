@@ -414,9 +414,35 @@ FL_TEST_CASE("Type aliases and compatibility") {
     hs.insert(123);
     FL_REQUIRE_EQ(hs.size(), 1u);
     FL_REQUIRE(hs.find(123) != hs.end());
-    
+
     // Test that it behaves the same as unordered_set
     fl::unordered_set<int> HS;
     HS.insert(123);
     FL_REQUIRE_EQ(HS.size(), hs.size());
+}
+
+FL_TEST_CASE("Iterator operator*() returns reference to set data, not temporary") {
+    // Regression test: Iterator must return reference to data in the set,
+    // not a temporary copy. This ensures pointers to dereferenced iterators
+    // remain valid as long as the set is alive.
+
+    fl::unordered_set<fl::string> set;
+    set.insert("one");
+    set.insert("two");
+    set.insert("three");
+
+    // Store pointer to the first key
+    const fl::string* ptr = nullptr;
+
+    for (const auto& key : set) {
+        // key should be a reference to data in the set, not a temporary
+        // Taking its address should be safe as long as set is alive
+        ptr = &key;
+        break;  // Just grab the first one
+    }
+
+    // Access the pointer after the loop (set is still alive)
+    // This should work correctly without ASAN errors
+    FL_REQUIRE(ptr != nullptr);
+    FL_REQUIRE(!ptr->empty());  // key is valid
 }

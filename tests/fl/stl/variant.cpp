@@ -3,7 +3,6 @@
 #include "fl/stl/variant.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/function.h"
-#include "fl/stl/new.h"
 #include "test.h"
 #include "fl/hash.h"
 #include "fl/log.h"
@@ -173,7 +172,7 @@ FL_TEST_CASE("HashMap iterator-based erase") {
     FL_CHECK_EQ(it->second, "three");
     
     // Erase using iterator - should return iterator to next element
-    auto next_it = map.erase(it);
+    map.erase(it);
     FL_CHECK_EQ(map.size(), 4);
     FL_CHECK(map.find(3) == map.end()); // Element should be gone
     

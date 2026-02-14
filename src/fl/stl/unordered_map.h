@@ -9,23 +9,22 @@ This will keep the memory from growing during multiple inserts
 and removals.
 */
 
+#include "fl/align.h"
+#include "fl/clamp.h"
+#include "fl/compiler_control.h"
+#include "fl/detail/private.h"
+#include "fl/hash.h"
+#include "fl/int.h"
+#include "fl/map_range.h"
 #include "fl/stl/assert.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/bitset.h"
-#include "fl/clamp.h"
-#include "fl/hash.h"
-#include "fl/stl/initializer_list.h"
-#include "fl/map_range.h"
+#include "fl/stl/move.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/pair.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/vector.h"
-#include "fl/warn.h"
-#include "fl/align.h"
-#include "fl/compiler_control.h"
-#include "fl/math_macros.h"
-
-#include "fl/compiler_control.h"
+#include "fl/stl/initializer_list.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_SHORTEN_64_TO_32
@@ -189,29 +188,15 @@ class FL_ALIGN unordered_map {
             advance_to_occupied();
         }
 
-        value_type operator*() const {
+        reference operator*() const {
             auto &e = _map->_buckets[_idx];
-            return {e.key, e.value};
+            // Entry and pair<const Key, T> have the same memory layout
+            // Safe to reinterpret since we only add const to Key
+            return *fl::bit_cast<value_type*>(&e);
         }
 
-        pointer operator->() {
-            // Use fl::bit_cast since pair<const Key, T> and pair<Key, T> are different types
-            // but have the same memory layout, then destroy/reconstruct to avoid assignment issues
-            using mutable_value_type = pair<Key, T>;
-            auto& mutable_cached = *fl::bit_cast<mutable_value_type*>(&_cached_value);
-            mutable_cached.~mutable_value_type();
-            new (&mutable_cached) mutable_value_type(operator*());
-            return &_cached_value;
-        }
-        
         pointer operator->() const {
-            // Use fl::bit_cast since pair<const Key, T> and pair<Key, T> are different types
-            // but have the same memory layout, then destroy/reconstruct to avoid assignment issues
-            using mutable_value_type = pair<Key, T>;
-            auto& mutable_cached = *fl::bit_cast<mutable_value_type*>(&_cached_value);
-            mutable_cached.~mutable_value_type();
-            new (&mutable_cached) mutable_value_type(operator*());
-            return &_cached_value;
+            return &(operator*());
         }
 
         iterator &operator++() {
@@ -242,7 +227,6 @@ class FL_ALIGN unordered_map {
       private:
         unordered_map *_map;
         fl::size _idx;
-        mutable value_type _cached_value;
         friend class unordered_map;
     };
 
@@ -260,19 +244,15 @@ class FL_ALIGN unordered_map {
         }
         const_iterator(const iterator &it) : _map(it._map), _idx(it._idx) {}
 
-        value_type operator*() const {
+        reference operator*() const {
             auto &e = _map->_buckets[_idx];
-            return {e.key, e.value};
+            // Entry and pair<const Key, T> have the same memory layout
+            // Safe to reinterpret since we only add const to Key
+            return *fl::bit_cast<const value_type*>(&e);
         }
 
         pointer operator->() const {
-            // Use fl::bit_cast since pair<const Key, T> and pair<Key, T> are different types
-            // but have the same memory layout, then destroy/reconstruct to avoid assignment issues
-            using mutable_value_type = pair<Key, T>;
-            auto& mutable_cached = *fl::bit_cast<mutable_value_type*>(&_cached_value);
-            mutable_cached.~mutable_value_type();
-            new (&mutable_cached) mutable_value_type(operator*());
-            return &_cached_value;
+            return &(operator*());
         }
 
         const_iterator &operator++() {
@@ -305,7 +285,6 @@ class FL_ALIGN unordered_map {
       private:
         const unordered_map *_map;
         fl::size _idx;
-        mutable value_type _cached_value;
     };
 
     iterator begin() { return iterator(this, 0); }

@@ -1651,3 +1651,33 @@ FL_TEST_CASE("Hash policy - comprehensive workflow") {
     FL_REQUIRE(lf < 0.2f);  // 6 elements in 40+ buckets
 }
 
+// Phase 7: Iterator Lifetime Tests
+
+FL_TEST_CASE("Iterator operator*() returns reference to map data, not temporary") {
+    // Regression test: Iterator must return reference to data in the map,
+    // not a temporary copy. This ensures pointers to dereferenced iterators
+    // remain valid as long as the map is alive.
+
+    fl::unordered_map<fl::string, int> map;
+    map.insert("one", 1);
+    map.insert("two", 2);
+    map.insert("three", 3);
+
+    // Store pointer to the first key-value pair
+    const fl::pair<const fl::string, int>* ptr = nullptr;
+
+    for (const auto& kv : map) {
+        // kv should be a reference to data in the map, not a temporary
+        // Taking its address should be safe as long as map is alive
+        ptr = &kv;
+        break;  // Just grab the first one
+    }
+
+    // Access the pointer after the loop (map is still alive)
+    // This should work correctly without ASAN errors
+    FL_REQUIRE(ptr != nullptr);
+    FL_REQUIRE(!ptr->first.empty());  // key is valid
+    FL_REQUIRE(ptr->second >= 1);     // value is valid
+    FL_REQUIRE(ptr->second <= 3);     // value is in range
+}
+
