@@ -49,19 +49,19 @@
   { include: ['"platforms/arm/d21/mutex_samd.h"', 'private', '"fl/stl/mutex.h"', 'public'] },
 
   # Platform-specific headers should not be suggested directly
-  { include: ['"platforms/*/fastled_*.h"', 'private', '"FastLED.h"', 'public'] },
-  { include: ['"platforms/*/clockless_*.h"', 'private', '"FastLED.h"', 'public'] },
-  { include: ['"platforms/*/*"', 'private', '"FastLED.h"', 'public'] },
+  # Use @"regex" syntax (IWYU does not support shell globs - * is literal)
+  { include: ['@"platforms/.*/fastled_.*\\.h"', 'private', '', 'public'] },
+  { include: ['@"platforms/.*/clockless_.*\\.h"', 'private', '', 'public'] },
   
   # Internal headers should redirect to public API
-  { include: ['"controller.h"', 'private', '"FastLED.h"', 'public'] },
-  { include: ['"cled_controller.h"', 'private', '"FastLED.h"', 'public'] },
-  { include: ['"led_sysdefs.h"', 'private', '"FastLED.h"', 'public'] },
-  { include: ['"led_sysdefs_stub_generic.h"', 'private', '"FastLED.h"', 'public'] },
-  { include: ['"fastled_config.h"', 'private', '"FastLED.h"', 'public'] },
-  { include: ['"fastled_delay.h"', 'private', '"FastLED.h"', 'public'] },
-  { include: ['"fastled_progmem.h"', 'private', '"FastLED.h"', 'public'] },
-  { include: ['"power_mgt.h"', 'private', '"FastLED.h"', 'public'] },
+  { include: ['"controller.h"', 'private', '', 'public'] },
+  { include: ['"cled_controller.h"', 'private', '', 'public'] },
+  { include: ['"led_sysdefs.h"', 'private', '', 'public'] },
+  { include: ['"led_sysdefs_stub_generic.h"', 'private', '', 'public'] },
+  { include: ['"fastled_config.h"', 'private', '', 'public'] },
+  { include: ['"fastled_delay.h"', 'private', '', 'public'] },
+  { include: ['"fastled_progmem.h"', 'private', '', 'public'] },
+  { include: ['"power_mgt.h"', 'private', '', 'public'] },
   
   # fl/ namespace headers - the modern FastLED API
   { include: ['"fl/ptr.h"', 'public', '"fl/ptr.h"', 'public'] },
@@ -81,20 +81,21 @@
   { include: ['"fx/fx_engine.h"', 'public', '"fl/fx/fx_engine.h"', 'public'] },
   { include: ['"fl/fx/frame.h"', 'public', '"fl/fx/frame.h"', 'public'] },
   { include: ['"fx/frame.h"', 'public', '"fl/fx/frame.h"', 'public'] },
-  { include: ['"fx/detail/*"', 'private', '"fl/fx/fx.h"', 'public'] },
+  { include: ['@"fx/detail/.*"', 'private', '"fl/fx/fx.h"', 'public'] },
   
   # Third-party headers should not be suggested for user code
-  { include: ['"third_party/*/*"', 'private', '"FastLED.h"', 'public'] },
+  { include: ['@"third_party/.*"', 'private', '', 'public'] },
 
   # Chipset-specific headers redirect to main header
-  { include: ['"chipsets.h"', 'private', '"FastLED.h"', 'public'] },
-  { include: ['"ws2812_controller.h"', 'private', '"FastLED.h"', 'public'] },
-  { include: ['"apa102_controller.h"', 'private', '"FastLED.h"', 'public'] },
+  { include: ['"chipsets.h"', 'private', '', 'public'] },
+  { include: ['"ws2812_controller.h"', 'private', '', 'public'] },
+  { include: ['"apa102_controller.h"', 'private', '', 'public'] },
   
   # Testing headers - keep as-is for test files
   { include: ['"test.h"', 'public', '"test.h"', 'public'] },
-  { include: ['"test_*.h"', 'public', '"test_*.h"', 'public'] },
-  { include: ['"doctest.h"', 'public', '"doctest.h"', 'public'] },
+  { include: ['@"test_.*\\.h"', 'public', '"test.h"', 'public'] },
+  # doctest.h is private - IWYU should never recommend it
+  { include: ['"doctest.h"', 'private', '"test.h"', 'public'] },
 
   # FastLED uses custom stdint.h replacement to avoid 500ms compile-time penalty
   # Map standard headers to FastLED equivalents
@@ -115,7 +116,7 @@
   # All code should use the public API: fl/int.h
   { include: ['"platforms/shared/int_windows.h"', 'private', '"fl/int.h"', 'public'] },
   { include: ['"platforms/shared/int.h"', 'private', '"fl/int.h"', 'public'] },
-  { include: ['"platforms/*/int*.h"', 'private', '"fl/int.h"', 'public'] },
+  { include: ['@"platforms/.*/int.*\\.h"', 'private', '"fl/int.h"', 'public'] },
 
   # ========================================================================
   # Platform-Specific Headers (Not Available on Host Platform)
@@ -133,9 +134,9 @@
   # These don't exist on stub - map to FastLED's progmem abstraction
   # Note: fastled_progmem.h itself is private (line 51), so we mark it private here too
   { include: ['<avr/pgmspace.h>', 'private', '"fastled_progmem.h"', 'private'] },
-  { include: ['<avr/io.h>', 'private', '"FastLED.h"', 'public'] },
-  { include: ['<avr/interrupt.h>', 'private', '"FastLED.h"', 'public'] },
-  { include: ['<avr/wdt.h>', 'private', '"FastLED.h"', 'public'] },
+  { include: ['<avr/io.h>', 'private', '', 'public'] },
+  { include: ['<avr/interrupt.h>', 'private', '', 'public'] },
+  { include: ['<avr/wdt.h>', 'private', '', 'public'] },
 
   # ESP32 Arduino HAL Headers
   { include: ['<esp32-hal.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
@@ -166,13 +167,28 @@
   { include: ['<freertos/queue.h>', 'private', '"platforms/esp/32/core/led_sysdefs_esp32.h"', 'public'] },
 
   # ARM/Teensy Platform Headers
-  { include: ['<kinetis.h>', 'private', '"FastLED.h"', 'public'] },
-  { include: ['<imxrt.h>', 'private', '"FastLED.h"', 'public'] },
-  { include: ['<nrf.h>', 'private', '"FastLED.h"', 'public'] },
-  { include: ['<sam.h>', 'private', '"FastLED.h"', 'public'] },
+  { include: ['<kinetis.h>', 'private', '', 'public'] },
+  { include: ['<imxrt.h>', 'private', '', 'public'] },
+  { include: ['<nrf.h>', 'private', '', 'public'] },
+  { include: ['<sam.h>', 'private', '', 'public'] },
 
   # Raspberry Pi Pico SDK Headers
-  { include: ['<pico/stdlib.h>', 'private', '"FastLED.h"', 'public'] },
-  { include: ['<hardware/gpio.h>', 'private', '"FastLED.h"', 'public'] },
-  { include: ['<hardware/pio.h>', 'private', '"FastLED.h"', 'public'] },
+  { include: ['<pico/stdlib.h>', 'private', '', 'public'] },
+  { include: ['<hardware/gpio.h>', 'private', '', 'public'] },
+  { include: ['<hardware/pio.h>', 'private', '', 'public'] },
+
+  # ========================================================================
+  # CATCH-ALL: *.cpp.hpp files are private (unity build implementation files)
+  # ========================================================================
+  # These are implementation files, not headers. IWYU should never recommend them.
+  # Only _build.cpp.hpp files include them (enforced by a separate linter).
+  { include: ['@".*\\.cpp\\.hpp"', 'private', '', 'public'] },
+
+  # ========================================================================
+  # CATCH-ALL: All platform headers are private
+  # ========================================================================
+  # This must be LAST so specific rules above take priority.
+  # Matches any header under platforms/ at any depth and marks it private.
+  # IWYU will never recommend including a platforms/ header directly.
+  { include: ['@"platforms/.*"', 'private', '', 'public'] },
 ]
