@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from ci.lint_cpp.attribute_checker import AttributeChecker
 from ci.lint_cpp.banned_headers_checker import (
     BANNED_HEADERS_COMMON,
     BANNED_HEADERS_CORE,
@@ -133,6 +134,7 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
         LoggingInIramChecker(),
         PlatformIncludesChecker(),
         WeakAttributeChecker(),
+        AttributeChecker(),  # Checks all C++ standard attributes (replaces MaybeUnusedChecker)
         FlIsDefinedChecker(),
         # Note: Private libc++ headers checking is now integrated into BannedHeadersChecker
         # Note: _build.hpp hierarchy checking is now integrated into test_unity_build.py

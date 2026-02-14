@@ -612,7 +612,7 @@ private:
                 state = static_cast<rmt_encode_state_t>(state | RMT_ENCODING_MEM_FULL);
                 goto out;
             }
-            [[fallthrough]];
+            FL_FALLTHROUGH;
 
         case 1:
             encoded_symbols += mCopyEncoder->encode(mCopyEncoder, channel, &mResetCode,

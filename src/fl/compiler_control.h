@@ -480,6 +480,121 @@ FL_DISABLE_WARNING_POP
   #define FL_NODISCARD
 #endif
 
+// Suppress warnings for intentionally unused fall-through in switch statements
+// Used to indicate that fall-through from one case to another is intentional.
+//
+// Usage:
+//   switch (state) {
+//     case 0:
+//       setup();
+//       FL_FALLTHROUGH;
+//     case 1:
+//       process();
+//       break;
+//   }
+//
+// This macro is portable across C++11/14/17 compilers.
+#if __cplusplus >= 201703L
+  // C++17+: Use standard [[fallthrough]] attribute
+  #define FL_FALLTHROUGH [[fallthrough]]
+#elif defined(FL_IS_GCC) || defined(FL_IS_CLANG)
+  // GCC 7+ / Clang 10+: Use fallthrough attribute
+  #define FL_FALLTHROUGH __attribute__((fallthrough))
+#else
+  // C++11/14 or older compilers: Use empty statement with descriptive comment
+  #define FL_FALLTHROUGH /* fallthrough */
+#endif
+
+// Mark functions that never return (e.g., infinite loops, exit handlers)
+// Enables compiler optimizations and warnings for unreachable code.
+//
+// Usage: FL_NORETURN void abort_handler();
+//
+// This macro is portable across C++11/14/17 compilers.
+#if __cplusplus >= 201103L
+  // C++11+: Use standard [[noreturn]] attribute
+  #define FL_NORETURN [[noreturn]]
+#elif defined(FL_IS_GCC) || defined(FL_IS_CLANG)
+  // GCC/Clang: Use noreturn attribute
+  #define FL_NORETURN __attribute__((noreturn))
+#elif defined(FL_IS_WIN_MSVC)
+  // MSVC: Use __declspec(noreturn)
+  #define FL_NORETURN __declspec(noreturn)
+#else
+  // Unsupported compiler: no-op
+  #define FL_NORETURN
+#endif
+
+// Mark symbols (functions, types, variables) as deprecated
+// Generates compiler warnings when deprecated symbols are used.
+//
+// Usage:
+//   FL_DEPRECATED void old_function();
+//   struct FL_DEPRECATED OldClass { };
+//
+// This macro is portable across C++11/14/17 compilers.
+#if __cplusplus >= 201402L
+  // C++14+: Use standard [[deprecated]] attribute
+  #define FL_DEPRECATED [[deprecated]]
+#elif defined(FL_IS_GCC) || defined(FL_IS_CLANG)
+  // GCC/Clang: Use deprecated attribute
+  #define FL_DEPRECATED __attribute__((deprecated))
+#elif defined(FL_IS_WIN_MSVC)
+  // MSVC: Use __declspec(deprecated)
+  #define FL_DEPRECATED __declspec(deprecated)
+#else
+  // Unsupported compiler: no-op
+  #define FL_DEPRECATED
+#endif
+
+// Branch prediction hints for hot paths (C++20 [[likely]] / [[unlikely]])
+// Helps the compiler optimize for the common case.
+//
+// Usage:
+//   if FL_LIKELY(ptr != nullptr) { /* common case */ }
+//   if FL_UNLIKELY(error_occurred) { /* rare case */ }
+//
+// Note: Use sparingly and only for measurable hot paths. Modern compilers
+// often predict branches well without hints, and incorrect hints can degrade
+// performance.
+#if __cplusplus >= 202002L
+  // C++20+: Use standard [[likely]] / [[unlikely]] attributes
+  #define FL_LIKELY(x) (x) [[likely]]
+  #define FL_UNLIKELY(x) (x) [[unlikely]]
+#elif defined(FL_IS_GCC) || defined(FL_IS_CLANG)
+  // GCC/Clang: Use __builtin_expect
+  #define FL_LIKELY(x) __builtin_expect(!!(x), 1)
+  #define FL_UNLIKELY(x) __builtin_expect(!!(x), 0)
+#else
+  // Unsupported compiler: no-op
+  #define FL_LIKELY(x) (x)
+  #define FL_UNLIKELY(x) (x)
+#endif
+
+// Allows empty base class optimization for member variables (C++20)
+// Enables the compiler to optimize away empty member variables, reducing
+// struct size when possible.
+//
+// Usage:
+//   struct MyClass {
+//     FL_NO_UNIQUE_ADDRESS EmptyAllocator allocator;
+//     int data;
+//   };
+//
+// This is particularly useful for policy-based designs where stateless
+// policy classes are common.
+#if __cplusplus >= 202002L
+  // C++20+: Use standard [[no_unique_address]] attribute
+  #define FL_NO_UNIQUE_ADDRESS [[no_unique_address]]
+#elif defined(FL_IS_CLANG) || defined(FL_IS_GCC)
+  // GCC/Clang: May have vendor-specific support (check compiler version)
+  // For now, fall back to no-op since it's not standard in C++17
+  #define FL_NO_UNIQUE_ADDRESS
+#else
+  // Unsupported compiler: no-op
+  #define FL_NO_UNIQUE_ADDRESS
+#endif
+
 // Restrict pointer attribute for better optimization (no aliasing)
 // Tells the compiler that a pointer is the only way to access the underlying
 // object for the scope of that pointer, enabling better optimization.
