@@ -7,7 +7,7 @@ Follows the same pattern as fl/type_traits.h to provide essential type informati
 */
 
 #include "fl/stl/stdint.h"
-#include "fl/undef.h"
+#include "fl/stl/undef.h"
 #include "fl/stl/math.h"
 
 namespace fl {
@@ -198,11 +198,18 @@ struct numeric_limits<unsigned char> {
     static constexpr unsigned char round_error() noexcept { return 0; }
 };
 
+} // namespace fl
+
 // Protect against min/max macros from Arduino and other platforms
-#pragma push_macro("min")
-#pragma push_macro("max")
+// Undefine them again in case they were redefined by earlier includes
+#ifdef min
 #undef min
+#endif
+#ifdef max
 #undef max
+#endif
+
+namespace fl {
 
 // Specialization for short (i16)
 template <>
@@ -466,9 +473,5 @@ struct numeric_limits<double> {
 };
 
 // long double specialization removed
-
-// Restore min/max macros if they were defined
-#pragma pop_macro("max")
-#pragma pop_macro("min")
 
 } // namespace fl

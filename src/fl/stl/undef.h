@@ -16,7 +16,7 @@
 // min, max, abs, round, etc. to prevent macro expansion issues.
 //
 // Usage:
-//   #include "fl/undef.h"  // Before declaring min/max/abs functions
+//   #include "fl/stl/undef.h"  // Before declaring min/max/abs functions
 //   static T min() { ... }
 //   static T max() { ... }
 

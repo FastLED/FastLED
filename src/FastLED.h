@@ -156,8 +156,8 @@
 
 // Arduino.h defines min, max, abs, map, radians, degrees as macros
 // These macros cause problems with C++ code (double evaluation, no type safety)
-// Include fl/undef.h AFTER platform headers to ensure macros are truly undefined
-#include "fl/undef.h"
+// Include fl/stl/undef.h AFTER platform headers to ensure macros are truly undefined
+#include "fl/stl/undef.h"
 
 // Include math functions (min, max, abs, radians, degrees)
 #include "fl/stl/math.h"
