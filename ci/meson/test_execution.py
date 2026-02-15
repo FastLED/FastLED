@@ -4,7 +4,7 @@ import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Optional
 
 from running_process import RunningProcess
 
@@ -60,9 +60,6 @@ def run_meson_test(
     Returns:
         MesonTestResult with success status, duration, and test counts
     """
-    # Import here to avoid circular dependency with compile module
-    from ci.meson.compile import _create_error_context_filter
-
     cmd = [
         get_meson_executable(),
         "test",
@@ -155,20 +152,42 @@ def run_meson_test(
 
             returncode = proc.wait()
 
-            # If test failed, show error context
+            # If test failed, parse testlog.txt to extract detailed error information
             if returncode != 0:
-                # Create error-detecting filter with reasonable limit for test failures
-                # Limit context to prevent overly long output (5 failures × 20 lines ≈ 100 lines)
-                # vs previous 15 failures × 40 lines ≈ 600 lines
-                error_filter: Callable[[str], None] = _create_error_context_filter(
-                    context_lines=10,  # 10 lines before/after (reduced from 20)
-                    max_unique_errors=5,  # Show first 5 unique failures (reduced from 15)
-                )
+                # Import testlog parser
+                from ci.meson.testlog_parser import extract_error_context_from_testlog
 
-                # Process accumulated output to show error context
-                output_lines = proc.stdout.splitlines()
-                for line in output_lines:
-                    error_filter(line)
+                # Collect names of failed tests from our tracking
+                failed_test_names: set[str] = set()
+
+                # Parse the meson output to find which tests failed
+                # Pattern matches: "fastled:fl_remote_remote FAIL"
+                test_fail_pattern = re.compile(r"(\S+:\S+)\s+FAIL")
+                for match in test_fail_pattern.finditer(proc.stdout):
+                    failed_test_names.add(match.group(1))
+
+                # Also check if we're running a specific test that failed
+                if test_name and num_failed > 0:
+                    # If running specific test, add it to failed list
+                    # Meson test names may have suite prefix (e.g., "fastled:test_name")
+                    if ":" not in test_name:
+                        failed_test_names.add(f"fastled:{test_name}")
+                    else:
+                        failed_test_names.add(test_name)
+
+                # Extract error context from testlog.txt
+                testlog_path = build_dir / "meson-logs" / "testlog.txt"
+                if failed_test_names and testlog_path.exists():
+                    extract_error_context_from_testlog(
+                        testlog_path=testlog_path,
+                        failed_test_names=failed_test_names,
+                        context_lines=10,  # Show 10 lines before/after errors
+                    )
+                else:
+                    # Fallback: show generic error message
+                    _print_error(
+                        "[MESON] ⚠️  Test failed but could not extract detailed error information"
+                    )
 
         duration = time.time() - start_time
 

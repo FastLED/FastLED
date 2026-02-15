@@ -1,0 +1,3 @@
+# Temporary test file created by integration_test_error_reporting.py
+# Should never be committed to the repository
+tmp_intentional_build_failure.cpp
