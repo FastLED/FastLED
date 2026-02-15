@@ -17,13 +17,14 @@ class u16x16 {
   public:
     static constexpr int INT_BITS = 16;
     static constexpr int FRAC_BITS = 16;
+    static constexpr i32 SCALE = static_cast<i32>(1) << FRAC_BITS;
 
     // ---- Construction ------------------------------------------------------
 
     constexpr u16x16() = default;
 
     explicit constexpr u16x16(float f)
-        : mValue(static_cast<u32>(f * (1 << FRAC_BITS))) {}
+        : mValue(static_cast<u32>(f * (SCALE))) {}
 
     // Auto-promotion from other fixed-point types
     // Enabled only when both INT_BITS and FRAC_BITS can be promoted (no demotion)
@@ -47,7 +48,7 @@ class u16x16 {
 
     u32 raw() const { return mValue; }
     u32 to_int() const { return mValue >> FRAC_BITS; }
-    float to_float() const { return static_cast<float>(mValue) / (1 << FRAC_BITS); }
+    float to_float() const { return static_cast<float>(mValue) / (SCALE); }
 
     // ---- Fixed-point arithmetic --------------------------------------------
 
@@ -103,19 +104,19 @@ class u16x16 {
     }
 
     static FASTLED_FORCE_INLINE u16x16 floor(u16x16 x) {
-        constexpr u32 frac_mask = (1 << FRAC_BITS) - 1;
+        constexpr u32 frac_mask = (SCALE) - 1;
         return from_raw(x.mValue & ~frac_mask);
     }
 
     static FASTLED_FORCE_INLINE u16x16 ceil(u16x16 x) {
-        constexpr u32 frac_mask = (1 << FRAC_BITS) - 1;
+        constexpr u32 frac_mask = (SCALE) - 1;
         u32 floored = x.mValue & ~frac_mask;
-        if (x.mValue & frac_mask) floored += (1 << FRAC_BITS);
+        if (x.mValue & frac_mask) floored += (SCALE);
         return from_raw(floored);
     }
 
     static FASTLED_FORCE_INLINE u16x16 fract(u16x16 x) {
-        constexpr u32 frac_mask = (1 << FRAC_BITS) - 1;
+        constexpr u32 frac_mask = (SCALE) - 1;
         return from_raw(x.mValue & frac_mask);
     }
 
@@ -198,9 +199,9 @@ class u16x16 {
         u32 int_part = msb - FRAC_BITS;
         u32 t;
         if (msb >= FRAC_BITS) {
-            t = (val >> (msb - FRAC_BITS)) - (1u << FRAC_BITS);
+            t = (val >> (msb - FRAC_BITS)) - (SCALE);
         } else {
-            t = (val << (FRAC_BITS - msb)) - (1u << FRAC_BITS);
+            t = (val << (FRAC_BITS - msb)) - (SCALE);
         }
 
         // 2-term polynomial coefficients for log2(1+t), t in [0,1).
@@ -231,7 +232,7 @@ class u16x16 {
 
         if (n >= INT_BITS) return from_raw(0xFFFFFFFF);  // overflow
 
-        u32 int_pow = (1u << FRAC_BITS) << n;
+        u32 int_pow = (SCALE) << n;
 
         // 4-term minimax coefficients for 2^t - 1, t in [0,1).
         // Stored as u64 with 24 fractional bits.

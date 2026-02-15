@@ -6,11 +6,13 @@
 // Derived classes inherit via protected inheritance and re-expose methods
 // via using declarations for explicit API control.
 
-#include "fl/stl/stdint.h"
-#include "fl/sin32.h"
-#include "fl/fixed_point/isqrt.h"
-#include "fl/fixed_point/fixed_point_traits.h"
 #include "fl/compiler_control.h"
+#include "fl/fixed_point/fixed_point_traits.h"
+#include "fl/fixed_point/isqrt.h"
+#include "fl/force_inline.h"
+#include "fl/sin32.h"
+#include "fl/stl/stdint.h"
+#include "fl/stl/type_traits.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
@@ -112,19 +114,19 @@ class fixed_point_base {
     }
 
     static FASTLED_FORCE_INLINE Derived floor(Derived x) {
-        constexpr raw_type frac_mask = (1 << FRAC_BITS) - 1;
+        constexpr raw_type frac_mask = (Derived::SCALE) - 1;
         return Derived::from_raw(x.mValue & ~frac_mask);
     }
 
     static FASTLED_FORCE_INLINE Derived ceil(Derived x) {
-        constexpr raw_type frac_mask = (1 << FRAC_BITS) - 1;
+        constexpr raw_type frac_mask = (Derived::SCALE) - 1;
         raw_type floored = x.mValue & ~frac_mask;
-        if (x.mValue & frac_mask) floored += (1 << FRAC_BITS);
+        if (x.mValue & frac_mask) floored += (Derived::SCALE);
         return Derived::from_raw(floored);
     }
 
     static FASTLED_FORCE_INLINE Derived fract(Derived x) {
-        constexpr raw_type frac_mask = (1 << FRAC_BITS) - 1;
+        constexpr raw_type frac_mask = (Derived::SCALE) - 1;
         return Derived::from_raw(x.mValue & frac_mask);
     }
 

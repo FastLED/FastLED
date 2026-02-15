@@ -17,6 +17,7 @@ class s8x8 {
   public:
     static constexpr int INT_BITS = 8;
     static constexpr int FRAC_BITS = 8;
+    static constexpr i32 SCALE = static_cast<i32>(1) << FRAC_BITS;
 
     // ---- Construction ------------------------------------------------------
 
@@ -57,7 +58,7 @@ class s8x8 {
 
     FASTLED_FORCE_INLINE s8x8 operator/(s8x8 b) const {
         return from_raw(static_cast<i16>(
-            (static_cast<i32>(mValue) * (static_cast<i32>(1) << FRAC_BITS)) / b.mValue));
+            (static_cast<i32>(mValue) * (SCALE)) / b.mValue));
     }
 
     FASTLED_FORCE_INLINE s8x8 operator+(s8x8 b) const {
@@ -102,19 +103,19 @@ class s8x8 {
     }
 
     static FASTLED_FORCE_INLINE s8x8 floor(s8x8 x) {
-        constexpr i16 frac_mask = (1 << FRAC_BITS) - 1;
+        constexpr i16 frac_mask = (SCALE) - 1;
         return from_raw(x.mValue & ~frac_mask);
     }
 
     static FASTLED_FORCE_INLINE s8x8 ceil(s8x8 x) {
-        constexpr i16 frac_mask = (1 << FRAC_BITS) - 1;
+        constexpr i16 frac_mask = (SCALE) - 1;
         i16 floored = x.mValue & ~frac_mask;
-        if (x.mValue & frac_mask) floored += (1 << FRAC_BITS);
+        if (x.mValue & frac_mask) floored += (SCALE);
         return from_raw(floored);
     }
 
     static FASTLED_FORCE_INLINE s8x8 fract(s8x8 x) {
-        constexpr i16 frac_mask = (1 << FRAC_BITS) - 1;
+        constexpr i16 frac_mask = (SCALE) - 1;
         return from_raw(x.mValue & frac_mask);
     }
 
@@ -311,10 +312,10 @@ class s8x8 {
         i32 t;
         if (msb >= FRAC_BITS) {
             t = static_cast<i32>(
-                (val >> (msb - FRAC_BITS)) - (1u << FRAC_BITS));
+                (val >> (msb - FRAC_BITS)) - (SCALE));
         } else {
             t = static_cast<i32>(
-                (val << (FRAC_BITS - msb)) - (1u << FRAC_BITS));
+                (val << (FRAC_BITS - msb)) - (SCALE));
         }
         // 4-term minimax coefficients for log2(1+t), t in [0,1).
         // Stored as i32 with 16 fractional bits. Max product ~2^29, fits i32 after shift.
@@ -347,9 +348,9 @@ class s8x8 {
         if (n < -FRAC_BITS) return s8x8();
         i32 int_pow;
         if (n >= 0) {
-            int_pow = static_cast<i32>(1u << FRAC_BITS) << n;
+            int_pow = static_cast<i32>(SCALE) << n;
         } else {
-            int_pow = static_cast<i32>(1u << FRAC_BITS) >> (-n);
+            int_pow = static_cast<i32>(SCALE) >> (-n);
         }
         // 4-term minimax coefficients for 2^t - 1, t in [0,1).
         // Stored as i32 with 16 fractional bits.

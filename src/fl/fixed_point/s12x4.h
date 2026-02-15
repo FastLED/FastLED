@@ -17,6 +17,7 @@ class s12x4 {
   public:
     static constexpr int INT_BITS = 12;
     static constexpr int FRAC_BITS = 4;
+    static constexpr i32 SCALE = static_cast<i32>(1) << FRAC_BITS;
 
     // ---- Construction ------------------------------------------------------
 
@@ -46,7 +47,7 @@ class s12x4 {
 
     FASTLED_FORCE_INLINE s12x4 operator/(s12x4 b) const {
         return from_raw(static_cast<i16>(
-            (static_cast<i32>(mValue) * (static_cast<i32>(1) << FRAC_BITS)) / b.mValue));
+            (static_cast<i32>(mValue) * (SCALE)) / b.mValue));
     }
 
     FASTLED_FORCE_INLINE s12x4 operator+(s12x4 b) const {
@@ -91,19 +92,19 @@ class s12x4 {
     }
 
     static FASTLED_FORCE_INLINE s12x4 floor(s12x4 x) {
-        constexpr i16 frac_mask = (1 << FRAC_BITS) - 1;
+        constexpr i16 frac_mask = (SCALE) - 1;
         return from_raw(x.mValue & ~frac_mask);
     }
 
     static FASTLED_FORCE_INLINE s12x4 ceil(s12x4 x) {
-        constexpr i16 frac_mask = (1 << FRAC_BITS) - 1;
+        constexpr i16 frac_mask = (SCALE) - 1;
         i16 floored = x.mValue & ~frac_mask;
-        if (x.mValue & frac_mask) floored += (1 << FRAC_BITS);
+        if (x.mValue & frac_mask) floored += (SCALE);
         return from_raw(floored);
     }
 
     static FASTLED_FORCE_INLINE s12x4 fract(s12x4 x) {
-        constexpr i16 frac_mask = (1 << FRAC_BITS) - 1;
+        constexpr i16 frac_mask = (SCALE) - 1;
         return from_raw(x.mValue & frac_mask);
     }
 
@@ -300,10 +301,10 @@ class s12x4 {
         i32 t;
         if (msb >= FRAC_BITS) {
             t = static_cast<i32>(
-                (val >> (msb - FRAC_BITS)) - (1u << FRAC_BITS));
+                (val >> (msb - FRAC_BITS)) - (SCALE));
         } else {
             t = static_cast<i32>(
-                (val << (FRAC_BITS - msb)) - (1u << FRAC_BITS));
+                (val << (FRAC_BITS - msb)) - (SCALE));
         }
         // 4-term minimax coefficients for log2(1+t), t in [0,1).
         // Stored as i32 with 12 fractional bits. Max product ~2^21, fits i32 comfortably.
@@ -336,9 +337,9 @@ class s12x4 {
         if (n < -FRAC_BITS) return s12x4();
         i32 int_pow;
         if (n >= 0) {
-            int_pow = static_cast<i32>(1u << FRAC_BITS) << n;
+            int_pow = static_cast<i32>(SCALE) << n;
         } else {
-            int_pow = static_cast<i32>(1u << FRAC_BITS) >> (-n);
+            int_pow = static_cast<i32>(SCALE) >> (-n);
         }
         // 4-term minimax coefficients for 2^t - 1, t in [0,1).
         // Stored as i32 with 12 fractional bits.

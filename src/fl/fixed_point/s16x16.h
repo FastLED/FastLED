@@ -17,13 +17,14 @@ class s16x16 {
   public:
     static constexpr int INT_BITS = 16;
     static constexpr int FRAC_BITS = 16;
+    static constexpr i32 SCALE = static_cast<i32>(1) << FRAC_BITS;
 
     // ---- Construction ------------------------------------------------------
 
     constexpr s16x16() = default;
 
     explicit constexpr s16x16(float f)
-        : mValue(static_cast<i32>(f * (static_cast<i32>(1) << FRAC_BITS))) {}
+        : mValue(static_cast<i32>(f * (SCALE))) {}
 
     // Auto-promotion from other fixed-point types
     // Enabled only when both INT_BITS and FRAC_BITS can be promoted (no demotion)
@@ -47,7 +48,7 @@ class s16x16 {
 
     i32 raw() const { return mValue; }
     i32 to_int() const { return mValue >> FRAC_BITS; }
-    float to_float() const { return static_cast<float>(mValue) / (static_cast<i32>(1) << FRAC_BITS); }
+    float to_float() const { return static_cast<float>(mValue) / (SCALE); }
 
     // ---- Fixed-point arithmetic --------------------------------------------
 
@@ -58,7 +59,7 @@ class s16x16 {
 
     FASTLED_FORCE_INLINE s16x16 operator/(s16x16 b) const {
         return from_raw(static_cast<i32>(
-            (static_cast<i64>(mValue) * (static_cast<i64>(1) << FRAC_BITS)) / b.mValue));
+            (static_cast<i64>(mValue) * (static_cast<i64>(SCALE))) / b.mValue));
     }
 
     FASTLED_FORCE_INLINE s16x16 operator+(s16x16 b) const {
@@ -103,19 +104,19 @@ class s16x16 {
     }
 
     static FASTLED_FORCE_INLINE s16x16 floor(s16x16 x) {
-        constexpr i32 frac_mask = (1 << FRAC_BITS) - 1;
+        constexpr i32 frac_mask = (SCALE) - 1;
         return from_raw(x.mValue & ~frac_mask);
     }
 
     static FASTLED_FORCE_INLINE s16x16 ceil(s16x16 x) {
-        constexpr i32 frac_mask = (1 << FRAC_BITS) - 1;
+        constexpr i32 frac_mask = (SCALE) - 1;
         i32 floored = x.mValue & ~frac_mask;
-        if (x.mValue & frac_mask) floored += (1 << FRAC_BITS);
+        if (x.mValue & frac_mask) floored += (SCALE);
         return from_raw(floored);
     }
 
     static FASTLED_FORCE_INLINE s16x16 fract(s16x16 x) {
-        constexpr i32 frac_mask = (1 << FRAC_BITS) - 1;
+        constexpr i32 frac_mask = (SCALE) - 1;
         return from_raw(x.mValue & frac_mask);
     }
 
@@ -207,7 +208,7 @@ class s16x16 {
     static FASTLED_FORCE_INLINE s16x16 rsqrt(s16x16 x) {
         s16x16 s = sqrt(x);
         if (s.mValue == 0) return s16x16();
-        return from_raw(static_cast<i32>(1) << FRAC_BITS) / s;
+        return from_raw(SCALE) / s;
     }
 
     static FASTLED_FORCE_INLINE s16x16 pow(s16x16 base, s16x16 exp) {
@@ -314,10 +315,10 @@ class s16x16 {
         i32 t;
         if (msb >= FRAC_BITS) {
             t = static_cast<i32>(
-                (val >> (msb - FRAC_BITS)) - (1u << FRAC_BITS));
+                (val >> (msb - FRAC_BITS)) - (SCALE));
         } else {
             t = static_cast<i32>(
-                (val << (FRAC_BITS - msb)) - (1u << FRAC_BITS));
+                (val << (FRAC_BITS - msb)) - (SCALE));
         }
         // 4-term minimax coefficients for log2(1+t), t in [0,1).
         // Stored as i64 with 24 fractional bits. Max product ~2^49, fits i64.
@@ -350,9 +351,9 @@ class s16x16 {
         if (n < -FRAC_BITS) return s16x16();
         i32 int_pow;
         if (n >= 0) {
-            int_pow = static_cast<i32>(1u << FRAC_BITS) << n;
+            int_pow = static_cast<i32>(SCALE) << n;
         } else {
-            int_pow = static_cast<i32>(1u << FRAC_BITS) >> (-n);
+            int_pow = static_cast<i32>(SCALE) >> (-n);
         }
         // 4-term minimax coefficients for 2^t - 1, t in [0,1).
         // Stored as i64 with 24 fractional bits. Max product ~2^48, fits i64.

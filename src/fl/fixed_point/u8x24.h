@@ -18,13 +18,14 @@ class u8x24 {
   public:
     static constexpr int INT_BITS = 8;
     static constexpr int FRAC_BITS = 24;
+    static constexpr i32 SCALE = static_cast<i32>(1) << FRAC_BITS;
 
     // ---- Construction ------------------------------------------------------
 
     constexpr u8x24() = default;
 
     explicit constexpr u8x24(float f)
-        : mValue(static_cast<u32>(f * (1 << FRAC_BITS))) {}
+        : mValue(static_cast<u32>(f * (SCALE))) {}
 
     // Auto-promotion from other fixed-point types
     template <typename OtherFP>
@@ -47,7 +48,7 @@ class u8x24 {
 
     u32 raw() const { return mValue; }
     u32 to_int() const { return mValue >> FRAC_BITS; }
-    float to_float() const { return static_cast<float>(mValue) / (1 << FRAC_BITS); }
+    float to_float() const { return static_cast<float>(mValue) / (SCALE); }
 
     // ---- Fixed-point arithmetic --------------------------------------------
 
@@ -103,19 +104,19 @@ class u8x24 {
     }
 
     static FASTLED_FORCE_INLINE u8x24 floor(u8x24 x) {
-        constexpr u32 frac_mask = (1 << FRAC_BITS) - 1;
+        constexpr u32 frac_mask = (SCALE) - 1;
         return from_raw(x.mValue & ~frac_mask);
     }
 
     static FASTLED_FORCE_INLINE u8x24 ceil(u8x24 x) {
-        constexpr u32 frac_mask = (1 << FRAC_BITS) - 1;
+        constexpr u32 frac_mask = (SCALE) - 1;
         u32 floored = x.mValue & ~frac_mask;
-        if (x.mValue & frac_mask) floored += (1 << FRAC_BITS);
+        if (x.mValue & frac_mask) floored += (SCALE);
         return from_raw(floored);
     }
 
     static FASTLED_FORCE_INLINE u8x24 fract(u8x24 x) {
-        constexpr u32 frac_mask = (1 << FRAC_BITS) - 1;
+        constexpr u32 frac_mask = (SCALE) - 1;
         return from_raw(x.mValue & frac_mask);
     }
 
@@ -196,9 +197,9 @@ class u8x24 {
         u32 int_part = msb - FRAC_BITS;
         u32 t;
         if (msb >= FRAC_BITS) {
-            t = (val >> (msb - FRAC_BITS)) - (1u << FRAC_BITS);
+            t = (val >> (msb - FRAC_BITS)) - (SCALE);
         } else {
-            t = (val << (FRAC_BITS - msb)) - (1u << FRAC_BITS);
+            t = (val << (FRAC_BITS - msb)) - (SCALE);
         }
 
         // 4-term minimax coefficients for log2(1+t), t in [0,1).
@@ -230,7 +231,7 @@ class u8x24 {
         // Prevent overflow
         if (n >= INT_BITS) return from_raw(0xFFFFFFFFu);
 
-        u32 int_pow = static_cast<u32>(1u << FRAC_BITS) << n;
+        u32 int_pow = static_cast<u32>(SCALE) << n;
 
         // 4-term minimax coefficients for 2^t - 1, t in [0,1).
         constexpr int IFRAC = 24;

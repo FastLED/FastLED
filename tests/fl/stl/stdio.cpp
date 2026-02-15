@@ -3,16 +3,11 @@
 #include "fl/stl/cstdio.h"
 #include "fl/stl/string.h"
 #include "fl/compiler_control.h"
-#include "fl/stl/iostream.h" // ok include
-#include "fl/stl/cstdio.h" // ok include
-#include "fl/stl/algorithm.h"
-#include "fl/stl/new.h"
+#include "fl/int.h"
+#include "fl/stl/function.h"
 #include "fl/stl/ostream.h"
 #include "fl/stl/cstring.h"
-#include "fl/stl/move.h"
 #include "fl/unused.h"
-#include "fl/stl/ios.h"
-#include "fl/str.h"
 
 
 
@@ -670,15 +665,11 @@ FL_TEST_CASE("fl::printf handles length modifiers") {
 
     char buf[128];
 
-    FL_SUBCASE("%lu (unsigned long) - show actual output") {
+    FL_SUBCASE("%lu (unsigned long)") {
         fl::u32 value = 4294967295U;
         fl::snprintf(buf, sizeof(buf), "Value: %lu", static_cast<unsigned long>(value));
-
-        // FORCE output to be visible in test results
-        fl::string result(buf);
-
-        // UNCONDITIONAL FAILURE to show output
-        FL_REQUIRE_MESSAGE(1 == 2, "TEST IS RUNNING! Output was: " << result.c_str());
+        FL_CHECK(fl::string(buf).find("<unknown_format>") == fl::string::npos);
+        FL_CHECK(fl::string(buf).find("4294967295") != fl::string::npos);
     }
 
     FL_SUBCASE("%ld (signed long)") {
