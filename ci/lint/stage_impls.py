@@ -19,6 +19,11 @@ from ci.python_lint_cache import (
 )
 
 
+# IWYU (Include-What-You-Use) is currently disabled because it doesn't work well
+# with platform code and complains about missing headers that are provided by the framework
+ENABLE_IWYU = False
+
+
 class Colors:
     """ANSI color codes."""
 
@@ -126,6 +131,10 @@ def run_iwyu_pragma_check() -> bool:
     print("🔍 IWYU PRAGMA CHECK")
     print("--------------------")
 
+    if not ENABLE_IWYU:
+        print("⏭️  IWYU pragma check disabled (ENABLE_IWYU = False)")
+        return True
+
     result = subprocess.run(
         ["uv", "run", "python", "ci/lint_cpp/iwyu_pragma_check.py"],
         capture_output=False,
@@ -152,6 +161,10 @@ def run_iwyu_analysis(run_full: bool, run_iwyu: bool, run_strict: bool = False) 
     print("")
     print("🔍 INCLUDE-WHAT-YOU-USE ANALYSIS")
     print("---------------------------------")
+
+    if not ENABLE_IWYU:
+        print("⏭️  IWYU disabled (ENABLE_IWYU = False)")
+        return True
 
     if run_full or run_iwyu or run_strict:
         print("Running IWYU on C++ test suite...")
@@ -518,6 +531,9 @@ def run_iwyu_pragma_check_single_file(file_path: str) -> bool:
     Returns:
         True if file has IWYU pragma or is not in platforms/, False otherwise
     """
+    if not ENABLE_IWYU:
+        return True
+
     result = subprocess.run(
         ["uv", "run", "python", "ci/lint_cpp/iwyu_pragma_check.py", file_path],
         capture_output=True,
@@ -547,6 +563,10 @@ def run_iwyu_single_file(file_path: str) -> bool:
     Returns:
         True if IWYU passed (no violations), False otherwise
     """
+    # Check if IWYU is enabled
+    if not ENABLE_IWYU:
+        return True
+
     # Skip .ino files - they need to be compiled through the wrapper template
     # For full IWYU analysis on .ino files, use the full build system:
     # `bash lint --iwyu` or `uv run test.py --examples --check --build`
