@@ -497,7 +497,7 @@ class ANIMartRIX {
     // find the right led index according to you LED matrix wiring
 
     void get_ready() { // wait until new buffer is ready, measure time
-        a = ::micros();
+        a = fl::micros();
         logOutput();
     }
 
@@ -505,9 +505,9 @@ class ANIMartRIX {
 
     // virtual void setPixelColorInternal(int index, rgb pixel) = 0;
 
-    void logOutput() { b = ::micros(); }
+    void logOutput() { b = fl::micros(); }
 
-    void logFrame() { c = ::micros(); }
+    void logFrame() { c = fl::micros(); }
 
     // Show the current framerate, rendered pixels per second,
     // rendering time & time spend to push the data to the leds.
@@ -1213,7 +1213,7 @@ class ANIMartRIX {
 
         get_ready();
 
-        a = ::micros(); // for time measurement in report_performance()
+        a = fl::micros(); // for time measurement in report_performance()
 
         timings.master_speed = 0.001; // speed ratios for the oscillators
         timings.ratio[0] = 3;         // higher values = faster transitions
