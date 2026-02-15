@@ -9,9 +9,10 @@
 // IWYU pragma: private
 
 #include "platforms/esp/is_esp.h"
+#include "fl/has_include.h"
 
 // Only compile for ESP32-P4 with RGB LCD support
-#if defined(FL_IS_ESP_32P4) && __has_include("esp_lcd_panel_rgb.h")
+#if defined(FL_IS_ESP_32P4) && FL_HAS_INCLUDE("esp_lcd_panel_rgb.h")
 
 #include "ilcd_rgb_peripheral.h"
 #include "esp_lcd_panel_ops.h"

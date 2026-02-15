@@ -27,6 +27,7 @@
 // ============================================================================
 
 #include "is_stm32.h"
+#include "fl/has_include.h"
 
 #ifndef FL_IS_STM32
     #error "stm32_capabilities.h included on non-STM32 platform"
@@ -184,157 +185,157 @@
 // ============================================================================
 // STM32 HAL/LL Header Includes
 // ============================================================================
-#if __has_include("stm32_def.h")
+#if FL_HAS_INCLUDE("stm32_def.h")
     #include <stm32_def.h>
 
     // Family-specific LL (Low-Layer) driver includes for performance-critical code
     #if defined(FL_IS_STM32_F1)
         // F1 LL driver headers
-        #if __has_include("stm32f1xx_ll_tim.h")
+        #if FL_HAS_INCLUDE("stm32f1xx_ll_tim.h")
             #include "stm32f1xx_ll_tim.h"
         #endif
-        #if __has_include("stm32f1xx_ll_dma.h")
+        #if FL_HAS_INCLUDE("stm32f1xx_ll_dma.h")
             #include "stm32f1xx_ll_dma.h"
         #endif
-        #if __has_include("stm32f1xx_ll_gpio.h")
+        #if FL_HAS_INCLUDE("stm32f1xx_ll_gpio.h")
             #include "stm32f1xx_ll_gpio.h"
         #endif
-        #if __has_include("stm32f1xx_ll_bus.h")
+        #if FL_HAS_INCLUDE("stm32f1xx_ll_bus.h")
             #include "stm32f1xx_ll_bus.h"
         #endif
 
     #elif defined(FL_IS_STM32_F2)
         // F2 LL driver headers
-        #if __has_include("stm32f2xx_ll_tim.h")
+        #if FL_HAS_INCLUDE("stm32f2xx_ll_tim.h")
             #include "stm32f2xx_ll_tim.h"
         #endif
-        #if __has_include("stm32f2xx_ll_dma.h")
+        #if FL_HAS_INCLUDE("stm32f2xx_ll_dma.h")
             #include "stm32f2xx_ll_dma.h"
         #endif
-        #if __has_include("stm32f2xx_ll_gpio.h")
+        #if FL_HAS_INCLUDE("stm32f2xx_ll_gpio.h")
             #include "stm32f2xx_ll_gpio.h"
         #endif
-        #if __has_include("stm32f2xx_ll_bus.h")
+        #if FL_HAS_INCLUDE("stm32f2xx_ll_bus.h")
             #include "stm32f2xx_ll_bus.h"
         #endif
 
     #elif defined(FL_IS_STM32_F4)
         // F4 LL driver headers
-        #if __has_include("stm32f4xx_ll_tim.h")
+        #if FL_HAS_INCLUDE("stm32f4xx_ll_tim.h")
             #include "stm32f4xx_ll_tim.h"
         #endif
-        #if __has_include("stm32f4xx_ll_dma.h")
+        #if FL_HAS_INCLUDE("stm32f4xx_ll_dma.h")
             #include "stm32f4xx_ll_dma.h"
         #endif
-        #if __has_include("stm32f4xx_ll_gpio.h")
+        #if FL_HAS_INCLUDE("stm32f4xx_ll_gpio.h")
             #include "stm32f4xx_ll_gpio.h"
         #endif
-        #if __has_include("stm32f4xx_ll_bus.h")
+        #if FL_HAS_INCLUDE("stm32f4xx_ll_bus.h")
             #include "stm32f4xx_ll_bus.h"
         #endif
 
     #elif defined(FL_IS_STM32_F7)
         // F7 LL driver headers
-        #if __has_include("stm32f7xx_ll_tim.h")
+        #if FL_HAS_INCLUDE("stm32f7xx_ll_tim.h")
             #include "stm32f7xx_ll_tim.h"
         #endif
-        #if __has_include("stm32f7xx_ll_dma.h")
+        #if FL_HAS_INCLUDE("stm32f7xx_ll_dma.h")
             #include "stm32f7xx_ll_dma.h"
         #endif
-        #if __has_include("stm32f7xx_ll_gpio.h")
+        #if FL_HAS_INCLUDE("stm32f7xx_ll_gpio.h")
             #include "stm32f7xx_ll_gpio.h"
         #endif
-        #if __has_include("stm32f7xx_ll_bus.h")
+        #if FL_HAS_INCLUDE("stm32f7xx_ll_bus.h")
             #include "stm32f7xx_ll_bus.h"
         #endif
 
     #elif defined(FL_IS_STM32_L4)
         // L4 LL driver headers
-        #if __has_include("stm32l4xx_ll_tim.h")
+        #if FL_HAS_INCLUDE("stm32l4xx_ll_tim.h")
             #include "stm32l4xx_ll_tim.h"
         #endif
-        #if __has_include("stm32l4xx_ll_dma.h")
+        #if FL_HAS_INCLUDE("stm32l4xx_ll_dma.h")
             #include "stm32l4xx_ll_dma.h"
         #endif
-        #if __has_include("stm32l4xx_ll_gpio.h")
+        #if FL_HAS_INCLUDE("stm32l4xx_ll_gpio.h")
             #include "stm32l4xx_ll_gpio.h"
         #endif
-        #if __has_include("stm32l4xx_ll_bus.h")
+        #if FL_HAS_INCLUDE("stm32l4xx_ll_bus.h")
             #include "stm32l4xx_ll_bus.h"
         #endif
         // L4 also needs DMAMUX
         #if defined(FASTLED_STM32_HAS_DMAMUX)
-            #if __has_include("stm32l4xx_ll_dmamux.h")
+            #if FL_HAS_INCLUDE("stm32l4xx_ll_dmamux.h")
                 #include "stm32l4xx_ll_dmamux.h"
             #endif
         #endif
 
     #elif defined(FL_IS_STM32_H7)
         // H7 LL driver headers
-        #if __has_include("stm32h7xx_ll_tim.h")
+        #if FL_HAS_INCLUDE("stm32h7xx_ll_tim.h")
             #include "stm32h7xx_ll_tim.h"
         #endif
-        #if __has_include("stm32h7xx_ll_dma.h")
+        #if FL_HAS_INCLUDE("stm32h7xx_ll_dma.h")
             #include "stm32h7xx_ll_dma.h"
         #endif
-        #if __has_include("stm32h7xx_ll_gpio.h")
+        #if FL_HAS_INCLUDE("stm32h7xx_ll_gpio.h")
             #include "stm32h7xx_ll_gpio.h"
         #endif
-        #if __has_include("stm32h7xx_ll_bus.h")
+        #if FL_HAS_INCLUDE("stm32h7xx_ll_bus.h")
             #include "stm32h7xx_ll_bus.h"
         #endif
         // H7 has DMAMUX
         #if defined(FASTLED_STM32_HAS_DMAMUX)
-            #if __has_include("stm32h7xx_ll_dmamux.h")
+            #if FL_HAS_INCLUDE("stm32h7xx_ll_dmamux.h")
                 #include "stm32h7xx_ll_dmamux.h"
             #endif
         #endif
         // H7 has BDMA
         #if defined(FASTLED_STM32_HAS_BDMA)
-            #if __has_include("stm32h7xx_ll_bdma.h")
+            #if FL_HAS_INCLUDE("stm32h7xx_ll_bdma.h")
                 #include "stm32h7xx_ll_bdma.h"
             #endif
         #endif
         // H7 has MDMA
         #if defined(FASTLED_STM32_HAS_MDMA)
-            #if __has_include("stm32h7xx_ll_mdma.h")
+            #if FL_HAS_INCLUDE("stm32h7xx_ll_mdma.h")
                 #include "stm32h7xx_ll_mdma.h"
             #endif
         #endif
 
     #elif defined(FL_IS_STM32_G4)
         // G4 LL driver headers
-        #if __has_include("stm32g4xx_ll_tim.h")
+        #if FL_HAS_INCLUDE("stm32g4xx_ll_tim.h")
             #include "stm32g4xx_ll_tim.h"
         #endif
-        #if __has_include("stm32g4xx_ll_dma.h")
+        #if FL_HAS_INCLUDE("stm32g4xx_ll_dma.h")
             #include "stm32g4xx_ll_dma.h"
         #endif
-        #if __has_include("stm32g4xx_ll_gpio.h")
+        #if FL_HAS_INCLUDE("stm32g4xx_ll_gpio.h")
             #include "stm32g4xx_ll_gpio.h"
         #endif
-        #if __has_include("stm32g4xx_ll_bus.h")
+        #if FL_HAS_INCLUDE("stm32g4xx_ll_bus.h")
             #include "stm32g4xx_ll_bus.h"
         #endif
         // G4 has DMAMUX
         #if defined(FASTLED_STM32_HAS_DMAMUX)
-            #if __has_include("stm32g4xx_ll_dmamux.h")
+            #if FL_HAS_INCLUDE("stm32g4xx_ll_dmamux.h")
                 #include "stm32g4xx_ll_dmamux.h"
             #endif
         #endif
 
     #elif defined(FL_IS_STM32_U5)
         // U5 LL driver headers (GPDMA-based)
-        #if __has_include("stm32u5xx_ll_tim.h")
+        #if FL_HAS_INCLUDE("stm32u5xx_ll_tim.h")
             #include "stm32u5xx_ll_tim.h"
         #endif
-        #if __has_include("stm32u5xx_ll_dma.h")
+        #if FL_HAS_INCLUDE("stm32u5xx_ll_dma.h")
             #include "stm32u5xx_ll_dma.h"
         #endif
-        #if __has_include("stm32u5xx_ll_gpio.h")
+        #if FL_HAS_INCLUDE("stm32u5xx_ll_gpio.h")
             #include "stm32u5xx_ll_gpio.h"
         #endif
-        #if __has_include("stm32u5xx_ll_bus.h")
+        #if FL_HAS_INCLUDE("stm32u5xx_ll_bus.h")
             #include "stm32u5xx_ll_bus.h"
         #endif
     #endif

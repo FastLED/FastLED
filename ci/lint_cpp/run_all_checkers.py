@@ -19,6 +19,7 @@ from ci.lint_cpp.banned_headers_checker import (
     BANNED_HEADERS_PLATFORMS,
     BannedHeadersChecker,
 )
+from ci.lint_cpp.banned_macros_checker import BannedMacrosChecker
 
 # Import all checker classes
 from ci.lint_cpp.check_namespace_includes import NamespaceIncludesChecker
@@ -137,6 +138,7 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
         PlatformTrampolineChecker(),  # Enforce trampoline architecture in src/fl/** and root src/
         WeakAttributeChecker(),
         AttributeChecker(),  # Checks all C++ standard attributes (replaces MaybeUnusedChecker)
+        BannedMacrosChecker(),  # Checks for banned preprocessor macros like __has_include
         FlIsDefinedChecker(),
         # Note: Private libc++ headers checking is now integrated into BannedHeadersChecker
         # Note: _build.hpp hierarchy checking is now integrated into test_unity_build.py

@@ -86,6 +86,9 @@ bool UsbSerialJtagEsp32::initDriver() {
     esp_rom_printf("\n=== USB-Serial JTAG Driver Init ===\n");
 
     // ROBUST DRIVER DETECTION:
+    // usb_serial_jtag_is_driver_installed() was added in ESP-IDF 5.4.0
+    // For earlier versions, we attempt to install and handle errors
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 4, 0)
     // Use usb_serial_jtag_is_driver_installed() to check if driver already exists
     if (usb_serial_jtag_is_driver_installed()) {
         esp_rom_printf("USB-Serial JTAG: Driver already installed (inherited from Arduino or bootloader)\n");
@@ -96,6 +99,11 @@ bool UsbSerialJtagEsp32::initDriver() {
 
     // Driver not installed - install it ourselves
     esp_rom_printf("USB-Serial JTAG: Driver not detected, installing...\n");
+#else
+    // ESP-IDF < 5.4.0: No is_driver_installed() function available
+    // Attempt to install driver - if it fails with ESP_ERR_INVALID_STATE, driver already installed
+    esp_rom_printf("USB-Serial JTAG: Attempting driver installation...\n");
+#endif
 
     // Configure USB-Serial JTAG with buffer sizes
     usb_serial_jtag_driver_config_t usb_config = {};
@@ -117,19 +125,37 @@ bool UsbSerialJtagEsp32::initDriver() {
         vTaskDelay(50 / portTICK_PERIOD_MS);  // 50ms delay
         esp_rom_printf("USB-Serial JTAG: Post-install delay complete\n");
 
-        // Verify installation worked
+        // Verify installation worked (only if function is available)
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 4, 0)
         if (usb_serial_jtag_is_driver_installed()) {
             esp_rom_printf("USB-Serial JTAG: Verification OK - buffered mode active\n");
         } else {
             esp_rom_printf("WARNING: USB-Serial JTAG verification failed\n");
         }
+#else
+        esp_rom_printf("USB-Serial JTAG: Driver installed (verification not available in IDF < 5.4)\n");
+#endif
 
         return true;
     }
 
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 4, 0)
     // Installation failed - will fall back to ROM UART
     esp_rom_printf("ERROR: USB-Serial JTAG driver installation failed (err=0x%x) - FALLING BACK TO ROM UART\n", err);
     return false;
+#else
+    // ESP-IDF < 5.4.0: If installation failed with ESP_ERR_INVALID_STATE, driver is already installed by Arduino
+    if (err == ESP_ERR_INVALID_STATE) {
+        esp_rom_printf("USB-Serial JTAG: Driver already installed by Arduino/bootloader\n");
+        mBuffered = true;
+        mInstalledDriver = false;  // We didn't install it, so don't uninstall it
+        return true;
+    }
+
+    // Other errors - fall back to ROM UART
+    esp_rom_printf("ERROR: USB-Serial JTAG driver installation failed (err=0x%x) - FALLING BACK TO ROM UART\n", err);
+    return false;
+#endif
 
 #else
     // USB-Serial JTAG not available on this chip - fall back to ROM UART
@@ -264,12 +290,20 @@ bool UsbSerialJtagEsp32::flush(u32 timeoutMs) {
         return false;  // Driver not installed, cannot flush
     }
 
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 4, 0)
     // Wait for TX buffer to empty (all data transmitted)
     // Convert milliseconds to FreeRTOS ticks
     TickType_t timeout_ticks = timeoutMs / portTICK_PERIOD_MS;
     esp_err_t err = usb_serial_jtag_wait_tx_done(timeout_ticks);
 
     return (err == ESP_OK);
+#else
+    // ESP-IDF < 5.4.0: usb_serial_jtag_wait_tx_done() not available
+    // Just add a delay to allow transmission to complete
+    (void)timeoutMs;  // Unused in this fallback
+    vTaskDelay(10 / portTICK_PERIOD_MS);  // 10ms delay for transmission
+    return true;
+#endif
 #else
     return false;
 #endif

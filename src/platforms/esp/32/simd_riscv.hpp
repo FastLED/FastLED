@@ -2,7 +2,7 @@
 
 // IWYU pragma: private
 
-#include "platforms/esp/is_esp.h"
+#include "platforms/esp/is_esp.h"  // IWYU pragma: keep
 
 /// @file simd_riscv.hpp
 /// ESP32 RISC-V-specific SIMD implementations
@@ -10,8 +10,8 @@
 /// Provides atomic SIMD operations for ESP32 RISC-V processors (C2, C3, C5, C6, H2, P4).
 /// Currently uses scalar fallback - RISC-V vector extensions (RVV) could be added in the future.
 
-#include "fl/stl/stdint.h"
-#include "fl/align.h"
+#include "fl/stl/stdint.h"  // IWYU pragma: keep
+#include "fl/align.h"  // IWYU pragma: keep
 
 #if defined(FL_IS_ESP_32C2) || defined(FL_IS_ESP_32C3) || \
     defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32C6) || \
@@ -19,13 +19,14 @@
 
 #include "fl/force_inline.h"
 #include "fl/compiler_control.h"
+#include "fl/has_include.h"
 #include "fl/stl/math.h"  // for sqrtf
 
 // RISC-V vector extensions (RVV) support detection
 // Note: Current ESP32 RISC-V variants do not include RVV hardware
 // Future variants may support RVV intrinsics via <riscv_vector.h>
-#if __has_include(<riscv_vector.h>)
-  #include <riscv_vector.h>
+#if FL_HAS_INCLUDE(<riscv_vector.h>)
+  #include <riscv_vector.h>  // IWYU pragma: keep
   #define FASTLED_ESP32_RISCV_HAS_RVV 1
 #else
   #define FASTLED_ESP32_RISCV_HAS_RVV 0

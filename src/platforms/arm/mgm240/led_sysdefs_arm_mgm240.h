@@ -16,6 +16,7 @@
 /// - FreeRTOS compatibility with automatic detection
 
 #include "fl/stl/stdint.h"
+#include "fl/has_include.h"
 #include "platforms/arm/is_arm.h"
 
 // Include Silicon Labs EMLIB GPIO for direct register access
@@ -44,8 +45,8 @@
 /// @brief FreeRTOS-compatible critical section macros
 /// Automatically detects FreeRTOS presence and uses task-safe critical sections.
 /// Falls back to bare metal interrupt disable/enable when FreeRTOS is not available.
-#ifdef __has_include
-  #if __has_include("FreeRTOS.h")
+#ifdef FL_HAS_INCLUDE
+  #if FL_HAS_INCLUDE("FreeRTOS.h")
     #include "FreeRTOS.h"
     /// Enter critical section (FreeRTOS task-safe)
     #define cli()  taskENTER_CRITICAL()
@@ -58,7 +59,7 @@
     #define sei()  __enable_irq()
   #endif
 #else
-  // Fallback for compilers without __has_include
+  // Fallback for compilers without FL_HAS_INCLUDE
   #define cli()  __disable_irq()
   #define sei()  __enable_irq()
 #endif

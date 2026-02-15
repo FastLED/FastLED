@@ -2,16 +2,18 @@
 
 // IWYU pragma: private
 
-#include "platforms/esp/is_esp.h"
+#include "platforms/esp/is_esp.h"  // IWYU pragma: keep
 
 #ifdef FL_IS_ESP32
 
 // ok no namespace fl
 
+#include "fl/has_include.h"
+
 // FL_ESP_USE_IDF_SERIAL controls whether to use ESP-IDF UART driver or Arduino Serial
 // Auto-detect: Use IDF if Arduino is not available, otherwise default to Arduino
 #ifndef FL_ESP_USE_IDF_SERIAL
-    #if !__has_include(<Arduino.h>)
+    #if !FL_HAS_INCLUDE(<Arduino.h>)
         #define FL_ESP_USE_IDF_SERIAL 1  // Arduino not available - use ESP-IDF
     #else
         #define FL_ESP_USE_IDF_SERIAL 0  // Arduino available - use Arduino Serial by default

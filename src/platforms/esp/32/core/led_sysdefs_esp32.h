@@ -3,6 +3,7 @@
 
 // IWYU pragma: private
 #include "fl/stl/stdint.h"
+#include "fl/has_include.h"
 #include "sdkconfig.h"
 #ifndef ESP32
 #define ESP32
@@ -66,7 +67,7 @@ typedef unsigned long prog_uint32_t;
   // ESP32: IRAM_ATTR is typically provided by the framework
   // Arduino ESP32: Already defined by framework
   // ESP-IDF: Available via esp_attr.h
-  #if __has_include("esp_attr.h") && !defined(IRAM_ATTR)
+  #if FL_HAS_INCLUDE("esp_attr.h") && !defined(IRAM_ATTR)
     #ifdef __cplusplus
       extern "C" {
       #include "esp_attr.h"  // Provides IRAM_ATTR for ESP-IDF

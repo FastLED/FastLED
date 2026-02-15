@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fl/has_include.h"  // IWYU pragma: keep
+
 #include "fl/compiler_control.h"
 
 #if FL_HAS_INCLUDE(<stdlib.h>)

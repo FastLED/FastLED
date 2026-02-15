@@ -8,18 +8,19 @@
 /// Provides atomic SIMD operations for Xtensa processors using PIE (Processor Interface Extension).
 /// Currently uses scalar fallback - PIE intrinsics to be added later.
 
-#include "fl/stl/stdint.h"
-#include "fl/align.h"
+#include "fl/stl/stdint.h"  // IWYU pragma: keep
+#include "fl/align.h"  // IWYU pragma: keep
 
 #if defined(__XTENSA__)
 
 #include "fl/force_inline.h"
 #include "fl/compiler_control.h"
+#include "fl/has_include.h"
 #include "fl/stl/math.h"  // for sqrtf
 
 // Xtensa PIE intrinsics (available on ESP32, ESP32-S2, ESP32-S3)
-#if __has_include(<xtensa/tie/xt_PIE.h>)
-  #include <xtensa/tie/xt_PIE.h>
+#if FL_HAS_INCLUDE(<xtensa/tie/xt_PIE.h>)
+  #include <xtensa/tie/xt_PIE.h>  // IWYU pragma: keep
   #define FASTLED_XTENSA_HAS_PIE 1
 #else
   #define FASTLED_XTENSA_HAS_PIE 0

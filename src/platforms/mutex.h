@@ -5,6 +5,9 @@
 /// @file platforms/mutex.h
 /// @brief Platform dispatch for mutex support
 ///
+/// NOTE: IWYU analysis of this dispatcher header is not meaningful - it suggests
+/// adding platform-specific includes that are already conditionally included.
+///
 /// This header provides platform-specific mutex implementations in fl::platforms::
 /// namespace. It follows the coarse-to-fine delegation pattern, routing to
 /// platform-specific headers based on platform detection.
@@ -22,27 +25,29 @@
 /// fl::recursive_mutex in fl/stl/mutex.h bind to fl::platforms::mutex and
 /// fl::platforms::recursive_mutex.
 
-#include "platforms/is_platform.h"
+#include "fl/has_include.h"  // IWYU pragma: keep
+#include "fl/stl/thread_config.h"  // IWYU pragma: keep
+#include "platforms/is_platform.h"  // IWYU pragma: keep
 
 // Platform dispatch
 #ifdef FL_IS_ESP32
-    #include "platforms/esp/32/mutex_esp32.h"
+    #include "platforms/esp/32/mutex_esp32.h"  // IWYU pragma: keep
 #elif defined(FL_IS_RP2040)
-    #include "platforms/arm/rp/mutex_rp.h"
-#elif defined(FL_IS_STM32) && __has_include("FreeRTOS.h")
-    #include "platforms/arm/stm32/mutex_stm32.h"
+    #include "platforms/arm/rp/mutex_rp.h"  // IWYU pragma: keep
+#elif defined(FL_IS_STM32) && FL_HAS_INCLUDE("FreeRTOS.h")
+    #include "platforms/arm/stm32/mutex_stm32.h"  // IWYU pragma: keep
 #elif defined(FL_IS_STUB) || defined(FL_IS_WASM)
     // WASM uses stub mutex profile (std::mutex with pthread support)
-    #include "platforms/stub/mutex_stub.h"
+    #include "platforms/stub/mutex_stub.h"  // IWYU pragma: keep
 #elif defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
-    #include "platforms/arm/d21/mutex_samd.h"
+    #include "platforms/arm/d21/mutex_samd.h"  // IWYU pragma: keep
 #elif defined(FL_IS_TEENSY)
     // TODO: Implement Teensy mutexes
-    #include "platforms/stub/mutex_stub_noop.h"
+    #include "platforms/stub/mutex_stub_noop.h"  // IWYU pragma: keep
 #else
     // Default fallback: Use stub implementation for all platforms
     // TODO: Add platform-specific implementations here as needed
-    #include "platforms/stub/mutex_stub.h"
+    #include "platforms/stub/mutex_stub.h"  // IWYU pragma: keep
 #endif
 
 #ifndef FASTLED_MULTITHREADED

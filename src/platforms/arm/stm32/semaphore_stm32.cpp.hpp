@@ -4,12 +4,13 @@
 /// @brief STM32 FreeRTOS semaphore platform implementation
 
 #include "is_stm32.h"
+#include "fl/has_include.h"
 
 #if defined(FL_IS_STM32)
 
 // Only compile if FreeRTOS is available
 // Maple/libmaple core doesn't have FreeRTOS support
-#if __has_include("FreeRTOS.h") && !defined(FL_IS_STM32_LIBMAPLE)
+#if FL_HAS_INCLUDE("FreeRTOS.h") && !defined(FL_IS_STM32_LIBMAPLE)
 
 #include "semaphore_stm32.h"
 #include "fl/warn.h"
@@ -163,5 +164,5 @@ template bool CountingSemaphoreSTM32<1>::try_acquire_until(const std::chrono::ti
 } // namespace platforms
 } // namespace fl
 
-#endif // __has_include("FreeRTOS.h")
+#endif // FL_HAS_INCLUDE("FreeRTOS.h")
 #endif // FL_IS_STM32

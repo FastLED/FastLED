@@ -8,13 +8,12 @@
 #include "platforms/is_platform.h"
 #if defined(FL_IS_ESP32)
 
+#include "fl/has_include.h"
 #include <Arduino.h>
 
-#ifdef __has_include
-    #if __has_include("driver/ledc.h")
-        #include "driver/ledc.h"
-        #define FL_CLED_HAS_LEDC 1
-    #endif
+#if FL_HAS_INCLUDE("driver/ledc.h")
+    #include "driver/ledc.h"
+    #define FL_CLED_HAS_LEDC 1
 #endif
 
 #include "platforms/esp/32/feature_flags/enabled.h"

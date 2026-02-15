@@ -6,12 +6,13 @@
 
 // FastLED.h must be included first to trigger precompiled headers for FastLED's build system
 #include "FastLED.h"
+#include "fl/has_include.h"
 
-#if __has_include("SmartMatrix.h")
+#if FL_HAS_INCLUDE("SmartMatrix.h")
 #include "SmartMatrixSketch.h"
 #else
 void setup() {
 }
 void loop() {
 }
-#endif  // __has_include("SmartMatrix.h")
+#endif  // FL_HAS_INCLUDE("SmartMatrix.h")

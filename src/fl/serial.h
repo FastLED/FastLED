@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "fl/has_include.h"  // IWYU pragma: keep
+
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstddef.h"
 #include "fl/compiler_control.h"

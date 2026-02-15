@@ -31,12 +31,13 @@
 
 // IWYU pragma: private
 #include "is_nrf52.h"
+#include "fl/has_include.h"
 
 #if defined(FL_IS_NRF52)
 
 // Detect FreeRTOS availability by checking for FreeRTOS.h inclusion
 // The Adafruit nRF52 BSP includes FreeRTOS by default
-#if __has_include("FreeRTOS.h")
+#if FL_HAS_INCLUDE("FreeRTOS.h")
 #define FASTLED_NRF52_HAS_FREERTOS 1
 #endif
 

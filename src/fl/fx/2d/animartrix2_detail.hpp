@@ -1,5 +1,6 @@
 #pragma once
 // allow-include-after-namespace
+// IWYU pragma: private, include "fl/fx/2d/animartrix2.hpp"
 
 // Animartrix2 detail: Refactored version of animartrix_detail.hpp
 // Original by Stefan Petrick 2023. Adapted to C++ by Netmindz 2023.
@@ -12,10 +13,9 @@
 // Architecture: Context struct holds all shared state. Each animation is a
 // free function (Visualizer) that operates on Context. Internally delegates
 // to animartrix_detail::ANIMartRIX for bit-identical output.
-
-#ifndef ANIMARTRIX2_INTERNAL
-#error "This file is not meant to be included directly. Include animartrix2.hpp instead."
-#endif
+//
+// NOTE: This is an internal implementation header. Do not include directly.
+//       Include "fl/fx/2d/animartrix2.hpp" instead.
 
 // Include the original detail for its ANIMartRIX base class
 #define ANIMARTRIX_INTERNAL
@@ -28,6 +28,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/sin32.h"
 #include "fl/fixed_point/s16x16.h"
+#include "fl/simd.h"
 
 
 #ifndef PI

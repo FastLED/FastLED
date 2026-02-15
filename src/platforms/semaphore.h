@@ -22,13 +22,14 @@
 /// and fl::platforms::binary_semaphore.
 
 #include "platforms/is_platform.h"
+#include "fl/has_include.h"
 
 // Platform dispatch
 #ifdef FL_IS_STUB
     #include "platforms/stub/semaphore_stub.h"
 #elif defined(ESP32)
     #include "platforms/esp/32/semaphore_esp32.h"
-#elif defined(FL_IS_STM32) && __has_include("FreeRTOS.h")
+#elif defined(FL_IS_STM32) && FL_HAS_INCLUDE("FreeRTOS.h")
     #include "platforms/arm/stm32/semaphore_stm32.h"
 #elif defined(FL_IS_RP2040)
     #include "platforms/arm/rp/semaphore_rp.h"

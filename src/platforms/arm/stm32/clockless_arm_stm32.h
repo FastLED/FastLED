@@ -4,13 +4,14 @@
 
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/vector.h"
+#include "fl/has_include.h"
 #include "fastled_delay.h"
 #include "platforms/arm/stm32/interrupts_stm32_inline.h"
 #include "platforms/arm/stm32/core_detection.h"
 #include "platforms/arm/stm32/is_stm32.h"
 
 // Get CMSIS DWT/CoreDebug registers from framework or fallback
-#if __has_include("stm32_def.h")
+#if FL_HAS_INCLUDE("stm32_def.h")
     // STM32duino core - stm32_def.h includes device header which includes core_cmX.h
     #include <stm32_def.h>
 #else

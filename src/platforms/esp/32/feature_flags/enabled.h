@@ -5,6 +5,7 @@
 
 #include "platforms/is_platform.h"
 #if defined(FL_IS_ESP32)
+#include "fl/has_include.h"
 #include "sdkconfig.h"
 #include "platforms/esp/esp_version.h"
 
@@ -90,7 +91,7 @@ FL_EXTERN_C_END
 // LCD RGB peripheral is only available on ESP32-P4 (uses RGB LCD peripheral for parallel LED driving)
 // Requires ESP-IDF 5.0+ and esp_lcd_panel_rgb.h header
 #if !defined(FASTLED_ESP32_HAS_LCD_RGB)
-#if defined(FL_IS_ESP_32P4) && __has_include("esp_lcd_panel_rgb.h")
+#if defined(FL_IS_ESP_32P4) && FL_HAS_INCLUDE("esp_lcd_panel_rgb.h")
 #define FASTLED_ESP32_HAS_LCD_RGB 1
 #else
 #define FASTLED_ESP32_HAS_LCD_RGB 0

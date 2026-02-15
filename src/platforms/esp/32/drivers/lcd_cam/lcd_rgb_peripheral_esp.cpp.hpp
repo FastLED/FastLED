@@ -6,9 +6,10 @@
 #include "platforms/is_platform.h"
 #if defined(FL_IS_ESP32)
 
+#include "fl/has_include.h"
 #include "sdkconfig.h"
 
-#if defined(FL_IS_ESP_32P4) && __has_include("esp_lcd_panel_rgb.h")
+#if defined(FL_IS_ESP_32P4) && FL_HAS_INCLUDE("esp_lcd_panel_rgb.h")
 
 #include "lcd_rgb_peripheral_esp.h"
 #include "fl/singleton.h"

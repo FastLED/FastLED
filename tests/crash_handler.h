@@ -1,12 +1,14 @@
 #ifndef CRASH_HANDLER_H
 #define CRASH_HANDLER_H
 
+#include "fl/has_include.h"  // IWYU pragma: keep
+
 // Phase 1: Include the appropriate implementation at the top (before namespace declarations)
 #ifdef _WIN32
     #include "crash_handler_win.h"
 #elif defined(USE_LIBUNWIND)
     #include "crash_handler_libunwind.h"
-#elif __has_include(<execinfo.h>)
+#elif FL_HAS_INCLUDE(<execinfo.h>)
     #define USE_EXECINFO 1
     #include "crash_handler_execinfo.h"
 #else
@@ -18,7 +20,7 @@
     namespace impl = crash_handler_win;
 #elif defined(USE_LIBUNWIND)
     namespace impl = crash_handler_libunwind;
-#elif __has_include(<execinfo.h>)
+#elif FL_HAS_INCLUDE(<execinfo.h>)
     namespace impl = crash_handler_execinfo;
 #else
     namespace impl = crash_handler_noop;

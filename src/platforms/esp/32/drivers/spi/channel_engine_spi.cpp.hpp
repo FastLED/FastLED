@@ -25,6 +25,7 @@
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 
+#include "fl/has_include.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
 
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
@@ -52,13 +53,13 @@ FL_EXTERN_C_BEGIN
 #include "soc/spi_reg.h"    // SPI_DMA_CONF_REG for ESP32-S3 DMA fix
 #include "soc/gpio_sig_map.h"  // GPIO matrix signal IDs (FSPID_OUT_IDX, HSPID_OUT_IDX, etc.)
 #include "esp_rom_gpio.h"  // esp_rom_gpio_connect_out_signal for manual GPIO routing
-#if __has_include("esp_cache.h")
+#if FL_HAS_INCLUDE("esp_cache.h")
 #include "esp_cache.h"  // For esp_cache_msync (ESP32-C6, ESP32-S3, etc.)
 #define FASTLED_SPI_HAS_CACHE_API 1
 #else
 #define FASTLED_SPI_HAS_CACHE_API 0
 #endif
-#if __has_include("esp_dma_utils.h")
+#if FL_HAS_INCLUDE("esp_dma_utils.h")
 #include "esp_dma_utils.h"  // For esp_dma_capable_malloc (ESP-IDF 5.x)
 #define FASTLED_SPI_HAS_DMA_UTILS 1
 #else
