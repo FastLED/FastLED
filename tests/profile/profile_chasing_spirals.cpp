@@ -110,8 +110,8 @@ int main(int argc, char *argv[]) {
         u32 t1 = ::micros();
 
         u32 elapsed_us = t1 - t0;
-        printf("Float:              %d frames in %lu us (%.1f us/frame)\n",
-               PROFILE_FRAMES, static_cast<unsigned long>(elapsed_us),
+        printf("Float:              %d frames in %u us (%.1f us/frame)\n",
+               PROFILE_FRAMES, elapsed_us,
                static_cast<double>(elapsed_us) / PROFILE_FRAMES);
     }
 
