@@ -1149,7 +1149,7 @@ inline void Yves(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 
-    e->a = ::micros();
+    e->a = fl::micros();
 
     e->timings.master_speed = 0.001;
     e->timings.ratio[0] = 3;
