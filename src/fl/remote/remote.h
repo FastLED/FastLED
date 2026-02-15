@@ -5,16 +5,14 @@
 #if FASTLED_ENABLE_JSON
 
 #include "fl/stl/stdint.h"
-#include "fl/stl/new.h"
-#include "fl/stl/allocator.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
 #include "fl/stl/unordered_map.h"
-#include "fl/stl/function.h"
 #include "fl/stl/vector.h"
-#include "fl/stl/strstream.h"
+#include "fl/stl/strstream.h"  // IWYU pragma: keep
 #include "fl/remote/rpc/rpc.h"
+#include "fl/remote/rpc/rpc_mode.h"
 #include "fl/remote/rpc/server.h"
 #include "fl/remote/types.h"
 #include "fl/scheduler.h"
@@ -79,10 +77,10 @@ public:
         mRpc.bind(config);
     }
 
-    /// Register method by name and function
+    /// Register method by name, function, and optional mode (default SYNC)
     template<typename Callable>
-    void bind(const char* name, Callable fn) {
-        bind(fl::Rpc::Config<Callable>{name, fl::move(fn)});
+    void bind(const char* name, Callable fn, fl::RpcMode mode = fl::RpcMode::SYNC) {
+        bind(fl::Rpc::Config<Callable>{name, fl::move(fn), mode});
     }
 
     /// Get bound method by name for direct C++ invocation
@@ -145,7 +143,21 @@ public:
         return mRpc.count();
     }
 
+    // =========================================================================
+    // Async Response Support
+    // =========================================================================
+
+    /// Send async response for a previously-called async method
+    /// The request ID is automatically retrieved from internal storage
+    void sendAsyncResponse(const char* method, const fl::Json& result);
+
 protected:
+    // Storage for async request IDs (method name -> request ID)
+    struct AsyncRequest {
+        int requestId;
+        u32 timestamp;
+    };
+    fl::unordered_map<fl::string, AsyncRequest> mAsyncRequests;
     void scheduleFunction(u32 timestamp, u32 receivedAt, const fl::Json& jsonRpcRequest);
     void recordResult(const fl::string& funcName, const fl::Json& result, u32 scheduledAt, u32 receivedAt, u32 executedAt, bool wasScheduled);
 

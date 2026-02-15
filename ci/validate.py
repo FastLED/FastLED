@@ -379,7 +379,7 @@ async def run_pin_discovery(
     end_pin: int = 21,
     timeout: float = 15.0,
     use_pyserial: bool = False,
-) -> tuple[bool, int | None, int | None]:
+) -> tuple[bool, int | None, int | None, "RpcClient | None"]:
     """Auto-discover connected pin pairs by probing adjacent GPIO pins (async).
 
     This function calls the findConnectedPins RPC to search for a jumper wire
@@ -393,10 +393,11 @@ async def run_pin_discovery(
         use_pyserial: If True, use pyserial directly instead of fbuild (for --no-fbuild)
 
     Returns:
-        Tuple of (success, tx_pin, rx_pin) where:
+        Tuple of (success, tx_pin, rx_pin, client) where:
         - success: True if pins were found and auto-applied
         - tx_pin: Discovered TX pin number (or None if not found)
         - rx_pin: Discovered RX pin number (or None if not found)
+        - client: RpcClient instance (kept open for reuse, or None on error)
     """
     print()
     print("=" * 60)
@@ -405,81 +406,84 @@ async def run_pin_discovery(
     print(f"Searching for jumper wire connection in GPIO range {start_pin}-{end_pin}")
     print()
 
+    client: RpcClient | None = None
     try:
         print("  Waiting for device to boot...")
         print("\n" + "=" * 60)
         print("RPC CLIENT DEBUG OUTPUT")
         print("=" * 60)
-        async with RpcClient(
+        client = RpcClient(
             port, timeout=timeout, use_pyserial=use_pyserial, verbose=True
-        ) as client:
-            print()
-            print("=" * 60)
-            print("PING TEST (verify basic RPC works)")
-            print("=" * 60)
-            try:
-                ping_response = await client.send("ping", retries=3)
-                print(f"✅ Ping successful: {ping_response.data}")
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
-                raise
-            except Exception as e:
-                print(f"❌ Ping failed: {e}")
-                print(
-                    "   RPC communication is not working - device may not be responding"
-                )
-                return (False, None, None)
+        )
+        await client.connect(boot_wait=3.0, drain_boot=True)
+
+        print()
+        print("=" * 60)
+        print("PING TEST (verify basic RPC works)")
+        print("=" * 60)
+        try:
+            ping_response = await client.send("ping", retries=3)
+            print(f"✅ Ping successful: {ping_response.data}")
+        except KeyboardInterrupt:
+            handle_keyboard_interrupt_properly()
+            raise
+        except Exception as e:
+            print(f"❌ Ping failed: {e}")
+            print("   RPC communication is not working - device may not be responding")
+            if client:
+                await client.close()
+            return (False, None, None, None)
+
+        print()
+        print("=" * 60)
+        print("PIN DISCOVERY")
+        print("=" * 60)
+        print("  Probing adjacent pin pairs for jumper wire connection...")
+
+        response = await client.send_and_match(
+            "findConnectedPins",
+            args=[{"startPin": start_pin, "endPin": end_pin, "autoApply": True}],
+            match_key="found",
+            retries=3,
+        )
+
+        if response.get("found", False):
+            tx_pin = response.get("txPin")
+            rx_pin = response.get("rxPin")
+            auto_applied = response.get("autoApplied", False)
 
             print()
-            print("=" * 60)
-            print("PIN DISCOVERY")
-            print("=" * 60)
-            print("  Probing adjacent pin pairs for jumper wire connection...")
-
-            response = await client.send_and_match(
-                "findConnectedPins",
-                args=[{"startPin": start_pin, "endPin": end_pin, "autoApply": True}],
-                match_key="found",
-                retries=3,
+            print(f"{Fore.GREEN}✅ PIN DISCOVERY SUCCESSFUL{Style.RESET_ALL}")
+            print(f"   Found connected pins: TX (GPIO {tx_pin}) → RX (GPIO {rx_pin})")
+            if auto_applied:
+                print(f"   {Fore.CYAN}Pins auto-applied to firmware{Style.RESET_ALL}")
+            print()
+            # Return client along with pins - keep connection open!
+            return (True, tx_pin, rx_pin, client)
+        else:
+            print()
+            print(
+                f"{Fore.YELLOW}⚠️  PIN DISCOVERY: No connection found{Style.RESET_ALL}"
             )
-
-            if response.get("found", False):
-                tx_pin = response.get("txPin")
-                rx_pin = response.get("rxPin")
-                auto_applied = response.get("autoApplied", False)
-
-                print()
-                print(f"{Fore.GREEN}✅ PIN DISCOVERY SUCCESSFUL{Style.RESET_ALL}")
-                print(
-                    f"   Found connected pins: TX (GPIO {tx_pin}) → RX (GPIO {rx_pin})"
-                )
-                if auto_applied:
-                    print(
-                        f"   {Fore.CYAN}Pins auto-applied to firmware{Style.RESET_ALL}"
-                    )
-                print()
-                return (True, tx_pin, rx_pin)
-            else:
-                print()
-                print(
-                    f"{Fore.YELLOW}⚠️  PIN DISCOVERY: No connection found{Style.RESET_ALL}"
-                )
-                print()
-                print(
-                    f"   {response.get('message', 'No connected pin pairs detected')}"
-                )
-                print()
-                print(f"   {Fore.YELLOW}Falling back to default pins{Style.RESET_ALL}")
-                print()
-                return (False, None, None)
+            print()
+            print(f"   {response.get('message', 'No connected pin pairs detected')}")
+            print()
+            print(f"   {Fore.YELLOW}Falling back to default pins{Style.RESET_ALL}")
+            print()
+            # Return client even on failure - keep connection open!
+            return (False, None, None, client)
 
     except RpcTimeoutError:
         print()
         print(f"{Fore.YELLOW}⚠️  PIN DISCOVERY TIMEOUT{Style.RESET_ALL}")
         print(f"   No response within {timeout} seconds, falling back to default pins")
         print()
-        return (False, None, None)
+        if client:
+            await client.close()
+        return (False, None, None, None)
     except KeyboardInterrupt:
+        if client:
+            await client.close()
         handle_keyboard_interrupt_properly()
         raise
     except (RuntimeError, OSError) as e:
@@ -488,14 +492,18 @@ async def run_pin_discovery(
         print(f"   Serial error: {e}")
         print("   Falling back to default pins")
         print()
-        return (False, None, None)
+        if client:
+            await client.close()
+        return (False, None, None, None)
     except Exception as e:
         print()
         print(f"{Fore.YELLOW}⚠️  PIN DISCOVERY ERROR{Style.RESET_ALL}")
         print(f"   Unexpected error: {e}")
         print("   Falling back to default pins")
         print()
-        return (False, None, None)
+        if client:
+            await client.close()
+        return (False, None, None, None)
 
 
 # ============================================================
@@ -1491,24 +1499,14 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
 
                 try:
                     # Try to open the serial port briefly
-                    if args.no_fbuild:
-                        # Use pyserial directly when --no-fbuild is specified
-                        import serial
+                    # Use pyserial to avoid event loop conflicts with fbuild
+                    import serial
 
-                        with serial.Serial(upload_port, 115200, timeout=0.1) as _ser:
-                            port_ready = True
-                            elapsed = time.time() - start_time
-                            print(f"✅ Serial port available after {elapsed:.1f}s")
-                            break
-                    else:
-                        # Use fbuild's SerialMonitor (default)
-                        from fbuild.api import SerialMonitor as FbuildSerialMonitor
-
-                        with FbuildSerialMonitor(upload_port, baud_rate=115200) as _mon:
-                            port_ready = True
-                            elapsed = time.time() - start_time
-                            print(f"✅ Serial port available after {elapsed:.1f}s")
-                            break
+                    with serial.Serial(upload_port, 115200, timeout=0.1) as _ser:
+                        port_ready = True
+                        elapsed = time.time() - start_time
+                        print(f"✅ Serial port available after {elapsed:.1f}s")
+                        break
                 except KeyboardInterrupt:
                     handle_keyboard_interrupt_properly()
                     raise
@@ -1604,6 +1602,14 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
         effective_rx_pin: int | None = None
         pins_discovered = False
 
+        # WORKAROUND: Force pyserial for ESP32-C6 to avoid event loop conflict
+        # fbuild's SerialMonitor uses run_until_complete() which fails in async context
+        # See: .loop/VALIDATE_EVENT_LOOP_ISSUE.md
+        force_pyserial = args.no_fbuild or final_environment == "esp32c6"
+
+        # Store discovery client for reuse (keep connection open!)
+        discovery_client: RpcClient | None = None
+
         # Skip pin discovery and GPIO pre-test for SIMD mode (no hardware needed)
         if simd_test_mode:
             print("\n📌 SIMD mode: skipping pin discovery and GPIO pre-test")
@@ -1624,9 +1630,12 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
         # Auto-discover pins if enabled and no CLI override
         elif args.auto_discover_pins:
             print("\n🔍 Auto-discovery enabled - searching for connected pins...")
-            success, discovered_tx, discovered_rx = await run_pin_discovery(
-                upload_port, use_pyserial=args.no_fbuild
-            )
+            (
+                success,
+                discovered_tx,
+                discovered_rx,
+                discovery_client,
+            ) = await run_pin_discovery(upload_port, use_pyserial=force_pyserial)
 
             if success and discovered_tx is not None and discovered_rx is not None:
                 effective_tx_pin = discovered_tx
@@ -1644,6 +1653,10 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                 print(
                     f"📌 Using default pins: TX={effective_tx_pin}, RX={effective_rx_pin}"
                 )
+                # Close discovery client if we got one but discovery failed
+                if discovery_client:
+                    await discovery_client.close()
+                    discovery_client = None
         else:
             # Auto-discovery disabled, use defaults
             effective_tx_pin = PIN_TX
@@ -1664,7 +1677,7 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
             upload_port,
             effective_tx_pin or PIN_TX,
             effective_rx_pin or PIN_RX,
-            use_pyserial=args.no_fbuild,
+            use_pyserial=force_pyserial,  # Use same backend as pin discovery
         ):
             print()
             print(f"{Fore.RED}=" * 60)
@@ -1696,7 +1709,7 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                 # Use short boot_wait - device already rebooted and we waited for port
                 print("   ⏳ Connecting to device...", end="", flush=True)
                 client = RpcClient(
-                    upload_port, timeout=10.0, use_pyserial=args.no_fbuild
+                    upload_port, timeout=10.0, use_pyserial=force_pyserial
                 )
                 await client.connect(
                     boot_wait=1.0
@@ -1738,10 +1751,9 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                     await client.close()
 
         # ============================================================
-        # CUSTOM SERIAL MONITORING - Stay connected throughout
+        # RPC CLIENT - Use RpcClient for reliable communication
         # ============================================================
-        # We handle serial connection ourselves to avoid reconnection/reboot
-        # Flow: connect → send RPCs → monitor for stop word → parse results → close
+        # Flow: connect → send RPCs via client.send() → get results from response
 
         # Kill port users before starting
         if upload_port:
@@ -1750,293 +1762,170 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
 
         print()
         print("=" * 60)
-        print("MONITORING DEVICE OUTPUT")
+        print("EXECUTING VALIDATION TESTS VIA RPC")
         print("=" * 60)
 
-        output_lines: list[str] = []
-        stop_word_found: str | None = None
         test_failed = False
-        start_time = time.time()
+        stop_word_found: str | None = None
 
+        client: RpcClient | None = None
         try:
-            # Open serial connection (stays open until we're done)
-            print(f"📡 Connecting to {upload_port}...")
-            if args.no_fbuild:
-                from ci.util.pyserial_monitor import SerialMonitor as PySerialMonitor
-
-                monitor = PySerialMonitor(upload_port, baud_rate=115200)
-                monitor.__enter__()
+            # Reuse existing connection from pin discovery, or create new one
+            if discovery_client:
+                client = discovery_client
             else:
-                from fbuild.api import SerialMonitor as FbuildSerialMonitor
-
-                monitor = FbuildSerialMonitor(upload_port, baud_rate=115200)
-                monitor.__enter__()
-
-            # Wait for device boot
-            print("⏳ Waiting for device boot...")
-            time.sleep(3.0)
-
-            # Drain boot output and wait for ready signal
-            print("📥 Draining boot output...")
-            boot_lines = 0
-            device_ready = False
-            drain_start = time.time()
-            max_drain_time = 120.0  # Wait up to 120 seconds for device to be ready
-
-            while time.time() - drain_start < max_drain_time:
-                try:
-                    for line in monitor.read_lines(timeout=0.5):
-                        boot_lines += 1
-                        # Check for ready signal: RESULT: {"ready":true...}
-                        if "RESULT:" in line and '"ready":true' in line:
-                            device_ready = True
-                            print(f"   ✓ Device ready signal received")
-                            break
-                        # Also check for legacy ready message
-                        if "[SETUP COMPLETE]" in line or "Validation ready" in line:
-                            device_ready = True
-                            print(f"   ✓ Device ready message received")
-                            break
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
-                except Exception:
-                    break
-
-                if device_ready:
-                    break
-
-                # Small delay to avoid busy-waiting
-                time.sleep(0.01)
-
-            print(f"   Drained {boot_lines} boot lines")
-
-            if not device_ready:
-                print(
-                    f"⚠️  Warning: Device ready signal not detected after {max_drain_time}s"
+                # Create new RPC client
+                print(f"📡 Connecting to {upload_port}...")
+                client = RpcClient(
+                    upload_port,
+                    timeout=timeout_seconds,
+                    use_pyserial=force_pyserial,
+                    verbose=True,  # Enable verbose mode to see debug output
                 )
-                print(f"   Proceeding anyway, but RPC commands may fail...")
-            else:
-                # Give device a brief moment to finish initialization
-                time.sleep(0.5)
+                await client.connect(boot_wait=3.0, drain_boot=True)
+            print(f"{Fore.GREEN}✓ Connected{Style.RESET_ALL}")
 
-            # Send RPC commands
-            print(f"🔧 Sending {len(json_rpc_commands)} JSON-RPC command(s)...")
-            rpc_send_start = time.time()
-            for i, cmd in enumerate(json_rpc_commands, 1):
-                cmd_str = json.dumps(cmd, separators=(",", ":"))
-                monitor.write(cmd_str + "\n")
-                print(
-                    f"   ✓ Sent command {i}/{len(json_rpc_commands)}: {cmd['method']}()"
-                )
-                time.sleep(0.1)  # Brief delay between commands
-
-            # Monitor output for stop word
-            print(f"\n👀 Monitoring output (timeout: {timeout_seconds}s)...")
+            # Send RPC commands sequentially
+            print(f"\n🔧 Executing {len(json_rpc_commands)} RPC command(s)...")
             print("─" * 60)
 
-            # Track if we've received any response from the test
-            test_started = False
-            test_start_timeout = 30.0  # 30 second timeout for test to start
-            last_response_time = rpc_send_start
+            for i, cmd in enumerate(json_rpc_commands, 1):
+                method = cmd.get("method", "unknown")
+                params = cmd.get("params", [])
 
-            while True:
-                # Check timeout
-                elapsed = time.time() - start_time
-                if elapsed >= timeout_seconds:
-                    print(f"\n⏱️  Timeout after {timeout_seconds}s")
+                print(f"\n[{i}/{len(json_rpc_commands)}] Calling {method}()...")
+
+                try:
+                    # Send RPC request with extended timeout for test execution
+                    # runSingleTest can take 5-10 seconds for validation tests
+                    response = await client.send(
+                        method,
+                        args=params if params else [],
+                        timeout=120.0,  # Allow up to 2 minutes for test
+                    )
+
+                    # Parse response data
+                    test_data = response.data
+
+                    if not isinstance(test_data, dict):
+                        print(
+                            f"{Fore.YELLOW}⚠️  Unexpected response type: {type(test_data)}{Style.RESET_ALL}"
+                        )
+                        print(f"   Response: {test_data}")
+                        continue
+
+                    # Check test results
+                    if test_data.get("success") and test_data.get("passed"):
+                        stop_word_found = "OK"
+                        print(f"{Fore.GREEN}✅ Test passed{Style.RESET_ALL}")
+
+                        # Display test summary
+                        if "passedTests" in test_data and "totalTests" in test_data:
+                            print(
+                                f"   Tests: {test_data['passedTests']}/{test_data['totalTests']} passed"
+                            )
+                        if "duration_ms" in test_data:
+                            print(f"   Duration: {test_data['duration_ms']}ms")
+
+                        # Display per-pattern details if available
+                        if "patterns" in test_data:
+                            display_pattern_details(test_data)
+
+                    elif test_data.get("success") and not test_data.get("passed"):
+                        stop_word_found = "ERROR"
+                        test_failed = True
+                        print(f"{Fore.RED}❌ Test failed{Style.RESET_ALL}")
+
+                        # Display failure details
+                        if "firstFailure" in test_data:
+                            failure = test_data["firstFailure"]
+                            print(
+                                f"   Failed pattern: {failure.get('pattern', 'unknown')}"
+                            )
+                            print(f"   Lane: {failure.get('lane', 'unknown')}")
+                            print(f"   Expected: {failure.get('expected', 'unknown')}")
+                            print(f"   Actual: {failure.get('actual', 'unknown')}")
+
+                        # Display per-pattern details if available
+                        if "patterns" in test_data:
+                            display_pattern_details(test_data)
+
+                    elif test_data.get("success") is False:
+                        stop_word_found = "ERROR"
+                        test_failed = True
+                        print(f"{Fore.RED}❌ RPC command failed{Style.RESET_ALL}")
+                        if "error" in test_data:
+                            print(f"   Error: {test_data['error']}")
+
+                    else:
+                        # Generic success response (e.g., ping, status, setup commands)
+                        stop_word_found = "OK"
+                        print(f"{Fore.GREEN}✓ Command completed{Style.RESET_ALL}")
+                        if test_data:
+                            print(f"   Response: {test_data}")
+
+                except RpcTimeoutError:
+                    print(f"{Fore.RED}❌ RPC timeout{Style.RESET_ALL}")
+                    print(f"   No response within {120}s")
+                    test_failed = True
+                    stop_word_found = "ERROR"
                     break
 
-                # Check if test hasn't started within 30 seconds of sending commands
-                if not test_started:
-                    time_since_rpc = time.time() - last_response_time
-                    if time_since_rpc >= test_start_timeout:
-                        print(
-                            f"\n{Fore.RED}❌ ERROR: Test did not start within {test_start_timeout}s{Style.RESET_ALL}"
-                        )
-                        print(
-                            f"   No response received from device after sending RPC commands"
-                        )
-                        print(f"   Possible causes:")
-                        print(
-                            f"   1. Device is not responding (check serial connection)"
-                        )
-                        print(f"   2. Firmware is not running (check device reboot)")
-                        print(f"   3. RPC system initialization failed")
-                        test_failed = True
-                        break
-
-                # Check interrupt
-                if is_interrupted():
-                    raise KeyboardInterrupt()
-
-                # Read line
-                line = None
-                try:
-                    for read_line in monitor.read_lines(timeout=0.1):
-                        line = read_line
-                        break
                 except KeyboardInterrupt:
                     handle_keyboard_interrupt_properly()
-                except Exception:
-                    continue
+                    raise
 
-                if not line:
-                    continue
-
-                # Store line
-                output_lines.append(line)
-
-                # Mark test as started if we receive any output (indicates device is running)
-                if not test_started:
-                    test_started = True
-                    last_response_time = time.time()
-
-                # Check for JSON-RPC responses (RPC-based validation)
-                if line.startswith("REMOTE:"):
-                    try:
-                        json_str = line[7:].strip()  # Remove "REMOTE: " prefix
-                        response = json.loads(json_str)
-
-                        # Check if this is a response (has result or error field)
-                        if "result" in response or "error" in response:
-                            # RPC command completed - extract success status
-                            if "result" in response:
-                                result = response["result"]
-                                # Check if result indicates test success/failure
-                                if isinstance(result, dict):
-                                    if result.get("success") and result.get("passed"):
-                                        stop_word_found = "OK"
-                                        print(
-                                            f"\n{Fore.GREEN}✓ RPC test passed{Style.RESET_ALL}"
-                                        )
-                                    elif result.get("success") and not result.get(
-                                        "passed"
-                                    ):
-                                        stop_word_found = "ERROR"
-                                        print(
-                                            f"\n{Fore.RED}✗ RPC test failed{Style.RESET_ALL}"
-                                        )
-                                    elif result.get("success") is False:
-                                        stop_word_found = "ERROR"
-                                        print(
-                                            f"\n{Fore.RED}✗ RPC command failed{Style.RESET_ALL}"
-                                        )
-                                    else:
-                                        # Generic success response (e.g., ping, status)
-                                        stop_word_found = "OK"
-                                        print(
-                                            f"\n{Fore.GREEN}✓ RPC command completed{Style.RESET_ALL}"
-                                        )
-                                    # Display per-pattern error details if available
-                                    if "patterns" in result:
-                                        display_pattern_details(result)
-                                else:
-                                    # Non-dict result (simple return value)
-                                    stop_word_found = "OK"
-                                    print(
-                                        f"\n{Fore.GREEN}✓ RPC command completed{Style.RESET_ALL}"
-                                    )
-                            else:
-                                # Error response
-                                stop_word_found = "ERROR"
-                                error = response.get("error", {})
-                                error_msg = (
-                                    error.get("message", "Unknown error")
-                                    if isinstance(error, dict)
-                                    else str(error)
-                                )
-                                print(
-                                    f"\n{Fore.RED}✗ RPC error: {error_msg}{Style.RESET_ALL}"
-                                )
-                            break
-                    except json.JSONDecodeError:
-                        # Not valid JSON, continue monitoring
-                        pass
-
-                # Check for stop words (legacy text-based validation)
-                if "TEST_COMPLETED_EXIT_OK" in line:
-                    stop_word_found = "OK"
-                    print(f"\n{Fore.GREEN}✓ TEST_COMPLETED_EXIT_OK{Style.RESET_ALL}")
-                    break
-                elif "TEST_COMPLETED_EXIT_ERROR" in line:
+                except Exception as e:
+                    print(f"{Fore.RED}❌ RPC error: {e}{Style.RESET_ALL}")
+                    test_failed = True
                     stop_word_found = "ERROR"
-                    print(f"\n{Fore.RED}✗ TEST_COMPLETED_EXIT_ERROR{Style.RESET_ALL}")
                     break
-
-                # Check for failure patterns
-                for pattern in fail_keywords:
-                    if pattern in line and "ERROR" in pattern:
-                        # Only flag as error if it's a real error, not test failure message
-                        if "register dump" in line or "ClearCommError" in line:
-                            test_failed = True
-                            print(
-                                f"\n{Fore.RED}❌ Device error detected: {line[:80]}{Style.RESET_ALL}"
-                            )
-                            break
-
-                # Print progress (show test completions)
-                if "PASS] Test case" in line or "FAIL] Test case" in line:
-                    print(f"  {line[:100]}")
 
         except KeyboardInterrupt:
             print("\n\n⚠️  Interrupted by user")
             handle_keyboard_interrupt_properly()
             return 130
         except Exception as e:
-            print(f"\n{Fore.RED}❌ Serial error: {e}{Style.RESET_ALL}")
+            print(f"\n{Fore.RED}❌ RPC client error: {e}{Style.RESET_ALL}")
             return 1
         finally:
-            # Close serial connection
-            monitor.__exit__(None, None, None)
-            print(f"\n✅ Serial connection closed")
+            # Close RPC client
+            if client is not None:
+                await client.close()
+                print(f"\n✅ RPC connection closed")
 
         print("─" * 60)
-        print(f"📊 Captured {len(output_lines)} output lines")
 
-        # Check if we failed due to device error
+        # Check test results
         if test_failed:
+            print(f"\n{Fore.RED}❌ VALIDATION FAILED{Style.RESET_ALL}")
             return 1
 
-        # Check if no stop word found
         if not stop_word_found:
             print(
-                f"\n{Fore.YELLOW}⚠️  No completion stop word found within timeout{Style.RESET_ALL}"
+                f"\n{Fore.YELLOW}⚠️  No test completion signal received{Style.RESET_ALL}"
             )
-            # Save output for debugging
-            debug_file = f"validation_timeout_debug.txt"
-            with open(debug_file, "w", encoding="utf-8") as f:
-                f.write(f"=== VALIDATION TIMEOUT DEBUG OUTPUT ===\n")
-                f.write(f"Environment: {final_environment}\n")
-                f.write(f"Timeout: {timeout_seconds}s\n")
-                f.write(f"Lines captured: {len(output_lines)}\n")
-                f.write(f"\n=== DEVICE OUTPUT ===\n")
-                for line in output_lines:
-                    f.write(line + "\n")
-            print(f"\n💾 Debug output saved to: {debug_file}")
             return 1
 
-        # If stop word found, parse test summary from captured output
-        if stop_word_found:
+        # If stop word found, validation succeeded
+        if stop_word_found == "OK":
             print()
             print("=" * 60)
-            print("FINAL TEST SUMMARY")
+            print(f"{Fore.GREEN}✓ VALIDATION SUCCEEDED{Style.RESET_ALL}")
             print("=" * 60)
+            return 0
+        elif stop_word_found == "ERROR":
+            print()
+            print("=" * 60)
+            print(f"{Fore.RED}✗ VALIDATION FAILED{Style.RESET_ALL}")
+            print("=" * 60)
+            return 1
 
+        # Legacy parsing code removed - RPC responses already contain test results
+        # This section is kept for backward compatibility but should not be reached
+        if False:  # Disabled legacy code
             try:
-                # Parse test results from JSON-RPC responses in output
-                # Look for RESULT lines with type="test_complete" for overall stats
-                # and type="test_case_result" for individual case results
-                # Also parse test case headers like "[PASS] Test case PARLIO (2 lanes, 100 LEDs)"
-                print("  Parsing test results from captured output...")
-
-                summary = None
-                test_complete_data = None
-                case_results = []
-                current_driver = None
-                current_lanes = None
-                current_leds = None
-
-                for line in output_lines:
+                for line in []:
                     # Parse test case headers to extract driver, lanes, LEDs
                     if "Test case" in line and ("PASS" in line or "FAIL" in line):
                         # Example: "[PASS] Test case PARLIO (2 lanes, 100 LEDs) completed successfully"

@@ -19,6 +19,14 @@
 namespace fl {
 
 // =============================================================================
+// Rpc::setResponseSink() - Set response sink for async ACKs
+// =============================================================================
+
+void Rpc::setResponseSink(fl::function<void(const fl::Json&)> sink) {
+    mResponseSink = fl::move(sink);
+}
+
+// =============================================================================
 // Rpc::handle() - Process JSON-RPC requests
 // =============================================================================
 
@@ -61,8 +69,71 @@ Json Rpc::handle(const Json& request) {
         return detail::makeJsonRpcError(-32602, "Invalid params: must be an array", request["id"]);
     }
 
+    // Check if this is an async function
+    const detail::RpcEntry& entry = it->second;
+    bool isAsync = (entry.mMode == RpcMode::ASYNC);
+
+    // Print request details for debugging
+    Serial.println("╔═══════════════════════════════════════════════════════════╗");
+    Serial.print("║ [RPC-REQUEST] Method: ");
+    Serial.println(methodName.c_str());
+    Serial.print("║ [RPC-REQUEST] Has ID: ");
+    Serial.println(request.contains("id") ? "YES" : "NO");
+    if (request.contains("id")) {
+        Serial.print("║ [RPC-REQUEST] ID value: ");
+        if (request["id"].is_int()) {
+            Serial.println(request["id"].as_int().value_or(-1));
+        } else {
+            Serial.println("NOT AN INT");
+        }
+    }
+    Serial.print("║ [RPC-REQUEST] Is async: ");
+    Serial.println(isAsync ? "YES" : "NO");
+    Serial.print("║ [RPC-REQUEST] Has ResponseSink: ");
+    Serial.println(mResponseSink ? "YES" : "NO");
+    Serial.println("╚═══════════════════════════════════════════════════════════╝");
+    Serial.flush();
+
+    // For async functions, send ACK immediately
+    if (isAsync && mResponseSink && request.contains("id")) {
+        Serial.println("╔═══════════════════════════════════════════════════════════╗");
+        Serial.print("║ [RPC] ASYNC MODE - Sending ACK for: ");
+        Serial.println(methodName.c_str());
+        Serial.println("╚═══════════════════════════════════════════════════════════╝");
+        Serial.flush();
+
+        Json ack = Json::object();
+        ack.set("jsonrpc", "2.0");
+        ack.set("id", request["id"]);
+
+        Json ackResult = Json::object();
+        ackResult.set("acknowledged", true);
+        ack.set("result", ackResult);
+
+        mResponseSink(ack);
+
+        Serial.println("╔═══════════════════════════════════════════════════════════╗");
+        Serial.println("║ [RPC] ACK sent successfully                              ║");
+        Serial.println("╚═══════════════════════════════════════════════════════════╝");
+        Serial.flush();
+        FL_DBG("RPC: Sent ACK for async method: " << methodName.c_str());
+    }
+
     // Invoke the method
-    fl::tuple<TypeConversionResult, Json> resultTuple = it->second.mInvoker->invoke(params);
+    Serial.println("╔═══════════════════════════════════════════════════════════╗");
+    Serial.print("║ [RPC] About to invoke: ");
+    Serial.println(methodName.c_str());
+    Serial.print("║ [RPC] Is async: ");
+    Serial.println(isAsync ? "YES" : "NO");
+    Serial.println("╚═══════════════════════════════════════════════════════════╝");
+    Serial.flush();
+
+    fl::tuple<TypeConversionResult, Json> resultTuple = entry.mInvoker->invoke(params);
+
+    Serial.println("╔═══════════════════════════════════════════════════════════╗");
+    Serial.println("║ [RPC] Method completed - building response               ║");
+    Serial.println("╚═══════════════════════════════════════════════════════════╝");
+    Serial.flush();
 
     TypeConversionResult convResult = fl::get<0>(resultTuple);
     Json returnVal = fl::get<1>(resultTuple);
@@ -90,6 +161,11 @@ Json Rpc::handle(const Json& request) {
             warnings.push_back(Json(convResult.warnings()[i]));
         }
         response.set("warnings", warnings);
+    }
+
+    // For async functions, mark response to not queue it (ACK already sent)
+    if (isAsync) {
+        response.set("__async", true);  // Internal marker
     }
 
     return response;
@@ -152,11 +228,16 @@ fl::vector<fl::string> Rpc::tags() const {
 Json Rpc::methods() const {
     Json arr = Json::array();
     for (auto it = mRegistry.begin(); it != mRegistry.end(); ++it) {
-        // Format: ["methodName", "returnType", [["param1", "type1"], ["param2", "type2"]]]
+        // Format: ["methodName", "returnType", [["param1", "type1"], ["param2", "type2"]], "mode"]
         Json methodTuple = Json::array();
         methodTuple.push_back(it->first.c_str());  // Method name
         methodTuple.push_back(it->second.mSchemaGenerator->resultTypeName());  // Return type
         methodTuple.push_back(it->second.mSchemaGenerator->params());  // Params array
+
+        // Add mode (sync or async)
+        const char* modeStr = (it->second.mMode == RpcMode::ASYNC) ? "async" : "sync";
+        methodTuple.push_back(modeStr);
+
         arr.push_back(methodTuple);
     }
     return arr;

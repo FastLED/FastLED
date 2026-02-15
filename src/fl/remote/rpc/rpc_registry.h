@@ -11,6 +11,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/unordered_map.h"
 #include "fl/remote/rpc/rpc_invokers.h"
+#include "fl/remote/rpc/rpc_mode.h"
 
 namespace fl {
 namespace detail {
@@ -44,6 +45,7 @@ struct RpcEntry {
     fl::shared_ptr<ErasedSchemaGenerator> mSchemaGenerator;
     fl::string mDescription;
     fl::vector<fl::string> mTags;
+    fl::RpcMode mMode = fl::RpcMode::SYNC;  // Default to synchronous
 };
 
 // =============================================================================

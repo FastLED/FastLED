@@ -32,9 +32,44 @@ bool Remote::has(const fl::string& name) const {
     return mRpc.has(name.c_str());
 }
 
+// Async Response Support
+
+void Remote::sendAsyncResponse(const char* method, const fl::Json& result) {
+    fl::string methodName(method);
+    auto it = mAsyncRequests.find(methodName);
+    if (it == mAsyncRequests.end()) {
+        FL_WARN("No pending async request for method: " << method);
+        return;
+    }
+
+    int requestId = it->second.requestId;
+    mAsyncRequests.erase(it);
+
+    // Build JSON-RPC response
+    fl::Json response = fl::Json::object();
+    response.set("jsonrpc", "2.0");
+    response.set("id", requestId);
+    response.set("result", result);
+
+    // Send via response sink
+    if (mResponseSink) {
+        mResponseSink(response);
+        FL_DBG("Sent async response for " << method << " (id=" << requestId << ")");
+    }
+}
+
 // RPC Processing
 
 fl::Json Remote::processRpc(const fl::Json& request) {
+    Serial.println("╔═══════════════════════════════════════════════════════════╗");
+    Serial.println("║ [REMOTE] processRpc() called                              ║");
+    if (request.contains("method")) {
+        Serial.print("║ [REMOTE] Method: ");
+        Serial.println(request["method"].as_string().value_or("unknown").c_str());
+    }
+    Serial.println("╚═══════════════════════════════════════════════════════════╝");
+    Serial.flush();
+
     // Extract optional timestamp field (0 = immediate, >0 = scheduled)
     u32 timestamp = 0;
     if (request.contains("timestamp") && request["timestamp"].is_int()) {
@@ -45,8 +80,32 @@ fl::Json Remote::processRpc(const fl::Json& request) {
 
     // Execute or schedule
     if (timestamp == 0) {
+        // Store request ID BEFORE invoking function (needed for async functions)
+        // This allows sendAsyncResponse() to find the request ID while function is running
+        if (request.contains("id") && request.contains("method")) {
+            fl::string methodName = request["method"].as_string().value_or("");
+            int requestId = request["id"].as_int().value_or(0);
+            mAsyncRequests[methodName] = {requestId, receivedAt};
+            FL_DBG("Stored request ID for " << methodName.c_str() << " (id=" << requestId << ")");
+        }
+
         // Immediate execution - pass directly to Rpc
         fl::Json response = mRpc.handle(request);
+
+        // For async functions, response already sent via sendAsyncResponse()
+        if (response.contains("__async") && response["__async"].as_bool().value_or(false)) {
+            // Don't return response (ACK already sent by Rpc)
+            // Return null to prevent Server from queuing it
+            fl::Json nullResponse = fl::Json::object();
+            nullResponse.set("__skip", true);  // Marker to skip queueing
+            return nullResponse;
+        }
+
+        // For sync functions, remove request ID (not needed)
+        if (request.contains("method")) {
+            fl::string methodName = request["method"].as_string().value_or("");
+            mAsyncRequests.erase(methodName);
+        }
 
         // Record result if successful
         if (response.contains("result") && request.contains("method")) {
@@ -135,6 +194,14 @@ Remote::Remote(RequestSource source, ResponseSink sink)
     // Set request handler to processRpc
     setRequestHandler([this](const fl::Json& request) {
         return processRpc(request);
+    });
+
+    // Set response sink on Rpc for async ACKs
+    mRpc.setResponseSink([this](const fl::Json& response) {
+        // Send response directly via Server's response sink
+        if (mResponseSink) {
+            mResponseSink(response);
+        }
     });
 }
 

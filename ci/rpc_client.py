@@ -385,6 +385,10 @@ class RpcClient:
                     self._check_interrupt()
                     await asyncio.sleep(0)  # Allow other async tasks to run
 
+                    # Show all serial output in verbose mode (helps debug crashes)
+                    if self.verbose and not line.startswith(self.RESPONSE_PREFIX):
+                        print(f"  [serial] {line[:120]}")
+
                     if line.startswith(self.RESPONSE_PREFIX):
                         json_str = line[len(self.RESPONSE_PREFIX) :]
                         try:
@@ -528,6 +532,18 @@ class RpcClient:
                         else:
                             # No result or error - empty response
                             response_data = {}
+
+                        # Check if this is an ACK for async function (skip and continue waiting)
+                        if (
+                            isinstance(response_data, dict)
+                            and "acknowledged" in response_data
+                            and response_data["acknowledged"] is True
+                        ):
+                            if self.verbose:
+                                print(
+                                    f"📬 [RPC] ACK received for request {expected_id}, waiting for final response..."
+                                )
+                            continue  # Skip ACK, wait for final response
 
                         # Determine success: void functions return null, treat as success
                         success: bool  # Explicit type declaration

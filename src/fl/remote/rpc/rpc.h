@@ -77,6 +77,7 @@
 // Internal RPC headers
 #include "fl/remote/rpc/rpc_handle.h"
 #include "fl/remote/rpc/rpc_registry.h"
+#include "fl/remote/rpc/rpc_mode.h"
 
 // STL headers required for public API
 #include "fl/stl/stdint.h"
@@ -181,25 +182,27 @@ public:
     struct Config {
         fl::string name;                            ///< Method name (REQUIRED)
         Callable fn;                                ///< Function to register (REQUIRED)
+        fl::RpcMode mode = fl::RpcMode::SYNC;       ///< Execution mode (SYNC or ASYNC, default SYNC)
         fl::vector<fl::string> params = {};         ///< Parameter names (optional)
         fl::string description = "";                ///< Method description (optional)
         fl::vector<fl::string> tags = {};           ///< Tags for grouping (optional)
 
         /// Constructor requiring name and function (metadata is optional)
-        Config(fl::string n, Callable f)
-            : name(fl::move(n)), fn(fl::move(f)) {}
+        Config(fl::string n, Callable f, fl::RpcMode m = fl::RpcMode::SYNC)
+            : name(fl::move(n)), fn(fl::move(f)), mode(m) {}
 
         /// Constructor with params
-        Config(fl::string n, Callable f, fl::vector<fl::string> p)
-            : name(fl::move(n)), fn(fl::move(f)), params(fl::move(p)) {}
+        Config(fl::string n, Callable f, fl::vector<fl::string> p, fl::RpcMode m = fl::RpcMode::SYNC)
+            : name(fl::move(n)), fn(fl::move(f)), mode(m), params(fl::move(p)) {}
 
         /// Constructor with all fields
         Config(fl::string n,
                Callable f,
                fl::vector<fl::string> p,
                fl::string desc,
-               fl::vector<fl::string> t = {})
-            : name(fl::move(n)), fn(fl::move(f)), params(fl::move(p)),
+               fl::vector<fl::string> t = {},
+               fl::RpcMode m = fl::RpcMode::SYNC)
+            : name(fl::move(n)), fn(fl::move(f)), mode(m), params(fl::move(p)),
               description(fl::move(desc)), tags(fl::move(t)) {}
     };
 
@@ -213,6 +216,13 @@ public:
     Rpc& operator=(Rpc&&) = default;
 
     // =========================================================================
+    // Response Sink for Async ACKs
+    // =========================================================================
+
+    /// Set response sink for sending ACK responses (used by async functions)
+    void setResponseSink(fl::function<void(const fl::Json&)> sink);
+
+    // =========================================================================
     // Method Registration (Binding)
     // =========================================================================
 
@@ -223,13 +233,13 @@ public:
     void bind(const Config<Callable>& config) {
         using Sig = typename callable_traits<typename decay<Callable>::type>::signature;
         RpcFn<Sig> wrapped(config.fn);
-        registerMethod<Sig>(config.name.c_str(), wrapped, config.params, config.description, config.tags);
+        registerMethod<Sig>(config.name.c_str(), wrapped, config.params, config.description, config.tags, config.mode);
     }
 
-    /// Convenience overload: bind method by name and function
+    /// Convenience overload: bind method by name, function, and optional mode
     template<typename Callable>
-    void bind(const char* name, Callable fn) {
-        bind(Config<Callable>{name, fl::move(fn)});
+    void bind(const char* name, Callable fn, fl::RpcMode mode = fl::RpcMode::SYNC) {
+        bind(Config<Callable>{name, fl::move(fn), mode});
     }
 
     // =========================================================================
@@ -320,7 +330,8 @@ public:
     bool registerMethod(const char* name, RpcFn<Sig> fn,
                         const fl::vector<fl::string>& paramNames,
                         const fl::string& description,
-                        const fl::vector<fl::string>& tags) {
+                        const fl::vector<fl::string>& tags,
+                        fl::RpcMode mode = fl::RpcMode::SYNC) {
         fl::string key(name);
         auto it = mRegistry.find(key);
         if (it != mRegistry.end()) {
@@ -336,6 +347,7 @@ public:
         entry.mSchemaGenerator = fl::make_shared<detail::TypedSchemaGenerator<Sig>>();
         entry.mDescription = description;
         entry.mTags = tags;
+        entry.mMode = mode;
 
         if (!paramNames.empty()) {
             entry.mSchemaGenerator->setParamNames(paramNames);
@@ -347,6 +359,7 @@ public:
 
 private:
     fl::unordered_map<fl::string, detail::RpcEntry> mRegistry;
+    fl::function<void(const fl::Json&)> mResponseSink;  // For sending ACK responses
 };
 
 // RpcFactory is kept as an alias for backwards compatibility

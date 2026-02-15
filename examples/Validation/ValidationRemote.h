@@ -41,6 +41,7 @@ struct ValidationState {
     int default_pin_rx;
     RxDeviceFactory rx_factory;
     bool gpio_baseline_test_done = false;  // Track whether GPIO baseline test has run in loop()
+    bool debug_enabled = false;  // Runtime debug logging toggle (default: off)
 };
 
 /// @brief Print JSON directly to Serial, bypassing fl::println and ScopedLogDisable

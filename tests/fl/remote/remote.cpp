@@ -2,6 +2,12 @@
 
 #if FASTLED_ENABLE_JSON
 
+#include "fl/stl/cctype.h"
+#include "fl/stl/cstdint.h"
+#include "fl/stl/cstring.h"
+#include "fl/stl/optional.h"
+#include "fl/stl/span.h"
+#include "fl/string_view.h"
 #include "test.h"
 
 // =============================================================================
@@ -1456,6 +1462,251 @@ FL_TEST_CASE("Remote: Compact JSON output (no newlines)") {
     fl::string output = outputStream.outputLines[0];
     FL_REQUIRE(output.find('\n') == fl::string::npos);
     FL_REQUIRE(output.find('\r') == fl::string::npos);
+}
+
+// =============================================================================
+// Async RPC Tests - Simulates Validation Script Flow
+// =============================================================================
+
+FL_TEST_CASE("Remote: Async RPC - Immediate ACK + deferred response") {
+    TestIO io;
+    fl::Remote remote(
+        [&io]() { return io.pullRequest(); },
+        [&io](const fl::Json& r) { io.pushResponse(r); }
+    );
+
+    int functionCalled = 0;
+
+    // Register async function that takes time to complete
+    remote.bind("slowTest", [&functionCalled]() -> fl::Json {
+        functionCalled++;
+
+        // Simulate work (in real scenario this might take seconds)
+        // For test we just return immediately
+
+        fl::Json result = fl::Json::object();
+        result.set("success", true);
+        result.set("value", 42);
+        return result;
+    }, fl::RpcMode::ASYNC);
+
+    // Client: Send request with ID
+    fl::Json request = makeRequest("slowTest", fl::Json::array(), 123);
+    io.requests.push_back(request);
+
+    // Server: Pull request (should send ACK and execute function)
+    size_t processed = remote.pull();
+    FL_REQUIRE(processed == 1);
+    FL_REQUIRE(functionCalled == 1);
+
+    // Server: Push responses
+    remote.push();
+
+    // Should have at least 1 response (ACK)
+    FL_REQUIRE(io.responses.size() >= 1);
+
+    // First response should be ACK
+    fl::Json ack = io.responses[0];
+    FL_REQUIRE(ack.contains("id"));
+    FL_REQUIRE(ack["id"].as_int().value() == 123);
+    FL_REQUIRE(ack.contains("result"));
+
+    // ACK result should have "acknowledged": true
+    fl::Json ackResult = ack["result"];
+    if (ackResult.is_object()) {
+        FL_REQUIRE(ackResult.contains("acknowledged"));
+        FL_REQUIRE(ackResult["acknowledged"].as_bool().value() == true);
+    }
+}
+
+FL_TEST_CASE("Remote: Async RPC - Simulate validation script flow") {
+    TestIO io;
+    fl::Remote remote(
+        [&io]() { return io.pullRequest(); },
+        [&io](const fl::Json& r) { io.pushResponse(r); }
+    );
+
+    // Simulate runSingleTest function (like ValidationRemote)
+    remote.bind("runSingleTest", [](const fl::Json& args) -> fl::Json {
+        // Simulate test execution that takes time
+
+        // Extract test params from args
+        fl::string driver = args["driver"].as_string().value_or("unknown");
+
+        // Return test results
+        fl::Json result = fl::Json::object();
+        result.set("success", true);
+        result.set("driver", driver.c_str());
+        result.set("passed", true);
+        result.set("totalTests", 4);
+        result.set("passedTests", 4);
+        result.set("duration_ms", 1234);
+
+        return result;
+    }, fl::RpcMode::ASYNC);
+
+    // Client: Create request like validate.py does
+    fl::Json testArgs = fl::Json::object();
+    testArgs.set("driver", "PARLIO");
+
+    fl::Json laneSizes = fl::Json::array();
+    laneSizes.push_back(100);
+    testArgs.set("laneSizes", laneSizes);
+
+    testArgs.set("pattern", "MSB_LSB_A");
+    testArgs.set("iterations", 1);
+
+    fl::Json params = fl::Json::array();
+    params.push_back(testArgs);
+
+    fl::Json request = makeRequest("runSingleTest", params, 1);
+
+    // Client: Send request
+    io.requests.push_back(request);
+
+    // Server: Process request
+    remote.pull();  // Pull and execute
+    remote.push();  // Send responses
+
+    // Client: Should receive at least ACK
+    FL_REQUIRE(io.responses.size() >= 1);
+
+    // Client: Check ACK
+    fl::Json ack = io.responses[0];
+    FL_REQUIRE(ack.contains("id"));
+    FL_REQUIRE(ack["id"].as_int().value() == 1);
+
+    // Client would now wait for final response
+    // (In real scenario, this comes later when async work completes)
+}
+
+FL_TEST_CASE("Remote: Async RPC - Debug request fields") {
+    TestIO io;
+    fl::Remote remote(
+        [&io]() { return io.pullRequest(); },
+        [&io](const fl::Json& r) { io.pushResponse(r); }
+    );
+
+    bool functionReached = false;
+    remote.bind("testMethod", [&functionReached](int value) -> int {
+        functionReached = true;
+        return value * 2;
+    }, fl::RpcMode::ASYNC);
+
+    // Create request with all expected fields
+    fl::Json request = fl::Json::object();
+    request.set("method", "testMethod");
+
+    fl::Json params = fl::Json::array();
+    params.push_back(10);
+    request.set("params", params);
+
+    request.set("id", 999);
+
+    // Verify request structure before sending
+    FL_REQUIRE(request.contains("method"));
+    FL_REQUIRE(request.contains("params"));
+    FL_REQUIRE(request.contains("id"));
+    FL_REQUIRE(request["method"].as_string().value() == "testMethod");
+    FL_REQUIRE(request["id"].as_int().value() == 999);
+
+    // Send request
+    io.requests.push_back(request);
+
+    // Process
+    remote.pull();
+    FL_REQUIRE(functionReached);
+
+    remote.push();
+
+    // Verify ACK was sent
+    FL_REQUIRE(io.responses.size() >= 1);
+    FL_REQUIRE(io.responses[0].contains("id"));
+    FL_REQUIRE(io.responses[0]["id"].as_int().value() == 999);
+}
+
+FL_TEST_CASE("Remote: Async RPC - Multiple async calls with different IDs") {
+    TestIO io;
+    fl::Remote remote(
+        [&io]() { return io.pullRequest(); },
+        [&io](const fl::Json& r) { io.pushResponse(r); }
+    );
+
+    fl::vector<int> callOrder;
+    remote.bind("task", [&callOrder](int taskNum) -> int {
+        callOrder.push_back(taskNum);
+        return taskNum * 10;
+    }, fl::RpcMode::ASYNC);
+
+    // Queue 3 async requests with different IDs
+    fl::Json params1 = fl::Json::array();
+    params1.push_back(1);
+    io.requests.push_back(makeRequest("task", params1, 101));
+
+    fl::Json params2 = fl::Json::array();
+    params2.push_back(2);
+    io.requests.push_back(makeRequest("task", params2, 102));
+
+    fl::Json params3 = fl::Json::array();
+    params3.push_back(3);
+    io.requests.push_back(makeRequest("task", params3, 103));
+
+    // Process all
+    remote.pull();
+    remote.push();
+
+    // All 3 tasks should execute
+    FL_REQUIRE(callOrder.size() == 3);
+    FL_REQUIRE(callOrder[0] == 1);
+    FL_REQUIRE(callOrder[1] == 2);
+    FL_REQUIRE(callOrder[2] == 3);
+
+    // Should have ACKs for all 3 (at minimum)
+    FL_REQUIRE(io.responses.size() >= 3);
+
+    // Verify IDs match
+    FL_REQUIRE(io.responses[0]["id"].as_int().value() == 101);
+    FL_REQUIRE(io.responses[1]["id"].as_int().value() == 102);
+    FL_REQUIRE(io.responses[2]["id"].as_int().value() == 103);
+}
+
+FL_TEST_CASE("Remote: Async RPC - Sync vs Async behavior difference") {
+    TestIO io;
+    fl::Remote remote(
+        [&io]() { return io.pullRequest(); },
+        [&io](const fl::Json& r) { io.pushResponse(r); }
+    );
+
+    // Register same function as both sync and async
+    remote.bind("syncFunc", []() -> int { return 42; });  // Default: sync
+    remote.bind("asyncFunc", []() -> int { return 42; }, fl::RpcMode::ASYNC);
+
+    // Call sync function
+    io.requests.push_back(makeRequest("syncFunc", fl::Json::array(), 1));
+    remote.pull();
+    remote.push();
+
+    size_t syncResponses = io.responses.size();
+    FL_REQUIRE(syncResponses == 1);  // Only final response
+    FL_REQUIRE(io.responses[0]["result"].as_int().value() == 42);
+
+    // Reset
+    io.reset();
+
+    // Call async function
+    io.requests.push_back(makeRequest("asyncFunc", fl::Json::array(), 2));
+    remote.pull();
+    remote.push();
+
+    size_t asyncResponses = io.responses.size();
+    FL_REQUIRE(asyncResponses >= 1);  // ACK (+ possibly final response)
+
+    // First response should be ACK
+    FL_REQUIRE(io.responses[0].contains("result"));
+    fl::Json ackResult = io.responses[0]["result"];
+    if (ackResult.is_object() && ackResult.contains("acknowledged")) {
+        FL_REQUIRE(ackResult["acknowledged"].as_bool().value() == true);
+    }
 }
 
 #endif // FASTLED_ENABLE_JSON

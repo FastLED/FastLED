@@ -7,17 +7,12 @@
 // - Test execution wrapped in fl::ScopedLogDisable to suppress debug noise
 // - This provides clean, parseable JSON output without FL_DBG/FL_PRINT spam
 
-// Disable debug logging - it overwhelms the serial connection and causes timeouts
-// Uncomment to enable debug output for troubleshooting
-// #define VALIDATION_DEBUG_ENABLED
+// Dynamic debug logging controlled via RPC setDebug() function
+// Allows runtime toggling of debug output without recompiling
 
-#ifdef VALIDATION_DEBUG_ENABLED
-#define DEBUG_PRINT(x) Serial.print(x)
-#define DEBUG_PRINTLN(x) Serial.println(x)
-#else
+// Legacy macros (deprecated - use DEBUG_LOG instead)
 #define DEBUG_PRINT(x) do {} while(0)
 #define DEBUG_PRINTLN(x) do {} while(0)
-#endif
 
 #include "ValidationRemote.h"
 #include "fl/remote/transport/serial.h"
@@ -32,6 +27,29 @@
 #include "fl/simd.h"
 #include "fl/memory.h"
 #include <Arduino.h>
+
+// ============================================================================
+// Global Debug State (for runtime-gated debug logging)
+// ============================================================================
+
+// Helper global to access debug state - set in registerFunctions()
+static fl::shared_ptr<ValidationState> g_validation_state;
+
+// Always-on checkpoint logging (critical execution points)
+#define LOG_CHECKPOINT(msg) do { \
+    Serial.print("[CHECKPOINT] "); \
+    Serial.println(msg); \
+    Serial.flush(); \
+} while(0)
+
+// Runtime-gated debug logging (verbose details, enabled via setDebug RPC)
+#define DEBUG_LOG(msg) do { \
+    if (g_validation_state && g_validation_state->debug_enabled) { \
+        Serial.print("[DEBUG] "); \
+        Serial.println(msg); \
+        Serial.flush(); \
+    } \
+} while(0)
 
 // ============================================================================
 // Raw Serial Output Functions (bypass fl::println and ScopedLogDisable)
@@ -97,39 +115,51 @@ fl::Json makeResponse(bool success, ReturnCode returnCode, const char* message,
 // ============================================================================
 
 fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
-    Serial.println("[CHECKPOINT] runSingleTest ENTERED"); Serial.flush();
-    DEBUG_PRINTLN("[DEBUG] runSingleTest called");
-    DEBUG_PRINT("[DEBUG] Free heap: ");
-    DEBUG_PRINTLN(fl::getFreeHeap().total());
+    // CRITICAL: This print MUST appear if function is called
+    Serial.println("╔══════════════════════════════════════════════════════════════╗");
+    Serial.println("║  runSingleTestImpl() ENTRY POINT - FUNCTION WAS CALLED!     ║");
+    Serial.println("╚══════════════════════════════════════════════════════════════╝");
+    Serial.flush();
+
+    Serial.println("[ASYNC-FLOW] ========================================");
+    Serial.println("[ASYNC-FLOW] ✓ runSingleTest() called (ASYNC mode)");
+    Serial.println("[ASYNC-FLOW]   ACK already sent by RPC system");
+    Serial.println("[ASYNC-FLOW]   → Starting test execution (blocking 5-10s)...");
+    Serial.println("[ASYNC-FLOW] ========================================");
     Serial.flush();
 
     fl::Json response = fl::Json::object();
 
+    LOG_CHECKPOINT("Before args.is_object()");
     // RPC system unwraps single-element arrays, so args is the config object directly
     if (!args.is_object()) {
-        DEBUG_PRINTLN("[DEBUG] Args validation failed - not an object");
-        Serial.flush();
+        LOG_CHECKPOINT("Args validation FAILED - not an object");
+        DEBUG_LOG("Args validation failed - not an object");
         response.set("success", false);
         response.set("error", "InvalidArgs");
         response.set("message", "Expected {driver, laneSizes, pattern?, iterations?, pinTx?, pinRx?, timing?}");
         return response;
     }
 
-    DEBUG_PRINTLN("[DEBUG] Args validation passed");
-    Serial.flush();
+    LOG_CHECKPOINT("Args is object");
+    DEBUG_LOG("Args validation passed - is object");
 
     fl::Json config = args;
 
     // ========== REQUIRED PARAMETERS ==========
 
     // 1. Extract driver (required)
+    LOG_CHECKPOINT("Extracting driver");
     if (!config.contains("driver") || !config["driver"].is_string()) {
+        LOG_CHECKPOINT("Driver field missing or invalid");
         response.set("success", false);
         response.set("error", "MissingDriver");
         response.set("message", "Required field 'driver' (string) missing");
         return response;
     }
     fl::string driver_name = config["driver"].as_string().value();
+    LOG_CHECKPOINT(driver_name.c_str());
+    DEBUG_LOG(driver_name.c_str());
 
     // Validate driver exists
     bool driver_found = false;
@@ -140,6 +170,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         }
     }
     if (!driver_found) {
+        LOG_CHECKPOINT("Driver NOT FOUND");
         response.set("success", false);
         response.set("error", "UnknownDriver");
         fl::sstream msg;
@@ -147,9 +178,12 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         response.set("message", msg.str().c_str());
         return response;
     }
+    LOG_CHECKPOINT("Driver found OK");
 
     // 2. Extract laneSizes (required)
+    LOG_CHECKPOINT("Extracting laneSizes");
     if (!config.contains("laneSizes") || !config["laneSizes"].is_array()) {
+        LOG_CHECKPOINT("laneSizes missing or invalid");
         response.set("success", false);
         response.set("error", "MissingLaneSizes");
         response.set("message", "Required field 'laneSizes' (array) missing");
@@ -247,46 +281,38 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
 
     // ========== EXECUTION ==========
 
-    DEBUG_PRINT("[DEBUG] runSingleTest starting - driver: ");
-    DEBUG_PRINTLN(driver_name.c_str());
-    DEBUG_PRINT("[DEBUG] Free heap: ");
-    DEBUG_PRINTLN(fl::getFreeHeap().total());
-    Serial.flush();
+    LOG_CHECKPOINT("========== STARTING EXECUTION ==========");
+    DEBUG_LOG("Execution phase starting");
 
     uint32_t start_ms = millis();
 
     // Set driver as exclusive
-    Serial.println("[CHECKPOINT] Before setExclusiveDriver"); Serial.flush();
-    DEBUG_PRINTLN("[DEBUG] Setting exclusive driver...");
-    Serial.flush();
+    LOG_CHECKPOINT("Before setExclusiveDriver");
+    DEBUG_LOG("Calling FastLED.setExclusiveDriver");
     if (!FastLED.setExclusiveDriver(driver_name.c_str())) {
+        LOG_CHECKPOINT("setExclusiveDriver FAILED");
         response.set("success", false);
         response.set("error", "DriverSetupFailed");
         fl::sstream msg;
         msg << "Failed to set " << driver_name.c_str() << " as exclusive driver";
         response.set("message", msg.str().c_str());
-        DEBUG_PRINTLN("[DEBUG] Failed to set exclusive driver");
-        Serial.flush();
+        DEBUG_LOG("Failed to set exclusive driver");
         return response;
     }
-    Serial.println("[CHECKPOINT] After setExclusiveDriver OK"); Serial.flush();
-    DEBUG_PRINTLN("[DEBUG] Exclusive driver set");
-    Serial.flush();
+    LOG_CHECKPOINT("After setExclusiveDriver SUCCESS");
+    DEBUG_LOG("Exclusive driver set successfully");
 
     // Get timing configuration (currently hardcoded to WS2812B-V5)
-    DEBUG_PRINTLN("[DEBUG] Creating timing config");
-    Serial.flush();
+    LOG_CHECKPOINT("Creating timing config");
+    DEBUG_LOG("Creating timing config");
     fl::NamedTimingConfig timing_config(
         fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(),
         timing_name.c_str()
     );
 
     // Dynamically allocate LED arrays for each lane
-    DEBUG_PRINT("[DEBUG] Allocating LED arrays - lanes: ");
-    DEBUG_PRINTLN(lane_sizes.size());
-    DEBUG_PRINT("[DEBUG] Free heap: ");
-    DEBUG_PRINTLN(fl::getFreeHeap().total());
-    Serial.flush();
+    LOG_CHECKPOINT("Allocating LED arrays");
+    DEBUG_LOG("Allocating LED arrays");
 
     fl::vector<fl::unique_ptr<fl::vector<CRGB>>> led_arrays;
     fl::vector<fl::ChannelConfig> tx_configs;
@@ -398,12 +424,12 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         fl::ScopedLogDisable logGuard;  // Suppress FL_DBG/FL_PRINT during test
 
         // Run warm-up iteration (discard results)
-        Serial.println("[CHECKPOINT] Before warmup validateChipsetTiming"); Serial.flush();
+        LOG_CHECKPOINT("Before warmup validateChipsetTiming");
         DEBUG_PRINTLN("[DEBUG] Running warmup");
         Serial.flush();
         int warmup_total = 0, warmup_passed = 0;
         validateChipsetTiming(validation_config, warmup_total, warmup_passed);
-        Serial.println("[CHECKPOINT] After warmup validateChipsetTiming"); Serial.flush();
+        LOG_CHECKPOINT("After warmup validateChipsetTiming");
         DEBUG_PRINT("[DEBUG] Warmup done, heap: ");
         DEBUG_PRINTLN(fl::getFreeHeap().total());
         Serial.flush();
@@ -430,7 +456,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         passed = (total_tests > 0) && (passed_tests == total_tests);
     }  // logGuard destroyed, logging restored
 
-    Serial.println("[CHECKPOINT] Test complete, building response"); Serial.flush();
+    LOG_CHECKPOINT("Test complete, building response");
     DEBUG_PRINT("[DEBUG] Test complete - passed: ");
     DEBUG_PRINTLN(passed);
     DEBUG_PRINT("[DEBUG] Free heap: ");
@@ -516,10 +542,18 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
 
     DEBUG_PRINT("[DEBUG] Response built, heap: ");
     DEBUG_PRINTLN(fl::getFreeHeap().total());
-    DEBUG_PRINTLN("[DEBUG] Returning response");
+    Serial.println("[ASYNC-FLOW] ✓ Test execution complete, sending final response...");
     Serial.flush();
 
-    return response;
+    // Send async response (ACK was already sent by RPC system)
+    Serial.println("[ASYNC-FLOW] → Calling sendAsyncResponse()");
+    Serial.flush();
+    mRemote->sendAsyncResponse("runSingleTest", response);
+    Serial.println("[ASYNC-FLOW] ✓ sendAsyncResponse() completed - final response sent!");
+    Serial.flush();  // Ensure response is sent immediately
+
+    // Return null response (actual response already sent via sendAsyncResponse)
+    return fl::Json(nullptr);
 }
 
 fl::Json ValidationRemoteControl::findConnectedPinsImpl(const fl::Json& args) {
@@ -691,6 +725,9 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     // Store shared state
     mState = state;
 
+    // Set global state for DEBUG_LOG macro access
+    g_validation_state = state;
+
     // NOTE: All RPC callbacks use const fl::Json& for efficient parameter passing.
     // The RPC system strips const/reference qualifiers and stores values in the tuple,
     // then passes them as references to the function. This avoids copies while
@@ -741,9 +778,15 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
 
     // Returns: {success, passed, totalTests, passedTests, duration_ms, driver,
     //          laneCount, laneSizes, pattern, firstFailure?}
+    // ASYNC: Sends ACK immediately, final response sent via sendAsyncResponse()
     mRemote->bind("runSingleTest", [this](const fl::Json& args) -> fl::Json {
-        return runSingleTestImpl(args);
-    });
+        Serial.println("[ASYNC-FLOW] ▶▶▶ Lambda called - about to invoke runSingleTestImpl");
+        Serial.flush();
+        fl::Json result = this->runSingleTestImpl(args);
+        Serial.println("[ASYNC-FLOW] ◀◀◀ runSingleTestImpl returned");
+        Serial.flush();
+        return result;
+    }, fl::RpcMode::ASYNC);
 
     // ========================================================================
     // Phase 4 Functions: Utility and Control
@@ -758,6 +801,48 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         response.set("message", "pong");
         response.set("timestamp", static_cast<int64_t>(now));
         response.set("uptimeMs", static_cast<int64_t>(now));
+        return response;
+    });
+
+    // TEST: Simple RPC without Serial to verify task context works
+    mRemote->bind("testNoSerial", [this](const fl::Json& args) -> fl::Json {
+        fl::Json response = fl::Json::object();
+        response.set("success", true);
+        response.set("message", "RPC works from task context");
+        response.set("serial_safe", false);
+        return response;
+    });
+
+    // Register "setDebug" function - enable/disable runtime debug logging
+    mRemote->bind("setDebug", [this](const fl::Json& args) -> fl::Json {
+        fl::Json response = fl::Json::object();
+
+        // Validate args: expects [enabled: bool]
+        if (!args.is_array() || args.size() != 1) {
+            response.set("success", false);
+            response.set("error", "InvalidArgs");
+            response.set("message", "Expected [enabled: bool]");
+            return response;
+        }
+
+        if (!args[0].is_bool()) {
+            response.set("success", false);
+            response.set("error", "InvalidType");
+            response.set("message", "Argument must be boolean");
+            return response;
+        }
+
+        bool enabled = args[0].as_bool().value();
+        mState->debug_enabled = enabled;
+
+        response.set("success", true);
+        response.set("debug_enabled", enabled);
+        response.set("message", enabled ? "Debug logging enabled" : "Debug logging disabled");
+
+        Serial.print("[SYSTEM] Debug logging ");
+        Serial.println(enabled ? "ENABLED" : "DISABLED");
+        Serial.flush();
+
         return response;
     });
 
