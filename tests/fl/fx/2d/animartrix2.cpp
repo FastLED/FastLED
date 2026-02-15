@@ -396,6 +396,47 @@ FL_TEST_CASE("Animartrix2 - API compatibility") {
 // Chasing_Spirals Q31 Optimization Tests
 // ============================================================
 
+FL_TEST_CASE("Animartrix2 - CHASING_SPIRALS Single Pixel Debug") {
+    fl::cout << "\n=== Single Pixel Debug Trace (t=1000, pixel 0) ===" << fl::endl;
+
+    constexpr uint32_t TEST_TIME = 1000;
+
+    // Render all three versions
+    CRGB leds_scalar[N] = {};
+    CRGB leds_simd[N] = {};
+    CRGB leds_float[N] = {};
+
+    fl::cout << "\n--- Float (Reference) ---" << fl::endl;
+    XYMap xy_float = XYMap::constructRectangularGrid(W, H);
+    Animartrix fx_float(xy_float, CHASING_SPIRALS);
+    Fx::DrawContext ctx_float(TEST_TIME, leds_float);
+    fx_float.draw(ctx_float);
+
+    fl::cout << "\n--- Scalar Q31 (Non-SIMD) ---" << fl::endl;
+    renderChasingSpiralQ31(leds_scalar, TEST_TIME);
+
+    fl::cout << "\n--- SIMD Q31 ---" << fl::endl;
+    renderChasingSpiralQ31_SIMD(leds_simd, TEST_TIME);
+
+    // Compare pixel 0
+    fl::cout << "\n=== Pixel 0 Comparison ===" << fl::endl;
+    fl::cout << "Float:  RGB(" << (int)leds_float[0].r << "," << (int)leds_float[0].g << "," << (int)leds_float[0].b << ")" << fl::endl;
+    fl::cout << "Scalar: RGB(" << (int)leds_scalar[0].r << "," << (int)leds_scalar[0].g << "," << (int)leds_scalar[0].b << ")" << fl::endl;
+    fl::cout << "SIMD:   RGB(" << (int)leds_simd[0].r << "," << (int)leds_simd[0].g << "," << (int)leds_simd[0].b << ")" << fl::endl;
+
+    int diff_scalar = abs(leds_float[0].r - leds_scalar[0].r) +
+                      abs(leds_float[0].g - leds_scalar[0].g) +
+                      abs(leds_float[0].b - leds_scalar[0].b);
+    int diff_simd = abs(leds_float[0].r - leds_simd[0].r) +
+                    abs(leds_float[0].g - leds_simd[0].g) +
+                    abs(leds_float[0].b - leds_simd[0].b);
+
+    fl::cout << "Scalar error: " << diff_scalar << fl::endl;
+    fl::cout << "SIMD error: " << diff_simd << fl::endl;
+
+    // Debug output will appear above showing intermediate values
+}
+
 FL_TEST_CASE("Chasing_Spirals Q31 - low error at t=1000") {
     CRGB leds_float[N] = {};
     CRGB leds_q31[N] = {};
