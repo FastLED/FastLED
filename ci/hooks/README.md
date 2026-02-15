@@ -51,6 +51,12 @@ The hook also blocks dangerous patterns:
 
 **Rationale:** Makes builds 10-100x slower. Fingerprint cache is reliable and tracks changes correctly.
 
+#### Build Commands in Command Chains
+- ` meson ` anywhere in command - Use `bash test` instead
+- ` ninja ` anywhere in command - Use `bash test` instead
+
+**Rationale:** Catches build commands in the middle of command chains (e.g., `cd .build/meson-quick && meson test`). Uses literal space matching to detect commands with spaces around them.
+
 #### Environment Variables
 - `SCCACHE_DISABLE=1` - Never disable sccache
 
