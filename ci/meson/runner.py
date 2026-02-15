@@ -369,6 +369,56 @@ def run_meson_build_and_test(
                             create_filtering_echo_callback() if verbose else False
                         )
                         returncode = proc.wait(echo=echo_callback)
+
+                        # Enhanced error detection for streaming tests
+                        if returncode != 0:
+                            stdout_lower = proc.stdout.lower()
+                            has_doctest_output = any(
+                                pattern in stdout_lower
+                                for pattern in [
+                                    "test cases:",
+                                    "assertions:",
+                                    "[doctest]",
+                                    "test case failed",
+                                ]
+                            )
+
+                            if returncode == 1 and not has_doctest_output:
+                                test_name = test_path.stem
+                                _ts_print(
+                                    f"[MESON] ⚠️  {test_name}: Test failed during initialization (before doctest ran)",
+                                    file=sys.stderr,
+                                )
+
+                                # Filter for error messages in output
+                                error_lines = [
+                                    line.strip()
+                                    for line in proc.stdout.splitlines()
+                                    if "error" in line.lower() and line.strip()
+                                ]
+
+                                if error_lines and verbose:
+                                    _ts_print(
+                                        f"[MESON] 🔍 Error messages:",
+                                        file=sys.stderr,
+                                    )
+                                    # Show first 3 errors in streaming mode (more concise)
+                                    for error_line in error_lines[:3]:
+                                        _ts_print(
+                                            f"[MESON]    {error_line}", file=sys.stderr
+                                        )
+                                    if len(error_lines) > 3:
+                                        _ts_print(
+                                            f"[MESON]    ... (+{len(error_lines) - 3} more)",
+                                            file=sys.stderr,
+                                        )
+
+                                if verbose:
+                                    _ts_print(
+                                        f"[MESON] 💡 Check for: static init failure, test registration issues, or disabled tests",
+                                        file=sys.stderr,
+                                    )
+
                         return returncode == 0
 
                     except KeyboardInterrupt:
@@ -856,10 +906,60 @@ def run_meson_build_and_test(
                         f"[MESON] ❌ Test FAILED during execution (exit code {returncode})"
                     )
                     _print_error(f"[MESON] Test: {meson_test_name}")
-                    # Check if crash vs test failure
+
+                    # Enhanced crash detection: Check if doctest actually ran
+                    # Doctest prints patterns like "test cases:", "assertions:", "[doctest]"
+                    stdout_lower = proc.stdout.lower()
+                    has_doctest_output = any(
+                        pattern in stdout_lower
+                        for pattern in [
+                            "test cases:",
+                            "assertions:",
+                            "[doctest]",
+                            "test case failed",
+                        ]
+                    )
+
                     if returncode == 1 and not proc.stdout.strip():
+                        # No output at all - immediate crash
                         _print_error(
                             f"[MESON] ⚠️  No output - possible crash at startup"
+                        )
+                    elif returncode == 1 and not has_doctest_output:
+                        # Has output but no doctest execution - initialization failure
+                        _print_error(
+                            f"[MESON] ⚠️  Test failed during initialization (before doctest ran)"
+                        )
+
+                        # Filter stderr/stdout for error messages (case insensitive)
+                        error_lines = [
+                            line.strip()
+                            for line in proc.stdout.splitlines()
+                            if "error" in line.lower() and line.strip()
+                        ]
+
+                        if error_lines:
+                            _print_error(f"[MESON] 🔍 Error messages found in output:")
+                            # Show up to 10 error lines
+                            for error_line in error_lines[:10]:
+                                _print_error(f"[MESON]    {error_line}")
+                            if len(error_lines) > 10:
+                                _print_error(
+                                    f"[MESON]    ... ({len(error_lines) - 10} more error(s))"
+                                )
+
+                        _print_error(f"[MESON] 💡 Possible causes:")
+                        _print_error(
+                            f"[MESON]    - Static initialization failure (global object constructor crash)"
+                        )
+                        _print_error(
+                            f"[MESON]    - Test registration issue (FL_TEST_CASE macro problem)"
+                        )
+                        _print_error(
+                            f"[MESON]    - DLL loading failure (missing dependency or symbol)"
+                        )
+                        _print_error(
+                            f"[MESON]    - All test cases disabled with #if 0 (check test file)"
                         )
                 else:
                     phase_name = (

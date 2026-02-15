@@ -68,6 +68,8 @@ def _is_compilation_error(line: str) -> bool:
         pattern in line_lower
         for pattern in [
             "error:",  # Compiler errors
+            "note:",  # Compiler diagnostic notes (CRITICAL for context!)
+            "warning:",  # Compiler warnings
             "failed:",  # Build system failures
             "fatal error:",  # Catastrophic failures
             "undefined reference",  # Linker errors
