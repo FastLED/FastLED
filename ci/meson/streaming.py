@@ -11,12 +11,14 @@ from typing import Callable, Optional
 
 from running_process import RunningProcess
 
-from ci.meson.compile import _create_error_context_filter
+from ci.meson.compile import _create_error_context_filter, _is_compilation_error
 from ci.meson.compiler import get_meson_executable
 from ci.meson.output import _print_banner, _print_error, _print_success
+from ci.meson.phase_tracker import PhaseTracker
 from ci.meson.test_execution import MesonTestResult
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.output_formatter import TimestampFormatter
+from ci.util.tee import StreamTee
 from ci.util.timestamp_print import ts_print as _ts_print
 
 
@@ -55,6 +57,21 @@ def stream_compile_and_run_tests(
         build_mode = "debug"
     elif "meson-release" in str(build_dir):
         build_mode = "release"
+
+    # Initialize phase tracker for error diagnostics
+    phase_tracker = PhaseTracker(build_dir, build_mode)
+    phase_tracker.set_phase("COMPILE", target=target, path="streaming")
+
+    # Create compile-errors directory for error logging
+    compile_errors_dir = build_dir.parent / "compile-errors"
+    compile_errors_dir.mkdir(exist_ok=True)
+
+    # Generate timestamped log filename
+    import time
+
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    test_name_slug = target.replace("/", "_") if target else "all"
+    error_log_path = compile_errors_dir / f"{test_name_slug}-{timestamp}.log"
 
     # Show build stage banner
     # WARNING: This build progress reporting is essential for user feedback!
@@ -120,6 +137,10 @@ def stream_compile_and_run_tests(
             seen_pch, \
             seen_any_test
 
+        # Create tee for error log capture (stdout + stderr merged)
+        stderr_tee = StreamTee(error_log_path, echo=False)
+        last_error_lines: list[str] = []
+
         try:
             # Use RunningProcess for streaming output
             # Note: No formatter here - we need raw Ninja output for regex pattern matching
@@ -134,6 +155,15 @@ def stream_compile_and_run_tests(
             # Stream output line by line
             with proc.line_iter(timeout=None) as it:
                 for line in it:
+                    # Write to error log (captures both stdout and stderr)
+                    stderr_tee.write_line(line)
+
+                    # Track errors for smart detection
+                    if _is_compilation_error(line):
+                        last_error_lines.append(line)
+                        if len(last_error_lines) > 50:
+                            last_error_lines.pop(0)
+
                     # Filter out noisy Meson/Ninja INFO lines that clutter output
                     # These provide no useful information for normal operation
                     stripped = line.strip()
@@ -283,8 +313,29 @@ def stream_compile_and_run_tests(
 
             # Check compilation result
             returncode = proc.wait()
+
+            # Write standardized footer to error log
+            stderr_tee.write_footer(returncode)
+            stderr_tee.close()
+
+            # Save last error snippet if compilation failed
+            if returncode != 0 and last_error_lines:
+                last_error_path = (
+                    build_dir.parent / "meson-state" / "last-compilation-error.txt"
+                )
+                last_error_path.parent.mkdir(exist_ok=True)
+
+                with open(last_error_path, "w", encoding="utf-8") as f:
+                    f.write(f"# Compilation failed at {timestamp}\n")
+                    f.write(f"# Target: {target or 'all'}\n")
+                    f.write(f"# Full log: {error_log_path}\n\n")
+                    f.write("--- Error Context ---\n\n")
+                    f.write("\n".join(last_error_lines))
+
             compilation_output = proc.stdout  # Capture for error analysis
             if returncode != 0:
+                # Track link phase failure
+                phase_tracker.set_phase("LINK", target=target, path="streaming")
                 _ts_print(
                     f"[MESON] Compilation failed with return code {returncode}",
                     file=sys.stderr,
@@ -300,6 +351,9 @@ def stream_compile_and_run_tests(
 
                 compilation_failed = True
             else:
+                # Track successful link phase
+                phase_tracker.set_phase("LINK", target=target, path="streaming")
+
                 # Report cached artifacts (things we didn't see being built)
                 # Only report if we saw at least one artifact being built (otherwise it's a no-op build)
                 if (
@@ -359,6 +413,11 @@ def stream_compile_and_run_tests(
 
                 # Type narrowing: test_path is now guaranteed to be Path (not None)
                 assert test_path is not None
+
+                # Track execution phase
+                phase_tracker.set_phase(
+                    "EXECUTE", test_name=test_path.stem, path="streaming"
+                )
 
                 # Run the test
                 tests_run += 1

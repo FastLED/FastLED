@@ -16,6 +16,7 @@ from ci.meson.compiler import get_meson_executable
 from ci.meson.output import _print_banner
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.output_formatter import TimestampFormatter
+from ci.util.tee import StreamTee
 from ci.util.timestamp_print import ts_print as _ts_print
 
 
@@ -28,6 +29,12 @@ class CompileResult:
     suppressed_errors: list[
         str
     ]  # Validation errors suppressed during quiet mode (max 5)
+
+    # NEW: Path to full error log file (if compilation attempted)
+    error_log_file: Optional[Path] = None
+
+    # NEW: Extracted error snippet (key error lines with context)
+    error_snippet: Optional[str] = None
 
 
 # Error patterns that indicate stale build state recoverable by reconfiguration
@@ -48,6 +55,26 @@ def is_stale_build_error(output: str) -> bool:
     """
     output_lower = output.lower()
     return any(pattern in output_lower for pattern in STALE_BUILD_PATTERNS)
+
+
+def _is_compilation_error(line: str) -> bool:
+    """Detect if a line contains a compilation error pattern.
+
+    Returns:
+        True if the line contains an error indicator
+    """
+    line_lower = line.lower()
+    return any(
+        pattern in line_lower
+        for pattern in [
+            "error:",  # Compiler errors
+            "failed:",  # Build system failures
+            "fatal error:",  # Catastrophic failures
+            "undefined reference",  # Linker errors
+            "no such file",  # Missing headers
+            "ld returned 1 exit status",  # Linker failure
+        ]
+    )
 
 
 def compile_meson(
@@ -98,6 +125,15 @@ def compile_meson(
     #   3. Cache status reporting (shows when artifacts are up-to-date)
     if not quiet:
         _ts_print(f"[BUILD] Building FastLED engine ({build_mode} mode)...")
+
+    # Create compile-errors directory for error logging
+    compile_errors_dir = build_dir.parent / "compile-errors"
+    compile_errors_dir.mkdir(exist_ok=True)
+
+    # Generate timestamped log filename
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    test_name_slug = target.replace("/", "_") if target else "all"
+    error_log_path = compile_errors_dir / f"{test_name_slug}-{timestamp}.log"
 
     # Inject IWYU wrapper by modifying build.ninja when check mode is enabled
     # This avoids meson setup probe issues while still running IWYU during compilation
@@ -184,6 +220,10 @@ def compile_meson(
         else:
             _ts_print(f"[MESON] ⚠️ IWYU wrapper not found, skipping static analysis")
 
+    # Create tee for error log capture (stdout + stderr merged)
+    stderr_tee = StreamTee(error_log_path, echo=False)
+    last_error_lines: list[str] = []
+
     try:
         # Use RunningProcess for streaming output
         # Pass modified environment with IWYU wrapper if check=True
@@ -229,6 +269,15 @@ def compile_meson(
         # In verbose mode, show full compilation output for detailed debugging
         with proc.line_iter(timeout=None) as it:
             for line in it:
+                # Write to error log (captures both stdout and stderr)
+                stderr_tee.write_line(line)
+
+                # Track errors for smart detection
+                if _is_compilation_error(line):
+                    last_error_lines.append(line)
+                    if len(last_error_lines) > 50:
+                        last_error_lines.pop(0)
+
                 # Filter out noisy Meson/Ninja INFO lines that clutter output
                 # Note: TimestampFormatter may add timestamp prefix, so check contains not startswith
                 stripped = line.strip()
@@ -378,6 +427,24 @@ def compile_meson(
 
         returncode = proc.wait()
 
+        # Write standardized footer to error log
+        stderr_tee.write_footer(returncode)
+        stderr_tee.close()
+
+        # Save last error snippet if compilation failed
+        if returncode != 0 and last_error_lines:
+            last_error_path = (
+                build_dir.parent / "meson-state" / "last-compilation-error.txt"
+            )
+            last_error_path.parent.mkdir(exist_ok=True)
+
+            with open(last_error_path, "w", encoding="utf-8") as f:
+                f.write(f"# Compilation failed at {timestamp}\n")
+                f.write(f"# Target: {target or 'all'}\n")
+                f.write(f"# Full log: {error_log_path}\n\n")
+                f.write("--- Error Context ---\n\n")
+                f.write("\n".join(last_error_lines))
+
         # Check for Meson version incompatibility
         # This appears as "Build directory has been generated with Meson version X.Y.Z, which is incompatible with the current version A.B.C"
         # When detected, suggest reconfiguration (setup_meson_build handles auto-healing)
@@ -400,7 +467,10 @@ def compile_meson(
             )
             # Return failure - caller should trigger reconfiguration
             return CompileResult(
-                success=False, error_output=output, suppressed_errors=suppressed_errors
+                success=False,
+                error_output=output,
+                suppressed_errors=suppressed_errors,
+                error_log_file=error_log_path,
             )
 
         # Check for Ninja dependency database corruption
@@ -483,7 +553,10 @@ def compile_meson(
                     )
 
             return CompileResult(
-                success=False, error_output=output, suppressed_errors=suppressed_errors
+                success=False,
+                error_output=output,
+                suppressed_errors=suppressed_errors,
+                error_log_file=error_log_path,
             )
 
         # Report cached artifacts (things we didn't see being built)
@@ -517,7 +590,10 @@ def compile_meson(
         # Don't print "Compilation successful" - the transition to Running phase implies success
         # This was previously conditional on quiet mode, but it's always redundant
         return CompileResult(
-            success=True, error_output="", suppressed_errors=suppressed_errors
+            success=True,
+            error_output="",
+            suppressed_errors=suppressed_errors,
+            error_log_file=None,  # Success - no error log needed
         )
 
     except KeyboardInterrupt:
@@ -525,7 +601,12 @@ def compile_meson(
         raise
     except Exception as e:
         _ts_print(f"[MESON] Compilation failed with exception: {e}", file=sys.stderr)
-        return CompileResult(success=False, error_output=str(e), suppressed_errors=[])
+        return CompileResult(
+            success=False,
+            error_output=str(e),
+            suppressed_errors=[],
+            error_log_file=None,
+        )
 
 
 def _create_error_context_filter(
