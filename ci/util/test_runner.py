@@ -493,7 +493,7 @@ def create_examples_test_process(
 
 
 def create_python_test_process(
-    enable_stack_trace: bool, run_slow: bool = False
+    enable_stack_trace: bool, run_slow: bool = False, verbose: bool = False
 ) -> RunningProcess:
     """Create a Python test process without starting it"""
     # Use list format for better environment handling
@@ -501,12 +501,16 @@ def create_python_test_process(
         "uv",
         "run",
         "pytest",
-        "-s",  # Don't capture stdout/stderr
-        "-v",  # Verbose output
         "--tb=short",  # Shorter traceback format
-        "--durations=0",  # Show all durations
         "ci/tests",  # Test directory
     ]
+
+    # Add verbose flags only if requested
+    if verbose:
+        cmd.extend(["-s", "-v"])  # Don't capture stdout/stderr, verbose output
+
+    # Always show test durations
+    cmd.append("--durations=0")
 
     # If running slow tests, add --runslow flag (handled by conftest.py)
     if run_slow:
@@ -593,11 +597,11 @@ def get_cpp_test_processes(
 
 
 def get_python_test_processes(
-    enable_stack_trace: bool, run_slow: bool = False
+    enable_stack_trace: bool, run_slow: bool = False, verbose: bool = False
 ) -> list[RunningProcess]:
     """Return all processes needed for Python tests"""
     return [
-        create_python_test_process(False, run_slow)
+        create_python_test_process(False, run_slow, verbose)
     ]  # Disable stack trace for Python tests
 
 
@@ -624,7 +628,7 @@ def get_all_test_processes(
         processes.append(create_examples_test_process(args, enable_stack_trace))
     if test_categories.py:
         processes.append(
-            create_python_test_process(False)
+            create_python_test_process(False, run_slow=False, verbose=args.verbose)
         )  # Disable stack trace for Python tests
     if test_categories.integration:
         processes.append(create_integration_test_process(args, enable_stack_trace))
@@ -1689,7 +1693,7 @@ def runner(
             )
 
             processes.append(
-                create_python_test_process(False, run_slow)
+                create_python_test_process(False, run_slow, verbose=args.verbose)
             )  # Disable stack trace for Python tests
         elif (test_categories.py or test_categories.py_only) and not python_test_change:
             cache_msg = _format_cache_hit_message(
