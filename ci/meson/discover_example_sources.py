@@ -34,11 +34,19 @@ def find_sources_for_example(ino_file: Path, project_root: Path) -> list[str]:
     source_files: list[str] = []
 
     # Excluded directory names
-    excluded_dirs = {".git", "__pycache__", ".pio", ".vscode", "fastled_js", "build"}
+    excluded_dirs: set[str] = {
+        ".git",
+        "__pycache__",
+        ".pio",
+        ".vscode",
+        "fastled_js",
+        "build",
+    }
 
     # 1. Find .cpp files in the example root directory (same level as .ino)
+    # Exclude .ino.cpp files (preprocessed .ino files - already included by wrapper)
     for cpp_file in example_dir.glob("*.cpp"):
-        if cpp_file.is_file():
+        if cpp_file.is_file() and not cpp_file.name.endswith(".ino.cpp"):
             try:
                 rel_path = cpp_file.relative_to(project_root)
                 source_files.append(str(rel_path))
