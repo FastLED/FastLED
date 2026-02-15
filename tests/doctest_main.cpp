@@ -51,6 +51,7 @@
 #include "fl/stl/algorithm.h"
 #include "fl/stl/ostream.h"
 #include <chrono>              // For test case timing
+#include <memory>              // For std::unique_ptr in TimingReporter
 
 // This file contains the main function for doctest
 // It will be compiled once and linked to all test executables
@@ -61,25 +62,45 @@
 namespace testing_detail {
 
 // Custom reporter that warns about slow test cases
+// This wraps the console reporter and adds timing warnings
 struct TimingReporter : public doctest::IReporter {
     std::chrono::steady_clock::time_point start_time;
     const doctest::TestCaseData* current_test = nullptr;
     const doctest::ContextOptions& opt;
+    std::unique_ptr<doctest::IReporter> console_reporter;
 
-    explicit TimingReporter(const doctest::ContextOptions& in) : opt(in) {}
+    explicit TimingReporter(const doctest::ContextOptions& in)
+        : opt(in)
+        , console_reporter(nullptr)
+    {
+        // Create console reporter to delegate to
+        console_reporter.reset(new doctest::ConsoleReporter(in));
+    }
 
-    void report_query(const doctest::QueryData&) override {}
-    void test_run_start() override {}
-    void test_run_end(const doctest::TestRunStats&) override {}
+    // Delegate all reporting to console reporter
+    void report_query(const doctest::QueryData& qd) override {
+        console_reporter->report_query(qd);
+    }
+
+    void test_run_start() override {
+        console_reporter->test_run_start();
+    }
+
+    void test_run_end(const doctest::TestRunStats& ts) override {
+        console_reporter->test_run_end(ts);
+    }
 
     void test_case_start(const doctest::TestCaseData& data) override {
         current_test = &data;
         start_time = std::chrono::steady_clock::now();
+        console_reporter->test_case_start(data);
     }
 
-    void test_case_reenter(const doctest::TestCaseData&) override {}
+    void test_case_reenter(const doctest::TestCaseData& data) override {
+        console_reporter->test_case_reenter(data);
+    }
 
-    void test_case_end(const doctest::CurrentTestCaseStats&) override {
+    void test_case_end(const doctest::CurrentTestCaseStats& stats) override {
         auto end_time = std::chrono::steady_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 
@@ -93,14 +114,33 @@ struct TimingReporter : public doctest::IReporter {
                       << "(threshold: " << (WARNING_THRESHOLD_MS / 1000.0) << " second)"
                       << std::endl;
         }
+
+        console_reporter->test_case_end(stats);
     }
 
-    void test_case_exception(const doctest::TestCaseException&) override {}
-    void subcase_start(const doctest::SubcaseSignature&) override {}
-    void subcase_end() override {}
-    void log_assert(const doctest::AssertData&) override {}
-    void log_message(const doctest::MessageData&) override {}
-    void test_case_skipped(const doctest::TestCaseData&) override {}
+    void test_case_exception(const doctest::TestCaseException& ex) override {
+        console_reporter->test_case_exception(ex);
+    }
+
+    void subcase_start(const doctest::SubcaseSignature& sig) override {
+        console_reporter->subcase_start(sig);
+    }
+
+    void subcase_end() override {
+        console_reporter->subcase_end();
+    }
+
+    void log_assert(const doctest::AssertData& ad) override {
+        console_reporter->log_assert(ad);
+    }
+
+    void log_message(const doctest::MessageData& md) override {
+        console_reporter->log_message(md);
+    }
+
+    void test_case_skipped(const doctest::TestCaseData& data) override {
+        console_reporter->test_case_skipped(data);
+    }
 };
 
 // Register the custom reporter

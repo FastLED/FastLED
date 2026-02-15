@@ -58,7 +58,7 @@ Json Rpc::handle(const Json& request) {
     // Look up the method
     auto it = mRegistry.find(methodName);
     if (it == mRegistry.end()) {
-        FL_ERROR("RPC: Method not found: " << methodName.c_str());
+        FL_WARN("RPC: Method not found: " << methodName.c_str());
         return detail::makeJsonRpcError(-32601, "Method not found: " + methodName, request["id"]);
     }
 

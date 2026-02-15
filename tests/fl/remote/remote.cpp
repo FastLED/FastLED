@@ -500,9 +500,9 @@ FL_TEST_CASE("Remote: schema returns minimal schema") {
     }
     FL_REQUIRE(found_add);
 
-    // Verify format: ["methodName", "returnType", [["param1", "type1"], ...]]
+    // Verify format: ["methodName", "returnType", [["param1", "type1"], ...], "mode"]
     FL_REQUIRE(addMethod.is_array());
-    FL_REQUIRE(addMethod.size() == 3);
+    FL_REQUIRE(addMethod.size() == 4);
 
     // Method name
     FL_REQUIRE(addMethod[0].is_string());
@@ -515,6 +515,10 @@ FL_TEST_CASE("Remote: schema returns minimal schema") {
     // Params array
     FL_REQUIRE(addMethod[2].is_array());
     FL_REQUIRE(addMethod[2].size() == 2);
+
+    // Mode
+    FL_REQUIRE(addMethod[3].is_string());
+    FL_REQUIRE(addMethod[3].as_string().value() == "sync");
 
     // First param: ["a", "integer"]
     FL_REQUIRE(addMethod[2][0].is_array());
@@ -597,7 +601,7 @@ FL_TEST_CASE("Remote: Schema is compact array format") {
     fl::Json methods = schema["schema"];
     for (fl::size i = 0; i < methods.size(); i++) {
         FL_REQUIRE(methods[i].is_array());
-        FL_REQUIRE(methods[i].size() == 3);  // [name, returnType, params]
+        FL_REQUIRE(methods[i].size() == 4);  // [name, returnType, params, mode]
     }
 }
 
