@@ -3,20 +3,11 @@
 #include "fl/int.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/optional.h"
-#include "fl/stl/string.h"
-#include "fl/stl/chrono.h"  // For fl::millis()
-
-#ifdef FASTLED_TESTING
-#include "fl/stl/function.h"
-#endif
 
 namespace fl {
 class sstream;  // Forward declaration
 class string;   // Forward declaration
 template <typename> class function;  // Forward declaration for function template
-
-class string;
-class sstream;
 
 // =============================================================================
 // Global Log Level Control

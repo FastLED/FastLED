@@ -661,26 +661,30 @@ inline void Chasing_Spirals_Q31_SIMD(Context &ctx) {
         };
 
         // ========== RED CHANNEL: Batch 4 sincos calls into 1 SIMD call ==========
+        // Unrolled angle computation (eliminates loop overhead, improves register allocation)
         fl::u32 angles_red_arr[4];
-        for (int j = 0; j < 4; j++) {
-            angles_red_arr[j] = static_cast<fl::u32>((static_cast<fl::i64>(base_arr[j] + rad0_raw) * RAD_TO_A24) >> FP::FRAC_BITS);
-        }
+        angles_red_arr[0] = static_cast<fl::u32>((static_cast<fl::i64>(base_arr[0] + rad0_raw) * RAD_TO_A24) >> FP::FRAC_BITS);
+        angles_red_arr[1] = static_cast<fl::u32>((static_cast<fl::i64>(base_arr[1] + rad0_raw) * RAD_TO_A24) >> FP::FRAC_BITS);
+        angles_red_arr[2] = static_cast<fl::u32>((static_cast<fl::i64>(base_arr[2] + rad0_raw) * RAD_TO_A24) >> FP::FRAC_BITS);
+        angles_red_arr[3] = static_cast<fl::u32>((static_cast<fl::i64>(base_arr[3] + rad0_raw) * RAD_TO_A24) >> FP::FRAC_BITS);
         fl::simd::simd_u32x4 angles_red = fl::simd::load_u32_4(angles_red_arr);
         fl::SinCos32_simd sc_red = fl::sincos32_simd(angles_red);
 
-        // Store SIMD sin/cos results to arrays (6 stores instead of 8 extracts in loop)
+        // Store SIMD sin/cos results to arrays
         fl::u32 cos_r_arr[4], sin_r_arr[4];
         fl::simd::store_u32_4(cos_r_arr, sc_red.cos_vals);
         fl::simd::store_u32_4(sin_r_arr, sc_red.sin_vals);
 
-        // Compute coordinates using stored values
+        // Unrolled coordinate computation (improves instruction scheduling)
         fl::i32 nx_r[4], ny_r[4], s_r[4];
-        for (int j = 0; j < 4; j++) {
-            fl::i32 cosj = static_cast<fl::i32>(cos_r_arr[j]);
-            fl::i32 sinj = static_cast<fl::i32>(sin_r_arr[j]);
-            nx_r[j] = lin0_raw + cx_raw - static_cast<fl::i32>((static_cast<fl::i64>(cosj) * dist_arr[j]) >> 31);
-            ny_r[j] = cy_raw - static_cast<fl::i32>((static_cast<fl::i64>(sinj) * dist_arr[j]) >> 31);
-        }
+        nx_r[0] = lin0_raw + cx_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(cos_r_arr[0])) * dist_arr[0]) >> 31);
+        ny_r[0] = cy_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(sin_r_arr[0])) * dist_arr[0]) >> 31);
+        nx_r[1] = lin0_raw + cx_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(cos_r_arr[1])) * dist_arr[1]) >> 31);
+        ny_r[1] = cy_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(sin_r_arr[1])) * dist_arr[1]) >> 31);
+        nx_r[2] = lin0_raw + cx_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(cos_r_arr[2])) * dist_arr[2]) >> 31);
+        ny_r[2] = cy_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(sin_r_arr[2])) * dist_arr[2]) >> 31);
+        nx_r[3] = lin0_raw + cx_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(cos_r_arr[3])) * dist_arr[3]) >> 31);
+        ny_r[3] = cy_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(sin_r_arr[3])) * dist_arr[3]) >> 31);
 
         // Batched SIMD Perlin noise (4 evaluations in parallel)
         Perlin::pnoise2d_raw_simd4(nx_r, ny_r, fade_lut, perm, s_r);
@@ -692,10 +696,12 @@ inline void Chasing_Spirals_Q31_SIMD(Context &ctx) {
         fl::i32 s3_r = s_r[3]; if (s3_r < 0) s3_r = 0; if (s3_r > FP_ONE) s3_r = FP_ONE; s3_r *= 255;
 
         // ========== GREEN CHANNEL: Batch 4 sincos calls into 1 SIMD call ==========
+        // Unrolled angle computation
         fl::u32 angles_green_arr[4];
-        for (int j = 0; j < 4; j++) {
-            angles_green_arr[j] = static_cast<fl::u32>((static_cast<fl::i64>(base_arr[j] + rad1_raw) * RAD_TO_A24) >> FP::FRAC_BITS);
-        }
+        angles_green_arr[0] = static_cast<fl::u32>((static_cast<fl::i64>(base_arr[0] + rad1_raw) * RAD_TO_A24) >> FP::FRAC_BITS);
+        angles_green_arr[1] = static_cast<fl::u32>((static_cast<fl::i64>(base_arr[1] + rad1_raw) * RAD_TO_A24) >> FP::FRAC_BITS);
+        angles_green_arr[2] = static_cast<fl::u32>((static_cast<fl::i64>(base_arr[2] + rad1_raw) * RAD_TO_A24) >> FP::FRAC_BITS);
+        angles_green_arr[3] = static_cast<fl::u32>((static_cast<fl::i64>(base_arr[3] + rad1_raw) * RAD_TO_A24) >> FP::FRAC_BITS);
         fl::simd::simd_u32x4 angles_green = fl::simd::load_u32_4(angles_green_arr);
         fl::SinCos32_simd sc_green = fl::sincos32_simd(angles_green);
 
@@ -704,13 +710,16 @@ inline void Chasing_Spirals_Q31_SIMD(Context &ctx) {
         fl::simd::store_u32_4(cos_g_arr, sc_green.cos_vals);
         fl::simd::store_u32_4(sin_g_arr, sc_green.sin_vals);
 
+        // Unrolled coordinate computation
         fl::i32 nx_g[4], ny_g[4], s_g[4];
-        for (int j = 0; j < 4; j++) {
-            fl::i32 cosj = static_cast<fl::i32>(cos_g_arr[j]);
-            fl::i32 sinj = static_cast<fl::i32>(sin_g_arr[j]);
-            nx_g[j] = lin1_raw + cx_raw - static_cast<fl::i32>((static_cast<fl::i64>(cosj) * dist_arr[j]) >> 31);
-            ny_g[j] = cy_raw - static_cast<fl::i32>((static_cast<fl::i64>(sinj) * dist_arr[j]) >> 31);
-        }
+        nx_g[0] = lin1_raw + cx_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(cos_g_arr[0])) * dist_arr[0]) >> 31);
+        ny_g[0] = cy_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(sin_g_arr[0])) * dist_arr[0]) >> 31);
+        nx_g[1] = lin1_raw + cx_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(cos_g_arr[1])) * dist_arr[1]) >> 31);
+        ny_g[1] = cy_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(sin_g_arr[1])) * dist_arr[1]) >> 31);
+        nx_g[2] = lin1_raw + cx_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(cos_g_arr[2])) * dist_arr[2]) >> 31);
+        ny_g[2] = cy_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(sin_g_arr[2])) * dist_arr[2]) >> 31);
+        nx_g[3] = lin1_raw + cx_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(cos_g_arr[3])) * dist_arr[3]) >> 31);
+        ny_g[3] = cy_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(sin_g_arr[3])) * dist_arr[3]) >> 31);
 
         Perlin::pnoise2d_raw_simd4(nx_g, ny_g, fade_lut, perm, s_g);
 
@@ -720,10 +729,12 @@ inline void Chasing_Spirals_Q31_SIMD(Context &ctx) {
         fl::i32 s3_g = s_g[3]; if (s3_g < 0) s3_g = 0; if (s3_g > FP_ONE) s3_g = FP_ONE; s3_g *= 255;
 
         // ========== BLUE CHANNEL: Batch 4 sincos calls into 1 SIMD call ==========
+        // Unrolled angle computation
         fl::u32 angles_blue_arr[4];
-        for (int j = 0; j < 4; j++) {
-            angles_blue_arr[j] = static_cast<fl::u32>((static_cast<fl::i64>(base_arr[j] + rad2_raw) * RAD_TO_A24) >> FP::FRAC_BITS);
-        }
+        angles_blue_arr[0] = static_cast<fl::u32>((static_cast<fl::i64>(base_arr[0] + rad2_raw) * RAD_TO_A24) >> FP::FRAC_BITS);
+        angles_blue_arr[1] = static_cast<fl::u32>((static_cast<fl::i64>(base_arr[1] + rad2_raw) * RAD_TO_A24) >> FP::FRAC_BITS);
+        angles_blue_arr[2] = static_cast<fl::u32>((static_cast<fl::i64>(base_arr[2] + rad2_raw) * RAD_TO_A24) >> FP::FRAC_BITS);
+        angles_blue_arr[3] = static_cast<fl::u32>((static_cast<fl::i64>(base_arr[3] + rad2_raw) * RAD_TO_A24) >> FP::FRAC_BITS);
         fl::simd::simd_u32x4 angles_blue = fl::simd::load_u32_4(angles_blue_arr);
         fl::SinCos32_simd sc_blue = fl::sincos32_simd(angles_blue);
 
@@ -732,13 +743,16 @@ inline void Chasing_Spirals_Q31_SIMD(Context &ctx) {
         fl::simd::store_u32_4(cos_b_arr, sc_blue.cos_vals);
         fl::simd::store_u32_4(sin_b_arr, sc_blue.sin_vals);
 
+        // Unrolled coordinate computation
         fl::i32 nx_b[4], ny_b[4], s_b[4];
-        for (int j = 0; j < 4; j++) {
-            fl::i32 cosj = static_cast<fl::i32>(cos_b_arr[j]);
-            fl::i32 sinj = static_cast<fl::i32>(sin_b_arr[j]);
-            nx_b[j] = lin2_raw + cx_raw - static_cast<fl::i32>((static_cast<fl::i64>(cosj) * dist_arr[j]) >> 31);
-            ny_b[j] = cy_raw - static_cast<fl::i32>((static_cast<fl::i64>(sinj) * dist_arr[j]) >> 31);
-        }
+        nx_b[0] = lin2_raw + cx_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(cos_b_arr[0])) * dist_arr[0]) >> 31);
+        ny_b[0] = cy_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(sin_b_arr[0])) * dist_arr[0]) >> 31);
+        nx_b[1] = lin2_raw + cx_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(cos_b_arr[1])) * dist_arr[1]) >> 31);
+        ny_b[1] = cy_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(sin_b_arr[1])) * dist_arr[1]) >> 31);
+        nx_b[2] = lin2_raw + cx_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(cos_b_arr[2])) * dist_arr[2]) >> 31);
+        ny_b[2] = cy_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(sin_b_arr[2])) * dist_arr[2]) >> 31);
+        nx_b[3] = lin2_raw + cx_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(cos_b_arr[3])) * dist_arr[3]) >> 31);
+        ny_b[3] = cy_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(sin_b_arr[3])) * dist_arr[3]) >> 31);
 
         Perlin::pnoise2d_raw_simd4(nx_b, ny_b, fade_lut, perm, s_b);
 

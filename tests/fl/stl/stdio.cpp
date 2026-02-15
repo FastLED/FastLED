@@ -664,6 +664,54 @@ FL_TEST_CASE("fl::printf handles int64_t") {
     FL_CHECK(fl::string(buf) == "Small: 42");
 }
 
+FL_TEST_CASE("fl::printf handles length modifiers") {
+    // Test that length modifiers (l, ll, h, etc.) are properly handled
+    // This test should initially fail showing <unknown_format> for %lu, %llu, etc.
+
+    char buf[128];
+
+    FL_SUBCASE("%lu (unsigned long) - show actual output") {
+        fl::u32 value = 4294967295U;
+        fl::snprintf(buf, sizeof(buf), "Value: %lu", static_cast<unsigned long>(value));
+
+        // FORCE output to be visible in test results
+        fl::string result(buf);
+
+        // UNCONDITIONAL FAILURE to show output
+        FL_REQUIRE_MESSAGE(1 == 2, "TEST IS RUNNING! Output was: " << result.c_str());
+    }
+
+    FL_SUBCASE("%ld (signed long)") {
+        long value = -2147483648L;
+        fl::snprintf(buf, sizeof(buf), "Value: %ld", value);
+        FL_CHECK(fl::string(buf).find("<unknown_format>") == fl::string::npos);
+        FL_CHECK(fl::string(buf).find("-2147483648") != fl::string::npos);
+    }
+
+    FL_SUBCASE("%llu (unsigned long long)") {
+        fl::u64 value = 18446744073709551615ULL;
+        fl::snprintf(buf, sizeof(buf), "Value: %llu", value);
+        FL_CHECK(fl::string(buf).find("<unknown_format>") == fl::string::npos);
+        FL_CHECK(fl::string(buf) == "Value: 18446744073709551615");
+    }
+
+    FL_SUBCASE("%lld (signed long long)") {
+        fl::i64 value = -9223372036854775807LL;
+        fl::snprintf(buf, sizeof(buf), "Value: %lld", value);
+        FL_CHECK(fl::string(buf).find("<unknown_format>") == fl::string::npos);
+        FL_CHECK(fl::string(buf).find("-9223372036854775807") != fl::string::npos);
+    }
+
+    FL_SUBCASE("profiler use case") {
+        // This is the exact pattern from profile_chasing_spirals.cpp
+        fl::u32 elapsed_us = 12345;
+        fl::snprintf(buf, sizeof(buf), "200 frames in %lu us (%.1f us/frame)",
+                    static_cast<unsigned long>(elapsed_us), 61.7);
+        FL_CHECK(fl::string(buf).find("<unknown_format>") == fl::string::npos);
+        FL_CHECK(fl::string(buf).find("12345 us") != fl::string::npos);
+    }
+}
+
 FL_TEST_CASE("fl::snprintf vs fl::snprintf return value comparison") {
     // Test that fl::snprintf returns the same values as fl::snprintf
 
