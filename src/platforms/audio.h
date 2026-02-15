@@ -1,8 +1,6 @@
 // ok no namespace fl
 #pragma once
 
-// IWYU pragma: public
-
 #include "fl/has_include.h"
 #include "platforms/arm/teensy/is_teensy.h"
 

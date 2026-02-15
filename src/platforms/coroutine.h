@@ -1,8 +1,6 @@
 // ok no namespace fl
 #pragma once
 
-// IWYU pragma: public
-
 /// @file platforms/coroutine.h
 /// @brief Platform dispatch for OS-level coroutine/task support
 ///

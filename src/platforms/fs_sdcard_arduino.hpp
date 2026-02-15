@@ -1,7 +1,5 @@
 #pragma once
 
-// IWYU pragma: public
-
 // fs card arduino implementation.
 
 #include "fs.h"
@@ -12,7 +10,6 @@
 #else
 #include <SD.h>
 #endif
-
 
 
 #include "fl/stl/memory.h"

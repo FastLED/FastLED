@@ -1,8 +1,6 @@
 // ok no namespace fl
 #pragma once
 
-// IWYU pragma: public
-
 // Platform-specific integer type definitions
 // This file dispatches to the appropriate platform-specific int.h file
 

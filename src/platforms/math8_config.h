@@ -1,8 +1,6 @@
 // ok no namespace fl
 #pragma once
 
-// IWYU pragma: public
-
 // Include centralized AVR platform detection
 #if defined(__AVR__)
 #include "platforms/avr/is_avr.h"

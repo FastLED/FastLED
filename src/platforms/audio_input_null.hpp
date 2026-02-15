@@ -1,7 +1,5 @@
 #pragma once
 
-// IWYU pragma: public
-
 #include "fl/unused.h"
 #include "fl/audio_input.h"
 

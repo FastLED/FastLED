@@ -1,8 +1,6 @@
 // ok no namespace fl
 #pragma once
 
-// IWYU pragma: public
-
 // Platform-specific atomic operations
 // This file dispatches to the appropriate platform-specific atomic.h file
 // Pattern follows platforms/int.h

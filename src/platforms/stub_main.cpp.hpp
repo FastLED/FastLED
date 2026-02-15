@@ -1,4 +1,3 @@
-// IWYU pragma: public
 
 /*
  * Stub implementation of main() for Arduino sketches (.ino files).

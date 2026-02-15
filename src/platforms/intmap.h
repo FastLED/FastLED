@@ -22,8 +22,6 @@
 
 #pragma once
 
-// IWYU pragma: public
-
 #include "lib8tion/lib8static.h"
 #include "fl/stl/stdint.h"
 #include "fl/sketch_macros.h"
@@ -482,7 +480,6 @@ FL_ALWAYS_INLINE u32 map16_to_32(u16 x) {
 FL_ALWAYS_INLINE i32 smap16_to_32(i16 x) {
     return i32(map16_to_32(u16(x)));
 }
-
 
 /// @brief Maps a 16-bit unsigned value down to an 8-bit unsigned value.
 /// @param x The 16-bit input value to scale down.

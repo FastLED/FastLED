@@ -7,8 +7,6 @@
 
 #pragma once
 
-// IWYU pragma: public
-
 #ifndef _FASTLED_STRINGIFY
 #define _FASTLED_STRINGIFY_HELPER(x) #x
 #define _FASTLED_STRINGIFY(x) _FASTLED_STRINGIFY_HELPER(x)

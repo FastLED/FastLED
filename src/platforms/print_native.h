@@ -1,7 +1,5 @@
 #pragma once
 
-// IWYU pragma: public
-
 #ifdef _WIN32
 #include <io.h>  // for _write
 #else

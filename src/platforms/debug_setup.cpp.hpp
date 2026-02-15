@@ -1,4 +1,3 @@
-// IWYU pragma: public
 
 /// @file debug_setup.cpp
 /// Platform-specific debug initialization dispatch

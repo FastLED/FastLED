@@ -1,7 +1,5 @@
 #pragma once
 
-// IWYU pragma: public
-
 // ok no namespace fl
 
 /// @file spi_output_template.h

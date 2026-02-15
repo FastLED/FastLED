@@ -1,8 +1,6 @@
 // ok no namespace fl
 #pragma once
 
-// IWYU pragma: public
-
 #include "fl/int.h"  // for FastLED integer types
 #include "fl/stl/cstring.h"  // for memcopy (FastLED equivalent)
 

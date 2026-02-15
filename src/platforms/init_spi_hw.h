@@ -1,7 +1,5 @@
 #pragma once
 
-// IWYU pragma: public
-
 /// @file init_spi_hw.h
 /// @brief Platform dispatch header for SPI hardware initialization
 ///

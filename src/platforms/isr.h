@@ -11,8 +11,6 @@
 
 #pragma once
 
-// IWYU pragma: public
-
 #include "platforms/is_platform.h"
 
 // ok no namespace fl - dispatch header includes platform-specific implementations

@@ -1,8 +1,6 @@
 // ok no namespace fl
 #pragma once
 
-// IWYU pragma: public
-
 #ifndef __INC_FASTLED_PLATFORMS_DELAYCYCLES_GENERIC_H
 #define __INC_FASTLED_PLATFORMS_DELAYCYCLES_GENERIC_H
 

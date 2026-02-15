@@ -1,4 +1,3 @@
-// IWYU pragma: public
 
 #define FASTLED_INTERNAL  
 #include "fl/fastled.h"
@@ -16,9 +15,7 @@
 #define FASTLED_USE_COMPILE_TESTS 1
 #endif
 
-
 #if FASTLED_USE_COMPILE_TESTS
-
 
 #include "fl/compiler_control.h"
 
@@ -26,7 +23,6 @@ FL_DISABLE_WARNING_PUSH
 
 FL_DISABLE_WARNING(unused-function)
 FL_DISABLE_WARNING(unused-parameter)
-
 
 // Include platform-specific compile test headers
 #if defined(__AVR__)
@@ -116,7 +112,6 @@ FL_MAYBE_UNUSED static void compile_tests() {
     static_assert(sizeof(u64) == 8, "u64 must be exactly 8 bytes");
     static_assert(sizeof(uptr) == sizeof(uintptr_t), "uptr must be exactly the same size as uintptr_t");
     static_assert(sizeof(size) == sizeof(size_t), "size must be exactly the same size as size_t");
-
 
 #if defined(__AVR__)
     avr_compile_tests();

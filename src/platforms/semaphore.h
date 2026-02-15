@@ -2,8 +2,6 @@
 // allow-include-after-namespace
 #pragma once
 
-// IWYU pragma: public
-
 /// @file platforms/semaphore.h
 /// @brief Platform dispatch for semaphore support
 ///

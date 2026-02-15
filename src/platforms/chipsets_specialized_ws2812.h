@@ -1,8 +1,6 @@
 // ok no namespace fl
 #pragma once
 
-// IWYU pragma: public
-
 #include "platforms/esp/is_esp.h"
 
 // The WS2812 family of chipsets is special! Why?
@@ -19,7 +17,6 @@
 #ifndef FASTLED_OVERCLOCK
 #error "This needs to be included by chipsets.h when FASTLED_OVERCLOCK is defined"
 #endif
-
 
 #if defined(FASTLED_USES_ESP32S3_I2S)
 #include "platforms/esp/32/drivers/i2s/clockless_i2s_esp32s3.h"

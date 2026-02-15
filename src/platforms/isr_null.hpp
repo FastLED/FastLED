@@ -12,8 +12,6 @@
 
 #pragma once
 
-// IWYU pragma: public
-
 #include "fl/isr.h"
 #include "fl/compiler_control.h"
 

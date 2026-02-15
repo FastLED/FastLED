@@ -1,7 +1,5 @@
 #pragma once
 
-// IWYU pragma: public
-
 // ok no namespace fl - Platform dispatch header only
 // This header dispatches to platform-specific implementations
 

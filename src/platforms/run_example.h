@@ -1,8 +1,6 @@
 // ok no namespace fl
 #pragma once
 
-// IWYU pragma: public
-
 /// @file run_example.h
 /// Platform dispatch header for example runner
 ///

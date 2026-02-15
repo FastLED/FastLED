@@ -2,9 +2,12 @@
 """
 IWYU Pragma Linter for Platform Headers
 
-Ensures all platform headers have explicit IWYU pragma markings.
+Ensures platform implementation headers have explicit IWYU pragma markings.
 - Files in platforms/**/ (subdirectories) should be marked private
-- Files in platforms/ (root) should be marked private or public
+- Files in platforms/ (root) are public by default (no pragma required)
+
+Note: IWYU only supports 'private', 'keep', 'export', 'no_include' pragmas.
+The 'public' pragma does not exist - headers are public by default.
 """
 
 import argparse
@@ -42,23 +45,22 @@ def check_single_file(file_path: str, project_root: Path) -> int:
     platforms_dir = project_root / "src" / "platforms"
 
     try:
-        rel_to_platforms = file.relative_to(platforms_dir)
+        file.relative_to(platforms_dir)
     except ValueError:
         # Not in platforms/ directory - skip check
+        return 0
+
+    # Only require pragma for subdirectory files (implementation details)
+    # Root-level files are public by default in IWYU
+    if not is_subdirectory_file(file, platforms_dir):
         return 0
 
     if has_iwyu_pragma(file):
         return 0
 
-    # Missing IWYU pragma
+    # Missing IWYU pragma on subdirectory file (should be private)
     rel_path = file.relative_to(project_root)
-
-    if is_subdirectory_file(file, platforms_dir):
-        recommendation = "Should be marked: // IWYU pragma: private"
-    else:
-        recommendation = (
-            "Should be marked: // IWYU pragma: private OR // IWYU pragma: public"
-        )
+    recommendation = "Should be marked: // IWYU pragma: private"
 
     print(f"❌ {rel_path}")
     print(f"   → {recommendation}")
@@ -101,18 +103,17 @@ def main() -> int:
     errors: list[tuple[Path, str]] = []
 
     for header in sorted(headers):
-        rel_path = header.relative_to(project_root)
+        # Only require pragma for subdirectory files (implementation details)
+        # Root-level files are public by default in IWYU
+        if not is_subdirectory_file(header, platforms_dir):
+            continue
 
         if has_iwyu_pragma(header):
             continue
 
-        # Missing IWYU pragma
-        if is_subdirectory_file(header, platforms_dir):
-            recommendation = "Should be marked: // IWYU pragma: private"
-        else:
-            recommendation = (
-                "Should be marked: // IWYU pragma: private OR // IWYU pragma: public"
-            )
+        # Missing IWYU pragma on subdirectory file (should be private)
+        rel_path = header.relative_to(project_root)
+        recommendation = "Should be marked: // IWYU pragma: private"
 
         errors.append((rel_path, recommendation))
 

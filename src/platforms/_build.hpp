@@ -1,4 +1,3 @@
-// IWYU pragma: public
 
 /// @file _build.hpp
 /// @brief Unity build header for platforms/ directory

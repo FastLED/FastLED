@@ -1,8 +1,6 @@
 // ok no namespace fl
 #pragma once
 
-// IWYU pragma: public
-
 /// @file platforms/init.h
 /// @brief Platform dispatch for one-time initialization
 ///

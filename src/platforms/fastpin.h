@@ -12,8 +12,6 @@
 // ok no namespace fl
 #pragma once
 
-// IWYU pragma: public
-
 // Platform-specific implementations
 // Each platform path provides FastPin<> specializations.
 // Pin class implementation is platform-dependent (see below).

@@ -2,8 +2,6 @@
 // allow-include-after-namespace
 #pragma once
 
-// IWYU pragma: public
-
 /// @file platforms/mutex.h
 /// @brief Platform dispatch for mutex support
 ///

@@ -175,9 +175,16 @@ def main():
     # IWYU format: include-what-you-use [iwyu-opts] [compiler-args] source.cpp
     # Add --driver-mode=g++ to help IWYU find C++ stdlib headers
     driver_mode = ["--driver-mode=g++"]
+
+    # Disable built-in STL mappings (prevents unwanted STL header shuffling)
+    # FastLED uses custom STL wrappers (fl/stl/*), so we don't want IWYU's
+    # default STL mappings interfering with our custom mappings
+    no_internal_mappings = ["-Xiwyu", "--no_internal_mappings"]
+
     iwyu_cmd = (
         [iwyu_binary]
         + driver_mode
+        + no_internal_mappings
         + mapping_args
         + iwyu_specific_args
         + extra_includes
