@@ -1560,4 +1560,153 @@ inline void Chasing_Spirals_i16_Batch4_ColorGrouped(Context &ctx) {
 
 } // namespace i16_opt
 
+// ============================================================
+// Q8 Perlin variant: Uses 8 fractional bits (s8x8) for maximum speed
+// ============================================================
+
+namespace q8 {
+
+using FP = fl::s16x16;
+using Perlin = animartrix2_detail::perlin_s8x8;  // Q8 precision!
+using PixelLUT = ChasingSpiralPixelLUT;
+
+// Q8 variant: Ultra-fast with minimal precision (8-bit fractional)
+inline void Chasing_Spirals_Q8_Batch4_ColorGrouped(Context &ctx) {
+    auto *e = ctx.mEngine;
+    e->get_ready();
+
+    // Timing (once per frame, float is fine here)
+    e->timings.master_speed = 0.01;
+    e->timings.ratio[0] = 0.1;
+    e->timings.ratio[1] = 0.13;
+    e->timings.ratio[2] = 0.16;
+    e->timings.offset[1] = 10;
+    e->timings.offset[2] = 20;
+    e->timings.offset[3] = 30;
+    e->calculate_oscillators(e->timings);
+
+    const int num_x = e->num_x;
+    const int num_y = e->num_y;
+    const int total_pixels = num_x * num_y;
+
+    // Per-frame constants
+    constexpr FP scale(0.1f);
+    const FP radius_fp(e->radial_filter_radius);
+    const FP center_x_scaled = FP(e->animation.center_x * 0.1f);
+    const FP center_y_scaled = FP(e->animation.center_y * 0.1f);
+
+    const FP radial0(e->move.radial[0]);
+    const FP radial1(e->move.radial[1]);
+    const FP radial2(e->move.radial[2]);
+
+    constexpr float perlin_period = 2560.0f;
+    constexpr float scale_f = 0.1f;
+    const FP linear0_scaled = FP(fl::fmodf(e->move.linear[0], perlin_period) * scale_f);
+    const FP linear1_scaled = FP(fl::fmodf(e->move.linear[1], perlin_period) * scale_f);
+    const FP linear2_scaled = FP(fl::fmodf(e->move.linear[2], perlin_period) * scale_f);
+
+    constexpr FP three_fp(3.0f);
+    constexpr FP one(1.0f);
+
+    // Build per-pixel geometry LUT (once, persists across frames)
+    if (e->mChasingSpiralLUT.size() != static_cast<size_t>(total_pixels)) {
+        e->mChasingSpiralLUT.resize(total_pixels);
+        const FP inv_radius = one / radius_fp;
+        const FP one_third = one / three_fp;
+        PixelLUT *lut = e->mChasingSpiralLUT.data();
+        int idx = 0;
+        for (int x = 0; x < num_x; x++) {
+            for (int y = 0; y < num_y; y++) {
+                const FP theta(e->polar_theta[x][y]);
+                const FP dist(e->distance[x][y]);
+                const FP rf = (radius_fp - dist) * inv_radius;
+                lut[idx].base_angle = three_fp * theta - dist * one_third;
+                lut[idx].dist_scaled = dist * scale;
+                lut[idx].rf3 = three_fp * rf;
+                lut[idx].rf_half = rf >> 1;
+                lut[idx].rf_quarter = rf >> 2;
+                lut[idx].pixel_idx = e->mCtx->xyMapFn(x, y, e->mCtx->xyMapUserData);
+                idx++;
+            }
+        }
+    }
+    const PixelLUT *lut = e->mChasingSpiralLUT.data();
+
+    // Use Q8 fade LUT (separate from Q16/Q24 versions)
+    if (!e->mFadeLUTInitialized) {
+        Perlin::init_fade_lut(e->mFadeLUT);
+        e->mFadeLUTInitialized = true;
+    }
+    const fl::i32 *fade_lut = e->mFadeLUT;
+    const fl::u8 *perm = animartrix_detail::PERLIN_NOISE;
+
+    const fl::i32 cx_raw = center_x_scaled.raw();
+    const fl::i32 cy_raw = center_y_scaled.raw();
+    const fl::i32 lin0_raw = linear0_scaled.raw();
+    const fl::i32 lin1_raw = linear1_scaled.raw();
+    const fl::i32 lin2_raw = linear2_scaled.raw();
+    const fl::i32 rad0_raw = radial0.raw();
+    const fl::i32 rad1_raw = radial1.raw();
+    const fl::i32 rad2_raw = radial2.raw();
+
+    constexpr fl::i32 FP_ONE = 1 << FP::FRAC_BITS;
+    CRGB *leds = e->mCtx->leds;
+
+    constexpr fl::i32 RAD_TO_A24 = 2670177;
+
+    // Simple noise computation helper
+    auto compute_noise = [&](fl::i32 lin_raw, fl::i32 rad_raw, const PixelLUT &px) -> fl::i32 {
+        fl::i32 a24 = static_cast<fl::i32>((static_cast<fl::i64>(px.base_angle.raw()) * RAD_TO_A24) >> 16) + rad_raw;
+        fl::SinCos32 sc = fl::sincos32(a24);
+        fl::i32 nx = lin_raw + cx_raw -
+            static_cast<fl::i32>((static_cast<fl::i64>(sc.cos_val) * px.dist_scaled.raw()) >> 31);
+        fl::i32 ny = cy_raw -
+            static_cast<fl::i32>((static_cast<fl::i64>(sc.sin_val) * px.dist_scaled.raw()) >> 31);
+        fl::i32 raw = Perlin::pnoise2d_raw(nx, ny, fade_lut, perm);  // Q8 Perlin!
+        if (raw < 0) raw = 0;
+        if (raw > FP_ONE) raw = FP_ONE;
+        return raw * 255;
+    };
+
+    // Color-grouped batch processing
+    for (int i = 0; i < total_pixels; i += 4) {
+        int batch_size = (i + 4 <= total_pixels) ? 4 : (total_pixels - i);
+
+        fl::i32 s_r[4] = {0, 0, 0, 0};
+        fl::i32 s_g[4] = {0, 0, 0, 0};
+        fl::i32 s_b[4] = {0, 0, 0, 0};
+
+        // Compute all red channels
+        for (int j = 0; j < batch_size; j++) {
+            s_r[j] = compute_noise(lin0_raw, rad0_raw, lut[i + j]);
+        }
+
+        // Compute all green channels
+        for (int j = 0; j < batch_size; j++) {
+            s_g[j] = compute_noise(lin1_raw, rad1_raw, lut[i + j]);
+        }
+
+        // Compute all blue channels
+        for (int j = 0; j < batch_size; j++) {
+            s_b[j] = compute_noise(lin2_raw, rad2_raw, lut[i + j]);
+        }
+
+        // Apply radial filters and write pixels
+        for (int j = 0; j < batch_size; j++) {
+            const PixelLUT &px = lut[i + j];
+            fl::i32 r = static_cast<fl::i32>((static_cast<fl::i64>(s_r[j]) * px.rf3.raw()) >> (FP::FRAC_BITS * 2));
+            fl::i32 g = static_cast<fl::i32>((static_cast<fl::i64>(s_g[j]) * px.rf_half.raw()) >> (FP::FRAC_BITS * 2));
+            fl::i32 b = static_cast<fl::i32>((static_cast<fl::i64>(s_b[j]) * px.rf_quarter.raw()) >> (FP::FRAC_BITS * 2));
+
+            if (r < 0) r = 0; if (r > 255) r = 255;
+            if (g < 0) g = 0; if (g > 255) g = 255;
+            if (b < 0) b = 0; if (b > 255) b = 255;
+
+            leds[px.pixel_idx] = CRGB(static_cast<fl::u8>(r), static_cast<fl::u8>(g), static_cast<fl::u8>(b));
+        }
+    }
+}
+
+} // namespace q8
+
 } // namespace animartrix2_detail
