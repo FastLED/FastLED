@@ -907,6 +907,23 @@ def run_meson_build_and_test(
                     )
                     _print_error(f"[MESON] Test: {meson_test_name}")
 
+                    # Write test output to error log file (for ALL failures)
+                    compile_errors_dir = build_dir.parent / "compile-errors"
+                    compile_errors_dir.mkdir(exist_ok=True)
+                    test_name_slug = meson_test_name.replace("test_", "").replace(
+                        "/", "_"
+                    )
+                    error_log_path = compile_errors_dir / f"{test_name_slug}.log"
+
+                    with open(error_log_path, "w", encoding="utf-8") as f:
+                        f.write(f"# Test: {meson_test_name}\n")
+                        f.write(f"# Exit code: {returncode}\n")
+                        f.write(f"# Full test output below:\n\n")
+                        f.write("--- Test Output ---\n\n")
+                        f.write(proc.stdout)
+
+                    _print_error(f"[MESON] 📄 Full test output: {error_log_path}")
+
                     # Enhanced crash detection: Check if doctest actually ran
                     # Doctest prints patterns like "test cases:", "assertions:", "[doctest]"
                     stdout_lower = proc.stdout.lower()

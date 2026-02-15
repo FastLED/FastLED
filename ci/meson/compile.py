@@ -132,10 +132,9 @@ def compile_meson(
     compile_errors_dir = build_dir.parent / "compile-errors"
     compile_errors_dir.mkdir(exist_ok=True)
 
-    # Generate timestamped log filename
-    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    # Generate log filename
     test_name_slug = target.replace("/", "_") if target else "all"
-    error_log_path = compile_errors_dir / f"{test_name_slug}-{timestamp}.log"
+    error_log_path = compile_errors_dir / f"{test_name_slug}.log"
 
     # Inject IWYU wrapper by modifying build.ninja when check mode is enabled
     # This avoids meson setup probe issues while still running IWYU during compilation
@@ -441,7 +440,6 @@ def compile_meson(
             last_error_path.parent.mkdir(exist_ok=True)
 
             with open(last_error_path, "w", encoding="utf-8") as f:
-                f.write(f"# Compilation failed at {timestamp}\n")
                 f.write(f"# Target: {target or 'all'}\n")
                 f.write(f"# Full log: {error_log_path}\n\n")
                 f.write("--- Error Context ---\n\n")

@@ -66,12 +66,9 @@ def stream_compile_and_run_tests(
     compile_errors_dir = build_dir.parent / "compile-errors"
     compile_errors_dir.mkdir(exist_ok=True)
 
-    # Generate timestamped log filename
-    import time
-
-    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    # Generate log filename
     test_name_slug = target.replace("/", "_") if target else "all"
-    error_log_path = compile_errors_dir / f"{test_name_slug}-{timestamp}.log"
+    error_log_path = compile_errors_dir / f"{test_name_slug}.log"
 
     # Show build stage banner
     # WARNING: This build progress reporting is essential for user feedback!
@@ -326,7 +323,6 @@ def stream_compile_and_run_tests(
                 last_error_path.parent.mkdir(exist_ok=True)
 
                 with open(last_error_path, "w", encoding="utf-8") as f:
-                    f.write(f"# Compilation failed at {timestamp}\n")
                     f.write(f"# Target: {target or 'all'}\n")
                     f.write(f"# Full log: {error_log_path}\n\n")
                     f.write("--- Error Context ---\n\n")
