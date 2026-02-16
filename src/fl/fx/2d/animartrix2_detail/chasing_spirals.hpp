@@ -261,13 +261,13 @@ inline fl::u32 radiansToA24(fl::i32 base_s16x16, fl::i32 offset_s16x16) {
 
 // Compute Perlin coordinates from SIMD sincos results and distances (4 pixels)
 inline void simd4_computePerlinCoords(
-    const fl::u32 cos_arr[4], const fl::u32 sin_arr[4],
+    const fl::i32 cos_arr[4], const fl::i32 sin_arr[4],
     const fl::i32 dist_arr[4], fl::i32 lin_raw, fl::i32 cx_raw, fl::i32 cy_raw,
     fl::i32 nx_out[4], fl::i32 ny_out[4]) {
 
     for (int i = 0; i < 4; i++) {
-        nx_out[i] = lin_raw + cx_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(cos_arr[i])) * dist_arr[i]) >> 31);
-        ny_out[i] = cy_raw - static_cast<fl::i32>((static_cast<fl::i64>(static_cast<fl::i32>(sin_arr[i])) * dist_arr[i]) >> 31);
+        nx_out[i] = lin_raw + cx_raw - static_cast<fl::i32>((static_cast<fl::i64>(cos_arr[i]) * dist_arr[i]) >> 31);
+        ny_out[i] = cy_raw - static_cast<fl::i32>((static_cast<fl::i64>(sin_arr[i]) * dist_arr[i]) >> 31);
     }
 }
 
@@ -306,9 +306,9 @@ inline void simd4_processChannel(
     fl::SinCos32_simd sc = fl::sincos32_simd(angles_vec);
 
     // Extract sin/cos results to arrays
-    fl::u32 cos_arr[4], sin_arr[4];
-    fl::simd::store_u32_4(cos_arr, sc.cos_vals);
-    fl::simd::store_u32_4(sin_arr, sc.sin_vals);
+    fl::i32 cos_arr[4], sin_arr[4];
+    fl::simd::store_u32_4(reinterpret_cast<fl::u32*>(cos_arr), sc.cos_vals); // ok reinterpret cast
+    fl::simd::store_u32_4(reinterpret_cast<fl::u32*>(sin_arr), sc.sin_vals); // ok reinterpret cast
 
     // Compute Perlin coordinates from sincos and distances
     fl::i32 nx[4], ny[4];

@@ -264,6 +264,63 @@ FL_TEST_CASE("Animartrix2 - CALEIDO1") { testAnimation(17, "CALEIDO1"); }
 FL_TEST_CASE("Animartrix2 - DISTANCE_EXPERIMENT") { testAnimation(18, "DISTANCE_EXPERIMENT"); }
 FL_TEST_CASE("Animartrix2 - CENTER_FIELD") { testAnimation(19, "CENTER_FIELD"); }
 FL_TEST_CASE("Animartrix2 - WAVES") { testAnimation(20, "WAVES"); }
+FL_TEST_CASE("Animartrix2 - CHASING_SPIRALS_1x1_DEBUG") {
+    fl::cout << "\n=== Testing CHASING_SPIRALS 1x1 DEBUG ===" << fl::endl;
+
+    // Use 1x1 grid for simple debugging
+    const uint16_t W_DEBUG = 1;
+    const uint16_t H_DEBUG = 1;
+    const uint16_t N_DEBUG = 1;
+
+    XYMap xy_scalar = XYMap::constructRectangularGrid(W_DEBUG, H_DEBUG);
+    XYMap xy_simd = XYMap::constructRectangularGrid(W_DEBUG, H_DEBUG);
+
+    CRGB leds_scalar[N_DEBUG] = {};
+    CRGB leds_simd[N_DEBUG] = {};
+
+    // Render using both paths
+    animartrix2_detail::Context ctx_scalar;
+    ctx_scalar.leds = leds_scalar;
+    ctx_scalar.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
+        XYMap *map = static_cast<XYMap*>(userData);
+        return map->mapToIndex(x, y);
+    };
+    ctx_scalar.xyMapUserData = &xy_scalar;
+    animartrix2_detail::init(ctx_scalar, W_DEBUG, H_DEBUG);
+    animartrix2_detail::setTime(ctx_scalar, 1000);
+
+    animartrix2_detail::Context ctx_simd;
+    ctx_simd.leds = leds_simd;
+    ctx_simd.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
+        XYMap *map = static_cast<XYMap*>(userData);
+        return map->mapToIndex(x, y);
+    };
+    ctx_simd.xyMapUserData = &xy_simd;
+    animartrix2_detail::init(ctx_simd, W_DEBUG, H_DEBUG);
+    animartrix2_detail::setTime(ctx_simd, 1000);
+
+    fl::cout << "Running scalar Q31..." << fl::endl;
+    animartrix2_detail::q31::Chasing_Spirals_Q31(ctx_scalar);
+
+    fl::cout << "Running SIMD Q31..." << fl::endl;
+    animartrix2_detail::q31::Chasing_Spirals_Q31_SIMD(ctx_simd);
+
+    fl::cout << "\n=== 1x1 Results ===" << fl::endl;
+    fl::cout << "Scalar: RGB(" << (int)leds_scalar[0].r << "," << (int)leds_scalar[0].g << "," << (int)leds_scalar[0].b << ")" << fl::endl;
+    fl::cout << "SIMD:   RGB(" << (int)leds_simd[0].r << "," << (int)leds_simd[0].g << "," << (int)leds_simd[0].b << ")" << fl::endl;
+
+    int diff = abs(leds_scalar[0].r - leds_simd[0].r) +
+               abs(leds_scalar[0].g - leds_simd[0].g) +
+               abs(leds_scalar[0].b - leds_simd[0].b);
+    fl::cout << "Total difference: " << diff << fl::endl;
+
+    if (diff <= 3) {
+        fl::cout << "✓ PASS: 1x1 test within tolerance" << fl::endl;
+    } else {
+        fl::cout << "✗ FAIL: 1x1 test exceeded tolerance (diff=" << diff << ")" << fl::endl;
+    }
+}
+
 FL_TEST_CASE("Animartrix2 - CHASING_SPIRALS") {
     fl::cout << "\n=== Testing CHASING_SPIRALS Q31 (non-SIMD) ===" << fl::endl;
 
@@ -290,6 +347,35 @@ FL_TEST_CASE("Animartrix2 - CHASING_SPIRALS") {
 
     int mismatches_simd = compareLeds(leds_float, leds_q31_simd, N, "CHASING_SPIRALS_Q31_SIMD");
     FL_MESSAGE("Q31_SIMD: ", mismatches_simd, " mismatched pixels");
+
+    // DEBUG: Find first error pixel and compare
+    int first_error_pixel = -1;
+    for (int i = 0; i < N; i++) {
+        if (leds_q31_simd[i] != leds_float[i]) {
+            int simd_err = abs(leds_float[i].r - leds_q31_simd[i].r) +
+                          abs(leds_float[i].g - leds_q31_simd[i].g) +
+                          abs(leds_float[i].b - leds_q31_simd[i].b);
+            if (simd_err > 3) {  // Non-trivial error
+                first_error_pixel = i;
+                break;
+            }
+        }
+    }
+
+    if (first_error_pixel >= 0) {
+        fl::cout << "\n=== First Error Pixel (" << first_error_pixel << ") Detailed Comparison ===" << fl::endl;
+        fl::cout << "Float:  RGB(" << (int)leds_float[first_error_pixel].r << "," << (int)leds_float[first_error_pixel].g << "," << (int)leds_float[first_error_pixel].b << ")" << fl::endl;
+        fl::cout << "Scalar: RGB(" << (int)leds_q31[first_error_pixel].r << "," << (int)leds_q31[first_error_pixel].g << "," << (int)leds_q31[first_error_pixel].b << ")" << fl::endl;
+        fl::cout << "SIMD:   RGB(" << (int)leds_q31_simd[first_error_pixel].r << "," << (int)leds_q31_simd[first_error_pixel].g << "," << (int)leds_q31_simd[first_error_pixel].b << ")" << fl::endl;
+        int scalar_diff = abs(leds_float[first_error_pixel].r - leds_q31[first_error_pixel].r) +
+                         abs(leds_float[first_error_pixel].g - leds_q31[first_error_pixel].g) +
+                         abs(leds_float[first_error_pixel].b - leds_q31[first_error_pixel].b);
+        int simd_diff = abs(leds_float[first_error_pixel].r - leds_q31_simd[first_error_pixel].r) +
+                       abs(leds_float[first_error_pixel].g - leds_q31_simd[first_error_pixel].g) +
+                       abs(leds_float[first_error_pixel].b - leds_q31_simd[first_error_pixel].b);
+        fl::cout << "Scalar total error: " << scalar_diff << fl::endl;
+        fl::cout << "SIMD total error: " << simd_diff << fl::endl;
+    }
 
     // Report which variant is better
     if (mismatches_q31 < mismatches_simd) {

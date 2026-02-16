@@ -1,9 +1,9 @@
 // ok standalone
-// Standalone profiling binary for Chasing Spirals: float (Animartrix) vs Q31 (Animartrix2)
+// Standalone profiling binary for Chasing Spirals: Float vs Q31 (scalar) vs Q31_SIMD
 // Build with profile mode (-Os -g) and run under valgrind --tool=callgrind
 //
 // Usage:
-//   ./profile_chasing_spirals                   # Profile all variants
+//   ./profile_chasing_spirals                   # Profile all 3 variants
 //   ./profile_chasing_spirals float             # Profile float (Animartrix) only
 //   ./profile_chasing_spirals q31               # Profile Q31 (scalar fixed-point) only
 //   ./profile_chasing_spirals simd              # Profile Q31_SIMD (vectorized) only

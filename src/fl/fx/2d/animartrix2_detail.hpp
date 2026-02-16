@@ -244,21 +244,23 @@ struct perlin_s16x16 {
         fl::simd::simd_u32x4 g_bb_vec = fl::simd::load_u32_4(reinterpret_cast<const fl::u32*>(g_bb)); // ok reinterpret cast
 
         // SIMD: lerp1 = lerp(u, g_aa, g_ba) = g_aa + ((g_ba - g_aa) * u) >> HP_BITS
+        // Fix: Pre-shift diff to avoid losing high bits in mulhi
+        // Instead of: (diff * u) >> 16 >> 8, do: ((diff >> 8) * u) >> 16
         fl::simd::simd_u32x4 diff1 = fl::simd::sub_i32_4(g_ba_vec, g_aa_vec);
-        fl::simd::simd_u32x4 lerp1_vec = fl::simd::mulhi_i32_4(diff1, u_vec);  // >> 16
-        lerp1_vec = fl::simd::sra_i32_4(lerp1_vec, HP_BITS - 16);              // Additional >> 8 (total >> 24, arithmetic)
+        diff1 = fl::simd::sra_i32_4(diff1, HP_BITS - 16);                      // Pre-shift: >> 8 (Q8.24 -> Q8.16)
+        fl::simd::simd_u32x4 lerp1_vec = fl::simd::mulhi_i32_4(diff1, u_vec);  // (Q8.16 * Q8.24) >> 16 = Q8.24
         lerp1_vec = fl::simd::add_i32_4(g_aa_vec, lerp1_vec);
 
         // SIMD: lerp2 = lerp(u, g_ab, g_bb) = g_ab + ((g_bb - g_ab) * u) >> HP_BITS
         fl::simd::simd_u32x4 diff2 = fl::simd::sub_i32_4(g_bb_vec, g_ab_vec);
-        fl::simd::simd_u32x4 lerp2_vec = fl::simd::mulhi_i32_4(diff2, u_vec);  // >> 16
-        lerp2_vec = fl::simd::sra_i32_4(lerp2_vec, HP_BITS - 16);              // Additional >> 8 (total >> 24, arithmetic)
+        diff2 = fl::simd::sra_i32_4(diff2, HP_BITS - 16);                      // Pre-shift: >> 8
+        fl::simd::simd_u32x4 lerp2_vec = fl::simd::mulhi_i32_4(diff2, u_vec);  // (Q8.16 * Q8.24) >> 16 = Q8.24
         lerp2_vec = fl::simd::add_i32_4(g_ab_vec, lerp2_vec);
 
         // SIMD: final = lerp(v, lerp1, lerp2) = lerp1 + ((lerp2 - lerp1) * v) >> HP_BITS
         fl::simd::simd_u32x4 diff3 = fl::simd::sub_i32_4(lerp2_vec, lerp1_vec);
-        fl::simd::simd_u32x4 final_vec = fl::simd::mulhi_i32_4(diff3, v_vec);  // >> 16
-        final_vec = fl::simd::sra_i32_4(final_vec, HP_BITS - 16);              // Additional >> 8 (total >> 24, arithmetic)
+        diff3 = fl::simd::sra_i32_4(diff3, HP_BITS - 16);                      // Pre-shift: >> 8
+        fl::simd::simd_u32x4 final_vec = fl::simd::mulhi_i32_4(diff3, v_vec);  // (Q8.16 * Q8.24) >> 16 = Q8.24
         final_vec = fl::simd::add_i32_4(lerp1_vec, final_vec);
 
         // SIMD: Shift to match s16x16 fractional bits (arithmetic for signed values)
