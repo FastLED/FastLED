@@ -146,7 +146,7 @@ FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000)") {
 
         animartrix2_detail::init(ctx, W, H);
         animartrix2_detail::setTime(ctx, t);
-        animartrix2_detail::Chasing_Spirals_Q31(ctx);
+        fl::Chasing_Spirals_Q31(ctx);
     }
 
     // ========================
@@ -212,7 +212,7 @@ FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000000)") {
 
         animartrix2_detail::init(ctx, W, H);
         animartrix2_detail::setTime(ctx, t);
-        animartrix2_detail::Chasing_Spirals_Q31(ctx);
+        fl::Chasing_Spirals_Q31(ctx);
     }
 
     // ========================
@@ -266,7 +266,7 @@ FL_TEST_CASE("chasing_spirals - float vs q31 sample pixels") {
 
         animartrix2_detail::init(ctx, W, H);
         animartrix2_detail::setTime(ctx, t);
-        animartrix2_detail::Chasing_Spirals_Q31(ctx);
+        fl::Chasing_Spirals_Q31(ctx);
     }
 
     // Print sample pixels to see error patterns

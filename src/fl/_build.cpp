@@ -27,6 +27,7 @@
 #include "fl/details/_build.hpp"
 #include "fl/fx/1d/_build.hpp"
 #include "fl/fx/2d/_build.hpp"
+#include "fl/fx/2d/animartrix2_detail/_build.hpp"
 #include "fl/fx/_build.hpp"
 #include "fl/fx/audio/_build.hpp"
 #include "fl/fx/audio/detectors/_build.hpp"

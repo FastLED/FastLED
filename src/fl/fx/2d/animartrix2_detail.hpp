@@ -4097,20 +4097,19 @@ inline void Fluffy_Blobs(Context &ctx) {
 
 // Q31 optimized Chasing_Spirals extracted to its own file.
 // Included after main namespace so all types are defined.
-#define ANIMARTRIX2_CHASING_SPIRALS_INTERNAL
 #include "fl/fx/2d/animartrix2_detail/chasing_spirals.hpp" // allow-include-after-namespace
 
 // Namespace wrappers for backwards compatibility with test code
 namespace animartrix2_detail {
 namespace q31 {
-    using animartrix2_detail::Chasing_Spirals_Q31;
-    using animartrix2_detail::Chasing_Spirals_Q31_SIMD;
+    using fl::Chasing_Spirals_Q31;
+    using fl::Chasing_Spirals_Q31_SIMD;
 }
 
 namespace q16 {
     // Q16 implementation aliased to Q31 (Q16 was removed, use Q31 instead)
     inline void Chasing_Spirals_Q16_Batch4_ColorGrouped(Context &ctx) {
-        Chasing_Spirals_Q31(ctx);
+        fl::Chasing_Spirals_Q31(ctx);
     }
 }
 } // namespace animartrix2_detail

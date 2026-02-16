@@ -142,7 +142,7 @@ void renderChasingSpiralQ31(CRGB *leds, uint32_t timeMs) {
 
     animartrix2_detail::init(ctx, W, H);
     animartrix2_detail::setTime(ctx, timeMs);
-    animartrix2_detail::q31::Chasing_Spirals_Q31(ctx);
+    fl::Chasing_Spirals_Q31(ctx);
 }
 
 // Render Chasing_Spirals using Q31 SIMD path
@@ -159,7 +159,7 @@ void renderChasingSpiralQ31_SIMD(CRGB *leds, uint32_t timeMs) {
 
     animartrix2_detail::init(ctx, W, H);
     animartrix2_detail::setTime(ctx, timeMs);
-    animartrix2_detail::q31::Chasing_Spirals_Q31_SIMD(ctx);
+    fl::Chasing_Spirals_Q31_SIMD(ctx);
 }
 
 // Render Chasing_Spirals using Q16 integer path (reduced precision Perlin)
@@ -300,10 +300,10 @@ FL_TEST_CASE("Animartrix2 - CHASING_SPIRALS_1x1_DEBUG") {
     animartrix2_detail::setTime(ctx_simd, 1000);
 
     fl::cout << "Running scalar Q31..." << fl::endl;
-    animartrix2_detail::q31::Chasing_Spirals_Q31(ctx_scalar);
+    fl::Chasing_Spirals_Q31(ctx_scalar);
 
     fl::cout << "Running SIMD Q31..." << fl::endl;
-    animartrix2_detail::q31::Chasing_Spirals_Q31_SIMD(ctx_simd);
+    fl::Chasing_Spirals_Q31_SIMD(ctx_simd);
 
     fl::cout << "\n=== 1x1 Results ===" << fl::endl;
     fl::cout << "Scalar: RGB(" << (int)leds_scalar[0].r << "," << (int)leds_scalar[0].g << "," << (int)leds_scalar[0].b << ")" << fl::endl;

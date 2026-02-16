@@ -158,10 +158,6 @@
 // See also: docs/profiling/HOW_TO_PROFILE.md
 // ============================================================================
 
-#ifndef ANIMARTRIX2_CHASING_SPIRALS_INTERNAL
-#error "Do not include chasing_spirals.hpp directly. Include animartrix2.hpp instead."
-#endif
-
 #include "fl/fixed_point/s16x16.h"
 
 // fl/fixed_point/s16x16.h is included by animartrix2_detail.hpp before

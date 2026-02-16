@@ -133,11 +133,11 @@ int main(int argc, char *argv[]) {
         animartrix2_detail::init(ctx, W, H);
 
         // Warmup (not profiled)
-        renderQ31_Direct(&animartrix2_detail::q31::Chasing_Spirals_Q31, ctx, WARMUP_FRAMES, 0);
+        renderQ31_Direct(&fl::Chasing_Spirals_Q31, ctx, WARMUP_FRAMES, 0);
 
         // Profile
         u32 t0 = ::micros();
-        renderQ31_Direct(&animartrix2_detail::q31::Chasing_Spirals_Q31, ctx, PROFILE_FRAMES, WARMUP_FRAMES);
+        renderQ31_Direct(&fl::Chasing_Spirals_Q31, ctx, PROFILE_FRAMES, WARMUP_FRAMES);
         u32 t1 = ::micros();
 
         u32 elapsed_us = t1 - t0;
@@ -164,11 +164,11 @@ int main(int argc, char *argv[]) {
         animartrix2_detail::init(ctx, W, H);
 
         // Warmup (not profiled)
-        renderQ31_Direct(&animartrix2_detail::q31::Chasing_Spirals_Q31_SIMD, ctx, WARMUP_FRAMES, 0);
+        renderQ31_Direct(&fl::Chasing_Spirals_Q31_SIMD, ctx, WARMUP_FRAMES, 0);
 
         // Profile
         u32 t0 = ::micros();
-        renderQ31_Direct(&animartrix2_detail::q31::Chasing_Spirals_Q31_SIMD, ctx, PROFILE_FRAMES, WARMUP_FRAMES);
+        renderQ31_Direct(&fl::Chasing_Spirals_Q31_SIMD, ctx, PROFILE_FRAMES, WARMUP_FRAMES);
         u32 t1 = ::micros();
 
         u32 elapsed_us = t1 - t0;
