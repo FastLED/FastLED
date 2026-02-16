@@ -1,6 +1,7 @@
 // IWYU pragma: private
 
-#if defined(FASTLED_HAS_NETWORKING) && 0
+#if 0  // POSIX socket wrappers disabled - use system functions directly
+#ifdef FASTLED_HAS_NETWORKING
 #include "platforms/wasm/is_wasm.h"
 #include "platforms/win/is_win.h"
 
@@ -147,11 +148,12 @@ int ioctl(int fd, unsigned long request, ...) {
 }
 
 // Error handling - direct access to errno
-int get_errno() {
+inline int get_errno() {
     return errno;
 }
 
 } // namespace fl
 
 #endif // !defined(FL_IS_WIN) && !defined(FL_IS_WASM)
-#endif // FASTLED_HAS_NETWORKING 
+#endif // FASTLED_HAS_NETWORKING
+#endif // #if 0 - POSIX socket wrappers disabled 

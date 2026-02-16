@@ -4,7 +4,7 @@
 
 #include "platforms/win/is_win.h"
 
-#ifdef FASTLED_HAS_NETWORKING && 0
+#ifdef FASTLED_HAS_NETWORKING
 #ifdef FL_IS_WIN
 
 #include "fl/stl/string.h"
@@ -178,6 +178,9 @@ int get_errno();
 // POSIX errno constants for Windows
 #ifndef EWOULDBLOCK
 #define EWOULDBLOCK     WSAEWOULDBLOCK
+#endif
+#ifndef EAGAIN
+#define EAGAIN          WSAEWOULDBLOCK  // On Windows, EAGAIN == EWOULDBLOCK
 #endif
 #ifndef ECONNREFUSED
 #define ECONNREFUSED    WSAECONNREFUSED

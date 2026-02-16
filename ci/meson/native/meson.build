@@ -36,6 +36,7 @@ base_defines = [
   '-DFASTLED_DEBUG_LEVEL=1',
   '-DFASTLED_NO_ATEXIT=1',
   '-DENABLE_CRASH_HANDLER',
+  '-DFASTLED_HAS_NETWORKING',    # Enable networking APIs (HTTP server, fetch client, sockets)
 ]
 
 # Group 2: Warning and error flags (code quality enforcement)
@@ -195,19 +196,12 @@ endforeach
 # ============================================================================
 # Core link arguments (shared by all targets)
 # ============================================================================
-# NOTE: -Wl,--no-undefined is only added in quick/release modes because
-# sanitizers (ASan/UBSan) have symbols resolved at runtime, not link time.
-# See: https://github.com/google/sanitizers/issues/380
-#
 # --deploy-dependencies is a clang-tool-chain specific flag that copies
 # required runtime libraries to the build directory. Stock clang doesn't
 # support this flag.
 core_link_args = ['-fuse-ld=lld']
 if is_clang_tool_chain
   core_link_args += ['--deploy-dependencies']
-endif
-if build_mode != 'debug'
-  core_link_args += ['-Wl,--no-undefined']
 endif
 if build_mode == 'release'
   # Enable thin LTO at link time for release builds
@@ -228,6 +222,15 @@ endif
 # DLL/shared library link arguments
 # ============================================================================
 # Used for test DLLs and example DLLs. Minimal linking - heavy deps in runner.
+#
+# NOTE: On Windows, each DLL must link its own dependencies (ws2_32.lib).
+# Windows DLLs have import tables built at link time - symbols can't be
+# "provided" by the runner at load time like Unix shared libraries.
+# ws2_32.lib is an import library (~100KB stubs), not actual code.
+# All DLLs import from the same system ws2_32.dll - no code duplication.
+#
+# IMPORTANT: We do NOT add -Wl,--no-undefined to DLLs because:
+# - On Unix: Sanitizers (debug mode) have symbols resolved at runtime by runner
 dll_link_args = core_link_args + sanitizer_link_args
 if is_windows
   dll_link_args += [
@@ -235,12 +238,14 @@ if is_windows
     '-static-libstdc++',
     '-mconsole',
     '-Wl,--stack,16777216',
+    '-lws2_32',  # Socket library (import library, not code - all DLLs share system ws2_32.dll)
   ]
 else
   dll_link_args += ['-rdynamic']
   # In debug mode with sanitizers, shared libraries need to allow undefined symbols
   # that will be provided by the sanitizer runtime when the runner loads them.
-  # LLD by default enforces no undefined symbols even in shared libraries.
+  # LLD by default allows undefined symbols in shared libraries, but we add the
+  # flag explicitly on Unix for compatibility with other linkers.
   if build_mode == 'debug'
     dll_link_args += ['-Wl,--allow-shlib-undefined']
   endif
@@ -253,11 +258,17 @@ endif
 # In debug mode: dynamic linking (required for sanitizers)
 # In quick mode: static linking with libunwind for stack traces
 # In release mode: static linking without stack trace support
+#
+# NOTE: -Wl,--no-undefined is added in quick/release modes to catch missing
+# libraries early. It's NOT added in debug mode because sanitizers (ASan/UBSan)
+# have symbols resolved at runtime, not link time.
+# See: https://github.com/google/sanitizers/issues/380
 if build_mode == 'debug'
   # Debug mode: dynamic linking required for sanitizers
+  # No --no-undefined: sanitizers resolve symbols at runtime
   runner_link_args = core_link_args + sanitizer_link_args + ['-pthread']
   if is_windows
-    runner_link_args += ['-ldbghelp', '-lpsapi']
+    runner_link_args += ['-ldbghelp', '-lpsapi', '-lws2_32']
   else
     # Unix: Link libunwind for crash handler stack traces
     runner_link_args += ['-lunwind']
@@ -271,16 +282,21 @@ elif build_mode == 'quick'
   if is_windows
     # Windows: static linking works well with LoadLibrary
     runner_link_args = core_link_args + [
+      '-Wl,--no-undefined',  # Catch missing libraries early
       '-static',
       '-static-libgcc',
       '-static-libstdc++',
       '-pthread',
-      '-ldbghelp', '-lpsapi',
+      '-ldbghelp', '-lpsapi', '-lws2_32',
     ]
   else
     # macOS and Linux: dynamic linking (glibc doesn't support static + dlopen)
     # Link libunwind for crash handler stack traces
-    runner_link_args = core_link_args + ['-pthread', '-lunwind']
+    runner_link_args = core_link_args + [
+      '-Wl,--no-undefined',  # Catch missing libraries early
+      '-pthread',
+      '-lunwind',
+    ]
   endif
 else
   # Release mode: static linking on Windows, dynamic on Unix
@@ -288,16 +304,21 @@ else
   if is_windows
     # Windows: static linking works well with LoadLibrary
     runner_link_args = core_link_args + [
+      '-Wl,--no-undefined',  # Catch missing libraries early
       '-static',
       '-static-libgcc',
       '-static-libstdc++',
       '-pthread',
-      '-ldbghelp', '-lpsapi',
+      '-ldbghelp', '-lpsapi', '-lws2_32',
     ]
   else
     # macOS and Linux: dynamic linking (glibc doesn't support static + dlopen)
     # Link libunwind for crash handler stack traces
-    runner_link_args = core_link_args + ['-pthread', '-lunwind']
+    runner_link_args = core_link_args + [
+      '-Wl,--no-undefined',  # Catch missing libraries early
+      '-pthread',
+      '-lunwind',
+    ]
   endif
 endif
 

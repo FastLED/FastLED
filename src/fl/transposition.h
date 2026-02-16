@@ -883,7 +883,8 @@ FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION size_t transpose_wave8byte_par
         }
     } else if (DATA_WIDTH <= 8) {
         // Pack into single bytes (compile-time branch elimination via template instantiation)
-        const size_t ticksPerByte = 8 / DATA_WIDTH;
+        // Guard against division by zero when DATA_WIDTH > 8 (shouldn't execute this branch, but compiler still evaluates it)
+        const size_t ticksPerByte = (DATA_WIDTH > 8) ? 1 : (8 / DATA_WIDTH);
         const size_t numOutputBytes = (pulsesPerByte + ticksPerByte - 1) / ticksPerByte;
 
         for (size_t outputByteIdx = 0; outputByteIdx < numOutputBytes; outputByteIdx++) {
