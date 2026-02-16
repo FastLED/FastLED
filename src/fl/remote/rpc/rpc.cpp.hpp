@@ -7,6 +7,7 @@
 #include "fl/log.h"
 #include "fl/remote/rpc/rpc_invokers.h"
 #include "fl/remote/rpc/rpc_registry.h"
+#include "fl/remote/rpc/response_send.h"
 #include "fl/remote/rpc/type_conversion_result.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/shared_ptr.h"
@@ -24,6 +25,38 @@ namespace fl {
 
 void Rpc::setResponseSink(fl::function<void(const fl::Json&)> sink) {
     mResponseSink = fl::move(sink);
+}
+
+// =============================================================================
+// Rpc::bindAsync() - Bind async method with ResponseSend parameter
+// =============================================================================
+
+void Rpc::bindAsync(const char* name,
+                   fl::function<void(ResponseSend&, const Json&)> fn,
+                   fl::RpcMode mode) {
+    fl::string key(name);
+
+    detail::RpcEntry entry;
+    entry.mTypeTag = detail::TypeTag<void(const Json&)>::id();
+    entry.mMode = mode;
+    entry.mIsResponseAware = true;
+    entry.mResponseAwareFn = fl::move(fn);
+
+    // Create schema generator for void(Json) signature (params not decomposed)
+    entry.mSchemaGenerator = fl::make_shared<detail::TypedSchemaGenerator<void(const Json&)>>();
+    entry.mDescription = "";
+    entry.mTags = {};
+
+    // Create a placeholder invoker (actual invocation handled in handle())
+    struct PlaceholderInvoker : public detail::ErasedInvoker {
+        fl::tuple<TypeConversionResult, Json> invoke(const Json&) override {
+            // Should not be called - handle() will call mResponseAwareFn directly
+            return fl::make_tuple(TypeConversionResult::success(), Json(nullptr));
+        }
+    };
+    entry.mInvoker = fl::make_shared<PlaceholderInvoker>();
+
+    mRegistry[key] = fl::move(entry);
 }
 
 // =============================================================================
@@ -71,7 +104,10 @@ Json Rpc::handle(const Json& request) {
 
     // Check if this is an async function
     const detail::RpcEntry& entry = it->second;
-    bool isAsync = (entry.mMode == RpcMode::ASYNC);
+    bool isAsync = (entry.mMode == RpcMode::ASYNC || entry.mMode == RpcMode::ASYNC_STREAM);
+
+    // Check if this is a response-aware function (uses ResponseSend&)
+    bool isResponseAware = entry.mIsResponseAware;
 
     // Print request details for debugging
     Serial.println("╔═══════════════════════════════════════════════════════════╗");
@@ -125,10 +161,28 @@ Json Rpc::handle(const Json& request) {
     Serial.println(methodName.c_str());
     Serial.print("║ [RPC] Is async: ");
     Serial.println(isAsync ? "YES" : "NO");
+    Serial.print("║ [RPC] Is response-aware: ");
+    Serial.println(isResponseAware ? "YES" : "NO");
     Serial.println("╚═══════════════════════════════════════════════════════════╝");
     Serial.flush();
 
-    fl::tuple<TypeConversionResult, Json> resultTuple = entry.mInvoker->invoke(params);
+    fl::tuple<TypeConversionResult, Json> resultTuple;
+
+    // Handle response-aware methods (with ResponseSend& parameter)
+    if (isResponseAware) {
+        // Create ResponseSend instance
+        fl::Json requestId = request.contains("id") ? request["id"] : Json(nullptr);
+        ResponseSend responseSend(requestId, mResponseSink);
+
+        // Invoke user function with ResponseSend& and raw JSON params
+        entry.mResponseAwareFn(responseSend, params);
+
+        // Return success with null result (actual responses sent via ResponseSend)
+        resultTuple = fl::make_tuple(TypeConversionResult::success(), Json(nullptr));
+    } else {
+        // Regular invocation
+        resultTuple = entry.mInvoker->invoke(params);
+    }
 
     Serial.println("╔═══════════════════════════════════════════════════════════╗");
     Serial.println("║ [RPC] Method completed - building response               ║");
