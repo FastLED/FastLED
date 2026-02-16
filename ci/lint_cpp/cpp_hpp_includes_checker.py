@@ -32,8 +32,12 @@ class CppHppIncludesChecker(FileContentChecker):
         if not file_path.endswith((".cpp", ".h", ".hpp", ".cpp.hpp")):
             return False
 
-        # _build.hpp files are ALLOWED to include .cpp.hpp files (that's their purpose)
-        if file_path.endswith("_build.hpp"):
+        # _build.hpp, _build.cpp, and _build.cpp.hpp files are ALLOWED to include .cpp.hpp files (that's their purpose)
+        if (
+            file_path.endswith("_build.hpp")
+            or file_path.endswith("_build.cpp")
+            or file_path.endswith("_build.cpp.hpp")
+        ):
             return False
 
         return True
@@ -48,6 +52,9 @@ class CppHppIncludesChecker(FileContentChecker):
         cpp_hpp_include_pattern = re.compile(
             r'#\s*include\s+[<"]([^>"]+\.cpp\.hpp)[>"]'
         )
+
+        # Pattern to match opt-out pragma (without the // prefix since we split it off)
+        opt_out_pattern = re.compile(r"\s*ok\s+include\s+cpp\.hpp")
 
         for line_number, line in enumerate(file_content.lines, 1):
             stripped = line.strip()
@@ -69,10 +76,15 @@ class CppHppIncludesChecker(FileContentChecker):
 
             # Split line to separate code from inline comments
             code_part = line.split("//")[0]
+            comment_part = line.split("//", 1)[1] if "//" in line else ""
 
-            # Check for *.cpp.hpp includes in code portion (no exceptions allowed)
+            # Check for *.cpp.hpp includes in code portion
             match = cpp_hpp_include_pattern.search(code_part)
             if match:
+                # Check if line has opt-out pragma
+                if opt_out_pattern.search(comment_part):
+                    continue  # Skip this violation due to opt-out
+
                 included_file = match.group(1)
                 violations.append(
                     (

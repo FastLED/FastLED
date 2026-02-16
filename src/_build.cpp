@@ -8,7 +8,7 @@
 // IWYU pragma: end_keep
 
 // Root directory implementations
-#include "_build.hpp"
+#include "_build.cpp.hpp"
 
 // Subdirectory implementations (already compiled by their own _build.cpp files)
 // - fl/_build.cpp

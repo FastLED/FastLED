@@ -79,7 +79,7 @@ void simd4_processChannel(
 
     // SIMD Perlin noise (4 evaluations in parallel)
     i32 raw_noise[4];
-    Perlin::pnoise2d_raw_simd4(nx, ny, fade_lut, perm, raw_noise);
+    animartrix2_detail::perlin_s16x16_simd::pnoise2d_raw_simd4(nx, ny, fade_lut, perm, raw_noise);
 
     // Clamp and scale results to [0, 255]
     noise_out[0] = clampAndScale255(raw_noise[0]);

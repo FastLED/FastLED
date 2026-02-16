@@ -3,11 +3,11 @@
 // than scalar for the same input coordinates.
 
 #include "test.h"
-#include "fl/fx/2d/animartrix2_detail/perlin_s16x16.hpp"
-#include "fl/fx/2d/animartrix2_detail/perlin_s16x16_simd.hpp"
+#include "fl/fx/2d/animartrix2_detail/perlin_s16x16.h"
+#include "fl/fx/2d/animartrix2_detail/perlin_s16x16_simd.h"
 #include <stdio.h>  // ok include: needed for fprintf debug output
 
-using namespace fl::fx;
+using namespace animartrix2_detail;
 
 // Standard Perlin permutation table
 static const fl::u8 perm_table[256] = {

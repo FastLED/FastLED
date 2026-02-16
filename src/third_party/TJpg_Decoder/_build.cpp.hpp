@@ -6,4 +6,4 @@
 #include "third_party/TJpg_Decoder/driver.cpp.hpp"
 
 // Subdirectory implementations (one level down only)
-#include "third_party/TJpg_Decoder/src/_build.hpp"
+#include "third_party/TJpg_Decoder/src/_build.cpp.hpp"

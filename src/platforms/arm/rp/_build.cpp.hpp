@@ -11,5 +11,5 @@
 #include "platforms/arm/rp/semaphore_rp.cpp.hpp"
 
 // Subdirectory implementations (alphabetical order)
-#include "platforms/arm/rp/rp2040/_build.hpp"
-#include "platforms/arm/rp/rpcommon/_build.hpp"
+#include "platforms/arm/rp/rp2040/_build.cpp.hpp"
+#include "platforms/arm/rp/rpcommon/_build.cpp.hpp"

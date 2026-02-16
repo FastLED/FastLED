@@ -5,4 +5,4 @@
 /// Includes all implementation files
 
 // Subdirectory implementations (alphabetical order)
-#include "platforms/shared/mock/esp/32/drivers/_build.hpp"
+#include "platforms/shared/mock/esp/32/drivers/_build.cpp.hpp"

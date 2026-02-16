@@ -40,7 +40,8 @@ from ci.util.paths import PROJECT_ROOT
 
 
 # File and directory name constants
-BUILD_HPP = "_build.hpp"
+BUILD_HPP = "_build.cpp.hpp"  # Renamed from _build.hpp to _build.cpp.hpp
+BUILD_CPP_HPP = "_build.cpp.hpp"
 BUILD_CPP = "_build.cpp"
 CPP_HPP_PATTERN = "*.cpp.hpp"
 SRC_DIR_NAME = "src"
@@ -49,6 +50,7 @@ SRC_DIR_NAME = "src"
 BUILD_HPP_INCLUDE_PATTERN = re.compile(
     r'^\s*#include\s+"([^"]+/' + BUILD_HPP + r')"', re.MULTILINE
 )
+CPP_HPP_INCLUDE_PATTERN = re.compile(r'^\s*#include\s+"[^"]+\.cpp\.hpp"', re.MULTILINE)
 
 # library.json constants
 LIBRARY_JSON_FILE = "library.json"
@@ -143,6 +145,32 @@ def _get_line_number(content: str, match_start: int) -> int:
     return content[:match_start].count("\n") + 1
 
 
+def _check_build_hpp_naming(src_dir: Path) -> list[str]:
+    """
+    Check for legacy _build.hpp files (all should now be _build.cpp.hpp).
+
+    Returns:
+        list of violation strings
+    """
+    violations: list[str] = []
+
+    # Check for any legacy _build.hpp files
+    for build_hpp in src_dir.rglob("_build.hpp"):
+        content = build_hpp.read_text(encoding="utf-8")
+
+        # If it includes .cpp.hpp files, it should be renamed
+        if CPP_HPP_INCLUDE_PATTERN.search(content):
+            rel_file = build_hpp.relative_to(PROJECT_ROOT)
+            expected_name = build_hpp.parent / BUILD_CPP_HPP
+            rel_expected = expected_name.relative_to(PROJECT_ROOT)
+            violations.append(
+                f"{rel_file.as_posix()}: Legacy _build.hpp file includes .cpp.hpp files. "
+                f"Should be renamed to '{rel_expected.as_posix()}' to follow implementation file convention."
+            )
+
+    return violations
+
+
 def check_hierarchy(src_dir: Path) -> list[str]:
     """
     Check that _build.hpp files only include immediate children (one level down).
@@ -186,7 +214,7 @@ def check_hierarchy(src_dir: Path) -> list[str]:
 
 def _check_cpp_hpp_files(src_dir: Path, cpp_hpp_by_dir: CppHppByDir) -> list[str]:
     """
-    Check that all .cpp.hpp files are referenced in their directory's _build.hpp.
+    Check that all .cpp.hpp files are referenced in their directory's _build.cpp.hpp.
 
     Returns:
         list of violation strings
@@ -204,6 +232,10 @@ def _check_cpp_hpp_files(src_dir: Path, cpp_hpp_by_dir: CppHppByDir) -> list[str
         content = build_hpp.read_text(encoding="utf-8")
 
         for cpp_hpp in sorted(cpp_hpp_files):
+            # Skip the _build.cpp.hpp file itself (shouldn't include itself)
+            if cpp_hpp.name == BUILD_HPP:
+                continue
+
             rel_path = cpp_hpp.relative_to(src_dir)
             include_path = rel_path.as_posix()
 
@@ -250,30 +282,45 @@ def _should_skip_build_hpp(
     build_cpp_dir: Path,
     parent_build_hpp: Path,
     build_hpp_includes: IncludeMap,
+    src_dir: Path,
 ) -> bool:
     """
-    Determine if a _build.hpp file should be skipped (already included hierarchically).
+    Determine if a _build.cpp.hpp file should be skipped (already included hierarchically or in a header).
 
     Returns:
-        True if this _build.hpp should be skipped, False otherwise
+        True if this _build.cpp.hpp should be skipped, False otherwise
     """
     try:
         rel_to_cpp_dir = build_hpp.relative_to(build_cpp_dir)
     except ValueError:
         return True  # Not under this _build.cpp's directory
 
-    # Check if this is the parent _build.hpp itself
+    # Check if this is the parent _build.cpp.hpp itself
     if rel_to_cpp_dir.parts[0] == BUILD_HPP:
-        return False  # Don't skip the parent _build.hpp
+        return False  # Don't skip the parent _build.cpp.hpp
 
-    # This is a subdirectory _build.hpp
+    # This is a subdirectory _build.cpp.hpp
     subdir = build_cpp_dir / rel_to_cpp_dir.parts[0]
 
     # Skip if subdirectory has its own _build.cpp
     if (subdir / BUILD_CPP).exists():
         return True
 
-    # Check if parent _build.hpp includes this file (directly or via intermediate)
+    # Check if this _build.cpp.hpp is included in a corresponding .hpp header file
+    # (e.g., animartrix2_detail/_build.cpp.hpp might be in animartrix2_detail.hpp)
+    build_cpp_hpp_path = build_hpp.relative_to(src_dir).as_posix()
+    # Check for a corresponding header file (directory name + .hpp)
+    dir_name = build_hpp.parent.name
+    potential_header = build_hpp.parent.parent / f"{dir_name}.hpp"
+    if potential_header.exists():
+        try:
+            header_content = potential_header.read_text(encoding="utf-8")
+            if build_cpp_hpp_path in header_content:
+                return True  # Included in header, skip in _build.cpp
+        except Exception:
+            pass
+
+    # Check if parent _build.cpp.hpp includes this file (directly or via intermediate)
     if not parent_build_hpp.exists():
         return False
 
@@ -311,11 +358,11 @@ def _check_build_cpp_files(
 
         for build_hpp in all_build_hpp_files:
             if _should_skip_build_hpp(
-                build_hpp, build_cpp_dir, parent_build_hpp, build_hpp_includes
+                build_hpp, build_cpp_dir, parent_build_hpp, build_hpp_includes, src_dir
             ):
                 continue
 
-            # This _build.hpp should be directly included by _build.cpp
+            # This _build.cpp.hpp should be directly included by _build.cpp
             rel_path = build_hpp.relative_to(src_dir)
             include_path = rel_path.as_posix()
 
@@ -436,13 +483,16 @@ def check_scanned_data(data: ScannedData) -> CheckResult:
     """
     violations: list[str] = []
 
-    # 1. Check hierarchical structure
+    # 1. Check _build.hpp naming (must be _build.cpp.hpp if includes .cpp.hpp)
+    violations.extend(_check_build_hpp_naming(data.src_dir))
+
+    # 2. Check hierarchical structure
     violations.extend(check_hierarchy(data.src_dir))
 
-    # 2. Check all .cpp.hpp files are referenced in _build.hpp
+    # 3. Check all .cpp.hpp files are referenced in _build.hpp
     violations.extend(_check_cpp_hpp_files(data.src_dir, data.cpp_hpp_by_dir))
 
-    # 3. Check _build.cpp files include necessary _build.hpp files
+    # 4. Check _build.cpp files include necessary _build.hpp files
     violations.extend(
         _check_build_cpp_files(
             data.src_dir,
@@ -452,7 +502,7 @@ def check_scanned_data(data: ScannedData) -> CheckResult:
         )
     )
 
-    # 4. Validate library.json srcFilter
+    # 5. Validate library.json srcFilter
     violations.extend(_check_library_json_srcfilter())
 
     return CheckResult(success=len(violations) == 0, violations=violations)

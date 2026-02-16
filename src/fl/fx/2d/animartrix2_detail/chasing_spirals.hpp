@@ -5,6 +5,10 @@
 //
 // Included from animartrix2_detail.hpp — do NOT include directly.
 
+// Dependencies
+#include "fl/fx/2d/animartrix2_detail/context.h"
+#include "fl/fx/2d/animartrix2_detail/perlin_s16x16.h"
+
 // ============================================================================
 // PERFORMANCE ANALYSIS & OPTIMIZATION HISTORY (2026-02-09)
 // ============================================================================
@@ -158,10 +162,10 @@
 // See also: docs/profiling/HOW_TO_PROFILE.md
 // ============================================================================
 
-#include "fl/fixed_point/s16x16.h"
-
-// fl/fixed_point/s16x16.h is included by animartrix2_detail.hpp before
-// the namespace block, so fl::s16x16 is available at global scope.
+// Dependencies are included by animartrix2_detail.hpp:
+// - fl/fixed_point/s16x16.h (for fl::s16x16 type)
+// - fl/simd.h (for SIMD intrinsics)
+// - fl/sin32.h (for sincos32 functions)
 
 #include "chasing_spirals_common.hpp"  // Common helper code
 #include "chasing_spirals_q31.hpp"     // Q31 scalar implementation

@@ -46,8 +46,12 @@ class PlatformsFlNamespaceChecker(FileContentChecker):
         if "/examples/" in normalized_path or "/tests/" in normalized_path:
             return False
 
-        # Exclude unity build aggregation files (_build.hpp, _build.cpp)
-        if file_path.endswith("_build.hpp") or file_path.endswith("_build.cpp"):
+        # Exclude unity build aggregation files (_build.hpp, _build.cpp, _build.cpp.hpp)
+        if (
+            file_path.endswith("_build.hpp")
+            or file_path.endswith("_build.cpp")
+            or file_path.endswith("_build.cpp.hpp")
+        ):
             return False
 
         # Only check .h, .cpp, and .hpp files

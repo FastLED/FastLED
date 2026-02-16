@@ -5,3 +5,8 @@
 #include "fl/fx/2d/animartrix2_detail/chasing_spirals_common.cpp.hpp"
 #include "fl/fx/2d/animartrix2_detail/chasing_spirals_q31.cpp.hpp"
 #include "fl/fx/2d/animartrix2_detail/chasing_spirals_simd.cpp.hpp"
+#include "fl/fx/2d/animartrix2_detail/perlin_i16_optimized.cpp.hpp"
+#include "fl/fx/2d/animartrix2_detail/perlin_q16.cpp.hpp"
+#include "fl/fx/2d/animartrix2_detail/perlin_s16x16.cpp.hpp"
+#include "fl/fx/2d/animartrix2_detail/perlin_s16x16_simd.cpp.hpp"
+#include "fl/fx/2d/animartrix2_detail/perlin_s8x8.cpp.hpp"

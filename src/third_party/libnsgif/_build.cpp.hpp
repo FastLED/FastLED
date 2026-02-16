@@ -6,4 +6,4 @@
 #include "third_party/libnsgif/software_decoder.cpp.hpp"
 
 // Subdirectory implementations (one level down only)
-#include "third_party/libnsgif/src/_build.hpp"
+#include "third_party/libnsgif/src/_build.cpp.hpp"

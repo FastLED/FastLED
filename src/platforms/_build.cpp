@@ -3,4 +3,4 @@
 /// Compiles entire platforms/ namespace into single object file
 /// This is the ONLY .cpp file in src/platforms/** that should be compiled
 
-#include "platforms/_build.hpp"
+#include "platforms/_build.cpp.hpp"

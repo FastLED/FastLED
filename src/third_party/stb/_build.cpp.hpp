@@ -14,9 +14,9 @@
 // stb_hexwave - Bandlimited audio oscillator v0.5
 // License: MIT or Public Domain
 // Source: https://github.com/nothings/stb
-#include "third_party/stb/hexwave/_build.hpp"
+#include "third_party/stb/hexwave/_build.cpp.hpp"
 
 // stb_truetype - TrueType font rasterizer v1.26
 // License: MIT or Public Domain
 // Source: https://github.com/nothings/stb
-#include "third_party/stb/truetype/_build.hpp"
+#include "third_party/stb/truetype/_build.cpp.hpp"

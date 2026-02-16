@@ -10,4 +10,4 @@
 #include "platforms/avr/io_avr.cpp.hpp"
 
 // Subdirectory implementations (alphabetical order)
-#include "platforms/avr/attiny/_build.hpp"
+#include "platforms/avr/attiny/_build.cpp.hpp"

@@ -10,4 +10,4 @@
 #include "platforms/arm/teensy/semaphore_teensy.cpp.hpp"
 
 // Subdirectory implementations (alphabetical order)
-#include "platforms/arm/teensy/teensy4_common/_build.hpp"
+#include "platforms/arm/teensy/teensy4_common/_build.cpp.hpp"
