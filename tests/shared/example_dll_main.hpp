@@ -8,6 +8,7 @@
 // ok no namespace fl
 
 #include "platforms/stub_main.hpp"
+#include "fl/engine_events.h"
 
 // Export function for DLL mode - called by example_runner.exe
 extern "C" {
@@ -20,12 +21,15 @@ extern "C" {
         (void)argc;  // Suppress unused parameter warning
         (void)argv;  // Examples don't typically use command-line args
 
+        // Scoped cleanup - destructor calls EngineEvents::onExit() automatically
+        fl::stub_main::ScopedEngineCleanup cleanup;
+
         // Run setup() once, then loop() until next_loop() returns false
         fl::stub_main::setup();
         while (fl::stub_main::next_loop()) {
             // Loop continues based on FASTLED_STUB_MAIN_FAST_EXIT
         }
 
-        return 0;
+        return 0;  // cleanup destructor called here
     }
 }

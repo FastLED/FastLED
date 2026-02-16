@@ -237,7 +237,19 @@ string Response::to_string() const {
 // HttpServer implementation
 //==============================================================================
 
+Server::Server() {
+    // Register as engine event listener for automatic cleanup on exit
+    EngineEvents::addListener(this);
+}
+
 Server::~Server() {
+    // Unregister from engine events
+    EngineEvents::removeListener(this);
+    stop();
+}
+
+void Server::onExit() {
+    // Automatically stop server on engine shutdown
     stop();
 }
 

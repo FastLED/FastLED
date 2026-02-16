@@ -15,6 +15,8 @@
 // Include function.h and time_stub.h at file scope
 #include "fl/compiler_control.h"  // For FL_MAYBE_UNUSED
 #include "fl/stl/function.h"
+#include "fl/delay.h"  // For delay() function
+#include "fl/engine_events.h"  // For onExit() event
 #if !defined(ARDUINO) || defined(FASTLED_USE_STUB_ARDUINO)
 #include "platforms/stub/time_stub.h"
 #endif
@@ -28,11 +30,46 @@ extern void loop();
 
 // Helper function to determine if loop should continue
 // When FASTLED_STUB_MAIN_FAST_EXIT defined: runs 5 iterations then stops
-// When undefined: runs forever
+// When undefined: runs forever (unless stop_loop() is called)
 namespace fl {
 namespace stub_main {
 
+// RAII helper that ensures EngineEvents::onExit() is called on scope exit
+// This handles cleanup automatically when main() returns or example exits
+class ScopedEngineCleanup {
+public:
+    ScopedEngineCleanup() = default;
+    ~ScopedEngineCleanup() {
+        if (!exit_called) {
+            exit_called = true;
+            fl::EngineEvents::onExit();
+        }
+    }
+
+    // Non-copyable, non-movable
+    ScopedEngineCleanup(const ScopedEngineCleanup&) = delete;
+    ScopedEngineCleanup& operator=(const ScopedEngineCleanup&) = delete;
+
+private:
+    static bool exit_called;  // okay static in class
+};
+
+bool ScopedEngineCleanup::exit_called = false;  // okay static definition in header
+
+// Global flag to allow examples to signal completion
+static bool g_should_stop = false;  // okay static in header
+
+// Function examples can call to signal completion
+inline void stop_loop() {
+    g_should_stop = true;
+}
+
 bool keep_going() {
+    // Check if example requested stop
+    if (g_should_stop) {
+        return false;
+    }
+
 #ifndef FASTLED_STUB_MAIN_FAST_EXIT
     return true;
 #else
@@ -71,8 +108,12 @@ bool next_loop() {
 // Real Arduino platforms (ESP32, etc.) have their own main() in the framework
 #if !defined(ARDUINO) || defined(FASTLED_USE_STUB_ARDUINO)
 int main() {
+    // Scoped cleanup - destructor calls EngineEvents::onExit() automatically
+    fl::stub_main::ScopedEngineCleanup cleanup;
+
     fl::stub_main::setup();
     while (fl::stub_main::next_loop()) {;}
-    return 0;
+
+    return 0;  // cleanup destructor called here
 }
 #endif

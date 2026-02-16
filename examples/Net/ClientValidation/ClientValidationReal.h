@@ -22,9 +22,13 @@
 
 #include "fl/net/http/server.h"
 #include "fl/net/fetch.h"
-#include "fl/warn.h"
 #include "fl/async.h"
 #include <FastLED.h>
+
+// For signaling test completion
+#ifdef FASTLED_STUB
+#include "platforms/stub_main.hpp"
+#endif
 
 #define NUM_LEDS 10
 #define DATA_PIN 2
@@ -46,6 +50,7 @@ TestState state = SERVER_STARTING;
 int tests_passed = 0;
 int tests_failed = 0;
 uint32_t test_start_time = 0;
+bool done = false;  // Track completion to print results once
 
 void updateLEDs() {
     switch (state) {
@@ -244,7 +249,7 @@ void setup() {
         return fl::http_response::ok("pong\n");
     });
 
-    // Start server
+    // Start server (automatically integrates with FastLED async system)
     if (server.start(SERVER_PORT)) {
         Serial.print("Server started on http://localhost:");
         Serial.println(SERVER_PORT);
@@ -262,8 +267,8 @@ void setup() {
 }
 
 void loop() {
-    // Update server (process incoming requests)
-    server.update();
+    // Server updates are now handled by the task (every 1ms)
+    // No need for manual server.update() here
 
     // Wait 1 second after startup before starting tests
     if (state == SERVER_STARTING && (fl::millis() - test_start_time > 1000)) {
@@ -301,7 +306,7 @@ void loop() {
         }
         delay(500);
     }
-    else if (state == FAILED) {
+    else if (state == FAILED && !done) {
         FL_WARN("\n=================================");
         FL_WARN("Test Results");
         FL_WARN("=================================");
@@ -310,24 +315,20 @@ void loop() {
         FL_WARN("Total:  " << (tests_passed + tests_failed));
         FL_WARN("=================================");
         FL_WARN("✗ Some tests FAILED");
-
-        // Stop after failure
-        server.stop();
-        while (true) {
-            updateLEDs();
-            FastLED.show();
-            delay(100);
-        }
+        done = true;
+        // Signal completion - cleanup happens automatically via ScopedEngineCleanup
+        #ifdef FASTLED_STUB
+        fl::stub_main::stop_loop();
+        #endif
     }
-    else if (state == ALL_PASSED) {
-        // Stop after success
-        server.stop();
-        while (true) {
-            updateLEDs();
-            FastLED.show();
-            delay(100);
-        }
+    else if (state == ALL_PASSED && !done) {
+        done = true;
+        // Signal completion - cleanup happens automatically via ScopedEngineCleanup
+        #ifdef FASTLED_STUB
+        fl::stub_main::stop_loop();
+        #endif
     }
+    // Keep updating LEDs on hardware
 
     updateLEDs();
     FastLED.show();

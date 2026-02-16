@@ -41,6 +41,7 @@ class EngineEvents {
         }
         virtual void onPlatformPreLoop() {}
         virtual void onPlatformPreLoop2() {}
+        virtual void onExit() {}  // Called before engine shutdown
     };
 
     static void addListener(Listener *listener, int priority = 0) {
@@ -111,6 +112,12 @@ class EngineEvents {
 #endif
     }
 
+    static void onExit() {
+#if FASTLED_HAS_ENGINE_EVENTS
+        EngineEvents::getInstance()->_onExit();
+#endif
+    }
+
     // Needed by fl::vector<T>
     EngineEvents();
     ~EngineEvents();
@@ -126,6 +133,7 @@ class EngineEvents {
     void _onStripAdded(CLEDController *strip, fl::u32 num_leds);
     void _onCanvasUiSet(CLEDController *strip, const ScreenMap &xymap);
     void _onPlatformPreLoop();
+    void _onExit();
     bool _hasListener(Listener *listener);
 #if FASTLED_HAS_ENGINE_EVENTS
     struct Pair {

@@ -8,6 +8,10 @@
 #define FASTLED_STUB_IMPL
 #endif
 
+#ifndef FASTLED_STUB
+#define FASTLED_STUB
+#endif
+
 #include "fl/stl/stdint.h"
 
 #ifndef F_CPU

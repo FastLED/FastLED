@@ -162,6 +162,9 @@ struct SerialEmulation {
 #define lowByte(w) ((fl::u8) ((w) & 0xff))
 #define highByte(w) ((fl::u8) ((w) >> 8))
 
+// Arduino math macro
+#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
+
 void digitalWrite(int, int);
 void analogWrite(int, int);
 void analogReference(int);

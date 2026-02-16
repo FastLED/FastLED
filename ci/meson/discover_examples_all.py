@@ -114,8 +114,16 @@ def discover_examples_all(examples_dir: Path) -> None:
         print(f"EXAMPLE|{example_name}|{'|'.join(include_dirs)}")
 
         # Collect additional .cpp source files as relative paths
-        # Look in src/ and lib/ subdirectories
+        # Look in example root directory and src/ and lib/ subdirectories
         cpp_sources: list[str] = []
+
+        # First, check for .cpp files in the example root directory
+        for cpp_file in example_root.glob("*.cpp"):
+            cpp_sources.append(
+                str(cpp_file.relative_to(examples_dir.parent)).replace("\\", "/")
+            )
+
+        # Then, look in src/ and lib/ subdirectories
         for subdir_name in ["src", "lib"]:
             subdir = example_root / subdir_name
             if subdir.exists() and subdir.is_dir():

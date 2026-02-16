@@ -128,6 +128,16 @@ void EngineEvents::_onCanvasUiSet(CLEDController *strip,
     }
 }
 
+void EngineEvents::_onExit() {
+    // Make the copy of the listener list to avoid issues with listeners being
+    // added or removed during the loop.
+    ListenerList copy = mListeners;
+    for (auto &item : copy) {
+        auto listener = item.listener;
+        listener->onExit();
+    }
+}
+
 #endif // FASTLED_HAS_ENGINE_EVENTS
 
 } // namespace fl

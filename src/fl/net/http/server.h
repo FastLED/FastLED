@@ -37,6 +37,7 @@
 #include "fl/stl/map.h"
 #include "fl/json.h"
 #include "fl/async.h"
+#include "fl/engine_events.h"
 
 namespace fl {
 namespace net {
@@ -161,10 +162,11 @@ using RouteHandler = function<Response(const Request&)>;
 /// @note Server automatically integrates with FastLED's async system.
 /// When the server is running, it will automatically process requests
 /// during FastLED.show(), delay(), and async_run() calls.
-class Server {
+/// The server also listens for engine shutdown events and cleans up automatically.
+class Server : public EngineEvents::Listener {
 public:
     /// Constructor
-    Server() = default;
+    Server();
 
     /// Destructor (stops server if running)
     ~Server();
@@ -223,6 +225,9 @@ public:
     string last_error() const { return mLastError; }
 
 private:
+    // EngineEvents::Listener implementation
+    void onExit() override;
+
     // Forward declaration for async integration helper
     class ServerAsyncRunner;
     struct RouteEntry {
