@@ -20,6 +20,7 @@ from ci.lint_cpp.banned_headers_checker import (
     BannedHeadersChecker,
 )
 from ci.lint_cpp.banned_macros_checker import BannedMacrosChecker
+from ci.lint_cpp.banned_namespace_checker import BannedNamespaceChecker
 
 # Import all checker classes
 from ci.lint_cpp.check_namespace_includes import NamespaceIncludesChecker
@@ -148,6 +149,7 @@ def create_checkers(
         AttributeChecker(),  # Checks all C++ standard attributes (replaces MaybeUnusedChecker)
         BannedMacrosChecker(),  # Checks for banned preprocessor macros like __has_include
         FlIsDefinedChecker(),
+        BannedNamespaceChecker(),  # Checks for banned namespace patterns like fl::fl
         # Note: Private libc++ headers checking is now integrated into BannedHeadersChecker
         # Note: _build.hpp hierarchy checking is now integrated into test_unity_build.py
     ]
