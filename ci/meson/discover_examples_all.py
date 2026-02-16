@@ -14,8 +14,65 @@ Usage:
     python discover_examples_all.py <examples_dir>
 """
 
+import os
+import re
 import sys
 from pathlib import Path
+
+
+def should_skip_for_stub(filter_str: str) -> tuple[bool, str]:
+    """
+    Evaluate filter expression for STUB platform (host compilation).
+
+    Filter expressions can be:
+    - Simple platform list: "STUB" or "ESP32" or "TEENSY"
+    - Expression: "(platform is native)" or "(memory is high)"
+
+    For STUB builds (Mac/Linux/Windows host compilation):
+    - "STUB" (case-insensitive) -> include
+    - "(platform is native)" -> include (native = STUB/host)
+    - Other platforms -> skip
+
+    Args:
+        filter_str: Filter string from @filter: annotation
+
+    Returns:
+        Tuple of (should_skip, reason)
+    """
+    # Check if filters are disabled via environment variable
+    if os.environ.get("FASTLED_IGNORE_EXAMPLE_FILTERS") == "1":
+        return False, ""
+
+    # Normalize for comparison
+    filter_upper = filter_str.upper()
+
+    # Simple check: if "STUB" appears anywhere, include it
+    if "STUB" in filter_upper:
+        return False, ""
+
+    # Expression-based filter: "(platform is native)" or similar
+    # Pattern: (platform is <value>) or (memory is <value>)
+    platform_match = re.search(
+        r"\(\s*platform\s+is\s+(\w+)\s*\)", filter_str, re.IGNORECASE
+    )
+    if platform_match:
+        platform_value = platform_match.group(1).lower()
+        # "native" means host/STUB build (Mac/Linux/Windows)
+        if platform_value == "native":
+            return False, ""
+        # Other specific platforms (esp32, teensy, etc.) should be skipped for STUB
+        return True, f"Platform-specific (@filter:{filter_str})"
+
+    # Memory filters don't exclude STUB builds
+    if re.search(r"\(\s*memory\s+is\s+\w+\s*\)", filter_str, re.IGNORECASE):
+        return False, ""
+
+    # Board filters don't exclude STUB builds
+    if re.search(r"\(\s*board\s+is\s+(not\s+)?\w+\s*\)", filter_str, re.IGNORECASE):
+        return False, ""
+
+    # Default: if we don't recognize the filter and it doesn't mention STUB, skip it
+    return True, f"Platform-specific (@filter:{filter_str})"
 
 
 def discover_examples_all(examples_dir: Path) -> None:
@@ -84,11 +141,10 @@ def discover_examples_all(examples_dir: Path) -> None:
                 for line in content.split("\n"):
                     line = line.strip()
                     if line.startswith("// @filter:"):
-                        platforms = line.split("// @filter:")[1].strip()
-                        if "STUB" not in platforms.upper():
-                            print(
-                                f"SKIP|{example_name}|Platform-specific (@filter:{platforms})"
-                            )
+                        filter_str = line.split("// @filter:")[1].strip()
+                        should_skip, reason = should_skip_for_stub(filter_str)
+                        if should_skip:
+                            print(f"SKIP|{example_name}|{reason}")
                         break
                     elif line.startswith("// @filter-out:"):
                         platforms = line.split("// @filter-out:")[1].strip()

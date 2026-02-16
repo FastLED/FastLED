@@ -383,12 +383,30 @@ def run_meson_examples(
 
         shutil.rmtree(build_dir)
 
+    # When specific examples are requested, disable filters to ensure they can be built
+    # even if they have platform restrictions
+    force_reconfigure = False
+    if examples is not None and len(examples) > 0:
+        os.environ["FASTLED_IGNORE_EXAMPLE_FILTERS"] = "1"
+        # Yellow warning (ANSI code 33 for yellow)
+        _ts_print(
+            "\033[93m⚠  Example filters disabled for specific example(s): "
+            + ", ".join(examples)
+            + "\033[0m"
+        )
+        # Invalidate cache to force re-discovery with filters disabled
+        cache_file = build_dir / "example_metadata.cache"
+        if cache_file.exists():
+            cache_file.unlink()
+        # Force reconfiguration to pick up the new discovery
+        force_reconfigure = True
+
     # Setup build with explicit build_mode to ensure proper cache invalidation
     if not setup_meson_build(
         source_dir,
         build_dir,
         debug=(build_mode == "debug"),
-        reconfigure=False,
+        reconfigure=force_reconfigure,
         build_mode=build_mode,
         verbose=verbose,
     ):
