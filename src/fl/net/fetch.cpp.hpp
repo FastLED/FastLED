@@ -375,6 +375,12 @@ response perform_http_request(const fl::string& url, const fetch_options& reques
             if (!value.empty() && value[0] == ' ') {
                 value = value.substr(1);
             }
+            // Normalize header name to lowercase for case-insensitive lookup (RFC 2616)
+            for (size_t i = 0; i < name.size(); ++i) {
+                if (name[i] >= 'A' && name[i] <= 'Z') {
+                    name[i] = name[i] + ('a' - 'A');
+                }
+            }
             resp.set_header(name, value);
         }
 
