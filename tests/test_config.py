@@ -8,6 +8,7 @@ easier to maintain and modify test organization.
 
 from pathlib import Path
 
+
 # ============================================================================
 # Test Discovery Configuration
 # ============================================================================
@@ -20,7 +21,9 @@ TESTS_DIR: Path = Path(__file__).parent.resolve()
 EXCLUDED_TEST_FILES: set[Path] = {
     TESTS_DIR / "test_runner.cpp",
     TESTS_DIR / "doctest_main.cpp",
-    TESTS_DIR / "fx" / "profile_chasing_spirals.cpp",  # Standalone profiling binary, not a test
+    TESTS_DIR
+    / "fx"
+    / "profile_chasing_spirals.cpp",  # Standalone profiling binary, not a test
 }
 
 # Directories to exclude from recursive test discovery.
@@ -39,7 +42,7 @@ EXCLUDED_TEST_DIRS: set[Path] = {
     TESTS_DIR / "testing",
     TESTS_DIR / "data",
     TESTS_DIR / "manual",
-    TESTS_DIR / "profile",
+    # TESTS_DIR / "profile",  # Temporarily enabled for json_memory_profile.cpp
     TESTS_DIR / "build",
     TESTS_DIR / "builddir",
     TESTS_DIR / "x64",

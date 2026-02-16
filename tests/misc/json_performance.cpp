@@ -3,9 +3,14 @@
 // Compares parse() (ArduinoJson) vs parse2() (custom parser) parsing speed
 
 #include "test.h"
+#include "fl/file_system.h"
+#include "fl/int.h"
 #include "fl/json.h"
 #include "fl/stl/chrono.h"
-#include "fl/file_system.h"
+#include "fl/stl/cstdint.h"
+#include "fl/stl/stdio.h"
+#include "fl/stl/string.h"
+#include "stdio.h"  // ok include
 
 using namespace fl;
 
@@ -170,8 +175,18 @@ FL_TEST_CASE("JSON Performance: parse() vs parse2() - Large (1MB)") {
 
     printf("Loading large JSON file: %s\n", filepath);
 
-    FileHandle fh = FileSystem::open(filepath);
-    if (!fh) {
+    // Initialize FileSystem for testing
+    FileSystem fs;
+    FsImplPtr fsImpl = make_sdcard_filesystem(0);
+    if (!fs.begin(fsImpl)) {
+        printf("❌ ERROR: Failed to initialize test filesystem\n");
+        FL_REQUIRE(false);
+        return;
+    }
+
+    // Open and read the JSON file
+    FileHandlePtr fh = fs.openRead(filepath);
+    if (!fh || !fh->valid()) {
         printf("❌ ERROR: Could not open %s\n", filepath);
         printf("   Make sure to download it first with:\n");
         printf("   curl -o %s https://microsoftedge.github.io/Demos/json-dummy-data/1MB.json\n", filepath);
@@ -179,10 +194,10 @@ FL_TEST_CASE("JSON Performance: parse() vs parse2() - Large (1MB)") {
         return;
     }
 
-    size_t file_size = fh.size();
+    size_t file_size = fh->size();
     large_json.resize(file_size);
-    size_t bytes_read = fh.read(reinterpret_cast<u8*>(&large_json[0]), file_size);
-    fh.close();
+    size_t bytes_read = fh->read(reinterpret_cast<u8*>(&large_json[0]), file_size);
+    fh->close();
 
     if (bytes_read != file_size) {
         printf("❌ ERROR: Read %zu bytes but expected %zu bytes\n", bytes_read, file_size);

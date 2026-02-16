@@ -59,9 +59,7 @@ class ProfileRunner:
         self.force_regenerate = force_regenerate
         self.use_callgrind = use_callgrind
         self.debuggable = debuggable
-        self.test_name = "profile_" + self._sanitize_name(
-            target
-        )  # Include "profile_" prefix
+        self.test_name = self._sanitize_name(target)
         self.test_path = Path(f"tests/profile/{self.test_name}.cpp")
         self.results_file = Path(f"{self.test_name}_results.json")
 

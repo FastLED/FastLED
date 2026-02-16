@@ -19,7 +19,7 @@ import os
 import sys
 # Use source directory passed as argument
 source_dir = sys.argv[1] if len(sys.argv) > 1 else "."
-files = glob.glob(os.path.join(source_dir, "tests/profile/profile_*.cpp"))
+files = glob.glob(os.path.join(source_dir, "tests/profile/*.cpp"))
 if files:
     # Use semicolon as separator to avoid newline issues on Windows
     print(";".join(files))
@@ -30,15 +30,16 @@ if files:
 
 if profile_test_files != ''
   foreach profile_file : profile_test_files.split(';')
-    # Extract test name from file path: tests/profile/profile_sincos16.cpp → sincos16
-    profile_basename = fs.name(profile_file)  # profile_sincos16.cpp
-    profile_name = profile_basename.substring(8, -4)  # Remove 'profile_' prefix and '.cpp' suffix
+    # Extract test name from file path: json_memory_profile.cpp → json_memory_profile
+    # Supports both old (profile_*.cpp) and new naming conventions
+    profile_basename = fs.name(profile_file)  # e.g., json_memory_profile.cpp or profile_sincos32.cpp
+    profile_name = profile_basename.substring(0, -4)  # Remove '.cpp' extension
 
     # Build as standalone executable (no PCH, no doctest, no runner)
     # Uses profile_test_compile_args for readable stack traces (frame pointers + debug symbols)
     # Include project root for tests/profile/profile_result.h
     project_root_dir = include_directories('../..')
-    executable('profile_' + profile_name,
+    executable(profile_name,
       profile_file,
       include_directories: [src_dir, stub_dir, project_root_dir],
       cpp_args: profile_test_compile_args,
@@ -51,5 +52,5 @@ if profile_test_files != ''
 
   message('Profile tests found: ' + profile_test_files.split(';').length().to_string() + ' benchmarks')
 else
-  message('No profile tests found (tests/profile/profile_*.cpp)')
+  message('No profile tests found (tests/profile/*.cpp)')
 endif

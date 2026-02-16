@@ -3,7 +3,7 @@
 Parse profiler results and generate statistical analysis.
 
 Usage:
-    python ci/profile/parse_results.py profile_sincos16_results.json
+    python ci/profile/parse_results.py sincos16_results.json
 """
 
 import json

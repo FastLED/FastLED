@@ -14,7 +14,7 @@
 #include "fl/fx/2d/animartrix2_detail/chasing_spirals.hpp"
 #include "fl/stl/cstring.h"
 #include "fl/stl/stdio.h"
-#include "tests/profile/profile_result.h"
+#include "profile_result.h"
 
 using namespace fl;
 

@@ -22,7 +22,7 @@ class ProfileGenerator:
     def __init__(self, target: str):
         self.target = target
         self.test_name = self._sanitize_name(target)
-        self.output_path = Path(f"tests/profile/profile_{self.test_name}.cpp")
+        self.output_path = Path(f"tests/profile/{self.test_name}.cpp")
 
     def _sanitize_name(self, name: str) -> str:
         """Convert 'fl::sincos16' → 'sincos16'"""

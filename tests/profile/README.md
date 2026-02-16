@@ -36,7 +36,7 @@ bash profile sincos16 --docker --callgrind
 
 ## Generated Files
 
-### Profile Test (`profile_<function>.cpp`)
+### Profile Test (`<function>.cpp`)
 Auto-generated template that MUST be customized:
 - Add realistic test inputs
 - Call target function correctly
@@ -63,13 +63,13 @@ int main() {
 ```
 
 ### Result Files
-- `profile_<function>_results.json` - Raw data (all iterations)
-- `profile_<function>_results.ai.json` - Statistical summary
+- `<function>_results.json` - Raw data (all iterations)
+- `<function>_results.ai.json` - Statistical summary
 
 ## Workflow
 
 1. **Generate**: `bash profile <function>` creates template
-2. **Customize**: Edit `tests/profile/profile_<function>.cpp`
+2. **Customize**: Edit `tests/profile/<function>.cpp`
 3. **Build**: Compiles with release flags (-O2)
 4. **Run**: Executes multiple iterations
 5. **Analyze**: Computes statistics (best/median/worst/stdev)
@@ -174,8 +174,8 @@ Profile tests are:
 
 **Manual build:**
 ```bash
-uv run test.py profile_<function> --cpp --build-mode release --build
-.build/meson-release/tests/profile_<function>.exe baseline
+uv run test.py <function> --cpp --build-mode release --build
+.build/meson-release/tests/<function>.exe baseline
 ```
 
 ## Best Practices
