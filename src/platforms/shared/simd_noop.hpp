@@ -348,6 +348,16 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sll_u32_4(simd_u32x4 vec, int shift) noe
     return result;
 }
 
+// Shift right arithmetic (sign-extend) - for signed fixed-point math
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sra_i32_4(simd_u32x4 vec, int shift) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        i32 signed_val = static_cast<i32>(vec.data[i]);
+        result.data[i] = static_cast<u32>(signed_val >> shift);
+    }
+    return result;
+}
+
 // Bitwise AND of two u32 vectors
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 and_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
     simd_u32x4 result;
