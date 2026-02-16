@@ -7,8 +7,9 @@ namespace fl {
 // =============================================================================
 
 enum class RpcMode {
-    SYNC,   // Synchronous: Returns result immediately (default)
-    ASYNC   // Asynchronous: Sends ACK immediately, result comes later
+    SYNC,          // Synchronous: Returns result immediately (default)
+    ASYNC,         // Asynchronous: Sends ACK immediately, result comes later
+    ASYNC_STREAM   // Asynchronous Streaming: ACK + multiple updates + final result
 };
 
 } // namespace fl

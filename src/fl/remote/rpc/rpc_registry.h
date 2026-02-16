@@ -14,6 +14,10 @@
 #include "fl/remote/rpc/rpc_mode.h"
 
 namespace fl {
+
+// Forward declaration
+class ResponseSend;
+
 namespace detail {
 
 // =============================================================================
@@ -46,6 +50,10 @@ struct RpcEntry {
     fl::string mDescription;
     fl::vector<fl::string> mTags;
     fl::RpcMode mMode = fl::RpcMode::SYNC;  // Default to synchronous
+
+    // For response-aware async methods (with ResponseSend& parameter)
+    fl::function<void(ResponseSend&, const Json&)> mResponseAwareFn;
+    bool mIsResponseAware = false;
 };
 
 // =============================================================================

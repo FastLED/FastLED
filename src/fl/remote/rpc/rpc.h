@@ -92,6 +92,9 @@
 
 namespace fl {
 
+// Forward declarations
+class ResponseSend;
+
 // =============================================================================
 // BindError - Error codes for bind() failures
 // =============================================================================
@@ -241,6 +244,21 @@ public:
     void bind(const char* name, Callable fn, fl::RpcMode mode = fl::RpcMode::SYNC) {
         bind(Config<Callable>{name, fl::move(fn), mode});
     }
+
+    /// Bind async method with ResponseSend& parameter (for ASYNC/ASYNC_STREAM modes)
+    /// Signature: void(ResponseSend&, const Json&)
+    /// The ResponseSend& parameter is automatically injected with request ID and response sink
+    /// The Json& parameter contains the raw JSON params from the request
+    ///
+    /// EXAMPLE:
+    ///   rpc.bindAsync("longTask", [](ResponseSend& send, const Json& params) {
+    ///       // ACK already sent automatically
+    ///       // Do work...
+    ///       send.send(Json::object().set("value", 42));  // Send result
+    ///   });
+    void bindAsync(const char* name,
+                   fl::function<void(ResponseSend&, const Json&)> fn,
+                   fl::RpcMode mode = fl::RpcMode::ASYNC);
 
     // =========================================================================
     // Method Retrieval

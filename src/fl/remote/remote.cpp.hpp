@@ -58,6 +58,61 @@ void Remote::sendAsyncResponse(const char* method, const fl::Json& result) {
     }
 }
 
+void Remote::sendStreamUpdate(const char* method, const fl::Json& update) {
+    fl::string methodName(method);
+    auto it = mAsyncRequests.find(methodName);
+    if (it == mAsyncRequests.end()) {
+        FL_WARN("No pending async request for method: " << method);
+        return;
+    }
+
+    int requestId = it->second.requestId;
+    // Don't erase - stream is still active
+
+    // Build JSON-RPC response with "update" marker
+    fl::Json response = fl::Json::object();
+    response.set("jsonrpc", "2.0");
+    response.set("id", requestId);
+
+    fl::Json resultObj = fl::Json::object();
+    resultObj.set("update", update);
+    response.set("result", resultObj);
+
+    // Send via response sink
+    if (mResponseSink) {
+        mResponseSink(response);
+        FL_DBG("Sent stream update for " << method << " (id=" << requestId << ")");
+    }
+}
+
+void Remote::sendStreamFinal(const char* method, const fl::Json& result) {
+    fl::string methodName(method);
+    auto it = mAsyncRequests.find(methodName);
+    if (it == mAsyncRequests.end()) {
+        FL_WARN("No pending async request for method: " << method);
+        return;
+    }
+
+    int requestId = it->second.requestId;
+    mAsyncRequests.erase(it);  // Stream complete - remove request
+
+    // Build JSON-RPC response with "stop" marker
+    fl::Json response = fl::Json::object();
+    response.set("jsonrpc", "2.0");
+    response.set("id", requestId);
+
+    fl::Json resultObj = fl::Json::object();
+    resultObj.set("value", result);
+    resultObj.set("stop", true);
+    response.set("result", resultObj);
+
+    // Send via response sink
+    if (mResponseSink) {
+        mResponseSink(response);
+        FL_DBG("Sent stream final for " << method << " (id=" << requestId << ")");
+    }
+}
+
 // RPC Processing
 
 fl::Json Remote::processRpc(const fl::Json& request) {

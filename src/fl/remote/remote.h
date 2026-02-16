@@ -19,6 +19,9 @@
 
 namespace fl {
 
+// Forward declarations
+class ResponseSend;
+
 /**
  * @brief JSON-RPC server with scheduling support
  *
@@ -53,11 +56,19 @@ public:
      * @param source Function that returns next JSON-RPC request (or nullopt if none)
      * @param sink Function that handles outgoing JSON-RPC responses
      *
-     * Example:
+     * Example (Serial):
      *   fl::Remote remote(
      *       [&]() { return parseJsonRpcFromSerial(); },
      *       [](const fl::Json& r) { writeJsonRpcToSerial(r); }
      *   );
+     *
+     * Example (HTTP Streaming):
+     *   auto transport = fl::make_shared<HttpStreamClient>("localhost", 8080);
+     *   fl::Remote remote(
+     *       [&transport]() { return transport->readRequest(); },
+     *       [&transport](const fl::Json& r) { transport->writeResponse(r); }
+     *   );
+     *   // In main loop: transport->update(millis()); remote.update(millis());
      */
     Remote(RequestSource source, ResponseSink sink);
 
@@ -81,6 +92,15 @@ public:
     template<typename Callable>
     void bind(const char* name, Callable fn, fl::RpcMode mode = fl::RpcMode::SYNC) {
         bind(fl::Rpc::Config<Callable>{name, fl::move(fn), mode});
+    }
+
+    /// Register async method with ResponseSend& parameter (for ASYNC/ASYNC_STREAM modes)
+    /// Signature: void(ResponseSend&, const Json&)
+    /// The ResponseSend& parameter provides send(), sendUpdate(), sendFinal() methods
+    void bindAsync(const char* name,
+                   fl::function<void(fl::ResponseSend&, const fl::Json&)> fn,
+                   fl::RpcMode mode = fl::RpcMode::ASYNC) {
+        mRpc.bindAsync(name, fl::move(fn), mode);
     }
 
     /// Get bound method by name for direct C++ invocation
@@ -150,6 +170,14 @@ public:
     /// Send async response for a previously-called async method
     /// The request ID is automatically retrieved from internal storage
     void sendAsyncResponse(const char* method, const fl::Json& result);
+
+    /// Send stream update for a streaming async method (ASYNC_STREAM mode)
+    /// The request ID is automatically retrieved from internal storage
+    void sendStreamUpdate(const char* method, const fl::Json& update);
+
+    /// Send final stream response for a streaming async method (ASYNC_STREAM mode)
+    /// The request ID is automatically retrieved from internal storage and method is removed
+    void sendStreamFinal(const char* method, const fl::Json& result);
 
 protected:
     // Storage for async request IDs (method name -> request ID)
