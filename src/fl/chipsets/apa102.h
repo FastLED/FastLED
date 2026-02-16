@@ -7,7 +7,11 @@
 #include "crgb.h"
 #include "eorder.h"
 #include "fl/math_macros.h"
+#include "cpixel_ledcontroller.h"
+#include "fastspi.h"
+// IWYU pragma: begin_keep
 #include "platforms/shared/spi_pixel_writer.h"  // ok platform headers
+// IWYU pragma: end_keep
 #include "platforms/spi_output_template.h"
 #include "fl/chipsets/encoders/apa102.h"
 

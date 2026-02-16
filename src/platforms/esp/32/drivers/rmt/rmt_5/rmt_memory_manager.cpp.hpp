@@ -12,7 +12,9 @@
 #include "common.h"
 
 FL_EXTERN_C_BEGIN
+// IWYU pragma: begin_keep
 #include "soc/soc_caps.h"
+// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 namespace fl {

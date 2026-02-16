@@ -5,7 +5,9 @@
 
 #include "controller.h"
 #include "lib8tion.h"
+// IWYU pragma: begin_keep
 #include <avr/interrupt.h> // for cli/se definitions
+// IWYU pragma: end_keep
 #include "fl/force_inline.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/chipsets/timing_traits.h"

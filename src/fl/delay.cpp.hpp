@@ -24,7 +24,9 @@
 
 // Include stub time header for delay override check (only on stub platform)
 #if defined(FASTLED_STUB_IMPL) && (!defined(ARDUINO) || defined(FASTLED_USE_STUB_ARDUINO))
-#include "platforms/stub/time_stub.h"  // ok platform headers (stub-specific delay override check)
+// IWYU pragma: begin_keep
+#include "platforms/stub/time_stub.h"  // ok platform headers
+// IWYU pragma: end_keep  // ok platform headers (stub-specific delay override check)
 #endif
 
 namespace fl {

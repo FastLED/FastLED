@@ -12,9 +12,11 @@
 #include "fl/stl/stdint.h"
 
 // Minimal POSIX includes for function declarations
+// IWYU pragma: begin_keep
 #include <sys/types.h>    // For ssize_t, socklen_t
 #include <sys/socket.h>   // For struct sockaddr, struct msghdr  
 #include <netdb.h>        // For struct addrinfo
+// IWYU pragma: end_keep
 
 namespace fl {
 

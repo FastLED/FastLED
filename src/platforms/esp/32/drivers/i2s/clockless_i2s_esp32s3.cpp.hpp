@@ -19,8 +19,10 @@
 #define FASTLED_INTERNAL
 #include "fl/fastled.h"
 
+// IWYU pragma: begin_keep
 #include "third_party/yves/I2SClockLessLedDriveresp32s3/driver.h"
 
+// IWYU pragma: end_keep
 #include "cpixel_ledcontroller.h"
 #include "crgb.h"
 #include "eorder.h"

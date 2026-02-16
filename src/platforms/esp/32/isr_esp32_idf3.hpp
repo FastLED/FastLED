@@ -24,12 +24,22 @@
 
 FL_EXTERN_C_BEGIN
 #include "esp_intr_alloc.h"
+// IWYU pragma: begin_keep
 #include "driver/timer.h"
+// IWYU pragma: end_keep
 #include "esp_log.h"
+// IWYU pragma: begin_keep
 #include "soc/soc.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "driver/gpio.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "freertos/task.h"
+// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 #include "fl/stl/assert.h"

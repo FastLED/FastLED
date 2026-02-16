@@ -13,8 +13,12 @@
 
 // Include Pico SDK headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN
+// IWYU pragma: begin_keep
 #include "hardware/sync.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "pico/platform.h"
+// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 namespace fl {

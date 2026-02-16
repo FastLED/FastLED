@@ -21,7 +21,9 @@
 #if defined(CORE_TEENSY)
     // Teensy core is available - use native Teensy functions
     // These are defined in the Teensy core's core_pins.h
+    // IWYU pragma: begin_keep
     #include <core_pins.h>
+    // IWYU pragma: end_keep
 #else
     // Fallback: Define basic pin constants if Teensy core not available
     #ifndef OUTPUT

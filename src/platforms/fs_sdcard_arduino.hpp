@@ -4,11 +4,17 @@
 
 #include "fs.h"
 
+// IWYU pragma: begin_keep
 #include <SPI.h>
+// IWYU pragma: end_keep
 #ifdef USE_SDFAT
+// IWYU pragma: begin_keep
 #include <SdFat.h>
+// IWYU pragma: end_keep
 #else
+// IWYU pragma: begin_keep
 #include <SD.h>
+// IWYU pragma: end_keep
 #endif
 
 

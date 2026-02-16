@@ -1,6 +1,8 @@
 #include "fl/codec/jpeg.h"
 #include "fl/stl/unique_ptr.h"  // For make_unique
+// IWYU pragma: begin_keep
 #include "third_party/TJpg_Decoder/driver.h"
+// IWYU pragma: end_keep
 #include "fl/stl/utility.h"
 #include "fl/stl/vector.h"
 #include "fl/fx/frame.h"

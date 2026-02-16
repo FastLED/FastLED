@@ -6,7 +6,9 @@
 #include "fl/warn.h"
 #include "fl/stl/cstring.h"  // For memcpy
 #include "fl/channels/config.h"  // For SpiChipsetConfig
+// IWYU pragma: begin_keep
 #include "platforms/shared/spi_hw_1.h"  // For SpiHw1::Config // ok platform headers
+// IWYU pragma: end_keep
 
 namespace fl {
 

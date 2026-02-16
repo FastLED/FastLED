@@ -12,11 +12,17 @@
 
 // Include FreeRTOS headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN
+// IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "freertos/semphr.h"
+// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
+// IWYU pragma: begin_keep
 #include <chrono>  // ok include - for std::chrono
+// IWYU pragma: end_keep
 
 namespace fl {
 namespace platforms {

@@ -12,7 +12,9 @@
 #include "fl/stl/not_null.h"
 
 #ifdef FL_IS_WASM
+// IWYU pragma: begin_keep
 #include <string>
+// IWYU pragma: end_keep
 #endif
 
 #include "fl/math_macros.h"

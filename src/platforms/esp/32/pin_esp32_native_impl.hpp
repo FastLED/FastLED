@@ -19,15 +19,23 @@
 #include "platforms/esp/esp_version.h"
 
 FL_EXTERN_C_BEGIN
+// IWYU pragma: begin_keep
 #include "driver/gpio.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "driver/ledc.h"
+// IWYU pragma: end_keep
 #include "esp_err.h"
 
 #if ESP_IDF_VERSION_5_OR_HIGHER
+// IWYU pragma: begin_keep
 #include "esp_adc/adc_oneshot.h"
+// IWYU pragma: end_keep
 #else
 // Legacy ADC API for IDF v4.x
+// IWYU pragma: begin_keep
 #include "driver/adc.h"
+// IWYU pragma: end_keep
 #endif
 
 FL_EXTERN_C_END

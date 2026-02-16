@@ -19,7 +19,9 @@
 // These headers provide platform_* functions for socket operations
 
 #if defined(_WIN32)
+    // IWYU pragma: begin_keep
     #include "win/socket_win.h"
+    // IWYU pragma: end_keep
 #elif defined(__EMSCRIPTEN__)
     // WASM platforms (Emscripten, standalone WASM)
     #include "platforms/wasm/socket_wasm.h"

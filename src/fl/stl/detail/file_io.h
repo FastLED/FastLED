@@ -6,7 +6,9 @@
 #include "fl/stl/cstring.h"   // For fl::strerror()
 
 #ifdef FASTLED_TESTING
-#include <cstdio>   // For ::FILE*, ::fopen, ::fclose, etc.
+// IWYU pragma: begin_keep
+#include <cstdio>
+// IWYU pragma: end_keep   // For ::FILE*, ::fopen, ::fclose, etc.
 #endif
 
 // Platform-agnostic file I/O abstraction

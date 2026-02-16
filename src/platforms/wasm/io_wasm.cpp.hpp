@@ -9,8 +9,10 @@
 /// Print functions use printf to output to JavaScript console.
 /// Input functions always return empty/no-data (WASM doesn't support serial input by default).
 
+// IWYU pragma: begin_keep
 #include <emscripten.h>
 #include <cstdio>
+// IWYU pragma: end_keep
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
 

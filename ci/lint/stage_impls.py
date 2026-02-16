@@ -21,7 +21,7 @@ from ci.python_lint_cache import (
 
 # IWYU (Include-What-You-Use) is currently disabled because it doesn't work well
 # with platform code and complains about missing headers that are provided by the framework
-ENABLE_IWYU = False
+ENABLE_IWYU = True
 
 
 class Colors:
@@ -162,7 +162,9 @@ def run_iwyu_analysis(run_full: bool, run_iwyu: bool, run_strict: bool = False) 
     print("🔍 INCLUDE-WHAT-YOU-USE ANALYSIS")
     print("---------------------------------")
 
-    if not ENABLE_IWYU:
+    # Allow explicit --iwyu flag to bypass ENABLE_IWYU check
+    # This lets users run IWYU manually even when globally disabled
+    if not ENABLE_IWYU and not run_iwyu:
         print("⏭️  IWYU disabled (ENABLE_IWYU = False)")
         return True
 

@@ -1,7 +1,9 @@
 #pragma once
 
 #include "fl/codec/common.h"
+// IWYU pragma: begin_keep
 #include "third_party/mpeg1_decoder/software_decoder.h"
+// IWYU pragma: end_keep
 
 namespace fl {
 

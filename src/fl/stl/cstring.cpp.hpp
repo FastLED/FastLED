@@ -10,12 +10,16 @@
 #include "fl/stl/bit_cast.h"
 #include "platforms/is_platform.h"
 // Include C string headers for standard C library functions
+// IWYU pragma: begin_keep
 #include <string.h>  // okay banned header (STL wrapper implementation requires standard header)
 #include <stdlib.h>  // okay banned header (STL wrapper implementation requires standard header)
 
+// IWYU pragma: end_keep
 // Include Arduino PROGMEM headers if on AVR
 #if defined(ARDUINO) && defined(FL_IS_AVR)
+// IWYU pragma: begin_keep
 #include <avr/pgmspace.h>
+// IWYU pragma: end_keep
 #endif
 
 // C library string functions are available through the global namespace

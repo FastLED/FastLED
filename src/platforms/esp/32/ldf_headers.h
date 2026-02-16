@@ -16,12 +16,16 @@
 // Force LDF to detect SPI library dependency
 // FastLED's ESP32 FastSPI implementation uses <SPI.h> from the Arduino ESP32 framework
 #if 0
+// IWYU pragma: begin_keep
 #include <SPI.h>
+// IWYU pragma: end_keep
 #endif
 
 // Additional ESP32 framework libraries that FastLED may use conditionally
 #if 0
+// IWYU pragma: begin_keep
 #include <Wire.h>      // I2C support (if used by user code)
 #include <WiFi.h>      // WiFi support (if used by user code)
 #include <FS.h>        // File system support (if used by user code)
+// IWYU pragma: end_keep
 #endif

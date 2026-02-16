@@ -72,9 +72,15 @@
 
 // Hardware headers for RP2040/RP2350
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+// IWYU pragma: begin_keep
 #include "hardware/pio.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "hardware/dma.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "hardware/gpio.h"
+// IWYU pragma: end_keep
 #include "fl/stl/cstring.h"
 #endif
 namespace fl {

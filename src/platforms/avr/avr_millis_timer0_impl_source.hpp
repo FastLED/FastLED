@@ -27,8 +27,10 @@
 
 #ifdef DEFINE_AVR_TIMER_SOURCE_USES_TIMER0
 
+// IWYU pragma: begin_keep
 #include <avr/io.h>
 #include <avr/interrupt.h>
+// IWYU pragma: end_keep
 
 #ifndef F_CPU
 #warning "F_CPU not defined for millis timer"

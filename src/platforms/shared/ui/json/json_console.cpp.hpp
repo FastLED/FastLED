@@ -12,7 +12,9 @@
 #include "fl/stl/algorithm.h"
 #include "fl/stl/stdint.h"
 #include "platforms/shared/ui/json/ui.h"
+// IWYU pragma: begin_keep
 #include <stdlib.h>
+// IWYU pragma: end_keep
 
 namespace fl {
 

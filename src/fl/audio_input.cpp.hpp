@@ -15,7 +15,9 @@
 // Auto-determine platform audio input support
 
 // First check for Teensy (before Arduino, since Teensy is Arduino-compatible)
+// IWYU pragma: begin_keep
 #include "platforms/arm/teensy/is_teensy.h" // ok platform headers
+// IWYU pragma: end_keep
 #ifndef FASTLED_USES_TEENSY_AUDIO_INPUT
   #if defined(FL_IS_TEENSY)
     #define FASTLED_USES_TEENSY_AUDIO_INPUT 1
@@ -61,6 +63,7 @@
 #endif
 
 // Include platform-specific audio input implementation
+// IWYU pragma: begin_keep
 #if FASTLED_USES_TEENSY_AUDIO_INPUT
 #include "platforms/arm/teensy/audio_input_teensy.h" // ok platform headers
 #elif FASTLED_USES_ARDUINO_AUDIO_INPUT
@@ -70,6 +73,7 @@
 #elif FASTLED_USES_WASM_AUDIO_INPUT
 #include "platforms/wasm/audio_input_wasm.hpp" // ok platform headers
 #endif
+// IWYU pragma: end_keep
 
 namespace fl {
 

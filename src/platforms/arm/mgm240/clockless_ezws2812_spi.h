@@ -24,7 +24,9 @@
 
 // Only include SPI controller if explicitly requested
 #ifdef FASTLED_USES_EZWS2812_SPI
+// IWYU pragma: begin_keep
 #include "third_party/ezws2812/ezWS2812.h"
+// IWYU pragma: end_keep
 #endif
 namespace fl {
 #ifdef FASTLED_USES_EZWS2812_SPI

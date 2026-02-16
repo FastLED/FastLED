@@ -28,7 +28,9 @@
 #include "fl/stl/stdint.h"
 #include "fl/stddef.h"
 #include "fl/log.h"
+// IWYU pragma: begin_keep
 #include <SPI.h>
+// IWYU pragma: end_keep
 
 namespace fl {
 

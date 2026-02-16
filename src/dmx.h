@@ -12,7 +12,9 @@
 /// @{
 
 #if defined(DmxSimple_h) || defined(FASTLED_DOXYGEN)
+// IWYU pragma: begin_keep
 #include <DmxSimple.h>
+// IWYU pragma: end_keep
 
 /// Flag set when the DmxSimple library is included
 #define HAS_DMX_SIMPLE
@@ -48,7 +50,9 @@ protected:
 #endif
 
 #if defined(DmxSerial_h) || defined(FASTLED_DOXYGEN)
+// IWYU pragma: begin_keep
 #include <DMXSerial.h>
+// IWYU pragma: end_keep
 
 /// Flag set when the DMXSerial library is included
 #define HAS_DMX_SERIAL

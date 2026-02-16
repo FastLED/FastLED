@@ -28,11 +28,13 @@
 //
 // ⚠️⚠️⚠️ REMEMBER: This is a PURE DATA LAYER - no JavaScript embedded! ⚠️⚠️⚠️
 
+// IWYU pragma: begin_keep
 #include <emscripten.h>
 #include <emscripten/emscripten.h>
 #include <emscripten/html5.h>
 #include <cfloat> // ok include
 #include <string>
+// IWYU pragma: end_keep
 
 #include "js_bindings.h"
 

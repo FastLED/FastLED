@@ -12,14 +12,20 @@
 // implementation that pumps fetch requests during delay periods.
 // ================================================================================================
 
+// IWYU pragma: begin_keep
 #include <emscripten.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
+// IWYU pragma: end_keep
 
+// IWYU pragma: begin_keep
 #include <memory> // ok include
+// IWYU pragma: end_keep
 #include "fl/stl/stdint.h"
+// IWYU pragma: begin_keep
 #include <stdio.h> // ok include
 #include <string>
+// IWYU pragma: end_keep
 
 #include "active_strip_data.h"
 #include "engine_listener.h"

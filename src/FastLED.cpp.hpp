@@ -1,5 +1,7 @@
 #define FASTLED_INTERNAL
-#include <stdint.h>  // for u8, u32, u16
+// IWYU pragma: begin_keep
+#include <stdint.h>
+// IWYU pragma: end_keep  // for u8, u32, u16
 #include "FastLED.h"
 #include "fl/engine_events.h"
 #include "fl/compiler_control.h"

@@ -21,10 +21,12 @@
 /// linking the runner against libfastled.a. The runner should be a lightweight
 /// DLL loader with no FastLED dependencies - only the test DLLs link FastLED.
 
+// IWYU pragma: begin_keep
 #include <string>
 #include <vector>
 #include <iostream>
 #include <cstddef>
+// IWYU pragma: end_keep
 
 // Crash handler setup (defined in crash_handler_main.cpp)
 extern "C" void runner_setup_crash_handler();

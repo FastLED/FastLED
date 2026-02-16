@@ -12,7 +12,9 @@
     // IDF 3.3 defines __int32_t and __uint32_t in system headers
     // We must use these exact types to match system's uint32_t/int32_t typedefs
     // Include minimal header that defines these internal types
+    // IWYU pragma: begin_keep
     #include <sys/types.h>
+    // IWYU pragma: end_keep
   #endif
 #endif
 

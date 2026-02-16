@@ -15,7 +15,9 @@
 #include "fl/stl/stdint.h"
 
 FL_EXTERN_C_BEGIN
+// IWYU pragma: begin_keep
 #include "soc/rmt_struct.h"
+// IWYU pragma: end_keep
 #include "esp_attr.h"
 FL_EXTERN_C_END
 

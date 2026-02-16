@@ -14,7 +14,9 @@
 #include "fl/numeric_limits.h"
 #include "fl/spi/config.h"
 #include "fl/spi/transaction.h"
-#include "platforms/shared/spi_types.h"  // ok platform headers - DMABuffer, SPIError, TransmitMode
+// IWYU pragma: begin_keep
+#include "platforms/shared/spi_types.h"  // ok platform headers
+// IWYU pragma: end_keep  // ok platform headers - DMABuffer, SPIError, TransmitMode
 
 namespace fl {
 namespace spi {

@@ -9,7 +9,9 @@
 
 #include "platforms/time_platform.h"
 #include "fl/stl/stdint.h"
+// IWYU pragma: begin_keep
 #include <emscripten.h>
+// IWYU pragma: end_keep
 
 // Forward declare WASM timer functions (defined in timer.cpp.hpp)
 extern "C" {

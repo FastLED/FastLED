@@ -22,10 +22,12 @@
 #include "fl/stl/stdint.h"
 
 // Thread-based mode: Use real-time ISR emulation
+// IWYU pragma: begin_keep
 #include <thread>   // ok include (no fl/thread.h wrapper available)
 #include <chrono>   // ok include (no fl/chrono.h available)
 #include <atomic>   // ok include (for std::atomic_thread_fence)
 #include <cstdio>   // ok include (for std::printf)
+// IWYU pragma: end_keep
 #include "fl/stl/atomic.h"
 #include "fl/stl/mutex.h"
 #include "fl/stl/vector.h"

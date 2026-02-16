@@ -6,7 +6,9 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/shared_ptr.h"
+// IWYU pragma: begin_keep
 #include "platforms/shared/spi_hw_base.h"  // ok platform headers
+// IWYU pragma: end_keep  // ok platform headers
 
 namespace fl {
 namespace spi {

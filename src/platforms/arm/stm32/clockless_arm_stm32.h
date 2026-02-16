@@ -13,7 +13,9 @@
 // Get CMSIS DWT/CoreDebug registers from framework or fallback
 #if FL_HAS_INCLUDE("stm32_def.h")
     // STM32duino core - stm32_def.h includes device header which includes core_cmX.h
+    // IWYU pragma: begin_keep
     #include <stm32_def.h>
+    // IWYU pragma: end_keep
 #else
     // Libmaple or other cores without CMSIS - use our definitions
     #include "platforms/arm/stm32/cm3_regs.h"

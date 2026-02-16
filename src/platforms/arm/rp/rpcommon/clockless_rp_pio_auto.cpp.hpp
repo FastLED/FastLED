@@ -23,10 +23,16 @@
 #include "fl/dbg.h"
 
 // Hardware headers for RP2040/RP2350
+// IWYU pragma: begin_keep
 #include "hardware/pio.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "hardware/dma.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "hardware/gpio.h"
 
+// IWYU pragma: end_keep
 namespace fl {
 
 /// @brief Represents a group of consecutive GPIO pins for parallel output

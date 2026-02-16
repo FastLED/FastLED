@@ -14,8 +14,10 @@
 
 #define FASTLED_SPI_BYTE_ONLY
 
+// IWYU pragma: begin_keep
 #include <avr/io.h>
 #include <avr/interrupt.h> // for cli/se definitions
+// IWYU pragma: end_keep
 
 // Define the register types
 typedef volatile       fl::u8 RoReg; /**< Read only 8-bit register (volatile const unsigned int) */

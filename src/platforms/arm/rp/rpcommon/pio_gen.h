@@ -5,8 +5,10 @@
 #define _PIO_GEN_H
 
 #include "pio_asm.h"
+// IWYU pragma: begin_keep
 #include "hardware/pio.h"
 
+// IWYU pragma: end_keep
 /*
  * This file contains code to manage the PIO program for clockless LEDs.
  * 

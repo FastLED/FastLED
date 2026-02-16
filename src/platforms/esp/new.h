@@ -14,7 +14,9 @@
     #include <new>  // ok include // IWYU pragma: export // IWYU pragma: keep
 #elif FL_HAS_INCLUDE(<new.h>)
     // Alternative standard header location
+    // IWYU pragma: begin_keep
     #include <new.h>  // ok include // IWYU pragma: export
+    // IWYU pragma: end_keep
 #else
     // Fallback to manual definition
     #include "fl/stl/stdint.h"

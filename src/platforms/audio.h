@@ -20,7 +20,9 @@
     #include "platforms/esp/esp_version.h"
     // soc/soc_caps.h was introduced in ESP-IDF 4.0, not available in 3.3
     #if ESP_IDF_VERSION_4_OR_HIGHER && FL_HAS_INCLUDE("soc/soc_caps.h")
+      // IWYU pragma: begin_keep
       #include "soc/soc_caps.h"
+      // IWYU pragma: end_keep
       #if SOC_I2S_SUPPORTED
         #define FASTLED_HAS_AUDIO_INPUT 1
       #else

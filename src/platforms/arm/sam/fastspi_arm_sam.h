@@ -12,9 +12,11 @@
 #endif
 
 #if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
+// IWYU pragma: begin_keep
 #include <Arduino.h>
 #include <SPI.h>
 #include <wiring_private.h>
+// IWYU pragma: end_keep
 #include "fl/pin.h"  // For PinMode, PinValue enums
 #include "fl/compiler_control.h"
 

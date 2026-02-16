@@ -54,9 +54,13 @@
 // to improve IDE support and cross-platform compatibility. However, this driver's public
 // interface requires ESP-IDF types (spi_device_handle_t, spi_host_device_t, gpio_num_t).
 // TODO: Consider refactoring to use forward declarations + opaque handles in future.
+// IWYU pragma: begin_keep
 #include "driver/spi_master.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "driver/gpio.h"
 
+// IWYU pragma: end_keep
 namespace fl {
 
 /// @brief Multi-lane SPI pin configuration

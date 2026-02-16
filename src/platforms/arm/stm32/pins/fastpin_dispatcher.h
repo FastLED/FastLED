@@ -25,68 +25,92 @@
 #if defined(__STM32F1__)
   // Maple Mini (libmaple)
   #define FASTLED_STM32_BOARD_FILE "platforms/arm/stm32/pins/boards/f1/maple_mini.h"
+  // IWYU pragma: begin_keep
   #include "families/stm32f1.h"  // nolint
 
+  // IWYU pragma: end_keep
 #elif defined(ARDUINO_GENERIC_F103C8TX)
   // Generic STM32F103C8 (STM32duino)
   #define FASTLED_STM32_BOARD_FILE "platforms/arm/stm32/pins/boards/f1/generic_f103c8.h"
+  // IWYU pragma: begin_keep
   #include "families/stm32f1.h"  // nolint
 
+  // IWYU pragma: end_keep
 #elif defined(STM32F1) && !defined(SPARK)
   // Generic STM32F1 fallback (STM32duino)
   #define FASTLED_STM32_BOARD_FILE "platforms/arm/stm32/pins/boards/f1/generic_f103c8.h"
+  // IWYU pragma: begin_keep
   #include "families/stm32f1.h"  // nolint
 
 // ========================================
 // STM32F2 Family (HAS_BRR = false)
 // ========================================
 
+  // IWYU pragma: end_keep
 #elif defined(SPARK)
   // Spark Core (STM32F103 with F2-style registers)
   #define FASTLED_STM32_BOARD_FILE "platforms/arm/stm32/pins/boards/f2/spark_core.h"
+  // IWYU pragma: begin_keep
   #include "families/stm32f2.h"  // nolint
 
+  // IWYU pragma: end_keep
 #elif defined(STM32F2XX)
   // Particle Photon (STM32F205)
   #define FASTLED_STM32_BOARD_FILE "platforms/arm/stm32/pins/boards/f2/photon.h"
+  // IWYU pragma: begin_keep
   #include "families/stm32f2.h"  // nolint
 
 // ========================================
 // STM32F4 Family (HAS_BRR = false)
 // ========================================
 
+  // IWYU pragma: end_keep
 #elif defined(ARDUINO_BLACKPILL_F411CE)
   #define FASTLED_STM32_BOARD_FILE "platforms/arm/stm32/pins/boards/f4/f411ce_blackpill.h"
+  // IWYU pragma: begin_keep
   #include "families/stm32f4.h"  // nolint
 
+  // IWYU pragma: end_keep
 #elif defined(ARDUINO_NUCLEO_F411RE)
   #define FASTLED_STM32_BOARD_FILE "platforms/arm/stm32/pins/boards/f4/f411re_nucleo.h"
+  // IWYU pragma: begin_keep
   #include "families/stm32f4.h"  // nolint
 
+  // IWYU pragma: end_keep
 #elif defined(ARDUINO_BLACKPILL_F401CC) || defined(ARDUINO_BLACKPILL_F401CE)
   #define FASTLED_STM32_BOARD_FILE "platforms/arm/stm32/pins/boards/f4/f401cx_blackpill.h"
+  // IWYU pragma: begin_keep
   #include "families/stm32f4.h"  // nolint
 
+  // IWYU pragma: end_keep
 #elif defined(ARDUINO_NUCLEO_F401RE)
   #define FASTLED_STM32_BOARD_FILE "platforms/arm/stm32/pins/boards/f4/f401re_nucleo.h"
+  // IWYU pragma: begin_keep
   #include "families/stm32f4.h"  // nolint
 
+  // IWYU pragma: end_keep
 #elif defined(ARDUINO_DISCO_F407VG)
   #define FASTLED_STM32_BOARD_FILE "platforms/arm/stm32/pins/boards/f4/f407vg_disco.h"
+  // IWYU pragma: begin_keep
   #include "families/stm32f4.h"  // nolint
 
+  // IWYU pragma: end_keep
 #elif defined(ARDUINO_NUCLEO_F446RE)
   #define FASTLED_STM32_BOARD_FILE "platforms/arm/stm32/pins/boards/f4/f446re_nucleo.h"
+  // IWYU pragma: begin_keep
   #include "families/stm32f4.h"  // nolint
 
+  // IWYU pragma: end_keep
 #elif defined(ARDUINO_NUCLEO_F429ZI) || defined(ARDUINO_NUCLEO_F439ZI)
   #define FASTLED_STM32_BOARD_FILE "platforms/arm/stm32/pins/boards/f4/f4x9zi_nucleo.h"
+  // IWYU pragma: begin_keep
   #include "families/stm32f4.h"  // nolint
 
 // ========================================
 // Unknown Board - Error with Guidance
 // ========================================
 
+  // IWYU pragma: end_keep
 #else
   #error "STM32: Unknown board. Check your ARDUINO_* board macro and add it to src/platforms/arm/stm32/pins/fastpin_dispatcher.h. See src/platforms/arm/stm32/pins/README.md for architecture guide and examples."
 #endif

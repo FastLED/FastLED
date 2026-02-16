@@ -24,7 +24,9 @@
 
 #include "fl/stl/assert.h"
 #include "fl/warn.h"
+// IWYU pragma: begin_keep
 #include <mutex>  // ok include - needed for std::unique_lock compatibility
+// IWYU pragma: end_keep
 
 namespace fl {
 namespace platforms {

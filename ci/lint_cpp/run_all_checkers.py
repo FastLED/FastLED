@@ -35,6 +35,7 @@ from ci.lint_cpp.headers_exist_checker import HeadersExistChecker
 from ci.lint_cpp.include_after_namespace_checker import IncludeAfterNamespaceChecker
 from ci.lint_cpp.include_paths_checker import IncludePathsChecker
 from ci.lint_cpp.is_header_include_checker import IsHeaderIncludeChecker
+from ci.lint_cpp.iwyu_pragma_block_checker import IwyuPragmaBlockChecker
 from ci.lint_cpp.logging_in_iram_checker import LoggingInIramChecker
 from ci.lint_cpp.namespace_platforms_checker import NamespacePlatformsChecker
 from ci.lint_cpp.native_platform_defines_checker import NativePlatformDefinesChecker
@@ -121,8 +122,15 @@ def collect_all_files_by_directory() -> dict[str, list[str]]:
     return files_by_dir
 
 
-def create_checkers() -> dict[str, list[FileContentChecker]]:
-    """Create all checker instances organized by which files they should check."""
+def create_checkers(
+    all_headers: frozenset[str] | None = None,
+) -> dict[str, list[FileContentChecker]]:
+    """Create all checker instances organized by which files they should check.
+
+    Args:
+        all_headers: Optional frozenset of all header file paths in the project
+                    (used for cross-file validation in some checkers)
+    """
     checkers_by_scope: dict[str, list[FileContentChecker]] = {}
 
     # Global checkers (run on all src/, examples/, tests/ files)
@@ -160,6 +168,7 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
         PlatformsFlNamespaceChecker(),
         NamespacePlatformsChecker(),
         IsHeaderIncludeChecker(),
+        IwyuPragmaBlockChecker(all_headers=all_headers),
     ]
 
     # Native platform defines checker — runs on ALL src/ files (including third_party/)
@@ -190,6 +199,7 @@ def create_checkers() -> dict[str, list[FileContentChecker]]:
     checkers_by_scope["fl"] = [
         BannedHeadersChecker(banned_headers_list=BANNED_HEADERS_CORE, strict_mode=True),
         NoCppInFlChecker(),
+        IwyuPragmaBlockChecker(all_headers=all_headers),
     ]
 
     # lib8tion/ directory checkers with STRICT enforcement
@@ -555,6 +565,26 @@ def _determine_file_scopes(file_path: str) -> set[str]:
     return scopes
 
 
+def _collect_all_headers(files_by_dir: dict[str, list[str]]) -> frozenset[str]:
+    """Collect all header files from the project for cross-file validation.
+
+    Args:
+        files_by_dir: Dictionary of files organized by directory
+
+    Returns:
+        Immutable frozenset of all header file paths
+    """
+    all_headers: set[str] = set()
+
+    # Collect all header files from all directories
+    for file_list in files_by_dir.values():
+        for file_path in file_list:
+            if file_path.endswith((".h", ".hpp", ".hh", ".hxx")):
+                all_headers.add(file_path)
+
+    return frozenset(all_headers)
+
+
 def run_checkers_on_single_file(
     file_path: str, checkers_by_scope: dict[str, list[FileContentChecker]]
 ) -> dict[str, CheckerResults]:
@@ -618,8 +648,12 @@ def main() -> int:
         print(f"File: {file_path}")
         print()
 
+        # Collect all headers for cross-file validation (even in single-file mode)
+        files_by_dir = collect_all_files_by_directory()
+        all_headers = _collect_all_headers(files_by_dir)
+
         # Create all checker instances
-        checkers_by_scope = create_checkers()
+        checkers_by_scope = create_checkers(all_headers=all_headers)
 
         # Run all applicable checkers on the single file
         results = run_checkers_on_single_file(str(file_path), checkers_by_scope)
@@ -637,8 +671,11 @@ def main() -> int:
         # Collect all files by directory
         files_by_dir = collect_all_files_by_directory()
 
+        # Extract all headers for cross-file validation
+        all_headers = _collect_all_headers(files_by_dir)
+
         # Create all checker instances
-        checkers_by_scope = create_checkers()
+        checkers_by_scope = create_checkers(all_headers=all_headers)
 
         # Run all checkers in a single pass per scope
         results = run_checkers(files_by_dir, checkers_by_scope)

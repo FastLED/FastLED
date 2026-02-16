@@ -23,10 +23,14 @@
 
 #if defined(USE_NEW_STM32_PIN_DEFINITIONS)
 // from https://github.com/13rac1/FastLED-STM32
+// IWYU pragma: begin_keep
 #include "pins/fastpin_dispatcher.h"
+// IWYU pragma: end_keep
 #else
 // Legacy fastled pin definitions
+// IWYU pragma: begin_keep
 #include "pins/fastpin_legacy.h"
+// IWYU pragma: end_keep
 #endif
 
 #endif  // FASTLED_FORCE_SOFTWARE_PINS

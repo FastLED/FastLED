@@ -18,9 +18,15 @@ FL_EXTERN_C_BEGIN
     defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2)
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 0)
 #define FL_HAS_USB_SERIAL_JTAG 1
+// IWYU pragma: begin_keep
 #include "driver/usb_serial_jtag.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"  // For vTaskDelay
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "freertos/task.h"       // For portTICK_PERIOD_MS
+// IWYU pragma: end_keep
 #endif
 #endif
 

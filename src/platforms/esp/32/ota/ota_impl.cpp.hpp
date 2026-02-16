@@ -23,6 +23,7 @@
 #ifdef FL_ESP_OTA_SUPPORTED
 
 // ESP-IDF headers (available in both Arduino and pure ESP-IDF builds)
+// IWYU pragma: begin_keep
 #include <esp_http_server.h>
 #include <esp_ota_ops.h>
 #include <mdns.h>
@@ -37,6 +38,7 @@
 #include <mbedtls/md.h>
 #include <mbedtls/md5.h>
 #include <mbedtls/sha256.h>
+// IWYU pragma: end_keep
 
 // FastLED headers
 #include "fl/str.h"

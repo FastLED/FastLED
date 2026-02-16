@@ -17,9 +17,11 @@
 #include "fl/warn.h"
 #include "fl/log.h"
 #include "fl/numeric_limits.h"
+// IWYU pragma: begin_keep
 #include <SPI.h>
 #include <imxrt.h>
 #include <cstring> // ok include
+// IWYU pragma: end_keep
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 
 namespace fl {

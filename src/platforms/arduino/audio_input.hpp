@@ -16,7 +16,9 @@
 #endif
 
 
+// IWYU pragma: begin_keep
 #include <Arduino.h>  // ok include
+// IWYU pragma: end_keep
 #include "fl/stl/undef.h"  // Undefine Arduino macros (min, max, abs, etc.)
 #include "platforms/is_platform.h"
 
@@ -25,7 +27,9 @@
 #define ARDUINO_I2S_FULLY_SUPPORTED 0
 #define ARDUINO_I2S_BROKEN_REASON "I2S not supported on SAMD21"
 #elif FL_HAS_INCLUDE(<I2S.h>)
+// IWYU pragma: begin_keep
 #include <I2S.h>
+// IWYU pragma: end_keep
 
 // Define ARDUINO_I2S_FULLY_SUPPORTED only when ALL I2S components are present and functional
 #if defined(ARDUINO_UNOR4_WIFI) || defined(ARDUINO_UNOR4_MINIMA) || \

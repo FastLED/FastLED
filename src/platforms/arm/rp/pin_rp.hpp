@@ -10,9 +10,15 @@
 ///
 /// IMPORTANT: All functions use enum class types from fl/pin.h for type safety.
 
+// IWYU pragma: begin_keep
 #include "hardware/gpio.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "hardware/adc.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "hardware/pwm.h"
+// IWYU pragma: end_keep
 #include "fl/pin.h"
 
 namespace fl {

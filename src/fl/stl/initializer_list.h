@@ -7,7 +7,9 @@
 // Define if initializer_list is available
 // Check for C++11 and if std::initializer_list exists
 #if !defined(FL_IS_AVR)
+// IWYU pragma: begin_keep
 #include <initializer_list>
+// IWYU pragma: end_keep
 #endif
 
 #if defined(FL_IS_AVR)

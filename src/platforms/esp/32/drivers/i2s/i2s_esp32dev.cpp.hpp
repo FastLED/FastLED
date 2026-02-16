@@ -15,18 +15,26 @@
 
 #include "i2s_esp32dev.h"
 
+// IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "freertos/semphr.h"
 
+// IWYU pragma: end_keep
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstring.h"
 #include "fl/chipsets/led_timing.h"
+// IWYU pragma: begin_keep
 #include <string.h> // ok include // for memset
+// IWYU pragma: end_keep
 
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
 // Patches the i2s driver for compatibility with ESP-IDF v5.0.
 // This has only been compile tested. If there are issues then please file a bug.
+// IWYU pragma: begin_keep
 #include "soc/gpio_periph.h"
+// IWYU pragma: end_keep
 #include "fl/pin.h"  // For PinMode, PinValue enums
 #define gpio_matrix_out esp_rom_gpio_connect_out_signal
 #endif

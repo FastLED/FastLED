@@ -6,7 +6,9 @@
 /// This file contains the actual Adafruit_NeoPixel integration, keeping the
 /// dependency isolated from header files to avoid PlatformIO LDF issues.
 
+// IWYU pragma: begin_keep
 #include <Adafruit_NeoPixel.h>
+// IWYU pragma: end_keep
 
 
 #include "fl/stl/unique_ptr.h"

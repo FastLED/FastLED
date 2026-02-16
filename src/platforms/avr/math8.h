@@ -14,10 +14,14 @@
 // Select appropriate AVR implementation based on MUL instruction availability
 #ifdef FL_IS_AVR_ATTINY
 // ATtiny platforms without MUL instruction
+// IWYU pragma: begin_keep
 #include "attiny/math/math8_attiny.h"
+// IWYU pragma: end_keep
 #else
 // AVR platforms with MUL instruction (ATmega, etc.)
+// IWYU pragma: begin_keep
 #include "atmega/common/math8_avr.h"
+// IWYU pragma: end_keep
 #endif
 
 // All function implementations are now in math8_attiny.h or math8_avr.h

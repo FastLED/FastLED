@@ -28,7 +28,9 @@
 // Use Teensy's native core_pins.h instead of Arduino.h
 // core_pins.h provides the same pin functions (pinMode, digitalWrite, etc.)
 // and constants (INPUT, OUTPUT, etc.) but works in both Arduino and non-Arduino builds
+// IWYU pragma: begin_keep
 #include <core_pins.h>
+// IWYU pragma: end_keep
 
 namespace fl {
 namespace platforms {

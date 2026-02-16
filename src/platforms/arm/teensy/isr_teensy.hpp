@@ -23,7 +23,9 @@
 
 #include "fl/isr.h"
 #include "fl/warn.h"
+// IWYU pragma: begin_keep
 #include <IntervalTimer.h>
+// IWYU pragma: end_keep
 namespace fl {
 namespace isr {
 

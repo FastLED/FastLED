@@ -4,6 +4,7 @@
 #include "fl/dbg.h"
 
 // Include parallel SPI backends
+// IWYU pragma: begin_keep
 #include "platforms/shared/spi_bitbang/spi_isr_1.h" // ok platform headers
 #include "platforms/shared/spi_bitbang/spi_isr_2.h" // ok platform headers
 #include "platforms/shared/spi_bitbang/spi_isr_4.h" // ok platform headers
@@ -16,6 +17,7 @@
 #include "platforms/shared/spi_bitbang/spi_block_8.h" // ok platform headers
 #include "platforms/shared/spi_bitbang/spi_block_16.h" // ok platform headers
 #include "platforms/shared/spi_bitbang/spi_block_32.h" // ok platform headers
+// IWYU pragma: end_keep
 
 namespace fl {
 namespace spi {

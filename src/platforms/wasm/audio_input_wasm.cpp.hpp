@@ -8,8 +8,10 @@
 #include "fl/dbg.h"
 #include "fl/stl/stdio.h"
 #include "fl/str.h"
+// IWYU pragma: begin_keep
 #include <emscripten.h>
 #include <emscripten/emscripten.h>
+// IWYU pragma: end_keep
 
 namespace fl {
 

@@ -4,7 +4,9 @@
 #include "platforms/posix/is_posix.h"
 
 #ifdef FL_IS_POSIX
+// IWYU pragma: begin_keep
 #include <unistd.h>  // for write and fsync
+// IWYU pragma: end_keep
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstddef.h"
 

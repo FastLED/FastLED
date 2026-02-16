@@ -3,7 +3,9 @@
 // IWYU pragma: private
 #pragma message "ESP8266 Hardware SPI support added"
 
+// IWYU pragma: begin_keep
 #include <SPI.h>
+// IWYU pragma: end_keep
 #include "fl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH

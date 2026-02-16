@@ -9,7 +9,9 @@
 // CLEDController is forward declared in header - no include needed
 
 #if FASTLED_ENABLE_JSON
+// IWYU pragma: begin_keep
 #include "third_party/arduinojson/json.h"
+// IWYU pragma: end_keep
 #endif
 
 namespace fl {

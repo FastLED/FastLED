@@ -17,8 +17,10 @@ extern "C" void emscripten_sleep(unsigned int ms);
 #endif
 
 #ifdef FASTLED_STUB_IMPL
+// IWYU pragma: begin_keep
 #include "platforms/stub/coroutine_runner.h" // ok platform headers
 #include <thread>  // okay banned header (for std::this_thread::yield in stub impl)
+// IWYU pragma: end_keep
 #endif
 
 namespace fl {

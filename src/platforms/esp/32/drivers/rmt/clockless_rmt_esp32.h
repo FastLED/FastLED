@@ -38,9 +38,13 @@
 
 #if FASTLED_ESP32_HAS_RMT
 #if !FASTLED_RMT5
+// IWYU pragma: begin_keep
 #include "rmt_4/idf4_clockless_rmt_esp32.h"
+// IWYU pragma: end_keep
 #else
+// IWYU pragma: begin_keep
 #include "rmt_5/idf5_clockless.h"
+// IWYU pragma: end_keep
 #endif
 
 

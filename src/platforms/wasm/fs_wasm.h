@@ -3,7 +3,9 @@
 // IWYU pragma: private
 
 #include "fl/stl/stdint.h"
+// IWYU pragma: begin_keep
 #include <string>
+// IWYU pragma: end_keep
 
 #include "fl/file_system.h"
 #include "fl/stl/memory.h"

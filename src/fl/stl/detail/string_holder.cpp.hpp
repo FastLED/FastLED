@@ -1,6 +1,8 @@
+// IWYU pragma: begin_keep
 #include <stdlib.h>
 #include <string.h>  // okay banned header (STL wrapper implementation requires standard header for strlen)
 
+// IWYU pragma: end_keep
 #include "fl/stl/detail/string_holder.h"
 #include "fl/stl/cstring.h"  // For memcpy
 #include "fl/stl/malloc.h"   // For fl::malloc, fl::free, fl::realloc

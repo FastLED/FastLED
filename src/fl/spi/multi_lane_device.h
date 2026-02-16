@@ -14,7 +14,9 @@
 #include "fl/numeric_limits.h"
 #include "fl/spi/transaction.h"
 #include "fl/spi/write_result.h"
+// IWYU pragma: begin_keep
 #include "platforms/shared/spi_types.h"  // ok platform headers
+// IWYU pragma: end_keep  // ok platform headers
 
 namespace fl {
 namespace spi {

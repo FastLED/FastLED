@@ -87,7 +87,9 @@
 #include "platforms/chipsets_specialized_ws2812.h"
 
 #if defined(ARDUINO) && (defined(SoftwareSerial_h) || defined(__SoftwareSerial_h))
+// IWYU pragma: begin_keep
 #include <SoftwareSerial.h>
+// IWYU pragma: end_keep
 #endif
 
 /// @file chipsets.h

@@ -4,8 +4,10 @@
 ## Usage Example
 
 ```cpp
+// IWYU pragma: begin_keep
 #include <fl/fastled.h>
 #include <fl/task.h>
+// IWYU pragma: end_keep
 
 void setup() {
     // Create a recurring task that runs every 100ms

@@ -79,8 +79,10 @@
 #endif
 
 // Additional includes for implementation
+// IWYU pragma: begin_keep
 #include <sys/types.h>
 #include <cstdarg>  // For va_list in fcntl emulation
+// IWYU pragma: end_keep
 
 namespace fl {
 

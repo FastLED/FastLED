@@ -5,7 +5,9 @@
 
 // IWYU pragma: private
 
+// IWYU pragma: begin_keep
 #include <pgmspace.h>  // ok platform headers
+// IWYU pragma: end_keep
 #include "fl/int.h"  // ok platform headers
 
 #define FL_PROGMEM    PROGMEM

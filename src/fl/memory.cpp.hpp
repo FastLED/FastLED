@@ -3,10 +3,14 @@
 // Platform-specific headers
 #include "platforms/is_platform.h"  // IWYU pragma: keep (needed for FL_IS_* macros)
 #ifdef FL_IS_ESP32
-#include <Arduino.h>  // For ESP object
+// IWYU pragma: begin_keep
+#include <Arduino.h>
+// IWYU pragma: end_keep  // For ESP object
 #include "esp_heap_caps.h"  // For heap_caps_get_free_size()
 #elif defined(FL_IS_ESP8266)
-#include <Arduino.h>  // For ESP object
+// IWYU pragma: begin_keep
+#include <Arduino.h>
+// IWYU pragma: end_keep  // For ESP object
 #elif defined(FL_IS_AVR)
 // AVR doesn't have a built-in getFreeHeap, but we can compute it
 // by measuring the gap between heap and stack pointers

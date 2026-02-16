@@ -10,7 +10,9 @@
 #include "semaphore_samd.h"
 #include "fl/warn.h"
 
+// IWYU pragma: begin_keep
 #include <chrono>  // ok include - for std::chrono
+// IWYU pragma: end_keep
 
 // Include CMSIS for interrupt control
 // CMSIS provides __disable_irq() and __enable_irq()

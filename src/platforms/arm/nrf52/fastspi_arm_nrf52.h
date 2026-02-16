@@ -8,7 +8,9 @@
 #include "fastspi_types.h"
 #include "fl/eorder.h"
 #include "fl/delay.h"
+// IWYU pragma: begin_keep
 #include <nrf_spim.h>
+// IWYU pragma: end_keep
 
 namespace fl {
 

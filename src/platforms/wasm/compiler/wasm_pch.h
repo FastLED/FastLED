@@ -43,9 +43,11 @@
 // ============================================================================
 // Core emscripten headers for WASM runtime support. These are used by
 // platform implementation files and any code that interacts with JavaScript.
+// IWYU pragma: begin_keep
 #include <emscripten.h>
 #include <emscripten/emscripten.h>
 #include <emscripten/html5.h>
+// IWYU pragma: end_keep
 
 // ============================================================================
 // ADDITIONAL COMMONLY USED HEADERS
@@ -55,7 +57,9 @@
 // every compilation unit, so precompiling them provides significant speedup.
 
 // Standard library headers used throughout FastLED
+// IWYU pragma: begin_keep
 #include <cstdio>      // printf, FILE operations
+// IWYU pragma: end_keep
 #include "fl/stl/cstring.h"     // memcpy, memset, strlen
 #include "fl/stl/cstdlib.h"     // malloc, free, abs
 

@@ -14,7 +14,9 @@
 #include "fl/stl/cstddef.h"
 
 // CRITICAL: Include <chrono> BEFORE opening namespace to avoid polluting std::
+// IWYU pragma: begin_keep
 #include <chrono>  // ok include
+// IWYU pragma: end_keep
 
 namespace fl {
 namespace platforms {

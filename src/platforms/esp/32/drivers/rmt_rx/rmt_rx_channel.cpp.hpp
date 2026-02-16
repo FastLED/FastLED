@@ -30,15 +30,25 @@
 #endif
 
 FL_EXTERN_C_BEGIN
+// IWYU pragma: begin_keep
 #include "driver/gpio.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "driver/rmt_common.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "driver/rmt_rx.h"
+// IWYU pragma: end_keep
 #include "esp_attr.h"
 #include "esp_err.h"
 #include "esp_log.h"   // For esp_log_timestamp()
 #include "esp_timer.h" // For esp_timer_get_time()
+// IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "freertos/task.h" // For taskYIELD()
+// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 #include "fl/stl/bit_cast.h"

@@ -6,7 +6,9 @@
 #include "crgb.h"
 #include "eorder.h"
 #include "fl/gamma.h"
+// IWYU pragma: begin_keep
 #include "platforms/shared/spi_pixel_writer.h"  // ok platform headers
+// IWYU pragma: end_keep
 #include "platforms/spi_output_template.h"
 #include "fastspi.h"
 #include "cpixel_ledcontroller.h"

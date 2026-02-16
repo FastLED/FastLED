@@ -3,14 +3,18 @@
 
 #include "platforms/is_platform.h"
 #include "rx_device.h"
-#include "platforms/shared/rx_device_dummy.h" // ok platform headers
+// IWYU pragma: begin_keep
+#include "platforms/shared/rx_device_dummy.h"  // ok platform headers
+// IWYU pragma: end_keep // ok platform headers
 #include "fl/chipsets/led_timing.h"
 #include "fl/str.h"
 
 #ifdef FL_IS_ESP32
+// IWYU pragma: begin_keep
 #include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h" // ok platform headers
 #include "platforms/esp/32/drivers/gpio_isr_rx/gpio_isr_rx.h" // ok platform headers
 #endif
+// IWYU pragma: end_keep
 
 namespace fl {
 

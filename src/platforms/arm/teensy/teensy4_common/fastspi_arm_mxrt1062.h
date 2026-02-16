@@ -6,7 +6,9 @@
 #include "platforms/arm/teensy/is_teensy.h"
 
 #if defined(FL_IS_TEENSY_4X)
+// IWYU pragma: begin_keep
 #include <SPI.h>
+// IWYU pragma: end_keep
 #include "fastspi_types.h"
 #include "fl/compiler_control.h"
 

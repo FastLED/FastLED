@@ -20,14 +20,20 @@
 #include "fl/dbg.h"
 #include "esp_task_wdt.h"
 #include "esp_system.h"
+// IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "freertos/task.h"
+// IWYU pragma: end_keep
 #include "platforms/esp/esp_version.h"
 
 // USB Serial JTAG registers - only available on ESP32-S3, ESP32-C3, ESP32-C6, ESP32-H2
 #if defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C3) || \
     defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2)
+    // IWYU pragma: begin_keep
     #include "soc/usb_serial_jtag_reg.h"
+    // IWYU pragma: end_keep
     #define HAS_USB_SERIAL_JTAG 1
 #else
     #define HAS_USB_SERIAL_JTAG 0
@@ -39,7 +45,9 @@
     #include "esp_rom_sys.h"
 #else
     // ESP-IDF v3.x: ROM functions are in rom/ets_sys.h
+    // IWYU pragma: begin_keep
     #include "rom/ets_sys.h"
+    // IWYU pragma: end_keep
 #endif
 
 namespace fl {

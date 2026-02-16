@@ -26,7 +26,9 @@
 
 #define USED_LANES ((FIRST_PIN!=15) ? FL_MIN(LANES,8) : FL_MIN(LANES,12))
 
+// IWYU pragma: begin_keep
 #include <kinetis.h>
+// IWYU pragma: end_keep
 #include "fl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH

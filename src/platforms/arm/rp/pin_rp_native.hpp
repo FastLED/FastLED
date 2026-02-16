@@ -8,9 +8,15 @@
 /// Provides Arduino-compatible pin functions using native Pico SDK GPIO APIs.
 /// This file is used in non-Arduino builds (Pico SDK only).
 
+// IWYU pragma: begin_keep
 #include "hardware/gpio.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "hardware/adc.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "hardware/pwm.h"
+// IWYU pragma: end_keep
 #include "fl/pin.h"
 
 namespace fl {

@@ -14,8 +14,12 @@
 #include "fl/warn.h"  // For FL_WARN macro
 
 FL_EXTERN_C_BEGIN
+// IWYU pragma: begin_keep
 #include "driver/spi_master.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "driver/gpio.h"
+// IWYU pragma: end_keep
 #include "esp_heap_caps.h"
 #include "fl/compiler_control.h"
 

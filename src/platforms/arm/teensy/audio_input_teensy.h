@@ -15,7 +15,9 @@
 // Detect Teensy Audio Library availability
 #if defined(FL_IS_TEENSY) && FL_HAS_INCLUDE(<Audio.h>)
 #define TEENSY_AUDIO_LIBRARY_AVAILABLE 1
+// IWYU pragma: begin_keep
 #include <Audio.h>  // ok include
+// IWYU pragma: end_keep
 #else
 #define TEENSY_AUDIO_LIBRARY_AVAILABLE 0
 #endif

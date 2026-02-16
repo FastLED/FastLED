@@ -1,5 +1,7 @@
 #include "fl/stl/math.h"
-#include <math.h>  // okay banned header (STL wrapper implementation requires standard math.h)
+// IWYU pragma: begin_keep
+#include <math.h>
+// IWYU pragma: end_keep  // okay banned header (STL wrapper implementation requires standard math.h)
 
 namespace fl {
 

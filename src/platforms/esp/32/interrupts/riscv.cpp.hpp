@@ -19,8 +19,12 @@
 #include "esp_err.h"
 #include "esp_intr_alloc.h"
 #include "esp_log.h"
+// IWYU pragma: begin_keep
 #include "driver/rmt_tx.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "soc/soc.h"
+// IWYU pragma: end_keep
 #include "fl/dbg.h"
 #include "fl/log.h"
 

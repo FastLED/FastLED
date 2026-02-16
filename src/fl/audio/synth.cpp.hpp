@@ -5,7 +5,10 @@
 
 #include "synth.h"
 #include "fl/stl/cstring.h"
+#include "fl/stl/malloc.h"
+// IWYU pragma: begin_keep
 #include "third_party/stb/hexwave/stb_hexwave.h"
+// IWYU pragma: end_keep
 
 namespace fl {
 

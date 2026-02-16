@@ -1,5 +1,7 @@
 #include "gif.h"
+// IWYU pragma: begin_keep
 #include "third_party/libnsgif/software_decoder.h"
+// IWYU pragma: end_keep
 #include "fl/bytestreammemory.h"
 
 namespace fl {

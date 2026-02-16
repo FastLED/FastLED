@@ -14,7 +14,9 @@
 // Use ESP-IDF SoC capability macros to detect hardware features
 // These are defined in soc/soc_caps.h for each chip variant
 FL_EXTERN_C_BEGIN
+// IWYU pragma: begin_keep
 #include "soc/soc_caps.h"
+// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 // Platform capability detection using SoC macros

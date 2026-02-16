@@ -39,11 +39,15 @@
 #include "fl/warn.h"
 #include "fl/numeric_limits.h"
 #include "js.h"
+// IWYU pragma: begin_keep
 #include <thread>
 #include <cmath>  // For fmod function
+// IWYU pragma: end_keep
 
+// IWYU pragma: begin_keep
 #include <emscripten.h>
 #include <emscripten/html5.h>
+// IWYU pragma: end_keep
 
 namespace {
 // We are just going to get the time since the app started. Getting the

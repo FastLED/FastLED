@@ -11,7 +11,9 @@
 /// For STM32 with FreeRTOS, we use std::unique_lock for full compatibility with condition variables.
 
 #include "fl/stl/assert.h"
+// IWYU pragma: begin_keep
 #include <mutex>  // ok include - needed for std::unique_lock
+// IWYU pragma: end_keep
 
 namespace fl {
 namespace platforms {

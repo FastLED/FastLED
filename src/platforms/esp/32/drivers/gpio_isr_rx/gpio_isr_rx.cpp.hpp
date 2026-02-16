@@ -34,14 +34,26 @@
 #endif
 
 FL_EXTERN_C_BEGIN
+// IWYU pragma: begin_keep
 #include "driver/gpio.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "driver/gptimer.h"  // For hardware timer
+// IWYU pragma: end_keep
 #include "esp_attr.h"
 #include "esp_err.h"
+// IWYU pragma: begin_keep
 #include "soc/rtc.h"       // For rtc_clk_cpu_freq_get_config() - Arduino ESP32
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "soc/gpio_reg.h"  // For GPIO_IN_REG, GPIO_IN1_REG (direct register access)
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "freertos/task.h"  // For taskYIELD()
+// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 namespace fl {

@@ -3,7 +3,9 @@
 #include "fl/stl/cstring.h"
 
 // Include Helix MP3 decoder internal API (in fl::third_party namespace)
+// IWYU pragma: begin_keep
 #include "third_party/libhelix_mp3/pub/mp3dec.h"
+// IWYU pragma: end_keep
 
 namespace fl {
 namespace third_party {

@@ -13,7 +13,9 @@
 #error "This header is only for Particle devices (Photon/Electron)"
 #endif
 
+// IWYU pragma: begin_keep
 #include <application.h>
+// IWYU pragma: end_keep
 #include "fl/stl/stdint.h"
 
 // Interrupt control is provided by interrupts_stm32.h (included by led_sysdefs_arm_stm32.h)

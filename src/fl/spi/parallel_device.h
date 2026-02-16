@@ -12,7 +12,9 @@
 #include "fl/spi/config.h"
 #include "fl/spi/transaction.h"
 #include "fl/numeric_limits.h"
+// IWYU pragma: begin_keep
 #include "platforms/shared/spi_types.h"  // ok platform headers
+// IWYU pragma: end_keep  // ok platform headers
 
 // Forward declarations for backends
 namespace fl {

@@ -73,14 +73,22 @@
 #include "platforms/shared/spi_types.h"
 
 // Include Yves' I2S driver
+// IWYU pragma: begin_keep
 #include "third_party/yves/I2SClockBasedLedDriver/I2SClockBasedLedDriver.h"
 
 // ESP32 SDK headers
+// IWYU pragma: end_keep
 #ifdef FL_IS_ESP32
 #include "esp_heap_caps.h"
+// IWYU pragma: begin_keep
 #include "driver/gpio.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "freertos/semphr.h"
+// IWYU pragma: end_keep
 #endif
 
 namespace fl {

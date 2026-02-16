@@ -31,12 +31,16 @@
 
 #include "platforms/shared/spi_hw_4.h"
 #include "fl/numeric_limits.h"
+// IWYU pragma: begin_keep
 #include <nrf_spim.h>
 #include <nrf_gpio.h>
+// IWYU pragma: end_keep
 
 // Include Nordic SDK headers for TIMER, PPI
+// IWYU pragma: begin_keep
 #include <nrfx_timer.h>
 #include <nrfx_ppi.h>
+// IWYU pragma: end_keep
 
 #include "fl/warn.h"
 #include "fl/stddef.h"

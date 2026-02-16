@@ -141,7 +141,9 @@ void * memmove8 ( void * dst, const void* src, fl::u16 num )
 
 #if 0
 // TEST / VERIFICATION CODE ONLY BELOW THIS POINT
-#include <Arduino.h>  // ok include
+// IWYU pragma: begin_keep
+#include <Arduino.h>
+// IWYU pragma: end_keep  // ok include
 #include "lib8tion.h"
 
 void test1abs( fl::i8 i)

@@ -15,8 +15,12 @@
 #include "fl/singleton.h"
 #include "fl/warn.h"
 
+// IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "freertos/semphr.h"
+// IWYU pragma: end_keep
 #include "esp_lcd_panel_io.h"
 #include "esp_heap_caps.h"
 #include "esp_timer.h"

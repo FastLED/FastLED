@@ -10,15 +10,19 @@
 
 // Minimal socket includes for function declarations
 // WASM provides some basic socket types but limited functionality
+// IWYU pragma: begin_keep
 #include <sys/types.h>    // For ssize_t, socklen_t if available
+// IWYU pragma: end_keep
 #include "is_wasm.h"
 #include "platforms/win/is_win.h"
 
 #ifdef FL_IS_WASM
+    // IWYU pragma: begin_keep
     #include <sys/socket.h>   // Basic socket definitions if available
     #include <netinet/in.h>   // For sockaddr_in 
     #include <arpa/inet.h>    // For inet_pton/ntop
     #include <netdb.h>        // For getaddrinfo
+    // IWYU pragma: end_keep
     
     // Define constants that may be missing in Emscripten
     #ifndef TCP_NODELAY
@@ -26,8 +30,10 @@
     #endif
 #elif defined(FL_IS_WIN)
     // When testing on Windows, use Windows headers - don't define our own types
+    // IWYU pragma: begin_keep
     #include <winsock2.h>
     #include <ws2tcpip.h>
+    // IWYU pragma: end_keep
 #else
     // Pure WASM environment - define our own socket types
     typedef int socklen_t;

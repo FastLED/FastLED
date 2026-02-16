@@ -29,8 +29,10 @@
 #endif
 
 // Get some system include files
+// IWYU pragma: begin_keep
 #include <avr/io.h>
 #include <avr/interrupt.h> // for cli/se definitions
+// IWYU pragma: end_keep
 // Define the register types
 #if defined(ARDUINO) // && ARDUINO < 150
 typedef volatile       fl::u8 RoReg; /**< Read only 8-bit register (volatile const unsigned int) */

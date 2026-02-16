@@ -6,7 +6,9 @@
 
 // IWYU pragma: private
 
+// IWYU pragma: begin_keep
 #include <avr/io.h>
+// IWYU pragma: end_keep
 #include "platforms/avr/atmega/common/avr_pin.h"
 
 #warning "Untested platform. Please report any issues to the https://github.com/fastled/fastled/issues"

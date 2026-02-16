@@ -77,19 +77,27 @@
 #endif
 
 #ifdef SmartMatrix_h
+// IWYU pragma: begin_keep
 #include <SmartMatrix.h>
+// IWYU pragma: end_keep
 #endif
 
 #ifdef DmxSimple_h
+// IWYU pragma: begin_keep
 #include <DmxSimple.h>
+// IWYU pragma: end_keep
 #endif
 
 #ifdef DmxSerial_h
+// IWYU pragma: begin_keep
 #include <DMXSerial.h>
+// IWYU pragma: end_keep
 #endif
 
 #ifdef USE_OCTOWS2811
+// IWYU pragma: begin_keep
 #include <OctoWS2811.h>
+// IWYU pragma: end_keep
 #endif
 
 // Convenience includes for sketch inclusion

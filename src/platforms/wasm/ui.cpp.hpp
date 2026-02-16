@@ -33,9 +33,11 @@
 //
 // ⚠️⚠️⚠️ REMEMBER: Async UI failures are often silent and hard to debug! ⚠️⚠️⚠️
 
+// IWYU pragma: begin_keep
 #include <emscripten.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
+// IWYU pragma: end_keep
 
 #include "platforms/wasm/ui.h"
 #include "platforms/wasm/js_bindings.h"

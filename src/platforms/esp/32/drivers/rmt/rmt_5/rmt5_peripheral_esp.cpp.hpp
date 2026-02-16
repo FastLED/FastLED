@@ -24,14 +24,22 @@
 
 // Include ESP-IDF headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN
+// IWYU pragma: begin_keep
 #include "driver/gpio.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "driver/rmt_tx.h"
+// IWYU pragma: end_keep
 #include "esp_cache.h"
 #include "esp_heap_caps.h"
 #include "esp_log.h"
+// IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"
+// IWYU pragma: end_keep
 #include "esp_rom_gpio.h"  // For esp_rom_gpio_connect_out_signal
+// IWYU pragma: begin_keep
 #include "soc/gpio_sig_map.h"  // For RMT_SIG_OUT0_IDX etc.
+// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 // ESP-IDF 5.2+ compatibility: ESP_CACHE_MSYNC_FLAG_DIR_C2M

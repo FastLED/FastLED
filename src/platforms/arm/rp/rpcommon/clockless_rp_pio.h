@@ -4,7 +4,9 @@
 #define __INC_CLOCKLESS_RP_PIO_COMMON
 
 #include "fl/chipsets/timing_traits.h"
+// IWYU pragma: begin_keep
 #include "hardware/structs/sio.h"
+// IWYU pragma: end_keep
 #include "fastled_delay.h"
 #include "platforms/arm/rp/is_rp.h"  // FL_IS_RP2040, FL_IS_RP2350
 
@@ -13,13 +15,19 @@
 #endif
 
 #if FASTLED_RP2040_CLOCKLESS_PIO
+// IWYU pragma: begin_keep
 #include "hardware/clocks.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "hardware/dma.h"
 // compiler throws a warning about comparison that is always true
 // silence that so users don't see it
+// IWYU pragma: end_keep
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wtype-limits"
+// IWYU pragma: begin_keep
 #include "hardware/pio.h"
+// IWYU pragma: end_keep
 #pragma GCC diagnostic pop
 
 #include "pio_gen.h"

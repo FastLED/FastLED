@@ -48,7 +48,9 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string.h"
+// IWYU pragma: begin_keep
 #include "platforms/shared/spi_hw_base.h"  // ok platform headers - required for SpiHwBase interface
+// IWYU pragma: end_keep
 
 namespace fl {
 

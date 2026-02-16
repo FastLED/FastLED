@@ -17,10 +17,14 @@
 //       validated for Xtensa LX7 architecture before use.
 
 #include "fl/stl/stdint.h"
+// IWYU pragma: begin_keep
 #include "soc/soc.h"
+// IWYU pragma: end_keep
 #include "esp_intr_alloc.h"
+// IWYU pragma: begin_keep
 #include "hal/interrupt_coreasm.h"
 
+// IWYU pragma: end_keep
 FL_EXTERN_C_BEGIN
 
 //=============================================================================
