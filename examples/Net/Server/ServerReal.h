@@ -24,8 +24,8 @@
 
 #pragma once
 
-// Disable fast exit for this example - HTTP server needs to run long enough to accept connections
-#undef FASTLED_STUB_MAIN_FAST_EXIT
+// Note: FASTLED_STUB_MAIN_FAST_EXIT is enabled by default for testing
+// This allows the server to start, verify it's working, and exit cleanly after 5 iterations
 
 #include "fl/net/http/server.h"
 #include <FastLED.h>
