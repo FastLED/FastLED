@@ -5,6 +5,7 @@
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/atomic.h"
 #include "fl/int.h"
+#include "fl/align.h"
 
 
 namespace fl {
@@ -77,17 +78,56 @@ template<typename T, typename Deleter = default_delete<T>>
 struct ControlBlock : public ControlBlockBase {
     T* ptr;
     Deleter deleter;
-    
-    ControlBlock(T* p, Deleter d = Deleter(), bool track = true) 
+
+    ControlBlock(T* p, Deleter d = Deleter(), bool track = true)
         : ControlBlockBase(track), ptr(p), deleter(d) {}
-    
+
     void destroy_object() override {
         if (ptr && !is_no_tracking()) {  // Only delete if tracking
             deleter(ptr);
             ptr = nullptr;
         }
     }
-    
+
+    void destroy_control_block() override {
+        delete this;
+    }
+};
+
+// Helper to compute maximum alignment for InlinedControlBlock
+// Ensures alignment is at least as strict as ControlBlockBase, but respects T's requirements if larger
+template<typename T>
+struct control_block_alignment {
+    static constexpr fl::size value =
+        (alignof(T) > alignof(ControlBlockBase)) ? alignof(T) : alignof(ControlBlockBase);
+};
+
+// Inlined control block for make_shared optimization
+// Stores the object inline with the control block (single allocation)
+template<typename T>
+struct FL_ALIGNAS(control_block_alignment<T>::value) InlinedControlBlock : public ControlBlockBase {
+    FL_ALIGNAS(T) char storage[sizeof(T)];  // Object storage (properly aligned)
+    bool object_constructed;                 // Track construction state
+
+    InlinedControlBlock()
+        : ControlBlockBase(true), object_constructed(false) {}
+
+    // Get pointer to the inline object storage
+    T* get_object() {
+        return fl::bit_cast<T*>(&storage[0]);
+    }
+
+    const T* get_object() const {
+        return fl::bit_cast<const T*>(&storage[0]);
+    }
+
+    void destroy_object() override {
+        if (object_constructed) {
+            get_object()->~T();  // Manual destructor call
+            object_constructed = false;
+        }
+    }
+
     void destroy_control_block() override {
         delete this;
     }
@@ -355,15 +395,13 @@ private:
 
 // Factory functions
 
-// make_shared with optimized inlined storage
+// make_shared with optimized inlined storage (single allocation)
 template<typename T, typename... Args>
 shared_ptr<T> make_shared(Args&&... args) {
-    T* obj = new T(fl::forward<Args>(args)...);
-    auto* control = new detail::ControlBlock<T>(obj);
-    //FASTLED_WARN("make_shared created object at " << obj
-    //          << " with control block at " << control);
-    //new(control->get_object()) T(fl::forward<Args>(args)...);
-    //control->object_constructed = true;
+    auto* control = new detail::InlinedControlBlock<T>();
+    T* obj = control->get_object();
+    new(obj) T(fl::forward<Args>(args)...);  // Placement new
+    control->object_constructed = true;
     return shared_ptr<T>(obj, control, detail::make_shared_tag{});
 }
 
