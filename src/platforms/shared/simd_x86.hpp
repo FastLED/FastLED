@@ -24,9 +24,7 @@
   // Suppress C++14 extension warnings when including these system headers
   FL_DIAGNOSTIC_PUSH
   FL_DIAGNOSTIC_IGNORE_C14_EXTENSIONS
-  // IWYU pragma: begin_keep
   #include <emmintrin.h>  // SSE2
-  // IWYU pragma: end_keep
   FL_DIAGNOSTIC_POP
   #define FASTLED_X86_HAS_SSE2 1
 #else
@@ -38,9 +36,7 @@
 #if defined(__SSE4_1__) || defined(__AVX__)
   FL_DIAGNOSTIC_PUSH
   FL_DIAGNOSTIC_IGNORE_C14_EXTENSIONS
-  // IWYU pragma: begin_keep
   #include <smmintrin.h>  // SSE4.1
-  // IWYU pragma: end_keep
   FL_DIAGNOSTIC_POP
   #define FASTLED_X86_HAS_SSE41 1
 #else

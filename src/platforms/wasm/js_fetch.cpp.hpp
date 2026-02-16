@@ -12,10 +12,8 @@
 
 #include "is_wasm.h"
 #ifdef FL_IS_WASM
-// IWYU pragma: begin_keep
 #include <emscripten.h>
 #include <emscripten/val.h>
-// IWYU pragma: end_keep
 #endif
 
 namespace fl {

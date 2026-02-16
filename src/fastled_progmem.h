@@ -48,9 +48,7 @@
 #endif
 
 #if FASTLED_INCLUDE_PGMSPACE == 1
-// IWYU pragma: begin_keep
 #include <avr/pgmspace.h>
-// IWYU pragma: end_keep
 #endif
 
 /// PROGMEM keyword for storage

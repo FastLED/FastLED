@@ -6,9 +6,7 @@
 
 #ifdef FL_IS_WIN
 
-// IWYU pragma: begin_keep
 #include <io.h>  // for _write
-// IWYU pragma: end_keep
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstddef.h"
 

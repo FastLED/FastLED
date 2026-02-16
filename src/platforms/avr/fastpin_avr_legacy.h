@@ -21,6 +21,4 @@
 
 #warning "fastpin_avr_legacy.h is deprecated. The god-header has been split into family-specific files. This backward-compat shim will be removed in FastLED v4.0."
 
-// IWYU pragma: begin_keep
 #include "atmega/common/fastpin_avr_legacy_dispatcher.h"
-// IWYU pragma: end_keep

@@ -40,24 +40,12 @@
 
 // Pico SDK headers
 FL_EXTERN_C_BEGIN
-// IWYU pragma: begin_keep
 #include "hardware/irq.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "hardware/timer.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "hardware/gpio.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "hardware/sync.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "pico/time.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "pico/critical_section.h"
-// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 namespace fl {

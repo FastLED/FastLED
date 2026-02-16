@@ -27,9 +27,7 @@
 //
 // ⚠️⚠️⚠️ DO NOT DUPLICATE SHARED FUNCTIONALITY HERE ⚠️⚠️⚠️
 
-// IWYU pragma: begin_keep
 #include <emscripten.h>
-// IWYU pragma: end_keep
 
 #include "platforms/shared/active_strip_data/active_strip_data.h"
 #include "fl/id_tracker.h"

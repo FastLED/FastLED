@@ -17,26 +17,18 @@
 // Include ESP-IDF headers first to detect what's already defined
 #include "fl/has_include.h"
 #if FL_HAS_INCLUDE(<soc/soc_caps.h>)
-  // IWYU pragma: begin_keep
   #include <soc/soc_caps.h>
-  // IWYU pragma: end_keep
 #endif
 #if FL_HAS_INCLUDE(<driver/spi_common.h>)
-  // IWYU pragma: begin_keep
   #include <driver/spi_common.h>  // For spi_host_device_t, spi_common_dma_t
-  // IWYU pragma: end_keep
 #endif
 #if FL_HAS_INCLUDE(<hal/spi_types.h>)
-  // IWYU pragma: begin_keep
   #include <hal/spi_types.h>  // For SPI2_HOST, SPI3_HOST (modern ESP-IDF)
-  // IWYU pragma: end_keep
 #endif
 
 // Include driver/spi_master.h for spi_host_device_t type definition
 // Required for SPI2_HOST/SPI3_HOST macro definitions below
-// IWYU pragma: begin_keep
 #include <driver/spi_master.h>
-// IWYU pragma: end_keep
 
 // Determine SPI3_HOST availability using SOC capability macro
 // SOC_SPI_PERIPH_NUM indicates the number of SPI peripherals available

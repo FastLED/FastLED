@@ -46,12 +46,10 @@
 
 
 
-// IWYU pragma: begin_keep
 #include <nrf.h>
 #include <nrf_spim.h>   // for FastSPI
 #include <nrf_pwm.h>    // for Clockless
 #include <nrf_nvic.h>   // for Clockless / anything else using interrupts
-// IWYU pragma: end_keep
 typedef __I  fl::u32 RoReg;
 typedef __IO fl::u32 RwReg;
 

@@ -186,9 +186,7 @@
 // STM32 HAL/LL Header Includes
 // ============================================================================
 #if FL_HAS_INCLUDE("stm32_def.h")
-    // IWYU pragma: begin_keep
     #include <stm32_def.h>
-    // IWYU pragma: end_keep
 
     // Family-specific LL (Low-Layer) driver includes for performance-critical code
     #if defined(FL_IS_STM32_F1)

@@ -36,14 +36,10 @@
 // Try CMSIS-RTOS v2 first (preferred)
 #if FL_HAS_INCLUDE(<cmsis_os2.h>)
     #define FASTLED_STM32_HAS_CMSIS_RTOS_V2 1
-    // IWYU pragma: begin_keep
     #include <cmsis_os2.h>
-    // IWYU pragma: end_keep
 #elif FL_HAS_INCLUDE(<cmsis_os.h>)
     #define FASTLED_STM32_HAS_CMSIS_RTOS_V1 1
-    // IWYU pragma: begin_keep
     #include <cmsis_os.h>
-    // IWYU pragma: end_keep
 #else
     // No CMSIS-RTOS available - will use fake mutex
     #define FASTLED_STM32_HAS_CMSIS_RTOS_NONE 1

@@ -14,9 +14,7 @@
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0)
 #include "fl/compiler_control.h"
 FL_EXTERN_C_BEGIN
-// IWYU pragma: begin_keep
 #include "soc/soc_caps.h"
-// IWYU pragma: end_keep
 FL_EXTERN_C_END
 #endif
 

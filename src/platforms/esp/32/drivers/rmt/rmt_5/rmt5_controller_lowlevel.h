@@ -18,10 +18,8 @@
 
 FL_EXTERN_C_BEGIN
 
-// IWYU pragma: begin_keep
 #include "driver/gpio.h"
 
-// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 namespace fl {

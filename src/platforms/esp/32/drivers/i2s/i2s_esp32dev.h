@@ -13,41 +13,23 @@
 // Wrap only ESP-IDF C headers in extern C
 FL_EXTERN_C_BEGIN
 
-// IWYU pragma: begin_keep
 #include "driver/gpio.h"
-// IWYU pragma: end_keep
 #include "esp_heap_caps.h"
-// IWYU pragma: begin_keep
 #include "soc/gpio_sig_map.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "soc/i2s_reg.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "soc/i2s_struct.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "soc/io_mux_reg.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "soc/soc.h"
 
-// IWYU pragma: end_keep
 #if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR >= 5
-// IWYU pragma: begin_keep
 #include "esp_private/periph_ctrl.h"
-// IWYU pragma: end_keep
 #else
-// IWYU pragma: begin_keep
 #include "driver/periph_ctrl.h"
-// IWYU pragma: end_keep
 #endif
 
 #include "esp_system.h" // Load ESP_IDF_VERSION_MAJOR if exists
-// IWYU pragma: begin_keep
 #include "rom/lldesc.h"
 // ESP_IDF_VERSION_MAJOR is defined in ESP-IDF v3.3 or later
-// IWYU pragma: end_keep
 #if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR > 3
 #include "esp_intr_alloc.h"
 #else

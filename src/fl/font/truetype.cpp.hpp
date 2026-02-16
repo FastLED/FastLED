@@ -6,9 +6,7 @@
 
 #include "fl/font/truetype.h"
 #include "fl/font/ttf_covenant5x5.h"  // Embedded default font declarations
-// IWYU pragma: begin_keep
-#include "third_party/stb/truetype/stb_truetype.h"
-// IWYU pragma: end_keep  // declarations only
+#include "third_party/stb/truetype/stb_truetype.h"  // declarations only
 
 namespace fl {
 

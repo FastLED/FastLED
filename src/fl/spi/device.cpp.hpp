@@ -3,13 +3,11 @@
 #include "fl/log.h"
 #include "fl/warn.h"
 #include "fl/stl/chrono.h"
-// IWYU pragma: begin_keep
 #include "platforms/shared/spi_bus_manager.h" // ok platform headers
 #include "platforms/shared/spi_hw_1.h" // ok platform headers
 #include "platforms/shared/spi_hw_2.h" // ok platform headers
 #include "platforms/shared/spi_hw_4.h" // ok platform headers
 
-// IWYU pragma: end_keep
 namespace fl {
 namespace spi {
 

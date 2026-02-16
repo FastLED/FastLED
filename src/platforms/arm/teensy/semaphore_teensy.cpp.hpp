@@ -9,22 +9,16 @@
 
 #include "semaphore_teensy.h"
 #include "fl/warn.h"
-// IWYU pragma: begin_keep
 #include <chrono>  // ok include - for std::chrono
-// IWYU pragma: end_keep
 
 // Include platform-specific CMSIS headers for interrupt control
 #if defined(FL_IS_TEENSY_4X)
     FL_EXTERN_C_BEGIN
-    // IWYU pragma: begin_keep
     #include <imxrt.h>  // Provides __disable_irq()/__enable_irq() macros
-    // IWYU pragma: end_keep
     FL_EXTERN_C_END
 #elif defined(FL_IS_TEENSY_3X) || defined(FL_IS_TEENSY_LC)
     FL_EXTERN_C_BEGIN
-    // IWYU pragma: begin_keep
     #include <kinetis.h>  // Provides __disable_irq()/__enable_irq() macros
-    // IWYU pragma: end_keep
     FL_EXTERN_C_END
 #else
     #error "Unknown Teensy platform - cannot determine interrupt control header"

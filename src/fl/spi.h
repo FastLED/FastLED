@@ -18,9 +18,7 @@
 #include "fl/spi/lane.h"
 #include "fl/spi/write_result.h"  // Defines WriteResult with wait() method
 #include "fl/spi/multi_lane_device.h"
-// IWYU pragma: begin_keep
 #include "platforms/shared/spi_types.h"  // ok platform headers
-// IWYU pragma: end_keep  // ok platform headers
 
 namespace fl {
 

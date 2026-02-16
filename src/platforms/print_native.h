@@ -1,13 +1,9 @@
 #pragma once
 
 #ifdef _WIN32
-// IWYU pragma: begin_keep
 #include <io.h>  // for _write
-// IWYU pragma: end_keep
 #else
-// IWYU pragma: begin_keep
 #include <unistd.h>  // for write
-// IWYU pragma: end_keep
 #endif
 
 namespace fl {

@@ -26,25 +26,19 @@
 
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/numeric_limits.h"
-// IWYU pragma: begin_keep
 #include <nrf_spim.h>
 #include <nrf_gpio.h>
-// IWYU pragma: end_keep
 
 // Include Nordic SDK headers for TIMER, PPI, GPIOTE
 #if defined(FL_IS_NRF52840) || defined(FL_IS_NRF52833)
-    // IWYU pragma: begin_keep
     #include <nrfx_timer.h>
     #include <nrfx_ppi.h>
     #include <nrfx_gpiote.h>
-    // IWYU pragma: end_keep
 #else
     // For nRF52832, use legacy API
-    // IWYU pragma: begin_keep
     #include <nrf_timer.h>
     #include <nrf_ppi.h>
     #include <nrf_gpiote.h>
-    // IWYU pragma: end_keep
 #endif
 
 #include "fl/warn.h"

@@ -30,9 +30,7 @@
 #if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
 
 #include "fl/pin.h"
-// IWYU pragma: begin_keep
 #include <sam.h>  // SAMD register definitions
-// IWYU pragma: end_keep
 
 namespace fl {
 namespace platforms {

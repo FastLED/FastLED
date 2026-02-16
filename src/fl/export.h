@@ -5,9 +5,7 @@
 
 #ifndef FASTLED_EXPORT
     #if defined(FL_IS_WASM)
-        // IWYU pragma: begin_keep
-#include <emscripten.h>
-// IWYU pragma: end_keep
+        #include <emscripten.h>
         #define FASTLED_EXPORT EMSCRIPTEN_KEEPALIVE
     #elif defined(_WIN32) || defined(_WIN64)
         // Windows DLL export/import

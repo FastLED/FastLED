@@ -18,7 +18,6 @@
 
 #ifdef FL_IS_WIN
 
-// IWYU pragma: begin_keep
 #include <chrono>
 #include <iostream>
 #include <string>
@@ -26,7 +25,6 @@
 #include <cstddef>
 #include <windef.h>
 #include <libloaderapi.h>
-// IWYU pragma: end_keep
 #include "errhandlingapi.h"
 #include "minwindef.h"
 #include "winbase.h"

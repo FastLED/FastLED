@@ -16,19 +16,13 @@
 #include "fl/singleton.h"
 
 #ifdef FL_IS_WIN
-// IWYU pragma: begin_keep
 #include <malloc.h>  // ok include - For _aligned_malloc/_aligned_free on Windows
-// IWYU pragma: end_keep
 #else
-// IWYU pragma: begin_keep
 #include <stdlib.h>  // For aligned_alloc on POSIX
-// IWYU pragma: end_keep
 #endif
 
 #ifdef ARDUINO
-// IWYU pragma: begin_keep
 #include <Arduino.h>  // ok include - For fl::micros() and delay() on Arduino platforms
-// IWYU pragma: end_keep
 #else
 #include "platforms/stub/time_stub.h"  // For fl::micros() and delay() on host tests
 #endif

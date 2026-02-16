@@ -4,10 +4,8 @@
 
 // IWYU pragma: private
 
-// IWYU pragma: begin_keep
 #include <driver/gpio.h>
 #include <driver/i2s_std.h>
-// IWYU pragma: end_keep
 
 #include "fl/stl/assert.h"
 #include "fl/int.h"

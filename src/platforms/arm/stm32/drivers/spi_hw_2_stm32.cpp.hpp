@@ -43,9 +43,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/numeric_limits.h"
-// IWYU pragma: begin_keep
 #include <Arduino.h>  // Ensure STM32 HAL is initialized
-// IWYU pragma: end_keep
 
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/warn.h"
@@ -56,9 +54,7 @@
 // Define this to enable software GPIO bitbanging mode for testing
 // #define FASTLED_STM32_DUALSPI_SOFTWARE_MODE 1
 
-// IWYU pragma: begin_keep
 #include <cstring> // ok include
-// IWYU pragma: end_keep
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 #include "platforms/arm/stm32/stm32_gpio_timer_helpers.h"  // Centralized GPIO/Timer/DMA helpers
 

@@ -4,16 +4,12 @@
 
 #ifdef FL_IS_WASM
 
-// IWYU pragma: begin_keep
 #include <emscripten.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
 #include <emscripten/val.h>
-// IWYU pragma: end_keep
 
-// IWYU pragma: begin_keep
 #include <map> // ok include
-// IWYU pragma: end_keep
 
 #include "engine_listener.h"
 #include "platforms/wasm/active_strip_data.h"

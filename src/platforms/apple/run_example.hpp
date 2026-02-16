@@ -18,10 +18,8 @@
 
 #ifdef FL_IS_APPLE
 
-// IWYU pragma: begin_keep
 #include <dlfcn.h>       // For dlopen, dlsym, dlclose
 #include <mach-o/dyld.h> // For _NSGetExecutablePath
-// IWYU pragma: end_keep
 
 int main(int argc, char** argv) {
     // Setup crash handler BEFORE loading any shared libraries

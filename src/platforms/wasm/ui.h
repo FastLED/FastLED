@@ -2,9 +2,7 @@
 
 // IWYU pragma: private
 
-// IWYU pragma: begin_keep
 #include <string>
-// IWYU pragma: end_keep
 
 namespace fl {
 

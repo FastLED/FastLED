@@ -9,9 +9,7 @@
 
 #include "crgb.h"
 #include "fastspi_types.h"
-// IWYU pragma: begin_keep
 #include <SPI.h>
-// IWYU pragma: end_keep
 #include "fl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH

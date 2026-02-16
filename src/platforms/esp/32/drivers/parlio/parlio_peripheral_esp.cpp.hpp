@@ -22,21 +22,13 @@
 
 // Include ESP-IDF headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN
-// IWYU pragma: begin_keep
 #include "driver/gptimer.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "driver/parlio_tx.h"
-// IWYU pragma: end_keep
 #include "esp_cache.h"      // For esp_cache_msync (DMA cache coherency)
 #include "esp_heap_caps.h"
 #include "esp_timer.h"      // For esp_timer_get_time()
-// IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "freertos/task.h"
-// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 #include "platforms/memory_barrier.h"  // For FL_MEMORY_BARRIER

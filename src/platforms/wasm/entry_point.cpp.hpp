@@ -28,11 +28,9 @@
 // This enables proper socket proxying while allowing JavaScript to control FastLED timing.
 // ================================================================================================
 
-// IWYU pragma: begin_keep
 #include <emscripten.h>
 #include <emscripten/emscripten.h>
 #include <emscripten/html5.h>
-// IWYU pragma: end_keep
 
 #include "active_strip_data.h"
 #include "engine_listener.h"
@@ -40,9 +38,7 @@
 #include "fl/async.h"
 #include "fl/dbg.h"
 #include "fl/warn.h"
-// IWYU pragma: begin_keep
 #include <stdio.h> // ok include
-// IWYU pragma: end_keep
 
 // Forward declarations for Arduino-style setup/loop functions
 // These will be provided by the user's sketch

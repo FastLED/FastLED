@@ -8,9 +8,7 @@
 
 #if defined(FL_IS_NRF52)
 
-// IWYU pragma: begin_keep
 #include <nrf51_bitfields.h>
-// IWYU pragma: end_keep
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
 #if (FASTLED_ALLOW_INTERRUPTS==1)

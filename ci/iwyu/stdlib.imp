@@ -1,17 +1,7 @@
 # Standard Library Include What You Use Mapping File
 # This file provides standard library header mappings for better IWYU suggestions
-#
-# BLANKET RULE: Block ALL libc++ private headers (any header starting with __)
-# Different platforms (Linux/macOS/Windows) and compilers (gcc/clang/MSVC) have
-# different private header structures. We use regex to catch them all.
 
 [
-  # Regex patterns to block ALL private libc++ headers (IWYU supports @ prefix for regex)
-  # This catches __memory/*, __string/*, __algorithm/*, etc. on all platforms
-  { include: ['@"__.*"', 'private', '<stdlib.h>', 'public'] },
-  { include: ['@<__.*>', 'private', '<stdlib.h>', 'public'] },
-
-
   # C++ standard library headers
   { include: ['<cstdint>', 'public', '"fl/stl/stdint.h"', 'public'] },
   { include: ['<cstddef>', 'public', '"fl/stl/cstddef.h"', 'public'] },
@@ -150,29 +140,8 @@
   { include: ['"__hash/base.h"', 'private', '"fl/stl/unordered_map.h"', 'public'] },
   { include: ['"__hash/node_handle.h"', 'private', '"fl/stl/unordered_map.h"', 'public'] },
 
-  # __memory/* -> "fl/stl/shared_ptr.h" or "fl/stl/string.h" (for allocator)
-  { include: ['"__memory/allocator.h"', 'private', '"fl/stl/string.h"', 'public'] },
-  { include: ['"__memory/allocator_traits.h"', 'private', '"fl/stl/string.h"', 'public'] },
-  { include: ['"__memory/shared_ptr.h"', 'private', '"fl/stl/shared_ptr.h"', 'public'] },
-  { include: ['"__memory/unique_ptr.h"', 'private', '"fl/stl/shared_ptr.h"', 'public'] },
-  { include: ['"__memory/construct_at.h"', 'private', '"fl/stl/shared_ptr.h"', 'public'] },
-
-  # __string/* -> "fl/stl/string.h"
-  { include: ['"__string/char_traits.h"', 'private', '"fl/stl/string.h"', 'public'] },
-  { include: ['"__string/string.h"', 'private', '"fl/stl/string.h"', 'public'] },
-
-  # __ios/* -> "fl/stl/iostream.h"
-  { include: ['"__ios/fpos.h"', 'private', '"fl/stl/iostream.h"', 'public'] },
-
-  # __locale/* -> "fl/stl/iostream.h"
-  { include: ['"__locale"', 'private', '"fl/stl/iostream.h"', 'public'] },
-
-  # __filesystem/* -> not supported in FastLED
-  { include: ['"__filesystem/path.h"', 'private', '<filesystem>', 'public'] },
-
   # Top-level private headers
   { include: ['"__hash_table"', 'private', '"fl/stl/unordered_map.h"', 'public'] },
   { include: ['"__tree"', 'private', '"fl/stl/map.h"', 'public'] },
   { include: ['"__node_handle"', 'private', '"fl/stl/unordered_map.h"', 'public'] },
-  { include: ['"__split_buffer"', 'private', '"fl/stl/vector.h"', 'public'] },
 ]

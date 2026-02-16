@@ -8,11 +8,9 @@
 
 #include "fl/stl/type_traits.h"
 #include "fl/stl/limits.h"
-// IWYU pragma: begin_keep
 #include "platforms/shared/spi_bitbang/spi_block_8.h" // ok platform headers
 #include "platforms/shared/spi_bitbang/spi_block_16.h" // ok platform headers
 
-// IWYU pragma: end_keep
 namespace fl {
 
 // numeric_limits - Only define static constexpr members that use template expressions

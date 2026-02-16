@@ -12,16 +12,10 @@
 
 // ESP-IDF headers (only in .cpp.hpp, not in .h)
 FL_EXTERN_C_BEGIN
-// IWYU pragma: begin_keep
 #include "driver/uart.h"
-// IWYU pragma: end_keep
 #include "esp_rom_uart.h"
-// IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"  // For vTaskDelay
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "freertos/task.h"       // For portTICK_PERIOD_MS
-// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 namespace fl {

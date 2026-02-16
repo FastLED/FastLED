@@ -3,9 +3,7 @@
 // Breaking the dependency chain from core string functionality to UI system
 
 #include "fl/str.h"
-// IWYU pragma: begin_keep
-#include "platforms/shared/ui/json/ui_internal.h"  // ok platform headers
-// IWYU pragma: end_keep // ok platform headers
+#include "platforms/shared/ui/json/ui_internal.h" // ok platform headers
 
 namespace fl {
 

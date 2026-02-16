@@ -11,9 +11,7 @@
 #include "fl/json.h"      // 61.1ms - only needed for ParseJson/toJson implementations
 #include "fl/str.h"       // 129.4ms - only needed for string parameters in implementations
 #include "fl/stl/map.h"       // 12.4ms - only needed for fl_map parameters in implementations
-// IWYU pragma: begin_keep
-#include "fl/stl/function.h"
-// IWYU pragma: end_keep  // ~5ms - only needed for function<> constructor implementation
+#include "fl/stl/function.h"  // ~5ms - only needed for function<> constructor implementation
 
 // Other implementation dependencies
 #include "fl/stl/math.h"

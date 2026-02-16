@@ -39,44 +39,28 @@
 
 // Include concrete engine implementations
 #if FASTLED_ESP32_HAS_PARLIO
-// IWYU pragma: begin_keep
 #include "parlio/channel_engine_parlio.h"
-// IWYU pragma: end_keep
 #endif
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
-// IWYU pragma: begin_keep
 #include "spi/channel_engine_spi.h"
-// IWYU pragma: end_keep
 #endif
 #if FASTLED_ESP32_HAS_UART
-// IWYU pragma: begin_keep
 #include "uart/channel_engine_uart.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "uart/uart_peripheral_esp.h"
-// IWYU pragma: end_keep
 #endif
 #if FASTLED_ESP32_HAS_RMT
 // Include the appropriate RMT driver (RMT4 or RMT5) based on platform
 #if FASTLED_ESP32_RMT5_ONLY_PLATFORM || FASTLED_RMT5
-// IWYU pragma: begin_keep
 #include "rmt/rmt_5/channel_engine_rmt.h"
-// IWYU pragma: end_keep
 #else
-// IWYU pragma: begin_keep
 #include "rmt/rmt_4/channel_engine_rmt4.h"
-// IWYU pragma: end_keep
 #endif
 #endif  // FASTLED_ESP32_HAS_RMT
 #if FASTLED_ESP32_HAS_LCD_RGB
-// IWYU pragma: begin_keep
 #include "lcd_cam/channel_engine_lcd_rgb.h"
-// IWYU pragma: end_keep
 #endif
 #if FASTLED_ESP32_HAS_I2S_LCD_CAM
-// IWYU pragma: begin_keep
 #include "i2s/channel_engine_i2s.h"
-// IWYU pragma: end_keep
 #endif
 
 namespace fl {

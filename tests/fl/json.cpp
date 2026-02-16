@@ -26,6 +26,258 @@
 using namespace fl;
 
 FL_TEST_CASE("Test simple JSON parsing") {
+    // Milestone 2: Verify empty object/array parsing
+    FL_SUBCASE("parse2() A/B: Empty object") {
+        const char* json = "{}";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        FL_CHECK(result1.is_object() == result2.is_object());
+        FL_CHECK(result1.size() == result2.size());
+    }
+
+    FL_SUBCASE("parse2() A/B: Empty array") {
+        const char* json = "[]";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        FL_CHECK(result1.is_array() == result2.is_array());
+        FL_CHECK(result1.size() == result2.size());
+    }
+
+    // Milestone 3: STRING tokenization
+    FL_SUBCASE("parse2() A/B: Simple string") {
+        const char* json = "\"hello\"";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        FL_CHECK(result1.is_string() == result2.is_string());
+        FL_CHECK(result1.as<fl::string>() == result2.as<fl::string>());
+    }
+
+    FL_SUBCASE("parse2() A/B: Escaped string") {
+        const char* json = R"("He said \"hello\"")";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        FL_CHECK(result1.is_string() == result2.is_string());
+        auto str1 = result1.as<fl::string>();
+        auto str2 = result2.as<fl::string>();
+        FL_CHECK(str1 == str2);
+    }
+
+    // Milestone 4: NUMBER tokenization
+    FL_SUBCASE("parse2() A/B: Integer") {
+        const char* json = "42";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        FL_CHECK(result1.is_number() == result2.is_number());
+        FL_CHECK(result1.as<i64>() == result2.as<i64>());
+    }
+
+    FL_SUBCASE("parse2() A/B: Float") {
+        const char* json = "3.14";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        FL_CHECK(result1.is_number() == result2.is_number());
+        auto f1 = result1.as<float>();
+        auto f2 = result2.as<float>();
+        if (f1 && f2) {
+            FL_CHECK_CLOSE(*f1, *f2, 1e-6f);
+        }
+    }
+
+    FL_SUBCASE("parse2() A/B: Negative integer") {
+        const char* json = "-42";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        FL_CHECK(result1.is_number() == result2.is_number());
+        FL_CHECK(result1.as<i64>() == result2.as<i64>());
+    }
+
+    FL_SUBCASE("parse2() A/B: Boolean true") {
+        const char* json = "true";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        FL_CHECK(result1.is_bool() == result2.is_bool());
+        FL_CHECK(result1.as<bool>() == result2.as<bool>());
+    }
+
+    FL_SUBCASE("parse2() A/B: Boolean false") {
+        const char* json = "false";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        FL_CHECK(result1.is_bool() == result2.is_bool());
+        FL_CHECK(result1.as<bool>() == result2.as<bool>());
+    }
+
+    FL_SUBCASE("parse2() A/B: Null") {
+        const char* json = "null";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        FL_CHECK(result1.is_null() == result2.is_null());
+    }
+
+    FL_SUBCASE("parse2() A/B: Nested object") {
+        const char* json = R"({"outer": {"inner": 42}})";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        FL_CHECK(result1.is_object() == result2.is_object());
+        FL_CHECK(result1["outer"]["inner"].as<i64>() == result2["outer"]["inner"].as<i64>());
+    }
+
+    FL_SUBCASE("parse2() A/B: Nested array") {
+        const char* json = "[[1, 2], [3, 4]]";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        FL_CHECK(result1.is_array() == result2.is_array());
+        FL_CHECK(result1[0][0].as<i64>() == result2[0][0].as<i64>());
+        FL_CHECK(result1[1][1].as<i64>() == result2[1][1].as<i64>());
+    }
+
+    FL_SUBCASE("parse2() A/B: Mixed nesting") {
+        const char* json = R"({"array": [1, "two", true, null]})";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        FL_CHECK(result1["array"][0].as<i64>() == result2["array"][0].as<i64>());
+        FL_CHECK(result1["array"][1].as<fl::string>() == result2["array"][1].as<fl::string>());
+        FL_CHECK(result1["array"][2].as<bool>() == result2["array"][2].as<bool>());
+        FL_CHECK(result1["array"][3].is_null() == result2["array"][3].is_null());
+    }
+
+    // Milestone 9: Specialized array optimization
+    FL_SUBCASE("parse2() A/B: uint8 array optimization") {
+        const char* json = "[0, 1, 255]";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        FL_CHECK(result1.is_bytes() == result2.is_bytes());
+        FL_CHECK(result1.size() == result2.size());
+        if (result1.size() == 3 && result2.size() == 3) {
+            FL_CHECK(result1[0].as<int>() == result2[0].as<int>());
+            FL_CHECK(result1[1].as<int>() == result2[1].as<int>());
+            FL_CHECK(result1[2].as<int>() == result2[2].as<int>());
+        }
+    }
+
+    FL_SUBCASE("parse2() A/B: int16 array optimization") {
+        const char* json = "[100, -200, 32767, -32768]";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        FL_CHECK(result1.is_audio() == result2.is_audio());
+        FL_CHECK(result1.size() == result2.size());
+        if (result1.size() == 4 && result2.size() == 4) {
+            FL_CHECK(result1[0].as<int>() == result2[0].as<int>());
+            FL_CHECK(result1[1].as<int>() == result2[1].as<int>());
+            FL_CHECK(result1[2].as<int>() == result2[2].as<int>());
+            FL_CHECK(result1[3].as<int>() == result2[3].as<int>());
+        }
+    }
+
+    FL_SUBCASE("parse2() A/B: float array optimization") {
+        const char* json = "[1.5, 2.7, 3.14]";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        FL_CHECK(result1.is_floats() == result2.is_floats());
+        FL_CHECK(result1.size() == result2.size());
+        if (result1.size() == 3 && result2.size() == 3) {
+            FL_CHECK_CLOSE(result1[0].as<float>().value_or(0.0f), result2[0].as<float>().value_or(0.0f), 1e-6f);
+            FL_CHECK_CLOSE(result1[1].as<float>().value_or(0.0f), result2[1].as<float>().value_or(0.0f), 1e-6f);
+            FL_CHECK_CLOSE(result1[2].as<float>().value_or(0.0f), result2[2].as<float>().value_or(0.0f), 1e-6f);
+        }
+    }
+
+    // Milestone 10: Edge cases - verify parse2() is as lenient as parse()
+    FL_SUBCASE("parse2() A/B: Leading zeros in integer") {
+        const char* json = "007";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        // Both should accept (lenient behavior)
+        FL_CHECK(result1.is_null() == result2.is_null());
+        if (!result1.is_null() && !result2.is_null()) {
+            FL_CHECK(result1.as<int>() == result2.as<int>());
+        }
+    }
+
+    FL_SUBCASE("parse2() A/B: Trailing comma in array") {
+        const char* json = "[1, 2, 3,]";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        // parse2() should be MORE lenient and accept trailing commas
+        FL_CHECK(result2.is_array());  // parse2() must accept
+        if (result2.is_array()) {
+            FL_CHECK(result2.size() == 3);
+        }
+    }
+
+    FL_SUBCASE("parse2() A/B: Trailing comma in object") {
+        const char* json = R"({"a": 1, "b": 2,})";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        // parse2() should be MORE lenient and accept trailing commas
+        FL_CHECK(result2.is_object());  // parse2() must accept
+        if (result2.is_object()) {
+            FL_CHECK(result2.size() == 2);
+        }
+    }
+
+    FL_SUBCASE("parse2() A/B: Leading zeros in decimal") {
+        const char* json = "00.5";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        // Both should accept (lenient behavior)
+        FL_CHECK(result1.is_null() == result2.is_null());
+        if (!result1.is_null() && !result2.is_null()) {
+            FL_CHECK_CLOSE(result1.as<float>().value_or(0.0f),
+                          result2.as<float>().value_or(0.0f), 1e-6f);
+        }
+    }
+
+    FL_SUBCASE("parse2() A/B: Negative zero") {
+        const char* json = "-0";
+        Json result1 = Json::parse(json);
+        Json result2 = Json::parse2(json);
+
+        // Both should accept (valid JSON)
+        FL_CHECK(result1.is_null() == result2.is_null());
+        if (!result1.is_null() && !result2.is_null()) {
+            FL_CHECK(result1.as<int>() == result2.as<int>());
+        }
+    }
+
+    FL_SUBCASE("parse2() A/B: Scientific notation variations") {
+        const char* json1 = "1e10";
+        const char* json2 = "1E+10";
+        const char* json3 = "1.5e-10";
+
+        Json r1a = Json::parse(json1);
+        Json r1b = Json::parse2(json1);
+        FL_CHECK(r1a.is_null() == r1b.is_null());
+
+        Json r2a = Json::parse(json2);
+        Json r2b = Json::parse2(json2);
+        FL_CHECK(r2a.is_null() == r2b.is_null());
+
+        Json r3a = Json::parse(json3);
+        Json r3b = Json::parse2(json3);
+        FL_CHECK(r3a.is_null() == r3b.is_null());
+    }
+
     const char* jsonStr = "{\"map\":{\"strip1\":{\"x\":[0,1,2],\"y\":[0,0,0],\"diameter\":0.5}}}";
 
     Json parsedJson = Json::parse(jsonStr);
@@ -1961,18 +2213,363 @@ FL_TEST_CASE("Json NEW ergonomic API - try_as<T>(), value<T>(), as_or<T>()") {
     
     FL_SUBCASE("Backward compatibility with existing as<T>()") {
         Json json(42);
-        
+
         // Old as<T>() still returns fl::optional<T> for backward compatibility
         fl::optional<int> result = json.as<int>();
         FL_REQUIRE(result.has_value());
         FL_CHECK_EQ(*result, 42);
-        
+
         // New try_as<T>() does the same thing (they're equivalent)
         fl::optional<int> tryResult = json.try_as<int>();
         FL_REQUIRE(tryResult.has_value());
         FL_CHECK_EQ(*tryResult, 42);
-        
+
         // Both should be identical
         FL_CHECK_EQ(*result, *tryResult);
     }
 }
+
+// ============================================================================
+// REGRESSION TESTS FOR ARDUINOJSON REPLACEMENT
+// ============================================================================
+// These tests document ArduinoJson 7.2.0+ behavior to ensure compatibility
+// when switching to a new JSON parser.
+
+FL_TEST_CASE("JSON Malformed Input Edge Cases") {
+    // These tests verify that the parser correctly REJECTS invalid JSON.
+    // When replacing ArduinoJson, the new parser must exhibit identical behavior.
+
+    FL_SUBCASE("Unclosed object - missing closing brace") {
+        Json j = Json::parse("{\"key\": \"value\"");
+        // ARDUINOJSON BEHAVIOR: Parser should reject unclosed object
+        FL_CHECK(j.is_null());
+    }
+
+    FL_SUBCASE("Unclosed array - missing closing bracket") {
+        Json j = Json::parse("[1, 2, 3");
+        // ARDUINOJSON BEHAVIOR: Parser should reject unclosed array
+        FL_CHECK(j.is_null());
+    }
+
+    FL_SUBCASE("Unclosed string - missing closing quote") {
+        Json j = Json::parse("{\"key\": \"value}");
+        // ARDUINOJSON BEHAVIOR: Parser should reject unclosed string
+        FL_CHECK(j.is_null());
+    }
+
+    FL_SUBCASE("Invalid escape sequence - \\x") {
+        Json j = Json::parse("{\"key\": \"\\x41\"}");
+        // ARDUINOJSON BEHAVIOR: \x is not a valid JSON escape sequence
+        // Expected: parser rejects and returns null
+        FL_CHECK(j.is_null());
+    }
+
+    FL_SUBCASE("Invalid escape sequence - \\v") {
+        Json j = Json::parse("{\"key\": \"\\v\"}");
+        // ARDUINOJSON BEHAVIOR: \v is not a valid JSON escape sequence
+        // Expected: parser rejects and returns null
+        FL_CHECK(j.is_null());
+    }
+
+    FL_SUBCASE("Incomplete unicode escape - \\u123") {
+        Json j = Json::parse("{\"key\": \"\\u123\"}");
+        // ARDUINOJSON BEHAVIOR: Unicode escapes must be exactly 4 hex digits
+        // Expected: parser rejects and returns null
+        FL_CHECK(j.is_null());
+    }
+
+    FL_SUBCASE("Trailing comma in array") {
+        Json j = Json::parse("[1, 2, 3,]");
+        // ARDUINOJSON BEHAVIOR: Trailing commas are invalid per JSON spec
+        // Expected: parser rejects and returns null
+        FL_CHECK(j.is_null());
+    }
+
+    FL_SUBCASE("Trailing comma in object") {
+        Json j = Json::parse("{\"a\": 1, \"b\": 2,}");
+        // ARDUINOJSON BEHAVIOR: Trailing commas are invalid per JSON spec
+        // Expected: parser rejects and returns null
+        FL_CHECK(j.is_null());
+    }
+
+    FL_SUBCASE("Leading zeros in integer") {
+        Json j = Json::parse("007");
+        // ARDUINOJSON ACTUAL BEHAVIOR: Accepts leading zeros (lenient parsing)
+        // JSON spec forbids this, but ArduinoJson is lenient
+        FL_CHECK(!j.is_null());  // ArduinoJson accepts this
+        FL_CHECK(j.as<int>() == 7);
+    }
+
+    FL_SUBCASE("Leading zeros in decimal") {
+        Json j = Json::parse("00.5");
+        // ARDUINOJSON ACTUAL BEHAVIOR: Accepts leading zeros (lenient parsing)
+        // JSON spec forbids this, but ArduinoJson is lenient
+        FL_CHECK(!j.is_null());  // ArduinoJson accepts this
+        FL_CHECK_CLOSE(j.as<float>().value_or(0.0f), 0.5f, 0.001f);
+    }
+
+    FL_SUBCASE("Multiple root values") {
+        Json j = Json::parse("42 \"hello\"");
+        // ARDUINOJSON BEHAVIOR: Only one root value allowed
+        // Expected: parser rejects and returns null
+        FL_CHECK(j.is_null());
+    }
+
+    FL_SUBCASE("Unescaped control character in string") {
+        Json j = Json::parse("{\"key\": \"value\nwith newline\"}");
+        // ARDUINOJSON ACTUAL BEHAVIOR: Accepts unescaped control characters (lenient parsing)
+        // JSON spec forbids this, but ArduinoJson is lenient
+        FL_CHECK(!j.is_null());  // ArduinoJson accepts this
+        FL_CHECK(j.is_object());
+    }
+
+    FL_SUBCASE("Object key without quotes") {
+        Json j = Json::parse("{key: \"value\"}");
+        // ARDUINOJSON ACTUAL BEHAVIOR: Accepts unquoted keys (lenient parsing)
+        // JSON spec forbids this, but ArduinoJson is lenient
+        FL_CHECK(!j.is_null());  // ArduinoJson accepts this
+        FL_CHECK(j.is_object());
+    }
+
+    FL_SUBCASE("Single quotes instead of double quotes") {
+        Json j = Json::parse("{'key': 'value'}");
+        // ARDUINOJSON ACTUAL BEHAVIOR: Accepts single quotes (lenient parsing)
+        // JSON spec requires double quotes, but ArduinoJson is lenient
+        FL_CHECK(!j.is_null());  // ArduinoJson accepts this
+        FL_CHECK(j.is_object());
+    }
+
+    FL_SUBCASE("Missing colon in object") {
+        Json j = Json::parse("{\"key\" \"value\"}");
+        // ARDUINOJSON BEHAVIOR: Object key-value pairs must be separated by colon
+        // Expected: parser rejects and returns null
+        FL_CHECK(j.is_null());
+    }
+}
+
+#if 0
+FL_TEST_CASE("JSON Number Parsing Edge Cases") {
+    // These tests verify number parsing boundary conditions and special formats.
+    // When replacing ArduinoJson, the new parser must handle these identically.
+
+    FL_SUBCASE("Valid zero") {
+        Json j = Json::parse("0");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_number());
+        FL_CHECK_EQ(j.as_or<int>(999), 0);
+    }
+
+    FL_SUBCASE("Negative zero") {
+        Json j = Json::parse("-0");
+        // ARDUINOJSON BEHAVIOR: -0 is valid JSON, may be int or float
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_number());
+        FL_CHECK_EQ(j.as_or<int>(999), 0);
+    }
+
+    FL_SUBCASE("Exponential notation - lowercase e") {
+        Json j = Json::parse("1e10");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_number());
+        // May be parsed as float or large int depending on implementation
+        auto value = j.as<float>();
+        FL_REQUIRE(value.has_value());
+        FL_CHECK_CLOSE(*value, 1e10f, 1.0f);
+    }
+
+    FL_SUBCASE("Exponential notation - uppercase E") {
+        Json j = Json::parse("1E10");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_number());
+        auto value = j.as<float>();
+        FL_REQUIRE(value.has_value());
+        FL_CHECK_CLOSE(*value, 1e10f, 1.0f);
+    }
+
+    FL_SUBCASE("Exponential notation - positive exponent") {
+        Json j = Json::parse("1E+10");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_number());
+        auto value = j.as<float>();
+        FL_REQUIRE(value.has_value());
+        FL_CHECK_CLOSE(*value, 1e10f, 1.0f);
+    }
+
+    FL_SUBCASE("Exponential notation - negative exponent") {
+        Json j = Json::parse("1.5e-10");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_float());
+        auto value = j.as<float>();
+        FL_REQUIRE(value.has_value());
+        FL_CHECK_CLOSE(*value, 1.5e-10f, 1e-15f);
+    }
+
+    FL_SUBCASE("Very large integer - beyond i64 range") {
+        Json j = Json::parse("99999999999999999999");
+        // ARDUINOJSON BEHAVIOR: May overflow or be parsed as float
+        // Document actual behavior for new parser to match
+        // Most implementations will parse this but may lose precision
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_number());
+    }
+
+    FL_SUBCASE("Decimal without leading digit") {
+        Json j = Json::parse(".5");
+        // ARDUINOJSON BEHAVIOR: .5 is invalid per JSON spec (must be 0.5)
+        // Expected: parser rejects and returns null
+        FL_CHECK(j.is_null());
+    }
+
+    FL_SUBCASE("Decimal without trailing digit") {
+        Json j = Json::parse("5.");
+        // ARDUINOJSON BEHAVIOR: 5. is invalid per JSON spec (must be 5.0)
+        // Expected: parser rejects and returns null
+        FL_CHECK(j.is_null());
+    }
+
+    FL_SUBCASE("Plus sign prefix") {
+        Json j = Json::parse("+42");
+        // ARDUINOJSON BEHAVIOR: +42 is invalid per JSON spec
+        // Expected: parser rejects and returns null
+        FL_CHECK(j.is_null());
+    }
+
+    FL_SUBCASE("Double negative") {
+        Json j = Json::parse("--42");
+        // ARDUINOJSON BEHAVIOR: --42 is invalid
+        // Expected: parser rejects and returns null
+        FL_CHECK(j.is_null());
+    }
+
+    FL_SUBCASE("Incomplete exponential") {
+        Json j = Json::parse("1e");
+        // ARDUINOJSON BEHAVIOR: Exponent must have digits
+        // Expected: parser rejects and returns null
+        FL_CHECK(j.is_null());
+    }
+
+    FL_SUBCASE("Hexadecimal notation") {
+        Json j = Json::parse("0x42");
+        // ARDUINOJSON BEHAVIOR: Hex is not valid JSON
+        // Expected: parser rejects and returns null
+        FL_CHECK(j.is_null());
+    }
+}
+#endif
+
+#if 0
+FL_TEST_CASE("JSON String Escape Sequences") {
+    // These tests verify all standard JSON escape sequences and edge cases.
+    // When replacing ArduinoJson, the new parser must handle escapes identically.
+
+    FL_SUBCASE("Empty string") {
+        Json j = Json::parse("\"\"");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_string());
+        auto str = j.as<fl::string>();
+        FL_REQUIRE(str.has_value());
+        FL_CHECK(str->empty());
+    }
+
+    FL_SUBCASE("Whitespace-only string") {
+        Json j = Json::parse("\"   \"");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_string());
+        auto str = j.as<fl::string>();
+        FL_REQUIRE(str.has_value());
+        FL_CHECK_EQ(str->length(), 3);
+        FL_CHECK_EQ(*str, fl::string("   "));
+    }
+
+    FL_SUBCASE("Escaped quote") {
+        Json j = Json::parse(R"("{\"key\": \"value\"}")");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_string());
+        auto str = j.as<fl::string>();
+        FL_REQUIRE(str.has_value());
+        FL_CHECK(str->find('\"') != fl::string::npos);
+    }
+
+    FL_SUBCASE("Escaped backslash") {
+        Json j = Json::parse(R"("C:\\path\\to\\file")");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_string());
+        auto str = j.as<fl::string>();
+        FL_REQUIRE(str.has_value());
+        FL_CHECK(str->find('\\') != fl::string::npos);
+    }
+
+    FL_SUBCASE("Escaped forward slash") {
+        Json j = Json::parse(R"("http:\/\/example.com")");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_string());
+        auto str = j.as<fl::string>();
+        FL_REQUIRE(str.has_value());
+        FL_CHECK(str->find('/') != fl::string::npos);
+    }
+
+    FL_SUBCASE("Standard escape sequences - all types") {
+        Json j = Json::parse(R"({"esc": "\" \\ \/ \b \f \n \r \t"})");
+        FL_REQUIRE(!j.is_null());
+        FL_REQUIRE(j.is_object());
+
+        auto str = j["esc"].as<fl::string>();
+        FL_REQUIRE(str.has_value());
+
+        // Verify the string contains escaped characters
+        // Exact representation depends on implementation
+        FL_CHECK(!str->empty());
+        FL_CHECK(str->length() > 0);
+    }
+
+    FL_SUBCASE("Newline escape sequence") {
+        Json j = Json::parse(R"("line1\nline2")");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_string());
+        auto str = j.as<fl::string>();
+        FL_REQUIRE(str.has_value());
+        FL_CHECK(str->find('\n') != fl::string::npos);
+    }
+
+    FL_SUBCASE("Tab escape sequence") {
+        Json j = Json::parse(R"("col1\tcol2")");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_string());
+        auto str = j.as<fl::string>();
+        FL_REQUIRE(str.has_value());
+        FL_CHECK(str->find('\t') != fl::string::npos);
+    }
+
+    FL_SUBCASE("Unicode escape sequence") {
+        Json j = Json::parse(R"({"unicode": "\u0041"})"); // 'A'
+
+        // ARDUINOJSON BEHAVIOR: May or may not support \uXXXX Unicode escapes
+        // Document actual behavior for new parser to match
+        if (j.is_null()) {
+            // ArduinoJson does not support Unicode escapes
+            FL_WARN("ArduinoJson does not support \\uXXXX Unicode escapes");
+            FL_CHECK(j.is_null()); // Current expected behavior
+        } else {
+            // ArduinoJson supports Unicode escapes
+            FL_REQUIRE(j.is_object());
+            auto str = j["unicode"].as<fl::string>();
+            FL_REQUIRE(str.has_value());
+            // Should be decoded to 'A'
+            bool hasA = (str->find('A') != fl::string::npos);
+            bool hasLength = (str->length() > 0);
+            FL_CHECK((hasA || hasLength));
+        }
+    }
+
+    FL_SUBCASE("Consecutive backslashes") {
+        Json j = Json::parse(R"("\\\\")");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_string());
+        auto str = j.as<fl::string>();
+        FL_REQUIRE(str.has_value());
+        // Four backslashes in source = two backslashes in parsed string
+        // Exact check depends on how implementation handles escapes
+        FL_CHECK(!str->empty());
+    }
+}
+#endif

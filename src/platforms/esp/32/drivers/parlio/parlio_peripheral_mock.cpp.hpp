@@ -16,18 +16,14 @@
 #include "fl/stl/atomic.h"
 #include "fl/stl/map.h"
 
-// IWYU pragma: begin_keep
 #include <thread>  // ok include
 #include <chrono>  // ok include
 #include <mutex>   // ok include
 #include <condition_variable>  // ok include
 #include <stdlib.h> // ok include for aligned_alloc on POSIX
-// IWYU pragma: end_keep
 
 #ifdef ARDUINO
-// IWYU pragma: begin_keep
 #include <Arduino.h>  // For micros() and delay() on Arduino platforms
-// IWYU pragma: end_keep
 #else
 #include "platforms/stub/time_stub.h"  // For micros() and delay() on host tests
 #endif

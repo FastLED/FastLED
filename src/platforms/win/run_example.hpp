@@ -18,23 +18,11 @@
 
 #ifdef FL_IS_WIN
 
-// IWYU pragma: begin_keep
-#include <iostream>
-#include <string>
-#include <vector>
-#include <cstddef>
 #include <windef.h>
 #include <libloaderapi.h>
 #include "errhandlingapi.h"
 #include "minwindef.h"
 #include "winbase.h"
-// IWYU pragma: end_keep
-
-// Crash handler setup (defined in crash_handler_main.cpp)
-extern "C" void runner_setup_crash_handler();
-
-// Function signature for the example entry point exported by example DLLs/SOs
-typedef int (*RunExampleFunc)(int argc, const char** argv);
 
 int main(int argc, char** argv) {
     // Setup crash handler BEFORE loading any DLLs

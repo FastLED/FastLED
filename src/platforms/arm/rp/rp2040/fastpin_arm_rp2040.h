@@ -4,12 +4,8 @@
 #define __FASTPIN_ARM_RP2040_H
 
 #include "pico.h"
-// IWYU pragma: begin_keep
 #include "hardware/gpio.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "hardware/structs/sio.h"
-// IWYU pragma: end_keep
 #include "fl/fastpin_base.h"
 #include "fl/compiler_control.h"
 

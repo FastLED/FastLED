@@ -3,9 +3,7 @@
 // IWYU pragma: private
 
 // arduino_before.h saves Serial macro as ArduinoSerial_Save before undefining it
-// IWYU pragma: begin_keep
 #include <Arduino.h>
-// IWYU pragma: end_keep
 
 namespace fl {
 namespace platforms {

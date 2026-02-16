@@ -59,6 +59,4 @@ typedef fl::iptr intptr_t;
 // Include the platform's <stdint.h> to get standard limit macros like INT32_MAX, UINT64_MAX, etc.
 // We include this at the END of the file after defining our types to avoid typedef conflicts.
 // The macros don't conflict and we need them for bounds checking in various parts of the codebase.
-// IWYU pragma: begin_keep
-#include <stdint.h>
-// IWYU pragma: end_keep  // For INT8_MAX, UINT64_MAX, etc.
+#include <stdint.h>  // For INT8_MAX, UINT64_MAX, etc.

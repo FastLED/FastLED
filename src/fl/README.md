@@ -92,7 +92,7 @@ void example() {
 Example: JSON with safe default access
 
 ```cpp
-#include "fl/json.h"
+#include "fl/json/json.h"
 
 void json_example(const fl::string& jsonStr) {
     fl::Json json = fl::Json::parse(jsonStr);

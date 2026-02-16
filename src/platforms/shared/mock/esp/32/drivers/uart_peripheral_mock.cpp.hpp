@@ -7,9 +7,7 @@
 #include "platforms/is_platform.h"
 
 #if defined(ARDUINO) || defined(FL_IS_ESP32)
-// IWYU pragma: begin_keep
 #include <Arduino.h>  // ok include - For fl::micros() on Arduino/ESP platforms
-// IWYU pragma: end_keep
 #else
 #include "platforms/stub/time_stub.h"  // For fl::micros() on host tests
 #endif

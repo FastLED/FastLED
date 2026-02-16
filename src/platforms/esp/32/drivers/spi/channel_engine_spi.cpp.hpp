@@ -44,26 +44,14 @@
 #include "fl/compiler_control.h" // FL_MEMORY_BARRIER for cache coherence
 
 FL_EXTERN_C_BEGIN
-// IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"  // portMAX_DELAY, pdMS_TO_TICKS
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "driver/gpio.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "driver/spi_master.h"
-// IWYU pragma: end_keep
 #include "esp_check.h"
 #include "esp_heap_caps.h"
-// IWYU pragma: begin_keep
 #include "soc/spi_periph.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "soc/spi_reg.h"    // SPI_DMA_CONF_REG for ESP32-S3 DMA fix
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "soc/gpio_sig_map.h"  // GPIO matrix signal IDs (FSPID_OUT_IDX, HSPID_OUT_IDX, etc.)
-// IWYU pragma: end_keep
 #include "esp_rom_gpio.h"  // esp_rom_gpio_connect_out_signal for manual GPIO routing
 #if FL_HAS_INCLUDE("esp_cache.h")
 #include "esp_cache.h"  // For esp_cache_msync (ESP32-C6, ESP32-S3, etc.)

@@ -1,8 +1,6 @@
 #pragma once
 
-// IWYU pragma: begin_keep
-#include <errno.h>
-// IWYU pragma: end_keep  // okay banned header (STL wrapper requires standard header)
+#include <errno.h>  // okay banned header (STL wrapper requires standard header)
 // Use C header <errno.h> instead of C++ <cerrno> for AVR platform compatibility
 
 // Bring errno functionality into fl:: namespace

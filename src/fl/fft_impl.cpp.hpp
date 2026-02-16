@@ -12,11 +12,9 @@
 
 #include "fl/fastled.h"
 
-// IWYU pragma: begin_keep
 #include "third_party/cq_kernel/cq_kernel.h"
 #include "third_party/cq_kernel/kiss_fftr.h"
 
-// IWYU pragma: end_keep
 #include "fl/alloca.h"
 #include "fl/stl/array.h"
 #include "fl/audio.h"

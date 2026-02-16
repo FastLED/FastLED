@@ -33,12 +33,8 @@ namespace platforms {
 
 // FreeRTOS includes must be included OUTSIDE namespaces
 FL_EXTERN_C_BEGIN
-// IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"  // ok include
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "freertos/task.h"       // ok include
-// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 namespace fl {

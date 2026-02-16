@@ -12,7 +12,5 @@
 
 // Force LDF to detect SPI library dependency
 #if 0
-// IWYU pragma: begin_keep
 #include <SPI.h>
-// IWYU pragma: end_keep
 #endif

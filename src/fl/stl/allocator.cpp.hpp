@@ -11,9 +11,7 @@
 #ifdef FL_IS_ESP32
 #include "esp_heap_caps.h"
 #include "esp_system.h"
-// IWYU pragma: begin_keep
-#include "platforms/esp/esp_version.h"  // ok platform headers
-// IWYU pragma: end_keep // ok platform headers
+#include "platforms/esp/esp_version.h" // ok platform headers
 #endif
 
 namespace fl {

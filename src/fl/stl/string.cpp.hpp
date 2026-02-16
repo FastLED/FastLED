@@ -1,23 +1,18 @@
 #include "fl/stl/string.h"
+#include "fl/stl/stdio.h"   // For fl::snprintf
 #include "fl/stl/cstring.h" // For fl::memcpy, fl::strcmp
-#include "fl/stl/string_interner.h" // For global_interner()
-#include "fl/stl/type_traits.h"      // for swap
-#include "fl/stl/variant.h"          // for variant
 
+#include "crgb.h"
 #include "fl/fft.h"
-#include "fl/geometry.h"             // for vec2
-#include "fl/int.h"                  // for size, u16, u8
-#include "fl/json.h"
-#include "fl/rgb8.h"                 // for CRGB
-#include "fl/tile2x2.h"
 #include "fl/unused.h"
 #include "fl/xymap.h"
+#include "fl/json.h"
+#include "fl/tile2x2.h"
+#include "fl/compiler_control.h"
 // UI dependency moved to separate compilation unit to break dependency chain
 
 #if FL_STRING_NEEDS_ARDUINO_CONVERSION
-// IWYU pragma: begin_keep
-#include <Arduino.h>
-// IWYU pragma: end_keep  // ok header
+#include <Arduino.h>  // ok header
 #endif
 
 namespace fl {
@@ -152,17 +147,5 @@ string &string::append(const ::String &str) {
     return *this;
 }
 #endif
-
-// String interning method implementation
-string& string::intern() {
-    // Skip interning if using inline storage (SSO) - already efficient, no heap allocation
-    if (mStorage.template is<InlinedBuffer>()) {
-        return *this;
-    }
-
-    // Intern via global interner - replaces this string with deduplicated version
-    *this = global_interner().intern(*this);
-    return *this;
-}
 
 } // namespace fl

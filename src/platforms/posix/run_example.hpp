@@ -19,10 +19,8 @@
 
 #if !defined(FL_IS_WIN) && !defined(FL_IS_APPLE)
 
-// IWYU pragma: begin_keep
 #include <dlfcn.h>  // For dlopen, dlsym, dlclose
 #include <unistd.h> // For readlink
-// IWYU pragma: end_keep
 
 int main(int argc, char** argv) {
     // Setup crash handler BEFORE loading any shared libraries

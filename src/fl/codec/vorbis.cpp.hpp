@@ -13,9 +13,7 @@
 #include "fl/stl/cstring.h"
 
 // Include stb_vorbis raw API (FL_STB_* macros translated to STB_* internally)
-// IWYU pragma: begin_keep
 #include "third_party/stb/stb_vorbis.h"
-// IWYU pragma: end_keep
 
 namespace fl {
 

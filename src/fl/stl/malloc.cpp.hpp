@@ -1,8 +1,6 @@
 #include "fl/stl/malloc.h"
 #include "fl/stl/cstring.h"
-// IWYU pragma: begin_keep
 #include <stdlib.h>
-// IWYU pragma: end_keep
 
 namespace fl {
     // Provide C standard library malloc/free/realloc functions

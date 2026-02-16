@@ -3,9 +3,7 @@
 // This file provides a common fallback for examples that won't compile on all platforms
 
 // ok no namespace fl
-// IWYU pragma: begin_keep
 #include <FastLED.h>  // ok include
-// IWYU pragma: end_keep
 
 #define NUM_LEDS 60
 

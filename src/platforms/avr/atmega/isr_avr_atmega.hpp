@@ -38,10 +38,8 @@
 
 // AVR libc headers
 FL_EXTERN_C_BEGIN
-// IWYU pragma: begin_keep
 #include <avr/interrupt.h>
 #include <avr/io.h>
-// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 // Compatibility macros for older AVR chips

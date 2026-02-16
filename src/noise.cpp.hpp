@@ -3,9 +3,7 @@
 
 #include "platforms/is_platform.h"
 
-// IWYU pragma: begin_keep
-#include <string.h>
-// IWYU pragma: end_keep  // ok include
+#include <string.h>  // ok include
 #include "fl/stl/array.h"
 
 

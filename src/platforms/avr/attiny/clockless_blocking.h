@@ -9,9 +9,7 @@
 
 #include "controller.h"
 #include "lib8tion.h"
-// IWYU pragma: begin_keep
 #include <avr/interrupt.h> // for cli/sei definitions
-// IWYU pragma: end_keep
 #include "fl/force_inline.h"
 #include "fl/register.h"
 #include "fl/fastpin.h"

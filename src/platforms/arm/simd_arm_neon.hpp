@@ -16,9 +16,7 @@
 
 #if defined(__ARM_NEON) || defined(__ARM_NEON__)
 
-// IWYU pragma: begin_keep
 #include <arm_neon.h>
-// IWYU pragma: end_keep
 
 //==============================================================================
 // Platform Implementation Namespace

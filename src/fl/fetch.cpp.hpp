@@ -8,16 +8,12 @@
 #include "fl/stl/unique_ptr.h"  // For make_unique
 
 #ifdef FL_IS_WASM
-// IWYU pragma: begin_keep
 #include <emscripten.h>
 #include <emscripten/val.h>
 #endif
-// IWYU pragma: end_keep
 
 // Include WASM-specific implementation
-// IWYU pragma: begin_keep
-#include "platforms/wasm/js_fetch.h"  // ok platform headers
-// IWYU pragma: end_keep // ok platform headers
+#include "platforms/wasm/js_fetch.h" // ok platform headers
 
 namespace fl {
 

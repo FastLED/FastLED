@@ -24,10 +24,8 @@
 #endif
 
 #include "fl/stl/stdint.h"
-// IWYU pragma: begin_keep
 #include <nrf51.h>
 #include <core_cm0.h>
-// IWYU pragma: end_keep
 typedef volatile fl::u32 RoReg;
 typedef volatile fl::u32 RwReg;
 typedef fl::u32 prog_uint32_t;

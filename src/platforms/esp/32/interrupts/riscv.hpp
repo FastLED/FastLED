@@ -19,14 +19,10 @@
 //       validation for specific RISC-V ESP32 variants before use.
 
 #include "fl/stl/stdint.h"
-// IWYU pragma: begin_keep
 #include "soc/soc.h"
-// IWYU pragma: end_keep
 #include "esp_intr_alloc.h"
-// IWYU pragma: begin_keep
 #include "riscv/interrupt.h"
 
-// IWYU pragma: end_keep
 FL_EXTERN_C_BEGIN
 
 //=============================================================================

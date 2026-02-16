@@ -35,9 +35,7 @@
 
 // Include SAM device headers for Pio type and PIOA/PIOB/PIOC/PIOD register definitions
 // chip.h includes sam.h which in turn includes the device-specific headers (sam3x8e.h, etc.)
-// IWYU pragma: begin_keep
 #include <chip.h>
-// IWYU pragma: end_keep
 
 namespace fl {
 namespace platforms {

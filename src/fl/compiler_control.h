@@ -333,9 +333,7 @@
 #ifndef FL_KEEP_ALIVE
   #if defined(FL_IS_WASM)
     // Emscripten: Use EMSCRIPTEN_KEEPALIVE to export symbols to JavaScript
-    // IWYU pragma: begin_keep
-#include <emscripten.h>
-// IWYU pragma: end_keep
+    #include <emscripten.h>
     #define FL_KEEP_ALIVE EMSCRIPTEN_KEEPALIVE
   #elif defined(FL_IS_GCC) || defined(FL_IS_CLANG)
     // GCC/Clang: Mark symbol as used to prevent linker optimization

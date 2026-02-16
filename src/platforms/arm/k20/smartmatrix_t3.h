@@ -4,9 +4,7 @@
 #define __INC_SMARTMATRIX_T3_H
 
 #ifdef SmartMatrix_h
-// IWYU pragma: begin_keep
 #include <SmartMatrix.h>
-// IWYU pragma: end_keep
 namespace fl {
 extern SmartMatrix *pSmartMatrix;
 

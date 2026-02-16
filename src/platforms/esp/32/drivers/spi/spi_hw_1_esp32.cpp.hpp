@@ -18,12 +18,10 @@
 #include "platforms/esp/32/drivers/spi/spi_hw_base.h"  // Common ESP32 SPI definitions
 #include "fl/stl/cstring.h"
 #include "fl/numeric_limits.h"
-// IWYU pragma: begin_keep
 #include <driver/spi_master.h>
 #include <esp_heap_caps.h>
 #include <esp_err.h>
 #include <cstring> // ok include
-// IWYU pragma: end_keep
 
 namespace fl {
 

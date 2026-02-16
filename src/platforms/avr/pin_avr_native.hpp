@@ -11,10 +11,8 @@
 ///
 /// Supported platforms: ATmega328P, ATmega2560, ATmega32U4, and compatible AVR MCUs
 
-// IWYU pragma: begin_keep
 #include <avr/io.h>
 #include <avr/pgmspace.h>
-// IWYU pragma: end_keep
 #include "fl/stl/stdint.h"
 #include "is_avr.h"
 

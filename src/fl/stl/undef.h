@@ -5,9 +5,7 @@
 #include "fl/compiler_control.h"
 
 #if FL_HAS_INCLUDE(<stdlib.h>)
-// IWYU pragma: begin_keep
-#include <stdlib.h>
-// IWYU pragma: end_keep  // This will sometimes define macros like abs, min, max, etc.
+#include <stdlib.h>  // This will sometimes define macros like abs, min, max, etc.
 #endif
 
 // Undefine common macros that conflict with FastLED function/method names

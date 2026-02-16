@@ -25,10 +25,8 @@
 #endif
 
 // Minimal Windows includes for type definitions
-// IWYU pragma: begin_keep
 #include <winsock2.h>
 #include <ws2tcpip.h>
-// IWYU pragma: end_keep
 
 namespace fl {
 

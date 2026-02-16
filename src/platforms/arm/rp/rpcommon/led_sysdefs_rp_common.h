@@ -11,16 +11,12 @@
 #pragma GCC diagnostic ignored "-Wignored-qualifiers"
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
-// IWYU pragma: begin_keep
 #include "hardware/sync.h"
 
 // Explicitly include Arduino.h here so any framework-specific defines take
 // priority.
-// IWYU pragma: end_keep
 #ifdef ARDUINO
-// IWYU pragma: begin_keep
 #include <Arduino.h> // ok include
-// IWYU pragma: end_keep
 #include "platforms/arm/is_arm.h"
 
 #endif

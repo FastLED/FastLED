@@ -12,21 +12,13 @@
 #include "uart_peripheral_esp.h"
 #include "fl/log.h"
 #include "fl/warn.h"
-// IWYU pragma: begin_keep
 #include <Arduino.h>  // ok include - For micros()
-// IWYU pragma: end_keep
 
 // Include ESP-IDF headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN
-// IWYU pragma: begin_keep
 #include "driver/uart.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "freertos/task.h"
-// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 // ESP-IDF version compatibility for UART clock source

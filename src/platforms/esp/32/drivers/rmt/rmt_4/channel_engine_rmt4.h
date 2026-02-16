@@ -41,36 +41,20 @@ FL_EXTERN_C_BEGIN
 #else
 #include "esp_intr.h"
 #endif
-// IWYU pragma: begin_keep
 #include "driver/gpio.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "driver/rmt.h"
-// IWYU pragma: end_keep
 #if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR >= 5
-// IWYU pragma: begin_keep
 #include "esp_private/periph_ctrl.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "soc/gpio_periph.h"
-// IWYU pragma: end_keep
 #define gpio_matrix_out esp_rom_gpio_connect_out_signal
 #else
-// IWYU pragma: begin_keep
 #include "driver/periph_ctrl.h"
-// IWYU pragma: end_keep
 #endif
-// IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "freertos/semphr.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "soc/rmt_struct.h"
 
 // Flash lock support (optional feature)
-// IWYU pragma: end_keep
 #if FASTLED_ESP32_FLASH_LOCK == 1
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0)
 #include "esp_flash.h"

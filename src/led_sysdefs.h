@@ -10,9 +10,7 @@
 
 // Arduino.h needed for convenience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
 #if defined(ARDUINO) && !defined(__EMSCRIPTEN__)
-// IWYU pragma: begin_keep
-#include <Arduino.h>
-// IWYU pragma: end_keep  // ok include
+#include <Arduino.h>  // ok include
 #endif
 
 /// @file led_sysdefs.h

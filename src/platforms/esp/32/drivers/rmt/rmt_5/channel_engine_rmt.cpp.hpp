@@ -54,9 +54,7 @@
 #ifndef FASTLED_STUB_IMPL
     // ESP32 platform: Real hardware drivers
     FL_EXTERN_C_BEGIN
-    // IWYU pragma: begin_keep
     #include "driver/rmt_tx.h"  // For rmt_channel_handle_t, rmt_tx_done_event_data_t (callback signature)
-    // IWYU pragma: end_keep
     FL_EXTERN_C_END
     #include "rmt5_peripheral_esp.h"
     #include "common.h"  // ESP32 constants (FASTLED_RMT5_CLOCK_HZ, IRAM_ATTR, etc.)

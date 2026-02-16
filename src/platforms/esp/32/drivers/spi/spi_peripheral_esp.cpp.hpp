@@ -20,23 +20,13 @@
 
 // Include ESP-IDF headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN
-// IWYU pragma: begin_keep
 #include "driver/spi_master.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "driver/spi_common.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "driver/gpio.h"        // For gpio_num_t
-// IWYU pragma: end_keep
 #include "esp_heap_caps.h"
 #include "esp_timer.h"          // For esp_timer_get_time()
-// IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "freertos/task.h"
-// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 namespace fl {

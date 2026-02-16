@@ -31,9 +31,7 @@
 // Conditionally include <exception> for platforms with exception support
 // This must be at the top of the file (before any namespace declarations)
 #if defined(__cpp_exceptions) || defined(__EXCEPTIONS)
-// IWYU pragma: begin_keep
-#include <exception>
-// IWYU pragma: end_keep  // For std::exception in CHECK_THROWS_WITH
+#include <exception>  // For std::exception in CHECK_THROWS_WITH
 #endif
 
 // Configure maximum test depth and counts

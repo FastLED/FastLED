@@ -13,33 +13,17 @@
 /// for validation that ARM detection has occurred.
 
 // Include platform-specific detection headers
-// IWYU pragma: begin_keep
 #include "nrf52/is_nrf52.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "renesas/is_renesas.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "rp/is_rp2040.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "sam/is_sam.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "samd/is_samd.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "silabs/is_silabs.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "stm32/is_stm32.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "teensy/is_teensy.h"
 
 /// ARM platform detection with optimized macro grouping
 /// This checks for various ARM-based microcontroller families
-// IWYU pragma: end_keep
 #if \
     /* Atmel SAM (Arduino Due, SAM3X8E Cortex-M3) - defined by is_sam.h */ \
     defined(FL_IS_SAM) || defined(__SAM3X8E__) || \

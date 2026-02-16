@@ -7,9 +7,7 @@
 // Check if STM32 HAL is available
 #if defined(HAL_SPI_MODULE_ENABLED)
     #define FASTLED_STM32_USE_HAL 1
-    // IWYU pragma: begin_keep
     #include <SPI.h>
-    // IWYU pragma: end_keep
 #else
     #define FASTLED_STM32_USE_HAL 0
 #endif

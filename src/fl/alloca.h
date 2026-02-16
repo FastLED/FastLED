@@ -35,16 +35,12 @@
     TYPE NAME[SIZE];                                                           \
     fl::memset(NAME, 0, sizeof(TYPE) * (SIZE))
 #elif FL_HAS_INCLUDE(<alloca.h>)
-// IWYU pragma: begin_keep
 #include <alloca.h>
-// IWYU pragma: end_keep
 #define FASTLED_STACK_ARRAY(TYPE, NAME, SIZE)                                  \
     TYPE *NAME = fl::bit_cast_ptr<TYPE>(alloca(sizeof(TYPE) * (SIZE)));      \
     fl::memset(NAME, 0, sizeof(TYPE) * (SIZE))
 #elif FL_HAS_INCLUDE(<malloc.h>)
-// IWYU pragma: begin_keep
 #include <malloc.h>
-// IWYU pragma: end_keep
 #define FASTLED_STACK_ARRAY(TYPE, NAME, SIZE)                                  \
     TYPE *NAME = fl::bit_cast_ptr<TYPE>(alloca(sizeof(TYPE) * (SIZE)));      \
     fl::memset(NAME, 0, sizeof(TYPE) * (SIZE))

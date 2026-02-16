@@ -12,14 +12,10 @@
 
 #ifdef FASTLED_TESTING
 // Test filesystem implementation that maps to real hard drive
-// IWYU pragma: begin_keep
 #include "platforms/stub/fs_stub.hpp" // ok platform headers
-// IWYU pragma: end_keep
 #define FASTLED_HAS_SDCARD 1
 #elif defined(FL_IS_WASM)
-// IWYU pragma: begin_keep
 #include "platforms/wasm/fs_wasm.h" // ok platform headers
-// IWYU pragma: end_keep
 #define FASTLED_HAS_SDCARD 1
 #elif FL_HAS_INCLUDE(<SD.h>) && FL_HAS_INCLUDE(<fs.h>)
 // Include Arduino SD card implementation when SD library is available

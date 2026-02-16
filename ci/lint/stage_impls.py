@@ -21,7 +21,7 @@ from ci.python_lint_cache import (
 
 # IWYU (Include-What-You-Use) is currently disabled because it doesn't work well
 # with platform code and complains about missing headers that are provided by the framework
-ENABLE_IWYU = True
+ENABLE_IWYU = False
 
 
 class Colors:
@@ -162,9 +162,7 @@ def run_iwyu_analysis(run_full: bool, run_iwyu: bool, run_strict: bool = False) 
     print("🔍 INCLUDE-WHAT-YOU-USE ANALYSIS")
     print("---------------------------------")
 
-    # Allow explicit --iwyu flag to bypass ENABLE_IWYU check
-    # This lets users run IWYU manually even when globally disabled
-    if not ENABLE_IWYU and not run_iwyu:
+    if not ENABLE_IWYU:
         print("⏭️  IWYU disabled (ENABLE_IWYU = False)")
         return True
 
@@ -643,94 +641,12 @@ def run_iwyu_single_file(file_path: str) -> bool:
     # IWYU returns non-zero if it has suggestions
     # We treat suggestions as failures (need to fix includes)
     if result.returncode != 0:
-        # Truncate IWYU output to first 4 warnings/errors to prevent spam
+        # Print IWYU output (suggestions)
         if result.stderr:
-            truncated_output = _truncate_iwyu_output(result.stderr, max_items=4)
-            print(truncated_output, file=sys.stderr)
+            print(result.stderr, file=sys.stderr)
         return False
 
     return True
-
-
-def _truncate_iwyu_output(iwyu_stderr: str, max_items: int = 4) -> str:
-    """Truncate IWYU output to first N warnings/errors.
-
-    IWYU output has sections separated by blank lines. Each section typically starts
-    with a file path and contains related include suggestions.
-
-    Args:
-        iwyu_stderr: Raw IWYU stderr output
-        max_items: Maximum number of warning/error sections to include
-
-    Returns:
-        Truncated output with message about additional items if truncated
-    """
-    lines = iwyu_stderr.strip().split("\n")
-    if not lines:
-        return iwyu_stderr
-
-    # IWYU output structure:
-    # - Lines starting with file paths (containing "should add" or "should remove")
-    # - Blank lines separate sections
-    # - Summary lines at the end ("--- The full include-list for...")
-
-    # Find section boundaries (blank lines or start of summary)
-    sections: list[list[str]] = []
-    current_section: list[str] = []
-
-    for line in lines:
-        # Summary section starts with "---" or "The full include-list"
-        if line.startswith("---") or "The full include-list" in line:
-            if current_section:
-                sections.append(current_section)
-            # Include summary as a final section
-            current_section = [line]
-        elif line.strip() == "":
-            # Blank line - end current section
-            if current_section:
-                sections.append(current_section)
-                current_section = []
-        else:
-            current_section.append(line)
-
-    # Add last section if not empty
-    if current_section:
-        sections.append(current_section)
-
-    # Count actual warning/error sections (exclude summary sections)
-    warning_sections = [
-        s for s in sections if not any("The full include-list" in line for line in s)
-    ]
-    total_warnings = len(warning_sections)
-
-    if total_warnings <= max_items:
-        # No truncation needed
-        return iwyu_stderr
-
-    # Take first max_items warning sections
-    output_sections = warning_sections[:max_items]
-    truncated_count = total_warnings - max_items
-
-    # Build truncated output
-    output_lines: list[str] = []
-    for section in output_sections:
-        output_lines.extend(section)
-        output_lines.append("")  # Add blank line between sections
-
-    # Add truncation message
-    output_lines.append("")
-    output_lines.append(
-        f"⚠️  Showing first {max_items} of {total_warnings} IWYU warnings/errors"
-    )
-    output_lines.append(
-        f"⚠️  {truncated_count} additional warning(s) truncated to prevent spam"
-    )
-    output_lines.append("")
-    output_lines.append(
-        "💡 Fix the above issues first, then run 'bash lint --strict' to see remaining issues"
-    )
-
-    return "\n".join(output_lines)
 
 
 def run_python_lint_single_file(file_path: str, strict: bool = False) -> bool:

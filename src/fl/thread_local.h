@@ -3,9 +3,7 @@
 #include "fl/stl/thread.h"
 #if FASTLED_USE_THREAD_LOCAL
 #include "fl/stl/unordered_map.h"
-// IWYU pragma: begin_keep
 #include <pthread.h>  // ok include
-// IWYU pragma: end_keep
 #endif
 
 #if FASTLED_USE_THREAD_LOCAL

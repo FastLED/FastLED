@@ -38,9 +38,7 @@
 
 #ifdef FL_IS_AVR
 
-// IWYU pragma: begin_keep
 #include <avr/interrupt.h>
-// IWYU pragma: end_keep
 
 namespace fl {
 

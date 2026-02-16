@@ -12,24 +12,14 @@
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 
 #include "platforms/shared/spi_hw_2.h"
-// IWYU pragma: begin_keep
 #include "hardware/clocks.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "hardware/dma.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "hardware/gpio.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
 #include "hardware/pio.h"
-// IWYU pragma: end_keep
 #include "pio_asm.h"
 #include "fl/warn.h"
 #include "fl/numeric_limits.h"
-// IWYU pragma: begin_keep
 #include <cstring> // ok include
-// IWYU pragma: end_keep
 #include "fl/stl/cstring.h"
 #include "fl/stl/chrono.h"
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
