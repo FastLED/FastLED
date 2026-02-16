@@ -2949,6 +2949,13 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         // If count == mLength, do nothing
     }
 
+    // Intern this string using the global string interner.
+    // If the string is using inline storage (SSO), skip interning since it's already efficient.
+    // Otherwise, replace this string with an interned version for deduplication.
+    // Returns *this for method chaining.
+    // Implementation in string.cpp.hpp to avoid circular dependency with string_interner.h
+    string& intern();
+
   private:
     enum {
         // Bake the size into the string class so we can issue a compile time

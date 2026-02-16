@@ -3,6 +3,11 @@
 
 #include "test.h"
 #include "fl/stl/string_interner.h"
+#include "fl/stl/cstring.h"          // for memcmp
+#include "fl/stl/span.h"             // for span
+#include "fl/stl/stdio.h"            // for snprintf
+#include "fl/stl/string.h"           // for string
+#include "fl/string_view.h"          // for string_view
 
 FL_TEST_CASE("StringInterner - basic interning") {
     fl::StringInterner interner;
@@ -145,4 +150,42 @@ FL_TEST_CASE("StringInterner - strings survive clear") {
     interner.clear();
     FL_CHECK(copy == "persistent");
     // Pointer comparison would trigger the deduplication bug
+}
+
+FL_TEST_CASE("string::intern() - SSO strings skip interning") {
+    // Small string that fits in inline buffer (SSO)
+    fl::string small("short");  // 5 chars < 64 byte inline buffer
+
+    // Intern should be a no-op for SSO strings
+    small.intern();
+
+    // String content should be preserved
+    FL_CHECK(small == "short");
+    FL_CHECK(small.size() == 5);
+}
+
+FL_TEST_CASE("string::intern() - large strings use interner") {
+    // Large string that requires heap allocation (>64 bytes)
+    fl::string large("this is a very long string that definitely exceeds the inline buffer size of 64 bytes and will require heap allocation");
+
+    // Intern should replace with interned version
+    large.intern();
+
+    // String content should be preserved
+    FL_CHECK(large == "this is a very long string that definitely exceeds the inline buffer size of 64 bytes and will require heap allocation");
+
+    // Create another large string with same content
+    fl::string large2("this is a very long string that definitely exceeds the inline buffer size of 64 bytes and will require heap allocation");
+    large2.intern();
+
+    // Should share the same underlying data (deduplication)
+    FL_CHECK(large.c_str() == large2.c_str());
+}
+
+FL_TEST_CASE("string::intern() - method chaining") {
+    fl::string s("test");
+    fl::string& result = s.intern();
+
+    // Should return reference to self for chaining
+    FL_CHECK(&result == &s);
 }
