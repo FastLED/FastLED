@@ -21,52 +21,134 @@ class TestMatch:
     path: str  # Relative path from project root
     type: str  # "unit_test" or "example"
     score: float  # Match score (0.0-1.0, higher is better)
+    length: int = 0  # Length for tie-breaking (shorter is better)
 
 
-def _fuzzy_score(query: str, target: str) -> float:
+def _normalize_for_matching(s: str) -> str:
+    """Normalize a string for fuzzy matching by treating spaces, underscores, and hyphens as equivalent.
+
+    Args:
+        s: String to normalize
+
+    Returns:
+        Normalized string with spaces/underscores/hyphens removed
+    """
+    # Replace common separators with empty string for matching
+    # This allows "string interner" to match "string_interner"
+    return s.replace(" ", "").replace("_", "").replace("-", "")
+
+
+def _edit_distance(s1: str, s2: str) -> int:
+    """Calculate Levenshtein edit distance between two strings.
+
+    Args:
+        s1: First string
+        s2: Second string
+
+    Returns:
+        Edit distance (number of edits needed to transform s1 into s2)
+    """
+    if len(s1) < len(s2):
+        return _edit_distance(s2, s1)
+
+    if len(s2) == 0:
+        return len(s1)
+
+    # Use two rows for space efficiency
+    previous_row = list(range(len(s2) + 1))
+    current_row = [0] * (len(s2) + 1)
+
+    for i, c1 in enumerate(s1):
+        current_row[0] = i + 1
+        for j, c2 in enumerate(s2):
+            # Cost of insertion, deletion, substitution
+            insertions = previous_row[j + 1] + 1
+            deletions = current_row[j] + 1
+            substitutions = previous_row[j] + (0 if c1 == c2 else 1)
+            current_row[j + 1] = min(insertions, deletions, substitutions)
+        previous_row, current_row = current_row, previous_row
+
+    return previous_row[-1]
+
+
+def _fuzzy_score(query: str, target: str) -> tuple[float, int]:
     """Calculate fuzzy match score between query and target strings.
 
     Score is based on:
     - Exact match: 1.0
     - Case-insensitive exact match: 0.95
-    - Substring match: 0.8
-    - Case-insensitive substring match: 0.7
-    - Character sequence match: 0.0-0.6 (based on coverage)
+    - Normalized match (spaces/underscores/hyphens equivalent): 0.9
+    - Substring match: 0.8-0.9 (prefer shorter targets and start matches)
+    - Case-insensitive substring match: 0.7-0.85 (prefer shorter targets)
+    - Edit distance match: 0.5-0.69 (based on similarity ratio)
+    - Character sequence match: 0.0-0.49 (based on coverage)
 
     Args:
         query: Search query string
         target: Target string to match against
 
     Returns:
-        Match score from 0.0 (no match) to 1.0 (exact match)
+        Tuple of (match_score, target_length) where score is 0.0-1.0 and
+        length is used for tie-breaking (shorter is better)
     """
     if not query:
-        return 0.0
+        return (0.0, len(target))
 
     query_lower = query.lower()
     target_lower = target.lower()
+    target_len = len(target)
 
     # Exact match
     if query == target:
-        return 1.0
+        return (1.0, target_len)
 
     # Case-insensitive exact match
     if query_lower == target_lower:
-        return 0.95
+        return (0.95, target_len)
+
+    # Normalized match (spaces, underscores, hyphens treated as equivalent)
+    query_normalized = _normalize_for_matching(query_lower)
+    target_normalized = _normalize_for_matching(target_lower)
+    if query_normalized == target_normalized:
+        return (0.9, target_len)
 
     # Substring match (case-sensitive)
     if query in target:
-        # Prefer matches at the start
+        # Prefer matches at the start and shorter targets
         if target.startswith(query):
-            return 0.9
-        return 0.8
+            return (0.9, target_len)
+        return (0.8, target_len)
 
     # Substring match (case-insensitive)
     if query_lower in target_lower:
-        # Prefer matches at the start
+        # Prefer matches at the start and shorter targets
         if target_lower.startswith(query_lower):
-            return 0.85
-        return 0.7
+            return (0.85, target_len)
+        return (0.7, target_len)
+
+    # Normalized substring match
+    if query_normalized in target_normalized:
+        # Multi-word queries (with spaces/separators) should get higher priority
+        # since they're more specific (e.g., "string intern" is more specific than "string")
+        has_separator = " " in query or "_" in query or "-" in query
+
+        # Prefer matches at the start and shorter targets
+        if target_normalized.startswith(query_normalized):
+            # Boost score for multi-word queries with start match
+            return (0.85 if has_separator else 0.75, target_len)
+        # Boost score for multi-word queries
+        return (0.75 if has_separator else 0.65, target_len)
+
+    # Edit distance match (for close matches)
+    edit_dist = _edit_distance(query_lower, target_lower)
+    max_len = max(len(query_lower), len(target_lower))
+    if max_len > 0:
+        similarity = 1.0 - (edit_dist / max_len)
+        # Only use edit distance for reasonably close matches (> 50% similar)
+        if similarity > 0.5:
+            # Scale to 0.5-0.69 range (below substring matches, above sequence matches)
+            edit_score = 0.5 + (similarity - 0.5) * 0.38
+            return (edit_score, target_len)
 
     # Character sequence match
     # All characters from query must appear in order in target
@@ -78,12 +160,12 @@ def _fuzzy_score(query: str, target: str) -> float:
     if query_pos == len(query_lower):
         # All characters matched in sequence
         coverage = query_pos / len(target_lower)
-        return 0.6 * coverage
+        return (0.49 * coverage, target_len)
 
-    return 0.0
+    return (0.0, target_len)
 
 
-def _score_match(query: str, match: TestMatch) -> float:
+def _score_match(query: str, match: TestMatch) -> tuple[float, int]:
     """Calculate match score for a TestMatch, considering both name and path.
 
     Path-based queries get exact match bonus if they match the path structure.
@@ -93,7 +175,7 @@ def _score_match(query: str, match: TestMatch) -> float:
         match: TestMatch to score
 
     Returns:
-        Match score from 0.0 to 1.0
+        Tuple of (match_score, length) where score is 0.0-1.0 and length is for tie-breaking
     """
     # Normalize path separators in query for cross-platform support
     normalized_query = query.replace("\\", "/")
@@ -102,17 +184,42 @@ def _score_match(query: str, match: TestMatch) -> float:
     if "/" in normalized_query or "\\" in query:
         # Path-based query - try exact path match first
         if match.path == normalized_query:
-            return 1.0  # Exact path match
+            return (1.0, len(match.name))  # Exact path match
 
         # Try matching path without extension
         path_no_ext = match.path.replace(".cpp", "").replace(".ino", "")
         if path_no_ext == normalized_query:
-            return 1.0  # Exact path match (without extension)
+            return (1.0, len(match.name))  # Exact path match (without extension)
 
         # Try fuzzy match on path
-        path_score = _fuzzy_score(normalized_query, match.path)
+        path_score, path_len = _fuzzy_score(normalized_query, match.path)
         if path_score > 0.0:
-            return path_score
+            return (path_score, path_len)
+
+    # Also try treating spaces as path separators for queries like "fl async" -> "fl/async"
+    # This allows natural language queries to match directory structures
+    if " " in query and "/" not in query:
+        space_to_slash = query.replace(" ", "/")
+
+        # Try exact path match with space-to-slash conversion
+        path_no_ext = match.path.replace(".cpp", "").replace(".ino", "")
+        if space_to_slash in path_no_ext:
+            # Substring match in path - check if it's a component match
+            # e.g., "fl async" matches "tests/fl/async.cpp"
+            parts = path_no_ext.split("/")
+            query_parts = space_to_slash.split("/")
+
+            # Check if query parts appear consecutively in path parts
+            for i in range(len(parts) - len(query_parts) + 1):
+                if parts[i : i + len(query_parts)] == query_parts:
+                    # Exact component match - use name length for tie-breaking
+                    return (0.95, len(match.name))
+
+        # Try fuzzy match with space-to-slash conversion
+        path_score, path_len = _fuzzy_score(space_to_slash, path_no_ext)
+        if path_score > 0.0:
+            # Boost score slightly since this is likely what the user meant
+            return (min(1.0, path_score + 0.05), path_len)
 
     # Fall back to name-based matching
     return _fuzzy_score(query, match.name)
@@ -220,34 +327,37 @@ def smart_select(
     # Calculate scores for all matches using both name and path
     scored_matches: list[TestMatch] = []
     for match in all_matches:
-        score = _score_match(query, match)
+        score, length = _score_match(query, match)
         if score > 0.0:  # Only include matches with non-zero scores
             match.score = score
+            match.length = length
             scored_matches.append(match)
 
     if not scored_matches:
         return []  # No matches found
 
-    # Sort by score (descending)
-    scored_matches.sort(key=lambda m: m.score, reverse=True)
+    # Sort by score (descending), then by length (ascending) for tie-breaking
+    # This ensures that when scores are equal, shorter names are preferred
+    scored_matches.sort(key=lambda m: (-m.score, m.length))
 
     # Get top score
     top_score = scored_matches[0].score
 
     # Check if we have a clear winner
-    # Exact match (score == 1.0) - but check for cross-type matches
+    # Exact match (score == 1.0) - auto-select unless there's another exact/near-exact match
     if top_score == 1.0:
-        # Check if there are high-scoring matches of a different type
-        # This handles cases like "async" (unit test) vs "Async" (example)
+        # Only disambiguate if there's another very high score (>= 0.98) of a different type
+        # This handles true ambiguity like "async" matching both unit test and example "async"
+        # But allows auto-selection when it's "async" (1.0) vs "Async" (0.95)
         top_type = scored_matches[0].type
-        has_other_type_high_score = False
+        has_other_type_near_exact = False
         for match in scored_matches[1:]:
-            if match.type != top_type and match.score >= 0.9:
-                has_other_type_high_score = True
+            if match.type != top_type and match.score >= 0.98:
+                has_other_type_near_exact = True
                 break
 
-        if has_other_type_high_score:
-            # We have high-scoring matches of different types - needs disambiguation
+        if has_other_type_near_exact:
+            # We have near-exact matches of different types - needs disambiguation
             pass  # Fall through to return multiple matches
         else:
             return scored_matches[0]  # Exact match wins
@@ -263,15 +373,32 @@ def smart_select(
             # Single case-insensitive exact match
             return scored_matches[0]
 
-    # For high scores (>= 0.8), check for significant margin over second place
-    if top_score >= 0.8:
+    # For high scores (>= 0.7), check for significant margin over second place
+    # Lower threshold for multi-word queries since they're more specific
+    has_separator = " " in query or "_" in query or "-" in query
+    min_score_threshold = 0.7 if has_separator else 0.8
+
+    if top_score >= min_score_threshold:
         # Check for ties or close seconds
         if len(scored_matches) == 1:
             return scored_matches[0]  # Clear winner
 
         second_score = scored_matches[1].score
-        if top_score - second_score >= 0.15:
-            return scored_matches[0]  # Clear winner with significant margin
+
+        # Handle exact ties - use length as tie-breaker (already sorted by length)
+        if abs(top_score - second_score) < 0.01:  # Scores are essentially equal
+            # If the top match is significantly shorter (>=30% shorter), auto-select it
+            top_length = scored_matches[0].length
+            second_length = scored_matches[1].length
+            if top_length < second_length * 0.7:  # At least 30% shorter
+                return scored_matches[0]  # Shortest match wins the tie
+            # Otherwise, needs disambiguation
+        else:
+            # More aggressive margin for multi-word queries (0.1 vs 0.15)
+            required_margin = 0.1 if has_separator else 0.15
+
+            if top_score - second_score >= required_margin:
+                return scored_matches[0]  # Clear winner with significant margin
 
     # Return top matches for disambiguation (up to 10 matches)
     return scored_matches[:10]

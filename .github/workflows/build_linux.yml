@@ -99,3 +99,10 @@ jobs:
         run: |
           # Run C++ unit tests (uses Meson for native compilation)
           uv run test.py --cpp
+
+      - name: Test Multi-Word Fuzzy Matching
+        working-directory: trusted
+        run: |
+          # Test that multiple positional arguments work for fuzzy matching
+          # This should find and run the "string_view" test
+          uv run test.py string view --cpp

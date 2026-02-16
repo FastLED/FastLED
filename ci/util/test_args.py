@@ -44,9 +44,9 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
     parser.add_argument(
         "test",
         type=str,
-        nargs="?",
+        nargs="*",
         default=None,
-        help="Specific test to run (Python or C++)",
+        help="Specific test to run (Python or C++). Multiple words can be provided for fuzzy matching (e.g., 'string interner')",
     )
 
     # Create mutually exclusive group for compiler selection
@@ -179,12 +179,20 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
 
     parsed_args = parser.parse_args(args)
 
+    # Handle test argument - join multiple words into a single query string
+    # nargs="*" returns a list, so we need to convert it
+    test_query = None
+    if parsed_args.test:
+        # Join multiple arguments with spaces for fuzzy matching
+        # e.g., ["string", "interner"] -> "string interner"
+        test_query = " ".join(parsed_args.test)
+
     # Convert argparse.Namespace to TestArgs dataclass
     test_args = TestArgs(
         cpp=parsed_args.cpp,
         unit=parsed_args.unit,
         py=parsed_args.py,
-        test=parsed_args.test,
+        test=test_query,
         clang=parsed_args.clang,
         gcc=parsed_args.gcc,
         clean=parsed_args.clean,
@@ -275,8 +283,26 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
                 # Print consolidated selection message with type and filter info
                 ts_print(f"Found: {match.name} ({match.path}) [example]{filter_desc}")
             else:  # unit_test
-                # Update test name to the matched name (in case user used path-based query)
-                test_args.test = match.name
+                # Convert path to Meson target name using the same logic as tests/test_helpers.py
+                # This ensures "fl async" → "tests/fl/async.cpp" → "fl_async" target
+                path_without_ext = match.path.replace(".cpp", "").replace(".ino", "")
+
+                # Remove "tests/" prefix if present
+                if path_without_ext.startswith("tests/"):
+                    path_without_ext = path_without_ext[6:]  # Remove "tests/"
+
+                # Convert to Meson target name format (following extract_test_name logic)
+                if path_without_ext.startswith("fl/"):
+                    # fl/async.cpp -> fl_async (replace / with _)
+                    meson_target_name = path_without_ext.replace("/", "_")
+                elif path_without_ext.startswith("fx/"):
+                    # fx/engine.cpp -> fx_engine (replace / with _)
+                    meson_target_name = path_without_ext.replace("/", "_")
+                else:
+                    # Other files: use basename (e.g., misc/test_uart.cpp -> test_uart)
+                    meson_target_name = path_without_ext.split("/")[-1]
+
+                test_args.test = meson_target_name
                 if not test_args.cpp and not test_args.py:
                     test_args.cpp = True
                 # Also enable --unit when a specific C++ test is provided without any other flags
