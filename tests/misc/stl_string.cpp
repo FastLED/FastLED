@@ -2,26 +2,19 @@
 // Combines tests from: str.cpp, string_comprehensive.cpp, string_memory_bugs.cpp, string_optimization.cpp
 // This tests the fl::string implementation in fl/stl/string.h and fl/stl/string.cpp
 
-#include "crgb.h"
-#include "fl/stl/vector.h"
-#include "fl/stl/cstring.h" // ok include
-#include "fl/stl/string.h"
-#include "fl/stl/stdint.h"
-#include "fl/stl/string.h"
-#include "fl/stl/new.h"
-#include "fl/stl/thread.h"
-#include "fl/stl/type_traits.h"
-#include "fl/stl/vector.h"
-#include "test.h"
 #include "fl/compiler_control.h"
 #include "fl/int.h"
-#include "fl/stl/allocator.h"
+#include "fl/stl/cstdint.h"
 #include "fl/stl/cstring.h"
-#include "fl/stl/move.h"
+#include "fl/stl/iterator.h"
+#include "fl/stl/span.h"
+#include "fl/stl/stdio.h"
 #include "fl/stl/string.h"
 #include "fl/stl/strstream.h"
-#include "fl/str.h"
-#include "fl/str.h" // ok include
+#include "fl/stl/thread.h"
+#include "fl/stl/vector.h"
+#include "hsv2rgb.h"
+#include "test.h"
 
 using namespace fl;
 
@@ -4670,5 +4663,61 @@ FL_TEST_CASE("fl::string - Precision and accuracy") {
         s.clear();
         s.append(static_cast<i16>(-32768));
         FL_CHECK(s == "-32768");
+    }
+}
+
+FL_TEST_CASE("fl::string - Construction from span") {
+    FL_SUBCASE("Construction from span<const char>") {
+        const char data[] = "hello world";
+        fl::span<const char> sp(data, 5); // Only first 5 chars: "hello"
+        fl::string s(sp);
+
+        FL_CHECK(s.size() == 5);
+        FL_CHECK(s == "hello");
+    }
+
+    FL_SUBCASE("Construction from span<char>") {
+        char data[] = "test string";
+        fl::span<char> sp(data, 4); // Only first 4 chars: "test"
+        fl::string s(sp);
+
+        FL_CHECK(s.size() == 4);
+        FL_CHECK(s == "test");
+    }
+
+    FL_SUBCASE("Construction from empty span<const char>") {
+        fl::span<const char> sp;
+        fl::string s(sp);
+
+        FL_CHECK(s.size() == 0);
+        FL_CHECK(s.empty());
+    }
+
+    FL_SUBCASE("Construction from empty span<char>") {
+        fl::span<char> sp;
+        fl::string s(sp);
+
+        FL_CHECK(s.size() == 0);
+        FL_CHECK(s.empty());
+    }
+
+    FL_SUBCASE("Span with entire string") {
+        const char data[] = "full content";
+        fl::span<const char> sp(data, sizeof(data) - 1); // Exclude null terminator
+        fl::string s(sp);
+
+        FL_CHECK(s.size() == 12);
+        FL_CHECK(s == "full content");
+    }
+
+    FL_SUBCASE("Modifications don't affect original span") {
+        char data[] = "original";
+        fl::span<char> sp(data, 8);
+        fl::string s(sp);
+
+        s.append(" modified");
+
+        FL_CHECK(s == "original modified");
+        FL_CHECK(fl::strcmp(data, "original") == 0); // Original unchanged
     }
 }

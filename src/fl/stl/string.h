@@ -28,6 +28,7 @@
 #include "fl/string_view.h"
 #include "fl/stl/iterator.h"
 #include "fl/bitset_dynamic.h"
+#include "fl/stl/bitset.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/move.h"
@@ -53,7 +54,6 @@ class String;  // Arduino String class
 namespace fl { // Mandatory namespace for this class since it has name
                // collisions.
 
-class string;
 class Tile2x2_u8_wrap;
 class JsonUiInternal;
 
@@ -64,24 +64,10 @@ class Json;
 template <typename T> struct rect;
 template <typename T> struct vec2;
 template <typename T> struct vec3;
-template <typename T, fl::size Extent> class span;
-template <typename T, typename Allocator> class vector;
-template <typename T, fl::size N> class InlinedVector;
-template <typename T, fl::size N> class FixedVector;
-template <fl::size N> class StrN;
 
 template <typename T> class WeakPtr;
-template <typename T> class Ptr;
-
-template <typename T> struct Hash;
-
-template <typename T> struct EqualTo;
 
 template <typename Key, typename Hash, typename KeyEqual> class HashSet;
-
-template <fl::u32 N> class BitsetFixed;
-class bitset_dynamic;
-template <fl::u32 N> class BitsetInlined;
 
 class XYMap;
 
@@ -2476,6 +2462,14 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     string(const StrN<M> &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
     // Constructor from string_view
     string(const string_view& sv) : StrN<FASTLED_STR_INLINED_SIZE>(sv) {}
+    // Constructor from span<const char>
+    string(const fl::span<const char>& s) : StrN<FASTLED_STR_INLINED_SIZE>() {
+        copy(s.data(), s.size());
+    }
+    // Constructor from span<char>
+    string(const fl::span<char>& s) : StrN<FASTLED_STR_INLINED_SIZE>() {
+        copy(s.data(), s.size());
+    }
     // Constructor from shared StringHolder (for string interner)
     string(const fl::shared_ptr<StringHolder>& holder) : StrN<FASTLED_STR_INLINED_SIZE>(holder) {}
     string &operator=(const string &other) {
