@@ -76,15 +76,18 @@ inline void simd4_processChannel(
     const fl::i32 *fade_lut, const fl::u8 *perm, fl::i32 cx_raw, fl::i32 cy_raw,
     fl::i32 noise_out[4]) {
 
-    // Compute angles for 4 pixels
-    fl::u32 angles_arr[4];
-    angles_arr[0] = radiansToA24(base_arr[0], radial_offset);
-    angles_arr[1] = radiansToA24(base_arr[1], radial_offset);
-    angles_arr[2] = radiansToA24(base_arr[2], radial_offset);
-    angles_arr[3] = radiansToA24(base_arr[3], radial_offset);
+    // Compute angles for 4 pixels using SIMD
+    // radiansToA24: (base + offset) * RAD_TO_A24 >> 16
+    constexpr fl::i32 RAD_TO_A24 = 2670177;
 
-    // SIMD sincos
-    fl::simd::simd_u32x4 angles_vec = fl::simd::load_u32_4(angles_arr);
+    // Load base angles and add radial offset
+    fl::simd::simd_u32x4 base_vec = fl::simd::load_u32_4(reinterpret_cast<const fl::u32*>(base_arr)); // ok reinterpret cast
+    fl::simd::simd_u32x4 offset_vec = fl::simd::set1_u32_4(static_cast<fl::u32>(radial_offset));
+    fl::simd::simd_u32x4 sum_vec = fl::simd::add_i32_4(base_vec, offset_vec);
+
+    // Multiply by constant and shift right by 16 (Q16.16 → A24)
+    fl::simd::simd_u32x4 rad_const_vec = fl::simd::set1_u32_4(static_cast<fl::u32>(RAD_TO_A24));
+    fl::simd::simd_u32x4 angles_vec = fl::simd::mulhi_su32_4(sum_vec, rad_const_vec);
     fl::SinCos32_simd sc = fl::sincos32_simd(angles_vec);
 
     // Extract sin/cos results to arrays
