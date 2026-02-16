@@ -1,7 +1,6 @@
 #include "fl/stl/string_interner.h"
 #include "fl/singleton.h"
 #include "fl/int.h"
-#include "fl/stl/cstring.h"
 #include "fl/stl/string.h"
 #include "fl/stl/detail/string_holder.h"
 #include "fl/stl/shared_ptr.h"
@@ -29,6 +28,14 @@ StringInterner::~StringInterner() {
 fl::string StringInterner::intern(const string_view& sv) {
     if (sv.empty()) return fl::string();
 
+    // SSO optimization: strings that fit in the inline buffer don't benefit from interning
+    // because fl::string will store them inline (no heap allocation anyway).
+    // Interning small strings would just add hash overhead with no memory savings.
+    if (sv.size() <= FASTLED_STR_INLINED_SIZE) {
+        return fl::string(sv);
+    }
+
+    // String is large enough to require heap allocation - check if already interned
     // Try to find existing entry - O(1) average via hash map
     auto it = mEntries.find(sv);
     if (it != mEntries.end()) {

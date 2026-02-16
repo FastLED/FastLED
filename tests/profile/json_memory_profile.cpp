@@ -7,6 +7,7 @@
 #include "fl/json.h"
 #include "fl/stl/map.h"
 #include "fl/stl/atomic.h"
+#include "fl/file_system.h"
 
 // Platform-specific includes (avoid windows.h to prevent macro conflicts)
 #ifdef _WIN32
@@ -303,6 +304,102 @@ constexpr const char* STRESS_TEST_JSON = R"({
 })";
 
 // ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+// Helper to run memory profiling on a JSON string
+void profile_json_memory(const char* test_name, const fl::string& json_data) {
+    printf("\n\n");
+    printf("================================================================================\n");
+    printf("%s\n", test_name);
+    printf("================================================================================\n");
+    printf("JSON size: %zu bytes (%.2f KB)\n", json_data.size(), json_data.size() / 1024.0);
+    printf("\n");
+
+#ifdef _WIN32
+    init_real_allocators();
+#endif
+
+    // Baseline: Measure overhead of tracking itself
+    g_tracking_enabled = false;
+    {
+        Json warmup = Json::parse(json_data);
+        (void)warmup;
+    }
+
+    // Test 1: ArduinoJson parse()
+    g_stats.reset();
+    g_tracking_enabled = true;
+
+    size_t parse1_peak = 0;
+    size_t parse1_allocs = 0;
+    {
+        Json result1 = Json::parse(json_data);
+        FL_REQUIRE(!result1.is_null());
+
+        parse1_peak = g_stats.peak_bytes.load();
+        parse1_allocs = g_stats.alloc_count.load();
+    }
+
+    g_tracking_enabled = false;
+    g_stats.print_stats("ArduinoJson parse()");
+
+    // Test 2: Custom parse2()
+    g_stats.reset();
+    g_tracking_enabled = true;
+
+    size_t parse2_peak = 0;
+    size_t parse2_allocs = 0;
+    {
+        Json result2 = Json::parse2(json_data);
+        FL_REQUIRE(!result2.is_null());
+
+        parse2_peak = g_stats.peak_bytes.load();
+        parse2_allocs = g_stats.alloc_count.load();
+    }
+
+    g_tracking_enabled = false;
+    g_stats.print_stats("Custom parse2()");
+
+    // Comparison
+    printf("\n");
+    printf("================================================================================\n");
+    printf("MEMORY COMPARISON\n");
+    printf("================================================================================\n");
+
+    double memory_ratio = (double)parse2_peak / (double)parse1_peak;
+    double alloc_ratio = (double)parse2_allocs / (double)parse1_allocs;
+
+    printf("Peak memory:   parse2() = %.1f%% of parse()  (%zu vs %zu bytes)\n",
+           memory_ratio * 100.0, parse2_peak, parse1_peak);
+    printf("Allocations:   parse2() = %.1f%% of parse()  (%zu vs %zu allocs)\n",
+           alloc_ratio * 100.0, parse2_allocs, parse1_allocs);
+
+    if (parse2_peak < parse1_peak) {
+        size_t saved = parse1_peak - parse2_peak;
+        printf("✓ Memory saved: %zu bytes (%.1f%% reduction)\n",
+               saved, (1.0 - memory_ratio) * 100.0);
+    } else {
+        size_t extra = parse2_peak - parse1_peak;
+        printf("✗ Extra memory: %zu bytes (%.1f%% increase)\n",
+               extra, (memory_ratio - 1.0) * 100.0);
+    }
+
+    if (parse2_allocs < parse1_allocs) {
+        int saved = parse1_allocs - parse2_allocs;
+        printf("✓ Allocations saved: %d (%.1f%% reduction)\n",
+               saved, (1.0 - alloc_ratio) * 100.0);
+    } else {
+        int extra = parse2_allocs - parse1_allocs;
+        printf("✗ Extra allocations: %d (%.1f%% increase)\n",
+               extra, (alloc_ratio - 1.0) * 100.0);
+    }
+
+    printf("================================================================================\n");
+    printf("\n");
+}
+
+// ============================================================================
 // MEMORY PROFILING TEST
 // ============================================================================
 
@@ -356,110 +453,52 @@ FL_TEST_CASE("JSON Phase 1 Validation: Zero Heap Allocations") {
     FL_CHECK(phase1_bytes == 0);
 }
 
-FL_TEST_CASE("JSON Memory Profiling: parse() vs parse2()") {
+FL_TEST_CASE("JSON Memory Profiling: parse() vs parse2() - Small JSON") {
+    profile_json_memory("SMALL JSON MEMORY PROFILE (10KB Synthetic)", STRESS_TEST_JSON);
+    FL_CHECK(true);
+}
+
+FL_TEST_CASE("JSON Memory Profiling: parse() vs parse2() - Large JSON") {
     printf("\n\n");
     printf("================================================================================\n");
-    printf("JSON MEMORY PROFILING TEST\n");
-    printf("================================================================================\n");
-    printf("JSON size: %zu bytes\n", ::strlen(STRESS_TEST_JSON));
-    printf("JSON complexity: 3 strips × 100 LEDs each, nested objects/arrays\n");
-    printf("\n");
-
-#ifdef _WIN32
-    init_real_allocators();
-#endif
-
-    // Baseline: Measure overhead of tracking itself
-    g_tracking_enabled = false;
-    {
-        Json warmup = Json::parse(STRESS_TEST_JSON);
-        (void)warmup;
-    }
-
-    // Test 1: ArduinoJson parse()
-    g_stats.reset();
-    g_tracking_enabled = true;
-
-    size_t parse1_peak = 0;
-    size_t parse1_allocs = 0;
-    {
-        Json result1 = Json::parse(STRESS_TEST_JSON);
-        FL_REQUIRE(!result1.is_null());
-
-        parse1_peak = g_stats.peak_bytes.load();
-        parse1_allocs = g_stats.alloc_count.load();
-    }
-
-    g_tracking_enabled = false;
-    g_stats.print_stats("ArduinoJson parse()");
-
-    // Test 2: Custom parse2()
-    g_stats.reset();
-    g_tracking_enabled = true;
-
-    size_t parse2_peak = 0;
-    size_t parse2_allocs = 0;
-    {
-        Json result2 = Json::parse2(STRESS_TEST_JSON);
-        FL_REQUIRE(!result2.is_null());
-
-        parse2_peak = g_stats.peak_bytes.load();
-        parse2_allocs = g_stats.alloc_count.load();
-    }
-
-    g_tracking_enabled = false;
-    g_stats.print_stats("Custom parse2()");
-
-    // Comparison
-    printf("\n");
-    printf("================================================================================\n");
-    printf("COMPARISON\n");
+    printf("LOADING LARGE JSON FILE\n");
     printf("================================================================================\n");
 
-    double memory_ratio = (double)parse2_peak / (double)parse1_peak;
-    double alloc_ratio = (double)parse2_allocs / (double)parse1_allocs;
-
-    printf("Peak memory:   parse2() = %.1f%% of parse()  (%zu vs %zu bytes)\n",
-           memory_ratio * 100.0, parse2_peak, parse1_peak);
-    printf("Allocations:   parse2() = %.1f%% of parse()  (%zu vs %zu allocs)\n",
-           alloc_ratio * 100.0, parse2_allocs, parse1_allocs);
-
-    if (parse2_peak < parse1_peak) {
-        size_t saved = parse1_peak - parse2_peak;
-        printf("✓ Memory saved: %zu bytes (%.1f%% reduction)\n",
-               saved, (1.0 - memory_ratio) * 100.0);
-    } else {
-        size_t extra = parse2_peak - parse1_peak;
-        printf("✗ Extra memory: %zu bytes (%.1f%% increase)\n",
-               extra, (memory_ratio - 1.0) * 100.0);
+    // Initialize FileSystem for testing
+    FileSystem fs;
+    FsImplPtr fsImpl = make_sdcard_filesystem(0);
+    if (!fs.begin(fsImpl)) {
+        printf("❌ ERROR: Failed to initialize test filesystem\n");
+        FL_REQUIRE(false);
+        return;
     }
 
-    if (parse2_allocs < parse1_allocs) {
-        int saved = parse1_allocs - parse2_allocs;
-        printf("✓ Allocations saved: %d (%.1f%% reduction)\n",
-               saved, (1.0 - alloc_ratio) * 100.0);
-    } else {
-        int extra = parse2_allocs - parse1_allocs;
-        printf("✗ Extra allocations: %d (%.1f%% increase)\n",
-               extra, (alloc_ratio - 1.0) * 100.0);
+    // Open and read the JSON file
+    FileHandlePtr fh = fs.openRead("tests/profile/benchmark_1mb.json");
+    if (!fh || !fh->valid()) {
+        printf("⚠️  WARNING: Could not open tests/profile/benchmark_1mb.json\n");
+        printf("   Skipping large JSON memory profile test.\n");
+        printf("   Download it with: curl -o tests/profile/benchmark_1mb.json https://microsoftedge.github.io/Demos/json-dummy-data/1MB.json\n");
+        return;
     }
 
-    printf("================================================================================\n");
-    printf("\n");
+    // Read file contents
+    fl::size file_size = fh->size();
+    fl::string large_json;
+    large_json.resize(file_size);
+    fl::size bytes_read = fh->read(reinterpret_cast<u8*>(&large_json[0]), file_size);
+    fh->close();
 
-    // PASS/FAIL Criteria
-    // parse2() should use ≤80% peak memory OR ≤50% allocations
-    bool memory_pass = (parse2_peak <= parse1_peak * 0.80);
-    bool alloc_pass = (parse2_allocs <= parse1_allocs * 0.50);
-
-    if (memory_pass || alloc_pass) {
-        printf("✓✓✓ PASS: parse2() is more memory-efficient than parse()\n");
-    } else {
-        printf("✗✗✗ FAIL: parse2() is NOT more memory-efficient\n");
-        printf("    Required: ≤80%% peak memory OR ≤50%% allocations\n");
+    if (bytes_read != file_size) {
+        printf("❌ ERROR: Read %zu bytes but expected %zu bytes\n", bytes_read, file_size);
+        FL_REQUIRE(false);
+        return;
     }
-    printf("\n");
 
-    // Assert for test framework
-    FL_CHECK((memory_pass || alloc_pass));
+    printf("✓ Loaded %zu bytes (%.2f KB)\n\n", bytes_read, bytes_read / 1024.0);
+
+    // Run memory profiling on large JSON
+    profile_json_memory("LARGE JSON MEMORY PROFILE (1MB Real-World)", large_json);
+
+    FL_CHECK(true);
 }

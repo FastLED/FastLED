@@ -5,11 +5,12 @@
 #include "test.h"
 #include "fl/json.h"
 #include "fl/stl/chrono.h"
+#include "fl/file_system.h"
 
 using namespace fl;
 
-// Test JSON (2.3KB ScreenMap)
-constexpr const char* BENCHMARK_JSON = R"({
+// Small Test JSON (2.3KB ScreenMap)
+constexpr const char* SMALL_BENCHMARK_JSON = R"({
   "version": "1.0",
   "fps": 60,
   "brightness": 0.85,
@@ -70,35 +71,33 @@ double benchmark_microseconds(Func&& func, int iterations) {
     return static_cast<double>(duration) / iterations;
 }
 
-FL_TEST_CASE("JSON Performance: parse() vs parse2()") {
-    printf("\n\n");
-    printf("================================================================================\n");
-    printf("JSON PERFORMANCE BENCHMARK\n");
-    printf("================================================================================\n");
-    printf("JSON size: %zu bytes\n", ::strlen(BENCHMARK_JSON));
-    printf("JSON complexity: 3 strips × 100 LEDs each, nested objects/arrays\n");
-    printf("Iterations: 1000\n");
+// Helper to run benchmark on a JSON string
+void run_benchmark(const char* test_name, const fl::string& json_data, int iterations) {
     printf("\n");
-
-    constexpr int ITERATIONS = 1000;
+    printf("================================================================================\n");
+    printf("%s\n", test_name);
+    printf("================================================================================\n");
+    printf("JSON size: %zu bytes (%.2f KB)\n", json_data.size(), json_data.size() / 1024.0);
+    printf("Iterations: %d\n", iterations);
+    printf("\n");
 
     // Benchmark ArduinoJson parse()
     double parse1_time = benchmark_microseconds([&]() {
-        Json result = Json::parse(BENCHMARK_JSON);
+        Json result = Json::parse(json_data);
         FL_REQUIRE(!result.is_null());
         // Force compiler to not optimize away
-        volatile bool valid = result.is_object();
+        volatile bool valid = result.is_object() || result.is_array();
         (void)valid;
-    }, ITERATIONS);
+    }, iterations);
 
     // Benchmark Custom parse2()
     double parse2_time = benchmark_microseconds([&]() {
-        Json result = Json::parse2(BENCHMARK_JSON);
+        Json result = Json::parse2(json_data);
         FL_REQUIRE(!result.is_null());
         // Force compiler to not optimize away
-        volatile bool valid = result.is_object();
+        volatile bool valid = result.is_object() || result.is_array();
         (void)valid;
-    }, ITERATIONS);
+    }, iterations);
 
     // Results
     printf("Performance Results:\n");
@@ -127,8 +126,8 @@ FL_TEST_CASE("JSON Performance: parse() vs parse2()") {
     }
 
     // Throughput
-    double throughput1_mbps = (::strlen(BENCHMARK_JSON) / parse1_time) * 1.0;  // bytes/µs = MB/s
-    double throughput2_mbps = (::strlen(BENCHMARK_JSON) / parse2_time) * 1.0;
+    double throughput1_mbps = (json_data.size() / parse1_time) * 1.0;  // bytes/µs = MB/s
+    double throughput2_mbps = (json_data.size() / parse2_time) * 1.0;
 
     printf("\n");
     printf("Throughput:\n");
@@ -136,10 +135,9 @@ FL_TEST_CASE("JSON Performance: parse() vs parse2()") {
     printf("  Custom parse2():      %.2f MB/s\n", throughput2_mbps);
 
     printf("================================================================================\n");
-    printf("\n");
 
     // Log results for README update
-    printf("COPY TO README.md:\n");
+    printf("\nCOPY TO README.md:\n");
     printf("| Metric | ArduinoJson parse() | Custom parse2() | Result |\n");
     printf("|--------|---------------------|-----------------|--------|\n");
     printf("| **Parse Time** | %.2f µs | %.2f µs | ", parse1_time, parse2_time);
@@ -155,7 +153,68 @@ FL_TEST_CASE("JSON Performance: parse() vs parse2()") {
         printf("%.1f%% |\n", ((throughput2_mbps / throughput1_mbps) - 1.0) * 100.0);
     }
     printf("\n");
+}
 
-    // Test always passes (informational only)
+FL_TEST_CASE("JSON Performance: parse() vs parse2() - Small (2.3KB)") {
+    printf("\n\n");
+    run_benchmark("SMALL JSON BENCHMARK (2.3KB ScreenMap)", SMALL_BENCHMARK_JSON, 1000);
+    FL_CHECK(true);
+}
+
+FL_TEST_CASE("JSON Performance: parse() vs parse2() - Large (1MB)") {
+    printf("\n\n");
+
+    // Load large JSON file
+    fl::string large_json;
+    const char* filepath = "tests/profile/benchmark_1mb.json";
+
+    printf("Loading large JSON file: %s\n", filepath);
+
+    FileHandle fh = FileSystem::open(filepath);
+    if (!fh) {
+        printf("❌ ERROR: Could not open %s\n", filepath);
+        printf("   Make sure to download it first with:\n");
+        printf("   curl -o %s https://microsoftedge.github.io/Demos/json-dummy-data/1MB.json\n", filepath);
+        FL_REQUIRE(false);
+        return;
+    }
+
+    size_t file_size = fh.size();
+    large_json.resize(file_size);
+    size_t bytes_read = fh.read(reinterpret_cast<u8*>(&large_json[0]), file_size);
+    fh.close();
+
+    if (bytes_read != file_size) {
+        printf("❌ ERROR: Read %zu bytes but expected %zu bytes\n", bytes_read, file_size);
+        FL_REQUIRE(false);
+        return;
+    }
+
+    printf("✓ Loaded %zu bytes (%.2f KB)\n\n", bytes_read, bytes_read / 1024.0);
+
+    // Run benchmark with fewer iterations for large file
+    run_benchmark("LARGE JSON BENCHMARK (1MB Real-World Data)", large_json, 100);
+
+    FL_CHECK(true);
+}
+
+FL_TEST_CASE("JSON Performance: parse() vs parse2() - Summary") {
+    printf("\n\n");
+    printf("================================================================================\n");
+    printf("COMPREHENSIVE A/B TEST SUMMARY\n");
+    printf("================================================================================\n");
+    printf("\n");
+    printf("This benchmark compares two JSON parsers:\n");
+    printf("  • parse()  - ArduinoJson library (external dependency)\n");
+    printf("  • parse2() - Custom native parser (zero external dependencies)\n");
+    printf("\n");
+    printf("Test Cases:\n");
+    printf("  1. Small JSON (2.3KB)  - Synthetic ScreenMap with nested arrays/objects\n");
+    printf("  2. Large JSON (1MB)    - Real-world dataset from Microsoft Edge demos\n");
+    printf("\n");
+    printf("Run the individual test cases above to see detailed results.\n");
+    printf("================================================================================\n");
+    printf("\n");
+
     FL_CHECK(true);
 }

@@ -1,5 +1,6 @@
 
 #include "fl/json.h"
+#include "fl/json/detail/types.h"
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/deque.h"
@@ -8,7 +9,8 @@
 #include "fl/stl/math.h" // For floor function
 #include "fl/compiler_control.h"
 #include "fl/stl/stdint.h"
-#include "fl/detail/private.h"
+#include "fl/stl/optional.h"
+#include "fl/stl/unordered_map.h"
 #include "fl/log.h"
 #include "fl/math_macros.h"
 #include "fl/stl/cstddef.h"
@@ -887,16 +889,6 @@ fl::string unescape_string(const fl::span<const char>& span) {
     return result;
 }
 
-// Helper: Create string from span, with lazy unescaping
-fl::string make_string_from_span(const fl::span<const char>& span) {
-    if (has_escape_sequences(span)) {
-        return unescape_string(span);
-    } else {
-        // No escapes - direct construction from span (zero-copy, one allocation)
-        return fl::string(span.data(), span.size());
-    }
-}
-
 // Array optimization helpers (Milestone 9)
 enum ArrayType { ALL_UINT8, ALL_INT16, ALL_FLOATS, GENERIC_ARRAY };
 
@@ -1015,7 +1007,8 @@ private:
     fl::vector_inlined<StackFrame, 8> mStack;  // Inline first 8 frames (most JSON is shallow)
     fl::shared_ptr<JsonValue> mRoot;
     int mDepth;
-    fl::StringInterner mKeyInterner;  // Intern large object keys (>64 bytes, heap threshold)
+    // String interning enabled for large strings (> 64 bytes) that overflow SSO
+    fl::StringInterner mInterner;
 
     // Parse integer array directly from span into vector (zero allocations)
     template<typename T>
@@ -1197,19 +1190,20 @@ public:
                 // Check if this is an object key (next token should be COLON)
                 if (!mStack.empty() && mStack.back().type == StackFrame::OBJECT &&
                     mStack.back().pending_key.empty()) {
-                    // This is a key - intern only if large (> 64 bytes = heap threshold)
-                    // Small keys use fl::string inline storage, so interning adds overhead
-                    constexpr size_t HEAP_THRESHOLD = 64;  // FASTLED_STR_INLINED_SIZE
-                    if (value.size() > HEAP_THRESHOLD) {
-                        // Large key - intern to deduplicate (would heap-allocate anyway)
-                        mStack.back().pending_key = mKeyInterner.intern(value);
+                    // Key: handle escape sequences, then intern (StringInterner handles SSO internally)
+                    if (has_escape_sequences(value)) {
+                        mStack.back().pending_key = mInterner.intern(unescape_string(value));
                     } else {
-                        // Small key - use direct allocation (inline storage, no heap)
-                        mStack.back().pending_key = make_string_from_span(value);
+                        mStack.back().pending_key = mInterner.intern(value);
                     }
                 } else {
-                    // This is a value - lazy unescaping
-                    fl::string str = make_string_from_span(value);
+                    // Value: handle escape sequences, then intern (StringInterner handles SSO internally)
+                    fl::string str;
+                    if (has_escape_sequences(value)) {
+                        str = mInterner.intern(unescape_string(value));
+                    } else {
+                        str = mInterner.intern(value);
+                    }
                     auto str_val = fl::make_shared<JsonValue>(str);
                     push_value(str_val);
                 }
