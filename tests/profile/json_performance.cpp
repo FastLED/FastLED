@@ -105,7 +105,7 @@ void run_benchmark(const char* test_name, const fl::string& json_data, int itera
 
     // Benchmark Custom parse2()
     double parse2_time = benchmark_microseconds([&]() {
-        Json result = Json::parse2(json_data);
+        Json result = Json::parse(json_data);
         if (result.is_null()) {
             success = false;
         }

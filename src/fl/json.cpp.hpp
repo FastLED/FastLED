@@ -27,14 +27,14 @@
 // FastLED no longer defines these macros to avoid conflicts with system headers.
 
 
-#if FASTLED_ENABLE_JSON
+#if FASTLED_ARDUINO_JSON_PARSING_ENABLED
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_NULL_DEREFERENCE
 #include "third_party/arduinojson/json.h"  // IWYU pragma: keep
 FL_DISABLE_WARNING_POP
 
-#endif  // FASTLED_ENABLE_JSON
+#endif  // FASTLED_ARDUINO_JSON_PARSING_ENABLED
 
 namespace fl {
 
@@ -83,8 +83,12 @@ JsonObject& get_empty_json_object() {
 }
 
 fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
-    #if !FASTLED_ENABLE_JSON
-    return fl::make_shared<JsonValue>(fl::string(txt));
+    #if !FASTLED_ARDUINO_JSON_PARSING_ENABLED
+    // ArduinoJson disabled - should not be called directly
+    // This function is only for ArduinoJson parsing
+    FL_ERROR("JsonValue::parse() called but FASTLED_ARDUINO_JSON_PARSING_ENABLED is disabled. "
+             "Use Json::parse() for native parsing instead.");
+    return fl::make_shared<JsonValue>(nullptr);
     #else
     // Determine the size of the JsonDocument needed.
     FLArduinoJson::JsonDocument doc;
@@ -401,6 +405,7 @@ private:
         // Track element types and ranges
         bool has_int = false;
         bool has_float = false;
+        bool has_float_beyond_precision = false;  // Track floats > 2^24
         bool has_string = false;
         bool has_bool = false;
         bool has_null = false;
@@ -469,6 +474,12 @@ private:
 
                 if (is_float) {
                     has_float = true;
+                    // Parse float value to check if it's beyond integer precision
+                    // Note: fl::parseFloat may have precision loss for very large numbers
+                    float f_val = fl::parseFloat(&mInput[num_start], mPos - num_start);
+                    if (fl::fl_abs(f_val) > 16777216.0f) {
+                        has_float_beyond_precision = true;
+                    }
                 } else {
                     has_int = true;
                     // Parse actual value to get accurate range
@@ -524,6 +535,10 @@ private:
         // Only emit specialized tokens for types JsonValue supports
         if (type_count == 1 || (type_count == 2 && has_int && has_float)) {
             if (has_float || (has_int && has_float)) {
+                // Don't optimize floats beyond integer precision
+                if (has_float_beyond_precision) {
+                    return JsonToken::LBRACKET;  // Use slow path
+                }
                 return JsonToken::ARRAY_FLOAT;  // vector<float>
             }
             if (has_int) {
@@ -899,6 +914,7 @@ ArrayType classify_array(const JsonArray& arr) {
     i64 min_val = fl::numeric_limits<i64>::max();
     i64 max_val = fl::numeric_limits<i64>::min();
     bool has_float = false;
+    bool has_float_beyond_precision = false;
 
     for (const auto& elem : arr) {
         if (!elem) {
@@ -923,6 +939,11 @@ ArrayType classify_array(const JsonArray& arr) {
                 all_numeric = false;
                 break;
             }
+            // Check if float is beyond integer precision (>2^24 or <-2^24)
+            float f = *val;
+            if (fl::fl_abs(f) > 16777216.0f) {
+                has_float_beyond_precision = true;
+            }
         } else {
             all_numeric = false;
             break;
@@ -933,6 +954,10 @@ ArrayType classify_array(const JsonArray& arr) {
 
     // Classification
     if (has_float) {
+        // If floats are beyond integer precision, don't optimize
+        if (has_float_beyond_precision) {
+            return GENERIC_ARRAY;
+        }
         return ALL_FLOATS;
     }
 
@@ -943,6 +968,12 @@ ArrayType classify_array(const JsonArray& arr) {
 
     if (min_val >= -32768 && max_val <= 32767) {
         return ALL_INT16;
+    }
+
+    // Large integers (>32767 or <-32768) that don't fit in int16 but can be represented as float
+    // Convert to float if within float's integer precision range (±2^24)
+    if (min_val >= -16777216 && max_val <= 16777216) {
+        return ALL_FLOATS;
     }
 
     return GENERIC_ARRAY;

@@ -113,10 +113,18 @@
  *
  * Performance Notes:
  * -------------------
- * - Parsing: Custom parser is **1.62x faster** than ArduinoJson with **62.5% higher throughput**
- * - Memory: **45% fewer allocations** and **24% lower peak memory** than ArduinoJson  
+ * - Parsing: Native parser is **1.62x faster** than ArduinoJson with **62.5% higher throughput**
+ * - Memory: **45% fewer allocations** and **24% lower peak memory** than ArduinoJson
  * - Validation: **Zero heap allocations** during validation phase
  * - See fl/json/README.md for detailed benchmarks
+ *
+ * ArduinoJson Support (Benchmarking Only):
+ * ------------------------------------------
+ * - **ArduinoJson is DISABLED by default** - native parser is always used
+ * - To enable ArduinoJson for benchmarking: compile with `-DFASTLED_ARDUINO_JSON_PARSING_ENABLED=1`
+ * - Use `fl::Json::parse_arduino_json(txt)` to explicitly use ArduinoJson parser
+ * - If ArduinoJson is disabled, `parse_arduino_json()` emits a warning and falls back to native parser
+ * - **Recommendation**: Use `fl::Json::parse(txt)` for all production code (native parser)
  *
  * @see fl::Json
  * @see fl::optional
@@ -638,19 +646,8 @@ public:
     // Native serialization (without external libraries)
     fl::string to_string_native() const;
 
-    // Parsing factory method
+    // Parsing factory method - uses native parser
     static Json parse(const fl::string &txt) {
-        auto parsed = JsonValue::parse(txt);
-        if (parsed) {
-            Json result;
-            result.m_value = parsed;
-            return result;
-        }
-        return Json(nullptr);
-    }
-
-    // Custom parser (Milestone 1 stub)
-    static Json parse2(const fl::string &txt) {
         auto parsed = JsonValue::parse2(txt);
         if (parsed) {
             Json result;
@@ -660,13 +657,24 @@ public:
         return Json(nullptr);
     }
 
-    // Phase 1 validation only (for testing - MUST allocate zero heap memory)
-    static bool parse2_validate_only(const fl::string &txt) {
-        return JsonValue::parse2_validate_only(txt);
-    }
-
-    static bool parse2_validate_only(fl::string_view txt) {
-        return JsonValue::parse2_validate_only(txt);
+    // ArduinoJson parsing (opt-in via FASTLED_ARDUINO_JSON_PARSING_ENABLED=1)
+    // This is kept ONLY for benchmarking purposes
+    static Json parse_arduino_json(const fl::string &txt) {
+        #if FASTLED_ARDUINO_JSON_PARSING_ENABLED
+        // ArduinoJson enabled - use ArduinoJson parser
+        auto parsed = JsonValue::parse(txt);
+        if (parsed) {
+            Json result;
+            result.m_value = parsed;
+            return result;
+        }
+        return Json(nullptr);
+        #else
+        // ArduinoJson disabled - emit warning and delegate to native parser
+        FL_WARN("ArduinoJson parsing is disabled (compiled out). Falling back to native fl::Json::parse(). "
+                "Enable with -DFASTLED_ARDUINO_JSON_PARSING_ENABLED=1 if needed for benchmarking.");
+        return parse(txt);  // Delegate to native parser
+        #endif
     }
 
     // Convenience methods for creating arrays and objects

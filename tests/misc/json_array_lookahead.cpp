@@ -107,7 +107,7 @@ FL_TEST_CASE("JSON Array Lookahead: Token Emission") {
 FL_TEST_CASE("JSON Array Lookahead: End-to-End Parsing") {
 
     FL_SUBCASE("ARRAY_UINT8 parses correctly") {
-        Json j = Json::parse2("[0, 1, 255]");
+        Json j = Json::parse("[0, 1, 255]");
         FL_CHECK(j.is_bytes()); // Should be vector<u8>
         FL_CHECK(j.size() == 3);
         FL_CHECK(j[0].as<int>() == 0);
@@ -116,7 +116,7 @@ FL_TEST_CASE("JSON Array Lookahead: End-to-End Parsing") {
     }
 
     FL_SUBCASE("ARRAY_INT16 parses correctly") {
-        Json j = Json::parse2("[1000, -1000, 2000]");
+        Json j = Json::parse("[1000, -1000, 2000]");
         FL_CHECK(j.is_audio()); // Should be vector<i16>
         FL_CHECK(j.size() == 3);
         FL_CHECK(j[0].as<int>() == 1000);
@@ -125,7 +125,7 @@ FL_TEST_CASE("JSON Array Lookahead: End-to-End Parsing") {
     }
 
     FL_SUBCASE("ARRAY_FLOAT parses correctly") {
-        Json j = Json::parse2("[1.5, 2.7, 3.14]");
+        Json j = Json::parse("[1.5, 2.7, 3.14]");
         FL_CHECK(j.is_floats()); // Should be vector<float>
         FL_CHECK(j.size() == 3);
         FL_CHECK_CLOSE(j[0].as<float>().value_or(0.0f), 1.5f, 0.001f);
@@ -134,7 +134,7 @@ FL_TEST_CASE("JSON Array Lookahead: End-to-End Parsing") {
     }
 
     FL_SUBCASE("ARRAY_STRING parses correctly") {
-        Json j = Json::parse2("[\"a\", \"b\", \"c\"]");
+        Json j = Json::parse("[\"a\", \"b\", \"c\"]");
         FL_CHECK(j.is_array());
         FL_CHECK(j.size() == 3);
         FL_CHECK(j[0].as<fl::string>() == "a");
@@ -143,7 +143,7 @@ FL_TEST_CASE("JSON Array Lookahead: End-to-End Parsing") {
     }
 
     FL_SUBCASE("Nested arrays use slow path but still work") {
-        Json j = Json::parse2("[[1,2], [3,4]]");
+        Json j = Json::parse("[[1,2], [3,4]]");
         FL_CHECK(j.is_array());
         FL_CHECK(j.size() == 2);
         FL_CHECK(j[0].is_array());
@@ -163,7 +163,7 @@ FL_TEST_CASE("JSON Array Lookahead: Stress Test") {
         }
         json += "]";
 
-        Json j = Json::parse2(json);
+        Json j = Json::parse(json);
         FL_CHECK(j.is_bytes()); // Should optimize to vector<u8>
         FL_CHECK(j.size() == 1000);
         FL_CHECK(j[0].as<int>() == 0);
@@ -171,7 +171,7 @@ FL_TEST_CASE("JSON Array Lookahead: Stress Test") {
     }
 
     FL_SUBCASE("Mixed array doesn't crash") {
-        Json j = Json::parse2("[1, \"hello\", true, null, 3.14]");
+        Json j = Json::parse("[1, \"hello\", true, null, 3.14]");
         FL_CHECK(j.is_array());
         FL_CHECK(j.size() == 5);
         FL_CHECK(j[0].as<int>() == 1);

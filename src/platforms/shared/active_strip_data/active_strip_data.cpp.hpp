@@ -8,7 +8,7 @@
 #include "fl/unused.h"
 // CLEDController is forward declared in header - no include needed
 
-#if FASTLED_ENABLE_JSON
+#if FASTLED_ARDUINO_JSON_PARSING_ENABLED
 // IWYU pragma: begin_keep
 #include "third_party/arduinojson/json.h"
 // IWYU pragma: end_keep
@@ -75,8 +75,9 @@ bool ActiveStripData::parseStripJsonInfo(const char* jsonStr) {
 }
 
 fl::string ActiveStripData::infoJsonString() {
-    // LEGACY API - WORKING: Create strip info JSON using ArduinoJSON
-#if FASTLED_ENABLE_JSON
+    // LEGACY API - DEPRECATED: Use infoJsonStringNew() instead
+    // This uses ArduinoJson and is only available when FASTLED_ARDUINO_JSON_PARSING_ENABLED=1
+#if FASTLED_ARDUINO_JSON_PARSING_ENABLED
     FLArduinoJson::JsonDocument doc;
     auto array = doc.to<FLArduinoJson::JsonArray>();
 
@@ -89,20 +90,21 @@ fl::string ActiveStripData::infoJsonString() {
 
     fl::string jsonBuffer;
     serializeJson(doc, jsonBuffer);
-    
+
     // Ensure we always return a valid JSON array, even if empty
     if (jsonBuffer.empty()) {
         return fl::string("[]");
     }
-    
+
     // Verify the JSON starts with [ to ensure it's an array
     if (jsonBuffer.length() == 0 || jsonBuffer[0] != '[') {
         return fl::string("[]");
     }
-    
+
     return jsonBuffer;
 #else
-    return fl::string("[]");
+    // ArduinoJson disabled - delegate to native implementation
+    return infoJsonStringNew();
 #endif
 }
 

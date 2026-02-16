@@ -251,8 +251,37 @@ float parseFloat(const char *str, fl::size len) {
 }
 
 int parseInt(const char *str, fl::size len) {
-    float f = parseFloat(str, len);
-    return static_cast<int>(f);
+    int result = 0;
+    int sign = 1;
+    fl::size pos = 0;
+
+    // Handle empty input
+    if (len == 0) {
+        return 0;
+    }
+
+    // Skip leading whitespace
+    while (pos < len &&
+           (str[pos] == ' ' || str[pos] == '\t' || str[pos] == '\n' ||
+            str[pos] == '\r' || str[pos] == '\f' || str[pos] == '\v')) {
+        pos++;
+    }
+
+    // Handle optional sign
+    if (pos < len && str[pos] == '-') {
+        sign = -1;
+        pos++;
+    } else if (pos < len && str[pos] == '+') {
+        pos++;
+    }
+
+    // Parse digits
+    while (pos < len && str[pos] >= '0' && str[pos] <= '9') {
+        result = result * 10 + (str[pos] - '0');
+        pos++;
+    }
+
+    return sign * result;
 }
 
 int parseInt(const char *str) {

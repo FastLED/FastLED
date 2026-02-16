@@ -366,7 +366,7 @@ void profile_json_memory(const char* test_name, const fl::string& json_data) {
     size_t parse2_peak = 0;
     size_t parse2_allocs = 0;
     {
-        Json result2 = Json::parse2(json_data);
+        Json result2 = Json::parse(json_data);
         if (result2.is_null()) {
             printf("❌ ERROR: parse2() returned null\n");
         }

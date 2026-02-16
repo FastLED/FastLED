@@ -27,7 +27,17 @@
 #include "fl/sketch_macros.h"
 
 #ifndef FASTLED_ENABLE_JSON
+// FASTLED_ENABLE_JSON enables JSON UI components (always enabled on platforms with memory)
+// This flag controls UI component compilation (sliders, checkboxes, etc.)
 #define FASTLED_ENABLE_JSON SKETCH_HAS_LOTS_OF_MEMORY
+#endif
+
+#ifndef FASTLED_ARDUINO_JSON_PARSING_ENABLED
+// FASTLED_ARDUINO_JSON_PARSING_ENABLED enables ArduinoJson parser (DISABLED by default)
+// Set to 1 to enable ArduinoJson for benchmarking purposes only
+// fl::Json::parse() ALWAYS uses native parser regardless of this flag
+// ArduinoJson is ONLY used when explicitly calling fl::Json::parse_arduino_json()
+#define FASTLED_ARDUINO_JSON_PARSING_ENABLED 0
 #endif
 
 namespace fl {
@@ -802,9 +812,9 @@ struct JsonValue {
         //FASTLED_WARN("is_bool called, tag=" << data.tag());
         return data.is<bool>(); 
     }
-    bool is_int() const noexcept { 
+    bool is_int() const noexcept {
         //FASTLED_WARN("is_int called, tag=" << data.tag());
-        return data.is<i64>() || data.is<bool>(); 
+        return data.is<i64>();
     }
     bool is_double() const noexcept { 
         //FASTLED_WARN("is_double called, tag=" << data.tag());
