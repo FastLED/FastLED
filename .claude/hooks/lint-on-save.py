@@ -64,6 +64,12 @@ def main() -> int:
     if not os.path.exists(file_path):
         return 0
 
+    # Skip C++ files in examples directory (IWYU checks not applicable)
+    rel_path = os.path.relpath(file_path, PROJECT_ROOT)
+    if Path(file_path).suffix.lower() in CPP_EXTENSIONS:
+        if rel_path.startswith("examples" + os.sep) or rel_path.startswith("examples/"):
+            return 0
+
     # Delegate to lint.py in single-file mode
     # Always use --strict for Python files (pyright on single file is fast)
     cmd = ["uv", "run", "ci/lint.py", "--strict", file_path]
@@ -86,7 +92,7 @@ def main() -> int:
             print(result.stdout.strip(), file=sys.stderr)
         if result.stderr.strip():
             print(result.stderr.strip(), file=sys.stderr)
-        return 2
+        return 1  # Exit with code 1 on first failure
 
     return 0
 
