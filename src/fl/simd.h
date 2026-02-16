@@ -260,6 +260,18 @@ using platforms::mulhi_su32_4;
 /// @return Vector shifted right by specified bits
 using platforms::srl_u32_4;
 
+/// Shift left logical (zero-fill) - for fixed-point format conversion
+/// @param vec Input vector (4 uint32)
+/// @param shift Number of bits to shift left
+/// @return Vector shifted left by specified bits
+using platforms::sll_u32_4;
+
+/// Shift right arithmetic (sign-extend) - for signed fixed-point math
+/// @param vec Input vector (4 int32 stored as uint32)
+/// @param shift Number of bits to shift right
+/// @return Vector shifted right with sign extension
+using platforms::sra_i32_4;
+
 /// Bitwise AND of two uint32 vectors
 /// @param a First operand (4 uint32)
 /// @param b Second operand (4 uint32)

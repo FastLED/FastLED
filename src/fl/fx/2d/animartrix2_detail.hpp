@@ -17,9 +17,10 @@
 // NOTE: This is an internal implementation header. Do not include directly.
 //       Include "fl/fx/2d/animartrix2.hpp" instead.
 
-// Include the original detail for its ANIMartRIX base class
-#define ANIMARTRIX_INTERNAL
-#include "fl/fx/2d/animartrix_detail.hpp"
+// Include standalone Animartrix2 core functionality
+#include "fl/fx/2d/animartrix2_detail/core_types.hpp"
+#include "fl/fx/2d/animartrix2_detail/perlin_float.hpp"
+#include "fl/fx/2d/animartrix2_detail/engine_core.hpp"
 
 #include "crgb.h"
 #include "fl/stl/vector.h"
@@ -82,7 +83,7 @@ struct Context {
 
 // Per-pixel pre-computed s16x16 values for Chasing_Spirals inner loop.
 // These are constant per-frame (depend only on grid geometry, not time).
-// Defined here (above Engine) so Engine can hold a persistent vector of them.
+// Chasing_Spirals-specific LUT, defined here (above Engine) so Engine can hold it.
 struct ChasingSpiralPixelLUT {
     fl::s16x16 base_angle;     // 3*theta - dist/3
     fl::s16x16 dist_scaled;    // distance * scale (0.1), pre-scaled for noise coords
@@ -170,11 +171,28 @@ struct perlin_s16x16 {
         fl::simd::simd_u32x4 Y_vec = fl::simd::srl_u32_4(ny_vec, FP_BITS);
 
         // SIMD: Extract fractional part and shift to HP_BITS
+        // Convert from Q16.16 to Q8.24 by shifting left 8 bits
+        // Since there's no sll_u32_4, implement shift left via repeated doubling: x << 8 = ((x << 4) << 4)
         fl::simd::simd_u32x4 mask_fp = fl::simd::set1_u32_4(FP_ONE - 1);
         fl::simd::simd_u32x4 x_frac_vec = fl::simd::and_u32_4(nx_vec, mask_fp);
         fl::simd::simd_u32x4 y_frac_vec = fl::simd::and_u32_4(ny_vec, mask_fp);
-        x_frac_vec = fl::simd::srl_u32_4(x_frac_vec, FP_BITS - HP_BITS);
-        y_frac_vec = fl::simd::srl_u32_4(y_frac_vec, FP_BITS - HP_BITS);
+        // Shift left by 8 using doubling: x << 8 = (((x << 2) << 2) << 2) << 2
+        x_frac_vec = fl::simd::add_i32_4(x_frac_vec, x_frac_vec);  // << 1
+        x_frac_vec = fl::simd::add_i32_4(x_frac_vec, x_frac_vec);  // << 2
+        x_frac_vec = fl::simd::add_i32_4(x_frac_vec, x_frac_vec);  // << 3
+        x_frac_vec = fl::simd::add_i32_4(x_frac_vec, x_frac_vec);  // << 4
+        x_frac_vec = fl::simd::add_i32_4(x_frac_vec, x_frac_vec);  // << 5
+        x_frac_vec = fl::simd::add_i32_4(x_frac_vec, x_frac_vec);  // << 6
+        x_frac_vec = fl::simd::add_i32_4(x_frac_vec, x_frac_vec);  // << 7
+        x_frac_vec = fl::simd::add_i32_4(x_frac_vec, x_frac_vec);  // << 8
+        y_frac_vec = fl::simd::add_i32_4(y_frac_vec, y_frac_vec);  // << 1
+        y_frac_vec = fl::simd::add_i32_4(y_frac_vec, y_frac_vec);  // << 2
+        y_frac_vec = fl::simd::add_i32_4(y_frac_vec, y_frac_vec);  // << 3
+        y_frac_vec = fl::simd::add_i32_4(y_frac_vec, y_frac_vec);  // << 4
+        y_frac_vec = fl::simd::add_i32_4(y_frac_vec, y_frac_vec);  // << 5
+        y_frac_vec = fl::simd::add_i32_4(y_frac_vec, y_frac_vec);  // << 6
+        y_frac_vec = fl::simd::add_i32_4(y_frac_vec, y_frac_vec);  // << 7
+        y_frac_vec = fl::simd::add_i32_4(y_frac_vec, y_frac_vec);  // << 8
 
         // SIMD: Wrap to [0, 255]
         fl::simd::simd_u32x4 mask_255 = fl::simd::set1_u32_4(255);
@@ -228,22 +246,27 @@ struct perlin_s16x16 {
         fl::simd::simd_u32x4 g_bb_vec = fl::simd::load_u32_4(reinterpret_cast<const fl::u32*>(g_bb)); // ok reinterpret cast
 
         // SIMD: lerp1 = lerp(u, g_aa, g_ba) = g_aa + ((g_ba - g_aa) * u) >> HP_BITS
+        // Fix: Pre-shift diff to avoid losing high bits in mulhi
+        // Instead of: (diff * u) >> 16 >> 8, do: ((diff >> 8) * u) >> 16
         fl::simd::simd_u32x4 diff1 = fl::simd::sub_i32_4(g_ba_vec, g_aa_vec);
-        fl::simd::simd_u32x4 lerp1_vec = fl::simd::mulhi_i32_4(diff1, u_vec);  // High 16 bits of 32×32→64 multiply
+        diff1 = fl::simd::sra_i32_4(diff1, HP_BITS - 16);                      // Pre-shift: >> 8 (Q8.24 -> Q8.16)
+        fl::simd::simd_u32x4 lerp1_vec = fl::simd::mulhi_i32_4(diff1, u_vec);  // (Q8.16 * Q8.24) >> 16 = Q8.24
         lerp1_vec = fl::simd::add_i32_4(g_aa_vec, lerp1_vec);
 
         // SIMD: lerp2 = lerp(u, g_ab, g_bb) = g_ab + ((g_bb - g_ab) * u) >> HP_BITS
         fl::simd::simd_u32x4 diff2 = fl::simd::sub_i32_4(g_bb_vec, g_ab_vec);
-        fl::simd::simd_u32x4 lerp2_vec = fl::simd::mulhi_i32_4(diff2, u_vec);
+        diff2 = fl::simd::sra_i32_4(diff2, HP_BITS - 16);                      // Pre-shift: >> 8
+        fl::simd::simd_u32x4 lerp2_vec = fl::simd::mulhi_i32_4(diff2, u_vec);  // (Q8.16 * Q8.24) >> 16 = Q8.24
         lerp2_vec = fl::simd::add_i32_4(g_ab_vec, lerp2_vec);
 
         // SIMD: final = lerp(v, lerp1, lerp2) = lerp1 + ((lerp2 - lerp1) * v) >> HP_BITS
         fl::simd::simd_u32x4 diff3 = fl::simd::sub_i32_4(lerp2_vec, lerp1_vec);
-        fl::simd::simd_u32x4 final_vec = fl::simd::mulhi_i32_4(diff3, v_vec);
+        diff3 = fl::simd::sra_i32_4(diff3, HP_BITS - 16);                      // Pre-shift: >> 8
+        fl::simd::simd_u32x4 final_vec = fl::simd::mulhi_i32_4(diff3, v_vec);  // (Q8.16 * Q8.24) >> 16 = Q8.24
         final_vec = fl::simd::add_i32_4(lerp1_vec, final_vec);
 
-        // SIMD: Shift to match s16x16 fractional bits
-        final_vec = fl::simd::srl_u32_4(final_vec, HP_BITS - fl::s16x16::FRAC_BITS);
+        // SIMD: Shift to match s16x16 fractional bits (arithmetic for signed values)
+        final_vec = fl::simd::sra_i32_4(final_vec, HP_BITS - fl::s16x16::FRAC_BITS);
 
         // Store result
         fl::simd::store_u32_4(reinterpret_cast<fl::u32*>(out), final_vec); // ok reinterpret cast
@@ -599,9 +622,41 @@ struct perlin_i16_optimized {
     }
 };
 
-// Bridge class: connects ANIMartRIX to Context's output callbacks
-struct Context::Engine : public animartrix_detail::ANIMartRIX {
+// Engine: Standalone implementation (no inheritance from ANIMartRIX)
+struct Context::Engine {
     Context *mCtx;
+
+    // Core ANIMartRIX state (extracted from animartrix_detail::ANIMartRIX)
+    int num_x = 0;
+    int num_y = 0;
+    float speed_factor = 1;
+    float radial_filter_radius = 23.0;
+    bool serpentine = false;
+
+    render_parameters animation;
+    oscillators timings;
+    modulators move;
+    rgb pixel;
+
+    fl::vector<fl::vector<float>> polar_theta;
+    fl::vector<fl::vector<float>> distance;
+
+    unsigned long a = 0;
+    unsigned long b = 0;
+    unsigned long c = 0;
+
+    float show1 = 0.0f;
+    float show2 = 0.0f;
+    float show3 = 0.0f;
+    float show4 = 0.0f;
+    float show5 = 0.0f;
+    float show6 = 0.0f;
+    float show7 = 0.0f;
+    float show8 = 0.0f;
+    float show9 = 0.0f;
+    float show0 = 0.0f;
+
+    fl::optional<fl::u32> currentTime;
 
     // Persistent PixelLUT for Chasing_Spirals_Q31.
     // Depends only on grid geometry (polar_theta, distance, radial_filter_radius),
@@ -616,13 +671,73 @@ struct Context::Engine : public animartrix_detail::ANIMartRIX {
 
     Engine(Context *ctx) : mCtx(ctx), mFadeLUT{}, mFadeLUTInitialized(false) {}
 
-    void setPixelColorInternal(int x, int y,
-                               animartrix_detail::rgb pixel) override {
+    void setTime(fl::u32 t) { currentTime = t; }
+    fl::u32 getTime() { return currentTime.has_value() ? currentTime.value() : fl::millis(); }
+
+    void init(int w, int h) {
+        animation = render_parameters();
+        timings = oscillators();
+        move = modulators();
+        pixel = rgb();
+
+        this->num_x = w;
+        this->num_y = h;
+        this->radial_filter_radius = FL_MIN(w, h) * 0.65;
+        render_polar_lookup_table(
+            (num_x / 2) - 0.5,
+            (num_y / 2) - 0.5,
+            polar_theta,
+            distance,
+            num_x,
+            num_y);
+        timings.master_speed = 0.01;
+    }
+
+    void setSpeedFactor(float speed) { this->speed_factor = speed; }
+
+    // Method wrappers that delegate to standalone functions
+    void calculate_oscillators(oscillators &t) {
+        animartrix2_detail::calculate_oscillators(t, move, getTime(), speed_factor);
+    }
+
+    void run_default_oscillators(float master_speed = 0.005) {
+        animartrix2_detail::run_default_oscillators(timings, move, getTime(), speed_factor, master_speed);
+    }
+
+    float render_value(render_parameters &anim) {
+        return animartrix2_detail::render_value(anim);
+    }
+
+    rgb rgb_sanity_check(rgb &p) {
+        return animartrix2_detail::rgb_sanity_check(p);
+    }
+
+    void get_ready() {
+        animartrix2_detail::get_ready(a, b);
+    }
+
+    void logOutput() {
+        animartrix2_detail::logOutput(b);
+    }
+
+    void logFrame() {
+        animartrix2_detail::logFrame(c);
+    }
+
+    // Color blend wrappers
+    float subtract(float &x, float &y) { return animartrix2_detail::subtract(x, y); }
+    float multiply(float &x, float &y) { return animartrix2_detail::multiply(x, y); }
+    float add(float &x, float &y) { return animartrix2_detail::add(x, y); }
+    float screen(float &x, float &y) { return animartrix2_detail::screen(x, y); }
+    float colordodge(float &x, float &y) { return animartrix2_detail::colordodge(x, y); }
+    float colorburn(float &x, float &y) { return animartrix2_detail::colorburn(x, y); }
+
+    void setPixelColorInternal(int x, int y, rgb pixel) {
         fl::u16 idx = mCtx->xyMapFn(x, y, mCtx->xyMapUserData);
         mCtx->leds[idx] = CRGB(pixel.red, pixel.green, pixel.blue);
     }
 
-    fl::u16 xyMap(fl::u16 x, fl::u16 y) override {
+    fl::u16 xyMap(fl::u16 x, fl::u16 y) {
         return mCtx->xyMapFn(x, y, mCtx->xyMapUserData);
     }
 };
@@ -3867,7 +3982,7 @@ inline void Module_Experiment10(Context &ctx) {
 
             fl::u8 a = e->getTime() / 100;
             CRGB p = CRGB(CHSV(((a + e->show1 + e->show2) + e->show3), 255, 255));
-            animartrix_detail::rgb pixel;
+            rgb pixel;
             pixel.red = p.red;
             pixel.green = p.green;
             pixel.blue = p.blue;
@@ -3984,6 +4099,21 @@ inline void Fluffy_Blobs(Context &ctx) {
 // Included after main namespace so all types are defined.
 #define ANIMARTRIX2_CHASING_SPIRALS_INTERNAL
 #include "fl/fx/2d/animartrix2_detail/chasing_spirals.hpp" // allow-include-after-namespace
+
+// Namespace wrappers for backwards compatibility with test code
+namespace animartrix2_detail {
+namespace q31 {
+    using animartrix2_detail::Chasing_Spirals_Q31;
+    using animartrix2_detail::Chasing_Spirals_Q31_SIMD;
+}
+
+namespace q16 {
+    // Q16 implementation aliased to Q31 (Q16 was removed, use Q31 instead)
+    inline void Chasing_Spirals_Q16_Batch4_ColorGrouped(Context &ctx) {
+        Chasing_Spirals_Q31(ctx);
+    }
+}
+} // namespace animartrix2_detail
 
 #if FL_ANIMARTRIX_USES_FAST_MATH
 FL_OPTIMIZATION_LEVEL_O3_END
