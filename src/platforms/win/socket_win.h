@@ -2,7 +2,7 @@
 
 // IWYU pragma: private
 
-#include "platforms/win/is_win.h"
+#include "platforms/win/is_win.h"  // IWYU pragma: keep
 
 #ifdef FASTLED_HAS_NETWORKING
 #ifdef FL_IS_WIN
@@ -26,8 +26,10 @@
 
 // Minimal Windows includes for type definitions
 // IWYU pragma: begin_keep
+// IWYU pragma: begin_exports
 #include <winsock2.h>
 #include <ws2tcpip.h>
+// IWYU pragma: end_exports
 // IWYU pragma: end_keep
 
 namespace fl {
