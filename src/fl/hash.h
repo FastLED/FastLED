@@ -242,11 +242,17 @@ template<> struct Hash<i16> {
 // FASTLED_DEFINE_FAST_HASH(int)
 
 //-----------------------------------------------------------------------------
-// Convenience for std::string → u32
+// Convenience for string types → u32
 //----------------------------------------------------------------------------
 template <> struct Hash<fl::string> {
     u32 operator()(const fl::string &key) const noexcept {
         return MurmurHash3_x86_32(key.data(), key.size());
+    }
+};
+
+template <> struct Hash<fl::string_view> {
+    u32 operator()(const fl::string_view& sv) const noexcept {
+        return MurmurHash3_x86_32(sv.data(), sv.size());
     }
 };
 

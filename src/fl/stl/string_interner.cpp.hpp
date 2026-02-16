@@ -3,10 +3,20 @@
 #include "fl/int.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/string.h"
-#include "fl/stl/vector.h"
+#include "fl/stl/detail/string_holder.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/unordered_map.h"
 #include "fl/string_view.h"
+#include "fl/stl/span.h"
+#include "fl/stl/mutex.h"
 
 namespace fl {
+
+// Mutex for global interner only (instance interners are single-threaded)
+static fl::mutex& global_interner_mutex() {
+    static fl::mutex mtx;
+    return mtx;
+}
 
 // StringInterner member function implementations
 
@@ -16,46 +26,54 @@ StringInterner::~StringInterner() {
     clear();
 }
 
-fl::string StringInterner::intern(const fl::string& str) {
-    if (str.empty()) return fl::string();
+fl::string StringInterner::intern(const string_view& sv) {
+    if (sv.empty()) return fl::string();
 
-    // Linear search - simple and works reliably for small N
-    // String interners typically have <1000 entries, so O(N) is acceptable
-    for (const fl::string& entry : mEntries) {
-        if (entry.size() == str.size() &&
-            fl::memcmp(entry.c_str(), str.c_str(), str.size()) == 0) {
-            return entry;  // Return existing (cheap copy via shared_ptr)
-        }
+    // Try to find existing entry - O(1) average via hash map
+    auto it = mEntries.find(sv);
+    if (it != mEntries.end()) {
+        // Found existing - return fl::string sharing the StringHolder
+        return fl::string(it->second);
     }
 
-    // Use interned() to force heap allocation for stable pointers
-    // This ensures all copies share the same StringHolder via shared_ptr
-    fl::string interned = fl::string::interned(str.c_str(), str.size());
+    // Not found - create new StringHolder (heap-allocated)
+    auto holder = fl::make_shared<StringHolder>(sv.data(), sv.size());
 
-    // Add to vector
-    mEntries.push_back(interned);
+    // Create string_view key that points into holder's data
+    // This is safe because StringHolder data is heap-allocated and never moves
+    string_view key(holder->data(), holder->length());
 
-    return interned;
+    // Insert into map - key points into value's data (self-referential)
+    mEntries[key] = holder;
+
+    // Return fl::string sharing the StringHolder
+    return fl::string(holder);
 }
 
-fl::string StringInterner::get(fl::size index) const {
-    if (index >= mEntries.size()) return fl::string();
-    return mEntries[index];  // Cheap shared_ptr copy
+fl::string StringInterner::intern(const fl::string& str) {
+    // Convert to string_view and delegate
+    return intern(string_view(str.c_str(), str.size()));
+}
+
+fl::string StringInterner::intern(const char* str) {
+    if (!str) return fl::string();
+    // Convert to string_view and delegate
+    return intern(string_view(str));
+}
+
+fl::string StringInterner::intern(const fl::span<const char>& sp) {
+    if (sp.empty()) return fl::string();
+    // Convert to string_view and delegate
+    return intern(string_view(sp.data(), sp.size()));
+}
+
+bool StringInterner::contains(const string_view& sv) const {
+    return mEntries.find(sv) != mEntries.end();
 }
 
 bool StringInterner::contains(const char* str) const {
     if (!str) return false;
     return contains(string_view(str));
-}
-
-bool StringInterner::contains(const string_view& sv) const {
-    for (const fl::string& entry : mEntries) {
-        if (entry.size() == sv.size() &&
-            fl::memcmp(entry.c_str(), sv.data(), sv.size()) == 0) {
-            return true;
-        }
-    }
-    return false;
 }
 
 fl::size StringInterner::size() const {
@@ -71,7 +89,11 @@ void StringInterner::clear() {
 }
 
 void StringInterner::reserve(fl::size count) {
-    mEntries.reserve(count);
+    // unordered_map doesn't have reserve(), but we can set the bucket count
+    // This pre-allocates buckets to avoid rehashing
+    if (count > 0) {
+        mEntries.rehash(count);
+    }
 }
 
 // Global string interner singleton implementation
@@ -79,9 +101,25 @@ StringInterner& global_interner() {
     return Singleton<StringInterner>::instance();
 }
 
-// Convenience function for global interning
+// Convenience functions for global interning (thread-safe via mutex)
+fl::string intern(const string_view& sv) {
+    fl::unique_lock<fl::mutex> lock(global_interner_mutex());
+    return global_interner().intern(sv);
+}
+
 fl::string intern(const fl::string& str) {
+    fl::unique_lock<fl::mutex> lock(global_interner_mutex());
     return global_interner().intern(str);
+}
+
+fl::string intern(const char* str) {
+    fl::unique_lock<fl::mutex> lock(global_interner_mutex());
+    return global_interner().intern(str);
+}
+
+fl::string intern(const fl::span<const char>& sp) {
+    fl::unique_lock<fl::mutex> lock(global_interner_mutex());
+    return global_interner().intern(sp);
 }
 
 } // namespace fl

@@ -243,6 +243,18 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         }
     }
 
+    // Constructor from shared StringHolder (for string interner)
+    // Shares ownership of the StringHolder via shared_ptr.
+    // This allows strings to outlive the interner that created them.
+    // The StringHolder must be non-null and contain valid data.
+    StrN(const fl::shared_ptr<StringHolder>& holder) : mLength(0), mStorage(InlinedBuffer{}) {
+        if (!holder || holder->length() == 0) {
+            return;
+        }
+        mLength = holder->length();
+        mStorage = NotNullStringHolderPtr(holder);
+    }
+
     // Iterator range constructor (std::string compatibility)
     // Constructs string from iterator range [first, last)
     // This enables construction from any iterator pair including:
@@ -2464,6 +2476,8 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     string(const StrN<M> &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
     // Constructor from string_view
     string(const string_view& sv) : StrN<FASTLED_STR_INLINED_SIZE>(sv) {}
+    // Constructor from shared StringHolder (for string interner)
+    string(const fl::shared_ptr<StringHolder>& holder) : StrN<FASTLED_STR_INLINED_SIZE>(holder) {}
     string &operator=(const string &other) {
         copy(other);
         return *this;
