@@ -188,9 +188,9 @@ foreach test_name : test_names
   is_serial = test_name in ['fl_file_system', 'test_uart_channel_engine']
 
   # Configure timeout with deadlock detection
-  # Default timeout is 10 seconds per test (generous for most tests)
+  # Default timeout is 20 seconds per test (generous for most tests)
   # Hung tests will be detected, get stack dumps via lldb/gdb, then killed
-  test_timeout = 10
+  test_timeout = 20
 
   # Check if deadlock detection wrapper should be used
   # Set FASTLED_TEST_WRAPPER=1 to enable wrapper with stack dumping

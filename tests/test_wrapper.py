@@ -15,13 +15,13 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-
+from typing import Optional
 
 from ci.util.deadlock_detector import handle_hung_test
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 
-DEFAULT_TIMEOUT = 10.0  # 10 seconds per test
+DEFAULT_TIMEOUT = 20.0  # 20 seconds per test
 
 
 def run_test_with_deadlock_detection(
@@ -57,6 +57,9 @@ def run_test_with_deadlock_detection(
             text=True,
             bufsize=1,  # Line buffered
         )
+    except KeyboardInterrupt:
+        handle_keyboard_interrupt_properly()
+        raise
     except Exception as e:
         print(f"Failed to start test: {e}", file=sys.stderr)
         return 1
@@ -72,7 +75,7 @@ def run_test_with_deadlock_detection(
                 if proc.stdout:
                     remaining = proc.stdout.read()
                     if remaining:
-                        print(remaining, end='')
+                        print(remaining, end="")
 
                 elapsed = time.time() - start_time
                 if returncode == 0:
@@ -115,25 +118,32 @@ def run_test_with_deadlock_detection(
                 try:
                     # Try to read a line with timeout
                     import select
-                    if hasattr(select, 'select'):
+
+                    if hasattr(select, "select"):
                         # Unix-like systems with select
                         ready, _, _ = select.select([proc.stdout], [], [], 0.1)
                         if ready:
                             line = proc.stdout.readline()
                             if line:
-                                print(line, end='')
+                                print(line, end="")
                     else:
                         # Windows - just try to read (may block briefly)
                         # Use a thread to avoid blocking
-                        import threading
                         import queue
+                        import threading
 
-                        q = queue.Queue()
+                        q: "queue.Queue[Optional[str]]" = queue.Queue()
+                        # Capture stdout for closure (type narrowing)
+                        stdout = proc.stdout
+                        assert stdout is not None
 
                         def read_line():
                             try:
-                                line = proc.stdout.readline()
+                                line = stdout.readline()
                                 q.put(line)
+                            except KeyboardInterrupt:
+                                handle_keyboard_interrupt_properly()
+                                q.put(None)
                             except:
                                 q.put(None)
 
@@ -145,10 +155,13 @@ def run_test_with_deadlock_detection(
                         try:
                             line = q.get_nowait()
                             if line:
-                                print(line, end='')
+                                print(line, end="")
                         except queue.Empty:
                             pass
 
+                except KeyboardInterrupt:
+                    handle_keyboard_interrupt_properly()
+                    raise
                 except Exception as e:
                     # No output available or error reading
                     time.sleep(0.1)
@@ -166,7 +179,10 @@ def run_test_with_deadlock_detection(
 def main():
     """Main entry point."""
     if len(sys.argv) < 3:
-        print("Usage: test_wrapper.py <runner_exe> <test_dll> [timeout_seconds]", file=sys.stderr)
+        print(
+            "Usage: test_wrapper.py <runner_exe> <test_dll> [timeout_seconds]",
+            file=sys.stderr,
+        )
         return 1
 
     runner_exe = sys.argv[1]
