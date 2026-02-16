@@ -510,16 +510,16 @@ When you have a unique resource (like a future, file handle, or network connecti
 **Examples:**
 ```cpp
 // ✅ GOOD - Using smart pointers
-fl::vector<fl::shared_ptr<HttpClient>> mActiveClients;
-auto client = fl::make_shared<HttpClient>();
-mActiveClients.push_back(client);
+fl::vector<fl::shared_ptr<Connection>> mActiveConnections;
+auto conn = fl::make_shared<Connection>();
+mActiveConnections.push_back(conn);
 
 // ✅ GOOD - Using unique_ptr for exclusive ownership
-fl::unique_ptr<HttpClient> client = fl::make_unique<HttpClient>();
+fl::unique_ptr<Connection> conn = fl::make_unique<Connection>();
 
 // ✅ GOOD - Moveable wrapper objects (fl::promise example)
-fl::vector<fl::promise<Response>> mActivePromises;  // Copyable wrapper around unique future
-fl::promise<Response> promise = fetch.get(url).execute();
+fl::vector<fl::promise<fl::response>> mActivePromises;  // Copyable wrapper around unique future
+fl::promise<fl::response> promise = fl::fetch_get(url);
 mActivePromises.push_back(promise);  // Safe copy, shared internal state
 
 // ✅ GOOD - Objects stored by value (if copyable/moveable)

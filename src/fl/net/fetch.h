@@ -11,7 +11,7 @@
 ///
 /// @section Simple Callback Usage
 /// @code
-/// #include "fl/fetch.h"
+/// #include "fl/net/fetch.h"
 /// 
 /// void setup() {
 ///     // Simple callback-based fetch (backward compatible)
@@ -25,7 +25,7 @@
 ///
 /// @section Promise Usage 
 /// @code
-/// #include "fl/fetch.h"
+/// #include "fl/net/fetch.h"
 /// 
 /// void setup() {
 ///     // JavaScript-like fetch with promises

@@ -1,5 +1,5 @@
-/// @file    NetTest.ino
-/// @brief   Educational tutorial for FastLED WASM networking with explicit types
+/// @file    Client.ino
+/// @brief   Educational tutorial for FastLED HTTP fetch API with explicit types
 /// @author  FastLED Community
 ///
 /// This tutorial demonstrates network functionality in FastLED WASM builds, specifically
@@ -64,13 +64,13 @@
 /// For WASM (recommended for networking):
 /// 1. Install FastLED: `pip install fastled`
 /// 2. cd into this examples directory  
-/// 3. Run: `fastled NetTest.ino`
+/// 3. Run: `fastled Client.ino`
 /// 4. Open the web page and check browser console for detailed fetch results
 ///
 /// For other platforms:
 /// Uses mock responses for testing the API without network connectivity
 
-#include "fl/fetch.h"     // FastLED HTTP fetch API
+#include "fl/net/fetch.h"     // FastLED HTTP fetch API
 #include "fl/warn.h"      // FastLED logging system  
 #include "fl/async.h"     // FastLED async utilities (await_top_level, etc.)
 #include <FastLED.h>      // FastLED core library
@@ -168,7 +168,7 @@ void test_await_approach() {
     // fetch_options is a data container - you can set timeout, headers, etc.
     fl::fetch_options request_config("");  // Empty URL - will use the URL passed to fetch_get()
     request_config.timeout(5000)          // 5 second timeout
-                  .header("User-Agent", "FastLED/NetTest-Tutorial");  // Custom user agent
+                  .header("User-Agent", "FastLED/Client-Tutorial");  // Custom user agent
     
     // TUTORIAL: fetch_get() returns fl::promise<fl::response> (explicit type!)
     // This promise represents the future HTTP response

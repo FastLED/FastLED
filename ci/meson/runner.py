@@ -843,8 +843,15 @@ def run_meson_build_and_test(
             if test_exe_unix.exists():
                 test_cmd = [str(test_exe_unix)]
             else:
-                # Try DLL-based test architecture: runner.exe + test.dll
-                runner_exe = build_dir / "tests" / "runner.exe"
+                # Try DLL-based test architecture: runner + test.dll/.so
+                # On Windows: runner.exe + test.dll
+                # On Linux: runner + test.so
+                import platform
+
+                runner_name = (
+                    "runner.exe" if platform.system() == "Windows" else "runner"
+                )
+                runner_exe = build_dir / "tests" / runner_name
                 test_dll = build_dir / "tests" / f"{meson_test_name}.dll"
 
                 if not runner_exe.exists():

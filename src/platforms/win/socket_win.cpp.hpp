@@ -2,7 +2,7 @@
 
 #include "platforms/win/is_win.h"
 
-#if defined(FASTLED_HAS_NETWORKING) && 0
+#ifdef FASTLED_HAS_NETWORKING
 #ifdef FL_IS_WIN
 
 #include "socket_win.h"
@@ -282,41 +282,9 @@ int fcntl(int fd, int cmd, ...) {
     return -1;
 }
 
-// Error handling
-int get_errno() {
-    return translate_windows_error(WSAGetLastError());
-}
-
-//=============================================================================
-// Platform-specific functions (required by socket_factory.cpp)
-//=============================================================================
-
-fl::shared_ptr<Socket> create_platform_socket(const SocketOptions& options) {
-    // Windows doesn't have a specific Socket implementation class yet
-    // Return nullptr for now - this will need a Windows Socket class implementation
-    (void)options;
-    return nullptr;
-}
-
-bool platform_supports_ipv6() {
-    // Windows supports IPv6
-    return true;
-}
-
-bool platform_supports_tls() {
-    // TLS would need to be implemented at a higher level for Windows
-    return false;
-}
-
-bool platform_supports_non_blocking_connect() {
-    // Windows supports non-blocking operations
-    return true;
-}
-
-bool platform_supports_socket_reuse() {
-    // Windows supports SO_REUSEADDR
-    return true;
-}
+// Note: get_errno() is provided by fl/stl/cerrno.h
+// Note: Platform abstraction functions (create_platform_socket, etc.) are not needed
+//       for basic HTTP server - HTTP server uses the socket API functions directly
 
 } // namespace fl
 
