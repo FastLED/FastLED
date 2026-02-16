@@ -1,4 +1,5 @@
 // ok no namespace fl
+// ok relative include - timeout_watchdog.h in tests/ needed by runner
 #pragma once
 
 // IWYU pragma: private
@@ -30,6 +31,9 @@
 #include "winbase.h"
 // IWYU pragma: end_keep
 
+// Timeout watchdog for hung example detection
+#include "../../../tests/timeout_watchdog.h"  // ok include path, ok relative include. IWYU pragma: keep
+
 // Crash handler setup (defined in crash_handler_main.cpp)
 extern "C" void runner_setup_crash_handler();
 
@@ -40,6 +44,10 @@ int main(int argc, char** argv) {
     // Setup crash handler BEFORE loading any DLLs
     // This ensures crash handling is active for the entire process lifetime
     runner_setup_crash_handler();
+
+    // Setup timeout watchdog to detect hung examples
+    timeout_watchdog::setup();  // Default: 20 seconds, configurable via FASTLED_TEST_TIMEOUT
+
     std::string dll_path;
 
     // Determine DLL path: explicit argument or inferred from exe name

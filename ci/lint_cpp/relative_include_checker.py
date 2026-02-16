@@ -13,6 +13,13 @@ SRC_DIR = str(PROJECT_ROOT / "src").replace("\\", "/")
 # Pre-compiled regex for #include with ".." in the path
 _RELATIVE_INCLUDE_PATTERN = re.compile(r'^\s*#\s*include\s+[<"]([^>"]*\.\..*)[>"]')
 
+# Files that are allowed to use relative includes (e.g., platform runners that need tests/ headers)
+_ALLOWED_RELATIVE_INCLUDE_FILES = {
+    "src/platforms/win/run_example.hpp",
+    "src/platforms/posix/run_example.hpp",
+    "src/platforms/apple/run_example.hpp",
+}
+
 
 class RelativeIncludeChecker(FileContentChecker):
     """Checker for relative includes containing '..' in src/ files."""
@@ -29,12 +36,24 @@ class RelativeIncludeChecker(FileContentChecker):
 
     def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check for relative includes containing '..'."""
+        # Skip files that are explicitly allowed to use relative includes
+        normalized_path = file_content.path.replace("\\", "/")
+        if any(
+            normalized_path.endswith(allowed_file)
+            for allowed_file in _ALLOWED_RELATIVE_INCLUDE_FILES
+        ):
+            return []
+
         violations: list[tuple[int, str]] = []
 
         for line_number, line in enumerate(file_content.lines, 1):
             match = _RELATIVE_INCLUDE_PATTERN.match(line)
             if match:
-                violations.append((line_number, f"Relative include: {line.strip()}"))
+                # Allow suppression with '// ok relative include' comment
+                if "// ok relative include" not in line:
+                    violations.append(
+                        (line_number, f"Relative include: {line.strip()}")
+                    )
 
         if violations:
             self.violations[file_content.path] = violations

@@ -39,19 +39,25 @@
 #undef ARDUINO_INPUT_BACKUP
 #endif
 
+// IWYU pragma: no_include "ios"
+// IWYU pragma: no_include "iostream"
+// IWYU pragma: no_include "ratio"
+// IWYU pragma: no_include "test.h"
+
 #ifdef ENABLE_CRASH_HANDLER
 #include "crash_handler.h"
 #endif
 
+// Timeout watchdog only in standalone mode (not DLL mode)
+// In DLL mode, runner.exe manages timeouts externally
+#ifndef TEST_DLL_MODE
+#include "platforms/timeout_watchdog.h"
+#endif
 
 #include "platforms/stub/task_coroutine_stub.h"
 #include "platforms/stub/coroutine_runner.h"
 #include "platforms/esp/32/drivers/parlio/parlio_peripheral_mock.h"
-#include "fl/stl/iostream.h"  // For debug output
-#include "fl/stl/algorithm.h"
-#include "fl/stl/ostream.h"
-#include <chrono>              // For test case timing
-#include <memory>              // For std::unique_ptr in TimingReporter
+#include "fl/stl/cstdlib.h"
 
 // This file contains the main function for doctest
 // It will be compiled once and linked to all test executables
@@ -160,6 +166,9 @@ int fl_run_tests(int argc, const char** argv) {
     // We do NOT call setup_crash_handler() here to avoid duplicate setup
     // and to keep crash handler dependencies (dbghelp, psapi) in runner.exe only
 
+    // NOTE: Timeout watchdog is NOT enabled in DLL mode - runner.exe and test_wrapper.py
+    // provide external timeout monitoring with better stack trace capabilities
+
     // Pre-initialize CoroutineRunner singleton to avoid DLL hang on first access
     std::cout << "Pre-initializing CoroutineRunner singleton" << std::endl;
     fl::detail::CoroutineRunner::instance();
@@ -173,6 +182,7 @@ int fl_run_tests(int argc, const char** argv) {
     context.setOption("no-colors", false);  // Enable colors for warnings
 
     int result = context.run();
+
     fl_cleanup();
     return result;
 }
@@ -180,6 +190,12 @@ int fl_run_tests(int argc, const char** argv) {
 int fl_main(int argc, char** argv) {
 #ifdef ENABLE_CRASH_HANDLER
     setup_crash_handler();
+#endif
+
+#ifndef TEST_DLL_MODE
+    // Setup internal timeout watchdog (detects hangs from within test process)
+    // Only in standalone mode - DLL mode uses external monitoring
+    timeout_watchdog::setup();  // Default: 20 seconds, configurable via FASTLED_TEST_TIMEOUT
 #endif
 
     // Run doctest with timing reporter
@@ -190,6 +206,12 @@ int fl_main(int argc, char** argv) {
     context.setOption("no-colors", false);  // Enable colors for warnings
 
     int result = context.run();
+
+#ifndef TEST_DLL_MODE
+    // Cancel watchdog before cleanup (tests completed successfully)
+    timeout_watchdog::cancel();
+#endif
+
     fl_cleanup();
     return result;
 }

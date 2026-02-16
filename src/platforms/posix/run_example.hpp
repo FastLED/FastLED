@@ -1,4 +1,5 @@
 // ok no namespace fl
+// ok relative include - timeout_watchdog.h in tests/ needed by runner
 #pragma once
 
 // IWYU pragma: private
@@ -14,7 +15,6 @@
 ///
 /// NOTE: Uses std:: types to avoid FastLED dependencies in the runner.
 
-#include "platforms/posix/is_posix.h"
 #include "platforms/win/is_win.h"
 
 #if !defined(FL_IS_WIN) && !defined(FL_IS_APPLE)
@@ -24,9 +24,15 @@
 #include <unistd.h> // For readlink
 // IWYU pragma: end_keep
 
+// Timeout watchdog for hung example detection
+#include "../../../tests/timeout_watchdog.h"  // ok include path, ok relative include. IWYU pragma: keep
+
 int main(int argc, char** argv) {
     // Setup crash handler BEFORE loading any shared libraries
     runner_setup_crash_handler();
+
+    // Setup timeout watchdog to detect hung examples
+    timeout_watchdog::setup();  // Default: 20 seconds, configurable via FASTLED_TEST_TIMEOUT
 
     std::string so_path;
     const std::string shared_lib_ext = ".so";

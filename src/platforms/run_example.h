@@ -36,9 +36,9 @@ typedef int (*RunExampleFunc)(int argc, const char** argv);
 
 // Platform-specific implementations
 #if defined(_WIN32)
-#include "platforms/win/run_example.hpp"
+#include "platforms/win/run_example.hpp"  // IWYU pragma: keep
 #elif defined(__APPLE__)
-#include "platforms/apple/run_example.hpp"
+#include "platforms/apple/run_example.hpp"  // IWYU pragma: keep
 #else
-#include "platforms/posix/run_example.hpp"
+#include "platforms/posix/run_example.hpp"  // IWYU pragma: keep
 #endif
