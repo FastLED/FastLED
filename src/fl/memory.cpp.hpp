@@ -18,6 +18,10 @@ extern "C" char *__brkval;  // Heap top pointer (set by malloc)
 extern "C" char *__malloc_heap_start;  // Heap start (linker symbol)
 #endif
 
+// IWYU pragma: begin_keep
+#include "fl/stl/undef.h"  // Undefine Arduino macros (min, max, abs, etc.)
+// IWYU pragma: end_keep
+
 namespace fl {
 
 #ifdef FL_IS_ESP32

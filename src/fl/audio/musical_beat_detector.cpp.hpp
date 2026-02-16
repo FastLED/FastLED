@@ -1,6 +1,7 @@
 #include "fl/audio/musical_beat_detector.h"
+#include "fl/int.h"
 #include "fl/stl/math.h"
-#include "fl/math_macros.h"
+#include "fl/stl/vector.h"
 
 namespace fl {
 

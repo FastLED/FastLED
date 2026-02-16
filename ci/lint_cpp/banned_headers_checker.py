@@ -208,6 +208,7 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
         HeaderException(
             "led_sysdefs.h", "Core system definitions need platform headers"
         ),
+        HeaderException("fl/stl/undef.h", "Needs Arduino.h to undefine its macros"),
         HeaderException("fl/stl/time.cpp", "Platform-specific time implementation"),
         HeaderException(
             "fl/stl/time.cpp.hpp", "Platform-specific time implementation (header-only)"

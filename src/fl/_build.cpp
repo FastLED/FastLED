@@ -8,6 +8,10 @@
 // See CLAUDE.md "Function-local statics and Teensy 3.x" for details.
 #include "platforms/new.h"
 
+// IWYU pragma: begin_keep
+#include "fl/stl/undef.h"  // Undefine Arduino macros (min, max, abs, etc.)
+// IWYU pragma: end_keep
+
 // Root directory implementations
 #include "fl/_build.hpp"
 
