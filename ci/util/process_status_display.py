@@ -71,6 +71,7 @@ class ProcessStatusDisplay(ABC):
         status_interval = (
             5  # Show status every 5 seconds (reduced noise for short tasks)
         )
+        last_printed_message: Optional[str] = None  # Track last message to avoid spam
 
         while not self._stop_event.is_set():
             try:
@@ -98,11 +99,19 @@ class ProcessStatusDisplay(ABC):
                         total = group_status.total_processes
                         # For single item, omit counter; for multiple, use 1-indexed current position
                         if total == 1:
-                            print(f"  Running: {running_list}")
+                            status_msg = f"  Running: {running_list}"
                         else:
                             # Show 1-indexed "current/total" (e.g., [1/3] when first is running)
                             current = completed_count + 1
-                            print(f"  [{current}/{total}] Running: {running_list}")
+                            status_msg = (
+                                f"  [{current}/{total}] Running: {running_list}"
+                            )
+
+                        # Only print if status changed to avoid spam
+                        if status_msg != last_printed_message:
+                            print(status_msg, flush=True)
+                            last_printed_message = status_msg
+
                         last_status_time = current_time
 
                 spinner_index = (spinner_index + 1) % 4

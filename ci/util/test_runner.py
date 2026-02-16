@@ -59,6 +59,55 @@ _GLOBAL_TIMEOUT = (
 MAX_FAILURES_BEFORE_ABORT = 3
 
 
+def get_test_counts() -> tuple[int, int, int]:
+    """
+    Get accurate counts of unit tests, examples, and Python tests.
+
+    Returns:
+        Tuple of (unit_test_count, example_count, python_test_count)
+    """
+    try:
+        from pathlib import Path
+
+        from ci.util.smart_selector import discover_all_tests
+
+        # Get unit tests and examples
+        unit_tests, examples = discover_all_tests(Path.cwd())
+        unit_count = len(unit_tests)
+        example_count = len(examples)
+
+        # Count Python tests by running pytest --collect-only
+        python_count = 0
+        try:
+            result = subprocess.run(
+                ["uv", "run", "pytest", "--collect-only", "-q", "ci/tests"],
+                capture_output=True,
+                text=True,
+                timeout=10,
+                check=False,
+            )
+            if result.returncode == 0:
+                # Parse output to count tests
+                # pytest --collect-only -q outputs lines like "test_foo.py::test_bar"
+                lines = result.stdout.strip().split("\n")
+                python_count = sum(1 for line in lines if "::" in line)
+        except KeyboardInterrupt:
+            handle_keyboard_interrupt_properly()
+            raise
+        except (subprocess.SubprocessError, subprocess.TimeoutExpired):
+            # If counting fails, use 0 as fallback
+            python_count = 0
+
+        return (unit_count, example_count, python_count)
+
+    except KeyboardInterrupt:
+        handle_keyboard_interrupt_properly()
+        raise
+    except Exception:
+        # If discovery fails, return zeros
+        return (0, 0, 0)
+
+
 def extract_error_snippet(accumulated_output: list[str], context_lines: int = 5) -> str:
     """
     Extract relevant error snippets from process output.

@@ -2,25 +2,19 @@
 // Memory profiling test for JSON parsers
 // Compares parse() (ArduinoJson) vs parse2() (custom parser)
 // Uses global allocation overrides to track ALL memory usage
-//
-// Usage:
-//   ./json_memory_profile              # Run all memory profiling tests (default)
-//   ./json_memory_profile phase1       # Test Phase 1 validation (zero allocations)
-//   ./json_memory_profile small        # Profile small JSON memory usage
-//   ./json_memory_profile large        # Profile large JSON memory usage
 
-#include "fl/file_system.h"
-#include "fl/int.h"
-#include "fl/json.h"
-#include "fl/string_view.h"
-#include "fl/stl/atomic.h"
-#include "fl/stl/cstdint.h"
-#include "fl/stl/cstring.h"
-#include "fl/stl/map.h"
-#include "fl/stl/stdio.h"
-#include "fl/stl/string.h"
-#include "stdio.h"   // ok include
-#include "stdlib.h"  // ok include
+#include "fl/file_system.h"  // for FileHandle, FileSystem, make_sdcard_filesystem
+#include "fl/int.h"          // for size, u32, u8
+#include "fl/json.h"         // for Json
+#include "fl/stl/atomic.h"   // for atomic
+#include "fl/stl/cstdint.h"  // for size_t
+#include "fl/stl/map.h"      // for FixedMap
+#include "fl/stl/stdio.h"    // for printf
+#include "fl/stl/string.h"   // for string
+#include "fl/string_view.h"  // for string_view
+#include "stdio.h"           // for printf // ok include
+#include "stdlib.h"          // for abort, calloc, free, malloc, realloc
+#include "string.h"          // for strlen // ok include
 
 // Platform-specific includes (avoid windows.h to prevent macro conflicts)
 #ifdef _WIN32
@@ -349,7 +343,9 @@ void profile_json_memory(const char* test_name, const fl::string& json_data) {
     {
         Json result1 = Json::parse(json_data);
         if (result1.is_null()) {
-            printf("❌ ERROR: parse() returned null\n");
+            printf("❌ ERROR: ArduinoJson parse() failed\n");
+            g_tracking_enabled = false;
+            return;
         }
 
         parse1_peak = g_stats.peak_bytes.load();
@@ -366,9 +362,11 @@ void profile_json_memory(const char* test_name, const fl::string& json_data) {
     size_t parse2_peak = 0;
     size_t parse2_allocs = 0;
     {
-        Json result2 = Json::parse(json_data);
+        Json result2 = Json::parse2(json_data);
         if (result2.is_null()) {
-            printf("❌ ERROR: parse2() returned null\n");
+            printf("❌ ERROR: Custom parse2() failed\n");
+            g_tracking_enabled = false;
+            return;
         }
 
         parse2_peak = g_stats.peak_bytes.load();
@@ -414,25 +412,13 @@ void profile_json_memory(const char* test_name, const fl::string& json_data) {
 
     printf("================================================================================\n");
     printf("\n");
-
-    // Structured output for AI consumption
-    printf("PROFILE_RESULT:{\n");
-    printf("  \"test\": \"%s\",\n", test_name);
-    printf("  \"json_size_bytes\": %zu,\n", json_data.size());
-    printf("  \"parse1_peak_bytes\": %zu,\n", parse1_peak);
-    printf("  \"parse1_allocs\": %zu,\n", parse1_allocs);
-    printf("  \"parse2_peak_bytes\": %zu,\n", parse2_peak);
-    printf("  \"parse2_allocs\": %zu,\n", parse2_allocs);
-    printf("  \"memory_ratio\": %.2f,\n", memory_ratio);
-    printf("  \"alloc_ratio\": %.2f\n", alloc_ratio);
-    printf("}\n");
 }
 
 // ============================================================================
-// TEST FUNCTIONS
+// MEMORY PROFILING FUNCTIONS
 // ============================================================================
 
-bool test_phase1_zero_allocations() {
+int test_phase1_validation() {
     printf("\n\n");
     printf("================================================================================\n");
     printf("JSON PHASE 1 VALIDATION TEST - ZERO HEAP ALLOCATIONS\n");
@@ -444,7 +430,7 @@ bool test_phase1_zero_allocations() {
 
     // Test Phase 1 validation with complex JSON
     const char* test_json = STRESS_TEST_JSON;
-    printf("JSON size: %zu bytes\n", fl::strlen(test_json));
+    printf("JSON size: %zu bytes\n", ::strlen(test_json));
     printf("Testing Phase 1 validation (tokenization + validation only)...\n\n");
 
     g_stats.reset();
@@ -452,7 +438,7 @@ bool test_phase1_zero_allocations() {
 
     // Phase 1 validation only - this MUST allocate ZERO heap memory
     // Use zero-copy string_view to avoid fl::string allocation
-    bool valid = Json::parse2_validate_only(fl::string_view(test_json, fl::strlen(test_json)));
+    bool valid = Json::parse2_validate_only(fl::string_view(test_json, ::strlen(test_json)));
 
     g_tracking_enabled = false;
 
@@ -468,25 +454,25 @@ bool test_phase1_zero_allocations() {
     printf("\n");
 
     // CRITICAL: Phase 1 must allocate ZERO heap memory
-    bool success = (phase1_allocs == 0 && phase1_bytes == 0);
-    if (success) {
+    if (phase1_allocs == 0 && phase1_bytes == 0) {
         printf("✓✓✓ PASS: Phase 1 validation allocates ZERO heap memory\n");
     } else {
         printf("✗✗✗ FAIL: Phase 1 validation allocated memory!\n");
         printf("    Expected: 0 allocations, 0 bytes\n");
         printf("    Actual:   %zu allocations, %zu bytes\n", phase1_allocs, phase1_bytes);
+        printf("================================================================================\n\n");
+        return 1;  // Failure
     }
     printf("================================================================================\n\n");
-
-    return success;
+    return 0;  // Success
 }
 
-bool test_small_json_memory() {
+int test_small_json_profiling() {
     profile_json_memory("SMALL JSON MEMORY PROFILE (10KB Synthetic)", STRESS_TEST_JSON);
-    return true;
+    return 0;  // Success
 }
 
-bool test_large_json_memory() {
+int test_large_json_profiling() {
     printf("\n\n");
     printf("================================================================================\n");
     printf("LOADING LARGE JSON FILE\n");
@@ -497,7 +483,7 @@ bool test_large_json_memory() {
     FsImplPtr fsImpl = make_sdcard_filesystem(0);
     if (!fs.begin(fsImpl)) {
         printf("❌ ERROR: Failed to initialize test filesystem\n");
-        return false;
+        return 1;  // Failure
     }
 
     // Open and read the JSON file
@@ -506,7 +492,7 @@ bool test_large_json_memory() {
         printf("⚠️  WARNING: Could not open tests/profile/benchmark_1mb.json\n");
         printf("   Skipping large JSON memory profile test.\n");
         printf("   Download it with: curl -o tests/profile/benchmark_1mb.json https://microsoftedge.github.io/Demos/json-dummy-data/1MB.json\n");
-        return true;  // Not an error, just skip
+        return 0;  // Skip, not a failure
     }
 
     // Read file contents
@@ -518,7 +504,7 @@ bool test_large_json_memory() {
 
     if (bytes_read != file_size) {
         printf("❌ ERROR: Read %zu bytes but expected %zu bytes\n", bytes_read, file_size);
-        return false;
+        return 1;  // Failure
     }
 
     printf("✓ Loaded %zu bytes (%.2f KB)\n\n", bytes_read, bytes_read / 1024.0);
@@ -526,45 +512,37 @@ bool test_large_json_memory() {
     // Run memory profiling on large JSON
     profile_json_memory("LARGE JSON MEMORY PROFILE (1MB Real-World)", large_json);
 
-    return true;
+    return 0;  // Success
 }
 
-void print_usage() {
-    printf("JSON Memory Profiler\n");
-    printf("Compares memory usage: parse() (ArduinoJson) vs parse2() (custom parser)\n\n");
-    printf("Usage:\n");
-    printf("  json_memory_profile              # Run all tests (default)\n");
-    printf("  json_memory_profile phase1       # Test Phase 1 zero allocations\n");
-    printf("  json_memory_profile small        # Profile small JSON memory\n");
-    printf("  json_memory_profile large        # Profile large JSON memory\n");
-}
+// ============================================================================
+// MAIN ENTRY POINT
+// ============================================================================
 
-int main(int argc, char* argv[]) {
-    const char* mode = "all";  // Default mode
-    if (argc > 1) {
-        mode = argv[1];
-    }
+int main(int argc, char** argv) {
+    printf("================================================================================\n");
+    printf("JSON MEMORY PROFILER\n");
+    printf("================================================================================\n");
+    printf("This profiler tracks ALL heap allocations using global malloc/free overrides.\n");
+    printf("Compares ArduinoJson parse() vs custom parse2() memory usage.\n");
+    printf("================================================================================\n\n");
 
-    bool success = true;
+    int failures = 0;
 
-    if (fl::strcmp(mode, "phase1") == 0) {
-        success = test_phase1_zero_allocations();
-    } else if (fl::strcmp(mode, "small") == 0) {
-        success = test_small_json_memory();
-    } else if (fl::strcmp(mode, "large") == 0) {
-        success = test_large_json_memory();
-    } else if (fl::strcmp(mode, "all") == 0) {
-        success = test_phase1_zero_allocations() &&
-                  test_small_json_memory() &&
-                  test_large_json_memory();
-    } else if (fl::strcmp(mode, "help") == 0 || fl::strcmp(mode, "--help") == 0 || fl::strcmp(mode, "-h") == 0) {
-        print_usage();
-        return 0;
+    // Run all profiling tests
+    failures += test_phase1_validation();
+    failures += test_small_json_profiling();
+    failures += test_large_json_profiling();
+
+    // Summary
+    printf("\n\n");
+    printf("================================================================================\n");
+    if (failures == 0) {
+        printf("✓✓✓ ALL PROFILING TESTS PASSED\n");
     } else {
-        printf("Unknown mode: %s\n\n", mode);
-        print_usage();
-        return 1;
+        printf("✗✗✗ %d TEST(S) FAILED\n", failures);
     }
+    printf("================================================================================\n");
 
-    return success ? 0 : 1;
+    return failures;
 }
