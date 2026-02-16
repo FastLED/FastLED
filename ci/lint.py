@@ -15,6 +15,7 @@ from ci.lint.args_parser import LintArgs, parse_lint_args
 from ci.lint.duration_tracker import DurationTracker
 from ci.lint.orchestrator import LintOrchestrator
 from ci.lint.stage_impls import (
+    run_clang_tidy,
     run_cpp_lint,
     run_cpp_lint_single_file,
     run_iwyu_analysis,
@@ -109,10 +110,12 @@ def print_ai_hints() -> None:
     print("  - Use 'bash lint --cpp' for C++ linting only")
     print("  - Use 'bash lint --full' to include IWYU (Include-What-You-Use) analysis")
     print("  - Use 'bash lint --iwyu' to run IWYU analysis only")
+    print("  - Use 'bash lint --tidy' to run clang-tidy static analysis on src/fl")
     print("  - Python linting includes: ruff (lint + format) + KBI checker + ty")
     print("  - Use --strict to also run pyright (strict type checking)")
     print("  - C++ linting includes: clang-format and custom checkers")
     print("  - IWYU runs with --full, --iwyu, or --strict flags")
+    print("  - clang-tidy runs with --tidy flag")
     print("  - JavaScript linting: FAST ONLY (no slow fallback)")
     print("  - To enable fast JavaScript linting: uv run ci/setup-js-linting-fast.py")
     print("  - Use 'bash lint --help' for usage information")
@@ -152,6 +155,8 @@ def create_stages(args: LintArgs) -> list[LintStage]:
                 return False
             if not run_iwyu_analysis(args.run_full, args.run_iwyu, args.run_pyright):
                 return False
+            if not run_clang_tidy(args.no_fingerprint, args.run_tidy):
+                return False
             return True
 
         stages.append(
@@ -159,7 +164,7 @@ def create_stages(args: LintArgs) -> list[LintStage]:
                 name="cpp_linting",
                 display_name="C++ LINTING",
                 run_fn=run_cpp_and_iwyu,
-                timeout=600.0,  # Combined timeout for C++ + IWYU
+                timeout=600.0,  # Combined timeout for C++ + IWYU + clang-tidy
             )
         )
 

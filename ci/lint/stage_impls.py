@@ -33,6 +33,101 @@ class Colors:
     NC = "\033[0m"  # No Color
 
 
+def run_clang_tidy(no_fingerprint: bool, run_tidy: bool) -> bool:
+    """
+    Run clang-tidy static analysis on C++ files.
+
+    Args:
+        no_fingerprint: Skip fingerprint cache
+        run_tidy: Run clang-tidy analysis
+
+    Returns:
+        True if analysis passed, False otherwise
+    """
+    print("")
+    print("🔍 CLANG-TIDY STATIC ANALYSIS")
+    print("------------------------------")
+
+    if not run_tidy:
+        print("⏭️  clang-tidy skipped (use --tidy to enable)")
+        return True
+
+    # Find all C++ source and header files in src/fl
+    src_fl_dir = Path("src/fl")
+    if not src_fl_dir.exists():
+        print("⚠️  src/fl directory not found")
+        return True
+
+    # Collect all C++ files
+    cpp_files = []
+    for ext in ["*.cpp", "*.h", "*.hpp"]:
+        cpp_files.extend(src_fl_dir.rglob(ext))
+
+    if not cpp_files:
+        print("⚠️  No C++ files found in src/fl")
+        return True
+
+    print(f"Running clang-tidy on {len(cpp_files)} files in src/fl/...")
+
+    # Run clang-tidy on each file
+    failed_files = []
+    issues_count = 0
+    checked_count = 0
+
+    for file_path in cpp_files:
+        checked_count += 1
+        # Print progress every 50 files
+        if checked_count % 50 == 0 or checked_count == len(cpp_files):
+            print(f"  [{checked_count}/{len(cpp_files)}] Checking files...")
+        # Build compiler arguments
+        # Use C++17 to avoid issues with modern standard library headers
+        compiler_args = [
+            "-std=c++17",
+            "-Isrc",
+            "-Isrc/platforms/stub",
+            "-DSTUB_PLATFORM",
+            "-DARDUINO=10808",
+            "-DFASTLED_USE_STUB_ARDUINO",
+            "-DFASTLED_STUB_IMPL",
+            "-DFASTLED_TESTING",
+        ]
+
+        # For header files, explicitly specify the language as C++
+        if str(file_path).endswith((".h", ".hpp")):
+            compiler_args.extend(["-x", "c++-header"])
+
+        # Run clang-tidy using clang-tool-chain wrapper via uv
+        result = subprocess.run(
+            [
+                "uv",
+                "run",
+                "clang-tool-chain-tidy",
+                str(file_path),
+                "--",
+            ]
+            + compiler_args,
+            capture_output=True,
+            text=True,
+        )
+
+        if result.returncode != 0:
+            failed_files.append(str(file_path))
+            issues_count += 1
+            # Print output for failed files
+            print(f"\n❌ {file_path.relative_to('src/fl')}:")
+            if result.stdout:
+                print(result.stdout)
+            if result.stderr:
+                print(result.stderr, file=sys.stderr)
+
+    if failed_files:
+        print(f"\n❌ clang-tidy found issues in {issues_count} file(s)")
+        return False
+    else:
+        print("✅ clang-tidy analysis passed")
+        return True
+
+
 def run_cpp_lint(no_fingerprint: bool, run_full: bool, run_iwyu: bool) -> bool:
     """
     Run C++ linting stage.

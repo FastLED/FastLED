@@ -16,6 +16,7 @@ class LintArgs:
     run_full: bool = False
     run_iwyu: bool = False
     run_pyright: bool = False
+    run_tidy: bool = False
     files: list[str] = field(default_factory=lambda: list[str]())
 
 
@@ -42,6 +43,7 @@ Python linting includes:
 C++ linting includes:
   - clang-format and custom checkers
   - IWYU (Include-What-You-Use) runs with --full, --iwyu, or --strict
+  - clang-tidy static analysis runs with --tidy
 
 JavaScript linting:
   - FAST ONLY (skips if not available)
@@ -53,6 +55,7 @@ Examples:
   bash lint --cpp              # C++ linting only
   bash lint --full             # Include IWYU (Include-What-You-Use) on all files
   bash lint --iwyu             # Run IWYU only
+  bash lint --tidy             # Run clang-tidy static analysis
   bash lint --no-fingerprint   # Force re-run all linters
   bash lint --strict file.cpp  # Single file with IWYU enabled
 """,
@@ -95,6 +98,12 @@ Examples:
     )
 
     parser.add_argument(
+        "--tidy",
+        action="store_true",
+        help="Run clang-tidy static analysis on C++ files",
+    )
+
+    parser.add_argument(
         "files",
         nargs="*",
         default=[],
@@ -118,5 +127,6 @@ Examples:
         run_full=args.full,
         run_iwyu=args.iwyu,
         run_pyright=args.strict,
+        run_tidy=args.tidy,
         files=files,
     )
