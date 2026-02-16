@@ -489,6 +489,10 @@ def run_cpp_lint_single_file(file_path: str, strict: bool = False) -> bool:
     Delegates to run_all_checkers.py which already supports single-file mode.
     When strict=True, also runs IWYU analysis on the file.
 
+    Execution order:
+    1. Standard C++ checkers (clang-format, banned headers, etc.)
+    2. IWYU checks (pragma check + analysis) - RUNS LAST, only if step 1 passed
+
     Args:
         file_path: Absolute path to the C++ file
         strict: If True, also run IWYU analysis on the file
@@ -498,7 +502,7 @@ def run_cpp_lint_single_file(file_path: str, strict: bool = False) -> bool:
     """
     print(f"🔧 C++ lint: {os.path.relpath(file_path)}")
 
-    # Run standard C++ checkers
+    # STEP 1: Run standard C++ checkers FIRST
     result = subprocess.run(
         ["uv", "run", "python", "ci/lint_cpp/run_all_checkers.py", file_path],
         capture_output=False,
@@ -507,6 +511,8 @@ def run_cpp_lint_single_file(file_path: str, strict: bool = False) -> bool:
     if result.returncode != 0:
         print(f"  ❌ failed")
         return False
+
+    # STEP 2: IWYU checks run LAST (only if C++ checkers passed with no errors)
 
     # Run IWYU pragma check (always)
     if not run_iwyu_pragma_check_single_file(file_path):
