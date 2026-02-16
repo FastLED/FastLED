@@ -347,6 +347,16 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 srl_u32_4(simd_u32x4 vec, int shift) noe
     return _mm_srli_epi32(vec, shift);
 }
 
+// Shift right arithmetic (sign-extend) - for signed fixed-point math
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sra_i32_4(simd_u32x4 vec, int shift) noexcept {
+    return _mm_srai_epi32(vec, shift);
+}
+
+// Shift left logical (zero-fill) - for fixed-point format conversion
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sll_u32_4(simd_u32x4 vec, int shift) noexcept {
+    return _mm_slli_epi32(vec, shift);
+}
+
 // Bitwise AND of two u32 vectors
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 and_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
     return _mm_and_si128(a, b);
@@ -690,6 +700,16 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 srl_u32_4(simd_u32x4 vec, int shift) noe
     simd_u32x4 result;
     for (int i = 0; i < 4; ++i) {
         result.data[i] = vec.data[i] >> shift;
+    }
+    return result;
+}
+
+// Shift right arithmetic (sign-extend) - for signed fixed-point math
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sra_i32_4(simd_u32x4 vec, int shift) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        i32 val = static_cast<i32>(vec.data[i]);
+        result.data[i] = static_cast<u32>(val >> shift);
     }
     return result;
 }

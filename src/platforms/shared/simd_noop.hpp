@@ -339,6 +339,15 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 srl_u32_4(simd_u32x4 vec, int shift) noe
     return result;
 }
 
+// Shift left logical (zero-fill) - for fixed-point format conversion
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sll_u32_4(simd_u32x4 vec, int shift) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        result.data[i] = vec.data[i] << shift;
+    }
+    return result;
+}
+
 // Bitwise AND of two u32 vectors
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 and_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
     simd_u32x4 result;
