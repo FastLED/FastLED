@@ -118,7 +118,10 @@ def discover_examples_all(examples_dir: Path) -> None:
         cpp_sources: list[str] = []
 
         # First, check for .cpp files in the example root directory
+        # Exclude .ino.cpp files (PlatformIO preprocessed intermediates)
         for cpp_file in example_root.glob("*.cpp"):
+            if cpp_file.name.endswith(".ino.cpp"):
+                continue
             cpp_sources.append(
                 str(cpp_file.relative_to(examples_dir.parent)).replace("\\", "/")
             )

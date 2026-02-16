@@ -104,11 +104,11 @@ Engines are tried in priority order until one accepts the channel:
 
 | Engine | Priority | Platforms | Status |
 |--------|----------|-----------|--------|
-| **PARLIO** | Highest | ESP32-P4, C6, H2 | Parallel I/O with hardware timing |
-| **RMT** | High | All ESP32 variants | Recommended default, reliable |
-| **I2S** | Medium | ESP32-S3 | LCD_CAM via I80 bus (experimental) |
-| **SPI** | Low | ESP32, S2, S3 | DMA-based, deprioritized due to reliability |
-| **UART** | Lowest | All ESP32 variants | Wave8 encoding (not recommended) |
+| **PARLIO** | 4 (Highest) | ESP32-P4, C6, H2, C5 | Parallel I/O with hardware timing |
+| **RMT** | 2 (Recommended) | All ESP32 variants | Recommended default, reliable |
+| **I2S** | 1 | ESP32-S3 | LCD_CAM via I80 bus (experimental) |
+| **SPI** | 0 | ESP32, S2, S3 | DMA-based, deprioritized due to reliability |
+| **UART** | -1 (Lowest) | All ESP32 variants | Wave8 encoding (broken, not recommended) |
 
 ### Overriding Engine Selection
 
@@ -338,14 +338,14 @@ FastLED.show();  // Sequential transmission through same engine
 
 Hardware engines use a 4-state machine for non-blocking DMA transmission:
 
-| State | Description | `beginTransmission()` behavior |
+| State | Description | `poll()` return value meaning |
 |-------|-------------|-------------------------------|
-| **READY** | Idle, ready to accept new data | Non-blocking |
-| **BUSY** | Actively enqueueing channels | Blocks until DRAINING |
-| **DRAINING** | All channels queued, DMA transmitting | Blocks until READY |
-| **ERROR** | Hardware error occurred | Returns immediately |
+| **READY** | Idle, ready to accept new data | Hardware is idle, safe to call `show()` |
+| **BUSY** | Actively transmitting or queuing channels | Transmission in progress, engine is working |
+| **DRAINING** | All channels enqueued, DMA still transmitting | Transmission finishing, no more data needed |
+| **ERROR** | Hardware error occurred | Error state, check error message |
 
-**State flow:** READY → `beginTransmission()` → BUSY → DRAINING → READY
+**State flow:** READY → `show()` → BUSY → DRAINING → `poll()` → READY
 
 ### Non-Blocking API
 
@@ -373,25 +373,21 @@ void loop() {
     // Get engine from ChannelBusManager
     auto& manager = fl::ChannelBusManager::instance();
 
-    // Poll engine state
-    while (true) {
-        fl::IChannelEngine::EngineState state = manager.poll();
+    // Check if engine is ready for new data
+    fl::IChannelEngine::EngineState state = manager.poll();
 
-        if (state == fl::IChannelEngine::EngineState::READY ||
-            state == fl::IChannelEngine::EngineState::DRAINING) {
-            break;  // Transmission queued or complete
-        }
-
-        if (state == fl::IChannelEngine::EngineState::ERROR) {
-            Serial.println(state.error.c_str());
-            break;
-        }
-
-        // BUSY - do other work while DMA transmits
+    if (state == fl::IChannelEngine::EngineState::READY) {
+        // Hardware is idle - safe to show next frame
+        FastLED.show();
+    } else if (state == fl::IChannelEngine::EngineState::DRAINING) {
+        // DMA transmission finishing - no more poll() needed this frame
+        // Do useful work while waiting
         computeNextFrame();
+    } else if (state == fl::IChannelEngine::EngineState::ERROR) {
+        Serial.println(state.error.c_str());
     }
+    // BUSY state: Keep polling until DRAINING or READY
 
-    FastLED.show();
     delay(20);
 }
 ```
@@ -400,6 +396,8 @@ void loop() {
 - High frame rate applications requiring CPU/DMA parallelism
 - Custom transmission scheduling across multiple engines
 - Fine-grained control over transmission timing
+
+**Key insight:** DRAINING state signals that the engine doesn't need more `poll()` calls - all channels are enqueued and DMA is finishing transmission. This is the optimal time to compute the next frame.
 
 ---
 
@@ -581,23 +579,24 @@ EngineState::READY     →  Clear mTransmittingChannels, ready for next frame
 
 Engines implement a 4-state machine for non-blocking transmission:
 
-| State | Description | Transition |
+| State | Description | When `poll()` returns this |
 |-------|-------------|------------|
-| **READY** | Idle, ready for new data | `show()` → BUSY |
-| **BUSY** | Actively enqueueing channels | Auto → DRAINING |
-| **DRAINING** | All channels queued, DMA transmitting | Hardware complete → READY |
-| **ERROR** | Hardware error occurred | User must reset |
+| **READY** | Idle, ready for new data | Hardware idle, no transmissions in progress |
+| **BUSY** | Actively transmitting channels | Hardware actively working, still accepting data |
+| **DRAINING** | All channels enqueued, DMA finishing | All data submitted, no more `poll()` needed |
+| **ERROR** | Hardware error occurred | Error state, check error message |
 
 **State flow:**
 ```
-READY → show() → BUSY → (all queued) → DRAINING → (complete) → READY
+READY → show() → BUSY → (all queued) → DRAINING → (hardware complete) → READY
                                            ↓
                                        (error) → ERROR
 ```
 
 **Implementation notes:**
-- Most engines skip BUSY (instant transition to DRAINING)
-- DRAINING is the primary "transmission in progress" state
+- Most engines skip BUSY (instant transition to DRAINING after `show()`)
+- DRAINING signals "all data enqueued, DMA finishing" - optimal time for CPU work
+- DRAINING means poll() doesn't need to be called again for current frame
 - ERROR requires manual recovery (reset hardware, clear state)
 
 ### Registration with ChannelBusManager
@@ -612,21 +611,20 @@ void setupCustomEngine() {
     auto engine = fl::make_shared<MyCustomEngine>();
 
     // Register with priority (higher = preferred)
-    // Priority range: 0 (lowest) to 10000 (highest)
+    // Built-in ESP32 engines use priorities 4 (PARLIO), 2 (RMT), 1 (I2S), 0 (SPI), -1 (UART)
+    // Custom engines can use any integer priority value
     fl::ChannelBusManager::instance().addEngine(
-        5000,              // Priority (between RMT=7000 and SPI=3000)
+        10,                // Priority (higher than built-in engines)
         engine,            // Shared pointer to engine
         "MY_ENGINE"        // Unique name for affinity binding
     );
 }
 ```
 
-**Priority guidelines:**
-- **10000+**: Reserved for testing/debugging overrides
-- **7000-9000**: High-performance hardware (e.g., RMT)
-- **5000-6000**: Standard hardware (e.g., PARLIO, I2S)
-- **3000-4000**: Fallback hardware (e.g., SPI)
-- **1000-2000**: Software implementations (e.g., bit-banging)
+**Priority guidelines for custom engines:**
+- Use priority values higher than built-in engines (>4) to override defaults
+- Use negative priorities (<0) for low-priority fallback implementations
+- Priority values are just integers - no predefined ranges required
 
 **Engine selection:**
 1. Bus manager maintains engines sorted by priority (high to low)
@@ -638,7 +636,7 @@ void setupCustomEngine() {
 - Engines are sorted by priority on registration (via `addEngine()`)
 - Priority can be changed at runtime via `setDriverPriority(name, priority)`
 - Changing priority triggers automatic re-sort of engine list
-- Higher priority engines are checked first (e.g., 9000 before 5000)
+- Higher priority engines are checked first (e.g., priority 10 before priority 2)
 
 ### Best Practices
 
