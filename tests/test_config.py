@@ -42,7 +42,7 @@ EXCLUDED_TEST_DIRS: set[Path] = {
     TESTS_DIR / "testing",
     TESTS_DIR / "data",
     TESTS_DIR / "manual",
-    # TESTS_DIR / "profile",  # Temporarily enabled for json_memory_profile.cpp
+    TESTS_DIR / "profile",  # Standalone profiling binaries (not unit tests)
     TESTS_DIR / "build",
     TESTS_DIR / "builddir",
     TESTS_DIR / "x64",
