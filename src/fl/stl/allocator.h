@@ -373,28 +373,28 @@ template <typename T> class allocator_psram {
         using const_reference = const T&;
         using size_type = fl::size;
         using difference_type = fl::ptrdiff_t;
-    
+
         // Rebind allocator to type U
         template <typename U>
         struct rebind {
             using other = allocator_psram<U>;
         };
-    
+
         // Default constructor
         allocator_psram() noexcept {}
-    
+
         // Copy constructor
         template <typename U>
         allocator_psram(const allocator_psram<U>&) noexcept {}
-    
+
         // Destructor
         ~allocator_psram() noexcept {}
-    
+
         // Allocate memory for n objects of type T
         T* allocate(fl::size n) {
             return PSRamAllocator<T>::Alloc(n);
         }
-    
+
         // Deallocate memory for n objects of type T
         void deallocate(T* p, fl::size n) {
             PSRamAllocator<T>::Free(p);

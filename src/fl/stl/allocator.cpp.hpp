@@ -37,11 +37,16 @@ namespace {
 #ifdef FL_IS_ESP32
 // On esp32, attempt to always allocate in psram first.
 void *DefaultAlloc(fl::size size) {
+#ifdef FL_VECTOR_PSRAM_ALWAYS_SRAM
+    // FL_VECTOR_PSRAM_ALWAYS_SRAM: skip PSRAM, use default (SRAM) only.
+    void *out = heap_caps_malloc(size, MALLOC_CAP_DEFAULT);
+#else
     void *out = heap_caps_malloc(size, MALLOC_CAP_SPIRAM);
     if (out == nullptr) {
         // Fallback to default allocator.
         out = heap_caps_malloc(size, MALLOC_CAP_DEFAULT);
     }
+#endif
     return out;
 }
 void DefaultFree(void *ptr) { heap_caps_free(ptr); }
