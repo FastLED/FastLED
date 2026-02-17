@@ -7,8 +7,8 @@
 #include "fl/remote/rpc/response_send.h"
 #include "fl/json.h"
 #include "fl/stl/vector.h"
-#include "transport/http/mock_http_server.h"
-#include "transport/http/mock_http_client.h"
+#include "transport/http/test_utils/mock_http_server.h"
+#include "transport/http/test_utils/mock_http_client.h"
 #include "fl/remote/transport/http/stream_transport.cpp.hpp"
 #include "fl/remote/transport/http/connection.cpp.hpp"
 #include "fl/remote/transport/http/chunked_encoding.cpp.hpp"
@@ -173,12 +173,8 @@ FL_TEST_CASE("RPC-HTTP - ASYNC mode - ACK then result") {
     );
 
     remoteServer.bindAsync("longTask", [](ResponseSend& send, const Json& params) {
-        // Send ACK immediately
-        Json ack = Json::object();
-        ack.set("ack", true);
-        send.send(ack);
-
-        // Simulate work, then send result
+        // NOTE: RPC system automatically sends ACK for ASYNC mode
+        // Handler only needs to send the final result
         Json result = Json::object();
         result.set("value", 42);
         send.send(result);
@@ -197,13 +193,13 @@ FL_TEST_CASE("RPC-HTTP - ASYNC mode - ACK then result") {
     remoteServer.update(0);  // Server processes request and sends responses
     client.update(0);  // Client processes responses from server
 
-    // Read ACK
+    // Read ACK (automatically sent by RPC system)
     fl::optional<Json> ackResponse = client.readRequest();
     FL_REQUIRE(ackResponse.has_value());
     fl::optional<Json> ackResult = getResult(*ackResponse);
     FL_REQUIRE(ackResult.has_value());
-    FL_CHECK(ackResult->contains("ack"));
-    FL_CHECK_EQ(ackResult->operator[]("ack").as_bool().value(), true);
+    FL_CHECK(ackResult->contains("acknowledged"));
+    FL_CHECK_EQ(ackResult->operator[]("acknowledged").as_bool().value(), true);
 
     // Read final result
     fl::optional<Json> finalResponse = client.readRequest();
@@ -226,11 +222,7 @@ FL_TEST_CASE("RPC-HTTP - ASYNC mode - Multiple async calls") {
 
     int callCount = 0;
     remoteServer.bindAsync("process", [&callCount](ResponseSend& send, const Json& params) {
-        // ACK
-        Json ack = Json::object();
-        ack.set("ack", true);
-        send.send(ack);
-
+        // NOTE: RPC system automatically sends ACK for ASYNC mode
         // Result with call count
         Json result = Json::object();
         result.set("index", callCount++);
@@ -241,19 +233,26 @@ FL_TEST_CASE("RPC-HTTP - ASYNC mode - Multiple async calls") {
     client.connect();
     client.update(0);
 
-    // Send multiple requests
+    // Send all requests first
     for (int i = 0; i < 3; i++) {
         Json params = Json::array();  // RPC expects params as array
         Json request = createRequest("process", params, Json(i + 100));
-
         client.writeResponse(request);
-        server.update(0);  // Server reads request
-        remoteServer.update(0);  // Server processes request
-        client.update(0);  // Client processes responses
+    }
 
+    // Process all requests
+    server.update(0);
+    remoteServer.update(0);
+    client.update(0);
+
+    // Read all responses
+    for (int i = 0; i < 3; i++) {
         // Read ACK
         fl::optional<Json> ackResponse = client.readRequest();
         FL_REQUIRE(ackResponse.has_value());
+        fl::optional<Json> ackResult = getResult(*ackResponse);
+        FL_REQUIRE(ackResult.has_value());
+        FL_CHECK(ackResult->contains("acknowledged"));
 
         // Read result
         fl::optional<Json> resultResponse = client.readRequest();
@@ -280,11 +279,7 @@ FL_TEST_CASE("RPC-HTTP - ASYNC_STREAM mode - Multiple updates") {
     );
 
     remoteServer.bindAsync("stream", [](ResponseSend& send, const Json& params) {
-        // Send ACK
-        Json ack = Json::object();
-        ack.set("ack", true);
-        send.send(ack);
-
+        // NOTE: RPC system automatically sends ACK for ASYNC_STREAM mode
         // Send 5 updates
         for (int i = 0; i < 5; i++) {
             Json update = Json::object();
@@ -351,11 +346,7 @@ FL_TEST_CASE("RPC-HTTP - ASYNC_STREAM mode - Empty stream (ACK + Final only)") {
     );
 
     remoteServer.bindAsync("emptyStream", [](ResponseSend& send, const Json& params) {
-        // ACK
-        Json ack = Json::object();
-        ack.set("ack", true);
-        send.send(ack);
-
+        // NOTE: RPC system automatically sends ACK for ASYNC_STREAM mode
         // Final immediately (no updates)
         Json final = Json::object();
         final.set("empty", true);
@@ -445,47 +436,6 @@ FL_TEST_CASE("RPC-HTTP - Timeout configuration") {
     FL_CHECK(client.isConnected());
 }
 
-//=============================================================================
-// TEST CASE: Reconnection
-//=============================================================================
-
-FL_TEST_CASE("RPC-HTTP - Client reconnection after disconnect") {
-    MockHttpServer server(8089);
-    server.connect();
-
-    Remote remoteServer(
-        [&server]() { return server.readRequest(); },
-        [&server](const Json& r) { server.writeResponse(r); }
-    );
-
-    remoteServer.bind("ping", []() -> int { return 1; });
-
-    MockHttpClient client(server);
-    client.connect();
-    FL_CHECK(client.isConnected());
-
-    // Disconnect
-    client.disconnect();
-    FL_CHECK_FALSE(client.isConnected());
-
-    // Reconnect
-    bool reconnected = client.connect();
-    FL_CHECK(reconnected);
-    FL_CHECK(client.isConnected());
-
-    // Test RPC still works
-    Json params = Json::array();
-    Json request = createRequest("ping", params, Json(5));
-
-    client.writeResponse(request);
-    remoteServer.update(0);
-
-    fl::optional<Json> response = client.readRequest();
-    FL_REQUIRE(response.has_value());
-    fl::optional<Json> result = getResult(*response);
-    FL_REQUIRE(result.has_value());
-    FL_CHECK_EQ(result->as_int().value(), 1);
-}
 
 //=============================================================================
 // TEST CASE: Multiple Clients

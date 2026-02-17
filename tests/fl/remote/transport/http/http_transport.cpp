@@ -1,7 +1,7 @@
 // ok standalone
 #include "test.h"
-#include "mock_http_server.h"
-#include "mock_http_client.h"
+#include "test_utils/mock_http_server.h"
+#include "test_utils/mock_http_client.h"
 #include "fl/remote/transport/http/stream_transport.cpp.hpp"
 #include "fl/remote/transport/http/connection.cpp.hpp"
 #include "fl/remote/transport/http/chunked_encoding.cpp.hpp"

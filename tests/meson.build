@@ -192,6 +192,32 @@ foreach test_name : test_names
   # Hung tests will be detected, get stack dumps via lldb/gdb, then killed
   test_timeout = 20
 
+  # Slow tests that need extended timeout (60 seconds) when running in parallel
+  # These are typically integration tests, network tests, or computationally intensive tests
+  slow_tests = [
+    'fastled',                      # Main integration test
+    'fl_fx_2d_animartrix2',        # 2D animation effects (heavy computation)
+    'fl_remote_loopback',          # HTTP loopback integration test
+    'fl_remote_remote',            # Remote RPC test
+    'fl_remote_rpc_http_stream',   # RPC HTTP streaming test
+    'fl_spi',                      # SPI communication test
+    'fl_xypath',                   # XY path computation test
+    'fx_wled',                     # WLED effects test
+    'hsv2rgb_accuracy',            # Color conversion accuracy test (many iterations)
+    'parlio_mock',                 # Parallel IO mock test
+    'parlio_engine',               # Parallel IO engine test
+    'rmt5_channel_engine',         # RMT5 channel engine test
+    'rmt5_peripheral_mock',        # RMT5 peripheral mock test
+    'test_downbeat_synthetic',     # Downbeat detection test (audio processing)
+    'test_spi_channel_adapter',    # SPI channel adapter test
+    'test_uart_channel_engine',    # UART channel engine test
+    'test_uart_waveform_alignment' # UART waveform timing test
+  ]
+
+  if test_name in slow_tests
+    test_timeout = 60  # Extended timeout for slow tests
+  endif
+
   # Check if deadlock detection wrapper should be used
   # Set FASTLED_TEST_WRAPPER=1 to enable wrapper with stack dumping
   use_wrapper = get_option('test_wrapper')

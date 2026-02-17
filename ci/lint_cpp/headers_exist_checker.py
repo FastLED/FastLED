@@ -193,9 +193,11 @@ class HeadersExistChecker(FileContentChecker):
             match = INCLUDE_PATTERN.match(line)
             if match:
                 header_path = match.group(1)
-                # Skip test framework headers
-                if "test.h" not in header_path and not header_path.startswith(
-                    "testing/"
+                # Skip test framework headers and test utilities
+                if (
+                    "test.h" not in header_path
+                    and not header_path.startswith("testing/")
+                    and not header_path.startswith("test_utils/")
                 ):
                     includes.append(header_path)
 
