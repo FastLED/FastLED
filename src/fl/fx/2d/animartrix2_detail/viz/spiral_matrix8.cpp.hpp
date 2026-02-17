@@ -1,0 +1,71 @@
+#include "fl/fx/2d/animartrix2_detail/viz/spiral_matrix8.h"
+
+namespace fl {
+
+void SpiralMatrix8(Context &ctx) {
+    auto *e = ctx.mEngine;
+    e->get_ready();
+
+    e->timings.master_speed = 0.005;
+    e->timings.ratio[0] = 0.025;
+    e->timings.ratio[1] = 0.027;
+    e->timings.ratio[2] = 0.031;
+    e->timings.ratio[3] = 0.0053;
+    e->timings.ratio[4] = 0.0056;
+    e->timings.ratio[5] = 0.01;
+
+    e->calculate_oscillators(e->timings);
+
+    for (int x = 0; x < e->num_x; x++) {
+        for (int y = 0; y < e->num_y; y++) {
+
+            e->animation.dist = e->distance[x][y];
+            e->animation.angle = 2;
+            e->animation.z = 5;
+            e->animation.scale_x = 0.15;
+            e->animation.scale_y = 0.15;
+            e->animation.offset_z = 0;
+            e->animation.offset_y = 50 * e->move.linear[0];
+            e->animation.offset_x = 0;
+            e->animation.low_limit = 0;
+            float show1 = e->render_value(e->animation);
+
+            e->animation.dist = e->distance[x][y];
+            e->animation.angle = 2;
+            e->animation.z = 150;
+            e->animation.offset_x = -50 * e->move.linear[0];
+            float show2 = e->render_value(e->animation);
+
+            e->animation.dist = e->distance[x][y];
+            e->animation.angle = 1;
+            e->animation.z = 550;
+            e->animation.scale_x = 0.15;
+            e->animation.scale_y = 0.15;
+            e->animation.offset_x = 0;
+            e->animation.offset_y = -50 * e->move.linear[1];
+            float show4 = e->render_value(e->animation);
+
+            e->animation.dist = e->distance[x][y];
+            e->animation.angle = 1;
+            e->animation.z = 1250;
+            e->animation.scale_x = 0.15;
+            e->animation.scale_y = 0.15;
+            e->animation.offset_x = 0;
+            e->animation.offset_y = 50 * e->move.linear[1];
+            float show5 = e->render_value(e->animation);
+
+            e->show3 = e->add(show1, show2);
+            e->show6 = e->screen(show4, show5);
+
+            e->pixel.red = e->show3;
+            e->pixel.green = 0;
+            e->pixel.blue = e->show6;
+
+            e->pixel = e->rgb_sanity_check(e->pixel);
+
+            e->setPixelColorInternal(x, y, e->pixel);
+        }
+    }
+}
+
+}  // namespace fl

@@ -7,7 +7,7 @@
 #include "fl/fx/2d/animartrix2_detail/perlin_s16x16_simd.h"
 #include <stdio.h>  // ok include
 
-using namespace animartrix2_detail;
+using namespace fl;
 
 // Standard Perlin permutation table
 static const fl::u8 perm_table[256] = {

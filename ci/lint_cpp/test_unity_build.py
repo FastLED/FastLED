@@ -284,6 +284,7 @@ def _should_skip_build_hpp(
     parent_build_hpp: Path,
     build_hpp_includes: IncludeMap,
     src_dir: Path,
+    build_cpp_content: str = "",
 ) -> bool:
     """
     Determine if a _build.cpp.hpp file should be skipped (already included hierarchically or in a header).
@@ -332,11 +333,31 @@ def _should_skip_build_hpp(
     if build_hpp in build_hpp_includes.get(parent_build_hpp, set()):
         return True
 
-    # For deeply nested files, check if parent includes the top-level intermediate
+    # For deeply nested files, find the actual parent _build.cpp.hpp by traversing up
+    # Example: fx/2d/animartrix2_detail/_build.cpp.hpp -> look for fx/2d/_build.cpp.hpp
     if len(rel_to_cpp_dir.parts) >= 2:
-        top_level_intermediate = build_cpp_dir / rel_to_cpp_dir.parts[0] / BUILD_HPP
-        if top_level_intermediate in build_hpp_includes.get(parent_build_hpp, set()):
-            return True  # Parent includes intermediate, hierarchy checker ensures chain
+        # Try each ancestor directory from immediate parent up to top-level
+        current_path = build_hpp.parent
+        while current_path != build_cpp_dir:
+            potential_parent_hpp = current_path / BUILD_HPP
+            if potential_parent_hpp.exists() and potential_parent_hpp != build_hpp:
+                # Check if this parent is included by the build_cpp's _build.cpp.hpp
+                if potential_parent_hpp in build_hpp_includes.get(
+                    parent_build_hpp, set()
+                ):
+                    return True  # Parent includes intermediate, hierarchy ensures chain
+
+                # Also check if the intermediate parent is directly in _build.cpp content
+                # This handles cases where _build.cpp includes deep _build.cpp.hpp files directly
+                if build_cpp_content:
+                    intermediate_path = potential_parent_hpp.relative_to(
+                        src_dir
+                    ).as_posix()
+                    if intermediate_path in build_cpp_content:
+                        return True  # Parent is in _build.cpp, hierarchy ensures chain
+            current_path = current_path.parent
+            if not current_path.is_relative_to(build_cpp_dir):
+                break
 
     return False
 
@@ -362,7 +383,12 @@ def _check_build_cpp_files(
 
         for build_hpp in all_build_hpp_files:
             if _should_skip_build_hpp(
-                build_hpp, build_cpp_dir, parent_build_hpp, build_hpp_includes, src_dir
+                build_hpp,
+                build_cpp_dir,
+                parent_build_hpp,
+                build_hpp_includes,
+                src_dir,
+                build_content,
             ):
                 continue
 

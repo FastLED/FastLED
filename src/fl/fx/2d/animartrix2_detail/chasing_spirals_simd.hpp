@@ -14,6 +14,6 @@
 
 namespace fl {
 
-void Chasing_Spirals_Q31_SIMD(animartrix2_detail::Context &ctx);
+void Chasing_Spirals_Q31_SIMD(fl::Context &ctx);
 
 } // namespace fl

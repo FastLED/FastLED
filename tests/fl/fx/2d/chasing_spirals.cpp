@@ -136,7 +136,7 @@ FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000)") {
     // Q31 version (Direct function call)
     // ========================
     {
-        animartrix2_detail::Context ctx;
+        fl::Context ctx;
         ctx.leds = q31_leds;
         ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
             XYMap *map = static_cast<XYMap*>(userData);
@@ -144,8 +144,8 @@ FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000)") {
         };
         ctx.xyMapUserData = &xy;
 
-        animartrix2_detail::init(ctx, W, H);
-        animartrix2_detail::setTime(ctx, t);
+        fl::init(ctx, W, H);
+        fl::setTime(ctx, t);
         fl::Chasing_Spirals_Q31(ctx);
     }
 
@@ -202,7 +202,7 @@ FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000000)") {
     // Q31 version (Direct function call)
     // ========================
     {
-        animartrix2_detail::Context ctx;
+        fl::Context ctx;
         ctx.leds = q31_leds;
         ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
             XYMap *map = static_cast<XYMap*>(userData);
@@ -210,8 +210,8 @@ FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000000)") {
         };
         ctx.xyMapUserData = &xy;
 
-        animartrix2_detail::init(ctx, W, H);
-        animartrix2_detail::setTime(ctx, t);
+        fl::init(ctx, W, H);
+        fl::setTime(ctx, t);
         fl::Chasing_Spirals_Q31(ctx);
     }
 
@@ -256,7 +256,7 @@ FL_TEST_CASE("chasing_spirals - float vs q31 sample pixels") {
     }
 
     {
-        animartrix2_detail::Context ctx;
+        fl::Context ctx;
         ctx.leds = q31_leds;
         ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
             XYMap *map = static_cast<XYMap*>(userData);
@@ -264,8 +264,8 @@ FL_TEST_CASE("chasing_spirals - float vs q31 sample pixels") {
         };
         ctx.xyMapUserData = &xy;
 
-        animartrix2_detail::init(ctx, W, H);
-        animartrix2_detail::setTime(ctx, t);
+        fl::init(ctx, W, H);
+        fl::setTime(ctx, t);
         fl::Chasing_Spirals_Q31(ctx);
     }
 

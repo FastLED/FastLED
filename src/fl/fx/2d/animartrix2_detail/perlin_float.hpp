@@ -11,7 +11,7 @@
 #include "fl/stl/math.h"
 #include "fl/math_macros.h"
 
-namespace animartrix2_detail {
+namespace fl {
 
 // Perlin noise permutation table
 FL_ALIGNAS(64) static const fl::u8 PERLIN_NOISE[] = {
@@ -89,4 +89,4 @@ inline float pnoise(float x, float y, float z) {
                           grad(P(BB + 1), x - 1, y - 1, z - 1))));
 }
 
-} // namespace animartrix2_detail
+}  // namespace fl

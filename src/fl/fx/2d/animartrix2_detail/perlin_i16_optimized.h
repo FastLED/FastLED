@@ -9,22 +9,22 @@
 #include "fl/fixed_point/s16x16.h"
 #include "fl/force_inline.h"
 
-namespace animartrix2_detail {
+namespace fl {
 
 struct perlin_i16_optimized {
     static constexpr int HP_BITS = 16;
     static constexpr fl::i32 HP_ONE = 1 << HP_BITS;
 
     // Build fade LUT - still i32 for API compatibility
-    static inline void init_fade_lut(fl::i32 *table);
+    static void init_fade_lut(fl::i32 *table);
 
     // Public API: accepts s16x16 raw values
-    static inline fl::s16x16 pnoise2d(fl::s16x16 fx, fl::s16x16 fy,
+    static fl::s16x16 pnoise2d(fl::s16x16 fx, fl::s16x16 fy,
                                       const fl::i32 *fade_lut,
                                       const fl::u8 *perm);
 
     // Hot path: uses i16 arithmetic for lerp/grad after extracting fractional part
-    static inline fl::i32 pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
+    static fl::i32 pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
                                         const fl::i32 *fade_lut,
                                         const fl::u8 *perm);
 
@@ -48,4 +48,4 @@ struct perlin_i16_optimized {
     static FASTLED_FORCE_INLINE fl::i32 grad_i16(int hash, fl::i16 x, fl::i16 y);
 };
 
-}  // namespace animartrix2_detail
+}  // namespace fl

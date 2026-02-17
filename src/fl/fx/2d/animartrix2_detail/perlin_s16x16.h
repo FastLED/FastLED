@@ -11,24 +11,24 @@
 #include "fl/fixed_point/s16x16.h"
 #include "fl/force_inline.h"
 
-namespace animartrix2_detail {
+namespace fl {
 
 struct perlin_s16x16 {
     static constexpr int HP_BITS = 24;
     static constexpr fl::i32 HP_ONE = 1 << HP_BITS; // 16777216 = 1.0
 
     // Build 257-entry Perlin fade LUT in Q8.24 format.
-    static inline void init_fade_lut(fl::i32 *table);
+    static void init_fade_lut(fl::i32 *table);
 
     // 2D Perlin noise. Input s16x16, output s16x16 approx [-1, 1].
     // perm: 256-byte Perlin permutation table (indexed with & 255).
-    static inline fl::s16x16 pnoise2d(fl::s16x16 fx, fl::s16x16 fy,
+    static fl::s16x16 pnoise2d(fl::s16x16 fx, fl::s16x16 fy,
                                       const fl::i32 *fade_lut,
                                       const fl::u8 *perm);
 
     // Raw i32 version: takes s16x16 raw values, returns s16x16 raw value.
     // Avoids from_raw/raw() round-trips when caller already has raw values.
-    static inline fl::i32 pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
+    static fl::i32 pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
                                         const fl::i32 *fade_lut,
                                         const fl::u8 *perm);
 
@@ -48,4 +48,4 @@ struct perlin_s16x16 {
     static FASTLED_FORCE_INLINE fl::i32 grad(int hash, fl::i32 x, fl::i32 y);
 };
 
-}  // namespace animartrix2_detail
+}  // namespace fl

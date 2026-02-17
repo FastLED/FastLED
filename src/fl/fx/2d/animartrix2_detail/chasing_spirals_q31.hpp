@@ -9,6 +9,6 @@
 
 namespace fl {
 
-void Chasing_Spirals_Q31(animartrix2_detail::Context &ctx);
+void Chasing_Spirals_Q31(fl::Context &ctx);
 
 } // namespace fl

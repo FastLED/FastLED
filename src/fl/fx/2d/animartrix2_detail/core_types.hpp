@@ -11,7 +11,7 @@
 #define num_oscillators 10
 #endif
 
-namespace animartrix2_detail {
+namespace fl {
 
 struct render_parameters {
     float center_x = (999 / 2) - 0.5; // center of the matrix
@@ -48,4 +48,4 @@ struct rgb {
     float blue = 0.0f;
 };
 
-} // namespace animartrix2_detail
+}  // namespace fl

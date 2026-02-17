@@ -8,11 +8,11 @@ namespace fl {
 
 namespace {
     using FP = fl::s16x16;
-    using Perlin = animartrix2_detail::perlin_s16x16;
-    using PixelLUT = animartrix2_detail::ChasingSpiralPixelLUT;
+    using Perlin = fl::perlin_s16x16;
+    using PixelLUT = fl::ChasingSpiralPixelLUT;
 }
 
-void Chasing_Spirals_Q31(animartrix2_detail::Context &ctx) {
+void Chasing_Spirals_Q31(fl::Context &ctx) {
     // Common frame setup: timing, constants, LUTs
     auto setup = setupChasingSpiralFrame(ctx);
     const int total_pixels = setup.total_pixels;

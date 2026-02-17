@@ -17,7 +17,7 @@
 #define FL_SIN_F(x) fl::sinf(x)
 #define FL_COS_F(x) fl::cosf(x)
 
-namespace animartrix2_detail {
+namespace fl {
 
 // Polar coordinate pre-computation
 // Builds polar_theta[x][y] and distance[x][y] lookup tables
@@ -173,4 +173,4 @@ inline void logFrame(unsigned long &c) {
     c = fl::micros();
 }
 
-} // namespace animartrix2_detail
+}  // namespace fl

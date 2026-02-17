@@ -9,7 +9,7 @@
 #include "fl/fx/2d/animartrix2_detail/perlin_s16x16.h"
 #include "fl/simd.h"
 
-namespace animartrix2_detail {
+namespace fl {
 
 struct perlin_s16x16_simd {
     static constexpr int HP_BITS = perlin_s16x16::HP_BITS;
@@ -18,10 +18,10 @@ struct perlin_s16x16_simd {
     static constexpr fl::i32 FP_ONE = 1 << FP_BITS;
 
     // SIMD batch version: Process 4 Perlin evaluations in parallel
-    static inline void pnoise2d_raw_simd4(
+    static void pnoise2d_raw_simd4(
         const fl::i32 nx[4], const fl::i32 ny[4],
         const fl::i32 *fade_lut, const fl::u8 *perm,
         fl::i32 out[4]);
 };
 
-}  // namespace animartrix2_detail
+}  // namespace fl

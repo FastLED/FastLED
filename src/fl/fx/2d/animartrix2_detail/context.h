@@ -7,7 +7,7 @@
 #include "fl/stl/optional.h"
 #include "fl/stl/stdint.h"
 
-namespace animartrix2_detail {
+namespace fl {
 
 // Forward declaration
 struct Context;
@@ -43,4 +43,4 @@ struct Context {
     Context &operator=(const Context &) = delete;
 };
 
-}  // namespace animartrix2_detail
+}  // namespace fl

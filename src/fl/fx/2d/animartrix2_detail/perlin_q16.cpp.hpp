@@ -4,9 +4,9 @@
 // 2D Perlin noise Q16 implementation
 // Implementation file - included from perlin_q16.h
 
-namespace animartrix2_detail {
+namespace fl {
 
-inline void perlin_q16::init_fade_lut(fl::i32 *table) {
+void perlin_q16::init_fade_lut(fl::i32 *table) {
     for (int i = 0; i <= 256; i++) {
         fl::i32 t = (i * HP_ONE) / 256;
         fl::i32 t2 = static_cast<fl::i32>((static_cast<fl::i64>(t) * t) >> HP_BITS);
@@ -19,14 +19,14 @@ inline void perlin_q16::init_fade_lut(fl::i32 *table) {
     }
 }
 
-inline fl::s16x16 perlin_q16::pnoise2d(fl::s16x16 fx, fl::s16x16 fy,
+fl::s16x16 perlin_q16::pnoise2d(fl::s16x16 fx, fl::s16x16 fy,
                                       const fl::i32 *fade_lut,
                                       const fl::u8 *perm) {
     return fl::s16x16::from_raw(
         pnoise2d_raw(fx.raw(), fy.raw(), fade_lut, perm));
 }
 
-inline fl::i32 perlin_q16::pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
+fl::i32 perlin_q16::pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
                                         const fl::i32 *fade_lut,
                                         const fl::u8 *perm) {
     int X, Y;
@@ -90,4 +90,4 @@ FASTLED_FORCE_INLINE fl::i32 perlin_q16::grad(int hash, fl::i32 x, fl::i32 y) {
     return g.cx * x + g.cy * y;
 }
 
-}  // namespace animartrix2_detail
+}  // namespace fl

@@ -8,14 +8,14 @@ namespace fl {
 
 namespace {
     using FP = fl::s16x16;
-    using Perlin = animartrix2_detail::perlin_s16x16;
-    using PixelLUT = animartrix2_detail::ChasingSpiralPixelLUT;
+    using Perlin = fl::perlin_s16x16;
+    using PixelLUT = fl::ChasingSpiralPixelLUT;
 }
 
 // SIMD-optimized version: Uses sincos32_simd and pnoise2d_raw_simd4 for vectorized processing.
 // Processes 4 pixels at once with batched trig (3 SIMD calls) and batched Perlin (3 SIMD calls).
 // Expected speedup: 15-20% over Batch4 by reducing sincos calls from 12 to 3 per batch.
-void Chasing_Spirals_Q31_SIMD(animartrix2_detail::Context &ctx) {
+void Chasing_Spirals_Q31_SIMD(fl::Context &ctx) {
     // ========== 1. Frame Setup ==========
     // Compute timing, constants, build PixelLUT, initialize fade LUT
     auto setup = setupChasingSpiralFrame(ctx);

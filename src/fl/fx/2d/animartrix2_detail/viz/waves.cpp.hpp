@@ -1,0 +1,47 @@
+#include "fl/fx/2d/animartrix2_detail/viz/waves.h"
+
+namespace fl {
+
+void Waves(Context &ctx) {
+    auto *e = ctx.mEngine;
+    e->get_ready();
+
+    e->timings.master_speed = 0.01;
+    e->timings.ratio[0] = 2;
+    e->timings.ratio[1] = 2.1;
+    e->timings.ratio[2] = 1.2;
+
+    e->timings.offset[1] = 100;
+    e->timings.offset[2] = 200;
+    e->timings.offset[3] = 300;
+
+    e->calculate_oscillators(e->timings);
+
+    for (int x = 0; x < e->num_x; x++) {
+        for (int y = 0; y < e->num_y; y++) {
+            e->animation.angle = e->polar_theta[x][y];
+            e->animation.scale_x = 0.1;
+            e->animation.scale_y = 0.1;
+            e->animation.scale_z = 0.1;
+            e->animation.dist = e->distance[x][y];
+            e->animation.offset_y = 0;
+            e->animation.offset_x = 0;
+            e->animation.z = 2 * e->distance[x][y] - e->move.linear[0];
+            float show1 = e->render_value(e->animation);
+
+            e->animation.angle = e->polar_theta[x][y];
+            e->animation.dist = e->distance[x][y];
+            e->animation.z = 2 * e->distance[x][y] - e->move.linear[1];
+            float show2 = e->render_value(e->animation);
+
+            e->pixel.red = show1;
+            e->pixel.green = 0;
+            e->pixel.blue = show2;
+
+            e->pixel = e->rgb_sanity_check(e->pixel);
+            e->setPixelColorInternal(x, y, e->pixel);
+        }
+    }
+}
+
+}  // namespace fl

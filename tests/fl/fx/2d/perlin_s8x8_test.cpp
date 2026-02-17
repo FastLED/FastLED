@@ -8,7 +8,7 @@ using namespace fl;
 FL_TEST_CASE("perlin_s8x8 - basic functionality") {
     // Initialize fade LUT
     i32 fade_lut[257];
-    animartrix2_detail::perlin_s8x8::init_fade_lut(fade_lut);
+    fl::perlin_s8x8::init_fade_lut(fade_lut);
 
     // Check LUT values are reasonable
     FL_CHECK(fade_lut[0] == 0);  // At t=0, fade should be 0
@@ -19,7 +19,7 @@ FL_TEST_CASE("perlin_s8x8 - basic functionality") {
     s16x16 fx(1.5f);
     s16x16 fy(2.3f);
 
-    i32 result = animartrix2_detail::perlin_s8x8::pnoise2d_raw(
+    i32 result = fl::perlin_s8x8::pnoise2d_raw(
         fx.raw(), fy.raw(), fade_lut, perm);
 
     // Result should be in valid range for s16x16
@@ -34,8 +34,8 @@ FL_TEST_CASE("perlin_s8x8 vs perlin_s16x16 - consistency check") {
     i32 fade_lut_q8[257];
     i32 fade_lut_q24[257];
 
-    animartrix2_detail::perlin_s8x8::init_fade_lut(fade_lut_q8);
-    animartrix2_detail::perlin_s16x16::init_fade_lut(fade_lut_q24);
+    fl::perlin_s8x8::init_fade_lut(fade_lut_q8);
+    fl::perlin_s16x16::init_fade_lut(fade_lut_q24);
 
     const u8 *perm = animartrix_detail::PERLIN_NOISE;
 
@@ -48,9 +48,9 @@ FL_TEST_CASE("perlin_s8x8 vs perlin_s16x16 - consistency check") {
     int max_diff = 0;
     for (auto fx : test_coords) {
         for (auto fy : test_coords) {
-            i32 result_q8 = animartrix2_detail::perlin_s8x8::pnoise2d_raw(
+            i32 result_q8 = fl::perlin_s8x8::pnoise2d_raw(
                 fx.raw(), fy.raw(), fade_lut_q8, perm);
-            i32 result_q24 = animartrix2_detail::perlin_s16x16::pnoise2d_raw(
+            i32 result_q24 = fl::perlin_s16x16::pnoise2d_raw(
                 fx.raw(), fy.raw(), fade_lut_q24, perm);
 
             int diff = static_cast<int>(result_q8 - result_q24);

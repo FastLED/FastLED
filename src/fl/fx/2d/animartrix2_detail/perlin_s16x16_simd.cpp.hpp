@@ -4,9 +4,9 @@
 // 2D Perlin noise SIMD implementation using s16x16 fixed-point arithmetic
 // Implementation file - included from perlin_s16x16_simd.h
 
-namespace animartrix2_detail {
+namespace fl {
 
-inline void perlin_s16x16_simd::pnoise2d_raw_simd4(
+void perlin_s16x16_simd::pnoise2d_raw_simd4(
     const fl::i32 nx[4], const fl::i32 ny[4],
     const fl::i32 *fade_lut, const fl::u8 *perm,
     fl::i32 out[4])
@@ -79,4 +79,4 @@ inline void perlin_s16x16_simd::pnoise2d_raw_simd4(
     }
 }
 
-}  // namespace animartrix2_detail
+}  // namespace fl

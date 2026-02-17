@@ -1,0 +1,95 @@
+#include "fl/fx/2d/animartrix2_detail/viz/parametric_water.h"
+
+namespace fl {
+
+void Parametric_Water(Context &ctx) {
+    auto *e = ctx.mEngine;
+    e->get_ready();
+
+    e->timings.master_speed = 0.003;
+    e->timings.ratio[0] = 0.025;
+    e->timings.ratio[1] = 0.027;
+    e->timings.ratio[2] = 0.029;
+    e->timings.ratio[3] = 0.033;
+    e->timings.ratio[4] = 0.037;
+    e->timings.ratio[5] = 0.15;
+    e->timings.ratio[6] = 0.41;
+
+    e->calculate_oscillators(e->timings);
+
+    for (int x = 0; x < e->num_x; x++) {
+        for (int y = 0; y < e->num_y; y++) {
+
+            float s = 4;
+            float f = 10 + 2 * e->move.directional[0];
+
+            e->animation.dist = (f + e->move.directional[0]) *
+                                 fl::sinf(-e->move.radial[5] + e->move.radial[0] +
+                                      (e->distance[x][y] / (s)));
+            e->animation.angle = 1 * e->polar_theta[x][y];
+            e->animation.z = 5;
+            e->animation.scale_x = 0.1;
+            e->animation.scale_y = 0.1;
+            e->animation.offset_z = -10;
+            e->animation.offset_y = 20 * e->move.linear[0];
+            e->animation.offset_x = 10;
+            e->animation.low_limit = 0;
+            e->show2 = e->render_value(e->animation);
+
+            e->animation.dist = (f + e->move.directional[1]) *
+                                 fl::sinf(-e->move.radial[5] + e->move.radial[1] +
+                                      (e->distance[x][y] / (s)));
+            e->animation.angle = 1 * e->polar_theta[x][y];
+            e->animation.z = 500;
+            e->animation.scale_x = 0.1;
+            e->animation.scale_y = 0.1;
+            e->animation.offset_z = -10;
+            e->animation.offset_y = 20 * e->move.linear[1];
+            e->animation.offset_x = 10;
+            e->animation.low_limit = 0;
+            e->show3 = e->render_value(e->animation);
+
+            e->animation.dist = (f + e->move.directional[2]) *
+                                 fl::sinf(-e->move.radial[5] + e->move.radial[2] +
+                                      (e->distance[x][y] / (s)));
+            e->animation.angle = 1 * e->polar_theta[x][y];
+            e->animation.z = 5000;
+            e->animation.scale_x = 0.1;
+            e->animation.scale_y = 0.1;
+            e->animation.offset_z = -10;
+            e->animation.offset_y = 20 * e->move.linear[2];
+            e->animation.offset_x = 10;
+            e->animation.low_limit = 0;
+            e->show4 = e->render_value(e->animation);
+
+            e->animation.dist = (f + e->move.directional[3]) *
+                                 fl::sinf(-e->move.radial[5] + e->move.radial[3] +
+                                      (e->distance[x][y] / (s)));
+            e->animation.angle = 1 * e->polar_theta[x][y];
+            e->animation.z = 2000;
+            e->animation.scale_x = 0.1;
+            e->animation.scale_y = 0.1;
+            e->animation.offset_z = -10;
+            e->animation.offset_y = 20 * e->move.linear[3];
+            e->animation.offset_x = 10;
+            e->animation.low_limit = 0;
+            e->show5 = e->render_value(e->animation);
+
+            e->show6 = e->screen(e->show4, e->show5);
+            e->show7 = e->screen(e->show2, e->show3);
+
+            float radius = 40;
+            float radial = (radius - e->distance[x][y]) / radius;
+
+            e->pixel.red = e->pixel.blue - 40;
+            e->pixel.green = 0;
+            e->pixel.blue = (0.3 * e->show6 + 0.7 * e->show7) * radial;
+
+            e->pixel = e->rgb_sanity_check(e->pixel);
+
+            e->setPixelColorInternal(x, y, e->pixel);
+        }
+    }
+}
+
+}  // namespace fl

@@ -10,7 +10,7 @@
 #include "fl/fixed_point/s16x16.h"
 #include "fl/stl/stdint.h"
 
-namespace animartrix2_detail {
+namespace fl {
 
 struct ChasingSpiralPixelLUT {
     fl::s16x16 base_angle;     // 3*theta - dist/3
@@ -21,4 +21,4 @@ struct ChasingSpiralPixelLUT {
     fl::u16 pixel_idx;        // Pre-computed xyMap(x, y) output pixel index
 };
 
-}  // namespace animartrix2_detail
+}  // namespace fl

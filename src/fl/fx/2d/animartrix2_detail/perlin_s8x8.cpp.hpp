@@ -4,9 +4,9 @@
 // 2D Perlin noise s8x8 implementation
 // Implementation file - included from perlin_s8x8.h
 
-namespace animartrix2_detail {
+namespace fl {
 
-inline void perlin_s8x8::init_fade_lut(fl::i32 *table) {
+void perlin_s8x8::init_fade_lut(fl::i32 *table) {
     for (int i = 0; i <= 256; i++) {
         fl::i16 t = static_cast<fl::i16>((i * HP_ONE) / 256);
         fl::i16 t2 = static_cast<fl::i16>((static_cast<fl::i32>(t) * t) >> HP_BITS);
@@ -19,14 +19,14 @@ inline void perlin_s8x8::init_fade_lut(fl::i32 *table) {
     }
 }
 
-inline fl::s16x16 perlin_s8x8::pnoise2d(fl::s16x16 fx, fl::s16x16 fy,
+fl::s16x16 perlin_s8x8::pnoise2d(fl::s16x16 fx, fl::s16x16 fy,
                                       const fl::i32 *fade_lut,
                                       const fl::u8 *perm) {
     return fl::s16x16::from_raw(
         pnoise2d_raw(fx.raw(), fy.raw(), fade_lut, perm));
 }
 
-inline fl::i32 perlin_s8x8::pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
+fl::i32 perlin_s8x8::pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
                                         const fl::i32 *fade_lut,
                                         const fl::u8 *perm) {
     int X, Y;
@@ -89,4 +89,4 @@ FASTLED_FORCE_INLINE fl::i16 perlin_s8x8::grad(int hash, fl::i16 x, fl::i16 y) {
     return static_cast<fl::i16>(g.cx * x + g.cy * y);
 }
 
-}  // namespace animartrix2_detail
+}  // namespace fl

@@ -9,8 +9,8 @@ namespace fl {
 // Anonymous namespace for file-local type aliases (CRITICAL - matches old behavior)
 namespace {
     using FP = fl::s16x16;
-    using Perlin = animartrix2_detail::perlin_s16x16;
-    using PixelLUT = animartrix2_detail::ChasingSpiralPixelLUT;
+    using Perlin = fl::perlin_s16x16;
+    using PixelLUT = fl::ChasingSpiralPixelLUT;
 }
 
 // Convert s16x16 angle (radians) to A24 format for sincos32
@@ -79,7 +79,7 @@ void simd4_processChannel(
 
     // SIMD Perlin noise (4 evaluations in parallel)
     i32 raw_noise[4];
-    animartrix2_detail::perlin_s16x16_simd::pnoise2d_raw_simd4(nx, ny, fade_lut, perm, raw_noise);
+    fl::perlin_s16x16_simd::pnoise2d_raw_simd4(nx, ny, fade_lut, perm, raw_noise);
 
     // Clamp and scale results to [0, 255]
     noise_out[0] = clampAndScale255(raw_noise[0]);
@@ -90,7 +90,7 @@ void simd4_processChannel(
 
 // Extract common frame setup logic shared by all Chasing_Spirals variants.
 // Computes timing, scaled constants, builds PixelLUT, initializes fade LUT.
-FrameSetup setupChasingSpiralFrame(animartrix2_detail::Context &ctx) {
+FrameSetup setupChasingSpiralFrame(fl::Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 
@@ -161,7 +161,7 @@ FrameSetup setupChasingSpiralFrame(animartrix2_detail::Context &ctx) {
     const i32 *fade_lut = e->mFadeLUT;
 
     // Permutation table for Perlin noise
-    const u8 *perm = animartrix2_detail::PERLIN_NOISE;
+    const u8 *perm = fl::PERLIN_NOISE;
 
     // Precompute raw i32 values for per-frame constants to avoid
     // repeated s16x16 construction overhead in the inner loop.

@@ -10,3 +10,6 @@
 #include "fl/fx/2d/animartrix2_detail/perlin_s16x16.cpp.hpp"
 #include "fl/fx/2d/animartrix2_detail/perlin_s16x16_simd.cpp.hpp"
 #include "fl/fx/2d/animartrix2_detail/perlin_s8x8.cpp.hpp"
+
+// Visualizer implementations
+#include "fl/fx/2d/animartrix2_detail/viz/_build.cpp.hpp"

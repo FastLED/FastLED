@@ -132,7 +132,7 @@ void renderChasingSpiralFloat(CRGB *leds, uint32_t timeMs) {
 void renderChasingSpiralQ31(CRGB *leds, uint32_t timeMs) {
     XYMap xy = XYMap::constructRectangularGrid(W, H);
 
-    animartrix2_detail::Context ctx;
+    fl::Context ctx;
     ctx.leds = leds;
     ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
         XYMap *map = static_cast<XYMap*>(userData);
@@ -140,8 +140,8 @@ void renderChasingSpiralQ31(CRGB *leds, uint32_t timeMs) {
     };
     ctx.xyMapUserData = &xy;
 
-    animartrix2_detail::init(ctx, W, H);
-    animartrix2_detail::setTime(ctx, timeMs);
+    fl::init(ctx, W, H);
+    fl::setTime(ctx, timeMs);
     fl::Chasing_Spirals_Q31(ctx);
 }
 
@@ -149,7 +149,7 @@ void renderChasingSpiralQ31(CRGB *leds, uint32_t timeMs) {
 void renderChasingSpiralQ31_SIMD(CRGB *leds, uint32_t timeMs) {
     XYMap xy = XYMap::constructRectangularGrid(W, H);
 
-    animartrix2_detail::Context ctx;
+    fl::Context ctx;
     ctx.leds = leds;
     ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
         XYMap *map = static_cast<XYMap*>(userData);
@@ -157,8 +157,8 @@ void renderChasingSpiralQ31_SIMD(CRGB *leds, uint32_t timeMs) {
     };
     ctx.xyMapUserData = &xy;
 
-    animartrix2_detail::init(ctx, W, H);
-    animartrix2_detail::setTime(ctx, timeMs);
+    fl::init(ctx, W, H);
+    fl::setTime(ctx, timeMs);
     fl::Chasing_Spirals_Q31_SIMD(ctx);
 }
 
@@ -167,7 +167,7 @@ void renderChasingSpiralQ16(CRGB *leds, uint32_t timeMs) {
     XYMap xy = XYMap::constructRectangularGrid(W, H);
 
     // Create context and call Q16 variant directly
-    animartrix2_detail::Context ctx;
+    fl::Context ctx;
     ctx.leds = leds;
     ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
         XYMap *map = static_cast<XYMap*>(userData);
@@ -175,9 +175,9 @@ void renderChasingSpiralQ16(CRGB *leds, uint32_t timeMs) {
     };
     ctx.xyMapUserData = &xy;
 
-    animartrix2_detail::init(ctx, W, H);
-    animartrix2_detail::setTime(ctx, timeMs);
-    animartrix2_detail::q16::Chasing_Spirals_Q16_Batch4_ColorGrouped(ctx);
+    fl::init(ctx, W, H);
+    fl::setTime(ctx, timeMs);
+    fl::q16::Chasing_Spirals_Q16_Batch4_ColorGrouped(ctx);
 }
 
 // Count mismatched pixels between two buffers
@@ -279,25 +279,25 @@ FL_TEST_CASE("Animartrix2 - CHASING_SPIRALS_1x1_DEBUG") {
     CRGB leds_simd[N_DEBUG] = {};
 
     // Render using both paths
-    animartrix2_detail::Context ctx_scalar;
+    fl::Context ctx_scalar;
     ctx_scalar.leds = leds_scalar;
     ctx_scalar.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
         XYMap *map = static_cast<XYMap*>(userData);
         return map->mapToIndex(x, y);
     };
     ctx_scalar.xyMapUserData = &xy_scalar;
-    animartrix2_detail::init(ctx_scalar, W_DEBUG, H_DEBUG);
-    animartrix2_detail::setTime(ctx_scalar, 1000);
+    fl::init(ctx_scalar, W_DEBUG, H_DEBUG);
+    fl::setTime(ctx_scalar, 1000);
 
-    animartrix2_detail::Context ctx_simd;
+    fl::Context ctx_simd;
     ctx_simd.leds = leds_simd;
     ctx_simd.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
         XYMap *map = static_cast<XYMap*>(userData);
         return map->mapToIndex(x, y);
     };
     ctx_simd.xyMapUserData = &xy_simd;
-    animartrix2_detail::init(ctx_simd, W_DEBUG, H_DEBUG);
-    animartrix2_detail::setTime(ctx_simd, 1000);
+    fl::init(ctx_simd, W_DEBUG, H_DEBUG);
+    fl::setTime(ctx_simd, 1000);
 
     fl::cout << "Running scalar Q31..." << fl::endl;
     fl::Chasing_Spirals_Q31(ctx_scalar);
