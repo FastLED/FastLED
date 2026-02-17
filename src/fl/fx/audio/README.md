@@ -38,7 +38,7 @@ All modules are designed for real-time operation on resource-constrained platfor
 The easiest way to use audio detection is through the **AudioProcessor** facade:
 
 ```cpp
-#include "fx/audio/audio_processor.h"
+#include "fl/fx/audio/audio_processor.h"
 
 fl::AudioProcessor audio;
 
