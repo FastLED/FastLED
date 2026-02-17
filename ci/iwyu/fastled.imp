@@ -76,7 +76,7 @@
 
   # Animartrix detail headers are private implementation details
   { include: ['"fl/fx/2d/animartrix_detail.hpp"', 'private', '"fl/fx/2d/animartrix.hpp"', 'public'] },
-  { include: ['"fl/fx/2d/animartrix2_detail.hpp"', 'private', '"fl/fx/2d/animartrix2.hpp"', 'public'] },
+  { include: ['"fl/fx/2d/animartrix2_detail.h"', 'private', '"fl/fx/2d/animartrix2.hpp"', 'public'] },
 
   # Third-party headers should not be suggested for user code
   # Note: third_party/.* is now marked with pragma in source files

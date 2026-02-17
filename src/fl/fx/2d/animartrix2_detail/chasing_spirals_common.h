@@ -4,20 +4,20 @@
 //
 // Shared by all Chasing_Spirals implementations (scalar, SIMD, etc.)
 
-#include "fl/fixed_point/s16x16.h"
-#include "fl/fx/2d/animartrix2_detail/context.h"
-#include "fl/fx/2d/animartrix2_detail/chasing_spiral_pixel_lut.h"
+#include "fl/fixed_point.h"
 #include "fl/fx/2d/animartrix2_detail/perlin_s16x16.h"
-#include "fl/fx/2d/animartrix2_detail/perlin_s16x16_simd.h"
+#include "fl/fx/2d/animartrix2_detail/chasing_spiral_pixel_lut.h"
+#include "fl/rgb8.h"
 
 namespace fl {
 
 // Q31 fixed-point helper types (avoid polluting global namespace)
-namespace {  // Anonymous namespace for file-local types
-    using FP = fl::s16x16;
-    using Perlin = fl::perlin_s16x16;
-    using PixelLUT = fl::ChasingSpiralPixelLUT;
-}
+
+using FP = s16x16;
+using Perlin = perlin_s16x16;
+using PixelLUT = ChasingSpiralPixelLUT;
+struct Context;
+
 
 // Common setup values returned by setupChasingSpiralFrame
 struct FrameSetup {
@@ -60,6 +60,6 @@ void simd4_processChannel(
 
 // Extract common frame setup logic shared by all Chasing_Spirals variants.
 // Computes timing, scaled constants, builds PixelLUT, initializes fade LUT.
-FrameSetup setupChasingSpiralFrame(fl::Context &ctx);
+FrameSetup setupChasingSpiralFrame(Context &ctx);
 
 } // namespace fl

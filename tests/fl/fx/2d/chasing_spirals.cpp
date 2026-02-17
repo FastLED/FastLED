@@ -9,7 +9,7 @@
 #include "test.h"
 #include "fl/fx/2d/animartrix.hpp"
 #include "fl/fx/2d/animartrix2.hpp"
-#include "fl/fx/2d/animartrix2_detail/viz/chasing_spirals.h"
+#include "fl/fx/2d/animartrix2_detail/chasing_spirals.h"
 #include "fl/xymap.h"
 #include <stdio.h>  // ok include: needed for debug output
 
@@ -136,7 +136,7 @@ FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000)") {
     // Q31 version (Direct function call)
     // ========================
     {
-        fl::Context ctx;
+        Context ctx;
         ctx.leds = q31_leds;
         ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
             XYMap *map = static_cast<XYMap*>(userData);
@@ -144,8 +144,8 @@ FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000)") {
         };
         ctx.xyMapUserData = &xy;
 
-        fl::init(ctx, W, H);
-        fl::setTime(ctx, t);
+        init(ctx, W, H);
+        setTime(ctx, t);
         fl::Chasing_Spirals_Q31(ctx);
     }
 
@@ -202,7 +202,7 @@ FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000000)") {
     // Q31 version (Direct function call)
     // ========================
     {
-        fl::Context ctx;
+        Context ctx;
         ctx.leds = q31_leds;
         ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
             XYMap *map = static_cast<XYMap*>(userData);
@@ -210,8 +210,8 @@ FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000000)") {
         };
         ctx.xyMapUserData = &xy;
 
-        fl::init(ctx, W, H);
-        fl::setTime(ctx, t);
+        init(ctx, W, H);
+        setTime(ctx, t);
         fl::Chasing_Spirals_Q31(ctx);
     }
 
@@ -256,7 +256,7 @@ FL_TEST_CASE("chasing_spirals - float vs q31 sample pixels") {
     }
 
     {
-        fl::Context ctx;
+        Context ctx;
         ctx.leds = q31_leds;
         ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
             XYMap *map = static_cast<XYMap*>(userData);
@@ -264,8 +264,8 @@ FL_TEST_CASE("chasing_spirals - float vs q31 sample pixels") {
         };
         ctx.xyMapUserData = &xy;
 
-        fl::init(ctx, W, H);
-        fl::setTime(ctx, t);
+        init(ctx, W, H);
+        setTime(ctx, t);
         fl::Chasing_Spirals_Q31(ctx);
     }
 

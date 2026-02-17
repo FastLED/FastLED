@@ -4,6 +4,8 @@
 // 2D Perlin noise s8x8 implementation
 // Implementation file - included from perlin_s8x8.h
 
+#include "fl/fx/2d/animartrix2_detail/perlin_s8x8.h"
+
 namespace fl {
 
 void perlin_s8x8::init_fade_lut(fl::i32 *table) {

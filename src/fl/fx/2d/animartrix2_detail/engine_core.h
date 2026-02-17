@@ -7,8 +7,8 @@
 #include "fl/stl/math.h"
 #include "fl/math_macros.h"
 #include "fl/stl/chrono.h"
-#include "fl/fx/2d/animartrix2_detail/core_types.hpp"
-#include "fl/fx/2d/animartrix2_detail/perlin_float.hpp"
+#include "fl/fx/2d/animartrix2_detail/core_types.h"
+#include "fl/fx/2d/animartrix2_detail/perlin_float.h"
 
 #ifndef PI
 #define PI 3.1415926535897932384626433832795
@@ -173,4 +173,4 @@ inline void logFrame(unsigned long &c) {
     c = fl::micros();
 }
 
-}  // namespace fl
+} // namespace fl

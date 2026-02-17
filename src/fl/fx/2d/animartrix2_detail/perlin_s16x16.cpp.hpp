@@ -4,6 +4,8 @@
 // 2D Perlin noise implementation using s16x16 fixed-point arithmetic
 // Implementation file - included from perlin_s16x16.h
 
+#include "fl/fx/2d/animartrix2_detail/perlin_s16x16.h"
+
 namespace fl {
 
 void perlin_s16x16::init_fade_lut(fl::i32 *table) {
@@ -55,13 +57,13 @@ fl::i32 perlin_s16x16::pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
     return result >> (HP_BITS - fl::s16x16::FRAC_BITS);
 }
 
-FASTLED_FORCE_INLINE void perlin_s16x16::floor_frac(fl::i32 fp16, int &ifloor,
+ void perlin_s16x16::floor_frac(fl::i32 fp16, int &ifloor,
                                             fl::i32 &frac24) {
     ifloor = fp16 >> FP_BITS;
     frac24 = (fp16 & (FP_ONE - 1)) << (HP_BITS - FP_BITS);
 }
 
-FASTLED_FORCE_INLINE fl::i32 perlin_s16x16::fade(fl::i32 t, const fl::i32 *table) {
+ fl::i32 perlin_s16x16::fade(fl::i32 t, const fl::i32 *table) {
     fl::u32 idx = static_cast<fl::u32>(t) >> 16;
     fl::i32 frac = t & 0xFFFF;
     fl::i32 a = table[idx];
@@ -70,12 +72,12 @@ FASTLED_FORCE_INLINE fl::i32 perlin_s16x16::fade(fl::i32 t, const fl::i32 *table
         (static_cast<fl::i64>(frac) * (b - a)) >> 16);
 }
 
-FASTLED_FORCE_INLINE fl::i32 perlin_s16x16::lerp(fl::i32 t, fl::i32 a, fl::i32 b) {
+ fl::i32 perlin_s16x16::lerp(fl::i32 t, fl::i32 a, fl::i32 b) {
     return a + static_cast<fl::i32>(
         (static_cast<fl::i64>(t) * (b - a)) >> HP_BITS);
 }
 
-FASTLED_FORCE_INLINE fl::i32 perlin_s16x16::grad(int hash, fl::i32 x, fl::i32 y) {
+ fl::i32 perlin_s16x16::grad(int hash, fl::i32 x, fl::i32 y) {
     struct GradCoeff { fl::i8 cx; fl::i8 cy; };
     constexpr GradCoeff lut[16] = {
         { 1,  1}, {-1,  1}, { 1, -1}, {-1, -1},

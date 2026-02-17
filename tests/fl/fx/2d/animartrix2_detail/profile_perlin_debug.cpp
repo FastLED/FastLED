@@ -3,11 +3,10 @@
 // Compile: clang-tool-chain-clang++ -std=c++17 -I../../src -o perlin_debug.exe tests/profile/profile_perlin_debug.cpp
 // Run: ./perlin_debug.exe
 
-#include "fl/fx/2d/animartrix2_detail/perlin_s16x16.h"
-#include "fl/fx/2d/animartrix2_detail/perlin_s16x16_simd.h"
+#include "fl/fx/2d/animartrix2_detail.h"
 #include <stdio.h>  // ok include
 
-using namespace fl;
+namespace fl {
 
 // Standard Perlin permutation table
 static const fl::u8 perm_table[256] = {
@@ -58,3 +57,5 @@ int main() {
         return 1;
     }
 }
+
+}  // namespace fl

@@ -11,7 +11,7 @@
 #include "FastLED.h"
 #include "fl/fx/2d/animartrix.hpp"
 #include "fl/fx/2d/animartrix2.hpp"
-#include "fl/fx/2d/animartrix2_detail/chasing_spirals.hpp"
+#include "fl/fx/2d/animartrix2_detail/chasing_spirals.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/stdio.h"
 #include "profile_result.h"
@@ -47,12 +47,12 @@ void renderQ31(Animartrix2 &fx, CRGB *leds, int frames, int start_frame) {
 
 // Direct function renderers for benchmarking specific implementations
 __attribute__((noinline))
-void renderQ31_Direct(void (*func)(animartrix2_detail::Context&),
-                      animartrix2_detail::Context &ctx,
+void renderQ31_Direct(void (*func)(Context&),
+                      Context &ctx,
                       int frames, int start_frame) {
     for (int i = 0; i < frames; i++) {
         uint32_t t = static_cast<uint32_t>((start_frame + i) * 16);
-        animartrix2_detail::setTime(ctx, t);
+        setTime(ctx, t);
         func(ctx);
     }
 }
@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
         XYMap xy = XYMap::constructRectangularGrid(W, H);
 
         // Create context
-        animartrix2_detail::Context ctx;
+        Context ctx;
         ctx.leds = leds;
         ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
             XYMap *map = static_cast<XYMap*>(userData);
@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
         };
         ctx.xyMapUserData = &xy;
 
-        animartrix2_detail::init(ctx, W, H);
+        init(ctx, W, H);
 
         // Warmup (not profiled)
         renderQ31_Direct(&fl::Chasing_Spirals_Q31, ctx, WARMUP_FRAMES, 0);
@@ -153,7 +153,7 @@ int main(int argc, char *argv[]) {
         XYMap xy = XYMap::constructRectangularGrid(W, H);
 
         // Create context
-        animartrix2_detail::Context ctx;
+        Context ctx;
         ctx.leds = leds;
         ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
             XYMap *map = static_cast<XYMap*>(userData);
@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
         };
         ctx.xyMapUserData = &xy;
 
-        animartrix2_detail::init(ctx, W, H);
+        init(ctx, W, H);
 
         // Warmup (not profiled)
         renderQ31_Direct(&fl::Chasing_Spirals_Q31_SIMD, ctx, WARMUP_FRAMES, 0);

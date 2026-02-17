@@ -4,6 +4,8 @@
 // 2D Perlin noise i16-optimized implementation
 // Implementation file - included from perlin_i16_optimized.h
 
+#include "fl/fx/2d/animartrix2_detail/perlin_i16_optimized.h"
+
 namespace fl {
 
 void perlin_i16_optimized::init_fade_lut(fl::i32 *table) {

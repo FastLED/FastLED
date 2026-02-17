@@ -34,8 +34,7 @@
 #include "eorder.h"
 #include "pixel_controller.h"
 
-#define ANIMARTRIX2_INTERNAL
-#include "fl/fx/2d/animartrix2_detail.hpp"
+#include "fl/fx/2d/animartrix2_detail.h"
 
 namespace fl {
 
@@ -103,63 +102,63 @@ enum Animartrix2Anim {
 struct Animartrix2Entry {
     Animartrix2Anim anim;
     const char *name;
-    fl::Visualizer func;
+    Visualizer func;
 };
 
 // The animation dispatch table
 static const Animartrix2Entry ANIMATION2_TABLE[] = {
-    {ANIM2_RGB_BLOBS5, "RGB_BLOBS5", &fl::RGB_Blobs5},
-    {ANIM2_RGB_BLOBS4, "RGB_BLOBS4", &fl::RGB_Blobs4},
-    {ANIM2_RGB_BLOBS3, "RGB_BLOBS3", &fl::RGB_Blobs3},
-    {ANIM2_RGB_BLOBS2, "RGB_BLOBS2", &fl::RGB_Blobs2},
-    {ANIM2_RGB_BLOBS, "RGB_BLOBS", &fl::RGB_Blobs},
-    {ANIM2_POLAR_WAVES, "POLAR_WAVES", &fl::Polar_Waves},
-    {ANIM2_SLOW_FADE, "SLOW_FADE", &fl::Slow_Fade},
-    {ANIM2_ZOOM2, "ZOOM2", &fl::Zoom2},
-    {ANIM2_ZOOM, "ZOOM", &fl::Zoom},
-    {ANIM2_HOT_BLOB, "HOT_BLOB", &fl::Hot_Blob},
-    {ANIM2_SPIRALUS2, "SPIRALUS2", &fl::Spiralus2},
-    {ANIM2_SPIRALUS, "SPIRALUS", &fl::Spiralus},
-    {ANIM2_YVES, "YVES", &fl::Yves},
-    {ANIM2_SCALEDEMO1, "SCALEDEMO1", &fl::Scaledemo1},
-    {ANIM2_LAVA1, "LAVA1", &fl::Lava1},
-    {ANIM2_CALEIDO3, "CALEIDO3", &fl::Caleido3},
-    {ANIM2_CALEIDO2, "CALEIDO2", &fl::Caleido2},
-    {ANIM2_CALEIDO1, "CALEIDO1", &fl::Caleido3},  // Note: same as original - Caleido1 maps to Caleido3
-    {ANIM2_DISTANCE_EXPERIMENT, "DISTANCE_EXPERIMENT", &fl::Distance_Experiment},
-    {ANIM2_CENTER_FIELD, "CENTER_FIELD", &fl::Center_Field},
-    {ANIM2_WAVES, "WAVES", &fl::Waves},
+    {ANIM2_RGB_BLOBS5, "RGB_BLOBS5", &RGB_Blobs5},
+    {ANIM2_RGB_BLOBS4, "RGB_BLOBS4", &RGB_Blobs4},
+    {ANIM2_RGB_BLOBS3, "RGB_BLOBS3", &RGB_Blobs3},
+    {ANIM2_RGB_BLOBS2, "RGB_BLOBS2", &RGB_Blobs2},
+    {ANIM2_RGB_BLOBS, "RGB_BLOBS", &RGB_Blobs},
+    {ANIM2_POLAR_WAVES, "POLAR_WAVES", &Polar_Waves},
+    {ANIM2_SLOW_FADE, "SLOW_FADE", &Slow_Fade},
+    {ANIM2_ZOOM2, "ZOOM2", &Zoom2},
+    {ANIM2_ZOOM, "ZOOM", &Zoom},
+    {ANIM2_HOT_BLOB, "HOT_BLOB", &Hot_Blob},
+    {ANIM2_SPIRALUS2, "SPIRALUS2", &Spiralus2},
+    {ANIM2_SPIRALUS, "SPIRALUS", &Spiralus},
+    {ANIM2_YVES, "YVES", &Yves},
+    {ANIM2_SCALEDEMO1, "SCALEDEMO1", &Scaledemo1},
+    {ANIM2_LAVA1, "LAVA1", &Lava1},
+    {ANIM2_CALEIDO3, "CALEIDO3", &Caleido3},
+    {ANIM2_CALEIDO2, "CALEIDO2", &Caleido2},
+    {ANIM2_CALEIDO1, "CALEIDO1", &Caleido3},  // Note: same as original - Caleido1 maps to Caleido3
+    {ANIM2_DISTANCE_EXPERIMENT, "DISTANCE_EXPERIMENT", &Distance_Experiment},
+    {ANIM2_CENTER_FIELD, "CENTER_FIELD", &Center_Field},
+    {ANIM2_WAVES, "WAVES", &Waves},
     {ANIM2_CHASING_SPIRALS, "CHASING_SPIRALS", &fl::Chasing_Spirals_Q31_SIMD}, // Optimized: SIMD sincos32
-    {ANIM2_ROTATING_BLOB, "ROTATING_BLOB", &fl::Rotating_Blob},
-    {ANIM2_RINGS, "RINGS", &fl::Rings},
-    {ANIM2_COMPLEX_KALEIDO, "COMPLEX_KALEIDO", &fl::Complex_Kaleido},
-    {ANIM2_COMPLEX_KALEIDO_2, "COMPLEX_KALEIDO_2", &fl::Complex_Kaleido_2},
-    {ANIM2_COMPLEX_KALEIDO_3, "COMPLEX_KALEIDO_3", &fl::Complex_Kaleido_3},
-    {ANIM2_COMPLEX_KALEIDO_4, "COMPLEX_KALEIDO_4", &fl::Complex_Kaleido_4},
-    {ANIM2_COMPLEX_KALEIDO_5, "COMPLEX_KALEIDO_5", &fl::Complex_Kaleido_5},
-    {ANIM2_COMPLEX_KALEIDO_6, "COMPLEX_KALEIDO_6", &fl::Complex_Kaleido_6},
-    {ANIM2_WATER, "WATER", &fl::Water},
-    {ANIM2_PARAMETRIC_WATER, "PARAMETRIC_WATER", &fl::Parametric_Water},
-    {ANIM2_MODULE_EXPERIMENT1, "MODULE_EXPERIMENT1", &fl::Module_Experiment1},
-    {ANIM2_MODULE_EXPERIMENT2, "MODULE_EXPERIMENT2", &fl::Module_Experiment2},
-    {ANIM2_MODULE_EXPERIMENT3, "MODULE_EXPERIMENT3", &fl::Module_Experiment3},
-    {ANIM2_MODULE_EXPERIMENT4, "MODULE_EXPERIMENT4", &fl::Module_Experiment4},
-    {ANIM2_MODULE_EXPERIMENT5, "MODULE_EXPERIMENT5", &fl::Module_Experiment5},
-    {ANIM2_MODULE_EXPERIMENT6, "MODULE_EXPERIMENT6", &fl::Module_Experiment6},
-    {ANIM2_MODULE_EXPERIMENT7, "MODULE_EXPERIMENT7", &fl::Module_Experiment7},
-    {ANIM2_MODULE_EXPERIMENT8, "MODULE_EXPERIMENT8", &fl::Module_Experiment8},
-    {ANIM2_MODULE_EXPERIMENT9, "MODULE_EXPERIMENT9", &fl::Module_Experiment9},
-    {ANIM2_MODULE_EXPERIMENT10, "MODULE_EXPERIMENT10", &fl::Module_Experiment10},
-    {ANIM2_MODULE_EXPERIMENT_SM1, "MODULE_EXPERIMENT_SM1", &fl::SpiralMatrix1},
-    {ANIM2_MODULE_EXPERIMENT_SM2, "MODULE_EXPERIMENT_SM2", &fl::SpiralMatrix2},
-    {ANIM2_MODULE_EXPERIMENT_SM3, "MODULE_EXPERIMENT_SM3", &fl::SpiralMatrix3},
-    {ANIM2_MODULE_EXPERIMENT_SM4, "MODULE_EXPERIMENT_SM4", &fl::SpiralMatrix4},
-    {ANIM2_MODULE_EXPERIMENT_SM5, "MODULE_EXPERIMENT_SM5", &fl::SpiralMatrix5},
-    {ANIM2_MODULE_EXPERIMENT_SM6, "MODULE_EXPERIMENT_SM6", &fl::SpiralMatrix6},
-    {ANIM2_MODULE_EXPERIMENT_SM8, "MODULE_EXPERIMENT_SM8", &fl::SpiralMatrix8},
-    {ANIM2_MODULE_EXPERIMENT_SM9, "MODULE_EXPERIMENT_SM9", &fl::SpiralMatrix9},
-    {ANIM2_MODULE_EXPERIMENT_SM10, "MODULE_EXPERIMENT_SM10", &fl::SpiralMatrix10},
-    {ANIM2_FLUFFY_BLOBS, "FLUFFY_BLOBS", &fl::Fluffy_Blobs},
+    {ANIM2_ROTATING_BLOB, "ROTATING_BLOB", &Rotating_Blob},
+    {ANIM2_RINGS, "RINGS", &Rings},
+    {ANIM2_COMPLEX_KALEIDO, "COMPLEX_KALEIDO", &Complex_Kaleido},
+    {ANIM2_COMPLEX_KALEIDO_2, "COMPLEX_KALEIDO_2", &Complex_Kaleido_2},
+    {ANIM2_COMPLEX_KALEIDO_3, "COMPLEX_KALEIDO_3", &Complex_Kaleido_3},
+    {ANIM2_COMPLEX_KALEIDO_4, "COMPLEX_KALEIDO_4", &Complex_Kaleido_4},
+    {ANIM2_COMPLEX_KALEIDO_5, "COMPLEX_KALEIDO_5", &Complex_Kaleido_5},
+    {ANIM2_COMPLEX_KALEIDO_6, "COMPLEX_KALEIDO_6", &Complex_Kaleido_6},
+    {ANIM2_WATER, "WATER", &Water},
+    {ANIM2_PARAMETRIC_WATER, "PARAMETRIC_WATER", &Parametric_Water},
+    {ANIM2_MODULE_EXPERIMENT1, "MODULE_EXPERIMENT1", &Module_Experiment1},
+    {ANIM2_MODULE_EXPERIMENT2, "MODULE_EXPERIMENT2", &Module_Experiment2},
+    {ANIM2_MODULE_EXPERIMENT3, "MODULE_EXPERIMENT3", &Module_Experiment3},
+    {ANIM2_MODULE_EXPERIMENT4, "MODULE_EXPERIMENT4", &Module_Experiment4},
+    {ANIM2_MODULE_EXPERIMENT5, "MODULE_EXPERIMENT5", &Module_Experiment5},
+    {ANIM2_MODULE_EXPERIMENT6, "MODULE_EXPERIMENT6", &Module_Experiment6},
+    {ANIM2_MODULE_EXPERIMENT7, "MODULE_EXPERIMENT7", &Module_Experiment7},
+    {ANIM2_MODULE_EXPERIMENT8, "MODULE_EXPERIMENT8", &Module_Experiment8},
+    {ANIM2_MODULE_EXPERIMENT9, "MODULE_EXPERIMENT9", &Module_Experiment9},
+    {ANIM2_MODULE_EXPERIMENT10, "MODULE_EXPERIMENT10", &Module_Experiment10},
+    {ANIM2_MODULE_EXPERIMENT_SM1, "MODULE_EXPERIMENT_SM1", &SpiralMatrix1},
+    {ANIM2_MODULE_EXPERIMENT_SM2, "MODULE_EXPERIMENT_SM2", &SpiralMatrix2},
+    {ANIM2_MODULE_EXPERIMENT_SM3, "MODULE_EXPERIMENT_SM3", &SpiralMatrix3},
+    {ANIM2_MODULE_EXPERIMENT_SM4, "MODULE_EXPERIMENT_SM4", &SpiralMatrix4},
+    {ANIM2_MODULE_EXPERIMENT_SM5, "MODULE_EXPERIMENT_SM5", &SpiralMatrix5},
+    {ANIM2_MODULE_EXPERIMENT_SM6, "MODULE_EXPERIMENT_SM6", &SpiralMatrix6},
+    {ANIM2_MODULE_EXPERIMENT_SM8, "MODULE_EXPERIMENT_SM8", &SpiralMatrix8},
+    {ANIM2_MODULE_EXPERIMENT_SM9, "MODULE_EXPERIMENT_SM9", &SpiralMatrix9},
+    {ANIM2_MODULE_EXPERIMENT_SM10, "MODULE_EXPERIMENT_SM10", &SpiralMatrix10},
+    {ANIM2_FLUFFY_BLOBS, "FLUFFY_BLOBS", &Fluffy_Blobs},
 };
 
 inline fl::string getAnimartrix2Name(int animation) {
@@ -210,14 +209,14 @@ class Animartrix2 : public Fx2d {
 
         // Initialize or reinitialize engine on animation change
         if (mPrevAnimation != mCurrentAnimation) {
-            fl::init(mCtx, getWidth(), getHeight());
+            init(mCtx, getWidth(), getHeight());
             mPrevAnimation = mCurrentAnimation;
         }
         if (mCtx.mEngine == nullptr) {
-            fl::init(mCtx, getWidth(), getHeight());
+            init(mCtx, getWidth(), getHeight());
         }
 
-        fl::setTime(mCtx, ctx.now);
+        setTime(mCtx, ctx.now);
 
         // Dispatch to the selected animation
         for (const auto &entry : ANIMATION2_TABLE) {
@@ -278,7 +277,7 @@ class Animartrix2 : public Fx2d {
     Animartrix2Anim mPrevAnimation = ANIM2_NUM_ANIMATIONS;
     Animartrix2Anim mCurrentAnimation = ANIM2_RGB_BLOBS5;
     EOrder mColorOrder = RGB;
-    fl::Context mCtx;
+    Context mCtx;
 };
 
 } // namespace fl

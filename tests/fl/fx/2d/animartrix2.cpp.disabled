@@ -132,7 +132,7 @@ void renderChasingSpiralFloat(CRGB *leds, uint32_t timeMs) {
 void renderChasingSpiralQ31(CRGB *leds, uint32_t timeMs) {
     XYMap xy = XYMap::constructRectangularGrid(W, H);
 
-    animartrix2_detail::Context ctx;
+    Context ctx;
     ctx.leds = leds;
     ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
         XYMap *map = static_cast<XYMap*>(userData);
@@ -140,16 +140,16 @@ void renderChasingSpiralQ31(CRGB *leds, uint32_t timeMs) {
     };
     ctx.xyMapUserData = &xy;
 
-    animartrix2_detail::init(ctx, W, H);
-    animartrix2_detail::setTime(ctx, timeMs);
-    animartrix2_detail::q31::Chasing_Spirals_Q31(ctx);
+    init(ctx, W, H);
+    setTime(ctx, timeMs);
+    q31::Chasing_Spirals_Q31(ctx);
 }
 
 // Render Chasing_Spirals using Q31 SIMD path
 void renderChasingSpiralQ31_SIMD(CRGB *leds, uint32_t timeMs) {
     XYMap xy = XYMap::constructRectangularGrid(W, H);
 
-    animartrix2_detail::Context ctx;
+    Context ctx;
     ctx.leds = leds;
     ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
         XYMap *map = static_cast<XYMap*>(userData);
@@ -157,9 +157,9 @@ void renderChasingSpiralQ31_SIMD(CRGB *leds, uint32_t timeMs) {
     };
     ctx.xyMapUserData = &xy;
 
-    animartrix2_detail::init(ctx, W, H);
-    animartrix2_detail::setTime(ctx, timeMs);
-    animartrix2_detail::q31::Chasing_Spirals_Q31_SIMD(ctx);
+    init(ctx, W, H);
+    setTime(ctx, timeMs);
+    q31::Chasing_Spirals_Q31_SIMD(ctx);
 }
 
 // Render Chasing_Spirals using Q16 integer path (reduced precision Perlin)
@@ -167,7 +167,7 @@ void renderChasingSpiralQ16(CRGB *leds, uint32_t timeMs) {
     XYMap xy = XYMap::constructRectangularGrid(W, H);
 
     // Create context and call Q16 variant directly
-    animartrix2_detail::Context ctx;
+    Context ctx;
     ctx.leds = leds;
     ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
         XYMap *map = static_cast<XYMap*>(userData);
@@ -175,9 +175,9 @@ void renderChasingSpiralQ16(CRGB *leds, uint32_t timeMs) {
     };
     ctx.xyMapUserData = &xy;
 
-    animartrix2_detail::init(ctx, W, H);
-    animartrix2_detail::setTime(ctx, timeMs);
-    animartrix2_detail::q16::Chasing_Spirals_Q16_Batch4_ColorGrouped(ctx);
+    init(ctx, W, H);
+    setTime(ctx, timeMs);
+    q16::Chasing_Spirals_Q16_Batch4_ColorGrouped(ctx);
 }
 
 // Count mismatched pixels between two buffers

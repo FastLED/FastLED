@@ -9,7 +9,7 @@
 // The z=0 specialization halves work vs full 3D noise.
 
 #include "fl/fixed_point/s16x16.h"
-#include "fl/force_inline.h"
+
 
 namespace fl {
 
@@ -36,16 +36,16 @@ struct perlin_s16x16 {
     static constexpr fl::i32 FP_ONE = 1 << FP_BITS;
 
     // Decompose s16x16 raw value into integer floor and Q8.24 fractional part.
-    static FASTLED_FORCE_INLINE void floor_frac(fl::i32 fp16, int &ifloor,
+    static void floor_frac(fl::i32 fp16, int &ifloor,
                                                 fl::i32 &frac24);
 
     // LUT fade: 1 lookup + 1 lerp replaces 5 multiplies.
-    static FASTLED_FORCE_INLINE fl::i32 fade(fl::i32 t, const fl::i32 *table);
+    static fl::i32 fade(fl::i32 t, const fl::i32 *table);
 
-    static FASTLED_FORCE_INLINE fl::i32 lerp(fl::i32 t, fl::i32 a, fl::i32 b);
+    static fl::i32 lerp(fl::i32 t, fl::i32 a, fl::i32 b);
 
     // z=0 gradient via branchless coefficient LUT.
-    static FASTLED_FORCE_INLINE fl::i32 grad(int hash, fl::i32 x, fl::i32 y);
+    static fl::i32 grad(int hash, fl::i32 x, fl::i32 y);
 };
 
 }  // namespace fl

@@ -4,6 +4,8 @@
 // 2D Perlin noise Q16 implementation
 // Implementation file - included from perlin_q16.h
 
+#include "fl/fx/2d/animartrix2_detail/perlin_q16.h"
+
 namespace fl {
 
 void perlin_q16::init_fade_lut(fl::i32 *table) {

@@ -643,7 +643,7 @@ Created comprehensive documentation:
 Updated `src/fl/fx/2d/animartrix2.hpp` line 117:
 ```cpp
 {ANIM2_CHASING_SPIRALS, "CHASING_SPIRALS",
- &animartrix2_detail::q16::Chasing_Spirals_Q16_Batch4_ColorGrouped},
+ &q16::Chasing_Spirals_Q16_Batch4_ColorGrouped},
 ```
 
 ---

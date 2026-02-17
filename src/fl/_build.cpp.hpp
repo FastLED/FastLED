@@ -22,6 +22,7 @@
 #include "fl/fft_impl.cpp.hpp"
 #include "fl/file_system.cpp.hpp"
 #include "fl/fill.cpp.hpp"
+#include "fl/fixed_point/_build.cpp.hpp"
 #include "fl/fltest.cpp.hpp"
 #include "fl/gamma.cpp.hpp"
 #include "fl/gradient.cpp.hpp"

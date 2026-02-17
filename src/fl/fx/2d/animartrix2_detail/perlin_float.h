@@ -89,4 +89,4 @@ inline float pnoise(float x, float y, float z) {
                           grad(P(BB + 1), x - 1, y - 1, z - 1))));
 }
 
-}  // namespace fl
+} // namespace fl

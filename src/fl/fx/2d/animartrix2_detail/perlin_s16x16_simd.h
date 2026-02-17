@@ -7,9 +7,9 @@
 // Uses FastLED SIMD abstraction layer for vectorizable operations
 
 #include "fl/fx/2d/animartrix2_detail/perlin_s16x16.h"
-#include "fl/simd.h"
 
 namespace fl {
+
 
 struct perlin_s16x16_simd {
     static constexpr int HP_BITS = perlin_s16x16::HP_BITS;

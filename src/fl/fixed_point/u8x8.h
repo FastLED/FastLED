@@ -272,10 +272,6 @@ class u8x8 {
     }
 };
 
-// Static member definitions for C++11 ODR compliance
-constexpr int u8x8::INT_BITS;
-constexpr int u8x8::FRAC_BITS;
-
 } // namespace fl
 
 FL_OPTIMIZATION_LEVEL_O3_END

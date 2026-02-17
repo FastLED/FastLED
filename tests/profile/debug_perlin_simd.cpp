@@ -2,7 +2,7 @@
 // Run: ./debug_perlin_simd.exe
 
 #define ANIMARTRIX2_INTERNAL
-#include "fl/fx/2d/animartrix2_detail.hpp"
+#include "fl/fx/2d/animartrix2_detail.h"
 #include <stdio.h>  // ok include
 
 using namespace fl::fx;

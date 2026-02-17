@@ -17,6 +17,7 @@
 #include "fl/remote/transport/http/http_parser.cpp.hpp"
 #include "fl/remote/transport/http/native_client.cpp.hpp"
 #include "fl/remote/transport/http/native_server.cpp.hpp"
+#include "fl/remote/transport/http/test_utils/server_thread.h"
 #include "fl/json.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/chrono.h"
@@ -50,8 +51,12 @@ FL_TEST_CASE("Loopback: Server startup and client connection") {
     // Start server
     FL_REQUIRE(server_transport->connect());
 
-    // Give server time to bind
-    delay(100);
+    // Start server thread (required for same-process client+server)
+    ServerThread server_thread(server_transport);
+    FL_REQUIRE(server_thread.start());
+
+    // Give server time to bind and start accepting
+    delay(200);
 
     // Create client
     auto client_transport = fl::make_shared<HttpStreamClient>("localhost", TEST_PORT);
@@ -68,6 +73,7 @@ FL_TEST_CASE("Loopback: Server startup and client connection") {
 
     // Cleanup
     client_transport->disconnect();
+    server_thread.stop();
     server_transport->disconnect();
 
     delay(100); // Give sockets time to close
@@ -77,7 +83,6 @@ FL_TEST_CASE("Loopback: SYNC mode - simple request/response") {
     // Create server transport
     auto server_transport = fl::make_shared<HttpStreamServer>(TEST_PORT);
     FL_REQUIRE(server_transport->connect());
-    delay(100);
 
     // Create server-side Remote
     fl::Remote server_remote(
@@ -89,6 +94,12 @@ FL_TEST_CASE("Loopback: SYNC mode - simple request/response") {
     server_remote.bind("add", [](int a, int b) -> int {
         return a + b;
     });
+
+    // Start server thread (required for same-process client+server)
+    ServerThread server_thread(server_transport);
+    FL_REQUIRE(server_thread.start());
+
+    delay(200);
 
     // Create client transport
     auto client_transport = fl::make_shared<HttpStreamClient>("localhost", TEST_PORT);
@@ -148,6 +159,7 @@ FL_TEST_CASE("Loopback: SYNC mode - simple request/response") {
 
     // Cleanup
     client_transport->disconnect();
+    server_thread.stop();
     server_transport->disconnect();
     delay(100);
 }
@@ -156,7 +168,6 @@ FL_TEST_CASE("Loopback: ASYNC mode - ACK + result") {
     // Create server transport
     auto server_transport = fl::make_shared<HttpStreamServer>(TEST_PORT);
     FL_REQUIRE(server_transport->connect());
-    delay(100);
 
     // Create server-side Remote
     fl::Remote server_remote(
@@ -182,6 +193,12 @@ FL_TEST_CASE("Loopback: ASYNC mode - ACK + result") {
         result.set("value", a * b);
         send.send(result);
     }, fl::RpcMode::ASYNC);
+
+    // Start server thread (required for same-process client+server)
+    ServerThread server_thread(server_transport);
+    FL_REQUIRE(server_thread.start());
+
+    delay(200);
 
     // Create client transport
     auto client_transport = fl::make_shared<HttpStreamClient>("localhost", TEST_PORT);
@@ -249,6 +266,7 @@ FL_TEST_CASE("Loopback: ASYNC mode - ACK + result") {
 
     // Cleanup
     client_transport->disconnect();
+    server_thread.stop();
     server_transport->disconnect();
     delay(100);
 }
@@ -257,7 +275,6 @@ FL_TEST_CASE("Loopback: ASYNC_STREAM mode - ACK + updates + final") {
     // Create server transport
     auto server_transport = fl::make_shared<HttpStreamServer>(TEST_PORT);
     FL_REQUIRE(server_transport->connect());
-    delay(100);
 
     // Create server-side Remote
     fl::Remote server_remote(
@@ -287,6 +304,12 @@ FL_TEST_CASE("Loopback: ASYNC_STREAM mode - ACK + updates + final") {
         final.set("count", 0);
         send.sendFinal(final);
     }, fl::RpcMode::ASYNC_STREAM);
+
+    // Start server thread (required for same-process client+server)
+    ServerThread server_thread(server_transport);
+    FL_REQUIRE(server_thread.start());
+
+    delay(200);
 
     // Create client transport
     auto client_transport = fl::make_shared<HttpStreamClient>("localhost", TEST_PORT);
@@ -364,6 +387,7 @@ FL_TEST_CASE("Loopback: ASYNC_STREAM mode - ACK + updates + final") {
 
     // Cleanup
     client_transport->disconnect();
+    server_thread.stop();
     server_transport->disconnect();
     delay(100);
 }
@@ -372,7 +396,6 @@ FL_TEST_CASE("Loopback: Multiple sequential requests") {
     // Create server transport
     auto server_transport = fl::make_shared<HttpStreamServer>(TEST_PORT);
     FL_REQUIRE(server_transport->connect());
-    delay(100);
 
     // Create server-side Remote
     fl::Remote server_remote(
@@ -384,6 +407,12 @@ FL_TEST_CASE("Loopback: Multiple sequential requests") {
     server_remote.bind("add", [](int a, int b) -> int { return a + b; });
     server_remote.bind("subtract", [](int a, int b) -> int { return a - b; });
     server_remote.bind("multiply", [](int a, int b) -> int { return a * b; });
+
+    // Start server thread (required for same-process client+server)
+    ServerThread server_thread(server_transport);
+    FL_REQUIRE(server_thread.start());
+
+    delay(200);
 
     // Create client transport
     auto client_transport = fl::make_shared<HttpStreamClient>("localhost", TEST_PORT);
@@ -437,6 +466,7 @@ FL_TEST_CASE("Loopback: Multiple sequential requests") {
 
     // Cleanup
     client_transport->disconnect();
+    server_thread.stop();
     server_transport->disconnect();
     delay(100);
 }
@@ -446,13 +476,18 @@ FL_TEST_CASE("Loopback: Heartbeat detection") {
     auto server_transport = fl::make_shared<HttpStreamServer>(TEST_PORT);
     server_transport->setHeartbeatInterval(500); // 500ms heartbeat
     FL_REQUIRE(server_transport->connect());
-    delay(100);
 
     // Create server-side Remote
     fl::Remote server_remote(
         [&server_transport]() { return server_transport->readRequest(); },
         [&server_transport](const fl::Json& r) { server_transport->writeResponse(r); }
     );
+
+    // Start server thread (required for same-process client+server)
+    ServerThread server_thread(server_transport);
+    FL_REQUIRE(server_thread.start());
+
+    delay(200);
 
     // Create client
     auto client_transport = fl::make_shared<HttpStreamClient>("localhost", TEST_PORT);
@@ -494,6 +529,7 @@ FL_TEST_CASE("Loopback: Heartbeat detection") {
 
     // Cleanup
     client_transport->disconnect();
+    server_thread.stop();
     server_transport->disconnect();
     delay(100);
 }
@@ -502,7 +538,6 @@ FL_TEST_CASE("Loopback: Client reconnection") {
     // Create server
     auto server_transport = fl::make_shared<HttpStreamServer>(TEST_PORT);
     FL_REQUIRE(server_transport->connect());
-    delay(100);
 
     // Create server-side Remote
     fl::Remote server_remote(
@@ -513,6 +548,12 @@ FL_TEST_CASE("Loopback: Client reconnection") {
     server_remote.bind("echo", [](const String& msg) -> String {
         return msg;
     });
+
+    // Start server thread (required for same-process client+server)
+    ServerThread server_thread(server_transport);
+    FL_REQUIRE(server_thread.start());
+
+    delay(200);
 
     // Create client
     auto client_transport = fl::make_shared<HttpStreamClient>("localhost", TEST_PORT);
@@ -570,6 +611,7 @@ FL_TEST_CASE("Loopback: Client reconnection") {
 
     // Cleanup
     client_transport->disconnect();
+    server_thread.stop();
     server_transport->disconnect();
     delay(100);
 }
@@ -578,13 +620,18 @@ FL_TEST_CASE("Loopback: Error handling - method not found") {
     // Create server
     auto server_transport = fl::make_shared<HttpStreamServer>(TEST_PORT);
     FL_REQUIRE(server_transport->connect());
-    delay(100);
 
     // Create server-side Remote (no methods bound)
     fl::Remote server_remote(
         [&server_transport]() { return server_transport->readRequest(); },
         [&server_transport](const fl::Json& r) { server_transport->writeResponse(r); }
     );
+
+    // Start server thread (required for same-process client+server)
+    ServerThread server_thread(server_transport);
+    FL_REQUIRE(server_thread.start());
+
+    delay(200);
 
     // Create client
     auto client_transport = fl::make_shared<HttpStreamClient>("localhost", TEST_PORT);
@@ -629,6 +676,7 @@ FL_TEST_CASE("Loopback: Error handling - method not found") {
 
     // Cleanup
     client_transport->disconnect();
+    server_thread.stop();
     server_transport->disconnect();
     delay(100);
 }

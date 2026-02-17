@@ -48,4 +48,4 @@ struct rgb {
     float blue = 0.0f;
 };
 
-}  // namespace fl
+} // namespace fl
