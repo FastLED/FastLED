@@ -54,11 +54,16 @@ static HANDLE g_main_thread = nullptr;
 static fl::atomic<bool> g_should_exit{false};
 
 inline DWORD WINAPI watchdog_timer_thread(LPVOID param) {
-    double timeout_ms = *static_cast<double*>(param);
-    DWORD sleep_time = static_cast<DWORD>(timeout_ms * 1000.0);
+    double timeout_s = *static_cast<double*>(param);
+    DWORD sleep_time = static_cast<DWORD>(timeout_s * 1000.0);
 
-    // Wait for timeout or cancellation
-    if (WaitForSingleObject(GetCurrentThread(), sleep_time) == WAIT_TIMEOUT) {
+    // Sleep for the timeout duration
+    // Note: WaitForSingleObject(GetCurrentThread(), ...) is incorrect here because
+    // GetCurrentThread() returns a pseudo-handle to the calling thread itself,
+    // so a thread waiting on itself never completes meaningfully.
+    Sleep(sleep_time);
+
+    {
         if (g_watchdog_active.load() && !g_should_exit.load()) {
             // Timeout occurred!
             g_watchdog_triggered.store(true);

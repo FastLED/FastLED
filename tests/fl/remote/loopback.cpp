@@ -18,6 +18,7 @@
 #include "fl/remote/transport/http/native_client.cpp.hpp"
 #include "fl/remote/transport/http/native_server.cpp.hpp"
 #include "fl/remote/transport/http/test_utils/server_thread.h"
+#include "fl/remote/transport/http/test_utils/server_thread.cpp"
 #include "fl/json.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/chrono.h"

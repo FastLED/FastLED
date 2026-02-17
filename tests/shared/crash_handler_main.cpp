@@ -30,3 +30,16 @@
 extern "C" void runner_setup_crash_handler() {
     setup_crash_handler();
 }
+
+// Print stack trace - callable from runner.exe watchdog timer
+extern "C" void runner_print_stacktrace() {
+    print_stacktrace();
+}
+
+// Print stack trace of a specific suspended thread (Windows only).
+// The thread_handle must be a valid HANDLE to a suspended thread.
+#ifdef _WIN32
+extern "C" void runner_print_stacktrace_for_thread(void* thread_handle) {
+    print_stacktrace_for_thread(thread_handle);
+}
+#endif

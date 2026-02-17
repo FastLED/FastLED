@@ -25,12 +25,89 @@
 #include <string>
 #include <vector>
 #include <cstddef>
+#include <cstdlib>
+#include <cstring>
+#include <cstdio>
+#include <csignal>
 #include <dlfcn.h>  // For dlopen, dlsym, dlclose
-#include <unistd.h> // For readlink
+#include <unistd.h> // For readlink, alarm
 // IWYU pragma: end_keep
 
 // Crash handler setup (defined in crash_handler_main.cpp)
 extern "C" void runner_setup_crash_handler();
+// Stack trace printer (defined in crash_handler_main.cpp)
+extern "C" void runner_print_stacktrace();
+
+namespace runner_watchdog {
+
+static volatile bool g_active = false;
+static double g_timeout_seconds = 20.0;
+
+static void alarm_handler(int) {
+    if (!g_active) {
+        return;
+    }
+
+    fprintf(stderr, "\n");
+    fprintf(stderr, "================================================================================\n");
+    fprintf(stderr, "RUNNER WATCHDOG TIMEOUT\n");
+    fprintf(stderr, "================================================================================\n");
+    fprintf(stderr, "Test exceeded runner timeout of %.1f seconds\n", g_timeout_seconds);
+    fprintf(stderr, "Dumping stack trace...\n");
+    fprintf(stderr, "================================================================================\n");
+    fprintf(stderr, "\n");
+
+    runner_print_stacktrace();
+
+    fprintf(stderr, "\n");
+    fprintf(stderr, "================================================================================\n");
+    fprintf(stderr, "END RUNNER WATCHDOG\n");
+    fprintf(stderr, "Exiting with code 1\n");
+    fprintf(stderr, "================================================================================\n");
+    fprintf(stderr, "\n");
+
+    _exit(1);
+}
+
+static void setup(double timeout_seconds = 20.0) {
+    const char* disable_env = getenv("FASTLED_DISABLE_TIMEOUT_WATCHDOG");
+    if (disable_env && (strcmp(disable_env, "1") == 0 || strcmp(disable_env, "true") == 0)) {
+        return;
+    }
+
+    const char* timeout_env = getenv("FASTLED_TEST_TIMEOUT");
+    if (timeout_env) {
+        double parsed = atof(timeout_env);
+        if (parsed > 0.0) {
+            timeout_seconds = parsed;
+        }
+    }
+
+    g_timeout_seconds = timeout_seconds;
+    g_active = true;
+
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_handler = alarm_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+
+    if (sigaction(SIGALRM, &sa, nullptr) == 0) {
+        alarm(static_cast<unsigned int>(timeout_seconds));
+        printf("Runner watchdog enabled (%.1f seconds)\n", timeout_seconds);
+    }
+}
+
+static void cancel() {
+    if (!g_active) {
+        return;
+    }
+    g_active = false;
+    alarm(0);
+    signal(SIGALRM, SIG_DFL);
+}
+
+} // namespace runner_watchdog
 
 // Function signature for the test entry point exported by test DLLs/SOs
 typedef int (*RunTestsFunc)(int argc, const char** argv);
@@ -114,8 +191,14 @@ int main(int argc, char** argv) {
         test_argv = const_cast<const char**>(argv);
     }
 
+    // Start watchdog timer
+    runner_watchdog::setup();
+
     // Call test function with arguments
     int test_result = run_tests(test_argc, test_argv);
+
+    // Cancel watchdog - tests completed normally
+    runner_watchdog::cancel();
 
     // Cleanup: Skip dlclose when running with AddressSanitizer
     // ASAN runs leak detection at program exit. If we dlclose() the shared library

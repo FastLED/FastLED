@@ -24,15 +24,119 @@
 #include <string>
 #include <vector>
 #include <cstddef>
+#include <cstdlib>
+#include <cstring>
+#include <cstdio>
 #include <windef.h>
 #include <libloaderapi.h>
 // IWYU pragma: end_keep
 #include "errhandlingapi.h"
 #include "minwindef.h"
 #include "winbase.h"
+#include <processthreadsapi.h>
+#include <synchapi.h>
 
 // Crash handler setup (defined in crash_handler_main.cpp)
 extern "C" void runner_setup_crash_handler();
+// Stack trace printer (defined in crash_handler_main.cpp)
+extern "C" void runner_print_stacktrace();
+// Thread-specific stack trace (walks a suspended thread's stack)
+extern "C" void runner_print_stacktrace_for_thread(void* thread_handle);
+
+namespace runner_watchdog {
+
+static HANDLE g_timer_thread = nullptr;
+static HANDLE g_main_thread = nullptr;
+static volatile bool g_active = false;
+static double g_timeout_seconds = 20.0;
+
+static DWORD WINAPI timer_thread_func(LPVOID) {
+    DWORD sleep_ms = static_cast<DWORD>(g_timeout_seconds * 1000.0);
+    Sleep(sleep_ms);
+
+    if (!g_active) {
+        return 0;
+    }
+
+    fprintf(stderr, "\n");
+    fprintf(stderr, "================================================================================\n");
+    fprintf(stderr, "RUNNER WATCHDOG TIMEOUT\n");
+    fprintf(stderr, "================================================================================\n");
+    fprintf(stderr, "Test exceeded runner timeout of %.1f seconds\n", g_timeout_seconds);
+    fprintf(stderr, "Dumping main thread stack trace...\n");
+    fprintf(stderr, "================================================================================\n");
+    fprintf(stderr, "\n");
+    fflush(stderr);
+
+    if (g_main_thread != nullptr) {
+        SuspendThread(g_main_thread);
+        // Use StackWalk64 to walk the suspended main thread's stack
+        runner_print_stacktrace_for_thread((void*)g_main_thread);
+        ResumeThread(g_main_thread);
+    } else {
+        // Fallback: print calling thread's stack
+        runner_print_stacktrace();
+    }
+
+    fprintf(stderr, "\n");
+    fprintf(stderr, "================================================================================\n");
+    fprintf(stderr, "END RUNNER WATCHDOG\n");
+    fprintf(stderr, "Exiting with code 1\n");
+    fprintf(stderr, "================================================================================\n");
+    fprintf(stderr, "\n");
+    fflush(stderr);
+
+    _exit(1);
+    return 0; // unreachable
+}
+
+static void setup(double timeout_seconds = 20.0) {
+    const char* disable_env = getenv("FASTLED_DISABLE_TIMEOUT_WATCHDOG");
+    if (disable_env && (strcmp(disable_env, "1") == 0 || strcmp(disable_env, "true") == 0)) {
+        return;
+    }
+
+    const char* timeout_env = getenv("FASTLED_TEST_TIMEOUT");
+    if (timeout_env) {
+        double parsed = atof(timeout_env);
+        if (parsed > 0.0) {
+            timeout_seconds = parsed;
+        }
+    }
+
+    g_timeout_seconds = timeout_seconds;
+    g_active = true;
+
+    DuplicateHandle(
+        GetCurrentProcess(), GetCurrentThread(),
+        GetCurrentProcess(), &g_main_thread,
+        0, FALSE, DUPLICATE_SAME_ACCESS
+    );
+
+    g_timer_thread = CreateThread(nullptr, 0, timer_thread_func, nullptr, 0, nullptr);
+    if (g_timer_thread != nullptr) {
+        printf("Runner watchdog enabled (%.1f seconds)\n", timeout_seconds);
+    }
+}
+
+static void cancel() {
+    if (!g_active) {
+        return;
+    }
+    g_active = false;
+
+    if (g_timer_thread != nullptr) {
+        WaitForSingleObject(g_timer_thread, 2000);
+        CloseHandle(g_timer_thread);
+        g_timer_thread = nullptr;
+    }
+    if (g_main_thread != nullptr) {
+        CloseHandle(g_main_thread);
+        g_main_thread = nullptr;
+    }
+}
+
+} // namespace runner_watchdog
 
 // Function signature for the test entry point exported by test DLLs/SOs
 typedef int (*RunTestsFunc)(int argc, const char** argv);
@@ -107,8 +211,14 @@ int main(int argc, char** argv) {
         test_argv = const_cast<const char**>(argv);
     }
 
+    // Start watchdog timer
+    runner_watchdog::setup();
+
     // Call test function with arguments
     int test_result = run_tests(test_argc, test_argv);
+
+    // Cancel watchdog - tests completed normally
+    runner_watchdog::cancel();
 
     // Cleanup: Skip FreeLibrary when running with AddressSanitizer
     // ASAN runs leak detection at program exit. If we FreeLibrary() the DLL

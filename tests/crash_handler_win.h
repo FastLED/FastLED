@@ -492,6 +492,125 @@ inline void print_stacktrace() {
     print_stacktrace_windows();
 }
 
+// Walk the stack of a suspended thread using StackWalk64.
+// The target thread MUST be suspended before calling this.
+inline void print_stacktrace_for_thread(HANDLE thread_handle) {
+    HANDLE process = GetCurrentProcess();
+
+    // Initialize symbol handler if not already done
+    if (!g_symbols_initialized) {
+        SymSetOptions(SYMOPT_LOAD_LINES |
+                     SYMOPT_DEFERRED_LOADS |
+                     SYMOPT_UNDNAME |
+                     SYMOPT_DEBUG |
+                     SYMOPT_LOAD_ANYTHING |
+                     SYMOPT_CASE_INSENSITIVE |
+                     SYMOPT_FAVOR_COMPRESSED |
+                     SYMOPT_INCLUDE_32BIT_MODULES |
+                     SYMOPT_AUTO_PUBLICS);
+
+        char currentPath[MAX_PATH];
+        GetCurrentDirectoryA(MAX_PATH, currentPath);
+        if (!SymInitialize(process, currentPath, TRUE)) {
+            printf("SymInitialize failed with error %lu\n", GetLastError());
+        } else {
+            g_symbols_initialized = true;
+            printf("Symbol handler initialized successfully.\n");
+        }
+    }
+
+    // Get thread context (thread must be suspended)
+    CONTEXT ctx;
+    memset(&ctx, 0, sizeof(ctx));
+    ctx.ContextFlags = CONTEXT_FULL;
+    if (!GetThreadContext(thread_handle, &ctx)) {
+        printf("GetThreadContext failed with error %lu\n", GetLastError());
+        // Fallback to current thread stack trace
+        print_stacktrace_windows();
+        return;
+    }
+
+    // Set up STACKFRAME64 from the context
+    STACKFRAME64 frame;
+    memset(&frame, 0, sizeof(frame));
+#ifdef _M_X64
+    DWORD machineType = IMAGE_FILE_MACHINE_AMD64;
+    frame.AddrPC.Offset = ctx.Rip;
+    frame.AddrPC.Mode = AddrModeFlat;
+    frame.AddrFrame.Offset = ctx.Rbp;
+    frame.AddrFrame.Mode = AddrModeFlat;
+    frame.AddrStack.Offset = ctx.Rsp;
+    frame.AddrStack.Mode = AddrModeFlat;
+#elif defined(__x86_64__) || defined(__amd64__)
+    // Clang/MinGW x86_64 uses the same register names but in CONTEXT struct
+    DWORD machineType = IMAGE_FILE_MACHINE_AMD64;
+    frame.AddrPC.Offset = ctx.Rip;
+    frame.AddrPC.Mode = AddrModeFlat;
+    frame.AddrFrame.Offset = ctx.Rbp;
+    frame.AddrFrame.Mode = AddrModeFlat;
+    frame.AddrStack.Offset = ctx.Rsp;
+    frame.AddrStack.Mode = AddrModeFlat;
+#else
+    DWORD machineType = IMAGE_FILE_MACHINE_I386;
+    frame.AddrPC.Offset = ctx.Eip;
+    frame.AddrPC.Mode = AddrModeFlat;
+    frame.AddrFrame.Offset = ctx.Ebp;
+    frame.AddrFrame.Mode = AddrModeFlat;
+    frame.AddrStack.Offset = ctx.Esp;
+    frame.AddrStack.Mode = AddrModeFlat;
+#endif
+
+    printf("Stack trace (main thread, via StackWalk64):\n\n");
+
+    // Symbol buffer
+    char symbolBuffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
+    PSYMBOL_INFO pSymbol = (PSYMBOL_INFO)symbolBuffer;
+    pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+    pSymbol->MaxNameLen = MAX_SYM_NAME;
+
+    IMAGEHLP_LINE64 line;
+    line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+
+    for (int i = 0; i < 100; i++) {
+        if (!StackWalk64(machineType, process, thread_handle, &frame, &ctx,
+                         nullptr, SymFunctionTableAccess64, SymGetModuleBase64, nullptr)) {
+            break;
+        }
+
+        if (frame.AddrPC.Offset == 0) {
+            break;
+        }
+
+        DWORD64 address = frame.AddrPC.Offset;
+        printf("#%-2d 0x%016llx", i, address);
+
+        std::string moduleName = get_module_name(address);
+        printf(" [%s]", moduleName.c_str());
+
+        // Try GDB first for DWARF symbols
+        std::string gdb_result = get_symbol_with_gdb(address);
+        if (gdb_result.find("--") != 0) {
+            printf(" %s", gdb_result.c_str());
+        } else if (g_symbols_initialized) {
+            DWORD64 displacement = 0;
+            if (SymFromAddr(process, address, &displacement, pSymbol)) {
+                std::string demangled = demangle_symbol(pSymbol->Name);
+                printf(" %s + %llu", demangled.c_str(), displacement);
+
+                DWORD lineDisplacement = 0;
+                if (SymGetLineFromAddr64(process, address, &lineDisplacement, &line)) {
+                    char* fileName = strrchr(line.FileName, '\\');
+                    if (fileName) fileName++;
+                    else fileName = line.FileName;
+                    printf(" [%s:%lu]", fileName, line.LineNumber);
+                }
+            }
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
 } // namespace crash_handler_win
 
 #endif // _WIN32

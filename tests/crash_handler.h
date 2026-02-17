@@ -39,4 +39,12 @@ inline void setup_crash_handler() {
     impl::setup_crash_handler();
 }
 
+// Walk the stack of a specific suspended thread (Windows only).
+// On other platforms, use print_stacktrace() from within the target thread.
+#ifdef _WIN32
+inline void print_stacktrace_for_thread(void* thread_handle) {
+    impl::print_stacktrace_for_thread((HANDLE)thread_handle);
+}
+#endif
+
 #endif // CRASH_HANDLER_H
