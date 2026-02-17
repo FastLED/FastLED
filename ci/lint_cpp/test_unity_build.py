@@ -36,6 +36,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.paths import PROJECT_ROOT
 
 
@@ -317,6 +318,9 @@ def _should_skip_build_hpp(
             header_content = potential_header.read_text(encoding="utf-8")
             if build_cpp_hpp_path in header_content:
                 return True  # Included in header, skip in _build.cpp
+        except KeyboardInterrupt:
+            handle_keyboard_interrupt_properly()
+            raise
         except Exception:
             pass
 

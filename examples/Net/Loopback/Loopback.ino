@@ -114,8 +114,8 @@ void setup() {
 }
 
 void loop() {
-    // Process incoming HTTP server requests (non-blocking)
-    server.update();
+    // Pump async task queue (async fetch tasks + server)
+    fl::async_run();
 
     // State: WAITING_FOR_TESTS -> wait 1 second after startup -> start tests
     if (state == WAITING_FOR_TESTS && (fl::millis() - startup_time > 1000)) {
@@ -133,12 +133,12 @@ void loop() {
         testRunner.update();
     }
 
-    // Terminal states - loop forever showing final LED status
+
     if (state == ALL_PASSED || state == FAILED) {
         updateLEDs();
         FastLED.show();
         delay(100);
-        return;  // Stay in terminal state
+        return;  // Stay in terminal state, let the framework break from this test.
     }
 
     // Update LED feedback and show

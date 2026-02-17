@@ -3,6 +3,8 @@
 #include "fl/engine_events.h"
 #include "fl/async.h"
 #include "fl/stl/unique_ptr.h"  // For make_unique
+#include "fl/task.h"  // For fl::task::every_ms
+#include "fl/scheduler.h"  // For fl::Scheduler
 
 // IWYU pragma: begin_keep
 #ifdef FL_IS_WASM
@@ -81,60 +83,14 @@ fl::promise<response> execute_fetch_request(const fl::string& url, const fetch_o
 #else
     #define SOCKET_ERROR_WOULD_BLOCK EWOULDBLOCK
     #define SOCKET_ERROR_IN_PROGRESS EINPROGRESS
-    #define closesocket ::close
 #endif
 
 namespace {
 
-// Helper: Parse URL into components
-struct ParsedURL {
-    fl::string protocol;
-    fl::string host;
-    int port = 80;
-    fl::string path;
-    bool valid = false;
-};
+// Old blocking implementation removed - now using FetchRequest with fl::task
 
-ParsedURL parse_url(const fl::string& url) {
-    ParsedURL result;
-
-    // Find protocol
-    size_t proto_end = url.find("://");
-    if (proto_end == fl::string::npos) {
-        return result;  // Invalid URL
-    }
-
-    result.protocol = url.substr(0, proto_end);
-    size_t host_start = proto_end + 3;
-
-    // Find path (starts with /)
-    size_t path_start = url.find('/', host_start);
-    fl::string host_port;
-
-    if (path_start != fl::string::npos) {
-        host_port = url.substr(host_start, path_start - host_start);
-        result.path = url.substr(path_start);
-    } else {
-        host_port = url.substr(host_start);
-        result.path = "/";
-    }
-
-    // Split host and port
-    size_t port_sep = host_port.find(':');
-    if (port_sep != fl::string::npos) {
-        result.host = host_port.substr(0, port_sep);
-        fl::string port_str = host_port.substr(port_sep + 1);
-        result.port = atoi(port_str.c_str());
-    } else {
-        result.host = host_port;
-        result.port = (result.protocol == "https") ? 443 : 80;
-    }
-
-    result.valid = !result.host.empty();
-    return result;
-}
-
-// Helper: Perform synchronous HTTP request
+/*
+// Helper: Perform synchronous HTTP request (DEPRECATED - now async with fl::task)
 response perform_http_request(const fl::string& url, const fetch_options& request) {
     ParsedURL parsed = parse_url(url);
 
@@ -150,17 +106,7 @@ response perform_http_request(const fl::string& url, const fetch_options& reques
         return resp;
     }
 
-#ifdef FL_IS_WIN
-    // Initialize Winsock
-    WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-        response resp(500, "Internal Server Error");
-        resp.set_body("Failed to initialize Winsock");
-        return resp;
-    }
-#endif
-
-    // Create socket
+    // Create socket (initialization handled by socket wrapper)
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) {
         response resp(500, "Internal Server Error");
@@ -169,9 +115,10 @@ response perform_http_request(const fl::string& url, const fetch_options& reques
     }
 
     // Resolve hostname
+    FL_WARN("[FETCH] Resolving hostname: " << parsed.host);
     struct hostent* server = gethostbyname(parsed.host.c_str());
     if (server == nullptr) {
-        closesocket(sock);
+        close(sock);
         response resp(500, "Internal Server Error");
         resp.set_body("Failed to resolve hostname");
         return resp;
@@ -201,7 +148,7 @@ response perform_http_request(const fl::string& url, const fetch_options& reques
         int err = errno;
 #endif
         if (err != SOCKET_ERROR_IN_PROGRESS && err != SOCKET_ERROR_WOULD_BLOCK) {
-            closesocket(sock);
+            close(sock);
             response resp(500, "Internal Server Error");
             resp.set_body("Failed to connect to server");
             return resp;
@@ -216,6 +163,7 @@ response perform_http_request(const fl::string& url, const fetch_options& reques
         FD_SET(sock, &write_fds);
 
         // Wait for connection with async pumping
+        FL_WARN("[FETCH] Waiting for connection to " << parsed.host << ":" << parsed.port);
         while (true) {
             timeout.tv_sec = 0;
             timeout.tv_usec = 10000;  // 10ms
@@ -226,14 +174,14 @@ response perform_http_request(const fl::string& url, const fetch_options& reques
                 socklen_t len = sizeof(sock_err);
                 getsockopt(sock, SOL_SOCKET, SO_ERROR, (char*)&sock_err, &len);
                 if (sock_err != 0) {
-                    closesocket(sock);
+                    close(sock);
                     response resp(500, "Internal Server Error");
                     resp.set_body("Failed to connect to server");
                     return resp;
                 }
                 break;  // Connection successful
             } else if (sel_result < 0) {
-                closesocket(sock);
+                close(sock);
                 response resp(500, "Internal Server Error");
                 resp.set_body("select() failed during connection");
                 return resp;
@@ -268,13 +216,14 @@ response perform_http_request(const fl::string& url, const fetch_options& reques
 
     // Send request
     if (send(sock, http_request.c_str(), static_cast<int>(http_request.size()), 0) < 0) {
-        closesocket(sock);
+        close(sock);
         response resp(500, "Internal Server Error");
         resp.set_body("Failed to send request");
         return resp;
     }
 
     // Read response (non-blocking with async pumping)
+    FL_WARN("[FETCH] Waiting for HTTP response...");
     fl::string response_data;
     char buffer[4096];
     int retries = 0;
@@ -309,7 +258,7 @@ response perform_http_request(const fl::string& url, const fetch_options& reques
 #endif
             } else {
                 // Real error
-                closesocket(sock);
+                close(sock);
                 response resp(500, "Internal Server Error");
                 resp.set_body("Failed to read response");
                 return resp;
@@ -317,7 +266,7 @@ response perform_http_request(const fl::string& url, const fetch_options& reques
         }
     }
 
-    closesocket(sock);
+    close(sock);
 
     if (retries >= max_retries) {
         response resp(500, "Internal Server Error");
@@ -389,20 +338,59 @@ response perform_http_request(const fl::string& url, const fetch_options& reques
 
     return resp;
 }
+*/
 
 } // anonymous namespace
 
 void fetch(const fl::string& url, const FetchCallback& callback) {
-    response resp = perform_http_request(url, fetch_options(url));
-    callback(resp);
+    // Use async execute_fetch_request and attach callback to promise
+    execute_fetch_request(url, fetch_options(url))
+        .then([callback](const response& resp) {
+            callback(resp);
+        })
+        .catch_([callback](const Error& err) {
+            // On error, return 500 response
+            response resp(500, "Internal Server Error");
+            resp.set_body(err.message);
+            callback(resp);
+        });
 }
 
 // Internal helper to execute a fetch request and return a promise
 fl::promise<response> execute_fetch_request(const fl::string& url, const fetch_options& request) {
-    // For native platforms, perform synchronous request and return resolved promise
-    // In the future, this could be made asynchronous using threads
-    response resp = perform_http_request(url, request);
-    return fl::promise<response>::resolve(resp);
+    // Create promise for this request
+    auto promise = fl::promise<response>::create();
+
+    // Register promise with FetchManager for tracking
+    FetchManager::instance().register_promise(promise);
+
+    // Create shared FetchRequest (managed by task lambda)
+    auto fetch_req = fl::make_shared<fl::net::FetchRequest>(url, request, promise);
+
+    // Create self-canceling task (stored in shared_ptr for lambda capture)
+    auto task_ptr = fl::make_shared<fl::task>();
+
+    *task_ptr = fl::task::every_ms(1)  // Update every 1ms
+        .then([fetch_req, task_ptr]() {
+            // Pump the fetch state machine
+            fetch_req->update();
+
+            // Self-cancel when done
+            if (fetch_req->is_done()) {
+                task_ptr->cancel();
+            }
+        })
+        .catch_([promise](const fl::Error& e) mutable {
+            // Task error - reject promise if not already completed
+            if (promise.valid() && !promise.is_completed()) {
+                promise.complete_with_error(e);
+            }
+        });
+
+    // Add to scheduler
+    fl::Scheduler::instance().add_task(*task_ptr);
+
+    return promise;
 }
 
 #else

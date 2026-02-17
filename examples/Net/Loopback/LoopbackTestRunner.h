@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <FastLED.h>
 #include "fl/net/fetch.h"
 #include "fl/warn.h"
 
@@ -48,6 +49,8 @@ public:
     {}
 
     void startTests(CompletionCallback callback) {
+        FL_WARN("[LOOPBACK] startTests() called - initializing test runner");
+        FL_WARN("[LOOPBACK] startTests() called");
         completion_callback = callback;
         tests_run = 0;
         tests_passed = 0;
@@ -118,6 +121,7 @@ public:
 private:
     void runTest(const char* name, const char* url,
                  const char* expected, TestSequenceState next_state) {
+        FL_WARN("[LOOPBACK] Running test: " << name << " -> " << url);
         Serial.print("Running test: ");
         Serial.println(name);
 

@@ -19,7 +19,6 @@
     #include "platforms/posix/socket_posix.h"  // ok platform headers (includes all system socket headers)  // IWYU pragma: keep
     #define SOCKET_ERROR_WOULD_BLOCK EWOULDBLOCK
     #define SOCKET_ERROR_IN_PROGRESS EINPROGRESS
-    #define closesocket ::close  // POSIX uses close() for sockets
 #endif
 
 namespace fl {
@@ -289,14 +288,14 @@ void Server::stop() {
     // Close all client connections
     for (auto& client : mClientSockets) {
         if (client.fd != -1) {
-            closesocket(client.fd);
+            close(client.fd);
         }
     }
     mClientSockets.clear();
 
     // Close listen socket
     if (mListenSocket != -1) {
-        closesocket(mListenSocket);
+        close(mListenSocket);
         mListenSocket = -1;
     }
 
@@ -332,16 +331,7 @@ size_t Server::update() {
 }
 
 bool Server::setup_listen_socket(int port) {
-#ifdef FL_IS_WIN
-    // Initialize Winsock
-    WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-        mLastError = "WSAStartup failed";
-        return false;
-    }
-#endif
-
-    // Create socket
+    // Create socket (initialization handled by socket wrapper)
     mListenSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (mListenSocket < 0) {
         mLastError = "Failed to create socket";
@@ -352,7 +342,7 @@ bool Server::setup_listen_socket(int port) {
     int opt = 1;
     if (setsockopt(mListenSocket, SOL_SOCKET, SO_REUSEADDR,
                    (const char*)(&opt), sizeof(opt)) < 0) {
-        closesocket(mListenSocket);
+        close(mListenSocket);
         mListenSocket = -1;
         mLastError = "Failed to set SO_REUSEADDR";
         return false;
@@ -360,7 +350,7 @@ bool Server::setup_listen_socket(int port) {
 
     // Set non-blocking
     if (!set_nonblocking(mListenSocket)) {
-        closesocket(mListenSocket);
+        close(mListenSocket);
         mListenSocket = -1;
         mLastError = "Failed to set non-blocking mode";
         return false;
@@ -373,7 +363,7 @@ bool Server::setup_listen_socket(int port) {
     addr.sin_port = htons(static_cast<u16>(port));
 
     if (bind(mListenSocket, (sockaddr*)(&addr), sizeof(addr)) < 0) {
-        closesocket(mListenSocket);
+        close(mListenSocket);
         mListenSocket = -1;
         mLastError = "Failed to bind to port";
         return false;
@@ -381,7 +371,7 @@ bool Server::setup_listen_socket(int port) {
 
     // Listen
     if (listen(mListenSocket, 5) < 0) {
-        closesocket(mListenSocket);
+        close(mListenSocket);
         mListenSocket = -1;
         mLastError = "Failed to listen on socket";
         return false;
@@ -412,7 +402,7 @@ void Server::accept_connections() {
 
         // Set client socket to non-blocking
         if (!set_nonblocking(client_fd)) {
-            closesocket(client_fd);
+            close(client_fd);
             continue;
         }
 
@@ -591,7 +581,7 @@ optional<RouteHandler> Server::find_handler(const string& method, const string& 
 void Server::close_client(size_t index) {
     if (index >= mClientSockets.size()) return;
 
-    closesocket(mClientSockets[index].fd);
+    close(mClientSockets[index].fd);
     mClientSockets.erase(mClientSockets.begin() + static_cast<ptrdiff_t>(index));
 }
 

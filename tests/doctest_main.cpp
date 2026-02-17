@@ -51,7 +51,7 @@
 // Timeout watchdog only in standalone mode (not DLL mode)
 // In DLL mode, runner.exe manages timeouts externally
 #ifndef TEST_DLL_MODE
-#include "platforms/timeout_watchdog.h"
+#include "timeout_watchdog.h"
 #endif
 
 #include "platforms/stub/task_coroutine_stub.h"
