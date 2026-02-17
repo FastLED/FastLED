@@ -3,8 +3,7 @@
 /// Includes all implementation files in alphabetical order
 
 #include "fl/fx/2d/animartrix2_detail/chasing_spirals_common.cpp.hpp"
-#include "fl/fx/2d/animartrix2_detail/chasing_spirals_q31.cpp.hpp"
-#include "fl/fx/2d/animartrix2_detail/chasing_spirals_simd.cpp.hpp"
+// chasing_spirals variants now in viz/chasing_spirals.cpp.hpp (included via viz/_build.cpp.hpp)
 #include "fl/fx/2d/animartrix2_detail/perlin_i16_optimized.cpp.hpp"
 #include "fl/fx/2d/animartrix2_detail/perlin_q16.cpp.hpp"
 #include "fl/fx/2d/animartrix2_detail/perlin_s16x16.cpp.hpp"

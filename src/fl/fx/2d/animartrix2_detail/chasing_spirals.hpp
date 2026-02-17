@@ -167,6 +167,5 @@
 // - fl/simd.h (for SIMD intrinsics)
 // - fl/sin32.h (for sincos32 functions)
 
-#include "chasing_spirals_common.hpp"  // Common helper code
-#include "chasing_spirals_q31.hpp"     // Q31 scalar implementation
-#include "chasing_spirals_simd.hpp"    // Q31 SIMD implementation
+// All three variants (float, Q31, SIMD) are now in viz/chasing_spirals.h
+#include "fl/fx/2d/animartrix2_detail/viz/chasing_spirals.h"
