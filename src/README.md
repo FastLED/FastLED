@@ -17,7 +17,7 @@ The `src/` directory contains the classic FastLED public API (`FastLED.h`), the 
   - [Effects and graphics: `fx/`](#effects-and-graphics-fx)
   - [Platforms and HAL: `platforms/`](#platforms-and-hal-platforms)
   - [Sensors and input: `fl/sensors/`](#sensors-and-input-sensors)
-  - [Fonts and assets: `fonts/`](#fonts-and-assets-fonts)
+  - [Fonts: `fl/font/`](#fonts-flfont)
   - [Third‑party and shims: `third_party/`](#third-party-and-shims-third_party)
 - [Quick Usage Examples](#quick-usage-examples)
   - [Classic strip setup](#classic-strip-setup)
@@ -45,7 +45,7 @@ The `src/` directory contains the classic FastLED public API (`FastLED.h`), the 
 - `fx/`: effect/graphics utilities and 1D/2D composition helpers
 - `platforms/`: hardware abstraction layers (AVR, ARM, ESP, POSIX, STUB, WASM, etc.)
 - `fl/sensors/`: basic input components (buttons, digital pins)
-- `fonts/`: built‑in bitmap fonts for overlays
+- `fl/font/`: TrueType and bitmap font support for text rendering
 - `third_party/`: vendored minimal headers and compatibility glue
 
 If you are writing Arduino‑style sketches, include `FastLED.h`. For advanced/host builds or portable C++, prefer including only what you use from `fl/` and related subsystems.
@@ -85,9 +85,11 @@ If you are writing Arduino‑style sketches, include `FastLED.h`. For advanced/h
 
 - Minimal input primitives (e.g., `button`, `digital_pin`) intended for demos and portable logic
 
-### Fonts and assets: `fonts/`
+### Fonts: `fl/font/`
 
-- Small bitmap fonts (e.g., `console_font_4x6`) to draw text overlays in demos/tests
+- TrueType font rendering support (`truetype.h`)
+- Bitmap console fonts (e.g., `console_font_4x6`, `console_font_5x8`) for text overlays in demos/tests
+- See `src/fl/font/README.md` for detailed documentation and BETA status warnings
 
 ### Third‑party and shims: `third_party/`
 

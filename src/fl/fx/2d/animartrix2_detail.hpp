@@ -53,7 +53,6 @@ FL_OPTIMIZATION_LEVEL_O3_BEGIN
 #include "fl/fx/2d/animartrix2_detail/perlin_q16.h"
 #include "fl/fx/2d/animartrix2_detail/perlin_s8x8.h"
 #include "fl/fx/2d/animartrix2_detail/perlin_i16_optimized.h"
-#include "fl/fx/2d/animartrix2_detail/chasing_spirals.hpp"
 
 // Visualizer declarations (implementations in viz/*.cpp.hpp)
 #include "fl/fx/2d/animartrix2_detail/viz/big_caleido.h"

@@ -538,6 +538,58 @@ def check_scanned_data(data: ScannedData) -> CheckResult:
     return CheckResult(success=len(violations) == 0, violations=violations)
 
 
+def check_single_file(file_path: Path) -> CheckResult:
+    """
+    Targeted unity build check for a single .cpp.hpp file.
+
+    Used in single-file linting mode (agent hook on save). Only checks the
+    immediate directory — does not walk the full project tree.
+
+    Rules:
+    - If file is _build.cpp.hpp: all *.cpp.hpp files in the same directory
+      must be listed in it.
+    - If file is any other *.cpp.hpp: the _build.cpp.hpp in the same directory
+      must include it.
+
+    Returns:
+        CheckResult with success flag and list of violations
+    """
+    if not file_path.name.endswith(".cpp.hpp"):
+        return CheckResult(success=True, violations=[])
+
+    src_dir = PROJECT_ROOT / SRC_DIR_NAME
+    dir_path = file_path.parent
+
+    if file_path.name == BUILD_CPP_HPP:
+        # Editing a _build.cpp.hpp: check all sibling .cpp.hpp files are listed.
+        cpp_hpp_by_dir: CppHppByDir = {dir_path: list(dir_path.glob(CPP_HPP_PATTERN))}
+        violations = _check_cpp_hpp_files(src_dir, cpp_hpp_by_dir)
+    else:
+        # Editing a regular .cpp.hpp: check its parent _build.cpp.hpp includes it.
+        build_hpp = dir_path / BUILD_CPP_HPP
+
+        if not build_hpp.exists():
+            try:
+                rel_dir = dir_path.relative_to(PROJECT_ROOT)
+            except ValueError:
+                return CheckResult(success=True, violations=[])
+            violations = [f"Missing {BUILD_CPP_HPP} in {rel_dir.as_posix()}/"]
+        else:
+            try:
+                rel_path = file_path.relative_to(src_dir)
+            except ValueError:
+                return CheckResult(success=True, violations=[])
+            include_path = rel_path.as_posix()
+            content = build_hpp.read_text(encoding="utf-8")
+            if include_path not in content:
+                rel_build = build_hpp.relative_to(PROJECT_ROOT)
+                violations = [f"{rel_build.as_posix()}: missing {include_path}"]
+            else:
+                violations = []
+
+    return CheckResult(success=len(violations) == 0, violations=violations)
+
+
 def check() -> CheckResult:
     """
     Check unity build structure integrity.

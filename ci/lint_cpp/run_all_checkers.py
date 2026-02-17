@@ -55,6 +55,9 @@ from ci.lint_cpp.stdint_type_checker import (
 )
 from ci.lint_cpp.test_path_structure_checker import TestPathStructureChecker
 from ci.lint_cpp.test_unity_build import check as check_unity_build
+from ci.lint_cpp.test_unity_build import (
+    check_single_file as check_unity_build_single_file,
+)
 from ci.lint_cpp.unit_test_checker import UnitTestChecker
 from ci.lint_cpp.using_namespace_fl_in_examples_checker import (
     UsingNamespaceFlInExamplesChecker,
@@ -659,6 +662,17 @@ def main() -> int:
 
         # Run all applicable checkers on the single file
         results = run_checkers_on_single_file(str(file_path), checkers_by_scope)
+
+        # Run targeted unity build check for .cpp.hpp and _build.cpp.hpp files
+        if file_path.name.endswith(".cpp.hpp"):
+            unity_result = check_unity_build_single_file(file_path)
+            if not unity_result.success:
+                unity_checker_results = CheckerResults()
+                for violation in unity_result.violations:
+                    unity_checker_results.add_violation(
+                        "unity_build_structure", 0, violation
+                    )
+                results["UnityBuildChecker"] = unity_checker_results
 
         # Format and print results
         exit_code = format_and_print_results(results)

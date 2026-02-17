@@ -9,7 +9,7 @@
 #include "test.h"
 #include "fl/fx/2d/animartrix.hpp"
 #include "fl/fx/2d/animartrix2.hpp"
-#include "fl/fx/2d/animartrix2_detail/chasing_spirals.hpp"
+#include "fl/fx/2d/animartrix2_detail/viz/chasing_spirals.h"
 #include "fl/xymap.h"
 #include <stdio.h>  // ok include: needed for debug output
 
