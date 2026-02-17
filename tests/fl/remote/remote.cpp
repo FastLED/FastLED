@@ -1,3 +1,5 @@
+// DISABLED in test suite (see tests/meson.build skipped_tests) - passes individually via `bash test tests/fl/remote/remote`
+
 #include "fl/remote/remote.h"
 
 #if FASTLED_ENABLE_JSON

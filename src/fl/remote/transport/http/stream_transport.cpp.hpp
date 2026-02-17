@@ -13,8 +13,6 @@ HttpStreamTransport::HttpStreamTransport(const char* host, u16 port, u32 heartbe
     , mLastHeartbeatReceived(0)
     , mHeartbeatInterval(heartbeatIntervalMs)
     , mTimeoutMs(60000)  // Default 60s timeout
-    , mHost(host)
-    , mPort(port)
     , mWasConnected(false)
     , mOnConnect(nullptr)
     , mOnDisconnect(nullptr) {

@@ -82,6 +82,7 @@ private:
         bool httpHeaderSent;
         HttpRequestParser requestParser;
         fl::vector<u8> pendingData;  // Data waiting to be processed
+        fl::string headerBuffer;     // Accumulates partial HTTP header reads
 
         // Default constructor (required for map operations)
         ClientState()

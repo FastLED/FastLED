@@ -13,15 +13,28 @@ If the test hangs (exceeds timeout), it:
 import os
 import subprocess
 import sys
+import threading
 import time
 from pathlib import Path
-from typing import Optional
 
 from ci.util.deadlock_detector import handle_hung_test
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
 
 DEFAULT_TIMEOUT = 20.0  # 20 seconds per test
+
+
+def _output_reader(proc, output_lines):
+    """Background thread that reads process output without blocking the main loop."""
+    try:
+        for line in iter(proc.stdout.readline, ""):
+            if not line:
+                break
+            output_lines.append(line)
+            print(line, end="", flush=True)
+    except (ValueError, OSError):
+        # Pipe closed or process terminated
+        pass
 
 
 def run_test_with_deadlock_detection(
@@ -35,7 +48,7 @@ def run_test_with_deadlock_detection(
     Args:
         runner_exe: Path to runner.exe (loads test DLLs)
         test_dll: Path to test DLL
-        timeout_seconds: Timeout in seconds (default: 10)
+        timeout_seconds: Timeout in seconds (default: 20)
 
     Returns:
         Exit code (0 = success, non-zero = failure/timeout)
@@ -47,8 +60,6 @@ def run_test_with_deadlock_detection(
     start_time = time.time()
 
     # Start the test process (runner.exe loads the test DLL)
-    # NOTE: Crash handler uses signal chaining - internal dump first, then external debugger
-    # No need to disable crash handler anymore!
     try:
         proc = subprocess.Popen(
             [runner_exe, test_dll],
@@ -64,18 +75,21 @@ def run_test_with_deadlock_detection(
         print(f"Failed to start test: {e}", file=sys.stderr)
         return 1
 
-    # Monitor the process
+    # Start background thread to read output without blocking
+    output_lines = []
+    reader_thread = threading.Thread(
+        target=_output_reader, args=(proc, output_lines), daemon=True
+    )
+    reader_thread.start()
+
+    # Monitor the process - just poll() and check timeout
     try:
         while True:
             # Check if process has finished
             returncode = proc.poll()
             if returncode is not None:
-                # Process finished
-                # Read any remaining output
-                if proc.stdout:
-                    remaining = proc.stdout.read()
-                    if remaining:
-                        print(remaining, end="")
+                # Process finished - wait for reader thread to drain remaining output
+                reader_thread.join(timeout=2.0)
 
                 elapsed = time.time() - start_time
                 if returncode == 0:
@@ -86,9 +100,7 @@ def run_test_with_deadlock_detection(
                 return returncode
 
             # Check for timeout
-            current_time = time.time()
-            elapsed = current_time - start_time
-
+            elapsed = time.time() - start_time
             if elapsed > timeout_seconds:
                 # Test has hung!
                 print(f"\n{'=' * 80}")
@@ -113,60 +125,8 @@ def run_test_with_deadlock_detection(
                 print(f"\nTest was killed due to timeout ({timeout_seconds}s)")
                 return 124  # Timeout exit code (similar to timeout command)
 
-            # Try to read output
-            if proc.stdout:
-                try:
-                    # Try to read a line with timeout
-                    import select
-
-                    if hasattr(select, "select"):
-                        # Unix-like systems with select
-                        ready, _, _ = select.select([proc.stdout], [], [], 0.1)
-                        if ready:
-                            line = proc.stdout.readline()
-                            if line:
-                                print(line, end="")
-                    else:
-                        # Windows - just try to read (may block briefly)
-                        # Use a thread to avoid blocking
-                        import queue
-                        import threading
-
-                        q: "queue.Queue[Optional[str]]" = queue.Queue()
-                        # Capture stdout for closure (type narrowing)
-                        stdout = proc.stdout
-                        assert stdout is not None
-
-                        def read_line():
-                            try:
-                                line = stdout.readline()
-                                q.put(line)
-                            except KeyboardInterrupt:
-                                handle_keyboard_interrupt_properly()
-                                q.put(None)
-                            except:
-                                q.put(None)
-
-                        t = threading.Thread(target=read_line)
-                        t.daemon = True
-                        t.start()
-                        t.join(timeout=0.1)
-
-                        try:
-                            line = q.get_nowait()
-                            if line:
-                                print(line, end="")
-                        except queue.Empty:
-                            pass
-
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
-                    raise
-                except Exception as e:
-                    # No output available or error reading
-                    time.sleep(0.1)
-            else:
-                time.sleep(0.1)
+            # Sleep briefly before next poll
+            time.sleep(0.1)
 
     except KeyboardInterrupt:
         handle_keyboard_interrupt_properly()

@@ -30,7 +30,7 @@ EXCLUDED_TEST_FILES: set[Path] = {
     / "transport"
     / "http"
     / "test_utils"
-    / "server_thread.cpp",  # Utility class, not a test (included by loopback.cpp)
+    / "server_thread.cpp.hpp",  # Utility class, not a test (included by loopback.cpp)
 }
 
 # Directories to exclude from recursive test discovery.

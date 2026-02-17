@@ -25,21 +25,20 @@ HttpStreamServer::~HttpStreamServer() {
 }
 
 bool HttpStreamServer::connect() {
-    FL_WARN("HttpStreamServer::connect() called on port " << mPort);
-
     // If already listening, return true
     if (isConnected()) {
-        FL_WARN("HttpStreamServer: Already listening");
         return true;
     }
 
     // Start listening
-    FL_WARN("HttpStreamServer: Starting server on port " << mPort << "...");
     if (!mNativeServer->start()) {
-        FL_WARN("HttpStreamServer: Failed to start server");
         return false;
     }
-    FL_WARN("HttpStreamServer: Server started successfully, listening on port " << mPort);
+
+    // Enable non-blocking mode so accept() and recv() don't block the server thread.
+    // Without this, the accept() loop in NativeHttpServer::acceptClients() blocks
+    // forever after accepting the first client, preventing HTTP header processing.
+    mNativeServer->setNonBlocking(true);
 
     // Mark connection as established in base class
     mConnection.onConnected();
@@ -65,13 +64,7 @@ void HttpStreamServer::acceptClients() {
     }
 
     // Accept new clients (non-blocking)
-    size_t prevClientCount = mNativeServer->getClientCount();
     mNativeServer->acceptClients();
-    size_t newClientCount = mNativeServer->getClientCount();
-
-    if (newClientCount > prevClientCount) {
-        FL_WARN("HttpStreamServer: Accepted " << (newClientCount - prevClientCount) << " new client(s), total clients: " << newClientCount);
-    }
 
     // Get list of all client IDs
     fl::vector<u32> clientIds = mNativeServer->getClientIds();
@@ -85,17 +78,11 @@ void HttpStreamServer::acceptClients() {
 
         // If HTTP headers not exchanged yet, do it now
         if (!state->httpHeaderReceived) {
-            FL_WARN("HttpStreamServer: Reading HTTP request header from client " << clientId << "...");
             if (readHttpRequestHeader(clientId)) {
-                FL_WARN("HttpStreamServer: HTTP request header received from client " << clientId);
                 // Send HTTP response header
-                FL_WARN("HttpStreamServer: Sending HTTP response header to client " << clientId << "...");
                 if (!sendHttpResponseHeader(clientId)) {
                     // Failed to send response, disconnect client
-                    FL_WARN("HttpStreamServer: Failed to send HTTP response header to client " << clientId << ", disconnecting");
                     disconnectClient(clientId);
-                } else {
-                    FL_WARN("HttpStreamServer: HTTP response header sent to client " << clientId << ", handshake complete");
                 }
             }
         }
@@ -207,78 +194,51 @@ bool HttpStreamServer::readHttpRequestHeader(u32 clientId) {
         return true;  // Already received
     }
 
-    // Read HTTP request header byte by byte until we find \r\n\r\n
-    fl::string headerBuffer;
-    u8 buffer[1];
+    // Read HTTP request header in chunks, accumulating in state->headerBuffer
+    // across multiple calls (non-blocking sockets may return partial data)
+    u8 buffer[256];
 
     // Maximum header size: 8KB (generous for HTTP headers)
     const size_t MAX_HEADER_SIZE = 8192;
 
-    while (headerBuffer.size() < MAX_HEADER_SIZE) {
-        int received = mNativeServer->recv(clientId, buffer, 1);
-        if (received <= 0) {
-            // No more data available right now, try again later
+    while (state->headerBuffer.size() < MAX_HEADER_SIZE) {
+        int received = mNativeServer->recv(clientId, buffer, sizeof(buffer));
+        if (received < 0) {
+            return false;
+        }
+        if (received == 0) {
             return false;
         }
 
-        headerBuffer.append(reinterpret_cast<const char*>(buffer), 1); // ok reinterpret cast
+        state->headerBuffer.append(reinterpret_cast<const char*>(buffer), received); // ok reinterpret cast
 
         // Check for \r\n\r\n pattern (end of headers)
-        if (headerBuffer.size() >= 4) {
-            size_t pos = headerBuffer.size() - 4;
-            if (headerBuffer[pos] == '\r' && headerBuffer[pos + 1] == '\n' &&
-                headerBuffer[pos + 2] == '\r' && headerBuffer[pos + 3] == '\n') {
+        if (state->headerBuffer.size() >= 4) {
+            size_t pos = state->headerBuffer.find("\r\n\r\n");
+            if (pos != fl::string::npos) {
                 break;
             }
         }
     }
 
-    // Parse HTTP request header
-    HttpRequestParser parser;
+    // Validate the header directly (don't use HttpRequestParser which waits for
+    // the chunked body to complete — we only need headers for the handshake).
+    const fl::string& hdr = state->headerBuffer;
 
-    // Feed the header data to parser (feed takes pointer and length)
-    parser.feed(reinterpret_cast<const u8*>(headerBuffer.c_str()), headerBuffer.size()); // ok reinterpret cast
-
-    // Get the parsed request
-    fl::optional<HttpRequest> requestOpt = parser.getRequest();
-    if (!requestOpt.has_value()) {
+    // Must start with "POST /rpc"
+    if (hdr.find("POST /rpc") != 0) {
         return false;
     }
 
-    const HttpRequest& request = requestOpt.value();
-
-    // Validate request
-    // Must be POST to /rpc
-    if (request.method != "POST") {
+    // Must have Content-Type: application/json (case-insensitive check)
+    if (hdr.find("Content-Type: application/json") == fl::string::npos &&
+        hdr.find("content-type: application/json") == fl::string::npos) {
         return false;
     }
 
-    if (request.uri != "/rpc") {
-        return false;
-    }
-
-    // Check for required headers
-    // Find Content-Type header
-    auto contentTypeIt = request.headers.find("content-type");
-    if (contentTypeIt == request.headers.end()) {
-        contentTypeIt = request.headers.find("Content-Type");
-    }
-    if (contentTypeIt == request.headers.end()) {
-        return false;
-    }
-    if (contentTypeIt->second.find("application/json") == fl::string::npos) {
-        return false;
-    }
-
-    // Find Transfer-Encoding header
-    auto transferEncodingIt = request.headers.find("transfer-encoding");
-    if (transferEncodingIt == request.headers.end()) {
-        transferEncodingIt = request.headers.find("Transfer-Encoding");
-    }
-    if (transferEncodingIt == request.headers.end()) {
-        return false;
-    }
-    if (transferEncodingIt->second.find("chunked") == fl::string::npos) {
+    // Must have Transfer-Encoding: chunked (case-insensitive check)
+    if (hdr.find("Transfer-Encoding: chunked") == fl::string::npos &&
+        hdr.find("transfer-encoding: chunked") == fl::string::npos) {
         return false;
     }
 
@@ -297,13 +257,6 @@ bool HttpStreamServer::sendHttpResponseHeader(u32 clientId) {
     }
 
     // Build HTTP 200 OK response header
-    // Format:
-    // HTTP/1.1 200 OK
-    // Content-Type: application/json
-    // Transfer-Encoding: chunked
-    // Connection: keep-alive
-    // \r\n
-
     fl::string header;
     header.append("HTTP/1.1 200 OK\r\n");
     header.append("Content-Type: application/json\r\n");

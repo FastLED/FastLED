@@ -32,9 +32,6 @@ public:
     bool isRunning() const;
 
 private:
-    /// Server thread main loop
-    void run();
-    
     fl::shared_ptr<ServerThreadData> mData;
 
 };

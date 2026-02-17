@@ -3,7 +3,7 @@
 #include "fl/align.h"  // Required for FL_ALIGNAS
 #include "fl/fx/2d/animartrix2_detail/engine.h"
 #include "fl/sin32.h"
-#include "../chasing_spirals_simd.h"
+#include "fl/fx/2d/animartrix2_detail/chasing_spirals_simd.h"  // IWYU pragma: keep
 
 namespace fl {
 

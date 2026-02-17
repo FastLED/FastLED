@@ -33,8 +33,8 @@
 #include "errhandlingapi.h"
 #include "minwindef.h"
 #include "winbase.h"
-#include <processthreadsapi.h>
-#include <synchapi.h>
+#include <processthreadsapi.h>  // IWYU pragma: keep
+#include <synchapi.h>  // IWYU pragma: keep
 
 // Crash handler setup (defined in crash_handler_main.cpp)
 extern "C" void runner_setup_crash_handler();

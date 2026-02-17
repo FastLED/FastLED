@@ -4,4 +4,4 @@
 //
 // Re-exports the SIMD declaration from the parent directory.
 
-#include "../chasing_spirals_simd.h"
+#include "fl/fx/2d/animartrix2_detail/chasing_spirals_simd.h"  // IWYU pragma: keep

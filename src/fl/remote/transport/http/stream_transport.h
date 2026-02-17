@@ -120,8 +120,6 @@ private:
     u32 mTimeoutMs;
 
     // Connection state
-    const char* mHost;
-    u16 mPort;
     bool mWasConnected;
 
     // Callbacks
