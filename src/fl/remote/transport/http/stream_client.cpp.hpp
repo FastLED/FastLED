@@ -3,7 +3,9 @@
 #include "stream_client.h"
 #include "fl/stl/string.h"
 #include "fl/stl/stdint.h"
+#include "fl/warn.h"
 #include <cstdio>  // IWYU pragma: keep
+#include <thread>  // IWYU pragma: keep
 
 namespace fl {
 
@@ -23,8 +25,11 @@ HttpStreamClient::~HttpStreamClient() {
 }
 
 bool HttpStreamClient::connect() {
+    FL_WARN("HttpStreamClient::connect() called for " << mHost.c_str() << ":" << mPort);
+
     // If already connected, return true
     if (isConnected()) {
+        FL_WARN("HttpStreamClient::connect() already connected");
         return true;
     }
 
@@ -33,21 +38,30 @@ bool HttpStreamClient::connect() {
     mHttpHeaderReceived = false;
 
     // Connect native socket
+    FL_WARN("HttpStreamClient: Connecting socket to " << mHost.c_str() << ":" << mPort << "...");
     if (!mNativeClient->connect()) {
+        FL_WARN("HttpStreamClient: Socket connection FAILED");
         return false;
     }
+    FL_WARN("HttpStreamClient: Socket connected successfully");
 
     // Send HTTP POST request header
+    FL_WARN("HttpStreamClient: Sending HTTP request header...");
     if (!sendHttpRequestHeader()) {
+        FL_WARN("HttpStreamClient: Failed to send HTTP request header");
         mNativeClient->disconnect();
         return false;
     }
+    FL_WARN("HttpStreamClient: HTTP request header sent");
 
     // Read HTTP response header
+    FL_WARN("HttpStreamClient: Reading HTTP response header...");
     if (!readHttpResponseHeader()) {
+        FL_WARN("HttpStreamClient: Failed to read HTTP response header");
         mNativeClient->disconnect();
         return false;
     }
+    FL_WARN("HttpStreamClient: HTTP response header received, connection established");
 
     // Mark connection as established in base class
     mConnection.onConnected();
@@ -132,40 +146,62 @@ bool HttpStreamClient::readHttpResponseHeader() {
     // Connection: keep-alive
     // \r\n
 
+    FL_WARN("HttpStreamClient: Waiting for HTTP response header from server...");
+
     // Read until we find \r\n\r\n (end of headers)
     fl::string headerBuffer;
-    u8 buffer[1];
+    u8 buffer[256];  // Read in chunks instead of byte-by-byte
 
-    // Read byte by byte until we get \r\n\r\n
-    // This is simple but not efficient - for production, use a proper parser
-    // Maximum header size: 4KB
+    // Maximum header size: 4KB, max retries when no data (yield to server thread)
     const size_t MAX_HEADER_SIZE = 4096;
+    const int MAX_READ_ATTEMPTS = 500;  // 500 yields before giving up
+    int readAttempts = 0;
 
     while (headerBuffer.size() < MAX_HEADER_SIZE) {
-        int received = mNativeClient->recv(buffer, 1);
-        if (received <= 0) {
+        int received = mNativeClient->recv(buffer, sizeof(buffer));
+
+        if (received < 0) {
+            FL_WARN("HttpStreamClient: recv() error, aborting");
             return false;
         }
 
-        headerBuffer.append(reinterpret_cast<const char*>(buffer), 1); // ok reinterpret cast
+        if (received == 0) {
+            // No data yet - server may still be processing the request
+            // Yield to allow other threads (e.g. server thread) to run
+            readAttempts++;
+            if (readAttempts >= MAX_READ_ATTEMPTS) {
+                FL_WARN("HttpStreamClient: Timeout waiting for HTTP response header");
+                return false;
+            }
+            // Sleep briefly to allow server thread to run
+            std::this_thread::yield();
+            continue;
+        }
+
+        headerBuffer.append(reinterpret_cast<const char*>(buffer), received); // ok reinterpret cast
+        FL_WARN("HttpStreamClient: Received " << received << " bytes, total header size: " << headerBuffer.size());
 
         // Check for \r\n\r\n pattern
         if (headerBuffer.size() >= 4) {
-            size_t pos = headerBuffer.size() - 4;
-            if (headerBuffer[pos] == '\r' && headerBuffer[pos + 1] == '\n' &&
-                headerBuffer[pos + 2] == '\r' && headerBuffer[pos + 3] == '\n') {
+            size_t pos = headerBuffer.find("\r\n\r\n");
+            if (pos != fl::string::npos) {
+                FL_WARN("HttpStreamClient: Found end of HTTP headers at position " << pos);
                 break;
             }
         }
     }
 
+    FL_WARN("HttpStreamClient: Complete header received (" << headerBuffer.size() << " bytes):\n" << headerBuffer.c_str());
+
     // Validate response
     // Must start with "HTTP/1.1 200"
     if (headerBuffer.size() < 12) {
+        FL_WARN("HttpStreamClient: Header too short (" << headerBuffer.size() << " bytes)");
         return false;
     }
 
     if (headerBuffer.substr(0, 12) != "HTTP/1.1 200") {
+        FL_WARN("HttpStreamClient: Invalid HTTP status line: " << headerBuffer.substr(0, 12).c_str());
         return false;
     }
 
@@ -181,9 +217,11 @@ bool HttpStreamClient::readHttpResponseHeader() {
     }
 
     if (!hasChunked) {
+        FL_WARN("HttpStreamClient: Missing 'Transfer-Encoding: chunked' header");
         return false;
     }
 
+    FL_WARN("HttpStreamClient: HTTP response header validated successfully");
     mHttpHeaderReceived = true;
     return true;
 }

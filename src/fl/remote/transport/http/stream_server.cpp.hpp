@@ -3,6 +3,7 @@
 #include "stream_server.h"
 #include "fl/stl/string.h"
 #include "fl/stl/stdint.h"
+#include "fl/warn.h"
 #include <cstdio>  // IWYU pragma: keep
 
 namespace fl {
@@ -24,15 +25,21 @@ HttpStreamServer::~HttpStreamServer() {
 }
 
 bool HttpStreamServer::connect() {
+    FL_WARN("HttpStreamServer::connect() called on port " << mPort);
+
     // If already listening, return true
     if (isConnected()) {
+        FL_WARN("HttpStreamServer: Already listening");
         return true;
     }
 
     // Start listening
+    FL_WARN("HttpStreamServer: Starting server on port " << mPort << "...");
     if (!mNativeServer->start()) {
+        FL_WARN("HttpStreamServer: Failed to start server");
         return false;
     }
+    FL_WARN("HttpStreamServer: Server started successfully, listening on port " << mPort);
 
     // Mark connection as established in base class
     mConnection.onConnected();
@@ -58,7 +65,13 @@ void HttpStreamServer::acceptClients() {
     }
 
     // Accept new clients (non-blocking)
+    size_t prevClientCount = mNativeServer->getClientCount();
     mNativeServer->acceptClients();
+    size_t newClientCount = mNativeServer->getClientCount();
+
+    if (newClientCount > prevClientCount) {
+        FL_WARN("HttpStreamServer: Accepted " << (newClientCount - prevClientCount) << " new client(s), total clients: " << newClientCount);
+    }
 
     // Get list of all client IDs
     fl::vector<u32> clientIds = mNativeServer->getClientIds();
@@ -72,11 +85,17 @@ void HttpStreamServer::acceptClients() {
 
         // If HTTP headers not exchanged yet, do it now
         if (!state->httpHeaderReceived) {
+            FL_WARN("HttpStreamServer: Reading HTTP request header from client " << clientId << "...");
             if (readHttpRequestHeader(clientId)) {
+                FL_WARN("HttpStreamServer: HTTP request header received from client " << clientId);
                 // Send HTTP response header
+                FL_WARN("HttpStreamServer: Sending HTTP response header to client " << clientId << "...");
                 if (!sendHttpResponseHeader(clientId)) {
                     // Failed to send response, disconnect client
+                    FL_WARN("HttpStreamServer: Failed to send HTTP response header to client " << clientId << ", disconnecting");
                     disconnectClient(clientId);
+                } else {
+                    FL_WARN("HttpStreamServer: HTTP response header sent to client " << clientId << ", handshake complete");
                 }
             }
         }

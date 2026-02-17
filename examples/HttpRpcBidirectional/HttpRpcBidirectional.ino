@@ -1,4 +1,4 @@
-// @filter: (memory is high) && (not avr)
+// @filter: (platform is native)
 
 /// @file HttpRpcBidirectional.ino
 /// @brief Example demonstrating bidirectional HTTP streaming RPC (server + client in same process)
@@ -31,6 +31,10 @@
 #include "fl/remote/transport/http/http_parser.cpp.hpp"
 #include "fl/remote/transport/http/native_server.cpp.hpp"
 #include "fl/remote/transport/http/native_client.cpp.hpp"
+#include <thread>  // ok include
+#include <atomic>  // ok include
+#include "fl/stl/chrono.h"
+#include "fl/stl/thread.h"
 
 #define NUM_LEDS 10
 #define DATA_PIN 3
@@ -45,6 +49,23 @@ fl::Remote* serverRemote = nullptr;
 // Client-side components
 fl::HttpStreamClient* clientTransport = nullptr;
 fl::Remote* clientRemote = nullptr;
+
+// Server background thread (needed for same-process client+server)
+std::thread serverThread;
+std::atomic<bool> serverRunning(false);
+
+// Run server in background thread so client can connect without deadlock
+void serverThreadFunc() {
+    while (serverRunning.load()) {
+        uint32_t now = millis();
+        serverTransport->acceptClients();
+        serverTransport->update(now);
+        if (serverRemote) {
+            serverRemote->update(now);
+        }
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(10));
+    }
+}
 
 // Request tracking
 int requestId = 1;
@@ -198,8 +219,12 @@ void setup() {
     }
     Serial.println("✓ Server started successfully\n");
 
+    // Start server in background thread so client can connect without deadlock
+    serverRunning.store(true);
+    serverThread = std::thread(serverThreadFunc);
+
     // ========== CLIENT SETUP ==========
-    delay(500); // Give server time to start
+    delay(500); // Give server time to start and begin accepting connections
 
     Serial.println("Connecting client to server...");
 
@@ -328,9 +353,7 @@ void handleClientResponse(const fl::Json& response) {
 void loop() {
     uint32_t now = millis();
 
-    // Update server
-    serverTransport->update(now);
-    serverRemote->update(now);
+    // Server is managed by serverThread - no update needed here
 
     // Update client
     clientTransport->update(now);
