@@ -1,4 +1,4 @@
-#include "fl/audio/auto_gain.h"
+#include "fl/fx/audio/auto_gain.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/new.h"
 #include "fl/stl/shared_ptr.h"

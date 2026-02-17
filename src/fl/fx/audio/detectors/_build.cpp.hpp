@@ -13,6 +13,8 @@
 #include "fl/fx/audio/detectors/frequency_bands.cpp.hpp"
 #include "fl/fx/audio/detectors/key.cpp.hpp"
 #include "fl/fx/audio/detectors/mood_analyzer.cpp.hpp"
+#include "fl/fx/audio/detectors/multiband_beat_detector.cpp.hpp"
+#include "fl/fx/audio/detectors/musical_beat_detector.cpp.hpp"
 #include "fl/fx/audio/detectors/note.cpp.hpp"
 #include "fl/fx/audio/detectors/percussion.cpp.hpp"
 #include "fl/fx/audio/detectors/pitch.cpp.hpp"

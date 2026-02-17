@@ -1,7 +1,7 @@
 /// @file frequency_bin_mapper.cpp.hpp
 /// @brief Implementation of FrequencyBinMapper for FFT bin to frequency channel mapping
 
-#include "fl/audio/frequency_bin_mapper.h"
+#include "fl/fx/audio/frequency_bin_mapper.h"
 #include "fl/stl/math.h"
 #include "fl/math_macros.h"
 #include "fl/compiler_control.h"

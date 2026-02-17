@@ -16,5 +16,3 @@ FL_TEST_CASE("Audio - Test registration works") {
 // Include audio test files (unity build pattern)
 #include "audio/audio_context.hpp"
 #include "audio/synth.hpp"
-#include "audio/spectral_equalizer.hpp"
-#include "audio/frequency_bin_mapper.hpp"

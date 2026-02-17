@@ -3,9 +3,9 @@
 #include "fl/audio.h"
 #include "fl/audio/audio_context.h"
 #include "fl/audio/audio_detector.h"
-#include "fl/audio/signal_conditioner.h"
-#include "fl/audio/auto_gain.h"
-#include "fl/audio/noise_floor_tracker.h"
+#include "fl/fx/audio/signal_conditioner.h"
+#include "fl/fx/audio/auto_gain.h"
+#include "fl/fx/audio/noise_floor_tracker.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/function.h"
 

@@ -1,7 +1,7 @@
 /// @file spectral_equalizer.cpp.hpp
 /// @brief Implementation of SpectralEqualizer for frequency-dependent gain correction
 
-#include "fl/audio/spectral_equalizer.h"
+#include "fl/fx/audio/spectral_equalizer.h"
 #include "fl/stl/math.h"
 #include "fl/math_macros.h"
 #include "fl/compiler_control.h"

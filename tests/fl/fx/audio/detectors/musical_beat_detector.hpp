@@ -1,7 +1,7 @@
 // Unit tests for MusicalBeatDetector - adversarial and boundary tests
 // standalone test
 
-#include "fl/audio/musical_beat_detector.h"
+#include "fl/fx/audio/detectors/musical_beat_detector.h"
 #include "fl/stl/math.h"
 #include "fl/math_macros.h"
 

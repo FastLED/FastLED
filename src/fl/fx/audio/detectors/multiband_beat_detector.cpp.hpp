@@ -1,4 +1,4 @@
-#include "fl/audio/multiband_beat_detector.h"
+#include "fl/fx/audio/detectors/multiband_beat_detector.h"
 #include "fl/stl/math.h"
 
 namespace fl {

@@ -1,7 +1,7 @@
 // Unit tests for NoiseFloorTracker - adversarial and boundary tests
 // standalone test
 
-#include "fl/audio/noise_floor_tracker.h"
+#include "fl/fx/audio/noise_floor_tracker.h"
 #include "fl/stl/math.h"
 
 using namespace fl;

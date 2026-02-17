@@ -1,6 +1,6 @@
 #include "fl/audio_reactive.h"
-#include "fl/audio/musical_beat_detector.h"
-#include "fl/audio/multiband_beat_detector.h"
+#include "fl/fx/audio/detectors/musical_beat_detector.h"
+#include "fl/fx/audio/detectors/multiband_beat_detector.h"
 #include "fl/stl/math.h"
 #include "fl/stl/span.h"
 #include "fl/int.h"

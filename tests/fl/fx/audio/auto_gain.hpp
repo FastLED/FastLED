@@ -1,12 +1,12 @@
 // Unit tests for AutoGain - adversarial and boundary tests
 // standalone test
 
-#include "fl/audio/auto_gain.h"
+#include "fl/fx/audio/auto_gain.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/math.h"
 #include "fl/math_macros.h"
-#include "test_helpers.h"
+#include "../../audio/test_helpers.h"
 
 using namespace fl;
 using fl::audio::test::generateConstantSignal;

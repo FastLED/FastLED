@@ -20,6 +20,7 @@ This directory contains **low-level infrastructure** for the FastLED audio syste
 - ❌ Detector implementations (→ `fx/audio/detectors/`)
 - ❌ High-level facades (→ `fx/audio/audio_processor.h`)
 - ❌ Domain-specific algorithms (→ `fx/audio/detectors/`)
+- ❌ Middleware components (→ `fx/audio/` - e.g., AutoGain, SignalConditioner, NoiseFloorTracker)
 
 ---
 
@@ -223,8 +224,9 @@ fl/audio/
 
 ### High-Level Audio Effects
 
-For user-facing audio detectors and effects, see:
+For user-facing audio detectors, effects, and middleware, see:
 - **`fx/audio/audio_processor.h`** - High-level facade for easy orchestration
+- **`fx/audio/`** - Middleware components (AutoGain, SignalConditioner, NoiseFloorTracker, FrequencyBinMapper, SpectralEqualizer)
 - **`fx/audio/detectors/`** - All detector implementations (beat, vocal, percussion, etc.)
 - **`fx/audio/README.md`** - Effects documentation
 
@@ -331,7 +333,7 @@ All detectors are located in **`fx/audio/detectors/`** and use this infrastructu
 
 ## Version History
 
-- **v3.0** (2025-01-16) - Reorganized: Detectors moved to fx/audio, infrastructure-only in fl/audio
+- **v3.0** (2025-01-16) - Reorganized: Detectors and middleware moved to fx/audio, infrastructure-only in fl/audio
   - 20 components fully implemented and tested
   - All detectors follow AudioContext pattern
   - Production-ready with comprehensive test coverage

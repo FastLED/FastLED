@@ -1,10 +1,10 @@
 #include "test.h"
-#include "fl/audio/frequency_bin_mapper.h"
-#include "fl/audio/spectral_equalizer.h"
+#include "fl/fx/audio/frequency_bin_mapper.h"
+#include "fl/fx/audio/spectral_equalizer.h"
 #include "fl/fft.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/math.h"
-#include "test_helpers.h"
+#include "../../audio/test_helpers.h"
 
 using namespace fl;
 using namespace fl::audio::test;

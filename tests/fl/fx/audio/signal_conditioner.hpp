@@ -1,7 +1,7 @@
 // Unit tests for SignalConditioner - adversarial and boundary tests
 // standalone test
 
-#include "fl/audio/signal_conditioner.h"
+#include "fl/fx/audio/signal_conditioner.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/math.h"

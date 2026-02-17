@@ -1,7 +1,7 @@
-#include "fl/audio/spectral_equalizer.h"
+#include "fl/fx/audio/spectral_equalizer.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/math.h"
-#include "test_helpers.h"
+#include "../../audio/test_helpers.h"
 
 using namespace fl;
 using fl::audio::test::generateUniformBins;
