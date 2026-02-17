@@ -30,15 +30,11 @@ private:
     // Channel data for transmission
     ChannelDataPtr mChannelData;
 
-    // Channel engine reference (selected dynamically from bus manager)
-    fl::shared_ptr<IChannelEngine> mEngine;
-
     // -- Verify that the pin is valid
     static_assert(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
 public:
     ClocklessIdf5()
-        : mEngine(getRmtEngine())
     {
         // Create channel data with pin and timing configuration
         ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
@@ -53,17 +49,20 @@ protected:
     //    This is the main entry point for the controller.
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) override
     {
-        if (!mEngine) {
-            FL_WARN_EVERY(100, "No Engine");
+        // Select best engine each frame (cheap operation, adapts to runtime changes)
+        fl::shared_ptr<IChannelEngine> engine =
+            ChannelBusManager::instance().selectEngineForChannel(mChannelData, fl::string());
+        if (!engine) {
+            FL_WARN_EVERY(100, "ClocklessIdf5: No compatible engine found");
             return;
         }
+
         // Wait for previous transmission to complete and release buffer
         // This prevents race conditions when show() is called faster than hardware can transmit
         u32 startTime = fl::millis();
-        u32 lastWarnTime = startTime;
         if (mChannelData->isInUse()) {
             FL_WARN_EVERY(100, "ClocklessIdf5: engine should have finished transmitting by now - waiting");
-            bool finished = mEngine->waitForReady();
+            bool finished = engine->waitForReady();
             if (!finished) {
                 FL_ERROR("ClocklessIdf5: Engine still busy after " << fl::millis() - startTime << "ms");
                 return;
@@ -77,11 +76,7 @@ protected:
         iterator.writeWS2812(&data);
 
         // Enqueue for transmission (will be sent when engine->show() is called)
-        mEngine->enqueue(mChannelData);
-    }
-
-    static shared_ptr<IChannelEngine> getRmtEngine() {
-        return ChannelBusManager::instance().getEngineByName("RMT");
+        engine->enqueue(mChannelData);
     }
 };
 
