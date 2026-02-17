@@ -24,6 +24,13 @@ EXCLUDED_TEST_FILES: set[Path] = {
     TESTS_DIR
     / "fx"
     / "profile_chasing_spirals.cpp",  # Standalone profiling binary, not a test
+    TESTS_DIR
+    / "fl"
+    / "remote"
+    / "transport"
+    / "http"
+    / "test_utils"
+    / "server_thread.cpp",  # Utility class, not a test (included by loopback.cpp)
 }
 
 # Directories to exclude from recursive test discovery.
