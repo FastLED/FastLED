@@ -1,4 +1,4 @@
-// @filter: (memory is high) && (not avr)
+// @filter: (platform is native)
 
 /// @file HttpRpcClient.ino
 /// @brief Example demonstrating HTTP streaming RPC client
@@ -206,8 +206,7 @@ void handleResponse(const fl::Json& response) {
     // Check for error
     if (response.contains("error")) {
         Serial.println("ERROR Response:");
-        String serialized = response.to_string();
-        Serial.println(serialized.c_str());
+        Serial.println(response.to_string().c_str());
         waitingForResponse = false;
         return;
     }
@@ -245,8 +244,7 @@ void handleResponse(const fl::Json& response) {
             if (stopOpt && *stopOpt == true) {
                 if (result.contains("value")) {
                     Serial.print("Received FINAL result: ");
-                    String serialized = result["value"].to_string();
-                    Serial.println(serialized.c_str());
+                    Serial.println(result["value"].to_string().c_str());
                 } else {
                     Serial.println("Received FINAL marker (no value)");
                 }
@@ -257,13 +255,11 @@ void handleResponse(const fl::Json& response) {
 
         // Regular result (SYNC or ASYNC final)
         Serial.print("Received result: ");
-        String serialized = result.to_string();
-        Serial.println(serialized.c_str());
+        Serial.println(result.to_string().c_str());
         waitingForResponse = false;
     } else {
         Serial.println("Received response without result:");
-        String serialized = response.to_string();
-        Serial.println(serialized.c_str());
+        Serial.println(response.to_string().c_str());
     }
 }
 
