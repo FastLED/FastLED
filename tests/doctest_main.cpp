@@ -58,6 +58,7 @@
 #include "platforms/stub/coroutine_runner.h"
 #include "platforms/esp/32/drivers/parlio/parlio_peripheral_mock.h"
 #include "fl/stl/cstdlib.h"
+#include "fl/stl/shared_ptr.h"
 
 // This file contains the main function for doctest
 // It will be compiled once and linked to all test executables
@@ -73,14 +74,13 @@ struct TimingReporter : public doctest::IReporter {
     std::chrono::steady_clock::time_point start_time;
     const doctest::TestCaseData* current_test = nullptr;
     const doctest::ContextOptions& opt;
-    std::unique_ptr<doctest::IReporter> console_reporter;
+    fl::shared_ptr<doctest::IReporter> console_reporter;
 
     explicit TimingReporter(const doctest::ContextOptions& in)
         : opt(in)
-        , console_reporter(nullptr)
+        , console_reporter(fl::make_shared<doctest::ConsoleReporter>(in))
     {
         // Create console reporter to delegate to
-        console_reporter.reset(new doctest::ConsoleReporter(in));
     }
 
     // Delegate all reporting to console reporter
