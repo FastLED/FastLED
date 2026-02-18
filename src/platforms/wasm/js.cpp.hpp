@@ -19,13 +19,11 @@
 // IWYU pragma: end_keep
 
 // IWYU pragma: begin_keep
-#include <memory> // ok include
-// IWYU pragma: end_keep
-#include "fl/stl/stdint.h"
-// IWYU pragma: begin_keep
-#include <stdio.h> // ok include
 #include <string>
 // IWYU pragma: end_keep
+#include "fl/stl/stdint.h"
+#include "fl/stl/unique_ptr.h"  // ok include
+#include "fl/stl/cstdio.h"  // ok include
 
 #include "active_strip_data.h"
 #include "engine_listener.h"

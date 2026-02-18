@@ -2,9 +2,9 @@
 
 // IWYU pragma: private
 
-// arduino_before.h saves Serial macro as ArduinoSerial_Save before undefining it
+// fl/arduino.h trampoline ensures Arduino.h + macro cleanup
 // IWYU pragma: begin_keep
-#include <Arduino.h>
+#include "fl/arduino.h"
 // IWYU pragma: end_keep
 
 namespace fl {

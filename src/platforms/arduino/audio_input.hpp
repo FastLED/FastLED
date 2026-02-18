@@ -17,9 +17,8 @@
 
 
 // IWYU pragma: begin_keep
-#include <Arduino.h>  // ok include
+#include "fl/arduino.h"
 // IWYU pragma: end_keep
-#include "fl/stl/undef.h"  // Undefine Arduino macros (min, max, abs, etc.)
 #include "platforms/is_platform.h"
 
 // Check for Arduino I2S library availability and completeness

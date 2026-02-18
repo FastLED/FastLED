@@ -42,10 +42,10 @@
 // IWYU pragma: end_keep
 
 // IWYU pragma: begin_keep
-#include <map> // ok include
-#include <mutex> // ok include
-#include <stdio.h> // ok include
-#include <vector> // ok include
+#include "fl/stl/map.h"  // ok include
+#include "fl/stl/mutex.h"  // ok include
+#include "fl/stl/cstdio.h"  // ok include
+#include "fl/stl/vector.h"  // ok include
 // IWYU pragma: end_keep
 
 #include "fl/dbg.h"
@@ -115,7 +115,7 @@ class FileData {
     mutable fl::mutex mMutex;
 };
 
-typedef std::map<string, FileDataPtr> FileMap;  // okay std namespace
+typedef fl::map<fl::string, FileDataPtr> FileMap;  // okay fl namespace
 static FileMap gFileMap;
 // At the time of creation, it's unclear whether this can be called by multiple
 // threads. With an std::map items remain valid while not erased. So we only
@@ -232,7 +232,7 @@ class FsImplWasm : public fl::FsImpl {
     }
 };
 
-FileDataPtr _findIfExists(const string &path) {
+FileDataPtr _findIfExists(const fl::string &path) {
     fl::unique_lock<fl::mutex> lock(gFileMapMutex);
     auto it = gFileMap.find(path);
     if (it != gFileMap.end()) {
@@ -241,25 +241,25 @@ FileDataPtr _findIfExists(const string &path) {
     return FileDataPtr();
 }
 
-FileDataPtr _findOrCreate(const string &path, size_t len) {
+FileDataPtr _findOrCreate(const fl::string &path, size_t len) {
     fl::unique_lock<fl::mutex> lock(gFileMapMutex);
     auto it = gFileMap.find(path);
     if (it != gFileMap.end()) {
         return it->second;
     }
     auto entry = fl::make_shared<FileData>(len);
-    gFileMap.insert(std::make_pair(path, entry));  // okay std namespace
+    gFileMap.insert(fl::make_pair(path, entry));  // okay fl namespace
     return entry;
 }
 
-FileDataPtr _createIfNotExists(const string &path, size_t len) {
+FileDataPtr _createIfNotExists(const fl::string &path, size_t len) {
     fl::unique_lock<fl::mutex> lock(gFileMapMutex);
     auto it = gFileMap.find(path);
     if (it != gFileMap.end()) {
         return FileDataPtr();
     }
     auto entry = fl::make_shared<FileData>(len);
-    gFileMap.insert(std::make_pair(path, entry));  // okay std namespace
+    gFileMap.insert(fl::make_pair(path, entry));  // okay fl namespace
     return entry;
 }
 

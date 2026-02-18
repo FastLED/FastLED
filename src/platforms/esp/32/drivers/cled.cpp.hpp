@@ -10,7 +10,7 @@
 
 #include "fl/has_include.h"
 // IWYU pragma: begin_keep
-#include <Arduino.h>
+#include "fl/arduino.h"
 // IWYU pragma: end_keep
 
 #if FL_HAS_INCLUDE("driver/ledc.h")

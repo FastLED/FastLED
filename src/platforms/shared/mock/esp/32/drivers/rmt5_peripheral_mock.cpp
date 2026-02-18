@@ -21,7 +21,7 @@
 #endif
 
 #ifdef ARDUINO
-#include <Arduino.h>  // ok include - For fl::micros() on Arduino platforms
+#include "fl/arduino.h"
 #else
 #include "platforms/stub/time_stub.h"  // For fl::micros() on host tests
 #endif

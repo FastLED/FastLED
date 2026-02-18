@@ -6,9 +6,9 @@
 #ifdef FASTLED_STUB_IMPL
 
 #include "task_coroutine_stub.h"
-#include <thread>  // ok include (stub platform only)
-#include <chrono>  // ok include (stub platform only)
-#include <memory>  // ok include (stub platform only)
+#include "fl/stl/thread.h"  // stub platform only
+#include "fl/stl/chrono.h"  // stub platform only
+#include "fl/stl/unique_ptr.h"  // stub platform only
 #include "fl/stl/atomic.h"
 #include "fl/stl/mutex.h"
 #include "coroutine_runner.h"  // Global coordination for thread safety

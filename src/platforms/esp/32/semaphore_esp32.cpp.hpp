@@ -21,7 +21,7 @@ FL_EXTERN_C_BEGIN
 FL_EXTERN_C_END
 
 // IWYU pragma: begin_keep
-#include <chrono>  // ok include - for std::chrono
+#include "fl/stl/chrono.h"  // ok include - for timing
 // IWYU pragma: end_keep
 
 namespace fl {

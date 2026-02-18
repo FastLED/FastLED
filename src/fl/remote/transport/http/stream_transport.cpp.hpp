@@ -3,8 +3,7 @@
 #include "stream_transport.h"
 #include "fl/json.h"
 #include "fl/stl/string.h"
-#include <cstring>  // IWYU pragma: keep
-
+#include "fl/stl/cstring.h"
 namespace fl {
 
 HttpStreamTransport::HttpStreamTransport(const char* host, u16 port, u32 heartbeatIntervalMs)

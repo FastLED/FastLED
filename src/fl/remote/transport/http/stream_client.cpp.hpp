@@ -3,10 +3,9 @@
 #include "stream_client.h"
 #include "fl/stl/string.h"
 #include "fl/stl/stdint.h"
-#include <chrono>  // IWYU pragma: keep
-#include <cstdio>  // IWYU pragma: keep
-#include <thread>  // IWYU pragma: keep
-
+#include "fl/stl/chrono.h"
+#include "fl/stl/cstdio.h"
+#include "fl/stl/thread.h"
 namespace fl {
 
 HttpStreamClient::HttpStreamClient(const char* host, u16 port, u32 heartbeatIntervalMs)

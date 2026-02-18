@@ -16,7 +16,7 @@
 
 #if FL_STRING_NEEDS_ARDUINO_CONVERSION
 // IWYU pragma: begin_keep
-#include <Arduino.h>
+#include "fl/arduino.h"
 // IWYU pragma: end_keep  // ok header
 #endif
 

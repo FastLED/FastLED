@@ -11,7 +11,7 @@
 #include "fl/warn.h"
 
 // IWYU pragma: begin_keep
-#include <chrono>  // ok include - for std::chrono
+#include "fl/stl/chrono.h"  // ok include - for timing
 // IWYU pragma: end_keep
 
 // Include CMSIS for interrupt control

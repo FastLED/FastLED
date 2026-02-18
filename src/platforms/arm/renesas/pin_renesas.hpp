@@ -27,7 +27,7 @@
 // - r_ioport.h: IOPORT driver implementation
 // - variant.h: PinMuxCfg_t type and g_pin_cfg[] array declaration
 // IWYU pragma: begin_keep
-#include <Arduino.h>
+#include "fl/arduino.h"
 // IWYU pragma: end_keep
 namespace fl {
 namespace platforms {

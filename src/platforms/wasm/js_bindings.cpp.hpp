@@ -32,9 +32,9 @@
 #include <emscripten.h>
 #include <emscripten/emscripten.h>
 #include <emscripten/html5.h>
-#include <cfloat> // ok include
 #include <string>
 // IWYU pragma: end_keep
+#include "fl/numeric_limits.h"  // ok include - for FLT_MAX and other float limits
 
 #include "js_bindings.h"
 

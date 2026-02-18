@@ -8,7 +8,7 @@
 
 // Include Arduino core to get Apollo3 HAL function declarations
 #ifdef ARDUINO
-#include "Arduino.h"
+#include "fl/arduino.h"
 #include "fl/pin.h"  // For PinMode, PinValue enums
 #include "fl/compiler_control.h"
 

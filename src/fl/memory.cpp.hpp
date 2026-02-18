@@ -4,12 +4,12 @@
 #include "platforms/is_platform.h"  // IWYU pragma: keep (needed for FL_IS_* macros)
 #ifdef FL_IS_ESP32
 // IWYU pragma: begin_keep
-#include <Arduino.h>
+#include "fl/arduino.h"
 // IWYU pragma: end_keep  // For ESP object
 #include "esp_heap_caps.h"  // For heap_caps_get_free_size()
 #elif defined(FL_IS_ESP8266)
 // IWYU pragma: begin_keep
-#include <Arduino.h>
+#include "fl/arduino.h"
 // IWYU pragma: end_keep  // For ESP object
 #elif defined(FL_IS_AVR)
 // AVR doesn't have a built-in getFreeHeap, but we can compute it
@@ -17,10 +17,6 @@
 extern "C" char *__brkval;  // Heap top pointer (set by malloc)
 extern "C" char *__malloc_heap_start;  // Heap start (linker symbol)
 #endif
-
-// IWYU pragma: begin_keep
-#include "fl/stl/undef.h"  // Undefine Arduino macros (min, max, abs, etc.)
-// IWYU pragma: end_keep
 
 namespace fl {
 

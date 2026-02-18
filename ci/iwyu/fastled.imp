@@ -131,9 +131,9 @@
   # doesn't suggest them, but allows them when behind #ifdef guards.
 
   # Arduino Core Headers
-  # Arduino.h is platform-specific - mark as private to prevent IWYU from suggesting it
-  # Files that need Arduino.h should include it explicitly with // IWYU pragma: keep
-  { include: ['<Arduino.h>', 'private', '<Arduino.h>', 'private'] },
+  # Arduino.h is now accessed through fl/arduino.h trampoline (includes Arduino.h + cleans up macros)
+  # IWYU will suggest fl/arduino.h instead of <Arduino.h>
+  { include: ['<Arduino.h>', 'private', '"fl/arduino.h"', 'public'] },
 
   # AVR Platform Headers
   # These don't exist on stub - map to FastLED's progmem abstraction

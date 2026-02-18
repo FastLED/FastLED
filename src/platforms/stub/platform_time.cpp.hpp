@@ -11,7 +11,7 @@
 #include "fl/stl/thread.h"
 #include "fl/compiler_control.h"
 #include "fl/stl/function.h"
-#include <chrono>  // okay banned header (platform-specific time implementation)
+#include "fl/stl/chrono.h"  // platform-specific time implementation
 
 // Forward declare delay override (defined in time_stub.cpp.hpp)
 extern fl::function<void(fl::u32)> g_delay_override;

@@ -32,12 +32,13 @@
 #include <esp_event.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-#include <string.h>  // ok include
 #include <lwip/sockets.h>
 #include <lwip/netdb.h>
 #include <mbedtls/md.h>
 #include <mbedtls/md5.h>
 #include <mbedtls/sha256.h>
+// IWYU pragma: end_keep
+#include "fl/stl/cstring.h"  // ok include - for string functions
 // IWYU pragma: end_keep
 
 // FastLED headers

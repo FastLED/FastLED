@@ -41,7 +41,7 @@
 #include "fl/dbg.h"
 #include "fl/warn.h"
 // IWYU pragma: begin_keep
-#include <stdio.h> // ok include
+#include "fl/stl/cstdio.h"  // ok include
 // IWYU pragma: end_keep
 
 // Forward declarations for Arduino-style setup/loop functions

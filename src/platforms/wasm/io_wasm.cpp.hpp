@@ -11,8 +11,8 @@
 
 // IWYU pragma: begin_keep
 #include <emscripten.h>
-#include <cstdio>
 // IWYU pragma: end_keep
+#include "fl/stl/cstdio.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
 

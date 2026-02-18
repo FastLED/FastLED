@@ -2,9 +2,8 @@
 
 #include "fl/remote/transport/http/http_parser.h"
 #include "fl/stl/algorithm.h"
-#include <cstring>  // IWYU pragma: keep
-#include <cctype>  // IWYU pragma: keep
-
+#include "fl/stl/cstring.h"
+#include "fl/stl/cctype.h"
 namespace fl {
 
 // Helper: Convert string to lowercase

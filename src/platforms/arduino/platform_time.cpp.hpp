@@ -8,7 +8,7 @@
 #if defined(ARDUINO) && !defined(FASTLED_STUB_IMPL) && !defined(FL_IS_WASM)
 
 #include "platforms/time_platform.h"
-#include "Arduino.h"  // okay banned header
+#include "fl/arduino.h"
 
 namespace fl {
 namespace platforms {

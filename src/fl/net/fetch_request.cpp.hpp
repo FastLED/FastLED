@@ -7,9 +7,7 @@
 
 #ifdef FASTLED_HAS_NETWORKING
 
-// IWYU pragma: begin_keep
-#include <cstring>  // For memcpy
-// IWYU pragma: end_keep
+#include "fl/stl/cstring.h"  // For memcpy
 
 // Platform-specific socket includes
 #ifdef FL_IS_WIN

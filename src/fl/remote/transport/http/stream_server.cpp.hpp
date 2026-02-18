@@ -4,8 +4,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/stdint.h"
 #include "fl/warn.h"
-#include <cstdio>  // IWYU pragma: keep
-
+#include "fl/stl/cstdio.h"
 namespace fl {
 
 HttpStreamServer::HttpStreamServer(u16 port, u32 heartbeatIntervalMs)

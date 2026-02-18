@@ -9,7 +9,7 @@
 #include "platforms/new.h"
 
 // IWYU pragma: begin_keep
-#include "fl/stl/undef.h"  // Undefine Arduino macros (min, max, abs, etc.)
+#include "fl/arduino.h"  // Trampoline that includes Arduino.h + cleans up macros
 // IWYU pragma: end_keep
 
 // Root directory implementations

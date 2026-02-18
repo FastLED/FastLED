@@ -40,9 +40,9 @@
 #include "fl/numeric_limits.h"
 #include "js.h"
 // IWYU pragma: begin_keep
-#include <thread>
-#include <cmath>  // For fmod function
 // IWYU pragma: end_keep
+#include "fl/stl/thread.h"
+#include "fl/stl/math.h"  // For fmod function
 
 // IWYU pragma: begin_keep
 #include <emscripten.h>

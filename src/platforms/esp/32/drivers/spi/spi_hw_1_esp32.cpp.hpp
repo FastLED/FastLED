@@ -22,7 +22,6 @@
 #include <driver/spi_master.h>
 #include <esp_heap_caps.h>
 #include <esp_err.h>
-#include <cstring> // ok include
 // IWYU pragma: end_keep
 
 namespace fl {

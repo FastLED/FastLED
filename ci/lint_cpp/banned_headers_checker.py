@@ -88,6 +88,7 @@ BANNED_HEADERS_PLATFORMS = BANNED_HEADERS_COMMON
 # Suggestions for which fl/ alternative to use for each banned header
 
 HEADER_RECOMMENDATIONS = {
+    "Arduino.h": "fl/arduino.h (trampoline that includes Arduino.h + cleans up macros)",
     "pthread.h": "fl/stl/thread.h or fl/stl/mutex.h (depending on what you need)",
     "assert.h": "FL_CHECK or FL_ASSERT macros (check fl/compiler_control.h)",
     "iostream": "fl/stl/iostream.h or fl/str.h",
@@ -203,87 +204,10 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
             "platforms/shared/new.h", "Platform-specific placement new wrapper"
         ),
     ],
-    # Core system definitions and platform headers
+    # Sole gateway to Arduino.h - includes Arduino.h + cleans up macros atomically
     "Arduino.h": [
-        HeaderException(
-            "led_sysdefs.h", "Core system definitions need platform headers"
-        ),
-        HeaderException("fl/stl/undef.h", "Needs Arduino.h to undefine its macros"),
-        HeaderException("fl/stl/time.cpp", "Platform-specific time implementation"),
-        HeaderException(
-            "fl/stl/time.cpp.hpp", "Platform-specific time implementation (header-only)"
-        ),
-        HeaderException(
-            "fl/delay.cpp.hpp", "Platform-specific delay implementation (header-only)"
-        ),
-        # platforms/ - .cpp files that need Arduino.h for platform functionality
-        HeaderException("platforms/avr/io_avr.cpp", "AVR platform I/O implementation"),
-        HeaderException("platforms/stub/Arduino.cpp", "Stub Arduino implementation"),
-        HeaderException(
-            "platforms/esp/32/drivers/cled.cpp", "ESP32 LED driver implementation"
-        ),
-        HeaderException(
-            "platforms/arm/d21/spi_hw_2_samd21.cpp",
-            "SAMD21 SPI hardware implementation",
-        ),
-        HeaderException(
-            "platforms/arm/d51/spi_hw_4_samd51.cpp",
-            "SAMD51 SPI hardware implementation",
-        ),
-        HeaderException(
-            "platforms/arm/d51/spi_hw_2_samd51.cpp",
-            "SAMD51 SPI hardware implementation",
-        ),
-        HeaderException(
-            "platforms/arm/stm32/spi_hw_2_stm32.cpp",
-            "STM32 SPI hardware implementation",
-        ),
-        HeaderException(
-            "platforms/arm/stm32/spi_hw_8_stm32.cpp",
-            "STM32 SPI hardware implementation",
-        ),
-        HeaderException(
-            "platforms/arm/stm32/spi_hw_4_stm32.cpp",
-            "STM32 SPI hardware implementation",
-        ),
-        HeaderException(
-            "platforms/arm/rp/rp2040/delay.cpp", "RP2040 delay implementation"
-        ),
-        # platforms/ - Legacy headers that need Arduino.h (TODO: refactor these)
-        HeaderException(
-            "platforms/apollo3/fastpin_apollo3.h", "TODO: Refactor to remove dependency"
-        ),
-        HeaderException(
-            "platforms/apollo3/clockless_apollo3.h",
-            "TODO: Refactor to remove dependency",
-        ),
-        HeaderException(
-            "platforms/arm/sam/fastspi_arm_sam.h", "TODO: Refactor to remove dependency"
-        ),
-        HeaderException(
-            "platforms/arm/rp/rpcommon/led_sysdefs_rp_common.h",
-            "TODO: Refactor to remove dependency",
-        ),
-        HeaderException(
-            "platforms/io_teensy_lc.h", "TODO: Refactor to remove dependency"
-        ),
-        HeaderException(
-            "platforms/arm/teensy/common/io_teensy_lc.h",
-            "TODO: Refactor to remove dependency",
-        ),
-        HeaderException(
-            "platforms/arduino/audio_input.hpp", "TODO: Refactor to remove dependency"
-        ),
-        HeaderException(
-            "platforms/esp/io_esp_arduino.hpp", "TODO: Refactor to remove dependency"
-        ),
-        HeaderException(
-            "platforms/wasm/led_sysdefs_wasm.h", "WASM wrapper for stub Arduino.h"
-        ),
-        HeaderException(
-            "platforms/wasm/compiler/Arduino.h", "WASM stub Arduino.h implementation"
-        ),
-        # third_party/ - External libraries that need Arduino.h
+        HeaderException("fl/arduino.h", "Sole gateway trampoline for Arduino.h"),
+        # Third-party exemptions (cannot modify):
         HeaderException(
             "third_party/ezws2812/ezWS2812.h", "Third-party SPI driver library"
         ),
@@ -291,6 +215,13 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
         HeaderException(
             "third_party/object_fled/src/ObjectFLEDDmaManager.h",
             "Third-party DMA manager library",
+        ),
+        # WASM stub is its own Arduino.h implementation:
+        HeaderException(
+            "platforms/wasm/compiler/Arduino.h", "WASM stub Arduino.h implementation"
+        ),
+        HeaderException(
+            "platforms/wasm/led_sysdefs_wasm.h", "WASM wrapper for stub Arduino.h"
         ),
     ],
     # Threading and synchronization
@@ -454,11 +385,7 @@ class BannedHeadersChecker(FileContentChecker):
     def should_process_file(self, file_path: str) -> bool:
         """Check if file should be processed for banned headers."""
         # Check file extension
-        if not file_path.endswith((".cpp", ".h", ".hpp", ".ino")):
-            return False
-
-        # Exclude .cpp.hpp files (unity build implementation files, not traditional headers)
-        if file_path.endswith(".cpp.hpp"):
+        if not file_path.endswith((".cpp", ".h", ".hpp", ".cpp.hpp", ".ino")):
             return False
 
         # Check if file is in excluded list (handles both Windows and Unix paths)

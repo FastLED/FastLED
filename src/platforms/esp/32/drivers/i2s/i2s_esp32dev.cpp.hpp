@@ -26,7 +26,7 @@
 #include "fl/stl/cstring.h"
 #include "fl/chipsets/led_timing.h"
 // IWYU pragma: begin_keep
-#include <string.h> // ok include // for memset
+#include "fl/stl/cstring.h"  // ok include - for memset
 // IWYU pragma: end_keep
 
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)

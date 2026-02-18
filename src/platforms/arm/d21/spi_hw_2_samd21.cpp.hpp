@@ -20,7 +20,7 @@
 #include "fl/stl/chrono.h"
 #include "fl/numeric_limits.h"
 // IWYU pragma: begin_keep
-#include <Arduino.h>  // ok include
+#include "fl/arduino.h"
 #include <wiring_private.h>
 // IWYU pragma: end_keep
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError

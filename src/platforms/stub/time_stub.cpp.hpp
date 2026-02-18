@@ -13,7 +13,7 @@
 
 #include "platforms/wasm/is_wasm.h"
 #ifndef FL_IS_WASM
-#include <thread>
+#include "fl/stl/thread.h"
 #endif
 
 // Global delay function override for fast testing (non-static for access from platform_time.cpp.hpp)
