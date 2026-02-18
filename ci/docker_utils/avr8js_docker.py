@@ -224,6 +224,8 @@ class DockerAVR8jsRunner:
                 print(f"❌ Dockerfile not found: {dockerfile_path}")
                 return False
 
+            # Build context must be project root to match COPY paths in Dockerfile
+            project_root = dockerfile_path.parent.parent.parent
             build_cmd = [
                 "docker",
                 "build",
@@ -231,7 +233,7 @@ class DockerAVR8jsRunner:
                 str(dockerfile_path),
                 "-t",
                 self.docker_image,
-                str(dockerfile_path.parent),
+                str(project_root),
             ]
 
             print(f"Building Docker image: {self.docker_image}")

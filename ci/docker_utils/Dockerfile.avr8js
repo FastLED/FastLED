@@ -13,7 +13,7 @@ WORKDIR /app
 
 # Copy package.json for avr8js installation
 # This layer is cached unless package.json changes
-COPY avr8js/package.json /app/package.json
+COPY ci/docker_utils/avr8js/package.json /app/package.json
 
 # Install git (required for npm to install from GitHub) and dependencies
 RUN apk add --no-cache git && \
@@ -23,7 +23,7 @@ RUN apk add --no-cache git && \
     rm -rf /root/.npm /tmp/*
 
 # Copy TypeScript source files
-COPY avr8js/*.ts /app/
+COPY ci/docker_utils/avr8js/*.ts /app/
 
 # Entrypoint: run the simulator using tsx
 # Usage: docker run <image> <firmware.hex> [timeout]
