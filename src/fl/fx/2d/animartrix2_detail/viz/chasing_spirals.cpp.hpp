@@ -1,4 +1,65 @@
-// Chasing_Spirals implementations (float, Q31 scalar, Q31 SIMD)
+// Chasing_Spirals Q31 SIMD implementation (fixed-point, 4-wide vectorized)
+//
+// ============================================================================
+// ALIGNMENT NOTES for fl::assume_aligned / FL_ASSUME_ALIGNED
+// ============================================================================
+//
+// Several data structures here are candidates for aligned access hints that
+// could let the compiler emit movdqa/vmovdqa (x86) or vld1q (ARM NEON)
+// instead of unaligned loads. Key opportunities:
+//
+// 1. fade_lut (i32[257], lives in Engine::mFadeLUT)
+//    - 257 × 4 = 1028 bytes. Accessed heavily inside pnoise2d_raw_simd4.
+//    - Currently natural-aligned (i32 → 4 bytes). If the Engine struct or
+//      mFadeLUT field were FL_ALIGNAS(16) or FL_ALIGNAS(32), the Perlin
+//      fade LUT lookups could use aligned SIMD gathers.
+//    - Apply: const i32 *fl = fl::assume_aligned<16>(fade_lut);
+//    - Benefit: Perlin noise is the hottest path (3 calls × 4 pixels per batch).
+//      Aligned loads eliminate microarchitectural split-line penalties on x86
+//      and are required for some ARM NEON instructions.
+//
+// 2. perm (u8[256], PERLIN_NOISE[] in perlin_float.h)
+//    - Already FL_ALIGNAS(64) at declaration site — good.
+//    - The pointer arrives here via setup.perm. Using assume_aligned would let
+//      the compiler trust this through function boundaries:
+//      const u8 *p = fl::assume_aligned<64>(perm);
+//    - Benefit: Perlin permutation table lookups with u8 gather can be widened
+//      to 4-byte or 16-byte reads when the base is known-aligned.
+//
+// 3. base_arr[4] / dist_arr[4] / cos_arr[4] / sin_arr[4] (stack arrays)
+//    - These i32[4] arrays (16 bytes each) are natural candidates for
+//      FL_ALIGNAS(16) + assume_aligned, enabling direct SSE/NEON register
+//      loads instead of 4 scalar loads:
+//        FL_ALIGNAS(16) i32 base_arr[4] = { ... };
+//        const i32 *b = fl::assume_aligned<16>(base_arr);
+//    - In simd4_processChannel (chasing_spirals_common.cpp.hpp), the
+//      load_u32_4 / store_u32_4 calls already treat these as SIMD vectors
+//      but without alignment guarantees. Aligning them would allow movdqa
+//      instead of movdqu on x86 (~same speed on modern cores, but prevents
+//      cache-line split penalties on older microarchitectures).
+//
+// 4. PixelLUT array (mChasingSpiralLUT, fl::vector<ChasingSpiralPixelLUT>)
+//    - sizeof(ChasingSpiralPixelLUT) = 22 bytes (5×i32 + u16), padded to 24.
+//    - NOT a natural SIMD width — stride is 24 bytes, so contiguous SIMD loads
+//      across LUT entries would require gather or AoS→SoA transposition.
+//    - Alignment won't help for sequential lut[i] access (struct stride ≠ 16).
+//    - FUTURE: Restructuring to SoA (separate base_angle[], dist_scaled[],
+//      rf3[], rf_half[], rf_quarter[], pixel_idx[] arrays) would enable
+//      FL_ALIGNAS(16) + assume_aligned on each array for direct 4-wide loads.
+//      This is the highest-impact optimization but requires refactoring
+//      ChasingSpiralPixelLUT and setupChasingSpiralFrame.
+//
+// Summary of where to apply (in order of expected impact):
+//   HIGH:   fade_lut in pnoise2d_raw_simd4 (hottest inner loop)
+//   MEDIUM: stack arrays (base_arr, dist_arr, cos_arr, sin_arr) → FL_ALIGNAS(16)
+//   MEDIUM: perm pointer (already aligned at source, needs assume_aligned propagation)
+//   LOW:    PixelLUT (AoS stride prevents contiguous SIMD; needs SoA refactor)
+//
+// For the Q31 scalar variant (chasing_spirals_q31.cpp.hpp), alignment hints
+// have less impact since there are no explicit SIMD operations — but the
+// compiler's auto-vectorizer can still benefit from alignment knowledge on
+// the fade_lut and perm pointers when optimizing the Perlin noise calls.
+// ============================================================================
 
 #include "fl/align.h"
 #include "fl/fx/2d/animartrix2_detail/engine.h"

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fl/assume_aligned.h"
 #include "platforms/is_platform.h"
 
 // Stringify helper for pragma arguments
@@ -645,6 +646,18 @@ FL_DISABLE_WARNING_POP
   // C99 has native 'restrict' keyword
   #define FL_RESTRICT_PARAM restrict
 #endif
+
+// Pointer alignment hint for the optimizer
+// Tells the compiler that a pointer is aligned to N bytes, enabling better
+// codegen (SIMD loads, wider memory ops). This is a hint only — it does not
+// enforce alignment at the call site.
+//
+// Usage: uint8_t* p = FL_ASSUME_ALIGNED(ptr, 64);
+//
+// Delegates to fl::assume_aligned<N>(ptr) which uses __builtin_assume_aligned
+// on GCC/Clang and falls back to a no-op on other platforms.
+// See fl/assume_aligned.h for the implementation.
+#define FL_ASSUME_ALIGNED(ptr, N) (fl::assume_aligned<(N)>(ptr))
 
 // Function name macro for debugging and tracing
 // Provides the current function name in a portable way across compilers.
