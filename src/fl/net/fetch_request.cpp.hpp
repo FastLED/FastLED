@@ -5,11 +5,11 @@
 #include "fl/warn.h"
 #include "fl/int.h"
 
+#ifdef FASTLED_HAS_NETWORKING
+
 // IWYU pragma: begin_keep
 #include <cstring>  // For memcpy
 // IWYU pragma: end_keep
-
-#ifdef FASTLED_HAS_NETWORKING
 
 // Platform-specific socket includes
 #ifdef FL_IS_WIN
