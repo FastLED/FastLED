@@ -659,6 +659,57 @@ def setup_meson_build(
         force_reconfigure = True
         force_reconfigure_reason = "test files changed"
 
+    # Check if example files have changed (added, removed, or filter annotations modified)
+    # This ensures Meson picks up new examples and respects @filter changes in .ino files
+    example_files_changed = False
+    if already_configured:
+        try:
+            from ci.meson.example_metadata_cache import compute_example_files_hash
+
+            examples_dir = source_dir / "examples"
+            example_cache_file = build_dir / "example_metadata.cache"
+
+            if examples_dir.exists():
+                current_example_hash = compute_example_files_hash(examples_dir)
+
+                # Check cached example hash
+                cached_example_hash = ""
+                if example_cache_file.exists():
+                    try:
+                        import json as _json
+
+                        with open(example_cache_file, "r") as f:
+                            cache_data = _json.load(f)
+                        cached_example_hash = cache_data.get("hash", "")
+                    except KeyboardInterrupt:
+                        handle_keyboard_interrupt_properly()
+                    except Exception:
+                        cached_example_hash = ""
+
+                if current_example_hash != cached_example_hash:
+                    _print_warning(
+                        "[MESON] \u26a0\ufe0f  Detected example file changes (files added/removed/modified)"
+                    )
+                    example_files_changed = True
+                    # Delete the stale cache so meson.build re-runs discovery
+                    if example_cache_file.exists():
+                        try:
+                            example_cache_file.unlink()
+                        except OSError:
+                            pass
+
+        except KeyboardInterrupt:
+            handle_keyboard_interrupt_properly()
+            raise
+        except Exception as e:
+            _ts_print(f"[MESON] Warning: Could not check example file changes: {e}")
+            example_files_changed = True
+
+    # Force reconfigure if example files changed
+    if example_files_changed:
+        force_reconfigure = True
+        force_reconfigure_reason = "example files changed"
+
     # Determine if we need to run meson setup/reconfigure
     # We skip meson setup only if already configured, not explicitly reconfiguring,
     # AND thin archive/source file settings haven't changed

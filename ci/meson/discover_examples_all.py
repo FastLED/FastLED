@@ -156,6 +156,9 @@ def discover_examples_all(examples_dir: Path) -> None:
                         should_skip, reason = should_skip_for_stub(filter_str)
                         if should_skip:
                             print(f"SKIP|{example_name}|{reason}")
+                        # Always output FILTER line so runtime guard can detect
+                        # platform-specific examples even with stale build cache
+                        print(f"FILTER|{example_name}|{filter_str}")
                         break
                     elif line.startswith("// @filter-out:"):
                         platforms = line.split("// @filter-out:")[1].strip()
@@ -163,6 +166,7 @@ def discover_examples_all(examples_dir: Path) -> None:
                             print(
                                 f"SKIP|{example_name}|Filtered out for STUB (@filter-out:{platforms})"
                             )
+                        print(f"FILTER|{example_name}|filter-out:{platforms}")
                         break
         except (UnicodeDecodeError, OSError):
             # If we can't read the file, skip silently

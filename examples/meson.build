@@ -77,6 +77,7 @@ stub_incompatible_examples = []
 example_includes = {}
 example_paths = {}  # Map example name to its root directory path
 example_sources = {}
+example_filters = {}  # Map example name to its @filter string (for runtime guard)
 
 foreach line : example_metadata_output.split('\n')
     if line != ''
@@ -113,6 +114,11 @@ foreach line : example_metadata_output.split('\n')
                 # Parse SKIP|<name>|<reason>
                 reason = parts[2]
                 stub_incompatible_examples += [example_name]
+
+            elif line_type == 'FILTER' and parts.length() >= 3
+                # Parse FILTER|<name>|<filter_string>
+                # Store the raw filter string for compile-time platform guard
+                example_filters += {example_name: parts[2]}
             endif
         endif
     endif
@@ -210,6 +216,23 @@ foreach example_name : example_paths.keys()
         '-DEXAMPLE_INO_PATH="' + ino_file + '"',
         '-fvisibility=hidden'
     ]
+
+    # Pass @filter annotation as preprocessor define for runtime platform guard
+    # This allows the wrapper template to detect platform-incompatible examples
+    # even when the meson build cache is stale, compiling a skip-stub instead
+    # of failing with a mysterious compile error
+    if example_filters.has_key(example_name)
+        example_filter_str = example_filters[example_name]
+        example_specific_cpp_args += [
+            '-DEXAMPLE_PLATFORM_FILTER="' + example_filter_str + '"'
+        ]
+        # Check if this filter indicates the example should NOT run on stub/native
+        # If it contains "platform is X" where X is not "native", mark as stub-incompatible
+        # This is a defense-in-depth guard - normally these are filtered at configure time
+        if example_filter_str.contains('platform is') and not example_filter_str.contains('platform is native')
+            example_specific_cpp_args += ['-DEXAMPLE_STUB_INCOMPATIBLE=1']
+        endif
+    endif
 
     # Collect all source files: wrapper + any additional .cpp files from subdirectories
     all_sources = [wrapper_cpp] + additional_sources
