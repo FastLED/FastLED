@@ -58,7 +58,6 @@ FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 // Visualizer declarations (implementations in viz/*.cpp.hpp via unity build)
 #include "fl/fx/2d/animartrix2_detail/viz/rotating_blob.h"
-#include "fl/fx/2d/animartrix2_detail/viz/chasing_spirals.h"
 #include "fl/fx/2d/animartrix2_detail/viz/rings.h"
 #include "fl/fx/2d/animartrix2_detail/viz/waves.h"
 #include "fl/fx/2d/animartrix2_detail/viz/center_field.h"

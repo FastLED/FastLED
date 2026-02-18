@@ -128,6 +128,23 @@ void renderChasingSpiralFloat(CRGB *leds, uint32_t timeMs) {
     fx.draw(ctx);
 }
 
+// Render Chasing_Spirals using the v2 float path (Animartrix2 decoupled float)
+void renderChasingSpiralFloat_v2(CRGB *leds, uint32_t timeMs) {
+    XYMap xy = XYMap::constructRectangularGrid(W, H);
+
+    Context ctx;
+    ctx.leds = leds;
+    ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
+        XYMap *map = static_cast<XYMap*>(userData);
+        return map->mapToIndex(x, y);
+    };
+    ctx.xyMapUserData = &xy;
+
+    init(ctx, W, H);
+    setTime(ctx, timeMs);
+    fl::Chasing_Spirals_Float(ctx);
+}
+
 // Render Chasing_Spirals using Q31 integer path (non-SIMD)
 void renderChasingSpiralQ31(CRGB *leds, uint32_t timeMs) {
     XYMap xy = XYMap::constructRectangularGrid(W, H);
@@ -389,6 +406,35 @@ FL_TEST_CASE("Animartrix2 - CHASING_SPIRALS") {
     // For now, expect both to have some errors (investigation needed)
     // TODO: Fix implementations to achieve LSB tolerance
 }
+FL_TEST_CASE("Animartrix2 - CHASING_SPIRALS_FLOAT bit-perfect") {
+    fl::cout << "\n=== Testing Chasing_Spirals_Float (v2) is bit-perfect with v1 ===" << fl::endl;
+
+    const uint32_t test_times[] = {1000, 5000, 100000, 1000000};
+
+    for (uint32_t t : test_times) {
+        CRGB leds_v1[N] = {};
+        CRGB leds_v2[N] = {};
+
+        renderChasingSpiralFloat(leds_v1, t);
+        renderChasingSpiralFloat_v2(leds_v2, t);
+
+        int mismatches = 0;
+        for (uint16_t i = 0; i < N; i++) {
+            if (leds_v1[i] != leds_v2[i]) {
+                if (mismatches < 5) {
+                    FL_MESSAGE("  t=", t, " pixel[", i, "]: v1=(",
+                            int(leds_v1[i].r), ",", int(leds_v1[i].g), ",", int(leds_v1[i].b),
+                            ") v2=(", int(leds_v2[i].r), ",", int(leds_v2[i].g), ",", int(leds_v2[i].b), ")");
+                }
+                mismatches++;
+            }
+        }
+        FL_MESSAGE("t=", t, ": ", mismatches, " mismatched pixels / ", N);
+        FL_CHECK_MESSAGE(mismatches == 0,
+                      "Chasing_Spirals_Float (v2) must be bit-perfect with v1 float");
+    }
+}
+
 FL_TEST_CASE("Animartrix2 - ROTATING_BLOB") { testAnimation(22, "ROTATING_BLOB"); }
 FL_TEST_CASE("Animartrix2 - RINGS") { testAnimation(23, "RINGS"); }
 FL_TEST_CASE("Animartrix2 - COMPLEX_KALEIDO") { testAnimation(24, "COMPLEX_KALEIDO"); }

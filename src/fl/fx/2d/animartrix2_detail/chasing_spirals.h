@@ -162,11 +162,11 @@
 // See also: docs/profiling/HOW_TO_PROFILE.md
 // ============================================================================
 
-// Dependencies are included by animartrix2_detail.hpp:
-// - fl/fixed_point/s16x16.h (for fl::s16x16 type)
-// - fl/simd.h (for SIMD intrinsics)
-// - fl/sin32.h (for sincos32 functions)
+namespace fl {
 
-#include "chasing_spirals_common.h"  // Common helper code
-#include "chasing_spirals_q31.h"     // Q31 scalar implementation
-#include "chasing_spirals_simd.h"    // Q31 SIMD implementation
+struct Context;
+void Chasing_Spirals_Float(Context &ctx);
+void Chasing_Spirals_Q31(Context &ctx);
+void Chasing_Spirals_Q31_SIMD(Context &ctx);
+
+} // namespace fl
