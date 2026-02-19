@@ -1,4 +1,9 @@
-#pragma once
+// Note: intentionally no #pragma once — this file is designed to be re-includable.
+// It is a macro-reset header, not a definitions header. Including it multiple times
+// is idempotent and correct: it cleans up any macros active at the point of inclusion.
+// Re-inclusion is needed because platform headers may re-define min/max/abs/etc. after
+// an earlier cleanup (e.g. the fl/arduino.h cleanup that runs before platform headers,
+// and the fl/stl/math.h cleanup that runs after them).
 
 #include "fl/has_include.h"  // IWYU pragma: keep
 

@@ -8,6 +8,18 @@
 #include "fl/dll.h"  // Will optionally compile in.
 #include "platforms/is_platform.h"
 
+// Include Arduino.h early and immediately normalize its math macros (min, max, abs,
+// round, radians, degrees, map). On Arduino platforms the IDE injects Arduino.h
+// before the sketch, so those macros are already active by the time FastLED.h is
+// processed. Pulling fl/arduino.h in here — before any internal FastLED headers —
+// ensures all subsequent headers see a clean, macro-free environment.
+// fl/stl/undef.h (included by fl/arduino.h) is intentionally re-includable, so a
+// second cleanup in fl/stl/math.h (included later, after platform headers) will
+// catch any macros re-introduced by those platform headers.
+#if defined(ARDUINO)
+#include "fl/arduino.h"
+#endif
+
 /// @file FastLED.h
 /// central include file for FastLED, defines the CFastLED class/object
 
@@ -144,10 +156,10 @@
 // MATH FUNCTION USING DECLARATIONS
 // ============================================================================
 
-// Note: fl/undef.h is included AFTER platform headers to ensure Arduino macros
-// are undefined even if platform-specific headers define them.
-// This section is completed after the platform includes below.
-
+// Arduino macros (min, max, abs, etc.) are cleaned up in two passes:
+//   Pass 1 — top of FastLED.h (above): fl/arduino.h cleans up before internal headers.
+//   Pass 2 — fl/stl/math.h (below): cleans up any macros re-introduced by platform headers.
+// fl/stl/undef.h is intentionally re-includable to support both passes.
 
 #include "controller.h"
 #include "fastpin.h"
@@ -162,12 +174,9 @@
 // headers without evaluating preprocessor paths.
 #include "platforms/ldf_headers.h"
 
-// Arduino.h defines min, max, abs, map, radians, degrees as macros
-// These macros cause problems with C++ code (double evaluation, no type safety)
-// fl/arduino.h trampoline ensures Arduino.h is always paired with undef.h,
-// so macros are cleaned up before any platform header code is evaluated.
-
-// Include math functions (min, max, abs, radians, degrees)
+// Pass 2 macro cleanup: fl/stl/math.h includes fl/stl/undef.h which undefs any
+// min/max/abs/round/radians/degrees/map macros re-introduced by platform headers above.
+// Then provides type-safe fl:: replacements brought into global scope via using below.
 #include "fl/stl/math.h"
 
 // Bring fl:: math functions into global namespace for Arduino compatibility

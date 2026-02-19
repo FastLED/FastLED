@@ -3,6 +3,7 @@ import asyncio
 import http.server
 import multiprocessing
 import os
+import socket
 import socketserver
 import sys
 import time
@@ -57,11 +58,27 @@ def install_playwright_browsers():
         sys.exit(1)
 
 
+def _find_free_port(start: int = 8080) -> int:
+    """Find a free TCP port starting from `start`."""
+    for port in range(start, start + 100):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind(("", port))
+                return port
+            except OSError:
+                continue
+    raise OSError(f"No free port found in range {start}–{start + 99}")
+
+
+class _ReuseAddrTCPServer(socketserver.TCPServer):
+    allow_reuse_address = True
+
+
 def _run_http_server(port: int, directory: str) -> None:
     """Run HTTP server in a separate process."""
     os.chdir(directory)
     handler = http.server.SimpleHTTPRequestHandler
-    with socketserver.TCPServer(("", port), handler) as httpd:
+    with _ReuseAddrTCPServer(("", port), handler) as httpd:
         httpd.serve_forever()
 
 
@@ -97,10 +114,8 @@ async def main() -> None:
     console.print()
 
     install_playwright_browsers()
-    # Find an available port
-    port = (
-        8080  # Todo, figure out why the http server ignores any port other than 8080.
-    )
+    # Find a free port starting from 8080
+    port = _find_free_port(8080)
     console.print(f"[dim]Using port: {port}[/dim]")
 
     # Start the HTTP server
@@ -113,6 +128,10 @@ async def main() -> None:
     try:
         # Give the server some time to start
         time.sleep(2)
+
+        # Verify the server process is still alive (i.e. it bound successfully)
+        if not server_process.is_alive():
+            raise Exception(f"HTTP server failed to start on port {port}")
 
         # Use Playwright to test the server
         async with async_playwright() as p:
