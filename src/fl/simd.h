@@ -75,6 +75,12 @@ using platforms::load_u32_4_aligned;
 /// @param vec SIMD register containing 4 uint32_t values
 using platforms::store_u32_4;
 
+/// Store 4 uint32_t values from SIMD register to 16-byte aligned memory.
+/// Uses _mm_store_si128 on SSE2 (faster than storeu on older cores).
+/// @param ptr Destination pointer — MUST be 16-byte aligned (assert with FL_ASSUME_ALIGNED)
+/// @param vec SIMD register containing 4 uint32_t values
+using platforms::store_u32_4_aligned;
+
 //==============================================================================
 // Atomic Arithmetic Operations (bring platform implementations into public namespace)
 //==============================================================================

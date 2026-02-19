@@ -21,11 +21,11 @@ void perlin_s16x16_simd::pnoise2d_raw_simd4(
     // BOUNDARY B via store_u32_4 into FL_ALIGNAS(16) stack arrays).  We
     // re-load them into SIMD registers here so that the coordinate arithmetic
     // below (floor, fractional extract, wrap-to-255) can stay vectorized.
-    // The caller aligned the arrays to 16 bytes, but the function signature
-    // `const i32 nx[4]` carries no alignment annotation, so load_u32_4 uses
-    // an unaligned load path to be safe on all call sites.
-    fl::simd::simd_u32x4 nx_vec = fl::simd::load_u32_4(reinterpret_cast<const fl::u32*>(nx)); // ok reinterpret cast
-    fl::simd::simd_u32x4 ny_vec = fl::simd::load_u32_4(reinterpret_cast<const fl::u32*>(ny)); // ok reinterpret cast
+    // The caller (pnoise2d_raw_simd4_vec) always passes FL_ALIGNAS(16) arrays stored
+    // at BOUNDARY B. FL_ASSUME_ALIGNED carries that guarantee into this call so the
+    // compiler can emit _mm_load_si128 instead of _mm_loadu_si128.
+    fl::simd::simd_u32x4 nx_vec = fl::simd::load_u32_4_aligned(FL_ASSUME_ALIGNED(reinterpret_cast<const fl::u32*>(nx), 16)); // ok reinterpret cast
+    fl::simd::simd_u32x4 ny_vec = fl::simd::load_u32_4_aligned(FL_ASSUME_ALIGNED(reinterpret_cast<const fl::u32*>(ny), 16)); // ok reinterpret cast
     // ── [end BOUNDARY C] ──────────────────────────────────────────────────────
 
     // SIMD: Extract integer floor (shift right by FP_BITS)
@@ -113,7 +113,7 @@ fl::simd::simd_u32x4 perlin_s16x16_simd::pnoise2d_raw_simd4_vec(
     // without re-entering scalar code.
     FL_ALIGNAS(16) fl::i32 out[4];
     pnoise2d_raw_simd4(nx, ny, fade_lut, perm, out);
-    return fl::simd::load_u32_4(reinterpret_cast<const fl::u32*>(out)); // ok reinterpret cast
+    return fl::simd::load_u32_4_aligned(FL_ASSUME_ALIGNED(reinterpret_cast<const fl::u32*>(out), 16)); // ok reinterpret cast
     // ── [end BOUNDARY E] ──────────────────────────────────────────────────────
 }
 

@@ -13,12 +13,12 @@
 //   Q16.16 → A24 (mulhi_su32_4)
 //   sincos32_simd                      ← fully SIMD (unchanged)
 //   Perlin coords (mulhi32_i32_4 << 1) ← fully SIMD (no scalar round-trip)
-//   [BOUNDARY B] store_u32_4 nx/ny → FL_ALIGNAS(16) stack arrays
-//   [BOUNDARY C] load_u32_4 ← same stack arrays (re-pack inside perlin callee)
+//   [BOUNDARY B] store_u32_4_aligned nx/ny → FL_ALIGNAS(16) stack arrays
+//   [BOUNDARY C] load_u32_4_aligned ← same stack arrays (re-pack inside perlin callee)
 //   [BOUNDARY D] store_u32_4 X/Y/x_frac/y_frac → scalar (SSE2: no integer gather)
 //   Permutation table (scalar)         ← fundamental SSE2 limit, unavoidable
 //   Fade LUT + lerp tree (scalar)      ← exact-match tests forbid vectorization
-//   [BOUNDARY E] load_u32_4 ← FL_ALIGNAS(16) out[4] (re-pack result into SIMD)
+//   [BOUNDARY E] load_u32_4_aligned ← FL_ALIGNAS(16) out[4] (re-pack result into SIMD)
 //   Clamp [0,FP_ONE] + scale ×255      ← fully SIMD
 //   Radial filter (mulhi32_i32_4)      ← fully SIMD
 //   [BOUNDARY F] extract_u32_4 × 4 + scatter ← pixel_idx scatter, unavoidable
@@ -130,8 +130,8 @@ simd::simd_u32x4 simd4_processChannel(
     // aligned load (avoiding a potential penalty vs. unaligned load).
     // This is an inherent boundary: no SSE2 integer gather instruction exists.
     FL_ALIGNAS(16) i32 nx[4], ny[4];
-    simd::store_u32_4(reinterpret_cast<u32*>(nx), nx_vec); // ok reinterpret cast
-    simd::store_u32_4(reinterpret_cast<u32*>(ny), ny_vec); // ok reinterpret cast
+    simd::store_u32_4_aligned(FL_ASSUME_ALIGNED(reinterpret_cast<u32*>(nx), 16), nx_vec); // ok reinterpret cast
+    simd::store_u32_4_aligned(FL_ASSUME_ALIGNED(reinterpret_cast<u32*>(ny), 16), ny_vec); // ok reinterpret cast
     // ── [end BOUNDARY B] ──────────────────────────────────────────────────────
 
     // Perlin noise — exact scalar lerp tree (preserves scalar==SIMD test invariant)

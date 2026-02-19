@@ -80,6 +80,14 @@ FASTLED_FORCE_INLINE FL_IRAM void store_u32_4(u32* ptr, simd_u32x4 vec) noexcept
         ptr[i] = vec.data[i];
     }
 }
+/// Aligned store scalar fallback: FL_ASSUME_ALIGNED propagates the alignment hint
+/// to surrounding loop code, matching the behaviour of _mm_store_si128 on SSE2.
+FASTLED_FORCE_INLINE FL_IRAM void store_u32_4_aligned(u32* ptr, simd_u32x4 vec) noexcept {
+    u32* p = FL_ASSUME_ALIGNED(ptr, 16);
+    for (int i = 0; i < 4; ++i) {
+        p[i] = vec.data[i];
+    }
+}
 
 FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 load_f32_4(const float* ptr) noexcept {
     simd_f32x4 result;

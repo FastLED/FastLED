@@ -91,6 +91,11 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 load_u32_4_aligned(const u32* ptr) noexc
 FASTLED_FORCE_INLINE FL_IRAM void store_u32_4(u32* ptr, simd_u32x4 vec) noexcept {
     _mm_storeu_si128(reinterpret_cast<__m128i*>(ptr), vec); // ok reinterpret cast
 }
+/// Aligned store: ptr MUST be 16-byte aligned (asserted by caller via FL_ASSUME_ALIGNED).
+/// Uses _mm_store_si128 which requires alignment — faster than storeu on older SSE2 cores.
+FASTLED_FORCE_INLINE FL_IRAM void store_u32_4_aligned(u32* ptr, simd_u32x4 vec) noexcept {
+    _mm_store_si128(reinterpret_cast<__m128i*>(ptr), vec); // ok reinterpret cast
+}
 FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 load_f32_4(const float* ptr) noexcept {
     return _mm_loadu_ps(ptr);
 }
@@ -518,6 +523,14 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 load_u32_4_aligned(const u32* ptr) noexc
 FASTLED_FORCE_INLINE FL_IRAM void store_u32_4(u32* ptr, simd_u32x4 vec) noexcept {
     for (int i = 0; i < 4; ++i) {
         ptr[i] = vec.data[i];
+    }
+}
+/// Aligned store scalar fallback: FL_ASSUME_ALIGNED propagates the alignment hint
+/// to surrounding loop code, matching the behaviour of _mm_store_si128 on SSE2.
+FASTLED_FORCE_INLINE FL_IRAM void store_u32_4_aligned(u32* ptr, simd_u32x4 vec) noexcept {
+    u32* p = FL_ASSUME_ALIGNED(ptr, 16);
+    for (int i = 0; i < 4; ++i) {
+        p[i] = vec.data[i];
     }
 }
 
