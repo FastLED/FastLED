@@ -1,12 +1,15 @@
 #pragma once
 
-// Center_Field visualizer declaration
+// Center_Field visualizer class
 // Extracted from animartrix2_detail.hpp
 
-#include "fl/fx/2d/animartrix2_detail/context.h"
+#include "fl/fx/2d/animartrix2_detail/viz/viz_base.h"
 
 namespace fl {
 
-void Center_Field(Context &ctx);
+class Center_Field : public IAnimartrix2Viz {
+public:
+    void draw(Context &ctx) override;
+};
 
 }  // namespace fl

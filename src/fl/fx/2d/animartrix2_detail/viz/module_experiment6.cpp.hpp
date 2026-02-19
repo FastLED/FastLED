@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void Module_Experiment6(Context &ctx) {
+void Module_Experiment6::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 

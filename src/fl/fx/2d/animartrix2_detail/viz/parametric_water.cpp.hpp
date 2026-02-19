@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void Parametric_Water(Context &ctx) {
+void Parametric_Water::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 

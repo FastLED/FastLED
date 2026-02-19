@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void Distance_Experiment(Context &ctx) {
+void Distance_Experiment::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 

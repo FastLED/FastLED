@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void Waves(Context &ctx) {
+void Waves::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 

@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void Water(Context &ctx) {
+void Water::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 

@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void Rings(Context &ctx) {
+void Rings::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 

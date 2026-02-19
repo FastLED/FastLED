@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void Spiralus(Context &ctx) {
+void Spiralus::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 

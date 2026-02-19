@@ -10,8 +10,8 @@
 // Licensed under Creative Commons Attribution License CC BY-NC 3.0
 // https://creativecommons.org/licenses/by-nc/3.0/
 //
-// Architecture: Context struct holds all shared state. Each animation is a
-// free function (Visualizer) that operates on Context. Internally delegates
+// Architecture: Context struct holds all shared state. Each animation is an
+// IAnimartrix2Viz subclass with a draw(Context&) method. Internally delegates
 // to animartrix_detail::ANIMartRIX for bit-identical output.
 //
 // NOTE: This is an internal implementation header. Do not include directly.
@@ -53,7 +53,7 @@ FL_OPTIMIZATION_LEVEL_O3_BEGIN
 #include "fl/fx/2d/animartrix2_detail/perlin_q16.h"
 #include "fl/fx/2d/animartrix2_detail/perlin_s8x8.h"
 #include "fl/fx/2d/animartrix2_detail/perlin_i16_optimized.h"
-#include "fl/fx/2d/animartrix2_detail/chasing_spirals.h"
+#include "fl/fx/2d/animartrix2_detail/viz/chasing_spirals.h"
 #include "fl/fx/2d/animartrix2_detail/engine.h"
 
 // Visualizer declarations (implementations in viz/*.cpp.hpp via unity build)
@@ -122,7 +122,7 @@ namespace q31 {
 namespace q16 {
     // Q16 implementation aliased to Q31 (Q16 was removed, use Q31 instead)
     inline void Chasing_Spirals_Q16_Batch4_ColorGrouped(Context &ctx) {
-        fl::Chasing_Spirals_Q31(ctx);
+        fl::Chasing_Spirals_Q31().draw(ctx);
     }
 }
 

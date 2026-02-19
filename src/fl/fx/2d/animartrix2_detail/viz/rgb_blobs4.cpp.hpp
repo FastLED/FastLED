@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void RGB_Blobs4(Context &ctx) {
+void RGB_Blobs4::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 

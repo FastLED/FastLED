@@ -13,9 +13,6 @@ namespace fl {
 struct Context;
 struct Engine;
 
-// Visualizer: a free function that operates on Context to render one frame
-using Visualizer = void (*)(Context &ctx);
-
 // Callback for mapping (x,y) to a 1D LED index
 using XYMapCallback = fl::u16 (*)(fl::u16 x, fl::u16 y, void *userData);
 

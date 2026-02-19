@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void Lava1(Context &ctx) {
+void Lava1::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 

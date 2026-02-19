@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void SpiralMatrix4(Context &ctx) {
+void SpiralMatrix4::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 

@@ -1,12 +1,15 @@
 #pragma once
 
-// Distance_Experiment visualizer declaration
+// Distance_Experiment visualizer class
 // Extracted from animartrix2_detail.hpp
 
-#include "fl/fx/2d/animartrix2_detail/context.h"
+#include "fl/fx/2d/animartrix2_detail/viz/viz_base.h"
 
 namespace fl {
 
-void Distance_Experiment(Context &ctx);
+class Distance_Experiment : public IAnimartrix2Viz {
+public:
+    void draw(Context &ctx) override;
+};
 
 }  // namespace fl

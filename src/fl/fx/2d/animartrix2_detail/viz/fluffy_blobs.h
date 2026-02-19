@@ -1,12 +1,15 @@
 #pragma once
 
-// Fluffy_Blobs visualizer declaration
+// Fluffy_Blobs visualizer class
 // Extracted from animartrix2_detail.hpp
 
-#include "fl/fx/2d/animartrix2_detail/context.h"
+#include "fl/fx/2d/animartrix2_detail/viz/viz_base.h"
 
 namespace fl {
 
-void Fluffy_Blobs(Context &ctx);
+class Fluffy_Blobs : public IAnimartrix2Viz {
+public:
+    void draw(Context &ctx) override;
+};
 
 }  // namespace fl

@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void Caleido1(Context &ctx) {
+void Caleido1::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 

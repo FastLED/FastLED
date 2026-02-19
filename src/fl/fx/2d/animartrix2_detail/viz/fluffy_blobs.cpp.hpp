@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void Fluffy_Blobs(Context &ctx) {
+void Fluffy_Blobs::draw(Context &ctx) {
     auto *e = ctx.mEngine;
 
     e->timings.master_speed = 0.015;

@@ -11,7 +11,7 @@
 #include "FastLED.h"
 #include "fl/fx/2d/animartrix.hpp"
 #include "fl/fx/2d/animartrix2.hpp"
-#include "fl/fx/2d/animartrix2_detail/chasing_spirals.h"
+#include "fl/fx/2d/animartrix2_detail/viz/chasing_spirals.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/stdio.h"
 #include "tests/profile/profile_result.h"

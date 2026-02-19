@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void Yves(Context &ctx) {
+void Yves::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 

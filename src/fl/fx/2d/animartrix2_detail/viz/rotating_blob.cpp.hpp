@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void Rotating_Blob(Context &ctx) {
+void Rotating_Blob::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 

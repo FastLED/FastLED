@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void Complex_Kaleido(Context &ctx) {
+void Complex_Kaleido::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 

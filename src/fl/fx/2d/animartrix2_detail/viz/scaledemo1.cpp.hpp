@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void Scaledemo1(Context &ctx) {
+void Scaledemo1::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 

@@ -1,12 +1,15 @@
 #pragma once
 
-// SpiralMatrix3 visualizer declaration
+// SpiralMatrix3 visualizer class
 // Extracted from animartrix2_detail.hpp
 
-#include "fl/fx/2d/animartrix2_detail/context.h"
+#include "fl/fx/2d/animartrix2_detail/viz/viz_base.h"
 
 namespace fl {
 
-void SpiralMatrix3(Context &ctx);
+class SpiralMatrix3 : public IAnimartrix2Viz {
+public:
+    void draw(Context &ctx) override;
+};
 
 }  // namespace fl

@@ -9,7 +9,7 @@
 #include "test.h"
 #include "fl/fx/2d/animartrix.hpp"
 #include "fl/fx/2d/animartrix2.hpp"
-#include "fl/fx/2d/animartrix2_detail/chasing_spirals.h"
+#include "fl/fx/2d/animartrix2_detail/viz/chasing_spirals.h"
 #include "fl/xymap.h"
 #include <stdio.h>  // ok include: needed for debug output
 
@@ -146,7 +146,7 @@ FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000)") {
 
         init(ctx, W, H);
         setTime(ctx, t);
-        fl::Chasing_Spirals_Q31(ctx);
+        fl::Chasing_Spirals_Q31().draw(ctx);
     }
 
     // ========================
@@ -212,7 +212,7 @@ FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000000)") {
 
         init(ctx, W, H);
         setTime(ctx, t);
-        fl::Chasing_Spirals_Q31(ctx);
+        fl::Chasing_Spirals_Q31().draw(ctx);
     }
 
     // ========================
@@ -266,7 +266,7 @@ FL_TEST_CASE("chasing_spirals - float vs q31 sample pixels") {
 
         init(ctx, W, H);
         setTime(ctx, t);
-        fl::Chasing_Spirals_Q31(ctx);
+        fl::Chasing_Spirals_Q31().draw(ctx);
     }
 
     // Print sample pixels to see error patterns

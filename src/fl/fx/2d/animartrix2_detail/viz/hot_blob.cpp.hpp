@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void Hot_Blob(Context &ctx) {
+void Hot_Blob::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
     e->run_default_oscillators(0.001);

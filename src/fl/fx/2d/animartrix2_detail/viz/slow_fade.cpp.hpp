@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void Slow_Fade(Context &ctx) {
+void Slow_Fade::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 

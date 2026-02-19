@@ -1,12 +1,15 @@
 #pragma once
 
-// RGB_Blobs4 visualizer declaration
+// RGB_Blobs4 visualizer class
 // Extracted from animartrix2_detail.hpp
 
-#include "fl/fx/2d/animartrix2_detail/context.h"
+#include "fl/fx/2d/animartrix2_detail/viz/viz_base.h"
 
 namespace fl {
 
-void RGB_Blobs4(Context &ctx);
+class RGB_Blobs4 : public IAnimartrix2Viz {
+public:
+    void draw(Context &ctx) override;
+};
 
 }  // namespace fl

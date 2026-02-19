@@ -36,7 +36,7 @@
 #include "fl/fx/2d/animartrix2_detail/perlin_float.h"
 #include "fl/simd.h"
 #include "fl/sin32.h"
-#include "fl/fx/2d/animartrix2_detail/chasing_spirals.h"
+#include "fl/fx/2d/animartrix2_detail/viz/chasing_spirals.h"
 
 namespace fl {
 
@@ -158,7 +158,8 @@ simd::simd_u32x4 simd4_processChannel(
 
 // Extract common frame setup logic shared by all variants.
 // Builds SoA geometry cache lazily (once when grid size changes).
-FrameSetup setupChasingSpiralFrame(Context &ctx) {
+// state is the caller's per-instance ChasingSpiralState member (not a global).
+FrameSetup setupChasingSpiralFrame(Context &ctx, ChasingSpiralState &state) {
     auto *e = ctx.mEngine;
     e->get_ready();
 
@@ -206,24 +207,15 @@ FrameSetup setupChasingSpiralFrame(Context &ctx) {
     constexpr FP three_fp(3.0f);
     constexpr FP one(1.0f);
 
-    // Module-level global: single-threaded, one active Chasing Spirals instance.
-    // FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS suppresses the Clang warning that
-    // fires when a global has a non-trivial constructor (fl::vector members).
-    FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
-    static ChasingSpiralState g_chasing_spiral_state;
-    FL_DISABLE_WARNING_POP
-    ChasingSpiralState *state = &g_chasing_spiral_state;
-
     // Build per-pixel SoA geometry (once when grid size changes)
-    if (state->count != total_pixels) {
+    if (state.count != total_pixels) {
         const int padded = (total_pixels + 3) & ~3;  // multiple of 4 for SIMD safety
-        state->base_angle.resize(padded, 0);
-        state->dist_scaled.resize(padded, 0);
-        state->rf3.resize(padded, 0);
-        state->rf_half.resize(padded, 0);
-        state->rf_quarter.resize(padded, 0);
-        state->pixel_idx.resize(padded, 0);
+        state.base_angle.resize(padded, 0);
+        state.dist_scaled.resize(padded, 0);
+        state.rf3.resize(padded, 0);
+        state.rf_half.resize(padded, 0);
+        state.rf_quarter.resize(padded, 0);
+        state.pixel_idx.resize(padded, 0);
 
         const FP inv_radius = one / radius_fp;
         const FP one_third = one / three_fp;
@@ -233,22 +225,22 @@ FrameSetup setupChasingSpiralFrame(Context &ctx) {
                 const FP theta(e->polar_theta[x][y]);
                 const FP dist(e->distance[x][y]);
                 const FP rf = (radius_fp - dist) * inv_radius;
-                state->base_angle[idx]  = (three_fp * theta - dist * one_third).raw();
-                state->dist_scaled[idx] = (dist * scale).raw();
-                state->rf3[idx]         = (three_fp * rf).raw();
-                state->rf_half[idx]     = (rf >> 1).raw();
-                state->rf_quarter[idx]  = (rf >> 2).raw();
-                state->pixel_idx[idx]   = e->mCtx->xyMapFn(x, y, e->mCtx->xyMapUserData);
+                state.base_angle[idx]  = (three_fp * theta - dist * one_third).raw();
+                state.dist_scaled[idx] = (dist * scale).raw();
+                state.rf3[idx]         = (three_fp * rf).raw();
+                state.rf_half[idx]     = (rf >> 1).raw();
+                state.rf_quarter[idx]  = (rf >> 2).raw();
+                state.pixel_idx[idx]   = e->mCtx->xyMapFn(x, y, e->mCtx->xyMapUserData);
                 idx++;
             }
         }
-        state->count = total_pixels;
+        state.count = total_pixels;
     }
 
     // Initialize Perlin fade LUT once per state lifetime
-    if (!state->fade_lut_initialized) {
-        Perlin::init_fade_lut(state->fade_lut);
-        state->fade_lut_initialized = true;
+    if (!state.fade_lut_initialized) {
+        Perlin::init_fade_lut(state.fade_lut);
+        state.fade_lut_initialized = true;
     }
 
     const i32 cx_raw   = center_x_scaled.raw();
@@ -262,13 +254,13 @@ FrameSetup setupChasingSpiralFrame(Context &ctx) {
 
     return FrameSetup{
         total_pixels,
-        state->base_angle.data(),
-        state->dist_scaled.data(),
-        state->rf3.data(),
-        state->rf_half.data(),
-        state->rf_quarter.data(),
-        state->pixel_idx.data(),
-        state->fade_lut,
+        state.base_angle.data(),
+        state.dist_scaled.data(),
+        state.rf3.data(),
+        state.rf_half.data(),
+        state.rf_quarter.data(),
+        state.pixel_idx.data(),
+        state.fade_lut,
         PERLIN_NOISE,
         cx_raw,
         cy_raw,
@@ -288,7 +280,7 @@ FrameSetup setupChasingSpiralFrame(Context &ctx) {
 // Float Implementation (original algorithm, uses v2 Engine)
 // ============================================================================
 
-void Chasing_Spirals_Float(Context &ctx) {
+void Chasing_Spirals_Float::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 
@@ -358,8 +350,8 @@ void Chasing_Spirals_Float(Context &ctx) {
 // Q31 Scalar Implementation (fixed-point, non-vectorized)
 // ============================================================================
 
-void Chasing_Spirals_Q31(Context &ctx) {
-    auto setup = setupChasingSpiralFrame(ctx);
+void Chasing_Spirals_Q31::draw(Context &ctx) {
+    auto setup = setupChasingSpiralFrame(ctx, mState);
     const int total_pixels  = setup.total_pixels;
     const i32 *fade_lut     = setup.fade_lut;
     const u8  *perm         = setup.perm;
@@ -414,8 +406,8 @@ void Chasing_Spirals_Q31(Context &ctx) {
 // SIMD Implementation (vectorized 4-wide processing)
 // ============================================================================
 
-void Chasing_Spirals_Q31_SIMD(Context &ctx) {
-    auto setup = setupChasingSpiralFrame(ctx);
+void Chasing_Spirals_Q31_SIMD::draw(Context &ctx) {
+    auto setup = setupChasingSpiralFrame(ctx, mState);
     const int   total_pixels  = setup.total_pixels;
     const i32  *base_angle    = setup.base_angle;
     const i32  *dist_scaled   = setup.dist_scaled;

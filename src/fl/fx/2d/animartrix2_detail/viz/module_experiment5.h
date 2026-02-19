@@ -1,12 +1,15 @@
 #pragma once
 
-// Module_Experiment5 visualizer declaration
+// Module_Experiment5 visualizer class
 // Extracted from animartrix2_detail.hpp
 
-#include "fl/fx/2d/animartrix2_detail/context.h"
+#include "fl/fx/2d/animartrix2_detail/viz/viz_base.h"
 
 namespace fl {
 
-void Module_Experiment5(Context &ctx);
+class Module_Experiment5 : public IAnimartrix2Viz {
+public:
+    void draw(Context &ctx) override;
+};
 
 }  // namespace fl

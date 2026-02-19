@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void Center_Field(Context &ctx) {
+void Center_Field::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 

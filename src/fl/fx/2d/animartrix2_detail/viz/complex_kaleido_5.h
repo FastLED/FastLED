@@ -1,12 +1,15 @@
 #pragma once
 
-// Complex_Kaleido_5 visualizer declaration
+// Complex_Kaleido_5 visualizer class
 // Extracted from animartrix2_detail.hpp
 
-#include "fl/fx/2d/animartrix2_detail/context.h"
+#include "fl/fx/2d/animartrix2_detail/viz/viz_base.h"
 
 namespace fl {
 
-void Complex_Kaleido_5(Context &ctx);
+class Complex_Kaleido_5 : public IAnimartrix2Viz {
+public:
+    void draw(Context &ctx) override;
+};
 
 }  // namespace fl

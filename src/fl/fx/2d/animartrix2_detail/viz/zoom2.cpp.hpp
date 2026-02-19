@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void Zoom2(Context &ctx) {
+void Zoom2::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 

@@ -1,12 +1,15 @@
 #pragma once
 
-// Zoom2 visualizer declaration
+// Zoom2 visualizer class
 // Extracted from animartrix2_detail.hpp
 
-#include "fl/fx/2d/animartrix2_detail/context.h"
+#include "fl/fx/2d/animartrix2_detail/viz/viz_base.h"
 
 namespace fl {
 
-void Zoom2(Context &ctx);
+class Zoom2 : public IAnimartrix2Viz {
+public:
+    void draw(Context &ctx) override;
+};
 
 }  // namespace fl

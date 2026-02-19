@@ -2,7 +2,7 @@
 
 namespace fl {
 
-void Polar_Waves(Context &ctx) {
+void Polar_Waves::draw(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
 
