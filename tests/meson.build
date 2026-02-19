@@ -186,13 +186,9 @@ foreach test_name : test_names
   # Register test: runner.exe loads the DLL and executes it
 
   # Skipped tests: still compile but don't run in the test suite.
-  # These pass individually (`bash test <name>`) but timeout under parallel load.
-  # TODO: Fix parallel execution issues then re-enable.
-  skipped_tests = [
-    'fl_remote_loopback',          # HTTP loopback integration test (real sockets)
-    'fl_remote_remote',            # Remote RPC test (mock, but slow under load)
-    'fl_remote_rpc_http_stream',   # RPC HTTP streaming test (mock, but slow under load)
-  ]
+  # Previously fl_remote_* tests were skipped due to timeouts under parallel load.
+  # All three now run in parallel with the default 20s timeout (fast enough).
+  skipped_tests = []
 
   if test_name in skipped_tests
     continue
@@ -211,9 +207,6 @@ foreach test_name : test_names
   slow_tests = [
     'fastled',                      # Main integration test
     'fl_fx_2d_animartrix2',        # 2D animation effects (heavy computation)
-    'fl_remote_loopback',          # HTTP loopback integration test
-    'fl_remote_remote',            # Remote RPC test
-    'fl_remote_rpc_http_stream',   # RPC HTTP streaming test
     'fl_spi',                      # SPI communication test
     'fl_xypath',                   # XY path computation test
     'fx_wled',                     # WLED effects test

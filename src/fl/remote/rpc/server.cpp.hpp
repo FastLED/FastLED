@@ -47,11 +47,6 @@ size_t Server::pull() {
 
     // Pull JSON-RPC requests from source until none available
     while (auto optRequest = mRequestSource()) {
-        Serial.println("╔═══════════════════════════════════════════════════════════╗");
-        Serial.println("║ [SERVER] pull() - Request received from source!          ║");
-        Serial.println("╚═══════════════════════════════════════════════════════════╝");
-        Serial.flush();
-
         fl::Json request = fl::move(*optRequest);
 
         // Process request through handler

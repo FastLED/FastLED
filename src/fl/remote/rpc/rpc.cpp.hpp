@@ -109,35 +109,8 @@ Json Rpc::handle(const Json& request) {
     // Check if this is a response-aware function (uses ResponseSend&)
     bool isResponseAware = entry.mIsResponseAware;
 
-    // Print request details for debugging
-    Serial.println("╔═══════════════════════════════════════════════════════════╗");
-    Serial.print("║ [RPC-REQUEST] Method: ");
-    Serial.println(methodName.c_str());
-    Serial.print("║ [RPC-REQUEST] Has ID: ");
-    Serial.println(request.contains("id") ? "YES" : "NO");
-    if (request.contains("id")) {
-        Serial.print("║ [RPC-REQUEST] ID value: ");
-        if (request["id"].is_int()) {
-            Serial.println(request["id"].as_int().value_or(-1));
-        } else {
-            Serial.println("NOT AN INT");
-        }
-    }
-    Serial.print("║ [RPC-REQUEST] Is async: ");
-    Serial.println(isAsync ? "YES" : "NO");
-    Serial.print("║ [RPC-REQUEST] Has ResponseSink: ");
-    Serial.println(mResponseSink ? "YES" : "NO");
-    Serial.println("╚═══════════════════════════════════════════════════════════╝");
-    Serial.flush();
-
     // For async functions, send ACK immediately
     if (isAsync && mResponseSink && request.contains("id")) {
-        Serial.println("╔═══════════════════════════════════════════════════════════╗");
-        Serial.print("║ [RPC] ASYNC MODE - Sending ACK for: ");
-        Serial.println(methodName.c_str());
-        Serial.println("╚═══════════════════════════════════════════════════════════╝");
-        Serial.flush();
-
         Json ack = Json::object();
         ack.set("jsonrpc", "2.0");
         ack.set("id", request["id"]);
@@ -147,24 +120,8 @@ Json Rpc::handle(const Json& request) {
         ack.set("result", ackResult);
 
         mResponseSink(ack);
-
-        Serial.println("╔═══════════════════════════════════════════════════════════╗");
-        Serial.println("║ [RPC] ACK sent successfully                              ║");
-        Serial.println("╚═══════════════════════════════════════════════════════════╝");
-        Serial.flush();
         FL_DBG("RPC: Sent ACK for async method: " << methodName.c_str());
     }
-
-    // Invoke the method
-    Serial.println("╔═══════════════════════════════════════════════════════════╗");
-    Serial.print("║ [RPC] About to invoke: ");
-    Serial.println(methodName.c_str());
-    Serial.print("║ [RPC] Is async: ");
-    Serial.println(isAsync ? "YES" : "NO");
-    Serial.print("║ [RPC] Is response-aware: ");
-    Serial.println(isResponseAware ? "YES" : "NO");
-    Serial.println("╚═══════════════════════════════════════════════════════════╝");
-    Serial.flush();
 
     fl::tuple<TypeConversionResult, Json> resultTuple;
 
@@ -183,11 +140,6 @@ Json Rpc::handle(const Json& request) {
         // Regular invocation
         resultTuple = entry.mInvoker->invoke(params);
     }
-
-    Serial.println("╔═══════════════════════════════════════════════════════════╗");
-    Serial.println("║ [RPC] Method completed - building response               ║");
-    Serial.println("╚═══════════════════════════════════════════════════════════╝");
-    Serial.flush();
 
     TypeConversionResult convResult = fl::get<0>(resultTuple);
     Json returnVal = fl::get<1>(resultTuple);

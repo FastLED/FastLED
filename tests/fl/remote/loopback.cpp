@@ -1,6 +1,6 @@
 // ok standalone
-// DISABLED in test suite (see tests/meson.build skipped_tests) - passes individually via `bash test tests/fl/remote/loopback`
 // Real loopback test: server startup + client connection + request + response
+// Uses real sockets on port 18080 (only test that does so - no port conflicts)
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "test.h"

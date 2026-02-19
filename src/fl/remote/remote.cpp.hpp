@@ -116,15 +116,6 @@ void Remote::sendStreamFinal(const char* method, const fl::Json& result) {
 // RPC Processing
 
 fl::Json Remote::processRpc(const fl::Json& request) {
-    Serial.println("╔═══════════════════════════════════════════════════════════╗");
-    Serial.println("║ [REMOTE] processRpc() called                              ║");
-    if (request.contains("method")) {
-        Serial.print("║ [REMOTE] Method: ");
-        Serial.println(request["method"].as_string().value_or("unknown").c_str());
-    }
-    Serial.println("╚═══════════════════════════════════════════════════════════╝");
-    Serial.flush();
-
     // Extract optional timestamp field (0 = immediate, >0 = scheduled)
     u32 timestamp = 0;
     if (request.contains("timestamp") && request["timestamp"].is_int()) {

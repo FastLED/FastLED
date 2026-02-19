@@ -917,7 +917,9 @@ def run_meson_build_and_test(
 
             # Use filtering callback in verbose mode to suppress noise patterns
             echo_callback = create_filtering_echo_callback() if verbose else False
+            test_start = time.time()
             returncode = proc.wait(echo=echo_callback)
+            test_duration = time.time() - test_start
             duration = time.time() - start_time
 
             if returncode != 0:
@@ -1025,7 +1027,10 @@ def run_meson_build_and_test(
             # Clear phase tracking on success
             phase_tracker.clear()
 
-            _print_success(f"✅ All tests passed (1/1 in {duration:.2f}s)")
+            build_duration = duration - test_duration
+            _print_success(
+                f"✅ All tests passed (1/1 in {test_duration:.2f}s, build: {build_duration:.1f}s)"
+            )
             return MesonTestResult(
                 success=True,
                 duration=duration,

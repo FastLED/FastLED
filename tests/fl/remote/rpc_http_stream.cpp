@@ -1,7 +1,7 @@
 // ok standalone
-// DISABLED in test suite (see tests/meson.build skipped_tests) - passes individually via `bash test tests/fl/remote/rpc_http_stream`
 // Integration tests for RPC over HTTP streaming transport
 // Tests all three RPC modes (SYNC, ASYNC, ASYNC_STREAM) with mock HTTP transport
+// Uses MockHttpServer (in-memory, no real sockets)
 
 #include "test.h"
 #include "fl/remote/remote.h"
