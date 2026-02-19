@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import functools
 import hashlib
 import threading
 import time
@@ -323,6 +324,92 @@ def determine_test_categories(args: TestArgs) -> TestCategories:
     )
 
 
+# C++ file extensions where whitespace-only changes don't affect compiled output.
+# Normalizing whitespace in these files prevents spurious fingerprint cache misses
+# when a developer adds/removes blank lines or trailing spaces in headers.
+_CPP_EXTENSIONS = frozenset({".h", ".hpp", ".cpp", ".c", ".cc", ".ino"})
+
+
+def _normalize_cpp_content(content: bytes) -> bytes:
+    """
+    Normalize C++ file content for whitespace-insensitive hashing.
+
+    Strips trailing whitespace from each line and normalizes line endings.
+    This prevents whitespace-only changes from invalidating the fingerprint cache,
+    avoiding full rebuilds (4+ minutes) when only cosmetic edits were made.
+
+    Safe for C++ because trailing whitespace and blank lines have no effect on
+    compiled binary output. The only exception would be __LINE__ usage, but
+    we only strip *trailing* whitespace (not leading indentation or blank lines
+    within code), preserving line count.
+    """
+    # Normalize line endings to LF
+    normalized = content.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    # Strip trailing whitespace from each line (preserves indentation and line count)
+    lines = normalized.split(b"\n")
+    stripped = [line.rstrip() for line in lines]
+    # Remove trailing blank lines at end of file
+    while stripped and not stripped[-1]:
+        stripped.pop()
+    return b"\n".join(stripped)
+
+
+@functools.lru_cache(maxsize=32)
+def _hash_directory(start_directory: Path, glob: str) -> str:
+    """
+    Compute SHA-256 hash of directory contents. Cached per process invocation to
+    avoid redundant file I/O when multiple fingerprint checks scan the same directory
+    (e.g., src/ is read by check_all, check_cpp, check_examples, and check_wasm).
+
+    For C++ files (.h, .hpp, .cpp, .c, .cc, .ino), whitespace is normalized before
+    hashing so that trailing-whitespace-only or blank-line-only changes don't trigger
+    cache invalidation and unnecessary full rebuilds.
+
+    Raises exceptions on failure so lru_cache does not cache error results.
+    """
+    hasher = hashlib.sha256()
+    patterns = glob.split(",")
+
+    # Get all matching files
+    all_files: list[Path] = []
+    for pattern in patterns:
+        all_files.extend(sorted(start_directory.glob(pattern.strip())))
+
+    # Sort files for consistent ordering
+    all_files.sort()
+
+    # Process each file
+    for file_path in all_files:
+        if file_path.is_file():
+            # Add the relative path to the hash
+            rel_path = file_path.relative_to(start_directory)
+            hasher.update(str(rel_path).encode("utf-8"))
+
+            # Add the file content to the hash
+            try:
+                if file_path.suffix.lower() in _CPP_EXTENSIONS:
+                    # For C++ files: normalize whitespace to avoid spurious cache misses
+                    # from cosmetic-only edits (trailing spaces, blank lines at end).
+                    # A full read is needed for normalization; C++ headers are small (<1MB).
+                    content = file_path.read_bytes()
+                    hasher.update(_normalize_cpp_content(content))
+                else:
+                    # Non-C++ files: hash raw content in chunks (whitespace may be significant)
+                    with open(file_path, "rb") as f:
+                        for chunk in iter(lambda: f.read(4096), b""):
+                            hasher.update(chunk)
+            except KeyboardInterrupt:
+                # Only notify main thread if we're in a worker thread
+                if threading.current_thread() != threading.main_thread():
+                    handle_keyboard_interrupt_properly()
+                raise
+            except Exception as e:
+                # If we can't read the file, include the error in the hash
+                hasher.update(f"ERROR:{str(e)}".encode("utf-8"))
+
+    return hasher.hexdigest()
+
+
 def fingerprint_code_base(
     start_directory: Path, glob: str = "**/*.h,**/*.cpp,**/*.hpp"
 ) -> FingerprintResult:
@@ -337,41 +424,7 @@ def fingerprint_code_base(
         A FingerprintResult with hash and optional status
     """
     try:
-        hasher = hashlib.sha256()
-        patterns = glob.split(",")
-
-        # Get all matching files
-        all_files: list[Path] = []
-        for pattern in patterns:
-            pattern = pattern.strip()
-            all_files.extend(sorted(start_directory.glob(pattern)))
-
-        # Sort files for consistent ordering
-        all_files.sort()
-
-        # Process each file
-        for file_path in all_files:
-            if file_path.is_file():
-                # Add the relative path to the hash
-                rel_path = file_path.relative_to(start_directory)
-                hasher.update(str(rel_path).encode("utf-8"))
-
-                # Add the file content to the hash
-                try:
-                    with open(file_path, "rb") as f:
-                        # Read in chunks to handle large files
-                        for chunk in iter(lambda: f.read(4096), b""):
-                            hasher.update(chunk)
-                except KeyboardInterrupt:
-                    # Only notify main thread if we're in a worker thread
-                    if threading.current_thread() != threading.main_thread():
-                        handle_keyboard_interrupt_properly()
-                    raise
-                except Exception as e:
-                    # If we can't read the file, include the error in the hash
-                    hasher.update(f"ERROR:{str(e)}".encode("utf-8"))
-
-        return FingerprintResult(hash=hasher.hexdigest())
+        return FingerprintResult(hash=_hash_directory(start_directory, glob))
     except KeyboardInterrupt:
         # Only notify main thread if we're in a worker thread
         if threading.current_thread() != threading.main_thread():

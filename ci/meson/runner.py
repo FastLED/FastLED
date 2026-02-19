@@ -17,6 +17,7 @@ from ci.meson.build_config import (
     perform_ninja_maintenance,
     setup_meson_build,
 )
+from ci.meson.build_optimizer import make_build_optimizer
 from ci.meson.compile import (
     CompileResult,
     _is_compilation_error,
@@ -338,6 +339,11 @@ def run_meson_build_and_test(
     # for parallel compilation + execution
     use_streaming = not meson_test_name
 
+    # Create build optimizer for DLL relink suppression via binary fingerprinting.
+    # Only used in streaming mode (all-tests run), where the 328-DLL relink cascade
+    # from sccache mtime updates causes the biggest performance penalty.
+    build_optimizer = make_build_optimizer(build_dir) if use_streaming else None
+
     try:
         with libfastled_build_lock(timeout=600):  # 10 minute timeout
             if use_streaming:
@@ -446,6 +452,7 @@ def run_meson_build_and_test(
                     target=None,  # Build all default test targets (unit tests)
                     verbose=verbose,
                     compile_timeout=compile_timeout,
+                    build_optimizer=build_optimizer,
                 )
 
                 # SELF-HEALING: If compilation failed due to stale build state,
@@ -468,6 +475,7 @@ def run_meson_build_and_test(
                             target=None,
                             verbose=verbose,
                             compile_timeout=compile_timeout,
+                            build_optimizer=build_optimizer,
                         )
 
                 # Run streaming compilation and testing for EXAMPLES
@@ -484,6 +492,7 @@ def run_meson_build_and_test(
                     target="examples-host",  # Build examples explicitly
                     verbose=verbose,
                     compile_timeout=compile_timeout,
+                    build_optimizer=build_optimizer,
                 )
 
                 # SELF-HEALING: If examples compilation failed due to stale build state,
@@ -506,12 +515,18 @@ def run_meson_build_and_test(
                             target="examples-host",
                             verbose=verbose,
                             compile_timeout=compile_timeout,
+                            build_optimizer=build_optimizer,
                         )
 
                 # Combine results
                 overall_success = overall_success_tests and overall_success_examples
                 num_passed = num_passed_tests + num_passed_examples
                 num_failed = num_failed_tests + num_failed_examples
+
+                # Save binary fingerprints of libfastled.a and all DLLs after a
+                # successful build so future runs can suppress unnecessary relinking.
+                if overall_success and build_optimizer is not None:
+                    build_optimizer.save_fingerprints(build_dir)
 
                 duration = time.time() - start_time
                 num_tests_run = num_passed + num_failed

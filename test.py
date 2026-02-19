@@ -185,11 +185,22 @@ def main() -> None:
         fingerprint_manager = FingerprintManager(cache_dir, build_mode=build_mode)
 
         # Calculate fingerprints
-        src_code_change = fingerprint_manager.check_all()
-        cpp_test_change = fingerprint_manager.check_cpp(args)
-        examples_change = fingerprint_manager.check_examples(args)
-        python_test_change = fingerprint_manager.check_python()
-        wasm_change = fingerprint_manager.check_wasm()
+        # OPTIMIZATION: When --no-fingerprint is set, skip computing fingerprints entirely.
+        # Fingerprint computation reads all source files and hashes them (~2-3s on typical
+        # machines). When --no-fingerprint is used, these values are ignored anyway because
+        # rebuild_mode forces all change flags to True. Skipping saves ~2-3s per invocation.
+        if args.no_fingerprint:
+            src_code_change = True
+            cpp_test_change = True
+            examples_change = True
+            python_test_change = True
+            wasm_change = True
+        else:
+            src_code_change = fingerprint_manager.check_all()
+            cpp_test_change = fingerprint_manager.check_cpp(args)
+            examples_change = fingerprint_manager.check_examples(args)
+            python_test_change = fingerprint_manager.check_python()
+            wasm_change = fingerprint_manager.check_wasm()
 
         # Handle --docker flag: run tests in Docker container
         if args.docker:

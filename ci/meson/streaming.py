@@ -11,6 +11,7 @@ from typing import Callable, Optional
 
 from running_process import RunningProcess
 
+from ci.meson.build_optimizer import BuildOptimizer
 from ci.meson.compile import _create_error_context_filter, _is_compilation_error
 from ci.meson.compiler import get_meson_executable
 from ci.meson.output import _print_banner, _print_error, _print_success
@@ -28,6 +29,7 @@ def stream_compile_and_run_tests(
     target: Optional[str] = None,
     verbose: bool = False,
     compile_timeout: int = 600,
+    build_optimizer: Optional[BuildOptimizer] = None,
 ) -> tuple[bool, int, int, str]:
     """
     Stream test compilation and execution in parallel.
@@ -42,6 +44,9 @@ def stream_compile_and_run_tests(
         target: Specific target to build (None = all)
         verbose: Show detailed progress messages (default: False)
         compile_timeout: Timeout in seconds for compilation (default: 600)
+        build_optimizer: Optional BuildOptimizer for DLL relink suppression.
+                        When provided, touches DLL files after libfastled.a is
+                        archived (if content unchanged) so ninja skips relinking.
 
     Returns:
         Tuple of (overall_success, num_passed, num_failed, compile_output)
@@ -196,6 +201,29 @@ def stream_compile_and_run_tests(
                             # Track which libraries we've seen for cache status reporting
                             if "libfastled" in stripped:
                                 seen_libfastled = True
+                                # Binary fingerprint optimization: libfastled.a just finished
+                                # archiving. If its content matches saved fingerprint, touch
+                                # all DLLs now so ninja sees them as newer → skips relinking.
+                                if build_optimizer is not None:
+                                    _opt = build_optimizer
+                                    _bdir = build_dir
+
+                                    def _touch_dlls_bg() -> None:
+                                        touched = _opt.touch_dlls_if_lib_unchanged(
+                                            _bdir
+                                        )
+                                        if touched > 0:
+                                            _ts_print(
+                                                f"[BUILD] ⚡ Suppressed {touched} DLL relinks"
+                                                f" (libfastled.a content unchanged)"
+                                            )
+
+                                    threading.Thread(
+                                        target=_touch_dlls_bg,
+                                        daemon=True,
+                                        name="DllTouch",
+                                    ).start()
+
                             if "libplatforms_shared" in stripped:
                                 seen_libplatforms_shared = True
                             if "libcrash_handler" in stripped:
