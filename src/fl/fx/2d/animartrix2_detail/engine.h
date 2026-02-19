@@ -5,7 +5,6 @@
 // and included independently by chasing_spirals implementations.
 
 #include "crgb.h"
-#include "fl/fx/2d/animartrix2_detail/chasing_spiral_state.h"
 #include "fl/fx/2d/animartrix2_detail/context.h"
 #include "fl/fx/2d/animartrix2_detail/core_types.h"
 #include "fl/fx/2d/animartrix2_detail/engine_core.h"
@@ -50,10 +49,6 @@ struct Engine {
     float show0 = 0.0f;
 
     fl::optional<fl::u32> currentTime;
-
-    // Persistent per-animation cache for Chasing Spirals (SoA geometry + fade LUT).
-    // Allocated lazily on first frame; deleted in destructor.
-    ChasingSpiralState *mChasingSpiralState = nullptr;
 
     Engine(Context *ctx) : mCtx(ctx) {}
     ~Engine();
@@ -129,9 +124,7 @@ struct Engine {
     }
 };
 
-inline Engine::~Engine() {
-    delete mChasingSpiralState;
-}
+inline Engine::~Engine() = default;
 
 inline Context::~Context() {
     delete mEngine;

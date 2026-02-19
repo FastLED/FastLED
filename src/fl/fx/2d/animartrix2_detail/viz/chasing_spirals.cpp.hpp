@@ -9,17 +9,19 @@
 //   fade_lut[257]  (FL_ALIGNAS(16) for aligned Perlin LUT loads)
 //
 // SIMD inner loop (simd4_processChannel, 4 pixels per batch):
-//   SoA load (load_u32_4)              ← was: AoS gather [Boundary 1 — GONE]
+//   [BOUNDARY A] SoA aligned load (load_u32_4_aligned + FL_ASSUME_ALIGNED)  ← FL_ALIGNAS(16) global + allocator guarantee
 //   Q16.16 → A24 (mulhi_su32_4)
 //   sincos32_simd                      ← fully SIMD (unchanged)
-//   Perlin coords (mulhi32_i32_4 << 1) ← was: unpack→scalar i64 [Boundary 3 — GONE]
-//   store nx/ny to 4×i32 stack arrays
+//   Perlin coords (mulhi32_i32_4 << 1) ← fully SIMD (no scalar round-trip)
+//   [BOUNDARY B] store_u32_4 nx/ny → FL_ALIGNAS(16) stack arrays
+//   [BOUNDARY C] load_u32_4 ← same stack arrays (re-pack inside perlin callee)
+//   [BOUNDARY D] store_u32_4 X/Y/x_frac/y_frac → scalar (SSE2: no integer gather)
 //   Permutation table (scalar)         ← fundamental SSE2 limit, unavoidable
 //   Fade LUT + lerp tree (scalar)      ← exact-match tests forbid vectorization
-//   load result into SIMD
-//   Clamp [0,FP_ONE] + scale ×255      ← was: scalar loop [Boundary 4b — GONE]
-//   Radial filter (mulhi32_i32_4)      ← was: AoS gather + scalar [Boundary 6 — GONE]
-//   extract_u32_4 × 4 + scatter        ← pixel_idx scatter remains scalar
+//   [BOUNDARY E] load_u32_4 ← FL_ALIGNAS(16) out[4] (re-pack result into SIMD)
+//   Clamp [0,FP_ONE] + scale ×255      ← fully SIMD
+//   Radial filter (mulhi32_i32_4)      ← fully SIMD
+//   [BOUNDARY F] extract_u32_4 × 4 + scatter ← pixel_idx scatter, unavoidable
 //
 // Precision: mulhi32_i32_4(cos_Q31, dist_Q16) << 1 loses bit 31 of the product
 //   — at most ±1 ULP in Q16.16 coordinate space ≈ 1/65536 of the Perlin period.
@@ -120,12 +122,23 @@ simd::simd_u32x4 simd4_processChannel(
     simd::simd_u32x4 ny_vec  = simd::sub_i32_4(cy_vec,
         simd::sll_u32_4(simd::mulhi32_i32_4(sc.sin_vals, dist_vec), 1));
 
-    // Store to aligned stack arrays for permutation table lookup (no SSE2 gather)
+    // ── [BOUNDARY B: SIMD → aligned stack store] ──────────────────────────────
+    // nx_vec/ny_vec hold the Perlin coordinates as SIMD registers but
+    // pnoise2d_raw_simd4_vec() requires plain scalar arrays (its permutation
+    // table and fade LUT paths need random-access indexing, not vector ops).
+    // We store to FL_ALIGNAS(16) stack arrays so the callee can reload with an
+    // aligned load (avoiding a potential penalty vs. unaligned load).
+    // This is an inherent boundary: no SSE2 integer gather instruction exists.
     FL_ALIGNAS(16) i32 nx[4], ny[4];
     simd::store_u32_4(reinterpret_cast<u32*>(nx), nx_vec); // ok reinterpret cast
     simd::store_u32_4(reinterpret_cast<u32*>(ny), ny_vec); // ok reinterpret cast
+    // ── [end BOUNDARY B] ──────────────────────────────────────────────────────
 
     // Perlin noise — exact scalar lerp tree (preserves scalar==SIMD test invariant)
+    // [BOUNDARY C is the re-pack at the start of pnoise2d_raw_simd4_vec: the
+    //  callee reloads nx/ny from the stack arrays back into SIMD registers for
+    //  the coordinate arithmetic (floor, frac, wrap-to-255) before unpacking
+    //  again for the permutation table. See perlin_s16x16_simd.cpp.hpp.]
     simd::simd_u32x4 raw_vec = perlin_s16x16_simd::pnoise2d_raw_simd4_vec(
         nx, ny, fade_lut, perm);
 
@@ -193,11 +206,14 @@ FrameSetup setupChasingSpiralFrame(Context &ctx) {
     constexpr FP three_fp(3.0f);
     constexpr FP one(1.0f);
 
-    // Allocate per-animation state lazily
-    if (!e->mChasingSpiralState) {
-        e->mChasingSpiralState = new ChasingSpiralState();
-    }
-    ChasingSpiralState *state = e->mChasingSpiralState;
+    // Module-level global: single-threaded, one active Chasing Spirals instance.
+    // FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS suppresses the Clang warning that
+    // fires when a global has a non-trivial constructor (fl::vector members).
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
+    static ChasingSpiralState g_chasing_spiral_state;
+    FL_DISABLE_WARNING_POP
+    ChasingSpiralState *state = &g_chasing_spiral_state;
 
     // Build per-pixel SoA geometry (once when grid size changes)
     if (state->count != total_pixels) {
@@ -422,12 +438,20 @@ void Chasing_Spirals_Q31_SIMD(Context &ctx) {
     // SIMD Pixel Pipeline (4-wide batches)
     int i = 0;
     for (; i + 3 < total_pixels; i += 4) {
-        // Direct SIMD load from SoA arrays (no AoS gather)
-        simd::simd_u32x4 base_vec    = simd::load_u32_4(reinterpret_cast<const u32*>(base_angle  + i)); // ok reinterpret cast
-        simd::simd_u32x4 dist_vec    = simd::load_u32_4(reinterpret_cast<const u32*>(dist_scaled + i)); // ok reinterpret cast
-        simd::simd_u32x4 rf3_vec     = simd::load_u32_4(reinterpret_cast<const u32*>(rf3_arr     + i)); // ok reinterpret cast
-        simd::simd_u32x4 rf_half_vec = simd::load_u32_4(reinterpret_cast<const u32*>(rf_half_arr + i)); // ok reinterpret cast
-        simd::simd_u32x4 rf_qtr_vec  = simd::load_u32_4(reinterpret_cast<const u32*>(rf_qtr_arr  + i)); // ok reinterpret cast
+        // ── [BOUNDARY A: aligned array → SIMD load] ───────────────────────────
+        // The SoA arrays live in g_chasing_spiral_state, a FL_ALIGNAS(16) global
+        // struct. fl::vector's heap allocator provides >= 16-byte alignment on all
+        // SIMD-capable platforms (x86-64, ARM64, ESP-IDF) for allocations >= 16 B.
+        // FL_ASSUME_ALIGNED asserts this guarantee to the compiler so it can emit
+        // _mm_load_si128 (aligned) rather than _mm_loadu_si128 (unaligned).
+        // i is always a multiple of 4 here (loop stride=4, sizeof(i32)=4 bytes),
+        // so ptr+i is also 16-byte aligned when ptr is 16-byte aligned.
+        simd::simd_u32x4 base_vec    = simd::load_u32_4_aligned(FL_ASSUME_ALIGNED(reinterpret_cast<const u32*>(base_angle  + i), 16)); // ok reinterpret cast
+        simd::simd_u32x4 dist_vec    = simd::load_u32_4_aligned(FL_ASSUME_ALIGNED(reinterpret_cast<const u32*>(dist_scaled + i), 16)); // ok reinterpret cast
+        simd::simd_u32x4 rf3_vec     = simd::load_u32_4_aligned(FL_ASSUME_ALIGNED(reinterpret_cast<const u32*>(rf3_arr     + i), 16)); // ok reinterpret cast
+        simd::simd_u32x4 rf_half_vec = simd::load_u32_4_aligned(FL_ASSUME_ALIGNED(reinterpret_cast<const u32*>(rf_half_arr + i), 16)); // ok reinterpret cast
+        simd::simd_u32x4 rf_qtr_vec  = simd::load_u32_4_aligned(FL_ASSUME_ALIGNED(reinterpret_cast<const u32*>(rf_qtr_arr  + i), 16)); // ok reinterpret cast
+        // ── [end BOUNDARY A] ──────────────────────────────────────────────────
 
         simd::simd_u32x4 r_vec = simd4_processChannel(
             base_vec, dist_vec, rad0_raw, lin0_raw, fade_lut, perm, cx_raw, cy_raw, rf3_vec);
@@ -436,6 +460,12 @@ void Chasing_Spirals_Q31_SIMD(Context &ctx) {
         simd::simd_u32x4 b_vec = simd4_processChannel(
             base_vec, dist_vec, rad2_raw, lin2_raw, fade_lut, perm, cx_raw, cy_raw, rf_qtr_vec);
 
+        // ── [BOUNDARY F: SIMD extract → scalar scatter] ───────────────────────
+        // pixel_idx[] holds arbitrary xyMap-remapped LED indices, so there is no
+        // contiguous destination address for a SIMD store. We extract each lane
+        // individually (4 extract_u32_4 calls per channel, 12 total) and scatter
+        // to the LED array. This is an unavoidable boundary: non-sequential writes
+        // cannot be vectorized without AVX-512 scatter instructions.
         leds[pixel_idx[i+0]] = CRGB(
             static_cast<u8>(simd::extract_u32_4(r_vec, 0)),
             static_cast<u8>(simd::extract_u32_4(g_vec, 0)),
@@ -452,6 +482,7 @@ void Chasing_Spirals_Q31_SIMD(Context &ctx) {
             static_cast<u8>(simd::extract_u32_4(r_vec, 3)),
             static_cast<u8>(simd::extract_u32_4(g_vec, 3)),
             static_cast<u8>(simd::extract_u32_4(b_vec, 3)));
+        // ── [end BOUNDARY F] ──────────────────────────────────────────────────
     }
 
     // Scalar fallback for remaining pixels (when total_pixels % 4 != 0)

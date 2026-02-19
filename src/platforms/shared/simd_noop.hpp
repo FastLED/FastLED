@@ -64,6 +64,17 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 load_u32_4(const u32* ptr) noexcept {
     return result;
 }
 
+/// Aligned load scalar fallback: element-by-element reads don't care about alignment,
+/// but FL_ASSUME_ALIGNED propagates the alignment hint to surrounding loop code.
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 load_u32_4_aligned(const u32* ptr) noexcept {
+    const u32* p = FL_ASSUME_ALIGNED(ptr, 16);
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        result.data[i] = p[i];
+    }
+    return result;
+}
+
 FASTLED_FORCE_INLINE FL_IRAM void store_u32_4(u32* ptr, simd_u32x4 vec) noexcept {
     for (int i = 0; i < 4; ++i) {
         ptr[i] = vec.data[i];

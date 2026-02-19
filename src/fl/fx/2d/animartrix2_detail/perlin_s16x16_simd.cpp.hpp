@@ -16,14 +16,17 @@ void perlin_s16x16_simd::pnoise2d_raw_simd4(
     const fl::i32 *fade_lut, const fl::u8 *perm,
     fl::i32 out[4])
 {
-    // ── [PACK flat arrays → SIMD register] ───────────────────────────────────
-    // nx[4] and ny[4] arrive as plain scalar arrays (filled by the caller's
-    // simd4_computePerlinCoords, which itself received values unpacked from the
-    // sincos32_simd SIMD register). We re-load them into SIMD here via
-    // load_u32_4() (unaligned 128-bit load). The reinterpret_cast<u32*> is safe:
-    // i32 and u32 share identical bit width and representation on all targets.
+    // ── [BOUNDARY C: scalar array → SIMD re-pack] ────────────────────────────
+    // nx[4] and ny[4] arrive as plain scalar arrays (stored by the caller at
+    // BOUNDARY B via store_u32_4 into FL_ALIGNAS(16) stack arrays).  We
+    // re-load them into SIMD registers here so that the coordinate arithmetic
+    // below (floor, fractional extract, wrap-to-255) can stay vectorized.
+    // The caller aligned the arrays to 16 bytes, but the function signature
+    // `const i32 nx[4]` carries no alignment annotation, so load_u32_4 uses
+    // an unaligned load path to be safe on all call sites.
     fl::simd::simd_u32x4 nx_vec = fl::simd::load_u32_4(reinterpret_cast<const fl::u32*>(nx)); // ok reinterpret cast
     fl::simd::simd_u32x4 ny_vec = fl::simd::load_u32_4(reinterpret_cast<const fl::u32*>(ny)); // ok reinterpret cast
+    // ── [end BOUNDARY C] ──────────────────────────────────────────────────────
 
     // SIMD: Extract integer floor (shift right by FP_BITS)
     fl::simd::simd_u32x4 X_vec = fl::simd::srl_u32_4(nx_vec, FP_BITS);
@@ -45,18 +48,20 @@ void perlin_s16x16_simd::pnoise2d_raw_simd4(
     Y_vec = fl::simd::and_u32_4(Y_vec, mask_255);
     // ── [end SIMD coordinate arithmetic] ──────────────────────────────────────
 
-    // ── [UNPACK SIMD register → flat arrays] ──────────────────────────────────
-    // The permutation table (perm[]) and fade LUT require random-access scalar
-    // indexing — SSE2 has no gather instruction (that requires AVX2). We extract
-    // all 4 processed coordinates back to scalar arrays here so that the
-    // subsequent scalar loops can index the tables with ordinary C array syntax.
+    // ── [BOUNDARY D: SIMD unpack → scalar arrays for gather] ─────────────────
+    // The processed coordinates (integer floor X/Y, fractional x_frac/y_frac)
+    // are needed as scalar indices into perm[] and fade_lut[] via random-access
+    // lookups.  SSE2 has no integer gather instruction (that requires AVX2), so
+    // we must exit SIMD here. All 4 sets of coordinates are stored to stack
+    // arrays and the rest of the Perlin evaluation runs as scalar loops.
+    // This is the primary scalar bottleneck in the SIMD path.
     fl::u32 X[4], Y[4];
     fl::i32 x_frac[4], y_frac[4];
     fl::simd::store_u32_4(X, X_vec);
     fl::simd::store_u32_4(Y, Y_vec);
     fl::simd::store_u32_4(reinterpret_cast<fl::u32*>(x_frac), x_frac_vec); // ok reinterpret cast
     fl::simd::store_u32_4(reinterpret_cast<fl::u32*>(y_frac), y_frac_vec); // ok reinterpret cast
-    // ── [end UNPACK ← SIMD] ───────────────────────────────────────────────────
+    // ── [end BOUNDARY D] ──────────────────────────────────────────────────────
 
     // SCALAR: Fade LUT lookups (requires gather, not available on SSE2)
     fl::i32 u[4], v[4];
@@ -99,9 +104,17 @@ fl::simd::simd_u32x4 perlin_s16x16_simd::pnoise2d_raw_simd4_vec(
     const fl::i32 nx[4], const fl::i32 ny[4],
     const fl::i32 *fade_lut, const fl::u8 *perm)
 {
+    // ── [BOUNDARY E: scalar output → aligned SIMD re-pack] ───────────────────
+    // pnoise2d_raw_simd4 computes results into a plain scalar array (out[4])
+    // because the lerp tree and gradient lookups are scalar (see BOUNDARY D).
+    // We declare out[] as FL_ALIGNAS(16) so the load below uses an aligned
+    // 128-bit load, then return the register so the caller (simd4_processChannel)
+    // can continue the pipeline (clamp, scale×255, radial filter) fully in SIMD
+    // without re-entering scalar code.
     FL_ALIGNAS(16) fl::i32 out[4];
     pnoise2d_raw_simd4(nx, ny, fade_lut, perm, out);
     return fl::simd::load_u32_4(reinterpret_cast<const fl::u32*>(out)); // ok reinterpret cast
+    // ── [end BOUNDARY E] ──────────────────────────────────────────────────────
 }
 
 }  // namespace fl

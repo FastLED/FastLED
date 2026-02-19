@@ -64,6 +64,12 @@ using platforms::store_u8_16;
 /// @return SIMD register containing 4 uint32_t values
 using platforms::load_u32_4;
 
+/// Load 4 uint32_t values from 16-byte aligned memory into a SIMD register.
+/// Uses _mm_load_si128 on SSE2 (faster than loadu on older cores).
+/// @param ptr Source pointer — MUST be 16-byte aligned (assert with FL_ASSUME_ALIGNED)
+/// @return SIMD register containing 4 uint32_t values
+using platforms::load_u32_4_aligned;
+
 /// Store 4 uint32_t values from SIMD register to memory
 /// @param ptr Destination pointer (unaligned access supported)
 /// @param vec SIMD register containing 4 uint32_t values
