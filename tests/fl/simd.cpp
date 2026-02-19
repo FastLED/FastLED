@@ -5,6 +5,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/fixed_point/s0x32x4.h"
 #include "fl/fixed_point/s16x16x4.h"
+#include "fl/numeric_limits.h"
 #include "test.h"
 
 using namespace fl;
@@ -814,6 +815,111 @@ FL_TEST_CASE("struct with SIMD member alignment") {
         FL_REQUIRE(reinterpret_cast<uintptr_t>(&s) % 16 == 0);
         FL_REQUIRE(reinterpret_cast<uintptr_t>(&s.a) % 16 == 0);
         FL_REQUIRE(reinterpret_cast<uintptr_t>(&s.b) % 16 == 0);
+    }
+}
+
+FL_TEST_CASE("or_u32_4 computes bitwise OR") {
+    uint32_t a[4] = {0x0F0F0F0F, 0xF0F0F0F0, 0x00FF00FF, 0xFF00FF00};
+    uint32_t b[4] = {0xF0F0F0F0, 0x0F0F0F0F, 0xFF00FF00, 0x00FF00FF};
+    uint32_t dst[4];
+
+    auto va = simd::load_u32_4(a);
+    auto vb = simd::load_u32_4(b);
+    auto result = simd::or_u32_4(va, vb);
+    simd::store_u32_4(dst, result);
+
+    for (int i = 0; i < 4; ++i) {
+        FL_REQUIRE_EQ(dst[i], a[i] | b[i]);
+    }
+}
+
+FL_TEST_CASE("min_i32_4 computes signed minimum") {
+    auto scalar_min = [](int32_t a, int32_t b) -> int32_t { return a < b ? a : b; };
+
+    int32_t a_vals[4] = {10, -10, fl::numeric_limits<int32_t>::min(), 0};
+    int32_t b_vals[4] = {-5,  -5, fl::numeric_limits<int32_t>::max(), 0};
+    int32_t expected[4];
+    for (int i = 0; i < 4; ++i) {
+        expected[i] = scalar_min(a_vals[i], b_vals[i]);
+    }
+
+    auto va = simd::load_u32_4(reinterpret_cast<uint32_t*>(a_vals));
+    auto vb = simd::load_u32_4(reinterpret_cast<uint32_t*>(b_vals));
+    auto result = simd::min_i32_4(va, vb);
+
+    int32_t dst[4];
+    simd::store_u32_4(reinterpret_cast<uint32_t*>(dst), result);
+
+    for (int i = 0; i < 4; ++i) {
+        FL_REQUIRE_EQ(dst[i], expected[i]);
+    }
+}
+
+FL_TEST_CASE("max_i32_4 computes signed maximum") {
+    auto scalar_max = [](int32_t a, int32_t b) -> int32_t { return a > b ? a : b; };
+
+    int32_t a_vals[4] = {10, -10, fl::numeric_limits<int32_t>::min(), 0};
+    int32_t b_vals[4] = {-5,  -5, fl::numeric_limits<int32_t>::max(), 0};
+    int32_t expected[4];
+    for (int i = 0; i < 4; ++i) {
+        expected[i] = scalar_max(a_vals[i], b_vals[i]);
+    }
+
+    auto va = simd::load_u32_4(reinterpret_cast<uint32_t*>(a_vals));
+    auto vb = simd::load_u32_4(reinterpret_cast<uint32_t*>(b_vals));
+    auto result = simd::max_i32_4(va, vb);
+
+    int32_t dst[4];
+    simd::store_u32_4(reinterpret_cast<uint32_t*>(dst), result);
+
+    for (int i = 0; i < 4; ++i) {
+        FL_REQUIRE_EQ(dst[i], expected[i]);
+    }
+}
+
+FL_TEST_CASE("mulhi32_i32_4 comprehensive signed test") {
+    // Scalar reference: ((i64)a * (i64)b) >> 32
+    auto scalar_mulhi32 = [](int32_t a, int32_t b) -> int32_t {
+        int64_t prod = static_cast<int64_t>(a) * static_cast<int64_t>(b);
+        return static_cast<int32_t>(prod >> 32);
+    };
+
+    struct TestCase {
+        int32_t a[4];
+        int32_t b[4];
+    };
+
+    TestCase cases[] = {
+        // pos × pos
+        {{0x40000000, 0x7FFFFFFF, 0x00010000, 0x00FF0000},
+         {0x40000000, 0x7FFFFFFF, 0x00020000, 0x00FF0000}},
+        // neg × pos
+        {{-0x40000000, -1, -0x00010000, fl::numeric_limits<int32_t>::min()},
+         { 0x40000000,  1,  0x00020000,  0x7FFFFFFF}},
+        // neg × neg
+        {{-0x40000000, -0x7FFFFFFF, -1, -1},
+         {-0x40000000, -0x7FFFFFFF, -1,  1}},
+        // zero / identity
+        {{0, 0x40000000, -0x40000000, 1},
+         {0x7FFFFFFF, 0, 0, 0x40000000}},
+    };
+
+    for (const auto& tc : cases) {
+        int32_t expected[4];
+        for (int i = 0; i < 4; ++i) {
+            expected[i] = scalar_mulhi32(tc.a[i], tc.b[i]);
+        }
+
+        auto va = simd::load_u32_4(reinterpret_cast<const uint32_t*>(tc.a));
+        auto vb = simd::load_u32_4(reinterpret_cast<const uint32_t*>(tc.b));
+        auto result = simd::mulhi32_i32_4(va, vb);
+
+        int32_t simd_result[4];
+        simd::store_u32_4(reinterpret_cast<uint32_t*>(simd_result), result);
+
+        for (int i = 0; i < 4; ++i) {
+            FL_REQUIRE_EQ(simd_result[i], expected[i]);
+        }
     }
 }
 

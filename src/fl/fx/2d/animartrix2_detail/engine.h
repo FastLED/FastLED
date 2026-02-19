@@ -5,7 +5,7 @@
 // and included independently by chasing_spirals implementations.
 
 #include "crgb.h"
-#include "fl/fx/2d/animartrix2_detail/chasing_spiral_pixel_lut.h"
+#include "fl/fx/2d/animartrix2_detail/chasing_spiral_state.h"
 #include "fl/fx/2d/animartrix2_detail/context.h"
 #include "fl/fx/2d/animartrix2_detail/core_types.h"
 #include "fl/fx/2d/animartrix2_detail/engine_core.h"
@@ -51,18 +51,12 @@ struct Engine {
 
     fl::optional<fl::u32> currentTime;
 
-    // Persistent PixelLUT for Chasing_Spirals_Q31.
-    // Depends only on grid geometry (polar_theta, distance, radial_filter_radius),
-    // which is constant across frames. Computed once on first use, reused every frame.
-    fl::vector<ChasingSpiralPixelLUT> mChasingSpiralLUT;
+    // Persistent per-animation cache for Chasing Spirals (SoA geometry + fade LUT).
+    // Allocated lazily on first frame; deleted in destructor.
+    ChasingSpiralState *mChasingSpiralState = nullptr;
 
-    // Persistent hp_fade LUT for Perlin noise (257 entries, Q8.24 format).
-    // Replaces 5 multiplies per hp_fade call with table lookup + lerp.
-    // Initialized on first use by q31::Chasing_Spirals_Q31.
-    fl::i32 mFadeLUT[257];
-    bool mFadeLUTInitialized;
-
-    Engine(Context *ctx) : mCtx(ctx), mFadeLUT{}, mFadeLUTInitialized(false) {}
+    Engine(Context *ctx) : mCtx(ctx) {}
+    ~Engine();
 
     void setTime(fl::u32 t) { currentTime = t; }
     fl::u32 getTime() { return currentTime.has_value() ? currentTime.value() : fl::millis(); }
@@ -134,6 +128,10 @@ struct Engine {
         return mCtx->xyMapFn(x, y, mCtx->xyMapUserData);
     }
 };
+
+inline Engine::~Engine() {
+    delete mChasingSpiralState;
+}
 
 inline Context::~Context() {
     delete mEngine;

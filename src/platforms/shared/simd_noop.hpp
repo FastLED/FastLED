@@ -367,6 +367,52 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 and_u32_4(simd_u32x4 a, simd_u32x4 b) no
     return result;
 }
 
+// Bitwise OR of two u32 vectors
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 or_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        result.data[i] = a.data[i] | b.data[i];
+    }
+    return result;
+}
+
+// Signed min of two i32 vectors
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 min_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        i32 ai = static_cast<i32>(a.data[i]);
+        i32 bi = static_cast<i32>(b.data[i]);
+        result.data[i] = static_cast<u32>(ai < bi ? ai : bi);
+    }
+    return result;
+}
+
+// Signed max of two i32 vectors
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 max_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        i32 ai = static_cast<i32>(a.data[i]);
+        i32 bi = static_cast<i32>(b.data[i]);
+        result.data[i] = static_cast<u32>(ai > bi ? ai : bi);
+    }
+    return result;
+}
+
+// Signed multiply high 32 bits: ((i64)a * (i64)b) >> 32
+// Classical "mulhi_epi32" — returns the high 32 bits of the 64-bit signed product.
+// Contrast with mulhi_i32_4 which returns >> 16 (Q16.16 arithmetic).
+// Used for (Q31 × Q16.16) >> 31 as: mulhi32_i32_4(a, b) << 1
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi32_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        i32 ai = static_cast<i32>(a.data[i]);
+        i32 bi = static_cast<i32>(b.data[i]);
+        i64 prod = static_cast<i64>(ai) * static_cast<i64>(bi);
+        result.data[i] = static_cast<u32>(static_cast<i32>(prod >> 32));
+    }
+    return result;
+}
+
 // Extract a single u32 lane from a SIMD vector
 FASTLED_FORCE_INLINE FL_IRAM u32 extract_u32_4(simd_u32x4 vec, int lane) noexcept {
     return vec.data[lane];

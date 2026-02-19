@@ -2,6 +2,7 @@
 #include "fl/fx/2d/animartrix.hpp"
 #include "fl/fx/2d/animartrix2.hpp"
 #include "crgb.h"
+#include "fl/numeric_limits.h"
 #include "test.h"
 #include "fl/xymap.h"
 
@@ -339,77 +340,79 @@ FL_TEST_CASE("Animartrix2 - CHASING_SPIRALS_1x1_DEBUG") {
 }
 
 FL_TEST_CASE("Animartrix2 - CHASING_SPIRALS") {
-    fl::cout << "\n=== Testing CHASING_SPIRALS Q31 (non-SIMD) ===" << fl::endl;
-
-    // Test Q31 non-SIMD variant
-    XYMap xy1 = XYMap::constructRectangularGrid(W, H);
-    XYMap xy2 = XYMap::constructRectangularGrid(W, H);
-
-    Animartrix fx_float(xy1, CHASING_SPIRALS);
+    // A/B comparison: float (Animartrix v1) vs Q31 and Q31_SIMD (Animartrix2).
+    // Both fixed-point variants must be within ±1 LSB of the float reference.
+    XYMap xy = XYMap::constructRectangularGrid(W, H);
+    Animartrix fx_float(xy, CHASING_SPIRALS);
     CRGB leds_float[N] = {};
     CRGB leds_q31[N] = {};
+    CRGB leds_q31_simd[N] = {};
 
     Fx::DrawContext ctx_float(1000, leds_float);
     fx_float.draw(ctx_float);
     renderChasingSpiralQ31(leds_q31, 1000);
-
-    int mismatches_q31 = compareLeds(leds_float, leds_q31, N, "CHASING_SPIRALS_Q31");
-    FL_MESSAGE("Q31 (non-SIMD): ", mismatches_q31, " mismatched pixels");
-
-    fl::cout << "\n=== Testing CHASING_SPIRALS Q31_SIMD ===" << fl::endl;
-
-    // Test Q31 SIMD variant
-    CRGB leds_q31_simd[N] = {};
     renderChasingSpiralQ31_SIMD(leds_q31_simd, 1000);
 
+    int mismatches_q31  = compareLeds(leds_float, leds_q31,      N, "CHASING_SPIRALS_Q31");
     int mismatches_simd = compareLeds(leds_float, leds_q31_simd, N, "CHASING_SPIRALS_Q31_SIMD");
-    FL_MESSAGE("Q31_SIMD: ", mismatches_simd, " mismatched pixels");
 
-    // DEBUG: Find first error pixel and compare
-    int first_error_pixel = -1;
-    for (int i = 0; i < N; i++) {
-        if (leds_q31_simd[i] != leds_float[i]) {
-            int simd_err = abs(leds_float[i].r - leds_q31_simd[i].r) +
-                          abs(leds_float[i].g - leds_q31_simd[i].g) +
-                          abs(leds_float[i].b - leds_q31_simd[i].b);
-            if (simd_err > 3) {  // Non-trivial error
-                first_error_pixel = i;
-                break;
-            }
-        }
+    FL_MESSAGE("Q31 (non-SIMD): ", mismatches_q31,  " pixels outside ±1 LSB / ", N);
+    FL_MESSAGE("Q31_SIMD:       ", mismatches_simd, " pixels outside ±1 LSB / ", N);
+
+    FL_CHECK_MESSAGE(mismatches_q31  == 0, "Q31 must be within ±1 LSB of float at t=1000");
+    FL_CHECK_MESSAGE(mismatches_simd == 0, "Q31_SIMD must be within ±1 LSB of float at t=1000");
+}
+
+FL_TEST_CASE("Animartrix2 - CHASING_SPIRALS_SIMD accuracy at multiple times") {
+    // Verify Q31_SIMD maintains low error vs float across low and high time values.
+    // Since both float and Q31 now apply fmodf(offset_x, 2560) period reduction,
+    // float32 precision is maintained at all time values including extreme uptimes.
+    // Previous max_err at t=2B was 10; after the fix it is ≤ 1.
+    const uint32_t times[] = {
+        1000,
+        1000000,
+        100000000,
+        2000000000,
+    };
+    const float avg_thresholds[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    const int   max_thresholds[] = {    6,    3,    3,    3 };
+
+    for (int ti = 0; ti < 4; ti++) {
+        uint32_t t = times[ti];
+        CRGB leds_float[N] = {};
+        CRGB leds_simd[N] = {};
+
+        renderChasingSpiralFloat(leds_float, t);
+        renderChasingSpiralQ31_SIMD(leds_simd, t);
+
+        float avg_err = computeAvgError(leds_float, leds_simd, N);
+        int   max_err = computeMaxError(leds_float, leds_simd, N);
+        float error_pct = avg_err / 255.0f * 100.0f;
+
+        FL_MESSAGE("Q31_SIMD t=", t, ": avg_err=", avg_err,
+                   " max_err=", max_err, " error_pct=", error_pct, "%");
+
+        FL_CHECK_MESSAGE(error_pct < avg_thresholds[ti],
+                         "Q31_SIMD avg error exceeded threshold");
+        FL_CHECK_MESSAGE(max_err <= max_thresholds[ti],
+                         "Q31_SIMD max error exceeded threshold");
     }
-
-    if (first_error_pixel >= 0) {
-        fl::cout << "\n=== First Error Pixel (" << first_error_pixel << ") Detailed Comparison ===" << fl::endl;
-        fl::cout << "Float:  RGB(" << (int)leds_float[first_error_pixel].r << "," << (int)leds_float[first_error_pixel].g << "," << (int)leds_float[first_error_pixel].b << ")" << fl::endl;
-        fl::cout << "Scalar: RGB(" << (int)leds_q31[first_error_pixel].r << "," << (int)leds_q31[first_error_pixel].g << "," << (int)leds_q31[first_error_pixel].b << ")" << fl::endl;
-        fl::cout << "SIMD:   RGB(" << (int)leds_q31_simd[first_error_pixel].r << "," << (int)leds_q31_simd[first_error_pixel].g << "," << (int)leds_q31_simd[first_error_pixel].b << ")" << fl::endl;
-        int scalar_diff = abs(leds_float[first_error_pixel].r - leds_q31[first_error_pixel].r) +
-                         abs(leds_float[first_error_pixel].g - leds_q31[first_error_pixel].g) +
-                         abs(leds_float[first_error_pixel].b - leds_q31[first_error_pixel].b);
-        int simd_diff = abs(leds_float[first_error_pixel].r - leds_q31_simd[first_error_pixel].r) +
-                       abs(leds_float[first_error_pixel].g - leds_q31_simd[first_error_pixel].g) +
-                       abs(leds_float[first_error_pixel].b - leds_q31_simd[first_error_pixel].b);
-        fl::cout << "Scalar total error: " << scalar_diff << fl::endl;
-        fl::cout << "SIMD total error: " << simd_diff << fl::endl;
-    }
-
-    // Report which variant is better
-    if (mismatches_q31 < mismatches_simd) {
-        fl::cout << "Q31 (non-SIMD) has fewer errors than Q31_SIMD" << fl::endl;
-    } else if (mismatches_simd < mismatches_q31) {
-        fl::cout << "Q31_SIMD has fewer errors than Q31 (non-SIMD)" << fl::endl;
-    } else {
-        fl::cout << "Both variants have the same error count" << fl::endl;
-    }
-
-    // For now, expect both to have some errors (investigation needed)
-    // TODO: Fix implementations to achieve LSB tolerance
 }
 FL_TEST_CASE("Animartrix2 - CHASING_SPIRALS_FLOAT bit-perfect") {
-    fl::cout << "\n=== Testing Chasing_Spirals_Float (v2) is bit-perfect with v1 ===" << fl::endl;
-
-    const uint32_t test_times[] = {1000, 5000, 100000, 1000000};
+    // Verify Chasing_Spirals_Float (animartrix2 v2) is bit-perfect with
+    // Chasing_Spirals (animartrix v1) at all times, including across the
+    // first period-reduction wrap (channel-0 wraps at t=2,560,000 ms).
+    // Both v1 and v2 apply the same fmodf(offset_x, 2560) fix, so they
+    // must produce identical output at all time values.
+    const uint32_t test_times[] = {
+        1000,
+        5000,
+        100000,
+        1000000,
+        2560000,   // channel-0 wrap boundary
+        2560001,   // just past the wrap
+        5120000,   // channel-0 second wrap
+    };
 
     for (uint32_t t : test_times) {
         CRGB leds_v1[N] = {};
@@ -432,6 +435,150 @@ FL_TEST_CASE("Animartrix2 - CHASING_SPIRALS_FLOAT bit-perfect") {
         FL_MESSAGE("t=", t, ": ", mismatches, " mismatched pixels / ", N);
         FL_CHECK_MESSAGE(mismatches == 0,
                       "Chasing_Spirals_Float (v2) must be bit-perfect with v1 float");
+    }
+}
+
+FL_TEST_CASE("Chasing_Spirals - period reduction: no jump at wrap boundary") {
+    // The fmodf(offset_x, kPerlinPeriod) reduction is mathematically equivalent to
+    // the unreduced value because Perlin noise is periodic with period 256 at
+    // integer coordinates, and scale_x=0.1 gives an effective period of
+    // 256/0.1 = 2560 for offset_x. This means:
+    //   render_value(offset_x) == render_value(offset_x + 2560)  (exactly)
+    //
+    // C0 continuity at the wrap: Perlin noise is always 0 at exact integer
+    // lattice points, so both sides of the wrap → 0 as delta_t → 0.
+    //
+    // Channel-0 wrap: move.linear[0] = t * 0.01 * 0.1 = t * 0.001
+    //   → wraps at t = 2560 / 0.001 = 2,560,000 ms (~43 min)
+    // Channel-1 wrap: t = 2560 / (0.01*0.13) ≈ 1,969,231 ms (~33 min)
+    // Channel-2 wrap: t = 2560 / (0.01*0.16) = 1,600,000 ms (~27 min)
+    //
+    // This test verifies that no pixel jump larger than a normal animation step
+    // occurs at the wrap boundary.
+
+    constexpr uint32_t dt = 50;  // 50 ms step on each side of wrap
+
+    // -- Channel 0 wrap (t = 2,560,000) --
+    {
+        constexpr uint32_t t_wrap = 2560000;
+        CRGB leds_pre[N] = {}, leds_post[N] = {};
+        renderChasingSpiralFloat(leds_pre,  t_wrap - dt);
+        renderChasingSpiralFloat(leds_post, t_wrap + dt);
+        int max_jump_wrap = computeMaxError(leds_pre, leds_post, N);
+
+        // Reference: same 2*dt window at a non-wrap point
+        CRGB leds_ref_a[N] = {}, leds_ref_b[N] = {};
+        renderChasingSpiralFloat(leds_ref_a, 500000);
+        renderChasingSpiralFloat(leds_ref_b, 500000 + 2 * dt);
+        int max_jump_ref = computeMaxError(leds_ref_a, leds_ref_b, N);
+
+        FL_MESSAGE("Ch0 wrap (2*dt=", 2*dt, "ms): jump=", max_jump_wrap,
+                   " ref=", max_jump_ref);
+        FL_CHECK_MESSAGE(max_jump_wrap <= max_jump_ref + 5,
+                         "Channel-0 wrap produces no larger jump than a normal step");
+    }
+
+    // -- Channel 1 wrap (t ≈ 1,969,232) --
+    {
+        constexpr uint32_t t_wrap = 1969232;
+        CRGB leds_pre[N] = {}, leds_post[N] = {};
+        renderChasingSpiralFloat(leds_pre,  t_wrap - dt);
+        renderChasingSpiralFloat(leds_post, t_wrap + dt);
+        int max_jump_wrap = computeMaxError(leds_pre, leds_post, N);
+
+        CRGB leds_ref_a[N] = {}, leds_ref_b[N] = {};
+        renderChasingSpiralFloat(leds_ref_a, 500000);
+        renderChasingSpiralFloat(leds_ref_b, 500000 + 2 * dt);
+        int max_jump_ref = computeMaxError(leds_ref_a, leds_ref_b, N);
+
+        FL_MESSAGE("Ch1 wrap (2*dt=", 2*dt, "ms): jump=", max_jump_wrap,
+                   " ref=", max_jump_ref);
+        FL_CHECK_MESSAGE(max_jump_wrap <= max_jump_ref + 5,
+                         "Channel-1 wrap produces no larger jump than a normal step");
+    }
+
+    // -- Channel 2 wrap (t = 1,600,000) --
+    {
+        constexpr uint32_t t_wrap = 1600000;
+        CRGB leds_pre[N] = {}, leds_post[N] = {};
+        renderChasingSpiralFloat(leds_pre,  t_wrap - dt);
+        renderChasingSpiralFloat(leds_post, t_wrap + dt);
+        int max_jump_wrap = computeMaxError(leds_pre, leds_post, N);
+
+        CRGB leds_ref_a[N] = {}, leds_ref_b[N] = {};
+        renderChasingSpiralFloat(leds_ref_a, 500000);
+        renderChasingSpiralFloat(leds_ref_b, 500000 + 2 * dt);
+        int max_jump_ref = computeMaxError(leds_ref_a, leds_ref_b, N);
+
+        FL_MESSAGE("Ch2 wrap (2*dt=", 2*dt, "ms): jump=", max_jump_wrap,
+                   " ref=", max_jump_ref);
+        FL_CHECK_MESSAGE(max_jump_wrap <= max_jump_ref + 5,
+                         "Channel-2 wrap produces no larger jump than a normal step");
+    }
+}
+
+FL_TEST_CASE("Chasing_Spirals - period reduction: C0 continuity as delta_t -> 0") {
+    // At the wrap boundary, both sides must converge to the same value as dt→0.
+    // Perlin noise is zero at all integer lattice coordinates, so:
+    //   - Just before wrap: offset_x → 2560 → x_perlin → 256 → Perlin → 0
+    //   - Just after  wrap: offset_x →    0 → x_perlin →   0 → Perlin → 0
+    // Both sides of the boundary produce Perlin output approaching 0,
+    // guaranteeing C0 continuity (no value discontinuity).
+    //
+    // This test verifies that at successively finer time steps around the
+    // channel-0 wrap, the pixel delta gets smaller (proves C0, not just C1).
+
+    constexpr uint32_t t_wrap = 2560000;  // channel-0 wrap point
+
+    uint32_t dts[] = {1000, 100, 10, 1};
+    int prev_max = fl::numeric_limits<int32_t>::max();
+
+    for (uint32_t dt : dts) {
+        CRGB leds_pre[N] = {}, leds_post[N] = {};
+        renderChasingSpiralFloat(leds_pre,  t_wrap - dt);
+        renderChasingSpiralFloat(leds_post, t_wrap + dt);
+        int max_jump = computeMaxError(leds_pre, leds_post, N);
+
+        FL_MESSAGE("C0 continuity at wrap: dt=", dt, " ms, max_jump=", max_jump);
+
+        // Smaller dt should produce smaller (or equal) max pixel change
+        FL_CHECK_MESSAGE(max_jump <= prev_max,
+                         "Pixel delta shrinks as dt approaches 0 at wrap boundary");
+        prev_max = max_jump;
+    }
+
+    // At dt=1 (the minimum), the jump should be very small
+    FL_CHECK_MESSAGE(prev_max <= 5, "Near zero dt: minimal pixel change at wrap boundary");
+}
+
+FL_TEST_CASE("Chasing_Spirals - period reduction: float32 precision fix at t=2B") {
+    // Without fmodf(offset_x, 2560): float32 loses per-pixel coordinate
+    // precision when offset_x grows large. At t=2B:
+    //   offset_x ≈ 2,000,000  →  x_perlin ≈ 200,000 + small_per_pixel_term
+    //   float32 ULP at 200,000 ≈ 0.024, coarser than per-pixel step (0.1)
+    //   → coordinates quantized coarsely → Q31 and float disagree: max_err=10
+    //
+    // With fmodf(offset_x, 2560): offset_x ∈ [0, 2560)
+    //   x_perlin ∈ [0, 256) + small_per_pixel_term
+    //   float32 ULP at 256 ≈ 3e-5, much finer than per-pixel step
+    //   → float and Q31 agree within ±1 LSB at all time values.
+    const uint32_t times[] = {
+        1000,
+        1000000,
+        100000000,
+        2000000000,  // ~23 days
+    };
+
+    for (uint32_t t : times) {
+        CRGB leds_float[N] = {}, leds_q31[N] = {};
+        renderChasingSpiralFloat(leds_float, t);
+        renderChasingSpiralQ31(leds_q31, t);
+
+        int max_err = computeMaxError(leds_float, leds_q31, N);
+        FL_MESSAGE("t=", t, ": float vs Q31 max_err=", max_err);
+
+        FL_CHECK_MESSAGE(max_err <= 3,
+                         "Period reduction keeps float and Q31 in agreement at all uptimes");
     }
 }
 
@@ -607,7 +754,10 @@ FL_TEST_CASE("Chasing_Spirals Q31 - low error at t=1000") {
 }
 
 FL_TEST_CASE("Chasing_Spirals Q31 - approximate at high time") {
-    // Test multiple high time values to verify stability
+    // Test multiple high time values to verify stability.
+    // After the period reduction fix (fmodf(offset_x, 2560)) applied to both
+    // float and Q31 paths, max_err is now ≤ 1 at all tested time values
+    // including t=2B (was max_err=10 before the fix).
     const uint32_t times[] = {
         1000000,     // ~16 minutes
         100000000,   // ~27 hours
@@ -630,8 +780,10 @@ FL_TEST_CASE("Chasing_Spirals Q31 - approximate at high time") {
                 " avg_err=", avg_err, " max_err=", max_err,
                 " error_pct=", error_pct, "%");
 
-        FL_CHECK_MESSAGE(error_pct < 3.0f,
-                      "Q31 Chasing_Spirals average error should be < 3% at high time values");
+        FL_CHECK_MESSAGE(error_pct < 1.0f,
+                      "Q31 Chasing_Spirals average error should be < 1% at high time values");
+        FL_CHECK_MESSAGE(max_err <= 3,
+                      "Q31 Chasing_Spirals max error should be <= 3 at high time values");
     }
 }
 

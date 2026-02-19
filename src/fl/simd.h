@@ -272,11 +272,35 @@ using platforms::sll_u32_4;
 /// @return Vector shifted right with sign extension
 using platforms::sra_i32_4;
 
+/// Bitwise OR of two uint32 vectors
+/// @param a First operand (4 uint32)
+/// @param b Second operand (4 uint32)
+/// @return Bitwise OR result
+using platforms::or_u32_4;
+
 /// Bitwise AND of two uint32 vectors
 /// @param a First operand (4 uint32)
 /// @param b Second operand (4 uint32)
 /// @return Bitwise AND result
 using platforms::and_u32_4;
+
+/// Signed element-wise minimum of two int32 vectors
+/// @param a First operand (4 int32 stored as uint32)
+/// @param b Second operand (4 int32 stored as uint32)
+/// @return Element-wise signed minimum
+using platforms::min_i32_4;
+
+/// Signed element-wise maximum of two int32 vectors
+/// @param a First operand (4 int32 stored as uint32)
+/// @param b Second operand (4 int32 stored as uint32)
+/// @return Element-wise signed maximum
+using platforms::max_i32_4;
+
+/// Signed multiply high 32 bits: ((i64)a * (i64)b) >> 32, for each of 4 lanes
+/// Classical mulhi_epi32 — high 32 bits of the signed 64-bit product.
+/// Key identity: (Q31 * Q16.16) >> 31 == mulhi32_i32_4(a, b) << 1
+/// Contrast with mulhi_i32_4 which returns >> 16 (Q16.16 fixed-point arithmetic).
+using platforms::mulhi32_i32_4;
 
 /// Extract a single u32 lane from a SIMD vector
 /// @param vec Input vector (4 uint32)

@@ -633,7 +633,15 @@ class ANIMartRIX {
                 animation.scale_z = 0.1;
                 animation.scale_y = 0.1;
                 animation.scale_x = 0.1;
-                animation.offset_x = move.linear[0];
+                // Reduce offset_x modulo the Perlin noise period (256 / scale_x = 2560)
+                // before passing to render_value. Without this, float32 loses per-pixel
+                // coordinate precision when move.linear[i] grows large at high uptime
+                // (float32 ULP at 200,000 is ~0.024, coarser than the 0.1 pixel step).
+                // The Perlin evaluator is periodic with this period, so the result is
+                // identical to the unreduced value but computed with full float32 precision.
+                // This keeps float and Q31 paths in agreement at extreme time values.
+                static constexpr float kPerlinPeriod = 2560.0f; // 256.0f / scale_x(0.1f)
+                animation.offset_x = fl::fmodf(move.linear[0], kPerlinPeriod);
                 animation.offset_y = 0;
                 animation.offset_z = 0;
                 animation.z = 0;
@@ -642,13 +650,13 @@ class ANIMartRIX {
                 animation.angle =
                     3 * polar_theta[x][y] + move.radial[1] - distance[x][y] / 3;
                 animation.dist = distance[x][y];
-                animation.offset_x = move.linear[1];
+                animation.offset_x = fl::fmodf(move.linear[1], kPerlinPeriod);
                 float show2 = render_value(animation);
 
                 animation.angle =
                     3 * polar_theta[x][y] + move.radial[2] - distance[x][y] / 3;
                 animation.dist = distance[x][y];
-                animation.offset_x = move.linear[2];
+                animation.offset_x = fl::fmodf(move.linear[2], kPerlinPeriod);
                 float show3 = render_value(animation);
 
                 // colormapping

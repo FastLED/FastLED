@@ -357,9 +357,70 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sll_u32_4(simd_u32x4 vec, int shift) noe
     return _mm_slli_epi32(vec, shift);
 }
 
+// Bitwise OR of two u32 vectors
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 or_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    return _mm_or_si128(a, b);
+}
+
 // Bitwise AND of two u32 vectors
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 and_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
     return _mm_and_si128(a, b);
+}
+
+// Signed min of two i32 vectors
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 min_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+#if FASTLED_X86_HAS_SSE41
+    return _mm_min_epi32(a, b);
+#else
+    // SSE2: a < b ? a : b via signed compare (safe across the full signed range)
+    __m128i cmp = _mm_cmplt_epi32(a, b);  // all-ones where a<b, 0 otherwise
+    return _mm_or_si128(_mm_and_si128(cmp, a), _mm_andnot_si128(cmp, b));
+#endif
+}
+
+// Signed max of two i32 vectors
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 max_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+#if FASTLED_X86_HAS_SSE41
+    return _mm_max_epi32(a, b);
+#else
+    // SSE2: a > b ? a : b via signed compare (safe across the full signed range)
+    __m128i cmp = _mm_cmpgt_epi32(a, b);  // all-ones where a>b, 0 otherwise
+    return _mm_or_si128(_mm_and_si128(cmp, a), _mm_andnot_si128(cmp, b));
+#endif
+}
+
+// Signed multiply high 32 bits: ((i64)a * (i64)b) >> 32, for each of 4 lanes
+// Classical "mulhi_epi32" — returns the high 32 bits of the 64-bit signed product.
+// Contrast with mulhi_i32_4 which returns >> 16 (Q16.16 arithmetic).
+// Used for (Q31 × Q16.16) >> 31 as: mulhi32_i32_4(a, b) << 1
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi32_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+#if FASTLED_X86_HAS_SSE41
+    __m128i prod02 = _mm_mul_epi32(a, b);
+    __m128i a_odd = _mm_srli_si128(a, 4);
+    __m128i b_odd = _mm_srli_si128(b, 4);
+    __m128i prod13 = _mm_mul_epi32(a_odd, b_odd);
+    __m128i sh02 = _mm_srli_epi64(prod02, 32);
+    __m128i sh13 = _mm_srli_epi64(prod13, 32);
+    __m128i sh13_aligned = _mm_slli_si128(sh13, 4);
+    return _mm_blend_epi16(sh02, sh13_aligned, 0xCC);
+#else
+    // SSE2: unsigned multiply with signed correction
+    __m128i prod02 = _mm_mul_epu32(a, b);
+    __m128i a_odd = _mm_srli_si128(a, 4);
+    __m128i b_odd = _mm_srli_si128(b, 4);
+    __m128i prod13 = _mm_mul_epu32(a_odd, b_odd);
+    __m128i sh02 = _mm_srli_epi64(prod02, 32);
+    __m128i sh13 = _mm_srli_epi64(prod13, 32);
+    __m128i p02 = _mm_shuffle_epi32(sh02, _MM_SHUFFLE(2, 0, 2, 0));
+    __m128i p13 = _mm_shuffle_epi32(sh13, _MM_SHUFFLE(2, 0, 2, 0));
+    __m128i unsigned_result = _mm_unpacklo_epi32(p02, p13);
+    // Signed correction: subtract b if a<0, subtract a if b<0
+    __m128i sign_a = _mm_srai_epi32(a, 31);
+    __m128i sign_b = _mm_srai_epi32(b, 31);
+    __m128i corr_a = _mm_and_si128(sign_a, b);
+    __m128i corr_b = _mm_and_si128(sign_b, a);
+    return _mm_sub_epi32(unsigned_result, _mm_add_epi32(corr_a, corr_b));
+#endif
 }
 
 // Extract a single u32 lane from a SIMD vector
@@ -714,11 +775,54 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sra_i32_4(simd_u32x4 vec, int shift) noe
     return result;
 }
 
+// Bitwise OR of two u32 vectors
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 or_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        result.data[i] = a.data[i] | b.data[i];
+    }
+    return result;
+}
+
 // Bitwise AND of two u32 vectors
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 and_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
     simd_u32x4 result;
     for (int i = 0; i < 4; ++i) {
         result.data[i] = a.data[i] & b.data[i];
+    }
+    return result;
+}
+
+// Signed min of two i32 vectors
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 min_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        i32 ai = static_cast<i32>(a.data[i]);
+        i32 bi = static_cast<i32>(b.data[i]);
+        result.data[i] = static_cast<u32>(ai < bi ? ai : bi);
+    }
+    return result;
+}
+
+// Signed max of two i32 vectors
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 max_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        i32 ai = static_cast<i32>(a.data[i]);
+        i32 bi = static_cast<i32>(b.data[i]);
+        result.data[i] = static_cast<u32>(ai > bi ? ai : bi);
+    }
+    return result;
+}
+
+// Signed multiply high 32 bits: ((i64)a * (i64)b) >> 32
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi32_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
+    simd_u32x4 result;
+    for (int i = 0; i < 4; ++i) {
+        i32 ai = static_cast<i32>(a.data[i]);
+        i32 bi = static_cast<i32>(b.data[i]);
+        i64 prod = static_cast<i64>(ai) * static_cast<i64>(bi);
+        result.data[i] = static_cast<u32>(static_cast<i32>(prod >> 32));
     }
     return result;
 }

@@ -1,72 +1,37 @@
 // Chasing_Spirals Q31 SIMD implementation (fixed-point, 4-wide vectorized)
 //
 // ============================================================================
-// ALIGNMENT NOTES for fl::assume_aligned / FL_ASSUME_ALIGNED
+// PIPELINE SUMMARY (SoA layout + full SIMD optimization)
 // ============================================================================
 //
-// Several data structures here are candidates for aligned access hints that
-// could let the compiler emit movdqa/vmovdqa (x86) or vld1q (ARM NEON)
-// instead of unaligned loads. Key opportunities:
+// Per-frame state is kept in ChasingSpiralState (SoA layout, engine.h):
+//   base_angle[], dist_scaled[], rf3[], rf_half[], rf_quarter[], pixel_idx[]
+//   fade_lut[257]  (FL_ALIGNAS(16) for aligned Perlin LUT loads)
 //
-// 1. fade_lut (i32[257], lives in Engine::mFadeLUT)
-//    - 257 × 4 = 1028 bytes. Accessed heavily inside pnoise2d_raw_simd4.
-//    - Currently natural-aligned (i32 → 4 bytes). If the Engine struct or
-//      mFadeLUT field were FL_ALIGNAS(16) or FL_ALIGNAS(32), the Perlin
-//      fade LUT lookups could use aligned SIMD gathers.
-//    - Apply: const i32 *fl = fl::assume_aligned<16>(fade_lut);
-//    - Benefit: Perlin noise is the hottest path (3 calls × 4 pixels per batch).
-//      Aligned loads eliminate microarchitectural split-line penalties on x86
-//      and are required for some ARM NEON instructions.
+// SIMD inner loop (simd4_processChannel, 4 pixels per batch):
+//   SoA load (load_u32_4)              ← was: AoS gather [Boundary 1 — GONE]
+//   Q16.16 → A24 (mulhi_su32_4)
+//   sincos32_simd                      ← fully SIMD (unchanged)
+//   Perlin coords (mulhi32_i32_4 << 1) ← was: unpack→scalar i64 [Boundary 3 — GONE]
+//   store nx/ny to 4×i32 stack arrays
+//   Permutation table (scalar)         ← fundamental SSE2 limit, unavoidable
+//   Fade LUT + lerp tree (scalar)      ← exact-match tests forbid vectorization
+//   load result into SIMD
+//   Clamp [0,FP_ONE] + scale ×255      ← was: scalar loop [Boundary 4b — GONE]
+//   Radial filter (mulhi32_i32_4)      ← was: AoS gather + scalar [Boundary 6 — GONE]
+//   extract_u32_4 × 4 + scatter        ← pixel_idx scatter remains scalar
 //
-// 2. perm (u8[256], PERLIN_NOISE[] in perlin_float.h)
-//    - Already FL_ALIGNAS(64) at declaration site — good.
-//    - The pointer arrives here via setup.perm. Using assume_aligned would let
-//      the compiler trust this through function boundaries:
-//      const u8 *p = fl::assume_aligned<64>(perm);
-//    - Benefit: Perlin permutation table lookups with u8 gather can be widened
-//      to 4-byte or 16-byte reads when the base is known-aligned.
-//
-// 3. base_arr[4] / dist_arr[4] / cos_arr[4] / sin_arr[4] (stack arrays)
-//    - These i32[4] arrays (16 bytes each) are natural candidates for
-//      FL_ALIGNAS(16) + assume_aligned, enabling direct SSE/NEON register
-//      loads instead of 4 scalar loads:
-//        FL_ALIGNAS(16) i32 base_arr[4] = { ... };
-//        const i32 *b = fl::assume_aligned<16>(base_arr);
-//    - In simd4_processChannel (chasing_spirals_common.cpp.hpp), the
-//      load_u32_4 / store_u32_4 calls already treat these as SIMD vectors
-//      but without alignment guarantees. Aligning them would allow movdqa
-//      instead of movdqu on x86 (~same speed on modern cores, but prevents
-//      cache-line split penalties on older microarchitectures).
-//
-// 4. PixelLUT array (mChasingSpiralLUT, fl::vector<ChasingSpiralPixelLUT>)
-//    - sizeof(ChasingSpiralPixelLUT) = 22 bytes (5×i32 + u16), padded to 24.
-//    - NOT a natural SIMD width — stride is 24 bytes, so contiguous SIMD loads
-//      across LUT entries would require gather or AoS→SoA transposition.
-//    - Alignment won't help for sequential lut[i] access (struct stride ≠ 16).
-//    - FUTURE: Restructuring to SoA (separate base_angle[], dist_scaled[],
-//      rf3[], rf_half[], rf_quarter[], pixel_idx[] arrays) would enable
-//      FL_ALIGNAS(16) + assume_aligned on each array for direct 4-wide loads.
-//      This is the highest-impact optimization but requires refactoring
-//      ChasingSpiralPixelLUT and setupChasingSpiralFrame.
-//
-// Summary of where to apply (in order of expected impact):
-//   HIGH:   fade_lut in pnoise2d_raw_simd4 (hottest inner loop)
-//   MEDIUM: stack arrays (base_arr, dist_arr, cos_arr, sin_arr) → FL_ALIGNAS(16)
-//   MEDIUM: perm pointer (already aligned at source, needs assume_aligned propagation)
-//   LOW:    PixelLUT (AoS stride prevents contiguous SIMD; needs SoA refactor)
-//
-// For the Q31 scalar variant (chasing_spirals_q31.cpp.hpp), alignment hints
-// have less impact since there are no explicit SIMD operations — but the
-// compiler's auto-vectorizer can still benefit from alignment knowledge on
-// the fade_lut and perm pointers when optimizing the Perlin noise calls.
+// Precision: mulhi32_i32_4(cos_Q31, dist_Q16) << 1 loses bit 31 of the product
+//   — at most ±1 ULP in Q16.16 coordinate space ≈ 1/65536 of the Perlin period.
+//   Within the 6-LSB pixel tolerance (avg<1%, max≤6 at t=1000).
 // ============================================================================
 
 #include "fl/align.h"
 #include "fl/fx/2d/animartrix2_detail/engine.h"
+#include "fl/fx/2d/animartrix2_detail/chasing_spiral_state.h"
 #include "fl/fx/2d/animartrix2_detail/perlin_s16x16.h"
 #include "fl/fx/2d/animartrix2_detail/perlin_s16x16_simd.h"
 #include "fl/fx/2d/animartrix2_detail/perlin_float.h"
-#include "fl/fx/2d/animartrix2_detail/chasing_spiral_pixel_lut.h"
 #include "fl/simd.h"
 #include "fl/sin32.h"
 #include "fl/fx/2d/animartrix2_detail/chasing_spirals.h"
@@ -77,14 +42,19 @@ namespace {
 
 using FP = fl::s16x16;
 using Perlin = perlin_s16x16;
-using PixelLUT = ChasingSpiralPixelLUT;
 
-// Common setup values returned by setupChasingSpiralFrame
+// Common setup values returned by setupChasingSpiralFrame.
+// Carries raw SoA pointers (no PixelLUT AoS struct).
 struct FrameSetup {
     int total_pixels;
-    const PixelLUT *lut;
+    const fl::i32 *base_angle;
+    const fl::i32 *dist_scaled;
+    const fl::i32 *rf3;
+    const fl::i32 *rf_half;
+    const fl::i32 *rf_quarter;
+    const fl::u16 *pixel_idx;
     const fl::i32 *fade_lut;
-    const fl::u8 *perm;
+    const fl::u8  *perm;
     fl::i32 cx_raw;
     fl::i32 cy_raw;
     fl::i32 lin0_raw;
@@ -100,17 +70,6 @@ struct FrameSetup {
 u32 radiansToA24(i32 base_s16x16, i32 offset_s16x16) {
     constexpr i32 RAD_TO_A24 = 2670177;
     return static_cast<u32>((static_cast<i64>(base_s16x16 + offset_s16x16) * RAD_TO_A24) >> FP::FRAC_BITS);
-}
-
-// Compute Perlin coordinates from SIMD sincos results and distances (4 pixels)
-void simd4_computePerlinCoords(
-    const i32 cos_arr[4], const i32 sin_arr[4],
-    const i32 dist_arr[4], i32 lin_raw, i32 cx_raw, i32 cy_raw,
-    i32 nx_out[4], i32 ny_out[4]) {
-    for (int i = 0; i < 4; i++) {
-        nx_out[i] = lin_raw + cx_raw - static_cast<i32>((static_cast<i64>(cos_arr[i]) * dist_arr[i]) >> 31);
-        ny_out[i] = cy_raw - static_cast<i32>((static_cast<i64>(sin_arr[i]) * dist_arr[i]) >> 31);
-    }
 }
 
 // Clamp s16x16 value to [0, 1] and scale to [0, 255]
@@ -129,59 +88,63 @@ i32 applyRadialFilter(i32 noise_255, i32 rf_raw) {
     return result;
 }
 
-// Process one color channel for 4 pixels using SIMD (angle -> sincos -> Perlin -> clamp)
-void simd4_processChannel(
-    const i32 base_arr[4], const i32 dist_arr[4],
+// Process one color channel for 4 pixels using a full SIMD pipeline.
+// Returns 4 clamped [0, 255] channel values in a simd_u32x4 register.
+//
+// base_vec, dist_vec: SoA fields already loaded into SIMD (no AoS gather).
+// rf_vec: radial-filter multiplier for this channel, also from SoA.
+simd::simd_u32x4 simd4_processChannel(
+    simd::simd_u32x4 base_vec, simd::simd_u32x4 dist_vec,
     i32 radial_offset, i32 linear_offset,
     const i32 *fade_lut, const u8 *perm, i32 cx_raw, i32 cy_raw,
-    i32 noise_out[4]) {
+    simd::simd_u32x4 rf_vec) {
 
     constexpr i32 RAD_TO_A24 = 2670177;
 
-    // Load base angles and add radial offset (static_cast i32->u32 for SIMD)
-    u32 base_u32[4] = {
-        static_cast<u32>(base_arr[0]), static_cast<u32>(base_arr[1]),
-        static_cast<u32>(base_arr[2]), static_cast<u32>(base_arr[3])
-    };
-    simd::simd_u32x4 base_vec = simd::load_u32_4(base_u32);
-    simd::simd_u32x4 offset_vec = simd::set1_u32_4(static_cast<u32>(radial_offset));
-    simd::simd_u32x4 sum_vec = simd::add_i32_4(base_vec, offset_vec);
-
-    // Multiply by constant and shift right by 16 (Q16.16 -> A24)
+    // Q16.16 → A24: (base + radial_offset) * RAD_TO_A24 >> 16
+    simd::simd_u32x4 offset_vec    = simd::set1_u32_4(static_cast<u32>(radial_offset));
+    simd::simd_u32x4 sum_vec       = simd::add_i32_4(base_vec, offset_vec);
     simd::simd_u32x4 rad_const_vec = simd::set1_u32_4(static_cast<u32>(RAD_TO_A24));
-    simd::simd_u32x4 angles_vec = simd::mulhi_su32_4(sum_vec, rad_const_vec);
+    simd::simd_u32x4 angles_vec    = simd::mulhi_su32_4(sum_vec, rad_const_vec);
+
+    // sincos32_simd returns Q31 values (cos_vals, sin_vals)
     SinCos32_simd sc = sincos32_simd(angles_vec);
 
-    // Extract sin/cos results to arrays (store as u32, static_cast to i32)
-    u32 cos_u32[4], sin_u32[4];
-    simd::store_u32_4(cos_u32, sc.cos_vals);
-    simd::store_u32_4(sin_u32, sc.sin_vals);
-    i32 cos_arr_local[4] = {
-        static_cast<i32>(cos_u32[0]), static_cast<i32>(cos_u32[1]),
-        static_cast<i32>(cos_u32[2]), static_cast<i32>(cos_u32[3])
-    };
-    i32 sin_arr_local[4] = {
-        static_cast<i32>(sin_u32[0]), static_cast<i32>(sin_u32[1]),
-        static_cast<i32>(sin_u32[2]), static_cast<i32>(sin_u32[3])
-    };
+    // Perlin coordinates (stays in SIMD — no scalar round-trip):
+    //   (cos_Q31 * dist_Q16) >> 31 == mulhi32_i32_4(cos, dist) << 1
+    //   Precision: loses bit 31 of the 64-bit product → ±1 ULP in Q16.16 coords.
+    simd::simd_u32x4 lin_cx = simd::set1_u32_4(static_cast<u32>(linear_offset + cx_raw));
+    simd::simd_u32x4 cy_vec  = simd::set1_u32_4(static_cast<u32>(cy_raw));
+    simd::simd_u32x4 nx_vec  = simd::sub_i32_4(lin_cx,
+        simd::sll_u32_4(simd::mulhi32_i32_4(sc.cos_vals, dist_vec), 1));
+    simd::simd_u32x4 ny_vec  = simd::sub_i32_4(cy_vec,
+        simd::sll_u32_4(simd::mulhi32_i32_4(sc.sin_vals, dist_vec), 1));
 
-    // Compute Perlin coordinates from sincos and distances
-    i32 nx[4], ny[4];
-    simd4_computePerlinCoords(cos_arr_local, sin_arr_local, dist_arr, linear_offset, cx_raw, cy_raw, nx, ny);
+    // Store to aligned stack arrays for permutation table lookup (no SSE2 gather)
+    FL_ALIGNAS(16) i32 nx[4], ny[4];
+    simd::store_u32_4(reinterpret_cast<u32*>(nx), nx_vec); // ok reinterpret cast
+    simd::store_u32_4(reinterpret_cast<u32*>(ny), ny_vec); // ok reinterpret cast
 
-    // SIMD Perlin noise (4 evaluations in parallel)
-    i32 raw_noise[4];
-    perlin_s16x16_simd::pnoise2d_raw_simd4(nx, ny, fade_lut, perm, raw_noise);
+    // Perlin noise — exact scalar lerp tree (preserves scalar==SIMD test invariant)
+    simd::simd_u32x4 raw_vec = perlin_s16x16_simd::pnoise2d_raw_simd4_vec(
+        nx, ny, fade_lut, perm);
 
-    // Clamp and scale results to [0, 255]
-    noise_out[0] = clampAndScale255(raw_noise[0]);
-    noise_out[1] = clampAndScale255(raw_noise[1]);
-    noise_out[2] = clampAndScale255(raw_noise[2]);
-    noise_out[3] = clampAndScale255(raw_noise[3]);
+    // Clamp to [0, FP_ONE] and scale by 255: (val << 8) - val
+    simd::simd_u32x4 zero   = simd::set1_u32_4(0u);
+    simd::simd_u32x4 fp_one = simd::set1_u32_4(static_cast<u32>(1 << FP::FRAC_BITS));
+    simd::simd_u32x4 clamped = simd::min_i32_4(simd::max_i32_4(raw_vec, zero), fp_one);
+    simd::simd_u32x4 noise_scaled = simd::sub_i32_4(simd::sll_u32_4(clamped, 8), clamped);
+
+    // Radial filter: (noise_scaled * rf) >> 32, clamped to [0, 255]
+    simd::simd_u32x4 max255 = simd::set1_u32_4(255u);
+    simd::simd_u32x4 result = simd::mulhi32_i32_4(noise_scaled, rf_vec);
+    result = simd::max_i32_4(result, zero);
+    result = simd::min_i32_4(result, max255);
+    return result;
 }
 
-// Extract common frame setup logic shared by both variants.
-// Computes timing, scaled constants, builds PixelLUT, initializes fade LUT.
+// Extract common frame setup logic shared by all variants.
+// Builds SoA geometry cache lazily (once when grid size changes).
 FrameSetup setupChasingSpiralFrame(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
@@ -210,9 +173,18 @@ FrameSetup setupChasingSpiralFrame(Context &ctx) {
     const FP radial1(e->move.radial[1]);
     const FP radial2(e->move.radial[2]);
 
-    // Reduce linear offsets mod Perlin period to prevent s16x16 overflow,
-    // then pre-multiply by scale (0.1) in float before single FP conversion.
-    constexpr float perlin_period = 2560.0f; // 256.0f / 0.1f
+    // Reduce linear offsets modulo the Perlin noise period before converting
+    // to s16x16. Two reasons:
+    //   1. Prevents s16x16 overflow (range ±32767 in integer part).
+    //   2. Float32 precision fix: matches the same reduction applied in
+    //      Chasing_Spirals_Float (animartrix v1 and v2 float paths) so both
+    //      paths compute identical Perlin coordinates at all time values.
+    //      Without this reduction, float32 loses per-pixel coordinate precision
+    //      when move.linear grows large (ULP at 200,000 ≈ 0.024 > pixel step 0.1).
+    // Perlin noise is exactly periodic with period 256 at integer coordinates,
+    // so with scale_x=0.1 the effective period for offset_x is 256/0.1 = 2560.
+    // See: tests/fl/fx/2d/animartrix2.cpp "period reduction" test cases.
+    constexpr float perlin_period = 2560.0f; // 256.0f / scale_x(0.1f)
     constexpr float scale_f = 0.1f;
     const FP linear0_scaled = FP(fmodf(e->move.linear[0], perlin_period) * scale_f);
     const FP linear1_scaled = FP(fmodf(e->move.linear[1], perlin_period) * scale_f);
@@ -221,44 +193,50 @@ FrameSetup setupChasingSpiralFrame(Context &ctx) {
     constexpr FP three_fp(3.0f);
     constexpr FP one(1.0f);
 
-    // Build per-pixel geometry LUT (once, persists across frames)
-    if (e->mChasingSpiralLUT.size() != static_cast<size_t>(total_pixels)) {
-        e->mChasingSpiralLUT.resize(total_pixels);
+    // Allocate per-animation state lazily
+    if (!e->mChasingSpiralState) {
+        e->mChasingSpiralState = new ChasingSpiralState();
+    }
+    ChasingSpiralState *state = e->mChasingSpiralState;
+
+    // Build per-pixel SoA geometry (once when grid size changes)
+    if (state->count != total_pixels) {
+        const int padded = (total_pixels + 3) & ~3;  // multiple of 4 for SIMD safety
+        state->base_angle.resize(padded, 0);
+        state->dist_scaled.resize(padded, 0);
+        state->rf3.resize(padded, 0);
+        state->rf_half.resize(padded, 0);
+        state->rf_quarter.resize(padded, 0);
+        state->pixel_idx.resize(padded, 0);
+
         const FP inv_radius = one / radius_fp;
         const FP one_third = one / three_fp;
-        PixelLUT *lut = e->mChasingSpiralLUT.data();
         int idx = 0;
         for (int x = 0; x < num_x; x++) {
             for (int y = 0; y < num_y; y++) {
                 const FP theta(e->polar_theta[x][y]);
                 const FP dist(e->distance[x][y]);
                 const FP rf = (radius_fp - dist) * inv_radius;
-                lut[idx].base_angle = three_fp * theta - dist * one_third;
-                lut[idx].dist_scaled = dist * scale;
-                lut[idx].rf3 = three_fp * rf;
-                lut[idx].rf_half = rf >> 1;
-                lut[idx].rf_quarter = rf >> 2;
-                lut[idx].pixel_idx = e->mCtx->xyMapFn(x, y, e->mCtx->xyMapUserData);
+                state->base_angle[idx]  = (three_fp * theta - dist * one_third).raw();
+                state->dist_scaled[idx] = (dist * scale).raw();
+                state->rf3[idx]         = (three_fp * rf).raw();
+                state->rf_half[idx]     = (rf >> 1).raw();
+                state->rf_quarter[idx]  = (rf >> 2).raw();
+                state->pixel_idx[idx]   = e->mCtx->xyMapFn(x, y, e->mCtx->xyMapUserData);
                 idx++;
             }
         }
+        state->count = total_pixels;
     }
-    const PixelLUT *lut = e->mChasingSpiralLUT.data();
 
-    // Build fade LUT (once per Engine lifetime)
-    if (!e->mFadeLUTInitialized) {
-        Perlin::init_fade_lut(e->mFadeLUT);
-        e->mFadeLUTInitialized = true;
+    // Initialize Perlin fade LUT once per state lifetime
+    if (!state->fade_lut_initialized) {
+        Perlin::init_fade_lut(state->fade_lut);
+        state->fade_lut_initialized = true;
     }
-    const i32 *fade_lut = e->mFadeLUT;
 
-    // Permutation table for Perlin noise
-    const u8 *perm = PERLIN_NOISE;
-
-    // Precompute raw i32 values for per-frame constants to avoid
-    // repeated s16x16 construction overhead in the inner loop.
-    const i32 cx_raw = center_x_scaled.raw();
-    const i32 cy_raw = center_y_scaled.raw();
+    const i32 cx_raw   = center_x_scaled.raw();
+    const i32 cy_raw   = center_y_scaled.raw();
     const i32 lin0_raw = linear0_scaled.raw();
     const i32 lin1_raw = linear1_scaled.raw();
     const i32 lin2_raw = linear2_scaled.raw();
@@ -266,13 +244,16 @@ FrameSetup setupChasingSpiralFrame(Context &ctx) {
     const i32 rad1_raw = radial1.raw();
     const i32 rad2_raw = radial2.raw();
 
-    CRGB *leds = e->mCtx->leds;
-
     return FrameSetup{
         total_pixels,
-        lut,
-        fade_lut,
-        perm,
+        state->base_angle.data(),
+        state->dist_scaled.data(),
+        state->rf3.data(),
+        state->rf_half.data(),
+        state->rf_quarter.data(),
+        state->pixel_idx.data(),
+        state->fade_lut,
+        PERLIN_NOISE,
         cx_raw,
         cy_raw,
         lin0_raw,
@@ -281,7 +262,7 @@ FrameSetup setupChasingSpiralFrame(Context &ctx) {
         rad0_raw,
         rad1_raw,
         rad2_raw,
-        leds
+        e->mCtx->leds
     };
 }
 
@@ -294,6 +275,17 @@ FrameSetup setupChasingSpiralFrame(Context &ctx) {
 void Chasing_Spirals_Float(Context &ctx) {
     auto *e = ctx.mEngine;
     e->get_ready();
+
+    // Perlin noise is periodic with period 256 at integer coordinates.
+    // scale_x = 0.1, so the effective period for offset_x is 256/0.1 = 2560.
+    // Reducing move.linear[i] modulo this period before use keeps float32
+    // coordinate arithmetic precise even at extreme uptime values.
+    // Without this, float32 loses per-pixel precision when adding a small
+    // per-pixel term (~0.1) to a large offset (e.g. 200,000), since float32
+    // ULP at that magnitude (~0.024) is coarser than the per-pixel step.
+    // This matches the reduction already applied in setupChasingSpiralFrame
+    // for the Q31 path, keeping both paths in agreement at all time values.
+    static constexpr float perlin_period = 2560.0f; // 256.0f / scale_x(0.1f)
 
     e->timings.master_speed = 0.01;
     e->timings.ratio[0] = 0.1;
@@ -313,7 +305,7 @@ void Chasing_Spirals_Float(Context &ctx) {
             e->animation.scale_z = 0.1;
             e->animation.scale_y = 0.1;
             e->animation.scale_x = 0.1;
-            e->animation.offset_x = e->move.linear[0];
+            e->animation.offset_x = fl::fmodf(e->move.linear[0], perlin_period);
             e->animation.offset_y = 0;
             e->animation.offset_z = 0;
             e->animation.z = 0;
@@ -323,14 +315,14 @@ void Chasing_Spirals_Float(Context &ctx) {
                 3 * e->polar_theta[x][y] + e->move.radial[1] -
                 e->distance[x][y] / 3;
             e->animation.dist = e->distance[x][y];
-            e->animation.offset_x = e->move.linear[1];
+            e->animation.offset_x = fl::fmodf(e->move.linear[1], perlin_period);
             float show2 = e->render_value(e->animation);
 
             e->animation.angle =
                 3 * e->polar_theta[x][y] + e->move.radial[2] -
                 e->distance[x][y] / 3;
             e->animation.dist = e->distance[x][y];
-            e->animation.offset_x = e->move.linear[2];
+            e->animation.offset_x = fl::fmodf(e->move.linear[2], perlin_period);
             float show3 = e->render_value(e->animation);
 
             float radius = e->radial_filter_radius;
@@ -352,22 +344,21 @@ void Chasing_Spirals_Float(Context &ctx) {
 
 void Chasing_Spirals_Q31(Context &ctx) {
     auto setup = setupChasingSpiralFrame(ctx);
-    const int total_pixels = setup.total_pixels;
-    const PixelLUT *lut = setup.lut;
-    const i32 *fade_lut = setup.fade_lut;
-    const u8 *perm = setup.perm;
-    const i32 cx_raw = setup.cx_raw;
-    const i32 cy_raw = setup.cy_raw;
-    const i32 lin0_raw = setup.lin0_raw;
-    const i32 lin1_raw = setup.lin1_raw;
-    const i32 lin2_raw = setup.lin2_raw;
-    const i32 rad0_raw = setup.rad0_raw;
-    const i32 rad1_raw = setup.rad1_raw;
-    const i32 rad2_raw = setup.rad2_raw;
-    CRGB *leds = setup.leds;
+    const int total_pixels  = setup.total_pixels;
+    const i32 *fade_lut     = setup.fade_lut;
+    const u8  *perm         = setup.perm;
+    const i32  cx_raw       = setup.cx_raw;
+    const i32  cy_raw       = setup.cy_raw;
+    const i32  lin0_raw     = setup.lin0_raw;
+    const i32  lin1_raw     = setup.lin1_raw;
+    const i32  lin2_raw     = setup.lin2_raw;
+    const i32  rad0_raw     = setup.rad0_raw;
+    const i32  rad1_raw     = setup.rad1_raw;
+    const i32  rad2_raw     = setup.rad2_raw;
+    CRGB      *leds         = setup.leds;
 
-    constexpr i32 FP_ONE = 1 << FP::FRAC_BITS;
-    constexpr i32 RAD_TO_A24 = 2670177; // 256/(2*PI) in s16x16
+    constexpr i32 FP_ONE    = 1 << FP::FRAC_BITS;
+    constexpr i32 RAD_TO_A24 = 2670177;
 
     auto noise_channel = [&](i32 base_raw, i32 rad_raw,
                              i32 lin_raw, i32 dist_raw) -> i32 {
@@ -386,25 +377,20 @@ void Chasing_Spirals_Q31(Context &ctx) {
     };
 
     for (int i = 0; i < total_pixels; i++) {
-        const PixelLUT &px = lut[i];
-        const i32 base_raw = px.base_angle.raw();
-        const i32 dist_raw = px.dist_scaled.raw();
+        const i32 base_raw = setup.base_angle[i];
+        const i32 dist_raw = setup.dist_scaled[i];
 
         i32 s0 = noise_channel(base_raw, rad0_raw, lin0_raw, dist_raw);
         i32 s1 = noise_channel(base_raw, rad1_raw, lin1_raw, dist_raw);
         i32 s2 = noise_channel(base_raw, rad2_raw, lin2_raw, dist_raw);
 
-        i32 r = static_cast<i32>((static_cast<i64>(s0) * px.rf3.raw()) >> (FP::FRAC_BITS * 2));
-        i32 g = static_cast<i32>((static_cast<i64>(s1) * px.rf_half.raw()) >> (FP::FRAC_BITS * 2));
-        i32 b = static_cast<i32>((static_cast<i64>(s2) * px.rf_quarter.raw()) >> (FP::FRAC_BITS * 2));
+        i32 r = applyRadialFilter(s0, setup.rf3[i]);
+        i32 g = applyRadialFilter(s1, setup.rf_half[i]);
+        i32 b = applyRadialFilter(s2, setup.rf_quarter[i]);
 
-        if (r < 0) r = 0; if (r > 255) r = 255;
-        if (g < 0) g = 0; if (g > 255) g = 255;
-        if (b < 0) b = 0; if (b > 255) b = 255;
-
-        leds[px.pixel_idx] = CRGB(static_cast<u8>(r),
-                                   static_cast<u8>(g),
-                                   static_cast<u8>(b));
+        leds[setup.pixel_idx[i]] = CRGB(static_cast<u8>(r),
+                                         static_cast<u8>(g),
+                                         static_cast<u8>(b));
     }
 }
 
@@ -414,72 +400,64 @@ void Chasing_Spirals_Q31(Context &ctx) {
 
 void Chasing_Spirals_Q31_SIMD(Context &ctx) {
     auto setup = setupChasingSpiralFrame(ctx);
-    const int total_pixels = setup.total_pixels;
-    const PixelLUT *lut = setup.lut;
-    const i32 *fade_lut = setup.fade_lut;
-    const u8 *perm = setup.perm;
-    const i32 cx_raw = setup.cx_raw;
-    const i32 cy_raw = setup.cy_raw;
-    const i32 lin0_raw = setup.lin0_raw;
-    const i32 lin1_raw = setup.lin1_raw;
-    const i32 lin2_raw = setup.lin2_raw;
-    const i32 rad0_raw = setup.rad0_raw;
-    const i32 rad1_raw = setup.rad1_raw;
-    const i32 rad2_raw = setup.rad2_raw;
-    CRGB *leds = setup.leds;
+    const int   total_pixels  = setup.total_pixels;
+    const i32  *base_angle    = setup.base_angle;
+    const i32  *dist_scaled   = setup.dist_scaled;
+    const i32  *rf3_arr       = setup.rf3;
+    const i32  *rf_half_arr   = setup.rf_half;
+    const i32  *rf_qtr_arr    = setup.rf_quarter;
+    const u16  *pixel_idx     = setup.pixel_idx;
+    const i32  *fade_lut      = setup.fade_lut;
+    const u8   *perm          = setup.perm;
+    const i32   cx_raw        = setup.cx_raw;
+    const i32   cy_raw        = setup.cy_raw;
+    const i32   lin0_raw      = setup.lin0_raw;
+    const i32   lin1_raw      = setup.lin1_raw;
+    const i32   lin2_raw      = setup.lin2_raw;
+    const i32   rad0_raw      = setup.rad0_raw;
+    const i32   rad1_raw      = setup.rad1_raw;
+    const i32   rad2_raw      = setup.rad2_raw;
+    CRGB       *leds          = setup.leds;
 
     // SIMD Pixel Pipeline (4-wide batches)
     int i = 0;
     for (; i + 3 < total_pixels; i += 4) {
-        i32 base_arr[4] = {
-            lut[i+0].base_angle.raw(),
-            lut[i+1].base_angle.raw(),
-            lut[i+2].base_angle.raw(),
-            lut[i+3].base_angle.raw()
-        };
-        i32 dist_arr[4] = {
-            lut[i+0].dist_scaled.raw(),
-            lut[i+1].dist_scaled.raw(),
-            lut[i+2].dist_scaled.raw(),
-            lut[i+3].dist_scaled.raw()
-        };
+        // Direct SIMD load from SoA arrays (no AoS gather)
+        simd::simd_u32x4 base_vec    = simd::load_u32_4(reinterpret_cast<const u32*>(base_angle  + i)); // ok reinterpret cast
+        simd::simd_u32x4 dist_vec    = simd::load_u32_4(reinterpret_cast<const u32*>(dist_scaled + i)); // ok reinterpret cast
+        simd::simd_u32x4 rf3_vec     = simd::load_u32_4(reinterpret_cast<const u32*>(rf3_arr     + i)); // ok reinterpret cast
+        simd::simd_u32x4 rf_half_vec = simd::load_u32_4(reinterpret_cast<const u32*>(rf_half_arr + i)); // ok reinterpret cast
+        simd::simd_u32x4 rf_qtr_vec  = simd::load_u32_4(reinterpret_cast<const u32*>(rf_qtr_arr  + i)); // ok reinterpret cast
 
-        i32 s_r[4], s_g[4], s_b[4];
-        simd4_processChannel(base_arr, dist_arr, rad0_raw, lin0_raw, fade_lut, perm, cx_raw, cy_raw, s_r);
-        simd4_processChannel(base_arr, dist_arr, rad1_raw, lin1_raw, fade_lut, perm, cx_raw, cy_raw, s_g);
-        simd4_processChannel(base_arr, dist_arr, rad2_raw, lin2_raw, fade_lut, perm, cx_raw, cy_raw, s_b);
+        simd::simd_u32x4 r_vec = simd4_processChannel(
+            base_vec, dist_vec, rad0_raw, lin0_raw, fade_lut, perm, cx_raw, cy_raw, rf3_vec);
+        simd::simd_u32x4 g_vec = simd4_processChannel(
+            base_vec, dist_vec, rad1_raw, lin1_raw, fade_lut, perm, cx_raw, cy_raw, rf_half_vec);
+        simd::simd_u32x4 b_vec = simd4_processChannel(
+            base_vec, dist_vec, rad2_raw, lin2_raw, fade_lut, perm, cx_raw, cy_raw, rf_qtr_vec);
 
-        i32 s0_r = s_r[0], s1_r = s_r[1], s2_r = s_r[2], s3_r = s_r[3];
-        i32 s0_g = s_g[0], s1_g = s_g[1], s2_g = s_g[2], s3_g = s_g[3];
-        i32 s0_b = s_b[0], s1_b = s_b[1], s2_b = s_b[2], s3_b = s_b[3];
-
-        i32 r0 = applyRadialFilter(s0_r, lut[i+0].rf3.raw());
-        i32 g0 = applyRadialFilter(s0_g, lut[i+0].rf_half.raw());
-        i32 b0 = applyRadialFilter(s0_b, lut[i+0].rf_quarter.raw());
-
-        i32 r1 = applyRadialFilter(s1_r, lut[i+1].rf3.raw());
-        i32 g1 = applyRadialFilter(s1_g, lut[i+1].rf_half.raw());
-        i32 b1 = applyRadialFilter(s1_b, lut[i+1].rf_quarter.raw());
-
-        i32 r2 = applyRadialFilter(s2_r, lut[i+2].rf3.raw());
-        i32 g2 = applyRadialFilter(s2_g, lut[i+2].rf_half.raw());
-        i32 b2 = applyRadialFilter(s2_b, lut[i+2].rf_quarter.raw());
-
-        i32 r3 = applyRadialFilter(s3_r, lut[i+3].rf3.raw());
-        i32 g3 = applyRadialFilter(s3_g, lut[i+3].rf_half.raw());
-        i32 b3 = applyRadialFilter(s3_b, lut[i+3].rf_quarter.raw());
-
-        leds[lut[i+0].pixel_idx] = CRGB(static_cast<u8>(r0), static_cast<u8>(g0), static_cast<u8>(b0));
-        leds[lut[i+1].pixel_idx] = CRGB(static_cast<u8>(r1), static_cast<u8>(g1), static_cast<u8>(b1));
-        leds[lut[i+2].pixel_idx] = CRGB(static_cast<u8>(r2), static_cast<u8>(g2), static_cast<u8>(b2));
-        leds[lut[i+3].pixel_idx] = CRGB(static_cast<u8>(r3), static_cast<u8>(g3), static_cast<u8>(b3));
+        leds[pixel_idx[i+0]] = CRGB(
+            static_cast<u8>(simd::extract_u32_4(r_vec, 0)),
+            static_cast<u8>(simd::extract_u32_4(g_vec, 0)),
+            static_cast<u8>(simd::extract_u32_4(b_vec, 0)));
+        leds[pixel_idx[i+1]] = CRGB(
+            static_cast<u8>(simd::extract_u32_4(r_vec, 1)),
+            static_cast<u8>(simd::extract_u32_4(g_vec, 1)),
+            static_cast<u8>(simd::extract_u32_4(b_vec, 1)));
+        leds[pixel_idx[i+2]] = CRGB(
+            static_cast<u8>(simd::extract_u32_4(r_vec, 2)),
+            static_cast<u8>(simd::extract_u32_4(g_vec, 2)),
+            static_cast<u8>(simd::extract_u32_4(b_vec, 2)));
+        leds[pixel_idx[i+3]] = CRGB(
+            static_cast<u8>(simd::extract_u32_4(r_vec, 3)),
+            static_cast<u8>(simd::extract_u32_4(g_vec, 3)),
+            static_cast<u8>(simd::extract_u32_4(b_vec, 3)));
     }
 
     // Scalar fallback for remaining pixels (when total_pixels % 4 != 0)
     for (; i < total_pixels; i++) {
-        const PixelLUT &px = lut[i];
-        const i32 base_raw = px.base_angle.raw();
-        const i32 dist_raw = px.dist_scaled.raw();
+        const i32 base_raw = base_angle[i];
+        const i32 dist_raw = dist_scaled[i];
 
         auto noise_ch = [&](i32 rad_raw, i32 lin_raw) -> i32 {
             u32 a24 = radiansToA24(base_raw, rad_raw);
@@ -496,11 +474,11 @@ void Chasing_Spirals_Q31_SIMD(Context &ctx) {
         i32 s1 = noise_ch(rad1_raw, lin1_raw);
         i32 s2 = noise_ch(rad2_raw, lin2_raw);
 
-        i32 r = applyRadialFilter(s0, px.rf3.raw());
-        i32 g = applyRadialFilter(s1, px.rf_half.raw());
-        i32 b = applyRadialFilter(s2, px.rf_quarter.raw());
+        i32 r = applyRadialFilter(s0, rf3_arr[i]);
+        i32 g = applyRadialFilter(s1, rf_half_arr[i]);
+        i32 b = applyRadialFilter(s2, rf_qtr_arr[i]);
 
-        leds[px.pixel_idx] = CRGB(static_cast<u8>(r), static_cast<u8>(g), static_cast<u8>(b));
+        leds[pixel_idx[i]] = CRGB(static_cast<u8>(r), static_cast<u8>(g), static_cast<u8>(b));
     }
 }
 

@@ -16,7 +16,12 @@ void perlin_s16x16_simd::pnoise2d_raw_simd4(
     const fl::i32 *fade_lut, const fl::u8 *perm,
     fl::i32 out[4])
 {
-    // SIMD: Load input coordinates as vectors
+    // ── [PACK flat arrays → SIMD register] ───────────────────────────────────
+    // nx[4] and ny[4] arrive as plain scalar arrays (filled by the caller's
+    // simd4_computePerlinCoords, which itself received values unpacked from the
+    // sincos32_simd SIMD register). We re-load them into SIMD here via
+    // load_u32_4() (unaligned 128-bit load). The reinterpret_cast<u32*> is safe:
+    // i32 and u32 share identical bit width and representation on all targets.
     fl::simd::simd_u32x4 nx_vec = fl::simd::load_u32_4(reinterpret_cast<const fl::u32*>(nx)); // ok reinterpret cast
     fl::simd::simd_u32x4 ny_vec = fl::simd::load_u32_4(reinterpret_cast<const fl::u32*>(ny)); // ok reinterpret cast
 
@@ -38,14 +43,20 @@ void perlin_s16x16_simd::pnoise2d_raw_simd4(
     fl::simd::simd_u32x4 mask_255 = fl::simd::set1_u32_4(255);
     X_vec = fl::simd::and_u32_4(X_vec, mask_255);
     Y_vec = fl::simd::and_u32_4(Y_vec, mask_255);
+    // ── [end SIMD coordinate arithmetic] ──────────────────────────────────────
 
-    // Extract to arrays for scalar operations (permutation lookups, fade LUT)
+    // ── [UNPACK SIMD register → flat arrays] ──────────────────────────────────
+    // The permutation table (perm[]) and fade LUT require random-access scalar
+    // indexing — SSE2 has no gather instruction (that requires AVX2). We extract
+    // all 4 processed coordinates back to scalar arrays here so that the
+    // subsequent scalar loops can index the tables with ordinary C array syntax.
     fl::u32 X[4], Y[4];
     fl::i32 x_frac[4], y_frac[4];
     fl::simd::store_u32_4(X, X_vec);
     fl::simd::store_u32_4(Y, Y_vec);
     fl::simd::store_u32_4(reinterpret_cast<fl::u32*>(x_frac), x_frac_vec); // ok reinterpret cast
     fl::simd::store_u32_4(reinterpret_cast<fl::u32*>(y_frac), y_frac_vec); // ok reinterpret cast
+    // ── [end UNPACK ← SIMD] ───────────────────────────────────────────────────
 
     // SCALAR: Fade LUT lookups (requires gather, not available on SSE2)
     fl::i32 u[4], v[4];
@@ -82,6 +93,15 @@ void perlin_s16x16_simd::pnoise2d_raw_simd4(
         // Shift to match s16x16 fractional bits
         out[i] = result >> (HP_BITS - fl::s16x16::FRAC_BITS);
     }
+}
+
+fl::simd::simd_u32x4 perlin_s16x16_simd::pnoise2d_raw_simd4_vec(
+    const fl::i32 nx[4], const fl::i32 ny[4],
+    const fl::i32 *fade_lut, const fl::u8 *perm)
+{
+    FL_ALIGNAS(16) fl::i32 out[4];
+    pnoise2d_raw_simd4(nx, ny, fade_lut, perm, out);
+    return fl::simd::load_u32_4(reinterpret_cast<const fl::u32*>(out)); // ok reinterpret cast
 }
 
 }  // namespace fl

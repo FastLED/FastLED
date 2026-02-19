@@ -22,6 +22,17 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run python .claude/hooks/lint-on-stop.py",
+            "timeout": 120
+          }
+        ]
+      }
     ]
   }
 }
