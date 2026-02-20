@@ -119,6 +119,9 @@ constexpr uint8_t PREAMBLE_16BIT_800KHZ[15] = {
     0x00, 0x00                           // Reserved (2 bytes)
 };
 
+// Note: PREAMBLE_16BIT_1600KHZ (mode byte 0x9B) timing is tested via encodeUCS7604
+// encoder tests, not in this preamble-specific test module.
+
 /// Interface for accessing captured byte data
 class IData {
 public:
