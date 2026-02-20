@@ -3,7 +3,6 @@
 import os
 import re
 import sys
-import time
 from collections import deque
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -12,6 +11,18 @@ from typing import Optional
 
 from running_process import RunningProcess
 
+from ci.meson.cache_utils import (
+    _check_full_run_cache,
+    _check_ninja_skip,
+    _check_test_result_cached,
+    _get_full_run_cache_file,
+    _get_max_source_file_mtime,
+    _get_ninja_skip_state_file,
+    _get_test_result_cache_file,
+    _save_full_run_result,
+    _save_ninja_skip_state,
+    _should_skip_scan_dir,
+)
 from ci.meson.compiler import get_meson_executable
 from ci.meson.output import _print_banner
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
@@ -109,6 +120,27 @@ def compile_meson(
         build_mode = "debug"
     elif "meson-release" in str(build_dir):
         build_mode = "release"
+
+    # NINJA SKIP OPTIMIZATION: If target is up-to-date, skip the full ninja
+    # startup (~2-3s) and return immediately.
+    #
+    # Conditions checked (~20-50ms total):
+    #   1. build.ninja mtime unchanged      → no meson reconfiguration
+    #   2. libfastled.a mtime unchanged     → no src/ code changes (proxy)
+    #   3. tests/ max source file mtime ≤ saved → no test source modifications
+    #   4. Output DLL/exe mtime unchanged   → not rebuilt externally or deleted
+    #
+    # Only applied to specific targets (not all-build) and non-IWYU mode.
+    # Overhead: ~20-50ms (os.scandir over tests/ source files). Savings: ~2-3s.
+    if target and not check and _check_ninja_skip(build_dir, target):
+        if not quiet:
+            _ts_print(f"[BUILD] ✓ Target up-to-date (ninja skipped)")
+        return CompileResult(
+            success=True,
+            error_output="",
+            suppressed_errors=[],
+            error_log_file=None,
+        )
 
     if target:
         cmd.append(target)
@@ -589,6 +621,12 @@ def compile_meson(
 
         # Don't print "Compilation successful" - the transition to Running phase implies success
         # This was previously conditional on quiet mode, but it's always redundant
+
+        # Save ninja skip state so the next run can bypass ninja for this target.
+        # Only for specific targets (not all-build) and non-IWYU mode.
+        if target and not check:
+            _save_ninja_skip_state(build_dir, target)
+
         return CompileResult(
             success=True,
             error_output="",

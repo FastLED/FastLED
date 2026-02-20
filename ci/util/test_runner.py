@@ -1619,7 +1619,9 @@ def runner(
                 )
 
             # Print timing summary table for unit-only mode
-            show_sccache_stats()
+            # Skip sccache stats when test result came from cache (no compilation occurred)
+            if not result.compilation_skipped:
+                show_sccache_stats()
             unit_timing = ProcessTiming(
                 name=f"cpp_unit_tests ({result.num_tests_passed}/{result.num_tests_run} passed)",
                 duration=result.duration,
@@ -1683,6 +1685,30 @@ def runner(
 
             if not result.success:
                 sys.exit(1)
+
+            # Save full-run cache after successful complete test suite run
+            # so the CASE 2 ultra-early exit can fire on next invocation.
+            if result.num_tests_run and result.num_tests_run == result.num_tests_passed:
+                try:
+                    from ci.meson.compile import _save_full_run_result
+                    from ci.util.paths import PROJECT_ROOT
+
+                    _build_mode_save = getattr(args, "build_mode", None) or (
+                        "debug" if getattr(args, "debug", False) else "quick"
+                    )
+                    _build_dir_save = (
+                        PROJECT_ROOT / ".build" / f"meson-{_build_mode_save}"
+                    )
+                    _save_full_run_result(
+                        _build_dir_save,
+                        result.num_tests_passed,
+                        result.num_tests_run,
+                        result.duration,
+                    )
+                except KeyboardInterrupt:
+                    handle_keyboard_interrupt_properly()
+                except Exception:
+                    pass  # Non-critical
         else:
             # Fingerprint cache hit - skip unit tests
             cache_msg = _format_cache_hit_message(
@@ -1822,8 +1848,50 @@ def runner(
         if meson_test_timing:
             all_timings.insert(0, meson_test_timing)  # Put unit tests first
         if all_timings:
-            # Show sccache statistics before test summary
-            show_sccache_stats()
+            # Show sccache statistics only when actual compilation occurred.
+            # Skip when all tests were fingerprint-cached (no subprocess compilation ran).
+            # timings is non-empty when at least one process (examples, python, wasm) ran.
+            # meson_test_timing.skipped=False when meson tests actually compiled+ran.
+            _did_compile = bool(timings) or (
+                meson_test_timing is not None and not meson_test_timing.skipped
+            )
+            if _did_compile:
+                show_sccache_stats()
+            else:
+                # All tests were fingerprint-cached — refresh the full run cache so
+                # the next invocation's CASE 2 ultra-early exit can fire even if
+                # meson has reconfigured (updated build.ninja) since the last full run.
+                # We re-save the previous result with the current build state.
+                if not getattr(args, "check", False):
+                    try:
+                        import json as _json
+
+                        from ci.meson.compile import (
+                            _get_full_run_cache_file,
+                            _save_full_run_result,
+                        )
+                        from ci.util.paths import PROJECT_ROOT
+
+                        _build_mode_tr = getattr(args, "build_mode", None) or (
+                            "debug" if getattr(args, "debug", False) else "quick"
+                        )
+                        _build_dir_tr = (
+                            PROJECT_ROOT / ".build" / f"meson-{_build_mode_tr}"
+                        )
+                        _cache_file_tr = _get_full_run_cache_file(_build_dir_tr)
+                        if _cache_file_tr.exists():
+                            _saved_tr = _json.loads(_cache_file_tr.read_text())
+                            if _saved_tr.get("result") == "pass":
+                                _save_full_run_result(
+                                    _build_dir_tr,
+                                    _saved_tr.get("num_passed", 0),
+                                    _saved_tr.get("num_tests", 0),
+                                    _saved_tr.get("duration", 0.0),
+                                )
+                    except KeyboardInterrupt:
+                        handle_keyboard_interrupt_properly()
+                    except Exception:
+                        pass  # Non-critical optimization; fail silently
             summary = _format_timing_summary(all_timings)
             # Use print() instead of ts_print() to avoid orphan timestamps
             # before multi-line content (the summary starts with \n)

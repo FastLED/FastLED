@@ -327,43 +327,12 @@ def determine_test_categories(args: TestArgs) -> TestCategories:
 # C++ file extensions where whitespace-only changes don't affect compiled output.
 # Normalizing whitespace in these files prevents spurious fingerprint cache misses
 # when a developer adds/removes blank lines or trailing spaces in headers.
-_CPP_EXTENSIONS = frozenset({".h", ".hpp", ".cpp", ".c", ".cc", ".ino"})
-
-
-def _normalize_cpp_content(content: bytes) -> bytes:
-    """
-    Normalize C++ file content for whitespace-insensitive hashing.
-
-    Strips trailing whitespace from each line and normalizes line endings.
-    This prevents whitespace-only changes from invalidating the fingerprint cache,
-    avoiding full rebuilds (4+ minutes) when only cosmetic edits were made.
-
-    Safe for C++ because trailing whitespace and blank lines have no effect on
-    compiled binary output. The only exception would be __LINE__ usage, but
-    we only strip *trailing* whitespace (not leading indentation or blank lines
-    within code), preserving line count.
-    """
-    # Normalize line endings to LF
-    normalized = content.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
-    # Strip trailing whitespace from each line (preserves indentation and line count)
-    lines = normalized.split(b"\n")
-    stripped = [line.rstrip() for line in lines]
-    # Remove trailing blank lines at end of file
-    while stripped and not stripped[-1]:
-        stripped.pop()
-    return b"\n".join(stripped)
-
-
 @functools.lru_cache(maxsize=32)
 def _hash_directory(start_directory: Path, glob: str) -> str:
     """
     Compute SHA-256 hash of directory contents. Cached per process invocation to
     avoid redundant file I/O when multiple fingerprint checks scan the same directory
     (e.g., src/ is read by check_all, check_cpp, check_examples, and check_wasm).
-
-    For C++ files (.h, .hpp, .cpp, .c, .cc, .ino), whitespace is normalized before
-    hashing so that trailing-whitespace-only or blank-line-only changes don't trigger
-    cache invalidation and unnecessary full rebuilds.
 
     Raises exceptions on failure so lru_cache does not cache error results.
     """
@@ -385,19 +354,11 @@ def _hash_directory(start_directory: Path, glob: str) -> str:
             rel_path = file_path.relative_to(start_directory)
             hasher.update(str(rel_path).encode("utf-8"))
 
-            # Add the file content to the hash
+            # Add the file content to the hash (raw bytes, no normalization)
             try:
-                if file_path.suffix.lower() in _CPP_EXTENSIONS:
-                    # For C++ files: normalize whitespace to avoid spurious cache misses
-                    # from cosmetic-only edits (trailing spaces, blank lines at end).
-                    # A full read is needed for normalization; C++ headers are small (<1MB).
-                    content = file_path.read_bytes()
-                    hasher.update(_normalize_cpp_content(content))
-                else:
-                    # Non-C++ files: hash raw content in chunks (whitespace may be significant)
-                    with open(file_path, "rb") as f:
-                        for chunk in iter(lambda: f.read(4096), b""):
-                            hasher.update(chunk)
+                with open(file_path, "rb") as f:
+                    for chunk in iter(lambda: f.read(4096), b""):
+                        hasher.update(chunk)
             except KeyboardInterrupt:
                 # Only notify main thread if we're in a worker thread
                 if threading.current_thread() != threading.main_thread():

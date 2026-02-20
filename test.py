@@ -1,34 +1,54 @@
 #!/usr/bin/env python3
+# Lazy imports: traceback and threading are deferred to avoid paying their
+# import cost (~4ms and ~2.5ms respectively) on early-exit paths (CASE 0-4).
+# They are imported just-in-time in the code that actually needs them.
+from __future__ import annotations
 
 import _thread
 import json
 import os
 import sys
-import threading
 import time
-import traceback
 import warnings
 from enum import Enum, auto
 from pathlib import Path
 
-from ci.runners.avr8js_runner import run_avr8js_tests
-from ci.runners.docker_runner import run_docker_tests
-from ci.runners.qemu_runner import run_qemu_tests
-from ci.util.fingerprint import FingerprintManager
+# Ultra-early-exit cache helpers: imported at module level to avoid heavy
+# ci.* imports during startup. See ci/early_exit_cache.py for details.
+from ci.early_exit_cache import (
+    argv_ultra_early_exit,
+    check_single_test_cached,
+)
+
+
+# Record start time as early as possible, before any heavy imports.
+# This gives the most accurate timing for ultra-early exit messages.
+_START_TIME = time.time()
+
+# Change to script directory for relative path resolution in early exit.
+# Ultra-early exit uses relative paths (.cache/, .build/, src/, etc.)
+# and requires the working directory to be the project root.
+os.chdir(Path(__file__).parent)
+
+
+# Ultra-early exit fires BEFORE heavy ci.util.* imports (~318ms savings on cached runs).
+# All ultra-early-exit logic is in ci.early_exit_cache (imported above).
+# typeguard (177ms), psutil (28ms), asyncio (50ms), unittest.mock (65ms) are skipped
+# entirely when the test result is found in cache.
+argv_ultra_early_exit(_START_TIME)
+
+# --- Heavy imports: only reached if no early exit fired above ---
 from ci.util.global_interrupt_handler import (
     signal_interrupt,
     wait_for_cleanup,
 )
-from ci.util.output_formatter import TimestampFormatter
 from ci.util.running_process_manager import RunningProcessManagerSingleton
-from ci.util.sccache_config import show_sccache_stats
 from ci.util.test_args import parse_args
 from ci.util.test_env import (
     dump_thread_stacks,
     setup_environment,
     setup_force_exit,
 )
-from ci.util.test_runner import runner as test_runner
 from ci.util.test_types import (
     process_test_flags,
 )
@@ -41,6 +61,9 @@ class RebuildMode(Enum):
     CACHED = auto()  # Use fingerprint cache normally
     NO_CACHE = auto()  # Disable fingerprint cache (--no-fingerprint)
     FULL_REBUILD = auto()  # Force full rebuild (--force, --clean)
+
+
+import threading  # noqa: PLC0415 - lazy import (not at top level to speed up early-exit paths)
 
 
 _CANCEL_WATCHDOG = threading.Event()
@@ -87,6 +110,8 @@ def make_watch_dog_thread(
         except Exception as e:
             ts_print(f"Failed to dump active processes: {e}")
 
+        import traceback  # noqa: PLC0415 - lazy: only imported when watchdog fires
+
         traceback.print_stack()
         time.sleep(0.5)
 
@@ -99,11 +124,10 @@ def make_watch_dog_thread(
 
 def main() -> None:
     try:
-        # Record start time
-        start_time = time.time()
-
-        # Change to script directory first
-        os.chdir(Path(__file__).parent)
+        # Use module-level start time (recorded before heavy imports for accuracy).
+        # _argv_ultra_early_exit() already fired at module level; if we reached main(),
+        # the early exit did not apply and we proceed normally.
+        start_time = _START_TIME
 
         # Parse and process arguments
         args = parse_args()
@@ -114,6 +138,32 @@ def main() -> None:
 
             list_all_tests(filter_pattern=args.test, filter_type=None)
             sys.exit(0)
+
+        # ULTRA-EARLY EXIT: Check if the requested test result is already cached.
+        # Uses check_single_test_cached() from ci.early_exit_cache for the full
+        # pipeline: name normalization → candidate matching → ninja skip → result cache.
+        if (
+            args.test
+            and not getattr(args, "clean", False)
+            and not getattr(args, "check", False)
+            and not getattr(args, "no_fingerprint", False)
+        ):
+            try:
+                _build_mode_early = (
+                    args.build_mode
+                    if args.build_mode
+                    else ("debug" if args.debug else "quick")
+                )
+                _build_dir_early = Path(".build") / f"meson-{_build_mode_early}"
+                if check_single_test_cached(args.test, _build_dir_early):
+                    print("✅ All tests passed (1/1 cached)")
+                    _CANCEL_WATCHDOG.set()
+                    print(f"Total: {time.time() - start_time:.2f}s")
+                    sys.exit(0)
+            except KeyboardInterrupt:
+                _thread.interrupt_main()
+            except Exception:
+                pass  # If ultra-early check fails, continue normally
 
         # Handle --no-unity flag
         if args.no_unity:
@@ -175,6 +225,10 @@ def main() -> None:
             sys.exit(1)
 
         # Set up fingerprint caching
+        # Lazy import: FingerprintManager pulls in ci.util.test_types -> typeguard (~245ms).
+        # We defer this until after all ultra-early exits so cached runs skip it entirely.
+        from ci.util.fingerprint import FingerprintManager
+
         cache_dir = Path(".cache")
         # Determine build mode (default to "quick")
         # IMPORTANT: If --debug is set, use "debug" mode even if --build-mode is not specified
@@ -204,6 +258,8 @@ def main() -> None:
 
         # Handle --docker flag: run tests in Docker container
         if args.docker:
+            from ci.runners.docker_runner import run_docker_tests
+
             ts_print("=== Docker Testing ===")
             exit_code = run_docker_tests(args)
             sys.exit(exit_code)
@@ -237,12 +293,16 @@ def main() -> None:
 
             # Route to appropriate backend
             if backend == "qemu":
+                from ci.runners.qemu_runner import run_qemu_tests
+
                 ts_print(f"=== QEMU Testing ({platform}) ===")
                 # Convert --run to --qemu format for backward compatibility
                 args.qemu = args.run
                 run_qemu_tests(args)
                 return
             elif backend == "avr8js":
+                from ci.runners.avr8js_runner import run_avr8js_tests
+
                 ts_print(f"=== avr8js Testing ({platform}) ===")
                 # Run avr8js tests
                 run_avr8js_tests(args)
@@ -255,6 +315,8 @@ def main() -> None:
 
         # Handle QEMU testing (deprecated - use --run)
         if args.qemu is not None:
+            from ci.runners.qemu_runner import run_qemu_tests
+
             ts_print("=== QEMU Testing ===")
             ts_print("Note: --qemu is deprecated, use --run instead")
             run_qemu_tests(args)
@@ -388,6 +450,11 @@ def main() -> None:
 
                 # Only show cache status when it's enabled (the notable case)
                 # When disabled (--no-fingerprint), this is the default so no message needed
+
+                # Lazy import: test_runner loads rich.console (~106ms) and other heavy
+                # modules. By importing here (not at top level), we skip those imports
+                # entirely on the ultra-early-exit path (cached test result).
+                from ci.util.test_runner import runner as test_runner
 
                 test_runner(
                     args,

@@ -18,6 +18,7 @@ from ci.meson.build_config import (
     setup_meson_build,
 )
 from ci.meson.build_optimizer import make_build_optimizer
+from ci.meson.cache_utils import _save_test_result_state
 from ci.meson.compile import (
     CompileResult,
     _is_compilation_error,
@@ -832,6 +833,7 @@ def run_meson_build_and_test(
         # 2. A DLL loaded by the shared runner.exe (e.g., fl_fixed_point_s16x16.dll)
         # 3. A profile test in tests/profile/ subdirectory
         test_cmd: list[str] = []
+        _artifact_path: Optional[Path] = None  # Tracked for test_result_cache update
 
         # Check for profile tests first (in tests/profile/ subdirectory)
         if meson_test_name.startswith("profile_"):
@@ -840,33 +842,37 @@ def run_meson_build_and_test(
             )
             if profile_exe_path.exists():
                 test_cmd = [str(profile_exe_path)]
+                _artifact_path = profile_exe_path
             else:
                 # Try Unix variant (no .exe extension)
                 profile_exe_unix = build_dir / "tests" / "profile" / meson_test_name
                 if profile_exe_unix.exists():
                     test_cmd = [str(profile_exe_unix)]
+                    _artifact_path = profile_exe_unix
 
         # If not a profile test, check standard locations
         if not test_cmd:
             test_exe_path = build_dir / "tests" / f"{meson_test_name}.exe"
             if test_exe_path.exists():
-                # Found copied runner .exe
+                # Found copied runner .exe (may be a copy of runner.exe that auto-loads the DLL)
                 test_cmd = [str(test_exe_path)]
+                # Prefer DLL as artifact_path: DLL changes with test code; .exe is a runner copy
+                _dll_candidate = build_dir / "tests" / f"{meson_test_name}.dll"
+                _artifact_path = (
+                    _dll_candidate if _dll_candidate.exists() else test_exe_path
+                )
 
         if not test_cmd:
             # Try Unix variant (no .exe extension)
             test_exe_unix = build_dir / "tests" / meson_test_name
             if test_exe_unix.exists():
                 test_cmd = [str(test_exe_unix)]
+                _artifact_path = test_exe_unix
             else:
                 # Try DLL-based test architecture: runner + test.dll/.so
                 # On Windows: runner.exe + test.dll
                 # On Linux: runner + test.so
-                import platform
-
-                runner_name = (
-                    "runner.exe" if platform.system() == "Windows" else "runner"
-                )
+                runner_name = "runner.exe" if os.name == "nt" else "runner"
                 runner_exe = build_dir / "tests" / runner_name
                 test_dll = build_dir / "tests" / f"{meson_test_name}.dll"
 
@@ -878,11 +884,13 @@ def run_meson_build_and_test(
 
                 if runner_exe.exists() and test_dll.exists():
                     test_cmd = [str(runner_exe), str(test_dll)]
+                    _artifact_path = test_dll
                 elif runner_exe.exists() and not test_dll.exists():
                     # Try .so for Linux
                     test_so = build_dir / "tests" / f"{meson_test_name}.so"
                     if test_so.exists():
                         test_cmd = [str(runner_exe), str(test_so)]
+                        _artifact_path = test_so
 
         if not test_cmd:
             _ts_print(
@@ -1016,6 +1024,10 @@ def run_meson_build_and_test(
                     _print_error("[MESON] Test output:")
                     for line in proc.stdout.splitlines()[-50:]:  # Last 50 lines
                         _ts_print(f"  {line}")
+                if _artifact_path is not None:
+                    _save_test_result_state(
+                        build_dir, meson_test_name, _artifact_path, passed=False
+                    )
                 return MesonTestResult(
                     success=False,
                     duration=duration,
@@ -1027,6 +1039,10 @@ def run_meson_build_and_test(
             # Clear phase tracking on success
             phase_tracker.clear()
 
+            if _artifact_path is not None:
+                _save_test_result_state(
+                    build_dir, meson_test_name, _artifact_path, passed=True
+                )
             build_duration = duration - test_duration
             _print_success(
                 f"✅ All tests passed (1/1 in {test_duration:.2f}s, build: {build_duration:.1f}s)"

@@ -37,9 +37,16 @@ def get_meson_executable() -> str:
 
 def check_meson_installed() -> bool:
     """Check if Meson is installed and accessible."""
+    meson_exe = get_meson_executable()
+    # Fast path: if get_meson_executable() returned an absolute venv path, it
+    # already confirmed the file exists - no need for a subprocess round-trip.
+    meson_path = Path(meson_exe)
+    if meson_path.is_absolute() and meson_path.exists():
+        return True
+    # Slow path: venv meson not found; verify the system-PATH "meson" works.
     try:
         result = subprocess.run(
-            [get_meson_executable(), "--version"],
+            [meson_exe, "--version"],
             capture_output=True,
             text=True,
             encoding="utf-8",
@@ -90,14 +97,29 @@ def check_meson_version_compatibility(build_dir: Path) -> tuple[bool, str]:
         - is_compatible: True if versions match or no stored version exists
         - message: Description of any incompatibility found
     """
+    # Fast path: skip meson --version subprocess when meson.exe hasn't changed
+    # since the build directory was last configured.
+    # If meson.exe mtime < coredata.dat mtime, meson was installed BEFORE the
+    # last configuration → same version must be in use → compatible.
+    coredata_path = build_dir / "meson-private" / "coredata.dat"
+    meson_exe_path = Path(get_meson_executable())
+    if (
+        meson_exe_path.is_absolute()
+        and meson_exe_path.exists()
+        and coredata_path.exists()
+    ):
+        try:
+            if meson_exe_path.stat().st_mtime < coredata_path.stat().st_mtime:
+                return True, "Meson version compatible (mtime fast-path)"
+        except OSError:
+            pass  # Fall through to full version check
+
+    if not coredata_path.exists():
+        return True, "Build directory not configured yet"
+
     current_version = get_meson_version()
     if current_version == "unknown":
         return True, "Could not determine meson version"
-
-    # Check the stored meson version in coredata.dat
-    coredata_path = build_dir / "meson-private" / "coredata.dat"
-    if not coredata_path.exists():
-        return True, "Build directory not configured yet"
 
     try:
         import pickle

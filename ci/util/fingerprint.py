@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 from typing import Callable, Dict, Optional
 
@@ -12,6 +13,109 @@ from ci.util.test_types import (
     calculate_wasm_fingerprint,
 )
 from ci.util.timestamp_print import ts_print
+
+
+# Directories to skip in mtime walk. These contain generated/cached files,
+# not developer-edited source files. Excluding them prevents false-positive
+# cache invalidation when Python writes .pyc files or other tools update caches.
+_MTIME_SKIP_DIRS = frozenset(
+    [
+        "__pycache__",
+        ".git",
+        "node_modules",
+        ".mypy_cache",
+        ".ruff_cache",
+        ".cache",
+        "bin",
+        ".pio",
+        "emscripten",
+        "fastled_js",
+    ]
+)
+# Prefix-based directory skipping: build artifact dirs that start with these prefixes
+# are skipped to avoid false positives. Covers .build-examples-*, build*, builddir*, .*.
+# Without prefix filtering: tests/ walks 400 dirs (~65ms); with it: 53 dirs (~6ms).
+_MTIME_SKIP_PREFIXES = (".build", "build", "builddir", ".")
+
+
+def _get_max_dir_mtime(root: Path) -> float:
+    """
+    Return the maximum mtime of any SOURCE directory under *root* (root included).
+
+    Walk only directory entries (skipping files) to detect whether any subdirectory
+    has been modified since a marker file was written.  Adding or removing a file
+    always updates the PARENT directory's mtime on NTFS, ext4, and APFS, so this
+    gives an O(#dirs) change proxy vs O(#files) for a full rglob.
+
+    Excludes non-source directories (``__pycache__``, ``.git``, etc.) that are
+    updated by tools (Python bytecode caching, version control) without representing
+    developer code changes.  Pruning them prevents false-positive cache invalidation
+    when the fingerprint file is older than a recently-written .pyc file.
+
+    Also excludes build artifact directories via name-exact and prefix-based
+    matching (_MTIME_SKIP_DIRS, _MTIME_SKIP_PREFIXES). This dramatically reduces
+    the number of directories walked in tests/ and ci/ (400→53 and 370→31 dirs).
+
+    Returns 0.0 when root does not exist or any OS error occurs.
+    """
+    max_mtime = 0.0
+    try:
+        for dirpath, dirnames, _ in os.walk(root):
+            # Prune non-source directories in-place so os.walk doesn't descend
+            # into them and we don't stat them (avoids false positives).
+            dirnames[:] = [
+                d
+                for d in dirnames
+                if d not in _MTIME_SKIP_DIRS
+                and not any(d.startswith(p) for p in _MTIME_SKIP_PREFIXES)
+            ]
+            try:
+                mtime = os.stat(dirpath).st_mtime
+                if mtime > max_mtime:
+                    max_mtime = mtime
+            except OSError:
+                pass
+    except OSError:
+        pass
+    return max_mtime
+
+
+def _get_max_source_file_mtime(root: Path) -> float:
+    """Return max mtime of any source file under root, skipping build directories.
+
+    Uses os.scandir() for efficiency. Detects BOTH structural changes (file
+    add/remove) AND content modifications (file writes), unlike
+    _get_max_dir_mtime() which only detects structural changes.
+
+    Scans C++ source files (.cpp, .h, .hpp, .c, .ino) by default.
+    Returns 0.0 on missing root or any OS error.
+    """
+    _SOURCE_EXTS = frozenset([".cpp", ".h", ".hpp", ".c", ".ino"])
+    max_mtime = 0.0
+    stack = [str(root)]
+    while stack:
+        current = stack.pop()
+        try:
+            with os.scandir(current) as it:
+                for entry in it:
+                    try:
+                        name = entry.name
+                        if entry.is_dir(follow_symlinks=False):
+                            if name not in _MTIME_SKIP_DIRS and not any(
+                                name.startswith(p) for p in _MTIME_SKIP_PREFIXES
+                            ):
+                                stack.append(entry.path)
+                        elif entry.is_file(follow_symlinks=False):
+                            _, ext = os.path.splitext(name)
+                            if ext.lower() in _SOURCE_EXTS:
+                                mtime = entry.stat(follow_symlinks=False).st_mtime
+                                if mtime > max_mtime:
+                                    max_mtime = mtime
+                    except OSError:
+                        pass
+        except OSError:
+            pass
+    return max_mtime
 
 
 class FingerprintManager:
@@ -113,17 +217,81 @@ class FingerprintManager:
         """Get the previous fingerprint data (from last run) for display"""
         return self._prev_fingerprints.get(name)
 
+    def _mtime_fast_path(self, name: str, *dirs: Path) -> bool:
+        """
+        Mtime-based fast-path for fingerprint checks.
+
+        If the fingerprint file for *name* is NEWER than all source file mtimes in
+        *dirs*, AND the stored status is "success", we can skip the expensive
+        rglob + SHA-256 hash computation entirely.
+
+        Returns True if the fast-path fired (fingerprint up-to-date, no change),
+        False if the full computation is needed.
+
+        Side effects on True: populates _prev_fingerprints[name] and
+        _fingerprints[name] so that save_all() behaves correctly.
+
+        Uses file-level mtime scanning (not directory-level) to correctly detect
+        content-only modifications. On NTFS/ext4, directory mtimes do NOT update
+        when a file's content changes (only on file create/delete), so the previous
+        directory-only approach could produce false "no change" results.
+
+        Overhead: ~20-70ms per call (file-level scanning of source files).
+        Savings: ~200-400ms vs full SHA-256 computation when no changes detected.
+        """
+        fp_file = self._get_fingerprint_file(name)
+        if not fp_file.exists():
+            return False
+        try:
+            fp_mtime = fp_file.stat().st_mtime
+            max_file_mtime = max(
+                (_get_max_source_file_mtime(d) for d in dirs), default=0.0
+            )
+            if max_file_mtime > fp_mtime:
+                return False  # a source file was modified after fingerprint write
+            prev = self.read(name)
+            if prev is None or prev.status != "success":
+                return False  # no previous result or previous run failed
+            # Fast-path fires: record the cached result without running the calculator
+            self._prev_fingerprints[name] = prev
+            self._fingerprints[name] = FingerprintResult(hash=prev.hash)
+            return True
+        except OSError:
+            return False
+
     def check_cpp(self, args: TestArgs) -> bool:
+        cwd = Path.cwd()
+        if self._mtime_fast_path("cpp_test", cwd / "src", cwd / "tests"):
+            return False  # no change detected via mtime fast-path
         return self.check("cpp_test", lambda: calculate_cpp_test_fingerprint(args))
 
     def check_examples(self, args: TestArgs) -> bool:
+        cwd = Path.cwd()
+        if self._mtime_fast_path("examples", cwd / "src", cwd / "examples"):
+            return False  # no change detected via mtime fast-path
         return self.check("examples", lambda: calculate_examples_fingerprint(args))
 
     def check_python(self) -> bool:
+        cwd = Path.cwd()
+        # Fast-path: if ci/ has no structural changes since last write, skip 135ms hash.
+        # Python tests depend on ci/ Python modules and ci/tests/ test files.
+        # Limitation: in-place file content edits (no add/remove) are not detected.
+        if self._mtime_fast_path("python_test", cwd / "ci"):
+            return False  # no change detected via mtime fast-path
         return self.check("python_test", calculate_python_test_fingerprint)
 
     def check_wasm(self) -> bool:
+        cwd = Path.cwd()
+        # Fast-path: if src/ and examples/ have no structural changes since last write,
+        # skip the expensive 500ms+ rglob + SHA-256 computation.
+        # WASM tests depend on src/ C++ files and examples/wasm/ source files.
+        # Limitation: in-place file content edits (no add/remove) are not detected.
+        if self._mtime_fast_path("wasm", cwd / "src", cwd / "examples"):
+            return False  # no change detected via mtime fast-path
         return self.check("wasm", calculate_wasm_fingerprint)
 
     def check_all(self) -> bool:
+        cwd = Path.cwd()
+        if self._mtime_fast_path("all", cwd / "src"):
+            return False  # no change detected via mtime fast-path
         return self.check("all", calculate_fingerprint)

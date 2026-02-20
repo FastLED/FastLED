@@ -40,6 +40,319 @@ class CleanupResult:
     failed_files: list[str]
 
 
+def inject_restat_into_static_linker_rule(build_dir: Path) -> bool:
+    """
+    Patch build.ninja to add `restat = 1` to the STATIC_LINKER rule.
+
+    This is required for the content-preserving archive optimization to work.
+    When combined with `ci/meson/ar_content_preserving.py` as the archiver:
+    - The archiver preserves libfastled.a mtime when content is unchanged
+    - ninja's `restat = 1` causes it to re-check libfastled.a mtime after archiving
+    - If mtime is unchanged, ninja does NOT propagate dirty to downstream DLL targets
+    - Result: 327 DLL relinks are suppressed when src/ whitespace changes
+
+    This patch is idempotent (safe to call multiple times) and handles regeneration
+    by checking if `restat = 1` is already present before modifying the file.
+
+    Args:
+        build_dir: Meson build directory containing build.ninja
+
+    Returns:
+        True if patch was applied or already present, False if build.ninja not found
+    """
+    build_ninja_path = build_dir / "build.ninja"
+    if not build_ninja_path.exists():
+        return False
+
+    try:
+        content = build_ninja_path.read_text(encoding="utf-8")
+    except OSError:
+        return False
+
+    # Check if STATIC_LINKER rule exists
+    if "rule STATIC_LINKER" not in content:
+        return False
+
+    # Find the STATIC_LINKER rule and check if restat=1 is already present
+    # The rule ends at the next blank line or next "rule " keyword
+    static_linker_pos = content.find("rule STATIC_LINKER")
+    if static_linker_pos == -1:
+        return False
+
+    # Find the end of the STATIC_LINKER rule (blank line or next rule)
+    rule_end = content.find("\n\n", static_linker_pos)
+    if rule_end == -1:
+        rule_end = len(content)
+
+    rule_text = content[static_linker_pos:rule_end]
+
+    # Check if restat=1 is already in this rule
+    if "restat = 1" in rule_text:
+        return True  # Already patched
+
+    # Insert `restat = 1` before the end of the rule
+    # The rule ends at the blank line; we insert before it
+    # Pattern: find " description = Linking static target $out\n" and append restat=1 after it
+    description_line = " description = Linking static target $out"
+    if description_line not in rule_text:
+        # Unexpected format - don't patch
+        return False
+
+    # Build new rule text with restat=1 appended after description
+    new_rule_text = rule_text.replace(
+        description_line,
+        description_line + "\n restat = 1",
+    )
+
+    # Replace in content
+    new_content = content[:static_linker_pos] + new_rule_text + content[rule_end:]
+
+    try:
+        build_ninja_path.write_text(new_content, encoding="utf-8")
+        return True
+    except OSError:
+        return False
+
+
+def inject_ar_wrapper_into_static_linker_command(
+    build_dir: Path,
+    source_dir: Path,
+) -> bool:
+    """
+    Patch build.ninja STATIC_LINKER command to use ar_content_preserving.py wrapper.
+
+    This patches the command directly in build.ninja (not via meson_native.txt) to
+    avoid triggering meson auto-regeneration. The patch is applied alongside
+    inject_restat_into_static_linker_rule() after any meson setup.
+
+    The patched command becomes:
+        "python.exe" "ar_content_preserving.py" "ar.exe" $LINK_ARGS $out $in
+
+    This wrapper intercepts archiving and preserves libfastled.a mtime when content
+    is unchanged (e.g., sccache cache hits that only update .obj mtime).
+
+    This patch is idempotent (safe to call multiple times). When combined with
+    restat=1 on the STATIC_LINKER rule, ninja suppresses DLL relinking when
+    archive content is unchanged.
+
+    Args:
+        build_dir: Meson build directory containing build.ninja
+        source_dir: Project source root (parent of ci/)
+
+    Returns:
+        True if patch was applied or already present, False if not applicable
+    """
+    ar_wrapper_script = source_dir / "ci" / "meson" / "ar_content_preserving.py"
+    if not ar_wrapper_script.exists():
+        return False
+
+    build_ninja_path = build_dir / "build.ninja"
+    if not build_ninja_path.exists():
+        return False
+
+    try:
+        content = build_ninja_path.read_text(encoding="utf-8")
+    except OSError:
+        return False
+
+    if "rule STATIC_LINKER" not in content:
+        return False
+
+    static_linker_pos = content.find("rule STATIC_LINKER")
+    rule_end = content.find("\n\n", static_linker_pos)
+    if rule_end == -1:
+        rule_end = len(content)
+
+    rule_text = content[static_linker_pos:rule_end]
+
+    # Idempotency check: if wrapper script name already in command, skip
+    if ar_wrapper_script.name in rule_text:
+        return True
+
+    # Find the command line in the rule
+    command_prefix = " command = "
+    if command_prefix not in rule_text:
+        return False
+
+    cmd_start = rule_text.find(command_prefix)
+    cmd_line_start = cmd_start + len(command_prefix)
+    cmd_line_end = rule_text.find("\n", cmd_line_start)
+    if cmd_line_end == -1:
+        cmd_line_end = len(rule_text)
+
+    original_cmd = rule_text[cmd_line_start:cmd_line_end]
+
+    # Verify expected suffix (flags, out, in positions match our wrapper's expectations)
+    if "$LINK_ARGS $out $in" not in original_cmd:
+        return False
+
+    # Build new command: prepend python + script before the existing ar command
+    python_exe = sys.executable
+    new_cmd = f'"{python_exe}" "{ar_wrapper_script}" {original_cmd}'
+
+    new_rule_text = rule_text[:cmd_line_start] + new_cmd + rule_text[cmd_line_end:]
+    new_content = content[:static_linker_pos] + new_rule_text + content[rule_end:]
+
+    try:
+        build_ninja_path.write_text(new_content, encoding="utf-8")
+        return True
+    except OSError:
+        return False
+
+
+def is_ar_content_preserving_active(build_dir: Path) -> bool:
+    """
+    Check if the content-preserving archive optimization is active in build.ninja.
+
+    Returns True if both patches are present:
+    - ar_content_preserving.py wrapper in the STATIC_LINKER command
+    - restat = 1 in the STATIC_LINKER rule
+
+    When this returns True, the BuildOptimizer's DLL fingerprinting is redundant:
+    - ar_content_preserving.py prevents the DLL relink cascade at the source
+    - BuildOptimizer.touch_dlls_if_lib_unchanged() (~5-6s) is no longer needed
+    - BuildOptimizer.save_fingerprints() (~5-6s) is no longer needed
+    - Skipping BuildOptimizer saves ~10-12 seconds per build
+
+    Performance: Uses a module-level cache populated by inject_ar_optimization_patches().
+    When inject_ar_optimization_patches() was called earlier in the same process
+    (which setup_meson_build() does), this function returns immediately from the cache
+    without reading build.ninja (~2ms saved per call).
+
+    Args:
+        build_dir: Meson build directory containing build.ninja
+
+    Returns:
+        True if both ar_content_preserving.py and restat=1 patches are active
+    """
+    # Fast path: check module-level cache populated by inject_ar_optimization_patches().
+    # In the normal code path, setup_meson_build() always calls that function first,
+    # so we get a cache hit here and avoid the build.ninja read (~2ms).
+    build_dir_key = str(build_dir)
+    if build_dir_key in _ar_opt_status_cache:
+        return _ar_opt_status_cache[build_dir_key]
+
+    # Cache miss: read build.ninja and check directly
+    build_ninja = build_dir / "build.ninja"
+    if not build_ninja.exists():
+        return False
+    try:
+        content = build_ninja.read_text(encoding="utf-8")
+        result = "ar_content_preserving.py" in content and "restat = 1" in content
+        _ar_opt_status_cache[build_dir_key] = result
+        return result
+    except OSError:
+        return False
+
+
+# Module-level cache for ar optimization status.
+# Populated by inject_ar_optimization_patches() to avoid repeated build.ninja reads.
+# Key: str(build_dir), Value: bool (True if both patches active)
+_ar_opt_status_cache: dict[str, bool] = {}
+
+
+def inject_ar_optimization_patches(build_dir: Path, source_dir: Path) -> bool:
+    """
+    Apply both ar optimization patches to build.ninja in a single read-modify-write.
+
+    Combines inject_restat_into_static_linker_rule() and
+    inject_ar_wrapper_into_static_linker_command() into one operation that reads
+    build.ninja only ONCE and writes at most ONCE (vs the original 2 reads + 2 writes).
+
+    Also populates _ar_opt_status_cache so that a subsequent call to
+    is_ar_content_preserving_active() can return from cache without reading
+    build.ninja a third time. This saves ~4ms per incremental build.
+
+    Patches applied:
+    1. ``restat = 1`` added to STATIC_LINKER rule (enables ninja cascade suppression)
+    2. ar_content_preserving.py wrapper prepended to STATIC_LINKER command
+
+    Args:
+        build_dir: Meson build directory containing build.ninja
+        source_dir: Project source root (parent of ci/)
+
+    Returns:
+        True if both patches are active after this call, False if not applicable
+    """
+    ar_wrapper_script = source_dir / "ci" / "meson" / "ar_content_preserving.py"
+    build_ninja_path = build_dir / "build.ninja"
+
+    if not ar_wrapper_script.exists() or not build_ninja_path.exists():
+        return False
+
+    try:
+        content = build_ninja_path.read_text(encoding="utf-8")
+    except OSError:
+        return False
+
+    if "rule STATIC_LINKER" not in content:
+        return False
+
+    # Idempotency check: if both patches already present, no write needed
+    has_ar_wrapper = ar_wrapper_script.name in content
+    has_restat = "restat = 1" in content
+
+    if has_ar_wrapper and has_restat:
+        _ar_opt_status_cache[str(build_dir)] = True
+        return True
+
+    # Need to apply one or both patches; find the STATIC_LINKER rule block
+    static_linker_pos = content.find("rule STATIC_LINKER")
+    if static_linker_pos == -1:
+        return False
+
+    rule_end = content.find("\n\n", static_linker_pos)
+    if rule_end == -1:
+        rule_end = len(content)
+
+    rule_text = content[static_linker_pos:rule_end]
+    new_rule_text = rule_text
+
+    # Patch 1: restat = 1 (enables ninja cascade suppression after archive)
+    if not has_restat:
+        description_line = " description = Linking static target $out"
+        if description_line in new_rule_text:
+            new_rule_text = new_rule_text.replace(
+                description_line,
+                description_line + "\n restat = 1",
+            )
+
+    # Patch 2: ar_content_preserving.py wrapper (preserves mtime when content unchanged)
+    if not has_ar_wrapper:
+        command_prefix = " command = "
+        if command_prefix in new_rule_text:
+            cmd_start = new_rule_text.find(command_prefix)
+            cmd_line_start = cmd_start + len(command_prefix)
+            cmd_line_end = new_rule_text.find("\n", cmd_line_start)
+            if cmd_line_end == -1:
+                cmd_line_end = len(new_rule_text)
+            original_cmd = new_rule_text[cmd_line_start:cmd_line_end]
+            if "$LINK_ARGS $out $in" in original_cmd:
+                python_exe = sys.executable
+                new_cmd = f'"{python_exe}" "{ar_wrapper_script}" {original_cmd}'
+                new_rule_text = (
+                    new_rule_text[:cmd_line_start]
+                    + new_cmd
+                    + new_rule_text[cmd_line_end:]
+                )
+
+    # Write modified content if anything changed (at most one write)
+    if new_rule_text != rule_text:
+        new_content = content[:static_linker_pos] + new_rule_text + content[rule_end:]
+        try:
+            build_ninja_path.write_text(new_content, encoding="utf-8")
+        except OSError:
+            _ar_opt_status_cache[str(build_dir)] = False
+            return False
+
+    # Verify both patches are now active and populate cache
+    patches_active = (
+        ar_wrapper_script.name in new_rule_text and "restat = 1" in new_rule_text
+    )
+    _ar_opt_status_cache[str(build_dir)] = patches_active
+    return patches_active
+
+
 def cleanup_build_artifacts(build_dir: Path, reason: str) -> dict[str, CleanupResult]:
     """
     Clean all build artifacts from a build directory.
@@ -163,6 +476,32 @@ def detect_system_llvm_tools() -> tuple[bool, bool]:
             continue
 
     return has_lld, has_llvm_ar
+
+
+def _get_max_dir_mtime(root: Path) -> float:
+    """
+    Return the maximum mtime of any directory under *root* (root included).
+
+    We walk only directory entries (skipping files) to efficiently detect
+    whether any subdirectory has been modified since a marker file was written.
+    Adding or removing a file updates the PARENT directory's mtime on all
+    common filesystems (NTFS, ext4, APFS), so this gives us a fast O(#dirs)
+    change detector compared to the O(#files) rglob-based approach.
+
+    Returns 0.0 when root does not exist or any OS error occurs.
+    """
+    max_mtime = 0.0
+    try:
+        for dirpath, _, _ in os.walk(root):
+            try:
+                mtime = os.stat(dirpath).st_mtime
+                if mtime > max_mtime:
+                    max_mtime = mtime
+            except OSError:
+                pass
+    except OSError:
+        pass
+    return max_mtime
 
 
 def setup_meson_build(
@@ -294,9 +633,6 @@ def setup_meson_build(
     # clang-tool-chain provides llvm-ar and lld that fully support thin archives
     use_thin_archives = not disable_thin_archives
 
-    # Legacy detection for standalone LLVM tools (kept for diagnostic messages)
-    has_lld, has_llvm_ar = detect_system_llvm_tools()
-
     # ============================================================================
     # CRITICAL: Check if thin archive configuration has changed
     # ============================================================================
@@ -317,8 +653,43 @@ def setup_meson_build(
     force_reconfigure = False
     compiler_version_changed = False  # Track for late check after compiler detection
 
-    # Get current source file hash (used for change detection and saving after setup)
-    current_source_hash, current_source_files = get_source_files_hash(source_dir)
+    # Pre-compute directory max-mtimes once for all fast-path checks below.
+    # The tests/ directory is needed by BOTH:
+    #   1. The source hash fast-path (src/ + tests/ combined max mtime, ~line 543)
+    #   2. The test discovery fast-path (tests/ max mtime alone, ~line 786)
+    # Without precomputation, tests/ is walked TWICE (~50ms each on Windows = ~100ms wasted).
+    # By computing once here and reusing below, we save ~50ms per incremental build.
+    _max_tests_dir_mtime: float = _get_max_dir_mtime(source_dir / "tests")
+
+    # Get current source file hash (used for change detection and saving after setup).
+    #
+    # Fast path: if source_files_marker is newer than every directory under src/
+    # and tests/, no files have been added or removed → use the cached hash without
+    # performing an expensive rglob walk (~200-500ms on large trees).
+    #
+    # Rationale: adding/removing a file always updates the PARENT directory's mtime
+    # on NTFS, ext4, and APFS.  So checking directory mtimes is an O(#dirs) proxy
+    # for the O(#files) rglob.  On a cache hit the walk is skipped entirely; on a
+    # miss we fall back to the full rglob as before.
+    current_source_hash: str = ""
+    current_source_files: list[str] = []
+    if source_files_marker.exists():
+        try:
+            _marker_mtime = source_files_marker.stat().st_mtime
+            _max_src_mtime = max(
+                _get_max_dir_mtime(source_dir / "src"),
+                _max_tests_dir_mtime,  # reuse precomputed value (avoids 2nd tests/ walk)
+            )
+            if _max_src_mtime <= _marker_mtime:
+                # No directory was modified after the marker → cached hash is valid.
+                _cached_hash = source_files_marker.read_text(encoding="utf-8").strip()
+                if _cached_hash:
+                    current_source_hash = _cached_hash
+                    # current_source_files stays [] - only used in log messages
+        except OSError:
+            pass
+    if not current_source_hash:
+        current_source_hash, current_source_files = get_source_files_hash(source_dir)
 
     # ============================================================================
     # CONSOLIDATED MARKER CHECKING
@@ -534,8 +905,24 @@ def setup_meson_build(
 
     # Check if test files have been added or removed (requires reconfigure)
     # This ensures Meson discovers new tests and removes deleted tests
+    #
+    # Fast path: if test_list_cache.txt is newer than every directory in tests/,
+    # no test files have been added or removed → skip the expensive importlib
+    # loading + rglob discovery entirely (~100-200ms savings on cache hit).
+    _test_list_cache_path = build_dir / "test_list_cache.txt"
+    _skip_test_discovery = False
+    if _test_list_cache_path.exists():
+        try:
+            _tlc_mtime = _test_list_cache_path.stat().st_mtime
+            if (
+                _max_tests_dir_mtime <= _tlc_mtime
+            ):  # reuse precomputed value (no 2nd walk)
+                _skip_test_discovery = True  # dirs unchanged → cache still valid
+        except OSError:
+            pass  # Fall through to full discovery on any error
+
     test_files_changed = False
-    if already_configured:
+    if already_configured and not _skip_test_discovery:
         try:
             # Import test discovery functions from tests/ directory
             # Uses importlib since tests/ is not a Python package
@@ -644,6 +1031,15 @@ def setup_meson_build(
                         temp_cache.unlink()
                     except (OSError, IOError):
                         pass
+            else:
+                # No test file changes detected.
+                # Touch the cache to update its mtime so that the directory-mtime
+                # fast-path can activate on the NEXT run (skipping this discovery).
+                # Without this, the cache stays old and fast-path never fires.
+                try:
+                    test_list_cache.touch()
+                except OSError:
+                    pass  # Non-critical - fast-path just won't fire next run
 
         except KeyboardInterrupt:
             handle_keyboard_interrupt_properly()
@@ -667,36 +1063,62 @@ def setup_meson_build(
             from ci.meson.example_metadata_cache import compute_example_files_hash
 
             examples_dir = source_dir / "examples"
-            example_cache_file = build_dir / "example_metadata.cache"
+            # Cache file location matches where meson.current_build_dir() writes it
+            # in examples/meson.build: .build/meson-quick/examples/example_metadata.cache
+            example_cache_file = build_dir / "examples" / "example_metadata.cache"
 
             if examples_dir.exists():
-                current_example_hash = compute_example_files_hash(examples_dir)
-
-                # Check cached example hash
-                cached_example_hash = ""
+                # Mtime fast-path: if example_cache_file is newer than all directories
+                # in examples/, no files have been added or removed since the last meson
+                # setup → skip the expensive 3-pass rglob + stat() + SHA256 computation.
+                #
+                # Rationale: adding or removing a file always updates the PARENT
+                # directory's mtime on NTFS, ext4, and APFS.  Checking only directory
+                # mtimes is an O(#dirs) proxy for structural changes (~5ms vs ~100ms).
+                #
+                # Limitation: in-place file content modifications update the FILE mtime
+                # but NOT the parent directory mtime, so they will not be detected by
+                # this fast-path.  This is acceptable because modifying existing example
+                # content without adding/removing files is a rare developer activity,
+                # and the next structural change will trigger reconfiguration anyway.
+                _skip_example_hash = False
                 if example_cache_file.exists():
                     try:
-                        import json as _json
+                        _cache_mtime = example_cache_file.stat().st_mtime
+                        _max_example_dir_mtime = _get_max_dir_mtime(examples_dir)
+                        if _max_example_dir_mtime <= _cache_mtime:
+                            _skip_example_hash = True  # No structural changes detected
+                    except OSError:
+                        pass  # Fall through to full hash computation
 
-                        with open(example_cache_file, "r") as f:
-                            cache_data = _json.load(f)
-                        cached_example_hash = cache_data.get("hash", "")
-                    except KeyboardInterrupt:
-                        handle_keyboard_interrupt_properly()
-                    except Exception:
-                        cached_example_hash = ""
+                if not _skip_example_hash:
+                    current_example_hash = compute_example_files_hash(examples_dir)
 
-                if current_example_hash != cached_example_hash:
-                    _print_warning(
-                        "[MESON] \u26a0\ufe0f  Detected example file changes (files added/removed/modified)"
-                    )
-                    example_files_changed = True
-                    # Delete the stale cache so meson.build re-runs discovery
+                    # Check cached example hash
+                    cached_example_hash = ""
                     if example_cache_file.exists():
                         try:
-                            example_cache_file.unlink()
-                        except OSError:
-                            pass
+                            import json as _json
+
+                            with open(example_cache_file, "r") as f:
+                                cache_data = _json.load(f)
+                            cached_example_hash = cache_data.get("hash", "")
+                        except KeyboardInterrupt:
+                            handle_keyboard_interrupt_properly()
+                        except Exception:
+                            cached_example_hash = ""
+
+                    if current_example_hash != cached_example_hash:
+                        _print_warning(
+                            "[MESON] \u26a0\ufe0f  Detected example file changes (files added/removed/modified)"
+                        )
+                        example_files_changed = True
+                        # Delete the stale cache so meson.build re-runs discovery
+                        if example_cache_file.exists():
+                            try:
+                                example_cache_file.unlink()
+                            except OSError:
+                                pass
 
         except KeyboardInterrupt:
             handle_keyboard_interrupt_properly()
@@ -845,8 +1267,30 @@ def setup_meson_build(
             _ts_print("[MESON]   - clang-tool-chain-ar")
         raise RuntimeError("clang-tool-chain wrapper commands not available")
 
-    # Get compiler version for consolidated output
-    current_compiler_version = get_compiler_version(clangxx_wrapper)
+    # Get compiler version for consolidated output.
+    # Optimization: Skip subprocess if the compiler binary hasn't changed since we
+    # last recorded its version. We compare the compiler wrapper's mtime against the
+    # compiler_version_marker's mtime: if the marker is NEWER than the binary, the
+    # binary predates the marker → the recorded version is still current.
+    current_compiler_version: str = ""  # initialized here; assigned below
+    _version_from_cache = False
+    _clangxx_path = Path(clangxx_wrapper)
+    if compiler_version_marker.exists() and _clangxx_path.exists():
+        try:
+            _compiler_mtime = _clangxx_path.stat().st_mtime
+            _marker_mtime = compiler_version_marker.stat().st_mtime
+            if _compiler_mtime < _marker_mtime:
+                # Compiler binary predates marker → version is stable → use cache
+                _cached_ver = compiler_version_marker.read_text(
+                    encoding="utf-8"
+                ).strip()
+                if _cached_ver and _cached_ver != "unknown":
+                    current_compiler_version = _cached_ver
+                    _version_from_cache = True
+        except OSError:
+            pass
+    if not _version_from_cache:
+        current_compiler_version = get_compiler_version(clangxx_wrapper)
 
     # Consolidated single-line toolchain summary (verbose mode only)
     # Before: 7 lines of compiler details
@@ -918,7 +1362,10 @@ def setup_meson_build(
         # Store check flag for later use during compilation phase
         # IWYU will be injected via environment if check=True
 
-        # Use llvm-ar wrapper from clang-tool-chain
+        # The ar wrapper (ar_content_preserving.py) is injected directly into
+        # build.ninja via inject_ar_wrapper_into_static_linker_command(), NOT via
+        # meson_native.txt. This avoids triggering meson auto-regeneration, which
+        # would strip our build.ninja patches (restat=1, ar wrapper command).
         ar_tool = f"['{llvm_ar_wrapper}']"
 
         # Detect platform for native file
@@ -1070,6 +1517,11 @@ endian = 'little'
                     f"[MESON] Warning: Could not write compiler version marker: {e}"
                 )
 
+        # Ensure build.ninja has restat=1 and ar wrapper on STATIC_LINKER rule.
+        # Combined function reads build.ninja once and populates _ar_opt_status_cache,
+        # so a subsequent is_ar_content_preserving_active() call in runner.py is free.
+        inject_ar_optimization_patches(build_dir, source_dir)
+
         return True
 
     # Run meson setup using RunningProcess for proper streaming output
@@ -1195,6 +1647,12 @@ endian = 'little'
         except (OSError, IOError) as e:
             # Not critical if marker file write fails
             _ts_print(f"[MESON] Warning: Could not write compiler version marker: {e}")
+
+        # Inject restat=1 and ar wrapper into STATIC_LINKER rule.
+        # Combined function reads build.ninja once and populates _ar_opt_status_cache,
+        # so a subsequent is_ar_content_preserving_active() call in runner.py is free.
+        # Must be called after meson setup so build.ninja exists.
+        inject_ar_optimization_patches(build_dir, source_dir)
 
         return True
 

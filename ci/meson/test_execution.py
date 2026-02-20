@@ -28,6 +28,9 @@ class MesonTestResult:
     num_tests_run: int  # Number of tests executed
     num_tests_passed: int  # Number of tests that passed
     num_tests_failed: int  # Number of tests that failed
+    compilation_skipped: bool = (
+        False  # True when result came from cache (no compilation)
+    )
 
     @staticmethod
     def construct_build_error(duration: float) -> "MesonTestResult":
