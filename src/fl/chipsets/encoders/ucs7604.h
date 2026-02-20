@@ -58,6 +58,12 @@ struct UCS7604CurrentControl {
 /// @param b_current Blue channel current control (0x0-0xF, wire order)
 /// @param w_current White channel current control (0x0-0xF, wire order)
 /// @note Current control values should already be reordered to match wire protocol (RGB)
+/// @note KNOWN LIMITATION: The UCS7604 protocol spec requires a ~20µs "W-code low"
+/// delay between the 8-byte verification code and the 7-byte configuration block.
+/// Our clockless controller sends all 15 bytes as a continuous bit-encoded stream
+/// without this gap. If this causes issues on some hardware, the transmission would
+/// need to be split into two separate clockless sends with a manual low-hold between
+/// them. See: https://github.com/clinder/Arduino-Teensy-UCS7604
 template <typename OutputIterator>
 void buildUCS7604Preamble(OutputIterator out, UCS7604Mode mode,
                           u8 r_current, u8 g_current,
@@ -72,7 +78,7 @@ void buildUCS7604Preamble(OutputIterator out, UCS7604Mode mode,
 
     // Header (2 bytes)
     *out++ = 0x00;
-    *out++ = 0x02;
+    *out++ = 0x03;
 
     // Mode byte
     *out++ = static_cast<u8>(mode);

@@ -105,7 +105,7 @@ struct RGBW16 {
 // Preamble constants for different modes
 constexpr uint8_t PREAMBLE_8BIT_800KHZ[15] = {
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,  // Sync pattern (6 bytes)
-    0x00, 0x02,                          // Header (2 bytes)
+    0x00, 0x03,                          // Header (2 bytes)
     0x03,                                // MODE: 8-bit @ 800kHz
     0x0F, 0x0F, 0x0F, 0x0F,             // RGBW current control (4 bytes)
     0x00, 0x00                           // Reserved (2 bytes)
@@ -113,7 +113,7 @@ constexpr uint8_t PREAMBLE_8BIT_800KHZ[15] = {
 
 constexpr uint8_t PREAMBLE_16BIT_800KHZ[15] = {
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,  // Sync pattern (6 bytes)
-    0x00, 0x02,                          // Header (2 bytes)
+    0x00, 0x03,                          // Header (2 bytes)
     0x8B,                                // MODE: 16-bit @ 800kHz
     0x0F, 0x0F, 0x0F, 0x0F,             // RGBW current control (4 bytes)
     0x00, 0x00                           // Reserved (2 bytes)
