@@ -20,7 +20,7 @@
 namespace fl {
 // Forward declaration for friend
 template<typename T, int N>
-class Singleton;
+class SingletonShared;
 namespace detail {
 
 /// @brief ESP32-S3 I2S LCD_CAM peripheral implementation

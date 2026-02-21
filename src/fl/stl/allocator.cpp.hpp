@@ -237,4 +237,47 @@ void DMAFree(void* ptr) {
 }
 #endif
 
+namespace detail {
+
+// Process-wide SlabAllocator registry.
+// Ensures all DLLs share the same SlabAllocator for a given (block_size, slab_size).
+// Simple fixed-size array since the number of unique allocator types is small.
+namespace {
+    struct SlabRegistryEntry {
+        fl::size block_size;
+        fl::size slab_size;
+        void* allocator;
+    };
+    static constexpr int SLAB_REGISTRY_MAX = 64;
+    static SlabRegistryEntry slab_registry[SLAB_REGISTRY_MAX];
+    static int slab_registry_count = 0;
+} // anonymous namespace
+
+void* slab_allocator_registry_get(fl::size block_size, fl::size slab_size) {
+    for (int i = 0; i < slab_registry_count; i++) {
+        if (slab_registry[i].block_size == block_size &&
+            slab_registry[i].slab_size == slab_size) {
+            return slab_registry[i].allocator;
+        }
+    }
+    return nullptr;
+}
+
+void slab_allocator_registry_set(fl::size block_size, fl::size slab_size, void* allocator) {
+    // Check if already registered (update)
+    for (int i = 0; i < slab_registry_count; i++) {
+        if (slab_registry[i].block_size == block_size &&
+            slab_registry[i].slab_size == slab_size) {
+            slab_registry[i].allocator = allocator;
+            return;
+        }
+    }
+    // Add new entry
+    if (slab_registry_count < SLAB_REGISTRY_MAX) {
+        slab_registry[slab_registry_count++] = {block_size, slab_size, allocator};
+    }
+}
+
+} // namespace detail
+
 } // namespace fl

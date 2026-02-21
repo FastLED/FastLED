@@ -49,7 +49,7 @@ template <typename TIMING> class ObjectFLEDGroup;
 class ObjectFLEDRegistry {
 public:
     static ObjectFLEDRegistry& getInstance() {
-        return fl::Singleton<ObjectFLEDRegistry>::instance();
+        return fl::SingletonShared<ObjectFLEDRegistry>::instance();
     }
 
     // Register a group for tracking
@@ -119,7 +119,7 @@ template <typename TIMING>
 class ObjectFLEDGroup {
 public:
     static ObjectFLEDGroup& getInstance() {
-        return fl::Singleton<ObjectFLEDGroup<TIMING>>::instance();
+        return fl::SingletonShared<ObjectFLEDGroup<TIMING>>::instance();
     }
 
     ObjectFLEDGroup()

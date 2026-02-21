@@ -3,22 +3,22 @@ Build Optimizer: Binary fingerprint caching to suppress unnecessary DLL relinks.
 
 Problem:
     When sccache returns cached .obj files on a cache hit, it updates the output file
-    mtime to NOW. This causes ninja to see .obj files as newer than libfastled.a,
-    triggering a re-archive of libfastled.a (same content, new mtime). Ninja then
-    sees libfastled.a as newer than all 328 DLLs, triggering relinking of all DLLs
+    mtime to NOW. This causes ninja to see .obj files as newer than fastled shared library,
+    triggering a re-archive of fastled shared library (same content, new mtime). Ninja then
+    sees fastled shared library as newer than all 328 DLLs, triggering relinking of all DLLs
     even though the final output is bit-for-bit identical.
 
 Solution:
-    1. After libfastled.a is archived during streaming compilation, hash its content.
+    1. After fastled shared library is archived during streaming compilation, hash its content.
     2. If the content matches the saved fingerprint from the last build, touch all
-       DLL files to update their mtime past libfastled.a's mtime.
+       DLL files to update their mtime past fastled shared library's mtime.
     3. Ninja then sees DLLs as newer than their inputs → skips relinking.
-    4. After each build, save the binary fingerprints of libfastled.a + all DLLs
+    4. After each build, save the binary fingerprints of fastled shared library + all DLLs
        so the next run can apply the same optimization.
 
 Usage:
     optimizer = BuildOptimizer(cache_file=Path(".cache/build_optimizer_quick.json"))
-    # ... during streaming build, after libfastled.a archive message ...
+    # ... during streaming build, after fastled shared library archive message ...
     touched = optimizer.touch_dlls_if_lib_unchanged(build_dir)
     # ... after build completes ...
     optimizer.save_fingerprints(build_dir)
@@ -32,8 +32,12 @@ from pathlib import Path
 from typing import Optional
 
 
-# Path of libfastled.a relative to the meson build directory
-_LIBFASTLED_REL_PATH = Path("ci") / "meson" / "native" / "libfastled.a"
+# Path of fastled shared library relative to the meson build directory
+# name_prefix='' in meson.build produces 'fastled.dll' on Windows, 'fastled.so' on Unix
+_LIBFASTLED_DIR = Path("ci") / "meson" / "native"
+_LIBFASTLED_REL_PATH = _LIBFASTLED_DIR / (
+    "fastled.dll" if os.name == "nt" else "fastled.so"
+)
 
 # DLL glob patterns to search within the build directory
 _DLL_PATTERNS = ["tests/*.dll", "examples/*.dll"]
@@ -61,7 +65,7 @@ def _find_dlls(build_dir: Path) -> list[Path]:
 
 class BuildOptimizer:
     """
-    Manages binary fingerprints for libfastled.a and test DLLs to suppress
+    Manages binary fingerprints for fastled shared library and test DLLs to suppress
     unnecessary relinking when library content hasn't changed.
 
     Thread-safe: touch_dlls_if_lib_unchanged() is designed to be called from
@@ -87,12 +91,12 @@ class BuildOptimizer:
 
     def touch_dlls_if_lib_unchanged(self, build_dir: Path) -> int:
         """
-        Check if libfastled.a content matches the saved fingerprint.
+        Check if fastled shared library content matches the saved fingerprint.
         If so, touch all DLL files whose content also matches the saved fingerprint,
-        making their mtime newer than libfastled.a so ninja skips relinking them.
+        making their mtime newer than fastled shared library so ninja skips relinking them.
 
-        This is called immediately after the "Linking static target libfastled.a"
-        line appears in ninja output - at that point libfastled.a has been freshly
+        This is called immediately after the "Linking static target fastled shared library"
+        line appears in ninja output - at that point fastled shared library has been freshly
         archived and its content can be compared to the saved fingerprint.
 
         Returns: number of DLLs touched (had mtime updated)
@@ -127,7 +131,7 @@ class BuildOptimizer:
             current_hash = _hash_file(dll_path)
             if current_hash and current_hash == saved_hash:
                 try:
-                    # Update mtime to just after libfastled.a was archived
+                    # Update mtime to just after fastled shared library was archived
                     # so ninja sees the DLL as newer than its inputs
                     os.utime(str(dll_path), (now, now))
                     touched += 1
@@ -138,7 +142,7 @@ class BuildOptimizer:
 
     def save_fingerprints(self, build_dir: Path) -> None:
         """
-        Save binary fingerprints of libfastled.a and all DLLs to the cache file.
+        Save binary fingerprints of fastled shared library and all DLLs to the cache file.
         Called after each successful build to prepare for the next run's optimization.
         """
         lib_path = build_dir / _LIBFASTLED_REL_PATH

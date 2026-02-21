@@ -289,7 +289,6 @@ def compile_meson(
 
         # Track what we've seen during build for cache status reporting
         seen_libfastled = False
-        seen_libplatforms_shared = False
         seen_libcrash_handler = False
         seen_pch = False
         seen_any_test = False
@@ -327,20 +326,12 @@ def compile_meson(
                 is_key_milestone = False
                 custom_message_shown = False
 
-                # Check for library archiving
+                # Check for library archiving (static libraries like libcrash_handler.a)
                 archive_match = archive_pattern.search(stripped)
                 if archive_match:
-                    if any(
-                        lib in stripped
-                        for lib in [
-                            "libfastled",
-                            "libplatforms_shared",
-                            "libcrash_handler",
-                        ]
-                    ):
+                    if "libcrash_handler" in stripped:
                         is_key_milestone = True
                         custom_message_shown = True
-                        # Show library path when it finishes building
                         lib_match = re.search(
                             r"(ci[\\/]meson[\\/]native[\\/]lib\S+\.a)", stripped
                         )
@@ -352,14 +343,7 @@ def compile_meson(
                             except ValueError:
                                 display_path = full_path
                             _ts_print(f"[BUILD] ✓ Core library: {display_path}")
-
-                            # Track which libraries we've seen for cache status reporting
-                            if "libfastled" in stripped:
-                                seen_libfastled = True
-                            if "libplatforms_shared" in stripped:
-                                seen_libplatforms_shared = True
-                            if "libcrash_handler" in stripped:
-                                seen_libcrash_handler = True
+                            seen_libcrash_handler = True
 
                 # Check for PCH compilation
                 pch_match = pch_pattern.search(stripped)
@@ -383,8 +367,25 @@ def compile_meson(
                             display_path = full_path
                         _ts_print(f"[BUILD] ✓ Precompiled header: {display_path}")
 
-                # Check for test/example linking
+                # Check for fastled shared library linking (fastled.dll/fastled.so)
                 test_link_match = link_pattern.search(stripped)
+                if test_link_match:
+                    _link_rel_path = test_link_match.group(1)
+                    _link_stem = Path(_link_rel_path).stem
+                    if _link_stem == "fastled" and Path(
+                        _link_rel_path
+                    ).suffix.lower() in (".dll", ".so", ".dylib"):
+                        is_key_milestone = True
+                        custom_message_shown = True
+                        seen_libfastled = True
+                        _link_full = build_dir / _link_rel_path
+                        try:
+                            _link_display = _link_full.relative_to(Path.cwd())
+                        except ValueError:
+                            _link_display = _link_full
+                        _ts_print(f"[BUILD] ✓ Core library: {_link_display}")
+
+                # Check for test/example linking
                 if test_link_match:
                     if (
                         "tests/" in stripped
@@ -591,19 +592,11 @@ def compile_meson(
         # Report cached artifacts (things we didn't see being built)
         # Only report if we saw at least one artifact being built (otherwise it's a no-op build)
         # Note: Show cached messages even in quiet mode - they provide useful build context
-        if (
-            seen_libfastled
-            or seen_libplatforms_shared
-            or seen_libcrash_handler
-            or seen_pch
-            or seen_any_test
-        ):
+        if seen_libfastled or seen_libcrash_handler or seen_pch or seen_any_test:
             # Report cached core libraries
             cached_libs: list[str] = []
             if not seen_libfastled:
-                cached_libs.append("libfastled.a")
-            if not seen_libplatforms_shared:
-                cached_libs.append("libplatforms_shared.a")
+                cached_libs.append("fastled (shared)")
             if not seen_libcrash_handler:
                 cached_libs.append("libcrash_handler.a")
 

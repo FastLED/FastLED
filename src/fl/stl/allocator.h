@@ -84,6 +84,16 @@ void PSRamDeallocate(void *ptr);
 void* Malloc(fl::size size);
 void Free(void *ptr);
 
+// SlabAllocator registry for cross-DLL shared slab allocators.
+// On Windows DLLs, inline functions with static locals create per-DLL copies.
+// This registry ensures all DLLs in a process share the same SlabAllocator
+// for a given (block_size, slab_size) pair, preventing cross-DLL slab
+// deallocation errors (freeing a pointer inside another DLL's slab).
+namespace detail {
+    void* slab_allocator_registry_get(fl::size block_size, fl::size slab_size);
+    void  slab_allocator_registry_set(fl::size block_size, fl::size slab_size, void* allocator);
+} // namespace detail
+
 #ifdef FL_IS_ESP32
 // ESP32-specific memory allocation functions for RMT buffer pooling
 void* InternalAlloc(fl::size size);      // MALLOC_CAP_INTERNAL - fast DRAM
@@ -721,9 +731,18 @@ public:
     ~allocator_slab() noexcept {}
 
 private:
-    // Get the shared static allocator instance
+    // Get the shared process-wide allocator instance.
+    // Uses a DLL-exported registry to ensure all DLLs in the process share
+    // the same SlabAllocator for a given (block_size, slab_size) pair.
     static SlabAllocator<T, SLAB_SIZE>& get_allocator() {
+        constexpr fl::size block_size = sizeof(T) > sizeof(void*) ? sizeof(T) : sizeof(void*);
+        void* ptr = detail::slab_allocator_registry_get(block_size, SLAB_SIZE);
+        if (ptr) {
+            return *static_cast<SlabAllocator<T, SLAB_SIZE>*>(ptr);
+        }
+        // First time for this (block_size, slab_size) pair - create and register
         static SlabAllocator<T, SLAB_SIZE> allocator;
+        detail::slab_allocator_registry_set(block_size, SLAB_SIZE, &allocator);
         return allocator;
     }
 

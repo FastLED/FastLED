@@ -176,6 +176,38 @@ int main(int argc, char** argv) {
         dll_path = exe_dir + "\\" + dll_name;
     }
 
+    // Pre-load fastled.dll so that transitive dependencies resolve correctly.
+    // Windows LoadLibraryA doesn't use PATH for resolving DLL dependencies,
+    // so we pre-load fastled.dll into the process first. Once loaded, the
+    // Windows loader will find it when resolving test DLL imports.
+    {
+        std::string fastled_dll_path;
+        const char* env_dir = getenv("FASTLED_LIB_DIR");
+        if (env_dir && env_dir[0] != '\0') {
+            fastled_dll_path = std::string(env_dir) + "\\fastled.dll";
+        } else {
+            // Derive from test DLL path: go up one level into ci/meson/native/
+            size_t slash = dll_path.find_last_of("\\/");
+            if (slash != std::string::npos) {
+                std::string dll_dir = dll_path.substr(0, slash);
+                size_t parent_slash = dll_dir.find_last_of("\\/");
+                if (parent_slash != std::string::npos) {
+                    fastled_dll_path = dll_dir.substr(0, parent_slash) + "\\ci\\meson\\native\\fastled.dll";
+                }
+            }
+        }
+        if (!fastled_dll_path.empty()) {
+            HMODULE fastled = LoadLibraryA(fastled_dll_path.c_str());
+            if (!fastled) {
+                // Also try SetDllDirectoryA as fallback
+                size_t last_slash = fastled_dll_path.find_last_of("\\/");
+                if (last_slash != std::string::npos) {
+                    SetDllDirectoryA(fastled_dll_path.substr(0, last_slash).c_str());
+                }
+            }
+        }
+    }
+
     // Load DLL
     HMODULE dll = LoadLibraryA(dll_path.c_str());
     if (!dll) {
@@ -220,14 +252,12 @@ int main(int argc, char** argv) {
     // Cancel watchdog - tests completed normally
     runner_watchdog::cancel();
 
-    // Cleanup: Skip FreeLibrary when running with AddressSanitizer
-    // ASAN runs leak detection at program exit. If we FreeLibrary() the DLL
-    // before that, ASAN cannot symbolize addresses from the unloaded library,
-    // resulting in "<unknown module>" in stack traces.
+    // Skip FreeLibrary: With shared library (fastled.dll), unloading the test
+    // DLL triggers static destructors that may reference objects in fastled.dll,
+    // causing access violations from DLL destruction order issues.
+    // The process is about to exit anyway - the OS will clean up all memory.
+    // This also benefits ASAN which needs the DLL loaded for leak symbolization.
     // See: https://github.com/google/sanitizers/issues/899
-#if !defined(__SANITIZE_ADDRESS__)
-    FreeLibrary(dll);
-#endif
 
     return test_result;
 }

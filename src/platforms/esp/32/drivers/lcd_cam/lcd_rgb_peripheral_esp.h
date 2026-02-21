@@ -20,7 +20,7 @@
 namespace fl {
 
 // Forward declaration for friend access
-template <typename T, int N> class Singleton;
+template <typename T, int N> class SingletonShared;
 
 namespace detail {
 

@@ -671,6 +671,44 @@ FL_DISABLE_WARNING_POP
 //   - MSVC: __FUNCTION__ (non-standard but widely supported)
 //
 // Note: __PRETTY_FUNCTION__ (GCC/Clang) includes full signature but is too verbose
+//
+// FL_PRETTY_FUNCTION: Full function signature including template parameters.
+// Use when you need a unique string per template instantiation (e.g., singleton keys).
+//   - GCC/Clang: __PRETTY_FUNCTION__
+//   - MSVC: __FUNCSIG__
+//   - Fallback: __func__
+#if defined(FL_IS_GCC) || defined(FL_IS_CLANG)
+  #define FL_PRETTY_FUNCTION __PRETTY_FUNCTION__
+#elif defined(FL_IS_WIN_MSVC)
+  #define FL_PRETTY_FUNCTION __FUNCSIG__
+#else
+  #define FL_PRETTY_FUNCTION __func__
+#endif
+
+// FL_MACRO_CONCAT: Token-paste two macro arguments after expansion.
+// FL_MACRO_CONCAT(foo, __LINE__) on line 42 produces foo42.
+#define FL_MACRO_CONCAT_(a, b) a##b
+#define FL_MACRO_CONCAT(a, b) FL_MACRO_CONCAT_(a, b)
+
+// FL_STRING_CONCAT: Concatenate two string literals (or stringified macros).
+// FL_STRING_CONCAT("file", FL_STRINGIFY(__LINE__)) produces "file42".
+// Both arguments must be string literals or macros that expand to string literals.
+#define FL_STRING_CONCAT(a, b) a b
+
+// FL_UNIQUE_KEY: Compile-time unique string literal per call site.
+// Produces "file:line" (e.g., "src/fl/singleton.h:42").
+// Uses only string literals so the result is a single compile-time constant
+// with zero runtime cost. Identical across DLLs compiling the same source.
+// NOTE: Not suitable for template code — all instantiations from the same
+// header line produce the same key. Use FL_PRETTY_FUNCTION for templates.
+#define FL_UNIQUE_KEY FL_STRING_CONCAT(__FILE__ ":", FL_STRINGIFY(__LINE__))
+
+// FL_UNIQUE_IDENTIFIER: Generate a unique C identifier per line.
+// Produces a token like _fl_uid_42. Useful for variable names in macros
+// that must not collide when the macro is used multiple times in a scope.
+// NOTE: Two invocations on the SAME line produce the same identifier.
+#define FL_UNIQUE_IDENTIFIER FL_MACRO_CONCAT(_fl_uid_, __LINE__)
+
 #if defined(__cplusplus)
   // C++11 standard: __func__ is a predefined identifier
   #define FL_FUNCTION __func__

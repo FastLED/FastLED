@@ -233,9 +233,10 @@ endif
 # - On Unix: Sanitizers (debug mode) have symbols resolved at runtime by runner
 dll_link_args = core_link_args + sanitizer_link_args
 if is_windows
+  # NOTE: Do NOT use -static-libgcc/-static-libstdc++ here.
+  # All DLLs in the process must share the same C++ runtime to avoid
+  # cross-DLL heap corruption (memory allocated in fastled.dll freed in test.dll).
   dll_link_args += [
-    '-static-libgcc',
-    '-static-libstdc++',
     '-mconsole',
     '-Wl,--stack,16777216',
     '-lws2_32',  # Socket library (import library, not code - all DLLs share system ws2_32.dll)
@@ -248,6 +249,25 @@ else
   # flag explicitly on Unix for compatibility with other linkers.
   if build_mode == 'debug'
     dll_link_args += ['-Wl,--allow-shlib-undefined']
+  endif
+endif
+
+# ============================================================================
+# FastLED shared library link arguments
+# ============================================================================
+# Used for building fastled.dll/libfastled.so itself.
+# Similar to DLL args but without consumer-specific flags like -mconsole.
+fastled_shared_link_args = core_link_args + sanitizer_link_args
+if is_windows
+  # NOTE: Do NOT use -static-libgcc/-static-libstdc++ here.
+  # fastled.dll and consumer DLLs must share the same C++ runtime heap.
+  fastled_shared_link_args += [
+    '-Wl,--export-all-symbols',  # Export all symbols without __declspec annotations
+    '-lws2_32',
+  ]
+else
+  if build_mode == 'debug'
+    fastled_shared_link_args += ['-Wl,--allow-shlib-undefined']
   endif
 endif
 
@@ -388,18 +408,19 @@ crash_handler_lib = static_library('crash_handler',
 # to ensure binary compatibility with both unit tests and examples.
 # Unit tests add their specific flags when compiling test sources.
 
-# Compile platforms/shared files separately
-platforms_shared_lib = static_library('platforms_shared',
-  platforms_shared_files,
+# Build FastLED as a shared library (DLL/SO)
+# All consumer DLLs (tests, examples) link against this single shared library,
+# dramatically reducing disk usage and link times (~17x reduction).
+# platforms_shared_files are merged directly into the shared library to avoid
+# -fPIC issues with link_whole: on static→shared boundaries.
+fastled_lib = shared_library('fastled',
+  fastled_sources + platforms_shared_files,
   include_directories: [src_dir, stub_dir],
-  cpp_args: base_compile_args,
+  cpp_args: base_compile_args + ['-DFASTLED_BUILDING_DLL'],
+  link_args: fastled_shared_link_args,
+  name_prefix: '',  # Produce 'fastled.dll' not 'libfastled.dll'
   install: false
 )
 
-fastled_lib = static_library('fastled',
-  fastled_sources,
-  link_with: platforms_shared_lib, # Link against the shared platforms library
-  include_directories: [src_dir, stub_dir],
-  cpp_args: base_compile_args,
-  install: false
-)
+# Export the directory containing fastled.dll for consumer DLLs to find at runtime
+fastled_lib_dir = meson.current_build_dir()

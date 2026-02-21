@@ -22,6 +22,7 @@
 ///       }
 ///   }
 
+#include "fl/compiler_control.h" // FL_PRETTY_FUNCTION
 #include "fl/stl/stdint.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/strstream.h"
@@ -1744,12 +1745,12 @@ namespace test {
 namespace detail {
 
 // Type name extraction using compiler-specific intrinsics
-// This extracts the type name from __PRETTY_FUNCTION__ or __FUNCSIG__
+// This extracts the type name from FL_PRETTY_FUNCTION (__PRETTY_FUNCTION__ or __FUNCSIG__)
 template <typename T>
 inline fl::string getTypeName() {
 #if defined(__clang__) || defined(__GNUC__)
-    // __PRETTY_FUNCTION__ format: "fl::string fl::test::detail::getTypeName() [T = int]"
-    const char* func = __PRETTY_FUNCTION__;
+    // FL_PRETTY_FUNCTION format: "fl::string fl::test::detail::getTypeName() [T = int]"
+    const char* func = FL_PRETTY_FUNCTION;
     const char* begin = func;
     // Find "T = "
     while (*begin && !(begin[0] == 'T' && begin[1] == ' ' && begin[2] == '=' && begin[3] == ' '))
@@ -1770,8 +1771,8 @@ inline fl::string getTypeName() {
         return fl::string(begin, static_cast<fl::size>(end - begin));
     }
 #elif defined(_MSC_VER)
-    // __FUNCSIG__ format: "class fl::string __cdecl fl::test::detail::getTypeName<int>(void)"
-    const char* func = __FUNCSIG__;
+    // FL_PRETTY_FUNCTION format: "class fl::string __cdecl fl::test::detail::getTypeName<int>(void)"
+    const char* func = FL_PRETTY_FUNCTION;
     const char* begin = func;
     // Find "getTypeName<"
     while (*begin && !(begin[0] == 'g' && begin[1] == 'e' && begin[2] == 't' && begin[3] == 'T' &&

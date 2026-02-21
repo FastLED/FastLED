@@ -156,8 +156,7 @@ namespace detail {
         fl::vector_fixed<AsyncLogger*, 16> mActiveLoggers;
 
         static ActiveLoggerRegistry& instance() {
-            static ActiveLoggerRegistry registry;
-            return registry;
+            return SingletonShared<ActiveLoggerRegistry>::instance();
         }
 
         void registerLogger(AsyncLogger* logger) {
@@ -205,7 +204,7 @@ namespace detail {
         void serviceLoggers();
 
     private:
-        friend class fl::Singleton<AsyncLoggerServiceTask>;
+        friend class fl::SingletonShared<AsyncLoggerServiceTask>;
 
         AsyncLoggerServiceTask();
         ~AsyncLoggerServiceTask() = default;
@@ -227,7 +226,7 @@ template<fl::size N, typename InfoProvider>
 inline AsyncLogger& get_async_logger_by_index() {
     // Get singleton instance (only this specific N is instantiated)
     static AsyncLogger* logger_ptr = []() {
-        AsyncLogger* ptr = &Singleton<AsyncLogger, N>::instance();
+        AsyncLogger* ptr = &SingletonShared<AsyncLogger, N>::instance();
         detail::ActiveLoggerRegistry::instance().registerLogger(ptr);
 
         // Auto-instantiate service task on first logger access

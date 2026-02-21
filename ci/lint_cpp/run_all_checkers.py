@@ -48,6 +48,7 @@ from ci.lint_cpp.platform_includes_checker import PlatformIncludesChecker
 from ci.lint_cpp.reinterpret_cast_checker import ReinterpretCastChecker
 from ci.lint_cpp.relative_include_checker import RelativeIncludeChecker
 from ci.lint_cpp.serial_printf_checker import SerialPrintfChecker
+from ci.lint_cpp.singleton_in_headers_checker import SingletonInHeadersChecker
 from ci.lint_cpp.static_in_headers_checker import StaticInHeaderChecker
 from ci.lint_cpp.std_namespace_checker import StdNamespaceChecker
 from ci.lint_cpp.stdint_type_checker import (
@@ -153,6 +154,7 @@ def create_checkers(
         BannedMacrosChecker(),  # Checks for banned preprocessor macros like __has_include
         FlIsDefinedChecker(),
         BannedNamespaceChecker(),  # Checks for banned namespace patterns like fl::fl
+        SingletonInHeadersChecker(),  # Checks for Singleton<T> in headers (must use SingletonShared<T>)
         # Note: Private libc++ headers checking is now integrated into BannedHeadersChecker
         # Note: _build.hpp hierarchy checking is now integrated into test_unity_build.py
     ]

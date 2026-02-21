@@ -139,6 +139,10 @@ endforeach
 all_test_dlls = []
 all_test_runners = []
 
+# Environment for test execution - ensure fastled.dll is discoverable on Windows
+test_env = environment()
+test_env.prepend('PATH', fastled_lib_dir)
+
 # Build each test as a DLL with shared PCH
 foreach test_name : test_names
   # Get test file path from dynamic map (for subdirectories) or default to test_name.cpp
@@ -242,6 +246,7 @@ foreach test_name : test_names
       depends: [test_dll],
       is_parallel: not is_serial,
       timeout: test_timeout,
+      env: test_env,
     )
   else
     # Direct test execution (Meson handles timeout, but no stack dumps)
@@ -251,6 +256,7 @@ foreach test_name : test_names
       depends: [test_dll],
       is_parallel: not is_serial,
       timeout: test_timeout,
+      env: test_env,
     )
   endif
 endforeach

@@ -10,8 +10,21 @@
 
 namespace fl {
 
-// A templated singleton class, parameterized by the type of the singleton and
-// an optional integer.
+namespace detail {
+
+// Process-wide singleton registry for cross-DLL singleton sharing.
+// On Windows, inline functions with static locals create per-DLL copies.
+// This registry ensures all DLLs share the same singleton instance.
+// Defined in singleton.cpp.hpp.
+void* singleton_registry_get(const char* key);
+void singleton_registry_set(const char* key, void* value);
+
+} // namespace detail
+
+// Internal singleton — NO registry lookup. Simple static storage + placement
+// new. For use in .cpp.hpp files only, where each compilation unit has exactly
+// one definition and cross-DLL sharing is handled by the .cpp.hpp include
+// pattern itself.
 //
 // IMPORTANT: Singleton instances are NEVER destroyed. This implementation uses
 // aligned char buffer storage and placement new to construct the instance on
@@ -20,19 +33,23 @@ namespace fl {
 // 2. Unnecessary cleanup in long-lived embedded systems (which never exit)
 // 3. Crashes from singleton dependencies during destruction
 //
-// The instance is constructed on first call to instance() and lives until
-// process termination (or forever in embedded systems).
-//
 // LSAN COMPATIBILITY: Uses __lsan::ScopedDisabler to prevent false positives.
-// LSAN cannot properly trace through char[] storage to find heap allocations
-// reachable from singleton members. The scoped disabler tells LSAN to ignore
-// all allocations during singleton construction (both the placement new and
-// any heap allocations in T's constructor).
 template <typename T, int N = 0> class Singleton {
   public:
     static T &instance() {
-        // Thread-safe initialization using C++11 magic statics
-        static T* ptr = instanceInner();
+        // Aligned char buffer storage — never destroyed
+        struct FL_ALIGN_AS_T(alignof(T)) AlignedStorage {
+            char data[sizeof(T)];
+        };
+
+        static AlignedStorage storage;
+        static T* ptr = nullptr;
+        if (!ptr) {
+#if FL_HAS_SANITIZER_LSAN
+            __lsan::ScopedDisabler disabler;
+#endif
+            ptr = new (&storage.data) T();
+        }
         return *ptr;
     }
 
@@ -44,23 +61,56 @@ template <typename T, int N = 0> class Singleton {
   private:
     Singleton() = default;
     ~Singleton() = default;
+};
+
+// Cross-DLL singleton — WITH FL_PRETTY_FUNCTION registry. For use in header
+// files where cross-DLL sharing matters. On Windows, inline functions with
+// static locals create per-DLL copies; the registry prevents this.
+//
+// IMPORTANT: SingletonShared instances are NEVER destroyed (same rationale as
+// Singleton above).
+//
+// CROSS-DLL SAFETY: Uses a process-wide registry to ensure all DLLs in a
+// process share the same singleton instance.
+//
+// LSAN COMPATIBILITY: Uses __lsan::ScopedDisabler to prevent false positives.
+template <typename T, int N = 0> class SingletonShared {
+  public:
+    static T &instance() {
+        // Check the process-wide registry first (handles cross-DLL sharing).
+        // FL_PRETTY_FUNCTION produces a unique string per template instantiation
+        // (includes template parameters in the signature).
+        void* existing = detail::singleton_registry_get(FL_PRETTY_FUNCTION);
+        if (existing) {
+            return *static_cast<T*>(existing);
+        }
+        // First time for this type — create and register
+        T* ptr = instanceInner();
+        detail::singleton_registry_set(FL_PRETTY_FUNCTION, ptr);
+        return *ptr;
+    }
+
+    static T *instanceRef() { return &instance(); }
+
+    SingletonShared(const SingletonShared &) = delete;
+    SingletonShared &operator=(const SingletonShared &) = delete;
+
+  private:
+    SingletonShared() = default;
+    ~SingletonShared() = default;
 
     static T* instanceInner() {
-        // Aligned char buffer storage - never destroyed
-        // Use a struct wrapper to apply alignment attributes
+        // Aligned char buffer storage — never destroyed
         struct FL_ALIGN_AS_T(alignof(T)) AlignedStorage {
             char data[sizeof(T)];
         };
 
-        // Static storage persists for program lifetime
         static AlignedStorage storage;
 
 #if FL_HAS_SANITIZER_LSAN
         __lsan::ScopedDisabler disabler;  // Ignore all allocations in this scope
 #endif
 
-        // Placement new: construct instance in pre-allocated storage
-        // INTENTIONAL: Destructor is NEVER called - this is a permanent leak
         T* ptr = new (&storage.data) T();
         return ptr;
     }

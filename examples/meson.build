@@ -264,10 +264,14 @@ foreach example_name : example_paths.keys()
 
     # Register as test target: runner loads the DLL and executes it
     # Add to 'examples' suite for easy filtering
+    # Environment ensures fastled.dll is discoverable on Windows
+    example_test_env = environment()
+    example_test_env.prepend('PATH', fastled_lib_dir)
     test('example-' + example_name, example_runner_exe,
         args: [example_dll.full_path()],
         suite: 'examples',
-        timeout: 60
+        timeout: 60,
+        env: example_test_env,
     )
 
     # Track both DLL and runner for alias target

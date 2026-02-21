@@ -355,18 +355,31 @@ def run_meson_build_and_test(
                     )
 
                 # Create test callback for streaming execution
+                # Prepare environment with fastled shared lib dir on PATH
+                _streaming_env = os.environ.copy()
+                _fastled_lib_dir = str(build_dir / "ci" / "meson" / "native")
+                if os.name == "nt":
+                    _streaming_env["PATH"] = (
+                        _fastled_lib_dir + os.pathsep + _streaming_env.get("PATH", "")
+                    )
+                else:
+                    _streaming_env["LD_LIBRARY_PATH"] = (
+                        _fastled_lib_dir
+                        + os.pathsep
+                        + _streaming_env.get("LD_LIBRARY_PATH", "")
+                    )
+
                 def test_callback(test_path: Path) -> bool:
                     """Run a single test executable and return success status"""
                     try:
-                        # Use current environment which includes ASAN_OPTIONS if in debug mode
-                        # (set at top of run_meson_build_and_test)
+                        # Use environment with fastled shared lib dir and ASAN_OPTIONS
                         proc = RunningProcess(
                             [str(test_path)],
                             cwd=source_dir,  # Run from project root
                             timeout=600,  # 10 minute timeout per test
                             auto_run=True,
                             check=False,
-                            env=os.environ.copy(),
+                            env=_streaming_env,
                             output_formatter=TimestampFormatter(),
                         )
 
@@ -900,13 +913,24 @@ def run_meson_build_and_test(
 
         # Run the test executable directly
         try:
+            # Ensure fastled shared library is discoverable at runtime
+            test_env = os.environ.copy()
+            fastled_lib_dir = str(build_dir / "ci" / "meson" / "native")
+            if os.name == "nt":
+                test_env["PATH"] = (
+                    fastled_lib_dir + os.pathsep + test_env.get("PATH", "")
+                )
+            else:
+                test_env["LD_LIBRARY_PATH"] = (
+                    fastled_lib_dir + os.pathsep + test_env.get("LD_LIBRARY_PATH", "")
+                )
             proc = RunningProcess(
                 test_cmd,
                 cwd=source_dir,  # Run from project root
                 timeout=600,  # 10 minute timeout
                 auto_run=True,
                 check=False,
-                env=os.environ.copy(),
+                env=test_env,
                 output_formatter=TimestampFormatter(),
             )
 

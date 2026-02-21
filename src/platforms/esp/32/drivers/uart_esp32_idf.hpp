@@ -156,7 +156,7 @@ namespace {
 class UartManager {
 public:
     static UartManager& instance() {
-        return fl::Singleton<UartManager>::instance();
+        return fl::SingletonShared<UartManager>::instance();
     }
 
     bool allocateUart(UartPort port) {
@@ -187,7 +187,7 @@ private:
     bool mAllocated[3] = {false, false, false};  // UART0, UART1, UART2
 
     UartManager() = default;
-    friend class fl::Singleton<UartManager>;
+    friend class fl::SingletonShared<UartManager>;
 };
 
 } // anonymous namespace

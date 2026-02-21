@@ -50,7 +50,7 @@ class EspIO {
 public:
     // Get singleton instance
     static EspIO& instance() {
-        return fl::Singleton<EspIO>::instance();
+        return fl::SingletonShared<EspIO>::instance();
     }
 
     // Initialize/reconfigure serial
@@ -238,7 +238,7 @@ private:
 #endif
     }
 
-    friend class fl::Singleton<EspIO>;
+    friend class fl::SingletonShared<EspIO>;
 };
 
 

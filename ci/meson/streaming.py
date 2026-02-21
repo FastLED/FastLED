@@ -118,7 +118,6 @@ def stream_compile_and_run_tests(
 
     # Track what we've seen during build for cache status reporting
     seen_libfastled = False
-    seen_libplatforms_shared = False
     seen_libcrash_handler = False
     seen_pch = False
     seen_any_test = False
@@ -132,12 +131,7 @@ def stream_compile_and_run_tests(
     def producer_thread() -> None:
         """Parse Ninja output and queue completed test executables"""
         nonlocal compilation_failed, compilation_output, shown_tests_stage
-        nonlocal \
-            seen_libfastled, \
-            seen_libplatforms_shared, \
-            seen_libcrash_handler, \
-            seen_pch, \
-            seen_any_test
+        nonlocal seen_libfastled, seen_libcrash_handler, seen_pch, seen_any_test
 
         # Create tee for error log capture (stdout + stderr merged)
         stderr_tee = StreamTee(error_log_path, echo=False)
@@ -177,19 +171,11 @@ def stream_compile_and_run_tests(
                     # Check for key build milestones (show even in non-verbose mode)
                     is_key_milestone = False
 
-                    # Check for library archiving
+                    # Check for library archiving (static libraries like libcrash_handler.a)
                     archive_match = archive_pattern.match(stripped)
                     if archive_match:
-                        if any(
-                            lib in stripped
-                            for lib in [
-                                "libfastled",
-                                "libplatforms_shared",
-                                "libcrash_handler",
-                            ]
-                        ):
+                        if "libcrash_handler" in stripped:
                             is_key_milestone = True
-                            # Show library path when it finishes building
                             rel_path = archive_match.group(1)
                             full_path = build_dir / rel_path
                             try:
@@ -197,37 +183,7 @@ def stream_compile_and_run_tests(
                             except ValueError:
                                 display_path = full_path
                             _ts_print(f"[BUILD] ✓ Core library: {display_path}")
-
-                            # Track which libraries we've seen for cache status reporting
-                            if "libfastled" in stripped:
-                                seen_libfastled = True
-                                # Binary fingerprint optimization: libfastled.a just finished
-                                # archiving. If its content matches saved fingerprint, touch
-                                # all DLLs now so ninja sees them as newer → skips relinking.
-                                if build_optimizer is not None:
-                                    _opt = build_optimizer
-                                    _bdir = build_dir
-
-                                    def _touch_dlls_bg() -> None:
-                                        touched = _opt.touch_dlls_if_lib_unchanged(
-                                            _bdir
-                                        )
-                                        if touched > 0:
-                                            _ts_print(
-                                                f"[BUILD] ⚡ Suppressed {touched} DLL relinks"
-                                                f" (libfastled.a content unchanged)"
-                                            )
-
-                                    threading.Thread(
-                                        target=_touch_dlls_bg,
-                                        daemon=True,
-                                        name="DllTouch",
-                                    ).start()
-
-                            if "libplatforms_shared" in stripped:
-                                seen_libplatforms_shared = True
-                            if "libcrash_handler" in stripped:
-                                seen_libcrash_handler = True
+                            seen_libcrash_handler = True
 
                     # Check for PCH compilation
                     elif pch_pattern.match(stripped):
@@ -266,6 +222,42 @@ def stream_compile_and_run_tests(
                         except ValueError:
                             # If path is outside project, show absolute path
                             display_line = line.replace(rel_path, str(full_path))
+
+                        # Detect fastled shared library linking (fastled.dll/fastled.so)
+                        link_stem = Path(rel_path).stem
+                        if link_stem == "fastled" and Path(rel_path).suffix.lower() in (
+                            ".dll",
+                            ".so",
+                            ".dylib",
+                        ):
+                            is_key_milestone = True
+                            seen_libfastled = True
+                            _lib_display = full_path
+                            try:
+                                _lib_display = full_path.relative_to(Path.cwd())
+                            except ValueError:
+                                pass
+                            _ts_print(f"[BUILD] ✓ Core library: {_lib_display}")
+                            # Binary fingerprint optimization: fastled shared lib just finished
+                            # linking. If its content matches saved fingerprint, touch
+                            # all DLLs now so ninja sees them as newer → skips relinking.
+                            if build_optimizer is not None:
+                                _opt = build_optimizer
+                                _bdir = build_dir
+
+                                def _touch_dlls_bg() -> None:
+                                    touched = _opt.touch_dlls_if_lib_unchanged(_bdir)
+                                    if touched > 0:
+                                        _ts_print(
+                                            f"[BUILD] ⚡ Suppressed {touched} DLL relinks"
+                                            f" (fastled shared lib content unchanged)"
+                                        )
+
+                                threading.Thread(
+                                    target=_touch_dlls_bg,
+                                    daemon=True,
+                                    name="DllTouch",
+                                ).start()
 
                         # Test/example linking is also a key milestone
                         if (
@@ -382,7 +374,6 @@ def stream_compile_and_run_tests(
                 # Only report if we saw at least one artifact being built (otherwise it's a no-op build)
                 if (
                     seen_libfastled
-                    or seen_libplatforms_shared
                     or seen_libcrash_handler
                     or seen_pch
                     or seen_any_test
@@ -390,9 +381,7 @@ def stream_compile_and_run_tests(
                     # Report cached core libraries
                     cached_libs: list[str] = []
                     if not seen_libfastled:
-                        cached_libs.append("libfastled.a")
-                    if not seen_libplatforms_shared:
-                        cached_libs.append("libplatforms_shared.a")
+                        cached_libs.append("fastled (shared)")
                     if not seen_libcrash_handler:
                         cached_libs.append("libcrash_handler.a")
 

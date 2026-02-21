@@ -40,7 +40,7 @@ public:
     /// @brief Get singleton instance (uses fl::Singleton for no-destructor semantics)
     /// @return Reference to the global network state tracker
     static NetworkStateTracker& instance() {
-        return Singleton<NetworkStateTracker>::instance();
+        return SingletonShared<NetworkStateTracker>::instance();
     }
 
     /// @brief Check if network state has changed since last call to hasChanged()
@@ -62,7 +62,7 @@ public:
     void reset() { mLastKnownState = false; }
 
 private:
-    friend class Singleton<NetworkStateTracker>;
+    friend class SingletonShared<NetworkStateTracker>;
 
     NetworkStateTracker() : mLastKnownState(false) {}
     ~NetworkStateTracker() = default;
