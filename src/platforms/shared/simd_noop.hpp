@@ -132,6 +132,17 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 set1_u32_4(u32 value) noexcept {
     return result;
 }
 
+/// Construct a simd_u32x4 from 4 individual u32 values.
+/// Lane order: lane0 = a, lane1 = b, lane2 = c, lane3 = d.
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 set_u32_4(u32 a, u32 b, u32 c, u32 d) noexcept {
+    simd_u32x4 result;
+    result.data[0] = a;
+    result.data[1] = b;
+    result.data[2] = c;
+    result.data[3] = d;
+    return result;
+}
+
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 blend_u8_16(simd_u8x16 a, simd_u8x16 b, u8 amount) noexcept {
     simd_u8x16 result;
     // result = a + ((b - a) * amount) / 256

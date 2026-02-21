@@ -29,6 +29,13 @@ struct perlin_s16x16_simd {
     static fl::simd::simd_u32x4 pnoise2d_raw_simd4_vec(
         const fl::i32 nx[4], const fl::i32 ny[4],
         const fl::i32 *fade_lut, const fl::u8 *perm);
+
+    // Register-accepting overload: takes SIMD registers directly, eliminating
+    // the store→reload round-trip (boundaries B+C) when the caller already has
+    // coordinates in SIMD registers.
+    static fl::simd::simd_u32x4 pnoise2d_raw_simd4_vec(
+        fl::simd::simd_u32x4 nx_vec, fl::simd::simd_u32x4 ny_vec,
+        const fl::i32 *fade_lut, const fl::u8 *perm);
 };
 
 }  // namespace fl

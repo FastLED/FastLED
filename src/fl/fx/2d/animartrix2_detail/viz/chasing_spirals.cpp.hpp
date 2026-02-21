@@ -13,12 +13,11 @@
 //   Q16.16 → A24 (mulhi_su32_4)
 //   sincos32_simd                      ← fully SIMD (unchanged)
 //   Perlin coords (mulhi32_i32_4 << 1) ← fully SIMD (no scalar round-trip)
-//   [BOUNDARY B] store_u32_4_aligned nx/ny → FL_ALIGNAS(16) stack arrays
-//   [BOUNDARY C] load_u32_4_aligned ← same stack arrays (re-pack inside perlin callee)
+//   pnoise2d_raw_simd4_vec(register)   ← SIMD registers passed directly (no B/C round-trip)
 //   [BOUNDARY D] store_u32_4 X/Y/x_frac/y_frac → scalar (SSE2: no integer gather)
 //   Permutation table (scalar)         ← fundamental SSE2 limit, unavoidable
 //   Fade LUT + lerp tree (scalar)      ← exact-match tests forbid vectorization
-//   [BOUNDARY E] load_u32_4_aligned ← FL_ALIGNAS(16) out[4] (re-pack result into SIMD)
+//   [BOUNDARY E] set_u32_4(lane0..3) ← scalar results packed directly into SIMD register
 //   Clamp [0,FP_ONE] + scale ×255      ← fully SIMD
 //   Radial filter (mulhi32_i32_4)      ← fully SIMD
 //   [BOUNDARY F] extract_u32_4 × 4 + scatter ← pixel_idx scatter, unavoidable
@@ -125,25 +124,11 @@ simd::simd_u32x4 simd4_processChannel(
     simd::simd_u32x4 ny_vec  = simd::sub_i32_4(cy_vec,
         simd::sll_u32_4(simd::mulhi32_i32_4(sc.sin_vals, dist_vec), 1));
 
-    // ── [BOUNDARY B: SIMD → aligned stack store] ──────────────────────────────
-    // nx_vec/ny_vec hold the Perlin coordinates as SIMD registers but
-    // pnoise2d_raw_simd4_vec() requires plain scalar arrays (its permutation
-    // table and fade LUT paths need random-access indexing, not vector ops).
-    // We store to FL_ALIGNAS(16) stack arrays so the callee can reload with an
-    // aligned load (avoiding a potential penalty vs. unaligned load).
-    // This is an inherent boundary: no SSE2 integer gather instruction exists.
-    FL_ALIGNAS(16) i32 nx[4], ny[4];
-    simd::store_u32_4_aligned(FL_ASSUME_ALIGNED(reinterpret_cast<u32*>(nx), 16), nx_vec); // ok reinterpret cast
-    simd::store_u32_4_aligned(FL_ASSUME_ALIGNED(reinterpret_cast<u32*>(ny), 16), ny_vec); // ok reinterpret cast
-    // ── [end BOUNDARY B] ──────────────────────────────────────────────────────
-
-    // Perlin noise — exact scalar lerp tree (preserves scalar==SIMD test invariant)
-    // [BOUNDARY C is the re-pack at the start of pnoise2d_raw_simd4_vec: the
-    //  callee reloads nx/ny from the stack arrays back into SIMD registers for
-    //  the coordinate arithmetic (floor, frac, wrap-to-255) before unpacking
-    //  again for the permutation table. See perlin_s16x16_simd.cpp.hpp.]
+    // Perlin noise — pass SIMD registers directly (no B/C round-trip).
+    // The register overload does SIMD floor/frac/wrap internally, then exits
+    // to scalar for fade/perm/grad/lerp (BOUNDARY D), and re-packs (BOUNDARY E).
     simd::simd_u32x4 raw_vec = perlin_s16x16_simd::pnoise2d_raw_simd4_vec(
-        nx, ny, fade_lut, perm);
+        nx_vec, ny_vec, fade_lut, perm);
 
     // Clamp to [0, FP_ONE] and scale by 255: (val << 8) - val
     simd::simd_u32x4 zero   = simd::set1_u32_4(0u);

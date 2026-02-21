@@ -137,6 +137,14 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 set1_u32_4(u32 value) noexcept {
     return _mm_set1_epi32(static_cast<i32>(value));
 }
 
+/// Construct a simd_u32x4 from 4 individual u32 values.
+/// Lane order: lane0 = a, lane1 = b, lane2 = c, lane3 = d.
+FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 set_u32_4(u32 a, u32 b, u32 c, u32 d) noexcept {
+    // _mm_set_epi32 takes args in reverse lane order: (lane3, lane2, lane1, lane0)
+    return _mm_set_epi32(static_cast<i32>(d), static_cast<i32>(c),
+                         static_cast<i32>(b), static_cast<i32>(a));
+}
+
 FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 set1_f32_4(float value) noexcept {
     return _mm_set1_ps(value);
 }

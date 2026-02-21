@@ -13,23 +13,13 @@ FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
-void perlin_s16x16_simd::pnoise2d_raw_simd4(
-    const fl::i32 nx[4], const fl::i32 ny[4],
-    const fl::i32 *fade_lut, const fl::u8 *perm,
-    fl::i32 out[4])
+// Primary overload: accepts SIMD registers directly.
+// Performs SIMD floor/frac/wrap, then exits to scalar for fade/perm/grad/lerp
+// (SSE2 has no integer gather), and re-packs the result into a SIMD register.
+fl::simd::simd_u32x4 perlin_s16x16_simd::pnoise2d_raw_simd4_vec(
+    fl::simd::simd_u32x4 nx_vec, fl::simd::simd_u32x4 ny_vec,
+    const fl::i32 *fade_lut, const fl::u8 *perm)
 {
-    // ── [BOUNDARY C: scalar array → SIMD re-pack] ────────────────────────────
-    // nx[4] and ny[4] arrive as plain scalar arrays (stored by the caller at
-    // BOUNDARY B via store_u32_4 into FL_ALIGNAS(16) stack arrays).  We
-    // re-load them into SIMD registers here so that the coordinate arithmetic
-    // below (floor, fractional extract, wrap-to-255) can stay vectorized.
-    // The caller (pnoise2d_raw_simd4_vec) always passes FL_ALIGNAS(16) arrays stored
-    // at BOUNDARY B. FL_ASSUME_ALIGNED carries that guarantee into this call so the
-    // compiler can emit _mm_load_si128 instead of _mm_loadu_si128.
-    fl::simd::simd_u32x4 nx_vec = fl::simd::load_u32_4_aligned(FL_ASSUME_ALIGNED(reinterpret_cast<const fl::u32*>(nx), 16)); // ok reinterpret cast
-    fl::simd::simd_u32x4 ny_vec = fl::simd::load_u32_4_aligned(FL_ASSUME_ALIGNED(reinterpret_cast<const fl::u32*>(ny), 16)); // ok reinterpret cast
-    // ── [end BOUNDARY C] ──────────────────────────────────────────────────────
-
     // SIMD: Extract integer floor (shift right by FP_BITS)
     fl::simd::simd_u32x4 X_vec = fl::simd::srl_u32_4(nx_vec, FP_BITS);
     fl::simd::simd_u32x4 Y_vec = fl::simd::srl_u32_4(ny_vec, FP_BITS);
@@ -86,37 +76,42 @@ void perlin_s16x16_simd::pnoise2d_raw_simd4(
     // Gradient computations and interpolation (scalar to match scalar implementation exactly)
     // The SIMD lerp with pre-shift loses precision due to truncation at different points
     // Use scalar lerp to guarantee exact match with scalar implementation
-    for (int i = 0; i < 4; i++) {
+    // ── [BOUNDARY E: scalar results → SIMD re-pack via set_u32_4] ────────────
+    constexpr int SHIFT = HP_BITS - fl::s16x16::FRAC_BITS;
+    auto lane = [&](int i) -> fl::i32 {
         fl::i32 g_aa = perlin_s16x16::grad(perm[AA[i] & 255], x_frac[i],           y_frac[i]);
         fl::i32 g_ba = perlin_s16x16::grad(perm[BA[i] & 255], x_frac[i] - HP_ONE, y_frac[i]);
         fl::i32 g_ab = perlin_s16x16::grad(perm[AB[i] & 255], x_frac[i],           y_frac[i] - HP_ONE);
         fl::i32 g_bb = perlin_s16x16::grad(perm[BB[i] & 255], x_frac[i] - HP_ONE, y_frac[i] - HP_ONE);
-
-        // Use scalar lerp for exact precision match
         fl::i32 lerp1 = perlin_s16x16::lerp(u[i], g_aa, g_ba);
         fl::i32 lerp2 = perlin_s16x16::lerp(u[i], g_ab, g_bb);
-        fl::i32 result = perlin_s16x16::lerp(v[i], lerp1, lerp2);
+        return perlin_s16x16::lerp(v[i], lerp1, lerp2) >> SHIFT;
+    };
+    return fl::simd::set_u32_4(
+        static_cast<fl::u32>(lane(0)), static_cast<fl::u32>(lane(1)),
+        static_cast<fl::u32>(lane(2)), static_cast<fl::u32>(lane(3)));
+    // ── [end BOUNDARY E] ──────────────────────────────────────────────────────
+}
 
-        // Shift to match s16x16 fractional bits
-        out[i] = result >> (HP_BITS - fl::s16x16::FRAC_BITS);
-    }
+// Array-accepting wrappers: load arrays → delegate to register overload.
+void perlin_s16x16_simd::pnoise2d_raw_simd4(
+    const fl::i32 nx[4], const fl::i32 ny[4],
+    const fl::i32 *fade_lut, const fl::u8 *perm,
+    fl::i32 out[4])
+{
+    fl::simd::simd_u32x4 nx_vec = fl::simd::load_u32_4(reinterpret_cast<const fl::u32*>(nx)); // ok reinterpret cast
+    fl::simd::simd_u32x4 ny_vec = fl::simd::load_u32_4(reinterpret_cast<const fl::u32*>(ny)); // ok reinterpret cast
+    fl::simd::simd_u32x4 result = pnoise2d_raw_simd4_vec(nx_vec, ny_vec, fade_lut, perm);
+    fl::simd::store_u32_4(reinterpret_cast<fl::u32*>(out), result); // ok reinterpret cast
 }
 
 fl::simd::simd_u32x4 perlin_s16x16_simd::pnoise2d_raw_simd4_vec(
     const fl::i32 nx[4], const fl::i32 ny[4],
     const fl::i32 *fade_lut, const fl::u8 *perm)
 {
-    // ── [BOUNDARY E: scalar output → aligned SIMD re-pack] ───────────────────
-    // pnoise2d_raw_simd4 computes results into a plain scalar array (out[4])
-    // because the lerp tree and gradient lookups are scalar (see BOUNDARY D).
-    // We declare out[] as FL_ALIGNAS(16) so the load below uses an aligned
-    // 128-bit load, then return the register so the caller (simd4_processChannel)
-    // can continue the pipeline (clamp, scale×255, radial filter) fully in SIMD
-    // without re-entering scalar code.
-    FL_ALIGNAS(16) fl::i32 out[4];
-    pnoise2d_raw_simd4(nx, ny, fade_lut, perm, out);
-    return fl::simd::load_u32_4_aligned(FL_ASSUME_ALIGNED(reinterpret_cast<const fl::u32*>(out), 16)); // ok reinterpret cast
-    // ── [end BOUNDARY E] ──────────────────────────────────────────────────────
+    fl::simd::simd_u32x4 nx_vec = fl::simd::load_u32_4(reinterpret_cast<const fl::u32*>(nx)); // ok reinterpret cast
+    fl::simd::simd_u32x4 ny_vec = fl::simd::load_u32_4(reinterpret_cast<const fl::u32*>(ny)); // ok reinterpret cast
+    return pnoise2d_raw_simd4_vec(nx_vec, ny_vec, fade_lut, perm);
 }
 
 }  // namespace fl

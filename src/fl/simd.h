@@ -102,6 +102,14 @@ using platforms::scale_u8_16;
 /// @return SIMD register with value replicated 4 times
 using platforms::set1_u32_4;
 
+/// Construct a simd_u32x4 from 4 individual u32 values
+/// @param a Lane 0 value
+/// @param b Lane 1 value
+/// @param c Lane 2 value
+/// @param d Lane 3 value
+/// @return SIMD register {a, b, c, d}
+using platforms::set_u32_4;
+
 /// Saturating subtract: (a - b) clamped to [0, 255]
 /// @param a First operand (16 uint8_t)
 /// @param b Second operand (16 uint8_t)
