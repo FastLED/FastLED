@@ -25,6 +25,7 @@ class DownbeatDetector;
 class BackbeatDetector;
 class VocalDetector;
 class PercussionDetector;
+enum class PercussionType : u8;
 class ChordDetector;
 struct Chord;
 class KeyDetector;
@@ -112,7 +113,7 @@ public:
     void onVocalConfidence(function<void(float confidence)> callback);
 
     // ----- Percussion Detection Events -----
-    void onPercussion(function<void(const char* type)> callback);
+    void onPercussion(function<void(PercussionType type)> callback);
     void onKick(function<void()> callback);
     void onSnare(function<void()> callback);
     void onHiHat(function<void()> callback);

@@ -67,17 +67,17 @@ void PercussionDetector::update(shared_ptr<AudioContext> context) {
 void PercussionDetector::fireCallbacks() {
     if (mKickDetected) {
         if (onKick) onKick();
-        if (onPercussionHit) onPercussionHit("kick");
+        if (onPercussionHit) onPercussionHit(PercussionType::Kick);
     }
 
     if (mSnareDetected) {
         if (onSnare) onSnare();
-        if (onPercussionHit) onPercussionHit("snare");
+        if (onPercussionHit) onPercussionHit(PercussionType::Snare);
     }
 
     if (mHiHatDetected) {
         if (onHiHat) onHiHat();
-        if (onPercussionHit) onPercussionHit("hihat");
+        if (onPercussionHit) onPercussionHit(PercussionType::HiHat);
     }
 }
 

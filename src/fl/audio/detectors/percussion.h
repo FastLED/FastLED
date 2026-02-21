@@ -2,9 +2,17 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
+#include "fl/int.h"
 #include "fl/stl/function.h"
 
 namespace fl {
+
+enum class PercussionType : u8 {
+    Kick,
+    Snare,
+    HiHat,
+    Tom,
+};
 
 class PercussionDetector : public AudioDetector {
 public:
@@ -19,7 +27,7 @@ public:
     void reset() override;
 
     // Callbacks (multiple listeners supported)
-    function_list<void(const char* type)> onPercussionHit;
+    function_list<void(PercussionType type)> onPercussionHit;
     function_list<void()> onKick;
     function_list<void()> onSnare;
     function_list<void()> onHiHat;

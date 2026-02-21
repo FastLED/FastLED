@@ -289,7 +289,7 @@ void AudioProcessor::onVocalConfidence(function<void(float)> callback) {
     });
 }
 
-void AudioProcessor::onPercussion(function<void(const char*)> callback) {
+void AudioProcessor::onPercussion(function<void(PercussionType)> callback) {
     auto detector = getPercussionDetector();
     detector->onPercussionHit.add(callback);
 }
