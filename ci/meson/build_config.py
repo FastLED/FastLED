@@ -3,6 +3,7 @@
 # pyright: reportMissingImports=false, reportUnknownVariableType=false
 
 import glob
+import json
 import os
 import platform
 import re
@@ -16,6 +17,7 @@ from typing import Optional
 
 from running_process import RunningProcess
 
+from ci.meson.cache_utils import _get_max_dir_mtime
 from ci.meson.compiler import (
     check_meson_installed,
     check_meson_version_compatibility,
@@ -38,166 +40,6 @@ class CleanupResult:
     deleted: int
     failed: int
     failed_files: list[str]
-
-
-def inject_restat_into_static_linker_rule(build_dir: Path) -> bool:
-    """
-    Patch build.ninja to add `restat = 1` to the STATIC_LINKER rule.
-
-    This is required for the content-preserving archive optimization to work.
-    When combined with `ci/meson/ar_content_preserving.py` as the archiver:
-    - The archiver preserves libfastled.a mtime when content is unchanged
-    - ninja's `restat = 1` causes it to re-check libfastled.a mtime after archiving
-    - If mtime is unchanged, ninja does NOT propagate dirty to downstream DLL targets
-    - Result: 327 DLL relinks are suppressed when src/ whitespace changes
-
-    This patch is idempotent (safe to call multiple times) and handles regeneration
-    by checking if `restat = 1` is already present before modifying the file.
-
-    Args:
-        build_dir: Meson build directory containing build.ninja
-
-    Returns:
-        True if patch was applied or already present, False if build.ninja not found
-    """
-    build_ninja_path = build_dir / "build.ninja"
-    if not build_ninja_path.exists():
-        return False
-
-    try:
-        content = build_ninja_path.read_text(encoding="utf-8")
-    except OSError:
-        return False
-
-    # Check if STATIC_LINKER rule exists
-    if "rule STATIC_LINKER" not in content:
-        return False
-
-    # Find the STATIC_LINKER rule and check if restat=1 is already present
-    # The rule ends at the next blank line or next "rule " keyword
-    static_linker_pos = content.find("rule STATIC_LINKER")
-    if static_linker_pos == -1:
-        return False
-
-    # Find the end of the STATIC_LINKER rule (blank line or next rule)
-    rule_end = content.find("\n\n", static_linker_pos)
-    if rule_end == -1:
-        rule_end = len(content)
-
-    rule_text = content[static_linker_pos:rule_end]
-
-    # Check if restat=1 is already in this rule
-    if "restat = 1" in rule_text:
-        return True  # Already patched
-
-    # Insert `restat = 1` before the end of the rule
-    # The rule ends at the blank line; we insert before it
-    # Pattern: find " description = Linking static target $out\n" and append restat=1 after it
-    description_line = " description = Linking static target $out"
-    if description_line not in rule_text:
-        # Unexpected format - don't patch
-        return False
-
-    # Build new rule text with restat=1 appended after description
-    new_rule_text = rule_text.replace(
-        description_line,
-        description_line + "\n restat = 1",
-    )
-
-    # Replace in content
-    new_content = content[:static_linker_pos] + new_rule_text + content[rule_end:]
-
-    try:
-        build_ninja_path.write_text(new_content, encoding="utf-8")
-        return True
-    except OSError:
-        return False
-
-
-def inject_ar_wrapper_into_static_linker_command(
-    build_dir: Path,
-    source_dir: Path,
-) -> bool:
-    """
-    Patch build.ninja STATIC_LINKER command to use ar_content_preserving.py wrapper.
-
-    This patches the command directly in build.ninja (not via meson_native.txt) to
-    avoid triggering meson auto-regeneration. The patch is applied alongside
-    inject_restat_into_static_linker_rule() after any meson setup.
-
-    The patched command becomes:
-        "python.exe" "ar_content_preserving.py" "ar.exe" $LINK_ARGS $out $in
-
-    This wrapper intercepts archiving and preserves libfastled.a mtime when content
-    is unchanged (e.g., sccache cache hits that only update .obj mtime).
-
-    This patch is idempotent (safe to call multiple times). When combined with
-    restat=1 on the STATIC_LINKER rule, ninja suppresses DLL relinking when
-    archive content is unchanged.
-
-    Args:
-        build_dir: Meson build directory containing build.ninja
-        source_dir: Project source root (parent of ci/)
-
-    Returns:
-        True if patch was applied or already present, False if not applicable
-    """
-    ar_wrapper_script = source_dir / "ci" / "meson" / "ar_content_preserving.py"
-    if not ar_wrapper_script.exists():
-        return False
-
-    build_ninja_path = build_dir / "build.ninja"
-    if not build_ninja_path.exists():
-        return False
-
-    try:
-        content = build_ninja_path.read_text(encoding="utf-8")
-    except OSError:
-        return False
-
-    if "rule STATIC_LINKER" not in content:
-        return False
-
-    static_linker_pos = content.find("rule STATIC_LINKER")
-    rule_end = content.find("\n\n", static_linker_pos)
-    if rule_end == -1:
-        rule_end = len(content)
-
-    rule_text = content[static_linker_pos:rule_end]
-
-    # Idempotency check: if wrapper script name already in command, skip
-    if ar_wrapper_script.name in rule_text:
-        return True
-
-    # Find the command line in the rule
-    command_prefix = " command = "
-    if command_prefix not in rule_text:
-        return False
-
-    cmd_start = rule_text.find(command_prefix)
-    cmd_line_start = cmd_start + len(command_prefix)
-    cmd_line_end = rule_text.find("\n", cmd_line_start)
-    if cmd_line_end == -1:
-        cmd_line_end = len(rule_text)
-
-    original_cmd = rule_text[cmd_line_start:cmd_line_end]
-
-    # Verify expected suffix (flags, out, in positions match our wrapper's expectations)
-    if "$LINK_ARGS $out $in" not in original_cmd:
-        return False
-
-    # Build new command: prepend python + script before the existing ar command
-    python_exe = sys.executable
-    new_cmd = f'"{python_exe}" "{ar_wrapper_script}" {original_cmd}'
-
-    new_rule_text = rule_text[:cmd_line_start] + new_cmd + rule_text[cmd_line_end:]
-    new_content = content[:static_linker_pos] + new_rule_text + content[rule_end:]
-
-    try:
-        build_ninja_path.write_text(new_content, encoding="utf-8")
-        return True
-    except OSError:
-        return False
 
 
 def is_ar_content_preserving_active(build_dir: Path) -> bool:
@@ -251,13 +93,73 @@ def is_ar_content_preserving_active(build_dir: Path) -> bool:
 _ar_opt_status_cache: dict[str, bool] = {}
 
 
+def _write_configuration_markers(
+    *,
+    build_mode_marker: Path,
+    build_mode: str,
+    thin_archive_marker: Path,
+    use_thin_archives: bool,
+    debug_marker: Path,
+    debug: bool,
+    check_marker: Path,
+    check: bool,
+    source_files_marker: Path,
+    current_source_hash: str,
+    current_source_files: list[str],
+    compiler_version_marker: Path,
+    current_compiler_version: str,
+    only_missing: bool = False,
+    verb: str = "Saved",
+) -> None:
+    """Write configuration marker files for cache invalidation.
+
+    Args:
+        only_missing: If True, only write markers that don't exist yet (migration path).
+                      If False, write all markers unconditionally (after meson setup).
+        verb: Display verb for log messages ("Saved" or "Created").
+    """
+    markers: list[tuple[Path, str, str]] = [
+        (build_mode_marker, build_mode, f"build_mode: {build_mode}"),
+        (
+            thin_archive_marker,
+            str(use_thin_archives),
+            f"thin archive: {use_thin_archives}",
+        ),
+        (debug_marker, str(debug), f"debug: {debug}"),
+        (check_marker, str(check), f"check: {check}"),
+        (
+            compiler_version_marker,
+            current_compiler_version,
+            f"compiler version: {current_compiler_version}",
+        ),
+    ]
+
+    for marker_path, value, description in markers:
+        if only_missing and marker_path.exists():
+            continue
+        try:
+            atomic_write_text(marker_path, value)
+            _ts_print(f"[MESON] ✅ {verb} {description}")
+        except (OSError, IOError) as e:
+            _ts_print(f"[MESON] Warning: Could not write {marker_path.name}: {e}")
+
+    # Source files marker has special handling (conditional on hash being non-empty)
+    if current_source_hash:
+        if not only_missing or not source_files_marker.exists():
+            try:
+                atomic_write_text(source_files_marker, current_source_hash)
+                _ts_print(
+                    f"[MESON] ✅ {verb} source/test files hash ({len(current_source_files)} files)"
+                )
+            except (OSError, IOError) as e:
+                _ts_print(f"[MESON] Warning: Could not write source files marker: {e}")
+
+
 def inject_ar_optimization_patches(build_dir: Path, source_dir: Path) -> bool:
     """
     Apply both ar optimization patches to build.ninja in a single read-modify-write.
 
-    Combines inject_restat_into_static_linker_rule() and
-    inject_ar_wrapper_into_static_linker_command() into one operation that reads
-    build.ninja only ONCE and writes at most ONCE (vs the original 2 reads + 2 writes).
+    Reads build.ninja only ONCE and writes at most ONCE.
 
     Also populates _ar_opt_status_cache so that a subsequent call to
     is_ar_content_preserving_active() can return from cache without reading
@@ -478,32 +380,6 @@ def detect_system_llvm_tools() -> tuple[bool, bool]:
     return has_lld, has_llvm_ar
 
 
-def _get_max_dir_mtime(root: Path) -> float:
-    """
-    Return the maximum mtime of any directory under *root* (root included).
-
-    We walk only directory entries (skipping files) to efficiently detect
-    whether any subdirectory has been modified since a marker file was written.
-    Adding or removing a file updates the PARENT directory's mtime on all
-    common filesystems (NTFS, ext4, APFS), so this gives us a fast O(#dirs)
-    change detector compared to the O(#files) rglob-based approach.
-
-    Returns 0.0 when root does not exist or any OS error occurs.
-    """
-    max_mtime = 0.0
-    try:
-        for dirpath, _, _ in os.walk(root):
-            try:
-                mtime = os.stat(dirpath).st_mtime
-                if mtime > max_mtime:
-                    max_mtime = mtime
-            except OSError:
-                pass
-    except OSError:
-        pass
-    return max_mtime
-
-
 def setup_meson_build(
     source_dir: Path,
     build_dir: Path,
@@ -543,6 +419,9 @@ def setup_meson_build(
     # Check if already configured
     meson_info = build_dir / "meson-info"
     already_configured = meson_info.exists()
+
+    force_reconfigure = False
+    compiler_version_changed = False  # Track for late check after compiler detection
 
     # ============================================================================
     # CRITICAL: Check meson version compatibility BEFORE proceeding
@@ -650,8 +529,6 @@ def setup_meson_build(
     check_marker = build_dir / ".check_config"
     build_mode_marker = build_dir / ".build_mode_config"
     compiler_version_marker = build_dir / ".compiler_version_config"
-    force_reconfigure = False
-    compiler_version_changed = False  # Track for late check after compiler detection
 
     # Pre-compute directory max-mtimes once for all fast-path checks below.
     # The tests/ directory is needed by BOTH:
@@ -1098,10 +975,8 @@ def setup_meson_build(
                     cached_example_hash = ""
                     if example_cache_file.exists():
                         try:
-                            import json as _json
-
                             with open(example_cache_file, "r") as f:
-                                cache_data = _json.load(f)
+                                cache_data = json.load(f)
                             cached_example_hash = cache_data.get("hash", "")
                         except KeyboardInterrupt:
                             handle_keyboard_interrupt_properly()
@@ -1461,61 +1336,24 @@ endian = 'little'
                 _ts_print(f"[MESON] Warning: Could not check/delete libfastled.a: {e}")
                 pass
 
-        # CRITICAL: Create all marker files if they don't exist (migration from older code)
-        # This ensures cache invalidation works correctly on first run after update
-        # Without this, marker files would never be created in the skip path
-        # NOTE: All marker writes use atomic_write_text to prevent corruption on crash
-        if not build_mode_marker.exists():
-            try:
-                atomic_write_text(build_mode_marker, build_mode)
-                _ts_print(f"[MESON] ✅ Created build_mode marker: {build_mode}")
-            except (OSError, IOError) as e:
-                _ts_print(f"[MESON] Warning: Could not write build_mode marker: {e}")
-
-        if not thin_archive_marker.exists():
-            try:
-                atomic_write_text(thin_archive_marker, str(use_thin_archives))
-                _ts_print(
-                    f"[MESON] ✅ Created thin archive marker: {use_thin_archives}"
-                )
-            except (OSError, IOError) as e:
-                _ts_print(f"[MESON] Warning: Could not write thin archive marker: {e}")
-
-        if not debug_marker.exists():
-            try:
-                atomic_write_text(debug_marker, str(debug))
-                _ts_print(f"[MESON] ✅ Created debug marker: {debug}")
-            except (OSError, IOError) as e:
-                _ts_print(f"[MESON] Warning: Could not write debug marker: {e}")
-
-        if not check_marker.exists():
-            try:
-                atomic_write_text(check_marker, str(check))
-                _ts_print(f"[MESON] ✅ Created check marker: {check}")
-            except (OSError, IOError) as e:
-                _ts_print(f"[MESON] Warning: Could not write check marker: {e}")
-
-        if current_source_hash and not source_files_marker.exists():
-            try:
-                atomic_write_text(source_files_marker, current_source_hash)
-                _ts_print(
-                    f"[MESON] ✅ Created source/test files marker ({len(current_source_files)} files)"
-                )
-            except (OSError, IOError) as e:
-                _ts_print(
-                    f"[MESON] Warning: Could not write source/test files marker: {e}"
-                )
-
-        if not compiler_version_marker.exists():
-            try:
-                atomic_write_text(compiler_version_marker, current_compiler_version)
-                _ts_print(
-                    f"[MESON] ✅ Created compiler version marker: {current_compiler_version}"
-                )
-            except (OSError, IOError) as e:
-                _ts_print(
-                    f"[MESON] Warning: Could not write compiler version marker: {e}"
-                )
+        # Create missing marker files (migration from older code)
+        _write_configuration_markers(
+            build_mode_marker=build_mode_marker,
+            build_mode=build_mode,
+            thin_archive_marker=thin_archive_marker,
+            use_thin_archives=use_thin_archives,
+            debug_marker=debug_marker,
+            debug=debug,
+            check_marker=check_marker,
+            check=check,
+            source_files_marker=source_files_marker,
+            current_source_hash=current_source_hash,
+            current_source_files=current_source_files,
+            compiler_version_marker=compiler_version_marker,
+            current_compiler_version=current_compiler_version,
+            only_missing=True,
+            verb="Created",
+        )
 
         # Ensure build.ninja has restat=1 and ar wrapper on STATIC_LINKER rule.
         # Combined function reads build.ninja once and populates _ar_opt_status_cache,
@@ -1591,62 +1429,23 @@ endian = 'little'
         _ts_print(f"[MESON] Setup successful")
 
         # Write marker files to track settings for future runs
-        # NOTE: All marker writes use atomic_write_text to prevent corruption on crash
-        try:
-            atomic_write_text(thin_archive_marker, str(use_thin_archives))
-            _ts_print(
-                f"[MESON] ✅ Saved thin archive configuration: {use_thin_archives}"
-            )
-        except (OSError, IOError) as e:
-            # Not critical if marker file write fails
-            _ts_print(f"[MESON] Warning: Could not write thin archive marker: {e}")
-
-        # Write marker file to track debug setting for future runs
-        try:
-            atomic_write_text(debug_marker, str(debug))
-            _ts_print(f"[MESON] ✅ Saved debug configuration: {debug}")
-        except (OSError, IOError) as e:
-            # Not critical if marker file write fails
-            _ts_print(f"[MESON] Warning: Could not write debug marker: {e}")
-
-        # Write marker file to track check setting for future runs
-        try:
-            atomic_write_text(check_marker, str(check))
-            _ts_print(f"[MESON] ✅ Saved check configuration: {check}")
-        except (OSError, IOError) as e:
-            # Not critical if marker file write fails
-            _ts_print(f"[MESON] Warning: Could not write check marker: {e}")
-
-        # Write marker file to track build_mode setting for future runs
-        # CRITICAL: This enables detection of quick <-> release transitions
-        try:
-            atomic_write_text(build_mode_marker, build_mode)
-            _ts_print(f"[MESON] ✅ Saved build_mode configuration: {build_mode}")
-        except (OSError, IOError) as e:
-            # Not critical if marker file write fails
-            _ts_print(f"[MESON] Warning: Could not write build_mode marker: {e}")
-
-        # Write marker file to track source/test file list for future runs
-        if current_source_hash:
-            try:
-                atomic_write_text(source_files_marker, current_source_hash)
-                _ts_print(
-                    f"[MESON] ✅ Saved source/test files hash ({len(current_source_files)} files)"
-                )
-            except (OSError, IOError) as e:
-                # Not critical if marker file write fails
-                _ts_print(
-                    f"[MESON] Warning: Could not write source/test files marker: {e}"
-                )
-
-        # Write marker file to track compiler version for future runs
-        # CRITICAL: This enables detection of compiler upgrades that invalidate PCH/objects
-        try:
-            atomic_write_text(compiler_version_marker, current_compiler_version)
-            _ts_print(f"[MESON] ✅ Saved compiler version: {current_compiler_version}")
-        except (OSError, IOError) as e:
-            # Not critical if marker file write fails
-            _ts_print(f"[MESON] Warning: Could not write compiler version marker: {e}")
+        _write_configuration_markers(
+            build_mode_marker=build_mode_marker,
+            build_mode=build_mode,
+            thin_archive_marker=thin_archive_marker,
+            use_thin_archives=use_thin_archives,
+            debug_marker=debug_marker,
+            debug=debug,
+            check_marker=check_marker,
+            check=check,
+            source_files_marker=source_files_marker,
+            current_source_hash=current_source_hash,
+            current_source_files=current_source_files,
+            compiler_version_marker=compiler_version_marker,
+            current_compiler_version=current_compiler_version,
+            only_missing=False,
+            verb="Saved",
+        )
 
         # Inject restat=1 and ar wrapper into STATIC_LINKER rule.
         # Combined function reads build.ninja once and populates _ar_opt_status_cache,

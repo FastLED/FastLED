@@ -2,8 +2,10 @@
 """Meson build system runner for FastLED tests."""
 
 import argparse
+import glob
 import os
 import shutil
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -76,8 +78,6 @@ def _recover_stale_build(
             Path(sys.prefix) / "Scripts" / "ninja.EXE"
         )
         try:
-            import subprocess
-
             result = subprocess.run(
                 [ninja_exe, "-C", str(build_dir), "-t", "cleandead"],
                 capture_output=True,
@@ -324,8 +324,6 @@ def run_meson_build_and_test(
         tests_dir = build_dir / "tests"
         if tests_dir.exists():
             # Look for executables matching *<name>*
-            import glob
-
             exe_pattern = f"*{test_name_lower}*.exe"
             matches = glob.glob(str(tests_dir / exe_pattern))
             # Extract just the executable name without path and extension
@@ -611,15 +609,6 @@ def run_meson_build_and_test(
                     ):
                         path_qualified.append(qualified)
                 targets_to_try.extend(path_qualified)
-
-                # Determine build mode from build directory name
-                build_mode = "unknown"
-                if "meson-quick" in str(build_dir):
-                    build_mode = "quick"
-                elif "meson-debug" in str(build_dir):
-                    build_mode = "debug"
-                elif "meson-release" in str(build_dir):
-                    build_mode = "release"
 
                 # Show build stage banner before compilation starts
                 # WARNING: This build progress reporting is essential for user feedback!

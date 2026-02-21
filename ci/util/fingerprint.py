@@ -3,6 +3,11 @@ import os
 from pathlib import Path
 from typing import Callable, Dict, Optional
 
+from ci.meson.cache_utils import (
+    _SKIP_DIR_NAMES,
+    _SKIP_DIR_PREFIXES,
+    _get_max_dir_mtime,
+)
 from ci.util.test_types import (
     FingerprintResult,
     TestArgs,
@@ -13,71 +18,6 @@ from ci.util.test_types import (
     calculate_wasm_fingerprint,
 )
 from ci.util.timestamp_print import ts_print
-
-
-# Directories to skip in mtime walk. These contain generated/cached files,
-# not developer-edited source files. Excluding them prevents false-positive
-# cache invalidation when Python writes .pyc files or other tools update caches.
-_MTIME_SKIP_DIRS = frozenset(
-    [
-        "__pycache__",
-        ".git",
-        "node_modules",
-        ".mypy_cache",
-        ".ruff_cache",
-        ".cache",
-        "bin",
-        ".pio",
-        "emscripten",
-        "fastled_js",
-    ]
-)
-# Prefix-based directory skipping: build artifact dirs that start with these prefixes
-# are skipped to avoid false positives. Covers .build-examples-*, build*, builddir*, .*.
-# Without prefix filtering: tests/ walks 400 dirs (~65ms); with it: 53 dirs (~6ms).
-_MTIME_SKIP_PREFIXES = (".build", "build", "builddir", ".")
-
-
-def _get_max_dir_mtime(root: Path) -> float:
-    """
-    Return the maximum mtime of any SOURCE directory under *root* (root included).
-
-    Walk only directory entries (skipping files) to detect whether any subdirectory
-    has been modified since a marker file was written.  Adding or removing a file
-    always updates the PARENT directory's mtime on NTFS, ext4, and APFS, so this
-    gives an O(#dirs) change proxy vs O(#files) for a full rglob.
-
-    Excludes non-source directories (``__pycache__``, ``.git``, etc.) that are
-    updated by tools (Python bytecode caching, version control) without representing
-    developer code changes.  Pruning them prevents false-positive cache invalidation
-    when the fingerprint file is older than a recently-written .pyc file.
-
-    Also excludes build artifact directories via name-exact and prefix-based
-    matching (_MTIME_SKIP_DIRS, _MTIME_SKIP_PREFIXES). This dramatically reduces
-    the number of directories walked in tests/ and ci/ (400→53 and 370→31 dirs).
-
-    Returns 0.0 when root does not exist or any OS error occurs.
-    """
-    max_mtime = 0.0
-    try:
-        for dirpath, dirnames, _ in os.walk(root):
-            # Prune non-source directories in-place so os.walk doesn't descend
-            # into them and we don't stat them (avoids false positives).
-            dirnames[:] = [
-                d
-                for d in dirnames
-                if d not in _MTIME_SKIP_DIRS
-                and not any(d.startswith(p) for p in _MTIME_SKIP_PREFIXES)
-            ]
-            try:
-                mtime = os.stat(dirpath).st_mtime
-                if mtime > max_mtime:
-                    max_mtime = mtime
-            except OSError:
-                pass
-    except OSError:
-        pass
-    return max_mtime
 
 
 def _get_max_source_file_mtime(root: Path) -> float:
@@ -101,8 +41,8 @@ def _get_max_source_file_mtime(root: Path) -> float:
                     try:
                         name = entry.name
                         if entry.is_dir(follow_symlinks=False):
-                            if name not in _MTIME_SKIP_DIRS and not any(
-                                name.startswith(p) for p in _MTIME_SKIP_PREFIXES
+                            if name not in _SKIP_DIR_NAMES and not any(
+                                name.startswith(p) for p in _SKIP_DIR_PREFIXES
                             ):
                                 stack.append(entry.path)
                         elif entry.is_file(follow_symlinks=False):

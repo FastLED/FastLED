@@ -21,7 +21,7 @@ from dataclasses import dataclass
 from queue import Queue
 
 # Import for type annotation only
-from typing import TYPE_CHECKING, Callable, Optional, Protocol, cast
+from typing import TYPE_CHECKING, Callable, Optional
 
 from running_process import RunningProcess
 from typeguard import typechecked
@@ -442,10 +442,6 @@ class ProcessOutputHandler:
         return TestResult(
             type=TestResultType.INFO, message=line, test_name=process_name
         )
-
-
-class ReconfigurableIO(Protocol):
-    def reconfigure(self, *, encoding: str, errors: str) -> None: ...
 
 
 def create_unit_test_process(
@@ -1122,307 +1118,6 @@ def _handle_stuck_processes(
             ts_print(f"Killed stuck process: {proc.command}")
 
 
-def _run_processes_parallel(
-    processes: list[RunningProcess], verbose: bool = False
-) -> list[ProcessTiming]:
-    """
-    DEPRECATED: Use RunningProcessGroup instead.
-
-    This function has been replaced by RunningProcessGroup.run()
-    for better maintainability and consistency.
-
-    Run multiple test processes in parallel and handle their output
-
-    Args:
-        processes: List of RunningProcess objects to execute
-
-    Returns:
-        List of ProcessTiming objects with execution times
-    """
-    if not processes:
-        return []
-
-    # Create a shared output handler for formatting
-    ProcessOutputHandler(verbose=verbose)
-
-    # Configure Windows console for UTF-8 output if needed
-    if os.name == "nt":  # Windows
-        if hasattr(sys.stdout, "reconfigure"):
-            cast(ReconfigurableIO, sys.stdout).reconfigure(
-                encoding="utf-8", errors="replace"
-            )
-        if hasattr(sys.stderr, "reconfigure"):
-            cast(ReconfigurableIO, sys.stderr).reconfigure(
-                encoding="utf-8", errors="replace"
-            )
-
-    # Start processes that aren't already running
-    for proc in processes:
-        cmd_str = proc.get_command_str()
-        if proc.proc is None:  # Only start if not already running
-            proc.start()
-            ts_print(f"Started: {cmd_str}")
-        else:
-            ts_print(f"Process already running: {cmd_str}")
-
-    # Monitor all processes for output and completion
-    active_processes = processes.copy()
-    start_time = time.time()
-
-    runner_timeouts: list[int] = [p.timeout for p in processes if p.timeout is not None]
-    global_timeout: Optional[int] = None
-    if runner_timeouts:
-        global_timeout = max(runner_timeouts) + 60  # Add 1 minute buffer
-
-    # Track last activity time for each process to detect stuck processes
-    last_activity_time = {proc: time.time() for proc in active_processes}
-    stuck_process_timeout = _GLOBAL_TIMEOUT
-
-    # Track failed processes for proper error reporting
-    failed_processes: list[str] = []  # Processes killed due to timeout/stuck
-    exit_failed_processes: list[
-        tuple[RunningProcess, int]
-    ] = []  # Processes that failed with non-zero exit code
-
-    # Track completed processes for timing summary
-    completed_timings: list[ProcessTiming] = []
-
-    # Create thread-based stuck process monitor
-    stuck_monitor = ProcessStuckMonitor(stuck_process_timeout)
-
-    try:
-        # Start monitoring threads for each process
-        for proc in active_processes:
-            stuck_monitor.start_monitoring(proc)
-
-        def time_expired() -> bool:
-            if global_timeout is None:
-                return False
-            assert global_timeout is not None
-            return time.time() - start_time > global_timeout
-
-        while active_processes:
-            # Check global timeout
-            if time_expired():
-                assert global_timeout is not None
-                ts_print(f"\nGlobal timeout reached after {global_timeout} seconds")
-                ts_print("\033[91m###### ERROR ######\033[0m")
-                ts_print("Tests failed due to global timeout")
-                failures: list[TestFailureInfo] = []
-                for p in active_processes:
-                    failed_processes.append(
-                        subprocess.list2cmdline(p.command)
-                    )  # Track all active processes as failed
-                    p.kill()
-                    failures.append(
-                        TestFailureInfo(
-                            test_name=_extract_test_name(p.command),
-                            command=str(p.command),
-                            return_code=1,
-                            output="Process killed due to global timeout",
-                            error_type="global_timeout",
-                        )
-                    )
-                raise TestTimeoutException("Global timeout reached", failures)
-
-            # Check for stuck processes (using threaded monitoring)
-            stuck_signals = stuck_monitor.check_for_stuck_processes()
-            if stuck_signals:
-                _handle_stuck_processes(
-                    stuck_signals, active_processes, failed_processes, stuck_monitor
-                )
-
-                # Early abort if failure threshold reached via stuck processes
-                if (
-                    len(exit_failed_processes) + len(failed_processes)
-                ) >= MAX_FAILURES_BEFORE_ABORT:
-                    ts_print(
-                        f"\nExceeded failure threshold ({MAX_FAILURES_BEFORE_ABORT}). Aborting remaining tests."
-                    )
-                    # Kill any remaining active processes
-                    for p in active_processes:
-                        p.kill()
-                    # Build detailed failures
-                    failures: list[TestFailureInfo] = []
-                    for proc, exit_code in exit_failed_processes:
-                        error_snippet = extract_error_snippet(proc.accumulated_output)
-                        failures.append(
-                            TestFailureInfo(
-                                test_name=_extract_test_name(proc.command),
-                                command=str(proc.command),
-                                return_code=exit_code,
-                                output=error_snippet,
-                                error_type="exit_failure",
-                            )
-                        )
-                    for cmd in failed_processes:
-                        cmd = subprocess.list2cmdline(cmd)
-                        failures.append(
-                            TestFailureInfo(
-                                test_name=_extract_test_name(cmd),
-                                command=str(cmd),
-                                return_code=1,
-                                output="Process was killed due to timeout/stuck detection",
-                                error_type="killed_process",
-                            )
-                        )
-                    raise TestExecutionFailedException(
-                        "Exceeded failure threshold", failures
-                    )
-
-            # Process each active test individually
-            # Iterate backwards to safely remove processes from the list
-            any_activity = False
-            for i in range(len(active_processes) - 1, -1, -1):
-                proc = active_processes[i]
-
-                if verbose:
-                    with proc.line_iter(timeout=60) as line_iter:
-                        for line in line_iter:
-                            ts_print(line)
-
-                # Check if process has finished
-                if proc.finished:
-                    # Get the exit code to check for failure
-                    exit_code = proc.wait()
-
-                    # Process completed, remove from active list
-                    active_processes.remove(proc)
-                    # Stop monitoring this process
-                    stuck_monitor.stop_monitoring(proc)
-
-                    # Check for non-zero exit code (failure)
-                    if exit_code != 0:
-                        ts_print(
-                            f"Process failed with exit code {exit_code}: {proc.command}"
-                        )
-                        exit_failed_processes.append((proc, exit_code))
-                        # Early abort if we reached the failure threshold
-                        if (
-                            len(exit_failed_processes) + len(failed_processes)
-                        ) >= MAX_FAILURES_BEFORE_ABORT:
-                            ts_print(
-                                f"\nExceeded failure threshold ({MAX_FAILURES_BEFORE_ABORT}). Aborting remaining tests."
-                            )
-                            # Kill remaining active processes
-                            for p in active_processes:
-                                if p is not proc:
-                                    p.kill()
-                            # Prepare failures with snippets
-                            failures: list[TestFailureInfo] = []
-                            for p, code in exit_failed_processes:
-                                error_snippet = extract_error_snippet(
-                                    p.accumulated_output
-                                )
-                                failures.append(
-                                    TestFailureInfo(
-                                        test_name=_extract_test_name(p.command),
-                                        command=str(p.command),
-                                        return_code=code,
-                                        output=error_snippet,
-                                        error_type="exit_failure",
-                                    )
-                                )
-                            for cmd in failed_processes:
-                                cmd_str = subprocess.list2cmdline(cmd)
-                                failures.append(
-                                    TestFailureInfo(
-                                        test_name=_extract_test_name(cmd_str),
-                                        command=cmd_str,
-                                        return_code=1,
-                                        output="Process was killed due to timeout/stuck detection",
-                                        error_type="killed_process",
-                                    )
-                                )
-                            raise TestExecutionFailedException(
-                                "Exceeded failure threshold", failures
-                            )
-                        any_activity = True
-                        continue
-
-                    # Update timing information
-                    # Calculate duration properly - if process duration is None, calculate it manually
-                    if proc.duration is not None:
-                        duration = proc.duration
-                    elif proc.start_time is not None:
-                        # Calculate duration from start time to now
-                        duration = time.time() - proc.start_time
-                    else:
-                        duration = 0.0
-
-                    timing = ProcessTiming(
-                        name=_get_friendly_test_name(proc.command),
-                        command=subprocess.list2cmdline(proc.command),
-                        duration=duration,
-                    )
-                    completed_timings.append(timing)
-                    # Process completion is shown in the timing summary table, no separate message needed
-                    any_activity = True
-                    continue
-
-                # Update last activity time if we have stdout activity
-                stdout_time = proc.time_last_stdout_line()
-                if stdout_time is not None:
-                    last_activity_time[proc] = stdout_time
-                    any_activity = True
-
-            # Only sleep if no activity was detected, and use a shorter sleep
-            # This prevents excessive CPU usage while maintaining responsiveness
-            if not any_activity:
-                time.sleep(0.01)  # 10ms sleep only when no activity
-
-        # Check for processes that failed with non-zero exit codes
-        if exit_failed_processes:
-            ts_print("\n\033[91m###### ERROR ######\033[0m")
-            ts_print(
-                f"Tests failed due to {len(exit_failed_processes)} process(es) with non-zero exit codes:"
-            )
-            for proc, exit_code in exit_failed_processes:
-                ts_print(f"  - {proc.command} (exit code {exit_code})")
-            failures: list[TestFailureInfo] = []
-            for proc, exit_code in exit_failed_processes:
-                # Extract error snippet from process output
-                error_snippet = extract_error_snippet(proc.accumulated_output)
-
-                failures.append(
-                    TestFailureInfo(
-                        test_name=_extract_test_name(proc.command),
-                        command=str(proc.command),
-                        return_code=exit_code,
-                        output=error_snippet,
-                        error_type="exit_failure",
-                    )
-                )
-            raise TestExecutionFailedException("Tests failed", failures)
-
-        # Check for failed processes - CRITICAL FIX
-        if failed_processes:
-            ts_print("\n\033[91m###### ERROR ######\033[0m")
-            ts_print(f"Tests failed due to {len(failed_processes)} killed process(es):")
-            for cmd in failed_processes:
-                ts_print(f"  - {cmd}")
-            ts_print("Processes were killed due to timeout/stuck detection")
-            failures: list[TestFailureInfo] = []
-            for cmd in failed_processes:
-                failures.append(
-                    TestFailureInfo(
-                        test_name=_extract_test_name(cmd),
-                        command=str(cmd),
-                        return_code=1,
-                        output="Process was killed due to timeout/stuck detection",
-                        error_type="killed_process",
-                    )
-                )
-            raise TestExecutionFailedException("Processes were killed", failures)
-
-        ts_print("\nAll parallel tests completed successfully")
-        return completed_timings
-
-    finally:
-        # Always shutdown stuck monitoring threads, even on exception
-        stuck_monitor.shutdown()
-
-
 def run_test_processes(
     processes: list[RunningProcess], parallel: bool = True, verbose: bool = False
 ) -> list[ProcessTiming]:
@@ -1690,7 +1385,7 @@ def runner(
             # so the CASE 2 ultra-early exit can fire on next invocation.
             if result.num_tests_run and result.num_tests_run == result.num_tests_passed:
                 try:
-                    from ci.meson.compile import _save_full_run_result
+                    from ci.meson.cache_utils import _save_full_run_result
                     from ci.util.paths import PROJECT_ROOT
 
                     _build_mode_save = getattr(args, "build_mode", None) or (
@@ -1866,7 +1561,7 @@ def runner(
                     try:
                         import json as _json
 
-                        from ci.meson.compile import (
+                        from ci.meson.cache_utils import (
                             _get_full_run_cache_file,
                             _save_full_run_result,
                         )

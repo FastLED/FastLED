@@ -212,39 +212,6 @@ def process_test_flags(args: TestArgs) -> TestArgs:
 
     # If any specific flags are provided, ONLY run those (exclusive behavior)
     if specific_count > 0:
-        # When specific flags are provided, disable everything else unless explicitly set
-        if not args.unit:
-            # Unit was not explicitly set, so disable it
-            pass  # args.unit is already False
-
-        # Auto-enable verbose mode for unit tests (disabled)
-        # if args.unit and not args.verbose:
-        #     args.verbose = True
-        #     print("Auto-enabled --verbose mode for unit tests")
-        if args.examples is None:
-            # Examples was not explicitly set, so disable it
-            pass  # args.examples is already None
-        if not args.py:
-            # Python was not explicitly set, so disable it
-            pass  # args.py is already False
-        if not args.full:
-            # Full was not explicitly set, so disable it
-            pass  # args.full is already False
-
-        # Log what's running (disabled - redundant with auto-enabled messages)
-        # enabled_tests: list[str] = []
-        # if args.unit:
-        #     enabled_tests.append("unit tests")
-        # if args.examples is not None:
-        #     enabled_tests.append("examples")
-        # if args.py:
-        #     enabled_tests.append("Python tests")
-        # if args.full:
-        #     if args.examples is not None:
-        #         enabled_tests.append("full example integration tests")
-        #     else:
-        #         enabled_tests.append("full integration tests")
-        # print(f"Specific test flags provided: Running only {', '.join(enabled_tests)}")
         return args
 
     # If no specific flags, run everything (backward compatibility)
@@ -253,13 +220,6 @@ def process_test_flags(args: TestArgs) -> TestArgs:
         args.examples = []  # Empty list means run all examples
         args.py = True
         args.default_mode = True  # Mark that we're in default mode (enables WASM)
-        # print("No test flags specified: Running all tests (unit, examples, Python)")
-
-        # Auto-enable verbose mode for unit tests (disabled)
-        # if args.unit and not args.verbose:
-        #     args.verbose = True
-        #     print("Auto-enabled --verbose mode for unit tests")
-
         return args
 
     return args

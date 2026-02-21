@@ -53,6 +53,42 @@ def _should_skip_scan_dir(name: str) -> bool:
     return False
 
 
+def _get_max_dir_mtime(root: Path) -> float:
+    """
+    Return the maximum mtime of any SOURCE directory under *root* (root included).
+
+    Walk only directory entries (skipping files) to detect whether any subdirectory
+    has been modified since a marker file was written.  Adding or removing a file
+    always updates the PARENT directory's mtime on NTFS, ext4, and APFS, so this
+    gives an O(#dirs) change proxy vs O(#files) for a full rglob.
+
+    Excludes non-source directories (``__pycache__``, ``.git``, etc.) that are
+    updated by tools (Python bytecode caching, version control) without representing
+    developer code changes.  Pruning them prevents false-positive cache invalidation.
+
+    Returns 0.0 when root does not exist or any OS error occurs.
+    """
+    max_mtime = 0.0
+    try:
+        for dirpath, dirnames, _ in os.walk(root):
+            # Prune non-source directories in-place so os.walk doesn't descend
+            dirnames[:] = [
+                d
+                for d in dirnames
+                if d not in _SKIP_DIR_NAMES
+                and not any(d.startswith(p) for p in _SKIP_DIR_PREFIXES)
+            ]
+            try:
+                mtime = os.stat(dirpath).st_mtime
+                if mtime > max_mtime:
+                    max_mtime = mtime
+            except OSError:
+                pass
+    except OSError:
+        pass
+    return max_mtime
+
+
 def _get_max_source_file_mtime(
     root: Path, exts: Optional[frozenset[str]] = None
 ) -> float:

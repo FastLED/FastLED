@@ -12,16 +12,8 @@ from typing import Optional
 from running_process import RunningProcess
 
 from ci.meson.cache_utils import (
-    _check_full_run_cache,
     _check_ninja_skip,
-    _check_test_result_cached,
-    _get_full_run_cache_file,
-    _get_max_source_file_mtime,
-    _get_ninja_skip_state_file,
-    _get_test_result_cache_file,
-    _save_full_run_result,
     _save_ninja_skip_state,
-    _should_skip_scan_dir,
 )
 from ci.meson.compiler import get_meson_executable
 from ci.meson.output import _print_banner
@@ -96,6 +88,7 @@ def compile_meson(
     check: bool = False,
     quiet: bool = False,
     verbose: bool = False,
+    build_mode: Optional[str] = None,
 ) -> CompileResult:
     """
     Compile using Meson.
@@ -106,20 +99,24 @@ def compile_meson(
         check: Enable IWYU static analysis during compilation (default: False)
         quiet: Suppress banner and progress output (used during target fallback retries)
         verbose: Enable verbose output with section banners
+        build_mode: Build mode string for display (e.g., "quick", "debug", "release").
+                    If None, derived from build directory name.
 
     Returns:
         CompileResult with success flag and error_output (empty on success).
     """
     cmd = [get_meson_executable(), "compile", "-C", str(build_dir)]
 
-    # Determine build mode from build directory name
-    build_mode = "unknown"
-    if "meson-quick" in str(build_dir):
-        build_mode = "quick"
-    elif "meson-debug" in str(build_dir):
-        build_mode = "debug"
-    elif "meson-release" in str(build_dir):
-        build_mode = "release"
+    # Derive build mode from build directory name if not provided
+    if build_mode is None:
+        if "meson-quick" in str(build_dir):
+            build_mode = "quick"
+        elif "meson-debug" in str(build_dir):
+            build_mode = "debug"
+        elif "meson-release" in str(build_dir):
+            build_mode = "release"
+        else:
+            build_mode = "unknown"
 
     # NINJA SKIP OPTIMIZATION: If target is up-to-date, skip the full ninja
     # startup (~2-3s) and return immediately.
