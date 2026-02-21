@@ -156,8 +156,6 @@ FL_EXTERN_C_END
 
 #ifndef FASTLED_RMT_MEM_BLOCKS
 #define FASTLED_RMT_MEM_BLOCKS 2  // 2x as much memory for increased stability vs wifi jitter.
-#else
-#pragma message "FASTLED_RMT_MEM_BLOCKS is deprecated. Use RmtMemoryManager::setMemoryBlockStrategy() instead."
 #endif
 
 // Network-aware memory allocation
@@ -165,8 +163,6 @@ FL_EXTERN_C_END
 // This helps compensate for increased interrupt latency caused by network operations
 #ifndef FASTLED_RMT_MEM_BLOCKS_NETWORK_MODE
 #define FASTLED_RMT_MEM_BLOCKS_NETWORK_MODE 3  // Triple-buffer for network activity
-#else
-#pragma message "FASTLED_RMT_MEM_BLOCKS_NETWORK_MODE is deprecated. Use RmtMemoryManager::setMemoryBlockStrategy() instead."
 #endif
 
 // Enable/disable Network-aware dynamic channel reduction
