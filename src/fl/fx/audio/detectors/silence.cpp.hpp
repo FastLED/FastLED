@@ -54,9 +54,8 @@ void SilenceDetector::update(shared_ptr<AudioContext> context) {
 
         // Only fire callbacks if minimum duration was met
         if (mIsSilent && duration >= mMinSilenceDuration) {
-            if (onSilenceEnd) onSilenceEnd();
-            if (onSilenceChange) onSilenceChange(false);
-            if (onSilenceDuration) onSilenceDuration(duration);
+            mPendingEvent = PendingSilenceEvent::kEnd;
+            mPendingDuration = duration;
         }
 
         mIsSilent = false;
@@ -69,16 +68,35 @@ void SilenceDetector::update(shared_ptr<AudioContext> context) {
         // Check if we've reached minimum duration and should fire start event
         if (!mIsSilent && duration >= mMinSilenceDuration) {
             mIsSilent = true;
-            if (onSilenceStart) onSilenceStart();
-            if (onSilenceChange) onSilenceChange(true);
+            mPendingEvent = PendingSilenceEvent::kStart;
         }
 
         // Check if we've exceeded maximum duration
         if (mIsSilent && mMaxSilenceDuration > 0 && duration >= mMaxSilenceDuration) {
-            // Periodic duration callback at max duration
-            if (onSilenceDuration) onSilenceDuration(duration);
+            mPendingEvent = PendingSilenceEvent::kMaxDuration;
+            mPendingDuration = duration;
         }
     }
+}
+
+void SilenceDetector::fireCallbacks() {
+    switch (mPendingEvent) {
+    case PendingSilenceEvent::kStart:
+        if (onSilenceStart) onSilenceStart();
+        if (onSilence) onSilence(255);
+        break;
+    case PendingSilenceEvent::kEnd:
+        if (onSilenceEnd) onSilenceEnd();
+        if (onSilence) onSilence(0);
+        if (onSilenceDuration) onSilenceDuration(mPendingDuration);
+        break;
+    case PendingSilenceEvent::kMaxDuration:
+        if (onSilenceDuration) onSilenceDuration(mPendingDuration);
+        break;
+    case PendingSilenceEvent::kNone:
+        break;
+    }
+    mPendingEvent = PendingSilenceEvent::kNone;
 }
 
 void SilenceDetector::reset() {

@@ -142,6 +142,7 @@ FL_TEST_CASE("Audio fix - BeatDetector ignores treble-only transients") {
     for (int i = 0; i < 20; ++i) {
         context->setSample(makeSample(silence));
         detector.update(context);
+        detector.fireCallbacks();
     }
     FL_CHECK_EQ(beatCount, 0);
 
@@ -150,6 +151,7 @@ FL_TEST_CASE("Audio fix - BeatDetector ignores treble-only transients") {
     generateSine(hihat, 512, 8000.0f, 44100.0f, 20000.0f);
     context->setSample(makeSample(hihat, 500));
     detector.update(context);
+    detector.fireCallbacks();
 
     // DESIRED: BeatDetector should NOT fire on a pure treble transient.
     // Musical beats are characterized by bass/low-mid energy (kick drum).
@@ -305,6 +307,7 @@ FL_TEST_CASE("Audio fix - FrequencyBands callbacks fire") {
     auto context = make_shared<AudioContext>(makeSample(pcm, 1000));
     context->setSampleRate(44100);
     bands.update(context);
+    bands.fireCallbacks();
 
     // All callbacks should have fired
     FL_CHECK(levelsUpdated);

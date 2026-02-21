@@ -66,6 +66,7 @@ public:
 
     // AudioDetector interface
     void update(shared_ptr<AudioContext> context) override;
+    void fireCallbacks() override;
     bool needsFFT() const override { return true; }
     bool needsFFTHistory() const override { return true; }
     const char* getName() const override { return "MoodAnalyzer"; }
@@ -90,6 +91,7 @@ public:
 private:
     Mood mCurrentMood;
     Mood mPreviousMood;
+    bool mMoodChanged = false;
     float mConfidenceThreshold;
     u32 mMinDuration;
     int mAveragingFrames;

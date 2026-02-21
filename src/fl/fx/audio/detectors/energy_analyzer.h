@@ -13,6 +13,7 @@ public:
     ~EnergyAnalyzer() override;
 
     void update(shared_ptr<AudioContext> context) override;
+    void fireCallbacks() override;
     bool needsFFT() const override { return false; }  // Uses RMS from AudioSample
     const char* getName() const override { return "EnergyAnalyzer"; }
     void reset() override;

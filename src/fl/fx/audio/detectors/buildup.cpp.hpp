@@ -69,9 +69,7 @@ void BuildupDetector::update(shared_ptr<AudioContext> context) {
 
             FL_DBG("BuildupDetector: Buildup started (intensity=" << intensity << ")");
 
-            if (onBuildupStart) {
-                onBuildupStart();
-            }
+            mFireBuildupStart = true;
         }
     } else {
         // Update existing buildup
@@ -87,20 +85,14 @@ void BuildupDetector::update(shared_ptr<AudioContext> context) {
             mPeakFired = true;
             FL_DBG("BuildupDetector: Peak reached");
 
-            if (onBuildupPeak) {
-                onBuildupPeak();
-            }
+            mFireBuildupPeak = true;
         }
 
-        // Fire progress callback
-        if (onBuildupProgress) {
-            onBuildupProgress(mCurrentBuildup.progress);
-        }
+        // Set progress callback flag
+        mFireBuildupProgress = true;
 
-        // Fire general buildup callback
-        if (onBuildup) {
-            onBuildup(mCurrentBuildup);
-        }
+        // Set general buildup callback flag
+        mFireBuildup = true;
 
         // Check if buildup should end
         if (shouldEndBuildup()) {
@@ -109,15 +101,36 @@ void BuildupDetector::update(shared_ptr<AudioContext> context) {
             mBuildupActive = false;
             mCurrentBuildup.active = false;
 
-            if (onBuildupEnd) {
-                onBuildupEnd();
-            }
+            mFireBuildupEnd = true;
         }
     }
 
     mPrevEnergy = rms;
     mPrevTreble = treble;
     mLastUpdateTime = timestamp;
+}
+
+void BuildupDetector::fireCallbacks() {
+    if (mFireBuildupStart) {
+        if (onBuildupStart) onBuildupStart();
+        mFireBuildupStart = false;
+    }
+    if (mFireBuildupPeak) {
+        if (onBuildupPeak) onBuildupPeak();
+        mFireBuildupPeak = false;
+    }
+    if (mFireBuildupProgress) {
+        if (onBuildupProgress) onBuildupProgress(mCurrentBuildup.progress);
+        mFireBuildupProgress = false;
+    }
+    if (mFireBuildup) {
+        if (onBuildup) onBuildup(mCurrentBuildup);
+        mFireBuildup = false;
+    }
+    if (mFireBuildupEnd) {
+        if (onBuildupEnd) onBuildupEnd();
+        mFireBuildupEnd = false;
+    }
 }
 
 void BuildupDetector::reset() {

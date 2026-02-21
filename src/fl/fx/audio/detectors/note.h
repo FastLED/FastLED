@@ -35,6 +35,7 @@ public:
     ~NoteDetector() override;
 
     void update(shared_ptr<AudioContext> context) override;
+    void fireCallbacks() override;
     bool needsFFT() const override { return false; }  // Uses pitch detection
     const char* getName() const override { return "NoteDetector"; }
     void reset() override;
@@ -85,6 +86,13 @@ private:
     u32 mMinNoteDuration;// Minimum note duration to prevent flicker (ms)
     u8 mNoteChangeThreshold; // Semitone threshold for note change event
     float mVelocitySensitivity;   // Velocity calculation sensitivity
+
+    bool mFireNoteOn = false;
+    bool mFireNoteOff = false;
+    bool mFireNoteChange = false;
+    u8 mPendingOnNote = 0;
+    u8 mPendingOnVelocity = 0;
+    u8 mPendingOffNote = 0;
 
     // Helper methods
     u8 frequencyToMidiNote(float hz) const;

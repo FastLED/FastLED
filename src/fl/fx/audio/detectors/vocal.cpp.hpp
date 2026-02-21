@@ -32,12 +32,17 @@ void VocalDetector::update(shared_ptr<AudioContext> context) {
     // Detect vocal based on spectral characteristics
     mVocalActive = detectVocal(mSpectralCentroid, mSpectralRolloff, mFormantRatio);
 
-    // Fire callbacks on state changes
-    if (mVocalActive != mPreviousVocalActive) {
-        if (onVocalChange) onVocalChange(mVocalActive);
+    // Track state changes for fireCallbacks
+    mStateChanged = (mVocalActive != mPreviousVocalActive);
+}
+
+void VocalDetector::fireCallbacks() {
+    if (mStateChanged) {
+        if (onVocal) onVocal(static_cast<u8>(mConfidence * 255.0f));
         if (mVocalActive && onVocalStart) onVocalStart();
         if (!mVocalActive && onVocalEnd) onVocalEnd();
         mPreviousVocalActive = mVocalActive;
+        mStateChanged = false;
     }
 }
 

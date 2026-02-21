@@ -70,29 +70,25 @@ void DynamicsAnalyzer::update(shared_ptr<AudioContext> context) {
     mIsCrescendo = (mTrend > mTrendThreshold);
     mIsDiminuendo = (mTrend < -mTrendThreshold);
 
-    // Fire callbacks for state changes
-    if (mIsCrescendo && !mPrevIsCrescendo && onCrescendo) {
-        onCrescendo();
-    }
-
-    if (mIsDiminuendo && !mPrevIsDiminuendo && onDiminuendo) {
-        onDiminuendo();
-    }
-
-    // Fire trend callback (always)
-    if (onDynamicTrend) {
-        onDynamicTrend(mTrend);
-    }
-
     // Update compression ratio
     updateCompression();
 
-    // Fire compression callback
+    mLastUpdateTime = timestamp;
+}
+
+void DynamicsAnalyzer::fireCallbacks() {
+    if (mIsCrescendo && !mPrevIsCrescendo && onCrescendo) {
+        onCrescendo();
+    }
+    if (mIsDiminuendo && !mPrevIsDiminuendo && onDiminuendo) {
+        onDiminuendo();
+    }
+    if (onDynamicTrend) {
+        onDynamicTrend(mTrend);
+    }
     if (onCompressionRatio) {
         onCompressionRatio(mCompressionRatio);
     }
-
-    mLastUpdateTime = timestamp;
 }
 
 void DynamicsAnalyzer::reset() {

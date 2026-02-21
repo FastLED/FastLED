@@ -8,7 +8,11 @@
 namespace fl {
 
 PercussionDetector::PercussionDetector()
-    : mKickThreshold(0.7f)
+    : mKickDetected(false)
+    , mSnareDetected(false)
+    , mHiHatDetected(false)
+    , mTomDetected(false)
+    , mKickThreshold(0.7f)
     , mSnareThreshold(0.6f)
     , mHiHatThreshold(0.5f)
     , mPrevBassEnergy(0.0f)
@@ -35,27 +39,22 @@ void PercussionDetector::update(shared_ptr<AudioContext> context) {
     float midFlux = fl::fl_max(0.0f, midEnergy - mPrevMidEnergy);
     float trebleFlux = fl::fl_max(0.0f, trebleEnergy - mPrevTrebleEnergy);
 
-    // Detect individual percussion types
-    bool kickDetected = detectKick(bassEnergy, bassFlux, timestamp);
-    bool snareDetected = detectSnare(midEnergy, midFlux, timestamp);
-    bool hihatDetected = detectHiHat(trebleEnergy, trebleFlux, timestamp);
+    // Detect individual percussion types and store state for polling
+    mKickDetected = detectKick(bassEnergy, bassFlux, timestamp);
+    mSnareDetected = detectSnare(midEnergy, midFlux, timestamp);
+    mHiHatDetected = detectHiHat(trebleEnergy, trebleFlux, timestamp);
+    mTomDetected = false; // Tom detection not yet implemented
 
-    // Fire callbacks for detected percussion
-    if (kickDetected) {
-        if (onKick) onKick();
-        if (onPercussionHit) onPercussionHit("kick");
+    // Update timestamps for detected percussion
+    if (mKickDetected) {
         mLastKickTime = timestamp;
     }
 
-    if (snareDetected) {
-        if (onSnare) onSnare();
-        if (onPercussionHit) onPercussionHit("snare");
+    if (mSnareDetected) {
         mLastSnareTime = timestamp;
     }
 
-    if (hihatDetected) {
-        if (onHiHat) onHiHat();
-        if (onPercussionHit) onPercussionHit("hihat");
+    if (mHiHatDetected) {
         mLastHiHatTime = timestamp;
     }
 
@@ -65,7 +64,28 @@ void PercussionDetector::update(shared_ptr<AudioContext> context) {
     mPrevTrebleEnergy = trebleEnergy;
 }
 
+void PercussionDetector::fireCallbacks() {
+    if (mKickDetected) {
+        if (onKick) onKick();
+        if (onPercussionHit) onPercussionHit("kick");
+    }
+
+    if (mSnareDetected) {
+        if (onSnare) onSnare();
+        if (onPercussionHit) onPercussionHit("snare");
+    }
+
+    if (mHiHatDetected) {
+        if (onHiHat) onHiHat();
+        if (onPercussionHit) onPercussionHit("hihat");
+    }
+}
+
 void PercussionDetector::reset() {
+    mKickDetected = false;
+    mSnareDetected = false;
+    mHiHatDetected = false;
+    mTomDetected = false;
     mPrevBassEnergy = 0.0f;
     mPrevMidEnergy = 0.0f;
     mPrevTrebleEnergy = 0.0f;

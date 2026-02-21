@@ -52,6 +52,7 @@ public:
 
     // AudioDetector interface
     void update(shared_ptr<AudioContext> context) override;
+    void fireCallbacks() override;
     bool needsFFT() const override { return true; }
     bool needsFFTHistory() const override { return false; }
     const char* getName() const override { return "BuildupDetector"; }
@@ -113,6 +114,13 @@ private:
     void updateEnergyHistory(float energy);
     void updateTrebleHistory(float treble);
     float getTrebleEnergy(const FFTBins& fft) const;
+
+    // Pending callback flags
+    bool mFireBuildupStart = false;
+    bool mFireBuildupPeak = false;
+    bool mFireBuildupEnd = false;
+    bool mFireBuildupProgress = false;
+    bool mFireBuildup = false;
 };
 
 } // namespace fl

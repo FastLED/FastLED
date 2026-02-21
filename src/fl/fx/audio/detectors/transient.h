@@ -20,6 +20,7 @@ public:
     ~TransientDetector() override;
 
     void update(shared_ptr<AudioContext> context) override;
+    void fireCallbacks() override;
     bool needsFFT() const override { return true; }
     const char* getName() const override { return "TransientDetector"; }
     void reset() override;

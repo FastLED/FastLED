@@ -8,6 +8,7 @@
 #include "fl/fx/audio/noise_floor_tracker.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/function.h"
+#include "fl/stl/vector.h"
 
 namespace fl {
 
@@ -73,7 +74,7 @@ public:
     void onAttack(function<void(float strength)> callback);
 
     // ----- Silence Detection Events -----
-    void onSilence(function<void(bool silent)> callback);
+    void onSilence(function<void(u8 silent)> callback);
     void onSilenceStart(function<void()> callback);
     void onSilenceEnd(function<void()> callback);
     void onSilenceDuration(function<void(u32 durationMs)> callback);
@@ -88,7 +89,7 @@ public:
     void onPitch(function<void(float hz)> callback);
     void onPitchWithConfidence(function<void(float hz, float confidence)> callback);
     void onPitchChange(function<void(float hz)> callback);
-    void onVoicedChange(function<void(bool voiced)> callback);
+    void onVoiced(function<void(u8 voiced)> callback);
 
     // ----- Note Detection Events -----
     void onNoteOn(function<void(u8 note, u8 velocity)> callback);
@@ -105,7 +106,7 @@ public:
     void onBackbeat(function<void(u8 beatNumber, float confidence, float strength)> callback);
 
     // ----- Vocal Detection Events -----
-    void onVocal(function<void(bool active)> callback);
+    void onVocal(function<void(u8 active)> callback);
     void onVocalStart(function<void()> callback);
     void onVocalEnd(function<void()> callback);
     void onVocalConfidence(function<void(float confidence)> callback);
@@ -143,6 +144,89 @@ public:
     void onDrop(function<void()> callback);
     void onDropEvent(function<void(const Drop&)> callback);
     void onDropImpact(function<void(float impact)> callback);
+
+    // ----- Polling Getters (uint8_t-scaled where applicable) -----
+
+    // Vocal Detection
+    u8 getVocalConfidence();
+    u8 isVocalActive();
+
+    // Beat Detection
+    u8 getBeatConfidence();
+    u8 isBeat();
+    float getBPM();
+
+    // Energy Analysis
+    u8 getEnergy();
+    u8 getPeakLevel();
+
+    // Frequency Bands
+    u8 getBassLevel();
+    u8 getMidLevel();
+    u8 getTrebleLevel();
+
+    // Silence Detection
+    u8 isSilent();
+    u32 getSilenceDuration();
+
+    // Transient Detection
+    u8 getTransientStrength();
+    u8 isTransient();
+
+    // Dynamics Analysis
+    u8 getDynamicTrend();
+    u8 isCrescendo();
+    u8 isDiminuendo();
+
+    // Pitch Detection
+    u8 getPitchConfidence();
+    float getPitch();
+    u8 isVoiced();
+
+    // Tempo Analysis
+    u8 getTempoConfidence();
+    float getTempoBPM();
+    u8 isTempoStable();
+
+    // Buildup Detection
+    u8 getBuildupIntensity();
+    u8 getBuildupProgress();
+    u8 isBuilding();
+
+    // Drop Detection
+    u8 getDropImpact();
+
+    // Percussion Detection
+    u8 isKick();
+    u8 isSnare();
+    u8 isHiHat();
+    u8 isTom();
+
+    // Note Detection
+    u8 getCurrentNote();
+    u8 getNoteVelocity();
+    u8 isNoteActive();
+
+    // Downbeat Detection
+    u8 isDownbeat();
+    u8 getMeasurePhase();
+    u8 getCurrentBeatNumber();
+
+    // Backbeat Detection
+    u8 getBackbeatConfidence();
+    u8 getBackbeatStrength();
+
+    // Chord Detection
+    u8 hasChord();
+    u8 getChordConfidence();
+
+    // Key Detection
+    u8 hasKey();
+    u8 getKeyConfidence();
+
+    // Mood Analysis
+    u8 getMoodArousal();
+    u8 getMoodValence();
 
     // ----- Configuration -----
     /// Set the sample rate for all frequency-based calculations.
@@ -185,6 +269,10 @@ private:
     AutoGain mAutoGain;
     NoiseFloorTracker mNoiseFloorTracker;
     shared_ptr<AudioContext> mContext;
+
+    // Active detector registry for two-phase update loop
+    vector<shared_ptr<AudioDetector>> mActiveDetectors;
+    void registerDetector(shared_ptr<AudioDetector> detector);
 
     // Lazy detector storage
     shared_ptr<BeatDetector> mBeatDetector;

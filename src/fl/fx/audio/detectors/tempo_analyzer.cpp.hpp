@@ -59,35 +59,34 @@ void TempoAnalyzer::update(shared_ptr<AudioContext> context) {
     pruneHypotheses();
 
     // Update current tempo based on best hypothesis
-    float previousBPM = mCurrentBPM;
     updateCurrentTempo();
 
     // Update stability analysis
     updateStability();
 
-    // Fire callbacks
+    // Track state changes for fireCallbacks()
+    float bpmDiff = fl::fl_abs(mCurrentBPM - mPreviousBPM);
+    mBpmChanged = (bpmDiff > 5.0f);
+    mPreviousBPM = mCurrentBPM;
+}
+
+void TempoAnalyzer::fireCallbacks() {
     if (onTempo) {
         onTempo(mCurrentBPM);
     }
-
     if (onTempoWithConfidence) {
         onTempoWithConfidence(mCurrentBPM, mConfidence);
     }
-
-    // Check for tempo change
-    float bpmDiff = fl::fl_abs(mCurrentBPM - previousBPM);
-    if (bpmDiff > 5.0f && onTempoChange) {
+    if (mBpmChanged && onTempoChange) {
         onTempoChange(mCurrentBPM);
+        mBpmChanged = false;
     }
-
-    // Check for stability change
-    static bool wasStable = false;
-    if (mIsStable && !wasStable && onTempoStable) {
+    if (mIsStable && !mWasStable && onTempoStable) {
         onTempoStable();
-    } else if (!mIsStable && wasStable && onTempoUnstable) {
+    } else if (!mIsStable && mWasStable && onTempoUnstable) {
         onTempoUnstable();
     }
-    wasStable = mIsStable;
+    mWasStable = mIsStable;
 }
 
 void TempoAnalyzer::reset() {

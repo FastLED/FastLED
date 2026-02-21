@@ -21,12 +21,14 @@ public:
 
     // AudioDetector interface
     void update(shared_ptr<AudioContext> context) override;
+    void fireCallbacks() override;
     bool needsFFT() const override { return true; }
     const char* getName() const override { return "VocalDetector"; }
     void reset() override;
+    void setSampleRate(int sampleRate) override { mSampleRate = sampleRate; }
 
     // Callbacks (multiple listeners supported)
-    function_list<void(bool active)> onVocalChange;
+    function_list<void(u8 active)> onVocal;
     function_list<void()> onVocalStart;
     function_list<void()> onVocalEnd;
 
@@ -34,12 +36,12 @@ public:
     bool isVocal() const { return mVocalActive; }
     float getConfidence() const { return mConfidence; }
     void setThreshold(float threshold) { mThreshold = threshold; }
-    void setSampleRate(int sampleRate) { mSampleRate = sampleRate; }
     int getNumBins() const { return mNumBins; }
 
 private:
     bool mVocalActive;
     bool mPreviousVocalActive;
+    bool mStateChanged = false;
     float mConfidence;
     float mThreshold;
     float mSpectralCentroid;

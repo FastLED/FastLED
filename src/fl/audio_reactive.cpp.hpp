@@ -1,4 +1,5 @@
 #include "fl/audio_reactive.h"
+#include "fl/fx/audio/audio_processor.h"
 #include "fl/fx/audio/detectors/musical_beat_detector.h"
 #include "fl/fx/audio/detectors/multiband_beat_detector.h"
 #include "fl/stl/math.h"
@@ -118,6 +119,12 @@ void AudioReactive::begin(const AudioReactiveConfig& config) {
     for (fl::size i = 0; i < mPreviousMagnitudes.size(); ++i) {
         mPreviousMagnitudes[i] = 0.0f;
     }
+
+    // Reset internal AudioProcessor if it exists
+    if (mAudioProcessor) {
+        mAudioProcessor->setSampleRate(config.sampleRate);
+        mAudioProcessor->reset();
+    }
 }
 
 void AudioReactive::setConfig(const AudioReactiveConfig& config) {
@@ -185,6 +192,11 @@ void AudioReactive::processSample(const AudioSample& sample) {
     smoothResults();
 
     mCurrentData.timestamp = currentTimeMs;
+
+    // Forward to internal AudioProcessor for detector-based polling getters
+    if (mAudioProcessor) {
+        mAudioProcessor->update(sample);
+    }
 }
 
 void AudioReactive::update(fl::u32 currentTimeMs) {
@@ -919,5 +931,61 @@ bool AudioReactive::isSpectralEqualizerEnabled() const {
 const SpectralEqualizer::Stats& AudioReactive::getSpectralEqualizerStats() const {
     return mSpectralEqualizer->getStats();
 }
+
+// ----- Polling Getter Forwarding (via internal AudioProcessor) -----
+
+AudioProcessor& AudioReactive::ensureAudioProcessor() {
+    if (!mAudioProcessor) {
+        mAudioProcessor = fl::make_unique<AudioProcessor>();
+        mAudioProcessor->setSampleRate(mConfig.sampleRate);
+    }
+    return *mAudioProcessor;
+}
+
+u8 AudioReactive::getVocalConfidence() { return ensureAudioProcessor().getVocalConfidence(); }
+u8 AudioReactive::isVocalActive() { return ensureAudioProcessor().isVocalActive(); }
+u8 AudioReactive::getBeatConfidence() { return ensureAudioProcessor().getBeatConfidence(); }
+u8 AudioReactive::isBeatDetected() { return ensureAudioProcessor().isBeat(); }
+float AudioReactive::getBPM() { return ensureAudioProcessor().getBPM(); }
+u8 AudioReactive::getEnergyLevel() { return ensureAudioProcessor().getEnergy(); }
+u8 AudioReactive::getPeakLevel() { return ensureAudioProcessor().getPeakLevel(); }
+u8 AudioReactive::getBassLevel() { return ensureAudioProcessor().getBassLevel(); }
+u8 AudioReactive::getMidLevel() { return ensureAudioProcessor().getMidLevel(); }
+u8 AudioReactive::getTrebleLevel() { return ensureAudioProcessor().getTrebleLevel(); }
+u8 AudioReactive::isSilent() { return ensureAudioProcessor().isSilent(); }
+u32 AudioReactive::getSilenceDuration() { return ensureAudioProcessor().getSilenceDuration(); }
+u8 AudioReactive::getTransientStrength() { return ensureAudioProcessor().getTransientStrength(); }
+u8 AudioReactive::isTransient() { return ensureAudioProcessor().isTransient(); }
+u8 AudioReactive::getDynamicTrend() { return ensureAudioProcessor().getDynamicTrend(); }
+u8 AudioReactive::isCrescendo() { return ensureAudioProcessor().isCrescendo(); }
+u8 AudioReactive::isDiminuendo() { return ensureAudioProcessor().isDiminuendo(); }
+u8 AudioReactive::getPitchConfidence() { return ensureAudioProcessor().getPitchConfidence(); }
+float AudioReactive::getPitchHz() { return ensureAudioProcessor().getPitch(); }
+u8 AudioReactive::isVoiced() { return ensureAudioProcessor().isVoiced(); }
+u8 AudioReactive::getTempoConfidence() { return ensureAudioProcessor().getTempoConfidence(); }
+float AudioReactive::getTempoBPM() { return ensureAudioProcessor().getTempoBPM(); }
+u8 AudioReactive::isTempoStable() { return ensureAudioProcessor().isTempoStable(); }
+u8 AudioReactive::getBuildupIntensity() { return ensureAudioProcessor().getBuildupIntensity(); }
+u8 AudioReactive::getBuildupProgress() { return ensureAudioProcessor().getBuildupProgress(); }
+u8 AudioReactive::isBuilding() { return ensureAudioProcessor().isBuilding(); }
+u8 AudioReactive::getDropImpact() { return ensureAudioProcessor().getDropImpact(); }
+u8 AudioReactive::isKick() { return ensureAudioProcessor().isKick(); }
+u8 AudioReactive::isSnare() { return ensureAudioProcessor().isSnare(); }
+u8 AudioReactive::isHiHat() { return ensureAudioProcessor().isHiHat(); }
+u8 AudioReactive::isTom() { return ensureAudioProcessor().isTom(); }
+u8 AudioReactive::getCurrentNote() { return ensureAudioProcessor().getCurrentNote(); }
+u8 AudioReactive::getNoteVelocity() { return ensureAudioProcessor().getNoteVelocity(); }
+u8 AudioReactive::isNoteActive() { return ensureAudioProcessor().isNoteActive(); }
+u8 AudioReactive::isDownbeat() { return ensureAudioProcessor().isDownbeat(); }
+u8 AudioReactive::getMeasurePhase() { return ensureAudioProcessor().getMeasurePhase(); }
+u8 AudioReactive::getCurrentBeatNumber() { return ensureAudioProcessor().getCurrentBeatNumber(); }
+u8 AudioReactive::getBackbeatConfidence() { return ensureAudioProcessor().getBackbeatConfidence(); }
+u8 AudioReactive::getBackbeatStrength() { return ensureAudioProcessor().getBackbeatStrength(); }
+u8 AudioReactive::hasChord() { return ensureAudioProcessor().hasChord(); }
+u8 AudioReactive::getChordConfidence() { return ensureAudioProcessor().getChordConfidence(); }
+u8 AudioReactive::hasKey() { return ensureAudioProcessor().hasKey(); }
+u8 AudioReactive::getKeyConfidence() { return ensureAudioProcessor().getKeyConfidence(); }
+u8 AudioReactive::getMoodArousal() { return ensureAudioProcessor().getMoodArousal(); }
+u8 AudioReactive::getMoodValence() { return ensureAudioProcessor().getMoodValence(); }
 
 } // namespace fl

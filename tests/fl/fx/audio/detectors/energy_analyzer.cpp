@@ -30,6 +30,7 @@ FL_TEST_CASE("EnergyAnalyzer - silence gives zero RMS") {
     EnergyAnalyzer analyzer;
     auto ctx = fl::make_shared<AudioContext>(makeSilence_EnergyAnalyzer(0));
     analyzer.update(ctx);
+    analyzer.fireCallbacks();
     FL_CHECK_EQ(analyzer.getRMS(), 0.0f);
     FL_CHECK_EQ(analyzer.getPeak(), 0.0f);
 }
@@ -38,6 +39,7 @@ FL_TEST_CASE("EnergyAnalyzer - known amplitude gives predictable RMS") {
     EnergyAnalyzer analyzer;
     auto ctx = fl::make_shared<AudioContext>(makeSample_EnergyAnalyzer(10000.0f, 100));
     analyzer.update(ctx);
+    analyzer.fireCallbacks();
     float rms = analyzer.getRMS();
     // Sine wave RMS = amplitude / sqrt(2) ≈ 0.707 * amplitude ≈ 7071
     FL_CHECK_GT(rms, 6500.0f);
@@ -50,11 +52,13 @@ FL_TEST_CASE("EnergyAnalyzer - peak tracking") {
     // Feed quiet signal
     auto ctx1 = fl::make_shared<AudioContext>(makeSample_EnergyAnalyzer(1000.0f, 100));
     analyzer.update(ctx1);
+    analyzer.fireCallbacks();
     float quietPeak = analyzer.getPeak();
 
     // Feed louder signal
     auto ctx2 = fl::make_shared<AudioContext>(makeSample_EnergyAnalyzer(15000.0f, 200));
     analyzer.update(ctx2);
+    analyzer.fireCallbacks();
     float loudPeak = analyzer.getPeak();
 
     FL_CHECK_GT(loudPeak, quietPeak);
@@ -116,6 +120,7 @@ FL_TEST_CASE("EnergyAnalyzer - callbacks fire") {
 
     auto ctx = fl::make_shared<AudioContext>(makeSample_EnergyAnalyzer(10000.0f, 100));
     analyzer.update(ctx);
+    analyzer.fireCallbacks();
 
     FL_CHECK_GT(lastRMS, 0.0f);
     FL_CHECK_GT(lastPeak, 0.0f);
@@ -149,6 +154,7 @@ FL_TEST_CASE("EnergyAnalyzer - onNormalizedEnergy callback fires") {
         float amplitude = 1000.0f + static_cast<float>(i) * 500.0f;
         auto ctx = fl::make_shared<AudioContext>(makeSample_EnergyAnalyzer(amplitude, i * 100));
         analyzer.update(ctx);
+        analyzer.fireCallbacks();
     }
 
     // The normalized energy callback should have fired

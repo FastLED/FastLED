@@ -48,8 +48,9 @@ void EnergyAnalyzer::update(shared_ptr<AudioContext> context) {
         }
     }
     mNormalizedRMS = fl::fl_min(1.0f, mCurrentRMS / mRunningMax);
+}
 
-    // Fire callbacks
+void EnergyAnalyzer::fireCallbacks() {
     if (onEnergy) {
         onEnergy(mCurrentRMS);
     }

@@ -13,9 +13,11 @@ public:
     ~FrequencyBands() override;
 
     void update(shared_ptr<AudioContext> context) override;
+    void fireCallbacks() override;
     bool needsFFT() const override { return true; }
     const char* getName() const override { return "FrequencyBands"; }
     void reset() override;
+    void setSampleRate(int sampleRate) override { mSampleRate = sampleRate; }
 
     // Callbacks (multiple listeners supported)
     function_list<void(float bass, float mid, float treble)> onLevelsUpdate;
@@ -36,8 +38,6 @@ public:
     // Smoothing factor (0.0 = no smoothing, 1.0 = maximum smoothing)
     void setSmoothing(float smoothing) { mSmoothing = smoothing; }
 
-    // Sample rate configuration (default 44100 Hz)
-    void setSampleRate(int sampleRate) { mSampleRate = sampleRate; }
     int getSampleRate() const { return mSampleRate; }
 
 private:

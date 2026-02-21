@@ -11,6 +11,8 @@ public:
     virtual ~AudioDetector() = default;
 
     virtual void update(shared_ptr<AudioContext> context) = 0;
+    virtual void fireCallbacks() {}
+    virtual void setSampleRate(int) {}
     virtual bool needsFFT() const { return false; }
     virtual bool needsFFTHistory() const { return false; }
     virtual const char* getName() const = 0;

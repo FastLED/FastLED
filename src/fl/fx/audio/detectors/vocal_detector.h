@@ -14,7 +14,7 @@ public:
     void reset();
 
     // Vocal state change callbacks (multiple listeners supported)
-    function_list<void(bool active)> onVocalChange;  // Called when vocal state changes
+    function_list<void(u8 active)> onVocal;  // Called when vocal state changes
     function_list<void()> onVocalStart;       // Called when vocals start
     function_list<void()> onVocalEnd;         // Called when vocals end
 

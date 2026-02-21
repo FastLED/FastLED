@@ -43,6 +43,7 @@ public:
     ~DownbeatDetector() override;
 
     void update(shared_ptr<AudioContext> context) override;
+    void fireCallbacks() override;
     bool needsFFT() const override { return true; }
     bool needsFFTHistory() const override { return false; }
     const char* getName() const override { return "DownbeatDetector"; }
@@ -127,6 +128,13 @@ private:
     // ----- Meter Detection -----
     vector<u8> mMeterCandidates;  // Recent detected meters
     static constexpr size METER_HISTORY_SIZE = 8;
+
+    // ----- Pending Callback Flags -----
+    bool mFireDownbeat = false;
+    bool mFireMeasureBeat = false;
+    u8 mPendingBeatNumber = 0;
+    bool mFireMeterChange = false;
+    u8 mPendingMeter = 0;
 
     // ----- Helper Methods -----
     void updateBeatDetector(shared_ptr<AudioContext> context);

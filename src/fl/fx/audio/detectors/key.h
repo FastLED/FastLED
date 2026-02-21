@@ -84,6 +84,7 @@ public:
 
     // AudioDetector interface
     void update(shared_ptr<AudioContext> context) override;
+    void fireCallbacks() override;
     bool needsFFT() const override { return true; }
     const char* getName() const override { return "KeyDetector"; }
     void reset() override;
@@ -130,7 +131,11 @@ private:
     void getAveragedChroma(float* chroma);
     Key detectKey(const float* chroma, u32 timestamp);
     float correlateWithProfile(const float* chroma, const float* profile, int rootNote);
-    void fireCallbacks(const Key& key, u32 timestamp);
+
+    // Pending callback flags
+    bool mFireKeyChange = false;
+    bool mFireKeyEnd = false;
+    bool mFireKey = false;
 };
 
 } // namespace fl

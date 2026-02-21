@@ -45,6 +45,7 @@ public:
     ~ChordDetector() override;
 
     void update(shared_ptr<AudioContext> context) override;
+    void fireCallbacks() override;
     bool needsFFT() const override { return true; }
     bool needsFFTHistory() const override { return true; }
     const char* getName() const override { return "ChordDetector"; }
@@ -77,6 +78,10 @@ private:
     // Chroma feature (pitch class profile)
     float mChroma[12];  // Energy for each pitch class (C, C#, D, ...)
     float mPrevChroma[12];
+
+    bool mFireChordChange = false;
+    bool mFireChordEnd = false;
+    bool mFireChord = false;
 
     // Detection methods
     void calculateChroma(const FFTBins& fft);

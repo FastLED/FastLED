@@ -144,6 +144,7 @@ FL_TEST_CASE("TempoAnalyzer - periodic onsets converge to BPM") {
 
             ctx->getFFT(16);
             analyzer.update(ctx);
+            analyzer.fireCallbacks();
         }
     }
 
@@ -193,6 +194,7 @@ FL_TEST_CASE("TempoAnalyzer - onTempo callback fires") {
             }
             ctx->getFFT(16);
             analyzer.update(ctx);
+            analyzer.fireCallbacks();
         }
     }
 
@@ -235,6 +237,7 @@ FL_TEST_CASE("TempoAnalyzer - onTempoChange callback fires on BPM shift") {
             }
             ctx->getFFT(16);
             analyzer.update(ctx);
+            analyzer.fireCallbacks();
         }
     }
 
@@ -255,6 +258,7 @@ FL_TEST_CASE("TempoAnalyzer - onTempoChange callback fires on BPM shift") {
             }
             ctx->getFFT(16);
             analyzer.update(ctx);
+            analyzer.fireCallbacks();
         }
     }
 
@@ -296,6 +300,7 @@ FL_TEST_CASE("TempoAnalyzer - isStable becomes true with consistent tempo") {
             }
             ctx->getFFT(16);
             analyzer.update(ctx);
+            analyzer.fireCallbacks();
         }
     }
 

@@ -18,13 +18,13 @@ public:
     // Callback types
     using PitchCallback = void(*)(float pitch);
     using PitchConfidenceCallback = void(*)(float pitch, float confidence);
-    using VoicedCallback = void(*)(bool isVoiced);
+    using VoicedCallback = void(*)(u8 isVoiced);
 
     // Pitch-related callbacks
     PitchCallback onPitch = nullptr;                          // Called continuously when pitch is detected
     PitchConfidenceCallback onPitchWithConfidence = nullptr;   // Pitch with confidence score
     PitchCallback onPitchChange = nullptr;                    // Called when pitch changes significantly
-    VoicedCallback onVoicedChange = nullptr;                  // Called when voiced/unvoiced state changes
+    VoicedCallback onVoiced = nullptr;                  // Called when voiced/unvoiced state changes
 
     // Configuration methods
     void setMinFrequency(float hz) { mMinFrequency = hz; updatePeriodRange(); }

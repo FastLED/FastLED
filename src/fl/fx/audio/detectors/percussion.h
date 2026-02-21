@@ -12,6 +12,7 @@ public:
     ~PercussionDetector() override;
 
     void update(shared_ptr<AudioContext> context) override;
+    void fireCallbacks() override;
     bool needsFFT() const override { return true; }
     bool needsFFTHistory() const override { return false; }
     const char* getName() const override { return "PercussionDetector"; }
@@ -24,12 +25,24 @@ public:
     function_list<void()> onHiHat;
     function_list<void()> onTom;
 
+    // State access (polling getters)
+    bool isKick() const { return mKickDetected; }
+    bool isSnare() const { return mSnareDetected; }
+    bool isHiHat() const { return mHiHatDetected; }
+    bool isTom() const { return mTomDetected; }
+
     // Configuration
     void setKickThreshold(float threshold) { mKickThreshold = threshold; }
     void setSnareThreshold(float threshold) { mSnareThreshold = threshold; }
     void setHiHatThreshold(float threshold) { mHiHatThreshold = threshold; }
 
 private:
+    // Per-frame detection state
+    bool mKickDetected;
+    bool mSnareDetected;
+    bool mHiHatDetected;
+    bool mTomDetected;
+
     float mKickThreshold;
     float mSnareThreshold;
     float mHiHatThreshold;

@@ -50,6 +50,7 @@ void DropDetector::update(shared_ptr<AudioContext> context) {
     float impact = calculateDropImpact(energyFlux, bassFlux, spectralNovelty, rms);
 
     // Check if we should trigger a drop
+    mDropDetectedThisFrame = false;
     if (shouldTriggerDrop(impact, timestamp)) {
         // Create drop event
         Drop dropEvent;
@@ -59,21 +60,11 @@ void DropDetector::update(shared_ptr<AudioContext> context) {
         dropEvent.timestamp = timestamp;
 
         mLastDrop = dropEvent;
+        mDropDetectedThisFrame = true;
 
         FL_DBG("DropDetector: Drop detected! Impact=" << impact
                << ", Bass=" << bassEnergy
                << ", Energy flux=" << energyFlux);
-
-        // Fire callbacks
-        if (onDrop) {
-            onDrop();
-        }
-        if (onDropEvent) {
-            onDropEvent(dropEvent);
-        }
-        if (onDropImpact) {
-            onDropImpact(impact);
-        }
     }
 
     // Update baselines (exponential moving average)
@@ -84,6 +75,21 @@ void DropDetector::update(shared_ptr<AudioContext> context) {
     mPrevBassEnergy = bassEnergy;
     mPrevMidEnergy = midEnergy;
     mPrevTrebleEnergy = trebleEnergy;
+}
+
+void DropDetector::fireCallbacks() {
+    if (mDropDetectedThisFrame) {
+        if (onDrop) {
+            onDrop();
+        }
+        if (onDropEvent) {
+            onDropEvent(mLastDrop);
+        }
+        if (onDropImpact) {
+            onDropImpact(mLastDrop.impact);
+        }
+        mDropDetectedThisFrame = false;
+    }
 }
 
 void DropDetector::reset() {

@@ -37,17 +37,6 @@ void TransientDetector::update(shared_ptr<AudioContext> context) {
 
     if (mTransientDetected) {
         updateAttackTime(flux);
-
-        if (onTransient) {
-            onTransient();
-        }
-        if (onTransientWithStrength) {
-            onTransientWithStrength(mStrength);
-        }
-        if (onAttack) {
-            onAttack(mStrength);
-        }
-
         mLastTransientTime = timestamp;
     }
 
@@ -59,6 +48,20 @@ void TransientDetector::update(shared_ptr<AudioContext> context) {
         mEnergyHistory.erase(mEnergyHistory.begin());
     }
     mEnergyHistory.push_back(mCurrentEnergy);
+}
+
+void TransientDetector::fireCallbacks() {
+    if (mTransientDetected) {
+        if (onTransient) {
+            onTransient();
+        }
+        if (onTransientWithStrength) {
+            onTransientWithStrength(mStrength);
+        }
+        if (onAttack) {
+            onAttack(mStrength);
+        }
+    }
 }
 
 void TransientDetector::reset() {

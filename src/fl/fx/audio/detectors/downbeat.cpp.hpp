@@ -76,13 +76,10 @@ void DownbeatDetector::update(shared_ptr<AudioContext> context) {
             mBeatsSinceDownbeat = 0;
             mLastDownbeatTime = timestamp;
 
-            // Fire callbacks
-            if (onDownbeat) {
-                onDownbeat();
-            }
-            if (onMeasureBeat) {
-                onMeasureBeat(1);
-            }
+            // Set callback flags
+            mFireDownbeat = true;
+            mFireMeasureBeat = true;
+            mPendingBeatNumber = 1;
 
             // Attempt meter detection if enabled
             if (mAutoMeterDetection && !mManualMeter) {
@@ -93,10 +90,9 @@ void DownbeatDetector::update(shared_ptr<AudioContext> context) {
             mBeatsSinceDownbeat++;
             mCurrentBeat = (mBeatsSinceDownbeat % mBeatsPerMeasure) + 1;
 
-            // Fire beat callback
-            if (onMeasureBeat) {
-                onMeasureBeat(mCurrentBeat);
-            }
+            // Set beat callback flag
+            mFireMeasureBeat = true;
+            mPendingBeatNumber = mCurrentBeat;
 
             // Check if we should force a downbeat (measure boundary)
             if (mBeatsSinceDownbeat >= mBeatsPerMeasure) {
@@ -106,9 +102,9 @@ void DownbeatDetector::update(shared_ptr<AudioContext> context) {
                 mBeatsSinceDownbeat = 0;
                 mLastDownbeatTime = timestamp;
 
-                if (onDownbeat) {
-                    onDownbeat();
-                }
+                mFireDownbeat = true;
+                mFireMeasureBeat = true;
+                mPendingBeatNumber = 1;
             }
         }
 
@@ -118,6 +114,21 @@ void DownbeatDetector::update(shared_ptr<AudioContext> context) {
 
     // Update measure phase
     updateMeasurePhase(timestamp);
+}
+
+void DownbeatDetector::fireCallbacks() {
+    if (mFireDownbeat) {
+        if (onDownbeat) onDownbeat();
+        mFireDownbeat = false;
+    }
+    if (mFireMeasureBeat) {
+        if (onMeasureBeat) onMeasureBeat(mPendingBeatNumber);
+        mFireMeasureBeat = false;
+    }
+    if (mFireMeterChange) {
+        if (onMeterChange) onMeterChange(mPendingMeter);
+        mFireMeterChange = false;
+    }
     if (onMeasurePhase) {
         onMeasurePhase(mMeasurePhase);
     }
@@ -352,10 +363,9 @@ void DownbeatDetector::detectMeter() {
         (void)mBeatsPerMeasure;  // Suppress unused warning (used in comparison above)
         mBeatsPerMeasure = consensusMeter;
 
-        // Fire meter change callback
-        if (onMeterChange) {
-            onMeterChange(mBeatsPerMeasure);
-        }
+        // Set meter change callback flag
+        mFireMeterChange = true;
+        mPendingMeter = mBeatsPerMeasure;
 
         // Reset beat counter
         mCurrentBeat = 1;

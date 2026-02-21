@@ -143,7 +143,7 @@ void KeyDetector::update(shared_ptr<AudioContext> context) {
                    << mCurrentKey.getQuality() << " (confidence: "
                    << mCurrentKey.confidence << ")");
 
-            fireCallbacks(mCurrentKey, timestamp);
+            mFireKeyChange = true;
         }
     }
 
@@ -151,17 +151,13 @@ void KeyDetector::update(shared_ptr<AudioContext> context) {
     if (mKeyActive && detectedKey.confidence < mConfidenceThreshold * 0.5f) {
         FL_DBG("Key ended: " << mCurrentKey.getRootName() << " " << mCurrentKey.getQuality());
 
-        if (onKeyEnd) {
-            onKeyEnd();
-        }
+        mFireKeyEnd = true;
         mKeyActive = false;
         mCurrentKey.confidence = 0.0f;
     }
 
-    // Fire onKey callback every frame if key is active
-    if (mKeyActive && onKey) {
-        onKey(mCurrentKey);
-    }
+    // Set onKey flag every frame if key is active
+    if (mKeyActive) mFireKey = true;
 }
 
 void KeyDetector::reset() {
@@ -344,12 +340,18 @@ float KeyDetector::correlateWithProfile(const float* chroma, const float* profil
     return correlation;
 }
 
-void KeyDetector::fireCallbacks(const Key& key, u32 /*timestamp*/) {
-    // Fire onKeyChange if key actually changed
-    if (mPreviousKey != key || !mKeyActive) {
-        if (onKeyChange) {
-            onKeyChange(key);
-        }
+void KeyDetector::fireCallbacks() {
+    if (mFireKeyEnd) {
+        if (onKeyEnd) onKeyEnd();
+        mFireKeyEnd = false;
+    }
+    if (mFireKeyChange) {
+        if (onKeyChange) onKeyChange(mCurrentKey);
+        mFireKeyChange = false;
+    }
+    if (mFireKey) {
+        if (onKey) onKey(mCurrentKey);
+        mFireKey = false;
     }
 }
 

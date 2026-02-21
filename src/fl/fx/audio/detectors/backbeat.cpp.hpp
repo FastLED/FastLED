@@ -91,11 +91,6 @@ void BackbeatDetector::update(shared_ptr<AudioContext> context) {
         if (mBackbeatDetected) {
             mLastBackbeatNumber = mCurrentBeat;
 
-            // Fire callback
-            if (onBackbeat) {
-                onBackbeat(mCurrentBeat, mConfidence, mCurrentStrength);
-            }
-
             // Update backbeat profile
             if (mAdaptive) {
                 updateBackbeatProfile(fft);
@@ -121,6 +116,14 @@ void BackbeatDetector::update(shared_ptr<AudioContext> context) {
 
         // Store current accent for next frame
         mPreviousAccent = accent;
+    }
+}
+
+void BackbeatDetector::fireCallbacks() {
+    if (mBackbeatDetected) {
+        if (onBackbeat) {
+            onBackbeat(mCurrentBeat, mConfidence, mCurrentStrength);
+        }
     }
 }
 

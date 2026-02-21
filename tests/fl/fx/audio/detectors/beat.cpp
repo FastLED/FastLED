@@ -36,6 +36,7 @@ FL_TEST_CASE("BeatDetector - silence produces no beats") {
         auto ctx = fl::make_shared<AudioContext>(makeSilence_BeatDetector(i * 23));
         ctx->setSampleRate(44100);
         detector.update(ctx);
+        detector.fireCallbacks();
     }
 
     FL_CHECK_EQ(beatCount, 0);
@@ -55,11 +56,13 @@ FL_TEST_CASE("BeatDetector - strong bass onset after silence triggers beat") {
     for (int i = 0; i < 20; ++i) {
         ctx->setSample(makeSilence_BeatDetector(i * 23));
         detector.update(ctx);
+        detector.fireCallbacks();
     }
 
     // Now inject a strong bass signal (200 Hz, within CQ range)
     ctx->setSample(makeSample_BeatDetector(200.0f, 500, 20000.0f));
     detector.update(ctx);
+    detector.fireCallbacks();
 
     // Should have detected at least one beat (strong bass onset)
     bool gotBeat = (beatCount >= 1) || detector.isBeat();
@@ -78,11 +81,13 @@ FL_TEST_CASE("BeatDetector - pure treble should not trigger beat") {
     for (int i = 0; i < 20; ++i) {
         ctx->setSample(makeSilence_BeatDetector(i * 23));
         detector.update(ctx);
+        detector.fireCallbacks();
     }
 
     // Inject pure treble (4kHz)
     ctx->setSample(makeSample_BeatDetector(4000.0f, 500, 20000.0f));
     detector.update(ctx);
+    detector.fireCallbacks();
 
     // Treble transient should NOT trigger a beat
     FL_CHECK_EQ(beatCount, 0);
@@ -173,6 +178,7 @@ FL_TEST_CASE("BeatDetector - periodic bass onsets converge BPM") {
 
             ctx->getFFT(16);
             detector.update(ctx);
+            detector.fireCallbacks();
         }
     }
 
@@ -217,6 +223,7 @@ FL_TEST_CASE("BeatDetector - phase increases monotonically between beats") {
             }
             ctx->getFFT(16);
             detector.update(ctx);
+            detector.fireCallbacks();
         }
     }
 
@@ -230,6 +237,7 @@ FL_TEST_CASE("BeatDetector - phase increases monotonically between beats") {
         ctx->setSample(AudioSample(fl::span<const fl::i16>(silenceData.data(), silenceData.size()), timestamp));
         ctx->getFFT(16);
         detector.update(ctx);
+        detector.fireCallbacks();
 
         float phase = detector.getPhase();
         FL_CHECK_GE(phase, 0.0f);

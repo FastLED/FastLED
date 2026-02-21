@@ -57,17 +57,15 @@ void ChordDetector::update(shared_ptr<AudioContext> context) {
     if (detected.isValid() && detected.confidence >= mConfidenceThreshold) {
         if (!mCurrentChord.isValid() || !isSimilarChord(detected, mCurrentChord)) {
             // New chord detected
-            if (mCurrentChord.isValid() && onChordEnd) {
-                onChordEnd();
+            if (mCurrentChord.isValid()) {
+                mFireChordEnd = true;
             }
 
             mPreviousChord = mCurrentChord;
             mCurrentChord = detected;
             mChordStartTime = timestamp;
 
-            if (onChordChange) {
-                onChordChange(mCurrentChord);
-            }
+            mFireChordChange = true;
 
             FL_DBG("Chord detected: " << mCurrentChord.getRootName()
                    << mCurrentChord.getTypeName()
@@ -78,19 +76,15 @@ void ChordDetector::update(shared_ptr<AudioContext> context) {
             mCurrentChord.timestamp = timestamp;
         }
 
-        // Fire onChord callback every frame when chord is active
-        if (onChord) {
-            onChord(mCurrentChord);
-        }
+        // Set flag for onChord callback every frame when chord is active
+        mFireChord = true;
     } else {
         // No valid chord or low confidence
         if (mCurrentChord.isValid()) {
             u32 duration = timestamp - mChordStartTime;
             if (duration >= mMinChordDuration) {
                 mChordEndTime = timestamp;
-                if (onChordEnd) {
-                    onChordEnd();
-                }
+                mFireChordEnd = true;
             }
             mCurrentChord = Chord();  // Reset to invalid
         }
@@ -99,6 +93,21 @@ void ChordDetector::update(shared_ptr<AudioContext> context) {
     // Save chroma for next frame
     for (int i = 0; i < 12; i++) {
         mPrevChroma[i] = mChroma[i];
+    }
+}
+
+void ChordDetector::fireCallbacks() {
+    if (mFireChordEnd) {
+        if (onChordEnd) onChordEnd();
+        mFireChordEnd = false;
+    }
+    if (mFireChordChange) {
+        if (onChordChange) onChordChange(mCurrentChord);
+        mFireChordChange = false;
+    }
+    if (mFireChord) {
+        if (onChord) onChord(mCurrentChord);
+        mFireChord = false;
     }
 }
 

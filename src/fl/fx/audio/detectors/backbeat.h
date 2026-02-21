@@ -62,6 +62,7 @@ public:
     ~BackbeatDetector() override;
 
     void update(shared_ptr<AudioContext> context) override;
+    void fireCallbacks() override;
     bool needsFFT() const override { return true; }
     bool needsFFTHistory() const override { return false; }
     const char* getName() const override { return "BackbeatDetector"; }

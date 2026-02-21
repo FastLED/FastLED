@@ -33,6 +33,7 @@ public:
     ~PitchDetector() override;
 
     void update(shared_ptr<AudioContext> context) override;
+    void fireCallbacks() override;
     bool needsFFT() const override { return false; }  // Uses PCM data directly
     const char* getName() const override { return "PitchDetector"; }
     void reset() override;
@@ -41,7 +42,7 @@ public:
     function_list<void(float hz)> onPitch;  // Continuous pitch updates
     function_list<void(float hz, float confidence)> onPitchWithConfidence;
     function_list<void(float hz)> onPitchChange;  // Fires when pitch changes significantly
-    function_list<void(bool voiced)> onVoicedChange;  // Fires when voiced/unvoiced state changes
+    function_list<void(u8 voiced)> onVoiced;  // Fires when voiced/unvoiced state changes
 
     // State access
     float getPitch() const { return mCurrentPitch; }
@@ -64,6 +65,9 @@ private:
     bool mIsVoiced;           // True if currently detecting pitched sound
     bool mPreviousVoiced;     // Previous voiced state for change detection
     float mPreviousPitch;     // Previous pitch for change detection
+    bool mFirePitch = false;
+    bool mFirePitchChange = false;
+    bool mVoicedStateChanged = false;
 
     // Configuration
     float mMinFrequency;      // Minimum detectable frequency (Hz)

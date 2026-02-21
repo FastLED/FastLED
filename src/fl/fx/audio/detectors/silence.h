@@ -13,12 +13,13 @@ public:
     ~SilenceDetector() override;
 
     void update(shared_ptr<AudioContext> context) override;
+    void fireCallbacks() override;
     bool needsFFT() const override { return false; }  // Uses RMS from AudioSample
     const char* getName() const override { return "SilenceDetector"; }
     void reset() override;
 
     // Callbacks (multiple listeners supported)
-    function_list<void(bool silent)> onSilenceChange;
+    function_list<void(u8 silent)> onSilence;
     function_list<void()> onSilenceStart;
     function_list<void()> onSilenceEnd;
     function_list<void(u32 durationMs)> onSilenceDuration;
@@ -52,6 +53,10 @@ private:
     vector<float> mRMSHistory;
     int mHistorySize;
     int mHistoryIndex;
+
+    enum class PendingSilenceEvent : u8 { kNone, kStart, kEnd, kMaxDuration };
+    PendingSilenceEvent mPendingEvent = PendingSilenceEvent::kNone;
+    u32 mPendingDuration = 0;
 
     static constexpr u32 DEFAULT_MIN_SILENCE_MS = 500;
     static constexpr u32 DEFAULT_MAX_SILENCE_MS = 60000;  // 1 minute

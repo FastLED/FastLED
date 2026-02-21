@@ -13,6 +13,7 @@ public:
     ~TempoAnalyzer() override;
 
     void update(shared_ptr<AudioContext> context) override;
+    void fireCallbacks() override;
     bool needsFFT() const override { return true; }
     bool needsFFTHistory() const override { return true; }
     const char* getName() const override { return "TempoAnalyzer"; }
@@ -67,6 +68,11 @@ private:
     float mAdaptiveThreshold;
     vector<float> mFluxHistory;
     static constexpr size FLUX_HISTORY_SIZE = 43;  // ~1 second at 43fps
+
+    // Callback state tracking
+    bool mWasStable = false;
+    bool mBpmChanged = false;
+    float mPreviousBPM = 120.0f;
 
     // Stability tracking
     vector<float> mBPMHistory;

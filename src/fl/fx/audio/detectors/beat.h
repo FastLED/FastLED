@@ -13,6 +13,7 @@ public:
     ~BeatDetector() override;
 
     void update(shared_ptr<AudioContext> context) override;
+    void fireCallbacks() override;
     bool needsFFT() const override { return true; }
     bool needsFFTHistory() const override { return true; }
     const char* getName() const override { return "BeatDetector"; }
@@ -36,6 +37,7 @@ public:
 
 private:
     bool mBeatDetected;
+    bool mTempoChanged = false;
     float mBPM;
     float mPhase;
     float mConfidence;

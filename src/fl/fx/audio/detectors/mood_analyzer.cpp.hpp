@@ -75,7 +75,11 @@ void MoodAnalyzer::update(shared_ptr<AudioContext> context) {
         mCurrentMood.duration = 0;
     }
 
-    // Fire callbacks
+    // Check for mood changes (store result for fireCallbacks)
+    mMoodChanged = shouldChangeMood(mCurrentMood);
+}
+
+void MoodAnalyzer::fireCallbacks() {
     if (onMood) {
         onMood(mCurrentMood);
     }
@@ -84,8 +88,7 @@ void MoodAnalyzer::update(shared_ptr<AudioContext> context) {
         onValenceArousal(mCurrentMood.valence, mCurrentMood.arousal);
     }
 
-    // Check for mood changes
-    if (shouldChangeMood(mCurrentMood) && onMoodChange) {
+    if (mMoodChanged && onMoodChange) {
         onMoodChange(mCurrentMood);
     }
 }

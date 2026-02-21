@@ -76,9 +76,9 @@ void NoteDetector::update(shared_ptr<AudioContext> context) {
             mNoteOnEnergy = energy;
             mPitchBend = calculatePitchBend(pitch, newNote);
 
-            if (onNoteOn) {
-                onNoteOn(newNote, velocity);
-            }
+            mFireNoteOn = true;
+            mPendingOnNote = newNote;
+            mPendingOnVelocity = velocity;
         }
     } else {
         // Note currently active - check for note-off or note-change
@@ -86,9 +86,8 @@ void NoteDetector::update(shared_ptr<AudioContext> context) {
             // Check minimum note duration to prevent flicker
             u32 noteDuration = timestamp - mNoteOnTime;
             if (noteDuration >= mMinNoteDuration) {
-                if (onNoteOff) {
-                    onNoteOff(mCurrentNote);
-                }
+                mFireNoteOff = true;
+                mPendingOffNote = mCurrentNote;
 
                 mCurrentNote = NO_NOTE;
                 mLastVelocity = 0;
@@ -103,10 +102,9 @@ void NoteDetector::update(shared_ptr<AudioContext> context) {
             if (shouldTriggerNoteChange(newNote, mCurrentNote)) {
                 u8 velocity = calculateVelocity(energy, confidence);
 
-                // Fire note-off for old note
-                if (onNoteOff) {
-                    onNoteOff(mCurrentNote);
-                }
+                // Set pending note-off for old note
+                mFireNoteOff = true;
+                mPendingOffNote = mCurrentNote;
 
                 // Update to new note
                 mCurrentNote = newNote;
@@ -114,17 +112,28 @@ void NoteDetector::update(shared_ptr<AudioContext> context) {
                 mNoteOnTime = timestamp;
                 mPitchBend = calculatePitchBend(pitch, newNote);
 
-                // Fire note-on for new note
-                if (onNoteOn) {
-                    onNoteOn(newNote, velocity);
-                }
-
-                // Also fire note-change callback
-                if (onNoteChange) {
-                    onNoteChange(newNote, velocity);
-                }
+                // Set pending note-on for new note
+                mFireNoteOn = true;
+                mPendingOnNote = newNote;
+                mPendingOnVelocity = velocity;
+                mFireNoteChange = true;
             }
         }
+    }
+}
+
+void NoteDetector::fireCallbacks() {
+    if (mFireNoteOff) {
+        if (onNoteOff) onNoteOff(mPendingOffNote);
+        mFireNoteOff = false;
+    }
+    if (mFireNoteOn) {
+        if (onNoteOn) onNoteOn(mPendingOnNote, mPendingOnVelocity);
+        mFireNoteOn = false;
+    }
+    if (mFireNoteChange) {
+        if (onNoteChange) onNoteChange(mPendingOnNote, mPendingOnVelocity);
+        mFireNoteChange = false;
     }
 }
 

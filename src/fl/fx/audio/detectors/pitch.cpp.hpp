@@ -38,12 +38,7 @@ void PitchDetector::update(shared_ptr<AudioContext> context) {
         mConfidence = 0.0f;
         mIsVoiced = false;
 
-        if (mIsVoiced != mPreviousVoiced) {
-            if (onVoicedChange) {
-                onVoicedChange(mIsVoiced);
-            }
-            mPreviousVoiced = mIsVoiced;
-        }
+        mVoicedStateChanged = (mIsVoiced != mPreviousVoiced);
         return;
     }
 
@@ -54,37 +49,36 @@ void PitchDetector::update(shared_ptr<AudioContext> context) {
     if (detectedPitch > 0.0f && mConfidence >= mConfidenceThreshold) {
         mIsVoiced = true;
         mCurrentPitch = detectedPitch;
-
-        // Apply exponential smoothing
         updatePitchSmoothing(detectedPitch);
+        mFirePitch = true;
 
-        // Fire continuous pitch callbacks
-        if (onPitch) {
-            onPitch(mSmoothedPitch);
-        }
-        if (onPitchWithConfidence) {
-            onPitchWithConfidence(mSmoothedPitch, mConfidence);
-        }
-
-        // Check for pitch change
         if (shouldReportPitchChange(detectedPitch)) {
-            if (onPitchChange) {
-                onPitchChange(mSmoothedPitch);
-            }
+            mFirePitchChange = true;
             mPreviousPitch = detectedPitch;
         }
     } else {
-        // No reliable pitch detected
         mIsVoiced = false;
         mCurrentPitch = 0.0f;
+        mFirePitch = false;
     }
 
-    // Fire voiced state change callback
-    if (mIsVoiced != mPreviousVoiced) {
-        if (onVoicedChange) {
-            onVoicedChange(mIsVoiced);
-        }
+    mVoicedStateChanged = (mIsVoiced != mPreviousVoiced);
+}
+
+void PitchDetector::fireCallbacks() {
+    if (mFirePitch) {
+        if (onPitch) onPitch(mSmoothedPitch);
+        if (onPitchWithConfidence) onPitchWithConfidence(mSmoothedPitch, mConfidence);
+        mFirePitch = false;
+    }
+    if (mFirePitchChange) {
+        if (onPitchChange) onPitchChange(mSmoothedPitch);
+        mFirePitchChange = false;
+    }
+    if (mVoicedStateChanged) {
+        if (onVoiced) onVoiced(static_cast<u8>(mConfidence * 255.0f));
         mPreviousVoiced = mIsVoiced;
+        mVoicedStateChanged = false;
     }
 }
 

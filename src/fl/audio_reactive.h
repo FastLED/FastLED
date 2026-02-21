@@ -17,6 +17,8 @@
 
 namespace fl {
 
+class AudioProcessor;
+
 // Forward declarations for enhanced beat detection
 class SpectralFluxDetector;
 class PerceptualWeighting;
@@ -116,6 +118,90 @@ public:
     float getMidEnergy() const;
     float getTrebleEnergy() const;
     
+    // ----- Polling Getters (uint8_t-scaled where applicable) -----
+    // These forward to an internal AudioProcessor for detector-based analysis.
+
+    // Vocal Detection
+    u8 getVocalConfidence();
+    u8 isVocalActive();
+
+    // Beat Detection (detector-based)
+    u8 getBeatConfidence();
+    u8 isBeatDetected();
+    float getBPM();
+
+    // Energy Analysis
+    u8 getEnergyLevel();
+    u8 getPeakLevel();
+
+    // Frequency Bands (uint8_t)
+    u8 getBassLevel();
+    u8 getMidLevel();
+    u8 getTrebleLevel();
+
+    // Silence Detection
+    u8 isSilent();
+    u32 getSilenceDuration();
+
+    // Transient Detection
+    u8 getTransientStrength();
+    u8 isTransient();
+
+    // Dynamics Analysis
+    u8 getDynamicTrend();
+    u8 isCrescendo();
+    u8 isDiminuendo();
+
+    // Pitch Detection
+    u8 getPitchConfidence();
+    float getPitchHz();
+    u8 isVoiced();
+
+    // Tempo Analysis
+    u8 getTempoConfidence();
+    float getTempoBPM();
+    u8 isTempoStable();
+
+    // Buildup Detection
+    u8 getBuildupIntensity();
+    u8 getBuildupProgress();
+    u8 isBuilding();
+
+    // Drop Detection
+    u8 getDropImpact();
+
+    // Percussion Detection
+    u8 isKick();
+    u8 isSnare();
+    u8 isHiHat();
+    u8 isTom();
+
+    // Note Detection
+    u8 getCurrentNote();
+    u8 getNoteVelocity();
+    u8 isNoteActive();
+
+    // Downbeat Detection
+    u8 isDownbeat();
+    u8 getMeasurePhase();
+    u8 getCurrentBeatNumber();
+
+    // Backbeat Detection
+    u8 getBackbeatConfidence();
+    u8 getBackbeatStrength();
+
+    // Chord Detection
+    u8 hasChord();
+    u8 getChordConfidence();
+
+    // Key Detection
+    u8 hasKey();
+    u8 getKeyConfidence();
+
+    // Mood Analysis
+    u8 getMoodArousal();
+    u8 getMoodValence();
+
     // Effect helpers
     fl::u8 volumeToScale255() const;
     CRGB volumeToColor(const CRGBPalette16& palette) const;
@@ -198,6 +284,10 @@ private:
 
     // Enhanced beat detection state
     fl::array<float, 16> mPreviousMagnitudes;
+
+    // Internal AudioProcessor for detector-based polling getters
+    fl::unique_ptr<AudioProcessor> mAudioProcessor;
+    AudioProcessor& ensureAudioProcessor();
 };
 
 // Spectral flux-based onset detection for enhanced beat detection

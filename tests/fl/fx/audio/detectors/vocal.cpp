@@ -70,14 +70,15 @@ FL_TEST_CASE("VocalDetector - callbacks don't crash") {
 
     bool changeCallbackInvoked = false;
     bool lastActiveState = true; // Initialize to opposite of expected
-    detector.onVocalChange.add([&changeCallbackInvoked, &lastActiveState](bool active) {
+    detector.onVocal.add([&changeCallbackInvoked, &lastActiveState](u8 active) {
         changeCallbackInvoked = true;
-        lastActiveState = active;
+        lastActiveState = (active > 0);
     });
 
     auto ctx = fl::make_shared<AudioContext>(makeSample_VocalDetector(440.0f, 1000));
     ctx->setSampleRate(44100);
     detector.update(ctx);
+    detector.fireCallbacks();
 
     // A pure sine at 440Hz should not be vocal. Since detector starts with
     // mVocalActive=false and mPreviousVocalActive=false, and the sine is
@@ -115,6 +116,7 @@ FL_TEST_CASE("VocalDetector - onVocalStart and onVocalEnd callbacks") {
         ctx->setSampleRate(44100);
         ctx->getFFT(128);  // High bin count for formant resolution
         detector.update(ctx);
+        detector.fireCallbacks();
 
         // Silence to potentially trigger vocal end
         fl::vector<fl::i16> silence(512, 0);
@@ -123,6 +125,7 @@ FL_TEST_CASE("VocalDetector - onVocalStart and onVocalEnd callbacks") {
         silentCtx->setSampleRate(44100);
         silentCtx->getFFT(128);
         detector.update(silentCtx);
+        detector.fireCallbacks();
     }
 
     // If vocal end was detected, vocal start must have been detected first

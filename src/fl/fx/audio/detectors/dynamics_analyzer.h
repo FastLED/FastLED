@@ -16,6 +16,7 @@ public:
 
     // AudioDetector interface
     void update(shared_ptr<AudioContext> context) override;
+    void fireCallbacks() override;
     bool needsFFT() const override { return false; }
     const char* getName() const override { return "DynamicsAnalyzer"; }
     void reset() override;

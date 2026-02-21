@@ -74,8 +74,9 @@ void FrequencyBands::update(shared_ptr<AudioContext> context) {
     mBass = mSmoothing * mBass + (1.0f - mSmoothing) * bassEnergy;
     mMid = mSmoothing * mMid + (1.0f - mSmoothing) * midEnergy;
     mTreble = mSmoothing * mTreble + (1.0f - mSmoothing) * trebleEnergy;
+}
 
-    // Fire callbacks
+void FrequencyBands::fireCallbacks() {
     if (onLevelsUpdate) {
         onLevelsUpdate(mBass, mMid, mTreble);
     }
