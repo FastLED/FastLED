@@ -1169,16 +1169,12 @@ public:
 	/// Configure platform-specific channel bus drivers
 	/// @{
 
-#if defined(FL_IS_ESP32) || defined(FL_IS_STUB)
-	/// @platform ESP32 / Stub
-	/// @note On ESP32: controls RMT, SPI, PARLIO, etc. driver selection at runtime
-	/// @note On FL_IS_STUB: delegates to ChannelBusManager (registers STUB engine)
-
 	/// Enable or disable a channel driver by name at runtime
 	/// @param name Driver name to control (case-sensitive, e.g., "RMT", "SPI", "PARLIO")
 	/// @param enabled true to enable, false to disable
 	/// @note Disabled drivers are skipped during selection
 	/// @note Changes take effect immediately on next LED update
+	/// @note On platforms without registered engines, this is a safe no-op
 	void setDriverEnabled(const char* name, bool enabled);
 
 	/// Enable only one driver exclusively (disables all others)
@@ -1201,53 +1197,6 @@ public:
 	/// @return Span of driver info (sorted by priority descending)
 	/// @note Returned span is valid until next call to any non-const method
 	fl::span<const fl::DriverInfo> getDriverInfos() const;
-#else
-	/// @platform Non-ESP32
-	/// @warning These methods are no-op stubs on non-ESP32 platforms
-	/// @note Non-ESP32 platforms use single-engine architectures (no runtime switching)
-
-	/// No-op stub: Enable or disable a channel driver by name at runtime
-	/// @param name Driver name (ignored on non-ESP32)
-	/// @param enabled Enable flag (ignored on non-ESP32)
-	/// @note Non-ESP32: Does nothing (safe no-op)
-	void setDriverEnabled(const char* /*name*/, bool /*enabled*/) {
-		// No-op: Only ESP32 has multi-engine architecture
-	}
-
-	/// No-op stub: Enable only one driver exclusively
-	/// @param name Driver name (ignored on non-ESP32)
-	/// @return Always returns false (no engines available)
-	/// @note Non-ESP32: Always returns false
-	bool setExclusiveDriver(const char* /*name*/) {
-		// No-op: Only ESP32 has multi-engine architecture
-		return false;  // Name not found (no engines exist)
-	}
-
-	/// No-op stub: Check if a driver is enabled by name
-	/// @param name Driver name (ignored on non-ESP32)
-	/// @return Always returns false (no engines registered)
-	/// @note Non-ESP32: Always returns false
-	bool isDriverEnabled(const char* /*name*/) const {
-		// No-op: Only ESP32 has multi-engine architecture
-		return false;  // Name not found (no engines exist)
-	}
-
-	/// No-op stub: Get count of registered channel drivers
-	/// @return Always returns 0 (no engines)
-	/// @note Non-ESP32: Always returns 0
-	fl::size getDriverCount() const {
-		// No-op: Only ESP32 has multi-engine architecture
-		return 0;  // No engines registered
-	}
-
-	/// No-op stub: Get full state of all registered channel drivers
-	/// @return Empty span (no engines)
-	/// @note Non-ESP32: Always returns empty span
-	fl::span<const fl::DriverInfo> getDriverInfos() const {
-		// No-op: Only ESP32 has multi-engine architecture
-		return fl::span<const fl::DriverInfo>(nullptr, 0);  // Empty span
-	}
-#endif
 
 	/// @} Channel Bus Manager Controls
 

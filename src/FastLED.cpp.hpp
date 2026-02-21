@@ -535,7 +535,6 @@ void delay_at_max_brightness_for_power(fl::u16 ms)
 // Channel Bus Manager Controls
 // ============================================================================
 
-#if defined(FL_IS_ESP32) || defined(FL_IS_STUB)
 void CFastLED::setDriverEnabled(const char* name, bool enabled) {
 	fl::ChannelBusManager& manager = fl::channelBusManager();
 	manager.setDriverEnabled(name, enabled);
@@ -560,7 +559,6 @@ fl::span<const fl::DriverInfo> CFastLED::getDriverInfos() const {
 	fl::ChannelBusManager& manager = fl::channelBusManager();
 	return manager.getDriverInfos();
 }
-#endif
 
 // ============================================================================
 // Wait for channel bus transmissions

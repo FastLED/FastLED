@@ -184,9 +184,7 @@
 #include "ValidationHelpers.h"
 #include "ValidationRemote.h"
 #include "ValidationAsync.h"
-#ifdef FL_IS_ESP32
-#include "platforms/esp/32/watchdog_esp32.h"  // For fl::watchdog_setup()
-#endif
+#include "ValidationPlatform.h"
 
 // ============================================================================
 // Configuration
@@ -203,32 +201,8 @@ const fl::RxDeviceType RX_TYPE = fl::RxDeviceType::RMT;
 // These defaults are chosen based on hardware constraints of each platform.
 // They can be overridden at runtime via JSON-RPC (setPins, setTxPin, setRxPin).
 
-#if defined(FL_IS_STUB)
-    // Stub: TX and RX same pin — NativeRxDevice monitors TX output directly
-    constexpr int DEFAULT_PIN_TX = 1;
-    constexpr int DEFAULT_PIN_RX = 1;
-#elif defined(FL_IS_ESP_32S3)
-    // ESP32-S3: Standard configuration with jumper wire
-    // Connect GPIO 1 (TX) to GPIO 2 (RX) with a physical jumper wire
-    constexpr int DEFAULT_PIN_TX = 1;
-    constexpr int DEFAULT_PIN_RX = 2;
-#elif defined(FL_IS_ESP_32S2)
-    // ESP32-S2: Standard configuration
-    constexpr int DEFAULT_PIN_TX = 1;
-    constexpr int DEFAULT_PIN_RX = 0;
-#elif defined(FL_IS_ESP_32C6)
-    // ESP32-C6: RISC-V - standard configuration
-    constexpr int DEFAULT_PIN_TX = 1;
-    constexpr int DEFAULT_PIN_RX = 0;
-#elif defined(FL_IS_ESP_32C3)
-    // ESP32-C3: RISC-V - standard configuration
-    constexpr int DEFAULT_PIN_TX = 1;
-    constexpr int DEFAULT_PIN_RX = 0;
-#else
-    // ESP32 (classic) and other variants: Standard configuration
-    constexpr int DEFAULT_PIN_TX = 1;
-    constexpr int DEFAULT_PIN_RX = 0;
-#endif
+constexpr int DEFAULT_PIN_TX = validation::defaultTxPin();
+constexpr int DEFAULT_PIN_RX = validation::defaultRxPin();
 
 // Legacy macros for backward compatibility in existing code
 #define PIN_TX g_validation_state->pin_tx
@@ -287,10 +261,7 @@ void setup() {
     // Must be called BEFORE Serial.begin()
     init_serial_buffers();
     Serial.begin(115200);
-    // Initialize watchdog with 5 second timeout (ESP32 only)
-    // Provides automatic proof-of-life monitoring and USB disconnect fix for Windows
-    // DISABLED FOR DEBUGGING: Investigating if watchdog causes crash at 7.69s
-    // fl::watchdog_setup(5000);
+    // Watchdog disabled — investigating if it causes crash at 7.69s
     while (!Serial && millis() < SERIAL_TIMEOUT_MS);  // Wait for serial monitor (early exits when connected)
 
     FL_WARN("[SETUP] Validation sketch starting - serial output active");
@@ -317,17 +288,7 @@ void setup() {
 
     // Platform information
     ss << "\n[PLATFORM]\n";
-    #if defined(FL_IS_ESP_32C6)
-        ss << "  Chip: ESP32-C6 (RISC-V)\n";
-    #elif defined(FL_IS_ESP_32S3)
-        ss << "  Chip: ESP32-S3 (Xtensa)\n";
-    #elif defined(FL_IS_ESP_32C3)
-        ss << "  Chip: ESP32-C3 (RISC-V)\n";
-    #elif defined(FL_IS_ESP_32DEV)
-        ss << "  Chip: ESP32 (Xtensa)\n";
-    #else
-        ss << "  Chip: Unknown ESP32 variant\n";
-    #endif
+    ss << "  Chip: " << validation::chipName() << "\n";
 
     // Hardware configuration - machine-parseable for --expect validation
     ss << "\n[HARDWARE]\n";
