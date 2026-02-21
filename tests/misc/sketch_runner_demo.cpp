@@ -1,7 +1,7 @@
 // Standalone sketch runner demonstration
 // This shows how external applications can use the FastLED sketch runner interface
 
-#include "fl/str.h" // ok include
+#include "fl/stl/string.h" // ok include
 
 // Demo sketch implementation
 static int setup_call_count = 0;

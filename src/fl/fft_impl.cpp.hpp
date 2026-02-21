@@ -22,7 +22,7 @@
 #include "fl/audio.h"
 #include "fl/fft.h"
 #include "fl/fft_impl.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/unused.h"
 #include "fl/stl/vector.h"
 #include "fl/warn.h"

@@ -294,7 +294,7 @@ ARDUINOJSON_END_PRIVATE_NAMESPACE
 #include "fl/stl/cstdlib.h"
 #include "fl/stddef.h"
 #include "fl/stl/malloc.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 class Allocator {
  public:
@@ -666,7 +666,6 @@ void swap_(T& a, T& b) {
   b = move(tmp);
 }
 ARDUINOJSON_END_PRIVATE_NAMESPACE
-#include "fl/stl/string.h"
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 using PoolCount = SlotId;
 template <typename T>

@@ -9,7 +9,7 @@ https://github.com/Bodmer/TJpg_Decoder
 
 #include "TJpg_Decoder.h"
 #include "fl/unused.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/stl/cstring.h"  // for fl::memset() and fl::memcpy()
 
 namespace fl {

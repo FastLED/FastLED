@@ -14,7 +14,7 @@
 #include "fl/xymap.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/pair.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/fx/fx2d.h"
 #include "eorder.h"
 #include "pixel_controller.h"  // For RGB_BYTE_0, RGB_BYTE_1, RGB_BYTE_2

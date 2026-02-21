@@ -3,7 +3,7 @@
 #include "active_strip_data.h"
 
 #include "fl/stl/map.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/json.h"
 #include "fl/unused.h"
 // CLEDController is forward declared in header - no include needed

@@ -15,7 +15,6 @@
 #include "fl/stl/allocator.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/string.h"
-#include "fl/str.h"
 
 #include "lzw.h"
 #include "third_party/libnsgif/include/nsgif.hpp"

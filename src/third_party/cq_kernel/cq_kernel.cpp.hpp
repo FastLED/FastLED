@@ -16,7 +16,6 @@
 #include "fl/stl/math.h"
 #include "fl/stl/string.h"
 #include "fl/stl/malloc.h"
-#include "fl/str.h"
 #include "fl/stl/cstring.h"  // for fl::memset() and fl::memcpy()
 #include "cq_kernel.h"
 #include "fft_precision.h"

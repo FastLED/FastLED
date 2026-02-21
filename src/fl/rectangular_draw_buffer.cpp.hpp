@@ -2,7 +2,7 @@
 #include "fl/rectangular_draw_buffer.h"
 #include "fl/stl/allocator.h"
 #include "rgbw.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/stl/cstring.h"  // for fl::memset()
 
 namespace fl {

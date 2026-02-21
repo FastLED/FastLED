@@ -3,7 +3,7 @@
 /// @file spi/write_result.h
 /// @brief Result type for SPI write operations
 
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/stl/stdint.h"
 
 namespace fl {

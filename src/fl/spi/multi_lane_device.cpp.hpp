@@ -2,7 +2,7 @@
 #include "fl/spi/device_impl_base.h"
 #include "fl/warn.h"
 #include "fl/dbg.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 // IWYU pragma: begin_keep
 #include "platforms/shared/spi_hw_1.h" // ok platform headers
 #include "platforms/shared/spi_hw_2.h" // ok platform headers

@@ -9,7 +9,7 @@
 // Heavy includes moved from header to reduce compilation time
 #include "fl/lut.h"       // Full LUT definitions needed for implementation
 #include "fl/json.h"      // 61.1ms - only needed for ParseJson/toJson implementations
-#include "fl/str.h"       // 129.4ms - only needed for string parameters in implementations
+#include "fl/stl/string.h"       // 129.4ms - only needed for string parameters in implementations
 #include "fl/stl/map.h"       // 12.4ms - only needed for fl_map parameters in implementations
 // IWYU pragma: begin_keep
 #include "fl/stl/function.h"

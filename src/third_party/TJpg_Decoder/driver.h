@@ -7,7 +7,7 @@
 #include "platforms/avr/is_avr.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/span.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/codec/pixel.h"
 #include "fl/fx/frame.h"
 #include "fl/bytestream.h"

@@ -7,7 +7,7 @@
 #include "audio_input_wasm.hpp"
 #include "fl/dbg.h"
 #include "fl/stl/stdio.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 // IWYU pragma: begin_keep
 #include <emscripten.h>
 #include <emscripten/emscripten.h>

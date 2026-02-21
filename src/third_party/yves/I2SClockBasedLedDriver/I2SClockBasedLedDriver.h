@@ -27,12 +27,11 @@
 #include "driver/gpio.h"
 #include "driver/periph_ctrl.h"
 #include "rom/lldesc.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/stl/math.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h"
-#include "fl/str.h"
 #include "fl/stl/cstring.h"
 #include <rom/ets_sys.h>
 #include "esp32-hal-log.h"

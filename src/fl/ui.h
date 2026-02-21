@@ -3,7 +3,7 @@
 
 #include "fl/stl/shared_ptr.h"  // For shared_ptr
 #include "fl/json.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/int.h"
 #include "fl/audio.h"
 #include "fl/audio_input.h"  // For AudioConfig

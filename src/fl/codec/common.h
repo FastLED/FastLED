@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/stl/shared_ptr.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/stl/stdint.h"
 #include "fl/bytestream.h"
 #include "fl/scoped_array.h"

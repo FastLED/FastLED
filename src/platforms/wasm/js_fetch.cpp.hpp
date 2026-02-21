@@ -3,7 +3,7 @@
 #include "js_fetch.h"
 #include "fl/net/fetch.h"  // Include for fl::response definition
 #include "fl/warn.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/stl/function.h"
 #include "fl/stl/unordered_map.h"
 #include "fl/stl/mutex.h"

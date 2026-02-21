@@ -13,7 +13,7 @@
 #endif
 
 // FastLED headers only - NO stdlib headers
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/stddef.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/ostream.h"

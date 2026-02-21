@@ -2,7 +2,7 @@
 #include "crgb.h"
 #include "fl/tile2x2.h"
 #include "fl/fft.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/stl/ios.h"
 #include "fl/stl/charconv.h"
 

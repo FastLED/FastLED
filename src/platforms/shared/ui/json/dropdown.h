@@ -3,7 +3,7 @@
 // IWYU pragma: private
 
 #include "fl/engine_events.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/stl/vector.h"
 #include "platforms/shared/ui/json/ui_internal.h"
 #include "fl/json.h"

@@ -1,7 +1,7 @@
 #include "software_decoder.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/utility.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/compiler_control.h"
 #include "fl/stl/cstring.h"  // for fl::memset() and fl::memcpy()
 

@@ -3,7 +3,7 @@
 #if defined(__EMSCRIPTEN__)
 
 #include "socket_wasm.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include <cstring>
 #include <cstdio>  // For snprintf
 #include <errno.h>

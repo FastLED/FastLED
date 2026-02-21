@@ -1404,7 +1404,7 @@ extern CFastLED FastLED;
 
 #if !defined(FASTLED_INTERNAL) && !defined(FASTLED_LEAN_AND_MEAN)
 
-#include "fl/str.h"   // Awesome Str class that has stack allocation and heap overflow, copy on write.
+#include "fl/stl/string.h"   // Awesome Str class that has stack allocation and heap overflow, copy on write.
 #include "fl/xymap.h"  // XYMap class for mapping 2D coordinates on seperintine matrices.
 
 #include "fl/clamp.h"  // fl::clamp(value, min, max)

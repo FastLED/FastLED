@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/fastled.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/fx/fx1d.h"
 
 namespace fl {

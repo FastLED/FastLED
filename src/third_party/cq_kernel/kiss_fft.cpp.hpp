@@ -7,7 +7,7 @@
  */
 
 #include "fl/stl/cstddef.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/stl/cstring.h"  // for fl::memset() and fl::memcpy()
 #include "_kiss_fft_guts.h"
 

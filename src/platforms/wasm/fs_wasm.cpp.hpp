@@ -53,7 +53,7 @@
 #include "fl/json.h"
 #include "fl/math_macros.h"
 #include "fl/stl/memory.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/warn.h"
 #include "fl/stl/mutex.h"
 #include "platforms/wasm/js.h"

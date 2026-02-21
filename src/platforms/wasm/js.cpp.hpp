@@ -30,7 +30,7 @@
 #include "fl/dbg.h"
 #include "fl/stl/map.h"
 #include "fl/screenmap.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "js.h"
 #include "platforms/shared/ui/json/ui_internal.h"
 #include "fl/stl/chrono.h"

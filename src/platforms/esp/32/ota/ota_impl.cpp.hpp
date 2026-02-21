@@ -42,7 +42,7 @@
 // IWYU pragma: end_keep
 
 // FastLED headers
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/warn.h"
 #include "fl/dbg.h"
 

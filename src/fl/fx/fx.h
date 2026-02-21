@@ -6,7 +6,7 @@
 #include "fl/fx/detail/draw_context.h"
 #include "fl/fx/detail/transition.h"
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/unused.h"
 
 namespace fl {

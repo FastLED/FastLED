@@ -4,7 +4,7 @@
 #include "fl/bytestreammemory.h"
 #include "fl/dbg.h"
 #include "fl/math_macros.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/warn.h"
 #include "fl/fx/frame.h"
 #include "fl/fx/video/frame_interpolator.h"

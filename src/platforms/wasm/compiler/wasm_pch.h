@@ -66,7 +66,7 @@
 // FastLED utility headers commonly used across the codebase
 #include "fl/stl/span.h"        // fl::span (non-owning array view)
 #include "fl/stl/vector.h"      // fl::vector
-#include "fl/str.h"          // fl::string
+#include "fl/stl/string.h"          // fl::string
 #include "fl/math_macros.h"  // fl::min, fl::max, etc.
 #include "fl/dbg.h"          // FL_DBG macro for debug output
 #include "fl/warn.h"         // FL_WARN macro for warnings

@@ -3,7 +3,7 @@
 // IWYU pragma: private
 
 #include "fl/json.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "platforms/shared/ui/json/ui_internal.h"
 #include "platforms/shared/ui/json/audio_buffer.h"
 #include "fl/stl/vector.h"

@@ -3,7 +3,7 @@
 #include "fl/codec/idecoder.h"
 #include "fl/codec/common.h"
 #include "fl/stl/shared_ptr.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 #include "fl/stl/stdint.h"
 #include "fl/scoped_array.h"
 #include "fl/stl/vector.h"

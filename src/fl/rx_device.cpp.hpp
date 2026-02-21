@@ -7,7 +7,7 @@
 #include "platforms/shared/rx_device_dummy.h"  // ok platform headers
 // IWYU pragma: end_keep // ok platform headers
 #include "fl/chipsets/led_timing.h"
-#include "fl/str.h"
+#include "fl/stl/string.h"
 
 #ifdef FL_IS_ESP32
 // IWYU pragma: begin_keep
