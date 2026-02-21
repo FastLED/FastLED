@@ -36,6 +36,7 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/dbg.h"
 #include "fl/delay.h"
+#include "fl/pin.h"
 #include "fl/math_macros.h"
 #include "fl/warn.h"
 #include "fl/stl/chrono.h"
@@ -218,6 +219,10 @@ ChannelEngineSpi::~ChannelEngineSpi() {
         if (channel.spi_host != SPI_HOST_MAX) {
             releaseSpiHost(channel.spi_host);
         }
+
+        // Restore GPIO pulldown when SPI channel is destroyed
+        // This ensures pin returns to stable LOW state
+        fl::pinMode(channel.pin, fl::PinMode::InputPulldown);
     }
 }
 

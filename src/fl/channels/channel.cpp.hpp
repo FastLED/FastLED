@@ -18,13 +18,7 @@
 #include "pixel_controller.h"
 #include "fl/trace.h"
 
-#ifdef FL_IS_ESP32
-FL_EXTERN_C_BEGIN
-// IWYU pragma: begin_keep
-#include "driver/gpio.h"
-// IWYU pragma: end_keep
-FL_EXTERN_C_END
-#endif
+#include "fl/pin.h"
 
 namespace fl {
 
@@ -65,12 +59,10 @@ Channel::Channel(const ChipsetVariant& chipset, EOrder rgbOrder, RegistrationMod
     , mAffinity()
     , mId(nextId())
     , mName(makeName(mId)) {
-#ifdef FL_IS_ESP32
-    gpio_set_pull_mode(static_cast<gpio_num_t>(mPin), GPIO_PULLDOWN_ONLY);
+    fl::pinMode(mPin, fl::PinMode::InputPulldown);
     if (const SpiChipsetConfig* spi = chipset.ptr<SpiChipsetConfig>()) {
-        gpio_set_pull_mode(static_cast<gpio_num_t>(spi->clockPin), GPIO_PULLDOWN_ONLY);
+        fl::pinMode(spi->clockPin, fl::PinMode::InputPulldown);
     }
-#endif
     mChannelData = ChannelData::create(mChipset);
 }
 
@@ -85,17 +77,15 @@ Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
     , mAffinity(options.mAffinity)  // Get affinity from ChannelOptions
     , mId(nextId())
     , mName(makeName(mId)) {
-#ifdef FL_IS_ESP32
-    // ESP32: Initialize GPIO with pulldown to ensure stable LOW state
+    // Initialize GPIO with pulldown to ensure stable LOW state
     // This prevents RX from capturing noise/glitches on uninitialized pins
     // Must happen before any engine initialization
-    gpio_set_pull_mode(static_cast<gpio_num_t>(mPin), GPIO_PULLDOWN_ONLY);
+    fl::pinMode(mPin, fl::PinMode::InputPulldown);
 
     // For SPI chipsets, also initialize the clock pin
     if (const SpiChipsetConfig* spi = chipset.ptr<SpiChipsetConfig>()) {
-        gpio_set_pull_mode(static_cast<gpio_num_t>(spi->clockPin), GPIO_PULLDOWN_ONLY);
+        fl::pinMode(spi->clockPin, fl::PinMode::InputPulldown);
     }
-#endif
 
     // Set the LED data array
     setLeds(leds);
@@ -122,10 +112,8 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
     , mAffinity(options.mAffinity)  // Get affinity from ChannelOptions
     , mId(nextId())
     , mName(makeName(mId)) {
-#ifdef FL_IS_ESP32
-    // ESP32: Initialize GPIO with pulldown to ensure stable LOW state
-    gpio_set_pull_mode(static_cast<gpio_num_t>(pin), GPIO_PULLDOWN_ONLY);
-#endif
+    // Initialize GPIO with pulldown to ensure stable LOW state
+    fl::pinMode(pin, fl::PinMode::InputPulldown);
 
     // Set the LED data array
     setLeds(leds);
