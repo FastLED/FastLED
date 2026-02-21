@@ -351,14 +351,17 @@ bool ChannelBusManager::waitForCondition(Condition condition, u32 timeoutMs) {
 
 IChannelEngine::EngineState ChannelBusManager::poll() {
     // Poll all registered engines and return aggregate state
-    // Return "worst" state: ERROR > BUSY > READY
+    // Return "worst" state: ERROR > BUSY > DRAINING > READY
     bool anyBusy = false;
+    bool anyDraining = false;
     fl::string firstError;
 
     for (auto& entry : mEngines) {
         IChannelEngine::EngineState result = entry.engine->poll();
         if (result.state == IChannelEngine::EngineState::BUSY) {
             anyBusy = true;
+        } else if (result.state == IChannelEngine::EngineState::DRAINING) {
+            anyDraining = true;
         }
         // Capture first error encountered
         if (result.state == IChannelEngine::EngineState::ERROR && firstError.empty()) {
@@ -371,7 +374,10 @@ IChannelEngine::EngineState ChannelBusManager::poll() {
         return IChannelEngine::EngineState(IChannelEngine::EngineState::ERROR, firstError);
     }
 
-    return IChannelEngine::EngineState(anyBusy ? IChannelEngine::EngineState::BUSY : IChannelEngine::EngineState::READY);
+    return IChannelEngine::EngineState(
+        anyBusy ? IChannelEngine::EngineState::BUSY
+                : anyDraining ? IChannelEngine::EngineState::DRAINING
+                              : IChannelEngine::EngineState::READY);
 }
 
 bool ChannelBusManager::waitForReady(u32 timeoutMs) {

@@ -358,7 +358,7 @@ IChannelEngine::EngineState ChannelEngineSpi::poll() {
     }
 
     // Pipeline idle — check for any channels needing cleanup
-    bool anyBusy = false;
+    bool anyDraining = false;
     for (auto &channel : mChannels) {
         if (!channel.inUse) continue;
         if (channel.transmissionComplete) {
@@ -367,12 +367,12 @@ IChannelEngine::EngineState ChannelEngineSpi::poll() {
             }
             releaseChannel(&channel);
         } else {
-            anyBusy = true;
+            anyDraining = true;
         }
     }
 
-    if (anyBusy)
-        return EngineState::BUSY;
+    if (anyDraining)
+        return EngineState::DRAINING;
 
     // All channels complete - clear transmitting list
     if (!mTransmittingChannels.empty()) {
@@ -384,7 +384,7 @@ IChannelEngine::EngineState ChannelEngineSpi::poll() {
 
 /// @brief Poll channel states for cleanup
 IChannelEngine::EngineState ChannelEngineSpi::pollChannels() {
-    bool anyBusy = false;
+    bool anyDraining = false;
 
     for (auto &channel : mChannels) {
         if (!channel.inUse)
@@ -396,12 +396,12 @@ IChannelEngine::EngineState ChannelEngineSpi::pollChannels() {
             }
             releaseChannel(&channel);
         } else {
-            anyBusy = true;
+            anyDraining = true;
         }
     }
 
-    if (anyBusy)
-        return EngineState::BUSY;
+    if (anyDraining)
+        return EngineState::DRAINING;
 
     return EngineState::READY;
 }
@@ -1448,7 +1448,7 @@ IChannelEngine::EngineState ChannelEngineSpi::advancePipeline() {
             spi_transaction_t* completed;
             esp_err_t ret = spi_device_get_trans_result(ch->spi_device, &completed, 0);
             if (ret != ESP_OK) {
-                return EngineState::BUSY; // DMA still in flight
+                return EngineState::DRAINING; // DMA still in flight
             }
             if (completed == &ch->transA) ch->transAInFlight = false;
             else if (completed == &ch->transB) ch->transBInFlight = false;
@@ -1478,13 +1478,13 @@ IChannelEngine::EngineState ChannelEngineSpi::advancePipeline() {
                     mPipeline.mEncodeIdx++;
                 }
             }
-            return EngineState::BUSY;
+            return EngineState::DRAINING;
         }
 
         // No more data to encode
         if (mPipeline.mDmaInFlight) {
             mPipeline.mPhase = DmaPipelineState::COMPLETING;
-            return EngineState::BUSY;
+            return EngineState::DRAINING;
         }
 
         // All done for this channel
@@ -1494,7 +1494,7 @@ IChannelEngine::EngineState ChannelEngineSpi::advancePipeline() {
 
         if (startNextChannel()) {
             startFirstDma();
-            return EngineState::BUSY;
+            return EngineState::DRAINING;
         }
         mPipeline.mPhase = DmaPipelineState::IDLE;
         mPipeline.mActiveChannel = nullptr;
@@ -1511,10 +1511,10 @@ IChannelEngine::EngineState ChannelEngineSpi::advancePipeline() {
         if (ch->transAInFlight || ch->transBInFlight) {
             spi_transaction_t* completed;
             esp_err_t ret = spi_device_get_trans_result(ch->spi_device, &completed, 0);
-            if (ret != ESP_OK) return EngineState::BUSY;
+            if (ret != ESP_OK) return EngineState::DRAINING;
             if (completed == &ch->transA) ch->transAInFlight = false;
             else if (completed == &ch->transB) ch->transBInFlight = false;
-            if (ch->transAInFlight || ch->transBInFlight) return EngineState::BUSY;
+            if (ch->transAInFlight || ch->transBInFlight) return EngineState::DRAINING;
         }
 
         ch->transmissionComplete = true;
@@ -1523,7 +1523,7 @@ IChannelEngine::EngineState ChannelEngineSpi::advancePipeline() {
 
         if (startNextChannel()) {
             startFirstDma();
-            return EngineState::BUSY;
+            return EngineState::DRAINING;
         }
         mPipeline.mPhase = DmaPipelineState::IDLE;
         mPipeline.mActiveChannel = nullptr;
@@ -1535,13 +1535,13 @@ IChannelEngine::EngineState ChannelEngineSpi::advancePipeline() {
         if ((now - mPipeline.mResetDelayStartUs) >= mPipeline.mResetDelayDurationUs) {
             if (startNextChannel()) {
                 startFirstDma();
-                return EngineState::BUSY;
+                return EngineState::DRAINING;
             }
             mPipeline.mPhase = DmaPipelineState::IDLE;
             mPipeline.mActiveChannel = nullptr;
             return EngineState::READY;
         }
-        return EngineState::BUSY;
+        return EngineState::DRAINING;
     }
     }
 

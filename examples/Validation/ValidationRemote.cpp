@@ -1203,14 +1203,33 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     mRemote->bind("testAsync", [this](const fl::Json& args) -> fl::Json {
         fl::Json response = fl::Json::object();
 
-        // Parse optional numLeds (default: 300 LEDs ≈ 9ms TX time at WS2812B timing)
+        // Parse optional parameters from args object
         int num_leds = 300;
-        if (args.is_object() && args.contains("numLeds") && args["numLeds"].is_int()) {
-            num_leds = static_cast<int>(args["numLeds"].as_int().value());
+        fl::string requested_driver;
+        fl::Json config;
+        if (args.is_object()) {
+            config = args;
         } else if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
-            fl::Json config = args[0];
+            config = args[0];
+        }
+        if (!config.is_null()) {
             if (config.contains("numLeds") && config["numLeds"].is_int()) {
                 num_leds = static_cast<int>(config["numLeds"].as_int().value());
+            }
+            if (config.contains("driver") && config["driver"].is_string()) {
+                requested_driver = config["driver"].as_string().value();
+            }
+        }
+
+        // Set exclusive driver if requested
+        if (!requested_driver.empty()) {
+            if (!FastLED.setExclusiveDriver(requested_driver.c_str())) {
+                response.set("success", false);
+                response.set("error", "DriverSetupFailed");
+                fl::sstream msg;
+                msg << "Failed to set '" << requested_driver.c_str() << "' as exclusive driver";
+                response.set("message", msg.str().c_str());
+                return response;
             }
         }
 
@@ -1242,25 +1261,36 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
             return response;
         }
 
-        // Measure show() duration vs wait() duration
+        // === DRAW 1: May include one-time SPI hardware init overhead ===
         uint32_t t0 = micros();
         FastLED.show();
         uint32_t t1 = micros();
         FastLED.wait(5000);  // 5 second timeout
         uint32_t t2 = micros();
 
-        uint32_t show_us = t1 - t0;
-        uint32_t wait_us = t2 - t1;
-        uint32_t total_us = t2 - t0;
+        uint32_t show1_us = t1 - t0;
+        uint32_t wait1_us = t2 - t1;
+        uint32_t total1_us = t2 - t0;
+
+        // === DRAW 2: Should be fast (no init overhead) ===
+        uint32_t t3 = micros();
+        FastLED.show();
+        uint32_t t4 = micros();
+        FastLED.wait(5000);  // 5 second timeout
+        uint32_t t5 = micros();
+
+        uint32_t show2_us = t4 - t3;
+        uint32_t wait2_us = t5 - t4;
+        uint32_t total2_us = t5 - t3;
 
         // Clean up channel
         FastLED.reset(ResetFlags::CHANNELS);
 
-        // Determine if async behavior is working:
+        // Determine if async behavior is working on draw 2 (no init overhead):
         // If async: show_us << total_us (show returns quickly, wait blocks for remainder)
         // If blocking: show_us ≈ total_us (show blocks for entire TX, wait returns instantly)
-        // Pass criterion: show_us < 50% of total_us
-        bool passed = (total_us > 0) && (show_us < total_us / 2);
+        // Pass criterion: show_us < 50% of total_us (on draw 2)
+        bool passed = (total2_us > 0) && (show2_us < total2_us / 2);
 
         // Determine driver name
         fl::string driver_name = "unknown";
@@ -1273,19 +1303,28 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
 
         response.set("success", true);
         response.set("passed", passed);
-        response.set("show_us", static_cast<int64_t>(show_us));
-        response.set("wait_us", static_cast<int64_t>(wait_us));
-        response.set("total_us", static_cast<int64_t>(total_us));
+        // Draw 1 (with possible init overhead)
+        response.set("show1_us", static_cast<int64_t>(show1_us));
+        response.set("wait1_us", static_cast<int64_t>(wait1_us));
+        response.set("total1_us", static_cast<int64_t>(total1_us));
+        // Draw 2 (steady-state, no init)
+        response.set("show2_us", static_cast<int64_t>(show2_us));
+        response.set("wait2_us", static_cast<int64_t>(wait2_us));
+        response.set("total2_us", static_cast<int64_t>(total2_us));
         response.set("num_leds", static_cast<int64_t>(num_leds));
         response.set("driver", driver_name.c_str());
 
         fl::sstream msg;
         if (passed) {
-            msg << "Async OK: show() returned in " << show_us
-                << "us while TX took " << total_us << "us total";
+            msg << "Async OK: draw2 show()=" << show2_us
+                << "us, wait()=" << wait2_us
+                << "us, total=" << total2_us << "us"
+                << " (draw1 show=" << show1_us << "us)";
         } else {
-            msg << "Async FAIL: show() took " << show_us
-                << "us out of " << total_us << "us total (expected <50%)";
+            msg << "Async FAIL: draw2 show()=" << show2_us
+                << "us out of " << total2_us
+                << "us total (expected <50%)"
+                << " (draw1 show=" << show1_us << "us)";
         }
         response.set("message", msg.str().c_str());
 
