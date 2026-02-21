@@ -14,7 +14,7 @@ from running_process import RunningProcess
 from ci.meson.build_optimizer import BuildOptimizer
 from ci.meson.compile import _create_error_context_filter, _is_compilation_error
 from ci.meson.compiler import get_meson_executable
-from ci.meson.output import _print_banner, _print_error, _print_success
+from ci.meson.output import print_banner, print_error, print_success
 from ci.meson.phase_tracker import PhaseTracker
 from ci.meson.test_execution import MesonTestResult
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
@@ -493,16 +493,16 @@ def stream_compile_and_run_tests(
         _ts_print(f"[MESON] Streaming test execution complete:")
         _ts_print(f"  Tests run: {tests_run}")
         if num_passed > 0:
-            _print_success(f"  Passed: {num_passed}")
+            print_success(f"  Passed: {num_passed}")
         else:
             _ts_print(f"  Passed: {num_passed}")
         if num_failed > 0:
-            _print_error(f"  Failed: {num_failed}")
+            print_error(f"  Failed: {num_failed}")
         else:
             _ts_print(f"  Failed: {num_failed}")
         if compilation_failed:
-            _print_error(f"  Compilation: ✗ FAILED")
+            print_error(f"  Compilation: ✗ FAILED")
         else:
-            _print_success(f"  Compilation: ✓ OK")
+            print_success(f"  Compilation: ✓ OK")
 
     return overall_success, num_passed, num_failed, compilation_output

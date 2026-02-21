@@ -1385,7 +1385,7 @@ def runner(
             # so the CASE 2 ultra-early exit can fire on next invocation.
             if result.num_tests_run and result.num_tests_run == result.num_tests_passed:
                 try:
-                    from ci.meson.cache_utils import _save_full_run_result
+                    from ci.meson.cache_utils import save_full_run_result
                     from ci.util.paths import PROJECT_ROOT
 
                     _build_mode_save = getattr(args, "build_mode", None) or (
@@ -1394,7 +1394,7 @@ def runner(
                     _build_dir_save = (
                         PROJECT_ROOT / ".build" / f"meson-{_build_mode_save}"
                     )
-                    _save_full_run_result(
+                    save_full_run_result(
                         _build_dir_save,
                         result.num_tests_passed,
                         result.num_tests_run,
@@ -1562,8 +1562,8 @@ def runner(
                         import json as _json
 
                         from ci.meson.cache_utils import (
-                            _get_full_run_cache_file,
-                            _save_full_run_result,
+                            get_full_run_cache_file,
+                            save_full_run_result,
                         )
                         from ci.util.paths import PROJECT_ROOT
 
@@ -1573,11 +1573,11 @@ def runner(
                         _build_dir_tr = (
                             PROJECT_ROOT / ".build" / f"meson-{_build_mode_tr}"
                         )
-                        _cache_file_tr = _get_full_run_cache_file(_build_dir_tr)
+                        _cache_file_tr = get_full_run_cache_file(_build_dir_tr)
                         if _cache_file_tr.exists():
                             _saved_tr = _json.loads(_cache_file_tr.read_text())
                             if _saved_tr.get("result") == "pass":
-                                _save_full_run_result(
+                                save_full_run_result(
                                     _build_dir_tr,
                                     _saved_tr.get("num_passed", 0),
                                     _saved_tr.get("num_tests", 0),

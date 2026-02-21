@@ -53,7 +53,7 @@ def _should_skip_scan_dir(name: str) -> bool:
     return False
 
 
-def _get_max_dir_mtime(root: Path) -> float:
+def get_max_dir_mtime(root: Path) -> float:
     """
     Return the maximum mtime of any SOURCE directory under *root* (root included).
 
@@ -145,7 +145,7 @@ def _get_ninja_skip_state_file(build_dir: Path) -> Path:
     return build_dir / ".ninja_skip_state.json"
 
 
-def _check_ninja_skip(build_dir: Path, target: str) -> bool:
+def check_ninja_skip(build_dir: Path, target: str) -> bool:
     """Check if the ninja invocation can be skipped for this target.
 
     Returns True if all of these hold:
@@ -212,7 +212,7 @@ def _check_ninja_skip(build_dir: Path, target: str) -> bool:
         return False
 
 
-def _save_ninja_skip_state(build_dir: Path, target: str) -> None:
+def save_ninja_skip_state(build_dir: Path, target: str) -> None:
     """Save build state after successful ninja run to enable skip on next run.
 
     Stores:
@@ -287,7 +287,7 @@ def _get_test_result_cache_file(build_dir: Path) -> Path:
     return build_dir / ".test_result_cache.json"
 
 
-def _check_test_result_cached(
+def check_test_result_cached(
     build_dir: Path, test_name: str, artifact_path: Path
 ) -> bool:
     """Check if the test result is cached and the test can be skipped.
@@ -334,7 +334,7 @@ def _check_test_result_cached(
         return False
 
 
-def _save_test_result_state(
+def save_test_result_state(
     build_dir: Path, test_name: str, artifact_path: Path, passed: bool
 ) -> None:
     """Save test result to cache for future skip decisions.
@@ -372,12 +372,12 @@ def _save_test_result_state(
 # ---------------------------------------------------------------------------
 
 
-def _get_full_run_cache_file(build_dir: Path) -> Path:
+def get_full_run_cache_file(build_dir: Path) -> Path:
     """Return path to the full test suite run cache file."""
     return build_dir / ".full_run_cache.json"
 
 
-def _check_full_run_cache(
+def check_full_run_cache(
     build_dir: Path,
     include_examples: bool = False,
 ) -> Optional[tuple[int, int, float]]:
@@ -385,7 +385,7 @@ def _check_full_run_cache(
 
     Returns (num_passed, num_tests, duration_seconds) if conditions match, else None.
 
-    Uses same gate conditions as _check_ninja_skip:
+    Uses same gate conditions as check_ninja_skip:
     1. build.ninja mtime unchanged (no meson reconfiguration)
     2. libfastled.a mtime unchanged (no src/ code changes)
     3. tests/ max source file mtime unchanged (no test source modifications)
@@ -400,7 +400,7 @@ def _check_full_run_cache(
     Overhead: ~30-60ms (scandir over tests/ [+ examples/] + 2 stat calls + JSON read).
     Savings: ~3s per cached 'bash test --cpp' run (skips fingerprint + imports).
     """
-    cache_file = _get_full_run_cache_file(build_dir)
+    cache_file = get_full_run_cache_file(build_dir)
     if not cache_file.exists():
         return None
 
@@ -452,7 +452,7 @@ def _check_full_run_cache(
         return None
 
 
-def _save_full_run_result(
+def save_full_run_result(
     build_dir: Path, num_passed: int, num_tests: int, duration: float
 ) -> None:
     """Save full test suite result for future fast-path.
@@ -462,7 +462,7 @@ def _save_full_run_result(
     when nothing has changed. Also captures examples/ mtime so the
     'bash test --cpp' ultra-early exit can correctly detect example changes.
     """
-    cache_file = _get_full_run_cache_file(build_dir)
+    cache_file = get_full_run_cache_file(build_dir)
     try:
         build_ninja = build_dir / "build.ninja"
         cwd = Path.cwd()

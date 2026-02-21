@@ -27,19 +27,6 @@ PARRALLEL_PROJECT_INITIALIZATION = (
 )
 
 
-def _banner_print(msg: str) -> None:
-    """Print a banner message."""
-    # will produce
-    #######
-    # msg #
-    #######
-    lines = msg.splitlines()
-    for line in lines:
-        print("#" * (len(line) + 4))
-        print(f"# {line} #")
-        print("#" * (len(line) + 4))
-
-
 @dataclass
 class ConcurrentRunArgs:
     projects: list[Board]

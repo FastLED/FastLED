@@ -17,7 +17,7 @@ from typing import Optional
 
 from running_process import RunningProcess
 
-from ci.meson.cache_utils import _get_max_dir_mtime
+from ci.meson.cache_utils import get_max_dir_mtime
 from ci.meson.compiler import (
     check_meson_installed,
     check_meson_version_compatibility,
@@ -26,7 +26,7 @@ from ci.meson.compiler import (
     get_meson_version,
 )
 from ci.meson.io_utils import atomic_write_text, write_if_different
-from ci.meson.output import _print_banner, _print_warning
+from ci.meson.output import print_banner, print_warning
 from ci.meson.test_discovery import get_source_files_hash
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.output_formatter import TimestampFormatter
@@ -536,7 +536,7 @@ def setup_meson_build(
     #   2. The test discovery fast-path (tests/ max mtime alone, ~line 786)
     # Without precomputation, tests/ is walked TWICE (~50ms each on Windows = ~100ms wasted).
     # By computing once here and reusing below, we save ~50ms per incremental build.
-    _max_tests_dir_mtime: float = _get_max_dir_mtime(source_dir / "tests")
+    _max_tests_dir_mtime: float = get_max_dir_mtime(source_dir / "tests")
 
     # Get current source file hash (used for change detection and saving after setup).
     #
@@ -554,7 +554,7 @@ def setup_meson_build(
         try:
             _marker_mtime = source_files_marker.stat().st_mtime
             _max_src_mtime = max(
-                _get_max_dir_mtime(source_dir / "src"),
+                get_max_dir_mtime(source_dir / "src"),
                 _max_tests_dir_mtime,  # reuse precomputed value (avoids 2nd tests/ walk)
             )
             if _max_src_mtime <= _marker_mtime:
@@ -856,32 +856,30 @@ def setup_meson_build(
                 added: set[str] = set(current_test_files) - set(cached_test_files)
                 removed: set[str] = set(cached_test_files) - set(current_test_files)
 
-                _print_warning("[MESON] ⚠️  Detected test file changes:")
+                print_warning("[MESON] ⚠️  Detected test file changes:")
                 if added:
                     added_list = sorted(added)
                     if len(added_list) > 10:
                         # Summarize long lists
-                        _print_warning(
+                        print_warning(
                             f"[MESON]     Added: {len(added_list)} test files"
                         )
-                        _print_warning(
+                        print_warning(
                             f"[MESON]     (First 10: {', '.join(added_list[:10])}...)"
                         )
                     else:
-                        _print_warning(f"[MESON]     Added: {', '.join(added_list)}")
+                        print_warning(f"[MESON]     Added: {', '.join(added_list)}")
                 if removed:
                     removed_list = sorted(removed)
                     if len(removed_list) > 10:
-                        _print_warning(
+                        print_warning(
                             f"[MESON]     Removed: {len(removed_list)} test files"
                         )
-                        _print_warning(
+                        print_warning(
                             f"[MESON]     (First 10: {', '.join(removed_list[:10])}...)"
                         )
                     else:
-                        _print_warning(
-                            f"[MESON]     Removed: {', '.join(removed_list)}"
-                        )
+                        print_warning(f"[MESON]     Removed: {', '.join(removed_list)}")
 
                 test_files_changed = True
 
@@ -962,7 +960,7 @@ def setup_meson_build(
                 if example_cache_file.exists():
                     try:
                         _cache_mtime = example_cache_file.stat().st_mtime
-                        _max_example_dir_mtime = _get_max_dir_mtime(examples_dir)
+                        _max_example_dir_mtime = get_max_dir_mtime(examples_dir)
                         if _max_example_dir_mtime <= _cache_mtime:
                             _skip_example_hash = True  # No structural changes detected
                     except OSError:
@@ -984,7 +982,7 @@ def setup_meson_build(
                             cached_example_hash = ""
 
                     if current_example_hash != cached_example_hash:
-                        _print_warning(
+                        print_warning(
                             "[MESON] \u26a0\ufe0f  Detected example file changes (files added/removed/modified)"
                         )
                         example_files_changed = True
@@ -1365,7 +1363,7 @@ endian = 'little'
     # Run meson setup using RunningProcess for proper streaming output
     assert cmd is not None, "cmd should be set when not skipping meson setup"
     meson_cmd: list[str] = cmd  # Type narrowing for use in nested function
-    _print_banner("MESON CONFIGURATION", "⚙️")
+    print_banner("MESON CONFIGURATION", "⚙️")
 
     def _run_meson_setup() -> tuple[int, str]:
         """Run meson setup and return (returncode, stdout)."""

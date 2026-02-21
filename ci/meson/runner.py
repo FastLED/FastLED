@@ -20,7 +20,7 @@ from ci.meson.build_config import (
     setup_meson_build,
 )
 from ci.meson.build_optimizer import make_build_optimizer
-from ci.meson.cache_utils import _save_test_result_state
+from ci.meson.cache_utils import save_test_result_state
 from ci.meson.compile import (
     CompileResult,
     _is_compilation_error,
@@ -28,7 +28,7 @@ from ci.meson.compile import (
     is_stale_build_error,
 )
 from ci.meson.compiler import check_meson_installed, get_meson_executable
-from ci.meson.output import _print_banner, _print_error, _print_info, _print_success
+from ci.meson.output import print_banner, print_error, print_info, print_success
 from ci.meson.phase_tracker import PhaseTracker
 from ci.meson.streaming import stream_compile_and_run_tests
 from ci.meson.test_discovery import get_fuzzy_test_candidates
@@ -535,7 +535,7 @@ def run_meson_build_and_test(
                 # Show simplified message instead of detailed "0/0" breakdown
                 if num_tests_run == 0 and overall_success:
                     if verbose:
-                        _print_info(
+                        print_info(
                             "[MESON] Build up-to-date, running existing tests..."
                         )
                     # Note: run_meson_test already prints the RUNNING TESTS banner
@@ -548,7 +548,7 @@ def run_meson_build_and_test(
                     return result
 
                 if not overall_success:
-                    _print_error(
+                    print_error(
                         f"[MESON] ❌ Some tests failed ({num_passed}/{num_tests_run} tests in {duration:.2f}s)"
                     )
                     return MesonTestResult(
@@ -559,7 +559,7 @@ def run_meson_build_and_test(
                         num_tests_failed=num_failed,
                     )
 
-                _print_success(
+                print_success(
                     f"✅ All tests passed ({num_passed}/{num_tests_run} in {duration:.2f}s)"
                 )
                 return MesonTestResult(
@@ -672,7 +672,7 @@ def run_meson_build_and_test(
 
                 # Show the final result after target resolution
                 if compilation_success and has_fallbacks:
-                    _print_banner("Compile", "📦", verbose=verbose)
+                    print_banner("Compile", "📦", verbose=verbose)
                     print(f"Compiling: {successful_target}")
                     # Note: Don't print "Compilation successful" - redundant before Running phase
 
@@ -687,14 +687,14 @@ def run_meson_build_and_test(
                     )
 
                     # Display header with phase context
-                    _print_error(f"\n[MESON] ❌ Build FAILED during {phase_name} phase")
-                    _print_error("=" * 80)
+                    print_error(f"\n[MESON] ❌ Build FAILED during {phase_name} phase")
+                    print_error("=" * 80)
 
                     # Always show full log path prominently if available
                     if last_result and last_result.error_log_file:
-                        _print_error(f"[MESON] 📄 Full compilation log:")
-                        _print_error(f"[MESON]    {last_result.error_log_file}")
-                        _print_error("")
+                        print_error(f"[MESON] 📄 Full compilation log:")
+                        print_error(f"[MESON]    {last_result.error_log_file}")
+                        print_error("")
 
                     # Try to show error snippet from saved file or directly from log
                     error_snippet_shown = False
@@ -706,9 +706,9 @@ def run_meson_build_and_test(
                             # Print with error line highlighting
                             for line in error_context.splitlines():
                                 if _is_compilation_error(line):
-                                    _print_error(f"\033[91m{line}\033[0m")  # Red
+                                    print_error(f"\033[91m{line}\033[0m")  # Red
                                 else:
-                                    _print_error(line)
+                                    print_error(line)
                         error_snippet_shown = True
 
                     elif (
@@ -717,8 +717,8 @@ def run_meson_build_and_test(
                         and last_result.error_log_file.exists()
                     ):
                         # Fallback: read last 50 error lines directly from log file
-                        _print_error("[MESON] 🔍 Error excerpt from compilation log:")
-                        _print_error("")
+                        print_error("[MESON] 🔍 Error excerpt from compilation log:")
+                        print_error("")
                         try:
                             with open(
                                 last_result.error_log_file, "r", encoding="utf-8"
@@ -738,47 +738,45 @@ def run_meson_build_and_test(
                                     for line in log_lines[start_idx:end_idx]:
                                         line = line.rstrip()
                                         if _is_compilation_error(line):
-                                            _print_error(
-                                                f"\033[91m{line}\033[0m"
-                                            )  # Red
+                                            print_error(f"\033[91m{line}\033[0m")  # Red
                                         else:
-                                            _print_error(line)
+                                            print_error(line)
                                     error_snippet_shown = True
                         except KeyboardInterrupt:
                             handle_keyboard_interrupt_properly()
                             raise
                         except Exception as e:
-                            _print_error(f"[MESON] ⚠️  Could not read error log: {e}")
+                            print_error(f"[MESON] ⚠️  Could not read error log: {e}")
 
                     if error_snippet_shown:
-                        _print_error("=" * 80)
+                        print_error("=" * 80)
                     else:
                         # No error snippet available - show legacy diagnostics
                         # SELF-HEALING DIAGNOSTICS: Show validation errors that were suppressed during fallback
                         if all_suppressed_errors:
-                            _print_error(
+                            print_error(
                                 "[MESON] Self-healing triggered - showing suppressed validation errors:"
                             )
                             for err in all_suppressed_errors[
                                 :5
                             ]:  # Cap at 5 total (already capped per-attempt)
-                                _print_error(f"  {err}")
-                            _print_error("")
+                                print_error(f"  {err}")
+                            print_error("")
 
                         # Print diagnostic: show what was tried and why it failed
-                        _print_error(
+                        print_error(
                             f"[MESON] Compilation failed for test '{test_name}'"
                         )
                         if has_fallbacks:
                             tried = ", ".join(str(t) for t in targets_to_try)
-                            _print_error(f"[MESON] Tried targets: {tried}")
+                            print_error(f"[MESON] Tried targets: {tried}")
                         # Show the last meson error if it's informative (e.g., ambiguous target)
                         if last_error_output:
                             for line in last_error_output.splitlines():
                                 if "ERROR:" in line or "Can't invoke target" in line:
-                                    _print_error(f"[MESON] {line.strip()}")
+                                    print_error(f"[MESON] {line.strip()}")
                                     break
-                        _print_error("=" * 80)
+                        print_error("=" * 80)
 
                     return MesonTestResult(
                         success=False,
@@ -894,7 +892,7 @@ def run_meson_build_and_test(
                 num_tests_failed=0,
             )
 
-        _print_banner("Test", "▶️", verbose=verbose)
+        print_banner("Test", "▶️", verbose=verbose)
         print(f"Running: {meson_test_name}")
 
         # Track execution phase for error diagnostics
@@ -924,10 +922,10 @@ def run_meson_build_and_test(
                 phase_data = phase_tracker.get_phase()
 
                 if phase_data and phase_data["phase"] == "EXECUTE":
-                    _print_error(
+                    print_error(
                         f"[MESON] ❌ Test FAILED during execution (exit code {returncode})"
                     )
-                    _print_error(f"[MESON] Test: {meson_test_name}")
+                    print_error(f"[MESON] Test: {meson_test_name}")
 
                     # Write test output to error log file (for ALL failures)
                     compile_errors_dir = build_dir.parent / "compile-errors"
@@ -944,7 +942,7 @@ def run_meson_build_and_test(
                         f.write("--- Test Output ---\n\n")
                         f.write(proc.stdout)
 
-                    _print_error(f"[MESON] 📄 Full test output: {error_log_path}")
+                    print_error(f"[MESON] 📄 Full test output: {error_log_path}")
 
                     # Enhanced crash detection: Check if doctest actually ran
                     # Doctest prints patterns like "test cases:", "assertions:", "[doctest]"
@@ -961,12 +959,10 @@ def run_meson_build_and_test(
 
                     if returncode == 1 and not proc.stdout.strip():
                         # No output at all - immediate crash
-                        _print_error(
-                            f"[MESON] ⚠️  No output - possible crash at startup"
-                        )
+                        print_error(f"[MESON] ⚠️  No output - possible crash at startup")
                     elif returncode == 1 and not has_doctest_output:
                         # Has output but no doctest execution - initialization failure
-                        _print_error(
+                        print_error(
                             f"[MESON] ⚠️  Test failed during initialization (before doctest ran)"
                         )
 
@@ -978,43 +974,43 @@ def run_meson_build_and_test(
                         ]
 
                         if error_lines:
-                            _print_error(f"[MESON] 🔍 Error messages found in output:")
+                            print_error(f"[MESON] 🔍 Error messages found in output:")
                             # Show up to 10 error lines
                             for error_line in error_lines[:10]:
-                                _print_error(f"[MESON]    {error_line}")
+                                print_error(f"[MESON]    {error_line}")
                             if len(error_lines) > 10:
-                                _print_error(
+                                print_error(
                                     f"[MESON]    ... ({len(error_lines) - 10} more error(s))"
                                 )
 
-                        _print_error(f"[MESON] 💡 Possible causes:")
-                        _print_error(
+                        print_error(f"[MESON] 💡 Possible causes:")
+                        print_error(
                             f"[MESON]    - Static initialization failure (global object constructor crash)"
                         )
-                        _print_error(
+                        print_error(
                             f"[MESON]    - Test registration issue (FL_TEST_CASE macro problem)"
                         )
-                        _print_error(
+                        print_error(
                             f"[MESON]    - DLL loading failure (missing dependency or symbol)"
                         )
-                        _print_error(
+                        print_error(
                             f"[MESON]    - All test cases disabled with #if 0 (check test file)"
                         )
                 else:
                     phase_name = (
                         phase_data.get("phase", "UNKNOWN") if phase_data else "UNKNOWN"
                     )
-                    _print_error(
+                    print_error(
                         f"[MESON] ❌ Build FAILED during {phase_name} phase (exit code {returncode})"
                     )
 
                 # Show test output for failures (even if not verbose)
                 if not verbose and proc.stdout:
-                    _print_error("[MESON] Test output:")
+                    print_error("[MESON] Test output:")
                     for line in proc.stdout.splitlines()[-50:]:  # Last 50 lines
                         _ts_print(f"  {line}")
                 if _artifact_path is not None:
-                    _save_test_result_state(
+                    save_test_result_state(
                         build_dir, meson_test_name, _artifact_path, passed=False
                     )
                 return MesonTestResult(
@@ -1029,11 +1025,11 @@ def run_meson_build_and_test(
             phase_tracker.clear()
 
             if _artifact_path is not None:
-                _save_test_result_state(
+                save_test_result_state(
                     build_dir, meson_test_name, _artifact_path, passed=True
                 )
             build_duration = duration - test_duration
-            _print_success(
+            print_success(
                 f"✅ All tests passed (1/1 in {test_duration:.2f}s, build: {build_duration:.1f}s)"
             )
             return MesonTestResult(

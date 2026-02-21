@@ -158,7 +158,7 @@ def ninja_skip(
       3. Source files (src/ and tests/) haven't been modified
       4. Target output file hasn't been modified
 
-    Mirrors ci/util/cache_utils._check_ninja_skip() without importing that module.
+    Mirrors ci/meson/cache_utils.check_ninja_skip() without importing that module.
 
     Args:
         build_dir: Meson build directory.
@@ -230,7 +230,7 @@ def test_cached(build_dir: Path, test_name: str, artifact_path: Path) -> bool:
       3. Cached result was "pass"
       4. Artifact hasn't been recompiled since cache write
 
-    Mirrors ci/util/cache_utils._check_test_result_cached() without importing
+    Mirrors ci/meson/cache_utils.check_test_result_cached() without importing
     that module.
 
     Args:
@@ -272,7 +272,7 @@ def full_run_cache(
       3. build.ninja hasn't been modified
       4. Source files (src/, tests/, and optionally examples/) haven't changed
 
-    Mirrors ci/util/cache_utils._check_full_run_cache() without importing
+    Mirrors ci/meson/cache_utils.check_full_run_cache() without importing
     that module.
 
     Args:

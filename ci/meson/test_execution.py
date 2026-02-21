@@ -10,9 +10,9 @@ from running_process import RunningProcess
 
 from ci.meson.compiler import get_meson_executable
 from ci.meson.output import (
-    _print_banner,
-    _print_error,
-    _print_success,
+    print_banner,
+    print_error,
+    print_success,
 )
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.output_formatter import TimestampFormatter, create_filtering_echo_callback
@@ -81,10 +81,10 @@ def run_meson_test(
     if exclude_suites:
         for suite in exclude_suites:
             cmd.extend(["--no-suite", suite])
-        _print_banner("Test", "▶️", verbose=verbose)
+        print_banner("Test", "▶️", verbose=verbose)
         print(f"Running: {test_name}")
     else:
-        _print_banner("Test", "▶️", verbose=verbose)
+        print_banner("Test", "▶️", verbose=verbose)
         print("Running all tests...")
 
     start_time = time.time()
@@ -136,17 +136,17 @@ def run_meson_test(
                         if status == "OK":
                             num_passed += 1
                             # Show brief progress for passed tests in green
-                            _print_success(
+                            print_success(
                                 f"  [{current}/{total}] ✓ {test_name_match} ({duration_str}s)"
                             )
                         elif status == "FAIL":
                             num_failed += 1
-                            _print_error(
+                            print_error(
                                 f"  [{current}/{total}] ✗ {test_name_match} FAILED ({duration_str}s)"
                             )
                         elif status == "TIMEOUT":
                             num_failed += 1
-                            _print_error(
+                            print_error(
                                 f"  [{current}/{total}] ⏱ {test_name_match} TIMEOUT ({duration_str}s)"
                             )
                     elif verbose or "FAILED" in line or "ERROR" in line:
@@ -188,14 +188,14 @@ def run_meson_test(
                     )
                 else:
                     # Fallback: show generic error message
-                    _print_error(
+                    print_error(
                         "[MESON] ⚠️  Test failed but could not extract detailed error information"
                     )
 
         duration = time.time() - start_time
 
         if returncode != 0:
-            _print_error(f"[MESON] ❌ Tests failed with return code {returncode}")
+            print_error(f"[MESON] ❌ Tests failed with return code {returncode}")
             return MesonTestResult(
                 success=False,
                 duration=duration,
@@ -211,7 +211,7 @@ def run_meson_test(
         actual_passed = expected_total if expected_total > 0 else num_passed
         actual_run = expected_total if expected_total > 0 else num_run
 
-        _print_success(
+        print_success(
             f"✅ All tests passed ({actual_passed}/{actual_run} in {duration:.2f}s)"
         )
         return MesonTestResult(

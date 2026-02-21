@@ -9,7 +9,7 @@ The `ci.meson` package is organized into 9 focused modules following a tier-base
 ### Tier 1: Leaf Modules (No Internal Dependencies)
 
 - **`output.py`** (~100 lines) - Output formatting and colored printing
-  - Functions: `_print_success()`, `_print_error()`, `_print_warning()`, `_print_info()`, `_print_banner()`
+  - Functions: `print_success()`, `print_error()`, `print_warning()`, `print_info()`, `print_banner()`
 
 - **`io_utils.py`** (~90 lines) - Safe file I/O operations
   - Functions: `atomic_write_text()`, `write_if_different()`
@@ -29,7 +29,7 @@ The `ci.meson` package is organized into 9 focused modules following a tier-base
   - Functions: `cleanup_build_artifacts()`, `detect_system_llvm_tools()`, `setup_meson_build()`, `perform_ninja_maintenance()`
 
 - **`compile.py`** (~280 lines) - Compilation execution with IWYU support
-  - Functions: `compile_meson()`, `_create_error_context_filter()`
+  - Functions: `compile_meson()`, `create_error_context_filter()`
 
 - **`test_execution.py`** (~150 lines) - Individual test execution
   - Types: `MesonTestResult` dataclass
@@ -54,13 +54,13 @@ The old `ci.util.meson_runner` module is now a backward compatibility shim that 
 from ci.util.meson_runner import MesonTestResult
 from ci.util.meson_runner import run_meson_build_and_test
 from ci.util.meson_runner import setup_meson_build
-from ci.util.meson_runner import _print_banner
+from ci.util.meson_runner import print_banner
 
 # NEW (modular imports)
 from ci.meson.test_execution import MesonTestResult
 from ci.meson.runner import run_meson_build_and_test
 from ci.meson.build_config import setup_meson_build
-from ci.meson.output import _print_banner
+from ci.meson.output import print_banner
 
 # OR use package-level exports for common functions
 from ci.meson import (
@@ -70,7 +70,7 @@ from ci.meson import (
     check_meson_installed,
     get_meson_executable,
     perform_ninja_maintenance,
-    _print_banner,
+    print_banner,
 )
 ```
 
@@ -93,7 +93,7 @@ The `ci.meson` package exports these public APIs:
 | `perform_ninja_maintenance()` | `build_config` | Periodic Ninja dependency database optimization |
 | `check_meson_installed()` | `compiler` | Check if Meson is installed and accessible |
 | `get_meson_executable()` | `compiler` | Resolve Meson executable path (venv preferred) |
-| `_print_banner()` | `output` | Print section separator banner |
+| `print_banner()` | `output` | Print section separator banner |
 
 ## Dependency Graph
 

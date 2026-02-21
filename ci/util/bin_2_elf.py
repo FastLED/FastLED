@@ -418,9 +418,3 @@ def bin_to_elf(
     print(f"📊 Binary analysis saved to: {analysis_file}")
 
     return output_elf
-
-
-# For backward compatibility, keep the old function name
-def _generate_linker_script(map_file: Path) -> Path:
-    """Legacy function for backward compatibility."""
-    return _generate_platform_linker_script(map_file, "generic")

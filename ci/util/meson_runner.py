@@ -15,7 +15,7 @@ Migration guide:
   NEW: from ci.meson.build_config import setup_meson_build
 
 Full module structure:
-  - ci.meson.output: Output formatting (_print_success, _print_error, etc.)
+  - ci.meson.output: Output formatting (print_success, print_error, etc.)
   - ci.meson.io_utils: File I/O (atomic_write_text, write_if_different)
   - ci.meson.compiler: Compiler detection (get_meson_executable, check_meson_installed)
   - ci.meson.test_discovery: Test discovery (get_fuzzy_test_candidates, get_source_files_hash)
@@ -39,10 +39,10 @@ warnings.warn(
 # Re-export public API for backward compatibility
 from ci.meson import (
     MesonTestResult,
-    _print_banner,
     check_meson_installed,
     get_meson_executable,
     perform_ninja_maintenance,
+    print_banner,
     run_meson_build_and_test,
     setup_meson_build,
 )
@@ -55,7 +55,7 @@ __all__ = [
     "perform_ninja_maintenance",
     "run_meson_build_and_test",
     "setup_meson_build",
-    "_print_banner",
+    "print_banner",
 ]
 
 if __name__ == "__main__":

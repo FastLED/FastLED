@@ -12,11 +12,11 @@ from typing import Optional
 from running_process import RunningProcess
 
 from ci.meson.cache_utils import (
-    _check_ninja_skip,
-    _save_ninja_skip_state,
+    check_ninja_skip,
+    save_ninja_skip_state,
 )
 from ci.meson.compiler import get_meson_executable
-from ci.meson.output import _print_banner
+from ci.meson.output import print_banner
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.tee import StreamTee
@@ -129,7 +129,7 @@ def compile_meson(
     #
     # Only applied to specific targets (not all-build) and non-IWYU mode.
     # Overhead: ~20-50ms (os.scandir over tests/ source files). Savings: ~2-3s.
-    if target and not check and _check_ninja_skip(build_dir, target):
+    if target and not check and check_ninja_skip(build_dir, target):
         if not quiet:
             _ts_print(f"[BUILD] ✓ Target up-to-date (ninja skipped)")
         return CompileResult(
@@ -142,11 +142,11 @@ def compile_meson(
     if target:
         cmd.append(target)
         if not quiet:
-            _print_banner("Compile", "📦", verbose=verbose)
+            print_banner("Compile", "📦", verbose=verbose)
             print(f"Compiling: {target}")
     else:
         if not quiet:
-            _print_banner("Compile", "📦", verbose=verbose)
+            print_banner("Compile", "📦", verbose=verbose)
             print("Compiling all targets...")
 
     # Show build stage banner (unless in quiet mode for fallback retries)
@@ -622,7 +622,7 @@ def compile_meson(
         # Save ninja skip state so the next run can bypass ninja for this target.
         # Only for specific targets (not all-build) and non-IWYU mode.
         if target and not check:
-            _save_ninja_skip_state(build_dir, target)
+            save_ninja_skip_state(build_dir, target)
 
         return CompileResult(
             success=True,

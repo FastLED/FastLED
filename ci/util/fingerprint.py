@@ -6,7 +6,7 @@ from typing import Callable, Dict, Optional
 from ci.meson.cache_utils import (
     _SKIP_DIR_NAMES,
     _SKIP_DIR_PREFIXES,
-    _get_max_dir_mtime,
+    get_max_dir_mtime,
 )
 from ci.util.test_types import (
     FingerprintResult,
@@ -25,7 +25,7 @@ def _get_max_source_file_mtime(root: Path) -> float:
 
     Uses os.scandir() for efficiency. Detects BOTH structural changes (file
     add/remove) AND content modifications (file writes), unlike
-    _get_max_dir_mtime() which only detects structural changes.
+    get_max_dir_mtime() which only detects structural changes.
 
     Scans C++ source files (.cpp, .h, .hpp, .c, .ino) by default.
     Returns 0.0 on missing root or any OS error.

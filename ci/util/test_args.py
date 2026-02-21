@@ -251,9 +251,9 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         else:
             # Use smart selector to find matching unit test or example
             # Print banner for test discovery phase (verbose mode only)
-            from ci.meson.output import _print_banner
+            from ci.meson.output import print_banner
 
-            _print_banner("Discovery", "🔍", verbose=test_args.verbose)
+            print_banner("Discovery", "🔍", verbose=test_args.verbose)
 
             # Determine filter type based on flags (silently, no separate message)
             filter_type = None

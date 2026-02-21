@@ -155,11 +155,6 @@ def _get_status_file(artifact_dir: Path, cache_key: str) -> Path:
     return artifact_dir / "info.json"
 
 
-def _read_status(status_file: Path) -> Optional[dict[str, Any]]:
-    """Read status from JSON file (legacy wrapper)."""
-    return read_breadcrumb(status_file)
-
-
 def _write_status(status_file: Path, status: dict[str, Any]) -> None:
     """Write status to JSON file (legacy wrapper)."""
     write_breadcrumb(status_file, status)

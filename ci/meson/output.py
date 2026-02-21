@@ -3,27 +3,27 @@
 from ci.util.color_output import print_blue, print_green, print_red, print_yellow
 
 
-def _print_success(msg: str) -> None:
+def print_success(msg: str) -> None:
     """Print success message in green."""
     print_green(msg)
 
 
-def _print_error(msg: str) -> None:
+def print_error(msg: str) -> None:
     """Print error message in red."""
     print_red(msg)
 
 
-def _print_warning(msg: str) -> None:
+def print_warning(msg: str) -> None:
     """Print warning message in yellow."""
     print_yellow(msg)
 
 
-def _print_info(msg: str) -> None:
+def print_info(msg: str) -> None:
     """Print info message in blue."""
     print_blue(msg)
 
 
-def _print_banner(
+def print_banner(
     title: str, emoji: str = "", width: int = 50, verbose: bool | None = None
 ) -> None:
     """Print a lightweight section separator.

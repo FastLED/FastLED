@@ -36,7 +36,7 @@ __all__ = [
     "MesonTestResult",
     "perform_ninja_maintenance",
     "setup_meson_build",
-    "_print_banner",
+    "print_banner",
 ]
 
 
@@ -66,7 +66,7 @@ _LAZY_ATTRS: dict[str, _LazyAttr] = {
         "perform_ninja_maintenance",
     ),
     "setup_meson_build": _LazyAttr("ci.meson.build_config", "setup_meson_build"),
-    "_print_banner": _LazyAttr("ci.meson.output", "_print_banner"),
+    "print_banner": _LazyAttr("ci.meson.output", "print_banner"),
 }
 
 
