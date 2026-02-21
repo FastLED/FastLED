@@ -1,4 +1,7 @@
+#include "fl/compiler_control.h"
 #include "fl/fx/2d/animartrix2_detail/viz/spiral_matrix1.h"
+
+FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
@@ -84,3 +87,5 @@ void SpiralMatrix1::draw(Context &ctx) {
 }
 
 }  // namespace fl
+
+FL_OPTIMIZATION_LEVEL_O3_END

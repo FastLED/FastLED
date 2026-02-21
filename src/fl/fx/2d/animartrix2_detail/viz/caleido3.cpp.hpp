@@ -1,4 +1,7 @@
+#include "fl/compiler_control.h"
 #include "fl/fx/2d/animartrix2_detail/viz/caleido3.h"
+
+FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
@@ -76,3 +79,5 @@ void Caleido3::draw(Context &ctx) {
 }
 
 }  // namespace fl
+
+FL_OPTIMIZATION_LEVEL_O3_END

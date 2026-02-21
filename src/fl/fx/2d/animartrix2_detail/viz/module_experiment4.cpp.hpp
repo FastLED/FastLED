@@ -1,4 +1,7 @@
+#include "fl/compiler_control.h"
 #include "fl/fx/2d/animartrix2_detail/viz/module_experiment4.h"
+
+FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
@@ -65,3 +68,5 @@ void Module_Experiment4::draw(Context &ctx) {
 }
 
 }  // namespace fl
+
+FL_OPTIMIZATION_LEVEL_O3_END

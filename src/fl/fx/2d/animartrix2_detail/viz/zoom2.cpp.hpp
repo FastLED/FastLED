@@ -1,4 +1,7 @@
+#include "fl/compiler_control.h"
 #include "fl/fx/2d/animartrix2_detail/viz/zoom2.h"
+
+FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
@@ -37,3 +40,5 @@ void Zoom2::draw(Context &ctx) {
 }
 
 }  // namespace fl
+
+FL_OPTIMIZATION_LEVEL_O3_END

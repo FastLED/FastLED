@@ -4,7 +4,10 @@
 // 2D Perlin noise Q16 implementation
 // Implementation file - included from perlin_q16.h
 
+#include "fl/compiler_control.h"
 #include "fl/fx/2d/animartrix2_detail/perlin_q16.h"
+
+FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
@@ -93,3 +96,5 @@ FASTLED_FORCE_INLINE fl::i32 perlin_q16::grad(int hash, fl::i32 x, fl::i32 y) {
 }
 
 }  // namespace fl
+
+FL_OPTIMIZATION_LEVEL_O3_END

@@ -4,7 +4,10 @@
 // 2D Perlin noise s8x8 implementation
 // Implementation file - included from perlin_s8x8.h
 
+#include "fl/compiler_control.h"
 #include "fl/fx/2d/animartrix2_detail/perlin_s8x8.h"
+
+FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
@@ -92,3 +95,5 @@ FASTLED_FORCE_INLINE fl::i16 perlin_s8x8::grad(int hash, fl::i16 x, fl::i16 y) {
 }
 
 }  // namespace fl
+
+FL_OPTIMIZATION_LEVEL_O3_END

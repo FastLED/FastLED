@@ -1,4 +1,7 @@
+#include "fl/compiler_control.h"
 #include "fl/fx/2d/animartrix2_detail/viz/polar_waves.h"
+
+FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
@@ -51,3 +54,5 @@ void Polar_Waves::draw(Context &ctx) {
 }
 
 }  // namespace fl
+
+FL_OPTIMIZATION_LEVEL_O3_END

@@ -45,15 +45,15 @@ void renderQ31(Animartrix2 &fx, CRGB *leds, int frames, int start_frame) {
     }
 }
 
-// Direct function renderers for benchmarking specific implementations
+// Direct class renderers for benchmarking specific implementations
 __attribute__((noinline))
-void renderQ31_Direct(void (*func)(Context&),
+void renderQ31_Direct(IAnimartrix2Viz &viz,
                       Context &ctx,
                       int frames, int start_frame) {
     for (int i = 0; i < frames; i++) {
         uint32_t t = static_cast<uint32_t>((start_frame + i) * 16);
         setTime(ctx, t);
-        func(ctx);
+        viz.draw(ctx);
     }
 }
 
@@ -132,12 +132,14 @@ int main(int argc, char *argv[]) {
 
         init(ctx, W, H);
 
+        Chasing_Spirals_Q31 q31_viz;
+
         // Warmup (not profiled)
-        renderQ31_Direct(&Chasing_Spirals_Q31, ctx, WARMUP_FRAMES, 0);
+        renderQ31_Direct(q31_viz, ctx, WARMUP_FRAMES, 0);
 
         // Profile
         u32 t0 = ::micros();
-        renderQ31_Direct(&Chasing_Spirals_Q31, ctx, PROFILE_FRAMES, WARMUP_FRAMES);
+        renderQ31_Direct(q31_viz, ctx, PROFILE_FRAMES, WARMUP_FRAMES);
         u32 t1 = ::micros();
 
         u32 elapsed_us = t1 - t0;
@@ -163,12 +165,14 @@ int main(int argc, char *argv[]) {
 
         init(ctx, W, H);
 
+        Chasing_Spirals_Q31_SIMD simd_viz;
+
         // Warmup (not profiled)
-        renderQ31_Direct(&Chasing_Spirals_Q31_SIMD, ctx, WARMUP_FRAMES, 0);
+        renderQ31_Direct(simd_viz, ctx, WARMUP_FRAMES, 0);
 
         // Profile
         u32 t0 = ::micros();
-        renderQ31_Direct(&Chasing_Spirals_Q31_SIMD, ctx, PROFILE_FRAMES, WARMUP_FRAMES);
+        renderQ31_Direct(simd_viz, ctx, PROFILE_FRAMES, WARMUP_FRAMES);
         u32 t1 = ::micros();
 
         u32 elapsed_us = t1 - t0;

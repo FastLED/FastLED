@@ -29,6 +29,7 @@
 // ============================================================================
 
 #include "fl/align.h"
+#include "fl/compiler_control.h"
 #include "fl/fx/2d/animartrix2_detail/engine.h"
 #include "fl/fx/2d/animartrix2_detail/chasing_spiral_state.h"
 #include "fl/fx/2d/animartrix2_detail/perlin_s16x16.h"
@@ -37,6 +38,8 @@
 #include "fl/simd.h"
 #include "fl/sin32.h"
 #include "fl/fx/2d/animartrix2_detail/viz/chasing_spirals.h"
+
+FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
@@ -506,3 +509,5 @@ void Chasing_Spirals_Q31_SIMD::draw(Context &ctx) {
 }
 
 } // namespace fl
+
+FL_OPTIMIZATION_LEVEL_O3_END

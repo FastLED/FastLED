@@ -4,7 +4,10 @@
 // 2D Perlin noise implementation using s16x16 fixed-point arithmetic
 // Implementation file - included from perlin_s16x16.h
 
+#include "fl/compiler_control.h"
 #include "fl/fx/2d/animartrix2_detail/perlin_s16x16.h"
+
+FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
@@ -90,3 +93,5 @@ fl::i32 perlin_s16x16::pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
 }
 
 }  // namespace fl
+
+FL_OPTIMIZATION_LEVEL_O3_END
