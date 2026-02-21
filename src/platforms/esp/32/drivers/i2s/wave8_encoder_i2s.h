@@ -62,13 +62,25 @@ size_t wave8EncodeI2sMultiLane(
     fl::span<u16> output,
     const Wave8BitExpansionLut& lut);
 
+/// Wave8 I2S expansion factor: each input byte produces this many uint16_t words.
+///
+/// Derivation:
+///   1 LED byte = 8 data bits
+///   Each data bit → 8 wave8 pulses (the wave8 encoding)
+///   8 bits × 8 pulses = 64 clock cycles per input byte
+///
+/// This factor is independent of the number of active lanes because lanes are
+/// packed *widthwise* into the 16-bit I2S bus (up to 16 lanes in D0..D15),
+/// not lengthwise into more buffer entries. Adding lanes fills more bits per
+/// uint16_t word, but doesn't change the number of words.
+static constexpr size_t kWave8I2sExpansionFactor = 8 * 8;
+
 /// @brief Calculate required output buffer size for I2S wave8 encoding
 ///
 /// @param input_bytes Number of input LED bytes per lane
 /// @return Required output buffer size in uint16_t words
 constexpr size_t wave8CalculateI2sOutputSize(size_t input_bytes) {
-    // Each input byte → 8 Wave8Bit → 64 bits → 4 uint16_t words
-    return input_bytes * 4;
+    return input_bytes * kWave8I2sExpansionFactor;
 }
 
 /// @brief Calculate I2S clock frequency for WS2812 timing

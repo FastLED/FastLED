@@ -17,6 +17,7 @@
     (!defined(ARDUINO) && (defined(__linux__) || defined(__APPLE__) || defined(_WIN32)))
 
 #include "channel_engine_lcd_rgb.h"
+#include "fl/async.h"
 #include "fl/warn.h"
 #include "fl/stl/cstring.h"
 
@@ -94,7 +95,8 @@ void ChannelEngineLcdRgb::show() {
 
     // Wait for previous transmission to complete
     while (poll() != EngineState::READY) {
-        // Busy wait - poll() handles state transitions
+        // poll() handles state transitions; run async tasks while waiting
+        async_run();
     }
 
     // Group channels by timing configuration

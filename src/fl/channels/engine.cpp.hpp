@@ -47,10 +47,10 @@ bool IChannelEngine::waitForReady(u32 timeoutMs) {
 }
 
 bool IChannelEngine::waitForReadyOrDraining(u32 timeoutMs) {
-    // wait until the engine is in a READY or DRAINING state.
     bool ok = waitForCondition([this]() {
         auto state = poll();
-        return state.state == IChannelEngine::EngineState::READY || state.state == IChannelEngine::EngineState::DRAINING;
+        return state.state == IChannelEngine::EngineState::READY ||
+               state.state == IChannelEngine::EngineState::DRAINING;
     }, timeoutMs);
     return ok;
 }

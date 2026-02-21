@@ -20,6 +20,7 @@
 #include "fl/warn.h"
 #include "fl/dbg.h"
 #include "fl/stl/cstring.h"
+#include "fl/async.h"
 #include "fl/channels/wave8.h"
 #include "fl/channels/detail/wave8.hpp"
 
@@ -114,9 +115,10 @@ void ChannelEngineI2S::show() {
         return;
     }
 
-    // Wait for previous transmission to complete
+    // Wait for previous frame to finish before starting a new one.
     while (poll() != EngineState::READY) {
-        // Busy wait - poll() handles state transitions
+        // poll() drives the state machine and clears in-use flags.
+        async_run();
     }
 
     // Group channels by timing configuration
@@ -312,6 +314,14 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
                      needsLutRebuild;
 
     if (needsInit) {
+        // Config change or buffer reallocation needed: must wait for DMA first
+        // since we need to free/reallocate buffers that DMA may be reading.
+        while (mPeripheral->isBusy()) {
+            // Wait for in-flight DMA to complete before touching buffers
+            async_run();
+        }
+        mBusy = false;
+
         // Free old buffers
         for (int i = 0; i < 2; i++) {
             if (mBuffers[i] != nullptr) {
@@ -402,7 +412,8 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
         mInitialized = true;
     }
 
-    // Prepare scratch buffer
+    // Prepare scratch buffer and encode into back buffer BEFORE waiting for DMA.
+    // This is safe because DMA reads the front buffer while we write the back buffer.
     prepareScratchBuffer(channelData, maxChannelSize);
 
     // Mark channels as in use
@@ -410,10 +421,18 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
         channel->setInUse(true);
     }
 
-    // Encode frame data
+    // Encode frame data into the back buffer (overlaps with DMA on front buffer)
     encodeFrame();
 
-    // Start DMA transfer
+    // Now wait for any in-flight DMA to complete before starting new transmission.
+    // Encoding has already been done above, so this wait is the only blocking time.
+    while (mPeripheral->isBusy()) {
+        // Wait for previous DMA to finish
+        async_run();
+    }
+    mBusy = false;
+
+    // Start DMA transfer on the newly-encoded back buffer
     mBusy = true;
     int backBuffer = 1 - mFrontBuffer;
     if (!mPeripheral->transmit(mBuffers[backBuffer], mBufferSize)) {

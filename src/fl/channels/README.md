@@ -703,6 +703,23 @@ void setupCustomEngine() {
 - Changing priority triggers automatic re-sort of engine list
 - Higher priority engines are checked first (e.g., priority 10 before priority 2)
 
+### DMA Wait Pattern
+
+**`show()` must wait for READY before starting a new frame.** The correct pattern is a simple spin on `poll()`:
+
+```cpp
+void show() override {
+    // Wait for previous frame to finish.
+    while (poll() != EngineState::READY) {
+        // poll() drives the state machine and clears in-use flags.
+    }
+
+    // Now safe to start new frame...
+}
+```
+
+**Do NOT branch on DRAINING or other intermediate states** inside `show()`'s wait loop. The `poll()` method is responsible for driving the state machine to READY — `show()` just needs to wait for it. Branching on intermediate states (e.g., breaking early on DRAINING) splits the "wait for previous frame" logic across multiple places and makes the code harder to reason about.
+
 ### Best Practices
 
 **Memory Management:**

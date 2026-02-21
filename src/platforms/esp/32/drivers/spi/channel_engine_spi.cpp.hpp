@@ -38,6 +38,7 @@
 #include "fl/delay.h"
 #include "fl/pin.h"
 #include "fl/math_macros.h"
+#include "fl/async.h"
 #include "fl/warn.h"
 #include "fl/stl/chrono.h"
 #include "platforms/esp/32/drivers/spi/spi_hw_base.h" // SPI host definitions (SPI2_HOST, SPI3_HOST)
@@ -506,7 +507,8 @@ void ChannelEngineSpi::beginBatchedTransmission(
                     FL_WARN_EVERY(10, "ChannelEngineSpi: Error during batch transmission");
                     break;
                 }
-                // Yield CPU to allow ISR timer and other tasks to run (prevents LED flickering)
+                // Run async tasks and yield CPU while waiting
+                async_run();
                 taskYIELD();
             }
 

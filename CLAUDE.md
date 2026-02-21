@@ -297,6 +297,13 @@ uv run test.py profile_sincos16 --cpp --build-mode release --build
 - **NEVER push code to remote**: Do NOT run `git push` or any command that pushes to remote repository
 - **User controls all git operations**: All git commit and push decisions are made by the user
 
+### Channel Engine DMA Wait Pattern
+- **`onBeginFrame()` / `show()` must wait for `poll() == READY` before starting a new frame** — use a simple `while (poll() != READY)` loop
+- **Do NOT branch on DRAINING or other intermediate states** inside the wait loop in `show()` or `onBeginFrame()`. The `poll()` method drives the state machine to READY; callers just wait for it.
+- **`onEndFrame()` may wait for READY *or* DRAINING** — after `show()` kicks off DMA, it's fine to return once DMA is running (DRAINING). `onBeginFrame()` will ensure READY before the next frame.
+- **Rationale**: Branching on intermediate states in the "wait for previous frame" path splits logic across multiple places and makes the code harder to reason about. The only place DRAINING is acceptable is `onEndFrame()`, which doesn't need to block until DMA fully completes.
+- **Reference**: See `src/fl/channels/README.md` → "DMA Wait Pattern" section
+
 ### Error Fixing Policy
 - **ALWAYS fix encountered errors immediately**: When running tests or linting, fix ALL errors you encounter, even if they are pre-existing issues unrelated to your current task
 - **Rationale**: Leaving broken tests or linting errors creates technical debt and makes the codebase less maintainable

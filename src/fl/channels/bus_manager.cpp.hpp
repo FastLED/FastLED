@@ -393,11 +393,8 @@ bool ChannelBusManager::waitForReady(u32 timeoutMs) {
 bool ChannelBusManager::waitForReadyOrDraining(u32 timeoutMs) {
     bool ok = waitForCondition([this]() {
         auto state = poll();
-        bool draining_or_done = (
-            state.state == IChannelEngine::EngineState::READY ||
-            state.state == IChannelEngine::EngineState::DRAINING
-        );
-        return draining_or_done;
+        return state.state == IChannelEngine::EngineState::READY ||
+               state.state == IChannelEngine::EngineState::DRAINING;
     }, timeoutMs);
     if (!ok) {
         FL_ERROR("ChannelBusManager: Timeout occurred while waiting for READY or DRAINING state");
@@ -405,8 +402,8 @@ bool ChannelBusManager::waitForReadyOrDraining(u32 timeoutMs) {
     return ok;
 }
 
-
 void ChannelBusManager::onBeginFrame() {
+    // Wait for previous frame to finish before starting a new one.
     // 2s timeout: a frame should never take 2s; prevents infinite hang on stalled engine
     // (e.g. PARLIO on ESP32-C6 where DMA ISR never fires)
     if (!waitForReady(2000)) {
@@ -423,8 +420,11 @@ void ChannelBusManager::onEndFrame() {
             entry.engine->show();
         }
     }
+    // Wait for engines to reach DRAINING (DMA running) or READY.
+    // We don't need to block until DMA completes here — onBeginFrame()
+    // will wait for READY before the next frame starts.
     // 2s timeout: prevents infinite hang if engine never transitions from BUSY
-    // (e.g. PARLIO on ESP32-C6 where DMA ISR never fires and state stays BUSY)
+    // (e.g. PARLIO on ESP32-C6 where DMA ISR never fires)
     if (!waitForReadyOrDraining(2000)) {
         FL_WARN("ChannelBusManager: onEndFrame() timeout - engine may be stalled");
     }
