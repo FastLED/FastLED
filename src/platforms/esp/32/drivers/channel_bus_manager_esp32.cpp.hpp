@@ -193,16 +193,8 @@ static void addLcdRgbIfPossible(ChannelBusManager& manager) {
 /// @brief Add SPI engine if supported by platform
 static void addSpiIfPossible(ChannelBusManager& manager) {
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
-    #if defined(FL_IS_ESP_32C6)
-    // ESP32-C6 has SPI2 available, but only 1 host vs 2-3 on other ESP32 chips.
-    // RMT5 provides better performance and scalability for LED control on this platform.
-    // Note: SPI0/SPI1 are reserved for flash operations and cannot be used.
-    FL_DBG("ESP32-C6: SPI engine not enabled (only 1 SPI host available, RMT5 preferred)");
-    (void)manager;  // Suppress unused parameter warning
-    #else
     manager.addEngine(PRIORITY_SPI, fl::make_shared<ChannelEngineSpi>());
     FL_DBG("ESP32: Added SPI engine (priority " << PRIORITY_SPI << ")");
-    #endif
 #else
     (void)manager;  // Suppress unused parameter warning
 #endif

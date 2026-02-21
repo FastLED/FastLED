@@ -109,23 +109,14 @@ createSerialRequestSource(const char* prefix = "") {
             return fl::nullopt;
         }
 
-        FL_PRINT("[TRANSPORT] Data available: ");
-        FL_PRINT(avail);
-        FL_PRINT(" bytes\n");
-
         // Data available - read a complete line.
         // On Arduino platforms, fl::readLine() delegates to Serial.readStringUntil()
         // which uses yield() (immediate context switch) for fast USB CDC multi-packet
         // assembly. On other platforms, falls back to character-by-character reading.
         auto line = fl::readLine('\n', '\r', fl::optional<u32>(1000));
         if (!line.has_value() || line->empty()) {
-            FL_PRINT("[TRANSPORT] Failed to read line or line empty\n");
             return fl::nullopt;
         }
-
-        FL_PRINT("[TRANSPORT] Read line: ");
-        FL_PRINT(line->c_str());
-        FL_PRINT("\n");
 
         // Use string_view for zero-copy prefix stripping and trimming
         fl::string_view view = *line;
@@ -149,16 +140,12 @@ createSerialRequestSource(const char* prefix = "") {
 
         // Only parse if input starts with '{'
         if (view.empty() || view[0] != '{') {
-            FL_PRINT("[TRANSPORT] Line doesn't start with '{', skipping\n");
             return fl::nullopt;
         }
 
         // Single copy when parsing JSON (unavoidable - JSON needs owned string)
         fl::string input(view);
-        FL_PRINT("[TRANSPORT] Parsing JSON...\n");
-        auto result = fl::Json::parse(input);
-        FL_PRINT("[TRANSPORT] JSON parsed successfully\n");
-        return result;
+        return fl::Json::parse(input);
     };
 }
 

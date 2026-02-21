@@ -638,52 +638,30 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
         // If already initialized, just re-arm the receiver for a new capture
         if (mChannel) {
-            FL_LOG_RX("RX channel already initialized, re-arming receiver");
-
-            // CRITICAL: After rmt_receive() completes, the channel is in
-            // "enabled" state but rmt_receive() CANNOT be called again until we
-            // cycle through disable/enable. The ESP-IDF RMT driver requires
-            // this pattern:
-            //   1. rmt_disable() - transition "enabled" → "init" state
-            //   2. rmt_enable() - transition "init" → "enabled" state
-            //   3. rmt_receive() - start new receive operation
-            //
-            // NOTE: This disable/enable cycling only affects the LOCAL RX
-            // channel, not other RMT channels. Previous concerns about
-            // corrupting TX interrupt routing were based on a misunderstanding
-            // - the issue was with a different code path.
-
             // Disable channel to reset to "init" state
             esp_err_t err = rmt_disable(mChannel);
             if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-                FL_WARN("Failed to disable RX channel during re-arm: "
-                        << esp_err_to_name(err));
                 return false;
             }
-            FL_LOG_RX("RX channel disabled for re-arm");
 
             // Clear receive state (resets mSkipCounter to skip_signals_)
             clear();
 
             // Enable channel (transition "init" → "enabled")
             if (!enable()) {
-                FL_WARN("Failed to enable RX channel during re-arm");
                 return false;
             }
 
             // Handle skip phase using small discard buffer
             if (!handleSkipPhase()) {
-                FL_WARN("Failed to handle skip phase in begin()");
                 return false;
             }
 
             // Allocate buffer and arm receiver for actual capture
             if (!allocateAndArm()) {
-                FL_WARN("Failed to re-arm receiver in begin()");
                 return false;
             }
 
-            FL_LOG_RX("RX receiver re-armed and ready");
             return true;
         }
 
@@ -1153,18 +1131,6 @@ class RmtRxChannelImpl : public RmtRxChannel {
      * partial RX callback
      */
     bool allocateAndArm() {
-        // Allocate DMA buffer (moderate size for partial RX mode)
-        // ESP-IDF partial RX mode works by:
-        // 1. User provides buffer to rmt_receive()
-        // 2. Hardware fills this buffer from FIFO
-        // 3. Callback fires with pointer to filled region
-        // 4. User must copy data before returning from callback
-        // 5. Hardware continues filling from where it left off
-        //
-        // The buffer size should be large enough to reduce callback overhead
-        // but not too large to cause memory allocation issues.
-        // Iteration 10: Increased from 256 to 4096 to fix premature RX
-        // termination at ~225 LEDs
         constexpr size_t DMA_BUFFER_SIZE =
             4096; // Larger buffer to reduce callback frequency
         mInternalBuffer.clear();
@@ -1176,18 +1142,23 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // Allocate accumulation buffer (full user-requested size)
         mAccumulationBuffer.clear();
         mAccumulationBuffer.reserve(mBufferSize);
-        for (size_t i = 0; i < mBufferSize; i++) {
+        // Use actual capacity as effective size - reserve may have failed
+        // on memory-constrained devices (e.g. ESP32-C6 with 320KB SRAM
+        // can't allocate 768800*4 = 3MB). Using capacity avoids ~728K
+        // failed malloc calls that each traverse fragmented heap.
+        size_t effective_size = mAccumulationBuffer.capacity();
+        if (effective_size < mBufferSize) {
+            FL_WARN("allocateAndArm(): accumulation buffer reduced from "
+                    << mBufferSize << " to " << effective_size
+                    << " symbols (memory constrained)");
+        }
+        for (size_t i = mAccumulationBuffer.size(); i < effective_size; i++) {
             mAccumulationBuffer.push_back(0);
         }
 
         FL_LOG_RX("allocateAndArm(): DMA buffer="
                << DMA_BUFFER_SIZE << " symbols, accumulation buffer="
                << mBufferSize << " symbols");
-
-        // Channel must be enabled before calling startReceive()
-        // Caller (begin()) ensures channel is enabled via enable() call
-        // startReceive() calls rmt_receive() which requires channel to be in
-        // "enabled" state
 
         // Start receive operation (pass DMA buffer, not accumulation buffer)
         if (!startReceive(mInternalBuffer.data(), DMA_BUFFER_SIZE)) {

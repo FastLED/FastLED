@@ -590,7 +590,6 @@ void ChannelEngineSpi::beginTransmission(
             mPendingChannels.push_back({data, pin, timing});
             continue;
         }
-
         // Mark data as in-use (prevents strip driver from modifying during TX)
         data->setInUse(true);
 
@@ -630,14 +629,6 @@ void ChannelEngineSpi::beginTransmission(
         channel->sourceData = data;
 
         // Double-buffered streaming transmission from main task context.
-        // Overlaps DMA transfer with CPU encoding using ping-pong buffers:
-        //   - Encode into buffer A, queue for DMA
-        //   - Encode into buffer B while DMA sends buffer A
-        //   - Wait for A to complete, queue B, encode next into A
-        //   ... until all LED data is transmitted.
-        //
-        // Each staging buffer is 4KB, holding ~512 LED bytes (~170 RGB LEDs) with wave8.
-        // Reset zeros are only appended after the LAST chunk.
         transmitStreaming(channel);
 
         // Mark transmission as complete (no async waiting needed)
@@ -1324,9 +1315,12 @@ void ChannelEngineSpi::transmitStreaming(SpiChannelState* channel) {
         return;
     }
 
+    int chunk_num = 0;
     while (channel->ledBytesRemaining > 0) {
         size_t encoded = encodeChunk(channel, channel->currentStaging, channel->stagingCapacity);
-        if (encoded == 0) break;
+        if (encoded == 0) {
+            break;
+        }
 
         spi_transaction_t trans;
         fl::memset(&trans, 0, sizeof(trans));
@@ -1339,13 +1333,12 @@ void ChannelEngineSpi::transmitStreaming(SpiChannelState* channel) {
             trans.flags = SPI_TRANS_MODE_DIO;
         }
 
-        esp_err_t ret = spi_device_transmit(channel->spi_device, &trans);
+        esp_err_t ret = spi_device_polling_transmit(channel->spi_device, &trans);
         if (ret != ESP_OK) {
-            FL_WARN_EVERY(100, "ChannelEngineSpi: transmitStreaming failed: " << ret);
             break;
         }
+        chunk_num++;
     }
-
     channel->stagingOffset = 0;
 }
 

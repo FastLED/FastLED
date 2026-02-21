@@ -170,17 +170,12 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
         }
     } else {
         // Non-RMT (PARLIO, SPI, etc.): Single-TX approach
-        // Arm RX first, then TX - avoids double-transmission issues with streaming engines
-        FL_WARN("[CAPTURE] " << driver_name << ": Single-TX approach (arm RX first)");
-
         if (!rx_channel->begin(rx_config)) {
-            FL_ERROR("Failed to arm RX receiver");
             return 0;
         }
 
         FastLED.show();
         if (!FastLED.wait(TX_WAIT_TIMEOUT_MS)) {
-            FL_ERROR("[CAPTURE] TX wait timeout - driver may be stalled");
             return 0;
         }
     }
@@ -626,7 +621,6 @@ void validateChipsetTiming(fl::ValidationConfig& config,
             return;
         }
         channels.push_back(channel);
-        // Channel creation logging silenced for speed
     }
 
     FastLED.setBrightness(255);
@@ -635,7 +629,6 @@ void validateChipsetTiming(fl::ValidationConfig& config,
     for (size_t i = 0; i < config.tx_configs.size(); i++) {
         fill_solid(config.tx_configs[i].mLeds.data(), config.tx_configs[i].mLeds.size(), CRGB::Black);
     }
-    FL_WARN("[PREINIT] First FastLED.show() - RX not armed yet");
     FastLED.show();
     if (!FastLED.wait(1000)) {  // 1s timeout - driver stall guard
         FL_ERROR("[PREINIT] TX wait timeout - driver may be stalled on this platform");

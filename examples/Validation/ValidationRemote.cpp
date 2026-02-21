@@ -435,7 +435,7 @@ fl::Json ValidationRemoteControl::findConnectedPinsImpl(const fl::Json& args) {
         return response;
     }
 
-    FL_PRINT("[PIN PROBE] Searching for connected pin pairs in range " << start_pin << "-" << end_pin);
+    FL_DBG("[PIN PROBE] Searching for connected pin pairs in range " << start_pin << "-" << end_pin);
 
     // Helper lambda to test if two pins are connected
     auto testPinPair = [](int tx, int rx) -> bool {
@@ -482,7 +482,7 @@ fl::Json ValidationRemoteControl::findConnectedPinsImpl(const fl::Json& args) {
             tested_pairs.push_back(pair);
             found_tx = tx_candidate;
             found_rx = rx_candidate;
-            FL_PRINT("[PIN PROBE] ✓ Found connected pair: TX=" << found_tx << " → RX=" << found_rx);
+            FL_DBG("[PIN PROBE] Found connected pair: TX=" << found_tx << " -> RX=" << found_rx);
             break;
         }
 
@@ -494,7 +494,7 @@ fl::Json ValidationRemoteControl::findConnectedPinsImpl(const fl::Json& args) {
             tested_pairs.push_back(pair);
             found_tx = rx_candidate;  // Swap since reversed
             found_rx = tx_candidate;
-            FL_PRINT("[PIN PROBE] ✓ Found connected pair (reversed): TX=" << found_tx << " → RX=" << found_rx);
+            FL_DBG("[PIN PROBE] Found connected pair (reversed): TX=" << found_tx << " -> RX=" << found_rx);
             break;
         }
 
@@ -540,7 +540,7 @@ fl::Json ValidationRemoteControl::findConnectedPinsImpl(const fl::Json& args) {
                 }
             }
 
-            FL_PRINT("[PIN PROBE] Auto-applied pins: TX=" << found_tx << ", RX=" << found_rx);
+            FL_DBG("[PIN PROBE] Auto-applied pins: TX=" << found_tx << ", RX=" << found_rx);
             response.set("autoApplied", true);
             response.set("previousTxPin", static_cast<int64_t>(old_tx));
             response.set("previousRxPin", static_cast<int64_t>(old_rx));
@@ -591,15 +591,6 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
 
     // Register "debugTest" function - test RPC argument passing
     mRemote->bind("debugTest", [](const fl::Json& args) -> fl::Json {
-        DEBUG_PRINTLN("[DEBUG] debugTest called!");
-        DEBUG_PRINT("[DEBUG] args type: ");
-        if (args.is_array()) DEBUG_PRINTLN("array");
-        else if (args.is_object()) DEBUG_PRINTLN("object");
-        else DEBUG_PRINTLN("other");
-        DEBUG_PRINT("[DEBUG] args toString: ");
-        DEBUG_PRINTLN(args.to_string().c_str());
-        Serial.flush();
-
         fl::Json response = fl::Json::object();
         response.set("success", true);
         response.set("received", args);
@@ -686,17 +677,12 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         response.set("debug_enabled", enabled);
         response.set("message", enabled ? "Debug logging enabled" : "Debug logging disabled");
 
-        Serial.print("[SYSTEM] Debug logging ");
-        Serial.println(enabled ? "ENABLED" : "DISABLED");
-        Serial.flush();
-
         return response;
     });
 
     // Register "testGpioConnection" function - test if TX and RX pins are electrically connected
     // This is a pre-test to diagnose hardware connection issues before running validation
     mRemote->bind("testGpioConnection", [](const fl::Json& args) -> fl::Json {
-        FL_WARN("[RPC DEBUG] testGpioConnection: Entry");
         fl::Json response = fl::Json::object();
 
         // Validate args: expects [txPin, rxPin]
@@ -715,64 +701,45 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         int tx_pin = static_cast<int>(args[0].as_int().value());
         int rx_pin = static_cast<int>(args[1].as_int().value());
 
-        FL_PRINT("[GPIO TEST] Testing connection: TX=" << tx_pin << " → RX=" << rx_pin);
-        FL_WARN("[RPC DEBUG] testGpioConnection: Starting GPIO test");
-
         // Test 1: TX drives LOW, RX has pullup → RX should read LOW if connected
         pinMode(tx_pin, OUTPUT);
-        FL_WARN("[RPC DEBUG] testGpioConnection: pinMode TX done");
         pinMode(rx_pin, INPUT_PULLUP);
-        FL_WARN("[RPC DEBUG] testGpioConnection: pinMode RX done");
         digitalWrite(tx_pin, LOW);
-        FL_WARN("[RPC DEBUG] testGpioConnection: digitalWrite LOW done");
         delay(5);  // Allow signal to settle
-        FL_WARN("[RPC DEBUG] testGpioConnection: delay 1 done");
         int rx_when_tx_low = digitalRead(rx_pin);
-        FL_WARN("[RPC DEBUG] testGpioConnection: digitalRead LOW done");
 
         // Test 2: TX drives HIGH → RX should read HIGH if connected
         digitalWrite(tx_pin, HIGH);
-        FL_WARN("[RPC DEBUG] testGpioConnection: digitalWrite HIGH done");
         delay(5);  // Allow signal to settle
-        FL_WARN("[RPC DEBUG] testGpioConnection: delay 2 done");
         int rx_when_tx_high = digitalRead(rx_pin);
-        FL_WARN("[RPC DEBUG] testGpioConnection: digitalRead HIGH done");
 
         // Restore pins to safe state
         pinMode(tx_pin, INPUT);
         pinMode(rx_pin, INPUT);
-        FL_WARN("[RPC DEBUG] testGpioConnection: Pins restored");
 
         // Analyze results
         bool connected = (rx_when_tx_low == LOW) && (rx_when_tx_high == HIGH);
-        FL_WARN("[RPC DEBUG] testGpioConnection: Results analyzed");
 
         response.set("txPin", static_cast<int64_t>(tx_pin));
         response.set("rxPin", static_cast<int64_t>(rx_pin));
         response.set("rxWhenTxLow", rx_when_tx_low == LOW ? "LOW" : "HIGH");
         response.set("rxWhenTxHigh", rx_when_tx_high == HIGH ? "HIGH" : "LOW");
         response.set("connected", connected);
-        FL_WARN("[RPC DEBUG] testGpioConnection: Response fields set");
 
         if (connected) {
             response.set("success", true);
             response.set("message", "GPIO pins are connected");
-            FL_PRINT("[GPIO TEST] ✓ Pins connected: TX=" << tx_pin << " → RX=" << rx_pin);
         } else {
             response.set("success", false);
             if (rx_when_tx_low == HIGH && rx_when_tx_high == HIGH) {
                 response.set("message", "RX pin stuck HIGH - no connection detected (check jumper wire)");
-                FL_ERROR("[GPIO TEST] ✗ RX stuck HIGH - pins NOT connected");
             } else if (rx_when_tx_low == LOW && rx_when_tx_high == LOW) {
                 response.set("message", "RX pin stuck LOW - possible short to ground");
-                FL_ERROR("[GPIO TEST] ✗ RX stuck LOW - check for short");
             } else {
                 response.set("message", "Unexpected GPIO behavior - check wiring");
-                FL_ERROR("[GPIO TEST] ✗ Unexpected behavior");
             }
         }
 
-        FL_WARN("[RPC DEBUG] testGpioConnection: About to return response");
         return response;
     });
 
