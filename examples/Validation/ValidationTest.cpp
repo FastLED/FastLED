@@ -2,6 +2,7 @@
 // Driver-agnostic test function implementations
 
 #include "ValidationTest.h"
+#include "LegacyClocklessProxy.h"
 #include <FastLED.h>
 #include "fl/stl/sstream.h"
 
@@ -683,6 +684,77 @@ void validateChipsetTiming(fl::ValidationConfig& config,
     // If we only destroy local shared_ptrs, FastLED still holds references
     FastLED.reset(ResetFlags::CHANNELS);
     // Channel destruction is synchronous - no delay needed
+}
+
+// Validate using the legacy template addLeds API (single-lane only)
+// Nearly identical to validateChipsetTiming() — only channel creation differs:
+//   Normal:  FastLED.add(channel_config) → Channel
+//   Legacy:  LegacyClocklessProxy(pin, leds, numLeds) → WS2812B<PIN> → ClocklessIdf5 → Channel
+void validateChipsetTimingLegacy(fl::ValidationConfig& config,
+                                 int& driver_total, int& driver_passed,
+                                 fl::vector<fl::RunResult>* out_results) {
+    // Legacy API only supports single-lane
+    if (config.tx_configs.size() != 1) {
+        FL_ERROR("Legacy API validation requires exactly 1 lane, got " << config.tx_configs.size());
+        return;
+    }
+
+    fl::sstream ss;
+    ss << "\n========================================\n";
+    ss << "Testing (LEGACY API): " << config.timing_name << "\n";
+    ss << "  T0H: " << config.timing.t1_ns << "ns\n";
+    ss << "  T1H: " << (config.timing.t1_ns + config.timing.t2_ns) << "ns\n";
+    ss << "  T0L: " << config.timing.t3_ns << "ns\n";
+    ss << "  RESET: " << config.timing.reset_us << "us\n";
+    ss << "  Pin: " << config.tx_configs[0].pin << "\n";
+    ss << "  LEDs: " << config.tx_configs[0].mLeds.size() << "\n";
+    ss << "========================================";
+    FL_WARN(ss.str());
+
+    int pin = config.tx_configs[0].pin;
+    CRGB* leds = config.tx_configs[0].mLeds.data();
+    int numLeds = static_cast<int>(config.tx_configs[0].mLeds.size());
+
+    // Create legacy controller via proxy (maps runtime pin to WS2812B<PIN> template)
+    LegacyClocklessProxy proxy(pin, leds, numLeds);
+    if (!proxy.valid()) {
+        FL_ERROR("Legacy proxy invalid (pin " << pin << " out of range 0-8)");
+        return;
+    }
+
+    FastLED.setBrightness(255);
+
+    // Pre-initialize the TX engine to avoid first-call setup delays
+    // (same as validateChipsetTiming)
+    fill_solid(leds, numLeds, CRGB::Black);
+    FastLED.show();
+    if (!FastLED.wait(1000)) {
+        FL_ERROR("[LEGACY] TX wait timeout - driver may be stalled");
+        return;  // proxy destructor cleans up
+    }
+
+    delay(5);  // Buffer drain (same as validateChipsetTiming)
+
+    // Run test patterns (identical to validateChipsetTiming)
+    int total = 0;
+    int passed = 0;
+
+    fl::MultiRunConfig multi_config;
+    multi_config.num_runs = 1;
+    multi_config.print_all_runs = false;
+    multi_config.print_per_led_errors = false;
+    multi_config.max_errors_per_run = 10;
+
+    for (int pattern_id = 0; pattern_id < 4; pattern_id++) {
+        setMixedBitPattern(leds, numLeds, pattern_id);
+        runMultiTest(getBitPatternName(pattern_id), config, multi_config, total, passed, out_results);
+    }
+
+    driver_total += total;
+    driver_passed += passed;
+
+    // proxy destructor deletes the controller → ~CLEDController removes from draw list
+    // (no FastLED.reset(CHANNELS) needed — proxy handles cleanup)
 }
 
 // Set mixed RGB bit patterns to test MSB vs LSB handling

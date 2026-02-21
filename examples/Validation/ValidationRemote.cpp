@@ -7,10 +7,7 @@
 // - Test execution wrapped in fl::ScopedLogDisable to suppress debug noise
 // - This provides clean, parseable JSON output without FL_DBG/FL_PRINT spam
 
-// Dynamic debug logging controlled via RPC setDebug() function
-// Allows runtime toggling of debug output without recompiling
-
-// Legacy macros (deprecated - use DEBUG_LOG instead)
+// Legacy debug macros (no-ops, kept for debugTest RPC function)
 #define DEBUG_PRINT(x) do {} while(0)
 #define DEBUG_PRINTLN(x) do {} while(0)
 
@@ -27,29 +24,6 @@
 #include "fl/simd.h"
 #include "fl/memory.h"
 #include <Arduino.h>
-
-// ============================================================================
-// Global Debug State (for runtime-gated debug logging)
-// ============================================================================
-
-// Helper global to access debug state - set in registerFunctions()
-static fl::shared_ptr<ValidationState> g_validation_state;
-
-// Always-on checkpoint logging (critical execution points)
-#define LOG_CHECKPOINT(msg) do { \
-    Serial.print("[CHECKPOINT] "); \
-    Serial.println(msg); \
-    Serial.flush(); \
-} while(0)
-
-// Runtime-gated debug logging (verbose details, enabled via setDebug RPC)
-#define DEBUG_LOG(msg) do { \
-    if (g_validation_state && g_validation_state->debug_enabled) { \
-        Serial.print("[DEBUG] "); \
-        Serial.println(msg); \
-        Serial.flush(); \
-    } \
-} while(0)
 
 // ============================================================================
 // Raw Serial Output Functions (bypass fl::println and ScopedLogDisable)
@@ -115,51 +89,28 @@ fl::Json makeResponse(bool success, ReturnCode returnCode, const char* message,
 // ============================================================================
 
 fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
-    // CRITICAL: This print MUST appear if function is called
-    Serial.println("╔══════════════════════════════════════════════════════════════╗");
-    Serial.println("║  runSingleTestImpl() ENTRY POINT - FUNCTION WAS CALLED!     ║");
-    Serial.println("╚══════════════════════════════════════════════════════════════╝");
-    Serial.flush();
-
-    Serial.println("[ASYNC-FLOW] ========================================");
-    Serial.println("[ASYNC-FLOW] ✓ runSingleTest() called (ASYNC mode)");
-    Serial.println("[ASYNC-FLOW]   ACK already sent by RPC system");
-    Serial.println("[ASYNC-FLOW]   → Starting test execution (blocking 5-10s)...");
-    Serial.println("[ASYNC-FLOW] ========================================");
-    Serial.flush();
-
     fl::Json response = fl::Json::object();
 
-    LOG_CHECKPOINT("Before args.is_object()");
     // RPC system unwraps single-element arrays, so args is the config object directly
     if (!args.is_object()) {
-        LOG_CHECKPOINT("Args validation FAILED - not an object");
-        DEBUG_LOG("Args validation failed - not an object");
         response.set("success", false);
         response.set("error", "InvalidArgs");
         response.set("message", "Expected {driver, laneSizes, pattern?, iterations?, pinTx?, pinRx?, timing?}");
         return response;
     }
 
-    LOG_CHECKPOINT("Args is object");
-    DEBUG_LOG("Args validation passed - is object");
-
     fl::Json config = args;
 
     // ========== REQUIRED PARAMETERS ==========
 
     // 1. Extract driver (required)
-    LOG_CHECKPOINT("Extracting driver");
     if (!config.contains("driver") || !config["driver"].is_string()) {
-        LOG_CHECKPOINT("Driver field missing or invalid");
         response.set("success", false);
         response.set("error", "MissingDriver");
         response.set("message", "Required field 'driver' (string) missing");
         return response;
     }
     fl::string driver_name = config["driver"].as_string().value();
-    LOG_CHECKPOINT(driver_name.c_str());
-    DEBUG_LOG(driver_name.c_str());
 
     // Validate driver exists
     bool driver_found = false;
@@ -170,7 +121,6 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         }
     }
     if (!driver_found) {
-        LOG_CHECKPOINT("Driver NOT FOUND");
         response.set("success", false);
         response.set("error", "UnknownDriver");
         fl::sstream msg;
@@ -178,12 +128,9 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         response.set("message", msg.str().c_str());
         return response;
     }
-    LOG_CHECKPOINT("Driver found OK");
 
     // 2. Extract laneSizes (required)
-    LOG_CHECKPOINT("Extracting laneSizes");
     if (!config.contains("laneSizes") || !config["laneSizes"].is_array()) {
-        LOG_CHECKPOINT("laneSizes missing or invalid");
         response.set("success", false);
         response.set("error", "MissingLaneSizes");
         response.set("message", "Required field 'laneSizes' (array) missing");
@@ -279,118 +226,83 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         timing_name = config["timing"].as_string().value();
     }
 
-    // ========== EXECUTION ==========
+    // 8. Extract useLegacyApi (optional, default: false)
+    bool use_legacy_api = false;
+    if (config.contains("useLegacyApi") && config["useLegacyApi"].is_bool()) {
+        use_legacy_api = config["useLegacyApi"].as_bool().value();
+    }
 
-    LOG_CHECKPOINT("========== STARTING EXECUTION ==========");
-    DEBUG_LOG("Execution phase starting");
+    // Legacy API only supports single-lane
+    if (use_legacy_api && lane_sizes.size() > 1) {
+        response.set("success", false);
+        response.set("error", "LegacyApiMultiLane");
+        response.set("message", "Legacy template API does not support multi-lane (only 1 lane allowed)");
+        return response;
+    }
+
+    // Legacy API pin must be 0-8 (compile-time template range)
+    if (use_legacy_api && (pin_tx < 0 || pin_tx > 8)) {
+        response.set("success", false);
+        response.set("error", "LegacyApiPinRange");
+        fl::sstream msg;
+        msg << "Legacy template API only supports pins 0-8, got " << pin_tx;
+        response.set("message", msg.str().c_str());
+        return response;
+    }
+
+    // ========== EXECUTION ==========
 
     uint32_t start_ms = millis();
 
     // Set driver as exclusive
-    LOG_CHECKPOINT("Before setExclusiveDriver");
-    DEBUG_LOG("Calling FastLED.setExclusiveDriver");
     if (!FastLED.setExclusiveDriver(driver_name.c_str())) {
-        LOG_CHECKPOINT("setExclusiveDriver FAILED");
         response.set("success", false);
         response.set("error", "DriverSetupFailed");
         fl::sstream msg;
         msg << "Failed to set " << driver_name.c_str() << " as exclusive driver";
         response.set("message", msg.str().c_str());
-        DEBUG_LOG("Failed to set exclusive driver");
         return response;
     }
-    LOG_CHECKPOINT("After setExclusiveDriver SUCCESS");
-    DEBUG_LOG("Exclusive driver set successfully");
 
-    // Get timing configuration (currently hardcoded to WS2812B-V5)
-    LOG_CHECKPOINT("Creating timing config");
-    DEBUG_LOG("Creating timing config");
+    // Get timing configuration
+    // Legacy API: WS2812B<PIN> template uses TIMING_WS2812_800KHZ (T1=250, T2=625, T3=375)
+    // Channel API: Uses TIMING_WS2812B_V5 (T1=225, T2=355, T3=645)
+    // RX decode timing MUST match actual TX timing for correct capture
     fl::NamedTimingConfig timing_config(
-        fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(),
-        timing_name.c_str()
+        use_legacy_api ? fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>()
+                       : fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(),
+        use_legacy_api ? "WS2812-800KHZ" : timing_name.c_str()
     );
 
     // Dynamically allocate LED arrays for each lane
-    LOG_CHECKPOINT("Allocating LED arrays");
-    DEBUG_LOG("Allocating LED arrays");
-
     fl::vector<fl::unique_ptr<fl::vector<CRGB>>> led_arrays;
     fl::vector<fl::ChannelConfig> tx_configs;
 
     for (fl::size i = 0; i < lane_sizes.size(); i++) {
-        DEBUG_PRINT("[DEBUG] Lane ");
-        DEBUG_PRINT(i);
-        DEBUG_PRINT(" - allocating ");
-        DEBUG_PRINT(lane_sizes[i]);
-        DEBUG_PRINTLN(" LEDs");
-        DEBUG_PRINT("[DEBUG] Free heap: ");
-        DEBUG_PRINTLN(fl::getFreeHeap().total());
-        Serial.flush();
-
-        // Allocate LED array
         auto leds = fl::make_unique<fl::vector<CRGB>>(lane_sizes[i]);
-
-        DEBUG_PRINT("[DEBUG] Lane ");
-        DEBUG_PRINT(i);
-        DEBUG_PRINTLN(" - creating channel config");
-        Serial.flush();
-
-        // Create channel config
         tx_configs.push_back(fl::ChannelConfig(
             pin_tx + i,  // Consecutive pins for multi-lane
             timing_config.timing,
             fl::span<CRGB>(leds->data(), leds->size()),
             RGB  // Default color order
         ));
-
-        // Store array to keep it alive
         led_arrays.push_back(fl::move(leds));
-
-        DEBUG_PRINT("[DEBUG] Lane ");
-        DEBUG_PRINT(i);
-        DEBUG_PRINT(" complete, free heap: ");
-        DEBUG_PRINTLN(fl::getFreeHeap().total());
-        Serial.flush();
     }
 
-    DEBUG_PRINT("[DEBUG] All lanes allocated, free heap: ");
-    DEBUG_PRINTLN(fl::getFreeHeap().total());
-    Serial.flush();
-
     // Create temporary RX channel if pinRx differs from default
-    DEBUG_PRINTLN("[DEBUG] Setting up RX channel");
-    DEBUG_PRINT("[DEBUG] Free heap: ");
-    DEBUG_PRINTLN(fl::getFreeHeap().total());
-    Serial.flush();
-
     fl::shared_ptr<fl::RxDevice> rx_channel_to_use = mState->rx_channel;
-    bool created_temp_rx = false;
-    (void)created_temp_rx;
 
     if (pin_rx != mState->pin_rx && mState->rx_factory) {
-        DEBUG_PRINTLN("[DEBUG] Creating temp RX channel");
-        Serial.flush();
         rx_channel_to_use = mState->rx_factory(pin_rx);
         if (!rx_channel_to_use) {
             response.set("success", false);
             response.set("error", "RxChannelCreationFailed");
             response.set("message", "Failed to create RX channel on custom pin");
-            DEBUG_PRINTLN("[DEBUG] RX channel creation failed");
-            Serial.flush();
             return response;
         }
-        created_temp_rx = true;
-        DEBUG_PRINTLN("[DEBUG] Temp RX channel created");
-        Serial.flush();
     }
 
-    DEBUG_PRINT("[DEBUG] Free heap after RX: ");
-    DEBUG_PRINTLN(fl::getFreeHeap().total());
-    Serial.flush();
-
     // Create validation configuration
-    DEBUG_PRINTLN("[DEBUG] Creating validation config");
-    Serial.flush();
     fl::ValidationConfig validation_config(
         timing_config.timing,
         timing_config.name,
@@ -402,77 +314,39 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         fl::RxDeviceType::RMT  // Default RX device type
     );
 
-    DEBUG_PRINT("[DEBUG] Validation config created, free heap: ");
-    DEBUG_PRINTLN(fl::getFreeHeap().total());
-    Serial.flush();
-
     // Run test with debug output suppressed
-    DEBUG_PRINT("[DEBUG] Starting test - iterations: ");
-    DEBUG_PRINTLN(iterations);
-    DEBUG_PRINT("[DEBUG] Free heap: ");
-    DEBUG_PRINTLN(fl::getFreeHeap().total());
-    Serial.flush();
-
     int total_tests = 0;
     int passed_tests = 0;
     bool passed = false;
     fl::vector<fl::RunResult> run_results;
 
     {
-        DEBUG_PRINTLN("[DEBUG] Entering test scope (log disable)");
-        Serial.flush();
-
         fl::ScopedLogDisable logGuard;  // Suppress FL_DBG/FL_PRINT during test
 
-        // Run warm-up iteration (discard results)
-        LOG_CHECKPOINT("Before warmup validateChipsetTiming");
-        DEBUG_PRINTLN("[DEBUG] Running warmup");
-        Serial.flush();
-        int warmup_total = 0, warmup_passed = 0;
-        validateChipsetTiming(validation_config, warmup_total, warmup_passed);
-        LOG_CHECKPOINT("After warmup validateChipsetTiming");
-        DEBUG_PRINT("[DEBUG] Warmup done, heap: ");
-        DEBUG_PRINTLN(fl::getFreeHeap().total());
-        Serial.flush();
-
-        // Run actual test iterations
-        for (int iter = 0; iter < iterations; iter++) {
-            DEBUG_PRINT("[DEBUG] Iteration ");
-            DEBUG_PRINTLN(iter + 1);
-            DEBUG_PRINT("[DEBUG] Free heap: ");
-            DEBUG_PRINTLN(fl::getFreeHeap().total());
-            Serial.flush();
-
-            int iter_total = 0, iter_passed = 0;
-            validateChipsetTiming(validation_config, iter_total, iter_passed, &run_results);
-            total_tests += iter_total;
-            passed_tests += iter_passed;
-
-            DEBUG_PRINT("[DEBUG] Iteration ");
-            DEBUG_PRINT(iter + 1);
-            DEBUG_PRINTLN(" done");
-            Serial.flush();
+        if (use_legacy_api) {
+            // Legacy API path: WS2812B<PIN> template instantiation
+            for (int iter = 0; iter < iterations; iter++) {
+                int iter_total = 0, iter_passed = 0;
+                validateChipsetTimingLegacy(validation_config, iter_total, iter_passed, &run_results);
+                total_tests += iter_total;
+                passed_tests += iter_passed;
+            }
+        } else {
+            // Channel API path: FastLED.add(channel_config)
+            for (int iter = 0; iter < iterations; iter++) {
+                int iter_total = 0, iter_passed = 0;
+                validateChipsetTiming(validation_config, iter_total, iter_passed, &run_results);
+                total_tests += iter_total;
+                passed_tests += iter_passed;
+            }
         }
 
         passed = (total_tests > 0) && (passed_tests == total_tests);
     }  // logGuard destroyed, logging restored
 
-    LOG_CHECKPOINT("Test complete, building response");
-    DEBUG_PRINT("[DEBUG] Test complete - passed: ");
-    DEBUG_PRINTLN(passed);
-    DEBUG_PRINT("[DEBUG] Free heap: ");
-    DEBUG_PRINTLN(fl::getFreeHeap().total());
-    Serial.flush();
-
     uint32_t duration_ms = millis() - start_ms;
 
     // ========== RESPONSE ==========
-
-    DEBUG_PRINTLN("[DEBUG] Building response");
-    DEBUG_PRINT("[DEBUG] Free heap: ");
-    DEBUG_PRINTLN(fl::getFreeHeap().total());
-    Serial.flush();
-
     response.set("success", true);
     response.set("passed", passed);
     response.set("totalTests", static_cast<int64_t>(total_tests));
@@ -481,29 +355,26 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     response.set("driver", driver_name.c_str());
     response.set("laneCount", static_cast<int64_t>(lane_sizes.size()));
 
-    DEBUG_PRINTLN("[DEBUG] Building laneSizes array");
-    Serial.flush();
-    // Add laneSizes array to response
     fl::Json sizes_response = fl::Json::array();
     for (int size : lane_sizes) {
         sizes_response.push_back(static_cast<int64_t>(size));
     }
     response.set("laneSizes", sizes_response);
     response.set("pattern", pattern.c_str());
+    response.set("useLegacyApi", use_legacy_api);
 
-    // Serialize per-pattern results with byte-level error details
-    if (!run_results.empty()) {
+    // Free run_results before building response to reclaim heap
+    // Only serialize pattern details when tests FAIL (saves heap on passing tests)
+    if (!passed && !run_results.empty()) {
         fl::Json patterns = fl::Json::array();
         for (fl::size ri = 0; ri < run_results.size(); ri++) {
             const auto& rr = run_results[ri];
+            if (rr.passed) continue;  // Skip passing patterns
             fl::Json pat = fl::Json::object();
-            pat.set("name", getBitPatternName(rr.run_number - 1));
             pat.set("totalLeds", static_cast<int64_t>(rr.total_leds));
             pat.set("mismatchedLeds", static_cast<int64_t>(rr.mismatches));
-            pat.set("totalBytes", static_cast<int64_t>(rr.totalBytes));
             pat.set("mismatchedBytes", static_cast<int64_t>(rr.mismatchedBytes));
             pat.set("lsbOnlyErrors", static_cast<int64_t>(rr.lsbOnlyErrors));
-            pat.set("passed", rr.passed);
 
             // Serialize first N LED errors
             if (!rr.errors.empty()) {
@@ -530,31 +401,10 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         }
         response.set("patterns", patterns);
     }
+    run_results.clear();  // Free memory before serialization
 
-    // Add first failure info if test failed
-    if (!passed) {
-        DEBUG_PRINTLN("[DEBUG] Adding failure info");
-        Serial.flush();
-        fl::Json failure = fl::Json::object();
-        failure.set("pattern", pattern.c_str());
-        failure.set("details", "Validation mismatch detected");
-        response.set("firstFailure", failure);
-    }
-
-    DEBUG_PRINT("[DEBUG] Response built, heap: ");
-    DEBUG_PRINTLN(fl::getFreeHeap().total());
-    Serial.println("[ASYNC-FLOW] ✓ Test execution complete, sending final response...");
-    Serial.flush();
-
-    // Send async response (ACK was already sent by RPC system)
-    Serial.println("[ASYNC-FLOW] → Calling sendAsyncResponse()");
-    Serial.flush();
-    mRemote->sendAsyncResponse("runSingleTest", response);
-    Serial.println("[ASYNC-FLOW] ✓ sendAsyncResponse() completed - final response sent!");
-    Serial.flush();  // Ensure response is sent immediately
-
-    // Return null response (actual response already sent via sendAsyncResponse)
-    return fl::Json(nullptr);
+    // Return the response — the lambda wrapper will call sendAsyncResponse
+    return response;
 }
 
 fl::Json ValidationRemoteControl::findConnectedPinsImpl(const fl::Json& args) {
@@ -562,7 +412,7 @@ fl::Json ValidationRemoteControl::findConnectedPinsImpl(const fl::Json& args) {
 
     // Parse optional arguments: [{startPin: int, endPin: int, autoApply: bool}]
     int start_pin = 0;
-    int end_pin = 21;  // Default range: GPIO 0-21 covers most common pins
+    int end_pin = 8;  // Default range: GPIO 0-8 (safe range, avoids USB/flash/strapping pins)
     bool auto_apply = true;  // If true, automatically apply found pins
 
     if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
@@ -617,13 +467,8 @@ fl::Json ValidationRemoteControl::findConnectedPinsImpl(const fl::Json& args) {
         int tx_candidate = pin;
         int rx_candidate = pin + 1;
 
-        // Skip certain pins known to cause issues
-        #if defined(FL_IS_ESP_32S3)
-        // Skip GPIO 0 as RX (boot mode issues), skip strapping pins
-        if (rx_candidate == 0 || tx_candidate == 0) continue;
-        if (tx_candidate >= 26 && tx_candidate <= 32) continue;  // Flash pins
-        if (rx_candidate >= 26 && rx_candidate <= 32) continue;
-        #endif
+        // No pin skip logic needed - default range (0-8) is safe for all platforms
+        // Higher pins (USB, flash, strapping) are excluded by the reduced default range
 
         fl::Json pair = fl::Json::object();
         pair.set("tx", static_cast<int64_t>(tx_candidate));
@@ -726,9 +571,6 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     // Store shared state
     mState = state;
 
-    // Set global state for DEBUG_LOG macro access
-    g_validation_state = state;
-
     // NOTE: All RPC callbacks use const fl::Json& for efficient parameter passing.
     // The RPC system strips const/reference qualifiers and stores values in the tuple,
     // then passes them as references to the function. This avoids copies while
@@ -784,18 +626,11 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     // sendAsyncResponse(). This wrapper ensures a response is ALWAYS sent so
     // the Python client never times out waiting 120s for a missing response.
     mRemote->bind("runSingleTest", [this](const fl::Json& args) -> fl::Json {
-        Serial.println("[ASYNC-FLOW] ▶▶▶ Lambda called - about to invoke runSingleTestImpl");
-        Serial.flush();
         fl::Json result = this->runSingleTestImpl(args);
-        Serial.println("[ASYNC-FLOW] ◀◀◀ runSingleTestImpl returned");
-        Serial.flush();
         // If runSingleTestImpl returned a non-null response, it exited early without
         // calling sendAsyncResponse(). Send it now so the client gets a response.
         if (!result.is_null()) {
-            Serial.println("[ASYNC-FLOW] ⚠ Early exit detected - routing error response via sendAsyncResponse");
-            Serial.flush();
             mRemote->sendAsyncResponse("runSingleTest", result);
-            return fl::Json(nullptr);
         }
         return fl::Json(nullptr);
     }, fl::RpcMode::ASYNC);

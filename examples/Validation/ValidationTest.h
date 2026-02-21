@@ -163,6 +163,16 @@ void validateChipsetTiming(fl::ValidationConfig& config,
                            int& total, int& passed,
                            fl::vector<fl::RunResult>* out_results = nullptr);
 
+// Validate using the legacy template addLeds API (single-lane only)
+// Uses LegacyClocklessProxy to map runtime pin to WS2812B<PIN> template instantiation
+// @param config All validation configuration (must have exactly 1 tx_config)
+// @param total Output parameter - total tests run (incremented)
+// @param passed Output parameter - tests passed (incremented)
+// @param out_results Optional output for per-pattern results with LED error details
+void validateChipsetTimingLegacy(fl::ValidationConfig& config,
+                                 int& total, int& passed,
+                                 fl::vector<fl::RunResult>* out_results = nullptr);
+
 // Set mixed RGB bit patterns to test MSB vs LSB handling
 // @param leds LED array to fill with pattern
 // @param count Number of LEDs in array

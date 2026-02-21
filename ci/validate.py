@@ -376,7 +376,7 @@ async def run_gpio_pretest(
 async def run_pin_discovery(
     port: str,
     start_pin: int = 0,
-    end_pin: int = 21,
+    end_pin: int = 8,
     timeout: float = 15.0,
     use_pyserial: bool = False,
 ) -> tuple[bool, int | None, int | None, "RpcClient | None"]:
@@ -561,6 +561,9 @@ class Args:
 
     # Color pattern (NEW)
     color_pattern: str | None
+
+    # Legacy API testing
+    legacy: bool
 
     @staticmethod
     def parse_args() -> "Args":
@@ -834,6 +837,13 @@ See Also:
             help="RGB color pattern in hex format (e.g., 'ff00aa' or '0x00ff00')",
         )
 
+        # Legacy API testing
+        parser.add_argument(
+            "--legacy",
+            action="store_true",
+            help="Test using legacy template addLeds API (WS2812B<PIN>) instead of Channel API. Single-lane only, pin must be 0-8.",
+        )
+
         parsed = parser.parse_args()
 
         # Convert argparse.Namespace to Args dataclass
@@ -866,6 +876,7 @@ See Also:
             lanes=parsed.lanes,  # NEW
             lane_counts=parsed.lane_counts,  # NEW
             color_pattern=parsed.color_pattern,  # NEW
+            legacy=parsed.legacy,
         )
 
 
@@ -1066,6 +1077,20 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                 print(f"❌ Error: Invalid lane count '{args.lanes}' (expected integer)")
                 return 1
 
+    # Enforce single-lane for --legacy mode
+    if args.legacy:
+        if max_lanes is not None and max_lanes > 1:
+            print(
+                "❌ Error: --legacy only supports single-lane (pin 0-8). Remove --lanes or use --lanes 1"
+            )
+            return 1
+        # Force single lane
+        min_lanes = 1
+        max_lanes = 1
+        print(
+            "ℹ️  Legacy API mode: using WS2812B<PIN> template path (single-lane, pin 0-8)"
+        )
+
     # Parse --lane-counts argument (NEW)
     per_lane_counts: list[int] | None = None
 
@@ -1222,12 +1247,14 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                 # NOTE: params is the config object directly (not wrapped in array).
                 # rpc_client.send() wraps it once: wrapped_args = [params] = [config_object]
                 # Firmware receives params[0] = config_object (the fl::Json& args it expects)
-                test_config = {
+                test_config: dict[str, Any] = {
                     "driver": driver,
                     "laneSizes": lane_sizes,
                     "pattern": "MSB_LSB_A",  # Default pattern
                     "iterations": 1,  # Default iterations
                 }
+                if args.legacy:
+                    test_config["useLegacyApi"] = True
                 rpc_command = {"method": "runSingleTest", "params": test_config}
                 rpc_commands_list.append(rpc_command)
 
