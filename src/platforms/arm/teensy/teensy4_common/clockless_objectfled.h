@@ -27,6 +27,7 @@
 
 #include "cpixel_ledcontroller.h"
 #include "pixel_iterator.h"
+#include "fl/rectangular_draw_buffer.h"
 #include "fl/stl/vector.h"
 #include "fl/singleton.h"
 #include "fl/stl/map.h"
@@ -104,17 +105,12 @@ public:
     void flush();
 
 private:
-    void onQueuingDone();
     void rebuildObjectFLED();
-    void writePixels(u8 pin, PixelIterator& pixel_iterator);
 
     ObjectFLEDTimingConfig mTiming;
+    RectangularDrawBuffer mRectDrawBuffer;
     void* mObjectFLED;  // Opaque pointer to ObjectFLED
-    void* mStripsData;  // Opaque pointer to strips vector
-    void* mPrevStripsData;  // Opaque pointer to previous strips vector
-    u16 mMaxBytesPerStrip;
     bool mDrawn;
-    bool mStripsChanged;
 };
 
 /// Templated singleton wrapper - one instance per chipset type

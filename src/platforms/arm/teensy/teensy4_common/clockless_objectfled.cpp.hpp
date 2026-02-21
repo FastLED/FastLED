@@ -21,16 +21,6 @@ namespace {
 
 typedef fl::FixedVector<fl::u8, 50> PinList50;
 
-// Lightweight strip tracking
-struct StripInfo {
-    fl::u8 pin;
-    fl::u16 numLeds;
-    fl::u16 numBytes;      // numLeds * (3 or 4)
-    fl::u16 offsetBytes;   // Offset into frameBufferLocal
-    fl::u16 bytesWritten;  // Bytes written so far (for padding check)
-    bool isRgbw;
-};
-
 } // anonymous namespace
 
 namespace fl {
@@ -79,30 +69,19 @@ bool ObjectFLEDRegistry::contains(const GroupEntry& entry) {
 ObjectFLEDGroupBase::ObjectFLEDGroupBase(const ObjectFLEDTimingConfig& timing)
     : mTiming(timing)
     , mObjectFLED(nullptr)
-    , mStripsData(new fl::vector<StripInfo>())
-    , mPrevStripsData(new fl::vector<StripInfo>())
-    , mMaxBytesPerStrip(0)
-    , mDrawn(false)
-    , mStripsChanged(false) {
+    , mDrawn(false) {
 }
 
 ObjectFLEDGroupBase::~ObjectFLEDGroupBase() {
     delete static_cast<fl::ObjectFLED*>(mObjectFLED);
-    delete static_cast<fl::vector<StripInfo>*>(mStripsData);
-    delete static_cast<fl::vector<StripInfo>*>(mPrevStripsData);
 }
 
 void ObjectFLEDGroupBase::onQueuingStart() {
-    auto& strips = *static_cast<fl::vector<StripInfo>*>(mStripsData);
-    auto& prevStrips = *static_cast<fl::vector<StripInfo>*>(mPrevStripsData);
-    strips.swap(prevStrips);
-    strips.clear();
+    mRectDrawBuffer.onQueuingStart();
     mDrawn = false;
 }
 
 void ObjectFLEDGroupBase::addStrip(u8 pin, PixelIterator& pixel_iterator) {
-    auto& strips = *static_cast<fl::vector<StripInfo>*>(mStripsData);
-
     // Validate pin before adding
     auto validation = objectfled::validate_teensy4_pin(pin);
     if (!validation.valid) {
@@ -121,9 +100,9 @@ void ObjectFLEDGroupBase::addStrip(u8 pin, PixelIterator& pixel_iterator) {
         FL_WARN("================================================================================");
     }
 
-    // Check for duplicate pin
-    for (const auto& strip : strips) {
-        if (strip.pin == pin) {
+    // Check for duplicate pin in current draw list
+    for (const auto& item : mRectDrawBuffer.mDrawList) {
+        if (item.mPin == pin) {
             FL_WARN("================================================================================");
             FL_WARN("FASTLED ERROR: Pin " << (int)pin << " is already in use - strip disabled");
             FL_WARN("================================================================================");
@@ -131,107 +110,105 @@ void ObjectFLEDGroupBase::addStrip(u8 pin, PixelIterator& pixel_iterator) {
         }
     }
 
-    // Add strip metadata
-    StripInfo info;
-    info.pin = pin;
-    info.numLeds = pixel_iterator.size();
-    info.isRgbw = pixel_iterator.get_rgbw().active();
-    info.numBytes = info.numLeds * (info.isRgbw ? 4 : 3);
-    info.offsetBytes = 0;
-    info.bytesWritten = 0;
-    strips.push_back(info);
+    // Queue strip into rectangular draw buffer
+    const u16 numLeds = pixel_iterator.size();
+    const bool isRgbw = pixel_iterator.get_rgbw().active();
+    mRectDrawBuffer.queue(DrawItem(pin, numLeds, isRgbw));
 
-    // Finalize strip list
-    onQueuingDone();
+    // Finalize buffer layout so we can write pixels
+    mRectDrawBuffer.onQueuingDone();
 
-    // Write pixels directly to ObjectFLED's frameBufferLocal
-    writePixels(pin, pixel_iterator);
+    // Write pixels into RectangularDrawBuffer
+    fl::span<u8> strip_bytes = mRectDrawBuffer.getLedsBufferBytesForPin(pin, true);
+    const Rgbw rgbw = pixel_iterator.get_rgbw();
+
+    if (rgbw.active()) {
+        u8 r, g, b, w;
+        while (pixel_iterator.has(1)) {
+            pixel_iterator.loadAndScaleRGBW(&r, &g, &b, &w);
+            strip_bytes[0] = r;
+            strip_bytes[1] = g;
+            strip_bytes[2] = b;
+            strip_bytes[3] = w;
+            strip_bytes.pop_front();
+            strip_bytes.pop_front();
+            strip_bytes.pop_front();
+            strip_bytes.pop_front();
+            pixel_iterator.advanceData();
+            pixel_iterator.stepDithering();
+        }
+    } else {
+        u8 r, g, b;
+        while (pixel_iterator.has(1)) {
+            pixel_iterator.loadAndScaleRGB(&r, &g, &b);
+            strip_bytes[0] = r;
+            strip_bytes[1] = g;
+            strip_bytes[2] = b;
+            strip_bytes.pop_front();
+            strip_bytes.pop_front();
+            strip_bytes.pop_front();
+            pixel_iterator.advanceData();
+            pixel_iterator.stepDithering();
+        }
+    }
 }
 
 void ObjectFLEDGroupBase::flush() {
-    auto& strips = *static_cast<fl::vector<StripInfo>*>(mStripsData);
-
-    if (mDrawn || strips.size() == 0) {
+    if (mDrawn || mRectDrawBuffer.mDrawList.size() == 0) {
         return;  // Already drawn or no data
     }
 
     mDrawn = true;
 
-    if (mStripsChanged || !mObjectFLED) {
+    bool drawListChanged = mRectDrawBuffer.mDrawListChangedThisFrame;
+    if (drawListChanged || !mObjectFLED) {
         rebuildObjectFLED();
     }
 
+    // Copy pixel data from RectangularDrawBuffer into ObjectFLED's frameBufferLocal
+    auto* objectfled = static_cast<fl::ObjectFLED*>(mObjectFLED);
+    u32 totalBytes = mRectDrawBuffer.getTotalBytes();
+    if (totalBytes > 0) {
+        fl::memcpy(objectfled->frameBufferLocal,
+                    mRectDrawBuffer.mAllLedsBufferUint8.get(),
+                    totalBytes);
+    }
+
     // TRANSMIT to hardware!
-    static_cast<fl::ObjectFLED*>(mObjectFLED)->show();
-}
-
-void ObjectFLEDGroupBase::onQueuingDone() {
-    auto& strips = *static_cast<fl::vector<StripInfo>*>(mStripsData);
-    auto& prevStrips = *static_cast<fl::vector<StripInfo>*>(mPrevStripsData);
-
-    // Calculate max bytes per strip
-    mMaxBytesPerStrip = 0;
-    for (const auto& strip : strips) {
-        if (strip.numBytes > mMaxBytesPerStrip) {
-            mMaxBytesPerStrip = strip.numBytes;
-        }
-    }
-
-    // Assign offsets for each strip (interleaved layout)
-    u16 offset = 0;
-    for (auto& strip : strips) {
-        strip.offsetBytes = offset;
-        strip.bytesWritten = 0;
-        offset += mMaxBytesPerStrip;
-    }
-
-    // Check if strip configuration changed
-    mStripsChanged = (strips.size() != prevStrips.size());
-    if (!mStripsChanged) {
-        for (size_t i = 0; i < strips.size(); i++) {
-            if (strips[i].pin != prevStrips[i].pin ||
-                strips[i].numLeds != prevStrips[i].numLeds ||
-                strips[i].isRgbw != prevStrips[i].isRgbw) {
-                mStripsChanged = true;
-                break;
-            }
-        }
-    }
+    objectfled->show();
 }
 
 void ObjectFLEDGroupBase::rebuildObjectFLED() {
-    auto& strips = *static_cast<fl::vector<StripInfo>*>(mStripsData);
-
     delete static_cast<fl::ObjectFLED*>(mObjectFLED);
     mObjectFLED = nullptr;
 
-    // Build pin list
+    // Build pin list from draw list
     PinList50 pinList;
-    for (const auto& strip : strips) {
-        pinList.push_back(strip.pin);
-    }
-
-    // Check if any strip uses RGBW
     bool hasRgbw = false;
-    for (const auto& strip : strips) {
-        if (strip.isRgbw) {
+    for (const auto& item : mRectDrawBuffer.mDrawList) {
+        pinList.push_back(item.mPin);
+        if (item.mIsRgbw) {
             hasRgbw = true;
-            break;
         }
     }
 
-    // Total LEDs = max_bytes_per_strip * num_strips / bytes_per_led
+    u32 num_strips = 0;
+    u32 bytes_per_strip = 0;
+    u32 total_bytes = 0;
+    mRectDrawBuffer.getBlockInfo(&num_strips, &bytes_per_strip, &total_bytes);
+
+    // Total LEDs = total_bytes / bytes_per_led
     int bytesPerLed = hasRgbw ? 4 : 3;
-    int totalLeds = (mMaxBytesPerStrip / bytesPerLed) * strips.size();
+    int totalLeds = total_bytes / bytesPerLed;
 
     #ifdef FASTLED_DEBUG_OBJECTFLED
-    FL_WARN("ObjectFLEDGroupBase: totalLeds=" << totalLeds << " maxBytes=" << mMaxBytesPerStrip);
+    FL_WARN("ObjectFLEDGroupBase: totalLeds=" << totalLeds << " bytesPerStrip=" << bytes_per_strip);
     #endif
 
     // Pass nullptr so ObjectFLED allocates frameBufferLocal internally
     auto* objectfled = new fl::ObjectFLED(
         totalLeds,
-        nullptr,  // No intermediate buffer - write directly to frameBufferLocal!
+        nullptr,
         hasRgbw ? CORDER_RGBW : CORDER_RGB,
         pinList.size(),
         pinList.data(),
@@ -244,65 +221,7 @@ void ObjectFLEDGroupBase::rebuildObjectFLED() {
     mObjectFLED = objectfled;
 
     // Clear frameBufferLocal to zeros (for padding)
-    int totalBytes = mMaxBytesPerStrip * strips.size();
-    fl::memset(objectfled->frameBufferLocal, 0, totalBytes);
-}
-
-void ObjectFLEDGroupBase::writePixels(u8 pin, PixelIterator& pixel_iterator) {
-    auto& strips = *static_cast<fl::vector<StripInfo>*>(mStripsData);
-    auto* objectfled = static_cast<fl::ObjectFLED*>(mObjectFLED);
-
-    if (!objectfled) {
-        FL_WARN("ObjectFLEDGroupBase::writePixels: mObjectFLED not initialized");
-        return;
-    }
-
-    // Find the strip info for this pin
-    StripInfo* stripInfo = nullptr;
-    for (auto& strip : strips) {
-        if (strip.pin == pin) {
-            stripInfo = &strip;
-            break;
-        }
-    }
-
-    if (!stripInfo) {
-        FL_WARN("ObjectFLEDGroupBase::writePixels: strip not found for pin " << (int)pin);
-        return;
-    }
-
-    // Write directly to ObjectFLED's frameBufferLocal (saves a frame buffer!)
-    u8* dest = objectfled->frameBufferLocal + stripInfo->offsetBytes;
-    u16 bytesWritten = 0;
-
-    const Rgbw rgbw = pixel_iterator.get_rgbw();
-
-    if (rgbw.active()) {
-        u8 r, g, b, w;
-        while (pixel_iterator.has(1)) {
-            pixel_iterator.loadAndScaleRGBW(&r, &g, &b, &w);
-            *dest++ = r;
-            *dest++ = g;
-            *dest++ = b;
-            *dest++ = w;
-            bytesWritten += 4;
-            pixel_iterator.advanceData();
-            pixel_iterator.stepDithering();
-        }
-    } else {
-        u8 r, g, b;
-        while (pixel_iterator.has(1)) {
-            pixel_iterator.loadAndScaleRGB(&r, &g, &b);
-            *dest++ = r;
-            *dest++ = g;
-            *dest++ = b;
-            bytesWritten += 3;
-            pixel_iterator.advanceData();
-            pixel_iterator.stepDithering();
-        }
-    }
-
-    stripInfo->bytesWritten = bytesWritten;
+    fl::memset(objectfled->frameBufferLocal, 0, total_bytes);
 }
 
 } // namespace fl
