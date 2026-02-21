@@ -6,6 +6,7 @@
 #include "dither_mode.h"
 #include "rgbw.h"
 #include "fl/string.h"
+#include "fl/stl/optional.h"
 
 namespace fl {
 
@@ -17,6 +18,7 @@ struct ChannelOptions {
     fl::u8 mDitherMode = BINARY_DITHER;
     Rgbw mRgbw = RgbwInvalid::value(); // RGBW is RGB by default
     fl::string mAffinity;              // Engine affinity (empty = let ChannelBusManager decide)
+    fl::optional<float> mGamma;        // Gamma override (empty = chipset default)
 };
 
 } // namespace fl

@@ -128,6 +128,15 @@ public:
     /// @brief Get the RGBW conversion mode
     Rgbw getRgbw() const;
 
+    /// @brief Set the gamma correction override for this channel
+    /// @param gamma Gamma exponent (e.g. 2.8, 3.2). Empty = chipset default.
+    /// @return Reference to this channel
+    Channel& setGamma(float gamma);
+
+    /// @brief Get the gamma correction override for this channel
+    /// @return Gamma override if set, or empty optional if using chipset default
+    fl::optional<float> getGamma() const;
+
     /// @brief Get the name of the currently bound engine (if any)
     /// @return Engine name, or empty string if no engine is bound or engine has expired
     fl::string getEngineName() const;

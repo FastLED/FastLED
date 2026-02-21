@@ -137,25 +137,26 @@ void encodeUCS7604_8bit_RGBW(InputIterator first, InputIterator last, OutputIter
 /// @param first Beginning of pixel range
 /// @param last End of pixel range
 /// @param out Output iterator for encoded bytes
+/// @param gamma Gamma8 LUT for 8-to-16 bit expansion
 /// @note Writes 6 bytes per pixel (R16_hi, R16_lo, G16_hi, G16_lo, B16_hi, B16_lo)
-/// @note Applies gamma 2.8 correction to expand 8-bit to 16-bit values
 template <typename InputIterator, typename OutputIterator>
-void encodeUCS7604_16bit_RGB(InputIterator first, InputIterator last, OutputIterator out) {
+void encodeUCS7604_16bit_RGB(InputIterator first, InputIterator last, OutputIterator out,
+                              const Gamma8& gamma) {
     while (first != last) {
         const auto& pixel = *first;
 
-        // Apply gamma 2.8 correction for 16-bit output
-        u16 r16 = fl::gamma_2_8(pixel[0]);
-        u16 g16 = fl::gamma_2_8(pixel[1]);
-        u16 b16 = fl::gamma_2_8(pixel[2]);
+        // Apply gamma correction for 16-bit output
+        u8 rgb_in[3] = { pixel[0], pixel[1], pixel[2] };
+        u16 rgb_out[3];
+        gamma.convert(fl::span<const u8>(rgb_in, 3), fl::span<u16>(rgb_out, 3));
 
         // Write big-endian 16-bit values
-        *out++ = r16 >> 8;
-        *out++ = r16 & 0xFF;
-        *out++ = g16 >> 8;
-        *out++ = g16 & 0xFF;
-        *out++ = b16 >> 8;
-        *out++ = b16 & 0xFF;
+        *out++ = rgb_out[0] >> 8;
+        *out++ = rgb_out[0] & 0xFF;
+        *out++ = rgb_out[1] >> 8;
+        *out++ = rgb_out[1] & 0xFF;
+        *out++ = rgb_out[2] >> 8;
+        *out++ = rgb_out[2] & 0xFF;
         ++first;
     }
 }
@@ -166,28 +167,28 @@ void encodeUCS7604_16bit_RGB(InputIterator first, InputIterator last, OutputIter
 /// @param first Beginning of pixel range
 /// @param last End of pixel range
 /// @param out Output iterator for encoded bytes
+/// @param gamma Gamma8 LUT for 8-to-16 bit expansion
 /// @note Writes 8 bytes per pixel (R16_hi, R16_lo, G16_hi, G16_lo, B16_hi, B16_lo, W16_hi, W16_lo)
-/// @note Applies gamma 2.8 correction to expand 8-bit to 16-bit values
 template <typename InputIterator, typename OutputIterator>
-void encodeUCS7604_16bit_RGBW(InputIterator first, InputIterator last, OutputIterator out) {
+void encodeUCS7604_16bit_RGBW(InputIterator first, InputIterator last, OutputIterator out,
+                               const Gamma8& gamma) {
     while (first != last) {
         const auto& pixel = *first;
 
-        // Apply gamma 2.8 correction for 16-bit output
-        u16 r16 = fl::gamma_2_8(pixel[0]);
-        u16 g16 = fl::gamma_2_8(pixel[1]);
-        u16 b16 = fl::gamma_2_8(pixel[2]);
-        u16 w16 = fl::gamma_2_8(pixel[3]);
+        // Apply gamma correction for 16-bit output
+        u8 rgbw_in[4] = { pixel[0], pixel[1], pixel[2], pixel[3] };
+        u16 rgbw_out[4];
+        gamma.convert(fl::span<const u8>(rgbw_in, 4), fl::span<u16>(rgbw_out, 4));
 
         // Write big-endian 16-bit values
-        *out++ = r16 >> 8;
-        *out++ = r16 & 0xFF;
-        *out++ = g16 >> 8;
-        *out++ = g16 & 0xFF;
-        *out++ = b16 >> 8;
-        *out++ = b16 & 0xFF;
-        *out++ = w16 >> 8;
-        *out++ = w16 & 0xFF;
+        *out++ = rgbw_out[0] >> 8;
+        *out++ = rgbw_out[0] & 0xFF;
+        *out++ = rgbw_out[1] >> 8;
+        *out++ = rgbw_out[1] & 0xFF;
+        *out++ = rgbw_out[2] >> 8;
+        *out++ = rgbw_out[2] & 0xFF;
+        *out++ = rgbw_out[3] >> 8;
+        *out++ = rgbw_out[3] & 0xFF;
         ++first;
     }
 }
@@ -200,11 +201,13 @@ void encodeUCS7604_16bit_RGBW(InputIterator first, InputIterator last, OutputIte
 /// @param mode UCS7604 protocol mode (8-bit/16-bit)
 /// @param current Current control settings (wire order RGBW)
 /// @param is_rgbw True for RGBW mode, false for RGB mode
+/// @param gamma Gamma8 LUT for 16-bit modes (nullable, ignored for 8-bit mode)
 /// @note Outputs: preamble (15 bytes) + padding (0-2 bytes) + LED data
 /// @note Total output size is always divisible by 3 (required by UCS7604 protocol)
 template <typename OutputIterator>
 void encodeUCS7604(PixelIterator& pixel_iter, size_t num_leds, OutputIterator out,
-                   UCS7604Mode mode, const UCS7604CurrentControl& current, bool is_rgbw) {
+                   UCS7604Mode mode, const UCS7604CurrentControl& current, bool is_rgbw,
+                   const Gamma8* gamma = nullptr) {
     constexpr size_t PREAMBLE_LEN = 15;
 
     // Calculate bytes per LED based on mode and RGB/RGBW
@@ -238,13 +241,15 @@ void encodeUCS7604(PixelIterator& pixel_iter, size_t num_leds, OutputIterator ou
             encodeUCS7604_8bit_RGB(range.first, range.second, out);
         }
     } else {
-        // 16-bit modes
+        // 16-bit modes — fall back to gamma 2.8 if no gamma provided
+        static fl::shared_ptr<const Gamma8> default_gamma;
+        const Gamma8& g = gamma ? *gamma : *(default_gamma ? default_gamma : (default_gamma = Gamma8::getOrCreate(2.8f)));
         if (is_rgbw) {
             auto range = makeScaledPixelRangeRGBW(&pixel_iter);
-            encodeUCS7604_16bit_RGBW(range.first, range.second, out);
+            encodeUCS7604_16bit_RGBW(range.first, range.second, out, g);
         } else {
             auto range = makeScaledPixelRangeRGB(&pixel_iter);
-            encodeUCS7604_16bit_RGB(range.first, range.second, out);
+            encodeUCS7604_16bit_RGB(range.first, range.second, out, g);
         }
     }
 }

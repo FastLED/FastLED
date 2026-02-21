@@ -376,6 +376,15 @@ Rgbw Channel::getRgbw() const {
     return CPixelLEDController<RGB>::getRgbw();
 }
 
+Channel& Channel::setGamma(float gamma) {
+    mSettings.mGamma = gamma;
+    return *this;
+}
+
+fl::optional<float> Channel::getGamma() const {
+    return mSettings.mGamma;
+}
+
 fl::string Channel::getEngineName() const {
     // Lock the weak_ptr to get a shared_ptr
     auto engine = mEngine.lock();

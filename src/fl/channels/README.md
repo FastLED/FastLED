@@ -210,6 +210,71 @@ void loop() {
 - Integration with monitoring systems
 - Synchronization with external hardware
 
+### Gamma Correction (UCS7604 16-bit)
+
+The UCS7604 chipset supports 16-bit color depth, which benefits from gamma correction to produce perceptually smooth brightness gradients. The Channels API provides per-channel gamma control:
+
+```cpp
+#include <FastLED.h>
+#include "fl/channels/config.h"
+#include "fl/chipsets/led_timing.h"
+
+#define NUM_LEDS 60
+
+CRGB leds[NUM_LEDS];
+
+void setup() {
+    auto timing = fl::makeTimingConfig<fl::TIMING_UCS7604_800KHZ>();
+    fl::ChannelConfig config(fl::ClocklessChipset(2, timing), leds, RGB);
+
+    auto channel = FastLED.add(config);
+    channel->setGamma(3.2f);  // Override gamma (default is 2.8)
+
+    FastLED.setBrightness(128);
+}
+
+void loop() {
+    static uint8_t hue = 0;
+    fill_rainbow(leds, NUM_LEDS, hue++, 7);
+    FastLED.show();
+    delay(20);
+}
+```
+
+**How gamma resolution works:**
+
+| Method | Scope | Precedence |
+|--------|-------|------------|
+| `channel->setGamma(3.2f)` | Per-channel | Highest - overrides built-in default |
+| *(no call)* | Built-in default | 2.8 (matches UCS7604 datasheet recommendation) |
+
+**Common gamma values:**
+- **1.0** - Linear (no correction, useful for data visualization)
+- **2.2** - sRGB standard (common for displays)
+- **2.8** - Default for UCS7604 16-bit modes
+- **3.2** - Steeper curve, darker midtones, more contrast
+
+**Per-channel example (two strips, different gamma):**
+
+```cpp
+CRGB warm_leds[60];
+CRGB cool_leds[60];
+
+void setup() {
+    auto timing = fl::makeTimingConfig<fl::TIMING_UCS7604_800KHZ>();
+
+    auto warm = FastLED.add(fl::ChannelConfig(
+        fl::ClocklessChipset(2, timing), warm_leds, RGB));
+    warm->setGamma(2.2f);  // Gentle curve for warm ambiance
+
+    auto cool = FastLED.add(fl::ChannelConfig(
+        fl::ClocklessChipset(4, timing), cool_leds, RGB));
+    cool->setGamma(3.2f);  // Steep curve for high contrast
+}
+```
+
+**Note:** Gamma correction only affects 16-bit UCS7604 modes (`TIMING_UCS7604_800KHZ` with 16-bit, `TIMING_UCS7604_1600KHZ`). 8-bit mode passes values through unchanged.
+
 ### Runtime Reconfiguration
 
 Change LED settings at runtime without recreating channels using `applyConfig()`:
@@ -728,7 +793,7 @@ See `tests/fl/channels/engine.cpp` for more test examples.
 **Headers:**
 - `fl/channels/channel.h` - Channel class and factory methods
 - `fl/channels/config.h` - ChannelConfig, ClocklessChipset, SpiChipsetConfig
-- `fl/channels/options.h` - ChannelOptions (correction, temperature, dither, affinity)
+- `fl/channels/options.h` - ChannelOptions (correction, temperature, dither, affinity, gamma)
 - `fl/channels/channel_events.h` - Lifecycle event callbacks
 - `fl/channels/engine.h` - Engine interface and state machine
 

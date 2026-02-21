@@ -165,6 +165,10 @@ protected:
         // Create current control struct with reordered values
         fl::UCS7604CurrentControl wire_current(r_current, g_current, b_current, w_current);
 
+        // Get gamma LUT: per-controller override or default 2.8
+        float gamma = this->mSettings.mGamma.value_or(2.8f);
+        fl::shared_ptr<const Gamma8> gamma8 = Gamma8::getOrCreate(gamma);
+
         // Convert to PixelIterator with RGBW support
         fl::Rgbw rgbw = mDelegate.getRgbw();
         fl::PixelIterator pixel_iter = pixels.as_iterator(rgbw);
@@ -172,7 +176,7 @@ protected:
         // Clear buffer and use encoder to fill it
         mByteBuffer.clear();
         fl::encodeUCS7604(pixel_iter, pixels.size(), fl::back_inserter(mByteBuffer),
-                          MODE, wire_current, pixel_iter.get_rgbw().active());
+                          MODE, wire_current, pixel_iter.get_rgbw().active(), gamma8.get());
 
         // Reinterpret byte buffer as CRGB pixels (encoder ensures divisible by 3)
         size_t num_pixels = mByteBuffer.size() / 3;

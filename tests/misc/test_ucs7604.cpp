@@ -176,6 +176,10 @@ public:
         const IData* idata = static_cast<const IData*>(&delegate);
         return idata->data();
     }
+
+    // Set gamma override (accesses protected mSettings directly)
+    void setGamma(float gamma) { this->mSettings.mGamma = gamma; }
+    void clearGamma() { this->mSettings.mGamma.reset(); }
 };
 
 /// Test wrapper that exposes protected showPixels method and provides access to captured bytes
@@ -201,6 +205,10 @@ public:
         const IData* idata = static_cast<const IData*>(&delegate);
         return idata->data();
     }
+
+    // Set gamma override (accesses protected mSettings directly)
+    void setGamma(float gamma) { this->mSettings.mGamma = gamma; }
+    void clearGamma() { this->mSettings.mGamma.reset(); }
 };
 
 
@@ -1035,6 +1043,165 @@ FL_TEST_CASE("UCS7604 16-bit RGBW - 5 LEDs (1 byte padding)") {
 
     // Verify pixel data with 2 bytes padding
     verifyPixels16bitRGBW(output, expected, 2);
+}
+
+FL_TEST_CASE("UCS7604 16-bit gamma via Gamma8") {
+
+    // Helper: convert a single u8 through a Gamma8 LUT
+    auto gamma16 = [](const Gamma8& g, u8 value) -> u16 {
+        u16 out;
+        g.convert(fl::span<const u8>(&value, 1), fl::span<u16>(&out, 1));
+        return out;
+    };
+
+    FL_SUBCASE("default gamma 2.8 matches gamma_2_8") {
+        auto g28 = Gamma8::getOrCreate(2.8f);
+        for (int i = 0; i < 256; ++i) {
+            u8 val = static_cast<u8>(i);
+            FL_CHECK_EQ(gamma16(*g28, val), fl::gamma_2_8(val));
+        }
+    }
+
+    FL_SUBCASE("gamma 3.2 monotonically increasing") {
+        auto g32 = Gamma8::getOrCreate(3.2f);
+        u16 prev = 0;
+        for (int i = 0; i < 256; ++i) {
+            u16 val = gamma16(*g32, static_cast<u8>(i));
+            FL_CHECK_GE(val, prev);
+            prev = val;
+        }
+    }
+
+    FL_SUBCASE("gamma 3.2 produces different values than 2.8") {
+        auto g32 = Gamma8::getOrCreate(3.2f);
+
+        // gamma 3.2 should produce darker midtones (lower values for mid inputs)
+        u16 g32_127 = gamma16(*g32, 127);
+        u16 g28_127 = fl::gamma_2_8(127);
+        FL_CHECK_LT(g32_127, g28_127);  // 3.2 is steeper, mid values are darker
+
+        // Boundaries must still hold
+        FL_CHECK_EQ(gamma16(*g32, 0), 0);
+        FL_CHECK_EQ(gamma16(*g32, 255), 65535);
+    }
+
+    FL_SUBCASE("gamma 3.2 captured in 16-bit RGB wire bytes") {
+        auto g32 = Gamma8::getOrCreate(3.2f);
+
+        CRGB leds[] = {
+            CRGB(127, 64, 200)
+        };
+
+        // Compute expected 16-bit values with gamma 3.2
+        u16 expected_r = gamma16(*g32, 127);
+        u16 expected_g = gamma16(*g32, 64);
+        u16 expected_b = gamma16(*g32, 200);
+
+        // Encode via the test controller with gamma override
+        static UCS7604TestController16bit<10, RGB> controller;
+        controller.setGamma(3.2f);
+
+        PixelController<RGB> pixels(leds, 1, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+        controller.init();
+        controller.showPixels(pixels);
+
+        fl::span<const uint8_t> output = controller.getCapturedBytes();
+
+        // Verify total size: 15 (preamble) + 6 (1 LED * 6 bytes) = 21
+        FL_REQUIRE_EQ(output.size(), 21);
+
+        // Verify preamble
+        verifyPreamble(output, PREAMBLE_16BIT_800KHZ);
+
+        // Verify pixel data at offset 15 (big-endian 16-bit)
+        RGB16 expected[] = { RGB16(expected_r, expected_g, expected_b) };
+        verifyPixels16bit(output, expected);
+
+        // Double-check the values differ from gamma 2.8
+        u16 g28_r = fl::gamma_2_8(127);
+        FL_CHECK_NE(expected_r, g28_r);
+
+        // Clean up
+        controller.clearGamma();
+    }
+
+    FL_SUBCASE("gamma 1.0 is linear") {
+        auto g10 = Gamma8::getOrCreate(1.0f);
+
+        // gamma 1.0: output = input/255 * 65535 = input * 257 (approximately)
+        FL_CHECK_EQ(gamma16(*g10, 0), 0);
+        FL_CHECK_EQ(gamma16(*g10, 255), 65535);
+        // 128/255 * 65535 = 32896
+        FL_CHECK_CLOSE(gamma16(*g10, 128), 32896, 1);
+    }
+
+    FL_SUBCASE("different gamma values produce different results") {
+        auto g32 = Gamma8::getOrCreate(3.2f);
+        auto g28 = Gamma8::getOrCreate(2.8f);
+
+        u16 g32_100 = gamma16(*g32, 100);
+        u16 g28_100 = gamma16(*g28, 100);
+
+        FL_CHECK_EQ(g28_100, fl::gamma_2_8(100));
+        FL_CHECK_NE(g32_100, g28_100);
+    }
+}
+
+FL_TEST_CASE("UCS7604 per-controller gamma override via setGamma") {
+
+    // Helper: convert a single u8 through a Gamma8 LUT
+    auto gamma16 = [](const Gamma8& g, u8 value) -> u16 {
+        u16 out;
+        g.convert(fl::span<const u8>(&value, 1), fl::span<u16>(&out, 1));
+        return out;
+    };
+
+    FL_SUBCASE("controller with setGamma(3.2) uses gamma 3.2") {
+        UCS7604TestController16bit<10, RGB> controller;
+        controller.setGamma(3.2f);
+
+        CRGB leds[] = { CRGB(127, 64, 200) };
+
+        // Compute expected 16-bit values with gamma 3.2
+        auto g32 = Gamma8::getOrCreate(3.2f);
+        u16 expected_r = gamma16(*g32, 127);
+        u16 expected_g = gamma16(*g32, 64);
+        u16 expected_b = gamma16(*g32, 200);
+
+        PixelController<RGB> pixels(leds, 1, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+        controller.init();
+        controller.showPixels(pixels);
+
+        fl::span<const uint8_t> output = controller.getCapturedBytes();
+        FL_REQUIRE_EQ(output.size(), 21);  // 15 preamble + 6 (1 LED * 6 bytes)
+
+        // Verify pixel data uses gamma 3.2 values
+        RGB16 expected[] = { RGB16(expected_r, expected_g, expected_b) };
+        verifyPixels16bit(output, expected);
+    }
+
+    FL_SUBCASE("controller without setGamma uses default 2.8") {
+        UCS7604TestController16bit<10, RGB> controller;
+        // No setGamma call — should fall back to default 2.8
+
+        CRGB leds[] = { CRGB(127, 64, 200) };
+
+        // Compute expected 16-bit values with default gamma 2.8
+        u16 expected_r = fl::gamma_2_8(127);
+        u16 expected_g = fl::gamma_2_8(64);
+        u16 expected_b = fl::gamma_2_8(200);
+
+        PixelController<RGB> pixels(leds, 1, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+        controller.init();
+        controller.showPixels(pixels);
+
+        fl::span<const uint8_t> output = controller.getCapturedBytes();
+        FL_REQUIRE_EQ(output.size(), 21);
+
+        // Verify pixel data uses default gamma 2.8 values
+        RGB16 expected[] = { RGB16(expected_r, expected_g, expected_b) };
+        verifyPixels16bit(output, expected);
+    }
 }
 
 } // anonymous namespace
