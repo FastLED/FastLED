@@ -47,14 +47,16 @@ namespace runner_watchdog {
 
 static HANDLE g_timer_thread = nullptr;
 static HANDLE g_main_thread = nullptr;
+static HANDLE g_cancel_event = nullptr;
 static volatile bool g_active = false;
 static double g_timeout_seconds = 20.0;
 
 static DWORD WINAPI timer_thread_func(LPVOID) {
     DWORD sleep_ms = static_cast<DWORD>(g_timeout_seconds * 1000.0);
-    Sleep(sleep_ms);
-
-    if (!g_active) {
+    // Wait on cancel event instead of Sleep so we can be woken immediately
+    DWORD result = WaitForSingleObject(g_cancel_event, sleep_ms);
+    if (result == WAIT_OBJECT_0 || !g_active) {
+        // Cancelled or deactivated — exit immediately
         return 0;
     }
 
@@ -107,6 +109,9 @@ static void setup(double timeout_seconds = 20.0) {
     g_timeout_seconds = timeout_seconds;
     g_active = true;
 
+    // Create manual-reset event for cancellation signaling
+    g_cancel_event = CreateEventA(nullptr, TRUE, FALSE, nullptr);
+
     DuplicateHandle(
         GetCurrentProcess(), GetCurrentThread(),
         GetCurrentProcess(), &g_main_thread,
@@ -125,10 +130,19 @@ static void cancel() {
     }
     g_active = false;
 
+    // Signal the cancel event to wake the timer thread from its wait
+    if (g_cancel_event != nullptr) {
+        SetEvent(g_cancel_event);
+    }
+
     if (g_timer_thread != nullptr) {
         WaitForSingleObject(g_timer_thread, 2000);
         CloseHandle(g_timer_thread);
         g_timer_thread = nullptr;
+    }
+    if (g_cancel_event != nullptr) {
+        CloseHandle(g_cancel_event);
+        g_cancel_event = nullptr;
     }
     if (g_main_thread != nullptr) {
         CloseHandle(g_main_thread);
