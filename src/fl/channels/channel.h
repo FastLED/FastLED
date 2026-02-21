@@ -38,7 +38,7 @@ FASTLED_SHARED_PTR(ChannelData);
 ///
 /// Provides access to LED channel functionality for driving LED strips.
 /// RGB_ORDER is set to RGB - reordering is handled internally by the Channel
-class Channel: protected CPixelLEDController<RGB> {
+class Channel: public CPixelLEDController<RGB> {
 public:
     /// @brief Create a new channel with optional affinity binding
     /// @param config Channel configuration (includes optional affinity for engine selection)
@@ -141,6 +141,15 @@ private:
     template<typename T, typename... Args>
     friend fl::shared_ptr<T> fl::make_shared(Args&&... args);
 
+protected:
+    /// @brief Protected constructor for template subclasses (e.g., ClocklessIdf5)
+    /// @param chipset Chipset configuration (clockless or SPI)
+    /// @param rgbOrder RGB channel ordering
+    /// @param mode Registration mode (AutoRegister or DeferRegister)
+    /// @note Does not set LED data or channel options - caller must do that
+    Channel(const ChipsetVariant& chipset, EOrder rgbOrder, RegistrationMode mode);
+
+private:
     /// @brief Private constructor (use create() factory method)
     /// @param chipset Chipset configuration (clockless or SPI)
     /// @param leds LED data array

@@ -55,6 +55,25 @@ ChannelPtr Channel::create(const ChannelConfig &config) {
     return channel;
 }
 
+Channel::Channel(const ChipsetVariant& chipset, EOrder rgbOrder, RegistrationMode mode)
+    : CPixelLEDController<RGB>(mode)
+    , mChipset(chipset)
+    , mPin(getDataPinFromChipset(chipset))
+    , mTiming(getTimingFromChipset(chipset))
+    , mRgbOrder(rgbOrder)
+    , mEngine()
+    , mAffinity()
+    , mId(nextId())
+    , mName(makeName(mId)) {
+#ifdef FL_IS_ESP32
+    gpio_set_pull_mode(static_cast<gpio_num_t>(mPin), GPIO_PULLDOWN_ONLY);
+    if (const SpiChipsetConfig* spi = chipset.ptr<SpiChipsetConfig>()) {
+        gpio_set_pull_mode(static_cast<gpio_num_t>(spi->clockPin), GPIO_PULLDOWN_ONLY);
+    }
+#endif
+    mChannelData = ChannelData::create(mChipset);
+}
+
 Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
                  EOrder rgbOrder, const ChannelOptions& options)
     : CPixelLEDController<RGB>(RegistrationMode::DeferRegister)  // Defer registration until FastLED.add()
