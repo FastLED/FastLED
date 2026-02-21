@@ -142,12 +142,19 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
     // - RMT: Two-TX approach (ESP32-S3 workaround - TX GPIO blocked when RX active)
     // - PARLIO/SPI/other: Single-TX approach (arm RX first, then TX)
 
+    // TX wait timeout: 1 second max per frame - prevents infinite hang if driver stalls
+    // Even a 10000-LED strip at 800kbps takes only ~300ms, so 1s is very safe
+    const uint32_t TX_WAIT_TIMEOUT_MS = 1000;
+
     if (is_rmt_driver) {
         // RMT: Two-TX approach for ESP32-S3 compatibility
         // First TX without RX armed (diagnostics), then arm RX, then second TX
         FL_WARN("[CAPTURE] RMT: Two-TX approach (ESP32-S3 workaround)");
         FastLED.show();
-        FastLED.wait();
+        if (!FastLED.wait(TX_WAIT_TIMEOUT_MS)) {
+            FL_ERROR("[CAPTURE] TX wait timeout (pre-arm) - driver may be stalled");
+            return 0;
+        }
 
         // Arm RX for capture
         if (!rx_channel->begin(rx_config)) {
@@ -156,7 +163,10 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
         }
         // Second TX with RX armed
         FastLED.show();
-        FastLED.wait();
+        if (!FastLED.wait(TX_WAIT_TIMEOUT_MS)) {
+            FL_ERROR("[CAPTURE] TX wait timeout (capture) - driver may be stalled");
+            return 0;
+        }
     } else {
         // Non-RMT (PARLIO, SPI, etc.): Single-TX approach
         // Arm RX first, then TX - avoids double-transmission issues with streaming engines
@@ -168,7 +178,10 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
         }
 
         FastLED.show();
-        FastLED.wait();
+        if (!FastLED.wait(TX_WAIT_TIMEOUT_MS)) {
+            FL_ERROR("[CAPTURE] TX wait timeout - driver may be stalled");
+            return 0;
+        }
     }
 
 
@@ -329,6 +342,7 @@ void runTest(const char* test_name,
         size_t bytes_to_check = (bytes_captured < bytes_expected + rx_buffer_offset) ?
                                  (bytes_captured > rx_buffer_offset ? bytes_captured - rx_buffer_offset : 0) :
                                  bytes_expected;
+        (void)bytes_to_check;
 
         for (size_t i = 0; i < num_leds; i++) {
             size_t byte_offset = rx_buffer_offset + i * 3; // Skip front padding
@@ -440,6 +454,7 @@ void runMultiTest(const char* test_name,
             size_t bytes_to_check = (bytes_captured < bytes_expected + rx_buffer_offset) ?
                                      (bytes_captured > rx_buffer_offset ? bytes_captured - rx_buffer_offset : 0) :
                                      bytes_expected;
+            (void)bytes_to_check;
 
             for (size_t i = 0; i < num_leds; i++) {
                 size_t byte_offset = rx_buffer_offset + i * 3; // Apply offset for PARLIO front padding
@@ -621,7 +636,11 @@ void validateChipsetTiming(fl::ValidationConfig& config,
     }
     FL_WARN("[PREINIT] First FastLED.show() - RX not armed yet");
     FastLED.show();
-    FastLED.wait();  // Wait for transmission to complete
+    if (!FastLED.wait(1000)) {  // 1s timeout - driver stall guard
+        FL_ERROR("[PREINIT] TX wait timeout - driver may be stalled on this platform");
+        FastLED.reset(ResetFlags::CHANNELS);
+        return;
+    }
     // TX engine pre-init logging silenced for speed
 
     // CRITICAL: Wait for PARLIO streaming transmission to complete before starting tests

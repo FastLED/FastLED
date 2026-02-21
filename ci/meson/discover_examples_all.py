@@ -52,13 +52,15 @@ def should_skip_for_stub(filter_str: str) -> tuple[bool, str]:
 
     # Expression-based filter: "(platform is native)" or similar
     # Pattern: (platform is <value>) or (memory is <value>)
-    platform_match = re.search(
+    # Use findall to handle OR expressions like "(platform is esp32) or (platform is native)"
+    platform_matches = re.findall(
         r"\(\s*platform\s+is\s+(\w+)\s*\)", filter_str, re.IGNORECASE
     )
-    if platform_match:
-        platform_value = platform_match.group(1).lower()
+    if platform_matches:
+        platform_values = [m.lower() for m in platform_matches]
         # "native" means host/STUB build (Mac/Linux/Windows)
-        if platform_value == "native":
+        # If any platform in an OR expression is "native", include in STUB builds
+        if "native" in platform_values:
             return False, ""
         # Other specific platforms (esp32, teensy, etc.) should be skipped for STUB
         return True, f"Platform-specific (@filter:{filter_str})"

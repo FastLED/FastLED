@@ -906,6 +906,69 @@ def _should_use_fbuild(
     return False
 
 
+def _is_native_platform(environment: str | None) -> bool:
+    """Check if the target is the native/stub (host) platform."""
+    if not environment:
+        return False
+    return environment.lower() in ("native", "stub", "host")
+
+
+async def _run_native_validation(args: Args, build_mode: str = "quick") -> int:
+    """Run validation on native/stub platform via Meson compile + execute.
+
+    Native validation is self-contained: the compiled binary discovers stub
+    drivers, runs validateChipsetTiming() for each, and exits 0 (pass) or 1 (fail).
+    No serial port, upload, or JSON-RPC needed.
+    """
+    from ci.util.meson_example_runner import run_meson_examples
+
+    project_dir = args.project_dir.resolve()
+    build_dir = project_dir / ".build" / "meson"
+
+    # Banner
+    print("─" * 60)
+    print("FastLED Validation — Native Platform")
+    print("─" * 60)
+    print(f"  Mode        Compile + Run (Meson, {build_mode})")
+    print(f"  Build dir   {project_dir / '.build' / f'meson-{build_mode}'}")
+    print("─" * 60)
+    print()
+
+    # Phase 1: Optional lint
+    if not args.skip_lint:
+        from ci.debug_attached import run_cpp_lint
+
+        if not run_cpp_lint():
+            print("\n❌ Linting failed. Fix issues or use --skip-lint to bypass.")
+            return 1
+    else:
+        print("⚠️  Skipping C++ linting (--skip-lint flag set)\n")
+
+    # Phase 2+3: Meson setup + compile + run
+    print("=" * 60)
+    print("COMPILE + EXECUTE (Meson — native host)")
+    print("=" * 60)
+
+    result = run_meson_examples(
+        source_dir=project_dir,
+        build_dir=build_dir,
+        examples=["Validation"],
+        verbose=args.verbose,
+        build_mode=build_mode,
+        full=True,  # Compile AND execute
+    )
+
+    print()
+    print("=" * 60)
+    if result.success:
+        print(f"{Fore.GREEN}✓ NATIVE VALIDATION SUCCEEDED{Style.RESET_ALL}")
+    else:
+        print(f"{Fore.RED}✗ NATIVE VALIDATION FAILED{Style.RESET_ALL}")
+    print("=" * 60)
+
+    return 0 if result.success else 1
+
+
 # ============================================================
 # Main Entry Point
 # ============================================================
@@ -1155,14 +1218,17 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                 lane_sizes = [strip_size] * lane_count
 
                 # Build runSingleTest command
-                # Format: {"method":"runSingleTest","params":[{"driver":"PARLIO","laneSizes":[100,100],"pattern":"MSB_LSB_A","iterations":1}]}
+                # Format: {"method":"runSingleTest","params":{"driver":"PARLIO","laneSizes":[100,100],"pattern":"MSB_LSB_A","iterations":1}}
+                # NOTE: params is the config object directly (not wrapped in array).
+                # rpc_client.send() wraps it once: wrapped_args = [params] = [config_object]
+                # Firmware receives params[0] = config_object (the fl::Json& args it expects)
                 test_config = {
                     "driver": driver,
                     "laneSizes": lane_sizes,
                     "pattern": "MSB_LSB_A",  # Default pattern
                     "iterations": 1,  # Default iterations
                 }
-                rpc_command = {"method": "runSingleTest", "params": [test_config]}
+                rpc_command = {"method": "runSingleTest", "params": test_config}
                 rpc_commands_list.append(rpc_command)
 
     # Convert to JSON string
@@ -1174,6 +1240,12 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
     except ValueError as e:
         print(f"❌ Error parsing JSON-RPC commands: {e}")
         return 1
+
+    # ============================================================
+    # Native Platform — bypass PlatformIO/serial/RPC entirely
+    # ============================================================
+    if _is_native_platform(final_environment):
+        return await _run_native_validation(args)
 
     # ============================================================
     # Build Pattern Lists

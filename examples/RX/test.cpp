@@ -43,7 +43,7 @@ void executeToggles(fl::RxDevice& rx,
     // Set pin to initial state before begin()
     pinMode(pin_tx, OUTPUT);
     digitalWrite(pin_tx, config.start_low ? LOW : HIGH);
-    delayMicroseconds(100);  // Allow pin to settle
+    fl::delayMicroseconds(100);  // Allow pin to settle
 
     // Initialize RX device
     if (!rx.begin(config)) {
@@ -54,7 +54,7 @@ void executeToggles(fl::RxDevice& rx,
     // Execute pin toggles
     for (size_t i = 0; i < toggles.size(); i++) {
         digitalWrite(pin_tx, toggles[i].is_high ? HIGH : LOW);
-        delayMicroseconds(toggles[i].delay_us);
+        fl::delayMicroseconds(toggles[i].delay_us);
     }
 }
 

@@ -40,8 +40,8 @@
 #elif defined(FL_IS_APOLLO3)
     #include "platforms/apollo3/pin_apollo3.hpp"
 #elif defined(FL_IS_STUB)
-    // Stub platform for testing (no-op pins)
-    #include "platforms/shared/pin_noop.hpp"
+    // Stub platform for testing — tracks pin state via fl::stub::setPinState
+    #include "platforms/stub/pin_stub.hpp"
 #elif defined(FL_IS_WASM)
     // WASM platform uses no-op pin implementation
     #include "platforms/shared/pin_noop.hpp"

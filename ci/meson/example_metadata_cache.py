@@ -54,6 +54,11 @@ def compute_example_files_hash(examples_dir: Path) -> str:
     for f in sorted(examples_dir.rglob("*.h")):
         example_files.append(f)
 
+    # Also include the discovery script itself so changes to it invalidate the cache
+    this_script = Path(__file__).parent / "discover_examples_all.py"
+    if this_script.is_file():
+        example_files.append(this_script)
+
     # Deduplicate while preserving order
     seen: set[Path] = set()
     unique_files: list[Path] = []
@@ -69,7 +74,11 @@ def compute_example_files_hash(examples_dir: Path) -> str:
             from os import stat_result
 
             stat: stat_result = f.stat()
-            rel_path: str = f.relative_to(examples_dir).as_posix()
+            # Use absolute path for scripts outside examples_dir
+            try:
+                rel_path: str = f.relative_to(examples_dir).as_posix()
+            except ValueError:
+                rel_path = f.as_posix()
             # Include path, mtime, and size in hash
             hash_input.append(f"{rel_path}:{stat.st_mtime:.6f}:{stat.st_size}")
 

@@ -179,8 +179,9 @@ void CFastLED::reset(ResetFlags flags) {
 
 	// Reset CHANNELS - remove all channels from controller list
 	if (clearFlag(ResetFlags::CHANNELS)) {
-		// Always wait for all channel bus transmissions to complete first
-		FastLED.wait();
+		// Wait for engines to complete, with 2s timeout to prevent infinite hang
+		// if an engine is permanently stalled (e.g. PARLIO on ESP32-C6 hw bug)
+		FastLED.wait(2000);
 
 		// Remove all channels by iterating through a copy of the vector
 		// (we make a copy because remove() modifies mChannels)
@@ -199,8 +200,8 @@ void CFastLED::reset(ResetFlags flags) {
 
 	// Reset CHANNEL_ENGINES - clear all registered channel engines
 	if (clearFlag(ResetFlags::CHANNEL_ENGINES)) {
-		// Always wait for all channel bus transmissions to complete first
-		FastLED.wait();
+		// Wait with 2s timeout to prevent infinite hang on stalled engines
+		FastLED.wait(2000);
 		fl::ChannelBusManager& manager = fl::channelBusManager();
 		manager.clearAllEngines();
 	}
@@ -534,7 +535,7 @@ void delay_at_max_brightness_for_power(fl::u16 ms)
 // Channel Bus Manager Controls
 // ============================================================================
 
-#ifdef FL_IS_ESP32
+#if defined(FL_IS_ESP32) || defined(FL_IS_STUB)
 void CFastLED::setDriverEnabled(const char* name, bool enabled) {
 	fl::ChannelBusManager& manager = fl::channelBusManager();
 	manager.setDriverEnabled(name, enabled);
@@ -570,6 +571,11 @@ void CFastLED::wait() {
 	// Wait for all engines to become READY
 	// Calls async_run() and uses time-based delays to avoid busy-waiting
 	manager.waitForReady();
+}
+
+bool CFastLED::wait(fl::u32 timeout_ms) {
+	fl::ChannelBusManager& manager = fl::channelBusManager();
+	return manager.waitForReady(timeout_ms);
 }
 
 // ============================================================================

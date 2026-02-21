@@ -107,6 +107,10 @@ def copy_example_source(project_root: Path, build_dir: Path, example: str) -> bo
             continue
 
         if file_path.is_file():
+            # Skip .ino.cpp artifacts (preprocessed .ino files that would cause
+            # duplicate symbols when PlatformIO also compiles the .ino via main.cpp)
+            if file_path.name.endswith(".ino.cpp"):
+                continue
             shutil.copy2(file_path, sketch_dir)
             # Calculate relative paths for cleaner output
             try:

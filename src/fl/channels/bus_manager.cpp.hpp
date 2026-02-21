@@ -70,10 +70,10 @@ void ChannelBusManager::addEngine(int priority, fl::shared_ptr<IChannelEngine> e
         }
     }
 
-    // If replacing, wait for all engines to become READY
+    // If replacing, wait for all engines to become READY (2s timeout for stalled engines)
     if (replacing) {
         FL_DBG("ChannelBusManager: Waiting for all engines to become READY before replacement");
-        waitForReady();
+        waitForReady(2000);
 
         // Remove the old engine with matching name (shared_ptr may trigger deletion)
         for (size_t i = 0; i < mEngines.size(); ++i) {
@@ -140,9 +140,9 @@ bool ChannelBusManager::removeEngine(fl::shared_ptr<IChannelEngine> engine) {
 void ChannelBusManager::clearAllEngines() {
     FL_DBG("ChannelBusManager: Waiting for all engines to become READY before clearing");
 
-    // Wait for all engines to become READY before clearing
-    // This prevents clearing engines that are still transmitting
-    waitForReady();
+    // Wait for all engines to become READY before clearing, with 2s timeout
+    // to prevent infinite hang on permanently stalled engines
+    waitForReady(2000);
 
     FL_DBG("ChannelBusManager: Clearing " << mEngines.size() << " engines");
 
@@ -401,7 +401,11 @@ bool ChannelBusManager::waitForReadyOrDraining(u32 timeoutMs) {
 
 
 void ChannelBusManager::onBeginFrame() {
-    waitForReady();  // Wait for all engines to become READY before clearing previous frame state.
+    // 2s timeout: a frame should never take 2s; prevents infinite hang on stalled engine
+    // (e.g. PARLIO on ESP32-C6 where DMA ISR never fires)
+    if (!waitForReady(2000)) {
+        FL_WARN("ChannelBusManager: onBeginFrame() timeout - engine may be stalled");
+    }
 }
 
 void ChannelBusManager::onEndFrame() {
@@ -413,12 +417,19 @@ void ChannelBusManager::onEndFrame() {
             entry.engine->show();
         }
     }
-    waitForReadyOrDraining();
+    // 2s timeout: prevents infinite hang if engine never transitions from BUSY
+    // (e.g. PARLIO on ESP32-C6 where DMA ISR never fires and state stays BUSY)
+    if (!waitForReadyOrDraining(2000)) {
+        FL_WARN("ChannelBusManager: onEndFrame() timeout - engine may be stalled");
+    }
 }
 
 void ChannelBusManager::reset() {
     // Allow all channel engines to clean up
-    waitForReady();
+    // 2s timeout: prevents infinite hang if engine is stalled
+    if (!waitForReady(2000)) {
+        FL_WARN("ChannelBusManager: reset() timeout - engine may be stalled");
+    }
     FL_DBG("ChannelBusManager: reset() - all engines ready");
 }
 

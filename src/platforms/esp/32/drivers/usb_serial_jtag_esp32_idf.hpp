@@ -176,22 +176,26 @@ void UsbSerialJtagEsp32::write(const char* str) {
 
 #ifdef FL_HAS_USB_SERIAL_JTAG
     if (mBuffered) {
-        // Use usb_serial_jtag_write_bytes() - copies to TX ring buffer, non-blocking
         size_t len = 0;
         const char* p = str;
         while (*p++) len++;
 
-        esp_rom_printf("[DEBUG] USB-Serial JTAG buffered write: len=%d, first_chars='%.20s'\n",
-                      static_cast<int>(len), str);
-
-        int written = usb_serial_jtag_write_bytes(str, len, 0);  // timeout=0 (non-blocking)
-        esp_rom_printf("[DEBUG] USB-Serial JTAG usb_serial_jtag_write_bytes returned: %d\n", written);
-
-        if (written < 0) {
-            // USB write failed - log error
-            esp_rom_printf("ERROR: USB-Serial JTAG write failed (err=%d, len=%d)\n",
-                          written, static_cast<int>(len));
-            // Keep mBuffered = true - don't fall back silently
+        // Write in chunks to handle data larger than the TX ring buffer.
+        // timeout=0 non-blocking fails silently for large payloads; use a small
+        // per-chunk timeout so the driver can drain between writes.
+        size_t remaining = len;
+        const char* src = str;
+        while (remaining > 0) {
+            size_t chunk = remaining < 512 ? remaining : 512;
+            int written = usb_serial_jtag_write_bytes(src, chunk, pdMS_TO_TICKS(100));
+            if (written > 0) {
+                src += (size_t)written;
+                remaining -= (size_t)written;
+            } else if (written < 0) {
+                esp_rom_printf("ERROR: USB-Serial JTAG write failed (err=%d)\n", written);
+                break;
+            }
+            // written == 0: buffer full, will retry after timeout
         }
         return;
     }
@@ -209,9 +213,23 @@ size_t UsbSerialJtagEsp32::write(const u8* buffer, size_t size) {
 
 #ifdef FL_HAS_USB_SERIAL_JTAG
     if (mBuffered) {
-        // Use usb_serial_jtag_write_bytes() - handles raw binary data
-        int written = usb_serial_jtag_write_bytes(buffer, size, 0);  // timeout=0 (non-blocking)
-        return (written < 0) ? 0 : static_cast<size_t>(written);
+        // Write in chunks to handle data larger than the TX ring buffer.
+        size_t total_written = 0;
+        const u8* src = buffer;
+        size_t remaining = size;
+        while (remaining > 0) {
+            size_t chunk = remaining < 512 ? remaining : 512;
+            int written = usb_serial_jtag_write_bytes(src, chunk, pdMS_TO_TICKS(100));
+            if (written > 0) {
+                src += (size_t)written;
+                remaining -= (size_t)written;
+                total_written += (size_t)written;
+            } else if (written < 0) {
+                break;  // Error
+            }
+            // written == 0: retry after timeout
+        }
+        return total_written;
     }
 #endif
 
@@ -228,22 +246,31 @@ void UsbSerialJtagEsp32::writeln(const char* str) {
 
 #ifdef FL_HAS_USB_SERIAL_JTAG
     if (mBuffered) {
-        // Write string and newline
+        // Write all bytes in chunks to handle payloads larger than the TX ring buffer.
+        // USB JTAG TX buffer defaults to 4096 bytes but JSON responses can be larger.
+        // Using timeout=0 (non-blocking) fails silently for large payloads; a small
+        // per-chunk timeout allows the driver to drain data between writes.
         size_t len = 0;
         const char* p = str;
         while (*p++) len++;
 
-        int written = usb_serial_jtag_write_bytes(str, len, 0);  // timeout=0
-        if (written < 0) {
-            esp_rom_printf("ERROR: USB-Serial JTAG writeln failed (err=%d, len=%d)\n",
-                          written, static_cast<int>(len));
-            return;
+        size_t remaining = len;
+        const char* src = str;
+        while (remaining > 0) {
+            size_t chunk = remaining < 512 ? remaining : 512;
+            int written = usb_serial_jtag_write_bytes(src, chunk, pdMS_TO_TICKS(100));
+            if (written > 0) {
+                src += (size_t)written;
+                remaining -= (size_t)written;
+            } else if (written < 0) {
+                esp_rom_printf("ERROR: USB-Serial JTAG writeln failed (err=%d)\n", written);
+                break;
+            }
+            // written == 0: buffer full after timeout, retry
         }
 
-        written = usb_serial_jtag_write_bytes("\n", 1, 0);
-        if (written < 0) {
-            esp_rom_printf("ERROR: USB-Serial JTAG newline write failed (err=%d)\n", written);
-        }
+        // Write newline (with timeout)
+        usb_serial_jtag_write_bytes("\n", 1, pdMS_TO_TICKS(100));
         return;
     }
 #endif

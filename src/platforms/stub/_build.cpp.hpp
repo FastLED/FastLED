@@ -6,6 +6,7 @@
 
 #include "platforms/stub/Arduino.cpp.hpp"
 #include "platforms/stub/coroutine_runner.cpp.hpp"
+#include "platforms/stub/stub_gpio.cpp.hpp"
 #include "platforms/stub/fastspi_stub_generic.cpp.hpp"
 #include "platforms/stub/fs_stub.cpp.hpp"
 #include "platforms/stub/led_sysdefs_stub.cpp.hpp"

@@ -5,32 +5,30 @@
 /// @file init_channel_engine.h
 /// @brief Stub platform channel engine initialization
 ///
-/// This registers the stub channel engine so the legacy FastLED.addLeds<>() API
-/// can route through the channel engine infrastructure for testing.
+/// Registers ClocklessChannelEngineStub with the ChannelBusManager so that
+/// the FastLED.add() API (Channel objects) drives stub GPIO simulation and
+/// fires SimEdgeObserver callbacks that NativeRxDevice uses for validation.
 
 #include "fl/channels/bus_manager.h"
 #include "fl/channels/channel.h"
+#include "fl/stl/shared_ptr.h"
+#include "platforms/stub/clockless_channel_engine_stub.h"
 
 namespace fl {
 namespace platforms {
 
 /// @brief Initialize channel engines for stub platform
-///
-/// Registers the stub channel engine with the ChannelBusManager.
-/// This allows the legacy API to work with channel engines in tests.
 inline void initChannelEngines() {
-    // Register the stub channel engine (low priority)
-    // This allows tests to override with higher-priority mock engines
     fl::ChannelBusManager& manager = fl::ChannelBusManager::instance();
 
-    // Get the stub engine singleton
-    auto* stubEngine = fl::getStubChannelEngine();
-
-    // Wrap it in a shared_ptr without taking ownership (non-deleting)
-    auto sharedStub = fl::shared_ptr<IChannelEngine>(stubEngine, [](IChannelEngine*){});
-
-    // Register with low priority so test mocks can override
-    manager.addEngine(0, sharedStub);
+    // Register the stub clockless engine with priority 1.
+    // Priority 1 > 0 (the no-op StubChannelEngine registered elsewhere),
+    // so this engine is preferred for clockless channels on the stub platform.
+    static fl::stub::ClocklessChannelEngineStub stubEngine;  // ok static in header
+    // Cast to base so make_shared_no_tracking creates shared_ptr<IChannelEngine>
+    fl::IChannelEngine& engineRef = stubEngine;
+    auto sharedEngine = fl::make_shared_no_tracking(engineRef);
+    manager.addEngine(1, sharedEngine);
 }
 
 }  // namespace platforms

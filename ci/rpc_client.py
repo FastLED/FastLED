@@ -486,94 +486,98 @@ class RpcClient:
                 self._check_interrupt()
                 await asyncio.sleep(0)  # Allow other async tasks to run
 
-                if line.startswith(self.RESPONSE_PREFIX):
-                    json_str = line[len(self.RESPONSE_PREFIX) :]
-                    try:
-                        data = json.loads(json_str)
+                if not line.startswith(self.RESPONSE_PREFIX):
+                    if self.verbose:
+                        print(f"  [async-serial] {line[:200]}")
+                    # Check timeout for non-REMOTE lines
+                    if time.time() - start >= timeout:
+                        break
+                    continue
 
-                        # Check if response ID matches expected ID (JSON-RPC 2.0 correlation)
-                        # ID is mandatory - must match exactly
-                        response_id = data.get("id")
-                        if response_id is None:
-                            # Responses without ID are invalid - skip them
-                            continue
-                        if response_id != expected_id:
-                            # Skip responses that don't match our expected request ID
-                            continue
+                # Line starts with RESPONSE_PREFIX - parse as JSON-RPC response
+                json_str = line[len(self.RESPONSE_PREFIX) :]
+                try:
+                    data = json.loads(json_str)
 
-                        # JSON-RPC 2.0: "error" and "result" are mutually exclusive
-                        # If "error" is present, raise RpcError immediately
-                        if "error" in data:
-                            error_obj = data["error"]
-
-                            # Extract error details (code and message are standard fields)
-                            if isinstance(error_obj, dict):
-                                error_code = error_obj.get("code")  # type: ignore[assignment]
-                                error_message = error_obj.get(  # type: ignore[assignment]
-                                    "message", "Unknown error"
-                                )
-                                error_data = error_obj.get("data")  # type: ignore[assignment]
-
-                                # Build detailed error message
-                                msg = f"RPC Error {error_code}: {error_message}"
-                                if error_data:
-                                    import json as json_module
-
-                                    msg += f" (data: {json_module.dumps(error_data)})"
-
-                                raise RpcError(msg)
-                            else:
-                                # Malformed error object (should be dict)
-                                raise RpcError(f"Malformed error object: {error_obj}")
-
-                        # Extract result field for JSON-RPC 2.0 responses
-                        if "result" in data:
-                            response_data = data["result"]
-                        else:
-                            # No result or error - empty response
-                            response_data = {}
-
-                        # Check if this is an ACK for async function (skip and continue waiting)
-                        if (
-                            isinstance(response_data, dict)
-                            and "acknowledged" in response_data
-                            and response_data["acknowledged"] is True
-                        ):
-                            if self.verbose:
-                                print(
-                                    f"📬 [RPC] ACK received for request {expected_id}, waiting for final response..."
-                                )
-                            continue  # Skip ACK, wait for final response
-
-                        # Determine success: void functions return null, treat as success
-                        success: bool  # Explicit type declaration
-                        if "success" in data:
-                            success = bool(data.get("success", True))
-                        elif isinstance(response_data, dict):
-                            success = bool(response_data.get("success", True))  # type: ignore[arg-type]
-                        else:
-                            # Void functions return null - treat as successful execution
-                            success = True
-
-                        # Ensure response_data is always a dict for consistent API
-                        final_response_data: dict[str, Any]
-                        if response_data is None or not isinstance(response_data, dict):
-                            final_response_data = {}
-                        else:
-                            final_response_data = response_data  # type: ignore[assignment]
-
-                        return RpcResponse(
-                            success=success,
-                            data=final_response_data,
-                            raw_line=line,
-                            _id=response_id,  # ID is always present
-                        )
-                    except json.JSONDecodeError:
+                    # Check if response ID matches expected ID (JSON-RPC 2.0 correlation)
+                    # ID is mandatory - must match exactly
+                    response_id = data.get("id")
+                    if response_id is None:
+                        # Responses without ID are invalid - skip them
+                        continue
+                    if response_id != expected_id:
+                        # Skip responses that don't match our expected request ID
                         continue
 
-                # Check timeout
-                if time.time() - start >= timeout:
-                    break
+                    # JSON-RPC 2.0: "error" and "result" are mutually exclusive
+                    # If "error" is present, raise RpcError immediately
+                    if "error" in data:
+                        error_obj = data["error"]
+
+                        # Extract error details (code and message are standard fields)
+                        if isinstance(error_obj, dict):
+                            error_code = error_obj.get("code")  # type: ignore[assignment]
+                            error_message = error_obj.get(  # type: ignore[assignment]
+                                "message", "Unknown error"
+                            )
+                            error_data = error_obj.get("data")  # type: ignore[assignment]
+
+                            # Build detailed error message
+                            msg = f"RPC Error {error_code}: {error_message}"
+                            if error_data:
+                                import json as json_module
+
+                                msg += f" (data: {json_module.dumps(error_data)})"
+
+                            raise RpcError(msg)
+                        else:
+                            # Malformed error object (should be dict)
+                            raise RpcError(f"Malformed error object: {error_obj}")
+
+                    # Extract result field for JSON-RPC 2.0 responses
+                    if "result" in data:
+                        response_data = data["result"]
+                    else:
+                        # No result or error - empty response
+                        response_data = {}
+
+                    # Check if this is an ACK for async function (skip and continue waiting)
+                    if (
+                        isinstance(response_data, dict)
+                        and "acknowledged" in response_data
+                        and response_data["acknowledged"] is True
+                    ):
+                        if self.verbose:
+                            print(
+                                f"[RPC] ACK received for request {expected_id}, waiting for final response..."
+                            )
+                        continue  # Skip ACK, wait for final response
+
+                    # Determine success: void functions return null, treat as success
+                    success: bool  # Explicit type declaration
+                    if "success" in data:
+                        success = bool(data.get("success", True))
+                    elif isinstance(response_data, dict):
+                        success = bool(response_data.get("success", True))  # type: ignore[arg-type]
+                    else:
+                        # Void functions return null - treat as successful execution
+                        success = True
+
+                    # Ensure response_data is always a dict for consistent API
+                    final_response_data: dict[str, Any]
+                    if response_data is None or not isinstance(response_data, dict):
+                        final_response_data = {}
+                    else:
+                        final_response_data = response_data  # type: ignore[assignment]
+
+                    return RpcResponse(
+                        success=success,
+                        data=final_response_data,
+                        raw_line=line,
+                        _id=response_id,  # ID is always present
+                    )
+                except json.JSONDecodeError:
+                    continue
 
         except KeyboardInterrupt:
             notify_main_thread()

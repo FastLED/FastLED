@@ -1,4 +1,4 @@
-// @filter: (platform is esp32)
+// @filter: (platform is esp32) or (platform is native)
 
 // examples/Validation/Validation.ino
 //
@@ -184,7 +184,9 @@
 #include "ValidationHelpers.h"
 #include "ValidationRemote.h"
 #include "ValidationAsync.h"
+#ifdef FL_IS_ESP32
 #include "platforms/esp/32/watchdog_esp32.h"  // For fl::watchdog_setup()
+#endif
 
 // ============================================================================
 // Configuration
@@ -201,7 +203,11 @@ const fl::RxDeviceType RX_TYPE = fl::RxDeviceType::RMT;
 // These defaults are chosen based on hardware constraints of each platform.
 // They can be overridden at runtime via JSON-RPC (setPins, setTxPin, setRxPin).
 
-#if defined(FL_IS_ESP_32S3)
+#if defined(FL_IS_STUB)
+    // Stub: TX and RX same pin — NativeRxDevice monitors TX output directly
+    constexpr int DEFAULT_PIN_TX = 1;
+    constexpr int DEFAULT_PIN_RX = 1;
+#elif defined(FL_IS_ESP_32S3)
     // ESP32-S3: Standard configuration with jumper wire
     // Connect GPIO 1 (TX) to GPIO 2 (RX) with a physical jumper wire
     constexpr int DEFAULT_PIN_TX = 1;
@@ -254,7 +260,7 @@ fl::shared_ptr<ValidationState> g_validation_state;  // Shared state pointer
 // Initialize serial buffers with platform-specific configuration
 // Note: Some boards (ESP32S2) don't support setTxBufferSize() on USBCDC interface
 void init_serial_buffers() {
-#if !defined(FL_IS_ESP_32S2)
+#if defined(FL_IS_ESP32) && !defined(FL_IS_ESP_32S2)
     Serial.setTxBufferSize(4096);  // 4KB buffer (default is 256 bytes)
 #endif
 }
@@ -381,6 +387,10 @@ void setup() {
     FL_PRINT("[ASYNC] Setting up JSON-RPC async task (10ms interval)");
     validation::setupRpcAsyncTask(RemoteControlSingleton::instance(), 10);
     FL_PRINT("[ASYNC] ✓ JSON-RPC task registered with scheduler");
+
+    // Stub: register self-running validation client (no-op on ESP32)
+    validation::maybeRegisterStubAutorun(RemoteControlSingleton::instance(),
+                                          g_validation_state);
 
     // ========================================================================
     // GPIO Baseline Test - Verify GPIO→GPIO path works before testing PARLIO

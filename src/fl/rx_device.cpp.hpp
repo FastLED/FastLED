@@ -16,6 +16,12 @@
 #endif
 // IWYU pragma: end_keep
 
+#ifdef FL_IS_STUB
+// IWYU pragma: begin_keep
+#include "platforms/shared/rx_device_native.h"  // ok platform headers
+// IWYU pragma: end_keep
+#endif
+
 namespace fl {
 
 // Private static helper - creates dummy device (singleton pattern)
@@ -89,22 +95,36 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>(int pin) {
     return device;
 }
 
+#elif defined(FL_IS_STUB)
+
+// RMT device specialization (native stub for host/desktop testing)
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>(int pin) {
+    return NativeRxDevice::create(pin);
+}
+
+// ISR device specialization (native stub for host/desktop testing)
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>(int pin) {
+    return NativeRxDevice::create(pin);
+}
+
 #else
 
-// RMT device specialization (dummy for non-ESP32)
+// RMT device specialization (dummy for non-ESP32, non-stub)
 template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>(int pin) {
     (void)pin;  // Suppress unused parameter warning
     return RxDevice::createDummy();
 }
 
-// ISR device specialization (dummy for non-ESP32)
+// ISR device specialization (dummy for non-ESP32, non-stub)
 template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>(int pin) {
     (void)pin;  // Suppress unused parameter warning
     return RxDevice::createDummy();
 }
 
-#endif // FL_IS_ESP32
+#endif // FL_IS_ESP32 / FL_IS_STUB
 
 } // namespace fl

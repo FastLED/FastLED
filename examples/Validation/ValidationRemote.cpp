@@ -365,6 +365,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
 
     fl::shared_ptr<fl::RxDevice> rx_channel_to_use = mState->rx_channel;
     bool created_temp_rx = false;
+    (void)created_temp_rx;
 
     if (pin_rx != mState->pin_rx && mState->rx_factory) {
         DEBUG_PRINTLN("[DEBUG] Creating temp RX channel");
@@ -779,13 +780,24 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     // Returns: {success, passed, totalTests, passedTests, duration_ms, driver,
     //          laneCount, laneSizes, pattern, firstFailure?}
     // ASYNC: Sends ACK immediately, final response sent via sendAsyncResponse()
+    // NOTE: runSingleTestImpl() may return early (error cases) without calling
+    // sendAsyncResponse(). This wrapper ensures a response is ALWAYS sent so
+    // the Python client never times out waiting 120s for a missing response.
     mRemote->bind("runSingleTest", [this](const fl::Json& args) -> fl::Json {
         Serial.println("[ASYNC-FLOW] ▶▶▶ Lambda called - about to invoke runSingleTestImpl");
         Serial.flush();
         fl::Json result = this->runSingleTestImpl(args);
         Serial.println("[ASYNC-FLOW] ◀◀◀ runSingleTestImpl returned");
         Serial.flush();
-        return result;
+        // If runSingleTestImpl returned a non-null response, it exited early without
+        // calling sendAsyncResponse(). Send it now so the client gets a response.
+        if (!result.is_null()) {
+            Serial.println("[ASYNC-FLOW] ⚠ Early exit detected - routing error response via sendAsyncResponse");
+            Serial.flush();
+            mRemote->sendAsyncResponse("runSingleTest", result);
+            return fl::Json(nullptr);
+        }
+        return fl::Json(nullptr);
     }, fl::RpcMode::ASYNC);
 
     // ========================================================================

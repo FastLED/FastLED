@@ -146,7 +146,7 @@ endforeach
 # libunwind is injected via DLL at runtime by clang-tool-chain, no explicit linking needed.
 example_runner_exe = executable('example_runner',
   files('../tests/shared/example_runner.cpp'),
-  include_directories: [src_dir, stub_dir],
+  include_directories: [src_dir, stub_dir, tests_dir],
   cpp_args: runner_cpp_args,
   link_args: runner_link_args,
   link_with: [crash_handler_lib],  # Shared crash handler from root meson.build

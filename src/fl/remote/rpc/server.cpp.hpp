@@ -52,9 +52,10 @@ size_t Server::pull() {
         // Process request through handler
         fl::Json response = mRequestHandler(request);
 
-        // Queue response (skip scheduled acknowledgments - actual result sent later)
+        // Queue response (skip scheduled acknowledgments and async skip markers)
         bool isScheduledAck = response.contains("scheduled") && response["scheduled"].as_bool().value_or(false);
-        if (!response.is_null() && !isScheduledAck) {
+        bool isAsyncSkip = response.contains("__skip") && response["__skip"].as_bool().value_or(false);
+        if (!response.is_null() && !isScheduledAck && !isAsyncSkip) {
             mOutgoingQueue.push_back(fl::move(response));
         }
 

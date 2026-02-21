@@ -22,7 +22,7 @@
 namespace fl {
     class Json;
     class Remote;
-    struct RxDevice;
+    class RxDevice;
 }
 
 /// @brief Factory function type for creating RxDevice instances

@@ -2,16 +2,14 @@
 
 // IWYU pragma: private
 
-/// @file platforms/shared/pin_noop.hpp
-/// Pin implementation for non-Arduino builds (WASM, host tests without stub GPIO).
+/// @file platforms/stub/pin_stub.hpp
+/// Pin implementation for the stub (native/host) platform.
 ///
-/// All functions are no-ops. Stub (FL_IS_STUB) builds use
-/// platforms/stub/pin_stub.hpp instead, which routes through fl::stub::setPinState.
-///
-/// Functions are placed in the platform namespace and will be wrapped by non-inline
-/// functions in fl/pin.cpp.
+/// Tracks pin state and records edges via fl::stub::setPinState /
+/// fl::stub::getPinState, enabling NativeRxDevice and ClocklessController
+/// stub to observe simulated GPIO transitions.
 
-#include "platforms/is_platform.h"
+#include "platforms/stub/stub_gpio.h"
 
 namespace fl {
 namespace platforms {
@@ -21,19 +19,19 @@ namespace platforms {
 // ============================================================================
 
 inline void pinMode(int /*pin*/, PinMode /*mode*/) {
-    // No-op: Host builds don't have physical pins
+    // No physical pins on host builds
 }
 
 // ============================================================================
 // Digital I/O
 // ============================================================================
 
-inline void digitalWrite(int /*pin*/, PinValue /*val*/) {
-    // No-op: Host builds don't have physical pins
+inline void digitalWrite(int pin, PinValue val) {
+    fl::stub::setPinState(pin, val == PinValue::High);
 }
 
-inline PinValue digitalRead(int /*pin*/) {
-    return PinValue::Low;  // Always return LOW
+inline PinValue digitalRead(int pin) {
+    return fl::stub::getPinState(pin) ? PinValue::High : PinValue::Low;
 }
 
 // ============================================================================
@@ -41,21 +39,14 @@ inline PinValue digitalRead(int /*pin*/) {
 // ============================================================================
 
 inline u16 analogRead(int /*pin*/) {
-    // No-op: Host builds don't have physical pins
-    return 0;  // Always return 0
+    return 0;
 }
 
-inline void analogWrite(int /*pin*/, u16 /*val*/) {
-    // No-op: Host builds don't have physical pins
-}
+inline void analogWrite(int /*pin*/, u16 /*val*/) {}
 
-inline void setPwm16(int /*pin*/, u16 /*val*/) {
-    // No-op: Host builds don't have physical pins
-}
+inline void setPwm16(int /*pin*/, u16 /*val*/) {}
 
-inline void setAdcRange(AdcRange /*range*/) {
-    // No-op: Host builds don't have physical pins
-}
+inline void setAdcRange(AdcRange /*range*/) {}
 
 // ============================================================================
 // PWM Frequency Control

@@ -1169,10 +1169,10 @@ public:
 	/// Configure platform-specific channel bus drivers
 	/// @{
 
-#ifdef FL_IS_ESP32
-	/// @platform ESP32
-	/// @note These methods control driver selection for RMT, SPI, and PARLIO engines
-	/// @note Only functional on ESP32 platforms with multi-engine architecture
+#if defined(FL_IS_ESP32) || defined(FL_IS_STUB)
+	/// @platform ESP32 / Stub
+	/// @note On ESP32: controls RMT, SPI, PARLIO, etc. driver selection at runtime
+	/// @note On FL_IS_STUB: delegates to ChannelBusManager (registers STUB engine)
 
 	/// Enable or disable a channel driver by name at runtime
 	/// @param name Driver name to control (case-sensitive, e.g., "RMT", "SPI", "PARLIO")
@@ -1256,6 +1256,11 @@ public:
 	/// @note Uses delayMicroseconds(100) between polls to prevent watchdog timeout
 	/// @note Safe to call on all platforms (no-op on platforms without channel bus)
 	void wait();
+
+	/// Wait for all channel bus transmissions to complete with timeout
+	/// @param timeout_ms Maximum milliseconds to wait (0 = wait forever)
+	/// @return true if all engines became READY, false if timeout occurred
+	bool wait(fl::u32 timeout_ms);
 
 	/// Set the maximum power to be used, given in volts and milliamps.
 	/// @param volts how many volts the leds are being driven at (usually 5)

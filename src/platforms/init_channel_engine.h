@@ -3,7 +3,11 @@
 // ok no namespace fl - Platform dispatch header only
 // This header dispatches to platform-specific implementations
 
-#if defined(ESP32)
+#include "platforms/stub/is_stub.h"
+
+#if defined(FL_IS_STUB)
+    #include "platforms/stub/init_channel_engine.h"
+#elif defined(ESP32)
     #include "platforms/esp/32/init_channel_engine.h"
 #include "platforms/arm/stm32/is_stm32.h"
 #include "platforms/arm/teensy/is_teensy.h"

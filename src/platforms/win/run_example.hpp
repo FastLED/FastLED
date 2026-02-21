@@ -32,7 +32,7 @@
 // IWYU pragma: end_keep
 
 // Timeout watchdog for hung example detection
-#include "../../../tests/timeout_watchdog.h"  // ok include path, ok relative include. IWYU pragma: keep
+#include "timeout_watchdog.h"  // IWYU pragma: keep
 
 // Crash handler setup (defined in crash_handler_main.cpp)
 extern "C" void runner_setup_crash_handler();

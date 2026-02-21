@@ -20,6 +20,7 @@
 #include "fl/warn.h"
 #include "fl/stl/vector.h"
 #include "platforms/shared/active_strip_tracker/active_strip_tracker.h"
+#include "platforms/stub/stub_gpio.h"
 
 namespace fl {
 
@@ -103,6 +104,18 @@ protected:
         auto& data = mChannelData->getData();
         data.clear();
         iterator.writeWS2812(&data);
+
+        // Simulate WS2812 GPIO pin toggling so NativeRxDevice can capture the data.
+        // This fills the per-pin edge buffer used by NativeRxDevice::decode().
+        // The timing constants come from the TIMING template parameter.
+        {
+            ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
+            fl::stub::simulateWS2812Output(
+                DATA_PIN,
+                fl::span<const u8>(data.data(), data.size()),
+                timing
+            );
+        }
 
         // Enqueue for transmission (will be sent when engine->show() is called)
         engine->enqueue(mChannelData);
