@@ -70,3 +70,4 @@
 #include "fl/xypath.cpp.hpp"
 #include "fl/xypath_impls.cpp.hpp"
 #include "fl/xypath_renderer.cpp.hpp"
+#include "fl/yield.cpp.hpp"

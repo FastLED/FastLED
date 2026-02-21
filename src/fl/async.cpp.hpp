@@ -10,6 +10,7 @@
 #include "fl/thread_local.h"
 
 #include "fl/stl/new.h"
+#include "fl/yield.h"
 
 // Platform-specific includes
 #ifdef FL_IS_WASM
@@ -86,6 +87,7 @@ size_t AsyncManager::total_active_tasks() const {
 void async_run() {
     fl::Scheduler::instance().update();
     AsyncManager::instance().update_all();
+    fl::yield(); // Let RTOS tasks (WiFi, BT, etc.) run on ESP32
 }
 
 void async_yield() {
