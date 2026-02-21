@@ -1197,6 +1197,100 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         }
         return response;
     });
+
+    // Register "testAsync" function - verify that show() returns before TX completes (async DMA)
+    // This proves the SPI driver releases back to the main thread while draining.
+    mRemote->bind("testAsync", [this](const fl::Json& args) -> fl::Json {
+        fl::Json response = fl::Json::object();
+
+        // Parse optional numLeds (default: 300 LEDs ≈ 9ms TX time at WS2812B timing)
+        int num_leds = 300;
+        if (args.is_object() && args.contains("numLeds") && args["numLeds"].is_int()) {
+            num_leds = static_cast<int>(args["numLeds"].as_int().value());
+        } else if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
+            fl::Json config = args[0];
+            if (config.contains("numLeds") && config["numLeds"].is_int()) {
+                num_leds = static_cast<int>(config["numLeds"].as_int().value());
+            }
+        }
+
+        if (num_leds < 10 || num_leds > 1000) {
+            response.set("success", false);
+            response.set("error", "InvalidNumLeds");
+            response.set("message", "numLeds must be 10-1000");
+            return response;
+        }
+
+        // Set up a channel with the specified number of LEDs
+        fl::vector<CRGB> leds(num_leds);
+        for (int i = 0; i < num_leds; i++) {
+            leds[i] = CRGB(0xFF, 0x00, 0x80);  // Solid color pattern
+        }
+
+        fl::ChannelConfig channel_config(
+            mState->pin_tx,
+            fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(),
+            fl::span<CRGB>(leds.data(), leds.size()),
+            RGB
+        );
+
+        auto channel = FastLED.add(channel_config);
+        if (!channel) {
+            response.set("success", false);
+            response.set("error", "ChannelCreationFailed");
+            response.set("message", "Failed to create channel");
+            return response;
+        }
+
+        // Measure show() duration vs wait() duration
+        uint32_t t0 = micros();
+        FastLED.show();
+        uint32_t t1 = micros();
+        FastLED.wait(5000);  // 5 second timeout
+        uint32_t t2 = micros();
+
+        uint32_t show_us = t1 - t0;
+        uint32_t wait_us = t2 - t1;
+        uint32_t total_us = t2 - t0;
+
+        // Clean up channel
+        FastLED.reset(ResetFlags::CHANNELS);
+
+        // Determine if async behavior is working:
+        // If async: show_us << total_us (show returns quickly, wait blocks for remainder)
+        // If blocking: show_us ≈ total_us (show blocks for entire TX, wait returns instantly)
+        // Pass criterion: show_us < 50% of total_us
+        bool passed = (total_us > 0) && (show_us < total_us / 2);
+
+        // Determine driver name
+        fl::string driver_name = "unknown";
+        for (fl::size i = 0; i < mState->drivers_available.size(); i++) {
+            if (mState->drivers_available[i].enabled) {
+                driver_name = mState->drivers_available[i].name;
+                break;
+            }
+        }
+
+        response.set("success", true);
+        response.set("passed", passed);
+        response.set("show_us", static_cast<int64_t>(show_us));
+        response.set("wait_us", static_cast<int64_t>(wait_us));
+        response.set("total_us", static_cast<int64_t>(total_us));
+        response.set("num_leds", static_cast<int64_t>(num_leds));
+        response.set("driver", driver_name.c_str());
+
+        fl::sstream msg;
+        if (passed) {
+            msg << "Async OK: show() returned in " << show_us
+                << "us while TX took " << total_us << "us total";
+        } else {
+            msg << "Async FAIL: show() took " << show_us
+                << "us out of " << total_us << "us total (expected <50%)";
+        }
+        response.set("message", msg.str().c_str());
+
+        return response;
+    });
 }
 
 void ValidationRemoteControl::tick(uint32_t current_millis) {
