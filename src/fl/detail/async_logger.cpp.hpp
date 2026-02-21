@@ -45,7 +45,7 @@ namespace detail {
         state->mNeedsFlush = true;
         // Debug: Toggle a counter to verify ISR is firing (visible in debugger)
         static volatile fl::u32 isr_fire_count = 0;
-        isr_fire_count++;
+        isr_fire_count = isr_fire_count + 1;
     }
 } // namespace detail
 

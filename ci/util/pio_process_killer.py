@@ -109,7 +109,7 @@ class PioProcessRegistry:
                 else self._original_sigint
             )
             if callable(original):
-                original(signum, frame)
+                original(signum, frame)  # type: ignore[call-top-callable]
             elif original == signal.SIG_DFL:
                 # Re-raise to trigger default behavior
                 signal.signal(signum, signal.SIG_DFL)
