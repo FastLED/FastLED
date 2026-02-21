@@ -1,8 +1,8 @@
 // Unit tests for DownbeatDetector with synthetic data validation
 
 #include "fl/audio/audio_context.h"
-#include "fl/fx/audio/detectors/beat.h"
-#include "fl/fx/audio/detectors/downbeat.h"
+#include "fl/audio/detectors/beat.h"
+#include "fl/audio/detectors/downbeat.h"
 #include "fl/stl/new.h"
 #include "test.h"
 #include "fl/audio.h"

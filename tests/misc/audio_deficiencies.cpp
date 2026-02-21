@@ -19,11 +19,11 @@
 #include "fl/audio.h"
 #include "fl/audio/audio_context.h"
 #include "fl/fft.h"
-#include "fl/fx/audio/audio_processor.h"
-#include "fl/fx/audio/detectors/beat.h"
-#include "fl/fx/audio/detectors/frequency_bands.h"
-#include "fl/fx/audio/detectors/tempo_analyzer.h"
-#include "fl/fx/audio/detectors/vocal.h"
+#include "fl/audio/audio_processor.h"
+#include "fl/audio/detectors/beat.h"
+#include "fl/audio/detectors/frequency_bands.h"
+#include "fl/audio/detectors/tempo_analyzer.h"
+#include "fl/audio/detectors/vocal.h"
 #include "fl/stl/math.h"
 
 using namespace fl;

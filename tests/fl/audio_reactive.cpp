@@ -1,5 +1,5 @@
 #include "fl/audio_reactive.h"
-#include "fl/fx/audio/audio_processor.h"
+#include "fl/audio/audio_processor.h"
 #include "audio/test_helpers.hpp"
 #include "fl/audio.h"
 #include "fl/circular_buffer.h"

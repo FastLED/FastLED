@@ -13,7 +13,7 @@ void setup() {}
 void loop() {}
 #else
 
-#include "fl/fx/audio/audio_processor.h"
+#include "fl/audio/audio_processor.h"
 #include "fl/ui.h"
 
 // LED Configuration

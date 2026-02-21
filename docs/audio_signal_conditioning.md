@@ -41,9 +41,9 @@ audio.processSample(sample);
 Each component can also be used independently:
 
 ```cpp
-#include "fl/fx/audio/signal_conditioner.h"
-#include "fl/fx/audio/auto_gain.h"
-#include "fl/fx/audio/noise_floor_tracker.h"
+#include "fl/audio/signal_conditioner.h"
+#include "fl/audio/auto_gain.h"
+#include "fl/audio/noise_floor_tracker.h"
 
 // Signal conditioning
 SignalConditioner conditioner;
