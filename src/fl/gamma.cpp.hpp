@@ -2,7 +2,6 @@
 
 namespace fl {
 
-// gamma_2_8 lookup table has been moved to fl/ease.cpp.hpp
-// This file is kept for compatibility with the build system
+// Gamma8 implementation has moved to ease.cpp.hpp
 
 } // namespace fl

@@ -11,6 +11,12 @@
 #include "lib8tion/intmap.h"
 #include "fl/sin32.h"
 #include "fl/int.h"
+#include "fl/stl/math.h"
+#include "fl/stl/weak_ptr.h"
+#include "fl/stl/unordered_map.h"
+#include "fl/align.h"
+#include "fl/fixed_point.h"
+#include "fl/hash.h"
 
 namespace fl {
 
@@ -338,6 +344,90 @@ u16 easeInOutSine16(u16 i) {
     // We want: (2147418112 - cos_result) / 2, then scale to [0, 65535]
     fl::i64 adjusted = (2147418112LL - (fl::i64)cos_result) / 2;
     return (u16)((fl::u64)adjusted * 65535ULL / 2147418112ULL);
+}
+
+// --- Gamma8 implementation ---
+
+// Fixed-point key for gamma cache: unsigned 4.12 (range [0, 15.999], 1/4096 resolution).
+using GammaKey = fl::ufixed_point<4, 12>;
+
+// Hash specialization so GammaKey works as an unordered_map key.
+template <> struct Hash<GammaKey> {
+    u32 operator()(const GammaKey &key) const noexcept {
+        u16 raw = key.raw();
+        return MurmurHash3_x86_32(&raw, sizeof(raw));
+    }
+};
+
+class Gamma8Impl : public Gamma8 {
+public:
+    explicit Gamma8Impl(float gamma) {
+        mLut[0] = 0;
+        for (int i = 1; i < 256; ++i) {
+            float v = fl::powf(static_cast<float>(i) / 255.0f, gamma) * 65535.0f;
+            mLut[i] = static_cast<u16>(fl::roundf(v));
+        }
+    }
+
+    void convert(fl::span<const u8> input,
+                  fl::span<u16> output) const override {
+        const int n =
+            input.size() < output.size() ? input.size() : output.size();
+        for (int i = 0; i < n; ++i) {
+            output[i] = mLut[input[i]];
+        }
+    }
+
+    void convert(fl::span<const fl::ufixed_point<8, 8>> input,
+                  fl::span<u16> output) const override {
+        const int n =
+            input.size() < output.size() ? input.size() : output.size();
+        for (int i = 0; i < n; ++i) {
+            output[i] = lerpLut(input[i]);
+        }
+    }
+
+    void convert(fl::span<const fl::ufixed_point<8, 8>> input,
+                  fl::span<fl::ufixed_point<8, 8>> output) const override {
+        using FP = fl::ufixed_point<8, 8>;
+        const int n =
+            input.size() < output.size() ? input.size() : output.size();
+        for (int i = 0; i < n; ++i) {
+            output[i] = FP::from_raw(lerpLut(input[i]));
+        }
+    }
+
+private:
+    u16 lerpLut(fl::ufixed_point<8, 8> fp) const {
+        u16 raw = fp.raw();
+        u8 idx = static_cast<u8>(raw >> 8);    // integer part (LUT index)
+        u8 frac = static_cast<u8>(raw & 0xFF); // fractional part (0-255)
+        u16 a = mLut[idx];
+        u16 b = (idx < 255) ? mLut[idx + 1] : mLut[idx];
+        i32 diff = static_cast<i32>(b) - static_cast<i32>(a);
+        return static_cast<u16>(a + ((diff * frac) >> 8));
+    }
+
+    FL_ALIGNAS(64) u16 mLut[256];
+};
+
+fl::shared_ptr<const Gamma8> Gamma8::getOrCreate(float gamma) {
+    GammaKey key(gamma);
+
+    static fl::unordered_map<GammaKey, fl::weak_ptr<const Gamma8>> sCache;
+
+    auto* wp = sCache.find_value(key);
+    if (wp) {
+        fl::shared_ptr<const Gamma8> existing = wp->lock();
+        if (existing) {
+            return existing;
+        }
+    }
+
+    fl::shared_ptr<const Gamma8> ptr =
+        fl::make_shared<Gamma8Impl>(gamma);
+    sCache[key] = ptr;
+    return ptr;
 }
 
 } // namespace fl

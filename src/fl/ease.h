@@ -9,6 +9,9 @@ Modern platforms are so fast that the extra performance is not needed, but accur
 */
 
 #include "fl/int.h"
+#include "fl/stl/span.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/fixed_point.h"
 
 namespace fl {
 
@@ -271,5 +274,19 @@ inline void ease8(EaseType type, u8* src, u8* dst, u8 count) {
         }
     }
 }
+
+// Gamma8: cached 8-bit to 16-bit gamma correction with 64-byte aligned LUT.
+// Use getOrCreate(gamma) to obtain a shared instance. Instances with the
+// same gamma value are deduplicated via an internal weak_ptr cache that
+// automatically expires when all callers release their shared_ptr.
+class Gamma8 {
+public:
+    static fl::shared_ptr<const Gamma8> getOrCreate(float gamma);
+    virtual ~Gamma8() = default;
+
+    virtual void convert(fl::span<const u8> input, fl::span<u16> output) const = 0;
+    virtual void convert(fl::span<const fl::ufixed_point<8, 8>> input, fl::span<u16> output) const = 0;
+    virtual void convert(fl::span<const fl::ufixed_point<8, 8>> input, fl::span<fl::ufixed_point<8, 8>> output) const = 0;
+};
 
 } // namespace fl

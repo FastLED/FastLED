@@ -472,3 +472,130 @@ FL_TEST_CASE("All easing functions 8-bit vs 16-bit consistency tests") {
         }
     }
 }
+
+// --- Gamma8 tests ---
+// Gamma8 is declared in fl/ease.h (already included above)
+
+FL_TEST_CASE("Gamma8 - getOrCreate returns same instance for same gamma") {
+    auto a = Gamma8::getOrCreate(2.8f);
+    auto b = Gamma8::getOrCreate(2.8f);
+    FL_CHECK(a.get() == b.get());
+}
+
+FL_TEST_CASE("Gamma8 - different gamma returns different instance") {
+    auto a = Gamma8::getOrCreate(1.0f);
+    auto b = Gamma8::getOrCreate(2.8f);
+    FL_CHECK(a.get() != b.get());
+}
+
+FL_TEST_CASE("Gamma8 - u8 to u16 span overload") {
+    auto g = Gamma8::getOrCreate(2.0f);
+    u8 in[] = {0, 128, 255};
+    u16 out[3];
+    g->convert(fl::span<const u8>(in, 3), fl::span<u16>(out, 3));
+    FL_CHECK(out[0] == 0);
+    // 128/255 = 0.502, pow(0.502, 2.0) ~ 0.252 -> ~16516
+    FL_CHECK(out[1] > 13000);
+    FL_CHECK(out[1] < 20000);
+    FL_CHECK(out[2] == 65535);
+}
+
+FL_TEST_CASE("Gamma8 - u8 to u16 gamma 1.0 is linear scale") {
+    auto g = Gamma8::getOrCreate(1.0f);
+    u8 in[] = {0, 1, 128, 255};
+    u16 out[4];
+    g->convert(fl::span<const u8>(in, 4), fl::span<u16>(out, 4));
+    FL_CHECK(out[0] == 0);
+    // gamma 1.0: lut[i] = round(i/255 * 65535) = round(i * 257.0)
+    FL_CHECK(out[1] == 257);
+    FL_CHECK_CLOSE(out[2], 32896, 1);
+    FL_CHECK(out[3] == 65535);
+}
+
+FL_TEST_CASE("Gamma8 - cache expires when all shared_ptrs released") {
+    const Gamma8* raw_ptr;
+    {
+        auto g = Gamma8::getOrCreate(3.5f);
+        raw_ptr = g.get();
+    }
+    // g is out of scope — weak_ptr in cache should be expired.
+    // getOrCreate must construct a new instance.
+    auto g2 = Gamma8::getOrCreate(3.5f);
+    // New instance (old one was destroyed), pointer must differ.
+    FL_CHECK(g2.get() != raw_ptr);
+}
+
+FL_TEST_CASE("Gamma8 - fixed_point<8,8> convert with lerp interpolation") {
+    using FP = fl::ufixed_point<8, 8>;
+    auto g = Gamma8::getOrCreate(2.0f);
+
+    // Integer inputs should match u8 LUT exactly
+    FP fp_in[] = {FP(0), FP(128), FP(255)};
+    FP fp_out[3];
+    g->convert(fl::span<const FP>(fp_in, 3), fl::span<FP>(fp_out, 3));
+
+    // Also get u8 results for comparison
+    u8 u8_in[] = {0, 128, 255};
+    u16 u16_out[3];
+    g->convert(fl::span<const u8>(u8_in, 3), fl::span<u16>(u16_out, 3));
+
+    // Integer-valued fixed-point should produce same raw as u8 LUT
+    FL_CHECK(fp_out[0].raw() == u16_out[0]);
+    FL_CHECK(fp_out[1].raw() == u16_out[1]);
+    FL_CHECK(fp_out[2].raw() == u16_out[2]);
+}
+
+FL_TEST_CASE("Gamma8 - fixed_point<8,8> lerp interpolates between LUT entries") {
+    using FP = fl::ufixed_point<8, 8>;
+    auto g = Gamma8::getOrCreate(2.0f);
+
+    // Get LUT values at index 100 and 101 via u8 convert
+    u8 u8_in[] = {100, 101};
+    u16 u16_out[2];
+    g->convert(fl::span<const u8>(u8_in, 2), fl::span<u16>(u16_out, 2));
+    u16 lut100 = u16_out[0];
+    u16 lut101 = u16_out[1];
+
+    // Midpoint: 100.5 = raw 100*256 + 128 = 25728
+    FP mid = FP::from_raw(100 * 256 + 128);
+    FP fp_out[1];
+    g->convert(fl::span<const FP>(&mid, 1), fl::span<FP>(fp_out, 1));
+
+    // Result should be approximately halfway between lut[100] and lut[101]
+    u16 expected_mid = static_cast<u16>(
+        lut100 + ((static_cast<i32>(lut101) - static_cast<i32>(lut100)) * 128 >> 8));
+    FL_CHECK(fp_out[0].raw() == expected_mid);
+
+    // Sanity: interpolated value is strictly between the two LUT entries
+    FL_CHECK(fp_out[0].raw() > lut100);
+    FL_CHECK(fp_out[0].raw() < lut101);
+}
+
+FL_TEST_CASE("Gamma8 - fixed_point<8,8> to u16 span overload") {
+    using FP = fl::ufixed_point<8, 8>;
+    auto g = Gamma8::getOrCreate(2.0f);
+
+    // Integer inputs via fixed-point -> u16 should match u8 -> u16 exactly
+    FP fp_in[] = {FP(0), FP(128), FP(255)};
+    u16 fp_u16_out[3];
+    g->convert(fl::span<const FP>(fp_in, 3), fl::span<u16>(fp_u16_out, 3));
+
+    u8 u8_in[] = {0, 128, 255};
+    u16 u8_u16_out[3];
+    g->convert(fl::span<const u8>(u8_in, 3), fl::span<u16>(u8_u16_out, 3));
+
+    FL_CHECK(fp_u16_out[0] == u8_u16_out[0]);
+    FL_CHECK(fp_u16_out[1] == u8_u16_out[1]);
+    FL_CHECK(fp_u16_out[2] == u8_u16_out[2]);
+
+    // Fractional input: 100.5 -> u16, should match fixed_point output raw
+    FP mid = FP::from_raw(100 * 256 + 128);
+    u16 mid_u16_out[1];
+    g->convert(fl::span<const FP>(&mid, 1), fl::span<u16>(mid_u16_out, 1));
+
+    FP mid_fp_out[1];
+    g->convert(fl::span<const FP>(&mid, 1), fl::span<FP>(mid_fp_out, 1));
+
+    // Both overloads should produce the same lerped value
+    FL_CHECK(mid_u16_out[0] == mid_fp_out[0].raw());
+}
