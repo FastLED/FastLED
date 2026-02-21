@@ -40,22 +40,25 @@ FL_TEST_CASE("perlin_s16x16 - scalar vs SIMD single point") {
     fl::i32 scalar_result = perlin_s16x16::pnoise2d_raw(nx, ny, fade_lut, perm_table);
 
     // SIMD evaluation (batch of 4, we only care about first element)
-    fl::i32 nx_batch[4] = {nx, 0, 0, 0};
-    fl::i32 ny_batch[4] = {ny, 0, 0, 0};
-    fl::i32 simd_result[4];
-    perlin_s16x16_simd::pnoise2d_raw_simd4(nx_batch, ny_batch, fade_lut, perm_table, simd_result);
+    fl::simd::simd_u32x4 nx_vec = fl::simd::set_u32_4(
+        static_cast<fl::u32>(nx), 0, 0, 0);
+    fl::simd::simd_u32x4 ny_vec = fl::simd::set_u32_4(
+        static_cast<fl::u32>(ny), 0, 0, 0);
+    fl::simd::simd_u32x4 simd_vec = perlin_s16x16_simd::pnoise2d_raw_simd4_vec(
+        nx_vec, ny_vec, fade_lut, perm_table);
+    fl::i32 simd_result = static_cast<fl::i32>(fl::simd::extract_u32_4(simd_vec, 0));
 
     // Print results for debugging
     fprintf(stderr, "\n=== Perlin s16x16 Test (nx=%d, ny=%d) ===\n", nx, ny);
     fprintf(stderr, "Scalar result: %d\n", scalar_result);
-    fprintf(stderr, "SIMD result:   %d\n", simd_result[0]);
-    fprintf(stderr, "Difference:    %d\n", simd_result[0] - scalar_result);
+    fprintf(stderr, "SIMD result:   %d\n", simd_result);
+    fprintf(stderr, "Difference:    %d\n", simd_result - scalar_result);
     fflush(stderr);
 
     // They should match exactly
-    if (scalar_result != simd_result[0]) {
+    if (scalar_result != simd_result) {
         fprintf(stderr, "❌ FAILURE: SIMD result does not match scalar! Scalar=%d, SIMD=%d, diff=%d\n",
-                scalar_result, simd_result[0], simd_result[0] - scalar_result);
+                scalar_result, simd_result, simd_result - scalar_result);
         fflush(stderr);
         FL_ASSERT(false, "SIMD result does not match scalar");
     }
@@ -74,18 +77,23 @@ FL_TEST_CASE("perlin_s16x16 - scalar vs SIMD batch") {
     fl::i32 expected[4] = {-8740, 17879, -6960, 9452};
 
     // SIMD evaluation
-    fl::i32 simd_result[4];
-    perlin_s16x16_simd::pnoise2d_raw_simd4(nx_batch, ny_batch, fade_lut, perm_table, simd_result);
+    fl::simd::simd_u32x4 nx_vec = fl::simd::load_u32_4(
+        reinterpret_cast<const fl::u32*>(nx_batch)); // ok reinterpret cast
+    fl::simd::simd_u32x4 ny_vec = fl::simd::load_u32_4(
+        reinterpret_cast<const fl::u32*>(ny_batch)); // ok reinterpret cast
+    fl::simd::simd_u32x4 simd_vec = perlin_s16x16_simd::pnoise2d_raw_simd4_vec(
+        nx_vec, ny_vec, fade_lut, perm_table);
 
     fprintf(stderr, "\n=== Perlin s16x16 Batch Test ===\n");
     for (int i = 0; i < 4; i++) {
         // Compute scalar result for comparison
         fl::i32 scalar_result = perlin_s16x16::pnoise2d_raw(nx_batch[i], ny_batch[i], fade_lut, perm_table);
+        fl::i32 simd_result = static_cast<fl::i32>(fl::simd::extract_u32_4(simd_vec, i));
 
         fprintf(stderr, "Point %d: nx=%d, ny=%d\n", i, nx_batch[i], ny_batch[i]);
         fprintf(stderr, "  Scalar: %d (expected: %d)\n", scalar_result, expected[i]);
-        fprintf(stderr, "  SIMD:   %d\n", simd_result[i]);
-        fprintf(stderr, "  Diff:   %d\n", simd_result[i] - scalar_result);
+        fprintf(stderr, "  SIMD:   %d\n", simd_result);
+        fprintf(stderr, "  Diff:   %d\n", simd_result - scalar_result);
         fflush(stderr);
 
         // Verify scalar matches expected
@@ -97,9 +105,9 @@ FL_TEST_CASE("perlin_s16x16 - scalar vs SIMD batch") {
         }
 
         // Verify SIMD matches scalar
-        if (scalar_result != simd_result[i]) {
+        if (scalar_result != simd_result) {
             fprintf(stderr, "❌ Point %d: SIMD result %d does not match scalar %d (diff=%d)\n",
-                    i, simd_result[i], scalar_result, simd_result[i] - scalar_result);
+                    i, simd_result, scalar_result, simd_result - scalar_result);
             fflush(stderr);
             FL_ASSERT(false, "SIMD result does not match scalar");
         }
@@ -137,25 +145,28 @@ FL_TEST_CASE("perlin_s16x16 - various coordinates") {
         fl::i32 scalar_result = perlin_s16x16::pnoise2d_raw(nx, ny, fade_lut, perm_table);
 
         // SIMD evaluation
-        fl::i32 nx_batch[4] = {nx, 0, 0, 0};
-        fl::i32 ny_batch[4] = {ny, 0, 0, 0};
-        fl::i32 simd_result[4];
-        perlin_s16x16_simd::pnoise2d_raw_simd4(nx_batch, ny_batch, fade_lut, perm_table, simd_result);
+        fl::simd::simd_u32x4 nx_vec = fl::simd::set_u32_4(
+            static_cast<fl::u32>(nx), 0, 0, 0);
+        fl::simd::simd_u32x4 ny_vec = fl::simd::set_u32_4(
+            static_cast<fl::u32>(ny), 0, 0, 0);
+        fl::simd::simd_u32x4 simd_vec = perlin_s16x16_simd::pnoise2d_raw_simd4_vec(
+            nx_vec, ny_vec, fade_lut, perm_table);
+        fl::i32 simd_result = static_cast<fl::i32>(fl::simd::extract_u32_4(simd_vec, 0));
 
         fprintf(stderr, "Test %zu: %s (nx=%d, ny=%d)\n", i, tests[i].desc, nx, ny);
         fprintf(stderr, "  Scalar: %d\n", scalar_result);
-        fprintf(stderr, "  SIMD:   %d\n", simd_result[0]);
+        fprintf(stderr, "  SIMD:   %d\n", simd_result);
 
-        if (scalar_result != simd_result[0]) {
-            fprintf(stderr, "  ❌ MISMATCH! Diff=%d\n", simd_result[0] - scalar_result);
+        if (scalar_result != simd_result) {
+            fprintf(stderr, "  ❌ MISMATCH! Diff=%d\n", simd_result - scalar_result);
         } else {
             fprintf(stderr, "  ✓ Match\n");
         }
         fflush(stderr);
 
-        if (scalar_result != simd_result[0]) {
+        if (scalar_result != simd_result) {
             fprintf(stderr, "❌ Test %zu (%s): SIMD result %d does not match scalar %d\n",
-                    i, tests[i].desc, simd_result[0], scalar_result);
+                    i, tests[i].desc, simd_result, scalar_result);
             fflush(stderr);
             FL_ASSERT(false, "SIMD result does not match scalar");
         }

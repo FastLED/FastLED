@@ -93,26 +93,6 @@ fl::simd::simd_u32x4 perlin_s16x16_simd::pnoise2d_raw_simd4_vec(
     // ── [end BOUNDARY E] ──────────────────────────────────────────────────────
 }
 
-// Array-accepting wrappers: load arrays → delegate to register overload.
-void perlin_s16x16_simd::pnoise2d_raw_simd4(
-    const fl::i32 nx[4], const fl::i32 ny[4],
-    const fl::i32 *fade_lut, const fl::u8 *perm,
-    fl::i32 out[4])
-{
-    fl::simd::simd_u32x4 nx_vec = fl::simd::load_u32_4(reinterpret_cast<const fl::u32*>(nx)); // ok reinterpret cast
-    fl::simd::simd_u32x4 ny_vec = fl::simd::load_u32_4(reinterpret_cast<const fl::u32*>(ny)); // ok reinterpret cast
-    fl::simd::simd_u32x4 result = pnoise2d_raw_simd4_vec(nx_vec, ny_vec, fade_lut, perm);
-    fl::simd::store_u32_4(reinterpret_cast<fl::u32*>(out), result); // ok reinterpret cast
-}
-
-fl::simd::simd_u32x4 perlin_s16x16_simd::pnoise2d_raw_simd4_vec(
-    const fl::i32 nx[4], const fl::i32 ny[4],
-    const fl::i32 *fade_lut, const fl::u8 *perm)
-{
-    fl::simd::simd_u32x4 nx_vec = fl::simd::load_u32_4(reinterpret_cast<const fl::u32*>(nx)); // ok reinterpret cast
-    fl::simd::simd_u32x4 ny_vec = fl::simd::load_u32_4(reinterpret_cast<const fl::u32*>(ny)); // ok reinterpret cast
-    return pnoise2d_raw_simd4_vec(nx_vec, ny_vec, fade_lut, perm);
-}
 
 }  // namespace fl
 

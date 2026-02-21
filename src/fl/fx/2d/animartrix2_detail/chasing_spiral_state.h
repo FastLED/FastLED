@@ -34,7 +34,7 @@ struct FL_ALIGNAS(16) ChasingSpiralState {
     int count = 0;
 
     // Perlin fade LUT (257 entries, Q8.24 format).
-    // FL_ALIGNAS(16): enables aligned SIMD loads in pnoise2d_raw_simd4.
+    // FL_ALIGNAS(16): enables aligned SIMD loads in pnoise2d_raw_simd4_vec.
     FL_ALIGNAS(16) fl::i32 fade_lut[257];
     bool fade_lut_initialized = false;
 

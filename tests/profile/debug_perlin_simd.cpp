@@ -42,15 +42,18 @@ int main() {
 
     // SIMD evaluation (batch of 4, we only care about first element)
     printf("--- SIMD ---\n");
-    fl::i32 nx_batch[4] = {nx, 0, 0, 0};
-    fl::i32 ny_batch[4] = {ny, 0, 0, 0};
-    fl::i32 simd_result[4];
-    perlin_s16x16::pnoise2d_raw_simd4(nx_batch, ny_batch, fade_lut, perm_table, simd_result);
-    printf("SIMD result:   %d\n\n", simd_result[0]);
+    fl::simd::simd_u32x4 nx_vec = fl::simd::set_u32_4(
+        static_cast<fl::u32>(nx), 0, 0, 0);
+    fl::simd::simd_u32x4 ny_vec = fl::simd::set_u32_4(
+        static_cast<fl::u32>(ny), 0, 0, 0);
+    fl::simd::simd_u32x4 simd_vec = perlin_s16x16_simd::pnoise2d_raw_simd4_vec(
+        nx_vec, ny_vec, fade_lut, perm_table);
+    fl::i32 simd_result = static_cast<fl::i32>(fl::simd::extract_u32_4(simd_vec, 0));
+    printf("SIMD result:   %d\n\n", simd_result);
 
-    printf("Difference:    %d\n", simd_result[0] - scalar_result);
+    printf("Difference:    %d\n", simd_result - scalar_result);
 
-    if (scalar_result == simd_result[0]) {
+    if (scalar_result == simd_result) {
         printf("\n✓ PASS: Results match!\n");
         return 0;
     } else {
