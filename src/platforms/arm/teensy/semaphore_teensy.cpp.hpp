@@ -9,9 +9,6 @@
 
 #include "semaphore_teensy.h"
 #include "fl/warn.h"
-// IWYU pragma: begin_keep
-#include "fl/stl/chrono.h"  // ok include - for timing
-// IWYU pragma: end_keep
 
 // Include platform-specific CMSIS headers for interrupt control
 #if defined(FL_IS_TEENSY_4X)
@@ -105,7 +102,7 @@ bool CountingSemaphoreTeensy<LeastMaxValue>::try_acquire() {
 template<ptrdiff_t LeastMaxValue>
 template<class Rep, class Period>
 bool CountingSemaphoreTeensy<LeastMaxValue>::try_acquire_for(
-    const std::chrono::duration<Rep, Period>& rel_time) {  // okay std namespace
+    const fl::chrono::duration<Rep, Period>& rel_time) {
 
     // On single-threaded platforms, timed acquire is same as try_acquire
     // (no waiting possible - would deadlock)
@@ -116,7 +113,7 @@ bool CountingSemaphoreTeensy<LeastMaxValue>::try_acquire_for(
 template<ptrdiff_t LeastMaxValue>
 template<class Clock, class Duration>
 bool CountingSemaphoreTeensy<LeastMaxValue>::try_acquire_until(
-    const std::chrono::time_point<Clock, Duration>& abs_time) {  // okay std namespace
+    const fl::chrono::time_point<Clock, Duration>& abs_time) {
 
     // On single-threaded platforms, timed acquire is same as try_acquire
     // (no waiting possible - would deadlock)
@@ -139,14 +136,14 @@ template class CountingSemaphoreTeensy<100>;
 template class CountingSemaphoreTeensy<1000>;
 
 // Explicit instantiation of try_acquire_for for common duration types
-template bool CountingSemaphoreTeensy<1>::try_acquire_for(const std::chrono::duration<long long, std::milli>&);  // okay std namespace
-template bool CountingSemaphoreTeensy<1>::try_acquire_for(const std::chrono::duration<long long, std::micro>&);  // okay std namespace
-template bool CountingSemaphoreTeensy<1>::try_acquire_for(const std::chrono::duration<long long, std::nano>&);  // okay std namespace
-template bool CountingSemaphoreTeensy<1>::try_acquire_for(const std::chrono::duration<long long, std::ratio<1>>&);  // okay std namespace
+template bool CountingSemaphoreTeensy<1>::try_acquire_for(const fl::chrono::duration<long long, fl::milli>&);
+template bool CountingSemaphoreTeensy<1>::try_acquire_for(const fl::chrono::duration<long long, fl::micro>&);
+template bool CountingSemaphoreTeensy<1>::try_acquire_for(const fl::chrono::duration<long long, fl::nano>&);
+template bool CountingSemaphoreTeensy<1>::try_acquire_for(const fl::chrono::duration<long long, fl::ratio<1>>&);
 
 // Explicit instantiation of try_acquire_until for common clock types
-template bool CountingSemaphoreTeensy<1>::try_acquire_until(const std::chrono::time_point<std::chrono::steady_clock, std::chrono::duration<long long, std::nano>>&);  // okay std namespace
-template bool CountingSemaphoreTeensy<1>::try_acquire_until(const std::chrono::time_point<std::chrono::system_clock, std::chrono::duration<long long, std::nano>>&);  // okay std namespace
+template bool CountingSemaphoreTeensy<1>::try_acquire_until(const fl::chrono::time_point<fl::chrono::steady_clock, fl::chrono::steady_clock::duration>&);
+template bool CountingSemaphoreTeensy<1>::try_acquire_until(const fl::chrono::time_point<fl::chrono::system_clock, fl::chrono::system_clock::duration>&);
 
 } // namespace platforms
 } // namespace fl

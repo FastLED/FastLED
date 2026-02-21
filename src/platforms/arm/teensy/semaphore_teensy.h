@@ -22,15 +22,8 @@
 /// - Teensy 4.x (ARM Cortex-M7, 600 MHz)
 
 #include "fl/stl/assert.h"
+#include "fl/stl/chrono.h"
 #include "fl/stl/cstddef.h"
-
-// Forward declare std::chrono types to avoid including <chrono> in header
-namespace std {
-    namespace chrono {
-        template<typename Rep, typename Period> class duration;
-        template<typename Clock, typename Duration> class time_point;
-    }
-}
 
 namespace fl {
 namespace platforms {
@@ -94,7 +87,7 @@ public:
     /// @param rel_time Maximum time to wait (ignored on single-threaded)
     /// @return true if acquired, false if count was 0
     template<class Rep, class Period>
-    bool try_acquire_for(const std::chrono::duration<Rep, Period>& rel_time);  // okay std namespace
+    bool try_acquire_for(const fl::chrono::duration<Rep, Period>& rel_time);
 
     /// @brief Try to acquire until an absolute time point (no-op on single-threaded)
     /// @tparam Clock Clock type
@@ -102,7 +95,7 @@ public:
     /// @param abs_time Absolute time point to wait until (ignored on single-threaded)
     /// @return true if acquired, false if count was 0
     template<class Clock, class Duration>
-    bool try_acquire_until(const std::chrono::time_point<Clock, Duration>& abs_time);  // okay std namespace
+    bool try_acquire_until(const fl::chrono::time_point<Clock, Duration>& abs_time);
 
     /// @brief Get the maximum value the semaphore can hold
     /// @return LeastMaxValue

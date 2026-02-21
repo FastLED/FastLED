@@ -110,6 +110,105 @@ using minutes = duration<fl::i32, fl::ratio<60>>;
 /// Hours - duration with period of 3600 seconds
 using hours = duration<fl::i32, fl::ratio<3600>>;
 
+/// @brief Represents a point in time relative to a clock
+/// @tparam Clock The clock type this time_point is measured against
+/// @tparam Duration The duration type used to measure time since epoch
+///
+/// This is a simplified version of std::chrono::time_point that provides:
+/// - Storage for a time point as a duration since the clock's epoch
+/// - Comparison operators
+/// - Arithmetic with other time_points and durations
+template<typename Clock, typename Duration = typename Clock::duration>
+class time_point {
+public:
+    using clock = Clock;
+    using duration = Duration;
+    using rep = typename Duration::rep;
+    using period = typename Duration::period;
+
+    /// Default constructor - epoch time point
+    constexpr time_point() : mDuration() {}
+
+    /// Construct from a duration since epoch
+    constexpr explicit time_point(const Duration& d) : mDuration(d) {}
+
+    /// Get the duration since epoch
+    constexpr Duration time_since_epoch() const { return mDuration; }
+
+    // Comparison operators
+    constexpr bool operator<=(const time_point& rhs) const {
+        return mDuration.count() <= rhs.mDuration.count();
+    }
+    constexpr bool operator<(const time_point& rhs) const {
+        return mDuration.count() < rhs.mDuration.count();
+    }
+    constexpr bool operator>=(const time_point& rhs) const {
+        return mDuration.count() >= rhs.mDuration.count();
+    }
+    constexpr bool operator>(const time_point& rhs) const {
+        return mDuration.count() > rhs.mDuration.count();
+    }
+    constexpr bool operator==(const time_point& rhs) const {
+        return mDuration.count() == rhs.mDuration.count();
+    }
+    constexpr bool operator!=(const time_point& rhs) const {
+        return mDuration.count() != rhs.mDuration.count();
+    }
+
+    /// Subtract two time_points to get a duration
+    constexpr Duration operator-(const time_point& rhs) const {
+        return Duration(mDuration.count() - rhs.mDuration.count());
+    }
+
+    /// Add a duration to a time_point
+    constexpr time_point operator+(const Duration& d) const {
+        return time_point(Duration(mDuration.count() + d.count()));
+    }
+
+    /// Subtract a duration from a time_point
+    constexpr time_point operator-(const Duration& d) const {
+        return time_point(Duration(mDuration.count() - d.count()));
+    }
+
+private:
+    Duration mDuration;
+};
+
+// Forward declarations for clock types (now() implemented after fl::micros() declaration)
+struct steady_clock;
+struct system_clock;
+
+/// @brief Monotonic clock that never goes backwards
+///
+/// Uses fl::micros() as the underlying time source, providing microsecond
+/// resolution across all FastLED platforms.
+struct steady_clock {
+    using duration = microseconds;
+    using rep = duration::rep;
+    using period = duration::period;
+    using time_point = fl::chrono::time_point<steady_clock>;
+    static constexpr bool is_steady = true;
+
+    /// Returns the current time point (implemented after fl::micros() declaration)
+    static time_point now();
+};
+
+/// @brief Wall clock (may not be monotonic)
+///
+/// On embedded platforms this behaves identically to steady_clock since
+/// there is no real-time clock available. Uses fl::micros() as the
+/// underlying time source.
+struct system_clock {
+    using duration = microseconds;
+    using rep = duration::rep;
+    using period = duration::period;
+    using time_point = fl::chrono::time_point<system_clock>;
+    static constexpr bool is_steady = false;
+
+    /// Returns the current time point (implemented after fl::micros() declaration)
+    static time_point now();
+};
+
 } // namespace chrono
 
 ///////////////////// TIME FUNCTIONS //////////////////////////////////////
@@ -193,6 +292,15 @@ fl::u32 millis();
 /// }
 /// @endcode
 fl::u32 micros();
+
+// Now that fl::micros() is declared, implement clock::now() methods
+inline chrono::steady_clock::time_point chrono::steady_clock::now() {
+    return time_point(duration(static_cast<fl::i64>(fl::micros())));
+}
+
+inline chrono::system_clock::time_point chrono::system_clock::now() {
+    return time_point(duration(static_cast<fl::i64>(fl::micros())));
+}
 
 /// 64-bit millisecond timer - returns milliseconds since system startup without wraparound
 ///
