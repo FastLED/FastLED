@@ -71,12 +71,14 @@ void testDriver(
     // TX channel construction may have extra latency on first run
     FL_WARN("[INFO] Running warm-up frame (results will be discarded)");
     int warmup_total = 0, warmup_passed = 0;
-    validateChipsetTiming(validation_config, warmup_total, warmup_passed);
+    uint32_t warmup_duration_ms = 0;
+    validateChipsetTiming(validation_config, warmup_total, warmup_passed, warmup_duration_ms);
     FL_WARN("[INFO] Warm-up complete (" << warmup_passed << "/" << warmup_total << " passed - discarding)");
 
     // SECOND RUN: Keep results (actual test)
     FL_WARN("[INFO] Running actual test frame");
-    validateChipsetTiming(validation_config, result.total_tests, result.passed_tests);
+    uint32_t test_duration_ms = 0;
+    validateChipsetTiming(validation_config, result.total_tests, result.passed_tests, test_duration_ms);
 
     FL_WARN("\n[INFO] All timing tests complete for " << driver_name << " driver");
 }

@@ -106,7 +106,8 @@ inline void maybeRegisterStubAutorun(
                 fl::RxDeviceType::RMT);
 
             int driver_total = 0, driver_passed = 0;
-            validateChipsetTiming(vcfg, driver_total, driver_passed);
+            uint32_t driver_duration_ms = 0;
+            validateChipsetTiming(vcfg, driver_total, driver_passed, driver_duration_ms);
 
             FL_PRINT("[STUB CLIENT] " << drv.name.c_str()
                      << ": " << driver_passed << "/" << driver_total << " passed");

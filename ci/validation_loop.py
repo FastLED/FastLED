@@ -197,7 +197,13 @@ def run_validation_loop(
                         status = "PASS" if result.passed else "FAIL"
                         print(f"  Result: {status}")
                         print(f"  Tests: {result.passed_tests}/{result.total_tests}")
-                        print(f"  Duration: {result.duration_ms}ms")
+                        duration_str = f"{result.duration_ms}ms"
+                        if (
+                            hasattr(result, "show_duration_ms")
+                            and result.show_duration_ms
+                        ):
+                            duration_str += f" (show: {result.show_duration_ms}ms)"
+                        print(f"  Duration: {duration_str}")
 
                         # Print per-lane results
                         for lr in result.lane_results:

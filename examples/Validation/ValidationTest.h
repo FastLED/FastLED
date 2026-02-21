@@ -161,6 +161,7 @@ void runMultiTest(const char* test_name,
 // @param out_results Optional output for per-pattern results with LED error details
 void validateChipsetTiming(fl::ValidationConfig& config,
                            int& total, int& passed,
+                           uint32_t& out_show_duration_ms,
                            fl::vector<fl::RunResult>* out_results = nullptr);
 
 // Validate using the legacy template addLeds API (single-lane only)
@@ -171,6 +172,7 @@ void validateChipsetTiming(fl::ValidationConfig& config,
 // @param out_results Optional output for per-pattern results with LED error details
 void validateChipsetTimingLegacy(fl::ValidationConfig& config,
                                  int& total, int& passed,
+                                 uint32_t& out_show_duration_ms,
                                  fl::vector<fl::RunResult>* out_results = nullptr);
 
 // Set mixed RGB bit patterns to test MSB vs LSB handling

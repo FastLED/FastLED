@@ -1924,7 +1924,12 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                                 f"   Tests: {test_data['passedTests']}/{test_data['totalTests']} passed"
                             )
                         if "duration_ms" in test_data:
-                            print(f"   Duration: {test_data['duration_ms']}ms")
+                            duration_str = f"{test_data['duration_ms']}ms"
+                            if "show_duration_ms" in test_data:
+                                duration_str += (
+                                    f" (show: {test_data['show_duration_ms']}ms)"
+                                )
+                            print(f"   Duration: {duration_str}")
 
                         # Display per-pattern details if available
                         if "patterns" in test_data:

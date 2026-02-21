@@ -108,6 +108,7 @@ class TestResult:
     passed_tests: int
     failed_tests: int
     duration_ms: int
+    show_duration_ms: int  # Duration of show() calls only (excludes setup/teardown)
     lane_results: list[LaneResult]  # Per-lane details with sizes
 
 
@@ -367,6 +368,7 @@ class ValidationAgent:
                 passed_tests=results["passedTests"],
                 failed_tests=results["failedTests"],
                 duration_ms=state.get("timing", {}).get("durationMs", 0),
+                show_duration_ms=state.get("timing", {}).get("showDurationMs", 0),
                 lane_results=lane_results,
             )
 
@@ -410,6 +412,7 @@ class ValidationAgent:
             failed_tests=test_complete_data["totalTests"]
             - test_complete_data["passedTests"],
             duration_ms=test_complete_data["durationMs"],
+            show_duration_ms=test_complete_data.get("showDurationMs", 0),
             lane_results=[],  # Per-lane details not included in streaming mode yet
         )
 

@@ -318,6 +318,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     int total_tests = 0;
     int passed_tests = 0;
     bool passed = false;
+    uint32_t show_duration_ms = 0;
     fl::vector<fl::RunResult> run_results;
 
     {
@@ -327,7 +328,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
             // Legacy API path: WS2812B<PIN> template instantiation
             for (int iter = 0; iter < iterations; iter++) {
                 int iter_total = 0, iter_passed = 0;
-                validateChipsetTimingLegacy(validation_config, iter_total, iter_passed, &run_results);
+                validateChipsetTimingLegacy(validation_config, iter_total, iter_passed, show_duration_ms, &run_results);
                 total_tests += iter_total;
                 passed_tests += iter_passed;
             }
@@ -335,7 +336,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
             // Channel API path: FastLED.add(channel_config)
             for (int iter = 0; iter < iterations; iter++) {
                 int iter_total = 0, iter_passed = 0;
-                validateChipsetTiming(validation_config, iter_total, iter_passed, &run_results);
+                validateChipsetTiming(validation_config, iter_total, iter_passed, show_duration_ms, &run_results);
                 total_tests += iter_total;
                 passed_tests += iter_passed;
             }
@@ -352,6 +353,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     response.set("totalTests", static_cast<int64_t>(total_tests));
     response.set("passedTests", static_cast<int64_t>(passed_tests));
     response.set("duration_ms", static_cast<int64_t>(duration_ms));
+    response.set("show_duration_ms", static_cast<int64_t>(show_duration_ms));
     response.set("driver", driver_name.c_str());
     response.set("laneCount", static_cast<int64_t>(lane_sizes.size()));
 

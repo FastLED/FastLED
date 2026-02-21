@@ -593,6 +593,7 @@ void runMultiTest(const char* test_name,
 // Creates channels, runs tests, destroys channels
 void validateChipsetTiming(fl::ValidationConfig& config,
                            int& driver_total, int& driver_passed,
+                           uint32_t& out_show_duration_ms,
                            fl::vector<fl::RunResult>* out_results) {
     fl::sstream ss;
     ss << "\n========================================\n";
@@ -653,6 +654,9 @@ void validateChipsetTiming(fl::ValidationConfig& config,
     multi_config.print_per_led_errors = false;  // Errors reported via JSON-RPC
     multi_config.max_errors_per_run = 10;  // Store first 10 errors for JSON response
 
+    // Measure show-only duration (excludes setup/teardown overhead)
+    uint32_t show_start_ms = millis();
+
     // Test all 4 bit patterns (0-3)
     for (int pattern_id = 0; pattern_id < 4; pattern_id++) {
         // Apply pattern to all lanes
@@ -665,6 +669,8 @@ void validateChipsetTiming(fl::ValidationConfig& config,
         }
         runMultiTest(getBitPatternName(pattern_id), config, multi_config, total, passed);
     }
+
+    out_show_duration_ms += millis() - show_start_ms;
 
     // Results reported via JSON-RPC (verbose logging silenced for speed)
 
@@ -685,6 +691,7 @@ void validateChipsetTiming(fl::ValidationConfig& config,
 //   Legacy:  LegacyClocklessProxy(pin, leds, numLeds) → WS2812B<PIN> → ClocklessIdf5 → Channel
 void validateChipsetTimingLegacy(fl::ValidationConfig& config,
                                  int& driver_total, int& driver_passed,
+                                 uint32_t& out_show_duration_ms,
                                  fl::vector<fl::RunResult>* out_results) {
     // Legacy API only supports single-lane
     if (config.tx_configs.size() != 1) {
@@ -738,10 +745,15 @@ void validateChipsetTimingLegacy(fl::ValidationConfig& config,
     multi_config.print_per_led_errors = false;
     multi_config.max_errors_per_run = 10;
 
+    // Measure show-only duration (excludes setup/teardown overhead)
+    uint32_t show_start_ms = millis();
+
     for (int pattern_id = 0; pattern_id < 4; pattern_id++) {
         setMixedBitPattern(leds, numLeds, pattern_id);
         runMultiTest(getBitPatternName(pattern_id), config, multi_config, total, passed, out_results);
     }
+
+    out_show_duration_ms += millis() - show_start_ms;
 
     driver_total += total;
     driver_passed += passed;
