@@ -95,13 +95,13 @@ private:
 };
 
 FL_TEST_CASE("HttpStreamTransport: Constructor") {
-    MockStreamTransport transport("localhost", 8080);
+    MockStreamTransport transport("localhost", 47501);
     FL_CHECK(!transport.isConnected());
     FL_CHECK(transport.getHeartbeatInterval() == 1000);  // Set in constructor
 }
 
 FL_TEST_CASE("HttpStreamTransport: Connect/Disconnect") {
-    MockStreamTransport transport("localhost", 8080);
+    MockStreamTransport transport("localhost", 47501);
 
     FL_SUBCASE("Initial state") {
         FL_CHECK(!transport.isConnected());
@@ -120,7 +120,7 @@ FL_TEST_CASE("HttpStreamTransport: Connect/Disconnect") {
 }
 
 FL_TEST_CASE("HttpStreamTransport: Read Request") {
-    MockStreamTransport transport("localhost", 8080);
+    MockStreamTransport transport("localhost", 47501);
     transport.connect();
 
     FL_SUBCASE("No data available") {
@@ -155,7 +155,7 @@ FL_TEST_CASE("HttpStreamTransport: Read Request") {
 }
 
 FL_TEST_CASE("HttpStreamTransport: Write Response") {
-    MockStreamTransport transport("localhost", 8080);
+    MockStreamTransport transport("localhost", 47501);
     transport.connect();
 
     FL_SUBCASE("Write valid JSON-RPC response") {
@@ -190,7 +190,7 @@ FL_TEST_CASE("HttpStreamTransport: Write Response") {
 }
 
 FL_TEST_CASE("HttpStreamTransport: Heartbeat") {
-    MockStreamTransport transport("localhost", 8080);
+    MockStreamTransport transport("localhost", 47501);
     transport.connect();
     transport.setCurrentTime(0);
     transport.clearSentData();
@@ -230,7 +230,7 @@ FL_TEST_CASE("HttpStreamTransport: Heartbeat") {
 }
 
 FL_TEST_CASE("HttpStreamTransport: Heartbeat Timeout") {
-    MockStreamTransport transport("localhost", 8080);
+    MockStreamTransport transport("localhost", 47501);
     transport.setTimeout(2000);  // 2s timeout
     transport.connect();
     transport.setCurrentTime(0);
@@ -271,7 +271,7 @@ static void onDisconnectCallback() {
 }
 
 FL_TEST_CASE("HttpStreamTransport: Connection Callbacks") {
-    MockStreamTransport transport("localhost", 8080);
+    MockStreamTransport transport("localhost", 47501);
 
     g_connectCalled = false;
     g_disconnectCalled = false;
@@ -299,7 +299,7 @@ FL_TEST_CASE("HttpStreamTransport: Connection Callbacks") {
 }
 
 FL_TEST_CASE("HttpStreamTransport: Configuration") {
-    MockStreamTransport transport("localhost", 8080);
+    MockStreamTransport transport("localhost", 47501);
 
     FL_SUBCASE("Heartbeat interval") {
         FL_CHECK(transport.getHeartbeatInterval() == 1000);
@@ -315,7 +315,7 @@ FL_TEST_CASE("HttpStreamTransport: Configuration") {
 }
 
 FL_TEST_CASE("HttpStreamTransport: Multiple Requests") {
-    MockStreamTransport transport("localhost", 8080);
+    MockStreamTransport transport("localhost", 47501);
     transport.connect();
 
     FL_SUBCASE("Read multiple requests in sequence") {
@@ -338,7 +338,7 @@ FL_TEST_CASE("HttpStreamTransport: Multiple Requests") {
 }
 
 FL_TEST_CASE("HttpStreamTransport: Error Handling") {
-    MockStreamTransport transport("localhost", 8080);
+    MockStreamTransport transport("localhost", 47501);
     transport.connect();
 
     FL_SUBCASE("Invalid JSON ignored") {

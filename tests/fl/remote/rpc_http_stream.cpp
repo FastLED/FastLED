@@ -48,7 +48,7 @@ static fl::optional<Json> getError(const Json& response) {
 
 FL_TEST_CASE("RPC-HTTP - SYNC mode - Simple add function") {
     // Setup: Server with RPC method
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
 
     Remote remoteServer(

@@ -23,7 +23,7 @@ using namespace fl;
 
 // Test: Chunked Encoding Round-Trip
 FL_TEST_CASE("HTTP Transport - Chunked encoding round-trip") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47601);
     MockHttpClient client(server);
 
     server.connect();
@@ -49,7 +49,7 @@ FL_TEST_CASE("HTTP Transport - Chunked encoding round-trip") {
 
 // Test: Multiple Messages in Sequence
 FL_TEST_CASE("HTTP Transport - Multiple messages in sequence") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47601);
     MockHttpClient client(server);
 
     server.connect();
@@ -81,7 +81,7 @@ FL_TEST_CASE("HTTP Transport - Multiple messages in sequence") {
 
 // Test: Bidirectional Communication
 FL_TEST_CASE("HTTP Transport - Bidirectional communication") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47601);
     MockHttpClient client(server);
 
     server.connect();
@@ -117,7 +117,7 @@ FL_TEST_CASE("HTTP Transport - Bidirectional communication") {
 
 // Test: Large Message Handling
 FL_TEST_CASE("HTTP Transport - Large message handling") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47601);
     MockHttpClient client(server);
 
     server.connect();
@@ -149,7 +149,7 @@ FL_TEST_CASE("HTTP Transport - Large message handling") {
 
 // Test: Heartbeat Detection
 FL_TEST_CASE("HTTP Transport - Heartbeat detection") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47601);
     MockHttpClient client(server);
 
     // Set short heartbeat interval (1 second)
@@ -176,7 +176,7 @@ FL_TEST_CASE("HTTP Transport - Heartbeat detection") {
 
 // Test: Connection Timeout Detection
 FL_TEST_CASE("HTTP Transport - Connection timeout detection") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47601);
     MockHttpClient client(server);
 
     // Set short timeout (2 seconds)
@@ -205,7 +205,7 @@ FL_TEST_CASE("HTTP Transport - Connection timeout detection") {
 
 // Test: Error Response Handling
 FL_TEST_CASE("HTTP Transport - Error response handling") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47601);
     MockHttpClient client(server);
 
     server.connect();
@@ -245,7 +245,7 @@ FL_TEST_CASE("HTTP Transport - Error response handling") {
 
 // Test: Multiple Clients on Server
 FL_TEST_CASE("HTTP Transport - Multiple clients on server") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47601);
     MockHttpClient client1(server);
     MockHttpClient client2(server);
 
@@ -292,7 +292,7 @@ FL_TEST_CASE("HTTP Transport - Multiple clients on server") {
 
 // Test: Server Broadcast to Multiple Clients
 FL_TEST_CASE("HTTP Transport - Server broadcast to multiple clients") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47601);
     MockHttpClient client1(server);
     MockHttpClient client2(server);
 
@@ -331,7 +331,7 @@ FL_TEST_CASE("HTTP Transport - Server broadcast to multiple clients") {
 
 // Test: Client Reconnection
 FL_TEST_CASE("HTTP Transport - Client reconnection") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47601);
     MockHttpClient client(server);
 
     server.connect();
@@ -360,7 +360,7 @@ FL_TEST_CASE("HTTP Transport - Client reconnection") {
 
 // Test: Empty Message Handling
 FL_TEST_CASE("HTTP Transport - Empty message handling") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47601);
     MockHttpClient client(server);
 
     server.connect();
@@ -378,7 +378,7 @@ FL_TEST_CASE("HTTP Transport - Empty message handling") {
 
 // Test: Rapid Message Sending
 FL_TEST_CASE("HTTP Transport - Rapid message sending") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47601);
     MockHttpClient client(server);
 
     server.connect();
@@ -406,7 +406,7 @@ FL_TEST_CASE("HTTP Transport - Rapid message sending") {
 
 // Test: Configuration Getters/Setters
 FL_TEST_CASE("HTTP Transport - Configuration management") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47601);
 
     // Default values
     FL_CHECK_EQ(server.getHeartbeatInterval(), 30000); // 30 seconds
@@ -422,7 +422,7 @@ FL_TEST_CASE("HTTP Transport - Configuration management") {
 
 // Test: Connection State Callbacks
 FL_TEST_CASE("HTTP Transport - Connection state callbacks") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47601);
     MockHttpClient client(server);
 
     // Note: Callbacks use C function pointers and can't capture state
@@ -447,7 +447,7 @@ FL_TEST_CASE("HTTP Transport - Connection state callbacks") {
 
 // Test: JSON-RPC 2.0 Compliance - Request Structure
 FL_TEST_CASE("HTTP Transport - JSON-RPC 2.0 request compliance") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47601);
     MockHttpClient client(server);
 
     server.connect();
@@ -480,7 +480,7 @@ FL_TEST_CASE("HTTP Transport - JSON-RPC 2.0 request compliance") {
 
 // Test: JSON-RPC 2.0 Compliance - Response Structure
 FL_TEST_CASE("HTTP Transport - JSON-RPC 2.0 response compliance") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47601);
     MockHttpClient client(server);
 
     server.connect();
@@ -510,7 +510,7 @@ FL_TEST_CASE("HTTP Transport - JSON-RPC 2.0 response compliance") {
 
 // Test: JSON-RPC 2.0 Notification (no id)
 FL_TEST_CASE("HTTP Transport - JSON-RPC 2.0 notification") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47601);
     MockHttpClient client(server);
 
     server.connect();
@@ -539,7 +539,7 @@ FL_TEST_CASE("HTTP Transport - JSON-RPC 2.0 notification") {
 
 // Test: Stress Test - Many Messages
 FL_TEST_CASE("HTTP Transport - Stress test with 1000 messages") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47601);
     MockHttpClient client(server);
 
     server.connect();

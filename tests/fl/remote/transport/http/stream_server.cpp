@@ -11,14 +11,17 @@
 
 using namespace fl;
 
+// Use unique high ports to avoid conflicts with other tests and services
+static const int kBasePort = 47401;
+
 FL_TEST_CASE("HttpStreamServer - Construction") {
-    HttpStreamServer server(9081);
+    HttpStreamServer server(kBasePort);
     FL_CHECK_FALSE(server.isConnected());
     FL_CHECK(server.getClientCount() == 0);
 }
 
 FL_TEST_CASE("HttpStreamServer - Disconnect when not connected is safe") {
-    HttpStreamServer server(9082);
+    HttpStreamServer server(kBasePort + 1);
     FL_CHECK_FALSE(server.isConnected());
 
     // Should not crash
@@ -27,7 +30,7 @@ FL_TEST_CASE("HttpStreamServer - Disconnect when not connected is safe") {
 }
 
 FL_TEST_CASE("HttpStreamServer - Multiple disconnects are safe") {
-    HttpStreamServer server(9083);
+    HttpStreamServer server(kBasePort + 2);
 
     server.disconnect();
     FL_CHECK_FALSE(server.isConnected());
@@ -40,18 +43,18 @@ FL_TEST_CASE("HttpStreamServer - Multiple disconnects are safe") {
 }
 
 FL_TEST_CASE("HttpStreamServer - getClientCount when no clients") {
-    HttpStreamServer server(9084);
+    HttpStreamServer server(kBasePort + 3);
     FL_CHECK(server.getClientCount() == 0);
 }
 
 FL_TEST_CASE("HttpStreamServer - getClientIds when no clients") {
-    HttpStreamServer server(9085);
+    HttpStreamServer server(kBasePort + 4);
     fl::vector<uint32_t> clientIds = server.getClientIds();
     FL_CHECK(clientIds.empty());
 }
 
 FL_TEST_CASE("HttpStreamServer - acceptClients when not connected is safe") {
-    HttpStreamServer server(9086);
+    HttpStreamServer server(kBasePort + 5);
     FL_CHECK_FALSE(server.isConnected());
 
     // Should not crash
@@ -60,7 +63,7 @@ FL_TEST_CASE("HttpStreamServer - acceptClients when not connected is safe") {
 }
 
 FL_TEST_CASE("HttpStreamServer - Write/read fail when disconnected") {
-    HttpStreamServer server(9087);
+    HttpStreamServer server(kBasePort + 6);
     FL_CHECK_FALSE(server.isConnected());
 
     // writeResponse should not crash when disconnected
@@ -76,7 +79,7 @@ FL_TEST_CASE("HttpStreamServer - Write/read fail when disconnected") {
 }
 
 FL_TEST_CASE("HttpStreamServer - readRequest returns nullopt when disconnected") {
-    HttpStreamServer server(9088);
+    HttpStreamServer server(kBasePort + 7);
     FL_CHECK_FALSE(server.isConnected());
 
     fl::optional<fl::Json> request = server.readRequest();
@@ -84,7 +87,7 @@ FL_TEST_CASE("HttpStreamServer - readRequest returns nullopt when disconnected")
 }
 
 FL_TEST_CASE("HttpStreamServer - Multiple writes when disconnected are safe") {
-    HttpStreamServer server(9089);
+    HttpStreamServer server(kBasePort + 8);
     FL_CHECK_FALSE(server.isConnected());
 
     fl::Json response = fl::Json::object();
@@ -100,7 +103,7 @@ FL_TEST_CASE("HttpStreamServer - Multiple writes when disconnected are safe") {
 }
 
 FL_TEST_CASE("HttpStreamServer - Heartbeat interval configuration") {
-    HttpStreamServer server(9090, 5000);  // 5s heartbeat
+    HttpStreamServer server(kBasePort + 9, 5000);  // 5s heartbeat
     FL_CHECK(server.getHeartbeatInterval() == 5000);
 
     server.setHeartbeatInterval(10000);
@@ -108,7 +111,7 @@ FL_TEST_CASE("HttpStreamServer - Heartbeat interval configuration") {
 }
 
 FL_TEST_CASE("HttpStreamServer - Timeout configuration") {
-    HttpStreamServer server(9091);
+    HttpStreamServer server(kBasePort + 10);
 
     // Default timeout from base class (60s)
     FL_CHECK(server.getTimeout() == 60000);
@@ -118,7 +121,7 @@ FL_TEST_CASE("HttpStreamServer - Timeout configuration") {
 }
 
 FL_TEST_CASE("HttpStreamServer - Update with disconnected server") {
-    HttpStreamServer server(9092);
+    HttpStreamServer server(kBasePort + 11);
     FL_CHECK_FALSE(server.isConnected());
 
     // Update should not crash
@@ -130,18 +133,18 @@ FL_TEST_CASE("HttpStreamServer - Update with disconnected server") {
 }
 
 FL_TEST_CASE("HttpStreamServer - Construction with custom heartbeat interval") {
-    HttpStreamServer server1(9093, 1000);
+    HttpStreamServer server1(kBasePort + 12, 1000);
     FL_CHECK(server1.getHeartbeatInterval() == 1000);
 
-    HttpStreamServer server2(9094, 30000);
+    HttpStreamServer server2(kBasePort + 13, 30000);
     FL_CHECK(server2.getHeartbeatInterval() == 30000);
 
-    HttpStreamServer server3(9095, 60000);
+    HttpStreamServer server3(kBasePort + 14, 60000);
     FL_CHECK(server3.getHeartbeatInterval() == 60000);
 }
 
 FL_TEST_CASE("HttpStreamServer - Callbacks can be set") {
-    HttpStreamServer server(9096);
+    HttpStreamServer server(kBasePort + 15);
 
     static bool connectCalled = false;
     static bool disconnectCalled = false;
@@ -166,7 +169,7 @@ FL_TEST_CASE("HttpStreamServer - Constructor with default port") {
 }
 
 FL_TEST_CASE("HttpStreamServer - disconnectClient when not connected is safe") {
-    HttpStreamServer server(9097);
+    HttpStreamServer server(kBasePort + 16);
     FL_CHECK_FALSE(server.isConnected());
 
     // Should not crash

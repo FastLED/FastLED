@@ -17,7 +17,7 @@ public:
     /// Constructor
     /// @param port Server port (ignored for mock)
     /// @param heartbeatIntervalMs Heartbeat interval in milliseconds
-    MockHttpServer(uint16_t port = 8080, uint32_t heartbeatIntervalMs = 30000)
+    MockHttpServer(uint16_t port = 47701, uint32_t heartbeatIntervalMs = 30000)
         : HttpStreamTransport("localhost", port, heartbeatIntervalMs)
         , mListening(false)
         , mCurrentTime(0)

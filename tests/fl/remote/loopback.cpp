@@ -1,6 +1,6 @@
 // ok standalone
 // Real loopback test: server startup + client connection + request + response
-// Uses real sockets on port 18080 (only test that does so - no port conflicts)
+// Uses real sockets on port 47901 (only test that does so - no port conflicts)
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "test.h"
@@ -31,7 +31,7 @@ __attribute__((unused)) static void delay(uint32_t ms) {
 }
 
 FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
-    constexpr uint16_t PORT = 18080;
+    constexpr uint16_t PORT = 47901;
 
     // Server
     auto server_transport = fl::make_shared<HttpStreamServer>(PORT);

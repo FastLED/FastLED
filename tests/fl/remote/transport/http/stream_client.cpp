@@ -10,20 +10,23 @@
 
 using namespace fl;
 
+// Use unique high ports to avoid conflicts with other tests and services
+static const int kTestPort = 47301;
+
 FL_TEST_CASE("HttpStreamClient - Construction") {
-    HttpStreamClient client("localhost", 8080);
+    HttpStreamClient client("localhost", kTestPort);
     FL_CHECK_FALSE(client.isConnected());
 }
 
 FL_TEST_CASE("HttpStreamClient - Connect to invalid host fails") {
-    HttpStreamClient client("invalid.host.that.does.not.exist.test", 8080);
+    HttpStreamClient client("invalid.host.that.does.not.exist.test", kTestPort);
     bool result = client.connect();
     FL_CHECK_FALSE(result);
     FL_CHECK_FALSE(client.isConnected());
 }
 
 FL_TEST_CASE("HttpStreamClient - Disconnect when not connected is safe") {
-    HttpStreamClient client("localhost", 8080);
+    HttpStreamClient client("localhost", kTestPort);
     FL_CHECK_FALSE(client.isConnected());
 
     // Should not crash
@@ -32,7 +35,7 @@ FL_TEST_CASE("HttpStreamClient - Disconnect when not connected is safe") {
 }
 
 FL_TEST_CASE("HttpStreamClient - Write/read fail when disconnected") {
-    HttpStreamClient client("localhost", 8080);
+    HttpStreamClient client("localhost", kTestPort);
     FL_CHECK_FALSE(client.isConnected());
 
     // writeResponse should not crash when disconnected
@@ -48,7 +51,7 @@ FL_TEST_CASE("HttpStreamClient - Write/read fail when disconnected") {
 }
 
 FL_TEST_CASE("HttpStreamClient - readRequest returns nullopt when disconnected") {
-    HttpStreamClient client("localhost", 8080);
+    HttpStreamClient client("localhost", kTestPort);
     FL_CHECK_FALSE(client.isConnected());
 
     fl::optional<fl::Json> request = client.readRequest();
@@ -56,7 +59,7 @@ FL_TEST_CASE("HttpStreamClient - readRequest returns nullopt when disconnected")
 }
 
 FL_TEST_CASE("HttpStreamClient - Multiple writes when disconnected are safe") {
-    HttpStreamClient client("localhost", 8080);
+    HttpStreamClient client("localhost", kTestPort);
     FL_CHECK_FALSE(client.isConnected());
 
     fl::Json response = fl::Json::object();
@@ -72,7 +75,7 @@ FL_TEST_CASE("HttpStreamClient - Multiple writes when disconnected are safe") {
 }
 
 FL_TEST_CASE("HttpStreamClient - Heartbeat interval configuration") {
-    HttpStreamClient client("localhost", 8080, 5000);  // 5s heartbeat
+    HttpStreamClient client("localhost", kTestPort, 5000);  // 5s heartbeat
     FL_CHECK(client.getHeartbeatInterval() == 5000);
 
     client.setHeartbeatInterval(10000);
@@ -80,7 +83,7 @@ FL_TEST_CASE("HttpStreamClient - Heartbeat interval configuration") {
 }
 
 FL_TEST_CASE("HttpStreamClient - Timeout configuration") {
-    HttpStreamClient client("localhost", 8080);
+    HttpStreamClient client("localhost", kTestPort);
 
     // Default timeout from base class (60s)
     FL_CHECK(client.getTimeout() == 60000);
@@ -90,7 +93,7 @@ FL_TEST_CASE("HttpStreamClient - Timeout configuration") {
 }
 
 FL_TEST_CASE("HttpStreamClient - Disconnect and reconnect cycle") {
-    HttpStreamClient client("localhost", 8080);
+    HttpStreamClient client("localhost", kTestPort);
 
     // First connection attempt (will fail without server)
     bool result1 = client.connect();
@@ -108,7 +111,7 @@ FL_TEST_CASE("HttpStreamClient - Disconnect and reconnect cycle") {
 }
 
 FL_TEST_CASE("HttpStreamClient - Multiple disconnects are safe") {
-    HttpStreamClient client("localhost", 8080);
+    HttpStreamClient client("localhost", kTestPort);
 
     client.disconnect();
     FL_CHECK_FALSE(client.isConnected());
@@ -121,7 +124,7 @@ FL_TEST_CASE("HttpStreamClient - Multiple disconnects are safe") {
 }
 
 FL_TEST_CASE("HttpStreamClient - Update with disconnected client") {
-    HttpStreamClient client("localhost", 8080);
+    HttpStreamClient client("localhost", kTestPort);
     FL_CHECK_FALSE(client.isConnected());
 
     // Update should not crash
@@ -133,7 +136,7 @@ FL_TEST_CASE("HttpStreamClient - Update with disconnected client") {
 }
 
 FL_TEST_CASE("HttpStreamClient - readRequest with no data returns nullopt") {
-    HttpStreamClient client("localhost", 8080);
+    HttpStreamClient client("localhost", kTestPort);
 
     // Even without connection, should return nullopt gracefully
     fl::optional<fl::Json> request = client.readRequest();
@@ -141,18 +144,18 @@ FL_TEST_CASE("HttpStreamClient - readRequest with no data returns nullopt") {
 }
 
 FL_TEST_CASE("HttpStreamClient - Construction with custom heartbeat interval") {
-    HttpStreamClient client1("localhost", 8080, 1000);
+    HttpStreamClient client1("localhost", kTestPort, 1000);
     FL_CHECK(client1.getHeartbeatInterval() == 1000);
 
-    HttpStreamClient client2("localhost", 8080, 30000);
+    HttpStreamClient client2("localhost", kTestPort, 30000);
     FL_CHECK(client2.getHeartbeatInterval() == 30000);
 
-    HttpStreamClient client3("localhost", 8080, 60000);
+    HttpStreamClient client3("localhost", kTestPort, 60000);
     FL_CHECK(client3.getHeartbeatInterval() == 60000);
 }
 
 FL_TEST_CASE("HttpStreamClient - Callbacks can be set") {
-    HttpStreamClient client("localhost", 8080);
+    HttpStreamClient client("localhost", kTestPort);
 
     static bool connectCalled = false;
     static bool disconnectCalled = false;
@@ -178,7 +181,7 @@ FL_TEST_CASE("HttpStreamClient - Constructor with default port") {
 
 FL_TEST_CASE("HttpStreamClient - Destructor cleanup") {
     {
-        HttpStreamClient client("localhost", 8080);
+        HttpStreamClient client("localhost", kTestPort);
         FL_CHECK_FALSE(client.isConnected());
         // Destructor called here
     }

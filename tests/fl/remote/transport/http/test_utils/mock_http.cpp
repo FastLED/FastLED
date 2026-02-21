@@ -11,21 +11,21 @@ using namespace fl;
 
 // Test: MockHttpServer - Construction
 FL_TEST_CASE("MockHttpServer - Construction") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     FL_CHECK_FALSE(server.isConnected());
     FL_CHECK_EQ(0, server.getClientCount());
 }
 
 // Test: MockHttpServer - Start
 FL_TEST_CASE("MockHttpServer - Start server") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     FL_CHECK(server.connect());
     FL_CHECK(server.isConnected());
 }
 
 // Test: MockHttpServer - Stop
 FL_TEST_CASE("MockHttpServer - Stop server") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
     server.disconnect();
     FL_CHECK_FALSE(server.isConnected());
@@ -33,7 +33,7 @@ FL_TEST_CASE("MockHttpServer - Stop server") {
 
 // Test: MockHttpServer - Double start is safe
 FL_TEST_CASE("MockHttpServer - Double start is safe") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     FL_CHECK(server.connect());
     FL_CHECK(server.connect());
     FL_CHECK(server.isConnected());
@@ -41,7 +41,7 @@ FL_TEST_CASE("MockHttpServer - Double start is safe") {
 
 // Test: MockHttpServer - Double stop is safe
 FL_TEST_CASE("MockHttpServer - Double stop is safe") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
     server.disconnect();
     server.disconnect();
@@ -50,7 +50,7 @@ FL_TEST_CASE("MockHttpServer - Double stop is safe") {
 
 // Test: MockHttpServer - Accept single client
 FL_TEST_CASE("MockHttpServer - Accept single client") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
 
     uint32_t clientId = server.acceptClient();
@@ -60,7 +60,7 @@ FL_TEST_CASE("MockHttpServer - Accept single client") {
 
 // Test: MockHttpServer - Accept multiple clients
 FL_TEST_CASE("MockHttpServer - Accept multiple clients") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
 
     uint32_t clientId1 = server.acceptClient();
@@ -77,7 +77,7 @@ FL_TEST_CASE("MockHttpServer - Accept multiple clients") {
 
 // Test: MockHttpServer - Cannot accept when not listening
 FL_TEST_CASE("MockHttpServer - Cannot accept when not listening") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
     server.disconnect();
     uint32_t clientId = server.acceptClient();
@@ -87,7 +87,7 @@ FL_TEST_CASE("MockHttpServer - Cannot accept when not listening") {
 
 // Test: MockHttpServer - Disconnect client
 FL_TEST_CASE("MockHttpServer - Disconnect client") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
 
     uint32_t clientId1 = server.acceptClient();
@@ -103,7 +103,7 @@ FL_TEST_CASE("MockHttpServer - Disconnect client") {
 
 // Test: MockHttpClient - Construction
 FL_TEST_CASE("MockHttpClient - Construction") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
 
     MockHttpClient client(server);
@@ -112,7 +112,7 @@ FL_TEST_CASE("MockHttpClient - Construction") {
 
 // Test: MockHttpClient - Connect to server
 FL_TEST_CASE("MockHttpClient - Connect to server") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
     MockHttpClient client(server);
 
@@ -123,7 +123,7 @@ FL_TEST_CASE("MockHttpClient - Connect to server") {
 
 // Test: MockHttpClient - Cannot connect to stopped server
 FL_TEST_CASE("MockHttpClient - Cannot connect to stopped server") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
     MockHttpClient client(server);
 
@@ -134,7 +134,7 @@ FL_TEST_CASE("MockHttpClient - Cannot connect to stopped server") {
 
 // Test: MockHttpClient - Disconnect from server
 FL_TEST_CASE("MockHttpClient - Disconnect from server") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
     MockHttpClient client(server);
 
@@ -146,7 +146,7 @@ FL_TEST_CASE("MockHttpClient - Disconnect from server") {
 
 // Test: MockHttpClient - Double connect is safe
 FL_TEST_CASE("MockHttpClient - Double connect is safe") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
     MockHttpClient client(server);
 
@@ -157,7 +157,7 @@ FL_TEST_CASE("MockHttpClient - Double connect is safe") {
 
 // Test: MockHttpClient - Double disconnect is safe
 FL_TEST_CASE("MockHttpClient - Double disconnect is safe") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
     MockHttpClient client(server);
 
@@ -169,7 +169,7 @@ FL_TEST_CASE("MockHttpClient - Double disconnect is safe") {
 
 // Test: Client sends request, server receives
 FL_TEST_CASE("MockHttpClient/Server - Client sends request, server receives") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
     MockHttpClient client(server);
     client.connect();
@@ -196,7 +196,7 @@ FL_TEST_CASE("MockHttpClient/Server - Client sends request, server receives") {
 
 // Test: Server sends response, client receives
 FL_TEST_CASE("MockHttpClient/Server - Server sends response, client receives") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
     MockHttpClient client(server);
     client.connect();
@@ -219,7 +219,7 @@ FL_TEST_CASE("MockHttpClient/Server - Server sends response, client receives") {
 
 // Test: Full request-response cycle
 FL_TEST_CASE("MockHttpClient/Server - Full request-response cycle") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
     MockHttpClient client(server);
     client.connect();
@@ -258,7 +258,7 @@ FL_TEST_CASE("MockHttpClient/Server - Full request-response cycle") {
 
 // Test: Broadcast responses to all clients
 FL_TEST_CASE("MockHttpServer - Broadcast responses to all clients") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
 
     MockHttpClient client1(server);
@@ -293,7 +293,7 @@ FL_TEST_CASE("MockHttpServer - Broadcast responses to all clients") {
 
 // Test: Server receives requests from multiple clients
 FL_TEST_CASE("MockHttpServer - Server receives requests from multiple clients") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
 
     MockHttpClient client1(server);
@@ -343,7 +343,7 @@ FL_TEST_CASE("MockHttpServer - Server receives requests from multiple clients") 
 
 // Test: MockHttpServer - Set current time
 FL_TEST_CASE("MockHttpServer - Set current time") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
     server.setCurrentTime(1000);
     FL_CHECK_EQ(1000, server.getCurrentTimeMs());
@@ -351,7 +351,7 @@ FL_TEST_CASE("MockHttpServer - Set current time") {
 
 // Test: MockHttpServer - Advance time
 FL_TEST_CASE("MockHttpServer - Advance time") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
     server.setCurrentTime(1000);
     server.advanceTime(500);
@@ -360,7 +360,7 @@ FL_TEST_CASE("MockHttpServer - Advance time") {
 
 // Test: MockHttpClient - Set current time
 FL_TEST_CASE("MockHttpClient - Set current time") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
     MockHttpClient client(server);
     client.setCurrentTime(2000);
@@ -369,7 +369,7 @@ FL_TEST_CASE("MockHttpClient - Set current time") {
 
 // Test: MockHttpClient - Advance time
 FL_TEST_CASE("MockHttpClient - Advance time") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
     MockHttpClient client(server);
     client.setCurrentTime(2000);
@@ -379,7 +379,7 @@ FL_TEST_CASE("MockHttpClient - Advance time") {
 
 // Test: Multiple sequential requests
 FL_TEST_CASE("MockHttpClient/Server - Multiple sequential requests") {
-    MockHttpServer server(8080);
+    MockHttpServer server(47701);
     server.connect();
 
     MockHttpClient client(server);

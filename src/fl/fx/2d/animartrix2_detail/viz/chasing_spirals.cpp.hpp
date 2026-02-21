@@ -14,10 +14,8 @@
 //   sincos32_simd                      ← fully SIMD (unchanged)
 //   Perlin coords (mulhi32_i32_4 << 1) ← fully SIMD (no scalar round-trip)
 //   pnoise2d_raw_simd4_vec(register)   ← SIMD registers passed directly (no B/C round-trip)
-//   [BOUNDARY D] store_u32_4 X/Y/x_frac/y_frac → scalar (SSE2: no integer gather)
-//   Permutation table (scalar)         ← fundamental SSE2 limit, unavoidable
-//   Fade LUT + lerp tree (scalar)      ← exact-match tests forbid vectorization
-//   [BOUNDARY E] set_u32_4(lane0..3) ← scalar results packed directly into SIMD register
+//   [BOUNDARY D+E] extract_u32_4 per-lane → fade/perm/grad/lerp → set_u32_4 re-pack
+//     (no intermediate arrays — extract directly from SIMD registers, SSE2: no gather)
 //   Clamp [0,FP_ONE] + scale ×255      ← fully SIMD
 //   Radial filter (mulhi32_i32_4)      ← fully SIMD
 //   [BOUNDARY F] extract_u32_4 × 4 + scatter ← pixel_idx scatter, unavoidable

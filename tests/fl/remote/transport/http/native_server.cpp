@@ -8,14 +8,25 @@
 
 using namespace fl;
 
+// Use unique high ports to avoid conflicts with other tests and services
+static const int kTestPort = 47211;
+// Socket test ports (each test needs its own to avoid bind conflicts in parallel)
+static const int kSocketPort1 = 47221;
+static const int kSocketPort2 = 47222;
+static const int kSocketPort3 = 47223;
+static const int kSocketPort4 = 47224;
+static const int kSocketPort5 = 47225;
+static const int kSocketPort6 = 47226;
+static const int kSocketPort7 = 47227;
+
 FL_TEST_CASE("NativeHttpServer - Construction and destruction") {
-    NativeHttpServer server(8080);
+    NativeHttpServer server(kTestPort);
     FL_CHECK_FALSE(server.isListening());
     FL_CHECK(server.getClientCount() == 0);
 }
 
 FL_TEST_CASE("NativeHttpServer - Start and stop listening") {
-    NativeHttpServer server(8080);
+    NativeHttpServer server(kTestPort);
 
     FL_CHECK_FALSE(server.isListening());
 
@@ -30,7 +41,7 @@ FL_TEST_CASE("NativeHttpServer - Start and stop listening") {
 }
 
 FL_TEST_CASE("NativeHttpServer - Start listening twice (idempotent)") {
-    NativeHttpServer server(8080);
+    NativeHttpServer server(kTestPort);
 
     // Start first time
     bool result1 = server.start();
@@ -46,7 +57,7 @@ FL_TEST_CASE("NativeHttpServer - Start listening twice (idempotent)") {
 }
 
 FL_TEST_CASE("NativeHttpServer - Accept clients with no server listening") {
-    NativeHttpServer server(8080);
+    NativeHttpServer server(kTestPort);
 
     // Accept without starting server (should be no-op)
     server.acceptClients();
@@ -54,7 +65,7 @@ FL_TEST_CASE("NativeHttpServer - Accept clients with no server listening") {
 }
 
 FL_TEST_CASE("NativeHttpServer - Non-blocking mode") {
-    NativeHttpServer server(8080);
+    NativeHttpServer server(kTestPort);
 
     // Set non-blocking mode before starting
     server.setNonBlocking(true);
@@ -70,7 +81,7 @@ FL_TEST_CASE("NativeHttpServer - Non-blocking mode") {
 }
 
 FL_TEST_CASE("NativeHttpServer - Client management operations when no clients") {
-    NativeHttpServer server(8080);
+    NativeHttpServer server(kTestPort);
     server.start();
 
     // Check client count
@@ -96,7 +107,7 @@ FL_TEST_CASE("NativeHttpServer - Client management operations when no clients") 
 }
 
 FL_TEST_CASE("NativeHttpServer - Send and recv with no clients") {
-    NativeHttpServer server(8080);
+    NativeHttpServer server(kTestPort);
     server.start();
 
     uint8_t sendData[] = {'t', 'e', 's', 't'};
@@ -111,7 +122,7 @@ FL_TEST_CASE("NativeHttpServer - Send and recv with no clients") {
 }
 
 FL_TEST_CASE("NativeHttpServer - Broadcast with no clients") {
-    NativeHttpServer server(8080);
+    NativeHttpServer server(kTestPort);
     server.start();
 
     uint8_t data[] = {'t', 'e', 's', 't'};
@@ -121,7 +132,7 @@ FL_TEST_CASE("NativeHttpServer - Broadcast with no clients") {
 }
 
 FL_TEST_CASE("NativeHttpServer - Update loop with no clients") {
-    NativeHttpServer server(8080);
+    NativeHttpServer server(kTestPort);
     server.start();
 
     // Update should not crash with no clients
@@ -135,12 +146,12 @@ FL_TEST_CASE("NativeHttpServer - Update loop with no clients") {
 }
 
 FL_TEST_CASE("NativeHttpServer - Accept real client connection") {
-    NativeHttpServer server(9001);  // Use different port to avoid conflicts
+    NativeHttpServer server(kSocketPort1);  // Use different port to avoid conflicts
     server.setNonBlocking(true);
     server.start();
 
     // Create client and connect
-    NativeHttpClient client("localhost", 9001);
+    NativeHttpClient client("localhost", kSocketPort1);
     client.setNonBlocking(true);
     client.connect();
 
@@ -166,12 +177,12 @@ FL_TEST_CASE("NativeHttpServer - Accept real client connection") {
 }
 
 FL_TEST_CASE("NativeHttpServer - Client ID tracking") {
-    NativeHttpServer server(9002);
+    NativeHttpServer server(kSocketPort2);
     server.setNonBlocking(true);
     server.start();
 
     // Connect first client
-    NativeHttpClient client1("localhost", 9002);
+    NativeHttpClient client1("localhost", kSocketPort2);
     client1.setNonBlocking(true);
     client1.connect();
 
@@ -197,7 +208,7 @@ FL_TEST_CASE("NativeHttpServer - Client ID tracking") {
     FL_CHECK(server.hasClient(clientId1));
 
     // Connect second client
-    NativeHttpClient client2("localhost", 9002);
+    NativeHttpClient client2("localhost", kSocketPort2);
     client2.setNonBlocking(true);
     client2.connect();
 
@@ -230,12 +241,12 @@ FL_TEST_CASE("NativeHttpServer - Client ID tracking") {
 }
 
 FL_TEST_CASE("NativeHttpServer - Send and recv with real client") {
-    NativeHttpServer server(9003);
+    NativeHttpServer server(kSocketPort3);
     server.setNonBlocking(true);
     server.start();
 
     // Connect client
-    NativeHttpClient client("localhost", 9003);
+    NativeHttpClient client("localhost", kSocketPort3);
     client.setNonBlocking(true);
     client.connect();
 
@@ -315,13 +326,13 @@ FL_TEST_CASE("NativeHttpServer - Send and recv with real client") {
 }
 
 FL_TEST_CASE("NativeHttpServer - Broadcast to multiple clients") {
-    NativeHttpServer server(9004);
+    NativeHttpServer server(kSocketPort4);
     server.setNonBlocking(true);
     server.start();
 
     // Connect two clients
-    NativeHttpClient client1("localhost", 9004);
-    NativeHttpClient client2("localhost", 9004);
+    NativeHttpClient client1("localhost", kSocketPort4);
+    NativeHttpClient client2("localhost", kSocketPort4);
     client1.setNonBlocking(true);
     client2.setNonBlocking(true);
     client1.connect();
@@ -381,13 +392,13 @@ FL_TEST_CASE("NativeHttpServer - Broadcast to multiple clients") {
 }
 
 FL_TEST_CASE("NativeHttpServer - Disconnect specific client") {
-    NativeHttpServer server(9005);
+    NativeHttpServer server(kSocketPort5);
     server.setNonBlocking(true);
     server.start();
 
     // Connect two clients
-    NativeHttpClient client1("localhost", 9005);
-    NativeHttpClient client2("localhost", 9005);
+    NativeHttpClient client1("localhost", kSocketPort5);
+    NativeHttpClient client2("localhost", kSocketPort5);
     client1.setNonBlocking(true);
     client2.setNonBlocking(true);
     client1.connect();
@@ -427,13 +438,13 @@ FL_TEST_CASE("NativeHttpServer - Disconnect specific client") {
 }
 
 FL_TEST_CASE("NativeHttpServer - Disconnect all clients") {
-    NativeHttpServer server(9006);
+    NativeHttpServer server(kSocketPort6);
     server.setNonBlocking(true);
     server.start();
 
     // Connect two clients
-    NativeHttpClient client1("localhost", 9006);
-    NativeHttpClient client2("localhost", 9006);
+    NativeHttpClient client1("localhost", kSocketPort6);
+    NativeHttpClient client2("localhost", kSocketPort6);
     client1.setNonBlocking(true);
     client2.setNonBlocking(true);
     client1.connect();
@@ -465,12 +476,12 @@ FL_TEST_CASE("NativeHttpServer - Disconnect all clients") {
 }
 
 FL_TEST_CASE("NativeHttpServer - Update removes disconnected clients") {
-    NativeHttpServer server(9007);
+    NativeHttpServer server(kSocketPort7);
     server.setNonBlocking(true);
     server.start();
 
     // Connect client
-    NativeHttpClient client("localhost", 9007);
+    NativeHttpClient client("localhost", kSocketPort7);
     client.setNonBlocking(true);
     client.connect();
 

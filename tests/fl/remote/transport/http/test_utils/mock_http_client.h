@@ -18,7 +18,7 @@ public:
     /// @param server Mock server to connect to
     /// @param heartbeatIntervalMs Heartbeat interval in milliseconds
     MockHttpClient(MockHttpServer& server, uint32_t heartbeatIntervalMs = 30000)
-        : HttpStreamTransport("localhost", 8080, heartbeatIntervalMs)
+        : HttpStreamTransport("localhost", 47701, heartbeatIntervalMs)
         , mServer(server)
         , mClientId(0)
         , mConnected(false)

@@ -34,13 +34,13 @@ int main() {
     });
 
     // Start server
-    if (!server.start(8080)) {
+    if (!server.start(47801)) {
         FL_WARN("✗ FAILED: Could not start server");
         FL_WARN("Error: " << server.last_error());
         return 1;
     }
 
-    FL_WARN("✓ Server started on port 8080");
+    FL_WARN("✓ Server started on port 47801");
 
     // Give server a moment to bind
     fl::delay(100);
@@ -53,7 +53,7 @@ int main() {
         FL_WARN("\nTest 1: GET /");
         server.update();  // Process any pending
 
-        fl::promise<fl::response> promise = fl::fetch_get("http://localhost:8080/");
+        fl::promise<fl::response> promise = fl::fetch_get("http://localhost:47801/");
         fl::result<fl::response> result = fl::await_top_level(promise);
 
         if (!result.ok()) {
@@ -81,7 +81,7 @@ int main() {
         FL_WARN("\nTest 2: GET /ping");
         server.update();
 
-        fl::promise<fl::response> promise = fl::fetch_get("http://localhost:8080/ping");
+        fl::promise<fl::response> promise = fl::fetch_get("http://localhost:47801/ping");
         fl::result<fl::response> result = fl::await_top_level(promise);
 
         if (!result.ok()) {
@@ -109,7 +109,7 @@ int main() {
         FL_WARN("\nTest 3: GET /test (JSON)");
         server.update();
 
-        fl::promise<fl::response> promise = fl::fetch_get("http://localhost:8080/test");
+        fl::promise<fl::response> promise = fl::fetch_get("http://localhost:47801/test");
         fl::result<fl::response> result = fl::await_top_level(promise);
 
         if (!result.ok()) {

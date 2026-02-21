@@ -6,14 +6,19 @@
 
 using namespace fl;
 
+// Use unique high ports that don't conflict with other tests
+// (native_server.cpp uses port 8080, stream tests also use 8080)
+static const int kTestPort1 = 58901;
+static const int kTestPort2 = 58902;
+
 FL_TEST_CASE("NativeHttpClient - Construction and destruction") {
-    NativeHttpClient client("localhost", 8080);
+    NativeHttpClient client("localhost", kTestPort1);
     FL_CHECK(client.getState() == ConnectionState::DISCONNECTED);
     FL_CHECK_FALSE(client.isConnected());
 }
 
 FL_TEST_CASE("NativeHttpClient - Connection to invalid host fails") {
-    NativeHttpClient client("invalid.host.that.does.not.exist.test", 8080);
+    NativeHttpClient client("invalid.host.that.does.not.exist.test", kTestPort1);
 
     bool result = client.connect();
     FL_CHECK_FALSE(result);
@@ -21,7 +26,7 @@ FL_TEST_CASE("NativeHttpClient - Connection to invalid host fails") {
 }
 
 FL_TEST_CASE("NativeHttpClient - Connection state transitions") {
-    NativeHttpClient client("localhost", 8080);
+    NativeHttpClient client("localhost", kTestPort1);
 
     FL_CHECK(client.getState() == ConnectionState::DISCONNECTED);
 
@@ -34,7 +39,7 @@ FL_TEST_CASE("NativeHttpClient - Connection state transitions") {
 }
 
 FL_TEST_CASE("NativeHttpClient - Send and recv fail when disconnected") {
-    NativeHttpClient client("localhost", 8080);
+    NativeHttpClient client("localhost", kTestPort1);
 
     uint8_t sendData[] = {'t', 'e', 's', 't'};
     int sendResult = client.send(sendData, sizeof(sendData));
@@ -46,7 +51,7 @@ FL_TEST_CASE("NativeHttpClient - Send and recv fail when disconnected") {
 }
 
 FL_TEST_CASE("NativeHttpClient - Non-blocking mode") {
-    NativeHttpClient client("localhost", 8080);
+    NativeHttpClient client("localhost", kTestPort1);
 
     // Set non-blocking mode before connection
     client.setNonBlocking(true);
@@ -61,7 +66,7 @@ FL_TEST_CASE("NativeHttpClient - Non-blocking mode") {
 }
 
 FL_TEST_CASE("NativeHttpClient - Disconnect and close") {
-    NativeHttpClient client("localhost", 8080);
+    NativeHttpClient client("localhost", kTestPort1);
 
     // Disconnect when already disconnected (should be no-op)
     client.disconnect();
@@ -81,7 +86,7 @@ FL_TEST_CASE("NativeHttpClient - Heartbeat tracking") {
     ConnectionConfig config;
     config.heartbeatIntervalMs = 1000;
 
-    NativeHttpClient client("localhost", 8080, config);
+    NativeHttpClient client("localhost", kTestPort1, config);
 
     // Should not send heartbeat when disconnected
     FL_CHECK_FALSE(client.shouldSendHeartbeat(0));
@@ -95,7 +100,7 @@ FL_TEST_CASE("NativeHttpClient - Reconnection tracking") {
     config.reconnectMaxDelayMs = 5000;
     config.reconnectBackoffMultiplier = 2;
 
-    NativeHttpClient client("localhost", 8080, config);
+    NativeHttpClient client("localhost", kTestPort1, config);
 
     // Initial state
     FL_CHECK(client.getReconnectAttempts() == 0);
@@ -107,7 +112,7 @@ FL_TEST_CASE("NativeHttpClient - Update loop") {
     config.reconnectInitialDelayMs = 100;
     config.maxReconnectAttempts = 1;  // Only 1 attempt
 
-    NativeHttpClient client("localhost", 8080, config);
+    NativeHttpClient client("localhost", kTestPort1, config);
 
     // Initial state
     FL_CHECK(client.getState() == ConnectionState::DISCONNECTED);
@@ -125,8 +130,8 @@ FL_TEST_CASE("NativeHttpClient - Update loop") {
 }
 
 FL_TEST_CASE("NativeHttpClient - Multiple instances") {
-    NativeHttpClient client1("localhost", 8080);
-    NativeHttpClient client2("localhost", 8081);
+    NativeHttpClient client1("localhost", kTestPort1);
+    NativeHttpClient client2("localhost", kTestPort2);
 
     FL_CHECK_FALSE(client1.isConnected());
     FL_CHECK_FALSE(client2.isConnected());
