@@ -91,6 +91,11 @@ def build_library(build_dir: Path, verbose: bool = False) -> bool:
 
     Returns True if build succeeded.
     """
+    # Check for stale PCH before invoking Ninja (Windows backslash path issue)
+    from ci.compile_pch import invalidate_stale_pch
+
+    pch_file = build_dir / "ci" / "meson" / "wasm" / "wasm_pch.h.pch"
+    invalidate_stale_pch(pch_file)
     cmd = [get_meson_executable(), "compile", "-C", str(build_dir), "fastled"]
     if verbose:
         cmd.append("-v")

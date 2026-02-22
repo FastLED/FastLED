@@ -82,6 +82,14 @@ def _is_compilation_error(line: str) -> bool:
     )
 
 
+def _invalidate_stale_pchs(build_dir: Path) -> None:
+    """Find and invalidate any stale PCH files in the build directory."""
+    from ci.compile_pch import invalidate_stale_pch
+
+    for pch_file in build_dir.rglob("*.pch"):
+        invalidate_stale_pch(pch_file)
+
+
 def compile_meson(
     build_dir: Path,
     target: Optional[str] = None,
@@ -138,6 +146,11 @@ def compile_meson(
             suppressed_errors=[],
             error_log_file=None,
         )
+
+    # Check for stale PCH before invoking Ninja.  Compilers on Windows emit
+    # absolute backslash paths in depfiles which Ninja may fail to track
+    # correctly, leaving the PCH stale even though headers changed.
+    _invalidate_stale_pchs(build_dir)
 
     if target:
         cmd.append(target)

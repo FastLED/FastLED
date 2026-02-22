@@ -98,12 +98,22 @@ def fix_depfile(depfile_path: Path, pch_output_path: Path) -> None:
         return
 
     # Everything after the separator (including ": ") is the dependencies
-    dependencies = content[separator_idx:]
+    deps_str = content[separator_idx + 2 :]
 
-    # Create new depfile with correct target
-    # Use forward slashes for Ninja compatibility on Windows
-    pch_output_str = str(pch_output_path).replace("\\", "/")
-    new_content = f"{pch_output_str}{dependencies}"
+    # Parse individual dependency paths
+    dep_paths = _tokenize_depfile_deps(deps_str)
+
+    # Normalize ALL paths to forward slashes for Ninja compatibility on Windows.
+    # Compilers (especially emscripten) emit absolute Windows backslash paths
+    # (e.g. C:\Users\...\rx_device.h) which Ninja may fail to match against
+    # its internal deps database, causing stale PCH errors.
+    pch_output_str = Path(pch_output_path).as_posix()
+    normalized_deps = [Path(p).as_posix() for p in dep_paths]
+
+    # Rebuild depfile in Make format
+    # Escape spaces in paths for Make syntax
+    escaped_deps = [d.replace(" ", "\\ ") for d in normalized_deps]
+    new_content = pch_output_str + ": \\\n  " + " \\\n  ".join(escaped_deps) + "\n"
 
     depfile_path.write_text(new_content, encoding="utf-8")
 
@@ -177,6 +187,44 @@ def hash_input_files(files: list[Path]) -> str:
         else:
             h.update(b"\x00")  # sentinel: file missing
     return h.hexdigest()
+
+
+def invalidate_stale_pch(pch_file: Path) -> None:
+    """Delete a PCH file if its input files have changed since it was built.
+
+    Uses the ``.d.cache`` and ``.input_hash`` files saved by previous builds
+    to detect when a header dependency has been modified.  If the hash doesn't
+    match, the PCH and hash file are removed so Ninja is forced to rebuild.
+
+    This works around a Ninja limitation on Windows where backslash paths in
+    depfiles can cause Ninja to miss dependency changes.
+    """
+    if not pch_file.exists():
+        return
+
+    saved_depfile = pch_file.with_name(pch_file.name.replace(".pch", ".d.cache"))
+    hash_file = Path(str(pch_file) + ".input_hash")
+    if not saved_depfile.exists() or not hash_file.exists():
+        return
+
+    try:
+        input_files = parse_depfile_inputs(saved_depfile)
+        if not input_files:
+            return
+        current_hash = hash_input_files(input_files)
+        stored_hash = hash_file.read_text(encoding="utf-8").strip()
+        if current_hash != stored_hash:
+            print(
+                f"PCH inputs changed — removing stale {pch_file.name} to force rebuild",
+                file=sys.stderr,
+            )
+            pch_file.unlink(missing_ok=True)
+            hash_file.unlink(missing_ok=True)
+    except KeyboardInterrupt:
+        handle_keyboard_interrupt_properly()
+        raise
+    except Exception as e:
+        print(f"WARNING: PCH staleness check failed: {e}", file=sys.stderr)
 
 
 def main() -> int:

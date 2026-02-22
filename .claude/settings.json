@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run python ci/hooks/check_forbidden_commands.py"
+            "command": "cd \"$(git rev-parse --show-toplevel)\" && uv run python ci/hooks/check_forbidden_commands.py"
           }
         ]
       }
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run python .claude/hooks/lint-on-save.py",
+            "command": "cd \"$(git rev-parse --show-toplevel)\" && uv run python .claude/hooks/lint-on-save.py",
             "timeout": 30
           }
         ]
@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run python .claude/hooks/lint-on-stop.py",
+            "command": "cd \"$(git rev-parse --show-toplevel)\" && uv run python .claude/hooks/lint-on-stop.py",
             "timeout": 120
           }
         ]
