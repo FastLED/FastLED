@@ -82,10 +82,16 @@ FASTLED_FORCE_INLINE i32 applyRadialFilter(i32 noise_255, i32 rf_raw) {
 }
 
 // Load 4 aligned i32 values from an SoA array into a SIMD register.
-// All SoA arrays are FL_ALIGNAS(16) and loop stride is 4, so ptr+i is 16-byte aligned.
+//
+// FrameSetup pointers already carry assume_aligned<16> from setupChasingSpiralFrame(),
+// but reinterpret_cast<const u32*> strips the compiler's alignment metadata.
+// Re-asserting assume_aligned<16> here restores the hint so the compiler can
+// emit aligned SIMD loads (e.g. movaps/movdqa on x86) instead of unaligned ones
+// (movups/movdqu), which avoids a micro-op penalty on older cores and removes
+// a redundant alignment check on modern ones.
 FASTLED_FORCE_INLINE simd::simd_u32x4 loadAligned(const i32 *arr, int i) {
     return simd::load_u32_4_aligned(
-        FL_ASSUME_ALIGNED(reinterpret_cast<const u32*>(arr + i), 16)); // ok reinterpret cast
+        fl::assume_aligned<16>(reinterpret_cast<const u32*>(arr + i))); // ok reinterpret cast
 }
 
 // Write one pixel from per-channel SIMD registers at the given lane.
@@ -233,15 +239,36 @@ FrameSetup setupChasingSpiralFrame(Context &ctx, ChasingSpiralState &state) {
     const i32 rad1_raw = radial1.raw();
     const i32 rad2_raw = radial2.raw();
 
+    // Stamp alignment on SoA pointers at the source so every downstream
+    // consumer (Q31 scalar loop, SIMD 4-wide loop, loadAligned helper)
+    // inherits the hint without needing per-site annotations.
+    //
+    // Why this matters for performance:
+    //   1. The SIMD path calls loadAligned() which feeds load_u32_4_aligned().
+    //      With the alignment hint the compiler emits movdqa/movaps (aligned
+    //      128-bit loads) instead of movdqu/movups (unaligned). On older x86
+    //      (pre-Nehalem) unaligned loads are significantly slower; on modern
+    //      cores they still cost an extra micro-op when the address crosses a
+    //      cache-line boundary.
+    //   2. The Q31 scalar path benefits too: the compiler can widen scalar
+    //      i32 loads into SIMD gathers or auto-vectorize more aggressively
+    //      when it knows the base pointer is 16-byte aligned.
+    //   3. fade_lut (256-entry i32 Perlin fade table) is accessed in every
+    //      Perlin noise evaluation; the alignment hint lets the compiler
+    //      assume cache-line-friendly access patterns.
+    //
+    // The underlying SoA arrays are allocated with FL_ALIGNAS(16) in
+    // ChasingSpiralState, so this is a promise (not a request).
+    // pixel_idx is u16 (2 bytes) and not SIMD-loaded, so no hint needed.
     return FrameSetup{
         total_pixels,
-        state.base_angle.data(),
-        state.dist_scaled.data(),
-        state.rf3.data(),
-        state.rf_half.data(),
-        state.rf_quarter.data(),
+        fl::assume_aligned<16>(state.base_angle.data()),
+        fl::assume_aligned<16>(state.dist_scaled.data()),
+        fl::assume_aligned<16>(state.rf3.data()),
+        fl::assume_aligned<16>(state.rf_half.data()),
+        fl::assume_aligned<16>(state.rf_quarter.data()),
         state.pixel_idx.data(),
-        state.fade_lut,
+        fl::assume_aligned<16>(state.fade_lut),
         PERLIN_NOISE,
         cx_raw,
         cy_raw,
