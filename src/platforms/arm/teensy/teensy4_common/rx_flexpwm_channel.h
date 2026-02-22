@@ -1,4 +1,4 @@
-/// @file flexpwm_rx_channel.h
+/// @file rx_flexpwm_channel.h
 /// @brief Teensy 4.x FlexPWM input-capture RX driver for WS2812-like signals
 
 #pragma once

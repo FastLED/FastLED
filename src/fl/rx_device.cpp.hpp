@@ -18,7 +18,7 @@
 
 #ifdef FL_IS_TEENSY_4X
 // IWYU pragma: begin_keep
-#include "platforms/arm/teensy/teensy4_common/flexpwm_rx_channel.h" // ok platform headers
+#include "platforms/arm/teensy/teensy4_common/rx_flexpwm_channel.h" // ok platform headers
 // IWYU pragma: end_keep
 #endif
 

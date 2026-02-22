@@ -1,4 +1,4 @@
-/// @file flexpwm_rx_channel.cpp.hpp
+/// @file rx_flexpwm_channel.cpp.hpp
 /// @brief Teensy 4.x FlexPWM input-capture RX implementation
 ///
 /// Hardware pipeline (based on Paul Stoffregen's WS2812Capture):
@@ -26,7 +26,7 @@
 
 #define FASTLED_INTERNAL
 #include "fl/fastled.h"
-#include "flexpwm_rx_channel.h"
+#include "rx_flexpwm_channel.h"
 
 #include "fl/stl/vector.h"
 #include "fl/warn.h"
@@ -132,14 +132,16 @@ static const FlexPwmPinInfo kPinMap[] = {
      &IOMUXC_FLEXPWM1_PWMA2_SELECT_INPUT, 0},
 
     // Pin 53: FlexPWM3_SM0_A (GPIO_EMC_29, ALT1) [bottom pads]
+    // No select_input register: FlexPWM3_PWMA0 has only one pad option on IMXRT1062
     {53, &IMXRT_FLEXPWM3, 0, false, 80,
      &IOMUXC_SW_MUX_CTL_PAD_GPIO_EMC_29, 1,
-     &IOMUXC_FLEXPWM3_PWMA0_SELECT_INPUT, 0},
+     nullptr, 0},
 
     // Pin 54: FlexPWM3_SM2_A (GPIO_EMC_33, ALT1) [bottom pads]
+    // No select_input register: FlexPWM3_PWMA2 has only one pad option on IMXRT1062
     {54, &IMXRT_FLEXPWM3, 2, false, 84,
      &IOMUXC_SW_MUX_CTL_PAD_GPIO_EMC_33, 1,
-     &IOMUXC_FLEXPWM3_PWMA2_SELECT_INPUT, 0},
+     nullptr, 0},
 #endif // ARDUINO_TEENSY41
 };
 
