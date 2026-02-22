@@ -384,8 +384,13 @@ def run_meson_examples(
         shutil.rmtree(build_dir)
 
     # When specific examples are requested, disable filters to ensure they can be built
-    # even if they have platform restrictions
+    # even if they have platform restrictions.
+    # Use a marker file to track the filter state so we only reconfigure when it changes.
+    # Previously this forced reconfigure on EVERY run with specific examples, causing
+    # ~15-22s rebuilds when nothing changed (meson setup regenerates build.ninja,
+    # which makes ninja think all 300+ targets are stale).
     force_reconfigure = False
+    filter_marker = build_dir / ".example_filters_disabled"
     if examples is not None and len(examples) > 0:
         os.environ["FASTLED_IGNORE_EXAMPLE_FILTERS"] = "1"
         # Yellow warning (ANSI code 33 for yellow)
@@ -394,12 +399,31 @@ def run_meson_examples(
             + ", ".join(examples)
             + "\033[0m"
         )
-        # Invalidate cache to force re-discovery with filters disabled
-        cache_file = build_dir / "example_metadata.cache"
-        if cache_file.exists():
-            cache_file.unlink()
-        # Force reconfiguration to pick up the new discovery
-        force_reconfigure = True
+        # Only reconfigure if filters were previously enabled (marker absent)
+        if not filter_marker.exists():
+            # Invalidate cache to force re-discovery with filters disabled
+            cache_file = build_dir / "examples" / "example_metadata.cache"
+            if cache_file.exists():
+                cache_file.unlink()
+            force_reconfigure = True
+            # Create marker so subsequent runs skip reconfigure
+            try:
+                build_dir.mkdir(parents=True, exist_ok=True)
+                filter_marker.touch()
+            except OSError:
+                pass
+    else:
+        # Running all examples (no specific selection) - filters should be active
+        if filter_marker.exists():
+            # Filters were previously disabled, need to reconfigure to re-enable them
+            try:
+                filter_marker.unlink()
+            except OSError:
+                pass
+            cache_file = build_dir / "examples" / "example_metadata.cache"
+            if cache_file.exists():
+                cache_file.unlink()
+            force_reconfigure = True
 
     # Setup build with explicit build_mode to ensure proper cache invalidation
     if not setup_meson_build(
