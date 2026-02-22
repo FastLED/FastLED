@@ -14,13 +14,19 @@ import sys
 
 from ci.rpc_client import RpcClient
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.serial_interface import create_serial_interface
 
 
 async def main_async(port: str, baudrate: int, use_pyserial: bool) -> int:
     """Test void RPC functionality (async main function)."""
     print(f"🔌 Connecting to {port} at {baudrate} baud...")
 
-    async with RpcClient(port, baudrate=baudrate, use_pyserial=use_pyserial) as client:
+    serial_iface = create_serial_interface(
+        port, baud_rate=baudrate, use_pyserial=use_pyserial
+    )
+    async with RpcClient(
+        port, baudrate=baudrate, serial_interface=serial_iface
+    ) as client:
         print("✅ Connected")
 
         # Test 1: Call a void function (setPins doesn't return a value)

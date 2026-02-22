@@ -53,7 +53,7 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from colorama import Fore, Style, init
 
@@ -89,6 +89,10 @@ except ImportError:
     FBUILD_LEDGER_AVAILABLE = False
     fbuild_detect_and_cache = None  # type: ignore[assignment,misc]
 from ci.util.sketch_resolver import parse_timeout
+
+
+if TYPE_CHECKING:
+    from ci.util.serial_interface import SerialInterface
 
 
 # Initialize colorama
@@ -243,7 +247,7 @@ async def run_gpio_pretest(
     tx_pin: int = PIN_TX,
     rx_pin: int = PIN_RX,
     timeout: float = 15.0,
-    use_pyserial: bool = False,
+    serial_interface: "SerialInterface | None" = None,
 ) -> bool:
     """Test GPIO connectivity between TX and RX pins before running validation (async).
 
@@ -255,7 +259,7 @@ async def run_gpio_pretest(
         tx_pin: TX pin number (default: PIN_TX)
         rx_pin: RX pin number (default: PIN_RX)
         timeout: Timeout in seconds for response
-        use_pyserial: If True, use pyserial directly instead of fbuild (for --no-fbuild)
+        serial_interface: Pre-created SerialInterface (defaults to fbuild if None)
 
     Returns:
         True if pins are connected, False otherwise
@@ -275,7 +279,7 @@ async def run_gpio_pretest(
         print("RPC CLIENT DEBUG OUTPUT")
         print("=" * 60)
         client = RpcClient(
-            port, timeout=timeout, use_pyserial=use_pyserial, verbose=True
+            port, timeout=timeout, serial_interface=serial_interface, verbose=True
         )
         await client.connect(
             boot_wait=15.0, drain_boot=False
@@ -378,7 +382,7 @@ async def run_pin_discovery(
     start_pin: int = 0,
     end_pin: int = 8,
     timeout: float = 15.0,
-    use_pyserial: bool = False,
+    serial_interface: "SerialInterface | None" = None,
 ) -> tuple[bool, int | None, int | None, "RpcClient | None"]:
     """Auto-discover connected pin pairs by probing adjacent GPIO pins (async).
 
@@ -390,7 +394,7 @@ async def run_pin_discovery(
         start_pin: Start of pin range to search (default: 0)
         end_pin: End of pin range to search (default: 21)
         timeout: Timeout in seconds for response
-        use_pyserial: If True, use pyserial directly instead of fbuild (for --no-fbuild)
+        serial_interface: Pre-created SerialInterface (defaults to fbuild if None)
 
     Returns:
         Tuple of (success, tx_pin, rx_pin, client) where:
@@ -413,7 +417,7 @@ async def run_pin_discovery(
         print("RPC CLIENT DEBUG OUTPUT")
         print("=" * 60)
         client = RpcClient(
-            port, timeout=timeout, use_pyserial=use_pyserial, verbose=True
+            port, timeout=timeout, serial_interface=serial_interface, verbose=True
         )
         await client.connect(boot_wait=3.0, drain_boot=True)
 
@@ -1701,10 +1705,16 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
         effective_rx_pin: int | None = None
         pins_discovered = False
 
-        # WORKAROUND: Force pyserial for ESP32-C6 to avoid event loop conflict
-        # fbuild's SerialMonitor uses run_until_complete() which fails in async context
-        # See: .loop/VALIDATE_EVENT_LOOP_ISSUE.md
-        force_pyserial = args.no_fbuild or final_environment == "esp32c6"
+        # Create serial interface based on --no-fbuild flag
+        force_pyserial = args.no_fbuild
+        if force_pyserial:
+            from ci.util.serial_interface import create_serial_interface
+
+            serial_iface: SerialInterface | None = create_serial_interface(
+                port=upload_port, use_pyserial=True
+            )
+        else:
+            serial_iface = None  # Let RpcClient default to fbuild
 
         # Store discovery client for reuse (keep connection open!)
         discovery_client: RpcClient | None = None
@@ -1734,7 +1744,7 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                 discovered_tx,
                 discovered_rx,
                 discovery_client,
-            ) = await run_pin_discovery(upload_port, use_pyserial=force_pyserial)
+            ) = await run_pin_discovery(upload_port, serial_interface=serial_iface)
 
             if success and discovered_tx is not None and discovered_rx is not None:
                 effective_tx_pin = discovered_tx
@@ -1776,7 +1786,7 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
             upload_port,
             effective_tx_pin or PIN_TX,
             effective_rx_pin or PIN_RX,
-            use_pyserial=force_pyserial,  # Use same backend as pin discovery
+            serial_interface=serial_iface,  # Use same backend as pin discovery
         ):
             print()
             print(f"{Fore.RED}=" * 60)
@@ -1808,7 +1818,7 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                 # Use short boot_wait - device already rebooted and we waited for port
                 print("   ⏳ Connecting to device...", end="", flush=True)
                 client = RpcClient(
-                    upload_port, timeout=10.0, use_pyserial=force_pyserial
+                    upload_port, timeout=10.0, serial_interface=serial_iface
                 )
                 await client.connect(
                     boot_wait=1.0
@@ -1878,7 +1888,7 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                 client = RpcClient(
                     upload_port,
                     timeout=timeout_seconds,
-                    use_pyserial=force_pyserial,
+                    serial_interface=serial_iface,
                     verbose=True,  # Enable verbose mode to see debug output
                 )
                 await client.connect(boot_wait=3.0, drain_boot=True)

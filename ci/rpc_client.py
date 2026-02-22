@@ -2,8 +2,7 @@
 Async JSON-RPC client with automatic request ID correlation for serial communication.
 
 This module provides an async/await RPC client that automatically manages request IDs:
-- Serial connection management via fbuild daemon (eliminates port lock conflicts)
-- Or direct pyserial connection (when --no-fbuild is specified)
+- Serial connection management via a SerialInterface abstraction
 - JSON-RPC 2.0 command serialization with automatic request ID generation
 - Internal response matching by ID (transparent to users)
 - ID wraparound handling for uint32 range (0 to 4,294,967,295)
@@ -19,8 +18,10 @@ Usage (IDs are managed internally, async/await required):
         print(response.success)  # True/False
         # Note: response._id exists but is internal - don't use it
 
-    # With pyserial (no fbuild daemon):
-    async with RpcClient("/dev/ttyUSB0", use_pyserial=True) as client:
+    # With explicit serial interface (e.g., pyserial backend):
+    from ci.util.serial_interface import create_serial_interface
+    iface = create_serial_interface("/dev/ttyUSB0", use_pyserial=True)
+    async with RpcClient("/dev/ttyUSB0", serial_interface=iface) as client:
         response = await client.send("ping")
 
     # Or with explicit connection management:
@@ -43,11 +44,7 @@ from ci.util.global_interrupt_handler import is_interrupted, notify_main_thread
 
 
 if TYPE_CHECKING:
-    from fbuild.api import SerialMonitor as FbuildSerialMonitorType
-
-    from ci.util.pyserial_monitor import SerialMonitor as PySerialMonitorType
-
-    SerialMonitorType = PySerialMonitorType | FbuildSerialMonitorType
+    from ci.util.serial_interface import SerialInterface
 
 
 @dataclass
@@ -91,16 +88,21 @@ class RpcError(Exception):
 class RpcClient:
     """Stateful JSON-RPC client for serial communication.
 
-    Supports two serial backends:
-    - fbuild daemon (default): Better for concurrent access and deploy coordination
-    - pyserial direct (use_pyserial=True): For --no-fbuild mode, avoids asyncio issues
+    Accepts a SerialInterface for serial I/O. Use create_serial_interface()
+    to create the appropriate backend (pyserial or fbuild).
+
+    If no serial_interface is provided, an fbuild backend is created by default.
+    To use pyserial, create the interface externally and pass it in:
+
+        from ci.util.serial_interface import create_serial_interface
+        iface = create_serial_interface(port, use_pyserial=True)
+        client = RpcClient(port, serial_interface=iface)
 
     Attributes:
         port: Serial port path
         baudrate: Serial baud rate (default: 115200)
         timeout: Default RPC response timeout in seconds
         response_prefix: Prefix for RPC responses (default: "REMOTE: ")
-        use_pyserial: If True, use pyserial directly instead of fbuild daemon
     """
 
     RESPONSE_PREFIX = "REMOTE: "
@@ -111,7 +113,7 @@ class RpcClient:
         baudrate: int = 115200,
         timeout: float = 10.0,
         read_timeout: float = 0.5,
-        use_pyserial: bool = False,
+        serial_interface: SerialInterface | None = None,
         verbose: bool = False,
     ):
         """Initialize RPC client.
@@ -121,16 +123,17 @@ class RpcClient:
             baudrate: Serial baud rate (default: 115200)
             timeout: Default timeout for RPC operations in seconds
             read_timeout: Timeout for individual serial reads (unused with fbuild)
-            use_pyserial: If True, use pyserial directly instead of fbuild (for --no-fbuild)
+            serial_interface: Pre-created SerialInterface. If None, an fbuild
+                backend is created automatically on connect().
             verbose: If True, enable detailed RPC logging
         """
         self.port = port
         self.baudrate = baudrate
         self.timeout = timeout
         self.read_timeout = read_timeout
-        self.use_pyserial = use_pyserial
         self.verbose = verbose
-        self._monitor: Any = None  # SerialMonitor (fbuild or pyserial)
+        self._serial: SerialInterface | None = serial_interface
+        self._owns_serial = serial_interface is None
         self._next_id: int = (
             1  # Request ID counter for JSON-RPC 2.0 correlation (uint32 range)
         )
@@ -138,12 +141,10 @@ class RpcClient:
     @property
     def is_connected(self) -> bool:
         """Check if serial connection is open."""
-        return self._monitor is not None
+        return self._serial is not None
 
     async def connect(self, boot_wait: float = 3.0, drain_boot: bool = True) -> None:
         """Open serial connection (async).
-
-        Uses either fbuild daemon or direct pyserial based on use_pyserial setting.
 
         Args:
             boot_wait: Time to wait for device boot (seconds)
@@ -152,34 +153,22 @@ class RpcClient:
         if self.is_connected:
             return
 
+        # Create serial interface if not provided externally (defaults to fbuild)
+        if self._serial is None:
+            from ci.util.serial_interface import create_serial_interface
+
+            self._serial = create_serial_interface(
+                port=self.port,
+                baud_rate=self.baudrate,
+            )
+            self._owns_serial = True
+
+        backend_name = type(self._serial).__name__
         if self.verbose:
             print(f"🔌 [RPC] Connecting to {self.port} @ {self.baudrate} baud...")
-            print(
-                f"🔌 [RPC] Using {'pyserial' if self.use_pyserial else 'fbuild'} backend"
-            )
+            print(f"🔌 [RPC] Using {backend_name} backend")
 
-        # Select appropriate SerialMonitor implementation
-        if self.use_pyserial:
-            from ci.util.pyserial_monitor import SerialMonitor as PySerialMonitor
-
-            self._monitor = PySerialMonitor(
-                port=self.port,
-                baud_rate=self.baudrate,
-                auto_reconnect=True,
-                verbose=False,
-            )
-        else:
-            from fbuild.api import SerialMonitor as FbuildSerialMonitor
-
-            self._monitor = FbuildSerialMonitor(
-                port=self.port,
-                baud_rate=self.baudrate,
-                auto_reconnect=True,  # Handle deploy preemption gracefully
-                verbose=False,
-            )
-
-        # Attach to serial session (works for both implementations)
-        self._monitor.__enter__()
+        await self._serial.connect()
 
         if self.verbose:
             print(f"✅ [RPC] Serial connection established")
@@ -203,9 +192,9 @@ class RpcClient:
 
     async def close(self) -> None:
         """Close serial connection (async)."""
-        if self._monitor is not None:
-            self._monitor.__exit__(None, None, None)
-            self._monitor = None
+        if self._serial is not None:
+            await self._serial.close()
+            self._serial = None
             await asyncio.sleep(0)  # Yield control
 
     async def drain_boot_output(
@@ -223,16 +212,15 @@ class RpcClient:
         if not self.is_connected:
             raise RpcError("Not connected")
 
-        assert self._monitor is not None
+        assert self._serial is not None
 
         lines_drained = 0
 
         # Poll for boot output with short timeout (wait for buffer to drain)
         # Use read_lines with a short timeout to drain existing buffer
         try:
-            for line in self._monitor.read_lines(timeout=1.0):
+            async for line in self._serial.read_lines(timeout=1.0):
                 self._check_interrupt()
-                await asyncio.sleep(0)  # Allow other async tasks to run
                 lines_drained += 1
 
                 if verbose:
@@ -277,7 +265,7 @@ class RpcClient:
         if not self.is_connected:
             raise RpcError("Not connected")
 
-        assert self._monitor is not None
+        assert self._serial is not None
 
         # Generate unique request ID for JSON-RPC 2.0 correlation (mandatory)
         request_id = self._next_id
@@ -304,8 +292,8 @@ class RpcClient:
 
         for _attempt in range(retries):
             try:
-                # Write command via serial monitor
-                self._monitor.write(cmd_str + "\n")
+                # Write command via serial interface
+                await self._serial.write(cmd_str + "\n")
 
                 # Await response with ID matching (mandatory)
                 response = await self._wait_for_response(
@@ -350,7 +338,7 @@ class RpcClient:
         if not self.is_connected:
             raise RpcError("Not connected")
 
-        assert self._monitor is not None
+        assert self._serial is not None
 
         # Generate unique request ID for JSON-RPC 2.0 correlation (mandatory)
         request_id = self._next_id
@@ -376,14 +364,13 @@ class RpcClient:
         for _attempt in range(retries):
             self._check_interrupt()  # Check before each attempt
 
-            # Write command via serial monitor
-            self._monitor.write(cmd_str + "\n")
+            # Write command via serial interface
+            await self._serial.write(cmd_str + "\n")
 
             start = time.time()
             try:
-                for line in self._monitor.read_lines(timeout=attempt_timeout):
+                async for line in self._serial.read_lines(timeout=attempt_timeout):
                     self._check_interrupt()
-                    await asyncio.sleep(0)  # Allow other async tasks to run
 
                     # Show all serial output in verbose mode (helps debug crashes)
                     if self.verbose and not line.startswith(self.RESPONSE_PREFIX):
@@ -477,14 +464,13 @@ class RpcClient:
         Raises:
             RpcTimeoutError: If no matching response within timeout
         """
-        assert self._monitor is not None
+        assert self._serial is not None
 
         start = time.time()
 
         try:
-            for line in self._monitor.read_lines(timeout=timeout):
+            async for line in self._serial.read_lines(timeout=timeout):
                 self._check_interrupt()
-                await asyncio.sleep(0)  # Allow other async tasks to run
 
                 if not line.startswith(self.RESPONSE_PREFIX):
                     if self.verbose:
