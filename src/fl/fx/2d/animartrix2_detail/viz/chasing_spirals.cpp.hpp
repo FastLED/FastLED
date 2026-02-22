@@ -1,29 +1,15 @@
-// Chasing_Spirals Q31 SIMD implementation (fixed-point, 4-wide vectorized)
+// Chasing Spirals — three implementations (Float, Q31 scalar, Q31 SIMD).
 //
-// ============================================================================
-// PIPELINE SUMMARY (SoA layout + full SIMD optimization)
-// ============================================================================
+// All variants share setupChasingSpiralFrame() which builds a per-pixel SoA
+// geometry cache (base_angle, dist_scaled, radial filters, pixel_idx) and
+// a Perlin fade LUT.  Per-frame constants (center, linear/radial offsets)
+// are computed once and passed via FrameSetup.
 //
-// Per-frame state is kept in ChasingSpiralState (SoA layout, engine.h):
-//   base_angle[], dist_scaled[], rf3[], rf_half[], rf_quarter[], pixel_idx[]
-//   fade_lut[257]  (FL_ALIGNAS(16) for aligned Perlin LUT loads)
-//
-// SIMD inner loop (simd4_processChannel, 4 pixels per batch):
-//   [BOUNDARY A] SoA aligned load (load_u32_4_aligned + FL_ASSUME_ALIGNED)  ← FL_ALIGNAS(16) global + allocator guarantee
-//   Q16.16 → A24 (mulhi_su32_4)
-//   sincos32_simd                      ← fully SIMD (unchanged)
-//   Perlin coords (mulhi32_i32_4 << 1) ← fully SIMD (no scalar round-trip)
-//   pnoise2d_raw_simd4_vec(register)   ← SIMD registers passed directly (no B/C round-trip)
-//   [BOUNDARY D+E] extract_u32_4 per-lane → fade/perm/grad/lerp → set_u32_4 re-pack
-//     (no intermediate arrays — extract directly from SIMD registers, SSE2: no gather)
-//   Clamp [0,FP_ONE] + scale ×255      ← fully SIMD
-//   Radial filter (mulhi32_i32_4)      ← fully SIMD
-//   [BOUNDARY F] extract_u32_4 × 4 + scatter ← pixel_idx scatter, unavoidable
-//
-// Precision: mulhi32_i32_4(cos_Q31, dist_Q16) << 1 loses bit 31 of the product
-//   — at most ±1 ULP in Q16.16 coordinate space ≈ 1/65536 of the Perlin period.
-//   Within the 6-LSB pixel tolerance (avg<1%, max≤6 at t=1000).
-// ============================================================================
+// Q31 scalar:  Batches 3 channel sincos into one sincos32_simd call per pixel,
+//              then evaluates Perlin noise and radial filter per channel.
+// Q31 SIMD:    Processes 4 pixels at a time with full SIMD pipeline (aligned
+//              SoA loads → sincos32_simd → Perlin → clamp/scale → scatter).
+//              Perlin exits to scalar per-lane (SSE2 has no integer gather).
 
 #include "fl/align.h"
 #include "fl/compiler_control.h"
@@ -69,32 +55,49 @@ struct FrameSetup {
 };
 
 // Convert s16x16 angle (radians) to A24 format for sincos32
-u32 radiansToA24(i32 base_s16x16, i32 offset_s16x16) {
+FASTLED_FORCE_INLINE u32 radiansToA24(i32 base_s16x16, i32 offset_s16x16) {
     constexpr i32 RAD_TO_A24 = 2670177;
     return static_cast<u32>((static_cast<i64>(base_s16x16 + offset_s16x16) * RAD_TO_A24) >> FP::FRAC_BITS);
 }
 
+// Compute Perlin coordinate from sincos result and distance
+FASTLED_FORCE_INLINE i32 perlinCoord(i32 sc_val, i32 dist_raw, i32 offset) {
+    return offset - static_cast<i32>((static_cast<i64>(sc_val) * dist_raw) >> 31);
+}
+
 // Clamp s16x16 value to [0, 1] and scale to [0, 255]
-i32 clampAndScale255(i32 raw_s16x16) {
+FASTLED_FORCE_INLINE i32 clampAndScale255(i32 raw_s16x16) {
     constexpr i32 FP_ONE = 1 << FP::FRAC_BITS;
     if (raw_s16x16 < 0) raw_s16x16 = 0;
     if (raw_s16x16 > FP_ONE) raw_s16x16 = FP_ONE;
-    return raw_s16x16 * 255;
+    return (raw_s16x16 << 8) - raw_s16x16;
 }
 
 // Apply radial filter to noise value and clamp to [0, 255]
-i32 applyRadialFilter(i32 noise_255, i32 rf_raw) {
+FASTLED_FORCE_INLINE i32 applyRadialFilter(i32 noise_255, i32 rf_raw) {
     i32 result = static_cast<i32>((static_cast<i64>(noise_255) * rf_raw) >> (FP::FRAC_BITS * 2));
     if (result < 0) result = 0;
     if (result > 255) result = 255;
     return result;
 }
 
+// Load 4 aligned i32 values from an SoA array into a SIMD register.
+// All SoA arrays are FL_ALIGNAS(16) and loop stride is 4, so ptr+i is 16-byte aligned.
+FASTLED_FORCE_INLINE simd::simd_u32x4 loadAligned(const i32 *arr, int i) {
+    return simd::load_u32_4_aligned(
+        FL_ASSUME_ALIGNED(reinterpret_cast<const u32*>(arr + i), 16)); // ok reinterpret cast
+}
+
+// Write one pixel from per-channel SIMD registers at the given lane.
+FASTLED_FORCE_INLINE void scatterPixel(CRGB *leds, u16 idx,
+    simd::simd_u32x4 r, simd::simd_u32x4 g, simd::simd_u32x4 b, int lane) {
+    leds[idx] = CRGB(static_cast<u8>(simd::extract_u32_4(r, lane)),
+                     static_cast<u8>(simd::extract_u32_4(g, lane)),
+                     static_cast<u8>(simd::extract_u32_4(b, lane)));
+}
+
 // Process one color channel for 4 pixels using a full SIMD pipeline.
-// Returns 4 clamped [0, 255] channel values in a simd_u32x4 register.
-//
-// base_vec, dist_vec: SoA fields already loaded into SIMD (no AoS gather).
-// rf_vec: radial-filter multiplier for this channel, also from SoA.
+// Returns 4 clamped [0, 255] channel values.
 simd::simd_u32x4 simd4_processChannel(
     simd::simd_u32x4 base_vec, simd::simd_u32x4 dist_vec,
     i32 radial_offset, i32 linear_offset,
@@ -103,43 +106,35 @@ simd::simd_u32x4 simd4_processChannel(
 
     constexpr i32 RAD_TO_A24 = 2670177;
 
-    // Q16.16 → A24: (base + radial_offset) * RAD_TO_A24 >> 16
-    simd::simd_u32x4 offset_vec    = simd::set1_u32_4(static_cast<u32>(radial_offset));
-    simd::simd_u32x4 sum_vec       = simd::add_i32_4(base_vec, offset_vec);
-    simd::simd_u32x4 rad_const_vec = simd::set1_u32_4(static_cast<u32>(RAD_TO_A24));
-    simd::simd_u32x4 angles_vec    = simd::mulhi_su32_4(sum_vec, rad_const_vec);
+    // Angle conversion: Q16.16 → A24
+    auto offset_vec    = simd::set1_u32_4(static_cast<u32>(radial_offset));
+    auto sum_vec       = simd::add_i32_4(base_vec, offset_vec);
+    auto rad_const_vec = simd::set1_u32_4(static_cast<u32>(RAD_TO_A24));
+    auto angles_vec    = simd::mulhi_su32_4(sum_vec, rad_const_vec);
 
-    // sincos32_simd returns Q31 values (cos_vals, sin_vals)
     SinCos32_simd sc = sincos32_simd(angles_vec);
 
-    // Perlin coordinates (stays in SIMD — no scalar round-trip):
-    //   (cos_Q31 * dist_Q16) >> 31 == mulhi32_i32_4(cos, dist) << 1
-    //   Precision: loses bit 31 of the 64-bit product → ±1 ULP in Q16.16 coords.
-    simd::simd_u32x4 lin_cx = simd::set1_u32_4(static_cast<u32>(linear_offset + cx_raw));
-    simd::simd_u32x4 cy_vec  = simd::set1_u32_4(static_cast<u32>(cy_raw));
-    simd::simd_u32x4 nx_vec  = simd::sub_i32_4(lin_cx,
+    // Perlin coordinates: nx = lin+cx - cos*dist, ny = cy - sin*dist
+    auto lin_cx  = simd::set1_u32_4(static_cast<u32>(linear_offset + cx_raw));
+    auto cy_vec  = simd::set1_u32_4(static_cast<u32>(cy_raw));
+    auto nx_vec  = simd::sub_i32_4(lin_cx,
         simd::sll_u32_4(simd::mulhi32_i32_4(sc.cos_vals, dist_vec), 1));
-    simd::simd_u32x4 ny_vec  = simd::sub_i32_4(cy_vec,
+    auto ny_vec  = simd::sub_i32_4(cy_vec,
         simd::sll_u32_4(simd::mulhi32_i32_4(sc.sin_vals, dist_vec), 1));
 
-    // Perlin noise — pass SIMD registers directly (no B/C round-trip).
-    // The register overload does SIMD floor/frac/wrap internally, then exits
-    // to scalar for fade/perm/grad/lerp (BOUNDARY D), and re-packs (BOUNDARY E).
-    simd::simd_u32x4 raw_vec = perlin_s16x16_simd::pnoise2d_raw_simd4_vec(
+    // Perlin noise (SIMD floor/frac/wrap, scalar fade/perm/grad/lerp per lane)
+    auto raw_vec = perlin_s16x16_simd::pnoise2d_raw_simd4_vec(
         nx_vec, ny_vec, fade_lut, perm);
 
-    // Clamp to [0, FP_ONE] and scale by 255: (val << 8) - val
-    simd::simd_u32x4 zero   = simd::set1_u32_4(0u);
-    simd::simd_u32x4 fp_one = simd::set1_u32_4(static_cast<u32>(1 << FP::FRAC_BITS));
-    simd::simd_u32x4 clamped = simd::min_i32_4(simd::max_i32_4(raw_vec, zero), fp_one);
-    simd::simd_u32x4 noise_scaled = simd::sub_i32_4(simd::sll_u32_4(clamped, 8), clamped);
+    // Clamp [0, FP_ONE], scale ×255, apply radial filter, clamp [0, 255]
+    auto zero   = simd::set1_u32_4(0u);
+    auto fp_one = simd::set1_u32_4(static_cast<u32>(1 << FP::FRAC_BITS));
+    auto clamped = simd::min_i32_4(simd::max_i32_4(raw_vec, zero), fp_one);
+    auto noise_scaled = simd::sub_i32_4(simd::sll_u32_4(clamped, 8), clamped);
 
-    // Radial filter: (noise_scaled * rf) >> 32, clamped to [0, 255]
-    simd::simd_u32x4 max255 = simd::set1_u32_4(255u);
-    simd::simd_u32x4 result = simd::mulhi32_i32_4(noise_scaled, rf_vec);
-    result = simd::max_i32_4(result, zero);
-    result = simd::min_i32_4(result, max255);
-    return result;
+    auto max255 = simd::set1_u32_4(255u);
+    auto result = simd::mulhi32_i32_4(noise_scaled, rf_vec);
+    return simd::min_i32_4(simd::max_i32_4(result, zero), max255);
 }
 
 // Extract common frame setup logic shared by all variants.
@@ -351,32 +346,30 @@ void Chasing_Spirals_Q31::draw(Context &ctx) {
     const i32  rad2_raw     = setup.rad2_raw;
     CRGB      *leds         = setup.leds;
 
-    constexpr i32 FP_ONE    = 1 << FP::FRAC_BITS;
-    constexpr i32 RAD_TO_A24 = 2670177;
-
-    auto noise_channel = [&](i32 base_raw, i32 rad_raw,
+    // Compute one noise channel from a batched SinCos32_simd result.
+    auto noise_channel = [&](const SinCos32_simd &sc, int lane,
                              i32 lin_raw, i32 dist_raw) -> i32 {
-        u32 a24 = static_cast<u32>(
-            (static_cast<i64>(base_raw + rad_raw) * RAD_TO_A24) >> FP::FRAC_BITS);
-        SinCos32 sc = sincos32(a24);
-        i32 nx = lin_raw + cx_raw -
-            static_cast<i32>((static_cast<i64>(sc.cos_val) * dist_raw) >> 31);
-        i32 ny = cy_raw -
-            static_cast<i32>((static_cast<i64>(sc.sin_val) * dist_raw) >> 31);
-
-        i32 raw = Perlin::pnoise2d_raw(nx, ny, fade_lut, perm);
-        if (raw < 0) raw = 0;
-        if (raw > FP_ONE) raw = FP_ONE;
-        return raw * 255;
+        i32 cos_v = static_cast<i32>(simd::extract_u32_4(sc.cos_vals, lane));
+        i32 sin_v = static_cast<i32>(simd::extract_u32_4(sc.sin_vals, lane));
+        i32 nx = perlinCoord(cos_v, dist_raw, lin_raw + cx_raw);
+        i32 ny = perlinCoord(sin_v, dist_raw, cy_raw);
+        return clampAndScale255(Perlin::pnoise2d_raw(nx, ny, fade_lut, perm));
     };
 
     for (int i = 0; i < total_pixels; i++) {
         const i32 base_raw = setup.base_angle[i];
         const i32 dist_raw = setup.dist_scaled[i];
 
-        i32 s0 = noise_channel(base_raw, rad0_raw, lin0_raw, dist_raw);
-        i32 s1 = noise_channel(base_raw, rad1_raw, lin1_raw, dist_raw);
-        i32 s2 = noise_channel(base_raw, rad2_raw, lin2_raw, dist_raw);
+        // Batch all 3 channel sincos into one SIMD call (4th lane unused)
+        simd::simd_u32x4 angles = simd::set_u32_4(
+            radiansToA24(base_raw, rad0_raw),
+            radiansToA24(base_raw, rad1_raw),
+            radiansToA24(base_raw, rad2_raw), 0);
+        SinCos32_simd sc = sincos32_simd(angles);
+
+        i32 s0 = noise_channel(sc, 0, lin0_raw, dist_raw);
+        i32 s1 = noise_channel(sc, 1, lin1_raw, dist_raw);
+        i32 s2 = noise_channel(sc, 2, lin2_raw, dist_raw);
 
         i32 r = applyRadialFilter(s0, setup.rf3[i]);
         i32 g = applyRadialFilter(s1, setup.rf_half[i]);
@@ -413,54 +406,28 @@ void Chasing_Spirals_Q31_SIMD::draw(Context &ctx) {
     const i32   rad2_raw      = setup.rad2_raw;
     CRGB       *leds          = setup.leds;
 
-    // SIMD Pixel Pipeline (4-wide batches)
+    // SIMD pixel pipeline: process 4 pixels per iteration
     int i = 0;
     for (; i + 3 < total_pixels; i += 4) {
-        // ── [BOUNDARY A: aligned array → SIMD load] ───────────────────────────
-        // The SoA arrays live in g_chasing_spiral_state, a FL_ALIGNAS(16) global
-        // struct. fl::vector's heap allocator provides >= 16-byte alignment on all
-        // SIMD-capable platforms (x86-64, ARM64, ESP-IDF) for allocations >= 16 B.
-        // FL_ASSUME_ALIGNED asserts this guarantee to the compiler so it can emit
-        // _mm_load_si128 (aligned) rather than _mm_loadu_si128 (unaligned).
-        // i is always a multiple of 4 here (loop stride=4, sizeof(i32)=4 bytes),
-        // so ptr+i is also 16-byte aligned when ptr is 16-byte aligned.
-        simd::simd_u32x4 base_vec    = simd::load_u32_4_aligned(FL_ASSUME_ALIGNED(reinterpret_cast<const u32*>(base_angle  + i), 16)); // ok reinterpret cast
-        simd::simd_u32x4 dist_vec    = simd::load_u32_4_aligned(FL_ASSUME_ALIGNED(reinterpret_cast<const u32*>(dist_scaled + i), 16)); // ok reinterpret cast
-        simd::simd_u32x4 rf3_vec     = simd::load_u32_4_aligned(FL_ASSUME_ALIGNED(reinterpret_cast<const u32*>(rf3_arr     + i), 16)); // ok reinterpret cast
-        simd::simd_u32x4 rf_half_vec = simd::load_u32_4_aligned(FL_ASSUME_ALIGNED(reinterpret_cast<const u32*>(rf_half_arr + i), 16)); // ok reinterpret cast
-        simd::simd_u32x4 rf_qtr_vec  = simd::load_u32_4_aligned(FL_ASSUME_ALIGNED(reinterpret_cast<const u32*>(rf_qtr_arr  + i), 16)); // ok reinterpret cast
-        // ── [end BOUNDARY A] ──────────────────────────────────────────────────
+        // Aligned SoA loads (arrays are FL_ALIGNAS(16), stride is 4)
+        auto base_vec    = loadAligned(base_angle,  i);
+        auto dist_vec    = loadAligned(dist_scaled, i);
+        auto rf3_vec     = loadAligned(rf3_arr,     i);
+        auto rf_half_vec = loadAligned(rf_half_arr, i);
+        auto rf_qtr_vec  = loadAligned(rf_qtr_arr,  i);
 
-        simd::simd_u32x4 r_vec = simd4_processChannel(
+        auto r_vec = simd4_processChannel(
             base_vec, dist_vec, rad0_raw, lin0_raw, fade_lut, perm, cx_raw, cy_raw, rf3_vec);
-        simd::simd_u32x4 g_vec = simd4_processChannel(
+        auto g_vec = simd4_processChannel(
             base_vec, dist_vec, rad1_raw, lin1_raw, fade_lut, perm, cx_raw, cy_raw, rf_half_vec);
-        simd::simd_u32x4 b_vec = simd4_processChannel(
+        auto b_vec = simd4_processChannel(
             base_vec, dist_vec, rad2_raw, lin2_raw, fade_lut, perm, cx_raw, cy_raw, rf_qtr_vec);
 
-        // ── [BOUNDARY F: SIMD extract → scalar scatter] ───────────────────────
-        // pixel_idx[] holds arbitrary xyMap-remapped LED indices, so there is no
-        // contiguous destination address for a SIMD store. We extract each lane
-        // individually (4 extract_u32_4 calls per channel, 12 total) and scatter
-        // to the LED array. This is an unavoidable boundary: non-sequential writes
-        // cannot be vectorized without AVX-512 scatter instructions.
-        leds[pixel_idx[i+0]] = CRGB(
-            static_cast<u8>(simd::extract_u32_4(r_vec, 0)),
-            static_cast<u8>(simd::extract_u32_4(g_vec, 0)),
-            static_cast<u8>(simd::extract_u32_4(b_vec, 0)));
-        leds[pixel_idx[i+1]] = CRGB(
-            static_cast<u8>(simd::extract_u32_4(r_vec, 1)),
-            static_cast<u8>(simd::extract_u32_4(g_vec, 1)),
-            static_cast<u8>(simd::extract_u32_4(b_vec, 1)));
-        leds[pixel_idx[i+2]] = CRGB(
-            static_cast<u8>(simd::extract_u32_4(r_vec, 2)),
-            static_cast<u8>(simd::extract_u32_4(g_vec, 2)),
-            static_cast<u8>(simd::extract_u32_4(b_vec, 2)));
-        leds[pixel_idx[i+3]] = CRGB(
-            static_cast<u8>(simd::extract_u32_4(r_vec, 3)),
-            static_cast<u8>(simd::extract_u32_4(g_vec, 3)),
-            static_cast<u8>(simd::extract_u32_4(b_vec, 3)));
-        // ── [end BOUNDARY F] ──────────────────────────────────────────────────
+        // Scatter to LED array (pixel_idx holds arbitrary xyMap-remapped indices)
+        scatterPixel(leds, pixel_idx[i+0], r_vec, g_vec, b_vec, 0);
+        scatterPixel(leds, pixel_idx[i+1], r_vec, g_vec, b_vec, 1);
+        scatterPixel(leds, pixel_idx[i+2], r_vec, g_vec, b_vec, 2);
+        scatterPixel(leds, pixel_idx[i+3], r_vec, g_vec, b_vec, 3);
     }
 
     // Scalar fallback for remaining pixels (when total_pixels % 4 != 0)
@@ -471,10 +438,8 @@ void Chasing_Spirals_Q31_SIMD::draw(Context &ctx) {
         auto noise_ch = [&](i32 rad_raw, i32 lin_raw) -> i32 {
             u32 a24 = radiansToA24(base_raw, rad_raw);
             SinCos32 sc = sincos32(a24);
-            i32 nx = lin_raw + cx_raw -
-                static_cast<i32>((static_cast<i64>(sc.cos_val) * dist_raw) >> 31);
-            i32 ny = cy_raw -
-                static_cast<i32>((static_cast<i64>(sc.sin_val) * dist_raw) >> 31);
+            i32 nx = perlinCoord(sc.cos_val, dist_raw, lin_raw + cx_raw);
+            i32 ny = perlinCoord(sc.sin_val, dist_raw, cy_raw);
             i32 raw = Perlin::pnoise2d_raw(nx, ny, fade_lut, perm);
             return clampAndScale255(raw);
         };
