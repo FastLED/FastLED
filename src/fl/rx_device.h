@@ -163,9 +163,10 @@ enum class RxWaitResult : u8 {
  * factory pattern for compile-time device selection.
  */
 enum class RxDeviceType : u8 {
-    ISR = 0,      ///< GPIO ISR-based receiver (ESP32)
-    RMT = 1,      ///< RMT-based receiver (ESP32)
-    FLEXPWM = 2   ///< FlexPWM input-capture receiver (Teensy 4.x)
+    DEFAULT = 0,  ///< Platform default (RMT on ESP32, FLEXPWM on Teensy 4.x)
+    ISR = 1,      ///< GPIO ISR-based receiver (ESP32)
+    RMT = 2,      ///< RMT-based receiver (ESP32)
+    FLEXPWM = 3   ///< FlexPWM input-capture receiver (Teensy 4.x)
 };
 
 /**
@@ -175,6 +176,7 @@ enum class RxDeviceType : u8 {
  */
 inline const char* toString(RxDeviceType type) {
     switch (type) {
+    case RxDeviceType::DEFAULT: return "DEFAULT";
     case RxDeviceType::ISR:     return "ISR";
     case RxDeviceType::RMT:     return "RMT";
     case RxDeviceType::FLEXPWM: return "FLEXPWM";
