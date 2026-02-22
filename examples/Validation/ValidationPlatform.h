@@ -20,6 +20,8 @@ constexpr int defaultTxPin() {
     return 1;  // ESP32-C6 (RISC-V)
 #elif defined(FL_IS_ESP_32C3)
     return 1;  // ESP32-C3 (RISC-V)
+#elif defined(FL_IS_ESP_32P4)
+    return 5;  // ESP32-P4: Connect GPIO 5 (TX) to GPIO 6 (RX) with jumper wire
 #else
     return 1;  // ESP32 (classic) and other variants
 #endif
@@ -37,6 +39,8 @@ constexpr int defaultRxPin() {
     return 0;
 #elif defined(FL_IS_ESP_32C3)
     return 0;
+#elif defined(FL_IS_ESP_32P4)
+    return 6;  // ESP32-P4: jumper wire from GPIO 5
 #else
     return 0;  // ESP32 (classic) and other variants
 #endif
@@ -54,6 +58,8 @@ constexpr const char* chipName() {
     return "ESP32-C3 (RISC-V)";
 #elif defined(FL_IS_ESP_32DEV)
     return "ESP32 (Xtensa)";
+#elif defined(FL_IS_ESP_32P4)
+    return "ESP32-P4 (dual-core RISC-V)";
 #else
     return "Unknown ESP32 variant";
 #endif
