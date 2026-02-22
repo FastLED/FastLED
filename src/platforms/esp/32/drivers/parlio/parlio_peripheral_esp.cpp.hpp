@@ -151,7 +151,7 @@ bool ParlioPeripheralESPImpl::initialize(const ParlioPeripheralConfig& config) {
     // Recommendation: Use RMT driver for >95% reliability requirements on ESP32-C6.
     // See: src/platforms/esp/32/drivers/parlio/README.md (ESP32-C6 Hardware Reliability Issue)
 
-    // Store PSRAM preference
+    // Store PSRAM preference (respects config on all platforms)
     mPreferPsram = config.prefer_psram;
 
     // If already initialized, clean up first so re-initialization can succeed.
@@ -175,6 +175,7 @@ bool ParlioPeripheralESPImpl::initialize(const ParlioPeripheralConfig& config) {
         ? PARLIO_BIT_PACK_ORDER_LSB
         : PARLIO_BIT_PACK_ORDER_MSB;
     esp_config.sample_edge = PARLIO_SAMPLE_EDGE_POS;
+    esp_config.dma_burst_size = 64;  // Match ESP32-P4 cache line size (64 bytes)
 
     // Assign GPIO pins
     FL_DBG("PARLIO_PERIPH: GPIO pins:");
@@ -304,12 +305,9 @@ bool FL_IRAM ParlioPeripheralESPImpl::transmit(const u8* buffer, size_t bit_coun
     // Memory barrier: Ensure all preceding writes complete before DMA submission
     FL_MEMORY_BARRIER;
 
-    // Cache sync: SKIP for DMA buffers
-    // Buffers are allocated with MALLOC_CAP_DMA (non-cacheable SRAM1 on ESP32-C6)
-    // esp_cache_msync() is unnecessary for non-cacheable memory and causes:
-    //   E (xxxx) cache: esp_cache_msync(103): invalid addr or null pointer
-    // on ESP32-C6. Memory barriers provide sufficient ordering guarantees.
-    // See parlio_engine.cpp lines 881-891 for buffer allocation details.
+    // Cache sync: Handled internally by ESP-IDF parlio_tx_unit_transmit()
+    // which calls esp_cache_msync(C2M) for cacheable addresses.
+    // No manual cache sync needed here.
 
     // Memory barrier: Ensure writes complete before DMA submission
     FL_MEMORY_BARRIER;
@@ -392,10 +390,12 @@ u8* ParlioPeripheralESPImpl::allocateDmaBuffer(size_t size) {
     // Try PSRAM first if enabled (follows I2S LCD CAM and MoonBase pattern)
     // PSRAM provides much larger memory pool (~8MB on ESP32-P4) vs internal SRAM (~512KB)
     // Use calloc (zero-initialized) for deterministic behavior
+    // Note: ESP-IDF parlio_tx_unit_transmit() handles cache sync internally
+    // via esp_cache_msync(C2M) for cacheable addresses (PSRAM on ESP32-P4).
     if (mPreferPsram) {
         buffer = static_cast<u8*>(
             heap_caps_aligned_calloc(64, aligned_size, 1,
-                MALLOC_CAP_SPIRAM | MALLOC_CAP_DMA | MALLOC_CAP_8BIT)
+                MALLOC_CAP_SPIRAM | MALLOC_CAP_DMA | MALLOC_CAP_CACHE_ALIGNED | MALLOC_CAP_8BIT)
         );
     }
 
