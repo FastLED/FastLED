@@ -16,6 +16,12 @@
 #endif
 // IWYU pragma: end_keep
 
+#ifdef FL_IS_TEENSY_4X
+// IWYU pragma: begin_keep
+#include "platforms/arm/teensy/teensy4_common/flexpwm_rx_channel.h" // ok platform headers
+// IWYU pragma: end_keep
+#endif
+
 #ifdef FL_IS_STUB
 // IWYU pragma: begin_keep
 #include "platforms/shared/rx_device_native.h"  // ok platform headers
@@ -95,6 +101,39 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>(int pin) {
     return device;
 }
 
+// FLEXPWM not available on ESP32
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXPWM>(int pin) {
+    (void)pin;
+    return fl::make_shared<DummyRxDevice>("FLEXPWM RX not supported on ESP32");
+}
+
+#elif defined(FL_IS_TEENSY_4X)
+
+// FLEXPWM device specialization for Teensy 4.x
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXPWM>(int pin) {
+    auto device = FlexPwmRxChannel::create(pin);
+    if (!device) {
+        return fl::make_shared<DummyRxDevice>("FlexPWM RX channel creation failed");
+    }
+    return device;
+}
+
+// RMT not available on Teensy
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>(int pin) {
+    (void)pin;
+    return fl::make_shared<DummyRxDevice>("RMT RX not supported on Teensy");
+}
+
+// ISR not available on Teensy
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>(int pin) {
+    (void)pin;
+    return fl::make_shared<DummyRxDevice>("ISR RX not supported on Teensy");
+}
+
 #elif defined(FL_IS_STUB)
 
 // RMT device specialization (native stub for host/desktop testing)
@@ -106,6 +145,12 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>(int pin) {
 // ISR device specialization (native stub for host/desktop testing)
 template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>(int pin) {
+    return NativeRxDevice::create(pin);
+}
+
+// FLEXPWM device specialization (native stub for host/desktop testing)
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXPWM>(int pin) {
     return NativeRxDevice::create(pin);
 }
 
@@ -125,6 +170,13 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>(int pin) {
     return RxDevice::createDummy();
 }
 
-#endif // FL_IS_ESP32 / FL_IS_STUB
+// FLEXPWM device specialization (dummy for unsupported platforms)
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXPWM>(int pin) {
+    (void)pin;  // Suppress unused parameter warning
+    return RxDevice::createDummy();
+}
+
+#endif // FL_IS_ESP32 / FL_IS_TEENSY_4X / FL_IS_STUB
 
 } // namespace fl
