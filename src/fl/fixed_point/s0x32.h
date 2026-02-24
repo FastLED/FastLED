@@ -124,7 +124,7 @@ class s0x32 {
         return from_raw(static_cast<i32>(result));
     }
 
-    friend constexpr FASTLED_FORCE_INLINE s0x32 operator*(i32 scalar, s0x32 a) {
+    friend FASTLED_FORCE_INLINE s0x32 operator*(i32 scalar, s0x32 a) {
         return a * scalar;  // Commutative
     }
 
