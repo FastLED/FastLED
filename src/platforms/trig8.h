@@ -42,6 +42,15 @@ namespace fl {
 inline i16 sin16(u16 theta) { return fl::sin16lut(theta); }
 inline i16 cos16(u16 theta) { return fl::cos16lut(theta); }
 
+// 8-bit wrappers derived from 16-bit LUTs.
+inline u8 sin8(u8 theta) {
+	return static_cast<u8>((static_cast<i32>(sin16(static_cast<u16>(theta) << 8)) + 32768) >> 8);
+}
+
+inline u8 cos8(u8 theta) {
+	return static_cast<u8>((static_cast<i32>(cos16(static_cast<u16>(theta) << 8)) + 32768) >> 8);
+}
+
 #endif
 
 }  // namespace fl
