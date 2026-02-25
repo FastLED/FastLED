@@ -41,22 +41,26 @@ function adjustGamma( orig, gamma)
 
 
 var origurl = document.location.href;
-//"http://seaviewsensing.com/pub/cpt-city/dca/tn/alarm.p1.0.2.png.index.html";
+if (document.location.href.endsWith(".png.index.html"))
+{
+  // prev: "http://seaviewsensing.com/pub/cpt-city/dca/tn/alarm.p1.0.2.png.index.html";
+  //    -> "http://seaviewsensing.com/pub/cpt-city/dca/alarm.p1.0.2.c3g";
+  var url2 = origurl.replace( "/tn/", "/");
+  var url3 = url2.replace( ".png.index.html", ".c3g");
+  var matches = url3.match("([^/]+)\.c3g");
+  var nom = matches[1];
 
-// origurl = //document.location.href;
-var url2 = origurl.replace( "/tn/", "/");
-var url3 = url2.replace( ".png.index.html", ".c3g");
-
-var onSite = url3.indexOf("http://seaviewsensing.com/");
-if( onSite != 0) {
-    window.location.href="http://seaviewsensing.com/pub/cpt-city/";
-    //return;
+} else {
+  // now:  "https://phillips.shef.ac.uk/pub/cpt-city/dca/alarm-p1-0-2"
+  //       the 4th link on the page leads to the c3g file
+  var nom = document.location.pathname.replace( "/pub/cpt-city/", "");
+  var url3 = document.querySelectorAll('div.scheme a')[0].href;
 }
-
-var matches = url3.match("([^/]+)\.c3g");
-var nom = matches[1];
 nom = nom.replace(/[^A-Za-z0-9]/g,"_");
 nom = nom + "_gp";
+console.log("nom: " + nom);
+console.log("url3: " + url3);
+
 
 
 var src = "/*\n\
@@ -173,21 +177,24 @@ function DoConvert( content)
 
 
 
-if( onSite == 0) {
-    var i = document.createElement('iframe');
-    i.id = 'srcframe';
-    i.style.display = 'none';
-    i.onload = function() { 
-	var fr = document.getElementById("srcframe");
-	var iframeDocument = fr.contentDocument || fr.contentWindow.document;
-	var content = iframeDocument.body.innerHTML;
-	DoConvert( content); 
-	i.parentNode.removeChild(i); };
+// var onSite = url3.indexOf("https://phillips.shef.ac.uk/");
+// if( onSite != 0) {
+//     window.location.href="https://phillips.shef.ac.uk/pub/cpt-city/";
+//     //return;
+// } else {
+  fetch(url3)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then((content) => {
+      DoConvert(content);
+    })
+    .catch((error) => {
+      console.error("Error converting: ", error);
+    });
+// }
 
-    i.src = url3;
-    document.body.appendChild(i);
-} else {
-    window.location.href="http://seaviewsensing.com/pub/cpt-city/";
-}
 cursor_clear();
-//alert(stdout);
