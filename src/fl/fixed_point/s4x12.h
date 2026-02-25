@@ -360,7 +360,7 @@ class s4x12 {
         acc = d2 + static_cast<i32>((static_cast<i64>(acc) * fr20) >> IFRAC);
         acc = d1 + static_cast<i32>((static_cast<i64>(acc) * fr20) >> IFRAC);
         acc = d0 + static_cast<i32>((static_cast<i64>(acc) * fr20) >> IFRAC);
-        constexpr i32 one20 = 1 << IFRAC;
+        constexpr i32 one20 = static_cast<i32>(1) << IFRAC;
         i32 frac_pow20 = one20 + static_cast<i32>((static_cast<i64>(acc) * fr20) >> IFRAC);
         // Convert from 20 frac bits to 12 frac bits, then scale by int_pow.
         i32 frac_pow12 = frac_pow20 >> (IFRAC - FRAC_BITS);

@@ -255,7 +255,7 @@ class u8x8 {
         acc = d2 + static_cast<i32>((static_cast<i64>(acc) * fr16) >> IFRAC);
         acc = d1 + static_cast<i32>((static_cast<i64>(acc) * fr16) >> IFRAC);
         acc = d0 + static_cast<i32>((static_cast<i64>(acc) * fr16) >> IFRAC);
-        constexpr i32 one16 = 1 << IFRAC;
+        constexpr i32 one16 = static_cast<i32>(1) << IFRAC;
         i32 frac_pow16 = one16 + static_cast<i32>((static_cast<i64>(acc) * fr16) >> IFRAC);
         // Convert from 16 frac bits to 8 frac bits, then scale by int_pow.
         i32 frac_pow8 = frac_pow16 >> (IFRAC - FRAC_BITS);
