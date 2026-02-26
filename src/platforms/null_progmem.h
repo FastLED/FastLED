@@ -13,6 +13,7 @@
 // Ensure PROGMEM is available before using it
 #if defined(PROGMEM)
 #define FL_PROGMEM PROGMEM
+#include <avr/pgmspace.h>
 #else
 // Fallback for platforms without PROGMEM - just use empty attribute
 #define FL_PROGMEM
@@ -30,6 +31,7 @@ static inline T fl_progmem_safe_read(const void* addr) {
 
 // Safe memory access macros to avoid strict aliasing issues
 // These use the private helper function which wraps memcpy safely
+#if !(defined(FL_IS_AVR))
 static inline fl::u8 fl_pgm_read_byte_near_safe(const void* addr) {
     return fl_progmem_safe_read<fl::u8>(addr);
 }
@@ -41,6 +43,12 @@ static inline fl::u16 fl_pgm_read_word_near_safe(const void* addr) {
 static inline fl::u32 fl_pgm_read_dword_near_safe(const void* addr) {
     return fl_progmem_safe_read<fl::u32>(addr);
 }
+#else
+// On AVR, we can directly use the standard pgm_read_* functions for PROGMEM data, which are designed to handle flash memory access correctly. The safe wrapper is not needed because AVR's pgm_read_* functions already handle the necessary memory access patterns for flash.
+#define fl_pgm_read_byte_near_safe(x) pgm_read_byte_near(x)
+#define fl_pgm_read_word_near_safe(x) pgm_read_word_near(x)
+#define fl_pgm_read_dword_near_safe(x) pgm_read_dword_near(x)
+#endif // !(defined(FL_IS_AVR))
 
 #define FL_PGM_READ_BYTE_NEAR(x) (fl_pgm_read_byte_near_safe(x))
 #define FL_PGM_READ_WORD_NEAR(x) (fl_pgm_read_word_near_safe(x))
@@ -54,11 +62,16 @@ static inline fl::u32 fl_pgm_read_dword_near_safe(const void* addr) {
 // normal memory. Uses __builtin_memcpy (compiler intrinsic) which always lowers
 // to a single load instruction — unlike fl::memcpy which is a cross-TU call
 // that the compiler cannot inline without LTO.
+#if !(defined(FL_IS_AVR))
 static inline fl::u32 _fl_progmem_aligned_read_4(const void* addr) {
     fl::u32 result;
     __builtin_memcpy(&result, addr, 4);
     return result;
 }
 #define FL_PGM_READ_DWORD_ALIGNED(addr) (_fl_progmem_aligned_read_4(addr))
+#else
+// On AVR, we must use the standard pgm_read_dword_near for PROGMEM data, which may be unaligned in flash. The safe wrapper is not needed because AVR's pgm_read_dword_near handles unaligned access correctly.
+#define FL_PGM_READ_DWORD_ALIGNED(addr) FL_PGM_READ_DWORD_NEAR(addr)
+#endif // !(defined(FL_IS_AVR))
 
 #define FL_PROGMEM_USES_NULL 1
