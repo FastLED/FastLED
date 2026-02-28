@@ -36,7 +36,7 @@ struct ServerClientConnection {
 };
 
 // Native HTTP server using POSIX sockets
-// Supports multiple concurrent clients, non-blocking I/O
+// Always non-blocking — blocking I/O is never appropriate on embedded
 class NativeHttpServer {
 public:
     // Constructor
@@ -66,9 +66,6 @@ public:
     // Broadcast to all clients
     void broadcast(fl::span<const u8> data);
 
-    // Configuration
-    void setNonBlocking(bool enabled);
-
     // Update loop (handles disconnections, heartbeat)
     void update(u32 currentTimeMs);
 
@@ -78,7 +75,6 @@ public:
 private:
     u16 mPort;
     int mListenSocket;  // Server listening socket
-    bool mNonBlocking;
     bool mIsListening;
     u32 mNextClientId;
     ConnectionConfig mConfig;

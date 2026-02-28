@@ -12,7 +12,7 @@
 namespace fl {
 
 // Native HTTP client using POSIX sockets
-// Supports blocking and non-blocking I/O
+// Always non-blocking — blocking I/O is never appropriate on embedded
 class NativeHttpClient {
 public:
     // Constructor
@@ -34,9 +34,6 @@ public:
     int send(fl::span<const u8> data);
     int recv(fl::span<u8> buffer);
 
-    // Configuration
-    void setNonBlocking(bool enabled);
-
     // Update loop (handles reconnection, heartbeat)
     void update(u32 currentTimeMs);
 
@@ -53,7 +50,6 @@ private:
     string mHost;
     u16 mPort;
     int mSocket;  // Socket file descriptor
-    bool mNonBlocking;
     HttpConnection mConnection;
 
     // Platform-specific connection

@@ -110,23 +110,19 @@ FL_TEST_CASE("NativeHttpClient - Connection to invalid host fails") {
     FL_CHECK_FALSE(client.isConnected());
 }
 
-FL_TEST_CASE("NativeHttpClient - Non-blocking mode") {
+FL_TEST_CASE("NativeHttpClient - Non-blocking by default") {
     NativeHttpClient client("localhost", kPortStateTransitions);
-
-    // Set non-blocking mode before connection
-    client.setNonBlocking(true);
 
     // Attempt connection (should not block, even if server doesn't exist)
     bool result = client.connect();
 
     // Connection may succeed or fail depending on whether server exists
-    // The important thing is that it returned immediately (non-blocking)
+    // The important thing is that it returned immediately (always non-blocking)
     FL_CHECK((result == true || result == false));  // Just verify it returned
 }
 
 FL_TEST_CASE("NativeHttpClient - Connection state transitions with server") {
     NativeHttpServer server(kPortStateTransitions);
-    server.setNonBlocking(true);
     FL_REQUIRE(server.start());
 
     NativeHttpClient client("localhost", kPortStateTransitions);
@@ -145,7 +141,6 @@ FL_TEST_CASE("NativeHttpClient - Connection state transitions with server") {
 
 FL_TEST_CASE("NativeHttpClient - Update loop with server") {
     NativeHttpServer server(kPortUpdateLoop);
-    server.setNonBlocking(true);
     FL_REQUIRE(server.start());
 
     ConnectionConfig config;
@@ -171,8 +166,6 @@ FL_TEST_CASE("NativeHttpClient - Update loop with server") {
 FL_TEST_CASE("NativeHttpClient - Multiple instances with server") {
     NativeHttpServer server1(kPortMultiInst1);
     NativeHttpServer server2(kPortMultiInst2);
-    server1.setNonBlocking(true);
-    server2.setNonBlocking(true);
     FL_REQUIRE(server1.start());
     FL_REQUIRE(server2.start());
 
@@ -201,7 +194,6 @@ FL_TEST_CASE("NativeHttpClient - Multiple instances with server") {
 
 FL_TEST_CASE("NativeHttpClient - Connect to live server succeeds") {
     NativeHttpServer server(kPortConnectLive);
-    server.setNonBlocking(true);
     FL_REQUIRE(server.start());
 
     NativeHttpClient client("localhost", kPortConnectLive);
@@ -221,11 +213,9 @@ FL_TEST_CASE("NativeHttpClient - Connect to live server succeeds") {
 
 FL_TEST_CASE("NativeHttpClient - Client sends data to server") {
     NativeHttpServer server(kPortClientSend);
-    server.setNonBlocking(true);
     FL_REQUIRE(server.start());
 
     NativeHttpClient client("localhost", kPortClientSend);
-    client.setNonBlocking(true);
     FL_REQUIRE(client.connect());
     FL_REQUIRE(pollUntil([&]() {
         server.acceptClients();
@@ -255,11 +245,9 @@ FL_TEST_CASE("NativeHttpClient - Client sends data to server") {
 
 FL_TEST_CASE("NativeHttpClient - Client receives data from server") {
     NativeHttpServer server(kPortClientRecv);
-    server.setNonBlocking(true);
     FL_REQUIRE(server.start());
 
     NativeHttpClient client("localhost", kPortClientRecv);
-    client.setNonBlocking(true);
     FL_REQUIRE(client.connect());
     FL_REQUIRE(pollUntil([&]() {
         server.acceptClients();
@@ -289,11 +277,9 @@ FL_TEST_CASE("NativeHttpClient - Client receives data from server") {
 
 FL_TEST_CASE("NativeHttpClient - Bidirectional echo") {
     NativeHttpServer server(kPortBidiEcho);
-    server.setNonBlocking(true);
     FL_REQUIRE(server.start());
 
     NativeHttpClient client("localhost", kPortBidiEcho);
-    client.setNonBlocking(true);
     FL_REQUIRE(client.connect());
     FL_REQUIRE(pollUntil([&]() {
         server.acceptClients();
@@ -337,11 +323,9 @@ FL_TEST_CASE("NativeHttpClient - Bidirectional echo") {
 
 FL_TEST_CASE("NativeHttpClient - Large payload transfer") {
     NativeHttpServer server(kPortLargePayload);
-    server.setNonBlocking(true);
     FL_REQUIRE(server.start());
 
     NativeHttpClient client("localhost", kPortLargePayload);
-    client.setNonBlocking(true);
     FL_REQUIRE(client.connect());
     FL_REQUIRE(pollUntil([&]() {
         server.acceptClients();

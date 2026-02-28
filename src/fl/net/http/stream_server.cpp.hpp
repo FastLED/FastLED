@@ -34,11 +34,6 @@ bool HttpStreamServer::connect() {
         return false;
     }
 
-    // Enable non-blocking mode so accept() and recv() don't block the server thread.
-    // Without this, the accept() loop in NativeHttpServer::acceptClients() blocks
-    // forever after accepting the first client, preventing HTTP header processing.
-    mNativeServer->setNonBlocking(true);
-
     // Mark connection as established in base class
     mConnection.onConnected();
 

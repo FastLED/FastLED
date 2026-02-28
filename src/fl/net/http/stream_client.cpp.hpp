@@ -38,10 +38,6 @@ bool HttpStreamClient::connect() {
         return false;
     }
 
-    // Enable non-blocking mode so recv() returns 0 instead of blocking forever
-    // when waiting for the server's HTTP response header.
-    mNativeClient->setNonBlocking(true);
-
     // Send HTTP POST request header
     if (!sendHttpRequestHeader()) {
         mNativeClient->disconnect();

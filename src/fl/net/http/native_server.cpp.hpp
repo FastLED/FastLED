@@ -79,7 +79,6 @@ namespace {
 NativeHttpServer::NativeHttpServer(u16 port, const ConnectionConfig& config)
     : mPort(port)
     , mListenSocket(-1)
-    , mNonBlocking(false)
     , mIsListening(false)
     , mNextClientId(1)
     , mConfig(config)
@@ -205,22 +204,6 @@ void NativeHttpServer::broadcast(fl::span<const u8> data) {
     }
 }
 
-void NativeHttpServer::setNonBlocking(bool enabled) {
-    mNonBlocking = enabled;
-
-    // Apply to listen socket
-    if (mListenSocket != -1) {
-        set_socket_nonblocking(mListenSocket, enabled);
-    }
-
-    // Apply to all client sockets
-    for (auto& client : mClients) {
-        if (client.socket != -1) {
-            set_socket_nonblocking(client.socket, enabled);
-        }
-    }
-}
-
 void NativeHttpServer::update(u32 currentTimeMs) {
     // Check for dead connections
     for (size_t i = 0; i < mClients.size(); ) {
@@ -291,10 +274,8 @@ bool NativeHttpServer::platformStartListening() {
         return false;
     }
 
-    // Apply non-blocking mode if enabled
-    if (mNonBlocking) {
-        setNonBlocking(true);
-    }
+    // Always apply non-blocking mode — blocking is never appropriate on embedded
+    set_socket_nonblocking(mListenSocket, true);
 
     return true;
 }
@@ -320,10 +301,8 @@ int NativeHttpServer::platformAcceptClient() {
         return -1;
     }
 
-    // Apply non-blocking mode to client socket if enabled
-    if (mNonBlocking) {
-        set_socket_nonblocking(clientSocket, true);
-    }
+    // Always set non-blocking on client sockets
+    set_socket_nonblocking(clientSocket, true);
 
     return clientSocket;
 }

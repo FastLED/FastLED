@@ -98,7 +98,6 @@ NativeHttpClient::NativeHttpClient(const string& host, u16 port, const Connectio
     : mHost(host)
     , mPort(port)
     , mSocket(-1)
-    , mNonBlocking(false)
     , mConnection(config)
 {
 }
@@ -194,16 +193,6 @@ int NativeHttpClient::recv(fl::span<u8> buffer) {
     return static_cast<int>(result);
 }
 
-void NativeHttpClient::setNonBlocking(bool enabled) {
-    mNonBlocking = enabled;
-
-    if (mSocket == -1) {
-        return;  // Socket not created yet
-    }
-
-    set_client_socket_nonblocking(mSocket, enabled);
-}
-
 void NativeHttpClient::update(u32 currentTimeMs) {
     // Update connection state machine
     mConnection.update(currentTimeMs);
@@ -280,10 +269,8 @@ bool NativeHttpClient::platformConnect() {
         }
         mSocket = sock;
 
-        // Apply non-blocking mode if enabled
-        if (mNonBlocking) {
-            setNonBlocking(true);
-        }
+        // Always set non-blocking — blocking is never appropriate on embedded
+        set_client_socket_nonblocking(mSocket, true);
 
         // Attempt connection
         ret = platform_client_connect(mSocket, addr->ai_addr, static_cast<socklen_t>(addr->ai_addrlen));
@@ -294,7 +281,7 @@ bool NativeHttpClient::platformConnect() {
             break;
         }
 
-        if (mNonBlocking && is_client_error_in_progress()) {
+        if (is_client_error_in_progress()) {
             // Non-blocking connect in progress
             connected = true;
             break;
