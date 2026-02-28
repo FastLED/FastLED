@@ -28,8 +28,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-toplevel)\" && uv run python .claude/hooks/lint-on-stop.py",
-            "timeout": 120
+            "command": "cd \"$(git rev-parse --show-toplevel)\" && uv run python .claude/hooks/check-on-stop.py",
+            "timeout": 600
           }
         ]
       }
