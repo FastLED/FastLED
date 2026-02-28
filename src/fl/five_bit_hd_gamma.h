@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "fl/gamma.h"
+#include "fl/ease.h"
 #include "fl/int.h"
 #include "fl/stl/math.h"
 #include "fl/compiler_control.h"
@@ -25,14 +25,6 @@ enum FiveBitGammaCorrectionMode {
 void five_bit_bitshift(u16 r16, u16 g16, u16 b16, fl::u8 brightness, CRGB *out,
                        fl::u8 *out_power_5bit);
 
-// Simple gamma correction function that converts from
-// 8-bit color component and converts it to gamma corrected 16-bit
-// color component. Fast and no memory overhead!
-inline void five_bit_hd_gamma_function(CRGB color, u16 *r16, u16 *g16,
-                                       u16 *b16) {
-    gamma16(color, r16, g16, b16);
-}
-
 FL_NO_INLINE_IF_AVR
 inline void five_bit_hd_gamma_bitshift(
     CRGB colors, CRGB colors_scale, fl::u8 global_brightness, CRGB *out_colors,
@@ -45,8 +37,9 @@ inline void five_bit_hd_gamma_bitshift(
     }
 
     // Step 1: Gamma Correction
-    u16 r16, g16, b16;
-    five_bit_hd_gamma_function(colors, &r16, &g16, &b16);
+    u16 r16 = gamma_2_8(colors.r);
+    u16 g16 = gamma_2_8(colors.g);
+    u16 b16 = gamma_2_8(colors.b);
 
     // Step 2: Color correction step comes after gamma correction. These values
     // are assumed to be be relatively close to 255.

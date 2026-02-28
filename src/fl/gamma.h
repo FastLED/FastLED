@@ -1,19 +1,5 @@
 #pragma once
 
-#include "crgb.h"
-#include "fl/stl/stdint.h"
-#include "fl/int.h"
+// This header is kept for backward compatibility.
+// gamma_2_8() is declared in fl/ease.h.
 #include "fl/ease.h"
-
-namespace fl {
-
-// gamma_2_8 is now a function defined in fl/ease.h
-// No forward declaration needed - it's included above
-
-inline void gamma16(const CRGB &rgb, u16* r16, u16* g16, u16* b16) {
-    *r16 = gamma_2_8(rgb.r);
-    *g16 = gamma_2_8(rgb.g);
-    *b16 = gamma_2_8(rgb.b);
-}
-
-} // namespace fl
