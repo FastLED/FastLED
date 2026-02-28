@@ -4,7 +4,44 @@
 #include "fl/json.h"
 #include "fl/stl/string.h"
 #include "fl/stl/cstring.h"
+#include "fl/stl/stdio.h"
+
 namespace fl {
+
+// --- StreamHandle implementation ---
+
+StreamHandle::StreamHandle(fl::promise<fl::Json> p,
+                           fl::shared_ptr<fl::function<void(const fl::Json&)>> updateCb)
+    : mPromise(fl::move(p))
+    , mUpdateCallback(fl::move(updateCb)) {
+}
+
+StreamHandle& StreamHandle::onData(fl::function<void(const fl::Json&)> cb) {
+    if (mUpdateCallback) {
+        *mUpdateCallback = fl::move(cb);
+    }
+    return *this;
+}
+
+StreamHandle& StreamHandle::then(fl::function<void(const fl::Json&)> cb) {
+    mPromise.then(fl::move(cb));
+    return *this;
+}
+
+StreamHandle& StreamHandle::catch_(fl::function<void(const fl::Error&)> cb) {
+    mPromise.catch_(fl::move(cb));
+    return *this;
+}
+
+fl::promise<fl::Json>& StreamHandle::promise() {
+    return mPromise;
+}
+
+bool StreamHandle::valid() const {
+    return mPromise.valid();
+}
+
+// --- HttpStreamTransport implementation ---
 
 HttpStreamTransport::HttpStreamTransport(const fl::string& host, u16 port, u32 heartbeatIntervalMs)
     : mConnection(ConnectionConfig{})  // Use default config
@@ -20,53 +57,230 @@ HttpStreamTransport::~HttpStreamTransport() {
     // Subclasses must clean up in their own destructors
 }
 
+fl::string HttpStreamTransport::idToString(const fl::Json& id) {
+    if (id.is_int()) {
+        char buf[32];
+        fl::snprintf(buf, sizeof(buf), "%d", id.as_int().value());
+        return fl::string(buf);
+    }
+    if (id.is_string()) {
+        return id.as_string().value();
+    }
+    // Fallback for other types - use string representation
+    return id.to_string();
+}
+
+void HttpStreamTransport::parseChunkedMessages() {
+    for (;;) {
+        size_t chunkSize = mReader.nextChunkSize();
+        if (chunkSize == 0) {
+            break;
+        }
+
+        u8 stackBuf[512];
+        fl::vector<u8> heapBuf;
+        fl::span<u8> outSpan;
+        if (chunkSize <= sizeof(stackBuf)) {
+            outSpan = fl::span<u8>(stackBuf, sizeof(stackBuf));
+        } else {
+            heapBuf.resize(chunkSize);
+            outSpan = heapBuf;
+        }
+
+        ChunkedReadResult result = mReader.readChunk(outSpan);
+        if (!result.hasData()) {
+            break;
+        }
+
+        fl::string jsonStr(reinterpret_cast<const char*>(result.data.data()), result.data.size()); // ok reinterpret cast
+        fl::Json json = fl::Json::parse(jsonStr.c_str());
+        if (json.is_null()) {
+            continue;
+        }
+
+        // Filter heartbeats
+        if (json["method"].as_string() == "rpc.ping") {
+            mLastHeartbeatReceived = getCurrentTimeMs();
+            continue;
+        }
+
+        mLastHeartbeatReceived = getCurrentTimeMs();
+
+        // Try to dispatch to pending calls/streams by id
+        if (json.contains("id") && !json["id"].is_null()) {
+            fl::string idKey = idToString(json["id"]);
+
+            if (resolveRpc(json, idKey)) {
+                continue;  // Consumed by pending call
+            }
+            if (resolveRpcStream(json, idKey)) {
+                continue;  // Consumed by pending stream
+            }
+        }
+
+        // Not matched - add to incoming queue for readRequest()
+        mIncomingQueue.push_back(fl::move(json));
+    }
+}
+
+bool HttpStreamTransport::resolveRpc(const fl::Json& msg, const fl::string& idKey) {
+    PendingCall* pending = mPendingCalls.find_value(idKey);
+    if (!pending) {
+        return false;
+    }
+
+    // Check for error
+    if (msg.contains("error")) {
+        fl::Error err(msg["error"]["message"].as_string().value());
+        pending->promise.complete_with_error(err);
+        mPendingCalls.erase(idKey);
+        return true;
+    }
+
+    // Check for ACK (ASYNC mode sends acknowledged first)
+    if (msg.contains("result") && msg["result"].contains("acknowledged")) {
+        if (msg["result"]["acknowledged"].as_bool() == true) {
+            pending->ackReceived = true;
+            return true;  // Stay pending, wait for final result
+        }
+    }
+
+    // Final result
+    pending->promise.complete_with_value(msg);
+    mPendingCalls.erase(idKey);
+    return true;
+}
+
+bool HttpStreamTransport::resolveRpcStream(const fl::Json& msg, const fl::string& idKey) {
+    PendingStream* pending = mPendingStreams.find_value(idKey);
+    if (!pending) {
+        return false;
+    }
+
+    // Check for error
+    if (msg.contains("error")) {
+        fl::Error err(msg["error"]["message"].as_string().value());
+        pending->promise.complete_with_error(err);
+        mPendingStreams.erase(idKey);
+        return true;
+    }
+
+    // Check for ACK
+    if (msg.contains("result") && msg["result"].contains("acknowledged")) {
+        if (msg["result"]["acknowledged"].as_bool() == true) {
+            pending->ackReceived = true;
+            return true;
+        }
+    }
+
+    // Check for stream update
+    if (msg.contains("result") && msg["result"].contains("update")) {
+        if (pending->updateCallback && *pending->updateCallback) {
+            (*pending->updateCallback)(msg["result"]["update"]);
+        }
+        return true;
+    }
+
+    // Check for stream final (stop marker)
+    if (msg.contains("result") && msg["result"].contains("stop")) {
+        if (msg["result"]["stop"].as_bool() == true) {
+            // Resolve with the value field if present, otherwise the full result
+            if (msg["result"].contains("value")) {
+                pending->promise.complete_with_value(msg["result"]["value"]);
+            } else {
+                pending->promise.complete_with_value(msg["result"]);
+            }
+            mPendingStreams.erase(idKey);
+            return true;
+        }
+    }
+
+    // Unrecognized message shape - treat as final
+    pending->promise.complete_with_value(msg);
+    mPendingStreams.erase(idKey);
+    return true;
+}
+
+fl::promise<fl::Json> HttpStreamTransport::rpc(const fl::string& method, const fl::Json& params) {
+    int id = mNextCallId++;
+    fl::Json request = fl::Json::object();
+    request.set("jsonrpc", "2.0");
+    request.set("method", method);
+    request.set("params", params);
+    request.set("id", id);
+    return rpc(request);
+}
+
+fl::promise<fl::Json> HttpStreamTransport::rpc(const fl::Json& fullRequest) {
+    fl::promise<fl::Json> p = fl::promise<fl::Json>::create();
+
+    if (!isConnected()) {
+        p.complete_with_error(fl::Error("Not connected"));
+        return p;
+    }
+
+    fl::string idKey = idToString(fullRequest["id"]);
+    PendingCall pc;
+    pc.promise = p;
+    mPendingCalls.insert(idKey, fl::move(pc));
+
+    writeResponse(fullRequest);
+    return p;
+}
+
+StreamHandle HttpStreamTransport::rpcStream(const fl::string& method, const fl::Json& params) {
+    int id = mNextCallId++;
+    fl::Json request = fl::Json::object();
+    request.set("jsonrpc", "2.0");
+    request.set("method", method);
+    request.set("params", params);
+    request.set("id", id);
+    return rpcStream(request);
+}
+
+StreamHandle HttpStreamTransport::rpcStream(const fl::Json& fullRequest) {
+    auto updateCb = fl::make_shared<fl::function<void(const fl::Json&)>>();
+    fl::promise<fl::Json> p = fl::promise<fl::Json>::create();
+
+    if (!isConnected()) {
+        p.complete_with_error(fl::Error("Not connected"));
+        return StreamHandle(fl::move(p), fl::move(updateCb));
+    }
+
+    fl::string idKey = idToString(fullRequest["id"]);
+    PendingStream ps;
+    ps.promise = p;
+    ps.updateCallback = updateCb;
+    mPendingStreams.insert(idKey, fl::move(ps));
+
+    writeResponse(fullRequest);
+    return StreamHandle(p, updateCb);
+}
+
 fl::optional<fl::Json> HttpStreamTransport::readRequest() {
     if (!isConnected()) {
         return fl::nullopt;
     }
 
-    // Process incoming data (best effort - may return false if no new data)
+    // Process incoming data and drain into queue
     processIncomingData();
+    parseChunkedMessages();
 
-    // Try to read a complete chunk into stack buffer
-    size_t chunkSize = mReader.nextChunkSize();
-    if (chunkSize == 0) {
-        return fl::nullopt;
-    }
-    // Use stack buffer for small chunks, heap for large ones
-    u8 stackBuf[512];
-    fl::vector<u8> heapBuf;
-    fl::span<u8> outSpan;
-    if (chunkSize <= sizeof(stackBuf)) {
-        outSpan = fl::span<u8>(stackBuf, sizeof(stackBuf));
-    } else {
-        heapBuf.resize(chunkSize);
-        outSpan = heapBuf;
-    }
-    ChunkedReadResult result = mReader.readChunk(outSpan);
-    if (!result.hasData()) {
+    // Pop from incoming queue
+    if (mIncomingQueue.empty()) {
         return fl::nullopt;
     }
 
-    // Parse JSON from chunk
-    fl::string jsonStr(reinterpret_cast<const char*>(result.data.data()), result.data.size()); // ok reinterpret cast
-    fl::Json json = fl::Json::parse(jsonStr.c_str());
-    if (json.is_null()) {
-        // Failed to parse JSON
-        return fl::nullopt;
+    fl::Json front = fl::move(mIncomingQueue[0]);
+    // Shift remaining elements
+    fl::vector<fl::Json> remaining;
+    remaining.reserve(mIncomingQueue.size() - 1);
+    for (size_t i = 1; i < mIncomingQueue.size(); i++) {
+        remaining.push_back(fl::move(mIncomingQueue[i]));
     }
+    mIncomingQueue = fl::move(remaining);
 
-    // Check if this is a heartbeat (rpc.ping)
-    if (json["method"].as_string() == "rpc.ping") {
-        mLastHeartbeatReceived = getCurrentTimeMs();
-        // Don't return heartbeat as a request (filtered out)
-        return fl::nullopt;
-    }
-
-    // Update last received time
-    mLastHeartbeatReceived = getCurrentTimeMs();
-
-    return json;
+    return front;
 }
 
 void HttpStreamTransport::writeResponse(const fl::Json& response) {
@@ -130,8 +344,9 @@ void HttpStreamTransport::update(u32 currentTimeMs) {
     // Check for heartbeat timeout
     checkHeartbeatTimeout(currentTimeMs);
 
-    // Process incoming data
+    // Process incoming data and drain messages (resolves promises)
     processIncomingData();
+    parseChunkedMessages();
 }
 
 void HttpStreamTransport::setOnConnect(StateCallback callback) {
