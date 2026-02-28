@@ -213,7 +213,7 @@ foreach test_name : test_names
   endif
 
   # Some tests have race conditions when run in parallel (use wall-clock time via micros())
-  is_serial = test_name in ['fl_file_system', 'test_uart_channel_engine']
+  is_serial = test_name in ['fl_file_system', 'channel_driver_uart']
 
   # Configure timeout with deadlock detection
   # Default timeout is 20 seconds per test (generous for most tests)
@@ -228,13 +228,13 @@ foreach test_name : test_names
     'fl_spi',                      # SPI communication test
     'fl_xypath',                   # XY path computation test
     'fx_wled',                     # WLED effects test
-    'hsv2rgb_accuracy',            # Color conversion accuracy test (many iterations)
+    'fl_hsv2rgb_accuracy',          # Color conversion accuracy test (many iterations)
     'rmt5_channel_engine',         # RMT5 channel engine test
     'rmt5_peripheral_mock',        # RMT5 peripheral mock test
-    'test_downbeat_synthetic',     # Downbeat detection test (audio processing)
-    'test_spi_channel_adapter',    # SPI channel adapter test
-    'test_uart_channel_engine',    # UART channel engine test
-    'test_uart_waveform_alignment', # UART waveform timing test
+    'fl_audio_detectors_downbeat_synthetic', # Downbeat detection test (audio processing)
+    'fl_channels_adapters_spi_channel_adapter', # SPI channel adapter test
+    'channel_driver_uart',          # UART channel engine test
+    'uart_waveform_alignment',      # UART waveform timing test
     'fl_audio_detectors_vocal',    # Vocal detector test (CQ kernel generation + MP3 decoding)
     'fl_net_http_chunked_encoding', # HTTP chunked encoding test
     'fl_net_http_connection',       # HTTP connection test

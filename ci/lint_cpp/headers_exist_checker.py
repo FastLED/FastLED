@@ -35,9 +35,8 @@ SRC_ROOT = PROJECT_ROOT / "src"
 # Test files that don't need corresponding headers
 EXCLUDED_TEST_FILES = {
     "doctest_main.cpp",  # Test framework entry point
-    "sketch_runner_demo.cpp",  # Demo file, not a real test
     "sketch_runner.cpp",  # Self-contained test for sketch runner functionality
-    "test_spi_batching_logic.cpp",  # Self-contained algorithm validation test
+    "spi_batching_logic.cpp",  # Self-contained algorithm validation test
     "serial_printf.cpp",  # Tests Arduino Serial API, not a FastLED header
     "test_runner.cpp",  # Test runner executable that loads test DLLs
     "runner.cpp",  # Windows DLL loader for test execution

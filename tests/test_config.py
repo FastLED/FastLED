@@ -19,7 +19,6 @@ TESTS_DIR: Path = Path(__file__).parent.resolve()
 # Files to exclude from test discovery (special tests with custom build rules)
 # Includes infrastructure files like test runner and doctest main
 EXCLUDED_TEST_FILES: set[Path] = {
-    TESTS_DIR / "test_runner.cpp",
     TESTS_DIR / "doctest_main.cpp",
     TESTS_DIR
     / "fx"

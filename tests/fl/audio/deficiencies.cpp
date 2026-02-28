@@ -15,7 +15,7 @@
 ///   6. FrequencyBands should produce comparable outputs for equal-energy input
 
 #include "test.h"
-#include "../fl/audio/test_helpers.h"
+#include "test_helpers.h"
 #include "fl/audio.h"
 #include "fl/audio/audio_context.h"
 #include "fl/fft.h"
