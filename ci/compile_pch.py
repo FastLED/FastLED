@@ -205,6 +205,15 @@ def invalidate_stale_pch(pch_file: Path) -> None:
     saved_depfile = pch_file.with_name(pch_file.name.replace(".pch", ".d.cache"))
     hash_file = Path(str(pch_file) + ".input_hash")
     if not saved_depfile.exists() or not hash_file.exists():
+        # Missing tracking files means we can't verify the PCH is fresh.
+        # Delete it to force a safe rebuild rather than risking a stale-PCH
+        # compiler error that would fail the entire build.
+        print(
+            f"PCH tracking files missing — removing {pch_file.name} to force rebuild",
+            file=sys.stderr,
+        )
+        pch_file.unlink(missing_ok=True)
+        hash_file.unlink(missing_ok=True)
         return
 
     try:

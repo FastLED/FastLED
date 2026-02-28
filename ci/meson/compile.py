@@ -46,6 +46,7 @@ STALE_BUILD_PATTERNS = [
     "no such file or directory",
     "missing and no known rule to make it",
     "does not exist",
+    "has been modified since the precompiled header",
 ]
 
 
