@@ -176,52 +176,56 @@ private:
 	}
 
 	inline void showPixelsGammaBitShift(PixelController<RGB_ORDER> & pixels) {
+		static constexpr fl::u16 kBatchSize = 8;
+		const fl::u16 n = static_cast<fl::u16>(pixels.size());
+
+		// Extract uniform color scale and brightness (constant across all pixels)
+		fl::u8 scale_r, scale_g, scale_b, global_brightness;
+		#if FASTLED_HD_COLOR_MIXING
+		pixels.loadRGBScaleAndBrightness(&scale_r, &scale_g, &scale_b, &global_brightness);
+		#else
+		pixels.loadAndScaleRGB(&scale_r, &scale_g, &scale_b);
+		global_brightness = 255;
+		#endif
+		const CRGB colors_scale(scale_r, scale_g, scale_b);
+
+		// RGB reorder indices (compile-time constant from RGB_ORDER template param)
+		const fl::u8 b0_index = (RGB_ORDER >> 6) & 0x3;
+		const fl::u8 b1_index = (RGB_ORDER >> 3) & 0x3;
+		const fl::u8 b2_index = RGB_ORDER & 0x3;
+
 		mSPI.select();
 		startBoundary();
 
-		while (pixels.has(1)) {
-			// Get raw pixel data
-			const fl::u8* raw_data = pixels.getRawPixelData();
-			CRGB rgb = CRGB(raw_data[0], raw_data[1], raw_data[2]);
-			fl::u8 brightness = 0;
+		// Process pixels in batches of 8 using stack-allocated buffers
+		fl::u16 remaining = n;
+		while (remaining > 0) {
+			const fl::u16 batch = (remaining < kBatchSize) ? remaining : kBatchSize;
+			CRGB input_buf[kBatchSize];
+			fl::CRGBA5 gamma_buf[kBatchSize];
 
-			if (rgb) {
-				// Get color correction scales and brightness
-				fl::u8 scale_r, scale_g, scale_b;
-				#if FASTLED_HD_COLOR_MIXING
-				// HD mode: separate color correction and brightness
-				pixels.loadRGBScaleAndBrightness(&scale_r, &scale_g, &scale_b, &brightness);
-				#else
-				// Standard mode: premixed color and brightness
-				pixels.loadAndScaleRGB(&scale_r, &scale_g, &scale_b);
-				brightness = 255;
-				#endif
-				CRGB scale = CRGB(scale_r, scale_g, scale_b);
-
-				// Apply 5-bit HD gamma correction
-				fl::five_bit_hd_gamma_bitshift(rgb, scale, brightness, &rgb, &brightness);
+			// Copy raw pixel bytes into CRGB input buffer
+			for (fl::u16 i = 0; i < batch; ++i) {
+				const fl::u8* raw = pixels.getRawPixelData();
+				input_buf[i] = CRGB(raw[0], raw[1], raw[2]);
+				pixels.advanceData();
 			}
 
-			// Reorder RGB to wire order manually (RGB_ORDER determines wire ordering)
-			// Uses RO() macro pattern from PixelController
-			const fl::u8 b0_index = (RGB_ORDER >> 6) & 0x3;  // First wire byte color index
-			const fl::u8 b1_index = (RGB_ORDER >> 3) & 0x3;  // Second wire byte color index
-			const fl::u8 b2_index = RGB_ORDER & 0x3;         // Third wire byte color index
-			const fl::u8 c0 = rgb.raw[b0_index];
-			const fl::u8 c1 = rgb.raw[b1_index];
-			const fl::u8 c2 = rgb.raw[b2_index];
+			fl::five_bit_hd_gamma_bitshift(
+				fl::span<const CRGB>(input_buf, batch), colors_scale, global_brightness,
+				fl::span<fl::CRGBA5>(gamma_buf, batch));
 
-			// APA102 uses BGR wire order: c0=Blue, c1=Green, c2=Red (when RGB_ORDER=BGR)
-			writeLed(brightness, c0, c1, c2);
+			for (fl::u16 i = 0; i < batch; ++i) {
+				const CRGB& rgb = gamma_buf[i].color;
+				writeLed(gamma_buf[i].brightness_5bit,
+				         rgb.raw[b0_index], rgb.raw[b1_index], rgb.raw[b2_index]);
+			}
 
-			pixels.stepDithering();
-			pixels.advanceData();
+			remaining -= batch;
 		}
 
-		endBoundary(pixels.size());
+		endBoundary(n);
 		mSPI.endTransaction();
-
-		// Finalize transmission (no-op on non-ESP32, flushes Quad-SPI on ESP32)
 		mSPI.finalizeTransmission();
 	}
 

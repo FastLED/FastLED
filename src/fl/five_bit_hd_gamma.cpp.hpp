@@ -3,6 +3,9 @@
 
 namespace fl {
 
+namespace {
+namespace five_bit_impl {
+
 // ix/31 * 255/65536 * 256 scaling factors, valid for indexes 1..31.
 // Uses flash storage on AVR/ESP, zero heap allocation on all platforms.
 static constexpr u32 BRIGHT_SCALE[32] FL_PROGMEM = {
@@ -11,40 +14,7 @@ static constexpr u32 BRIGHT_SCALE[32] FL_PROGMEM = {
     126480, 119040,  112427,  106509, 101184, 96366,  91985,  87986,
     84320,  80947,   77834,   74951,  72274,  69782,  67456,  65280};
 
-void five_bit_hd_gamma_bitshift(
-    CRGB colors, CRGB colors_scale, u8 global_brightness, CRGB *out_colors,
-    u8 *out_power_5bit) {
-
-    if (global_brightness == 0) {
-        *out_colors = CRGB(0, 0, 0);
-        *out_power_5bit = 0;
-        return;
-    }
-
-    // Step 1: Gamma Correction
-    u16 r16 = gamma_2_8(colors.r);
-    u16 g16 = gamma_2_8(colors.g);
-    u16 b16 = gamma_2_8(colors.b);
-
-    // Step 2: Color correction step comes after gamma correction. These values
-    // are assumed to be be relatively close to 255.
-    if (colors_scale.r != 0xff) {
-        r16 = scale16by8(r16, colors_scale.r);
-    }
-    if (colors_scale.g != 0xff) {
-        g16 = scale16by8(g16, colors_scale.g);
-    }
-    if (colors_scale.b != 0xff) {
-        b16 = scale16by8(b16, colors_scale.b);
-    }
-
-    five_bit_bitshift(r16, g16, b16, global_brightness, out_colors,
-                      out_power_5bit);
-}
-
-// Since the return value wasn't used, it has been omitted.
-// It's not clear what scale brightness is, or how it is to be applied,
-// so we assume 8 bits applied over the given rgb values.
+FL_OPTIMIZE_FUNCTION
 void five_bit_bitshift(u16 r16, u16 g16, u16 b16,
                        u8 brightness, CRGB *out,
                        u8 *out_power_5bit) {
@@ -100,6 +70,66 @@ void five_bit_bitshift(u16 r16, u16 g16, u16 b16,
         *out = CRGB(r8, g8, b8);
         *out_power_5bit = static_cast<u8>(scale);
         return;
+    }
+}
+
+FL_OPTIMIZE_FUNCTION
+void five_bit_hd_gamma_bitshift(
+    CRGB colors, CRGB colors_scale, u8 global_brightness, CRGB *out_colors,
+    u8 *out_power_5bit) {
+
+    if (global_brightness == 0) {
+        *out_colors = CRGB(0, 0, 0);
+        *out_power_5bit = 0;
+        return;
+    }
+
+    // Step 1: Gamma Correction
+    u16 r16 = gamma_2_8(colors.r);
+    u16 g16 = gamma_2_8(colors.g);
+    u16 b16 = gamma_2_8(colors.b);
+
+    // Step 2: Color correction step comes after gamma correction. These values
+    // are assumed to be be relatively close to 255.
+    if (colors_scale.r != 0xff) {
+        r16 = scale16by8(r16, colors_scale.r);
+    }
+    if (colors_scale.g != 0xff) {
+        g16 = scale16by8(g16, colors_scale.g);
+    }
+    if (colors_scale.b != 0xff) {
+        b16 = scale16by8(b16, colors_scale.b);
+    }
+
+    five_bit_bitshift(r16, g16, b16, global_brightness, out_colors,
+                      out_power_5bit);
+}
+
+} // namespace five_bit_impl
+} // anonymous namespace
+
+FL_OPTIMIZE_FUNCTION
+void five_bit_hd_gamma_bitshift(
+    fl::span<const CRGB> colors, CRGB colors_scale, u8 global_brightness,
+    fl::span<CRGB> out_colors, fl::span<u8> out_power_5bit) {
+    u16 n = static_cast<u16>(colors.size());
+    if (out_colors.size() < n) n = static_cast<u16>(out_colors.size());
+    if (out_power_5bit.size() < n) n = static_cast<u16>(out_power_5bit.size());
+    for (u16 i = 0; i < n; ++i) {
+        five_bit_impl::five_bit_hd_gamma_bitshift(colors[i], colors_scale, global_brightness,
+                                   &out_colors[i], &out_power_5bit[i]);
+    }
+}
+
+FL_OPTIMIZE_FUNCTION
+void five_bit_hd_gamma_bitshift(
+    fl::span<const CRGB> colors, CRGB colors_scale, u8 global_brightness,
+    fl::span<CRGBA5> out) {
+    u16 n = static_cast<u16>(colors.size());
+    if (out.size() < n) n = static_cast<u16>(out.size());
+    for (u16 i = 0; i < n; ++i) {
+        five_bit_impl::five_bit_hd_gamma_bitshift(colors[i], colors_scale, global_brightness,
+                                   &out[i].color, &out[i].brightness_5bit);
     }
 }
 
