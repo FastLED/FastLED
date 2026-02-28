@@ -1473,26 +1473,38 @@ FL_TEST_CASE("ParlioEngine - SPI DMA output matches encoding") {
     auto& driver = ParlioEngine::getInstance();
 
     fl::vector<int> pins = {5, 6};
-    bool init_ok = driver.initializeSpi(pins, 6000000, 10);
+    bool init_ok = driver.initializeSpi(pins, 6000000, 100);
     FL_REQUIRE(init_ok);
 
-    u8 data[1] = {0xFF};
-    bool tx_ok = driver.beginTransmission(data, 1, 1, 1);
+    // Test multiple bytes with diverse bit patterns
+    u8 data[] = {0xFF, 0x00, 0xA5, 0x5A, 0x0F, 0xF0, 0xC3, 0x3C};
+    const size_t dataLen = sizeof(data);
+    bool tx_ok = driver.beginTransmission(data, dataLen, 1, dataLen);
     FL_REQUIRE(tx_ok);
 
     auto& mock = ParlioPeripheralMock::instance();
     const auto& history = mock.getTransmissionHistory();
     FL_REQUIRE(history.size() > 0);
 
-    const auto& tx = history[0];
-    FL_REQUIRE(tx.buffer_copy.size() >= 4);
+    // Collect all DMA bytes across all chunks
+    fl::vector<u8> allDmaBytes;
+    for (const auto& tx : history) {
+        for (size_t i = 0; i < tx.buffer_copy.size(); i++) {
+            allDmaBytes.push_back(tx.buffer_copy[i]);
+        }
+    }
+    FL_REQUIRE(allDmaBytes.size() >= dataLen * 4);
 
-    u8 expected[4];
-    ParlioEngine::encodeSpiByteForTest(0xFF, expected);
-    FL_CHECK_EQ(tx.buffer_copy[0], expected[0]);
-    FL_CHECK_EQ(tx.buffer_copy[1], expected[1]);
-    FL_CHECK_EQ(tx.buffer_copy[2], expected[2]);
-    FL_CHECK_EQ(tx.buffer_copy[3], expected[3]);
+    // Verify every byte is correctly encoded
+    for (size_t i = 0; i < dataLen; i++) {
+        u8 expected[4];
+        ParlioEngine::encodeSpiByteForTest(data[i], expected);
+        size_t dmaOffset = i * 4;
+        FL_CHECK_EQ(allDmaBytes[dmaOffset + 0], expected[0]);
+        FL_CHECK_EQ(allDmaBytes[dmaOffset + 1], expected[1]);
+        FL_CHECK_EQ(allDmaBytes[dmaOffset + 2], expected[2]);
+        FL_CHECK_EQ(allDmaBytes[dmaOffset + 3], expected[3]);
+    }
 }
 
 //=============================================================================
@@ -1615,12 +1627,16 @@ FL_TEST_CASE("ChannelDriverPARLIO - SPI enqueue/show/poll sends data to PARLIO m
     SpiEncoder encoder = SpiEncoder::apa102(6000000);
     SpiChipsetConfig spiConfig{5, 18, encoder};
 
-    fl::vector_psram<u8> spiBytes = {
+    // 16 input bytes with varied patterns to exercise all encoding paths
+    const u8 inputBytes[] = {
         0x00, 0x00, 0x00, 0x00,
         0xFF, 0x00, 0xFF, 0x00,
         0xFF, 0xAA, 0x55, 0xCC,
         0xFF, 0xFF, 0xFF, 0xFF
     };
+    const size_t inputLen = sizeof(inputBytes);
+
+    fl::vector_psram<u8> spiBytes(inputBytes, inputBytes + inputLen);
     auto channelData = fl::ChannelData::create(spiConfig, fl::move(spiBytes));
     FL_REQUIRE(channelData != nullptr);
     FL_REQUIRE(channelData->isSpi());
@@ -1629,20 +1645,31 @@ FL_TEST_CASE("ChannelDriverPARLIO - SPI enqueue/show/poll sends data to PARLIO m
     parlioDriver.show();
     waitForDriverReady(parlioDriver);
 
+    // Collect all DMA bytes across all transmission chunks
     auto& mock = ParlioPeripheralMock::instance();
     const auto& history = mock.getTransmissionHistory();
     FL_REQUIRE(history.size() > 0);
 
-    const auto& tx = history[0];
-    FL_CHECK(tx.buffer_copy.size() >= 64);
-    FL_CHECK(tx.bit_count > 0);
+    fl::vector<u8> allDmaBytes;
+    for (const auto& tx : history) {
+        for (size_t i = 0; i < tx.buffer_copy.size(); i++) {
+            allDmaBytes.push_back(tx.buffer_copy[i]);
+        }
+    }
 
-    u8 expected_0x00[4];
-    ParlioEngine::encodeSpiByteForTest(0x00, expected_0x00);
-    FL_CHECK_EQ(tx.buffer_copy[0], expected_0x00[0]);
-    FL_CHECK_EQ(tx.buffer_copy[1], expected_0x00[1]);
-    FL_CHECK_EQ(tx.buffer_copy[2], expected_0x00[2]);
-    FL_CHECK_EQ(tx.buffer_copy[3], expected_0x00[3]);
+    // Each input byte produces 4 DMA bytes → 16 * 4 = 64 minimum
+    FL_REQUIRE(allDmaBytes.size() >= inputLen * 4);
+
+    // Verify EVERY input byte is correctly encoded in the DMA output
+    for (size_t i = 0; i < inputLen; i++) {
+        u8 expected[4];
+        ParlioEngine::encodeSpiByteForTest(inputBytes[i], expected);
+        size_t dmaOffset = i * 4;
+        FL_CHECK_EQ(allDmaBytes[dmaOffset + 0], expected[0]);
+        FL_CHECK_EQ(allDmaBytes[dmaOffset + 1], expected[1]);
+        FL_CHECK_EQ(allDmaBytes[dmaOffset + 2], expected[2]);
+        FL_CHECK_EQ(allDmaBytes[dmaOffset + 3], expected[3]);
+    }
 }
 
 FL_TEST_CASE("ChannelDriverPARLIO - SPI uses clock and data pins from config") {
@@ -1671,6 +1698,130 @@ FL_TEST_CASE("ChannelDriverPARLIO - SPI uses clock and data pins from config") {
     FL_CHECK_EQ(config.gpio_pins[1], DATA_PIN);
 }
 
+FL_TEST_CASE("ChannelDriverPARLIO - SPI per-pin clock and data lane verification") {
+    resetMockHistory();
+
+    fl::ChannelDriverPARLIO parlioDriver;
+
+    const int CLOCK_PIN = 10;
+    const int DATA_PIN = 11;
+    SpiEncoder encoder = SpiEncoder::apa102(6000000);
+    SpiChipsetConfig spiConfig{DATA_PIN, CLOCK_PIN, encoder};
+
+    // Use a single byte 0xFF so we can predict the exact per-pin waveform.
+    //
+    // SPI encoding: tick = (data_bit << 1) | clock_bit
+    //   bit1 = data, bit0 = clock
+    //
+    // MSB untranspose assigns lane 0 to bit1 (data), lane 1 to bit0 (clock).
+    // gpio_pins[0] = CLOCK_PIN → gets lane 0 → data waveform
+    // gpio_pins[1] = DATA_PIN  → gets lane 1 → clock waveform
+    //
+    // For 0xFF (all 1s):
+    //   Clock waveform: alternating 1,0,1,0... → packed LSB-first = 0x55
+    //   Data waveform:  all 1s → 0xFF
+    fl::vector_psram<u8> spiBytes = {0xFF};
+    auto channelData = fl::ChannelData::create(spiConfig, fl::move(spiBytes));
+    FL_REQUIRE(channelData != nullptr);
+
+    parlioDriver.enqueue(channelData);
+    parlioDriver.show();
+    waitForDriverReady(parlioDriver);
+
+    auto& mock = ParlioPeripheralMock::instance();
+    FL_REQUIRE(mock.isInitialized());
+
+    // CLOCK_PIN gets lane 0 which is the DATA waveform (MSB bit1 extracted first)
+    fl::span<const u8> clockPinData = mock.getTransmissionDataForPin(CLOCK_PIN);
+    FL_REQUIRE(clockPinData.size() >= 2);
+    FL_CHECK_EQ(clockPinData[0], (u8)0xFF);  // data waveform for 0xFF: all 1s
+    FL_CHECK_EQ(clockPinData[1], (u8)0xFF);
+
+    // DATA_PIN gets lane 1 which is the CLOCK waveform
+    fl::span<const u8> dataPinData = mock.getTransmissionDataForPin(DATA_PIN);
+    FL_REQUIRE(dataPinData.size() >= 2);
+    FL_CHECK_EQ(dataPinData[0], (u8)0x55);  // clock waveform: alternating 1,0
+    FL_CHECK_EQ(dataPinData[1], (u8)0x55);
+}
+
+FL_TEST_CASE("ChannelDriverPARLIO - SPI per-pin data lane varies with input") {
+    resetMockHistory();
+
+    fl::ChannelDriverPARLIO parlioDriver;
+
+    const int CLOCK_PIN = 10;
+    const int DATA_PIN = 11;
+    SpiEncoder encoder = SpiEncoder::apa102(6000000);
+    SpiChipsetConfig spiConfig{DATA_PIN, CLOCK_PIN, encoder};
+
+    // Use a single byte 0x00 (all zeros):
+    //   Clock waveform: alternating 1,0 → 0x55 (always, regardless of data)
+    //   Data waveform:  all 0s → 0x00
+    // Lane mapping: CLOCK_PIN→lane0=data, DATA_PIN→lane1=clock
+    fl::vector_psram<u8> spiBytes = {0x00};
+    auto channelData = fl::ChannelData::create(spiConfig, fl::move(spiBytes));
+    FL_REQUIRE(channelData != nullptr);
+
+    parlioDriver.enqueue(channelData);
+    parlioDriver.show();
+    waitForDriverReady(parlioDriver);
+
+    auto& mock = ParlioPeripheralMock::instance();
+
+    // CLOCK_PIN → lane 0 → data waveform: all zeros
+    fl::span<const u8> clockPinData = mock.getTransmissionDataForPin(CLOCK_PIN);
+    FL_REQUIRE(clockPinData.size() >= 2);
+    FL_CHECK_EQ(clockPinData[0], (u8)0x00);
+    FL_CHECK_EQ(clockPinData[1], (u8)0x00);
+
+    // DATA_PIN → lane 1 → clock waveform: always alternating
+    fl::span<const u8> dataPinData = mock.getTransmissionDataForPin(DATA_PIN);
+    FL_REQUIRE(dataPinData.size() >= 2);
+    FL_CHECK_EQ(dataPinData[0], (u8)0x55);
+    FL_CHECK_EQ(dataPinData[1], (u8)0x55);
+}
+
+FL_TEST_CASE("ChannelDriverPARLIO - SPI per-pin data lane for 0xA5") {
+    resetMockHistory();
+
+    fl::ChannelDriverPARLIO parlioDriver;
+
+    const int CLOCK_PIN = 10;
+    const int DATA_PIN = 11;
+    SpiEncoder encoder = SpiEncoder::apa102(6000000);
+    SpiChipsetConfig spiConfig{DATA_PIN, CLOCK_PIN, encoder};
+
+    // SPI byte 0xA5 = 0b10100101 (MSB first)
+    // Each SPI bit produces 2 ticks (rise+fall) with data=data_bit.
+    // Bit sequence MSB→LSB: 1,0,1,0,0,1,0,1
+    // Data ticks (2 per bit): 1,1, 0,0, 1,1, 0,0, 0,0, 1,1, 0,0, 1,1
+    // Packed LSB-first into bytes:
+    //   Byte 0 (ticks 0-7): bits 1,1,0,0,1,1,0,0 → 0b00110011 = 0x33
+    //   Byte 1 (ticks 8-15): bits 0,0,1,1,0,0,1,1 → 0b11001100 = 0xCC
+    // Lane mapping: CLOCK_PIN→lane0=data, DATA_PIN→lane1=clock
+    fl::vector_psram<u8> spiBytes = {0xA5};
+    auto channelData = fl::ChannelData::create(spiConfig, fl::move(spiBytes));
+    FL_REQUIRE(channelData != nullptr);
+
+    parlioDriver.enqueue(channelData);
+    parlioDriver.show();
+    waitForDriverReady(parlioDriver);
+
+    auto& mock = ParlioPeripheralMock::instance();
+
+    // CLOCK_PIN → lane 0 → data waveform for 0xA5
+    fl::span<const u8> clockPinData = mock.getTransmissionDataForPin(CLOCK_PIN);
+    FL_REQUIRE(clockPinData.size() >= 2);
+    FL_CHECK_EQ(clockPinData[0], (u8)0x33);
+    FL_CHECK_EQ(clockPinData[1], (u8)0xCC);
+
+    // DATA_PIN → lane 1 → clock waveform: always alternating
+    fl::span<const u8> dataPinData = mock.getTransmissionDataForPin(DATA_PIN);
+    FL_REQUIRE(dataPinData.size() >= 2);
+    FL_CHECK_EQ(dataPinData[0], (u8)0x55);
+    FL_CHECK_EQ(dataPinData[1], (u8)0x55);
+}
+
 FL_TEST_CASE("ChannelDriverPARLIO - mixed clockless and SPI channels") {
     resetMockHistory();
 
@@ -1682,7 +1833,9 @@ FL_TEST_CASE("ChannelDriverPARLIO - mixed clockless and SPI channels") {
 
     SpiEncoder encoder = SpiEncoder::apa102(6000000);
     SpiChipsetConfig spiConfig{5, 18, encoder};
-    fl::vector_psram<u8> spiBytes = {0x00, 0x00, 0x00, 0x00, 0xFF, 0xAA, 0x55, 0xCC};
+    const u8 spiInputBytes[] = {0x00, 0x00, 0x00, 0x00, 0xFF, 0xAA, 0x55, 0xCC};
+    const size_t spiInputLen = sizeof(spiInputBytes);
+    fl::vector_psram<u8> spiBytes(spiInputBytes, spiInputBytes + spiInputLen);
     auto spiData = fl::ChannelData::create(spiConfig, fl::move(spiBytes));
 
     parlioDriver.enqueue(clocklessData);
@@ -1693,16 +1846,34 @@ FL_TEST_CASE("ChannelDriverPARLIO - mixed clockless and SPI channels") {
     auto& mock = ParlioPeripheralMock::instance();
     const auto& history = mock.getTransmissionHistory();
 
-    FL_CHECK(history.size() >= 2);
+    // Must have at least 2 transmission groups (clockless then SPI)
+    FL_REQUIRE(history.size() >= 2);
 
-    bool foundLargeBuffer = false;
-    bool foundSpiBuffer = false;
-    for (const auto& tx : history) {
-        if (tx.buffer_copy.size() >= 24) foundLargeBuffer = true;
-        if (tx.buffer_copy.size() >= 32) foundSpiBuffer = true;
+    // The SPI transmission is the last group. Collect its DMA bytes.
+    // Clockless transmission uses wider data width, SPI uses data_width=2.
+    // The SPI group starts after the clockless group completes.
+    // The mock records per-pin data only for the last transmit() call,
+    // so verify the mock config switched to 2-bit SPI mode.
+    const auto& config = mock.getConfig();
+    FL_CHECK_EQ(config.data_width, (size_t)2);
+
+    // Verify the SPI encoded bytes in the last transmission group.
+    // After the clockless group completes, the engine re-initializes for SPI.
+    // Find the SPI transmission(s) — they come after clockless ones.
+    // SPI transmission data width is 2 (encoded as 4 DMA bytes per input byte).
+    // Collect all DMA bytes from the last transmission (the SPI one).
+    const auto& spiTx = history[history.size() - 1];
+    FL_REQUIRE(spiTx.buffer_copy.size() >= spiInputLen * 4);
+
+    for (size_t i = 0; i < spiInputLen; i++) {
+        u8 expected[4];
+        ParlioEngine::encodeSpiByteForTest(spiInputBytes[i], expected);
+        size_t dmaOffset = i * 4;
+        FL_CHECK_EQ(spiTx.buffer_copy[dmaOffset + 0], expected[0]);
+        FL_CHECK_EQ(spiTx.buffer_copy[dmaOffset + 1], expected[1]);
+        FL_CHECK_EQ(spiTx.buffer_copy[dmaOffset + 2], expected[2]);
+        FL_CHECK_EQ(spiTx.buffer_copy[dmaOffset + 3], expected[3]);
     }
-    FL_CHECK(foundLargeBuffer);
-    FL_CHECK(foundSpiBuffer);
 }
 
 FL_TEST_CASE("ChannelDriverPARLIO - SPI poll returns READY after completion") {

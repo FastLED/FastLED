@@ -106,8 +106,8 @@ struct TimingReporter : public doctest::IReporter {
         auto end_time = std::chrono::steady_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 
-        // Warn if test case took longer than 1 second
-        constexpr int WARNING_THRESHOLD_MS = 1000;
+        // Warn if test case took longer than 5 seconds
+        constexpr int WARNING_THRESHOLD_MS = 5000;
         if (duration.count() > WARNING_THRESHOLD_MS && current_test) {
             std::cout << "WARNING: Test case '"
                       << current_test->m_file << ":" << current_test->m_line
