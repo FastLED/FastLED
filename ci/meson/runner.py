@@ -511,6 +511,7 @@ def run_meson_build_and_test(
                     num_passed,
                     num_failed,
                     compile_output,
+                    streaming_failed_names,
                 ) = stream_compile_and_run_tests(
                     build_dir=build_dir,
                     test_callback=test_callback,
@@ -532,6 +533,7 @@ def run_meson_build_and_test(
                             num_passed,
                             num_failed,
                             compile_output,
+                            streaming_failed_names,
                         ) = stream_compile_and_run_tests(
                             build_dir=build_dir,
                             test_callback=test_callback,
@@ -576,6 +578,7 @@ def run_meson_build_and_test(
                         num_tests_run=num_tests_run,
                         num_tests_passed=num_passed,
                         num_tests_failed=num_failed,
+                        failed_test_names=streaming_failed_names,
                     )
 
                 print_success(
@@ -1052,6 +1055,7 @@ def run_meson_build_and_test(
                     num_tests_run=1,
                     num_tests_passed=0,
                     num_tests_failed=1,
+                    failed_test_names=[meson_test_name] if meson_test_name else [],
                 )
 
             # Clear phase tracking on success

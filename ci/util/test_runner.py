@@ -818,6 +818,60 @@ def _get_friendly_test_name(command: str | list[str]) -> str:
         return _extract_test_name(command)
 
 
+def _format_failure_summary(
+    failed_tests: list[tuple[str, str]],
+) -> str:
+    """Format a summary table of failed tests with re-run commands.
+
+    Args:
+        failed_tests: List of (test_name, category) tuples.
+                      category is "unit" or "example".
+
+    Returns:
+        Formatted string with failure summary table.
+    """
+    if not failed_tests:
+        return ""
+
+    lines: list[str] = []
+    lines.append("")
+    lines.append("\033[91m" + "=" * 60 + "\033[0m")
+    lines.append("\033[91mFAILED TESTS SUMMARY\033[0m")
+    lines.append("\033[91m" + "=" * 60 + "\033[0m")
+
+    # Build re-run commands
+    rerun_cmds: list[str] = []
+    for test_name, category in failed_tests:
+        # Strip suite prefix (e.g., "fastled:test_name" -> "test_name")
+        clean_name = test_name.split(":")[-1] if ":" in test_name else test_name
+        if category == "example":
+            rerun_cmds.append(f"bash test {clean_name} --examples")
+        else:
+            rerun_cmds.append(f"bash test {clean_name} --cpp")
+
+    # Table header
+    max_name = max(
+        len(t[0].split(":")[-1] if ":" in t[0] else t[0]) for t in failed_tests
+    )
+    max_name = max(max_name, 4)  # min width for "Test"
+    header = f"  {'Test':<{max_name}} | {'Category':<8} | Re-run command"
+    sep = f"  {'-' * max_name}-+-{'-' * 8}-+-{'-' * 30}"
+    lines.append(header)
+    lines.append(sep)
+
+    for (test_name, category), cmd in zip(failed_tests, rerun_cmds):
+        clean_name = test_name.split(":")[-1] if ":" in test_name else test_name
+        lines.append(f"  {clean_name:<{max_name}} | {category:<8} | {cmd}")
+
+    lines.append("")
+    lines.append("To re-run failed tests:")
+    for cmd in rerun_cmds:
+        lines.append(f"  {cmd}")
+    lines.append("")
+
+    return "\n".join(lines)
+
+
 def _format_timing_summary(process_timings: list[ProcessTiming]) -> str:
     """Format a summary of process execution times.
 
@@ -1301,6 +1355,11 @@ def runner(
             )
 
             if not result.success:
+                if result.failed_test_names:
+                    summary = _format_failure_summary(
+                        [(name, "unit") for name in result.failed_test_names]
+                    )
+                    print(summary)
                 sys.exit(1)
 
             # Update fingerprint metadata for cache display on next run
@@ -1379,6 +1438,11 @@ def runner(
                 )
 
             if not result.success:
+                if result.failed_test_names:
+                    summary = _format_failure_summary(
+                        [(name, "unit") for name in result.failed_test_names]
+                    )
+                    print(summary)
                 sys.exit(1)
 
             # Save full-run cache after successful complete test suite run
@@ -1603,8 +1667,21 @@ def runner(
             # before multi-line content (the summary starts with \n)
             print(summary)
     except (TestExecutionFailedException, TestTimeoutException) as e:
+        # Print failure summary table from exception details
+        if e.failures:
+            failed_tests: list[tuple[str, str]] = []
+            for failure in e.failures:
+                # Determine category from test name or command
+                category = (
+                    "example" if "example" in failure.test_name.lower() else "unit"
+                )
+                failed_tests.append((failure.test_name, category))
+            if failed_tests:
+                summary = _format_failure_summary(failed_tests)
+                print(summary)
+
         # Print summary and exit with proper code
-        ts_print("\n\033[91m###### ERROR ######\033[0m")
+        ts_print("\033[91m###### ERROR ######\033[0m")
         ts_print(f"Tests failed with {len(e.failures)} failure(s)")
 
         # Exit with appropriate code

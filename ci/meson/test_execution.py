@@ -2,7 +2,7 @@
 
 import re
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
@@ -31,6 +31,7 @@ class MesonTestResult:
     compilation_skipped: bool = (
         False  # True when result came from cache (no compilation)
     )
+    failed_test_names: list[str] = field(default_factory=list)
 
     @staticmethod
     def construct_build_error(duration: float) -> "MesonTestResult":
@@ -112,10 +113,24 @@ def run_meson_test(
             r"^[\d.]+\s+(\d+)/(\d+)\s+(\S+)\s+(OK|FAIL|SKIP|TIMEOUT)\s+([\d.]+)s"
         )
 
+        # Collect names of failed tests from our tracking
+        failed_test_names: set[str] = set()
+
         if verbose:
             # Use filtering callback in verbose mode to suppress noise patterns
             echo_callback = create_filtering_echo_callback()
             returncode = proc.wait(echo=echo_callback)
+
+            # Parse failed test names from verbose output
+            if returncode != 0:
+                test_fail_pattern = re.compile(r"(\S+:\S+)\s+FAIL")
+                for match in test_fail_pattern.finditer(proc.stdout):
+                    failed_test_names.add(match.group(1))
+                if test_name and not failed_test_names:
+                    if ":" not in test_name:
+                        failed_test_names.add(f"fastled:{test_name}")
+                    else:
+                        failed_test_names.add(test_name)
         else:
             # Stream output line by line to show test progress
             with proc.line_iter(timeout=None) as it:
@@ -160,9 +175,6 @@ def run_meson_test(
                 # Import testlog parser
                 from ci.meson.testlog_parser import extract_error_context_from_testlog
 
-                # Collect names of failed tests from our tracking
-                failed_test_names: set[str] = set()
-
                 # Parse the meson output to find which tests failed
                 # Pattern matches: "fastled:fl_remote_remote FAIL"
                 test_fail_pattern = re.compile(r"(\S+:\S+)\s+FAIL")
@@ -202,6 +214,7 @@ def run_meson_test(
                 num_tests_run=num_run,
                 num_tests_passed=num_passed,
                 num_tests_failed=num_failed,
+                failed_test_names=sorted(failed_test_names),
             )
 
         # When Meson returns success (exit code 0), all tests passed.

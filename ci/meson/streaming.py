@@ -30,7 +30,7 @@ def stream_compile_and_run_tests(
     verbose: bool = False,
     compile_timeout: int = 600,
     build_optimizer: Optional[BuildOptimizer] = None,
-) -> tuple[bool, int, int, str]:
+) -> tuple[bool, int, int, str, list[str]]:
     """
     Stream test compilation and execution in parallel.
 
@@ -49,8 +49,9 @@ def stream_compile_and_run_tests(
                         archived (if content unchanged) so ninja skips relinking.
 
     Returns:
-        Tuple of (overall_success, num_passed, num_failed, compile_output)
+        Tuple of (overall_success, num_passed, num_failed, compile_output, failed_names)
         compile_output contains the compilation stdout/stderr for error analysis
+        failed_names contains the stem names of tests that failed
     """
     cmd = [get_meson_executable(), "compile", "-C", str(build_dir)]
 
@@ -112,6 +113,7 @@ def stream_compile_and_run_tests(
     num_passed = 0
     num_failed = 0
     tests_run = 0
+    failed_names: list[str] = []
 
     # Track build stages for progress reporting
     shown_tests_stage = False  # Track if we've shown "Building tests..." message
@@ -445,6 +447,7 @@ def stream_compile_and_run_tests(
                             _ts_print(f"[TEST {tests_run}] ✓ PASSED: {test_path.name}")
                     else:
                         num_failed += 1
+                        failed_names.append(test_path.stem)
                         # Always show failures even in non-verbose mode
                         _ts_print(f"[TEST {tests_run}] ✗ FAILED: {test_path.name}")
                 except KeyboardInterrupt:
@@ -454,6 +457,7 @@ def stream_compile_and_run_tests(
                     # Always show errors even in non-verbose mode
                     _ts_print(f"[TEST {tests_run}] ✗ ERROR: {test_path.name}: {e}")
                     num_failed += 1
+                    failed_names.append(test_path.stem)
 
             except queue.Empty:
                 # No test available yet, check if producer is still alive
@@ -494,4 +498,4 @@ def stream_compile_and_run_tests(
         else:
             print_success(f"  Compilation: ✓ OK")
 
-    return overall_success, num_passed, num_failed, compilation_output
+    return overall_success, num_passed, num_failed, compilation_output, failed_names
