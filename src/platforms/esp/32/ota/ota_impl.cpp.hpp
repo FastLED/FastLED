@@ -33,7 +33,6 @@
 #include <freertos/task.h>
 #include "platforms/esp/32/ota/ota_lwip.h"
 #include <mbedtls/md.h>
-#include <mbedtls/md5.h>
 #include <mbedtls/sha256.h>
 // IWYU pragma: end_keep
 #include "fl/stl/cstring.h"  // ok include - for string functions
@@ -1075,10 +1074,12 @@ private:
             return;
         }
 
-        // Initialize MD5 context for verification
-        mbedtls_md5_context md5_ctx;
-        mbedtls_md5_init(&md5_ctx);
-        mbedtls_md5_starts(&md5_ctx);
+        // Initialize MD5 context for verification using generic md interface
+        // (direct mbedtls_md5_* API may be unavailable on some ESP32 builds)
+        mbedtls_md_context_t md5_ctx;
+        mbedtls_md_init(&md5_ctx);
+        mbedtls_md_setup(&md5_ctx, mbedtls_md_info_from_type(MBEDTLS_MD_MD5), 0);
+        mbedtls_md_starts(&md5_ctx);
 
         // Receive and write firmware data
         u8 buffer[1024];
@@ -1100,7 +1101,7 @@ private:
             }
 
             // Update MD5 hash
-            mbedtls_md5_update(&md5_ctx, buffer, received);
+            mbedtls_md_update(&md5_ctx, buffer, received);
 
             // Write to flash
             err = esp_ota_write(ota_handle, buffer, received);
@@ -1126,7 +1127,7 @@ private:
         // Check for errors
         if (write_error) {
             esp_ota_abort(ota_handle);
-            mbedtls_md5_free(&md5_ctx);
+            mbedtls_md_free(&md5_ctx);
             if (mStateCb) {
                 mStateCb(3);  // OTA_ERROR
             }
@@ -1135,8 +1136,8 @@ private:
 
         // Finalize MD5 and verify
         unsigned char md5_hash[16];
-        mbedtls_md5_finish(&md5_ctx, md5_hash);
-        mbedtls_md5_free(&md5_ctx);
+        mbedtls_md_finish(&md5_ctx, md5_hash);
+        mbedtls_md_free(&md5_ctx);
 
         char computed_md5[33];
         for (int i = 0; i < 16; i++) {
