@@ -26,7 +26,7 @@
 ///
 /// // Configure
 /// UartPeripheralConfig config = {
-///     .mBaudRate = 3200000,
+///     .mBaudRate = 4000000,
 ///     .mTxPin = 17,
 ///     .mRxPin = -1,
 ///     .mTxBufferSize = 4096,

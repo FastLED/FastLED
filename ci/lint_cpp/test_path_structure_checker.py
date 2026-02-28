@@ -120,6 +120,7 @@ class TestPathStructureChecker(FileContentChecker):
             f"⚠️  DO NOT add '// ok standalone' unless absolutely necessary. This amnesty is a last\n"
             f"resort for rare infrastructure files that genuinely cannot be organized. AI agents\n"
             f"should NEVER add this comment — instead fix the path or consolidate tests.\n\n"
+            f"Avoid creating tests in 'tests/misc/' - prefer mirroring source directory structure.\n"
             f"Test organization should mirror source organization for maintainability.\n"
             f"Note: Source matcher checks .h, .hpp, and .cpp.hpp files."
         )

@@ -45,9 +45,10 @@
 /// ## Technical Details
 ///
 /// ### WS2812 Timing via UART
-/// UART baud rate: 3.2 Mbps (312.5ns per bit)
-/// - LED bit 0: SHORT high, LONG low (via UART pattern 0x88/0x8C)
-/// - LED bit 1: LONG high, SHORT low (via UART pattern 0xC8/0xCC)
+/// UART baud rate: 4.0 Mbps (250ns per bit, compensated for 10-bit framing)
+/// - The 8 data bits encode the WS2812 waveform via 2-bit LUT
+/// - Start + stop bits add 2 extra bits per frame (10 bits total)
+/// - Baud rate = 3.2 Mbps × 10/8 = 4.0 Mbps so 10-bit frame = 2500ns = 2 LED bits
 /// - Each LED byte → 4 UART bytes (2-bit LUT encoding)
 /// - Each RGB LED → 12 UART bytes total
 ///
@@ -235,13 +236,13 @@ private:
 /// @brief Factory function to create UART driver with real hardware peripheral
 /// @param uart_num UART peripheral number (0, 1, or 2)
 /// @param tx_pin GPIO pin for TX output
-/// @param baud_rate UART baud rate (typically 3200000 for WS2812)
+/// @param baud_rate UART baud rate (4000000 for WS2812 with 10-bit frame compensation)
 /// @return Shared pointer to IChannelDriver, or nullptr if creation fails
 ///
 /// Creates ChannelEngineUART with UartPeripheralEsp (real hardware).
 /// The driver will be registered with ChannelManager automatically.
 fl::shared_ptr<IChannelDriver> createUartEngine(int uart_num,
                                                 int tx_pin,
-                                                u32 baud_rate = 3200000);
+                                                u32 baud_rate = 4000000);
 
 } // namespace fl

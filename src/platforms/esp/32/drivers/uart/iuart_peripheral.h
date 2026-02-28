@@ -62,7 +62,7 @@ namespace fl {
 /// Maps directly to ESP-IDF's uart_config_t structure.
 /// Note: This is separate from the general-purpose UartPeripheralConfig in uart_esp32.h
 struct UartPeripheralConfig {
-    u32 mBaudRate;          ///< Baud rate (e.g., 3200000 for 3.2 Mbps)
+    u32 mBaudRate;          ///< Baud rate (e.g., 4000000 for WS2812 with 10/8 compensation)
     int mTxPin;                  ///< GPIO pin for TX output
     int mRxPin;                  ///< GPIO pin for RX (typically -1 for TX-only)
     u32 mTxBufferSize;      ///< TX ring buffer size (0 = blocking mode)
@@ -115,7 +115,7 @@ struct UartPeripheralConfig {
 ///
 /// // Configure
 /// UartPeripheralConfig config = {
-///     .mBaudRate = 3200000,    // 3.2 Mbps
+///     .mBaudRate = 4000000,    // 4.0 Mbps (10/8 compensation for start/stop bits)
 ///     .mTxPin = 17,
 ///     .mRxPin = -1,
 ///     .mTxBufferSize = 4096,

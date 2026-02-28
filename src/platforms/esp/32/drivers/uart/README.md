@@ -153,7 +153,7 @@ The driver uses sensible defaults optimized for WS2812:
 ```cpp
 // Typical UART configuration for WS2812 (handled automatically)
 UartConfig config;
-config.mBaudRate = 3200000;      // 3.2 Mbps (312.5ns per bit)
+config.mBaudRate = 4000000;      // 4.0 Mbps (250ns per bit, 10/8 compensation for start/stop bits)
 config.mTxPin = 17;              // GPIO pin for TX output
 config.mRxPin = -1;              // RX not used for LED control
 config.mTxBufferSize = 4096;     // TX DMA buffer (adjust for LED count)
@@ -405,7 +405,7 @@ TEST_CASE("UART transmission test") {
     auto driver = new ChannelEngineUART(mock);
 
     // Configure mock UART
-    UartConfig config(3200000, 17, -1, 4096, 0, 1, 1);
+    UartConfig config(4000000, 17, -1, 4096, 0, 1, 1);
     mock->initialize(config);
 
     // Prepare test data

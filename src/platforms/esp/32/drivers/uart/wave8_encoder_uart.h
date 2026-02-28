@@ -66,11 +66,12 @@ namespace detail {
 /// Maps 2 LED bits to 1 UART data byte (8 bits). The UART hardware
 /// automatically adds start bit (LOW) and stop bit (HIGH) during transmission.
 ///
-/// Pattern derivation (WS2812 timing at 3.2 Mbps):
+/// Pattern derivation (WS2812 timing at 4.0 Mbps):
 /// - LED bit 0: SHORT high pulse (0.4 µs), LONG low pulse (0.85 µs)
 /// - LED bit 1: LONG high pulse (0.8 µs), SHORT low pulse (0.45 µs)
-/// - UART bit duration at 3.2 Mbps: 312.5 ns
+/// - UART bit duration at 4.0 Mbps: 250 ns
 /// - 2 LED bits encoded in 10 UART bits (1 start + 8 data + 1 stop)
+/// - Baud rate = 3.2 Mbps × 10/8 compensates for start/stop bit overhead
 ///
 /// FIXED: The original patterns (0x88, 0x8C, 0xC8, 0xCC) had bit alignment issues
 /// due to UART transmission preamble. All values have been left-rotated by 1 bit

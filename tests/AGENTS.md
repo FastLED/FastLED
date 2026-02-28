@@ -258,11 +258,24 @@ FL_REQUIRE_LT((map_range<int, int, long>(x, 0, 100, 0, 1000)), max_value)
 - ✅ **Isolated feature areas** that don't fit logically into existing test structure
 - ✅ **Complex integration tests** that require dedicated setup/teardown
 
+### TEST FILE PLACEMENT
+**🚨 NEVER create tests in `tests/misc/`** - this is a legacy catch-all that should not grow.
+
+When creating a new test file, **mirror the source directory structure**:
+- Source at `src/fl/stl/flat_map.h` → test at `tests/fl/stl/flat_map.cpp`
+- Source at `src/platforms/esp/32/drivers/uart/wave8_encoder_uart.h` → test at `tests/platforms/esp/32/drivers/uart/wave8_encoder_uart.cpp`
+
+Before creating a new file, always check:
+1. Is there an existing test file for the same source file? → **Add your test there**
+2. Is there an existing test in the same directory/functional area? → **Add your test there**
+3. Only create a new file if no related test exists, and place it at the matching source path
+
 ### AVOID
 - ❌ **Creating new test files for minor bug fixes** - add to existing tests
 - ❌ **One test case per file** - consolidate related functionality
 - ❌ **Duplicate test patterns** across multiple files
 - ❌ **Scattered feature testing** - keep related tests together
+- ❌ **Putting tests in `tests/misc/`** - mirror source directory structure instead
 
 ### DEVELOPMENT WORKFLOW
 1. **During Development/Bug Fixing:** Temporary test files are acceptable for rapid iteration

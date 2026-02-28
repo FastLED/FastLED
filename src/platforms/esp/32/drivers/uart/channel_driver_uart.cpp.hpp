@@ -248,9 +248,13 @@ void ChannelEngineUART::beginTransmission(
     if (!mInitialized) {
         FL_DBG("UART: Initializing peripheral (first time)");
         // Calculate baud rate from LED timing
-        // For WS2812: 3.2 Mbps achieves correct timing with 2-bit LUT encoding
-        // TODO: Make baud rate configurable based on timing requirements
-        u32 baud_rate = 3200000; // 3.2 Mbps
+        // The 2-bit LUT encodes 2 LED bits per UART byte. The 8 data bits
+        // produce the correct WS2812 waveform, but UART adds start + stop bits
+        // (10 bits total per frame). To keep the total frame time equal to
+        // 2 LED bit periods (2 × 1.25μs = 2.5μs), we scale the baud rate
+        // by 10/8: 3.2 Mbps × 10/8 = 4.0 Mbps.
+        // At 4.0 Mbps: each UART bit = 250ns, frame = 10 × 250ns = 2500ns = 2 LED bits.
+        u32 baud_rate = 4000000; // 4.0 Mbps (compensated for 10-bit UART framing)
 
         UartPeripheralConfig config(
             baud_rate,         // mBaudRate
