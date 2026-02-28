@@ -1,7 +1,7 @@
 /// @file channel_driver_parlio.h
-/// @brief Parallel IO implementation of ChannelEngine for ESP32-P4/C6/H2/C5
+/// @brief Parallel IO implementation of ChannelDriver for ESP32-P4/C6/H2/C5
 ///
-/// This file implements a ChannelEngine that uses ESP32's Parallel IO (PARLIO)
+/// This file implements a ChannelDriver that uses ESP32's Parallel IO (PARLIO)
 /// peripheral to drive multiple WS2812/WS2812B LED strips simultaneously on
 /// parallel GPIO pins.
 ///
@@ -30,7 +30,7 @@
 ///
 /// ## Usage Example
 /// ```cpp
-/// // ChannelEnginePARLIO is automatically registered with ChannelManager
+/// // ChannelDriverPARLIO is automatically registered with ChannelManager
 /// // when FASTLED_ESP32_HAS_PARLIO is enabled. Simply use FastLED's standard
 /// API:
 ///
@@ -179,8 +179,6 @@
 // IWYU pragma: private
 
 #include "fl/compiler_control.h"
-#include "platforms/is_platform.h"
-#ifdef FL_IS_ESP32
 
 #include "fl/align.h"
 #include "fl/channels/data.h"
@@ -239,9 +237,9 @@ namespace fl {
 /// @brief Select optimal PARLIO data width for given channel count
 /// @param channel_count Number of actual channels (1-16)
 /// @return Data width (1, 2, 4, 8, or 16), or 0 if invalid
-/// @note This helper is used internally by ChannelEnginePARLIOImpl for
+/// @note This helper is used internally by ChannelDriverPARLIOImpl for
 /// validation.
-///       The polymorphic ChannelEnginePARLIO wrapper uses simplified 8/16-bit
+///       The polymorphic ChannelDriverPARLIO wrapper uses simplified 8/16-bit
 ///       selection.
 /// @note Hardware capability validation happens at runtime in the .cpp file
 ///       using SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH.
@@ -401,7 +399,7 @@ struct FL_ALIGNAS(64) ParlioIsrContext {
         return s_instance;
     }
 
-    // Singleton setter (called by ChannelEnginePARLIOImpl)
+    // Singleton setter (called by ChannelDriverPARLIOImpl)
     static void setInstance(ParlioIsrContext* instance) {
         s_instance = instance;
     }
@@ -431,17 +429,17 @@ constexpr size_t PARLIO_RING_BUFFER_COUNT = 8;
 /// @brief Internal PARLIO implementation with fixed data width
 ///
 /// This is the actual hardware driver implementation. It is used internally
-/// by the polymorphic ChannelEnginePARLIO wrapper class.
+/// by the polymorphic ChannelDriverPARLIO wrapper class.
 ///
-/// @note This class should not be used directly - use ChannelEnginePARLIO
+/// @note This class should not be used directly - use ChannelDriverPARLIO
 /// instead.
-class ChannelEnginePARLIOImpl : public IChannelDriver {
+class ChannelDriverPARLIOImpl : public IChannelDriver {
 
   public:
     /// @brief Constructor with runtime data width selection
     /// @param data_width PARLIO data width (1, 2, 4, 8, or 16)
-    explicit ChannelEnginePARLIOImpl(size_t data_width);
-    ~ChannelEnginePARLIOImpl() override;
+    explicit ChannelDriverPARLIOImpl(size_t data_width);
+    ~ChannelDriverPARLIOImpl() override;
 
     /// @brief Check if driver can handle channel data (clockless only)
     /// @param data Channel data to check
@@ -535,7 +533,7 @@ class ChannelEnginePARLIOImpl : public IChannelDriver {
 ///   recreate
 ///
 /// ## Architecture: Lazy Initialization
-/// - Contains ONE ChannelEnginePARLIOImpl instance (created on-demand)
+/// - Contains ONE ChannelDriverPARLIOImpl instance (created on-demand)
 /// - On first show(), determines optimal width from channel count
 /// - Creates TX unit with power-of-2 width: 1, 2, 4, 8, or 16-bit
 /// - If channel count changes significantly, deletes and recreates with new
@@ -547,7 +545,7 @@ class ChannelEnginePARLIOImpl : public IChannelDriver {
 /// 1. **Construction**: No hardware initialization (lazy)
 /// 2. **First show()**:
 ///    - Determines optimal width from channel count
-///    - Creates single ChannelEnginePARLIOImpl instance
+///    - Creates single ChannelDriverPARLIOImpl instance
 ///    - Initializes PARLIO TX unit with optimal width
 /// 3. **Subsequent Frames**:
 ///    - If channel count fits current width: reuse driver
@@ -568,15 +566,15 @@ class ChannelEnginePARLIOImpl : public IChannelDriver {
 /// @note Only available on ESP32-P4, ESP32-C6, ESP32-H2, and ESP32-C5 with
 /// PARLIO peripheral.
 ///       Compilation is guarded by FASTLED_ESP32_HAS_PARLIO feature flag.
-class ChannelEnginePARLIO : public IChannelDriver {
+class ChannelDriverPARLIO : public IChannelDriver {
   public:
     /// @brief Constructor - lazy initialization (no driver created)
-    ChannelEnginePARLIO();
-    ~ChannelEnginePARLIO() override;
+    ChannelDriverPARLIO();
+    ~ChannelDriverPARLIO() override;
 
-    /// @brief Check if driver can handle channel data (clockless only)
+    /// @brief Check if driver can handle channel data (clockless and SPI)
     /// @param data Channel data to check
-    /// @return true if clockless channel (rejects SPI), false otherwise
+    /// @return true for both clockless and SPI channels
     bool canHandle(const ChannelDataPtr& data) const override;
 
     /// @brief Enqueue channel data for transmission
@@ -594,35 +592,48 @@ class ChannelEnginePARLIO : public IChannelDriver {
     /// @return "PARLIO"
     fl::string getName() const override { return fl::string::from_literal("PARLIO"); }
 
-    /// @brief Get driver capabilities (CLOCKLESS protocols only)
-    /// @return Capabilities with supportsClockless=true, supportsSpi=false
+    /// @brief Get driver capabilities (both clockless and SPI)
+    /// @return Capabilities with supportsClockless=true, supportsSpi=true
     Capabilities getCapabilities() const override {
-        return Capabilities(true, false);  // Clockless only
+        return Capabilities(true, true);  // Both clockless and SPI
     }
 
   private:
-    /// @brief Begin LED data transmission with lazy init and reconfiguration
-    /// @param channelData Span of channel data to transmit
-    /// @note Creates driver on first use, reconfigures if width changes
-    void beginTransmission(fl::span<const ChannelDataPtr> channelData);
+    /// @brief Begin clockless transmission with lazy init and reconfiguration
+    void beginClocklessTransmission(fl::span<const ChannelDataPtr> channelData);
 
-  private:
-    /// @brief Single driver instance (created on-demand, reconfigured as
-    /// needed)
-    /// @note Using fl::unique_ptr for RAII - automatic cleanup, no manual
-    /// delete
-    fl::unique_ptr<ChannelEnginePARLIOImpl> mDriver;
+    /// @brief Begin SPI transmission (sequential per-channel)
+    void beginSpiTransmission();
 
-    /// @brief Current data width (0 = not initialized)
+    /// @brief Begin SPI transmission for a single channel
+    void beginSingleSpiChannel(const ChannelDataPtr& channelData);
+
+    /// @brief Transmission phase state machine
+    enum class TransmitPhase { IDLE, CLOCKLESS, SPI };
+
+    /// @brief Clockless backend driver (created on-demand)
+    fl::unique_ptr<ChannelDriverPARLIOImpl> mClocklessDriver;
+
+    /// @brief Current data width for clockless driver (0 = not initialized)
     size_t mCurrentDataWidth;
 
-    /// @brief Internal state management for IChannelDriver interface
-    fl::vector<ChannelDataPtr>
-        mEnqueuedChannels; ///< Channels enqueued via enqueue(), waiting for
-                           ///< show()
-    fl::vector<ChannelDataPtr>
-        mTransmittingChannels; ///< Channels currently transmitting (for
-                               ///< cleanup)
+    /// @brief Current transmission phase
+    TransmitPhase mPhase;
+
+    /// @brief All channels currently transmitting (for isInUse cleanup)
+    fl::vector<ChannelDataPtr> mTransmittingChannels;
+
+    /// @brief SPI channels pending transmission
+    fl::vector<ChannelDataPtr> mPendingSpi;
+
+    /// @brief SPI scratch buffer for single-lane data
+    fl::vector<u8> mSpiScratchBuffer;
+
+    /// @brief Index of currently transmitting SPI channel in mPendingSpi
+    size_t mCurrentSpiChannelIndex;
+
+    /// @brief Whether SPI engine has been initialized
+    bool mSpiInitialized;
 };
 
 //=============================================================================
@@ -660,8 +671,6 @@ ParlioDebugMetrics getParlioDebugMetrics();
 /// @note Auto-selects optimal data width based on channel count (1, 2, 4, 8, or
 /// 16-bit)
 /// @note Reconfigures width dynamically if channel count changes significantly
-fl::shared_ptr<IChannelDriver> createParlioEngine();
+fl::shared_ptr<IChannelDriver> createParlioDriver();
 
 } // namespace fl
-
-#endif // FL_IS_ESP32

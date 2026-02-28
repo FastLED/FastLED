@@ -73,6 +73,8 @@ public:
     u8* allocateDmaBuffer(size_t size) override;
     void freeDmaBuffer(u8* buffer) override;
     void delay(u32 ms) override;
+    void delayMicroseconds(u32 us) override;
+    u32 millis() override;
     u64 getMicroseconds() override;
     void freeDmaBuffer(void* ptr) override;
 
@@ -433,18 +435,15 @@ void ParlioPeripheralESPImpl::delay(u32 ms) {
     vTaskDelay(pdMS_TO_TICKS(ms));
 }
 
-//=============================================================================
-// Task Management (REMOVED - Use fl::TaskCoroutine directly)
-//=============================================================================
-// Task methods removed. Use fl::TaskCoroutine directly from driver code.
+void ParlioPeripheralESPImpl::delayMicroseconds(u32 us) {
+    fl::delayMicroseconds(us);
+}
 
-//=============================================================================
-// Timer Management (REMOVED - Use fl/isr.h directly)
-//=============================================================================
-// Timer methods removed. Use fl::isr::attachTimerHandler() and related
-// functions from fl/isr.h instead.
+u32 ParlioPeripheralESPImpl::millis() {
+    return static_cast<u32>(esp_timer_get_time() / 1000);
+}
 
-u64 ParlioPeripheralESPImpl::getMicroseconds() {
+u64 FL_IRAM ParlioPeripheralESPImpl::getMicroseconds() {
     return esp_timer_get_time();
 }
 

@@ -72,13 +72,30 @@ class TestPathStructureChecker(FileContentChecker):
         test_name_no_ext = rel_from_tests.with_suffix("")  # Remove .cpp
 
         # Check for source file at exact matching path
-        # Check for .h or .hpp header files
+        # Check for .h, .hpp, or .cpp.hpp files (ESP32 implementations use .cpp.hpp)
         expected_source_h = SRC_ROOT / test_name_no_ext.with_suffix(".h")
         expected_source_hpp = SRC_ROOT / test_name_no_ext.with_suffix(".hpp")
+        expected_source_cpp_hpp = SRC_ROOT / (str(test_name_no_ext) + ".cpp.hpp")
 
         # If matching source file exists at the expected location, no issue
-        if expected_source_h.exists() or expected_source_hpp.exists():
+        if (
+            expected_source_h.exists()
+            or expected_source_hpp.exists()
+            or expected_source_cpp_hpp.exists()
+        ):
             return []
+
+        # Also check if any source file exists in the same directory as the test
+        # This handles consolidated test files that test multiple sources in one directory
+        expected_dir = SRC_ROOT / rel_from_tests.parent
+        if expected_dir.is_dir():
+            has_sources = any(
+                f.suffix in (".h", ".hpp") or f.name.endswith(".cpp.hpp")
+                for f in expected_dir.iterdir()
+                if f.is_file()
+            )
+            if has_sources:
+                return []
 
         # Check if file has "// ok standalone" comment in first few lines
         for line in file_content.lines[:5]:  # Check first 5 lines
@@ -92,15 +109,19 @@ class TestPathStructureChecker(FileContentChecker):
         message = (
             f"Test file has no corresponding source file at matching path. "
             f"Test is at '{rel_current_test}' but no source file found at "
-            f"'src/{rel_from_tests.with_suffix('.h')}' or 'src/{rel_from_tests.with_suffix('.hpp')}'. "
+            f"'src/{rel_from_tests.with_suffix('.h')}', 'src/{rel_from_tests.with_suffix('.hpp')}', "
+            f"or 'src/{rel_from_tests.with_name(rel_from_tests.stem + '.cpp.hpp')}'. "
             f"\n\n"
             f"REQUIRED ACTIONS (in order of preference):\n"
             f"  1. RENAME the test to match the source file it's testing (best option)\n"
-            f"  2. MERGE this test into an existing test file if it tests the same source\n"
-            f"  3. MOVE to 'tests/misc/{test_path.name}' if this truly doesn't test a specific source file\n"
-            f"  4. ONLY as a last resort: add '// ok standalone' comment at the top if this absolutely cannot be organized otherwise\n\n"
+            f"  2. MERGE this test into an existing test file that tests the same source — each test\n"
+            f"     file costs compile time, so consolidating into fewer files is strongly preferred\n"
+            f"  3. MOVE to 'tests/misc/{test_path.name}' if this truly doesn't test a specific source file\n\n"
+            f"⚠️  DO NOT add '// ok standalone' unless absolutely necessary. This amnesty is a last\n"
+            f"resort for rare infrastructure files that genuinely cannot be organized. AI agents\n"
+            f"should NEVER add this comment — instead fix the path or consolidate tests.\n\n"
             f"Test organization should mirror source organization for maintainability.\n"
-            f"Note: Source matcher checks .h and .hpp header files, not .cpp.hpp implementation files."
+            f"Note: Source matcher checks .h, .hpp, and .cpp.hpp files."
         )
 
         self.violations[file_content.path] = [(1, message)]

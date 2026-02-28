@@ -1,7 +1,7 @@
 // IWYU pragma: private
 
 /// @file channel_driver_parlio.cpp
-/// @brief Parallel IO implementation of ChannelEngine for ESP32-P4/C6/H2/C5
+/// @brief Parallel IO implementation of ChannelDriver for ESP32-P4/C6/H2/C5
 ///
 /// This implementation uses ESP32's Parallel IO (PARLIO) peripheral to drive
 /// multiple LED strips simultaneously on parallel GPIO pins. It supports
@@ -15,15 +15,10 @@
 /// This file now contains only channel management logic. All hardware-specific
 /// operations have been moved to parlio_engine.{h,cpp}.
 
-#include "platforms/is_platform.h"
-#ifdef FL_IS_ESP32
-
 #include "fl/compiler_control.h"
-#include "platforms/esp/32/feature_flags/enabled.h"
-
-#if FASTLED_ESP32_HAS_PARLIO
 
 #include "channel_driver_parlio.h"
+#include "fl/channels/config.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/delay.h"
 #include "fl/warn.h"
@@ -44,7 +39,7 @@ namespace fl {
 // Constructors / Destructors - Implementation Class
 //=============================================================================
 
-ChannelEnginePARLIOImpl::ChannelEnginePARLIOImpl(size_t data_width)
+ChannelDriverPARLIOImpl::ChannelDriverPARLIOImpl(size_t data_width)
     : mDriver(detail::ParlioEngine::getInstance()),
       mInitialized(false),
       mDataWidth(data_width),
@@ -61,17 +56,17 @@ ChannelEnginePARLIOImpl::ChannelEnginePARLIOImpl(size_t data_width)
     }
 }
 
-ChannelEnginePARLIOImpl::~ChannelEnginePARLIOImpl() {
+ChannelDriverPARLIOImpl::~ChannelDriverPARLIOImpl() {
     // Wait for any active transmissions to complete
     // Must check for READY (not just !BUSY) since poll() can return DRAINING
     DriverState state = poll();
-    u32 start = fl::millis();
+    u32 start = mDriver.peripheral()->millis();
     while (state.state != DriverState::READY && state.state != DriverState::ERROR) {
-        if (fl::millis() - start >= 2000) {
+        if (mDriver.peripheral()->millis() - start >= 2000) {
             FL_ERROR("PARLIO: Destructor timeout waiting for READY");
             break;
         }
-        fl::delayMicroseconds(100);
+        mDriver.peripheral()->delayMicroseconds(100);
         state = poll();
     }
 
@@ -83,7 +78,7 @@ ChannelEnginePARLIOImpl::~ChannelEnginePARLIOImpl() {
     mCurrentGroupIndex = 0;
 }
 
-bool ChannelEnginePARLIOImpl::canHandle(const ChannelDataPtr& data) const {
+bool ChannelDriverPARLIOImpl::canHandle(const ChannelDataPtr& data) const {
     if (!data) {
         return false;
     }
@@ -100,20 +95,20 @@ bool ChannelEnginePARLIOImpl::canHandle(const ChannelDataPtr& data) const {
 // Public Interface - IChannelDriver Implementation
 //=============================================================================
 
-void ChannelEnginePARLIOImpl::enqueue(ChannelDataPtr channelData) {
+void ChannelDriverPARLIOImpl::enqueue(ChannelDataPtr channelData) {
     if (channelData) {
         mEnqueuedChannels.push_back(channelData);
     }
 }
 
-void ChannelEnginePARLIOImpl::setReversedPinOrder(bool reversed_pin_order) {
+void ChannelDriverPARLIOImpl::setReversedPinOrder(bool reversed_pin_order) {
     mReversedPinOrder = reversed_pin_order;
 }
 
-void ChannelEnginePARLIOImpl::show() {
+void ChannelDriverPARLIOImpl::show() {
     FL_SCOPED_TRACE;
     if (!mEnqueuedChannels.empty()) {
-        FL_ASSERT(mTransmittingChannels.empty(), "ChannelEnginePARLIOImpl::show() - enqueue while mTransmittingChannels is not empty, indicating transmission is in progress");
+        FL_ASSERT(mTransmittingChannels.empty(), "ChannelDriverPARLIOImpl::show() - enqueue while mTransmittingChannels is not empty, indicating transmission is in progress");
 
         // Mark all channels as in use before transmission
         for (auto& channel : mEnqueuedChannels) {
@@ -217,7 +212,7 @@ void ChannelEnginePARLIOImpl::show() {
     }
 }
 
-IChannelDriver::DriverState ChannelEnginePARLIOImpl::poll() {
+IChannelDriver::DriverState ChannelDriverPARLIOImpl::poll() {
     // If not initialized, we're ready (no hardware to poll)
     if (!mInitialized) {
         return DriverState::READY;
@@ -280,7 +275,7 @@ IChannelDriver::DriverState ChannelEnginePARLIOImpl::poll() {
 // Private Methods - Transmission
 //=============================================================================
 
-void ChannelEnginePARLIOImpl::beginTransmission(
+void ChannelDriverPARLIOImpl::beginTransmission(
     fl::span<const ChannelDataPtr> channelData) {
 
     // Validate channel data first (before initialization)
@@ -376,7 +371,7 @@ void ChannelEnginePARLIOImpl::beginTransmission(
     }
 }
 
-void ChannelEnginePARLIOImpl::prepareScratchBuffer(
+void ChannelDriverPARLIOImpl::prepareScratchBuffer(
     fl::span<const ChannelDataPtr> channelData,
     size_t maxChannelSize) {
 
@@ -411,112 +406,212 @@ void ChannelEnginePARLIOImpl::prepareScratchBuffer(
 // Polymorphic Wrapper Class Implementation
 //=============================================================================
 
-ChannelEnginePARLIO::ChannelEnginePARLIO() : mDriver(), mCurrentDataWidth(0) {}
+ChannelDriverPARLIO::ChannelDriverPARLIO()
+    : mCurrentDataWidth(0),
+      mPhase(TransmitPhase::IDLE),
+      mCurrentSpiChannelIndex(0),
+      mSpiInitialized(false) {}
 
-ChannelEnginePARLIO::~ChannelEnginePARLIO() {
-    // fl::unique_ptr automatically deletes mDriver when it goes out of scope
-    // (RAII)
+ChannelDriverPARLIO::~ChannelDriverPARLIO() {
     mCurrentDataWidth = 0;
 }
 
-bool ChannelEnginePARLIO::canHandle(const ChannelDataPtr& data) const {
+bool ChannelDriverPARLIO::canHandle(const ChannelDataPtr& data) const {
     if (!data) {
         return false;
     }
-    // Clockless drivers only handle non-SPI chipsets
-    return !data->isSpi();
+    // Accept both clockless and SPI channels
+    return true;
 }
 
-void ChannelEnginePARLIO::enqueue(ChannelDataPtr channelData) {
+void ChannelDriverPARLIO::enqueue(ChannelDataPtr channelData) {
     if (channelData) {
-        mEnqueuedChannels.push_back(channelData);
+        mTransmittingChannels.push_back(channelData);
     }
 }
 
-void ChannelEnginePARLIO::show() {
+void ChannelDriverPARLIO::show() {
     FL_SCOPED_TRACE;
-    if (!mEnqueuedChannels.empty()) {
-        // Mark all channels as in use before transmission
-        for (auto& channel : mEnqueuedChannels) {
-            channel->setInUse(true);
+    if (mTransmittingChannels.empty()) return;
+
+    // Mark all channels as in use
+    for (auto& channel : mTransmittingChannels) {
+        channel->setInUse(true);
+    }
+
+    // Separate clockless and SPI channels
+    fl::vector<ChannelDataPtr> clocklessChannels;
+    mPendingSpi.clear();
+
+    for (auto& channel : mTransmittingChannels) {
+        if (channel->isSpi()) {
+            mPendingSpi.push_back(channel);
+        } else {
+            clocklessChannels.push_back(channel);
+        }
+    }
+
+    // Begin transmission: clockless first, then SPI
+    if (!clocklessChannels.empty()) {
+        beginClocklessTransmission(clocklessChannels);
+        mPhase = TransmitPhase::CLOCKLESS;
+    } else if (!mPendingSpi.empty()) {
+        beginSpiTransmission();
+        mPhase = TransmitPhase::SPI;
+    }
+}
+
+IChannelDriver::DriverState ChannelDriverPARLIO::poll() {
+    switch (mPhase) {
+        case TransmitPhase::IDLE:
+            return DriverState::READY;
+
+        case TransmitPhase::CLOCKLESS: {
+            if (!mClocklessDriver) {
+                mPhase = TransmitPhase::IDLE;
+                return DriverState::ERROR;
+            }
+            DriverState state = mClocklessDriver->poll();
+            if (state == DriverState::READY) {
+                // Clockless done - transition to SPI if pending
+                if (!mPendingSpi.empty()) {
+                    beginSpiTransmission();
+                    mPhase = TransmitPhase::SPI;
+                    return DriverState::DRAINING;
+                }
+                // All done
+                for (auto& channel : mTransmittingChannels) {
+                    channel->setInUse(false);
+                }
+                mTransmittingChannels.clear();
+                mPhase = TransmitPhase::IDLE;
+                return DriverState::READY;
+            }
+            return state;
         }
 
-        // Move enqueued channels to transmitting channels
-        mTransmittingChannels = fl::move(mEnqueuedChannels);
-        mEnqueuedChannels.clear();
+        case TransmitPhase::SPI: {
+            detail::ParlioEngineState halState = detail::ParlioEngine::getInstance().poll();
 
-        // Begin transmission (selects driver and delegates)
-        beginTransmission(fl::span<const ChannelDataPtr>(
-            mTransmittingChannels.data(), mTransmittingChannels.size()));
-    }
-}
+            if (halState == detail::ParlioEngineState::READY) {
+                // Current SPI channel completed - check if more pending
+                if (mCurrentSpiChannelIndex < mPendingSpi.size() - 1) {
+                    mCurrentSpiChannelIndex++;
+                    beginSingleSpiChannel(mPendingSpi[mCurrentSpiChannelIndex]);
+                    return DriverState::DRAINING;
+                }
 
-IChannelDriver::DriverState ChannelEnginePARLIO::poll() {
-    // Poll the driver if initialized
-    if (mDriver) {
-        DriverState state = mDriver->poll();
+                // All SPI channels completed
+                for (auto& channel : mTransmittingChannels) {
+                    channel->setInUse(false);
+                }
+                mTransmittingChannels.clear();
+                mPendingSpi.clear();
+                mCurrentSpiChannelIndex = 0;
+                mPhase = TransmitPhase::IDLE;
+                return DriverState::READY;
+            }
 
-        // Clear in-use flags and transmitting channels when READY
-        if (state == DriverState::READY && !mTransmittingChannels.empty()) {
+            if (halState == detail::ParlioEngineState::DRAINING) {
+                return DriverState::DRAINING;
+            }
+            if (halState == detail::ParlioEngineState::BUSY) {
+                return DriverState::BUSY;
+            }
+
+            // Error
             for (auto& channel : mTransmittingChannels) {
                 channel->setInUse(false);
             }
             mTransmittingChannels.clear();
+            mPendingSpi.clear();
+            mCurrentSpiChannelIndex = 0;
+            mPhase = TransmitPhase::IDLE;
+            return DriverState::ERROR;
         }
 
-        return state;
+        default:
+            return DriverState::ERROR;
     }
-
-    // No driver initialized = ready state (lazy initialization)
-    return DriverState::READY;
 }
 
-void ChannelEnginePARLIO::beginTransmission(
+void ChannelDriverPARLIO::beginClocklessTransmission(
     fl::span<const ChannelDataPtr> channelData) {
-    // Validate channel data
     if (channelData.size() == 0) {
         return;
     }
 
     size_t channel_count = channelData.size();
-
-    // Validate channel count is within bounds
     if (channel_count > 16) {
-        FL_WARN("PARLIO: Too many channels (got " << channel_count
-                                                  << ", max 16)");
+        FL_WARN("PARLIO: Too many clockless channels (got " << channel_count
+                                                            << ", max 16)");
         return;
     }
 
-    // Determine optimal data width for this transmission
     size_t required_width = selectDataWidth(channel_count);
     if (required_width == 0) {
-        FL_WARN("PARLIO: Invalid channel count " << channel_count);
+        FL_WARN("PARLIO: Invalid clockless channel count " << channel_count);
         return;
     }
 
-    // Check if we need to create or reconfigure the driver
-    if (!mDriver) {
-        // First initialization - create driver with optimal width
-        mDriver = fl::make_unique<ChannelEnginePARLIOImpl>(required_width);
-        mCurrentDataWidth = required_width;
-    } else if (mCurrentDataWidth != required_width) {
-        // Width changed - need to reconfigure
-        // Reset unique_ptr - automatically deletes old driver, creates new one
-        mDriver = fl::make_unique<ChannelEnginePARLIOImpl>(required_width);
+    // Create or reconfigure clockless driver
+    if (!mClocklessDriver || mCurrentDataWidth != required_width) {
+        mClocklessDriver = fl::make_unique<ChannelDriverPARLIOImpl>(required_width);
         mCurrentDataWidth = required_width;
     }
 
-    // Delegate to internal driver
-    if (mDriver) {
-        // Enqueue all channels
-        for (const auto& ch : channelData) {
-            mDriver->enqueue(ch);
-        }
-        mDriver->show();
+    // Enqueue all clockless channels and show
+    for (const auto& ch : channelData) {
+        mClocklessDriver->enqueue(ch);
+    }
+    mClocklessDriver->show();
+}
+
+void ChannelDriverPARLIO::beginSpiTransmission() {
+    if (mPendingSpi.empty()) return;
+
+    mCurrentSpiChannelIndex = 0;
+    beginSingleSpiChannel(mPendingSpi[0]);
+}
+
+void ChannelDriverPARLIO::beginSingleSpiChannel(const ChannelDataPtr& channelData) {
+    if (!channelData || !channelData->isSpi()) return;
+
+    // Extract SPI config from channel data
+    const ChipsetVariant& chipset = channelData->getChipset();
+    const SpiChipsetConfig* spiConfig = chipset.ptr<SpiChipsetConfig>();
+    if (!spiConfig) {
+        FL_WARN("PARLIO_SPI: Channel is not SPI type");
+        return;
+    }
+
+    // Build pin vector: lane 0 = clock, lane 1 = data
+    fl::vector<int> pins;
+    pins.push_back(spiConfig->clockPin);
+    pins.push_back(spiConfig->dataPin);
+
+    // Get encoded SPI bytes
+    const auto& encodedData = channelData->getData();
+    if (encodedData.empty()) return;
+
+    size_t dataSize = encodedData.size();
+
+    // Initialize engine in SPI mode
+    auto& driver = detail::ParlioEngine::getInstance();
+    if (!driver.initializeSpi(pins, spiConfig->timing.clock_hz, dataSize)) {
+        FL_WARN("PARLIO_SPI: HAL initialization failed");
+        return;
+    }
+    mSpiInitialized = true;
+
+    // Prepare scratch buffer (single lane - raw SPI bytes)
+    mSpiScratchBuffer.resize(dataSize);
+    fl::memcpy(mSpiScratchBuffer.data(), encodedData.data(), dataSize);
+
+    // Transmit (single lane, laneStride = dataSize)
+    if (!driver.beginTransmission(mSpiScratchBuffer.data(), dataSize, 1, dataSize)) {
+        FL_WARN("PARLIO_SPI: Transmission failed");
     }
 }
 
 } // namespace fl
-
-#endif // FASTLED_ESP32_HAS_PARLIO
-#endif // FL_IS_ESP32

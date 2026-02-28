@@ -229,15 +229,25 @@ foreach test_name : test_names
     'fl_xypath',                   # XY path computation test
     'fx_wled',                     # WLED effects test
     'hsv2rgb_accuracy',            # Color conversion accuracy test (many iterations)
-    'parlio_mock',                 # Parallel IO mock test
-    'parlio_engine',               # Parallel IO engine test
     'rmt5_channel_engine',         # RMT5 channel engine test
     'rmt5_peripheral_mock',        # RMT5 peripheral mock test
     'test_downbeat_synthetic',     # Downbeat detection test (audio processing)
     'test_spi_channel_adapter',    # SPI channel adapter test
     'test_uart_channel_engine',    # UART channel engine test
     'test_uart_waveform_alignment', # UART waveform timing test
-    'fl_audio_detectors_vocal'     # Vocal detector test (CQ kernel generation + MP3 decoding)
+    'fl_audio_detectors_vocal',    # Vocal detector test (CQ kernel generation + MP3 decoding)
+    'fl_net_http_chunked_encoding', # HTTP chunked encoding test
+    'fl_net_http_connection',       # HTTP connection test
+    'fl_net_http_http_parser',      # HTTP parser test
+    'fl_net_http_http_transport',   # HTTP transport test
+    'fl_net_http_native_client',    # HTTP native client test (network I/O)
+    'fl_net_http_native_server',    # HTTP native server test (network I/O)
+    'fl_net_http_server',           # HTTP server test
+    'fl_net_http_server_loopback',  # HTTP server loopback test
+    'fl_net_http_stream_client',    # HTTP stream client test (network I/O)
+    'fl_net_http_stream_server',    # HTTP stream server test
+    'fl_net_http_stream_transport', # HTTP stream transport test
+    'fl_net_http_test_utils_mock_http' # HTTP mock test utilities
   ]
 
   if test_name in slow_tests

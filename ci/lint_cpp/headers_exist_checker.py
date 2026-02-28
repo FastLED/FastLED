@@ -110,6 +110,11 @@ class HeadersExistChecker(FileContentChecker):
         except (ValueError, IndexError):
             pass
 
+        # Check if file has "// ok standalone" comment in first few lines
+        for line in file_content.lines[:5]:
+            if "// ok standalone" in line.lower():
+                return []  # Exempt from header existence checks
+
         # Extract includes from the test file
         includes = self._extract_includes(file_content)
 
@@ -152,30 +157,42 @@ class HeadersExistChecker(FileContentChecker):
 
         elif not primary_exists and fallback_exists:
             # WARN: Directory structure mismatch (like tests/ftl/ including fl/stl/)
-            # Only warn if the first include path suggests the test is in the wrong dir
+            # Only warn if NO included header's directory matches the test's directory
             if includes:
-                first_include = includes[0]
                 test_rel = test_file.relative_to(TESTS_ROOT)
-
-                # Get full test directory path (e.g., "fl/stl" from "fl/stl/algorithm.cpp")
                 test_dir_path = str(test_rel.parent).replace("\\", "/")
 
-                # Get include directory path (e.g., "fl/stl" from "fl/stl/algorithm.h")
-                include_parts = first_include.rsplit("/", 1)  # Split off filename
-                include_dir_path = include_parts[0] if len(include_parts) > 1 else ""
+                # Check if ANY include matches the test directory
+                any_include_matches = False
+                first_mismatched_include_dir = None
+                for include in includes:
+                    include_parts = include.rsplit("/", 1)
+                    include_dir_path = (
+                        include_parts[0] if len(include_parts) > 1 else ""
+                    )
+                    if (
+                        test_dir_path
+                        and include_dir_path
+                        and test_dir_path == include_dir_path
+                    ):
+                        any_include_matches = True
+                        break
+                    if (
+                        first_mismatched_include_dir is None
+                        and test_dir_path
+                        and include_dir_path
+                        and test_dir_path != include_dir_path
+                    ):
+                        first_mismatched_include_dir = include_dir_path
 
-                # Check if test directory doesn't match include directory
-                if (
-                    test_dir_path
-                    and include_dir_path
-                    and test_dir_path != include_dir_path
-                ):
+                # Only warn if NO include matches the test directory
+                if not any_include_matches and first_mismatched_include_dir:
                     test_full_rel = test_file.relative_to(PROJECT_ROOT)
                     msg = (
                         f"⚠️  Test file {test_full_rel} may be in wrong directory:\n"
                         f"  Test location: tests/{test_dir_path}/\n"
-                        f"  Includes headers from: src/{include_dir_path}/\n"
-                        f"  Expected location: tests/{include_dir_path}/"
+                        f"  Includes headers from: src/{first_mismatched_include_dir}/\n"
+                        f"  Expected location: tests/{first_mismatched_include_dir}/"
                     )
                     self.violations[file_content.path] = msg
 

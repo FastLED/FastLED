@@ -353,6 +353,22 @@ public:
     /// for sub-millisecond precision requirements.
     virtual void delay(u32 ms) = 0;
 
+    /// @brief Portable microsecond delay
+    /// @param us Delay duration in microseconds
+    ///
+    /// Maps to platform-specific delay:
+    /// - ESP32: ets_delay_us() or busy-wait
+    /// - Mock: No-op (instant, advances simulated time)
+    virtual void delayMicroseconds(u32 us) = 0;
+
+    /// @brief Get current time in milliseconds
+    /// @return Current time in milliseconds (monotonic)
+    ///
+    /// Maps to:
+    /// - ESP32: esp_timer_get_time() / 1000
+    /// - Mock: Simulated time (advances with delay calls)
+    virtual u32 millis() = 0;
+
     //=========================================================================
     // Task Management (REMOVED - Use fl::TaskCoroutine directly)
     //=========================================================================

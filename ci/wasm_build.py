@@ -412,6 +412,20 @@ def _copy_from_dist(dist_dir: Path, output_dir: Path) -> None:
             shutil.copy2(item, dst)
 
 
+def _run_npm(args: list[str], cwd: Path) -> int:
+    """Run npm via nodejs-wheel."""
+    from nodejs_wheel import npm as npm_func  # type: ignore[import-untyped]
+
+    return npm_func(args, cwd=str(cwd))
+
+
+def _run_npx(args: list[str], cwd: Path) -> int:
+    """Run npx via nodejs-wheel."""
+    from nodejs_wheel import npx as npx_func  # type: ignore[import-untyped]
+
+    return npx_func(args, cwd=str(cwd))
+
+
 def _copy_templates_legacy(output_dir: Path) -> None:  # noqa: ARG001
     """Legacy direct copy — no longer supported after TypeScript migration.
 
@@ -435,30 +449,15 @@ def copy_templates(output_dir: Path) -> None:
     template_dir = PROJECT_ROOT / "src" / "platforms" / "wasm" / "compiler"
 
     if not (template_dir / "node_modules").exists():
-        raise RuntimeError(
-            "node_modules not found in src/platforms/wasm/compiler/. "
-            "Run 'npm install' in that directory to install dependencies "
-            "(required for TypeScript frontend build)."
-        )
-
-    npx = shutil.which("npx")
-    if not npx:
-        raise RuntimeError(
-            "npx not found on PATH. Node.js is required to build the "
-            "TypeScript frontend with Vite."
-        )
+        print("[WASM] Installing frontend dependencies (npm install)...")
+        rc = _run_npm(["install"], cwd=template_dir)
+        if rc != 0:
+            raise RuntimeError("npm install failed")
 
     print("[WASM] Building frontend with Vite...")
-    result = subprocess.run(
-        [npx, "vite", "build"],
-        cwd=template_dir,
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode != 0:
-        raise RuntimeError(
-            f"Vite build failed (exit code {result.returncode}):\n{result.stderr}"
-        )
+    rc = _run_npx(["vite", "build"], cwd=template_dir)
+    if rc != 0:
+        raise RuntimeError("Vite build failed")
 
     dist_dir = template_dir / "dist"
     if not dist_dir.exists():

@@ -145,7 +145,10 @@ public:
     /// @brief Get singleton instance
     static ParlioEngine& getInstance();
 
-    /// @brief Initialize PARLIO hardware (one-time setup)
+    /// @brief Encoding mode for the PARLIO engine
+    enum class EncodingMode { CLOCKLESS, SPI };
+
+    /// @brief Initialize PARLIO hardware for clockless mode (one-time setup)
     /// @param dataWidth PARLIO data width (1, 2, 4, 8, or 16)
     /// @param pins GPIO pins for each lane (size must equal dataWidth)
     /// @param timing Chipset timing configuration (T1, T2, T3)
@@ -155,6 +158,20 @@ public:
                    const fl::vector<int>& pins,
                    const ChipsetTimingConfig& timing,
                    size_t maxLedsPerChannel);
+
+    /// @brief Initialize for SPI-over-PARLIO mode (2-bit: clock + data)
+    /// @param pins GPIO pins: {clockPin, dataPin} (must have exactly 2 entries)
+    /// @param spiClockHz SPI clock frequency in Hz (e.g., 6000000 for APA102)
+    /// @param maxBytesPerChannel Maximum encoded bytes per channel (for buffer sizing)
+    /// @return true on success, false on error
+    bool initializeSpi(const fl::vector<int>& pins,
+                      u32 spiClockHz,
+                      size_t maxBytesPerChannel);
+
+    /// @brief Encode a single SPI byte into 4 DMA bytes (static utility for testing)
+    /// @param dataByte The SPI data byte to encode
+    /// @param output 4-byte output buffer
+    static void encodeSpiByteForTest(u8 dataByte, u8 output[4]);
 
     /// @brief Begin LED data transmission (blocking until complete)
     /// @param scratchBuffer Per-lane scratch buffer (caller-owned)
@@ -190,6 +207,9 @@ public:
     /// @brief Destructor - cleans up PARLIO hardware
     ~ParlioEngine();
 
+    /// @brief Access the underlying peripheral (for time/delay delegation)
+    IParlioPeripheral* peripheral() { return mPeripheral; }
+
 private:
     // Singleton pattern - allow Singleton<T> to construct instance
     friend class fl::Singleton<ParlioEngine>;
@@ -224,13 +244,20 @@ private:
     static void debugTaskFunction(void* arg);
 #endif
 
-    /// @brief Populate a DMA buffer with waveform data
+    /// @brief Populate a DMA buffer with waveform data (clockless or SPI)
     /// ⚠️  CRITICAL HOT PATH - NO LOGGING IN IMPLEMENTATION
     bool populateDmaBuffer(u8* outputBuffer,
                           size_t outputBufferCapacity,
                           size_t startByte,
                           size_t byteCount,
                           size_t& outputBytesWritten);
+
+    /// @brief Populate a DMA buffer with SPI clock+data encoding
+    /// ⚠️  CRITICAL HOT PATH - NO LOGGING IN IMPLEMENTATION
+    FL_OPTIMIZE_FUNCTION bool FL_IRAM populateDmaBufferSpi(
+        u8* outputBuffer, size_t outputCapacity,
+        size_t startByte, size_t byteCount,
+        size_t& outputBytesWritten);
 
     /// @brief Populate next available DMA buffer (incremental)
     /// ⚠️  CRITICAL HOT PATH - NO LOGGING IN IMPLEMENTATION
@@ -263,8 +290,14 @@ private:
     u32 mTimingT3Ns;
     u32 mResetUs;  // Reset time in microseconds
 
-    // Wave8 lookup table
+    // Wave8 lookup table (used for clockless encoding)
     fl::Wave8BitExpansionLut mWave8Lut;
+
+    // Encoding mode (clockless or SPI)
+    EncodingMode mEncodingMode;
+
+    // SPI clock frequency (only used in SPI mode)
+    u32 mSpiClockHz;
 
     // ISR context (cache-aligned, 64 bytes)
     fl::unique_ptr<ParlioIsrContext> mIsrContext;

@@ -168,7 +168,7 @@ static void addParlioIfPossible(ChannelManager& manager) {
 #if FASTLED_ESP32_HAS_PARLIO
     // ESP32-C6: Fixed by explicitly setting clk_in_gpio_num = -1 (Iteration 2)
     // This tells the driver to use internal clock source instead of external GPIO 0
-    manager.addDriver(PRIORITY_PARLIO, fl::make_shared<ChannelEnginePARLIO>());
+    manager.addDriver(PRIORITY_PARLIO, fl::make_shared<ChannelDriverPARLIO>());
     FL_DBG("ESP32: Added PARLIO driver (priority " << PRIORITY_PARLIO << ")");
 #else
     (void)manager;  // Suppress unused parameter warning

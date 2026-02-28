@@ -273,6 +273,8 @@ ParlioEngine::ParlioEngine()
       mTimingT2Ns(0),
       mTimingT3Ns(0),
       mResetUs(0),
+      mEncodingMode(EncodingMode::CLOCKLESS),
+      mSpiClockHz(0),
       mIsrContext(),
       mMainTaskHandle(nullptr),
       mRingBuffer(),
@@ -286,13 +288,13 @@ ParlioEngine::ParlioEngine()
 
 ParlioEngine::~ParlioEngine() {
     // Wait for any active transmissions to complete
-    u32 start = fl::millis();
+    u32 start = mPeripheral ? mPeripheral->millis() : 0;
     while (isTransmitting()) {
-        if (fl::millis() - start >= 2000) {
+        if (mPeripheral && (mPeripheral->millis() - start >= 2000)) {
             FL_LOG_PARLIO("PARLIO: Engine destructor timeout waiting for transmission");
             break;
         }
-        fl::delayMicroseconds(100);
+        if (mPeripheral) mPeripheral->delayMicroseconds(100);
     }
 
     // Clean up PARLIO peripheral
@@ -764,6 +766,13 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
                                  size_t startByte,
                                  size_t byteCount,
                                  size_t& outputBytesWritten) {
+    // SPI mode: delegate to SPI-specific encoding
+    if (mEncodingMode == EncodingMode::SPI) {
+        return populateDmaBufferSpi(outputBuffer, outputBufferCapacity,
+                                     startByte, byteCount, outputBytesWritten);
+    }
+
+    // === Clockless (Wave8) encoding follows ===
     size_t outputIdx = 0;
     size_t byteOffset = 0;
 
@@ -1228,8 +1237,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
     chipsetTiming.name = "PARLIO";
 
     mWave8Lut = buildWave8ExpansionLUT(chipsetTiming);
-
-
+    mEncodingMode = EncodingMode::CLOCKLESS;
 
     // Configure peripheral (constructor handles -1 filling for unused pins)
     // prefer_psram defaults true: allocator tries PSRAM+DMA first, falls back to internal SRAM
@@ -1328,6 +1336,205 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
     mInitialized = true;
     FL_DBG("PARLIO_INIT: Initialization COMPLETE - mInitialized=true");
+    return true;
+}
+
+bool ParlioEngine::initializeSpi(const fl::vector<int>& pins,
+                                  u32 spiClockHz,
+                                  size_t maxBytesPerChannel) {
+    // SPI-over-PARLIO requires exactly 2 pins (clock + data)
+    if (pins.size() != 2) {
+        FL_WARN("PARLIO_SPI: Expected 2 pins (clock, data), got " << pins.size());
+        return false;
+    }
+
+    // Detect config change: if already initialized with different mode or clock, deinit first
+    bool needsReinit = false;
+    if (mInitialized) {
+        if (mEncodingMode != EncodingMode::SPI || mSpiClockHz != spiClockHz ||
+            mDataWidth != 2 || mPins.size() != pins.size() ||
+            (mPins.size() >= 2 && (mPins[0] != pins[0] || mPins[1] != pins[1]))) {
+            needsReinit = true;
+        } else if (mPeripheral && mPeripheral->isInitialized()) {
+            // Same config, already initialized - reuse
+            return true;
+        }
+    }
+
+    if (needsReinit && mPeripheral && mPeripheral->isInitialized()) {
+        if (mTxUnitEnabled) {
+            mPeripheral->disable();
+        }
+        mPeripheral->deinitialize();
+        mInitialized = false;
+        mTxUnitEnabled = false;
+    }
+
+    // Set SPI-specific state before calling base initialize path
+    mEncodingMode = EncodingMode::SPI;
+    mSpiClockHz = spiClockHz;
+
+    // Convert max bytes to max LEDs for buffer sizing (3 bytes per "LED")
+    size_t maxLedsEquivalent = (maxBytesPerChannel + 2) / 3;
+    if (maxLedsEquivalent == 0) maxLedsEquivalent = 1;
+
+    // Store data width and pins directly (bypass full initialize which does Wave8 LUT)
+    mDataWidth = 2;
+    mPins = pins;
+    mActualChannels = 2;
+    mDummyLanes = 0;
+
+    // Store timing parameters
+    mTimingT1Ns = 0;
+    mTimingT2Ns = 0;
+    mTimingT3Ns = 0;
+    mResetUs = 0;  // SPI protocols use explicit start/end frames, no reset
+
+    // Get peripheral
+    if (mPeripheral == nullptr) {
+        mPeripheral = getParlioPeripheral();
+    }
+
+    // Allocate ISR context
+    if (!mIsrContext) {
+        mIsrContext = fl::make_unique<ParlioIsrContext>();
+    }
+
+    // PARLIO clock = 2× SPI clock (2 ticks per SPI bit: rise + fall)
+    u32 parlioClockHz = spiClockHz * 2;
+
+    ParlioPeripheralConfig config(
+        pins,
+        parlioClockHz,
+        FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH,
+        65534,
+        ParlioBitPackOrder::FL_PARLIO_MSB,
+        true  // prefer_psram
+    );
+
+    if (!mPeripheral->initialize(config)) {
+        FL_WARN("PARLIO_SPI: Peripheral initialization failed");
+        mPeripheral = nullptr;
+        return false;
+    }
+
+    // Register ISR callback
+    if (!mPeripheral->registerTxDoneCallback(
+            reinterpret_cast<void*>(txDoneCallback), this)) { // ok reinterpret cast
+        FL_WARN("PARLIO_SPI: Failed to register ISR callback");
+        mPeripheral->deinitialize();
+        mPeripheral = nullptr;
+        return false;
+    }
+
+    // Calculate ring buffer capacity (SPI expansion: 4:1)
+    // Each input byte produces 4 DMA bytes
+    ParlioBufferCalculator calc{mDataWidth};
+    size_t raw_capacity = calc.calculateRingBufferCapacity(
+        maxLedsEquivalent, 0, ParlioRingBuffer3::RING_BUFFER_COUNT,
+        FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM);
+    mRingBufferCapacity = ((raw_capacity + 63) / 64) * 64;
+
+    if (!allocateRingBuffers()) {
+        // Try SRAM-sized
+        raw_capacity = calc.calculateRingBufferCapacity(
+            maxLedsEquivalent, 0, ParlioRingBuffer3::RING_BUFFER_COUNT,
+            FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
+        mRingBufferCapacity = ((raw_capacity + 63) / 64) * 64;
+
+        if (!allocateRingBuffers()) {
+            FL_WARN("PARLIO_SPI: Failed to allocate ring buffers");
+            mPeripheral->deinitialize();
+            mPeripheral = nullptr;
+            return false;
+        }
+    }
+
+    // Initialize ISR context state
+    if (mIsrContext) {
+        mIsrContext->mTransmitting = false;
+        mIsrContext->mStreamComplete = false;
+        mIsrContext->mCurrentByte = 0;
+        mIsrContext->mTotalBytes = 0;
+    }
+    mErrorOccurred = false;
+
+    mInitialized = true;
+    FL_DBG("PARLIO_SPI: Initialization COMPLETE - clockHz=" << parlioClockHz);
+    return true;
+}
+
+// ============================================================================
+// Static utility: Encode a single SPI byte into 4 DMA bytes
+// ============================================================================
+void ParlioEngine::encodeSpiByteForTest(u8 dataByte, u8 output[4]) {
+    // 2-bit PARLIO mode with MSB packing.
+    // Each DMA byte holds 4 PARLIO ticks (2 bits per tick, MSB first).
+    //
+    // For MSB packing, the FIRST tick occupies the MSB position:
+    //   byte = (tick0 << 6) | (tick1 << 4) | (tick2 << 2) | tick3
+    //
+    // Lane assignment: bit0 = lane0 (clock), bit1 = lane1 (data)
+    //
+    // For each SPI data bit (MSB first, bit 7 down to bit 0):
+    //   tick_rise = (data_bit << 1) | 1    (clock=1, data=data_bit)
+    //   tick_fall = (data_bit << 1) | 0    (clock=0, data=data_bit)
+    //
+    // 8 SPI bits -> 16 ticks -> 4 DMA bytes (4 ticks per byte)
+
+    for (int outIdx = 0; outIdx < 4; outIdx++) {
+        u8 byte_val = 0;
+
+        for (int tickInByte = 0; tickInByte < 4; tickInByte++) {
+            int tickNum = outIdx * 4 + tickInByte;
+            int spiBitIdx = tickNum / 2;
+            bool isFall = (tickNum % 2) == 1;
+
+            u8 dataBit = (dataByte >> (7 - spiBitIdx)) & 1;
+
+            u8 tickVal;
+            if (isFall) {
+                tickVal = (dataBit << 1) | 0;  // clock LOW
+            } else {
+                tickVal = (dataBit << 1) | 1;  // clock HIGH
+            }
+
+            int shift = (3 - tickInByte) * 2;
+            byte_val |= (tickVal << shift);
+        }
+
+        output[outIdx] = byte_val;
+    }
+}
+
+// ============================================================================
+// HOT PATH - NO LOGGING IN THIS FUNCTION
+// ============================================================================
+FL_OPTIMIZE_FUNCTION bool FL_IRAM
+ParlioEngine::populateDmaBufferSpi(
+    u8* outputBuffer, size_t outputCapacity,
+    size_t startByte, size_t byteCount,
+    size_t& outputBytesWritten) {
+
+    size_t outputIdx = 0;
+
+    // SPI encoding: single lane of data (lane 0 in scratch buffer)
+    // The clock+data interleaving is generated by encodeSpiByteForTest()
+    for (size_t byteOffset = 0; byteOffset < byteCount; byteOffset++) {
+        if (outputIdx + 4 > outputCapacity) {
+            outputBytesWritten = outputIdx;
+            return false;
+        }
+
+        // Get source byte from scratch buffer (single lane, lane 0)
+        u8 srcByte = mScratchBuffer[0 * mLaneStride + startByte + byteOffset];
+
+        // Encode into 4 DMA bytes
+        encodeSpiByteForTest(srcByte, outputBuffer + outputIdx);
+        outputIdx += 4;
+    }
+
+    outputBytesWritten = outputIdx;
     return true;
 }
 
@@ -1595,7 +1802,7 @@ ParlioEngineState ParlioEngine::poll() {
             }
 
             // Short delay for GPIO stabilization
-            fl::delayMicroseconds(100);
+            mPeripheral->delayMicroseconds(100);
 
             return ParlioEngineState::READY;
         } else {
