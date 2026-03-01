@@ -1,7 +1,5 @@
 #pragma once
 
-#include "fl/channels/channel.h"
-
 namespace fl {
 
 // Helper to extract data pin from chipset variant

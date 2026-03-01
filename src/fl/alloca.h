@@ -1,8 +1,6 @@
 #pragma once
 
 #include "fl/has_include.h"
-#include "fl/stl/cstring.h"
-#include "fl/stl/bit_cast.h"
 
 // Conditional stack array support includes - must be before namespace
 #ifndef FASTLED_VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION

@@ -2,14 +2,12 @@
 #pragma once
 
 #include "fl/geometry.h"
-#include "fl/slice.h"
 #include "fl/stl/vector.h"
 #include "fl/int.h"
 
 namespace fl {
 
 template <typename T> class allocator_psram;
-
 
 template <typename T> class Grid {
   public:
@@ -28,7 +26,6 @@ template <typename T> class Grid {
         mSlice = fl::MatrixSlice<T>(mData.data(), width, height, 0, 0,
                                     width, height);
     }
-
 
     void clear() {
         for (u32 i = 0; i < mWidth * mHeight; ++i) {

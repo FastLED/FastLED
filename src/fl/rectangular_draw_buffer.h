@@ -15,15 +15,11 @@
 // Data access is achieved through a span<u8> representing the pixel data
 // for that pin.
 
-
 #include "fl/int.h"
 #include "fl/stl/map.h"
 #include "fl/scoped_array.h"
-#include "fl/stl/new.h"
-#include "fl/slice.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/strstream.h"
-#include "fl/stl/utility.h"
 
 namespace fl {
 
@@ -46,10 +42,8 @@ struct DrawItem {
     }
 };
 
-
 class RectangularDrawBuffer {
   public:
-
 
     RectangularDrawBuffer()
         : mAllLedsBufferUint8Size(0)

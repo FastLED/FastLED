@@ -7,18 +7,11 @@ not allocate memory for the entire grid. This is useful for large grids where
 only a small number of pixels are set.
 */
 
-#include "fl/stl/stdint.h"
-
 #include "fl/int.h"
 #include "fl/geometry.h"
-#include "fl/grid.h"
 #include "fl/stl/unordered_map.h"
-#include "fl/stl/map.h"
 #include "fl/stl/span.h"
-#include "fl/tile2x2.h"
 #include "fl/xymap.h"
-
-#include "crgb.h"
 
 #ifndef FASTLED_RASTER_SPARSE_INLINED_COUNT
 #define FASTLED_RASTER_SPARSE_INLINED_COUNT 128

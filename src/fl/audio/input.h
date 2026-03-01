@@ -1,12 +1,8 @@
 #pragma once
 
-
-#include "fl/stl/stdint.h"
-#include "platforms/is_platform.h"
 #include "fl/int.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/variant.h"
-#include "fl/stl/shared_ptr.h"
 #include "fl/audio.h"
 #include "fl/audio/mic_profiles.h"
 #include "fl/compiler_control.h"
@@ -15,7 +11,6 @@
 #ifndef FASTLED_HAS_AUDIO_INPUT
 #error "platforms/audio.h must define FASTLED_HAS_AUDIO_INPUT"
 #endif
-
 
 #define I2S_AUDIO_BUFFER_LEN 512
 #define AUDIO_DEFAULT_SAMPLE_RATE 44100ul
@@ -31,7 +26,6 @@ enum AudioChannel {
     Right = 1,
     Both = 2,  // Two microphones can be used to capture both channels with one AudioSource.
 };
-
 
 enum I2SCommFormat {
     Philips = 0X01,  // I2S communication I2S Philips standard, data launch at second BCK
@@ -139,7 +133,6 @@ namespace TeensyI2S {
     }
 }
 
-
 class AudioConfig : public fl::variant<AudioConfigI2S, AudioConfigPdm> {
 public:
     // The most common microphone on Amazon as of 2025-September.
@@ -205,7 +198,6 @@ public:
     //   set internally via an interrupt / queue and then they can just be popped off the queue.
     static fl::shared_ptr<IAudioInput> create(const AudioConfig& config, fl::string* error_message = nullptr);
 
-
     virtual ~IAudioInput() = default;
     // Starts the audio source.
     virtual void start() = 0;
@@ -243,7 +235,6 @@ public:
 private:
     float mGain = 1.0f;
 };
-
 
 // Free function for audio input creation - can be overridden by platform-specific implementations
 fl::shared_ptr<IAudioInput> platform_create_audio_input(const AudioConfig& config, fl::string* error_message = nullptr) FL_LINK_WEAK;

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fl/int.h"
-#include "fl/stl/array.h"
 #include "fl/stl/span.h"
 
 namespace fl {

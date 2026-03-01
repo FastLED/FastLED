@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fl/stl/stdint.h"
-#include "crgb.h"
 #include "fl/stl/shared_ptr.h"
 
 // Forward declarations - actual includes moved to cpp

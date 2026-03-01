@@ -1,19 +1,14 @@
 #pragma once
 
-#include "pixeltypes.h"
 #include "fl/five_bit_hd_gamma.h"
 #include "fl/force_inline.h"
-#include "pixel_iterator.h"
 #include "crgb.h"
 #include "eorder.h"
-#include "fl/math_macros.h"
 #include "cpixel_ledcontroller.h"
 #include "fastspi.h"
 // IWYU pragma: begin_keep
 #include "platforms/shared/spi_pixel_writer.h"  // ok platform headers
 // IWYU pragma: end_keep
-#include "platforms/spi_output_template.h"
-#include "fl/chipsets/encoders/apa102.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -343,7 +338,6 @@ class SK9822ControllerHD : public APA102Controller<
 	0x00000000
 > {
 };
-
 
 /// HD107 is just the APA102 with a default 40Mhz clock rate.
 template <

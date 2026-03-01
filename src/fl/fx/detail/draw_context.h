@@ -1,6 +1,5 @@
 #pragma once
 
-#include "crgb.h"
 #include "fl/stl/stdint.h"
 
 namespace fl {

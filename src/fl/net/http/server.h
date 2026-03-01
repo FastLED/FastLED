@@ -36,8 +36,6 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/map.h"
-#include "fl/json.h"
-#include "fl/async.h"
 #include "fl/engine_events.h"
 #include "platforms/esp/is_esp.h"  // ok platform headers - for FL_IS_ESP32  // IWYU pragma: keep
 

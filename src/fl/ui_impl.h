@@ -1,15 +1,8 @@
 #pragma once
 
-#include "fl/stl/stdint.h"
-
-#include "fl/audio.h"
 #include "fl/audio_input.h"  // For AudioConfig
-#include "fl/math_macros.h"
 #include "fl/stl/string.h"
-#include "fl/stl/type_traits.h"
 #include "fl/unused.h"
-#include "fl/stl/vector.h"
-#include "fl/warn.h"
 #include "platforms/ui_defs.h"
 
 #ifndef FASTLED_HAS_UI_SLIDER

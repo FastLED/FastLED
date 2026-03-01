@@ -1,8 +1,6 @@
 #pragma once
 
-#include "fl/stl/stdint.h"
 #include "fl/int.h"
-#include "crgb.h"
 #include "fl/ease.h"
 
 namespace fl {

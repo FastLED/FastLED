@@ -13,9 +13,6 @@
 ///
 /// @note This is just a wrapper around the WS2801 encoder
 
-#include "fl/stl/stdint.h"
-#include "fl/stl/array.h"
-
 namespace fl {
 
 // Forward declaration of WS2801 encoder

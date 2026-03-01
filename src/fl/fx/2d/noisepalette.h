@@ -6,14 +6,11 @@
 
 #include "fl/stl/stdint.h"
 
-#include "fl/fastled.h"
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/stl/shared_ptr.h"  // For shared_ptr
 #include "fl/xymap.h"
 #include "fl/fx/fx2d.h"
-#include "fl/fx/time.h"
 #include "lib8tion/random8.h"
-#include "noise.h"
 
 namespace fl {
 

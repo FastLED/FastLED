@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fl/fx/wled/ifastled.h"
-#include "fl/stl/shared_ptr.h"
 
 namespace fl {
 

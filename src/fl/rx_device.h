@@ -4,14 +4,9 @@
 #pragma once
 
 #include "fl/stl/stdint.h"
-#include "fl/stl/shared_ptr.h"
 #include "fl/stl/optional.h"
 #include "fl/result.h"
-#include "fl/stl/new.h"
-#include "fl/slice.h"
 #include "fl/stl/cstddef.h"
-#include "fl/stl/move.h"
-
 
 namespace fl {
 
@@ -243,7 +238,6 @@ struct RxConfig {
  */
 class RxDevice {
 
-
 public:
 
     /**
@@ -295,7 +289,6 @@ public:
      * @endcode
      */
     virtual bool begin(const RxConfig& config) = 0;
-
 
     /**
      * @brief Check if receive operation is complete
@@ -402,13 +395,11 @@ public:
      */
     virtual bool injectEdges(fl::span<const EdgeTime> edges) = 0;
 
-
 protected:
     // Allow shared_ptr to access protected destructor
     friend class fl::shared_ptr<RxDevice>;
     RxDevice() = default;
     virtual ~RxDevice() = default;
-
 
 private:
     /**

@@ -1,15 +1,9 @@
 #pragma once
 
-#include "pixeltypes.h"
-#include "fl/force_inline.h"
-#include "pixel_iterator.h"
-#include "crgb.h"
 #include "eorder.h"
-#include "fl/gamma.h"
 // IWYU pragma: begin_keep
 #include "platforms/shared/spi_pixel_writer.h"  // ok platform headers
 // IWYU pragma: end_keep
-#include "platforms/spi_output_template.h"
 #include "fastspi.h"
 #include "cpixel_ledcontroller.h"
 
@@ -45,7 +39,6 @@ template <int DATA_PIN, fl::u8 CLOCK_PIN, EOrder RGB_ORDER = GRB, fl::u32 SPI_SP
 class HD108Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef fl::SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
-
 
 public:
 	HD108Controller() {}

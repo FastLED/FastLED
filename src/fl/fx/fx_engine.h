@@ -1,12 +1,8 @@
 #pragma once
 
-#include "crgb.h"
 #include "fl/stl/map.h"
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
-#include "fl/ui.h"
-#include "fl/xymap.h"
 #include "fl/fx/detail/fx_compositor.h"
-#include "fl/fx/detail/fx_layer.h"
 #include "fl/fx/fx.h"
 #include "fl/fx/time.h"
 #include "fl/fx/video.h"

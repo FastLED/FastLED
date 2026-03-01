@@ -10,16 +10,7 @@ Based on works and code by Shawn Silverman.
 
 #include "fl/stl/stdint.h"
 
-#include "fl/math_macros.h" // if needed for MAX/FL_MIN macros
-#include "fl/stl/unique_ptr.h"
 #include "fl/stl/vector.h"
-#include "fl/warn.h"
-
-#include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
-#include "fl/supersample.h"
-#include "fl/xymap.h"
-#include "fl/fx/fx.h"
-#include "fl/fx/fx2d.h"
 
 namespace fl {
 
@@ -56,7 +47,6 @@ class WaveSimulation1D_Real {
     void setHalfDuplex(bool on) { mHalfDuplex = on; }
 
     bool getHalfDuplex() const { return mHalfDuplex; }
-
 
     // Get the simulation value at the inner grid cell x (converted to float in
     // the range [-1.0, 1.0]).

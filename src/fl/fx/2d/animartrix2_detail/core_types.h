@@ -3,8 +3,6 @@
 // Core data structures for Animartrix2
 // Extracted from animartrix_detail.hpp to enable standalone operation
 
-#include "fl/stl/stdint.h"
-
 // Use macro for num_oscillators to match original animartrix convention
 // and avoid conflicts when both headers are included
 #ifndef num_oscillators

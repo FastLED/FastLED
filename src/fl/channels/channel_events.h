@@ -1,8 +1,6 @@
 #pragma once
 
 #include "fl/stl/function.h"
-#include "fl/string.h"
-#include "fl/singleton.h"
 
 namespace fl {
 

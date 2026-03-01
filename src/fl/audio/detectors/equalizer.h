@@ -1,10 +1,7 @@
 #pragma once
 
 #include "fl/audio/audio_detector.h"
-#include "fl/audio/audio_context.h"
-#include "fl/audio/mic_profiles.h"
 #include "fl/audio/spectral_equalizer.h"
-#include "fl/fft.h"
 #include "fl/filter.h"
 #include "fl/stl/function.h"
 #include "fl/stl/span.h"

@@ -4,7 +4,6 @@
 /// @brief Shared implementation helpers for SPI device classes
 /// @note This reduces code duplication between MultiLaneDevice and ParallelDevice
 
-#include "fl/stl/stdint.h"
 #include "fl/stl/shared_ptr.h"
 // IWYU pragma: begin_keep
 #include "platforms/shared/spi_hw_base.h"  // ok platform headers

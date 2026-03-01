@@ -11,12 +11,9 @@
 
 #include "fl/stl/stdint.h"
 
-#include "crgb.h"
-#include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
-#include "fl/stl/shared_ptr.h"  // For shared_ptr
+#include "fl/stl/shared_ptr.h"
 #include "fl/xymap.h"       // Needed for constructor parameter
 #include "fl/fx/fx2d.h"
-
 
 /// @name ScaleUp Precision Modes
 /// @{

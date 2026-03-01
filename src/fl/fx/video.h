@@ -1,13 +1,10 @@
 #pragma once
 
 #include "fl/stl/stdint.h"
-#include "platforms/is_platform.h"
 
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/stl/string.h"
 #include "fl/fx/fx1d.h"
-#include "fl/fx/time.h"
-
 
 namespace fl {
 

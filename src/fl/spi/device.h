@@ -6,12 +6,9 @@
 /// This file contains the main Device class for SPI communication.
 
 #include "fl/stl/stdint.h"
-#include "fl/stl/span.h"
 #include "fl/stl/unique_ptr.h"
-#include "fl/result.h"
 #include "fl/stl/optional.h"
 #include "fl/promise.h"  // for fl::Error
-#include "fl/numeric_limits.h"
 #include "fl/spi/config.h"
 #include "fl/spi/transaction.h"
 // IWYU pragma: begin_keep

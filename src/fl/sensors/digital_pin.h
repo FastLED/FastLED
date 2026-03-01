@@ -1,14 +1,10 @@
 #pragma once
 
-#include "fl/stl/stdint.h"
-
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
-
 
 namespace fl {
 
 FASTLED_SHARED_PTR(DigitalPinImpl);
-
 
 // A simple digital pin that provides a unified interface across all platforms
 // using fl/pin.h. Supports digital I/O, pullup/pulldown resistors.

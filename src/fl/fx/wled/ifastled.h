@@ -1,8 +1,6 @@
 #pragma once
 
-
 #include "fl/stl/span.h"
-#include "crgb.h"
 #include "fl/stl/stdint.h"
 
 namespace fl {

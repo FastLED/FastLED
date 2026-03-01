@@ -13,13 +13,9 @@
 #pragma once
 
 #include "cpixel_ledcontroller.h"
-#include "pixel_controller.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/weak_ptr.h"
 #include "fl/stl/stdint.h"
-#include "fl/string.h"
-#include "fl/singleton.h"
-#include "pixeltypes.h"
 #include "fl/channels/config.h"
 #include "fl/virtual_if_not_avr.h"
 

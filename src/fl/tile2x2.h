@@ -8,13 +8,10 @@
 #include "fl/xymap.h"
 #include "fl/stl/vector.h"
 
-#include "fl/rgb8.h"
-
 namespace fl {
 
 class XYMap;
 class XYRasterU8Sparse;
-
 
 class Tile2x2_u8 {
 

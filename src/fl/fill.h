@@ -1,9 +1,7 @@
 #pragma once
 
-#include "crgb.h"
 #include "fl/colorutils_misc.h"
 #include "fl/int.h"
-#include "fl/stl/stdint.h"
 
 #include "fl/compiler_control.h"
 

@@ -3,8 +3,6 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/function.h"
 #include "fl/stl/shared_ptr.h"  // For FASTLED_SHARED_PTR macros
-#include "fl/pin.h"
-#include "fl/ui.h"
 
 namespace fl {
 

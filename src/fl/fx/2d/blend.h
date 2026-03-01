@@ -8,8 +8,7 @@ are blended by the the max luminance of the components.
 
 #include "fl/stl/stdint.h"
 
-#include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
-#include "fl/stl/shared_ptr.h"  // For shared_ptr
+#include "fl/stl/shared_ptr.h"
 #include "fl/fx/fx2d.h"
 
 // Forward declarations to reduce header overhead

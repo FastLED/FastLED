@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include "fl/stl/shared_ptr.h"
 #include "fl/int.h"
 
 namespace fl {

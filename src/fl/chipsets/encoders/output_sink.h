@@ -7,8 +7,6 @@
 /// that allow encoder free functions to work with both buffer-based
 /// (PixelIterator) and hardware-based (template controllers) architectures.
 
-#include "fl/stl/stdint.h"
-
 namespace fl {
 
 /// @brief OutputSink Concept

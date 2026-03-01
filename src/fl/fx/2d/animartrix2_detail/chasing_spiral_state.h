@@ -9,7 +9,6 @@
 // concurrent animation instances are needed.
 
 #include "fl/align.h"
-#include "fl/compiler_control.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/vector.h"
 

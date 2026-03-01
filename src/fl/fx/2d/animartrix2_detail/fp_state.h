@@ -5,10 +5,8 @@
 // Each FP visualizer owns an FPVizState instance as a private member.
 
 #include "fl/align.h"
-#include "fl/compiler_control.h"
 #include "fl/fixed_point/s16x16.h"
 #include "fl/fx/2d/animartrix2_detail/perlin_s16x16.h"
-#include "fl/fx/2d/animartrix2_detail/perlin_float.h"
 #include "fl/fx/2d/animartrix2_detail/engine.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/vector.h"

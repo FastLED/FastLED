@@ -1,8 +1,6 @@
 #pragma once
 
 #include "fl/audio/audio_detector.h"
-#include "fl/audio/audio_context.h"
-#include "fl/audio/detectors/pitch.h"
 #include "fl/stl/function.h"
 #include "fl/stl/shared_ptr.h"
 

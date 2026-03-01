@@ -1,9 +1,5 @@
 #pragma once
 
-#include "fl/stl/memory.h"
-#include "fl/audio/audio_context.h"
-#include "fl/audio/detectors/pitch.h"
-
 namespace fl {
 
 class NoteDetector {

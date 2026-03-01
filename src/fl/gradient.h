@@ -3,7 +3,6 @@
 #include "fl/colorutils.h"
 #include "fl/stl/function.h"
 #include "fl/stl/span.h"
-#include "fl/stl/type_traits.h"
 #include "fl/stl/variant.h"
 
 namespace fl {

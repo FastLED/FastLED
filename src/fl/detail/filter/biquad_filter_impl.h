@@ -1,6 +1,5 @@
 #pragma once
 
-#include "fl/math.h"
 #include "fl/math_macros.h"
 
 namespace fl {

@@ -11,8 +11,6 @@
 // a new instance is constructed when the selected animation changes, and the
 // previous instance (with its cached state) is automatically destroyed.
 
-#include "fl/fx/2d/animartrix2_detail/context.h"
-
 namespace fl {
 
 class IAnimartrix2Viz {

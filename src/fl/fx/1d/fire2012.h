@@ -1,6 +1,5 @@
 #pragma once
 
-#include "fl/fastled.h"
 #include "fl/stl/vector.h"
 #include "fl/fx/fx1d.h"
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "fl/fastled.h"
 #include "fl/fx/fx1d.h"
 #include "noisegen.h"
 

@@ -5,7 +5,6 @@
 #if FASTLED_ENABLE_JSON
 
 #include "fl/stl/function.h"
-#include "fl/stl/optional.h"
 
 namespace fl {
 

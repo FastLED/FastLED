@@ -10,4 +10,3 @@
 
 // Clean up Arduino macros (abs, min, max, round, etc.)
 // This MUST be immediately after Arduino.h so macros never leak.
-#include "fl/stl/undef.h"

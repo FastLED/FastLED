@@ -6,12 +6,9 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/unique_ptr.h"
-#include "fl/result.h"
 #include "fl/stl/optional.h"
 #include "fl/promise.h"  // for fl::Error
 #include "fl/spi/config.h"
-#include "fl/spi/lane.h"
-#include "fl/numeric_limits.h"
 #include "fl/spi/transaction.h"
 #include "fl/spi/write_result.h"
 // IWYU pragma: begin_keep

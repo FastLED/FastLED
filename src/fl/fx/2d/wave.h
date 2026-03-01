@@ -8,12 +8,10 @@
 
 #include "fl/stl/stdint.h"
 
-#include "fl/colorutils.h"
 #include "fl/gradient.h"
 #include "fl/stl/shared_ptr.h"  // For FASTLED_SHARED_PTR macros and shared_ptr
 #include "fl/wave_simulation.h"
 #include "fl/xymap.h"
-#include "fl/fx/fx.h"
 #include "fl/fx/fx2d.h"
 
 namespace fl {

@@ -3,7 +3,6 @@
 /// @file detail/async_log_queue.h
 /// @brief High-performance ISR-safe async logging queue (SPSC ring buffer) - declarations only
 
-#include "fl/stl/string.h"
 #include "fl/int.h"
 
 namespace fl {

@@ -6,8 +6,6 @@
 #include "fl/int.h"
 #include "fl/stl/span.h"
 
-#include "crgb.h"
-
 namespace fl {
 
 // Packed gamma-corrected pixel: 3 bytes RGB + 1 byte 5-bit brightness.

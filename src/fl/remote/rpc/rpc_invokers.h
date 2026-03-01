@@ -4,11 +4,9 @@
 
 #if FASTLED_ENABLE_JSON
 
-#include "fl/stl/stdint.h"
 #include "fl/stl/tuple.h"
 #include "fl/stl/function.h"
 #include "fl/stl/vector.h"
-#include "fl/stl/string.h"
 #include "fl/remote/rpc/type_conversion_result.h"
 #include "fl/remote/rpc/typed_rpc_binding.h"
 #include "fl/remote/rpc/type_schema.h"

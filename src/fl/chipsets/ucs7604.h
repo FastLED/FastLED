@@ -3,18 +3,13 @@
 #ifndef __INC_UCS7604_H
 #define __INC_UCS7604_H
 
-#include "led_sysdefs.h"
-#include "pixeltypes.h"
 #include "pixel_controller.h"
 #include "cpixel_ledcontroller.h"
-#include "fl/force_inline.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/chipsets/encoders/pixel_iterator.h"
 #include "fl/chipsets/encoders/ucs7604.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/vector.h"
-#include "lib8tion/intmap.h"
-#include "fl/stl/type_traits.h"
 #include "fl/ease.h"
 #include "fl/stl/iterator.h"
 
@@ -82,9 +77,6 @@ namespace ucs7604 {
     CurrentControl brightness();
 
 }  // namespace ucs7604
-
-
-
 
 /// @brief UCS7604 controller extending CPixelLEDController
 template <
@@ -199,7 +191,6 @@ using UCS7604Controller16bitT = UCS7604ControllerT<DATA_PIN, RGB_ORDER, fl::UCS7
 
 template <int DATA_PIN, EOrder RGB_ORDER, template<int, typename, EOrder> class CLOCKLESS_CONTROLLER>
 using UCS7604Controller16bit1600T = UCS7604ControllerT<DATA_PIN, RGB_ORDER, fl::UCS7604_MODE_16BIT_1600KHZ, fl::TIMING_UCS7604_1600KHZ, CLOCKLESS_CONTROLLER>;
-
 
 }  // namespace fl
 

@@ -7,7 +7,6 @@
 #include "fl/stl/function.h"
 #include "fl/stl/tuple.h"
 #include "fl/remote/rpc/response_send.h"
-#include "fl/remote/rpc/response_aware_traits.h"
 #include "fl/remote/rpc/type_conversion_result.h"
 #include "fl/remote/rpc/typed_rpc_binding.h"
 #include "fl/remote/rpc/rpc_invokers.h"

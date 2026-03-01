@@ -1,6 +1,5 @@
 #pragma once
 
-#include "fl/math_macros.h"
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
 

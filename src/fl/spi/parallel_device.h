@@ -6,12 +6,9 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/unique_ptr.h"
-#include "fl/result.h"
 #include "fl/stl/optional.h"
 #include "fl/promise.h"  // for fl::Error
-#include "fl/spi/config.h"
 #include "fl/spi/transaction.h"
-#include "fl/numeric_limits.h"
 // IWYU pragma: begin_keep
 #include "platforms/shared/spi_types.h"  // ok platform headers
 // IWYU pragma: end_keep  // ok platform headers

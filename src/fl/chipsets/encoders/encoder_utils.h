@@ -7,8 +7,6 @@
 /// brightness mapping, checksum generation, and color scaling.
 
 #include "fl/stl/stdint.h"
-#include "fl/gamma.h"
-#include "platforms/is_platform.h"
 
 namespace fl {
 

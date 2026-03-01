@@ -32,14 +32,11 @@
 #include "fl/stl/allocator.h"
 #include "fl/geometry.h"
 #include "fl/stl/math.h"
-#include "fl/math_macros.h"
-#include "fl/stl/pair.h"
 #include "fl/tile2x2.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/variant.h"
 #include "fl/stl/span.h"
-#include "crgb.h"
 #include "fl/int.h"
 
 namespace fl {
@@ -77,8 +74,6 @@ struct Gap {
     Gap(Gap &&other) noexcept = default;
     Gap &operator=(Gap &&other) noexcept = default;
 };
-
-
 
 // Maps a Corkscrew defined by the input to a cylindrical mapping for rendering
 // a densly wrapped LED corkscrew.
@@ -148,10 +143,8 @@ class Corkscrew {
     // Constructor with external pixel buffer - these pixels will be drawn to directly
     Corkscrew(float totalTurns, fl::span<CRGB> dstPixels, bool invert = false, const Gap& gapParams = Gap());
     
-    
     Corkscrew(const Corkscrew &) = default;
     Corkscrew(Corkscrew &&) = default;
-
 
     // Caching control
     void setCachingEnabled(bool enabled);
@@ -167,7 +160,6 @@ class Corkscrew {
     // Draw like a regular rectangle surface - access input surface directly
     fl::Grid<CRGB>& surface();
 
-    
     // Draw the corkscrew by reading from the internal surface and populating LED pixels
     void draw(bool use_multi_sampling = true);
 
@@ -198,7 +190,6 @@ class Corkscrew {
     
     // Fill the input surface with a color
     void fillInputSurface(const CRGB& color);
-
 
   private:
     // For internal use. Splats the pixel on the surface which

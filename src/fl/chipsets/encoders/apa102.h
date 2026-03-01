@@ -21,10 +21,7 @@
 #include "fl/stl/array.h"
 #include "fl/chipsets/encoders/encoder_utils.h"
 #include "fl/chipsets/encoders/encoder_constants.h"
-#include "fl/five_bit_hd_gamma.h"
-#include "fl/force_inline.h"
 #include "fl/compiler_control.h"
-#include "crgb.h"
 
 namespace fl {
 

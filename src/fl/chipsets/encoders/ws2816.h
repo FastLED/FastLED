@@ -18,10 +18,6 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/array.h"
 #include "fl/stl/pair.h"
-#include "fl/force_inline.h"
-#include "crgb.h"
-#include "lib8tion/scale8.h"
-#include "lib8tion/intmap.h"
 
 namespace fl {
 

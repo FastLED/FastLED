@@ -20,9 +20,6 @@
 #include "fl/log.h"
 #include "fl/promise.h" // For Error type
 #include "fl/string_view.h"
-#include "fl/stl/span.h"
-#include "fl/stl/string_interner.h"
-#include "fl/warn.h"
 
 #include "fl/sketch_macros.h"
 
@@ -135,8 +132,6 @@ struct DefaultValueVisitor {
         result = &storage;
     }
     
-
-
     // Generic overload for all other types
     template<typename U>
     typename fl::enable_if<
@@ -657,7 +652,6 @@ struct JsonValue {
     // Friend declarations
     friend class Json;
     
-    
     // The variant holds exactly one of these alternatives
     using variant_t = fl::variant<
         fl::nullptr_t,   // null
@@ -790,8 +784,6 @@ struct JsonValue {
         return *this;
     }
 
-
-    
     // Special constructor for char values
     static fl::shared_ptr<JsonValue> from_char(char c) {
         return fl::make_shared<JsonValue>(fl::string(1, c));
@@ -882,8 +874,6 @@ struct JsonValue {
     bool is_generic_array() const noexcept {
         return data.is<JsonArray>();
     }
-    
-
     
     bool is_object() const noexcept { 
         //FASTLED_WARN("is_object called, tag=" << data.tag());
@@ -1188,7 +1178,6 @@ struct JsonValue {
         // Use temporary empty object to avoid static initialization conflicts with Teensy
         return const_iterator::from_iterator(JsonObject().begin());
     }
-    
     
     const_iterator end() const {
         if (is_object()) {

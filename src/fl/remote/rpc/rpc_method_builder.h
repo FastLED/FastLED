@@ -1,12 +1,9 @@
 #pragma once
 
-#include "fl/json.h"
-
 #if FASTLED_ENABLE_JSON
 
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
-#include "fl/stl/initializer_list.h"
 #include "fl/remote/rpc/rpc_handle.h"
 
 namespace fl {
