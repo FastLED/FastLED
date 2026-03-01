@@ -159,7 +159,7 @@ bool HttpStreamClient::readHttpResponseHeader() {
             // Sleep briefly to allow server thread to run.
             // The server thread sleeps 10ms between iterations, so we need
             // a real sleep (not just yield) to give it time to process.
-            fl::this_thread::sleep_for(fl::chrono::milliseconds(10));
+            fl::this_thread::sleep_for(fl::chrono::milliseconds(10));  // ok sleep for
             continue;
         }
 

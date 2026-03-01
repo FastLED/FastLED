@@ -63,7 +63,7 @@ void serverThreadFunc() {
         if (serverRemote) {
             serverRemote->update(now);
         }
-        fl::this_thread::sleep_for(fl::chrono::milliseconds(10));
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(10));  // ok sleep for
     }
 }
 

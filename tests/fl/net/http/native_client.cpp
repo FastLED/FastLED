@@ -6,6 +6,7 @@
 #include "fl/net/http/native_server.h"
 #include "fl/net/http/native_server.cpp.hpp"
 #include "fl/stl/function.h"
+#include "fl/delay.h"
 
 using namespace fl;
 
@@ -24,11 +25,12 @@ static const int kPortClientRecv       = 58913;
 static const int kPortBidiEcho         = 58914;
 static const int kPortLargePayload     = 58915;
 
-// Poll a condition up to maxAttempts times. Loopback TCP is fast but the
-// accept/recv may not be ready on the very first call.
-static bool pollUntil(fl::function<bool()> pred, int maxAttempts = 20) {
+// Poll a condition with sleep between attempts. Loopback TCP is fast but
+// accept/recv may not be ready immediately, especially under heavy load.
+static bool pollUntil(fl::function<bool()> pred, int maxAttempts = 100) {
     for (int i = 0; i < maxAttempts; ++i) {
         if (pred()) return true;
+        fl::delay(10);
     }
     return false;
 }

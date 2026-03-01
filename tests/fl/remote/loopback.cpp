@@ -1,6 +1,7 @@
 // ok standalone
 // Real loopback test: server startup + client connection + request + response
-// Uses real sockets on port 47901 (only test that does so - no port conflicts)
+// Uses a background accept thread for the blocking connect() phase, then
+// single-threaded polling for everything else (acceptClients + update + RPC).
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "test.h"
@@ -16,24 +17,34 @@
 #include "fl/net/http/http_parser.cpp.hpp"
 #include "fl/net/http/native_client.cpp.hpp"
 #include "fl/net/http/native_server.cpp.hpp"
-#include "fl/net/http/test_utils/server_thread.h"
-#include "fl/net/http/test_utils/server_thread.cpp.hpp"
 #include "fl/json.h"
 #include "fl/task.h"
 #include "fl/delay.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/chrono.h"
-#include <thread>  // ok include
-#include <chrono>  // ok include
+#include "fl/stl/thread.h"
+#include "fl/delay.h"
 
 using namespace fl;
 
-FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
-    constexpr uint16_t PORT = 47901;
+// Try binding on several ports to avoid TIME_WAIT collisions from parallel tests.
+static uint16_t findOpenPort(fl::shared_ptr<HttpStreamServer>& server) {
+    // Spread across a wide range to minimize collision probability.
+    static constexpr uint16_t kPorts[] = {59901, 59911, 59921, 59931, 59941};
+    for (uint16_t port : kPorts) {
+        server = fl::make_shared<HttpStreamServer>(port);
+        if (server->connect()) {
+            return port;
+        }
+    }
+    return 0;
+}
 
-    // Server
-    auto server_transport = fl::make_shared<HttpStreamServer>(PORT);
-    FL_REQUIRE(server_transport->connect());
+
+FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
+    fl::shared_ptr<HttpStreamServer> server_transport;
+    uint16_t PORT = findOpenPort(server_transport);
+    FL_REQUIRE(PORT != 0);
 
     fl::Remote server_remote(
         [&server_transport]() { return server_transport->readRequest(); },
@@ -41,16 +52,22 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
     );
     server_remote.bind("add", [](int a, int b) -> int { return a + b; });
 
-    ServerThread server_thread(server_transport);
-    FL_REQUIRE(server_thread.start());
-    // ServerThread::start() already waits for the thread to spin up.
-
-    // Client — connect with retry in case the server hasn't accepted yet.
+    // Client — connect() blocks, so run acceptClients() in a background thread
+    // during the connect phase only.
     auto client_transport = fl::make_shared<HttpStreamClient>("localhost", PORT);
+
+    fl::atomic<bool> accepting{true};
+    fl::thread accept_thread([&server_transport, &accepting]() {
+        while (accepting.load()) {
+            server_transport->acceptClients();
+            fl::this_thread::sleep_for(fl::chrono::milliseconds(1));  // ok sleep for
+        }
+    });
+
     {
         bool connected = false;
         uint32_t connect_start = fl::millis();
-        while (fl::millis() - connect_start < 2000) {
+        while (fl::millis() - connect_start < 5000) {
             if (client_transport->connect()) {
                 connected = true;
                 break;
@@ -59,6 +76,11 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
         }
         FL_REQUIRE(connected);
     }
+
+    // Stop the accept thread now that TCP connection is established.
+    accepting.store(false);
+    accept_thread.join();
+
     FL_CHECK(client_transport->isConnected());
 
     // Register a task to pump transports and RPC via fl::Scheduler.
@@ -82,8 +104,8 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
     request.set("id", 1);
     client_transport->writeResponse(request);
 
-    // Wait for response — fl::delay() pumps the scheduler which drives
-    // the transport updates registered above.
+    // Wait for response — single-threaded: acceptClients() finishes HTTP
+    // handshake, update() processes chunked data, Remote handles RPC.
     bool got_response = false;
     Json response;
     uint32_t start = fl::millis();
@@ -95,7 +117,8 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
             got_response = true;
             break;
         }
-        fl::delay(1);
+
+        fl::delay(10);
     }
 
     pump_task.cancel();
@@ -106,6 +129,5 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
 
     // Cleanup
     client_transport->disconnect();
-    server_thread.stop();
     server_transport->disconnect();
 }

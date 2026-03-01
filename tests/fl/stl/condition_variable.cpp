@@ -2,6 +2,7 @@
 /// @brief Tests for fl::condition_variable wrapper
 
 #include "fl/stl/condition_variable.h"
+#include "fl/delay.h"
 #include "fl/stl/mutex.h"
 #include "fl/stl/atomic.h"
 #include "test.h"
@@ -61,7 +62,7 @@ FL_TEST_CASE("fl::condition_variable basic operations") {
         }
 
         // Give threads time to start waiting (reduced from 10ms to 5ms for performance)
-        fl::this_thread::sleep_for(fl::chrono::milliseconds(5));
+        fl::delay(5);
 
         // Wake all threads
         {

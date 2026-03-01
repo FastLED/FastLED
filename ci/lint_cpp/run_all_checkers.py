@@ -53,6 +53,7 @@ from ci.lint_cpp.reinterpret_cast_checker import ReinterpretCastChecker
 from ci.lint_cpp.relative_include_checker import RelativeIncludeChecker
 from ci.lint_cpp.serial_printf_checker import SerialPrintfChecker
 from ci.lint_cpp.singleton_in_headers_checker import SingletonInHeadersChecker
+from ci.lint_cpp.sleep_for_checker import SleepForChecker
 from ci.lint_cpp.span_from_pointer_checker import SpanFromPointerChecker
 from ci.lint_cpp.static_in_headers_checker import StaticInHeaderChecker
 from ci.lint_cpp.std_namespace_checker import StdNamespaceChecker
@@ -162,6 +163,7 @@ def create_checkers(
         SingletonInHeadersChecker(),  # Checks for Singleton<T> in headers (must use SingletonShared<T>)
         SpanFromPointerChecker(),  # Checks for span<T>(container.data(), container.size()) → span<T>(container)
         BareAllocationChecker(),  # Checks for bare new/delete/malloc/free — use fl::unique_ptr/fl::shared_ptr
+        SleepForChecker(),  # Checks for sleep_for() — bypasses async runner, use fl::yield/fl::async_run
         # Note: Private libc++ headers checking is now integrated into BannedHeadersChecker
         # Note: _build.hpp hierarchy checking is now integrated into test_unity_build.py
     ]

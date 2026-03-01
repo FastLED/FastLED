@@ -27,9 +27,35 @@
 // FASTLED_MULTITHREADED is defined by fl/stl/thread_config.h
 // This file provides the STL-based thread implementation for multithreaded platforms
 
+// Forward declare fl::yield() so sleep_for can pump events on the main thread.
+namespace fl { void yield(); }
+
 namespace fl {
 namespace platforms {
 namespace detail {
+
+/// @brief Capture the main thread ID (set once on first call)
+inline std::thread::id& main_thread_id() {
+    static std::thread::id id = std::this_thread::get_id();  // okay std namespace  // okay static in header
+    return id;
+}
+
+/// @brief Check if the current thread is the main thread
+inline bool is_main_thread() {
+    return std::this_thread::get_id() == main_thread_id();  // okay std namespace
+}
+
+/// @brief Native sleep for 1ms
+inline void native_sleep_1ms() {
+#ifdef FL_IS_WIN
+    Sleep(1);
+#else
+    struct timespec ts;
+    ts.tv_sec = 0;
+    ts.tv_nsec = 1000000;  // 1ms
+    while (::nanosleep(&ts, &ts) == -1 && errno == EINTR) {}
+#endif
+}
 
 /// @brief Native sleep implementation using platform APIs
 /// @tparam Rep The arithmetic type representing the number of ticks
@@ -79,9 +105,23 @@ namespace this_thread {
     using std::this_thread::yield;   // okay std namespace
 
     // Sleep functions - fl::chrono::duration overloads
+    // On main thread: pumps events via fl::yield() between 1ms sleep chunks
+    // On worker threads: raw native sleep
     template<typename Rep, typename Period>
     inline void sleep_for(const fl::chrono::duration<Rep, Period>& sleep_duration) {
-        fl::platforms::detail::native_sleep(sleep_duration);
+        if (fl::platforms::detail::is_main_thread()) {
+            // Pump events while sleeping on the main thread
+            auto ms = fl::chrono::duration_cast<fl::chrono::milliseconds>(sleep_duration).count();
+            for (decltype(ms) i = 0; i < ms; ++i) {
+                fl::yield();
+                fl::platforms::detail::native_sleep_1ms();
+            }
+            if (ms <= 0) {
+                fl::yield();
+            }
+        } else {
+            fl::platforms::detail::native_sleep(sleep_duration);
+        }
     }
 
     // Sleep functions - fl::chrono::time_point overloads

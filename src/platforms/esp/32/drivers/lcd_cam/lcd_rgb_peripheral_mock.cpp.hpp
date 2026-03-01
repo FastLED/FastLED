@@ -327,7 +327,7 @@ bool LcdRgbPeripheralMockImpl::waitFrameDone(u32 timeout_ms) {
             return false;  // Timeout
         }
 
-        fl::this_thread::sleep_for(fl::chrono::microseconds(10));
+        fl::this_thread::sleep_for(fl::chrono::microseconds(10));  // ok sleep for
     }
 }
 
@@ -437,10 +437,10 @@ void LcdRgbPeripheralMockImpl::reset() {
 
     // Wait for callback to finish
     while (mCallbackExecuting.load(fl::memory_order_acquire)) {
-        fl::this_thread::sleep_for(fl::chrono::microseconds(10));
+        fl::this_thread::sleep_for(fl::chrono::microseconds(10));  // ok sleep for
     }
 
-    fl::this_thread::sleep_for(fl::chrono::microseconds(100));
+    fl::this_thread::sleep_for(fl::chrono::microseconds(100));  // ok sleep for
 
     // Reset all state
     fl::lock_guard<fl::mutex> lock(mMutex);

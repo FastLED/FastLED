@@ -26,7 +26,7 @@ static void serverThreadFunc(fl::shared_ptr<ServerThreadData> data) {
         data->mServer->acceptClients();
 
         // Small sleep to prevent CPU spinning
-        fl::this_thread::sleep_for(fl::chrono::milliseconds(10));
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(10));  // ok sleep for
     }
 }
 
@@ -55,7 +55,7 @@ bool ServerThread::start() {
     mData->mThread = fl::thread(serverThreadFunc, mData);
 
     // Give the thread time to start
-    fl::this_thread::sleep_for(fl::chrono::milliseconds(100));
+    fl::this_thread::sleep_for(fl::chrono::milliseconds(100));  // ok sleep for
 
     return true;
 }

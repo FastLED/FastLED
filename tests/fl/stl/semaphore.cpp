@@ -2,6 +2,7 @@
 /// @brief Tests for fl::counting_semaphore and fl::binary_semaphore
 
 #include "fl/stl/semaphore.h"
+#include "fl/delay.h"
 #include "fl/stl/atomic.h"
 #include "test.h"
 #include "fl/stl/thread.h"
@@ -136,7 +137,7 @@ FL_TEST_CASE("fl::counting_semaphore multiple threads") {
             }
 
             // Simulate work (reduced from 10ms to 5ms for performance)
-            fl::this_thread::sleep_for(fl::chrono::milliseconds(5));
+            fl::this_thread::sleep_for(fl::chrono::milliseconds(5));  // ok sleep for
 
             total_runs.fetch_add(1);
             concurrent_count.fetch_sub(1);
@@ -195,7 +196,7 @@ FL_TEST_CASE("fl::binary_semaphore as thread synchronization") {
     });
 
     // Signal worker to start (reduced from 10ms to 5ms for performance)
-    fl::this_thread::sleep_for(fl::chrono::milliseconds(5));
+    fl::delay(5);
     ready.release();
 
     // Wait for completion
