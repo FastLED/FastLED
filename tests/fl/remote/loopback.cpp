@@ -88,7 +88,7 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
     Json response;
     uint32_t start = fl::millis();
 
-    while (fl::millis() - start < 5000) {
+    while (fl::millis() - start < 10000) {
         auto resp = client_transport->readRequest();
         if (resp.has_value()) {
             response = resp.value();

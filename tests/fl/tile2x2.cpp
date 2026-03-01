@@ -2,9 +2,12 @@
 // g++ --std=c++11 test.cpp
 
 #include "fl/tile2x2.h"
+#include "fl/xypath.h"
 #include "fl/stl/stdint.h"
 #include "test.h"
 #include "fl/geometry.h"
+#include "fl/raster_sparse.h"
+#include "fl/slice.h"
 
 
 // Test basic fl::Tile2x2_u8 functionality
@@ -236,4 +239,26 @@ FL_TEST_CASE("Tile2x2_u8_wrap::Interpolate") {
         FL_REQUIRE(result_over.size() == 1);
         FL_CHECK(result_over[0].at(0, 0).second == 200);
     }
+}
+
+// ============================================================
+// Raster sparse tests using tiles (merged from raster.cpp)
+// ============================================================
+
+FL_TEST_CASE("XYRasterU8SparseTest should match bounds of pixels draw area") {
+    fl::XYPathPtr path = fl::XYPath::NewLinePath(-1, -1, 1, 1);
+    path->setDrawBounds(4,4);
+    fl::Tile2x2_u8 sp0 = path->at_subpixel(0);
+    fl::Tile2x2_u8 sp1 = path->at_subpixel(1);
+    fl::Tile2x2_u8 subpixels[2] = {sp0, sp1};
+
+    FL_MESSAGE("subpixels[0] = " << subpixels[0]);
+    FL_MESSAGE("subpixels[1] = " << subpixels[1]);
+    fl::XYRasterU8Sparse raster(4, 4);
+    raster.rasterize(subpixels);
+    auto obligatory_bounds = raster.bounds();
+    FL_REQUIRE_EQ(fl::rect<uint16_t>(0, 0, 4, 4), obligatory_bounds);
+
+    auto pixel_bounds = raster.bounds_pixels();
+    FL_REQUIRE_EQ(fl::rect<uint16_t>(0, 0, 4, 4), pixel_bounds);
 }

@@ -539,6 +539,28 @@ FL_TEST_CASE("line_xy::methods") {
         // Distance from (4,5) to (1,1) = sqrt(9 + 16) = 5
         FL_CHECK(doctest::Approx(dist).epsilon(0.001) == 5.0f);
     }
+
+    FL_SUBCASE("distance_to - origin on diagonal line") {
+        line_xy<float> line(-100.0f, -100.0f, 100.0f, 100.0f);
+        vec2<float> p(0.0f, 0.0f);
+        vec2<float> projected;
+        float dist = line.distance_to(p, &projected);
+        FL_CHECK(doctest::Approx(projected.x).epsilon(0.001) == 0.0f);
+        FL_CHECK(doctest::Approx(projected.y).epsilon(0.001) == 0.0f);
+        FL_CHECK(doctest::Approx(dist).epsilon(0.001) == 0.0f);
+    }
+
+    FL_SUBCASE("distance_to - point closest to diagonal line") {
+        line_xy<float> line(-100.0f, -100.0f, 100.0f, 100.0f);
+        vec2<float> p(50.0f, 0.0f);
+        vec2<float> projected;
+        float dist = line.distance_to(p, &projected);
+        // The closest point should be (25, 25)
+        FL_CHECK(doctest::Approx(projected.x).epsilon(0.001) == 25.0f);
+        FL_CHECK(doctest::Approx(projected.y).epsilon(0.001) == 25.0f);
+        // Distance should be sqrt((50-25)^2 + (0-25)^2) = sqrt(1250) ≈ 35.355
+        FL_CHECK(doctest::Approx(dist).epsilon(0.001) == 35.355f);
+    }
 }
 
 FL_TEST_CASE("rect::construction") {
