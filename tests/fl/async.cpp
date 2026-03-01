@@ -597,7 +597,7 @@ promise<T> delayed_resolve(const T& value, uint32_t delay_ms) {
         // Sleep in small increments to allow early exit on shutdown
         for (uint32_t elapsed = 0; elapsed < delay_ms && !g_shutdown_requested.load(); elapsed += 1) {
             uint32_t sleep_time = FL_MIN(1u, delay_ms - elapsed);
-            fl::this_thread::sleep_for(fl::chrono::milliseconds(sleep_time));
+            fl::this_thread::sleep_for(fl::chrono::milliseconds(sleep_time));  // ok sleep for
         }
 
         // Only complete if not shutting down
@@ -621,7 +621,7 @@ promise<T> delayed_reject(const Error& error, uint32_t delay_ms) {
         // Sleep in small increments to allow early exit on shutdown
         for (uint32_t elapsed = 0; elapsed < delay_ms && !g_shutdown_requested.load(); elapsed += 1) {
             uint32_t sleep_time = FL_MIN(1u, delay_ms - elapsed);
-            fl::this_thread::sleep_for(fl::chrono::milliseconds(sleep_time));
+            fl::this_thread::sleep_for(fl::chrono::milliseconds(sleep_time));  // ok sleep for
         }
 
         // Only complete if not shutting down

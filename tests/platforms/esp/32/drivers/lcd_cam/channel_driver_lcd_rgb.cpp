@@ -19,6 +19,7 @@
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/thread.h"
+#include "fl/stl/chrono.h"
 
 using namespace fl;
 using namespace fl::detail;
@@ -140,9 +141,9 @@ FL_TEST_CASE("ChannelEngineLcdRgb - single channel transmission") {
     driver.enqueue(channelData);
     driver.show();
 
-    // Wait for completion - yield to allow simulation thread to process
+    // Wait for completion - sleep to allow simulation thread to process
     while (driver.poll() != IChannelDriver::DriverState::READY) {
-        fl::this_thread::yield();
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(1));  // ok sleep for
     }
 
     // Verify mock received data
@@ -188,9 +189,9 @@ FL_TEST_CASE("ChannelEngineLcdRgb - multi-channel transmission") {
     driver.enqueue(channel3);
     driver.show();
 
-    // Wait for completion - yield to allow simulation thread to process
+    // Wait for completion - sleep to allow simulation thread to process
     while (driver.poll() != IChannelDriver::DriverState::READY) {
-        fl::this_thread::yield();
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(1));  // ok sleep for
     }
 
     // Verify transmission occurred
@@ -221,11 +222,11 @@ FL_TEST_CASE("ChannelEngineLcdRgb - state transitions") {
     // Start transmission
     driver.show();
 
-    // Wait and verify completion - yield to allow simulation thread to process
+    // Wait and verify completion - sleep to allow simulation thread to process
     int iterations = 0;
     const int maxIterations = 1000;
     while (driver.poll() != IChannelDriver::DriverState::READY && iterations < maxIterations) {
-        fl::this_thread::yield();
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(1));  // ok sleep for
         iterations++;
     }
 
@@ -257,7 +258,7 @@ FL_TEST_CASE("ChannelEngineLcdRgb - draw failure handling") {
     int iterations = 0;
     const int maxIterations = 100;
     while (driver.poll() != IChannelDriver::DriverState::READY && iterations < maxIterations) {
-        fl::this_thread::yield();
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(1));  // ok sleep for
         iterations++;
     }
 

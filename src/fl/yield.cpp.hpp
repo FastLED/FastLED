@@ -40,7 +40,9 @@ void yield() {
     vTaskDelay(0);
 #elif FASTLED_MULTITHREADED
     // On multithreaded host/stub platforms, yield the OS thread.
-    fl::this_thread::yield();
+    // Use std::this_thread::yield() directly (not fl::this_thread::yield())
+    // because fl::this_thread::yield() calls fl::yield() on the main thread.
+    std::this_thread::yield();  // okay std namespace
 #endif
     // Single-threaded non-RTOS platforms: no-op
 }

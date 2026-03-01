@@ -102,7 +102,17 @@ using thread_id = std::thread::id;  // okay std namespace
 /// @brief this_thread namespace for thread-specific operations
 namespace this_thread {
     using std::this_thread::get_id;  // okay std namespace
-    using std::this_thread::yield;   // okay std namespace
+
+    /// @brief Yield with event pumping on main thread
+    /// On main thread: calls fl::yield() to pump scheduler + OS yield
+    /// On worker threads: raw std::this_thread::yield()
+    inline void yield() {
+        if (fl::platforms::detail::is_main_thread()) {
+            fl::yield();
+        } else {
+            std::this_thread::yield();  // okay std namespace
+        }
+    }
 
     // Sleep functions - fl::chrono::duration overloads
     // On main thread: pumps events via fl::yield() between 1ms sleep chunks

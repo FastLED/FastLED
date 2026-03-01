@@ -1,7 +1,8 @@
 // ok standalone
 // Real loopback test: server startup + client connection + request + response
-// Uses a background accept thread for the blocking connect() phase, then
-// single-threaded polling for everything else (acceptClients + update + RPC).
+// Uses a background thread for server-side accept + transport pumping + RPC,
+// while the main thread handles the client side. Results are posted to the
+// main thread via atomic flags (standard net-thread-to-main pattern).
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "test.h"
@@ -18,19 +19,20 @@
 #include "fl/net/http/native_client.cpp.hpp"
 #include "fl/net/http/native_server.cpp.hpp"
 #include "fl/json.h"
-#include "fl/task.h"
 #include "fl/delay.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/chrono.h"
 #include "fl/stl/thread.h"
-#include "fl/delay.h"
+#include "fl/stl/atomic.h"
+#include "fl/stl/mutex.h"
 
 using namespace fl;
 
 // Try binding on several ports to avoid TIME_WAIT collisions from parallel tests.
 static uint16_t findOpenPort(fl::shared_ptr<HttpStreamServer>& server) {
     // Spread across a wide range to minimize collision probability.
-    static constexpr uint16_t kPorts[] = {59901, 59911, 59921, 59931, 59941};
+    static constexpr uint16_t kPorts[] = {59901, 59911, 59921, 59931, 59941,
+                                          59951, 59961, 59971, 59981, 59991};
     for (uint16_t port : kPorts) {
         server = fl::make_shared<HttpStreamServer>(port);
         if (server->connect()) {
@@ -52,17 +54,24 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
     );
     server_remote.bind("add", [](int a, int b) -> int { return a + b; });
 
-    // Client — connect() blocks, so run acceptClients() in a background thread
-    // during the connect phase only.
-    auto client_transport = fl::make_shared<HttpStreamClient>("localhost", PORT);
-
-    fl::atomic<bool> accepting{true};
-    fl::thread accept_thread([&server_transport, &accepting]() {
-        while (accepting.load()) {
+    // Background thread: handles acceptClients + server transport update + RPC.
+    // This is the standard net-thread pattern — the server side runs entirely
+    // in a dedicated thread, and results (the RPC response) flow back through
+    // the TCP connection to the client on the main thread.
+    fl::atomic<bool> server_running{true};
+    fl::thread server_thread([&]() {
+        while (server_running.load()) {
+            uint32_t now = fl::millis();
             server_transport->acceptClients();
+            server_transport->update(now);
+            server_remote.update(now);
             fl::this_thread::sleep_for(fl::chrono::milliseconds(1));  // ok sleep for
         }
     });
+
+    // Client — connect() blocks until the server accepts, but the server
+    // thread is already running acceptClients() so this won't deadlock.
+    auto client_transport = fl::make_shared<HttpStreamClient>("localhost", PORT);
 
     {
         bool connected = false;
@@ -72,26 +81,12 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
                 connected = true;
                 break;
             }
-            fl::delay(10);
+            fl::this_thread::sleep_for(fl::chrono::milliseconds(10));  // ok sleep for
         }
         FL_REQUIRE(connected);
     }
 
-    // Stop the accept thread now that TCP connection is established.
-    accepting.store(false);
-    accept_thread.join();
-
     FL_CHECK(client_transport->isConnected());
-
-    // Register a task to pump transports and RPC via fl::Scheduler.
-    // fl::delay() automatically calls async_yield() → Scheduler::update(),
-    // so this task runs every 1ms during the delay loop below.
-    auto pump_task = fl::task::every_ms(1).then([&]() {
-        uint32_t now = fl::millis();
-        server_transport->update(now);
-        client_transport->update(now);
-        server_remote.update(now);
-    });
 
     // Send request
     Json params = Json::array();
@@ -104,13 +99,16 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
     request.set("id", 1);
     client_transport->writeResponse(request);
 
-    // Wait for response — single-threaded: acceptClients() finishes HTTP
-    // handshake, update() processes chunked data, Remote handles RPC.
+    // Wait for response — the server thread handles accept + update + RPC,
+    // so we only need to pump the client transport on the main thread.
     bool got_response = false;
     Json response;
     uint32_t start = fl::millis();
 
     while (fl::millis() - start < 10000) {
+        uint32_t now = fl::millis();
+        client_transport->update(now);
+
         auto resp = client_transport->readRequest();
         if (resp.has_value()) {
             response = resp.value();
@@ -118,10 +116,12 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
             break;
         }
 
-        fl::delay(10);
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(1));  // ok sleep for
     }
 
-    pump_task.cancel();
+    // Stop server thread
+    server_running.store(false);
+    server_thread.join();
 
     FL_REQUIRE(got_response);
     FL_CHECK_EQ(response["result"].as_int().value(), 12); // 5 + 7
