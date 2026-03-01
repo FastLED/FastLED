@@ -22,5 +22,6 @@
 /// emits aligned operator new. Cap at 4 bytes for safety.
 #define FL_ALIGN_PROGMEM(N)  __attribute__((aligned(4)))
 
-// Aligned 4-byte PROGMEM read using platform pgm_read_dword.
+// Aligned PROGMEM reads using platform pgm_read_*.
+#define FL_PGM_READ_WORD_ALIGNED(addr) ((fl::u16)pgm_read_word(addr))
 #define FL_PGM_READ_DWORD_ALIGNED(addr) ((fl::u32)pgm_read_dword(addr))

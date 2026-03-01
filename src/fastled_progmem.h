@@ -76,7 +76,8 @@
 
 /// @} PROGMEM
 
-// Aligned 4-byte PROGMEM read using AVR pgm_read_dword_near.
+// Aligned PROGMEM reads using AVR pgm_read_* functions.
+#define FL_PGM_READ_WORD_ALIGNED(addr) ((fl::u16)pgm_read_word_near(addr))
 #define FL_PGM_READ_DWORD_ALIGNED(addr) ((fl::u32)pgm_read_dword_near(addr))
 
 // Workaround for http://gcc.gnu.org/bugzilla/show_bug.cgi?id=34734

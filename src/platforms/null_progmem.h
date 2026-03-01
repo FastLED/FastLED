@@ -63,19 +63,26 @@ static inline fl::u32 fl_pgm_read_dword_near_safe(const void* addr) {
 // Use alignas(N) in C++ or __attribute__((aligned(N))) for maximum compatibility
 #define FL_ALIGN_PROGMEM(N) __attribute__((aligned(N)))
 
-// Aligned 4-byte PROGMEM read. On non-AVR/non-flash platforms, data lives in
+// Aligned PROGMEM reads. On non-AVR/non-flash platforms, data lives in
 // normal memory. Uses __builtin_memcpy (compiler intrinsic) which always lowers
 // to a single load instruction — unlike fl::memcpy which is a cross-TU call
 // that the compiler cannot inline without LTO.
 #if !(defined(FL_IS_AVR))
+static inline fl::u16 _fl_progmem_aligned_read_2(const void* addr) {
+    fl::u16 result;
+    __builtin_memcpy(&result, addr, 2);
+    return result;
+}
 static inline fl::u32 _fl_progmem_aligned_read_4(const void* addr) {
     fl::u32 result;
     __builtin_memcpy(&result, addr, 4);
     return result;
 }
+#define FL_PGM_READ_WORD_ALIGNED(addr) (_fl_progmem_aligned_read_2(addr))
 #define FL_PGM_READ_DWORD_ALIGNED(addr) (_fl_progmem_aligned_read_4(addr))
 #else
-// On AVR, we must use the standard pgm_read_dword_near for PROGMEM data, which may be unaligned in flash. The safe wrapper is not needed because AVR's pgm_read_dword_near handles unaligned access correctly.
+// On AVR, we must use the standard pgm_read_* for PROGMEM data in flash.
+#define FL_PGM_READ_WORD_ALIGNED(addr) FL_PGM_READ_WORD_NEAR(addr)
 #define FL_PGM_READ_DWORD_ALIGNED(addr) FL_PGM_READ_DWORD_NEAR(addr)
 #endif // !(defined(FL_IS_AVR))
 

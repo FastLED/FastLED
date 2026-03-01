@@ -10,7 +10,8 @@
 #define FL_PGM_READ_WORD_NEAR(x) (*((const fl::u16 *)(x)))
 #define FL_PGM_READ_DWORD_NEAR(x) (*((const fl::u32 *)(x)))
 
-// Aligned 4-byte PROGMEM read. On WASM, data lives in normal memory.
+// Aligned PROGMEM reads. On WASM, data lives in normal memory.
+#define FL_PGM_READ_WORD_ALIGNED(addr) (*((const fl::u16*)(addr)))
 #define FL_PGM_READ_DWORD_ALIGNED(addr) (*((const fl::u32*)(addr)))
 
 // On WASM (platforms without PROGMEM), alignment can help with cache performance
