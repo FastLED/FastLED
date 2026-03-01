@@ -127,4 +127,4 @@ FL_TEST_CASE("downscale 11x11 to 2x2") {
 }
 
 // Grouped tests
-#include "splat.cpp"
+#include "splat.hpp"

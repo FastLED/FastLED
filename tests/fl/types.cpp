@@ -103,4 +103,4 @@ FL_TEST_CASE("fl::cycle_t type definition") {
 }
 
 // Grouped tests
-#include "numeric_limits.cpp"
+#include "numeric_limits.hpp"

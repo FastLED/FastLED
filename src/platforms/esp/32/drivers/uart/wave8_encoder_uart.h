@@ -66,21 +66,31 @@ namespace detail {
 /// Maps 2 LED bits to 1 UART data byte (8 bits). The UART hardware
 /// automatically adds start bit (LOW) and stop bit (HIGH) during transmission.
 ///
-/// Pattern derivation (WS2812 timing at 4.0 Mbps):
-/// - LED bit 0: SHORT high pulse (0.4 µs), LONG low pulse (0.85 µs)
-/// - LED bit 1: LONG high pulse (0.8 µs), SHORT low pulse (0.45 µs)
-/// - UART bit duration at 4.0 Mbps: 250 ns
-/// - 2 LED bits encoded in 10 UART bits (1 start + 8 data + 1 stop)
-/// - Baud rate = 3.2 Mbps × 10/8 compensates for start/stop bit overhead
+/// **REQUIRES TX LINE INVERSION** (`UART_SIGNAL_TXD_INV` on ESP32).
+/// With TX inversion: idle=LOW (correct for WS2812), start bit=HIGH,
+/// stop bit=LOW. Each 10-bit UART frame at 4.0 Mbps = 2500ns = exactly
+/// 2 WS2812 bit periods (1250ns each).
 ///
-/// FIXED: The original patterns (0x88, 0x8C, 0xC8, 0xCC) had bit alignment issues
-/// due to UART transmission preamble. All values have been left-rotated by 1 bit
-/// to properly align with the UART framing sequence.
+/// Pattern derivation (WS2812 timing at 4.0 Mbps, inverted TX):
+/// - Each UART bit = 250ns
+/// - Each 10-bit frame = 2500ns = 2 LED bit periods
+/// - LED bit "0": 1 HIGH + 4 LOW = T0H=250ns, T0L=1000ns
+/// - LED bit "1": 3 HIGH + 2 LOW = T1H=750ns, T1L=500ns
+///
+/// Inverted wire format: [START=H] [~D0..~D7 LSB-first] [STOP=L]
+///
+/// ```
+/// 2-bit   → UART byte → Inverted wire (10 bits)      → LED timing
+/// 0b00(0) → 0xEF      → H L L L L  H L L L L         → "0"(250/1000) "0"(250/1000)
+/// 0b01(1) → 0x8F      → H L L L L  H H H L L         → "0"(250/1000) "1"(750/500)
+/// 0b10(2) → 0xEC      → H H H L L  H L L L L         → "1"(750/500)  "0"(250/1000)
+/// 0b11(3) → 0x8C      → H H H L L  H H H L L         → "1"(750/500)  "1"(750/500)
+/// ```
 constexpr u8 kUartEncode2BitLUT[4] = {
-    0x11,  // 0b00 → 00010001 (was 0x88)
-    0x19,  // 0b01 → 00011001 (was 0x8C)
-    0x91,  // 0b10 → 10010001 (was 0xC8)
-    0x99   // 0b11 → 10011001 (was 0xCC)
+    0xEF,  // 0b00 → LED "0","0" → wire: H L L L L H L L L L
+    0x8F,  // 0b01 → LED "0","1" → wire: H L L L L H H H L L
+    0xEC,  // 0b10 → LED "1","0" → wire: H H H L L H L L L L
+    0x8C   // 0b11 → LED "1","1" → wire: H H H L L H H H L L
 };
 
 /// @brief Encode 2 LED bits to 1 UART byte using LUT

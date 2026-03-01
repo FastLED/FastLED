@@ -19,6 +19,7 @@
 
 #include "fl/force_inline.h"
 #include "fl/compiler_control.h"
+#include "fl/assume_aligned.h"
 #include "fl/has_include.h"
 #include "fl/stl/math.h"  // for sqrtf
 

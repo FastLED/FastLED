@@ -161,4 +161,4 @@ FL_TEST_CASE("ScreenMap getBounds functionality") {
 }
 
 // Grouped tests
-#include "xymap.cpp"
+#include "xymap.hpp"

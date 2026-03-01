@@ -96,4 +96,4 @@ FL_TEST_CASE("HeapInfo helper methods") {
 #undef TEST_MODULE
 
 // Grouped tests
-#include "alloca.cpp"
+#include "alloca.hpp"

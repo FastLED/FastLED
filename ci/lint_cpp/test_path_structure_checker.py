@@ -33,12 +33,12 @@ class TestPathStructureChecker(FileContentChecker):
 
     def should_process_file(self, file_path: str) -> bool:
         """Check if file should be processed for path structure validation."""
-        # Only check .cpp files in tests directory
+        # Only check files in tests directory
         if not file_path.startswith(str(TESTS_ROOT)):
             return False
 
-        # Only check .cpp files (test files)
-        if not file_path.endswith(".cpp"):
+        # Check .cpp and .hpp test files (sub-tests use .hpp extension)
+        if not file_path.endswith((".cpp", ".hpp")):
             return False
 
         test_path = Path(file_path)
@@ -49,9 +49,13 @@ class TestPathStructureChecker(FileContentChecker):
 
         # Skip tests/misc/ directory (these tests don't need to match source structure)
         # Skip tests/profile/ directory (standalone performance benchmarks)
+        # Skip tests/shared/ directory (shared test infrastructure)
+        # Skip any test_utils/ directories (test utilities)
         try:
             rel_path = test_path.relative_to(TESTS_ROOT)
-            if rel_path.parts[0] in ("misc", "profile"):
+            if rel_path.parts[0] in ("misc", "profile", "shared"):
+                return False
+            if "test_utils" in rel_path.parts:
                 return False
         except (ValueError, IndexError):
             pass
@@ -138,7 +142,7 @@ def main() -> None:
         checker,
         [str(TESTS_ROOT)],
         "Found test files with incorrect path structure",
-        extensions=[".cpp"],
+        extensions=[".cpp", ".hpp"],
     )
 
 

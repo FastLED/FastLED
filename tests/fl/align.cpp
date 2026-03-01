@@ -305,4 +305,4 @@ FL_TEST_CASE("FL_ALIGN macro combinations") {
 }
 
 // Grouped tests
-#include "assume_aligned.cpp"
+#include "assume_aligned.hpp"

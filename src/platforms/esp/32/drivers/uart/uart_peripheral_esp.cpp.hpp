@@ -156,10 +156,23 @@ bool UartPeripheralEsp::initialize(const UartPeripheralConfig& config) {
         return false;
     }
 
+    // Invert TX signal for WS2812 compatibility.
+    // Normal UART idle = HIGH, but WS2812 requires idle = LOW.
+    // With TX inversion: idle=LOW, start bit=HIGH (leading edge),
+    // stop bit=LOW (trailing edge). This creates correct WS2812 polarity.
+    FL_DBG("UART_PERIPH: Calling uart_set_line_inverse() for TX inversion");
+    err = uart_set_line_inverse(uart_num, UART_SIGNAL_TXD_INV);
+    if (err != ESP_OK) {
+        FL_WARN("UartPeripheralEsp: Failed to set TX inversion: " << err);
+        uart_driver_delete(uart_num);
+        return false;
+    }
+
     mInitialized = true;
     FL_DBG("UART: Initialized (uart_num=" << config.mUartNum
            << ", baud=" << config.mBaudRate
-           << ", tx_pin=" << config.mTxPin << ")");
+           << ", tx_pin=" << config.mTxPin
+           << ", tx_inverted=true)");
 
     return true;
 }

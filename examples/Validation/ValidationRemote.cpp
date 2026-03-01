@@ -386,10 +386,14 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
             pat.set("mismatchedBytes", static_cast<int64_t>(rr.mismatchedBytes));
             pat.set("lsbOnlyErrors", static_cast<int64_t>(rr.lsbOnlyErrors));
 
-            // Serialize first N LED errors
+            // Serialize first N LED errors (limit to prevent OOM on small MCUs)
+            constexpr fl::size kMaxSerializedErrors = 5;
             if (!rr.errors.empty()) {
                 fl::Json errs = fl::Json::array();
-                for (fl::size ei = 0; ei < rr.errors.size(); ei++) {
+                const fl::size errLimit = rr.errors.size() < kMaxSerializedErrors
+                                              ? rr.errors.size()
+                                              : kMaxSerializedErrors;
+                for (fl::size ei = 0; ei < errLimit; ei++) {
                     const auto& e = rr.errors[ei];
                     fl::Json err = fl::Json::object();
                     err.set("led", static_cast<int64_t>(e.led_index));
@@ -406,6 +410,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
                     errs.push_back(err);
                 }
                 pat.set("errors", errs);
+                pat.set("totalErrors", static_cast<int64_t>(rr.errors.size()));
             }
             patterns.push_back(pat);
         }

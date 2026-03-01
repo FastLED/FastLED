@@ -164,4 +164,4 @@ FL_TEST_CASE("sin8 monotonic first quadrant") {
 }
 
 // Grouped tests
-#include "sin32.cpp"
+#include "sin32.hpp"

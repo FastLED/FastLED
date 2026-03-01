@@ -32,4 +32,4 @@ FL_TEST_CASE("Timeout - rollover test") {
 }
 
 // Grouped tests
-#include "time_alpha.cpp"
+#include "time_alpha.hpp"

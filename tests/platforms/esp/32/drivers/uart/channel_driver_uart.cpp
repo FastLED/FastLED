@@ -114,10 +114,10 @@ size_t decodeUartWave8FromEdges(fl::span<const EdgeTime> edges, fl::span<uint8_t
 
     auto decode_lut = [](uint8_t b) -> int {
         switch (b) {
-            case 0x11: return 0;
-            case 0x19: return 1;
-            case 0x91: return 2;
-            case 0x99: return 3;
+            case 0xEF: return 0;
+            case 0x8F: return 1;
+            case 0xEC: return 2;
+            case 0x8C: return 3;
             default:   return -1;
         }
     };
@@ -252,10 +252,10 @@ FL_TEST_CASE("UART wave8 round-trip: byte 0xE4") {
     uint8_t uart_buf[4];
     FL_REQUIRE(encodeLedsToUart(input, 1, uart_buf, sizeof(uart_buf)) == 4);
 
-    FL_CHECK_EQ(0x99, uart_buf[0]);  // bits 7-6 = 11
-    FL_CHECK_EQ(0x91, uart_buf[1]);  // bits 5-4 = 10
-    FL_CHECK_EQ(0x19, uart_buf[2]);  // bits 3-2 = 01
-    FL_CHECK_EQ(0x11, uart_buf[3]);  // bits 1-0 = 00
+    FL_CHECK_EQ(0x8C, uart_buf[0]);  // bits 7-6 = 11
+    FL_CHECK_EQ(0xEC, uart_buf[1]);  // bits 5-4 = 10
+    FL_CHECK_EQ(0x8F, uart_buf[2]);  // bits 3-2 = 01
+    FL_CHECK_EQ(0xEF, uart_buf[3]);  // bits 1-0 = 00
 
     UartPeripheralMock mock;
     FL_REQUIRE(mock.initialize(defaultConfig()));
@@ -539,103 +539,79 @@ FL_TEST_CASE("UART Waveform Alignment - All LUT patterns") {
     UartPeripheralMock mock;
     FL_REQUIRE(mock.initialize(defaultConfig()));
 
-    FL_SUBCASE("Pattern 0b00 -> 0x11") {
+    FL_SUBCASE("Pattern 0b00 -> 0xEF") {
         uint8_t pattern = detail::encodeUart2Bits(0x00);
-        FL_REQUIRE(pattern == 0x11);
+        FL_REQUIRE_EQ(pattern, 0xEF);
         mock.writeBytes(&pattern, 1);
         fl::vector<bool> waveform = mock.getWaveformWithFraming();
-        // 0x11 LSB-first: 1-0-0-0-1-0-0-0
+        // 0xEF = 0b11101111 LSB-first: 1-1-1-1-0-1-1-1
         FL_REQUIRE(waveform[0] == false);  // START
-        FL_REQUIRE(waveform[1] == true);
-        FL_REQUIRE(waveform[2] == false);
-        FL_REQUIRE(waveform[3] == false);
-        FL_REQUIRE(waveform[4] == false);
-        FL_REQUIRE(waveform[5] == true);
-        FL_REQUIRE(waveform[6] == false);
-        FL_REQUIRE(waveform[7] == false);
-        FL_REQUIRE(waveform[8] == false);
+        FL_REQUIRE(waveform[1] == true);   // D0=1
+        FL_REQUIRE(waveform[2] == true);   // D1=1
+        FL_REQUIRE(waveform[3] == true);   // D2=1
+        FL_REQUIRE(waveform[4] == true);   // D3=1
+        FL_REQUIRE(waveform[5] == false);  // D4=0
+        FL_REQUIRE(waveform[6] == true);   // D5=1
+        FL_REQUIRE(waveform[7] == true);   // D6=1
+        FL_REQUIRE(waveform[8] == true);   // D7=1
         FL_REQUIRE(waveform[9] == true);   // STOP
     }
 
-    FL_SUBCASE("Pattern 0b01 -> 0x19") {
+    FL_SUBCASE("Pattern 0b01 -> 0x8F") {
         mock.resetCapturedData();
         uint8_t pattern = detail::encodeUart2Bits(0x01);
-        FL_REQUIRE(pattern == 0x19);
+        FL_REQUIRE_EQ(pattern, 0x8F);
         mock.writeBytes(&pattern, 1);
         fl::vector<bool> waveform = mock.getWaveformWithFraming();
-        // 0x19 LSB-first: 1-0-0-1-1-0-0-0
-        FL_REQUIRE(waveform[0] == false);
-        FL_REQUIRE(waveform[1] == true);
-        FL_REQUIRE(waveform[2] == false);
-        FL_REQUIRE(waveform[3] == false);
-        FL_REQUIRE(waveform[4] == true);
-        FL_REQUIRE(waveform[5] == true);
-        FL_REQUIRE(waveform[6] == false);
-        FL_REQUIRE(waveform[7] == false);
-        FL_REQUIRE(waveform[8] == false);
-        FL_REQUIRE(waveform[9] == true);
+        // 0x8F = 0b10001111 LSB-first: 1-1-1-1-0-0-0-1
+        FL_REQUIRE(waveform[0] == false);  // START
+        FL_REQUIRE(waveform[1] == true);   // D0=1
+        FL_REQUIRE(waveform[2] == true);   // D1=1
+        FL_REQUIRE(waveform[3] == true);   // D2=1
+        FL_REQUIRE(waveform[4] == true);   // D3=1
+        FL_REQUIRE(waveform[5] == false);  // D4=0
+        FL_REQUIRE(waveform[6] == false);  // D5=0
+        FL_REQUIRE(waveform[7] == false);  // D6=0
+        FL_REQUIRE(waveform[8] == true);   // D7=1
+        FL_REQUIRE(waveform[9] == true);   // STOP
     }
 
-    FL_SUBCASE("Pattern 0b10 -> 0x91") {
+    FL_SUBCASE("Pattern 0b10 -> 0xEC") {
         mock.resetCapturedData();
         uint8_t pattern = detail::encodeUart2Bits(0x02);
-        FL_REQUIRE(pattern == 0x91);
+        FL_REQUIRE_EQ(pattern, 0xEC);
         mock.writeBytes(&pattern, 1);
         fl::vector<bool> waveform = mock.getWaveformWithFraming();
-        // 0x91 LSB-first: 1-0-0-0-1-0-0-1
-        FL_REQUIRE(waveform[0] == false);
-        FL_REQUIRE(waveform[1] == true);
-        FL_REQUIRE(waveform[2] == false);
-        FL_REQUIRE(waveform[3] == false);
-        FL_REQUIRE(waveform[4] == false);
-        FL_REQUIRE(waveform[5] == true);
-        FL_REQUIRE(waveform[6] == false);
-        FL_REQUIRE(waveform[7] == false);
-        FL_REQUIRE(waveform[8] == true);
-        FL_REQUIRE(waveform[9] == true);
+        // 0xEC = 0b11101100 LSB-first: 0-0-1-1-0-1-1-1
+        FL_REQUIRE(waveform[0] == false);  // START
+        FL_REQUIRE(waveform[1] == false);  // D0=0
+        FL_REQUIRE(waveform[2] == false);  // D1=0
+        FL_REQUIRE(waveform[3] == true);   // D2=1
+        FL_REQUIRE(waveform[4] == true);   // D3=1
+        FL_REQUIRE(waveform[5] == false);  // D4=0
+        FL_REQUIRE(waveform[6] == true);   // D5=1
+        FL_REQUIRE(waveform[7] == true);   // D6=1
+        FL_REQUIRE(waveform[8] == true);   // D7=1
+        FL_REQUIRE(waveform[9] == true);   // STOP
     }
 
-    FL_SUBCASE("Pattern 0b11 -> 0x99") {
+    FL_SUBCASE("Pattern 0b11 -> 0x8C") {
         mock.resetCapturedData();
         uint8_t pattern = detail::encodeUart2Bits(0x03);
-        FL_REQUIRE(pattern == 0x99);
+        FL_REQUIRE_EQ(pattern, 0x8C);
         mock.writeBytes(&pattern, 1);
         fl::vector<bool> waveform = mock.getWaveformWithFraming();
-        // 0x99 LSB-first: 1-0-0-1-1-0-0-1
-        FL_REQUIRE(waveform[0] == false);
-        FL_REQUIRE(waveform[1] == true);
-        FL_REQUIRE(waveform[2] == false);
-        FL_REQUIRE(waveform[3] == false);
-        FL_REQUIRE(waveform[4] == true);
-        FL_REQUIRE(waveform[5] == true);
-        FL_REQUIRE(waveform[6] == false);
-        FL_REQUIRE(waveform[7] == false);
-        FL_REQUIRE(waveform[8] == true);
-        FL_REQUIRE(waveform[9] == true);
-    }
-}
-
-FL_TEST_CASE("UART Waveform - Pre-rotation vs post-rotation patterns") {
-    UartPeripheralMock mock;
-    FL_REQUIRE(mock.initialize(defaultConfig()));
-
-    FL_SUBCASE("Original 0x88 (pre-rotation) has alignment problem") {
-        // 0x88 LSB-first: 0-0-0-1-0-0-0-1
-        // START(0) + B0(0) = 2 consecutive LOWs - alignment issue
-        uint8_t pattern = 0x88;
-        mock.writeBytes(&pattern, 1);
-        fl::vector<bool> waveform = mock.getWaveformWithFraming();
-        FL_REQUIRE(waveform[0] == false);
-        FL_REQUIRE(waveform[1] == false);  // Problem: blends with START
-    }
-
-    FL_SUBCASE("Rotated 0x11 (post-rotation) has clean edge after START") {
-        mock.resetCapturedData();
-        uint8_t pattern = 0x11;
-        mock.writeBytes(&pattern, 1);
-        fl::vector<bool> waveform = mock.getWaveformWithFraming();
-        FL_REQUIRE(waveform[0] == false);
-        FL_REQUIRE(waveform[1] == true);   // Clean HIGH after START
+        // 0x8C = 0b10001100 LSB-first: 0-0-1-1-0-0-0-1
+        FL_REQUIRE(waveform[0] == false);  // START
+        FL_REQUIRE(waveform[1] == false);  // D0=0
+        FL_REQUIRE(waveform[2] == false);  // D1=0
+        FL_REQUIRE(waveform[3] == true);   // D2=1
+        FL_REQUIRE(waveform[4] == true);   // D3=1
+        FL_REQUIRE(waveform[5] == false);  // D4=0
+        FL_REQUIRE(waveform[6] == false);  // D5=0
+        FL_REQUIRE(waveform[7] == false);  // D6=0
+        FL_REQUIRE(waveform[8] == true);   // D7=1
+        FL_REQUIRE(waveform[9] == true);   // STOP
     }
 }
 
@@ -670,16 +646,17 @@ FL_TEST_CASE("UartPeripheralMock - Start/stop bit validation") {
 FL_TEST_CASE("UART waveformToEdges produces correct edge structure") {
     UartPeripheralMock mock;
     FL_REQUIRE(mock.initialize(defaultConfig()));
-    uint8_t data[] = {0x11, 0x11};
+    uint8_t data[] = {0xEF, 0xEF};  // LED "00","00" pattern
     mock.writeBytes(data, 2);
 
     fl::vector<bool> waveform = mock.getWaveformWithFraming();
     FL_REQUIRE(waveform.size() == 20);
 
-    FL_CHECK_EQ(false, waveform[0]);
-    FL_CHECK_EQ(true,  waveform[1]);
-    FL_CHECK_EQ(false, waveform[2]);
-    FL_CHECK_EQ(true,  waveform[9]);
+    // 0xEF = 0b11101111, LSB-first: 1,1,1,1,0,1,1,1
+    FL_CHECK_EQ(false, waveform[0]);  // START bit
+    FL_CHECK_EQ(true,  waveform[1]);  // D0=1
+    FL_CHECK_EQ(true,  waveform[2]);  // D1=1
+    FL_CHECK_EQ(true,  waveform[9]); // STOP bit
 
     fl::vector<EdgeTime> edges = waveformToEdges(waveform, UART_BIT_NS);
 
@@ -993,16 +970,16 @@ FL_TEST_CASE("ChannelEngineUART - Single channel enqueue and show") {
         FL_CHECK(captured.size() == 12);
 
         // 0xE4 = 0b11100100
-        FL_CHECK(captured[0] == 0x99);  // 11
-        FL_CHECK(captured[1] == 0x91);  // 10
-        FL_CHECK(captured[2] == 0x19);  // 01
-        FL_CHECK(captured[3] == 0x11);  // 00
+        FL_CHECK(captured[0] == 0x8C);  // 11
+        FL_CHECK(captured[1] == 0xEC);  // 10
+        FL_CHECK(captured[2] == 0x8F);  // 01
+        FL_CHECK(captured[3] == 0xEF);  // 00
 
-        // 0x00 → all 0x11
-        for (int i = 4; i < 8; i++) FL_CHECK(captured[i] == 0x11);
+        // 0x00 → all 0xEF
+        for (int i = 4; i < 8; i++) FL_CHECK(captured[i] == 0xEF);
 
-        // 0xFF → all 0x99
-        for (int i = 8; i < 12; i++) FL_CHECK(captured[i] == 0x99);
+        // 0xFF → all 0x8C
+        for (int i = 8; i < 12; i++) FL_CHECK(captured[i] == 0x8C);
     }
 }
 

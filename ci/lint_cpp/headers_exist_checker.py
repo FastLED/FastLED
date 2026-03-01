@@ -44,11 +44,14 @@ EXCLUDED_TEST_FILES = {
     "example_runner.cpp",  # Generic example runner that loads and executes example DLLs
     "fltest_self_test.cpp",  # Self-test for fl::test framework (tests fltest.h)
     "asan_leak.cpp",  # ASAN/LSAN symbolization verification test (no src header)
+    "test_helpers.hpp",  # Shared test helper utilities (not 1:1 with source)
 }
 
 # Test directories that don't follow the 1:1 mapping (legacy code)
 EXCLUDED_TEST_DIRS = {
     "core",  # Legacy tests with different structure
+    "shared",  # Shared test infrastructure (not 1:1 with source)
+    "test_utils",  # Test utilities (not 1:1 with source)
     ".build-examples-all",  # Generated build artifacts for example compilation
 }
 
@@ -64,11 +67,11 @@ class HeadersExistChecker(FileContentChecker):
         self.violations: dict[str, str] = {}
 
     def should_process_file(self, file_path: str) -> bool:
-        """Only process .cpp files in tests/ directory."""
+        """Only process .cpp and .hpp test files in tests/ directory."""
         path = Path(file_path)
 
-        # Must be a .cpp file
-        if path.suffix != ".cpp":
+        # Must be a .cpp or .hpp file (sub-tests use .hpp extension)
+        if path.suffix not in (".cpp", ".hpp"):
             return False
 
         # Must be in tests/ directory
@@ -185,7 +188,18 @@ class HeadersExistChecker(FileContentChecker):
                         first_mismatched_include_dir = include_dir_path
 
                 # Only warn if NO include matches the test directory
-                if not any_include_matches and first_mismatched_include_dir:
+                # Also skip warning if the source directory matching the test path has headers
+                src_mirror_dir = SRC_ROOT / test_dir_path
+                has_source_headers = src_mirror_dir.is_dir() and any(
+                    f.suffix in (".h", ".hpp") or f.name.endswith(".cpp.hpp")
+                    for f in src_mirror_dir.iterdir()
+                    if f.is_file()
+                )
+                if (
+                    not any_include_matches
+                    and first_mismatched_include_dir
+                    and not has_source_headers
+                ):
                     test_full_rel = test_file.relative_to(PROJECT_ROOT)
                     msg = (
                         f"⚠️  Test file {test_full_rel} may be in wrong directory:\n"
@@ -263,7 +277,7 @@ def main() -> None:
         checker,
         [str(TESTS_ROOT)],
         "Found test files without corresponding headers",
-        extensions=[".cpp"],
+        extensions=[".cpp", ".hpp"],
     )
 
 

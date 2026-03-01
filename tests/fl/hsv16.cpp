@@ -397,4 +397,4 @@ FL_TEST_CASE("colorBoost() preserves hue - hard cases") {
 }
 
 // Grouped tests
-#include "eorder.cpp"
+#include "eorder.hpp"

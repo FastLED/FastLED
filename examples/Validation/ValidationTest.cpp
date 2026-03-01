@@ -165,175 +165,6 @@ static fl::vector<uint8_t> buildExpectedUCS7604(fl::span<CRGB> leds, const fl::C
     return expected;
 }
 
-// UART wave8 decoder: Decodes raw RMT edge captures of UART-encoded LED data.
-// ZERO HEAP ALLOCATION - uses only stack buffers for ESP32-C6 memory safety.
-//
-// UART at 3.2 Mbps transmits 10-bit frames (start + 8 data + stop) at 312.5ns per bit.
-// Each UART byte encodes 2 LED bits via a 2-bit LUT:
-//   0x11 → LED bits 00, 0x19 → LED bits 01, 0x91 → LED bits 10, 0x99 → LED bits 11
-//
-// The decoder uses a streaming edge cursor to determine signal level at any time
-// without storing the complete edge timeline in memory.
-//
-// Returns number of decoded LED bytes, or 0 on error.
-static size_t decodeUartWave8(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buffer) {
-    // UART bit period at 4.0 Mbps = 250 ns (3.2 Mbps × 10/8 compensation)
-    const uint32_t BIT_NS = 250;
-    const uint32_t HALF_BIT_NS = BIT_NS / 2;
-    const uint32_t FRAME_NS = BIT_NS * 10;  // 10 bits per UART frame = 2500ns = 2 LED bits
-
-    // Edge cursor state - allows forward-only traversal of the edge stream.
-    // We maintain a small window of edges and advance through the RMT RX buffer
-    // without storing the entire timeline.
-    static constexpr size_t WINDOW_SIZE = 64;
-    fl::EdgeTime window[WINDOW_SIZE];
-    size_t win_count = 0;         // edges currently in window
-    size_t win_idx = 0;           // current position within window
-    size_t rx_offset = 0;         // offset into RMT RX buffer for next read
-    uint32_t edge_start_ns = 0;   // cumulative start time of current edge
-    uint32_t edge_end_ns = 0;     // cumulative end time of current edge
-    uint8_t edge_level = 0;       // level of current edge (0 or 1)
-    bool edges_exhausted = false;
-
-    // Count total edges first (single pass to get count for logging)
-    size_t total_edges = 0;
-    {
-        fl::EdgeTime probe[64];
-        size_t probe_off = 0;
-        while (true) {
-            size_t n = rx_channel->getRawEdgeTimes(fl::span<fl::EdgeTime>(probe, 64), probe_off);
-            if (n == 0) break;
-            total_edges += n;
-            probe_off += n;
-            if (n < 64) break;
-        }
-    }
-
-    if (total_edges == 0) {
-        FL_WARN("[UART DECODE] No raw edges captured");
-        return 0;
-    }
-
-    FL_WARN("[UART DECODE] " << total_edges << " edges to decode");
-
-    // Load first window of edges
-    win_count = rx_channel->getRawEdgeTimes(fl::span<fl::EdgeTime>(window, WINDOW_SIZE), 0);
-    rx_offset = win_count;
-    win_idx = 0;
-    if (win_count > 0) {
-        edge_start_ns = 0;
-        edge_end_ns = window[0].ns;
-        edge_level = window[0].high ? 1 : 0;
-    }
-
-    // Advance the edge cursor to cover time t_ns.
-    // Returns the signal level at time t_ns. Only forward movement is supported.
-    auto advance_to = [&](uint32_t t_ns) -> uint8_t {
-        while (t_ns >= edge_end_ns && !edges_exhausted) {
-            win_idx++;
-            if (win_idx >= win_count) {
-                // Load next window
-                win_count = rx_channel->getRawEdgeTimes(
-                    fl::span<fl::EdgeTime>(window, WINDOW_SIZE), rx_offset);
-                if (win_count == 0) {
-                    edges_exhausted = true;
-                    return edge_level;
-                }
-                rx_offset += win_count;
-                win_idx = 0;
-            }
-            edge_start_ns = edge_end_ns;
-            edge_end_ns = edge_start_ns + window[win_idx].ns;
-            edge_level = window[win_idx].high ? 1 : 0;
-        }
-        return edge_level;
-    };
-
-    // Reverse LUT: UART byte → 2 LED bits (or -1 for invalid)
-    auto decode_lut = [](uint8_t b) -> int {
-        switch (b) {
-            case 0x11: return 0;
-            case 0x19: return 1;
-            case 0x91: return 2;
-            case 0x99: return 3;
-            default:   return -1;
-        }
-    };
-
-    // Scan forward through the edge stream to find first idle HIGH
-    uint32_t scan_pos = 0;
-    // Find an upper bound for total time from the edge count (rough estimate)
-    // Each edge is at least 1 bit (312ns), so max time ~ total_edges * 1000ns
-    const uint32_t MAX_SCAN_NS = total_edges * 1000;
-    while (scan_pos < MAX_SCAN_NS) {
-        uint8_t level = advance_to(scan_pos);
-        if (level == 1) break;  // Found HIGH (idle)
-        scan_pos += HALF_BIT_NS;
-    }
-
-    size_t led_bytes = 0;
-    size_t decode_errors = 0;
-    int max_frames = static_cast<int>(rx_buffer.size()) * 4 + 10;
-    int frames_in_group = 0;
-    uint8_t led_accum = 0;
-
-    for (int frame = 0; frame < max_frames; frame++) {
-        // Find next start bit (HIGH→LOW transition)
-        bool found = false;
-        uint32_t limit = scan_pos + BIT_NS * 3;
-        while (scan_pos < limit) {
-            if (edges_exhausted) break;
-            uint8_t level = advance_to(scan_pos);
-            if (level == 0) { found = true; break; }
-            scan_pos += HALF_BIT_NS / 2;
-        }
-        if (!found) break;
-
-        // Verify we have room for a full frame
-        uint32_t frame_end = scan_pos + FRAME_NS;
-        // Sample 8 data bits at center of each bit cell (LSB first)
-        uint8_t byte_val = 0;
-        for (int bit = 0; bit < 8; bit++) {
-            uint32_t sample = scan_pos + BIT_NS + HALF_BIT_NS + bit * BIT_NS;
-            if (edges_exhausted) break;
-            if (advance_to(sample)) byte_val |= (1 << bit);
-        }
-
-        // Decode 2-bit LUT and accumulate into LED byte
-        int pair = decode_lut(byte_val);
-        if (pair < 0) {
-            decode_errors++;
-            if (decode_errors <= 3) {
-                FL_WARN("[UART DECODE] LUT miss: frame " << frame
-                        << " byte=0x" << fl::hex << static_cast<int>(byte_val) << fl::dec);
-            }
-            pair = 0;
-        }
-
-        // Pack: first UART byte = bits 7-6, second = bits 5-4, etc.
-        led_accum = static_cast<uint8_t>((led_accum << 2) | pair);
-        frames_in_group++;
-
-        if (frames_in_group == 4) {
-            if (led_bytes < rx_buffer.size()) {
-                rx_buffer[led_bytes++] = led_accum;
-            }
-            led_accum = 0;
-            frames_in_group = 0;
-        }
-
-        scan_pos = frame_end;
-    }
-
-    if (decode_errors > 0) {
-        FL_WARN("[UART DECODE] " << led_bytes << " LED bytes, " << decode_errors << " LUT errors");
-    } else {
-        FL_WARN("[UART DECODE] " << led_bytes << " LED bytes decoded OK");
-    }
-
-    return led_bytes;
-}
-
 // Capture transmitted LED data via RX loopback
 // - rx_channel: Shared pointer to RX device (persistent across calls)
 // - rx_buffer: Buffer to store received bytes
@@ -353,20 +184,10 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
     fl::RxConfig rx_config;  // Use default WS2812B-compatible settings
     rx_config.hz = 40000000; // 40MHz for high-precision LED timing capture
 
-    // Buffer size depends on driver encoding:
-    // - WS2812/RMT/PARLIO: 1 LED byte = 8 bits = 8 RMT symbols → buffer_size = bytes * 8
-    // - UART wave8: 1 LED byte = 4 UART frames × ~10 edges = ~40 symbols → buffer_size = bytes * 40
-    //   BUT capped to avoid memory exhaustion on ESP32-C6 (~320KB SRAM)
+    // Buffer size: 1 LED byte = 8 bits = 8 RMT symbols
+    // UART with TX inversion produces standard WS2812 waveform, same symbol count
     bool is_uart_driver = (fl::strcmp(driver_name, "UART") == 0);
-    if (is_uart_driver) {
-        // UART: each LED byte → 4 UART bytes → ~40 RMT edges, but cap at 4096
-        // to stay within memory budget. The RMT RX accumulation buffer gets clamped
-        // to 25% of free heap anyway, so requesting more just wastes the mBufferSize check.
-        size_t uart_symbols = rx_buffer.size() * 40;
-        rx_config.buffer_size = uart_symbols < 4096 ? uart_symbols : 4096;
-    } else {
-        rx_config.buffer_size = rx_buffer.size() * 8;  // Convert bytes to symbols (1 byte = 8 bits = 8 symbols)
-    }
+    rx_config.buffer_size = rx_buffer.size() * 8;
 
     // Internal loopback configuration: Enable ONLY for RMT TX -> RMT RX scenarios
     // When driver_name == "RMT", enable io_loop_back to route RMT TX output to RMT RX internally
@@ -431,41 +252,62 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
 
     // Wait for RX completion
     // WS2812B: ~30μs per LED → 3000 LEDs = 90ms, use 150ms
-    // UART: ~37.5μs per LED (4 UART bytes × 3.125μs × 3 channels) → 100 LEDs = ~11ms, use 500ms
-    // UART needs longer timeout because RMT RX idle detection (signal_range_max_ns=100μs)
-    // triggers end-of-reception after the last UART byte, which may take time to propagate
+    // UART with inverted TX produces same waveform timing as WS2812
     const uint32_t rx_wait_ms = is_uart_driver ? 500 : 150;
     FL_WARN("[CAPTURE] Waiting for RX completion (" << rx_wait_ms << "ms timeout)...");
     auto wait_result = rx_channel->wait(rx_wait_ms);
     FL_WARN("[CAPTURE] RX wait returned: " << static_cast<int>(wait_result));
 
     if (wait_result != fl::RxWaitResult::SUCCESS) {
-        if (is_uart_driver) {
-            // UART: timeout is expected because buffer_size may exceed what RMT RX
-            // can accumulate (memory-capped). Try decoding whatever edges were captured.
-            FL_WARN("[CAPTURE] RX wait timed out for UART - will attempt decode with captured edges");
-        } else {
-            FL_ERROR("RX wait failed (timeout or no data received)");
-            fl::sstream ss;
-            ss << "\n⚠️  TROUBLESHOOTING:\n";
-            ss << "   1. Connect physical jumper wire from TX GPIO to RX GPIO " << rx_channel->getPin() << "\n";
-            ss << "   2. Check that both TX and RX pins are correctly configured\n";
-            ss << "   3. Verify the GPIO connection is working (GPIO baseline test should pass)\n";
-            ss << "   4. For RMT TX → RMT RX: Ensure io_loop_back=true in RxConfig";
-            FL_WARN(ss.str());
+        FL_WARN("RX wait failed (timeout or no data received)");
+        fl::sstream ss;
+        ss << "\n⚠️  TROUBLESHOOTING:\n";
+        ss << "   1. Connect physical jumper wire from TX GPIO to RX GPIO " << rx_channel->getPin() << "\n";
+        ss << "   2. Check that both TX and RX pins are correctly configured\n";
+        ss << "   3. Verify the GPIO connection is working (GPIO baseline test should pass)\n";
+        ss << "   4. For RMT TX → RMT RX: Ensure io_loop_back=true in RxConfig";
+        FL_WARN(ss.str());
+        if (!is_uart_driver) {
             return 0;
         }
+        // UART: still attempt decode with captured edges (timeout may be expected)
+        FL_WARN("[CAPTURE] UART: attempting decode with captured edges despite timeout");
     }
 
-    // UART uses wave8 encoding with UART framing (start/stop bits), which creates
-    // a fundamentally different waveform than standard WS2812 signaling.
-    // Use UART-specific decoder that reconstructs UART bytes from raw edges,
-    // then reverses the 2-bit LUT to recover LED pixel data.
+    // UART with TX inversion at 4 Mbps produces a standard WS2812-compatible
+    // waveform on the wire. Each 10-bit UART frame (2500ns) encodes exactly 2
+    // LED bits with correct WS2812 timing:
+    //   T0H=250ns, T0L=1000ns (LED bit "0")
+    //   T1H=750ns, T1L=500ns  (LED bit "1")
+    // Use the standard WS2812 decoder with UART-specific timing thresholds.
     if (is_uart_driver) {
-        FL_WARN("[CAPTURE] Using UART wave8 decoder...");
-        size_t decoded = decodeUartWave8(rx_channel, rx_buffer);
-        FL_WARN("[CAPTURE] UART decode result: " << decoded << " LED bytes");
-        return decoded;
+        FL_WARN("[CAPTURE] UART (inverted TX): using standard WS2812 decoder with UART timing...");
+        // UART timing at 4 Mbps: T0H=250ns, T1H-T0H=500ns, T0L=1000ns
+        fl::ChipsetTiming uart_timing{
+            250,   // T1 = T0H (1 UART bit = 250ns)
+            500,   // T2 = T1H - T0H (3 bits - 1 bit = 2 bits = 500ns)
+            500,   // T3 = T1L (2 UART bits = 500ns, stop + next start)
+            50,    // reset_us (WS2812 minimum)
+            "UART_4Mbps"
+        };
+        // Use wider tolerance (250ns) for UART because the UART clock and RMT
+        // sample clock are asynchronous, and GPIO matrix adds ~10-20ns jitter
+        auto rx_timing = fl::make4PhaseTiming(uart_timing, 250);
+        rx_timing.gap_tolerance_ns = 100000; // 100µs for UART inter-frame gaps
+
+        FL_WARN("[CAPTURE] UART RX timing: T0H=" << uart_timing.T1
+                << " T1H=" << (uart_timing.T1 + uart_timing.T2)
+                << " T0L=" << (uart_timing.T2 + uart_timing.T3)
+                << " T1L=" << uart_timing.T3);
+
+        auto decode_result = rx_channel->decode(rx_timing, rx_buffer);
+        if (!decode_result.ok()) {
+            FL_WARN("[CAPTURE] UART decode failed (error: " << static_cast<int>(decode_result.error()) << ")");
+            dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 256));
+            return 0;
+        }
+        FL_WARN("[CAPTURE] UART decoded " << decode_result.value() << " LED bytes");
+        return decode_result.value();
     }
 
     // Decode received data directly into rx_buffer
