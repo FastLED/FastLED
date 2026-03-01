@@ -7,8 +7,6 @@
 
 #include "fl/has_include.h"  // IWYU pragma: keep
 
-#include "fl/compiler_control.h"
-
 #if FL_HAS_INCLUDE(<stdlib.h>)
 // IWYU pragma: begin_keep
 #include <stdlib.h>
@@ -54,4 +52,3 @@
 #ifdef map
 #undef map
 #endif
-

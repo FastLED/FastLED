@@ -11,7 +11,6 @@
 
 #include "fl/stl/stdint.h"
 
-#include "fl/stl/shared_ptr.h"
 #include "fl/xymap.h"       // Needed for constructor parameter
 #include "fl/fx/fx2d.h"
 

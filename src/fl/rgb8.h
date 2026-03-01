@@ -3,15 +3,10 @@
 
 #pragma once
 
-#include "fl/stl/stdint.h"
 #include "fl/int.h"
 
-#include "hsv.h"
-#include "lib8tion/types.h"
 #include "fl/force_inline.h"
-#include "fl/stl/type_traits.h"
 #include "fl/ease.h"
-#include "platforms/is_platform.h"
 // Include color.h for LEDColorCorrection and ColorTemperature enums
 // These are needed for constexpr constructors and can't be forward-declared
 #include "color.h"
@@ -217,7 +212,6 @@ struct CRGB {
         return *this;
     }
 
-
     /// Add one CRGB to another, saturating at 0xFF for each channel
     CRGB& operator+= (const CRGB& rhs);
 
@@ -303,7 +297,6 @@ struct CRGB {
 
     constexpr CRGB nscale8_constexpr (const CRGB scaledown ) const;
 
-
     /// Return a CRGB object that is a scaled down version of this object
     FASTLED_FORCE_INLINE CRGB scale8 (u8 scaledown ) const;
 
@@ -388,8 +381,6 @@ struct CRGB {
     /// Get the "luma" of a CRGB object. In other words, roughly how much
     /// light the CRGB pixel is putting out (from 0 to 255).
     u8 getLuma() const;
-
-
 
     /// Get the average of the R, G, and B values
     FASTLED_FORCE_INLINE u8 getAverageLight() const;
@@ -733,7 +724,6 @@ struct CRGB {
     } HTMLColorCode;
 };
 
-
 /// Check if two CRGB objects have the same color data
 FASTLED_FORCE_INLINE bool operator== (const CRGB& lhs, const CRGB& rhs)
 {
@@ -782,14 +772,11 @@ FASTLED_FORCE_INLINE bool operator<= (const CRGB& lhs, const CRGB& rhs)
     return sl <= sr;
 }
 
-
-
 /// @copydoc CRGB::operator/=
 FASTLED_FORCE_INLINE CRGB operator/( const CRGB& p1, u8 d)
 {
     return CRGB( p1.r/d, p1.g/d, p1.b/d);
 }
-
 
 /// Combine two CRGB objects, taking the smallest value of each channel
 FASTLED_FORCE_INLINE CRGB operator&( const CRGB& p1, const CRGB& p2)

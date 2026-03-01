@@ -5,7 +5,6 @@
 #include "fl/stl/variant.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/new.h"   // for placement new operator
-#include "fl/stl/bit_cast.h"
 #include "fl/align.h"
 #include "fl/stl/pair.h"
 #include "fl/stl/vector.h"
@@ -42,8 +41,6 @@ struct is_function_pointer<R(*)(Args...)> {
 // lambdas/functors. Only large lambdas/functors use heap allocation.
 //----------------------------------------------------------------------------
 template <typename> class function;
-
-
 
 template <typename R, typename... Args>
 class FL_ALIGN function<R(Args...)> {
@@ -347,7 +344,6 @@ private:
         mStorage = fl::shared_ptr<CallableBase>(fl::make_shared<Callable<F>>(fl::move(f)));
     }
 };
-
 
 //----------------------------------------------------------------------------
 // function_list: Container for managing multiple callbacks with add/remove

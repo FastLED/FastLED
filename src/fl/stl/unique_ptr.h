@@ -4,7 +4,6 @@
 #include "fl/stl/utility.h"       // for fl::move, fl::forward, fl::swap
 #include "fl/stl/stdint.h"        // for fl::size_t
 #include "fl/stl/cstddef.h"       // for fl::nullptr_t
-#include "fl/stl/initializer_list.h"  // for consistency (though not used in unique_ptr itself)
 
 namespace fl {
 

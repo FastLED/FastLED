@@ -1,6 +1,5 @@
 #pragma once
 
-#include "platforms/is_platform.h"
 #include "fl/stl/thread_config.h"  // For FASTLED_MULTITHREADED (no circular deps)
 #include "fl/int.h"
 

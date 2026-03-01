@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "fl/stl/vector.h"
 #include "fl/stl/detail/rbtree.h"
 #include "fl/stl/allocator.h"
@@ -10,9 +9,7 @@
 #include "fl/stl/strstream.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/utility.h"
-#include "fl/stl/initializer_list.h"
 #include "fl/int.h"
-
 
 namespace fl {
 

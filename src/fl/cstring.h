@@ -9,5 +9,3 @@
 #if defined(FL_IS_GCC) || defined(FL_IS_CLANG)
 #warning "fl/cstring.h is deprecated, use fl/stl/cstring.h instead"
 #endif
-
-#include "fl/stl/cstring.h"

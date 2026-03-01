@@ -1,6 +1,5 @@
 #pragma once
 
-#include "fl/assume_aligned.h"
 #include "platforms/is_platform.h"
 
 // Stringify helper for pragma arguments
@@ -397,7 +396,6 @@ FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
 
 FL_DISABLE_WARNING_POP
 
-
 // FL_RUN_ONCE - Ensures a function is called only once (thread-safe on platforms with mutexes)
 //
 // Usage:
@@ -419,7 +417,6 @@ FL_DISABLE_WARNING_POP
             code; \
         } \
     } while(0)
-
 
 // C linkage macros for compatibility with C++ name mangling
 #ifdef __cplusplus
@@ -451,7 +448,6 @@ FL_DISABLE_WARNING_POP
 #ifndef FL_IRAM
   #define FL_IRAM  // No-op on platforms without IRAM support
 #endif
-
 
 // Inline constexpr macro for C++11/17 compatibility
 // In C++17+, constexpr variables are implicitly inline (external linkage)
@@ -738,4 +734,3 @@ FL_DISABLE_WARNING_POP
 #ifndef FL_HAS_SANITIZER_LSAN
 #  define FL_HAS_SANITIZER_LSAN 0
 #endif
-

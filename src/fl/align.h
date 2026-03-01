@@ -1,7 +1,5 @@
 #pragma once
 
-#include "platforms/is_platform.h"
-
 /// @file align.h
 /// Alignment macros for FastLED
 ///

@@ -1,13 +1,11 @@
 #pragma once
 
-#include "platforms/is_platform.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/type_traits.h"
 #include "fl/unused.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/stdint.h"
-#include "fl/stl/new.h"
 #include "fl/stl/bitset.h"
 #include "fl/stl/malloc.h"
 #include "fl/align.h"
@@ -443,15 +441,12 @@ template <typename T> class allocator_psram {
         }
 };
 
-
-
 // Slab allocator for fixed-size objects
 // Optimized for frequent allocation/deallocation of objects of the same size
 // Uses pre-allocated memory slabs with free lists to reduce fragmentation
 template <typename T, fl::size SLAB_SIZE = FASTLED_DEFAULT_SLAB_SIZE>
 class SlabAllocator {
 private:
-
 
     static constexpr fl::size SLAB_BLOCK_SIZE = sizeof(T) > sizeof(void*) ? sizeof(T) : sizeof(void*);
     static constexpr fl::size BLOCKS_PER_SLAB = SLAB_SIZE;
@@ -524,8 +519,6 @@ private:
         // Request too large for slab, fall back to malloc
         return nullptr;
     }
-    
-
     
     void* findContiguousBlocks(Slab* slab, fl::size n) {
         // Check if allocation is too large for this slab
@@ -943,8 +936,6 @@ public:
             return;
         }
         
-
-        
         // Fallback to base allocator for heap allocations
         m_base_allocator.deallocate(p, n);
         m_active_allocations -= n;
@@ -1024,8 +1015,6 @@ private:
         // Base allocator doesn't have cleanup method, do nothing
     }
     
-
-
     // Equality comparison
     bool operator==(const allocator_inlined& other) const noexcept {
         FASTLED_UNUSED(other);
@@ -1044,7 +1033,6 @@ using allocator_inlined_psram = allocator_inlined<T, N, fl::allocator_psram<T>>;
 // Inlined allocator that uses slab allocator for heap allocation
 template <typename T, fl::size N, fl::size SLAB_SIZE = 8>
 using allocator_inlined_slab_psram = allocator_inlined<T, N, fl::allocator_slab<T, SLAB_SIZE>>;
-
 
 template <typename T, fl::size N>
 using allocator_inlined_slab = allocator_inlined<T, N, fl::allocator_slab<T>>;

@@ -4,8 +4,6 @@
 // Usage: fl::fixed_point<16, 16> (defaults to signed)
 //        fl::fixed_point<16, 16, fl::Sign::UNSIGNED> (explicit unsigned)
 
-#include "fl/fixed_point/fixed_point_traits.h"
-#include "fl/fixed_point/fixed_point_base.h"
 #include "fl/fixed_point/s0x32.h"
 #include "fl/fixed_point/s4x12.h"
 #include "fl/fixed_point/s8x8.h"

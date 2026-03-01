@@ -1,11 +1,5 @@
 #pragma once
 
-#include "fl/stl/ostream.h"
-#include "fl/stl/chrono.h"
-#include "fl/delay.h"
-
-#include "platforms/is_platform.h"
-
 #if defined(FL_IS_AVR) \
   || defined(__AVR_ATtiny85__) \
   || defined(__AVR_ATtiny88__) \

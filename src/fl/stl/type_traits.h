@@ -4,8 +4,6 @@
 Provides eanble_if and is_derived for compilers before C++14.
 */
 
-#include "fl/stl/stdint.h"
-
 #include "fl/stl/move.h"
 #include "fl/int.h"
 
@@ -101,7 +99,6 @@ template <typename T> struct is_same<T, T> {
 template <typename T, typename U> struct is_same_v_helper {
     static constexpr bool value = is_same<T, U>::value;
 };
-
 
 // Define conditional trait
 template <bool B, typename T, typename F> struct conditional {
@@ -993,8 +990,6 @@ template <typename T> struct underlying_type {
 
 template <typename T>
 using underlying_type_t = typename underlying_type<T>::type;
-
-
 
 // C++11 requires out-of-class definitions for static constexpr members that are ODR-used
 // These definitions are in src/fl/static_constexpr_defs.cpp to avoid duplicate symbols

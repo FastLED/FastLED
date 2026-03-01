@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "fl/stl/shared_ptr.h"
 #include "fl/fx/fx2d.h"
 
 namespace fl {

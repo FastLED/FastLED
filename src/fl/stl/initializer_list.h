@@ -1,8 +1,5 @@
 
-
 #pragma once
-
-#include "platforms/is_platform.h"
 
 // Define if initializer_list is available
 // Check for C++11 and if std::initializer_list exists

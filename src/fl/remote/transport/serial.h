@@ -10,7 +10,6 @@
 
 #include "fl/delay.h"
 #include "fl/int.h"
-#include "fl/log.h"
 #include "fl/stl/cctype.h"
 #include "fl/stl/chrono.h"
 #include "fl/stl/cstdio.h"

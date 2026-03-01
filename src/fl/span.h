@@ -9,5 +9,3 @@
 #if defined(FL_IS_GCC) || defined(FL_IS_CLANG)
 #warning "fl/span.h is deprecated, use fl/stl/span.h instead"
 #endif
-
-#include "fl/stl/span.h"

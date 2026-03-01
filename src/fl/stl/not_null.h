@@ -46,7 +46,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "fl/stl/type_traits.h"
-#include "fl/stl/move.h"
 #include "fl/stl/cstddef.h"
 
 // Forward declarations to break circular dependency with assert.h
@@ -58,8 +57,6 @@ namespace detail {
     void not_null_assert_failed(const char* message);
 } // namespace detail
 } // namespace fl
-
-
 
 namespace fl {
 

@@ -36,7 +36,6 @@
 /// @endcode
 
 #include "fl/stl/stdint.h"
-#include "fl/stl/utility.h"
 #include "fl/stl/variant.h"
 #include "fl/stl/string.h"
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "fl/compiler_control.h"
 /// @file dll.h
 /// FastLED dynamic library interface - lightweight header for external callers
 

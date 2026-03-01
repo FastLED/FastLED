@@ -9,5 +9,3 @@
 #if defined(FL_IS_GCC) || defined(FL_IS_CLANG)
 #warning "fl/vector.h is deprecated, use fl/stl/vector.h instead"
 #endif
-
-#include "fl/stl/vector.h"
