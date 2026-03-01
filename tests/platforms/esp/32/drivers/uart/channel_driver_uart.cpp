@@ -112,6 +112,10 @@ size_t decodeUartWave8FromEdges(fl::span<const EdgeTime> edges, fl::span<uint8_t
         return edge_level;
     };
 
+    // Build the expected Wave10 LUT for the test timing
+    // WS2812_T0H=400, WS2812_T0L=850, WS2812_T1H=800, WS2812_T1L=450
+    // maps to ChipsetTimingConfig(t1=400, t2=850, t3=800)
+    // which produces the same pulse counts as WS2812 (1 and 3)
     auto decode_lut = [](uint8_t b) -> int {
         switch (b) {
             case 0xEF: return 0;
@@ -1106,5 +1110,30 @@ FL_TEST_CASE("ChannelEngineUART - Edge cases") {
         fixture.mMockPeripheral->forceTransmissionComplete();
         FL_CHECK(fixture.pollUntilReady());
         FL_CHECK(fixture.mMockPeripheral->getCapturedBytes().size() == 24000);
+    }
+}
+
+//=============================================================================
+// ChannelEngineUART - canHandle with timing validation
+//=============================================================================
+
+FL_TEST_CASE("ChannelEngineUART - canHandle validates timing") {
+    ChannelEngineUARTFixture fixture;
+
+    FL_SUBCASE("Accepts WS2812 timing") {
+        auto ch = fixture.createChannel(17, 10);
+        FL_CHECK(fixture.mDriver.canHandle(ch));
+    }
+
+    FL_SUBCASE("Rejects null channel") {
+        FL_CHECK_FALSE(fixture.mDriver.canHandle(nullptr));
+    }
+
+    FL_SUBCASE("Rejects infeasible timing (TM1829-1600kHz)") {
+        // TM1829-1600k: T1=100, T2=300, T3=200, period=600ns → 8.3 Mbps
+        ChipsetTimingConfig timing(100, 300, 200, 500);
+        fl::vector_psram<uint8_t> data(30);
+        auto ch = fl::make_shared<ChannelData>(17, timing, fl::move(data));
+        FL_CHECK_FALSE(fixture.mDriver.canHandle(ch));
     }
 }
