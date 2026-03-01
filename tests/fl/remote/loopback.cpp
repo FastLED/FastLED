@@ -81,7 +81,10 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
 
     while (fl::millis() - start < 5000) {
         uint32_t now = fl::millis();
+        // Process server-side RPC first so the response is ready to read.
         server_transport->update(now);
+        server_remote.update(now);
+
         client_transport->update(now);
 
         auto resp = client_transport->readRequest();
@@ -91,8 +94,7 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
             break;
         }
 
-        server_remote.update(now);
-        delay(1);
+        fl::this_thread::yield();
     }
 
     FL_REQUIRE(got_response);
