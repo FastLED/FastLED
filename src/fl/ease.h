@@ -18,6 +18,11 @@ namespace fl {
 // LUT for 8-bit to 16-bit gamma correction at pow(x, 2.8)
 u16 gamma_2_8(u8 value);
 
+// Direct access to the 64-byte aligned gamma 2.8 LUT (256 entries, u16).
+// Use with FL_PGM_READ_WORD_ALIGNED for fast reads in hot loops.
+extern const u16 GAMMA_2_8_LUT[256];
+
+
 enum EaseType {
     EASE_NONE,
     EASE_IN_QUAD,
