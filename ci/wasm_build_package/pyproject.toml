@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=65.5.1", "setuptools-scm", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fastled-wasm-build"
+version = "0.1.0"
+readme = "README.md"
+description = "FastLED WASM build chain using Meson + Ninja"
+requires-python = ">=3.10"
+keywords = ["fastled", "wasm", "build"]
+license = { text = "MIT" }
+classifiers = ["Programming Language :: Python :: 3"]
+dependencies = [
+    "clang-tool-chain[sccache]>=1.1.11",
+    "nodejs-wheel>=22.0.0",
+    "meson>=1.10.0",
+    "ninja",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}

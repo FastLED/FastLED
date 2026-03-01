@@ -2,7 +2,7 @@
 
 #include "fl/fft.h"
 #include "fl/int.h"
-#include "fl/audio.h"
+#include "fl/audio.h"  // IWYU pragma: keep
 #include "fl/audio/signal_conditioner.h"
 #include "fl/audio/noise_floor_tracker.h"
 #include "fl/audio/frequency_bin_mapper.h"
@@ -10,8 +10,8 @@
 #include "fl/stl/array.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/sketch_macros.h"
-#include "fl/colorutils.h"
-#include "fl/rgb8.h"  // for CRGB
+#include "fl/colorutils.h"  // IWYU pragma: keep
+#include "fl/rgb8.h"  // for CRGB  // IWYU pragma: keep
 #include "fl/stl/vector.h"
 
 namespace fl {

@@ -111,10 +111,10 @@ auto task = fl::task::coroutine({
 
 // allow-include-after-namespace
 
-#include "fl/stl/functional.h"
+#include "fl/stl/functional.h"  // IWYU pragma: keep
 #include "fl/stl/string.h"
 #include "fl/trace.h"
-#include "fl/promise.h"
+#include "fl/promise.h"  // IWYU pragma: keep
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/cstddef.h"
 
@@ -130,7 +130,7 @@ enum class TaskType {
 
 // Forward declarations
 class ITaskImpl;
-class TaskCoroutine;
+class TaskCoroutine;  // IWYU pragma: keep
 
 /// @brief Configuration for OS-level coroutine tasks
 struct CoroutineConfig {
@@ -226,6 +226,6 @@ private:
 
 /// @brief Internal RAII wrapper for OS-level tasks (implementation detail)
 /// @note Users should use task::coroutine() instead of TaskCoroutine directly
-class TaskCoroutine;
+class TaskCoroutine;  // IWYU pragma: keep
 
 } // namespace fl

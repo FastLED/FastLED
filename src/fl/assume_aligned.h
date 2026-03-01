@@ -8,7 +8,7 @@
 /// a hint only — it does not enforce alignment at the call site.
 
 #include "fl/stl/cstddef.h"
-#include "platforms/is_platform.h"
+#include "platforms/is_platform.h"  // IWYU pragma: keep
 
 namespace fl {
 

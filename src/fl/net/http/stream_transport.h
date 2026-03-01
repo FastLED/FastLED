@@ -13,7 +13,7 @@
 
 namespace fl {
 
-class HttpStreamTransport;
+class HttpStreamTransport;  // IWYU pragma: keep
 
 /// Handle for ASYNC_STREAM calls
 /// Provides onData() for intermediate updates, plus then()/catch_() for final result

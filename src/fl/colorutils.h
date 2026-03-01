@@ -6,16 +6,16 @@
 // #include "FastLED.h"
 
 #include "fl/int.h"
-#include "crgb.h"
+#include "crgb.h"  // IWYU pragma: keep
 #include "fastled_progmem.h"
-#include "fl/blur.h"
+#include "fl/blur.h"  // IWYU pragma: keep
 #include "fl/colorutils_misc.h"
 #include "fl/fill.h"
-#include "fl/xymap.h"
+#include "fl/xymap.h"  // IWYU pragma: keep
 #include "lib8tion/memmove.h"
 #include "fl/compiler_control.h"
-#include "fl/warn.h"
-#include "platforms/is_platform.h"
+#include "fl/warn.h"  // IWYU pragma: keep
+#include "platforms/is_platform.h"  // IWYU pragma: keep
 
 // #include "pixeltypes.h"  // pulls in FastLED.h, beware.
 
@@ -245,12 +245,12 @@ CRGB HeatColor(fl::u8 temperature);
 ///
 /// @{
 
-class CRGBPalette16;
-class CRGBPalette32;
-class CRGBPalette256;
-class CHSVPalette16;
-class CHSVPalette32;
-class CHSVPalette256;
+class CRGBPalette16;  // IWYU pragma: keep
+class CRGBPalette32;  // IWYU pragma: keep
+class CRGBPalette256;  // IWYU pragma: keep
+class CHSVPalette16;  // IWYU pragma: keep
+class CHSVPalette32;  // IWYU pragma: keep
+class CHSVPalette256;  // IWYU pragma: keep
 
 /// Struct for digesting gradient pointer data into its components.
 /// This is used when loading a gradient stored in PROGMEM or on

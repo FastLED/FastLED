@@ -10,7 +10,7 @@
 
 namespace fl {
 
-class XYMap;
+class XYMap;  // IWYU pragma: keep
 class XYRasterU8Sparse;
 
 class Tile2x2_u8 {

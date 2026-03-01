@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/json.h"
+#include "fl/json.h"  // IWYU pragma: keep
 
 // =============================================================================
 // RPC System - Main Public API
@@ -70,7 +70,7 @@
 //
 // =============================================================================
 
-#include "fl/json.h"
+#include "fl/json.h"  // IWYU pragma: keep
 
 #if FASTLED_ENABLE_JSON
 
@@ -88,7 +88,7 @@
 #include "fl/stl/function.h"
 #include "fl/stl/unordered_map.h"
 #include "fl/stl/type_traits.h"
-#include "fl/stl/initializer_list.h"
+#include "fl/stl/initializer_list.h"  // IWYU pragma: keep
 
 namespace fl {
 

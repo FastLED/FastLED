@@ -49,9 +49,9 @@ namespace fl {
 namespace test {
 
 // Forward declarations
-class TestCase;
-class Subcase;
-class TestContext;
+class TestCase;  // IWYU pragma: keep
+class Subcase;  // IWYU pragma: keep
+class TestContext;  // IWYU pragma: keep
 
 // Source location info
 struct SourceLocation {

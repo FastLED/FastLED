@@ -61,8 +61,8 @@ namespace detail {
 namespace fl {
 
 // Forward declaration
-template<typename T>
-class not_null;
+template<typename T>  // IWYU pragma: keep
+class not_null;  // IWYU pragma: keep
 
 namespace detail {
 

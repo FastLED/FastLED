@@ -11,7 +11,7 @@
 
 #include "fl/stl/stdint.h"
 
-#include "fl/xymap.h"       // Needed for constructor parameter
+#include "fl/xymap.h"       // Needed for constructor parameter  // IWYU pragma: keep
 #include "fl/fx/fx2d.h"
 
 /// @name ScaleUp Precision Modes

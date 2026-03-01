@@ -1,11 +1,14 @@
 #pragma once
 
+// IWYU pragma: no_include "platforms/arm/is_arm.h"
+// IWYU pragma: no_include "platforms/shared/int.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 // PLATFORM-SPECIFIC INTEGER TYPE CONFLICT RESOLUTION GUIDE
 //
 // ⚠️  CRITICAL: When integer type conflicts occur (typedef redefinition errors),
 //              the fix MUST go in src/platforms/**/int*.h files.
-//              DO NOT modify this file (fl/int.h) or fl/stdint.h!
+//              DO NOT modify this file (fl/int.h) or fl/stdint.h!  // IWYU pragma: keep
 //
 // ============================================================================
 // WHAT THIS FILE DOES
@@ -28,7 +31,7 @@
 //
 // This happens when:
 // 1. System header (Arduino.h, stdint.h) defines: typedef __uint32_t uint32_t
-// 2. FastLED's fl/stdint.h defines: typedef fl::u32 uint32_t
+// 2. FastLED's fl/stdint.h defines: typedef fl::u32 uint32_t  // IWYU pragma: keep
 // 3. fl::u32 != __uint32_t (they're different base types)
 //
 // ============================================================================
@@ -163,7 +166,7 @@
 
 // Platform-specific integer type definitions
 // This includes platform-specific 16/32/64-bit types
-#include "platforms/int.h"
+#include "platforms/int.h"  // IWYU pragma: keep
 
 #ifdef __cplusplus
 namespace fl {

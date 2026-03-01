@@ -12,11 +12,11 @@ and removals.
 #include "fl/align.h"
 #include "fl/clamp.h"
 #include "fl/compiler_control.h"
-#include "fl/detail/private.h"
+#include "fl/detail/private.h"  // IWYU pragma: keep
 #include "fl/hash.h"
 #include "fl/int.h"
 #include "fl/map_range.h"
-#include "fl/stl/assert.h"
+#include "fl/stl/assert.h"  // IWYU pragma: keep
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/bitset.h"
 #include "fl/stl/move.h"
@@ -24,7 +24,7 @@ and removals.
 #include "fl/stl/pair.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/vector.h"
-#include "fl/stl/initializer_list.h"
+#include "fl/stl/initializer_list.h"  // IWYU pragma: keep
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_SHORTEN_64_TO_32

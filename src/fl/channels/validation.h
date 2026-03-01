@@ -13,9 +13,9 @@
 // Forward declarations for detail modules
 namespace fl {
 namespace validation {
-    class RxTest;
-    class ResultFormatter;
-    class Platform;
+    class RxTest;  // IWYU pragma: keep
+    class ResultFormatter;  // IWYU pragma: keep
+    class Platform;  // IWYU pragma: keep
 }
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/promise.h"
-#include "fl/net/fetch.h"  // Includes response class
+#include "fl/net/fetch.h"  // Includes response class  // IWYU pragma: keep
 #include "fl/stl/string.h"
 #include "fl/int.h"
 

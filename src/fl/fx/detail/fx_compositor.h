@@ -3,11 +3,11 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstring.h"
 
-#include "crgb.h"
+#include "crgb.h"  // IWYU pragma: keep
 #include "fl/stl/shared_ptr.h"  // For shared_ptr
-#include "fl/stl/vector.h"
+#include "fl/stl/vector.h"  // IWYU pragma: keep
 #include "fl/fx/detail/fx_layer.h"
-#include "fl/fx/fx.h"
+#include "fl/fx/fx.h"  // IWYU pragma: keep
 
 #ifndef FASTLED_FX_ENGINE_MAX_FX
 #define FASTLED_FX_ENGINE_MAX_FX 64

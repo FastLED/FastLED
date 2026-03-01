@@ -2,21 +2,21 @@
 
 
 #include "fl/stl/shared_ptr.h"  // For shared_ptr
-#include "fl/json.h"
+#include "fl/json.h"  // IWYU pragma: keep
 #include "fl/stl/string.h"
-#include "fl/int.h"
+#include "fl/int.h"  // IWYU pragma: keep
 #include "fl/audio.h"
-#include "fl/audio_input.h"  // For AudioConfig
+#include "fl/audio_input.h"  // For AudioConfig  // IWYU pragma: keep
 #include "fl/engine_events.h"
 #include "fl/stl/function.h"
 #include "fl/math_macros.h"
 #include "fl/stl/type_traits.h"
 #include "fl/ui_impl.h"
-#include "fl/unused.h"
+#include "fl/unused.h"  // IWYU pragma: keep
 #include "platforms/ui_defs.h"
-#include "fl/sensors/button.h"
+#include "fl/sensors/button.h"  // IWYU pragma: keep
 #include "fl/virtual_if_not_avr.h"
-#include "fl/int.h"
+#include "fl/int.h"  // IWYU pragma: keep
 
 #define FL_NO_COPY(CLASS)                                                      \
     CLASS(const CLASS &) = delete;                                             \

@@ -7,7 +7,7 @@ namespace fl {
 
 // Forward declarations
 template <fl::size SIZE> class StrN;
-class string;
+class string;  // IWYU pragma: keep
 
 // string_view: A non-owning view into a contiguous sequence of characters
 // Provides std::string_view-like functionality for embedded environments

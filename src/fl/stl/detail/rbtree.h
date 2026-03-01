@@ -1,10 +1,14 @@
 #pragma once
 
+// IWYU pragma: no_forward_declare RedBlackTree::const_iterator
+// IWYU pragma: no_forward_declare RedBlackTree::const_reverse_iterator
+// IWYU pragma: no_forward_declare RedBlackTree::reverse_iterator
+
 #include "fl/stl/algorithm.h"
 #include "fl/stl/allocator.h"
-#include "fl/stl/assert.h"
-#include "fl/stl/comparators.h"
-#include "fl/stl/initializer_list.h"
+#include "fl/stl/assert.h"  // IWYU pragma: keep
+#include "fl/stl/comparators.h"  // IWYU pragma: keep
+#include "fl/stl/initializer_list.h"  // IWYU pragma: keep
 #include "fl/stl/pair.h"
 #include "fl/stl/type_traits.h"
 
@@ -18,9 +22,9 @@ template <typename T, typename Compare = less<T>, typename Allocator = allocator
 class RedBlackTree {
 public:
     class iterator;
-    class const_iterator;
-    class reverse_iterator;
-    class const_reverse_iterator;
+    class const_iterator;  // IWYU pragma: keep
+    class reverse_iterator;  // IWYU pragma: keep
+    class const_reverse_iterator;  // IWYU pragma: keep
     using value_type = T;
     using size_type = fl::size;
     using difference_type = ptrdiff_t;

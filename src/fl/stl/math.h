@@ -1,8 +1,8 @@
 #pragma once
 
-#include "fl/clamp.h"
-#include "fl/math_macros.h"
-#include "fl/stl/undef.h"
+#include "fl/clamp.h"  // IWYU pragma: keep
+#include "fl/math_macros.h"  // IWYU pragma: keep
+#include "fl/stl/undef.h"  // IWYU pragma: keep
 
 namespace fl {
 

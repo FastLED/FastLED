@@ -2,20 +2,20 @@
 
 #include "fl/remote/remote.h"
 #include "fl/stl/vector.h"
-#include "fl/stl/span.h"
-#include "fl/stl/memory.h"
-#include "fl/stl/shared_ptr.h"
+#include "fl/stl/span.h"  // IWYU pragma: keep
+#include "fl/stl/memory.h"  // IWYU pragma: keep
+#include "fl/stl/shared_ptr.h"  // IWYU pragma: keep
 
 // WLED subdirectory components (always available)
-#include "fl/fx/wled/ifastled.h"
-#include "fl/fx/wled/adapter.h"
-#include "fl/fx/wled/client.h"
+#include "fl/fx/wled/ifastled.h"  // IWYU pragma: keep
+#include "fl/fx/wled/adapter.h"  // IWYU pragma: keep
+#include "fl/fx/wled/client.h"  // IWYU pragma: keep
 
 // WLED-specific Remote extension requires JSON support
 #if FASTLED_ENABLE_JSON
 
 #include "fl/fx/wled/segment.h"
-#include "fl/fx/wled/json_helpers.h"
+#include "fl/fx/wled/json_helpers.h"  // IWYU pragma: keep
 
 namespace fl {
 

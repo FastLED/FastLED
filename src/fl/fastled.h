@@ -20,90 +20,90 @@
 // ============================================================================
 
 /// Platform-agnostic integer types
-#include "fl/stl/stdint.h"
-#include "fl/int.h"
+#include "fl/stl/stdint.h"  // IWYU pragma: keep
+#include "fl/int.h"  // IWYU pragma: keep
 
 /// Version and configuration
-#include "fl/dll.h"
-#include "fl/force_inline.h"
+#include "fl/dll.h"  // IWYU pragma: keep
+#include "fl/force_inline.h"  // IWYU pragma: keep
 
 // ============================================================================
 // CONFIGURATION AND SYSTEM DEFINITIONS
 // ============================================================================
 
 /// FastLED configuration and platform definitions
-#include "fastled_config.h"
-#include "led_sysdefs.h"
-#include "cpp_compat.h"
+#include "fastled_config.h"  // IWYU pragma: keep
+#include "led_sysdefs.h"  // IWYU pragma: keep
+#include "cpp_compat.h"  // IWYU pragma: keep
 
 // ============================================================================
 // CORE UTILITY HEADERS
 // ============================================================================
 
 /// Compiler and language features
-#include "fl/compiler_control.h"
-#include "fl/math_macros.h"
+#include "fl/compiler_control.h"  // IWYU pragma: keep
+#include "fl/math_macros.h"  // IWYU pragma: keep
 
 /// Memory and type utilities
-#include "fl/stl/bit_cast.h"
-#include "fl/stl/cstring.h"
+#include "fl/stl/bit_cast.h"  // IWYU pragma: keep
+#include "fl/stl/cstring.h"  // IWYU pragma: keep
 
 // ============================================================================
 // CORE LED TYPE DEFINITIONS
 // ============================================================================
 
 /// Basic color types (CRGB, HSV)
-#include "color.h"
-#include "crgb.h"
-#include "chsv.h"
+#include "color.h"  // IWYU pragma: keep
+#include "crgb.h"  // IWYU pragma: keep
+#include "chsv.h"  // IWYU pragma: keep
 
 /// Pixel types and color ordering
-#include "pixeltypes.h"
-#include "eorder.h"
+#include "pixeltypes.h"  // IWYU pragma: keep
+#include "eorder.h"  // IWYU pragma: keep
 
 /// Pixel utilities
-#include "dither_mode.h"
-#include "pixel_controller.h"
-#include "pixel_iterator.h"
+#include "dither_mode.h"  // IWYU pragma: keep
+#include "pixel_controller.h"  // IWYU pragma: keep
+#include "pixel_iterator.h"  // IWYU pragma: keep
 
 // ============================================================================
 // CORE CONTROLLER DEFINITIONS
 // ============================================================================
 
 /// Base LED controller classes
-#include "cled_controller.h"
-#include "cpixel_ledcontroller.h"
-#include "controller.h"
+#include "cled_controller.h"  // IWYU pragma: keep
+#include "cpixel_ledcontroller.h"  // IWYU pragma: keep
+#include "controller.h"  // IWYU pragma: keep
 
 // ============================================================================
 // PLATFORM SUPPORT
 // ============================================================================
 
 /// Platform-specific definitions and initialization
-#include "platforms.h"
+#include "platforms.h"  // IWYU pragma: keep
 
 // ============================================================================
 // MISCELLANEOUS CORE UTILITIES
 // ============================================================================
 
 /// Timing utilities
-#include "fastled_delay.h"
+#include "fastled_delay.h"  // IWYU pragma: keep
 
 /// Math utilities from lib8tion
-#include "lib8tion.h"
+#include "lib8tion.h"  // IWYU pragma: keep
 
 /// Bit manipulation
-#include "bitswap.h"
+#include "bitswap.h"  // IWYU pragma: keep
 
 /// Memory utilities
-#include "fastled_progmem.h"
+#include "fastled_progmem.h"  // IWYU pragma: keep
 
 /// Hardware pin definitions
-#include "fastpin.h"
+#include "fastpin.h"  // IWYU pragma: keep
 
 /// Color utilities and palettes
-#include "colorutils.h"
-#include "colorpalettes.h"
+#include "colorutils.h"  // IWYU pragma: keep
+#include "colorpalettes.h"  // IWYU pragma: keep
 
 // ============================================================================
 // INTERNAL UTILITY DECLARATIONS

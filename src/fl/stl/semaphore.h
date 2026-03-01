@@ -1,5 +1,9 @@
 #pragma once
 
+// IWYU pragma: no_include "fl/has_include.h"
+// IWYU pragma: no_include "platforms/is_platform.h"
+// IWYU pragma: no_include "platforms/stub/semaphore_stub.h"
+
 // Include platform-specific semaphore implementation
 // This will define FASTLED_MULTITHREADED based on platform capabilities
 #include "platforms/semaphore.h"  // IWYU pragma: keep
@@ -21,12 +25,12 @@ namespace fl {
 /// sem.release();   // Increment count
 /// ```
 template<ptrdiff_t LeastMaxValue = 1>
-using counting_semaphore = fl::platforms::counting_semaphore<LeastMaxValue>;
+using counting_semaphore = fl::platforms::counting_semaphore<LeastMaxValue>;  // IWYU pragma: keep
 
 /// @brief Binary semaphore abstraction for FastLED
 ///
 /// A counting semaphore with a maximum value of 1. Commonly used for signaling.
-///
+///  // IWYU pragma: keep
 /// Usage:
 /// ```cpp
 /// fl::binary_semaphore sem(0);  // Initial count 0

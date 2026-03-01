@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/codec/common.h"
+#include "fl/codec/common.h"  // IWYU pragma: keep
 // IWYU pragma: begin_keep
 #include "third_party/mpeg1_decoder/software_decoder.h"
 // IWYU pragma: end_keep

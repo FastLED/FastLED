@@ -36,8 +36,8 @@
 namespace fl {
 
 // Forward declarations
-class FontImpl;
-class FontRendererImpl;
+class FontImpl;  // IWYU pragma: keep
+class FontRendererImpl;  // IWYU pragma: keep
 
 // Font metrics returned by Font::getMetrics()
 struct FontMetrics {

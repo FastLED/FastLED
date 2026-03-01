@@ -385,11 +385,11 @@ template <typename T> struct is_pod_v_helper {
 // trait to detect pointer‑to‑member‑function
 // must come before Function so SFINAE sees it
 //----------------------------------------------------------------------------
-template <typename T> struct is_member_function_pointer;
-template <typename C, typename Ret, typename... A>
-struct is_member_function_pointer<Ret (C::*)(A...)>;
-template <typename C, typename Ret, typename... A>
-struct is_member_function_pointer<Ret (C::*)(A...) const>;
+template <typename T> struct is_member_function_pointer;  // IWYU pragma: keep
+template <typename C, typename Ret, typename... A>  // IWYU pragma: keep
+struct is_member_function_pointer<Ret (C::*)(A...)>;  // IWYU pragma: keep
+template <typename C, typename Ret, typename... A>  // IWYU pragma: keep
+struct is_member_function_pointer<Ret (C::*)(A...) const>;  // IWYU pragma: keep
 
 template <typename T> struct is_member_function_pointer {
     enum : bool { value = false };

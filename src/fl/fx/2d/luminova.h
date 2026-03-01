@@ -2,9 +2,9 @@
 
 #include "fl/stl/stdint.h"
 
-#include "crgb.h"           // Needed for CRGB parameter types
-#include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
-#include "fl/stl/shared_ptr.h"  // For shared_ptr
+#include "crgb.h"           // Needed for CRGB parameter types  // IWYU pragma: keep
+#include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros  // IWYU pragma: keep
+#include "fl/stl/shared_ptr.h"  // For shared_ptr  // IWYU pragma: keep
 #include "fl/fx/fx2d.h"
 
 namespace fl {

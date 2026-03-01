@@ -14,8 +14,8 @@ are blended by the the max luminance of the components.
 namespace fl {
 class Frame;
 class XYMap;
-template<typename T, typename Allocator>
-class vector;
+template<typename T, typename Allocator>  // IWYU pragma: keep
+class vector;  // IWYU pragma: keep
 
 struct Blend2dParams {
     u8 blur_amount = 0;

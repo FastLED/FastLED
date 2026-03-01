@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/codec/common.h"
+#include "fl/codec/common.h"  // IWYU pragma: keep
 #include "fl/bytestream.h"
 #include "fl/stl/function.h"
 

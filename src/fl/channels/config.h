@@ -1,7 +1,7 @@
 #pragma once
 
-#include "crgb.h"
-#include "fl/rgbw.h"
+#include "crgb.h"  // IWYU pragma: keep
+#include "fl/rgbw.h"  // IWYU pragma: keep
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
@@ -12,8 +12,8 @@
 #include "fl/eorder.h"
 #include "fl/channels/options.h"
 #include "fl/stl/optional.h"
-#include "color.h"
-#include "dither_mode.h"
+#include "color.h"  // IWYU pragma: keep
+#include "dither_mode.h"  // IWYU pragma: keep
 
 namespace fl {
 

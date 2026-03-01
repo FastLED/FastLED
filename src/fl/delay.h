@@ -15,7 +15,7 @@
 // Platform-specific includes via trampoline header
 // ============================================================================
 
-#include "platforms/delay.h"
+#include "platforms/delay.h"  // IWYU pragma: keep
 
 namespace fl {
 

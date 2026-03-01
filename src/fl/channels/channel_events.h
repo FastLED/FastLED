@@ -5,7 +5,7 @@
 namespace fl {
 
 class Channel;
-class IChannelDriver;
+class IChannelDriver;  // IWYU pragma: keep
 class ChannelData;
 struct ChannelConfig;
 

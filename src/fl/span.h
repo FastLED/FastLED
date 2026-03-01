@@ -4,7 +4,7 @@
 // Use "fl/stl/span.h" instead of "fl/span.h"
 // This stub exists for backward compatibility only
 
-#include "platforms/is_platform.h"
+#include "platforms/is_platform.h"  // IWYU pragma: keep
 
 #if defined(FL_IS_GCC) || defined(FL_IS_CLANG)
 #warning "fl/span.h is deprecated, use fl/stl/span.h instead"

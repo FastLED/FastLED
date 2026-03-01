@@ -37,11 +37,11 @@ void helper() {
  */
 
 #include "fl/stl/tuple.h"
-#include "fl/stl/chrono.h"
+#include "fl/stl/chrono.h"  // IWYU pragma: keep
 #include "fl/stl/stdint.h"
-#include "fl/stl/string.h"
+#include "fl/stl/string.h"  // IWYU pragma: keep
 #include "fl/stl/vector.h"
-#include "fl/compiler_control.h"  // For FL_FUNCTION
+#include "fl/compiler_control.h"  // For FL_FUNCTION  // IWYU pragma: keep
 
 namespace fl {
 

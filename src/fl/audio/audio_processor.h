@@ -1,13 +1,13 @@
 #pragma once
 
-#include "fl/audio.h"
-#include "fl/audio/audio_context.h"
-#include "fl/audio/audio_detector.h"
+#include "fl/audio.h"  // IWYU pragma: keep
+#include "fl/audio/audio_context.h"  // IWYU pragma: keep
+#include "fl/audio/audio_detector.h"  // IWYU pragma: keep
 #include "fl/audio/mic_profiles.h"
 #include "fl/audio/signal_conditioner.h"
 #include "fl/audio/noise_floor_tracker.h"
 #include "fl/stl/shared_ptr.h"
-#include "fl/stl/function.h"
+#include "fl/stl/function.h"  // IWYU pragma: keep
 #include "fl/stl/vector.h"
 #include "fl/task.h"
 

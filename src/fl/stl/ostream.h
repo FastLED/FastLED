@@ -2,10 +2,10 @@
 
 #include "fl/int.h"
 #include "fl/stl/type_traits.h"
-#include "fl/rgb8.h"
-#include "fl/stl/move.h"
+#include "fl/rgb8.h"  // IWYU pragma: keep
+#include "fl/stl/move.h"  // IWYU pragma: keep
 #include "fl/stl/string.h"
-#include "fl/stl/ios.h"
+#include "fl/stl/ios.h"  // IWYU pragma: keep
 
 // Include cstdio for print function
 #include "fl/stl/cstdio.h"

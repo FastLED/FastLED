@@ -1,10 +1,10 @@
 #pragma once
 
-#include "fl/screenmap.h"
+#include "fl/screenmap.h"  // IWYU pragma: keep
 #include "fl/singleton.h"
 #include "fl/stl/vector.h"
-#include "fl/xymap.h"
-#include "fl/stl/string.h"
+#include "fl/xymap.h"  // IWYU pragma: keep
+#include "fl/stl/string.h"  // IWYU pragma: keep
 #include "fl/int.h"
 #include "fl/sketch_macros.h"
 

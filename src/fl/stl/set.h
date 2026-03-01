@@ -13,11 +13,11 @@
 
 namespace fl {
 
-template <typename Key, typename Allocator> class set;
+template <typename Key, typename Allocator> class set;  // IWYU pragma: keep
 
 // VectorSet stores values in order of insertion.
 template <typename Key, size N> class VectorSetFixed;
-template <typename Key, typename Allocator> class VectorSet;
+template <typename Key, typename Allocator> class VectorSet;  // IWYU pragma: keep
 
 template <typename Key, size N>
 using FixedSet = VectorSetFixed<Key, N>;  // Backwards compatibility

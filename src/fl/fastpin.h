@@ -13,15 +13,15 @@
 
 #pragma once
 
-#include "fl/compiler_control.h"
-#include "led_sysdefs.h"
+#include "fl/compiler_control.h"  // IWYU pragma: keep
+#include "led_sysdefs.h"  // IWYU pragma: keep
 
 /// Constant for "not a pin"
 /// @todo Unused, remove?
 #define NO_PIN 255
 
 // Include base class definitions (Selectable, FastPin<>, FastPinBB, __FL_PORT_INFO, etc.)
-#include "fl/fastpin_base.h"
+#include "fl/fastpin_base.h"  // IWYU pragma: keep
 
 // Platform-specific implementations:
 // This include handles platform detection and provides:
@@ -29,4 +29,4 @@
 // - FastPin<> specializations - platform-specific optimization
 // - For stub/WASM: no-op implementations
 // - For other platforms: optimized register access or Arduino PINMAP fallback
-#include "platforms/fastpin.h"
+#include "platforms/fastpin.h"  // IWYU pragma: keep

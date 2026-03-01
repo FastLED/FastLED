@@ -175,8 +175,8 @@ private:
 };
 
 // Forward declarations for clock types (now() implemented after fl::micros() declaration)
-struct steady_clock;
-struct system_clock;
+struct steady_clock;  // IWYU pragma: keep
+struct system_clock;  // IWYU pragma: keep
 
 /// @brief Monotonic clock that never goes backwards
 ///

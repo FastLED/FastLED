@@ -2,19 +2,19 @@
 
 // allow-include-after-namespace
 
-#include "fl/stl/stdint.h"
-#include "fl/int.h"
+#include "fl/stl/stdint.h"  // IWYU pragma: keep
+#include "fl/int.h"  // IWYU pragma: keep
 
 #include "fl/stl/bit_cast.h"
-#include "fl/stl/functional.h"
-#include "fl/stl/initializer_list.h"
+#include "fl/stl/functional.h"  // IWYU pragma: keep
+#include "fl/stl/initializer_list.h"  // IWYU pragma: keep
 #include "fl/insert_result.h"
 #include "fl/math_macros.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/allocator.h"
-#include "fl/stl/scoped_ptr.h"
+#include "fl/stl/scoped_ptr.h"  // IWYU pragma: keep
 #include "fl/stl/type_traits.h"
-#include "fl/stl/new.h"
+#include "fl/stl/new.h"  // IWYU pragma: keep
 #include "fl/stl/move.h"
 #include "fl/align.h"
 #include "fl/unused.h"
@@ -22,7 +22,7 @@
 namespace fl {
 
 // Forward declaration for span (defined in fl/slice.h)
-template <typename T, fl::size Extent> class span;
+template <typename T, fl::size Extent> class span;  // IWYU pragma: keep
 
 // Aligned memory block for inlined data structures.
 // Must be aligned to at least the alignment of T, but not less than the natural alignment

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "fl/stl/shared_ptr.h"
-#include "fl/stl/string.h"
-#include "fl/stl/stdint.h"
-#include "fl/bytestream.h"
-#include "fl/scoped_array.h"
-#include "fl/fx/frame.h"
-#include "fl/codec/idecoder.h"
+#include "fl/stl/shared_ptr.h"  // IWYU pragma: keep
+#include "fl/stl/string.h"  // IWYU pragma: keep
+#include "fl/stl/stdint.h"  // IWYU pragma: keep
+#include "fl/bytestream.h"  // IWYU pragma: keep
+#include "fl/scoped_array.h"  // IWYU pragma: keep
+#include "fl/fx/frame.h"  // IWYU pragma: keep
+#include "fl/codec/idecoder.h"  // IWYU pragma: keep
 
 namespace fl {
 

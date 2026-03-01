@@ -1,8 +1,8 @@
 #pragma once
 
-#include "fl/codec/common.h"
-#include "fl/stl/vector.h"
-#include "fl/stl/shared_ptr.h"
+#include "fl/codec/common.h"  // IWYU pragma: keep
+#include "fl/stl/vector.h"  // IWYU pragma: keep
+#include "fl/stl/shared_ptr.h"  // IWYU pragma: keep
 
 namespace fl {
 

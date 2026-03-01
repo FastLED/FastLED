@@ -10,7 +10,7 @@ Modern platforms are so fast that the extra performance is not needed, but accur
 
 #include "fl/int.h"
 #include "fl/stl/span.h"
-#include "fl/stl/shared_ptr.h"
+#include "fl/stl/shared_ptr.h"  // IWYU pragma: keep
 #include "fl/fixed_point.h"
 
 namespace fl {

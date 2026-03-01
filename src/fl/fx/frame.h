@@ -1,9 +1,9 @@
 #pragma once
 
 #include "fl/stl/cstring.h"
-#include "crgb.h"
+#include "crgb.h"  // IWYU pragma: keep
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
-#include "fl/xymap.h"
+#include "fl/xymap.h"  // IWYU pragma: keep
 #include "fl/stl/vector.h"
 #include "fl/stl/stdint.h"
 

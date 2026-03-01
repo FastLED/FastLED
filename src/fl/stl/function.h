@@ -4,7 +4,7 @@
 #include "fl/compiler_control.h"
 #include "fl/stl/variant.h"
 #include "fl/stl/cstring.h"
-#include "fl/stl/new.h"   // for placement new operator
+#include "fl/stl/new.h"   // for placement new operator  // IWYU pragma: keep
 #include "fl/align.h"
 #include "fl/stl/pair.h"
 #include "fl/stl/vector.h"

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "fl/stl/type_traits.h"
-#include "fl/stl/utility.h"       // for fl::move, fl::forward, fl::swap
-#include "fl/stl/stdint.h"        // for fl::size_t
+#include "fl/stl/utility.h"       // for fl::move, fl::forward, fl::swap  // IWYU pragma: keep
+#include "fl/stl/stdint.h"        // for fl::size_t  // IWYU pragma: keep
 #include "fl/stl/cstddef.h"       // for fl::nullptr_t
 
 namespace fl {

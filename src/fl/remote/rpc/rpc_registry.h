@@ -4,13 +4,13 @@
 
 #if FASTLED_ENABLE_JSON
 
-#include "fl/stl/stdint.h"
+#include "fl/stl/stdint.h"  // IWYU pragma: keep
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/function.h"
 #include "fl/stl/shared_ptr.h"
-#include "fl/stl/unordered_map.h"
-#include "fl/remote/rpc/rpc_invokers.h"
+#include "fl/stl/unordered_map.h"  // IWYU pragma: keep
+#include "fl/remote/rpc/rpc_invokers.h"  // IWYU pragma: keep
 #include "fl/remote/rpc/rpc_mode.h"
 
 namespace fl {

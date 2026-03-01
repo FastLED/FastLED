@@ -14,9 +14,9 @@
 namespace fl {
 
 // Forward declarations for string types
-class string;
-template <fl::size N> class StrN;
+class string;  // IWYU pragma: keep
+template <fl::size N> class StrN;  // IWYU pragma: keep
 
-class StringHolder;
+class StringHolder;  // IWYU pragma: keep
 
 } // namespace fl

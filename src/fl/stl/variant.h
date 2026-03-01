@@ -5,7 +5,7 @@
 #include "fl/stl/type_traits.h" // for fl::enable_if, fl::is_same, etc.
 #include "fl/stl/bit_cast.h"    // for safe type-punning
 #include "fl/stl/move.h"          // for move
-#include "fl/stl/new.h"          // for placement new operator (must be before namespace fl)
+#include "fl/stl/new.h"          // for placement new operator (must be before namespace fl)  // IWYU pragma: keep
 #include "fl/align.h"        // for FL_ALIGN_AS_T macro (GCC 4.8.3 workaround)
 #include "fl/compiler_control.h"
 

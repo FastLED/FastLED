@@ -7,9 +7,9 @@
 
 namespace fl {
 
-class CRGBPalette16;
-class CRGBPalette32;
-class CRGBPalette256;
+class CRGBPalette16;  // IWYU pragma: keep
+class CRGBPalette32;  // IWYU pragma: keep
+class CRGBPalette256;  // IWYU pragma: keep
 class GradientInlined;
 
 class Gradient {

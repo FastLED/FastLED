@@ -19,9 +19,9 @@
 namespace fl {
 
 class string;
-class string_view;
+class string_view;  // IWYU pragma: keep
 class StringHolder;
-template <typename T, fl::size Extent> class span;
+template <typename T, fl::size Extent> class span;  // IWYU pragma: keep
 
 // StringInterner: Manages a pool of unique strings as fl::string instances.
 // Interned strings are heap-allocated and reference-counted, making copies cheap.

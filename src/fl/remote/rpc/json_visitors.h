@@ -1,9 +1,9 @@
 #pragma once
 
-#include "fl/remote/rpc/type_conversion_result.h"
-#include "fl/stl/stdint.h"
-#include "fl/stl/string.h"
-#include "fl/stl/cstdlib.h"
+#include "fl/remote/rpc/type_conversion_result.h"  // IWYU pragma: keep
+#include "fl/stl/stdint.h"  // IWYU pragma: keep
+#include "fl/stl/string.h"  // IWYU pragma: keep
+#include "fl/stl/cstdlib.h"  // IWYU pragma: keep
 
 #if FASTLED_ENABLE_JSON
 

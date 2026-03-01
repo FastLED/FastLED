@@ -1,18 +1,18 @@
 #pragma once
 
-#include "fl/stl/cstring.h"
+#include "fl/stl/cstring.h"  // IWYU pragma: keep
 #include "fl/stl/type_traits.h"
-#include "fl/stl/bit_cast.h"
-#include "fl/stl/new.h"   // for placement new operator
-#include "fl/stl/allocator.h"
+#include "fl/stl/bit_cast.h"  // IWYU pragma: keep
+#include "fl/stl/new.h"   // for placement new operator  // IWYU pragma: keep
+#include "fl/stl/allocator.h"  // IWYU pragma: keep
 
-#include "fl/stl/initializer_list.h"
-#include "fl/alloca.h"
+#include "fl/stl/initializer_list.h"  // IWYU pragma: keep
+#include "fl/alloca.h"  // IWYU pragma: keep
 
 namespace fl {
 
 // Forward declaration for span (defined in fl/slice.h)
-template <typename T, fl::size Extent> class span;
+template <typename T, fl::size Extent> class span;  // IWYU pragma: keep
 
 /**
  * @brief A fixed-size array implementation similar to std::array

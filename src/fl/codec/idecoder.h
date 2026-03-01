@@ -1,10 +1,10 @@
 #pragma once
 
-#include "fl/stl/shared_ptr.h"
+#include "fl/stl/shared_ptr.h"  // IWYU pragma: keep
 #include "fl/stl/string.h"
 #include "fl/stl/stdint.h"
 #include "fl/bytestream.h"
-#include "fl/stl/shared_ptr.h"
+#include "fl/stl/shared_ptr.h"  // IWYU pragma: keep
 #include "fl/stl/function.h"
 #include "fl/audio.h"
 #include "fl/fx/frame.h"

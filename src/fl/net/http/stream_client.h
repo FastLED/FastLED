@@ -1,7 +1,7 @@
 #pragma once
 
 #include "stream_transport.h"
-#include "native_client.h"
+#include "native_client.h"  // IWYU pragma: keep
 #include "fl/stl/string.h"
 #include "fl/stl/unique_ptr.h"
 

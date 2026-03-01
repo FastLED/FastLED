@@ -8,7 +8,7 @@
 namespace fl {
 
 class FFTImpl;
-class AudioSample;
+class AudioSample;  // IWYU pragma: keep
 
 class FFTBins {
     friend class FFTContext;

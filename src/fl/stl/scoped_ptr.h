@@ -3,7 +3,7 @@
 
 // Backward compatibility - include the new unique_ptr header
 #include "fl/stl/unique_ptr.h"
-#include "fl/scoped_array.h"
+#include "fl/scoped_array.h"  // IWYU pragma: keep
 
 namespace fl {
 

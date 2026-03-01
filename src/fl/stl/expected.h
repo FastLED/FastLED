@@ -58,7 +58,7 @@ enum class ResultError : u8 {
 };
 
 // Forward declaration for expected template
-template<typename T, typename E = ResultError> class expected;
+template<typename T, typename E = ResultError> class expected;  // IWYU pragma: keep
 
 /// @brief Error information for expected type
 /// @tparam E The error code type

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "crgb.h"
+#include "crgb.h"  // IWYU pragma: keep
 #include "fl/xymap.h"
 
 namespace fl {

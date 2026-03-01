@@ -24,7 +24,7 @@ namespace fl {
 // Forward declarations
 class IChannelDriver;
 class ChannelData;
-struct ChannelOptions;
+struct ChannelOptions;  // IWYU pragma: keep
 class Channel;
 FASTLED_SHARED_PTR(Channel);
 FASTLED_SHARED_PTR(ChannelData);

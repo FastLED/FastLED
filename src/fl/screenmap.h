@@ -27,7 +27,7 @@ using vec2f = vec2<float>;
 // Forward declare LUT types and smart pointers
 template<typename T> class LUT;
 using LUTXYFLOAT = LUT<vec2f>;
-template<typename T> class shared_ptr;
+template<typename T> class shared_ptr;  // IWYU pragma: keep
 using LUTXYFLOATPtr = shared_ptr<LUTXYFLOAT>;
 
 // ScreenMap screen map maps strip indexes to x,y coordinates for a ui

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/align.h"           // FL_ALIGN_AS_T macro for aligned storage
-#include "fl/stl/new.h"         // Placement new operator
+#include "fl/stl/new.h"         // Placement new operator  // IWYU pragma: keep
 #include "fl/compiler_control.h" // FL_HAS_SANITIZER_LSAN macro
 
 #if FL_HAS_SANITIZER_LSAN

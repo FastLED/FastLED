@@ -1,14 +1,14 @@
 #pragma once
 
-#include "fl/codec/common.h"
-#include "fl/audio.h"
+#include "fl/codec/common.h"  // IWYU pragma: keep
+#include "fl/audio.h"  // IWYU pragma: keep
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/stdint.h"
 #include "fl/bytestream.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/unique_ptr.h"
-#include "fl/stl/string.h"
+#include "fl/stl/string.h"  // IWYU pragma: keep
 
 namespace fl {
 

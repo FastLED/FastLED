@@ -1,11 +1,15 @@
 
 #pragma once
 
+// IWYU pragma: no_include "__cstddef/size_t.h"
+// IWYU pragma: no_include "__config"
+// IWYU pragma: no_include "version"
+
 // Define if initializer_list is available
 // Check for C++11 and if std::initializer_list exists
 #if !defined(FL_IS_AVR)
 // IWYU pragma: begin_keep
-#include <initializer_list>
+#include <initializer_list>  // IWYU pragma: keep
 // IWYU pragma: end_keep
 #endif
 
@@ -45,9 +49,9 @@ namespace std {
 
         // Allow compiler access to private constructor
         template<typename U> friend class initializer_list;
-    };
+    };  // IWYU pragma: keep
 
-    // Helper functions to match std::initializer_list interface
+    // Helper functions to match std::initializer_list interface  // IWYU pragma: keep
     template<typename T>
     constexpr const T* begin(initializer_list<T> il) {
         return il.begin();

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "fl/stl/cstdint.h"
+#include "fl/stl/cstdint.h"  // IWYU pragma: keep
 #include "fl/stl/string.h"
-#include "crgb.h"
-#include "fl/stl/ios.h"
+#include "crgb.h"  // IWYU pragma: keep
+#include "fl/stl/ios.h"  // IWYU pragma: keep
 #include "fl/stl/type_traits.h"
 
 
@@ -13,18 +13,18 @@ class Tile2x2_u8;
 class Tile2x2_u8_wrap;  // Forward declaration to support operator<< overload
 template <typename T> struct vec2;  // Forward declaration from fl/geometry.h
 template <typename T> struct rect;  // Forward declaration from fl/geometry.h
-template <typename T, typename Alloc> class vector;  // Forward declaration from fl/vector.h
+template <typename T, typename Alloc> class vector;  // Forward declaration from fl/vector.h  // IWYU pragma: keep
 template <typename T> class Optional;  // Forward declaration from fl/stl/optional.h
 template <typename Key, typename Hash, typename KeyEqual> class unordered_set;  // Forward declaration from fl/stl/unordered_set.h
 template <typename Key, typename T, typename Hash, typename KeyEqual, int INLINED_COUNT> class unordered_map;  // Forward declaration from fl/stl/unordered_map.h
 template <typename Key, typename Value, fl::size N> class FixedMap;  // Forward declaration from fl/stl/map.h
 template <typename Key, typename Value, typename Less, typename Allocator> class SortedHeapMap;  // Forward declaration from fl/stl/map.h
-template <typename T, fl::size Extent> class span;  // Forward declaration from fl/slice.h (no default arg to avoid redefinition)
+template <typename T, fl::size Extent> class span;  // Forward declaration from fl/slice.h (no default arg to avoid redefinition)  // IWYU pragma: keep
 template <typename T1, typename T2> struct pair;  // Forward declaration from fl/stl/pair.h
 class FFTBins;  // Forward declaration from fl/fft.h
 template <fl::u32 N> class BitsetFixed;
-class bitset_dynamic;
-template <fl::u32 N> class BitsetInlined;
+class bitset_dynamic;  // IWYU pragma: keep
+template <fl::u32 N> class BitsetInlined;  // IWYU pragma: keep
 
 // Note: int_cast_detail::cast_target is now defined in fl/stl/type_traits.h
 // and shared between sstream and StrN for consistent integer formatting

@@ -11,7 +11,7 @@
 namespace fl {
 
 // Forward declarations
-template<typename T> class shared_ptr;
+template<typename T> class shared_ptr;  // IWYU pragma: keep
 template<typename T> class weak_ptr;
 
 namespace detail {

@@ -2,11 +2,11 @@
 
 #include "fl/stl/stdint.h"
 
-#include "crgb.h"
+#include "crgb.h"  // IWYU pragma: keep
 #include "fl/fx/detail/draw_context.h"
-#include "fl/fx/detail/transition.h"
+#include "fl/fx/detail/transition.h"  // IWYU pragma: keep
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
-#include "fl/stl/string.h"
+#include "fl/stl/string.h"  // IWYU pragma: keep
 #include "fl/unused.h"
 
 namespace fl {

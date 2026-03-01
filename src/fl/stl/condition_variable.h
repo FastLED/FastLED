@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: no_include "platforms/is_platform.h"
+
 /// @file fl/stl/condition_variable.h
 /// @brief Condition variable wrapper providing a consistent interface across platforms
 ///

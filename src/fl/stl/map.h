@@ -2,12 +2,12 @@
 
 #include "fl/stl/stdint.h"
 
-#include "fl/stl/assert.h"
-#include "fl/stl/comparators.h"
+#include "fl/stl/assert.h"  // IWYU pragma: keep
+#include "fl/stl/comparators.h"  // IWYU pragma: keep
 #include "fl/insert_result.h"
 #include "fl/stl/pair.h"
-#include "fl/stl/type_traits.h"
-#include "fl/stl/type_traits.h"
+#include "fl/stl/type_traits.h"  // IWYU pragma: keep
+#include "fl/stl/type_traits.h"  // IWYU pragma: keep
 #include "fl/stl/vector.h"
 #include "fl/stl/detail/rbtree.h"
 #include "fl/stl/allocator.h"

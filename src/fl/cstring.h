@@ -4,7 +4,7 @@
 // Use "fl/stl/cstring.h" instead of "fl/cstring.h"
 // This stub exists for backward compatibility only
 
-#include "platforms/is_platform.h"
+#include "platforms/is_platform.h"  // IWYU pragma: keep
 
 #if defined(FL_IS_GCC) || defined(FL_IS_CLANG)
 #warning "fl/cstring.h is deprecated, use fl/stl/cstring.h instead"

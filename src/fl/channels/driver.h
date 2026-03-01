@@ -19,7 +19,7 @@
 #pragma once
 
 #include "fl/stl/shared_ptr.h"
-#include "fl/string.h"
+#include "fl/string.h"  // IWYU pragma: keep
 
 namespace fl {
 

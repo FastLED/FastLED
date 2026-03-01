@@ -1,11 +1,11 @@
 #pragma once
 
-#include "led_sysdefs.h"
-#include "pixeltypes.h"
+#include "led_sysdefs.h"  // IWYU pragma: keep
+#include "pixeltypes.h"  // IWYU pragma: keep
 #include "color.h"
 #include "dither_mode.h"
-#include "rgbw.h"
-#include "fl/string.h"
+#include "rgbw.h"  // IWYU pragma: keep
+#include "fl/string.h"  // IWYU pragma: keep
 #include "fl/stl/optional.h"
 
 namespace fl {

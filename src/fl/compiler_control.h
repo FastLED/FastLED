@@ -1,6 +1,6 @@
 #pragma once
 
-#include "platforms/is_platform.h"
+#include "platforms/is_platform.h"  // IWYU pragma: keep
 
 // Stringify helper for pragma arguments
 #define FL_STRINGIFY2(x) #x
