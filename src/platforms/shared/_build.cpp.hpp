@@ -18,6 +18,7 @@
 
 // Subdirectory implementations (alphabetical order)
 #include "platforms/shared/active_strip_data/_build.cpp.hpp"
+#include "platforms/shared/bitbang/_build.cpp.hpp"
 #include "platforms/shared/mock/_build.cpp.hpp"
 #include "platforms/shared/spi_bitbang/_build.cpp.hpp"
 #include "platforms/shared/ui/_build.cpp.hpp"

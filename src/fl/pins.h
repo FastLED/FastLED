@@ -37,6 +37,18 @@ class DigitalMultiWrite8 {
     /// 1 = HIGH, 0 = LOW. Pins set to -1 during init() are skipped.
     void write(fl::span<const u8> pin_data) const;
 
+    /// Write a single bitmask byte to the 8 pins.
+    ///
+    /// Same as write() but optimized for the single-byte case in
+    /// timing-critical hot loops (clockless bit-banging). Avoids span
+    /// iteration overhead — inlines directly to two nibble LUT lookups.
+    void writeByte(u8 byte) const {
+        const u8 lo_nib = byte & 0x0F;
+        const u8 hi_nib = (byte >> 4) & 0x0F;
+        applyNibble(mSetLo[lo_nib], mClrLo[lo_nib]);
+        applyNibble(mSetHi[hi_nib], mClrHi[hi_nib]);
+    }
+
     /// Check whether all active pins (non -1) share the same GPIO port.
     /// Returns true if fewer than 2 active pins exist (trivially same port).
     bool allSamePort() const;

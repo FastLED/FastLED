@@ -410,6 +410,84 @@ FL_TEST_CASE("digitalMultiWrite8_all_skipped") {
 }
 
 // ============================================================================
+// writeByte() Tests
+// ============================================================================
+
+FL_TEST_CASE("digitalMultiWrite8_writeByte_all_high") {
+    fl::DigitalMultiWrite8 writer;
+    fl::Pins8 pins = {{40, 41, 42, 43, 44, 45, 46, 47}};
+    writer.init(pins);
+    writer.writeByte(0xFF);
+    for (int i = 0; i < 8; ++i) {
+        FL_REQUIRE_EQ(fl::digitalRead(40 + i), fl::PinValue::High);
+    }
+}
+
+FL_TEST_CASE("digitalMultiWrite8_writeByte_all_low") {
+    fl::DigitalMultiWrite8 writer;
+    fl::Pins8 pins = {{40, 41, 42, 43, 44, 45, 46, 47}};
+    writer.init(pins);
+    writer.writeByte(0xFF);  // set high first
+    writer.writeByte(0x00);  // then clear
+    for (int i = 0; i < 8; ++i) {
+        FL_REQUIRE_EQ(fl::digitalRead(40 + i), fl::PinValue::Low);
+    }
+}
+
+FL_TEST_CASE("digitalMultiWrite8_writeByte_alternating") {
+    fl::DigitalMultiWrite8 writer;
+    fl::Pins8 pins = {{40, 41, 42, 43, 44, 45, 46, 47}};
+    writer.init(pins);
+    writer.writeByte(0xAA);  // 0b10101010
+    FL_REQUIRE_EQ(fl::digitalRead(40), fl::PinValue::Low);
+    FL_REQUIRE_EQ(fl::digitalRead(41), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(42), fl::PinValue::Low);
+    FL_REQUIRE_EQ(fl::digitalRead(43), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(44), fl::PinValue::Low);
+    FL_REQUIRE_EQ(fl::digitalRead(45), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(46), fl::PinValue::Low);
+    FL_REQUIRE_EQ(fl::digitalRead(47), fl::PinValue::High);
+}
+
+FL_TEST_CASE("digitalMultiWrite8_writeByte_skip_pins") {
+    fl::DigitalMultiWrite8 writer;
+    fl::Pins8 pins = {{50, -1, -1, -1, -1, -1, -1, 57}};
+    fl::digitalWrite(50, fl::PinValue::Low);
+    fl::digitalWrite(57, fl::PinValue::Low);
+    writer.init(pins);
+    writer.writeByte(0x81);  // bits 0 and 7 set
+    FL_REQUIRE_EQ(fl::digitalRead(50), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(57), fl::PinValue::High);
+}
+
+FL_TEST_CASE("digitalMultiWrite8_writeByte_matches_write") {
+    fl::DigitalMultiWrite8 writer;
+    fl::Pins8 pins = {{40, 41, 42, 43, 44, 45, 46, 47}};
+    writer.init(pins);
+
+    // Use writeByte
+    writer.writeByte(0xAA);
+    fl::PinValue wb_results[8];
+    for (int i = 0; i < 8; ++i) {
+        wb_results[i] = fl::digitalRead(40 + i);
+    }
+
+    // Reset pins
+    for (int i = 0; i < 8; ++i) {
+        fl::digitalWrite(40 + i, fl::PinValue::Low);
+    }
+
+    // Use write(span)
+    fl::u8 data[] = {0xAA};
+    writer.write(fl::span<const fl::u8>(data, 1));
+
+    // Both methods produce identical results
+    for (int i = 0; i < 8; ++i) {
+        FL_REQUIRE_EQ(fl::digitalRead(40 + i), wb_results[i]);
+    }
+}
+
+// ============================================================================
 // allSamePort() and auto-disable Tests
 // ============================================================================
 // On stub platform, FastPin<N>::port() returns nullptr for all pins, so
