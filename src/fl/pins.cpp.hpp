@@ -22,7 +22,7 @@ namespace fl {
 
 namespace pin_port_table {
 
-constexpr int TABLE_SIZE = 32;
+constexpr int TABLE_SIZE = 64;
 
 using port_ptr_t = typename FastPin<0>::port_ptr_t;
 
@@ -40,6 +40,14 @@ inline const port_ptr_t* portTable() {
         PortEntry<20>::get(), PortEntry<21>::get(), PortEntry<22>::get(), PortEntry<23>::get(),
         PortEntry<24>::get(), PortEntry<25>::get(), PortEntry<26>::get(), PortEntry<27>::get(),
         PortEntry<28>::get(), PortEntry<29>::get(), PortEntry<30>::get(), PortEntry<31>::get(),
+        PortEntry<32>::get(), PortEntry<33>::get(), PortEntry<34>::get(), PortEntry<35>::get(),
+        PortEntry<36>::get(), PortEntry<37>::get(), PortEntry<38>::get(), PortEntry<39>::get(),
+        PortEntry<40>::get(), PortEntry<41>::get(), PortEntry<42>::get(), PortEntry<43>::get(),
+        PortEntry<44>::get(), PortEntry<45>::get(), PortEntry<46>::get(), PortEntry<47>::get(),
+        PortEntry<48>::get(), PortEntry<49>::get(), PortEntry<50>::get(), PortEntry<51>::get(),
+        PortEntry<52>::get(), PortEntry<53>::get(), PortEntry<54>::get(), PortEntry<55>::get(),
+        PortEntry<56>::get(), PortEntry<57>::get(), PortEntry<58>::get(), PortEntry<59>::get(),
+        PortEntry<60>::get(), PortEntry<61>::get(), PortEntry<62>::get(), PortEntry<63>::get(),
     };
     return table;
 }
@@ -209,6 +217,138 @@ void digitalMultiWrite8(const Pins8& pins, fl::span<const u8> pin_data) {
     DigitalMultiWrite8 writer;
     writer.init(pins);
     writer.write(pin_data);
+}
+
+// ============================================================================
+// DigitalMultiWrite16
+// ============================================================================
+
+void DigitalMultiWrite16::init(const Pins16& pins) {
+    for (u8 i = 0; i < 16; ++i) {
+        mPins[i] = pins.pins[i];
+    }
+
+    // Find the majority port and disable pins on other ports.
+    int port_counts[64] = {};
+    int port_ids[16] = {};
+    int num_active = 0;
+    for (u8 i = 0; i < 16; ++i) {
+        if (mPins[i] < 0) {
+            port_ids[i] = -1;
+            continue;
+        }
+        int p = fl::pinToPort(mPins[i]);
+        port_ids[i] = p;
+        if (p >= 0 && p < 64) {
+            port_counts[p]++;
+        }
+        num_active++;
+    }
+
+    // Find the port with the highest pin count.
+    int best_port = -1;
+    int best_count = 0;
+    for (int p = 0; p < 64; ++p) {
+        if (port_counts[p] > best_count) {
+            best_count = port_counts[p];
+            best_port = p;
+        }
+    }
+
+    // Disable pins that aren't on the majority port and warn.
+    if (best_port >= 0 && best_count < num_active) {
+        for (u8 i = 0; i < 16; ++i) {
+            if (mPins[i] < 0) {
+                continue;
+            }
+            if (port_ids[i] != best_port) {
+                FL_WARN("digitalMultiWrite16: pin "
+                        << mPins[i] << " (port " << port_ids[i]
+                        << ") disabled — not on majority port "
+                        << best_port);
+                mPins[i] = -1;
+            }
+        }
+    }
+
+    for (u8 n = 0; n < 4; ++n) {
+        buildNibbleLut(n * 4, mSetNib[n], mClrNib[n]);
+    }
+}
+
+void DigitalMultiWrite16::write(fl::span<const u16> pin_data) const {
+    for (fl::size i = 0; i < pin_data.size(); ++i) {
+        const u16 word = pin_data[i];
+        for (u8 n = 0; n < 4; ++n) {
+            const u8 nib = (word >> (n * 4)) & 0x0F;
+            applyNibble(mSetNib[n][nib], mClrNib[n][nib]);
+        }
+    }
+}
+
+bool DigitalMultiWrite16::allSamePort() const {
+    int first_port = -1;
+    for (u8 i = 0; i < 16; ++i) {
+        if (mPins[i] < 0) {
+            continue;
+        }
+        int port = fl::pinToPort(mPins[i]);
+        if (first_port < 0) {
+            first_port = port;
+        } else if (port != first_port) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void DigitalMultiWrite16::buildNibbleLut(u8 bit_offset,
+                                          PinList (&set_lut)[16],
+                                          PinList (&clr_lut)[16]) {
+    for (u16 nib = 0; nib < 16; ++nib) {
+        PinList &s = set_lut[nib];
+        PinList &c = clr_lut[nib];
+        s.count = 0;
+        c.count = 0;
+        for (u8 b = 0; b < 4; ++b) {
+            int pin = mPins[bit_offset + b];
+            if (pin < 0) {
+                continue;
+            }
+            if (nib & (1 << b)) {
+                s.pins[s.count++] = pin;
+            } else {
+                c.pins[c.count++] = pin;
+            }
+        }
+    }
+}
+
+void DigitalMultiWrite16::applyNibble(const PinList &set, const PinList &clr) {
+    for (u8 i = 0; i < set.count; ++i) {
+        fl::digitalWrite(set.pins[i], PinValue::High);
+    }
+    for (u8 i = 0; i < clr.count; ++i) {
+        fl::digitalWrite(clr.pins[i], PinValue::Low);
+    }
+}
+
+void digitalMultiWrite16(const Pins16& pins, fl::span<const u16> pin_data) {
+    DigitalMultiWrite16 writer;
+    writer.init(pins);
+    writer.write(pin_data);
+}
+
+// ============================================================================
+// pinMap
+// ============================================================================
+
+void pinMap(fl::span<PinInfo> pins) {
+    for (fl::size i = 0; i < pins.size(); ++i) {
+        if (pins[i].pin >= 0) {
+            pins[i].port = pinToPort(pins[i].pin);
+        }
+    }
 }
 
 } // namespace fl

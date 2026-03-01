@@ -507,6 +507,139 @@ FL_TEST_CASE("digitalMultiWrite8_single_active_pin") {
 // pinToPort Tests
 // ============================================================================
 
+// ============================================================================
+// digitalMultiWrite16 Tests
+// ============================================================================
+
+FL_TEST_CASE("digitalMultiWrite16_all_high") {
+    fl::Pins16 pins = {{40, 41, 42, 43, 44, 45, 46, 47,
+                         48, 49, 50, 51, 52, 53, 54, 55}};
+    fl::u16 data[] = {0xFFFF};
+    fl::digitalMultiWrite16(pins, fl::span<const fl::u16>(data, 1));
+    for (int i = 0; i < 16; ++i) {
+        FL_REQUIRE_EQ(fl::digitalRead(40 + i), fl::PinValue::High);
+    }
+}
+
+FL_TEST_CASE("digitalMultiWrite16_all_low") {
+    fl::Pins16 pins = {{40, 41, 42, 43, 44, 45, 46, 47,
+                         48, 49, 50, 51, 52, 53, 54, 55}};
+    fl::u16 data[] = {0x0000};
+    fl::digitalMultiWrite16(pins, fl::span<const fl::u16>(data, 1));
+    for (int i = 0; i < 16; ++i) {
+        FL_REQUIRE_EQ(fl::digitalRead(40 + i), fl::PinValue::Low);
+    }
+}
+
+FL_TEST_CASE("digitalMultiWrite16_alternating") {
+    // 0xAAAA = 0b1010101010101010 -> odd bits high, even bits low
+    fl::Pins16 pins = {{40, 41, 42, 43, 44, 45, 46, 47,
+                         48, 49, 50, 51, 52, 53, 54, 55}};
+    fl::u16 data[] = {0xAAAA};
+    fl::digitalMultiWrite16(pins, fl::span<const fl::u16>(data, 1));
+    for (int i = 0; i < 16; ++i) {
+        if (i & 1) {
+            FL_REQUIRE_EQ(fl::digitalRead(40 + i), fl::PinValue::High);
+        } else {
+            FL_REQUIRE_EQ(fl::digitalRead(40 + i), fl::PinValue::Low);
+        }
+    }
+}
+
+FL_TEST_CASE("digitalMultiWrite16_multiple_words") {
+    fl::Pins16 pins = {{40, 41, 42, 43, 44, 45, 46, 47,
+                         48, 49, 50, 51, 52, 53, 54, 55}};
+    fl::u16 data[] = {0xAAAA, 0x5555};
+    fl::digitalMultiWrite16(pins, fl::span<const fl::u16>(data, 2));
+    // Final state reflects the last word (0x5555 = 0b0101010101010101)
+    for (int i = 0; i < 16; ++i) {
+        if (i & 1) {
+            FL_REQUIRE_EQ(fl::digitalRead(40 + i), fl::PinValue::Low);
+        } else {
+            FL_REQUIRE_EQ(fl::digitalRead(40 + i), fl::PinValue::High);
+        }
+    }
+}
+
+FL_TEST_CASE("digitalMultiWrite16_empty_data") {
+    fl::Pins16 pins = {{40, 41, 42, 43, 44, 45, 46, 47,
+                         48, 49, 50, 51, 52, 53, 54, 55}};
+    fl::digitalMultiWrite16(pins, fl::span<const fl::u16>());
+}
+
+FL_TEST_CASE("digitalMultiWrite16_skip_pins") {
+    fl::digitalWrite(40, fl::PinValue::Low);
+    fl::digitalWrite(55, fl::PinValue::Low);
+    fl::Pins16 pins = {{40, -1, -1, -1, -1, -1, -1, -1,
+                         -1, -1, -1, -1, -1, -1, -1, 55}};
+    fl::u16 data[] = {0x8001}; // bits 0 and 15 set
+    fl::digitalMultiWrite16(pins, fl::span<const fl::u16>(data, 1));
+    FL_REQUIRE_EQ(fl::digitalRead(40), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(55), fl::PinValue::High);
+}
+
+FL_TEST_CASE("digitalMultiWrite16_all_skipped") {
+    fl::Pins16 pins = {{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}};
+    fl::u16 data[] = {0xFFFF};
+    fl::digitalMultiWrite16(pins, fl::span<const fl::u16>(data, 1));
+}
+
+FL_TEST_CASE("digitalMultiWrite16_high_byte_only") {
+    // 0xFF00 = upper 8 bits set, lower 8 bits clear
+    fl::Pins16 pins = {{40, 41, 42, 43, 44, 45, 46, 47,
+                         48, 49, 50, 51, 52, 53, 54, 55}};
+    fl::u16 data[] = {0xFF00};
+    fl::digitalMultiWrite16(pins, fl::span<const fl::u16>(data, 1));
+    for (int i = 0; i < 8; ++i) {
+        FL_REQUIRE_EQ(fl::digitalRead(40 + i), fl::PinValue::Low);
+    }
+    for (int i = 8; i < 16; ++i) {
+        FL_REQUIRE_EQ(fl::digitalRead(40 + i), fl::PinValue::High);
+    }
+}
+
+FL_TEST_CASE("digitalMultiWrite16_same_port") {
+    fl::DigitalMultiWrite16 writer;
+    fl::Pins16 pins = {{0, 1, 2, 3, 4, 5, 6, 7,
+                         8, 9, 10, 11, 12, 13, 14, 15}};
+    writer.init(pins);
+    FL_REQUIRE(writer.allSamePort());
+
+    fl::u16 data[] = {0xFFFF};
+    writer.write(fl::span<const fl::u16>(data, 1));
+    for (int i = 0; i < 16; ++i) {
+        FL_REQUIRE_EQ(fl::digitalRead(i), fl::PinValue::High);
+    }
+}
+
+FL_TEST_CASE("digitalMultiWrite16_minority_port_disabled") {
+    // 10 pins on port 0 (0-9), 6 pins on port 1 (32-37)
+    fl::DigitalMultiWrite16 writer;
+    fl::Pins16 pins = {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+                         32, 33, 34, 35, 36, 37}};
+    writer.init(pins);
+
+    FL_REQUIRE(writer.allSamePort());
+
+    for (int i = 0; i < 10; ++i) {
+        fl::digitalWrite(i, fl::PinValue::Low);
+    }
+    for (int i = 32; i < 38; ++i) {
+        fl::digitalWrite(i, fl::PinValue::Low);
+    }
+
+    fl::u16 data[] = {0xFFFF};
+    writer.write(fl::span<const fl::u16>(data, 1));
+    // Port 0 pins should be high
+    for (int i = 0; i < 10; ++i) {
+        FL_REQUIRE_EQ(fl::digitalRead(i), fl::PinValue::High);
+    }
+    // Port 1 pins should still be low (disabled)
+    for (int i = 32; i < 38; ++i) {
+        FL_REQUIRE_EQ(fl::digitalRead(i), fl::PinValue::Low);
+    }
+}
+
 FL_TEST_CASE("pinToPort_same_port_group") {
     // On stub, pins 0-31 should all return the same port ID
     int port0 = fl::pinToPort(0);
@@ -518,4 +651,33 @@ FL_TEST_CASE("pinToPort_same_port_group") {
 
 FL_TEST_CASE("pinToPort_negative_pin") {
     FL_REQUIRE_EQ(fl::pinToPort(-1), -1);
+}
+
+// ============================================================================
+// pinMap Tests
+// ============================================================================
+
+FL_TEST_CASE("pinMap_resolves_ports") {
+    fl::PinInfo infos[3];
+    infos[0].pin = 0;
+    infos[1].pin = 1;
+    infos[2].pin = 32;
+    fl::pinMap(fl::span<fl::PinInfo>(infos, 3));
+    // Pins 0 and 1 are on the same port (stub: pin/32 = 0)
+    FL_REQUIRE_EQ(infos[0].port, infos[1].port);
+    // Pin 32 is on a different port (stub: pin/32 = 1)
+    FL_REQUIRE(infos[2].port != infos[0].port);
+}
+
+FL_TEST_CASE("pinMap_skips_negative_pins") {
+    fl::PinInfo infos[2];
+    infos[0].pin = -1;
+    infos[1].pin = 5;
+    fl::pinMap(fl::span<fl::PinInfo>(infos, 2));
+    FL_REQUIRE_EQ(infos[0].port, -1);
+    FL_REQUIRE(infos[1].port >= 0);
+}
+
+FL_TEST_CASE("pinMap_empty_span") {
+    fl::pinMap(fl::span<fl::PinInfo>());
 }
