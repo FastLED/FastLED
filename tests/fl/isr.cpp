@@ -84,11 +84,11 @@ FL_TEST_CASE("test_isr_timer_basic") {
     g_isr_call_count = 0;
     g_isr_user_data_value = 0;
 
-    // Configure a 100 Hz timer (10ms period)
+    // Configure a 200 Hz timer (5ms period)
     isr::isr_config_t config;
     config.handler = test_isr_handler;
     config.user_data = nullptr;
-    config.frequency_hz = 100;  // 100 Hz
+    config.frequency_hz = 200;  // 200 Hz
     config.priority = isr::ISR_PRIORITY_MEDIUM;
     config.flags = isr::ISR_FLAG_IRAM_SAFE;
 
@@ -98,16 +98,16 @@ FL_TEST_CASE("test_isr_timer_basic") {
     FL_REQUIRE(result == 0);
     FL_REQUIRE(handle.is_valid());
 
-    // Wait for at least 2 calls (with 200ms timeout = 20 expected calls at 100 Hz)
+    // Wait for at least 2 calls (with 100ms timeout = 20 expected calls at 200 Hz)
     // This ensures the timer is working, even under heavy system load
     bool got_calls = wait_for_condition([](){ return g_isr_call_count.load() >= 2; },
-                                        std::chrono::milliseconds(200)); // okay std namespace
+                                        std::chrono::milliseconds(100)); // okay std namespace
     FL_REQUIRE(got_calls);
 
     int call_count = g_isr_call_count.load();
     // Should have gotten at least 2 calls, upper bound is generous for slow systems
     FL_REQUIRE(call_count >= 2);
-    FL_REQUIRE(call_count <= 25);  // At most 25 calls in 200ms at 100Hz (allowing overhead)
+    FL_REQUIRE(call_count <= 25);  // At most 25 calls in 100ms at 200Hz (allowing overhead)
 
     // Detach handler - use release memory order to ensure visibility
     result = isr::detachHandler(handle);
@@ -117,12 +117,12 @@ FL_TEST_CASE("test_isr_timer_basic") {
     // Capture count immediately after detach
     int final_count = g_isr_call_count.load();
 
-    // Wait up to 50ms to ensure no more ISR calls occur
+    // Wait up to 15ms to ensure no more ISR calls occur
     // Use condition variable wait to detect any unexpected calls immediately
     auto& manager = fl::isr::TimerThreadManager::instance();
     fl::unique_lock<fl::mutex> lock(manager.get_test_sync_mutex());
 
-    auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(50); // okay std namespace
+    auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(15); // okay std namespace
     bool spurious_call = false;
 
     while (std::chrono::steady_clock::now() < deadline) { // okay std namespace
@@ -155,7 +155,7 @@ FL_TEST_CASE("test_isr_timer_user_data") {
     isr::isr_config_t config;
     config.handler = test_isr_handler;
     config.user_data = &test_value;
-    config.frequency_hz = 50;  // 50 Hz
+    config.frequency_hz = 200;  // 200 Hz
     config.priority = isr::ISR_PRIORITY_LOW;
     config.flags = isr::ISR_FLAG_IRAM_SAFE;
 
@@ -164,10 +164,10 @@ FL_TEST_CASE("test_isr_timer_user_data") {
 
     FL_REQUIRE(result == 0);
 
-    // Wait for user data to be set (timeout 200ms = 10 expected calls at 50 Hz)
+    // Wait for user data to be set (timeout 50ms = 10 expected calls at 200 Hz)
     bool got_user_data = wait_for_condition(
         [test_value](){ return g_isr_user_data_value.load() == test_value; },
-        std::chrono::milliseconds(200)); // okay std namespace
+        std::chrono::milliseconds(50)); // okay std namespace
 
     // Verify user data was passed correctly
     FL_REQUIRE(got_user_data);
@@ -185,7 +185,7 @@ FL_TEST_CASE("test_isr_timer_enable_disable") {
     isr::isr_config_t config;
     config.handler = test_isr_handler;
     config.user_data = nullptr;
-    config.frequency_hz = 100;  // 100 Hz
+    config.frequency_hz = 200;  // 200 Hz
     config.priority = isr::ISR_PRIORITY_MEDIUM;
     config.flags = isr::ISR_FLAG_IRAM_SAFE;
 
@@ -193,9 +193,9 @@ FL_TEST_CASE("test_isr_timer_enable_disable") {
     int result = isr::attachTimerHandler(config, &handle);
     FL_REQUIRE(result == 0);
 
-    // Wait for at least one call (with 200ms timeout)
+    // Wait for at least one call (with 100ms timeout)
     bool got_calls = wait_for_condition([](){ return g_isr_call_count.load() > 0; },
-                                        std::chrono::milliseconds(200)); // okay std namespace
+                                        std::chrono::milliseconds(100)); // okay std namespace
     FL_REQUIRE(got_calls);
     int count_before_disable = g_isr_call_count.load();
     FL_REQUIRE(count_before_disable > 0);
@@ -205,13 +205,13 @@ FL_TEST_CASE("test_isr_timer_enable_disable") {
     FL_REQUIRE(result == 0);
     FL_REQUIRE(!isr::isHandlerEnabled(handle));
 
-    // Wait up to 50ms to ensure count stabilizes (no more ISR calls)
+    // Wait up to 15ms to ensure count stabilizes (no more ISR calls)
     // Use condition variable to detect any calls immediately
     auto& manager = fl::isr::TimerThreadManager::instance();
     fl::unique_lock<fl::mutex> lock(manager.get_test_sync_mutex());
 
     int count_after_disable = count_before_disable;
-    auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(50); // okay std namespace
+    auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(15); // okay std namespace
 
     while (std::chrono::steady_clock::now() < deadline) { // okay std namespace
         auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>( // okay std namespace
@@ -222,7 +222,7 @@ FL_TEST_CASE("test_isr_timer_enable_disable") {
         if (current_count != count_after_disable) {
             count_after_disable = current_count;
             // Count changed, wait a bit more to ensure it stabilizes
-            deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(30); // okay std namespace
+            deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(10); // okay std namespace
         }
 
         manager.get_test_sync_cv().wait_for(lock, remaining);
@@ -237,10 +237,10 @@ FL_TEST_CASE("test_isr_timer_enable_disable") {
     FL_REQUIRE(result == 0);
     FL_REQUIRE(isr::isHandlerEnabled(handle));
 
-    // Wait for at least one new call after re-enabling (with 200ms timeout)
+    // Wait for at least one new call after re-enabling (with 100ms timeout)
     bool got_new_calls = wait_for_condition(
         [count_after_disable](){ return g_isr_call_count.load() > count_after_disable; },
-        std::chrono::milliseconds(200)); // okay std namespace
+        std::chrono::milliseconds(100)); // okay std namespace
     FL_REQUIRE(got_new_calls);
     int count_after_enable = g_isr_call_count.load();
     FL_REQUIRE(count_after_enable > count_after_disable);
@@ -308,7 +308,7 @@ FL_TEST_CASE("test_interrupts_global_disable_blocks_isr") {
     isr::isr_config_t config;
     config.handler = test_isr_handler;
     config.user_data = nullptr;
-    config.frequency_hz = 100;  // 100 Hz
+    config.frequency_hz = 200;  // 200 Hz
     config.priority = isr::ISR_PRIORITY_MEDIUM;
     config.flags = isr::ISR_FLAG_IRAM_SAFE;
 
@@ -316,9 +316,9 @@ FL_TEST_CASE("test_interrupts_global_disable_blocks_isr") {
     int result = isr::attachTimerHandler(config, &handle);
     FL_REQUIRE(result == 0);
 
-    // Wait for at least one call to verify timer is firing (with 200ms timeout)
+    // Wait for at least one call to verify timer is firing (with 100ms timeout)
     bool got_calls = wait_for_condition([](){ return g_isr_call_count.load() > 0; },
-                                        std::chrono::milliseconds(200)); // okay std namespace
+                                        std::chrono::milliseconds(100)); // okay std namespace
     FL_REQUIRE(got_calls);
     int count_enabled = g_isr_call_count.load();
     FL_REQUIRE(count_enabled > 0);
@@ -327,13 +327,13 @@ FL_TEST_CASE("test_interrupts_global_disable_blocks_isr") {
     interruptsDisable();
     FL_REQUIRE(interruptsDisabled());
 
-    // Wait up to 50ms to ensure count stabilizes (no more ISR calls)
+    // Wait up to 15ms to ensure count stabilizes (no more ISR calls)
     // Use condition variable to detect any calls immediately
     auto& manager = fl::isr::TimerThreadManager::instance();
     fl::unique_lock<fl::mutex> lock(manager.get_test_sync_mutex());
 
     int count_disabled = count_enabled;
-    auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(50); // okay std namespace
+    auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(15); // okay std namespace
 
     while (std::chrono::steady_clock::now() < deadline) { // okay std namespace
         auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>( // okay std namespace
@@ -344,7 +344,7 @@ FL_TEST_CASE("test_interrupts_global_disable_blocks_isr") {
         if (current_count != count_disabled) {
             count_disabled = current_count;
             // Count changed, wait a bit more to ensure it stabilizes
-            deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(30); // okay std namespace
+            deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(10); // okay std namespace
         }
 
         manager.get_test_sync_cv().wait_for(lock, remaining);
@@ -358,10 +358,10 @@ FL_TEST_CASE("test_interrupts_global_disable_blocks_isr") {
     interruptsEnable();
     FL_REQUIRE(interruptsEnabled());
 
-    // Wait for at least one new call after re-enabling (with 200ms timeout)
+    // Wait for at least one new call after re-enabling (with 100ms timeout)
     bool got_new_calls = wait_for_condition(
         [count_disabled](){ return g_isr_call_count.load() > count_disabled; },
-        std::chrono::milliseconds(200)); // okay std namespace
+        std::chrono::milliseconds(100)); // okay std namespace
     FL_REQUIRE(got_new_calls);
     int count_reenabled = g_isr_call_count.load();
     FL_REQUIRE(count_reenabled > count_disabled);

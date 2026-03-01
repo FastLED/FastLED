@@ -63,18 +63,16 @@ promise<T> delayed_resolve(const T& value, uint32_t delay_ms) {
     // This thread does NOT participate in global coordination (like ISR)
     fl::thread t([p, value, delay_ms]() mutable {
         // Sleep in small increments to allow early exit on shutdown
-        for (uint32_t elapsed = 0; elapsed < delay_ms && !g_shutdown_requested.load(); elapsed += 10) {
-            uint32_t sleep_time = FL_MIN(10u, delay_ms - elapsed);
+        for (uint32_t elapsed = 0; elapsed < delay_ms && !g_shutdown_requested.load(); elapsed += 1) {
+            uint32_t sleep_time = FL_MIN(1u, delay_ms - elapsed);
             fl::this_thread::sleep_for(fl::chrono::milliseconds(sleep_time));
         }
 
         // Only complete if not shutting down
         if (!g_shutdown_requested.load()) {
-            printf("    [Background] Promise resolving with value %d after %u ms\n", (int)value, delay_ms);
             // Complete promise WITHOUT acquiring global lock
             // The promise callbacks (cv.notify) can run from any thread
             p.complete_with_value(value);
-            printf("    [Background] Promise completed with value %d\n", (int)value);
         }
     });
 
@@ -89,8 +87,8 @@ promise<T> delayed_reject(const Error& error, uint32_t delay_ms) {
 
     fl::thread t([p, error, delay_ms]() mutable {
         // Sleep in small increments to allow early exit on shutdown
-        for (uint32_t elapsed = 0; elapsed < delay_ms && !g_shutdown_requested.load(); elapsed += 10) {
-            uint32_t sleep_time = FL_MIN(10u, delay_ms - elapsed);
+        for (uint32_t elapsed = 0; elapsed < delay_ms && !g_shutdown_requested.load(); elapsed += 1) {
+            uint32_t sleep_time = FL_MIN(1u, delay_ms - elapsed);
             fl::this_thread::sleep_for(fl::chrono::milliseconds(sleep_time));
         }
 
@@ -129,12 +127,12 @@ FL_TEST_CASE("await in coroutine - basic resolution") {
     config.name = "TestAwait";
     auto coro = task::coroutine(config);
 
-    // Wait for coroutine to complete (max 500ms to account for slow CI)
+    // Wait for coroutine to complete (max 200ms to account for slow CI)
     int timeout = 0;
-    while (!test_completed.load() && timeout < 500) {
+    while (!test_completed.load() && timeout < 200) {
         async_yield();  // Release lock and pump async tasks
-        delay(10);
-        timeout += 10;
+        delay(5);
+        timeout += 5;
     }
 
     FL_CHECK(test_completed.load());
@@ -167,12 +165,12 @@ FL_TEST_CASE("await in coroutine - error handling") {
     config.name = "TestAwaitError";
     auto coro = task::coroutine(config);
 
-    // Wait for completion (max 500ms to account for slow CI)
+    // Wait for completion (max 200ms to account for slow CI)
     int timeout = 0;
-    while (!test_completed.load() && timeout < 500) {
+    while (!test_completed.load() && timeout < 200) {
         async_yield();
-        delay(10);
-        timeout += 10;
+        delay(5);
+        timeout += 5;
     }
 
     FL_CHECK(test_completed.load());
@@ -204,12 +202,12 @@ FL_TEST_CASE("await in coroutine - already completed promise") {
     config.name = "TestAwaitImmediate";
     auto coro = task::coroutine(config);
 
-    // Should complete quickly (within 500ms to account for slow CI)
+    // Should complete quickly (within 200ms to account for slow CI)
     int timeout = 0;
-    while (!test_completed.load() && timeout < 500) {
+    while (!test_completed.load() && timeout < 200) {
         async_yield();
-        delay(10);
-        timeout += 10;
+        delay(5);
+        timeout += 5;
     }
 
     FL_CHECK(test_completed.load());
@@ -230,8 +228,8 @@ FL_TEST_CASE("await in coroutine - multiple concurrent coroutines") {
         CoroutineConfig config;
         config.function = [&, i]() {
             printf("  Coroutine %d: Started\n", i);
-            // Each promise resolves to i*10 after (i*10)ms
-            auto p = delayed_resolve<int>(i * 10, i * 10);
+            // Each promise resolves to i*10 after (i*2)ms
+            auto p = delayed_resolve<int>(i * 10, i * 2);
             printf("  Coroutine %d: Created promise, calling await()\n", i);
             auto result = fl::await(p);
             printf("  Coroutine %d: await() returned, ok=%d\n", i, result.ok());
@@ -249,16 +247,16 @@ FL_TEST_CASE("await in coroutine - multiple concurrent coroutines") {
         printf("Test: Spawned coroutine %d\n", i);
     }
 
-    // Wait for all coroutines to complete (max 2000ms to account for slow CI)
+    // Wait for all coroutines to complete (max 500ms to account for slow CI)
     int timeout = 0;
     printf("Test: Waiting for coroutines to complete...\n");
-    while (completed_count.load() < 5 && timeout < 2000) {
-        if (timeout % 200 == 0) {
+    while (completed_count.load() < 5 && timeout < 500) {
+        if (timeout % 100 == 0) {
             printf("Test: timeout=%d, completed=%d, sum=%d\n", timeout, completed_count.load(), sum.load());
         }
         async_yield();
-        delay(10);
-        timeout += 10;
+        delay(5);
+        timeout += 5;
     }
     printf("Test: Wait complete. completed=%d, sum=%d\n", completed_count.load(), sum.load());
 
@@ -291,12 +289,12 @@ FL_TEST_CASE("await in coroutine - invalid promise") {
     config.name = "TestAwaitInvalid";
     auto coro = task::coroutine(config);
 
-    // Should complete quickly (within 500ms to account for slow CI)
+    // Should complete quickly (within 200ms to account for slow CI)
     int timeout = 0;
-    while (!test_completed.load() && timeout < 500) {
+    while (!test_completed.load() && timeout < 200) {
         async_yield();
-        delay(10);
-        timeout += 10;
+        delay(5);
+        timeout += 5;
     }
 
     FL_CHECK(test_completed.load());
@@ -329,12 +327,12 @@ FL_TEST_CASE("await in coroutine - sequential awaits") {
     config.name = "TestAwaitSequential";
     auto coro = task::coroutine(config);
 
-    // Wait for completion (max 500ms to account for slow CI)
+    // Wait for completion (max 200ms to account for slow CI)
     int timeout = 0;
-    while (!test_completed.load() && timeout < 500) {
+    while (!test_completed.load() && timeout < 200) {
         async_yield();
-        delay(10);
-        timeout += 10;
+        delay(5);
+        timeout += 5;
     }
 
     FL_CHECK(test_completed.load());
@@ -372,8 +370,8 @@ FL_TEST_CASE("await vs await_top_level - CPU usage comparison") {
     int timeout = 0;
     while (!await_completed.load() && timeout < 200) {
         async_yield();
-        delay(10);
-        timeout += 10;
+        delay(5);
+        timeout += 5;
     }
     FL_CHECK(await_completed.load());
 
@@ -464,10 +462,10 @@ FL_TEST_CASE("global coordination - no concurrent execution") {
 
     // Wait for coroutine to complete
     int timeout = 0;
-    while (!test_completed.load() && timeout < 5000) {
+    while (!test_completed.load() && timeout < 500) {
         async_yield();  // Keep yielding to let coroutine finish
-        delay(10);
-        timeout += 10;
+        delay(1);
+        timeout += 1;
     }
 
     // Verify no race condition detected
@@ -519,10 +517,10 @@ FL_TEST_CASE("global coordination - await releases lock for other threads") {
     // Wait for BOTH coroutines to actually complete (progress == 2)
     // This avoids race condition where one coroutine finishes before the other
     int timeout = 0;
-    while ((coroutine1_progress.load() < 2 || coroutine2_progress.load() < 2) && timeout < 5000) {
+    while ((coroutine1_progress.load() < 2 || coroutine2_progress.load() < 2) && timeout < 500) {
         async_yield();
-        delay(10);
-        timeout += 10;
+        delay(1);
+        timeout += 1;
     }
 
     FL_CHECK(coroutine1_progress.load() == 2);

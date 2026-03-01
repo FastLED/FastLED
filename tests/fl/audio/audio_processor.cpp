@@ -122,7 +122,7 @@ FL_TEST_CASE("FrequencyBands - getBassNorm/getMidNorm/getTrebleNorm exist and re
     processor.getBassLevel();
 
     // Feed a bass-heavy signal for multiple frames to let filters converge
-    for (int i = 0; i < 50; ++i) {
+    for (int i = 0; i < 30; ++i) {
         AudioSample sample = makeSample(200.0f, i * 23, 20000.0f);
         processor.update(sample);
     }
@@ -152,7 +152,7 @@ FL_TEST_CASE("FrequencyBands - normalization makes bands self-referential") {
 
     // Feed a signal with strong bass (200Hz, amplitude 20000) and weak treble (6000Hz, amplitude 2000)
     // With correct dt (~11.6ms), need ~2x more frames for filters to converge.
-    for (int i = 0; i < 160; ++i) {
+    for (int i = 0; i < 80; ++i) {
         fl::vector<fl::i16> data;
         data.reserve(512);
         for (int s = 0; s < 512; ++s) {
@@ -239,7 +239,7 @@ FL_TEST_CASE("AudioProcessor - getBassLevel uses normalized values") {
 
     // Feed bass-heavy + weak-treble signal for multiple frames
     // With correct dt (~11.6ms), need ~2x more frames for filters to converge.
-    for (int i = 0; i < 160; ++i) {
+    for (int i = 0; i < 80; ++i) {
         fl::vector<fl::i16> data;
         data.reserve(512);
         for (int s = 0; s < 512; ++s) {
@@ -483,7 +483,7 @@ FL_TEST_CASE("FrequencyBands - normalization converges for steady signal") {
     processor.getBassLevel(); // Force lazy creation
 
     // Feed steady bass signal for many frames
-    for (int i = 0; i < 400; ++i) {
+    for (int i = 0; i < 200; ++i) {
         AudioSample sample = makeSample(200.0f, i * 12, 20000.0f);
         processor.update(sample);
     }

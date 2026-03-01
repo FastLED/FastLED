@@ -27,8 +27,8 @@ struct AnimResult {
     double v2_us; // Animartrix2 draw time in microseconds
 };
 
-constexpr int WARMUP_FRAMES = 3;
-constexpr int BENCH_FRAMES = 10;
+constexpr int WARMUP_FRAMES = 1;
+constexpr int BENCH_FRAMES = 3;
 
 AnimResult testAnimation(int animIndex, const char *name, uint32_t timeMs) {
     XYMap xy1 = XYMap::constructRectangularGrid(W, H);

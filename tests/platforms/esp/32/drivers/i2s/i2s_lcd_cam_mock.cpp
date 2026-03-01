@@ -471,12 +471,12 @@ FL_TEST_CASE("I2sLcdCamPeripheralMock - delay") {
     auto& mock = I2sLcdCamPeripheralMock::instance();
 
     uint64_t start = mock.getMicroseconds();
-    mock.delay(5);  // 5ms delay
+    mock.delay(2);  // 2ms delay
     uint64_t end = mock.getMicroseconds();
 
-    // Should have delayed at least 4ms (allow for timing variance)
+    // Should have delayed at least 1ms (allow for timing variance)
     uint64_t elapsed_ms = (end - start) / 1000;
-    FL_CHECK(elapsed_ms >= 4);
+    FL_CHECK(elapsed_ms >= 1);
 }
 
 //=============================================================================

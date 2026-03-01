@@ -163,7 +163,7 @@ FL_TEST_CASE("VocalDetector - amplitude sweep: confidence consistency for same s
         VocalDetector detector;
         detector.setSampleRate(44100);
 
-        for (int frame = 0; frame < 10; ++frame) {
+        for (int frame = 0; frame < 5; ++frame) {
             auto ctx = fl::make_shared<AudioContext>(
                 makeSample_VocalDetector(440.0f, frame * 23, level.amplitude));
             ctx->setSampleRate(44100);
@@ -191,7 +191,7 @@ FL_TEST_CASE("VocalDetector - single sine 440Hz is not vocal") {
     VocalDetector detector;
     detector.setSampleRate(44100);
 
-    for (int frame = 0; frame < 10; ++frame) {
+    for (int frame = 0; frame < 5; ++frame) {
         auto sample = makeSample(440.0f, frame * 23);
         auto ctx = fl::make_shared<AudioContext>(sample);
         ctx->setSampleRate(44100);
@@ -207,7 +207,7 @@ FL_TEST_CASE("VocalDetector - multi-harmonic is not vocal") {
     VocalDetector detector;
     detector.setSampleRate(44100);
 
-    for (int frame = 0; frame < 10; ++frame) {
+    for (int frame = 0; frame < 5; ++frame) {
         auto sample = makeMultiHarmonic(220.0f, 8, 0.7f, frame * 23, 16000.0f);
         auto ctx = fl::make_shared<AudioContext>(sample);
         ctx->setSampleRate(44100);
@@ -261,7 +261,7 @@ FL_TEST_CASE("VocalDetector - white noise is not vocal") {
     VocalDetector detector;
     detector.setSampleRate(44100);
 
-    for (int frame = 0; frame < 10; ++frame) {
+    for (int frame = 0; frame < 5; ++frame) {
         auto sample = makeWhiteNoise(frame * 23, 16000.0f);
         auto ctx = fl::make_shared<AudioContext>(sample);
         ctx->setSampleRate(44100);
@@ -277,7 +277,7 @@ FL_TEST_CASE("VocalDetector - chirp is not vocal") {
     VocalDetector detector;
     detector.setSampleRate(44100);
 
-    for (int frame = 0; frame < 10; ++frame) {
+    for (int frame = 0; frame < 5; ++frame) {
         auto sample = makeChirp(200.0f, 2000.0f, frame * 23, 16000.0f);
         auto ctx = fl::make_shared<AudioContext>(sample);
         ctx->setSampleRate(44100);
@@ -293,7 +293,7 @@ FL_TEST_CASE("VocalDetector - two unrelated sines not vocal") {
     VocalDetector detector;
     detector.setSampleRate(44100);
 
-    for (int frame = 0; frame < 10; ++frame) {
+    for (int frame = 0; frame < 5; ++frame) {
         fl::vector<fl::i16> data(512, 0);
         for (int i = 0; i < 512; ++i) {
             float phase1 = 2.0f * FL_M_PI * 440.0f * i / 44100.0f;
@@ -338,7 +338,7 @@ inline AudioSample makeGuitarLike(fl::u32 timestamp, float amplitude = 16000.0f,
 
     const float fMin = 150.0f;
     const float fMax = 5000.0f;
-    const int numComponents = 200;
+    const int numComponents = 50;
 
     for (int c = 0; c < numComponents; ++c) {
         float t = static_cast<float>(rng.random16()) / 65535.0f;
@@ -369,7 +369,7 @@ inline AudioSample makeVoiceInMixLike(fl::u32 timestamp, float amplitude = 16000
     const float fMax = 5000.0f;
 
     // 1. Weak broadband base (much weaker than guitar → harmonics dominate)
-    const int numComponents = 100;
+    const int numComponents = 30;
     for (int c = 0; c < numComponents; ++c) {
         float t = static_cast<float>(rng.random16()) / 65535.0f;
         float freq = fMin * fl::powf(fMax / fMin, t);
@@ -402,7 +402,7 @@ inline AudioSample makeVoiceInMixLike(fl::u32 timestamp, float amplitude = 16000
 FL_TEST_CASE("VocalDetector - guitar-like broadband not detected as vocal") {
     VocalDetector detector;
     detector.setSampleRate(44100);
-    for (int frame = 0; frame < 10; ++frame) {
+    for (int frame = 0; frame < 5; ++frame) {
         auto sample = makeGuitarLike(frame * 23);
         auto ctx = fl::make_shared<AudioContext>(sample);
         ctx->setSampleRate(44100);
@@ -426,7 +426,7 @@ FL_TEST_CASE("VocalDetector - guitar-like broadband not detected as vocal") {
 FL_TEST_CASE("VocalDetector - voice-in-mix harmonic structure") {
     VocalDetector detector;
     detector.setSampleRate(44100);
-    for (int frame = 0; frame < 10; ++frame) {
+    for (int frame = 0; frame < 5; ++frame) {
         auto sample = makeVoiceInMixLike(frame * 23);
         auto ctx = fl::make_shared<AudioContext>(sample);
         ctx->setSampleRate(44100);

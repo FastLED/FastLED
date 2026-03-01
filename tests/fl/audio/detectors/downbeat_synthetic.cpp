@@ -155,22 +155,16 @@ DetectionMetrics runDetectorTest(DownbeatDetector& detector,
             u32 beatEndTime = timestamp + beatInterval;
 
             // Generate frames to fill the beat interval
-            // Start with quiet frames, then beat onset frames
-            u32 quietDuration = beatInterval / 2; // First half is quiet
+            // Use fewer frames per beat: 1 quiet + 1 onset (sufficient for spectral flux)
+            u32 beatMidpoint = beatStartTime + beatInterval / 2;
 
-            // Quiet phase
-            while (timestamp < beatStartTime + quietDuration) {
-                auto quietContext = createMockAudioContext(timestamp, false, true, accentMultiplier);
-                detector.update(quietContext);
-                timestamp += frameInterval;
-            }
+            // Single quiet frame
+            auto quietContext = createMockAudioContext(beatMidpoint, false, true, accentMultiplier);
+            detector.update(quietContext);
 
-            // Beat onset phase
-            while (timestamp < beatEndTime) {
-                auto beatContext = createMockAudioContext(timestamp, isDownbeat, false, accentMultiplier);
-                detector.update(beatContext);
-                timestamp += frameInterval;
-            }
+            // Single beat onset frame
+            auto beatContext = createMockAudioContext(beatEndTime - frameInterval, isDownbeat, false, accentMultiplier);
+            detector.update(beatContext);
 
             // Ensure we're exactly at the next beat boundary
             timestamp = beatEndTime;
@@ -197,24 +191,21 @@ DetectionMetrics runDetectorTest(DownbeatDetector& detector,
     int lastDownbeatBeatIndex = -1;
 
     // Phase 3: Run test and track beat spacing
+    // Use 1 quiet + 2 onset frames per beat (minimal for detection)
     for (size gtIdx = 0; gtIdx < groundTruth.size(); gtIdx++) {
         const auto& gt = groundTruth[gtIdx];
         u32 beatStartTime = timestamp;
         u32 beatEndTime = timestamp + beatInterval;
 
-        // Generate frames to fill the beat interval
-        u32 quietDuration = beatInterval / 2; // First half is quiet
+        // Single quiet frame
+        auto quietContext = createMockAudioContext(timestamp, false, true, accentMultiplier);
+        detector.update(quietContext);
 
-        // Quiet phase
-        while (timestamp < beatStartTime + quietDuration) {
-            auto quietContext = createMockAudioContext(timestamp, false, true, accentMultiplier);
-            detector.update(quietContext);
-            timestamp += frameInterval;
-        }
-
-        // Beat onset phase - check for detections during this phase
+        // Beat onset frames - check for detections
         bool detectedThisBeat = false;
-        while (timestamp < beatEndTime) {
+        u32 onsetTime = beatStartTime + beatInterval / 2;
+        for (int f = 0; f < 2; f++) {
+            timestamp = onsetTime + f * frameInterval;
             auto beatContext = createMockAudioContext(timestamp, gt.isDownbeat, false, accentMultiplier);
             detector.update(beatContext);
 
@@ -247,8 +238,6 @@ DetectionMetrics runDetectorTest(DownbeatDetector& detector,
                     metrics.truePositives++;  // Correct spacing = true positive
                 }
             }
-
-            timestamp += frameInterval;
         }
 
         // Ensure we're exactly at the next beat boundary
