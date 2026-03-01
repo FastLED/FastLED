@@ -86,6 +86,7 @@ from fbuild.api import SerialMonitor
 from running_process.process_output_reader import EndOfStream
 
 from ci.compiler.build_utils import get_utf8_env
+from ci.util.crash_trace_decoder import CrashTraceDecoder
 from ci.util.global_interrupt_handler import (
     handle_keyboard_interrupt_properly,
     is_interrupted,
@@ -583,6 +584,11 @@ def run_monitor(
     if trigger_pattern and trigger_timeout_seconds:
         trigger_deadline = start_time + trigger_timeout_seconds
 
+    # Create crash trace decoder for inline stack trace decoding.
+    crash_decoder: CrashTraceDecoder | None = None
+    if environment:
+        crash_decoder = CrashTraceDecoder(build_dir, environment)
+
     try:
         # Select appropriate SerialMonitor implementation
         if use_pyserial:
@@ -672,6 +678,12 @@ def run_monitor(
                                 formatted_line
                             )  # Store timestamped line
                             print(formatted_line)  # Display with timestamp
+
+                            # Feed line to crash trace decoder for inline decoding.
+                            if crash_decoder is not None:
+                                decoded = crash_decoder.process_line(line)
+                                for dl in decoded:
+                                    print(dl)
 
                             # Parse RESULT JSON lines for test summary
                             if "RESULT: " in formatted_line:

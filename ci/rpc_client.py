@@ -44,6 +44,7 @@ from ci.util.global_interrupt_handler import is_interrupted, notify_main_thread
 
 
 if TYPE_CHECKING:
+    from ci.util.crash_trace_decoder import CrashTraceDecoder
     from ci.util.serial_interface import SerialInterface
 
 
@@ -85,6 +86,18 @@ class RpcError(Exception):
     pass
 
 
+class RpcCrashError(RpcError):
+    """Device crashed during RPC operation.
+
+    Attributes:
+        decoded_lines: Decoded stack trace lines (if decoding succeeded).
+    """
+
+    def __init__(self, message: str, decoded_lines: list[str] | None = None) -> None:
+        super().__init__(message)
+        self.decoded_lines = decoded_lines or []
+
+
 class RpcClient:
     """Stateful JSON-RPC client for serial communication.
 
@@ -115,6 +128,7 @@ class RpcClient:
         read_timeout: float = 0.5,
         serial_interface: SerialInterface | None = None,
         verbose: bool = False,
+        crash_decoder: CrashTraceDecoder | None = None,
     ):
         """Initialize RPC client.
 
@@ -126,6 +140,7 @@ class RpcClient:
             serial_interface: Pre-created SerialInterface. If None, an fbuild
                 backend is created automatically on connect().
             verbose: If True, enable detailed RPC logging
+            crash_decoder: Optional CrashTraceDecoder for inline crash decoding.
         """
         self.port = port
         self.baudrate = baudrate
@@ -138,6 +153,7 @@ class RpcClient:
         self._next_id: int = (
             1  # Request ID counter for JSON-RPC 2.0 correlation (uint32 range)
         )
+        self._crash_decoder: CrashTraceDecoder | None = crash_decoder
 
     @property
     def is_connected(self) -> bool:
@@ -379,6 +395,19 @@ class RpcClient:
                     if self.verbose and not line.startswith(self.RESPONSE_PREFIX):
                         print(f"  [serial] {line[:120]}")
 
+                    # Feed non-REMOTE lines to crash decoder.
+                    if self._crash_decoder is not None and not line.startswith(
+                        self.RESPONSE_PREFIX
+                    ):
+                        decoded = self._crash_decoder.process_line(line)
+                        if decoded:
+                            for dl in decoded:
+                                print(dl)
+                            raise RpcCrashError(
+                                "Device crashed during RPC operation",
+                                decoded_lines=decoded,
+                            )
+
                     if line.startswith(self.RESPONSE_PREFIX):
                         json_str = line[len(self.RESPONSE_PREFIX) :]
                         try:
@@ -478,6 +507,16 @@ class RpcClient:
                 if not line.startswith(self.RESPONSE_PREFIX):
                     if self.verbose:
                         print(f"  [async-serial] {line[:200]}")
+                    # Feed line to crash decoder if available.
+                    if self._crash_decoder is not None:
+                        decoded = self._crash_decoder.process_line(line)
+                        if decoded:
+                            for dl in decoded:
+                                print(dl)
+                            raise RpcCrashError(
+                                "Device crashed during RPC operation",
+                                decoded_lines=decoded,
+                            )
                     # Check timeout for non-REMOTE lines
                     if time.time() - start >= timeout:
                         break
@@ -571,10 +610,23 @@ class RpcClient:
         except KeyboardInterrupt:
             notify_main_thread()
             raise
+        except RpcCrashError:
+            raise  # Re-raise crash errors without masking them
         except Exception as e:
             if self.verbose:
                 print(f"⚠️  [RPC] Exception during read_lines: {e}")
             pass  # Timeout or other error
+
+        # Flush any partial crash data before raising timeout.
+        if self._crash_decoder is not None:
+            flushed = self._crash_decoder.flush()
+            if flushed:
+                for fl in flushed:
+                    print(fl)
+                raise RpcCrashError(
+                    "Device crashed during RPC operation (detected at timeout)",
+                    decoded_lines=flushed,
+                )
 
         if self.verbose:
             print(

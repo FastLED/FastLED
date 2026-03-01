@@ -70,7 +70,8 @@ from ci.debug_attached import (
     run_monitor,
     run_upload,
 )
-from ci.rpc_client import RpcClient, RpcTimeoutError
+from ci.rpc_client import RpcClient, RpcCrashError, RpcTimeoutError
+from ci.util.crash_trace_decoder import CrashTraceDecoder
 from ci.util.global_interrupt_handler import (
     handle_keyboard_interrupt_properly,
     install_signal_handler,
@@ -1939,6 +1940,13 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
         else:
             serial_iface = None  # Let RpcClient default to fbuild
 
+        # Create crash trace decoder for inline stack trace decoding.
+        crash_decoder: CrashTraceDecoder | None = None
+        if final_environment:
+            crash_decoder = CrashTraceDecoder(
+                build_dir, final_environment, use_fbuild=use_fbuild
+            )
+
         # Store discovery client for reuse (keep connection open!)
         discovery_client: RpcClient | None = None
 
@@ -2203,6 +2211,7 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                     timeout=timeout_seconds,
                     serial_interface=serial_iface,
                     verbose=True,  # Enable verbose mode to see debug output
+                    crash_decoder=crash_decoder,
                 )
                 await client.connect(boot_wait=3.0, drain_boot=True)
             print(f"{Fore.GREEN}✓ Connected{Style.RESET_ALL}")
@@ -2290,6 +2299,17 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                         print(f"{Fore.GREEN}✓ Command completed{Style.RESET_ALL}")
                         if test_data:
                             print(f"   Response: {test_data}")
+
+                except RpcCrashError as crash_err:
+                    print(
+                        f"{Fore.RED}❌ Device crashed during {method}(){Style.RESET_ALL}"
+                    )
+                    # Decoded trace already printed by RpcClient.
+                    if not crash_err.decoded_lines:
+                        print("   (no decoded stack trace available)")
+                    test_failed = True
+                    stop_word_found = "ERROR"
+                    break
 
                 except RpcTimeoutError:
                     print(f"{Fore.RED}❌ RPC timeout{Style.RESET_ALL}")

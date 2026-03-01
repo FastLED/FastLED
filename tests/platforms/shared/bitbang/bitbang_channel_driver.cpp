@@ -1,4 +1,4 @@
-/// @file tests/platforms/shared/bitbang_channel_driver.cpp
+/// @file tests/platforms/shared/bitbang/bitbang_channel_driver.cpp
 /// @brief Unit tests for BitBangChannelDriver
 ///
 /// Tests cover:
