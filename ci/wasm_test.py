@@ -177,7 +177,11 @@ async def main() -> None:
 
                 test_url = f"http://localhost:{port}?gfx={args.gfx}"
                 console.print(f"[dim]Navigating to: {test_url}[/dim]")
-                await page.goto(test_url, timeout=30000)
+                await page.goto(
+                    test_url,
+                    timeout=30000,
+                    wait_until="domcontentloaded",
+                )
 
                 # Wait for FastLED to initialize and render frames.
                 # The Vite-bundled fastled_callbacks.ts increments

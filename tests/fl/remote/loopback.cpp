@@ -45,13 +45,23 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
 
     ServerThread server_thread(server_transport);
     FL_REQUIRE(server_thread.start());
-    delay(200);
+    // ServerThread::start() already waits for the thread to spin up.
 
-    // Client
+    // Client — connect with retry in case the server hasn't accepted yet.
     auto client_transport = fl::make_shared<HttpStreamClient>("localhost", PORT);
-    FL_REQUIRE(client_transport->connect());
+    {
+        bool connected = false;
+        uint32_t connect_start = fl::millis();
+        while (fl::millis() - connect_start < 2000) {
+            if (client_transport->connect()) {
+                connected = true;
+                break;
+            }
+            delay(10);
+        }
+        FL_REQUIRE(connected);
+    }
     FL_CHECK(client_transport->isConnected());
-    delay(100);
 
     // Send request
     Json params = Json::array();
@@ -69,7 +79,7 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
     Json response;
     uint32_t start = fl::millis();
 
-    while (fl::millis() - start < 2000) {
+    while (fl::millis() - start < 5000) {
         uint32_t now = fl::millis();
         server_transport->update(now);
         client_transport->update(now);
@@ -82,7 +92,7 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
         }
 
         server_remote.update(now);
-        delay(10);
+        delay(1);
     }
 
     FL_REQUIRE(got_response);

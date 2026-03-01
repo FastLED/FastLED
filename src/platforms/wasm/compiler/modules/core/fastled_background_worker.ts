@@ -379,9 +379,9 @@ async function initializeFastLEDModule() {
       workerLog('LOG', 'BACKGROUND_WORKER', 'Dynamically loading fastled.js...');
 
       // Fetch the fastled.js script and evaluate it in the worker context
-      // Worker is at /modules/core/fastled_background_worker.js, fastled.js is at /fastled.js
-      // So we need to go up two levels: ../../fastled.js
-      const fastledScriptPath = new URL('../../fastled.js', self.location.href).href;
+      // After Vite bundling, the worker is output at the same root level as fastled.js
+      // so we resolve relative to the worker's own location
+      const fastledScriptPath = new URL('./fastled.js', self.location.href).href;
       workerLog('LOG', 'BACKGROUND_WORKER', `Fetching: ${fastledScriptPath}`);
 
       const response = await fetch(fastledScriptPath);
@@ -415,7 +415,7 @@ async function initializeFastLEDModule() {
       canvas: workerState.canvas,
       // Fix pthread worker creation: Tell Emscripten to use fastled.js for pthread workers,
       // not the current worker script (fastled_background_worker.js)
-      mainScriptUrlOrBlob: new URL('../../fastled.js', self.location.href).href,
+      mainScriptUrlOrBlob: new URL('./fastled.js', self.location.href).href,
       // Pass URL parameters to WASM module via environment
       // This allows C++ code to access them through getenv() or similar
       preRun: [(Module) => {
@@ -433,9 +433,9 @@ async function initializeFastLEDModule() {
       }],
       locateFile: (path) => {
         // Resolve WASM file paths relative to worker location
-        // Worker is at /modules/core/, so WASM files need to go up two levels
+        // After Vite bundling, worker and WASM files are at the same root level
         if (path.endsWith('.wasm')) {
-          return `../../${path}`;
+          return `./${path}`;
         }
         return path;
       }

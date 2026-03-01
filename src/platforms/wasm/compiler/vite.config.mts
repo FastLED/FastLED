@@ -42,7 +42,13 @@ export default defineConfig({
         // No content hashing — wasm_build.py references files by name
         entryFileNames: '[name].js',
         chunkFileNames: '[name].js',
-        assetFileNames: '[name][extname]',
+        assetFileNames: (assetInfo) => {
+          // Place font files in assets/fonts/ subdirectory
+          if (assetInfo.names?.some(n => /\.(ttf|woff2?|eot|otf)$/i.test(n))) {
+            return 'assets/fonts/[name][extname]';
+          }
+          return '[name][extname]';
+        },
       },
     },
 

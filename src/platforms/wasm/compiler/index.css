@@ -1,6 +1,15 @@
 /* Import JSON Inspector CSS */
 @import url('./modules/utils/json_inspector.css');
 
+/* Local Roboto Condensed font (no external fetch) */
+@font-face {
+    font-family: 'Roboto Condensed';
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url('./assets/fonts/RobotoCondensed-Light.ttf') format('truetype');
+}
+
 body {
     background-color: #121212;
     /* Dark gray background */
