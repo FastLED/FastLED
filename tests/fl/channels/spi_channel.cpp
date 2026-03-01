@@ -299,6 +299,87 @@ FL_TEST_CASE("SPI chipset - mock driver integration") {
     manager.setDriverEnabled("MOCK_SPI", false);
 }
 
+FL_TEST_CASE("SPI chipset - APA102HD mock driver integration") {
+    // Create and register mock SPI driver
+    auto mockEngine = fl::make_shared<MockSpiEngine>("MOCK_SPI_HD");
+    ChannelManager& manager = ChannelManager::instance();
+    manager.addDriver(1000, mockEngine);
+
+    // Set mock driver as exclusive (disables all other drivers)
+    bool exclusive = manager.setExclusiveDriver("MOCK_SPI_HD");
+    FL_REQUIRE(exclusive);
+
+    // Create LED array and set pixel data
+    const int NUM_LEDS = 3;
+    CRGB leds[NUM_LEDS];
+    leds[0] = CRGB(255, 0, 0);    // Red
+    leds[1] = CRGB(0, 255, 0);    // Green
+    leds[2] = CRGB(0, 0, 255);    // Blue
+
+    // Create SPI channel with APA102HD chipset
+    SpiEncoder encoder = SpiEncoder::apa102HD();
+    SpiChipsetConfig spiConfig{5, 6, encoder};
+
+    ChannelOptions options;
+    options.mAffinity = "MOCK_SPI_HD";
+    ChannelConfig config(spiConfig, fl::span<CRGB>(leds, NUM_LEDS), RGB, options);
+
+    // Verify it's configured as APA102HD
+    FL_REQUIRE(config.isSpi());
+    const SpiChipsetConfig* spi = config.getSpiChipset();
+    FL_REQUIRE(spi != nullptr);
+    FL_CHECK_EQ((int)spi->timing.chipset, (int)SpiChipset::APA102HD);
+
+    auto channel = Channel::create(config);
+    FL_REQUIRE(channel != nullptr);
+
+    // Add channel to FastLED
+    FastLED.add(channel);
+
+    // Trigger FastLED.show() - encodes APA102HD data and enqueues to mock driver
+    FastLED.show();
+
+    // Verify data was enqueued
+    FL_CHECK_GT(mockEngine->mEnqueueCount, 0);
+
+    // Trigger transmission
+    mockEngine->show();
+
+    // Verify data was transmitted
+    FL_CHECK_GT(mockEngine->mTransmitCount, 0);
+
+    const auto& data = mockEngine->mLastTransmittedData;
+    FL_CHECK_GT(data.size(), 0);
+
+    // APA102 wire format: 4-byte start frame + (4 bytes per LED) [+ optional end frame]
+    // Start frame: 0x00 0x00 0x00 0x00
+    // Per LED:     [0xE0 | brightness_5bit] [B] [G] [R]
+    size_t expectedMinSize = 4 + (4 * NUM_LEDS);
+    FL_CHECK_GE(data.size(), expectedMinSize);
+
+    // Verify start frame (4 bytes of 0x00)
+    FL_CHECK_EQ(data[0], 0x00);
+    FL_CHECK_EQ(data[1], 0x00);
+    FL_CHECK_EQ(data[2], 0x00);
+    FL_CHECK_EQ(data[3], 0x00);
+
+    // Verify each LED has brightness header with 0xE0 prefix
+    // APA102HD uses per-LED brightness (not necessarily all the same)
+    for (int i = 0; i < NUM_LEDS; i++) {
+        size_t offset = 4 + (i * 4);  // skip start frame
+        uint8_t header = data[offset];
+        // Header must have 0xE0 prefix (top 3 bits set)
+        FL_CHECK_EQ(header & 0xE0, 0xE0);
+        // Brightness is bottom 5 bits (0-31), must be non-zero for non-black pixels
+        uint8_t brightness = header & 0x1F;
+        FL_CHECK_GT(brightness, 0);
+    }
+
+    // Clean up
+    channel->removeFromDrawList();
+    manager.setDriverEnabled("MOCK_SPI_HD", false);
+}
+
 FL_TEST_CASE("ChannelData - chipset variant type checking") {
     const int NUM_LEDS = 10;
     CRGB leds[NUM_LEDS];

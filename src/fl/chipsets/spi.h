@@ -45,6 +45,13 @@ struct SpiEncoder {
         return config;
     }
 
+    /// @brief Create APA102HD encoder configuration (per-LED brightness via HD gamma)
+    /// @param clock_hz Clock frequency (default 6MHz, same as APA102)
+    static inline SpiEncoder apa102HD(u32 clock_hz = 6000000) {
+        SpiEncoder config = {SpiChipset::APA102HD, clock_hz};
+        return config;
+    }
+
     /// @brief Create SK9822 encoder configuration
     /// @param clock_hz Clock frequency (default 12MHz)
     static inline SpiEncoder sk9822(u32 clock_hz = 12000000) {
