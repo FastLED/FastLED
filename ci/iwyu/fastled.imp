@@ -203,6 +203,29 @@
   { include: ['"platforms/memory_barrier.h"', 'private', '"platforms/memory_barrier.h"', 'private'] },
 
   # ========================================================================
+  # libc++ Internal Headers (transitive includes IWYU shouldn't flag)
+  # ========================================================================
+  # These are pulled in transitively by <initializer_list> and other libc++
+  # headers. They don't correspond to actual #include lines in our code.
+  { include: ['<__cstddef/size_t.h>', 'private', '"fl/stl/initializer_list.h"', 'public'] },
+  { include: ['<__config>', 'private', '"fl/stl/initializer_list.h"', 'public'] },
+  { include: ['<version>', 'private', '"fl/stl/initializer_list.h"', 'public'] },
+
+  # ========================================================================
+  # Platform Dispatch Headers (resolved paths IWYU shouldn't flag)
+  # ========================================================================
+  # IWYU resolves platform #ifdef chains and reports the final resolved path.
+  # These don't exist as literal #include lines in our source.
+  { include: ['"platforms/arm/is_arm.h"', 'private', '"fl/int.h"', 'public'] },
+  { include: ['"platforms/delay.h"', 'private', '"fl/delay.h"', 'public'] },
+  { include: ['"platforms/trig8.h"', 'private', '"fl/trig8.h"', 'public'] },
+  { include: ['"platforms/fastpin.h"', 'private', '"fl/fastpin.h"', 'public'] },
+  { include: ['"platforms/is_platform.h"', 'private', '"fl/int.h"', 'public'] },
+  { include: ['"platforms/stub/semaphore_stub.h"', 'private', '"fl/stl/semaphore.h"', 'public'] },
+  { include: ['"native_client.h"', 'private', '"fl/net/http/stream_client.h"', 'public'] },
+  { include: ['"native_server.h"', 'private', '"fl/net/http/stream_server.h"', 'public'] },
+
+  # ========================================================================
   # CATCH-ALL: All other platform headers are private and redirect
   # ========================================================================
   # This must be LAST so specific rules above take priority.

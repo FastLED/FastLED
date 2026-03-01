@@ -1,3 +1,4 @@
+// ok cpp include
 /// @file log.cpp
 /// @brief Tests for logging, debug, and warning macros (fl/log.h)
 

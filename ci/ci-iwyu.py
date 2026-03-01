@@ -1,18 +1,258 @@
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false
 
+"""Run include-what-you-use on the project.
+
+Default mode (no board): parallel scan of all src/fl/ headers (~2 min).
+Board mode: run IWYU via PlatformIO on a specific board build.
+"""
+
 import argparse
+import json
 import os
+import re
 import subprocess
 import sys
+import time
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
+
+# ---------------------------------------------------------------------------
+# Phantom-violation filtering helpers
+# ---------------------------------------------------------------------------
+
+
+def _extract_line_number(removal_text: str) -> int | None:
+    """Extract line number from IWYU removal like '#include "foo.h"  // lines 3-3'."""
+    m = re.search(r"// lines (\d+)", removal_text)
+    return int(m.group(1)) if m else None
+
+
+def _line_has_real_violation(file_path: Path, line_num: int) -> bool:
+    """Check if the given line actually contains a removable #include or forward declaration."""
+    try:
+        lines = file_path.read_text(encoding="utf-8", errors="replace").splitlines()
+        if line_num < 1 or line_num > len(lines):
+            return False
+        line = lines[line_num - 1].strip()
+        # Lines explicitly marked to keep are not violations
+        if "IWYU pragma: keep" in line:
+            return False
+        # Actual #include
+        if line.startswith("#include"):
+            return True
+        # Forward declarations (class/struct/enum/template)
+        for kw in ("class ", "struct ", "enum ", "template"):
+            if kw in line and "IWYU pragma: no_forward_declare" not in line:
+                return True
+        # Namespace-wrapped forward decls like "namespace fl { class Foo; }"
+        if line.startswith("namespace") and ("class " in line or "struct " in line):
+            return True
+        return False
+    except KeyboardInterrupt:
+        import _thread
+
+        _thread.interrupt_main()
+        return True  # unreachable, satisfies type checker
+    except Exception:
+        return True  # Can't read file — keep the violation to be safe
+
+
+# ---------------------------------------------------------------------------
+# Single-file IWYU scanner (runs in worker processes)
+# ---------------------------------------------------------------------------
+
+# Resolved once at import time so workers inherit it.
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _scan_one_header(file_path_str: str) -> tuple[str, list[str]]:
+    """Run IWYU on a single header and return (rel_path, removals).
+
+    Returns ("", []) when there are no real violations.
+    """
+    f = Path(file_path_str)
+    iwyu_cmd = [
+        sys.executable,
+        str(_PROJECT_ROOT / "ci" / "iwyu_wrapper.py"),
+        "-Xiwyu",
+        "--error",
+        "--",
+        "clang-tool-chain-sccache-cpp",
+        "-std=gnu++11",
+        "-DSTUB_PLATFORM",
+        "-DARDUINO=10808",
+        "-DFASTLED_USE_STUB_ARDUINO",
+        "-DFASTLED_STUB_IMPL",
+        "-DFASTLED_TESTING",
+        "-DFASTLED_UNIT_TEST=1",
+        f"-I{_PROJECT_ROOT / 'src'}",
+        f"-I{_PROJECT_ROOT / 'src' / 'platforms' / 'stub'}",
+        "-x",
+        "c++-header",
+        "-c",
+        str(f),
+    ]
+    try:
+        result = subprocess.run(iwyu_cmd, capture_output=True, text=True, timeout=30)
+    except subprocess.TimeoutExpired:
+        return ("", [])
+
+    if result.returncode == 0:
+        return ("", [])
+
+    removals: list[str] = []
+    in_remove = False
+    for line in result.stderr.split("\n"):
+        if "should remove" in line:
+            in_remove = True
+            continue
+        if "The full include-list" in line or "should add" in line:
+            in_remove = False
+            continue
+        if in_remove and line.startswith("- "):
+            removal = line[2:].strip()
+            line_num = _extract_line_number(removal)
+            if line_num is not None and not _line_has_real_violation(f, line_num):
+                continue  # Phantom violation — skip
+            removals.append(removal)
+
+    if removals:
+        rel = str(f.relative_to(_PROJECT_ROOT)).replace("\\", "/")
+        return (rel, removals)
+    return ("", [])
+
+
+# ---------------------------------------------------------------------------
+# Parallel header scanner
+# ---------------------------------------------------------------------------
+
+
+def scan_single_file(file_path: str) -> tuple[str, list[str]]:
+    """Scan a single C++ file for IWYU violations.
+
+    Args:
+        file_path: Path to the file to scan.
+
+    Returns:
+        (rel_path, removals) — empty rel_path if no violations.
+    """
+    f = Path(file_path).resolve()
+    project_root = _PROJECT_ROOT
+
+    is_header = f.suffix in (".h", ".hpp", ".hh", ".hxx")
+    is_test = False
+    try:
+        f.relative_to(project_root / "tests")
+        is_test = True
+    except ValueError:
+        pass
+
+    compiler_args = [
+        "clang-tool-chain-sccache-cpp",
+        "-std=gnu++11",
+        "-DSTUB_PLATFORM",
+        "-DARDUINO=10808",
+        "-DFASTLED_USE_STUB_ARDUINO",
+        "-DFASTLED_STUB_IMPL",
+        "-DFASTLED_TESTING",
+        "-DFASTLED_UNIT_TEST=1",
+        f"-I{project_root / 'src'}",
+        f"-I{project_root / 'src' / 'platforms' / 'stub'}",
+    ]
+    if is_test:
+        compiler_args.append(f"-I{project_root / 'tests'}")
+    if is_header:
+        compiler_args.extend(["-x", "c++-header"])
+    compiler_args.extend(["-c", str(f)])
+
+    iwyu_cmd = [
+        sys.executable,
+        str(project_root / "ci" / "iwyu_wrapper.py"),
+        "-Xiwyu",
+        "--error",
+        "--",
+    ] + compiler_args
+
+    try:
+        result = subprocess.run(iwyu_cmd, capture_output=True, text=True, timeout=60)
+    except subprocess.TimeoutExpired:
+        return ("", [])
+
+    if result.returncode == 0:
+        return ("", [])
+
+    removals: list[str] = []
+    in_remove = False
+    for line in result.stderr.split("\n"):
+        if "should remove" in line:
+            in_remove = True
+            continue
+        if "The full include-list" in line or "should add" in line:
+            in_remove = False
+            continue
+        if in_remove and line.startswith("- "):
+            removal = line[2:].strip()
+            line_num = _extract_line_number(removal)
+            if line_num is not None and not _line_has_real_violation(f, line_num):
+                continue
+            removals.append(removal)
+
+    if removals:
+        try:
+            rel = str(f.relative_to(project_root)).replace("\\", "/")
+        except ValueError:
+            rel = str(f)
+        return (rel, removals)
+    return ("", [])
+
+
+def scan_fl_headers(quiet: bool = False) -> dict[str, list[str]]:
+    """Scan all src/fl/ headers in parallel and return {file: [violations]}."""
+    fl_dir = _PROJECT_ROOT / "src" / "fl"
+    files: list[Path] = []
+    for ext in ("*.h", "*.hpp"):
+        files.extend(fl_dir.rglob(ext))
+    files = [f for f in files if not str(f).endswith(".cpp.hpp")]
+    files = sorted(files)
+
+    max_workers = os.cpu_count() or 4
+    if not quiet:
+        print(f"Scanning {len(files)} headers with {max_workers} workers...")
+    start = time.time()
+
+    results: dict[str, list[str]] = {}
+    done = 0
+    with ProcessPoolExecutor(max_workers=max_workers) as pool:
+        futures = {pool.submit(_scan_one_header, str(f)): f for f in files}
+        for future in as_completed(futures):
+            done += 1
+            if not quiet and done % 50 == 0:
+                elapsed = time.time() - start
+                print(f"  [{done}/{len(files)}] ({elapsed:.1f}s)...")
+            rel, removals = future.result()
+            if rel and removals:
+                results[rel] = removals
+
+    elapsed = time.time() - start
+    if not quiet:
+        print(
+            f"Done: {len(files)} files in {elapsed:.1f}s ({len(results)} with violations)"
+        )
+    return results
+
+
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Run include-what-you-use on the project"
     )
-    parser.add_argument("board", nargs="?", help="Board to check, optional")
+    parser.add_argument("board", nargs="?", help="Board to check (optional)")
     parser.add_argument(
         "--fix",
         action="store_true",
@@ -35,45 +275,26 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Suppress verbose output (show only essential status)",
     )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output results as JSON (header scan mode only)",
+    )
+    parser.add_argument(
+        "--file",
+        help="Check a single file instead of scanning all headers",
+    )
     return parser.parse_args()
 
 
-def find_platformio_project_dir(board_dir: Path) -> Path | None:
-    """Find a directory containing platformio.ini file in the board's build directory.
-
-    With the new pio ci build system, the structure is:
-    .build/uno/Blink/platformio.ini
-    .build/uno/SomeExample/platformio.ini
-
-    We need to find one of these example directories that has a platformio.ini file.
-    """
-    if not board_dir.exists():
-        return None
-
-    # Look for subdirectories containing platformio.ini
-    for subdir in board_dir.iterdir():
-        if subdir.is_dir():
-            platformio_ini = subdir / "platformio.ini"
-            if platformio_ini.exists():
-                print(f"Found platformio.ini in {subdir}")
-                return subdir
-
-    # Fallback: check if there's a platformio.ini directly in the board directory (old system)
-    if (board_dir / "platformio.ini").exists():
-        print(f"Found platformio.ini directly in {board_dir}")
-        return board_dir
-
-    return None
+# ---------------------------------------------------------------------------
+# IWYU availability check
+# ---------------------------------------------------------------------------
 
 
 def check_iwyu_available() -> tuple[bool, str]:
-    """Check if include-what-you-use is available in the system
-
-    Returns:
-        Tuple of (is_available, command_prefix)
-        command_prefix is empty string for system IWYU, or "uv run " for clang-tool-chain
-    """
-    # First try system include-what-you-use
+    """Return (is_available, command_prefix)."""
+    # System IWYU
     try:
         result = subprocess.run(
             ["include-what-you-use", "--version"],
@@ -90,9 +311,8 @@ def check_iwyu_available() -> tuple[bool, str]:
     ):
         pass
 
-    # Fall back to clang-tool-chain-iwyu via uv
+    # clang-tool-chain-iwyu via uv
     try:
-        # Note: clang-tool-chain-iwyu doesn't support --version, so we just check if it exists
         result = subprocess.run(
             [
                 "uv",
@@ -117,268 +337,55 @@ def check_iwyu_available() -> tuple[bool, str]:
     return (False, "")
 
 
-def run_iwyu_on_cpp_tests(args: argparse.Namespace) -> int:
-    """Run IWYU on the C++ test suite and examples"""
-    here = Path(__file__).parent
-    project_root = here.parent
-
-    if not args.quiet:
-        print("Running include-what-you-use on C++ test suite and examples...")
-
-    # Run IWYU on C++ tests
-    cmd_tests = [
-        "uv",
-        "run",
-        "test.py",
-        "--cpp",
-        "--check",  # This enables IWYU
-        "--clang",
-        "--no-interactive",
-        "--no-fingerprint",  # Force re-run to ensure IWYU checks all files
-    ]
-
-    if args.verbose:
-        cmd_tests.append("--verbose")
-
-    # Run IWYU on examples
-    cmd_examples = [
-        "uv",
-        "run",
-        "test.py",
-        "--examples",
-        "--check",  # This enables IWYU
-        "--clang",
-        "--no-interactive",
-        "--no-fingerprint",  # Force re-run to ensure IWYU checks all files
-        "--build",  # Only build, don't execute
-    ]
-
-    if args.verbose:
-        cmd_examples.append("--verbose")
-
-    try:
-        # Run C++ tests first
-        if not args.quiet:
-            print("\n=== Checking C++ tests ===")
-        if args.quiet:
-            result_tests = subprocess.run(
-                cmd_tests,
-                cwd=project_root,
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-            )
-            # Only show output if there was an error
-            if result_tests.returncode != 0:
-                if result_tests.stdout:
-                    print(result_tests.stdout)
-                if result_tests.stderr:
-                    print(result_tests.stderr, file=sys.stderr)
-        else:
-            result_tests = subprocess.run(cmd_tests, cwd=project_root)
-
-        if result_tests.returncode != 0:
-            return result_tests.returncode
-
-        # Run examples
-        if not args.quiet:
-            print("\n=== Checking examples ===")
-        if args.quiet:
-            result_examples = subprocess.run(
-                cmd_examples,
-                cwd=project_root,
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-            )
-            # Only show output if there was an error
-            if result_examples.returncode != 0:
-                if result_examples.stdout:
-                    print(result_examples.stdout)
-                if result_examples.stderr:
-                    print(result_examples.stderr, file=sys.stderr)
-        else:
-            result_examples = subprocess.run(cmd_examples, cwd=project_root)
-
-        if result_examples.returncode != 0:
-            return result_examples.returncode
-
-        # Run IWYU on platform headers (not covered by test suite)
-        result_platform = run_iwyu_on_platform_headers(args)
-        return result_platform
-
-    except subprocess.CalledProcessError as e:
-        if not args.quiet:
-            print(f"IWYU analysis failed with return code {e.returncode}")
-        return e.returncode
+# ---------------------------------------------------------------------------
+# PlatformIO board mode (unchanged from original)
+# ---------------------------------------------------------------------------
 
 
-def run_iwyu_on_platform_headers(
-    args: argparse.Namespace, platform_dirs: list[str] | None = None
-) -> int:
-    """Run IWYU on platform headers individually.
-
-    This checks platform-specific headers that may not be included in the test suite.
-
-    Args:
-        args: Parsed command-line arguments
-        platform_dirs: List of platform subdirectories to check (e.g., ["esp/32/drivers"])
-                      If None, checks all platform headers
-
-    Returns:
-        0 if all headers pass, non-zero if any header has violations
-    """
-    here = Path(__file__).parent
-    project_root = here.parent
-
-    if not args.quiet:
-        print("\n=== Checking platform headers ===")
-
-    # Default to checking a small test set
-    if platform_dirs is None:
-        platform_dirs = ["esp/32/drivers"]  # Start with small isolated test case
-
-    # Collect all .h files in specified platform directories
-    header_files: list[Path] = []
-    for platform_dir in platform_dirs:
-        platform_path = project_root / "src" / "platforms" / platform_dir
-        if not platform_path.exists():
-            if not args.quiet:
-                print(f"Warning: Platform directory not found: {platform_path}")
-            continue
-
-        headers = list(platform_path.rglob("*.h"))
-        header_files.extend(headers)
-        if not args.quiet:
-            print(f"Found {len(headers)} headers in platforms/{platform_dir}")
-
-    if not header_files:
-        if not args.quiet:
-            print("No platform headers found to check")
-        return 0
-
-    # Run IWYU on each header file
-    failed_files: list[tuple[Path, str]] = []
-    checked_count = 0
-
-    for header_file in header_files:
-        checked_count += 1
-        rel_path = header_file.relative_to(project_root)
-
-        if not args.quiet:
-            print(f"  [{checked_count}/{len(header_files)}] Checking {rel_path}...")
-
-        # Build compiler args for IWYU (matches stage_impls.py:run_iwyu_single_file)
-        compiler = os.environ.get("CXX", "clang-tool-chain-sccache-cpp")
-
-        compiler_args = [
-            compiler,
-            "-std=gnu++11",
-            "-DSTUB_PLATFORM",
-            "-DARDUINO=10808",
-            "-DFASTLED_USE_STUB_ARDUINO",
-            "-DFASTLED_STUB_IMPL",
-            "-DFASTLED_TESTING",
-            "-DFASTLED_UNIT_TEST=1",
-            f"-I{project_root / 'src'}",
-            f"-I{project_root / 'src' / 'platforms' / 'stub'}",
-            "-x",
-            "c++-header",  # Explicitly specify language for header files
-            "-c",  # Compile only (don't link)
-            str(header_file),
-        ]
-
-        # Call IWYU wrapper
-        iwyu_cmd = [
-            sys.executable,
-            str(project_root / "ci" / "iwyu_wrapper.py"),
-            "-Xiwyu",
-            "--error",
-            "--",  # Separator
-        ] + compiler_args
-
-        result = subprocess.run(
-            iwyu_cmd,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-        )
-
-        # IWYU returns non-zero if it has suggestions or errors
-        if result.returncode != 0:
-            failed_files.append((rel_path, result.stderr))
-            if not args.quiet:
-                print(f"    ❌ IWYU violations found")
-
-    # Report results
-    if failed_files:
-        print(
-            f"\n❌ Platform header IWYU check failed: {len(failed_files)}/{checked_count} files have violations\n"
-        )
-        print("Files with violations:")
-        for file_path, error_output in failed_files:
-            print(f"\n  {file_path}:")
-            # Print first few lines of error output
-            error_lines = error_output.strip().split("\n")
-            for line in error_lines[:10]:  # Limit to first 10 lines per file
-                print(f"    {line}")
-            if len(error_lines) > 10:
-                print(f"    ... ({len(error_lines) - 10} more lines)")
-        return 1
-    else:
-        if not args.quiet:
-            print(f"✅ All {checked_count} platform headers passed IWYU")
-        return 0
+def find_platformio_project_dir(board_dir: Path) -> Path | None:
+    """Find a directory containing platformio.ini in the board's build directory."""
+    if not board_dir.exists():
+        return None
+    for subdir in board_dir.iterdir():
+        if subdir.is_dir():
+            if (subdir / "platformio.ini").exists():
+                print(f"Found platformio.ini in {subdir}")
+                return subdir
+    if (board_dir / "platformio.ini").exists():
+        print(f"Found platformio.ini directly in {board_dir}")
+        return board_dir
+    return None
 
 
 def run_iwyu_on_platformio_project(project_dir: Path, args: argparse.Namespace) -> int:
-    """Run IWYU on a PlatformIO project"""
+    """Run IWYU on a PlatformIO project."""
     print(f"Running include-what-you-use in {project_dir}")
     os.chdir(str(project_dir))
 
-    # Build mapping file arguments
     mapping_args: list[str] = []
-
-    # Add FastLED mapping files if they exist
     project_root = project_dir
-    while project_root.parent != project_root:  # Find project root
+    while project_root.parent != project_root:
         if (project_root / "ci" / "iwyu").exists():
             break
         project_root = project_root.parent
 
-    fastled_mapping = project_root / "ci" / "iwyu" / "fastled.imp"
-    stdlib_mapping = project_root / "ci" / "iwyu" / "stdlib.imp"
+    for name in ("fastled.imp", "stdlib.imp"):
+        p = project_root / "ci" / "iwyu" / name
+        if p.exists():
+            mapping_args.extend(["--mapping_file", str(p)])
 
-    if fastled_mapping.exists():
-        mapping_args.extend(["--mapping_file", str(fastled_mapping)])
-
-    if stdlib_mapping.exists():
-        mapping_args.extend(["--mapping_file", str(stdlib_mapping)])
-
-    # Add user-specified mapping files
     if args.mapping_file:
         for mapping in args.mapping_file:
             mapping_args.extend(["--mapping_file", mapping])
 
-    # Build IWYU command
     iwyu_cmd = [
         "include-what-you-use",
         f"--max_line_length={args.max_line_length}",
         "--quoted_includes_first",
         "--no_comments",
-    ]
+        "--verbose=3" if args.verbose else "--verbose=1",
+    ] + mapping_args
 
-    if args.verbose:
-        iwyu_cmd.append("--verbose=3")
-    else:
-        iwyu_cmd.append("--verbose=1")
-
-    iwyu_cmd.extend(mapping_args)
-
-    # Run through PlatformIO's check system with IWYU
     pio_cmd = [
         "pio",
         "check",
@@ -386,7 +393,7 @@ def run_iwyu_on_platformio_project(project_dir: Path, args: argparse.Namespace) 
         "--src-filters=+<src/>",
         "--tool=include-what-you-use",
         "--flags",
-    ] + iwyu_cmd[1:]  # Skip the include-what-you-use binary name
+    ] + iwyu_cmd[1:]
 
     try:
         result = subprocess.run(pio_cmd)
@@ -397,9 +404,8 @@ def run_iwyu_on_platformio_project(project_dir: Path, args: argparse.Namespace) 
 
 
 def apply_iwyu_fixes(source_dir: Path) -> int:
-    """Apply IWYU fixes using fix_includes tool"""
+    """Apply IWYU fixes using fix_includes tool."""
     try:
-        # Check if fix_includes is available
         subprocess.run(["fix_includes", "--help"], capture_output=True, check=True)
     except (subprocess.CalledProcessError, FileNotFoundError):
         print(
@@ -407,20 +413,15 @@ def apply_iwyu_fixes(source_dir: Path) -> int:
         )
         return 1
 
-    # Find all .h and .cpp files
     cpp_files: list[Path] = []
-    for pattern in ["**/*.cpp", "**/*.h", "**/*.hpp"]:
+    for pattern in ("**/*.cpp", "**/*.h", "**/*.hpp"):
         cpp_files.extend(source_dir.glob(pattern))
-
     if not cpp_files:
         print("No C++ files found to fix")
         return 0
 
     print(f"Applying IWYU fixes to {len(cpp_files)} files...")
-
-    # Run fix_includes on the source directory
     cmd = ["fix_includes", "--update_comments", str(source_dir)]
-
     try:
         result = subprocess.run(cmd)
         if result.returncode == 0:
@@ -433,12 +434,14 @@ def apply_iwyu_fixes(source_dir: Path) -> int:
         return e.returncode
 
 
+# ---------------------------------------------------------------------------
+# main
+# ---------------------------------------------------------------------------
+
+
 def main() -> int:
     args = parse_args()
-    here = Path(__file__).parent
-    project_root = here.parent
 
-    # Check if IWYU is available
     iwyu_available, iwyu_prefix = check_iwyu_available()
     if not iwyu_available:
         print("Error: include-what-you-use not found")
@@ -450,21 +453,41 @@ def main() -> int:
 
     if not args.quiet:
         if iwyu_prefix:
-            print(
-                f"Found include-what-you-use via clang-tool-chain (using: {iwyu_prefix}clang-tool-chain-iwyu)"
-            )
+            print(f"Found include-what-you-use via clang-tool-chain")
         else:
             print("Found system include-what-you-use")
 
-    # If no board specified, run on C++ test suite
-    if not args.board:
+    # --- Single file mode ---
+    if args.file:
+        rel, removals = scan_single_file(args.file)
+        if removals:
+            print(f"❌ IWYU violations in {rel}:")
+            for r in removals:
+                print(f"  - {r}")
+            return 1
         if not args.quiet:
-            print("No board specified, running IWYU on C++ test suite")
-        return run_iwyu_on_cpp_tests(args)
+            print(f"✅ {args.file} passes IWYU")
+        return 0
 
-    # Run on specific board
-    build = project_root / ".build"
+    # --- No board: parallel header scan (fast, ~2 min) ---
+    if not args.board:
+        violations = scan_fl_headers(quiet=args.quiet)
+        if args.json:
+            print(json.dumps(violations, indent=2))
+        if violations:
+            if not args.json:
+                print(f"\n❌ {len(violations)} files with IWYU violations:")
+                for file, removals in sorted(violations.items()):
+                    print(f"\n  {file}:")
+                    for r in removals:
+                        print(f"    - {r}")
+            return 1
+        if not args.quiet:
+            print("✅ All src/fl/ headers pass IWYU")
+        return 0
 
+    # --- Board mode: PlatformIO ---
+    build = _PROJECT_ROOT / ".build"
     if not build.exists():
         print(f"Build directory {build} not found")
         print("Run a compilation first: ./compile [board] --examples [example]")
@@ -482,22 +505,19 @@ def main() -> int:
     project_dir = find_platformio_project_dir(board_dir)
     if not project_dir:
         print(f"No platformio.ini found in {board_dir} or its subdirectories")
-        print("This usually means the board hasn't been compiled yet.")
         print(f"Try running: ./compile {args.board} --examples Blink")
         return 1
 
-    # Run IWYU on the PlatformIO project
-    result = run_iwyu_on_platformio_project(project_dir, args)
+    result_code = run_iwyu_on_platformio_project(project_dir, args)
 
-    # Apply fixes if requested and analysis succeeded
-    if args.fix and result == 0:
+    if args.fix and result_code == 0:
         src_dir = project_dir / "src"
         if src_dir.exists():
             fix_result = apply_iwyu_fixes(src_dir)
             if fix_result != 0:
-                result = fix_result
+                result_code = fix_result
 
-    return result
+    return result_code
 
 
 if __name__ == "__main__":

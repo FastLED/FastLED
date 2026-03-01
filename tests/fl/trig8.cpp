@@ -1,4 +1,4 @@
-
+// ok cpp include
 // Tests for sin8() and cos8() — validates both the standard LUT path
 // and the USE_SIN_32 wrapper path produce correct results.
 

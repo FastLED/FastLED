@@ -656,6 +656,9 @@ def run_iwyu_pragma_check_single_file(file_path: str) -> bool:
 def run_iwyu_single_file(file_path: str) -> bool:
     """Run IWYU analysis on a single C++ file.
 
+    Delegates to ci/ci-iwyu.py --file for unified IWYU logic
+    (including phantom-violation filtering).
+
     Note: .ino files are skipped as they require special compilation through
     a wrapper template. For .ino files, use `bash lint --iwyu` to check all
     examples via the full build system.
@@ -666,172 +669,36 @@ def run_iwyu_single_file(file_path: str) -> bool:
     Returns:
         True if IWYU passed (no violations), False otherwise
     """
-    # Check if IWYU is enabled
     if not ENABLE_IWYU:
         return True
 
-    # Skip .ino files - they need to be compiled through the wrapper template
-    # For full IWYU analysis on .ino files, use the full build system:
-    # `bash lint --iwyu` or `uv run test.py --examples --check --build`
     if file_path.endswith(".ino"):
         print(
             "  ⏭️  IWYU skipped for .ino file (use 'bash lint --iwyu' for full example checking)"
         )
         return True
 
-    # Get compiler path
-    compiler = os.environ.get("CXX", "clang-tool-chain-sccache-cpp")
-
-    # Build minimal compiler args for IWYU
-    # These match the base flags from meson.build
     project_root = Path(__file__).parent.parent.parent
-    file_path_obj = Path(file_path)
-
-    # Check if file is in tests/ directory
-    is_test_file = False
-    try:
-        file_path_obj.relative_to(project_root / "tests")
-        is_test_file = True
-    except ValueError:
-        # File is not under tests/ directory
-        is_test_file = False
-
-    compiler_args = [
-        compiler,
-        "-std=gnu++11",
-        "-DSTUB_PLATFORM",
-        "-DARDUINO=10808",
-        "-DFASTLED_USE_STUB_ARDUINO",
-        "-DFASTLED_STUB_IMPL",
-        "-DFASTLED_TESTING",
-        "-DFASTLED_UNIT_TEST=1",
-        f"-I{project_root / 'src'}",
-        f"-I{project_root / 'src' / 'platforms' / 'stub'}",
-    ]
-
-    # Add tests/ include path for test files
-    if is_test_file:
-        compiler_args.append(f"-I{project_root / 'tests'}")
-
-    # Explicitly specify language for header files to avoid deprecated warning
-    # clang++ defaults .h to C, then infers C++ from content (deprecated)
-    if file_path.endswith((".h", ".hpp", ".hh", ".hxx")):
-        compiler_args.extend(["-x", "c++-header"])
-
-    compiler_args.extend(
-        [
-            "-c",  # Compile only (don't link)
-            file_path,
-        ]
-    )
-
-    # Call IWYU wrapper
-    # Format: iwyu_wrapper.py [iwyu-args] -- compiler [compiler-args] file.cpp
-    iwyu_cmd = [
-        sys.executable,
-        str(project_root / "ci" / "iwyu_wrapper.py"),
-        "-Xiwyu",
-        "--error",
-        "--",  # Separator
-    ] + compiler_args
-
     result = subprocess.run(
-        iwyu_cmd,
+        [
+            sys.executable,
+            str(project_root / "ci" / "ci-iwyu.py"),
+            "--file",
+            file_path,
+            "--quiet",
+        ],
         capture_output=True,
         text=True,
     )
 
-    # IWYU returns non-zero if it has suggestions
-    # We treat suggestions as failures (need to fix includes)
     if result.returncode != 0:
-        # Truncate IWYU output to first 4 warnings/errors to prevent spam
+        if result.stdout:
+            print(result.stdout, file=sys.stderr)
         if result.stderr:
-            truncated_output = _truncate_iwyu_output(result.stderr, max_items=4)
-            print(truncated_output, file=sys.stderr)
+            print(result.stderr, file=sys.stderr)
         return False
 
     return True
-
-
-def _truncate_iwyu_output(iwyu_stderr: str, max_items: int = 4) -> str:
-    """Truncate IWYU output to first N warnings/errors.
-
-    IWYU output has sections separated by blank lines. Each section typically starts
-    with a file path and contains related include suggestions.
-
-    Args:
-        iwyu_stderr: Raw IWYU stderr output
-        max_items: Maximum number of warning/error sections to include
-
-    Returns:
-        Truncated output with message about additional items if truncated
-    """
-    lines = iwyu_stderr.strip().split("\n")
-    if not lines:
-        return iwyu_stderr
-
-    # IWYU output structure:
-    # - Lines starting with file paths (containing "should add" or "should remove")
-    # - Blank lines separate sections
-    # - Summary lines at the end ("--- The full include-list for...")
-
-    # Find section boundaries (blank lines or start of summary)
-    sections: list[list[str]] = []
-    current_section: list[str] = []
-
-    for line in lines:
-        # Summary section starts with "---" or "The full include-list"
-        if line.startswith("---") or "The full include-list" in line:
-            if current_section:
-                sections.append(current_section)
-            # Include summary as a final section
-            current_section = [line]
-        elif line.strip() == "":
-            # Blank line - end current section
-            if current_section:
-                sections.append(current_section)
-                current_section = []
-        else:
-            current_section.append(line)
-
-    # Add last section if not empty
-    if current_section:
-        sections.append(current_section)
-
-    # Count actual warning/error sections (exclude summary sections)
-    warning_sections = [
-        s for s in sections if not any("The full include-list" in line for line in s)
-    ]
-    total_warnings = len(warning_sections)
-
-    if total_warnings <= max_items:
-        # No truncation needed
-        return iwyu_stderr
-
-    # Take first max_items warning sections
-    output_sections = warning_sections[:max_items]
-    truncated_count = total_warnings - max_items
-
-    # Build truncated output
-    output_lines: list[str] = []
-    for section in output_sections:
-        output_lines.extend(section)
-        output_lines.append("")  # Add blank line between sections
-
-    # Add truncation message
-    output_lines.append("")
-    output_lines.append(
-        f"⚠️  Showing first {max_items} of {total_warnings} IWYU warnings/errors"
-    )
-    output_lines.append(
-        f"⚠️  {truncated_count} additional warning(s) truncated to prevent spam"
-    )
-    output_lines.append("")
-    output_lines.append(
-        "💡 Fix the above issues first, then run 'bash lint --strict' to see remaining issues"
-    )
-
-    return "\n".join(output_lines)
 
 
 def run_python_lint_single_file(file_path: str, strict: bool = False) -> bool:
