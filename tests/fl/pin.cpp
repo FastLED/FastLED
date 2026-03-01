@@ -1,8 +1,10 @@
 /// @file tests/fl/pin.cpp
 /// Unit tests for fl::pin API (GPIO and unified PWM frequency)
+/// and digitalMultiWrite bulk pin API
 /// Implementation is in src/fl/pin.cpp.hpp
 
 #include "fl/pin.h"
+#include "fl/pins.h"
 #include "fl/fltest.h"
 
 // ============================================================================
@@ -332,4 +334,188 @@ FL_TEST_CASE("pwm_pinmode_different_modes") {
     FL_REQUIRE_EQ(fl::setPwmFrequency(40, 100), 0);
     fl::pinMode(40, fl::PinMode::Output);
     FL_REQUIRE_EQ(fl::getPwmFrequency(40), 0u);
+}
+
+// ============================================================================
+// digitalMultiWrite8 Tests
+// ============================================================================
+
+FL_TEST_CASE("digitalMultiWrite8_all_high") {
+    fl::Pins8 pins = {{40, 41, 42, 43, 44, 45, 46, 47}};
+    fl::u8 data[] = {0xFF};
+    fl::digitalMultiWrite8(pins, fl::span<const fl::u8>(data, 1));
+    for (int i = 0; i < 8; ++i) {
+        FL_REQUIRE_EQ(fl::digitalRead(40 + i), fl::PinValue::High);
+    }
+}
+
+FL_TEST_CASE("digitalMultiWrite8_all_low") {
+    fl::Pins8 pins = {{40, 41, 42, 43, 44, 45, 46, 47}};
+    fl::u8 data[] = {0x00};
+    fl::digitalMultiWrite8(pins, fl::span<const fl::u8>(data, 1));
+    for (int i = 0; i < 8; ++i) {
+        FL_REQUIRE_EQ(fl::digitalRead(40 + i), fl::PinValue::Low);
+    }
+}
+
+FL_TEST_CASE("digitalMultiWrite8_alternating") {
+    // 0xAA = 0b10101010 -> pins[1,3,5,7] high, pins[0,2,4,6] low
+    fl::Pins8 pins = {{40, 41, 42, 43, 44, 45, 46, 47}};
+    fl::u8 data[] = {0xAA};
+    fl::digitalMultiWrite8(pins, fl::span<const fl::u8>(data, 1));
+    FL_REQUIRE_EQ(fl::digitalRead(40), fl::PinValue::Low);
+    FL_REQUIRE_EQ(fl::digitalRead(41), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(42), fl::PinValue::Low);
+    FL_REQUIRE_EQ(fl::digitalRead(43), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(44), fl::PinValue::Low);
+    FL_REQUIRE_EQ(fl::digitalRead(45), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(46), fl::PinValue::Low);
+    FL_REQUIRE_EQ(fl::digitalRead(47), fl::PinValue::High);
+}
+
+FL_TEST_CASE("digitalMultiWrite8_multiple_bytes") {
+    fl::Pins8 pins = {{40, 41, 42, 43, 44, 45, 46, 47}};
+    fl::u8 data[] = {0xAA, 0x55};
+    fl::digitalMultiWrite8(pins, fl::span<const fl::u8>(data, 2));
+    // Final state reflects the last byte (0x55 = 0b01010101)
+    FL_REQUIRE_EQ(fl::digitalRead(40), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(41), fl::PinValue::Low);
+    FL_REQUIRE_EQ(fl::digitalRead(42), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(43), fl::PinValue::Low);
+    FL_REQUIRE_EQ(fl::digitalRead(44), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(45), fl::PinValue::Low);
+    FL_REQUIRE_EQ(fl::digitalRead(46), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(47), fl::PinValue::Low);
+}
+
+FL_TEST_CASE("digitalMultiWrite8_empty_data") {
+    fl::Pins8 pins = {{40, 41, 42, 43, 44, 45, 46, 47}};
+    fl::digitalMultiWrite8(pins, fl::span<const fl::u8>());
+}
+
+FL_TEST_CASE("digitalMultiWrite8_skip_pins") {
+    fl::digitalWrite(50, fl::PinValue::Low);
+    fl::digitalWrite(57, fl::PinValue::Low);
+    fl::Pins8 pins = {{50, -1, -1, -1, -1, -1, -1, 57}};
+    fl::u8 data[] = {0x81}; // bits 0 and 7 set
+    fl::digitalMultiWrite8(pins, fl::span<const fl::u8>(data, 1));
+    FL_REQUIRE_EQ(fl::digitalRead(50), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(57), fl::PinValue::High);
+}
+
+FL_TEST_CASE("digitalMultiWrite8_all_skipped") {
+    fl::Pins8 pins = {{-1, -1, -1, -1, -1, -1, -1, -1}};
+    fl::u8 data[] = {0xFF};
+    fl::digitalMultiWrite8(pins, fl::span<const fl::u8>(data, 1));
+}
+
+// ============================================================================
+// allSamePort() and auto-disable Tests
+// ============================================================================
+// On stub platform, FastPin<N>::port() returns nullptr for all pins, so
+// pinToPort() falls back to pin / 32 grouping. Pins 0-31 are port 0,
+// pins 32-63 are port 1, etc.
+
+FL_TEST_CASE("digitalMultiWrite8_same_port") {
+    fl::DigitalMultiWrite8 writer;
+    fl::Pins8 pins = {{0, 1, 2, 3, 4, 5, 6, 7}};
+    writer.init(pins);
+    FL_REQUIRE(writer.allSamePort());
+
+    fl::u8 data[] = {0xFF};
+    writer.write(fl::span<const fl::u8>(data, 1));
+    for (int i = 0; i < 8; ++i) {
+        FL_REQUIRE_EQ(fl::digitalRead(i), fl::PinValue::High);
+    }
+}
+
+FL_TEST_CASE("digitalMultiWrite8_same_port_with_skips") {
+    fl::DigitalMultiWrite8 writer;
+    fl::Pins8 pins = {{32, -1, -1, -1, -1, -1, -1, 63}};
+    writer.init(pins);
+    FL_REQUIRE(writer.allSamePort());
+}
+
+FL_TEST_CASE("digitalMultiWrite8_minority_port_disabled") {
+    // 5 pins on port 0 (0-4), 3 pins on port 1 (32-34)
+    fl::DigitalMultiWrite8 writer;
+    fl::Pins8 pins = {{0, 1, 2, 3, 4, 32, 33, 34}};
+    writer.init(pins);
+
+    FL_REQUIRE(writer.allSamePort());
+
+    for (int i = 0; i < 5; ++i) {
+        fl::digitalWrite(i, fl::PinValue::Low);
+    }
+    for (int i = 32; i < 35; ++i) {
+        fl::digitalWrite(i, fl::PinValue::Low);
+    }
+
+    fl::u8 data[] = {0xFF};
+    writer.write(fl::span<const fl::u8>(data, 1));
+    FL_REQUIRE_EQ(fl::digitalRead(0), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(1), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(2), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(3), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(4), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(32), fl::PinValue::Low);
+    FL_REQUIRE_EQ(fl::digitalRead(33), fl::PinValue::Low);
+    FL_REQUIRE_EQ(fl::digitalRead(34), fl::PinValue::Low);
+}
+
+FL_TEST_CASE("digitalMultiWrite8_tie_goes_to_first_port") {
+    fl::DigitalMultiWrite8 writer;
+    fl::Pins8 pins = {{0, 1, 2, 3, 32, 33, 34, 35}};
+    writer.init(pins);
+    FL_REQUIRE(writer.allSamePort());
+
+    for (int i = 0; i < 4; ++i) {
+        fl::digitalWrite(i, fl::PinValue::Low);
+    }
+    for (int i = 32; i < 36; ++i) {
+        fl::digitalWrite(i, fl::PinValue::Low);
+    }
+
+    fl::u8 data[] = {0xFF};
+    writer.write(fl::span<const fl::u8>(data, 1));
+
+    FL_REQUIRE_EQ(fl::digitalRead(0), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(1), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(2), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(3), fl::PinValue::High);
+    FL_REQUIRE_EQ(fl::digitalRead(32), fl::PinValue::Low);
+    FL_REQUIRE_EQ(fl::digitalRead(33), fl::PinValue::Low);
+    FL_REQUIRE_EQ(fl::digitalRead(34), fl::PinValue::Low);
+    FL_REQUIRE_EQ(fl::digitalRead(35), fl::PinValue::Low);
+}
+
+FL_TEST_CASE("digitalMultiWrite8_all_skipped_same_port") {
+    fl::DigitalMultiWrite8 writer;
+    fl::Pins8 pins = {{-1, -1, -1, -1, -1, -1, -1, -1}};
+    writer.init(pins);
+    FL_REQUIRE(writer.allSamePort());
+}
+
+FL_TEST_CASE("digitalMultiWrite8_single_active_pin") {
+    fl::DigitalMultiWrite8 writer;
+    fl::Pins8 pins = {{-1, -1, -1, 20, -1, -1, -1, -1}};
+    writer.init(pins);
+    FL_REQUIRE(writer.allSamePort());
+}
+
+// ============================================================================
+// pinToPort Tests
+// ============================================================================
+
+FL_TEST_CASE("pinToPort_same_port_group") {
+    // On stub, pins 0-31 should all return the same port ID
+    int port0 = fl::pinToPort(0);
+    FL_REQUIRE(port0 >= 0);
+    for (int i = 1; i < 32; ++i) {
+        FL_REQUIRE_EQ(fl::pinToPort(i), port0);
+    }
+}
+
+FL_TEST_CASE("pinToPort_negative_pin") {
+    FL_REQUIRE_EQ(fl::pinToPort(-1), -1);
 }

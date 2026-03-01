@@ -22,18 +22,18 @@ namespace detail {
 #ifndef FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES
   #if defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32S3)
     // ESP32-C6/S3: 256 KB total (fits in ~512 KB SRAM, leaves room for other allocations)
-    #define FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES (256 * 1024)
+    #define FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES (256UL * 1024UL)
   #elif defined(FL_IS_ESP_32P4)
     // ESP32-P4: 512 KB total (better performance, larger SRAM available)
-    #define FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES (512 * 1024)
+    #define FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES (512UL * 1024UL)
   #else
     // Conservative default for unknown platforms
-    #define FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES (256 * 1024)
+    #define FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES (256UL * 1024UL)
   #endif
 #endif
 
 // Minimum cap validation (supports at least 1 LED × 16 lanes)
-static_assert(FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES >= 12 * 1024,
+static_assert(FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES >= 12UL * 1024UL,
               "FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES too small (minimum 12 KB)");
 
 // PSRAM ring buffer memory cap (used when PSRAM is available at runtime)
@@ -42,10 +42,10 @@ static_assert(FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES >= 12 * 1024,
 #ifndef FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM
   #if defined(FL_IS_ESP_32P4)
     // ESP32-P4: 2 MB (has ~8MB PSRAM, generous allocation for 5+ channels)
-    #define FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM (2 * 1024 * 1024)
+    #define FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM (2UL * 1024UL * 1024UL)
   #else
     // Other platforms: 1 MB (conservative default)
-    #define FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM (1 * 1024 * 1024)
+    #define FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM (1UL * 1024UL * 1024UL)
   #endif
 #endif
 

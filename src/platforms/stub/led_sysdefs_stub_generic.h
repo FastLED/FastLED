@@ -33,7 +33,7 @@
 // Arduino pin and register macros - excluded when FASTLED_NO_ARDUINO_STUBS is defined
 // (for compatibility with ArduinoFake and other Arduino mock frameworks)
 #define digitalPinToBitMask(P) ( 0 )
-#define digitalPinToPort(P) ( 0 )
+#define digitalPinToPort(P) ( (P) / 32 )
 #define portOutputRegister(P) ( 0 )
 #define portInputRegister(P) ( 0 )
 

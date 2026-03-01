@@ -41,6 +41,7 @@
 #include "fl/noise_woryley.cpp.hpp"
 #include "fl/ota.cpp.hpp"
 #include "fl/pin.cpp.hpp"
+#include "fl/pins.cpp.hpp"
 #include "fl/raster_sparse.cpp.hpp"
 #include "fl/rectangular_draw_buffer.cpp.hpp"
 #include "fl/remote/_build.cpp.hpp"
