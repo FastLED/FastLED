@@ -21,7 +21,7 @@
 
 using namespace fl;
 
-namespace {
+namespace test_ws2812 {
 
 /// Helper to create RGB pixel array
 fl::array<u8, 3> makeRGBPixel(u8 r, u8 g, u8 b) {
@@ -303,4 +303,4 @@ FL_TEST_CASE("WS2812_RGBW - Many LEDs (stress test)") {
 // the RGB and RGBW encoders separately above.
 // ============================================================================
 
-} // anonymous namespace
+} // namespace test_ws2812

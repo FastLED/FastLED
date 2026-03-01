@@ -10,7 +10,7 @@
 
 using namespace fl;
 
-namespace {
+namespace test_animartrix2 {
 
 const uint16_t W = 32;
 const uint16_t H = 32;
@@ -189,7 +189,8 @@ void printInt(int val, int width) {
     for (int i = pos - 1; i >= 0; i--) fl::cout << buf[i];
 }
 
-} // namespace
+} // namespace test_animartrix2
+using namespace test_animartrix2;
 
 FL_TEST_CASE("Animartrix1 vs Animartrix2 - all visualizers") {
     const uint32_t timestamps[] = {0, 1};

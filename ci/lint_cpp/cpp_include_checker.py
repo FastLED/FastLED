@@ -30,6 +30,12 @@ class CppIncludeChecker(FileContentChecker):
 
     def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check file content for .cpp file includes."""
+        # Unity build aggregator files are exempt — they exist solely to
+        # #include other .cpp files into a single translation unit.
+        for line in file_content.lines[:5]:
+            if "// ok cpp include" in line.lower():
+                return []
+
         violations: list[tuple[int, str]] = []
         in_multiline_comment = False
 

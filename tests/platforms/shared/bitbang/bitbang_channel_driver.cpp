@@ -1,3 +1,4 @@
+// ok standalone
 /// @file tests/platforms/shared/bitbang/bitbang_channel_driver.cpp
 /// @brief Unit tests for BitBangChannelDriver
 ///

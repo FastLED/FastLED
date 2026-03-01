@@ -7,7 +7,7 @@
 
 
 // Helper function to set up filesystem for codec tests
-static fl::FileSystem setupCodecFilesystem() {
+static fl::FileSystem setupCodecFilesystem_gif() {
     fl::setTestFileSystemRoot("tests");
     fl::FileSystem fs;
     bool ok = fs.beginSd(5);
@@ -16,7 +16,7 @@ static fl::FileSystem setupCodecFilesystem() {
 }
 
 FL_TEST_CASE("GIF file loading and decoding") {
-    fl::FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem_gif();
         // Test that we can load the GIF file from filesystem
         fl::FileHandlePtr handle = fs.openRead("data/codec/file.gif");
         FL_REQUIRE(handle != nullptr);
@@ -137,7 +137,7 @@ FL_TEST_CASE("GIF file loading and decoding") {
 }
 
 FL_TEST_CASE("GIF metadata parsing without decoding") {
-    fl::FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem_gif();
 
     // Test that we can load the GIF file from filesystem
     fl::FileHandlePtr handle = fs.openRead("data/codec/file.gif");

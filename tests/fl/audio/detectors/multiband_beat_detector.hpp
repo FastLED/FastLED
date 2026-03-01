@@ -3,7 +3,7 @@
 
 using namespace fl;
 
-namespace {
+namespace test_multiband_beat {
 
 // Helper: Create 16-element frequency bin array with specified band energies
 static array<float, 16> createFrequencyBins(float bassLevel, float midLevel, float trebleLevel) {
@@ -25,7 +25,8 @@ static array<float, 16> createFrequencyBins(float bassLevel, float midLevel, flo
     return bins;
 }
 
-} // anonymous namespace
+} // namespace test_multiband_beat
+using namespace test_multiband_beat;
 
 FL_TEST_CASE("MultiBandBeatDetector - Basic configuration") {
     MultiBandBeatDetector detector;

@@ -394,3 +394,6 @@ FL_TEST_CASE("colorBoost() preserves hue - hard cases") {
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(99, 33, 66), 0);
     }
 }
+
+// Grouped tests
+#include "eorder.cpp"

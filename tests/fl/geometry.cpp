@@ -789,3 +789,8 @@ FL_TEST_CASE("vec2::cross_type_operations") {
         FL_CHECK_EQ(result.y, 3);  // This will likely fail due to the bug
     }
 }
+
+// Grouped tests
+#include "grid.cpp"
+#include "tile2x2.cpp"
+#include "traverse_grid.cpp"

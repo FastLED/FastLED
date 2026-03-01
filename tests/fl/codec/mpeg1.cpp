@@ -7,7 +7,7 @@
 
 
 // Helper function to set up filesystem for codec tests
-static fl::FileSystem setupCodecFilesystem() {
+static fl::FileSystem setupCodecFilesystem_mpeg1() {
     fl::setTestFileSystemRoot("tests");
     fl::FileSystem fs;
     bool ok = fs.beginSd(5);
@@ -16,7 +16,7 @@ static fl::FileSystem setupCodecFilesystem() {
 }
 
 FL_TEST_CASE("MPEG1 file loading and decoding") {
-    fl::FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem_mpeg1();
         // Test that we can load the MPEG1 file from filesystem
         fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
         FL_REQUIRE(handle != nullptr);
@@ -153,7 +153,7 @@ FL_TEST_CASE("MPEG1 file loading and decoding") {
 }
 
 FL_TEST_CASE("MPEG1 decoder error handling") {
-    fl::FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem_mpeg1();
 
     FL_SUBCASE("null ByteStream") {
         fl::Mpeg1Config config;
@@ -229,7 +229,7 @@ FL_TEST_CASE("MPEG1 decoder error handling") {
 }
 
 FL_TEST_CASE("MPEG1 configuration options") {
-    fl::FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem_mpeg1();
 
     // Load valid MPEG1 data
     fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
@@ -314,7 +314,7 @@ FL_TEST_CASE("MPEG1 configuration options") {
 }
 
 FL_TEST_CASE("MPEG1 decoder properties and metadata") {
-    fl::FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem_mpeg1();
 
     fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
     FL_REQUIRE(handle != nullptr);
@@ -378,7 +378,7 @@ FL_TEST_CASE("MPEG1 decoder properties and metadata") {
 }
 
 FL_TEST_CASE("MPEG1 frame data validation") {
-    fl::FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem_mpeg1();
 
     fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
     FL_REQUIRE(handle != nullptr);
@@ -451,7 +451,7 @@ FL_TEST_CASE("MPEG1 frame data validation") {
 }
 
 FL_TEST_CASE("MPEG1 multi-frame sequence validation") {
-    fl::FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem_mpeg1();
 
     fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
     FL_REQUIRE(handle != nullptr);
@@ -513,7 +513,7 @@ FL_TEST_CASE("MPEG1 multi-frame sequence validation") {
 }
 
 FL_TEST_CASE("MPEG1 metadata parsing without decoding") {
-    fl::FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem_mpeg1();
 
     // Test that we can load the MPEG1 file from filesystem
     fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
@@ -596,7 +596,7 @@ FL_TEST_CASE("MPEG1 metadata parsing without decoding") {
 }
 
 FL_TEST_CASE("MPEG1 audio extraction") {
-    fl::FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem_mpeg1();
 
     // Load valid MPEG1 data with audio
     fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");

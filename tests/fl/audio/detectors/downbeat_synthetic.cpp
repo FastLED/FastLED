@@ -16,7 +16,7 @@
 
 using namespace fl;
 
-namespace {
+namespace test_downbeat_synthetic {
 
 // Ground truth marker for validation
 struct GroundTruthMarker {
@@ -270,7 +270,8 @@ DetectionMetrics runDetectorTest(DownbeatDetector& detector,
     return metrics;
 }
 
-} // anonymous namespace
+} // namespace test_downbeat_synthetic
+using namespace test_downbeat_synthetic;
 
 FL_TEST_CASE("DownbeatDetector - Basic downbeat pattern detection") {
     // Test that detector can identify downbeats in a simulated 4/4 pattern

@@ -462,3 +462,7 @@ FL_TEST_CASE("Hash collision resistance") {
         }
     }
 }
+
+// Grouped tests
+#include "hash_map_lru.cpp"
+#include "insert_result.cpp"

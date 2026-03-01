@@ -20,7 +20,7 @@ using fl::audio::test::makeSilence;
 using fl::audio::test::makeSample;
 using fl::audio::test::makeWhiteNoise;
 
-namespace {
+namespace test_percussion {
 
 // Feed multiple frames to warm up the envelope follower and let onset detection work.
 // Returns true if the target type was detected in any frame.
@@ -45,7 +45,8 @@ void feedSingle(PercussionDetector& det, const AudioSample& sample) {
     det.update(ctx);
 }
 
-} // anonymous namespace
+} // namespace test_percussion
+using namespace test_percussion;
 
 // ============================================================================
 // API / Constructor Tests

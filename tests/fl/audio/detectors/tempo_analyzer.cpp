@@ -15,7 +15,7 @@ using namespace fl;
 using fl::audio::test::makeSample;
 using fl::audio::test::makeSilence;
 
-namespace {
+namespace test_tempo_analyzer {
 
 static AudioSample makeSample_TempoAnalyzer(float freq, fl::u32 timestamp, float amplitude = 16000.0f) {
     return makeSample(freq, timestamp, amplitude);
@@ -25,7 +25,8 @@ static AudioSample makeSilence_TempoAnalyzer(fl::u32 timestamp) {
     return makeSilence(timestamp);
 }
 
-} // anonymous namespace
+} // namespace test_tempo_analyzer
+using namespace test_tempo_analyzer;
 
 FL_TEST_CASE("TempoAnalyzer - initial state") {
     TempoAnalyzer analyzer;

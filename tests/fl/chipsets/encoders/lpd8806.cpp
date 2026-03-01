@@ -23,7 +23,7 @@
 
 using namespace fl;
 
-namespace {
+namespace test_lpd8806 {
 
 FL_TEST_CASE("LPD8806 - lpd8806Encode() helper function") {
     // Verify 7-bit encoding with MSB set
@@ -219,4 +219,4 @@ FL_TEST_CASE("LPD8806 - 7-bit color depth verification") {
     FL_CHECK_LT(val1, val2);
 }
 
-} // anonymous namespace
+} // namespace test_lpd8806

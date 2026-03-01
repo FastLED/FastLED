@@ -30,6 +30,22 @@ EXCLUDED_TEST_FILES: set[Path] = {
     / "http"
     / "test_utils"
     / "server_thread.cpp.hpp",  # Utility class, not a test (included by loopback.cpp)
+    # Grouped into sibling test files via #include
+    TESTS_DIR / "fl" / "grid.cpp",  # → geometry.cpp
+    TESTS_DIR / "fl" / "tile2x2.cpp",  # → geometry.cpp
+    TESTS_DIR / "fl" / "traverse_grid.cpp",  # → geometry.cpp
+    TESTS_DIR / "fl" / "sin32.cpp",  # → trig8.cpp
+    TESTS_DIR / "fl" / "time_alpha.cpp",  # → timeout.cpp
+    TESTS_DIR / "fl" / "assume_aligned.cpp",  # → align.cpp
+    TESTS_DIR / "fl" / "map_range.cpp",  # → clamp.cpp
+    TESTS_DIR / "fl" / "hash_map_lru.cpp",  # → hash.cpp
+    TESTS_DIR / "fl" / "insert_result.cpp",  # → hash.cpp
+    TESTS_DIR / "fl" / "alloca.cpp",  # → memory.cpp
+    TESTS_DIR / "fl" / "numeric_limits.cpp",  # → types.cpp
+    TESTS_DIR / "fl" / "trace.cpp",  # → log.cpp
+    TESTS_DIR / "fl" / "eorder.cpp",  # → hsv16.cpp
+    TESTS_DIR / "fl" / "xymap.cpp",  # → screenmap.cpp
+    TESTS_DIR / "fl" / "splat.cpp",  # → downscale.cpp
 }
 
 # Directories to exclude from recursive test discovery.
@@ -55,4 +71,12 @@ EXCLUDED_TEST_DIRS: set[Path] = {
     TESTS_DIR / "bin",
     TESTS_DIR / "example_compile_direct",
     TESTS_DIR / "fastled_js",
+    # Consolidated test directories (individual files included via parent .cpp)
+    TESTS_DIR / "fl" / "chipsets" / "encoders",
+    TESTS_DIR / "fl" / "detail",
+    TESTS_DIR / "fl" / "audio" / "detectors",
+    TESTS_DIR / "fl" / "channels" / "detail" / "validation",
+    TESTS_DIR / "fl" / "remote" / "rpc",
+    TESTS_DIR / "fl" / "codec",
+    TESTS_DIR / "fl" / "fx" / "2d",
 }

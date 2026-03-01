@@ -29,3 +29,6 @@ FL_TEST_CASE("Timeout - rollover test") {
     FL_CHECK(timeout.done(past_rollover));
     FL_CHECK(timeout.elapsed(past_rollover) == 512);
 }
+
+// Grouped tests
+#include "time_alpha.cpp"

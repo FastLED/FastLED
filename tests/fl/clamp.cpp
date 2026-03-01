@@ -144,3 +144,6 @@ FL_TEST_CASE("fl::clamp") {
     // Note: clamp is not currently marked constexpr in fl/clamp.h
     // If it becomes constexpr in the future, compile-time tests could be added
 }
+
+// Grouped tests
+#include "map_range.cpp"

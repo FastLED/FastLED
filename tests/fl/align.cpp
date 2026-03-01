@@ -302,3 +302,6 @@ FL_TEST_CASE("FL_ALIGN macro combinations") {
         FL_CHECK(sizeof(Container) >= 2);
     }
 }
+
+// Grouped tests
+#include "assume_aligned.cpp"

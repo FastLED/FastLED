@@ -224,18 +224,17 @@ foreach test_name : test_names
   # These are typically integration tests, network tests, or computationally intensive tests
   slow_tests = [
     'fastled',                      # Main integration test
-    'fl_fx_2d_animartrix2',        # 2D animation effects (heavy computation)
+    'fl_fx_2d',                    # 2D animation effects (heavy computation)
     'fl_spi',                      # SPI communication test
     'fl_xypath',                   # XY path computation test
     'fx_wled',                     # WLED effects test
     'fl_hsv2rgb_accuracy',          # Color conversion accuracy test (many iterations)
     'rmt5_channel_engine',         # RMT5 channel engine test
     'rmt5_peripheral_mock',        # RMT5 peripheral mock test
-    'fl_audio_detectors_downbeat_synthetic', # Downbeat detection test (audio processing)
+    'fl_audio_detectors',          # Audio detector tests (downbeat, vocal, etc.)
     'fl_channels_adapters_spi_channel_adapter', # SPI channel adapter test
     'channel_driver_uart',          # UART channel engine test
     'uart_waveform_alignment',      # UART waveform timing test
-    'fl_audio_detectors_vocal',    # Vocal detector test (CQ kernel generation + MP3 decoding)
     'fl_net_http_chunked_encoding', # HTTP chunked encoding test
     'fl_net_http_connection',       # HTTP connection test
     'fl_net_http_http_parser',      # HTTP parser test

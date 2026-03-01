@@ -15,7 +15,7 @@ using namespace fl;
 using fl::audio::test::makeSample;
 using fl::audio::test::makeSilence;
 
-namespace {
+namespace test_beat {
 
 struct AmplitudeLevel {
     const char* label;
@@ -38,7 +38,8 @@ static AudioSample makeSilence_BeatDetector(fl::u32 timestamp) {
     return makeSilence(timestamp);
 }
 
-} // anonymous namespace
+} // namespace test_beat
+using namespace test_beat;
 
 FL_TEST_CASE("BeatDetector - silence produces no beats") {
     BeatDetector detector;

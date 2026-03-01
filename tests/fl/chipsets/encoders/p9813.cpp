@@ -24,7 +24,7 @@
 
 using namespace fl;
 
-namespace {
+namespace test_p9813 {
 
 /// Helper to calculate expected P9813 flag byte from RGB values
 u8 expectedFlagByte(u8 r, u8 g, u8 b) {
@@ -412,4 +412,4 @@ FL_TEST_CASE("P9813 - Output iterator compatibility") {
     FL_CHECK_EQ(output[4], expectedFlagByte(128, 128, 128));
 }
 
-} // anonymous namespace
+} // namespace test_p9813

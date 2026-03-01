@@ -6,7 +6,7 @@
 #include "fl/int.h"
 
 
-namespace {
+namespace xymap_test {
 // Helper to fill a LUT for serpentine layout
 void fill_serpentine_lut(fl::u16* out, fl::u16 width, fl::u16 height) {
     for (fl::u16 y = 0; y < height; ++y) {
@@ -31,7 +31,8 @@ void fill_custom_irregular_lut(fl::u16* out, fl::u16 width, fl::u16 height) {
         }
     }
 }
-} // namespace
+} // namespace xymap_test
+using namespace xymap_test;
 
 FL_TEST_CASE("XYMap - LUT and wrapped user function mappings are identical (serpentine)") {
     constexpr fl::u16 W = 5;

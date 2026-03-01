@@ -7,7 +7,7 @@
 
 
 // Helper function to set up filesystem for codec tests
-static fl::FileSystem setupCodecFilesystem() {
+static fl::FileSystem setupCodecFilesystem_jpeg() {
     fl::setTestFileSystemRoot("tests");
     fl::FileSystem fs;
     bool ok = fs.beginSd(5);
@@ -16,7 +16,7 @@ static fl::FileSystem setupCodecFilesystem() {
 }
 
 FL_TEST_CASE("JPEG file loading and decoding") {
-    fl::FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem_jpeg();
 
     // Test that we can load the JPEG file from filesystem
     fl::FileHandlePtr handle = fs.openRead("data/codec/file.jpg");

@@ -20,7 +20,7 @@
 
 using namespace fl;
 
-namespace {
+namespace test_sk9822 {
 
 /// Helper to create a pixel in BGR wire order
 fl::array<u8, 3> makePixel(u8 r, u8 g, u8 b) {
@@ -72,7 +72,8 @@ void verifyEndFrame(const fl::vector<u8>& output, size_t& offset, size_t num_led
     FL_CHECK_EQ(offset, output.size());
 }
 
-} // anonymous namespace
+} // namespace test_sk9822
+using namespace test_sk9822;
 
 FL_TEST_CASE("SK9822 - encodeSK9822() basic functionality") {
     // Test single LED with maximum brightness (31)

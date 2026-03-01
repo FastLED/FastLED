@@ -6,6 +6,7 @@
 #include "fl/net/http/native_server.h"
 #include "fl/net/http/native_server.cpp.hpp"
 #include "fl/stl/function.h"
+#include "fl/stl/unique_ptr.h"
 #include "fl/stl/thread.h"
 #include "fl/stl/chrono.h"
 #include "fl/stl/atomic.h"
@@ -33,10 +34,13 @@ static const uint16_t kPortLargePayload[]     = {58915, 58965};
 // RAII wrapper for NativeHttpServer that tries multiple ports.
 // NativeHttpServer has no move/copy, so we must heap-allocate.
 struct ServerGuard {
-    NativeHttpServer* ptr = nullptr;
+    fl::unique_ptr<NativeHttpServer> ptr;
     uint16_t port = 0;
-    ~ServerGuard() { if (ptr) { ptr->stop(); delete ptr; } }
-    NativeHttpServer* operator->() { return ptr; }
+    ServerGuard() = default;
+    ServerGuard(ServerGuard&& o) : ptr(fl::move(o.ptr)), port(o.port) { o.port = 0; }
+    ServerGuard& operator=(ServerGuard&& o) { ptr = fl::move(o.ptr); port = o.port; o.port = 0; return *this; }
+    ~ServerGuard() { if (ptr) { ptr->stop(); } }
+    NativeHttpServer* operator->() { return ptr.get(); }
     NativeHttpServer& operator*() { return *ptr; }
     explicit operator bool() const { return ptr != nullptr; }
 };
@@ -46,13 +50,12 @@ static ServerGuard makeServer(const uint16_t (&candidates)[N],
                               const ConnectionConfig& config = ConnectionConfig()) {
     ServerGuard g;
     for (size_t i = 0; i < N; ++i) {
-        g.ptr = new NativeHttpServer(candidates[i], config);
+        g.ptr = fl::make_unique<NativeHttpServer>(candidates[i], config);
         if (g.ptr->start()) {
             g.port = candidates[i];
             return g;
         }
-        delete g.ptr;
-        g.ptr = nullptr;
+        g.ptr.reset();
     }
     return g;
 }

@@ -18,7 +18,7 @@ using fl::audio::test::makeSyntheticVowel;
 using fl::audio::test::makeWhiteNoise;
 using fl::audio::test::makeChirp;
 
-namespace {
+namespace test_vocal {
 
 struct AmplitudeLevel {
     const char* label;
@@ -37,7 +37,8 @@ static AudioSample makeSample_VocalDetector(float freq, fl::u32 timestamp, float
     return makeSample(freq, timestamp, amplitude);
 }
 
-} // anonymous namespace
+} // namespace test_vocal
+using namespace test_vocal;
 
 FL_TEST_CASE("VocalDetector - pure sine is not vocal") {
     VocalDetector detector;
@@ -325,7 +326,7 @@ FL_TEST_CASE("VocalDetector - two unrelated sines not vocal") {
 //   - Guitar: ~0.48 (more uniform spectrum)
 //   - Voice+guitar: ~0.46 (slightly more peaked due to formant structure)
 
-namespace {
+namespace test_vocal {
 
 /// Generate a guitar-like signal with flatness OUTSIDE the vocal detection
 /// peak (0.46 ± 0.05). Guitar signals should NOT trigger vocal detection.
@@ -394,7 +395,7 @@ inline AudioSample makeVoiceInMixLike(fl::u32 timestamp, float amplitude = 16000
     return AudioSample(data, timestamp);
 }
 
-} // anonymous namespace
+} // namespace test_vocal
 
 // Synthetic signal tests: broadband signals matching real-audio characteristics.
 // Guitar-like signal should NOT trigger vocal detection (flatness outside peak).

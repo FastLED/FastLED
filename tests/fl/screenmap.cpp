@@ -159,3 +159,6 @@ FL_TEST_CASE("ScreenMap getBounds functionality") {
     FL_CHECK(emptyBounds.x == 0.0f);
     FL_CHECK(emptyBounds.y == 0.0f);
 }
+
+// Grouped tests
+#include "xymap.cpp"

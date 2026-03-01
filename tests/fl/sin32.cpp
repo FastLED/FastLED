@@ -6,7 +6,7 @@ using namespace fl;
 
 // Helper function for absolute value of integers
 template<typename T>
-static T abs_helper(T value) {
+static T abs_helper_sin32(T value) {
     return value < 0 ? -value : value;
 }
 
@@ -28,7 +28,7 @@ FL_TEST_CASE("fl::sin32") {
         // 16777216 / 2 = 8388608 (180 degrees)
         i32 result = sin32(8388608);
         // Should be close to zero
-        FL_CHECK(abs_helper(result) < 100000);
+        FL_CHECK(abs_helper_sin32(result) < 100000);
     }
 
     FL_SUBCASE("three quarters circle (270 degrees)") {
@@ -43,7 +43,7 @@ FL_TEST_CASE("fl::sin32") {
         // 16777216 (360 degrees, same as 0)
         i32 result = sin32(16777216);
         // Should be close to zero (same as 0 degrees)
-        FL_CHECK(abs_helper(result) < 100000);
+        FL_CHECK(abs_helper_sin32(result) < 100000);
     }
 
     FL_SUBCASE("small angles") {
@@ -83,7 +83,7 @@ FL_TEST_CASE("fl::sin32") {
         i32 sin_a = sin32(angle);
         i32 sin_a_plus_180 = sin32(angle + 8388608); // +180 degrees
         // Allow small error due to interpolation
-        FL_CHECK(abs_helper(sin_a + sin_a_plus_180) < 1000);
+        FL_CHECK(abs_helper_sin32(sin_a + sin_a_plus_180) < 1000);
     }
 }
 
@@ -99,7 +99,7 @@ FL_TEST_CASE("fl::cos32") {
         // 16777216 / 4 = 4194304 (90 degrees)
         i32 result = cos32(4194304);
         // cos(90°) = 0
-        FL_CHECK(abs_helper(result) < 100000);
+        FL_CHECK(abs_helper_sin32(result) < 100000);
     }
 
     FL_SUBCASE("half circle (180 degrees)") {
@@ -114,7 +114,7 @@ FL_TEST_CASE("fl::cos32") {
         // 16777216 * 3 / 4 = 12582912 (270 degrees)
         i32 result = cos32(12582912);
         // cos(270°) = 0
-        FL_CHECK(abs_helper(result) < 100000);
+        FL_CHECK(abs_helper_sin32(result) < 100000);
     }
 
     FL_SUBCASE("full circle (360 degrees)") {
@@ -155,7 +155,7 @@ FL_TEST_CASE("fl::cos32") {
         i32 cos_a = cos32(angle);
         i32 sin_a_plus_90 = sin32(angle + 4194304); // +90 degrees
         // Allow small error due to interpolation
-        FL_CHECK(abs_helper(cos_a - sin_a_plus_90) < 1000);
+        FL_CHECK(abs_helper_sin32(cos_a - sin_a_plus_90) < 1000);
     }
 }
 
@@ -177,7 +177,7 @@ FL_TEST_CASE("fl::sin16lut") {
         // 65536 / 2 = 32768 (180 degrees)
         i16 result = sin16lut(32768);
         // Should be close to zero
-        FL_CHECK(abs_helper(result) < 100);
+        FL_CHECK(abs_helper_sin32(result) < 100);
     }
 
     FL_SUBCASE("three quarters circle (270 degrees)") {
@@ -193,7 +193,7 @@ FL_TEST_CASE("fl::sin16lut") {
         // Note: 65536 = 0 in u16
         i16 result = sin16lut(0);  // Equivalent to sin16lut(65536) due to u16 overflow
         // Should be close to zero (same as 0 degrees)
-        FL_CHECK(abs_helper(result) < 100);
+        FL_CHECK(abs_helper_sin32(result) < 100);
     }
 
     FL_SUBCASE("small angles") {
@@ -233,7 +233,7 @@ FL_TEST_CASE("fl::sin16lut") {
         i16 sin_a = sin16lut(angle);
         i16 sin_a_plus_180 = sin16lut(angle + 32768); // +180 degrees
         // Allow small error due to interpolation
-        FL_CHECK(abs_helper(sin_a + sin_a_plus_180) < 10);
+        FL_CHECK(abs_helper_sin32(sin_a + sin_a_plus_180) < 10);
     }
 }
 
@@ -249,7 +249,7 @@ FL_TEST_CASE("fl::cos16lut") {
         // 65536 / 4 = 16384 (90 degrees)
         i16 result = cos16lut(16384);
         // cos(90°) = 0
-        FL_CHECK(abs_helper(result) < 100);
+        FL_CHECK(abs_helper_sin32(result) < 100);
     }
 
     FL_SUBCASE("half circle (180 degrees)") {
@@ -264,7 +264,7 @@ FL_TEST_CASE("fl::cos16lut") {
         // 65536 * 3 / 4 = 49152 (270 degrees)
         i16 result = cos16lut(49152);
         // cos(270°) = 0
-        FL_CHECK(abs_helper(result) < 100);
+        FL_CHECK(abs_helper_sin32(result) < 100);
     }
 
     FL_SUBCASE("full circle (360 degrees)") {
@@ -306,7 +306,7 @@ FL_TEST_CASE("fl::cos16lut") {
         i16 cos_a = cos16lut(angle);
         i16 sin_a_plus_90 = sin16lut(angle + 16384); // +90 degrees
         // Allow small error due to interpolation
-        FL_CHECK(abs_helper(cos_a - sin_a_plus_90) < 10);
+        FL_CHECK(abs_helper_sin32(cos_a - sin_a_plus_90) < 10);
     }
 }
 
@@ -330,7 +330,7 @@ FL_TEST_CASE("fl::sin32 vs sin16lut consistency") {
             i16 result32_scaled = static_cast<i16>(result32 / 65536);
 
             // Allow some error due to scaling and interpolation
-            FL_CHECK(abs_helper(result16 - result32_scaled) < 5);
+            FL_CHECK(abs_helper_sin32(result16 - result32_scaled) < 5);
         }
     }
 }
@@ -348,7 +348,7 @@ FL_TEST_CASE("fl::cos32 vs cos16lut consistency") {
             i16 result32_scaled = static_cast<i16>(result32 / 65536);
 
             // Allow some error due to scaling and interpolation
-            FL_CHECK(abs_helper(result16 - result32_scaled) < 5);
+            FL_CHECK(abs_helper_sin32(result16 - result32_scaled) < 5);
         }
     }
 }
@@ -395,17 +395,17 @@ FL_TEST_CASE("fl::sincos32") {
         // 90 degrees (4194304): sin=max, cos=0
         SinCos32 sc90 = sincos32(4194304);
         FL_CHECK(sc90.sin_val > 2147000000);
-        FL_CHECK(abs_helper(sc90.cos_val) < 100000);
+        FL_CHECK(abs_helper_sin32(sc90.cos_val) < 100000);
 
         // 180 degrees (8388608): sin=0, cos=-max
         SinCos32 sc180 = sincos32(8388608);
-        FL_CHECK(abs_helper(sc180.sin_val) < 100000);
+        FL_CHECK(abs_helper_sin32(sc180.sin_val) < 100000);
         FL_CHECK(sc180.cos_val < -2147000000);
 
         // 270 degrees (12582912): sin=-max, cos=0
         SinCos32 sc270 = sincos32(12582912);
         FL_CHECK(sc270.sin_val < -2147000000);
-        FL_CHECK(abs_helper(sc270.cos_val) < 100000);
+        FL_CHECK(abs_helper_sin32(sc270.cos_val) < 100000);
     }
 
     FL_SUBCASE("pythagorean identity") {

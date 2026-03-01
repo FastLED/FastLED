@@ -440,3 +440,6 @@ FL_TEST_CASE("warning macro edge cases") {
         FL_CHECK(true);
     }
 }
+
+// Grouped tests
+#include "trace.cpp"

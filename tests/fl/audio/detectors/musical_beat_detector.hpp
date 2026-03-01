@@ -7,9 +7,10 @@
 
 using namespace fl;
 
-namespace {
+namespace test_musical_beat {
 // No helper functions needed in this file
-} // anonymous namespace
+} // namespace test_musical_beat
+using namespace test_musical_beat;
 
 // MB-1: Steady 120 BPM - Tight Validation
 FL_TEST_CASE("MusicalBeatDetector - steady 120 BPM tight") {

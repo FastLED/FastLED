@@ -14,7 +14,7 @@ using namespace fl;
 using fl::audio::test::makeSample;
 using fl::audio::test::makeSilence;
 
-namespace {
+namespace test_energy_analyzer {
 
 static AudioSample makeSample_EnergyAnalyzer(float amplitude, fl::u32 timestamp) {
     return makeSample(440.0f, timestamp, amplitude);
@@ -24,7 +24,8 @@ static AudioSample makeSilence_EnergyAnalyzer(fl::u32 timestamp) {
     return makeSilence(timestamp);
 }
 
-} // anonymous namespace
+} // namespace test_energy_analyzer
+using namespace test_energy_analyzer;
 
 FL_TEST_CASE("EnergyAnalyzer - silence gives zero RMS") {
     EnergyAnalyzer analyzer;

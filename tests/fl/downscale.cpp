@@ -125,3 +125,6 @@ FL_TEST_CASE("downscale 11x11 to 2x2") {
         FL_CHECK(dst[i] == CRGB(129, 0, 0));  // Averaged color
     }
 }
+
+// Grouped tests
+#include "splat.cpp"
