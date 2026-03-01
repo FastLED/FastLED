@@ -2,7 +2,12 @@
 /// @brief Implementation of fl::yield()
 
 #include "fl/yield.h"
+#include "fl/sketch_macros.h"
 #include "fl/stl/thread.h"
+
+#if SKETCH_HAS_LOTS_OF_MEMORY
+#include "fl/async.h"
+#endif
 
 #ifdef FL_IS_ESP32
 // IWYU pragma: begin_keep
@@ -14,6 +19,19 @@
 namespace fl {
 
 void yield() {
+#if SKETCH_HAS_LOTS_OF_MEMORY
+    // Pump the scheduler so registered fl::task instances make progress
+    // during yield. Reentrancy guard prevents infinite recursion when
+    // a task callback calls yield().
+    static bool s_in_yield = false;
+    if (!s_in_yield) {
+        s_in_yield = true;
+        Scheduler::instance().update();
+        s_in_yield = false;
+    }
+#endif
+
+    // OS/RTOS yield
 #ifdef FL_IS_ESP32
     // Yield to FreeRTOS scheduler - allows WiFi, BT, and other
     // system tasks to run. vTaskDelay(0) yields to any

@@ -19,16 +19,14 @@
 #include "fl/net/http/test_utils/server_thread.h"
 #include "fl/net/http/test_utils/server_thread.cpp.hpp"
 #include "fl/json.h"
+#include "fl/task.h"
+#include "fl/delay.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/chrono.h"
 #include <thread>  // ok include
 #include <chrono>  // ok include
 
 using namespace fl;
-
-__attribute__((unused)) static void delay(uint32_t ms) {
-    fl::this_thread::sleep_for(fl::chrono::milliseconds(ms));
-}
 
 FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
     constexpr uint16_t PORT = 47901;
@@ -57,11 +55,21 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
                 connected = true;
                 break;
             }
-            delay(10);
+            fl::delay(10);
         }
         FL_REQUIRE(connected);
     }
     FL_CHECK(client_transport->isConnected());
+
+    // Register a task to pump transports and RPC via fl::Scheduler.
+    // fl::delay() automatically calls async_yield() → Scheduler::update(),
+    // so this task runs every 1ms during the delay loop below.
+    auto pump_task = fl::task::every_ms(1).then([&]() {
+        uint32_t now = fl::millis();
+        server_transport->update(now);
+        client_transport->update(now);
+        server_remote.update(now);
+    });
 
     // Send request
     Json params = Json::array();
@@ -74,28 +82,23 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
     request.set("id", 1);
     client_transport->writeResponse(request);
 
-    // Wait for response
+    // Wait for response — fl::delay() pumps the scheduler which drives
+    // the transport updates registered above.
     bool got_response = false;
     Json response;
     uint32_t start = fl::millis();
 
     while (fl::millis() - start < 5000) {
-        uint32_t now = fl::millis();
-        // Process server-side RPC first so the response is ready to read.
-        server_transport->update(now);
-        server_remote.update(now);
-
-        client_transport->update(now);
-
         auto resp = client_transport->readRequest();
         if (resp.has_value()) {
             response = resp.value();
             got_response = true;
             break;
         }
-
-        fl::this_thread::yield();
+        fl::delay(1);
     }
+
+    pump_task.cancel();
 
     FL_REQUIRE(got_response);
     FL_CHECK_EQ(response["result"].as_int().value(), 12); // 5 + 7

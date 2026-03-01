@@ -5,6 +5,7 @@
 #include "fl/net/http/native_server.cpp.hpp"
 #include "fl/net/http/native_client.h"
 #include "fl/net/http/native_client.cpp.hpp"
+#include "fl/delay.h"
 
 using namespace fl;
 
@@ -161,11 +162,7 @@ FL_TEST_CASE("NativeHttpServer - Accept real client connection") {
         if (server.getClientCount() > 0) {
             break;
         }
-        #ifdef _WIN32
-        Sleep(10);  // 10ms
-        #else
-        usleep(10000);  // 10ms
-        #endif
+        fl::delay(10);
     }
 
     // Server should have accepted the client
@@ -190,11 +187,7 @@ FL_TEST_CASE("NativeHttpServer - Client ID tracking") {
         if (server.getClientCount() > 0) {
             break;
         }
-        #ifdef _WIN32
-        Sleep(10);
-        #else
-        usleep(10000);
-        #endif
+        fl::delay(10);
     }
 
     FL_CHECK(server.getClientCount() == 1);
@@ -215,11 +208,7 @@ FL_TEST_CASE("NativeHttpServer - Client ID tracking") {
         if (server.getClientCount() > 1) {
             break;
         }
-        #ifdef _WIN32
-        Sleep(10);
-        #else
-        usleep(10000);
-        #endif
+        fl::delay(10);
     }
 
     FL_CHECK(server.getClientCount() == 2);
@@ -251,11 +240,7 @@ FL_TEST_CASE("NativeHttpServer - Send and recv with real client") {
         if (server.getClientCount() > 0) {
             break;
         }
-        #ifdef _WIN32
-        Sleep(10);
-        #else
-        usleep(10000);
-        #endif
+        fl::delay(10);
     }
 
     FL_CHECK(server.getClientCount() == 1);
@@ -274,11 +259,7 @@ FL_TEST_CASE("NativeHttpServer - Send and recv with real client") {
         if (recvResult > 0) {
             break;
         }
-        #ifdef _WIN32
-        Sleep(10);
-        #else
-        usleep(10000);
-        #endif
+        fl::delay(10);
     }
 
     FL_CHECK(recvResult == sizeof(serverData));
@@ -301,11 +282,7 @@ FL_TEST_CASE("NativeHttpServer - Send and recv with real client") {
         if (recvResult > 0) {
             break;
         }
-        #ifdef _WIN32
-        Sleep(10);
-        #else
-        usleep(10000);
-        #endif
+        fl::delay(10);
     }
 
     FL_CHECK(recvResult == sizeof(clientData));
@@ -336,11 +313,7 @@ FL_TEST_CASE("NativeHttpServer - Broadcast to multiple clients") {
         if (server.getClientCount() >= 2) {
             break;
         }
-        #ifdef _WIN32
-        Sleep(10);
-        #else
-        usleep(10000);
-        #endif
+        fl::delay(10);
     }
 
     FL_CHECK(server.getClientCount() == 2);
@@ -365,11 +338,7 @@ FL_TEST_CASE("NativeHttpServer - Broadcast to multiple clients") {
         if (recv1 > 0 && recv2 > 0) {
             break;
         }
-        #ifdef _WIN32
-        Sleep(10);
-        #else
-        usleep(10000);
-        #endif
+        fl::delay(10);
     }
 
     FL_CHECK(recv1 == sizeof(broadcastData));
@@ -399,11 +368,7 @@ FL_TEST_CASE("NativeHttpServer - Disconnect specific client") {
         if (server.getClientCount() >= 2) {
             break;
         }
-        #ifdef _WIN32
-        Sleep(10);
-        #else
-        usleep(10000);
-        #endif
+        fl::delay(10);
     }
 
     FL_CHECK(server.getClientCount() == 2);
@@ -442,11 +407,7 @@ FL_TEST_CASE("NativeHttpServer - Disconnect all clients") {
         if (server.getClientCount() >= 2) {
             break;
         }
-        #ifdef _WIN32
-        Sleep(10);
-        #else
-        usleep(10000);
-        #endif
+        fl::delay(10);
     }
 
     FL_CHECK(server.getClientCount() == 2);
@@ -475,11 +436,7 @@ FL_TEST_CASE("NativeHttpServer - Update removes disconnected clients") {
         if (server.getClientCount() > 0) {
             break;
         }
-        #ifdef _WIN32
-        Sleep(10);
-        #else
-        usleep(10000);
-        #endif
+        fl::delay(10);
     }
 
     FL_CHECK(server.getClientCount() == 1);
@@ -488,11 +445,7 @@ FL_TEST_CASE("NativeHttpServer - Update removes disconnected clients") {
     client.close();
 
     // Give server time to detect disconnection
-    #ifdef _WIN32
-    Sleep(50);
-    #else
-    usleep(50000);
-    #endif
+    fl::delay(50);
 
     // Update should remove disconnected client
     server.update(0);
@@ -504,11 +457,7 @@ FL_TEST_CASE("NativeHttpServer - Update removes disconnected clients") {
         if (server.getClientCount() == 0) {
             break;
         }
-        #ifdef _WIN32
-        Sleep(10);
-        #else
-        usleep(10000);
-        #endif
+        fl::delay(10);
     }
 
     // Cleanup
@@ -530,11 +479,7 @@ FL_TEST_CASE("NativeHttpServer - HTTP-like request/response exchange") {
     for (int i = 0; i < 10; ++i) {
         server.acceptClients();
         if (server.getClientCount() > 0) break;
-        #ifdef _WIN32
-        Sleep(10);
-        #else
-        usleep(10000);
-        #endif
+        fl::delay(10);
     }
     FL_REQUIRE(server.getClientCount() == 1);
     uint32_t clientId = server.getClientIds()[0];
@@ -555,11 +500,7 @@ FL_TEST_CASE("NativeHttpServer - HTTP-like request/response exchange") {
         if (got > 0) {
             totalRecv += got;
         } else {
-            #ifdef _WIN32
-            Sleep(5);
-            #else
-            usleep(5000);
-            #endif
+            fl::delay(5);
         }
     }
     FL_CHECK(totalRecv == reqLen);
@@ -584,11 +525,7 @@ FL_TEST_CASE("NativeHttpServer - HTTP-like request/response exchange") {
         if (got > 0) {
             totalRecv += got;
         } else {
-            #ifdef _WIN32
-            Sleep(5);
-            #else
-            usleep(5000);
-            #endif
+            fl::delay(5);
         }
     }
     FL_CHECK(totalRecv == respLen);
@@ -619,11 +556,7 @@ FL_TEST_CASE("NativeHttpServer - Server restart on same port (SO_REUSEADDR)") {
         for (int i = 0; i < 10; ++i) {
             server.acceptClients();
             if (server.getClientCount() > 0) break;
-            #ifdef _WIN32
-            Sleep(10);
-            #else
-            usleep(10000);
-            #endif
+            fl::delay(10);
         }
         FL_CHECK(server.getClientCount() == 1);
 
@@ -645,11 +578,7 @@ FL_TEST_CASE("NativeHttpServer - Server restart on same port (SO_REUSEADDR)") {
         for (int i = 0; i < 10; ++i) {
             server.acceptClients();
             if (server.getClientCount() > 0) break;
-            #ifdef _WIN32
-            Sleep(10);
-            #else
-            usleep(10000);
-            #endif
+            fl::delay(10);
         }
         FL_CHECK(server.getClientCount() == 1);
 
@@ -669,11 +598,7 @@ FL_TEST_CASE("NativeHttpServer - Large server-to-client transfer") {
     for (int i = 0; i < 10; ++i) {
         server.acceptClients();
         if (server.getClientCount() > 0) break;
-        #ifdef _WIN32
-        Sleep(10);
-        #else
-        usleep(10000);
-        #endif
+        fl::delay(10);
     }
     FL_REQUIRE(server.getClientCount() == 1);
     uint32_t clientId = server.getClientIds()[0];
@@ -694,11 +619,7 @@ FL_TEST_CASE("NativeHttpServer - Large server-to-client transfer") {
         if (sent > 0) {
             totalSent += sent;
         } else {
-            #ifdef _WIN32
-            Sleep(1);
-            #else
-            usleep(1000);
-            #endif
+            fl::delay(1);
         }
     }
     FL_CHECK(totalSent == payloadSize);
@@ -715,11 +636,7 @@ FL_TEST_CASE("NativeHttpServer - Large server-to-client transfer") {
                 recvBuf[totalRecv++] = tmp[j];
             }
         } else {
-            #ifdef _WIN32
-            Sleep(5);
-            #else
-            usleep(5000);
-            #endif
+            fl::delay(5);
         }
     }
     FL_CHECK(totalRecv == payloadSize);
@@ -749,11 +666,7 @@ FL_TEST_CASE("NativeHttpServer - Multiple sequential requests on same connection
     for (int i = 0; i < 10; ++i) {
         server.acceptClients();
         if (server.getClientCount() > 0) break;
-        #ifdef _WIN32
-        Sleep(10);
-        #else
-        usleep(10000);
-        #endif
+        fl::delay(10);
     }
     FL_REQUIRE(server.getClientCount() == 1);
     uint32_t clientId = server.getClientIds()[0];
@@ -770,11 +683,7 @@ FL_TEST_CASE("NativeHttpServer - Multiple sequential requests on same connection
         for (int i = 0; i < 10; ++i) {
             got = server.recv(clientId, srvBuf);
             if (got > 0) break;
-            #ifdef _WIN32
-            Sleep(5);
-            #else
-            usleep(5000);
-            #endif
+            fl::delay(5);
         }
         FL_CHECK(got == 4);
         FL_CHECK(srvBuf[3] == (uint8_t)('0' + cycle));
@@ -789,11 +698,7 @@ FL_TEST_CASE("NativeHttpServer - Multiple sequential requests on same connection
         for (int i = 0; i < 10; ++i) {
             got = client.recv(cliBuf);
             if (got > 0) break;
-            #ifdef _WIN32
-            Sleep(5);
-            #else
-            usleep(5000);
-            #endif
+            fl::delay(5);
         }
         FL_CHECK(got == 4);
         FL_CHECK(cliBuf[0] == 'R');
