@@ -10,6 +10,7 @@
 #include "fl/stl/cctype.h"
 #include "fl/stl/charconv.h"
 #include "fl/stl/not_null.h"
+#include "fl/compiler_control.h"
 
 #ifdef FL_IS_WASM
 // IWYU pragma: begin_keep
@@ -24,7 +25,6 @@
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"  // IWYU pragma: keep
 #include "fl/stl/variant.h"
-#include "fl/compiler_control.h"
 #include "fl/string_view.h"
 #include "fl/stl/iterator.h"
 #include "fl/bitset_dynamic.h"
