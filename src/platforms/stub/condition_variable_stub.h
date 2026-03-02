@@ -12,9 +12,12 @@
 /// or provides a fake implementation for single-threaded environments.
 
 #include "fl/stl/assert.h"
+#include "fl/stl/thread_config.h"  // For FASTLED_MULTITHREADED
 
-// Check if we have C++11 threading support
-#if __cplusplus >= 201103L && !defined(FASTLED_STUB_NO_STD_THREAD)
+// Use FASTLED_MULTITHREADED for detection (consistent with mutex_stub.h)
+// Previously checked __cplusplus >= 201103L which could get out of sync with
+// mutex detection on platforms like WASM without pthreads.
+#if FASTLED_MULTITHREADED
     #include <condition_variable>  // ok include
     #define FASTLED_STUB_HAS_CONDITION_VARIABLE 1
 #else
@@ -89,9 +92,13 @@ public:
         FL_ASSERT(false, "ConditionVariableFake::wait(pred) called in single-threaded mode would deadlock");
     }
 
-    // Note: wait_for and wait_until are not implemented in fake version
-    // as they would require timing facilities and are not commonly used
-    // in single-threaded scenarios
+    /// @brief wait_for would deadlock in single-threaded mode
+    /// Templated on Duration to avoid requiring <chrono> include in fake implementation
+    template<typename Mutex, typename Duration>
+    cv_status wait_for(unique_lock<Mutex>& lock, const Duration& timeout_duration) {
+        FL_ASSERT(false, "ConditionVariableFake::wait_for() called in single-threaded mode would deadlock");
+        return cv_status::timeout;
+    }
 };
 
 using condition_variable = ConditionVariableFake;

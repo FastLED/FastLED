@@ -119,7 +119,7 @@ EMSCRIPTEN_KEEPALIVE fl::u32 micros() {
 // Replacement for 'yield' in WebAssembly context
 EMSCRIPTEN_KEEPALIVE void yield() {
     // Use emscripten_yield to allow the browser to perform other tasks
-    delay(0);
+    fl::delay(0);
 }
 }
 
