@@ -25,6 +25,7 @@
 
 #include "fl/stl/thread.h"
 #include "fl/stl/chrono.h"
+#include <chrono>  // IWYU pragma: keep — std::chrono::microseconds for std::condition_variable::wait_for
 
 // Simple logging for stub/WASM platforms (avoid FL_WARN/FL_DBG due to exception issues)
 #include "fl/stl/stdio.h"

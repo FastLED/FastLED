@@ -13,6 +13,7 @@
 #include "fl/compiler_control.h"
 #include "fl/stl/math.h"  // for sqrtf
 #include "fl/align.h"
+#include "fl/assume_aligned.h"  // IWYU pragma: keep
 
 //==============================================================================
 // Platform Implementation Namespace

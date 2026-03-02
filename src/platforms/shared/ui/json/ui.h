@@ -3,11 +3,10 @@
 // IWYU pragma: private
 
 #include "fl/stl/function.h"
+#include "fl/stl/weak_ptr.h"  // Full definition needed by callers of addJsonUiComponent
 
 namespace fl {
 
-template<typename T>
-class weak_ptr;
 // Forward declare the JsonUiInternal class.
 class JsonUiInternal;
 class JsonUiManager;
