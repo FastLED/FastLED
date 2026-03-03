@@ -23,6 +23,7 @@ namespace fl {
     class Json;
     class Remote;
     class RxDevice;
+    struct BleTransportState;
 }
 
 /// @brief Factory function type for creating RxDevice instances
@@ -44,6 +45,7 @@ struct ValidationState {
     bool debug_enabled = false;  // Runtime debug logging toggle (default: off)
     bool net_server_active = false;  // Network server validation active
     bool net_client_active = false;  // Network client validation active
+    bool ble_server_active = false;  // BLE GATT server validation active
 };
 
 /// @brief Print JSON directly to Serial, bypassing fl::println and ScopedLogDisable
@@ -79,9 +81,23 @@ public:
     /// @brief Get underlying Remote instance
     fl::Remote* getRemote() { return mRemote.get(); }
 
+    /// @brief Start BLE remote (creates BLE GATT server + second Remote instance)
+    /// @return JSON result from startBle()
+    fl::Json startBleRemote();
+
+    /// @brief Stop BLE remote (destroys BLE Remote + GATT server)
+    /// @return JSON result from stopBle()
+    fl::Json stopBleRemote();
+
 private:
-    fl::unique_ptr<fl::Remote> mRemote;  // Remote RPC system instance
+    fl::unique_ptr<fl::Remote> mRemote;      // Serial Remote RPC system instance
+    fl::unique_ptr<fl::Remote> mBleRemote;   // BLE Remote RPC system instance (created by startBle)
+    fl::BleTransportState* mBleState = nullptr; // Opaque BLE state (heap-allocated by createBleTransport)
     fl::shared_ptr<ValidationState> mState;  // Shared validation state
+    bool mPendingBleStop = false;            // Deferred BLE teardown flag (set by stopBle RPC)
+
+    /// @brief Register all RPC methods on a given Remote instance
+    void registerAllMethods(fl::Remote* remote);
 
     // Private helper functions for RPC implementation
     fl::Json runSingleTestImpl(const fl::Json& args);

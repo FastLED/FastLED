@@ -19,6 +19,30 @@ You are a specialized code review agent for FastLED. Review staged and unstaged 
 - Use alternative error handling patterns (return values, error codes, etc.)
 - If found: Report violation with exact line number and fix or ask user
 
+### src/** and examples/** C++ changes - SPAN USAGE MANDATES
+**Core Principle**: Use `fl::span` instead of raw pointer+size pairs for contiguous data.
+
+**Rules**:
+1. ❌ **NEVER pass raw `(pointer, size)` pairs** between FastLED functions when `fl::span` can be used
+   - ❌ Bad: `void process(const u8* data, size_t len)`
+   - ✅ Good: `void process(fl::span<const u8> data)`
+2. ❌ **NEVER use Arduino `String` type** in FastLED code
+   - Use `fl::string` instead
+   - Exception: Unavoidable when calling external library APIs (e.g., NimBLE `getValue()` returns `String`)
+   - In such cases, convert to `fl::string` immediately at the API boundary
+3. ✅ **Raw pointer+size is OK for external API boundaries** — no need to wrap in `fl::span` when calling third-party APIs
+   - ✅ Fine: `externalApi((const u8*)str.c_str(), str.size());`
+   - ❌ Bad: Wrapping in span just to immediately unwrap: `fl::span<const u8> data(...); externalApi(data.data(), data.size());`
+4. ✅ **`fl::span` auto-converts from containers** — pass containers directly
+   - ✅ Good: `process(myVector);` (implicit `fl::span` conversion)
+   - ❌ Bad: `process(fl::span<const u8>(myVector.data(), myVector.size()));`
+
+**Check Process**:
+1. Scan for function signatures with `(const u8* data, size_t size)` or similar pointer+length pairs
+2. Scan for `Arduino String` usage (`String val`, `String&`, etc.)
+3. Scan for raw pointer casts passed directly without span intermediary
+4. If found: Report violation and suggest `fl::span` refactoring
+
 ### examples/** changes - QUALITY CONTROL
 1. **Check for new *.ino files** (newly added files)
 2. **Evaluate each new *.ino for "AI slop"**:
@@ -223,6 +247,8 @@ void validateHardware() {
   - Try-catch blocks: N
   - Platform headers in .h files: N
   - Filename mismatches: N
+  - Span usage / raw pointer pairs: N
+  - Arduino String usage: N
   - Type annotation issues: N
   - Other: N
 - Violations fixed: N

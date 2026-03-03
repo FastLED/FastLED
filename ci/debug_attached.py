@@ -168,6 +168,7 @@ def run_compile(
     build_dir: Path,
     environment: str | None = None,
     verbose: bool = False,
+    clean: bool = False,
 ) -> bool:
     """Compile the PlatformIO project.
 
@@ -178,10 +179,18 @@ def run_compile(
         build_dir: Project directory containing platformio.ini
         environment: PlatformIO environment to build (None = default)
         verbose: Enable verbose output
+        clean: Clean build artifacts before compiling
 
     Returns:
         True if compilation succeeded, False otherwise
     """
+    if clean:
+        clean_cmd = ["pio", "run", "--target", "clean", "--project-dir", str(build_dir)]
+        if environment:
+            clean_cmd.extend(["--environment", environment])
+        print("🧹 Cleaning build artifacts...")
+        subprocess.run(clean_cmd, capture_output=True)
+
     cmd = ["pio", "run", "--project-dir", str(build_dir)]
     if environment:
         cmd.extend(["--environment", environment])

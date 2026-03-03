@@ -29,3 +29,12 @@
 #include <FS.h>        // File system support (if used by user code)
 // IWYU pragma: end_keep
 #endif
+
+// BLE support (used by ble_esp32.cpp.hpp for GATT server transport)
+#if 0
+// IWYU pragma: begin_keep
+#include <BLEDevice.h>
+#include <BLEServer.h>
+#include <BLEUtils.h>
+// IWYU pragma: end_keep
+#endif

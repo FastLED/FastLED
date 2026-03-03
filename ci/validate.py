@@ -83,6 +83,7 @@ from ci.util.port_utils import (
     detect_attached_chip,
     kill_port_users,
 )
+from ci.validate_ble import run_ble_validation
 from ci.validate_net import run_net_loopback_validation, run_net_validation
 from ci.validate_ota import run_ota_validation
 
@@ -563,6 +564,7 @@ class Args:
     # Build system selection
     use_fbuild: bool
     no_fbuild: bool
+    clean: bool
 
     # Strip size configuration (NEW - Phase 8)
     strip_sizes: str | None
@@ -589,6 +591,9 @@ class Args:
 
     # OTA validation mode
     ota: bool
+
+    # BLE validation mode
+    ble: bool
 
     @staticmethod
     def parse_args() -> "Args":
@@ -753,6 +758,17 @@ See Also:
             help="ESP32 starts WiFi AP + OTA HTTP server; host validates auth and update endpoints",
         )
 
+        # BLE validation mode
+        ble_group = parser.add_argument_group(
+            "BLE Validation (ESP32 BLE GATT)",
+            "Test ESP32 BLE GATT server with JSON-RPC ping/pong over BLE.",
+        )
+        ble_group.add_argument(
+            "--ble",
+            action="store_true",
+            help="ESP32 starts BLE GATT server; host connects via Bleak and validates ping/pong",
+        )
+
         # Standard options
         parser.add_argument(
             "--env",
@@ -859,6 +875,11 @@ See Also:
             action="store_true",
             help="Force PlatformIO even for esp32s3 (disables fbuild default)",
         )
+        parser.add_argument(
+            "--clean",
+            action="store_true",
+            help="Clean build before compiling (removes cached build artifacts)",
+        )
 
         # Strip size configuration (NEW - Phase 8)
         strip_size_group = parser.add_argument_group(
@@ -946,6 +967,7 @@ See Also:
             and not parsed.no_auto_discover_pins,
             use_fbuild=parsed.use_fbuild,
             no_fbuild=parsed.no_fbuild,
+            clean=parsed.clean,
             strip_sizes=parsed.strip_sizes,  # NEW - Phase 8
             lanes=parsed.lanes,  # NEW
             lane_counts=parsed.lane_counts,  # NEW
@@ -956,6 +978,7 @@ See Also:
             net_client=parsed.net_client,
             net=parsed.net,
             ota=parsed.ota,
+            ble=parsed.ble,
         )
 
 
@@ -1180,12 +1203,15 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
     # OTA validation mode
     ota_mode = args.ota
 
-    # Validate mutual exclusivity of net/ota modes with driver modes
-    if (net_server_mode or net_client_mode or net_loopback_mode or ota_mode) and (
-        drivers or simd_test_mode
-    ):
+    # BLE validation mode
+    ble_mode = args.ble
+
+    # Validate mutual exclusivity of net/ota/ble modes with driver modes
+    if (
+        net_server_mode or net_client_mode or net_loopback_mode or ota_mode or ble_mode
+    ) and (drivers or simd_test_mode):
         print(
-            f"{Fore.RED}❌ Error: --net/--net-server/--net-client/--ota cannot be combined with driver flags or --simd{Style.RESET_ALL}"
+            f"{Fore.RED}❌ Error: --net/--net-server/--net-client/--ota/--ble cannot be combined with driver flags or --simd{Style.RESET_ALL}"
         )
         return 1
     net_mode_count = sum([net_server_mode, net_client_mode, net_loopback_mode])
@@ -1199,8 +1225,13 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
             f"{Fore.RED}❌ Error: --ota cannot be combined with --net/--net-server/--net-client{Style.RESET_ALL}"
         )
         return 1
+    if ble_mode and (net_mode_count > 0 or ota_mode):
+        print(
+            f"{Fore.RED}❌ Error: --ble cannot be combined with --net/--net-server/--net-client/--ota{Style.RESET_ALL}"
+        )
+        return 1
 
-    # GPIO-only mode: no drivers, not SIMD, not net, not OTA — just run GPIO pre-test
+    # GPIO-only mode: no drivers, not SIMD, not net, not OTA, not BLE — just run GPIO pre-test
     gpio_only_mode = (
         not drivers
         and not simd_test_mode
@@ -1208,6 +1239,7 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
         and not net_client_mode
         and not net_loopback_mode
         and not ota_mode
+        and not ble_mode
     )
     if gpio_only_mode:
         print(
@@ -1779,10 +1811,14 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
         if use_fbuild:
             from ci.util.fbuild_runner import run_fbuild_compile
 
-            if not run_fbuild_compile(build_dir, final_environment, args.verbose):
+            if not run_fbuild_compile(
+                build_dir, final_environment, args.verbose, clean=args.clean
+            ):
                 return 1
         else:
-            if not run_compile(build_dir, final_environment, args.verbose):
+            if not run_compile(
+                build_dir, final_environment, args.verbose, clean=args.clean
+            ):
                 return 1
 
         # ============================================================
@@ -1957,6 +1993,8 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
             print("\n📌 Network mode: skipping pin discovery and GPIO pre-test")
         elif ota_mode:
             print("\n📌 OTA mode: skipping pin discovery and GPIO pre-test")
+        elif ble_mode:
+            print("\n📌 BLE mode: skipping pin discovery and GPIO pre-test")
         # CLI args take priority - skip discovery if user specified pins
         elif args.tx_pin is not None or args.rx_pin is not None:
             effective_tx_pin = args.tx_pin if args.tx_pin is not None else PIN_TX
@@ -2018,6 +2056,8 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
         elif net_server_mode or net_client_mode or net_loopback_mode:
             pass  # Already printed skip message above
         elif ota_mode:
+            pass  # Already printed skip message above
+        elif ble_mode:
             pass  # Already printed skip message above
         elif pins_discovered:
             print("\n✅ Skipping GPIO pre-test (pins verified during discovery)")
@@ -2105,6 +2145,16 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                 serial_iface=serial_iface,
                 timeout=timeout_seconds,
                 firmware_path=firmware_path,
+            )
+
+        # ============================================================
+        # BLE Validation Mode (--ble)
+        # ============================================================
+        if ble_mode:
+            return await run_ble_validation(
+                upload_port=upload_port,
+                serial_iface=serial_iface,
+                timeout=timeout_seconds,
             )
 
         # SIMD test mode - run comprehensive SIMD test suite via RPC

@@ -12,6 +12,7 @@
 #define DEBUG_PRINTLN(x) do {} while(0)
 
 #include "ValidationRemote.h"
+#include "ValidationBle.h"
 #include "ValidationNet.h"
 #include "ValidationOta.h"
 #include "fl/remote/transport/serial.h"
@@ -27,6 +28,10 @@
 #include "ValidationSimd.h"
 #include "fl/memory.h"
 #include <Arduino.h>
+
+#if defined(FL_IS_ESP32)
+#include "fl/net/ble.h"
+#endif
 
 // ============================================================================
 // Raw Serial Output Functions (bypass fl::println and ScopedLogDisable)
@@ -1400,6 +1405,39 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     mRemote->bind("stopOta", [](const fl::Json& args) -> fl::Json {
         return stopOta();
     });
+
+    // ========================================================================
+    // BLE Validation RPC Functions
+    // ========================================================================
+
+    // Register "startBle" - Start BLE GATT server + create BLE Remote
+    mRemote->bind("startBle", [this](const fl::Json& args) -> fl::Json {
+        return this->startBleRemote();
+    });
+
+    // Register "stopBle" - Stop BLE GATT server + destroy BLE Remote
+    mRemote->bind("stopBle", [this](const fl::Json& args) -> fl::Json {
+        return this->stopBleRemote();
+    });
+
+    // Register "bleStatus" - Query BLE connection/subscription state
+    mRemote->bind("bleStatus", [this](const fl::Json& args) -> fl::Json {
+        fl::Json response = fl::Json::object();
+#if defined(FL_IS_ESP32)
+        response.set("ble_active", mState->ble_server_active);
+        fl::BleStatusInfo info = fl::queryBleStatus(mBleState);
+        response.set("connected", info.connected);
+        response.set("connected_count", static_cast<int64_t>(info.connectedCount));
+        response.set("tx_char_exists", info.txCharExists);
+        response.set("tx_value_len", static_cast<int64_t>(info.txValueLen));
+        response.set("ring_head", static_cast<int64_t>(info.ringHead));
+        response.set("ring_tail", static_cast<int64_t>(info.ringTail));
+#else
+        response.set("ble_active", false);
+        response.set("error", "BLE not supported on this platform");
+#endif
+        return response;
+    });
 }
 
 void ValidationRemoteControl::tick(uint32_t current_millis) {
@@ -1407,4 +1445,100 @@ void ValidationRemoteControl::tick(uint32_t current_millis) {
         // Remote::update() does pull + tick + push
         mRemote->update(current_millis);
     }
+    if (mBleRemote) {
+        mBleRemote->update(current_millis);
+    }
+    // Deferred BLE teardown: stopBle RPC sets this flag so the response
+    // is sent (via push() above) before we call BLEDevice::deinit().
+    if (mPendingBleStop) {
+        mPendingBleStop = false;
+#if defined(FL_IS_ESP32)
+        mBleRemote.reset();  // destroy lambdas before freeing state they capture
+        fl::destroyBleTransport(mBleState);
+        mBleState = nullptr;
+        mState->ble_server_active = false;
+        getBleState().ble_server_active = false;
+        FL_WARN("[BLE] Deferred teardown complete");
+#endif
+    }
+}
+
+void ValidationRemoteControl::registerAllMethods(fl::Remote* remote) {
+    // Register the core methods that BLE remote needs.
+    // This registers a subset of methods — enough for ping/pong PoC.
+
+    // Register "ping" function - health check with timestamp
+    remote->bind("ping", [this](const fl::Json& args) -> fl::Json {
+        uint32_t now = millis();
+        fl::Json response = fl::Json::object();
+        response.set("success", true);
+        response.set("message", "pong");
+        response.set("timestamp", static_cast<int64_t>(now));
+        response.set("uptimeMs", static_cast<int64_t>(now));
+        response.set("transport", "ble");
+        return response;
+    });
+
+    // Register "status" function - device readiness check
+    remote->bind("status", [this](const fl::Json& args) -> fl::Json {
+        fl::Json status = fl::Json::object();
+        status.set("ready", true);
+        status.set("pinTx", static_cast<int64_t>(mState->pin_tx));
+        status.set("pinRx", static_cast<int64_t>(mState->pin_rx));
+        status.set("transport", "ble");
+        return status;
+    });
+}
+
+fl::Json ValidationRemoteControl::startBleRemote() {
+#if defined(FL_IS_ESP32)
+    if (mBleRemote) {
+        fl::Json response = fl::Json::object();
+        response.set("success", true);
+        response.set("message", "BLE remote already active");
+        response.set("device_name", VALIDATION_BLE_DEVICE_NAME);
+        return response;
+    }
+
+    // Create BLE GATT server (heap-allocates transport state)
+    mBleState = fl::createBleTransport(VALIDATION_BLE_DEVICE_NAME);
+
+    // Get transport lambdas that capture mBleState
+    auto [source, sink] = fl::getBleTransportCallbacks(mBleState);
+
+    // Create BLE Remote instance with BLE transport
+    mBleRemote = fl::make_unique<fl::Remote>(source, sink);
+
+    // Register RPC methods on the BLE remote
+    registerAllMethods(mBleRemote.get());
+
+    mState->ble_server_active = true;
+    getBleState().ble_server_active = true;
+
+    fl::Json response = fl::Json::object();
+    response.set("success", true);
+    response.set("device_name", VALIDATION_BLE_DEVICE_NAME);
+    response.set("service_uuid", FL_BLE_SERVICE_UUID);
+    response.set("rx_uuid", FL_BLE_CHAR_RX_UUID);
+    response.set("tx_uuid", FL_BLE_CHAR_TX_UUID);
+    FL_WARN("[BLE] Remote created and advertising");
+    return response;
+#else
+    fl::Json response = fl::Json::object();
+    response.set("success", false);
+    response.set("error", "BLE only supported on ESP32");
+    return response;
+#endif
+}
+
+fl::Json ValidationRemoteControl::stopBleRemote() {
+#if defined(FL_IS_ESP32)
+    // Defer actual BLE teardown to tick() so the RPC response is sent first.
+    // BLEDevice::deinit(true) blocks long enough to prevent the response
+    // from being transmitted over serial before the device resets BLE state.
+    mPendingBleStop = true;
+#endif
+    fl::Json response = fl::Json::object();
+    response.set("success", true);
+    return response;
 }

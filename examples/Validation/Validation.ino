@@ -1,4 +1,4 @@
-// @filter: (platform is esp32) or (platform is native) or (board is teensy40) or (board is teensy41)
+// @filter: (platform is esp32) or (platform is native) or (platform is teensy)
 
 // examples/Validation/Validation.ino
 //
@@ -183,6 +183,7 @@
 #include "ValidationTest.h"
 #include "ValidationHelpers.h"
 #include "ValidationRemote.h"
+#include "ValidationBle.h"
 #include "ValidationNet.h"
 #include "ValidationAsync.h"
 #include "ValidationPlatform.h"
