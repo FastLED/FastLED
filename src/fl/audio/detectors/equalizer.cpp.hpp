@@ -18,38 +18,38 @@ const int kTrebleStart = 11;
 const int kTrebleEnd = 15;
 
 // Microphone pink noise correction profiles (16-channel gain tables).
-// These are the actual measured values from WLED-MM's fftResultPink array.
-// Values > 1.0 boost (mic is weak at that frequency), < 1.0 cut (mic is hot).
-// Source: WLED-MM audio_reactive.h fftResultPink[][]
+// All profiles are identity (no adjustment) — placeholder for user-measured data.
+// To calibrate for a specific microphone, measure its frequency response and
+// populate the corresponding array with per-bin correction gains.
 
-// INMP441 (WLED-MM profile 2): Empirically measured MEMS microphone correction
+// INMP441: Identity (no correction)
 const float kMicProfile_INMP441[16] = {
-    1.82f, 1.72f, 1.70f, 1.50f, 1.52f, 1.57f, 1.68f, 1.80f,
-    1.89f, 2.00f, 2.11f, 2.21f, 2.30f, 2.90f, 3.86f, 6.29f
+    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f
 };
 
-// ICS-43434 (WLED-MM profile 5): Empirically measured MEMS microphone correction
+// ICS-43434: Identity (no correction)
 const float kMicProfile_ICS43434[16] = {
-    2.75f, 1.60f, 1.40f, 1.46f, 1.52f, 1.57f, 1.68f, 1.80f,
-    1.89f, 2.00f, 2.11f, 2.21f, 2.30f, 1.75f, 2.55f, 3.60f
+    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f
 };
 
-// SPM1423 (WLED-MM profile 7): Empirically measured MEMS microphone correction
+// SPM1423: Identity (no correction)
 const float kMicProfile_SPM1423[16] = {
-    1.65f, 1.00f, 1.05f, 1.30f, 1.48f, 1.30f, 1.80f, 3.00f,
-    1.50f, 1.65f, 2.56f, 3.00f, 2.60f, 2.30f, 5.00f, 3.00f
+    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f
 };
 
-// Generic MEMS (WLED-MM profile 0 "default"): Generic correction for unknown mics
+// Generic MEMS: Identity (no correction)
 const float kMicProfile_GenericMEMS[16] = {
-    1.70f, 1.71f, 1.73f, 1.78f, 1.68f, 1.56f, 1.55f, 1.63f,
-    1.79f, 1.62f, 1.80f, 2.06f, 2.47f, 3.35f, 6.83f, 9.55f
+    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f
 };
 
-// Line-In (WLED-MM profile 1): Line-in input correction
+// Line-In: Identity (no correction)
 const float kMicProfile_LineIn[16] = {
-    2.35f, 1.32f, 1.32f, 1.40f, 1.48f, 1.57f, 1.68f, 1.80f,
-    1.89f, 1.95f, 2.14f, 2.26f, 2.50f, 2.90f, 4.20f, 6.50f
+    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f
 };
 
 /// Apply FFT scaling mode to a single bin value

@@ -248,10 +248,10 @@ private:
     float mPreviousVolume = 0.0f;
     float mVolumeThreshold = 10.0f;
     
-    // Pink noise compensation (from WLED)
+    // Pink noise compensation (identity — no adjustment)
     static constexpr float PINK_NOISE_COMPENSATION[16] = {
-        1.70f, 1.71f, 1.73f, 1.78f, 1.68f, 1.56f, 1.55f, 1.63f,
-        1.79f, 1.62f, 1.80f, 2.06f, 2.47f, 3.35f, 6.83f, 9.55f
+        1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f
     };
     
     // Signal conditioning components

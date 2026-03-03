@@ -6,7 +6,7 @@ namespace fl {
 
 /// Microphone pink noise correction profile.
 /// Each profile provides 16-channel gain corrections to flatten the frequency
-/// response of a specific microphone. Derived from WLED-MM's measured profiles.
+/// response of a specific microphone. Profiles are identity (no-op) by default.
 ///
 /// Set on AudioProcessor via setMicProfile() — the correction is applied
 /// inside EqualizerDetector before per-bin normalization.
