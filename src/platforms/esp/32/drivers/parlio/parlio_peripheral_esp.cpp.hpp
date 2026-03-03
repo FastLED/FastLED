@@ -161,7 +161,7 @@ bool ParlioPeripheralESPImpl::initialize(const ParlioPeripheralConfig& config) {
     // partially succeeded (TX unit created) but a later step (e.g., ring buffer
     // allocation) failed and the caller is retrying.
     if (mTxUnit != nullptr) {
-        FL_DBG("ParlioPeripheralESP: Already initialized, deinitializing for re-init");
+        FL_LOG_PARLIO("ParlioPeripheralESP: Already initialized, deinitializing for re-init");
         deinitialize();
     }
 
@@ -180,7 +180,7 @@ bool ParlioPeripheralESPImpl::initialize(const ParlioPeripheralConfig& config) {
     esp_config.dma_burst_size = 64;  // Match ESP32-P4 cache line size (64 bytes)
 
     // Assign GPIO pins
-    FL_DBG("PARLIO_PERIPH: GPIO pins:");
+    FL_LOG_PARLIO("PARLIO_PERIPH: GPIO pins:");
     for (size_t i = 0; i < 16; i++) {
         esp_config.data_gpio_nums[i] = static_cast<gpio_num_t>(config.gpio_pins[i]);
         if (config.gpio_pins[i] >= 0) {

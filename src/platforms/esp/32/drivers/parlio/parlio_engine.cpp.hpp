@@ -1183,7 +1183,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
     // If configuration changed, we need to re-initialize
     if (mInitialized && !config_matches) {
-        FL_DBG("PARLIO_INIT: Configuration changed, re-initializing");
+        FL_LOG_PARLIO("PARLIO_INIT: Configuration changed, re-initializing");
         mInitialized = false;
         mTxUnitEnabled = false;
     }
@@ -1258,13 +1258,13 @@ bool ParlioEngine::initialize(size_t dataWidth,
         #endif
         true  // prefer_psram: try PSRAM first, fall back to internal SRAM
     );
-    FL_DBG("PARLIO_INIT: Config - clock=" << FL_ESP_PARLIO_CLOCK_FREQ_HZ << " queue_depth=" << FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH);
+    FL_LOG_PARLIO("PARLIO_INIT: Config - clock=" << FL_ESP_PARLIO_CLOCK_FREQ_HZ << " queue_depth=" << FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH);
 
     // DIAGNOSTIC: Log bit packing mode
     #if PARLIO_FORCE_LSB_MODE
-        FL_WARN("PARLIO_INIT: ⚠️ LSB MODE ENABLED (DIAGNOSTIC) - expect waveform failures!");
+        FL_LOG_PARLIO("PARLIO_INIT: ⚠️ LSB MODE ENABLED (DIAGNOSTIC) - expect waveform failures!");
     #else
-        FL_DBG("PARLIO_INIT: MSB mode enabled (correct for Wave8)");
+        FL_LOG_PARLIO("PARLIO_INIT: MSB mode enabled (correct for Wave8)");
     #endif
 
     // Initialize peripheral
@@ -1303,21 +1303,21 @@ bool ParlioEngine::initialize(size_t dataWidth,
     mRingBufferCapacity = ((raw_capacity + 63) / 64) * 64;
 
     if (mRingBufferCapacity != raw_capacity) {
-        FL_DBG("PARLIO: Rounded buffer capacity from " << raw_capacity << " to " << mRingBufferCapacity << " bytes (64-byte alignment)");
+        FL_LOG_PARLIO("PARLIO: Rounded buffer capacity from " << raw_capacity << " to " << mRingBufferCapacity << " bytes (64-byte alignment)");
     }
 
     // Allocate ring buffers - try PSRAM-sized first, fall back to SRAM-sized
     FL_LOG_PARLIO("PARLIO_INIT: Allocating ring buffers (capacity=" << mRingBufferCapacity << ")");
     if (!allocateRingBuffers()) {
         // PSRAM-sized allocation failed, retry with internal SRAM cap
-        FL_DBG("PARLIO_INIT: PSRAM-sized allocation failed, retrying with SRAM cap");
+        FL_LOG_PARLIO("PARLIO_INIT: PSRAM-sized allocation failed, retrying with SRAM cap");
         raw_capacity = calc.calculateRingBufferCapacity(
             maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT,
             FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
         mRingBufferCapacity = ((raw_capacity + 63) / 64) * 64;
 
         if (!allocateRingBuffers()) {
-            FL_DBG("PARLIO_INIT: FAILED to allocate ring buffers");
+            FL_LOG_PARLIO("PARLIO_INIT: FAILED to allocate ring buffers");
             mPeripheral->deinitialize(); // Clean up TX unit so re-init can succeed
             mPeripheral = nullptr;
             return false;
@@ -1335,7 +1335,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
     mErrorOccurred = false;
 
     mInitialized = true;
-    FL_DBG("PARLIO_INIT: Initialization COMPLETE - mInitialized=true");
+    FL_LOG_PARLIO("PARLIO_INIT: Initialization COMPLETE - mInitialized=true");
     return true;
 }
 
@@ -1460,7 +1460,7 @@ bool ParlioEngine::initializeSpi(const fl::vector<int>& pins,
     mErrorOccurred = false;
 
     mInitialized = true;
-    FL_DBG("PARLIO_SPI: Initialization COMPLETE - clockHz=" << parlioClockHz);
+    FL_LOG_PARLIO("PARLIO_SPI: Initialization COMPLETE - clockHz=" << parlioClockHz);
     return true;
 }
 
@@ -1578,7 +1578,7 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
     // If laneStride is correct (= computed), this is a no-op
     // If laneStride is incorrect (= totalBytes), this fixes it
     if (laneStride > computed_lane_stride) {
-        FL_DBG("PARLIO: Correcting laneStride from " << laneStride << " to " << computed_lane_stride);
+        FL_LOG_PARLIO("PARLIO: Correcting laneStride from " << laneStride << " to " << computed_lane_stride);
         mLaneStride = computed_lane_stride;
     } else {
         mLaneStride = laneStride;
@@ -1647,7 +1647,7 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
 
     // Enable PARLIO peripheral for this transmission (only if not already enabled)
     if (!mTxUnitEnabled) {
-        FL_DBG("PARLIO_TX: Enabling peripheral");
+        FL_LOG_PARLIO("PARLIO_TX: Enabling peripheral");
         if (!mPeripheral->enable()) {
             FL_LOG_PARLIO("PARLIO: Failed to enable peripheral");
             mErrorOccurred = true;
@@ -1664,7 +1664,7 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
            << mRingBuffer->sizes[0] << " | buffers_ready=" << buffers_populated);
 
     size_t first_buffer_size = mRingBuffer->sizes[0];
-    FL_DBG("PARLIO_TX: Starting transmission - first_buffer=" << first_buffer_size << " bytes, buffers_ready=" << buffers_populated);
+    FL_LOG_PARLIO("PARLIO_TX: Starting transmission - first_buffer=" << first_buffer_size << " bytes, buffers_ready=" << buffers_populated);
 
     // CRITICAL FIX: Mark transmission started BEFORE submitting buffer
     // This closes the race window where txDoneCallback could fire before flag is set (Issue #2)
@@ -1711,7 +1711,7 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
         poll_iterations++;
 
         if (poll_iterations % 100 == 0) {
-            FL_WARN("PARLIO STUB: Poll iteration " << poll_iterations
+            FL_LOG_PARLIO("PARLIO STUB: Poll iteration " << poll_iterations
                    << " - bytesTransmitted=" << mIsrContext->mBytesTransmitted
                    << "/" << mIsrContext->mTotalBytes
                    << " streamComplete=" << mIsrContext->mStreamComplete
