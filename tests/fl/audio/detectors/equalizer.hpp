@@ -432,7 +432,7 @@ FL_TEST_CASE("ADVERSARIAL - mic correction does not leak to other detectors") {
 FL_TEST_CASE("ADVERSARIAL - extreme mic gains keep bins in 0-1") {
     // Even with extreme mic profile gains, output should stay in valid range
     auto eq = make_shared<EqualizerDetector>();
-    // GenericMEMS profile (identity by default, but tests extreme gains if populated)
+    // GenericMEMS has modest gains (0.92-1.05x) derived from datasheet data
     eq->setMicProfile(MicProfile::GenericMEMS);
 
     auto sample = makeSample(4000.0f, 0, 30000.0f, 512); // near-max amplitude

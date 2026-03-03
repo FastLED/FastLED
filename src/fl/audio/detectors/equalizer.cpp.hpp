@@ -1,5 +1,6 @@
 #include "fl/audio/detectors/equalizer.h"
 #include "fl/audio/audio_context.h"
+#include "fl/audio/mic_response_data.h"
 #include "fl/fft.h"
 #include "fl/stl/math.h"
 
@@ -17,41 +18,6 @@ const int kMidEnd = 10;
 const int kTrebleStart = 11;
 const int kTrebleEnd = 15;
 
-// Microphone pink noise correction profiles (16-channel gain tables).
-// All profiles are identity (no adjustment) — placeholder for user-measured data.
-// To calibrate for a specific microphone, measure its frequency response and
-// populate the corresponding array with per-bin correction gains.
-
-// INMP441: Identity (no correction)
-const float kMicProfile_INMP441[16] = {
-    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f
-};
-
-// ICS-43434: Identity (no correction)
-const float kMicProfile_ICS43434[16] = {
-    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f
-};
-
-// SPM1423: Identity (no correction)
-const float kMicProfile_SPM1423[16] = {
-    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f
-};
-
-// Generic MEMS: Identity (no correction)
-const float kMicProfile_GenericMEMS[16] = {
-    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f
-};
-
-// Line-In: Identity (no correction)
-const float kMicProfile_LineIn[16] = {
-    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f
-};
-
 /// Apply FFT scaling mode to a single bin value
 inline float applyScaling(float value, FFTScalingMode mode) {
     switch (mode) {
@@ -63,19 +29,6 @@ inline float applyScaling(float value, FFTScalingMode mode) {
     case FFTScalingMode::Linear:
     default:
         return value;
-    }
-}
-
-/// Get the mic correction profile gains for a given profile enum
-const float* getMicProfileGains(MicProfile profile) {
-    switch (profile) {
-    case MicProfile::INMP441:      return kMicProfile_INMP441;
-    case MicProfile::ICS43434:     return kMicProfile_ICS43434;
-    case MicProfile::SPM1423:      return kMicProfile_SPM1423;
-    case MicProfile::GenericMEMS:  return kMicProfile_GenericMEMS;
-    case MicProfile::LineIn:       return kMicProfile_LineIn;
-    case MicProfile::None:
-    default:                       return nullptr;
     }
 }
 
@@ -130,19 +83,35 @@ void EqualizerDetector::configure(const EqualizerConfig& config) {
         mSpectralEq.configure(eqConfig);
     }
 
+    // Recompute mic gains if a profile is set (handles freq range changes)
+    if (mCurrentMicProfile != MicProfile::None) {
+        setMicProfile(mCurrentMicProfile);
+    }
 }
 
 void EqualizerDetector::setMicProfile(MicProfile profile) {
-    const float* profileGains = getMicProfileGains(profile);
-    mHasMicCorrection = (profileGains != nullptr);
+    mCurrentMicProfile = profile;
+    MicResponseCurve curve = getMicResponseCurve(profile);
+    mHasMicCorrection = (curve.count > 0);
     if (mHasMicCorrection) {
-        for (int i = 0; i < kNumBins; ++i) {
-            mMicGains[i] = profileGains[i];
-        }
+        float binCenters[kNumBins];
+        computeBinCenters(binCenters);
+        downsampleMicResponse(curve, binCenters, kNumBins, mMicGains);
     } else {
         for (int i = 0; i < kNumBins; ++i) {
             mMicGains[i] = 1.0f;
         }
+    }
+}
+
+void EqualizerDetector::computeBinCenters(float* out) const {
+    // Log-spaced bin centers matching FFTBins::binToFreq formula
+    float fmin = mConfig.minFreq;
+    float fmax = mConfig.maxFreq;
+    if (fmax <= fmin) fmax = fmin * 2.0f;
+    float m = fl::logf(fmax / fmin);
+    for (int i = 0; i < kNumBins; ++i) {
+        out[i] = fmin * fl::expf(m * static_cast<float>(i) / static_cast<float>(kNumBins - 1));
     }
 }
 

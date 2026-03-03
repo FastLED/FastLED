@@ -248,11 +248,11 @@ private:
     float mPreviousVolume = 0.0f;
     float mVolumeThreshold = 10.0f;
     
-    // Pink noise compensation (identity — no adjustment)
-    static constexpr float PINK_NOISE_COMPENSATION[16] = {
-        1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-        1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f
-    };
+    // Pink noise compensation: √(f_center / f_ref) normalized so geometric mean ≈ 1.0.
+    // Compensates for 1/f spectral tilt of natural audio (music, speech).
+    // Computed dynamically from bin centers in begin().
+    float mPinkNoiseGains[16] = {};
+    bool mPinkNoiseComputed = false;
     
     // Signal conditioning components
     SignalConditioner mSignalConditioner;

@@ -2,6 +2,7 @@
 #include "fl/audio/audio_processor.h"
 #include "fl/audio/detectors/musical_beat_detector.h"
 #include "fl/audio/detectors/multiband_beat_detector.h"
+#include "fl/audio/mic_response_data.h"
 #include "fl/stl/math.h"
 #include "fl/stl/span.h"
 #include "fl/int.h"
@@ -56,6 +57,20 @@ void AudioReactive::begin(const AudioReactiveConfig& config) {
     // fftBinCount will be set when we know the FFT size (after first processSample)
     fbmConfig.fftBinCount = 256;  // Default, overridden when actual FFT size known
     mFrequencyBinMapper.configure(fbmConfig);
+
+    // Compute pink noise compensation gains from bin centers.
+    // CQ bins span linearly from fmin to fmax (default: 174.6-4698.3 Hz).
+    {
+        const float fmin = FFT_Args::DefaultMinFrequency();
+        const float fmax = FFT_Args::DefaultMaxFrequency();
+        float binCenters[16];
+        for (int i = 0; i < 16; ++i) {
+            float t = static_cast<float>(i) / 15.0f;
+            binCenters[i] = fmin + (fmax - fmin) * t;
+        }
+        computePinkNoiseGains(binCenters, 16, mPinkNoiseGains);
+        mPinkNoiseComputed = true;
+    }
 
     // Reset enhanced beat detection components
     if (mSpectralFluxDetector) {
@@ -158,8 +173,10 @@ void AudioReactive::processSample(const AudioSample& sample) {
 
     // Apply pink noise compensation AFTER band energy calculation
     // so that bassEnergy/midEnergy/trebleEnergy reflect actual spectral content
-    for (int i = 0; i < 16; ++i) {
-        mCurrentData.frequencyBins[i] *= PINK_NOISE_COMPENSATION[i];
+    if (mPinkNoiseComputed) {
+        for (int i = 0; i < 16; ++i) {
+            mCurrentData.frequencyBins[i] *= mPinkNoiseGains[i];
+        }
     }
 
     updateSpectralFlux();

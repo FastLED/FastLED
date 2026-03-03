@@ -148,6 +148,10 @@ private:
     // Microphone correction gains (applied before spectral EQ)
     float mMicGains[kNumBins] = {};
     bool mHasMicCorrection = false;
+    MicProfile mCurrentMicProfile = MicProfile::None;
+
+    // Compute log-spaced bin center frequencies from current config
+    void computeBinCenters(float* out) const;
 
     // Cached FFT from AudioContext (shared across detectors)
     shared_ptr<const FFTBins> mRetainedFFT;
