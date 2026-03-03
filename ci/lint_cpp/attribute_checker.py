@@ -100,22 +100,27 @@ class AttributeChecker(FileContentChecker):
             if "#define" in code_part and "FL_" in code_part:
                 continue
 
-            # Check for C++ standard attributes
-            for match in ATTRIBUTE_PATTERN.finditer(code_part):
-                attr_name = match.group(1)
+            # Fast first pass: skip regex if line contains neither [[ nor alignas
+            if "[[" not in code_part and "alignas" not in code_part:
+                continue
 
-                # Check if this is a known standard attribute
-                if attr_name in ATTRIBUTE_MAPPINGS:
-                    fl_macro = ATTRIBUTE_MAPPINGS[attr_name]
-                    violations.append(
-                        (
-                            line_number,
-                            f"Use {fl_macro} instead of [[{attr_name}]]: {stripped}",
+            # Check for C++ standard attributes
+            if "[[" in code_part:
+                for match in ATTRIBUTE_PATTERN.finditer(code_part):
+                    attr_name = match.group(1)
+
+                    # Check if this is a known standard attribute
+                    if attr_name in ATTRIBUTE_MAPPINGS:
+                        fl_macro = ATTRIBUTE_MAPPINGS[attr_name]
+                        violations.append(
+                            (
+                                line_number,
+                                f"Use {fl_macro} instead of [[{attr_name}]]: {stripped}",
+                            )
                         )
-                    )
 
             # Check for alignas keyword (C++11 alignment specifier)
-            if ALIGNAS_PATTERN.search(code_part):
+            if "alignas" in code_part and ALIGNAS_PATTERN.search(code_part):
                 # Skip if it's already using FL_ALIGNAS
                 if "FL_ALIGNAS" not in code_part:
                     violations.append(

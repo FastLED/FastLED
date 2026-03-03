@@ -17,6 +17,11 @@ BANNED_NAMESPACES = [
     "fl::fl",  # Indicates improper include inside namespace
 ]
 
+# Pre-compiled regex patterns for each banned namespace (avoid re-compiling per file)
+_BANNED_NS_PATTERNS: list[re.Pattern[str]] = [
+    re.compile(rf"\b{re.escape(ns)}\b") for ns in BANNED_NAMESPACES
+]
+
 
 class BannedNamespaceChecker(FileContentChecker):
     """Checker for detecting banned namespace patterns."""
@@ -36,19 +41,11 @@ class BannedNamespaceChecker(FileContentChecker):
 
     def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check file content for banned namespace patterns."""
-        violations: list[tuple[int, str]] = []
+        # Fast file-level check: skip if no banned namespace keyword in file
+        if not any(ns in file_content.content for ns in BANNED_NAMESPACES):
+            return []
 
-        # Compile regex patterns for each banned namespace
-        # Match namespace usage in various contexts:
-        # - namespace fl::fl { ... }
-        # - using namespace fl::fl;
-        # - fl::fl::something
-        patterns = []
-        for banned_ns in BANNED_NAMESPACES:
-            # Escape double colons for regex
-            escaped_ns = re.escape(banned_ns)
-            # Match the namespace pattern in various contexts
-            patterns.append(re.compile(rf"\b{escaped_ns}\b"))
+        violations: list[tuple[int, str]] = []
 
         for line_num, line in enumerate(file_content.lines, 1):
             # Skip empty lines and comments
@@ -59,8 +56,12 @@ class BannedNamespaceChecker(FileContentChecker):
             # Remove inline comments for more accurate checking
             code_part = line.split("//")[0]
 
-            # Check against all banned namespace patterns
-            for pattern in patterns:
+            # Fast first pass: skip regex if no banned namespace keyword in line
+            if not any(ns in code_part for ns in BANNED_NAMESPACES):
+                continue
+
+            # Check against all banned namespace patterns (pre-compiled at module level)
+            for pattern in _BANNED_NS_PATTERNS:
                 if pattern.search(code_part):
                     violations.append((line_num, line.strip()))
                     break  # Only report once per line

@@ -87,6 +87,10 @@ class SleepForChecker(FileContentChecker):
             if "// ok sleep for" in line or "// okay sleep for" in line:
                 continue
 
+            # Fast first pass: skip regex if "sleep_for" not in line
+            if "sleep_for" not in code_part:
+                continue
+
             # Check for sleep_for usage
             if _SLEEP_FOR_RE.search(code_part):
                 violations.append(

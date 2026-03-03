@@ -91,6 +91,10 @@ class BannedMacrosChecker(FileContentChecker):
             if "#define" in code_part and "FL_HAS_INCLUDE" in code_part:
                 continue
 
+            # Fast first pass: skip regex if keyword not present
+            if "__has_include" not in code_part:
+                continue
+
             # Check for __has_include(...) usage
             if HAS_INCLUDE_PATTERN.search(code_part):
                 # Skip if it's in a #ifndef __has_include guard (definition pattern)

@@ -72,6 +72,10 @@ class SingletonInHeadersChecker(FileContentChecker):
             # Remove inline comment portion
             code_part = line.split("//")[0]
 
+            # Fast first pass: skip regex if "Singleton" not in line
+            if "Singleton" not in code_part:
+                continue
+
             if is_cpp_hpp:
                 # In .cpp.hpp: flag SingletonShared usage
                 if self._SINGLETON_SHARED_PATTERN.search(code_part):

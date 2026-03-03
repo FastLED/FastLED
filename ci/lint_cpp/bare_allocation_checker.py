@@ -55,6 +55,10 @@ _MALLOC_FAMILY_RE = re.compile(r"(?<!::)(?<!\.)\b(malloc|calloc|realloc)\s*\(")
 # free( — but NOT fl::free(, obj.free(, or xxx_free(
 _FREE_RE = re.compile(r"(?<!::)(?<!\.)\bfree\s*\(")
 
+# Pre-compiled patterns for deleted functions (= delete;)
+_DELETED_FUNC_RE = re.compile(r"=\s*delete\s*[;{]")
+_DELETED_FUNC_EOL_RE = re.compile(r"=\s*delete\s*$")
+
 _SUGGESTION_NEW = (
     "Use fl::make_unique<T>() or fl::make_shared<T>() instead of bare 'new', "
     "or add '// ok bare allocation' to suppress"
@@ -125,6 +129,18 @@ class BareAllocationChecker(FileContentChecker):
             if _SUPPRESSION_OK in line or _SUPPRESSION_OKAY in line:
                 continue
 
+            # Fast first pass: skip expensive regex/string-strip if line contains
+            # none of the allocation keywords (allows false positives, no false negatives)
+            if not (
+                "new" in line
+                or "delete" in line
+                or "malloc" in line
+                or "calloc" in line
+                or "realloc" in line
+                or "free" in line
+            ):
+                continue
+
             # Remove inline comment portion before checking
             code_part = line.split("//")[0]
 
@@ -137,10 +153,10 @@ class BareAllocationChecker(FileContentChecker):
                 continue
 
             # Skip deleted functions: = delete
-            if re.search(r"=\s*delete\s*[;{]", code_part):
+            if _DELETED_FUNC_RE.search(code_part):
                 continue
             # Also handle = delete at end of line (before comment was stripped)
-            if re.search(r"=\s*delete\s*$", code_part.rstrip()):
+            if _DELETED_FUNC_EOL_RE.search(code_part.rstrip()):
                 continue
 
             # Check for bare new

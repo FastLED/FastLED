@@ -290,6 +290,13 @@ _PREPROCESSOR_CONDITIONAL_RE = re.compile(r"^\s*#\s*(?:if|ifdef|ifndef|elif)\b")
 # This is intentionally loose — false positives are fine, false negatives are not.
 _FAST_HAS_CONDITIONAL_RE = re.compile(r"#\s*(?:if|ifdef|ifndef|elif)\b")
 
+# Pre-compiled word-boundary patterns for each native define
+# (was re.search(r"\b" + re.escape(native_define) + r"\b", ...) per line per define)
+_NATIVE_DEFINE_PATTERNS: dict[str, re.Pattern[str]] = {
+    native_define: re.compile(r"\b" + re.escape(native_define) + r"\b")
+    for native_define in NATIVE_TO_MODERN_DEFINES
+}
+
 
 def _fast_scan_dominated(content: str) -> bool:
     """Return True if the file *might* contain a flaggable violation.
@@ -451,8 +458,11 @@ class NativePlatformDefinesChecker(FileContentChecker):
             code_part = line.split("//")[0]
 
             for native_define, modern_define in NATIVE_TO_MODERN_DEFINES.items():
-                pattern = r"\b" + re.escape(native_define) + r"\b"
-                if re.search(pattern, code_part):
+                # Fast first pass: skip regex if keyword not in line as substring
+                if native_define not in code_part:
+                    continue
+                # Accurate second pass with pre-compiled word-boundary regex
+                if _NATIVE_DEFINE_PATTERNS[native_define].search(code_part):
                     message = (
                         f"Native platform define '{native_define}' found in "
                         f"preprocessor conditional. "

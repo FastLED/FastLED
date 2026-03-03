@@ -72,6 +72,21 @@ _PATTERN = re.compile(r"(?<!\w)(?::{2})?\b(" + "|".join(_ALL_FUNCTIONS) + r")\s*
 # Match fl:: prefixed calls (these are OK)
 _FL_PATTERN = re.compile(r"\bfl::(" + "|".join(_ALL_FUNCTIONS) + r")\s*\(")
 
+# Pre-compiled namespace fl detection (was inline re.search per line)
+_NAMESPACE_FL_RE = re.compile(r"\bnamespace\s+fl\s*\{")
+
+# Pre-compiled per-function patterns for the inner violation loop
+# (was re.compile() inside the loop, creating new patterns per violation)
+_BARE_FUNC_PATTERNS: dict[str, re.Pattern[str]] = {
+    func: re.compile(r"(?<!\w)(?:::)?\b" + func + r"\s*\(") for func in _ALL_FUNCTIONS
+}
+_FL_FUNC_PATTERNS: dict[str, re.Pattern[str]] = {
+    func: re.compile(r"\bfl::" + func + r"\s*\(") for func in _ALL_FUNCTIONS
+}
+
+# Fast first pass: frozenset of keywords for quick substring check
+_FAST_KEYWORDS: frozenset[str] = frozenset(_ALL_FUNCTIONS)
+
 # Map function -> its header for better error messages
 _FUNC_HEADER: dict[str, str] = {}
 for _f in CTYPE_FUNCTIONS:
@@ -106,6 +121,10 @@ class CtypeGlobalChecker(FileContentChecker):
 
     def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check file content for global-scope C library function usage."""
+        # Fast file-level check: skip if no function keywords appear in file
+        if not any(kw in file_content.content for kw in _FAST_KEYWORDS):
+            return []
+
         violations: list[tuple[int, str]] = []
         in_multiline_comment = False
         # Track namespace fl depth — bare calls inside namespace fl { } are fine
@@ -134,7 +153,7 @@ class CtypeGlobalChecker(FileContentChecker):
             code_part = line.split("//")[0]
 
             # Track brace depth and namespace fl
-            if re.search(r"\bnamespace\s+fl\s*\{", code_part):
+            if "namespace" in code_part and _NAMESPACE_FL_RE.search(code_part):
                 fl_namespace_depth += 1
                 brace_depth_at_fl_namespace.append(brace_depth)
             for ch in code_part:
@@ -157,6 +176,10 @@ class CtypeGlobalChecker(FileContentChecker):
             if "// ok ctype" in line or "// okay ctype" in line:
                 continue
 
+            # Fast first pass: skip regex if no function keyword appears in the line
+            if not any(kw in code_part for kw in _FAST_KEYWORDS):
+                continue
+
             # Find all function calls
             all_matches = _PATTERN.findall(code_part)
             if not all_matches:
@@ -169,11 +192,9 @@ class CtypeGlobalChecker(FileContentChecker):
             bare_count = len(all_matches) - len(fl_matches)
             if bare_count > 0:
                 for func in set(all_matches):
-                    # Check if this specific function appears without fl:: prefix
-                    bare_pattern = re.compile(r"(?<!\w)(?:::)?\b" + func + r"\s*\(")
-                    fl_specific = re.compile(r"\bfl::" + func + r"\s*\(")
-                    bare_hits = bare_pattern.findall(code_part)
-                    fl_hits = fl_specific.findall(code_part)
+                    # Use pre-compiled per-function patterns
+                    bare_hits = _BARE_FUNC_PATTERNS[func].findall(code_part)
+                    fl_hits = _FL_FUNC_PATTERNS[func].findall(code_part)
                     if len(bare_hits) > len(fl_hits):
                         header = _FUNC_HEADER.get(func, "fl/stl/cstring.h")
                         violations.append(

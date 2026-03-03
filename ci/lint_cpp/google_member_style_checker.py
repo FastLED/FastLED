@@ -137,6 +137,18 @@ class GoogleMemberStyleChecker(FileContentChecker):
             if not code_part.strip():
                 continue
 
+            # Fast first pass: skip complex regex if line doesn't contain
+            # a trailing underscore followed by a terminator (;, =, comma, or paren)
+            # This allows false positives but catches all true positives.
+            if not (
+                "_;" in code_part
+                or "_=" in code_part
+                or "_," in code_part
+                or "_)" in code_part
+                or "_ " in code_part
+            ):
+                continue
+
             # Basic string literal handling (skip lines with string literals containing underscores)
             # This is a simple heuristic - may need refinement
             if '"' in code_part:

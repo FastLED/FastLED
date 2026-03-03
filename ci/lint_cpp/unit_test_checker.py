@@ -127,6 +127,38 @@ for _bare, _fl_ver in sorted(BANNED_MACROS.items(), key=lambda x: -len(x[0])):
         )
     )
 
+# Single combined regex for fast first pass: matches any banned macro keyword.
+# This is used as a fast pre-check before running individual patterns.
+# The alternation is ordered longest-first so the regex engine matches greedily.
+_COMBINED_BANNED_RE = re.compile(
+    r"\b("
+    + "|".join(
+        re.escape(bare)
+        for bare, _ in sorted(BANNED_MACROS.items(), key=lambda x: -len(x[0]))
+    )
+    + r")\s*\("
+)
+
+# Fast first-pass keywords: small set of root prefixes covering all banned macros.
+# Used for O(1)-ish substring check before even the combined regex.
+_FAST_PREFIXES: tuple[str, ...] = (
+    "CHECK",
+    "REQUIRE",
+    "WARN",
+    "TEST_",
+    "SUBCASE",
+    "FAIL",
+    "SCENARIO",
+    "GIVEN",
+    "WHEN",
+    "THEN",
+    "AND_",
+    "MESSAGE",
+    "INFO",
+    "CAPTURE",
+    "TYPE_TO_STRING",
+)
+
 
 class UnitTestChecker(FileContentChecker):
     """Checker that flags:
@@ -168,10 +200,18 @@ class UnitTestChecker(FileContentChecker):
                 )
 
             # Check 2: bare doctest macros
-            for pattern, bare, fl_ver in _BANNED_PATTERNS:
-                if pattern.search(line):
+            # Two-phase approach for speed:
+            # Phase 1: fast substring check with small prefix set
+            if not any(pfx in line for pfx in _FAST_PREFIXES):
+                continue
+
+            # Phase 2: single combined regex finds which macro matched
+            for match in _COMBINED_BANNED_RE.finditer(line):
+                macro_name = match.group(1)
+                fl_ver = BANNED_MACROS.get(macro_name)
+                if fl_ver is not None:
                     violations.append(
-                        (line_number, f"Use {fl_ver}() instead of bare {bare}()")
+                        (line_number, f"Use {fl_ver}() instead of bare {macro_name}()")
                     )
 
         if violations:

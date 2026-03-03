@@ -158,6 +158,10 @@ class NumericLimitMacroChecker(FileContentChecker):
             if "// okay numeric limit macro" in line:
                 continue
 
+            # Fast first pass: skip regex if line doesn't contain _MAX or _MIN
+            if "_MAX" not in code_part and "_MIN" not in code_part:
+                continue
+
             match = self._MACRO_REGEX.search(code_part)
             if match:
                 macro_name = match.group(1)

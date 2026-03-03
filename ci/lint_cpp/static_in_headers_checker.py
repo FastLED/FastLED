@@ -78,6 +78,10 @@ class StaticInHeaderChecker(FileContentChecker):
 
     def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check header file for function-local static variables."""
+        # Fast file-level check: skip if "static" not in file at all
+        if "static" not in file_content.content:
+            return []
+
         violations: list[tuple[int, str]] = []
         in_multiline_comment = False
         brace_depth = 0  # Track brace nesting level
@@ -110,11 +114,17 @@ class StaticInHeaderChecker(FileContentChecker):
             close_braces = code_part.count("}")
 
             # Detect template declaration - next function will be a template function
-            if self._TEMPLATE_PATTERN.search(code_part):
+            # Fast first pass: skip regex if "template" not in line
+            if "template" in code_part and self._TEMPLATE_PATTERN.search(code_part):
                 in_template_function = True
 
             # Detect entering a function body (inline implementation)
-            if self._INLINE_FUNC_PATTERN.search(code_part) and "{" in code_part:
+            # Fast first pass: only run regex if line has both "(" and "{"
+            if (
+                "(" in code_part
+                and "{" in code_part
+                and self._INLINE_FUNC_PATTERN.search(code_part)
+            ):
                 in_function = True
                 brace_depth = open_braces - close_braces
             elif in_function:
@@ -130,7 +140,8 @@ class StaticInHeaderChecker(FileContentChecker):
             # But NOT: static Type func() { ... } (static member functions)
             # EXCEPTION: Allow statics inside template functions
             if in_function and brace_depth > 0 and not in_template_function:
-                if self._STATIC_VAR_PATTERN.search(code_part):
+                # Fast first pass: skip regex if "static" not in line
+                if "static" in code_part and self._STATIC_VAR_PATTERN.search(code_part):
                     # Skip if line contains function definition pattern (false positive)
                     if not self._STATIC_FUNC_PATTERN.search(code_part):
                         # Allow suppression
