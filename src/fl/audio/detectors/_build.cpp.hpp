@@ -13,6 +13,7 @@
 #include "fl/audio/detectors/equalizer.cpp.hpp"
 #include "fl/audio/detectors/frequency_bands.cpp.hpp"
 #include "fl/audio/detectors/key.cpp.hpp"
+#include "fl/audio/detectors/vibe.cpp.hpp"
 #include "fl/audio/detectors/mood_analyzer.cpp.hpp"
 #include "fl/audio/detectors/multiband_beat_detector.cpp.hpp"
 #include "fl/audio/detectors/musical_beat_detector.cpp.hpp"

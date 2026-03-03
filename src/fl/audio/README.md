@@ -336,6 +336,176 @@ void loop() {
 | 4-10 | ~320-2560 Hz (mid) | `getEqMid()` |
 | 11-15 | ~2560-5120 Hz (treble) | `getEqTreble()` |
 
+### VibeDetector: MilkDrop-Inspired Self-Normalizing Audio Analysis
+
+`VibeDetector` provides self-normalizing, FPS-independent bass/mid/treb levels with
+asymmetric attack/decay smoothing. The algorithm is a direct port of Ryan Geiss's
+`DoCustomSoundAnalysis()` from [MilkDrop](https://www.geisswerks.com/milkdrop/) v2.25c
+— the legendary Winamp visualizer. See `MILK_DROP_AUDIO_REACTIVE.md` for a detailed
+technical analysis of the original algorithm.
+
+Key properties:
+- **Self-normalizing**: Levels hover around 1.0 regardless of volume, mic sensitivity, or genre
+- **Asymmetric smoothing**: Fast attack (beats hit hard), slow decay (graceful fade)
+- **Dual timescale**: Short-term average for beat tracking, long-term average for song-level adaptation
+- **FPS-independent**: Identical behavior at 30fps, 60fps, or 144fps
+- **Spike detection**: `bass > bass_att` means a beat is happening right now
+
+#### Understanding the Values
+
+Vibe levels are **not** 0.0-1.0 like the Equalizer. They are **ratios** against the
+long-term average energy of the current song:
+
+| Value | Meaning |
+|-------|---------|
+| `1.0` | Average level for this song/environment |
+| `> 1.0` | Louder than recent average (spike/beat) |
+| `< 1.0` | Quieter than recent average |
+| `~0.7` | Quiet passage |
+| `~1.3` | Loud passage / beat hit |
+
+The self-normalization means the same preset code works on quiet acoustic songs and
+loud electronic music without any gain or threshold calibration.
+
+#### Two Sets of Levels: Immediate vs Smoothed
+
+Each band has two relative levels:
+
+- **`bass` / `mid` / `treb`** — Immediate relative level. Reacts instantly to audio changes.
+- **`bassAtt` / `midAtt` / `trebAtt`** — Smoothed ("attenuated") relative level. Follows the signal with asymmetric attack/decay: fast attack (80% new signal on beats), slow decay (graceful fadeout).
+
+The relationship between these two is the core of MilkDrop's beat detection:
+- When `bass > bassAtt`, energy is rising — **a beat is happening**
+- When `bass < bassAtt`, energy is falling — fading out between beats
+
+#### Beat Detection Pattern
+
+The canonical MilkDrop idiom for beat-reactive effects:
+
+```cpp
+// In your loop:
+float bass = audio->getVibeBass();         // immediate relative
+float bassAtt = audio->getVibeBassAtt();   // smoothed relative
+
+// Beat intensity: positive when a beat is hitting, zero/negative otherwise
+float beatIntensity = bass - bassAtt;
+
+// Binary beat: true/false
+bool beat = bass > bassAtt;
+// Or use the convenience method:
+bool beat = audio->isVibeBassSpike();
+
+// Scale an effect proportionally to the music's dynamics:
+float zoom = 1.0f + 0.1f * (bass - 1.0f);
+
+// Decay that responds to bass hits:
+uint8_t decay = 240 + static_cast<uint8_t>(bass * 10);
+```
+
+#### Choosing Between Vibe and Other Band APIs
+
+| API | Range | Use when... |
+|-----|-------|-------------|
+| `getVibeBass()` | ~1.0 (unbounded) | You want self-normalizing, beat-reactive effects that adapt to any song |
+| `getBassLevel()` | 0.0-1.0 | You want simple normalized levels for brightness/color mapping |
+| `getEqBass()` | 0.0-1.0 | You want WLED-compatible spectrum analysis |
+| `getBassRaw()` | 0+ (absolute) | You need raw FFT energy for custom algorithms |
+
+#### Example: Callback API
+
+```cpp
+#include "FastLED.h"
+
+#define NUM_LEDS 60
+#define LED_PIN 2
+
+// I2S pins for INMP441 microphone
+#define I2S_WS  7
+#define I2S_SD  8
+#define I2S_CLK 4
+
+CRGB leds[NUM_LEDS];
+fl::shared_ptr<fl::AudioProcessor> audio;
+
+void setup() {
+    FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, NUM_LEDS);
+    FastLED.setBrightness(128);
+
+    auto config = fl::AudioConfig::CreateInmp441(I2S_WS, I2S_SD, I2S_CLK, fl::Right);
+    audio = FastLED.add(config);
+
+    // Flash white on bass spike (rising edge only)
+    audio->onVibeBassSpike([] {
+        fill_solid(leds, NUM_LEDS, CRGB::White);
+    });
+
+    // React to all three bands every frame
+    audio->onVibeLevels([](const fl::VibeLevels& v) {
+        // v.bass/mid/treb hover around 1.0; >1 means louder than recent average
+        uint8_t hue = static_cast<uint8_t>(v.mid * 80);
+        uint8_t brightness = static_cast<uint8_t>(constrain(v.vol * 200, 0, 255));
+        fill_solid(leds, NUM_LEDS, CHSV(hue, 255, brightness));
+    });
+}
+
+void loop() {
+    fadeToBlackBy(leds, NUM_LEDS, 20);
+    FastLED.show();  // Audio is auto-pumped here
+}
+```
+
+#### Polling API (Complete)
+
+```cpp
+// ---- Immediate relative levels (~1.0 = average, unbounded) ----
+float bass = audio->getVibeBass();       // Immediate relative bass
+float mid  = audio->getVibeMid();        // Immediate relative mid
+float treb = audio->getVibeTreb();       // Immediate relative treble
+float vol  = audio->getVibeVol();        // Average of bass/mid/treb
+
+// ---- Smoothed relative levels (for beat comparison) ----
+float bassAtt = audio->getVibeBassAtt(); // Smoothed relative bass
+float midAtt  = audio->getVibeMidAtt();  // Smoothed relative mid
+float trebAtt = audio->getVibeTrebAtt(); // Smoothed relative treble
+float volAtt  = audio->getVibeVolAtt();  // Average of smoothed bands
+
+// ---- Spike detection (bass > bassAtt = beat) ----
+bool bassBeat = audio->isVibeBassSpike();  // true when bass is rising
+bool midBeat  = audio->isVibeMidSpike();   // true when mid is rising
+bool trebBeat = audio->isVibeTrebSpike();  // true when treb is rising
+```
+
+#### VibeLevels Callback Struct
+
+The `onVibeLevels` callback provides everything in one struct per frame:
+
+```cpp
+struct VibeLevels {
+    // Self-normalizing relative levels (~1.0 = average)
+    float bass, mid, treb;     // Immediate relative
+    float vol;                 // (bass + mid + treb) / 3
+
+    // Spike detection
+    bool bassSpike, midSpike, trebSpike;  // true when energy is rising
+
+    // Absolute values (for advanced use)
+    float bassRaw, midRaw, trebRaw;           // Immediate absolute energy
+    float bassAvg, midAvg, trebAvg;           // Short-term smoothed absolute
+    float bassLongAvg, midLongAvg, trebLongAvg; // Long-term average absolute
+};
+```
+
+#### Spike Callbacks
+
+Spike callbacks fire on the **rising edge** only (transition from no-spike to spike),
+so you get one event per beat rather than continuous firing:
+
+```cpp
+audio->onVibeBassSpike([] { /* bass beat! */ });
+audio->onVibeMidSpike([] { /* mid-range transient */ });
+audio->onVibeTrebSpike([] { /* high-frequency hit (hi-hat, cymbal) */ });
+```
+
 ### Mid-Level: Custom Detector
 
 Create your own detector by subclassing `AudioDetector`. This gives you direct access to `AudioContext` for FFT data while integrating into the update loop.
@@ -957,6 +1127,7 @@ audio.configureNoiseFloorTracker(nfConfig);
 | **MoodAnalyzer** | Yes | Yes | `onMood(Mood)`, `onValenceArousal(float, float)` | `getMoodValence()`, `getMoodArousal()` |
 | **BuildupDetector** | Yes | No | `onBuildupStart()`, `onBuildupPeak()` | `isBuilding()`, `getBuildupProgress()` |
 | **DropDetector** | Yes | No | `onDrop()`, `onDropImpact(float)` | `getDropImpact()` |
+| **VibeDetector** | Yes | No | `onVibeLevels(const VibeLevels&)`, `onVibeBassSpike()`, `onVibeMidSpike()`, `onVibeTrebSpike()` | `getVibeBass()`, `getVibeMid()`, `getVibeTreb()`, `getVibeVol()`, `isVibeBassSpike()` |
 
 ---
 
@@ -999,6 +1170,7 @@ fl/audio/
     ├── backbeat.h     # Backbeat detection
     ├── buildup.h      # Buildup detection (EDM)
     ├── drop.h         # Drop detection (EDM)
+    ├── vibe.h/.cpp.hpp # MilkDrop-inspired self-normalizing audio analysis
     ├── transient.h    # Transient / attack detection
     ├── silence.h      # Silence detection
     ├── dynamics_analyzer.h # Crescendo / diminuendo

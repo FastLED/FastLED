@@ -4,6 +4,7 @@
 #include "detectors/beat.cpp"
 #include "detectors/downbeat_synthetic.cpp"
 #include "detectors/energy_analyzer.cpp"
+#include "detectors/vibe.cpp"
 #include "detectors/percussion.cpp"
 #include "detectors/tempo_analyzer.cpp"
 #include "detectors/vocal.cpp"

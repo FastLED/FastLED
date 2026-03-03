@@ -19,6 +19,7 @@
 #include "fl/audio/detectors/buildup.h"
 #include "fl/audio/detectors/drop.h"
 #include "fl/audio/detectors/equalizer.h"
+#include "fl/audio/detectors/vibe.h"
 
 namespace fl {
 
@@ -403,6 +404,26 @@ void AudioProcessor::onDropImpact(function<void(float)> callback) {
     detector->onDropImpact.add(callback);
 }
 
+void AudioProcessor::onVibeLevels(function<void(const VibeLevels&)> callback) {
+    auto detector = getVibeDetector();
+    detector->onVibeLevels.add(callback);
+}
+
+void AudioProcessor::onVibeBassSpike(function<void()> callback) {
+    auto detector = getVibeDetector();
+    detector->onBassSpike.add(callback);
+}
+
+void AudioProcessor::onVibeMidSpike(function<void()> callback) {
+    auto detector = getVibeDetector();
+    detector->onMidSpike.add(callback);
+}
+
+void AudioProcessor::onVibeTrebSpike(function<void()> callback) {
+    auto detector = getVibeDetector();
+    detector->onTrebSpike.add(callback);
+}
+
 // ----- Polling Getter Implementations -----
 
 // Helper: clamp float to 0..1
@@ -579,6 +600,50 @@ float AudioProcessor::getMoodValence() {
     return clampNeg1To1(getMoodAnalyzer()->getValence());
 }
 
+float AudioProcessor::getVibeBass() {
+    return getVibeDetector()->getBass();
+}
+
+float AudioProcessor::getVibeMid() {
+    return getVibeDetector()->getMid();
+}
+
+float AudioProcessor::getVibeTreb() {
+    return getVibeDetector()->getTreb();
+}
+
+float AudioProcessor::getVibeVol() {
+    return getVibeDetector()->getVol();
+}
+
+float AudioProcessor::getVibeBassAtt() {
+    return getVibeDetector()->getBassAtt();
+}
+
+float AudioProcessor::getVibeMidAtt() {
+    return getVibeDetector()->getMidAtt();
+}
+
+float AudioProcessor::getVibeTrebAtt() {
+    return getVibeDetector()->getTrebAtt();
+}
+
+float AudioProcessor::getVibeVolAtt() {
+    return getVibeDetector()->getVolAtt();
+}
+
+bool AudioProcessor::isVibeBassSpike() {
+    return getVibeDetector()->isBassSpike();
+}
+
+bool AudioProcessor::isVibeMidSpike() {
+    return getVibeDetector()->isMidSpike();
+}
+
+bool AudioProcessor::isVibeTrebSpike() {
+    return getVibeDetector()->isTrebSpike();
+}
+
 float AudioProcessor::getEqBass() {
     return clamp01(getEqualizerDetector()->getBass());
 }
@@ -708,6 +773,7 @@ void AudioProcessor::reset() {
     mBuildupDetector.reset();
     mDropDetector.reset();
     mEqualizerDetector.reset();
+    mVibeDetector.reset();
 }
 
 shared_ptr<BeatDetector> AudioProcessor::getBeatDetector() {
@@ -870,6 +936,14 @@ shared_ptr<EqualizerDetector> AudioProcessor::getEqualizerDetector() {
         registerDetector(mEqualizerDetector);
     }
     return mEqualizerDetector;
+}
+
+shared_ptr<VibeDetector> AudioProcessor::getVibeDetector() {
+    if (!mVibeDetector) {
+        mVibeDetector = make_shared<VibeDetector>();
+        registerDetector(mVibeDetector);
+    }
+    return mVibeDetector;
 }
 
 shared_ptr<AudioProcessor> AudioProcessor::createWithAutoInput(

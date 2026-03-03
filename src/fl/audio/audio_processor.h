@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef FL_AUDIO_AUDIO_PROCESSOR_H
+#define FL_AUDIO_AUDIO_PROCESSOR_H
+
 #include "fl/audio.h"  // IWYU pragma: keep
 #include "fl/audio/audio_context.h"  // IWYU pragma: keep
 #include "fl/audio/audio_detector.h"  // IWYU pragma: keep
@@ -44,6 +47,8 @@ struct Drop;
 class EqualizerDetector;
 struct Equalizer;
 struct EqualizerConfig;
+class VibeDetector;
+struct VibeLevels;
 
 class AudioProcessor {
 public:
@@ -157,6 +162,13 @@ public:
     void onDropEvent(function<void(const Drop&)> callback);
     void onDropImpact(function<void(float impact)> callback);
 
+    // ----- Vibe Audio-Reactive Events -----
+    // Comprehensive self-normalizing levels, spikes, and raw values
+    void onVibeLevels(function<void(const VibeLevels&)> callback);
+    void onVibeBassSpike(function<void()> callback);
+    void onVibeMidSpike(function<void()> callback);
+    void onVibeTrebSpike(function<void()> callback);
+
     // ----- Polling Getters (float 0.0-1.0, bool, or integer) -----
 
     // Vocal Detection
@@ -236,6 +248,19 @@ public:
     // Mood Analysis
     float getMoodArousal();
     float getMoodValence();  // -1.0 to 1.0
+
+    // Vibe Audio-Reactive (self-normalizing, ~1.0 = average)
+    float getVibeBass();      // Immediate relative bass level
+    float getVibeMid();       // Immediate relative mid level
+    float getVibeTreb();      // Immediate relative treble level
+    float getVibeVol();       // Average of bass/mid/treb
+    float getVibeBassAtt();   // Smoothed relative bass level
+    float getVibeMidAtt();    // Smoothed relative mid level
+    float getVibeTrebAtt();   // Smoothed relative treble level
+    float getVibeVolAtt();    // Average of smoothed bands
+    bool isVibeBassSpike();   // True when bass > bass_att (beat)
+    bool isVibeMidSpike();    // True when mid > mid_att
+    bool isVibeTrebSpike();   // True when treb > treb_att
 
     // Equalizer (WLED-style, all 0.0-1.0)
     float getEqBass();
@@ -328,6 +353,7 @@ private:
     shared_ptr<BuildupDetector> mBuildupDetector;
     shared_ptr<DropDetector> mDropDetector;
     shared_ptr<EqualizerDetector> mEqualizerDetector;
+    shared_ptr<VibeDetector> mVibeDetector;
 
     // Lazy creation helpers
     shared_ptr<BeatDetector> getBeatDetector();
@@ -349,6 +375,7 @@ private:
     shared_ptr<BuildupDetector> getBuildupDetector();
     shared_ptr<DropDetector> getDropDetector();
     shared_ptr<EqualizerDetector> getEqualizerDetector();
+    shared_ptr<VibeDetector> getVibeDetector();
 
     // Auto-pump support (used by CFastLED::add(AudioConfig))
     fl::task mAutoTask;
@@ -360,3 +387,5 @@ private:
 };
 
 } // namespace fl
+
+#endif // FL_AUDIO_AUDIO_PROCESSOR_H
