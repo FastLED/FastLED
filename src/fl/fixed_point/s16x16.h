@@ -86,7 +86,7 @@ class s16x16 {
         return from_raw(mValue * scalar);
     }
 
-    friend constexpr FASTLED_FORCE_INLINE s16x16 operator*(i32 scalar, s16x16 fp) {
+    friend constexpr s16x16 operator*(i32 scalar, s16x16 fp) {
         return s16x16::from_raw(scalar * fp.mValue);
     }
 

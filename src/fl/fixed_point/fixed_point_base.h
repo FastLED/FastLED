@@ -96,7 +96,7 @@ class fixed_point_base {
         return Derived::from_raw(mValue * scalar);
     }
 
-    friend constexpr FASTLED_FORCE_INLINE Derived operator*(raw_type scalar, Derived fp) {
+    friend constexpr Derived operator*(raw_type scalar, Derived fp) {
         return Derived::from_raw(scalar * fp.mValue);
     }
 

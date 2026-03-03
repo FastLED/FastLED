@@ -166,7 +166,7 @@ class fixed_point : protected fixed_point_impl<IntBits, FracBits, S>::type {
         return from_raw((Base::operator*(scalar)).raw());
     }
 
-    friend constexpr FASTLED_FORCE_INLINE fixed_point operator*(i32 scalar, fixed_point fp) {
+    friend constexpr fixed_point operator*(i32 scalar, fixed_point fp) {
         return from_raw((scalar * static_cast<Base>(fp)).raw());
     }
 

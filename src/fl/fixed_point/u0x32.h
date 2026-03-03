@@ -126,7 +126,7 @@ class u0x32 {
             : from_raw(static_cast<u32>(static_cast<u64>(mValue) * scalar));
     }
 
-    friend constexpr FASTLED_FORCE_INLINE u0x32 operator*(u32 scalar, u0x32 a) {
+    friend constexpr u0x32 operator*(u32 scalar, u0x32 a) {
         return a * scalar;  // Commutative
     }
 

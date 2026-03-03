@@ -85,7 +85,7 @@ class s4x12 {
         return from_raw(mValue * scalar);
     }
 
-    friend constexpr FASTLED_FORCE_INLINE s4x12 operator*(i16 scalar, s4x12 fp) {
+    friend constexpr s4x12 operator*(i16 scalar, s4x12 fp) {
         return s4x12::from_raw(scalar * fp.mValue);
     }
 

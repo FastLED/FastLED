@@ -86,7 +86,7 @@ class u16x16 {
         return from_raw(mValue * scalar);
     }
 
-    friend constexpr FASTLED_FORCE_INLINE u16x16 operator*(u32 scalar, u16x16 fp) {
+    friend constexpr u16x16 operator*(u32 scalar, u16x16 fp) {
         return u16x16::from_raw(scalar * fp.mValue);
     }
 

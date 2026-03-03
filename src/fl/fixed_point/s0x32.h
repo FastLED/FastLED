@@ -125,7 +125,7 @@ class s0x32 {
                 : from_raw(static_cast<i32>(static_cast<i64>(mValue) * scalar));
     }
 
-    friend constexpr FASTLED_FORCE_INLINE s0x32 operator*(i32 scalar, s0x32 a) {
+    friend constexpr s0x32 operator*(i32 scalar, s0x32 a) {
         return a * scalar;  // Commutative
     }
 
@@ -141,7 +141,7 @@ class s0x32 {
     // Implemented in fixed_point.h after s16x16 is fully defined
     constexpr FASTLED_FORCE_INLINE s16x16 operator*(s16x16 b) const;
 
-    friend constexpr FASTLED_FORCE_INLINE s16x16 operator*(s16x16 a, s0x32 b);
+    friend constexpr s16x16 operator*(s16x16 a, s0x32 b);
 
     // ---- Math functions ----------------------------------------------------
 

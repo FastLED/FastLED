@@ -85,7 +85,7 @@ class s8x24 {
         return from_raw(mValue * scalar);
     }
 
-    friend constexpr FASTLED_FORCE_INLINE s8x24 operator*(i32 scalar, s8x24 fp) {
+    friend constexpr s8x24 operator*(i32 scalar, s8x24 fp) {
         return s8x24::from_raw(scalar * fp.mValue);
     }
 
