@@ -323,6 +323,10 @@ private:
 
     // TX unit enable state tracking (prevents double-disable errors)
     bool mTxUnitEnabled;
+
+    // Maximum LEDs per channel used to size ring buffers
+    // Used to detect when ring buffers need reallocation (new test has more LEDs)
+    size_t mMaxLedsPerChannel;
 };
 
 } // namespace detail

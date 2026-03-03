@@ -292,7 +292,8 @@ ParlioEngine::ParlioEngine()
       mScratchBuffer(nullptr),
       mLaneStride(0),
       mErrorOccurred(false),
-      mTxUnitEnabled(false) {
+      mTxUnitEnabled(false),
+      mMaxLedsPerChannel(0) {
     FL_LOG_PARLIO("PARLIO_INIT: Constructor entered");
 }
 
@@ -847,15 +848,19 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
             outputIdx += sizeof(Wave8Byte);
         } else if (mDataWidth == 2) {
             // Two-lane mode: Use 2-lane transpose to interleave lanes
+            // CRITICAL: FL_WAVE8_SPREAD_TO_16 puts lanes[0] in ODD bits → data_line[1],
+            // and lanes[1] in EVEN bits → data_line[0].
+            // PARLIO maps data_line[0]=pins[0]=channel0_pin, data_line[1]=pins[1]=channel1_pin.
+            // To send channel 0's data on channel 0's pin (data_line[0] = EVEN bits),
+            // channel 0 data must go in lanes[1] and channel 1 data in lanes[0].
             u8 lanes[2];
-            lanes[0] = (mActualChannels > 0)
-                ? mScratchBuffer[0 * mLaneStride + startByte + byteOffset]
-                : 0;
-            lanes[1] = (mActualChannels > 1)
+            lanes[0] = (mActualChannels > 1)
                 ? mScratchBuffer[1 * mLaneStride + startByte + byteOffset]
                 : 0;
+            lanes[1] = (mActualChannels > 0)
+                ? mScratchBuffer[0 * mLaneStride + startByte + byteOffset]
+                : 0;
 
-            // MSB bit packing: Use natural lane order (no swap needed)
             u8 transposed[2 * sizeof(Wave8Byte)];
             fl::wave8Transpose_2(reinterpret_cast<const u8(&)[2]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
                                 reinterpret_cast<u8(&)[2 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
@@ -1187,8 +1192,75 @@ bool ParlioEngine::initialize(size_t dataWidth,
                           mTimingT2Ns == timing.t2_ns &&
                           mTimingT3Ns == timing.t3_ns);
     if (mInitialized && mPeripheral && mPeripheral->isInitialized() && config_matches) {
-        FL_LOG_PARLIO("PARLIO_INIT: Already initialized with matching config, returning true");
-        return true; // Already initialized with same configuration
+        // Config matches but check if ring buffers need reallocation for larger LED count
+        if (maxLedsPerChannel > mMaxLedsPerChannel) {
+            FL_LOG_PARLIO("PARLIO_INIT: Config matches but maxLeds increased from "
+                         << mMaxLedsPerChannel << " to " << maxLedsPerChannel
+                         << " - reallocating ring buffers");
+
+            // Recalculate ring buffer capacity for larger LED count
+            ParlioBufferCalculator calc{mDataWidth};
+            size_t raw_capacity = calc.calculateRingBufferCapacity(
+                maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT,
+                FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM);
+            size_t new_capacity = ((raw_capacity + 63) / 64) * 64;
+
+            if (new_capacity > mRingBufferCapacity) {
+                mRingBufferCapacity = new_capacity;
+                // Release old ring buffers before allocating new ones
+                mRingBuffer.reset();
+                if (!allocateRingBuffers()) {
+                    // PSRAM-sized allocation failed, retry with SRAM cap
+                    raw_capacity = calc.calculateRingBufferCapacity(
+                        maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT,
+                        FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
+                    mRingBufferCapacity = ((raw_capacity + 63) / 64) * 64;
+                    if (!allocateRingBuffers()) {
+                        FL_LOG_PARLIO("PARLIO_INIT: FAILED to reallocate ring buffers");
+                        mInitialized = false;
+                        return false;
+                    }
+                }
+                FL_LOG_PARLIO("PARLIO_INIT: Ring buffers reallocated (capacity=" << mRingBufferCapacity << ")");
+            }
+            mMaxLedsPerChannel = maxLedsPerChannel;
+        }
+
+        // CRITICAL: Reinitialize the PARLIO TX unit when reusing the same config.
+        // The ESP32 PARLIO TX unit's internal DMA state machine can get stuck after
+        // channels are destroyed and recreated. A full deinit/reinit of the TX unit
+        // resets this state while keeping ring buffers allocated (avoiding fragmentation).
+        FL_LOG_PARLIO("PARLIO_INIT: Reinitializing TX unit for clean DMA state");
+        mPeripheral->deinitialize();
+        mTxUnitEnabled = false;
+
+        ParlioPeripheralConfig config(
+            pins,
+            FL_ESP_PARLIO_CLOCK_FREQ_HZ,
+            FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH,
+            65534,
+            #if PARLIO_FORCE_LSB_MODE
+            ParlioBitPackOrder::FL_PARLIO_LSB,
+            #else
+            ParlioBitPackOrder::FL_PARLIO_MSB,
+            #endif
+            true
+        );
+        if (!mPeripheral->initialize(config)) {
+            FL_LOG_PARLIO("PARLIO_INIT: FAILED to reinitialize TX unit");
+            mInitialized = false;
+            return false;
+        }
+        if (!mPeripheral->registerTxDoneCallback(
+                reinterpret_cast<void*>(txDoneCallback), this)) { // ok reinterpret cast - callback function pointer to void*
+            FL_LOG_PARLIO("PARLIO_INIT: FAILED to re-register ISR callback");
+            mPeripheral->deinitialize();
+            mInitialized = false;
+            return false;
+        }
+
+        FL_LOG_PARLIO("PARLIO_INIT: TX unit reinitialized, config still matching");
+        return true;
     }
 
     // If configuration changed, we need to re-initialize
@@ -1344,8 +1416,9 @@ bool ParlioEngine::initialize(size_t dataWidth,
     }
     mErrorOccurred = false;
 
+    mMaxLedsPerChannel = maxLedsPerChannel;
     mInitialized = true;
-    FL_LOG_PARLIO("PARLIO_INIT: Initialization COMPLETE - mInitialized=true");
+    FL_LOG_PARLIO("PARLIO_INIT: Initialization COMPLETE - mInitialized=true, maxLeds=" << maxLedsPerChannel);
     return true;
 }
 
@@ -1559,6 +1632,14 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
         return false;
     }
 
+    // CRITICAL: Wait for hardware TX queue to fully drain from any previous transmission.
+    // The ESP-IDF PARLIO driver's internal DMA queue may still have the last buffer
+    // queued even after our ISR context shows mStreamComplete=true. Without this,
+    // consecutive transmissions with the same config fail silently (0 bytes output).
+    if (mTxUnitEnabled) {
+        mPeripheral->waitAllDone(100);  // 100ms timeout - should be near-instant
+    }
+
     // Check if already transmitting
     if (mIsrContext->mTransmitting) {
         FL_LOG_PARLIO("PARLIO_TX: FAILED - transmission already in progress");
@@ -1655,19 +1736,24 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
         return false;
     }
 
-    // Enable PARLIO peripheral for this transmission (only if not already enabled)
-    if (!mTxUnitEnabled) {
-        FL_LOG_PARLIO("PARLIO_TX: Enabling peripheral");
-        if (!mPeripheral->enable()) {
-            FL_LOG_PARLIO("PARLIO: Failed to enable peripheral");
-            mErrorOccurred = true;
-            return false;
-        }
-        mTxUnitEnabled = true;
-        FL_LOG_PARLIO("PARLIO_TX: Peripheral enabled successfully");
-    } else {
-        FL_LOG_PARLIO("PARLIO_TX: Peripheral already enabled");
+    // CRITICAL: Always disable and re-enable the PARLIO peripheral between transmissions.
+    // The ESP32 PARLIO hardware requires a disable/enable cycle to reset its DMA state
+    // machine. Without this, consecutive transmissions with the same config silently fail
+    // (DMA doesn't start, TX produces no output, RX captures 0 bytes).
+    if (mTxUnitEnabled) {
+        FL_LOG_PARLIO("PARLIO_TX: Disabling peripheral for re-enable cycle");
+        mPeripheral->disable();
+        mTxUnitEnabled = false;
     }
+
+    FL_LOG_PARLIO("PARLIO_TX: Enabling peripheral");
+    if (!mPeripheral->enable()) {
+        FL_LOG_PARLIO("PARLIO: Failed to enable peripheral");
+        mErrorOccurred = true;
+        return false;
+    }
+    mTxUnitEnabled = true;
+    FL_LOG_PARLIO("PARLIO_TX: Peripheral enabled successfully");
 
     // Queue first buffer to start transmission
     FL_LOG_PARLIO("PARLIO: Starting ISR-based streaming | first_buffer_size="
