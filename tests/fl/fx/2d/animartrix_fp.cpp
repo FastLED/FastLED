@@ -7,6 +7,7 @@
 
 #include "test.h"
 #include "fl/fx/2d/animartrix.hpp"
+#include "fl/stl/unique_ptr.h"
 #include "fl/xymap.h"
 #include <stdio.h>  // ok include: needed for debug output
 
@@ -16,12 +17,12 @@ namespace {
 
 // Factory function template
 template <typename T>
-IAnimartrix2Viz *make() { return new T(); }
+fl::unique_ptr<IAnimartrix2Viz> make() { return fl::make_unique<T>(); }
 
 struct FPCompareEntry {
     const char *name;
-    IAnimartrix2Viz *(*float_factory)();
-    IAnimartrix2Viz *(*fp_factory)();
+    fl::unique_ptr<IAnimartrix2Viz> (*float_factory)();
+    fl::unique_ptr<IAnimartrix2Viz> (*fp_factory)();
 };
 
 // clang-format off
@@ -158,11 +159,11 @@ FL_TEST_CASE("animartrix_fp - float vs fixed-point all vizs") {
     for (int i = 0; i < kEntryCount; i++) {
         const FPCompareEntry &e = kEntries[i];
 
-        IAnimartrix2Viz *flt = e.float_factory();
-        IAnimartrix2Viz *fp = e.fp_factory();
+        auto flt = e.float_factory();
+        auto fp = e.fp_factory();
 
-        renderViz(flt, float_leds, N, xy, W, H, t);
-        renderViz(fp, fp_leds, N, xy, W, H, t);
+        renderViz(flt.get(), float_leds, N, xy, W, H, t);
+        renderViz(fp.get(), fp_leds, N, xy, W, H, t);
 
         CompareResult cr = compareBuffers(float_leds, fp_leds, N);
 
@@ -177,9 +178,6 @@ FL_TEST_CASE("animartrix_fp - float vs fixed-point all vizs") {
 
         fprintf(stderr, "%-25s %9d %9.2f %s\n",
                 e.name, cr.max_error, cr.avg_error, status);
-
-        delete flt;
-        delete fp;
     }
 
     fprintf(stderr, "\nSummary: %d OK, %d WARN, %d FAIL out of %d vizs\n",
