@@ -40,7 +40,16 @@ def report_failure(label: str, result: subprocess.CompletedProcess[str]) -> None
         print(result.stderr.strip(), file=sys.stderr)
 
 
+def repo_is_clean() -> bool:
+    """Return True if the working tree has no staged, unstaged, or untracked changes."""
+    result = run_cmd(["git", "status", "--porcelain"])
+    return result.returncode == 0 and not result.stdout.strip()
+
+
 def main() -> int:
+    if repo_is_clean():
+        return 0
+
     lint_done = threading.Event()
     lint_results: list[subprocess.CompletedProcess[str]] = []
     test_proc_holder: list[subprocess.Popen[str]] = []
