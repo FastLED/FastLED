@@ -1,5 +1,11 @@
 #pragma once
 
+#include "fl/fx/wled/segment.h"
+#include "fl/json.h"
+#include "fl/stl/string.h"
+
+#if FASTLED_ENABLE_JSON
+
 namespace fl {
 namespace wled {
 
@@ -44,3 +50,5 @@ void parseSegmentFields(const fl::Json& segJson, WLEDSegment& seg);
 
 } // namespace wled
 } // namespace fl
+
+#endif // FASTLED_ENABLE_JSON

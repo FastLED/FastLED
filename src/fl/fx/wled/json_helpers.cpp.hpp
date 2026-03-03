@@ -1,4 +1,7 @@
 #include "fl/fx/wled/json_helpers.h"
+
+#if FASTLED_ENABLE_JSON
+
 #include "fl/warn.h"
 #include "fl/stl/cstdlib.h"  // For strtol
 
@@ -350,3 +353,5 @@ void parseSegmentFields(const fl::Json& segJson, WLEDSegment& seg) {
 
 } // namespace wled
 } // namespace fl
+
+#endif // FASTLED_ENABLE_JSON
