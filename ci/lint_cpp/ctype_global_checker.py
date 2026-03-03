@@ -72,6 +72,12 @@ _PATTERN = re.compile(r"(?<!\w)(?::{2})?\b(" + "|".join(_ALL_FUNCTIONS) + r")\s*
 # Match fl:: prefixed calls (these are OK)
 _FL_PATTERN = re.compile(r"\bfl::(" + "|".join(_ALL_FUNCTIONS) + r")\s*\(")
 
+# Match explicitly global-qualified ::func() calls — these bypass fl:: even inside
+# namespace fl and must ALWAYS be flagged (unlike bare calls which resolve via ADL).
+_GLOBAL_QUALIFIED_PATTERN = re.compile(
+    r"(?<!\w)::(" + "|".join(_ALL_FUNCTIONS) + r")\s*\("
+)
+
 # Pre-compiled namespace fl detection (was inline re.search per line)
 _NAMESPACE_FL_RE = re.compile(r"\bnamespace\s+fl\s*\{")
 
@@ -168,16 +174,28 @@ class CtypeGlobalChecker(FileContentChecker):
                         fl_namespace_depth -= 1
                         brace_depth_at_fl_namespace.pop()
 
-            # Skip lines inside namespace fl — bare calls resolve to fl:: variants
-            if fl_namespace_depth > 0:
-                continue
-
             # Skip lines with suppression comment
             if "// ok ctype" in line or "// okay ctype" in line:
                 continue
 
             # Fast first pass: skip regex if no function keyword appears in the line
             if not any(kw in code_part for kw in _FAST_KEYWORDS):
+                continue
+
+            # Inside namespace fl, bare calls (e.g. memcpy()) resolve to fl::memcpy
+            # via unqualified lookup — those are fine. But explicitly global-qualified
+            # calls (::memcpy()) bypass fl:: and must still be flagged.
+            if fl_namespace_depth > 0:
+                global_matches = _GLOBAL_QUALIFIED_PATTERN.findall(code_part)
+                for func in set(global_matches):
+                    header = _FUNC_HEADER.get(func, "fl/stl/cstring.h")
+                    violations.append(
+                        (
+                            line_number,
+                            f"Use fl::{func}() instead of ::{func}() "
+                            f"— see {header}: {stripped}",
+                        )
+                    )
                 continue
 
             # Find all function calls

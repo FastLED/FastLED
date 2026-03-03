@@ -29,9 +29,7 @@
 #include "fl/memory.h"
 #include <Arduino.h>
 
-#if defined(FL_IS_ESP32)
 #include "fl/net/ble.h"
-#endif
 
 // ============================================================================
 // Raw Serial Output Functions (bypass fl::println and ScopedLogDisable)
@@ -1422,7 +1420,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     // Register "bleStatus" - Query BLE connection/subscription state
     mRemote->bind("bleStatus", [this](const fl::Json& args) -> fl::Json {
         fl::Json response = fl::Json::object();
-#if defined(FL_IS_ESP32)
+#if FL_BLE_AVAILABLE
         response.set("ble_active", mState->ble_server_active);
         fl::BleStatusInfo info = fl::queryBleStatus(mBleState);
         response.set("connected", info.connected);
@@ -1448,10 +1446,10 @@ void ValidationRemoteControl::tick(uint32_t current_millis) {
         mBleRemote->update(current_millis);
     }
     // Deferred BLE teardown: stopBle RPC sets this flag so the response
-    // is sent (via push() above) before we call BLEDevice::deinit().
+    // is sent (via push() above) before we call destroyBleTransport().
     if (mPendingBleStop) {
         mPendingBleStop = false;
-#if defined(FL_IS_ESP32)
+#if FL_BLE_AVAILABLE
         mBleRemote.reset();  // destroy lambdas before freeing state they capture
         fl::destroyBleTransport(mBleState);
         mBleState = nullptr;
@@ -1490,7 +1488,7 @@ void ValidationRemoteControl::registerAllMethods(fl::Remote* remote) {
 }
 
 fl::Json ValidationRemoteControl::startBleRemote() {
-#if defined(FL_IS_ESP32)
+#if FL_BLE_AVAILABLE
     if (mBleRemote) {
         fl::Json response = fl::Json::object();
         response.set("success", true);
@@ -1531,7 +1529,7 @@ fl::Json ValidationRemoteControl::startBleRemote() {
 }
 
 fl::Json ValidationRemoteControl::stopBleRemote() {
-#if defined(FL_IS_ESP32)
+#if FL_BLE_AVAILABLE
     // Defer actual BLE teardown to tick() so the RPC response is sent first.
     // BLEDevice::deinit(true) blocks long enough to prevent the response
     // from being transmitted over serial before the device resets BLE state.
