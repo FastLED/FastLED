@@ -178,6 +178,9 @@ FL_TEST_CASE("animartrix_fp - float vs fixed-point all vizs") {
 
         fprintf(stderr, "%-25s %9d %9.2f %s\n",
                 e.name, cr.max_error, cr.avg_error, status);
+
+        flt.reset();
+        fp.reset();
     }
 
     fprintf(stderr, "\nSummary: %d OK, %d WARN, %d FAIL out of %d vizs\n",

@@ -26,7 +26,9 @@
 #include "fl/stl/new.h"
 #include "fl/channels/data.h"
 #include "fl/channels/config.h"
+#include "fl/channels/wave3.h"
 #include "fl/channels/wave8.h"
+#include "fl/channels/detail/wave3.hpp"
 #include "fl/chipsets/spi.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/chipsets/led_timing.h"
@@ -1197,7 +1199,12 @@ FL_TEST_CASE("ParlioEngine - large buffer streaming with capture") {
         total_bits += tx.bit_count;
     }
 
-    size_t expected_min_bits = num_bytes * 8 * 8;
+    // Wave3-eligible chipsets (WS2812) use 3 ticks/bit, others use 8 ticks/bit
+    // Minimum expected bits: num_bytes × 8 bits/byte × ticks_per_bit
+    ChipsetTiming ct;
+    ct.T1 = timing.t1_ns; ct.T2 = timing.t2_ns; ct.T3 = timing.t3_ns;
+    size_t ticks_per_bit = canUseWave3(ct) ? 3 : 8;
+    size_t expected_min_bits = num_bytes * 8 * ticks_per_bit;
     FL_CHECK(total_bits >= expected_min_bits);
 }
 
@@ -2302,7 +2309,500 @@ FL_TEST_CASE("ParlioEngine - LED count growth reallocates ring buffers") {
     ok = engine.beginTransmission(largeScratch.data(), largeScratch.size(), 4, 100 * 3);
     FL_REQUIRE(ok);
 
-    auto& mock = ParlioPeripheralMock::instance();
-    const auto& history = mock.getTransmissionHistory();
-    FL_CHECK(history.size() > 0);
+    auto& mock5 = ParlioPeripheralMock::instance();
+    const auto& history5 = mock5.getTransmissionHistory();
+    FL_CHECK(history5.size() > 0);
+}
+
+//=============================================================================
+// Wave3 Encoding Tests
+//=============================================================================
+
+// --- Eligibility tests ---
+
+FL_TEST_CASE("Wave3 eligibility - WS2812 eligible") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_WS2812_800KHZ>();
+    FL_CHECK(fl::canUseWave3(timing));
+}
+
+FL_TEST_CASE("Wave3 eligibility - SK6812 eligible") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_SK6812>();
+    FL_CHECK(fl::canUseWave3(timing));
+}
+
+FL_TEST_CASE("Wave3 eligibility - WS2812B Mini V3 NOT eligible") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_WS2812B_MINI_V3>();
+    FL_CHECK(!fl::canUseWave3(timing));
+}
+
+FL_TEST_CASE("Wave3 eligibility - WS2811 400KHz NOT eligible") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_WS2811_400KHZ>();
+    FL_CHECK(!fl::canUseWave3(timing));
+}
+
+FL_TEST_CASE("Wave3 eligibility - WS2815 NOT eligible") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_WS2815>();
+    FL_CHECK(!fl::canUseWave3(timing));
+}
+
+FL_TEST_CASE("Wave3 eligibility - SM16824E NOT eligible") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_SM16824E>();
+    FL_CHECK(!fl::canUseWave3(timing));
+}
+
+FL_TEST_CASE("Wave3 eligibility - GW6205 800KHz eligible") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_GW6205_800KHZ>();
+    FL_CHECK(fl::canUseWave3(timing));
+}
+
+FL_TEST_CASE("Wave3 eligibility - WS2813 eligible") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_WS2813>();
+    FL_CHECK(fl::canUseWave3(timing));
+}
+
+FL_TEST_CASE("Wave3 eligibility - TM1814 eligible") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_TM1814>();
+    FL_CHECK(fl::canUseWave3(timing));
+}
+
+// --- Clock frequency tests ---
+
+FL_TEST_CASE("Wave3 clock frequency - WS2812") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_WS2812_800KHZ>();
+    u32 freq = fl::wave3ClockFrequencyHz(timing);
+    FL_CHECK_EQ(freq, (u32)2400000);
+}
+
+FL_TEST_CASE("Wave3 clock frequency - SK6812") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_SK6812>();
+    u32 freq = fl::wave3ClockFrequencyHz(timing);
+    FL_CHECK_EQ(freq, (u32)2500000);
+}
+
+FL_TEST_CASE("Wave3 clock frequency - GW6205 800KHz") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_GW6205_800KHZ>();
+    u32 freq = fl::wave3ClockFrequencyHz(timing);
+    FL_CHECK_EQ(freq, (u32)2500000);
+}
+
+// --- LUT tests ---
+
+FL_TEST_CASE("Wave3 LUT - nibble 0b0000 encodes to 100_100_100_100") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_WS2812_800KHZ>();
+    fl::Wave3BitExpansionLut lut = fl::buildWave3ExpansionLUT(timing);
+    // 0b0000: all bit-0 patterns -> 100_100_100_100 = 0x924
+    FL_CHECK_EQ(lut.lut[0x0], (u16)0x924);
+}
+
+FL_TEST_CASE("Wave3 LUT - nibble 0b1111 encodes to 110_110_110_110") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_WS2812_800KHZ>();
+    fl::Wave3BitExpansionLut lut = fl::buildWave3ExpansionLUT(timing);
+    // 0b1111: all bit-1 patterns -> 110_110_110_110 = 0xDB6
+    FL_CHECK_EQ(lut.lut[0xF], (u16)0xDB6);
+}
+
+FL_TEST_CASE("Wave3 LUT - nibble 0b1010 mixed pattern") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_WS2812_800KHZ>();
+    fl::Wave3BitExpansionLut lut = fl::buildWave3ExpansionLUT(timing);
+    // 0b1010: bit3=1->110, bit2=0->100, bit1=1->110, bit0=0->100
+    // Binary: 110 100 110 100 = 0xD34
+    FL_CHECK_EQ(lut.lut[0xA], (u16)0xD34);
+}
+
+// --- Single-byte encoding tests ---
+
+FL_TEST_CASE("Wave3 encoding - byte 0xFF all ones") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_WS2812_800KHZ>();
+    fl::Wave3BitExpansionLut lut = fl::buildWave3ExpansionLUT(timing);
+
+    u8 output[sizeof(fl::Wave3Byte)];
+    fl::wave3(0xFF, lut, output);
+
+    // 0xFF: high nibble=0xF->0xDB6, low nibble=0xF->0xDB6
+    // 24 bits = high[11:0] low[11:0] = 0xDB6_DB6
+    // byte[0] = high[11:4] = 0xDB
+    // byte[1] = high[3:0] low[11:8] = 0x6D
+    // byte[2] = low[7:0] = 0xB6
+    FL_CHECK_EQ(output[0], (u8)0xDB);
+    FL_CHECK_EQ(output[1], (u8)0x6D);
+    FL_CHECK_EQ(output[2], (u8)0xB6);
+}
+
+FL_TEST_CASE("Wave3 encoding - byte 0x00 all zeros") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_WS2812_800KHZ>();
+    fl::Wave3BitExpansionLut lut = fl::buildWave3ExpansionLUT(timing);
+
+    u8 output[sizeof(fl::Wave3Byte)];
+    fl::wave3(0x00, lut, output);
+
+    // 0x00: high nibble=0x0->0x924, low nibble=0x0->0x924
+    // 24 bits = 0x924_924
+    // byte[0] = 0x92
+    // byte[1] = 0x49
+    // byte[2] = 0x24
+    FL_CHECK_EQ(output[0], (u8)0x92);
+    FL_CHECK_EQ(output[1], (u8)0x49);
+    FL_CHECK_EQ(output[2], (u8)0x24);
+}
+
+FL_TEST_CASE("Wave3 encoding - byte 0xAA alternating") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_WS2812_800KHZ>();
+    fl::Wave3BitExpansionLut lut = fl::buildWave3ExpansionLUT(timing);
+
+    u8 output[sizeof(fl::Wave3Byte)];
+    fl::wave3(0xAA, lut, output);
+
+    // 0xAA: high nibble=0xA->0xD34, low nibble=0xA->0xD34
+    // byte[0] = 0xD3
+    // byte[1] = 0x4D
+    // byte[2] = 0x34
+    FL_CHECK_EQ(output[0], (u8)0xD3);
+    FL_CHECK_EQ(output[1], (u8)0x4D);
+    FL_CHECK_EQ(output[2], (u8)0x34);
+}
+
+// --- Transpose roundtrip tests ---
+
+FL_TEST_CASE("Wave3 transpose roundtrip - 2 lanes") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_WS2812_800KHZ>();
+    fl::Wave3BitExpansionLut lut = fl::buildWave3ExpansionLUT(timing);
+
+    u8 lanes[2] = {0xAB, 0xCD};
+    u8 transposed[2 * sizeof(fl::Wave3Byte)];
+    fl::wave3Transpose_2(reinterpret_cast<const u8(&)[2]>(lanes), lut,
+                         reinterpret_cast<u8(&)[2 * sizeof(fl::Wave3Byte)]>(transposed));
+
+    u8 untransposed[2 * sizeof(fl::Wave3Byte)];
+    fl::wave3Untranspose_2(
+        reinterpret_cast<const u8(&)[2 * sizeof(fl::Wave3Byte)]>(transposed),
+        reinterpret_cast<u8(&)[2 * sizeof(fl::Wave3Byte)]>(untransposed));
+
+    u8 expected_lane0[sizeof(fl::Wave3Byte)];
+    u8 expected_lane1[sizeof(fl::Wave3Byte)];
+    fl::wave3(0xAB, lut, expected_lane0);
+    fl::wave3(0xCD, lut, expected_lane1);
+
+    for (size_t i = 0; i < sizeof(fl::Wave3Byte); i++) {
+        FL_CHECK_EQ(untransposed[i], expected_lane0[i]);
+        FL_CHECK_EQ(untransposed[sizeof(fl::Wave3Byte) + i], expected_lane1[i]);
+    }
+}
+
+FL_TEST_CASE("Wave3 transpose roundtrip - 4 lanes") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_WS2812_800KHZ>();
+    fl::Wave3BitExpansionLut lut = fl::buildWave3ExpansionLUT(timing);
+
+    u8 lanes[4] = {0x11, 0x22, 0x33, 0x44};
+    u8 transposed[4 * sizeof(fl::Wave3Byte)];
+    fl::wave3Transpose_4(reinterpret_cast<const u8(&)[4]>(lanes), lut,
+                         reinterpret_cast<u8(&)[4 * sizeof(fl::Wave3Byte)]>(transposed));
+
+    u8 untransposed[4 * sizeof(fl::Wave3Byte)];
+    fl::wave3Untranspose_4(
+        reinterpret_cast<const u8(&)[4 * sizeof(fl::Wave3Byte)]>(transposed),
+        reinterpret_cast<u8(&)[4 * sizeof(fl::Wave3Byte)]>(untransposed));
+
+    for (int lane = 0; lane < 4; lane++) {
+        u8 expected[sizeof(fl::Wave3Byte)];
+        fl::wave3(lanes[lane], lut, expected);
+        for (size_t i = 0; i < sizeof(fl::Wave3Byte); i++) {
+            FL_CHECK_EQ(untransposed[lane * sizeof(fl::Wave3Byte) + i], expected[i]);
+        }
+    }
+}
+
+FL_TEST_CASE("Wave3 transpose roundtrip - 8 lanes") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_WS2812_800KHZ>();
+    fl::Wave3BitExpansionLut lut = fl::buildWave3ExpansionLUT(timing);
+
+    u8 lanes[8] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
+    u8 transposed[8 * sizeof(fl::Wave3Byte)];
+    fl::wave3Transpose_8(reinterpret_cast<const u8(&)[8]>(lanes), lut,
+                         reinterpret_cast<u8(&)[8 * sizeof(fl::Wave3Byte)]>(transposed));
+
+    u8 untransposed[8 * sizeof(fl::Wave3Byte)];
+    fl::wave3Untranspose_8(
+        reinterpret_cast<const u8(&)[8 * sizeof(fl::Wave3Byte)]>(transposed),
+        reinterpret_cast<u8(&)[8 * sizeof(fl::Wave3Byte)]>(untransposed));
+
+    for (int lane = 0; lane < 8; lane++) {
+        u8 expected[sizeof(fl::Wave3Byte)];
+        fl::wave3(lanes[lane], lut, expected);
+        for (size_t i = 0; i < sizeof(fl::Wave3Byte); i++) {
+            FL_CHECK_EQ(untransposed[lane * sizeof(fl::Wave3Byte) + i], expected[i]);
+        }
+    }
+}
+
+FL_TEST_CASE("Wave3 transpose roundtrip - 16 lanes") {
+    fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_WS2812_800KHZ>();
+    fl::Wave3BitExpansionLut lut = fl::buildWave3ExpansionLUT(timing);
+
+    u8 lanes[16] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+                    0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF};
+    u8 transposed[16 * sizeof(fl::Wave3Byte)];
+    fl::wave3Transpose_16(reinterpret_cast<const u8(&)[16]>(lanes), lut,
+                          reinterpret_cast<u8(&)[16 * sizeof(fl::Wave3Byte)]>(transposed));
+
+    u8 untransposed[16 * sizeof(fl::Wave3Byte)];
+    fl::wave3Untranspose_16(
+        reinterpret_cast<const u8(&)[16 * sizeof(fl::Wave3Byte)]>(transposed),
+        reinterpret_cast<u8(&)[16 * sizeof(fl::Wave3Byte)]>(untransposed));
+
+    for (int lane = 0; lane < 16; lane++) {
+        u8 expected[sizeof(fl::Wave3Byte)];
+        fl::wave3(lanes[lane], lut, expected);
+        for (size_t i = 0; i < sizeof(fl::Wave3Byte); i++) {
+            FL_CHECK_EQ(untransposed[lane * sizeof(fl::Wave3Byte) + i], expected[i]);
+        }
+    }
+}
+
+// --- Output size tests ---
+
+FL_TEST_CASE("Wave3 output sizes match expected") {
+    FL_CHECK_EQ(sizeof(fl::Wave3Byte), (size_t)3);
+    FL_CHECK_EQ(2 * sizeof(fl::Wave3Byte), (size_t)6);
+    FL_CHECK_EQ(4 * sizeof(fl::Wave3Byte), (size_t)12);
+    FL_CHECK_EQ(8 * sizeof(fl::Wave3Byte), (size_t)24);
+    FL_CHECK_EQ(16 * sizeof(fl::Wave3Byte), (size_t)48);
+}
+
+//=============================================================================
+// Wave3 Integration Tests (Engine + Mock)
+//=============================================================================
+
+FL_TEST_CASE("Wave3 integration - WS2812 selects wave3 mode") {
+    resetMockHistory();
+    auto& driver = ParlioEngine::getInstance();
+
+    fl::vector<int> pins = {1};
+    ChipsetTimingConfig timing = getWS2812Timing();
+    bool init_ok = driver.initialize(1, pins, timing, 10);
+    FL_REQUIRE(init_ok);
+
+    // Verify clock frequency is wave3 clock (2.4 MHz for WS2812)
+    auto& mock6 = ParlioPeripheralMock::instance();
+    const auto& config6 = mock6.getConfig();
+    // WS2812: period = 350 + 800 + 450 = 1600ns, clock = 3e9/1600 = 1875000
+    FL_CHECK(config6.clock_freq_hz != 8000000);  // NOT wave8 clock
+    FL_CHECK(config6.clock_freq_hz > 0);
+}
+
+FL_TEST_CASE("Wave3 integration - WS2812B_V5 falls back to wave8") {
+    resetMockHistory();
+    auto& driver = ParlioEngine::getInstance();
+
+    fl::vector<int> pins = {1};
+    // WS2812B-V5: T1=225, T2=355, T3=645 — NOT wave3 eligible
+    ChipsetTimingConfig timing(225, 355, 645, 280, "WS2812B_V5");
+    bool init_ok = driver.initialize(1, pins, timing, 10);
+    FL_REQUIRE(init_ok);
+
+    // Verify clock frequency is wave8 clock (8 MHz)
+    auto& mock7 = ParlioPeripheralMock::instance();
+    const auto& config7 = mock7.getConfig();
+    FL_CHECK_EQ(config7.clock_freq_hz, (u32)8000000);
+}
+
+FL_TEST_CASE("Wave3 integration - transmit produces correct output size") {
+    resetMockHistory();
+    auto& driver = ParlioEngine::getInstance();
+
+    fl::vector<int> pins = {1};
+    ChipsetTimingConfig timing = getWS2812Timing();  // wave3 eligible
+    size_t num_leds = 5;
+    size_t num_bytes = num_leds * 3;
+    bool init_ok = driver.initialize(1, pins, timing, num_leds);
+    FL_REQUIRE(init_ok);
+
+    fl::vector<uint8_t> scratch(num_bytes);
+    for (size_t i = 0; i < num_bytes; i++) {
+        scratch[i] = static_cast<uint8_t>(i & 0xFF);
+    }
+
+    bool tx_ok = driver.beginTransmission(scratch.data(), num_bytes, 1, num_bytes);
+    FL_REQUIRE(tx_ok);
+
+    auto& mock8 = ParlioPeripheralMock::instance();
+    const auto& history8 = mock8.getTransmissionHistory();
+    FL_CHECK(history8.size() > 0);
+
+    // Total bits should reflect wave3 expansion (3 ticks per bit, not 8)
+    size_t total_bits = 0;
+    for (const auto& tx : history8) {
+        total_bits += tx.bit_count;
+    }
+    // Minimum: num_bytes × 8 bits × 3 ticks/bit = num_bytes × 24
+    size_t expected_min_bits = num_bytes * 8 * 3;
+    FL_CHECK(total_bits >= expected_min_bits);
+}
+
+//=============================================================================
+// Wave3/Wave8 Mode Switch Corner Cases
+//=============================================================================
+
+FL_TEST_CASE("Wave3 corner case - mode switch wave3 to wave8") {
+    resetMockHistory();
+    auto& driver = ParlioEngine::getInstance();
+
+    fl::vector<int> pins = {1};
+
+    // First: init with WS2812 (wave3)
+    ChipsetTimingConfig timing_ws2812 = getWS2812Timing();
+    bool init_ok = driver.initialize(1, pins, timing_ws2812, 10);
+    FL_REQUIRE(init_ok);
+
+    auto& mock9 = ParlioPeripheralMock::instance();
+    u32 wave3_clock = mock9.getConfig().clock_freq_hz;
+    FL_CHECK(wave3_clock != 8000000);  // Should be wave3 clock
+
+    // Second: reinit with WS2812B_V5 (wave8) — different timing forces reinit
+    ChipsetTimingConfig timing_v5(225, 355, 645, 280, "WS2812B_V5");
+    init_ok = driver.initialize(1, pins, timing_v5, 10);
+    FL_REQUIRE(init_ok);
+
+    u32 wave8_clock = mock9.getConfig().clock_freq_hz;
+    FL_CHECK_EQ(wave8_clock, (u32)8000000);  // Should be wave8 clock
+
+    // Verify transmission works in wave8 mode
+    uint8_t scratch[15] = {0xFF, 0xAA, 0x55, 0xF0, 0x0F,
+                           0xC3, 0x3C, 0x99, 0x66, 0x11,
+                           0x22, 0x33, 0x44, 0x55, 0x66};
+    bool tx_ok = driver.beginTransmission(scratch, 15, 1, 15);
+    FL_CHECK(tx_ok);
+}
+
+FL_TEST_CASE("Wave3 corner case - mode switch wave8 to wave3") {
+    resetMockHistory();
+    auto& driver = ParlioEngine::getInstance();
+
+    fl::vector<int> pins = {1};
+
+    // First: init with WS2812B_V5 (wave8)
+    ChipsetTimingConfig timing_v5(225, 355, 645, 280, "WS2812B_V5");
+    bool init_ok = driver.initialize(1, pins, timing_v5, 10);
+    FL_REQUIRE(init_ok);
+
+    auto& mock10 = ParlioPeripheralMock::instance();
+    FL_CHECK_EQ(mock10.getConfig().clock_freq_hz, (u32)8000000);
+
+    // Second: reinit with WS2812 (wave3) — different timing forces reinit
+    ChipsetTimingConfig timing_ws2812 = getWS2812Timing();
+    init_ok = driver.initialize(1, pins, timing_ws2812, 10);
+    FL_REQUIRE(init_ok);
+
+    u32 wave3_clock = mock10.getConfig().clock_freq_hz;
+    FL_CHECK(wave3_clock != 8000000);  // Should now be wave3 clock
+
+    // Verify transmission works in wave3 mode
+    uint8_t scratch[15] = {0xFF, 0xAA, 0x55, 0xF0, 0x0F,
+                           0xC3, 0x3C, 0x99, 0x66, 0x11,
+                           0x22, 0x33, 0x44, 0x55, 0x66};
+    bool tx_ok = driver.beginTransmission(scratch, 15, 1, 15);
+    FL_CHECK(tx_ok);
+}
+
+FL_TEST_CASE("Wave3 corner case - same timing reinit no reallocation") {
+    resetMockHistory();
+    auto& driver = ParlioEngine::getInstance();
+
+    fl::vector<int> pins = {1};
+    ChipsetTimingConfig timing = getWS2812Timing();
+
+    // Init twice with same timing — should not trigger full reinit
+    bool init_ok1 = driver.initialize(1, pins, timing, 10);
+    FL_REQUIRE(init_ok1);
+
+    bool init_ok2 = driver.initialize(1, pins, timing, 10);
+    FL_REQUIRE(init_ok2);
+
+    // Verify engine is functional
+    uint8_t scratch[15] = {0xFF, 0xAA, 0x55, 0xF0, 0x0F,
+                           0xC3, 0x3C, 0x99, 0x66, 0x11,
+                           0x22, 0x33, 0x44, 0x55, 0x66};
+    bool tx_ok = driver.beginTransmission(scratch, 15, 1, 15);
+    FL_CHECK(tx_ok);
+}
+
+FL_TEST_CASE("Wave3 corner case - ring buffer reallocation on LED increase") {
+    resetMockHistory();
+    auto& driver = ParlioEngine::getInstance();
+
+    fl::vector<int> pins = {1};
+    ChipsetTimingConfig timing = getWS2812Timing();
+
+    // Init with small LED count
+    bool init_ok1 = driver.initialize(1, pins, timing, 10);
+    FL_REQUIRE(init_ok1);
+
+    // Reinit with larger LED count — should reallocate ring buffers
+    bool init_ok2 = driver.initialize(1, pins, timing, 100);
+    FL_REQUIRE(init_ok2);
+
+    // Verify larger transmission works
+    size_t num_bytes = 100 * 3;
+    fl::vector<uint8_t> scratch(num_bytes);
+    for (size_t i = 0; i < num_bytes; i++) {
+        scratch[i] = static_cast<uint8_t>(i & 0xFF);
+    }
+    bool tx_ok = driver.beginTransmission(scratch.data(), num_bytes, 1, num_bytes);
+    FL_CHECK(tx_ok);
+}
+
+FL_TEST_CASE("Wave3 corner case - mock reset between modes") {
+    resetMockHistory();
+    auto& driver = ParlioEngine::getInstance();
+    auto& mock11 = ParlioPeripheralMock::instance();
+
+    fl::vector<int> pins = {1};
+
+    // Init wave3 mode
+    ChipsetTimingConfig timing_ws2812 = getWS2812Timing();
+    bool init_ok = driver.initialize(1, pins, timing_ws2812, 10);
+    FL_REQUIRE(init_ok);
+    FL_CHECK(mock11.getConfig().clock_freq_hz != 8000000);
+
+    // Reset mock — simulates hardware reset
+    mock11.reset();
+
+    // Reinit with wave8 mode
+    ChipsetTimingConfig timing_v5(225, 355, 645, 280, "WS2812B_V5");
+    init_ok = driver.initialize(1, pins, timing_v5, 10);
+    FL_REQUIRE(init_ok);
+    FL_CHECK_EQ(mock11.getConfig().clock_freq_hz, (u32)8000000);
+
+    // Verify transmission works after reset+reinit
+    uint8_t scratch[15] = {0xFF, 0xAA, 0x55, 0xF0, 0x0F,
+                           0xC3, 0x3C, 0x99, 0x66, 0x11,
+                           0x22, 0x33, 0x44, 0x55, 0x66};
+    bool tx_ok = driver.beginTransmission(scratch, 15, 1, 15);
+    FL_CHECK(tx_ok);
+}
+
+FL_TEST_CASE("Wave3 integration - multi-lane wave3 transmission") {
+    resetMockHistory();
+    auto& driver = ParlioEngine::getInstance();
+
+    fl::vector<int> pins = {1, 2, 3, 4};
+    ChipsetTimingConfig timing = getWS2812Timing();  // wave3 eligible
+
+    size_t num_leds = 10;
+    size_t num_bytes_per_lane = num_leds * 3;
+    bool init_ok = driver.initialize(4, pins, timing, num_leds);
+    FL_REQUIRE(init_ok);
+
+    // Verify wave3 clock is used
+    auto& mock12 = ParlioPeripheralMock::instance();
+    FL_CHECK(mock12.getConfig().clock_freq_hz != 8000000);
+
+    // Create multi-lane scratch buffer
+    fl::vector<uint8_t> scratch(num_bytes_per_lane * 4);
+    for (size_t i = 0; i < scratch.size(); i++) {
+        scratch[i] = static_cast<uint8_t>((i * 7 + 13) & 0xFF);
+    }
+
+    bool tx_ok = driver.beginTransmission(scratch.data(), num_bytes_per_lane * 4,
+                                           4, num_bytes_per_lane);
+    FL_CHECK(tx_ok);
 }

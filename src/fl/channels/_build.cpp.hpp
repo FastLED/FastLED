@@ -9,4 +9,5 @@
 #include "fl/channels/data.cpp.hpp"
 #include "fl/channels/driver.cpp.hpp"
 #include "fl/channels/validation.cpp.hpp"
+#include "fl/channels/wave3.cpp.hpp"
 #include "fl/channels/wave8.cpp.hpp"

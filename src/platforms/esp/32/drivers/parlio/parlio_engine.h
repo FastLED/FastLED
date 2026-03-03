@@ -65,6 +65,7 @@
 #include "fl/isr.h"
 #include "fl/singleton.h"
 
+#include "fl/channels/wave3.h"
 #include "fl/channels/wave8.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/chipsets/chipset_timing_config.h"
@@ -292,6 +293,11 @@ private:
 
     // Wave8 lookup table (used for clockless encoding)
     fl::Wave8BitExpansionLut mWave8Lut;
+
+    // Wave3 lookup table and state (used when chipset timing is wave3-eligible)
+    fl::Wave3BitExpansionLut mWave3Lut;
+    bool mUseWave3;
+    u32 mClockFreqHz;  // Dynamic clock frequency (wave3: per-chipset, wave8: 8MHz)
 
     // Encoding mode (clockless or SPI)
     EncodingMode mEncodingMode;

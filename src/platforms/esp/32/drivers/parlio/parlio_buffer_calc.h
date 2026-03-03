@@ -60,16 +60,26 @@ static_assert(FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES >= 12UL * 1024UL,
 /// Transposition packs pulses into bytes based on data_width.
 struct ParlioBufferCalculator {
     size_t mDataWidth;
+    bool mUseWave3;
+    u32 mClockFreqHz;
 
-    /// @brief Calculate output bytes per input byte after wave8 + transpose
-    /// @return Output bytes per input byte (8 for width≤8, 128 for width=16)
+    /// @brief Construct for wave8 mode (default, backward compatible)
+    explicit ParlioBufferCalculator(size_t dataWidth)
+        : mDataWidth(dataWidth), mUseWave3(false), mClockFreqHz(8000000) {}
+
+    /// @brief Construct with explicit wave mode and clock frequency
+    ParlioBufferCalculator(size_t dataWidth, bool useWave3, u32 clockFreqHz)
+        : mDataWidth(dataWidth), mUseWave3(useWave3), mClockFreqHz(clockFreqHz) {}
+
+    /// @brief Calculate output bytes per input byte after wave encoding + transpose
+    /// @return Output bytes per input byte
     size_t outputBytesPerInputByte() const {
+        if (mUseWave3) {
+            // Wave3: 8 LED bits × 3 ticks = 24 bits = 3 bytes per input byte per lane
+            return 3 * mDataWidth;
+        }
         if (mDataWidth <= 8) {
-            // Bit-packed: 64 pulses packed into (8 / mDataWidth) ticks per byte
-            // For data_width=1: 64 pulses / 8 ticks = 8 bytes
-            // For data_width=2: 64 pulses / 4 ticks = 16 bytes
-            // For data_width=4: 64 pulses / 2 ticks = 32 bytes
-            // For data_width=8: 64 pulses / 1 tick = 64 bytes
+            // Wave8 bit-packed: 64 pulses packed into (8 / mDataWidth) ticks per byte
             size_t ticksPerByte = 8 / mDataWidth;
             return (64 + ticksPerByte - 1) / ticksPerByte;
         } else if (mDataWidth == 16) {
@@ -92,14 +102,17 @@ struct ParlioBufferCalculator {
         // ITERATION 18: Zero front padding, keep back padding
         // Front padding caused phase shift (75% improvement when removed)
         // Back padding is REQUIRED for stable transmission (removing it makes things worse)
-        constexpr size_t BYTES_PER_WAVE8 = 8;
         constexpr size_t FRONT_PAD_PER_LANE = 0;  // NO front padding (causes phase shift)
-        constexpr size_t BACK_PAD_PER_LANE = BYTES_PER_WAVE8;   // 1 Wave8Byte (REQUIRED)
 
-        // After transposition, padding is interleaved with lanes
-        // For 1 lane: front=0, back=8 → total=8
-        // For N lanes: Each lane contributes to transposed output
-        // After transpose: 0 bytes front + 8 bytes back per lane
+        if (mUseWave3) {
+            // Wave3: 1 Wave3Byte (3 bytes) back padding per lane
+            constexpr size_t BYTES_PER_WAVE3 = 3;
+            constexpr size_t BACK_PAD_PER_LANE = BYTES_PER_WAVE3;
+            return (FRONT_PAD_PER_LANE + BACK_PAD_PER_LANE) * mDataWidth;
+        }
+
+        constexpr size_t BYTES_PER_WAVE8 = 8;
+        constexpr size_t BACK_PAD_PER_LANE = BYTES_PER_WAVE8;   // 1 Wave8Byte (REQUIRED)
         return (FRONT_PAD_PER_LANE + BACK_PAD_PER_LANE) * mDataWidth;
     }
 
@@ -117,6 +130,10 @@ struct ParlioBufferCalculator {
     /// @brief Calculate transpose output block size for populateDmaBuffer
     /// @return Block size in bytes for transpose operation
     size_t FL_IRAM transposeBlockSize() const {
+        if (mUseWave3) {
+            // Wave3: 3 bytes per input byte per lane
+            return 3 * mDataWidth;
+        }
         if (mDataWidth <= 8) {
             size_t ticksPerByte = 8 / mDataWidth;
             size_t pulsesPerByte = 64;
@@ -129,25 +146,42 @@ struct ParlioBufferCalculator {
 
     /// @brief Calculate additional bytes needed for reset time padding
     /// @param reset_us Reset time in microseconds
-    /// @return Bytes to append for reset padding (all-zero Wave8Bytes)
+    /// @return Bytes to append for reset padding (all-zero bytes)
     ///
-    /// Calculation:
-    /// - Each Wave8Byte = 64 pulses × 125ns (8MHz clock) = 8µs
-    /// - Reset padding bytes = ceil(reset_us / 8µs) × 8 bytes
-    /// - Example: 280µs reset ÷ 8µs = 35 Wave8Bytes = 280 bytes
+    /// Calculation uses mClockFreqHz to compute time per wave unit:
+    /// - Wave8: 64 ticks per Wave8Byte. At 8MHz (125ns/tick): 8µs per Wave8Byte.
+    /// - Wave3: 24 ticks per Wave3Byte. At 2.4MHz (416.7ns/tick): 10µs per Wave3Byte.
+    /// - Formula: us_per_unit = (ticks_per_unit * 1,000,000) / mClockFreqHz
+    /// - Padding bytes = ceil(reset_us / us_per_unit) × bytes_per_unit × mDataWidth
     size_t resetPaddingBytes(u32 reset_us) const {
         if (reset_us == 0) {
             return 0;
         }
 
-        // Each Wave8Byte covers 8µs (64 ticks at 8MHz)
-        constexpr size_t US_PER_WAVE8BYTE = 8;
+        // Ticks and bytes per wave unit depend on encoding mode
+        size_t ticks_per_unit;
+        size_t bytes_per_unit;
+        if (mUseWave3) {
+            ticks_per_unit = 24;  // 8 LED bits × 3 ticks per bit
+            bytes_per_unit = 3;   // 1 Wave3Byte = 3 bytes
+        } else {
+            ticks_per_unit = 64;  // 8 LED bits × 8 ticks per bit
+            bytes_per_unit = 8;   // 1 Wave8Byte = 8 bytes
+        }
 
-        // Calculate number of Wave8Bytes needed (round up)
-        size_t num_wave8bytes = (reset_us + US_PER_WAVE8BYTE - 1) / US_PER_WAVE8BYTE;
+        // Calculate microseconds per wave unit: (ticks × 1,000,000) / clock_hz
+        // Use u64 to avoid overflow
+        u32 us_per_unit = static_cast<u32>(
+            (static_cast<u64>(ticks_per_unit) * 1000000ULL + mClockFreqHz - 1) / mClockFreqHz);
+        if (us_per_unit == 0) {
+            us_per_unit = 1;  // Safety floor
+        }
 
-        // Convert to byte count (8 bytes per Wave8Byte)
-        return num_wave8bytes * 8;
+        // Calculate number of wave units needed (round up)
+        size_t num_units = (reset_us + us_per_unit - 1) / us_per_unit;
+
+        // Convert to byte count (bytes_per_unit per wave unit)
+        return num_units * bytes_per_unit;
     }
 
     /// @brief Calculate optimal ring buffer capacity based on LED frame boundaries

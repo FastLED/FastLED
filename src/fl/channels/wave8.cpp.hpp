@@ -253,11 +253,13 @@ void wave8Untranspose_8(const u8 (&FL_RESTRICT_PARAM transposed)[8 * sizeof(Wave
         u8 lane_bytes[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
         // Process 8 input bytes (1 pulse per byte)
+        // Hacker's Delight 8x8 transpose outputs columns in LSB-first order:
+        // byte 0 = column 0 (bit 0 of each lane), byte 7 = column 7 (bit 7)
         for (int byte_idx = 0; byte_idx < 8; byte_idx++) {
             u8 input_byte = transposed[symbol_idx * 8 + byte_idx];
 
             // Calculate which pulse bit this corresponds to
-            int pulse_bit = 7 - byte_idx;
+            int pulse_bit = byte_idx;
 
             // De-interleave 8 lanes from this byte
             // Bit layout: [L7, L6, L5, L4, L3, L2, L1, L0]

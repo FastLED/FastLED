@@ -258,6 +258,32 @@ FL_REQUIRE_LT((map_range<int, int, long>(x, 0, 100, 0, 1000)), max_value)
 - ✅ **Isolated feature areas** that don't fit logically into existing test structure
 - ✅ **Complex integration tests** that require dedicated setup/teardown
 
+### Consolidated Test Directories
+
+Some test directories use a **consolidation pattern** where multiple `.cpp` files in a subdirectory are `#include`d into a single parent `.cpp` file that compiles as one test binary. These subdirectories are listed in `EXCLUDED_TEST_DIRS` in `tests/test_config.py` so the auto-discovery system doesn't try to compile them individually.
+
+**Example:** `tests/fl/fx/2d/` contains individual test files (`animartrix_fp.cpp`, `chasing_spirals.cpp`, etc.) that are all `#include`d by the parent file `tests/fl/fx/2d.cpp`:
+```cpp
+// tests/fl/fx/2d.cpp
+// ok standalone // ok cpp include
+#include "2d/animartrix_fp.cpp"
+#include "2d/chasing_spirals.cpp"
+#include "2d/perlin_s8x8_test.cpp"
+```
+
+**Key points:**
+- The individual files in these directories **do compile** — via the parent consolidation file, not directly
+- The `// ok standalone` comment at the top of these files is a **linter exemption** (tells lint checks the file is valid despite being `#include`d rather than compiled on its own). It is **not** a build system registration mechanism.
+- To add a new test file to a consolidated directory, add it to the parent `.cpp` file's `#include` list
+- Current consolidated directories (see `EXCLUDED_TEST_DIRS` in `tests/test_config.py`):
+  - `tests/fl/fx/2d/` → parent: `tests/fl/fx/2d.cpp`
+  - `tests/fl/chipsets/encoders/`
+  - `tests/fl/detail/`
+  - `tests/fl/audio/detectors/`
+  - `tests/fl/channels/detail/validation/`
+  - `tests/fl/remote/rpc/`
+  - `tests/fl/codec/`
+
 ### TEST FILE PLACEMENT
 **🚨 NEVER create tests in `tests/misc/`** - this is a legacy catch-all that should not grow.
 

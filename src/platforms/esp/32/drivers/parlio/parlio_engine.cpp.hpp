@@ -20,6 +20,7 @@
 #include "platforms/memory_barrier.h"  // For FL_MEMORY_BARRIER
 
 #include "parlio_engine.h"
+#include "fl/channels/detail/wave3.hpp"
 #include "fl/channels/detail/wave8.hpp"
 #include "parlio_isr_context.h"
 #include "parlio_buffer_calc.h"
@@ -122,6 +123,8 @@ struct BufferPopulationParams {
     size_t dataWidth;               ///< Data width (number of lanes: 1, 2, 4, 8, 16)
     size_t laneStride;              ///< Bytes per lane in scratch buffer
     u32 resetUs;               ///< Reset time in microseconds
+    bool useWave3;                  ///< True if using wave3 encoding
+    u32 clockFreqHz;               ///< Clock frequency in Hz
 };
 
 /// @brief Calculate the byte count for a DMA buffer population
@@ -166,7 +169,7 @@ calculateBufferByteCount(const BufferPopulationParams& params) {
     constexpr size_t MIN_INPUT_BYTES_PER_BUFFER = 20;  // Increased from 15 to test glitch hypothesis
 
     // Calculate buffer sizing parameters (used throughout function)
-    ParlioBufferCalculator calc{params.dataWidth};
+    ParlioBufferCalculator calc(params.dataWidth, params.useWave3, params.clockFreqHz);
     size_t expansionFactor = calc.outputBytesPerInputByte();
 
     // Calculate effective ring count to ensure minimum buffer size
@@ -283,6 +286,8 @@ ParlioEngine::ParlioEngine()
       mTimingT2Ns(0),
       mTimingT3Ns(0),
       mResetUs(0),
+      mUseWave3(false),
+      mClockFreqHz(8000000),
       mEncodingMode(EncodingMode::CLOCKLESS),
       mSpiClockHz(0),
       mIsrContext(),
@@ -700,6 +705,8 @@ ParlioEngine::workerIsrCallback(void *user_data) {
     params.dataWidth = self->mDataWidth;
     params.laneStride = self->mLaneStride;
     params.resetUs = self->mResetUs;
+    params.useWave3 = self->mUseWave3;
+    params.clockFreqHz = self->mClockFreqHz;
 
     size_t byte_count = calculateBufferByteCount(params);
     if (byte_count == 0) {
@@ -783,16 +790,16 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
                                      startByte, byteCount, outputBytesWritten);
     }
 
-    // === Clockless (Wave8) encoding follows ===
+    // === Clockless (Wave8 or Wave3) encoding follows ===
     size_t outputIdx = 0;
     size_t byteOffset = 0;
 
     // Use calculator for padding and transpose block size
-    ParlioBufferCalculator calc{mDataWidth};
+    ParlioBufferCalculator calc(mDataWidth, mUseWave3, mClockFreqHz);
     size_t blockSize = calc.transposeBlockSize();
 
     // ═══════════════════════════════════════════════════════════════
-    // PHASE 1: Insert front padding (1 Wave8Byte per lane = 8 bytes)
+    // PHASE 1: Insert front padding
     // ═══════════════════════════════════════════════════════════════
     // Only add front padding on the FIRST byte of transmission
     bool is_first_byte = (startByte == 0);
@@ -815,7 +822,7 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
         outputIdx += front_padding_total;
     }
 
-    // Process one byte position at a time using wave8 transpose functions
+    // Process one byte position at a time using wave transpose functions
     // These functions combine expansion + transposition in one step with minimal memory overhead
 
     while (byteOffset < byteCount) {
@@ -828,106 +835,182 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
 
         // Prepare lane bytes for transposition
         // Use stack-allocated temporary arrays sized for the actual data width
-        // Dispatch to appropriate wave8Transpose function based on data width
+        // Dispatch to appropriate transpose function based on data width and wave mode
 
-        if (mDataWidth == 1) {
-            // Single-lane mode: Convert byte directly to Wave8Byte WITHOUT interleaving
-            // For single-lane, we don't want 2-lane transpose which would interleave
-            // lane[0] with dummy lane[1] padding
-            u8 byte_value = (mActualChannels > 0)
-                ? mScratchBuffer[0 * mLaneStride + startByte + byteOffset]
-                : 0;
-
-            Wave8Byte wave8_output;
-            fl::detail::wave8_convert_byte_to_wave8byte(byte_value, mWave8Lut, &wave8_output);
-
-            // MSB bit packing: Wave8Bit stores pulses MSB-first, PARLIO MSB packing required
-            // (Hardware validation confirms MSB packing is correct for Wave8 format)
-
-            fl::memcpy(outputBuffer + outputIdx, &wave8_output, sizeof(Wave8Byte));
-            outputIdx += sizeof(Wave8Byte);
-        } else if (mDataWidth == 2) {
-            // Two-lane mode: Use 2-lane transpose to interleave lanes
-            // CRITICAL: FL_WAVE8_SPREAD_TO_16 puts lanes[0] in ODD bits → data_line[1],
-            // and lanes[1] in EVEN bits → data_line[0].
-            // PARLIO maps data_line[0]=pins[0]=channel0_pin, data_line[1]=pins[1]=channel1_pin.
-            // To send channel 0's data on channel 0's pin (data_line[0] = EVEN bits),
-            // channel 0 data must go in lanes[1] and channel 1 data in lanes[0].
-            u8 lanes[2];
-            lanes[0] = (mActualChannels > 1)
-                ? mScratchBuffer[1 * mLaneStride + startByte + byteOffset]
-                : 0;
-            lanes[1] = (mActualChannels > 0)
-                ? mScratchBuffer[0 * mLaneStride + startByte + byteOffset]
-                : 0;
-
-            u8 transposed[2 * sizeof(Wave8Byte)];
-            fl::wave8Transpose_2(reinterpret_cast<const u8(&)[2]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
-                                reinterpret_cast<u8(&)[2 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
-
-            fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
-            outputIdx += blockSize;
-        } else if (mDataWidth == 4) {
-            u8 lanes[4];
-            for (size_t lane = 0; lane < 4; lane++) {
-                lanes[lane] = (lane < mActualChannels)
-                    ? mScratchBuffer[lane * mLaneStride + startByte + byteOffset]
+        if (mUseWave3) {
+            // === Wave3 encoding path ===
+            if (mDataWidth == 1) {
+                u8 byte_value = (mActualChannels > 0)
+                    ? mScratchBuffer[0 * mLaneStride + startByte + byteOffset]
                     : 0;
-            }
 
-            u8 transposed[4 * sizeof(Wave8Byte)];
-            fl::wave8Transpose_4(reinterpret_cast<const u8(&)[4]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
-                                reinterpret_cast<u8(&)[4 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
+                Wave3Byte wave3_output;
+                fl::detail::wave3_convert_byte_to_wave3byte(byte_value, mWave3Lut, &wave3_output);
 
-            fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
-            outputIdx += blockSize;
-        } else if (mDataWidth == 8) {
-            u8 lanes[8];
-            for (size_t lane = 0; lane < 8; lane++) {
-                lanes[lane] = (lane < mActualChannels)
-                    ? mScratchBuffer[lane * mLaneStride + startByte + byteOffset]
+                fl::memcpy(outputBuffer + outputIdx, &wave3_output, sizeof(Wave3Byte));
+                outputIdx += sizeof(Wave3Byte);
+            } else if (mDataWidth == 2) {
+                u8 lanes[2];
+                lanes[0] = (mActualChannels > 1)
+                    ? mScratchBuffer[1 * mLaneStride + startByte + byteOffset]
                     : 0;
-            }
-
-            u8 transposed[8 * sizeof(Wave8Byte)];
-            fl::wave8Transpose_8(reinterpret_cast<const u8(&)[8]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
-                                reinterpret_cast<u8(&)[8 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
-
-            fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
-            outputIdx += blockSize;
-        } else if (mDataWidth == 16) {
-            u8 lanes[16];
-            for (size_t lane = 0; lane < 16; lane++) {
-                lanes[lane] = (lane < mActualChannels)
-                    ? mScratchBuffer[lane * mLaneStride + startByte + byteOffset]
+                lanes[1] = (mActualChannels > 0)
+                    ? mScratchBuffer[0 * mLaneStride + startByte + byteOffset]
                     : 0;
+
+                u8 transposed[2 * sizeof(Wave3Byte)];
+                fl::wave3Transpose_2(reinterpret_cast<const u8(&)[2]>(lanes), mWave3Lut, // ok reinterpret cast - array reference type conversion
+                                    reinterpret_cast<u8(&)[2 * sizeof(Wave3Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
+
+                fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
+                outputIdx += blockSize;
+            } else if (mDataWidth == 4) {
+                u8 lanes[4];
+                for (size_t lane = 0; lane < 4; lane++) {
+                    lanes[lane] = (lane < mActualChannels)
+                        ? mScratchBuffer[lane * mLaneStride + startByte + byteOffset]
+                        : 0;
+                }
+
+                u8 transposed[4 * sizeof(Wave3Byte)];
+                fl::wave3Transpose_4(reinterpret_cast<const u8(&)[4]>(lanes), mWave3Lut, // ok reinterpret cast - array reference type conversion
+                                    reinterpret_cast<u8(&)[4 * sizeof(Wave3Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
+
+                fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
+                outputIdx += blockSize;
+            } else if (mDataWidth == 8) {
+                u8 lanes[8];
+                for (size_t lane = 0; lane < 8; lane++) {
+                    lanes[lane] = (lane < mActualChannels)
+                        ? mScratchBuffer[lane * mLaneStride + startByte + byteOffset]
+                        : 0;
+                }
+
+                u8 transposed[8 * sizeof(Wave3Byte)];
+                fl::wave3Transpose_8(reinterpret_cast<const u8(&)[8]>(lanes), mWave3Lut, // ok reinterpret cast - array reference type conversion
+                                    reinterpret_cast<u8(&)[8 * sizeof(Wave3Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
+
+                fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
+                outputIdx += blockSize;
+            } else if (mDataWidth == 16) {
+                u8 lanes[16];
+                for (size_t lane = 0; lane < 16; lane++) {
+                    lanes[lane] = (lane < mActualChannels)
+                        ? mScratchBuffer[lane * mLaneStride + startByte + byteOffset]
+                        : 0;
+                }
+
+                u8 transposed[16 * sizeof(Wave3Byte)];
+                fl::wave3Transpose_16(reinterpret_cast<const u8(&)[16]>(lanes), mWave3Lut, // ok reinterpret cast - array reference type conversion
+                                     reinterpret_cast<u8(&)[16 * sizeof(Wave3Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
+
+                fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
+                outputIdx += blockSize;
+            } else {
+                outputBytesWritten = outputIdx;
+                return false;
             }
-
-            u8 transposed[16 * sizeof(Wave8Byte)];
-            fl::wave8Transpose_16(reinterpret_cast<const u8(&)[16]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
-                                 reinterpret_cast<u8(&)[16 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
-
-            fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
-            outputIdx += blockSize;
         } else {
-            // Invalid data width - should never happen (validated in initialize())
-            outputBytesWritten = outputIdx;
-            return false;
+            // === Wave8 encoding path ===
+            if (mDataWidth == 1) {
+                // Single-lane mode: Convert byte directly to Wave8Byte WITHOUT interleaving
+                // For single-lane, we don't want 2-lane transpose which would interleave
+                // lane[0] with dummy lane[1] padding
+                u8 byte_value = (mActualChannels > 0)
+                    ? mScratchBuffer[0 * mLaneStride + startByte + byteOffset]
+                    : 0;
+
+                Wave8Byte wave8_output;
+                fl::detail::wave8_convert_byte_to_wave8byte(byte_value, mWave8Lut, &wave8_output);
+
+                // MSB bit packing: Wave8Bit stores pulses MSB-first, PARLIO MSB packing required
+                // (Hardware validation confirms MSB packing is correct for Wave8 format)
+
+                fl::memcpy(outputBuffer + outputIdx, &wave8_output, sizeof(Wave8Byte));
+                outputIdx += sizeof(Wave8Byte);
+            } else if (mDataWidth == 2) {
+                // Two-lane mode: Use 2-lane transpose to interleave lanes
+                // CRITICAL: FL_WAVE8_SPREAD_TO_16 puts lanes[0] in ODD bits → data_line[1],
+                // and lanes[1] in EVEN bits → data_line[0].
+                // PARLIO maps data_line[0]=pins[0]=channel0_pin, data_line[1]=pins[1]=channel1_pin.
+                // To send channel 0's data on channel 0's pin (data_line[0] = EVEN bits),
+                // channel 0 data must go in lanes[1] and channel 1 data in lanes[0].
+                u8 lanes[2];
+                lanes[0] = (mActualChannels > 1)
+                    ? mScratchBuffer[1 * mLaneStride + startByte + byteOffset]
+                    : 0;
+                lanes[1] = (mActualChannels > 0)
+                    ? mScratchBuffer[0 * mLaneStride + startByte + byteOffset]
+                    : 0;
+
+                u8 transposed[2 * sizeof(Wave8Byte)];
+                fl::wave8Transpose_2(reinterpret_cast<const u8(&)[2]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
+                                    reinterpret_cast<u8(&)[2 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
+
+                fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
+                outputIdx += blockSize;
+            } else if (mDataWidth == 4) {
+                u8 lanes[4];
+                for (size_t lane = 0; lane < 4; lane++) {
+                    lanes[lane] = (lane < mActualChannels)
+                        ? mScratchBuffer[lane * mLaneStride + startByte + byteOffset]
+                        : 0;
+                }
+
+                u8 transposed[4 * sizeof(Wave8Byte)];
+                fl::wave8Transpose_4(reinterpret_cast<const u8(&)[4]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
+                                    reinterpret_cast<u8(&)[4 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
+
+                fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
+                outputIdx += blockSize;
+            } else if (mDataWidth == 8) {
+                u8 lanes[8];
+                for (size_t lane = 0; lane < 8; lane++) {
+                    lanes[lane] = (lane < mActualChannels)
+                        ? mScratchBuffer[lane * mLaneStride + startByte + byteOffset]
+                        : 0;
+                }
+
+                u8 transposed[8 * sizeof(Wave8Byte)];
+                fl::wave8Transpose_8(reinterpret_cast<const u8(&)[8]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
+                                    reinterpret_cast<u8(&)[8 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
+
+                fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
+                outputIdx += blockSize;
+            } else if (mDataWidth == 16) {
+                u8 lanes[16];
+                for (size_t lane = 0; lane < 16; lane++) {
+                    lanes[lane] = (lane < mActualChannels)
+                        ? mScratchBuffer[lane * mLaneStride + startByte + byteOffset]
+                        : 0;
+                }
+
+                u8 transposed[16 * sizeof(Wave8Byte)];
+                fl::wave8Transpose_16(reinterpret_cast<const u8(&)[16]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
+                                     reinterpret_cast<u8(&)[16 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
+
+                fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
+                outputIdx += blockSize;
+            } else {
+                // Invalid data width - should never happen (validated in initialize())
+                outputBytesWritten = outputIdx;
+                return false;
+            }
         }
 
         byteOffset++;
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // STAGE 3: Append back padding (1 Wave8Byte per lane = 8 bytes)
+    // STAGE 3: Append back padding
     // ═══════════════════════════════════════════════════════════════
     // Only append back padding on the LAST byte of transmission
     // (when processing the final byte in the total byte range)
     bool is_last_byte = (startByte + byteCount >= mIsrContext->mTotalBytes);
 
     if (is_last_byte) {
-        constexpr size_t BACK_PAD_BYTES = 8;  // 1 Wave8Byte per lane (REQUIRED)
-        size_t back_padding_total = BACK_PAD_BYTES * mDataWidth;
+        size_t back_pad_bytes = mUseWave3 ? 3 : 8;  // 1 Wave3Byte or 1 Wave8Byte per lane
+        size_t back_padding_total = back_pad_bytes * mDataWidth;
 
         // Boundary check
         if (outputIdx + back_padding_total > outputBufferCapacity) {
@@ -942,14 +1025,13 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // STAGE 4: Append reset time padding (all-zero Wave8Bytes)
+    // STAGE 4: Append reset time padding (all-zero bytes)
     // ═══════════════════════════════════════════════════════════════
     // Only append reset padding on the LAST byte of transmission
     // (when processing the final byte in the total byte range)
 
     if (is_last_byte && mResetUs > 0) {
-        // Calculate reset padding bytes needed
-        ParlioBufferCalculator calc{mDataWidth};
+        // Calculate reset padding bytes needed (uses wave mode and clock freq)
         size_t reset_padding_bytes = calc.resetPaddingBytes(mResetUs);
 
         // Boundary check: Ensure padding fits in output buffer
@@ -1106,6 +1188,8 @@ ParlioEngine::populateNextDMABuffer() {
     params.dataWidth = mDataWidth;
     params.laneStride = mLaneStride;
     params.resetUs = mResetUs;
+    params.useWave3 = mUseWave3;
+    params.clockFreqHz = mClockFreqHz;
 
     size_t byte_count = calculateBufferByteCount(params);
 
@@ -1199,7 +1283,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
                          << " - reallocating ring buffers");
 
             // Recalculate ring buffer capacity for larger LED count
-            ParlioBufferCalculator calc{mDataWidth};
+            ParlioBufferCalculator calc(mDataWidth, mUseWave3, mClockFreqHz);
             size_t raw_capacity = calc.calculateRingBufferCapacity(
                 maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT,
                 FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM);
@@ -1236,7 +1320,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
         ParlioPeripheralConfig config(
             pins,
-            FL_ESP_PARLIO_CLOCK_FREQ_HZ,
+            mClockFreqHz,
             FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH,
             65534,
             #if PARLIO_FORCE_LSB_MODE
@@ -1314,7 +1398,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
         return false;
     }
 
-    // Build wave8 expansion LUT from timing configuration
+    // Build expansion LUT from timing configuration
     ChipsetTiming chipsetTiming;
     chipsetTiming.T1 = mTimingT1Ns;
     chipsetTiming.T2 = mTimingT2Ns;
@@ -1322,6 +1406,17 @@ bool ParlioEngine::initialize(size_t dataWidth,
     chipsetTiming.RESET = mResetUs;  // Stored for documentation (padding handled in DMA buffer population)
     chipsetTiming.name = "PARLIO";
 
+    // Check if wave3 encoding is eligible for this chipset timing
+    mUseWave3 = canUseWave3(chipsetTiming);
+    if (mUseWave3) {
+        mClockFreqHz = wave3ClockFrequencyHz(chipsetTiming);
+        mWave3Lut = buildWave3ExpansionLUT(chipsetTiming);
+        FL_LOG_PARLIO("PARLIO_INIT: Wave3 mode selected (clock=" << mClockFreqHz << " Hz)");
+    } else {
+        mClockFreqHz = FL_ESP_PARLIO_CLOCK_FREQ_HZ;
+        FL_LOG_PARLIO("PARLIO_INIT: Wave8 mode selected (clock=" << mClockFreqHz << " Hz)");
+    }
+    // Always build wave8 LUT (needed as fallback and for SPI mode)
     mWave8Lut = buildWave8ExpansionLUT(chipsetTiming);
     mEncodingMode = EncodingMode::CLOCKLESS;
 
@@ -1334,7 +1429,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
     ParlioPeripheralConfig config(
         pins,  // Uses actual pin vector (size = dataWidth)
-        FL_ESP_PARLIO_CLOCK_FREQ_HZ,
+        mClockFreqHz,
         FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH,
         65534,
         #if PARLIO_FORCE_LSB_MODE
@@ -1344,7 +1439,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
         #endif
         true  // prefer_psram: try PSRAM first, fall back to internal SRAM
     );
-    FL_LOG_PARLIO("PARLIO_INIT: Config - clock=" << FL_ESP_PARLIO_CLOCK_FREQ_HZ << " queue_depth=" << FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH);
+    FL_LOG_PARLIO("PARLIO_INIT: Config - clock=" << mClockFreqHz << " queue_depth=" << FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH);
 
     // DIAGNOSTIC: Log bit packing mode
     #if PARLIO_FORCE_LSB_MODE
@@ -1376,7 +1471,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
     // Calculate ring buffer capacity
     // Try PSRAM cap first (larger buffers for 5+ channels), fall back to SRAM cap
-    ParlioBufferCalculator calc{mDataWidth};
+    ParlioBufferCalculator calc(mDataWidth, mUseWave3, mClockFreqHz);
     size_t raw_capacity = calc.calculateRingBufferCapacity(
         maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT,
         FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM);
