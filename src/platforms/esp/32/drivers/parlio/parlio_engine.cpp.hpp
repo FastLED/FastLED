@@ -209,6 +209,16 @@ calculateBufferByteCount(const BufferPopulationParams& params) {
         max_input_bytes_per_buffer -= bytes_per_led_all_lanes;
     }
 
+    // CRITICAL: If ALL data fits in one buffer, use single buffer to avoid DMA gap.
+    // The PARLIO peripheral has a ~20µs gap between DMA buffer transitions
+    // (hardware limitation) that corrupts WS2812 signal timing.
+    // calculateRingBufferCapacity() already sizes buffers to hold full frames
+    // when possible, so honor that by using effective_ring_count=1 here.
+    if (max_input_bytes_per_buffer >= params.totalBytes) {
+        effective_ring_count = 1;
+        bytes_per_buffer = params.totalBytes;
+    }
+
     // Cap bytes_per_buffer at ring buffer capacity
     if (bytes_per_buffer > max_input_bytes_per_buffer) {
         bytes_per_buffer = max_input_bytes_per_buffer;

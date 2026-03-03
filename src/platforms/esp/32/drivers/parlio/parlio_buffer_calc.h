@@ -172,39 +172,37 @@ struct ParlioBufferCalculator {
     /// - With safety margin: 24000 + 280 + 128 = 24408 bytes
     size_t calculateRingBufferCapacity(size_t maxLedsPerChannel, u32 reset_us, size_t numRingBuffers = 3,
                                        size_t totalCapBytes = FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES) const {
-        // Step 1: Calculate LEDs per buffer (divide total LEDs by number of buffers)
+        size_t safetyMargin = 128;
+        size_t perBufferCap = totalCapBytes / numRingBuffers;
+
+        // CRITICAL: Try to fit the ENTIRE frame in a single DMA buffer.
+        // The PARLIO peripheral has a ~20µs gap between DMA buffer transitions
+        // (hardware limitation). This gap corrupts WS2812 signal timing and
+        // causes bit-shift errors in all LEDs after the transition point.
+        // By fitting all data in one buffer, we avoid transitions entirely.
+        size_t totalInputBytes = maxLedsPerChannel * 3 * mDataWidth;
+        size_t fullFrameDmaSize = dmaBufferSize(totalInputBytes, reset_us);
+
+        if (fullFrameDmaSize + safetyMargin <= perBufferCap) {
+            // Full frame fits in one ring buffer - no DMA transitions needed
+            return fullFrameDmaSize + safetyMargin;
+        }
+
+        // Full frame doesn't fit - fall back to streaming with multiple ring buffers.
+        // This path has the ~20µs DMA gap between buffers (unavoidable hardware limitation).
         size_t ledsPerBuffer = (maxLedsPerChannel + numRingBuffers - 1) / numRingBuffers;
-
-        // Step 2: Calculate input bytes per buffer
-        // - 3 bytes per LED (RGB)
-        // - Multiply by mDataWidth for multi-lane (each lane gets same LED count)
         size_t inputBytesPerBuffer = ledsPerBuffer * 3 * mDataWidth;
-
-        // Step 3: Apply wave8 expansion (8:1 ratio for ≤8-bit width, 128:1 for 16-bit)
-        //         and add reset padding bytes (for last buffer in stream)
         size_t dmaBufferCapacity = dmaBufferSize(inputBytesPerBuffer, reset_us);
-
-        // Step 4: Apply total ring buffer memory cap (prevent OOM)
-        // When cap exceeded, system uses streaming mode (multiple buffer iterations)
-        // totalCapBytes is runtime-configurable: larger for PSRAM, smaller for internal SRAM
-        size_t TOTAL_CAP = totalCapBytes;
-        size_t perBufferCap = TOTAL_CAP / numRingBuffers;
 
         if (dmaBufferCapacity > perBufferCap) {
             size_t uncappedCapacity = dmaBufferCapacity;
             dmaBufferCapacity = perBufferCap;
 
-            // Debug logging (enabled via FL_LOG_PARLIO macro)
             FL_LOG_PARLIO("PARLIO: Ring buffer capped at " << dmaBufferCapacity
                    << " bytes/buffer (uncapped: " << uncappedCapacity
-                   << ", total cap: " << TOTAL_CAP << " bytes)");
+                   << ", total cap: " << totalCapBytes << " bytes)");
         }
 
-        // Step 5: Add safety margin to prevent boundary check failures
-        // The populateDmaBuffer() boundary check tests (outputIdx + blockSize > capacity)
-        // When buffer is filled exactly to capacity, we need extra space for the final block
-        // Safety margin = max(transposeBlockSize) = 128 bytes (for 16-bit mode)
-        size_t safetyMargin = 128;
         dmaBufferCapacity += safetyMargin;
 
         return dmaBufferCapacity;

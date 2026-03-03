@@ -313,45 +313,59 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
     // Decode received data directly into rx_buffer
     // Create 4-phase RX timing from the TX timing
     //
-    // SPI clockless driver uses wave8 encoding (8-bit expansion):
-    //   SPI clock = 8 / (T1+T2+T3) Hz, each SPI bit = (T1+T2+T3)/8 ns
+    // Wave8 drivers (SPI, PARLIO, I2S) use 8-bit expansion encoding:
     //   Bit 0: round(T1/(T1+T2+T3)*8) HIGH pulses, rest LOW
     //   Bit 1: round((T1+T2)/(T1+T2+T3)*8) HIGH pulses, rest LOW
-    // The actual pulse widths are quantized to SPI bit boundaries, so we must
+    // The actual pulse widths are quantized to tick boundaries, so we must
     // compute the exact wave8 timing for RX decode thresholds.
+    // Without this correction, the RX decoder may reject valid waveforms when
+    // the nominal timing period differs from the quantized 8-tick period.
+    // Example: WS2812_800KHZ has T0L=1000ns nominal but PARLIO wave8 produces 750ns.
+    //
+    // Clock sources differ by driver:
+    //   SPI/I2S: clock = 8/(T1+T2+T3) Hz, tick = (T1+T2+T3)/8 ns (variable)
+    //   PARLIO:  clock = 8 MHz fixed, tick = 125 ns (fixed)
     bool is_spi_driver = (fl::strcmp(driver_name, "SPI") == 0);
+    bool is_parlio_driver = (fl::strcmp(driver_name, "PARLIO") == 0);
+    bool is_i2s_driver = (fl::strcmp(driver_name, "I2S") == 0);
+    bool uses_wave8 = is_spi_driver || is_parlio_driver || is_i2s_driver;
     fl::ChipsetTiming tx_timing;
-    if (is_spi_driver) {
+    if (uses_wave8) {
         // Compute actual wave8 timing from chipset timing
         const uint32_t period = timing.t1_ns + timing.t2_ns + timing.t3_ns;
-        const uint32_t spi_bit_ns = period / 8;  // Each SPI bit duration
+        // PARLIO uses fixed 8MHz clock (125ns/tick), not derived from period
+        // SPI/I2S derive clock from period: tick = period/8
+        const uint32_t tick_ns = is_parlio_driver ? 125 : (period / 8);
         // Wave8 LUT computes: pulses = round(fraction * 8)
         const uint32_t pulses_bit0 = static_cast<uint32_t>(
             static_cast<float>(timing.t1_ns) / period * 8.0f + 0.5f);
         const uint32_t pulses_bit1 = static_cast<uint32_t>(
             static_cast<float>(timing.t1_ns + timing.t2_ns) / period * 8.0f + 0.5f);
-        // Convert back to 3-phase timing (T1=T0H, T2=T1H-T0H, T3=period-T1H)
-        const uint32_t actual_t0h = pulses_bit0 * spi_bit_ns;
-        const uint32_t actual_t1h = pulses_bit1 * spi_bit_ns;
+        // Convert back to 3-phase timing (T1=T0H, T2=T1H-T0H, T3=actual_period-T1H)
+        const uint32_t actual_t0h = pulses_bit0 * tick_ns;
+        const uint32_t actual_t1h = pulses_bit1 * tick_ns;
+        const uint32_t actual_period = 8 * tick_ns;
+        const char* wave8_name = is_spi_driver ? "SPI_wave8" :
+                                 is_parlio_driver ? "PARLIO_wave8" : "I2S_wave8";
         tx_timing = fl::ChipsetTiming{
             actual_t0h,                    // T1 = T0H
             actual_t1h - actual_t0h,       // T2 = T1H - T0H
-            period - actual_t1h,           // T3 = period - T1H (using ideal period, not actual SPI)
+            actual_period - actual_t1h,    // T3 = actual_period - T1H
             timing.reset_us,
-            "SPI_wave8"
+            wave8_name
         };
-        FL_WARN("[RX TIMING] SPI wave8: pulses_bit0=" << pulses_bit0
+        FL_WARN("[RX TIMING] " << wave8_name << ": pulses_bit0=" << pulses_bit0
                 << " pulses_bit1=" << pulses_bit1
-                << " spi_bit_ns=" << spi_bit_ns
+                << " tick_ns=" << tick_ns
                 << " -> T1=" << tx_timing.T1 << " T2=" << tx_timing.T2
                 << " T3=" << tx_timing.T3);
     } else {
         tx_timing = fl::ChipsetTiming{timing.t1_ns, timing.t2_ns, timing.t3_ns, timing.reset_us, timing.name};
     }
-    // SPI wave8 encoding has timing jitter due to clock quantization and GPIO matrix latency
-    // Use wider tolerance for SPI (200ns) to accommodate SPI clock rounding
+    // Wave8 encoding has timing jitter due to clock quantization and GPIO matrix latency
+    // Use wider tolerance for wave8 drivers (200ns) to accommodate clock rounding
     // (e.g., requested 6.535MHz → actual 6.666MHz = ~2% faster)
-    const uint32_t tolerance = is_spi_driver ? 200 : 170;
+    const uint32_t tolerance = uses_wave8 ? 200 : 170;
     auto rx_timing = fl::make4PhaseTiming(tx_timing, tolerance);
 
     // Enable gap tolerance for PARLIO/SPI DMA gaps

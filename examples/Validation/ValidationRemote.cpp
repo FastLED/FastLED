@@ -335,7 +335,9 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     fl::vector<fl::RunResult> run_results;
 
     {
-        fl::ScopedLogDisable logGuard;  // Suppress debug noise during test execution
+        // Note: ScopedLogDisable removed to enable diagnostic output during test execution.
+        // This allows capture/decode debug messages (e.g., RX timing, edge dumps) to appear
+        // on serial, which is critical for diagnosing PARLIO failures at different LED counts.
 
         if (use_legacy_api) {
             // Legacy API path: WS2812B<PIN> template instantiation
@@ -356,7 +358,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         }
 
         passed = (total_tests > 0) && (passed_tests == total_tests);
-    }  // logGuard destroyed, logging restored
+    }
 
     uint32_t duration_ms = millis() - start_ms;
 
