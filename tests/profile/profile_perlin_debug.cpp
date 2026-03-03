@@ -3,7 +3,7 @@
 // Compile: clang-tool-chain-clang++ -std=c++17 -I../../src -o perlin_debug.exe tests/profile/profile_perlin_debug.cpp
 // Run: ./perlin_debug.exe
 
-#include "fl/fx/2d/animartrix2_detail.h"
+#include "fl/fx/2d/animartrix_detail.h"
 #include <stdio.h>  // ok include
 
 namespace fl {

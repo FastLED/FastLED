@@ -309,7 +309,7 @@ def _should_skip_build_hpp(
         return True
 
     # Check if this _build.cpp.hpp is included in a corresponding .hpp header file
-    # (e.g., animartrix2_detail/_build.cpp.hpp might be in animartrix2_detail.hpp)
+    # (e.g., animartrix_detail/_build.cpp.hpp might be in animartrix_detail.hpp)
     build_cpp_hpp_path = build_hpp.relative_to(src_dir).as_posix()
     # Check for a corresponding header file (directory name + .hpp)
     dir_name = build_hpp.parent.name
@@ -334,7 +334,7 @@ def _should_skip_build_hpp(
         return True
 
     # For deeply nested files, find the actual parent _build.cpp.hpp by traversing up
-    # Example: fx/2d/animartrix2_detail/_build.cpp.hpp -> look for fx/2d/_build.cpp.hpp
+    # Example: fx/2d/animartrix_detail/_build.cpp.hpp -> look for fx/2d/_build.cpp.hpp
     if len(rel_to_cpp_dir.parts) >= 2:
         # Try each ancestor directory from immediate parent up to top-level
         current_path = build_hpp.parent

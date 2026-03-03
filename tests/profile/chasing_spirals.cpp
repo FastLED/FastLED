@@ -1,5 +1,5 @@
 // ok standalone
-// Standalone profiling binary for Chasing Spirals: float (Animartrix) vs Q31 (Animartrix2)
+// Standalone profiling binary for Chasing Spirals: Animartrix vs Q31 direct
 // Build with profile mode (-Os -g) and run under valgrind --tool=callgrind
 //
 // Usage:
@@ -10,8 +10,7 @@
 
 #include "FastLED.h"
 #include "fl/fx/2d/animartrix.hpp"
-#include "fl/fx/2d/animartrix2.hpp"
-#include "fl/fx/2d/animartrix2_detail/viz/chasing_spirals.h"
+#include "fl/fx/2d/animartrix_detail/viz/chasing_spirals.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/stdio.h"
 #include "profile_result.h"
@@ -29,15 +28,6 @@ static const int PROFILE_FRAMES = 200;
 
 __attribute__((noinline))
 void renderFloat(Animartrix &fx, CRGB *leds, int frames, int start_frame) {
-    for (int i = 0; i < frames; i++) {
-        uint32_t t = static_cast<uint32_t>((start_frame + i) * 16);
-        Fx::DrawContext ctx(t, leds);
-        fx.draw(ctx);
-    }
-}
-
-__attribute__((noinline))
-void renderQ31(Animartrix2 &fx, CRGB *leds, int frames, int start_frame) {
     for (int i = 0; i < frames; i++) {
         uint32_t t = static_cast<uint32_t>((start_frame + i) * 16);
         Fx::DrawContext ctx(t, leds);
@@ -116,7 +106,7 @@ int main(int argc, char *argv[]) {
     }
 
     // ========================
-    // Q31 (Animartrix2) path - Original
+    // Q31 path - Original
     // ========================
     if (do_q31) {
         XYMap xy = XYMap::constructRectangularGrid(W, H);

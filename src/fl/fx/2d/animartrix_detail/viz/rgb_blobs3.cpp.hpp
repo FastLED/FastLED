@@ -1,0 +1,130 @@
+#include "fl/compiler_control.h"
+#include "fl/fx/2d/animartrix_detail/viz/rgb_blobs3.h"
+#include "fl/fx/2d/animartrix_detail/render_value_fp.h"
+#include "fl/fx/2d/animartrix_detail/perlin_float.h"
+
+FL_FAST_MATH_BEGIN
+FL_OPTIMIZATION_LEVEL_O3_BEGIN
+
+namespace fl {
+
+void RGB_Blobs3::draw(Context &ctx) {
+    auto *e = ctx.mEngine.get();
+    e->get_ready();
+
+    e->timings.master_speed = 0.12;
+    e->timings.ratio[0] = 0.0025;
+    e->timings.ratio[1] = 0.0027;
+    e->timings.ratio[2] = 0.0031;
+    e->timings.ratio[3] = 0.0033;
+    e->timings.ratio[4] = 0.0036;
+    e->timings.ratio[5] = 0.0039;
+
+    e->calculate_oscillators(e->timings);
+
+    for (int x = 0; x < e->num_x; x++) {
+        for (int y = 0; y < e->num_y; y++) {
+            e->animation.dist = e->distance[x][y] + e->move.noise_angle[4];
+            e->animation.angle = e->polar_theta[x][y] + e->move.radial[0] +
+                                 e->move.noise_angle[0] + e->move.noise_angle[3] +
+                                 e->move.noise_angle[1];
+            e->animation.z = (fl::sqrtf(e->animation.dist));
+            e->animation.scale_x = 0.1;
+            e->animation.scale_y = 0.1;
+            e->animation.offset_z = 10;
+            e->animation.offset_x = 10 * e->move.linear[0];
+            float show1 = e->render_value(e->animation);
+
+            e->animation.angle = e->polar_theta[x][y] + e->move.radial[1] +
+                                 e->move.noise_angle[1] + e->move.noise_angle[4] +
+                                 e->move.noise_angle[2];
+            e->animation.offset_x = 11 * e->move.linear[1];
+            e->animation.offset_z = 100;
+            float show2 = e->render_value(e->animation);
+
+            e->animation.angle = e->polar_theta[x][y] + e->move.radial[2] +
+                                 e->move.noise_angle[2] + e->move.noise_angle[5] +
+                                 e->move.noise_angle[3];
+            e->animation.offset_x = 12 * e->move.linear[2];
+            e->animation.offset_z = 300;
+            float show3 = e->render_value(e->animation);
+
+            float radius = e->radial_filter_radius;
+            float radial = (radius - e->distance[x][y]) / e->distance[x][y];
+
+            e->pixel.red = radial * (show1 + show3) * 0.5 * e->animation.dist / 5;
+            e->pixel.green = radial * (show2 + show1) * 0.5 * y / 15;
+            e->pixel.blue = radial * (show3 + show2) * 0.5 * x / 15;
+
+            e->pixel = e->rgb_sanity_check(e->pixel);
+            e->setPixelColorInternal(x, y, e->pixel);
+        }
+    }
+}
+
+
+// ============================================================================
+// Fixed-Point Implementation of RGB_Blobs3
+// ============================================================================
+
+void RGB_Blobs3_FP::draw(Context &ctx) {
+    auto *e = ctx.mEngine.get();
+    e->get_ready();
+    mState.ensureCache(e);
+    const fl::i32 *fade_lut = fl::assume_aligned<16>(mState.fade_lut);
+    const fl::u8 *perm = PERLIN_NOISE;
+
+    e->timings.master_speed = 0.12;
+    e->timings.ratio[0] = 0.0025;
+    e->timings.ratio[1] = 0.0027;
+    e->timings.ratio[2] = 0.0031;
+    e->timings.ratio[3] = 0.0033;
+    e->timings.ratio[4] = 0.0036;
+    e->timings.ratio[5] = 0.0039;
+
+    e->calculate_oscillators(e->timings);
+
+    for (int x = 0; x < e->num_x; x++) {
+        for (int y = 0; y < e->num_y; y++) {
+            e->animation.dist = e->distance[x][y] + e->move.noise_angle[4];
+            e->animation.angle = e->polar_theta[x][y] + e->move.radial[0] +
+                                 e->move.noise_angle[0] + e->move.noise_angle[3] +
+                                 e->move.noise_angle[1];
+            e->animation.z = (fl::sqrtf(e->animation.dist));
+            e->animation.scale_x = 0.1;
+            e->animation.scale_y = 0.1;
+            e->animation.offset_z = 10;
+            e->animation.offset_x = 10 * e->move.linear[0];
+            float show1 = render_value_fp_from_float(e->animation, fade_lut, perm);
+
+            e->animation.angle = e->polar_theta[x][y] + e->move.radial[1] +
+                                 e->move.noise_angle[1] + e->move.noise_angle[4] +
+                                 e->move.noise_angle[2];
+            e->animation.offset_x = 11 * e->move.linear[1];
+            e->animation.offset_z = 100;
+            float show2 = render_value_fp_from_float(e->animation, fade_lut, perm);
+
+            e->animation.angle = e->polar_theta[x][y] + e->move.radial[2] +
+                                 e->move.noise_angle[2] + e->move.noise_angle[5] +
+                                 e->move.noise_angle[3];
+            e->animation.offset_x = 12 * e->move.linear[2];
+            e->animation.offset_z = 300;
+            float show3 = render_value_fp_from_float(e->animation, fade_lut, perm);
+
+            float radius = e->radial_filter_radius;
+            float radial = (radius - e->distance[x][y]) / e->distance[x][y];
+
+            e->pixel.red = radial * (show1 + show3) * 0.5 * e->animation.dist / 5;
+            e->pixel.green = radial * (show2 + show1) * 0.5 * y / 15;
+            e->pixel.blue = radial * (show3 + show2) * 0.5 * x / 15;
+
+            e->pixel = e->rgb_sanity_check(e->pixel);
+            e->setPixelColorInternal(x, y, e->pixel);
+        }
+    }
+}
+
+}  // namespace fl
+
+FL_OPTIMIZATION_LEVEL_O3_END
+FL_FAST_MATH_END

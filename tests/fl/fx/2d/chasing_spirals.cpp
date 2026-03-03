@@ -1,15 +1,14 @@
 // ok standalone
-// Pixel accuracy test: Float vs Q31 Chasing_Spirals comparison
+// Pixel accuracy test: Animartrix float vs fixed-point (Q31) Chasing_Spirals
 //
 // Compares RGB output pixel-by-pixel to determine:
 // 1. Error distribution (min, max, average, std dev)
-// 2. Whether errors exceed 1 LSB (±1 in 8-bit RGB)
+// 2. Whether float and Q31 fixed-point paths agree within tolerance
 // 3. Where errors are coming from (which stage of computation)
 
 #include "test.h"
 #include "fl/fx/2d/animartrix.hpp"
-#include "fl/fx/2d/animartrix2.hpp"
-#include "fl/fx/2d/animartrix2_detail/viz/chasing_spirals.h"
+#include "fl/fx/2d/animartrix_detail/viz/chasing_spirals.h"
 #include "fl/xymap.h"
 #include <stdio.h>  // ok include: needed for debug output
 
@@ -124,16 +123,24 @@ FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000)") {
     XYMap xy = XYMap::constructRectangularGrid(W, H);
 
     // ========================
-    // Float version (Animartrix)
+    // Float reference via Context + Chasing_Spirals_Float
     // ========================
     {
-        Animartrix fx(xy, CHASING_SPIRALS);
-        Fx::DrawContext ctx(t, float_leds);
-        fx.draw(ctx);
+        Context ctx;
+        ctx.leds = float_leds;
+        ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
+            XYMap *map = static_cast<XYMap*>(userData);
+            return map->mapToIndex(x, y);
+        };
+        ctx.xyMapUserData = &xy;
+
+        init(ctx, W, H);
+        setTime(ctx, t);
+        fl::Chasing_Spirals_Float().draw(ctx);
     }
 
     // ========================
-    // Q31 version (Direct function call)
+    // Scalar Q31 fixed-point
     // ========================
     {
         Context ctx;
@@ -153,7 +160,7 @@ FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000)") {
     // Analyze errors
     // ========================
     ErrorStats stats = analyze_errors(float_leds, q31_leds, N);
-    print_error_stats(stats, "Chasing Spirals Accuracy (t=1000)");
+    print_error_stats(stats, "Chasing Spirals Float vs Q31 (t=1000)");
 
     // ========================
     // Assertions
@@ -190,16 +197,24 @@ FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000000)") {
     XYMap xy = XYMap::constructRectangularGrid(W, H);
 
     // ========================
-    // Float version (Animartrix)
+    // Float reference via Context + Chasing_Spirals_Float
     // ========================
     {
-        Animartrix fx(xy, CHASING_SPIRALS);
-        Fx::DrawContext ctx(t, float_leds);
-        fx.draw(ctx);
+        Context ctx;
+        ctx.leds = float_leds;
+        ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
+            XYMap *map = static_cast<XYMap*>(userData);
+            return map->mapToIndex(x, y);
+        };
+        ctx.xyMapUserData = &xy;
+
+        init(ctx, W, H);
+        setTime(ctx, t);
+        fl::Chasing_Spirals_Float().draw(ctx);
     }
 
     // ========================
-    // Q31 version (Direct function call)
+    // Scalar Q31 fixed-point
     // ========================
     {
         Context ctx;
@@ -219,7 +234,7 @@ FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000000)") {
     // Analyze errors
     // ========================
     ErrorStats stats = analyze_errors(float_leds, q31_leds, N);
-    print_error_stats(stats, "Chasing Spirals Accuracy (t=1000000)");
+    print_error_stats(stats, "Chasing Spirals Float vs Q31 (t=1000000)");
 
     // ========================
     // Assertions
@@ -250,9 +265,17 @@ FL_TEST_CASE("chasing_spirals - float vs q31 sample pixels") {
 
     // Run both implementations
     {
-        Animartrix fx(xy, CHASING_SPIRALS);
-        Fx::DrawContext ctx(t, float_leds);
-        fx.draw(ctx);
+        Context ctx;
+        ctx.leds = float_leds;
+        ctx.xyMapFn = [](u16 x, u16 y, void *userData) -> u16 {
+            XYMap *map = static_cast<XYMap*>(userData);
+            return map->mapToIndex(x, y);
+        };
+        ctx.xyMapUserData = &xy;
+
+        init(ctx, W, H);
+        setTime(ctx, t);
+        fl::Chasing_Spirals_Float().draw(ctx);
     }
 
     {

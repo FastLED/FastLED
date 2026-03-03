@@ -1,5 +1,4 @@
 // ok standalone - tests implementation details of perlin noise variants
-#include "fl/fx/2d/animartrix2.hpp"
 #include "fl/fx/2d/animartrix.hpp"
 #include "test.h"
 
@@ -15,7 +14,7 @@ FL_TEST_CASE("perlin_s8x8 - basic functionality") {
     FL_CHECK(fade_lut[256] > 0); // At t=1, fade should be > 0
 
     // Test perlin noise with known coordinates
-    const u8 *perm = animartrix_detail::PERLIN_NOISE;
+    const u8 *perm = PERLIN_NOISE;
     s16x16 fx(1.5f);
     s16x16 fy(2.3f);
 
@@ -37,7 +36,7 @@ FL_TEST_CASE("perlin_s8x8 vs perlin_s16x16 - consistency check") {
     perlin_s8x8::init_fade_lut(fade_lut_q8);
     perlin_s16x16::init_fade_lut(fade_lut_q24);
 
-    const u8 *perm = animartrix_detail::PERLIN_NOISE;
+    const u8 *perm = PERLIN_NOISE;
 
     // Test a few coordinates
     s16x16 test_coords[] = {

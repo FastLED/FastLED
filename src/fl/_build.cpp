@@ -28,7 +28,7 @@
 #include "fl/details/_build.cpp.hpp"
 #include "fl/fx/1d/_build.cpp.hpp"
 #include "fl/fx/2d/_build.cpp.hpp"
-#include "fl/fx/2d/animartrix2_detail/_build.cpp.hpp"
+#include "fl/fx/2d/animartrix_detail/_build.cpp.hpp"
 #include "fl/fx/_build.cpp.hpp"
 #include "fl/fx/detail/_build.cpp.hpp"
 #include "fl/fx/video/_build.cpp.hpp"
