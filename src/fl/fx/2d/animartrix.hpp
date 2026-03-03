@@ -98,7 +98,8 @@ class Animartrix : public Fx2d {
     Animartrix(const XYMap& xyMap, AnimartrixAnim which_animation) : Fx2d(xyMap) {
         // Note: Swapping out height and width.
         this->current_animation = which_animation;
-        mXyMap.convertToLookUpTable();
+        // convertToLookUpTable() is deferred to draw() to avoid
+        // cross-DLL static initialization order issues on Windows.
     }
 
     Animartrix(const Animartrix &) = delete;
@@ -311,6 +312,9 @@ const char *Animartrix::getAnimartrixName(AnimartrixAnim animation) {
 }
 
 void Animartrix::draw(DrawContext ctx) {
+    if (!mXyMap.isLUT()) {
+        mXyMap.convertToLookUpTable();
+    }
     this->leds = ctx.leds;
     AnimartrixLoop(*this, ctx.now);
     if (color_order != RGB) {

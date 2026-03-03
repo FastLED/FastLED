@@ -106,7 +106,13 @@ u16 XYMap::mapToIndex(const u16 &x, const u16 &y) const {
         break;
     }
     case kFunction:
-        index = xyFunction(x, y, width, height);
+        if (xyFunction) {
+            index = xyFunction(x, y, width, height);
+        } else {
+            // Null function pointer — fall back to line-by-line to avoid crash.
+            // This can happen due to cross-DLL static initialization order issues.
+            index = xy_line_by_line(x, y, width, height);
+        }
         break;
     case kLookUpTable:
         index = mLookUpTable->getData()[y * width + x];

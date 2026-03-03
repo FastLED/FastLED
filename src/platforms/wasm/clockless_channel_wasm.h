@@ -49,7 +49,7 @@ public:
     }
 
     virtual void init() override { }
-    virtual u16 getMaxRefreshRate() const { return 400; }
+    virtual u16 getMaxRefreshRate() const override { return 400; }
 
 protected:
     // -- Show pixels
@@ -77,9 +77,7 @@ protected:
         // This feeds frame data to JavaScript via getFrameData()
         mCaptureData.clear();
         PixelController<RGB> pixels_rgb = pixels;
-        #if FASTLED_HD_COLOR_MIXING
-        pixels_rgb.mColorAdjustment.brightness = 255;
-        #endif
+        // disableColorAdjustment() removes color correction but keeps brightness
         pixels_rgb.disableColorAdjustment();
         auto capture_iterator = pixels_rgb.as_iterator(RgbwInvalid());
         capture_iterator.writeWS2812(&mCaptureData);

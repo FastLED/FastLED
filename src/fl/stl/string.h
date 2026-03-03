@@ -11,6 +11,7 @@
 #include "fl/stl/charconv.h"
 #include "fl/stl/not_null.h"
 #include "fl/compiler_control.h"
+#include "platforms/is_platform.h"  // IWYU pragma: keep (for FL_IS_WASM)
 
 #ifdef FL_IS_WASM
 // IWYU pragma: begin_keep

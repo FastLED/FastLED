@@ -201,12 +201,16 @@ class Animartrix2 : public Fx2d {
     Animartrix2(const XYMap &xyMap, Animartrix2Anim which_animation)
         : Fx2d(xyMap) {
         mCurrentAnimation = which_animation;
-        mXyMap.convertToLookUpTable();
+        // convertToLookUpTable() is deferred to draw() to avoid
+        // cross-DLL static initialization order issues on Windows.
     }
 
     Animartrix2(const Animartrix2 &) = delete;
 
     void draw(DrawContext ctx) override {
+        if (!mXyMap.isLUT()) {
+            mXyMap.convertToLookUpTable();
+        }
         // Set up context for rendering
         mCtx.leds = ctx.leds;
         mCtx.xyMapFn = &xyMapCallbackAdapter;

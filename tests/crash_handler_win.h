@@ -316,6 +316,149 @@ inline void print_stacktrace_windows() {
     printf("\n");
 }
 
+// Walk the stack starting from an exception context using StackWalk64.
+// This produces the actual crash stack (not the handler's frames).
+inline void print_stacktrace_from_context(CONTEXT* ctx) {
+    HANDLE process = GetCurrentProcess();
+    HANDLE thread = GetCurrentThread();
+
+    // Initialize symbol handler if not already done
+    if (!g_symbols_initialized) {
+        SymSetOptions(SYMOPT_LOAD_LINES |
+                     SYMOPT_DEFERRED_LOADS |
+                     SYMOPT_UNDNAME |
+                     SYMOPT_DEBUG |
+                     SYMOPT_LOAD_ANYTHING |
+                     SYMOPT_CASE_INSENSITIVE |
+                     SYMOPT_FAVOR_COMPRESSED |
+                     SYMOPT_INCLUDE_32BIT_MODULES |
+                     SYMOPT_AUTO_PUBLICS);
+
+        char currentPath[MAX_PATH];
+        GetCurrentDirectoryA(MAX_PATH, currentPath);
+        if (!SymInitialize(process, currentPath, TRUE)) {
+            printf("SymInitialize failed with error %lu\n", GetLastError());
+        } else {
+            g_symbols_initialized = true;
+        }
+    }
+
+    // Make a copy of the context because StackWalk64 modifies it
+    CONTEXT ctxCopy = *ctx;
+
+    STACKFRAME64 frame;
+    memset(&frame, 0, sizeof(frame));
+#if defined(_M_X64) || defined(__x86_64__) || defined(__amd64__)
+    DWORD machineType = IMAGE_FILE_MACHINE_AMD64;
+    frame.AddrPC.Offset = ctxCopy.Rip;
+    frame.AddrPC.Mode = AddrModeFlat;
+    frame.AddrFrame.Offset = ctxCopy.Rbp;
+    frame.AddrFrame.Mode = AddrModeFlat;
+    frame.AddrStack.Offset = ctxCopy.Rsp;
+    frame.AddrStack.Mode = AddrModeFlat;
+#else
+    DWORD machineType = IMAGE_FILE_MACHINE_I386;
+    frame.AddrPC.Offset = ctxCopy.Eip;
+    frame.AddrPC.Mode = AddrModeFlat;
+    frame.AddrFrame.Offset = ctxCopy.Ebp;
+    frame.AddrFrame.Mode = AddrModeFlat;
+    frame.AddrStack.Offset = ctxCopy.Esp;
+    frame.AddrStack.Mode = AddrModeFlat;
+#endif
+
+    printf("Stack trace (from exception context via StackWalk64):\n\n");
+
+    // If RIP is 0 (null function pointer call), report it and recover the
+    // caller by reading the return address from the stack.
+#if defined(_M_X64) || defined(__x86_64__) || defined(__amd64__)
+    if (ctxCopy.Rip == 0 && ctxCopy.Rsp != 0) {
+        printf("#0  0x0000000000000000 [<null>] -- null function pointer call\n");
+        // The CALL instruction pushed the return address onto RSP before
+        // jumping to 0.  Read it to recover the real caller.
+        DWORD64 retAddr = 0;
+        SIZE_T bytesRead = 0;
+        if (ReadProcessMemory(process, (LPCVOID)ctxCopy.Rsp, &retAddr,
+                              sizeof(retAddr), &bytesRead) && bytesRead == sizeof(retAddr)) {
+            ctxCopy.Rip = retAddr;
+            ctxCopy.Rsp += sizeof(DWORD64);  // pop the return address
+            // Re-initialize the frame from the recovered context
+            memset(&frame, 0, sizeof(frame));
+            frame.AddrPC.Offset = ctxCopy.Rip;
+            frame.AddrPC.Mode = AddrModeFlat;
+            frame.AddrFrame.Offset = ctxCopy.Rbp;
+            frame.AddrFrame.Mode = AddrModeFlat;
+            frame.AddrStack.Offset = ctxCopy.Rsp;
+            frame.AddrStack.Mode = AddrModeFlat;
+        }
+    }
+#endif
+
+    char symbolBuffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
+    PSYMBOL_INFO pSymbol = (PSYMBOL_INFO)symbolBuffer;
+    pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+    pSymbol->MaxNameLen = MAX_SYM_NAME;
+
+    IMAGEHLP_LINE64 line;
+    line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+
+    for (int i = 0; i < 100; i++) {
+        if (!StackWalk64(machineType, process, thread, &frame, &ctxCopy,
+                         nullptr, SymFunctionTableAccess64, SymGetModuleBase64, nullptr)) {
+            break;
+        }
+
+        if (frame.AddrPC.Offset == 0) {
+            break;
+        }
+
+        DWORD64 address = frame.AddrPC.Offset;
+        printf("#%-2d 0x%016llx", i + 1, address);
+
+        std::string moduleName = get_module_name(address);
+        printf(" [%s]", moduleName.c_str());
+
+        // Try GDB first for DWARF symbols
+        std::string gdb_result = get_symbol_with_gdb(address);
+        if (gdb_result.find("--") != 0) {
+            printf(" %s", gdb_result.c_str());
+        } else if (g_symbols_initialized) {
+            DWORD64 displacement = 0;
+            if (SymFromAddr(process, address, &displacement, pSymbol)) {
+                std::string demangled = demangle_symbol(pSymbol->Name);
+                printf(" %s + %llu", demangled.c_str(), displacement);
+
+                DWORD lineDisplacement = 0;
+                if (SymGetLineFromAddr64(process, address, &lineDisplacement, &line)) {
+                    char* fileName = strrchr(line.FileName, '\\');
+                    if (fileName) fileName++;
+                    else fileName = line.FileName;
+                    printf(" [%s:%lu]", fileName, line.LineNumber);
+                }
+            } else {
+                printf(" -- no symbol info");
+            }
+        }
+        printf("\n");
+    }
+
+    // Show loaded modules
+    printf("\nLoaded modules:\n");
+    HMODULE hModules[1024];
+    DWORD cbNeeded;
+    if (EnumProcessModules(process, hModules, sizeof(hModules), &cbNeeded)) {
+        for (unsigned int i = 0; i < (cbNeeded / sizeof(HMODULE)); i++) {
+            char moduleName[MAX_PATH];
+            if (GetModuleFileNameA(hModules[i], moduleName, MAX_PATH)) {
+                char* fileName = strrchr(moduleName, '\\');
+                if (fileName) fileName++;
+                else fileName = moduleName;
+                printf("  %s\n", fileName);
+            }
+        }
+    }
+    printf("\n");
+}
+
 // Helper: returns true for exception codes that are fatal/actionable
 inline bool is_fatal_exception(DWORD code) {
     switch (code) {
@@ -421,8 +564,9 @@ inline LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS* ExceptionInfo) 
             break;
     }
 
-    // Internal stack trace dump
-    print_stacktrace_windows();
+    // Walk the actual crash stack using the exception context.
+    // This shows the frames that caused the crash, not the handler's frames.
+    print_stacktrace_from_context(ExceptionInfo->ContextRecord);
 
     printf("=== END INTERNAL HANDLER ===\n\n");
     fflush(stdout);
