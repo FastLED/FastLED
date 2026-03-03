@@ -2160,3 +2160,149 @@ FL_TEST_CASE("ParlioBufferCalculator - buffer overflow scenario from BUG-007") {
     size_t dma_size = calc.dmaBufferSize(total_bytes, 0);
     FL_CHECK(dma_size == 496);
 }
+
+//=============================================================================
+// Timing Config Change Reinitialization
+// Verifies that switching between different clockless timing configs
+// (the !config_matches path in ParlioEngine::initialize) properly frees
+// old ring buffers before allocating new ones, preventing peak memory
+// doubling that would fail on memory-constrained devices like ESP32-C6.
+//=============================================================================
+
+FL_TEST_CASE("ParlioEngine - reinitialize with different timing config") {
+    resetMockHistory();
+
+    auto& engine = ParlioEngine::getInstance();
+
+    // Timing A: WS2812-800KHZ (T1=250, T2=625, T3=375)
+    auto timingA = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    // Timing B: WS2812B-V5 (T1=225, T2=355, T3=645) — different T values
+    auto timingB = fl::makeTimingConfig<fl::TIMING_WS2812B_V5>();
+
+    // Confirm the timings actually differ (the test is meaningless if they match)
+    FL_REQUIRE(timingA.t1_ns != timingB.t1_ns);
+
+    fl::vector<int> pins = {1};
+
+    // First init with timing A
+    bool ok = engine.initialize(1, pins, timingA, 10);
+    FL_REQUIRE(ok);
+
+    // Transmit with timing A
+    u8 data[3] = {0xFF, 0x00, 0xAA};
+    ok = engine.beginTransmission(data, 3, 1, 3);
+    FL_REQUIRE(ok);
+
+    resetMockHistory();
+
+    // Re-init with timing B (triggers !config_matches path)
+    ok = engine.initialize(1, pins, timingB, 10);
+    FL_REQUIRE(ok);
+
+    // Transmit again — should succeed with new timing
+    ok = engine.beginTransmission(data, 3, 1, 3);
+    FL_REQUIRE(ok);
+
+    auto& mock = ParlioPeripheralMock::instance();
+    const auto& history = mock.getTransmissionHistory();
+    FL_CHECK(history.size() > 0);
+    FL_CHECK(history[0].buffer_copy.size() > 0);
+}
+
+FL_TEST_CASE("ParlioEngine - 4-lane timing config switch succeeds") {
+    resetMockHistory();
+
+    auto& engine = ParlioEngine::getInstance();
+
+    auto timingA = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    auto timingB = fl::makeTimingConfig<fl::TIMING_WS2812B_V5>();
+
+    fl::vector<int> pins = {1, 2, 3, 4};
+    const size_t maxLeds = 100;
+    const size_t bytesPerLane = maxLeds * 3;
+    const size_t totalBytes = bytesPerLane * 4;
+
+    // Allocate scratch buffer (4 lanes × 100 LEDs × 3 bytes)
+    fl::vector<u8> scratch(totalBytes, 0xAA);
+
+    // Init and transmit with timing A
+    bool ok = engine.initialize(4, pins, timingA, maxLeds);
+    FL_REQUIRE(ok);
+    ok = engine.beginTransmission(scratch.data(), totalBytes, 4, bytesPerLane);
+    FL_REQUIRE(ok);
+
+    resetMockHistory();
+
+    // Switch to timing B (different config — triggers full reinitialization)
+    ok = engine.initialize(4, pins, timingB, maxLeds);
+    FL_REQUIRE(ok);
+
+    // Transmit with new timing — must succeed (old ring buffers freed first)
+    ok = engine.beginTransmission(scratch.data(), totalBytes, 4, bytesPerLane);
+    FL_REQUIRE(ok);
+
+    auto& mock = ParlioPeripheralMock::instance();
+    const auto& history = mock.getTransmissionHistory();
+    FL_CHECK(history.size() > 0);
+}
+
+FL_TEST_CASE("ParlioEngine - repeated timing switches all succeed") {
+    resetMockHistory();
+
+    auto& engine = ParlioEngine::getInstance();
+
+    auto timingA = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    auto timingB = fl::makeTimingConfig<fl::TIMING_WS2812B_V5>();
+
+    fl::vector<int> pins = {1, 2, 3, 4};
+    const size_t maxLeds = 50;
+    const size_t bytesPerLane = maxLeds * 3;
+    const size_t totalBytes = bytesPerLane * 4;
+    fl::vector<u8> scratch(totalBytes, 0x55);
+
+    // Switch back and forth 4 times (A→B→A→B)
+    ChipsetTimingConfig timings[] = {timingA, timingB, timingA, timingB};
+    for (int i = 0; i < 4; i++) {
+        bool ok = engine.initialize(4, pins, timings[i], maxLeds);
+        FL_REQUIRE(ok);
+
+        resetMockHistory();
+        ok = engine.beginTransmission(scratch.data(), totalBytes, 4, bytesPerLane);
+        FL_REQUIRE(ok);
+
+        auto& mock = ParlioPeripheralMock::instance();
+        const auto& history = mock.getTransmissionHistory();
+        FL_CHECK(history.size() > 0);
+    }
+}
+
+FL_TEST_CASE("ParlioEngine - LED count growth reallocates ring buffers") {
+    resetMockHistory();
+
+    auto& engine = ParlioEngine::getInstance();
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::vector<int> pins = {1, 2, 3, 4};
+
+    // Init with small LED count
+    bool ok = engine.initialize(4, pins, timing, 10);
+    FL_REQUIRE(ok);
+
+    fl::vector<u8> smallScratch(10 * 3 * 4, 0xCC);
+    ok = engine.beginTransmission(smallScratch.data(), smallScratch.size(), 4, 10 * 3);
+    FL_REQUIRE(ok);
+
+    resetMockHistory();
+
+    // Re-init with larger LED count (same timing — config_matches=true,
+    // but maxLedsPerChannel > mMaxLedsPerChannel triggers reallocation)
+    ok = engine.initialize(4, pins, timing, 100);
+    FL_REQUIRE(ok);
+
+    fl::vector<u8> largeScratch(100 * 3 * 4, 0xDD);
+    ok = engine.beginTransmission(largeScratch.data(), largeScratch.size(), 4, 100 * 3);
+    FL_REQUIRE(ok);
+
+    auto& mock = ParlioPeripheralMock::instance();
+    const auto& history = mock.getTransmissionHistory();
+    FL_CHECK(history.size() > 0);
+}
