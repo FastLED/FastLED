@@ -673,7 +673,7 @@ inline int deprecated_test_function() {
 FL_TEST_CASE("fl::deprecated_function_usage") {
     // Function should still work even if deprecated
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
+    FL_DISABLE_WARNING(deprecated-declarations)
     int result = deprecated_test_function();
     FL_CHECK_EQ(result, 42);
     FL_DISABLE_WARNING_POP
@@ -691,7 +691,7 @@ public:
 FL_TEST_CASE("fl::deprecated_class_usage") {
     // Class should still work even if deprecated
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
+    FL_DISABLE_WARNING(deprecated-declarations)
     DeprecatedTestClass obj;
     FL_CHECK_EQ(obj.getValue(), 100);
 
@@ -715,7 +715,7 @@ public:
 FL_TEST_CASE("fl::deprecated_method_usage") {
     TestClassWithDeprecatedMethod obj;
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
+    FL_DISABLE_WARNING(deprecated-declarations)
 
     // Old method should still work
     FL_CHECK_EQ(obj.oldMethod(), 1);
@@ -739,7 +739,7 @@ inline int deprecated_fastled() {
 FL_TEST_CASE("fl::deprecated_macro_equivalence") {
     // Both versions should work
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
+    FL_DISABLE_WARNING(deprecated-declarations)
     FL_CHECK_EQ(deprecated_fl(), 1);
     FL_CHECK_EQ(deprecated_fastled(), 2);
 }
@@ -753,7 +753,7 @@ DeprecatedTestStruct {
 
 FL_TEST_CASE("fl::deprecated_struct_usage") {
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
+    FL_DISABLE_WARNING(deprecated-declarations)
     DeprecatedTestStruct s;
     s.x = 10;
     s.y = 20;
@@ -768,7 +768,7 @@ typedef int deprecated_int_type;
 
 FL_TEST_CASE("fl::deprecated_typedef_usage") {
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
+    FL_DISABLE_WARNING(deprecated-declarations)
     deprecated_int_type value = 42;
     FL_CHECK_EQ(value, 42);
     FL_DISABLE_WARNING_POP
@@ -782,7 +782,7 @@ static const int NEW_CONSTANT = 200;
 
 FL_TEST_CASE("fl::deprecated_variable_usage") {
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
+    FL_DISABLE_WARNING(deprecated-declarations)
     FL_CHECK_EQ(OLD_CONSTANT, 100);
     FL_DISABLE_WARNING_POP
     FL_CHECK_EQ(NEW_CONSTANT, 200);
@@ -802,7 +802,7 @@ T newTemplateFunction(T value) {
 
 FL_TEST_CASE("fl::deprecated_template_function") {
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
+    FL_DISABLE_WARNING(deprecated-declarations)
     FL_CHECK_EQ(oldTemplateFunction(5), 10);
     FL_CHECK_EQ(oldTemplateFunction(3.0), 6.0);
     FL_DISABLE_WARNING_POP
