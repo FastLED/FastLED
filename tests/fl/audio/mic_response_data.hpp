@@ -164,6 +164,37 @@ FL_TEST_CASE("MicResponseData - interpolation with None curve returns 1.0") {
     FL_CHECK(FL_ALMOST_EQUAL(gain, 1.0f, 0.001f));
 }
 
+FL_TEST_CASE("MicResponseData - mic correction * pink noise stays reasonable") {
+    // Combined mic + pink noise gains should stay within 0.1x–20x for all profiles.
+    MicProfile profiles[] = {
+        MicProfile::INMP441, MicProfile::ICS43434,
+        MicProfile::SPM1423, MicProfile::GenericMEMS, MicProfile::LineIn
+    };
+
+    float binCenters[16];
+    float fmin = 60.0f;
+    float fmax = 5120.0f;
+    float m = fl::logf(fmax / fmin);
+    for (int i = 0; i < 16; ++i) {
+        binCenters[i] = fmin * fl::expf(m * static_cast<float>(i) / 15.0f);
+    }
+
+    float pinkGains[16];
+    computePinkNoiseGains(binCenters, 16, pinkGains);
+
+    for (auto profile : profiles) {
+        MicResponseCurve curve = getMicResponseCurve(profile);
+        float micGains[16];
+        downsampleMicResponse(curve, binCenters, 16, micGains);
+
+        for (int i = 0; i < 16; ++i) {
+            float combined = micGains[i] * pinkGains[i];
+            FL_CHECK_GT(combined, 0.1f);
+            FL_CHECK_LT(combined, 20.0f);
+        }
+    }
+}
+
 FL_TEST_CASE("MicResponseData - INMP441 key frequencies match reference") {
     MicResponseCurve curve = getMicResponseCurve(MicProfile::INMP441);
 

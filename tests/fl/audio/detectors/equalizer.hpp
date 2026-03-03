@@ -3,6 +3,7 @@
 #include "fl/audio/detectors/equalizer.h"
 #include "fl/audio/audio_context.h"
 #include "fl/audio/audio_processor.h"
+#include "fl/audio/mic_response_data.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/math.h"
@@ -400,6 +401,55 @@ FL_TEST_CASE("EqualizerDetector - callback includes P2 fields") {
     FL_CHECK_GE(captured.dominantMagnitude, 0.0f);
     FL_CHECK_LE(captured.dominantMagnitude, 1.0f);
     FL_CHECK_GT(captured.volumeDb, -100.0f);
+}
+
+// ============================================================================
+// Pink noise spectral tilt tests
+// ============================================================================
+
+FL_TEST_CASE("EqualizerDetector - pink noise gains boost treble over bass") {
+    // Validate that computePinkNoiseGains produces increasing gains
+    // when called with the same bin centers as EqualizerDetector uses.
+    float binCenters[16];
+    float fmin = 60.0f;
+    float fmax = 5120.0f;
+    float m = fl::logf(fmax / fmin);
+    for (int i = 0; i < 16; ++i) {
+        binCenters[i] = fmin * fl::expf(m * static_cast<float>(i) / 15.0f);
+    }
+
+    float gains[16];
+    computePinkNoiseGains(binCenters, 16, gains);
+
+    // Treble bins (11-15) should have higher gain than bass bins (0-3)
+    float bassAvg = 0.0f;
+    for (int i = 0; i < 4; ++i) bassAvg += gains[i];
+    bassAvg /= 4.0f;
+
+    float trebleAvg = 0.0f;
+    for (int i = 11; i < 16; ++i) trebleAvg += gains[i];
+    trebleAvg /= 5.0f;
+
+    FL_CHECK_GT(trebleAvg, bassAvg);
+}
+
+FL_TEST_CASE("EqualizerDetector - all bins valid with pink noise active") {
+    auto eq = make_shared<EqualizerDetector>();
+
+    // Pink noise is always active — verify end-to-end bins stay in [0, 1]
+    auto sample = fl::audio::test::makeWhiteNoise(0, 16000.0f, 512);
+    auto context = make_shared<AudioContext>(sample);
+
+    for (int i = 0; i < 30; ++i) {
+        eq->update(context);
+    }
+
+    for (int i = 0; i < EqualizerDetector::kNumBins; ++i) {
+        float val = eq->getBin(i);
+        FL_CHECK_FALSE(val != val); // Not NaN
+        FL_CHECK_GE(val, 0.0f);
+        FL_CHECK_LE(val, 1.0f);
+    }
 }
 
 // ============================================================================

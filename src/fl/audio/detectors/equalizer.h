@@ -150,6 +150,10 @@ private:
     bool mHasMicCorrection = false;
     MicProfile mCurrentMicProfile = MicProfile::None;
 
+    // Pink noise spectral tilt compensation (always active)
+    float mPinkNoiseGains[kNumBins] = {};
+    void recomputePinkNoiseGains();
+
     // Compute log-spaced bin center frequencies from current config
     void computeBinCenters(float* out) const;
 

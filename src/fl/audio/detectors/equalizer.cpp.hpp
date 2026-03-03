@@ -47,6 +47,7 @@ EqualizerDetector::EqualizerDetector()
     for (int i = 0; i < kNumBins; ++i) {
         mMicGains[i] = 1.0f;
     }
+    recomputePinkNoiseGains();
 }
 
 EqualizerDetector::~EqualizerDetector() = default;
@@ -87,6 +88,9 @@ void EqualizerDetector::configure(const EqualizerConfig& config) {
     if (mCurrentMicProfile != MicProfile::None) {
         setMicProfile(mCurrentMicProfile);
     }
+
+    // Recompute pink noise gains (freq range may have changed)
+    recomputePinkNoiseGains();
 }
 
 void EqualizerDetector::setMicProfile(MicProfile profile) {
@@ -113,6 +117,12 @@ void EqualizerDetector::computeBinCenters(float* out) const {
     for (int i = 0; i < kNumBins; ++i) {
         out[i] = fmin * fl::expf(m * static_cast<float>(i) / static_cast<float>(kNumBins - 1));
     }
+}
+
+void EqualizerDetector::recomputePinkNoiseGains() {
+    float binCenters[kNumBins];
+    computeBinCenters(binCenters);
+    computePinkNoiseGains(binCenters, kNumBins, mPinkNoiseGains);
 }
 
 void EqualizerDetector::update(shared_ptr<AudioContext> context) {
@@ -143,6 +153,13 @@ void EqualizerDetector::update(shared_ptr<AudioContext> context) {
         for (int i = 0; i < numBins; ++i) {
             scaledBins[i] *= mMicGains[i];
         }
+    }
+
+    // Step 2.5: Pink noise spectral tilt compensation (always active).
+    // Corrects for 1/f power density of natural audio so that each octave
+    // contributes equal perceptual energy to the visualization.
+    for (int i = 0; i < numBins; ++i) {
+        scaledBins[i] *= mPinkNoiseGains[i];
     }
 
     // Step 3: Apply gain to FFT bins (WLED-MM applies AGC/gain here).
