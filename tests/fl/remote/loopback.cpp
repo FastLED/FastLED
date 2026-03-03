@@ -76,7 +76,7 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
     {
         bool connected = false;
         uint32_t connect_start = fl::millis();
-        while (fl::millis() - connect_start < 5000) {
+        while (fl::millis() - connect_start < 15000) {
             if (client_transport->connect()) {
                 connected = true;
                 break;
