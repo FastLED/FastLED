@@ -6,7 +6,7 @@ sketch and runs a comprehensive test matrix via JSON-RPC:
 
 Test matrix:
   - LED counts: 1, 10, 100
-  - Lane configs: 1 lane (legacy API), 2 lanes, 4 lanes (channel API, asymmetric sizes)
+  - Lane configs: 1 lane (legacy API), 2 lanes, 4 lanes (both legacy and channel API, asymmetric sizes)
 
 For 2-lane configs, lane sizes are asymmetric (differ by ~25%):
   - Base 1:   [1, 1]      (closest asymmetric for very small)
@@ -120,6 +120,16 @@ def build_test_matrix() -> list[TestCase]:
             )
         )
 
+        # 2-lane config: legacy API (same asymmetric sizes)
+        cases.append(
+            TestCase(
+                base_led_count=base_size,
+                lane_count=2,
+                lane_sizes=[base_size, lane2_size],
+                use_legacy_api=True,
+            )
+        )
+
         # 4-lane config: asymmetric sizes (100%, 90%, 75%, 50%), channel API
         lane_ratios = [1.0, 0.9, 0.75, 0.5]
         lane_sizes_4 = [max(1, round(base_size * r)) for r in lane_ratios]
@@ -129,6 +139,16 @@ def build_test_matrix() -> list[TestCase]:
                 lane_count=4,
                 lane_sizes=lane_sizes_4,
                 use_legacy_api=False,
+            )
+        )
+
+        # 4-lane config: legacy API (same asymmetric sizes)
+        cases.append(
+            TestCase(
+                base_led_count=base_size,
+                lane_count=4,
+                lane_sizes=lane_sizes_4,
+                use_legacy_api=True,
             )
         )
 

@@ -94,8 +94,8 @@ void wave8_transpose_2(const Wave8Byte lane_waves[2],
                               lane_waves[1].symbols[symbol_idx].data,
                               interleaved);
 
-        output[symbol_idx * 2] = (u8)(interleaved & 0xFF);      // Low byte first
-        output[symbol_idx * 2 + 1] = (u8)(interleaved >> 8);    // High byte second
+        output[symbol_idx * 2] = (u8)(interleaved >> 8);         // High byte first (MSB pulses 4-7)
+        output[symbol_idx * 2 + 1] = (u8)(interleaved & 0xFF);  // Low byte second (LSB pulses 0-3)
     }
 }
 

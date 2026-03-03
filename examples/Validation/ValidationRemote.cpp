@@ -240,22 +240,19 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         use_legacy_api = config["useLegacyApi"].as_bool().value();
     }
 
-    // Legacy API only supports single-lane
-    if (use_legacy_api && lane_sizes.size() > 1) {
-        response.set("success", false);
-        response.set("error", "LegacyApiMultiLane");
-        response.set("message", "Legacy template API does not support multi-lane (only 1 lane allowed)");
-        return response;
-    }
-
-    // Legacy API pin must be 0-8 (compile-time template range)
-    if (use_legacy_api && (pin_tx < 0 || pin_tx > 8)) {
-        response.set("success", false);
-        response.set("error", "LegacyApiPinRange");
-        fl::sstream msg;
-        msg << "Legacy template API only supports pins 0-8, got " << pin_tx;
-        response.set("message", msg.str().c_str());
-        return response;
+    // Legacy API: all pins must be in range 0-8 (compile-time template range)
+    // Multi-lane uses consecutive pins starting at pin_tx
+    if (use_legacy_api) {
+        int max_pin = pin_tx + (int)lane_sizes.size() - 1;
+        if (pin_tx < 0 || max_pin > 8) {
+            response.set("success", false);
+            response.set("error", "LegacyApiPinRange");
+            fl::sstream msg;
+            msg << "Legacy template API requires all pins in range 0-8, got pins "
+                << pin_tx << "-" << max_pin;
+            response.set("message", msg.str().c_str());
+            return response;
+        }
     }
 
     // ========== EXECUTION ==========
