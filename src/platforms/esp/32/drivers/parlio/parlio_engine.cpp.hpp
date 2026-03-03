@@ -1268,6 +1268,10 @@ bool ParlioEngine::initialize(size_t dataWidth,
         FL_LOG_PARLIO("PARLIO_INIT: Configuration changed, re-initializing");
         mInitialized = false;
         mTxUnitEnabled = false;
+        // Free old ring buffers BEFORE allocating new ones to avoid peak
+        // memory of 6×capacity (old 3 + new 3). On ESP32-C6 without PSRAM,
+        // the doubled allocation at 4-lane×100 LEDs (~57KB) exceeds free heap.
+        mRingBuffer.reset();
     }
 
     // If we reach here, either first initialization or peripheral was reset

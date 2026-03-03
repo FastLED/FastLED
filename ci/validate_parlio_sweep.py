@@ -5,18 +5,10 @@ This script connects to an already-flashed ESP32-C6 running the Validation.ino
 sketch and runs a comprehensive test matrix via JSON-RPC:
 
 Test matrix:
-  - LED counts: 1, 10, 100
-  - Lane configs: 1 lane (legacy API), 2 lanes, 4 lanes (both legacy and channel API, asymmetric sizes)
-
-For 2-lane configs, lane sizes are asymmetric (differ by ~25%):
-  - Base 1:   [1, 1]      (closest asymmetric for very small)
-  - Base 10:  [10, 8]     (8 = 10 * 0.75, rounded)
-  - Base 100: [100, 75]   (75 = 100 * 0.75)
-
-For 4-lane configs, lane sizes vary (100%, 90%, 75%, 50%):
-  - Base 1:   [1, 1, 1, 1]
-  - Base 10:  [10, 9, 8, 5]
-  - Base 100: [100, 90, 75, 50]
+  - LED counts: 1, 10, 25, 50, 75, 100 (finer granularity for threshold detection)
+  - Lane configs: 1 lane, 2 lanes, 4 lanes (both legacy and channel API)
+  - 2-lane: asymmetric sizes (~25% difference)
+  - 4-lane: asymmetric sizes (100%, 90%, 75%, 50%)
 
 Usage:
     # First compile and upload Validation sketch to ESP32-C6:
@@ -91,12 +83,17 @@ class TestResult:
 
 
 def build_test_matrix() -> list[TestCase]:
-    """Build the full test matrix: sizes x lanes x lane counts (1, 2, 4)."""
-    base_sizes = [1, 10, 100]
+    """Build the full test matrix: sizes x lanes x lane counts (1, 2, 4).
+
+    Uses finer granularity LED counts (1, 10, 25, 50, 75, 100) to identify
+    failure thresholds, especially for multi-lane configurations on
+    memory-constrained devices like ESP32-C6.
+    """
+    base_sizes = [1, 10, 25, 50, 75, 100]
     cases: list[TestCase] = []
 
     for base_size in base_sizes:
-        # 1-lane config: use legacy API
+        # 1-lane config: legacy API
         cases.append(
             TestCase(
                 base_led_count=base_size,
@@ -106,62 +103,65 @@ def build_test_matrix() -> list[TestCase]:
             )
         )
 
-        # 2-lane config: asymmetric sizes (~25% difference), channel API
-        lane2_size = max(1, round(base_size * 0.75))
-        # Ensure lane2 is actually different when possible
-        if lane2_size == base_size and base_size > 1:
-            lane2_size = base_size - 1
-        cases.append(
-            TestCase(
-                base_led_count=base_size,
-                lane_count=2,
-                lane_sizes=[base_size, lane2_size],
-                use_legacy_api=False,
-            )
-        )
-
-        # 2-lane config: legacy API (same asymmetric sizes)
-        cases.append(
-            TestCase(
-                base_led_count=base_size,
-                lane_count=2,
-                lane_sizes=[base_size, lane2_size],
-                use_legacy_api=True,
-            )
-        )
-
-        # 4-lane config: asymmetric sizes (100%, 90%, 75%, 50%), channel API
-        lane_ratios = [1.0, 0.9, 0.75, 0.5]
-        lane_sizes_4 = [max(1, round(base_size * r)) for r in lane_ratios]
-        cases.append(
-            TestCase(
-                base_led_count=base_size,
-                lane_count=4,
-                lane_sizes=lane_sizes_4,
-                use_legacy_api=False,
-            )
-        )
-
-        # 4-lane config: legacy API (same asymmetric sizes)
-        cases.append(
-            TestCase(
-                base_led_count=base_size,
-                lane_count=4,
-                lane_sizes=lane_sizes_4,
-                use_legacy_api=True,
-            )
-        )
-
-        # 4-lane config: symmetric (all same size), channel API
-        if base_size >= 10:  # Skip for tiny sizes (already covered by asymmetric)
+        # 1-lane config: channel API (skip base=1, redundant with legacy)
+        if base_size > 1:
             cases.append(
                 TestCase(
                     base_led_count=base_size,
-                    lane_count=4,
-                    lane_sizes=[base_size] * 4,
+                    lane_count=1,
+                    lane_sizes=[base_size],
                     use_legacy_api=False,
                 )
             )
+
+        # 2-lane config: asymmetric sizes (~25% difference)
+        lane2_size = max(1, round(base_size * 0.75))
+        if lane2_size == base_size and base_size > 1:
+            lane2_size = base_size - 1
+
+        # 2-lane channel API
+        cases.append(
+            TestCase(
+                base_led_count=base_size,
+                lane_count=2,
+                lane_sizes=[base_size, lane2_size],
+                use_legacy_api=False,
+            )
+        )
+
+        # 2-lane legacy API
+        cases.append(
+            TestCase(
+                base_led_count=base_size,
+                lane_count=2,
+                lane_sizes=[base_size, lane2_size],
+                use_legacy_api=True,
+            )
+        )
+
+        # 4-lane config: asymmetric sizes (100%, 90%, 75%, 50%)
+        lane_ratios = [1.0, 0.9, 0.75, 0.5]
+        lane_sizes_4 = [max(1, round(base_size * r)) for r in lane_ratios]
+
+        # 4-lane channel API (asymmetric)
+        cases.append(
+            TestCase(
+                base_led_count=base_size,
+                lane_count=4,
+                lane_sizes=lane_sizes_4,
+                use_legacy_api=False,
+            )
+        )
+
+        # 4-lane legacy API (asymmetric)
+        cases.append(
+            TestCase(
+                base_led_count=base_size,
+                lane_count=4,
+                lane_sizes=lane_sizes_4,
+                use_legacy_api=True,
+            )
+        )
 
     return cases
 
