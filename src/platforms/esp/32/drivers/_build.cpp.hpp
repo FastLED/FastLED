@@ -12,6 +12,7 @@
 #include "platforms/esp/32/drivers/usb_serial_jtag_esp32_idf.hpp"
 
 // Subdirectory implementations (alphabetical order)
+#include "platforms/esp/32/drivers/ble/_build.cpp.hpp"
 #include "platforms/esp/32/drivers/gpio_isr_rx/_build.cpp.hpp"
 #include "platforms/esp/32/drivers/i2s/_build.cpp.hpp"
 #include "platforms/esp/32/drivers/lcd_cam/_build.cpp.hpp"

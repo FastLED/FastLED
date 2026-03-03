@@ -3,7 +3,7 @@
 // Provides factory functions for creating RequestSource and ResponseSink
 // callbacks that communicate over BLE instead of serial.
 //
-// Platform-neutral header: all ESP32 BLE implementation lives in ble_esp32.cpp.hpp.
+// Platform-neutral header: all ESP32 BLE implementation lives in drivers/ble/ble_esp32.cpp.hpp.
 //
 // Requires: JSON enabled + ESP32 + IDF 5+ + NimBLE headers present.
 // If any requirement is missing, FL_BLE_AVAILABLE is 0 and BLE compiles out.
@@ -61,7 +61,7 @@ struct BleStatusInfo {
     int ringTail = 0;
 };
 
-/// @brief Opaque BLE transport state — defined in ble_esp32.cpp.hpp
+/// @brief Opaque BLE transport state — defined in drivers/ble/ble_esp32.cpp.hpp
 struct BleTransportState;
 
 /// @brief Create BLE GATT server, heap-allocate transport state

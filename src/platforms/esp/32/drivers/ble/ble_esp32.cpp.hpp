@@ -1,6 +1,6 @@
-// platforms/esp/32/ble_esp32.cpp.hpp
+// platforms/esp/32/drivers/ble/ble_esp32.cpp.hpp
 // BLE GATT transport layer — ESP32 NimBLE C API implementation (IDF 5+)
-// Included via platforms/esp/32/_build.cpp.hpp (unity build). Do NOT compile separately.
+// Included via platforms/esp/32/drivers/ble/_build.cpp.hpp (unity build). Do NOT compile separately.
 
 #pragma once
 

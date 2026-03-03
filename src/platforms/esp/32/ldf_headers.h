@@ -31,4 +31,4 @@
 #endif
 
 // BLE: No Arduino BLE dependency — uses ESP-IDF NimBLE C API directly.
-// See ble_esp32.cpp.hpp for implementation.
+// See drivers/ble/ble_esp32.cpp.hpp for implementation.
