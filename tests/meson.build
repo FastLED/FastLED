@@ -58,7 +58,7 @@ test_pch = custom_target('test_pch',
 doctest_dll_main = static_library('doctest_dll_main',
   'doctest_main.cpp',
   include_directories: [tests_dir, src_dir, stub_dir],  # Add src and stub for platform headers
-  cpp_args: ['-DTEST_DLL_MODE', '-DFASTLED_STUB_IMPL'],  # Removed -DENABLE_CRASH_HANDLER
+  cpp_args: ['-DTEST_DLL_MODE', '-DFASTLED_STUB_IMPL'] + shared_no_exception_flags,  # Must match project ABI (-fno-rtti)
   install: false
 )
 
