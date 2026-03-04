@@ -2,6 +2,7 @@
 
 #include "fl/audio_input.h"  // For AudioConfig  // IWYU pragma: keep
 #include "fl/stl/string.h"
+#include "fl/stl/url.h"
 #include "fl/unused.h"
 #include "platforms/ui_defs.h"
 
@@ -226,8 +227,12 @@ class UIHelpImpl {
 #if !FASTLED_HAS_UI_AUDIO
 class UIAudioImpl {
   public:
-    UIAudioImpl(const char *name) { FASTLED_UNUSED(name); }
-    UIAudioImpl(const char *name, const fl::AudioConfig& config) {
+    UIAudioImpl(const fl::string& name) { FASTLED_UNUSED(name); }
+    UIAudioImpl(const fl::string& name, const fl::url& url) {
+        FASTLED_UNUSED(name);
+        FASTLED_UNUSED(url);
+    }
+    UIAudioImpl(const fl::string& name, const fl::AudioConfig& config) {
         FASTLED_UNUSED(name);
         FASTLED_UNUSED(config);
     }

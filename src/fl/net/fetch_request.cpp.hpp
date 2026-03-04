@@ -66,10 +66,10 @@ namespace net {
 FetchRequest::FetchRequest(const fl::string& url, const fetch_options& opts, fl::promise<response> prom)
     : state(DNS_LOOKUP)
     , promise(prom)
+    , parsed_url(url)
     , hostname()
     , port(80)
     , path("/")
-    , protocol("http")
     , socket_fd(-1)
     , dns_result(nullptr)
     , request_buffer()
@@ -77,49 +77,18 @@ FetchRequest::FetchRequest(const fl::string& url, const fetch_options& opts, fl:
     , bytes_sent(0)
     , state_start_time(fl::millis())
 {
-    if (!parse_url(url)) {
+    if (!parsed_url.isValid() || parsed_url.host().empty()) {
         complete_error("Invalid URL");
+        return;
     }
+    hostname = fl::string(parsed_url.host().data(), parsed_url.host().size());
+    port = parsed_url.port();
+    fl::string_view p = parsed_url.path();
+    path = p.empty() ? fl::string("/") : fl::string(p.data(), p.size());
 }
 
 FetchRequest::~FetchRequest() {
     close_socket();
-}
-
-bool FetchRequest::parse_url(const fl::string& url) {
-    // Find protocol
-    size_t proto_end = url.find("://");
-    if (proto_end == fl::string::npos) {
-        return false;
-    }
-
-    protocol = url.substr(0, proto_end);
-    size_t host_start = proto_end + 3;
-
-    // Find path
-    size_t path_start = url.find('/', host_start);
-    fl::string host_port;
-
-    if (path_start != fl::string::npos) {
-        host_port = url.substr(host_start, path_start - host_start);
-        path = url.substr(path_start);
-    } else {
-        host_port = url.substr(host_start);
-        path = "/";
-    }
-
-    // Split host and port
-    size_t port_sep = host_port.find(':');
-    if (port_sep != fl::string::npos) {
-        hostname = host_port.substr(0, port_sep);
-        fl::string port_str = host_port.substr(port_sep + 1);
-        port = atoi(port_str.c_str());
-    } else {
-        hostname = host_port;
-        port = (protocol == "https") ? 443 : 80;
-    }
-
-    return !hostname.empty();
 }
 
 void FetchRequest::update() {

@@ -936,7 +936,44 @@ export class AudioManager {
     controlDiv.appendChild(buttonContainer);
     controlDiv.appendChild(audioInput);
 
+    // Auto-load from URL if specified
+    if (element.url) {
+      this.autoLoadFromUrl(element.url, audioInput, controlDiv);
+    }
+
     return controlDiv;
+  }
+
+  /**
+   * Auto-load audio from a URL (specified in C++ via UIAudio constructor)
+   * @param {string} url - The audio URL to load
+   * @param {HTMLInputElement} audioInput - The hidden file input element
+   * @param {HTMLElement} controlDiv - The control container
+   */
+  async autoLoadFromUrl(url, audioInput, controlDiv) {
+    try {
+      console.log(`🎵 Auto-loading audio from URL: ${url}`);
+
+      // Clean up previous audio context
+      await this.cleanupPreviousAudioContext(audioInput.id);
+
+      // Small delay to ensure cleanup is complete
+      await new Promise((resolve) => { setTimeout(resolve, 100); });
+
+      // Set up audio playback with fresh audio element
+      const audio = this.createOrUpdateAudioElement(controlDiv);
+
+      // Configure and play the audio
+      await this.configureAudioPlayback(audio, url, controlDiv);
+
+      // Add processing indicator
+      this.updateAudioProcessingIndicator(controlDiv);
+
+      console.log('🎵 Audio auto-load from URL complete');
+    } catch (error) {
+      console.error('🎵 Error auto-loading audio from URL:', error);
+      this.showAudioError(controlDiv, 'Failed to auto-load audio. Click play to retry.');
+    }
   }
 
   /**

@@ -8,6 +8,7 @@
 #include "fl/audio_input.h"
 #include "fl/engine_events.h"
 #include "fl/stl/string.h"
+#include "fl/stl/url.h"
 #include "platforms/shared/ui/json/ui_internal.h"
 
 #include "fl/stl/vector.h"
@@ -26,6 +27,7 @@ enum {
 class JsonAudioImpl {
   public:
     JsonAudioImpl(const fl::string &name);
+    JsonAudioImpl(const fl::string &name, const fl::url& url);
     JsonAudioImpl(const fl::string &name, const fl::AudioConfig& config);
     ~JsonAudioImpl();
     JsonAudioImpl &Group(const fl::string &name);

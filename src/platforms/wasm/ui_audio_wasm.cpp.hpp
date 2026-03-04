@@ -39,33 +39,46 @@ static void initWasmAudio(const char* name, WasmAudioInput*& wasmInput,
     }
 }
 
-WasmAudioImpl::WasmAudioImpl(const char *name)
+WasmAudioImpl::WasmAudioImpl(const fl::string& name)
     : mName(name)
     , mWasmInput(nullptr)
     , mOwnsInput(false)
 {
     // Create UI component for JSON UI system
-    mInternal = fl::make_shared<JsonUiAudioInternal>(fl::string(name));
+    mInternal = fl::make_shared<JsonUiAudioInternal>(name);
     addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 
     // Initialize WASM audio input
-    initWasmAudio(name, mWasmInput, mWasmInputOwner, mOwnsInput);
+    initWasmAudio(name.c_str(), mWasmInput, mWasmInputOwner, mOwnsInput);
 }
 
-WasmAudioImpl::WasmAudioImpl(const char *name, const fl::AudioConfig& config)
+WasmAudioImpl::WasmAudioImpl(const fl::string& name, const fl::url& url)
+    : mName(name)
+    , mWasmInput(nullptr)
+    , mOwnsInput(false)
+{
+    // Create UI component for JSON UI system with URL
+    mInternal = fl::make_shared<JsonUiAudioInternal>(name, url);
+    addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
+
+    // Initialize WASM audio input
+    initWasmAudio(name.c_str(), mWasmInput, mWasmInputOwner, mOwnsInput);
+}
+
+WasmAudioImpl::WasmAudioImpl(const fl::string& name, const fl::AudioConfig& config)
     : mName(name)
     , mWasmInput(nullptr)
     , mOwnsInput(false)
 {
     // Create UI component for JSON UI system
-    mInternal = fl::make_shared<JsonUiAudioInternal>(fl::string(name));
+    mInternal = fl::make_shared<JsonUiAudioInternal>(name);
     addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 
     // Config is ignored for WASM - audio comes from JavaScript
     (void)config;
 
     // Initialize WASM audio input
-    initWasmAudio(name, mWasmInput, mWasmInputOwner, mOwnsInput);
+    initWasmAudio(name.c_str(), mWasmInput, mWasmInputOwner, mOwnsInput);
 }
 
 WasmAudioImpl::~WasmAudioImpl() {

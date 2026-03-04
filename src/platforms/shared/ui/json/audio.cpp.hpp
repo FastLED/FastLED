@@ -29,6 +29,12 @@ JsonAudioImpl::JsonAudioImpl(const fl::string &name) {
     addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 }
 
+JsonAudioImpl::JsonAudioImpl(const fl::string &name, const fl::url& url) {
+    mInternal = fl::make_shared<JsonUiAudioInternal>(name, url);
+    mUpdater.init(this);
+    addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
+}
+
 JsonAudioImpl::JsonAudioImpl(const fl::string &name, const fl::AudioConfig& config) {
     // JSON UI gets audio from browser, so config is ignored
     FL_UNUSED(config);

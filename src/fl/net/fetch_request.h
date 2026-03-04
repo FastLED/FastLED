@@ -3,6 +3,7 @@
 #include "fl/promise.h"
 #include "fl/net/fetch.h"  // Includes response class  // IWYU pragma: keep
 #include "fl/stl/string.h"
+#include "fl/stl/url.h"
 #include "fl/int.h"
 
 // Forward declaration for hostent (platform-specific type)
@@ -54,11 +55,11 @@ private:
     State state;
     fl::promise<response> promise;
 
-    // Parsed URL components
+    // Parsed URL
+    fl::url parsed_url;
     fl::string hostname;
     int port;
     fl::string path;
-    fl::string protocol;
 
     // Socket state
     int socket_fd;
@@ -85,7 +86,6 @@ private:
     // Utilities
     response parse_http_response(const fl::string& raw);
     void close_socket();
-    bool parse_url(const fl::string& url);
 };
 
 } // namespace net

@@ -6,6 +6,7 @@
 #ifdef FL_IS_WASM
 
 #include "fl/stl/string.h"
+#include "fl/stl/url.h"
 #include "fl/audio.h"
 #include "fl/audio_input.h"  // For AudioConfig
 #include "fl/stl/shared_ptr.h"
@@ -21,8 +22,9 @@ class JsonUiAudioInternal;
  */
 class WasmAudioImpl {
   public:
-    WasmAudioImpl(const char *name);
-    WasmAudioImpl(const char *name, const fl::AudioConfig& config);
+    WasmAudioImpl(const fl::string& name);
+    WasmAudioImpl(const fl::string& name, const fl::url& url);
+    WasmAudioImpl(const fl::string& name, const fl::AudioConfig& config);
     ~WasmAudioImpl();
 
     AudioSample next();

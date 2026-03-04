@@ -12,6 +12,9 @@ void JsonUiAudioInternal::toJson(fl::Json &json) const {
     json.set("group", groupName());
     json.set("type", "audio");
     json.set("id", id());
+    if (mUrl.isValid()) {
+        json.set("url", mUrl.string());
+    }
     if (!mAudioDataArray.is_null() && mAudioDataArray.is_array()) {
         json.set("audioData", mAudioDataArray);
     }

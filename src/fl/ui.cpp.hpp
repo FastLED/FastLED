@@ -57,8 +57,9 @@ UIHelp::UIHelp(const char *markdownContent) : mImpl(markdownContent) {}
 UIHelp::~UIHelp() {}
 
 // UIAudio constructors
-UIAudio::UIAudio(const char *name) : mImpl(name) {}
-UIAudio::UIAudio(const char *name, const fl::AudioConfig& config) : mImpl(name, config) {}
+UIAudio::UIAudio(const fl::string& name) : mImpl(name) {}
+UIAudio::UIAudio(const fl::string& name, const fl::url& url) : mImpl(name, url) {}
+UIAudio::UIAudio(const fl::string& name, const fl::AudioConfig& config) : mImpl(name, config) {}
 UIAudio::~UIAudio() {}
 
 // UIDropdown constructors

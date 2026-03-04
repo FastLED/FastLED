@@ -4,6 +4,7 @@
 #include "fl/stl/shared_ptr.h"  // For shared_ptr
 #include "fl/json.h"  // IWYU pragma: keep
 #include "fl/stl/string.h"
+#include "fl/stl/url.h"
 #include "fl/int.h"  // IWYU pragma: keep
 #include "fl/audio.h"
 #include "fl/audio_input.h"  // For AudioConfig  // IWYU pragma: keep
@@ -420,8 +421,9 @@ class UIHelp : public UIElement {
 class UIAudio : public UIElement {
   public:
     FL_NO_COPY(UIAudio)
-    UIAudio(const char *name);
-    UIAudio(const char *name, const fl::AudioConfig& config);
+    UIAudio(const fl::string& name);
+    UIAudio(const fl::string& name, const fl::url& url);
+    UIAudio(const fl::string& name, const fl::AudioConfig& config);
     ~UIAudio();
     AudioSample next() { return mImpl.next(); }
     bool hasNext() { return mImpl.hasNext(); }
