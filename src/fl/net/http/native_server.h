@@ -51,6 +51,7 @@ public:
     bool start();             // Start listening for connections
     void stop();              // Stop server and disconnect all clients
     bool isListening() const;
+    u16 port() const { return mPort; }  // Actual port (useful when constructed with port 0)
 
     // Client management
     void acceptClients();     // Accept new client connections (non-blocking)

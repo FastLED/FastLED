@@ -239,6 +239,13 @@ bool NativeHttpServer::platformStartListening() {
         platformStopListening();
     }
 
+    // Ensure platform socket layer is initialized (needed before socket())
+    #ifdef FL_IS_WIN
+    if (!initialize_winsock()) {
+        return false;
+    }
+    #endif
+
     // Create socket
     int sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sock < 0) {
@@ -263,6 +270,15 @@ bool NativeHttpServer::platformStartListening() {
         platform_close(mListenSocket);
         mListenSocket = -1;
         return false;
+    }
+
+    // If port 0 was requested, query the OS-assigned port
+    if (mPort == 0) {
+        struct sockaddr_in boundAddr{};
+        socklen_t addrLen = sizeof(boundAddr);
+        if (getsockname(mListenSocket, (struct sockaddr*)&boundAddr, &addrLen) == 0) {
+            mPort = ntohs(boundAddr.sin_port);
+        }
     }
 
     // Start listening (backlog = 10 pending connections)

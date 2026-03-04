@@ -15,23 +15,11 @@
 
 using namespace fl;
 
-// Each test case needs its own unique port to avoid bind failures when the
-// test runner executes cases as separate subprocesses (TIME_WAIT races on
-// Windows). Ports are spread apart so no two tests ever share a port.
-// Multiple candidates per slot — if the first port is in TIME_WAIT, try alternates.
-static const uint16_t kPortStateTransitions[] = {58901, 58951};
-static const uint16_t kPortUpdateLoop[]       = {58902, 58952};
-static const uint16_t kPortMultiInst1[]       = {58903, 58953};
-static const uint16_t kPortMultiInst2[]       = {58904, 58954};
+// Use port 0 so the OS assigns a free port — avoids hardcoded port conflicts
+// with Windows Hyper-V/NAT reserved ranges and TIME_WAIT races.
+static const uint16_t kAnyPort = 0;
 
-// Ports for real socket I/O tests (each test gets its own)
-static const uint16_t kPortConnectLive[]      = {58911, 58961};
-static const uint16_t kPortClientSend[]       = {58912, 58962};
-static const uint16_t kPortClientRecv[]       = {58913, 58963};
-static const uint16_t kPortBidiEcho[]         = {58914, 58964};
-static const uint16_t kPortLargePayload[]     = {58915, 58965};
-
-// RAII wrapper for NativeHttpServer that tries multiple ports.
+// RAII wrapper for NativeHttpServer. Uses port 0 (OS-assigned).
 // NativeHttpServer has no move/copy, so we must heap-allocate.
 struct ServerGuard {
     fl::unique_ptr<NativeHttpServer> ptr;
@@ -45,18 +33,14 @@ struct ServerGuard {
     explicit operator bool() const { return ptr != nullptr; }
 };
 
-template<size_t N>
-static ServerGuard makeServer(const uint16_t (&candidates)[N],
-                              const ConnectionConfig& config = ConnectionConfig()) {
+static ServerGuard makeServer(const ConnectionConfig& config = ConnectionConfig()) {
     ServerGuard g;
-    for (size_t i = 0; i < N; ++i) {
-        g.ptr = fl::make_unique<NativeHttpServer>(candidates[i], config);
-        if (g.ptr->start()) {
-            g.port = candidates[i];
-            return g;
-        }
-        g.ptr.reset();
+    g.ptr = fl::make_unique<NativeHttpServer>(kAnyPort, config);
+    if (g.ptr->start()) {
+        g.port = g.ptr->port();
+        return g;
     }
+    g.ptr.reset();
     return g;
 }
 
@@ -104,13 +88,13 @@ static bool pollUntil(fl::function<bool()> pred, int maxAttempts = 100) {
 // =============================================================================
 
 FL_TEST_CASE("NativeHttpClient - Construction and destruction") {
-    NativeHttpClient client("localhost", kPortStateTransitions[0]);
+    NativeHttpClient client("localhost", 12345);
     FL_CHECK(client.getState() == ConnectionState::DISCONNECTED);
     FL_CHECK_FALSE(client.isConnected());
 }
 
 FL_TEST_CASE("NativeHttpClient - Send and recv fail when disconnected") {
-    NativeHttpClient client("localhost", kPortStateTransitions[0]);
+    NativeHttpClient client("localhost", 12345);
 
     uint8_t sendData[] = {'t', 'e', 's', 't'};
     int sendResult = client.send(sendData);
@@ -122,7 +106,7 @@ FL_TEST_CASE("NativeHttpClient - Send and recv fail when disconnected") {
 }
 
 FL_TEST_CASE("NativeHttpClient - Disconnect and close") {
-    NativeHttpClient client("localhost", kPortStateTransitions[0]);
+    NativeHttpClient client("localhost", 12345);
 
     // Disconnect when already disconnected (should be no-op)
     client.disconnect();
@@ -142,7 +126,7 @@ FL_TEST_CASE("NativeHttpClient - Heartbeat tracking") {
     ConnectionConfig config;
     config.heartbeatIntervalMs = 1000;
 
-    NativeHttpClient client("localhost", kPortStateTransitions[0], config);
+    NativeHttpClient client("localhost", 12345, config);
 
     // Should not send heartbeat when disconnected
     FL_CHECK_FALSE(client.shouldSendHeartbeat(0));
@@ -156,7 +140,7 @@ FL_TEST_CASE("NativeHttpClient - Reconnection tracking") {
     config.reconnectMaxDelayMs = 5000;
     config.reconnectBackoffMultiplier = 2;
 
-    NativeHttpClient client("localhost", kPortStateTransitions[0], config);
+    NativeHttpClient client("localhost", 12345, config);
 
     // Initial state
     FL_CHECK(client.getReconnectAttempts() == 0);
@@ -169,7 +153,7 @@ FL_TEST_CASE("NativeHttpClient - Reconnection tracking") {
 
 FL_TEST_CASE("NativeHttpClient - Connection to invalid host fails") {
     // DNS lookup for nonexistent host fails immediately (no TCP timeout)
-    NativeHttpClient client("invalid.host.that.does.not.exist.test", kPortStateTransitions[0]);
+    NativeHttpClient client("invalid.host.that.does.not.exist.test", 12345);
 
     bool result = client.connect();
     FL_CHECK_FALSE(result);
@@ -177,7 +161,7 @@ FL_TEST_CASE("NativeHttpClient - Connection to invalid host fails") {
 }
 
 FL_TEST_CASE("NativeHttpClient - Non-blocking by default") {
-    NativeHttpClient client("localhost", kPortStateTransitions[0]);
+    NativeHttpClient client("localhost", 12345);
 
     // Attempt connection (should not block, even if server doesn't exist)
     bool result = client.connect();
@@ -188,8 +172,8 @@ FL_TEST_CASE("NativeHttpClient - Non-blocking by default") {
 }
 
 FL_TEST_CASE("NativeHttpClient - Connection state transitions with server") {
-    auto server = makeServer(kPortStateTransitions);
-    if (!server) { FL_MESSAGE("SKIP: Server bind failed (port unavailable)"); return; }
+    auto server = makeServer();
+    FL_REQUIRE(server);
 
     NativeHttpClient client("localhost", server.port);
 
@@ -208,8 +192,8 @@ FL_TEST_CASE("NativeHttpClient - Update loop with server") {
     config.reconnectInitialDelayMs = 100;
     config.maxReconnectAttempts = 1;
 
-    auto server = makeServer(kPortUpdateLoop, config);
-    if (!server) { FL_MESSAGE("SKIP: Server bind failed (port unavailable)"); return; }
+    auto server = makeServer(config);
+    FL_REQUIRE(server);
 
     NativeHttpClient client("localhost", server.port, config);
 
@@ -227,9 +211,10 @@ FL_TEST_CASE("NativeHttpClient - Update loop with server") {
 }
 
 FL_TEST_CASE("NativeHttpClient - Multiple instances with server") {
-    auto server1 = makeServer(kPortMultiInst1);
-    auto server2 = makeServer(kPortMultiInst2);
-    if (!server1 || !server2) { FL_MESSAGE("SKIP: Server bind failed (port unavailable)"); return; }
+    auto server1 = makeServer();
+    auto server2 = makeServer();
+    FL_REQUIRE(server1);
+    FL_REQUIRE(server2);
 
     NativeHttpClient client1("localhost", server1.port);
     NativeHttpClient client2("localhost", server2.port);
@@ -255,8 +240,8 @@ FL_TEST_CASE("NativeHttpClient - Multiple instances with server") {
 // =============================================================================
 
 FL_TEST_CASE("NativeHttpClient - Connect to live server succeeds") {
-    auto server = makeServer(kPortConnectLive);
-    if (!server) { FL_MESSAGE("SKIP: Server bind failed (port unavailable)"); return; }
+    auto server = makeServer();
+    FL_REQUIRE(server);
     NetThread net(*server.ptr);
 
     NativeHttpClient client("localhost", server.port);
@@ -273,8 +258,8 @@ FL_TEST_CASE("NativeHttpClient - Connect to live server succeeds") {
 }
 
 FL_TEST_CASE("NativeHttpClient - Client sends data to server") {
-    auto server = makeServer(kPortClientSend);
-    if (!server) { FL_MESSAGE("SKIP: Server bind failed (port unavailable)"); return; }
+    auto server = makeServer();
+    FL_REQUIRE(server);
     NetThread net(*server.ptr);
 
     NativeHttpClient client("localhost", server.port);
@@ -304,8 +289,8 @@ FL_TEST_CASE("NativeHttpClient - Client sends data to server") {
 }
 
 FL_TEST_CASE("NativeHttpClient - Client receives data from server") {
-    auto server = makeServer(kPortClientRecv);
-    if (!server) { FL_MESSAGE("SKIP: Server bind failed (port unavailable)"); return; }
+    auto server = makeServer();
+    FL_REQUIRE(server);
     NetThread net(*server.ptr);
 
     NativeHttpClient client("localhost", server.port);
@@ -335,8 +320,8 @@ FL_TEST_CASE("NativeHttpClient - Client receives data from server") {
 }
 
 FL_TEST_CASE("NativeHttpClient - Bidirectional echo") {
-    auto server = makeServer(kPortBidiEcho);
-    if (!server) { FL_MESSAGE("SKIP: Server bind failed (port unavailable)"); return; }
+    auto server = makeServer();
+    FL_REQUIRE(server);
     NetThread net(*server.ptr);
 
     NativeHttpClient client("localhost", server.port);
@@ -380,8 +365,8 @@ FL_TEST_CASE("NativeHttpClient - Bidirectional echo") {
 }
 
 FL_TEST_CASE("NativeHttpClient - Large payload transfer") {
-    auto server = makeServer(kPortLargePayload);
-    if (!server) { FL_MESSAGE("SKIP: Server bind failed (port unavailable)"); return; }
+    auto server = makeServer();
+    FL_REQUIRE(server);
     NetThread net(*server.ptr);
 
     NativeHttpClient client("localhost", server.port);
