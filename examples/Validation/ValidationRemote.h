@@ -20,7 +20,7 @@
 
 // Forward declarations
 namespace fl {
-    class Json;
+    class json;
     class Remote;
     class RxDevice;
     struct BleTransportState;
@@ -52,12 +52,12 @@ struct ValidationState {
 /// This ensures RPC responses are always visible regardless of log level
 /// @param json JSON object to output
 /// @param prefix Optional prefix (default: "REMOTE: ")
-void printJsonRaw(const fl::Json& json, const char* prefix = "REMOTE: ");
+void printJsonRaw(const fl::json& json, const char* prefix = "REMOTE: ");
 
 /// @brief Print JSONL stream message directly to Serial, bypassing fl::println
 /// @param messageType Type of message (e.g., "test_result", "config_complete")
 /// @param data JSON object containing message data
-void printStreamRaw(const char* messageType, const fl::Json& data);
+void printStreamRaw(const char* messageType, const fl::json& data);
 
 /// @brief Remote RPC control system for test validation
 /// Encapsulates all RPC function registration and processing logic
@@ -83,11 +83,11 @@ public:
 
     /// @brief Start BLE remote (creates BLE GATT server + second Remote instance)
     /// @return JSON result from startBle()
-    fl::Json startBleRemote();
+    fl::json startBleRemote();
 
     /// @brief Stop BLE remote (destroys BLE Remote + GATT server)
     /// @return JSON result from stopBle()
-    fl::Json stopBleRemote();
+    fl::json stopBleRemote();
 
 private:
     fl::unique_ptr<fl::Remote> mRemote;      // Serial Remote RPC system instance
@@ -100,7 +100,7 @@ private:
     void registerAllMethods(fl::Remote* remote);
 
     // Private helper functions for RPC implementation
-    fl::Json runSingleTestImpl(const fl::Json& args);
-    fl::Json runParallelTestImpl(const fl::Json& args);
-    fl::Json findConnectedPinsImpl(const fl::Json& args);
+    fl::json runSingleTestImpl(const fl::json& args);
+    fl::json runParallelTestImpl(const fl::json& args);
+    fl::json findConnectedPinsImpl(const fl::json& args);
 };

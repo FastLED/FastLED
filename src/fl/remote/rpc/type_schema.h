@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/json.h"
+#include "fl/stl/json.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -77,8 +77,8 @@ struct MethodSchema;
 template <typename R, typename... Args>
 struct MethodSchema<R(Args...)> {
     // Flat params: [["name", "type"], ...] optimized for low-memory devices
-    static Json params(const fl::vector<fl::string>& names) {
-        Json arr = Json::array();
+    static json params(const fl::vector<fl::string>& names) {
+        json arr = json::array();
         addParams<0, Args...>(arr, names);
         return arr;
     }
@@ -89,15 +89,15 @@ struct MethodSchema<R(Args...)> {
 
 private:
     template <fl::size Index>
-    static void addParams(Json& arr, const fl::vector<fl::string>& names) {
+    static void addParams(json& arr, const fl::vector<fl::string>& names) {
         // Base case: no more parameters
         (void)arr;
         (void)names;
     }
 
     template <fl::size Index, typename First, typename... Rest>
-    static void addParams(Json& arr, const fl::vector<fl::string>& names) {
-        Json param = Json::array();
+    static void addParams(json& arr, const fl::vector<fl::string>& names) {
+        json param = json::array();
         // Name
         if (Index < names.size() && !names[Index].empty()) {
             param.push_back(names[Index].c_str());
@@ -115,8 +115,8 @@ private:
 template <typename... Args>
 struct MethodSchema<void(Args...)> {
     // Flat params: [["name", "type"], ...] optimized for low-memory devices
-    static Json params(const fl::vector<fl::string>& names) {
-        Json arr = Json::array();
+    static json params(const fl::vector<fl::string>& names) {
+        json arr = json::array();
         addParams<0, Args...>(arr, names);
         return arr;
     }
@@ -127,15 +127,15 @@ struct MethodSchema<void(Args...)> {
 
 private:
     template <fl::size Index>
-    static void addParams(Json& arr, const fl::vector<fl::string>& names) {
+    static void addParams(json& arr, const fl::vector<fl::string>& names) {
         // Base case: no more parameters
         (void)arr;
         (void)names;
     }
 
     template <fl::size Index, typename First, typename... Rest>
-    static void addParams(Json& arr, const fl::vector<fl::string>& names) {
-        Json param = Json::array();
+    static void addParams(json& arr, const fl::vector<fl::string>& names) {
+        json param = json::array();
         // Name
         if (Index < names.size() && !names[Index].empty()) {
             param.push_back(names[Index].c_str());

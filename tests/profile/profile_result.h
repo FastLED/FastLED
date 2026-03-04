@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/int.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/stl/stdio.h"
 
 /// Helper for building profile test results in the format expected by ci/profile_runner.py
@@ -46,7 +46,7 @@ public:
         double ns_per_call = static_cast<double>(elapsed_ns) / total_calls;
         double calls_per_sec = 1e9 / ns_per_call;
 
-        fl::Json result = fl::Json::object();
+        fl::json result = fl::json::object();
         result.set("variant", variant);
         result.set("target", target);
         result.set("total_calls", total_calls);
@@ -59,7 +59,7 @@ public:
 
     /// Constructor for building custom results (e.g., comparison tests)
     ProfileResultBuilder(const char* variant, const char* target)
-        : m_result(fl::Json::object()) {
+        : m_result(fl::json::object()) {
         m_result.set("variant", variant);
         m_result.set("target", target);
     }
@@ -77,7 +77,7 @@ public:
     }
 
     /// Add custom field to JSON (for comparison/analysis tests)
-    void set(const char* key, const fl::Json& value) {
+    void set(const char* key, const fl::json& value) {
         m_result.set(key, value);
     }
 
@@ -103,10 +103,10 @@ public:
     }
 
     /// Get the JSON object (for further manipulation)
-    fl::Json& json() {
+    fl::json& json() {
         return m_result;
     }
 
 private:
-    fl::Json m_result;
+    fl::json m_result;
 };

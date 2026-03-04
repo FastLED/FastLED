@@ -1,7 +1,7 @@
 #pragma once
 
 #include "stream_transport.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/stl/string.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/stdio.h"
@@ -10,20 +10,20 @@ namespace fl {
 
 // --- StreamHandle implementation ---
 
-StreamHandle::StreamHandle(fl::promise<fl::Json> p,
-                           fl::shared_ptr<fl::function<void(const fl::Json&)>> updateCb)
+StreamHandle::StreamHandle(fl::promise<fl::json> p,
+                           fl::shared_ptr<fl::function<void(const fl::json&)>> updateCb)
     : mPromise(fl::move(p))
     , mUpdateCallback(fl::move(updateCb)) {
 }
 
-StreamHandle& StreamHandle::onData(fl::function<void(const fl::Json&)> cb) {
+StreamHandle& StreamHandle::onData(fl::function<void(const fl::json&)> cb) {
     if (mUpdateCallback) {
         *mUpdateCallback = fl::move(cb);
     }
     return *this;
 }
 
-StreamHandle& StreamHandle::then(fl::function<void(const fl::Json&)> cb) {
+StreamHandle& StreamHandle::then(fl::function<void(const fl::json&)> cb) {
     mPromise.then(fl::move(cb));
     return *this;
 }
@@ -33,7 +33,7 @@ StreamHandle& StreamHandle::catch_(fl::function<void(const fl::Error&)> cb) {
     return *this;
 }
 
-fl::promise<fl::Json>& StreamHandle::promise() {
+fl::promise<fl::json>& StreamHandle::promise() {
     return mPromise;
 }
 
@@ -57,7 +57,7 @@ HttpStreamTransport::~HttpStreamTransport() {
     // Subclasses must clean up in their own destructors
 }
 
-fl::string HttpStreamTransport::idToString(const fl::Json& id) {
+fl::string HttpStreamTransport::idToString(const fl::json& id) {
     if (id.is_int()) {
         char buf[32];
         fl::snprintf(buf, sizeof(buf), "%d", id.as_int().value());
@@ -93,7 +93,7 @@ void HttpStreamTransport::parseChunkedMessages() {
         }
 
         fl::string jsonStr(reinterpret_cast<const char*>(result.data.data()), result.data.size()); // ok reinterpret cast
-        fl::Json json = fl::Json::parse(jsonStr.c_str());
+        fl::json json = fl::json::parse(jsonStr.c_str());
         if (json.is_null()) {
             continue;
         }
@@ -123,7 +123,7 @@ void HttpStreamTransport::parseChunkedMessages() {
     }
 }
 
-bool HttpStreamTransport::resolveRpc(const fl::Json& msg, const fl::string& idKey) {
+bool HttpStreamTransport::resolveRpc(const fl::json& msg, const fl::string& idKey) {
     PendingCall* pending = mPendingCalls.find_value(idKey);
     if (!pending) {
         return false;
@@ -151,7 +151,7 @@ bool HttpStreamTransport::resolveRpc(const fl::Json& msg, const fl::string& idKe
     return true;
 }
 
-bool HttpStreamTransport::resolveRpcStream(const fl::Json& msg, const fl::string& idKey) {
+bool HttpStreamTransport::resolveRpcStream(const fl::json& msg, const fl::string& idKey) {
     PendingStream* pending = mPendingStreams.find_value(idKey);
     if (!pending) {
         return false;
@@ -201,9 +201,9 @@ bool HttpStreamTransport::resolveRpcStream(const fl::Json& msg, const fl::string
     return true;
 }
 
-fl::promise<fl::Json> HttpStreamTransport::rpc(const fl::string& method, const fl::Json& params) {
+fl::promise<fl::json> HttpStreamTransport::rpc(const fl::string& method, const fl::json& params) {
     int id = mNextCallId++;
-    fl::Json request = fl::Json::object();
+    fl::json request = fl::json::object();
     request.set("jsonrpc", "2.0");
     request.set("method", method);
     request.set("params", params);
@@ -211,8 +211,8 @@ fl::promise<fl::Json> HttpStreamTransport::rpc(const fl::string& method, const f
     return rpc(request);
 }
 
-fl::promise<fl::Json> HttpStreamTransport::rpc(const fl::Json& fullRequest) {
-    fl::promise<fl::Json> p = fl::promise<fl::Json>::create();
+fl::promise<fl::json> HttpStreamTransport::rpc(const fl::json& fullRequest) {
+    fl::promise<fl::json> p = fl::promise<fl::json>::create();
 
     if (!isConnected()) {
         p.complete_with_error(fl::Error("Not connected"));
@@ -228,9 +228,9 @@ fl::promise<fl::Json> HttpStreamTransport::rpc(const fl::Json& fullRequest) {
     return p;
 }
 
-StreamHandle HttpStreamTransport::rpcStream(const fl::string& method, const fl::Json& params) {
+StreamHandle HttpStreamTransport::rpcStream(const fl::string& method, const fl::json& params) {
     int id = mNextCallId++;
-    fl::Json request = fl::Json::object();
+    fl::json request = fl::json::object();
     request.set("jsonrpc", "2.0");
     request.set("method", method);
     request.set("params", params);
@@ -238,9 +238,9 @@ StreamHandle HttpStreamTransport::rpcStream(const fl::string& method, const fl::
     return rpcStream(request);
 }
 
-StreamHandle HttpStreamTransport::rpcStream(const fl::Json& fullRequest) {
-    auto updateCb = fl::make_shared<fl::function<void(const fl::Json&)>>();
-    fl::promise<fl::Json> p = fl::promise<fl::Json>::create();
+StreamHandle HttpStreamTransport::rpcStream(const fl::json& fullRequest) {
+    auto updateCb = fl::make_shared<fl::function<void(const fl::json&)>>();
+    fl::promise<fl::json> p = fl::promise<fl::json>::create();
 
     if (!isConnected()) {
         p.complete_with_error(fl::Error("Not connected"));
@@ -257,7 +257,7 @@ StreamHandle HttpStreamTransport::rpcStream(const fl::Json& fullRequest) {
     return StreamHandle(p, updateCb);
 }
 
-fl::optional<fl::Json> HttpStreamTransport::readRequest() {
+fl::optional<fl::json> HttpStreamTransport::readRequest() {
     if (!isConnected()) {
         return fl::nullopt;
     }
@@ -271,9 +271,9 @@ fl::optional<fl::Json> HttpStreamTransport::readRequest() {
         return fl::nullopt;
     }
 
-    fl::Json front = fl::move(mIncomingQueue[0]);
+    fl::json front = fl::move(mIncomingQueue[0]);
     // Shift remaining elements
-    fl::vector<fl::Json> remaining;
+    fl::vector<fl::json> remaining;
     remaining.reserve(mIncomingQueue.size() - 1);
     for (size_t i = 1; i < mIncomingQueue.size(); i++) {
         remaining.push_back(fl::move(mIncomingQueue[i]));
@@ -283,7 +283,7 @@ fl::optional<fl::Json> HttpStreamTransport::readRequest() {
     return front;
 }
 
-void HttpStreamTransport::writeResponse(const fl::Json& response) {
+void HttpStreamTransport::writeResponse(const fl::json& response) {
     if (!isConnected()) {
         return;
     }
@@ -390,10 +390,10 @@ void HttpStreamTransport::sendHeartbeat() {
     }
 
     // Create heartbeat request (rpc.ping notification)
-    fl::Json heartbeat = fl::Json::object();
+    fl::json heartbeat = fl::json::object();
     heartbeat.set("jsonrpc", "2.0");
     heartbeat.set("method", "rpc.ping");
-    heartbeat.set("id", fl::Json());  // null value
+    heartbeat.set("id", fl::json());  // null value
 
     // Write as response (uses same chunked encoding)
     writeResponse(heartbeat);

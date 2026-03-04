@@ -3,7 +3,7 @@
 #if FASTLED_ENABLE_JSON
 
 #include "fl/int.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/log.h"
 #include "fl/remote/rpc/rpc.h"
 #include "fl/remote/rpc/server.h"
@@ -34,7 +34,7 @@ bool Remote::has(const fl::string& name) const {
 
 // Async Response Support
 
-void Remote::sendAsyncResponse(const char* method, const fl::Json& result) {
+void Remote::sendAsyncResponse(const char* method, const fl::json& result) {
     fl::string methodName(method);
     auto it = mAsyncRequests.find(methodName);
     if (it == mAsyncRequests.end()) {
@@ -46,7 +46,7 @@ void Remote::sendAsyncResponse(const char* method, const fl::Json& result) {
     mAsyncRequests.erase(it);
 
     // Build JSON-RPC response
-    fl::Json response = fl::Json::object();
+    fl::json response = fl::json::object();
     response.set("jsonrpc", "2.0");
     response.set("id", requestId);
     response.set("result", result);
@@ -58,7 +58,7 @@ void Remote::sendAsyncResponse(const char* method, const fl::Json& result) {
     }
 }
 
-void Remote::sendStreamUpdate(const char* method, const fl::Json& update) {
+void Remote::sendStreamUpdate(const char* method, const fl::json& update) {
     fl::string methodName(method);
     auto it = mAsyncRequests.find(methodName);
     if (it == mAsyncRequests.end()) {
@@ -70,11 +70,11 @@ void Remote::sendStreamUpdate(const char* method, const fl::Json& update) {
     // Don't erase - stream is still active
 
     // Build JSON-RPC response with "update" marker
-    fl::Json response = fl::Json::object();
+    fl::json response = fl::json::object();
     response.set("jsonrpc", "2.0");
     response.set("id", requestId);
 
-    fl::Json resultObj = fl::Json::object();
+    fl::json resultObj = fl::json::object();
     resultObj.set("update", update);
     response.set("result", resultObj);
 
@@ -85,7 +85,7 @@ void Remote::sendStreamUpdate(const char* method, const fl::Json& update) {
     }
 }
 
-void Remote::sendStreamFinal(const char* method, const fl::Json& result) {
+void Remote::sendStreamFinal(const char* method, const fl::json& result) {
     fl::string methodName(method);
     auto it = mAsyncRequests.find(methodName);
     if (it == mAsyncRequests.end()) {
@@ -97,11 +97,11 @@ void Remote::sendStreamFinal(const char* method, const fl::Json& result) {
     mAsyncRequests.erase(it);  // Stream complete - remove request
 
     // Build JSON-RPC response with "stop" marker
-    fl::Json response = fl::Json::object();
+    fl::json response = fl::json::object();
     response.set("jsonrpc", "2.0");
     response.set("id", requestId);
 
-    fl::Json resultObj = fl::Json::object();
+    fl::json resultObj = fl::json::object();
     resultObj.set("value", result);
     resultObj.set("stop", true);
     response.set("result", resultObj);
@@ -116,16 +116,16 @@ void Remote::sendStreamFinal(const char* method, const fl::Json& result) {
 // Error Reporting
 
 void Remote::reportError(const fl::string& message) {
-    fl::Json params = fl::Json::object();
+    fl::json params = fl::json::object();
     params.set("message", message);
     reportError(params);
 }
 
-void Remote::reportError(const fl::Json& data) {
+void Remote::reportError(const fl::json& data) {
     if (!mResponseSink) {
         return;
     }
-    fl::Json notification = fl::Json::object();
+    fl::json notification = fl::json::object();
     notification.set("jsonrpc", "2.0");
     notification.set("method", "__error");
     notification.set("params", data);
@@ -134,7 +134,7 @@ void Remote::reportError(const fl::Json& data) {
 
 // RPC Processing
 
-fl::Json Remote::processRpc(const fl::Json& request) {
+fl::json Remote::processRpc(const fl::json& request) {
     // Extract optional timestamp field (0 = immediate, >0 = scheduled)
     u32 timestamp = 0;
     if (request.contains("timestamp") && request["timestamp"].is_int()) {
@@ -155,13 +155,13 @@ fl::Json Remote::processRpc(const fl::Json& request) {
         }
 
         // Immediate execution - pass directly to Rpc
-        fl::Json response = mRpc.handle(request);
+        fl::json response = mRpc.handle(request);
 
         // For async functions, response already sent via sendAsyncResponse()
         if (response.contains("__async") && response["__async"].as_bool().value_or(false)) {
             // Don't return response (ACK already sent by Rpc)
             // Return null to prevent Server from queuing it
-            fl::Json nullResponse = fl::Json::object();
+            fl::json nullResponse = fl::json::object();
             nullResponse.set("__skip", true);  // Marker to skip queueing
             return nullResponse;
         }
@@ -185,19 +185,19 @@ fl::Json Remote::processRpc(const fl::Json& request) {
         FL_DBG("RPC: Scheduled function - result will be pushed after execution");
 
         // Return acknowledgment with null result and "scheduled" marker
-        fl::Json response = fl::Json::object();
+        fl::json response = fl::json::object();
         if (request.contains("id")) {
             response.set("id", request["id"]);
         }
-        response.set("result", fl::Json(nullptr));
+        response.set("result", fl::json(nullptr));
         response.set("scheduled", true);  // Marker to not queue this response
         return response;
     }
 }
 
-void Remote::scheduleFunction(u32 timestamp, u32 receivedAt, const fl::Json& jsonRpcRequest) {
+void Remote::scheduleFunction(u32 timestamp, u32 receivedAt, const fl::json& jsonRpcRequest) {
     // Make explicit copy for capture (avoid reference issues)
-    fl::Json requestCopy = jsonRpcRequest;
+    fl::json requestCopy = jsonRpcRequest;
     fl::string funcName = requestCopy["method"].as_string().value_or("unknown");
 
     // Wrap RPC execution in lambda and schedule it
@@ -205,7 +205,7 @@ void Remote::scheduleFunction(u32 timestamp, u32 receivedAt, const fl::Json& jso
         u32 executedAt = fl::millis();
 
         // Execute JSON-RPC request
-        fl::Json response = mRpc.handle(requestCopy);
+        fl::json response = mRpc.handle(requestCopy);
 
         // Record result with timing metadata
         if (response.contains("result") && requestCopy.contains("method")) {
@@ -216,7 +216,7 @@ void Remote::scheduleFunction(u32 timestamp, u32 receivedAt, const fl::Json& jso
     FL_DBG("Scheduled RPC: " << funcName << " at " << timestamp);
 }
 
-void Remote::recordResult(const fl::string& funcName, const fl::Json& result, u32 scheduledAt, u32 receivedAt, u32 executedAt, bool wasScheduled) {
+void Remote::recordResult(const fl::string& funcName, const fl::json& result, u32 scheduledAt, u32 receivedAt, u32 executedAt, bool wasScheduled) {
     mResults.push_back({funcName, result, scheduledAt, receivedAt, executedAt, wasScheduled});
 }
 
@@ -257,12 +257,12 @@ Remote::Remote(RequestSource source, ResponseSink sink)
     : Server(fl::move(source), fl::move(sink))
 {
     // Set request handler to processRpc
-    setRequestHandler([this](const fl::Json& request) {
+    setRequestHandler([this](const fl::json& request) {
         return processRpc(request);
     });
 
     // Set response sink on Rpc for async ACKs
-    mRpc.setResponseSink([this](const fl::Json& response) {
+    mRpc.setResponseSink([this](const fl::json& response) {
         // Send response directly via Server's response sink
         if (mResponseSink) {
             mResponseSink(response);
@@ -278,7 +278,7 @@ size_t Remote::update(u32 currentTimeMs) {
 
     // Push scheduled results as JSON-RPC responses
     for (const auto& r : mResults) {
-        fl::Json response = fl::Json::object();
+        fl::json response = fl::json::object();
         response.set("result", r.result);
         // Note: We don't have the original request ID for scheduled calls
         // This could be improved by storing the ID with RpcResult
@@ -296,7 +296,7 @@ fl::vector<Remote::MethodInfo> Remote::methods() const {
 
     // Get flat JSON schema from underlying RPC
     // Format: [["methodName", "returnType", [["param1", "type1"], ...]], ...]
-    fl::Json jsonMethods = mRpc.methods();
+    fl::json jsonMethods = mRpc.methods();
 
     if (!jsonMethods.is_array()) {
         return result;
@@ -304,7 +304,7 @@ fl::vector<Remote::MethodInfo> Remote::methods() const {
 
     // Convert each flat method array to MethodInfo struct
     for (fl::size i = 0; i < jsonMethods.size(); i++) {
-        fl::Json method = jsonMethods[i];
+        fl::json method = jsonMethods[i];
 
         if (!method.is_array() || method.size() < 3) {
             continue;  // Invalid method format
@@ -320,9 +320,9 @@ fl::vector<Remote::MethodInfo> Remote::methods() const {
 
         // method[2] = params array: [["param1", "type1"], ["param2", "type2"], ...]
         if (method[2].is_array()) {
-            fl::Json params = method[2];
+            fl::json params = method[2];
             for (fl::size j = 0; j < params.size(); j++) {
-                fl::Json param = params[j];
+                fl::json param = params[j];
                 if (param.is_array() && param.size() >= 2) {
                     ParamInfo paramInfo;
                     paramInfo.name = param[0].as_string().value_or("");

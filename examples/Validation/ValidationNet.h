@@ -20,7 +20,7 @@
 
 // Forward declarations
 namespace fl {
-class Json;
+class json;
 }
 
 /// @brief State for network validation
@@ -34,26 +34,26 @@ struct ValidationNetState {
 
 /// @brief Start WiFi Soft AP and HTTP server with test endpoints.
 /// @return JSON with {ssid, password, ip, port} on success, or {error} on failure.
-fl::Json startNetServer();
+fl::json startNetServer();
 
 /// @brief Start WiFi Soft AP only (for net-client mode).
 /// @return JSON with {ssid, password, gateway_ip} on success, or {error} on failure.
-fl::Json startNetClient();
+fl::json startNetClient();
 
 /// @brief Run HTTP client tests against a host server.
 /// @param host_ip IP address of the host HTTP server (e.g., "192.168.4.2")
 /// @param port Port of the host HTTP server (e.g., 8080)
 /// @return JSON with {success, tests_passed, tests_failed, results[]}
-fl::Json runNetClientTest(const char* host_ip, uint16_t port);
+fl::json runNetClientTest(const char* host_ip, uint16_t port);
 
 /// @brief Run self-contained loopback test: start HTTP server, client GETs localhost.
 /// No WiFi needed — purely TCP over localhost (127.0.0.1).
 /// @return JSON with {success, tests_passed, tests_failed, results[]}
-fl::Json runNetLoopback();
+fl::json runNetLoopback();
 
 /// @brief Stop WiFi AP and HTTP server/client, release all resources.
 /// @return JSON with {success: true} on success
-fl::Json stopNet();
+fl::json stopNet();
 
 /// @brief Get current network validation state.
 /// @return Reference to the global net state

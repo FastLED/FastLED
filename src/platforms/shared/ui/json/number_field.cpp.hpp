@@ -1,7 +1,7 @@
 // IWYU pragma: private
 
-#include "fl/json.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
+#include "fl/stl/json.h"
 #include "fl/math_macros.h"
 #include "platforms/shared/ui/json/number_field.h"
 #include "ui_internal.h"
@@ -24,7 +24,7 @@ public:
         : JsonUiInternal(name), mValue(value), mMin(min), mMax(max) {}
 
     // Override toJson to serialize the number field's data directly.
-    void toJson(fl::Json& json) const override {
+    void toJson(fl::json& json) const override {
         json.set("name", name());
         json.set("type", "number");
         json.set("group", groupName());
@@ -35,7 +35,7 @@ public:
     }
 
     // Override updateInternal to handle updates from JSON.
-    void updateInternal(const fl::Json& json) override {
+    void updateInternal(const fl::json& json) override {
         float value = json | 0.0f;
         if (value < mMin) {
             value = mMin;
@@ -88,7 +88,7 @@ JsonNumberFieldImpl &JsonNumberFieldImpl::Group(const fl::string &name) {
 
 const fl::string &JsonNumberFieldImpl::name() const { return mInternal->name(); }
 
-void JsonNumberFieldImpl::toJson(fl::Json &json) const {
+void JsonNumberFieldImpl::toJson(fl::json &json) const {
     mInternal->toJson(json);
 }
 

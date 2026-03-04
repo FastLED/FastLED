@@ -50,7 +50,7 @@
 
 #include "fl/dbg.h"
 #include "fl/file_system.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/math_macros.h"
 #include "fl/stl/memory.h"
 #include "fl/stl/string.h"
@@ -299,7 +299,7 @@ EMSCRIPTEN_KEEPALIVE bool jsDeclareFile(const char *path, size_t len) {
 }
 
 EMSCRIPTEN_KEEPALIVE void fastled_declare_files(const char* jsonStr) {
-    fl::Json doc = fl::Json::parse(fl::string(jsonStr));
+    fl::json doc = fl::json::parse(fl::string(jsonStr));
     if (!doc.is_object() || !doc.contains("files")) {
         return;
     }

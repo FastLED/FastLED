@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/json.h"
+#include "fl/stl/json.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -27,7 +27,7 @@ namespace fl {
  *       int result = doLongWork(param);
  *
  *       // Send final result
- *       send.send(Json::object().set("value", result));
+ *       send.send(json::object().set("value", result));
  *   });
  *
  * EXAMPLE USAGE (ASYNC_STREAM mode):
@@ -37,11 +37,11 @@ namespace fl {
  *
  *       // Send multiple updates
  *       for (int i = 0; i < count; i++) {
- *           send.sendUpdate(Json::object().set("progress", i * 10));
+ *           send.sendUpdate(json::object().set("progress", i * 10));
  *       }
  *
  *       // Send final result
- *       send.sendFinal(Json::object().set("done", true));
+ *       send.sendFinal(json::object().set("done", true));
  *   }, RpcMode::ASYNC_STREAM);
  */
 class ResponseSend {
@@ -51,7 +51,7 @@ public:
      * @param requestId The JSON-RPC request ID (can be int, string, or null)
      * @param sink Function to send JSON responses
      */
-    ResponseSend(const fl::Json& requestId, fl::function<void(const fl::Json&)> sink)
+    ResponseSend(const fl::json& requestId, fl::function<void(const fl::json&)> sink)
         : mRequestId(requestId), mResponseSink(fl::move(sink)), mIsFinal(false) {}
 
     // Non-copyable but movable
@@ -67,12 +67,12 @@ public:
      * Creates a JSON-RPC response:
      * {"jsonrpc": "2.0", "result": <result>, "id": <requestId>}
      */
-    void send(const fl::Json& result) {
+    void send(const fl::json& result) {
         if (!mResponseSink || mIsFinal) {
             return;
         }
 
-        fl::Json response = fl::Json::object();
+        fl::json response = fl::json::object();
         response.set("jsonrpc", "2.0");
         response.set("result", result);
         response.set("id", mRequestId);
@@ -87,15 +87,15 @@ public:
      * Creates a JSON-RPC response with "update" marker:
      * {"jsonrpc": "2.0", "result": {"update": <update>}, "id": <requestId>}
      */
-    void sendUpdate(const fl::Json& update) {
+    void sendUpdate(const fl::json& update) {
         if (!mResponseSink || mIsFinal) {
             return;
         }
 
-        fl::Json response = fl::Json::object();
+        fl::json response = fl::json::object();
         response.set("jsonrpc", "2.0");
 
-        fl::Json result = fl::Json::object();
+        fl::json result = fl::json::object();
         result.set("update", update);
 
         response.set("result", result);
@@ -113,17 +113,17 @@ public:
      *
      * After calling sendFinal(), no more responses can be sent.
      */
-    void sendFinal(const fl::Json& result) {
+    void sendFinal(const fl::json& result) {
         if (!mResponseSink || mIsFinal) {
             return;
         }
 
         mIsFinal = true;
 
-        fl::Json response = fl::Json::object();
+        fl::json response = fl::json::object();
         response.set("jsonrpc", "2.0");
 
-        fl::Json finalResult = fl::Json::object();
+        fl::json finalResult = fl::json::object();
         finalResult.set("value", result);
         finalResult.set("stop", true);
 
@@ -145,13 +145,13 @@ public:
      * @brief Get the request ID
      * @return The JSON-RPC request ID
      */
-    const fl::Json& requestId() const {
+    const fl::json& requestId() const {
         return mRequestId;
     }
 
 private:
-    fl::Json mRequestId;                          // Request ID from JSON-RPC request
-    fl::function<void(const fl::Json&)> mResponseSink;  // Function to send responses
+    fl::json mRequestId;                          // Request ID from JSON-RPC request
+    fl::function<void(const fl::json&)> mResponseSink;  // Function to send responses
     bool mIsFinal;                                // True if sendFinal() was called
 };
 

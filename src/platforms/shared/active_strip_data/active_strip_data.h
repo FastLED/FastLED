@@ -29,9 +29,9 @@ class ActiveStripData : public fl::EngineEvents::Listener {
 
     // JSON creation methods
     fl::string infoJsonString(); // Legacy implementation (working)
-    fl::string infoJsonStringNew(); // New fl::Json API (when creation is fixed)
+    fl::string infoJsonStringNew(); // New fl::json API (when creation is fixed)
 
-    // JSON parsing methods (NEW - using working fl::Json parsing API)
+    // JSON parsing methods (NEW - using working fl::json parsing API)
     bool parseStripJsonInfo(const char* jsonStr); // Parse strip configuration from JSON
     
     const StripDataMap &getData() const { return mStripMap; }

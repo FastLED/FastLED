@@ -3,7 +3,7 @@
 // IWYU pragma: private
 
 #include "fl/stl/function.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/stl/memory.h"
 #include "fl/stl/string.h"
 #include "fl/stl/mutex.h"
@@ -27,8 +27,8 @@ class JsonUiInternal {
     virtual ~JsonUiInternal() = default;
 
     const fl::string &name() const;
-    virtual void updateInternal(const fl::Json &json) { FL_UNUSED(json); }
-    virtual void toJson(fl::Json &json) const { FL_UNUSED(json); }
+    virtual void updateInternal(const fl::json &json) { FL_UNUSED(json); }
+    virtual void toJson(fl::json &json) const { FL_UNUSED(json); }
     int id() const;
 
     // Group functionality

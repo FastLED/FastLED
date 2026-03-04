@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/json.h"
+#include "fl/stl/json.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -41,11 +41,11 @@ template<typename R, typename... Args>
 class ResponseAwareInvoker<R(Args...)> : public ErasedInvoker {
 public:
     ResponseAwareInvoker(fl::function<R(ResponseSend&, Args...)> fn,
-                        const fl::Json& requestId,
-                        fl::function<void(const fl::Json&)> responseSink)
+                        const fl::json& requestId,
+                        fl::function<void(const fl::json&)> responseSink)
         : mFn(fl::move(fn)), mRequestId(requestId), mResponseSink(fl::move(responseSink)) {}
 
-    fl::tuple<TypeConversionResult, Json> invoke(const Json& args) override {
+    fl::tuple<TypeConversionResult, json> invoke(const json& args) override {
         // Create ResponseSend instance
         ResponseSend responseSend(mRequestId, mResponseSink);
 
@@ -60,8 +60,8 @@ public:
 
 private:
     fl::function<R(ResponseSend&, Args...)> mFn;
-    fl::Json mRequestId;
-    fl::function<void(const fl::Json&)> mResponseSink;
+    fl::json mRequestId;
+    fl::function<void(const fl::json&)> mResponseSink;
 };
 
 // Specialization for void return type
@@ -69,11 +69,11 @@ template<typename... Args>
 class ResponseAwareInvoker<void(Args...)> : public ErasedInvoker {
 public:
     ResponseAwareInvoker(fl::function<void(ResponseSend&, Args...)> fn,
-                        const fl::Json& requestId,
-                        fl::function<void(const fl::Json&)> responseSink)
+                        const fl::json& requestId,
+                        fl::function<void(const fl::json&)> responseSink)
         : mFn(fl::move(fn)), mRequestId(requestId), mResponseSink(fl::move(responseSink)) {}
 
-    fl::tuple<TypeConversionResult, Json> invoke(const Json& args) override {
+    fl::tuple<TypeConversionResult, json> invoke(const json& args) override {
         // Create ResponseSend instance
         ResponseSend responseSend(mRequestId, mResponseSink);
 
@@ -84,13 +84,13 @@ public:
         });
 
         TypeConversionResult result = binding.invoke(args);
-        return fl::make_tuple(result, Json(nullptr));
+        return fl::make_tuple(result, json(nullptr));
     }
 
 private:
     fl::function<void(ResponseSend&, Args...)> mFn;
-    fl::Json mRequestId;
-    fl::function<void(const fl::Json&)> mResponseSink;
+    fl::json mRequestId;
+    fl::function<void(const fl::json&)> mResponseSink;
 };
 
 } // namespace detail

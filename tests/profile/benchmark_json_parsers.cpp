@@ -1,6 +1,6 @@
 // ok standalone
 // JSON Parser A/B Benchmark
-// Compares parse() (ArduinoJson) vs parse2() (custom parser)
+// Compares parse() (Legacy) vs parse2() (custom parser)
 //
 // Usage:
 //   ./benchmark_json_parsers              # Run both small and large benchmarks (default)
@@ -9,7 +9,7 @@
 
 #include "fl/file_system.h"
 #include "fl/int.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/stl/chrono.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/stdio.h"
@@ -42,9 +42,9 @@ void run_benchmark(const char* test_name, const fl::string& json_data, int itera
     printf("Iterations: %d\n", iterations);
     printf("\n");
 
-    // Benchmark ArduinoJson parse()
+    // Benchmark Legacy parse()
     double parse1_time = benchmark_microseconds([&]() {
-        Json result = Json::parse(json_data);
+        json result = json::parse(json_data);
         if (result.is_null()) {
             success = false;
         }
@@ -54,7 +54,7 @@ void run_benchmark(const char* test_name, const fl::string& json_data, int itera
 
     // Benchmark Custom parse2()
     double parse2_time = benchmark_microseconds([&]() {
-        Json result = Json::parse(json_data);
+        json result = json::parse(json_data);
         if (result.is_null()) {
             success = false;
         }
@@ -64,7 +64,7 @@ void run_benchmark(const char* test_name, const fl::string& json_data, int itera
 
     // Results
     printf("Performance Results:\n");
-    printf("  ArduinoJson parse():  %.2f µs/parse\n", parse1_time);
+    printf("  Legacy parse():  %.2f µs/parse\n", parse1_time);
     printf("  Custom parse2():      %.2f µs/parse\n", parse2_time);
     printf("\n");
 
@@ -92,7 +92,7 @@ void run_benchmark(const char* test_name, const fl::string& json_data, int itera
 
     printf("\n");
     printf("Throughput:\n");
-    printf("  ArduinoJson parse():  %.2f MB/s\n", throughput1_mbps);
+    printf("  Legacy parse():  %.2f MB/s\n", throughput1_mbps);
     printf("  Custom parse2():      %.2f MB/s\n", throughput2_mbps);
     printf("================================================================================\n\n");
 
@@ -172,7 +172,7 @@ bool run_large_benchmark() {
 
 void print_usage() {
     printf("JSON Parser A/B Benchmark\n");
-    printf("Compares parse() (ArduinoJson) vs parse2() (custom parser)\n\n");
+    printf("Compares parse() (Legacy) vs parse2() (custom parser)\n\n");
     printf("Usage:\n");
     printf("  benchmark_json_parsers              # Run both benchmarks (default)\n");
     printf("  benchmark_json_parsers small        # Run small JSON benchmark\n");
@@ -188,7 +188,7 @@ int main(int argc, char* argv[]) {
     printf("################################################################################\n");
     printf("\n");
     printf("Comparing:\n");
-    printf("  • parse()  - ArduinoJson library (external dependency)\n");
+    printf("  • parse()  - Legacy library (external dependency)\n");
     printf("  • parse2() - Custom native parser (zero external dependencies)\n");
     printf("\n");
 

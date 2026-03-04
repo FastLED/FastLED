@@ -44,7 +44,7 @@
 #include "fl/stl/malloc.h"
 #include "fl/stl/cstring.h"
 #include "fl/screenmap.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/stl/stdio.h"
 
 // EM_JS function to push screenmap updates to JavaScript
@@ -112,27 +112,27 @@ EMSCRIPTEN_KEEPALIVE void* getScreenMapData(int* dataSize) {
 
     // Create dictionary of screenmaps (stripId → screenmap object)
     // Same format as _jsSetCanvasSize() to match JavaScript expectations
-    fl::Json root = fl::Json::object();
+    fl::json root = fl::json::object();
 
     // Build a separate screenmap object for each strip
     for (const auto &[stripIndex, screenMap] : screenMaps) {
         // Create this strip's screenmap object
-        fl::Json screenMapObj = fl::Json::object();
+        fl::json screenMapObj = fl::json::object();
 
         // Create strips object containing only this strip
-        fl::Json stripsObj = fl::Json::object();
-        fl::Json stripMapObj = fl::Json::object();
+        fl::json stripsObj = fl::json::object();
+        fl::json stripMapObj = fl::json::object();
 
-        fl::Json mapObj = fl::Json::object();
-        fl::Json xArray = fl::Json::array();
-        fl::Json yArray = fl::Json::array();
+        fl::json mapObj = fl::json::object();
+        fl::json xArray = fl::json::array();
+        fl::json yArray = fl::json::array();
 
         for (fl::u32 i = 0; i < screenMap.getLength(); i++) {
             float x = screenMap[i].x;
             float y = screenMap[i].y;
 
-            xArray.push_back(fl::Json(x));
-            yArray.push_back(fl::Json(y));
+            xArray.push_back(fl::json(x));
+            yArray.push_back(fl::json(y));
         }
 
         mapObj.set("x", xArray);
@@ -220,7 +220,7 @@ namespace fl {
  */
 EMSCRIPTEN_KEEPALIVE void* getStripUpdateData(int stripId, int* dataSize) {
     // Generate basic strip update JSON
-    fl::Json doc = fl::Json::object();
+    fl::json doc = fl::json::object();
     doc.set("strip_id", stripId);
     doc.set("event", "strip_update");
     doc.set("timestamp", static_cast<int>(fl::millis()));
@@ -250,7 +250,7 @@ EMSCRIPTEN_KEEPALIVE void notifyStripAdded(int stripId, int numLeds) {
  */
 EMSCRIPTEN_KEEPALIVE void* getUiUpdateData(int* dataSize) {
     // Export basic UI update structure
-    fl::Json doc = fl::Json::object();
+    fl::json doc = fl::json::object();
     doc.set("event", "ui_update");
     doc.set("timestamp", static_cast<int>(fl::millis()));
 
@@ -278,27 +278,27 @@ void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
     const auto& screenMaps = active_strips.getScreenMaps();
 
     // Create dictionary of screenmaps (stripId → screenmap object)
-    fl::Json root = fl::Json::object();
+    fl::json root = fl::json::object();
 
     // Build a separate screenmap object for each strip
     for (const auto &[stripIndex, screenMap] : screenMaps) {
         // Create this strip's screenmap object
-        fl::Json screenMapObj = fl::Json::object();
+        fl::json screenMapObj = fl::json::object();
 
         // Create strips object containing only this strip
-        fl::Json stripsObj = fl::Json::object();
-        fl::Json stripMapObj = fl::Json::object();
+        fl::json stripsObj = fl::json::object();
+        fl::json stripMapObj = fl::json::object();
 
-        fl::Json mapObj = fl::Json::object();
-        fl::Json xArray = fl::Json::array();
-        fl::Json yArray = fl::Json::array();
+        fl::json mapObj = fl::json::object();
+        fl::json xArray = fl::json::array();
+        fl::json yArray = fl::json::array();
 
         for (u32 i = 0; i < screenMap.getLength(); i++) {
             float x = screenMap[i].x;
             float y = screenMap[i].y;
 
-            xArray.push_back(fl::Json(x));
-            yArray.push_back(fl::Json(y));
+            xArray.push_back(fl::json(x));
+            yArray.push_back(fl::json(y));
         }
 
         mapObj.set("x", xArray);

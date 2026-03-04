@@ -388,10 +388,10 @@ public:
     virtual bool isConnected() const = 0;
 
     // RequestSource implementation (for Remote)
-    fl::optional<fl::Json> readRequest();
+    fl::optional<fl::json> readRequest();
 
     // ResponseSink implementation (for Remote)
-    void writeResponse(const fl::Json& response);
+    void writeResponse(const fl::json& response);
 
     // Update loop (handles reconnection, heartbeat, I/O)
     virtual void update(uint32_t currentTimeMs) = 0;
@@ -407,14 +407,14 @@ protected:
     virtual int recv(uint8_t* buffer, size_t maxLen) = 0;
 
     // Request/response parsing helpers
-    fl::optional<fl::Json> parseJsonFromChunk(const fl::vector<uint8_t>& chunk);
-    fl::vector<uint8_t> formatJsonChunk(const fl::Json& json);
+    fl::optional<fl::json> parseJsonFromChunk(const fl::vector<uint8_t>& chunk);
+    fl::vector<uint8_t> formatJsonChunk(const fl::json& json);
 
     HttpConnection* mConnection;
     ChunkedReader mReader;
     ChunkedWriter mWriter;
-    fl::queue<fl::Json> mRequestQueue;   // Buffered requests
-    fl::queue<fl::Json> mResponseQueue;  // Buffered responses
+    fl::queue<fl::json> mRequestQueue;   // Buffered requests
+    fl::queue<fl::json> mResponseQueue;  // Buffered responses
 };
 ```
 
@@ -445,10 +445,10 @@ public:
     void update(uint32_t currentTimeMs) override;
 
     // Send RPC request (client → server)
-    void sendRequest(const fl::Json& request);
+    void sendRequest(const fl::json& request);
 
     // Receive RPC response (server → client)
-    fl::optional<fl::Json> receiveResponse();
+    fl::optional<fl::json> receiveResponse();
 
 protected:
     // Platform-specific socket I/O (delegates to NativeHttpClient)
@@ -472,7 +472,7 @@ client->setHeartbeatInterval(30000);  // 30s
 // Create Remote with client as transport
 fl::Remote remote(
     [&client]() { return client->readRequest(); },
-    [&client](const fl::Json& r) { client->writeResponse(r); }
+    [&client](const fl::json& r) { client->writeResponse(r); }
 );
 
 // Update loop
@@ -535,7 +535,7 @@ server->start();
 // Create Remote with server as transport
 fl::Remote remote(
     [&server]() { return server->readRequest(); },
-    [&server](const fl::Json& r) { server->writeResponse(r); }
+    [&server](const fl::json& r) { server->writeResponse(r); }
 );
 
 // Bind RPC methods

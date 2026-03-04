@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/fx/wled/segment.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/stl/string.h"
 
 namespace fl {
@@ -44,7 +44,7 @@ fl::string rgbToHex(u8 r, u8 g, u8 b);
  * - Flags (sel, rev, mi, o1, o2, o3, rpt)
  * - Other (cct, si, m12, name)
  */
-void parseSegmentFields(const fl::Json& segJson, WLEDSegment& seg);
+void parseSegmentFields(const fl::json& segJson, WLEDSegment& seg);
 
 } // namespace wled
 } // namespace fl

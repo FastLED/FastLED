@@ -1,8 +1,8 @@
 // IWYU pragma: private
 
 #include "platforms/shared/ui/json/slider.h"
-#include "fl/json.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
+#include "fl/stl/json.h"
 #include "fl/math_macros.h"
 #include "platforms/shared/ui/json/ui.h"
 
@@ -35,7 +35,7 @@ public:
     }
 
     // Override toJson to serialize the slider's data directly.
-    void toJson(fl::Json& json) const override {
+    void toJson(fl::json& json) const override {
         json.set("name", name());
         json.set("type", "slider");
         json.set("group", groupName());
@@ -50,7 +50,7 @@ public:
     }
 
     // Override updateInternal to handle updates from JSON.
-    void updateInternal(const fl::Json& json) override {
+    void updateInternal(const fl::json& json) override {
         float value = json | 0.0f;
         if (value < mMin) {
             value = mMin;
@@ -109,7 +109,7 @@ JsonSliderImpl &JsonSliderImpl::Group(const fl::string &name) {
 
 const fl::string &JsonSliderImpl::name() const { return mInternal->name(); }
 
-void JsonSliderImpl::toJson(fl::Json &json) const {
+void JsonSliderImpl::toJson(fl::json &json) const {
     mInternal->toJson(json);
 }
 

@@ -23,7 +23,7 @@
 #include "fl/stl/sstream.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/optional.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/simd.h"
 #include "ValidationSimd.h"
 #include "fl/memory.h"
@@ -35,16 +35,16 @@
 // Raw Serial Output Functions (bypass fl::println and ScopedLogDisable)
 // ============================================================================
 
-void printJsonRaw(const fl::Json& json, const char* prefix) {
+void printJsonRaw(const fl::json& json, const char* prefix) {
     // Serialize and print response
     fl::string formatted = fl::formatJsonResponse(json, prefix);
     fl::println(formatted.c_str());
     fl::flush();
 }
 
-void printStreamRaw(const char* messageType, const fl::Json& data) {
+void printStreamRaw(const char* messageType, const fl::json& data) {
     // Build pure JSONL message: RESULT: {"type":"...", ...data}
-    fl::Json output = fl::Json::object();
+    fl::json output = fl::json::object();
     output.set("type", messageType);
 
     // Copy all fields from data into output
@@ -76,9 +76,9 @@ enum class ReturnCode : int {
     INVALID_ARGS = 3
 };
 
-fl::Json makeResponse(bool success, ReturnCode returnCode, const char* message,
-                      const fl::Json& data = fl::Json()) {
-    fl::Json r = fl::Json::object();
+fl::json makeResponse(bool success, ReturnCode returnCode, const char* message,
+                      const fl::json& data = fl::json()) {
+    fl::json r = fl::json::object();
     r.set("success", success);
     r.set("returnCode", static_cast<int64_t>(static_cast<int>(returnCode)));
     r.set("message", message);
@@ -94,8 +94,8 @@ fl::Json makeResponse(bool success, ReturnCode returnCode, const char* message,
 // ValidationRemoteControl Private Helper Functions
 // ============================================================================
 
-fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
-    fl::Json response = fl::Json::object();
+fl::json ValidationRemoteControl::runSingleTestImpl(const fl::json& args) {
+    fl::json response = fl::json::object();
 
     // RPC system unwraps single-element arrays, so args is the config object directly
     if (!args.is_object()) {
@@ -105,7 +105,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         return response;
     }
 
-    fl::Json config = args;
+    fl::json config = args;
 
     // ========== REQUIRED PARAMETERS ==========
 
@@ -143,7 +143,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
         return response;
     }
 
-    fl::Json lane_sizes_json = config["laneSizes"];
+    fl::json lane_sizes_json = config["laneSizes"];
     if (lane_sizes_json.size() == 0 || lane_sizes_json.size() > 8) {
         response.set("success", false);
         response.set("error", "InvalidLaneCount");
@@ -367,7 +367,7 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     response.set("driver", driver_name.c_str());
     response.set("laneCount", static_cast<int64_t>(lane_sizes.size()));
 
-    fl::Json sizes_response = fl::Json::array();
+    fl::json sizes_response = fl::json::array();
     for (int size : lane_sizes) {
         sizes_response.push_back(static_cast<int64_t>(size));
     }
@@ -378,11 +378,11 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     // Free run_results before building response to reclaim heap
     // Only serialize pattern details when tests FAIL (saves heap on passing tests)
     if (!passed && !run_results.empty()) {
-        fl::Json patterns = fl::Json::array();
+        fl::json patterns = fl::json::array();
         for (fl::size ri = 0; ri < run_results.size(); ri++) {
             const auto& rr = run_results[ri];
             if (rr.passed) continue;  // Skip passing patterns
-            fl::Json pat = fl::Json::object();
+            fl::json pat = fl::json::object();
             pat.set("totalLeds", static_cast<int64_t>(rr.total_leds));
             pat.set("mismatchedLeds", static_cast<int64_t>(rr.mismatches));
             pat.set("mismatchedBytes", static_cast<int64_t>(rr.mismatchedBytes));
@@ -391,20 +391,20 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
             // Serialize first N LED errors (limit to prevent OOM on small MCUs)
             constexpr fl::size kMaxSerializedErrors = 5;
             if (!rr.errors.empty()) {
-                fl::Json errs = fl::Json::array();
+                fl::json errs = fl::json::array();
                 const fl::size errLimit = rr.errors.size() < kMaxSerializedErrors
                                               ? rr.errors.size()
                                               : kMaxSerializedErrors;
                 for (fl::size ei = 0; ei < errLimit; ei++) {
                     const auto& e = rr.errors[ei];
-                    fl::Json err = fl::Json::object();
+                    fl::json err = fl::json::object();
                     err.set("led", static_cast<int64_t>(e.led_index));
-                    fl::Json expected = fl::Json::array();
+                    fl::json expected = fl::json::array();
                     expected.push_back(static_cast<int64_t>(e.expected_r));
                     expected.push_back(static_cast<int64_t>(e.expected_g));
                     expected.push_back(static_cast<int64_t>(e.expected_b));
                     err.set("expected", expected);
-                    fl::Json actual = fl::Json::array();
+                    fl::json actual = fl::json::array();
                     actual.push_back(static_cast<int64_t>(e.actual_r));
                     actual.push_back(static_cast<int64_t>(e.actual_g));
                     actual.push_back(static_cast<int64_t>(e.actual_b));
@@ -424,8 +424,8 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     return response;
 }
 
-fl::Json ValidationRemoteControl::runParallelTestImpl(const fl::Json& args) {
-    fl::Json response = fl::Json::object();
+fl::json ValidationRemoteControl::runParallelTestImpl(const fl::json& args) {
+    fl::json response = fl::json::object();
 
     // Expects: {drivers: [{driver: "PARLIO", laneSizes: [100]}, {driver: "LCD_RGB", laneSizes: [100]}],
     //           pattern?: "MSB_LSB_A", iterations?: 1, timing?: "WS2812B-V5"}
@@ -436,7 +436,7 @@ fl::Json ValidationRemoteControl::runParallelTestImpl(const fl::Json& args) {
         return response;
     }
 
-    fl::Json config = args;
+    fl::json config = args;
 
     // 1. Extract drivers array (required)
     if (!config.contains("drivers") || !config["drivers"].is_array()) {
@@ -446,7 +446,7 @@ fl::Json ValidationRemoteControl::runParallelTestImpl(const fl::Json& args) {
         return response;
     }
 
-    fl::Json drivers_json = config["drivers"];
+    fl::json drivers_json = config["drivers"];
     if (drivers_json.size() < 2) {
         response.set("success", false);
         response.set("error", "TooFewDrivers");
@@ -499,7 +499,7 @@ fl::Json ValidationRemoteControl::runParallelTestImpl(const fl::Json& args) {
             return response;
         }
 
-        fl::Json entry = drivers_json[i];
+        fl::json entry = drivers_json[i];
 
         // Validate driver name
         if (!entry.contains("driver") || !entry["driver"].is_string()) {
@@ -539,7 +539,7 @@ fl::Json ValidationRemoteControl::runParallelTestImpl(const fl::Json& args) {
             return response;
         }
 
-        fl::Json lane_sizes_json = entry["laneSizes"];
+        fl::json lane_sizes_json = entry["laneSizes"];
         fl::vector<int> lane_sizes;
         for (fl::size li = 0; li < lane_sizes_json.size(); li++) {
             if (!lane_sizes_json[li].is_int()) {
@@ -713,12 +713,12 @@ fl::Json ValidationRemoteControl::runParallelTestImpl(const fl::Json& args) {
     response.set("rx_validation_passed", rx_validation_passed);
 
     // List drivers tested
-    fl::Json drivers_tested = fl::Json::array();
+    fl::json drivers_tested = fl::json::array();
     for (fl::size i = 0; i < driver_entries.size(); i++) {
-        fl::Json drv = fl::Json::object();
+        fl::json drv = fl::json::object();
         drv.set("driver", driver_entries[i].name.c_str());
         drv.set("pinTx", static_cast<int64_t>(driver_entries[i].pin_tx));
-        fl::Json sizes = fl::Json::array();
+        fl::json sizes = fl::json::array();
         for (int s : driver_entries[i].lane_sizes) {
             sizes.push_back(static_cast<int64_t>(s));
         }
@@ -732,8 +732,8 @@ fl::Json ValidationRemoteControl::runParallelTestImpl(const fl::Json& args) {
     return response;
 }
 
-fl::Json ValidationRemoteControl::findConnectedPinsImpl(const fl::Json& args) {
-    fl::Json response = fl::Json::object();
+fl::json ValidationRemoteControl::findConnectedPinsImpl(const fl::json& args) {
+    fl::json response = fl::json::object();
 
     // Parse optional arguments: [{startPin: int, endPin: int, autoApply: bool}]
     int start_pin = 0;
@@ -741,7 +741,7 @@ fl::Json ValidationRemoteControl::findConnectedPinsImpl(const fl::Json& args) {
     bool auto_apply = true;  // If true, automatically apply found pins
 
     if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
-        fl::Json config = args[0];
+        fl::json config = args[0];
         if (config.contains("startPin") && config["startPin"].is_int()) {
             start_pin = static_cast<int>(config["startPin"].as_int().value());
         }
@@ -786,7 +786,7 @@ fl::Json ValidationRemoteControl::findConnectedPinsImpl(const fl::Json& args) {
     // Search for connected adjacent pin pairs (n, n+1)
     int found_tx = -1;
     int found_rx = -1;
-    fl::Json tested_pairs = fl::Json::array();
+    fl::json tested_pairs = fl::json::array();
 
     for (int pin = start_pin; pin < end_pin; pin++) {
         int tx_candidate = pin;
@@ -795,7 +795,7 @@ fl::Json ValidationRemoteControl::findConnectedPinsImpl(const fl::Json& args) {
         // No pin skip logic needed - default range (0-8) is safe for all platforms
         // Higher pins (USB, flash, strapping) are excluded by the reduced default range
 
-        fl::Json pair = fl::Json::object();
+        fl::json pair = fl::json::object();
         pair.set("tx", static_cast<int64_t>(tx_candidate));
         pair.set("rx", static_cast<int64_t>(rx_candidate));
 
@@ -830,7 +830,7 @@ fl::Json ValidationRemoteControl::findConnectedPinsImpl(const fl::Json& args) {
     // NOTE: testedPairs array omitted - causes heap exhaustion on ESP32 (21+ objects = ~1500 bytes)
     // Validation script doesn't use this data, only needs {found, txPin, rxPin}
     // response.set("testedPairs", tested_pairs);
-    fl::Json search_range = fl::Json::array();
+    fl::json search_range = fl::json::array();
     search_range.push_back(static_cast<int64_t>(start_pin));
     search_range.push_back(static_cast<int64_t>(end_pin));
     response.set("searchRange", search_range);
@@ -896,14 +896,14 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     // Store shared state
     mState = state;
 
-    // NOTE: All RPC callbacks use const fl::Json& for efficient parameter passing.
+    // NOTE: All RPC callbacks use const fl::json& for efficient parameter passing.
     // The RPC system strips const/reference qualifiers and stores values in the tuple,
     // then passes them as references to the function. This avoids copies while
     // maintaining clean const-correct API.
 
     // Register "status" function - device readiness check
-    mRemote->bind("status", [this](const fl::Json& args) -> fl::Json {
-        fl::Json status = fl::Json::object();
+    mRemote->bind("status", [this](const fl::json& args) -> fl::json {
+        fl::json status = fl::json::object();
         status.set("ready", true);
         status.set("pinTx", static_cast<int64_t>(mState->pin_tx));
         status.set("pinRx", static_cast<int64_t>(mState->pin_rx));
@@ -915,18 +915,18 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     // the full OpenRPC schema. Our custom getSchema was causing stack overflow on ESP32-C6.
 
     // Register "debugTest" function - test RPC argument passing
-    mRemote->bind("debugTest", [](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
+    mRemote->bind("debugTest", [](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
         response.set("success", true);
         response.set("received", args);
         return response;
     });
 
     // Register "drivers" function - list available drivers
-    mRemote->bind("drivers", [this](const fl::Json& args) -> fl::Json {
-        fl::Json drivers = fl::Json::array();
+    mRemote->bind("drivers", [this](const fl::json& args) -> fl::json {
+        fl::json drivers = fl::json::array();
         for (fl::size i = 0; i < mState->drivers_available.size(); i++) {
-            fl::Json driver = fl::Json::object();
+            fl::json driver = fl::json::object();
             driver.set("name", mState->drivers_available[i].name.c_str());
             driver.set("priority", static_cast<int64_t>(mState->drivers_available[i].priority));
             driver.set("enabled", mState->drivers_available[i].enabled);
@@ -941,14 +941,14 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     // NOTE: runSingleTestImpl() may return early (error cases) without calling
     // sendAsyncResponse(). This wrapper ensures a response is ALWAYS sent so
     // the Python client never times out waiting 120s for a missing response.
-    mRemote->bind("runSingleTest", [this](const fl::Json& args) -> fl::Json {
-        fl::Json result = this->runSingleTestImpl(args);
+    mRemote->bind("runSingleTest", [this](const fl::json& args) -> fl::json {
+        fl::json result = this->runSingleTestImpl(args);
         // If runSingleTestImpl returned a non-null response, it exited early without
         // calling sendAsyncResponse(). Send it now so the client gets a response.
         if (!result.is_null()) {
             mRemote->sendAsyncResponse("runSingleTest", result);
         }
-        return fl::Json(nullptr);
+        return fl::json(nullptr);
     }, fl::RpcMode::ASYNC);
 
     // Register "runParallelTest" - test multiple drivers simultaneously
@@ -956,12 +956,12 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     //         pattern?: "MSB_LSB_A", iterations?: 1, timing?: "WS2812B-V5"}
     // Returns: {success, passed, duration_ms, show_duration_us, drivers: [...],
     //           rx_validation_attempted, rx_validation_passed}
-    mRemote->bind("runParallelTest", [this](const fl::Json& args) -> fl::Json {
-        fl::Json result = this->runParallelTestImpl(args);
+    mRemote->bind("runParallelTest", [this](const fl::json& args) -> fl::json {
+        fl::json result = this->runParallelTestImpl(args);
         if (!result.is_null()) {
             mRemote->sendAsyncResponse("runParallelTest", result);
         }
-        return fl::Json(nullptr);
+        return fl::json(nullptr);
     }, fl::RpcMode::ASYNC);
 
     // ========================================================================
@@ -969,10 +969,10 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     // ========================================================================
 
     // Register "ping" function - health check with timestamp
-    mRemote->bind("ping", [this](const fl::Json& args) -> fl::Json {
+    mRemote->bind("ping", [this](const fl::json& args) -> fl::json {
         uint32_t now = millis();
 
-        fl::Json response = fl::Json::object();
+        fl::json response = fl::json::object();
         response.set("success", true);
         response.set("message", "pong");
         response.set("timestamp", static_cast<int64_t>(now));
@@ -981,8 +981,8 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     });
 
     // TEST: Simple RPC without Serial to verify task context works
-    mRemote->bind("testNoSerial", [this](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
+    mRemote->bind("testNoSerial", [this](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
         response.set("success", true);
         response.set("message", "RPC works from task context");
         response.set("serial_safe", false);
@@ -990,8 +990,8 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     });
 
     // Register "setDebug" function - enable/disable runtime debug logging
-    mRemote->bind("setDebug", [this](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
+    mRemote->bind("setDebug", [this](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
 
         // Validate args: expects [enabled: bool]
         if (!args.is_array() || args.size() != 1) {
@@ -1020,8 +1020,8 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
 
     // Register "testGpioConnection" function - test if TX and RX pins are electrically connected
     // This is a pre-test to diagnose hardware connection issues before running validation
-    mRemote->bind("testGpioConnection", [](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
+    mRemote->bind("testGpioConnection", [](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
 
         // Validate args: expects [txPin, rxPin]
         if (!args.is_array() || args.size() != 2) {
@@ -1086,13 +1086,13 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     // ========================================================================
 
     // Register "getPins" function - query current and default pin configuration
-    mRemote->bind("getPins", [this](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
+    mRemote->bind("getPins", [this](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
         response.set("success", true);
         response.set("txPin", static_cast<int64_t>(mState->pin_tx));
         response.set("rxPin", static_cast<int64_t>(mState->pin_rx));
 
-        fl::Json defaults = fl::Json::object();
+        fl::json defaults = fl::json::object();
         defaults.set("txPin", static_cast<int64_t>(mState->default_pin_tx));
         defaults.set("rxPin", static_cast<int64_t>(mState->default_pin_rx));
         response.set("defaults", defaults);
@@ -1113,8 +1113,8 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     });
 
     // Register "setTxPin" function - set TX pin (regenerates test cases)
-    mRemote->bind("setTxPin", [this](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
+    mRemote->bind("setTxPin", [this](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
 
         if (!args.is_array() || args.size() != 1 || !args[0].is_int()) {
             response.set("error", "InvalidArgs");
@@ -1143,8 +1143,8 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     });
 
     // Register "setRxPin" function - set RX pin (recreates RX channel)
-    mRemote->bind("setRxPin", [this](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
+    mRemote->bind("setRxPin", [this](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
 
         if (!args.is_array() || args.size() != 1 || !args[0].is_int()) {
             response.set("error", "InvalidArgs");
@@ -1198,8 +1198,8 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     });
 
     // Register "setPins" function - set both TX and RX pins atomically
-    mRemote->bind("setPins", [this](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
+    mRemote->bind("setPins", [this](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
 
         // Accept either {txPin, rxPin} object or [txPin, rxPin] array
         int new_tx_pin = -1;
@@ -1207,7 +1207,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
 
         if (args.is_array() && args.size() == 1 && args[0].is_object()) {
             // Object form: [{txPin: int, rxPin: int}]
-            fl::Json config = args[0];
+            fl::json config = args[0];
             if (config.contains("txPin") && config["txPin"].is_int()) {
                 new_tx_pin = static_cast<int>(config["txPin"].as_int().value());
             }
@@ -1290,16 +1290,16 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
 
     // Register "findConnectedPins" function - probe adjacent pin pairs to find a jumper wire connection
     // This allows automatic discovery of TX/RX pin pair without requiring user to specify them
-    mRemote->bind("findConnectedPins", [this](const fl::Json& args) -> fl::Json {
+    mRemote->bind("findConnectedPins", [this](const fl::json& args) -> fl::json {
         return findConnectedPinsImpl(args);
     });
 
     // Register "help" function - list all RPC functions with descriptions
-    mRemote->bind("help", [this](const fl::Json& args) -> fl::Json {
-        fl::Json functions = fl::Json::array();
+    mRemote->bind("help", [this](const fl::json& args) -> fl::json {
+        fl::json functions = fl::json::array();
 
         // Phase 1: Basic Control
-        fl::Json start_fn = fl::Json::object();
+        fl::json start_fn = fl::json::object();
         start_fn.set("name", "start");
         start_fn.set("phase", "Phase 1: Basic Control");
         start_fn.set("args", "[]");
@@ -1307,7 +1307,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         start_fn.set("description", "Trigger test matrix execution");
         functions.push_back(start_fn);
 
-        fl::Json status_fn = fl::Json::object();
+        fl::json status_fn = fl::json::object();
         status_fn.set("name", "status");
         status_fn.set("phase", "Phase 1: Basic Control");
         status_fn.set("args", "[]");
@@ -1315,7 +1315,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         status_fn.set("description", "Query current test state");
         functions.push_back(status_fn);
 
-        fl::Json drivers_fn = fl::Json::object();
+        fl::json drivers_fn = fl::json::object();
         drivers_fn.set("name", "drivers");
         drivers_fn.set("phase", "Phase 1: Basic Control");
         drivers_fn.set("args", "[]");
@@ -1324,7 +1324,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         functions.push_back(drivers_fn);
 
         // Phase 2: Configuration
-        fl::Json getConfig_fn = fl::Json::object();
+        fl::json getConfig_fn = fl::json::object();
         getConfig_fn.set("name", "getConfig");
         getConfig_fn.set("phase", "Phase 2: Configuration");
         getConfig_fn.set("args", "[]");
@@ -1332,7 +1332,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         getConfig_fn.set("description", "Query current test matrix configuration");
         functions.push_back(getConfig_fn);
 
-        fl::Json setDrivers_fn = fl::Json::object();
+        fl::json setDrivers_fn = fl::json::object();
         setDrivers_fn.set("name", "setDrivers");
         setDrivers_fn.set("phase", "Phase 2: Configuration");
         setDrivers_fn.set("args", "[driver1, driver2, ...]");
@@ -1340,7 +1340,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         setDrivers_fn.set("description", "Configure enabled drivers");
         functions.push_back(setDrivers_fn);
 
-        fl::Json setLaneRange_fn = fl::Json::object();
+        fl::json setLaneRange_fn = fl::json::object();
         setLaneRange_fn.set("name", "setLaneRange");
         setLaneRange_fn.set("phase", "Phase 2: Configuration");
         setLaneRange_fn.set("args", "[minLanes, maxLanes]");
@@ -1348,7 +1348,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         setLaneRange_fn.set("description", "Configure lane range (1-8)");
         functions.push_back(setLaneRange_fn);
 
-        fl::Json setStripSizes_fn = fl::Json::object();
+        fl::json setStripSizes_fn = fl::json::object();
         setStripSizes_fn.set("name", "setStripSizes");
         setStripSizes_fn.set("phase", "Phase 2: Configuration");
         setStripSizes_fn.set("args", "[size] or [shortSize, longSize]");
@@ -1357,7 +1357,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         functions.push_back(setStripSizes_fn);
 
         // Phase 3: Selective Execution
-        fl::Json runTestCase_fn = fl::Json::object();
+        fl::json runTestCase_fn = fl::json::object();
         runTestCase_fn.set("name", "runTestCase");
         runTestCase_fn.set("phase", "Phase 3: Selective Execution");
         runTestCase_fn.set("args", "[testCaseIndex]");
@@ -1365,7 +1365,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         runTestCase_fn.set("description", "Run single test case by index");
         functions.push_back(runTestCase_fn);
 
-        fl::Json runDriver_fn = fl::Json::object();
+        fl::json runDriver_fn = fl::json::object();
         runDriver_fn.set("name", "runDriver");
         runDriver_fn.set("phase", "Phase 3: Selective Execution");
         runDriver_fn.set("args", "[driverName]");
@@ -1373,7 +1373,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         runDriver_fn.set("description", "Run all tests for specific driver");
         functions.push_back(runDriver_fn);
 
-        fl::Json runAll_fn = fl::Json::object();
+        fl::json runAll_fn = fl::json::object();
         runAll_fn.set("name", "runAll");
         runAll_fn.set("phase", "Phase 3: Selective Execution");
         runAll_fn.set("args", "[]");
@@ -1381,7 +1381,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         runAll_fn.set("description", "Run full test matrix with JSON results");
         functions.push_back(runAll_fn);
 
-        fl::Json getResults_fn = fl::Json::object();
+        fl::json getResults_fn = fl::json::object();
         getResults_fn.set("name", "getResults");
         getResults_fn.set("phase", "Phase 3: Selective Execution");
         getResults_fn.set("args", "[]");
@@ -1389,7 +1389,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         getResults_fn.set("description", "Return all test results");
         functions.push_back(getResults_fn);
 
-        fl::Json getResult_fn = fl::Json::object();
+        fl::json getResult_fn = fl::json::object();
         getResult_fn.set("name", "getResult");
         getResult_fn.set("phase", "Phase 3: Selective Execution");
         getResult_fn.set("args", "[testCaseIndex]");
@@ -1398,7 +1398,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         functions.push_back(getResult_fn);
 
         // Phase 4: Utility and Control
-        fl::Json reset_fn = fl::Json::object();
+        fl::json reset_fn = fl::json::object();
         reset_fn.set("name", "reset");
         reset_fn.set("phase", "Phase 4: Utility");
         reset_fn.set("args", "[]");
@@ -1406,7 +1406,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         reset_fn.set("description", "Reset test state without device reboot");
         functions.push_back(reset_fn);
 
-        fl::Json halt_fn = fl::Json::object();
+        fl::json halt_fn = fl::json::object();
         halt_fn.set("name", "halt");
         halt_fn.set("phase", "Phase 4: Utility");
         halt_fn.set("args", "[]");
@@ -1414,7 +1414,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         halt_fn.set("description", "Trigger sketch halt");
         functions.push_back(halt_fn);
 
-        fl::Json ping_fn = fl::Json::object();
+        fl::json ping_fn = fl::json::object();
         ping_fn.set("name", "ping");
         ping_fn.set("phase", "Phase 4: Utility");
         ping_fn.set("args", "[]");
@@ -1423,7 +1423,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         functions.push_back(ping_fn);
 
         // Phase 5: Pin Configuration
-        fl::Json getPins_fn = fl::Json::object();
+        fl::json getPins_fn = fl::json::object();
         getPins_fn.set("name", "getPins");
         getPins_fn.set("phase", "Phase 5: Pin Configuration");
         getPins_fn.set("args", "[]");
@@ -1431,7 +1431,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         getPins_fn.set("description", "Query current and default pin configuration");
         functions.push_back(getPins_fn);
 
-        fl::Json setTxPin_fn = fl::Json::object();
+        fl::json setTxPin_fn = fl::json::object();
         setTxPin_fn.set("name", "setTxPin");
         setTxPin_fn.set("phase", "Phase 5: Pin Configuration");
         setTxPin_fn.set("args", "[pin]");
@@ -1439,7 +1439,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         setTxPin_fn.set("description", "Set TX pin (regenerates test cases)");
         functions.push_back(setTxPin_fn);
 
-        fl::Json setRxPin_fn = fl::Json::object();
+        fl::json setRxPin_fn = fl::json::object();
         setRxPin_fn.set("name", "setRxPin");
         setRxPin_fn.set("phase", "Phase 5: Pin Configuration");
         setRxPin_fn.set("args", "[pin]");
@@ -1447,7 +1447,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         setRxPin_fn.set("description", "Set RX pin (recreates RX channel)");
         functions.push_back(setRxPin_fn);
 
-        fl::Json setPins_fn = fl::Json::object();
+        fl::json setPins_fn = fl::json::object();
         setPins_fn.set("name", "setPins");
         setPins_fn.set("phase", "Phase 5: Pin Configuration");
         setPins_fn.set("args", "[{txPin, rxPin}] or [txPin, rxPin]");
@@ -1455,7 +1455,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         setPins_fn.set("description", "Set both TX and RX pins atomically");
         functions.push_back(setPins_fn);
 
-        fl::Json findConnectedPins_fn = fl::Json::object();
+        fl::json findConnectedPins_fn = fl::json::object();
         findConnectedPins_fn.set("name", "findConnectedPins");
         findConnectedPins_fn.set("phase", "Phase 5: Pin Configuration");
         findConnectedPins_fn.set("args", "[{startPin, endPin, autoApply}] (all optional)");
@@ -1463,7 +1463,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         findConnectedPins_fn.set("description", "Probe adjacent pin pairs to find jumper wire connection");
         functions.push_back(findConnectedPins_fn);
 
-        fl::Json help_fn = fl::Json::object();
+        fl::json help_fn = fl::json::object();
         help_fn.set("name", "help");
         help_fn.set("phase", "Phase 4: Utility");
         help_fn.set("args", "[]");
@@ -1471,7 +1471,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         help_fn.set("description", "List all RPC functions with descriptions");
         functions.push_back(help_fn);
 
-        fl::Json testSimd_fn = fl::Json::object();
+        fl::json testSimd_fn = fl::json::object();
         testSimd_fn.set("name", "testSimd");
         testSimd_fn.set("phase", "Phase 4: Utility");
         testSimd_fn.set("args", "[]");
@@ -1479,7 +1479,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         testSimd_fn.set("description", "Run comprehensive SIMD test suite (60 tests)");
         functions.push_back(testSimd_fn);
 
-        fl::Json response = fl::Json::object();
+        fl::json response = fl::json::object();
         response.set("success", true);
         response.set("totalFunctions", static_cast<int64_t>(22));
         response.set("functions", functions);
@@ -1487,8 +1487,8 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     });
 
     // Register "testSimd" function - run comprehensive SIMD test suite
-    mRemote->bind("testSimd", [](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
+    mRemote->bind("testSimd", [](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
 
         // Run the full test suite and collect per-test results
         using validation::simd_check::SimdTestEntry;
@@ -1498,7 +1498,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
 
         int passed_count = 0;
         int failed_count = 0;
-        fl::Json failures = fl::Json::array();
+        fl::json failures = fl::json::array();
 
         for (int i = 0; i < num_tests; i++) {
             bool ok = tests[i].func();
@@ -1523,13 +1523,13 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
 
     // Register "testAsync" function - verify that show() returns before TX completes (async DMA)
     // This proves the SPI driver releases back to the main thread while draining.
-    mRemote->bind("testAsync", [this](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
+    mRemote->bind("testAsync", [this](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
 
         // Parse optional parameters from args object
         int num_leds = 300;
         fl::string requested_driver;
-        fl::Json config;
+        fl::json config;
         if (args.is_object()) {
             config = args;
         } else if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
@@ -1659,21 +1659,21 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     // ========================================================================
 
     // Register "startNetServer" - Start WiFi AP + HTTP server for net-server validation
-    mRemote->bind("startNetServer", [this](const fl::Json& args) -> fl::Json {
+    mRemote->bind("startNetServer", [this](const fl::json& args) -> fl::json {
         mState->net_server_active = true;
         return startNetServer();
     });
 
     // Register "startNetClient" - Start WiFi AP only for net-client validation
-    mRemote->bind("startNetClient", [this](const fl::Json& args) -> fl::Json {
+    mRemote->bind("startNetClient", [this](const fl::json& args) -> fl::json {
         mState->net_client_active = true;
         return startNetClient();
     });
 
     // Register "runNetClientTest" - ESP32 fetches from host HTTP server
     // Args: {host_ip: string, port: int}
-    mRemote->bind("runNetClientTest", [](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
+    mRemote->bind("runNetClientTest", [](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
 
         // Parse arguments - args is the config object
         if (!args.is_object()) {
@@ -1682,8 +1682,8 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
             return response;
         }
 
-        fl::Json host_ip_val = args[fl::string("host_ip")];
-        fl::Json port_val = args[fl::string("port")];
+        fl::json host_ip_val = args[fl::string("host_ip")];
+        fl::json port_val = args[fl::string("port")];
 
         if (!host_ip_val.is_string() || !port_val.is_int()) {
             response.set("success", false);
@@ -1699,12 +1699,12 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
 
     // Register "runNetLoopback" - Self-contained loopback test (no WiFi needed)
     // Starts HTTP server on localhost, client GETs 127.0.0.1 endpoints
-    mRemote->bind("runNetLoopback", [](const fl::Json& args) -> fl::Json {
+    mRemote->bind("runNetLoopback", [](const fl::json& args) -> fl::json {
         return runNetLoopback();
     });
 
     // Register "stopNet" - Stop WiFi AP and HTTP server/client
-    mRemote->bind("stopNet", [this](const fl::Json& args) -> fl::Json {
+    mRemote->bind("stopNet", [this](const fl::json& args) -> fl::json {
         mState->net_server_active = false;
         mState->net_client_active = false;
         return stopNet();
@@ -1715,12 +1715,12 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     // ========================================================================
 
     // Register "startOta" - Start WiFi AP + OTA HTTP server for OTA validation
-    mRemote->bind("startOta", [](const fl::Json& args) -> fl::Json {
+    mRemote->bind("startOta", [](const fl::json& args) -> fl::json {
         return startOta();
     });
 
     // Register "stopOta" - Stop OTA server and WiFi AP
-    mRemote->bind("stopOta", [](const fl::Json& args) -> fl::Json {
+    mRemote->bind("stopOta", [](const fl::json& args) -> fl::json {
         return stopOta();
     });
 
@@ -1729,18 +1729,18 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     // ========================================================================
 
     // Register "startBle" - Start BLE GATT server + create BLE Remote
-    mRemote->bind("startBle", [this](const fl::Json& args) -> fl::Json {
+    mRemote->bind("startBle", [this](const fl::json& args) -> fl::json {
         return this->startBleRemote();
     });
 
     // Register "stopBle" - Stop BLE GATT server + destroy BLE Remote
-    mRemote->bind("stopBle", [this](const fl::Json& args) -> fl::Json {
+    mRemote->bind("stopBle", [this](const fl::json& args) -> fl::json {
         return this->stopBleRemote();
     });
 
     // Register "bleStatus" - Query BLE connection/subscription state
-    mRemote->bind("bleStatus", [this](const fl::Json& args) -> fl::Json {
-        fl::Json response = fl::Json::object();
+    mRemote->bind("bleStatus", [this](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
 #if FL_BLE_AVAILABLE
         response.set("ble_active", mState->ble_server_active);
         fl::BleStatusInfo info = fl::queryBleStatus(mBleState);
@@ -1786,9 +1786,9 @@ void ValidationRemoteControl::registerAllMethods(fl::Remote* remote) {
     // This registers a subset of methods — enough for ping/pong PoC.
 
     // Register "ping" function - health check with timestamp
-    remote->bind("ping", [this](const fl::Json& args) -> fl::Json {
+    remote->bind("ping", [this](const fl::json& args) -> fl::json {
         uint32_t now = millis();
-        fl::Json response = fl::Json::object();
+        fl::json response = fl::json::object();
         response.set("success", true);
         response.set("message", "pong");
         response.set("timestamp", static_cast<int64_t>(now));
@@ -1798,8 +1798,8 @@ void ValidationRemoteControl::registerAllMethods(fl::Remote* remote) {
     });
 
     // Register "status" function - device readiness check
-    remote->bind("status", [this](const fl::Json& args) -> fl::Json {
-        fl::Json status = fl::Json::object();
+    remote->bind("status", [this](const fl::json& args) -> fl::json {
+        fl::json status = fl::json::object();
         status.set("ready", true);
         status.set("pinTx", static_cast<int64_t>(mState->pin_tx));
         status.set("pinRx", static_cast<int64_t>(mState->pin_rx));
@@ -1808,10 +1808,10 @@ void ValidationRemoteControl::registerAllMethods(fl::Remote* remote) {
     });
 }
 
-fl::Json ValidationRemoteControl::startBleRemote() {
+fl::json ValidationRemoteControl::startBleRemote() {
 #if FL_BLE_AVAILABLE
     if (mBleRemote) {
-        fl::Json response = fl::Json::object();
+        fl::json response = fl::json::object();
         response.set("success", true);
         response.set("message", "BLE remote already active");
         response.set("device_name", VALIDATION_BLE_DEVICE_NAME);
@@ -1833,7 +1833,7 @@ fl::Json ValidationRemoteControl::startBleRemote() {
     mState->ble_server_active = true;
     getBleState().ble_server_active = true;
 
-    fl::Json response = fl::Json::object();
+    fl::json response = fl::json::object();
     response.set("success", true);
     response.set("device_name", VALIDATION_BLE_DEVICE_NAME);
     response.set("service_uuid", FL_BLE_SERVICE_UUID);
@@ -1842,21 +1842,21 @@ fl::Json ValidationRemoteControl::startBleRemote() {
     FL_WARN("[BLE] Remote created and advertising");
     return response;
 #else
-    fl::Json response = fl::Json::object();
+    fl::json response = fl::json::object();
     response.set("success", false);
     response.set("error", "BLE only supported on ESP32");
     return response;
 #endif
 }
 
-fl::Json ValidationRemoteControl::stopBleRemote() {
+fl::json ValidationRemoteControl::stopBleRemote() {
 #if FL_BLE_AVAILABLE
     // Defer actual BLE teardown to tick() so the RPC response is sent first.
     // BLEDevice::deinit(true) blocks long enough to prevent the response
     // from being transmitted over serial before the device resets BLE state.
     mPendingBleStop = true;
 #endif
-    fl::Json response = fl::Json::object();
+    fl::json response = fl::json::object();
     response.set("success", true);
     return response;
 }

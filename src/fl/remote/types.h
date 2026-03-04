@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/json.h"
+#include "fl/stl/json.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -16,7 +16,7 @@ namespace fl {
  */
 struct RpcResult {
     fl::string functionName;    // Name of function that executed
-    fl::Json result;            // Return value (null if no return)
+    fl::json result;            // Return value (null if no return)
     u32 scheduledAt;            // Timestamp when scheduled (0 for immediate)
     u32 receivedAt;             // Timestamp when RPC request received
     u32 executedAt;             // Timestamp when function executed
@@ -26,7 +26,7 @@ struct RpcResult {
      * @brief Serialize result to JSON object (compact single-line format)
      * @return JSON object with all result fields
      */
-    fl::Json to_json() const;
+    fl::json to_json() const;
 };
 
 /**

@@ -30,7 +30,7 @@ FL_TEST_CASE("Serial: createSerialRequestSource - basic JSON") {
     auto requestSource = fl::createSerialRequestSource();
 
     // Create a test by manually parsing (since we can't easily mock the serial input)
-    fl::optional<fl::Json> result = fl::Json::parse(mockInput);
+    fl::optional<fl::json> result = fl::json::parse(mockInput);
     FL_REQUIRE(result.has_value());
     FL_REQUIRE(result->contains("method"));
     FL_REQUIRE(result->contains("params"));
@@ -154,7 +154,7 @@ FL_TEST_CASE("Serial: Empty input after trim") {
 
 FL_TEST_CASE("Serial: formatJsonResponse - compact output") {
     // Test that formatJsonResponse produces compact output
-    fl::Json response = fl::Json::object();
+    fl::json response = fl::json::object();
     response.set("method", "test");
     response.set("id", 1);
 
@@ -167,7 +167,7 @@ FL_TEST_CASE("Serial: formatJsonResponse - compact output") {
 
 FL_TEST_CASE("Serial: formatJsonResponse - with prefix") {
     // Test that formatJsonResponse includes prefix
-    fl::Json response = fl::Json::object();
+    fl::json response = fl::json::object();
     response.set("result", 42);
 
     fl::string formatted = fl::formatJsonResponse(response, "REMOTE: ");

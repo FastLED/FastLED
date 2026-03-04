@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/json.h"
+#include "fl/stl/json.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -74,7 +74,7 @@ public:
     using args_tuple = fl::tuple<typename rpc_storage_type<Args>::type...>;
     static constexpr fl::size argCount() { return sizeof...(Args); }
 
-    static fl::tuple<args_tuple, TypeConversionResult> convert(const Json& jsonArgs) {
+    static fl::tuple<args_tuple, TypeConversionResult> convert(const json& jsonArgs) {
         TypeConversionResult result;
         args_tuple tuple;
 
@@ -97,7 +97,7 @@ public:
 
 private:
     template <fl::size... Is>
-    static void convertArgs(const Json& jsonArgs, args_tuple& tuple,
+    static void convertArgs(const json& jsonArgs, args_tuple& tuple,
                            TypeConversionResult& result, index_sequence<Is...>) {
         // Fold expression equivalent using initializer list
         int dummy[] = {0, (convertArg<Is>(jsonArgs, tuple, result), 0)...};
@@ -105,7 +105,7 @@ private:
     }
 
     template <fl::size I>
-    static void convertArg(const Json& jsonArgs, args_tuple& tuple, TypeConversionResult& result) {
+    static void convertArg(const json& jsonArgs, args_tuple& tuple, TypeConversionResult& result) {
         if (result.hasError()) return;
 
         // Use the stripped type (no const/ref) for conversion and storage
@@ -134,7 +134,7 @@ public:
     using args_tuple = fl::tuple<>;
     static constexpr fl::size argCount() { return 0; }
 
-    static fl::tuple<args_tuple, TypeConversionResult> convert(const Json& jsonArgs) {
+    static fl::tuple<args_tuple, TypeConversionResult> convert(const json& jsonArgs) {
         TypeConversionResult result;
         args_tuple tuple;
 

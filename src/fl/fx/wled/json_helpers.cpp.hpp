@@ -63,7 +63,7 @@ fl::string rgbToHex(u8 r, u8 g, u8 b) {
 }
 
 // Helper function to parse segment fields
-void parseSegmentFields(const fl::Json& segJson, WLEDSegment& seg) {
+void parseSegmentFields(const fl::json& segJson, WLEDSegment& seg) {
     // Extract basic properties
     if (segJson.contains("start") && segJson["start"].is_int()) {
         i64 startInt = segJson["start"] | 0;
@@ -226,7 +226,7 @@ void parseSegmentFields(const fl::Json& segJson, WLEDSegment& seg) {
     if (segJson.contains("col") && segJson["col"].is_array()) {
         seg.mColors.clear();
         for (size_t i = 0; i < segJson["col"].size(); i++) {
-            const fl::Json& colJson = segJson["col"][i];
+            const fl::json& colJson = segJson["col"][i];
 
             if (colJson.is_array()) {
                 // RGB(W) array format: [R,G,B] or [R,G,B,W]
@@ -265,7 +265,7 @@ void parseSegmentFields(const fl::Json& segJson, WLEDSegment& seg) {
 
         size_t ledIndex = 0;
         for (size_t i = 0; i < segJson["i"].size(); i++) {
-            const fl::Json& ledJson = segJson["i"][i];
+            const fl::json& ledJson = segJson["i"][i];
 
             if (!ledJson.is_string()) {
                 continue;

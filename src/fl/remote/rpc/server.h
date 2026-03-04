@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/json.h"
+#include "fl/stl/json.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -19,18 +19,18 @@ namespace fl {
  * Usage:
  *   Server server(
  *       []() { return getJsonRpcRequest(); },      // RequestSource
- *       [](const Json& r) { sendJsonRpcResponse(r); } // ResponseSink
+ *       [](const json& r) { sendJsonRpcResponse(r); } // ResponseSink
  *   );
- *   server.setRequestHandler([](const Json& req) {
+ *   server.setRequestHandler([](const json& req) {
  *       return processJsonRpc(req);
  *   });
  *   server.update();  // pull + push
  */
 class Server {
 public:
-    using RequestSource = fl::function<fl::optional<fl::Json>()>;
-    using ResponseSink = fl::function<void(const fl::Json&)>;
-    using RequestHandler = fl::function<fl::Json(const fl::Json&)>;
+    using RequestSource = fl::function<fl::optional<fl::json>()>;
+    using ResponseSink = fl::function<void(const fl::json&)>;
+    using RequestHandler = fl::function<fl::json(const fl::json&)>;
 
     /**
      * @brief Default constructor
@@ -90,7 +90,7 @@ protected:
     RequestSource mRequestSource;
     ResponseSink mResponseSink;
     RequestHandler mRequestHandler;
-    fl::vector<fl::Json> mOutgoingQueue;
+    fl::vector<fl::json> mOutgoingQueue;
 };
 
 } // namespace fl

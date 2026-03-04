@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/json.h"
+#include "fl/stl/json.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -59,14 +59,14 @@ public:
      * Example (Serial):
      *   fl::Remote remote(
      *       [&]() { return parseJsonRpcFromSerial(); },
-     *       [](const fl::Json& r) { writeJsonRpcToSerial(r); }
+     *       [](const fl::json& r) { writeJsonRpcToSerial(r); }
      *   );
      *
      * Example (HTTP Streaming):
      *   auto transport = fl::make_shared<HttpStreamClient>("localhost", 8080);
      *   fl::Remote remote(
      *       [&transport]() { return transport->readRequest(); },
-     *       [&transport](const fl::Json& r) { transport->writeResponse(r); }
+     *       [&transport](const fl::json& r) { transport->writeResponse(r); }
      *   );
      *   // In main loop: transport->update(millis()); remote.update(millis());
      */
@@ -95,10 +95,10 @@ public:
     }
 
     /// Register async method with ResponseSend& parameter (for ASYNC/ASYNC_STREAM modes)
-    /// Signature: void(ResponseSend&, const Json&)
+    /// Signature: void(ResponseSend&, const json&)
     /// The ResponseSend& parameter provides send(), sendUpdate(), sendFinal() methods
     void bindAsync(const char* name,
-                   fl::function<void(fl::ResponseSend&, const fl::Json&)> fn,
+                   fl::function<void(fl::ResponseSend&, const fl::json&)> fn,
                    fl::RpcMode mode = fl::RpcMode::ASYNC) {
         mRpc.bindAsync(name, fl::move(fn), mode);
     }
@@ -121,7 +121,7 @@ public:
 
     /// Process JSON-RPC request (with optional "timestamp" field for scheduling)
     /// Returns JSON-RPC response: {"result": ...} or {"error": {...}}
-    fl::Json processRpc(const fl::Json& request);
+    fl::json processRpc(const fl::json& request);
 
     // =========================================================================
     // Server Coordination
@@ -133,7 +133,7 @@ public:
     /// Process scheduled calls (call regularly)
     size_t tick(u32 currentTimeMs);
 
-    // Note: pull() and push() inherited from Server<fl::Json, fl::Json>
+    // Note: pull() and push() inherited from Server<fl::json, fl::json>
 
     // =========================================================================
     // Results and State
@@ -154,7 +154,7 @@ public:
 
     /// Returns flat schema document
     /// Format: {"schema": [["methodName", "returnType", [["param1", "type1"], ...]], ...]}
-    fl::Json schema() const {
+    fl::json schema() const {
         return mRpc.schema();
     }
 
@@ -169,15 +169,15 @@ public:
 
     /// Send async response for a previously-called async method
     /// The request ID is automatically retrieved from internal storage
-    void sendAsyncResponse(const char* method, const fl::Json& result);
+    void sendAsyncResponse(const char* method, const fl::json& result);
 
     /// Send stream update for a streaming async method (ASYNC_STREAM mode)
     /// The request ID is automatically retrieved from internal storage
-    void sendStreamUpdate(const char* method, const fl::Json& update);
+    void sendStreamUpdate(const char* method, const fl::json& update);
 
     /// Send final stream response for a streaming async method (ASYNC_STREAM mode)
     /// The request ID is automatically retrieved from internal storage and method is removed
-    void sendStreamFinal(const char* method, const fl::Json& result);
+    void sendStreamFinal(const char* method, const fl::json& result);
 
     // =========================================================================
     // Error Reporting (Unsolicited Notifications)
@@ -192,7 +192,7 @@ public:
 
     /// Send an error notification with structured data
     /// Format: {"jsonrpc":"2.0","method":"__error","params":<data>}
-    void reportError(const fl::Json& data);
+    void reportError(const fl::json& data);
 
 protected:
     // Storage for async request IDs (method name -> request ID)
@@ -201,8 +201,8 @@ protected:
         u32 timestamp;
     };
     fl::unordered_map<fl::string, AsyncRequest> mAsyncRequests;
-    void scheduleFunction(u32 timestamp, u32 receivedAt, const fl::Json& jsonRpcRequest);
-    void recordResult(const fl::string& funcName, const fl::Json& result, u32 scheduledAt, u32 receivedAt, u32 executedAt, bool wasScheduled);
+    void scheduleFunction(u32 timestamp, u32 receivedAt, const fl::json& jsonRpcRequest);
+    void recordResult(const fl::string& funcName, const fl::json& result, u32 scheduledAt, u32 receivedAt, u32 executedAt, bool wasScheduled);
 
     // Method registry and execution
     fl::Rpc mRpc;

@@ -98,7 +98,7 @@ void setup() {
     server.get("/status", [](const fl::http_request& req) {
         Serial.println("[GET /status] Status request");
 
-        fl::Json status = fl::Json::object();
+        fl::json status = fl::json::object();
         status.set("num_leds", NUM_LEDS);
         status.set("brightness", FastLED.getBrightness());
         status.set("uptime_ms", static_cast<fl::i64>(fl::millis()));
@@ -110,7 +110,7 @@ void setup() {
     server.post("/color", [](const fl::http_request& req) {
         Serial.println("[POST /color] Color change request");
 
-        fl::Json body = fl::Json::parse(req.body());
+        fl::json body = fl::json::parse(req.body());
         if (body.is_null()) {
             return fl::http_response::bad_request("Invalid JSON");
         }

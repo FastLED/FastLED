@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "fl/json.h"
+#include "fl/stl/json.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -33,7 +33,7 @@ namespace fl {
 /// @param prefix Optional prefix to prepend (default: "")
 /// @return Formatted string ready to be written to output
 /// @note Generic JSON serialization - works for any JSON, not just JSON-RPC
-fl::string formatJsonResponse(const fl::Json& response, const char* prefix = "");
+fl::string formatJsonResponse(const fl::json& response, const char* prefix = "");
 
 // =============================================================================
 // Generic I/O Functions (Templated for Testability)
@@ -99,9 +99,9 @@ struct SerialWriter {
 /// auto responseSink = fl::createSerialResponseSink("REMOTE: ");
 /// fl::Remote remote(requestSource, responseSink);
 /// @endcode
-inline fl::function<fl::optional<fl::Json>()>
+inline fl::function<fl::optional<fl::json>()>
 createSerialRequestSource(const char* prefix = "") {
-    return [prefix]() -> fl::optional<fl::Json> {
+    return [prefix]() -> fl::optional<fl::json> {
         // Non-blocking check - any data available?
         int avail = fl::available();
         if (avail <= 0) {
@@ -144,7 +144,7 @@ createSerialRequestSource(const char* prefix = "") {
 
         // Single copy when parsing JSON (unavoidable - JSON needs owned string)
         fl::string input(view);
-        return fl::Json::parse(input);
+        return fl::json::parse(input);
     };
 }
 
@@ -152,9 +152,9 @@ createSerialRequestSource(const char* prefix = "") {
 /// @param prefix Optional prefix to prepend to responses (default: "REMOTE: ")
 /// @return ResponseSink callback suitable for fl::Remote constructor
 /// @note Composes protocol layer (schema filtering) with transport layer (serial I/O)
-inline fl::function<void(const fl::Json&)>
+inline fl::function<void(const fl::json&)>
 createSerialResponseSink(const char* prefix = "REMOTE: ") {
-    return [prefix](const fl::Json& response) {
+    return [prefix](const fl::json& response) {
         // Format and write to serial (no filtering needed - protocol uses flat structure)
         SerialWriter serial;
         fl::string formatted = formatJsonResponse(response, prefix);
@@ -172,7 +172,7 @@ createSerialResponseSink(const char* prefix = "REMOTE: ") {
 /// auto [source, sink] = fl::transport::createSerialTransport();
 /// fl::Remote remote(source, sink);
 /// @endcode
-inline fl::pair<fl::function<fl::optional<fl::Json>()>, fl::function<void(const fl::Json&)>>
+inline fl::pair<fl::function<fl::optional<fl::json>()>, fl::function<void(const fl::json&)>>
 createSerialTransport(const char* responsePrefix = "REMOTE: ", const char* requestPrefix = "") {
     return {createSerialRequestSource(requestPrefix), createSerialResponseSink(responsePrefix)};
 }

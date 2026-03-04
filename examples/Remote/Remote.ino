@@ -29,13 +29,13 @@
 CRGB leds[NUM_LEDS];
 
 // Request/Response queues for callback-based I/O
-fl::vector<fl::Json> requestQueue;
-fl::vector<fl::Json> responseQueue;
+fl::vector<fl::json> requestQueue;
+fl::vector<fl::json> responseQueue;
 
 // Remote with callback-based I/O
 fl::Remote remote(
     // RequestSource: pull from queue
-    []() -> fl::optional<fl::Json> {
+    []() -> fl::optional<fl::json> {
         if (requestQueue.empty()) {
             return fl::nullopt;
         }
@@ -44,7 +44,7 @@ fl::Remote remote(
         return req;
     },
     // ResponseSink: push to queue
-    [](const fl::Json& response) {
+    [](const fl::json& response) {
         responseQueue.push_back(response);
     }
 );
@@ -88,16 +88,16 @@ void setup() {
         return static_cast<int64_t>(micros());
     });
 
-    remote.bind("getStatus", []() -> fl::Json {
-        fl::Json result = fl::Json::object();
+    remote.bind("getStatus", []() -> fl::json {
+        fl::json result = fl::json::object();
         result.set("numLeds", NUM_LEDS);
         result.set("brightness", FastLED.getBrightness());
         result.set("millis", static_cast<int64_t>(millis()));
         return result;
     });
 
-    remote.bind("getLed", [](int index) -> fl::Json {
-        fl::Json result = fl::Json::object();
+    remote.bind("getLed", [](int index) -> fl::json {
+        fl::json result = fl::json::object();
         if (index >= 0 && index < NUM_LEDS) {
             result.set("r", leds[index].r);
             result.set("g", leds[index].g);
@@ -113,7 +113,7 @@ void setup() {
 
     // Show schema (flat tuple format optimized for low-memory devices)
     Serial.println("=== RPC Schema ===");
-    fl::Json schema = remote.schema();
+    fl::json schema = remote.schema();
     fl::string schemaStr = schema.to_string();
 
     Serial.print("Schema size: ");
@@ -139,7 +139,7 @@ void loop() {
         fl::string jsonRpc = readSerialJson();
 
         // Parse JSON and queue the request
-        fl::Json doc = fl::Json::parse(jsonRpc);
+        fl::json doc = fl::json::parse(jsonRpc);
         requestQueue.push_back(doc);
     }
 

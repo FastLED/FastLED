@@ -6,7 +6,7 @@
 // Guarded with FL_IS_ESP32 - no-op stubs on other platforms.
 
 #include "ValidationOta.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/warn.h"
 
 // Global OTA state
@@ -122,8 +122,8 @@ static bool initOtaWifiAP() {
 // Public API
 // ============================================================================
 
-fl::Json startOta() {
-    fl::Json response = fl::Json::object();
+fl::json startOta() {
+    fl::json response = fl::json::object();
 
     // Start WiFi AP
     if (!initOtaWifiAP()) {
@@ -154,8 +154,8 @@ fl::Json startOta() {
     return response;
 }
 
-fl::Json stopOta() {
-    fl::Json response = fl::Json::object();
+fl::json stopOta() {
+    fl::json response = fl::json::object();
 
     // Stop OTA server
     if (s_ota.get()) {
@@ -181,15 +181,15 @@ fl::Json stopOta() {
 // Stub Implementation for Non-ESP32 Platforms
 // ============================================================================
 
-fl::Json startOta() {
-    fl::Json response = fl::Json::object();
+fl::json startOta() {
+    fl::json response = fl::json::object();
     response.set("success", false);
     response.set("error", "OTA validation only supported on ESP32");
     return response;
 }
 
-fl::Json stopOta() {
-    fl::Json response = fl::Json::object();
+fl::json stopOta() {
+    fl::json response = fl::json::object();
     response.set("success", true);
     return response;
 }

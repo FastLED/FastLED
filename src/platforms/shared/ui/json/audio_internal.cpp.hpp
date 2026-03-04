@@ -7,7 +7,7 @@
 
 namespace fl {
 
-void JsonUiAudioInternal::toJson(fl::Json &json) const {
+void JsonUiAudioInternal::toJson(fl::json &json) const {
     json.set("name", name());
     json.set("group", groupName());
     json.set("type", "audio");
@@ -20,24 +20,24 @@ void JsonUiAudioInternal::toJson(fl::Json &json) const {
     }
 }
 
-void JsonUiAudioInternal::updateInternal(const fl::Json &value) {
-    mAudioDataArray = fl::Json();  // Clear the stored audio data
+void JsonUiAudioInternal::updateInternal(const fl::json &value) {
+    mAudioDataArray = fl::json();  // Clear the stored audio data
     
     if (value.contains("audioData")) {
-        fl::Json audioDataArray = value["audioData"];
+        fl::json audioDataArray = value["audioData"];
         // Store the actual JSON array, not a string representation
         mAudioDataArray = audioDataArray;
         
         if (audioDataArray.is_array()) {
             for (size_t i = 0; i < audioDataArray.size(); ++i) {
-                fl::Json bufferJson = audioDataArray[i];
+                fl::json bufferJson = audioDataArray[i];
                 if (bufferJson.is_object()) {
                     fl::vector<i16> samples;
                     u32 timestamp = bufferJson["timestamp"] | 0;
 
                     if (bufferJson.contains("samples") &&
                         bufferJson["samples"].is_array()) {
-                        fl::Json samplesArray = bufferJson["samples"];
+                        fl::json samplesArray = bufferJson["samples"];
                         for (size_t j = 0; j < samplesArray.size(); ++j) {
                             samples.push_back(samplesArray[j] | 0);
                         }

@@ -62,7 +62,7 @@
 #include "fl/async.h"
 #include "fl/stl/mutex.h"
 #include "fl/warn.h"
-#include "fl/json.h"  // Add JSON support for response.json() method
+#include "fl/stl/json.h"  // Add JSON support for response.json() method
 
 namespace fl {
 
@@ -116,10 +116,10 @@ public:
     const fl::string& get_body_text() const { return mBody; }
     
     /// Response body parsed as JSON (JavaScript-like API)
-    /// @return fl::Json object for safe, ergonomic access
+    /// @return fl::json object for safe, ergonomic access
     /// @note Automatically parses JSON on first call, caches result
     /// @note Returns null JSON object for non-JSON or malformed content
-    fl::Json json() const;
+    fl::json json() const;
     
     /// Check if response appears to contain JSON content
     /// @return true if Content-Type header indicates JSON or body contains JSON markers
@@ -149,16 +149,16 @@ private:
     fl_map<fl::string, fl::string> mHeaders;
     
     // JSON parsing cache
-    mutable fl::optional<fl::Json> mCachedJson;  // Lazy-loaded JSON cache
+    mutable fl::optional<fl::json> mCachedJson;  // Lazy-loaded JSON cache
     mutable bool mJsonParsed = false;            // Track parsing attempts
     
     /// Parse JSON from response body with error handling
-    fl::Json parse_json_body() const {
-        fl::Json parsed = fl::Json::parse(mBody);
+    fl::json parse_json_body() const {
+        fl::json parsed = fl::json::parse(mBody);
         if (parsed.is_null() && (!mBody.empty())) {
             // If parsing failed but we have content, return null JSON
             // This allows safe chaining: resp.json()["key"] | default
-            return fl::Json(nullptr);
+            return fl::json(nullptr);
         }
         return parsed;
     }

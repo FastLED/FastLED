@@ -406,7 +406,7 @@ void setup() {
     validateExpectedEngines();
 
     // Emit JSON-RPC ready event for Python orchestration
-    fl::Json readyData = fl::Json::object();
+    fl::json readyData = fl::json::object();
     readyData.set("ready", true);
     readyData.set("setupTimeMs", static_cast<int64_t>(millis()));
     readyData.set("drivers", static_cast<int64_t>(g_validation_state->drivers_available.size()));
@@ -472,7 +472,7 @@ void loop() {
     static uint32_t last_status_ms = 0;
     uint32_t now = millis();
     if (now - last_status_ms >= 5000) {
-        fl::Json status = fl::Json::object();
+        fl::json status = fl::json::object();
         status.set("ready", true);
         status.set("uptimeMs", static_cast<int64_t>(now));
         printStreamRaw("status", status);

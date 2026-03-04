@@ -125,7 +125,7 @@ auto source = []{
     return fl::parseJsonRpcRequest(line.value());
 };
 
-auto sink = [](const fl::Json& response) {
+auto sink = [](const fl::json& response) {
     ArduinoSerialOut serial;
     auto formatted = fl::formatJsonRpcResponse(response, "REMOTE: ");
     fl::writeSerialLine(serial, formatted);
@@ -140,7 +140,7 @@ fl::Remote remote(source, sink);
 Generic JSON serialization to single-line string with optional prefix:
 
 ```cpp
-fl::Json response = fl::Json::object();
+fl::json response = fl::json::object();
 response.set("success", true);
 auto formatted = fl::formatJsonResponse(response, "REMOTE: ");
 // formatted = "REMOTE: {\"success\":true}"
@@ -160,8 +160,8 @@ Transforms old JSON-RPC format to standard 2.0:
 ```cpp
 #include "fl/remote/rpc/protocol.h"
 
-fl::Json oldFormat = fl::Json::parse(R"({"function": "ping", "args": []})").value();
-fl::Json normalized = fl::normalizeJsonRpcRequest(oldFormat);
+fl::json oldFormat = fl::json::parse(R"({"function": "ping", "args": []})").value();
+fl::json normalized = fl::normalizeJsonRpcRequest(oldFormat);
 // normalized = {"method": "ping", "params": []}
 ```
 
@@ -172,8 +172,8 @@ Filters schema responses to prevent stack overflow on constrained platforms:
 #include "fl/remote/rpc/protocol.h"
 
 // Detects large schema responses (rpc.discover) and replaces with minimal message
-fl::Json response = getRpcDiscoverResponse();
-fl::Json filtered = fl::filterSchemaResponse(response);
+fl::json response = getRpcDiscoverResponse();
+fl::json filtered = fl::filterSchemaResponse(response);
 // If response contains "schema", "openrpc", or "methods" keys,
 // returns minimal response: {"jsonrpc": "2.0", "id": ..., "result": {"message": "...", "methodCount": N}}
 // Otherwise returns original response unchanged
@@ -216,7 +216,7 @@ TEST(Transport, ParseRequest) {
 }
 
 TEST(Transport, FormatResponse) {
-    fl::Json response = fl::Json::object();
+    fl::json response = fl::json::object();
     response.set("result", "ok");
 
     auto formatted = fl::transport::formatJsonRpcResponse(response, "RPC: ");
@@ -254,8 +254,8 @@ To add a new transport (e.g., WebSocket):
 2. Implement factory functions:
    ```cpp
    namespace fl {
-       fl::function<fl::optional<fl::Json>()> createWsRequestSource(const char* url);
-       fl::function<void(const fl::Json&)> createWsResponseSink(const char* url);
+       fl::function<fl::optional<fl::json>()> createWsRequestSource(const char* url);
+       fl::function<void(const fl::json&)> createWsResponseSink(const char* url);
    }
    ```
 3. Reuse parsing functions: `parseJsonRpcRequest`, `formatJsonRpcResponse`

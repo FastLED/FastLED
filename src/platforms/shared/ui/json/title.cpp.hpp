@@ -1,7 +1,7 @@
 // IWYU pragma: private
 
 #include "title.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "platforms/shared/ui/json/ui.h"
 
 #if FASTLED_ENABLE_JSON
@@ -21,7 +21,7 @@ class JsonUiTitleInternal : public JsonUiInternal {
     // Override toJson to serialize the title's data directly.
     // This function will be called by JsonUiManager to get the component's
     // state.
-    void toJson(fl::Json &json) const override {
+    void toJson(fl::json &json) const override {
         json.set("name", name());
         json.set("type", "title");
         json.set("group",
@@ -32,7 +32,7 @@ class JsonUiTitleInternal : public JsonUiInternal {
 
     // Override updateInternal. Titles typically don't have update functionality
     // from the UI, so this can be a no-op.
-    void updateInternal(const fl::Json &json) override {
+    void updateInternal(const fl::json &json) override {
         // No update needed for title components
         FL_UNUSED(json);
     }

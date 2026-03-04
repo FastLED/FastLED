@@ -7,8 +7,8 @@
 
 #include "platforms/shared/ui/json/json_console.h"
 #include "fl/warn.h"
-#include "fl/json.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
+#include "fl/stl/json.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/stdint.h"
 #include "platforms/shared/ui/json/ui.h"
@@ -250,8 +250,8 @@ bool JsonConsole::setSliderValue(const fl::string& name, float value) {
         FL_WARN("JsonConsole: Found component ID: " << componentId);
     }
     
-    // Create JSON to update the component using new Json
-    fl::Json doc = fl::Json::object();
+    // Create JSON to update the component using new json
+    fl::json doc = fl::json::object();
     
     fl::string idStr;
     idStr += componentId;
@@ -279,8 +279,8 @@ void JsonConsole::updateComponentMapping(const char* jsonStr) {
         return;
     }
     
-    // Parse using new Json
-    auto doc = fl::Json::parse(jsonStr);
+    // Parse using new json
+    auto doc = fl::json::parse(jsonStr);
     if (doc.is_null()) {
         return; // Invalid JSON
     }

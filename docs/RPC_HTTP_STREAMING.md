@@ -81,7 +81,7 @@ void setup() {
     // Create Remote instance
     fl::Remote remote(
         [&transport]() { return transport->readRequest(); },
-        [&transport](const fl::Json& r) { transport->writeResponse(r); }
+        [&transport](const fl::json& r) { transport->writeResponse(r); }
     );
 
     // Register SYNC method
@@ -192,7 +192,7 @@ auto transport = fl::make_shared<fl::HttpStreamServer>(SERVER_PORT);
 // Create Remote with callbacks
 fl::Remote remote(
     [&transport]() { return transport->readRequest(); },
-    [&transport](const fl::Json& r) { transport->writeResponse(r); }
+    [&transport](const fl::json& r) { transport->writeResponse(r); }
 );
 
 // Register SYNC method (same API)
@@ -236,7 +236,7 @@ fl::Remote remote = fl::Remote::createSerial(Serial);
 auto transport = fl::make_shared<fl::HttpStreamServer>(8080);
 fl::Remote remote(
     [&transport]() { return transport->readRequest(); },
-    [&transport](const fl::Json& r) { transport->writeResponse(r); }
+    [&transport](const fl::json& r) { transport->writeResponse(r); }
 );
 ```
 
@@ -277,8 +277,8 @@ void disconnect();        // Stop server and close all clients
 bool isConnected() const; // Returns true if any client connected
 
 // RequestSource/ResponseSink implementation
-fl::optional<fl::Json> readRequest();
-void writeResponse(const fl::Json& response);
+fl::optional<fl::json> readRequest();
+void writeResponse(const fl::json& response);
 
 // Update loop (MUST call in loop())
 void update(uint32_t currentTimeMs);
@@ -329,8 +329,8 @@ void disconnect();        // Close connection
 bool isConnected() const; // Returns true if connected
 
 // RequestSource/ResponseSink implementation
-fl::optional<fl::Json> readRequest();
-void writeResponse(const fl::Json& response);
+fl::optional<fl::json> readRequest();
+void writeResponse(const fl::json& response);
 
 // Update loop (MUST call in loop())
 void update(uint32_t currentTimeMs);
@@ -661,11 +661,11 @@ HTTP transport preserves JSON-RPC 2.0 error responses:
 // Server responds: {"jsonrpc":"2.0","error":{"code":-32601,"message":"Method not found"},"id":1}
 
 // Server: custom error
-remote.bind("divide", [](int a, int b) -> fl::Json {
+remote.bind("divide", [](int a, int b) -> fl::json {
     if (b == 0) {
-        return fl::Json::object({
+        return fl::json::object({
             {"jsonrpc", "2.0"},
-            {"error", fl::Json::object({
+            {"error", fl::json::object({
                 {"code", -32000},
                 {"message", "Division by zero"}
             })},
@@ -757,7 +757,7 @@ auto transport = fl::make_shared<fl::HttpStreamServer>(8080);
 // Each client receives all RPC responses
 
 // To send to specific client, use custom routing:
-remote.bind("broadcast", [](const fl::Json& message) {
+remote.bind("broadcast", [](const fl::json& message) {
     // All clients receive this response
     return message;
 });

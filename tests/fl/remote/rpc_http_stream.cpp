@@ -6,7 +6,7 @@
 #include "test.h"
 #include "fl/remote/remote.h"
 #include "fl/remote/rpc/response_send.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/stl/vector.h"
 #include "fl/net/http/test_utils/mock_http_server.h"
 #include "fl/net/http/test_utils/mock_http_client.h"
@@ -17,8 +17,8 @@
 using namespace fl;
 
 // Helper to create JSON-RPC request
-static Json createRequest(const char* method, const Json& params, const Json& id) {
-    Json req = Json::object();
+static json createRequest(const char* method, const json& params, const json& id) {
+    json req = json::object();
     req.set("jsonrpc", "2.0");
     req.set("method", method);
     req.set("params", params);
@@ -27,7 +27,7 @@ static Json createRequest(const char* method, const Json& params, const Json& id
 }
 
 // Helper to extract result from JSON-RPC response
-static fl::optional<Json> getResult(const Json& response) {
+static fl::optional<json> getResult(const json& response) {
     if (!response.contains("result")) {
         return fl::nullopt;
     }
@@ -35,7 +35,7 @@ static fl::optional<Json> getResult(const Json& response) {
 }
 
 // Helper to extract error from JSON-RPC response
-static fl::optional<Json> getError(const Json& response) {
+static fl::optional<json> getError(const json& response) {
     if (!response.contains("error")) {
         return fl::nullopt;
     }
@@ -53,7 +53,7 @@ FL_TEST_CASE("RPC-HTTP - SYNC mode - Simple add function") {
 
     Remote remoteServer(
         [&server]() { return server.readRequest(); },
-        [&server](const Json& r) { server.writeResponse(r); }
+        [&server](const json& r) { server.writeResponse(r); }
     );
 
     remoteServer.bind("add", [](int a, int b) -> int {
@@ -65,10 +65,10 @@ FL_TEST_CASE("RPC-HTTP - SYNC mode - Simple add function") {
     client.connect();
 
     // Create request
-    Json params = Json::array();
-    params.push_back(Json(5));
-    params.push_back(Json(7));
-    Json request = createRequest("add", params, Json(1));
+    json params = json::array();
+    params.push_back(json(5));
+    params.push_back(json(7));
+    json request = createRequest("add", params, json(1));
 
     // Client sends request
     client.writeResponse(request);
@@ -77,7 +77,7 @@ FL_TEST_CASE("RPC-HTTP - SYNC mode - Simple add function") {
     remoteServer.update(0);
 
     // Client reads response
-    fl::optional<Json> response = client.readRequest();
+    fl::optional<json> response = client.readRequest();
     FL_REQUIRE(response.has_value());
 
     // Verify response
@@ -86,7 +86,7 @@ FL_TEST_CASE("RPC-HTTP - SYNC mode - Simple add function") {
     FL_CHECK(response->contains("id"));
     FL_CHECK_EQ(response->operator[]("id").as_int().value(), 1);
 
-    fl::optional<Json> result = getResult(*response);
+    fl::optional<json> result = getResult(*response);
     FL_REQUIRE(result.has_value());
     FL_CHECK_EQ(result->as_int().value(), 12);
 }
@@ -97,10 +97,10 @@ FL_TEST_CASE("RPC-HTTP - SYNC mode - Echo JSON object") {
 
     Remote remoteServer(
         [&server]() { return server.readRequest(); },
-        [&server](const Json& r) { server.writeResponse(r); }
+        [&server](const json& r) { server.writeResponse(r); }
     );
 
-    remoteServer.bind("echo", [](const Json& value) -> Json {
+    remoteServer.bind("echo", [](const json& value) -> json {
         return value;
     });
 
@@ -108,21 +108,21 @@ FL_TEST_CASE("RPC-HTTP - SYNC mode - Echo JSON object") {
     client.connect();
 
     // Create complex JSON object
-    Json obj = Json::object();
+    json obj = json::object();
     obj.set("name", "test");
     obj.set("value", 42);
 
-    Json params = Json::array();
+    json params = json::array();
     params.push_back(obj);
-    Json request = createRequest("echo", params, Json("echo-1"));
+    json request = createRequest("echo", params, json("echo-1"));
 
     client.writeResponse(request);
     remoteServer.update(0);
 
-    fl::optional<Json> response = client.readRequest();
+    fl::optional<json> response = client.readRequest();
     FL_REQUIRE(response.has_value());
 
-    fl::optional<Json> result = getResult(*response);
+    fl::optional<json> result = getResult(*response);
     FL_REQUIRE(result.has_value());
     FL_CHECK(result->contains("name"));
     FL_CHECK_EQ(result->operator[]("name").as_string().value(), "test");
@@ -136,24 +136,24 @@ FL_TEST_CASE("RPC-HTTP - SYNC mode - Method not found") {
 
     Remote remoteServer(
         [&server]() { return server.readRequest(); },
-        [&server](const Json& r) { server.writeResponse(r); }
+        [&server](const json& r) { server.writeResponse(r); }
     );
 
     MockHttpClient client(server);
     client.connect();
 
     // Request non-existent method
-    Json params = Json::array();
-    Json request = createRequest("nonexistent", params, Json(99));
+    json params = json::array();
+    json request = createRequest("nonexistent", params, json(99));
 
     client.writeResponse(request);
     remoteServer.update(0);
 
-    fl::optional<Json> response = client.readRequest();
+    fl::optional<json> response = client.readRequest();
     FL_REQUIRE(response.has_value());
 
     // Should have error
-    fl::optional<Json> error = getError(*response);
+    fl::optional<json> error = getError(*response);
     FL_REQUIRE(error.has_value());
     FL_CHECK(error->contains("code"));
     FL_CHECK_EQ(error->operator[]("code").as_int().value(), -32601);  // Method not found
@@ -170,13 +170,13 @@ FL_TEST_CASE("RPC-HTTP - ASYNC mode - ACK then result") {
 
     Remote remoteServer(
         [&server]() { return server.readRequest(); },
-        [&server](const Json& r) { server.writeResponse(r); }
+        [&server](const json& r) { server.writeResponse(r); }
     );
 
-    remoteServer.bindAsync("longTask", [](ResponseSend& send, const Json& params) {
+    remoteServer.bindAsync("longTask", [](ResponseSend& send, const json& params) {
         // NOTE: RPC system automatically sends ACK for ASYNC mode
         // Handler only needs to send the final result
-        Json result = Json::object();
+        json result = json::object();
         result.set("value", 42);
         send.send(result);
     }, RpcMode::ASYNC);
@@ -186,8 +186,8 @@ FL_TEST_CASE("RPC-HTTP - ASYNC mode - ACK then result") {
     client.update(0);
 
     // Send request
-    Json params = Json::array();  // RPC expects params as array
-    Json request = createRequest("longTask", params, Json(2));
+    json params = json::array();  // RPC expects params as array
+    json request = createRequest("longTask", params, json(2));
 
     client.writeResponse(request);
     server.update(0);  // Server reads request
@@ -195,17 +195,17 @@ FL_TEST_CASE("RPC-HTTP - ASYNC mode - ACK then result") {
     client.update(0);  // Client processes responses from server
 
     // Read ACK (automatically sent by RPC system)
-    fl::optional<Json> ackResponse = client.readRequest();
+    fl::optional<json> ackResponse = client.readRequest();
     FL_REQUIRE(ackResponse.has_value());
-    fl::optional<Json> ackResult = getResult(*ackResponse);
+    fl::optional<json> ackResult = getResult(*ackResponse);
     FL_REQUIRE(ackResult.has_value());
     FL_CHECK(ackResult->contains("acknowledged"));
     FL_CHECK_EQ(ackResult->operator[]("acknowledged").as_bool().value(), true);
 
     // Read final result
-    fl::optional<Json> finalResponse = client.readRequest();
+    fl::optional<json> finalResponse = client.readRequest();
     FL_REQUIRE(finalResponse.has_value());
-    fl::optional<Json> finalResult = getResult(*finalResponse);
+    fl::optional<json> finalResult = getResult(*finalResponse);
     FL_REQUIRE(finalResult.has_value());
     FL_CHECK(finalResult->contains("value"));
     FL_CHECK_EQ(finalResult->operator[]("value").as_int().value(), 42);
@@ -218,14 +218,14 @@ FL_TEST_CASE("RPC-HTTP - ASYNC mode - Multiple async calls") {
 
     Remote remoteServer(
         [&server]() { return server.readRequest(); },
-        [&server](const Json& r) { server.writeResponse(r); }
+        [&server](const json& r) { server.writeResponse(r); }
     );
 
     int callCount = 0;
-    remoteServer.bindAsync("process", [&callCount](ResponseSend& send, const Json& params) {
+    remoteServer.bindAsync("process", [&callCount](ResponseSend& send, const json& params) {
         // NOTE: RPC system automatically sends ACK for ASYNC mode
         // Result with call count
-        Json result = Json::object();
+        json result = json::object();
         result.set("index", callCount++);
         send.send(result);
     }, RpcMode::ASYNC);
@@ -236,8 +236,8 @@ FL_TEST_CASE("RPC-HTTP - ASYNC mode - Multiple async calls") {
 
     // Send all requests first
     for (int i = 0; i < 3; i++) {
-        Json params = Json::array();  // RPC expects params as array
-        Json request = createRequest("process", params, Json(i + 100));
+        json params = json::array();  // RPC expects params as array
+        json request = createRequest("process", params, json(i + 100));
         client.writeResponse(request);
     }
 
@@ -249,16 +249,16 @@ FL_TEST_CASE("RPC-HTTP - ASYNC mode - Multiple async calls") {
     // Read all responses
     for (int i = 0; i < 3; i++) {
         // Read ACK
-        fl::optional<Json> ackResponse = client.readRequest();
+        fl::optional<json> ackResponse = client.readRequest();
         FL_REQUIRE(ackResponse.has_value());
-        fl::optional<Json> ackResult = getResult(*ackResponse);
+        fl::optional<json> ackResult = getResult(*ackResponse);
         FL_REQUIRE(ackResult.has_value());
         FL_CHECK(ackResult->contains("acknowledged"));
 
         // Read result
-        fl::optional<Json> resultResponse = client.readRequest();
+        fl::optional<json> resultResponse = client.readRequest();
         FL_REQUIRE(resultResponse.has_value());
-        fl::optional<Json> result = getResult(*resultResponse);
+        fl::optional<json> result = getResult(*resultResponse);
         FL_REQUIRE(result.has_value());
         FL_CHECK(result->contains("index"));
         FL_CHECK_EQ(result->operator[]("index").as_int().value(), i);
@@ -276,20 +276,20 @@ FL_TEST_CASE("RPC-HTTP - ASYNC_STREAM mode - Multiple updates") {
 
     Remote remoteServer(
         [&server]() { return server.readRequest(); },
-        [&server](const Json& r) { server.writeResponse(r); }
+        [&server](const json& r) { server.writeResponse(r); }
     );
 
-    remoteServer.bindAsync("stream", [](ResponseSend& send, const Json& params) {
+    remoteServer.bindAsync("stream", [](ResponseSend& send, const json& params) {
         // NOTE: RPC system automatically sends ACK for ASYNC_STREAM mode
         // Send 5 updates
         for (int i = 0; i < 5; i++) {
-            Json update = Json::object();
+            json update = json::object();
             update.set("progress", i * 20);
             send.sendUpdate(update);
         }
 
         // Send final
-        Json final = Json::object();
+        json final = json::object();
         final.set("done", true);
         send.sendFinal(final);
     }, RpcMode::ASYNC_STREAM);
@@ -299,8 +299,8 @@ FL_TEST_CASE("RPC-HTTP - ASYNC_STREAM mode - Multiple updates") {
     client.update(0);
 
     // Send request
-    Json params = Json::array();  // RPC expects params as array
-    Json request = createRequest("stream", params, Json(3));
+    json params = json::array();  // RPC expects params as array
+    json request = createRequest("stream", params, json(3));
 
     client.writeResponse(request);
     server.update(0);  // Server reads request
@@ -308,28 +308,28 @@ FL_TEST_CASE("RPC-HTTP - ASYNC_STREAM mode - Multiple updates") {
     client.update(0);  // Client processes all responses
 
     // Read ACK
-    fl::optional<Json> ackResponse = client.readRequest();
+    fl::optional<json> ackResponse = client.readRequest();
     FL_REQUIRE(ackResponse.has_value());
 
     // Read 5 updates
     for (int i = 0; i < 5; i++) {
-        fl::optional<Json> updateResponse = client.readRequest();
+        fl::optional<json> updateResponse = client.readRequest();
         FL_REQUIRE(updateResponse.has_value());
-        fl::optional<Json> result = getResult(*updateResponse);
+        fl::optional<json> result = getResult(*updateResponse);
         FL_REQUIRE(result.has_value());
         FL_CHECK(result->contains("update"));
-        Json updateObj = result->operator[]("update");
+        json updateObj = result->operator[]("update");
         FL_CHECK(updateObj.contains("progress"));
         FL_CHECK_EQ(updateObj["progress"].as_int().value(), i * 20);
     }
 
     // Read final
-    fl::optional<Json> finalResponse = client.readRequest();
+    fl::optional<json> finalResponse = client.readRequest();
     FL_REQUIRE(finalResponse.has_value());
-    fl::optional<Json> finalResult = getResult(*finalResponse);
+    fl::optional<json> finalResult = getResult(*finalResponse);
     FL_REQUIRE(finalResult.has_value());
     FL_CHECK(finalResult->contains("value"));
-    Json valueObj = finalResult->operator[]("value");
+    json valueObj = finalResult->operator[]("value");
     FL_CHECK(valueObj.contains("done"));
     FL_CHECK_EQ(valueObj["done"].as_bool().value(), true);
     FL_CHECK(finalResult->contains("stop"));
@@ -343,13 +343,13 @@ FL_TEST_CASE("RPC-HTTP - ASYNC_STREAM mode - Empty stream (ACK + Final only)") {
 
     Remote remoteServer(
         [&server]() { return server.readRequest(); },
-        [&server](const Json& r) { server.writeResponse(r); }
+        [&server](const json& r) { server.writeResponse(r); }
     );
 
-    remoteServer.bindAsync("emptyStream", [](ResponseSend& send, const Json& params) {
+    remoteServer.bindAsync("emptyStream", [](ResponseSend& send, const json& params) {
         // NOTE: RPC system automatically sends ACK for ASYNC_STREAM mode
         // Final immediately (no updates)
-        Json final = Json::object();
+        json final = json::object();
         final.set("empty", true);
         send.sendFinal(final);
     }, RpcMode::ASYNC_STREAM);
@@ -358,8 +358,8 @@ FL_TEST_CASE("RPC-HTTP - ASYNC_STREAM mode - Empty stream (ACK + Final only)") {
     client.connect();
     client.update(0);
 
-    Json params = Json::array();  // RPC expects params as array
-    Json request = createRequest("emptyStream", params, Json(4));
+    json params = json::array();  // RPC expects params as array
+    json request = createRequest("emptyStream", params, json(4));
 
     client.writeResponse(request);
     server.update(0);  // Server reads request
@@ -367,13 +367,13 @@ FL_TEST_CASE("RPC-HTTP - ASYNC_STREAM mode - Empty stream (ACK + Final only)") {
     client.update(0);  // Client processes responses
 
     // Read ACK
-    fl::optional<Json> ackResponse = client.readRequest();
+    fl::optional<json> ackResponse = client.readRequest();
     FL_REQUIRE(ackResponse.has_value());
 
     // Read final (should have stop marker)
-    fl::optional<Json> finalResponse = client.readRequest();
+    fl::optional<json> finalResponse = client.readRequest();
     FL_REQUIRE(finalResponse.has_value());
-    fl::optional<Json> finalResult = getResult(*finalResponse);
+    fl::optional<json> finalResult = getResult(*finalResponse);
     FL_REQUIRE(finalResult.has_value());
     FL_CHECK(finalResult->contains("stop"));
     FL_CHECK_EQ(finalResult->operator[]("stop").as_bool().value(), true);
@@ -390,7 +390,7 @@ FL_TEST_CASE("RPC-HTTP - Heartbeat during idle") {
 
     Remote remoteServer(
         [&server]() { return server.readRequest(); },
-        [&server](const Json& r) { server.writeResponse(r); }
+        [&server](const json& r) { server.writeResponse(r); }
     );
 
     MockHttpClient client(server, 1000);  // 1 second heartbeat
@@ -420,7 +420,7 @@ FL_TEST_CASE("RPC-HTTP - Timeout configuration") {
 
     Remote remoteServer(
         [&server]() { return server.readRequest(); },
-        [&server](const Json& r) { server.writeResponse(r); }
+        [&server](const json& r) { server.writeResponse(r); }
     );
 
     MockHttpClient client(server, 1000);
@@ -449,7 +449,7 @@ FL_TEST_CASE("RPC-HTTP - Multiple clients simultaneously") {
 
     Remote remoteServer(
         [&server]() { return server.readRequest(); },
-        [&server](const Json& r) { server.writeResponse(r); }
+        [&server](const json& r) { server.writeResponse(r); }
     );
 
     remoteServer.bind("getNumber", [](int input) -> int {
@@ -471,19 +471,19 @@ FL_TEST_CASE("RPC-HTTP - Multiple clients simultaneously") {
     FL_CHECK_EQ(server.getClientCount(), 3);
 
     // Each client sends a request
-    Json params1 = Json::array();
-    params1.push_back(Json(10));
-    Json request1 = createRequest("getNumber", params1, Json(1));
+    json params1 = json::array();
+    params1.push_back(json(10));
+    json request1 = createRequest("getNumber", params1, json(1));
     client1.writeResponse(request1);
 
-    Json params2 = Json::array();
-    params2.push_back(Json(20));
-    Json request2 = createRequest("getNumber", params2, Json(2));
+    json params2 = json::array();
+    params2.push_back(json(20));
+    json request2 = createRequest("getNumber", params2, json(2));
     client2.writeResponse(request2);
 
-    Json params3 = Json::array();
-    params3.push_back(Json(30));
-    Json request3 = createRequest("getNumber", params3, Json(3));
+    json params3 = json::array();
+    params3.push_back(json(30));
+    json request3 = createRequest("getNumber", params3, json(3));
     client3.writeResponse(request3);
 
     // Server processes all requests (one at a time)
@@ -496,23 +496,23 @@ FL_TEST_CASE("RPC-HTTP - Multiple clients simultaneously") {
     // Each client reads response
     // Due to broadcast, all clients receive the response
     // Just verify all clients got a valid response
-    fl::optional<Json> response1 = client1.readRequest();
+    fl::optional<json> response1 = client1.readRequest();
     FL_REQUIRE(response1.has_value());
-    fl::optional<Json> result1 = getResult(*response1);
+    fl::optional<json> result1 = getResult(*response1);
     FL_REQUIRE(result1.has_value());
     FL_CHECK_EQ(result1->as_int().value(), 20);
 
     // Clients 2 and 3 also got the broadcast response
-    fl::optional<Json> response2 = client2.readRequest();
+    fl::optional<json> response2 = client2.readRequest();
     FL_REQUIRE(response2.has_value());
-    fl::optional<Json> result2 = getResult(*response2);
+    fl::optional<json> result2 = getResult(*response2);
     FL_REQUIRE(result2.has_value());
     // Due to broadcast, may get first response
     FL_CHECK(result2->as_int().has_value());
 
-    fl::optional<Json> response3 = client3.readRequest();
+    fl::optional<json> response3 = client3.readRequest();
     FL_REQUIRE(response3.has_value());
-    fl::optional<Json> result3 = getResult(*response3);
+    fl::optional<json> result3 = getResult(*response3);
     FL_REQUIRE(result3.has_value());
     // Due to broadcast, may get first response
     FL_CHECK(result3->as_int().has_value());
@@ -524,7 +524,7 @@ FL_TEST_CASE("RPC-HTTP - Server broadcast to multiple clients") {
 
     Remote remoteServer(
         [&server]() { return server.readRequest(); },
-        [&server](const Json& r) { server.writeResponse(r); }
+        [&server](const json& r) { server.writeResponse(r); }
     );
 
     MockHttpClient client1(server);
@@ -533,21 +533,21 @@ FL_TEST_CASE("RPC-HTTP - Server broadcast to multiple clients") {
     client2.connect();
 
     // Server sends notification (broadcast)
-    Json notification = Json::object();
+    json notification = json::object();
     notification.set("jsonrpc", "2.0");
     notification.set("method", "notify");
-    Json params = Json::object();
+    json params = json::object();
     params.set("message", "broadcast");
     notification.set("params", params);
 
     server.writeResponse(notification);
 
     // Both clients receive notification
-    fl::optional<Json> notify1 = client1.readRequest();
+    fl::optional<json> notify1 = client1.readRequest();
     FL_REQUIRE(notify1.has_value());
     FL_CHECK_EQ(notify1->operator[]("method").as_string().value(), "notify");
 
-    fl::optional<Json> notify2 = client2.readRequest();
+    fl::optional<json> notify2 = client2.readRequest();
     FL_REQUIRE(notify2.has_value());
     FL_CHECK_EQ(notify2->operator[]("method").as_string().value(), "notify");
 }
@@ -562,14 +562,14 @@ FL_TEST_CASE("RPC-HTTP - Invalid JSON-RPC request (no method)") {
 
     Remote remoteServer(
         [&server]() { return server.readRequest(); },
-        [&server](const Json& r) { server.writeResponse(r); }
+        [&server](const json& r) { server.writeResponse(r); }
     );
 
     MockHttpClient client(server);
     client.connect();
 
     // Invalid request (missing method)
-    Json badRequest = Json::object();
+    json badRequest = json::object();
     badRequest.set("jsonrpc", "2.0");
     badRequest.set("id", 1);
     // No method field
@@ -577,11 +577,11 @@ FL_TEST_CASE("RPC-HTTP - Invalid JSON-RPC request (no method)") {
     client.writeResponse(badRequest);
     remoteServer.update(0);
 
-    fl::optional<Json> response = client.readRequest();
+    fl::optional<json> response = client.readRequest();
     FL_REQUIRE(response.has_value());
 
     // Should have error
-    fl::optional<Json> error = getError(*response);
+    fl::optional<json> error = getError(*response);
     FL_REQUIRE(error.has_value());
     FL_CHECK(error->contains("code"));
     // Invalid request error code
@@ -612,33 +612,33 @@ FL_TEST_CASE("RPC-HTTP - Mixed SYNC, ASYNC, ASYNC_STREAM in one server") {
 
     Remote remoteServer(
         [&server]() { return server.readRequest(); },
-        [&server](const Json& r) { server.writeResponse(r); }
+        [&server](const json& r) { server.writeResponse(r); }
     );
 
     // SYNC method
     remoteServer.bind("sync", [](int x) -> int { return x * 2; });
 
     // ASYNC method
-    remoteServer.bindAsync("async", [](ResponseSend& send, const Json& params) {
-        Json ack = Json::object();
+    remoteServer.bindAsync("async", [](ResponseSend& send, const json& params) {
+        json ack = json::object();
         ack.set("ack", true);
         send.send(ack);
 
-        Json result = Json::object();
+        json result = json::object();
         result.set("async_result", 42);
         send.send(result);
     }, RpcMode::ASYNC);
 
     // ASYNC_STREAM method
-    remoteServer.bindAsync("stream", [](ResponseSend& send, const Json& params) {
-        Json ack = Json::object();
+    remoteServer.bindAsync("stream", [](ResponseSend& send, const json& params) {
+        json ack = json::object();
         ack.set("ack", true);
         send.send(ack);
 
-        send.sendUpdate(Json(1));
-        send.sendUpdate(Json(2));
+        send.sendUpdate(json(1));
+        send.sendUpdate(json(2));
 
-        send.sendFinal(Json("done"));
+        send.sendFinal(json("done"));
     }, RpcMode::ASYNC_STREAM);
 
     MockHttpClient client(server);
@@ -646,45 +646,45 @@ FL_TEST_CASE("RPC-HTTP - Mixed SYNC, ASYNC, ASYNC_STREAM in one server") {
     client.update(0);
 
     // Test SYNC
-    Json params1 = Json::array();
-    params1.push_back(Json(5));
-    Json request1 = createRequest("sync", params1, Json(1));
+    json params1 = json::array();
+    params1.push_back(json(5));
+    json request1 = createRequest("sync", params1, json(1));
     client.writeResponse(request1);
     server.update(0);
     remoteServer.update(0);
     client.update(0);
-    fl::optional<Json> response1 = client.readRequest();
+    fl::optional<json> response1 = client.readRequest();
     FL_REQUIRE(response1.has_value());
-    fl::optional<Json> result1 = getResult(*response1);
+    fl::optional<json> result1 = getResult(*response1);
     FL_REQUIRE(result1.has_value());
     FL_CHECK_EQ(result1->as_int().value(), 10);
 
     // Test ASYNC
-    Json params2 = Json::array();  // RPC expects params as array
-    Json request2 = createRequest("async", params2, Json(2));
+    json params2 = json::array();  // RPC expects params as array
+    json request2 = createRequest("async", params2, json(2));
     client.writeResponse(request2);
     server.update(0);
     remoteServer.update(0);
     client.update(0);
-    fl::optional<Json> ack2 = client.readRequest();
+    fl::optional<json> ack2 = client.readRequest();
     FL_REQUIRE(ack2.has_value());
-    fl::optional<Json> result2 = client.readRequest();
+    fl::optional<json> result2 = client.readRequest();
     FL_REQUIRE(result2.has_value());
 
     // Test ASYNC_STREAM
-    Json params3 = Json::array();  // RPC expects params as array
-    Json request3 = createRequest("stream", params3, Json(3));
+    json params3 = json::array();  // RPC expects params as array
+    json request3 = createRequest("stream", params3, json(3));
     client.writeResponse(request3);
     server.update(0);
     remoteServer.update(0);
     client.update(0);
-    fl::optional<Json> ack3 = client.readRequest();
+    fl::optional<json> ack3 = client.readRequest();
     FL_REQUIRE(ack3.has_value());
-    fl::optional<Json> update1 = client.readRequest();
+    fl::optional<json> update1 = client.readRequest();
     FL_REQUIRE(update1.has_value());
-    fl::optional<Json> update2 = client.readRequest();
+    fl::optional<json> update2 = client.readRequest();
     FL_REQUIRE(update2.has_value());
-    fl::optional<Json> final3 = client.readRequest();
+    fl::optional<json> final3 = client.readRequest();
     // May or may not have final message available yet
     // Just verify we got the 3 required messages (ACK + 2 updates)
     FL_CHECK(ack3.has_value());

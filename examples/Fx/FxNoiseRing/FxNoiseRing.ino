@@ -15,7 +15,7 @@
 #include "FastLED.h"
 
 // Now we can include other headers and do platform checks
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/math_macros.h"
 #include "fl/stl/math.h"
 #include "fl/warn.h"

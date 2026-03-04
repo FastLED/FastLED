@@ -8,7 +8,7 @@
 
 // Heavy includes moved from header to reduce compilation time
 #include "fl/lut.h"       // Full LUT definitions needed for implementation
-#include "fl/json.h"      // 61.1ms - only needed for ParseJson/toJson implementations
+#include "fl/stl/json.h"      // 61.1ms - only needed for ParseJson/toJson implementations
 #include "fl/stl/string.h"       // 129.4ms - only needed for string parameters in implementations
 #include "fl/stl/map.h"       // 12.4ms - only needed for fl_map parameters in implementations
 // IWYU pragma: begin_keep
@@ -29,7 +29,7 @@ ScreenMap::ScreenMap() = default;
 ScreenMap::~ScreenMap() = default;
 
 // Helper function to extract a vector of floats from a JSON array
-fl::vector<float> jsonArrayToFloatVector(const fl::Json& jsonArray) {
+fl::vector<float> jsonArrayToFloatVector(const fl::json& jsonArray) {
     fl::vector<float> result;
     
     if (!jsonArray.has_value() || !jsonArray.is_array()) {
@@ -39,19 +39,19 @@ fl::vector<float> jsonArrayToFloatVector(const fl::Json& jsonArray) {
     auto end_float = jsonArray.end_array<float>();
 
     using T = decltype(*begin_float);
-    static_assert(fl::is_same<T, fl::ParseResult<float>>::value, "Value type must be ParseResult<float>");
+    static_assert(fl::is_same<T, fl::parse_result<float>>::value, "Value type must be parse_result<float>");
     
     // Use explicit array iterator style as demonstrated in FEATURE.md
     // DO NOT CHANGE THIS CODE. FIX THE IMPLIMENTATION IF NECESSARY.
     for (auto it = begin_float; it != end_float; ++it) {
-        // assert that the value type is ParseResult<float>
+        // assert that the value type is parse_result<float>
 
         // get the name of the type
         auto parseResult = *it;
         if (!parseResult.has_error()) {
             result.push_back(parseResult.get_value());
         } else {
-            FL_WARN("jsonArrayToFloatVector: ParseResult<float> has error: " << parseResult.get_error().message);
+            FL_WARN("jsonArrayToFloatVector: parse_result<float> has error: " << parseResult.get_error().message);
         }
     }
     
@@ -113,7 +113,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
         err = &_err;
     }
 
-    auto jsonDoc = fl::Json::parse(jsonStrScreenMap);
+    auto jsonDoc = fl::json::parse(jsonStrScreenMap);
     if (!jsonDoc.has_value()) {
         *err = "Failed to parse JSON";
         FL_WARN("Failed to parse JSON");
@@ -155,14 +155,14 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
         auto name = kv.first;
 
         
-        // Check that the value is not null before creating Json object
+        // Check that the value is not null before creating json object
         if (!kv.second) {
             *err = "Null value for segment " + name;
             return false;
         }
         
-        // Create Json object directly from shared_ptr
-        fl::Json val(kv.second);
+        // Create json object directly from shared_ptr
+        fl::json val(kv.second);
         if (!val.has_value()) {
             *err = "Invalid value for segment " + name;
             return false;
@@ -254,7 +254,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
 }
 
 void ScreenMap::toJson(const fl::map<string, ScreenMap> &segmentMaps,
-                       fl::Json *doc) {
+                       fl::json *doc) {
 
 #if FASTLED_NO_JSON
     FL_WARN("ScreenMap::toJson called with FASTLED_NO_JSON");
@@ -266,10 +266,10 @@ void ScreenMap::toJson(const fl::map<string, ScreenMap> &segmentMaps,
     }
 
     // Create the root object
-    *doc = fl::Json::object();
+    *doc = fl::json::object();
     
     // Create the map object
-    fl::Json mapObj = fl::Json::object();
+    fl::json mapObj = fl::json::object();
     
     // Populate the map object with segments
     for (const auto& kv : segmentMaps) {
@@ -283,23 +283,23 @@ void ScreenMap::toJson(const fl::map<string, ScreenMap> &segmentMaps,
         float diameter = segment.getDiameter();
         
         // Create x array
-        fl::Json xArray = fl::Json::array();
+        fl::json xArray = fl::json::array();
         for (u16 i = 0; i < segment.getLength(); i++) {
-            xArray.push_back(fl::Json(static_cast<double>(segment[i].x)));
+            xArray.push_back(fl::json(static_cast<double>(segment[i].x)));
         }
         
         // Create y array
-        fl::Json yArray = fl::Json::array();
+        fl::json yArray = fl::json::array();
         for (u16 i = 0; i < segment.getLength(); i++) {
-            yArray.push_back(fl::Json(static_cast<double>(segment[i].y)));
+            yArray.push_back(fl::json(static_cast<double>(segment[i].y)));
         }
         
         // Create segment object
-        fl::Json segmentObj = fl::Json::object();
+        fl::json segmentObj = fl::json::object();
         // Add arrays and diameter to segment object
         segmentObj.set("x", xArray);
         segmentObj.set("y", yArray);
-        segmentObj.set("diameter", fl::Json(static_cast<double>(diameter)));
+        segmentObj.set("diameter", fl::json(static_cast<double>(diameter)));
         
         // Add segment to map object
         mapObj.set(name, segmentObj);
@@ -316,7 +316,7 @@ void ScreenMap::toJson(const fl::map<string, ScreenMap> &segmentMaps,
 
 void ScreenMap::toJsonStr(const fl::map<string, ScreenMap> &segmentMaps,
                           string *jsonBuffer) {
-    fl::Json doc;
+    fl::json doc;
     toJson(segmentMaps, &doc);
     *jsonBuffer = doc.to_string();
 }

@@ -117,7 +117,7 @@ The `fl/remote` module provides an ad-hoc JSON-RPC-inspired server for FastLED w
   2. Strip prefix using `string_view` (zero-copy)
   3. Trim whitespace using `string_view` (zero-copy)
   4. Parse JSON (single allocation)
-  5. Return `fl::optional<fl::Json>`
+  5. Return `fl::optional<fl::json>`
 
 - `createSerialResponseSink(prefix)` - Composes:
   1. Serialize JSON to compact string
@@ -174,7 +174,7 @@ auto transport = fl::make_shared<fl::HttpStreamServer>(8080);
 // Create Remote with callbacks
 fl::Remote remote(
     [&transport]() { return transport->readRequest(); },
-    [&transport](const fl::Json& r) { transport->writeResponse(r); }
+    [&transport](const fl::json& r) { transport->writeResponse(r); }
 );
 
 // Register SYNC method
@@ -201,7 +201,7 @@ See [`docs/RPC_HTTP_STREAMING.md`](../../docs/RPC_HTTP_STREAMING.md) for complet
 
 ```cpp
 // Custom JSONL streaming protocol
-inline fl::function<fl::optional<fl::Json>()>
+inline fl::function<fl::optional<fl::json>()>
 createJsonlRequestSource() {
     return []() {
         // Reuse transport layer for I/O
@@ -210,7 +210,7 @@ createJsonlRequestSource() {
         if (!line.has_value()) return fl::nullopt;
 
         // Parse JSON directly
-        return fl::Json::parse(line.value());
+        return fl::json::parse(line.value());
     };
 }
 ```
@@ -407,13 +407,13 @@ The `ResponseSend` class provides three methods for ASYNC/ASYNC_STREAM modes:
 class ResponseSend {
 public:
     // ASYNC: Send final result
-    void send(const fl::Json& result);
+    void send(const fl::json& result);
 
     // ASYNC_STREAM: Send update (no "stop" marker)
-    void sendUpdate(const fl::Json& update);
+    void sendUpdate(const fl::json& update);
 
     // ASYNC_STREAM: Send final result (with "stop: true")
-    void sendFinal(const fl::Json& result);
+    void sendFinal(const fl::json& result);
 };
 ```
 

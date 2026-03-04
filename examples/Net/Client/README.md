@@ -22,7 +22,7 @@ The example **cycles through all 4 approaches** every 10 seconds with LED feedba
 - `fl::response` - HTTP response with status/headers/body
 - `fl::optional<T>` - May or may not contain a value
 - `fl::Error` - Error information
-- `fl::Json` - JSON parsing with safe access
+- `fl::json` - JSON parsing with safe access
 
 ## LED Status Indicators
 
@@ -124,7 +124,7 @@ Promise pattern with automatic JSON parsing:
 ```cpp
 fl::fetch_get("https://httpbin.org/json").then([](const fl::response& response) {
     if (response.is_json()) {
-        fl::Json data = response.json();
+        fl::json data = response.json();
         fl::string author = data["slideshow"]["author"] | fl::string("unknown");
         FL_WARN("Author: " << author);
     }
@@ -148,7 +148,7 @@ fl::promise<fl::response> promise = fl::fetch_get("https://httpbin.org/get");
 fl::result<fl::response> result = fl::await_top_level(promise);
 
 if (result.ok() && result.value().is_json()) {
-    fl::Json data = result.value().json();
+    fl::json data = result.value().json();
     fl::string origin = data["origin"] | fl::string("unknown");
     FL_WARN("Origin: " << origin);
 }
@@ -184,7 +184,7 @@ HTTP response object:
 - `const string& status_text()` - Status text ("OK", "Not Found")
 - `bool ok()` - True if status 200-299
 - `const string& text()` - Response body as string
-- `fl::Json json()` - Parse response as JSON (cached)
+- `fl::json json()` - Parse response as JSON (cached)
 - `bool is_json()` - Check if response is JSON
 - `optional<string> get_content_type()` - Get Content-Type header
 
@@ -205,7 +205,7 @@ Wraps success or error:
 - `const T& value()` - Get success value (throws if error)
 - `const string& error_message()` - Get error message
 
-### fl::Json
+### fl::json
 
 JSON object with safe access:
 

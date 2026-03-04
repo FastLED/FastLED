@@ -211,7 +211,6 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
         HeaderException(
             "third_party/ezws2812/ezWS2812.h", "Third-party SPI driver library"
         ),
-        HeaderException("third_party/arduinojson/json.hpp", "Third-party JSON library"),
         HeaderException(
             "third_party/object_fled/src/ObjectFLEDDmaManager.h",
             "Third-party DMA manager library",

@@ -12,6 +12,7 @@
 #include "fl/stl/fstream.cpp.hpp"
 #include "fl/stl/ios.cpp.hpp"
 #include "fl/stl/istream.cpp.hpp"
+#include "fl/stl/json.cpp.hpp"
 #include "fl/stl/malloc.cpp.hpp"
 #include "fl/stl/math.cpp.hpp"
 #include "fl/stl/not_null.cpp.hpp"

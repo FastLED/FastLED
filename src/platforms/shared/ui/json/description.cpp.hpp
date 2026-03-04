@@ -4,7 +4,7 @@
 #include "platforms/shared/ui/json/ui.h"
 #include "ui_internal.h"
 
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/unused.h"
 
 #if FASTLED_ENABLE_JSON
@@ -22,7 +22,7 @@ class JsonUiDescriptionInternal : public JsonUiInternal {
         : JsonUiInternal(name), mText(text) {}
 
     // Override toJson to serialize the description's data directly.
-    void toJson(fl::Json &json) const override {
+    void toJson(fl::json &json) const override {
         json.set("name", name());
         json.set("type", "description");
         json.set("group", groupName());
@@ -32,7 +32,7 @@ class JsonUiDescriptionInternal : public JsonUiInternal {
 
     // Override updateInternal. Descriptions typically don't have update
     // functionality from the UI, so this can be a no-op.
-    void updateInternal(const fl::Json &json) override {
+    void updateInternal(const fl::json &json) override {
         FL_UNUSED(json);
         // No update needed for description components
     }
@@ -64,7 +64,7 @@ const fl::string &JsonDescriptionImpl::text() const {
     return mInternal->text();
 }
 
-void JsonDescriptionImpl::toJson(fl::Json &json) const {
+void JsonDescriptionImpl::toJson(fl::json &json) const {
     mInternal->toJson(json);
 }
 

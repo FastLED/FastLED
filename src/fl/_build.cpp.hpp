@@ -30,7 +30,6 @@
 #include "fl/hsv16.cpp.hpp"
 #include "fl/id_tracker.cpp.hpp"
 #include "fl/isr.cpp.hpp"
-#include "fl/json.cpp.hpp"
 #include "fl/leds.cpp.hpp"
 #include "fl/line_simplification.cpp.hpp"
 #include "fl/log.cpp.hpp"

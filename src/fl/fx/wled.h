@@ -265,7 +265,7 @@ public:
      * Example:
      *   fl::WLED wled(
      *       [&]() { return parseJsonRpcFromSerial(); },
-     *       [](const fl::Json& r) { writeJsonRpcToSerial(r); }
+     *       [](const fl::json& r) { writeJsonRpcToSerial(r); }
      *   );
      */
     WLED(RequestSource source, ResponseSink sink) : Remote(source, sink) {}
@@ -279,20 +279,20 @@ public:
      * - "bri": brightness 0-255 (optional, keeps existing value if missing)
      *
      * Example:
-     *   fl::Json state = fl::Json::parse(R"({"on":true,"bri":128})");
+     *   fl::json state = fl::json::parse(R"({"on":true,"bri":128})");
      *   remote.setState(state);
      */
-    void setState(const fl::Json& wledState);
+    void setState(const fl::json& wledState);
 
     /**
      * @brief Get current WLED state as JSON object
      * @return JSON object with "on" and "bri" fields
      *
      * Example:
-     *   fl::Json state = remote.getState();
+     *   fl::json state = remote.getState();
      *   // Returns: {"on":true,"bri":128}
      */
-    fl::Json getState() const;
+    fl::json getState() const;
 
     /**
      * @brief Get WLED on/off state
@@ -364,7 +364,7 @@ public:
      * @brief Get playlist configuration
      * @return JSON object with playlist settings (ps, dur, transition, repeat, end, r)
      */
-    fl::Json getPlaylistConfig() const;
+    fl::json getPlaylistConfig() const;
 
     /**
      * @brief Check if playlist is active
@@ -418,7 +418,7 @@ private:
      * Called when Remote needs to check for incoming requests.
      * Logs FL_ERROR to indicate this needs to be implemented.
      */
-    fl::optional<fl::Json> stubRequestSource();
+    fl::optional<fl::json> stubRequestSource();
 
     /**
      * @brief Stub response sink callback
@@ -427,7 +427,7 @@ private:
      * Called when Remote has a response to send.
      * Logs FL_ERROR to indicate this needs to be implemented.
      */
-    void stubResponseSink(const fl::Json& response);
+    void stubResponseSink(const fl::json& response);
 
     // WLED state (runtime-only, no persistence)
     bool mWledOn = false;           // WLED on/off state

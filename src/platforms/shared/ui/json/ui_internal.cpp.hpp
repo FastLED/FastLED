@@ -7,7 +7,7 @@
 #include "fl/warn.h"
 #include "ui_internal.h"
 
-#include "fl/json.h"
+#include "fl/stl/json.h"
 
 #if FASTLED_ENABLE_JSON
 

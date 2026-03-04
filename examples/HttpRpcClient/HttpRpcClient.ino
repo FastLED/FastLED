@@ -107,7 +107,7 @@ void setup() {
     // Create Remote with transport callbacks
     remote = new fl::Remote(  // ok bare allocation
         []() { return transport->readRequest(); },
-        [](const fl::Json& response) { transport->writeResponse(response); }
+        [](const fl::json& response) { transport->writeResponse(response); }
     );
 
     // Connect to server
@@ -127,10 +127,10 @@ void sendSyncRequest() {
     Serial.println("=== Testing SYNC mode: add(2, 3) ===");
 
     // Create JSON-RPC request manually (client doesn't have Remote::call() yet)
-    fl::Json request;
+    fl::json request;
     request["jsonrpc"] = "2.0";
     request["method"] = "add";
-    fl::Json params;
+    fl::json params;
     params.push_back(2);
     params.push_back(3);
     request["params"] = params;
@@ -150,10 +150,10 @@ void sendAsyncRequest() {
     Serial.println("=== Testing ASYNC mode: longTask(2000) ===");
 
     // Create JSON-RPC request
-    fl::Json request;
+    fl::json request;
     request["jsonrpc"] = "2.0";
     request["method"] = "longTask";
-    fl::Json params;
+    fl::json params;
     params.push_back(2000); // 2 second task
     request["params"] = params;
     request["id"] = requestId;
@@ -171,10 +171,10 @@ void sendAsyncStreamRequest() {
     Serial.println("=== Testing ASYNC_STREAM mode: streamData(5) ===");
 
     // Create JSON-RPC request
-    fl::Json request;
+    fl::json request;
     request["jsonrpc"] = "2.0";
     request["method"] = "streamData";
-    fl::Json params;
+    fl::json params;
     params.push_back(5); // Request 5 updates
     request["params"] = params;
     request["id"] = requestId;
@@ -188,10 +188,10 @@ void sendAsyncStreamRequest() {
     Serial.println("Expecting ACK, then 5 updates, then final result...");
 }
 
-void handleResponse(const fl::Json& response) {
+void handleResponse(const fl::json& response) {
     // Check if this is our expected response
     if (response.contains("id")) {
-        const fl::Json& idJson = response["id"];
+        const fl::json& idJson = response["id"];
         if (idJson.is_number()) {
             auto idOpt = idJson.as_int();
             if (idOpt) {
@@ -213,7 +213,7 @@ void handleResponse(const fl::Json& response) {
 
     // Check for ACK (ASYNC/ASYNC_STREAM modes)
     if (response.contains("result")) {
-        const fl::Json& result = response["result"];
+        const fl::json& result = response["result"];
 
         if (result.contains("ack")) {
             auto ackOpt = result["ack"].as_bool();
@@ -273,7 +273,7 @@ void loop() {
     remote->update(now);
 
     // Process any responses
-    fl::optional<fl::Json> response = transport->readRequest();
+    fl::optional<fl::json> response = transport->readRequest();
     if (response) {
         handleResponse(*response);
     }

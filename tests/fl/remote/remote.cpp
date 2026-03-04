@@ -17,8 +17,8 @@
 // =============================================================================
 
 // Test helper to create JSON-RPC request
-fl::Json makeRequest(const char* method, fl::Json params = fl::Json::array(), int id = 1, fl::u32 timestamp = 0) {
-    fl::Json req = fl::Json::object();
+fl::json makeRequest(const char* method, fl::json params = fl::json::array(), int id = 1, fl::u32 timestamp = 0) {
+    fl::json req = fl::json::object();
     req.set("method", method);
     req.set("params", params);
     req.set("id", id);
@@ -30,18 +30,18 @@ fl::Json makeRequest(const char* method, fl::Json params = fl::Json::array(), in
 
 // Request/Response queues for testing
 struct TestIO {
-    fl::vector<fl::Json> requests;
-    fl::vector<fl::Json> responses;
+    fl::vector<fl::json> requests;
+    fl::vector<fl::json> responses;
     size_t requestIndex = 0;
 
-    fl::optional<fl::Json> pullRequest() {
+    fl::optional<fl::json> pullRequest() {
         if (requestIndex >= requests.size()) {
             return fl::nullopt;
         }
         return requests[requestIndex++];
     }
 
-    void pushResponse(const fl::Json& response) {
+    void pushResponse(const fl::json& response) {
         responses.push_back(response);
     }
 
@@ -61,7 +61,7 @@ FL_TEST_CASE("Remote: Construction with callbacks") {
 
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     FL_REQUIRE(remote.count() == 0);  // No methods registered yet
@@ -75,7 +75,7 @@ FL_TEST_CASE("Remote: Bind method - void return") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     int called = 0;
@@ -89,7 +89,7 @@ FL_TEST_CASE("Remote: Bind method - with return value") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     remote.bind("add", [](int a, int b) { return a + b; });
@@ -102,7 +102,7 @@ FL_TEST_CASE("Remote: Bind method - with config") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     auto multiplyFn = [](int a, int b) { return a * b; };
@@ -121,7 +121,7 @@ FL_TEST_CASE("Remote: Unbind method") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     remote.bind("test", []() {});
@@ -136,7 +136,7 @@ FL_TEST_CASE("Remote: Get method by signature") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     remote.bind("add", [](int a, int b) { return a + b; });
@@ -154,14 +154,14 @@ FL_TEST_CASE("Remote: Process immediate RPC - void return") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     int called = 0;
     remote.bind("test", [&called]() { called++; });
 
-    fl::Json request = makeRequest("test");
-    fl::Json response = remote.processRpc(request);
+    fl::json request = makeRequest("test");
+    fl::json response = remote.processRpc(request);
 
     FL_REQUIRE(called == 1);
     FL_REQUIRE(response.contains("result"));
@@ -172,16 +172,16 @@ FL_TEST_CASE("Remote: Process immediate RPC - with return value") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     remote.bind("add", [](int a, int b) { return a + b; });
 
-    fl::Json params = fl::Json::array();
+    fl::json params = fl::json::array();
     params.push_back(5);
     params.push_back(7);
-    fl::Json request = makeRequest("add", params);
-    fl::Json response = remote.processRpc(request);
+    fl::json request = makeRequest("add", params);
+    fl::json response = remote.processRpc(request);
 
     FL_REQUIRE(response.contains("result"));
     FL_REQUIRE(response["result"].as_int().value() == 12);
@@ -191,11 +191,11 @@ FL_TEST_CASE("Remote: Process RPC - unknown method") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
-    fl::Json request = makeRequest("unknown");
-    fl::Json response = remote.processRpc(request);
+    fl::json request = makeRequest("unknown");
+    fl::json response = remote.processRpc(request);
 
     FL_REQUIRE(response.contains("error"));
 }
@@ -208,15 +208,15 @@ FL_TEST_CASE("Remote: Schedule RPC for future execution") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     int called = 0;
     remote.bind("test", [&called]() { called++; });
 
     // Schedule for timestamp 1000
-    fl::Json request = makeRequest("test", fl::Json::array(), 1, 1000);
-    fl::Json response = remote.processRpc(request);
+    fl::json request = makeRequest("test", fl::json::array(), 1, 1000);
+    fl::json response = remote.processRpc(request);
 
     // Should not execute yet
     FL_REQUIRE(called == 0);
@@ -231,14 +231,14 @@ FL_TEST_CASE("Remote: Tick executes scheduled RPCs") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     int called = 0;
     remote.bind("test", [&called]() { called++; });
 
     // Schedule for timestamp 1000
-    fl::Json request = makeRequest("test", fl::Json::array(), 1, 1000);
+    fl::json request = makeRequest("test", fl::json::array(), 1, 1000);
     remote.processRpc(request);
     FL_REQUIRE(called == 0);
 
@@ -258,7 +258,7 @@ FL_TEST_CASE("Remote: Multiple scheduled RPCs execute in order") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     fl::vector<int> callOrder;
@@ -267,9 +267,9 @@ FL_TEST_CASE("Remote: Multiple scheduled RPCs execute in order") {
     remote.bind("task3", [&callOrder]() { callOrder.push_back(3); });
 
     // Schedule out of order
-    remote.processRpc(makeRequest("task2", fl::Json::array(), 2, 2000));
-    remote.processRpc(makeRequest("task1", fl::Json::array(), 1, 1000));
-    remote.processRpc(makeRequest("task3", fl::Json::array(), 3, 3000));
+    remote.processRpc(makeRequest("task2", fl::json::array(), 2, 2000));
+    remote.processRpc(makeRequest("task1", fl::json::array(), 1, 1000));
+    remote.processRpc(makeRequest("task3", fl::json::array(), 3, 3000));
 
     FL_REQUIRE(remote.pendingCount() == 3);
 
@@ -291,7 +291,7 @@ FL_TEST_CASE("Remote: Pull requests from source") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     remote.bind("test", []() { return 42; });
@@ -308,7 +308,7 @@ FL_TEST_CASE("Remote: Push responses to sink") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     remote.bind("test", []() { return 42; });
@@ -328,7 +328,7 @@ FL_TEST_CASE("Remote: Update combines pull + tick + push") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     int immediate = 0;
@@ -338,7 +338,7 @@ FL_TEST_CASE("Remote: Update combines pull + tick + push") {
 
     // Queue immediate and scheduled requests
     io.requests.push_back(makeRequest("immediate"));
-    io.requests.push_back(makeRequest("scheduled", fl::Json::array(), 2, 1000));
+    io.requests.push_back(makeRequest("scheduled", fl::json::array(), 2, 1000));
 
     // Update at time 1000
     size_t total = remote.update(1000);
@@ -360,14 +360,14 @@ FL_TEST_CASE("Remote: Clear scheduled tasks") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     remote.bind("test", []() {});
 
     // Schedule tasks
-    remote.processRpc(makeRequest("test", fl::Json::array(), 1, 1000));
-    remote.processRpc(makeRequest("test", fl::Json::array(), 2, 2000));
+    remote.processRpc(makeRequest("test", fl::json::array(), 1, 1000));
+    remote.processRpc(makeRequest("test", fl::json::array(), 2, 2000));
     FL_REQUIRE(remote.pendingCount() == 2);
 
     // Clear scheduled
@@ -379,7 +379,7 @@ FL_TEST_CASE("Remote: Clear functions") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     remote.bind("test1", []() {});
@@ -395,11 +395,11 @@ FL_TEST_CASE("Remote: Clear multiple flags with OR") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     remote.bind("test", []() {});
-    remote.processRpc(makeRequest("test", fl::Json::array(), 1, 1000));
+    remote.processRpc(makeRequest("test", fl::json::array(), 1, 1000));
 
     FL_REQUIRE(remote.count() == 1);
     FL_REQUIRE(remote.pendingCount() == 1);
@@ -418,7 +418,7 @@ FL_TEST_CASE("Remote: Methods returns schema info") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     auto addFn = [](int a, int b) { return a + b; };
@@ -445,7 +445,7 @@ FL_TEST_CASE("Remote: Count returns number of methods") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     FL_REQUIRE(remote.count() == 0);
@@ -465,7 +465,7 @@ FL_TEST_CASE("Remote: schema returns minimal schema") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     auto addFn = [](int a, int b) { return a + b; };
@@ -480,18 +480,18 @@ FL_TEST_CASE("Remote: schema returns minimal schema") {
     remote.bind("test", voidFn);
 
     // Get flat schema
-    fl::Json schema = remote.schema();
+    fl::json schema = remote.schema();
 
     // Should have "schema" key
     FL_REQUIRE(schema.contains("schema"));
     FL_REQUIRE(schema["schema"].is_array());
 
     // Should have 2 methods
-    fl::Json methods = schema["schema"];
+    fl::json methods = schema["schema"];
     FL_REQUIRE(methods.size() == 2);
 
     // Find add method
-    fl::Json addMethod;
+    fl::json addMethod;
     bool found_add = false;
     for (fl::size i = 0; i < methods.size(); i++) {
         if (methods[i][0].as_string().value() == "add") {
@@ -535,7 +535,7 @@ FL_TEST_CASE("Remote: schema returns minimal schema") {
     FL_REQUIRE(addMethod[2][1][1].as_string().value() == "integer");
 
     // Find void method
-    fl::Json voidMethod;
+    fl::json voidMethod;
     bool found_void = false;
     for (fl::size i = 0; i < methods.size(); i++) {
         if (methods[i][0].as_string().value() == "test") {
@@ -556,21 +556,21 @@ FL_TEST_CASE("Remote: rpc.discover built-in method") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     remote.bind("test", [](int x) { return x * 2; });
 
     // Call rpc.discover
-    fl::Json request = makeRequest("rpc.discover");
-    fl::Json response = remote.processRpc(request);
+    fl::json request = makeRequest("rpc.discover");
+    fl::json response = remote.processRpc(request);
 
     // Should succeed
     FL_REQUIRE(response.contains("result"));
     FL_REQUIRE(response["result"].is_object());
 
     // Result should have "schema" key
-    fl::Json result = response["result"];
+    fl::json result = response["result"];
     FL_REQUIRE(result.contains("schema"));
     FL_REQUIRE(result["schema"].is_array());
 
@@ -582,7 +582,7 @@ FL_TEST_CASE("Remote: Schema is compact array format") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     // Register several methods
@@ -592,7 +592,7 @@ FL_TEST_CASE("Remote: Schema is compact array format") {
     remote.bind("method4", [](float x, float y) -> float { return x * y; });
 
     // Get schema
-    fl::Json schema = remote.schema();
+    fl::json schema = remote.schema();
 
     // Verify it has "schema" key with array
     FL_REQUIRE(schema.contains("schema"));
@@ -600,7 +600,7 @@ FL_TEST_CASE("Remote: Schema is compact array format") {
     FL_REQUIRE(schema["schema"].size() == 4);
 
     // Verify it's compact (each method is an array, not an object)
-    fl::Json methods = schema["schema"];
+    fl::json methods = schema["schema"];
     for (fl::size i = 0; i < methods.size(); i++) {
         FL_REQUIRE(methods[i].is_array());
         FL_REQUIRE(methods[i].size() == 4);  // [name, returnType, params, mode]
@@ -611,7 +611,7 @@ FL_TEST_CASE("Remote: Flat schema type mappings") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     // Register methods with different types
@@ -620,19 +620,19 @@ FL_TEST_CASE("Remote: Flat schema type mappings") {
     remote.bind("boolFunc", [](bool b) -> bool { return b; });
     remote.bind("floatFunc", [](float f) -> float { return f; });
     remote.bind("stringFunc", [](fl::string s) -> fl::string { return s; });
-    remote.bind("jsonFunc", [](fl::Json j) -> fl::Json { return j; });
+    remote.bind("jsonFunc", [](fl::json j) -> fl::json { return j; });
 
-    fl::Json schema = remote.schema();
-    fl::Json methods = schema["schema"];
+    fl::json schema = remote.schema();
+    fl::json methods = schema["schema"];
 
     // Helper to find method
-    auto findMethod = [&methods](const char* name) -> fl::Json {
+    auto findMethod = [&methods](const char* name) -> fl::json {
         for (fl::size i = 0; i < methods.size(); i++) {
             if (methods[i][0].as_string().value() == name) {
                 return methods[i];
             }
         }
-        return fl::Json();
+        return fl::json();
     };
 
     // Verify type mappings
@@ -658,13 +658,13 @@ FL_TEST_CASE("Remote: Flat schema with no parameters") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     remote.bind("noParams", []() -> int { return 42; });
 
-    fl::Json schema = remote.schema();
-    fl::Json methods = schema["schema"];
+    fl::json schema = remote.schema();
+    fl::json methods = schema["schema"];
 
     FL_REQUIRE(methods.size() == 1);
     FL_REQUIRE(methods[0][0].as_string().value() == "noParams");
@@ -677,7 +677,7 @@ FL_TEST_CASE("Remote: Flat schema with many parameters") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     // Method with 5 parameters
@@ -685,9 +685,9 @@ FL_TEST_CASE("Remote: Flat schema with many parameters") {
         return a + b + c + d + e;
     });
 
-    fl::Json schema = remote.schema();
-    fl::Json methods = schema["schema"];
-    fl::Json params = methods[0][2];
+    fl::json schema = remote.schema();
+    fl::json methods = schema["schema"];
+    fl::json params = methods[0][2];
 
     FL_REQUIRE(params.size() == 5);
     for (fl::size i = 0; i < 5; i++) {
@@ -701,14 +701,14 @@ FL_TEST_CASE("Remote: Flat schema via JSON-RPC with ID") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     remote.bind("test", []() {});
 
     // Call with explicit ID
-    fl::Json request = makeRequest("rpc.discover", fl::Json::array(), 42);
-    fl::Json response = remote.processRpc(request);
+    fl::json request = makeRequest("rpc.discover", fl::json::array(), 42);
+    fl::json response = remote.processRpc(request);
 
     // Response should have matching ID
     FL_REQUIRE(response.contains("id"));
@@ -724,19 +724,19 @@ FL_TEST_CASE("Remote: Flat schema via JSON-RPC with ID") {
 }
 
 // =============================================================================
-// Json Parameter Tests
+// json Parameter Tests
 // =============================================================================
 
-FL_TEST_CASE("Remote: Bind method with const Json& parameter") {
+FL_TEST_CASE("Remote: Bind method with const json& parameter") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
-    // Test that const Json& parameters work correctly
+    // Test that const json& parameters work correctly
     // The RPC system should strip const/ref and store by value
-    remote.bind("echo", [](const fl::Json& args) -> fl::Json {
+    remote.bind("echo", [](const fl::json& args) -> fl::json {
         // Verify we receive the args correctly
         return args;
     });
@@ -745,19 +745,19 @@ FL_TEST_CASE("Remote: Bind method with const Json& parameter") {
     FL_REQUIRE(remote.has("echo"));
 
     // Create request with array parameter containing a JSON object
-    fl::Json testData = fl::Json::object();
+    fl::json testData = fl::json::object();
     testData.set("key", "value");
     testData.set("number", 42);
 
-    fl::Json params = fl::Json::array();
+    fl::json params = fl::json::array();
     params.push_back(testData);
 
-    fl::Json request = makeRequest("echo", params);
-    fl::Json response = remote.processRpc(request);
+    fl::json request = makeRequest("echo", params);
+    fl::json response = remote.processRpc(request);
 
     // Verify response structure
     FL_REQUIRE(response.contains("result"));
-    fl::Json result = response["result"];
+    fl::json result = response["result"];
 
     // Result should be the testData object we passed in
     FL_REQUIRE(result.is_object());
@@ -767,31 +767,31 @@ FL_TEST_CASE("Remote: Bind method with const Json& parameter") {
     FL_REQUIRE(result["number"].as_int().value() == 42);
 }
 
-FL_TEST_CASE("Remote: Bind method with Json value parameter") {
+FL_TEST_CASE("Remote: Bind method with json value parameter") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
-    // Test that fl::Json (by value) also works
-    remote.bind("echoByValue", [](fl::Json args) -> fl::Json {
+    // Test that fl::json (by value) also works
+    remote.bind("echoByValue", [](fl::json args) -> fl::json {
         return args;
     });
 
     FL_REQUIRE(remote.count() == 1);
 
-    fl::Json testData = fl::Json::object();
+    fl::json testData = fl::json::object();
     testData.set("test", true);
 
-    fl::Json params = fl::Json::array();
+    fl::json params = fl::json::array();
     params.push_back(testData);
 
-    fl::Json request = makeRequest("echoByValue", params);
-    fl::Json response = remote.processRpc(request);
+    fl::json request = makeRequest("echoByValue", params);
+    fl::json response = remote.processRpc(request);
 
     FL_REQUIRE(response.contains("result"));
-    fl::Json result = response["result"];
+    fl::json result = response["result"];
     FL_REQUIRE(result.is_object());
     FL_REQUIRE(result.contains("test"));
     FL_REQUIRE(result["test"].as_bool().value() == true);
@@ -801,7 +801,7 @@ FL_TEST_CASE("Remote: Bind method with const string& parameter") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     // Test that const fl::string& parameters work
@@ -811,11 +811,11 @@ FL_TEST_CASE("Remote: Bind method with const string& parameter") {
 
     FL_REQUIRE(remote.count() == 1);
 
-    fl::Json params = fl::Json::array();
-    params.push_back(fl::Json("World"));
+    fl::json params = fl::json::array();
+    params.push_back(fl::json("World"));
 
-    fl::Json request = makeRequest("greet", params);
-    fl::Json response = remote.processRpc(request);
+    fl::json request = makeRequest("greet", params);
+    fl::json response = remote.processRpc(request);
 
     FL_REQUIRE(response.contains("result"));
     auto resultStr = response["result"].as_string();
@@ -827,7 +827,7 @@ FL_TEST_CASE("Remote: Bind method with string value parameter") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     // Test that fl::string (by value) also works
@@ -846,11 +846,11 @@ FL_TEST_CASE("Remote: Bind method with string value parameter") {
 
     FL_REQUIRE(remote.count() == 1);
 
-    fl::Json params = fl::Json::array();
-    params.push_back(fl::Json("test"));
+    fl::json params = fl::json::array();
+    params.push_back(fl::json("test"));
 
-    fl::Json request = makeRequest("upper", params);
-    fl::Json response = remote.processRpc(request);
+    fl::json request = makeRequest("upper", params);
+    fl::json response = remote.processRpc(request);
 
     FL_REQUIRE(response.contains("result"));
     auto resultStr = response["result"].as_string();
@@ -862,7 +862,7 @@ FL_TEST_CASE("Remote: Bind method with const char* parameter") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     // Test that const char* parameters work
@@ -877,11 +877,11 @@ FL_TEST_CASE("Remote: Bind method with const char* parameter") {
 
     FL_REQUIRE(remote.count() == 1);
 
-    fl::Json params = fl::Json::array();
-    params.push_back(fl::Json("hello"));
+    fl::json params = fl::json::array();
+    params.push_back(fl::json("hello"));
 
-    fl::Json request = makeRequest("length", params);
-    fl::Json response = remote.processRpc(request);
+    fl::json request = makeRequest("length", params);
+    fl::json response = remote.processRpc(request);
 
     FL_REQUIRE(response.contains("result"));
     auto resultInt = response["result"].as_int();
@@ -893,7 +893,7 @@ FL_TEST_CASE("Remote: Bind method with span<const int> parameter") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     // Test that span<const int> parameters work
@@ -908,18 +908,18 @@ FL_TEST_CASE("Remote: Bind method with span<const int> parameter") {
     FL_REQUIRE(remote.count() == 1);
 
     // Create JSON array of integers
-    fl::Json nums = fl::Json::array();
-    nums.push_back(fl::Json(1));
-    nums.push_back(fl::Json(2));
-    nums.push_back(fl::Json(3));
-    nums.push_back(fl::Json(4));
-    nums.push_back(fl::Json(5));
+    fl::json nums = fl::json::array();
+    nums.push_back(fl::json(1));
+    nums.push_back(fl::json(2));
+    nums.push_back(fl::json(3));
+    nums.push_back(fl::json(4));
+    nums.push_back(fl::json(5));
 
-    fl::Json params = fl::Json::array();
+    fl::json params = fl::json::array();
     params.push_back(nums);
 
-    fl::Json request = makeRequest("sum", params);
-    fl::Json response = remote.processRpc(request);
+    fl::json request = makeRequest("sum", params);
+    fl::json response = remote.processRpc(request);
 
     FL_REQUIRE(response.contains("result"));
     auto resultInt = response["result"].as_int();
@@ -931,7 +931,7 @@ FL_TEST_CASE("Remote: Bind method with span<const float> parameter") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     // Test that span<const float> parameters work
@@ -947,16 +947,16 @@ FL_TEST_CASE("Remote: Bind method with span<const float> parameter") {
     FL_REQUIRE(remote.count() == 1);
 
     // Create JSON array of floats
-    fl::Json nums = fl::Json::array();
-    nums.push_back(fl::Json(1.5));
-    nums.push_back(fl::Json(2.5));
-    nums.push_back(fl::Json(3.5));
+    fl::json nums = fl::json::array();
+    nums.push_back(fl::json(1.5));
+    nums.push_back(fl::json(2.5));
+    nums.push_back(fl::json(3.5));
 
-    fl::Json params = fl::Json::array();
+    fl::json params = fl::json::array();
     params.push_back(nums);
 
-    fl::Json request = makeRequest("average", params);
-    fl::Json response = remote.processRpc(request);
+    fl::json request = makeRequest("average", params);
+    fl::json response = remote.processRpc(request);
 
     FL_REQUIRE(response.contains("result"));
     // Result should be approximately 2.5
@@ -971,7 +971,7 @@ FL_TEST_CASE("Remote: Bind method with vector<int> parameter") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     // Test that fl::vector<int> parameters work (by value)
@@ -985,19 +985,19 @@ FL_TEST_CASE("Remote: Bind method with vector<int> parameter") {
 
     FL_REQUIRE(remote.count() == 1);
 
-    fl::Json nums = fl::Json::array();
-    nums.push_back(fl::Json(1));
-    nums.push_back(fl::Json(2));
-    nums.push_back(fl::Json(3));
+    fl::json nums = fl::json::array();
+    nums.push_back(fl::json(1));
+    nums.push_back(fl::json(2));
+    nums.push_back(fl::json(3));
 
-    fl::Json params = fl::Json::array();
+    fl::json params = fl::json::array();
     params.push_back(nums);
 
-    fl::Json request = makeRequest("reverse", params);
-    fl::Json response = remote.processRpc(request);
+    fl::json request = makeRequest("reverse", params);
+    fl::json response = remote.processRpc(request);
 
     FL_REQUIRE(response.contains("result"));
-    fl::Json result = response["result"];
+    fl::json result = response["result"];
     FL_REQUIRE(result.is_array());
     FL_REQUIRE(result.size() == 3);
     FL_REQUIRE(result[0].as_int().value() == 3);
@@ -1009,7 +1009,7 @@ FL_TEST_CASE("Remote: Bind method with const vector<float>& parameter") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     // Test that const fl::vector<float>& parameters work
@@ -1023,20 +1023,20 @@ FL_TEST_CASE("Remote: Bind method with const vector<float>& parameter") {
 
     FL_REQUIRE(remote.count() == 1);
 
-    fl::Json nums = fl::Json::array();
-    nums.push_back(fl::Json(1.0));
-    nums.push_back(fl::Json(2.0));
-    nums.push_back(fl::Json(3.0));
+    fl::json nums = fl::json::array();
+    nums.push_back(fl::json(1.0));
+    nums.push_back(fl::json(2.0));
+    nums.push_back(fl::json(3.0));
 
-    fl::Json params = fl::Json::array();
+    fl::json params = fl::json::array();
     params.push_back(nums);
-    params.push_back(fl::Json(2.0));
+    params.push_back(fl::json(2.0));
 
-    fl::Json request = makeRequest("scale", params);
-    fl::Json response = remote.processRpc(request);
+    fl::json request = makeRequest("scale", params);
+    fl::json response = remote.processRpc(request);
 
     FL_REQUIRE(response.contains("result"));
-    fl::Json result = response["result"];
+    fl::json result = response["result"];
     FL_REQUIRE(result.is_array());
     FL_REQUIRE(result.size() == 3);
     // Check that values are approximately 2.0, 4.0, 6.0
@@ -1046,7 +1046,7 @@ FL_TEST_CASE("Remote: Bind method with vector<string> parameter") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     // Test that fl::vector<fl::string> parameters work
@@ -1061,17 +1061,17 @@ FL_TEST_CASE("Remote: Bind method with vector<string> parameter") {
 
     FL_REQUIRE(remote.count() == 1);
 
-    fl::Json words = fl::Json::array();
-    words.push_back(fl::Json("Hello"));
-    words.push_back(fl::Json("World"));
-    words.push_back(fl::Json("Test"));
+    fl::json words = fl::json::array();
+    words.push_back(fl::json("Hello"));
+    words.push_back(fl::json("World"));
+    words.push_back(fl::json("Test"));
 
-    fl::Json params = fl::Json::array();
+    fl::json params = fl::json::array();
     params.push_back(words);
-    params.push_back(fl::Json(" "));
+    params.push_back(fl::json(" "));
 
-    fl::Json request = makeRequest("join", params);
-    fl::Json response = remote.processRpc(request);
+    fl::json request = makeRequest("join", params);
+    fl::json response = remote.processRpc(request);
 
     FL_REQUIRE(response.contains("result"));
     auto resultStr = response["result"].as_string();
@@ -1083,7 +1083,7 @@ FL_TEST_CASE("Remote: Bind method with vector<vector<int>> (nested) parameter") 
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     // Test nested vectors
@@ -1100,31 +1100,31 @@ FL_TEST_CASE("Remote: Bind method with vector<vector<int>> (nested) parameter") 
     FL_REQUIRE(remote.count() == 1);
 
     // Create nested array [[1,2], [3,4], [5,6]]
-    fl::Json row1 = fl::Json::array();
-    row1.push_back(fl::Json(1));
-    row1.push_back(fl::Json(2));
+    fl::json row1 = fl::json::array();
+    row1.push_back(fl::json(1));
+    row1.push_back(fl::json(2));
 
-    fl::Json row2 = fl::Json::array();
-    row2.push_back(fl::Json(3));
-    row2.push_back(fl::Json(4));
+    fl::json row2 = fl::json::array();
+    row2.push_back(fl::json(3));
+    row2.push_back(fl::json(4));
 
-    fl::Json row3 = fl::Json::array();
-    row3.push_back(fl::Json(5));
-    row3.push_back(fl::Json(6));
+    fl::json row3 = fl::json::array();
+    row3.push_back(fl::json(5));
+    row3.push_back(fl::json(6));
 
-    fl::Json matrix = fl::Json::array();
+    fl::json matrix = fl::json::array();
     matrix.push_back(row1);
     matrix.push_back(row2);
     matrix.push_back(row3);
 
-    fl::Json params = fl::Json::array();
+    fl::json params = fl::json::array();
     params.push_back(matrix);
 
-    fl::Json request = makeRequest("flatten", params);
-    fl::Json response = remote.processRpc(request);
+    fl::json request = makeRequest("flatten", params);
+    fl::json response = remote.processRpc(request);
 
     FL_REQUIRE(response.contains("result"));
-    fl::Json result = response["result"];
+    fl::json result = response["result"];
     FL_REQUIRE(result.is_array());
     FL_REQUIRE(result.size() == 6);
     FL_REQUIRE(result[0].as_int().value() == 1);
@@ -1195,7 +1195,7 @@ FL_TEST_CASE("Remote: JSON input pipeline - parse valid request") {
     stream.addInput(R"({"method":"add","params":[5,3],"id":1})");
 
     // Create request source
-    auto requestSource = [&stream]() -> fl::optional<fl::Json> {
+    auto requestSource = [&stream]() -> fl::optional<fl::json> {
         // Simulate readSerialLine
         fl::string line;
         while (true) {
@@ -1206,7 +1206,7 @@ FL_TEST_CASE("Remote: JSON input pipeline - parse valid request") {
         }
 
         // Parse JSON
-        return fl::Json::parse(line);
+        return fl::json::parse(line);
     };
 
     // Pull request
@@ -1223,13 +1223,13 @@ FL_TEST_CASE("Remote: JSON output pipeline - format response") {
     MemoryStream stream;
 
     // Create response
-    fl::Json response = fl::Json::object();
+    fl::json response = fl::json::object();
     response.set("jsonrpc", "2.0");
     response.set("result", 42);
     response.set("id", 1);
 
     // Create response sink
-    auto responseSink = [&stream](const fl::Json& r) {
+    auto responseSink = [&stream](const fl::json& r) {
         fl::string formatted = r.to_string();
         stream.println(formatted.c_str());
     };
@@ -1253,7 +1253,7 @@ FL_TEST_CASE("Remote: End-to-end JSON pipeline with prefix") {
     inputStream.addInput(R"(REMOTE: {"method":"echo","params":["hello"],"id":1})");
 
     // Create request source with prefix stripping
-    auto requestSource = [&inputStream]() -> fl::optional<fl::Json> {
+    auto requestSource = [&inputStream]() -> fl::optional<fl::json> {
         fl::string line;
         while (true) {
             int c = inputStream.read();
@@ -1279,11 +1279,11 @@ FL_TEST_CASE("Remote: End-to-end JSON pipeline with prefix") {
 
         // Parse JSON
         fl::string cleaned(view);
-        return fl::Json::parse(cleaned);
+        return fl::json::parse(cleaned);
     };
 
     // Create response sink with prefix
-    auto responseSink = [&outputStream](const fl::Json& r) {
+    auto responseSink = [&outputStream](const fl::json& r) {
         fl::string formatted = "REMOTE: " + r.to_string();
         outputStream.println(formatted.c_str());
     };
@@ -1313,7 +1313,7 @@ FL_TEST_CASE("Remote: Schema generation via JSON pipeline") {
     inputStream.addInput(R"({"method":"rpc.discover","params":[],"id":1})");
 
     // Create I/O adapters
-    auto requestSource = [&inputStream]() -> fl::optional<fl::Json> {
+    auto requestSource = [&inputStream]() -> fl::optional<fl::json> {
         fl::string line;
         while (true) {
             int c = inputStream.read();
@@ -1321,10 +1321,10 @@ FL_TEST_CASE("Remote: Schema generation via JSON pipeline") {
             if (c == '\n') break;
             line += static_cast<char>(c);
         }
-        return fl::Json::parse(line);
+        return fl::json::parse(line);
     };
 
-    auto responseSink = [&outputStream](const fl::Json& r) {
+    auto responseSink = [&outputStream](const fl::json& r) {
         outputStream.println(r.to_string().c_str());
     };
 
@@ -1339,16 +1339,16 @@ FL_TEST_CASE("Remote: Schema generation via JSON pipeline") {
 
     // Parse output
     FL_REQUIRE(outputStream.outputLines.size() == 1);
-    fl::Json response = fl::Json::parse(outputStream.outputLines[0]);
+    fl::json response = fl::json::parse(outputStream.outputLines[0]);
 
     // Verify schema structure
     FL_REQUIRE(response.contains("result"));
-    fl::Json result = response["result"];
+    fl::json result = response["result"];
     FL_REQUIRE(result.contains("schema"));
     FL_REQUIRE(result["schema"].is_array());
 
     // Verify schema contains our methods
-    fl::Json schema = result["schema"];
+    fl::json schema = result["schema"];
     FL_REQUIRE(schema.size() >= 2);  // At least add and multiply
 }
 
@@ -1363,7 +1363,7 @@ FL_TEST_CASE("Remote: Multiple RPC calls via JSON pipeline") {
     inputStream.addInput(R"({"method":"subtract","params":[10,6],"id":3})");
 
     // Create I/O adapters
-    auto requestSource = [&inputStream]() -> fl::optional<fl::Json> {
+    auto requestSource = [&inputStream]() -> fl::optional<fl::json> {
         fl::string line;
         while (true) {
             int c = inputStream.read();
@@ -1371,10 +1371,10 @@ FL_TEST_CASE("Remote: Multiple RPC calls via JSON pipeline") {
             if (c == '\n') break;
             line += static_cast<char>(c);
         }
-        return fl::Json::parse(line);
+        return fl::json::parse(line);
     };
 
-    auto responseSink = [&outputStream](const fl::Json& r) {
+    auto responseSink = [&outputStream](const fl::json& r) {
         outputStream.println(r.to_string().c_str());
     };
 
@@ -1392,19 +1392,19 @@ FL_TEST_CASE("Remote: Multiple RPC calls via JSON pipeline") {
     FL_REQUIRE(outputStream.outputLines.size() == 3);
 
     // Parse and verify first response (add)
-    fl::Json r1 = fl::Json::parse(outputStream.outputLines[0]);
+    fl::json r1 = fl::json::parse(outputStream.outputLines[0]);
     FL_REQUIRE(r1.contains("result"));
     FL_REQUIRE(r1["result"].as_int().value() == 8);  // 5+3
     FL_REQUIRE(r1["id"].as_int().value() == 1);
 
     // Parse and verify second response (multiply)
-    fl::Json r2 = fl::Json::parse(outputStream.outputLines[1]);
+    fl::json r2 = fl::json::parse(outputStream.outputLines[1]);
     FL_REQUIRE(r2.contains("result"));
     FL_REQUIRE(r2["result"].as_int().value() == 28);  // 4*7
     FL_REQUIRE(r2["id"].as_int().value() == 2);
 
     // Parse and verify third response (subtract)
-    fl::Json r3 = fl::Json::parse(outputStream.outputLines[2]);
+    fl::json r3 = fl::json::parse(outputStream.outputLines[2]);
     FL_REQUIRE(r3.contains("result"));
     FL_REQUIRE(r3["result"].as_int().value() == 4);  // 10-6
     FL_REQUIRE(r3["id"].as_int().value() == 3);
@@ -1419,7 +1419,7 @@ FL_TEST_CASE("Remote: Error handling via JSON pipeline") {
     inputStream.addInput(R"({"method":"unknownMethod","params":[],"id":42})");
 
     // Create I/O adapters
-    auto requestSource = [&inputStream]() -> fl::optional<fl::Json> {
+    auto requestSource = [&inputStream]() -> fl::optional<fl::json> {
         fl::string line;
         while (true) {
             int c = inputStream.read();
@@ -1427,10 +1427,10 @@ FL_TEST_CASE("Remote: Error handling via JSON pipeline") {
             if (c == '\n') break;
             line += static_cast<char>(c);
         }
-        return fl::Json::parse(line);
+        return fl::json::parse(line);
     };
 
-    auto responseSink = [&outputStream](const fl::Json& r) {
+    auto responseSink = [&outputStream](const fl::json& r) {
         outputStream.println(r.to_string().c_str());
     };
 
@@ -1443,7 +1443,7 @@ FL_TEST_CASE("Remote: Error handling via JSON pipeline") {
 
     // Verify error response
     FL_REQUIRE(outputStream.outputLines.size() == 1);
-    fl::Json response = fl::Json::parse(outputStream.outputLines[0]);
+    fl::json response = fl::json::parse(outputStream.outputLines[0]);
     FL_REQUIRE(response.contains("error"));
     FL_REQUIRE(response["id"].as_int().value() == 42);
 }
@@ -1453,9 +1453,9 @@ FL_TEST_CASE("Remote: Compact JSON output (no newlines)") {
     MemoryStream outputStream;
 
     // Create complex response
-    fl::Json response = fl::Json::object();
+    fl::json response = fl::json::object();
     response.set("jsonrpc", "2.0");
-    fl::Json result = fl::Json::object();
+    fl::json result = fl::json::object();
     result.set("value", 42);
     result.set("status", "success");
     response.set("result", result);
@@ -1478,26 +1478,26 @@ FL_TEST_CASE("Remote: Async RPC - Immediate ACK + deferred response") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     int functionCalled = 0;
 
     // Register async function that takes time to complete
-    remote.bind("slowTest", [&functionCalled]() -> fl::Json {
+    remote.bind("slowTest", [&functionCalled]() -> fl::json {
         functionCalled++;
 
         // Simulate work (in real scenario this might take seconds)
         // For test we just return immediately
 
-        fl::Json result = fl::Json::object();
+        fl::json result = fl::json::object();
         result.set("success", true);
         result.set("value", 42);
         return result;
     }, fl::RpcMode::ASYNC);
 
     // Client: Send request with ID
-    fl::Json request = makeRequest("slowTest", fl::Json::array(), 123);
+    fl::json request = makeRequest("slowTest", fl::json::array(), 123);
     io.requests.push_back(request);
 
     // Server: Pull request (should send ACK and execute function)
@@ -1512,13 +1512,13 @@ FL_TEST_CASE("Remote: Async RPC - Immediate ACK + deferred response") {
     FL_REQUIRE(io.responses.size() >= 1);
 
     // First response should be ACK
-    fl::Json ack = io.responses[0];
+    fl::json ack = io.responses[0];
     FL_REQUIRE(ack.contains("id"));
     FL_REQUIRE(ack["id"].as_int().value() == 123);
     FL_REQUIRE(ack.contains("result"));
 
     // ACK result should have "acknowledged": true
-    fl::Json ackResult = ack["result"];
+    fl::json ackResult = ack["result"];
     if (ackResult.is_object()) {
         FL_REQUIRE(ackResult.contains("acknowledged"));
         FL_REQUIRE(ackResult["acknowledged"].as_bool().value() == true);
@@ -1529,18 +1529,18 @@ FL_TEST_CASE("Remote: Async RPC - Simulate validation script flow") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     // Simulate runSingleTest function (like ValidationRemote)
-    remote.bind("runSingleTest", [](const fl::Json& args) -> fl::Json {
+    remote.bind("runSingleTest", [](const fl::json& args) -> fl::json {
         // Simulate test execution that takes time
 
         // Extract test params from args
         fl::string driver = args["driver"].as_string().value_or("unknown");
 
         // Return test results
-        fl::Json result = fl::Json::object();
+        fl::json result = fl::json::object();
         result.set("success", true);
         result.set("driver", driver.c_str());
         result.set("passed", true);
@@ -1552,20 +1552,20 @@ FL_TEST_CASE("Remote: Async RPC - Simulate validation script flow") {
     }, fl::RpcMode::ASYNC);
 
     // Client: Create request like validate.py does
-    fl::Json testArgs = fl::Json::object();
+    fl::json testArgs = fl::json::object();
     testArgs.set("driver", "PARLIO");
 
-    fl::Json laneSizes = fl::Json::array();
+    fl::json laneSizes = fl::json::array();
     laneSizes.push_back(100);
     testArgs.set("laneSizes", laneSizes);
 
     testArgs.set("pattern", "MSB_LSB_A");
     testArgs.set("iterations", 1);
 
-    fl::Json params = fl::Json::array();
+    fl::json params = fl::json::array();
     params.push_back(testArgs);
 
-    fl::Json request = makeRequest("runSingleTest", params, 1);
+    fl::json request = makeRequest("runSingleTest", params, 1);
 
     // Client: Send request
     io.requests.push_back(request);
@@ -1578,7 +1578,7 @@ FL_TEST_CASE("Remote: Async RPC - Simulate validation script flow") {
     FL_REQUIRE(io.responses.size() >= 1);
 
     // Client: Check ACK
-    fl::Json ack = io.responses[0];
+    fl::json ack = io.responses[0];
     FL_REQUIRE(ack.contains("id"));
     FL_REQUIRE(ack["id"].as_int().value() == 1);
 
@@ -1590,7 +1590,7 @@ FL_TEST_CASE("Remote: Async RPC - Debug request fields") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     bool functionReached = false;
@@ -1600,10 +1600,10 @@ FL_TEST_CASE("Remote: Async RPC - Debug request fields") {
     }, fl::RpcMode::ASYNC);
 
     // Create request with all expected fields
-    fl::Json request = fl::Json::object();
+    fl::json request = fl::json::object();
     request.set("method", "testMethod");
 
-    fl::Json params = fl::Json::array();
+    fl::json params = fl::json::array();
     params.push_back(10);
     request.set("params", params);
 
@@ -1635,7 +1635,7 @@ FL_TEST_CASE("Remote: Async RPC - Multiple async calls with different IDs") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     fl::vector<int> callOrder;
@@ -1645,15 +1645,15 @@ FL_TEST_CASE("Remote: Async RPC - Multiple async calls with different IDs") {
     }, fl::RpcMode::ASYNC);
 
     // Queue 3 async requests with different IDs
-    fl::Json params1 = fl::Json::array();
+    fl::json params1 = fl::json::array();
     params1.push_back(1);
     io.requests.push_back(makeRequest("task", params1, 101));
 
-    fl::Json params2 = fl::Json::array();
+    fl::json params2 = fl::json::array();
     params2.push_back(2);
     io.requests.push_back(makeRequest("task", params2, 102));
 
-    fl::Json params3 = fl::Json::array();
+    fl::json params3 = fl::json::array();
     params3.push_back(3);
     io.requests.push_back(makeRequest("task", params3, 103));
 
@@ -1680,7 +1680,7 @@ FL_TEST_CASE("Remote: Async RPC - Sync vs Async behavior difference") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     // Register same function as both sync and async
@@ -1688,7 +1688,7 @@ FL_TEST_CASE("Remote: Async RPC - Sync vs Async behavior difference") {
     remote.bind("asyncFunc", []() -> int { return 42; }, fl::RpcMode::ASYNC);
 
     // Call sync function
-    io.requests.push_back(makeRequest("syncFunc", fl::Json::array(), 1));
+    io.requests.push_back(makeRequest("syncFunc", fl::json::array(), 1));
     remote.pull();
     remote.push();
 
@@ -1700,7 +1700,7 @@ FL_TEST_CASE("Remote: Async RPC - Sync vs Async behavior difference") {
     io.reset();
 
     // Call async function
-    io.requests.push_back(makeRequest("asyncFunc", fl::Json::array(), 2));
+    io.requests.push_back(makeRequest("asyncFunc", fl::json::array(), 2));
     remote.pull();
     remote.push();
 
@@ -1709,7 +1709,7 @@ FL_TEST_CASE("Remote: Async RPC - Sync vs Async behavior difference") {
 
     // First response should be ACK
     FL_REQUIRE(io.responses[0].contains("result"));
-    fl::Json ackResult = io.responses[0]["result"];
+    fl::json ackResult = io.responses[0]["result"];
     if (ackResult.is_object() && ackResult.contains("acknowledged")) {
         FL_REQUIRE(ackResult["acknowledged"].as_bool().value() == true);
     }

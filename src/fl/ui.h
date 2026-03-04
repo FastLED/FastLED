@@ -2,7 +2,7 @@
 
 
 #include "fl/stl/shared_ptr.h"  // For shared_ptr
-#include "fl/json.h"  // IWYU pragma: keep
+#include "fl/stl/json.h"  // IWYU pragma: keep
 #include "fl/stl/string.h"
 #include "fl/stl/url.h"
 #include "fl/int.h"  // IWYU pragma: keep

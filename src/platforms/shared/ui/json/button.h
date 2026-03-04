@@ -5,7 +5,7 @@
 #include "fl/engine_events.h"
 #include "fl/stl/string.h"
 #include "platforms/shared/ui/json/ui_internal.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/stl/shared_ptr.h" // For fl::shared_ptr
 
 namespace fl {
@@ -20,7 +20,7 @@ class JsonButtonImpl {
     JsonButtonImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
-    void toJson(fl::Json &json) const;
+    void toJson(fl::json &json) const;
     bool isPressed() const;
     bool clicked() const;
     int clickedCount() const;

@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/has_include.h"
 
 // BLE requires: JSON enabled + ESP32 + IDF 5+ + NimBLE headers present
@@ -81,7 +81,7 @@ BleStatusInfo queryBleStatus(const BleTransportState* state);
 /// @brief Get RequestSource and ResponseSink lambdas for fl::Remote
 /// @param state Pointer returned by createBleTransport (must outlive returned lambdas)
 /// @return Pair of {RequestSource, ResponseSink} ready for fl::Remote constructor
-fl::pair<fl::function<fl::optional<fl::Json>()>, fl::function<void(const fl::Json&)>>
+fl::pair<fl::function<fl::optional<fl::json>()>, fl::function<void(const fl::json&)>>
 getBleTransportCallbacks(BleTransportState* state);
 
 } // namespace fl

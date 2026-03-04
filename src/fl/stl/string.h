@@ -59,8 +59,8 @@ class Tile2x2_u8_wrap;
 class JsonUiInternal;
 
 // Forward declarations for JSON types
-struct JsonValue;
-class Json;
+struct json_value;
+class json;
 
 template <typename T> struct rect;
 template <typename T> struct vec2;
@@ -2752,8 +2752,8 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     string &append(const JsonUiInternal& val);
     
     // JSON type append methods - implementations in str.cpp
-    string &append(const JsonValue& val);
-    string &append(const Json& val);
+    string &append(const json_value& val);
+    string &append(const json& val);
 
     template <typename T, fl::size N>
     string &append(const fl::FixedVector<T, N> &vec) {

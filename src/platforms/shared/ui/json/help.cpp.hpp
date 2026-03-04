@@ -4,7 +4,7 @@
 #include "platforms/shared/ui/json/ui.h"
 #include "ui_internal.h"
 
-#include "fl/json.h"
+#include "fl/stl/json.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -22,7 +22,7 @@ class JsonUiHelpInternal : public JsonUiInternal {
         : JsonUiInternal(name), mMarkdownContent(markdownContent) {}
 
     // Override toJson to serialize the help's data directly.
-    void toJson(fl::Json &json) const override {
+    void toJson(fl::json &json) const override {
         json.set("name", name());
         json.set("type", "help");
         json.set("group", groupName());
@@ -32,7 +32,7 @@ class JsonUiHelpInternal : public JsonUiInternal {
 
     // Override updateInternal. Help components typically don't have update
     // functionality from the UI, so this can be a no-op.
-    void updateInternal(const fl::Json &json) override {
+    void updateInternal(const fl::json &json) override {
         // No update needed for help components
         FL_UNUSED(json);
     }
@@ -66,7 +66,7 @@ const fl::string &JsonHelpImpl::markdownContent() const {
     return mInternal->markdownContent();
 }
 
-void JsonHelpImpl::toJson(fl::Json &json) const { mInternal->toJson(json); }
+void JsonHelpImpl::toJson(fl::json &json) const { mInternal->toJson(json); }
 
 const string &JsonHelpImpl::name() const { return mInternal->name(); }
 

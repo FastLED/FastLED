@@ -642,18 +642,18 @@ fl::size fetch_active_requests() {
 
 // ========== Response Class Method Implementations ==========
 
-fl::Json response::json() const {
+fl::json response::json() const {
     if (!mJsonParsed) {
         if (is_json() || mBody.find("{") != fl::string::npos || mBody.find("[") != fl::string::npos) {
             mCachedJson = parse_json_body();
         } else {
             FL_WARN("Response is not JSON: " << mBody);
-            mCachedJson = fl::Json(nullptr);  // Not JSON content
+            mCachedJson = fl::json(nullptr);  // Not JSON content
         }
         mJsonParsed = true;
     }
     
-    return mCachedJson.has_value() ? *mCachedJson : fl::Json(nullptr);
+    return mCachedJson.has_value() ? *mCachedJson : fl::json(nullptr);
 }
 
 } // namespace fl 

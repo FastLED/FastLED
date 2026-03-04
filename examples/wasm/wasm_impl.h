@@ -13,7 +13,7 @@
 
 #include <FastLED.h>
 #include "fl/fx/2d/noisepalette.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/slice.h"
 #include "fl/fx/fx_engine.h"
 

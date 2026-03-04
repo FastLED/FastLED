@@ -5,7 +5,7 @@
 #include "fl/net/http/stream_transport.cpp.hpp"
 #include "fl/net/http/connection.cpp.hpp"
 #include "fl/net/http/chunked_encoding.cpp.hpp"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 
 using namespace fl;
 
@@ -32,7 +32,7 @@ FL_TEST_CASE("HTTP Transport - Chunked encoding round-trip") {
     client.update(0);
 
     // Send JSON-RPC request from client
-    Json request = Json::object();
+    json request = json::object();
     request.set("jsonrpc", "2.0");
     request.set("method", "test");
     request.set("id", 1);
@@ -59,7 +59,7 @@ FL_TEST_CASE("HTTP Transport - Multiple messages in sequence") {
 
     // Send 3 messages
     for (int i = 0; i < 3; i++) {
-        Json request = Json::object();
+        json request = json::object();
         request.set("jsonrpc", "2.0");
         request.set("method", "msg");
         request.set("id", i);
@@ -90,7 +90,7 @@ FL_TEST_CASE("HTTP Transport - Bidirectional communication") {
     client.update(0);
 
     // Client sends request
-    Json request = Json::object();
+    json request = json::object();
     request.set("jsonrpc", "2.0");
     request.set("method", "ping");
     request.set("id", 1);
@@ -101,7 +101,7 @@ FL_TEST_CASE("HTTP Transport - Bidirectional communication") {
     auto received = server.readRequest();
     FL_REQUIRE(received.has_value());
 
-    Json response = Json::object();
+    json response = json::object();
     response.set("jsonrpc", "2.0");
     response.set("result", "pong");
     response.set("id", 1);
@@ -126,12 +126,12 @@ FL_TEST_CASE("HTTP Transport - Large message handling") {
     client.update(0);
 
     // Create a large params array
-    Json params = Json::array();
+    json params = json::array();
     for (int i = 0; i < 100; i++) {
-        params.push_back(Json(i));
+        params.push_back(json(i));
     }
 
-    Json request = Json::object();
+    json request = json::object();
     request.set("jsonrpc", "2.0");
     request.set("method", "largeData");
     request.set("params", params);
@@ -214,7 +214,7 @@ FL_TEST_CASE("HTTP Transport - Error response handling") {
     client.update(0);
 
     // Client sends request
-    Json request = Json::object();
+    json request = json::object();
     request.set("jsonrpc", "2.0");
     request.set("method", "badMethod");
     request.set("id", 1);
@@ -225,11 +225,11 @@ FL_TEST_CASE("HTTP Transport - Error response handling") {
     auto received = server.readRequest();
     FL_REQUIRE(received.has_value());
 
-    Json errorObj = Json::object();
+    json errorObj = json::object();
     errorObj.set("code", -32601);
     errorObj.set("message", "Method not found");
 
-    Json errorResponse = Json::object();
+    json errorResponse = json::object();
     errorResponse.set("jsonrpc", "2.0");
     errorResponse.set("error", errorObj);
     errorResponse.set("id", 1);
@@ -260,14 +260,14 @@ FL_TEST_CASE("HTTP Transport - Multiple clients on server") {
     FL_CHECK_EQ(server.getClientCount(), 2);
 
     // Client 1 sends message
-    Json request1 = Json::object();
+    json request1 = json::object();
     request1.set("jsonrpc", "2.0");
     request1.set("method", "client1");
     request1.set("id", 1);
     client1.writeResponse(request1);
 
     // Client 2 sends message
-    Json request2 = Json::object();
+    json request2 = json::object();
     request2.set("jsonrpc", "2.0");
     request2.set("method", "client2");
     request2.set("id", 2);
@@ -305,10 +305,10 @@ FL_TEST_CASE("HTTP Transport - Server broadcast to multiple clients") {
     client2.update(0);
 
     // Server broadcasts notification
-    Json params = Json::object();
+    json params = json::object();
     params.set("message", "hello");
 
-    Json notification = Json::object();
+    json notification = json::object();
     notification.set("jsonrpc", "2.0");
     notification.set("method", "broadcast");
     notification.set("params", params);
@@ -388,7 +388,7 @@ FL_TEST_CASE("HTTP Transport - Rapid message sending") {
 
     // Send 100 messages rapidly
     for (int i = 0; i < 100; i++) {
-        Json request = Json::object();
+        json request = json::object();
         request.set("jsonrpc", "2.0");
         request.set("method", "rapid");
         request.set("id", i);
@@ -456,12 +456,12 @@ FL_TEST_CASE("HTTP Transport - JSON-RPC 2.0 request compliance") {
     client.update(0);
 
     // Valid JSON-RPC 2.0 request
-    Json request = Json::object();
+    json request = json::object();
     request.set("jsonrpc", "2.0");
     request.set("method", "subtract");
-    Json params = Json::array();
-    params.push_back(Json(42));
-    params.push_back(Json(23));
+    json params = json::array();
+    params.push_back(json(42));
+    params.push_back(json(23));
     request.set("params", params);
     request.set("id", 1);
 
@@ -489,7 +489,7 @@ FL_TEST_CASE("HTTP Transport - JSON-RPC 2.0 response compliance") {
     client.update(0);
 
     // Valid JSON-RPC 2.0 response
-    Json response = Json::object();
+    json response = json::object();
     response.set("jsonrpc", "2.0");
     response.set("result", 19);
     response.set("id", 1);
@@ -519,13 +519,13 @@ FL_TEST_CASE("HTTP Transport - JSON-RPC 2.0 notification") {
     client.update(0);
 
     // Notification (no response expected)
-    Json notification = Json::object();
+    json notification = json::object();
     notification.set("jsonrpc", "2.0");
     notification.set("method", "update");
-    Json notifParams = Json::array();
-    notifParams.push_back(Json(1));
-    notifParams.push_back(Json(2));
-    notifParams.push_back(Json(3));
+    json notifParams = json::array();
+    notifParams.push_back(json(1));
+    notifParams.push_back(json(2));
+    notifParams.push_back(json(3));
     notification.set("params", notifParams);
 
     client.writeResponse(notification);
@@ -549,7 +549,7 @@ FL_TEST_CASE("HTTP Transport - Stress test with 1000 messages") {
 
     // Send 1000 messages
     for (int i = 0; i < 1000; i++) {
-        Json request = Json::object();
+        json request = json::object();
         request.set("jsonrpc", "2.0");
         request.set("method", "stress");
         request.set("id", i);

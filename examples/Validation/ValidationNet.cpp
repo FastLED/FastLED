@@ -6,7 +6,7 @@
 // Guarded with FL_IS_ESP32 - no-op stubs on other platforms.
 
 #include "ValidationNet.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/warn.h"
 
 // Global net state
@@ -140,7 +140,7 @@ static bool startHttpServer() {
     });
 
     s_http_server->get("/status", [](const fl::net::http::Request&) {
-        fl::Json json = fl::Json::object();
+        fl::json json = fl::json::object();
         json.set("uptime_ms", static_cast<int64_t>(millis()));
         json.set("free_heap", static_cast<int64_t>(ESP.getFreeHeap()));
 #if defined(FL_IS_ESP_32S3)
@@ -165,7 +165,7 @@ static bool startHttpServer() {
     });
 
     s_http_server->get("/leds", [](const fl::net::http::Request&) {
-        fl::Json json = fl::Json::object();
+        fl::json json = fl::json::object();
         json.set("num_leds", static_cast<int64_t>(10));
         json.set("brightness", static_cast<int64_t>(64));
         fl::net::http::Response resp;
@@ -209,8 +209,8 @@ static bool initNetifForLoopback() {
 }
 
 /// @brief Run a single HTTP GET test and return result
-static fl::Json runHttpGetTest(const char* url, const char* test_name) {
-    fl::Json result = fl::Json::object();
+static fl::json runHttpGetTest(const char* url, const char* test_name) {
+    fl::json result = fl::json::object();
     result.set("test", test_name);
 
     esp_http_client_config_t config = {};
@@ -254,8 +254,8 @@ static fl::Json runHttpGetTest(const char* url, const char* test_name) {
 // Public API
 // ============================================================================
 
-fl::Json startNetServer() {
-    fl::Json response = fl::Json::object();
+fl::json startNetServer() {
+    fl::json response = fl::json::object();
 
     if (!initWifiAP()) {
         response.set("success", false);
@@ -277,8 +277,8 @@ fl::Json startNetServer() {
     return response;
 }
 
-fl::Json startNetClient() {
-    fl::Json response = fl::Json::object();
+fl::json startNetClient() {
+    fl::json response = fl::json::object();
 
     if (!initWifiAP()) {
         response.set("success", false);
@@ -293,11 +293,11 @@ fl::Json startNetClient() {
     return response;
 }
 
-fl::Json runNetClientTest(const char* host_ip, uint16_t port) {
-    fl::Json response = fl::Json::object();
+fl::json runNetClientTest(const char* host_ip, uint16_t port) {
+    fl::json response = fl::json::object();
     int tests_passed = 0;
     int tests_failed = 0;
-    fl::Json results = fl::Json::array();
+    fl::json results = fl::json::array();
 
     // Build URLs
     char url_ping[128];
@@ -307,7 +307,7 @@ fl::Json runNetClientTest(const char* host_ip, uint16_t port) {
 
     // Test 1: GET /ping
     {
-        fl::Json r = runHttpGetTest(url_ping, "GET /ping");
+        fl::json r = runHttpGetTest(url_ping, "GET /ping");
         auto passed = r[fl::string("passed")].as_bool();
         if (passed.has_value() && passed.value()) {
             tests_passed++;
@@ -319,7 +319,7 @@ fl::Json runNetClientTest(const char* host_ip, uint16_t port) {
 
     // Test 2: GET /data
     {
-        fl::Json r = runHttpGetTest(url_data, "GET /data");
+        fl::json r = runHttpGetTest(url_data, "GET /data");
         auto passed = r[fl::string("passed")].as_bool();
         if (passed.has_value() && passed.value()) {
             tests_passed++;
@@ -336,11 +336,11 @@ fl::Json runNetClientTest(const char* host_ip, uint16_t port) {
     return response;
 }
 
-fl::Json runNetLoopback() {
-    fl::Json response = fl::Json::object();
+fl::json runNetLoopback() {
+    fl::json response = fl::json::object();
     int tests_passed = 0;
     int tests_failed = 0;
-    fl::Json results = fl::Json::array();
+    fl::json results = fl::json::array();
 
     // Initialize TCP/IP stack for loopback (no WiFi needed)
     if (!initNetifForLoopback()) {
@@ -374,7 +374,7 @@ fl::Json runNetLoopback() {
 
     // Test 1: GET /ping
     {
-        fl::Json r = runHttpGetTest(url_ping, "GET /ping (loopback)");
+        fl::json r = runHttpGetTest(url_ping, "GET /ping (loopback)");
         auto passed = r[fl::string("passed")].as_bool();
         if (passed.has_value() && passed.value()) {
             tests_passed++;
@@ -386,7 +386,7 @@ fl::Json runNetLoopback() {
 
     // Test 2: GET /status
     {
-        fl::Json r = runHttpGetTest(url_status, "GET /status (loopback)");
+        fl::json r = runHttpGetTest(url_status, "GET /status (loopback)");
         auto passed = r[fl::string("passed")].as_bool();
         if (passed.has_value() && passed.value()) {
             tests_passed++;
@@ -398,7 +398,7 @@ fl::Json runNetLoopback() {
 
     // Test 3: GET /leds
     {
-        fl::Json r = runHttpGetTest(url_leds, "GET /leds (loopback)");
+        fl::json r = runHttpGetTest(url_leds, "GET /leds (loopback)");
         auto passed = r[fl::string("passed")].as_bool();
         if (passed.has_value() && passed.value()) {
             tests_passed++;
@@ -415,8 +415,8 @@ fl::Json runNetLoopback() {
     return response;
 }
 
-fl::Json stopNet() {
-    fl::Json response = fl::Json::object();
+fl::json stopNet() {
+    fl::json response = fl::json::object();
 
     // Stop HTTP server (unified API)
     if (s_http_server.get()) {
@@ -443,38 +443,38 @@ fl::Json stopNet() {
 // Stub Implementation for Non-ESP32 Platforms
 // ============================================================================
 
-fl::Json startNetServer() {
-    fl::Json response = fl::Json::object();
+fl::json startNetServer() {
+    fl::json response = fl::json::object();
     response.set("success", false);
     response.set("error", "Net validation only supported on ESP32");
     return response;
 }
 
-fl::Json startNetClient() {
-    fl::Json response = fl::Json::object();
+fl::json startNetClient() {
+    fl::json response = fl::json::object();
     response.set("success", false);
     response.set("error", "Net validation only supported on ESP32");
     return response;
 }
 
-fl::Json runNetClientTest(const char* host_ip, uint16_t port) {
+fl::json runNetClientTest(const char* host_ip, uint16_t port) {
     (void)host_ip;
     (void)port;
-    fl::Json response = fl::Json::object();
+    fl::json response = fl::json::object();
     response.set("success", false);
     response.set("error", "Net validation only supported on ESP32");
     return response;
 }
 
-fl::Json runNetLoopback() {
-    fl::Json response = fl::Json::object();
+fl::json runNetLoopback() {
+    fl::json response = fl::json::object();
     response.set("success", false);
     response.set("error", "Net loopback validation only supported on ESP32");
     return response;
 }
 
-fl::Json stopNet() {
-    fl::Json response = fl::Json::object();
+fl::json stopNet() {
+    fl::json response = fl::json::object();
     response.set("success", true);
     return response;
 }

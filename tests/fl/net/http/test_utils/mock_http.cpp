@@ -5,7 +5,7 @@
 #include "fl/net/http/stream_transport.cpp.hpp"
 #include "fl/net/http/connection.cpp.hpp"
 #include "fl/net/http/chunked_encoding.cpp.hpp"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 
 using namespace fl;
 
@@ -175,10 +175,10 @@ FL_TEST_CASE("MockHttpClient/Server - Client sends request, server receives") {
     client.connect();
 
     // Client sends JSON-RPC request
-    Json request = Json::object();
+    json request = json::object();
     request.set("jsonrpc", "2.0");
     request.set("method", "add");
-    Json params = Json::array();
+    json params = json::array();
     params.push_back(5);
     params.push_back(3);
     request.set("params", params);
@@ -187,7 +187,7 @@ FL_TEST_CASE("MockHttpClient/Server - Client sends request, server receives") {
     client.writeResponse(request);
 
     // Server receives request
-    fl::optional<Json> receivedReq = server.readRequest();
+    fl::optional<json> receivedReq = server.readRequest();
     FL_REQUIRE(receivedReq);
     auto methodVal = (*receivedReq)["method"].as_string();
     FL_REQUIRE(methodVal.has_value());
@@ -202,7 +202,7 @@ FL_TEST_CASE("MockHttpClient/Server - Server sends response, client receives") {
     client.connect();
 
     // Server sends JSON-RPC response
-    Json response = Json::object();
+    json response = json::object();
     response.set("jsonrpc", "2.0");
     response.set("result", 42);
     response.set("id", 1);
@@ -210,7 +210,7 @@ FL_TEST_CASE("MockHttpClient/Server - Server sends response, client receives") {
     server.writeResponse(response);
 
     // Client receives response
-    fl::optional<Json> receivedResp = client.readRequest();
+    fl::optional<json> receivedResp = client.readRequest();
     FL_REQUIRE(receivedResp);
     auto resultVal = (*receivedResp)["result"].as_int();
     FL_REQUIRE(resultVal.has_value());
@@ -225,10 +225,10 @@ FL_TEST_CASE("MockHttpClient/Server - Full request-response cycle") {
     client.connect();
 
     // Client sends request
-    Json request = Json::object();
+    json request = json::object();
     request.set("jsonrpc", "2.0");
     request.set("method", "add");
-    Json params = Json::array();
+    json params = json::array();
     params.push_back(10);
     params.push_back(20);
     request.set("params", params);
@@ -237,11 +237,11 @@ FL_TEST_CASE("MockHttpClient/Server - Full request-response cycle") {
     client.writeResponse(request);
 
     // Server receives request
-    fl::optional<Json> receivedReq = server.readRequest();
+    fl::optional<json> receivedReq = server.readRequest();
     FL_REQUIRE(receivedReq);
 
     // Server sends response
-    Json response = Json::object();
+    json response = json::object();
     response.set("jsonrpc", "2.0");
     response.set("result", 30);
     response.set("id", 1);
@@ -249,7 +249,7 @@ FL_TEST_CASE("MockHttpClient/Server - Full request-response cycle") {
     server.writeResponse(response);
 
     // Client receives response
-    fl::optional<Json> receivedResp = client.readRequest();
+    fl::optional<json> receivedResp = client.readRequest();
     FL_REQUIRE(receivedResp);
     auto resultVal = (*receivedResp)["result"].as_int();
     FL_REQUIRE(resultVal.has_value());
@@ -269,7 +269,7 @@ FL_TEST_CASE("MockHttpServer - Broadcast responses to all clients") {
 
     FL_CHECK_EQ(2, server.getClientCount());
 
-    Json response = Json::object();
+    json response = json::object();
     response.set("jsonrpc", "2.0");
     response.set("result", 99);
     response.set("id", 1);
@@ -277,8 +277,8 @@ FL_TEST_CASE("MockHttpServer - Broadcast responses to all clients") {
     server.writeResponse(response);
 
     // Both clients should receive the response
-    fl::optional<Json> resp1 = client1.readRequest();
-    fl::optional<Json> resp2 = client2.readRequest();
+    fl::optional<json> resp1 = client1.readRequest();
+    fl::optional<json> resp2 = client2.readRequest();
 
     FL_REQUIRE(resp1);
     FL_REQUIRE(resp2);
@@ -303,22 +303,22 @@ FL_TEST_CASE("MockHttpServer - Server receives requests from multiple clients") 
     client2.connect();
 
     // Client 1 sends request
-    Json request1 = Json::object();
+    json request1 = json::object();
     request1.set("jsonrpc", "2.0");
     request1.set("method", "test1");
     request1.set("id", 1);
     client1.writeResponse(request1);
 
     // Client 2 sends request
-    Json request2 = Json::object();
+    json request2 = json::object();
     request2.set("jsonrpc", "2.0");
     request2.set("method", "test2");
     request2.set("id", 2);
     client2.writeResponse(request2);
 
     // Server receives both requests
-    fl::optional<Json> req1 = server.readRequest();
-    fl::optional<Json> req2 = server.readRequest();
+    fl::optional<json> req1 = server.readRequest();
+    fl::optional<json> req2 = server.readRequest();
 
     FL_REQUIRE(req1);
     FL_REQUIRE(req2);
@@ -386,17 +386,17 @@ FL_TEST_CASE("MockHttpClient/Server - Multiple sequential requests") {
     client.connect();
 
     for (int i = 0; i < 5; i++) {
-        Json request = Json::object();
+        json request = json::object();
         request.set("jsonrpc", "2.0");
         request.set("method", "echo");
-        Json params = Json::array();
+        json params = json::array();
         params.push_back(i);
         request.set("params", params);
         request.set("id", i);
 
         client.writeResponse(request);
 
-        fl::optional<Json> receivedReq = server.readRequest();
+        fl::optional<json> receivedReq = server.readRequest();
         FL_REQUIRE(receivedReq);
 
         auto idVal = (*receivedReq)["id"].as_int();

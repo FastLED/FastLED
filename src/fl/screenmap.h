@@ -10,14 +10,11 @@
  * FastLED for the browser.
  */
 
- // CONVERT JSON TO JSON2
- // DON'T USE JSON
-
 namespace fl {
 
 // Forward declarations - full definitions only needed in .cpp
 class string;
-class Json;
+class json;
 template<typename Signature> class function;
 
 // Forward declare geometry types
@@ -99,7 +96,7 @@ class ScreenMap {
 
     static void toJsonStr(const fl::map<string, ScreenMap> &,
                           string *jsonBuffer);
-    static void toJson(const fl::map<string, ScreenMap> &, fl::Json *doc);
+    static void toJson(const fl::map<string, ScreenMap> &, fl::json *doc);
 
   private:
     static const vec2f &empty();

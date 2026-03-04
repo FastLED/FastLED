@@ -1,5 +1,5 @@
 #include "fl/remote/rpc/response_send.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/stl/vector.h"
 #include "test.h"
 
@@ -8,22 +8,22 @@
 using namespace fl;
 
 FL_TEST_CASE("ResponseSend: send() creates proper JSON-RPC response") {
-    vector<Json> sentResponses;
-    auto sink = [&sentResponses](const Json& response) {
+    vector<json> sentResponses;
+    auto sink = [&sentResponses](const json& response) {
         sentResponses.push_back(response);
     };
 
-    Json requestId = Json(42);
+    json requestId = json(42);
     ResponseSend responseSend(requestId, sink);
 
     // Send a simple result
-    Json result = Json::object();
+    json result = json::object();
     result.set("value", 100);
     responseSend.send(result);
 
     FL_REQUIRE(sentResponses.size() == 1);
 
-    const Json& response = sentResponses[0];
+    const json& response = sentResponses[0];
     FL_REQUIRE(response.contains("jsonrpc"));
     FL_REQUIRE(response["jsonrpc"].as_string().value() == "2.0");
     FL_REQUIRE(response.contains("id"));
@@ -34,21 +34,21 @@ FL_TEST_CASE("ResponseSend: send() creates proper JSON-RPC response") {
 }
 
 FL_TEST_CASE("ResponseSend: sendUpdate() creates update response") {
-    vector<Json> sentResponses;
-    auto sink = [&sentResponses](const Json& response) {
+    vector<json> sentResponses;
+    auto sink = [&sentResponses](const json& response) {
         sentResponses.push_back(response);
     };
 
-    Json requestId = Json("test-id");
+    json requestId = json("test-id");
     ResponseSend responseSend(requestId, sink);
 
     // Send an update
-    Json update = Json(50);
+    json update = json(50);
     responseSend.sendUpdate(update);
 
     FL_REQUIRE(sentResponses.size() == 1);
 
-    const Json& response = sentResponses[0];
+    const json& response = sentResponses[0];
     FL_REQUIRE(response.contains("jsonrpc"));
     FL_REQUIRE(response["jsonrpc"].as_string().value() == "2.0");
     FL_REQUIRE(response.contains("id"));
@@ -59,22 +59,22 @@ FL_TEST_CASE("ResponseSend: sendUpdate() creates update response") {
 }
 
 FL_TEST_CASE("ResponseSend: sendFinal() creates final response with stop marker") {
-    vector<Json> sentResponses;
-    auto sink = [&sentResponses](const Json& response) {
+    vector<json> sentResponses;
+    auto sink = [&sentResponses](const json& response) {
         sentResponses.push_back(response);
     };
 
-    Json requestId = Json(99);
+    json requestId = json(99);
     ResponseSend responseSend(requestId, sink);
 
     // Send final result
-    Json finalResult = Json("done");
+    json finalResult = json("done");
     responseSend.sendFinal(finalResult);
 
     FL_REQUIRE(sentResponses.size() == 1);
     FL_REQUIRE(responseSend.isFinal());
 
-    const Json& response = sentResponses[0];
+    const json& response = sentResponses[0];
     FL_REQUIRE(response.contains("jsonrpc"));
     FL_REQUIRE(response["jsonrpc"].as_string().value() == "2.0");
     FL_REQUIRE(response.contains("id"));
@@ -87,54 +87,54 @@ FL_TEST_CASE("ResponseSend: sendFinal() creates final response with stop marker"
 }
 
 FL_TEST_CASE("ResponseSend: multiple sendUpdate() calls work") {
-    vector<Json> sentResponses;
-    auto sink = [&sentResponses](const Json& response) {
+    vector<json> sentResponses;
+    auto sink = [&sentResponses](const json& response) {
         sentResponses.push_back(response);
     };
 
-    Json requestId = Json(123);
+    json requestId = json(123);
     ResponseSend responseSend(requestId, sink);
 
     // Send multiple updates
     for (int i = 0; i < 3; i++) {
-        responseSend.sendUpdate(Json(i * 10));
+        responseSend.sendUpdate(json(i * 10));
     }
 
     FL_REQUIRE(sentResponses.size() == 3);
 
     // Verify each update
     for (int i = 0; i < 3; i++) {
-        const Json& response = sentResponses[i];
+        const json& response = sentResponses[i];
         FL_REQUIRE(response["result"]["update"].as_int().value() == i * 10);
     }
 }
 
 FL_TEST_CASE("ResponseSend: after sendFinal() no more responses sent") {
-    vector<Json> sentResponses;
-    auto sink = [&sentResponses](const Json& response) {
+    vector<json> sentResponses;
+    auto sink = [&sentResponses](const json& response) {
         sentResponses.push_back(response);
     };
 
-    Json requestId = Json(456);
+    json requestId = json(456);
     ResponseSend responseSend(requestId, sink);
 
     // Send final
-    responseSend.sendFinal(Json("final"));
+    responseSend.sendFinal(json("final"));
     FL_REQUIRE(sentResponses.size() == 1);
 
     // Try to send more (should be ignored)
-    responseSend.send(Json("ignored"));
-    responseSend.sendUpdate(Json("also-ignored"));
-    responseSend.sendFinal(Json("still-ignored"));
+    responseSend.send(json("ignored"));
+    responseSend.sendUpdate(json("also-ignored"));
+    responseSend.sendFinal(json("still-ignored"));
 
     // Should still be only 1 response
     FL_REQUIRE(sentResponses.size() == 1);
 }
 
 FL_TEST_CASE("ResponseSend: requestId() returns correct ID") {
-    auto sink = [](const Json&) {};
+    auto sink = [](const json&) {};
 
-    Json requestId = Json("my-id");
+    json requestId = json("my-id");
     ResponseSend responseSend(requestId, sink);
 
     FL_REQUIRE(responseSend.requestId().as_string().value() == "my-id");

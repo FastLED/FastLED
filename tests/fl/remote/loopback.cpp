@@ -18,7 +18,7 @@
 #include "fl/net/http/http_parser.cpp.hpp"
 #include "fl/net/http/native_client.cpp.hpp"
 #include "fl/net/http/native_server.cpp.hpp"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/delay.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/chrono.h"
@@ -50,7 +50,7 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
 
     fl::Remote server_remote(
         [&server_transport]() { return server_transport->readRequest(); },
-        [&server_transport](const fl::Json& r) { server_transport->writeResponse(r); }
+        [&server_transport](const fl::json& r) { server_transport->writeResponse(r); }
     );
     server_remote.bind("add", [](int a, int b) -> int { return a + b; });
 
@@ -89,10 +89,10 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
     FL_CHECK(client_transport->isConnected());
 
     // Send request
-    Json params = Json::array();
-    params.push_back(Json(5));
-    params.push_back(Json(7));
-    Json request = Json::object();
+    json params = json::array();
+    params.push_back(json(5));
+    params.push_back(json(7));
+    json request = json::object();
     request.set("jsonrpc", "2.0");
     request.set("method", "add");
     request.set("params", params);
@@ -102,7 +102,7 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
     // Wait for response — the server thread handles accept + update + RPC,
     // so we only need to pump the client transport on the main thread.
     bool got_response = false;
-    Json response;
+    json response;
     uint32_t start = fl::millis();
 
     while (fl::millis() - start < 10000) {

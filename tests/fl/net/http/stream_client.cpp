@@ -5,7 +5,7 @@
 #include "fl/net/http/connection.cpp.hpp"
 #include "fl/net/http/chunked_encoding.cpp.hpp"
 #include "fl/net/http/native_client.cpp.hpp"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/stl/string.h"
 
 using namespace fl;
@@ -39,14 +39,14 @@ FL_TEST_CASE("HttpStreamClient - Write/read fail when disconnected") {
     FL_CHECK_FALSE(client.isConnected());
 
     // writeResponse should not crash when disconnected
-    fl::Json response = fl::Json::object();
+    fl::json response = fl::json::object();
     response.set("jsonrpc", "2.0");
     response.set("result", 42);
     response.set("id", 1);
     client.writeResponse(response);
 
     // readRequest should return nullopt when disconnected
-    fl::optional<fl::Json> request = client.readRequest();
+    fl::optional<fl::json> request = client.readRequest();
     FL_CHECK_FALSE(request.has_value());
 }
 
@@ -54,7 +54,7 @@ FL_TEST_CASE("HttpStreamClient - readRequest returns nullopt when disconnected")
     HttpStreamClient client("localhost", kTestPort);
     FL_CHECK_FALSE(client.isConnected());
 
-    fl::optional<fl::Json> request = client.readRequest();
+    fl::optional<fl::json> request = client.readRequest();
     FL_CHECK_FALSE(request.has_value());
 }
 
@@ -62,7 +62,7 @@ FL_TEST_CASE("HttpStreamClient - Multiple writes when disconnected are safe") {
     HttpStreamClient client("localhost", kTestPort);
     FL_CHECK_FALSE(client.isConnected());
 
-    fl::Json response = fl::Json::object();
+    fl::json response = fl::json::object();
     response.set("jsonrpc", "2.0");
     response.set("result", 42);
     response.set("id", 1);
@@ -139,7 +139,7 @@ FL_TEST_CASE("HttpStreamClient - readRequest with no data returns nullopt") {
     HttpStreamClient client("localhost", kTestPort);
 
     // Even without connection, should return nullopt gracefully
-    fl::optional<fl::Json> request = client.readRequest();
+    fl::optional<fl::json> request = client.readRequest();
     FL_CHECK_FALSE(request.has_value());
 }
 

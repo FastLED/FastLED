@@ -15,7 +15,7 @@
 ///   });
 ///
 ///   server.post("/color", [](const Request& req) {
-///       fl::Json body = fl::Json::parse(req.body());
+///       fl::json body = fl::json::parse(req.body());
 ///       int r = body["r"] | 0;
 ///       // ... process color
 ///       return Response::ok("Color updated\n");
@@ -114,7 +114,7 @@ public:
     /// Set JSON response body with automatic Content-Type header
     /// @param data JSON object to serialize
     /// @return Reference to this for chaining
-    Response& json(const Json& data);
+    Response& json(const class json& data);
 
     /// Factory method for 200 OK response
     /// @param body Optional body content

@@ -11,21 +11,21 @@ namespace fl {
 WLED::WLED()
     : Remote(
         [this]() { return stubRequestSource(); },
-        [this](const fl::Json& response) { stubResponseSink(response); }
+        [this](const fl::json& response) { stubResponseSink(response); }
     ) {}
 
-fl::optional<fl::Json> WLED::stubRequestSource() {
+fl::optional<fl::json> WLED::stubRequestSource() {
     FL_ERROR("WLED::stubRequestSource: Not implemented - provide a real RequestSource callback");
     return fl::nullopt;
 }
 
-void WLED::stubResponseSink(const fl::Json& response) {
+void WLED::stubResponseSink(const fl::json& response) {
     FL_ERROR("WLED::stubResponseSink: Not implemented - provide a real ResponseSink callback");
 }
 
 // WLED State Management
 
-void WLED::setState(const fl::Json& wledState) {
+void WLED::setState(const fl::json& wledState) {
     if (!wledState.has_value()) {
         FL_WARN("WLED: setState called with invalid JSON");
         return;
@@ -175,7 +175,7 @@ void WLED::setState(const fl::Json& wledState) {
     // Extract "nl" field (nightlight object) - optional
     if (wledState.contains("nl")) {
         if (wledState["nl"].is_object()) {
-            const fl::Json& nl = wledState["nl"];
+            const fl::json& nl = wledState["nl"];
 
             // Extract "on" field (bool)
             if (nl.contains("on") && nl["on"].is_bool()) {
@@ -259,7 +259,7 @@ void WLED::setState(const fl::Json& wledState) {
     // Extract "udpn" field (UDP sync settings) - optional
     if (wledState.contains("udpn")) {
         if (wledState["udpn"].is_object()) {
-            const fl::Json& udpn = wledState["udpn"];
+            const fl::json& udpn = wledState["udpn"];
 
             // Extract "send" field (bool)
             if (udpn.contains("send") && udpn["send"].is_bool()) {
@@ -286,7 +286,7 @@ void WLED::setState(const fl::Json& wledState) {
     // Extract "playlist" field (playlist configuration) - optional
     if (wledState.contains("playlist")) {
         if (wledState["playlist"].is_object()) {
-            const fl::Json& pl = wledState["playlist"];
+            const fl::json& pl = wledState["playlist"];
 
             // Extract "ps" field (array of preset IDs)
             if (pl.contains("ps") && pl["ps"].is_array()) {
@@ -361,7 +361,7 @@ void WLED::setState(const fl::Json& wledState) {
     if (wledState.contains("seg")) {
         if (wledState["seg"].is_array()) {
             for (size_t i = 0; i < wledState["seg"].size(); i++) {
-                const fl::Json& segJson = wledState["seg"][i];
+                const fl::json& segJson = wledState["seg"][i];
                 if (!segJson.is_object()) {
                     FL_WARN("WLED: segment at index " << i << " is not an object");
                     continue;
@@ -404,8 +404,8 @@ void WLED::setState(const fl::Json& wledState) {
     }
 }
 
-fl::Json WLED::getState() const {
-    fl::Json state = fl::Json::object();
+fl::json WLED::getState() const {
+    fl::json state = fl::json::object();
     state.set("on", mWledOn);
     state.set("bri", static_cast<i64>(mWledBri));
     state.set("transition", static_cast<i64>(mTransition));
@@ -415,7 +415,7 @@ fl::Json WLED::getState() const {
     state.set("mainseg", static_cast<i64>(mMainSegment));
 
     // Nightlight object
-    fl::Json nl = fl::Json::object();
+    fl::json nl = fl::json::object();
     nl.set("on", mNightlightOn);
     nl.set("dur", static_cast<i64>(mNightlightDuration));
     nl.set("mode", static_cast<i64>(mNightlightMode));
@@ -423,7 +423,7 @@ fl::Json WLED::getState() const {
     state.set("nl", nl);
 
     // UDP sync settings
-    fl::Json udpn = fl::Json::object();
+    fl::json udpn = fl::json::object();
     udpn.set("send", mUdpSend);
     udpn.set("recv", mUdpReceive);
     state.set("udpn", udpn);
@@ -435,9 +435,9 @@ fl::Json WLED::getState() const {
 
     // Segments
     if (!mSegments.empty()) {
-        fl::Json segments = fl::Json::array();
+        fl::json segments = fl::json::array();
         for (const auto& seg : mSegments) {
-            fl::Json segJson = fl::Json::object();
+            fl::json segJson = fl::json::object();
 
             segJson.set("id", static_cast<i64>(seg.mId));
             segJson.set("start", static_cast<i64>(seg.mStart));
@@ -476,12 +476,12 @@ fl::Json WLED::getState() const {
 
             // Colors
             if (!seg.mColors.empty()) {
-                fl::Json colors = fl::Json::array();
+                fl::json colors = fl::json::array();
                 for (const auto& color : seg.mColors) {
                     if (color.size() >= 3) {
-                        fl::Json colorArray = fl::Json::array();
+                        fl::json colorArray = fl::json::array();
                         for (size_t i = 0; i < color.size(); i++) {
-                            colorArray.push_back(fl::Json(static_cast<i64>(color[i])));
+                            colorArray.push_back(fl::json(static_cast<i64>(color[i])));
                         }
                         colors.push_back(colorArray);
                     }
@@ -491,11 +491,11 @@ fl::Json WLED::getState() const {
 
             // Individual LEDs
             if (!seg.mIndividualLeds.empty()) {
-                fl::Json leds = fl::Json::array();
+                fl::json leds = fl::json::array();
                 for (const auto& led : seg.mIndividualLeds) {
                     if (led.size() >= 3) {
                         fl::string hexColor = wled::rgbToHex(led[0], led[1], led[2]);
-                        leds.push_back(fl::Json(hexColor.c_str()));
+                        leds.push_back(fl::json(hexColor.c_str()));
                     }
                 }
                 segJson.set("i", leds);
@@ -509,32 +509,32 @@ fl::Json WLED::getState() const {
     return state;
 }
 
-fl::Json WLED::getPlaylistConfig() const {
-    fl::Json playlist = fl::Json::object();
+fl::json WLED::getPlaylistConfig() const {
+    fl::json playlist = fl::json::object();
 
     // Preset IDs
     if (!mPlaylistPresets.empty()) {
-        fl::Json ps = fl::Json::array();
+        fl::json ps = fl::json::array();
         for (const auto& preset : mPlaylistPresets) {
-            ps.push_back(fl::Json(static_cast<i64>(preset)));
+            ps.push_back(fl::json(static_cast<i64>(preset)));
         }
         playlist.set("ps", ps);
     }
 
     // Durations
     if (!mPlaylistDurations.empty()) {
-        fl::Json dur = fl::Json::array();
+        fl::json dur = fl::json::array();
         for (const auto& duration : mPlaylistDurations) {
-            dur.push_back(fl::Json(static_cast<i64>(duration)));
+            dur.push_back(fl::json(static_cast<i64>(duration)));
         }
         playlist.set("dur", dur);
     }
 
     // Transitions
     if (!mPlaylistTransitions.empty()) {
-        fl::Json trans = fl::Json::array();
+        fl::json trans = fl::json::array();
         for (const auto& transition : mPlaylistTransitions) {
-            trans.push_back(fl::Json(static_cast<i64>(transition)));
+            trans.push_back(fl::json(static_cast<i64>(transition)));
         }
         playlist.set("transition", trans);
     }

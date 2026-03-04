@@ -22,27 +22,27 @@ public:
     StreamHandle() = default;
 
     /// Register callback for intermediate stream data
-    StreamHandle& onData(fl::function<void(const fl::Json&)> cb);
+    StreamHandle& onData(fl::function<void(const fl::json&)> cb);
 
     /// Register callback for final result
-    StreamHandle& then(fl::function<void(const fl::Json&)> cb);
+    StreamHandle& then(fl::function<void(const fl::json&)> cb);
 
     /// Register callback for errors
     StreamHandle& catch_(fl::function<void(const fl::Error&)> cb);
 
     /// Access the underlying promise
-    fl::promise<fl::Json>& promise();
+    fl::promise<fl::json>& promise();
 
     /// Check if handle is valid
     bool valid() const;
 
 private:
     friend class HttpStreamTransport;
-    StreamHandle(fl::promise<fl::Json> p,
-                 fl::shared_ptr<fl::function<void(const fl::Json&)>> updateCb);
+    StreamHandle(fl::promise<fl::json> p,
+                 fl::shared_ptr<fl::function<void(const fl::json&)>> updateCb);
 
-    fl::promise<fl::Json> mPromise;
-    fl::shared_ptr<fl::function<void(const fl::Json&)>> mUpdateCallback;
+    fl::promise<fl::json> mPromise;
+    fl::shared_ptr<fl::function<void(const fl::json&)>> mUpdateCallback;
 };
 
 /// Base class for HTTP streaming transport
@@ -80,29 +80,29 @@ public:
     /// Read next JSON-RPC request from stream
     /// Non-blocking, returns nullopt if no complete request available
     /// @return JSON-RPC request object or nullopt
-    fl::optional<fl::Json> readRequest();
+    fl::optional<fl::json> readRequest();
 
     // ResponseSink Implementation (for Remote)
 
     /// Write JSON-RPC response to stream
     /// @param response JSON-RPC response object
-    void writeResponse(const fl::Json& response);
+    void writeResponse(const fl::json& response);
 
     // Promise-based RPC API
 
     /// Send a JSON-RPC request, returns promise that resolves with the final response.
     /// For ASYNC methods, the ACK is automatically filtered out.
-    fl::promise<fl::Json> rpc(const fl::string& method, const fl::Json& params);
+    fl::promise<fl::json> rpc(const fl::string& method, const fl::json& params);
 
     /// Send a pre-built JSON-RPC request
-    fl::promise<fl::Json> rpc(const fl::Json& fullRequest);
+    fl::promise<fl::json> rpc(const fl::json& fullRequest);
 
     /// Send a streaming JSON-RPC request, returns StreamHandle for intermediate data.
     /// Use onData() for intermediate chunks, then()/catch_() for final result.
-    StreamHandle rpcStream(const fl::string& method, const fl::Json& params);
+    StreamHandle rpcStream(const fl::string& method, const fl::json& params);
 
     /// Send a streaming pre-built JSON-RPC request
-    StreamHandle rpcStream(const fl::Json& fullRequest);
+    StreamHandle rpcStream(const fl::json& fullRequest);
 
     // Update Loop
 
@@ -163,14 +163,14 @@ protected:
 private:
     // Pending call state (for rpc())
     struct PendingCall {
-        fl::promise<fl::Json> promise;
+        fl::promise<fl::json> promise;
         bool ackReceived = false;
     };
 
     // Pending stream state (for rpcStream())
     struct PendingStream {
-        fl::promise<fl::Json> promise;
-        fl::shared_ptr<fl::function<void(const fl::Json&)>> updateCallback;
+        fl::promise<fl::json> promise;
+        fl::shared_ptr<fl::function<void(const fl::json&)>> updateCallback;
         bool ackReceived = false;
     };
 
@@ -194,7 +194,7 @@ private:
     // Promise-based call tracking
     fl::unordered_map<fl::string, PendingCall> mPendingCalls;
     fl::unordered_map<fl::string, PendingStream> mPendingStreams;
-    fl::vector<fl::Json> mIncomingQueue;
+    fl::vector<fl::json> mIncomingQueue;
     int mNextCallId = 1;
 
     // Internal methods
@@ -203,9 +203,9 @@ private:
     bool processIncomingData();
     void handleConnectionStateChange();
     void parseChunkedMessages();
-    bool resolveRpc(const fl::Json& msg, const fl::string& idKey);
-    bool resolveRpcStream(const fl::Json& msg, const fl::string& idKey);
-    static fl::string idToString(const fl::Json& id);
+    bool resolveRpc(const fl::json& msg, const fl::string& idKey);
+    bool resolveRpcStream(const fl::json& msg, const fl::string& idKey);
+    static fl::string idToString(const fl::json& id);
 };
 
 }  // namespace fl

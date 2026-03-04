@@ -1,7 +1,7 @@
 // IWYU pragma: private
 
-#include "fl/json.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
+#include "fl/stl/json.h"
 #include "fl/stl/map.h"
 #include "fl/stl/mutex.h"
 #include "ui_manager.h"
@@ -63,7 +63,7 @@ void JsonUiManager::processPendingUpdates() {
 
     if (mHasPendingUpdate) {
         executeUiUpdates(mPendingJsonUpdate);
-        mPendingJsonUpdate = fl::Json(); // Clear the pending update
+        mPendingJsonUpdate = fl::json(); // Clear the pending update
         mHasPendingUpdate = false;
     }
 
@@ -89,7 +89,7 @@ void JsonUiManager::processPendingUpdates() {
     }
 
     if (shouldUpdate) {
-        fl::Json doc = fl::Json::array();
+        fl::json doc = fl::json::array();
         toJson(doc);
         fl::string jsonStr = doc.to_string();
         //FL_WARN("*** SENDING UI TO FRONTEND: " << jsonStr.substr(0, 100).c_str() << "...");
@@ -167,14 +167,14 @@ void JsonUiManager::updateUiComponents(const char* jsonStr) {
     // FL_WARN("*** JsonUiManager pointer: " << this);
     // FL_WARN("*** BEFORE: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
     
-    mPendingJsonUpdate = fl::Json::parse(jsonStr);
+    mPendingJsonUpdate = fl::json::parse(jsonStr);
     mHasPendingUpdate = true;
     // FL_WARN("*** AFTER: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
     // FL_WARN("*** BACKEND SET mHasPendingUpdate = true, waiting for onEndFrame()");
 }
 
 
-void JsonUiManager::executeUiUpdates(const fl::Json &doc) {
+void JsonUiManager::executeUiUpdates(const fl::json &doc) {
     
     if (doc.is_object()) {
         
@@ -186,7 +186,7 @@ void JsonUiManager::executeUiUpdates(const fl::Json &doc) {
             
             auto component = findUiComponent(id_or_name);
             if (component) {
-                const fl::Json v = doc[key.c_str()];
+                const fl::json v = doc[key.c_str()];
                 component->updateInternal(v);
                 //FL_WARN("*** Updated component with ID " << idStr);
             } else {
@@ -209,10 +209,10 @@ void JsonUiManager::onEndFrame() {
     processPendingUpdates();
 }
 
-void JsonUiManager::toJson(fl::Json &doc) {
+void JsonUiManager::toJson(fl::json &doc) {
     auto components = getComponents();
     for (const auto &component : components) {
-        fl::Json componentJson = fl::Json::object();
+        fl::json componentJson = fl::json::object();
         component->toJson(componentJson);
         doc.push_back(componentJson);
     }

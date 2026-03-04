@@ -40,10 +40,10 @@ void loop() {
 
     if (Serial.available()) {                 // 4. Read input
         fl::string jsonRpc = readSerialJson();
-        fl::Json doc = fl::Json::parse(jsonRpc);
+        fl::json doc = fl::json::parse(jsonRpc);
         auto response = remote.processRpc(fl::Remote::RpcRequest{...});
 
-        fl::Json response = fl::Json::object(); // 5. Build response
+        fl::json response = fl::json::object(); // 5. Build response
         if (response.ok()) {
             response.set("status", "ok");
             // ... 40 lines of response building
@@ -105,7 +105,7 @@ remote.onRequest([](Stream& stream) {
     return fl::string();
 });
 
-remote.onResponse([](const fl::Json& response) {
+remote.onResponse([](const fl::json& response) {
     Serial.println(response.to_string());
 });
 ```
@@ -168,7 +168,7 @@ public:
 
 private:
     RpcStream* mStream = nullptr;
-    fl::vector<fl::Json> mOutgoingQueue;  // Queued responses to send
+    fl::vector<fl::json> mOutgoingQueue;  // Queued responses to send
     fl::string mInputBuffer;              // Partial line buffer for reading
 };
 ```
@@ -190,7 +190,7 @@ size_t Remote::pull() {
         if (c == '\n' || c == '\r') {
             if (!mInputBuffer.empty()) {
                 // Process complete line
-                fl::Json doc = fl::Json::parse(mInputBuffer);
+                fl::json doc = fl::json::parse(mInputBuffer);
                 auto response = processRpc(fl::Remote::RpcRequest{
                     doc["function"] | fl::string(""),
                     doc["args"],
@@ -198,7 +198,7 @@ size_t Remote::pull() {
                 });
 
                 // Build response JSON and queue it
-                fl::Json responseJson = buildResponseJson(response);
+                fl::json responseJson = buildResponseJson(response);
                 mOutgoingQueue.push_back(responseJson);
 
                 mInputBuffer.clear();
@@ -222,7 +222,7 @@ size_t Remote::push() {
 
     // Write queued immediate responses
     while (!mOutgoingQueue.empty()) {
-        const fl::Json& response = mOutgoingQueue[0];
+        const fl::json& response = mOutgoingQueue[0];
         printJson(response);  // Uses existing printJson helper
         mOutgoingQueue.erase(mOutgoingQueue.begin());
         written++;

@@ -2,7 +2,7 @@
 
 #if FASTLED_ENABLE_JSON
 
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/move.h"
 #include "fl/stl/optional.h"
@@ -12,7 +12,7 @@ namespace fl {
 
 Server::Server()
     : mRequestSource([]() { return fl::nullopt; })
-    , mResponseSink([](const fl::Json&) {})
+    , mResponseSink([](const fl::json&) {})
 {}
 
 Server::Server(RequestSource source, ResponseSink sink)
@@ -47,10 +47,10 @@ size_t Server::pull() {
 
     // Pull JSON-RPC requests from source until none available
     while (auto optRequest = mRequestSource()) {
-        fl::Json request = fl::move(*optRequest);
+        fl::json request = fl::move(*optRequest);
 
         // Process request through handler
-        fl::Json response = mRequestHandler(request);
+        fl::json response = mRequestHandler(request);
 
         // Queue response (skip scheduled acknowledgments and async skip markers)
         bool isScheduledAck = response.contains("scheduled") && response["scheduled"].as_bool().value_or(false);

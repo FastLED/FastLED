@@ -2,7 +2,7 @@
 
 // IWYU pragma: private
 
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/stl/string.h"
 #include "fl/stl/url.h"
 #include "platforms/shared/ui/json/ui_internal.h"
@@ -14,7 +14,7 @@ namespace fl {
 
 class JsonUiAudioInternal : public JsonUiInternal {
 private:
-    fl::Json mAudioDataArray;  // Store actual JSON array instead of string
+    fl::json mAudioDataArray;  // Store actual JSON array instead of string
     fl::vector<AudioSampleImplPtr> mAudioSampleImpls;
 
 public:
@@ -24,8 +24,8 @@ public:
     JsonUiAudioInternal(const fl::string& name, const fl::url& url)
         : JsonUiInternal(name), mUrl(url) {}
 
-    void toJson(fl::Json& json) const override;
-    void updateInternal(const fl::Json& json) override;
+    void toJson(fl::json& json) const override;
+    void updateInternal(const fl::json& json) override;
 
     // Accessors for audio data
     fl::vector<AudioSampleImplPtr>& audioSamples() { return mAudioSampleImpls; }

@@ -4,15 +4,10 @@
 
 #include "fl/stl/map.h"
 #include "fl/stl/string.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/unused.h"
 // CLEDController is forward declared in header - no include needed
 
-#if FASTLED_ARDUINO_JSON_PARSING_ENABLED
-// IWYU pragma: begin_keep
-#include "third_party/arduinojson/json.h"
-// IWYU pragma: end_keep
-#endif
 
 namespace fl {
 
@@ -36,12 +31,12 @@ void ActiveStripData::onCanvasUiSet(CLEDController *strip,
     updateScreenMap(id, screenmap);
 }
 
-// NEW: JSON parsing using fl::Json API (WORKING - parsing is fully functional)
+// NEW: JSON parsing using fl::json API (WORKING - parsing is fully functional)
 bool ActiveStripData::parseStripJsonInfo(const char* jsonStr) {
     if (!jsonStr) return false;
     
-    // Use the working fl::Json parsing API
-    auto json = fl::Json::parse(jsonStr);
+    // Use the working fl::json parsing API
+    auto json = fl::json::parse(jsonStr);
     
     if (!json.has_value() || !json.is_array()) {
         return false;
@@ -75,52 +70,22 @@ bool ActiveStripData::parseStripJsonInfo(const char* jsonStr) {
 }
 
 fl::string ActiveStripData::infoJsonString() {
-    // LEGACY API - DEPRECATED: Use infoJsonStringNew() instead
-    // This uses ArduinoJson and is only available when FASTLED_ARDUINO_JSON_PARSING_ENABLED=1
-#if FASTLED_ARDUINO_JSON_PARSING_ENABLED
-    FLArduinoJson::JsonDocument doc;
-    auto array = doc.to<FLArduinoJson::JsonArray>();
-
-    for (const auto &pair : mStripMap) {
-        int stripIndex = pair.first;
-        auto obj = array.add<FLArduinoJson::JsonObject>();
-        obj["strip_id"] = stripIndex;
-        obj["type"] = "r8g8b8";
-    }
-
-    fl::string jsonBuffer;
-    serializeJson(doc, jsonBuffer);
-
-    // Ensure we always return a valid JSON array, even if empty
-    if (jsonBuffer.empty()) {
-        return fl::string("[]");
-    }
-
-    // Verify the JSON starts with [ to ensure it's an array
-    if (jsonBuffer.length() == 0 || jsonBuffer[0] != '[') {
-        return fl::string("[]");
-    }
-
-    return jsonBuffer;
-#else
-    // ArduinoJson disabled - delegate to native implementation
     return infoJsonStringNew();
-#endif
 }
 
 fl::string ActiveStripData::infoJsonStringNew() {
-    // NEW API - Using fl::Json creation API (PROPER IMPLEMENTATION)
+    // NEW API - Using fl::json creation API (PROPER IMPLEMENTATION)
     // 
     // This is the target implementation that the JSON creation API must support
     
 #if FASTLED_ENABLE_JSON
-    // Create a JSON array using the new fl::Json API
-    auto json = fl::Json::createArray();
+    // Create a JSON array using the new fl::json API
+    auto json = fl::json::createArray();
     
     // Add each strip as an object to the array
     for (const auto &pair : mStripMap) {
         int stripIndex = pair.first;
-        auto stripObj = fl::Json::createObject();
+        auto stripObj = fl::json::createObject();
         stripObj.set("strip_id", stripIndex);
         stripObj.set("type", "r8g8b8");
         json.push_back(stripObj);

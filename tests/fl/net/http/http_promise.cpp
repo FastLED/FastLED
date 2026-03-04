@@ -4,7 +4,7 @@
 #include "test.h"
 #include "fl/remote/remote.h"
 #include "fl/remote/rpc/response_send.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/promise.h"
 #include "fl/stl/vector.h"
 #include "fl/net/http/test_utils/mock_http_server.h"
@@ -25,7 +25,7 @@ FL_TEST_CASE("Promise - SYNC rpc() resolves") {
 
     Remote remoteServer(
         [&server]() { return server.readRequest(); },
-        [&server](const Json& r) { server.writeResponse(r); }
+        [&server](const json& r) { server.writeResponse(r); }
     );
 
     remoteServer.bind("add", [](int a, int b) -> int {
@@ -36,10 +36,10 @@ FL_TEST_CASE("Promise - SYNC rpc() resolves") {
     client.connect();
 
     // Use rpc() API
-    Json params = Json::array();
-    params.push_back(Json(5));
-    params.push_back(Json(7));
-    fl::promise<Json> p = client.rpc("add", params);
+    json params = json::array();
+    params.push_back(json(5));
+    params.push_back(json(7));
+    fl::promise<json> p = client.rpc("add", params);
 
     FL_CHECK(p.valid());
     FL_CHECK(!p.is_completed());
@@ -52,7 +52,7 @@ FL_TEST_CASE("Promise - SYNC rpc() resolves") {
     client.update(0);
 
     FL_REQUIRE(p.is_resolved());
-    const Json& response = p.value();
+    const json& response = p.value();
     FL_CHECK(response.contains("result"));
     FL_CHECK_EQ(response["result"].as_int().value(), 12);
 }
@@ -68,11 +68,11 @@ FL_TEST_CASE("Promise - ASYNC rpc() skips ACK") {
 
     Remote remoteServer(
         [&server]() { return server.readRequest(); },
-        [&server](const Json& r) { server.writeResponse(r); }
+        [&server](const json& r) { server.writeResponse(r); }
     );
 
-    remoteServer.bindAsync("longTask", [](ResponseSend& send, const Json& params) {
-        Json result = Json::object();
+    remoteServer.bindAsync("longTask", [](ResponseSend& send, const json& params) {
+        json result = json::object();
         result.set("value", 42);
         send.send(result);
     }, RpcMode::ASYNC);
@@ -81,8 +81,8 @@ FL_TEST_CASE("Promise - ASYNC rpc() skips ACK") {
     client.connect();
     client.update(0);
 
-    Json params = Json::array();
-    fl::promise<Json> p = client.rpc("longTask", params);
+    json params = json::array();
+    fl::promise<json> p = client.rpc("longTask", params);
 
     FL_CHECK(!p.is_completed());
 
@@ -92,7 +92,7 @@ FL_TEST_CASE("Promise - ASYNC rpc() skips ACK") {
     client.update(0);
 
     FL_REQUIRE(p.is_resolved());
-    const Json& response = p.value();
+    const json& response = p.value();
     FL_CHECK(response.contains("result"));
     // The final result should have "value": 42, not be the ACK
     FL_CHECK(response["result"].contains("value"));
@@ -110,16 +110,16 @@ FL_TEST_CASE("Promise - ASYNC_STREAM rpcStream() updates and final") {
 
     Remote remoteServer(
         [&server]() { return server.readRequest(); },
-        [&server](const Json& r) { server.writeResponse(r); }
+        [&server](const json& r) { server.writeResponse(r); }
     );
 
-    remoteServer.bindAsync("stream", [](ResponseSend& send, const Json& params) {
+    remoteServer.bindAsync("stream", [](ResponseSend& send, const json& params) {
         for (int i = 0; i < 3; i++) {
-            Json update = Json::object();
+            json update = json::object();
             update.set("progress", i * 33);
             send.sendUpdate(update);
         }
-        Json finalVal = Json::object();
+        json finalVal = json::object();
         finalVal.set("done", true);
         send.sendFinal(finalVal);
     }, RpcMode::ASYNC_STREAM);
@@ -128,16 +128,16 @@ FL_TEST_CASE("Promise - ASYNC_STREAM rpcStream() updates and final") {
     client.connect();
     client.update(0);
 
-    Json params = Json::array();
-    fl::vector<Json> updates;
+    json params = json::array();
+    fl::vector<json> updates;
     bool finalResolved = false;
-    Json finalValue;
+    json finalValue;
 
     StreamHandle handle = client.rpcStream("stream", params);
-    handle.onData([&updates](const Json& update) {
+    handle.onData([&updates](const json& update) {
         updates.push_back(update);
     });
-    handle.then([&finalResolved, &finalValue](const Json& val) {
+    handle.then([&finalResolved, &finalValue](const json& val) {
         finalResolved = true;
         finalValue = val;
     });
@@ -171,17 +171,17 @@ FL_TEST_CASE("Promise - Error rejects promise") {
 
     Remote remoteServer(
         [&server]() { return server.readRequest(); },
-        [&server](const Json& r) { server.writeResponse(r); }
+        [&server](const json& r) { server.writeResponse(r); }
     );
 
     MockHttpClient client(server);
     client.connect();
 
-    Json params = Json::array();
+    json params = json::array();
     bool errorCaught = false;
     fl::string errorMsg;
 
-    fl::promise<Json> p = client.rpc("nonexistent", params);
+    fl::promise<json> p = client.rpc("nonexistent", params);
     p.catch_([&errorCaught, &errorMsg](const fl::Error& err) {
         errorCaught = true;
         errorMsg = err.message;
@@ -207,7 +207,7 @@ FL_TEST_CASE("Promise - readRequest() backward compat with rpc()") {
 
     Remote remoteServer(
         [&server]() { return server.readRequest(); },
-        [&server](const Json& r) { server.writeResponse(r); }
+        [&server](const json& r) { server.writeResponse(r); }
     );
 
     remoteServer.bind("add", [](int a, int b) -> int {
@@ -222,18 +222,18 @@ FL_TEST_CASE("Promise - readRequest() backward compat with rpc()") {
     client.connect();
 
     // Use rpc() for "add"
-    Json addParams = Json::array();
-    addParams.push_back(Json(3));
-    addParams.push_back(Json(4));
-    fl::promise<Json> addPromise = client.rpc("add", addParams);
+    json addParams = json::array();
+    addParams.push_back(json(3));
+    addParams.push_back(json(4));
+    fl::promise<json> addPromise = client.rpc("add", addParams);
 
     // Also send a manual request for "multiply" via writeResponse (old API)
-    Json mulReq = Json::object();
+    json mulReq = json::object();
     mulReq.set("jsonrpc", "2.0");
     mulReq.set("method", "multiply");
-    Json mulParams = Json::array();
-    mulParams.push_back(Json(5));
-    mulParams.push_back(Json(6));
+    json mulParams = json::array();
+    mulParams.push_back(json(5));
+    mulParams.push_back(json(6));
     mulReq.set("params", mulParams);
     mulReq.set("id", "manual-1");
     client.writeResponse(mulReq);
@@ -250,7 +250,7 @@ FL_TEST_CASE("Promise - readRequest() backward compat with rpc()") {
     FL_CHECK_EQ(addPromise.value()["result"].as_int().value(), 7);
 
     // The "multiply" response should be available via readRequest()
-    fl::optional<Json> mulResponse = client.readRequest();
+    fl::optional<json> mulResponse = client.readRequest();
     FL_REQUIRE(mulResponse.has_value());
     FL_CHECK(mulResponse->contains("result"));
     FL_CHECK_EQ(mulResponse->operator[]("result").as_int().value(), 30);
@@ -266,7 +266,7 @@ FL_TEST_CASE("Promise - Multiple concurrent calls resolve correctly") {
 
     Remote remoteServer(
         [&server]() { return server.readRequest(); },
-        [&server](const Json& r) { server.writeResponse(r); }
+        [&server](const json& r) { server.writeResponse(r); }
     );
 
     remoteServer.bind("double", [](int x) -> int {
@@ -277,17 +277,17 @@ FL_TEST_CASE("Promise - Multiple concurrent calls resolve correctly") {
     client.connect();
 
     // Fire 3 concurrent calls
-    Json p1 = Json::array();
-    p1.push_back(Json(10));
-    fl::promise<Json> call1 = client.rpc("double", p1);
+    json p1 = json::array();
+    p1.push_back(json(10));
+    fl::promise<json> call1 = client.rpc("double", p1);
 
-    Json p2 = Json::array();
-    p2.push_back(Json(20));
-    fl::promise<Json> call2 = client.rpc("double", p2);
+    json p2 = json::array();
+    p2.push_back(json(20));
+    fl::promise<json> call2 = client.rpc("double", p2);
 
-    Json p3 = Json::array();
-    p3.push_back(Json(30));
-    fl::promise<Json> call3 = client.rpc("double", p3);
+    json p3 = json::array();
+    p3.push_back(json(30));
+    fl::promise<json> call3 = client.rpc("double", p3);
 
     FL_CHECK(!call1.is_completed());
     FL_CHECK(!call2.is_completed());

@@ -1,8 +1,8 @@
 // IWYU pragma: private
 
 #include "platforms/shared/ui/json/checkbox.h"
-#include "fl/json.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
+#include "fl/stl/json.h"
 #include "platforms/shared/ui/json/ui.h"
 
 #if FASTLED_ENABLE_JSON
@@ -20,7 +20,7 @@ public:
         : JsonUiInternal(name), mValue(value) {}
 
     // Override toJson to serialize the checkbox's data directly.
-    void toJson(fl::Json& json) const override {
+    void toJson(fl::json& json) const override {
         json.set("name", name());
         json.set("type", "checkbox");
         json.set("group", groupName());
@@ -29,7 +29,7 @@ public:
     }
 
     // Override updateInternal to handle updates from JSON.
-    void updateInternal(const fl::Json& json) override {
+    void updateInternal(const fl::json& json) override {
         mValue = json | false;
     }
 
@@ -58,7 +58,7 @@ JsonCheckboxImpl &JsonCheckboxImpl::Group(const fl::string &name) {
 
 const fl::string &JsonCheckboxImpl::name() const { return mInternal->name(); }
 
-void JsonCheckboxImpl::toJson(fl::Json &json) const {
+void JsonCheckboxImpl::toJson(fl::json &json) const {
     mInternal->toJson(json);
 }
 

@@ -4,8 +4,8 @@
 
 namespace fl {
 
-fl::Json RpcResult::to_json() const {
-    fl::Json obj = fl::Json::object();
+fl::json RpcResult::to_json() const {
+    fl::json obj = fl::json::object();
     obj.set("function", functionName);
     obj.set("result", result);
     obj.set("scheduledAt", static_cast<i64>(scheduledAt));

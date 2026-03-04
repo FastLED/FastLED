@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/json.h"
+#include "fl/stl/json.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -31,7 +31,7 @@ public:
 
     TypedRpcBinding(FunctionType fn) : mFunction(fn) {}
 
-    TypeConversionResult invoke(const Json& jsonArgs) {
+    TypeConversionResult invoke(const json& jsonArgs) {
         // C++11 compatible: avoid structured bindings
         fl::tuple<StorageTuple, TypeConversionResult> convTuple = Converter::convert(jsonArgs);
         StorageTuple tuple = fl::get<0>(convTuple);
@@ -63,7 +63,7 @@ public:
 
     TypedRpcBinding(FunctionType fn) : mFunction(fn) {}
 
-    TypeConversionResult invoke(const Json& jsonArgs) {
+    TypeConversionResult invoke(const json& jsonArgs) {
         // C++11 compatible: avoid structured bindings
         fl::tuple<StorageTuple, TypeConversionResult> convTuple = Converter::convert(jsonArgs);
         StorageTuple tuple = fl::get<0>(convTuple);
@@ -75,16 +75,16 @@ public:
         return result;
     }
 
-    fl::tuple<TypeConversionResult, Json> invokeWithReturn(const Json& jsonArgs) {
+    fl::tuple<TypeConversionResult, json> invokeWithReturn(const json& jsonArgs) {
         // C++11 compatible: avoid structured bindings
         fl::tuple<StorageTuple, TypeConversionResult> convTuple = Converter::convert(jsonArgs);
         StorageTuple tuple = fl::get<0>(convTuple);
         TypeConversionResult result = fl::get<1>(convTuple);
         if (!result.ok()) {
-            return fl::make_tuple(result, Json(nullptr));
+            return fl::make_tuple(result, json(nullptr));
         }
         R returnValue = invokeImplWithReturn(tuple, make_index_sequence<sizeof...(Args)>{});
-        Json jsonResult = detail::TypeToJson<R>::convert(returnValue);
+        json jsonResult = detail::TypeToJson<R>::convert(returnValue);
         return fl::make_tuple(result, jsonResult);
     }
 

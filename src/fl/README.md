@@ -63,7 +63,7 @@ Common types to reach for:
 - Math: `fl::math`, `fl::sin32`, `fl::random`, `fl::gamma`, `fl::gradient`
 - Graphics: `fl::raster`, `fl::screenmap`, `fl::rectangular_draw_buffer`, `fl::downscale`, `fl::supersample`
 - Color: `fl::hsv`, `fl::hsv16`, `fl::colorutils`
-- JSON: `fl::Json` with safe defaults and ergonomic access
+- JSON: `fl::json` with safe defaults and ergonomic access
 
 Example: using containers, views, and ownership
 
@@ -92,10 +92,10 @@ void example() {
 Example: JSON with safe default access
 
 ```cpp
-#include "fl/json.h"
+#include "fl/stl/json.h"
 
 void json_example(const fl::string& jsonStr) {
-    fl::Json json = fl::Json::parse(jsonStr);
+    fl::json json = fl::json::parse(jsonStr);
     int brightness = json["config"]["brightness"] | 128;  // default if missing
     bool enabled = json["enabled"] | false;
 }
@@ -290,7 +290,7 @@ Per‑header quick descriptions:
 - `ostream.h` / `istream.h`: Output/input stream interfaces for host builds.
 - `sstream.h` / `strstream.h`: String‑backed stream buffers and helpers.
 - `printf.h`: Small, portable formatted print utilities.
-- `json.h`: Safe, ergonomic `fl::Json` API with defaulting operator (`|`).
+- `json.h`: Safe, ergonomic `fl::json` API with defaulting operator (`|`).
 - `bytestream.h`: Sequential byte I/O abstraction for buffers/streams.
 - `bytestreammemory.h`: In‑memory byte stream implementation.
 - `io.h`: General I/O helpers for files/streams where available.
@@ -894,10 +894,10 @@ This section explains how the major graphics utilities fit together and how to u
 
 - Safe JSON access: `json.h`
 
-Why: Ergonomic, crash‑resistant access with defaulting operator (`|`). Prefer the `fl::Json` API for new code.
+Why: Ergonomic, crash‑resistant access with defaulting operator (`|`). Prefer the `fl::json` API for new code.
 
 ```cpp
-fl::Json cfg = fl::Json::parse("{\"enabled\":true}");
+fl::json cfg = fl::json::parse("{\"enabled\":true}");
 bool enabled = cfg["enabled"] | false;
 ```
 
@@ -1031,7 +1031,7 @@ Why: Build effects that respond to input signals.
 - If you are writing sketches: include `FastLED.h` and follow examples in `examples/`. The `fl::` headers power those features under the hood.
 - If you are extending FastLED internals or building advanced effects: prefer `fl::` containers and `fl::span` over STL equivalents to maintain portability.
 - Favor smart pointers and moveable wrappers for resource management. Avoid raw pointers and manual `delete`.
-- Use `fl::Json` for robust JSON handling with safe defaults.
+- Use `fl::json` for robust JSON handling with safe defaults.
 
 ## Guidance for C++ Developers
 

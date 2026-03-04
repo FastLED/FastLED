@@ -68,13 +68,13 @@ struct JsonToIntegerVisitor {
         mResult.setError("cannot convert null to integer");
     }
 
-    // Object (JsonObject)
-    void operator()(const JsonObject&) {
+    // Object (json_object)
+    void operator()(const json_object&) {
         mResult.setError("cannot convert object to integer");
     }
 
-    // Array (JsonArray)
-    void operator()(const JsonArray&) {
+    // Array (json_array)
+    void operator()(const json_array&) {
         mResult.setError("cannot convert array to integer");
     }
 
@@ -142,12 +142,12 @@ struct JsonToBoolVisitor {
     }
 
     // Object
-    void operator()(const JsonObject&) {
+    void operator()(const json_object&) {
         mResult.setError("cannot convert object to bool");
     }
 
     // Array
-    void operator()(const JsonArray&) {
+    void operator()(const json_array&) {
         mResult.setError("cannot convert array to bool");
     }
 
@@ -218,12 +218,12 @@ struct JsonToFloatVisitor {
     }
 
     // Object
-    void operator()(const JsonObject&) {
+    void operator()(const json_object&) {
         mResult.setError("cannot convert object to float");
     }
 
     // Array
-    void operator()(const JsonArray&) {
+    void operator()(const json_array&) {
         mResult.setError("cannot convert array to float");
     }
 
@@ -285,12 +285,12 @@ struct JsonToStringVisitor {
     }
 
     // Object
-    void operator()(const JsonObject&) {
+    void operator()(const json_object&) {
         mResult.setError("cannot convert object to string");
     }
 
     // Array
-    void operator()(const JsonArray&) {
+    void operator()(const json_array&) {
         mResult.setError("cannot convert array to string");
     }
 

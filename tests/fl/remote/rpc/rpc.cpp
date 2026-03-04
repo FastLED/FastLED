@@ -1,7 +1,7 @@
 /// @file rpc.cpp
 /// @brief Tests for RPC system - TypedRpc and RpcFactory
 
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/remote/rpc/rpc.h"
 
 #include "test.h"
@@ -83,7 +83,7 @@ FL_TEST_CASE("JsonArgConverter - Extract types from function signature") {
 
 FL_TEST_CASE("JsonArgConverter - Exact type matches (no warnings)") {
     FL_SUBCASE("int argument from JSON integer") {
-        Json args = Json::parse("[42]");
+        json args = json::parse("[42]");
         auto conv = JsonArgConverter<void(int)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -93,7 +93,7 @@ FL_TEST_CASE("JsonArgConverter - Exact type matches (no warnings)") {
     }
 
     FL_SUBCASE("float argument from JSON number") {
-        Json args = Json::parse("[3.14]");
+        json args = json::parse("[3.14]");
         auto conv = JsonArgConverter<void(float)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -105,7 +105,7 @@ FL_TEST_CASE("JsonArgConverter - Exact type matches (no warnings)") {
     }
 
     FL_SUBCASE("string argument from JSON string") {
-        Json args = Json::parse(R"(["hello"])");
+        json args = json::parse(R"(["hello"])");
         auto conv = JsonArgConverter<void(fl::string)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -115,7 +115,7 @@ FL_TEST_CASE("JsonArgConverter - Exact type matches (no warnings)") {
     }
 
     FL_SUBCASE("bool argument from JSON boolean") {
-        Json args = Json::parse("[true]");
+        json args = json::parse("[true]");
         auto conv = JsonArgConverter<void(bool)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -125,7 +125,7 @@ FL_TEST_CASE("JsonArgConverter - Exact type matches (no warnings)") {
     }
 
     FL_SUBCASE("multiple arguments of same type") {
-        Json args = Json::parse("[1, 2, 3]");
+        json args = json::parse("[1, 2, 3]");
         auto conv = JsonArgConverter<void(int, int, int)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -137,7 +137,7 @@ FL_TEST_CASE("JsonArgConverter - Exact type matches (no warnings)") {
     }
 
     FL_SUBCASE("multiple arguments of different types") {
-        Json args = Json::parse(R"([42, 3.14, "test", true])");
+        json args = json::parse(R"([42, 3.14, "test", true])");
         auto conv = JsonArgConverter<void(int, float, fl::string, bool)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -154,7 +154,7 @@ FL_TEST_CASE("JsonArgConverter - Exact type matches (no warnings)") {
 
 FL_TEST_CASE("JsonArgConverter - Type promotions with warnings") {
     FL_SUBCASE("float to int - truncation warning") {
-        Json args = Json::parse("[3.7]");
+        json args = json::parse("[3.7]");
         auto conv = JsonArgConverter<void(int)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -165,7 +165,7 @@ FL_TEST_CASE("JsonArgConverter - Type promotions with warnings") {
     }
 
     FL_SUBCASE("int to float - precision warning for large values") {
-        Json args = Json::parse("[16777217]");  // 2^24 + 1, beyond float precision
+        json args = json::parse("[16777217]");  // 2^24 + 1, beyond float precision
         auto conv = JsonArgConverter<void(float)>::convert(args);
         auto result = fl::get<1>(conv);
         FL_CHECK(result.ok());
@@ -173,7 +173,7 @@ FL_TEST_CASE("JsonArgConverter - Type promotions with warnings") {
     }
 
     FL_SUBCASE("string '123' to int - parse warning") {
-        Json args = Json::parse(R"(["123"])");
+        json args = json::parse(R"(["123"])");
         auto conv = JsonArgConverter<void(int)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -183,7 +183,7 @@ FL_TEST_CASE("JsonArgConverter - Type promotions with warnings") {
     }
 
     FL_SUBCASE("string '3.14' to float - parse warning") {
-        Json args = Json::parse(R"(["3.14"])");
+        json args = json::parse(R"(["3.14"])");
         auto conv = JsonArgConverter<void(float)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -195,7 +195,7 @@ FL_TEST_CASE("JsonArgConverter - Type promotions with warnings") {
     }
 
     FL_SUBCASE("bool to int - implicit conversion warning") {
-        Json args = Json::parse("[true]");
+        json args = json::parse("[true]");
         auto conv = JsonArgConverter<void(int)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -205,7 +205,7 @@ FL_TEST_CASE("JsonArgConverter - Type promotions with warnings") {
     }
 
     FL_SUBCASE("int to bool - implicit conversion warning") {
-        Json args = Json::parse("[1]");
+        json args = json::parse("[1]");
         auto conv = JsonArgConverter<void(bool)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -215,7 +215,7 @@ FL_TEST_CASE("JsonArgConverter - Type promotions with warnings") {
     }
 
     FL_SUBCASE("int 0 to bool - warning") {
-        Json args = Json::parse("[0]");
+        json args = json::parse("[0]");
         auto conv = JsonArgConverter<void(bool)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -225,7 +225,7 @@ FL_TEST_CASE("JsonArgConverter - Type promotions with warnings") {
     }
 
     FL_SUBCASE("string 'true' to bool - parse warning") {
-        Json args = Json::parse(R"(["true"])");
+        json args = json::parse(R"(["true"])");
         auto conv = JsonArgConverter<void(bool)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -235,7 +235,7 @@ FL_TEST_CASE("JsonArgConverter - Type promotions with warnings") {
     }
 
     FL_SUBCASE("int to string - stringify warning") {
-        Json args = Json::parse("[42]");
+        json args = json::parse("[42]");
         auto conv = JsonArgConverter<void(fl::string)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -247,7 +247,7 @@ FL_TEST_CASE("JsonArgConverter - Type promotions with warnings") {
 
 FL_TEST_CASE("JsonArgConverter - Type errors (critical mismatches)") {
     FL_SUBCASE("object to int - error") {
-        Json args = Json::parse(R"([{"key": "value"}])");
+        json args = json::parse(R"([{"key": "value"}])");
         auto conv = JsonArgConverter<void(int)>::convert(args);
         auto result = fl::get<1>(conv);
         FL_CHECK_FALSE(result.ok());
@@ -256,7 +256,7 @@ FL_TEST_CASE("JsonArgConverter - Type errors (critical mismatches)") {
     }
 
     FL_SUBCASE("array to int - error") {
-        Json args = Json::parse("[[1, 2, 3]]");
+        json args = json::parse("[[1, 2, 3]]");
         auto conv = JsonArgConverter<void(int)>::convert(args);
         auto result = fl::get<1>(conv);
         FL_CHECK_FALSE(result.ok());
@@ -264,7 +264,7 @@ FL_TEST_CASE("JsonArgConverter - Type errors (critical mismatches)") {
     }
 
     FL_SUBCASE("null to int - error") {
-        Json args = Json::parse("[null]");
+        json args = json::parse("[null]");
         auto conv = JsonArgConverter<void(int)>::convert(args);
         auto result = fl::get<1>(conv);
         FL_CHECK_FALSE(result.ok());
@@ -272,7 +272,7 @@ FL_TEST_CASE("JsonArgConverter - Type errors (critical mismatches)") {
     }
 
     FL_SUBCASE("unparseable string to int - error") {
-        Json args = Json::parse(R"(["not_a_number"])");
+        json args = json::parse(R"(["not_a_number"])");
         auto conv = JsonArgConverter<void(int)>::convert(args);
         auto result = fl::get<1>(conv);
         FL_CHECK_FALSE(result.ok());
@@ -280,7 +280,7 @@ FL_TEST_CASE("JsonArgConverter - Type errors (critical mismatches)") {
     }
 
     FL_SUBCASE("wrong argument count - too few") {
-        Json args = Json::parse("[1]");
+        json args = json::parse("[1]");
         auto conv = JsonArgConverter<void(int, int)>::convert(args);
         auto result = fl::get<1>(conv);
         FL_CHECK_FALSE(result.ok());
@@ -289,7 +289,7 @@ FL_TEST_CASE("JsonArgConverter - Type errors (critical mismatches)") {
     }
 
     FL_SUBCASE("wrong argument count - too many") {
-        Json args = Json::parse("[1, 2, 3]");
+        json args = json::parse("[1, 2, 3]");
         auto conv = JsonArgConverter<void(int)>::convert(args);
         auto result = fl::get<1>(conv);
         FL_CHECK_FALSE(result.ok());
@@ -297,7 +297,7 @@ FL_TEST_CASE("JsonArgConverter - Type errors (critical mismatches)") {
     }
 
     FL_SUBCASE("non-array args - error") {
-        Json args = Json::parse("42");
+        json args = json::parse("42");
         auto conv = JsonArgConverter<void(int)>::convert(args);
         auto result = fl::get<1>(conv);
         FL_CHECK_FALSE(result.ok());
@@ -316,7 +316,7 @@ FL_TEST_CASE("TypedRpcBinding - Invoke function with typed arguments") {
         fl::function<void()> fn = [&called]() { called = true; };
 
         TypedRpcBinding<void()> binding(fn);
-        Json args = Json::parse("[]");
+        json args = json::parse("[]");
 
         TypeConversionResult result = binding.invoke(args);
         FL_CHECK(result.ok());
@@ -328,7 +328,7 @@ FL_TEST_CASE("TypedRpcBinding - Invoke function with typed arguments") {
         fl::function<void(int)> fn = [&received](int x) { received = x; };
 
         TypedRpcBinding<void(int)> binding(fn);
-        Json args = Json::parse("[42]");
+        json args = json::parse("[42]");
 
         TypeConversionResult result = binding.invoke(args);
         FL_CHECK(result.ok());
@@ -346,7 +346,7 @@ FL_TEST_CASE("TypedRpcBinding - Invoke function with typed arguments") {
         };
 
         TypedRpcBinding<void(int, float, fl::string)> binding(fn);
-        Json args = Json::parse(R"([1, 2.5, "test"])");
+        json args = json::parse(R"([1, 2.5, "test"])");
 
         TypeConversionResult result = binding.invoke(args);
         FL_CHECK(result.ok());
@@ -360,7 +360,7 @@ FL_TEST_CASE("TypedRpcBinding - Invoke function with typed arguments") {
         fl::function<int(int, int)> fn = [](int x, int y) -> int { return x + y; };
 
         TypedRpcBinding<int(int, int)> binding(fn);
-        Json args = Json::parse("[10, 20]");
+        json args = json::parse("[10, 20]");
 
         auto resultTuple = binding.invokeWithReturn(args);
         auto result = fl::get<0>(resultTuple);
@@ -377,7 +377,7 @@ FL_TEST_CASE("TypedRpcBinding - Invoke function with typed arguments") {
         };
 
         TypedRpcBinding<fl::string(fl::string, int)> binding(fn);
-        Json args = Json::parse(R"(["hello", 3])");
+        json args = json::parse(R"(["hello", 3])");
 
         auto resultTuple = binding.invokeWithReturn(args);
         auto result = fl::get<0>(resultTuple);
@@ -392,7 +392,7 @@ FL_TEST_CASE("TypedRpcBinding - Invoke function with typed arguments") {
         fl::function<void(int)> fn = [&received](int x) { received = x; };
 
         TypedRpcBinding<void(int)> binding(fn);
-        Json args = Json::parse("[3.7]");  // float -> int
+        json args = json::parse("[3.7]");  // float -> int
 
         TypeConversionResult result = binding.invoke(args);
         FL_CHECK(result.ok());
@@ -404,7 +404,7 @@ FL_TEST_CASE("TypedRpcBinding - Invoke function with typed arguments") {
         fl::function<void(int)> fn = [](int x) { (void)x; };
 
         TypedRpcBinding<void(int)> binding(fn);
-        Json args = Json::parse(R"([{"key": "value"}])");  // object -> int
+        json args = json::parse(R"([{"key": "value"}])");  // object -> int
 
         TypeConversionResult result = binding.invoke(args);
         FL_CHECK_FALSE(result.ok());
@@ -418,14 +418,14 @@ FL_TEST_CASE("TypedRpcBinding - Invoke function with typed arguments") {
 
 FL_TEST_CASE("JsonArgConverter - Edge cases") {
     FL_SUBCASE("empty argument list") {
-        Json args = Json::parse("[]");
+        json args = json::parse("[]");
         auto conv = JsonArgConverter<void()>::convert(args);
         auto result = fl::get<1>(conv);
         FL_CHECK(result.ok());
     }
 
     FL_SUBCASE("negative integers") {
-        Json args = Json::parse("[-42]");
+        json args = json::parse("[-42]");
         auto conv = JsonArgConverter<void(int)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -434,7 +434,7 @@ FL_TEST_CASE("JsonArgConverter - Edge cases") {
     }
 
     FL_SUBCASE("negative float") {
-        Json args = Json::parse("[-3.14]");
+        json args = json::parse("[-3.14]");
         auto conv = JsonArgConverter<void(float)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -445,7 +445,7 @@ FL_TEST_CASE("JsonArgConverter - Edge cases") {
     }
 
     FL_SUBCASE("zero values") {
-        Json args = Json::parse("[0, 0.0, false]");
+        json args = json::parse("[0, 0.0, false]");
         auto conv = JsonArgConverter<void(int, float, bool)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -458,7 +458,7 @@ FL_TEST_CASE("JsonArgConverter - Edge cases") {
     }
 
     FL_SUBCASE("empty string") {
-        Json args = Json::parse(R"([""])");
+        json args = json::parse(R"([""])");
         auto conv = JsonArgConverter<void(fl::string)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -467,7 +467,7 @@ FL_TEST_CASE("JsonArgConverter - Edge cases") {
     }
 
     FL_SUBCASE("string with special characters") {
-        Json args = Json::parse(R"(["hello\nworld\t!"])");
+        json args = json::parse(R"(["hello\nworld\t!"])");
         auto conv = JsonArgConverter<void(fl::string)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -476,7 +476,7 @@ FL_TEST_CASE("JsonArgConverter - Edge cases") {
     }
 
     FL_SUBCASE("large integer") {
-        Json args = Json::parse("[2147483647]");  // INT_MAX
+        json args = json::parse("[2147483647]");  // INT_MAX
         auto conv = JsonArgConverter<void(int)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -485,7 +485,7 @@ FL_TEST_CASE("JsonArgConverter - Edge cases") {
     }
 
     FL_SUBCASE("uint8_t argument") {
-        Json args = Json::parse("[255]");
+        json args = json::parse("[255]");
         auto conv = JsonArgConverter<void(uint8_t)>::convert(args);
         auto argsTuple = fl::get<0>(conv);
         auto result = fl::get<1>(conv);
@@ -494,7 +494,7 @@ FL_TEST_CASE("JsonArgConverter - Edge cases") {
     }
 
     FL_SUBCASE("uint8_t overflow - warning or error") {
-        Json args = Json::parse("[300]");  // > 255
+        json args = json::parse("[300]");  // > 255
         auto conv = JsonArgConverter<void(uint8_t)>::convert(args);
         auto result = fl::get<1>(conv);
         // Could be warning (truncation) or error depending on implementation

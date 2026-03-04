@@ -119,7 +119,7 @@ void setup() {
 
     // Register POST route with JSON response
     server.post("/api/data", [](const fl::http_request& req) {
-        fl::Json response = fl::Json::object();
+        fl::json response = fl::json::object();
         response.set("status", "ok");
         response.set("message", "Data received");
 

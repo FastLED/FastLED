@@ -16,7 +16,7 @@
 #include "platforms/shared/ui/json/json_console.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/cstring.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/unused.h"
 #include "fl/stl/string.h" // ok include
 #include "test.h"
@@ -38,8 +38,8 @@ using namespace fl;
 class MockJsonUiInternal : public fl::JsonUiInternal {
 public:
     MockJsonUiInternal(const fl::string& name) : fl::JsonUiInternal(name) {}
-    void toJson(fl::Json& json) const override { FL_UNUSED(json); }
-    void updateInternal(const fl::Json& json) override { FL_UNUSED(json); }
+    void toJson(fl::json& json) const override { FL_UNUSED(json); }
+    void updateInternal(const fl::json& json) override { FL_UNUSED(json); }
 };
 
 FL_TEST_CASE("no updateJs handler") {
@@ -78,8 +78,8 @@ FL_TEST_CASE("internal manager with updateJs") {
     class MockJsonUiInternal : public fl::JsonUiInternal {
     public:
         MockJsonUiInternal(const fl::string& name) : fl::JsonUiInternal(name) {}
-        void toJson(fl::Json& json) const override { FL_UNUSED(json); }
-        void updateInternal(const fl::Json& json) override { FL_UNUSED(json); }
+        void toJson(fl::json& json) const override { FL_UNUSED(json); }
+        void updateInternal(const fl::json& json) override { FL_UNUSED(json); }
     };
     auto mockComponent = fl::make_shared<MockJsonUiInternal>("test_id");
     fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
@@ -167,8 +167,8 @@ FL_TEST_CASE("pending component cleanup with destroyed components") {
         class MockJsonUiInternal : public fl::JsonUiInternal {
         public:
             MockJsonUiInternal(const fl::string& name) : fl::JsonUiInternal(name) {}
-            void toJson(fl::Json& json) const override { FL_UNUSED(json); }
-            void updateInternal(const fl::Json& json) override { FL_UNUSED(json); }
+            void toJson(fl::json& json) const override { FL_UNUSED(json); }
+            void updateInternal(const fl::json& json) override { FL_UNUSED(json); }
         };
         auto mockComponent = fl::make_shared<MockJsonUiInternal>("test_id_destroyed");
         fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
@@ -210,8 +210,8 @@ FL_TEST_CASE("null handlers behavior") {
     class MockJsonUiInternal : public fl::JsonUiInternal {
     public:
         MockJsonUiInternal(const fl::string& name) : fl::JsonUiInternal(name) {}
-        void toJson(fl::Json& json) const override { FL_UNUSED(json); }
-        void updateInternal(const fl::Json& json) override { FL_UNUSED(json); }
+        void toJson(fl::json& json) const override { FL_UNUSED(json); }
+        void updateInternal(const fl::json& json) override { FL_UNUSED(json); }
     };
     auto mockComponent = fl::make_shared<MockJsonUiInternal>("test_id");
     fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
@@ -263,8 +263,8 @@ FL_TEST_CASE("manager replacement") {
     class MockJsonUiInternal : public fl::JsonUiInternal {
     public:
         MockJsonUiInternal(const fl::string& name) : fl::JsonUiInternal(name) {}
-        void toJson(fl::Json& json) const override { FL_UNUSED(json); }
-        void updateInternal(const fl::Json& json) override { FL_UNUSED(json); }
+        void toJson(fl::json& json) const override { FL_UNUSED(json); }
+        void updateInternal(const fl::json& json) override { FL_UNUSED(json); }
     };
     auto mockComponent = fl::make_shared<MockJsonUiInternal>("test2");
     fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
@@ -370,7 +370,7 @@ FL_TEST_CASE("complex ui element serialization") {
     // The test should verify that the components are correctly serialized, not exact formatting
     
     // Instead of comparing exact JSON strings, let's verify the components are present
-    fl::Json parsedOutput = fl::Json::parse(capturedJsonOutput.c_str());
+    fl::json parsedOutput = fl::json::parse(capturedJsonOutput.c_str());
     FL_CHECK(parsedOutput.is_array());
     FL_CHECK_EQ(parsedOutput.size(), 9); // Should have 9 components
     
@@ -380,7 +380,7 @@ FL_TEST_CASE("complex ui element serialization") {
     bool hasDescription = false, hasAudio = false, hasHelp = false;
     
     for (size_t i = 0; i < parsedOutput.size(); i++) {
-        fl::Json component = parsedOutput[i];
+        fl::json component = parsedOutput[i];
         fl::string type = component["type"].as_or(fl::string(""));
         
         if (type == "button") hasButton = true;
@@ -677,7 +677,7 @@ FL_TEST_CASE("JsonSlider step output behavior" * doctest::skip()) {
         FL_WARN("JsonSlider test 1: Creating slider1");
         fl::JsonSliderImpl slider1("slider1", 0.5f, 0.0f, 1.0f, 0.1f);
         FL_WARN("JsonSlider test 1: Creating json1");
-        fl::Json json1;
+        fl::json json1;
         FL_WARN("JsonSlider test 1: Calling toJson");
         slider1.toJson(json1);
         
@@ -693,7 +693,7 @@ FL_TEST_CASE("JsonSlider step output behavior" * doctest::skip()) {
     // Test 2: Slider with default step should NOT output step field
     {
         fl::JsonSliderImpl slider2("slider2", 0.5f, 0.0f, 1.0f); // No step provided
-        fl::Json json2;
+        fl::json json2;
         slider2.toJson(json2);
         
         FL_CHECK_FALSE(json2.contains("step"));
@@ -706,7 +706,7 @@ FL_TEST_CASE("JsonSlider step output behavior" * doctest::skip()) {
     // Test 3: Slider with explicitly set zero step should output step field
     {
         fl::JsonSliderImpl slider3("slider3", 0.5f, 0.0f, 1.0f, 0.0f);
-        fl::Json json3;
+        fl::json json3;
         slider3.toJson(json3);
         
         FL_CHECK(json3.contains("step"));
@@ -720,7 +720,7 @@ FL_TEST_CASE("JsonSlider step output behavior" * doctest::skip()) {
     // Test 4: Slider with very small step should output step field
     {
         fl::JsonSliderImpl slider4("slider4", 0.5f, 0.0f, 1.0f, 0.001f);
-        fl::Json json4;
+        fl::json json4;
         slider4.toJson(json4);
         
         FL_CHECK(json4.contains("step"));
@@ -736,7 +736,7 @@ FL_TEST_CASE("JsonSlider step output behavior" * doctest::skip()) {
 
 FL_TEST_CASE("XYPath slider step serialization bug - C++ verification" * doctest::skip()) {
     // TEMP DISABLED: This test causes a segfault when extracting strings from JSON.
-    // The bug appears to be in fl::Json::as_string() or related optional/variant code.
+    // The bug appears to be in fl::json::as_string() or related optional/variant code.
     // See .agent_task/ITERATION_8.md for debugging details.
     // Test verifying that C++ JSON generation is correct for XYPath sliders
     // NOTE: This test confirms C++ is working correctly.
@@ -748,13 +748,13 @@ FL_TEST_CASE("XYPath slider step serialization bug - C++ verification" * doctest
     fl::JsonSliderImpl length("Length", 1.0f, 0.0f, 1.0f, 0.01f);
     
     // Serialize each slider to JSON
-    fl::Json offsetJson;
+    fl::json offsetJson;
     offset.toJson(offsetJson);
     
-    fl::Json stepsJson;
+    fl::json stepsJson;
     steps.toJson(stepsJson);
     
-    fl::Json lengthJson;
+    fl::json lengthJson;
     length.toJson(lengthJson);
     
     // DEBUG: Show the actual C++ JSON output
@@ -905,7 +905,7 @@ Visit our [documentation](https://fastled.io) for more details!)";
     JsonHelpImpl help(markdownContent);
     help.Group("getting-started");
 
-    fl::Json jsonObj = fl::Json::createObject();
+    fl::json jsonObj = fl::json::createObject();
     help.toJson(jsonObj);
 
     fl::string name = jsonObj["name"].as_or(fl::string(""));
@@ -975,7 +975,7 @@ And some Unicode: ★ ♪ ⚡)";
 
     JsonHelpImpl help(complexMarkdown);
 
-    fl::Json jsonObj = fl::Json::createObject();
+    fl::json jsonObj = fl::json::createObject();
     help.toJson(jsonObj);
 
     // Verify the markdown content is preserved exactly
@@ -1010,7 +1010,7 @@ FL_TEST_CASE("UIHelp edge cases") {
     FL_CHECK(longHelp.markdownContent() == longContent);
 
     // Verify JSON serialization works with long content
-    fl::Json jsonObj = fl::Json::createObject();
+    fl::json jsonObj = fl::json::createObject();
     longHelp.toJson(jsonObj);
     fl::string content = jsonObj["markdownContent"].as_or(fl::string(""));
     FL_CHECK(content == longContent);

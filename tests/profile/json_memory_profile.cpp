@@ -1,11 +1,11 @@
 // ok standalone
 // Memory profiling test for JSON parsers
-// Compares parse() (ArduinoJson) vs parse2() (custom parser)
+// Compares parse() (Legacy) vs parse2() (custom parser)
 // Uses global allocation overrides to track ALL memory usage
 
 #include "fl/file_system.h"  // for FileHandle, FileSystem, make_sdcard_filesystem
 #include "fl/int.h"          // for size, u32, u8
-#include "fl/json.h"         // for Json
+#include "fl/stl/json.h"         // for json
 #include "fl/stl/atomic.h"   // for atomic
 #include "fl/stl/cstdint.h"  // for size_t
 #include "fl/stl/map.h"      // for FixedMap
@@ -330,20 +330,20 @@ void profile_json_memory(const char* test_name, const fl::string& json_data) {
     // Baseline: Measure overhead of tracking itself
     g_tracking_enabled = false;
     {
-        Json warmup = Json::parse(json_data);
+        json warmup = json::parse(json_data);
         (void)warmup;
     }
 
-    // Test 1: ArduinoJson parse()
+    // Test 1: Legacy parse()
     g_stats.reset();
     g_tracking_enabled = true;
 
     size_t parse1_peak = 0;
     size_t parse1_allocs = 0;
     {
-        Json result1 = Json::parse(json_data);
+        json result1 = json::parse(json_data);
         if (result1.is_null()) {
-            printf("❌ ERROR: ArduinoJson parse() failed\n");
+            printf("❌ ERROR: Legacy parse() failed\n");
             g_tracking_enabled = false;
             return;
         }
@@ -353,7 +353,7 @@ void profile_json_memory(const char* test_name, const fl::string& json_data) {
     }
 
     g_tracking_enabled = false;
-    g_stats.print_stats("ArduinoJson parse()");
+    g_stats.print_stats("Legacy parse()");
 
     // Test 2: Custom parse2()
     g_stats.reset();
@@ -362,7 +362,7 @@ void profile_json_memory(const char* test_name, const fl::string& json_data) {
     size_t parse2_peak = 0;
     size_t parse2_allocs = 0;
     {
-        Json result2 = Json::parse2(json_data);
+        json result2 = json::parse2(json_data);
         if (result2.is_null()) {
             printf("❌ ERROR: Custom parse2() failed\n");
             g_tracking_enabled = false;
@@ -438,7 +438,7 @@ int test_phase1_validation() {
 
     // Phase 1 validation only - this MUST allocate ZERO heap memory
     // Use zero-copy string_view to avoid fl::string allocation
-    bool valid = Json::parse2_validate_only(fl::string_view(test_json, ::strlen(test_json)));
+    bool valid = json::parse2_validate_only(fl::string_view(test_json, ::strlen(test_json)));
 
     g_tracking_enabled = false;
 
@@ -524,7 +524,7 @@ int main(int argc, char** argv) {
     printf("JSON MEMORY PROFILER\n");
     printf("================================================================================\n");
     printf("This profiler tracks ALL heap allocations using global malloc/free overrides.\n");
-    printf("Compares ArduinoJson parse() vs custom parse2() memory usage.\n");
+    printf("Compares Legacy parse() vs custom parse2() memory usage.\n");
     printf("================================================================================\n\n");
 
     int failures = 0;

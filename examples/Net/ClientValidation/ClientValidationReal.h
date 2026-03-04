@@ -99,7 +99,7 @@ void test_json_endpoint() {
         return;
     }
 
-    fl::Json data = resp.json();
+    fl::json data = resp.json();
     fl::string author = data["slideshow"]["author"] | fl::string("unknown");
     fl::string title = data["slideshow"]["title"] | fl::string("untitled");
     int slide_count = data["slideshow"]["slides"].size();
@@ -149,7 +149,7 @@ void test_get_endpoint() {
         return;
     }
 
-    fl::Json data = resp.json();
+    fl::json data = resp.json();
     fl::string origin = data["origin"] | fl::string("unknown");
     fl::string url = data["url"] | fl::string("unknown");
 

@@ -291,7 +291,7 @@ class RpcClient:
         self._next_id = (self._next_id + 1) & 0xFFFFFFFF  # Wrap at uint32 max
 
         # Wrap args in array to pass as single Json parameter to RPC functions
-        # RPC functions expect signature: (const fl::Json& args)
+        # RPC functions expect signature: (const fl::json& args)
         # So we need to pass the entire args as one parameter
         wrapped_args: list[Any] = [args] if args is not None else [{}]
         cmd: dict[str, Any] = {
@@ -364,7 +364,7 @@ class RpcClient:
         self._next_id = (self._next_id + 1) & 0xFFFFFFFF  # Wrap at uint32 max
 
         # Wrap args in array to pass as single Json parameter to RPC functions
-        # RPC functions expect signature: (const fl::Json& args)
+        # RPC functions expect signature: (const fl::json& args)
         # So we need to pass the entire args as one parameter
         wrapped_args: list[Any] = [args] if args is not None else [{}]
         cmd: dict[str, Any] = {

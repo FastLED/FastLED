@@ -12,7 +12,7 @@
 #include "platforms/shared/ui/json/ui_internal.h"
 
 #include "fl/stl/vector.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 
 #include "platforms/shared/ui/json/audio_internal.h"
 

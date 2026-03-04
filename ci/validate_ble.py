@@ -110,7 +110,7 @@ async def run_ble_validation(
 
         # Step 4: Send ping over BLE
         print("\n--- Step 4: Send ping over BLE ---")
-        # RPC functions expect signature: (const fl::Json& args)
+        # RPC functions expect signature: (const fl::json& args)
         # So params must be [{}] (array with one empty object arg)
         ping_request = json.dumps(
             {"jsonrpc": "2.0", "method": "ping", "params": [{}], "id": 1}

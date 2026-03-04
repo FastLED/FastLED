@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/json.h"
+#include "fl/stl/json.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -52,7 +52,7 @@ struct RpcEntry {
     fl::RpcMode mMode = fl::RpcMode::SYNC;  // Default to synchronous
 
     // For response-aware async methods (with ResponseSend& parameter)
-    fl::function<void(ResponseSend&, const Json&)> mResponseAwareFn;
+    fl::function<void(ResponseSend&, const json&)> mResponseAwareFn;
     bool mIsResponseAware = false;
 };
 
@@ -60,11 +60,11 @@ struct RpcEntry {
 // makeJsonRpcError - Helper to create JSON-RPC error responses
 // =============================================================================
 
-inline Json makeJsonRpcError(int code, const fl::string& message, const Json& id) {
-    Json response = Json::object();
+inline json makeJsonRpcError(int code, const fl::string& message, const json& id) {
+    json response = json::object();
     response.set("jsonrpc", "2.0");
 
-    Json error = Json::object();
+    json error = json::object();
     error.set("code", code);
     error.set("message", message);
     response.set("error", error);

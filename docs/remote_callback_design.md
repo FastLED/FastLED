@@ -15,7 +15,7 @@ namespace fl {
 using RequestSource = fl::function<fl::optional<RpcRequest>()>;
 
 // Response sink: Accepts response for output (user handles formatting/writing)
-using ResponseSink = fl::function<void(const fl::Json& response)>;
+using ResponseSink = fl::function<void(const fl::json& response)>;
 
 }
 ```
@@ -39,7 +39,7 @@ public:
 private:
     RequestSource mRequestSource;
     ResponseSink mResponseSink;
-    fl::vector<fl::Json> mOutgoingQueue;  // Responses waiting to be sent
+    fl::vector<fl::json> mOutgoingQueue;  // Responses waiting to be sent
 };
 ```
 
@@ -54,7 +54,7 @@ size_t Remote::update(u32 currentTimeMs) {
             auto response = processRpc(*request);
 
             // Build response JSON
-            fl::Json responseJson = fl::Json::object();
+            fl::json responseJson = fl::json::object();
             if (response.ok()) {
                 responseJson.set("status", "ok");
                 if (response.value().has_value()) {
@@ -109,7 +109,7 @@ public:
             if (c == '\n' || c == '\r') {
                 if (!inputBuffer.empty()) {
                     // Parse JSON
-                    fl::Json doc = fl::Json::parse(inputBuffer);
+                    fl::json doc = fl::json::parse(inputBuffer);
                     inputBuffer.clear();
 
                     // Validate and extract fields
@@ -146,7 +146,7 @@ public:
     }
 
     // Response sink: Format and write to Serial
-    void sendResponse(const fl::Json& response) {
+    void sendResponse(const fl::json& response) {
         fl::Remote::printJson(response);  // Uses existing helper
     }
 };
@@ -164,7 +164,7 @@ void setup() {
 
     // Attach callbacks
     remote.setRequestSource([&]() { return handler.getNextRequest(); });
-    remote.setResponseSink([&](const fl::Json& r) { handler.sendResponse(r); });
+    remote.setResponseSink([&](const fl::json& r) { handler.sendResponse(r); });
 }
 
 void loop() {
@@ -254,13 +254,13 @@ remote.setRequestSource([&]() {
 #### 2. Should Response be a struct instead of JSON?
 ```cpp
 // Current: JSON response
-using ResponseSink = fl::function<void(const fl::Json& response)>;
+using ResponseSink = fl::function<void(const fl::json& response)>;
 
 // Alternative: Typed response struct
 struct Response {
     enum class Status { Ok, Error, Warning };
     Status status;
-    fl::Json result;           // Only present for Ok
+    fl::json result;           // Only present for Ok
     fl::string errorMessage;   // Only present for Error
     Error errorCode;           // Only present for Error
 };
@@ -326,11 +326,11 @@ public:
     struct Response {
         enum class Status { Ok, Error };
         Status status;
-        fl::Json result;           // Present for Ok with return value
+        fl::json result;           // Present for Ok with return value
         fl::string errorMessage;   // Present for Error
         Error errorCode;           // Present for Error
 
-        fl::Json to_json() const;  // Convert to JSON if needed
+        fl::json to_json() const;  // Convert to JSON if needed
     };
 
     // Callback types

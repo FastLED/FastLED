@@ -12,7 +12,7 @@
 
 namespace fl {
 
-fl::string formatJsonResponse(const fl::Json& response, const char* prefix) {
+fl::string formatJsonResponse(const fl::json& response, const char* prefix) {
     // Use sstream to minimize allocations
     fl::sstream ss;
 

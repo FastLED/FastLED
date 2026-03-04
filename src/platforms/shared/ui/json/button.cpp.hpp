@@ -1,7 +1,7 @@
 // IWYU pragma: private
 
-#include "fl/json.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
+#include "fl/stl/json.h"
 #include "platforms/shared/ui/json/button.h"
 #include "platforms/shared/ui/json/ui.h"
 #include "fl/stl/assert.h"
@@ -19,7 +19,7 @@ public:
         : JsonUiInternal(name), mPressed(pressed) {}
 
     // Override toJson to serialize the button's data directly.
-    void toJson(fl::Json& json) const override {
+    void toJson(fl::json& json) const override {
         json.set("name", name());
         json.set("type", "button");
         json.set("group", groupName());
@@ -28,7 +28,7 @@ public:
     }
 
     // Override updateInternal to handle updates from JSON.
-    void updateInternal(const fl::Json& json) override {
+    void updateInternal(const fl::json& json) override {
         mPressed = json | false;
     }
 
@@ -60,7 +60,7 @@ bool JsonButtonImpl::clicked() const { return mClickedHappened; }
 
 const string &JsonButtonImpl::name() const { return mInternal->name(); }
 
-void JsonButtonImpl::toJson(fl::Json &json) const {
+void JsonButtonImpl::toJson(fl::json &json) const {
     mInternal->toJson(json);
 }
 

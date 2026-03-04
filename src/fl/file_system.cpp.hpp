@@ -29,7 +29,7 @@
 #define FASTLED_HAS_SDCARD 0
 #endif
 
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/screenmap.h"
 #include "fl/unused.h"
 #include "fl/codec/mpeg1.h"
@@ -250,14 +250,14 @@ void FileSystem::end() {
     }
 }
 
-bool FileSystem::readJson(const char *path, Json *doc) {
+bool FileSystem::readJson(const char *path, json *doc) {
     string text;
     if (!readText(path, &text)) {
         return false;
     }
     
-    // Parse using the new Json class
-    *doc = fl::Json::parse(text);
+    // Parse using the new json class
+    *doc = fl::json::parse(text);
     return !doc->is_null();
 }
 

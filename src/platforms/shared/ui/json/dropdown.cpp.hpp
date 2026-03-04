@@ -1,8 +1,8 @@
 // IWYU pragma: private
 
 #include "platforms/shared/ui/json/dropdown.h"
-#include "fl/json.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
+#include "fl/stl/json.h"
 #include "platforms/shared/ui/json/ui.h"
 #include "fl/stl/span.h"
 
@@ -24,14 +24,14 @@ public:
         : JsonUiInternal(name), mOptions(options), mSelectedIndex(selectedIndex) {}
 
     // Override toJson to serialize the dropdown's data directly.
-    void toJson(fl::Json& json) const override {
+    void toJson(fl::json& json) const override {
         json.set("name", name());
         json.set("type", "dropdown");
         json.set("group", groupName());
         json.set("id", id());
         json.set("value", static_cast<int>(mSelectedIndex));
         
-        fl::Json optionsArray = fl::Json::array();
+        fl::json optionsArray = fl::json::array();
         for (const auto& option : mOptions) {
             optionsArray.push_back(option);
         }
@@ -39,7 +39,7 @@ public:
     }
 
     // Override updateInternal to handle updates from JSON.
-    void updateInternal(const fl::Json& json) override {
+    void updateInternal(const fl::json& json) override {
         int index = json | 0;
         if (index >= 0 && static_cast<size_t>(index) < mOptions.size()) {
             mSelectedIndex = static_cast<size_t>(index);
@@ -120,7 +120,7 @@ JsonDropdownImpl &JsonDropdownImpl::Group(const fl::string &name) {
 
 const fl::string &JsonDropdownImpl::name() const { return mInternal->name(); }
 
-void JsonDropdownImpl::toJson(fl::Json &json) const {
+void JsonDropdownImpl::toJson(fl::json &json) const {
     mInternal->toJson(json);
 }
 

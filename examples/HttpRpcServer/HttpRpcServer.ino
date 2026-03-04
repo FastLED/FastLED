@@ -73,7 +73,7 @@ void setup() {
         // RequestSource: read from HTTP server
         [&transport]() { return transport->readRequest(); },
         // ResponseSink: write to HTTP server
-        [&transport](const fl::Json& r) { transport->writeResponse(r); }
+        [&transport](const fl::json& r) { transport->writeResponse(r); }
     );
     auto& remote = *pRemote;
 
@@ -132,8 +132,8 @@ void setup() {
         Serial.println(")");
     });
 
-    remote.bind("getStatus", []() -> fl::Json {
-        fl::Json result = fl::Json::object();
+    remote.bind("getStatus", []() -> fl::json {
+        fl::json result = fl::json::object();
         result.set("numLeds", NUM_LEDS);
         result.set("brightness", FastLED.getBrightness());
         result.set("millis", static_cast<int64_t>(millis()));
@@ -143,9 +143,9 @@ void setup() {
 
     // ========== ASYNC MODE: ACK immediately, result later ==========
 
-    remote.bindAsync("longTask", [](fl::ResponseSend& send, const fl::Json& params) {
+    remote.bindAsync("longTask", [](fl::ResponseSend& send, const fl::json& params) {
         // Send ACK immediately
-        fl::Json ack = fl::Json::object();
+        fl::json ack = fl::json::object();
         ack.set("ack", true);
         send.send(ack);
 
@@ -167,7 +167,7 @@ void setup() {
         }
 
         // Send final result
-        fl::Json result = fl::Json::object();
+        fl::json result = fl::json::object();
         result.set("value", 42);
         result.set("duration", duration);
         send.send(result);
@@ -179,9 +179,9 @@ void setup() {
 
     // ========== ASYNC_STREAM MODE: ACK + multiple updates + final ==========
 
-    remote.bindAsync("streamData", [](fl::ResponseSend& send, const fl::Json& params) {
+    remote.bindAsync("streamData", [](fl::ResponseSend& send, const fl::json& params) {
         // Send ACK immediately
-        fl::Json ack = fl::Json::object();
+        fl::json ack = fl::json::object();
         ack.set("ack", true);
         send.send(ack);
 
@@ -198,7 +198,7 @@ void setup() {
 
         // Send multiple updates
         for (int i = 0; i < count; i++) {
-            fl::Json update = fl::Json::object();
+            fl::json update = fl::json::object();
             update.set("update", i);
             update.set("progress", (i * 100) / count);
             send.sendUpdate(update);
@@ -213,7 +213,7 @@ void setup() {
         }
 
         // Send final result with "stop" marker
-        fl::Json final = fl::Json::object();
+        fl::json final = fl::json::object();
         final.set("done", true);
         final.set("count", count);
         send.sendFinal(final);

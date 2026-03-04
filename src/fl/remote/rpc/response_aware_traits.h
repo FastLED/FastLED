@@ -31,7 +31,7 @@ class ResponseSend;
  *
  *   // Response-aware async method
  *   void addAsync(ResponseSend& send, int a, int b) {
- *       send.send(Json::object().set("result", a + b));
+ *       send.send(json::object().set("result", a + b));
  *   }
  *   // Signature for JSON matching: void(int, int)  <- ResponseSend& stripped
  */

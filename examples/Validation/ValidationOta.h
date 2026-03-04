@@ -19,7 +19,7 @@
 
 // Forward declarations
 namespace fl {
-class Json;
+class json;
 }
 
 /// @brief State for OTA validation
@@ -31,11 +31,11 @@ struct ValidationOtaState {
 /// @brief Start WiFi Soft AP and OTA HTTP server.
 /// @return JSON with {success, ssid, password, ip, port, ota_password, hostname}
 ///         on success, or {success: false, error} on failure.
-fl::Json startOta();
+fl::json startOta();
 
 /// @brief Stop OTA server and WiFi AP, release all resources.
 /// @return JSON with {success: true}
-fl::Json stopOta();
+fl::json stopOta();
 
 /// @brief Get current OTA validation state.
 /// @return Reference to the global OTA state

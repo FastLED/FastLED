@@ -219,7 +219,7 @@ void test_await_approach() {
 /// APPROACH 3: JSON Response Handling with FastLED's ideal JSON API
 /// This demonstrates fetch responses with automatic JSON parsing
 void test_json_response() {
-    FL_WARN("APPROACH 3: JSON Response handling with fl::Json integration");
+    FL_WARN("APPROACH 3: JSON Response handling with fl::json integration");
     
     // TUTORIAL: Fetch a JSON API endpoint (httpbin.org provides test JSON)
     // This endpoint returns JSON with request information
@@ -233,9 +233,9 @@ void test_json_response() {
             if (response.is_json()) {
                 FL_WARN("DETECTED [JSON Promise] Response contains JSON data");
                 
-                // TUTORIAL: response.json() returns fl::Json with FastLED's ideal API
+                // TUTORIAL: response.json() returns fl::json with FastLED's ideal API
                 // Automatic parsing, caching, and safe access with defaults using operator|
-                fl::Json data = response.json();
+                fl::json data = response.json();
                 
                 // TUTORIAL: Safe JSON access with defaults - never crashes!
                 // Uses FastLED's proven pattern: json["path"]["to"]["key"] | default_value
@@ -249,7 +249,7 @@ void test_json_response() {
                 
                 // TUTORIAL: Access nested arrays safely
                 if (data.contains("slideshow") && data["slideshow"].contains("slides")) {
-                    fl::Json slides = data["slideshow"]["slides"];
+                    fl::json slides = data["slideshow"]["slides"];
                     if (slides.is_array() && slides.size() > 0) {
                         // Get first slide information with safe defaults
                         fl::string first_slide_title = slides[0]["title"] | fl::string("no title");
@@ -306,7 +306,7 @@ void test_json_await() {
             FL_WARN("DETECTED [JSON Await] Response contains JSON data");
             
             // TUTORIAL: Parse JSON with automatic caching
-            fl::Json data = http_response.json();
+            fl::json data = http_response.json();
             
             // TUTORIAL: httpbin.org/get returns information about the request
             // Extract data with safe defaults using FastLED's ideal JSON API
@@ -318,7 +318,7 @@ void test_json_await() {
             
             // TUTORIAL: Access nested headers object safely
             if (data.contains("headers")) {
-                fl::Json headers = data["headers"];
+                fl::json headers = data["headers"];
                 fl::string user_agent = headers["User-Agent"] | fl::string("unknown");
                 fl::string accept = headers["Accept"] | fl::string("unknown");
                 
@@ -328,7 +328,7 @@ void test_json_await() {
             
             // TUTORIAL: Access query parameters (if any)
             if (data.contains("args")) {
-                fl::Json args = data["args"];
+                fl::json args = data["args"];
                 if (args.size() > 0) {
                     FL_WARN("JSON [Await] Query parameters found: " << args.size());
                 } else {

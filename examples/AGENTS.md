@@ -139,12 +139,12 @@ const char* status = "PROCESSING: Request in progress...";
 ```
 
 ### JSON Usage - Ideal API Patterns
-**🎯 PREFERRED: Use the modern `fl::Json` class for all JSON operations.** FastLED provides an ideal JSON API that prioritizes type safety, ergonomics, and crash-proof operation.
+**🎯 PREFERRED: Use the modern `fl::json` class for all JSON operations.** FastLED provides an ideal JSON API that prioritizes type safety, ergonomics, and crash-proof operation.
 
 **✅ IDIOMATIC JSON USAGE:**
 ```cpp
 // NEW: Clean, safe, idiomatic API
-fl::Json json = fl::Json::parse(jsonStr);
+fl::json json = fl::json::parse(jsonStr);
 int brightness = json["config"]["brightness"] | 128;  // Gets value or 128 default
 string name = json["device"]["name"] | string("default");  // Type-safe with default
 bool enabled = json["features"]["networking"] | false;  // Never crashes

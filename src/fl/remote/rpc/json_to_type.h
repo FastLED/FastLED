@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/remote/rpc/type_conversion_result.h"
 #include "fl/remote/rpc/json_visitors.h"
 #include "fl/stl/tuple.h"
@@ -55,7 +55,7 @@ namespace detail {
 // Primary template declaration for JsonToType (with two template parameters for SFINAE)
 template <typename T, typename Enable = void>
 struct JsonToType {
-    static fl::tuple<T, TypeConversionResult> convert(const Json& j) {
+    static fl::tuple<T, TypeConversionResult> convert(const json& j) {
         (void)j;
         TypeConversionResult result;
         result.setError("unsupported type for JSON conversion");
@@ -66,9 +66,9 @@ struct JsonToType {
 // Integer conversion (excluding bool) - uses visitor pattern
 template <typename T>
 struct JsonToType<T, typename fl::enable_if<fl::is_integral<T>::value && !fl::is_same<T, bool>::value>::type> {
-    static fl::tuple<T, TypeConversionResult> convert(const Json& j) {
-        // Access internal JsonValue directly instead of re-parsing
-        const JsonValue* val = j.internal_value();
+    static fl::tuple<T, TypeConversionResult> convert(const json& j) {
+        // Access internal json_value directly instead of re-parsing
+        const json_value* val = j.internal_value();
         if (!val) {
             TypeConversionResult result;
             result.setError("failed to access JSON value");
@@ -84,9 +84,9 @@ struct JsonToType<T, typename fl::enable_if<fl::is_integral<T>::value && !fl::is
 // Boolean conversion - uses visitor pattern
 template <>
 struct JsonToType<bool, void> {
-    static fl::tuple<bool, TypeConversionResult> convert(const Json& j) {
-        // Access internal JsonValue directly instead of re-parsing
-        const JsonValue* val = j.internal_value();
+    static fl::tuple<bool, TypeConversionResult> convert(const json& j) {
+        // Access internal json_value directly instead of re-parsing
+        const json_value* val = j.internal_value();
         if (!val) {
             TypeConversionResult result;
             result.setError("failed to access JSON value");
@@ -102,9 +102,9 @@ struct JsonToType<bool, void> {
 // Float/double conversion - uses visitor pattern
 template <typename T>
 struct JsonToType<T, typename fl::enable_if<fl::is_floating_point<T>::value>::type> {
-    static fl::tuple<T, TypeConversionResult> convert(const Json& j) {
-        // Access internal JsonValue directly instead of re-parsing
-        const JsonValue* val = j.internal_value();
+    static fl::tuple<T, TypeConversionResult> convert(const json& j) {
+        // Access internal json_value directly instead of re-parsing
+        const json_value* val = j.internal_value();
         if (!val) {
             TypeConversionResult result;
             result.setError("failed to access JSON value");
@@ -120,9 +120,9 @@ struct JsonToType<T, typename fl::enable_if<fl::is_floating_point<T>::value>::ty
 // String conversion - uses visitor pattern
 template <>
 struct JsonToType<fl::string, void> {
-    static fl::tuple<fl::string, TypeConversionResult> convert(const Json& j) {
-        // Access internal JsonValue directly instead of re-parsing
-        const JsonValue* val = j.internal_value();
+    static fl::tuple<fl::string, TypeConversionResult> convert(const json& j) {
+        // Access internal json_value directly instead of re-parsing
+        const json_value* val = j.internal_value();
         if (!val) {
             TypeConversionResult result;
             result.setError("failed to access JSON value");
@@ -135,11 +135,11 @@ struct JsonToType<fl::string, void> {
     }
 };
 
-// Json identity conversion - pass Json through unchanged
-// This enables RPC methods to accept fl::Json parameters for dynamic typing
+// json identity conversion - pass json through unchanged
+// This enables RPC methods to accept fl::json parameters for dynamic typing
 template <>
-struct JsonToType<fl::Json, void> {
-    static fl::tuple<fl::Json, TypeConversionResult> convert(const Json& j) {
+struct JsonToType<fl::json, void> {
+    static fl::tuple<fl::json, TypeConversionResult> convert(const json& j) {
         TypeConversionResult result;  // Success by default
         return fl::make_tuple(j, result);
     }
@@ -149,7 +149,7 @@ struct JsonToType<fl::Json, void> {
 // The wrapper stores fl::string and converts to const char* on access
 template <>
 struct JsonToType<fl::ConstCharPtrWrapper, void> {
-    static fl::tuple<fl::ConstCharPtrWrapper, TypeConversionResult> convert(const Json& j) {
+    static fl::tuple<fl::ConstCharPtrWrapper, TypeConversionResult> convert(const json& j) {
         // Reuse the string converter
         auto stringResult = JsonToType<fl::string>::convert(j);
         fl::string str = fl::get<0>(stringResult);
@@ -162,7 +162,7 @@ struct JsonToType<fl::ConstCharPtrWrapper, void> {
 // ConstSpanWrapper conversion - converts JSON array to vector wrapper
 template <typename T>
 struct JsonToType<fl::ConstSpanWrapper<T>, void> {
-    static fl::tuple<fl::ConstSpanWrapper<T>, TypeConversionResult> convert(const Json& j) {
+    static fl::tuple<fl::ConstSpanWrapper<T>, TypeConversionResult> convert(const json& j) {
         TypeConversionResult result;
 
         if (!j.is_array()) {
@@ -192,7 +192,7 @@ struct JsonToType<fl::ConstSpanWrapper<T>, void> {
 // Works for any T that has a JsonToType specialization
 template <typename T>
 struct JsonToType<fl::vector<T>, void> {
-    static fl::tuple<fl::vector<T>, TypeConversionResult> convert(const Json& j) {
+    static fl::tuple<fl::vector<T>, TypeConversionResult> convert(const json& j) {
         TypeConversionResult result;
 
         if (!j.is_array()) {

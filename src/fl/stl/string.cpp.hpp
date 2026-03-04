@@ -7,7 +7,7 @@
 #include "fl/fft.h"
 #include "fl/geometry.h"             // for vec2
 #include "fl/int.h"                  // for size, u16, u8
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/rgb8.h"                 // for CRGB
 #include "fl/tile2x2.h"
 #include "fl/unused.h"
@@ -119,19 +119,19 @@ string &string::appendCRGB(const CRGB &rgb) {
 
 // JSON type append implementations
 // NOTE: These use forward declarations to avoid circular dependency with json.h
-string &string::append(const JsonValue& val) {
-    // Use the JsonValue's to_string method if available
+string &string::append(const json_value& val) {
+    // Use the json_value's to_string method if available
     // For now, just append a placeholder to avoid compilation errors
     FL_UNUSED(val);
-    append("<JsonValue>");
+    append("<json_value>");
     return *this;
 }
 
-string &string::append(const Json& val) {
-    // Use the Json's to_string method if available
+string &string::append(const json& val) {
+    // Use the json's to_string method if available
     // For now, just append a placeholder to avoid compilation errors
-    //append("<Json>");
-    append("Json(");
+    //append("<json>");
+    append("json(");
     append(val.to_string());
     append(")");
     return *this;

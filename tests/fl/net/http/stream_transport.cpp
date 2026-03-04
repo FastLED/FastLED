@@ -3,7 +3,7 @@
 #include "fl/net/http/stream_transport.cpp.hpp"
 #include "fl/net/http/connection.cpp.hpp"
 #include "fl/net/http/chunked_encoding.cpp.hpp"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/stl/vector.h"
 #include <cstring>  // ok include
 
@@ -159,7 +159,7 @@ FL_TEST_CASE("HttpStreamTransport: Write Response") {
     transport.connect();
 
     FL_SUBCASE("Write valid JSON-RPC response") {
-        Json response = Json::object();
+        json response = json::object();
         response.set("jsonrpc", "2.0");
         response.set("result", 3);
         response.set("id", 1);
@@ -177,7 +177,7 @@ FL_TEST_CASE("HttpStreamTransport: Write Response") {
     FL_SUBCASE("Write disconnected does nothing") {
         transport.disconnect();
 
-        Json response = Json::object();
+        json response = json::object();
         response.set("jsonrpc", "2.0");
         response.set("result", 3);
         response.set("id", 1);
@@ -215,7 +215,7 @@ FL_TEST_CASE("HttpStreamTransport: Heartbeat") {
 
     FL_SUBCASE("Reset heartbeat after sending data") {
         // Send response
-        Json response = Json::object();
+        json response = json::object();
         response.set("jsonrpc", "2.0");
         response.set("result", 42);
         response.set("id", 1);

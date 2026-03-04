@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/json.h"
+#include "fl/stl/json.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -33,7 +33,7 @@ struct TypeTag {
 class ErasedInvoker {
 public:
     virtual ~ErasedInvoker() = default;
-    virtual fl::tuple<TypeConversionResult, Json> invoke(const Json& args) = 0;
+    virtual fl::tuple<TypeConversionResult, json> invoke(const json& args) = 0;
 };
 
 // =============================================================================
@@ -46,7 +46,7 @@ public:
     virtual void setParamNames(const fl::vector<fl::string>& names) = 0;
 
     // Flat tuple format: [["name", "type"], ...] optimized for low-memory devices
-    virtual Json params() const = 0;
+    virtual json params() const = 0;
     virtual const char* resultTypeName() const = 0;
 };
 
@@ -62,7 +62,7 @@ public:
     }
 
     // Flat tuple format: [["name", "type"], ...] optimized for low-memory devices
-    Json params() const override {
+    json params() const override {
         return MethodSchema<Sig>::params(mParamNames);
     }
 
@@ -87,7 +87,7 @@ class TypedInvoker<R(Args...)> : public ErasedInvoker {
 public:
     TypedInvoker(fl::function<R(Args...)> fn) : mBinding(fn) {}
 
-    fl::tuple<TypeConversionResult, Json> invoke(const Json& args) override {
+    fl::tuple<TypeConversionResult, json> invoke(const json& args) override {
         return mBinding.invokeWithReturn(args);
     }
 
@@ -101,9 +101,9 @@ class TypedInvoker<void(Args...)> : public ErasedInvoker {
 public:
     TypedInvoker(fl::function<void(Args...)> fn) : mBinding(fn) {}
 
-    fl::tuple<TypeConversionResult, Json> invoke(const Json& args) override {
+    fl::tuple<TypeConversionResult, json> invoke(const json& args) override {
         TypeConversionResult result = mBinding.invoke(args);
-        return fl::make_tuple(result, Json(nullptr));
+        return fl::make_tuple(result, json(nullptr));
     }
 
 private:

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/json.h"  // IWYU pragma: keep
+#include "fl/stl/json.h"  // IWYU pragma: keep
 
 // =============================================================================
 // RPC System - Main Public API
@@ -57,20 +57,20 @@
 //   }
 //
 //   // JSON-RPC transport
-//   fl::Json request = fl::Json::parse(R"({"method":"add","params":[6,7],"id":1})");
-//   fl::Json response = rpc.handle(request);
+//   fl::json request = fl::json::parse(R"({"method":"add","params":[6,7],"id":1})");
+//   fl::json response = rpc.handle(request);
 //
 //   // Schema generation (flat tuple format) - always available
-//   fl::Json schema = rpc.schema();      // Flat schema document
-//   fl::Json methods = rpc.methods();    // Flat method array
+//   fl::json schema = rpc.schema();      // Flat schema document
+//   fl::json methods = rpc.methods();    // Flat method array
 //
 //   // Built-in rpc.discover method (always available)
-//   fl::Json request = fl::Json::parse(R"({"method":"rpc.discover","id":1})");
-//   fl::Json response = rpc.handle(request);  // Returns flat schema
+//   fl::json request = fl::json::parse(R"({"method":"rpc.discover","id":1})");
+//   fl::json response = rpc.handle(request);  // Returns flat schema
 //
 // =============================================================================
 
-#include "fl/json.h"  // IWYU pragma: keep
+#include "fl/stl/json.h"  // IWYU pragma: keep
 
 #if FASTLED_ENABLE_JSON
 
@@ -223,7 +223,7 @@ public:
     // =========================================================================
 
     /// Set response sink for sending ACK responses (used by async functions)
-    void setResponseSink(fl::function<void(const fl::Json&)> sink);
+    void setResponseSink(fl::function<void(const fl::json&)> sink);
 
     // =========================================================================
     // Method Registration (Binding)
@@ -246,18 +246,18 @@ public:
     }
 
     /// Bind async method with ResponseSend& parameter (for ASYNC/ASYNC_STREAM modes)
-    /// Signature: void(ResponseSend&, const Json&)
+    /// Signature: void(ResponseSend&, const json&)
     /// The ResponseSend& parameter is automatically injected with request ID and response sink
-    /// The Json& parameter contains the raw JSON params from the request
+    /// The json& parameter contains the raw JSON params from the request
     ///
     /// EXAMPLE:
-    ///   rpc.bindAsync("longTask", [](ResponseSend& send, const Json& params) {
+    ///   rpc.bindAsync("longTask", [](ResponseSend& send, const json& params) {
     ///       // ACK already sent automatically
     ///       // Do work...
-    ///       send.send(Json::object().set("value", 42));  // Send result
+    ///       send.send(json::object().set("value", 42));  // Send result
     ///   });
     void bindAsync(const char* name,
-                   fl::function<void(ResponseSend&, const Json&)> fn,
+                   fl::function<void(ResponseSend&, const json&)> fn,
                    fl::RpcMode mode = fl::RpcMode::ASYNC);
 
     // =========================================================================
@@ -313,10 +313,10 @@ public:
     /// Process a JSON-RPC request.
     /// Request format: {"method": "name", "params": [...], "id": ...}
     /// Response format: {"result": ..., "id": ...} or {"error": {...}, "id": ...}
-    Json handle(const Json& request);
+    json handle(const json& request);
 
     /// For notifications (no id), returns nullopt.
-    fl::optional<Json> handle_maybe(const Json& request);
+    fl::optional<json> handle_maybe(const json& request);
 
     // =========================================================================
     // Schema and Discovery
@@ -325,12 +325,12 @@ public:
     /// Returns flat method array: [["name", "returnType", [["param1", "type1"], ...]], ...]
     /// Format: Array of method tuples optimized for low-memory devices.
     /// Each method is represented as: ["methodName", "returnType", [["param1", "type1"], ...]]
-    Json methods() const;
+    json methods() const;
 
     /// Returns flat schema document.
     /// Format: {"schema": [["methodName", "returnType", [["param1", "type1"], ...]], ...]}
     /// The built-in "rpc.discover" method returns this schema.
-    Json schema() const;
+    json schema() const;
 
     /// Returns number of registered methods.
     fl::size count() const {
@@ -377,7 +377,7 @@ public:
 
 private:
     fl::unordered_map<fl::string, detail::RpcEntry> mRegistry;
-    fl::function<void(const fl::Json&)> mResponseSink;  // For sending ACK responses
+    fl::function<void(const fl::json&)> mResponseSink;  // For sending ACK responses
 };
 
 // RpcFactory is kept as an alias for backwards compatibility

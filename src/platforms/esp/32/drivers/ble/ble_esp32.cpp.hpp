@@ -422,10 +422,10 @@ BleStatusInfo queryBleStatus(const BleTransportState* state) {
     return info;
 }
 
-fl::pair<fl::function<fl::optional<fl::Json>()>, fl::function<void(const fl::Json&)>>
+fl::pair<fl::function<fl::optional<fl::json>()>, fl::function<void(const fl::json&)>>
 getBleTransportCallbacks(BleTransportState* state) {
     // RequestSource: polls ring buffer for incoming JSON-RPC
-    auto requestSource = [state]() -> fl::optional<fl::Json> {
+    auto requestSource = [state]() -> fl::optional<fl::json> {
         if (state->tail == state->head) {
             return fl::nullopt; // Empty
         }
@@ -457,7 +457,7 @@ getBleTransportCallbacks(BleTransportState* state) {
         }
 
         fl::string input(view);
-        auto parsed = fl::Json::parse(input);
+        auto parsed = fl::json::parse(input);
         if (parsed.has_value()) {
             FL_WARN("[BLE SRC] parsed OK");
         } else {
@@ -469,7 +469,7 @@ getBleTransportCallbacks(BleTransportState* state) {
     // ResponseSink: sends TX notification and stores value for READ fallback.
     // Due to ESP32-C6 onConnect bug, notify may silently fail.
     // The host should READ the TX characteristic as a fallback.
-    auto responseSink = [state](const fl::Json& response) {
+    auto responseSink = [state](const fl::json& response) {
         fl::string formatted = formatJsonResponse(response, "REMOTE: ");
         FL_WARN("[BLE TX] sending (" << formatted.size() << " bytes): " << formatted.c_str());
 

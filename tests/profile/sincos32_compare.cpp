@@ -3,7 +3,7 @@
 #include "FastLED.h"
 #include "fl/align.h"
 #include "fl/int.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/simd.h"
 #include "fl/sin32.h"
 #include "fl/stl/cstring.h"

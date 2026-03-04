@@ -123,13 +123,13 @@ void setup() {
     // Create server Remote
     serverRemote = new fl::Remote(  // ok bare allocation
         []() { return serverTransport->readRequest(); },
-        [](const fl::Json& response) { serverTransport->writeResponse(response); }
+        [](const fl::json& response) { serverTransport->writeResponse(response); }
     );
 
     // ========== BIND SERVER METHODS ==========
 
     // SYNC mode: add(a, b)
-    serverRemote->bind("add", [](const fl::Json& params) -> fl::Json {
+    serverRemote->bind("add", [](const fl::json& params) -> fl::json {
         int a = 0, b = 0;
         if (params.is_array() && params.size() >= 2) {
             auto aOpt = params[0].as_int();
@@ -141,13 +141,13 @@ void setup() {
         }
         int result = a + b;
         fl::printf("[SERVER] add(%d, %d) = %d\n", a, b, result);
-        return fl::Json(result);
+        return fl::json(result);
     });
 
     // ASYNC mode: longTask(duration)
-    serverRemote->bindAsync("longTask", [](fl::ResponseSend& send, const fl::Json& params) {
+    serverRemote->bindAsync("longTask", [](fl::ResponseSend& send, const fl::json& params) {
         // Send ACK
-        fl::Json ack = fl::Json::object();
+        fl::json ack = fl::json::object();
         ack.set("ack", true);
         send.send(ack);
 
@@ -169,7 +169,7 @@ void setup() {
         }
 
         // Send result
-        fl::Json result = fl::Json::object();
+        fl::json result = fl::json::object();
         result.set("value", 42);
         result.set("duration", duration);
         send.send(result);
@@ -178,9 +178,9 @@ void setup() {
     }, fl::RpcMode::ASYNC);
 
     // ASYNC_STREAM mode: streamData(count)
-    serverRemote->bindAsync("streamData", [](fl::ResponseSend& send, const fl::Json& params) {
+    serverRemote->bindAsync("streamData", [](fl::ResponseSend& send, const fl::json& params) {
         // Send ACK
-        fl::Json ack = fl::Json::object();
+        fl::json ack = fl::json::object();
         ack.set("ack", true);
         send.send(ack);
 
@@ -197,7 +197,7 @@ void setup() {
 
         // Send updates
         for (int i = 0; i < count; i++) {
-            fl::Json update = fl::Json::object();
+            fl::json update = fl::json::object();
             update.set("update", i);
             send.sendUpdate(update);
             fl::printf("[SERVER] streamData - update %d/%d\n", i + 1, count);
@@ -205,7 +205,7 @@ void setup() {
         }
 
         // Send final
-        fl::Json final = fl::Json::object();
+        fl::json final = fl::json::object();
         final.set("value", count);
         send.sendFinal(final);
 
@@ -249,7 +249,7 @@ void setup() {
     // Create client Remote
     clientRemote = new fl::Remote(  // ok bare allocation
         []() { return clientTransport->readRequest(); },
-        [](const fl::Json& response) { clientTransport->writeResponse(response); }
+        [](const fl::json& response) { clientTransport->writeResponse(response); }
     );
 
     // Connect to server
@@ -265,10 +265,10 @@ void setup() {
 void sendSyncRequest() {
     Serial.println(">>> [CLIENT] Testing SYNC mode: add(2, 3)");
 
-    fl::Json request;
+    fl::json request;
     request["jsonrpc"] = "2.0";
     request["method"] = "add";
-    fl::Json params;
+    fl::json params;
     params.push_back(2);
     params.push_back(3);
     request["params"] = params;
@@ -281,10 +281,10 @@ void sendSyncRequest() {
 void sendAsyncRequest() {
     Serial.println(">>> [CLIENT] Testing ASYNC mode: longTask(1000)");
 
-    fl::Json request;
+    fl::json request;
     request["jsonrpc"] = "2.0";
     request["method"] = "longTask";
-    fl::Json params;
+    fl::json params;
     params.push_back(1000);
     request["params"] = params;
     request["id"] = requestId++;
@@ -296,10 +296,10 @@ void sendAsyncRequest() {
 void sendAsyncStreamRequest() {
     Serial.println(">>> [CLIENT] Testing ASYNC_STREAM mode: streamData(5)");
 
-    fl::Json request;
+    fl::json request;
     request["jsonrpc"] = "2.0";
     request["method"] = "streamData";
-    fl::Json params;
+    fl::json params;
     params.push_back(5);
     request["params"] = params;
     request["id"] = requestId++;
@@ -308,9 +308,9 @@ void sendAsyncStreamRequest() {
     clientTransport->writeResponse(request);
 }
 
-void handleClientResponse(const fl::Json& response) {
+void handleClientResponse(const fl::json& response) {
     if (response.contains("result")) {
-        const fl::Json& result = response["result"];
+        const fl::json& result = response["result"];
 
         // ACK
         if (result.contains("ack")) {
@@ -360,7 +360,7 @@ void loop() {
     clientRemote->update(now);
 
     // Process client responses
-    fl::optional<fl::Json> response = clientTransport->readRequest();
+    fl::optional<fl::json> response = clientTransport->readRequest();
     if (response) {
         handleClientResponse(*response);
     }

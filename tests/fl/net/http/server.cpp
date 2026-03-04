@@ -15,7 +15,7 @@ int main() {
     });
 
     server.post("/data", [](const fl::http_request& req) {
-        fl::Json response = fl::Json::object();
+        fl::json response = fl::json::object();
         response.set("status", "ok");
         return fl::http_response::ok().json(response);
     });

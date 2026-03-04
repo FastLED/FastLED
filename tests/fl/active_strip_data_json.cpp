@@ -1,4 +1,4 @@
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "platforms/shared/active_strip_data/active_strip_data.h"
 #include "FastLED.h"
 #include "cpixel_ledcontroller.h"
@@ -72,7 +72,7 @@ FL_TEST_CASE("ActiveStripData JSON Round-Trip Test") {
     FL_WARN("Legacy JSON: " << legacyJson);
     
     // Parse back to verify data
-    auto parsed = fl::Json::parse(legacyJson.c_str());
+    auto parsed = fl::json::parse(legacyJson.c_str());
     
     FL_CHECK(parsed.has_value());
     FL_CHECK(parsed.is_array());
@@ -104,8 +104,8 @@ FL_TEST_CASE("ActiveStripData JSON Round-Trip Test") {
     FL_WARN("New JSON:    " << newJson);
     
     // Both should produce semantically identical output (field order may differ)
-    fl::Json legacyParsed = fl::Json::parse(legacyJson.c_str());
-    fl::Json newParsed = fl::Json::parse(newJson.c_str());
+    fl::json legacyParsed = fl::json::parse(legacyJson.c_str());
+    fl::json newParsed = fl::json::parse(newJson.c_str());
     
     // Verify both are arrays with same length
     FL_CHECK(legacyParsed.is_array());
@@ -114,8 +114,8 @@ FL_TEST_CASE("ActiveStripData JSON Round-Trip Test") {
     
     // Verify each element has the same content (regardless of field order)
     for (fl::size_t i = 0; i < legacyParsed.size(); i++) {
-        fl::Json legacyItem = legacyParsed[i];
-        fl::Json newItem = newParsed[i];
+        fl::json legacyItem = legacyParsed[i];
+        fl::json newItem = newParsed[i];
         
         FL_CHECK_EQ(legacyItem["strip_id"].as<int>(), newItem["strip_id"].as<int>());
         FL_CHECK_EQ(legacyItem["type"].as<fl::string>(), newItem["type"].as<fl::string>());

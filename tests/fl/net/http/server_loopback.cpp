@@ -27,7 +27,7 @@ int main() {
     });
 
     server.get("/test", [](const fl::http_request& req) {
-        fl::Json data = fl::Json::object();
+        fl::json data = fl::json::object();
         data.set("test", true);
         data.set("value", 42);
         return fl::http_response::ok().json(data);
@@ -124,7 +124,7 @@ int main() {
                 FL_WARN("  ✗ FAILED: Response is not JSON");
                 failed++;
             } else {
-                fl::Json data = response.json();
+                fl::json data = response.json();
                 bool test_val = data["test"] | false;
                 int value_val = data["value"] | 0;
                 if (!test_val || value_val != 42) {

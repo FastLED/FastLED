@@ -1815,12 +1815,12 @@ void processData(const uint8_t* data, size_t len) {
 **Why:** Many embedded platforms (especially Arduino-compatible boards) don't support C++ exceptions or have them disabled to save memory and improve performance. FastLED must work reliably across all supported platforms.
 
 ### JSON Usage - Ideal API Patterns
-**🎯 PREFERRED: Use the modern `fl::Json` class for all JSON operations.** FastLED provides an ideal JSON API that prioritizes type safety, ergonomics, and crash-proof operation.
+**🎯 PREFERRED: Use the modern `fl::json` class for all JSON operations.** FastLED provides an ideal JSON API that prioritizes type safety, ergonomics, and crash-proof operation.
 
 **✅ IDIOMATIC JSON USAGE:**
 ```cpp
 // NEW: Clean, safe, idiomatic API
-fl::Json json = fl::Json::parse(jsonStr);
+fl::json json = fl::json::parse(jsonStr);
 int brightness = json["config"]["brightness"] | 128;  // Gets value or 128 default
 string name = json["device"]["name"] | string("default");  // Type-safe with default
 bool enabled = json["features"]["networking"] | false;  // Never crashes
@@ -1862,7 +1862,7 @@ CHECK_EQ(json["brightness"] | 0, 128);
 CHECK(json["enabled"] | false);
 ```
 
-**🎯 GUIDELINE:** Always prefer the ideal `fl::Json` API for new code. The legacy `fl::parseJson` API remains available for backward compatibility but should be avoided in new implementations.
+**🎯 GUIDELINE:** Always prefer the ideal `fl::json` API for new code. The legacy `fl::parseJson` API remains available for backward compatibility but should be avoided in new implementations.
 
 ## ⚠️ CRITICAL WARNING: C++ ↔ JavaScript Bindings
 
