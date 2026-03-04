@@ -743,8 +743,7 @@ ESP32H2 = Board(
 ESP32_P4 = Board(
     board_name="esp32p4",
     real_board_name="esp32-p4-evboard",
-    platform_needs_install=True,  # Install platform package to get the boards
-    platform="https://github.com/pioarduino/platform-espressif32/releases/download/stable/platform-espressif32.zip",
+    platform=ESP32_IDF_5_5_1_PIOARDUINO,
 )
 
 ADA_FEATHER_NRF52840_SENSE = Board(

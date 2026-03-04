@@ -36,7 +36,7 @@ from ci.compiler.build_config import (
 from ci.compiler.build_utils import (
     create_building_banner,
     get_example_error_message,
-    get_utf8_env,
+    get_pio_execution_env,
 )
 from ci.compiler.compiler import CacheType, Compiler, InitResult, SketchResult
 from ci.compiler.lock_manager import PlatformLock
@@ -250,7 +250,7 @@ def _init_platformio_build(
         cwd=build_dir,
         auto_run=True,
         output_formatter=formatter,
-        env=get_utf8_env(),
+        env=get_pio_execution_env(),
     )
     # Output is transformed by the formatter, but we need to print it
     while line := running_process.get_next_line():
@@ -446,7 +446,7 @@ class PioCompiler(Compiler):
                 cwd=self.build_dir,
                 auto_run=True,
                 output_formatter=formatter,
-                env=get_utf8_env(),
+                env=get_pio_execution_env(),
             )
             try:
                 # Output is transformed by the formatter, but we need to print it
@@ -759,7 +759,7 @@ class PioCompiler(Compiler):
                 cwd=self.build_dir,
                 auto_run=True,
                 output_formatter=formatter,
-                env=get_utf8_env(),
+                env=get_pio_execution_env(),
             )
             try:
                 # Output is transformed by the formatter, but we need to print it
@@ -816,7 +816,10 @@ class PioCompiler(Compiler):
 
                 # Start monitor process (no lock needed for monitoring)
                 monitor_process = RunningProcess(
-                    monitor_cmd, cwd=self.build_dir, auto_run=True, env=get_utf8_env()
+                    monitor_cmd,
+                    cwd=self.build_dir,
+                    auto_run=True,
+                    env=get_pio_execution_env(),
                 )
                 try:
                     while line := monitor_process.get_next_line(
@@ -1143,7 +1146,7 @@ class PioCompiler(Compiler):
                 capture_output=True,
                 text=True,
                 timeout=300,
-                env=get_utf8_env(),
+                env=get_pio_execution_env(),
             )
         except subprocess.TimeoutExpired:
             return SketchResult(
