@@ -25,6 +25,10 @@
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 
+// Check if this SoC has MCPWM hardware (ESP32-C3/C2 do not)
+#include "soc/soc_caps.h"  // IWYU pragma: keep
+#if defined(SOC_MCPWM_SUPPORTED) && SOC_MCPWM_SUPPORTED
+
 #include "dual_isr_context.h"
 #include "fl/stl/stdint.h"  // IWYU pragma: keep
 
@@ -106,4 +110,5 @@ uint32_t mcpwm_timer_get_value();
 }
 #endif
 
+#endif // SOC_MCPWM_SUPPORTED
 #endif // FL_IS_ESP32

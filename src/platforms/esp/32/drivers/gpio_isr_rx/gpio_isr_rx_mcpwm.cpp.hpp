@@ -23,14 +23,18 @@
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 
-#include "gpio_isr_rx.h"
-#include "dual_isr_context.h"
-#include "mcpwm_timer.h"
-
 // Include feature flags to detect FASTLED_RMT5
 #include "platforms/esp/32/feature_flags/enabled.h"
 
 #if FASTLED_RMT5
+
+// Check if this SoC has MCPWM hardware (ESP32-C3/C2 do not)
+#include "soc/soc_caps.h"  // IWYU pragma: keep
+#if defined(SOC_MCPWM_SUPPORTED) && SOC_MCPWM_SUPPORTED
+
+#include "gpio_isr_rx.h"
+#include "dual_isr_context.h"
+#include "mcpwm_timer.h"
 
 #include "fl/dbg.h"
 #include "fl/warn.h"
@@ -929,5 +933,6 @@ fl::shared_ptr<GpioIsrRx> GpioIsrRxMcpwm_create(int pin) {
 
 } // namespace fl
 
+#endif // SOC_MCPWM_SUPPORTED
 #endif // FASTLED_RMT5
 #endif // FL_IS_ESP32

@@ -24,14 +24,10 @@
 #include "fl/stl/math.h"  // for sqrtf
 
 // RISC-V vector extensions (RVV) support detection
-// Note: Current ESP32 RISC-V variants do not include RVV hardware
-// Future variants may support RVV intrinsics via <riscv_vector.h>
-#if FL_HAS_INCLUDE(<riscv_vector.h>)
-  #include <riscv_vector.h>  // IWYU pragma: keep
-  #define FASTLED_ESP32_RISCV_HAS_RVV 1
-#else
-  #define FASTLED_ESP32_RISCV_HAS_RVV 0
-#endif
+// Note: Current ESP32 RISC-V variants do not include RVV hardware.
+// The header <riscv_vector.h> may exist in the toolchain but will fail to compile
+// without the vector extension enabled, so we do not include it.
+#define FASTLED_ESP32_RISCV_HAS_RVV 0
 
 //==============================================================================
 // Platform Implementation Namespace

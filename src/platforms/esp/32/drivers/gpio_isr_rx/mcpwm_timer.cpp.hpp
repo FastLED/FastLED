@@ -28,6 +28,15 @@
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 
+// Include feature flags to detect FASTLED_RMT5
+#include "platforms/esp/32/feature_flags/enabled.h"
+
+#if FASTLED_RMT5
+
+// Check if this SoC has MCPWM hardware (ESP32-C3/C2 do not)
+#include "soc/soc_caps.h"  // IWYU pragma: keep
+#if defined(SOC_MCPWM_SUPPORTED) && SOC_MCPWM_SUPPORTED
+
 #include "mcpwm_timer.h"
 #include "dual_isr_context.h"
 #include "fl/int.h"
@@ -50,7 +59,7 @@ using fl::u32;
 // Constants
 // ============================================================================
 
-static const char* TAG = "mcpwm_timer";
+static const char* MCPWM_TIMER_TAG = "mcpwm_timer";
 
 // MCPWM configuration
 #define MCPWM_GROUP_ID 0
@@ -104,24 +113,24 @@ static u32 mcpwm_get_capture_reg_addr(int group_id, int cap_channel) {
     // Validate group_id and cap_channel using ESP-IDF SOC headers
     #ifdef SOC_MCPWM_GROUPS_PER_CHIP
     if (group_id < 0 || group_id >= SOC_MCPWM_GROUPS_PER_CHIP) {
-        ESP_LOGE(TAG, "Invalid MCPWM group ID: %d", group_id);
+        ESP_LOGE(MCPWM_TIMER_TAG, "Invalid MCPWM group ID: %d", group_id);
         return 0;
     }
     #else
     if (group_id < 0 || group_id >= 1) {  // Default to 1 group if not defined
-        ESP_LOGE(TAG, "Invalid MCPWM group ID: %d (SOC_MCPWM_GROUPS_PER_CHIP not defined)", group_id);
+        ESP_LOGE(MCPWM_TIMER_TAG, "Invalid MCPWM group ID: %d (SOC_MCPWM_GROUPS_PER_CHIP not defined)", group_id);
         return 0;
     }
     #endif
 
     #ifdef SOC_MCPWM_CAPTURE_CHANNELS_PER_TIMER
     if (cap_channel < 0 || cap_channel >= SOC_MCPWM_CAPTURE_CHANNELS_PER_TIMER) {
-        ESP_LOGE(TAG, "Invalid capture channel: %d", cap_channel);
+        ESP_LOGE(MCPWM_TIMER_TAG, "Invalid capture channel: %d", cap_channel);
         return 0;
     }
     #else
     if (cap_channel < 0 || cap_channel >= 3) {  // Default to 3 channels if not defined
-        ESP_LOGE(TAG, "Invalid capture channel: %d (SOC_MCPWM_CAPTURE_CHANNELS_PER_TIMER not defined)", cap_channel);
+        ESP_LOGE(MCPWM_TIMER_TAG, "Invalid capture channel: %d (SOC_MCPWM_CAPTURE_CHANNELS_PER_TIMER not defined)", cap_channel);
         return 0;
     }
     #endif
@@ -143,7 +152,7 @@ static u32 mcpwm_get_capture_reg_addr(int group_id, int cap_channel) {
     }
     #endif
     else {
-        ESP_LOGE(TAG, "Unsupported MCPWM group: %d", group_id);
+        ESP_LOGE(MCPWM_TIMER_TAG, "Unsupported MCPWM group: %d", group_id);
         return 0;
     }
 
@@ -155,7 +164,7 @@ static u32 mcpwm_get_capture_reg_addr(int group_id, int cap_channel) {
 
     u32 reg_addr = (u32)cap_val_reg;
 
-    ESP_LOGI(TAG, "Capture register address: 0x%08lx (group=%d, channel=%d)",
+    ESP_LOGI(MCPWM_TIMER_TAG, "Capture register address: 0x%08lx (group=%d, channel=%d)",
              reg_addr, group_id, cap_channel);
 
     return reg_addr;
@@ -181,16 +190,16 @@ static u32 mcpwm_get_capture_reg_addr(int group_id, int cap_channel) {
  */
 int mcpwm_timer_init(DualIsrContext* ctx, int gpio_pin) {
     if (!ctx) {
-        ESP_LOGE(TAG, "Invalid context pointer");
+        ESP_LOGE(MCPWM_TIMER_TAG, "Invalid context pointer");
         return -1;
     }
 
     if (g_mcpwm_state.initialized) {
-        ESP_LOGW(TAG, "MCPWM already initialized, cleaning up first");
+        ESP_LOGW(MCPWM_TIMER_TAG, "MCPWM already initialized, cleaning up first");
         mcpwm_timer_cleanup();
     }
 
-    ESP_LOGI(TAG, "Initializing MCPWM capture timer at %d Hz (%.1f ns resolution)",
+    ESP_LOGI(MCPWM_TIMER_TAG, "Initializing MCPWM capture timer at %d Hz (%.1f ns resolution)",
              MCPWM_TIMER_RESOLUTION_HZ,
              1000000000.0 / MCPWM_TIMER_RESOLUTION_HZ);
 
@@ -203,7 +212,7 @@ int mcpwm_timer_init(DualIsrContext* ctx, int gpio_pin) {
 
     esp_err_t ret = mcpwm_new_capture_timer(&timer_config, &g_mcpwm_state.timer_handle);
     if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to create capture timer: %s", esp_err_to_name(ret));
+        ESP_LOGE(MCPWM_TIMER_TAG, "Failed to create capture timer: %s", esp_err_to_name(ret));
         return -1;
     }
 
@@ -211,18 +220,18 @@ int mcpwm_timer_init(DualIsrContext* ctx, int gpio_pin) {
     u32 actual_resolution = 0;
     ret = mcpwm_capture_timer_get_resolution(g_mcpwm_state.timer_handle, &actual_resolution);
     if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to get timer resolution: %s", esp_err_to_name(ret));
+        ESP_LOGE(MCPWM_TIMER_TAG, "Failed to get timer resolution: %s", esp_err_to_name(ret));
         mcpwm_del_capture_timer(g_mcpwm_state.timer_handle);
         g_mcpwm_state.timer_handle = nullptr;
         return -1;
     }
 
     if (actual_resolution != MCPWM_TIMER_RESOLUTION_HZ) {
-        ESP_LOGW(TAG, "Timer resolution mismatch: requested=%u, actual=%lu",
+        ESP_LOGW(MCPWM_TIMER_TAG, "Timer resolution mismatch: requested=%u, actual=%lu",
                  MCPWM_TIMER_RESOLUTION_HZ, actual_resolution);
         // Continue anyway - actual resolution might be acceptable
     } else {
-        ESP_LOGI(TAG, "Timer resolution verified: %lu Hz (12.5 ns per tick)", actual_resolution);
+        ESP_LOGI(MCPWM_TIMER_TAG, "Timer resolution verified: %lu Hz (12.5 ns per tick)", actual_resolution);
     }
 
     // Step 2: Create capture channel and connect to GPIO
@@ -242,18 +251,18 @@ int mcpwm_timer_init(DualIsrContext* ctx, int gpio_pin) {
     ret = mcpwm_new_capture_channel(g_mcpwm_state.timer_handle, &channel_config,
                                      &g_mcpwm_state.channel_handle);
     if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to create capture channel: %s", esp_err_to_name(ret));
+        ESP_LOGE(MCPWM_TIMER_TAG, "Failed to create capture channel: %s", esp_err_to_name(ret));
         mcpwm_del_capture_timer(g_mcpwm_state.timer_handle);
         g_mcpwm_state.timer_handle = nullptr;
         return -1;
     }
 
-    ESP_LOGI(TAG, "Capture channel created on GPIO %d", gpio_pin);
+    ESP_LOGI(MCPWM_TIMER_TAG, "Capture channel created on GPIO %d", gpio_pin);
 
     // Step 3: Get hardware register address for fast ISR access
     u32 reg_addr = mcpwm_get_capture_reg_addr(MCPWM_GROUP_ID, MCPWM_CAPTURE_CHANNEL);
     if (reg_addr == 0) {
-        ESP_LOGE(TAG, "Failed to get capture register address");
+        ESP_LOGE(MCPWM_TIMER_TAG, "Failed to get capture register address");
         mcpwm_del_capture_channel(g_mcpwm_state.channel_handle);
         mcpwm_del_capture_timer(g_mcpwm_state.timer_handle);
         g_mcpwm_state.timer_handle = nullptr;
@@ -268,7 +277,7 @@ int mcpwm_timer_init(DualIsrContext* ctx, int gpio_pin) {
     g_mcpwm_state.gpio_pin = gpio_pin;
     g_mcpwm_state.initialized = true;
 
-    ESP_LOGI(TAG, "MCPWM timer initialized successfully (reg_addr=0x%08lx)", reg_addr);
+    ESP_LOGI(MCPWM_TIMER_TAG, "MCPWM timer initialized successfully (reg_addr=0x%08lx)", reg_addr);
     return 0;
 }
 
@@ -285,23 +294,23 @@ int mcpwm_timer_init(DualIsrContext* ctx, int gpio_pin) {
  */
 int mcpwm_timer_start() {
     if (!g_mcpwm_state.initialized || !g_mcpwm_state.timer_handle) {
-        ESP_LOGE(TAG, "MCPWM not initialized");
+        ESP_LOGE(MCPWM_TIMER_TAG, "MCPWM not initialized");
         return -1;
     }
 
     esp_err_t ret = mcpwm_capture_timer_enable(g_mcpwm_state.timer_handle);
     if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to enable capture timer: %s", esp_err_to_name(ret));
+        ESP_LOGE(MCPWM_TIMER_TAG, "Failed to enable capture timer: %s", esp_err_to_name(ret));
         return -1;
     }
 
     ret = mcpwm_capture_timer_start(g_mcpwm_state.timer_handle);
     if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to start capture timer: %s", esp_err_to_name(ret));
+        ESP_LOGE(MCPWM_TIMER_TAG, "Failed to start capture timer: %s", esp_err_to_name(ret));
         return -1;
     }
 
-    ESP_LOGI(TAG, "MCPWM timer started");
+    ESP_LOGI(MCPWM_TIMER_TAG, "MCPWM timer started");
     return 0;
 }
 
@@ -318,23 +327,23 @@ int mcpwm_timer_start() {
  */
 int mcpwm_timer_stop() {
     if (!g_mcpwm_state.initialized || !g_mcpwm_state.timer_handle) {
-        ESP_LOGW(TAG, "MCPWM not initialized, nothing to stop");
+        ESP_LOGW(MCPWM_TIMER_TAG, "MCPWM not initialized, nothing to stop");
         return 0;  // Not an error - already stopped
     }
 
     esp_err_t ret = mcpwm_capture_timer_stop(g_mcpwm_state.timer_handle);
     if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to stop capture timer: %s", esp_err_to_name(ret));
+        ESP_LOGE(MCPWM_TIMER_TAG, "Failed to stop capture timer: %s", esp_err_to_name(ret));
         return -1;
     }
 
     ret = mcpwm_capture_timer_disable(g_mcpwm_state.timer_handle);
     if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to disable capture timer: %s", esp_err_to_name(ret));
+        ESP_LOGE(MCPWM_TIMER_TAG, "Failed to disable capture timer: %s", esp_err_to_name(ret));
         return -1;
     }
 
-    ESP_LOGI(TAG, "MCPWM timer stopped");
+    ESP_LOGI(MCPWM_TIMER_TAG, "MCPWM timer stopped");
     return 0;
 }
 
@@ -361,7 +370,7 @@ int mcpwm_timer_cleanup() {
     if (g_mcpwm_state.channel_handle) {
         esp_err_t ret = mcpwm_del_capture_channel(g_mcpwm_state.channel_handle);
         if (ret != ESP_OK) {
-            ESP_LOGW(TAG, "Failed to delete capture channel: %s", esp_err_to_name(ret));
+            ESP_LOGW(MCPWM_TIMER_TAG, "Failed to delete capture channel: %s", esp_err_to_name(ret));
         }
         g_mcpwm_state.channel_handle = nullptr;
     }
@@ -370,7 +379,7 @@ int mcpwm_timer_cleanup() {
     if (g_mcpwm_state.timer_handle) {
         esp_err_t ret = mcpwm_del_capture_timer(g_mcpwm_state.timer_handle);
         if (ret != ESP_OK) {
-            ESP_LOGW(TAG, "Failed to delete capture timer: %s", esp_err_to_name(ret));
+            ESP_LOGW(MCPWM_TIMER_TAG, "Failed to delete capture timer: %s", esp_err_to_name(ret));
         }
         g_mcpwm_state.timer_handle = nullptr;
     }
@@ -379,7 +388,7 @@ int mcpwm_timer_cleanup() {
     g_mcpwm_state.gpio_pin = -1;
     g_mcpwm_state.initialized = false;
 
-    ESP_LOGI(TAG, "MCPWM timer cleaned up");
+    ESP_LOGI(MCPWM_TIMER_TAG, "MCPWM timer cleaned up");
     return 0;
 }
 
@@ -410,10 +419,12 @@ u32 mcpwm_timer_get_value() {
         // We don't have a direct API to read it, but the capture register
         // holds the last captured value
         // For continuous timer value, we'd need to access hardware directly
-        ESP_LOGW(TAG, "Direct timer read not implemented - use capture events");
+        ESP_LOGW(MCPWM_TIMER_TAG, "Direct timer read not implemented - use capture events");
     }
 
     return cap_value;
 }
 
+#endif // SOC_MCPWM_SUPPORTED
+#endif // FASTLED_RMT5
 #endif // FL_IS_ESP32
