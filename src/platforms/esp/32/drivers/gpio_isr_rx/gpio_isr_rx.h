@@ -1,3 +1,11 @@
+/**
+ * @file gpio_isr_rx.h
+ * @brief GPIO ISR-Based RX Channel Interface (redirects to MCPWM implementation)
+ *
+ * This header provides the public GPIO ISR RX interface and redirects to
+ * the dual-ISR MCPWM implementation for ESP32-C6 and compatible platforms.
+ */
+
 #pragma once
 
 // IWYU pragma: private
@@ -15,9 +23,6 @@ namespace fl {
  *
  * Stores the timestamp in nanoseconds (relative to capture start)
  * and the GPIO level at the time of the edge.
- *
- * Note: ISR writes raw CPU cycles, main thread converts to nanoseconds
- * via getEdges(). This avoids slow time conversions in ISR.
  */
 struct EdgeTimestamp {
     union {
@@ -31,35 +36,38 @@ struct EdgeTimestamp {
  * @brief GPIO ISR-Based RX Channel Interface
  *
  * Provides ISR-based edge detection receiver that captures GPIO edge toggle
- * timestamps with ±1µs precision using fast timer polling (2µs interval).
+ * timestamps with hardware precision using MCPWM timer (12.5 ns resolution).
+ *
+ * Architecture:
+ * - Fast ISR (RISC-V assembly): Captures edges with MCPWM timestamps (~130 ns latency)
+ * - Slow ISR (C, GPTimer 10µs): Processes buffer, applies filtering, manages completion
  *
  * Features:
- * - Timer polling: 2µs interval (500kHz rate) for ±1µs precision
- * - Edge detection: Timer-driven GPIO register polling
- * - Timestamp precision: CPU cycle counter (nanosecond resolution)
- * - Output: Array of edge change timestamps
- * - Buffer: Pre-allocated (no dynamic allocation in ISR)
- * - Disarm conditions:
- *   - Buffer full
- *   - Idle timeout elapsed (configurable)
- * - Restrictions: No FL_WARN in ISR (ISR-safe logging only)
- * - WARNING: 2µs polling interval below ESP-IDF recommended 5µs minimum
+ * - Hardware timestamps: MCPWM timer at 80 MHz (12.5 ns resolution)
+ * - Ultra-fast edge capture: <130 ns ISR latency
+ * - Circular buffer: Lock-free communication between ISRs
+ * - Filtering: Skip signals, jitter filter, timeout detection
+ * - Edge capture rate: >1 MHz
  *
  * Pin Configuration:
  * - IMPORTANT: The pin must be configured (pinMode) by the user BEFORE calling begin()
  * - This ISR RX device only sets up interrupt handling - it does NOT change pin mode
- * - Pin can be INPUT or OUTPUT - GPIO_IN_REG register reads work for both modes
- * - Rationale: Allows validation of OUTPUT pins (LED drivers) without reconfiguration
  *
  * Usage Example:
  * @code
  * // Configure pin first (user's responsibility)
- * pinMode(6, INPUT);  // or OUTPUT - both work
+ * pinMode(6, INPUT);
  *
- * auto rx = GpioIsrRx::create(6, 1024);  // GPIO 6, 1024 edge buffer
+ * auto rx = GpioIsrRx::create(6);
  *
- * // Initialize with custom signal range (optional - defaults to 100ns/100μs)
- * if (!rx->begin(100, 100000)) {  // min=100ns, max=100μs
+ * // Initialize with configuration
+ * RxConfig config;
+ * config.buffer_size = 256;  // Must be power of 2
+ * config.signal_range_min_ns = 100;
+ * config.signal_range_max_ns = 100000;
+ * config.skip_signals = 0;
+ *
+ * if (!rx->begin(config)) {
  *     FL_WARN("GPIO ISR RX init failed");
  *     return;
  * }
@@ -75,17 +83,20 @@ struct EdgeTimestamp {
 class GpioIsrRx : public RxDevice {
 public:
     /**
-     * @brief Create GPIO ISR RX instance (does not initialize hardware)
+     * @brief Create GPIO ISR RX instance with MCPWM hardware timestamps
      * @param pin GPIO pin number for receiving signals
      * @return Shared pointer to GpioIsrRx interface
      *
      * Hardware parameters (buffer_size) are passed via RxConfig in begin().
      *
+     * IMPORTANT: Buffer size must be a power of 2 (e.g., 64, 128, 256, 512)
+     * for optimal performance (fast modulo optimization).
+     *
      * Example:
      * @code
      * auto rx = GpioIsrRx::create(6);  // GPIO 6
      * RxConfig config;
-     * config.buffer_size = 1024;
+     * config.buffer_size = 256;  // Power of 2 required
      * rx->begin(config);
      * @endcode
      */
@@ -102,31 +113,16 @@ public:
      * @return true on success, false on failure
      *
      * IMPORTANT: Pin must be configured with pinMode() BEFORE calling begin()
+     * IMPORTANT: buffer_size must be power of 2 (e.g., 64, 128, 256, 512)
      *
-     * First call: Installs ISR service and arms receiver (does NOT change pin mode)
-     * Subsequent calls: Re-arms the receiver for a new capture (clears state, re-enables ISR)
-     *
-     * The receiver is automatically armed and ready to capture after begin() returns.
+     * First call: Installs ISR service and arms receiver
+     * Subsequent calls: Re-arms the receiver for a new capture
      *
      * Configuration Parameters:
-     * - signal_range_min_ns: Pulses shorter than this are ignored (ISR-level noise filtering)
-     * - signal_range_max_ns: Pulses longer than this terminate reception (idle detection timeout)
-     * - skip_signals: Number of edges to skip before capturing (useful for memory-constrained environments)
-     * - start_low: Pin idle state for edge detection (true=LOW for WS2812B, false=HIGH for inverted)
-     *
-     * Edge Detection:
-     * Automatically skips edges captured before TX starts transmitting by detecting the first
-     * edge transition (rising for start_low=true, falling for start_low=false).
-     *
-     * Example with skip_signals:
-     * @code
-     * pinMode(6, INPUT);  // Configure pin first!
-     * auto rx = GpioIsrRx::create(6, 100);  // 100 edge buffer
-     * RxConfig config{100, 100000, 900};  // Skip first 900 edges
-     * rx->begin(config);
-     * // Transmit 1000 edges
-     * // Result: Only last 100 edges captured in buffer
-     * @endcode
+     * - buffer_size: Circular buffer size (MUST be power of 2)
+     * - signal_range_min_ns: Pulses shorter than this are ignored (jitter filter)
+     * - signal_range_max_ns: Pulses longer than this terminate reception (idle timeout)
+     * - skip_signals: Number of edges to skip before capturing
      */
     virtual bool begin(const RxConfig& config) override = 0;
 
@@ -142,16 +138,10 @@ public:
      * @return RxWaitResult - SUCCESS, TIMEOUT, or BUFFER_OVERFLOW
      *
      * Behavior:
-     * - Uses internal buffer size specified in create()
      * - Starts edge capture operation automatically
      * - Busy-waits with yield() until data received or timeout
      * - Returns SUCCESS if buffer filled OR idle timeout elapsed
      * - Returns TIMEOUT if wait timeout occurs
-     * - Returns BUFFER_OVERFLOW if buffer was too small
-     *
-     * Success cases:
-     * 1. Buffer filled (reached buffer_size edges)
-     * 2. Idle timeout elapsed since first edge (signal_range_max_ns from begin())
      */
     virtual RxWaitResult wait(u32 timeout_ms) override = 0;
 
@@ -172,22 +162,6 @@ public:
      *
      * Converts edge timestamps to pulse durations, then decodes pulses to bytes
      * using the provided timing thresholds.
-     *
-     * Example:
-     * @code
-     * auto rx = GpioIsrRx::create(6, 1024);
-     * rx->begin(100, 100000);  // min=100ns, max=100μs (or use defaults)
-     *
-     * // Wait for edges
-     * if (rx->wait(50) == RxWaitResult::SUCCESS) {
-     *     uint8_t buffer[256];
-     *     auto rx_timing = makeRxTiming(TIMING_WS2812_800KHZ);
-     *     auto result = rx->decode(rx_timing, buffer);
-     *     if (result.ok()) {
-     *         FL_DBG("Decoded " << result.value() << " bytes");
-     *     }
-     * }
-     * @endcode
      */
     virtual fl::Result<u32, DecodeError> decode(const ChipsetTiming4Phase &timing,
                                                        fl::span<u8> out) override = 0;

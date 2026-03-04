@@ -19,6 +19,8 @@ _EXCLUDED_FILENAMES = {
     "stdint.h",  # fl/stl/stdint.h - defines uint8_t as typedef of fl::u8
     "cstdint.h",  # fl/stl/cstdint.h - C language type definitions
     "run_unit_test.hpp",  # Platform runners use std:: types to avoid FastLED dependencies
+    "dual_isr_context.h",  # C header used from assembly - must use C types
+    "mcpwm_timer.h",  # C header with extern "C" API - must use C types
 }
 
 # Mapping of stdint types to FastLED equivalents
