@@ -98,9 +98,37 @@ int pinToPort(int pin) {
 
 #else // !FASTLED_ALL_PINS_VALID — real platforms (AVR, ESP32, ARM)
 
+namespace {
+// Convert digitalPinToPort() result to int. Most platforms return integers;
+// SAM3X8E returns Pio* which needs mapping to sequential port IDs.
+inline int portValueToId(unsigned char v) { return v; }
+inline int portValueToId(unsigned short v) { return static_cast<int>(v); }
+inline int portValueToId(int v) { return v; }
+inline int portValueToId(unsigned int v) { return static_cast<int>(v); }
+inline int portValueToId(long v) { return static_cast<int>(v); }
+inline int portValueToId(unsigned long v) { return static_cast<int>(v); }
+
+// Pointer overload for SAM and similar platforms where digitalPinToPort
+// returns a peripheral struct pointer (e.g. Pio*).
+template <typename T>
+int portValueToId(T* ptr) {
+    if (!ptr) return -1;
+    static T* seen[8] = {};
+    static int n = 0;
+    for (int i = 0; i < n; ++i) {
+        if (seen[i] == ptr) return i;
+    }
+    if (n < 8) {
+        seen[n] = ptr;
+        return n++;
+    }
+    return -1;
+}
+} // namespace
+
 int pinToPort(int pin) {
     if (pin < 0) return -1;
-    return digitalPinToPort(pin);
+    return portValueToId(digitalPinToPort(pin));
 }
 
 #endif // FASTLED_ALL_PINS_VALID
