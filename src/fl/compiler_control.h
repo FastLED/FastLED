@@ -1,6 +1,7 @@
 #pragma once
 
 #include "platforms/is_platform.h"  // IWYU pragma: keep
+#include "fl/assume_aligned.h"
 
 // Stringify helper for pragma arguments
 #define FL_STRINGIFY2(x) #x
@@ -643,6 +644,7 @@ FL_DISABLE_WARNING_POP
 // Delegates to fl::assume_aligned<N>(ptr) which uses __builtin_assume_aligned
 // on GCC/Clang and falls back to a no-op on other platforms.
 // See fl/assume_aligned.h for the implementation.
+
 #define FL_ASSUME_ALIGNED(ptr, N) (fl::assume_aligned<(N)>(ptr))
 
 // Function name macro for debugging and tracing

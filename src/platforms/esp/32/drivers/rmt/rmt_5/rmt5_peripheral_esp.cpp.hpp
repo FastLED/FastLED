@@ -728,22 +728,25 @@ private:
     }
 
     // Static callbacks for rmt_encoder_t interface
+    // Use reinterpret_cast instead of fl::bit_cast in IRAM callbacks to avoid
+    // Xtensa l32r literal pool relocation errors. Since rmt_encoder_t is the
+    // first member, the pointer address is identical — no type-punning occurs.
     static size_t FL_IRAM encodeCallback(rmt_encoder_t* encoder,
                                          rmt_channel_handle_t channel,
                                          const void* primary_data,
                                          size_t data_size,
                                          rmt_encode_state_t* ret_state) {
-        Rmt5EncoderImpl* impl = fl::bit_cast<Rmt5EncoderImpl*>(encoder);
+        Rmt5EncoderImpl* impl = reinterpret_cast<Rmt5EncoderImpl*>(encoder); // ok reinterpret cast - first member cast
         return impl->encode(channel, primary_data, data_size, ret_state);
     }
 
     static esp_err_t FL_IRAM resetCallback(rmt_encoder_t* encoder) {
-        Rmt5EncoderImpl* impl = fl::bit_cast<Rmt5EncoderImpl*>(encoder);
+        Rmt5EncoderImpl* impl = reinterpret_cast<Rmt5EncoderImpl*>(encoder); // ok reinterpret cast - first member cast
         return impl->reset();
     }
 
     static esp_err_t delCallback(rmt_encoder_t* encoder) {
-        Rmt5EncoderImpl* impl = fl::bit_cast<Rmt5EncoderImpl*>(encoder);
+        Rmt5EncoderImpl* impl = reinterpret_cast<Rmt5EncoderImpl*>(encoder); // ok reinterpret cast - first member cast
         delete impl;  // ok bare allocation
         return ESP_OK;
     }
