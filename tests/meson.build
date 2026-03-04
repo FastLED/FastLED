@@ -213,7 +213,7 @@ foreach test_name : test_names
   endif
 
   # Some tests have race conditions when run in parallel (use wall-clock time via micros())
-  is_serial = test_name in ['fl_file_system', 'channel_driver_uart']
+  is_serial = test_name in ['fl_file_system', 'channel_driver_uart', 'fl_remote_loopback']
 
   # Configure timeout with deadlock detection
   # Default timeout is 20 seconds per test (generous for most tests)

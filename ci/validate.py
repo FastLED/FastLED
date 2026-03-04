@@ -626,6 +626,7 @@ Driver Selection (JSON-RPC):
     --rmt         Test only RMT driver
     --spi         Test only SPI driver
     --uart        Test only UART driver
+    --lcd-rgb     Test only LCD RGB driver (ESP32-P4 only)
     --object-fled Test only ObjectFLED DMA driver (Teensy 4.x)
     --all         Test all drivers
 

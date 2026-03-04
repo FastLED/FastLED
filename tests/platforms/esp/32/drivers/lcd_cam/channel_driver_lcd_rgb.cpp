@@ -389,4 +389,63 @@ FL_TEST_CASE("ChannelEngineLcdRgb - draw failure handling") {
     FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
 }
 
+//=============================================================================
+// Test Suite: LED count sweep (1, 10, 100, 1000)
+// Validates single-lane operation at various strip sizes
+//=============================================================================
+
+FL_TEST_CASE("ChannelEngineLcdRgb - single LED transmission") {
+    resetMockState();
+
+    auto peripheral = createMockPeripheral();
+    ChannelEngineLcdRgb driver(peripheral);
+
+    auto channelData = createTestChannelData(1, 1);
+    driver.enqueue(channelData);
+    driver.show();
+
+    while (driver.poll() != IChannelDriver::DriverState::READY) {
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(1));  // ok sleep for
+    }
+
+    auto& mock = LcdRgbPeripheralMock::instance();
+    FL_CHECK(mock.getDrawCount() >= 1);
+}
+
+FL_TEST_CASE("ChannelEngineLcdRgb - 100 LED transmission") {
+    resetMockState();
+
+    auto peripheral = createMockPeripheral();
+    ChannelEngineLcdRgb driver(peripheral);
+
+    auto channelData = createTestChannelData(1, 100);
+    driver.enqueue(channelData);
+    driver.show();
+
+    while (driver.poll() != IChannelDriver::DriverState::READY) {
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(1));  // ok sleep for
+    }
+
+    auto& mock = LcdRgbPeripheralMock::instance();
+    FL_CHECK(mock.getDrawCount() >= 1);
+}
+
+FL_TEST_CASE("ChannelEngineLcdRgb - 1000 LED transmission") {
+    resetMockState();
+
+    auto peripheral = createMockPeripheral();
+    ChannelEngineLcdRgb driver(peripheral);
+
+    auto channelData = createTestChannelData(1, 1000);
+    driver.enqueue(channelData);
+    driver.show();
+
+    while (driver.poll() != IChannelDriver::DriverState::READY) {
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(1));  // ok sleep for
+    }
+
+    auto& mock = LcdRgbPeripheralMock::instance();
+    FL_CHECK(mock.getDrawCount() >= 1);
+}
+
 #endif // FASTLED_STUB_IMPL

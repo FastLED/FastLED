@@ -59,13 +59,16 @@ ChannelEngineLcdRgb::~ChannelEngineLcdRgb() {
         poll();
     }
 
-    // Free buffers
+    // Free buffers and deinitialize peripheral
     if (mPeripheral) {
         for (int i = 0; i < 2; i++) {
             if (mBuffers[i] != nullptr) {
                 mPeripheral->freeFrameBuffer(mBuffers[i]);
                 mBuffers[i] = nullptr;
             }
+        }
+        if (mPeripheral->isInitialized()) {
+            mPeripheral->deinitialize();
         }
     }
 }
@@ -207,6 +210,12 @@ bool ChannelEngineLcdRgb::beginTransmission(fl::span<const ChannelDataPtr> chann
                 mPeripheral->freeFrameBuffer(mBuffers[i]);
                 mBuffers[i] = nullptr;
             }
+        }
+
+        // Deinitialize peripheral before reconfiguring (singleton may still
+        // be initialized from a previous configuration).
+        if (mPeripheral->isInitialized()) {
+            mPeripheral->deinitialize();
         }
 
         // Configure
