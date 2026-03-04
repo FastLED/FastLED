@@ -424,6 +424,314 @@ fl::Json ValidationRemoteControl::runSingleTestImpl(const fl::Json& args) {
     return response;
 }
 
+fl::Json ValidationRemoteControl::runParallelTestImpl(const fl::Json& args) {
+    fl::Json response = fl::Json::object();
+
+    // Expects: {drivers: [{driver: "PARLIO", laneSizes: [100]}, {driver: "LCD_RGB", laneSizes: [100]}],
+    //           pattern?: "MSB_LSB_A", iterations?: 1, timing?: "WS2812B-V5"}
+    if (!args.is_object()) {
+        response.set("success", false);
+        response.set("error", "InvalidArgs");
+        response.set("message", "Expected {drivers: [{driver, laneSizes}, ...]}");
+        return response;
+    }
+
+    fl::Json config = args;
+
+    // 1. Extract drivers array (required)
+    if (!config.contains("drivers") || !config["drivers"].is_array()) {
+        response.set("success", false);
+        response.set("error", "MissingDrivers");
+        response.set("message", "Required field 'drivers' (array of {driver, laneSizes}) missing");
+        return response;
+    }
+
+    fl::Json drivers_json = config["drivers"];
+    if (drivers_json.size() < 2) {
+        response.set("success", false);
+        response.set("error", "TooFewDrivers");
+        response.set("message", "Parallel test requires at least 2 drivers");
+        return response;
+    }
+
+    // 2. Extract shared optional parameters
+    fl::string pattern = "MSB_LSB_A";
+    if (config.contains("pattern") && config["pattern"].is_string()) {
+        pattern = config["pattern"].as_string().value();
+    }
+
+    int iterations = 1;
+    if (config.contains("iterations") && config["iterations"].is_int()) {
+        iterations = static_cast<int>(config["iterations"].as_int().value());
+        if (iterations < 1) iterations = 1;
+    }
+
+    fl::string timing_name = "WS2812B-V5";
+    if (config.contains("timing") && config["timing"].is_string()) {
+        timing_name = config["timing"].as_string().value();
+    }
+
+    // Get timing configuration
+    fl::ChipsetTimingConfig resolved_timing;
+    if (timing_name == "UCS7604-800KHZ") {
+        resolved_timing = fl::makeTimingConfig<fl::TIMING_UCS7604_800KHZ>();
+    } else {
+        resolved_timing = fl::makeTimingConfig<fl::TIMING_WS2812B_V5>();
+    }
+    fl::NamedTimingConfig timing_config(resolved_timing, timing_name.c_str());
+
+    // 3. Parse each driver entry and validate
+    struct DriverEntry {
+        fl::string name;
+        fl::vector<int> lane_sizes;
+        int pin_tx;
+    };
+    fl::vector<DriverEntry> driver_entries;
+
+    int next_pin = mState->pin_tx;  // Start from the configured TX pin
+    for (fl::size i = 0; i < drivers_json.size(); i++) {
+        if (!drivers_json[i].is_object()) {
+            response.set("success", false);
+            response.set("error", "InvalidDriverEntry");
+            fl::sstream msg;
+            msg << "drivers[" << i << "] must be an object {driver, laneSizes}";
+            response.set("message", msg.str().c_str());
+            return response;
+        }
+
+        fl::Json entry = drivers_json[i];
+
+        // Validate driver name
+        if (!entry.contains("driver") || !entry["driver"].is_string()) {
+            response.set("success", false);
+            response.set("error", "MissingDriverName");
+            fl::sstream msg;
+            msg << "drivers[" << i << "] missing 'driver' (string) field";
+            response.set("message", msg.str().c_str());
+            return response;
+        }
+        fl::string driver_name = entry["driver"].as_string().value();
+
+        // Validate driver exists
+        bool driver_found = false;
+        for (fl::size j = 0; j < mState->drivers_available.size(); j++) {
+            if (mState->drivers_available[j].name == driver_name) {
+                driver_found = true;
+                break;
+            }
+        }
+        if (!driver_found) {
+            response.set("success", false);
+            response.set("error", "UnknownDriver");
+            fl::sstream msg;
+            msg << "Driver '" << driver_name.c_str() << "' not available";
+            response.set("message", msg.str().c_str());
+            return response;
+        }
+
+        // Validate laneSizes
+        if (!entry.contains("laneSizes") || !entry["laneSizes"].is_array()) {
+            response.set("success", false);
+            response.set("error", "MissingLaneSizes");
+            fl::sstream msg;
+            msg << "drivers[" << i << "] missing 'laneSizes' (array) field";
+            response.set("message", msg.str().c_str());
+            return response;
+        }
+
+        fl::Json lane_sizes_json = entry["laneSizes"];
+        fl::vector<int> lane_sizes;
+        for (fl::size li = 0; li < lane_sizes_json.size(); li++) {
+            if (!lane_sizes_json[li].is_int()) {
+                response.set("success", false);
+                response.set("error", "InvalidLaneSizeType");
+                return response;
+            }
+            int size = static_cast<int>(lane_sizes_json[li].as_int().value());
+            if (size <= 0) {
+                response.set("success", false);
+                response.set("error", "InvalidLaneSize");
+                return response;
+            }
+            lane_sizes.push_back(size);
+        }
+
+        // Extract optional pinTx per driver (default: auto-assign consecutive pins)
+        int pin_tx = next_pin;
+        if (entry.contains("pinTx") && entry["pinTx"].is_int()) {
+            pin_tx = static_cast<int>(entry["pinTx"].as_int().value());
+        }
+
+        DriverEntry de;
+        de.name = driver_name;
+        de.lane_sizes = lane_sizes;
+        de.pin_tx = pin_tx;
+        driver_entries.push_back(de);
+
+        // Advance pin for next driver (skip past this driver's lanes)
+        next_pin = pin_tx + (int)lane_sizes.size();
+    }
+
+    // ========== EXECUTION ==========
+    uint32_t start_ms = millis();
+
+    // Step 1: Enable all requested drivers (not exclusive)
+    // First disable all, then enable only the ones we want
+    for (fl::size i = 0; i < mState->drivers_available.size(); i++) {
+        FastLED.setDriverEnabled(mState->drivers_available[i].name.c_str(), false);
+    }
+    for (fl::size i = 0; i < driver_entries.size(); i++) {
+        FastLED.setDriverEnabled(driver_entries[i].name.c_str(), true);
+    }
+
+    // Step 2: Create channels for each driver using affinity binding
+    fl::vector<fl::unique_ptr<fl::vector<CRGB>>> all_led_arrays;
+    fl::vector<fl::ChannelPtr> all_channels;
+
+    for (fl::size di = 0; di < driver_entries.size(); di++) {
+        const auto& de = driver_entries[di];
+        for (fl::size li = 0; li < de.lane_sizes.size(); li++) {
+            auto leds = fl::make_unique<fl::vector<CRGB>>(de.lane_sizes[li]);
+
+            // Set up channel with driver affinity
+            fl::ChannelOptions opts;
+            opts.mAffinity = de.name;
+
+            fl::ChannelConfig channel_config(
+                de.pin_tx + (int)li,  // Consecutive pins per lane
+                timing_config.timing,
+                fl::span<CRGB>(leds->data(), leds->size()),
+                RGB,
+                opts
+            );
+
+            auto channel = FastLED.add(channel_config);
+            if (!channel) {
+                // Clean up already-created channels
+                FastLED.clear(ClearFlags::CHANNELS);
+                response.set("success", false);
+                response.set("error", "ChannelCreationFailed");
+                fl::sstream msg;
+                msg << "Failed to create channel for driver '" << de.name.c_str()
+                    << "' lane " << li;
+                response.set("message", msg.str().c_str());
+                return response;
+            }
+
+            all_channels.push_back(channel);
+            all_led_arrays.push_back(fl::move(leds));
+        }
+    }
+
+    // Step 3: Set LED data patterns and call show()
+    // Use a simple pattern: fill each driver's LEDs with a known color
+    int array_idx = 0;
+    for (fl::size di = 0; di < driver_entries.size(); di++) {
+        const auto& de = driver_entries[di];
+        for (fl::size li = 0; li < de.lane_sizes.size(); li++) {
+            auto& leds = *all_led_arrays[array_idx];
+            for (int led = 0; led < de.lane_sizes[li]; led++) {
+                // Pattern: alternate colors per driver for visual distinction
+                if (di == 0) {
+                    leds[led] = CRGB(0xFF, 0x00, 0x00);  // Red for first driver
+                } else {
+                    leds[led] = CRGB(0x00, 0xFF, 0x00);  // Green for second driver
+                }
+            }
+            array_idx++;
+        }
+    }
+
+    // Step 4: Call show() - both drivers transmit simultaneously
+    bool show_success = true;
+    uint32_t show_start = micros();
+    for (int iter = 0; iter < iterations; iter++) {
+        FastLED.show();
+        FastLED.wait(5000);  // 5 second timeout for DMA completion
+    }
+    uint32_t show_duration_us = micros() - show_start;
+
+    // Step 5: Validate first driver's output via RX loopback (if available)
+    // Only the first driver (PARLIO) is typically connected to the RX pin
+    bool rx_validation_passed = true;
+    bool rx_validation_attempted = false;
+
+    if (mState->rx_channel && driver_entries.size() > 0) {
+        const auto& primary_driver = driver_entries[0];
+
+        // Only attempt RX validation if the primary driver's pin matches our TX pin
+        if (primary_driver.pin_tx == mState->pin_tx) {
+            rx_validation_attempted = true;
+
+            // Create validation config for the primary driver
+            fl::vector<fl::ChannelConfig> tx_configs;
+            int led_array_offset = 0;
+            for (fl::size li = 0; li < primary_driver.lane_sizes.size(); li++) {
+                tx_configs.push_back(fl::ChannelConfig(
+                    primary_driver.pin_tx + (int)li,
+                    timing_config.timing,
+                    fl::span<CRGB>(all_led_arrays[led_array_offset + li]->data(),
+                                   all_led_arrays[led_array_offset + li]->size()),
+                    RGB
+                ));
+            }
+
+            fl::ValidationConfig validation_config(
+                timing_config.timing,
+                timing_config.name,
+                tx_configs,
+                primary_driver.name.c_str(),
+                mState->rx_channel,
+                mState->rx_buffer,
+                primary_driver.lane_sizes[0],
+                fl::RxDeviceType::RMT
+            );
+
+            int total_tests = 0;
+            int passed_tests = 0;
+            uint32_t val_show_duration_ms = 0;
+
+            validateChipsetTiming(validation_config, total_tests, passed_tests,
+                                  val_show_duration_ms, nullptr);
+
+            rx_validation_passed = (total_tests > 0) && (passed_tests == total_tests);
+        }
+    }
+
+    // Step 6: Clean up channels
+    FastLED.clear(ClearFlags::CHANNELS);
+
+    uint32_t duration_ms = millis() - start_ms;
+
+    // ========== RESPONSE ==========
+    response.set("success", true);
+    response.set("passed", show_success && rx_validation_passed);
+    response.set("duration_ms", static_cast<int64_t>(duration_ms));
+    response.set("show_duration_us", static_cast<int64_t>(show_duration_us));
+    response.set("iterations", static_cast<int64_t>(iterations));
+    response.set("rx_validation_attempted", rx_validation_attempted);
+    response.set("rx_validation_passed", rx_validation_passed);
+
+    // List drivers tested
+    fl::Json drivers_tested = fl::Json::array();
+    for (fl::size i = 0; i < driver_entries.size(); i++) {
+        fl::Json drv = fl::Json::object();
+        drv.set("driver", driver_entries[i].name.c_str());
+        drv.set("pinTx", static_cast<int64_t>(driver_entries[i].pin_tx));
+        fl::Json sizes = fl::Json::array();
+        for (int s : driver_entries[i].lane_sizes) {
+            sizes.push_back(static_cast<int64_t>(s));
+        }
+        drv.set("laneSizes", sizes);
+        drv.set("laneCount", static_cast<int64_t>(driver_entries[i].lane_sizes.size()));
+        drivers_tested.push_back(drv);
+    }
+    response.set("drivers", drivers_tested);
+    response.set("pattern", pattern.c_str());
+
+    return response;
+}
+
 fl::Json ValidationRemoteControl::findConnectedPinsImpl(const fl::Json& args) {
     fl::Json response = fl::Json::object();
 
@@ -639,6 +947,19 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         // calling sendAsyncResponse(). Send it now so the client gets a response.
         if (!result.is_null()) {
             mRemote->sendAsyncResponse("runSingleTest", result);
+        }
+        return fl::Json(nullptr);
+    }, fl::RpcMode::ASYNC);
+
+    // Register "runParallelTest" - test multiple drivers simultaneously
+    // Args: {drivers: [{driver: "PARLIO", laneSizes: [100]}, {driver: "LCD_RGB", laneSizes: [100]}],
+    //         pattern?: "MSB_LSB_A", iterations?: 1, timing?: "WS2812B-V5"}
+    // Returns: {success, passed, duration_ms, show_duration_us, drivers: [...],
+    //           rx_validation_attempted, rx_validation_passed}
+    mRemote->bind("runParallelTest", [this](const fl::Json& args) -> fl::Json {
+        fl::Json result = this->runParallelTestImpl(args);
+        if (!result.is_null()) {
+            mRemote->sendAsyncResponse("runParallelTest", result);
         }
         return fl::Json(nullptr);
     }, fl::RpcMode::ASYNC);

@@ -596,6 +596,9 @@ class Args:
     # BLE validation mode
     ble: bool
 
+    # Parallel driver testing
+    parallel: bool
+
     @staticmethod
     def parse_args() -> "Args":
         """Parse command-line arguments and return Args dataclass instance."""
@@ -731,6 +734,11 @@ See Also:
             "--simd",
             action="store_true",
             help="Test SIMD operations only (no LED drivers)",
+        )
+        driver_group.add_argument(
+            "--parallel",
+            action="store_true",
+            help="Test multiple drivers in parallel (e.g., --parlio --lcd-rgb --parallel --lanes 1)",
         )
 
         # Network validation modes
@@ -987,6 +995,7 @@ See Also:
             net=parsed.net,
             ota=parsed.ota,
             ble=parsed.ble,
+            parallel=parsed.parallel,
         )
 
 
@@ -1212,6 +1221,18 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
             drivers.append("LCD_RGB")
         if args.object_fled:
             drivers.append("OBJECTFLED")
+
+    # Parallel driver test mode
+    parallel_mode = args.parallel
+    if parallel_mode:
+        if len(drivers) < 2:
+            print(
+                f"{Fore.RED}❌ Error: --parallel requires at least 2 drivers (e.g., --parlio --lcd-rgb --parallel){Style.RESET_ALL}"
+            )
+            return 1
+        print(
+            f"\n{Fore.CYAN}ℹ️  Parallel mode: testing {', '.join(drivers)} simultaneously{Style.RESET_ALL}"
+        )
 
     # Network validation modes
     net_server_mode = args.net_server
@@ -1449,35 +1470,64 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
     }
     timing_name = chipset_timing_map.get(args.chipset, "WS2812B-V5")
 
-    # Generate runSingleTest commands for each test configuration
-    # New API: one test per RPC call (no matrix, no batch operations)
+    # Generate test commands based on mode (parallel vs sequential)
     drivers_list = config["drivers"]
     lane_range = config.get("laneRange", {"min": 1, "max": 1})
     strip_sizes = config.get("stripSizes", [100])
 
-    # Generate test configurations: drivers × lane counts × strip sizes
-    for driver in drivers_list:
+    if parallel_mode:
+        # Parallel mode: test multiple drivers simultaneously via runParallelTest
+        # Generate one runParallelTest command per lane_count × strip_size combination
         for lane_count in range(lane_range["min"], lane_range["max"] + 1):
             for strip_size in strip_sizes:
-                # Create lane sizes array (all lanes have same LED count)
                 lane_sizes = [strip_size] * lane_count
 
-                # Build runSingleTest command
-                # Format: {"method":"runSingleTest","params":{"driver":"PARLIO","laneSizes":[100,100],"pattern":"MSB_LSB_A","iterations":1}}
-                # NOTE: params is the config object directly (not wrapped in array).
-                # rpc_client.send() wraps it once: wrapped_args = [params] = [config_object]
-                # Firmware receives params[0] = config_object (the fl::Json& args it expects)
-                test_config: dict[str, Any] = {
-                    "driver": driver,
-                    "laneSizes": lane_sizes,
-                    "pattern": "MSB_LSB_A",  # Default pattern
-                    "iterations": 1,  # Default iterations
+                # Build driver entries for each driver
+                driver_entries: list[dict[str, Any]] = []
+                for driver in drivers_list:
+                    driver_entry: dict[str, Any] = {
+                        "driver": driver,
+                        "laneSizes": lane_sizes,
+                    }
+                    driver_entries.append(driver_entry)
+
+                parallel_config: dict[str, Any] = {
+                    "drivers": driver_entries,
+                    "pattern": "MSB_LSB_A",
+                    "iterations": 1,
                     "timing": timing_name,
                 }
-                if args.legacy:
-                    test_config["useLegacyApi"] = True
-                rpc_command = {"method": "runSingleTest", "params": test_config}
+                rpc_command = {"method": "runParallelTest", "params": parallel_config}
                 rpc_commands_list.append(rpc_command)
+
+        print(
+            f"ℹ️  Generated {len(rpc_commands_list)} parallel test(s) "
+            f"({len(drivers_list)} drivers × {lane_range['max'] - lane_range['min'] + 1} lane count(s) × {len(strip_sizes)} strip size(s))"
+        )
+    else:
+        # Sequential mode: one test per RPC call (no matrix, no batch operations)
+        for driver in drivers_list:
+            for lane_count in range(lane_range["min"], lane_range["max"] + 1):
+                for strip_size in strip_sizes:
+                    # Create lane sizes array (all lanes have same LED count)
+                    lane_sizes = [strip_size] * lane_count
+
+                    # Build runSingleTest command
+                    # Format: {"method":"runSingleTest","params":{"driver":"PARLIO","laneSizes":[100,100],"pattern":"MSB_LSB_A","iterations":1}}
+                    # NOTE: params is the config object directly (not wrapped in array).
+                    # rpc_client.send() wraps it once: wrapped_args = [params] = [config_object]
+                    # Firmware receives params[0] = config_object (the fl::Json& args it expects)
+                    test_config: dict[str, Any] = {
+                        "driver": driver,
+                        "laneSizes": lane_sizes,
+                        "pattern": "MSB_LSB_A",  # Default pattern
+                        "iterations": 1,  # Default iterations
+                        "timing": timing_name,
+                    }
+                    if args.legacy:
+                        test_config["useLegacyApi"] = True
+                    rpc_command = {"method": "runSingleTest", "params": test_config}
+                    rpc_commands_list.append(rpc_command)
 
     # Convert to JSON string
     json_rpc_cmd_str = json.dumps(rpc_commands_list)
@@ -2329,7 +2379,27 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                                 duration_str += (
                                     f" (show: {test_data['show_duration_ms']}ms)"
                                 )
+                            elif "show_duration_us" in test_data:
+                                duration_str += (
+                                    f" (show: {test_data['show_duration_us']}us)"
+                                )
                             print(f"   Duration: {duration_str}")
+
+                        # Display parallel test details
+                        if "drivers" in test_data and isinstance(
+                            test_data["drivers"], list
+                        ):
+                            drv_names = [
+                                d.get("driver", "?") for d in test_data["drivers"]
+                            ]
+                            print(f"   Parallel drivers: {', '.join(drv_names)}")
+                            if test_data.get("rx_validation_attempted"):
+                                rx_status = (
+                                    "passed"
+                                    if test_data.get("rx_validation_passed")
+                                    else "failed"
+                                )
+                                print(f"   RX validation: {rx_status}")
 
                         # Display per-pattern details if available
                         if "patterns" in test_data:

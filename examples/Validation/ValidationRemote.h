@@ -101,5 +101,6 @@ private:
 
     // Private helper functions for RPC implementation
     fl::Json runSingleTestImpl(const fl::Json& args);
+    fl::Json runParallelTestImpl(const fl::Json& args);
     fl::Json findConnectedPinsImpl(const fl::Json& args);
 };

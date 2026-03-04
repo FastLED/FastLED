@@ -15,6 +15,7 @@ You **must** specify at least one LED driver to test using one of these flags:
 - `--i2s` - Test I2S LCD_CAM driver (ESP32-S3 only)
 - `--lcd-rgb` - Test LCD RGB driver (ESP32-P4 only)
 - `--all` - Test all drivers (equivalent to `--parlio --rmt --spi --uart --i2s --lcd-rgb`)
+- `--parallel` - Test multiple drivers simultaneously (requires 2+ drivers)
 
 ### Usage Examples
 ```bash
@@ -27,10 +28,14 @@ bash validate --uart
 bash validate --i2s                       # ESP32-S3 only
 bash validate --lcd-rgb                   # ESP32-P4 only
 
-# Test multiple drivers
+# Test multiple drivers (sequentially)
 bash validate --parlio --rmt              # Auto-detect environment
 bash validate esp32dev --parlio --rmt     # Specify esp32dev environment
 bash validate --spi --uart
+
+# Test multiple drivers in parallel (simultaneously on device)
+bash validate --parlio --lcd-rgb --parallel --lanes 1    # PARLIO + LCD_RGB parallel on ESP32-P4
+bash validate --parlio --rmt --parallel                  # PARLIO + RMT parallel
 
 # Test all drivers
 bash validate --all                       # Auto-detect environment
@@ -245,6 +250,7 @@ Sent over serial with `REMOTE:` response prefix:
 | `setShortStripSize` | `size` | Set short strip LED count |
 | `setLongStripSize` | `size` | Set long strip LED count |
 | `setStripSizeValues` | `short, long` | Set both strip sizes at once |
+| `runParallelTest` | `{drivers: [{driver, laneSizes}, ...], pattern?, timing?}` | Test multiple drivers simultaneously (parallel peripheral coexistence) |
 | `reset` | - | Reset device state |
 
 ### Consolidated `runTest` with Named Arguments (recommended)

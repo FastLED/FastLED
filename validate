@@ -37,6 +37,7 @@ Driver Selection (optional - omit for GPIO-only mode):
   --lcd-rgb           Test LCD RGB driver (ESP32-P4 only)
   --all               Test all drivers (equivalent to --parlio --rmt --spi --uart --i2s --lcd-rgb)
   --simd              Test SIMD operations only (no LED drivers needed)
+  --parallel          Test multiple drivers simultaneously (requires 2+ drivers)
 
 Network Validation (ESP32 HTTP):
   --net               Self-contained loopback test: ESP32 HTTP server + client on localhost (no WiFi)
@@ -88,6 +89,7 @@ Examples:
   bash validate --i2s --lane-counts 100,200,300  # Test I2S with 3 lanes (100, 200, 300 LEDs)
   bash validate --rmt --color-pattern ff00aa     # Test RMT with custom color (pink)
   bash validate --parlio --no-fbuild             # Force PlatformIO (skip fbuild)
+  bash validate --parlio --lcd-rgb --parallel --lanes 1  # Test PARLIO + LCD_RGB in parallel
   bash validate --net                             # ESP32 self-contained HTTP loopback test
   bash validate --net-server                     # ESP32 WiFi AP + HTTP server validation
   bash validate --net-client                     # ESP32 WiFi AP + HTTP client validation
