@@ -398,7 +398,7 @@ public:
     }
 
 private:
-    u16 lerpLut(fl::ufixed_point<8, 8> fp) const {
+    u16 lerpLut(const fl::ufixed_point<8, 8>& fp) const {
         u16 raw = fp.raw();
         u8 idx = static_cast<u8>(raw >> 8);    // integer part (LUT index)
         u8 frac = static_cast<u8>(raw & 0xFF); // fractional part (0-255)
