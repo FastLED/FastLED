@@ -6,6 +6,7 @@
 
 #include "audio_input_wasm.hpp"
 #include "fl/dbg.h"
+#include "fl/warn.h"
 #include "fl/stl/stdio.h"
 #include "fl/stl/string.h"
 // IWYU pragma: begin_keep
@@ -92,12 +93,24 @@ AudioSample WasmAudioInput::read() {
     // Mark block as consumed and advance tail
     block.valid = false;
     mTail = nextIndex(mTail);
+    mReadBlocks++;
+
+    if (mReadBlocks == 1) {
+        printf("WasmAudioInput: First audio block consumed by sketch "
+               "(timestamp=%u ms)\n", (unsigned)block.timestamp);
+    }
 
     return result;
 }
 
 void WasmAudioInput::pushSamples(const fl::i16* samples, int count, fl::u32 timestamp) {
     if (!mRunning) {
+        static bool warned = false;
+        if (!warned) {
+            warned = true;
+            printf("WasmAudioInput: pushSamples called but not running - "
+                   "audio data is being dropped!\n");
+        }
         return;
     }
 
@@ -124,6 +137,17 @@ void WasmAudioInput::pushSamples(const fl::i16* samples, int count, fl::u32 time
 
     // Advance head
     mHead = nextIndex(mHead);
+    mPushedBlocks++;
+
+    // Periodic diagnostic: log every ~2 seconds at 44100Hz/512 = ~86 blocks/sec
+    if (mPushedBlocks == 1) {
+        printf("WasmAudioInput: First audio block received from JS "
+               "(timestamp=%u ms)\n", (unsigned)timestamp);
+    } else if (mPushedBlocks % 172 == 0) {
+        printf("WasmAudioInput: %u blocks received, %u read, %u dropped\n",
+               (unsigned)mPushedBlocks, (unsigned)mReadBlocks,
+               (unsigned)mDroppedBlocks);
+    }
 }
 
 bool WasmAudioInput::isFull() const {
@@ -172,7 +196,12 @@ extern "C" {
 EMSCRIPTEN_KEEPALIVE
 void pushAudioSamples(const fl::i16* samples, int count, fl::u32 timestamp) {
     if (!fl::g_wasmAudioInput) {
-        // No audio input instance created yet
+        static bool warned = false;
+        if (!warned) {
+            warned = true;
+            printf("pushAudioSamples: No WasmAudioInput instance - "
+                   "UIAudio not created yet. Audio data dropped!\n");
+        }
         return;
     }
 

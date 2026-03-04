@@ -425,7 +425,10 @@ class UIAudio : public UIElement {
     ~UIAudio();
     AudioSample next() { return mImpl.next(); }
     bool hasNext() { return mImpl.hasNext(); }
-    
+
+    // Expose underlying audio input for FastLED.add() auto-pump
+    fl::shared_ptr<IAudioInput> audioInput() { return mImpl.audioInput(); }
+
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIElement::setGroup(groupName); 

@@ -31,6 +31,9 @@ class WasmAudioImpl {
     // Group setting (used by JSON UI system)
     void setGroup(const fl::string& groupName);
 
+    // Expose underlying audio input for FastLED.add() auto-pump
+    fl::shared_ptr<IAudioInput> audioInput() { return mWasmInputOwner; }
+
   private:
     fl::string mName;
     WasmAudioInput* mWasmInput;

@@ -245,6 +245,9 @@ class UIAudioImpl {
 
     // Stub method for group setting (does nothing on non-WASM platforms)
     void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
+
+    // Stub: no underlying audio input on non-WASM platforms
+    fl::shared_ptr<IAudioInput> audioInput() { return nullptr; }
 };
 #endif
 

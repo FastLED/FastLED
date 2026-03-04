@@ -55,6 +55,8 @@ Performence notes @64x64:
 
 #include "fl/fx/2d/animartrix.hpp"
 #include "fl/ui.h"
+#include "fl/audio/audio_processor.h"
+#include "fl/audio/detectors/vibe.h"
 
 #ifndef PIN_DATA
 #define PIN_DATA 3
@@ -108,7 +110,14 @@ fl::UIDropdown fxIndex("Animartrix - index", {
 fl::UIDropdown colorOrder("Color Order", {"RGB", "RBG", "GRB", "GBR", "BRG", "BGR"});
 fl::UISlider timeSpeed("Time Speed", 1, -10, 10, .1);
 
+// Audio UI controls
+fl::UIAudio audio("Audio Input");
+fl::UICheckbox enableVibeReactive("Enable Vibe Reactive", false);
+fl::UISlider vibeSpeedMultiplier("Vibe Speed Multiplier", 3.0, 0.0, 10.0, 0.1);
+fl::UISlider vibeBaseSpeed("Vibe Base Speed", 1.0, 0.0, 5.0, 0.1);
 
+// AudioProcessor with VibeDetector
+fl::AudioProcessor audioProcessor;
 
 fl::Animartrix animartrix(xyMap, FIRST_ANIMATION);
 fl::FxEngine fxEngine(NUM_LEDS);
@@ -147,13 +156,70 @@ void setup() {
         }
         animartrix.setColorOrder(static_cast<fl::EOrder>(value));
     });
+
+    // Hook VibeDetector bass level to FxEngine timewarp.
+    // onVibeLevels fires every frame with self-normalizing levels:
+    //   bass ~1.0 = average, >1.0 = louder than normal, <1.0 = quieter
+    // We map bass level directly to animation speed so beats accelerate
+    // the animation.
+    audioProcessor.onVibeLevels([](const fl::VibeLevels &vibe) {
+        if (!enableVibeReactive.value()) {
+            return;
+        }
+        // Print beat/mid/treble levels and spike flags each frame
+        printf("Vibe: bass=%.2f mid=%.2f treb=%.2f | spikes: bass=%d mid=%d treb=%d\n",
+               vibe.bass, vibe.mid, vibe.treb,
+               vibe.bassSpike, vibe.midSpike, vibe.trebSpike);
+
+        float bassBoost = (vibe.bass - 1.0f) * vibeSpeedMultiplier.value();
+        float speed = vibeBaseSpeed.value() + bassBoost;
+        speed *= timeSpeed.value();
+        fxEngine.setSpeed(speed);
+    });
+
+    // Log spike events
+    audioProcessor.onVibeBassSpike([]() {
+        printf(">>> BASS SPIKE!\n");
+    });
+    audioProcessor.onVibeMidSpike([]() {
+        printf(">>> MID SPIKE!\n");
+    });
+    audioProcessor.onVibeTrebSpike([]() {
+        printf(">>> TREB SPIKE!\n");
+    });
 }
 
 void loop() {
     FL_WARN("*** LOOP ***");
     uint32_t start = fl::millis();
     FastLED.setBrightness(brightness);
-    fxEngine.setSpeed(timeSpeed);
+
+    // Always drain audio samples from the ring buffer to prevent overflow,
+    // and process them when vibe reactive is enabled.
+    {
+        fl::AudioSample sample = audio.next();
+        if (sample.isValid()) {
+            static uint32_t sAudioSamples = 0;
+            sAudioSamples++;
+            if (sAudioSamples == 1) {
+                printf("Animartrix: First audio sample received! "
+                       "enableVibeReactive=%d\n",
+                       (int)enableVibeReactive.value());
+            } else if (sAudioSamples % 172 == 0) {
+                printf("Animartrix: %u audio samples processed, "
+                       "enableVibeReactive=%d\n",
+                       (unsigned)sAudioSamples,
+                       (int)enableVibeReactive.value());
+            }
+            if (enableVibeReactive.value()) {
+                audioProcessor.update(sample);
+            }
+        }
+        if (!enableVibeReactive.value()) {
+            fxEngine.setSpeed(timeSpeed);
+        }
+    }
+
     static int lastFxIndex = -1;
     if (fxIndex.as_int() != lastFxIndex) {
         lastFxIndex = fxIndex.as_int();

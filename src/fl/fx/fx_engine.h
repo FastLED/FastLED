@@ -105,6 +105,7 @@ class FxEngine {
      * @param timeScale The new time scale value.
      */
     void setSpeed(float scale) { mTimeFunction.setSpeed(scale); }
+    float getSpeed() const { return mTimeFunction.scale(); }
 
   private:
     int mCounter = 0;

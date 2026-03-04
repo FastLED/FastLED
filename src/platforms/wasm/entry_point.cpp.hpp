@@ -97,17 +97,23 @@ void fastled_setup_once() {
     printf("FastLED WASM: Setup complete.\n");
 }
 
-// Single loop iteration function  
+// Single loop iteration function
 void fastled_loop_once() {
     // Ensure setup has been called
     fastled_setup_once();
-    
+
+    // Pump async tasks on the main thread so that fl::task scheduled tasks
+    // (e.g., audio auto-pump, timers) execute on the same thread as the sketch.
+    // The main() pthread also pumps async_run(), but that's a different thread
+    // and tasks that interact with sketch state need to run here.
+    fl::async_run();
+
     // Call pre-loop driver events
     fl::EngineEvents::onPlatformPreLoop();
-    
+
     // Call user's loop function
     loop();
-    
+
     // Check if frame ended naturally (via FastLED.show())
     if (!gEndFrameListener.endFrameHappened()) {
         // Frame didn't end naturally - manually trigger end frame event

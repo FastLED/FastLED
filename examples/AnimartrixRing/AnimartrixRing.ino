@@ -1,8 +1,8 @@
 // @filter: (memory is high)
 
 // AnimartrixRing: Sample a circle from an Animartrix rectangular grid
-// This example generates a rectangular animation grid and samples a circular
-// region from it to display on a ring of LEDs using Fx2dTo1d.
+// Uses AudioProcessor's VibeDetector for self-normalizing bass/mid/treb
+// levels. Bass level warps animation speed via FxEngine's TimeWarp.
 
 // Use SPI-based WS2812 driver instead of RMT on ESP32
 #define FASTLED_ESP32_USE_CLOCKLESS_SPI
@@ -11,16 +11,18 @@
 // build system
 #include "FastLED.h"
 
-#include "fl/audio_reactive.h"
 #include "fl/math_macros.h"
 #include "fl/screenmap.h"
 #include "fl/ui.h"
 #include "fl/stl/math.h"
 #include "fl/fx/2d/animartrix.hpp"
 #include "fl/audio/audio_processor.h"
+#include "fl/audio/detectors/vibe.h"
 #include "fl/fx/fx2d_to_1d.h"
 #include "fl/fx/fx_engine.h"
 #include <FastLED.h>
+
+FASTLED_TITLE("AnimartrixRing");
 
 #ifndef TWO_PI
 #define TWO_PI                                                                 \
@@ -91,34 +93,13 @@ fl::UISlider autoBrightnessHighThreshold("Auto Brightness High Threshold", 22,
 
 // Audio UI controls
 fl::UIAudio audio("Audio Input");
-fl::UICheckbox enableAudioReactive("Enable Audio Reactive", false);
-fl::UICheckbox audioAffectsSpeed("Audio Affects Speed", true);
-fl::UICheckbox audioAffectsBrightness("Audio Affects Brightness", false);
-fl::UISlider audioSpeedMultiplier("Audio Speed Multiplier", 5.0, 0.0, 20.0,
-                                  0.5);
-fl::UISlider audioBrightnessMultiplier("Audio Brightness Multiplier", 1.5, 0.0,
-                                       3.0, 0.1);
-fl::UISlider audioSensitivity("Audio Sensitivity", 128, 0, 255, 1);
+fl::UICheckbox enableVibeReactive("Enable Vibe Reactive", false);
+fl::UISlider vibeSpeedMultiplier("Vibe Speed Multiplier", 3.0, 0.0, 10.0, 0.1);
+fl::UISlider vibeBaseSpeed("Vibe Base Speed", 1.0, 0.0, 5.0, 0.1);
 
-// Downbeat darkness UI controls
-fl::UICheckbox enableDownbeatDarkness("Enable Downbeat Darkness", true);
-fl::UISlider downbeatDarknessAmount("Downbeat Darkness Amount", 0.3, 0.0, 1.0, 0.05);
-fl::UISlider darknessFadeDuration("Darkness Fade Duration (ms)", 300, 50, 1000, 50);
-
-// Audio reactive processor
-fl::AudioReactive audioReactive;
-
-// Audio processor for downbeat detection
-fl::AudioProcessor audioProcessor;
-
-// Downbeat darkness state
-bool darknessTrigger = false;
-float darknessAmount = 1.0f; // 1.0 = no darkness, 0.0 = full darkness
-unsigned long lastDarknessTime = 0;
-
-// Audio timeout tracking
-unsigned long lastValidAudioTime = 0;
-const unsigned long AUDIO_TIMEOUT_MS = 1000;
+// AudioProcessor with VibeDetector (initialized in setup via FastLED.add or fallback)
+fl::shared_ptr<fl::AudioProcessor> gAudioProcessor;
+bool gAutoPump = false;
 
 // Calculate average brightness percentage from LED array
 float getAverageBrightness(CRGB *leds, int numLeds) {
@@ -136,11 +117,8 @@ uint8_t applyBrightnessCompression(float inputBrightnessPercent,
                                    float highThreshold) {
     float maxBrightnessPercent = (maxBrightness / 255.0f) * 100.0f;
     if (inputBrightnessPercent < lowThreshold) {
-        // Below lowThreshold: full brightness (100%)
         return 255;
     } else if (inputBrightnessPercent < highThreshold) {
-        // lowThreshold-highThreshold: linear dampening from 100% down to
-        // maxBrightnessPercent
         float range = highThreshold - lowThreshold;
         float progress =
             (inputBrightnessPercent - lowThreshold) / range; // 0 to 1
@@ -148,7 +126,6 @@ uint8_t applyBrightnessCompression(float inputBrightnessPercent,
             100.0f - (progress * (100.0f - maxBrightnessPercent));
         return static_cast<uint8_t>((targetPercent / 100.0f) * 255.0f);
     } else {
-        // Above highThreshold: cap to maxBrightness
         return maxBrightness;
     }
 }
@@ -172,156 +149,84 @@ void setup() {
     animationSelector.onChanged([](fl::UIDropdown &dropdown) {
         int index = dropdown.as_int();
         animartrix->fxSet(index);
-        Serial.print("Animation changed to: ");
-        Serial.println(index);
     });
 
-    // Initialize audio reactive processor
-    fl::AudioReactiveConfig audioConfig;
-    audioConfig.gain = 128;
-    audioConfig.sensitivity = audioSensitivity.as_int();
-    audioConfig.sampleRate = 22050;
-    audioReactive.begin(audioConfig);
+    // Route audio through FastLED.add() for auto-pump when available
+    auto input = audio.audioInput();
+    if (input) {
+        gAudioProcessor = FastLED.add(input);
+        gAutoPump = true;
+        printf("AnimartrixRing: Audio routed via FastLED.add() (auto-pump)\n");
+    }
+    if (!gAudioProcessor) {
+        gAudioProcessor = fl::make_shared<fl::AudioProcessor>();
+        printf("AnimartrixRing: Audio using manual pump (fallback)\n");
+    }
 
-    // Setup downbeat detector callback
-    audioProcessor.onDownbeat([]() {
-        darknessTrigger = true;
-        FL_WARN("Downbeat detected! Triggering darkness effect");
+    // Hook VibeDetector bass level to FxEngine timewarp.
+    // onVibeLevels fires every frame with self-normalizing levels:
+    //   bass ~1.0 = average, >1.0 = louder than normal, <1.0 = quieter
+    // We map bass level directly to animation speed so beats accelerate
+    // the animation.
+    gAudioProcessor->onVibeLevels([](const fl::VibeLevels &vibe) {
+        if (!enableVibeReactive.value()) {
+            return;
+        }
+        // Print beat/mid/treble levels and spike flags each frame
+        printf("Vibe: bass=%.2f mid=%.2f treb=%.2f | spikes: bass=%d mid=%d treb=%d\n",
+               vibe.bass, vibe.mid, vibe.treb,
+               vibe.bassSpike, vibe.midSpike, vibe.trebSpike);
+
+        // bass hovers around 1.0; scale it into a speed multiplier
+        float bassBoost = (vibe.bass - 1.0f) * vibeSpeedMultiplier.value();
+        float speed = vibeBaseSpeed.value() + bassBoost;
+        // Combine with the user's manual time speed slider
+        speed *= timeSpeed.value();
+        fxEngine.setSpeed(speed);
+    });
+
+    // Log spike events
+    gAudioProcessor->onVibeBassSpike([]() {
+        printf(">>> BASS SPIKE!\n");
+    });
+    gAudioProcessor->onVibeMidSpike([]() {
+        printf(">>> MID SPIKE!\n");
+    });
+    gAudioProcessor->onVibeTrebSpike([]() {
+        printf(">>> TREB SPIKE!\n");
     });
 
     Serial.println("AnimartrixRing setup complete");
-    FL_WARN("Setup complete - Audio Reactive: " << enableAudioReactive.value()
-            << ", Downbeat Darkness: " << enableDownbeatDarkness.value());
 }
 
 void loop() {
-    // Process audio if enabled
-    float audioSpeedFactor = 1.0f;
-    float audioBrightnessFactor = 1.0f;
-
-    EVERY_N_MILLISECONDS(3000) {
-        FL_WARN("Audio Reactive Enabled: " << enableAudioReactive.value()
-                << ", Downbeat Darkness Enabled: " << enableDownbeatDarkness.value());
-    }
-
-    // Track audio reactive state transitions
-    static bool previousAudioReactiveState = false;
-
-    if (enableAudioReactive.value()) {
-        // Initialize timer when first enabled
-        if (!previousAudioReactiveState) {
-            lastValidAudioTime = millis();
-            FL_WARN("Audio Reactive ENABLED - starting audio processing (1000ms timeout)");
-            previousAudioReactiveState = true;
-        }
-
-        // Process audio samples
+    // When auto-pump is not available, manually drain audio and feed processor
+    if (!gAutoPump) {
         fl::AudioSample sample = audio.next();
         if (sample.isValid()) {
-            lastValidAudioTime = millis(); // Update last valid audio timestamp
-            audioReactive.processSample(sample);
-
-            const fl::AudioData &audioData = audioReactive.getSmoothedData();
-            EVERY_N_MILLISECONDS(2000) {
-                FL_WARN("Audio processing active - Volume: " << (int)audioData.volume);
+            static uint32_t sAudioSamples = 0;
+            sAudioSamples++;
+            if (sAudioSamples == 1) {
+                printf("AnimartrixRing: First audio sample received! "
+                       "enableVibeReactive=%d\n",
+                       (int)enableVibeReactive.value());
+            } else if (sAudioSamples % 172 == 0) {
+                printf("AnimartrixRing: %u audio samples processed, "
+                       "enableVibeReactive=%d\n",
+                       (unsigned)sAudioSamples,
+                       (int)enableVibeReactive.value());
             }
-
-            // Map volume to speed (0-1 range, scaled by multiplier)
-            if (audioAffectsSpeed.value()) {
-                float normalizedVolume = audioData.volume / 255.0f;
-                audioSpeedFactor =
-                    1.0f + (normalizedVolume * audioSpeedMultiplier.value());
+            if (enableVibeReactive.value()) {
+                gAudioProcessor->update(sample);
             }
-
-            // Map volume to brightness
-            if (audioAffectsBrightness.value()) {
-                float normalizedVolume = audioData.volume / 255.0f;
-                audioBrightnessFactor = fl::max(
-                    0.3f, normalizedVolume * audioBrightnessMultiplier.value());
-            }
-
-            // Process audio for downbeat detection
-            audioProcessor.update(sample);
-        } else {
-            // Check for audio timeout - auto-disable if no valid audio for 1000ms
-            unsigned long currentTime = millis();
-            if (lastValidAudioTime > 0 && (currentTime - lastValidAudioTime) > AUDIO_TIMEOUT_MS) {
-                FL_WARN("No valid audio for " << AUDIO_TIMEOUT_MS << "ms - AUTO-DISABLING Audio Reactive");
-                enableAudioReactive = false; // Use assignment operator
-                lastValidAudioTime = 0; // Reset timer
-            } else {
-                EVERY_N_MILLISECONDS(5000) {
-                    FL_WARN("Audio sample is INVALID - check microphone/audio input");
-                }
-            }
-        }
-    } else {
-        // Reset state when disabled
-        if (previousAudioReactiveState) {
-            FL_WARN("Audio Reactive DISABLED");
-            previousAudioReactiveState = false;
-        }
-
-        EVERY_N_MILLISECONDS(5000) {
-            FL_WARN("Audio Reactive is DISABLED - enable in UI to use downbeat detection");
         }
     }
-
-    // Update animation with audio-reactive speed
-    float effectiveSpeed = timeSpeed.value() * audioSpeedFactor;
-    fxEngine.setSpeed(effectiveSpeed);
+    if (!enableVibeReactive.value()) {
+        fxEngine.setSpeed(timeSpeed.value());
+    }
 
     // Draw the effect
     fxEngine.draw(millis(), leds);
-
-    // Apply downbeat darkness effect if enabled
-    if (enableDownbeatDarkness.value() && enableAudioReactive.value()) {
-        static bool firstRun = true;
-        if (firstRun) {
-            FL_WARN("Downbeat darkness ACTIVE - waiting for downbeats...");
-            firstRun = false;
-        }
-
-        unsigned long currentTime = millis();
-
-        // Trigger darkness on downbeat
-        if (darknessTrigger) {
-            darknessAmount = 1.0f - downbeatDarknessAmount.value(); // Convert darkness to brightness multiplier
-            lastDarknessTime = currentTime;
-            darknessTrigger = false;
-            FL_WARN("Applying darkness: " << darknessAmount << " (configured darkness: " << downbeatDarknessAmount.value() << ")");
-        }
-
-        // Fade back to normal brightness using exponential curve
-        if (darknessAmount < 1.0f) {
-            unsigned long elapsed = currentTime - lastDarknessTime;
-            float fadeDuration = darknessFadeDuration.value();
-
-            if (elapsed < fadeDuration) {
-                // Exponential fade: smoother and more natural
-                float progress = elapsed / fadeDuration; // 0 to 1
-                float targetDarkness = 1.0f - downbeatDarknessAmount.value();
-                darknessAmount = targetDarkness + (1.0f - targetDarkness) * (1.0f - fl::exp(-5.0f * progress));
-            } else {
-                darknessAmount = 1.0f; // Fully recovered
-            }
-        }
-
-        // Apply darkness to LEDs (scale brightness)
-        if (darknessAmount < 1.0f) {
-            uint8_t scaleFactor = static_cast<uint8_t>(darknessAmount * 255.0f);
-            FL_WARN("Scaling LEDs by " << scaleFactor << "/255 (darknessAmount: " << darknessAmount << ")");
-            for (int i = 0; i < NUM_LEDS; i++) {
-                leds[i].nscale8(scaleFactor);
-            }
-        }
-    } else {
-        EVERY_N_MILLISECONDS(5000) {
-            FL_WARN("Downbeat darkness NOT active - DownbeatDarkness: "
-                    << enableDownbeatDarkness.value() << ", AudioReactive: "
-                    << enableAudioReactive.value());
-        }
-    }
 
     // Calculate final brightness
     uint8_t finalBrightness;
@@ -335,13 +240,6 @@ void loop() {
         finalBrightness = static_cast<uint8_t>(brightness.value());
     }
 
-    // Apply audio brightness multiplier if enabled
-    if (enableAudioReactive.value() && audioAffectsBrightness.value()) {
-        finalBrightness =
-            static_cast<uint8_t>(finalBrightness * audioBrightnessFactor);
-    }
-
     FastLED.setBrightness(finalBrightness);
-
     FastLED.show();
 }

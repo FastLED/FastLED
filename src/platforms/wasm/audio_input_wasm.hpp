@@ -49,6 +49,8 @@ private:
     bool mHasError;
     fl::string mErrorMessage;
     fl::u32 mDroppedBlocks;
+    fl::u32 mPushedBlocks = 0;   // Total blocks received from JS
+    fl::u32 mReadBlocks = 0;     // Total blocks consumed by sketch
 
     bool isFull() const;
     bool isEmpty() const;

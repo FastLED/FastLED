@@ -38,6 +38,9 @@ class JsonAudioImpl {
     // Method to allow parent UIElement class to set the group
     void setGroup(const fl::string &groupName);
 
+    // Stub: no underlying audio input for JSON UI
+    fl::shared_ptr<IAudioInput> audioInput() { return nullptr; }
+
     int id() const {
       return mInternal->id();
     }
