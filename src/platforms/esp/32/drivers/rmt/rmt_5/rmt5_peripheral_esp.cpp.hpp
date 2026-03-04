@@ -602,12 +602,13 @@ private:
     }
 
     // Private methods
+    // Note: No static global accesses allowed in FL_IRAM functions on Xtensa.
+    // Static globals require 32-bit address loads via l32r, which needs literal
+    // pool entries. Per-function IRAM sections cause the linker to place literals
+    // after code, but l32r can only reference backward — causing link failure.
     size_t FL_IRAM encode(rmt_channel_handle_t channel,
                           const void* primary_data, size_t data_size,
                           rmt_encode_state_t* ret_state) {
-        // Increment call counter (ISR safe - atomic on 32-bit)
-        s_encoderCallCount = s_encoderCallCount + 1;
-
         rmt_encode_state_t session_state = RMT_ENCODING_RESET;
         rmt_encode_state_t state = RMT_ENCODING_RESET;
         size_t encoded_symbols = 0;
@@ -644,8 +645,6 @@ private:
         }
 
     out:
-        // Track total symbols encoded (ISR safe)
-        s_totalSymbolsEncoded = s_totalSymbolsEncoded + encoded_symbols;
         *ret_state = state;
         return encoded_symbols;
     }
@@ -727,26 +726,26 @@ private:
         return ESP_OK;
     }
 
-    // Static callbacks for rmt_encoder_t interface
-    // Use reinterpret_cast instead of fl::bit_cast in IRAM callbacks to avoid
-    // Xtensa l32r literal pool relocation errors. Since rmt_encoder_t is the
-    // first member, the pointer address is identical — no type-punning occurs.
+    // Static callbacks for rmt_encoder_t interface.
+    // Use reinterpret_cast (not fl::bit_cast) in FL_IRAM functions: bit_cast's
+    // memcpy generates l32r literal pool entries that break Xtensa per-function
+    // IRAM sections. Safe here because rmt_encoder_t base is the first member.
     static size_t FL_IRAM encodeCallback(rmt_encoder_t* encoder,
                                          rmt_channel_handle_t channel,
                                          const void* primary_data,
                                          size_t data_size,
                                          rmt_encode_state_t* ret_state) {
-        Rmt5EncoderImpl* impl = reinterpret_cast<Rmt5EncoderImpl*>(encoder); // ok reinterpret cast - first member cast
+        auto* impl = reinterpret_cast<Rmt5EncoderImpl*>(encoder); // ok reinterpret cast - first member
         return impl->encode(channel, primary_data, data_size, ret_state);
     }
 
     static esp_err_t FL_IRAM resetCallback(rmt_encoder_t* encoder) {
-        Rmt5EncoderImpl* impl = reinterpret_cast<Rmt5EncoderImpl*>(encoder); // ok reinterpret cast - first member cast
+        auto* impl = reinterpret_cast<Rmt5EncoderImpl*>(encoder); // ok reinterpret cast - first member
         return impl->reset();
     }
 
     static esp_err_t delCallback(rmt_encoder_t* encoder) {
-        Rmt5EncoderImpl* impl = reinterpret_cast<Rmt5EncoderImpl*>(encoder); // ok reinterpret cast - first member cast
+        auto* impl = reinterpret_cast<Rmt5EncoderImpl*>(encoder); // ok reinterpret cast - first member
         delete impl;  // ok bare allocation
         return ESP_OK;
     }
