@@ -167,9 +167,8 @@ void setup() {
             return;
         }
         // Print beat/mid/treble levels and spike flags each frame
-        printf("Vibe: bass=%.2f mid=%.2f treb=%.2f | spikes: bass=%d mid=%d treb=%d\n",
-               vibe.bass, vibe.mid, vibe.treb,
-               vibe.bassSpike, vibe.midSpike, vibe.trebSpike);
+        FL_WARN("Vibe: bass=" << vibe.bass << " mid=" << vibe.mid << " treb=" << vibe.treb
+                << " | spikes: bass=" << vibe.bassSpike << " mid=" << vibe.midSpike << " treb=" << vibe.trebSpike);
 
         float bassBoost = (vibe.bass - 1.0f) * vibeSpeedMultiplier.value();
         float speed = vibeBaseSpeed.value() + bassBoost;
@@ -179,13 +178,13 @@ void setup() {
 
     // Log spike events
     audioProcessor.onVibeBassSpike([]() {
-        printf(">>> BASS SPIKE!\n");
+        FL_WARN(">>> BASS SPIKE!");
     });
     audioProcessor.onVibeMidSpike([]() {
-        printf(">>> MID SPIKE!\n");
+        FL_WARN(">>> MID SPIKE!");
     });
     audioProcessor.onVibeTrebSpike([]() {
-        printf(">>> TREB SPIKE!\n");
+        FL_WARN(">>> TREB SPIKE!");
     });
 }
 
@@ -202,14 +201,9 @@ void loop() {
             static uint32_t sAudioSamples = 0;
             sAudioSamples++;
             if (sAudioSamples == 1) {
-                printf("Animartrix: First audio sample received! "
-                       "enableVibeReactive=%d\n",
-                       (int)enableVibeReactive.value());
+                FL_WARN("Animartrix: First audio sample received! enableVibeReactive=" << (int)enableVibeReactive.value());
             } else if (sAudioSamples % 172 == 0) {
-                printf("Animartrix: %u audio samples processed, "
-                       "enableVibeReactive=%d\n",
-                       (unsigned)sAudioSamples,
-                       (int)enableVibeReactive.value());
+                FL_WARN("Animartrix: " << sAudioSamples << " audio samples processed, enableVibeReactive=" << (int)enableVibeReactive.value());
             }
             if (enableVibeReactive.value()) {
                 audioProcessor.update(sample);
