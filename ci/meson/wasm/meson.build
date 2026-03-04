@@ -6,8 +6,8 @@
 # with the native build (in root meson.build), but everything else is
 # WASM-specific.
 #
-# Flags are migrated from src/platforms/wasm/compiler/build_flags.toml
-# to keep all build configuration in one place (meson.build).
+# Flags are loaded at configure time from src/platforms/wasm/compiler/build_flags.toml
+# via ci/wasm_flags.py to keep a single source of truth for all build consumers.
 #
 # Variables inherited from root meson.build:
 #   build_mode, fastled_sources, platforms_shared_files,
@@ -19,149 +19,27 @@
 wasm_compiler_dir = include_directories('../../../src/platforms/wasm/compiler')
 
 # ============================================================================
-# WASM preprocessor defines (from build_flags.toml [all].defines)
+# WASM flags loaded from build_flags.toml via ci/wasm_flags.py
 # ============================================================================
-wasm_defines = shared_defines + [
-  # FastLED Engine Configuration
-  '-DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50',
-  '-DFASTLED_FORCE_NAMESPACE=1',
-  '-DUSE_OFFSET_CONVERTER=0',
-  '-DGL_ENABLE_GET_PROC_ADDRESS=0',
+# All WASM compilation flags are defined in:
+#   src/platforms/wasm/compiler/build_flags.toml
+# This single source of truth is read by ci/wasm_flags.py and shared by
+# meson, wasm_build.py, wasm_build_library.py, wasm_compile_pch.py, and
+# wasm_compile_native.py to prevent flag drift.
+# ============================================================================
+wasm_flags_script = meson.project_source_root() / 'ci' / 'wasm_flags.py'
 
-  # Threading and Concurrency Support
-  '-D_REENTRANT=1',
+lib_result = run_command(uv_prog, 'run', 'python', wasm_flags_script,
+  '--target', 'lib_compile', '--mode', build_mode, check: true)
+wasm_lib_compile_args = lib_result.stdout().strip().split('\n')
 
-  # Emscripten-Specific Configuration
-  '-DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0',
-]
+sketch_result = run_command(uv_prog, 'run', 'python', wasm_flags_script,
+  '--target', 'sketch_compile', '--mode', build_mode, check: true)
+wasm_sketch_compile_args = sketch_result.stdout().strip().split('\n')
 
-# ============================================================================
-# WASM compiler flags (from build_flags.toml [all].compiler_flags)
-# ============================================================================
-wasm_common_flags = [
-  # Language Standard
-  '-std=gnu++17',
-  '-fpermissive',
-
-  # Warning Configuration
-  '-Wno-constant-logical-operand',
-  '-Wnon-c-typedef-for-linkage',
-  '-Werror=bad-function-cast',
-  '-Werror=cast-function-type',
-
-  # Runtime Behavior
-  '-fno-threadsafe-statics',
-] + shared_no_exception_flags + [
-
-  # Threading Support
-  '-pthread',
-
-  # PCH Support
-  '-fpch-instantiate-templates',
-]
-
-# ============================================================================
-# WASM library-specific flags (from build_flags.toml [library])
-# ============================================================================
-wasm_library_flags = [
-  '-flto=thin',
-  '-Wall',
-]
-
-# ============================================================================
-# WASM sketch-specific defines (from build_flags.toml [sketch])
-# ============================================================================
-wasm_sketch_defines = [
-  '-DSKETCH_COMPILE=1',
-  '-DFASTLED_WASM_USE_CCALL',
-]
-
-# ============================================================================
-# WASM mode-specific flags (from build_flags.toml [build_modes.*])
-# ============================================================================
-if build_mode == 'debug'
-  wasm_mode_flags = [
-    '-g3',
-    '-gsource-map',
-    '-fno-inline',
-    '-O0',
-  ]
-  wasm_mode_link_flags = [
-    '--profiling-funcs',
-    '-sSEPARATE_DWARF_URL=fastled.wasm.dwarf',
-    '-sSTACK_OVERFLOW_CHECK=2',
-    '-sASSERTIONS=1',
-  ]
-elif build_mode == 'quick'
-  wasm_mode_flags = [
-    '-flto=thin',
-    '-O1',
-    '-g0',
-    '-fno-inline-functions',
-    '-fno-vectorize',
-    '-fno-unroll-loops',
-    '-fno-strict-aliasing',
-    '-fno-delayed-template-parsing',
-    '-fmax-type-align=4',
-    '-ffast-math',
-    '-fno-finite-math-only',
-    '-fno-math-errno',
-    '-fno-exceptions',
-    '-fno-rtti',
-  ]
-  wasm_mode_link_flags = [
-    '-Wl,--thinlto-cache-dir=build/wasm/lto_cache',
-    '--profiling-funcs',
-    '--emit-symbol-map',
-    '-sINITIAL_MEMORY=67108864',
-    '-sASSERTIONS=0',
-    '-sSTACK_OVERFLOW_CHECK=0',
-    '-sWASM_BIGINT=0',
-    '-sERROR_ON_UNDEFINED_SYMBOLS=1',
-  ]
-elif build_mode == 'release'
-  wasm_mode_flags = [
-    '-Oz',
-  ]
-  wasm_mode_link_flags = []
-else
-  error('Invalid build_mode: @0@. Must be one of: debug, quick, release'.format(build_mode))
-endif
-
-# ============================================================================
-# WASM base linking flags (from build_flags.toml [linking.base])
-# ============================================================================
-wasm_base_link_flags = [
-  '-sWASM=1',
-  '-fuse-ld=wasm-ld',
-  '-pthread',
-  '-sUSE_PTHREADS=1',
-  '-sPROXY_TO_PTHREAD',
-]
-
-# ============================================================================
-# WASM sketch linking flags (from build_flags.toml [linking.sketch])
-# ============================================================================
-wasm_sketch_link_flags = [
-  '-sMODULARIZE=1',
-  '-sEXPORT_NAME=fastled',
-  '-sALLOW_MEMORY_GROWTH=1',
-  '-sINITIAL_MEMORY=134217728',
-  '-sAUTO_NATIVE_LIBRARIES=0',
-  '-sEXPORTED_RUNTIME_METHODS=[\'ccall\',\'cwrap\',\'stringToUTF8\',\'UTF8ToString\',\'lengthBytesUTF8\',\'HEAPU8\',\'getValue\']',
-  '-sEXPORTED_FUNCTIONS=[\'_malloc\',\'_free\',\'_main\',\'_extern_setup\',\'_extern_loop\',\'_fastled_declare_files\',\'_getStripPixelData\',\'_getFrameData\',\'_getScreenMapData\',\'_freeFrameData\',\'_getFrameVersion\',\'_hasNewFrameData\',\'_js_fetch_success_callback\',\'_js_fetch_error_callback\',\'_pushAudioSamples\']',
-  '-sEXIT_RUNTIME=0',
-  '-sFILESYSTEM=0',
-  '-Wl,--strip-debug',
-  '-Wl,--no-export-dynamic',
-]
-
-# ============================================================================
-# Assemble final WASM compilation args
-# ============================================================================
-wasm_lib_compile_args = wasm_defines + wasm_common_flags + wasm_library_flags + wasm_mode_flags
-wasm_sketch_compile_args = wasm_defines + wasm_common_flags + wasm_sketch_defines + wasm_mode_flags
-wasm_link_args = wasm_base_link_flags + wasm_sketch_link_flags + wasm_mode_link_flags
+link_result = run_command(uv_prog, 'run', 'python', wasm_flags_script,
+  '--target', 'link', '--mode', build_mode, check: true)
+wasm_link_args = link_result.stdout().strip().split('\n')
 
 # ============================================================================
 # WASM PCH (Precompiled Header)

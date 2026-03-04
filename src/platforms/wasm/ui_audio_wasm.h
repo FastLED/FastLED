@@ -34,6 +34,7 @@ class WasmAudioImpl {
   private:
     fl::string mName;
     WasmAudioInput* mWasmInput;
+    fl::shared_ptr<IAudioInput> mWasmInputOwner;  // Prevent premature destruction
     bool mOwnsInput;  // Track if we created the input
     fl::shared_ptr<JsonUiAudioInternal> mInternal;  // UI registration component
 };

@@ -23,9 +23,9 @@ import argparse
 import subprocess
 import sys
 import time
-import tomllib
 from pathlib import Path
 
+from ci.wasm_flags import get_sketch_compile_flags_dict
 from ci.wasm_tools import get_emcc
 
 
@@ -33,55 +33,8 @@ from ci.wasm_tools import get_emcc
 PROJECT_ROOT = Path(__file__).parent.parent
 
 # Paths
-BUILD_FLAGS_TOML = (
-    PROJECT_ROOT / "src" / "platforms" / "wasm" / "compiler" / "build_flags.toml"
-)
 BUILD_DIR = PROJECT_ROOT / "build" / "wasm"
 LTO_CACHE_DIR = BUILD_DIR / "lto_cache"
-
-
-def load_build_flags(
-    build_mode: str = "quick", target: str = "sketch"
-) -> dict[str, list[str]]:
-    """
-    Load and parse build flags from build_flags.toml.
-
-    Args:
-        build_mode: Build mode (debug, fast_debug, quick, release)
-        target: Target type ('sketch' for sketch compilation, 'link' for linking)
-
-    Returns:
-        Dictionary with 'defines', 'compiler_flags', 'link_flags' lists
-    """
-    if not BUILD_FLAGS_TOML.exists():
-        raise FileNotFoundError(f"Build flags TOML not found: {BUILD_FLAGS_TOML}")
-
-    with open(BUILD_FLAGS_TOML, "rb") as f:
-        config = tomllib.load(f)
-
-    # Collect flags from [all] section
-    defines = config.get("all", {}).get("defines", [])
-    compiler_flags = config.get("all", {}).get("compiler_flags", [])
-
-    if target == "sketch":
-        # Add sketch-specific flags (not library flags)
-        defines.extend(config.get("sketch", {}).get("defines", []))
-        compiler_flags.extend(config.get("sketch", {}).get("compiler_flags", []))
-
-    # Add build mode-specific flags
-    build_mode_config = config.get("build_modes", {}).get(build_mode, {})
-    compiler_flags.extend(build_mode_config.get("flags", []))
-
-    # Get linking flags (used only during linking phase)
-    link_flags = config.get("linking", {}).get("base", {}).get("flags", [])
-    link_flags.extend(config.get("linking", {}).get("sketch", {}).get("flags", []))
-    link_flags.extend(build_mode_config.get("link_flags", []))
-
-    return {
-        "defines": defines,
-        "compiler_flags": compiler_flags,
-        "link_flags": link_flags,
-    }
 
 
 def ensure_library_built(
@@ -323,7 +276,7 @@ def compile_wasm(
             print(f"Library build phase: {phase2_time:.2f}s")
 
         # Load build flags for sketch compilation
-        flags = load_build_flags(build_mode, target="sketch")
+        flags = get_sketch_compile_flags_dict(build_mode)
         if verbose:
             print(
                 f"Loaded {len(flags['defines'])} defines, {len(flags['compiler_flags'])} compiler flags, {len(flags['link_flags'])} link flags"

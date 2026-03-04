@@ -42,11 +42,11 @@ import hashlib
 import json
 import subprocess
 import sys
-import tomllib
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
+from ci.wasm_flags import get_lib_compile_flags_dict
 from ci.wasm_tools import get_emar, get_emcc, get_wasm_ld
 
 
@@ -54,9 +54,6 @@ from ci.wasm_tools import get_emar, get_emcc, get_wasm_ld
 PROJECT_ROOT = Path(__file__).parent.parent
 
 # Paths
-BUILD_FLAGS_TOML = (
-    PROJECT_ROOT / "src" / "platforms" / "wasm" / "compiler" / "build_flags.toml"
-)
 PCH_SCRIPT = PROJECT_ROOT / "ci" / "wasm_compile_pch.py"
 RGLOB_SCRIPT = PROJECT_ROOT / "ci" / "meson" / "rglob.py"
 COMPILE_PCH_WRAPPER = PROJECT_ROOT / "ci" / "compile_pch.py"
@@ -70,42 +67,6 @@ LIBRARY_OUTPUT = BUILD_DIR / "libfastled.a"
 LIBRARY_METADATA = BUILD_DIR / "library_metadata.json"
 UNITY_METADATA = UNITY_DIR / "unity_metadata.json"
 PCH_OUTPUT = BUILD_DIR / "wasm_pch.h.pch"
-
-
-def load_build_flags(build_mode: str = "quick") -> dict[str, list[str]]:
-    """
-    Load and parse build flags from build_flags.toml for library compilation.
-
-    Library uses [all] + [library] sections (NOT sketch flags).
-
-    Args:
-        build_mode: Build mode (debug, fast_debug, quick, release)
-
-    Returns:
-        Dictionary with 'defines', 'compiler_flags' lists
-    """
-    if not BUILD_FLAGS_TOML.exists():
-        raise FileNotFoundError(f"Build flags TOML not found: {BUILD_FLAGS_TOML}")
-
-    with open(BUILD_FLAGS_TOML, "rb") as f:
-        config = tomllib.load(f)
-
-    # Collect flags from [all] section (used by everything)
-    defines = config.get("all", {}).get("defines", [])
-    compiler_flags = config.get("all", {}).get("compiler_flags", [])
-
-    # Add library-specific flags
-    defines.extend(config.get("library", {}).get("defines", []))
-    compiler_flags.extend(config.get("library", {}).get("compiler_flags", []))
-
-    # Add build mode-specific flags
-    build_mode_config = config.get("build_modes", {}).get(build_mode, {})
-    compiler_flags.extend(build_mode_config.get("flags", []))
-
-    return {
-        "defines": defines,
-        "compiler_flags": compiler_flags,
-    }
 
 
 def compute_flags_hash(flags: dict[str, list[str]]) -> str:
@@ -612,7 +573,7 @@ def build_library(
             print(f"Using linker: {wasm_ld}")
 
         # Step 4: Load build flags
-        flags = load_build_flags(build_mode)
+        flags = get_lib_compile_flags_dict(build_mode)
         flags_hash = compute_flags_hash(flags)
         if verbose:
             print(

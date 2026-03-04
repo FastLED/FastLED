@@ -29,6 +29,7 @@ import sys
 import time
 from pathlib import Path
 
+from ci.wasm_flags import get_link_flags, get_sketch_compile_flags
 from ci.wasm_tools import get_emcc
 
 
@@ -138,169 +139,6 @@ def create_wrapper(example_name: str, build_dir: Path) -> Path:
     return wrapper_path
 
 
-def get_sketch_compile_args(build_dir: Path) -> list[str]:
-    """
-    Extract sketch compilation flags from meson introspection.
-
-    Falls back to reading them from the meson.build variables via
-    the built library's compile commands.
-    """
-    # Use meson introspect to get the compile args from the fastled target
-    # This ensures flags stay in sync with meson.build
-    try:
-        result = subprocess.run(
-            [get_meson_executable(), "introspect", "--targets", str(build_dir)],
-            capture_output=True,
-            text=True,
-            cwd=PROJECT_ROOT,
-        )
-        if result.returncode == 0:
-            targets = json.loads(result.stdout)
-            for target in targets:
-                if (
-                    target.get("name") == "fastled"
-                    and target.get("type") == "static library"
-                ):
-                    # Found the library target - get its compile args
-                    # We can extract them from the build commands
-                    break
-    except (json.JSONDecodeError, KeyError, subprocess.SubprocessError):
-        pass
-
-    # Fallback: construct flags directly (these must match meson.build wasm_sketch_compile_args)
-    # This is the authoritative list, kept in sync with meson.build
-    return _get_wasm_sketch_flags(build_dir)
-
-
-def _get_wasm_sketch_flags(build_dir: Path) -> list[str]:
-    """
-    Get WASM sketch compilation flags.
-
-    These MUST match the wasm_sketch_compile_args in meson.build.
-    Any changes to meson.build flags must be reflected here.
-    """
-    defines = [
-        "-DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50",
-        "-DFASTLED_FORCE_NAMESPACE=1",
-        "-DFASTLED_USE_PROGMEM=0",
-        "-DUSE_OFFSET_CONVERTER=0",
-        "-DGL_ENABLE_GET_PROC_ADDRESS=0",
-        "-D_REENTRANT=1",
-        "-DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0",
-        # Sketch-specific
-        "-DSKETCH_COMPILE=1",
-        "-DFASTLED_WASM_USE_CCALL",
-    ]
-
-    flags = [
-        "-std=gnu++17",
-        "-fpermissive",
-        "-Wno-constant-logical-operand",
-        "-Wnon-c-typedef-for-linkage",
-        "-Werror=bad-function-cast",
-        "-Werror=cast-function-type",
-        "-fno-threadsafe-statics",
-        "-fno-exceptions",
-        "-fno-rtti",
-        "-pthread",
-        "-fpch-instantiate-templates",
-    ]
-
-    includes = [
-        f"-I{PROJECT_ROOT / 'src'}",
-        f"-I{PROJECT_ROOT / 'src' / 'platforms' / 'wasm' / 'compiler'}",
-    ]
-
-    # PCH usage
-    pch_path = build_dir / "wasm_pch.h.pch"
-    pch_args = []
-    if pch_path.exists():
-        pch_args = [
-            "-include-pch",
-            str(pch_path),
-            "-Werror=invalid-pch",
-            "-fpch-validate-input-files-content",
-        ]
-
-    return defines + flags + includes + pch_args
-
-
-def _get_wasm_mode_flags(mode: str) -> list[str]:
-    """Get mode-specific compilation flags."""
-    if mode == "debug":
-        return ["-g3", "-gsource-map", "-fno-inline", "-O0"]
-    elif mode == "quick":
-        return [
-            "-flto=thin",
-            "-O1",
-            "-g0",
-            "-fno-inline-functions",
-            "-fno-vectorize",
-            "-fno-unroll-loops",
-            "-fno-strict-aliasing",
-            "-fno-delayed-template-parsing",
-            "-fmax-type-align=4",
-            "-ffast-math",
-            "-fno-finite-math-only",
-            "-fno-math-errno",
-            "-fno-exceptions",
-            "-fno-rtti",
-        ]
-    elif mode == "release":
-        return ["-Oz"]
-    return []
-
-
-def _get_wasm_link_flags(mode: str) -> list[str]:
-    """Get all WASM link flags (base + sketch + mode-specific)."""
-    base = [
-        "-sWASM=1",
-        "-fuse-ld=wasm-ld",
-        "-pthread",
-        "-sUSE_PTHREADS=1",
-        "-sPROXY_TO_PTHREAD",
-    ]
-
-    sketch = [
-        "-sMODULARIZE=1",
-        "-sEXPORT_NAME=fastled",
-        "-sALLOW_MEMORY_GROWTH=1",
-        "-sINITIAL_MEMORY=134217728",
-        "-sAUTO_NATIVE_LIBRARIES=0",
-        "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','UTF8ToString','lengthBytesUTF8','HEAPU8','getValue']",
-        "-sEXPORTED_FUNCTIONS=['_malloc','_free','_main','_extern_setup','_extern_loop','_fastled_declare_files','_getStripPixelData','_getFrameData','_getScreenMapData','_freeFrameData','_getFrameVersion','_hasNewFrameData','_js_fetch_success_callback','_js_fetch_error_callback','_pushAudioSamples']",
-        "-sEXIT_RUNTIME=0",
-        "-sFILESYSTEM=0",
-        "-Wl,--strip-debug",
-        "-Wl,--no-export-dynamic",
-    ]
-
-    if mode == "debug":
-        mode_link = [
-            "--profiling-funcs",
-            "-sSEPARATE_DWARF_URL=fastled.wasm.dwarf",
-            "-sSTACK_OVERFLOW_CHECK=2",
-            "-sASSERTIONS=1",
-        ]
-    elif mode == "quick":
-        mode_link = [
-            "-Wl,--thinlto-cache-dir=build/wasm/lto_cache",
-            "--profiling-funcs",
-            "--emit-symbol-map",
-            "-sINITIAL_MEMORY=67108864",
-            "-sASSERTIONS=0",
-            "-sSTACK_OVERFLOW_CHECK=0",
-            "-sWASM_BIGINT=0",
-            "-sERROR_ON_UNDEFINED_SYMBOLS=1",
-        ]
-    elif mode == "release":
-        mode_link = []
-    else:
-        mode_link = []
-
-    return base + sketch + mode_link
-
-
 def compile_sketch(
     wrapper_path: Path,
     build_dir: Path,
@@ -325,9 +163,30 @@ def compile_sketch(
             print("[WASM] Sketch is up-to-date")
             return object_path
 
-    sketch_flags = _get_wasm_sketch_flags(build_dir) + _get_wasm_mode_flags(mode)
+    sketch_flags = get_sketch_compile_flags(mode)
 
-    cmd = [emcc, "-c", str(wrapper_path), "-o", str(object_path)] + sketch_flags
+    includes = [
+        f"-I{PROJECT_ROOT / 'src'}",
+        f"-I{PROJECT_ROOT / 'src' / 'platforms' / 'wasm' / 'compiler'}",
+    ]
+
+    # PCH usage (build-dir dependent)
+    pch_path = build_dir / "wasm_pch.h.pch"
+    pch_args = []
+    if pch_path.exists():
+        pch_args = [
+            "-include-pch",
+            str(pch_path),
+            "-Werror=invalid-pch",
+            "-fpch-validate-input-files-content",
+        ]
+
+    cmd = (
+        [emcc, "-c", str(wrapper_path), "-o", str(object_path)]
+        + sketch_flags
+        + includes
+        + pch_args
+    )
 
     if verbose:
         print(f"[WASM] Compile: {subprocess.list2cmdline(cmd)}")
@@ -372,7 +231,7 @@ def link_wasm(
             print("[WASM] Output is up-to-date, skipping linking")
             return True
 
-    link_flags = _get_wasm_link_flags(mode)
+    link_flags = get_link_flags(mode)
 
     includes = [
         f"-I{PROJECT_ROOT / 'src'}",

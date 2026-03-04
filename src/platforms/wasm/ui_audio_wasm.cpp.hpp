@@ -13,7 +13,8 @@
 namespace fl {
 
 // Private helper to initialize WasmAudioInput
-static void initWasmAudio(const char* name, WasmAudioInput*& wasmInput, bool& ownsInput) {
+static void initWasmAudio(const char* name, WasmAudioInput*& wasmInput,
+                           fl::shared_ptr<IAudioInput>& wasmInputOwner, bool& ownsInput) {
     // Get or create the global WASM audio input
     wasmInput = wasm_get_audio_input();
 
@@ -22,9 +23,9 @@ static void initWasmAudio(const char* name, WasmAudioInput*& wasmInput, bool& ow
         fl::string error;
         // Use dummy I2S config (config is ignored for WASM anyway)
         AudioConfigI2S dummyConfig(0, 0, 0, 0, fl::AudioChannel::Left, 44100, 16);
-        auto audioInput = wasm_create_audio_input(fl::AudioConfig(dummyConfig), &error);
-        if (audioInput) {
-            audioInput->start();
+        wasmInputOwner = wasm_create_audio_input(fl::AudioConfig(dummyConfig), &error);
+        if (wasmInputOwner) {
+            wasmInputOwner->start();
             wasmInput = wasm_get_audio_input();  // Get the created instance
             ownsInput = true;
             FL_WARN("WasmAudioImpl: Created and started WasmAudioInput for '" << name << "'");
@@ -48,7 +49,7 @@ WasmAudioImpl::WasmAudioImpl(const char *name)
     addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 
     // Initialize WASM audio input
-    initWasmAudio(name, mWasmInput, mOwnsInput);
+    initWasmAudio(name, mWasmInput, mWasmInputOwner, mOwnsInput);
 }
 
 WasmAudioImpl::WasmAudioImpl(const char *name, const fl::AudioConfig& config)
@@ -64,7 +65,7 @@ WasmAudioImpl::WasmAudioImpl(const char *name, const fl::AudioConfig& config)
     (void)config;
 
     // Initialize WASM audio input
-    initWasmAudio(name, mWasmInput, mOwnsInput);
+    initWasmAudio(name, mWasmInput, mWasmInputOwner, mOwnsInput);
 }
 
 WasmAudioImpl::~WasmAudioImpl() {

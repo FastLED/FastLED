@@ -38,9 +38,9 @@ import hashlib
 import json
 import subprocess
 import sys
-import tomllib
 from pathlib import Path
 
+from ci.wasm_flags import get_lib_compile_flags_dict
 from ci.wasm_tools import get_emcc
 
 
@@ -48,9 +48,6 @@ from ci.wasm_tools import get_emcc
 PROJECT_ROOT = Path(__file__).parent.parent
 
 # Paths
-BUILD_FLAGS_TOML = (
-    PROJECT_ROOT / "src" / "platforms" / "wasm" / "compiler" / "build_flags.toml"
-)
 PCH_HEADER = PROJECT_ROOT / "src" / "platforms" / "wasm" / "compiler" / "wasm_pch.h"
 BUILD_DIR = PROJECT_ROOT / "build" / "wasm"
 PCH_OUTPUT = BUILD_DIR / "wasm_pch.h.pch"
@@ -76,43 +73,6 @@ def get_compiler_version(emcc: str) -> str:
     except Exception as e:
         print(f"Warning: Could not get compiler version: {e}")
         return "unknown"
-
-
-def load_build_flags(build_mode: str = "quick") -> dict[str, list[str]]:
-    """
-    Load and parse build flags from build_flags.toml for PCH compilation.
-
-    PCH must use the SAME flags as regular compilation to ensure compatibility.
-    We use [all] + [library] flags since PCH is used for library compilation.
-
-    Args:
-        build_mode: Build mode (debug, fast_debug, quick, release)
-
-    Returns:
-        Dictionary with 'defines', 'compiler_flags' lists
-    """
-    if not BUILD_FLAGS_TOML.exists():
-        raise FileNotFoundError(f"Build flags TOML not found: {BUILD_FLAGS_TOML}")
-
-    with open(BUILD_FLAGS_TOML, "rb") as f:
-        config = tomllib.load(f)
-
-    # Collect flags from [all] section (used by everything)
-    defines = config.get("all", {}).get("defines", [])
-    compiler_flags = config.get("all", {}).get("compiler_flags", [])
-
-    # Add library-specific flags (PCH is used for library compilation)
-    defines.extend(config.get("library", {}).get("defines", []))
-    compiler_flags.extend(config.get("library", {}).get("compiler_flags", []))
-
-    # Add build mode-specific flags
-    build_mode_config = config.get("build_modes", {}).get(build_mode, {})
-    compiler_flags.extend(build_mode_config.get("flags", []))
-
-    return {
-        "defines": defines,
-        "compiler_flags": compiler_flags,
-    }
 
 
 def compute_content_hash(file_path: Path) -> str:
@@ -491,7 +451,7 @@ def main() -> int:
             print(f"Using emscripten: {emcc}")
 
         # Load build flags from TOML
-        flags = load_build_flags(args.mode)
+        flags = get_lib_compile_flags_dict(args.mode)
         if args.verbose:
             print(
                 f"Loaded {len(flags['defines'])} defines, {len(flags['compiler_flags'])} compiler flags"

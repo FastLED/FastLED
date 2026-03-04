@@ -17,7 +17,6 @@ parallel compilation) across different toolchains.
 """
 
 import subprocess
-import tomllib
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -233,7 +232,7 @@ class EmscriptenToolchain(Toolchain):
             return "unknown"
 
     def load_build_flags(self, mode: str, target: str) -> dict[str, list[str]]:
-        """Load build flags from build_flags.toml.
+        """Load build flags from build_flags.toml via ci.wasm_flags.
 
         Args:
             mode: Build mode (debug, fast_debug, quick, release)
@@ -245,46 +244,34 @@ class EmscriptenToolchain(Toolchain):
         Raises:
             FileNotFoundError: If build_flags.toml doesn't exist
         """
-        if not self.build_flags_toml.exists():
-            raise FileNotFoundError(
-                f"Build flags TOML not found: {self.build_flags_toml}"
-            )
+        from ci.wasm_flags import (
+            get_lib_compile_flags_dict,
+            get_sketch_compile_flags_dict,
+        )
 
-        with open(self.build_flags_toml, "rb") as f:
-            config = tomllib.load(f)
-
-        # Collect flags from [all] section (used by everything)
-        defines = config.get("all", {}).get("defines", []).copy()
-        compiler_flags = config.get("all", {}).get("compiler_flags", []).copy()
-
-        # Add target-specific flags
         if target == "library":
-            defines.extend(config.get("library", {}).get("defines", []))
-            compiler_flags.extend(config.get("library", {}).get("compiler_flags", []))
+            d = get_lib_compile_flags_dict(mode)
+            return {
+                "defines": d["defines"],
+                "compiler_flags": d["compiler_flags"],
+                "link_flags": [],
+            }
         elif target == "sketch":
-            defines.extend(config.get("sketch", {}).get("defines", []))
-            compiler_flags.extend(config.get("sketch", {}).get("compiler_flags", []))
-
-        # Add build mode-specific flags
-        build_mode_config = config.get("build_modes", {}).get(mode, {})
-        compiler_flags.extend(build_mode_config.get("flags", []))
-
-        # Get linking flags (used only during linking phase)
-        link_flags: list[str] = []
-        if target == "link":
-            link_flags = (
-                config.get("linking", {}).get("base", {}).get("flags", []).copy()
-            )
-            link_flags.extend(
-                config.get("linking", {}).get("sketch", {}).get("flags", [])
-            )
-            link_flags.extend(build_mode_config.get("link_flags", []))
-
-        return {
-            "defines": defines,
-            "compiler_flags": compiler_flags,
-            "link_flags": link_flags,
-        }
+            d = get_sketch_compile_flags_dict(mode)
+            return {
+                "defines": d["defines"],
+                "compiler_flags": d["compiler_flags"],
+                "link_flags": [],
+            }
+        elif target == "link":
+            d = get_sketch_compile_flags_dict(mode)
+            return {
+                "defines": d["defines"],
+                "compiler_flags": d["compiler_flags"],
+                "link_flags": d["link_flags"],
+            }
+        else:
+            raise ValueError(f"Unknown target: {target}")
 
     def get_include_paths(self) -> list[str]:
         """Get WASM-specific include paths.
