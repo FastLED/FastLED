@@ -538,6 +538,7 @@ class Args:
     spi: bool
     uart: bool
     i2s: bool
+    lcd_rgb: bool
     object_fled: bool
     all: bool
     simd: bool
@@ -711,6 +712,11 @@ See Also:
             help="Test only I2S LCD_CAM driver (ESP32-S3 only)",
         )
         driver_group.add_argument(
+            "--lcd-rgb",
+            action="store_true",
+            help="Test only LCD RGB driver (ESP32-P4 only)",
+        )
+        driver_group.add_argument(
             "--object-fled",
             action="store_true",
             help="Test only ObjectFLED DMA driver (Teensy 4.x only)",
@@ -718,7 +724,7 @@ See Also:
         driver_group.add_argument(
             "--all",
             action="store_true",
-            help="Test all drivers (equivalent to --parlio --rmt --spi --uart --i2s --object-fled)",
+            help="Test all drivers (equivalent to --parlio --rmt --spi --uart --i2s --lcd-rgb --object-fled)",
         )
         driver_group.add_argument(
             "--simd",
@@ -948,6 +954,7 @@ See Also:
             spi=parsed.spi,
             uart=parsed.uart,
             i2s=parsed.i2s,
+            lcd_rgb=parsed.lcd_rgb,
             object_fled=parsed.object_fled,
             all=parsed.all,
             simd=parsed.simd,
@@ -1170,6 +1177,14 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
         final_environment = "esp32s3"
         print("ℹ️  --i2s flag requires ESP32-S3, auto-selecting 'esp32s3' environment")
 
+    # If --lcd-rgb is specified but no environment, force esp32p4
+    # LCD RGB driver is only available on ESP32-P4
+    if args.lcd_rgb and not final_environment:
+        final_environment = "esp32p4"
+        print(
+            "ℹ️  --lcd-rgb flag requires ESP32-P4, auto-selecting 'esp32p4' environment"
+        )
+
     # ============================================================
     # Driver Selection Validation
     # ============================================================
@@ -1180,7 +1195,7 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
 
     # Check if any driver flags were specified
     if args.all:
-        drivers = ["PARLIO", "RMT", "SPI", "UART", "I2S", "OBJECTFLED"]
+        drivers = ["PARLIO", "RMT", "SPI", "UART", "I2S", "LCD_RGB", "OBJECTFLED"]
     else:
         if args.parlio:
             drivers.append("PARLIO")
@@ -1192,6 +1207,8 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
             drivers.append("UART")
         if args.i2s:
             drivers.append("I2S")
+        if args.lcd_rgb:
+            drivers.append("LCD_RGB")
         if args.object_fled:
             drivers.append("OBJECTFLED")
 

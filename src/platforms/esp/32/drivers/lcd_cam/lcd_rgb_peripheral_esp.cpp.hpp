@@ -24,6 +24,7 @@
 #include "esp_lcd_panel_rgb.h"
 #include "esp_heap_caps.h"
 #include "esp_timer.h"
+#include "esp_attr.h"
 #include "platforms/esp/esp_version.h"
 
 // Alignment for DMA buffers
@@ -98,7 +99,7 @@ bool LcdRgbPeripheralEsp::initialize(const LcdRgbPeripheralConfig& config) {
     panel_config.dma_burst_size = 64;
 #endif
 
-    panel_config.num_fbs = 0;  // We manage our own frame buffers
+    panel_config.num_fbs = 1;  // Panel needs at least 1 FB for DMA; draw_bitmap copies our data to it
 
     // Timing parameters
     panel_config.timings.pclk_hz = config.pclk_hz;
@@ -231,6 +232,14 @@ bool LcdRgbPeripheralEsp::drawFrame(const u16* buffer, size_t size_bytes) {
         return false;
     }
 
+    // With refresh_on_demand=1, draw_bitmap only copies data to the panel's
+    // internal frame buffer. We must explicitly trigger the DMA refresh.
+    err = esp_lcd_rgb_panel_refresh(mPanelHandle);
+    if (err != ESP_OK) {
+        mBusy = false;
+        return false;
+    }
+
     return true;
 }
 
@@ -261,6 +270,33 @@ bool LcdRgbPeripheralEsp::isBusy() const {
 // Callback Registration
 //=============================================================================
 
+// Callback data passed to VSYNC ISR - must outlive registration
+struct VsyncCallbackData {
+    LcdRgbPeripheralEsp* self;
+    void* user_callback;
+    void* user_ctx;
+};
+
+// Static storage for callback data (singleton peripheral, so one instance suffices)
+static VsyncCallbackData s_vsync_cb_data;
+
+// VSYNC ISR callback - must be in IRAM for ESP-IDF
+static bool IRAM_ATTR vsyncIsrCallback(
+        esp_lcd_panel_handle_t panel,
+        const esp_lcd_rgb_panel_event_data_t* edata,
+        void* ctx) {
+    VsyncCallbackData* data = static_cast<VsyncCallbackData*>(ctx);
+    data->self->clearBusy();
+
+    // Call user callback if registered
+    if (data->user_callback) {
+        using CallbackType = bool (*)(void*, const void*, void*);
+        auto fn = reinterpret_cast<CallbackType>(data->user_callback); // ok reinterpret cast
+        return fn(panel, edata, data->user_ctx);
+    }
+    return false;
+}
+
 bool LcdRgbPeripheralEsp::registerDrawCallback(void* callback, void* user_ctx) {
     if (!mInitialized || mPanelHandle == nullptr) {
         return false;
@@ -269,35 +305,16 @@ bool LcdRgbPeripheralEsp::registerDrawCallback(void* callback, void* user_ctx) {
     mCallback = callback;
     mUserCtx = user_ctx;
 
-    // Wrapper callback that calls user callback and clears busy flag
-    struct CallbackData {
-        LcdRgbPeripheralEsp* self;
-        void* user_callback;
-        void* user_ctx;
-    };
+    // Store callback info in static storage
+    s_vsync_cb_data.self = this;
+    s_vsync_cb_data.user_callback = callback;
+    s_vsync_cb_data.user_ctx = user_ctx;
 
-    // Store callback info (static to persist across calls)
-    static CallbackData cb_data;
-    cb_data.self = this;
-    cb_data.user_callback = callback;
-    cb_data.user_ctx = user_ctx;
-
-    // Register with ESP-IDF
+    // Register IRAM-safe callback with ESP-IDF
     esp_lcd_rgb_panel_event_callbacks_t cbs = {};
-    cbs.on_vsync = [](esp_lcd_panel_handle_t panel, const esp_lcd_rgb_panel_event_data_t* edata, void* ctx) -> bool {
-        CallbackData* data = static_cast<CallbackData*>(ctx);
-        data->self->mBusy = false;
+    cbs.on_vsync = vsyncIsrCallback;
 
-        // Call user callback if registered
-        if (data->user_callback) {
-            using CallbackType = bool (*)(void*, const void*, void*);
-            auto fn = reinterpret_cast<CallbackType>(data->user_callback); // ok reinterpret cast
-            return fn(panel, edata, data->user_ctx);
-        }
-        return false;
-    };
-
-    esp_err_t err = esp_lcd_rgb_panel_register_event_callbacks(mPanelHandle, &cbs, &cb_data);
+    esp_err_t err = esp_lcd_rgb_panel_register_event_callbacks(mPanelHandle, &cbs, &s_vsync_cb_data);
     return err == ESP_OK;
 }
 

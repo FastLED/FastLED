@@ -34,7 +34,8 @@ Driver Selection (optional - omit for GPIO-only mode):
   --spi               Test SPI driver
   --uart              Test UART driver
   --i2s               Test I2S LCD_CAM driver (ESP32-S3 only)
-  --all               Test all drivers (equivalent to --parlio --rmt --spi --uart --i2s)
+  --lcd-rgb           Test LCD RGB driver (ESP32-P4 only)
+  --all               Test all drivers (equivalent to --parlio --rmt --spi --uart --i2s --lcd-rgb)
   --simd              Test SIMD operations only (no LED drivers needed)
 
 Network Validation (ESP32 HTTP):

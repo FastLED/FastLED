@@ -62,6 +62,9 @@ public:
     u64 getMicroseconds() override;
     void delay(u32 ms) override;
 
+    /// @brief Clear the busy flag (called from VSYNC ISR)
+    void clearBusy() { mBusy = false; }
+
 private:
     friend class fl::Singleton<LcdRgbPeripheralEsp>;
 

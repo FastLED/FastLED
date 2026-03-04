@@ -744,6 +744,7 @@ ESP32_P4 = Board(
     board_name="esp32p4",
     real_board_name="esp32-p4-evboard",
     platform=ESP32_IDF_5_5_1_PIOARDUINO,
+    board_partitions="huge_app.csv",
 )
 
 ADA_FEATHER_NRF52840_SENSE = Board(

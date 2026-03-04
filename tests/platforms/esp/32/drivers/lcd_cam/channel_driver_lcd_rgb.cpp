@@ -238,6 +238,130 @@ FL_TEST_CASE("ChannelEngineLcdRgb - state transitions") {
 // Test Suite: Error Handling
 //=============================================================================
 
+//=============================================================================
+// Test Suite: Encoding Verification
+//=============================================================================
+
+/// @brief Create channel data with a specific single-LED color
+ChannelDataPtr createChannelDataWithColor(int pin, uint8_t r, uint8_t g, uint8_t b) {
+    fl::vector_psram<uint8_t> data;
+    data.resize(3);  // 1 LED = 3 bytes (RGB)
+    data[0] = r;
+    data[1] = g;
+    data[2] = b;
+    return ChannelData::create(pin, getWS2812Timing(), fl::move(data));
+}
+
+FL_TEST_CASE("ChannelEngineLcdRgb - encoding solid red") {
+    resetMockState();
+
+    auto peripheral = createMockPeripheral();
+    ChannelEngineLcdRgb driver(peripheral);
+
+    // 1 lane, 1 LED, solid red (R=0xFF, G=0x00, B=0x00)
+    auto channelData = createChannelDataWithColor(1, 0xFF, 0x00, 0x00);
+    driver.enqueue(channelData);
+    driver.show();
+
+    while (driver.poll() != IChannelDriver::DriverState::READY) {
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(1));  // ok sleep for
+    }
+
+    auto& mock = LcdRgbPeripheralMock::instance();
+    auto frameData = mock.getLastFrameData();
+
+    // 1 LED * 24 bits * 4 pixels/bit = 96 u16 values
+    FL_CHECK_EQ(frameData.size(), static_cast<size_t>(96));
+
+    // For 1 lane (lane 0), encoding per bit:
+    //   "0" bit → [0xFFFF, 0x0000, 0x0000, 0x0000]
+    //   "1" bit → [0xFFFF, 0x0001, 0x0000, 0x0000]
+    //
+    // Channel data arrives pre-ordered; encoder uses identity mapping.
+    // Input: R=0xFF, G=0x00, B=0x00
+
+    // R section (offset 0..31): all "1" bits (R=0xFF)
+    for (int bit = 0; bit < 8; bit++) {
+        size_t off = static_cast<size_t>(bit * 4);
+        FL_CHECK_EQ(frameData[off + 0], static_cast<u16>(0xFFFF));
+        FL_CHECK_EQ(frameData[off + 1], static_cast<u16>(0x0001));
+        FL_CHECK_EQ(frameData[off + 2], static_cast<u16>(0x0000));
+        FL_CHECK_EQ(frameData[off + 3], static_cast<u16>(0x0000));
+    }
+
+    // G section (offset 32..63): all "0" bits (G=0x00)
+    for (int bit = 0; bit < 8; bit++) {
+        size_t off = static_cast<size_t>(32 + bit * 4);
+        FL_CHECK_EQ(frameData[off + 0], static_cast<u16>(0xFFFF));
+        FL_CHECK_EQ(frameData[off + 1], static_cast<u16>(0x0000));
+        FL_CHECK_EQ(frameData[off + 2], static_cast<u16>(0x0000));
+        FL_CHECK_EQ(frameData[off + 3], static_cast<u16>(0x0000));
+    }
+
+    // B section (offset 64..95): all "0" bits (B=0x00)
+    for (int bit = 0; bit < 8; bit++) {
+        size_t off = static_cast<size_t>(64 + bit * 4);
+        FL_CHECK_EQ(frameData[off + 0], static_cast<u16>(0xFFFF));
+        FL_CHECK_EQ(frameData[off + 1], static_cast<u16>(0x0000));
+        FL_CHECK_EQ(frameData[off + 2], static_cast<u16>(0x0000));
+        FL_CHECK_EQ(frameData[off + 3], static_cast<u16>(0x0000));
+    }
+}
+
+FL_TEST_CASE("ChannelEngineLcdRgb - encoding mixed color") {
+    resetMockState();
+
+    auto peripheral = createMockPeripheral();
+    ChannelEngineLcdRgb driver(peripheral);
+
+    // 1 lane, 1 LED: R=0xAA, G=0x55, B=0xF0
+    // Identity order: R=0xAA (10101010), G=0x55 (01010101), B=0xF0 (11110000)
+    auto channelData = createChannelDataWithColor(1, 0xAA, 0x55, 0xF0);
+    driver.enqueue(channelData);
+    driver.show();
+
+    while (driver.poll() != IChannelDriver::DriverState::READY) {
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(1));  // ok sleep for
+    }
+
+    auto& mock = LcdRgbPeripheralMock::instance();
+    auto frameData = mock.getLastFrameData();
+
+    FL_CHECK_EQ(frameData.size(), static_cast<size_t>(96));
+
+    // Encoder uses identity mapping: byte[0]=R, byte[1]=G, byte[2]=B
+    // R = 0xAA = 10101010 (MSB first), at offset 0
+    // Bit 7 (1): second pixel = 0x0001
+    FL_CHECK_EQ(frameData[0 * 4 + 1], static_cast<u16>(0x0001));
+    // Bit 6 (0): second pixel = 0x0000
+    FL_CHECK_EQ(frameData[1 * 4 + 1], static_cast<u16>(0x0000));
+    // Bit 5 (1): second pixel = 0x0001
+    FL_CHECK_EQ(frameData[2 * 4 + 1], static_cast<u16>(0x0001));
+    // Bit 4 (0): second pixel = 0x0000
+    FL_CHECK_EQ(frameData[3 * 4 + 1], static_cast<u16>(0x0000));
+
+    // G = 0x55 = 01010101 (MSB first), starts at offset 32
+    // Bit 7 (0): second pixel = 0x0000
+    FL_CHECK_EQ(frameData[8 * 4 + 1], static_cast<u16>(0x0000));
+    // Bit 6 (1): second pixel = 0x0001
+    FL_CHECK_EQ(frameData[9 * 4 + 1], static_cast<u16>(0x0001));
+
+    // B = 0xF0 = 11110000 (MSB first), starts at offset 64
+    // Bit 7 (1): second pixel = 0x0001
+    FL_CHECK_EQ(frameData[16 * 4 + 1], static_cast<u16>(0x0001));
+    // Bit 3 (0): second pixel = 0x0000
+    FL_CHECK_EQ(frameData[20 * 4 + 1], static_cast<u16>(0x0000));
+
+    // All first pixels should be 0xFFFF (high period always present)
+    for (size_t i = 0; i < 24; i++) {
+        FL_CHECK_EQ(frameData[i * 4 + 0], static_cast<u16>(0xFFFF));
+    }
+}
+
+//=============================================================================
+// Test Suite: Error Handling
+//=============================================================================
+
 FL_TEST_CASE("ChannelEngineLcdRgb - draw failure handling") {
     resetMockState();
 

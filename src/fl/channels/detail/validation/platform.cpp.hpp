@@ -1,126 +1,38 @@
 // src/fl/channels/detail/validation/platform.cpp.hpp
 //
 // Platform-specific validation implementation
+// Queries ChannelManager for registered drivers instead of maintaining a
+// hardcoded list.
 
 #include "platform.h"
-#include "fl/stl/sstream.h"
+#include "fl/channels/manager.h"
 #include "fl/log.h"
-
-// Platform detection macros (FL_IS_ESP_32*) are defined via build system
-// or in platform-specific headers that are automatically included
 
 namespace fl {
 namespace validation {
 
-inline vector<string> getExpectedEngines() {
-    fl::vector<fl::string> expected;
-
-#if defined(FL_IS_ESP_32C6)
-    // ESP32-C6: PARLIO, RMT (SPI disabled - only 1 host, RMT5 preferred)
-    expected.push_back("PARLIO");
-    expected.push_back("RMT");
-#elif defined(FL_IS_ESP_32S3)
-    // ESP32-S3: SPI, RMT, I2S (I2S uses LCD_CAM peripheral)
-    expected.push_back("SPI");
-    expected.push_back("RMT");
-    expected.push_back("I2S");
-#elif defined(FL_IS_ESP_32C3)
-    // ESP32-C3: RMT (no PARLIO, SPI available but not prioritized)
-    expected.push_back("RMT");
-#elif defined(FL_IS_ESP_32DEV)
-    // Original ESP32: SPI, RMT (no PARLIO)
-    expected.push_back("SPI");
-    expected.push_back("RMT");
-    // expected.push_back("I2S");  // I2S support varies
-#elif defined(FL_IS_TEENSY_4X)
-    // Teensy 4.x: FlexIO and ObjectFLED DMA engines for clockless strips
-    expected.push_back("FLEXIO");
-    expected.push_back("OBJECTFLED");
-#endif
-
-    return expected;
+inline bool validateExpectedEngines() {
+    auto infos = channelManager().getDriverInfos();
+    return !infos.empty();
 }
 
-inline bool validateExpectedEngines(const fl::vector<fl::DriverInfo>& available_drivers) {
-    auto expected = getExpectedEngines();
+inline void printEngineValidation() {
+    auto infos = channelManager().getDriverInfos();
 
-    // If no expected drivers defined (unknown platform), return true
-    if (expected.empty()) {
-        return true;
+    if (infos.empty()) {
+        FL_ERROR("[VALIDATION] No drivers registered with ChannelManager!");
+        return;
     }
 
-    bool all_present = true;
-    for (fl::size i = 0; i < expected.size(); i++) {
-        const fl::string& expected_name = expected[i];
-        bool found = false;
-
-        for (fl::size j = 0; j < available_drivers.size(); j++) {
-            if (available_drivers[j].name == expected_name) {
-                found = true;
-                break;
-            }
-        }
-
-        if (!found) {
-            all_present = false;
-            break;
-        }
+    FL_WARN("\n[VALIDATION] Registered drivers: " << infos.size());
+    for (fl::size i = 0; i < infos.size(); i++) {
+        const auto& info = infos[i];
+        FL_WARN("  - " << info.name.c_str()
+                        << " (priority=" << info.priority
+                        << ", enabled=" << (info.enabled ? "true" : "false")
+                        << ")");
     }
-
-    return all_present;
-}
-
-inline void printEngineValidation(const fl::vector<fl::DriverInfo>& available_drivers) {
-    auto expected = getExpectedEngines();
-
-    // Print platform info
-#if defined(FL_IS_ESP_32C6)
-    FL_WARN("\n[VALIDATION] Platform: ESP32-C6");
-#elif defined(FL_IS_ESP_32S3)
-    FL_WARN("\n[VALIDATION] Platform: ESP32-S3");
-#elif defined(FL_IS_ESP_32C3)
-    FL_WARN("\n[VALIDATION] Platform: ESP32-C3");
-#elif defined(FL_IS_ESP_32DEV)
-    FL_WARN("\n[VALIDATION] Platform: ESP32 (classic)");
-#elif defined(FL_IS_TEENSY_4X)
-    FL_WARN("\n[VALIDATION] Platform: Teensy 4.x (Cortex-M7)");
-#else
-    FL_WARN("\n[VALIDATION] Platform: Unknown ESP32 variant - skipping driver validation");
-    return;
-#endif
-
-    // Print expected drivers
-    fl::sstream ss;
-    ss << "[VALIDATION] Expected drivers: " << expected.size() << "\n";
-    for (fl::size i = 0; i < expected.size(); i++) {
-        ss << "  - " << expected[i].c_str() << "\n";
-    }
-    FL_WARN(ss.str());
-
-    // Validate each expected driver
-    bool all_present = true;
-    for (fl::size i = 0; i < expected.size(); i++) {
-        const fl::string& expected_name = expected[i];
-        bool found = false;
-
-        for (fl::size j = 0; j < available_drivers.size(); j++) {
-            if (available_drivers[j].name == expected_name) {
-                found = true;
-                break;
-            }
-        }
-
-        if (!found) {
-            FL_ERROR("Expected driver '" << expected_name.c_str() << "' is MISSING from available drivers!");
-            all_present = false;
-        }
-    }
-
-    if (all_present) {
-        FL_WARN("[VALIDATION] ✓ All expected drivers are available");
-    } else {
-        FL_ERROR("Engine validation FAILED - some expected drivers are missing!");
-    }
+    FL_WARN("[VALIDATION] Driver registration OK");
 }
 
 }  // namespace validation

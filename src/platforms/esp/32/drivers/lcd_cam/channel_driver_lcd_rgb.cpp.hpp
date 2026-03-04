@@ -244,6 +244,13 @@ bool ChannelEngineLcdRgb::beginTransmission(fl::span<const ChannelDataPtr> chann
             return false;
         }
 
+        // Register VSYNC callback to clear busy flags when DMA completes.
+        // On real hardware, without this registration the VSYNC ISR never
+        // fires, causing isBusy() to return true forever and poll() to hang.
+        // The peripheral's VSYNC ISR clears its own mBusy; poll() reads
+        // that via isBusy() so no user callback is needed here.
+        mPeripheral->registerDrawCallback(nullptr, nullptr);
+
         // Calculate buffer size
         size_t data_size = mNumLeds * 24 * 4 * 2;  // 4 pixels per bit, 2 bytes per pixel
         mBufferSize = data_size;
@@ -326,8 +333,8 @@ void ChannelEngineLcdRgb::encodeFrame() {
 
     // Encode all LEDs
     for (int led_idx = 0; led_idx < mNumLeds; led_idx++) {
-        // GRB order
-        const int color_order[3] = {1, 0, 2};
+        // Channel data arrives pre-ordered (GRB for WS2812); pass through as-is
+        const int color_order[3] = {0, 1, 2};
 
         for (int color = 0; color < 3; color++) {
             int component = color_order[color];

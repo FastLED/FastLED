@@ -23,8 +23,7 @@ bool testRxChannel(
 
 void validateExpectedEngines() {
     // Delegate to library implementation
-    auto drivers = FastLED.getDriverInfos();
-    fl::validation::printEngineValidation(drivers);
+    fl::validation::printEngineValidation();
 }
 
 void testDriver(
