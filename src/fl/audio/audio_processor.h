@@ -6,6 +6,7 @@
 #include "fl/audio.h"  // IWYU pragma: keep
 #include "fl/audio/audio_context.h"  // IWYU pragma: keep
 #include "fl/audio/audio_detector.h"  // IWYU pragma: keep
+#include "fl/audio/detectors/vibe.h"  // IWYU pragma: keep - VibeLevels used in public callback API
 #include "fl/audio/mic_profiles.h"
 #include "fl/audio/signal_conditioner.h"
 #include "fl/audio/noise_floor_tracker.h"
@@ -48,7 +49,6 @@ class EqualizerDetector;
 struct Equalizer;
 struct EqualizerConfig;
 class VibeDetector;
-struct VibeLevels;
 
 class AudioProcessor {
 public:

@@ -62,6 +62,13 @@ UIAudio::UIAudio(const fl::string& name, const fl::url& url) : mImpl(name, url) 
 UIAudio::UIAudio(const fl::string& name, const fl::AudioConfig& config) : mImpl(name, config) {}
 UIAudio::~UIAudio() {}
 
+fl::shared_ptr<AudioProcessor> UIAudio::processor() {
+    if (!mProcessor) {
+        mProcessor = addUIAudioProcessor(*this);
+    }
+    return mProcessor;
+}
+
 // UIDropdown constructors
 UIDropdown::UIDropdown(const char *name, fl::span<fl::string> options)
     : mImpl(fl::string(name), options), mListener(this) {

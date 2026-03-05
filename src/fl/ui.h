@@ -431,15 +431,20 @@ class UIAudio : public UIElement {
     // Expose underlying audio input for FastLED.add() auto-pump
     fl::shared_ptr<IAudioInput> audioInput() { return mImpl.audioInput(); }
 
+    // Lazily registers with CFastLED::add() on first call and returns the
+    // auto-pumped AudioProcessor. Subsequent calls return the cached processor.
+    fl::shared_ptr<AudioProcessor> processor();
+
     // Override setGroup to also update the implementation
-    void setGroup(const fl::string& groupName) override { 
-        UIElement::setGroup(groupName); 
+    void setGroup(const fl::string& groupName) override {
+        UIElement::setGroup(groupName);
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);
     }
 
   protected:
     UIAudioImpl mImpl;
+    fl::shared_ptr<AudioProcessor> mProcessor;
 };
 
 class UIDropdown : public UIElement {
@@ -596,5 +601,8 @@ FASTLED_UI_DEFINE_OPERATORS(UINumberField);
 FASTLED_UI_DEFINE_OPERATORS(UICheckbox);
 FASTLED_UI_DEFINE_OPERATORS(UIButton);
 FASTLED_UI_DEFINE_OPERATORS(UIDropdown);
+
+// Bridge: defined in FastLED.cpp.hpp where CFastLED is complete.
+shared_ptr<AudioProcessor> addUIAudioProcessor(UIAudio& audio);
 
 } // end namespace fl

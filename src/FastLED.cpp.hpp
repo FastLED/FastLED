@@ -13,6 +13,7 @@
 #include "fl/delay.h"  // for delayMicroseconds
 #include "fl/log.h"  // for FL_WARN
 #include "fl/audio/input.h"  // for IAudioInput
+#include "fl/ui.h"  // for UIAudio
 #include "fl/stl/assert.h"  // for FL_ASSERT
 #include "hsv2rgb.h"  // for CRGB
 #include "fl/int.h"  // for u32, u16
@@ -726,6 +727,14 @@ fl::shared_ptr<fl::AudioProcessor> CFastLED::add(fl::shared_ptr<fl::IAudioInput>
     (void)input;
     return fl::make_shared<fl::AudioProcessor>();
 #endif
+}
+
+fl::shared_ptr<fl::AudioProcessor> CFastLED::add(fl::UIAudio& uiAudio) {
+    return add(uiAudio.audioInput());
+}
+
+fl::shared_ptr<fl::AudioProcessor> fl::addUIAudioProcessor(fl::UIAudio& audio) {
+    return CFastLED::add(audio);
 }
 
 void CFastLED::remove(fl::shared_ptr<fl::AudioProcessor> processor) {

@@ -139,6 +139,7 @@
 
 #include "fl/audio/input.h"
 #include "fl/audio/audio_processor.h"
+#include "fl/ui.h"  // for UIAudio (needed for CFastLED::add(UIAudio&) overload)
 
 // ============================================================================
 // C STRING FUNCTION USING DECLARATIONS
@@ -762,6 +763,21 @@ public:
 	/// audio->onBeat([]{ /* test callback */ });
 	/// @endcode
 	FL_NODISCARD static fl::shared_ptr<fl::AudioProcessor> add(fl::shared_ptr<fl::IAudioInput> input);
+
+	/// @brief Add a UIAudio element and return an auto-pumped AudioProcessor
+	///
+	/// Convenience overload that extracts the audio input from a UIAudio widget.
+	///
+	/// @param uiAudio Reference to a UIAudio instance
+	/// @return shared_ptr to AudioProcessor
+	///
+	/// Example:
+	/// @code
+	/// fl::UIAudio audio_ui("Audio Input");
+	/// auto audio = FastLED.add(audio_ui);
+	/// audio->onBeat([]{ /* pulse leds */ });
+	/// @endcode
+	static fl::shared_ptr<fl::AudioProcessor> add(fl::UIAudio& uiAudio);
 
 	/// @brief Remove a channel from the LED controller list
 	///
