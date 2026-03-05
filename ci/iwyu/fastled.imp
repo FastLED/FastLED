@@ -221,8 +221,8 @@
   { include: ['"platforms/fastpin.h"', 'private', '"fl/fastpin.h"', 'public'] },
   { include: ['"platforms/is_platform.h"', 'private', '"fl/int.h"', 'public'] },
   { include: ['"platforms/stub/semaphore_stub.h"', 'private', '"fl/stl/semaphore.h"', 'public'] },
-  { include: ['"native_client.h"', 'private', '"fl/net/http/stream_client.h"', 'public'] },
-  { include: ['"native_server.h"', 'private', '"fl/net/http/stream_server.h"', 'public'] },
+  { include: ['"native_client.h"', 'private', '"fl/stl/asio/http/stream_client.h"', 'public'] },
+  { include: ['"native_server.h"', 'private', '"fl/stl/asio/http/stream_server.h"', 'public'] },
 
   # ========================================================================
   # CATCH-ALL: All other platform headers are private and redirect

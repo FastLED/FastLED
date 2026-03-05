@@ -166,7 +166,7 @@ fl::string input(view);                    // Single copy for JSON parsing
 
 ```cpp
 #include "fl/remote/remote.h"
-#include "fl/net/http/stream_server.h"
+#include "fl/stl/asio/http/stream_server.h"
 
 // Create HTTP server transport
 auto transport = fl::make_shared<fl::HttpStreamServer>(8080);

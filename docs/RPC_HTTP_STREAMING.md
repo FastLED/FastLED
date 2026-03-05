@@ -62,15 +62,15 @@ This enables real-time communication between FastLED devices and web-based or de
 #include <FastLED.h>
 #include "fl/remote/remote.h"
 #include "fl/remote/rpc/response_send.h"
-#include "fl/net/http/stream_server.h"
+#include "fl/stl/asio/http/stream_server.h"
 
 // Include implementations
-#include "fl/net/http/stream_server.cpp.hpp"
-#include "fl/net/http/stream_transport.cpp.hpp"
-#include "fl/net/http/connection.cpp.hpp"
-#include "fl/net/http/chunked_encoding.cpp.hpp"
-#include "fl/net/http/http_parser.cpp.hpp"
-#include "fl/net/http/native_server.cpp.hpp"
+#include "fl/stl/asio/http/stream_server.cpp.hpp"
+#include "fl/stl/asio/http/stream_transport.cpp.hpp"
+#include "fl/stl/asio/http/connection.cpp.hpp"
+#include "fl/stl/asio/http/chunked_encoding.cpp.hpp"
+#include "fl/stl/asio/http/http_parser.cpp.hpp"
+#include "fl/stl/asio/http/native_server.cpp.hpp"
 
 #define SERVER_PORT 8080
 
@@ -181,7 +181,7 @@ void loop() {
 
 ```cpp
 #include "fl/remote/remote.h"
-#include "fl/net/http/stream_server.h"
+#include "fl/stl/asio/http/stream_server.h"
 // ... include .cpp.hpp files
 
 #define SERVER_PORT 8080
@@ -948,11 +948,11 @@ bash test --docker --cpp loopback  # Runs with ASAN enabled
 
 ## See Also
 
-- [Protocol Specification](../src/fl/net/http/PROTOCOL.md) - Detailed HTTP streaming RPC protocol
+- [Protocol Specification](../src/fl/stl/asio/http/PROTOCOL.md) - Detailed HTTP streaming RPC protocol
 - [Architecture Document](../src/fl/remote/ARCHITECTURE.md) - fl::Remote architecture overview
-- [HttpRpcServer Example](../examples/HttpRpcServer/HttpRpcServer.ino) - Complete server example
-- [HttpRpcClient Example](../examples/HttpRpcClient/HttpRpcClient.ino) - Complete client example
-- [HttpRpcBidirectional Example](../examples/HttpRpcBidirectional/HttpRpcBidirectional.ino) - Bidirectional example
+- [RpcServer Example](../examples/Asio/RpcServer/RpcServer.ino) - Complete server example
+- [RpcClient Example](../examples/Asio/RpcClient/RpcClient.ino) - Complete client example
+- [RpcBidirectional Example](../examples/Asio/RpcBidirectional/RpcBidirectional.ino) - Bidirectional example
 
 ---
 

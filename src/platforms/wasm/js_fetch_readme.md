@@ -198,7 +198,7 @@ The following Emscripten flags are required in `build_flags.toml`:
 
 ## Example Projects
 
-- **`examples/NetTest/NetTest.ino`**: Comprehensive network testing with multiple fetch scenarios
+- **`examples/Asio/Client/Client.ino`**: Comprehensive network testing with multiple fetch scenarios
 
 ## Platform Support
 

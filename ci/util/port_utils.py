@@ -40,6 +40,14 @@ CHIP_TO_ENVIRONMENT: dict[str, str] = {
     "ESP8266": "esp8266",  # ESP8266
 }
 
+# ESP32 variants that lack WiFi hardware
+NO_WIFI_ENVIRONMENTS: set[str] = {"esp32h2", "esp32p4"}
+
+
+def environment_has_wifi(environment: str) -> bool:
+    """Check if a PlatformIO environment has WiFi hardware."""
+    return environment.lower() not in NO_WIFI_ENVIRONMENTS
+
 
 @dataclass
 class ComportResult:

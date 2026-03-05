@@ -81,6 +81,7 @@ from ci.util.json_rpc_handler import parse_json_rpc_commands
 from ci.util.port_utils import (
     auto_detect_upload_port,
     detect_attached_chip,
+    environment_has_wifi,
     kill_port_users,
 )
 from ci.validate_ble import run_ble_validation
@@ -2162,6 +2163,16 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
             print("No driver tests requested — skipping RPC test matrix.")
             print()
             return 0
+
+        # Fall back to loopback for no-WiFi platforms
+        if (net_server_mode or net_client_mode) and final_environment:
+            if not environment_has_wifi(final_environment):
+                mode_name = "--net-server" if net_server_mode else "--net-client"
+                print(f"\n⚠️  {final_environment} does not have WiFi hardware")
+                print(f"   Falling back from {mode_name} to --net (loopback) mode")
+                net_server_mode = False
+                net_client_mode = False
+                net_loopback_mode = True
 
         # ============================================================
         # Network Validation Mode (--net-server or --net-client)

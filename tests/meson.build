@@ -235,18 +235,18 @@ foreach test_name : test_names
     'fl_channels_adapters_spi_channel_adapter', # SPI channel adapter test
     'channel_driver_uart',          # UART channel engine test
     'uart_waveform_alignment',      # UART waveform timing test
-    'fl_net_http_chunked_encoding', # HTTP chunked encoding test
-    'fl_net_http_connection',       # HTTP connection test
-    'fl_net_http_http_parser',      # HTTP parser test
-    'fl_net_http_http_transport',   # HTTP transport test
-    'fl_net_http_native_client',    # HTTP native client test (network I/O)
-    'fl_net_http_native_server',    # HTTP native server test (network I/O)
-    'fl_net_http_server',           # HTTP server test
-    'fl_net_http_server_loopback',  # HTTP server loopback test
-    'fl_net_http_stream_client',    # HTTP stream client test (network I/O)
-    'fl_net_http_stream_server',    # HTTP stream server test
-    'fl_net_http_stream_transport', # HTTP stream transport test
-    'fl_net_http_test_utils_mock_http' # HTTP mock test utilities
+    'fl_stl_asio_http_chunked_encoding', # HTTP chunked encoding test
+    'fl_stl_asio_http_connection',       # HTTP connection test
+    'fl_stl_asio_http_http_parser',      # HTTP parser test
+    'fl_stl_asio_http_http_transport',   # HTTP transport test
+    'fl_stl_asio_http_native_client',    # HTTP native client test (network I/O)
+    'fl_stl_asio_http_native_server',    # HTTP native server test (network I/O)
+    'fl_stl_asio_http_server',           # HTTP server test
+    'fl_stl_asio_http_server_loopback',  # HTTP server loopback test
+    'fl_stl_asio_http_stream_client',    # HTTP stream client test (network I/O)
+    'fl_stl_asio_http_stream_server',    # HTTP stream server test
+    'fl_stl_asio_http_stream_transport', # HTTP stream transport test
+    'fl_stl_asio_http_test_utils_mock_http' # HTTP mock test utilities
   ]
 
   if test_name in slow_tests

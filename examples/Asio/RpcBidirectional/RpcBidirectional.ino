@@ -1,0 +1,392 @@
+// @filter: (platform is native)
+
+/// @file RpcBidirectional.ino
+/// @brief Example demonstrating bidirectional HTTP streaming RPC (server + client in same process)
+///
+/// This example shows how to:
+/// - Run both HTTP RPC server and client in the same application
+/// - Server binds methods (SYNC, ASYNC, ASYNC_STREAM)
+/// - Client connects to server via loopback (localhost)
+/// - Demonstrate all three RPC modes over HTTP streaming
+/// - Handle responses and visualize on LEDs
+///
+/// This is useful for:
+/// - Testing RPC functionality without multiple processes
+/// - Building applications with internal RPC communication
+/// - Demonstrating full HTTP streaming RPC capabilities
+///
+/// @see fl/remote/remote.h for full API documentation
+/// @see fl/stl/asio/http/PROTOCOL.md for protocol specification
+
+#include <FastLED.h>
+#include "fl/remote/remote.h"
+#include "fl/remote/rpc/response_send.h"
+#include "fl/stl/asio/http/stream_server.h"
+#include "fl/stl/asio/http/stream_client.h"
+#include "fl/stl/asio/http/stream_server.cpp.hpp"
+#include "fl/stl/asio/http/stream_client.cpp.hpp"
+#include "fl/stl/asio/http/stream_transport.cpp.hpp"
+#include "fl/stl/asio/http/connection.cpp.hpp"
+#include "fl/stl/asio/http/chunked_encoding.cpp.hpp"
+#include "fl/stl/asio/http/http_parser.cpp.hpp"
+#include "fl/stl/asio/http/native_server.cpp.hpp"
+#include "fl/stl/asio/http/native_client.cpp.hpp"
+#include <thread>  // ok include
+#include <atomic>  // ok include
+#include "fl/stl/chrono.h"
+#include "fl/stl/thread.h"
+
+#define NUM_LEDS 10
+#define DATA_PIN 3
+#define SERVER_PORT 8080
+
+CRGB leds[NUM_LEDS];
+
+// Server-side components
+fl::HttpStreamServer* serverTransport = nullptr;
+fl::Remote* serverRemote = nullptr;
+
+// Client-side components
+fl::HttpStreamClient* clientTransport = nullptr;
+fl::Remote* clientRemote = nullptr;
+
+// Server background thread (needed for same-process client+server)
+std::thread serverThread;
+std::atomic<bool> serverRunning(false);
+
+// Run server in background thread so client can connect without deadlock
+void serverThreadFunc() {
+    while (serverRunning.load()) {
+        uint32_t now = millis();
+        serverTransport->acceptClients();
+        serverTransport->update(now);
+        if (serverRemote) {
+            serverRemote->update(now);
+        }
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(10));  // ok sleep for
+    }
+}
+
+// Request tracking
+int requestId = 1;
+bool waitingForResponse = false;
+uint32_t lastRequestTime = 0;
+const uint32_t REQUEST_INTERVAL = 3000; // 3 seconds between requests
+
+// Test mode
+enum TestMode {
+    TEST_SYNC,        // Test SYNC mode (add)
+    TEST_ASYNC,       // Test ASYNC mode (longTask)
+    TEST_ASYNC_STREAM // Test ASYNC_STREAM mode (streamData)
+};
+TestMode currentMode = TEST_SYNC;
+
+void setup() {
+    Serial.begin(115200);
+    while (!Serial && millis() < 3000) {
+        // Wait for serial or timeout
+    }
+
+    Serial.println("\n=== HTTP RPC Bidirectional Example ===\n");
+    Serial.println("This example demonstrates server + client in one process:");
+    Serial.println("  - Server listens on port 8080");
+    Serial.println("  - Client connects to localhost:8080");
+    Serial.println("  - All three RPC modes demonstrated");
+    Serial.println();
+
+    // Initialize LEDs
+    FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
+    FastLED.setBrightness(50);
+    fill_solid(leds, NUM_LEDS, CRGB::Black);
+    FastLED.show();
+
+    // ========== SERVER SETUP ==========
+    Serial.println("Starting HTTP server on port 8080...");
+
+    serverTransport = new fl::HttpStreamServer(SERVER_PORT);  // ok bare allocation
+    serverTransport->setHeartbeatInterval(30000);
+    serverTransport->setTimeout(60000);
+
+    // Connection callbacks
+    serverTransport->setOnConnect([]() {
+        Serial.println("[SERVER] Client connected!");
+        leds[0] = CRGB::Green;
+        FastLED.show();
+    });
+
+    serverTransport->setOnDisconnect([]() {
+        Serial.println("[SERVER] Client disconnected!");
+        leds[0] = CRGB::Red;
+        FastLED.show();
+    });
+
+    // Create server Remote
+    serverRemote = new fl::Remote(  // ok bare allocation
+        []() { return serverTransport->readRequest(); },
+        [](const fl::json& response) { serverTransport->writeResponse(response); }
+    );
+
+    // ========== BIND SERVER METHODS ==========
+
+    // SYNC mode: add(a, b)
+    serverRemote->bind("add", [](const fl::json& params) -> fl::json {
+        int a = 0, b = 0;
+        if (params.is_array() && params.size() >= 2) {
+            auto aOpt = params[0].as_int();
+            auto bOpt = params[1].as_int();
+            if (aOpt && bOpt) {
+                a = *aOpt;
+                b = *bOpt;
+            }
+        }
+        int result = a + b;
+        fl::printf("[SERVER] add(%d, %d) = %d\n", a, b, result);
+        return fl::json(result);
+    });
+
+    // ASYNC mode: longTask(duration)
+    serverRemote->bindAsync("longTask", [](fl::ResponseSend& send, const fl::json& params) {
+        // Send ACK
+        fl::json ack = fl::json::object();
+        ack.set("ack", true);
+        send.send(ack);
+
+        // Extract duration
+        int duration = 1000;
+        if (params.is_array() && params.size() > 0) {
+            auto durationOpt = params[0].as_int();
+            if (durationOpt) {
+                duration = *durationOpt;
+            }
+        }
+
+        fl::printf("[SERVER] longTask(%d) - ACK sent\n", duration);
+
+        // Simulate work
+        uint32_t startTime = millis();
+        while (millis() - startTime < static_cast<uint32_t>(duration)) {
+            delay(100);
+        }
+
+        // Send result
+        fl::json result = fl::json::object();
+        result.set("value", 42);
+        result.set("duration", duration);
+        send.send(result);
+
+        fl::printf("[SERVER] longTask(%d) - DONE\n", duration);
+    }, fl::RpcMode::ASYNC);
+
+    // ASYNC_STREAM mode: streamData(count)
+    serverRemote->bindAsync("streamData", [](fl::ResponseSend& send, const fl::json& params) {
+        // Send ACK
+        fl::json ack = fl::json::object();
+        ack.set("ack", true);
+        send.send(ack);
+
+        // Extract count
+        int count = 5;
+        if (params.is_array() && params.size() > 0) {
+            auto countOpt = params[0].as_int();
+            if (countOpt) {
+                count = *countOpt;
+            }
+        }
+
+        fl::printf("[SERVER] streamData(%d) - ACK sent\n", count);
+
+        // Send updates
+        for (int i = 0; i < count; i++) {
+            fl::json update = fl::json::object();
+            update.set("update", i);
+            send.sendUpdate(update);
+            fl::printf("[SERVER] streamData - update %d/%d\n", i + 1, count);
+            delay(200);
+        }
+
+        // Send final
+        fl::json final = fl::json::object();
+        final.set("value", count);
+        send.sendFinal(final);
+
+        fl::printf("[SERVER] streamData(%d) - DONE\n", count);
+    }, fl::RpcMode::ASYNC_STREAM);
+
+    // Start server
+    if (!serverTransport->connect()) {
+        Serial.println("ERROR: Failed to start server!");
+        return;
+    }
+    Serial.println("✓ Server started successfully\n");
+
+    // Start server in background thread so client can connect without deadlock
+    serverRunning.store(true);
+    serverThread = std::thread(serverThreadFunc);
+
+    // ========== CLIENT SETUP ==========
+    delay(500); // Give server time to start and begin accepting connections
+
+    Serial.println("Connecting client to server...");
+
+    clientTransport = new fl::HttpStreamClient("localhost", SERVER_PORT);  // ok bare allocation
+    clientTransport->setHeartbeatInterval(30000);
+    clientTransport->setTimeout(60000);
+
+    // Connection callbacks
+    clientTransport->setOnConnect([]() {
+        Serial.println("[CLIENT] Connected to server!");
+        leds[9] = CRGB::Blue;
+        FastLED.show();
+    });
+
+    clientTransport->setOnDisconnect([]() {
+        Serial.println("[CLIENT] Disconnected from server!");
+        leds[9] = CRGB::Red;
+        FastLED.show();
+        waitingForResponse = false;
+    });
+
+    // Create client Remote
+    clientRemote = new fl::Remote(  // ok bare allocation
+        []() { return clientTransport->readRequest(); },
+        [](const fl::json& response) { clientTransport->writeResponse(response); }
+    );
+
+    // Connect to server
+    if (!clientTransport->connect()) {
+        Serial.println("ERROR: Failed to connect to server!");
+        return;
+    }
+
+    Serial.println("✓ Client connected successfully\n");
+    Serial.println("Starting test sequence...\n");
+}
+
+void sendSyncRequest() {
+    Serial.println(">>> [CLIENT] Testing SYNC mode: add(2, 3)");
+
+    fl::json request;
+    request["jsonrpc"] = "2.0";
+    request["method"] = "add";
+    fl::json params;
+    params.push_back(2);
+    params.push_back(3);
+    request["params"] = params;
+    request["id"] = requestId++;
+
+    waitingForResponse = true;
+    clientTransport->writeResponse(request);
+}
+
+void sendAsyncRequest() {
+    Serial.println(">>> [CLIENT] Testing ASYNC mode: longTask(1000)");
+
+    fl::json request;
+    request["jsonrpc"] = "2.0";
+    request["method"] = "longTask";
+    fl::json params;
+    params.push_back(1000);
+    request["params"] = params;
+    request["id"] = requestId++;
+
+    waitingForResponse = true;
+    clientTransport->writeResponse(request);
+}
+
+void sendAsyncStreamRequest() {
+    Serial.println(">>> [CLIENT] Testing ASYNC_STREAM mode: streamData(5)");
+
+    fl::json request;
+    request["jsonrpc"] = "2.0";
+    request["method"] = "streamData";
+    fl::json params;
+    params.push_back(5);
+    request["params"] = params;
+    request["id"] = requestId++;
+
+    waitingForResponse = true;
+    clientTransport->writeResponse(request);
+}
+
+void handleClientResponse(const fl::json& response) {
+    if (response.contains("result")) {
+        const fl::json& result = response["result"];
+
+        // ACK
+        if (result.contains("ack")) {
+            auto ackOpt = result["ack"].as_bool();
+            if (ackOpt && *ackOpt) {
+                Serial.println("<<< [CLIENT] Received ACK");
+                return;
+            }
+        }
+
+        // Update
+        if (result.contains("update")) {
+            auto updateOpt = result["update"].as_int();
+            if (updateOpt) {
+                int update = *updateOpt;
+                fl::printf("<<< [CLIENT] Received update: %d\n", update);
+                leds[update % NUM_LEDS] = CRGB::Purple;
+                FastLED.show();
+            }
+            return;
+        }
+
+        // Final
+        if (result.contains("stop")) {
+            auto stopOpt = result["stop"].as_bool();
+            if (stopOpt && *stopOpt) {
+                Serial.println("<<< [CLIENT] Received FINAL result");
+                waitingForResponse = false;
+                return;
+            }
+        }
+
+        // Regular result
+        Serial.print("<<< [CLIENT] Received result: ");
+        Serial.println(result.to_string().c_str());
+        waitingForResponse = false;
+    }
+}
+
+void loop() {
+    uint32_t now = millis();
+
+    // Server is managed by serverThread - no update needed here
+
+    // Update client
+    clientTransport->update(now);
+    clientRemote->update(now);
+
+    // Process client responses
+    fl::optional<fl::json> response = clientTransport->readRequest();
+    if (response) {
+        handleClientResponse(*response);
+    }
+
+    // Send requests periodically
+    if (!waitingForResponse && (now - lastRequestTime >= REQUEST_INTERVAL)) {
+        lastRequestTime = now;
+
+        switch (currentMode) {
+            case TEST_SYNC:
+                sendSyncRequest();
+                currentMode = TEST_ASYNC;
+                break;
+
+            case TEST_ASYNC:
+                sendAsyncRequest();
+                currentMode = TEST_ASYNC_STREAM;
+                break;
+
+            case TEST_ASYNC_STREAM:
+                sendAsyncStreamRequest();
+                currentMode = TEST_SYNC;
+                Serial.println("\n--- Test cycle complete, starting over ---\n");
+                break;
+        }
+    }
+
+    delay(10);
+}
