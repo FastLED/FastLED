@@ -7,7 +7,7 @@
 #include "fl/tile2x2.h"
 #include "fl/math_macros.h"
 #include "fl/unused.h"
-#include "fl/map_range.h"
+#include "fl/stl/math.h"
 #include "fl/leds.h"
 #include "fl/grid.h"
 #include "fl/screenmap.h"

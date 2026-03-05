@@ -10,8 +10,6 @@
 #include "fl/fft_impl.h"
 #include "fl/int.h"
 #include "fl/log.h"
-#include "fl/map_range.h"
-#include "fl/math_macros.h"
 #include "fl/stl/math.h"
 #include "fl/stl/move.h"
 #include "fl/stl/span.h"

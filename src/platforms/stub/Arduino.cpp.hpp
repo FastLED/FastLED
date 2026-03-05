@@ -11,7 +11,7 @@
 
 #include "fl/stl/map.h"
 #include "fl/stl/stdio.h"
-#include "fl/map_range.h"
+#include "fl/stl/math.h"
 #include "fl/stl/cstdlib.h"
 
 // Arduino map() function - in global namespace (NOT in fl::)

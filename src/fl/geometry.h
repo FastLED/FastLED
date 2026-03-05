@@ -333,6 +333,24 @@ using vec2f = vec2<float>; // Full precision but slow.
 using vec2u8 = vec2<fl::u8>; // 8-bit unsigned integer vector.
 using vec2i16 = vec2<i16>; // 16-bit signed integer vector.
 
+// vec2 partial specialization for map_range (base template in fl/stl/math.h)
+namespace map_range_detail {
+template <typename T, typename V> struct map_range_math<T, vec2<V>> {
+    static vec2<V> map(T value, T in_min, T in_max, vec2<V> out_min,
+                       vec2<V> out_max) {
+        if (in_min == in_max) {
+            return out_min;
+        }
+        T scale = (value - in_min) / T(in_max - in_min);
+        V dx = out_max.x - out_min.x;
+        V dy = out_max.y - out_min.y;
+        V x = out_min.x + V(dx * scale);
+        V y = out_min.y + V(dy * scale);
+        return {x, y};
+    }
+};
+} // namespace map_range_detail
+
 // Legacy support for vec3
 using pair_xyz_float = vec3<float>; // Legacy name for vec3f
 

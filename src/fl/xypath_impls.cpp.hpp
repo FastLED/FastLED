@@ -6,7 +6,7 @@
 #include "fl/stl/assert.h"
 #include "fl/stl/function.h"
 #include "fl/lut.h"
-#include "fl/map_range.h"
+#include "fl/stl/math.h"
 #include "fl/math_macros.h"
 #include "fl/raster.h"
 

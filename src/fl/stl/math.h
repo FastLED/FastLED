@@ -16,6 +16,7 @@
 
 #include "fl/compiler_control.h"
 #include "fl/force_inline.h"
+#include "fl/int.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/undef.h"  // IWYU pragma: keep
 
@@ -100,6 +101,130 @@ template <typename T> FASTLED_FORCE_INLINE T clamp(T value, T lo, T hi) {
     if (value > hi) return hi;
     return value;
 }
+
+// ===== Legacy macros (prefer fl:: functions directly) ========================
+
+#ifndef FL_MAX
+#define FL_MAX(a, b) fl::max(a, b)
+#endif
+
+#ifndef FL_MIN
+#define FL_MIN(a, b) fl::min(a, b)
+#endif
+
+#ifndef FL_ABS
+#define FL_ABS(x) fl::abs(x)
+#endif
+
+// ===== Map range =============================================================
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(float-equal)
+FL_DISABLE_WARNING(double-promotion)
+FL_DISABLE_WARNING_FLOAT_CONVERSION
+FL_DISABLE_WARNING_SIGN_CONVERSION
+FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
+FL_DISABLE_WARNING_FLOAT_CONVERSION
+
+namespace map_range_detail {
+
+// Primary template for map_range_math
+template <typename T, typename U> struct map_range_math {
+    static U map(T value, T in_min, T in_max, U out_min, U out_max) {
+        if (in_min == in_max)
+            return out_min;
+        return out_min +
+               (value - in_min) * (out_max - out_min) / (in_max - in_min);
+    }
+};
+
+// Specialization for u8 -> u8
+template <> struct map_range_math<u8, u8> {
+    static u8 map(u8 value, u8 in_min, u8 in_max,
+                       u8 out_min, u8 out_max);
+};
+
+// Specialization for u16 -> u16
+template <> struct map_range_math<u16, u16> {
+    static u16 map(u16 value, u16 in_min, u16 in_max,
+                        u16 out_min, u16 out_max);
+};
+
+// Equality comparison helpers
+template <typename T> bool equals(T a, T b) { return a == b; }
+inline bool equals(float a, float b) { return FL_ALMOST_EQUAL_FLOAT(a, b); }
+inline bool equals(double d, double d2) { return FL_ALMOST_EQUAL_DOUBLE(d, d2); }
+
+} // namespace map_range_detail
+
+template <typename T, typename U>
+FASTLED_FORCE_INLINE U map_range(T value, T in_min, T in_max, U out_min,
+                                 U out_max) {
+    if (map_range_detail::equals(value, in_min)) {
+        return out_min;
+    }
+    if (map_range_detail::equals(value, in_max)) {
+        return out_max;
+    }
+    return map_range_detail::map_range_math<T, U>::map(value, in_min, in_max, out_min, out_max);
+}
+
+template <typename T, typename U>
+FASTLED_FORCE_INLINE U map_range_clamped(T value, T in_min, T in_max, U out_min,
+                                         U out_max) {
+    value = clamp(value, in_min, in_max);
+    return map_range<T, U>(value, in_min, in_max, out_min, out_max);
+}
+
+namespace map_range_detail {
+
+inline u8 map_range_math<u8, u8>::map(u8 value, u8 in_min, u8 in_max,
+                   u8 out_min, u8 out_max) {
+    if (value == in_min) {
+        return out_min;
+    }
+    if (value == in_max) {
+        return out_max;
+    }
+    i16 v16 = value;
+    i16 in_min16 = in_min;
+    i16 in_max16 = in_max;
+    i16 out_min16 = out_min;
+    i16 out_max16 = out_max;
+    i16 out16 = fl::map_range<i16, i16>(v16, in_min16, in_max16,
+                                                  out_min16, out_max16);
+    if (out16 < 0) {
+        out16 = 0;
+    } else if (out16 > 255) {
+        out16 = 255;
+    }
+    return static_cast<u8>(out16);
+}
+
+inline u16 map_range_math<u16, u16>::map(u16 value, u16 in_min, u16 in_max,
+                    u16 out_min, u16 out_max) {
+    if (value == in_min) {
+        return out_min;
+    }
+    if (value == in_max) {
+        return out_max;
+    }
+    u32 v32 = value;
+    u32 in_min32 = in_min;
+    u32 in_max32 = in_max;
+    u32 out_min32 = out_min;
+    u32 out_max32 = out_max;
+    u32 out32 = fl::map_range<u32, u32>(v32, in_min32, in_max32,
+                                                  out_min32, out_max32);
+    if (out32 > 65535) {
+        out32 = 65535;
+    }
+    return static_cast<u16>(out32);
+}
+
+} // namespace map_range_detail
+
+FL_DISABLE_WARNING_POP
 
 // ===== Forward declarations (implementations in math.cpp.hpp) ================
 
@@ -345,17 +470,3 @@ sincos(T angle, float& out_sin, float& out_cos) {
 }
 
 } // namespace fl
-
-// ===== Legacy macros (prefer fl:: functions directly) ========================
-
-#ifndef FL_MAX
-#define FL_MAX(a, b) fl::max(a, b)
-#endif
-
-#ifndef FL_MIN
-#define FL_MIN(a, b) fl::min(a, b)
-#endif
-
-#ifndef FL_ABS
-#define FL_ABS(x) fl::abs(x)
-#endif

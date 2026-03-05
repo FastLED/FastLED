@@ -10,12 +10,11 @@ and removals.
 */
 
 #include "fl/align.h"
-#include "fl/clamp.h"
 #include "fl/compiler_control.h"
 #include "fl/detail/private.h"  // IWYU pragma: keep
 #include "fl/hash.h"
 #include "fl/int.h"
-#include "fl/map_range.h"
+#include "fl/stl/math.h"
 #include "fl/stl/assert.h"  // IWYU pragma: keep
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/bitset.h"

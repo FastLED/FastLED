@@ -1468,8 +1468,7 @@ extern CFastLED FastLED;
 #include "fl/stl/string.h"   // Awesome Str class that has stack allocation and heap overflow, copy on write.
 #include "fl/xymap.h"  // XYMap class for mapping 2D coordinates on seperintine matrices.
 
-#include "fl/clamp.h"  // fl::clamp(value, min, max)
-#include "fl/map_range.h"  // fl::map_range(value, in_min, in_max, out_min, out_max)
+#include "fl/stl/math.h"  // fl::clamp, fl::map_range, fl::min, fl::max, etc.
 
 #include "fl/error.h"
 #include "fl/warn.h"  // FASTLED_WARN("time now: " << millis()), FASTLED_WARN_IF(condition, "time now: " << millis());"

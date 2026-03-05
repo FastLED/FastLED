@@ -1,7 +1,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstring.h"
-#include "fl/clamp.h"
+#include "fl/stl/math.h"
 #include "fl/force_inline.h"
 #include "fl/screenmap.h"
 #include "fl/xymap.h"

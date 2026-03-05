@@ -13,7 +13,7 @@
 #include "fl/stl/function.h"
 #include "fl/gradient.h"
 #include "fl/lut.h"
-#include "fl/map_range.h"
+#include "fl/stl/math.h"
 #include "fl/math_macros.h"
 #include "fl/raster.h"
 #include "fl/xypath.h"

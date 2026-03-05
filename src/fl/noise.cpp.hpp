@@ -3,7 +3,7 @@
 
 #include "fl/fastled.h"
 #include "fl/hsv16.h"
-#include "fl/map_range.h"
+#include "fl/stl/math.h"
 #include "fl/noise.h"
 
 // Forward declarations from src/noise.cpp

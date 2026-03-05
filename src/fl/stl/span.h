@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "fl/clamp.h"
+#include "fl/stl/math.h"
 #include "fl/geometry.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/type_traits.h"

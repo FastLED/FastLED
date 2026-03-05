@@ -7,7 +7,7 @@
 #include "fl/ease.h"
 #include "lib8tion.h" // This is the problematic header that's hard to include
 
-#include "fl/map_range.h"
+#include "fl/stl/math.h"
 #include "lib8tion/intmap.h"
 #include "fl/sin32.h"
 #include "fl/int.h"

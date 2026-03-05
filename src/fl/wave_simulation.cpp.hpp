@@ -2,7 +2,7 @@
 
 #include "fl/stl/stdint.h"
 
-#include "fl/clamp.h"
+#include "fl/stl/math.h"
 #include "fl/wave_simulation.h"
 #include "fl/int.h"
 

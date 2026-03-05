@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/force_inline.h"
-#include "fl/clamp.h"
+#include "fl/stl/math.h"
 #include "fl/lut.h"
 #include "fl/stl/type_traits.h"
 #include "fl/int.h"

@@ -15,7 +15,7 @@
 
 
 #include "fl/stl/cstring.h"
-#include "fl/map_range.h"
+#include "fl/stl/math.h"
 // Compiler throws a warning about stack usage possibly being unbounded even
 // though bounds are checked, silence that so users don't see it
 #pragma GCC diagnostic push
