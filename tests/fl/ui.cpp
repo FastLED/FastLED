@@ -34,6 +34,8 @@
 #include "fl/stl/type_traits.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/weak_ptr.h"
+
+FL_TEST_FILE(FL_FILEPATH) {
 using namespace fl;
 class MockJsonUiInternal : public fl::JsonUiInternal {
 public:
@@ -1090,3 +1092,5 @@ FL_TEST_CASE("UI Bug - Memory Corruption") {
     } // Components go out of scope here and should be properly destroyed
 }
 #endif
+
+} // FL_TEST_FILE

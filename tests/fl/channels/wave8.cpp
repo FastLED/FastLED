@@ -8,6 +8,8 @@
 #include "test.h"
 #include "fl/chipsets/led_timing.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("buildWave8ExpansionLUT") {
@@ -858,3 +860,5 @@ FL_TEST_CASE("wave8Untranspose_16_distinct_patterns") {
         }
     }
 }
+
+} // FL_TEST_FILE

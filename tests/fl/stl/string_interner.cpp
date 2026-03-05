@@ -9,6 +9,8 @@
 #include "fl/stl/string.h"           // for string
 #include "fl/string_view.h"          // for string_view
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 FL_TEST_CASE("StringInterner - basic interning") {
     fl::StringInterner interner;
     // Use string > 64 bytes (SSO threshold) to trigger actual interning
@@ -203,3 +205,5 @@ FL_TEST_CASE("string::intern() - method chaining") {
     // Should return reference to self for chaining
     FL_CHECK(&result == &s);
 }
+
+} // FL_TEST_FILE

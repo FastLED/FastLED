@@ -9,6 +9,8 @@
 
 #include "fl/file_system.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl::third_party::truetype;
 
 namespace {
@@ -301,3 +303,5 @@ FL_TEST_CASE("stbtt_truetype - Kerning") {
         FL_CHECK(true); // If we got here, functions work
     }
 }
+
+} // FL_TEST_FILE

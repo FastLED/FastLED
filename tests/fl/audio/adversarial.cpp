@@ -22,6 +22,8 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/math_macros.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 using fl::audio::test::makeSample;
 using fl::audio::test::makeSilence;
@@ -595,3 +597,5 @@ FL_TEST_CASE("Adversarial - VocalDetector with silence") {
     float conf = detector.getConfidence();
     FL_CHECK_FALSE(isNaN(conf));
 }
+
+} // FL_TEST_FILE

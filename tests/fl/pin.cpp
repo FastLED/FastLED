@@ -4,8 +4,11 @@
 /// Implementation is in src/fl/pin.cpp.hpp
 
 #include "fl/pin.h"
+#include "test.h"
 #include "fl/pins.h"
 #include "fl/fltest.h"
+
+FL_TEST_FILE(FL_FILEPATH) {
 
 // ============================================================================
 // PWM Frequency Tests
@@ -759,3 +762,5 @@ FL_TEST_CASE("pinMap_skips_negative_pins") {
 FL_TEST_CASE("pinMap_empty_span") {
     fl::pinMap(fl::span<fl::PinInfo>());
 }
+
+} // FL_TEST_FILE

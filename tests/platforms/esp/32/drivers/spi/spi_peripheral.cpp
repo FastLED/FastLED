@@ -21,6 +21,8 @@
 #include "fl/stl/vector.h"
 #include "platforms/esp/32/drivers/spi/ispi_peripheral.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 using namespace fl::detail;
 
@@ -627,3 +629,5 @@ FL_TEST_CASE("SpiPeripheralMock - getMicroseconds") {
     // Time should advance (may not be exactly 1000us due to scheduling)
     FL_CHECK(t2 > t1);
 }
+
+} // FL_TEST_FILE

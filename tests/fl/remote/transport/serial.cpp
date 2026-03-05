@@ -7,6 +7,8 @@
 
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 // =============================================================================
 // String View Optimization Tests
 // =============================================================================
@@ -223,3 +225,5 @@ FL_TEST_CASE("String view: zero-copy operations") {
 }
 
 #endif // FASTLED_ENABLE_JSON
+
+} // FL_TEST_FILE

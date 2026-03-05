@@ -7,6 +7,8 @@
 #include "fl/stl/asio/http/native_client.cpp.hpp"
 #include "fl/delay.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // Use unique high ports to avoid conflicts with other tests and services
@@ -710,3 +712,5 @@ FL_TEST_CASE("NativeHttpServer - Multiple sequential requests on same connection
     server.stop();
     client.close();
 }
+
+} // FL_TEST_FILE

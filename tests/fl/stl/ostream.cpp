@@ -2,6 +2,8 @@
 #include "fl/stl/stdint.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 // Since we can't override the fl::print function easily in this test setup,
 // we'll just verify that the ostream compiles and basic functionality works
 
@@ -67,3 +69,5 @@ FL_TEST_CASE("fl::cout type conversions work correctly") {
     // The cout should use the same underlying string append mechanisms
     FL_CHECK(true);
 }
+
+} // FL_TEST_FILE

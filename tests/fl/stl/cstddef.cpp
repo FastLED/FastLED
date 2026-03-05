@@ -2,6 +2,8 @@
 #include "fl/stl/cstddef.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -452,3 +454,5 @@ FL_TEST_CASE("type conversions and casts") {
         FL_CHECK(ptr == nullptr);
     }
 }
+
+} // FL_TEST_FILE

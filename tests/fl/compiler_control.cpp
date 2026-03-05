@@ -3,6 +3,8 @@
 #include "fl/stl/cstddef.h"
 #include "fl/stl/cstring.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 // Test helper: Function that would normally trigger a warning
 static int unused_parameter_function(int x, FL_MAYBE_UNUSED int y) {
     FL_DISABLE_WARNING_PUSH
@@ -810,3 +812,5 @@ FL_TEST_CASE("fl::deprecated_template_function") {
     FL_CHECK_EQ(newTemplateFunction(5), 15);
     FL_CHECK_EQ(newTemplateFunction(3.0), 9.0);
 }
+
+} // FL_TEST_FILE

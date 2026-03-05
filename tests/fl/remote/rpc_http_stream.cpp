@@ -14,6 +14,8 @@
 #include "fl/stl/asio/http/connection.cpp.hpp"
 #include "fl/stl/asio/http/chunked_encoding.cpp.hpp"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // Helper to create JSON-RPC request
@@ -728,3 +730,5 @@ FL_TEST_CASE("RPC-HTTP - Connection state callbacks") {
     server.update(0);  // update() triggers callbacks
     FL_CHECK(g_serverDisconnected);
 }
+
+} // FL_TEST_FILE

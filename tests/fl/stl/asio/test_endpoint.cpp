@@ -2,6 +2,8 @@
 
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 using namespace fl::asio::ip::tcp;
 
@@ -42,3 +44,5 @@ FL_TEST_CASE("endpoint - Copy semantics") {
     b.port = 443;
     FL_CHECK(a != b);
 }
+
+} // FL_TEST_FILE

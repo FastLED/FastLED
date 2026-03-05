@@ -4,6 +4,8 @@
 #include "platforms/stub/fs_stub.hpp"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 FL_TEST_CASE("fstream errno - file not found") {
     fl::ifstream ifs("/nonexistent/file.txt");
     FL_CHECK(!ifs.is_open());
@@ -174,3 +176,5 @@ FL_TEST_CASE("fstream errno - fstream read/write") {
     fl::StubFileSystem::removeFile(file_path);
     fl::StubFileSystem::removeDirectory(test_dir);
 }
+
+} // FL_TEST_FILE

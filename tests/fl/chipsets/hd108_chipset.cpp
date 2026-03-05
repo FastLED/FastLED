@@ -30,6 +30,8 @@
 #include "fl/stl/utility.h"
 #include "pixel_controller.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 namespace {
@@ -195,3 +197,5 @@ FL_TEST_CASE("HD108 - Multi-LED with brightness and color order") {
 }
 
 } // anonymous namespace
+
+} // FL_TEST_FILE

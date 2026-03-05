@@ -38,6 +38,8 @@
 #include "fl/stl/move.h"
 #include "fl/stl/map.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 
 
 using namespace fl;
@@ -2806,3 +2808,5 @@ FL_TEST_CASE("Wave3 integration - multi-lane wave3 transmission") {
                                            4, num_bytes_per_lane);
     FL_CHECK(tx_ok);
 }
+
+} // FL_TEST_FILE

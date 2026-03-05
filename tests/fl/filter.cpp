@@ -4,6 +4,8 @@
 #include "fl/filter.h"
 #include "fl/stl/fixed_point.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 namespace { // Anonymous namespace for smoothing tests
@@ -1713,3 +1715,5 @@ FL_TEST_CASE("HampelFilter - bulk empty span") {
 }
 
 } // anonymous namespace
+
+} // FL_TEST_FILE

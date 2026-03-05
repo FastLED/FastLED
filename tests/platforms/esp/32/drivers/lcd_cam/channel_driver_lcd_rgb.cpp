@@ -21,6 +21,8 @@
 #include "fl/stl/thread.h"
 #include "fl/stl/chrono.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 using namespace fl::detail;
 
@@ -449,3 +451,5 @@ FL_TEST_CASE("ChannelEngineLcdRgb - 1000 LED transmission") {
 }
 
 #endif // FASTLED_STUB_IMPL
+
+} // FL_TEST_FILE

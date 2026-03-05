@@ -8,6 +8,8 @@
 #include "fl/stl/json.h"
 #include "fl/stl/string.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // Use unique high ports to avoid conflicts with other tests and services
@@ -188,3 +190,5 @@ FL_TEST_CASE("HttpStreamClient - Destructor cleanup") {
     // Should not crash or leak
     FL_CHECK(true);
 }
+
+} // FL_TEST_FILE

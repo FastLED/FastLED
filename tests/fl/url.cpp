@@ -5,6 +5,8 @@
 #include "test.h"
 #include "fl/stl/url.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("Url - basic http") {
@@ -125,3 +127,5 @@ FL_TEST_CASE("Url - real-world audio URL") {
     FL_CHECK(u.port() == 443);
     FL_CHECK(u.path() == "/jingle-bells-8bit-lullaby-116015.mp3");
 }
+
+} // FL_TEST_FILE

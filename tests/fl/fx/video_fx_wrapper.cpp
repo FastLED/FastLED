@@ -16,6 +16,8 @@
 #include "fl/stl/string.h"
 #include "fl/xymap.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 namespace {
 
 FASTLED_SHARED_PTR(Fake2d);
@@ -62,3 +64,5 @@ FL_TEST_CASE("test_fixed_fps") {
     FL_CHECK_EQ(2, fake->mFrameCounter);
     FL_CHECK_EQ(leds[0], CRGB(127, 0, 0));
 }
+
+} // FL_TEST_FILE

@@ -12,6 +12,8 @@
 #include "fl/string_view.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 // =============================================================================
 // Test Fixtures and Helpers
 // =============================================================================
@@ -1716,3 +1718,5 @@ FL_TEST_CASE("Remote: Async RPC - Sync vs Async behavior difference") {
 }
 
 #endif // FASTLED_ENABLE_JSON
+
+} // FL_TEST_FILE

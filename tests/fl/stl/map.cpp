@@ -2,6 +2,8 @@
 #include "fl/stl/string.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 FL_TEST_CASE("fl::map basic usage") {
     fl::map<fl::string, fl::string> headers;
 
@@ -13,3 +15,5 @@ FL_TEST_CASE("fl::map basic usage") {
     FL_CHECK(headers.size() == 1);
     FL_CHECK(headers["Content-Type"] == "application/json");
 }
+
+} // FL_TEST_FILE

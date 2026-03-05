@@ -9,6 +9,8 @@
 #include "fl/stl/json.h"
 #include "fl/stl/string.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // Use unique high ports to avoid conflicts with other tests and services
@@ -176,3 +178,5 @@ FL_TEST_CASE("HttpStreamServer - disconnectClient when not connected is safe") {
     server.disconnectClient(12345);
     FL_CHECK(server.getClientCount() == 0);
 }
+
+} // FL_TEST_FILE

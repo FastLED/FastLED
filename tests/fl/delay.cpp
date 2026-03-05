@@ -5,6 +5,8 @@
 #include "fl/async.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 // ============================================================================
 // Test Suite: Compile-time Template Delays
 // ============================================================================
@@ -238,3 +240,5 @@ FL_TEST_CASE("fl::delayMillis() does not pump async (legacy)") {
 
     fl::AsyncManager::instance().unregister_runner(&runner);
 }
+
+} // FL_TEST_FILE

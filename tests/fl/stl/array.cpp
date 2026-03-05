@@ -7,6 +7,8 @@
 #include "fl/stl/type_traits.h"
 #include "fl/int.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("fl::array - Basic construction and initialization") {
@@ -459,3 +461,5 @@ FL_TEST_CASE("fl::array - to_array() helper function from span") {
         FL_CHECK_EQ(arr[2], 7);
     }
 }
+
+} // FL_TEST_FILE

@@ -6,6 +6,8 @@
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("fl::Optional - default construction") {
@@ -708,3 +710,5 @@ FL_TEST_CASE("fl::Optional<T&&> - rvalue reference specialization") {
         FL_CHECK(&ref3 == &value);
     }
 }
+
+} // FL_TEST_FILE

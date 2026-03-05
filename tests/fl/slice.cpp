@@ -4,6 +4,8 @@
 #include "fl/geometry.h"
 #include "fl/int.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // Test basic span construction and access
@@ -523,3 +525,5 @@ FL_TEST_CASE("fl::MatrixSlice - basic functionality") {
         FL_CHECK_EQ(slice3.at(0, 0), matrix[0]);
     }
 }
+
+} // FL_TEST_FILE

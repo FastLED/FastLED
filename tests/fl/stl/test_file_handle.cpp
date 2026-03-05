@@ -3,6 +3,8 @@
 #include "fl/stl/cerrno.h"
 #include "platforms/stub/fs_stub.hpp"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 // RAII guard for test files
 class FilebufTestGuard {
     fl::string mDir;
@@ -186,3 +188,5 @@ FL_TEST_CASE("posix_filebuf path() for default constructed") {
     fl::detail::posix_filebuf fh;
     FL_CHECK_EQ(fl::string(fh.path()), fl::string(""));
 }
+
+} // FL_TEST_FILE

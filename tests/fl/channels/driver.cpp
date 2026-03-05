@@ -26,6 +26,8 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/strstream.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 namespace channel_engine_test {
 
 using namespace fl;
@@ -477,3 +479,5 @@ FL_TEST_CASE("Channel: Guard against double-encoding within single FastLED.show(
 }
 
 } // namespace channel_engine_test
+
+} // FL_TEST_FILE

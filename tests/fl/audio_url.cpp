@@ -10,6 +10,8 @@
 #include "platforms/shared/ui/json/audio_internal.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("UIAudio URL constructor serializes url field") {
@@ -133,3 +135,5 @@ FL_TEST_CASE("JsonUiAudioInternal without URL has empty url") {
     // url field should NOT be present when URL is empty
     FL_CHECK_FALSE(json.contains("url"));
 }
+
+} // FL_TEST_FILE

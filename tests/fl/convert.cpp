@@ -2,6 +2,8 @@
 #include "test.h"
 #include "fl/int.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // Test the single function in convert.h
@@ -143,3 +145,5 @@ FL_TEST_CASE("convert_fastled_timings_to_timedeltas input preservation") {
     FL_CHECK_EQ(T2, T2_orig);
     FL_CHECK_EQ(T3, T3_orig);
 }
+
+} // FL_TEST_FILE

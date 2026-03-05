@@ -5,6 +5,8 @@
 #include "test.h"
 #include "platforms/esp/32/drivers/rmt/rmt_5/rmt5_worker_lut.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("rmt5_nibble_lut_correctness") {
@@ -50,3 +52,5 @@ FL_TEST_CASE("rmt5_nibble_lut_correctness") {
     FL_CHECK(lut[low_nibble][2].val == zero.val);   // bit 1 = 0
     FL_CHECK(lut[low_nibble][3].val == one.val);    // bit 0 = 1
 }
+
+} // FL_TEST_FILE

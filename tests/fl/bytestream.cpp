@@ -11,6 +11,8 @@
 #include "fl/stl/shared_ptr.h"
 #include "hsv2rgb.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 FL_TEST_CASE("memorybuf basic operations") {
 
     FL_SUBCASE("Write and read single byte") {
@@ -252,3 +254,5 @@ FL_TEST_CASE("memory file handle with pixel stream") {
     // Close the stream
     stream->close();
 }
+
+} // FL_TEST_FILE

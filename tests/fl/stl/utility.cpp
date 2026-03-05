@@ -2,6 +2,8 @@
 #include "fl/stl/limits.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("fl::less<T>") {
@@ -220,3 +222,5 @@ FL_TEST_CASE("fl::less - use with standard algorithms pattern") {
         FL_CHECK(cmp(float(1.5), double(2.5)));
     }
 }
+
+} // FL_TEST_FILE

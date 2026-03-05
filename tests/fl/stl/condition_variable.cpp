@@ -14,6 +14,8 @@
 #include "thread_stub_stl.h"
 #include "fl/stl/vector.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 #if FASTLED_MULTITHREADED
 
 
@@ -125,3 +127,5 @@ FL_TEST_CASE("fl::condition_variable single-threaded mode") {
 }
 
 #endif // FASTLED_MULTITHREADED
+
+} // FL_TEST_FILE

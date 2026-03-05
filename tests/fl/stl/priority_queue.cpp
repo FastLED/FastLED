@@ -7,6 +7,8 @@
 #include "fl/stl/utility.h"
 #include "fl/stl/cstddef.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // ============================================================================
@@ -476,3 +478,5 @@ FL_TEST_CASE("priority_queue_stable: clear") {
     FL_REQUIRE_EQ(queue.size(), 1u);
     FL_REQUIRE_EQ(queue.top(), 10);
 }
+
+} // FL_TEST_FILE

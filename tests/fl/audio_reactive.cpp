@@ -12,6 +12,8 @@
 #include "fl/stl/stdint.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 using namespace fl::test;
 
@@ -2029,3 +2031,5 @@ FL_TEST_CASE("AudioProcessor - configureEqualizer silence threshold") {
     // With threshold at 1.0, moderate audio should NOT be silent
     FL_CHECK(isSilence == false);
 }
+
+} // FL_TEST_FILE

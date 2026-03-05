@@ -9,6 +9,8 @@
 #include "test.h"
 #include "fl/stl/move.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 
 
 // Free function for testing
@@ -122,3 +124,5 @@ FL_TEST_CASE("Test clear() method") {
     f3.clear();
     FL_REQUIRE(!f3);
 }
+
+} // FL_TEST_FILE

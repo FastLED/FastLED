@@ -6,6 +6,8 @@
 #include "fl/stl/string.h"
 #include "fl/int.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("string_view - construction") {
@@ -353,3 +355,5 @@ FL_TEST_CASE("string_view - edge cases") {
     string_view null_view(nullptr, 0);
     FL_CHECK(null_view.empty());
 }
+
+} // FL_TEST_FILE

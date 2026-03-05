@@ -14,6 +14,8 @@
 #include "fl/stl/new.h"
 #include "fl/stl/vector.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 //=============================================================================
@@ -395,3 +397,5 @@ FL_TEST_CASE("Wave10 - computeBaudRate") {
         FL_CHECK_EQ(Wave10Lut::computeBaudRate(timing), 0u);
     }
 }
+
+} // FL_TEST_FILE

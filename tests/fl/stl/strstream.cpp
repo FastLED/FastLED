@@ -42,6 +42,8 @@
 #include "fl/stl/ios.h"
 #include "fl/stl/string.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 FL_TEST_CASE("sstream basic operations") {
     FL_SUBCASE("Construction and assignment") {
         fl::sstream s;
@@ -1167,3 +1169,5 @@ FL_TEST_CASE("string append fixed_point types") {
         FL_CHECK(fl::strcmp(s.str().c_str(), "4.75") == 0);
     }
 }
+
+} // FL_TEST_FILE

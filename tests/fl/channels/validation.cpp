@@ -6,6 +6,8 @@
 #include "fl/channels/validation.h"
 #include "fl/channels/validation.cpp.hpp"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // Basic test configuration
@@ -158,3 +160,5 @@ FL_TEST_CASE("Large lane count - 8 lanes (maximum allowed)") {
     FL_CHECK(result.success);
     FL_CHECK(result.lane_count == 8);
 }
+
+} // FL_TEST_FILE

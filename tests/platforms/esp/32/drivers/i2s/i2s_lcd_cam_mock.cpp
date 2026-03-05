@@ -15,6 +15,8 @@
 #include "platforms/esp/32/drivers/i2s/i2s_lcd_cam_peripheral_mock.h"
 #include "fl/stl/vector.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 using namespace fl::detail;
 
@@ -502,3 +504,5 @@ FL_TEST_CASE("I2sLcdCamPeripheralMock - deinitialize") {
 }
 
 #endif // FASTLED_STUB_IMPL
+
+} // FL_TEST_FILE

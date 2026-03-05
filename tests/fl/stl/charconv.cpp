@@ -10,6 +10,8 @@
 #include "test.h"
 #include "fl/stl/string.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // ============================================================================
@@ -144,3 +146,5 @@ FL_TEST_CASE("fl::to_hex - case sensitivity") {
         FL_CHECK_EQ(to_hex(0xFEDCBA, true, true), "00FEDCBA");
     }
 }
+
+} // FL_TEST_FILE

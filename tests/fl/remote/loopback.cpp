@@ -26,6 +26,8 @@
 #include "fl/stl/atomic.h"
 #include "fl/stl/mutex.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // Pick a random ephemeral port seeded with the current time to avoid
@@ -137,3 +139,5 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
     client_transport->disconnect();
     server_transport->disconnect();
 }
+
+} // FL_TEST_FILE

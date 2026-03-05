@@ -3,6 +3,8 @@
 #include "fl/stl/stdint.h"
 #include "test.h"
 #include "platforms/intmap.h"
+
+FL_TEST_FILE(FL_FILEPATH) {
 using namespace fl;
 
 FL_TEST_CASE("map8_to_16") {
@@ -197,3 +199,5 @@ FL_TEST_CASE("smap32_to_8") {
     FL_CHECK_EQ((int_scale<int32_t, int8_t>(int32_t(-2147418112))), -128); // (-2147418112 + 8388608) >> 24 = -128
     FL_CHECK_EQ((int_scale<int32_t, int8_t>(int32_t(-2147483648))), -128); // Min negative value naturally maps to -128
 }
+
+} // FL_TEST_FILE

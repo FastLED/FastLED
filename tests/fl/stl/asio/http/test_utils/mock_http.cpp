@@ -7,6 +7,8 @@
 #include "fl/stl/asio/http/chunked_encoding.cpp.hpp"
 #include "fl/stl/json.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // Test: MockHttpServer - Construction
@@ -404,3 +406,5 @@ FL_TEST_CASE("MockHttpClient/Server - Multiple sequential requests") {
         FL_CHECK_EQ(i, *idVal);
     }
 }
+
+} // FL_TEST_FILE

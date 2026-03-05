@@ -5,6 +5,8 @@
 #include "test.h"
 #include "fl/scope_exit.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("scope_exit - basic execution") {
@@ -46,3 +48,5 @@ FL_TEST_CASE("scope_exit - multiple guards run in reverse order") {
     // Destructors run in reverse declaration order
     FL_CHECK_EQ(order, fl::string("321"));
 }
+
+} // FL_TEST_FILE

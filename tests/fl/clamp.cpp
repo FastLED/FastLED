@@ -148,3 +148,7 @@ FL_TEST_CASE("fl::clamp") {
 
 // Grouped tests
 #include "map_range.hpp"
+
+FL_TEST_FILE(FL_FILEPATH) {
+
+} // FL_TEST_FILE

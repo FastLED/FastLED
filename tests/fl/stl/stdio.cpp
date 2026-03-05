@@ -9,6 +9,8 @@
 #include "fl/stl/string.h"
 #include "fl/unused.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 
 
 
@@ -782,3 +784,5 @@ FL_TEST_CASE("fl::snprintf vs fl::snprintf return value comparison") {
         FL_REQUIRE_EQ(fl::strlen(buffer1), fl::strlen(buffer2));
     }
 }
+
+} // FL_TEST_FILE

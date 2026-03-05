@@ -19,6 +19,8 @@
 #include "initializer_list"
 #include "fl/int.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("Empty map properties") {
@@ -1681,3 +1683,5 @@ FL_TEST_CASE("Iterator operator*() returns reference to map data, not temporary"
     FL_REQUIRE(ptr->second <= 3);     // value is in range
 }
 
+
+} // FL_TEST_FILE

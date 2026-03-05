@@ -17,6 +17,8 @@
 #include "fl/unused.h"
 #include "fl/int.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 namespace {
 
 // Tracking allocator that records copy and move operations
@@ -488,3 +490,5 @@ FL_TEST_CASE("Allocator move semantics - Stateless allocator optimization") {
         FL_CHECK(vec2.size() == 0);
     }
 }
+
+} // FL_TEST_FILE

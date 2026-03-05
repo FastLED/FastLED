@@ -16,6 +16,8 @@
 #include "fl/stl/cstddef.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 // Note: We do NOT use "using namespace fl;" because string functions
 // would conflict with system C library functions (strcmp, strcpy, etc.)
 // Instead, we explicitly use fl:: prefix for all function calls.
@@ -750,3 +752,5 @@ FL_TEST_CASE("fl::cstring type safety") {
         FL_CHECK_EQ(fl::memcmp(buffer, str, len), 0);
     }
 }
+
+} // FL_TEST_FILE

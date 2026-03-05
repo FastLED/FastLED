@@ -9,6 +9,8 @@
 #include "fl/stl/string.h"
 #include "fl/stl/strstream.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 // Test that fl::cin and fl::istream compile without errors
 
 FL_TEST_CASE("fl::istream basic instantiation compiles") {
@@ -691,3 +693,5 @@ FL_TEST_CASE("fl::istream getline with mock input") {
 }
 
 #endif // FASTLED_TESTING
+
+} // FL_TEST_FILE

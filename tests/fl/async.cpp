@@ -19,6 +19,8 @@
 #include "thread_stub_stl.h"
 #include "fl/stl/vector.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // Test helper: A simple test async runner
@@ -1062,3 +1064,5 @@ FL_TEST_CASE("global coordination - await releases lock for other threads") {
     cleanup_threads();
 }
 #endif // FASTLED_STUB_IMPL
+
+} // FL_TEST_FILE

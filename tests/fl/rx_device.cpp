@@ -11,6 +11,8 @@
 #include "fl/stl/shared_ptr.h"
 #include "platforms/is_platform.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("RxDevice - default template returns non-null device") {
@@ -231,3 +233,5 @@ FL_TEST_CASE("EdgeTime - constexpr") {
     FL_CHECK(high2 == 1);
     FL_CHECK(ns2 == 1000);
 }
+
+} // FL_TEST_FILE

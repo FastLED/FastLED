@@ -27,6 +27,8 @@
 #include "platforms/esp/32/drivers/uart_esp32.h"
 #include "platforms/shared/mock/esp/32/drivers/uart_peripheral_mock.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 namespace {
@@ -1137,3 +1139,5 @@ FL_TEST_CASE("ChannelEngineUART - canHandle validates timing") {
         FL_CHECK_FALSE(fixture.mDriver.canHandle(ch));
     }
 }
+
+} // FL_TEST_FILE

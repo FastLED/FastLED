@@ -3,6 +3,8 @@
 #include "test.h"
 #include "fl/int.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // Test FL_ASSERT macro basic usage
@@ -317,3 +319,5 @@ FL_TEST_CASE("FL_ASSERT program flow") {
         }
     }
 }
+
+} // FL_TEST_FILE

@@ -22,6 +22,8 @@
 #include "fl/stl/strstream.h"
 #include "fl/stl/vector.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl::spi;
 using fl::SPIError;
 using fl::DMABuffer;
@@ -1388,3 +1390,5 @@ FL_TEST_CASE("SPI mode configuration") {
         FL_CHECK(retrieved.spi_mode == 2);
     }
 }
+
+} // FL_TEST_FILE

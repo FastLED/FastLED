@@ -467,3 +467,7 @@ FL_TEST_CASE("Hash collision resistance") {
 // Grouped tests
 #include "hash_map_lru.hpp"
 #include "insert_result.hpp"
+
+FL_TEST_FILE(FL_FILEPATH) {
+
+} // FL_TEST_FILE

@@ -13,6 +13,8 @@
 #include "test.h"
 #include "isr_stub.hpp"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 // Test counters
 static fl::atomic<int> g_isr_call_count{0};
@@ -374,3 +376,5 @@ FL_TEST_CASE("test_interrupts_global_disable_blocks_isr") {
 // Test Main
 // =============================================================================
 // Note: setup() and loop() removed - not needed for this test
+
+} // FL_TEST_FILE

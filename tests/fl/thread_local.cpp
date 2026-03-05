@@ -6,6 +6,8 @@
 #include <unistd.h>  // for usleep
 #include "test.h"
 #include "fl/stl/thread.h"
+
+FL_TEST_FILE(FL_FILEPATH) {
 #endif
 
 
@@ -352,3 +354,5 @@ FL_TEST_CASE("ThreadLocal - RAII behavior") {
 
 
 #endif  // FASTLED_USE_THREAD_LOCAL
+
+} // FL_TEST_FILE

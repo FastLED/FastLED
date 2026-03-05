@@ -4,6 +4,8 @@
 
 #include "fl/fx/time.h"
 #include "test.h"
+
+FL_TEST_FILE(FL_FILEPATH) {
 using namespace fl;
 FL_TEST_CASE("TimeWarp basic functionality") {
 
@@ -53,3 +55,5 @@ FL_TEST_CASE("TimeWarp basic functionality") {
     }
 
 }
+
+} // FL_TEST_FILE

@@ -28,6 +28,8 @@
 #include "fl/bitset_dynamic.h"
 #include "fl/stl/bitset.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 using namespace test_helpers;
 
@@ -1376,3 +1378,5 @@ FL_TEST_CASE("Container move edge cases") {
         FL_CHECK(destination.size() == 0);
     }
 }
+
+} // FL_TEST_FILE

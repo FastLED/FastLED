@@ -27,6 +27,8 @@
 #include "fl/stl/vector.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 using namespace fl::detail;
 
@@ -382,3 +384,5 @@ FL_TEST_CASE("RMT5 driver - rapid show() calls") {
 }
 
 #endif // FASTLED_STUB_IMPL
+
+} // FL_TEST_FILE

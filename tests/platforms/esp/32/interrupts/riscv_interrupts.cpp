@@ -9,6 +9,8 @@
 
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 // Simplified test that works on host platform
 FL_TEST_CASE("riscv_interrupts_documentation_exists") {
     // This test verifies that the ESP32 interrupt documentation exists
@@ -188,3 +190,6 @@ FL_TEST_CASE("riscv_interrupts_not_applicable") {
 #endif
 
 #endif // Disable ESP32-specific tests for host platform
+
+} // FL_TEST_FILE
+

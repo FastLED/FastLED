@@ -6,6 +6,8 @@
 #include "fl/stl/span.h"
 #include "fl/stl/allocator.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 
 FL_TEST_CASE("fl::span explicit conversions work correctly") {
     FL_SUBCASE("fl::vector to fl::span conversions") {
@@ -152,3 +154,5 @@ FL_TEST_CASE("fl::span limitations - template argument deduction") {
         // considers exact type matches, not constructor conversions
     }
 } 
+
+} // FL_TEST_FILE

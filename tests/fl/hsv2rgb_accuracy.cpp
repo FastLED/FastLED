@@ -11,6 +11,8 @@
 #include "fl/log.h"
 #include "fl/stl/math.h"
 #include "fl/stl/strstream.h"
+
+FL_TEST_FILE(FL_FILEPATH) {
 using namespace fl;
 struct AccuracyStats {
     float average;
@@ -253,3 +255,5 @@ FL_TEST_CASE("HSV to RGB Conversion - Hue Sweep Test") {
     }
     FL_WARN("");
 }
+
+} // FL_TEST_FILE

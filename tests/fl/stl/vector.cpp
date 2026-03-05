@@ -14,6 +14,8 @@
 #include "fl/unused.h"
 #include "stdlib.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 
 
 FL_TEST_CASE("Fixed vector simple") {
@@ -782,3 +784,5 @@ FL_TEST_CASE("is_trivially_copyable trait") {
         FL_CHECK_FALSE(fl::is_trivially_copyable<NonTriviallyCopyable>::value);
     }
 }
+
+} // FL_TEST_FILE

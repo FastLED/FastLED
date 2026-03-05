@@ -7,6 +7,8 @@
 #include "fl/stl/type_traits.h"
 #include "fl/stl/unique_ptr.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 namespace functional_test {
@@ -397,3 +399,5 @@ FL_TEST_CASE("fl::invoke with fl::function objects") {
     auto result7 = invoke(nested_func, 25);
     FL_CHECK_EQ(650, result7);  // (300 + 25) * 2 = 650
 }
+
+} // FL_TEST_FILE

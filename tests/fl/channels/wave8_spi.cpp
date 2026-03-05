@@ -20,6 +20,8 @@
 #include "test.h"  // for ResultBuilder, CHECK, etc.
 #include "fl/stl/span.h"  // for span
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // ============================================================================
@@ -358,3 +360,5 @@ FL_TEST_CASE("wave8_vs_legacy_encoding") {
     FL_REQUIRE(fl::memcmp(wave8_output, legacy_output, legacy_bytes) == 0);
 }
 */
+
+} // FL_TEST_FILE

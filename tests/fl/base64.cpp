@@ -1,6 +1,8 @@
 #include "test.h"
 #include "fl/remote/rpc/base64.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 FL_TEST_CASE("base64 encode/decode roundtrip") {
     FL_SUBCASE("empty data") {
         fl::vector<fl::u8> empty;
@@ -82,3 +84,5 @@ FL_TEST_CASE("base64 decode error handling") {
         FL_CHECK(result.empty());
     }
 }
+
+} // FL_TEST_FILE

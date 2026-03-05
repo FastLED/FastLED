@@ -2,6 +2,8 @@
 #include "test.h"
 #include "platforms/shared/atomic.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // Test both AtomicFake (single-threaded) and AtomicReal (multi-threaded)
@@ -322,3 +324,5 @@ FL_TEST_CASE("fl::atomic - complex usage patterns") {
         FL_CHECK_EQ(countdown.load(), 0);
     }
 }
+
+} // FL_TEST_FILE

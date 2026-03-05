@@ -8,6 +8,8 @@
 #include "fl/stl/math.h"
 #include "fl/math_macros.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 using fl::audio::test::makeSample;
 
@@ -638,3 +640,5 @@ FL_TEST_CASE("FrequencyBands - burst mode identical timestamps still converge") 
     // Should have converged meaningfully even with identical timestamps
     FL_CHECK_GT(bassNorm, 0.5f);
 }
+
+} // FL_TEST_FILE

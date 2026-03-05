@@ -1,6 +1,8 @@
 #include "fl/stl/circular_buffer.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("fl::circular_buffer - basic operations") {
@@ -498,3 +500,5 @@ FL_TEST_CASE("fl::circular_buffer - operator[] and back()") {
     FL_CHECK_EQ(buffer.front(), 30);
     FL_CHECK_EQ(buffer.back(), 60);
 }
+
+} // FL_TEST_FILE

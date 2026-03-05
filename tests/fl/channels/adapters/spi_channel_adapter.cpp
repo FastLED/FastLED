@@ -14,6 +14,8 @@
 #include "fl/stl/shared_ptr.h"
 #include "platforms/shared/spi_hw_base.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 namespace {
@@ -535,3 +537,5 @@ FL_TEST_CASE("SpiChannelEngineAdapter - Multiple channels same clock pin") {
     // Mock transmit called once per channel in batch
     FL_CHECK_GT(spiHw1->getTransmitCount(), 0);
 }
+
+} // FL_TEST_FILE

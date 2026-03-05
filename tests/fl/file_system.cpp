@@ -30,6 +30,8 @@
 #include "test.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/int.h"
+
+FL_TEST_FILE(FL_FILEPATH) {
 #endif
 
 
@@ -296,3 +298,5 @@ FL_TEST_CASE("FileSystem test with binary file loading") {
 
     // TestRootGuard destructor clears global state
 }
+
+} // FL_TEST_FILE

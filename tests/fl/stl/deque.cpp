@@ -4,6 +4,8 @@
 #include "test.h"
 #include "fl/stl/move.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("fl::deque - default constructor") {
@@ -482,3 +484,5 @@ FL_TEST_CASE("fl::deque - move semantics with push") {
     FL_CHECK_EQ(dq[0].value, 99);
     FL_CHECK_EQ(obj2.value, -1); // Moved from
 }
+
+} // FL_TEST_FILE

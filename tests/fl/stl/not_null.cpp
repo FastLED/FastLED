@@ -198,6 +198,8 @@ FL_TEST_CASE("not_null - modify through smart pointer") {
 #include "fl/stl/move.h"
 #include "fl/stl/type_traits.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 FL_TEST_CASE("not_null - works with CRGB pointer") {
     fl::CRGB pixel(255, 128, 64);
     not_null<fl::CRGB*> ptr(&pixel);
@@ -387,3 +389,5 @@ FL_TEST_CASE("not_null - deleted operations are compile-time enforced") {
     // is the test itself. We just need a passing check to keep the test framework happy.
     FL_CHECK(true);
 }
+
+} // FL_TEST_FILE

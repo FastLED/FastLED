@@ -15,6 +15,8 @@
 #include "crgb.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("SPI chipset channel creation and data push") {
@@ -475,3 +477,5 @@ FL_TEST_CASE("ChannelManager - predicate filtering (SPI accepted)") {
 }
 
 #endif  // End of disabled proxy pattern tests
+
+} // FL_TEST_FILE

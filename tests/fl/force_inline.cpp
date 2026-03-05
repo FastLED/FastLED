@@ -1,6 +1,8 @@
 #include "fl/force_inline.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 // Test that FASTLED_FORCE_INLINE macro is defined and can be used
 
 // Define test functions using the macro
@@ -172,3 +174,5 @@ FL_TEST_CASE("FASTLED_FORCE_INLINE with various signatures") {
         FL_CHECK_EQ(x, -50);
     }
 }
+
+} // FL_TEST_FILE

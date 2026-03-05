@@ -22,6 +22,8 @@
 #include "fl/stl/type_traits.h"
 #include "fl/stl/vector.h"
 #include "rgbw.h"
+
+FL_TEST_FILE(FL_FILEPATH) {
 using namespace fl;
 FL_TEST_CASE("ActiveStripData JSON Round-Trip Test") {
     FL_WARN("Testing ActiveStripData JSON round-trip...");
@@ -126,3 +128,5 @@ FL_TEST_CASE("ActiveStripData JSON Round-Trip Test") {
 
     
 } 
+
+} // FL_TEST_FILE

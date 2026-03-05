@@ -2,6 +2,9 @@
 
 #include "doctest.h"
 
+#define FL_FILEPATH __FILE__
+#define FL_TEST_FILE(path) namespace test
+
 #include "fl/stl/stdint.h"
 #include "fl/stl/iostream.h"
 #include "fl/stl/cstring.h"

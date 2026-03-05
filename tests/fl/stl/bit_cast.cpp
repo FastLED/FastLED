@@ -3,6 +3,8 @@
 #include "test.h"
 #include "fl/int.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("fl::bit_cast basic conversions") {
@@ -305,3 +307,5 @@ FL_TEST_CASE("fl::bit_cast runtime conversions") {
         FL_CHECK_EQ(runtime_result, static_cast<i32>(0x12345678));
     }
 }
+
+} // FL_TEST_FILE

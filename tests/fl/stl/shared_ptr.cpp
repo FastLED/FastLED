@@ -5,6 +5,8 @@
 #include "fl/stl/move.h"
 #include "fl/stl/vector.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 namespace shared_ptr_test {
 
 // Test class that does NOT inherit from fl::Referent (non-intrusive)
@@ -521,3 +523,5 @@ FL_TEST_CASE("fl::make_shared_no_tracking copy and move semantics") {
 }
 
 } // namespace shared_ptr_test
+
+} // FL_TEST_FILE

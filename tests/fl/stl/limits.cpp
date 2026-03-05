@@ -2,6 +2,8 @@
 #include "fl/stl/limits.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // Test primary template (unspecialized type)
@@ -629,3 +631,5 @@ FL_TEST_CASE("fl::numeric_limits - generic context usage") {
         FL_CHECK_FALSE(in_range);
     }
 }
+
+} // FL_TEST_FILE

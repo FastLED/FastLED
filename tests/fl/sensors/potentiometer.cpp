@@ -8,6 +8,8 @@
 #include "fl/stl/function.h"
 #include "fl/stl/move.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("Potentiometer - raw value reading") {
@@ -318,3 +320,5 @@ FL_TEST_CASE("Potentiometer - multiple callbacks") {
     FL_CHECK(callback1_count == 2);
     FL_CHECK(callback2_count == 2);
 }
+
+} // FL_TEST_FILE

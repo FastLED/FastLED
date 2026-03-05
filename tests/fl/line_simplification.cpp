@@ -10,6 +10,8 @@
 #include "fl/stl/span.h"
 #include "fl/stl/move.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 
 FL_TEST_CASE("Test Line Simplification") {
     // default‐constructed bitset is empty
@@ -207,3 +209,5 @@ FL_TEST_CASE("Known bad") {
 
 //     MESSAGE("Completed 1000 trials of random 5→3 simplification");
 // }
+
+} // FL_TEST_FILE

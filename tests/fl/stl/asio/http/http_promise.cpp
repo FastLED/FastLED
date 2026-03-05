@@ -13,6 +13,8 @@
 #include "fl/stl/asio/http/connection.cpp.hpp"
 #include "fl/stl/asio/http/chunked_encoding.cpp.hpp"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 //=============================================================================
@@ -310,3 +312,5 @@ FL_TEST_CASE("Promise - Multiple concurrent calls resolve correctly") {
     FL_CHECK_EQ(call2.value()["result"].as_int().value(), 40);
     FL_CHECK_EQ(call3.value()["result"].as_int().value(), 60);
 }
+
+} // FL_TEST_FILE

@@ -23,6 +23,8 @@
 #include "fl/string.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 namespace draining_state_test {
 
 using namespace fl;
@@ -164,3 +166,5 @@ FL_TEST_CASE("poll propagates worst state across multiple drivers") {
 }
 
 } // namespace draining_state_test
+
+} // FL_TEST_FILE

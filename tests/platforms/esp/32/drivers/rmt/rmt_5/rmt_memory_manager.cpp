@@ -14,6 +14,8 @@
 
 #include "platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // ============================================================================
@@ -714,6 +716,8 @@ FL_TEST_CASE("RMT Memory Manager: calculateMemoryBlocks integration with custom 
     // Restore default strategy after all subcases
     mgr.setMemoryBlockStrategy(saved_idle, saved_network);
 }
+
+} // FL_TEST_FILE
 
 #endif // FASTLED_RMT5
 #endif // ESP32

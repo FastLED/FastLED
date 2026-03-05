@@ -306,3 +306,7 @@ FL_TEST_CASE("FL_ALIGN macro combinations") {
 
 // Grouped tests
 #include "assume_aligned.hpp"
+
+FL_TEST_FILE(FL_FILEPATH) {
+
+} // FL_TEST_FILE

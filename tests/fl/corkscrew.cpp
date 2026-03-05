@@ -21,6 +21,8 @@
 #include "fl/stl/vector.h"
 #include "hsv2rgb.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 #undef NUM_LEDS  // Avoid redefinition in unity builds
 #define NUM_LEDS 288
 
@@ -666,3 +668,5 @@ FL_TEST_CASE("Corkscrew caching with edge cases") {
         }
     }
 }
+
+} // FL_TEST_FILE

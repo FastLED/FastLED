@@ -7,6 +7,8 @@
 #include "fl/stl/move.h"
 #include "fl/stl/type_traits.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("fl::tuple - empty tuple") {
@@ -266,3 +268,5 @@ FL_TEST_CASE("fl::tuple - edge cases") {
         FL_CHECK_EQ(5, get<4>(t));
     }
 }
+
+} // FL_TEST_FILE

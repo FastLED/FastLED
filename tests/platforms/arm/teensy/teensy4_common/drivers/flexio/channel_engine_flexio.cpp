@@ -18,6 +18,8 @@
 #include "fl/channels/driver.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 using DriverState = IChannelDriver::DriverState;
@@ -224,3 +226,5 @@ FL_TEST_CASE("FlexIO engine - handles init failure gracefully") {
 }
 
 #endif // FASTLED_STUB_IMPL
+
+} // FL_TEST_FILE

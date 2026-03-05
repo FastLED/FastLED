@@ -36,6 +36,8 @@
 #include "hsv2rgb.h"
 #include "FastLED.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 namespace {
@@ -1305,3 +1307,5 @@ FL_TEST_CASE("WS2812 channel produces no UCS7604 preamble") {
 }
 
 } // anonymous namespace
+
+} // FL_TEST_FILE

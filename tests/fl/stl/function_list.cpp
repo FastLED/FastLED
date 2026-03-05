@@ -10,6 +10,8 @@
 #include "fl/stl/move.h"
 #include "fl/stl/vector.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("function_list<void()> - no arguments") {
@@ -427,3 +429,5 @@ FL_TEST_CASE("function_list<int(float)> - should NOT compile due to non-void ret
     function_list<int(float)> callbacks;  // ERROR: non-void return type
 }
 */
+
+} // FL_TEST_FILE

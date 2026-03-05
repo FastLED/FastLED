@@ -5,6 +5,8 @@
 #include "test.h"
 #include "fl/stl/cstring.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 // Helper: wrap a C string as a span for feed()
 static fl::span<const uint8_t> asSpan(const char* s) {
     return fl::span<const uint8_t>(
@@ -410,3 +412,5 @@ FL_TEST_CASE("HttpResponseParser - Header value trimming") {
     FL_CHECK(res->headers.at("Content-Type") == "application/json");
     FL_CHECK(res->headers.at("Server") == "nginx");
 }
+
+} // FL_TEST_FILE

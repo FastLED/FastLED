@@ -12,6 +12,8 @@
 #include "fl/stl/type_traits.h"
 #include "fl/int.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // ========================================
@@ -345,3 +347,5 @@ FL_TEST_CASE("fl::set_inlined - Exceeding inlined size") {
         }
     }
 }
+
+} // FL_TEST_FILE

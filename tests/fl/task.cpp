@@ -10,6 +10,8 @@
 #include "fl/stl/function.h"
 #include "fl/stl/move.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 
 
 
@@ -277,3 +279,5 @@ FL_TEST_CASE("Task self-registration and destruction behavior [task]") {
         fl::Scheduler::instance().clear_all_tasks();
     }
 } 
+
+} // FL_TEST_FILE

@@ -4,6 +4,8 @@
 #include "test.h"
 #include "fl/stl/format.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // =============================================================================
@@ -350,3 +352,5 @@ FL_TEST_CASE("format - mixed types") {
     FL_CHECK(fl::strstr(result.c_str(), "3.14") != nullptr);
     FL_CHECK(fl::strstr(result.c_str(), "X") != nullptr);
 }
+
+} // FL_TEST_FILE

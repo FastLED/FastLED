@@ -1,4 +1,7 @@
 #include "noise_test_helpers.h"
+#include "test.h"
+
+FL_TEST_FILE(FL_FILEPATH) {
 
 using namespace fl;
 using namespace noise_test_helpers;
@@ -1426,3 +1429,5 @@ FL_TEST_CASE("[.]noiseCylinderCRGB full cylinder coverage") {
 
 #endif  // End disabled noise tests
 
+
+} // FL_TEST_FILE

@@ -7,6 +7,8 @@
 #include "fl/stl/asio/http/chunked_encoding.cpp.hpp"
 #include "fl/stl/json.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // ============================================================================
@@ -564,3 +566,5 @@ FL_TEST_CASE("HTTP Transport - Stress test with 1000 messages") {
         FL_CHECK_EQ((*received)["id"].as_int().value(), i);
     }
 }
+
+} // FL_TEST_FILE

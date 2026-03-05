@@ -6,6 +6,8 @@
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 FL_TEST_CASE("sstream handles all integer types generically") {
     fl::sstream ss;
 
@@ -234,3 +236,5 @@ FL_TEST_CASE("char types are handled correctly") {
         FL_CHECK(ss.str() == "65");
     }
 }
+
+} // FL_TEST_FILE

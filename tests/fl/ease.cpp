@@ -7,6 +7,8 @@
 #include "test.h"
 #include <cstdlib>  // ok include - for abs()
 #include <cmath>  // ok include - for math functions
+
+FL_TEST_FILE(FL_FILEPATH) {
 using namespace fl;
 // Common array of easing types with names used across multiple test cases
 static const fl::pair<fl::EaseType, const char*> ALL_EASING_TYPES[10] = {
@@ -599,3 +601,5 @@ FL_TEST_CASE("Gamma8 - fixed_point<8,8> to u16 span overload") {
     // Both overloads should produce the same lerped value
     FL_CHECK(mid_u16_out[0] == mid_fp_out[0].raw());
 }
+
+} // FL_TEST_FILE

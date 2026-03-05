@@ -3,6 +3,8 @@
 #include "test.h"
 #include "stdint.h" // ok include - testing FL types against standard
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 // Test that fl/stl/stdint.h provides standard integer types without including <stdint.h>
 // This header is critical for FastLED's fast compilation strategy
 // ok INT_MAX (this file tests that the numeric limit macros are properly defined)
@@ -345,3 +347,5 @@ FL_TEST_CASE("stdint constexpr compatibility") {
         static_assert(UINT32_MAX == 4294967295U, "UINT32_MAX should be 4294967295U");
     }
 }
+
+} // FL_TEST_FILE

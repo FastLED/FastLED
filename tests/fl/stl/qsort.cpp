@@ -1,6 +1,8 @@
 #include "fl/stl/cstdlib.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 // Helper comparison function for integers
 static int compare_ints(const void* a, const void* b) {
     int arg1 = *static_cast<const int*>(a);
@@ -248,3 +250,5 @@ FL_TEST_CASE("fl::qsort - stress test") {
         }
     }
 }
+
+} // FL_TEST_FILE

@@ -8,6 +8,8 @@
 #include "fl/stl/move.h"
 #include "mutex_stub_stl.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 FL_TEST_CASE("fl::thread - basic construction and joinable") {
     // Default constructed thread is not joinable
     fl::thread t1;
@@ -147,3 +149,5 @@ FL_TEST_CASE("fl::thread - thread with mutex synchronization") {
 
     FL_REQUIRE(shared_value == 2 * num_increments);
 }
+
+} // FL_TEST_FILE

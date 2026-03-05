@@ -9,6 +9,8 @@
 #include "fl/stl/span.h"
 #include "fl/stl/shared_ptr.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("WLEDClient construction") {
@@ -484,3 +486,5 @@ FL_TEST_CASE("WLEDClient advanced integration workflow") {
         FL_CHECK(mock->getClearCallCount() == 1);
     }
 }
+
+} // FL_TEST_FILE

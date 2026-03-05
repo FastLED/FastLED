@@ -7,6 +7,8 @@
 #include "fl/stl/stdint.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 
 
 FL_TEST_CASE("LUT interp8") {
@@ -40,3 +42,5 @@ FL_TEST_CASE("LUT interp16") {
         FL_CHECK_EQ(i, lut.interp16(alpha16));
     }
 }
+
+} // FL_TEST_FILE

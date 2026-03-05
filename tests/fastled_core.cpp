@@ -54,6 +54,8 @@
 #include "fl/stl/new.h"
 #include "fl/cled_controller.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 #undef NUM_LEDS  // Avoid redefinition in unity builds
 #define NUM_LEDS 1000
 #define DATA_PIN 2
@@ -1927,3 +1929,5 @@ FL_TEST_CASE("Channel API: Late binding - driver name empty after construction")
     manager.setDriverEnabled("LATE_BIND_AFFINITY", false);
     manager.setDriverEnabled("LATE_BIND_NO_AFFINITY", false);
 }
+
+} // FL_TEST_FILE

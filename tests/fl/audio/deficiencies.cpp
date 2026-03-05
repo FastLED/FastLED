@@ -26,6 +26,8 @@
 #include "fl/audio/detectors/vocal.h"
 #include "fl/stl/math.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 using fl::audio::test::makeSample;
 using fl::audio::test::generateDC;
@@ -316,3 +318,5 @@ FL_TEST_CASE("Audio fix - FrequencyBands callbacks fire") {
     FL_CHECK_GT(lastMid, 0.0f);
     FL_CHECK_GT(lastTreble, 0.0f);
 }
+
+} // FL_TEST_FILE

@@ -8,6 +8,8 @@
 #include "fl/stl/string.h"
 #include "fl/stl/variant.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 
 FL_TEST_CASE("fl::promise - Basic Operations") {
     FL_SUBCASE("Default constructor creates invalid promise") {
@@ -745,3 +747,5 @@ FL_TEST_CASE("fl::PromiseResult - Copy and Move Semantics") {
         FL_CHECK_EQ(moved.value(), "Move me");
     }
 } 
+
+} // FL_TEST_FILE

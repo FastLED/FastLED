@@ -16,6 +16,8 @@
 #include "fl/stl/span.h"
 #include "fl/stl/move.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 namespace {
@@ -179,3 +181,5 @@ FL_TEST_CASE("writeWithPadding - UCS7604 complex padding") {
     FL_REQUIRE(buffer.size() == 19);
     FL_REQUIRE(buffer[15] == 0xAA);
 }
+
+} // FL_TEST_FILE

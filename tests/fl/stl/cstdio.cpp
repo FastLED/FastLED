@@ -10,6 +10,8 @@
 #include "fl/stl/strstream.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 FL_TEST_CASE("fl::readStringUntil basic") {
     // Inject simple read handler that returns "hello\n"
     const char* testData = "hello\n";
@@ -353,3 +355,5 @@ FL_TEST_CASE("fl::printf pointer format") {
 // - %g/%G (general float) - requires choosing between %f and %e
 // - %*d (dynamic width) - requires runtime argument consumption in variadic templates
 // - %.*f (dynamic precision) - requires runtime argument consumption in variadic templates
+
+} // FL_TEST_FILE

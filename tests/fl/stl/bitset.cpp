@@ -4,6 +4,8 @@
 #include "fl/stl/move.h"
 #include "fl/int.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // Test the utility functions
@@ -283,3 +285,5 @@ FL_TEST_CASE("fl::bitset_fixed - type alias") {
     bitset_fixed<64> bs64;
     FL_CHECK_EQ(bs64.size(), 64);
 }
+
+} // FL_TEST_FILE

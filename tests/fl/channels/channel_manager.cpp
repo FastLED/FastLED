@@ -19,6 +19,8 @@
 #include "fl/stl/string.h"
 #include "fl/stl/cstdio.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 
 
 using namespace fl;
@@ -287,3 +289,5 @@ FL_TEST_CASE("ChannelManager - Span validity") {
     FL_CHECK(info2[0].name == "SPI");  // Higher priority
     FL_CHECK(info2[1].name == "RMT");
 }
+
+} // FL_TEST_FILE

@@ -20,6 +20,8 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/thread.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 using namespace fl::detail;
 
@@ -319,3 +321,5 @@ FL_TEST_CASE("ChannelEngineI2S - varying LED counts") {
 }
 
 #endif // FASTLED_STUB_IMPL
+
+} // FL_TEST_FILE

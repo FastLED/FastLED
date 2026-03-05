@@ -2,6 +2,8 @@
 #include "fl/stl/initializer_list.h"
 #include "fl/int.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("fl::initializer_list basic functionality") {
@@ -272,3 +274,5 @@ FL_TEST_CASE("fl::initializer_list single element") {
         FL_CHECK(doctest::Approx(*list.begin()).epsilon(0.001) == 3.14);
     }
 }
+
+} // FL_TEST_FILE

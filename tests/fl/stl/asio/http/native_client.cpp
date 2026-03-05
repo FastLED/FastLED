@@ -13,6 +13,8 @@
 #include "fl/stl/mutex.h"
 #include "fl/delay.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // Use port 0 so the OS assigns a free port — avoids hardcoded port conflicts
@@ -423,3 +425,5 @@ FL_TEST_CASE("NativeHttpClient - Large payload transfer") {
 
     client.close();
 }
+
+} // FL_TEST_FILE

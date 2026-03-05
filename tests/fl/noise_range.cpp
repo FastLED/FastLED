@@ -3,6 +3,8 @@
 #include "test.h"
 #include "fl/log.h"
 #include "fl/stl/strstream.h"
+
+FL_TEST_FILE(FL_FILEPATH) {
 using namespace fl;
 
 FL_TEST_CASE("Noise Range Analysis") {
@@ -259,3 +261,5 @@ FL_TEST_CASE("[.]3D Gradient Behavior Demonstration") {
 
 #endif  // End disabled noise tests
 
+
+} // FL_TEST_FILE

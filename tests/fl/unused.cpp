@@ -2,6 +2,8 @@
 #include "test.h"
 #include "fl/int.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // Test that the macros compile and suppress warnings
@@ -554,3 +556,5 @@ FL_TEST_CASE("compiler compatibility") {
         #endif
     }
 }
+
+} // FL_TEST_FILE

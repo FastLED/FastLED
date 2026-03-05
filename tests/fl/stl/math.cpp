@@ -1,6 +1,8 @@
 #include "fl/stl/math.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("fl::floor") {
@@ -375,3 +377,5 @@ FL_TEST_CASE("math functions") {
         FL_CHECK(doctest::Approx(static_cast<double>(FL_PI)).epsilon(1e-10) == 3.141592653589793);
     }
 }
+
+} // FL_TEST_FILE

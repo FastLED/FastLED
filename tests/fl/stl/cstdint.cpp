@@ -3,6 +3,8 @@
 #include "test.h"
 #include "stdint.h" // ok include - testing FL types against standard
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 // Test C++ standard integer types and macros defined in fl/stl/stdint.h
 // This header provides C++ integer type definitions without <stdint.h>
 // Note: Uses fl:: namespace types internally but exposes standard C++ type names
@@ -741,3 +743,5 @@ FL_TEST_CASE("size_t with sizeof") {
         FL_CHECK(struct_size >= 5);  // At least int + char
     }
 }
+
+} // FL_TEST_FILE

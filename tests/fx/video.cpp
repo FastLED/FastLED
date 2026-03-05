@@ -15,6 +15,8 @@
 #include "fl/file_system.h"
 #include "fl/rgb8.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 #define FPS 30
 #define FRAME_TIME 1000 / FPS
 #define VIDEO_WIDTH 10
@@ -242,3 +244,5 @@ FL_TEST_CASE("video with end frame fadeout") {
     }
     #endif  //
 }
+
+} // FL_TEST_FILE

@@ -3,6 +3,8 @@
 #include "fl/int.h"
 #include "fl/stl/move.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // Helper macro to avoid ODR-use of static constexpr enum values
@@ -631,3 +633,5 @@ namespace compile_time_tests {
         test_declval<Base>();
     }
 }
+
+} // FL_TEST_FILE

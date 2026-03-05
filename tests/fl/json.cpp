@@ -22,6 +22,8 @@
 #include "fl/stl/utility.h"
 #include "fl/stl/strstream.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("Test simple JSON parsing") {
@@ -2489,3 +2491,5 @@ FL_TEST_CASE("JSON String Escape Sequences") {
     }
 }
 #endif
+
+} // FL_TEST_FILE

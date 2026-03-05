@@ -6,6 +6,8 @@
 #include "fl/stl/pair.h"
 #include "fl/stl/random.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("fl::reverse") {
@@ -534,3 +536,5 @@ FL_TEST_CASE("fl::shuffle") {
         FL_CHECK(fl::equal(v.begin(), v.end(), original.begin()));
     }
 }
+
+} // FL_TEST_FILE

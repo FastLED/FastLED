@@ -6,6 +6,8 @@
 #include "fl/fx/video/frame_tracker.h"
 #include "fl/stl/stdint.h"
 #include "test.h"
+
+FL_TEST_FILE(FL_FILEPATH) {
 using namespace fl;
 FL_TEST_CASE("FrameTracker basic frame advancement") {
     FrameTracker tracker(1.0f);  // 1fps == 1000ms per frame
@@ -20,3 +22,5 @@ FL_TEST_CASE("FrameTracker basic frame advancement") {
     FL_CHECK(nextFrame == 1);
     FL_CHECK(amountOfNextFrame == 127);
 }
+
+} // FL_TEST_FILE

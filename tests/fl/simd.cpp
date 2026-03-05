@@ -8,6 +8,8 @@
 #include "fl/numeric_limits.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 //==============================================================================
@@ -960,3 +962,5 @@ FL_TEST_CASE("fixed-point SIMD type alignment") {
         FL_REQUIRE(reinterpret_cast<uintptr_t>(&s.b) % 16 == 0);
     }
 }
+
+} // FL_TEST_FILE

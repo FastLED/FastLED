@@ -24,6 +24,8 @@
 #include "fl/stl/unordered_set.h"
 #include "fl/stl/vector.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace test_helpers;
 
 
@@ -718,3 +720,5 @@ FL_TEST_CASE("Reverse iterator support - bidirectional containers") {
         FL_CHECK(destination.rbegin()->first == 30);
     }
 }
+
+} // FL_TEST_FILE

@@ -2,6 +2,8 @@
 #include "fl/stl/array.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("fl::begin and fl::end for C arrays") {
@@ -203,3 +205,5 @@ FL_TEST_CASE("fl::begin and fl::end modify through iterator") {
         FL_CHECK_EQ(arr[2], 35);
     }
 }
+
+} // FL_TEST_FILE

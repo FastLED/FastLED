@@ -6,6 +6,8 @@
 #include "test.h"
 #include "fl/stl/move.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 
 FL_TEST_CASE("Basic Queue Operations") {
     fl::queue<int> q;
@@ -242,3 +244,5 @@ FL_TEST_CASE("Queue Stress Test") {
     
     FL_CHECK(q.empty());
 } 
+
+} // FL_TEST_FILE

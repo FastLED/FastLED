@@ -18,6 +18,8 @@
 #include "fl/stl/strstream.h"
 #include "fl/stl/vector.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 // FFT tests adapt to the build-time FASTLED_FFT_PRECISION setting.
 // Test expectations are provided for all three precision modes:
 //   FASTLED_FFT_FIXED16 (default) - 16-bit fixed point
@@ -652,3 +654,5 @@ FL_TEST_CASE("FFTBins - linear bins clear resets") {
     bins.clear();
     FL_CHECK_EQ(bins.linear().size(), 0u);
 }
+
+} // FL_TEST_FILE

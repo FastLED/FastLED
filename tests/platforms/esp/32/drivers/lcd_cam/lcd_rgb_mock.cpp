@@ -15,6 +15,8 @@
 #include "platforms/esp/32/drivers/lcd_cam/lcd_rgb_peripheral_mock.h"
 #include "fl/stl/vector.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 using namespace fl::detail;
 
@@ -517,3 +519,5 @@ FL_TEST_CASE("LcdRgbPeripheralMock - deinitialize") {
 }
 
 #endif // FASTLED_STUB_IMPL
+
+} // FL_TEST_FILE

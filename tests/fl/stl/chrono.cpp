@@ -5,6 +5,8 @@
 #include "fl/stl/move.h"
 #include "fl/int.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("fl::time - basic functionality") {
@@ -531,3 +533,5 @@ FL_TEST_CASE("fl::millis64 - wraparound handling") {
 }
 
 #endif // FASTLED_TESTING
+
+} // FL_TEST_FILE

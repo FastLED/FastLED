@@ -9,6 +9,8 @@
 #include "fl/rgbw.h"
 #include "fl/stl/span.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 
 FL_TEST_CASE("Rectangular Buffer") {
     fl::RectangularDrawBuffer buffer;
@@ -206,3 +208,5 @@ FL_TEST_CASE("Rectangular Buffer queue tests") {
         }
     }
 };
+
+} // FL_TEST_FILE

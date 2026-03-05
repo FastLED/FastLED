@@ -33,6 +33,8 @@
 #include "fl/stl/detail/memory_file_handle.h"
 #include "fl/fx/frame.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 // ---------------------------------------------------------------------------
 // TestIO — same pattern as tests/fl/remote/remote.cpp
 // ---------------------------------------------------------------------------
@@ -401,3 +403,5 @@ FL_TEST_CASE("decode_file: JSON-RPC dispatch") {
 }
 
 #endif // FASTLED_ENABLE_JSON
+
+} // FL_TEST_FILE

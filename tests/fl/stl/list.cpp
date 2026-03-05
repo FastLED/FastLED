@@ -3,6 +3,8 @@
 #include "test.h"
 #include "fl/stl/move.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("fl::list - default constructor") {
@@ -632,3 +634,5 @@ FL_TEST_CASE("fl::list - large list operations") {
     lst.clear();
     FL_CHECK(lst.empty());
 }
+
+} // FL_TEST_FILE

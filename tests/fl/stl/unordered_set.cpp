@@ -5,6 +5,8 @@
 #include "test.h"
 #include "fl/stl/string.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 
 FL_TEST_CASE("Empty set properties") {
     fl::unordered_set<int> s;
@@ -406,3 +408,5 @@ FL_TEST_CASE("Iterator operator*() returns reference to set data, not temporary"
     FL_REQUIRE(ptr != nullptr);
     FL_REQUIRE(!ptr->empty());  // key is valid
 }
+
+} // FL_TEST_FILE

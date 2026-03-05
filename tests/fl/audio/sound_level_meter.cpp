@@ -6,6 +6,8 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/math.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("SoundLevelMeter - silence gives very negative dBFS") {
@@ -82,3 +84,5 @@ FL_TEST_CASE("SoundLevelMeter - span overload works") {
     meter.processBlock(signal);
     FL_CHECK_GT(meter.getDBFS(), -20.0);
 }
+
+} // FL_TEST_FILE

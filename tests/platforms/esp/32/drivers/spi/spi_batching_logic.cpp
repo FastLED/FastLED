@@ -16,6 +16,8 @@
 #include "test.h"
 #include "fl/math_macros.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 namespace spi_batching_logic_test {
@@ -206,3 +208,5 @@ FL_TEST_CASE("Backward compatibility - single channel no batching") {
 }
 
 } // namespace spi_batching_logic_test
+
+} // FL_TEST_FILE

@@ -3,6 +3,8 @@
 #include "test.h"
 #include "mutex_stub_stl.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 
 FL_TEST_CASE("Mutex reentrant") {
     // Tests that the lock can be acquired multiple times by the same thread.
@@ -17,3 +19,5 @@ FL_TEST_CASE("Mutex reentrant") {
         }
     }
 }
+
+} // FL_TEST_FILE

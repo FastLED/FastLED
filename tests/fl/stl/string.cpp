@@ -16,6 +16,8 @@
 #include "hsv2rgb.h"
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 
@@ -4721,3 +4723,5 @@ FL_TEST_CASE("fl::string - Construction from span") {
         FL_CHECK(fl::strcmp(data, "original") == 0); // Original unchanged
     }
 }
+
+} // FL_TEST_FILE

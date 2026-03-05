@@ -9,6 +9,8 @@
 #include "fl/geometry.h"
 #include "fl/math_macros.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 
 
 FL_TEST_CASE("Transform16::ToBounds(max_value)") {
@@ -70,3 +72,5 @@ FL_TEST_CASE("Transform16::ToBounds(min, max)") {
         FL_REQUIRE_EQ(fl::vec2<uint16_t>(high, high), t2);
     }
 }
+
+} // FL_TEST_FILE

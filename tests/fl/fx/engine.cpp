@@ -21,6 +21,8 @@
 #include "fl/stl/utility.h"
 #include "fl/xymap.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FASTLED_SHARED_PTR(MockFx);
@@ -220,3 +222,5 @@ FL_TEST_CASE("test_fixed_fps") {
     FL_CHECK_EQ(2, fake.mFrameCounter);
     FL_CHECK_EQ(leds[0], CRGB(127, 0, 0));
 }
+
+} // FL_TEST_FILE

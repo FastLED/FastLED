@@ -7,6 +7,8 @@
 #include "FastLED.h"
 #include "platforms/init.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 FL_TEST_CASE("platform_init") {
     FL_SUBCASE("fl::platforms::init() can be called") {
         // Test that the platform init function exists and can be called
@@ -60,3 +62,5 @@ FL_TEST_CASE("platform_init") {
         FL_CHECK(true);
     }
 }
+
+} // FL_TEST_FILE

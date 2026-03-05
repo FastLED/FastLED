@@ -10,6 +10,8 @@
 #include "fl/stl/string.h"
 #include "fl/stl/unordered_map.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 
 // Test object that tracks construction/destruction for move semantics testing
 struct TrackedObject {
@@ -341,3 +343,5 @@ FL_TEST_CASE("Variant") {
 //     opt2 = 100;
 //     FL_REQUIRE_EQ(*opt2.ptr(), 100);
 // }
+
+} // FL_TEST_FILE

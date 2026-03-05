@@ -9,6 +9,8 @@
 #include "fl/stl/move.h"
 #include "fl/stl/type_traits.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("fl::fl_random - Basic construction and seeding") {
@@ -458,3 +460,5 @@ FL_TEST_CASE("fl::fl_random - Type traits") {
         static_assert(fl_random::maximum() == 4294967295U, "maximum should be u32 max");
     }
 }
+
+} // FL_TEST_FILE

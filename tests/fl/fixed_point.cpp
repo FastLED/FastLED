@@ -106,6 +106,8 @@
 #include "fl/stl/fixed_point.h"
 #include "fl/stl/math.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 namespace { // Anonymous namespace for fixed_point tests
@@ -4859,3 +4861,5 @@ FL_TEST_CASE("constexpr scalar ops - s0x32 and u0x32") {
 }
 
 } // anonymous namespace
+
+} // FL_TEST_FILE

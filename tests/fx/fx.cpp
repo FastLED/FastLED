@@ -5,6 +5,8 @@
 #include "test.h"
 #include "fl/int.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 
 using namespace fl;
 uint16_t XY(uint8_t, uint8_t);  // declaration to fix compiler warning.
@@ -16,3 +18,5 @@ uint16_t XY(uint8_t, uint8_t) { return 0; }
 FL_TEST_CASE("Compile Test") {
     // Suceessful compilation test
 }
+
+} // FL_TEST_FILE

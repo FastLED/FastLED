@@ -444,3 +444,7 @@ FL_TEST_CASE("warning macro edge cases") {
 
 // Grouped tests
 #include "trace.hpp"
+
+FL_TEST_FILE(FL_FILEPATH) {
+
+} // FL_TEST_FILE

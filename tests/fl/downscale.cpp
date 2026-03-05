@@ -128,3 +128,6 @@ FL_TEST_CASE("downscale 11x11 to 2x2") {
 
 // Grouped tests
 #include "splat.hpp"
+FL_TEST_FILE(FL_FILEPATH) {
+
+} // FL_TEST_FILE

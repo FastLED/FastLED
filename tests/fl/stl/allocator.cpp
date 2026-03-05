@@ -8,6 +8,8 @@
 #include "fl/stl/type_traits.h"
 #include "fl/int.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // Test allocation_result struct
@@ -1504,3 +1506,5 @@ FL_TEST_CASE("Malloc/Free Test Hooks - Integration with allocators") {
     
     fl::ClearMallocFreeHook();
 }
+
+} // FL_TEST_FILE

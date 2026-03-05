@@ -7,6 +7,8 @@
 #include "fl/stl/vector.h"
 #include <cstring>  // ok include
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 // Mock implementation for testing
@@ -358,3 +360,5 @@ FL_TEST_CASE("HttpStreamTransport: Error Handling") {
         FL_CHECK(!request);  // Partial chunk, no complete request
     }
 }
+
+} // FL_TEST_FILE

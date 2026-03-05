@@ -97,3 +97,7 @@ FL_TEST_CASE("HeapInfo helper methods") {
 
 // Grouped tests
 #include "alloca.hpp"
+
+FL_TEST_FILE(FL_FILEPATH) {
+
+} // FL_TEST_FILE

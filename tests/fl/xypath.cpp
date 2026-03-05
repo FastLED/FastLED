@@ -14,6 +14,8 @@
 #include "fl/transform.h"
 #include "fl/xypath_impls.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 
 #define MESSAGE_TILE(TILE) \
     FL_MESSAGE("\nTile:\n" \
@@ -324,3 +326,5 @@ FL_TEST_CASE("Check complex types") {
     }
 
 }
+
+} // FL_TEST_FILE

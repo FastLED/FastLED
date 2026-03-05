@@ -6,6 +6,8 @@
 
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl::asio;
 using namespace fl::asio::ip;
 
@@ -108,3 +110,5 @@ FL_TEST_CASE("tcp::acceptor - Multiple clients") {
 }
 
 #endif // FASTLED_HAS_NETWORKING
+
+} // FL_TEST_FILE

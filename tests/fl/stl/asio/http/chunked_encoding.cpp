@@ -1,6 +1,8 @@
 #include "test.h"
 #include "fl/stl/asio/http/chunked_encoding.cpp.hpp"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 // Helper: wrap a C string as a span for feed()
 static fl::span<const uint8_t> asSpan(const char* s, size_t len) {
     return fl::span<const uint8_t>(reinterpret_cast<const uint8_t*>(s), len); // ok reinterpret cast
@@ -276,3 +278,5 @@ FL_TEST_CASE("ChunkedReader/Writer: Round-trip test") {
     FL_REQUIRE(!reader.hasChunk());
     FL_REQUIRE(reader.isFinal());
 }
+
+} // FL_TEST_FILE

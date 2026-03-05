@@ -3,6 +3,8 @@
 #include "fl/stl/move.h"
 #include "fl/stl/type_traits.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 namespace {
@@ -588,3 +590,5 @@ FL_TEST_CASE("fl::Pair backwards compatibility") {
         static_assert(fl::is_same<Pair<int, double>, pair<int, double>>::value, "Pair should be alias for pair");
     }
 }
+
+} // FL_TEST_FILE

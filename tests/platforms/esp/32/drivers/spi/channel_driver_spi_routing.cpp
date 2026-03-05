@@ -17,11 +17,10 @@
 
 #ifdef ESP32
 #include "platforms/esp/32/drivers/spi/channel_driver_spi.h"
-#endif
+
+FL_TEST_FILE(FL_FILEPATH) {
 
 using namespace fl;
-
-#ifdef ESP32
 
 namespace {
 
@@ -114,5 +113,7 @@ FL_TEST_CASE("ChannelEngineSpi - Routing architecture validation") {
     FL_CHECK_FALSE(driver.canHandle(spiData));
     CHECK_TRUE(spiData->isSpi());
 }
+
+} // FL_TEST_FILE
 
 #endif // ESP32

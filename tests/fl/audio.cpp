@@ -26,3 +26,7 @@ FL_TEST_CASE("Audio - Test registration works") {
 #include "audio/mic_response_data.hpp"
 #include "audio/detectors/multiband_beat_detector.hpp"
 #include "audio/detectors/musical_beat_detector.hpp"
+
+FL_TEST_FILE(FL_FILEPATH) {
+
+} // FL_TEST_FILE

@@ -3,6 +3,8 @@
 
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 using namespace fl::asio;
 
@@ -82,3 +84,5 @@ FL_TEST_CASE("error_code - All errc values are distinct") {
     FL_CHECK(errc::operation_aborted != errc::eof);
     FL_CHECK(errc::eof != errc::unknown);
 }
+
+} // FL_TEST_FILE

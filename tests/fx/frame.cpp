@@ -10,6 +10,8 @@
 #include "fl/draw_mode.h"
 #include "fl/rgb8.h"
 #include "fl/stl/shared_ptr.h"
+
+FL_TEST_FILE(FL_FILEPATH) {
 using namespace fl;
 namespace {
     int allocation_count = 0;
@@ -50,3 +52,5 @@ FL_TEST_CASE("test blend by black") {
     frame->draw(out, DRAW_MODE_BLEND_BY_MAX_BRIGHTNESS);
     FL_CHECK(out[0] == CRGB(64, 0, 0));
 }
+
+} // FL_TEST_FILE

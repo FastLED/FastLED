@@ -3,6 +3,8 @@
 
 #include "test.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 using namespace fl;
 
 FL_TEST_CASE("HttpConnection - Initial state is DISCONNECTED") {
@@ -265,3 +267,5 @@ FL_TEST_CASE("HttpConnection - No timeout when not connected") {
     // Disconnected, should never timeout
     FL_CHECK_FALSE(conn.isTimedOut(10000));
 }
+
+} // FL_TEST_FILE

@@ -7,6 +7,8 @@
 #include "test.h"
 #include "hsv2rgb.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 FL_TEST_CASE("PowerModelRGB - constructor") {
     PowerModelRGB model(40, 40, 40, 2);
     FL_CHECK(model.red_mW == 40);
@@ -164,3 +166,5 @@ FL_TEST_CASE("Default power model - WS2812 @ 5V") {
     FL_CHECK(current.blue_mW == 75);
     FL_CHECK(current.dark_mW == 5);
 }
+
+} // FL_TEST_FILE

@@ -33,3 +33,7 @@ FL_TEST_CASE("Timeout - rollover test") {
 
 // Grouped tests
 #include "time_alpha.hpp"
+
+FL_TEST_FILE(FL_FILEPATH) {
+
+} // FL_TEST_FILE

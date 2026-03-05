@@ -7,6 +7,8 @@
 #include "fl/stl/allocator.h"
 #include "fl/stl/move.h"
 
+FL_TEST_FILE(FL_FILEPATH) {
+
 namespace weak_ptr_test {
 
 // Test class that does NOT inherit from fl::Referent (non-intrusive)
@@ -579,3 +581,5 @@ FL_TEST_CASE("fl::weak_ptr stress test - rapid creation and destruction") {
 }
 
 } // namespace weak_ptr_test
+
+} // FL_TEST_FILE
