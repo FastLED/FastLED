@@ -109,7 +109,7 @@ void json_example(const fl::string& jsonStr) {
 
 Containers, views, algorithms, compile‑time utilities, memory/ownership, portability helpers.
 
-- Containers: `vector.h`, `deque.h`, `queue.h`, `priority_queue.h`, `set.h`, `map.h`, `unordered_set.h`, `hash_map.h`, `hash_set.h`, `rbtree.h`, `bitset.h`, `bitset_dynamic.h`
+- Containers: `vector.h`, `deque.h`, `queue.h`, `priority_queue.h`, `set.h`, `map.h`, `unordered_set.h`, `hash_map.h`, `hash_set.h`, `rbtree.h`, `stl/bitset.h`, `stl/bitset_dynamic.h`
 - Views and ranges: `span.h`, `slice.h`, `range_access.h`
 - Tuples and algebraic types: `tuple.h`, `pair.h`, `optional.h`, `variant.h`
 - Algorithms and helpers: `algorithm.h`, `transform.h`, `comparators.h`, `range_access.h`
@@ -129,8 +129,8 @@ Per‑header quick descriptions:
 - `hash_map.h`: Hash‑based key‑value container tuned for embedded use.
 - `hash_set.h`: Hash set implementation complementing `hash_map.h`.
 - `rbtree.h`: Balanced tree primitive used by ordered containers.
-- `bitset.h`: Fixed‑size compile‑time bitset operations.
-- `bitset_dynamic.h`: Runtime‑sized bitset for flexible masks.
+- `stl/bitset.h`: Fixed‑size compile‑time bitset operations.
+- `stl/bitset_dynamic.h`: Runtime‑sized bitset for flexible masks.
 - `span.h`: Non‑owning view over contiguous memory (preferred function parameter).
 - `slice.h`: Strided or sub‑range view utilities for buffers.
 - `range_access.h`: Helpers to unify begin/end access over custom ranges.

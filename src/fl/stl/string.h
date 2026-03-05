@@ -28,7 +28,7 @@
 #include "fl/stl/variant.h"
 #include "fl/string_view.h"
 #include "fl/stl/iterator.h"
-#include "fl/bitset_dynamic.h"
+#include "fl/stl/bitset_dynamic.h"
 #include "fl/stl/bitset.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/cstddef.h"
