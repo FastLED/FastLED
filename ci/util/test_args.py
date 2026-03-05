@@ -238,6 +238,10 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
                 f"Docker mode: using {test_args.build_mode} build (--build-mode specified)"
             )
 
+    # Save original test query before disambiguation modifies it
+    # (Docker runner needs the raw query, not the meson target name)
+    test_args.raw_test_query = test_args.test
+
     # Auto-enable --py or --cpp mode when a specific test is provided
     if test_args.test:
         # Check if this is a Python test first

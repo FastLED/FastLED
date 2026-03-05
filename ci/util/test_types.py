@@ -101,6 +101,7 @@ class TestArgs:
     )
     default_mode: bool = False  # True when no specific test flags were provided
     list_tests: bool = False  # List available tests without running them
+    raw_test_query: Optional[str] = None  # Original test query before disambiguation
 
 
 @typechecked

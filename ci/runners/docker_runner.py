@@ -174,8 +174,13 @@ def _build_test_command(args: TestArgs) -> list[str]:
         cmd.append("--examples")
         if args.examples:  # Non-empty list
             cmd.extend(args.examples)
-    if args.test:
-        cmd.append(args.test)
+    # Use raw_test_query (before disambiguation) so inner test.py can do its
+    # own discovery.  The outer test.py converts the query to a meson target
+    # name (e.g. fl_audio_fft_count_diagnostic) which the inner smart selector
+    # can't match well.
+    test_query = getattr(args, "raw_test_query", None) or args.test
+    if test_query:
+        cmd.append(test_query)
     if args.verbose:
         cmd.append("--verbose")
     if args.clean:
@@ -379,10 +384,8 @@ def run_docker_tests(args: TestArgs) -> int:
     # Build rsync script for syncing host files to container
     sync_script = _build_sync_script()
 
-    # Run tests in Docker
-    # Use named volumes unique to this project path for .venv and .build
-    # Mount source root as read-only at /host, then rsync into /fastled
-    docker_cmd = [
+    # Common Docker volume/env args
+    docker_base_args = [
         "docker",
         "run",
         "--rm",
@@ -400,8 +403,7 @@ def run_docker_tests(args: TestArgs) -> int:
         f"{cache_volume}:/root/.cache",  # Persist compiler/tool caches (uv, sccache, clang modules)
         "-w",
         "/fastled",
-        # Pass through terminal for colors
-        "-t",
+        # No -t flag: TTY allocation causes output buffering/loss when piped
         # Set environment to indicate Docker execution
         "-e",
         "FASTLED_DOCKER=1",
@@ -410,22 +412,40 @@ def run_docker_tests(args: TestArgs) -> int:
         "fastled-unit-tests",
         "bash",
         "-c",
-        # Sync files from /host to /fastled, then run tests
-        f"{sync_script}\n\n"
-        f"export PATH=/fastled/.venv/bin:$PATH && "
-        f"export PYTHONPATH=/fastled:$PYTHONPATH && "
-        f"{test_cmd_str}",
     ]
 
+    env_setup = (
+        "export PATH=/fastled/.venv/bin:$PATH && export PYTHONPATH=/fastled:$PYTHONPATH"
+    )
+
+    def _run_docker_step(step_name: str, bash_script: str, timeout: int = 1800) -> int:
+        """Run a single Docker step with streaming output.
+
+        Returns the exit code.
+        """
+        from running_process import RunningProcess
+
+        ts_print(f"=== Docker: {step_name} ===")
+        # Remove existing container before each step (--rm removes it after, but
+        # if a previous step crashed the name may linger)
+        existing = docker_container_exists(container_name)
+        if existing:
+            docker_force_remove_container(existing)
+
+        cmd = docker_base_args + [bash_script]
+        proc = RunningProcess(cmd, auto_run=True)
+        return proc.wait(echo=True, timeout=timeout)
+
     try:
-        result = subprocess.run(
-            docker_cmd,
-            cwd=project_root,
-            timeout=1800,  # 30 minute timeout
+        rc = _run_docker_step(
+            "Sync + Build + Test",
+            f"{sync_script}\n\n{env_setup} && {test_cmd_str}",
+            timeout=1800,
         )
-        return result.returncode
+        return rc
+
     except subprocess.TimeoutExpired:
-        ts_print("Error: Tests timed out after 30 minutes")
+        ts_print("Error: Tests timed out")
         return 1
     except KeyboardInterrupt:
         handle_keyboard_interrupt_properly()
