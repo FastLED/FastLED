@@ -946,7 +946,7 @@ Response::Response() = default;
 Response& Response::status(int) { return *this; }
 Response& Response::header(const string&, const string&) { return *this; }
 Response& Response::body(const string&) { return *this; }
-Response& Response::json(const json&) { return *this; }
+Response& Response::json(const class json&) { return *this; }
 
 Response Response::ok(const string&) { return Response(); }
 Response Response::not_found() { return Response(); }
