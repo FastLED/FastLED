@@ -64,8 +64,35 @@ def main() -> int:
     if not os.path.exists(file_path):
         return 0
 
-    # Skip C++ files in examples directory (IWYU checks not applicable)
+    # Skip files inside git submodules (e.g., wiki/) to avoid endless loops
     rel_path = os.path.relpath(file_path, PROJECT_ROOT)
+    try:
+        submodule_output = subprocess.run(
+            [
+                "git",
+                "config",
+                "--file",
+                ".gitmodules",
+                "--get-regexp",
+                r"^submodule\..*\.path$",
+            ],
+            capture_output=True,
+            text=True,
+            cwd=str(PROJECT_ROOT),
+        )
+        if submodule_output.returncode == 0:
+            for line in submodule_output.stdout.strip().splitlines():
+                # Format: "submodule.<name>.path <path>"
+                parts = line.split(None, 1)
+                if len(parts) == 2:
+                    sub_path = parts[1].replace("\\", "/")
+                    rel_norm = rel_path.replace("\\", "/")
+                    if rel_norm == sub_path or rel_norm.startswith(sub_path + "/"):
+                        return 0
+    except Exception:
+        pass
+
+    # Skip C++ files in examples directory (IWYU checks not applicable)
     if Path(file_path).suffix.lower() in CPP_EXTENSIONS:
         if rel_path.startswith("examples" + os.sep) or rel_path.startswith("examples/"):
             return 0
