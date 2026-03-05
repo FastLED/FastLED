@@ -223,7 +223,7 @@ struct JsonToType<fl::vector<T>, void> {
 // Base64 strings provide compact binary transport for JSON-RPC.
 template <>
 struct JsonToType<fl::vector<fl::u8>, void> {
-    static fl::tuple<fl::vector<fl::u8>, TypeConversionResult> convert(const Json& j) {
+    static fl::tuple<fl::vector<fl::u8>, TypeConversionResult> convert(const json& j) {
         TypeConversionResult result;
 
         if (j.is_string()) {

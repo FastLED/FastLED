@@ -295,6 +295,63 @@ def _find_examples(project_dir: Path) -> list[TestMatch]:
     return matches
 
 
+def _find_aggregator_matches(
+    query: str, all_matches: list[TestMatch], project_dir: Path
+) -> list[TestMatch]:
+    """Search inside aggregator test .cpp files for #include lines matching query.
+
+    Aggregator files (e.g., tests/fl/codec.cpp) include sub-test headers like
+    "codec/gif.hpp". When the user searches for "gif", this finds codec.cpp as
+    the parent aggregator containing gif tests.
+
+    Args:
+        query: Search query (e.g., "gif")
+        all_matches: All discovered test/example matches
+        project_dir: Project root directory
+
+    Returns:
+        List of TestMatch objects for aggregator files containing matching includes
+    """
+    query_lower = query.lower()
+    results: list[TestMatch] = []
+
+    for match in all_matches:
+        if match.type != "unit_test":
+            continue
+        filepath = project_dir / match.path
+        if not filepath.exists() or not filepath.suffix == ".cpp":
+            continue
+        try:
+            content = filepath.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        # Look for #include lines containing the query
+        for line in content.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("#include") and query_lower in stripped.lower():
+                # Found a matching include — score based on how specific the match is
+                include_path = stripped.split('"')[1] if '"' in stripped else ""
+                include_name = (
+                    include_path.rsplit("/", 1)[-1].rsplit(".", 1)[0]
+                    if include_path
+                    else ""
+                )
+                score, _ = _fuzzy_score(query, include_name)
+                if score > 0:
+                    results.append(
+                        TestMatch(
+                            name=match.name,
+                            path=match.path,
+                            type=match.type,
+                            score=score,
+                            length=len(match.name),
+                        )
+                    )
+                    break  # One match per aggregator file is enough
+
+    return results
+
+
 def smart_select(
     query: str, project_dir: Path | None = None, filter_type: str | None = None
 ) -> TestMatch | list[TestMatch]:
@@ -326,12 +383,25 @@ def smart_select(
 
     # Calculate scores for all matches using both name and path
     scored_matches: list[TestMatch] = []
+    # Minimum score threshold to avoid showing irrelevant results
+    # Short queries (e.g., "gif") can get very low character-sequence
+    # matches against unrelated tests — filter those out.
+    min_score_threshold = 0.3
     for match in all_matches:
         score, length = _score_match(query, match)
-        if score > 0.0:  # Only include matches with non-zero scores
+        if score >= min_score_threshold:
             match.score = score
             match.length = length
             scored_matches.append(match)
+
+    # If no direct matches found, search inside aggregator test files
+    # for #include lines that match the query (e.g., "gif" -> codec.cpp
+    # which includes "codec/gif.hpp")
+    if not scored_matches:
+        aggregator_matches = _find_aggregator_matches(query, all_matches, project_dir)
+        for match in aggregator_matches:
+            if match.score >= min_score_threshold:
+                scored_matches.append(match)
 
     if not scored_matches:
         return []  # No matches found

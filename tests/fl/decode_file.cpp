@@ -21,7 +21,7 @@
 #include <cstdlib>  // ok include
 
 #include "fl/remote/rpc/base64.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/string.h"
 #include "fl/vector.h"
 
@@ -34,7 +34,7 @@
 #include "fl/codec/mpeg1.h"
 
 // For decoders that use ByteStream
-#include "fl/bytestreammemory.h"
+#include "fl/stl/detail/memory_file_handle.h"
 #include "fl/fx/frame.h"
 
 // ---------------------------------------------------------------------------
@@ -42,18 +42,18 @@
 // ---------------------------------------------------------------------------
 
 struct TestIO {
-    fl::vector<fl::Json> requests;
-    fl::vector<fl::Json> responses;
+    fl::vector<fl::json> requests;
+    fl::vector<fl::json> responses;
     size_t requestIndex = 0;
 
-    fl::optional<fl::Json> pullRequest() {
+    fl::optional<fl::json> pullRequest() {
         if (requestIndex >= requests.size()) {
             return fl::nullopt;
         }
         return requests[requestIndex++];
     }
 
-    void pushResponse(const fl::Json& response) {
+    void pushResponse(const fl::json& response) {
         responses.push_back(response);
     }
 };
@@ -139,8 +139,8 @@ static void validateMpeg(const fl::vector<fl::u8>& data) {
         fl::string dec_error;
         auto decoder = fl::Mpeg1::createDecoder(config, &dec_error);
         FL_REQUIRE_MESSAGE(decoder, "MPEG1 decoder creation failed: " << dec_error);
-        auto stream = fl::make_shared<fl::ByteStreamMemory>(data.size());
-        stream->write(data.data(), data.size());
+        auto stream = fl::make_shared<fl::MemoryFileHandle>(data.size());
+        stream->write(data);
         FL_CHECK(decoder->begin(stream));
         auto result = decoder->decode();
         if (result == fl::DecodeResult::Success) {
@@ -174,8 +174,8 @@ static void validateGif(const fl::vector<fl::u8>& data) {
         fl::string dec_error;
         auto decoder = fl::Gif::createDecoder(config, &dec_error);
         FL_REQUIRE_MESSAGE(decoder, "GIF decoder creation failed: " << dec_error);
-        auto stream = fl::make_shared<fl::ByteStreamMemory>(data.size());
-        stream->write(data.data(), data.size());
+        auto stream = fl::make_shared<fl::MemoryFileHandle>(data.size());
+        stream->write(data);
         FL_REQUIRE(decoder->begin(stream));
         auto result = decoder->decode();
         if (result == fl::DecodeResult::Success) {
@@ -264,11 +264,11 @@ FL_TEST_CASE("decode_file: base64 roundtrip via JSON-RPC") {
     FL_REQUIRE(!b64.empty());
 
     // Build JSON-RPC request with base64 data as first param
-    fl::Json params = fl::Json::array();
-    params.push_back(fl::Json(b64.c_str()));       // base64 data
-    params.push_back(fl::Json(".bin"));              // extension
+    fl::json params = fl::json::array();
+    params.push_back(fl::json(b64.c_str()));       // base64 data
+    params.push_back(fl::json(".bin"));              // extension
 
-    fl::Json request = fl::Json::object();
+    fl::json request = fl::json::object();
     request.set("method", "decodeFile");
     request.set("params", params);
     request.set("id", 1);
@@ -277,7 +277,7 @@ FL_TEST_CASE("decode_file: base64 roundtrip via JSON-RPC") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     // Bind handler — fl::vector<fl::u8> auto-decodes from base64
@@ -318,7 +318,7 @@ FL_TEST_CASE("decode_file: JSON-RPC dispatch") {
                        "Failed to read payload file: " << payload_path);
 
     // Parse as JSON
-    fl::Json payload = fl::Json::parse(payload_str);
+    fl::json payload = fl::json::parse(payload_str);
     FL_REQUIRE_MESSAGE(!payload.is_null(), "Failed to parse payload JSON");
     FL_REQUIRE(payload.contains("method"));
     FL_REQUIRE(payload.contains("params"));
@@ -327,7 +327,7 @@ FL_TEST_CASE("decode_file: JSON-RPC dispatch") {
     TestIO io;
     fl::Remote remote(
         [&io]() { return io.pullRequest(); },
-        [&io](const fl::Json& r) { io.pushResponse(r); }
+        [&io](const fl::json& r) { io.pushResponse(r); }
     );
 
     // Bind handler — fl::vector<fl::u8> auto-decodes from base64

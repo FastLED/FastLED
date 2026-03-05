@@ -3,7 +3,6 @@
 #include "fl/codec/gif.h"
 #include "fl/fx/frame.h"
 #include "fl/stl/detail/memory_file_handle.h"
-#include "platforms/stub/fs_stub.hpp"
 
 
 // Helper function to set up filesystem for codec tests

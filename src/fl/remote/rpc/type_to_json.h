@@ -39,9 +39,9 @@ struct TypeToJson<fl::json> {
 // fl::vector<fl::u8> specialization - encodes binary data as base64 string.
 template <>
 struct TypeToJson<fl::vector<fl::u8>> {
-    static Json convert(const fl::vector<fl::u8>& value) {
+    static json convert(const fl::vector<fl::u8>& value) {
         fl::string encoded = fl::base64_encode(value);
-        return Json(encoded.c_str());
+        return json(encoded.c_str());
     }
 };
 
