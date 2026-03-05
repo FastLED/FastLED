@@ -2,7 +2,7 @@
 // in the JSON UI output on the stub platform.
 
 #include "fl/ui.h"
-#include "fl/json.h"
+#include "fl/stl/json.h"
 #include "fl/warn.h"
 #include "fl/stl/url.h"
 #include "platforms/shared/ui/json/ui.h"
@@ -35,14 +35,14 @@ FL_TEST_CASE("UIAudio URL constructor serializes url field") {
         FASTLED_WARN("Captured JSON: " << capturedJson.c_str());
 
         // Parse the JSON array
-        fl::Json parsed = fl::Json::parse(capturedJson.c_str());
+        fl::json parsed = fl::json::parse(capturedJson.c_str());
         FL_REQUIRE(parsed.is_array());
         FL_REQUIRE(parsed.size() >= 1);
 
         // Find the audio element
         bool foundAudio = false;
         for (size_t i = 0; i < parsed.size(); ++i) {
-            fl::Json component = parsed[i];
+            fl::json component = parsed[i];
             fl::string type = component["type"].as_or(fl::string(""));
             if (type == "audio") {
                 foundAudio = true;
@@ -81,12 +81,12 @@ FL_TEST_CASE("UIAudio without URL does not emit url field") {
         fl::processJsonUiPendingUpdates();
         FL_REQUIRE(!capturedJson.empty());
 
-        fl::Json parsed = fl::Json::parse(capturedJson.c_str());
+        fl::json parsed = fl::json::parse(capturedJson.c_str());
         FL_REQUIRE(parsed.is_array());
         FL_REQUIRE(parsed.size() >= 1);
 
         for (size_t i = 0; i < parsed.size(); ++i) {
-            fl::Json component = parsed[i];
+            fl::json component = parsed[i];
             fl::string type = component["type"].as_or(fl::string(""));
             if (type == "audio") {
                 // Verify url field is NOT present when no URL given
@@ -100,14 +100,14 @@ FL_TEST_CASE("UIAudio without URL does not emit url field") {
 
 FL_TEST_CASE("JsonUiAudioInternal URL constructor stores url") {
     // Direct test of the internal class
-    fl::JsonUiAudioInternal internal("TestAudio",
+    fl::JsonUiAudioInternal audio_internal("TestAudio",
         fl::url("https://example.com/test.mp3"));
 
-    FL_CHECK_EQ(internal.url(), fl::url("https://example.com/test.mp3"));
+    FL_CHECK_EQ(audio_internal.url(), fl::url("https://example.com/test.mp3"));
 
     // Serialize and verify
-    fl::Json json = fl::Json::createObject();
-    internal.toJson(json);
+    fl::json json = fl::json::createObject();
+    audio_internal.toJson(json);
 
     FL_CHECK(json.contains("url"));
     fl::string url = json["url"].as_or(fl::string(""));
@@ -123,12 +123,12 @@ FL_TEST_CASE("JsonUiAudioInternal URL constructor stores url") {
 }
 
 FL_TEST_CASE("JsonUiAudioInternal without URL has empty url") {
-    fl::JsonUiAudioInternal internal("TestAudio");
+    fl::JsonUiAudioInternal audio_internal("TestAudio");
 
-    FL_CHECK_FALSE(internal.url().isValid());
+    FL_CHECK_FALSE(audio_internal.url().isValid());
 
-    fl::Json json = fl::Json::createObject();
-    internal.toJson(json);
+    fl::json json = fl::json::createObject();
+    audio_internal.toJson(json);
 
     // url field should NOT be present when URL is empty
     FL_CHECK_FALSE(json.contains("url"));
