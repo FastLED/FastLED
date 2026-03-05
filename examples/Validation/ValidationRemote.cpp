@@ -1781,7 +1781,7 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
             return response;
         }
 
-        auto stream = fl::make_shared<fl::MemoryFileHandle>(data.size());
+        auto stream = fl::make_shared<fl::memorybuf>(data.size());
         stream->write(data);
 
         if (!decoder->begin(stream)) {

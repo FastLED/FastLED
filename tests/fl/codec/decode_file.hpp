@@ -16,9 +16,6 @@
 
 #if FASTLED_ENABLE_JSON
 
-#include <cstdio>   // ok include
-#include <cstdlib>  // ok include
-
 #include "fl/remote/rpc/base64.h"
 #include "fl/stl/json.h"
 #include "fl/string.h"
@@ -64,7 +61,7 @@ struct TestIO {
 static const char* DEFAULT_PAYLOAD_PATH = ".build/decode_payload.json";
 
 static const char* getPayloadPath() {
-    const char* env = getenv("FASTLED_DECODE_PAYLOAD");
+    const char* env = ::getenv("FASTLED_DECODE_PAYLOAD");
     if (env && env[0]) {
         return env;
     }
@@ -72,20 +69,20 @@ static const char* getPayloadPath() {
 }
 
 static fl::string readFileToString(const char* path) {
-    FILE* f = fopen(path, "rb");
+    fl::FILE* f = fl::fopen(path, "rb");
     if (!f) {
         return fl::string();
     }
-    fseek(f, 0, SEEK_END);
-    long len = ftell(f);
-    fseek(f, 0, SEEK_SET);
+    fl::fseek(f, 0, fl::io::seek_end);
+    long len = fl::ftell(f);
+    fl::fseek(f, 0, fl::io::seek_set);
     if (len <= 0) {
-        fclose(f);
+        fl::fclose(f);
         return fl::string();
     }
     fl::vector<char> buf(len);
-    size_t read = fread(buf.data(), 1, len, f);
-    fclose(f);
+    size_t read = fl::fread(buf.data(), 1, len, f);
+    fl::fclose(f);
     return fl::string(buf.data(), read);
 }
 
@@ -126,7 +123,7 @@ static void validateMp4(const fl::vector<fl::u8>& data) {
         fl::string dec_error;
         auto decoder = fl::H264::createDecoder(config, &dec_error);
         FL_REQUIRE_MESSAGE(decoder, "H264 decoder creation failed: " << dec_error);
-        auto stream = fl::make_shared<fl::MemoryFileHandle>(data.size());
+        auto stream = fl::make_shared<fl::memorybuf>(data.size());
         stream->write(data);
         FL_CHECK(decoder->begin(stream));
         auto result = decoder->decode();

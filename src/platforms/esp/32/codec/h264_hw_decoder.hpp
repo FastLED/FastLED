@@ -84,7 +84,7 @@ fl::vector<NalUnit> splitAnnexB(const fl::vector<fl::u8>& annexB) {
 } // namespace
 
 struct H264HwDecoder::Impl {
-    fl::FileHandlePtr stream;
+    fl::filebuf_ptr stream;
     bool ready = false;
     bool error = false;
     fl::string errorMsg;
@@ -105,7 +105,7 @@ H264HwDecoder::~H264HwDecoder() {
     end();
 }
 
-bool H264HwDecoder::begin(fl::FileHandlePtr stream) {
+bool H264HwDecoder::begin(fl::filebuf_ptr stream) {
     if (!stream) {
         mImpl->error = true;
         mImpl->errorMsg = "Null stream";
@@ -287,7 +287,7 @@ bool H264HwDecoder::hasMoreFrames() const {
 // Returns a clear error message.
 
 struct H264HwDecoder::Impl {
-    fl::FileHandlePtr stream;
+    fl::filebuf_ptr stream;
     bool ready = false;
     Frame currentFrame{0};
 };
@@ -295,7 +295,7 @@ struct H264HwDecoder::Impl {
 H264HwDecoder::H264HwDecoder() : mImpl(fl::make_unique<Impl>()) {}
 H264HwDecoder::~H264HwDecoder() { end(); }
 
-bool H264HwDecoder::begin(fl::FileHandlePtr) { return false; }
+bool H264HwDecoder::begin(fl::filebuf_ptr) { return false; }
 void H264HwDecoder::end() { mImpl->ready = false; mImpl->stream = nullptr; }
 bool H264HwDecoder::isReady() const { return false; }
 bool H264HwDecoder::hasError(fl::string* msg) const {
