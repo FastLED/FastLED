@@ -1,6 +1,5 @@
 #include "fl/stl/math.h"
 #include "test.h"
-#include "fl/math_macros.h"
 
 using namespace fl;
 
@@ -298,6 +297,50 @@ FL_TEST_CASE("fl::acos") {
         FL_CHECK(doctest::Approx(fl::acos(0.0)).epsilon(1e-10) == FL_PI / 2.0);
         FL_CHECK(doctest::Approx(fl::acos(-1.0)).epsilon(1e-10) == FL_PI);
         FL_CHECK(doctest::Approx(fl::acos(0.5)).epsilon(1e-10) == FL_PI / 3.0);
+    }
+}
+
+// Integer arguments should promote to float and return float (not truncate)
+FL_TEST_CASE("fl::math integer promotion") {
+    FL_SUBCASE("sin/cos with int") {
+        float s = fl::sin(1);  // sin(1 radian) ≈ 0.8415
+        float c = fl::cos(1);  // cos(1 radian) ≈ 0.5403
+        FL_CHECK(doctest::Approx(s).epsilon(0.001f) == 0.8415f);
+        FL_CHECK(doctest::Approx(c).epsilon(0.001f) == 0.5403f);
+    }
+
+    FL_SUBCASE("sqrt with int") {
+        float r = fl::sqrt(4);
+        FL_CHECK(doctest::Approx(r).epsilon(1e-5f) == 2.0f);
+    }
+
+    FL_SUBCASE("exp with int") {
+        float e = fl::exp(1);
+        FL_CHECK(doctest::Approx(e).epsilon(0.001f) == 2.71828f);
+    }
+
+    FL_SUBCASE("log with int") {
+        float l = fl::log(1);
+        FL_CHECK(doctest::Approx(l).epsilon(1e-6f) == 0.0f);
+    }
+
+    FL_SUBCASE("pow with int") {
+        float p = fl::pow(2, 3);
+        FL_CHECK(doctest::Approx(p).epsilon(0.001f) == 8.0f);
+    }
+
+    FL_SUBCASE("floor/ceil with int") {
+        float f = fl::floor(5);
+        float c = fl::ceil(5);
+        FL_CHECK(f == 5.0f);
+        FL_CHECK(c == 5.0f);
+    }
+
+    FL_SUBCASE("min/max/abs/clamp with int") {
+        FL_CHECK_EQ(fl::min(3, 7), 3);
+        FL_CHECK_EQ(fl::max(3, 7), 7);
+        FL_CHECK_EQ(fl::abs(-5), 5);
+        FL_CHECK_EQ(fl::clamp(15, 0, 10), 10);
     }
 }
 

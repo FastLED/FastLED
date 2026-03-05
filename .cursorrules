@@ -1560,7 +1560,7 @@ processor.start()
 - ❌ `#include <thread>` → ✅ `#include "fl/thread.h"`
 
 **Math & System:**
-- ❌ `#include <cmath>` → ✅ `#include "fl/math.h"`
+- ❌ `#include <cmath>` → ✅ `#include "fl/stl/math.h"`
 - ❌ `#include <cstdint>` → ✅ `#include "fl/stdint.h"`
 
 **Functions and classes:**

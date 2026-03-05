@@ -440,6 +440,11 @@ expfp(T x) {
     return powfp(e_val, x);
 }
 
+// exp(x) for fixed-point types — dispatches to expfp
+template <typename T>
+inline typename enable_if<is_fixed_point<T>::value, T>::type
+exp(T x) { return fl::expfp(x); }
+
 // ---- Cross-type operator implementations (after all types are fully defined) ----
 
 // s0x32 × s16x16 → s16x16

@@ -1,18 +1,5 @@
-
 #pragma once
 
-#include "fl/force_inline.h"
-
-namespace fl {
-
-template <typename T> FASTLED_FORCE_INLINE T clamp(T value, T min, T max) {
-    if (value < min) {
-        return min;
-    }
-    if (value > max) {
-        return max;
-    }
-    return value;
-}
-
-} // namespace fl
+// Backward-compatibility header.
+// All content now lives in fl/stl/math.h.
+#include "fl/stl/math.h"  // IWYU pragma: export

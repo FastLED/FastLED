@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/stl/circular_buffer.h"
-#include "fl/math.h"
+#include "fl/stl/math.h"
 #include "fl/stl/span.h"
 
 namespace fl {

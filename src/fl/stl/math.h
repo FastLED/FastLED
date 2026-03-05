@@ -1,12 +1,108 @@
 #pragma once
 
-#include "fl/clamp.h"  // IWYU pragma: keep
-#include "fl/math_macros.h"  // IWYU pragma: keep
+// Centralized math functions for FastLED.
+//
+// All math lives here: basic ops (min/max/abs/clamp), transcendentals
+// (sin/cos/exp/log/pow/sqrt), rounding, angle conversion, and constants.
+//
+// Type dispatch:
+//   float        — explicit f-suffix overloads (sinf, cosf, etc.)
+//   double       — explicit non-template overloads (sin, cos, etc.)
+//   integral     — template promotes to float, returns float
+//   fixed-point  — overloads in fl/stl/fixed_point.h (SFINAE-guarded)
+//
+// Backward-compatible headers fl/math_macros.h and fl/clamp.h still exist
+// and forward here.
+
+#include "fl/compiler_control.h"
+#include "fl/force_inline.h"
+#include "fl/stl/type_traits.h"
 #include "fl/stl/undef.h"  // IWYU pragma: keep
+
+// ===== Constants =============================================================
+
+#ifndef FL_PI
+#define FL_PI 3.1415926535897932384626433832795
+#endif
+
+#ifndef FL_E
+#define FL_E 2.71828182845904523536
+#endif
+
+#ifndef FL_M_PI
+#define FL_M_PI FL_PI
+#endif
+
+#ifndef FL_EPSILON_F
+#define FL_EPSILON_F 1.19209290e-07F
+#endif
+
+#ifndef FL_EPSILON_D
+#define FL_EPSILON_D 2.2204460492503131e-16
+#endif
+
+#ifndef FL_INFINITY_FLOAT
+#define FL_INFINITY_FLOAT (1.0f / 0.0f)
+#endif
+
+#ifndef FL_INFINITY_DOUBLE
+#define FL_INFINITY_DOUBLE (1.0 / 0.0)
+#endif
+
+#ifndef FL_FLT_MAX
+#define FL_FLT_MAX 3.402823466e+38F
+#endif
+
+// ===== Approximate-equality macros ===========================================
+
+#ifndef FL_ALMOST_EQUAL
+#define FL_ALMOST_EQUAL(a, b, small) (FL_ABS((a) - (b)) < small)
+#endif
+
+#ifndef FL_ALMOST_EQUAL_FLOAT
+#define FL_ALMOST_EQUAL_FLOAT(a, b) (FL_ABS((a) - (b)) < FL_EPSILON_F)
+#endif
+
+#ifndef FL_ALMOST_EQUAL_EPSILON
+#define FL_ALMOST_EQUAL_EPSILON(a, b, epsilon) (FL_ABS((a) - (b)) < (epsilon))
+#endif
+
+#ifndef FL_ALMOST_EQUAL_DOUBLE
+#define FL_ALMOST_EQUAL_DOUBLE(a, b) FL_ALMOST_EQUAL_EPSILON(a, b, FL_EPSILON_F)
+#endif
 
 namespace fl {
 
-// Forward declarations of implementation functions defined in math.cpp
+// ===== Basic: min, max, abs, clamp ===========================================
+
+template <typename T> constexpr inline T abs(T value) {
+    return value < 0 ? -value : value;
+}
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(sign-compare)
+FL_DISABLE_WARNING_FLOAT_CONVERSION
+FL_DISABLE_WARNING_SIGN_CONVERSION
+FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
+
+template <typename T, typename U> constexpr inline common_type_t<T, U> min(T a, U b) {
+    return (a < b) ? a : b;
+}
+
+template <typename T, typename U> constexpr inline common_type_t<T, U> max(T a, U b) {
+    return (a > b) ? a : b;
+}
+
+FL_DISABLE_WARNING_POP
+
+template <typename T> FASTLED_FORCE_INLINE T clamp(T value, T lo, T hi) {
+    if (value < lo) return lo;
+    if (value > hi) return hi;
+    return value;
+}
+
+// ===== Forward declarations (implementations in math.cpp.hpp) ================
+
 float floor_impl_float(float value);
 double floor_impl_double(double value);
 float ceil_impl_float(float value);
@@ -48,156 +144,218 @@ double tan_impl_double(double value);
 float ldexp_impl_float(float value, int exp);
 double ldexp_impl_double(double value, int exp);
 
-// Constexpr version for compile-time evaluation (compatible with older C++
-// standards)
+// ===== Constexpr helpers =====================================================
+
 constexpr int ceil_constexpr(float value) {
     return static_cast<int>((value > static_cast<float>(static_cast<int>(value)))
                                 ? static_cast<int>(value) + 1
                                 : static_cast<int>(value));
 }
 
-// Explicit float and double versions for all math functions
-// Following standard C naming: 'f' suffix for float, no suffix for double
+// ===== Rounding ==============================================================
+//
+// Pattern for each function:
+//   1. Explicit float version (f-suffix, e.g. floorf)
+//   2. Explicit double version (no suffix, e.g. floor)
+//   3. Integral promotion template — accepts integer types, returns float
+//
+// Fixed-point overloads live in fl/stl/fixed_point.h and are guarded by
+// enable_if<is_fixed_point<T>>, so there is no ambiguity.
 
-// Floor functions
+// floor
 inline float floorf(float value) { return floor_impl_float(value); }
 inline double floor(double value) { return floor_impl_double(value); }
-template<typename T> inline T floor(T value) { return floor_impl_float(value); }
+template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
+floor(T value) { return floor_impl_float(static_cast<float>(value)); }
 
-// Ceiling functions
+// ceil
 inline float ceilf(float value) { return ceil_impl_float(value); }
 inline double ceil(double value) { return ceil_impl_double(value); }
-template<typename T> inline T ceil(T value) { return ceil_impl_float(value); }
+template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
+ceil(T value) { return ceil_impl_float(static_cast<float>(value)); }
 
-// Square root functions
-inline float sqrtf(float value) { return sqrt_impl_float(value); }
-inline double sqrt(double value) { return sqrt_impl_double(value); }
-template<typename T> inline typename enable_if<!is_fixed_point<T>::value, T>::type sqrt(T value) { return sqrt_impl_float(value); }
-
-// Exponential functions
-inline float expf(float value) { return exp_impl_float(value); }
-inline double exp(double value) { return exp_impl_double(value); }
-template<typename T> inline typename enable_if<!is_fixed_point<T>::value, T>::type exp(T value) { return exp_impl_float(value); }
-
-// Sine functions
-inline float sinf(float value) { return sin_impl_float(value); }
-inline double sin(double value) { return sin_impl_double(value); }
-template<typename T> inline typename enable_if<!is_fixed_point<T>::value, T>::type sin(T value) { return sin_impl_float(value); }
-
-// Cosine functions
-inline float cosf(float value) { return cos_impl_float(value); }
-inline double cos(double value) { return cos_impl_double(value); }
-template<typename T> inline typename enable_if<!is_fixed_point<T>::value, T>::type cos(T value) { return cos_impl_float(value); }
-
-// Natural logarithm functions
-inline float logf(float value) { return log_impl_float(value); }
-inline double log(double value) { return log_impl_double(value); }
-template<typename T> inline T log(T value) { return log_impl_float(value); }
-
-// Base-10 logarithm functions
-inline float log10f(float value) { return log10_impl_float(value); }
-inline double log10(double value) { return log10_impl_double(value); }
-template<typename T> inline T log10(T value) { return log10_impl_float(value); }
-
-// Base-2 logarithm functions (implemented using natural log)
-inline float log2f(float value) { return log_impl_float(value) / log_impl_float(2.0f); }
-inline double log2(double value) { return log_impl_double(value) / log_impl_double(2.0); }
-template<typename T> inline T log2(T value) { return log_impl_float(value) / log_impl_float(2.0f); }
-
-// Power functions
-inline float powf(float base, float exponent) { return pow_impl_float(base, exponent); }
-inline double pow(double base, double exponent) { return pow_impl_double(base, exponent); }
-template<typename T> inline typename enable_if<!is_fixed_point<T>::value, T>::type pow(T base, T exponent) { return pow_impl_float(base, exponent); }
-
-// Absolute value functions (floating point)
-inline float fabsf(float value) { return fabs_impl_float(value); }
-inline double fabs(double value) { return fabs_impl_double(value); }
-template<typename T> inline T fabs(T value) { return fabs_impl_float(value); }
-
-// Round to nearest long integer
-inline long lroundf(float value) { return lround_impl_float(value); }
-inline long lround(double value) { return lround_impl_double(value); }
-template<typename T> inline long lround(T value) { return lround_impl_float(value); }
-
-// Round to nearest floating-point value
-// Arduino defines round as a macro, so we need to undefine it first
+// round — template form avoids "using fl::round" conflict with ::round
 inline float roundf(float value) { return round_impl_float(value); }
-// Template overload for exact type matching - avoids ambiguity with ::round
-// when using "using fl::round;" and calling round with float/double arguments
-// Template has higher priority than implicit float->double conversion
 template<typename T>
-inline T round(T value) {
-    // Delegate to float implementation for all types
-    // This will only be instantiated for types other than double (double uses specialized template below)
+inline typename enable_if<!is_integral<T>::value, T>::type
+round(T value) {
     return static_cast<T>(round_impl_float(static_cast<float>(value)));
 }
-// Explicit specialization for double to use double implementation
 template<>
 inline double round<double>(double value) {
     return round_impl_double(value);
 }
+template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
+round(T value) { return static_cast<float>(value); }
 
-// Floating-point modulo (remainder)
+// lround
+inline long lroundf(float value) { return lround_impl_float(value); }
+inline long lround(double value) { return lround_impl_double(value); }
+template<typename T> inline typename enable_if<is_integral<T>::value, long>::type
+lround(T value) { return static_cast<long>(value); }
+
+// fmod — template form avoids "using fl::fmod" conflict with ::fmod
 inline float fmodf(float x, float y) { return fmod_impl_float(x, y); }
-inline double fmod(double x, double y) { return fmod_impl_double(x, y); }
-// Template overload for exact type matching - avoids ambiguity with ::fmod
-// when using "using fl::fmod;" and calling fmod with float arguments
-// Template has higher priority than implicit float->double conversion
 template<typename T>
-inline T fmod(T x, T y) {
-    // Delegate to float or double implementation based on type
-    // This will only be instantiated for float (double uses the non-template overload above)
-    return fmod_impl_float(static_cast<float>(x), static_cast<float>(y));
+inline typename enable_if<!is_integral<T>::value, T>::type
+fmod(T x, T y) {
+    return static_cast<T>(fmod_impl_float(static_cast<float>(x), static_cast<float>(y)));
 }
+template<>
+inline double fmod<double>(double x, double y) {
+    return fmod_impl_double(x, y);
+}
+template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
+fmod(T x, T y) { return fmod_impl_float(static_cast<float>(x), static_cast<float>(y)); }
 
-// Inverse tangent functions (atan2)
-inline float atan2f(float y, float x) { return atan2_impl_float(y, x); }
-inline double atan2(double y, double x) { return atan2_impl_double(y, x); }
-template<typename T> inline T atan2(T y, T x) { return atan2_impl_float(y, x); }
+// ===== Trigonometry ==========================================================
 
-// Hypotenuse calculation
-inline float hypotf(float x, float y) { return hypot_impl_float(x, y); }
-inline double hypot(double x, double y) { return hypot_impl_double(x, y); }
-template<typename T> inline T hypot(T x, T y) { return hypot_impl_float(x, y); }
+// sin
+inline float sinf(float value) { return sin_impl_float(value); }
+inline double sin(double value) { return sin_impl_double(value); }
+template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
+sin(T value) { return sin_impl_float(static_cast<float>(value)); }
 
-// Inverse tangent functions (atan)
-inline float atanf(float value) { return atan_impl_float(value); }
-inline double atan(double value) { return atan_impl_double(value); }
-template<typename T> inline T atan(T value) { return atan_impl_float(value); }
+// cos
+inline float cosf(float value) { return cos_impl_float(value); }
+inline double cos(double value) { return cos_impl_double(value); }
+template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
+cos(T value) { return cos_impl_float(static_cast<float>(value)); }
 
-// Inverse sine functions (asin)
-inline float asinf(float value) { return asin_impl_float(value); }
-inline double asin(double value) { return asin_impl_double(value); }
-template<typename T> inline T asin(T value) { return asin_impl_float(value); }
-
-// Inverse cosine functions (acos)
-inline float acosf(float value) { return acos_impl_float(value); }
-inline double acos(double value) { return acos_impl_double(value); }
-template<typename T> inline T acos(T value) { return acos_impl_float(value); }
-
-// Tangent functions (tan)
+// tan
 inline float tanf(float value) { return tan_impl_float(value); }
 inline double tan(double value) { return tan_impl_double(value); }
-template<typename T> inline T tan(T value) { return tan_impl_float(value); }
+template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
+tan(T value) { return tan_impl_float(static_cast<float>(value)); }
 
-// Load exponent functions (ldexp) - multiply by power of 2: value * 2^exp
+// ===== Inverse trigonometry ==================================================
+
+// asin
+inline float asinf(float value) { return asin_impl_float(value); }
+inline double asin(double value) { return asin_impl_double(value); }
+template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
+asin(T value) { return asin_impl_float(static_cast<float>(value)); }
+
+// acos
+inline float acosf(float value) { return acos_impl_float(value); }
+inline double acos(double value) { return acos_impl_double(value); }
+template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
+acos(T value) { return acos_impl_float(static_cast<float>(value)); }
+
+// atan
+inline float atanf(float value) { return atan_impl_float(value); }
+inline double atan(double value) { return atan_impl_double(value); }
+template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
+atan(T value) { return atan_impl_float(static_cast<float>(value)); }
+
+// atan2
+inline float atan2f(float y, float x) { return atan2_impl_float(y, x); }
+inline double atan2(double y, double x) { return atan2_impl_double(y, x); }
+template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
+atan2(T y, T x) { return atan2_impl_float(static_cast<float>(y), static_cast<float>(x)); }
+
+// ===== Exponential / logarithmic =============================================
+
+// exp
+inline float expf(float value) { return exp_impl_float(value); }
+inline double exp(double value) { return exp_impl_double(value); }
+template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
+exp(T value) { return exp_impl_float(static_cast<float>(value)); }
+
+// log (natural)
+inline float logf(float value) { return log_impl_float(value); }
+inline double log(double value) { return log_impl_double(value); }
+template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
+log(T value) { return log_impl_float(static_cast<float>(value)); }
+
+// log10
+inline float log10f(float value) { return log10_impl_float(value); }
+inline double log10(double value) { return log10_impl_double(value); }
+template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
+log10(T value) { return log10_impl_float(static_cast<float>(value)); }
+
+// log2
+inline float log2f(float value) { return log_impl_float(value) / log_impl_float(2.0f); }
+inline double log2(double value) { return log_impl_double(value) / log_impl_double(2.0); }
+template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
+log2(T value) { return log_impl_float(static_cast<float>(value)) / log_impl_float(2.0f); }
+
+// pow
+inline float powf(float base, float exponent) { return pow_impl_float(base, exponent); }
+inline double pow(double base, double exponent) { return pow_impl_double(base, exponent); }
+template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
+pow(T base, T exponent) { return pow_impl_float(static_cast<float>(base), static_cast<float>(exponent)); }
+
+// ===== Roots / distance ======================================================
+
+// sqrt
+inline float sqrtf(float value) { return sqrt_impl_float(value); }
+inline double sqrt(double value) { return sqrt_impl_double(value); }
+template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
+sqrt(T value) { return sqrt_impl_float(static_cast<float>(value)); }
+
+// hypot
+inline float hypotf(float x, float y) { return hypot_impl_float(x, y); }
+inline double hypot(double x, double y) { return hypot_impl_double(x, y); }
+template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
+hypot(T x, T y) { return hypot_impl_float(static_cast<float>(x), static_cast<float>(y)); }
+
+// ===== Floating-point utilities ==============================================
+
+// fabs
+inline float fabsf(float value) { return fabs_impl_float(value); }
+inline double fabs(double value) { return fabs_impl_double(value); }
+template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
+fabs(T value) { return fabs_impl_float(static_cast<float>(value)); }
+
+// ldexp — multiply by power of 2: value * 2^exp
 inline float ldexpf(float value, int exp) { return ldexp_impl_float(value, exp); }
 inline double ldexp(double value, int exp) { return ldexp_impl_double(value, exp); }
-template<typename T> inline T ldexp(T value, int exp) { return ldexp_impl_float(static_cast<float>(value), exp); }
+template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
+ldexp(T value, int exp) { return ldexp_impl_float(static_cast<float>(value), exp); }
 
-// Arduino-compatible math functions (replacing problematic macros)
-// min/max/abs are defined in fl/math_macros.h (included above)
+// ===== Angle conversion ======================================================
 
-// radians - convert degrees to radians
 template<typename T>
 constexpr inline T radians(T deg) {
     return deg * static_cast<T>(0.017453292519943295); // PI / 180
 }
 
-// degrees - convert radians to degrees
 template<typename T>
 constexpr inline T degrees(T rad) {
     return rad * static_cast<T>(57.29577951308232); // 180 / PI
 }
 
+// ===== sincos ================================================================
+
+// sincos(angle, &out_sin, &out_cos) for floating-point types
+template <typename T>
+inline typename enable_if<is_floating_point<T>::value>::type
+sincos(T angle, T& out_sin, T& out_cos) {
+    out_sin = static_cast<T>(fl::sinf(static_cast<float>(angle)));
+    out_cos = static_cast<T>(fl::cosf(static_cast<float>(angle)));
+}
+
+// sincos(angle, &out_sin, &out_cos) for integral types
+template <typename T>
+inline typename enable_if<is_integral<T>::value>::type
+sincos(T angle, float& out_sin, float& out_cos) {
+    out_sin = fl::sinf(static_cast<float>(angle));
+    out_cos = fl::cosf(static_cast<float>(angle));
+}
+
 } // namespace fl
+
+// ===== Legacy macros (prefer fl:: functions directly) ========================
+
+#ifndef FL_MAX
+#define FL_MAX(a, b) fl::max(a, b)
+#endif
+
+#ifndef FL_MIN
+#define FL_MIN(a, b) fl::min(a, b)
+#endif
+
+#ifndef FL_ABS
+#define FL_ABS(x) fl::abs(x)
+#endif
