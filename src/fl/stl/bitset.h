@@ -17,16 +17,13 @@ FL_DISABLE_WARNING_FLOAT_CONVERSION
 
 namespace fl {
 
-template <fl::u32 N> class BitsetInlined;
+template <fl::u32 N> class bitset_inlined;
 
-template <fl::u32 N> class BitsetFixed;
+template <fl::u32 N> class bitset_fixed;
 
 class string;
 template <fl::u32 N = 16>
-using bitset = BitsetInlined<N>; // inlined but can go bigger.
-
-template <fl::u32 N>
-using bitset_fixed = BitsetFixed<N>; // fixed size, no dynamic allocation.
+using bitset = bitset_inlined<N>; // inlined but can go bigger.
 
 
 // TODO: move this to fl/math.h
@@ -41,7 +38,7 @@ inline fl::u8 countr_zero(IntType value) {
 }
 
 /// A simple fixed-size Bitset implementation similar to std::Bitset.
-template <fl::u32 N> class BitsetFixed {
+template <fl::u32 N> class bitset_fixed {
   private:
     static_assert(sizeof(fl::u16) == 2, "u16 should be 2 bytes");
     static constexpr fl::u32 bits_per_block = 8 * sizeof(fl::u16);
@@ -54,10 +51,10 @@ template <fl::u32 N> class BitsetFixed {
 
   public:
     struct Proxy {
-        BitsetFixed &_bitset;
+        bitset_fixed &_bitset;
         fl::u32 _pos;
 
-        Proxy(BitsetFixed &bitset, fl::u32 pos) : _bitset(bitset), _pos(pos) {}
+        Proxy(bitset_fixed &bitset, fl::u32 pos) : _bitset(bitset), _pos(pos) {}
 
         Proxy &operator=(bool value) {
             _bitset.set(_pos, value);
@@ -69,8 +66,8 @@ template <fl::u32 N> class BitsetFixed {
 
     Proxy operator[](fl::u32 pos) { return Proxy(*this, pos); }
 
-    /// Constructs a BitsetFixed with all bits reset.
-    constexpr BitsetFixed() noexcept : _blocks{} {}
+    /// Constructs a bitset_fixed with all bits reset.
+    constexpr bitset_fixed() noexcept : _blocks{} {}
 
     void to_string(string* dst) const {
         detail::to_string(_blocks, N, dst);
@@ -84,7 +81,7 @@ template <fl::u32 N> class BitsetFixed {
     }
 
     /// Sets or clears the bit at position pos.
-    BitsetFixed &set(fl::u32 pos, bool value = true) {
+    bitset_fixed &set(fl::u32 pos, bool value = true) {
         if (pos < N) {
             const fl::u32 idx = pos / bits_per_block;
             const fl::u32 off = pos % bits_per_block;
@@ -107,10 +104,10 @@ template <fl::u32 N> class BitsetFixed {
     }
 
     /// Clears the bit at position pos.
-    BitsetFixed &reset(fl::u32 pos) { return set(pos, false); }
+    bitset_fixed &reset(fl::u32 pos) { return set(pos, false); }
 
     /// Flips (toggles) the bit at position pos.
-    BitsetFixed &flip(fl::u32 pos) {
+    bitset_fixed &flip(fl::u32 pos) {
         if (pos < N) {
             const fl::u32 idx = pos / bits_per_block;
             const fl::u32 off = pos % bits_per_block;
@@ -120,7 +117,7 @@ template <fl::u32 N> class BitsetFixed {
     }
 
     /// Flips all bits.
-    BitsetFixed &flip() noexcept {
+    bitset_fixed &flip() noexcept {
         for (fl::u32 i = 0; i < block_count; ++i) {
             _blocks[i] = ~_blocks[i];
         }
@@ -206,28 +203,28 @@ template <fl::u32 N> class BitsetFixed {
     }
 
     /// Bitwise AND
-    BitsetFixed &operator&=(const BitsetFixed &other) noexcept {
+    bitset_fixed &operator&=(const bitset_fixed &other) noexcept {
         for (fl::u32 i = 0; i < block_count; ++i) {
             _blocks[i] &= other._blocks[i];
         }
         return *this;
     }
     /// Bitwise OR
-    BitsetFixed &operator|=(const BitsetFixed &other) noexcept {
+    bitset_fixed &operator|=(const bitset_fixed &other) noexcept {
         for (fl::u32 i = 0; i < block_count; ++i) {
             _blocks[i] |= other._blocks[i];
         }
         return *this;
     }
     /// Bitwise XOR
-    BitsetFixed &operator^=(const BitsetFixed &other) noexcept {
+    bitset_fixed &operator^=(const bitset_fixed &other) noexcept {
         for (fl::u32 i = 0; i < block_count; ++i) {
             _blocks[i] ^= other._blocks[i];
         }
         return *this;
     }
 
-    /// Size of the BitsetFixed (number of bits).
+    /// Size of the bitset_fixed (number of bits).
     constexpr fl::u32 size() const noexcept { return N; }
 
     /// Finds the first bit that matches the test value.
@@ -311,37 +308,37 @@ template <fl::u32 N> class BitsetFixed {
     }
 
     /// Friend operators for convenience.
-    friend BitsetFixed operator&(BitsetFixed lhs,
-                                 const BitsetFixed &rhs) noexcept {
+    friend bitset_fixed operator&(bitset_fixed lhs,
+                                 const bitset_fixed &rhs) noexcept {
         return lhs &= rhs;
     }
-    friend BitsetFixed operator|(BitsetFixed lhs,
-                                 const BitsetFixed &rhs) noexcept {
+    friend bitset_fixed operator|(bitset_fixed lhs,
+                                 const bitset_fixed &rhs) noexcept {
         return lhs |= rhs;
     }
-    friend BitsetFixed operator^(BitsetFixed lhs,
-                                 const BitsetFixed &rhs) noexcept {
+    friend bitset_fixed operator^(bitset_fixed lhs,
+                                 const bitset_fixed &rhs) noexcept {
         return lhs ^= rhs;
     }
-    friend BitsetFixed operator~(BitsetFixed bs) noexcept { return bs.flip(); }
+    friend bitset_fixed operator~(bitset_fixed bs) noexcept { return bs.flip(); }
 };
 
 /// A Bitset implementation with inline storage that can grow if needed.
 /// T is the storage type (u8, u16, u32, u64)
 /// N is the initial number of bits to store inline
 template <fl::u32 N = 16> // Default size is 16 bits, or 2 bytes
-class BitsetInlined {
+class bitset_inlined {
   private:
     // Either store a fixed Bitset<N> or a dynamic Bitset
-    using fixed_bitset = BitsetFixed<N>;
+    using fixed_bitset = bitset_fixed<N>;
     variant<fixed_bitset, bitset_dynamic> _storage;
 
   public:
     struct Proxy {
-        BitsetInlined &_bitset;
+        bitset_inlined &_bitset;
         fl::u32 _pos;
 
-        Proxy(BitsetInlined &bitset, fl::u32 pos)
+        Proxy(bitset_inlined &bitset, fl::u32 pos)
             : _bitset(bitset), _pos(pos) {}
 
         Proxy &operator=(bool value) {
@@ -355,22 +352,22 @@ class BitsetInlined {
     Proxy operator[](fl::u32 pos) { return Proxy(*this, pos); }
 
     /// Constructs a Bitset with all bits reset.
-    BitsetInlined() : _storage(fixed_bitset()) {}
-    BitsetInlined(fl::size size) : _storage(fixed_bitset()) {
+    bitset_inlined() : _storage(fixed_bitset()) {}
+    bitset_inlined(fl::size size) : _storage(fixed_bitset()) {
         if (size > N) {
             _storage = bitset_dynamic(size);
         }
     }
-    BitsetInlined(const BitsetInlined &other) : _storage(other._storage) {}
-    BitsetInlined(BitsetInlined &&other) noexcept
+    bitset_inlined(const bitset_inlined &other) : _storage(other._storage) {}
+    bitset_inlined(bitset_inlined &&other) noexcept
         : _storage(fl::move(other._storage)) {}
-    BitsetInlined &operator=(const BitsetInlined &other) {
+    bitset_inlined &operator=(const bitset_inlined &other) {
         if (this != &other) {
             _storage = other._storage;
         }
         return *this;
     }
-    BitsetInlined &operator=(BitsetInlined &&other) noexcept {
+    bitset_inlined &operator=(bitset_inlined &&other) noexcept {
         if (this != &other) {
             _storage = fl::move(other._storage);
         }
@@ -439,7 +436,7 @@ class BitsetInlined {
     }
 
     /// Sets or clears the bit at position pos.
-    BitsetInlined &set(fl::u32 pos, bool value = true) {
+    bitset_inlined &set(fl::u32 pos, bool value = true) {
         if (pos >= N && _storage.template is<fixed_bitset>()) {
             resize(pos + 1);
         }
@@ -458,10 +455,10 @@ class BitsetInlined {
     }
 
     /// Clears the bit at position pos.
-    BitsetInlined &reset(fl::u32 pos) { return set(pos, false); }
+    bitset_inlined &reset(fl::u32 pos) { return set(pos, false); }
 
     /// Flips (toggles) the bit at position pos.
-    BitsetInlined &flip(fl::u32 pos) {
+    bitset_inlined &flip(fl::u32 pos) {
         if (pos >= N && _storage.template is<fixed_bitset>()) {
             resize(pos + 1);
         }
@@ -480,7 +477,7 @@ class BitsetInlined {
     }
 
     /// Flips all bits.
-    BitsetInlined &flip() noexcept {
+    bitset_inlined &flip() noexcept {
         if (_storage.template is<fixed_bitset>()) {
             _storage.template ptr<fixed_bitset>()->flip();
         } else {
@@ -567,15 +564,15 @@ class BitsetInlined {
     }
 
     /// Bitwise operators
-    friend BitsetInlined operator~(const BitsetInlined &bs) noexcept {
-        BitsetInlined result = bs;
+    friend bitset_inlined operator~(const bitset_inlined &bs) noexcept {
+        bitset_inlined result = bs;
         result.flip();
         return result;
     }
 
-    friend BitsetInlined operator&(const BitsetInlined &lhs,
-                                   const BitsetInlined &rhs) noexcept {
-        BitsetInlined result = lhs;
+    friend bitset_inlined operator&(const bitset_inlined &lhs,
+                                   const bitset_inlined &rhs) noexcept {
+        bitset_inlined result = lhs;
 
         if (result._storage.template is<fixed_bitset>() &&
             rhs._storage.template is<fixed_bitset>()) {
@@ -598,9 +595,9 @@ class BitsetInlined {
         return result;
     }
 
-    friend BitsetInlined operator|(const BitsetInlined &lhs,
-                                   const BitsetInlined &rhs) noexcept {
-        BitsetInlined result = lhs;
+    friend bitset_inlined operator|(const bitset_inlined &lhs,
+                                   const bitset_inlined &rhs) noexcept {
+        bitset_inlined result = lhs;
 
         if (result._storage.template is<fixed_bitset>() &&
             rhs._storage.template is<fixed_bitset>()) {
@@ -628,9 +625,9 @@ class BitsetInlined {
         return result;
     }
 
-    friend BitsetInlined operator^(const BitsetInlined &lhs,
-                                   const BitsetInlined &rhs) noexcept {
-        BitsetInlined result = lhs;
+    friend bitset_inlined operator^(const bitset_inlined &lhs,
+                                   const bitset_inlined &rhs) noexcept {
+        bitset_inlined result = lhs;
 
         if (result._storage.template is<fixed_bitset>() &&
             rhs._storage.template is<fixed_bitset>()) {

@@ -22,9 +22,9 @@ template <typename Key, typename Value, typename Less, typename Allocator> class
 template <typename T, fl::size Extent> class span;  // Forward declaration from fl/slice.h (no default arg to avoid redefinition)  // IWYU pragma: keep
 template <typename T1, typename T2> struct pair;  // Forward declaration from fl/stl/pair.h
 class FFTBins;  // Forward declaration from fl/fft.h
-template <fl::u32 N> class BitsetFixed;
+template <fl::u32 N> class bitset_fixed;
 class bitset_dynamic;  // IWYU pragma: keep
-template <fl::u32 N> class BitsetInlined;  // IWYU pragma: keep
+template <fl::u32 N> class bitset_inlined;  // IWYU pragma: keep
 
 // Note: int_cast_detail::cast_target is now defined in fl/stl/type_traits.h
 // and shared between sstream and StrN for consistent integer formatting
@@ -275,7 +275,7 @@ class sstream {
     }
 
     template<fl::u32 N>
-    sstream &operator<<(const BitsetFixed<N> &bs) {
+    sstream &operator<<(const bitset_fixed<N> &bs) {
         // mStr.append(bs);
         bs.to_string(&mStr);
         return *this;
@@ -287,7 +287,7 @@ class sstream {
     }
 
     template<fl::u32 N>
-    sstream &operator<<(const BitsetInlined<N> &bs) {
+    sstream &operator<<(const bitset_inlined<N> &bs) {
         bs.to_string(&mStr);
         return *this;
     }
@@ -468,12 +468,12 @@ class sstream_noop {
 
     // Bitset support
     template<fl::u32 N>
-    sstream_noop &operator<<(const BitsetFixed<N> &) { return *this; }
+    sstream_noop &operator<<(const bitset_fixed<N> &) { return *this; }
 
     sstream_noop &operator<<(const bitset_dynamic &) { return *this; }
 
     template<fl::u32 N>
-    sstream_noop &operator<<(const BitsetInlined<N> &) { return *this; }
+    sstream_noop &operator<<(const bitset_inlined<N> &) { return *this; }
 
     // Support for hex and dec formatters
     sstream_noop &operator<<(const hex_t &) { return *this; }

@@ -2563,7 +2563,7 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     }
 
     template <fl::u32 N>
-    string &append(const BitsetFixed<N> &bs) {
+    string &append(const bitset_fixed<N> &bs) {
         bs.to_string(this);
         return *this;
     }
@@ -2574,7 +2574,7 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     }
 
     template <fl::u32 N>
-    string &append(const BitsetInlined<N> &bs) {
+    string &append(const bitset_inlined<N> &bs) {
         bs.to_string(this);
         return *this;
     }

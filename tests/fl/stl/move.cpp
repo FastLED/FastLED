@@ -919,18 +919,18 @@ FL_TEST_CASE("Container move semantics with shared_ptr") {
         FL_CHECK(destination.test(30));
     }
 
-    FL_SUBCASE("fl::BitsetInlined") {
-        fl::BitsetInlined<10> source;
+    FL_SUBCASE("fl::bitset_inlined") {
+        fl::bitset_inlined<10> source;
         source.set(5);
         source.set(7);
 
         FL_REQUIRE(source.test(5));
         FL_REQUIRE(source.test(7));
 
-        fl::BitsetInlined<10> destination;
+        fl::bitset_inlined<10> destination;
         destination = fl::move(source);
 
-        // BitsetInlined should transfer state
+        // bitset_inlined should transfer state
         FL_CHECK(destination.test(5));
         FL_CHECK(destination.test(7));
     }
