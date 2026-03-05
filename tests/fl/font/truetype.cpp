@@ -24,16 +24,16 @@ fl::vector<unsigned char> loadFontFile(const char* filename) {
     }
 
     auto file_handle = fs.openRead(filename);
-    if (!file_handle || !file_handle->valid()) {
+    if (!file_handle.is_open()) {
         return fl::vector<unsigned char>();
     }
 
     // Get file size
-    fl::size size = file_handle->size();
+    fl::size size = file_handle.size();
 
     // Read file into buffer
     fl::vector<unsigned char> buffer(size);
-    fl::size bytes_read = file_handle->read(buffer.data(), size);
+    fl::size bytes_read = file_handle.read(buffer.data(), size);
     if (bytes_read != size) {
         return fl::vector<unsigned char>();
     }

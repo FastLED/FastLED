@@ -95,16 +95,15 @@ FL_TEST_CASE("FileSystem test with real hard drive") {
     FL_REQUIRE(ok);
 
     // Try to read the test file
-    fl::filebuf_ptr handle = fs.openRead(test_file.c_str());
-    FL_REQUIRE(handle != nullptr);
-    FL_REQUIRE(handle->valid());
+    fl::ifstream handle = fs.openRead(test_file.c_str());
+    FL_REQUIRE(handle.is_open());
 
     // Check file size
-    FL_CHECK_EQ(handle->size(), test_content.length());
+    FL_CHECK_EQ(handle.size(), test_content.length());
 
     // Read the content
     fl::vector<uint8_t> buffer(test_content.length());
-    fl::size bytes_read = handle->read(buffer.data(), buffer.size());
+    fl::size bytes_read = handle.read(buffer.data(), buffer.size());
     FL_CHECK_EQ(bytes_read, test_content.length());
 
     // Verify content
@@ -113,16 +112,16 @@ FL_TEST_CASE("FileSystem test with real hard drive") {
     FL_CHECK_EQ(read_content, test_content);
 
     // Test seeking
-    FL_REQUIRE(handle->seek(7)); // Seek to position 7 ("FastLED...")
+    FL_REQUIRE(handle.seek(7)); // Seek to position 7 ("FastLED...")
     fl::vector<uint8_t> seek_buffer(7);
-    fl::size seek_bytes = handle->read(seek_buffer.data(), seek_buffer.size());
+    fl::size seek_bytes = handle.read(seek_buffer.data(), seek_buffer.size());
     FL_CHECK_EQ(seek_bytes, 7);
     fl::string seek_content;
     seek_content.assign((const char*)seek_buffer.data(), seek_buffer.size());
     FL_CHECK_EQ(seek_content, "FastLED");
 
     // Clean up
-    handle->close();
+    handle.close();
     fs.end();
 
     // TestDirGuard destructor handles cleanup
@@ -164,13 +163,12 @@ FL_TEST_CASE("FileSystem test with subdirectories") {
     fl::string file_path = sub_dir;
     file_path.append("/");
     file_path.append(test_file);
-    fl::filebuf_ptr handle = fs.openRead(file_path.c_str());
-    FL_REQUIRE(handle != nullptr);
-    FL_REQUIRE(handle->valid());
+    fl::ifstream handle = fs.openRead(file_path.c_str());
+    FL_REQUIRE(handle.is_open());
 
     // Read and verify content
     fl::vector<uint8_t> buffer(test_content.length());
-    fl::size bytes_read = handle->read(buffer.data(), buffer.size());
+    fl::size bytes_read = handle.read(buffer.data(), buffer.size());
     FL_CHECK_EQ(bytes_read, test_content.length());
 
     fl::string read_content;
@@ -178,7 +176,7 @@ FL_TEST_CASE("FileSystem test with subdirectories") {
     FL_CHECK_EQ(read_content, test_content);
 
     // Clean up
-    handle->close();
+    handle.close();
     fs.end();
 
     // TestDirGuard destructor handles cleanup
@@ -258,33 +256,32 @@ FL_TEST_CASE("FileSystem test with binary file loading") {
     FL_REQUIRE(ok);
 
     // Try to read the JPEG test file
-    fl::filebuf_ptr handle = fs.openRead("data/codec/file.jpg");
-    FL_REQUIRE(handle != nullptr);
-    FL_REQUIRE(handle->valid());
+    fl::ifstream handle = fs.openRead("data/codec/file.jpg");
+    FL_REQUIRE(handle.is_open());
 
     // JPEG files should start with FF D8 (JPEG SOI marker)
     uint8_t jpeg_header[2];
-    fl::size bytes_read = handle->read(jpeg_header, 2);
+    fl::size bytes_read = handle.read(jpeg_header, 2);
     FL_CHECK_EQ(bytes_read, 2);
     FL_CHECK_EQ(jpeg_header[0], 0xFF);
     FL_CHECK_EQ(jpeg_header[1], 0xD8);
 
     // Check that we can get the file size
-    fl::size file_size = handle->size();
+    fl::size file_size = handle.size();
     FL_CHECK(file_size > 0);
 
     // Test seeking to the end to check for JPEG EOI marker (FF D9)
-    FL_REQUIRE(handle->seek(file_size - 2));
+    FL_REQUIRE(handle.seek(file_size - 2));
     uint8_t jpeg_footer[2];
-    bytes_read = handle->read(jpeg_footer, 2);
+    bytes_read = handle.read(jpeg_footer, 2);
     FL_CHECK_EQ(bytes_read, 2);
     FL_CHECK_EQ(jpeg_footer[0], 0xFF);
     FL_CHECK_EQ(jpeg_footer[1], 0xD9);
 
     // Test reading the entire file into a buffer
-    FL_REQUIRE(handle->seek(0));
+    FL_REQUIRE(handle.seek(0));
     fl::vector<uint8_t> file_buffer(file_size);
-    bytes_read = handle->read(file_buffer.data(), file_size);
+    bytes_read = handle.read(file_buffer.data(), file_size);
     FL_CHECK_EQ(bytes_read, file_size);
 
     // Verify JPEG header and footer in the buffer
@@ -294,7 +291,7 @@ FL_TEST_CASE("FileSystem test with binary file loading") {
     FL_CHECK_EQ(file_buffer[file_size - 1], 0xD9);
 
     // Clean up
-    handle->close();
+    handle.close();
     fs.end();
 
     // TestRootGuard destructor clears global state

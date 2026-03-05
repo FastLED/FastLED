@@ -86,20 +86,19 @@ FL_TEST_CASE("Mp3HelixDecoder - Decode real MP3 file") {
     FL_CHECK(fs.beginSd(0)); // CS pin doesn't matter for test
 
     // Open the MP3 file
-    fl::filebuf_ptr file = fs.openRead("codec/jazzy_percussion.mp3");
-    FL_REQUIRE(file != nullptr);
-    FL_REQUIRE(file->valid());
+    fl::ifstream file = fs.openRead("codec/jazzy_percussion.mp3");
+    FL_REQUIRE(file.is_open());
 
     // Read entire file into buffer
-    fl::size file_size = file->size();
+    fl::size file_size = file.size();
     FL_CHECK_GT(file_size, 0);
 
     fl::vector<fl::u8> mp3_data;
     mp3_data.resize(file_size);
-    fl::size bytes_read = file->read(mp3_data.data(), file_size);
+    fl::size bytes_read = file.read(mp3_data.data(), file_size);
     FL_CHECK_EQ(bytes_read, file_size);
 
-    file->close();
+    file.close();
 
     // Decode MP3 data
     Mp3HelixDecoder decoder;
@@ -138,15 +137,15 @@ FL_TEST_CASE("Mp3HelixDecoder - Convert to fl::AudioSamples from real file") {
     FL_CHECK(fs.beginSd(0));
 
     // Open the MP3 file
-    fl::filebuf_ptr file = fs.openRead("codec/jazzy_percussion.mp3");
-    FL_REQUIRE(file != nullptr);
+    fl::ifstream file = fs.openRead("codec/jazzy_percussion.mp3");
+    FL_REQUIRE(file.is_open());
 
     // Read entire file
-    fl::size file_size = file->size();
+    fl::size file_size = file.size();
     fl::vector<fl::u8> mp3_data;
     mp3_data.resize(file_size);
-    file->read(mp3_data.data(), file_size);
-    file->close();
+    file.read(mp3_data.data(), file_size);
+    file.close();
 
     // Decode to fl::AudioSamples
     Mp3HelixDecoder decoder;

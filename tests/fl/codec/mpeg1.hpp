@@ -17,16 +17,16 @@ static fl::FileSystem setupCodecFilesystem_mpeg1() {
 FL_TEST_CASE("MPEG1 file loading and decoding") {
     fl::FileSystem fs = setupCodecFilesystem_mpeg1();
         // Test that we can load the MPEG1 file from filesystem
-        fl::filebuf_ptr handle = fs.openRead("data/codec/file.mpeg");
-        FL_REQUIRE(handle != nullptr);
-        FL_REQUIRE(handle->valid());
+        fl::ifstream handle = fs.openRead("data/codec/file.mpeg");
+        FL_REQUIRE(handle.is_open());
+        // handle.is_open() already checked above
 
         // Get file size and read into buffer
-        fl::size file_size = handle->size();
+        fl::size file_size = handle.size();
         FL_CHECK(file_size > 0);
 
         fl::vector<fl::u8> file_data(file_size);
-        fl::size bytes_read = handle->read(file_data.data(), file_size);
+        fl::size bytes_read = handle.read(file_data.data(), file_size);
         FL_CHECK_EQ(bytes_read, file_size);
 
         // MPEG1 files should start with start code (0x000001)
@@ -147,7 +147,7 @@ FL_TEST_CASE("MPEG1 file loading and decoding") {
             testMpeg1Decoding();
         }
 
-    handle->close();
+    handle.close();
     fs.end();
 }
 
@@ -196,13 +196,13 @@ FL_TEST_CASE("MPEG1 decoder error handling") {
 
     FL_SUBCASE("truncated MPEG1 data") {
         // Load the valid MPEG1 file but truncate it
-        fl::filebuf_ptr handle = fs.openRead("data/codec/file.mpeg");
-        FL_REQUIRE(handle != nullptr);
+        fl::ifstream handle = fs.openRead("data/codec/file.mpeg");
+        FL_REQUIRE(handle.is_open());
 
-        fl::size file_size = handle->size();
+        fl::size file_size = handle.size();
         fl::vector<fl::u8> file_data(file_size / 2); // Only read half
-        handle->read(file_data.data(), file_data.size());
-        handle->close();
+        handle.read(file_data.data(), file_data.size());
+        handle.close();
 
         fl::Mpeg1Config config;
         fl::string error_msg;
@@ -231,13 +231,13 @@ FL_TEST_CASE("MPEG1 configuration options") {
     fl::FileSystem fs = setupCodecFilesystem_mpeg1();
 
     // Load valid MPEG1 data
-    fl::filebuf_ptr handle = fs.openRead("data/codec/file.mpeg");
-    FL_REQUIRE(handle != nullptr);
+    fl::ifstream handle = fs.openRead("data/codec/file.mpeg");
+    FL_REQUIRE(handle.is_open());
 
-    fl::size file_size = handle->size();
+    fl::size file_size = handle.size();
     fl::vector<fl::u8> file_data(file_size);
-    handle->read(file_data.data(), file_size);
-    handle->close();
+    handle.read(file_data.data(), file_size);
+    handle.close();
 
     FL_SUBCASE("SingleFrame mode") {
         fl::Mpeg1Config config;
@@ -315,13 +315,13 @@ FL_TEST_CASE("MPEG1 configuration options") {
 FL_TEST_CASE("MPEG1 decoder properties and metadata") {
     fl::FileSystem fs = setupCodecFilesystem_mpeg1();
 
-    fl::filebuf_ptr handle = fs.openRead("data/codec/file.mpeg");
-    FL_REQUIRE(handle != nullptr);
+    fl::ifstream handle = fs.openRead("data/codec/file.mpeg");
+    FL_REQUIRE(handle.is_open());
 
-    fl::size file_size = handle->size();
+    fl::size file_size = handle.size();
     fl::vector<fl::u8> file_data(file_size);
-    handle->read(file_data.data(), file_size);
-    handle->close();
+    handle.read(file_data.data(), file_size);
+    handle.close();
 
     fl::Mpeg1Config config;
     fl::string error_msg;
@@ -379,13 +379,13 @@ FL_TEST_CASE("MPEG1 decoder properties and metadata") {
 FL_TEST_CASE("MPEG1 frame data validation") {
     fl::FileSystem fs = setupCodecFilesystem_mpeg1();
 
-    fl::filebuf_ptr handle = fs.openRead("data/codec/file.mpeg");
-    FL_REQUIRE(handle != nullptr);
+    fl::ifstream handle = fs.openRead("data/codec/file.mpeg");
+    FL_REQUIRE(handle.is_open());
 
-    fl::size file_size = handle->size();
+    fl::size file_size = handle.size();
     fl::vector<fl::u8> file_data(file_size);
-    handle->read(file_data.data(), file_size);
-    handle->close();
+    handle.read(file_data.data(), file_size);
+    handle.close();
 
     fl::Mpeg1Config config;
     config.mode = fl::Mpeg1Config::SingleFrame;
@@ -452,13 +452,13 @@ FL_TEST_CASE("MPEG1 frame data validation") {
 FL_TEST_CASE("MPEG1 multi-frame sequence validation") {
     fl::FileSystem fs = setupCodecFilesystem_mpeg1();
 
-    fl::filebuf_ptr handle = fs.openRead("data/codec/file.mpeg");
-    FL_REQUIRE(handle != nullptr);
+    fl::ifstream handle = fs.openRead("data/codec/file.mpeg");
+    FL_REQUIRE(handle.is_open());
 
-    fl::size file_size = handle->size();
+    fl::size file_size = handle.size();
     fl::vector<fl::u8> file_data(file_size);
-    handle->read(file_data.data(), file_size);
-    handle->close();
+    handle.read(file_data.data(), file_size);
+    handle.close();
 
     fl::Mpeg1Config config;
     config.mode = fl::Mpeg1Config::Streaming;
@@ -515,16 +515,16 @@ FL_TEST_CASE("MPEG1 metadata parsing without decoding") {
     fl::FileSystem fs = setupCodecFilesystem_mpeg1();
 
     // Test that we can load the MPEG1 file from filesystem
-    fl::filebuf_ptr handle = fs.openRead("data/codec/file.mpeg");
-    FL_REQUIRE(handle != nullptr);
-    FL_REQUIRE(handle->valid());
+    fl::ifstream handle = fs.openRead("data/codec/file.mpeg");
+    FL_REQUIRE(handle.is_open());
+    // handle.is_open() already checked above
 
     // Get file size and read into buffer
-    fl::size file_size = handle->size();
+    fl::size file_size = handle.size();
     FL_CHECK(file_size > 0);
 
     fl::vector<fl::u8> file_data(file_size);
-    fl::size bytes_read = handle->read(file_data.data(), file_size);
+    fl::size bytes_read = handle.read(file_data.data(), file_size);
     FL_CHECK_EQ(bytes_read, file_size);
 
     // Test MPEG1 metadata parsing
@@ -590,7 +590,7 @@ FL_TEST_CASE("MPEG1 metadata parsing without decoding") {
         FL_MESSAGE("Invalid stream error: " << invalid_error);
     }
 
-    handle->close();
+    handle.close();
     fs.end();
 }
 
@@ -598,13 +598,13 @@ FL_TEST_CASE("MPEG1 audio extraction") {
     fl::FileSystem fs = setupCodecFilesystem_mpeg1();
 
     // Load valid MPEG1 data with audio
-    fl::filebuf_ptr handle = fs.openRead("data/codec/file.mpeg");
-    FL_REQUIRE(handle != nullptr);
+    fl::ifstream handle = fs.openRead("data/codec/file.mpeg");
+    FL_REQUIRE(handle.is_open());
 
-    fl::size file_size = handle->size();
+    fl::size file_size = handle.size();
     fl::vector<fl::u8> file_data(file_size);
-    handle->read(file_data.data(), file_size);
-    handle->close();
+    handle.read(file_data.data(), file_size);
+    handle.close();
 
     FL_SUBCASE("Audio callback receives samples") {
         fl::Mpeg1Config config;
@@ -747,13 +747,13 @@ FL_TEST_CASE("MPEG1 audio extraction") {
 
     FL_SUBCASE("Audio and video both decode from multiplexed stream") {
         // Load MPEG1 file with both audio and video
-        fl::filebuf_ptr av_handle = fs.openRead("data/codec/test_audio_video.mpg");
-        FL_REQUIRE(av_handle != nullptr);
+        fl::ifstream av_handle = fs.openRead("data/codec/test_audio_video.mpg");
+        FL_REQUIRE(av_handle.is_open());
 
-        fl::size av_file_size = av_handle->size();
+        fl::size av_file_size = av_handle.size();
         fl::vector<fl::u8> av_file_data(av_file_size);
-        av_handle->read(av_file_data.data(), av_file_size);
-        av_handle->close();
+        av_handle.read(av_file_data.data(), av_file_size);
+        av_handle.close();
 
         fl::Mpeg1Config config;
         config.skipAudio = false;  // Enable audio

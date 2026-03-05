@@ -195,13 +195,6 @@ public:
 #endif
     }
 
-    void close(filebuf_ptr file) override {
-        // The close operation is now handled in the filebuf wrapper classes
-        // This method ensures the file is properly closed
-        if (file) {
-            file->close();
-        }
-    }
 };
 
 // Implementation of the factory function to create SD card filesystem

@@ -14,17 +14,16 @@ static fl::FileSystem setupCodecFilesystem_mp4() {
 FL_TEST_CASE("MP4 parser - parse test.mp4") {
     fl::FileSystem fs = setupCodecFilesystem_mp4();
 
-    fl::filebuf_ptr handle = fs.openRead("data/codec/test.mp4");
-    FL_REQUIRE(handle != nullptr);
-    FL_REQUIRE(handle->valid());
+    fl::ifstream handle = fs.openRead("data/codec/test.mp4");
+    FL_REQUIRE(handle.is_open());
 
-    fl::size file_size = handle->size();
+    fl::size file_size = handle.size();
     FL_CHECK_GT(file_size, 0);
 
     fl::vector<fl::u8> file_data(file_size);
-    fl::size bytes_read = handle->read(file_data.data(), file_size);
+    fl::size bytes_read = handle.read(file_data.data(), file_size);
     FL_CHECK_EQ(bytes_read, file_size);
-    handle->close();
+    handle.close();
 
     fl::string error;
     fl::Mp4TrackInfo track = fl::parseMp4(file_data, &error);
@@ -52,13 +51,13 @@ FL_TEST_CASE("MP4 parser - parse test.mp4") {
 FL_TEST_CASE("MP4 parser - extract NAL units") {
     fl::FileSystem fs = setupCodecFilesystem_mp4();
 
-    fl::filebuf_ptr handle = fs.openRead("data/codec/test.mp4");
-    FL_REQUIRE(handle != nullptr);
+    fl::ifstream handle = fs.openRead("data/codec/test.mp4");
+    FL_REQUIRE(handle.is_open());
 
-    fl::size file_size = handle->size();
+    fl::size file_size = handle.size();
     fl::vector<fl::u8> file_data(file_size);
-    handle->read(file_data.data(), file_size);
-    handle->close();
+    handle.read(file_data.data(), file_size);
+    handle.close();
 
     fl::string error;
     fl::Mp4TrackInfo track = fl::parseMp4(file_data, &error);

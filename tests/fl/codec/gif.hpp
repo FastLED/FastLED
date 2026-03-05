@@ -17,16 +17,15 @@ static fl::FileSystem setupCodecFilesystem_gif() {
 FL_TEST_CASE("GIF file loading and decoding") {
     fl::FileSystem fs = setupCodecFilesystem_gif();
         // Test that we can load the GIF file from filesystem
-        fl::filebuf_ptr handle = fs.openRead("data/codec/file.gif");
-        FL_REQUIRE(handle != nullptr);
-        FL_REQUIRE(handle->valid());
+        fl::ifstream handle = fs.openRead("data/codec/file.gif");
+        FL_REQUIRE(handle.is_open());
 
         // Get file size and read into buffer
-        fl::size file_size = handle->size();
+        fl::size file_size = handle.size();
         FL_CHECK(file_size > 0);
 
         fl::vector<fl::u8> file_data(file_size);
-        fl::size bytes_read = handle->read(file_data.data(), file_size);
+        fl::size bytes_read = handle.read(file_data.data(), file_size);
         FL_CHECK_EQ(bytes_read, file_size);
 
         // Validate GIF file signature
@@ -43,7 +42,7 @@ FL_TEST_CASE("GIF file loading and decoding") {
         // Test GIF decoder if supported
         if (!fl::Gif::isSupported()) {
             FL_MESSAGE("GIF decoder not supported on this platform");
-            handle->close();
+            handle.close();
             return;
         }
 
@@ -131,7 +130,7 @@ FL_TEST_CASE("GIF file loading and decoding") {
         }
 
         decoder->end();
-        handle->close();
+        handle.close();
         fs.end();
 }
 
@@ -139,16 +138,15 @@ FL_TEST_CASE("GIF metadata parsing without decoding") {
     fl::FileSystem fs = setupCodecFilesystem_gif();
 
     // Test that we can load the GIF file from filesystem
-    fl::filebuf_ptr handle = fs.openRead("data/codec/file.gif");
-    FL_REQUIRE(handle != nullptr);
-    FL_REQUIRE(handle->valid());
+    fl::ifstream handle = fs.openRead("data/codec/file.gif");
+    FL_REQUIRE(handle.is_open());
 
     // Get file size and read into buffer
-    fl::size file_size = handle->size();
+    fl::size file_size = handle.size();
     FL_CHECK(file_size > 0);
 
     fl::vector<fl::u8> file_data(file_size);
-    fl::size bytes_read = handle->read(file_data.data(), file_size);
+    fl::size bytes_read = handle.read(file_data.data(), file_size);
     FL_CHECK_EQ(bytes_read, file_size);
 
     // Test GIF metadata parsing
@@ -225,6 +223,6 @@ FL_TEST_CASE("GIF metadata parsing without decoding") {
         FL_MESSAGE("Invalid signature error: " << invalid_error);
     }
 
-    handle->close();
+    handle.close();
     fs.end();
 }

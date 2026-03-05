@@ -185,12 +185,6 @@ class NullFileSystem : public FsImpl {
     bool begin() override { return true; }
     void end() override {}
 
-    void close(filebuf_ptr file) override {
-        // No need to do anything for in-memory files
-        FASTLED_UNUSED(file);
-        FASTLED_WARN("NullFileSystem::close");
-    }
-
     filebuf_ptr openRead(const char *_path) override {
         FASTLED_UNUSED(_path);
         fl::shared_ptr<NullFileHandle> ptr = fl::make_shared<NullFileHandle>();
@@ -279,20 +273,18 @@ bool FileSystem::readScreenMap(const char *path, const char *name,
     return true;
 }
 
-void FileSystem::close(filebuf_ptr file) { mFs->close(file); }
-
-filebuf_ptr FileSystem::openRead(const char *path) {
-    return mFs->openRead(path);
+fl::ifstream FileSystem::openRead(const char *path) {
+    return fl::ifstream(mFs->openRead(path));
 }
 Video FileSystem::openVideo(const char *path, fl::size pixelsPerFrame, float fps,
                             fl::size nFrameHistory) {
     Video video(pixelsPerFrame, fps, nFrameHistory);
-    filebuf_ptr file = openRead(path);
-    if (!file) {
+    fl::ifstream file = openRead(path);
+    if (!file.is_open()) {
         video.setError(fl::string("Could not open file: ").append(path));
         return video;
     }
-    video.begin(file);
+    video.begin(file.rdbuf());
     return video;
 }
 
@@ -301,8 +293,8 @@ Video FileSystem::openMpeg1Video(const char *path, fl::size pixelsPerFrame, floa
     Video video(pixelsPerFrame, fps, nFrameHistory);
 
     // Open the MPEG1 file from SD card
-    filebuf_ptr file = openRead(path);
-    if (!file) {
+    fl::ifstream file = openRead(path);
+    if (!file.is_open()) {
         video.setError(fl::string("Could not open MPEG1 file: ").append(path));
         return video;
     }
@@ -323,7 +315,7 @@ Video FileSystem::openMpeg1Video(const char *path, fl::size pixelsPerFrame, floa
     }
 
     // Initialize decoder with filebuf
-    if (!decoder->begin(file)) {
+    if (!decoder->begin(file.rdbuf())) {
         fl::string decoder_error;
         decoder->hasError(&decoder_error);
         video.setError(fl::string("Failed to initialize MPEG1 decoder: ").append(decoder_error));
@@ -344,22 +336,21 @@ Video FileSystem::openMpeg1Video(const char *path, fl::size pixelsPerFrame, floa
 }
 
 bool FileSystem::readText(const char *path, fl::string *out) {
-    filebuf_ptr file = openRead(path);
-    if (!file) {
+    fl::ifstream file = openRead(path);
+    if (!file.is_open()) {
         FASTLED_WARN("Failed to open file: " << path);
         return false;
     }
-    fl::size size = file->size();
+    fl::size size = file.size();
     out->reserve(size + out->size());
     bool wrote = false;
-    while (file->available()) {
+    while (file.available()) {
         u8 buf[64];
-        fl::size n = file->read(buf, sizeof(buf));
-        // out->append(buf, n);
+        fl::size n = file.read(buf, sizeof(buf));
         out->append((const char *)buf, n);
         wrote = true;
     }
-    file->close();
+    file.close();
     FASTLED_DBG_IF(!wrote, "Failed to write any data to the output string.");
     return wrote;
 }
@@ -367,8 +358,8 @@ bool FileSystem::readText(const char *path, fl::string *out) {
 FramePtr FileSystem::loadJpeg(const char *path, const JpegConfig &config,
                                fl::string *error_message) {
     // Open the JPEG file
-    filebuf_ptr file = openRead(path);
-    if (!file || !file->valid()) {
+    fl::ifstream file = openRead(path);
+    if (!file.is_open()) {
         if (error_message) {
             *error_message = "Failed to open file: ";
             error_message->append(path);
@@ -378,13 +369,13 @@ FramePtr FileSystem::loadJpeg(const char *path, const JpegConfig &config,
     }
 
     // Get file size
-    fl::size fileSize = file->size();
+    fl::size fileSize = file.size();
     if (fileSize == 0) {
         if (error_message) {
             *error_message = "File is empty: ";
             error_message->append(path);
         }
-        file->close();
+        file.close();
         return FramePtr();
     }
 
@@ -395,16 +386,16 @@ FramePtr FileSystem::loadJpeg(const char *path, const JpegConfig &config,
     buffer.resize(fileSize);
 
     fl::size bytesRead = 0;
-    while (bytesRead < fileSize && file->available()) {
+    while (bytesRead < fileSize && file.available()) {
         fl::size chunkSize = min<fl::size>(4096, fileSize - bytesRead);
-        fl::size n = file->read(buffer.data() + bytesRead, chunkSize);
+        fl::size n = file.read(buffer.data() + bytesRead, chunkSize);
         if (n == 0) {
             break; // No more data to read
         }
         bytesRead += n;
     }
 
-    file->close();
+    file.close();
 
     if (bytesRead != fileSize) {
         if (error_message) {
@@ -434,8 +425,8 @@ FramePtr FileSystem::loadJpeg(const char *path, const JpegConfig &config,
 fl::Mp3DecoderPtr FileSystem::openMp3(const char *path,
                                       fl::string *error_message) {
     // Open the MP3 file
-    filebuf_ptr file = openRead(path);
-    if (!file || !file->valid()) {
+    fl::ifstream file = openRead(path);
+    if (!file.is_open()) {
         if (error_message) {
             *error_message = "Failed to open file: ";
             error_message->append(path);
@@ -447,7 +438,7 @@ fl::Mp3DecoderPtr FileSystem::openMp3(const char *path,
     // Create MP3 stream decoder using the public API
     fl::Mp3DecoderPtr decoder = fl::Mp3::createDecoder(error_message);
 
-    if (!decoder->begin(file)) {
+    if (!decoder->begin(file.rdbuf())) {
         fl::string decoder_error;
         decoder->hasError(&decoder_error);
         if (error_message) {

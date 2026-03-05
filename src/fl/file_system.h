@@ -5,7 +5,7 @@
 #include "fl/int.h"
 
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
-#include "fl/stl/detail/file_handle.h" // For fl::filebuf (unified)
+#include "fl/stl/fstream.h"            // For fl::ifstream (STL-like file I/O)
 #include "fl/stl/map.h"               // For fl::map
 #include "fl/str_fwd.h"     // Lightweight forward declarations for string
 #include "fl/fx/video.h"
@@ -35,7 +35,6 @@ namespace fl {
 
 class ScreenMap;
 FASTLED_SHARED_PTR(FileSystem);
-using filebuf_ptr = fl::shared_ptr<filebuf>; // filebuf is defined in file_handle.h
 class Video;
 template <typename Key, typename Value, fl::size N> class FixedMap;
 
@@ -51,8 +50,8 @@ class FileSystem {
                                                // filesystem resource.
     void end(); // Signal to end use of the file system.
 
-    filebuf_ptr
-    openRead(const char *path); // Null if file could not be opened.
+    fl::ifstream
+    openRead(const char *path); // Returns closed ifstream if file could not be opened.
     Video
     openVideo(const char *path, fl::size pixelsPerFrame, float fps = 30.0f,
               fl::size nFrameHistory = 0); // Null if video could not be opened.
@@ -65,8 +64,6 @@ class FileSystem {
                         string *error = nullptr);
     bool readScreenMap(const char *path, const char *name, ScreenMap *out,
                        string *error = nullptr);
-    void close(filebuf_ptr file);
-
     // Load JPEG image from file path directly to Frame
     FramePtr loadJpeg(const char *path, const JpegConfig &config = JpegConfig(),
                       fl::string *error_message = nullptr);
@@ -91,7 +88,6 @@ class FsImpl {
     virtual bool begin() = 0;
     //  End use of card
     virtual void end() = 0;
-    virtual void close(filebuf_ptr file) = 0;
     virtual filebuf_ptr openRead(const char *path) = 0;
 
     virtual bool ls(Visitor &visitor) {

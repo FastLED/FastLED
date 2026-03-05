@@ -15,13 +15,13 @@ static fl::FileSystem setupCodecFilesystem_h264() {
 FL_TEST_CASE("H264 parseH264Info from MP4") {
     fl::FileSystem fs = setupCodecFilesystem_h264();
 
-    fl::filebuf_ptr handle = fs.openRead("data/codec/test.mp4");
-    FL_REQUIRE(handle != nullptr);
+    fl::ifstream handle = fs.openRead("data/codec/test.mp4");
+    FL_REQUIRE(handle.is_open());
 
-    fl::size file_size = handle->size();
+    fl::size file_size = handle.size();
     fl::vector<fl::u8> file_data(file_size);
-    handle->read(file_data.data(), file_size);
-    handle->close();
+    handle.read(file_data.data(), file_size);
+    handle.close();
 
     fl::string error;
     fl::H264Info info = fl::H264::parseH264Info(file_data, &error);
@@ -47,13 +47,13 @@ FL_TEST_CASE("H264 SPS parsing") {
     fl::FileSystem fs = setupCodecFilesystem_h264();
 
     // Extract SPS from MP4 and parse it directly
-    fl::filebuf_ptr handle = fs.openRead("data/codec/test.mp4");
-    FL_REQUIRE(handle != nullptr);
+    fl::ifstream handle = fs.openRead("data/codec/test.mp4");
+    FL_REQUIRE(handle.is_open());
 
-    fl::size file_size = handle->size();
+    fl::size file_size = handle.size();
     fl::vector<fl::u8> file_data(file_size);
-    handle->read(file_data.data(), file_size);
-    handle->close();
+    handle.read(file_data.data(), file_size);
+    handle.close();
 
     fl::string error;
     fl::Mp4TrackInfo track = fl::parseMp4(file_data, &error);

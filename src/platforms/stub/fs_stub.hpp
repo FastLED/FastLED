@@ -265,12 +265,6 @@ public:
         // Nothing to do
     }
 
-    void close(filebuf_ptr file) override {
-        if (file) {
-            file->close();
-        }
-    }
-
     filebuf_ptr openRead(const char* path) override {
         fl::string full_path = mRootPath;
         full_path.append(path);

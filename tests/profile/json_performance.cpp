@@ -188,18 +188,18 @@ bool run_large_benchmark() {
     }
 
     // Open and read the JSON file
-    filebuf_ptr fh = fs.openRead(filepath);
-    if (!fh || !fh->valid()) {
+    ifstream fh = fs.openRead(filepath);
+    if (!fh.is_open()) {
         printf("❌ ERROR: Could not open %s\n", filepath);
         printf("   Make sure to download it first with:\n");
         printf("   curl -o %s https://microsoftedge.github.io/Demos/json-dummy-data/1MB.json\n", filepath);
         return false;
     }
 
-    size_t file_size = fh->size();
+    size_t file_size = fh.size();
     large_json.resize(file_size);
-    size_t bytes_read = fh->read(reinterpret_cast<u8*>(&large_json[0]), file_size);
-    fh->close();
+    size_t bytes_read = fh.read(reinterpret_cast<u8*>(&large_json[0]), file_size);
+    fh.close();
 
     if (bytes_read != file_size) {
         printf("❌ ERROR: Read %zu bytes but expected %zu bytes\n", bytes_read, file_size);

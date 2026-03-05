@@ -487,8 +487,8 @@ int test_large_json_profiling() {
     }
 
     // Open and read the JSON file
-    filebuf_ptr fh = fs.openRead("tests/profile/benchmark_1mb.json");
-    if (!fh || !fh->valid()) {
+    ifstream fh = fs.openRead("tests/profile/benchmark_1mb.json");
+    if (!fh.is_open()) {
         printf("⚠️  WARNING: Could not open tests/profile/benchmark_1mb.json\n");
         printf("   Skipping large JSON memory profile test.\n");
         printf("   Download it with: curl -o tests/profile/benchmark_1mb.json https://microsoftedge.github.io/Demos/json-dummy-data/1MB.json\n");
@@ -496,11 +496,11 @@ int test_large_json_profiling() {
     }
 
     // Read file contents
-    fl::size file_size = fh->size();
+    fl::size file_size = fh.size();
     fl::string large_json;
     large_json.resize(file_size);
-    fl::size bytes_read = fh->read(reinterpret_cast<u8*>(&large_json[0]), file_size);
-    fh->close();
+    fl::size bytes_read = fh.read(reinterpret_cast<u8*>(&large_json[0]), file_size);
+    fh.close();
 
     if (bytes_read != file_size) {
         printf("❌ ERROR: Read %zu bytes but expected %zu bytes\n", bytes_read, file_size);

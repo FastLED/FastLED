@@ -19,16 +19,15 @@ FL_TEST_CASE("JPEG file loading and decoding") {
     fl::FileSystem fs = setupCodecFilesystem_jpeg();
 
     // Test that we can load the JPEG file from filesystem
-    fl::filebuf_ptr handle = fs.openRead("data/codec/file.jpg");
-    FL_REQUIRE(handle != nullptr);
-    FL_REQUIRE(handle->valid());
+    fl::ifstream handle = fs.openRead("data/codec/file.jpg");
+    FL_REQUIRE(handle.is_open());
 
     // Get file size and read into buffer
-    fl::size file_size = handle->size();
+    fl::size file_size = handle.size();
     FL_CHECK(file_size > 0);
 
     fl::vector<fl::u8> file_data(file_size);
-    fl::size bytes_read = handle->read(file_data.data(), file_size);
+    fl::size bytes_read = handle.read(file_data.data(), file_size);
     FL_CHECK_EQ(bytes_read, file_size);
 
     // JPEG files should start with FF D8 (JPEG SOI marker)
@@ -130,6 +129,6 @@ FL_TEST_CASE("JPEG file loading and decoding") {
         }
     }
 
-    handle->close();
+    handle.close();
     fs.end();
 }

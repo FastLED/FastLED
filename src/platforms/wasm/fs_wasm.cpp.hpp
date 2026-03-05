@@ -218,13 +218,6 @@ class FsImplWasm : public fl::FsImpl {
     bool begin() override { return true; }
     void end() override {}
 
-    void close(filebuf_ptr file) override {
-        printf("Closing file %s\n", file->path());
-        if (file) {
-            file->close();
-        }
-    }
-
     fl::filebuf_ptr openRead(const char *_path) override {
         // FASTLED_DBG("Opening file: " << _path);
         string path(_path);
