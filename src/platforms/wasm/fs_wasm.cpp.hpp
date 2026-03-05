@@ -133,6 +133,8 @@ class WasmFileHandle : public fl::FileHandle {
 
     virtual ~WasmFileHandle() override {}
 
+    bool is_open() const override { return true; } // always open if we have data
+
     bool available() const override {
         if (mPos >= mData->capacity()) {
             return false;
@@ -145,15 +147,17 @@ class WasmFileHandle : public fl::FileHandle {
         }
         return true;
     }
-    size_t bytesLeft() const override {
+
+    fl::size_t bytes_left() const override {
         if (!available()) {
             return 0;
         }
         return mData->capacity() - mPos;
     }
+
     size_t size() const override { return mData->capacity(); }
 
-    size_t read(u8 *dst, size_t bytesToRead) override {
+    size_t read(char *dst, size_t bytesToRead) override {
         if (mPos >= mData->capacity()) {
             return 0;
         }
@@ -162,37 +166,48 @@ class WasmFileHandle : public fl::FileHandle {
         }
         if (!mData->ready(mPos)) {
             FASTLED_WARN("File is not ready yet. This is a major error because "
-                         "FastLED-wasmdoes not support async yet, the file "
+                         "FastLED-wasm does not support async yet, the file "
                          "will fail to read.");
             return 0;
         }
-        // We do not have async so a delay will actually block the entire wasm
-        // main thread. while (!mData->ready(mPos)) {
-        //     delay(1);
-        // }
-        size_t bytesRead = mData->read(mPos, dst, bytesToRead);
+        size_t bytesRead = mData->read(mPos, reinterpret_cast<u8*>(dst), bytesToRead); // ok reinterpret cast
         mPos += bytesRead;
         return bytesRead;
     }
+    using FileHandle::read; // Pull in u8 overload
 
-    size_t pos() const override { return mPos; }
+    size_t write(const char *data, size_t count) override {
+        (void)data; (void)count;
+        return 0; // Read-only
+    }
+
+    size_t tell() override { return mPos; }
     const char *path() const override { return mPath.c_str(); }
 
-    bool seek(size_t pos) override {
-        if (pos > mData->capacity()) {
+    bool seek(size_t pos, fl::seek_dir dir) override {
+        size_t target = pos;
+        if (dir == fl::seek_dir::cur) {
+            target = mPos + pos;
+        } else if (dir == fl::seek_dir::end) {
+            target = mData->capacity() + pos;
+        }
+        if (target > mData->capacity()) {
             return false;
         }
-        mPos = pos;
+        mPos = target;
         return true;
     }
+    using FileHandle::seek; // Pull in single-arg overload
 
     void close() override {
         // No need to do anything for in-memory files
     }
 
-    bool valid() const override {
-        return true;
-    } // always valid if we can open a file.
+    bool is_eof() const override { return mPos >= mData->capacity(); }
+    bool has_error() const override { return false; }
+    void clear_error() override {}
+    int error_code() const override { return 0; }
+    const char *error_message() const override { return "No error"; }
 };
 
 class FsImplWasm : public fl::FsImpl {

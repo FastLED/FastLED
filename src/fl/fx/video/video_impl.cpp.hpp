@@ -5,7 +5,6 @@
 #include "fl/stl/assert.h"
 #include "fl/math_macros.h"
 #include "fl/warn.h"
-#include "fl/bytestream.h"
 #include "fl/file_system.h"
 #include "fl/fx/video/frame_interpolator.h"
 #include "fl/fx/video/pixel_stream.h"
@@ -54,17 +53,8 @@ VideoImpl::~VideoImpl() { end(); }
 
 void VideoImpl::begin(FileHandlePtr h) {
     end();
-    // Removed setStartTime call
     mStream = fl::make_shared<PixelStream>(mPixelsPerFrame * kSizeRGB8);
     mStream->begin(h);
-    mPrevNow = 0;
-}
-
-void VideoImpl::beginStream(ByteStreamPtr bs) {
-    end();
-    mStream = fl::make_shared<PixelStream>(mPixelsPerFrame * kSizeRGB8);
-    // Removed setStartTime call
-    mStream->beginStream(bs);
     mPrevNow = 0;
 }
 
@@ -93,7 +83,7 @@ i32 VideoImpl::durationMicros() const {
     return (frames * micros_per_frame); // Convert to milliseconds
 }
 
-bool VideoImpl::draw(fl::u32 now, CRGB *leds) {
+bool VideoImpl::draw(fl::u32 now, fl::span<CRGB> leds) {
     if (!mTime) {
         mTime = fl::make_shared<TimeWarp>(now);
         mTime->setSpeed(mTimeScale);

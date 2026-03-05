@@ -1,36 +1,35 @@
 #pragma once
 
-#include "fl/bytestream.h"
 #include "fl/file_system.h"
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
-#include "fl/stl/shared_ptr.h"  // For shared_ptr
 #include "fl/int.h"
 namespace fl {
 FASTLED_SHARED_PTR(FileHandle);
-FASTLED_SHARED_PTR(ByteStream);
 } // namespace fl
 
 namespace fl {
 
 FASTLED_SHARED_PTR(PixelStream);
 
-// PixelStream takes either a file handle or a byte stream
-// and reads frames from it in order to serve data to the
-// video system.
+// PixelStream reads frames from a FileHandle to serve data to the video system.
+// A single handle is used for both seekable files and non-seekable streams.
+// Seekability is auto-detected via seek() at begin() time.
 class PixelStream {
   public:
     enum Type {
-        kStreaming,
-        kFile,
+        kStreaming, // Non-seekable (e.g. MemoryFileHandle circular buffer)
+        kFile,      // Seekable (e.g. posix_file_handle, SD card)
     };
 
     explicit PixelStream(int bytes_per_frame);
 
+    // Opens a handle. Streaming vs seekable is auto-detected:
+    // seek(0, beg) succeeds → kFile, fails → kStreaming.
     bool begin(fl::FileHandlePtr h);
-    bool beginStream(fl::ByteStreamPtr s);
+
     void close();
     i32 bytesPerFrame();
-    bool readPixel(CRGB *dst); // Convenience function to read a pixel
+    bool readPixel(CRGB *dst);
     size_t readBytes(u8 *dst, size_t len);
 
     bool readFrame(Frame *frame);
@@ -43,16 +42,13 @@ class PixelStream {
 
     i32 bytesRemaining() const;
     i32 bytesRemainingInFrame() const;
-    bool
-    rewind(); // Returns false on failure, which can happen for streaming mode.
-    Type getType()
-        const; // Returns the type of the video stream (kStreaming or kFile)
+    bool rewind(); // Returns false for non-seekable streams.
+    Type getType() const;
 
   private:
     fl::i32 mbytesPerFrame;
-    fl::FileHandlePtr mFileHandle;
-    fl::ByteStreamPtr mByteStream;
-    bool mUsingByteStream;
+    fl::FileHandlePtr mHandle;
+    Type mType;
 
   public:
     virtual ~PixelStream();

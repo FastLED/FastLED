@@ -2,6 +2,7 @@
 // This file contains out-of-line definitions to reduce header compilation overhead
 
 #include "fl/stl/fstream.h"
+#include "fl/stl/memory.h"
 
 namespace fl {
 
@@ -14,6 +15,11 @@ ifstream::ifstream(const char* path, ios::openmode mode)
     open(path, mode);
 }
 
+ifstream::ifstream(fl::shared_ptr<detail::file_handle_base> handle)
+    : mHandle(handle), mLastRead(0), mGood(false), mEof(false), mFail(true) {
+    updateState();
+}
+
 ifstream::~ifstream() {
     close();
 }
@@ -24,11 +30,11 @@ void ifstream::open(const char* path, ios::openmode mode) {
     // Build fopen mode string
     const char* fmode = (mode & ios::binary) ? "rb" : "r";
 
-    mHandle = detail::posix_file_handle(path, fmode);
+    mHandle = fl::make_shared<detail::posix_file_handle>(path, fmode);
 
-    if (mHandle.is_open()) {
+    if (mHandle->is_open()) {
         if (mode & ios::ate) {
-            mHandle.seek(0, detail::seek_dir::end);
+            mHandle->seek(0, seek_dir::end);
         }
         updateState();
     } else {
@@ -37,11 +43,11 @@ void ifstream::open(const char* path, ios::openmode mode) {
 }
 
 void ifstream::close() {
-    if (mHandle.is_open()) {
-        mHandle.close();
+    if (mHandle && mHandle->is_open()) {
+        mHandle->close();
         // After successful close: keep good() = true to match std::ofstream behavior
         // This allows fs_stub.hpp's createTextFile to work correctly
-        if (!mHandle.has_error()) {
+        if (!mHandle->has_error()) {
             mGood = true;
             mEof = false;
             mFail = false;
@@ -53,38 +59,49 @@ void ifstream::close() {
 
 ifstream& ifstream::read(char* buffer, fl::size_t count) {
     mLastRead = 0;
-    if (mHandle.is_open()) {
-        mLastRead = mHandle.read(buffer, count);
+    if (mHandle && mHandle->is_open()) {
+        mLastRead = mHandle->read(buffer, count);
         updateState();
     }
     return *this;
 }
 
 fl::size_t ifstream::tellg() {
-    return mHandle.tell();
+    if (!mHandle) {
+        return 0;
+    }
+    return mHandle->tell();
 }
 
 ifstream& ifstream::seekg(fl::size_t pos, ios::seekdir dir) {
-    if (mHandle.is_open()) {
-        detail::seek_dir seek_direction =
-            (dir == ios::beg) ? detail::seek_dir::beg :
-            (dir == ios::cur) ? detail::seek_dir::cur : detail::seek_dir::end;
-        mHandle.seek(pos, seek_direction);
+    if (mHandle && mHandle->is_open()) {
+        seek_dir seek_direction =
+            (dir == ios::beg) ? seek_dir::beg :
+            (dir == ios::cur) ? seek_dir::cur : seek_dir::end;
+        mHandle->seek(pos, seek_direction);
         updateState();
     }
     return *this;
 }
 
 int ifstream::error() const {
-    return mHandle.error_code();
+    if (!mHandle) {
+        return fl::io::err_bad_file;
+    }
+    return mHandle->error_code();
 }
 
 const char* ifstream::error_message() const {
-    return mHandle.error_message();
+    if (!mHandle) {
+        return "No handle";
+    }
+    return mHandle->error_message();
 }
 
 void ifstream::clear_error() {
-    mHandle.clear_error();
+    if (mHandle) {
+        mHandle->clear_error();
+    }
     mFail = false;
     updateState();
 }
@@ -96,6 +113,11 @@ void ifstream::clear_error() {
 ofstream::ofstream(const char* path, ios::openmode mode)
     : mGood(false), mEof(false), mFail(true), mLocalError(0) {
     open(path, mode);
+}
+
+ofstream::ofstream(fl::shared_ptr<detail::file_handle_base> handle)
+    : mHandle(handle), mGood(false), mEof(false), mFail(true), mLocalError(0) {
+    updateState();
 }
 
 ofstream::~ofstream() {
@@ -116,11 +138,11 @@ void ofstream::open(const char* path, ios::openmode mode) {
         fmode = (mode & ios::binary) ? "wb" : "w";
     }
 
-    mHandle = detail::posix_file_handle(path, fmode);
+    mHandle = fl::make_shared<detail::posix_file_handle>(path, fmode);
 
-    if (mHandle.is_open()) {
+    if (mHandle->is_open()) {
         if (mode & ios::ate) {
-            mHandle.seek(0, detail::seek_dir::end);
+            mHandle->seek(0, seek_dir::end);
         }
         updateState();
     } else {
@@ -129,11 +151,11 @@ void ofstream::open(const char* path, ios::openmode mode) {
 }
 
 void ofstream::close() {
-    if (mHandle.is_open()) {
-        mHandle.close();
+    if (mHandle && mHandle->is_open()) {
+        mHandle->close();
         // After successful close: keep good() = true to match std::ofstream behavior
         // This allows fs_stub.hpp's createTextFile to work correctly
-        if (!mHandle.has_error()) {
+        if (!mHandle->has_error()) {
             mGood = true;
             mEof = false;
             mFail = false;
@@ -144,8 +166,8 @@ void ofstream::close() {
 }
 
 ofstream& ofstream::write(const char* data, fl::size_t count) {
-    if (mHandle.is_open()) {
-        fl::size_t written = mHandle.write(data, count);
+    if (mHandle && mHandle->is_open()) {
+        fl::size_t written = mHandle->write(data, count);
         if (written != count) {
             mFail = true;
             mGood = false;
@@ -164,7 +186,10 @@ int ofstream::error() const {
     if (mLocalError != 0) {
         return mLocalError;
     }
-    return mHandle.error_code();
+    if (!mHandle) {
+        return fl::io::err_bad_file;
+    }
+    return mHandle->error_code();
 }
 
 const char* ofstream::error_message() const {
@@ -175,12 +200,17 @@ const char* ofstream::error_message() const {
         return "Write to closed stream";
 #endif
     }
-    return mHandle.error_message();
+    if (!mHandle) {
+        return "No handle";
+    }
+    return mHandle->error_message();
 }
 
 void ofstream::clear_error() {
     mLocalError = 0;
-    mHandle.clear_error();
+    if (mHandle) {
+        mHandle->clear_error();
+    }
     mFail = false;
     updateState();
 }
@@ -192,6 +222,11 @@ void ofstream::clear_error() {
 fstream::fstream(const char* path, ios::openmode mode)
     : mLastRead(0), mGood(false), mEof(false), mFail(true), mLocalError(0) {
     open(path, mode);
+}
+
+fstream::fstream(fl::shared_ptr<detail::file_handle_base> handle)
+    : mHandle(handle), mLastRead(0), mGood(false), mEof(false), mFail(true), mLocalError(0) {
+    updateState();
 }
 
 fstream::~fstream() {
@@ -211,11 +246,11 @@ void fstream::open(const char* path, ios::openmode mode) {
         fmode = (mode & ios::binary) ? "r+b" : "r+";
     }
 
-    mHandle = detail::posix_file_handle(path, fmode);
+    mHandle = fl::make_shared<detail::posix_file_handle>(path, fmode);
 
-    if (mHandle.is_open()) {
+    if (mHandle->is_open()) {
         if (mode & ios::ate) {
-            mHandle.seek(0, detail::seek_dir::end);
+            mHandle->seek(0, seek_dir::end);
         }
         updateState();
     } else {
@@ -224,11 +259,11 @@ void fstream::open(const char* path, ios::openmode mode) {
 }
 
 void fstream::close() {
-    if (mHandle.is_open()) {
-        mHandle.close();
+    if (mHandle && mHandle->is_open()) {
+        mHandle->close();
         // After successful close: keep good() = true to match std::ofstream behavior
         // This allows fs_stub.hpp's createTextFile to work correctly
-        if (!mHandle.has_error()) {
+        if (!mHandle->has_error()) {
             mGood = true;
             mEof = false;
             mFail = false;
@@ -240,16 +275,16 @@ void fstream::close() {
 
 fstream& fstream::read(char* buffer, fl::size_t count) {
     mLastRead = 0;
-    if (mHandle.is_open()) {
-        mLastRead = mHandle.read(buffer, count);
+    if (mHandle && mHandle->is_open()) {
+        mLastRead = mHandle->read(buffer, count);
         updateState();
     }
     return *this;
 }
 
 fstream& fstream::write(const char* data, fl::size_t count) {
-    if (mHandle.is_open()) {
-        fl::size_t written = mHandle.write(data, count);
+    if (mHandle && mHandle->is_open()) {
+        fl::size_t written = mHandle->write(data, count);
         if (written != count) {
             mFail = true;
             mGood = false;
@@ -265,15 +300,18 @@ fstream& fstream::write(const char* data, fl::size_t count) {
 }
 
 fl::size_t fstream::tellg() {
-    return mHandle.tell();
+    if (!mHandle) {
+        return 0;
+    }
+    return mHandle->tell();
 }
 
 fstream& fstream::seekg(fl::size_t pos, ios::seekdir dir) {
-    if (mHandle.is_open()) {
-        detail::seek_dir seek_direction =
-            (dir == ios::beg) ? detail::seek_dir::beg :
-            (dir == ios::cur) ? detail::seek_dir::cur : detail::seek_dir::end;
-        mHandle.seek(pos, seek_direction);
+    if (mHandle && mHandle->is_open()) {
+        seek_dir seek_direction =
+            (dir == ios::beg) ? seek_dir::beg :
+            (dir == ios::cur) ? seek_dir::cur : seek_dir::end;
+        mHandle->seek(pos, seek_direction);
         updateState();
     }
     return *this;
@@ -283,7 +321,10 @@ int fstream::error() const {
     if (mLocalError != 0) {
         return mLocalError;
     }
-    return mHandle.error_code();
+    if (!mHandle) {
+        return fl::io::err_bad_file;
+    }
+    return mHandle->error_code();
 }
 
 const char* fstream::error_message() const {
@@ -294,12 +335,17 @@ const char* fstream::error_message() const {
         return "Write to closed stream";
 #endif
     }
-    return mHandle.error_message();
+    if (!mHandle) {
+        return "No handle";
+    }
+    return mHandle->error_message();
 }
 
 void fstream::clear_error() {
     mLocalError = 0;
-    mHandle.clear_error();
+    if (mHandle) {
+        mHandle->clear_error();
+    }
     mFail = false;
     updateState();
 }

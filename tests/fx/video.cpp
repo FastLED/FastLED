@@ -4,7 +4,7 @@
 
 
 #include "crgb.h"
-#include "fl/bytestreammemory.h"
+#include "fl/stl/detail/memory_file_handle.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/fx/video.h"
 #include "fl/stl/cstddef.h"
@@ -27,35 +27,48 @@ FASTLED_SHARED_PTR(FakeFileHandle);
 class FakeFileHandle : public fl::FileHandle {
   public:
     virtual ~FakeFileHandle() {}
+    bool is_open() const override { return true; }
     bool available() const override { return mPos < data.size(); }
-    size_t bytesLeft() const override { return data.size() - mPos; }
     size_t size() const override { return data.size(); }
-    bool valid() const override { return true; }
 
-    size_t write(const uint8_t *src, size_t len) {
+    size_t writeData(const uint8_t *src, size_t len) {
         data.insert(data.end(), src, src + len);
         return len;
     }
     size_t writeCRGB(const CRGB *src, size_t len) {
-        size_t bytes_written = write((const uint8_t *)src, len * 3);
+        size_t bytes_written = writeData((const uint8_t *)src, len * 3);
         return bytes_written / 3;
     }
-    size_t read(uint8_t *dst, size_t bytesToRead) override {
+    size_t read(char *dst, size_t bytesToRead) override {
         size_t bytesRead = 0;
         while (bytesRead < bytesToRead && mPos < data.size()) {
-            dst[bytesRead] = data[mPos];
+            dst[bytesRead] = static_cast<char>(data[mPos]);
             bytesRead++;
             mPos++;
         }
         return bytesRead;
     }
-    size_t pos() const override { return mPos; }
+    using fl::FileHandle::read; // u8 overload
+    size_t write(const char *dat, size_t count) override {
+        (void)dat; (void)count;
+        return 0;
+    }
+    size_t tell() override { return mPos; }
     const char *path() const override { return "fake"; }
-    bool seek(size_t pos) override {
-        this->mPos = pos;
+    bool seek(size_t pos, fl::seek_dir dir) override {
+        if (dir == fl::seek_dir::beg) { this->mPos = pos; }
+        else if (dir == fl::seek_dir::cur) { this->mPos += pos; }
+        else { this->mPos = data.size() + pos; }
         return true;
     }
+    using fl::FileHandle::seek; // single-arg overload
     void close() override {}
+    bool is_eof() const override { return mPos >= data.size(); }
+    bool has_error() const override { return false; }
+    void clear_error() override {}
+    int error_code() const override { return 0; }
+    const char *error_message() const override { return "No error"; }
+
     fl::vector<uint8_t> data;
     size_t mPos = 0;
 };
@@ -64,15 +77,15 @@ FL_TEST_CASE("video with memory stream") {
     // fl::Video video(LEDS_PER_FRAME, FPS);
     fl::Video video(LEDS_PER_FRAME, FPS, 1);
     video.setFade(0, 0);
-    fl::ByteStreamMemoryPtr memoryStream =
-        fl::make_shared<fl::ByteStreamMemory>(LEDS_PER_FRAME * 3);
+    fl::MemoryFileHandlePtr memoryStream =
+        fl::make_shared<fl::MemoryFileHandle>(LEDS_PER_FRAME * 3);
     CRGB testData[LEDS_PER_FRAME] = {};
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
         testData[i] = i % 2 == 0 ? CRGB::Red : CRGB::Black;
     }
     size_t pixels_written = memoryStream->writeCRGB(testData, LEDS_PER_FRAME);
     FL_REQUIRE_EQ(pixels_written, LEDS_PER_FRAME);
-    video.beginStream(memoryStream);
+    video.begin(memoryStream);
     CRGB leds[LEDS_PER_FRAME];
     bool ok = video.draw(FRAME_TIME + 1, leds);
     FL_REQUIRE(ok);
@@ -93,8 +106,8 @@ FL_TEST_CASE("video with memory stream, interpolated") {
     // fl::Video video(LEDS_PER_FRAME, FPS);
     fl::Video video(LEDS_PER_FRAME, 1);
     video.setFade(0, 0);
-    fl::ByteStreamMemoryPtr memoryStream =
-        fl::make_shared<fl::ByteStreamMemory>(LEDS_PER_FRAME * sizeof(CRGB) * 2);
+    fl::MemoryFileHandlePtr memoryStream =
+        fl::make_shared<fl::MemoryFileHandle>(LEDS_PER_FRAME * sizeof(CRGB) * 2);
     CRGB testData[LEDS_PER_FRAME] = {};
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
         testData[i] = CRGB::Red;
@@ -106,7 +119,7 @@ FL_TEST_CASE("video with memory stream, interpolated") {
     }
     pixels_written = memoryStream->writeCRGB(testData, LEDS_PER_FRAME);
     FL_CHECK_EQ(pixels_written, LEDS_PER_FRAME);
-    video.beginStream(memoryStream); // One frame per second.
+    video.begin(memoryStream); // One frame per second.
     CRGB leds[LEDS_PER_FRAME];
     bool ok = video.draw(0, leds); // First frame starts time 0.
     ok = video.draw(500, leds);    // Half a frame.

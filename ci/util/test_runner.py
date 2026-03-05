@@ -350,7 +350,7 @@ class ProcessOutputHandler:
                 "All parallel tests",
                 "JSON parsing failed",
                 "readFrameAt failed",
-                "ByteStreamMemory",
+                "MemoryFileHandle",
                 "C:\\Users\\",
                 "\\dev\\fastled\\",
                 "\\tests\\",

@@ -24,11 +24,11 @@ void FxLayer::draw(fl::u32 now) {
 
     if (!running) {
         // Clear the frame
-        fl::memset((u8*)frame->rgb(), 0, frame->size() * sizeof(CRGB));
+        fl::memset((u8*)frame->rgb().data(), 0, frame->size() * sizeof(CRGB));
         fx->resume(now);
         running = true;
     }
-    Fx::DrawContext context = {now, frame->rgb()};
+    Fx::DrawContext context = {now, frame->rgb().data()};
     fx->draw(context);
 }
 
@@ -48,8 +48,8 @@ fl::shared_ptr<Fx> FxLayer::getFx() {
     return fx; 
 }
 
-CRGB* FxLayer::getSurface() { 
-    return frame->rgb(); 
+CRGB* FxLayer::getSurface() {
+    return frame->rgb().data();
 }
 
 }

@@ -10,7 +10,7 @@
 #include "fl/stl/string.h"
 #include "fl/codec/pixel.h"
 #include "fl/fx/frame.h"
-#include "fl/bytestream.h"
+#include "fl/file_system.h"
 #include "src/tjpgd.h"
 
 namespace fl {
@@ -80,7 +80,7 @@ private:
     float progress_ = 0.0f;
 
     // Input data management
-    fl::ByteStreamPtr input_stream_;
+    fl::FileHandlePtr input_stream_;
     fl::scoped_array<fl::u8> input_buffer_;
     fl::size input_size_ = 0;
 
@@ -106,7 +106,7 @@ public:
     ~TJpgInstanceDecoder();
 
     // Main decoding interface
-    bool beginDecodingStream(fl::ByteStreamPtr stream, PixelFormat format);
+    bool beginDecodingStream(fl::FileHandlePtr stream, PixelFormat format);
     bool processChunk();  // Process one chunk with time budget
     void endDecoding();
 

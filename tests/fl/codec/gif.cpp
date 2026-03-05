@@ -2,7 +2,7 @@
 #include "fl/file_system.h"
 #include "fl/codec/gif.h"
 #include "fl/fx/frame.h"
-#include "fl/bytestreammemory.h"
+#include "fl/stl/detail/memory_file_handle.h"
 #include "platforms/stub/fs_stub.hpp"
 
 
@@ -57,8 +57,8 @@ FL_TEST_CASE("GIF file loading and decoding") {
         FL_REQUIRE_MESSAGE(decoder != nullptr, "GIF decoder creation failed: " << error_msg);
 
         // Create byte stream and begin decoding
-        auto stream = fl::make_shared<fl::ByteStreamMemory>(file_size);
-        stream->write(file_data.data(), file_size);
+        auto stream = fl::make_shared<fl::MemoryFileHandle>(file_size);
+        stream->write(file_data);
         FL_REQUIRE_MESSAGE(decoder->begin(stream), "Failed to begin GIF decoder");
 
         // Decode first frame
@@ -66,7 +66,7 @@ FL_TEST_CASE("GIF file loading and decoding") {
         if (result == fl::DecodeResult::Success) {
             fl::Frame frame0 = decoder->getCurrentFrame();
             if (frame0.isValid() && frame0.getWidth() == 2 && frame0.getHeight() == 2) {
-                const CRGB* pixels = frame0.rgb();
+                const CRGB* pixels = frame0.rgb().data();
                 FL_REQUIRE_MESSAGE(pixels != nullptr, "GIF frame pixels should not be null");
 
                 // Debug: Show decoded pixel values like JPEG test

@@ -5,7 +5,6 @@
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/stdint.h"
-#include "fl/bytestream.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/string.h"  // IWYU pragma: keep
@@ -132,7 +131,7 @@ namespace third_party {
 }
 
 // MP3 decoder with streaming byte interface
-// This decoder consumes MP3 data from a ByteStream and decodes audio frames on demand
+// This decoder consumes MP3 data from a FileHandle and decodes audio frames on demand
 class Mp3Decoder {
 public:
     Mp3Decoder();
@@ -140,7 +139,7 @@ public:
 
     // Initialize the decoder with a byte stream
     // Returns true on success, false on failure
-    bool begin(fl::ByteStreamPtr stream);
+    bool begin(fl::FileHandlePtr stream);
 
     // Clean up decoder resources
     void end();

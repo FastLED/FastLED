@@ -8,7 +8,7 @@
 #include "fl/fx/frame.h"
 #include "fl/stl/stdio.h"
 #include "fl/warn.h"
-#include "fl/bytestreammemory.h"
+#include "fl/stl/detail/memory_file_handle.h"
 #include "fl/codec/pixel.h"
 #include "fl/stl/chrono.h"
 
@@ -67,7 +67,7 @@ public:
 
     ~Impl() = default;
 
-    bool begin(fl::ByteStreamPtr stream) {
+    bool begin(fl::FileHandlePtr stream) {
         if (!mDriver) {
             setError("Driver not initialized");
             return false;
@@ -216,7 +216,7 @@ JpegDecoder::JpegDecoder(const JpegConfig& config)
 
 JpegDecoder::~JpegDecoder() = default;
 
-bool JpegDecoder::begin(fl::ByteStreamPtr stream) {
+bool JpegDecoder::begin(fl::FileHandlePtr stream) {
     return mImpl->begin(stream);
 }
 
@@ -308,8 +308,8 @@ bool Jpeg::decode(const JpegConfig& config, fl::span<const fl::u8> data, Frame* 
     }
 
     auto decoder = createDecoder(config);
-    auto stream = fl::make_shared<fl::ByteStreamMemory>(data.size());
-    stream->write(data.data(), data.size());
+    auto stream = fl::make_shared<fl::MemoryFileHandle>(data.size());
+    stream->write(data);
 
     if (!decoder->begin(stream)) {
         if (error_message) {
@@ -341,8 +341,8 @@ bool Jpeg::decode(const JpegConfig& config, fl::span<const fl::u8> data, Frame* 
 
 FramePtr Jpeg::decode(const JpegConfig& config, fl::span<const fl::u8> data, fl::string* error_message) {
     auto decoder = createDecoder(config);
-    auto stream = fl::make_shared<fl::ByteStreamMemory>(data.size());
-    stream->write(data.data(), data.size());
+    auto stream = fl::make_shared<fl::MemoryFileHandle>(data.size());
+    stream->write(data);
 
     if (!decoder->begin(stream)) {
         if (error_message) {
@@ -392,8 +392,8 @@ bool Jpeg::decodeWithTimeout(
     }
 
     auto decoder = createDecoder(config);
-    auto stream = fl::make_shared<fl::ByteStreamMemory>(data.size());
-    stream->write(data.data(), data.size());
+    auto stream = fl::make_shared<fl::MemoryFileHandle>(data.size());
+    stream->write(data);
 
     if (!decoder->begin(stream)) {
         if (error_message) {
@@ -441,7 +441,7 @@ bool Jpeg::decodeWithTimeout(
 
 bool Jpeg::decodeStream(
     const JpegConfig& config,
-    fl::ByteStreamPtr input_stream,
+    fl::FileHandlePtr input_stream,
     Frame* frame,
     fl::u32 max_time_per_chunk_ms,
     fl::function<bool(float)> mProgresscallback) {

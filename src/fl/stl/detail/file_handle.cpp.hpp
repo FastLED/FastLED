@@ -2,8 +2,26 @@
 // This file contains out-of-line definitions to reduce header compilation overhead
 
 #include "fl/stl/detail/file_handle.h"
+#include "fl/stl/move.h"
 
 namespace fl {
+
+// ============================================================================
+// FileHandle default implementations
+// ============================================================================
+
+fl::size_t FileHandle::bytes_left() const {
+    fl::size_t s = size();
+    // tell() is non-const in the interface, but bytes_left needs it.
+    // Use const_cast for this read-only query - tell() doesn't mutate logical state.
+    fl::size_t t = const_cast<FileHandle*>(this)->tell();
+    return (t <= s) ? (s - t) : 0;
+}
+
+fl::size_t FileHandle::pos() const {
+    return const_cast<FileHandle*>(this)->tell();
+}
+
 namespace detail {
 
 // ============================================================================
@@ -11,7 +29,7 @@ namespace detail {
 // ============================================================================
 
 posix_file_handle::posix_file_handle(const char* path, const char* mode)
-    : mFile(nullptr), mLastError(0) {
+    : mFile(nullptr), mLastError(0), mPath(path ? path : "") {
     mFile = fl::fopen(path, mode);
     if (!mFile) {
         captureError();
@@ -23,7 +41,8 @@ posix_file_handle::~posix_file_handle() {
 }
 
 posix_file_handle::posix_file_handle(posix_file_handle&& other) noexcept
-    : mFile(other.mFile), mLastError(other.mLastError) {
+    : mFile(other.mFile), mLastError(other.mLastError),
+      mPath(fl::move(other.mPath)) {
     other.mFile = nullptr;
     other.mLastError = 0;
 }
@@ -33,6 +52,7 @@ posix_file_handle& posix_file_handle::operator=(posix_file_handle&& other) noexc
         close();
         mFile = other.mFile;
         mLastError = other.mLastError;
+        mPath = fl::move(other.mPath);
         other.mFile = nullptr;
         other.mLastError = 0;
     }
@@ -114,6 +134,28 @@ bool posix_file_handle::seek(fl::size_t pos, seek_dir dir) {
     }
     mLastError = 0;
     return true;
+}
+
+fl::size_t posix_file_handle::size() const {
+    if (!mFile) {
+        return 0;
+    }
+    // Save current position, seek to end, get size, restore position
+    long cur_pos = fl::ftell(mFile);
+    if (cur_pos < 0) {
+        return 0;
+    }
+    fl::fseek(mFile, 0, fl::io::seek_end);
+    long end_pos = fl::ftell(mFile);
+    fl::fseek(mFile, cur_pos, fl::io::seek_set);
+    if (end_pos < 0) {
+        return 0;
+    }
+    return static_cast<fl::size_t>(end_pos);
+}
+
+const char* posix_file_handle::path() const {
+    return mPath.c_str();
 }
 
 bool posix_file_handle::is_eof() const {

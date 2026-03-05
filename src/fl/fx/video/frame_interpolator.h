@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/stl/map.h"
+#include "fl/stl/span.h"
 #include "fl/fx/video/frame_tracker.h"
 
 namespace fl {
@@ -27,7 +28,7 @@ class FrameInterpolator {
     // otherwise. If false then the destination frame will not be modified. Note
     // that this adjustable_time is allowed to go pause or go backward in time.
     bool draw(fl::u32 adjustable_time, Frame *dst);
-    bool draw(fl::u32 adjustable_time, CRGB *leds);
+    bool draw(fl::u32 adjustable_time, fl::span<CRGB> leds);
     bool insert(fl::u32 frameNumber, FramePtr frame) {
         InsertResult result;
         mFrames.insert(frameNumber, frame, &result);

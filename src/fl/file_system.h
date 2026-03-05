@@ -5,6 +5,8 @@
 #include "fl/int.h"
 
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "fl/stl/detail/file_handle.h" // For fl::FileHandle (unified)
+#include "fl/stl/map.h"               // For fl::map
 #include "fl/str_fwd.h"     // Lightweight forward declarations for string
 #include "fl/fx/video.h"
 #include "fl/codec/jpeg.h"
@@ -33,7 +35,7 @@ namespace fl {
 
 class ScreenMap;
 FASTLED_SHARED_PTR(FileSystem);
-FASTLED_SHARED_PTR(FileHandle);
+FASTLED_SHARED_PTR_NO_FWD(FileHandle); // FileHandle is already defined in file_handle.h
 class Video;
 template <typename Key, typename Value, fl::size N> class FixedMap;
 
@@ -75,34 +77,6 @@ class FileSystem {
 
   private:
     FsImplPtr mFs; // System dependent filesystem.
-};
-
-// An abstract class that represents a file handle.
-// Devices like the SD card will return one of these.
-class FileHandle {
-  public:
-    virtual ~FileHandle() {}
-    virtual bool available() const = 0;
-    virtual fl::size bytesLeft() const;
-    virtual fl::size size() const = 0;
-    virtual fl::size read(fl::u8 *dst, fl::size bytesToRead) = 0;
-    virtual fl::size pos() const = 0;
-    virtual const char *path() const = 0;
-    virtual bool seek(fl::size pos) = 0;
-    virtual void close() = 0;
-    virtual bool valid() const = 0;
-
-    // convenience functions
-    // New preferred method using CRGB
-    fl::size readRGB8(CRGB *dst, fl::size n) {
-        return read((fl::u8 *)dst, n * 3) / 3;
-    }
-
-    // Deprecated: Use readRGB8 instead
-    FL_DEPRECATED("Use readRGB8(CRGB* dst, ...) instead")
-    fl::size readCRGB(CRGB *dst, fl::size n) {
-        return readRGB8(dst, n);
-    }
 };
 
 // Platforms will subclass this to implement the filesystem.

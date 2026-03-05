@@ -37,7 +37,7 @@ This subsystem is optional, intended for MCUs with adequate RAM and I/O throughp
   CRGB leds[NUM_LEDS];
   ByteStreamMemoryPtr stream = fl::make_shared<ByteStreamMemory>(3*NUM_LEDS*2);
   Video video(NUM_LEDS, 2.0f); // 2 fps source
-  void setup(){ FastLED.addLeds<WS2811,2,GRB>(leds, NUM_LEDS); video.beginStream(stream); }
+  void setup(){ FastLED.addLeds<WS2811,2,GRB>(leds, NUM_LEDS); video.begin(stream); }
   void loop(){ video.draw(millis(), leds); FastLED.show(); }
   ```
 - SD card video (from `examples/FxSdCard/FxSdCard.ino`):

@@ -61,7 +61,7 @@ void Blend2d::draw(DrawContext context) {
     bool first = true;
     for (auto it = mLayers.begin(); it != mLayers.end(); ++it) {
         DrawContext tmp_ctx = context;
-        tmp_ctx.leds = mFrame->rgb();
+        tmp_ctx.leds = mFrame->rgb().data();
         auto &fx = it->fx;
         fx->draw(tmp_ctx);
         DrawMode mode = first ? DrawMode::DRAW_MODE_OVERWRITE
@@ -74,7 +74,7 @@ void Blend2d::draw(DrawContext context) {
             u8 blur_passes = fl::max(1, it->blur_passes);
             for (u8 i = 0; i < blur_passes; ++i) {
                 // Apply the blur effect
-                blur2d(mFrame->rgb(), mXyMap.getWidth(), mXyMap.getHeight(),
+                blur2d(mFrame->rgb().data(), mXyMap.getWidth(), mXyMap.getHeight(),
                        blur_amount, xyMap);
             }
         }
@@ -86,7 +86,7 @@ void Blend2d::draw(DrawContext context) {
         u16 width = mXyMap.getWidth();
         u16 height = mXyMap.getHeight();
         XYMap rect = XYMap::constructRectangularGrid(width, height);
-        CRGB *rgb = mFrameTransform->rgb();
+        CRGB *rgb = mFrameTransform->rgb().data();
         u8 blur_passes = fl::max(1, mGlobalBlurPasses);
         for (u8 i = 0; i < blur_passes; ++i) {
             // Apply the blur effect
@@ -97,7 +97,7 @@ void Blend2d::draw(DrawContext context) {
     // Copy the final result to the output
     // memcpy(mFrameTransform->rgb(), context.leds, sizeof(CRGB) *
     // mXyMap.getTotal());
-    mFrameTransform->drawXY(context.leds, mXyMap,
+    mFrameTransform->drawXY(fl::span<CRGB>(context.leds, mXyMap.getTotal()), mXyMap,
                             DrawMode::DRAW_MODE_OVERWRITE);
 }
 

@@ -2,14 +2,14 @@
 
 #include "fl/int.h"
 #include "fl/stl/detail/file_handle.h"
+#include "fl/stl/shared_ptr.h"
 
 // Platform-aware file stream implementation
 // - Host/Testing platforms (FASTLED_TESTING): Full file I/O implementation via posix_file_handle
 // - Embedded platforms (ESP32, Uno, etc.): No-op stubs (no file system support)
 //
-// This implementation uses an abstraction layer (detail::file_handle_base) to hide
-// platform-specific file I/O details (FILE*, POSIX calls, etc.) and provide a
-// clean, extensible interface for future platform implementations.
+// These stream classes accept any file_handle_base subclass via shared_ptr,
+// enabling polymorphic dispatch to different backends (POSIX, SD card, WASM, memory).
 
 #ifdef FASTLED_TESTING
 #include "fl/stl/cstring.h"  // For fl::strerror
@@ -37,22 +37,22 @@ namespace ios {
 }
 
 // ============================================================================
-// IMPLEMENTATION (Uses detail::posix_file_handle abstraction)
+// IMPLEMENTATION (Polymorphic via shared_ptr<file_handle_base>)
 // ============================================================================
 
 // Input file stream
 class ifstream {
 private:
-    detail::posix_file_handle mHandle;
+    fl::shared_ptr<FileHandle> mHandle;
     fl::size_t mLastRead;
     bool mGood;
     bool mEof;
     bool mFail;
 
     void updateState() {
-        if (mHandle.is_open()) {
-            mEof = mHandle.is_eof();
-            mFail = mHandle.has_error();
+        if (mHandle && mHandle->is_open()) {
+            mEof = mHandle->is_eof();
+            mFail = mHandle->has_error();
             mGood = !mEof && !mFail;
         } else {
             mGood = false;
@@ -66,6 +66,8 @@ public:
 
     explicit ifstream(const char* path, ios::openmode mode = ios::in);
 
+    explicit ifstream(fl::shared_ptr<FileHandle> handle);
+
     ~ifstream();
 
     // Non-copyable
@@ -75,7 +77,7 @@ public:
     void open(const char* path, ios::openmode mode = ios::in);
 
     bool is_open() const {
-        return mHandle.is_open();
+        return mHandle && mHandle->is_open();
     }
 
     void close();
@@ -107,16 +109,16 @@ public:
 // Output file stream
 class ofstream {
 private:
-    detail::posix_file_handle mHandle;
+    fl::shared_ptr<FileHandle> mHandle;
     bool mGood;
     bool mEof;
     bool mFail;
     int mLocalError;  // Track errors that occur at stream level (not just handle level)
 
     void updateState() {
-        if (mHandle.is_open()) {
-            mEof = mHandle.is_eof();
-            mFail = mHandle.has_error() || (mLocalError != 0);
+        if (mHandle && mHandle->is_open()) {
+            mEof = mHandle->is_eof();
+            mFail = mHandle->has_error() || (mLocalError != 0);
             mGood = !mEof && !mFail;
         } else {
             mGood = false;
@@ -130,6 +132,8 @@ public:
 
     explicit ofstream(const char* path, ios::openmode mode = ios::out);
 
+    explicit ofstream(fl::shared_ptr<FileHandle> handle);
+
     ~ofstream();
 
     // Non-copyable
@@ -139,7 +143,7 @@ public:
     void open(const char* path, ios::openmode mode = ios::out);
 
     bool is_open() const {
-        return mHandle.is_open();
+        return mHandle && mHandle->is_open();
     }
 
     void close();
@@ -163,7 +167,7 @@ public:
 // Generic file stream (supports both reading and writing)
 class fstream {
 private:
-    detail::posix_file_handle mHandle;
+    fl::shared_ptr<FileHandle> mHandle;
     fl::size_t mLastRead;
     bool mGood;
     bool mEof;
@@ -171,9 +175,9 @@ private:
     int mLocalError;  // Track errors that occur at stream level (not just handle level)
 
     void updateState() {
-        if (mHandle.is_open()) {
-            mEof = mHandle.is_eof();
-            mFail = mHandle.has_error() || (mLocalError != 0);
+        if (mHandle && mHandle->is_open()) {
+            mEof = mHandle->is_eof();
+            mFail = mHandle->has_error() || (mLocalError != 0);
             mGood = !mEof && !mFail;
         } else {
             mGood = false;
@@ -187,6 +191,8 @@ public:
 
     explicit fstream(const char* path, ios::openmode mode = ios::in | ios::out);
 
+    explicit fstream(fl::shared_ptr<FileHandle> handle);
+
     ~fstream();
 
     // Non-copyable
@@ -196,7 +202,7 @@ public:
     void open(const char* path, ios::openmode mode = ios::in | ios::out);
 
     bool is_open() const {
-        return mHandle.is_open();
+        return mHandle && mHandle->is_open();
     }
 
     void close();

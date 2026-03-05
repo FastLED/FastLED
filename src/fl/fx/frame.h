@@ -3,6 +3,7 @@
 #include "fl/stl/cstring.h"
 #include "crgb.h"  // IWYU pragma: keep
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "fl/stl/span.h"
 #include "fl/xymap.h"  // IWYU pragma: keep
 #include "fl/stl/vector.h"
 #include "fl/stl/stdint.h"
@@ -37,16 +38,16 @@ class Frame {
     Frame& operator=(const Frame& other) = delete;
 
     ~Frame();
-    CRGB *rgb() { return mRgb.data(); }
-    const CRGB *rgb() const { return mRgb.data(); }
+    fl::span<CRGB> rgb() { return fl::span<CRGB>(mRgb.data(), mPixelsCount); }
+    fl::span<const CRGB> rgb() const { return fl::span<const CRGB>(mRgb.data(), mPixelsCount); }
     size_t size() const { return mPixelsCount; }
     void copy(const Frame &other);
     void interpolate(const Frame &frame1, const Frame &frame2,
                      u8 amountOfFrame2);
     static void interpolate(const Frame &frame1, const Frame &frame2,
-                            u8 amountofFrame2, CRGB *pixels);
-    void draw(CRGB *leds, DrawMode draw_mode = DRAW_MODE_OVERWRITE) const;
-    void drawXY(CRGB *leds, const XYMap &xyMap,
+                            u8 amountofFrame2, fl::span<CRGB> pixels);
+    void draw(fl::span<CRGB> leds, DrawMode draw_mode = DRAW_MODE_OVERWRITE) const;
+    void drawXY(fl::span<CRGB> leds, const XYMap &xyMap,
                 DrawMode draw_mode = DRAW_MODE_OVERWRITE) const;
     void clear();
 

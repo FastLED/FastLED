@@ -10,7 +10,6 @@
 #include "fl/audio_input.cpp.hpp"
 #include "fl/audio_reactive.cpp.hpp"
 #include "fl/blur.cpp.hpp"
-#include "fl/bytestreammemory.cpp.hpp"
 #include "fl/colorutils.cpp.hpp"
 #include "fl/corkscrew.cpp.hpp"
 #include "fl/delay.cpp.hpp"

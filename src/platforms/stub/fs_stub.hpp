@@ -52,30 +52,40 @@ public:
         }
     }
 
+    bool is_open() const override {
+        return mFile.is_open();
+    }
+
     bool available() const override {
         return mFile.is_open() && mPos < mSize;
     }
 
-    fl::size size() const override {
+    fl::size_t size() const override {
         return mSize;
     }
 
-    fl::size read(u8 *dst, fl::size bytesToRead) override {
+    fl::size_t read(char *dst, fl::size_t bytesToRead) override {
         if (!mFile.is_open() || mPos >= mSize) {
             return 0;
         }
 
-        fl::size bytesAvailable = mSize - mPos;
-        fl::size bytesToActuallyRead = (bytesToRead < bytesAvailable) ? bytesToRead : bytesAvailable;
+        fl::size_t bytesAvailable = mSize - mPos;
+        fl::size_t bytesToActuallyRead = (bytesToRead < bytesAvailable) ? bytesToRead : bytesAvailable;
 
-        mFile.read(fl::bit_cast<char*>(dst), bytesToActuallyRead);
-        fl::size bytesActuallyRead = mFile.gcount();
+        mFile.read(dst, bytesToActuallyRead);
+        fl::size_t bytesActuallyRead = mFile.gcount();
         mPos += bytesActuallyRead;
 
         return bytesActuallyRead;
     }
+    using FileHandle::read; // Pull in u8 overload
 
-    fl::size pos() const override {
+    fl::size_t write(const char *data, fl::size_t count) override {
+        (void)data; (void)count;
+        return 0; // Read-only
+    }
+
+    fl::size_t tell() override {
         return mPos;
     }
 
@@ -83,14 +93,26 @@ public:
         return mPath.c_str();
     }
 
-    bool seek(fl::size pos) override {
-        if (!mFile.is_open() || pos > mSize) {
+    bool seek(fl::size_t pos, fl::seek_dir dir) override {
+        if (!mFile.is_open()) {
             return false;
         }
-        mFile.seekg(pos, fl::ios::beg);
-        mPos = pos;
+        fl::size_t target = pos;
+        if (dir == fl::seek_dir::cur) {
+            target = mPos + pos;
+        } else if (dir == fl::seek_dir::end) {
+            target = mSize + pos; // pos is typically 0 or negative offset
+        }
+        if (target > mSize) {
+            return false;
+        }
+        fl::ios::seekdir sdir = (dir == fl::seek_dir::beg) ? fl::ios::beg :
+                                (dir == fl::seek_dir::cur) ? fl::ios::cur : fl::ios::end;
+        mFile.seekg(pos, sdir);
+        mPos = target;
         return true;
     }
+    using FileHandle::seek; // Pull in single-arg overload
 
     void close() override {
         if (mFile.is_open()) {
@@ -98,9 +120,19 @@ public:
         }
     }
 
-    bool valid() const override {
-        return mFile.is_open();
+    bool is_eof() const override {
+        return mPos >= mSize;
     }
+
+    bool has_error() const override {
+        return !mFile.is_open() && mSize == 0;
+    }
+
+    void clear_error() override {}
+
+    int error_code() const override { return 0; }
+
+    const char* error_message() const override { return "No error"; }
 };
 
 class StubFileSystem : public FsImpl {

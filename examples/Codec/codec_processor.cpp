@@ -112,8 +112,8 @@ void processGif() {
     }
 
     // Create byte stream from data
-    auto stream = fl::make_shared<fl::ByteStreamMemory>(gifData.size());
-    stream->write(gifData.data(), gifData.size());
+    auto stream = fl::make_shared<fl::MemoryFileHandle>(gifData.size());
+    stream->write(gifData);
 
     // Begin decoding
     if (!decoder->begin(stream)) {
@@ -175,8 +175,8 @@ void processMpeg1() {
     }
 
     // Create byte stream from data
-    auto stream = fl::make_shared<fl::ByteStreamMemory>(mpegData.size());
-    stream->write(mpegData.data(), mpegData.size());
+    auto stream = fl::make_shared<fl::MemoryFileHandle>(mpegData.size());
+    stream->write(mpegData);
 
     // Begin decoding
     if (!decoder->begin(stream)) {

@@ -2,18 +2,17 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/span.h"
 
 // Forward declarations - actual includes moved to cpp
 namespace fl {
 class FileHandle;
-class ByteStream;
 class Frame;
 class FrameInterpolator;
 class PixelStream;
 class TimeWarp;
 
 FASTLED_SHARED_PTR(FileHandle);
-FASTLED_SHARED_PTR(ByteStream);
 } // namespace fl
 
 namespace fl {
@@ -36,9 +35,8 @@ class VideoImpl {
     ~VideoImpl();
     // Api
     void begin(fl::FileHandlePtr h);
-    void beginStream(fl::ByteStreamPtr s);
     void setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime);
-    bool draw(fl::u32 now, CRGB *leds);
+    bool draw(fl::u32 now, fl::span<CRGB> leds);
     void end();
     bool rewind();
     // internal use

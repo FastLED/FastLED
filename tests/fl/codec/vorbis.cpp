@@ -3,7 +3,7 @@
 
 #include "test.h"
 #include "fl/codec/vorbis.h"
-#include "fl/bytestream.h"
+#include "fl/stl/detail/file_handle.h"
 
 // Include low-level stb_vorbis API for pushdata and FILE tests
 #include "third_party/stb/stb_vorbis.h"

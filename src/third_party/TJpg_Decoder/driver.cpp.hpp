@@ -18,7 +18,7 @@ TJpgInstanceDecoder::~TJpgInstanceDecoder() {
     endDecoding();
 }
 
-bool TJpgInstanceDecoder::beginDecodingStream(fl::ByteStreamPtr stream, PixelFormat format) {
+bool TJpgInstanceDecoder::beginDecodingStream(fl::FileHandlePtr stream, PixelFormat format) {
     if (!stream) {
         setError("Invalid stream provided");
         return false;
@@ -193,7 +193,7 @@ bool TJpgInstanceDecoder::processChunk() {
 
         if (res == JDR_OK) {
             // Check if any pixels were actually set by sampling the first pixel
-            CRGB* pixels = current_frame_->rgb();
+            CRGB* pixels = current_frame_->rgb().data();
             fl::u8 first_pixel_sum = 0;
             if (pixels) {
                 first_pixel_sum = pixels[0].r + pixels[0].g + pixels[0].b;
@@ -352,7 +352,7 @@ int TJpgInstanceDecoder::outputCallback(JDEC* jd, void* bitmap, JRECT* rect) {
     }
 
     // Get pointer to frame's RGB buffer
-    CRGB* frame_pixels = decoder->current_frame_->rgb();
+    CRGB* frame_pixels = decoder->current_frame_->rgb().data();
     if (!frame_pixels) {
         return 0;
     }

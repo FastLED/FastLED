@@ -41,7 +41,7 @@ namespace third_party {
     class SoftwareGifDecoder : public fl::IDecoder {
     private:
         nsgif_t* gif_;
-        fl::ByteStreamPtr stream_;
+        fl::FileHandlePtr stream_;
         fl::shared_ptr<fl::Frame> currentFrame_;
         fl::string errorMessage_;
         bool ready_;
@@ -75,7 +75,7 @@ namespace third_party {
         ~SoftwareGifDecoder();
 
         // IDecoder interface implementation
-        bool begin(fl::ByteStreamPtr stream) override;
+        bool begin(fl::FileHandlePtr stream) override;
         void end() override;
         bool isReady() const override { return ready_; }
         bool hasError(fl::string* msg = nullptr) const override;

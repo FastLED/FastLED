@@ -45,11 +45,11 @@ Frame::~Frame() {
     // Vector will handle memory cleanup automatically
 }
 
-void Frame::draw(CRGB *leds, DrawMode draw_mode) const {
+void Frame::draw(fl::span<CRGB> leds, DrawMode draw_mode) const {
     if (!mRgb.empty()) {
         switch (draw_mode) {
         case DRAW_MODE_OVERWRITE: {
-            fl::memcpy(leds, mRgb.data(), mPixelsCount * sizeof(CRGB));
+            fl::memcpy(leds.data(), mRgb.data(), mPixelsCount * sizeof(CRGB));
             break;
         }
         case DRAW_MODE_BLEND_BY_MAX_BRIGHTNESS: {
@@ -62,7 +62,7 @@ void Frame::draw(CRGB *leds, DrawMode draw_mode) const {
     }
 }
 
-void Frame::drawXY(CRGB *leds, const XYMap &xyMap, DrawMode draw_mode) const {
+void Frame::drawXY(fl::span<CRGB> leds, const XYMap &xyMap, DrawMode draw_mode) const {
     const u16 width = xyMap.getWidth();
     const u16 height = xyMap.getHeight();
     fl::u32 count = 0;
@@ -102,13 +102,13 @@ void Frame::clear() {
 }
 
 void Frame::interpolate(const Frame &frame1, const Frame &frame2,
-                        u8 amountofFrame2, CRGB *pixels) {
+                        u8 amountofFrame2, fl::span<CRGB> pixels) {
     if (frame1.size() != frame2.size()) {
         return; // Frames must have the same size
     }
 
-    const CRGB *rgbFirst = frame1.rgb();
-    const CRGB *rgbSecond = frame2.rgb();
+    const CRGB *rgbFirst = frame1.rgb().data();
+    const CRGB *rgbSecond = frame2.rgb().data();
 
     if (frame1.mRgb.empty() || frame2.mRgb.empty()) {
         // Error, why are we getting null pointers?
@@ -127,7 +127,7 @@ void Frame::interpolate(const Frame &frame1, const Frame &frame2,
         FASTLED_DBG("Frames must have the same size");
         return; // Frames must have the same size
     }
-    interpolate(frame1, frame2, amountOfFrame2, mRgb.data());
+    interpolate(frame1, frame2, amountOfFrame2, rgb());
 }
 
 bool Frame::isValid() const {

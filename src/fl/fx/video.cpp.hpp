@@ -1,7 +1,7 @@
 #include "fl/fx/video.h"
 
 #include "crgb.h"
-#include "fl/bytestreammemory.h"
+#include "fl/stl/detail/memory_file_handle.h"
 #include "fl/dbg.h"
 #include "fl/math_macros.h"
 #include "fl/stl/string.h"
@@ -58,22 +58,7 @@ bool Video::begin(FileHandlePtr handle) {
     return true;
 }
 
-bool Video::beginStream(ByteStreamPtr bs) {
-    if (!bs) {
-        mError = "FileHandle is null";
-        FASTLED_DBG(mError.c_str());
-        return false;
-    }
-    if (mError.size()) {
-        FASTLED_DBG(mError.c_str());
-        return false;
-    }
-    mError.clear();
-    mImpl->beginStream(bs);
-    return true;
-}
-
-bool Video::draw(fl::u32 now, CRGB *leds) {
+bool Video::draw(fl::u32 now, fl::span<CRGB> leds) {
     if (!mImpl) {
         FASTLED_WARN_IF(!mError.empty(), mError.c_str());
         return false;
@@ -91,7 +76,7 @@ void Video::draw(DrawContext context) {
         FASTLED_WARN_IF(!mError.empty(), mError.c_str());
         return;
     }
-    mImpl->draw(context.now, context.leds);
+    mImpl->draw(context.now, fl::span<CRGB>(context.leds, mImpl->pixelsPerFrame()));
 }
 
 i32 Video::durationMicros() const {
@@ -160,8 +145,8 @@ VideoFxWrapper::VideoFxWrapper(fl::shared_ptr<Fx> fx) : Fx1d(fx->getNumLeds()), 
         mFps = 30.0f;
     }
     mVideo = fl::make_shared<VideoImpl>(mFx->getNumLeds(), mFps, 2);
-    mByteStream = fl::make_shared<ByteStreamMemory>(mFx->getNumLeds() * sizeof(CRGB));
-    mVideo->beginStream(mByteStream);
+    mByteStream = fl::make_shared<MemoryFileHandle>(mFx->getNumLeds() * sizeof(CRGB));
+    mVideo->begin(mByteStream);
 }
 
 VideoFxWrapper::~VideoFxWrapper() = default;
@@ -179,7 +164,7 @@ void VideoFxWrapper::draw(DrawContext context) {
             context.leds,
             mFx->getNumLeds()); // now write the leds to the byte stream.
     }
-    bool ok = mVideo->draw(context.now, context.leds);
+    bool ok = mVideo->draw(context.now, fl::span<CRGB>(context.leds, mFx->getNumLeds()));
     if (!ok) {
         FASTLED_WARN("VideoFxWrapper: draw failed.");
     }

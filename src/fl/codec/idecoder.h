@@ -3,13 +3,15 @@
 #include "fl/stl/shared_ptr.h"  // IWYU pragma: keep
 #include "fl/stl/string.h"
 #include "fl/stl/stdint.h"
-#include "fl/bytestream.h"
+#include "fl/stl/detail/file_handle.h"  // For fl::FileHandle
 #include "fl/stl/shared_ptr.h"  // IWYU pragma: keep
 #include "fl/stl/function.h"
 #include "fl/audio.h"
 #include "fl/fx/frame.h"
 
 namespace fl {
+
+FASTLED_SHARED_PTR_NO_FWD(FileHandle); // FileHandle is defined in file_handle.h
 
 // Decoder result types
 enum class DecodeResult {
@@ -34,7 +36,7 @@ public:
     virtual ~IDecoder() = default;
 
     // Lifecycle methods
-    virtual bool begin(fl::ByteStreamPtr stream) = 0;
+    virtual bool begin(fl::FileHandlePtr stream) = 0;
     virtual void end() = 0;
     virtual bool isReady() const = 0;
     virtual bool hasError(fl::string* msg = nullptr) const = 0;
@@ -58,7 +60,7 @@ public:
 // Null decoder implementation for unsupported platforms
 class NullDecoder : public IDecoder {
 public:
-    bool begin(fl::ByteStreamPtr) override { return false; }
+    bool begin(fl::FileHandlePtr) override { return false; }
     void end() override {}
     bool isReady() const override { return false; }
     bool hasError(fl::string* msg = nullptr) const override {

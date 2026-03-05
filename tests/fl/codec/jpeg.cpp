@@ -1,7 +1,7 @@
 #include "test.h"
 #include "fl/file_system.h"
 #include "fl/codec/jpeg.h"
-#include "fl/bytestreammemory.h"
+#include "fl/stl/detail/memory_file_handle.h"
 #include "fl/fx/frame.h"
 #include "platforms/stub/fs_stub.hpp"
 
@@ -62,7 +62,7 @@ FL_TEST_CASE("JPEG file loading and decoding") {
 
             // Expected layout: red-white-blue-black (2x2)
             // Verify pixel values match expected color pattern (JPEG compression affects exact values)
-            const CRGB* pixels = frame->rgb();
+            const CRGB* pixels = frame->rgb().data();
             FL_REQUIRE(pixels != nullptr);
 
             // Verify we have 4 pixels for a 2x2 image

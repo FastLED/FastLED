@@ -5,7 +5,6 @@
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/stdint.h"
-#include "fl/bytestream.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/string.h"  // IWYU pragma: keep
@@ -75,7 +74,7 @@ private:
 };
 
 // Vorbis decoder with streaming byte interface
-// This decoder consumes Vorbis data from a ByteStream and decodes audio frames on demand
+// This decoder consumes Vorbis data from a FileHandle and decodes audio frames on demand
 class VorbisDecoder {
 public:
     VorbisDecoder();
@@ -84,7 +83,7 @@ public:
     // Initialize the decoder with a byte stream
     // Note: stb_vorbis requires the entire stream in memory for pulldata API
     // Returns true on success, false on failure
-    bool begin(fl::ByteStreamPtr stream);
+    bool begin(fl::FileHandlePtr stream);
 
     // Clean up decoder resources
     void end();

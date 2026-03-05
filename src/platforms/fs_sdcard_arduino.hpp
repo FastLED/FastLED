@@ -36,40 +36,55 @@ private:
 
 public:
     SdFatFileHandle(SdFile file, const char* path) : _file(fl::move(file)), _path(path) {}
-    ~SdFatFileHandle() override { 
+    ~SdFatFileHandle() override {
         if (_file.isOpen()) {
-            _file.close(); 
+            _file.close();
         }
     }
 
+    bool is_open() const override {
+        return _file.isOpen();
+    }
     bool available() const override {
-        // SdFat's available() is not const, so we need const_cast
         auto f = const_cast<SdFatFileHandle*>(this);
         return f->_file.available() > 0;
     }
-    fl::size size() const override { 
-        return _file.fileSize(); 
+    fl::size_t size() const override {
+        return _file.fileSize();
     }
-    fl::size read(u8 *dst, fl::size bytesToRead) override { 
-        return _file.read(dst, bytesToRead); 
+    fl::size_t read(char *dst, fl::size_t bytesToRead) override {
+        return _file.read(reinterpret_cast<u8*>(dst), bytesToRead); // ok reinterpret cast
     }
-    fl::size pos() const override { 
-        return _file.curPosition(); 
+    using FileHandle::read;
+    fl::size_t write(const char *data, fl::size_t count) override {
+        (void)data; (void)count;
+        return 0;
     }
-    const char* path() const override { 
-        return _path.c_str(); 
+    fl::size_t tell() override {
+        return _file.curPosition();
     }
-    bool seek(fl::size pos) override { 
-        return _file.seekSet(pos); 
+    const char* path() const override {
+        return _path.c_str();
     }
-    void close() override { 
+    bool seek(fl::size_t pos, fl::seek_dir dir) override {
+        if (dir == fl::seek_dir::beg) return _file.seekSet(pos);
+        if (dir == fl::seek_dir::cur) return _file.seekCur(pos);
+        return _file.seekEnd(pos);
+    }
+    using FileHandle::seek;
+    void close() override {
         if (_file.isOpen()) {
-            _file.close(); 
+            _file.close();
         }
     }
-    bool valid() const override { 
-        return _file.isOpen(); 
+    bool is_eof() const override {
+        auto f = const_cast<SdFatFileHandle*>(this);
+        return f->_file.available() <= 0;
     }
+    bool has_error() const override { return false; }
+    void clear_error() override {}
+    int error_code() const override { return 0; }
+    const char* error_message() const override { return "No error"; }
 };
 #else
 class SDFileHandle : public FileHandle {
@@ -79,46 +94,63 @@ private:
 
 public:
     SDFileHandle(File file, const char* path) : _file(file), _path(path) {}
-    ~SDFileHandle() override { 
+    ~SDFileHandle() override {
         if (_file) {
-            _file.close(); 
+            _file.close();
         }
     }
 
+    bool is_open() const override {
+        auto f = const_cast<File&>(_file);
+        return f;
+    }
     bool available() const override {
-        // Arduino's available() is not const, so we need const_cast
         auto f = const_cast<File&>(_file);
         return f.available() > 0;
     }
-    fl::size size() const override { 
-        // Arduino's size() is not const, so we need const_cast
+    fl::size_t size() const override {
         auto f = const_cast<File&>(_file);
-        return f.size(); 
+        return f.size();
     }
-    fl::size read(u8 *dst, fl::size bytesToRead) override { 
-        return _file.read(dst, bytesToRead); 
+    fl::size_t read(char *dst, fl::size_t bytesToRead) override {
+        return _file.read(reinterpret_cast<u8*>(dst), bytesToRead); // ok reinterpret cast
     }
-    fl::size pos() const override { 
-        // Arduino's position() is not const, so we need const_cast
+    using FileHandle::read;
+    fl::size_t write(const char *data, fl::size_t count) override {
+        (void)data; (void)count;
+        return 0;
+    }
+    fl::size_t tell() override {
         auto f = const_cast<File&>(_file);
-        return f.position(); 
+        return f.position();
     }
-    const char* path() const override { 
-        return _path.c_str(); 
+    const char* path() const override {
+        return _path.c_str();
     }
-    bool seek(fl::size pos) override { 
-        return _file.seek(pos); 
+    bool seek(fl::size_t pos, fl::seek_dir dir) override {
+        if (dir == fl::seek_dir::beg) return _file.seek(pos);
+        // Arduino SD doesn't support cur/end natively
+        if (dir == fl::seek_dir::cur) {
+            auto f = const_cast<File&>(_file);
+            return _file.seek(f.position() + pos);
+        }
+        auto f = const_cast<File&>(_file);
+        return _file.seek(f.size() + pos);
     }
-    void close() override { 
+    using FileHandle::seek;
+    void close() override {
         if (_file) {
-            _file.close(); 
+            _file.close();
         }
     }
-    bool valid() const override { 
-        // Arduino's operator bool() is not const, so we need const_cast
+    bool is_eof() const override {
         auto f = const_cast<File&>(_file);
-        return f; 
+        return f.available() <= 0;
     }
+    bool has_error() const override { return false; }
+    void clear_error() override {}
+    int error_code() const override { return 0; }
+    const char* error_message() const override { return "No error"; }
 };
 #endif
 

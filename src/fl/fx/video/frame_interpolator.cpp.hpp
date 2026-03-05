@@ -23,7 +23,7 @@ bool FrameInterpolator::draw(fl::u32 now, Frame *dst) {
     return ok;
 }
 
-bool FrameInterpolator::draw(fl::u32 now, CRGB *leds) {
+bool FrameInterpolator::draw(fl::u32 now, fl::span<CRGB> leds) {
     fl::u32 frameNumber, nextFrameNumber;
     u8 amountOfNextFrame;
     // DBG("now: " << now);

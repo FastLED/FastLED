@@ -3,7 +3,9 @@
 #include "fl/stl/stdint.h"
 
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "fl/stl/span.h"
 #include "fl/stl/string.h"
+#include "fl/stl/detail/memory_file_handle.h"
 #include "fl/fx/fx1d.h"
 
 namespace fl {
@@ -13,15 +15,14 @@ using CRGB = fl::CRGB;  // CRGB is now a typedef
 
 // Forward declare classes
 FASTLED_SHARED_PTR(FileHandle);
-FASTLED_SHARED_PTR(ByteStream);
 FASTLED_SHARED_PTR(Frame);
 FASTLED_SHARED_PTR(VideoImpl);
 FASTLED_SHARED_PTR(VideoFxWrapper);
-FASTLED_SHARED_PTR(ByteStreamMemory);
+FASTLED_SHARED_PTR_NO_FWD(MemoryFileHandle);
 
 // Video represents a video file that can be played back on a LED strip.
-// The video file is expected to be a sequence of frames. You can either use
-// a file handle or a byte stream to read the video data.
+// The video file is expected to be a sequence of frames. Pass any FileHandle
+// to begin() — streaming vs seekable is auto-detected.
 class Video : public Fx1d { // Fx1d because video can be irregular.
   public:
     static size_t DefaultFrameHistoryCount() {
@@ -52,8 +53,7 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
 
     // Api
     bool begin(fl::FileHandlePtr h);
-    bool beginStream(fl::ByteStreamPtr s);
-    bool draw(fl::u32 now, CRGB *leds);
+    bool draw(fl::u32 now, fl::span<CRGB> leds);
     bool draw(fl::u32 now, Frame *frame);
     void end();
     bool finished();
@@ -94,7 +94,7 @@ class VideoFxWrapper : public Fx1d {
   private:
     FxPtr mFx;
     VideoImplPtr mVideo;
-    ByteStreamMemoryPtr mByteStream;
+    MemoryFileHandlePtr mByteStream;
     float mFps = 30.0f;
 };
 

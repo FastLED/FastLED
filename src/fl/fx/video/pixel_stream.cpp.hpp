@@ -8,112 +8,90 @@
 namespace fl {
 
 PixelStream::PixelStream(int bytes_per_frame)
-    : mbytesPerFrame(bytes_per_frame), mUsingByteStream(false) {}
+    : mbytesPerFrame(bytes_per_frame), mType(kFile) {}
 
 PixelStream::~PixelStream() { close(); }
 
 bool PixelStream::begin(FileHandlePtr h) {
     close();
-    mFileHandle = h;
-    mUsingByteStream = false;
-    return mFileHandle->available();
-}
-
-bool PixelStream::beginStream(ByteStreamPtr s) {
-    close();
-    mByteStream = s;
-    mUsingByteStream = true;
-    return mByteStream->available(mbytesPerFrame);
+    mHandle = h;
+    // Probe seekability: if seek-to-start succeeds, this is a seekable file.
+    mType = mHandle->seek(0, seek_dir::beg) ? kFile : kStreaming;
+    if (mType == kFile) {
+        return mHandle->available();
+    }
+    return mHandle->available(mbytesPerFrame);
 }
 
 void PixelStream::close() {
-    if (!mUsingByteStream && mFileHandle) {
-        mFileHandle.reset();
-    }
-    mByteStream.reset();
-    mFileHandle.reset();
+    mHandle.reset();
 }
 
 i32 PixelStream::bytesPerFrame() { return mbytesPerFrame; }
 
 bool PixelStream::readPixel(CRGB *dst) {
-    if (mUsingByteStream) {
-        return mByteStream->read(&dst->r, 1) && mByteStream->read(&dst->g, 1) &&
-               mByteStream->read(&dst->b, 1);
-    } else {
-        return mFileHandle->read(&dst->r, 1) && mFileHandle->read(&dst->g, 1) &&
-               mFileHandle->read(&dst->b, 1);
-    }
+    return mHandle->read(&dst->r, 1) && mHandle->read(&dst->g, 1) &&
+           mHandle->read(&dst->b, 1);
 }
 
 bool PixelStream::available() const {
-    if (mUsingByteStream) {
-        return mByteStream->available(mbytesPerFrame);
-    } else {
-        return mFileHandle->available();
+    if (mType == kStreaming) {
+        return mHandle->available(mbytesPerFrame);
     }
+    return mHandle->available();
 }
 
 bool PixelStream::atEnd() const {
-    if (mUsingByteStream) {
+    if (mType == kStreaming) {
         return false;
-    } else {
-        return !mFileHandle->available();
     }
+    return !mHandle->available();
 }
 
 bool PixelStream::readFrame(Frame *frame) {
     if (!frame) {
         return false;
     }
-    if (!mUsingByteStream) {
-        if (!framesRemaining()) {
-            return false;
-        }
-        size_t n = mFileHandle->readRGB8(frame->rgb(), mbytesPerFrame / 3);
-        DBG("pos: " << mFileHandle->pos());
-        return n * 3 == size_t(mbytesPerFrame);
+    if (mType == kFile && !framesRemaining()) {
+        return false;
     }
-    size_t n = mByteStream->readCRGB(frame->rgb(), mbytesPerFrame / 3);
+    size_t n = mHandle->readRGB8(frame->rgb());
+    if (mType == kFile) {
+        DBG("pos: " << mHandle->pos());
+    }
     return n * 3 == size_t(mbytesPerFrame);
 }
 
 bool PixelStream::hasFrame(fl::u32 frameNumber) {
-    if (mUsingByteStream) {
-        // ByteStream doesn't support seeking
+    if (mType == kStreaming) {
+        // Streaming handle doesn't support seeking
         DBG("Not implemented and therefore always returns true");
         return true;
-    } else {
-        size_t total_bytes = mFileHandle->size();
-        return frameNumber * mbytesPerFrame < total_bytes;
     }
+    size_t total_bytes = mHandle->size();
+    return frameNumber * mbytesPerFrame < total_bytes;
 }
 
 bool PixelStream::readFrameAt(fl::u32 frameNumber, Frame *frame) {
-    // DBG("read frame at " << frameNumber);
-    if (mUsingByteStream) {
-        // ByteStream doesn't support seeking
-        FASTLED_DBG("ByteStream doesn't support seeking");
+    if (mType == kStreaming) {
+        // Streaming handle doesn't support seeking
+        FASTLED_DBG("Streaming handle doesn't support seeking");
         return false;
-    } else {
-        // DBG("mbytesPerFrame: " << mbytesPerFrame);
-        mFileHandle->seek(frameNumber * mbytesPerFrame);
-        if (mFileHandle->bytesLeft() == 0) {
-            return false;
-        }
-        size_t read =
-            mFileHandle->readRGB8(frame->rgb(), mbytesPerFrame / 3) * 3;
-        // DBG("read: " << read);
-        // DBG("pos: " << mFileHandle->Position());
-
-        bool ok = int(read) == mbytesPerFrame;
-        if (!ok) {
-            DBG("readFrameAt failed - read: "
-                << read << ", mbytesPerFrame: " << mbytesPerFrame << ", frame:"
-                << frameNumber << ", left: " << mFileHandle->bytesLeft());
-        }
-        return ok;
     }
+    mHandle->seek(frameNumber * mbytesPerFrame);
+    if (mHandle->bytesLeft() == 0) {
+        return false;
+    }
+    size_t read =
+        mHandle->readRGB8(frame->rgb()) * 3;
+
+    bool ok = int(read) == mbytesPerFrame;
+    if (!ok) {
+        DBG("readFrameAt failed - read: "
+            << read << ", mbytesPerFrame: " << mbytesPerFrame << ", frame:"
+            << frameNumber << ", left: " << mHandle->bytesLeft());
+    }
+    return ok;
 }
 
 i32 PixelStream::framesRemaining() const {
@@ -127,23 +105,19 @@ i32 PixelStream::framesRemaining() const {
 }
 
 i32 PixelStream::framesDisplayed() const {
-    if (mUsingByteStream) {
-        // ByteStream doesn't have a concept of total size, so we can't
-        // calculate this
+    if (mType == kStreaming) {
         return -1;
-    } else {
-        i32 bytes_played = mFileHandle->pos();
-        return bytes_played / mbytesPerFrame;
     }
+    i32 bytes_played = mHandle->pos();
+    return bytes_played / mbytesPerFrame;
 }
 
 i32 PixelStream::bytesRemaining() const {
-    if (mUsingByteStream) {
+    if (mType == kStreaming) {
         // Use (max)() to prevent macro expansion by Arduino.h's max macro
         return (fl::numeric_limits<i32>::max)();
-    } else {
-        return mFileHandle->bytesLeft();
     }
+    return mHandle->bytesLeft();
 }
 
 i32 PixelStream::bytesRemainingInFrame() const {
@@ -151,33 +125,30 @@ i32 PixelStream::bytesRemainingInFrame() const {
 }
 
 bool PixelStream::rewind() {
-    if (mUsingByteStream) {
-        // ByteStream doesn't support rewinding
+    if (mType == kStreaming) {
         return false;
-    } else {
-        mFileHandle->seek(0);
-        return true;
     }
+    mHandle->seek(0);
+    return true;
 }
 
 PixelStream::Type PixelStream::getType() const {
-    return mUsingByteStream ? Type::kStreaming : Type::kFile;
+    return mType;
 }
 
 size_t PixelStream::readBytes(u8 *dst, size_t len) {
     u16 bytesRead = 0;
-    if (mUsingByteStream) {
-        while (bytesRead < len && mByteStream->available(len)) {
-            // use pop_front()
-            if (mByteStream->read(dst + bytesRead, 1)) {
+    if (mType == kStreaming) {
+        while (bytesRead < len && mHandle->available(len)) {
+            if (mHandle->read(dst + bytesRead, 1)) {
                 bytesRead++;
             } else {
                 break;
             }
         }
     } else {
-        while (bytesRead < len && mFileHandle->available()) {
-            if (mFileHandle->read(dst + bytesRead, 1)) {
+        while (bytesRead < len && mHandle->available()) {
+            if (mHandle->read(dst + bytesRead, 1)) {
                 bytesRead++;
             } else {
                 break;

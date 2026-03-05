@@ -32,7 +32,7 @@ private:
     struct Mpeg1DecoderData;
     Mpeg1Config config_;
     Mpeg1DecoderData* decoderData_;
-    fl::ByteStreamPtr stream_;
+    fl::FileHandlePtr stream_;
     fl::shared_ptr<Frame> currentFrame_;
     fl::string errorMessage_;
     bool ready_ = false;
@@ -59,7 +59,7 @@ public:
     ~SoftwareMpeg1Decoder();
 
     // IDecoder interface
-    bool begin(fl::ByteStreamPtr stream) override;
+    bool begin(fl::FileHandlePtr stream) override;
     void end() override;
     bool isReady() const override { return ready_; }
     bool hasError(fl::string* msg = nullptr) const override;

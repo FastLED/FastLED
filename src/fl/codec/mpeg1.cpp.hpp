@@ -1,6 +1,6 @@
 #include "fl/codec/mpeg1.h"
 #include "fl/stl/utility.h"
-#include "fl/bytestreammemory.h"
+#include "fl/stl/detail/memory_file_handle.h"
 
 namespace fl {
 
@@ -64,8 +64,8 @@ Mpeg1Info Mpeg1::parseMpeg1Info(fl::span<const fl::u8> data, fl::string* error_m
     tempConfig.skipAudio = true;
 
     auto decoder = fl::make_shared<third_party::SoftwareMpeg1Decoder>(tempConfig);
-    auto stream = fl::make_shared<fl::ByteStreamMemory>(data.size());
-    stream->write(data.data(), data.size());
+    auto stream = fl::make_shared<fl::MemoryFileHandle>(data.size());
+    stream->write(data);
 
     if (decoder->begin(stream)) {
         // Extract metadata using decoder methods

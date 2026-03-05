@@ -33,44 +33,14 @@
 #include "fl/screenmap.h"
 #include "fl/unused.h"
 #include "fl/codec/mpeg1.h"
-#include "fl/bytestream.h"
 #include "fl/math_macros.h" // for min
 #include "fl/stl/cstring.h"
 
 namespace fl {
 
-// Adapter to convert FileHandle to ByteStream for codec input
-class ByteStreamFileHandle : public ByteStream {
-private:
-    FileHandlePtr mFileHandle;
-
-public:
-    explicit ByteStreamFileHandle(FileHandlePtr handle) : mFileHandle(handle) {}
-
-    bool available(fl::size bytesRequested) const override {
-        if (!mFileHandle) return false;
-        return mFileHandle->available() && mFileHandle->bytesLeft() >= bytesRequested;
-    }
-
-    fl::size read(fl::u8* dst, fl::size bytesToRead) override {
-        if (!mFileHandle) return 0;
-        return mFileHandle->read(dst, bytesToRead);
-    }
-
-    const char* path() const override {
-        if (!mFileHandle) return "INVALID_HANDLE";
-        return mFileHandle->path();
-    }
-
-    void close() override {
-        if (mFileHandle) {
-            mFileHandle->close();
-        }
-    }
-};
-
-// Custom ByteStream that wraps MPEG1 decoder for seamless integration with Video system
-class Mpeg1ByteStream : public ByteStream {
+// FileHandle that wraps MPEG1 decoder for seamless integration with Video system
+// Non-seekable: decodes frames on demand and provides them as sequential bytes
+class Mpeg1FileHandle : public FileHandle {
 private:
     IDecoderPtr mDecoder;
     fl::shared_ptr<Frame> mCurrentFrame;
@@ -79,77 +49,8 @@ private:
     fl::string mPath;
     bool mHasValidFrame;
 
-public:
-    Mpeg1ByteStream(IDecoderPtr decoder, fl::size pixelsPerFrame, const char* path)
-        : mDecoder(decoder), mCurrentFrame(nullptr), mFrameSize(pixelsPerFrame * 3), mCurrentPos(0),
-          mPath(path), mHasValidFrame(false) {
-        // Try to decode the first frame
-        decodeNextFrameIfNeeded();
-    }
-
-    bool available(fl::size bytesRequested) const override {
-        if (!mDecoder || !mHasValidFrame) {
-            return false;
-        }
-        // Check if we have enough bytes remaining in current frame
-        fl::size bytesAvailableInCurrentFrame = (mCurrentPos < mFrameSize) ? (mFrameSize - mCurrentPos) : 0;
-
-        // If we have enough in current frame, return true
-        if (bytesAvailableInCurrentFrame >= bytesRequested) {
-            return true;
-        }
-
-        // If not enough in current frame, check if we can get more frames
-        // (simplified check - we know each frame has mFrameSize bytes)
-        return mDecoder->hasMoreFrames();
-    }
-
-    fl::size read(fl::u8* dst, fl::size bytesToRead) override {
-        if (!mDecoder || !mHasValidFrame) {
-            return 0;
-        }
-
-        fl::size totalRead = 0;
-
-        while (bytesToRead > 0 && mHasValidFrame) {
-            fl::size remainingInFrame = mFrameSize - mCurrentPos;
-
-            if (remainingInFrame == 0) {
-                // Need next frame
-                if (!decodeNextFrameIfNeeded()) {
-                    break;
-                }
-                remainingInFrame = mFrameSize - mCurrentPos;
-            }
-
-            fl::size toRead = fl::min(bytesToRead, remainingInFrame);
-            if (toRead > 0 && mCurrentFrame && mCurrentFrame->rgb()) {
-                fl::memcpy(dst + totalRead, (fl::u8*)mCurrentFrame->rgb() + mCurrentPos, toRead);
-                mCurrentPos += toRead;
-                totalRead += toRead;
-                bytesToRead -= toRead;
-            } else {
-                break;
-            }
-        }
-
-        return totalRead;
-    }
-
-    const char* path() const override {
-        return mPath.c_str();
-    }
-
-    void close() override {
-        if (mDecoder) {
-            mDecoder->end();
-        }
-    }
-
-private:
     bool decodeNextFrameIfNeeded() {
         if (mCurrentPos >= mFrameSize || !mHasValidFrame) {
-            // Need to decode next frame
             if (!mDecoder->hasMoreFrames()) {
                 mHasValidFrame = false;
                 return false;
@@ -169,6 +70,75 @@ private:
         }
         return mHasValidFrame;
     }
+
+public:
+    Mpeg1FileHandle(IDecoderPtr decoder, fl::size pixelsPerFrame, const char* path)
+        : mDecoder(decoder), mCurrentFrame(nullptr), mFrameSize(pixelsPerFrame * 3), mCurrentPos(0),
+          mPath(path), mHasValidFrame(false) {
+        decodeNextFrameIfNeeded();
+    }
+
+    bool is_open() const override { return mDecoder != nullptr; }
+
+    void close() override {
+        if (mDecoder) {
+            mDecoder->end();
+        }
+    }
+
+    fl::size_t read(char* dst, fl::size_t bytesToRead) override {
+        if (!mDecoder || !mHasValidFrame) {
+            return 0;
+        }
+
+        fl::size totalRead = 0;
+
+        while (bytesToRead > 0 && mHasValidFrame) {
+            fl::size remainingInFrame = mFrameSize - mCurrentPos;
+
+            if (remainingInFrame == 0) {
+                if (!decodeNextFrameIfNeeded()) {
+                    break;
+                }
+                remainingInFrame = mFrameSize - mCurrentPos;
+            }
+
+            fl::size toRead = fl::min(bytesToRead, remainingInFrame);
+            if (toRead > 0 && mCurrentFrame && mCurrentFrame->rgb().data()) {
+                fl::memcpy(dst + totalRead, (fl::u8*)mCurrentFrame->rgb().data() + mCurrentPos, toRead);
+                mCurrentPos += toRead;
+                totalRead += toRead;
+                bytesToRead -= toRead;
+            } else {
+                break;
+            }
+        }
+
+        return totalRead;
+    }
+    using FileHandle::read; // u8 overload
+
+    fl::size_t write(const char*, fl::size_t) override { return 0; } // Read-only
+    fl::size_t tell() override { return 0; }
+    bool seek(fl::size_t, seek_dir) override { return false; } // Non-seekable
+    using FileHandle::seek;
+    fl::size_t size() const override { return 0; } // Unknown for streaming
+
+    const char* path() const override { return mPath.c_str(); }
+
+    bool is_eof() const override { return !mHasValidFrame && !mDecoder->hasMoreFrames(); }
+    bool has_error() const override { return false; }
+    void clear_error() override {}
+    int error_code() const override { return 0; }
+    const char* error_message() const override { return "No error"; }
+
+    bool available() const override { return mHasValidFrame || mDecoder->hasMoreFrames(); }
+
+    fl::size_t bytes_left() const override {
+        if (!mHasValidFrame) return 0;
+        fl::size inFrame = (mCurrentPos < mFrameSize) ? (mFrameSize - mCurrentPos) : 0;
+        return inFrame;
+    }
 };
 
 class NullFileHandle : public FileHandle {
@@ -176,24 +146,32 @@ class NullFileHandle : public FileHandle {
     NullFileHandle() = default;
     ~NullFileHandle() override {}
 
-    bool available() const override { return false; }
-    fl::size size() const override { return 0; }
-    fl::size read(u8 *dst, fl::size bytesToRead) override {
+    bool is_open() const override { return false; }
+    fl::size_t size() const override { return 0; }
+    fl::size_t read(char *dst, fl::size_t bytesToRead) override {
         FASTLED_UNUSED(dst);
         FASTLED_UNUSED(bytesToRead);
         return 0;
     }
-    fl::size pos() const override { return 0; }
+    fl::size_t write(const char *data, fl::size_t count) override {
+        FASTLED_UNUSED(data);
+        FASTLED_UNUSED(count);
+        return 0;
+    }
+    fl::size_t tell() override { return 0; }
     const char *path() const override { return "nullptr FILE HANDLE"; }
-    bool seek(fl::size pos) override {
+    bool seek(fl::size_t pos, seek_dir dir) override {
         FASTLED_UNUSED(pos);
+        FASTLED_UNUSED(dir);
         return false;
     }
+    using FileHandle::seek; // single-arg overload
     void close() override {}
-    bool valid() const override {
-        FASTLED_WARN("NullFileHandle is not valid");
-        return false;
-    }
+    bool is_eof() const override { return true; }
+    bool has_error() const override { return false; }
+    void clear_error() override {}
+    int error_code() const override { return 0; }
+    const char *error_message() const override { return "NullFileHandle"; }
 };
 
 class NullFileSystem : public FsImpl {
@@ -239,8 +217,6 @@ bool FileSystem::begin(FsImplPtr platform_filesystem) {
     mFs->begin();
     return true;
 }
-
-fl::size FileHandle::bytesLeft() const { return size() - pos(); }
 
 FileSystem::FileSystem() : mFs() {}
 
@@ -331,10 +307,6 @@ Video FileSystem::openMpeg1Video(const char *path, fl::size pixelsPerFrame, floa
         return video;
     }
 
-    // Create ByteStream adapter for the file
-    fl::shared_ptr<ByteStreamFileHandle> fileStream =
-        fl::make_shared<ByteStreamFileHandle>(file);
-
     // Create MPEG1 decoder configuration
     Mpeg1Config config;
     config.mode = Mpeg1Config::Streaming;
@@ -350,20 +322,20 @@ Video FileSystem::openMpeg1Video(const char *path, fl::size pixelsPerFrame, floa
         return video;
     }
 
-    // Initialize decoder with file stream
-    if (!decoder->begin(fileStream)) {
+    // Initialize decoder with file handle
+    if (!decoder->begin(file)) {
         fl::string decoder_error;
         decoder->hasError(&decoder_error);
         video.setError(fl::string("Failed to initialize MPEG1 decoder: ").append(decoder_error));
         return video;
     }
 
-    // Create custom ByteStream that provides decoded frames
-    fl::shared_ptr<Mpeg1ByteStream> mpeg1Stream =
-        fl::make_shared<Mpeg1ByteStream>(decoder, pixelsPerFrame, path);
+    // Create FileHandle that provides decoded frames as sequential bytes
+    fl::shared_ptr<Mpeg1FileHandle> mpeg1Stream =
+        fl::make_shared<Mpeg1FileHandle>(decoder, pixelsPerFrame, path);
 
-    // Initialize video with the MPEG1 stream
-    if (!video.beginStream(mpeg1Stream)) {
+    // Initialize video with the MPEG1 decoded stream
+    if (!video.begin(mpeg1Stream)) {
         video.setError(fl::string("Failed to initialize video with MPEG1 stream"));
         return video;
     }
@@ -472,14 +444,10 @@ fl::Mp3DecoderPtr FileSystem::openMp3(const char *path,
         return fl::Mp3DecoderPtr();
     }
 
-    // Create ByteStream adapter for the file
-    fl::shared_ptr<ByteStreamFileHandle> fileStream =
-        fl::make_shared<ByteStreamFileHandle>(file);
-
     // Create MP3 stream decoder using the public API
     fl::Mp3DecoderPtr decoder = fl::Mp3::createDecoder(error_message);
 
-    if (!decoder->begin(fileStream)) {
+    if (!decoder->begin(file)) {
         fl::string decoder_error;
         decoder->hasError(&decoder_error);
         if (error_message) {

@@ -2,7 +2,7 @@
 // IWYU pragma: begin_keep
 #include "third_party/libnsgif/software_decoder.h"
 // IWYU pragma: end_keep
-#include "fl/bytestreammemory.h"
+#include "fl/stl/detail/memory_file_handle.h"
 
 namespace fl {
 
@@ -77,8 +77,8 @@ GifInfo Gif::parseGifInfo(fl::span<const fl::u8> data, fl::string* error_message
     // For a more complete parsing, we would need to create a temporary decoder
     // and let libnsgif parse the structure. Let's use the existing decoder briefly.
     auto decoder = fl::make_shared<fl::third_party::SoftwareGifDecoder>(PixelFormat::RGB888);
-    auto stream = fl::make_shared<fl::ByteStreamMemory>(data.size());
-    stream->write(data.data(), data.size());
+    auto stream = fl::make_shared<fl::MemoryFileHandle>(data.size());
+    stream->write(data);
 
     if (decoder->begin(stream)) {
         // Now we can extract more detailed info using the decoder's methods
