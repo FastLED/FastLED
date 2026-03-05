@@ -23,7 +23,6 @@
 #include "fl/file_system.cpp.hpp"
 #include "fl/fill.cpp.hpp"
 #include "fl/five_bit_hd_gamma.cpp.hpp"
-#include "fl/fixed_point/_build.cpp.hpp"
 #include "fl/fltest.cpp.hpp"
 #include "fl/gamma.cpp.hpp"
 #include "fl/gradient.cpp.hpp"

@@ -7,8 +7,8 @@
 // via using declarations for explicit API control.
 
 #include "fl/compiler_control.h"
-#include "fl/fixed_point/fixed_point_traits.h"
-#include "fl/fixed_point/isqrt.h"
+#include "fl/stl/fixed_point/traits.h"
+#include "fl/stl/fixed_point/isqrt.h"
 #include "fl/force_inline.h"
 #include "fl/sin32.h"
 #include "fl/stl/stdint.h"

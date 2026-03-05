@@ -103,7 +103,7 @@
 
 #include "test.h"
 #include "fl/compiler_control.h"
-#include "fl/fixed_point.h"
+#include "fl/stl/fixed_point.h"
 #include "fl/stl/math.h"
 
 using namespace fl;

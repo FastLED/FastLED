@@ -5,7 +5,7 @@
 // Range: [0, 256) with 24 fractional bits.
 
 #include "fl/int.h"
-#include "fl/fixed_point/isqrt.h"
+#include "fl/stl/fixed_point/isqrt.h"
 #include "fl/compiler_control.h"
 #include "fl/stl/type_traits.h"
 

@@ -8,7 +8,7 @@
 // The fade LUT replaces the 6t^5-15t^4+10t^3 polynomial with table lookup.
 // The z=0 specialization halves work vs full 3D noise.
 
-#include "fl/fixed_point/s16x16.h"
+#include "fl/stl/fixed_point/s16x16.h"
 
 
 namespace fl {

@@ -7,7 +7,7 @@
 // These are constant per-frame (depend only on grid geometry, not time).
 // Chasing_Spirals-specific LUT.
 
-#include "fl/fixed_point/s16x16.h"
+#include "fl/stl/fixed_point/s16x16.h"
 #include "fl/stl/stdint.h"
 
 

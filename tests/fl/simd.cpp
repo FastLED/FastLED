@@ -3,8 +3,8 @@
 #include "fl/simd.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
-#include "fl/fixed_point/s0x32x4.h"
-#include "fl/fixed_point/s16x16x4.h"
+#include "fl/stl/fixed_point/s0x32x4.h"
+#include "fl/stl/fixed_point/s16x16x4.h"
 #include "fl/numeric_limits.h"
 #include "test.h"
 

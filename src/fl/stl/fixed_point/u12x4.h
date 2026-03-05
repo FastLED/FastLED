@@ -4,7 +4,7 @@
 // All operations are integer-only in the hot path.
 
 #include "fl/stl/stdint.h"
-#include "fl/fixed_point/isqrt.h"
+#include "fl/stl/fixed_point/isqrt.h"
 #include "fl/compiler_control.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN

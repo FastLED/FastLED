@@ -3,8 +3,8 @@
 /// @file simd_ops.h
 /// Cross-type SIMD fixed-point operations (implemented after all types are defined)
 
-#include "fl/fixed_point/s0x32x4.h"
-#include "fl/fixed_point/s16x16x4.h"
+#include "fl/stl/fixed_point/s0x32x4.h"
+#include "fl/stl/fixed_point/s16x16x4.h"
 #include "fl/align.h"
 
 namespace fl {

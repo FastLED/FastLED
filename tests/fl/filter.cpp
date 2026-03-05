@@ -2,7 +2,7 @@
 
 #include "test.h"
 #include "fl/filter.h"
-#include "fl/fixed_point.h"
+#include "fl/stl/fixed_point.h"
 
 using namespace fl;
 

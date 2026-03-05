@@ -28,7 +28,7 @@
 #include "fl/stl/optional.h"
 #include "fl/stl/stdint.h"
 #include "fl/sin32.h"
-#include "fl/fixed_point/s16x16.h"
+#include "fl/stl/fixed_point/s16x16.h"
 #include "fl/simd.h"
 
 

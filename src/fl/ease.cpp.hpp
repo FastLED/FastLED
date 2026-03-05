@@ -15,7 +15,7 @@
 #include "fl/stl/weak_ptr.h"
 #include "fl/stl/unordered_map.h"
 #include "fl/align.h"
-#include "fl/fixed_point.h"
+#include "fl/stl/fixed_point.h"
 #include "fl/hash.h"
 
 namespace fl {

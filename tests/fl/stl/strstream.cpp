@@ -36,7 +36,7 @@
 #include "fl/stl/strstream.h"
 #include "crgb.h"
 #include "test.h"
-#include "fl/fixed_point.h"
+#include "fl/stl/fixed_point.h"
 #include "fl/int.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/ios.h"

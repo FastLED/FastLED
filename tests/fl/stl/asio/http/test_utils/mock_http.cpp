@@ -2,9 +2,9 @@
 #include "test.h"
 #include "mock_http_server.h"
 #include "mock_http_client.h"
-#include "fl/net/http/stream_transport.cpp.hpp"
-#include "fl/net/http/connection.cpp.hpp"
-#include "fl/net/http/chunked_encoding.cpp.hpp"
+#include "fl/stl/asio/http/stream_transport.cpp.hpp"
+#include "fl/stl/asio/http/connection.cpp.hpp"
+#include "fl/stl/asio/http/chunked_encoding.cpp.hpp"
 #include "fl/stl/json.h"
 
 using namespace fl;

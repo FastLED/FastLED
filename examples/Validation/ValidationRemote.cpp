@@ -29,7 +29,7 @@
 #include "fl/memory.h"
 #include <Arduino.h>
 
-#include "fl/net/ble.h"
+#include "fl/stl/asio/ble.h"
 
 // ============================================================================
 // Raw Serial Output Functions (bypass fl::println and ScopedLogDisable)

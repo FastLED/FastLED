@@ -4,7 +4,7 @@
 /// SIMD 4-wide s0x32 fixed-point vector type
 
 #include "fl/simd.h"
-#include "fl/fixed_point/s0x32.h"
+#include "fl/stl/fixed_point/s0x32.h"
 #include "fl/force_inline.h"
 
 namespace fl {

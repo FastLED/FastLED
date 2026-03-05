@@ -3,21 +3,31 @@
 // Template system for fixed-point types with sign support.
 // Usage: fl::fixed_point<16, 16> (defaults to signed)
 //        fl::fixed_point<16, 16, fl::Sign::UNSIGNED> (explicit unsigned)
+//
+// Free-function math API (std::cmath style):
+//   fl::floor(x), fl::ceil(x), fl::fract(x), fl::abs(x)
+//   fl::sqrt(x), fl::rsqrt(x), fl::pow(x, y)
+//   fl::sin(x), fl::cos(x), fl::sincos(angle, &s, &c)
+//   fl::atan(x), fl::atan2(y, x), fl::asin(x), fl::acos(x)
+//   fl::lerp(a, b, t), fl::clamp(x, lo, hi), fl::mod(a, b)
+//   fl::step(edge, x), fl::smoothstep(e0, e1, x)
+//
+// numeric_limits specializations in fl/stl/limits.h
 
-#include "fl/fixed_point/s0x32.h"
-#include "fl/fixed_point/s4x12.h"
-#include "fl/fixed_point/s8x8.h"
-#include "fl/fixed_point/s8x24.h"
-#include "fl/fixed_point/s12x4.h"
-#include "fl/fixed_point/s16x16.h"
-#include "fl/fixed_point/s24x8.h"
-#include "fl/fixed_point/u0x32.h"
-#include "fl/fixed_point/u4x12.h"
-#include "fl/fixed_point/u8x8.h"
-#include "fl/fixed_point/u8x24.h"
-#include "fl/fixed_point/u12x4.h"
-#include "fl/fixed_point/u16x16.h"
-#include "fl/fixed_point/u24x8.h"
+#include "fl/stl/fixed_point/s0x32.h"
+#include "fl/stl/fixed_point/s4x12.h"
+#include "fl/stl/fixed_point/s8x8.h"
+#include "fl/stl/fixed_point/s8x24.h"
+#include "fl/stl/fixed_point/s12x4.h"
+#include "fl/stl/fixed_point/s16x16.h"
+#include "fl/stl/fixed_point/s24x8.h"
+#include "fl/stl/fixed_point/u0x32.h"
+#include "fl/stl/fixed_point/u4x12.h"
+#include "fl/stl/fixed_point/u8x8.h"
+#include "fl/stl/fixed_point/u8x24.h"
+#include "fl/stl/fixed_point/u12x4.h"
+#include "fl/stl/fixed_point/u16x16.h"
+#include "fl/stl/fixed_point/u24x8.h"
 #include "fl/stl/type_traits.h"
 
 namespace fl {
@@ -313,6 +323,101 @@ template <typename T> struct is_fixed_point<const T> : is_fixed_point<T> {};
 template <typename T> struct is_fixed_point<volatile T> : is_fixed_point<T> {};
 template <typename T> struct is_fixed_point<const volatile T> : is_fixed_point<T> {};
 template <typename T> struct is_fixed_point<T&> : is_fixed_point<T> {};
+
+//-------------------------------------------------------------------------------
+// Free-function math API (std::cmath style)
+// These enable ADL: fl::sin(x), fl::floor(x), etc.
+//-------------------------------------------------------------------------------
+
+// ---- Rounding / decomposition ----
+
+template <typename T>
+inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
+floor(T x) { return T::floor(x); }
+
+template <typename T>
+inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
+ceil(T x) { return T::ceil(x); }
+
+template <typename T>
+inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
+fract(T x) { return T::fract(x); }
+
+template <typename T>
+inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
+mod(T a, T b) { return T::mod(a, b); }
+
+// ---- Absolute value / sign ----
+
+template <typename T>
+inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
+abs(T x) { return T::abs(x); }
+
+template <typename T>
+inline constexpr typename enable_if<is_fixed_point<T>::value, int>::type
+sign(T x) { return T::sign(x); }
+
+// ---- Interpolation / clamping ----
+
+template <typename T>
+inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
+lerp(T a, T b, T t) { return T::lerp(a, b, t); }
+
+template <typename T>
+inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
+clamp(T x, T lo, T hi) { return T::clamp(x, lo, hi); }
+
+template <typename T>
+inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
+step(T edge, T x) { return T::step(edge, x); }
+
+template <typename T>
+inline typename enable_if<is_fixed_point<T>::value, T>::type
+smoothstep(T edge0, T edge1, T x) { return T::smoothstep(edge0, edge1, x); }
+
+// ---- Roots / powers ----
+
+template <typename T>
+inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
+sqrt(T x) { return T::sqrt(x); }
+
+template <typename T>
+inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
+rsqrt(T x) { return T::rsqrt(x); }
+
+template <typename T>
+inline typename enable_if<is_fixed_point<T>::value, T>::type
+pow(T base, T exp) { return T::pow(base, exp); }
+
+// ---- Trigonometry ----
+
+template <typename T>
+inline typename enable_if<is_fixed_point<T>::value, T>::type
+sin(T angle) { return T::sin(angle); }
+
+template <typename T>
+inline typename enable_if<is_fixed_point<T>::value, T>::type
+cos(T angle) { return T::cos(angle); }
+
+template <typename T>
+inline typename enable_if<is_fixed_point<T>::value, void>::type
+sincos(T angle, T& out_sin, T& out_cos) { T::sincos(angle, out_sin, out_cos); }
+
+template <typename T>
+inline typename enable_if<is_fixed_point<T>::value, T>::type
+atan(T x) { return T::atan(x); }
+
+template <typename T>
+inline typename enable_if<is_fixed_point<T>::value, T>::type
+atan2(T y, T x) { return T::atan2(y, x); }
+
+template <typename T>
+inline typename enable_if<is_fixed_point<T>::value, T>::type
+asin(T x) { return T::asin(x); }
+
+template <typename T>
+inline typename enable_if<is_fixed_point<T>::value, T>::type
+acos(T x) { return T::acos(x); }
 
 //-------------------------------------------------------------------------------
 // powfp<T>(base, exp) — free-function power for fixed_point types.

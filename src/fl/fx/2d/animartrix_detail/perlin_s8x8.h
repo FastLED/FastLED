@@ -6,7 +6,7 @@
 // s8x8 Perlin: Ultra-fast 8-bit variant for maximum speed with reduced precision
 // Uses 8 fractional bits throughout. Trades accuracy for speed (4x faster multiplies vs i32).
 
-#include "fl/fixed_point/s16x16.h"
+#include "fl/stl/fixed_point/s16x16.h"
 #include "fl/force_inline.h"
 
 namespace fl {

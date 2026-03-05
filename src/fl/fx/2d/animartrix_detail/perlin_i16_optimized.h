@@ -6,7 +6,7 @@
 // i16-optimized Perlin: Uses i16 for lerp/grad hot path (2x faster multiplies)
 // Coordinates stay as i32 (s16x16) externally but convert to i16 for interpolation
 
-#include "fl/fixed_point/s16x16.h"
+#include "fl/stl/fixed_point/s16x16.h"
 #include "fl/force_inline.h"
 
 namespace fl {

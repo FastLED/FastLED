@@ -25,11 +25,11 @@ BleStatusInfo queryBleStatus(const BleTransportState*) {
     return BleStatusInfo{};
 }
 
-fl::pair<fl::function<fl::optional<fl::Json>()>, fl::function<void(const fl::Json&)>>
+fl::pair<fl::function<fl::optional<fl::json>()>, fl::function<void(const fl::json&)>>
 getBleTransportCallbacks(BleTransportState*) {
     return {
-        fl::function<fl::optional<fl::Json>()>([]() -> fl::optional<fl::Json> { return fl::optional<fl::Json>(); }),
-        fl::function<void(const fl::Json&)>([](const fl::Json&) {})
+        fl::function<fl::optional<fl::json>()>([]() -> fl::optional<fl::json> { return fl::optional<fl::json>(); }),
+        fl::function<void(const fl::json&)>([](const fl::json&) {})
     };
 }
 

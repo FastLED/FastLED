@@ -23,4 +23,5 @@
 #include "fl/stl/string_interner.cpp.hpp"
 #include "fl/stl/strstream.cpp.hpp"
 #include "fl/stl/type_traits.cpp.hpp"
+#include "fl/stl/fixed_point/_build.cpp.hpp"
 #include "fl/stl/asio/_build.cpp.hpp"

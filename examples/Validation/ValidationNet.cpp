@@ -23,7 +23,7 @@ ValidationNetState& getNetState() {
 #if defined(FL_IS_ESP32)
 
 // Unified HTTP server API (must be included before Arduino.h to avoid INADDR_NONE conflict)
-#include "fl/net/http/server.h"
+#include "fl/stl/asio/http/server.h"
 
 #include "fl/stl/cstring.h"
 #include "fl/stl/unique_ptr.h"

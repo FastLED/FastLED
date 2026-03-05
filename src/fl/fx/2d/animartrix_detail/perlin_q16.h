@@ -6,7 +6,7 @@
 // Q16 variant: Uses 16 fractional bits instead of 24 for faster arithmetic.
 // Trades internal precision for speed: i32 ops instead of i64, smaller LUT.
 
-#include "fl/fixed_point/s16x16.h"
+#include "fl/stl/fixed_point/s16x16.h"
 #include "fl/force_inline.h"
 
 namespace fl {
