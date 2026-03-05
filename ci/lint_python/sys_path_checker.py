@@ -1,10 +1,14 @@
 """Checker that flags sys.path modification calls.
 
-These calls break type checkers (pyright, ty), IDE code navigation, and
-make imports non-reproducible. Prefer proper package structure instead.
+sys.path hacks are NEVER allowed in this project. They break type checkers
+(pyright, ty), IDE code navigation, and make imports non-reproducible.
+
+All Python scripts MUST be launched via 'uv run' which handles path resolution
+automatically. If your imports don't resolve, fix the package structure — do NOT
+add sys.path hacks.
 
 Error Codes:
-    SPI001: sys.path modification detected - breaks type checking and IDE support
+    SPI001: sys.path modification detected — use 'uv run' instead
 """
 
 from __future__ import annotations
@@ -41,8 +45,10 @@ class SysPathVisitor(ast.NodeVisitor):
             self.violations.append(
                 (
                     node.lineno,
-                    "SPI001 sys.path modification detected - breaks type checking "
-                    "and IDE support. Suppress with # noqa: SPI001 if unavoidable.",
+                    "SPI001 sys.path modification is FORBIDDEN. "
+                    "Use 'uv run' to launch scripts (handles path resolution automatically). "
+                    "Do NOT use bare 'python' — always 'uv run python' or 'uv run <script>'. "
+                    "Remove the sys.path hack and fix imports to use proper package paths.",
                 )
             )
         self.generic_visit(node)
@@ -58,7 +64,7 @@ def check_file(path: str, source: str) -> list[tuple[int, str]]:
     visitor = SysPathVisitor()
     visitor.visit(tree)
 
-    # Filter out violations on lines with noqa SPI001 suppression
+    # Silently filter out violations on lines with noqa SPI001 suppression
     lines = source.splitlines()
     result: list[tuple[int, str]] = []
     for line_no, message in visitor.violations:

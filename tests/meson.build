@@ -257,6 +257,12 @@ foreach test_name : test_names
   # Set FASTLED_TEST_WRAPPER=1 to enable wrapper with stack dumping
   use_wrapper = get_option('test_wrapper')
 
+  # Build per-test environment: inherit shared PATH and set runner watchdog
+  # timeout to match the meson timeout (runner defaults to 20s otherwise).
+  this_test_env = environment()
+  this_test_env.prepend('PATH', fastled_lib_dir)
+  this_test_env.set('FASTLED_TEST_TIMEOUT', test_timeout.to_string())
+
   if use_wrapper
     # Use Python wrapper for deadlock detection with stack traces
     test(test_name, python_exe,
@@ -270,7 +276,7 @@ foreach test_name : test_names
       depends: [test_dll],
       is_parallel: not is_serial,
       timeout: test_timeout,
-      env: test_env,
+      env: this_test_env,
     )
   else
     # Direct test execution (Meson handles timeout, but no stack dumps)
@@ -280,7 +286,7 @@ foreach test_name : test_names
       depends: [test_dll],
       is_parallel: not is_serial,
       timeout: test_timeout,
-      env: test_env,
+      env: this_test_env,
     )
   endif
 endforeach

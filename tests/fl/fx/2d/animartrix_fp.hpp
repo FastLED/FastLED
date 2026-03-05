@@ -9,7 +9,7 @@
 #include "fl/fx/2d/animartrix.hpp"
 #include "fl/stl/unique_ptr.h"
 #include "fl/xymap.h"
-#include <stdio.h>  // ok include: needed for debug output
+#include "fl/stl/stdio.h"
 
 using namespace fl;
 
@@ -152,9 +152,9 @@ FL_TEST_CASE("animartrix_fp - float vs fixed-point all vizs") {
     int catastrophic = 0;
     int warn_count = 0;
 
-    fprintf(stderr, "\n=== Float vs Fixed-Point Accuracy (t=%u, %dx%d) ===\n", t, W, H);
-    fprintf(stderr, "%-25s %9s %9s %s\n", "Visualization", "MaxErr", "AvgErr", "Status");
-    fprintf(stderr, "%-25s %9s %9s %s\n", "-------------------------", "---------", "---------", "------");
+    fl::printf("\n=== Float vs Fixed-Point Accuracy (t=%u, %dx%d) ===\n", t, W, H);
+    fl::printf("%-25s %9s %9s %s\n", "Visualization", "MaxErr", "AvgErr", "Status");
+    fl::printf("%-25s %9s %9s %s\n", "-------------------------", "---------", "---------", "------");
 
     for (int i = 0; i < kEntryCount; i++) {
         const FPCompareEntry &e = kEntries[i];
@@ -176,19 +176,19 @@ FL_TEST_CASE("animartrix_fp - float vs fixed-point all vizs") {
             warn_count++;
         }
 
-        fprintf(stderr, "%-25s %9d %9.2f %s\n",
+        fl::printf("%-25s %9d %9.2f %s\n",
                 e.name, cr.max_error, cr.avg_error, status);
 
         flt.reset();
         fp.reset();
     }
 
-    fprintf(stderr, "\nSummary: %d OK, %d WARN, %d FAIL out of %d vizs\n",
+    fl::printf("\nSummary: %d OK, %d WARN, %d FAIL out of %d vizs\n",
             kEntryCount - warn_count - catastrophic, warn_count, catastrophic, kEntryCount);
     fflush(stderr);
 
     if (catastrophic > 0) {
-        fprintf(stderr, "FAIL: %d vizs exceeded catastrophic threshold "
+        fl::printf("FAIL: %d vizs exceeded catastrophic threshold "
                 "(max_error>%d or avg_error>%.0f)\n",
                 catastrophic, MAX_ERROR_LIMIT, AVG_ERROR_LIMIT);
         fflush(stderr);

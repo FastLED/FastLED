@@ -10,7 +10,7 @@
 #include "fl/fx/2d/animartrix.hpp"
 #include "fl/fx/2d/animartrix_detail/viz/chasing_spirals.h"
 #include "fl/xymap.h"
-#include <stdio.h>  // ok include: needed for debug output
+#include "fl/stl/stdio.h"
 
 using namespace fl;
 
@@ -81,29 +81,29 @@ ErrorStats analyze_errors(const CRGB *float_leds, const CRGB *q31_leds, int coun
 }
 
 void print_error_stats(const ErrorStats &stats, const char *test_name) {
-    fprintf(stderr, "\n=== %s ===\n", test_name);
-    fprintf(stderr, "Total pixels: %d\n", stats.total_pixels);
-    fprintf(stderr, "Pixels with error: %d (%.1f%%)\n",
+    fl::printf("\n=== %s ===\n", test_name);
+    fl::printf("Total pixels: %d\n", stats.total_pixels);
+    fl::printf("Pixels with error: %d (%.1f%%)\n",
             stats.pixels_with_error,
             100.0 * stats.pixels_with_error / stats.total_pixels);
-    fprintf(stderr, "Max error: %d (%.1f%%)\n", stats.max_error, 100.0 * stats.max_error / 255);
-    fprintf(stderr, "Avg error: %.2f\n", stats.avg_error);
-    fprintf(stderr, "Std dev: %.2f\n", stats.std_dev);
-    fprintf(stderr, "\nError distribution:\n");
-    fprintf(stderr, "  >1 LSB (>1):  %d pixels (%.1f%%)\n",
+    fl::printf("Max error: %d (%.1f%%)\n", stats.max_error, 100.0 * stats.max_error / 255);
+    fl::printf("Avg error: %.2f\n", stats.avg_error);
+    fl::printf("Std dev: %.2f\n", stats.std_dev);
+    fl::printf("\nError distribution:\n");
+    fl::printf("  >1 LSB (>1):  %d pixels (%.1f%%)\n",
             stats.pixels_over_1bit,
             100.0 * stats.pixels_over_1bit / stats.total_pixels);
-    fprintf(stderr, "  >2 LSB (>2):  %d pixels (%.1f%%)\n",
+    fl::printf("  >2 LSB (>2):  %d pixels (%.1f%%)\n",
             stats.pixels_over_2bit,
             100.0 * stats.pixels_over_2bit / stats.total_pixels);
-    fprintf(stderr, "  >4 LSB (>4):  %d pixels (%.1f%%)\n",
+    fl::printf("  >4 LSB (>4):  %d pixels (%.1f%%)\n",
             stats.pixels_over_4bit,
             100.0 * stats.pixels_over_4bit / stats.total_pixels);
 
-    fprintf(stderr, "\nHistogram (first 20 buckets):\n");
+    fl::printf("\nHistogram (first 20 buckets):\n");
     for (int i = 0; i < 20 && i <= stats.max_error; i++) {
         if (stats.histogram[i] > 0) {
-            fprintf(stderr, "  Error=%2d: %4d pixels (%.1f%%)\n",
+            fl::printf("  Error=%2d: %4d pixels (%.1f%%)\n",
                     i, stats.histogram[i],
                     100.0 * stats.histogram[i] / stats.total_pixels);
         }
@@ -166,19 +166,19 @@ FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000)") {
     // Assertions
     // ========================
     if (stats.max_error > 10) {
-        fprintf(stderr, "FAIL: Max error %d exceeds threshold of 10\n", stats.max_error);
+        fl::printf("FAIL: Max error %d exceeds threshold of 10\n", stats.max_error);
         fflush(stderr);
     }
     FL_ASSERT(stats.max_error <= 10, "Max error exceeded threshold");
 
     if (stats.avg_error > 3.0) {
-        fprintf(stderr, "FAIL: Avg error %.2f exceeds threshold of 3.0\n", stats.avg_error);
+        fl::printf("FAIL: Avg error %.2f exceeds threshold of 3.0\n", stats.avg_error);
         fflush(stderr);
     }
     FL_ASSERT(stats.avg_error <= 3.0, "Average error exceeded threshold");
 
     if (stats.pixels_over_4bit >= N / 10) {
-        fprintf(stderr, "FAIL: %.1f%% of pixels have >4 LSB error (threshold: 10%%)\n",
+        fl::printf("FAIL: %.1f%% of pixels have >4 LSB error (threshold: 10%%)\n",
                 100.0 * stats.pixels_over_4bit / N);
         fflush(stderr);
     }
@@ -240,13 +240,13 @@ FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000000)") {
     // Assertions
     // ========================
     if (stats.max_error > 20) {
-        fprintf(stderr, "FAIL: Max error %d exceeds threshold of 20\n", stats.max_error);
+        fl::printf("FAIL: Max error %d exceeds threshold of 20\n", stats.max_error);
         fflush(stderr);
     }
     FL_ASSERT(stats.max_error <= 20, "Max error exceeded threshold");
 
     if (stats.avg_error > 5.0) {
-        fprintf(stderr, "FAIL: Avg error %.2f exceeds threshold of 5.0\n", stats.avg_error);
+        fl::printf("FAIL: Avg error %.2f exceeds threshold of 5.0\n", stats.avg_error);
         fflush(stderr);
     }
     FL_ASSERT(stats.avg_error <= 5.0, "Average error exceeded threshold");
@@ -293,8 +293,8 @@ FL_TEST_CASE("chasing_spirals - float vs q31 sample pixels") {
     }
 
     // Print sample pixels to see error patterns
-    fprintf(stderr, "\n=== Sample Pixel Comparison ===\n");
-    fprintf(stderr, "Format: (x,y) Float RGB -> Q31 RGB (Error: R G B)\n\n");
+    fl::printf("\n=== Sample Pixel Comparison ===\n");
+    fl::printf("Format: (x,y) Float RGB -> Q31 RGB (Error: R G B)\n\n");
 
     for (int i = 0; i < 10; i++) {
         int idx = (N / 10) * i;  // Sample evenly across grid
@@ -308,7 +308,7 @@ FL_TEST_CASE("chasing_spirals - float vs q31 sample pixels") {
         int g_err = static_cast<int>(f.g) - static_cast<int>(q.g);
         int b_err = static_cast<int>(f.b) - static_cast<int>(q.b);
 
-        fprintf(stderr, "(%2d,%2d) (%3d,%3d,%3d) -> (%3d,%3d,%3d)  Err:(%+4d,%+4d,%+4d)\n",
+        fl::printf("(%2d,%2d) (%3d,%3d,%3d) -> (%3d,%3d,%3d)  Err:(%+4d,%+4d,%+4d)\n",
                 x, y, f.r, f.g, f.b, q.r, q.g, q.b, r_err, g_err, b_err);
     }
     fflush(stderr);

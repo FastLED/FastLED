@@ -3,8 +3,10 @@
 /// Includes all implementation files in alphabetical order
 
 #include "fl/codec/gif.cpp.hpp"
+#include "fl/codec/h264.cpp.hpp"
 #include "fl/codec/jpeg.cpp.hpp"
 #include "fl/codec/mp3.cpp.hpp"
+#include "fl/codec/mp4_parser.cpp.hpp"
 #include "fl/codec/mpeg1.cpp.hpp"
 #include "fl/codec/pixel.cpp.hpp"
 #include "fl/codec/vorbis.cpp.hpp"

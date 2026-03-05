@@ -28,24 +28,30 @@
 
 using namespace fl;
 
-// Try binding on several ports to avoid TIME_WAIT collisions from parallel tests.
-static uint16_t findOpenPort(fl::shared_ptr<HttpStreamServer>& server) {
-    // Spread across a wide range to minimize collision probability.
-    static constexpr uint16_t kPorts[] = {59901, 59911, 59921, 59931, 59941,
-                                          59951, 59961, 59971, 59981, 59991};
-    for (uint16_t port : kPorts) {
-        server = fl::make_shared<HttpStreamServer>(port);
-        if (server->connect()) {
-            return port;
-        }
-    }
-    return 0;
+// Pick a random ephemeral port seeded with the current time to avoid
+// collisions with other test processes or TIME_WAIT sockets.
+static uint16_t randomPort() {
+    uint32_t seed = static_cast<uint32_t>(fl::millis());
+    // Simple LCG — only need a reasonable spread, not crypto quality.
+    seed = seed * 1103515245u + 12345u;
+    // Ephemeral range 49152-65535 (IANA dynamic/private ports)
+    return static_cast<uint16_t>(49152 + (seed % (65535 - 49152 + 1)));
 }
 
-
 FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
+    // Try random ports seeded with current time until one binds.
+    uint16_t PORT = 0;
     fl::shared_ptr<HttpStreamServer> server_transport;
-    uint16_t PORT = findOpenPort(server_transport);
+    for (int attempt = 0; attempt < 20; ++attempt) {
+        uint16_t candidate = randomPort();
+        auto st = fl::make_shared<HttpStreamServer>(candidate);
+        if (st->connect()) {
+            PORT = st->port();
+            server_transport = st;
+            break;
+        }
+    }
+    FL_REQUIRE(server_transport);
     FL_REQUIRE(PORT != 0);
 
     fl::Remote server_remote(

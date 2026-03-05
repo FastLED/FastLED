@@ -9,6 +9,7 @@
 #include "fl/stl/move.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/span.h"
+#include "fl/remote/rpc/base64.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -215,6 +216,51 @@ struct JsonToType<fl::vector<T>, void> {
         }
 
         return fl::make_tuple(fl::move(vec), result);
+    }
+};
+
+// fl::vector<fl::u8> specialization - accepts base64 string OR integer array.
+// Base64 strings provide compact binary transport for JSON-RPC.
+template <>
+struct JsonToType<fl::vector<fl::u8>, void> {
+    static fl::tuple<fl::vector<fl::u8>, TypeConversionResult> convert(const Json& j) {
+        TypeConversionResult result;
+
+        if (j.is_string()) {
+            // Decode base64 string to binary
+            fl::string encoded;
+            auto strResult = JsonToType<fl::string>::convert(j);
+            encoded = fl::get<0>(strResult);
+            TypeConversionResult strConvResult = fl::get<1>(strResult);
+            if (strConvResult.hasError()) {
+                return fl::make_tuple(fl::vector<fl::u8>(), strConvResult);
+            }
+            fl::vector<fl::u8> decoded = fl::base64_decode(encoded);
+            if (decoded.empty() && !encoded.empty()) {
+                result.setError("invalid base64 string");
+                return fl::make_tuple(fl::vector<fl::u8>(), result);
+            }
+            return fl::make_tuple(fl::move(decoded), result);
+        }
+
+        if (j.is_array()) {
+            // Fall back to integer array
+            fl::vector<fl::u8> vec;
+            for (fl::size i = 0; i < j.size(); i++) {
+                auto elemResult = JsonToType<fl::u8>::convert(j[i]);
+                fl::u8 elem = fl::get<0>(elemResult);
+                TypeConversionResult elemConvResult = fl::get<1>(elemResult);
+                if (elemConvResult.hasError()) {
+                    result.setError("element " + fl::to_string(static_cast<fl::i64>(i)) + ": " + elemConvResult.errorMessage());
+                    return fl::make_tuple(fl::vector<fl::u8>(), result);
+                }
+                vec.push_back(elem);
+            }
+            return fl::make_tuple(fl::move(vec), result);
+        }
+
+        result.setError("expected base64 string or integer array for byte vector");
+        return fl::make_tuple(fl::vector<fl::u8>(), result);
     }
 };
 

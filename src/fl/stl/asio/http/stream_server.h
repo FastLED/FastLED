@@ -39,6 +39,10 @@ public:
 
     // Server-specific methods
 
+    /// Get actual listening port (useful when constructed with port 0)
+    /// @return Actual port number
+    u16 port() const;
+
     /// Accept new client connections (non-blocking)
     /// Call this in update loop to accept new clients
     void acceptClients();

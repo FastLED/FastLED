@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""PARLIO sweep test for ESP32-C6 - tests multiple LED strip sizes and lane configurations.
+"""Driver sweep test — tests multiple LED strip sizes and lane configurations.
 
-This script connects to an already-flashed ESP32-C6 running the Validation.ino
-sketch and runs a comprehensive test matrix via JSON-RPC:
+This script connects to an already-flashed device running the Validation.ino
+sketch and runs a comprehensive test matrix via JSON-RPC for any driver type.
 
 Test matrix:
   - LED counts: 1, 10, 25, 50, 75, 100 (finer granularity for threshold detection)
@@ -11,20 +11,19 @@ Test matrix:
   - 4-lane: asymmetric sizes (100%, 90%, 75%, 50%)
 
 Usage:
-    # First compile and upload Validation sketch to ESP32-C6:
-    bash validate esp32c6 --parlio --legacy --skip-lint  # (or let this script handle it)
-
-    # Then run the sweep test on the already-flashed device:
-    uv run python ci/validate_parlio_sweep.py
+    # Run sweep for a specific driver:
+    uv run python -m ci.validate.driver_sweep --driver PARLIO
+    uv run python -m ci.validate.driver_sweep --driver RMT
+    uv run python -m ci.validate.driver_sweep --driver SPI
 
     # With explicit port:
-    uv run python ci/validate_parlio_sweep.py --port COM5
+    uv run python -m ci.validate.driver_sweep --driver PARLIO --port COM5
 
     # Skip compile/upload (device already flashed):
-    uv run python ci/validate_parlio_sweep.py --skip-flash
+    uv run python -m ci.validate.driver_sweep --driver RMT --skip-flash
 
     # Verbose mode:
-    uv run python ci/validate_parlio_sweep.py --verbose
+    uv run python -m ci.validate.driver_sweep --driver PARLIO --verbose
 """
 
 from __future__ import annotations
@@ -37,15 +36,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-
-# Add project root to path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))  # noqa: SPI001
-
 from ci.rpc_client import RpcClient, RpcCrashError, RpcTimeoutError
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.port_utils import auto_detect_upload_port
 from ci.util.serial_interface import create_serial_interface
+
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 
 @dataclass
@@ -82,12 +79,15 @@ class TestResult:
     raw_response: dict[str, Any] | None = None
 
 
-def build_test_matrix() -> list[TestCase]:
+def build_test_matrix(driver: str) -> list[TestCase]:
     """Build the full test matrix: sizes x lanes x lane counts (1, 2, 4).
 
     Uses finer granularity LED counts (1, 10, 25, 50, 75, 100) to identify
     failure thresholds, especially for multi-lane configurations on
-    memory-constrained devices like ESP32-C6.
+    memory-constrained devices.
+
+    Args:
+        driver: Driver name (e.g. "PARLIO", "RMT", "SPI", "I2S")
     """
     base_sizes = [1, 10, 25, 50, 75, 100]
     cases: list[TestCase] = []
@@ -100,6 +100,7 @@ def build_test_matrix() -> list[TestCase]:
                 lane_count=1,
                 lane_sizes=[base_size],
                 use_legacy_api=True,
+                driver=driver,
             )
         )
 
@@ -111,6 +112,7 @@ def build_test_matrix() -> list[TestCase]:
                     lane_count=1,
                     lane_sizes=[base_size],
                     use_legacy_api=False,
+                    driver=driver,
                 )
             )
 
@@ -126,6 +128,7 @@ def build_test_matrix() -> list[TestCase]:
                 lane_count=2,
                 lane_sizes=[base_size, lane2_size],
                 use_legacy_api=False,
+                driver=driver,
             )
         )
 
@@ -136,6 +139,7 @@ def build_test_matrix() -> list[TestCase]:
                 lane_count=2,
                 lane_sizes=[base_size, lane2_size],
                 use_legacy_api=True,
+                driver=driver,
             )
         )
 
@@ -150,6 +154,7 @@ def build_test_matrix() -> list[TestCase]:
                 lane_count=4,
                 lane_sizes=lane_sizes_4,
                 use_legacy_api=False,
+                driver=driver,
             )
         )
 
@@ -160,6 +165,7 @@ def build_test_matrix() -> list[TestCase]:
                 lane_count=4,
                 lane_sizes=lane_sizes_4,
                 use_legacy_api=True,
+                driver=driver,
             )
         )
 
@@ -168,24 +174,26 @@ def build_test_matrix() -> list[TestCase]:
 
 async def run_sweep(
     port: str,
+    driver: str,
     verbose: bool = False,
     timeout: float = 120.0,
 ) -> list[TestResult]:
-    """Run the full PARLIO sweep test matrix on the device.
+    """Run the full sweep test matrix on the device.
 
     Args:
         port: Serial port path
+        driver: Driver name (e.g. "PARLIO", "RMT", "SPI")
         verbose: Enable verbose RPC output
         timeout: Per-test timeout in seconds
 
     Returns:
         List of TestResult objects
     """
-    test_matrix = build_test_matrix()
+    test_matrix = build_test_matrix(driver)
     results: list[TestResult] = []
 
     print(f"\n{'=' * 70}")
-    print(f"  PARLIO Sweep Test - ESP32-C6")
+    print(f"  {driver} Sweep Test")
     print(f"  {len(test_matrix)} test configurations")
     print(f"  Port: {port}")
     print(f"{'=' * 70}")
@@ -426,10 +434,10 @@ def print_summary(results: list[TestResult]) -> None:
 
     # Header
     print(
-        f"  {'#':<3} {'Status':<8} {'Lanes':<6} {'Base':<6} {'Sizes':<15} {'API':<8} {'Tests':<10} {'Time':<10} {'Error'}"
+        f"  {'#':<3} {'Status':<8} {'Driver':<10} {'Lanes':<6} {'Base':<6} {'Sizes':<15} {'API':<8} {'Tests':<10} {'Time':<10} {'Error'}"
     )
     print(
-        f"  {'-' * 3} {'-' * 8} {'-' * 6} {'-' * 6} {'-' * 15} {'-' * 8} {'-' * 10} {'-' * 10} {'-' * 20}"
+        f"  {'-' * 3} {'-' * 8} {'-' * 10} {'-' * 6} {'-' * 6} {'-' * 15} {'-' * 8} {'-' * 10} {'-' * 10} {'-' * 20}"
     )
 
     passed_count = 0
@@ -450,7 +458,7 @@ def print_summary(results: list[TestResult]) -> None:
             failed_count += 1
 
         print(
-            f"  {i:<3} {status:<8} {tc.lane_count:<6} {tc.base_led_count:<6} {sizes_str:<15} {api:<8} {tests_str:<10} {time_str:<10} {error_str}"
+            f"  {i:<3} {status:<8} {tc.driver:<10} {tc.lane_count:<6} {tc.base_led_count:<6} {sizes_str:<15} {api:<8} {tests_str:<10} {time_str:<10} {error_str}"
         )
 
     print()
@@ -461,9 +469,7 @@ def print_summary(results: list[TestResult]) -> None:
         print(f"\n  FAILED TESTS:")
         for i, r in enumerate(results, 1):
             if not r.passed:
-                tc = r.test_case
-                sizes_str = ",".join(str(s) for s in tc.lane_sizes)
-                print(f"    [{i}] {tc.label}: {r.error}")
+                print(f"    [{i}] {r.test_case.label}: {r.error}")
 
     print()
     if failed_count == 0:
@@ -475,7 +481,13 @@ def print_summary(results: list[TestResult]) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="PARLIO sweep test for ESP32-C6 - tests multiple sizes and lane configs"
+        description="Driver sweep test — tests multiple LED strip sizes and lane configurations for any driver"
+    )
+    parser.add_argument(
+        "--driver",
+        type=str,
+        required=True,
+        help="Driver to test (e.g., PARLIO, RMT, SPI, I2S, UART, LCD_RGB)",
     )
     parser.add_argument(
         "--port",
@@ -501,25 +513,23 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    driver = args.driver.upper()
+
     # Detect port
     port: str = args.port or ""
     if not port:
         print("Auto-detecting serial port...")
         result = auto_detect_upload_port()
         if not result.ok:
-            print(
-                "ERROR: No USB serial port found. Plug in the ESP32-C6 or use --port."
-            )
+            print("ERROR: No USB serial port found. Plug in the device or use --port.")
             return 1
         port = str(result.selected_port)
         print(f"Found: {port}")
 
     # Optionally compile and upload
     if not args.skip_flash:
-        print("\nCompiling and uploading Validation sketch to ESP32-C6...")
+        print(f"\nCompiling and uploading Validation sketch...")
         print("(Use --skip-flash to skip this step if already flashed)\n")
-        # Use bash validate to compile and upload, but skip the test phase
-        # We just need the firmware on the device
         compile_cmd = [
             "bash",
             "compile",
@@ -528,13 +538,15 @@ def main() -> int:
             "Validation",
         ]
         print(f"Running: {' '.join(compile_cmd)}")
-        compile_result = subprocess.run(compile_cmd, cwd=str(project_root))
+        compile_result = subprocess.run(compile_cmd, cwd=str(PROJECT_ROOT))
         if compile_result.returncode != 0:
             print(f"ERROR: Compile failed with exit code {compile_result.returncode}")
             return 1
 
     # Run the sweep test
-    results = asyncio.run(run_sweep(port, verbose=args.verbose, timeout=args.timeout))
+    results = asyncio.run(
+        run_sweep(port, driver=driver, verbose=args.verbose, timeout=args.timeout)
+    )
 
     # Print summary
     print_summary(results)

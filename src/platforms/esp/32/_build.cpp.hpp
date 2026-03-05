@@ -16,6 +16,7 @@
 
 // Subdirectory implementations (alphabetical order)
 #include "platforms/esp/32/audio/_build.cpp.hpp"
+#include "platforms/esp/32/codec/_build.cpp.hpp"
 #include "platforms/esp/32/core/_build.cpp.hpp"
 #include "platforms/esp/32/drivers/_build.cpp.hpp"
 #include "platforms/esp/32/interrupts/_build.cpp.hpp"

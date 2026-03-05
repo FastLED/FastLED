@@ -84,9 +84,10 @@ from ci.util.port_utils import (
     environment_has_wifi,
     kill_port_users,
 )
-from ci.validate_ble import run_ble_validation
-from ci.validate_net import run_net_loopback_validation, run_net_validation
-from ci.validate_ota import run_ota_validation
+from ci.validate.ble import run_ble_validation
+from ci.validate.decode import run_decode_validation
+from ci.validate.net import run_net_loopback_validation, run_net_validation
+from ci.validate.ota import run_ota_validation
 
 
 # Try to import fbuild ledger for cached chip detection
@@ -600,6 +601,9 @@ class Args:
     # Parallel driver testing
     parallel: bool
 
+    # Decode validation mode (host-only, no device needed)
+    decode: str | None
+
     @staticmethod
     def parse_args() -> "Args":
         """Parse command-line arguments and return Args dataclass instance."""
@@ -783,6 +787,19 @@ See Also:
             "--ble",
             action="store_true",
             help="ESP32 starts BLE GATT server; host connects via Bleak and validates ping/pong",
+        )
+
+        # Decode validation mode (host-only)
+        decode_group = parser.add_argument_group(
+            "Decode Validation (host-only)",
+            "Test codec decoding of a local file or URL. No device needed.",
+        )
+        decode_group.add_argument(
+            "--decode",
+            type=str,
+            default=None,
+            metavar="PATH_OR_URL",
+            help="Decode a media file (local path or URL). Supported: .mp4 .mpeg .mpg .gif .jpg .jpeg .mp3 .webp",
         )
 
         # Standard options
@@ -997,6 +1014,7 @@ See Also:
             ota=parsed.ota,
             ble=parsed.ble,
             parallel=parsed.parallel,
+            decode=parsed.decode,
         )
 
 
@@ -1245,6 +1263,28 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
 
     # BLE validation mode
     ble_mode = args.ble
+
+    # Decode validation mode (host-only)
+    decode_mode = args.decode is not None
+
+    # Short-circuit: --decode is host-only, bypass all device logic
+    if decode_mode:
+        any_device_mode = (
+            bool(drivers)
+            or simd_test_mode
+            or net_server_mode
+            or net_client_mode
+            or net_loopback_mode
+            or ota_mode
+            or ble_mode
+        )
+        if any_device_mode:
+            print(
+                f"{Fore.RED}❌ Error: --decode cannot be combined with driver flags, --simd, --net, --ota, or --ble{Style.RESET_ALL}"
+            )
+            return 1
+        assert args.decode is not None  # narrowed by decode_mode check
+        return await run_decode_validation(args.decode)
 
     # Validate mutual exclusivity of net/ota/ble modes with driver modes
     if (

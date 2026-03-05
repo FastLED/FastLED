@@ -3,6 +3,7 @@
 #include "fl/stl/json.h"
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
+#include "fl/remote/rpc/base64.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -32,6 +33,15 @@ template <>
 struct TypeToJson<fl::json> {
     static json convert(const json& value) {
         return value;
+    }
+};
+
+// fl::vector<fl::u8> specialization - encodes binary data as base64 string.
+template <>
+struct TypeToJson<fl::vector<fl::u8>> {
+    static Json convert(const fl::vector<fl::u8>& value) {
+        fl::string encoded = fl::base64_encode(value);
+        return Json(encoded.c_str());
     }
 };
 

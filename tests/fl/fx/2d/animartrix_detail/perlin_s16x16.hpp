@@ -4,7 +4,7 @@
 
 #include "test.h"
 #include "fl/fx/2d/animartrix_detail.h"
-#include <stdio.h>  // ok include: needed for fprintf debug output
+#include "fl/stl/stdio.h"
 
 namespace fl {
 
@@ -49,15 +49,15 @@ FL_TEST_CASE("perlin_s16x16 - scalar vs SIMD single point") {
     fl::i32 simd_result = static_cast<fl::i32>(fl::simd::extract_u32_4(simd_vec, 0));
 
     // Print results for debugging
-    fprintf(stderr, "\n=== Perlin s16x16 Test (nx=%d, ny=%d) ===\n", nx, ny);
-    fprintf(stderr, "Scalar result: %d\n", scalar_result);
-    fprintf(stderr, "SIMD result:   %d\n", simd_result);
-    fprintf(stderr, "Difference:    %d\n", simd_result - scalar_result);
+    fl::printf("\n=== Perlin s16x16 Test (nx=%d, ny=%d) ===\n", nx, ny);
+    fl::printf("Scalar result: %d\n", scalar_result);
+    fl::printf("SIMD result:   %d\n", simd_result);
+    fl::printf("Difference:    %d\n", simd_result - scalar_result);
     fflush(stderr);
 
     // They should match exactly
     if (scalar_result != simd_result) {
-        fprintf(stderr, "❌ FAILURE: SIMD result does not match scalar! Scalar=%d, SIMD=%d, diff=%d\n",
+        fl::printf("❌ FAILURE: SIMD result does not match scalar! Scalar=%d, SIMD=%d, diff=%d\n",
                 scalar_result, simd_result, simd_result - scalar_result);
         fflush(stderr);
         FL_ASSERT(false, "SIMD result does not match scalar");
@@ -84,21 +84,21 @@ FL_TEST_CASE("perlin_s16x16 - scalar vs SIMD batch") {
     fl::simd::simd_u32x4 simd_vec = perlin_s16x16_simd::pnoise2d_raw_simd4_vec(
         nx_vec, ny_vec, fade_lut, perm_table);
 
-    fprintf(stderr, "\n=== Perlin s16x16 Batch Test ===\n");
+    fl::printf("\n=== Perlin s16x16 Batch Test ===\n");
     for (int i = 0; i < 4; i++) {
         // Compute scalar result for comparison
         fl::i32 scalar_result = perlin_s16x16::pnoise2d_raw(nx_batch[i], ny_batch[i], fade_lut, perm_table);
         fl::i32 simd_result = static_cast<fl::i32>(fl::simd::extract_u32_4(simd_vec, i));
 
-        fprintf(stderr, "Point %d: nx=%d, ny=%d\n", i, nx_batch[i], ny_batch[i]);
-        fprintf(stderr, "  Scalar: %d (expected: %d)\n", scalar_result, expected[i]);
-        fprintf(stderr, "  SIMD:   %d\n", simd_result);
-        fprintf(stderr, "  Diff:   %d\n", simd_result - scalar_result);
+        fl::printf("Point %d: nx=%d, ny=%d\n", i, nx_batch[i], ny_batch[i]);
+        fl::printf("  Scalar: %d (expected: %d)\n", scalar_result, expected[i]);
+        fl::printf("  SIMD:   %d\n", simd_result);
+        fl::printf("  Diff:   %d\n", simd_result - scalar_result);
         fflush(stderr);
 
         // Verify scalar matches expected
         if (scalar_result != expected[i]) {
-            fprintf(stderr, "❌ Point %d: Scalar result %d does not match expected %d\n",
+            fl::printf("❌ Point %d: Scalar result %d does not match expected %d\n",
                     i, scalar_result, expected[i]);
             fflush(stderr);
             FL_ASSERT(false, "Scalar result does not match expected");
@@ -106,7 +106,7 @@ FL_TEST_CASE("perlin_s16x16 - scalar vs SIMD batch") {
 
         // Verify SIMD matches scalar
         if (scalar_result != simd_result) {
-            fprintf(stderr, "❌ Point %d: SIMD result %d does not match scalar %d (diff=%d)\n",
+            fl::printf("❌ Point %d: SIMD result %d does not match scalar %d (diff=%d)\n",
                     i, simd_result, scalar_result, simd_result - scalar_result);
             fflush(stderr);
             FL_ASSERT(false, "SIMD result does not match scalar");
@@ -135,7 +135,7 @@ FL_TEST_CASE("perlin_s16x16 - various coordinates") {
         {3155921, 3313496, "Bug trigger case"},
     };
 
-    fprintf(stderr, "\n=== Perlin s16x16 Various Coordinates Test ===\n");
+    fl::printf("\n=== Perlin s16x16 Various Coordinates Test ===\n");
 
     for (size_t i = 0; i < sizeof(tests) / sizeof(tests[0]); i++) {
         fl::i32 nx = tests[i].nx;
@@ -153,19 +153,19 @@ FL_TEST_CASE("perlin_s16x16 - various coordinates") {
             nx_vec, ny_vec, fade_lut, perm_table);
         fl::i32 simd_result = static_cast<fl::i32>(fl::simd::extract_u32_4(simd_vec, 0));
 
-        fprintf(stderr, "Test %zu: %s (nx=%d, ny=%d)\n", i, tests[i].desc, nx, ny);
-        fprintf(stderr, "  Scalar: %d\n", scalar_result);
-        fprintf(stderr, "  SIMD:   %d\n", simd_result);
+        fl::printf("Test %zu: %s (nx=%d, ny=%d)\n", i, tests[i].desc, nx, ny);
+        fl::printf("  Scalar: %d\n", scalar_result);
+        fl::printf("  SIMD:   %d\n", simd_result);
 
         if (scalar_result != simd_result) {
-            fprintf(stderr, "  ❌ MISMATCH! Diff=%d\n", simd_result - scalar_result);
+            fl::printf("  ❌ MISMATCH! Diff=%d\n", simd_result - scalar_result);
         } else {
-            fprintf(stderr, "  ✓ Match\n");
+            fl::printf("  ✓ Match\n");
         }
         fflush(stderr);
 
         if (scalar_result != simd_result) {
-            fprintf(stderr, "❌ Test %zu (%s): SIMD result %d does not match scalar %d\n",
+            fl::printf("❌ Test %zu (%s): SIMD result %d does not match scalar %d\n",
                     i, tests[i].desc, simd_result, scalar_result);
             fflush(stderr);
             FL_ASSERT(false, "SIMD result does not match scalar");

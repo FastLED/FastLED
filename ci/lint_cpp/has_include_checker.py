@@ -8,11 +8,7 @@ This prevents compilation errors when FL_HAS_INCLUDE is used without the proper 
 import sys
 from pathlib import Path
 
-
-# Add parent directory to path to import fix_has_include
-sys.path.insert(0, str(Path(__file__).parent.parent))  # noqa: SPI001
-
-from fix_has_include import check_has_include, find_files_using_macro  # type: ignore
+from ci.fix_has_include import check_has_include, find_files_using_macro
 
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent.resolve()

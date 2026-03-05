@@ -20,7 +20,7 @@ from colorama import Fore, Style
 
 from ci.rpc_client import RpcClient, RpcTimeoutError
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
-from ci.validate_net import create_wifi_manager
+from ci.validate.net import create_wifi_manager
 
 
 if TYPE_CHECKING:

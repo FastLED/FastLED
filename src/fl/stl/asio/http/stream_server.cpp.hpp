@@ -52,6 +52,10 @@ bool HttpStreamServer::isConnected() const {
     return mNativeServer && mNativeServer->isListening();
 }
 
+u16 HttpStreamServer::port() const {
+    return mNativeServer ? mNativeServer->port() : 0;
+}
+
 void HttpStreamServer::acceptClients() {
     if (!isConnected()) {
         return;

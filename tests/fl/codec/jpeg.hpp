@@ -3,7 +3,7 @@
 #include "fl/codec/jpeg.h"
 #include "fl/stl/detail/memory_file_handle.h"
 #include "fl/fx/frame.h"
-#include "platforms/stub/fs_stub.hpp"
+#include "platforms/stub/fs_stub.hpp" // ok platform headers
 
 
 // Helper function to set up filesystem for codec tests

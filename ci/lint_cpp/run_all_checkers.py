@@ -60,6 +60,11 @@ from ci.lint_cpp.std_namespace_checker import StdNamespaceChecker
 from ci.lint_cpp.stdint_type_checker import (
     StdintTypeChecker,
 )
+from ci.lint_cpp.test_aggregation_checker import TestAggregationChecker
+from ci.lint_cpp.test_aggregation_checker import check as check_test_aggregation
+from ci.lint_cpp.test_aggregation_checker import (
+    check_single_file as check_test_aggregation_single_file,
+)
 from ci.lint_cpp.test_path_structure_checker import TestPathStructureChecker
 from ci.lint_cpp.test_unity_build import check as check_unity_build
 from ci.lint_cpp.test_unity_build import (
@@ -269,6 +274,7 @@ def create_checkers(
         TestPathStructureChecker(),
         UnitTestChecker(),
         CtypeGlobalChecker(),  # Checks for bare C ctype/cstring functions (use fl:: variants)
+        TestAggregationChecker(),  # Checks that .hpp files in excluded test dirs have parent aggregators
     ]
 
     return checkers_by_scope
@@ -450,6 +456,16 @@ def run_unity_build_check() -> tuple[int, list[str]]:
     """
     result = check_unity_build()
     return (len(result.violations), result.violations)
+
+
+def run_test_aggregation_check() -> tuple[int, list[str]]:
+    """Run test aggregation structure check.
+
+    Returns:
+        (violation_count, violation_messages)
+    """
+    success, violations = check_test_aggregation()
+    return (len(violations), violations)
 
 
 def _convert_violations_to_results(violations: Any) -> CheckerResults:
@@ -689,6 +705,15 @@ def main() -> int:
                     )
                 results["UnityBuildChecker"] = unity_checker_results
 
+        # Run targeted test aggregation check for test .cpp/.hpp files
+        if "/tests/" in str(file_path).replace("\\", "/"):
+            agg_success, agg_violations = check_test_aggregation_single_file(file_path)
+            if not agg_success:
+                agg_results = CheckerResults()
+                for violation in agg_violations:
+                    agg_results.add_violation("test_aggregation", 0, violation)
+                results["TestAggregationChecker"] = agg_results
+
         # Format and print results
         exit_code = format_and_print_results(results)
 
@@ -718,6 +743,14 @@ def main() -> int:
             for violation in unity_violations:
                 unity_results.add_violation("unity_build_structure", 0, violation)
             results["UnityBuildChecker"] = unity_results
+
+        # Run test aggregation structure check
+        agg_count, agg_violations = run_test_aggregation_check()
+        if agg_count > 0:
+            agg_results = CheckerResults()
+            for violation in agg_violations:
+                agg_results.add_violation("test_aggregation", 0, violation)
+            results["TestAggregationChecker"] = agg_results
 
         # Format and print results
         exit_code = format_and_print_results(results)
