@@ -818,6 +818,22 @@ public:
         }
     }
 
+    // Range erase: remove count elements starting at first
+    void erase_range(iterator first, fl::size count) {
+        if (count == 0 || first >= end()) return;
+        if (first + count > end()) count = end() - first;
+        // Move remaining elements forward
+        iterator dst = first;
+        for (iterator src = first + count; src != end(); ++src, ++dst) {
+            *dst = fl::move(*src);
+        }
+        // Clear tail and update size
+        for (iterator it = end() - count; it != end(); ++it) {
+            *it = T();
+        }
+        mSize -= count;
+    }
+
     void swap(vector<T> &other) {
         fl::swap(mArray, other.mArray);
         fl::swap(mSize, other.mSize);

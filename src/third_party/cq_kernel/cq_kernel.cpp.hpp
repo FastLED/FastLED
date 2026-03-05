@@ -33,12 +33,17 @@ void _generate_center_freqs(float freq[], int bands, float fmin, float fmax){
 }
 
 void _generate_hamming(kiss_fft_scalar window[], int N){
+    if (N <= 1) {
+        if (N == 1) window[0] = 1;
+        return;
+    }
     fft_float_t a0 = 0.54;
     for(int i = 0; i < N; i++){
+        fft_float_t val = a0-(1-a0)*FFT_COS(2*M_PI*i/(N-1));
         #ifdef FIXED_POINT  // If fixed_point, represent hamming window with integers
-        window[i] = SAMP_MAX*(a0-(1-a0)*FFT_COS(2*M_PI*i/(N-1)));
+        window[i] = (kiss_fft_scalar)(SAMP_MAX*val);
         #else               // Else if floating point, represent hamming window as-is
-        window[i] = a0-(1-a0)*FFT_COS(2*M_PI*i/(N-1));
+        window[i] = val;
         #endif
     }
 }

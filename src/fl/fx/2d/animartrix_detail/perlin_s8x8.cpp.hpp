@@ -58,7 +58,7 @@ fl::i32 perlin_s8x8::pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
                 grad(perm[BB & 255], x - HP_ONE, y - HP_ONE)));
 
     // Shift from Q8 to s16x16's Q16 format
-    return static_cast<fl::i32>(result) << (fl::s16x16::FRAC_BITS - HP_BITS);
+    return static_cast<fl::i32>(static_cast<fl::u32>(static_cast<fl::i32>(result)) << (fl::s16x16::FRAC_BITS - HP_BITS));
 }
 
 FASTLED_FORCE_INLINE void perlin_s8x8::floor_frac(fl::i32 fp16, int &ifloor,

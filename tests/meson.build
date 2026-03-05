@@ -223,7 +223,7 @@ foreach test_name : test_names
   # Slow tests that need extended timeout (60 seconds) when running in parallel
   # These are typically integration tests, network tests, or computationally intensive tests
   slow_tests = [
-    'fastled',                      # Main integration test
+    'fastled_core',                 # Main integration test
     'fl_fx_2d',                    # 2D animation effects (heavy computation)
     'fl_spi',                      # SPI communication test
     'fl_xypath',                   # XY path computation test

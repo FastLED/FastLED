@@ -331,7 +331,7 @@ class s16x16 {
         i64 frac_part = (acc * t24) >> IFRAC;
         // Convert from 24 frac bits back to 16.
         i32 frac16 = static_cast<i32>(frac_part >> (IFRAC - FRAC_BITS));
-        return from_raw((int_part << FRAC_BITS) + frac16);
+        return from_raw(static_cast<i32>(static_cast<u32>(int_part) << FRAC_BITS) + frac16);
     }
 
     // Fixed-point 2^x. Uses 4-term minimax polynomial for 2^t, t in [0,1).

@@ -107,26 +107,32 @@ char* strerror(int errnum) noexcept {
 // ============================================================================
 
 void* memcpy(void* dest, const void* src, size_t n) noexcept {
+    if (n == 0) return dest;
     return ::memcpy(dest, src, n);
 }
 
 int memcmp(const void* s1, const void* s2, size_t n) noexcept {
+    if (n == 0) return 0;
     return ::memcmp(s1, s2, n);
 }
 
 void* memmove(void* dest, const void* src, size_t n) noexcept {
+    if (n == 0) return dest;
     return ::memmove(dest, src, n);
 }
 
 void* memset(void* s, int c, size_t n) noexcept {
+    if (n == 0) return s;
     return ::memset(s, c, n);
 }
 
 void* memchr(void* s, int c, size_t n) noexcept {
+    if (n == 0) return nullptr;
     return ::memchr(s, c, n);
 }
 
 const void* memchr(const void* s, int c, size_t n) noexcept {
+    if (n == 0) return nullptr;
     return ::memchr(s, c, n);
 }
 

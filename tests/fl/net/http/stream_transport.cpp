@@ -47,7 +47,7 @@ public:
 
         size_t toCopy = (mRecvData.size() < buffer.size()) ? mRecvData.size() : buffer.size();
         fl::memcpy(buffer.data(), mRecvData.data(), toCopy);
-        mRecvData.erase(mRecvData.begin(), mRecvData.begin() + toCopy);
+        mRecvData.erase_range(mRecvData.begin(), toCopy);
         return static_cast<int>(toCopy);
     }
 
