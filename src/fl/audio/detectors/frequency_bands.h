@@ -4,6 +4,7 @@
 #include "fl/fft.h"
 #include "fl/filter.h"
 #include "fl/stl/function.h"
+#include "fl/stl/shared_ptr.h"
 
 namespace fl {
 
@@ -45,6 +46,10 @@ public:
 
     int getSampleRate() const { return mSampleRate; }
 
+    // Diagnostic counters
+    static int getPrivateFFTCount();
+    static void resetPrivateFFTCount();
+
 private:
     int mSampleRate = 44100;
     float mBass;
@@ -72,9 +77,8 @@ private:
     float mMidNorm = 0.0f;
     float mTrebleNorm = 0.0f;
 
-    // Own FFT instance for computing with the correct frequency range
-    FFT mFFT;
-    FFTBins mFFTBins;
+    // Retained FFT from context (keeps shared_ptr alive during update)
+    shared_ptr<const FFTBins> mRetainedFFT;
 
     float calculateBandEnergy(const FFTBins& fft, float minFreq, float maxFreq,
                               float fftMinFreq, float fftMaxFreq);

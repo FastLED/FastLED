@@ -12,6 +12,7 @@ class AudioSample;  // IWYU pragma: keep
 
 class FFTBins {
     friend class FFTContext;
+    friend class AudioContext;
 
   public:
     FFTBins(fl::size n) : mBands(n) {

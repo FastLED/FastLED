@@ -9,6 +9,10 @@
 
 namespace fl {
 
+static int sVibeFFTCount = 0;
+int VibeDetector::getPrivateFFTCount() { return sVibeFFTCount; }
+void VibeDetector::resetPrivateFFTCount() { sVibeFFTCount = 0; }
+
 namespace {
 
 // FFT configuration: 64 CQ bins from 20-11025 Hz for good resolution
@@ -28,7 +32,6 @@ const float kVibeBandBounds[4] = {20.0f, 3650.0f, 7350.0f, 11025.0f};
 } // namespace
 
 VibeDetector::VibeDetector()
-    : mFFTBins(kVibeNumBins)
 {}
 
 VibeDetector::~VibeDetector() = default;
@@ -41,13 +44,14 @@ void VibeDetector::update(shared_ptr<AudioContext> context) {
     mFrameCount++;
     mSampleRate = context->getSampleRate();
 
-    // --- Step 1: Run FFT ---
-    span<const i16> pcm = context->getPCM();
-    FFT_Args args(pcm.size(), kVibeNumBins, kVibeFFTMinFreq, kVibeFFTMaxFreq, mSampleRate);
-    mFFTBins.clear();
-    mFFT.run(pcm, &mFFTBins, args);
+    // --- Step 1: Get FFT from shared context (downsampled from master) ---
+    mRetainedFFT = context->getFFT(kVibeNumBins, kVibeFFTMinFreq, kVibeFFTMaxFreq);
+    const FFTBins& fftBins = *mRetainedFFT;
+    sVibeFFTCount++;  // Diagnostic counter (no private FFT anymore)
 
-    const int numBins = static_cast<int>(mFFTBins.raw().size());
+    span<const i16> pcm = context->getPCM();
+
+    const int numBins = static_cast<int>(fftBins.raw().size());
     if (numBins == 0) {
         return;
     }
@@ -67,12 +71,12 @@ void VibeDetector::update(shared_ptr<AudioContext> context) {
             if (i == 0) {
                 binLow = kVibeFFTMinFreq;
             } else {
-                binLow = mFFTBins.binBoundary(i - 1);
+                binLow = fftBins.binBoundary(i - 1);
             }
             if (i == numBins - 1) {
                 binHigh = kVibeFFTMaxFreq;
             } else {
-                binHigh = mFFTBins.binBoundary(i);
+                binHigh = fftBins.binBoundary(i);
             }
 
             // Fractional overlap with target band
@@ -87,7 +91,7 @@ void VibeDetector::update(shared_ptr<AudioContext> context) {
                 continue;
             }
             float fraction = (overlapMax - overlapMin) / binWidth;
-            energy += mFFTBins.raw()[i] * fraction;
+            energy += fftBins.raw()[i] * fraction;
         }
 
         mImm[band] = energy;

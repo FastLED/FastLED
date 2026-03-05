@@ -5,6 +5,10 @@
 
 namespace fl {
 
+static int sFrequencyBandsFFTCount = 0;
+int FrequencyBands::getPrivateFFTCount() { return sFrequencyBandsFFTCount; }
+void FrequencyBands::resetPrivateFFTCount() { sFrequencyBandsFFTCount = 0; }
+
 namespace {
 // Number of FFT bins — higher count gives better frequency resolution
 // and cleaner band separation. With 64 bins, the CQ kernel provides
@@ -31,7 +35,6 @@ FrequencyBands::FrequencyBands()
     , mMidMax(4000.0f)
     , mTrebleMin(4000.0f)
     , mTrebleMax(20000.0f)
-    , mFFTBins(kNumBands)
 {}
 
 FrequencyBands::~FrequencyBands() = default;
@@ -40,19 +43,17 @@ void FrequencyBands::update(shared_ptr<AudioContext> context) {
     // Use sample rate from context if available
     mSampleRate = context->getSampleRate();
 
-    // Compute FFT directly with higher bin count and wider frequency range
-    // for better frequency resolution and band coverage.
-    const float fftMin = kFFTMinFreq;
-    const float fftMax = kFFTMaxFreq;
+    // Use shared master FFT via context (downsampled to our config)
+    mRetainedFFT = context->getFFT(kNumBands, kFFTMinFreq, kFFTMaxFreq);
+    const FFTBins& fftBins = *mRetainedFFT;
+    sFrequencyBandsFFTCount++;  // Diagnostic counter (no private FFT anymore)
+
     span<const i16> pcm = context->getPCM();
-    FFT_Args args(pcm.size(), kNumBands, fftMin, fftMax, mSampleRate);
-    mFFTBins.clear();
-    mFFT.run(pcm, &mFFTBins, args);
 
     // Calculate energy for each band using fractional bin overlap
-    float bassEnergy = calculateBandEnergy(mFFTBins, mBassMin, mBassMax, fftMin, fftMax);
-    float midEnergy = calculateBandEnergy(mFFTBins, mMidMin, mMidMax, fftMin, fftMax);
-    float trebleEnergy = calculateBandEnergy(mFFTBins, mTrebleMin, mTrebleMax, fftMin, fftMax);
+    float bassEnergy = calculateBandEnergy(fftBins, mBassMin, mBassMax, kFFTMinFreq, kFFTMaxFreq);
+    float midEnergy = calculateBandEnergy(fftBins, mMidMin, mMidMax, kFFTMinFreq, kFFTMaxFreq);
+    float trebleEnergy = calculateBandEnergy(fftBins, mTrebleMin, mTrebleMax, kFFTMinFreq, kFFTMaxFreq);
 
     // Compute dt from actual audio buffer duration: pcmSize / sampleRate
     const float dt = computeAudioDt(pcm.size(), mSampleRate);

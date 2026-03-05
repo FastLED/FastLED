@@ -23,6 +23,7 @@
 #include "fl/audio/audio_detector.h"
 #include "fl/fft.h"
 #include "fl/stl/function.h"
+#include "fl/stl/shared_ptr.h"
 
 namespace fl {
 
@@ -119,6 +120,10 @@ public:
     // Only needed if the audio update rate doesn't match the actual frame rate.
     void setTargetFps(float fps) { mTargetFps = fps; }
 
+    // Diagnostic counters
+    static int getPrivateFFTCount();
+    static void resetPrivateFFTCount();
+
 private:
     int mSampleRate = 44100;
     int mFrameCount = 0;
@@ -139,9 +144,8 @@ private:
     bool mPrevMidSpike = false;
     bool mPrevTrebSpike = false;
 
-    // Own FFT instance
-    FFT mFFT;
-    FFTBins mFFTBins;
+    // Retained FFT from context (keeps shared_ptr alive during update)
+    shared_ptr<const FFTBins> mRetainedFFT;
 
     // FPS-independent rate adjustment
     static float adjustRateToFPS(float rateAtFps1, float fps1, float actualFps);

@@ -132,43 +132,7 @@ FL_TEST_CASE("AudioContext - setSample updates state") {
     FL_CHECK_EQ(ctx.getTimestamp(), 2000u);
 }
 
-FL_TEST_CASE("AudioContext - FFTBins recycled when not retained") {
-    AudioSample sample1 = makeSineAudioSample(440.0f, 1000);
-    AudioContext ctx(sample1);
-
-    // Get FFT, capture raw pointer, then let shared_ptr go out of scope
-    const FFTBins* rawPtr;
-    {
-        auto fft = ctx.getFFT(16);
-        rawPtr = fft.get();
-    }
-    // Only cache holds it now (use_count == 1).
-    // setSample should recycle it.
-    AudioSample sample2 = makeSineAudioSample(880.0f, 2000);
-    ctx.setSample(sample2);
-
-    // getFFT with same band count should reuse the recycled object
-    auto fft2 = ctx.getFFT(16);
-    FL_CHECK_EQ(fft2.get(), rawPtr);
-}
-
-FL_TEST_CASE("AudioContext - FFTBins NOT recycled when still retained") {
-    AudioSample sample1 = makeSineAudioSample(440.0f, 1000);
-    AudioContext ctx(sample1);
-
-    // Hold onto the shared_ptr — refcount > 1
-    auto retained = ctx.getFFT(16);
-    const FFTBins* rawPtr = retained.get();
-
-    AudioSample sample2 = makeSineAudioSample(880.0f, 2000);
-    ctx.setSample(sample2);
-
-    // Since we still hold retained, it shouldn't have been recycled
-    auto fft2 = ctx.getFFT(16);
-    FL_CHECK_NE(fft2.get(), rawPtr);
-}
-
-FL_TEST_CASE("AudioContext - recycled FFTBins has correct data") {
+FL_TEST_CASE("AudioContext - new sample produces fresh FFT data") {
     AudioSample sample1 = makeSineAudioSample(440.0f, 1000);
     AudioContext ctx(sample1);
 

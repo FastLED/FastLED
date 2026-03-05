@@ -44,7 +44,7 @@ void MoodAnalyzer::update(shared_ptr<AudioContext> context) {
     if (static_cast<int>(mValenceHistory.size()) < mAveragingFrames) {
         mValenceHistory.push_back(valence);
         mArousalHistory.push_back(arousal);
-        mHistoryIndex = mValenceHistory.size();
+        mHistoryIndex = static_cast<int>(mValenceHistory.size()) % mAveragingFrames;
     } else {
         mValenceHistory[mHistoryIndex] = valence;
         mArousalHistory[mHistoryIndex] = arousal;
