@@ -7,4 +7,5 @@
 #include "codec/mp4_parser.hpp"
 #include "codec/mpeg1.hpp"
 #include "codec/pixel.hpp"
+#include "codec/decode_file.hpp"
 #include "codec/vorbis.hpp"

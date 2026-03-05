@@ -10,7 +10,6 @@
 //   bash test decode_file --cpp                          (uses default path)
 //   FASTLED_DECODE_PAYLOAD=<payload.json> bash test decode_file --cpp
 
-// ok standalone // ok cpp include
 #include "test.h"
 
 #include "fl/remote/remote.h"
@@ -119,6 +118,36 @@ static void validateMp4(const fl::vector<fl::u8>& data) {
     if (track.isValid) {
         fl::vector<fl::u8> annexB = fl::extractH264NalUnits(data, track, &error);
         FL_CHECK_GT(annexB.size(), 0);
+    }
+
+    // Attempt frame decoding (mirrors validateMpeg/validateGif pattern)
+    if (fl::H264::isSupported()) {
+        fl::H264Config config;
+        fl::string dec_error;
+        auto decoder = fl::H264::createDecoder(config, &dec_error);
+        FL_REQUIRE_MESSAGE(decoder, "H264 decoder creation failed: " << dec_error);
+        auto stream = fl::make_shared<fl::MemoryFileHandle>(data.size());
+        stream->write(data);
+        FL_CHECK(decoder->begin(stream));
+        auto result = decoder->decode();
+        if (result == fl::DecodeResult::Success) {
+            fl::Frame frame = decoder->getCurrentFrame();
+            FL_CHECK(frame.isValid());
+            FL_CHECK_GT(frame.getWidth(), 0);
+            FL_CHECK_GT(frame.getHeight(), 0);
+            FL_MESSAGE("H264 first frame: " << frame.getWidth() << "x" << frame.getHeight());
+            auto pixels = frame.rgb();
+            int count = pixels.size() < 16 ? (int)pixels.size() : 16;
+            for (int i = 0; i < count; i++) {
+                FL_MESSAGE("  pixel[" << i << "] = ("
+                           << (int)pixels[i].r << ","
+                           << (int)pixels[i].g << ","
+                           << (int)pixels[i].b << ")");
+            }
+        }
+        decoder->end();
+    } else {
+        FL_MESSAGE("H264 decoder not supported on this platform");
     }
 }
 

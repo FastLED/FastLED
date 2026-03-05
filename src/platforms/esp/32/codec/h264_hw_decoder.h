@@ -18,7 +18,7 @@ public:
     H264HwDecoder();
     ~H264HwDecoder() override;
 
-    bool begin(fl::ByteStreamPtr stream) override;
+    bool begin(fl::FileHandlePtr stream) override;
     void end() override;
     bool isReady() const override;
     bool hasError(fl::string* msg = nullptr) const override;

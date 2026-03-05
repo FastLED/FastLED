@@ -85,7 +85,7 @@ from ci.util.port_utils import (
     kill_port_users,
 )
 from ci.validate.ble import run_ble_validation
-from ci.validate.decode import run_decode_validation
+from ci.validate.decode import run_decode_validation, run_device_decode_validation
 from ci.validate.net import run_net_loopback_validation, run_net_validation
 from ci.validate.ota import run_ota_validation
 
@@ -789,10 +789,12 @@ See Also:
             help="ESP32 starts BLE GATT server; host connects via Bleak and validates ping/pong",
         )
 
-        # Decode validation mode (host-only)
+        # Decode validation mode (host-only or device)
         decode_group = parser.add_argument_group(
-            "Decode Validation (host-only)",
-            "Test codec decoding of a local file or URL. No device needed.",
+            "Decode Validation",
+            "Test codec decoding of a local file or URL. "
+            "Without --env: runs host-only C++ test. "
+            "With --env: sends file to device via JSON-RPC for on-device decoding.",
         )
         decode_group.add_argument(
             "--decode",
@@ -1264,12 +1266,12 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
     # BLE validation mode
     ble_mode = args.ble
 
-    # Decode validation mode (host-only)
+    # Decode validation mode (host-only or device)
     decode_mode = args.decode is not None
 
-    # Short-circuit: --decode is host-only, bypass all device logic
+    # Short-circuit: --decode bypasses driver/simd/net/ota/ble logic
     if decode_mode:
-        any_device_mode = (
+        any_incompatible_mode = (
             bool(drivers)
             or simd_test_mode
             or net_server_mode
@@ -1278,12 +1280,28 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
             or ota_mode
             or ble_mode
         )
-        if any_device_mode:
+        if any_incompatible_mode:
             print(
                 f"{Fore.RED}❌ Error: --decode cannot be combined with driver flags, --simd, --net, --ota, or --ble{Style.RESET_ALL}"
             )
             return 1
         assert args.decode is not None  # narrowed by decode_mode check
+
+        # Device mode: --decode with --env sends file to device via JSON-RPC
+        if final_environment:
+            upload_port = args.upload_port
+            if not upload_port:
+                result = auto_detect_upload_port()
+                if not result.ok:
+                    print(
+                        f"{Fore.RED}❌ Error: No serial port detected for device decode{Style.RESET_ALL}"
+                    )
+                    return 1
+                upload_port = result.selected_port
+            assert upload_port is not None
+            return await run_device_decode_validation(args.decode, upload_port)
+
+        # Host-only mode: no environment specified
         return await run_decode_validation(args.decode)
 
     # Validate mutual exclusivity of net/ota/ble modes with driver modes

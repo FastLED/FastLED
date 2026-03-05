@@ -31,6 +31,12 @@
 
 #include "fl/stl/asio/ble.h"
 
+// Codec headers for decodeFile RPC
+#include "fl/codec/h264.h"
+#include "fl/codec/mp4_parser.h"
+#include "fl/stl/detail/memory_file_handle.h"
+#include "fl/fx/frame.h"
+
 // ============================================================================
 // Raw Serial Output Functions (bypass fl::println and ScopedLogDisable)
 // ============================================================================
@@ -1736,6 +1742,92 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
     // Register "stopBle" - Stop BLE GATT server + destroy BLE Remote
     mRemote->bind("stopBle", [this](const fl::json& args) -> fl::json {
         return this->stopBleRemote();
+    });
+
+    // Register "decodeFile" - Decode a media file and return first 16 pixels
+    // Args: [base64_data_string, extension_string]  (base64 auto-decoded to fl::vector<fl::u8>)
+    mRemote->bind("decodeFile", [](fl::vector<fl::u8> data, fl::string ext) -> fl::json {
+        fl::json response = fl::json::object();
+
+        if (ext != ".mp4") {
+            response.set("success", false);
+            response.set("error", "Only .mp4 supported for device decode");
+            return response;
+        }
+
+        // Parse MP4 container metadata
+        fl::string error;
+        fl::H264Info info = fl::H264::parseH264Info(data, &error);
+        if (!info.isValid) {
+            response.set("success", false);
+            response.set("error", error.c_str());
+            return response;
+        }
+        response.set("width", static_cast<int64_t>(info.width));
+        response.set("height", static_cast<int64_t>(info.height));
+
+        if (!fl::H264::isSupported()) {
+            response.set("success", false);
+            response.set("error", "H264 decoder not supported on this platform");
+            return response;
+        }
+
+        // Create decoder and decode first frame
+        fl::string dec_error;
+        auto decoder = fl::H264::createDecoder(fl::H264Config{}, &dec_error);
+        if (!decoder) {
+            response.set("success", false);
+            response.set("error", dec_error.c_str());
+            return response;
+        }
+
+        auto stream = fl::make_shared<fl::MemoryFileHandle>(data.size());
+        stream->write(data);
+
+        if (!decoder->begin(stream)) {
+            fl::string msg;
+            decoder->hasError(&msg);
+            response.set("success", false);
+            response.set("error", msg.empty() ? "Decoder begin() failed" : msg.c_str());
+            return response;
+        }
+
+        auto result = decoder->decode();
+        if (result != fl::DecodeResult::Success) {
+            response.set("success", false);
+            response.set("error", "Decode returned non-success");
+            response.set("decode_result", static_cast<int64_t>(static_cast<int>(result)));
+            decoder->end();
+            return response;
+        }
+
+        fl::Frame frame = decoder->getCurrentFrame();
+        decoder->end();
+
+        if (!frame.isValid()) {
+            response.set("success", false);
+            response.set("error", "Decoded frame is invalid");
+            return response;
+        }
+
+        response.set("success", true);
+        response.set("frame_width", static_cast<int64_t>(frame.getWidth()));
+        response.set("frame_height", static_cast<int64_t>(frame.getHeight()));
+
+        // Return first 16 pixels as [[r,g,b], ...]
+        auto pixels = frame.rgb();
+        fl::json pixel_array = fl::json::array();
+        int count = pixels.size() < 16 ? static_cast<int>(pixels.size()) : 16;
+        for (int i = 0; i < count; i++) {
+            fl::json px = fl::json::array();
+            px.push_back(static_cast<int64_t>(pixels[i].r));
+            px.push_back(static_cast<int64_t>(pixels[i].g));
+            px.push_back(static_cast<int64_t>(pixels[i].b));
+            pixel_array.push_back(px);
+        }
+        response.set("pixels", pixel_array);
+
+        return response;
     });
 
     // Register "bleStatus" - Query BLE connection/subscription state
