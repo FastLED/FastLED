@@ -74,7 +74,7 @@ private:
 };
 
 // Vorbis decoder with streaming byte interface
-// This decoder consumes Vorbis data from a FileHandle and decodes audio frames on demand
+// This decoder consumes Vorbis data from a filebuf and decodes audio frames on demand
 class VorbisDecoder {
 public:
     VorbisDecoder();
@@ -83,7 +83,7 @@ public:
     // Initialize the decoder with a byte stream
     // Note: stb_vorbis requires the entire stream in memory for pulldata API
     // Returns true on success, false on failure
-    bool begin(fl::FileHandlePtr stream);
+    bool begin(fl::filebuf_ptr stream);
 
     // Clean up decoder resources
     void end();

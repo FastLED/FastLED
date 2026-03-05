@@ -11,10 +11,10 @@
 #include "fl/stl/shared_ptr.h"
 #include "hsv2rgb.h"
 
-FL_TEST_CASE("MemoryFileHandle basic operations") {
+FL_TEST_CASE("memorybuf basic operations") {
 
     FL_SUBCASE("Write and read single byte") {
-        fl::MemoryFileHandle stream(10);  // Stream with 10 bytes capacity
+        fl::memorybuf stream(10);  // Stream with 10 bytes capacity
         fl::u8 testByte = 42;
         FL_CHECK(stream.write(fl::span<const fl::u8>(&testByte, 1)) == 1);
 
@@ -27,7 +27,7 @@ FL_TEST_CASE("MemoryFileHandle basic operations") {
     }
 
     FL_SUBCASE("Write and read multiple bytes") {
-        fl::MemoryFileHandle stream(10);
+        fl::memorybuf stream(10);
         fl::u8 testData[] = {1, 2, 3, 4, 5};
         FL_CHECK(stream.write(fl::span<const fl::u8>(testData, 5)) == 5);
 
@@ -39,19 +39,19 @@ FL_TEST_CASE("MemoryFileHandle basic operations") {
     }
 
     FL_SUBCASE("Attempt to read from empty stream") {
-        fl::MemoryFileHandle stream(10);
+        fl::memorybuf stream(10);
         fl::u8 readByte = 0;
         FL_CHECK(stream.read(&readByte, 1) == 0);
     }
 
     FL_SUBCASE("Attempt to write beyond capacity") {
-        fl::MemoryFileHandle stream(5);
+        fl::memorybuf stream(5);
         fl::u8 testData[] = {1, 2, 3, 4, 5, 6};
         FL_CHECK(stream.write(fl::span<const fl::u8>(testData, 6)) == 5);  // Should write up to capacity
     }
 
     FL_SUBCASE("Attempt to read more than available data") {
-        fl::MemoryFileHandle stream(10);
+        fl::memorybuf stream(10);
         fl::u8 testData[] = {1, 2, 3};
         FL_CHECK(stream.write(fl::span<const fl::u8>(testData, 3)) == 3);
 
@@ -60,7 +60,7 @@ FL_TEST_CASE("MemoryFileHandle basic operations") {
     }
 
     FL_SUBCASE("Multiple write and read operations") {
-        fl::MemoryFileHandle stream(10);
+        fl::memorybuf stream(10);
         fl::u8 testData1[] = {1, 2, 3};
         fl::u8 testData2[] = {4, 5};
         FL_CHECK(stream.write(fl::span<const fl::u8>(testData1, 3)) == 3);
@@ -77,7 +77,7 @@ FL_TEST_CASE("MemoryFileHandle basic operations") {
 
 
     FL_SUBCASE("Write after partial read") {
-        fl::MemoryFileHandle stream(10);
+        fl::memorybuf stream(10);
         fl::u8 testData[] = {1, 2, 3, 4, 5};
         FL_CHECK(stream.write(fl::span<const fl::u8>(testData, 5)) == 5);
 
@@ -99,7 +99,7 @@ FL_TEST_CASE("MemoryFileHandle basic operations") {
     }
 
     FL_SUBCASE("Fill and empty stream multiple times") {
-        fl::MemoryFileHandle stream(10);
+        fl::memorybuf stream(10);
         fl::u8 testData[10];
         for (fl::u8 i = 0; i < 10; ++i) {
             testData[i] = i;
@@ -122,7 +122,7 @@ FL_TEST_CASE("MemoryFileHandle basic operations") {
     }
 
     FL_SUBCASE("Zero-length write and read") {
-        fl::MemoryFileHandle stream(10);
+        fl::memorybuf stream(10);
         FL_CHECK(stream.write(fl::span<const fl::u8>()) == 0);
 
         fl::u8 readData[3] = {0};
@@ -130,13 +130,13 @@ FL_TEST_CASE("MemoryFileHandle basic operations") {
     }
 
     FL_SUBCASE("Write and read with null pointers") {
-        fl::MemoryFileHandle stream(10);
+        fl::memorybuf stream(10);
         FL_CHECK(stream.write(static_cast<const char*>(nullptr), 5) == 0);
         FL_CHECK(stream.read(static_cast<char*>(nullptr), 5) == 0);
     }
 
     FL_SUBCASE("Boundary conditions") {
-        fl::MemoryFileHandle stream(10);
+        fl::memorybuf stream(10);
         fl::u8 testData[10];
         for (fl::u8 i = 0; i < 10; ++i) {
             testData[i] = i;
@@ -154,7 +154,7 @@ FL_TEST_CASE("MemoryFileHandle basic operations") {
     }
 
     FL_SUBCASE("Write with partial capacity") {
-        fl::MemoryFileHandle stream(5);
+        fl::memorybuf stream(5);
         fl::u8 testData[] = {1, 2, 3, 4, 5};
         FL_CHECK(stream.write(fl::span<const fl::u8>(testData, 5)) == 5);
 
@@ -175,7 +175,7 @@ FL_TEST_CASE("MemoryFileHandle basic operations") {
     }
 
     FL_SUBCASE("Read after buffer is reset") {
-        fl::MemoryFileHandle stream(10);
+        fl::memorybuf stream(10);
         fl::u8 testData[] = {1, 2, 3};
         FL_CHECK(stream.write(fl::span<const fl::u8>(testData, 3)) == 3);
 
@@ -186,13 +186,13 @@ FL_TEST_CASE("MemoryFileHandle basic operations") {
     }
 
     FL_SUBCASE("Write zero bytes when buffer is full") {
-        fl::MemoryFileHandle stream(0);  // Zero capacity
+        fl::memorybuf stream(0);  // Zero capacity
         fl::u8 testByte = 42;
         FL_CHECK(stream.write(fl::span<const fl::u8>(&testByte, 1)) == 0);  // Cannot write to zero-capacity buffer
     }
 
     FL_SUBCASE("Sequential writes and reads") {
-        fl::MemoryFileHandle stream(10);
+        fl::memorybuf stream(10);
         for (fl::u8 i = 0; i < 10; ++i) {
             FL_CHECK(stream.write(fl::span<const fl::u8>(&i, 1)) == 1);
         }
@@ -213,11 +213,11 @@ FL_TEST_CASE("MemoryFileHandle basic operations") {
 FL_TEST_CASE("memory file handle with pixel stream") {
     const int BYTES_PER_FRAME = 3 * 10 * 10; // Assuming a 10x10 RGB video
 
-    // Create a MemoryFileHandle
+    // Create a memorybuf
     const fl::u32 BUFFER_SIZE = BYTES_PER_FRAME * 10; // Enough for 10 frames
-    fl::MemoryFileHandlePtr memoryStream = fl::make_shared<fl::MemoryFileHandle>(BUFFER_SIZE);
+    fl::memorybufPtr memoryStream = fl::make_shared<fl::memorybuf>(BUFFER_SIZE);
 
-    // Fill the MemoryFileHandle with test data
+    // Fill the memorybuf with test data
     fl::u8 testData[BUFFER_SIZE];
     for (fl::u32 i = 0; i < BUFFER_SIZE; ++i) {
         testData[i] = static_cast<fl::u8>(i % 256);

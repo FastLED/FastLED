@@ -38,9 +38,9 @@
 
 namespace fl {
 
-// FileHandle that wraps MPEG1 decoder for seamless integration with Video system
+// filebuf that wraps MPEG1 decoder for seamless integration with Video system
 // Non-seekable: decodes frames on demand and provides them as sequential bytes
-class Mpeg1FileHandle : public FileHandle {
+class Mpeg1FileHandle : public filebuf {
 private:
     IDecoderPtr mDecoder;
     fl::shared_ptr<Frame> mCurrentFrame;
@@ -116,12 +116,12 @@ public:
 
         return totalRead;
     }
-    using FileHandle::read; // u8 overload
+    using filebuf::read; // u8 overload
 
     fl::size_t write(const char*, fl::size_t) override { return 0; } // Read-only
     fl::size_t tell() override { return 0; }
     bool seek(fl::size_t, seek_dir) override { return false; } // Non-seekable
-    using FileHandle::seek;
+    using filebuf::seek;
     fl::size_t size() const override { return 0; } // Unknown for streaming
 
     const char* path() const override { return mPath.c_str(); }
@@ -141,7 +141,7 @@ public:
     }
 };
 
-class NullFileHandle : public FileHandle {
+class NullFileHandle : public filebuf {
   public:
     NullFileHandle() = default;
     ~NullFileHandle() override {}
@@ -159,13 +159,13 @@ class NullFileHandle : public FileHandle {
         return 0;
     }
     fl::size_t tell() override { return 0; }
-    const char *path() const override { return "nullptr FILE HANDLE"; }
+    const char *path() const override { return "nullptr filebuf"; }
     bool seek(fl::size_t pos, seek_dir dir) override {
         FASTLED_UNUSED(pos);
         FASTLED_UNUSED(dir);
         return false;
     }
-    using FileHandle::seek; // single-arg overload
+    using filebuf::seek; // single-arg overload
     void close() override {}
     bool is_eof() const override { return true; }
     bool has_error() const override { return false; }
@@ -185,16 +185,16 @@ class NullFileSystem : public FsImpl {
     bool begin() override { return true; }
     void end() override {}
 
-    void close(FileHandlePtr file) override {
+    void close(filebuf_ptr file) override {
         // No need to do anything for in-memory files
         FASTLED_UNUSED(file);
         FASTLED_WARN("NullFileSystem::close");
     }
 
-    FileHandlePtr openRead(const char *_path) override {
+    filebuf_ptr openRead(const char *_path) override {
         FASTLED_UNUSED(_path);
         fl::shared_ptr<NullFileHandle> ptr = fl::make_shared<NullFileHandle>();
-        FileHandlePtr out = ptr;
+        filebuf_ptr out = ptr;
         return out;
     }
 };
@@ -279,15 +279,15 @@ bool FileSystem::readScreenMap(const char *path, const char *name,
     return true;
 }
 
-void FileSystem::close(FileHandlePtr file) { mFs->close(file); }
+void FileSystem::close(filebuf_ptr file) { mFs->close(file); }
 
-FileHandlePtr FileSystem::openRead(const char *path) {
+filebuf_ptr FileSystem::openRead(const char *path) {
     return mFs->openRead(path);
 }
 Video FileSystem::openVideo(const char *path, fl::size pixelsPerFrame, float fps,
                             fl::size nFrameHistory) {
     Video video(pixelsPerFrame, fps, nFrameHistory);
-    FileHandlePtr file = openRead(path);
+    filebuf_ptr file = openRead(path);
     if (!file) {
         video.setError(fl::string("Could not open file: ").append(path));
         return video;
@@ -301,7 +301,7 @@ Video FileSystem::openMpeg1Video(const char *path, fl::size pixelsPerFrame, floa
     Video video(pixelsPerFrame, fps, nFrameHistory);
 
     // Open the MPEG1 file from SD card
-    FileHandlePtr file = openRead(path);
+    filebuf_ptr file = openRead(path);
     if (!file) {
         video.setError(fl::string("Could not open MPEG1 file: ").append(path));
         return video;
@@ -322,7 +322,7 @@ Video FileSystem::openMpeg1Video(const char *path, fl::size pixelsPerFrame, floa
         return video;
     }
 
-    // Initialize decoder with file handle
+    // Initialize decoder with filebuf
     if (!decoder->begin(file)) {
         fl::string decoder_error;
         decoder->hasError(&decoder_error);
@@ -330,7 +330,7 @@ Video FileSystem::openMpeg1Video(const char *path, fl::size pixelsPerFrame, floa
         return video;
     }
 
-    // Create FileHandle that provides decoded frames as sequential bytes
+    // Create filebuf that provides decoded frames as sequential bytes
     fl::shared_ptr<Mpeg1FileHandle> mpeg1Stream =
         fl::make_shared<Mpeg1FileHandle>(decoder, pixelsPerFrame, path);
 
@@ -344,7 +344,7 @@ Video FileSystem::openMpeg1Video(const char *path, fl::size pixelsPerFrame, floa
 }
 
 bool FileSystem::readText(const char *path, fl::string *out) {
-    FileHandlePtr file = openRead(path);
+    filebuf_ptr file = openRead(path);
     if (!file) {
         FASTLED_WARN("Failed to open file: " << path);
         return false;
@@ -367,7 +367,7 @@ bool FileSystem::readText(const char *path, fl::string *out) {
 FramePtr FileSystem::loadJpeg(const char *path, const JpegConfig &config,
                                fl::string *error_message) {
     // Open the JPEG file
-    FileHandlePtr file = openRead(path);
+    filebuf_ptr file = openRead(path);
     if (!file || !file->valid()) {
         if (error_message) {
             *error_message = "Failed to open file: ";
@@ -434,7 +434,7 @@ FramePtr FileSystem::loadJpeg(const char *path, const JpegConfig &config,
 fl::Mp3DecoderPtr FileSystem::openMp3(const char *path,
                                       fl::string *error_message) {
     // Open the MP3 file
-    FileHandlePtr file = openRead(path);
+    filebuf_ptr file = openRead(path);
     if (!file || !file->valid()) {
         if (error_message) {
             *error_message = "Failed to open file: ";

@@ -1,14 +1,15 @@
 #pragma once
 
 #include "fl/int.h"
+#include "fl/stl/bit_cast.h"
 #include "fl/stl/detail/file_handle.h"
 #include "fl/stl/shared_ptr.h"
 
-// Platform-aware file stream implementation
-// - Host/Testing platforms (FASTLED_TESTING): Full file I/O implementation via posix_file_handle
+// Platform-aware file stream implementation (analogous to std::ifstream / std::ofstream)
+// - Host/Testing platforms (FASTLED_TESTING): Full file I/O implementation via posix_filebuf
 // - Embedded platforms (ESP32, Uno, etc.): No-op stubs (no file system support)
 //
-// These stream classes accept any file_handle_base subclass via shared_ptr,
+// These stream classes accept any filebuf subclass via shared_ptr,
 // enabling polymorphic dispatch to different backends (POSIX, SD card, WASM, memory).
 
 #ifdef FASTLED_TESTING
@@ -16,6 +17,9 @@
 #endif
 
 namespace fl {
+
+// Shared pointer to the polymorphic backend
+using filebuf_ptr = fl::shared_ptr<filebuf>;
 
 // File stream mode flags and seek directions
 namespace ios {
@@ -37,13 +41,12 @@ namespace ios {
 }
 
 // ============================================================================
-// IMPLEMENTATION (Polymorphic via shared_ptr<file_handle_base>)
+// Input file stream (analogous to std::ifstream)
 // ============================================================================
 
-// Input file stream
 class ifstream {
 private:
-    fl::shared_ptr<FileHandle> mHandle;
+    filebuf_ptr mHandle;
     fl::size_t mLastRead;
     bool mGood;
     bool mEof;
@@ -66,13 +69,41 @@ public:
 
     explicit ifstream(const char* path, ios::openmode mode = ios::in);
 
-    explicit ifstream(fl::shared_ptr<FileHandle> handle);
+    explicit ifstream(filebuf_ptr handle);
 
     ~ifstream();
 
     // Non-copyable
     ifstream(const ifstream&) = delete;
     ifstream& operator=(const ifstream&) = delete;
+
+    // Moveable
+    ifstream(ifstream&& other) noexcept
+        : mHandle(other.mHandle), mLastRead(other.mLastRead),
+          mGood(other.mGood), mEof(other.mEof), mFail(other.mFail) {
+        other.mHandle.reset();
+        other.mLastRead = 0;
+        other.mGood = false;
+        other.mEof = false;
+        other.mFail = true;
+    }
+
+    ifstream& operator=(ifstream&& other) noexcept {
+        if (this != &other) {
+            close();
+            mHandle = other.mHandle;
+            mLastRead = other.mLastRead;
+            mGood = other.mGood;
+            mEof = other.mEof;
+            mFail = other.mFail;
+            other.mHandle.reset();
+            other.mLastRead = 0;
+            other.mGood = false;
+            other.mEof = false;
+            other.mFail = true;
+        }
+        return *this;
+    }
 
     void open(const char* path, ios::openmode mode = ios::in);
 
@@ -104,16 +135,81 @@ public:
 
     // Manually clear error state (for retry scenarios)
     void clear_error();
+
+    // --- Enriched API (forwarded from filebuf) ---
+
+    // Access the underlying buffer (like std::ifstream::rdbuf())
+    filebuf_ptr rdbuf() const { return mHandle; }
+
+    // Total file size in bytes
+    fl::size_t size() const {
+        return mHandle ? mHandle->size() : 0;
+    }
+
+    // Bytes remaining from current position to end
+    fl::size_t bytes_left() const {
+        return mHandle ? mHandle->bytes_left() : 0;
+    }
+
+    // File path (or description for non-file buffers)
+    const char* path() const {
+        return mHandle ? mHandle->path() : "";
+    }
+
+    // Check if data is available for reading
+    bool available() const {
+        return mHandle ? mHandle->available() : false;
+    }
+
+    // Check if at least n bytes are available
+    bool available(fl::size_t n) const {
+        return mHandle ? mHandle->available(n) : false;
+    }
+
+    // Convenience: read into u8 buffer
+    fl::size_t read(fl::u8* dst, fl::size_t n) {
+        read(fl::reinterpret_cast_<char*>(dst), n);
+        return mLastRead;
+    }
+
+    // Convenience: read into u8 span
+    fl::size_t read(fl::span<fl::u8> dst) {
+        return read(dst.data(), dst.size());
+    }
+
+    // Convenience: read RGB8 pixels (3 bytes per pixel)
+    fl::size_t readRGB8(fl::span<CRGB> dst) {
+        read(fl::reinterpret_cast_<char*>(dst.data()), dst.size() * 3);
+        return mLastRead / 3;
+    }
+
+    // Backward-compat aliases
+    bool valid() const { return is_open(); }
+    fl::size_t pos() const { return mHandle ? mHandle->pos() : 0; }
+    fl::size_t bytesLeft() const { return bytes_left(); }
+    bool seek(fl::size_t p) {
+        seekg(p, ios::beg);
+        return good();
+    }
+    bool seek(fl::size_t p, seek_dir dir) {
+        ios::seekdir d = (dir == seek_dir::beg) ? ios::beg :
+                         (dir == seek_dir::cur) ? ios::cur : ios::end;
+        seekg(p, d);
+        return good();
+    }
 };
 
-// Output file stream
+// ============================================================================
+// Output file stream (analogous to std::ofstream)
+// ============================================================================
+
 class ofstream {
 private:
-    fl::shared_ptr<FileHandle> mHandle;
+    filebuf_ptr mHandle;
     bool mGood;
     bool mEof;
     bool mFail;
-    int mLocalError;  // Track errors that occur at stream level (not just handle level)
+    int mLocalError;
 
     void updateState() {
         if (mHandle && mHandle->is_open()) {
@@ -132,13 +228,41 @@ public:
 
     explicit ofstream(const char* path, ios::openmode mode = ios::out);
 
-    explicit ofstream(fl::shared_ptr<FileHandle> handle);
+    explicit ofstream(filebuf_ptr handle);
 
     ~ofstream();
 
     // Non-copyable
     ofstream(const ofstream&) = delete;
     ofstream& operator=(const ofstream&) = delete;
+
+    // Moveable
+    ofstream(ofstream&& other) noexcept
+        : mHandle(other.mHandle), mGood(other.mGood), mEof(other.mEof),
+          mFail(other.mFail), mLocalError(other.mLocalError) {
+        other.mHandle.reset();
+        other.mGood = false;
+        other.mEof = false;
+        other.mFail = true;
+        other.mLocalError = 0;
+    }
+
+    ofstream& operator=(ofstream&& other) noexcept {
+        if (this != &other) {
+            close();
+            mHandle = other.mHandle;
+            mGood = other.mGood;
+            mEof = other.mEof;
+            mFail = other.mFail;
+            mLocalError = other.mLocalError;
+            other.mHandle.reset();
+            other.mGood = false;
+            other.mEof = false;
+            other.mFail = true;
+            other.mLocalError = 0;
+        }
+        return *this;
+    }
 
     void open(const char* path, ios::openmode mode = ios::out);
 
@@ -162,17 +286,23 @@ public:
 
     // Manually clear error state (for retry scenarios)
     void clear_error();
+
+    // Access the underlying buffer
+    filebuf_ptr rdbuf() const { return mHandle; }
 };
 
+// ============================================================================
 // Generic file stream (supports both reading and writing)
+// ============================================================================
+
 class fstream {
 private:
-    fl::shared_ptr<FileHandle> mHandle;
+    filebuf_ptr mHandle;
     fl::size_t mLastRead;
     bool mGood;
     bool mEof;
     bool mFail;
-    int mLocalError;  // Track errors that occur at stream level (not just handle level)
+    int mLocalError;
 
     void updateState() {
         if (mHandle && mHandle->is_open()) {
@@ -191,13 +321,45 @@ public:
 
     explicit fstream(const char* path, ios::openmode mode = ios::in | ios::out);
 
-    explicit fstream(fl::shared_ptr<FileHandle> handle);
+    explicit fstream(filebuf_ptr handle);
 
     ~fstream();
 
     // Non-copyable
     fstream(const fstream&) = delete;
     fstream& operator=(const fstream&) = delete;
+
+    // Moveable
+    fstream(fstream&& other) noexcept
+        : mHandle(other.mHandle), mLastRead(other.mLastRead),
+          mGood(other.mGood), mEof(other.mEof), mFail(other.mFail),
+          mLocalError(other.mLocalError) {
+        other.mHandle.reset();
+        other.mLastRead = 0;
+        other.mGood = false;
+        other.mEof = false;
+        other.mFail = true;
+        other.mLocalError = 0;
+    }
+
+    fstream& operator=(fstream&& other) noexcept {
+        if (this != &other) {
+            close();
+            mHandle = other.mHandle;
+            mLastRead = other.mLastRead;
+            mGood = other.mGood;
+            mEof = other.mEof;
+            mFail = other.mFail;
+            mLocalError = other.mLocalError;
+            other.mHandle.reset();
+            other.mLastRead = 0;
+            other.mGood = false;
+            other.mEof = false;
+            other.mFail = true;
+            other.mLocalError = 0;
+        }
+        return *this;
+    }
 
     void open(const char* path, ios::openmode mode = ios::in | ios::out);
 
@@ -231,6 +393,9 @@ public:
 
     // Manually clear error state (for retry scenarios)
     void clear_error();
+
+    // Access the underlying buffer
+    filebuf_ptr rdbuf() const { return mHandle; }
 };
 
 } // namespace fl

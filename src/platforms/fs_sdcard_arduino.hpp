@@ -29,7 +29,7 @@ class FsArduino;
 FASTLED_SHARED_PTR(FsArduino);
 
 #ifdef USE_SDFAT
-class SdFatFileHandle : public FileHandle {
+class SdFatFileHandle : public filebuf {
 private:
     SdFile _file;
     string _path;
@@ -55,7 +55,7 @@ public:
     fl::size_t read(char *dst, fl::size_t bytesToRead) override {
         return _file.read(reinterpret_cast<u8*>(dst), bytesToRead); // ok reinterpret cast
     }
-    using FileHandle::read;
+    using filebuf::read;
     fl::size_t write(const char *data, fl::size_t count) override {
         (void)data; (void)count;
         return 0;
@@ -71,7 +71,7 @@ public:
         if (dir == fl::seek_dir::cur) return _file.seekCur(pos);
         return _file.seekEnd(pos);
     }
-    using FileHandle::seek;
+    using filebuf::seek;
     void close() override {
         if (_file.isOpen()) {
             _file.close();
@@ -87,7 +87,7 @@ public:
     const char* error_message() const override { return "No error"; }
 };
 #else
-class SDFileHandle : public FileHandle {
+class SDFileHandle : public filebuf {
 private:
     File _file;
     string _path;
@@ -115,7 +115,7 @@ public:
     fl::size_t read(char *dst, fl::size_t bytesToRead) override {
         return _file.read(reinterpret_cast<u8*>(dst), bytesToRead); // ok reinterpret cast
     }
-    using FileHandle::read;
+    using filebuf::read;
     fl::size_t write(const char *data, fl::size_t count) override {
         (void)data; (void)count;
         return 0;
@@ -137,7 +137,7 @@ public:
         auto f = const_cast<File&>(_file);
         return _file.seek(f.size() + pos);
     }
-    using FileHandle::seek;
+    using filebuf::seek;
     void close() override {
         if (_file) {
             _file.close();
@@ -178,25 +178,25 @@ public:
         // Note: This is a limitation of the Arduino SD library
     }
 
-    FileHandlePtr openRead(const char *name) override {
+    filebuf_ptr openRead(const char *name) override {
 #ifdef USE_SDFAT
         SdFile file;
         // Open file for reading
         if (!file.open(name, O_READ)) {
-            return FileHandlePtr();
+            return filebuf_ptr();
         }
         return fl::make_shared<SdFatFileHandle>(fl::move(file), name);
 #else
         File file = SD.open(name, FILE_READ);
         if (!file) {
-            return FileHandlePtr();
+            return filebuf_ptr();
         }
         return fl::make_shared<SDFileHandle>(fl::move(file), name);
 #endif
     }
 
-    void close(FileHandlePtr file) override {
-        // The close operation is now handled in the FileHandle wrapper classes
+    void close(filebuf_ptr file) override {
+        // The close operation is now handled in the filebuf wrapper classes
         // This method ensures the file is properly closed
         if (file) {
             file->close();

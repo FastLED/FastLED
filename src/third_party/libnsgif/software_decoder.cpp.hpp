@@ -33,7 +33,7 @@ SoftwareGifDecoder::~SoftwareGifDecoder() {
     end();
 }
 
-bool SoftwareGifDecoder::begin(fl::FileHandlePtr stream) {
+bool SoftwareGifDecoder::begin(fl::filebuf_ptr stream) {
     if (!stream) {
         setError("Invalid stream provided");
         return false;

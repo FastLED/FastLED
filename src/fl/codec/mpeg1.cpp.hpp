@@ -64,7 +64,7 @@ Mpeg1Info Mpeg1::parseMpeg1Info(fl::span<const fl::u8> data, fl::string* error_m
     tempConfig.skipAudio = true;
 
     auto decoder = fl::make_shared<third_party::SoftwareMpeg1Decoder>(tempConfig);
-    auto stream = fl::make_shared<fl::MemoryFileHandle>(data.size());
+    auto stream = fl::make_shared<fl::memorybuf>(data.size());
     stream->write(data);
 
     if (decoder->begin(stream)) {

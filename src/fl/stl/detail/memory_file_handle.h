@@ -8,15 +8,15 @@
 namespace fl {
 namespace detail {
 
-// In-memory file handle backed by a circular buffer.
-// Replaces ByteStreamMemory. Non-seekable (pipe/socket-like).
-// Write pushes to buffer, read pops from buffer.
-class MemoryFileHandle : public fl::FileHandle {
+// In-memory file buffer backed by a circular buffer.
+// Non-seekable (pipe/socket-like). Write pushes to buffer, read pops from buffer.
+// Analogous to std::stringbuf but for circular byte streams.
+class memorybuf : public fl::filebuf {
 public:
-    explicit MemoryFileHandle(fl::u32 capacity)
+    explicit memorybuf(fl::u32 capacity)
         : mBuffer(capacity), mTotalWritten(0) {}
 
-    ~MemoryFileHandle() override = default;
+    ~memorybuf() override = default;
 
     bool is_open() const override { return true; }
 
@@ -32,7 +32,7 @@ public:
         }
         return actual;
     }
-    using FileHandle::read; // u8 overload
+    using filebuf::read; // u8 overload
 
     fl::size_t write(const char* data, fl::size_t count) override {
         if (!data || count == 0 || mBuffer.capacity() == 0) return 0;
@@ -60,11 +60,11 @@ public:
     fl::size_t tell() override { return 0; } // Not meaningful for circular buffer
 
     bool seek(fl::size_t, seek_dir) override { return false; } // Non-seekable
-    using FileHandle::seek;
+    using filebuf::seek;
 
     fl::size_t size() const override { return mBuffer.size(); }
 
-    const char* path() const override { return "MemoryFileHandle"; }
+    const char* path() const override { return "memorybuf"; }
 
     bool is_eof() const override { return mBuffer.empty(); }
 
@@ -88,8 +88,8 @@ private:
 
 } // namespace detail
 
-// Convenience alias
-using MemoryFileHandle = detail::MemoryFileHandle;
-FASTLED_SHARED_PTR_NO_FWD(MemoryFileHandle);
+// Public alias
+using memorybuf = detail::memorybuf;
+FASTLED_SHARED_PTR_NO_FWD(memorybuf);
 
 } // namespace fl

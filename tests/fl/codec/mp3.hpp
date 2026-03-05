@@ -86,7 +86,7 @@ FL_TEST_CASE("Mp3HelixDecoder - Decode real MP3 file") {
     FL_CHECK(fs.beginSd(0)); // CS pin doesn't matter for test
 
     // Open the MP3 file
-    fl::FileHandlePtr file = fs.openRead("codec/jazzy_percussion.mp3");
+    fl::filebuf_ptr file = fs.openRead("codec/jazzy_percussion.mp3");
     FL_REQUIRE(file != nullptr);
     FL_REQUIRE(file->valid());
 
@@ -138,7 +138,7 @@ FL_TEST_CASE("Mp3HelixDecoder - Convert to fl::AudioSamples from real file") {
     FL_CHECK(fs.beginSd(0));
 
     // Open the MP3 file
-    fl::FileHandlePtr file = fs.openRead("codec/jazzy_percussion.mp3");
+    fl::filebuf_ptr file = fs.openRead("codec/jazzy_percussion.mp3");
     FL_REQUIRE(file != nullptr);
 
     // Read entire file

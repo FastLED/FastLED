@@ -145,7 +145,7 @@ bool run_large_benchmark() {
     }
 
     // Open and read the JSON file
-    FileHandlePtr fh = fs.openRead("tests/profile/benchmark_1mb.json");
+    filebuf_ptr fh = fs.openRead("tests/profile/benchmark_1mb.json");
     if (!fh || !fh->valid()) {
         printf("❌ ERROR: Could not open tests/profile/benchmark_1mb.json\n");
         printf("   Download it with: curl -o tests/profile/benchmark_1mb.json https://microsoftedge.github.io/Demos/json-dummy-data/1MB.json\n");

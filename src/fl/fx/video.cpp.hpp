@@ -38,14 +38,14 @@ Video::~Video() = default;
 Video::Video(const Video &) = default;
 Video &Video::operator=(const Video &) = default;
 
-bool Video::begin(FileHandlePtr handle) {
+bool Video::begin(filebuf_ptr handle) {
     if (!mImpl) {
         FASTLED_WARN("Video::begin: mImpl is null, manually constructed videos "
                      "must include full parameters.");
         return false;
     }
     if (!handle) {
-        mError = "FileHandle is null";
+        mError = "filebuf is null";
         FASTLED_DBG(mError.c_str());
         return false;
     }
@@ -145,7 +145,7 @@ VideoFxWrapper::VideoFxWrapper(fl::shared_ptr<Fx> fx) : Fx1d(fx->getNumLeds()), 
         mFps = 30.0f;
     }
     mVideo = fl::make_shared<VideoImpl>(mFx->getNumLeds(), mFps, 2);
-    mByteStream = fl::make_shared<MemoryFileHandle>(mFx->getNumLeds() * sizeof(CRGB));
+    mByteStream = fl::make_shared<memorybuf>(mFx->getNumLeds() * sizeof(CRGB));
     mVideo->begin(mByteStream);
 }
 

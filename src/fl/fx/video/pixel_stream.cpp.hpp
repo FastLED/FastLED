@@ -12,7 +12,7 @@ PixelStream::PixelStream(int bytes_per_frame)
 
 PixelStream::~PixelStream() { close(); }
 
-bool PixelStream::begin(FileHandlePtr h) {
+bool PixelStream::begin(filebuf_ptr h) {
     close();
     mHandle = h;
     // Probe seekability: if seek-to-start succeeds, this is a seekable file.

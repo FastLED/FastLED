@@ -14,14 +14,15 @@ struct CRGB;
 using CRGB = fl::CRGB;  // CRGB is now a typedef
 
 // Forward declare classes
-FASTLED_SHARED_PTR(FileHandle);
+class filebuf;
+using filebuf_ptr = fl::shared_ptr<filebuf>;
 FASTLED_SHARED_PTR(Frame);
 FASTLED_SHARED_PTR(VideoImpl);
 FASTLED_SHARED_PTR(VideoFxWrapper);
-FASTLED_SHARED_PTR_NO_FWD(MemoryFileHandle);
+FASTLED_SHARED_PTR_NO_FWD(memorybuf);
 
 // Video represents a video file that can be played back on a LED strip.
-// The video file is expected to be a sequence of frames. Pass any FileHandle
+// The video file is expected to be a sequence of frames. Pass any filebuf
 // to begin() — streaming vs seekable is auto-detected.
 class Video : public Fx1d { // Fx1d because video can be irregular.
   public:
@@ -52,7 +53,7 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
     string fxName() const override;
 
     // Api
-    bool begin(fl::FileHandlePtr h);
+    bool begin(fl::filebuf_ptr h);
     bool draw(fl::u32 now, fl::span<CRGB> leds);
     bool draw(fl::u32 now, Frame *frame);
     void end();
@@ -94,7 +95,7 @@ class VideoFxWrapper : public Fx1d {
   private:
     FxPtr mFx;
     VideoImplPtr mVideo;
-    MemoryFileHandlePtr mByteStream;
+    memorybufPtr mByteStream;
     float mFps = 30.0f;
 };
 

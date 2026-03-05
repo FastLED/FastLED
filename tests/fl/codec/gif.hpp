@@ -17,7 +17,7 @@ static fl::FileSystem setupCodecFilesystem_gif() {
 FL_TEST_CASE("GIF file loading and decoding") {
     fl::FileSystem fs = setupCodecFilesystem_gif();
         // Test that we can load the GIF file from filesystem
-        fl::FileHandlePtr handle = fs.openRead("data/codec/file.gif");
+        fl::filebuf_ptr handle = fs.openRead("data/codec/file.gif");
         FL_REQUIRE(handle != nullptr);
         FL_REQUIRE(handle->valid());
 
@@ -56,7 +56,7 @@ FL_TEST_CASE("GIF file loading and decoding") {
         FL_REQUIRE_MESSAGE(decoder != nullptr, "GIF decoder creation failed: " << error_msg);
 
         // Create byte stream and begin decoding
-        auto stream = fl::make_shared<fl::MemoryFileHandle>(file_size);
+        auto stream = fl::make_shared<fl::memorybuf>(file_size);
         stream->write(file_data);
         FL_REQUIRE_MESSAGE(decoder->begin(stream), "Failed to begin GIF decoder");
 
@@ -139,7 +139,7 @@ FL_TEST_CASE("GIF metadata parsing without decoding") {
     fl::FileSystem fs = setupCodecFilesystem_gif();
 
     // Test that we can load the GIF file from filesystem
-    fl::FileHandlePtr handle = fs.openRead("data/codec/file.gif");
+    fl::filebuf_ptr handle = fs.openRead("data/codec/file.gif");
     FL_REQUIRE(handle != nullptr);
     FL_REQUIRE(handle->valid());
 

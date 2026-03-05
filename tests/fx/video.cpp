@@ -21,12 +21,12 @@
 #define VIDEO_HEIGHT 10
 #define LEDS_PER_FRAME VIDEO_WIDTH *VIDEO_HEIGHT
 
-FASTLED_SHARED_PTR(FakeFileHandle);
+FASTLED_SHARED_PTR(FakeFilebuf);
 
 
-class FakeFileHandle : public fl::FileHandle {
+class FakeFilebuf : public fl::filebuf {
   public:
-    virtual ~FakeFileHandle() {}
+    virtual ~FakeFilebuf() {}
     bool is_open() const override { return true; }
     bool available() const override { return mPos < data.size(); }
     size_t size() const override { return data.size(); }
@@ -48,7 +48,7 @@ class FakeFileHandle : public fl::FileHandle {
         }
         return bytesRead;
     }
-    using fl::FileHandle::read; // u8 overload
+    using fl::filebuf::read; // u8 overload
     size_t write(const char *dat, size_t count) override {
         (void)dat; (void)count;
         return 0;
@@ -61,7 +61,7 @@ class FakeFileHandle : public fl::FileHandle {
         else { this->mPos = data.size() + pos; }
         return true;
     }
-    using fl::FileHandle::seek; // single-arg overload
+    using fl::filebuf::seek; // single-arg overload
     void close() override {}
     bool is_eof() const override { return mPos >= data.size(); }
     bool has_error() const override { return false; }
@@ -77,8 +77,8 @@ FL_TEST_CASE("video with memory stream") {
     // fl::Video video(LEDS_PER_FRAME, FPS);
     fl::Video video(LEDS_PER_FRAME, FPS, 1);
     video.setFade(0, 0);
-    fl::MemoryFileHandlePtr memoryStream =
-        fl::make_shared<fl::MemoryFileHandle>(LEDS_PER_FRAME * 3);
+    fl::memorybufPtr memoryStream =
+        fl::make_shared<fl::memorybuf>(LEDS_PER_FRAME * 3);
     CRGB testData[LEDS_PER_FRAME] = {};
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
         testData[i] = i % 2 == 0 ? CRGB::Red : CRGB::Black;
@@ -106,8 +106,8 @@ FL_TEST_CASE("video with memory stream, interpolated") {
     // fl::Video video(LEDS_PER_FRAME, FPS);
     fl::Video video(LEDS_PER_FRAME, 1);
     video.setFade(0, 0);
-    fl::MemoryFileHandlePtr memoryStream =
-        fl::make_shared<fl::MemoryFileHandle>(LEDS_PER_FRAME * sizeof(CRGB) * 2);
+    fl::memorybufPtr memoryStream =
+        fl::make_shared<fl::memorybuf>(LEDS_PER_FRAME * sizeof(CRGB) * 2);
     CRGB testData[LEDS_PER_FRAME] = {};
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
         testData[i] = CRGB::Red;
@@ -138,7 +138,7 @@ FL_TEST_CASE("video with file handle") {
     // fl::Video video(LEDS_PER_FRAME, FPS);
     fl::Video video(LEDS_PER_FRAME, FPS);
     video.setFade(0, 0);
-    FakeFileHandlePtr fileHandle = fl::make_shared<FakeFileHandle>();
+    FakeFilebufPtr fileHandle = fl::make_shared<FakeFilebuf>();
     CRGB led_frame[LEDS_PER_FRAME];
     // alternate between red and black
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
@@ -163,7 +163,7 @@ FL_TEST_CASE("video with file handle") {
 
 FL_TEST_CASE("Video duration") {
     fl::Video video(LEDS_PER_FRAME, FPS);
-    FakeFileHandlePtr fileHandle = fl::make_shared<FakeFileHandle>();
+    FakeFilebufPtr fileHandle = fl::make_shared<FakeFilebuf>();
     CRGB led_frame[LEDS_PER_FRAME];
     // just set all the leds to white
 
@@ -185,7 +185,7 @@ FL_TEST_CASE("Video duration") {
 FL_TEST_CASE("video with end frame fadeout") {
     fl::Video video(LEDS_PER_FRAME, FPS);
     video.setFade(0, 1000);
-    FakeFileHandlePtr fileHandle = fl::make_shared<FakeFileHandle>();
+    FakeFilebufPtr fileHandle = fl::make_shared<FakeFilebuf>();
     CRGB led_frame[LEDS_PER_FRAME];
     // just set all the leds to white
 

@@ -15,7 +15,7 @@ ifstream::ifstream(const char* path, ios::openmode mode)
     open(path, mode);
 }
 
-ifstream::ifstream(fl::shared_ptr<detail::file_handle_base> handle)
+ifstream::ifstream(filebuf_ptr handle)
     : mHandle(handle), mLastRead(0), mGood(false), mEof(false), mFail(true) {
     updateState();
 }
@@ -30,7 +30,7 @@ void ifstream::open(const char* path, ios::openmode mode) {
     // Build fopen mode string
     const char* fmode = (mode & ios::binary) ? "rb" : "r";
 
-    mHandle = fl::make_shared<detail::posix_file_handle>(path, fmode);
+    mHandle = fl::make_shared<detail::posix_filebuf>(path, fmode);
 
     if (mHandle->is_open()) {
         if (mode & ios::ate) {
@@ -115,7 +115,7 @@ ofstream::ofstream(const char* path, ios::openmode mode)
     open(path, mode);
 }
 
-ofstream::ofstream(fl::shared_ptr<detail::file_handle_base> handle)
+ofstream::ofstream(filebuf_ptr handle)
     : mHandle(handle), mGood(false), mEof(false), mFail(true), mLocalError(0) {
     updateState();
 }
@@ -138,7 +138,7 @@ void ofstream::open(const char* path, ios::openmode mode) {
         fmode = (mode & ios::binary) ? "wb" : "w";
     }
 
-    mHandle = fl::make_shared<detail::posix_file_handle>(path, fmode);
+    mHandle = fl::make_shared<detail::posix_filebuf>(path, fmode);
 
     if (mHandle->is_open()) {
         if (mode & ios::ate) {
@@ -224,7 +224,7 @@ fstream::fstream(const char* path, ios::openmode mode)
     open(path, mode);
 }
 
-fstream::fstream(fl::shared_ptr<detail::file_handle_base> handle)
+fstream::fstream(filebuf_ptr handle)
     : mHandle(handle), mLastRead(0), mGood(false), mEof(false), mFail(true), mLocalError(0) {
     updateState();
 }
@@ -246,7 +246,7 @@ void fstream::open(const char* path, ios::openmode mode) {
         fmode = (mode & ios::binary) ? "r+b" : "r+";
     }
 
-    mHandle = fl::make_shared<detail::posix_file_handle>(path, fmode);
+    mHandle = fl::make_shared<detail::posix_filebuf>(path, fmode);
 
     if (mHandle->is_open()) {
         if (mode & ios::ate) {

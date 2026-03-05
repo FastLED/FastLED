@@ -3,7 +3,7 @@
 // Compares parse() (Legacy) vs parse2() (custom parser)
 // Uses global allocation overrides to track ALL memory usage
 
-#include "fl/file_system.h"  // for FileHandle, FileSystem, make_sdcard_filesystem
+#include "fl/file_system.h"  // for filebuf, FileSystem, make_sdcard_filesystem
 #include "fl/int.h"          // for size, u32, u8
 #include "fl/stl/json.h"         // for json
 #include "fl/stl/atomic.h"   // for atomic
@@ -487,7 +487,7 @@ int test_large_json_profiling() {
     }
 
     // Open and read the JSON file
-    FileHandlePtr fh = fs.openRead("tests/profile/benchmark_1mb.json");
+    filebuf_ptr fh = fs.openRead("tests/profile/benchmark_1mb.json");
     if (!fh || !fh->valid()) {
         printf("⚠️  WARNING: Could not open tests/profile/benchmark_1mb.json\n");
         printf("   Skipping large JSON memory profile test.\n");

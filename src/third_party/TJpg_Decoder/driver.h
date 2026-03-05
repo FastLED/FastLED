@@ -80,7 +80,7 @@ private:
     float progress_ = 0.0f;
 
     // Input data management
-    fl::FileHandlePtr input_stream_;
+    fl::filebuf_ptr input_stream_;
     fl::scoped_array<fl::u8> input_buffer_;
     fl::size input_size_ = 0;
 
@@ -106,7 +106,7 @@ public:
     ~TJpgInstanceDecoder();
 
     // Main decoding interface
-    bool beginDecodingStream(fl::FileHandlePtr stream, PixelFormat format);
+    bool beginDecodingStream(fl::filebuf_ptr stream, PixelFormat format);
     bool processChunk();  // Process one chunk with time budget
     void endDecoding();
 

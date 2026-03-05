@@ -77,7 +77,7 @@ GifInfo Gif::parseGifInfo(fl::span<const fl::u8> data, fl::string* error_message
     // For a more complete parsing, we would need to create a temporary decoder
     // and let libnsgif parse the structure. Let's use the existing decoder briefly.
     auto decoder = fl::make_shared<fl::third_party::SoftwareGifDecoder>(PixelFormat::RGB888);
-    auto stream = fl::make_shared<fl::MemoryFileHandle>(data.size());
+    auto stream = fl::make_shared<fl::memorybuf>(data.size());
     stream->write(data);
 
     if (decoder->begin(stream)) {

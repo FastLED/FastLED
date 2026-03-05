@@ -17,7 +17,7 @@ static fl::FileSystem setupCodecFilesystem_mpeg1() {
 FL_TEST_CASE("MPEG1 file loading and decoding") {
     fl::FileSystem fs = setupCodecFilesystem_mpeg1();
         // Test that we can load the MPEG1 file from filesystem
-        fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
+        fl::filebuf_ptr handle = fs.openRead("data/codec/file.mpeg");
         FL_REQUIRE(handle != nullptr);
         FL_REQUIRE(handle->valid());
 
@@ -89,7 +89,7 @@ FL_TEST_CASE("MPEG1 file loading and decoding") {
             }
 
             // Create byte stream from file data
-            auto stream = fl::make_shared<fl::MemoryFileHandle>(file_size);
+            auto stream = fl::make_shared<fl::memorybuf>(file_size);
             stream->write(file_data);
             bool began = decoder->begin(stream);
             FL_CHECK(began);
@@ -154,7 +154,7 @@ FL_TEST_CASE("MPEG1 file loading and decoding") {
 FL_TEST_CASE("MPEG1 decoder error handling") {
     fl::FileSystem fs = setupCodecFilesystem_mpeg1();
 
-    FL_SUBCASE("null FileHandle") {
+    FL_SUBCASE("null filebuf") {
         fl::Mpeg1Config config;
         fl::string error_msg;
         auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
@@ -164,13 +164,13 @@ FL_TEST_CASE("MPEG1 decoder error handling") {
         FL_CHECK(decoder->hasError());
     }
 
-    FL_SUBCASE("empty FileHandle") {
+    FL_SUBCASE("empty filebuf") {
         fl::Mpeg1Config config;
         fl::string error_msg;
         auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         FL_REQUIRE(decoder);
 
-        auto empty_stream = fl::make_shared<fl::MemoryFileHandle>(0);
+        auto empty_stream = fl::make_shared<fl::memorybuf>(0);
         FL_CHECK_FALSE(decoder->begin(empty_stream));
         FL_CHECK(decoder->hasError());
 
@@ -187,7 +187,7 @@ FL_TEST_CASE("MPEG1 decoder error handling") {
 
         // Create stream with invalid data (not MPEG1 format)
         const fl::u8 invalid_data[] = {0xFF, 0xD8, 0xFF, 0xE0}; // JPEG header
-        auto stream = fl::make_shared<fl::MemoryFileHandle>(sizeof(invalid_data));
+        auto stream = fl::make_shared<fl::memorybuf>(sizeof(invalid_data));
         stream->write(fl::span<const fl::u8>(invalid_data, sizeof(invalid_data)));
 
         FL_CHECK_FALSE(decoder->begin(stream));
@@ -196,7 +196,7 @@ FL_TEST_CASE("MPEG1 decoder error handling") {
 
     FL_SUBCASE("truncated MPEG1 data") {
         // Load the valid MPEG1 file but truncate it
-        fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
+        fl::filebuf_ptr handle = fs.openRead("data/codec/file.mpeg");
         FL_REQUIRE(handle != nullptr);
 
         fl::size file_size = handle->size();
@@ -209,7 +209,7 @@ FL_TEST_CASE("MPEG1 decoder error handling") {
         auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         FL_REQUIRE(decoder);
 
-        auto stream = fl::make_shared<fl::MemoryFileHandle>(file_data.size());
+        auto stream = fl::make_shared<fl::memorybuf>(file_data.size());
         stream->write(file_data);
 
         // Decoder might initialize but should fail during decode or have limited functionality
@@ -231,7 +231,7 @@ FL_TEST_CASE("MPEG1 configuration options") {
     fl::FileSystem fs = setupCodecFilesystem_mpeg1();
 
     // Load valid MPEG1 data
-    fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
+    fl::filebuf_ptr handle = fs.openRead("data/codec/file.mpeg");
     FL_REQUIRE(handle != nullptr);
 
     fl::size file_size = handle->size();
@@ -247,7 +247,7 @@ FL_TEST_CASE("MPEG1 configuration options") {
         auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         FL_REQUIRE(decoder);
 
-        auto stream = fl::make_shared<fl::MemoryFileHandle>(file_size);
+        auto stream = fl::make_shared<fl::memorybuf>(file_size);
         stream->write(file_data);
 
         FL_CHECK(decoder->begin(stream));
@@ -269,7 +269,7 @@ FL_TEST_CASE("MPEG1 configuration options") {
         auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         FL_REQUIRE(decoder);
 
-        auto stream = fl::make_shared<fl::MemoryFileHandle>(file_size);
+        auto stream = fl::make_shared<fl::memorybuf>(file_size);
         stream->write(file_data);
 
         FL_CHECK(decoder->begin(stream));
@@ -287,7 +287,7 @@ FL_TEST_CASE("MPEG1 configuration options") {
         auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         FL_REQUIRE(decoder);
 
-        auto stream = fl::make_shared<fl::MemoryFileHandle>(file_size);
+        auto stream = fl::make_shared<fl::memorybuf>(file_size);
         stream->write(file_data);
 
         FL_CHECK(decoder->begin(stream));
@@ -302,7 +302,7 @@ FL_TEST_CASE("MPEG1 configuration options") {
         auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         FL_REQUIRE(decoder);
 
-        auto stream = fl::make_shared<fl::MemoryFileHandle>(file_size);
+        auto stream = fl::make_shared<fl::memorybuf>(file_size);
         stream->write(file_data);
 
         FL_CHECK(decoder->begin(stream));
@@ -315,7 +315,7 @@ FL_TEST_CASE("MPEG1 configuration options") {
 FL_TEST_CASE("MPEG1 decoder properties and metadata") {
     fl::FileSystem fs = setupCodecFilesystem_mpeg1();
 
-    fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
+    fl::filebuf_ptr handle = fs.openRead("data/codec/file.mpeg");
     FL_REQUIRE(handle != nullptr);
 
     fl::size file_size = handle->size();
@@ -328,7 +328,7 @@ FL_TEST_CASE("MPEG1 decoder properties and metadata") {
     auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
     FL_REQUIRE(decoder);
 
-    auto stream = fl::make_shared<fl::MemoryFileHandle>(file_size);
+    auto stream = fl::make_shared<fl::memorybuf>(file_size);
     stream->write(file_data);
 
     FL_CHECK(decoder->begin(stream));
@@ -379,7 +379,7 @@ FL_TEST_CASE("MPEG1 decoder properties and metadata") {
 FL_TEST_CASE("MPEG1 frame data validation") {
     fl::FileSystem fs = setupCodecFilesystem_mpeg1();
 
-    fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
+    fl::filebuf_ptr handle = fs.openRead("data/codec/file.mpeg");
     FL_REQUIRE(handle != nullptr);
 
     fl::size file_size = handle->size();
@@ -394,7 +394,7 @@ FL_TEST_CASE("MPEG1 frame data validation") {
     auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
     FL_REQUIRE(decoder);
 
-    auto stream = fl::make_shared<fl::MemoryFileHandle>(file_size);
+    auto stream = fl::make_shared<fl::memorybuf>(file_size);
     stream->write(file_data);
 
     FL_CHECK(decoder->begin(stream));
@@ -452,7 +452,7 @@ FL_TEST_CASE("MPEG1 frame data validation") {
 FL_TEST_CASE("MPEG1 multi-frame sequence validation") {
     fl::FileSystem fs = setupCodecFilesystem_mpeg1();
 
-    fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
+    fl::filebuf_ptr handle = fs.openRead("data/codec/file.mpeg");
     FL_REQUIRE(handle != nullptr);
 
     fl::size file_size = handle->size();
@@ -467,7 +467,7 @@ FL_TEST_CASE("MPEG1 multi-frame sequence validation") {
     auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
     FL_REQUIRE(decoder);
 
-    auto stream = fl::make_shared<fl::MemoryFileHandle>(file_size);
+    auto stream = fl::make_shared<fl::memorybuf>(file_size);
     stream->write(file_data);
 
     FL_CHECK(decoder->begin(stream));
@@ -515,7 +515,7 @@ FL_TEST_CASE("MPEG1 metadata parsing without decoding") {
     fl::FileSystem fs = setupCodecFilesystem_mpeg1();
 
     // Test that we can load the MPEG1 file from filesystem
-    fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
+    fl::filebuf_ptr handle = fs.openRead("data/codec/file.mpeg");
     FL_REQUIRE(handle != nullptr);
     FL_REQUIRE(handle->valid());
 
@@ -598,7 +598,7 @@ FL_TEST_CASE("MPEG1 audio extraction") {
     fl::FileSystem fs = setupCodecFilesystem_mpeg1();
 
     // Load valid MPEG1 data with audio
-    fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
+    fl::filebuf_ptr handle = fs.openRead("data/codec/file.mpeg");
     FL_REQUIRE(handle != nullptr);
 
     fl::size file_size = handle->size();
@@ -632,7 +632,7 @@ FL_TEST_CASE("MPEG1 audio extraction") {
         auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         FL_REQUIRE(decoder);
 
-        auto stream = fl::make_shared<fl::MemoryFileHandle>(file_size);
+        auto stream = fl::make_shared<fl::memorybuf>(file_size);
         stream->write(file_data);
 
         FL_CHECK(decoder->begin(stream));
@@ -673,7 +673,7 @@ FL_TEST_CASE("MPEG1 audio extraction") {
         auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         FL_REQUIRE(decoder);
 
-        auto stream = fl::make_shared<fl::MemoryFileHandle>(file_size);
+        auto stream = fl::make_shared<fl::memorybuf>(file_size);
         stream->write(file_data);
 
         FL_CHECK(decoder->begin(stream));
@@ -698,7 +698,7 @@ FL_TEST_CASE("MPEG1 audio extraction") {
         auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         FL_REQUIRE(decoder);
 
-        auto stream = fl::make_shared<fl::MemoryFileHandle>(file_size);
+        auto stream = fl::make_shared<fl::memorybuf>(file_size);
         stream->write(file_data);
 
         FL_CHECK(decoder->begin(stream));
@@ -720,7 +720,7 @@ FL_TEST_CASE("MPEG1 audio extraction") {
         auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         FL_REQUIRE(decoder);
 
-        auto stream = fl::make_shared<fl::MemoryFileHandle>(file_size);
+        auto stream = fl::make_shared<fl::memorybuf>(file_size);
         stream->write(file_data);
 
         FL_CHECK(decoder->begin(stream));
@@ -747,7 +747,7 @@ FL_TEST_CASE("MPEG1 audio extraction") {
 
     FL_SUBCASE("Audio and video both decode from multiplexed stream") {
         // Load MPEG1 file with both audio and video
-        fl::FileHandlePtr av_handle = fs.openRead("data/codec/test_audio_video.mpg");
+        fl::filebuf_ptr av_handle = fs.openRead("data/codec/test_audio_video.mpg");
         FL_REQUIRE(av_handle != nullptr);
 
         fl::size av_file_size = av_handle->size();
@@ -781,7 +781,7 @@ FL_TEST_CASE("MPEG1 audio extraction") {
         auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         FL_REQUIRE(decoder);
 
-        auto stream = fl::make_shared<fl::MemoryFileHandle>(av_file_size);
+        auto stream = fl::make_shared<fl::memorybuf>(av_file_size);
         stream->write(av_file_data);
 
         bool began = decoder->begin(stream);

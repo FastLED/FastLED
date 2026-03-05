@@ -19,7 +19,7 @@ FL_TEST_CASE("JPEG file loading and decoding") {
     fl::FileSystem fs = setupCodecFilesystem_jpeg();
 
     // Test that we can load the JPEG file from filesystem
-    fl::FileHandlePtr handle = fs.openRead("data/codec/file.jpg");
+    fl::filebuf_ptr handle = fs.openRead("data/codec/file.jpg");
     FL_REQUIRE(handle != nullptr);
     FL_REQUIRE(handle->valid());
 

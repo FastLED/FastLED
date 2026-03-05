@@ -107,7 +107,7 @@ public:
     VorbisDecoderImpl();
     ~VorbisDecoderImpl();
 
-    bool begin(fl::FileHandlePtr stream);
+    bool begin(fl::filebuf_ptr stream);
     void end();
     bool isReady() const { return mDecoder.isOpen(); }
     bool hasError(fl::string* msg = nullptr) const;
@@ -135,7 +135,7 @@ VorbisDecoderImpl::~VorbisDecoderImpl() {
     end();
 }
 
-bool VorbisDecoderImpl::begin(fl::FileHandlePtr stream) {
+bool VorbisDecoderImpl::begin(fl::filebuf_ptr stream) {
     end();  // Clean up any previous state
 
     if (!stream) {
@@ -244,7 +244,7 @@ void VorbisDecoderImpl::reset() {
 VorbisDecoder::VorbisDecoder() : mImpl(fl::make_unique<VorbisDecoderImpl>()) {}
 VorbisDecoder::~VorbisDecoder() = default;
 
-bool VorbisDecoder::begin(fl::FileHandlePtr stream) { return mImpl->begin(stream); }
+bool VorbisDecoder::begin(fl::filebuf_ptr stream) { return mImpl->begin(stream); }
 void VorbisDecoder::end() { mImpl->end(); }
 bool VorbisDecoder::isReady() const { return mImpl->isReady(); }
 bool VorbisDecoder::hasError(fl::string* msg) const { return mImpl->hasError(msg); }

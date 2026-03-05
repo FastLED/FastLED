@@ -6,13 +6,13 @@
 
 // Forward declarations - actual includes moved to cpp
 namespace fl {
-class FileHandle;
+class filebuf;
 class Frame;
 class FrameInterpolator;
 class PixelStream;
 class TimeWarp;
 
-FASTLED_SHARED_PTR(FileHandle);
+using filebuf_ptr = fl::shared_ptr<filebuf>;
 } // namespace fl
 
 namespace fl {
@@ -34,7 +34,7 @@ class VideoImpl {
               size_t frameHistoryCount = 0);
     ~VideoImpl();
     // Api
-    void begin(fl::FileHandlePtr h);
+    void begin(fl::filebuf_ptr h);
     void setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime);
     bool draw(fl::u32 now, fl::span<CRGB> leds);
     void end();

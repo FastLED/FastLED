@@ -5,9 +5,10 @@
 #include "fl/stl/span.h"
 #include "fl/stl/string.h"
 
-// Unified file handle abstraction
+// Unified file buffer abstraction (streambuf-style backend)
 // This provides a platform-agnostic interface for file I/O operations.
-// Platform-specific implementations subclass fl::FileHandle.
+// Platform-specific implementations subclass fl::filebuf.
+// User-facing API is fl::ifstream / fl::ofstream (see fstream.h).
 
 namespace fl {
 
@@ -20,11 +21,11 @@ enum class seek_dir {
     end = 2   // End of file
 };
 
-// Unified abstract interface for file operations.
-// Replaces both the old ad-hoc FileHandle and file_handle_base.
-class FileHandle {
+// Polymorphic file buffer backend (analogous to std::filebuf / std::streambuf).
+// Platform implementations subclass this; consumers should prefer fl::ifstream.
+class filebuf {
 public:
-    virtual ~FileHandle() = default;
+    virtual ~filebuf() = default;
 
     // Core file operations (pure virtual)
     virtual bool is_open() const = 0;
@@ -76,14 +77,11 @@ public:
 
 namespace detail {
 
-// Backward-compat alias for code using the old name
-using file_handle_base = fl::FileHandle;
-
 // ============================================================================
-// POSIX File Handle Implementation (uses fl::FILE* abstraction)
+// POSIX File Buffer Implementation (uses fl::FILE* abstraction)
 // ============================================================================
 
-class posix_file_handle : public fl::FileHandle {
+class posix_filebuf : public fl::filebuf {
 private:
     fl::FILE* mFile;
     int mLastError;
@@ -93,34 +91,34 @@ private:
     void clearErrorState();
 
 public:
-    posix_file_handle() : mFile(nullptr), mLastError(0) {}
+    posix_filebuf() : mFile(nullptr), mLastError(0) {}
 
-    explicit posix_file_handle(const char* path, const char* mode);
+    explicit posix_filebuf(const char* path, const char* mode);
 
-    ~posix_file_handle() override;
+    ~posix_filebuf() override;
 
     // Non-copyable
-    posix_file_handle(const posix_file_handle&) = delete;
-    posix_file_handle& operator=(const posix_file_handle&) = delete;
+    posix_filebuf(const posix_filebuf&) = delete;
+    posix_filebuf& operator=(const posix_filebuf&) = delete;
 
     // Moveable
-    posix_file_handle(posix_file_handle&& other) noexcept;
+    posix_filebuf(posix_filebuf&& other) noexcept;
 
-    posix_file_handle& operator=(posix_file_handle&& other) noexcept;
+    posix_filebuf& operator=(posix_filebuf&& other) noexcept;
 
     bool is_open() const override;
 
     void close() override;
 
     fl::size_t read(char* buffer, fl::size_t count) override;
-    using FileHandle::read; // Pull in u8 overload
+    using filebuf::read; // Pull in u8 overload
 
     fl::size_t write(const char* data, fl::size_t count) override;
 
     fl::size_t tell() override;
 
     bool seek(fl::size_t pos, seek_dir dir) override;
-    using FileHandle::seek; // Pull in single-arg overload
+    using filebuf::seek; // Pull in single-arg overload
 
     fl::size_t size() const override;
 

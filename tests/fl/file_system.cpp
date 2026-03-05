@@ -95,7 +95,7 @@ FL_TEST_CASE("FileSystem test with real hard drive") {
     FL_REQUIRE(ok);
 
     // Try to read the test file
-    fl::FileHandlePtr handle = fs.openRead(test_file.c_str());
+    fl::filebuf_ptr handle = fs.openRead(test_file.c_str());
     FL_REQUIRE(handle != nullptr);
     FL_REQUIRE(handle->valid());
 
@@ -164,7 +164,7 @@ FL_TEST_CASE("FileSystem test with subdirectories") {
     fl::string file_path = sub_dir;
     file_path.append("/");
     file_path.append(test_file);
-    fl::FileHandlePtr handle = fs.openRead(file_path.c_str());
+    fl::filebuf_ptr handle = fs.openRead(file_path.c_str());
     FL_REQUIRE(handle != nullptr);
     FL_REQUIRE(handle->valid());
 
@@ -258,7 +258,7 @@ FL_TEST_CASE("FileSystem test with binary file loading") {
     FL_REQUIRE(ok);
 
     // Try to read the JPEG test file
-    fl::FileHandlePtr handle = fs.openRead("data/codec/file.jpg");
+    fl::filebuf_ptr handle = fs.openRead("data/codec/file.jpg");
     FL_REQUIRE(handle != nullptr);
     FL_REQUIRE(handle->valid());
 

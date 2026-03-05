@@ -15,7 +15,7 @@ static fl::FileSystem setupCodecFilesystem_h264() {
 FL_TEST_CASE("H264 parseH264Info from MP4") {
     fl::FileSystem fs = setupCodecFilesystem_h264();
 
-    fl::FileHandlePtr handle = fs.openRead("data/codec/test.mp4");
+    fl::filebuf_ptr handle = fs.openRead("data/codec/test.mp4");
     FL_REQUIRE(handle != nullptr);
 
     fl::size file_size = handle->size();
@@ -47,7 +47,7 @@ FL_TEST_CASE("H264 SPS parsing") {
     fl::FileSystem fs = setupCodecFilesystem_h264();
 
     // Extract SPS from MP4 and parse it directly
-    fl::FileHandlePtr handle = fs.openRead("data/codec/test.mp4");
+    fl::filebuf_ptr handle = fs.openRead("data/codec/test.mp4");
     FL_REQUIRE(handle != nullptr);
 
     fl::size file_size = handle->size();

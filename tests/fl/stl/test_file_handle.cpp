@@ -4,14 +4,14 @@
 #include "platforms/stub/fs_stub.hpp"
 
 // RAII guard for test files
-class FileHandleTestGuard {
+class FilebufTestGuard {
     fl::string mDir;
 public:
-    explicit FileHandleTestGuard(const char* dir) : mDir(dir) {
+    explicit FilebufTestGuard(const char* dir) : mDir(dir) {
         fl::StubFileSystem::forceRemoveDirectory(mDir);
         fl::StubFileSystem::createDirectory(mDir);
     }
-    ~FileHandleTestGuard() {
+    ~FilebufTestGuard() {
         fl::StubFileSystem::forceRemoveDirectory(mDir);
     }
     fl::string filePath(const char* name) const {
@@ -22,32 +22,32 @@ public:
     }
 };
 
-FL_TEST_CASE("posix_file_handle::size() returns correct file size") {
-    FileHandleTestGuard guard("test_fh_size");
+FL_TEST_CASE("posix_filebuf::size() returns correct file size") {
+    FilebufTestGuard guard("test_fh_size");
     fl::string path = guard.filePath("test.bin");
     fl::StubFileSystem::createTextFile(path, "0123456789");
 
-    fl::detail::posix_file_handle fh(path.c_str(), "rb");
+    fl::detail::posix_filebuf fh(path.c_str(), "rb");
     FL_REQUIRE(fh.is_open());
     FL_CHECK_EQ(fh.size(), 10);
 }
 
-FL_TEST_CASE("posix_file_handle::path() returns path passed to constructor") {
-    FileHandleTestGuard guard("test_fh_path");
+FL_TEST_CASE("posix_filebuf::path() returns path passed to constructor") {
+    FilebufTestGuard guard("test_fh_path");
     fl::string path = guard.filePath("hello.txt");
     fl::StubFileSystem::createTextFile(path, "hi");
 
-    fl::detail::posix_file_handle fh(path.c_str(), "rb");
+    fl::detail::posix_filebuf fh(path.c_str(), "rb");
     FL_REQUIRE(fh.is_open());
     FL_CHECK_EQ(fl::string(fh.path()), path);
 }
 
-FL_TEST_CASE("file_handle_base::available() default implementation") {
-    FileHandleTestGuard guard("test_fh_avail");
+FL_TEST_CASE("filebuf::available() default implementation") {
+    FilebufTestGuard guard("test_fh_avail");
     fl::string path = guard.filePath("data.txt");
     fl::StubFileSystem::createTextFile(path, "abcd");
 
-    fl::detail::posix_file_handle fh(path.c_str(), "rb");
+    fl::detail::posix_filebuf fh(path.c_str(), "rb");
     FL_REQUIRE(fh.is_open());
     FL_CHECK(fh.available());
 
@@ -57,12 +57,12 @@ FL_TEST_CASE("file_handle_base::available() default implementation") {
     FL_CHECK(!fh.available()); // EOF reached
 }
 
-FL_TEST_CASE("file_handle_base::bytes_left() tracks correctly") {
-    FileHandleTestGuard guard("test_fh_bytes_left");
+FL_TEST_CASE("filebuf::bytes_left() tracks correctly") {
+    FilebufTestGuard guard("test_fh_bytes_left");
     fl::string path = guard.filePath("data.txt");
     fl::StubFileSystem::createTextFile(path, "0123456789");
 
-    fl::detail::posix_file_handle fh(path.c_str(), "rb");
+    fl::detail::posix_filebuf fh(path.c_str(), "rb");
     FL_REQUIRE(fh.is_open());
     FL_CHECK_EQ(fh.bytes_left(), 10);
 
@@ -77,12 +77,12 @@ FL_TEST_CASE("file_handle_base::bytes_left() tracks correctly") {
     FL_CHECK_EQ(fh.bytes_left(), 0);
 }
 
-FL_TEST_CASE("posix_file_handle::read(u8*, n) overload") {
-    FileHandleTestGuard guard("test_fh_u8_read");
+FL_TEST_CASE("posix_filebuf::read(u8*, n) overload") {
+    FilebufTestGuard guard("test_fh_u8_read");
     fl::string path = guard.filePath("data.bin");
     fl::StubFileSystem::createTextFile(path, "ABCD");
 
-    fl::detail::posix_file_handle fh(path.c_str(), "rb");
+    fl::detail::posix_filebuf fh(path.c_str(), "rb");
     FL_REQUIRE(fh.is_open());
 
     fl::u8 buf[4];
@@ -94,19 +94,19 @@ FL_TEST_CASE("posix_file_handle::read(u8*, n) overload") {
     FL_CHECK_EQ(buf[3], 'D');
 }
 
-FL_TEST_CASE("file_handle_base::readRGB8() reads CRGB values") {
-    FileHandleTestGuard guard("test_fh_rgb8");
+FL_TEST_CASE("filebuf::readRGB8() reads CRGB values") {
+    FilebufTestGuard guard("test_fh_rgb8");
     fl::string path = guard.filePath("pixels.bin");
     // 2 pixels: RGB(10,20,30) and RGB(40,50,60)
     char pixel_data[] = {10, 20, 30, 40, 50, 60};
     // Write raw binary data
     {
-        fl::detail::posix_file_handle wh(path.c_str(), "wb");
+        fl::detail::posix_filebuf wh(path.c_str(), "wb");
         FL_REQUIRE(wh.is_open());
         wh.write(pixel_data, 6);
     }
 
-    fl::detail::posix_file_handle fh(path.c_str(), "rb");
+    fl::detail::posix_filebuf fh(path.c_str(), "rb");
     FL_REQUIRE(fh.is_open());
 
     CRGB pixels[2];
@@ -120,9 +120,9 @@ FL_TEST_CASE("file_handle_base::readRGB8() reads CRGB values") {
     FL_CHECK_EQ(pixels[1].b, 60);
 }
 
-FL_TEST_CASE("posix_file_handle error state") {
+FL_TEST_CASE("posix_filebuf error state") {
     // File not found
-    fl::detail::posix_file_handle fh("/nonexistent/path/file.txt", "rb");
+    fl::detail::posix_filebuf fh("/nonexistent/path/file.txt", "rb");
     FL_CHECK(!fh.is_open());
     FL_CHECK(fh.has_error());
     FL_CHECK(fh.error_code() == ENOENT);
@@ -134,12 +134,12 @@ FL_TEST_CASE("posix_file_handle error state") {
     FL_CHECK(fh.error_code() == 0);
 }
 
-FL_TEST_CASE("posix_file_handle seek directions") {
-    FileHandleTestGuard guard("test_fh_seek");
+FL_TEST_CASE("posix_filebuf seek directions") {
+    FilebufTestGuard guard("test_fh_seek");
     fl::string path = guard.filePath("seek.txt");
     fl::StubFileSystem::createTextFile(path, "0123456789");
 
-    fl::detail::posix_file_handle fh(path.c_str(), "rb");
+    fl::detail::posix_filebuf fh(path.c_str(), "rb");
     FL_REQUIRE(fh.is_open());
 
     // Seek from beginning
@@ -165,12 +165,12 @@ FL_TEST_CASE("posix_file_handle seek directions") {
     FL_CHECK_EQ(c, '9');
 }
 
-FL_TEST_CASE("posix_file_handle size() does not change position") {
-    FileHandleTestGuard guard("test_fh_size_pos");
+FL_TEST_CASE("posix_filebuf size() does not change position") {
+    FilebufTestGuard guard("test_fh_size_pos");
     fl::string path = guard.filePath("data.txt");
     fl::StubFileSystem::createTextFile(path, "0123456789");
 
-    fl::detail::posix_file_handle fh(path.c_str(), "rb");
+    fl::detail::posix_filebuf fh(path.c_str(), "rb");
     FL_REQUIRE(fh.is_open());
 
     // Seek to middle
@@ -182,7 +182,7 @@ FL_TEST_CASE("posix_file_handle size() does not change position") {
     FL_CHECK_EQ(fh.tell(), 5);
 }
 
-FL_TEST_CASE("posix_file_handle path() for default constructed") {
-    fl::detail::posix_file_handle fh;
+FL_TEST_CASE("posix_filebuf path() for default constructed") {
+    fl::detail::posix_filebuf fh;
     FL_CHECK_EQ(fl::string(fh.path()), fl::string(""));
 }

@@ -67,7 +67,7 @@ public:
 
     ~Impl() = default;
 
-    bool begin(fl::FileHandlePtr stream) {
+    bool begin(fl::filebuf_ptr stream) {
         if (!mDriver) {
             setError("Driver not initialized");
             return false;
@@ -216,7 +216,7 @@ JpegDecoder::JpegDecoder(const JpegConfig& config)
 
 JpegDecoder::~JpegDecoder() = default;
 
-bool JpegDecoder::begin(fl::FileHandlePtr stream) {
+bool JpegDecoder::begin(fl::filebuf_ptr stream) {
     return mImpl->begin(stream);
 }
 
@@ -308,7 +308,7 @@ bool Jpeg::decode(const JpegConfig& config, fl::span<const fl::u8> data, Frame* 
     }
 
     auto decoder = createDecoder(config);
-    auto stream = fl::make_shared<fl::MemoryFileHandle>(data.size());
+    auto stream = fl::make_shared<fl::memorybuf>(data.size());
     stream->write(data);
 
     if (!decoder->begin(stream)) {
@@ -341,7 +341,7 @@ bool Jpeg::decode(const JpegConfig& config, fl::span<const fl::u8> data, Frame* 
 
 FramePtr Jpeg::decode(const JpegConfig& config, fl::span<const fl::u8> data, fl::string* error_message) {
     auto decoder = createDecoder(config);
-    auto stream = fl::make_shared<fl::MemoryFileHandle>(data.size());
+    auto stream = fl::make_shared<fl::memorybuf>(data.size());
     stream->write(data);
 
     if (!decoder->begin(stream)) {
@@ -392,7 +392,7 @@ bool Jpeg::decodeWithTimeout(
     }
 
     auto decoder = createDecoder(config);
-    auto stream = fl::make_shared<fl::MemoryFileHandle>(data.size());
+    auto stream = fl::make_shared<fl::memorybuf>(data.size());
     stream->write(data);
 
     if (!decoder->begin(stream)) {
@@ -441,7 +441,7 @@ bool Jpeg::decodeWithTimeout(
 
 bool Jpeg::decodeStream(
     const JpegConfig& config,
-    fl::FileHandlePtr input_stream,
+    fl::filebuf_ptr input_stream,
     Frame* frame,
     fl::u32 max_time_per_chunk_ms,
     fl::function<bool(float)> mProgresscallback) {

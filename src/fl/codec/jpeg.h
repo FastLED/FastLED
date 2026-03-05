@@ -64,7 +64,7 @@ public:
     ~JpegDecoder() override;
 
     // IDecoder interface
-    bool begin(fl::FileHandlePtr stream) override;
+    bool begin(fl::filebuf_ptr stream) override;
     void end() override;
     bool isReady() const override;
     bool hasError(fl::string* msg = nullptr) const override;
@@ -119,7 +119,7 @@ public:
                                  float* progress_out = nullptr,
                                  fl::string* error_message = nullptr);
 
-    static bool decodeStream(const JpegConfig& config, fl::FileHandlePtr input_stream,
+    static bool decodeStream(const JpegConfig& config, fl::filebuf_ptr input_stream,
                            Frame* frame, fl::u32 max_time_per_chunk_ms = 4,
                            fl::function<bool(float)> progress_callback = {});
 

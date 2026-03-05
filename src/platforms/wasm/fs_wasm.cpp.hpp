@@ -121,7 +121,7 @@ static FileMap gFileMap;
 // safe to access without a lock.
 static fl::mutex gFileMapMutex;
 
-class WasmFileHandle : public fl::FileHandle {
+class WasmFileHandle : public fl::filebuf {
   private:
     FileDataPtr mData;
     size_t mPos;
@@ -174,7 +174,7 @@ class WasmFileHandle : public fl::FileHandle {
         mPos += bytesRead;
         return bytesRead;
     }
-    using FileHandle::read; // Pull in u8 overload
+    using filebuf::read; // Pull in u8 overload
 
     size_t write(const char *data, size_t count) override {
         (void)data; (void)count;
@@ -197,7 +197,7 @@ class WasmFileHandle : public fl::FileHandle {
         mPos = target;
         return true;
     }
-    using FileHandle::seek; // Pull in single-arg overload
+    using filebuf::seek; // Pull in single-arg overload
 
     void close() override {
         // No need to do anything for in-memory files
@@ -218,17 +218,17 @@ class FsImplWasm : public fl::FsImpl {
     bool begin() override { return true; }
     void end() override {}
 
-    void close(FileHandlePtr file) override {
+    void close(filebuf_ptr file) override {
         printf("Closing file %s\n", file->path());
         if (file) {
             file->close();
         }
     }
 
-    fl::FileHandlePtr openRead(const char *_path) override {
+    fl::filebuf_ptr openRead(const char *_path) override {
         // FASTLED_DBG("Opening file: " << _path);
         string path(_path);
-        FileHandlePtr out;
+        filebuf_ptr out;
         {
             fl::unique_lock<fl::mutex> lock(gFileMapMutex);
             auto it = gFileMap.find(path);
@@ -237,7 +237,7 @@ class FsImplWasm : public fl::FsImpl {
                 out = fl::make_shared<WasmFileHandle>(path, data);
                 // FASTLED_DBG("Opened file: " << _path);
             } else {
-                out = fl::FileHandlePtr();
+                out = fl::filebuf_ptr();
                 FASTLED_DBG("File not found: " << _path);
             }
         }

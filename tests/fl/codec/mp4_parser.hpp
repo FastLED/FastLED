@@ -14,7 +14,7 @@ static fl::FileSystem setupCodecFilesystem_mp4() {
 FL_TEST_CASE("MP4 parser - parse test.mp4") {
     fl::FileSystem fs = setupCodecFilesystem_mp4();
 
-    fl::FileHandlePtr handle = fs.openRead("data/codec/test.mp4");
+    fl::filebuf_ptr handle = fs.openRead("data/codec/test.mp4");
     FL_REQUIRE(handle != nullptr);
     FL_REQUIRE(handle->valid());
 
@@ -52,7 +52,7 @@ FL_TEST_CASE("MP4 parser - parse test.mp4") {
 FL_TEST_CASE("MP4 parser - extract NAL units") {
     fl::FileSystem fs = setupCodecFilesystem_mp4();
 
-    fl::FileHandlePtr handle = fs.openRead("data/codec/test.mp4");
+    fl::filebuf_ptr handle = fs.openRead("data/codec/test.mp4");
     FL_REQUIRE(handle != nullptr);
 
     fl::size file_size = handle->size();

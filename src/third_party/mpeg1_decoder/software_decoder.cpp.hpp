@@ -150,9 +150,9 @@ SoftwareMpeg1Decoder::~SoftwareMpeg1Decoder() {
     delete decoderData_;
 }
 
-bool SoftwareMpeg1Decoder::begin(fl::FileHandlePtr stream) {
+bool SoftwareMpeg1Decoder::begin(fl::filebuf_ptr stream) {
     if (!stream) {
-        setError("Invalid FileHandle provided");
+        setError("Invalid filebuf provided");
         return false;
     }
 

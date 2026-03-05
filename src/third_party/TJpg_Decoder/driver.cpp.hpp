@@ -18,7 +18,7 @@ TJpgInstanceDecoder::~TJpgInstanceDecoder() {
     endDecoding();
 }
 
-bool TJpgInstanceDecoder::beginDecodingStream(fl::FileHandlePtr stream, PixelFormat format) {
+bool TJpgInstanceDecoder::beginDecodingStream(fl::filebuf_ptr stream, PixelFormat format) {
     if (!stream) {
         setError("Invalid stream provided");
         return false;

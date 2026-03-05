@@ -28,7 +28,7 @@
 
 namespace fl {
 
-class StubFileHandle : public FileHandle {
+class StubFileHandle : public filebuf {
 private:
     fl::ifstream mFile;
     fl::string mPath;
@@ -78,7 +78,7 @@ public:
 
         return bytesActuallyRead;
     }
-    using FileHandle::read; // Pull in u8 overload
+    using filebuf::read; // Pull in u8 overload
 
     fl::size_t write(const char *data, fl::size_t count) override {
         (void)data; (void)count;
@@ -112,7 +112,7 @@ public:
         mPos = target;
         return true;
     }
-    using FileHandle::seek; // Pull in single-arg overload
+    using filebuf::seek; // Pull in single-arg overload
 
     void close() override {
         if (mFile.is_open()) {
@@ -265,13 +265,13 @@ public:
         // Nothing to do
     }
 
-    void close(FileHandlePtr file) override {
+    void close(filebuf_ptr file) override {
         if (file) {
             file->close();
         }
     }
 
-    FileHandlePtr openRead(const char* path) override {
+    filebuf_ptr openRead(const char* path) override {
         fl::string full_path = mRootPath;
         full_path.append(path);
 
@@ -287,13 +287,13 @@ public:
         if (access(full_path.c_str(), F_OK) != 0) {
 #endif
             FL_WARN("Test file not found: " << full_path.c_str());
-            return FileHandlePtr();
+            return filebuf_ptr();
         }
 
         auto handle = fl::make_shared<StubFileHandle>(full_path);
         if (!handle->valid()) {
             FL_WARN("Failed to open test file: " << full_path.c_str());
-            return FileHandlePtr();
+            return filebuf_ptr();
         }
 
         return handle;

@@ -188,7 +188,7 @@ bool run_large_benchmark() {
     }
 
     // Open and read the JSON file
-    FileHandlePtr fh = fs.openRead(filepath);
+    filebuf_ptr fh = fs.openRead(filepath);
     if (!fh || !fh->valid()) {
         printf("❌ ERROR: Could not open %s\n", filepath);
         printf("   Make sure to download it first with:\n");

@@ -23,7 +23,7 @@
 #include "fl/remote/rpc/base64.h"
 #include "fl/stl/json.h"
 #include "fl/string.h"
-#include "fl/vector.h"
+#include "fl/stl/vector.h"
 
 // Codec headers
 #include "fl/codec/gif.h"
@@ -139,7 +139,7 @@ static void validateMpeg(const fl::vector<fl::u8>& data) {
         fl::string dec_error;
         auto decoder = fl::Mpeg1::createDecoder(config, &dec_error);
         FL_REQUIRE_MESSAGE(decoder, "MPEG1 decoder creation failed: " << dec_error);
-        auto stream = fl::make_shared<fl::MemoryFileHandle>(data.size());
+        auto stream = fl::make_shared<fl::memorybuf>(data.size());
         stream->write(data);
         FL_CHECK(decoder->begin(stream));
         auto result = decoder->decode();
@@ -174,7 +174,7 @@ static void validateGif(const fl::vector<fl::u8>& data) {
         fl::string dec_error;
         auto decoder = fl::Gif::createDecoder(config, &dec_error);
         FL_REQUIRE_MESSAGE(decoder, "GIF decoder creation failed: " << dec_error);
-        auto stream = fl::make_shared<fl::MemoryFileHandle>(data.size());
+        auto stream = fl::make_shared<fl::memorybuf>(data.size());
         stream->write(data);
         FL_REQUIRE(decoder->begin(stream));
         auto result = decoder->decode();

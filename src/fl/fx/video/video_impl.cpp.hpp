@@ -51,7 +51,7 @@ bool VideoImpl::needsFrame(fl::u32 now) const {
 
 VideoImpl::~VideoImpl() { end(); }
 
-void VideoImpl::begin(FileHandlePtr h) {
+void VideoImpl::begin(filebuf_ptr h) {
     end();
     mStream = fl::make_shared<PixelStream>(mPixelsPerFrame * kSizeRGB8);
     mStream->begin(h);

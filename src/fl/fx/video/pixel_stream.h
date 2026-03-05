@@ -4,28 +4,29 @@
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/int.h"
 namespace fl {
-FASTLED_SHARED_PTR(FileHandle);
+class filebuf;
+using filebuf_ptr = fl::shared_ptr<filebuf>;
 } // namespace fl
 
 namespace fl {
 
 FASTLED_SHARED_PTR(PixelStream);
 
-// PixelStream reads frames from a FileHandle to serve data to the video system.
+// PixelStream reads frames from a filebuf to serve data to the video system.
 // A single handle is used for both seekable files and non-seekable streams.
 // Seekability is auto-detected via seek() at begin() time.
 class PixelStream {
   public:
     enum Type {
-        kStreaming, // Non-seekable (e.g. MemoryFileHandle circular buffer)
-        kFile,      // Seekable (e.g. posix_file_handle, SD card)
+        kStreaming, // Non-seekable (e.g. memorybuf circular buffer)
+        kFile,      // Seekable (e.g. posix_filebuf, SD card)
     };
 
     explicit PixelStream(int bytes_per_frame);
 
     // Opens a handle. Streaming vs seekable is auto-detected:
     // seek(0, beg) succeeds → kFile, fails → kStreaming.
-    bool begin(fl::FileHandlePtr h);
+    bool begin(fl::filebuf_ptr h);
 
     void close();
     i32 bytesPerFrame();
@@ -47,7 +48,7 @@ class PixelStream {
 
   private:
     fl::i32 mbytesPerFrame;
-    fl::FileHandlePtr mHandle;
+    fl::filebuf_ptr mHandle;
     Type mType;
 
   public:

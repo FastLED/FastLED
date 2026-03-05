@@ -35,13 +35,13 @@ const int BYTES_PER_FRAME = 3 * NUM_LEDS;
 const int NUM_FRAMES = 2;
 const uint32_t BUFFER_SIZE = BYTES_PER_FRAME * NUM_FRAMES;
 
-fl::MemoryFileHandlePtr memoryStream;
+fl::memorybufPtr memoryStream;
 fl::FxEngine fxEngine(NUM_LEDS);
 // Create and initialize Video object
 fl::XYMap xymap(MATRIX_WIDTH, MATRIX_HEIGHT);
 fl::Video video(NUM_LEDS, 2.0f);
 
-void write_one_frame(fl::MemoryFileHandlePtr memoryStream) {
+void write_one_frame(fl::memorybufPtr memoryStream) {
     //memoryStream->seek(0);  // Reset to the beginning of the stream
     uint32_t total_bytes_written = 0;
     bool toggle = (fl::millis() / 500) % 2 == 0;
@@ -68,7 +68,7 @@ void setup() {
     FastLED.setBrightness(BRIGHTNESS);
 
     // Create memory-backed file handle for streaming video
-    memoryStream = fl::make_shared<fl::MemoryFileHandle>(BUFFER_SIZE*sizeof(fl::CRGB));
+    memoryStream = fl::make_shared<fl::memorybuf>(BUFFER_SIZE*sizeof(fl::CRGB));
 
     video.begin(memoryStream);
     // Add the video effect to the FxEngine

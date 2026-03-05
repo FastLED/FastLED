@@ -126,7 +126,7 @@ class Mp3StreamDecoderImpl {
     Mp3StreamDecoderImpl();
     ~Mp3StreamDecoderImpl();
 
-    bool begin(fl::FileHandlePtr stream);
+    bool begin(fl::filebuf_ptr stream);
     void end();
     bool isReady() const { return mStream != nullptr && mDecoder != nullptr; }
     bool hasError(fl::string* msg = nullptr) const;
@@ -141,7 +141,7 @@ class Mp3StreamDecoderImpl {
     bool fillBuffer();
     bool findAndDecodeFrame(AudioSample* out_sample);
 
-    fl::FileHandlePtr mStream;
+    fl::filebuf_ptr mStream;
     fl::unique_ptr<Mp3HelixDecoder> mDecoder;
     fl::vector<fl::u8> mBuffer;
     fl::size mBufferPos;
@@ -165,7 +165,7 @@ Mp3StreamDecoderImpl::~Mp3StreamDecoderImpl() {
     end();
 }
 
-bool Mp3StreamDecoderImpl::begin(fl::FileHandlePtr stream) {
+bool Mp3StreamDecoderImpl::begin(fl::filebuf_ptr stream) {
     if (!stream) {
         mErrorMsg = "Invalid stream provided";
         mHasError = true;
@@ -363,7 +363,7 @@ Mp3Decoder::Mp3Decoder() : mImpl(fl::make_unique<third_party::Mp3StreamDecoderIm
 
 Mp3Decoder::~Mp3Decoder() = default;
 
-bool Mp3Decoder::begin(fl::FileHandlePtr stream) {
+bool Mp3Decoder::begin(fl::filebuf_ptr stream) {
     return mImpl->begin(stream);
 }
 

@@ -1,4 +1,4 @@
-// Implementation file for fl::detail::posix_file_handle
+// Implementation file for fl::filebuf and fl::detail::posix_filebuf
 // This file contains out-of-line definitions to reduce header compilation overhead
 
 #include "fl/stl/detail/file_handle.h"
@@ -7,28 +7,28 @@
 namespace fl {
 
 // ============================================================================
-// FileHandle default implementations
+// filebuf default implementations
 // ============================================================================
 
-fl::size_t FileHandle::bytes_left() const {
+fl::size_t filebuf::bytes_left() const {
     fl::size_t s = size();
     // tell() is non-const in the interface, but bytes_left needs it.
     // Use const_cast for this read-only query - tell() doesn't mutate logical state.
-    fl::size_t t = const_cast<FileHandle*>(this)->tell();
+    fl::size_t t = const_cast<filebuf*>(this)->tell();
     return (t <= s) ? (s - t) : 0;
 }
 
-fl::size_t FileHandle::pos() const {
-    return const_cast<FileHandle*>(this)->tell();
+fl::size_t filebuf::pos() const {
+    return const_cast<filebuf*>(this)->tell();
 }
 
 namespace detail {
 
 // ============================================================================
-// posix_file_handle Implementation
+// posix_filebuf Implementation
 // ============================================================================
 
-posix_file_handle::posix_file_handle(const char* path, const char* mode)
+posix_filebuf::posix_filebuf(const char* path, const char* mode)
     : mFile(nullptr), mLastError(0), mPath(path ? path : "") {
     mFile = fl::fopen(path, mode);
     if (!mFile) {
@@ -36,18 +36,18 @@ posix_file_handle::posix_file_handle(const char* path, const char* mode)
     }
 }
 
-posix_file_handle::~posix_file_handle() {
+posix_filebuf::~posix_filebuf() {
     close();
 }
 
-posix_file_handle::posix_file_handle(posix_file_handle&& other) noexcept
+posix_filebuf::posix_filebuf(posix_filebuf&& other) noexcept
     : mFile(other.mFile), mLastError(other.mLastError),
       mPath(fl::move(other.mPath)) {
     other.mFile = nullptr;
     other.mLastError = 0;
 }
 
-posix_file_handle& posix_file_handle::operator=(posix_file_handle&& other) noexcept {
+posix_filebuf& posix_filebuf::operator=(posix_filebuf&& other) noexcept {
     if (this != &other) {
         close();
         mFile = other.mFile;
@@ -59,11 +59,11 @@ posix_file_handle& posix_file_handle::operator=(posix_file_handle&& other) noexc
     return *this;
 }
 
-bool posix_file_handle::is_open() const {
+bool posix_filebuf::is_open() const {
     return mFile != nullptr;
 }
 
-void posix_file_handle::close() {
+void posix_filebuf::close() {
     if (mFile) {
         int result = fl::fclose(mFile);
         mFile = nullptr;
@@ -75,7 +75,7 @@ void posix_file_handle::close() {
     }
 }
 
-fl::size_t posix_file_handle::read(char* buffer, fl::size_t count) {
+fl::size_t posix_filebuf::read(char* buffer, fl::size_t count) {
     if (!mFile) {
         return 0;
     }
@@ -91,7 +91,7 @@ fl::size_t posix_file_handle::read(char* buffer, fl::size_t count) {
     return bytes_read;
 }
 
-fl::size_t posix_file_handle::write(const char* data, fl::size_t count) {
+fl::size_t posix_filebuf::write(const char* data, fl::size_t count) {
     if (!mFile) {
         mLastError = fl::io::err_bad_file;
         return 0;
@@ -106,7 +106,7 @@ fl::size_t posix_file_handle::write(const char* data, fl::size_t count) {
     return bytes_written;
 }
 
-fl::size_t posix_file_handle::tell() {
+fl::size_t posix_filebuf::tell() {
     if (!mFile) {
         mLastError = fl::io::err_bad_file;
         return 0;
@@ -120,7 +120,7 @@ fl::size_t posix_file_handle::tell() {
     return static_cast<fl::size_t>(pos);
 }
 
-bool posix_file_handle::seek(fl::size_t pos, seek_dir dir) {
+bool posix_filebuf::seek(fl::size_t pos, seek_dir dir) {
     if (!mFile) {
         mLastError = fl::io::err_bad_file;
         return false;
@@ -136,7 +136,7 @@ bool posix_file_handle::seek(fl::size_t pos, seek_dir dir) {
     return true;
 }
 
-fl::size_t posix_file_handle::size() const {
+fl::size_t posix_filebuf::size() const {
     if (!mFile) {
         return 0;
     }
@@ -154,38 +154,38 @@ fl::size_t posix_file_handle::size() const {
     return static_cast<fl::size_t>(end_pos);
 }
 
-const char* posix_file_handle::path() const {
+const char* posix_filebuf::path() const {
     return mPath.c_str();
 }
 
-bool posix_file_handle::is_eof() const {
+bool posix_filebuf::is_eof() const {
     return mFile ? (fl::feof(mFile) != 0) : false;
 }
 
-bool posix_file_handle::has_error() const {
+bool posix_filebuf::has_error() const {
     return mLastError != 0 || (mFile && fl::ferror(mFile) != 0);
 }
 
-void posix_file_handle::clear_error() {
+void posix_filebuf::clear_error() {
     clearErrorState();
 }
 
-int posix_file_handle::error_code() const {
+int posix_filebuf::error_code() const {
     return mLastError;
 }
 
-const char* posix_file_handle::error_message() const {
+const char* posix_filebuf::error_message() const {
     if (mLastError == 0) {
         return "No error";
     }
     return fl::strerror(mLastError);
 }
 
-void posix_file_handle::captureError() {
+void posix_filebuf::captureError() {
     mLastError = fl::get_errno();
 }
 
-void posix_file_handle::clearErrorState() {
+void posix_filebuf::clearErrorState() {
     mLastError = 0;
     if (mFile) {
         fl::clearerr(mFile);
