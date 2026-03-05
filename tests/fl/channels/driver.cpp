@@ -21,7 +21,7 @@
 #include "fl/eorder.h"
 #include "fl/log.h"
 #include "fl/rgb8.h"
-#include "fl/slice.h"
+#include "fl/stl/span.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/strstream.h"

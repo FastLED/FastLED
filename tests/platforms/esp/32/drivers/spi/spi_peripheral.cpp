@@ -16,7 +16,7 @@
 #include "platforms/shared/mock/esp/32/drivers/spi_peripheral_mock.h"
 #include "fl/stl/stdint.h"
 #include "test.h"
-#include "fl/slice.h"
+#include "fl/stl/span.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/vector.h"
 #include "platforms/esp/32/drivers/spi/ispi_peripheral.h"

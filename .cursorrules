@@ -1544,7 +1544,7 @@ processor.start()
 - ❌ `#include <unordered_map>` → ✅ `#include "fl/hash_map.h"`
 - ❌ `#include <unordered_set>` → ✅ `#include "fl/hash_set.h"`
 - ❌ `#include <set>` → ✅ `#include "fl/set.h"`
-- ❌ `#include <span>` → ✅ `#include "fl/slice.h"`
+- ❌ `#include <span>` → ✅ `#include "fl/stl/span.h"`
 
 **Utilities & Smart Types:**
 - ❌ `#include <optional>` → ✅ `#include "fl/optional.h"`

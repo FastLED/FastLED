@@ -3,7 +3,7 @@
 #include "fl/stl/array.h"
 #include "fl/stl/new.h"
 #include "test.h"
-#include "fl/slice.h"
+#include "fl/stl/span.h"
 #include "fl/stl/allocator.h"
 
 

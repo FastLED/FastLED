@@ -14,7 +14,7 @@
 #include "test.h"
 #include "fl/channels/driver.h"
 #include "fl/chipsets/led_timing.h"
-#include "fl/slice.h"
+#include "fl/stl/span.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/string.h"
 #include "fl/stl/cstdio.h"

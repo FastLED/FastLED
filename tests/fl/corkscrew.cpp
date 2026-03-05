@@ -14,7 +14,7 @@
 #include "fl/geometry.h"
 #include "fl/log.h"
 #include "fl/rgb8.h"
-#include "fl/slice.h"
+#include "fl/stl/span.h"
 #include "fl/stl/strstream.h"
 #include "fl/unused.h"
 #include "fl/int.h"

@@ -14,7 +14,7 @@
 #include "fl/log.h"
 #include "fl/rgb8.h"
 #include "fl/rgbw.h"
-#include "fl/slice.h"
+#include "fl/stl/span.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/move.h"

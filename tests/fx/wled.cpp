@@ -6,7 +6,7 @@
 #include "test.h"
 #include "fl/fx/wled/client.h"
 #include "fl/rgb8.h"
-#include "fl/slice.h"
+#include "fl/stl/span.h"
 #include "fl/stl/shared_ptr.h"
 
 using namespace fl;

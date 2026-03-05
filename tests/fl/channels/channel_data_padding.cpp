@@ -13,7 +13,7 @@
 #include "fl/stl/new.h"
 #include "test.h"
 #include "fl/chipsets/chipset_timing_config.h"
-#include "fl/slice.h"
+#include "fl/stl/span.h"
 #include "fl/stl/move.h"
 
 using namespace fl;

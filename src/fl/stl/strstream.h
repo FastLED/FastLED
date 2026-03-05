@@ -19,7 +19,7 @@ template <typename Key, typename Hash, typename KeyEqual> class unordered_set;  
 template <typename Key, typename T, typename Hash, typename KeyEqual, int INLINED_COUNT> class unordered_map;  // Forward declaration from fl/stl/unordered_map.h
 template <typename Key, typename Value, fl::size N> class FixedMap;  // Forward declaration from fl/stl/map.h
 template <typename Key, typename Value, typename Less, typename Allocator> class SortedHeapMap;  // Forward declaration from fl/stl/map.h
-template <typename T, fl::size Extent> class span;  // Forward declaration from fl/slice.h (no default arg to avoid redefinition)  // IWYU pragma: keep
+template <typename T, fl::size Extent> class span;  // Forward declaration from fl/stl/span.h (no default arg to avoid redefinition)  // IWYU pragma: keep
 template <typename T1, typename T2> struct pair;  // Forward declaration from fl/stl/pair.h
 class FFTBins;  // Forward declaration from fl/fft.h
 template <fl::u32 N> class bitset_fixed;

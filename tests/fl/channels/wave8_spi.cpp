@@ -18,7 +18,7 @@
 #include "fl/stl/cstddef.h"  // for size_t
 #include "fl/stl/stdint.h"  // for uint8_t
 #include "test.h"  // for ResultBuilder, CHECK, etc.
-#include "fl/slice.h"  // for span
+#include "fl/stl/span.h"  // for span
 
 using namespace fl;
 

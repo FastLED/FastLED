@@ -50,7 +50,7 @@ Performence notes @64x64:
 
 #include <FastLED.h>
 #include "fl/stl/json.h"
-#include "fl/slice.h"
+#include "fl/stl/span.h"
 #include "fl/fx/fx_engine.h"
 
 #include "fl/fx/2d/animartrix.hpp"

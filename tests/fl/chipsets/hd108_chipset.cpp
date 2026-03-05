@@ -26,7 +26,7 @@
 #include "fl/engine_events.h"
 #include "fl/eorder.h"
 #include "fl/int.h"
-#include "fl/slice.h"
+#include "fl/stl/span.h"
 #include "fl/stl/utility.h"
 #include "pixel_controller.h"
 

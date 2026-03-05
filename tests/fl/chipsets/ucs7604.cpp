@@ -28,7 +28,7 @@
 #include "fl/eorder.h"
 #include "fl/rgb8.h"
 #include "fl/rgbw.h"
-#include "fl/slice.h"
+#include "fl/stl/span.h"
 #include "pixel_controller.h"
 #include "pixeltypes.h"
 #include "rgbw.h"

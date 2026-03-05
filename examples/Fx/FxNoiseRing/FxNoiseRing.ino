@@ -21,7 +21,7 @@
 #include "fl/warn.h"
 #include "noisegen.h"
 #include "fl/screenmap.h"
-#include "fl/slice.h"
+#include "fl/stl/span.h"
 #include "fl/ui.h"
 #include "fl/sensors/pir.h"
 #include "fl/stl/sstream.h"

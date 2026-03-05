@@ -21,7 +21,7 @@
 
 namespace fl {
 
-// Forward declaration for span (defined in fl/slice.h)
+// Forward declaration for span (defined in fl/stl/span.h)
 template <typename T, fl::size Extent> class span;  // IWYU pragma: keep
 
 // Aligned memory block for inlined data structures.
@@ -506,7 +506,7 @@ class FL_ALIGN vector {
     }
 
     // Implicit copy constructor from span
-    // Note: dynamic_extent is defined as fl::size(-1) in fl/slice.h
+    // Note: dynamic_extent is defined as fl::size(-1) in fl/stl/span.h
     vector(span<const T, fl::size(-1)> s) {
         reserve(s.size());
         assign(s.begin(), s.end());

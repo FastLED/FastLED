@@ -9,7 +9,7 @@
 #include "fl/audio.h"
 #include "fl/int.h"
 #include "fl/math_macros.h"
-#include "fl/slice.h"
+#include "fl/stl/span.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/function.h"

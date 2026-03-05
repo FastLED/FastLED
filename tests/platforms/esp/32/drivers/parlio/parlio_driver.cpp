@@ -32,7 +32,7 @@
 #include "fl/chipsets/spi.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/chipsets/led_timing.h"
-#include "fl/slice.h"
+#include "fl/stl/span.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/move.h"

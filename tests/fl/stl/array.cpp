@@ -1,5 +1,5 @@
 #include "fl/stl/array.h"
-#include "fl/slice.h"  // For fl::span
+#include "fl/stl/span.h"  // For fl::span
 #include "fl/stl/new.h"
 #include "test.h"
 #include "fl/stl/vector.h"

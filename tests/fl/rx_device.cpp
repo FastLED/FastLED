@@ -6,7 +6,7 @@
 #include "fl/stl/new.h"
 #include "fl/stl/stdint.h"
 #include "test.h"
-#include "fl/slice.h"
+#include "fl/stl/span.h"
 #include "fl/stl/move.h"
 #include "fl/stl/shared_ptr.h"
 #include "platforms/is_platform.h"

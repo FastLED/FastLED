@@ -11,7 +11,7 @@
 
 namespace fl {
 
-// Forward declaration for span (defined in fl/slice.h)
+// Forward declaration for span (defined in fl/stl/span.h)
 template <typename T, fl::size Extent> class span;  // IWYU pragma: keep
 
 /**

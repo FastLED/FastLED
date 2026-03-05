@@ -7,7 +7,7 @@
 #include "test.h"
 #include "fl/geometry.h"
 #include "fl/raster_sparse.h"
-#include "fl/slice.h"
+#include "fl/stl/span.h"
 
 
 // Test basic fl::Tile2x2_u8 functionality

@@ -11,7 +11,7 @@
 #include "fl/log.h"
 #include "fl/promise.h"
 #include "fl/result.h"
-#include "fl/slice.h"
+#include "fl/stl/span.h"
 #include "fl/spi/config.h"
 #include "fl/spi/device.h"
 #include "fl/spi/transaction.h"

@@ -594,7 +594,7 @@ FL_TEST_CASE("sstream SortedHeapMap support") {
 }
 
 // Test fl::span with sstream
-#include "fl/slice.h"
+#include "fl/stl/span.h"
 #include "fl/stl/pair.h"
 
 FL_TEST_CASE("sstream span support") {
