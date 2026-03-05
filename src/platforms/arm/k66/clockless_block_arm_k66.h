@@ -24,7 +24,7 @@
 #define PORT_SHIFT(P) ((P) << ((FIRST_PIN==0) ? 16 : 0))
 #define PORT_MASK PORT_SHIFT(LANE_MASK)
 
-#define USED_LANES ((FIRST_PIN!=15) ? FL_MIN(LANES,8) : FL_MIN(LANES,12))
+#define USED_LANES ((FIRST_PIN!=15) ? fl::min(LANES,8) : fl::min(LANES,12))
 
 // IWYU pragma: begin_keep
 #include <kinetis.h>

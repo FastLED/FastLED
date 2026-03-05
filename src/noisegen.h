@@ -24,7 +24,7 @@ struct NoiseGenerator {
 
     int LedValue(fl::i32 i, unsigned long time_ms) const {
         int val = Value(i, time_ms);
-        return FL_MAX(0, val - 128) * 2;
+        return fl::max(0, val - 128) * 2;
     }
 };
 

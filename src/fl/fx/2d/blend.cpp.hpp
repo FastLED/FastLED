@@ -71,7 +71,7 @@ void Blend2d::draw(DrawContext context) {
         u8 blur_amount = it->blur_amount;
         if (blur_amount > 0) {
             const XYMap &xyMap = fx->getXYMap();
-            u8 blur_passes = FL_MAX(1, it->blur_passes);
+            u8 blur_passes = fl::max(1, it->blur_passes);
             for (u8 i = 0; i < blur_passes; ++i) {
                 // Apply the blur effect
                 blur2d(mFrame->rgb(), mXyMap.getWidth(), mXyMap.getHeight(),
@@ -87,7 +87,7 @@ void Blend2d::draw(DrawContext context) {
         u16 height = mXyMap.getHeight();
         XYMap rect = XYMap::constructRectangularGrid(width, height);
         CRGB *rgb = mFrameTransform->rgb();
-        u8 blur_passes = FL_MAX(1, mGlobalBlurPasses);
+        u8 blur_passes = fl::max(1, mGlobalBlurPasses);
         for (u8 i = 0; i < blur_passes; ++i) {
             // Apply the blur effect
             blur2d(rgb, width, height, mGlobalBlurAmount, rect);

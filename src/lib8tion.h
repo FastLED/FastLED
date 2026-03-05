@@ -45,13 +45,13 @@
 ///    of 255, or a minimum of 0.  Useful for adding pixel
 ///    values.  E.g., qadd8( 200, 100) = 255.
 ///      @code
-///      qadd8( i, j) == FL_MIN( (i + j), 0xFF )
-///      qsub8( i, j) == FL_MAX( (i - j), 0 )
+///      qadd8( i, j) == fl::min( (i + j), 0xFF )
+///      qsub8( i, j) == fl::max( (i - j), 0 )
 ///      @endcode
 ///
 ///  - Saturating signed 8-bit ("7-bit") add.
 ///      @code
-///      qadd7( i, j) == FL_MIN( (i + j), 0x7F)
+///      qadd7( i, j) == fl::min( (i + j), 0x7F)
 ///      @endcode
 ///
 ///  - Scaling (down) of unsigned 8- and 16- bit values.

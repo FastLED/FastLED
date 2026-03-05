@@ -12,7 +12,7 @@ Based on works and code by Shawn Silverman.
 
 #pragma once
 
-#include "fl/math_macros.h" // if needed for MAX/FL_MIN macros
+#include "fl/math_macros.h" // for fl::min, fl::max
 #include "fl/wave_simulation_real.h"
 
 #include "fl/grid.h"

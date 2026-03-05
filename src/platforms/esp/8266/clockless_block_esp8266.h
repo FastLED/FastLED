@@ -20,7 +20,7 @@ FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 #define FIX_BITS(bits) (((bits & 0x0fL) << 12) | (bits & 0x30))
 
-#define USED_LANES (FL_MIN(LANES, 6))
+#define USED_LANES (fl::min(LANES, 6))
 #define PORT_MASK (((1 << USED_LANES)-1) & 0x0000FFFFL)
 #define PIN_MASK FIX_BITS(PORT_MASK)
 namespace fl {

@@ -14,7 +14,7 @@ FL_TEST_CASE("MicResponseData - interpolation at exact data points") {
     for (int i = 0; i < curve.count; ++i) {
         float freq = fl_progmem_read_float(&curve.freqs[i]);
         float gain = interpolateMicResponse(curve, freq);
-        FL_CHECK(FL_ALMOST_EQUAL(gain, 1.0f, 0.001f));
+        FL_CHECK(fl::almost_equal(gain, 1.0f, 0.001f));
     }
 }
 
@@ -47,11 +47,11 @@ FL_TEST_CASE("MicResponseData - clamping at frequency extremes") {
 
     // Below 20 Hz → should clamp to first value
     float belowMin = interpolateMicResponse(curve, 5.0f);
-    FL_CHECK(FL_ALMOST_EQUAL(belowMin, g0, 0.001f));
+    FL_CHECK(fl::almost_equal(belowMin, g0, 0.001f));
 
     // Above 20 kHz → should clamp to last value
     float aboveMax = interpolateMicResponse(curve, 30000.0f);
-    FL_CHECK(FL_ALMOST_EQUAL(aboveMax, gN, 0.001f));
+    FL_CHECK(fl::almost_equal(aboveMax, gN, 0.001f));
 }
 
 FL_TEST_CASE("MicResponseData - downsample to 16 bins") {
@@ -79,7 +79,7 @@ FL_TEST_CASE("MicResponseData - downsample to 16 bins") {
     FL_CHECK_GT(gains[0], 1.1f);
 
     // Mid-range bins (1–2 kHz) should be near 1.0 (flat region)
-    FL_CHECK(FL_ALMOST_EQUAL(gains[8], 1.0f, 0.1f));
+    FL_CHECK(fl::almost_equal(gains[8], 1.0f, 0.1f));
 }
 
 FL_TEST_CASE("MicResponseData - pink noise gains follow sqrt formula") {
@@ -116,7 +116,7 @@ FL_TEST_CASE("MicResponseData - pink noise geometric mean normalization") {
         logSum += fl::logf(gains[i]);
     }
     float geoMean = fl::expf(logSum / 16.0f);
-    FL_CHECK(FL_ALMOST_EQUAL(geoMean, 1.0f, 0.01f));
+    FL_CHECK(fl::almost_equal(geoMean, 1.0f, 0.01f));
 }
 
 FL_TEST_CASE("MicResponseData - all mic profiles produce valid gains") {
@@ -161,7 +161,7 @@ FL_TEST_CASE("MicResponseData - None profile returns empty curve") {
 FL_TEST_CASE("MicResponseData - interpolation with None curve returns 1.0") {
     MicResponseCurve curve = getMicResponseCurve(MicProfile::None);
     float gain = interpolateMicResponse(curve, 1000.0f);
-    FL_CHECK(FL_ALMOST_EQUAL(gain, 1.0f, 0.001f));
+    FL_CHECK(fl::almost_equal(gain, 1.0f, 0.001f));
 }
 
 FL_TEST_CASE("MicResponseData - mic correction * pink noise stays reasonable") {
@@ -200,13 +200,13 @@ FL_TEST_CASE("MicResponseData - INMP441 key frequencies match reference") {
 
     // At 40 Hz (f[6]), ikostoski analysis: significant bass rolloff, ~1.74x
     float gain40 = interpolateMicResponse(curve, 40.0f);
-    FL_CHECK(FL_ALMOST_EQUAL(gain40, 1.74f, 0.1f));
+    FL_CHECK(fl::almost_equal(gain40, 1.74f, 0.1f));
 
     // At 80 Hz (f[12]), transitioning to flat, ~1.07x
     float gain80 = interpolateMicResponse(curve, 80.0f);
-    FL_CHECK(FL_ALMOST_EQUAL(gain80, 1.07f, 0.1f));
+    FL_CHECK(fl::almost_equal(gain80, 1.07f, 0.1f));
 
     // At ~1000 Hz, should be essentially flat (1.0)
     float gain1k = interpolateMicResponse(curve, 1000.0f);
-    FL_CHECK(FL_ALMOST_EQUAL(gain1k, 1.0f, 0.05f));
+    FL_CHECK(fl::almost_equal(gain1k, 1.0f, 0.05f));
 }

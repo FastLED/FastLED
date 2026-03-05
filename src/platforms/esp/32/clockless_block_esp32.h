@@ -11,6 +11,7 @@
 #include "fl/force_inline.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fl/compiler_control.h"
+#include "fl/math_macros.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -18,8 +19,7 @@ FL_DISABLE_WARNING_DEPRECATED_REGISTER
 #define FASTLED_HAS_BLOCKLESS 1
 
 #define PORT_MASK (((1<<LANES)-1) & 0x0000FFFFL)
-#define FL_MIN(X,Y) (((X)<(Y)) ? (X):(Y))
-#define USED_LANES (FL_MIN(LANES,4))
+#define USED_LANES (fl::min(LANES,4))
 #define REAL_FIRST_PIN 12
 #define LAST_PIN (12 + USED_LANES - 1)
 

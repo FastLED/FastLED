@@ -420,7 +420,7 @@ inline void ScaledPixelIteratorBrightness::advance() {
         // Fallback: compute brightness from max RGB component
         u8 r, g, b;
         mPixels->loadAndScaleRGB(&r, &g, &b);
-        // Use sequential comparisons to avoid nested FL_MAX (helps AVR register allocation)
+        // Use sequential comparisons to avoid nested fl::max (helps AVR register allocation)
         u8 max_rg = (r > g) ? r : g;
         mCurrent = (max_rg > b) ? max_rg : b;
         #endif

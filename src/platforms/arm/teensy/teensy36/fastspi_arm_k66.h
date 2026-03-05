@@ -93,7 +93,7 @@ template <int VAL> void getScalars(u32 & preScalar, u32 & scalar, u32 & dbl) {
 			int w5 = (VAL/5) > 0 ? 5 * (1 << p5) : 0;
 			int w7 = (VAL/7) > 0 ? 7 * (1 << p7) : 0;
 
-			int maxval = FL_MAX(FL_MAX(w2, w3), FL_MAX(w5, w7));
+			int maxval = fl::max(fl::max(w2, w3), fl::max(w5, w7));
 
 			if(w2 == maxval) { preScalar = 0; scalar = p2; }
 			else if(w3 == maxval) { preScalar = 1; scalar = p3; }

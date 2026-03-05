@@ -88,7 +88,7 @@ void draw(uint32_t now) {
         CHSV hsv = fl::noiseRingHSV8(angle, now, noise_radius);
 
         // Apply same constraints as before: minimum saturation and adjusted value
-        hsv.s = FL_MAX(128u, (unsigned)hsv.s);
+        hsv.s = fl::max(128u, (unsigned)hsv.s);
         // Apply value mapping similar to original: map from 0-255 to -64-255, clamp to 0-255
         uint16_t val = hsv.v;
         int16_t adjusted_val = map(val, 0, 255, -64, 255);

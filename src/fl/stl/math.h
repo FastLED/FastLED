@@ -54,24 +54,6 @@
 #define FL_FLT_MAX 3.402823466e+38F
 #endif
 
-// ===== Approximate-equality macros ===========================================
-
-#ifndef FL_ALMOST_EQUAL
-#define FL_ALMOST_EQUAL(a, b, small) (FL_ABS((a) - (b)) < small)
-#endif
-
-#ifndef FL_ALMOST_EQUAL_FLOAT
-#define FL_ALMOST_EQUAL_FLOAT(a, b) (FL_ABS((a) - (b)) < FL_EPSILON_F)
-#endif
-
-#ifndef FL_ALMOST_EQUAL_EPSILON
-#define FL_ALMOST_EQUAL_EPSILON(a, b, epsilon) (FL_ABS((a) - (b)) < (epsilon))
-#endif
-
-#ifndef FL_ALMOST_EQUAL_DOUBLE
-#define FL_ALMOST_EQUAL_DOUBLE(a, b) FL_ALMOST_EQUAL_EPSILON(a, b, FL_EPSILON_F)
-#endif
-
 namespace fl {
 
 // ===== Basic: min, max, abs, clamp ===========================================
@@ -102,6 +84,21 @@ template <typename T> FASTLED_FORCE_INLINE T clamp(T value, T lo, T hi) {
     return value;
 }
 
+// ===== Approximate equality ===================================================
+
+template <typename T, typename U>
+constexpr inline bool almost_equal(T a, T b, U tolerance) {
+    return fl::abs(a - b) < tolerance;
+}
+
+inline bool almost_equal(float a, float b) {
+    return fl::abs(a - b) < FL_EPSILON_F;
+}
+
+inline bool almost_equal(double a, double b) {
+    return fl::abs(a - b) < FL_EPSILON_F;
+}
+
 // ===== Legacy macros (prefer fl:: functions directly) ========================
 
 #ifndef FL_MAX
@@ -114,6 +111,22 @@ template <typename T> FASTLED_FORCE_INLINE T clamp(T value, T lo, T hi) {
 
 #ifndef FL_ABS
 #define FL_ABS(x) fl::abs(x)
+#endif
+
+#ifndef FL_ALMOST_EQUAL
+#define FL_ALMOST_EQUAL(a, b, small) fl::almost_equal(a, b, small)
+#endif
+
+#ifndef FL_ALMOST_EQUAL_FLOAT
+#define FL_ALMOST_EQUAL_FLOAT(a, b) fl::almost_equal(static_cast<float>(a), static_cast<float>(b))
+#endif
+
+#ifndef FL_ALMOST_EQUAL_EPSILON
+#define FL_ALMOST_EQUAL_EPSILON(a, b, epsilon) fl::almost_equal(a, b, epsilon)
+#endif
+
+#ifndef FL_ALMOST_EQUAL_DOUBLE
+#define FL_ALMOST_EQUAL_DOUBLE(a, b) fl::almost_equal(static_cast<double>(a), static_cast<double>(b))
 #endif
 
 // ===== Map range =============================================================
@@ -152,8 +165,8 @@ template <> struct map_range_math<u16, u16> {
 
 // Equality comparison helpers
 template <typename T> bool equals(T a, T b) { return a == b; }
-inline bool equals(float a, float b) { return FL_ALMOST_EQUAL_FLOAT(a, b); }
-inline bool equals(double d, double d2) { return FL_ALMOST_EQUAL_DOUBLE(d, d2); }
+inline bool equals(float a, float b) { return fl::almost_equal(a, b); }
+inline bool equals(double d, double d2) { return fl::almost_equal(d, d2); }
 
 } // namespace map_range_detail
 

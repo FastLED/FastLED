@@ -130,10 +130,10 @@ FL_TEST_CASE("Test HeartPath") {
         fl::vec2<float> point = heart->compute(alpha);
         
         // Update min/max values
-        min_x = FL_MIN(min_x, point.x);
-        max_x = FL_MAX(max_x, point.x);
-        min_y = FL_MIN(min_y, point.y);
-        max_y = FL_MAX(max_y, point.y);
+        min_x = fl::min(min_x, point.x);
+        max_x = fl::max(max_x, point.x);
+        min_y = fl::min(min_y, point.y);
+        max_y = fl::max(max_y, point.y);
         
         // Print every 10th point for visual inspection
         if (i % 10 == 0) {
@@ -169,10 +169,10 @@ FL_TEST_CASE("Test ArchimedeanSpiralPath") {
         fl::vec2<float> point = spiral->compute(alpha);
         
         // Update min/max values
-        min_x = FL_MIN(min_x, point.x);
-        max_x = FL_MAX(max_x, point.x);
-        min_y = FL_MIN(min_y, point.y);
-        max_y = FL_MAX(max_y, point.y);
+        min_x = fl::min(min_x, point.x);
+        max_x = fl::max(max_x, point.x);
+        min_y = fl::min(min_y, point.y);
+        max_y = fl::max(max_y, point.y);
         
         // Print every 10th point for visual inspection
         if (i % 10 == 0) {
@@ -210,10 +210,10 @@ FL_TEST_CASE("Test RosePath") {
             fl::vec2<float> point = rose->compute(alpha);
             
             // Update min/max values
-            min_x = FL_MIN(min_x, point.x);
-            max_x = FL_MAX(max_x, point.x);
-            min_y = FL_MIN(min_y, point.y);
-            max_y = FL_MAX(max_y, point.y);
+            min_x = fl::min(min_x, point.x);
+            max_x = fl::max(max_x, point.x);
+            min_y = fl::min(min_y, point.y);
+            max_y = fl::max(max_y, point.y);
             
             // Print every 10th point for visual inspection
             if (i % 10 == 0) {
@@ -249,10 +249,10 @@ FL_TEST_CASE("Test RosePath") {
             fl::vec2<float> point = rose->compute(alpha);
             
             // Update min/max values
-            min_x = FL_MIN(min_x, point.x);
-            max_x = FL_MAX(max_x, point.x);
-            min_y = FL_MIN(min_y, point.y);
-            max_y = FL_MAX(max_y, point.y);
+            min_x = fl::min(min_x, point.x);
+            max_x = fl::max(max_x, point.x);
+            min_y = fl::min(min_y, point.y);
+            max_y = fl::max(max_y, point.y);
         }
         
         // Verify the rose is within the expected bounds
@@ -291,13 +291,13 @@ FL_TEST_CASE("Check complex types") {
     FL_SUBCASE("Check floating point range") {
         for (auto &path : paths) {
             for (float alpha = 0.0f; true; alpha += 0.01f) {
-                alpha = FL_MIN(1.f, alpha);
+                alpha = fl::min(1.f, alpha);
                 fl::vec2<float> xy = path->at(alpha);
                 FL_REQUIRE(xy.x >= -1.0f);
                 FL_REQUIRE(xy.x <= 1.0f);
                 FL_REQUIRE(xy.y >= -1.0f);
                 FL_REQUIRE(xy.y <= 1.0f);
-                if (FL_ALMOST_EQUAL(alpha, 1.0f, 0.001f)) {
+                if (fl::almost_equal(alpha, 1.0f, 0.001f)) {
                     break;
                 }
             }
@@ -310,13 +310,13 @@ FL_TEST_CASE("Check complex types") {
 
         for (auto &path : paths) {
             for (float alpha = 0.0f; true; alpha += 0.01f) {
-                alpha = FL_MIN(1.f, alpha);
+                alpha = fl::min(1.f, alpha);
                 fl::vec2<float> xy = path->at(alpha, tx);
                 FL_REQUIRE_GE(xy.x, -4.0f);
                 FL_REQUIRE_LE(xy.x, 4.0f);
                 FL_REQUIRE_GE(xy.y, -4.0f);
                 FL_REQUIRE_LE(xy.y, 4.0f);
-                if (FL_ALMOST_EQUAL(alpha, 1.0f, 0.001f)) {
+                if (fl::almost_equal(alpha, 1.0f, 0.001f)) {
                     break;
                 }
             }

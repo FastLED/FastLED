@@ -210,7 +210,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
             }
         }
 
-        auto n = FL_MIN(x_array.size(), y_array.size());
+        auto n = fl::min(x_array.size(), y_array.size());
         if (n != x_array.size() || n != y_array.size()) {
             if (n != x_array.size()) {
             }
@@ -411,10 +411,10 @@ vec2f ScreenMap::getBounds() const {
 
     for (u32 i = 1; i < length; i++) {
         const vec2f &p = lut[i];
-        minX = FL_MIN(minX, p.x);
-        maxX = FL_MAX(maxX, p.x);
-        minY = FL_MIN(minY, p.y);
-        maxY = FL_MAX(maxY, p.y);
+        minX = fl::min(minX, p.x);
+        maxX = fl::max(maxX, p.x);
+        minY = fl::min(minY, p.y);
+        maxY = fl::max(maxY, p.y);
     }
 
     return {maxX - minX, maxY - minY};

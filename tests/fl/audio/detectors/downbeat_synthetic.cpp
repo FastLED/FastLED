@@ -71,7 +71,7 @@ shared_ptr<AudioContext> createMockAudioContext(u32 timestamp, bool isDownbeat,
         i16 baseAmplitude = isDownbeat ? 25000 : 15000;
         // Clamp to i16 range to prevent UBSan overflow (max accentMultiplier is 2.0)
         float amplitudeFloat = baseAmplitude * accentMultiplier;
-        i16 amplitude = static_cast<i16>(FL_MIN(amplitudeFloat, 32767.0f));
+        i16 amplitude = static_cast<i16>(fl::min(amplitudeFloat, 32767.0f));
 
         // Use multiple frequencies to create richer spectral content.
         // Frequencies chosen to fall clearly within CQ bass bins (fmin=30 Hz).

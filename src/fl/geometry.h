@@ -152,11 +152,11 @@ template <typename T> struct vec3 {
     }
 
     vec3 getMax(const vec3 &p) const {
-        return vec3(FL_MAX(x, p.x), FL_MAX(y, p.y), FL_MAX(z, p.z));
+        return vec3(fl::max(x, p.x), fl::max(y, p.y), fl::max(z, p.z));
     }
 
     vec3 getMin(const vec3 &p) const {
-        return vec3(FL_MIN(x, p.x), FL_MIN(y, p.y), FL_MIN(z, p.z));
+        return vec3(fl::min(x, p.x), fl::min(y, p.y), fl::min(z, p.z));
     }
 
     template <typename U> vec3<U> cast() const {
@@ -164,11 +164,11 @@ template <typename T> struct vec3 {
     }
 
     template <typename U> vec3 getMax(const vec3<U> &p) const {
-        return vec3<U>(FL_MAX(x, p.x), FL_MAX(y, p.y), FL_MAX(z, p.z));
+        return vec3<U>(fl::max(x, p.x), fl::max(y, p.y), fl::max(z, p.z));
     }
 
     template <typename U> vec3 getMin(const vec3<U> &p) const {
-        return vec3<U>(FL_MIN(x, p.x), FL_MIN(y, p.y), FL_MIN(z, p.z));
+        return vec3<U>(fl::min(x, p.x), fl::min(y, p.y), fl::min(z, p.z));
     }
 
     T distance(const vec3 &p) const {
@@ -304,20 +304,20 @@ template <typename T> struct vec2 {
         return (x != p.x || y != p.y);
     }
 
-    vec2 getMax(const vec2 &p) const { return vec2(FL_MAX(x, p.x), FL_MAX(y, p.y)); }
+    vec2 getMax(const vec2 &p) const { return vec2(fl::max(x, p.x), fl::max(y, p.y)); }
 
-    vec2 getMin(const vec2 &p) const { return vec2(FL_MIN(x, p.x), FL_MIN(y, p.y)); }
+    vec2 getMin(const vec2 &p) const { return vec2(fl::min(x, p.x), fl::min(y, p.y)); }
 
     template <typename U> vec2<U> cast() const {
         return vec2<U>(static_cast<U>(x), static_cast<U>(y));
     }
 
     template <typename U> vec2 getMax(const vec2<U> &p) const {
-        return vec2<U>(FL_MAX(x, p.x), FL_MAX(y, p.y));
+        return vec2<U>(fl::max(x, p.x), fl::max(y, p.y));
     }
 
     template <typename U> vec2 getMin(const vec2<U> &p) const {
-        return vec2<U>(FL_MIN(x, p.x), FL_MIN(y, p.y));
+        return vec2<U>(fl::min(x, p.x), fl::min(y, p.y));
     }
 
     T distance(const vec2 &p) const {
@@ -461,10 +461,10 @@ template <typename T> struct rect {
     }
 
     void expand(T x, T y) {
-        mMin.x = FL_MIN(mMin.x, x);
-        mMin.y = FL_MIN(mMin.y, y);
-        mMax.x = FL_MAX(mMax.x, x);
-        mMax.y = FL_MAX(mMax.y, y);
+        mMin.x = fl::min(mMin.x, x);
+        mMin.y = fl::min(mMin.y, y);
+        mMax.x = fl::max(mMax.x, x);
+        mMax.y = fl::max(mMax.y, y);
     }
 
     bool contains(const vec2<T> &p) const {

@@ -344,31 +344,31 @@ FL_TEST_CASE("fl::math integer promotion") {
     }
 }
 
-FL_TEST_CASE("math macros") {
-    FL_SUBCASE("FL_MIN and FL_MAX") {
-        FL_CHECK_EQ(FL_MIN(5, 10), 5);
-        FL_CHECK_EQ(FL_MAX(5, 10), 10);
-        FL_CHECK_EQ(FL_MIN(-5, -10), -10);
-        FL_CHECK_EQ(FL_MAX(-5, -10), -5);
+FL_TEST_CASE("math functions") {
+    FL_SUBCASE("fl::min and fl::max") {
+        FL_CHECK_EQ(fl::min(5, 10), 5);
+        FL_CHECK_EQ(fl::max(5, 10), 10);
+        FL_CHECK_EQ(fl::min(-5, -10), -10);
+        FL_CHECK_EQ(fl::max(-5, -10), -5);
     }
 
-    FL_SUBCASE("FL_ABS") {
-        FL_CHECK_EQ(FL_ABS(5), 5);
-        FL_CHECK_EQ(FL_ABS(-5), 5);
-        FL_CHECK_EQ(FL_ABS(0), 0);
+    FL_SUBCASE("fl::abs") {
+        FL_CHECK_EQ(fl::abs(5), 5);
+        FL_CHECK_EQ(fl::abs(-5), 5);
+        FL_CHECK_EQ(fl::abs(0), 0);
     }
 
-    FL_SUBCASE("FL_ALMOST_EQUAL") {
-        FL_CHECK(FL_ALMOST_EQUAL(1.0f, 1.00001f, 0.001f));
-        FL_CHECK_FALSE(FL_ALMOST_EQUAL(1.0f, 1.01f, 0.001f));
+    FL_SUBCASE("fl::almost_equal") {
+        FL_CHECK(fl::almost_equal(1.0f, 1.00001f, 0.001f));
+        FL_CHECK_FALSE(fl::almost_equal(1.0f, 1.01f, 0.001f));
     }
 
-    FL_SUBCASE("FL_ALMOST_EQUAL_FLOAT") {
-        FL_CHECK(FL_ALMOST_EQUAL_FLOAT(1.0f, 1.0f + FL_EPSILON_F / 2.0f));
+    FL_SUBCASE("fl::almost_equal float") {
+        FL_CHECK(fl::almost_equal(1.0f, 1.0f + FL_EPSILON_F / 2.0f));
     }
 
-    FL_SUBCASE("FL_ALMOST_EQUAL_DOUBLE") {
-        FL_CHECK(FL_ALMOST_EQUAL_DOUBLE(1.0, 1.0 + FL_EPSILON_D / 2.0));
+    FL_SUBCASE("fl::almost_equal double") {
+        FL_CHECK(fl::almost_equal(1.0, 1.0 + FL_EPSILON_D / 2.0));
     }
 
     FL_SUBCASE("FL_PI") {

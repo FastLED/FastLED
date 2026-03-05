@@ -154,7 +154,7 @@ class TimeClampedTransition : public TimeAlpha {
         }
         float out = time_alphaf(now, mStart, mEnd);
         if (mMaxClamp > 0.f) {
-            out = FL_MIN(out, mMaxClamp);
+            out = fl::min(out, mMaxClamp);
         }
         return out;
     }

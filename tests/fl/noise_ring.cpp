@@ -188,14 +188,14 @@ FL_TEST_CASE("[.]noiseRingHSV16 full ring coverage") {
         fl::HSV16 hsv = noiseRingHSV16(angle, time_sample, radius);
 
         // Track ranges
-        min_hsv.h = FL_MIN(min_hsv.h, hsv.h);
-        max_hsv.h = FL_MAX(max_hsv.h, hsv.h);
+        min_hsv.h = fl::min(min_hsv.h, hsv.h);
+        max_hsv.h = fl::max(max_hsv.h, hsv.h);
 
-        min_hsv.s = FL_MIN(min_hsv.s, hsv.s);
-        max_hsv.s = FL_MAX(max_hsv.s, hsv.s);
+        min_hsv.s = fl::min(min_hsv.s, hsv.s);
+        max_hsv.s = fl::max(max_hsv.s, hsv.s);
 
-        min_hsv.v = FL_MIN(min_hsv.v, hsv.v);
-        max_hsv.v = FL_MAX(max_hsv.v, hsv.v);
+        min_hsv.v = fl::min(min_hsv.v, hsv.v);
+        max_hsv.v = fl::max(max_hsv.v, hsv.v);
 
         // Track sums for average
         h_sum += hsv.h;
@@ -439,14 +439,14 @@ FL_TEST_CASE("[.]noiseSphereHSV16 full sphere coverage") {
             fl::HSV16 hsv = noiseSphereHSV16(angle, phi, time_sample, radius);
 
             // Track ranges
-            min_hsv.h = FL_MIN(min_hsv.h, hsv.h);
-            max_hsv.h = FL_MAX(max_hsv.h, hsv.h);
+            min_hsv.h = fl::min(min_hsv.h, hsv.h);
+            max_hsv.h = fl::max(max_hsv.h, hsv.h);
 
-            min_hsv.s = FL_MIN(min_hsv.s, hsv.s);
-            max_hsv.s = FL_MAX(max_hsv.s, hsv.s);
+            min_hsv.s = fl::min(min_hsv.s, hsv.s);
+            max_hsv.s = fl::max(max_hsv.s, hsv.s);
 
-            min_hsv.v = FL_MIN(min_hsv.v, hsv.v);
-            max_hsv.v = FL_MAX(max_hsv.v, hsv.v);
+            min_hsv.v = fl::min(min_hsv.v, hsv.v);
+            max_hsv.v = fl::max(max_hsv.v, hsv.v);
 
             // Track sums for average
             h_sum += hsv.h;
@@ -565,14 +565,14 @@ FL_TEST_CASE("[.]noiseRingHSV16 stress test - 1M time samples") {
         fl::HSV16 hsv = noiseRingHSV16(ANGLE, time, RADIUS);
 
         // Update running min/max for each component
-        min_h = FL_MIN(min_h, hsv.h);
-        max_h = FL_MAX(max_h, hsv.h);
+        min_h = fl::min(min_h, hsv.h);
+        max_h = fl::max(max_h, hsv.h);
 
-        min_s = FL_MIN(min_s, hsv.s);
-        max_s = FL_MAX(max_s, hsv.s);
+        min_s = fl::min(min_s, hsv.s);
+        max_s = fl::max(max_s, hsv.s);
 
-        min_v = FL_MIN(min_v, hsv.v);
-        max_v = FL_MAX(max_v, hsv.v);
+        min_v = fl::min(min_v, hsv.v);
+        max_v = fl::max(max_v, hsv.v);
     }
 
     uint16_t h_span = max_h - min_h;
@@ -626,14 +626,14 @@ FL_TEST_CASE("[.]noiseRingHSV16 angle sweep - full ring coverage at fixed time")
         float angle_rad = (angle_deg / 360.0f) * 2.0f * M_PI;
         fl::HSV16 hsv = noiseRingHSV16(angle_rad, TIME, RADIUS);
 
-        min_h = FL_MIN(min_h, hsv.h);
-        max_h = FL_MAX(max_h, hsv.h);
+        min_h = fl::min(min_h, hsv.h);
+        max_h = fl::max(max_h, hsv.h);
 
-        min_s = FL_MIN(min_s, hsv.s);
-        max_s = FL_MAX(max_s, hsv.s);
+        min_s = fl::min(min_s, hsv.s);
+        max_s = fl::max(max_s, hsv.s);
 
-        min_v = FL_MIN(min_v, hsv.v);
-        max_v = FL_MAX(max_v, hsv.v);
+        min_v = fl::min(min_v, hsv.v);
+        max_v = fl::max(max_v, hsv.v);
     }
 
     uint16_t h_span = max_h - min_h;
@@ -687,14 +687,14 @@ FL_TEST_CASE("[.]noiseRingHSV16 2D parameter space - time + angle variation") {
         for (int t = 0; t < TIME_SAMPLES; t++) {
             fl::HSV16 hsv = noiseRingHSV16(angle, t, RADIUS);
 
-            min_h = FL_MIN(min_h, hsv.h);
-            max_h = FL_MAX(max_h, hsv.h);
+            min_h = fl::min(min_h, hsv.h);
+            max_h = fl::max(max_h, hsv.h);
 
-            min_s = FL_MIN(min_s, hsv.s);
-            max_s = FL_MAX(max_s, hsv.s);
+            min_s = fl::min(min_s, hsv.s);
+            max_s = fl::max(max_s, hsv.s);
 
-            min_v = FL_MIN(min_v, hsv.v);
-            max_v = FL_MAX(max_v, hsv.v);
+            min_v = fl::min(min_v, hsv.v);
+            max_v = fl::max(max_v, hsv.v);
         }
     }
 
@@ -756,14 +756,14 @@ FL_TEST_CASE("[.]noiseRingHSV16 random angle + time - 1M samples") {
 
         fl::HSV16 hsv = noiseRingHSV16(angle, time, RADIUS);
 
-        min_h = FL_MIN(min_h, hsv.h);
-        max_h = FL_MAX(max_h, hsv.h);
+        min_h = fl::min(min_h, hsv.h);
+        max_h = fl::max(max_h, hsv.h);
 
-        min_s = FL_MIN(min_s, hsv.s);
-        max_s = FL_MAX(max_s, hsv.s);
+        min_s = fl::min(min_s, hsv.s);
+        max_s = fl::max(max_s, hsv.s);
 
-        min_v = FL_MIN(min_v, hsv.v);
-        max_v = FL_MAX(max_v, hsv.v);
+        min_v = fl::min(min_v, hsv.v);
+        max_v = fl::max(max_v, hsv.v);
     }
 
     uint16_t h_span = max_h - min_h;
@@ -829,12 +829,12 @@ FL_TEST_CASE("[.]noiseRingHSV16 find optimal extents for 98% coverage - 100k raw
         uint16_t s_raw = inoise16(nx, ny, time + 0x10000);
         uint16_t v_raw = inoise16(nx, ny, time + 0x20000);
 
-        min_h_raw = FL_MIN(min_h_raw, h_raw);
-        max_h_raw = FL_MAX(max_h_raw, h_raw);
-        min_s_raw = FL_MIN(min_s_raw, s_raw);
-        max_s_raw = FL_MAX(max_s_raw, s_raw);
-        min_v_raw = FL_MIN(min_v_raw, v_raw);
-        max_v_raw = FL_MAX(max_v_raw, v_raw);
+        min_h_raw = fl::min(min_h_raw, h_raw);
+        max_h_raw = fl::max(max_h_raw, h_raw);
+        min_s_raw = fl::min(min_s_raw, s_raw);
+        max_s_raw = fl::max(max_s_raw, s_raw);
+        min_v_raw = fl::min(min_v_raw, v_raw);
+        max_v_raw = fl::max(max_v_raw, v_raw);
     }
 
     // Current extents
@@ -855,8 +855,8 @@ FL_TEST_CASE("[.]noiseRingHSV16 find optimal extents for 98% coverage - 100k raw
 
     // To achieve 98% coverage, we need tighter extents that better match actual distribution
     // Use observed mins and maxs with small safety margin (0.5% on each side)
-    uint16_t global_min_observed = FL_MIN(FL_MIN(min_h_raw, min_s_raw), min_v_raw);
-    uint16_t global_max_observed = FL_MAX(FL_MAX(max_h_raw, max_s_raw), max_v_raw);
+    uint16_t global_min_observed = fl::min(fl::min(min_h_raw, min_s_raw), min_v_raw);
+    uint16_t global_max_observed = fl::max(fl::max(max_h_raw, max_s_raw), max_v_raw);
 
     // Calculate safety margin (~100 units for conservative bounds)
     uint16_t safety_margin = 100;
@@ -928,14 +928,14 @@ FL_TEST_CASE("[.]noiseRingHSV16 extent validation - 10k random samples at radius
             uint16_t s_raw = inoise16(nx, ny, time + 0x10000);
             uint16_t v_raw = inoise16(nx, ny, time + 0x20000);
 
-            min_h_raw = FL_MIN(min_h_raw, h_raw);
-            max_h_raw = FL_MAX(max_h_raw, h_raw);
+            min_h_raw = fl::min(min_h_raw, h_raw);
+            max_h_raw = fl::max(max_h_raw, h_raw);
 
-            min_s_raw = FL_MIN(min_s_raw, s_raw);
-            max_s_raw = FL_MAX(max_s_raw, s_raw);
+            min_s_raw = fl::min(min_s_raw, s_raw);
+            max_s_raw = fl::max(max_s_raw, s_raw);
 
-            min_v_raw = FL_MIN(min_v_raw, v_raw);
-            max_v_raw = FL_MAX(max_v_raw, v_raw);
+            min_v_raw = fl::min(min_v_raw, v_raw);
+            max_v_raw = fl::max(max_v_raw, v_raw);
         }
 
         h_mins[trial] = min_h_raw;
@@ -988,12 +988,12 @@ FL_TEST_CASE("[.]noiseRingHSV16 extent validation - 10k random samples at radius
     uint16_t global_v_min = v_mins[0], global_v_max = v_maxs[0];
 
     for (int i = 1; i < NUM_TRIALS; i++) {
-        global_h_min = FL_MIN(global_h_min, h_mins[i]);
-        global_h_max = FL_MAX(global_h_max, h_maxs[i]);
-        global_s_min = FL_MIN(global_s_min, s_mins[i]);
-        global_s_max = FL_MAX(global_s_max, s_maxs[i]);
-        global_v_min = FL_MIN(global_v_min, v_mins[i]);
-        global_v_max = FL_MAX(global_v_max, v_maxs[i]);
+        global_h_min = fl::min(global_h_min, h_mins[i]);
+        global_h_max = fl::max(global_h_max, h_maxs[i]);
+        global_s_min = fl::min(global_s_min, s_mins[i]);
+        global_s_max = fl::max(global_s_max, s_maxs[i]);
+        global_v_min = fl::min(global_v_min, v_mins[i]);
+        global_v_max = fl::max(global_v_max, v_maxs[i]);
     }
 
     FL_WARN("  HUE:        " << global_h_min << " - " << global_h_max);
@@ -1203,14 +1203,14 @@ FL_TEST_CASE("[.]noiseCylinderHSV16 full circumference coverage") {
         fl::HSV16 hsv = noiseCylinderHSV16(angle, HEIGHT, time_sample, radius);
 
         // Track ranges
-        min_hsv.h = FL_MIN(min_hsv.h, hsv.h);
-        max_hsv.h = FL_MAX(max_hsv.h, hsv.h);
+        min_hsv.h = fl::min(min_hsv.h, hsv.h);
+        max_hsv.h = fl::max(max_hsv.h, hsv.h);
 
-        min_hsv.s = FL_MIN(min_hsv.s, hsv.s);
-        max_hsv.s = FL_MAX(max_hsv.s, hsv.s);
+        min_hsv.s = fl::min(min_hsv.s, hsv.s);
+        max_hsv.s = fl::max(max_hsv.s, hsv.s);
 
-        min_hsv.v = FL_MIN(min_hsv.v, hsv.v);
-        max_hsv.v = FL_MAX(max_hsv.v, hsv.v);
+        min_hsv.v = fl::min(min_hsv.v, hsv.v);
+        max_hsv.v = fl::max(max_hsv.v, hsv.v);
 
         // Track sums for average
         h_sum += hsv.h;
@@ -1327,14 +1327,14 @@ FL_TEST_CASE("[.]noiseCylinderHSV16 full cylinder coverage (angle + height)") {
             fl::HSV16 hsv = noiseCylinderHSV16(angle, height, time_sample, radius);
 
             // Track ranges
-            min_hsv.h = FL_MIN(min_hsv.h, hsv.h);
-            max_hsv.h = FL_MAX(max_hsv.h, hsv.h);
+            min_hsv.h = fl::min(min_hsv.h, hsv.h);
+            max_hsv.h = fl::max(max_hsv.h, hsv.h);
 
-            min_hsv.s = FL_MIN(min_hsv.s, hsv.s);
-            max_hsv.s = FL_MAX(max_hsv.s, hsv.s);
+            min_hsv.s = fl::min(min_hsv.s, hsv.s);
+            max_hsv.s = fl::max(max_hsv.s, hsv.s);
 
-            min_hsv.v = FL_MIN(min_hsv.v, hsv.v);
-            max_hsv.v = FL_MAX(max_hsv.v, hsv.v);
+            min_hsv.v = fl::min(min_hsv.v, hsv.v);
+            max_hsv.v = fl::max(max_hsv.v, hsv.v);
 
             // Track sums for average
             h_sum += hsv.h;
@@ -1387,14 +1387,14 @@ FL_TEST_CASE("[.]noiseCylinderCRGB full cylinder coverage") {
             CRGB rgb = noiseCylinderCRGB(angle, height, time_sample, radius);
 
             // Track ranges
-            min_r = FL_MIN(min_r, (uint16_t)rgb.r);
-            max_r = FL_MAX(max_r, (uint16_t)rgb.r);
+            min_r = fl::min(min_r, (uint16_t)rgb.r);
+            max_r = fl::max(max_r, (uint16_t)rgb.r);
 
-            min_g = FL_MIN(min_g, (uint16_t)rgb.g);
-            max_g = FL_MAX(max_g, (uint16_t)rgb.g);
+            min_g = fl::min(min_g, (uint16_t)rgb.g);
+            max_g = fl::max(max_g, (uint16_t)rgb.g);
 
-            min_b = FL_MIN(min_b, (uint16_t)rgb.b);
-            max_b = FL_MAX(max_b, (uint16_t)rgb.b);
+            min_b = fl::min(min_b, (uint16_t)rgb.b);
+            max_b = fl::max(max_b, (uint16_t)rgb.b);
 
             // Track sums for average
             r_sum += rgb.r;

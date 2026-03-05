@@ -120,7 +120,7 @@ FL_TEST_CASE("Iteratively find the closest point") {
         }
         thresh += 0.01f;
     }
-    FL_REQUIRE(FL_ALMOST_EQUAL(thresh, 0.5f, 0.01f));
+    FL_REQUIRE(fl::almost_equal(thresh, 0.5f, 0.01f));
 }
 
 

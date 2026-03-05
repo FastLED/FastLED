@@ -134,7 +134,7 @@ void encodeSK9822_AutoBrightness(InputIterator first, InputIterator last,
     // Extract global brightness from first pixel
     const fl::array<u8, BYTES_PER_PIXEL_RGB>& first_pixel = *first;
     const u16 maxBrightness = 0x1F;
-    // Use sequential comparisons to avoid nested FL_MAX (helps AVR register allocation)
+    // Use sequential comparisons to avoid nested fl::max (helps AVR register allocation)
     u8 max_rg = (first_pixel[2] > first_pixel[1]) ? first_pixel[2] : first_pixel[1];
     u8 max_component = (max_rg > first_pixel[0]) ? max_rg : first_pixel[0];
     u16 brightness = ((((u16)max_component + 1) * maxBrightness - 1) >> 8) + 1;

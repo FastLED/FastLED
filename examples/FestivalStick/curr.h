@@ -702,8 +702,8 @@ void processWaveAutoTrigger(uint32_t now) {
             uint32_t max_interval = (uint32_t)(3000 * speed);  // Maximum 3000ms * speed
             
             // Ensure valid range
-            uint32_t min = FL_MIN(min_interval, max_interval);
-            uint32_t max = FL_MAX(min_interval, max_interval);
+            uint32_t min = fl::min(min_interval, max_interval);
+            uint32_t max = fl::max(min_interval, max_interval);
             if (min >= max) max = min + 1;
             
             nextWaveTrigger = now + random16(min, max);

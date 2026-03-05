@@ -23,7 +23,7 @@ fl::size ByteStreamMemory::read(fl::u8 *dst, fl::size bytesToRead) {
     }
 
     // Read up to the requested amount, whatever is available
-    fl::size actualBytesToRead = FL_MIN(bytesToRead, mReadBuffer.size());
+    fl::size actualBytesToRead = fl::min(bytesToRead, mReadBuffer.size());
     fl::size bytesRead = 0;
 
     while (bytesRead < actualBytesToRead) {

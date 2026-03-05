@@ -108,7 +108,7 @@ struct TransformFloat {
     float offset_y() const { return mImpl->offset_y; }
     // rotation range is [0,1], not [0,2*FL_PI]!
     float rotation() const { return mImpl->rotation; }
-    float scale() const { return FL_MIN(scale_x(), scale_y()); }
+    float scale() const { return fl::min(scale_x(), scale_y()); }
     void set_scale(float scale) { mImpl->set_scale(scale); }
     void set_scale_x(float scale) { mImpl->scale_x = scale; }
     void set_scale_y(float scale) { mImpl->scale_y = scale; }

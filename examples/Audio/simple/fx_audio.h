@@ -31,8 +31,8 @@ public:
         // 1) block peak
         float peak = 0.0f;
         for (size_t i = 0; i < length; ++i) {
-            float v = FL_ABS(samples[i]) * (1.0f/32768.0f);
-            peak = FL_MAX(peak, v);
+            float v = fl::abs(samples[i]) * (1.0f/32768.0f);
+            peak = fl::max(peak, v);
         }
 
         // 2) time delta

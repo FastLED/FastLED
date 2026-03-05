@@ -133,7 +133,7 @@ vec2<alpha16> Transform16::transform(const vec2<alpha16> &xy) const {
     return out;
 }
 
-float TransformFloatImpl::scale() const { return FL_MIN(scale_x, scale_y); }
+float TransformFloatImpl::scale() const { return fl::min(scale_x, scale_y); }
 
 void TransformFloatImpl::set_scale(float scale) {
     scale_x = scale;

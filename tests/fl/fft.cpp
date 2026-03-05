@@ -66,7 +66,7 @@ FL_TEST_CASE("fft tester 512") {
     for (int i = 0; i < 16; ++i) {
         float a = out.raw()[i];
         float b = expected_output[i];
-        bool almost_equal = FL_ALMOST_EQUAL(a, b, tolerance);
+        bool almost_equal = fl::almost_equal(a, b, tolerance);
         if (!almost_equal) {
             FASTLED_WARN("FFTImpl output mismatch at index " << i << ": " << a
                                                          << " != " << b);
@@ -121,7 +121,7 @@ FL_TEST_CASE("fft tester 256") {
     for (int i = 0; i < 16; ++i) {
         float a = out.raw()[i];
         float b = expected_output[i];
-        bool almost_equal = FL_ALMOST_EQUAL(a, b, tolerance);
+        bool almost_equal = fl::almost_equal(a, b, tolerance);
         if (!almost_equal) {
             FASTLED_WARN("FFTImpl output mismatch at index " << i << ": " << a
                                                          << " != " << b);
@@ -197,7 +197,7 @@ FL_TEST_CASE("fft tester 256 with 64 bands") {
     for (int i = 0; i < 64; ++i) {
         float a = out.raw()[i];
         float b = expected_output[i];
-        bool almost_equal = FL_ALMOST_EQUAL(a, b, tolerance);
+        bool almost_equal = fl::almost_equal(a, b, tolerance);
         if (!almost_equal) {
             FASTLED_WARN("FFTImpl output mismatch at index " << i << ": " << a
                                                          << " != " << b);
@@ -417,7 +417,7 @@ FL_TEST_CASE("fl::FFTBins - binToFreq known values") {
     fft.run(silence, &bins);
 
     // Bin 0 = fmin
-    FL_CHECK(FL_ALMOST_EQUAL(bins.binToFreq(0), 174.6f, 0.1f));
+    FL_CHECK(fl::almost_equal(bins.binToFreq(0), 174.6f, 0.1f));
 
     // Bin 15 = fmax (within 1% due to fl:: math precision)
     float relError = fl::abs(bins.binToFreq(15) - 4698.3f) / 4698.3f;

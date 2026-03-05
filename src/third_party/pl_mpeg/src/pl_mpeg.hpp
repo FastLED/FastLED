@@ -2604,7 +2604,7 @@ int plm_video_decode_motion_vector(plm_video_t *self, int r_size, int motion) {
 
 	if ((m_code != 0) && (fscale != 1)) {
 		r = plm_buffer_read(self->buffer, r_size);
-		d = ((FL_ABS(m_code) - 1) << r_size) + r + 1;
+		d = ((fl::abs(m_code) - 1) << r_size) + r + 1;
 		if (m_code < 0) {
 			d = -d;
 		}

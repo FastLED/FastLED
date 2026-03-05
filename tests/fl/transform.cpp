@@ -48,8 +48,8 @@ FL_TEST_CASE("Transform16::ToBounds(max_value)") {
             FL_DINFO("i = " << i);
             FL_REQUIRE_LE(xy.x, 255);
             FL_REQUIRE_LE(xy.y, 255);
-            smallest = FL_MIN(smallest, xy.x);
-            largest = FL_MAX(largest, xy.x);
+            smallest = fl::min(smallest, xy.x);
+            largest = fl::max(largest, xy.x);
         }
 
         FL_REQUIRE_EQ(0, smallest);

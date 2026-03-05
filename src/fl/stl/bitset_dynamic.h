@@ -124,7 +124,7 @@ class bitset_dynamic {
             fl::memset(new_blocks, 0, new_block_count * sizeof(block_type));
 
             if (_blocks) {
-                fl::u32 copy_blocks = FL_MIN(_block_count, new_block_count);
+                fl::u32 copy_blocks = fl::min(_block_count, new_block_count);
                 fl::memcpy(new_blocks, _blocks.get(), copy_blocks * sizeof(block_type));
             }
 
@@ -362,7 +362,7 @@ class bitset_dynamic {
             return result;
         }
 
-        fl::u32 min_blocks = FL_MIN(_block_count, other._block_count);
+        fl::u32 min_blocks = fl::min(_block_count, other._block_count);
 
         for (fl::u32 i = 0; i < min_blocks; ++i) {
             result._blocks[i] = _blocks[i] & other._blocks[i];
@@ -379,7 +379,7 @@ class bitset_dynamic {
             return result;
         }
 
-        fl::u32 min_blocks = FL_MIN(_block_count, other._block_count);
+        fl::u32 min_blocks = fl::min(_block_count, other._block_count);
 
         for (fl::u32 i = 0; i < min_blocks; ++i) {
             result._blocks[i] = _blocks[i] | other._blocks[i];
@@ -402,7 +402,7 @@ class bitset_dynamic {
             return result;
         }
 
-        fl::u32 min_blocks = FL_MIN(_block_count, other._block_count);
+        fl::u32 min_blocks = fl::min(_block_count, other._block_count);
 
         for (fl::u32 i = 0; i < min_blocks; ++i) {
             result._blocks[i] = _blocks[i] ^ other._blocks[i];

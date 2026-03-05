@@ -80,14 +80,14 @@ inline void traverseGridSegmentFloat(const vec2f &start, const vec2f &end,
     float dx = end.x - start.x;
     float dy = end.y - start.y;
 
-    float tDeltaX = (dx != 0.0f) ? FL_ABS(1.0f / dx) : FL_FLT_MAX;
-    float tDeltaY = (dy != 0.0f) ? FL_ABS(1.0f / dy) : FL_FLT_MAX;
+    float tDeltaX = (dx != 0.0f) ? fl::abs(1.0f / dx) : FL_FLT_MAX;
+    float tDeltaY = (dy != 0.0f) ? fl::abs(1.0f / dy) : FL_FLT_MAX;
 
     float nextX = (stepX > 0) ? (fl::floor(start.x) + 1) : fl::floor(start.x);
     float nextY = (stepY > 0) ? (fl::floor(start.y) + 1) : fl::floor(start.y);
 
-    float tMaxX = (dx != 0.0f) ? FL_ABS((nextX - start.x) / dx) : FL_FLT_MAX;
-    float tMaxY = (dy != 0.0f) ? FL_ABS((nextY - start.y) / dy) : FL_FLT_MAX;
+    float tMaxX = (dx != 0.0f) ? fl::abs((nextX - start.x) / dx) : FL_FLT_MAX;
+    float tMaxY = (dy != 0.0f) ? fl::abs((nextY - start.y) / dy) : FL_FLT_MAX;
 
     float maxT = 1.0f;
 
@@ -96,7 +96,7 @@ inline void traverseGridSegmentFloat(const vec2f &start, const vec2f &end,
 
     while (true) {
         visitor.visit(currentX, currentY);
-        float t = FL_MIN(tMaxX, tMaxY);
+        float t = fl::min(tMaxX, tMaxY);
         if (t > maxT)
             break;
 
@@ -148,11 +148,11 @@ inline void traverseGridSegment16(const vec2f &start, const vec2f &end,
     // Use (max)() to prevent macro expansion by Arduino.h's max macro
     u16 absDeltaX_fp =
         (deltaX_fp != 0) ? static_cast<u16>(
-                               FL_ABS((i32(FP_ONE) << FP_SHIFT) / deltaX_fp))
+                               fl::abs((i32(FP_ONE) << FP_SHIFT) / deltaX_fp))
                          : (fl::numeric_limits<u16>::max)();
     u16 absDeltaY_fp =
         (deltaY_fp != 0) ? static_cast<u16>(
-                               FL_ABS((i32(FP_ONE) << FP_SHIFT) / deltaY_fp))
+                               fl::abs((i32(FP_ONE) << FP_SHIFT) / deltaY_fp))
                          : (fl::numeric_limits<u16>::max)();
 
     i16 nextX_fp = (stepX > 0) ? ((x0 + 1) << FP_SHIFT) : (x0 << FP_SHIFT);
@@ -162,12 +162,12 @@ inline void traverseGridSegment16(const vec2f &start, const vec2f &end,
     u16 tMaxX_fp =
         (deltaX_fp != 0)
             ? static_cast<u16>(
-                  FL_ABS(i32(nextX_fp - startX_fp)) * absDeltaX_fp >> FP_SHIFT)
+                  fl::abs(i32(nextX_fp - startX_fp)) * absDeltaX_fp >> FP_SHIFT)
             : (fl::numeric_limits<u16>::max)();
     u16 tMaxY_fp =
         (deltaY_fp != 0)
             ? static_cast<u16>(
-                  FL_ABS(i32(nextY_fp - startY_fp)) * absDeltaY_fp >> FP_SHIFT)
+                  fl::abs(i32(nextY_fp - startY_fp)) * absDeltaY_fp >> FP_SHIFT)
             : (fl::numeric_limits<u16>::max)();
 
     const u16 maxT_fp = FP_ONE;
@@ -230,11 +230,11 @@ inline void traverseGridSegment32(const vec2f &start, const vec2f &end,
     // Use (max)() to prevent macro expansion by Arduino.h's max macro
     u32 absDeltaX_fp =
         (deltaX_fp != 0) ? static_cast<u32>(
-                               FL_ABS((fl::i64(FP_ONE) << FP_SHIFT) / deltaX_fp))
+                               fl::abs((fl::i64(FP_ONE) << FP_SHIFT) / deltaX_fp))
                          : (fl::numeric_limits<u32>::max)();
     u32 absDeltaY_fp =
         (deltaY_fp != 0) ? static_cast<u32>(
-                               FL_ABS((fl::i64(FP_ONE) << FP_SHIFT) / deltaY_fp))
+                               fl::abs((fl::i64(FP_ONE) << FP_SHIFT) / deltaY_fp))
                          : (fl::numeric_limits<u32>::max)();
 
     i32 nextX_fp = (stepX > 0) ? ((x0 + 1) << FP_SHIFT) : (x0 << FP_SHIFT);
@@ -244,12 +244,12 @@ inline void traverseGridSegment32(const vec2f &start, const vec2f &end,
     u32 tMaxX_fp =
         (deltaX_fp != 0)
             ? static_cast<u32>(
-                  FL_ABS(fl::i64(nextX_fp - startX_fp)) * absDeltaX_fp >> FP_SHIFT)
+                  fl::abs(fl::i64(nextX_fp - startX_fp)) * absDeltaX_fp >> FP_SHIFT)
             : (fl::numeric_limits<u32>::max)();
     u32 tMaxY_fp =
         (deltaY_fp != 0)
             ? static_cast<u32>(
-                  FL_ABS(fl::i64(nextY_fp - startY_fp)) * absDeltaY_fp >> FP_SHIFT)
+                  fl::abs(fl::i64(nextY_fp - startY_fp)) * absDeltaY_fp >> FP_SHIFT)
             : (fl::numeric_limits<u32>::max)();
 
     const u32 maxT_fp = FP_ONE;
@@ -281,9 +281,9 @@ inline void traverseGridSegment32(const vec2f &start, const vec2f &end,
 template <typename GridVisitor>
 inline void traverseGridSegment(const vec2f &start, const vec2f &end,
                                 GridVisitor &visitor) {
-    float dx = FL_ABS(end.x - start.x);
-    float dy = FL_ABS(end.y - start.y);
-    float maxRange = FL_MAX(dx, dy);
+    float dx = fl::abs(end.x - start.x);
+    float dy = fl::abs(end.y - start.y);
+    float maxRange = fl::max(dx, dy);
 
     // if (maxRange < 256.0f) {
     //     // Use Q8.8 (16-bit signed) if within ±127

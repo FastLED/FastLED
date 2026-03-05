@@ -207,7 +207,7 @@ FL_TEST_CASE("fl::map_range - vec2 specialization") {
 
 FL_TEST_CASE("fl::map_range - float equality handling") {
     FL_SUBCASE("float boundary equality uses epsilon") {
-        // The map_range_detail::equals function uses FL_ALMOST_EQUAL_FLOAT
+        // The map_range_detail::equals function uses fl::almost_equal
         // This ensures that values very close to boundaries are treated correctly
         float epsilon = 0.0000001f;
         float result = map_range(1.0f + epsilon, 1.0f, 2.0f, 100.0f, 200.0f);

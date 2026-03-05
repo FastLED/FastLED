@@ -64,7 +64,7 @@ inline rgb16 HSVtoRGB(hsv color){
     float v = color.v;
    // float H=color.h;
     float C = s*v;
-    float X = C*(1-FL_ABS(fl::fmod(H/60.0f, 2.0f)-1.0f));
+    float X = C*(1-fl::abs(fl::fmod(H/60.0f, 2.0f)-1.0f));
     float m = v-C;
     float r,g,b;
     if(H >= 0 && H < 60){

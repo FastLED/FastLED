@@ -27,9 +27,9 @@ public:
     // Constructor: Initializes the base JsonUiInternal with name, and sets initial values.
     JsonUiSliderInternal(const fl::string& name, float value, float min, float max, float step = -1)
         : JsonUiInternal(name), mMin(min), mMax(max), mValue(value), mStep(step), mStepExplicitlySet(false) {
-        if (FL_ALMOST_EQUAL_FLOAT(mStep, -1.f) && mMax > mMin) {
+        if (fl::almost_equal(mStep, -1.f) && mMax > mMin) {
             mStep = (mMax - mMin) / 255.0f;
-        } else if (!FL_ALMOST_EQUAL_FLOAT(mStep, -1.f)) {
+        } else if (!fl::almost_equal(mStep, -1.f)) {
             mStepExplicitlySet = true;
         }
     }
@@ -76,7 +76,7 @@ public:
     }
     
     float value_normalized() const {
-        if (FL_ALMOST_EQUAL(mMax, mMin, 0.0001f)) {
+        if (fl::almost_equal(mMax, mMin, 0.0001f)) {
             return 0;
         }
         return (mValue - mMin) / (mMax - mMin);
