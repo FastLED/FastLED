@@ -171,13 +171,27 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
 ssize_t send(int sockfd, const void *buf, size_t len, int flags) {
     SOCKET sock = static_cast<SOCKET>(sockfd);
     int result = ::send(sock, static_cast<const char*>(buf), static_cast<int>(len), flags);
-    return (result == SOCKET_ERROR) ? -1 : static_cast<ssize_t>(result);
+    if (result == SOCKET_ERROR) {
+        // Capture Windows error immediately before it can be overwritten
+        int wsa_error = WSAGetLastError();
+        // Set errno so error_code::from_errno() can translate it
+        errno = translate_windows_error(wsa_error);
+        return -1;
+    }
+    return static_cast<ssize_t>(result);
 }
 
 ssize_t recv(int sockfd, void *buf, size_t len, int flags) {
     SOCKET sock = static_cast<SOCKET>(sockfd);
     int result = ::recv(sock, static_cast<char*>(buf), static_cast<int>(len), flags);
-    return (result == SOCKET_ERROR) ? -1 : static_cast<ssize_t>(result);
+    if (result == SOCKET_ERROR) {
+        // Capture Windows error immediately before it can be overwritten
+        int wsa_error = WSAGetLastError();
+        // Set errno so error_code::from_errno() can translate it
+        errno = translate_windows_error(wsa_error);
+        return -1;
+    }
+    return static_cast<ssize_t>(result);
 }
 
 ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
