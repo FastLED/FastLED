@@ -304,12 +304,20 @@ class fixed_point : protected fixed_point_impl<IntBits, FracBits, S>::type {
     }
 };
 
-// Convenience aliases (backward compatibility)
+// Main API aliases: sfixed_integer and ufixed_integer
+// Usage: sfixed_integer<16, 16> for signed, ufixed_integer<8, 8> for unsigned
 template <int IntBits, int FracBits>
-using sfixed_point = fixed_point<IntBits, FracBits, Sign::SIGNED>;
+using sfixed_integer = fixed_point<IntBits, FracBits, Sign::SIGNED>;
 
 template <int IntBits, int FracBits>
-using ufixed_point = fixed_point<IntBits, FracBits, Sign::UNSIGNED>;
+using ufixed_integer = fixed_point<IntBits, FracBits, Sign::UNSIGNED>;
+
+// Backward compatibility aliases
+template <int IntBits, int FracBits>
+using sfixed_point = sfixed_integer<IntBits, FracBits>;
+
+template <int IntBits, int FracBits>
+using ufixed_point = ufixed_integer<IntBits, FracBits>;
 
 //-------------------------------------------------------------------------------
 // is_fixed_point trait — specialization for fixed_point<I,F,S>
