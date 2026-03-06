@@ -113,6 +113,7 @@ Containers, views, algorithms, compile‑time utilities, memory/ownership, porta
 - Views and ranges: `span.h`, `slice.h`, `range_access.h`
 - Tuples and algebraic types: `tuple.h`, `pair.h`, `optional.h`, `variant.h`
 - Algorithms and helpers: `algorithm.h`, `transform.h`, `comparators.h`, `range_access.h`
+- SIMD and optimization primitives: `stl/simd.h`
 - Types and traits: `types.h`, `type_traits.h`, `initializer_list.h`, `utility.h`, `move.h`, `template_magic.h`, `stdint.h`, `cstddef.h`
 - Memory/ownership: `unique_ptr.h`, `shared_ptr.h`, `weak_ptr.h`, `scoped_ptr.h`, `scoped_array.h`, `referent.h`, `allocator.h`, `memory.h`, `memfill.h`, `inplacenew.h`
 - Portability and compiler control: `compiler_control.h`, `force_inline.h`, `virtual_if_not_avr.h`, `has_define.h`, `register.h`, `warn.h`, `trace.h`, `dbg.h`, `log.h`, `assert.h`, `unused.h`, `export.h`, `dll.h`, `deprecated.h`, `avr_disallowed.h`, `bit_cast.h`, `id_tracker.h`, `insert_result.h`, `singleton.h`
@@ -141,6 +142,7 @@ Per‑header quick descriptions:
 - `algorithm.h`: Core algorithms (search, sort helpers, transforms) adapted to `fl::` containers.
 - `transform.h`: Functional style element‑wise transformations with spans/ranges.
 - `comparators.h`: Reusable comparator utilities for ordering operations.
+- `stl/simd.h`: SIMD-accelerated register operations for cache-friendly pipelines (u8x16, u32x4, f32x4 vectors with platform delegation).
 - `types.h`: Canonical type aliases and shared type definitions.
 - `type_traits.h`: Compile‑time type inspection and enable_if‑style utilities.
 - `initializer_list.h`: Lightweight initializer list support for container construction.
