@@ -22,8 +22,6 @@ DownbeatDetector::DownbeatDetector(shared_ptr<BeatDetector> beatDetector)
     , mBeatsSinceDownbeat(0)
     , mPreviousEnergy(0.0f)
 {
-    mBeatAccents.reserve(MAX_BEAT_HISTORY);
-    mMeterCandidates.reserve(METER_HISTORY_SIZE);
 }
 
 DownbeatDetector::DownbeatDetector()
@@ -65,7 +63,7 @@ void DownbeatDetector::update(shared_ptr<AudioContext> context) {
 
         // Store accent in history
         if (mBeatAccents.size() >= MAX_BEAT_HISTORY) {
-            mBeatAccents.erase(mBeatAccents.begin());
+            mBeatAccents.pop_front();
         }
         mBeatAccents.push_back(accent);
 
@@ -352,7 +350,7 @@ void DownbeatDetector::detectMeter() {
 
     // Add to meter history
     if (mMeterCandidates.size() >= METER_HISTORY_SIZE) {
-        mMeterCandidates.erase(mMeterCandidates.begin());
+        mMeterCandidates.pop_front();
     }
     mMeterCandidates.push_back(detectedMeter);
 

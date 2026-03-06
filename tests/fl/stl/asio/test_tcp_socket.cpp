@@ -83,7 +83,7 @@ FL_TEST_CASE("tcp::socket - Connect to invalid host returns error") {
 }
 
 FL_TEST_CASE("tcp::socket - Loopback connect and I/O") {
-    // Create server acceptor
+    // Create server acceptor on ephemeral port (port 0)
     tcp::acceptor acc;
     error_code ec = acc.open(0);
     FL_CHECK(ec.ok());
@@ -92,10 +92,11 @@ FL_TEST_CASE("tcp::socket - Loopback connect and I/O") {
     ec = acc.listen(1);
     FL_CHECK(ec.ok());
 
+    // Get the actual assigned port
     fl::u16 port = acc.port();
     FL_CHECK(port > 0);
 
-    // Client connects
+    // Client connects to loopback on the actual port
     tcp::socket client;
     ec = client.connect(tcp::endpoint("127.0.0.1", port));
     FL_CHECK(ec.ok());

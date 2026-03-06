@@ -140,42 +140,38 @@ void EqualizerDetector::update(shared_ptr<AudioContext> context) {
 
     const auto& raw = fftBins.raw();
     const int numBins = fl::min(static_cast<int>(raw.size()), kNumBins);
-
-    // Step 1: Copy raw bins and apply FFT downscale (windowing correction).
-    // WLED-MM applies FFT_DOWNSCALE = 0.40 to compensate for window amplitude gain.
     float scaledBins[kNumBins] = {};
+
+    // Fused loop: Steps 1-4 (Copy, mic correction, pink noise, gain, scaling)
+    // Combined for better cache locality and reduced memory bandwidth
+    const bool applyMicCorrection = mHasMicCorrection;
+    const bool applyScalingMode = (mConfig.scalingMode != FFTScalingMode::None &&
+                                    mConfig.scalingMode != FFTScalingMode::Linear);
+    const bool applyGain = (mGain != 1.0f);
+
     for (int i = 0; i < numBins; ++i) {
-        scaledBins[i] = raw[i] * kFFTDownscale;
-    }
+        // Step 1: Copy raw and apply FFT downscale
+        float val = raw[i] * kFFTDownscale;
 
-    // Step 2: Apply microphone correction profile (before scaling, per WLED-MM)
-    if (mHasMicCorrection) {
-        for (int i = 0; i < numBins; ++i) {
-            scaledBins[i] *= mMicGains[i];
+        // Step 2: Microphone correction
+        if (applyMicCorrection) {
+            val *= mMicGains[i];
         }
-    }
 
-    // Step 2.5: Pink noise spectral tilt compensation (always active).
-    // Corrects for 1/f power density of natural audio so that each octave
-    // contributes equal perceptual energy to the visualization.
-    for (int i = 0; i < numBins; ++i) {
-        scaledBins[i] *= mPinkNoiseGains[i];
-    }
+        // Step 2.5: Pink noise spectral tilt compensation
+        val *= mPinkNoiseGains[i];
 
-    // Step 3: Apply gain to FFT bins (WLED-MM applies AGC/gain here).
-    // This scales magnitudes so per-bin normalization tracks source level.
-    if (mGain != 1.0f) {
-        for (int i = 0; i < numBins; ++i) {
-            scaledBins[i] *= mGain;
+        // Step 3: Apply gain
+        if (applyGain) {
+            val *= mGain;
         }
-    }
 
-    // Step 4: Apply FFT scaling mode (after mic correction + gain, per WLED-MM)
-    if (mConfig.scalingMode != FFTScalingMode::None &&
-        mConfig.scalingMode != FFTScalingMode::Linear) {
-        for (int i = 0; i < numBins; ++i) {
-            scaledBins[i] = applyScaling(scaledBins[i], mConfig.scalingMode);
+        // Step 4: Apply FFT scaling mode
+        if (applyScalingMode) {
+            val = applyScaling(val, mConfig.scalingMode);
         }
+
+        scaledBins[i] = val;
     }
 
     // Step 5: Apply spectral equalization curve (if not flat)

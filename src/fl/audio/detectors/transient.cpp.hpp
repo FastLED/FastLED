@@ -17,7 +17,6 @@ TransientDetector::TransientDetector()
     , mAttackTime(0.0f)
 {
     mPreviousHighFreq.resize(16, 0.0f);
-    mEnergyHistory.reserve(ENERGY_HISTORY_SIZE);
 }
 
 TransientDetector::~TransientDetector() = default;
@@ -49,7 +48,7 @@ void TransientDetector::update(shared_ptr<AudioContext> context) {
 
     // Update energy history with outlier-rejected values
     if (mEnergyHistory.size() >= ENERGY_HISTORY_SIZE) {
-        mEnergyHistory.erase(mEnergyHistory.begin());
+        mEnergyHistory.pop_front();
     }
     mEnergyHistory.push_back(filteredEnergy);
 }

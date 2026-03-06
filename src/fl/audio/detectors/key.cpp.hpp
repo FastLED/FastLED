@@ -85,9 +85,32 @@ KeyDetector::KeyDetector()
     for (int i = 0; i < 12; i++) {
         mChromaHistory[i].reserve(mAveragingFrames);
     }
+
+    // Pre-compute profile statistics once (eliminates 24 recomputations per frame)
+    initializeProfileStats();
 }
 
 KeyDetector::~KeyDetector() = default;
+
+void KeyDetector::initializeProfileStats() {
+    // Pre-compute statistics for MAJOR_PROFILE
+    float majorSum = 0.0f, majorSqSum = 0.0f;
+    for (int i = 0; i < 12; i++) {
+        majorSum += MAJOR_PROFILE[i];
+        majorSqSum += MAJOR_PROFILE[i] * MAJOR_PROFILE[i];
+    }
+    mMajorProfileMean = majorSum / 12.0f;
+    mMajorProfileStdDev = fl::sqrtf(majorSqSum / 12.0f - mMajorProfileMean * mMajorProfileMean);
+
+    // Pre-compute statistics for MINOR_PROFILE
+    float minorSum = 0.0f, minorSqSum = 0.0f;
+    for (int i = 0; i < 12; i++) {
+        minorSum += MINOR_PROFILE[i];
+        minorSqSum += MINOR_PROFILE[i] * MINOR_PROFILE[i];
+    }
+    mMinorProfileMean = minorSum / 12.0f;
+    mMinorProfileStdDev = fl::sqrtf(minorSqSum / 12.0f - mMinorProfileMean * mMinorProfileMean);
+}
 
 void KeyDetector::update(shared_ptr<AudioContext> context) {
     // Get FFT data
@@ -308,16 +331,17 @@ Key KeyDetector::detectKey(const float* chroma, u32 timestamp) {
 
 float KeyDetector::correlateWithProfile(const float* chroma, const float* profile, int rootNote) {
     // Pearson correlation coefficient between chroma and rotated profile
+    // Uses pre-computed profile statistics (calculated once in constructor)
 
-    // First, normalize the profile weights
-    float profileSum = 0.0f;
-    float profileSqSum = 0.0f;
-    for (int i = 0; i < 12; i++) {
-        profileSum += profile[i];
-        profileSqSum += profile[i] * profile[i];
+    // Use pre-computed profile statistics based on which profile
+    float profileMean, profileStdDev;
+    if (profile == MAJOR_PROFILE) {
+        profileMean = mMajorProfileMean;
+        profileStdDev = mMajorProfileStdDev;
+    } else {
+        profileMean = mMinorProfileMean;
+        profileStdDev = mMinorProfileStdDev;
     }
-    float profileMean = profileSum / 12.0f;
-    float profileStdDev = sqrtf((profileSqSum / 12.0f) - (profileMean * profileMean));
     if (profileStdDev < 1e-6f) profileStdDev = 1.0f;
 
     // Calculate chroma mean and std dev

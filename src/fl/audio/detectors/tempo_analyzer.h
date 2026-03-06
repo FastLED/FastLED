@@ -4,6 +4,7 @@
 #include "fl/filter.h"
 #include "fl/stl/function.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/deque.h"
 
 namespace fl {
 
@@ -61,7 +62,7 @@ private:
     static constexpr size MAX_HYPOTHESES = 5;
 
     // Onset detection state
-    vector<u32> mOnsetTimes;
+    deque<u32> mOnsetTimes;
     static constexpr size MAX_ONSET_HISTORY = 50;
     vector<float> mPreviousMagnitudes;  // Per-bin magnitudes for spectral flux
     float mPreviousFlux;                // Previous frame's total flux (for threshold)
@@ -76,7 +77,7 @@ private:
 
     // Stability tracking (MedianFilter rejects half/double-tempo outliers)
     MedianFilter<float, 21> mBPMMedian;
-    vector<float> mBPMHistory;
+    deque<float> mBPMHistory;
     static constexpr size BPM_HISTORY_SIZE = 20;
     u32 mStableFrameCount;
     static constexpr u32 STABLE_FRAMES_REQUIRED = 10;

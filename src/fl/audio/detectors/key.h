@@ -123,9 +123,16 @@ private:
     static const float MAJOR_PROFILE[12];
     static const float MINOR_PROFILE[12];
 
+    // Pre-computed profile statistics (computed once at init, reused 24x per frame)
+    float mMajorProfileMean = 0.0f;
+    float mMajorProfileStdDev = 0.0f;
+    float mMinorProfileMean = 0.0f;
+    float mMinorProfileStdDev = 0.0f;
+
     shared_ptr<const FFTBins> mRetainedFFT;
 
     // Helper methods
+    void initializeProfileStats();  // Pre-compute profile statistics once
     void extractChroma(const FFTBins& fft, float* chroma);
     void normalizeChroma(float* chroma);
     void updateChromaHistory(const float* chroma);

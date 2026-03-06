@@ -3,6 +3,7 @@
 #include "fl/audio/audio_detector.h"
 #include "fl/stl/function.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/unordered_map.h"
 
 namespace fl {
 
@@ -19,6 +20,9 @@ enum class ChordType {
     SUSPENDED4,
     UNKNOWN
 };
+
+// Forward declaration of chord template structure (defined in .cpp.hpp)
+struct ChordTemplate;
 
 // Detected chord information
 struct Chord {
@@ -82,9 +86,14 @@ private:
     bool mFireChordEnd = false;
     bool mFireChord = false;
 
+    // Template lookup map (O(1) access, pre-computed at init)
+    // Maps ChordType (as int) to ChordTemplate pointer for fast template lookups
+    unordered_map<int, const ChordTemplate*> mTemplateMap;
+
     shared_ptr<const FFTBins> mRetainedFFT;
 
     // Detection methods
+    void initializeTemplateMap();  // Pre-compute template lookups
     void calculateChroma(const FFTBins& fft);
     Chord detectChord(const float* chroma, u32 timestamp);
     float matchChordPattern(const float* chroma, int root, ChordType type);

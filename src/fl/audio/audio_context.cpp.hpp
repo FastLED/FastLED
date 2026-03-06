@@ -2,6 +2,23 @@
 
 namespace fl {
 
+fl::size AudioContext::hashFFTArgs(const FFT_Args& args) {
+    // Create a hash from FFT_Args for O(1) cache lookup
+    // Use simple hash combining of the integer fields
+    fl::size hash = 0;
+    hash = (hash * 31) ^ static_cast<fl::size>(args.samples);
+    hash = (hash * 31) ^ static_cast<fl::size>(args.bands);
+    hash = (hash * 31) ^ static_cast<fl::size>(args.sample_rate);
+
+    // For floats, use bit representation via memcpy (safer than reinterpret_cast)
+    unsigned int fmin_bits, fmax_bits;
+    fl::memcpy(&fmin_bits, &args.fmin, sizeof(fmin_bits));
+    fl::memcpy(&fmax_bits, &args.fmax, sizeof(fmax_bits));
+    hash = (hash * 31) ^ static_cast<fl::size>(fmin_bits);
+    hash = (hash * 31) ^ static_cast<fl::size>(fmax_bits);
+    return hash;
+}
+
 AudioContext::AudioContext(const AudioSample& sample)
     : mSample(sample)
     , mFFTHistoryDepth(0)
@@ -15,10 +32,16 @@ AudioContext::~AudioContext() = default;
 shared_ptr<const FFTBins> AudioContext::getFFT(int bands, float fmin, float fmax) {
     FFT_Args args(mSample.size(), bands, fmin, fmax, mSampleRate);
 
-    // Search cache for matching args
-    for (size i = 0; i < mFFTCache.size(); i++) {
-        if (mFFTCache[i].args == args) {
-            return mFFTCache[i].bins;
+    // O(1) cache lookup using hash map
+    fl::size argsHash = hashFFTArgs(args);
+    auto it = mFFTCacheMap.find(argsHash);
+    if (it != mFFTCacheMap.end()) {
+        int idx = it->second;
+        if (idx >= 0 && idx < static_cast<int>(mFFTCache.size())) {
+            // Double-check args match in case of hash collision
+            if (mFFTCache[idx].args == args) {
+                return mFFTCache[idx].bins;
+            }
         }
     }
 
@@ -41,12 +64,27 @@ shared_ptr<const FFTBins> AudioContext::getFFT(int bands, float fmin, float fmax
 
     // Evict oldest if at capacity
     if (static_cast<int>(mFFTCache.size()) >= MAX_FFT_CACHE_ENTRIES) {
+        // Remove the oldest entry's hash from hash map
+        fl::size oldHash = hashFFTArgs(mFFTCache[0].args);
+        mFFTCacheMap.erase(oldHash);
+
+        // Shift all remaining entries and update map indices
+        for (size i = 1; i < mFFTCache.size(); i++) {
+            fl::size key = hashFFTArgs(mFFTCache[i].args);
+            mFFTCacheMap[key] = static_cast<int>(i - 1);
+        }
         mFFTCache.erase(mFFTCache.begin());
     }
+
     FFTCacheEntry entry;
     entry.args = args;
     entry.bins = bins;
+    int newIndex = static_cast<int>(mFFTCache.size());
     mFFTCache.push_back(fl::move(entry));
+
+    // Add to hash map for O(1) future lookups
+    mFFTCacheMap[argsHash] = newIndex;
+
     return bins;
 }
 
@@ -103,6 +141,7 @@ void AudioContext::setSample(const AudioSample& sample) {
 
 void AudioContext::clearCache() {
     mFFTCache.clear();
+    mFFTCacheMap.clear();
     mRecyclePool.clear();
     mFFTHistory.clear();
     mFFTHistoryDepth = 0;

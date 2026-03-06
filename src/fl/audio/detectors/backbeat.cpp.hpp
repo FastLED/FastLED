@@ -29,8 +29,6 @@ BackbeatDetector::BackbeatDetector(shared_ptr<BeatDetector> beatDetector)
     , mProfileAlpha(0.1f)
 {
     mPreviousAccent = {0.0f, 0.0f, 0.0f, 0.0f};
-    mBackbeatAccents.reserve(MAX_ACCENT_HISTORY);
-    mNonBackbeatAccents.reserve(MAX_ACCENT_HISTORY);
     mBackbeatSpectralProfile.reserve(SPECTRAL_PROFILE_SIZE);
     for (size i = 0; i < SPECTRAL_PROFILE_SIZE; i++) {
         mBackbeatSpectralProfile.push_back(0.0f);
@@ -99,13 +97,13 @@ void BackbeatDetector::update(shared_ptr<AudioContext> context) {
 
             // Store accent in backbeat history
             if (mBackbeatAccents.size() >= MAX_ACCENT_HISTORY) {
-                mBackbeatAccents.erase(mBackbeatAccents.begin());
+                mBackbeatAccents.pop_front();
             }
             mBackbeatAccents.push_back(accentStrength);
         } else {
             // Store accent in non-backbeat history
             if (mNonBackbeatAccents.size() >= MAX_ACCENT_HISTORY) {
-                mNonBackbeatAccents.erase(mNonBackbeatAccents.begin());
+                mNonBackbeatAccents.pop_front();
             }
             mNonBackbeatAccents.push_back(accentStrength);
         }

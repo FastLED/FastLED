@@ -2,6 +2,7 @@
 
 #include "fl/int.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/deque.h"
 
 namespace fl {
 
@@ -150,7 +151,7 @@ private:
     u32 mCurrentFrame = 0;
 
     /// Inter-beat interval history (in frames)
-    vector<u32> mIBIHistory;
+    deque<u32> mIBIHistory;
 
     /// Average inter-beat interval (in frames)
     float mAverageIBI = 0.0f;

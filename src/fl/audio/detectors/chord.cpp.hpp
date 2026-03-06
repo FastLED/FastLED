@@ -40,9 +40,20 @@ ChordDetector::ChordDetector()
         mChroma[i] = 0.0f;
         mPrevChroma[i] = 0.0f;
     }
+
+    // Pre-compute template lookups (O(1) access per frame)
+    initializeTemplateMap();
 }
 
 ChordDetector::~ChordDetector() = default;
+
+void ChordDetector::initializeTemplateMap() {
+    // Pre-compute lookup map from ChordType to ChordTemplate*
+    // Avoids linear search through kChordTemplates (9 searches per frame)
+    for (int i = 0; i < kNumChordTemplates; i++) {
+        mTemplateMap[static_cast<int>(kChordTemplates[i].type)] = &kChordTemplates[i];
+    }
+}
 
 void ChordDetector::update(shared_ptr<AudioContext> context) {
     mRetainedFFT = context->getFFT(32);  // Higher resolution for pitch detection
@@ -190,14 +201,11 @@ Chord ChordDetector::detectChord(const float* chroma, u32 timestamp) {
 }
 
 float ChordDetector::matchChordPattern(const float* chroma, int root, ChordType type) {
-    // Find the matching template
-    const ChordTemplate* tmpl = nullptr;
-    for (int i = 0; i < kNumChordTemplates; i++) {
-        if (kChordTemplates[i].type == type) {
-            tmpl = &kChordTemplates[i];
-            break;
-        }
-    }
+    // Find the matching template using pre-computed lookup (O(1) vs O(n) linear search)
+    auto it = mTemplateMap.find(static_cast<int>(type));
+    if (it == mTemplateMap.end()) return 0.0f;
+
+    const ChordTemplate* tmpl = it->second;
     if (!tmpl) return 0.0f;
 
     // Calculate match score

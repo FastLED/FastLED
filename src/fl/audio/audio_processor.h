@@ -267,6 +267,7 @@ public:
     float getEqMid();
     float getEqTreble();
     float getEqVolume();
+    float getEqVolumeNormFactor();
     float getEqZcf();
     float getEqBin(int index);
     float getEqAutoGain();

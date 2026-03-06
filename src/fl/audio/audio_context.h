@@ -5,6 +5,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/span.h"
+#include "fl/stl/unordered_map.h"
 
 namespace fl {
 
@@ -50,10 +51,14 @@ private:
         shared_ptr<FFTBins> bins;
     };
 
+    // Create cache key hash from FFT_Args for O(1) lookup
+    static fl::size hashFFTArgs(const FFT_Args& args);
+
     int mSampleRate = 44100;
     AudioSample mSample;
     FFT mFFT; // FFT engine (has its own kernel cache)
     vector<FFTCacheEntry> mFFTCache; // Strong cache: co-owned with callers
+    unordered_map<fl::size, int> mFFTCacheMap; // Maps args hash to index in mFFTCache
     vector<shared_ptr<FFTBins>> mRecyclePool; // Recycled bins for zero-alloc reuse
     vector<FFTBins> mFFTHistory;
     int mFFTHistoryDepth = 0;

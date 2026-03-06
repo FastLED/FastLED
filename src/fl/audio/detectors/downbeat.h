@@ -3,6 +3,7 @@
 #include "fl/audio/audio_detector.h"
 #include "fl/stl/function.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/deque.h"
 #include "fl/stl/shared_ptr.h"
 
 namespace fl {
@@ -120,11 +121,11 @@ private:
 
     // ----- Accent Detection -----
     float mPreviousEnergy;
-    vector<float> mBeatAccents;  // Recent beat accent strengths
+    deque<float> mBeatAccents;  // Recent beat accent strengths
     static constexpr size MAX_BEAT_HISTORY = 32;
 
     // ----- Meter Detection -----
-    vector<u8> mMeterCandidates;  // Recent detected meters
+    deque<u8> mMeterCandidates;  // Recent detected meters
     static constexpr size METER_HISTORY_SIZE = 8;
 
     // ----- Pending Callback Flags -----

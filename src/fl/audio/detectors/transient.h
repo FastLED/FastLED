@@ -4,6 +4,7 @@
 #include "fl/filter.h"
 #include "fl/stl/function.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/deque.h"
 
 namespace fl {
 
@@ -55,7 +56,7 @@ private:
 
     // High-frequency emphasis for transient detection
     vector<float> mPreviousHighFreq;
-    vector<float> mEnergyHistory;
+    deque<float> mEnergyHistory;
     static constexpr size ENERGY_HISTORY_SIZE = 5;
 
     // Adaptive outlier rejection for energy before history

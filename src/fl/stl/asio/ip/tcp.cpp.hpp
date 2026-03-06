@@ -259,7 +259,11 @@ size_t socket::read_some(fl::span<u8> buffer, error_code &ec) {
             ec = error_code(errc::would_block);
             return 0;
         }
+#ifdef FL_IS_WIN
+        ec = error_code(errc::unknown, "recv failed");
+#else
         ec = error_code::from_errno(errno);
+#endif
         return 0;
     }
 
@@ -286,7 +290,11 @@ size_t socket::write_some(fl::span<const u8> buffer, error_code &ec) {
             ec = error_code(errc::would_block);
             return 0;
         }
+#ifdef FL_IS_WIN
+        ec = error_code(errc::unknown, "send failed");
+#else
         ec = error_code::from_errno(errno);
+#endif
         return 0;
     }
 
@@ -370,7 +378,9 @@ error_code acceptor::open(u16 port) {
     struct sockaddr_in addr {};
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
-    addr.sin_addr.s_addr = INADDR_ANY;
+    // Bind to loopback for consistent behavior across platforms
+    // especially for port 0 (ephemeral port assignment)
+    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
     int ret =
         plat_bind(sock, (struct sockaddr *)&addr, sizeof(addr));
@@ -384,9 +394,11 @@ error_code acceptor::open(u16 port) {
         struct sockaddr_in boundAddr {};
         socklen_t addrLen = sizeof(boundAddr);
         if (plat_getsockname(sock, (struct sockaddr *)&boundAddr,
-                             &addrLen) == 0) {
-            port = ntohs(boundAddr.sin_port);
+                             &addrLen) != 0) {
+            plat_close(sock);
+            return error_code(errc::unknown, "getsockname failed - cannot resolve ephemeral port");
         }
+        port = ntohs(boundAddr.sin_port);
     }
 
     mFd = sock;
@@ -425,7 +437,11 @@ error_code acceptor::accept(socket &peer) {
         if (is_would_block()) {
             return error_code(errc::would_block);
         }
+#ifdef FL_IS_WIN
+        return error_code(errc::unknown, "accept failed");
+#else
         return error_code::from_errno(errno);
+#endif
     }
 
     // Non-blocking on accepted socket

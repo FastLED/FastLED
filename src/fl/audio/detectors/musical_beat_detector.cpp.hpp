@@ -16,7 +16,6 @@ MusicalBeatDetector::~MusicalBeatDetector() = default;
 void MusicalBeatDetector::configure(const MusicalBeatDetectorConfig& config) {
     mConfig = config;
     mIBIHistory.clear();
-    mIBIHistory.reserve(mConfig.maxIBIHistory);
     reset();
 }
 
@@ -49,7 +48,7 @@ void MusicalBeatDetector::processSample(bool onsetDetected, float onsetStrength)
             // Add to history
             if (mIBIHistory.size() >= mConfig.maxIBIHistory) {
                 // Remove oldest IBI
-                mIBIHistory.erase(mIBIHistory.begin());
+                mIBIHistory.pop_front();
             }
             mIBIHistory.push_back(ibiFrames);
 

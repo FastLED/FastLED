@@ -3,6 +3,7 @@
 #include "fl/audio/audio_detector.h"
 #include "fl/stl/function.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/deque.h"
 #include "fl/stl/shared_ptr.h"
 
 namespace fl {
@@ -142,8 +143,8 @@ private:
 
     // ----- Accent History -----
     MultibandAccent mPreviousAccent;
-    vector<float> mBackbeatAccents;      // Accent strengths on backbeats
-    vector<float> mNonBackbeatAccents;   // Accent strengths on non-backbeats
+    deque<float> mBackbeatAccents;      // Accent strengths on backbeats
+    deque<float> mNonBackbeatAccents;   // Accent strengths on non-backbeats
     static constexpr size MAX_ACCENT_HISTORY = 16;
 
     // ----- Adaptive Thresholds -----

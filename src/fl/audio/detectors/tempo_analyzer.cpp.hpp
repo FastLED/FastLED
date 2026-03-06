@@ -19,8 +19,6 @@ TempoAnalyzer::TempoAnalyzer()
 {
     mPreviousMagnitudes.resize(8, 0.0f);  // Track first 8 bins for spectral flux
     mHypotheses.reserve(MAX_HYPOTHESES);
-    mOnsetTimes.reserve(MAX_ONSET_HISTORY);
-    mBPMHistory.reserve(BPM_HISTORY_SIZE);
 }
 
 TempoAnalyzer::~TempoAnalyzer() = default;
@@ -40,7 +38,7 @@ void TempoAnalyzer::update(shared_ptr<AudioContext> context) {
     if (detectOnset(timestamp)) {
         mOnsetTimes.push_back(timestamp);
         if (mOnsetTimes.size() > MAX_ONSET_HISTORY) {
-            mOnsetTimes.erase(mOnsetTimes.begin());
+            mOnsetTimes.pop_front();
         }
 
         // Update tempo hypotheses
@@ -234,7 +232,7 @@ void TempoAnalyzer::updateCurrentTempo() {
     // Add to BPM history for stability analysis
     mBPMHistory.push_back(mCurrentBPM);
     if (mBPMHistory.size() > BPM_HISTORY_SIZE) {
-        mBPMHistory.erase(mBPMHistory.begin());
+        mBPMHistory.pop_front();
     }
 }
 

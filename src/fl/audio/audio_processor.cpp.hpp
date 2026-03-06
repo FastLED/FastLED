@@ -660,6 +660,10 @@ float AudioProcessor::getEqVolume() {
     return clamp01(getEqualizerDetector()->getVolume());
 }
 
+float AudioProcessor::getEqVolumeNormFactor() {
+    return clamp01(getEqualizerDetector()->getVolumeNormFactor());
+}
+
 float AudioProcessor::getEqZcf() {
     return clamp01(getEqualizerDetector()->getZcf());
 }
