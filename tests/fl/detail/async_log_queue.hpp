@@ -1,5 +1,5 @@
 #include "fl/detail/async_log_queue.h"
-#include "fl/isr.h"  // For fl::isr::CriticalSection
+#include "fl/stl/isr/critical_section.h"
 #include "fl/stl/sstream.h"
 #include "test.h"
 #include "fl/stl/string.h"
@@ -12,11 +12,11 @@ using namespace fl;
 constexpr fl::size TEST_DESC_COUNT = 8;  // Power of 2
 constexpr fl::size TEST_ARENA_SIZE = 64; // Power of 2
 
-FL_TEST_CASE("fl::isr::CriticalSection - RAII interrupt control") {
+FL_TEST_CASE("fl::isr::critical_section - RAII interrupt control") {
     FL_SUBCASE("constructor disables interrupts, destructor enables") {
         // This is hard to test directly without mocking, but we can verify it compiles
         {
-            fl::isr::CriticalSection cs;
+            fl::isr::critical_section cs;
             // Interrupts should be disabled here
         }
         // Interrupts should be re-enabled here
@@ -28,8 +28,8 @@ FL_TEST_CASE("fl::isr::CriticalSection - RAII interrupt control") {
     FL_SUBCASE("non-copyable") {
         // This is a compile-time check
         // If this compiles, the test fails (should not be copyable)
-        // fl::isr::CriticalSection cs1;
-        // fl::isr::CriticalSection cs2 = cs1;  // Should not compile
+        // fl::isr::critical_section cs1;
+        // fl::isr::critical_section cs2 = cs1;  // Should not compile
         FL_CHECK(true);
     }
 }

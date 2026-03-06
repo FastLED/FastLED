@@ -21,7 +21,7 @@
 
 #if defined(FL_IS_TEENSY)
 
-#include "fl/isr.h"
+#include "fl/stl/isr/handler.h"
 #include "fl/warn.h"
 #include "fl/stl/unique_ptr.h"
 // IWYU pragma: begin_keep

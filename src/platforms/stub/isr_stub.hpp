@@ -15,7 +15,7 @@
 // Only compile this implementation for stub/host/WASM platform builds
 #if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL) || defined(FL_IS_WASM)
 
-#include "fl/isr.h"
+#include "fl/stl/isr/handler.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/vector.h"
@@ -547,6 +547,10 @@ inline bool interruptsEnabled() {
 inline bool interruptsDisabled() {
     return !isr::getGlobalInterruptState().load();
 }
+
+// Snake_case aliases
+inline bool interrupts_enabled() { return interruptsEnabled(); }
+inline bool interrupts_disabled() { return interruptsDisabled(); }
 
 } // namespace fl
 

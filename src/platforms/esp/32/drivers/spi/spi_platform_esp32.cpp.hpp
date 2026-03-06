@@ -12,7 +12,7 @@
 #if defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C2) || defined(ARDUINO_ESP32C3_DEV) || defined(ARDUINO_ESP32C2_DEV)
 
 #include "fl/compiler_control.h"
-#include "fl/isr.h"
+#include "fl/stl/isr.h"
 
 FL_EXTERN_C_BEGIN
 
@@ -26,7 +26,7 @@ FL_EXTERN_C_END
 #define PARALLEL_SPI_TAG "parallel_spi_c3"
 
 // ISR handle for cross-platform API
-static fl::isr::isr_handle_t s_isr_handle;
+static fl::isr::handle s_isr_handle;
 
 /**
  * Timer alarm callback - calls the ISR
@@ -51,16 +51,16 @@ FL_EXTERN_C int fl_spi_platform_isr_start(fl::u32 timer_hz) {
     }
 
     // Configure ISR using cross-platform API
-    fl::isr::isr_config_t config;
+    fl::isr::config config;
     config.handler = spi_isr_wrapper;
     config.user_data = nullptr;
     config.frequency_hz = timer_hz;
     config.priority = fl::isr::ISR_PRIORITY_HIGH;  // Level 3 on ESP32-C3
     config.flags = fl::isr::ISR_FLAG_IRAM_SAFE;
 
-    int result = fl::isr::attachTimerHandler(config, &s_isr_handle);
+    int result = fl::isr::attach_timer_handler(config, &s_isr_handle);
     if (result != 0) {
-        ESP_LOGE(PARALLEL_SPI_TAG, "Failed to attach timer: %s", fl::isr::getErrorString(result));
+        ESP_LOGE(PARALLEL_SPI_TAG, "Failed to attach timer: %s", fl::isr::get_error_string(result));
         return result;
     }
 
@@ -73,11 +73,11 @@ FL_EXTERN_C int fl_spi_platform_isr_start(fl::u32 timer_hz) {
  */
 FL_EXTERN_C void fl_spi_platform_isr_stop(void) {
     if (s_isr_handle.is_valid()) {
-        int result = fl::isr::detachHandler(s_isr_handle);
+        int result = fl::isr::detach_handler(s_isr_handle);
         if (result == 0) {
             ESP_LOGI(PARALLEL_SPI_TAG, "Timer stopped using fl::isr API");
         } else {
-            ESP_LOGW(PARALLEL_SPI_TAG, "Failed to detach timer: %s", fl::isr::getErrorString(result));
+            ESP_LOGW(PARALLEL_SPI_TAG, "Failed to detach timer: %s", fl::isr::get_error_string(result));
         }
     }
 }

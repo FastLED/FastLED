@@ -10,7 +10,7 @@
 #include "wave8.h"
 #include "fl/channels/detail/wave8.hpp"
 #include "fl/chipsets/led_timing.h"
-#include "fl/isr.h"
+#include "fl/stl/isr/memcpy.h"
 
 namespace fl {
 

@@ -7,7 +7,7 @@
 */
 
 #define FASTLED_INTERNAL
-#include "fl/isr.h"
+#include "fl/stl/isr.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/thread.h"
 #include "test.h"
@@ -71,15 +71,15 @@ static void test_isr_handler(void* user_data) {
 // =============================================================================
 
 FL_TEST_CASE("test_isr_platform_info") {
-    const char* platform = isr::getPlatformName();
+    const char* platform = isr::get_platform_name();
     FL_REQUIRE(platform != nullptr);
 
     // Just call the functions to verify they exist and don't crash
-    (void)isr::getMaxTimerFrequency();
-    (void)isr::getMinTimerFrequency();
-    (void)isr::getMaxPriority();
-    (void)isr::requiresAssemblyHandler(1);
-    (void)isr::requiresAssemblyHandler(5);
+    (void)isr::get_max_timer_frequency();
+    (void)isr::get_min_timer_frequency();
+    (void)isr::get_max_priority();
+    (void)isr::requires_assembly_handler(1);
+    (void)isr::requires_assembly_handler(5);
 }
 
 FL_TEST_CASE("test_isr_timer_basic") {
@@ -87,15 +87,15 @@ FL_TEST_CASE("test_isr_timer_basic") {
     g_isr_user_data_value = 0;
 
     // Configure a 200 Hz timer (5ms period)
-    isr::isr_config_t config;
+    isr::config config;
     config.handler = test_isr_handler;
     config.user_data = nullptr;
     config.frequency_hz = 200;  // 200 Hz
     config.priority = isr::ISR_PRIORITY_MEDIUM;
     config.flags = isr::ISR_FLAG_IRAM_SAFE;
 
-    isr::isr_handle_t handle;
-    int result = isr::attachTimerHandler(config, &handle);
+    isr::handle handle;
+    int result = isr::attach_timer_handler(config, &handle);
 
     FL_REQUIRE(result == 0);
     FL_REQUIRE(handle.is_valid());
@@ -111,7 +111,7 @@ FL_TEST_CASE("test_isr_timer_basic") {
     FL_REQUIRE(call_count >= 2);
 
     // Detach handler - use release memory order to ensure visibility
-    result = isr::detachHandler(handle);
+    result = isr::detach_handler(handle);
     FL_REQUIRE(result == 0);
     FL_REQUIRE(!handle.is_valid());
 
@@ -153,15 +153,15 @@ FL_TEST_CASE("test_isr_timer_user_data") {
     uint32_t test_value = 0x12345678;
 
     // Configure timer with user data
-    isr::isr_config_t config;
+    isr::config config;
     config.handler = test_isr_handler;
     config.user_data = &test_value;
     config.frequency_hz = 200;  // 200 Hz
     config.priority = isr::ISR_PRIORITY_LOW;
     config.flags = isr::ISR_FLAG_IRAM_SAFE;
 
-    isr::isr_handle_t handle;
-    int result = isr::attachTimerHandler(config, &handle);
+    isr::handle handle;
+    int result = isr::attach_timer_handler(config, &handle);
 
     FL_REQUIRE(result == 0);
 
@@ -175,7 +175,7 @@ FL_TEST_CASE("test_isr_timer_user_data") {
     FL_REQUIRE(g_isr_user_data_value.load() == test_value);
 
     // Cleanup
-    result = isr::detachHandler(handle);
+    result = isr::detach_handler(handle);
     FL_REQUIRE(result == 0);
 }
 
@@ -183,15 +183,15 @@ FL_TEST_CASE("test_isr_timer_enable_disable") {
     g_isr_call_count = 0;
 
     // Configure timer
-    isr::isr_config_t config;
+    isr::config config;
     config.handler = test_isr_handler;
     config.user_data = nullptr;
     config.frequency_hz = 200;  // 200 Hz
     config.priority = isr::ISR_PRIORITY_MEDIUM;
     config.flags = isr::ISR_FLAG_IRAM_SAFE;
 
-    isr::isr_handle_t handle;
-    int result = isr::attachTimerHandler(config, &handle);
+    isr::handle handle;
+    int result = isr::attach_timer_handler(config, &handle);
     FL_REQUIRE(result == 0);
 
     // Wait for at least one call (generous timeout for loaded systems)
@@ -202,9 +202,9 @@ FL_TEST_CASE("test_isr_timer_enable_disable") {
     FL_REQUIRE(count_before_disable > 0);
 
     // Disable handler
-    result = isr::disableHandler(handle);
+    result = isr::disable_handler(handle);
     FL_REQUIRE(result == 0);
-    FL_REQUIRE(!isr::isHandlerEnabled(handle));
+    FL_REQUIRE(!isr::is_handler_enabled(handle));
 
     // Wait up to 15ms to ensure count stabilizes (no more ISR calls)
     // Use condition variable to detect any calls immediately
@@ -234,9 +234,9 @@ FL_TEST_CASE("test_isr_timer_enable_disable") {
     lock.unlock();
 
     // Re-enable handler
-    result = isr::enableHandler(handle);
+    result = isr::enable_handler(handle);
     FL_REQUIRE(result == 0);
-    FL_REQUIRE(isr::isHandlerEnabled(handle));
+    FL_REQUIRE(isr::is_handler_enabled(handle));
 
     // Wait for at least one new call after re-enabling (generous timeout for loaded systems)
     bool got_new_calls = wait_for_condition(
@@ -247,40 +247,40 @@ FL_TEST_CASE("test_isr_timer_enable_disable") {
     FL_REQUIRE(count_after_enable > count_after_disable);
 
     // Cleanup
-    result = isr::detachHandler(handle);
+    result = isr::detach_handler(handle);
     FL_REQUIRE(result == 0);
 }
 
 FL_TEST_CASE("test_isr_error_handling") {
     // Test null handler
-    isr::isr_config_t config;
+    isr::config config;
     config.handler = nullptr;  // Invalid
     config.frequency_hz = 100;
 
-    isr::isr_handle_t handle;
-    int result = isr::attachTimerHandler(config, &handle);
+    isr::handle handle;
+    int result = isr::attach_timer_handler(config, &handle);
     FL_REQUIRE(result != 0);
     FL_REQUIRE(!handle.is_valid());
 
     // Test zero frequency
     config.handler = test_isr_handler;
     config.frequency_hz = 0;  // Invalid
-    result = isr::attachTimerHandler(config, &handle);
+    result = isr::attach_timer_handler(config, &handle);
     FL_REQUIRE(result != 0);
     FL_REQUIRE(!handle.is_valid());
 
     // Test invalid handle operations
-    isr::isr_handle_t invalid_handle;
-    result = isr::detachHandler(invalid_handle);
+    isr::handle invalid_handle;
+    result = isr::detach_handler(invalid_handle);
     FL_REQUIRE(result != 0);
 
-    result = isr::enableHandler(invalid_handle);
+    result = isr::enable_handler(invalid_handle);
     FL_REQUIRE(result != 0);
 
-    result = isr::disableHandler(invalid_handle);
+    result = isr::disable_handler(invalid_handle);
     FL_REQUIRE(result != 0);
 
-    FL_REQUIRE(!isr::isHandlerEnabled(invalid_handle));
+    FL_REQUIRE(!isr::is_handler_enabled(invalid_handle));
 }
 
 FL_TEST_CASE("test_interrupts_global_state") {
@@ -306,15 +306,15 @@ FL_TEST_CASE("test_interrupts_global_disable_blocks_isr") {
     interruptsEnable();
 
     // Configure timer
-    isr::isr_config_t config;
+    isr::config config;
     config.handler = test_isr_handler;
     config.user_data = nullptr;
     config.frequency_hz = 200;  // 200 Hz
     config.priority = isr::ISR_PRIORITY_MEDIUM;
     config.flags = isr::ISR_FLAG_IRAM_SAFE;
 
-    isr::isr_handle_t handle;
-    int result = isr::attachTimerHandler(config, &handle);
+    isr::handle handle;
+    int result = isr::attach_timer_handler(config, &handle);
     FL_REQUIRE(result == 0);
 
     // Wait for at least one call to verify timer is firing (generous timeout for loaded systems)
@@ -368,7 +368,7 @@ FL_TEST_CASE("test_interrupts_global_disable_blocks_isr") {
     FL_REQUIRE(count_reenabled > count_disabled);
 
     // Cleanup
-    result = isr::detachHandler(handle);
+    result = isr::detach_handler(handle);
     FL_REQUIRE(result == 0);
 }
 

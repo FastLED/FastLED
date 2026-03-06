@@ -31,7 +31,7 @@
 
 #define FL_ISR_AVR_IMPLEMENTED  // Sentinel macro to indicate this implementation is active
 
-#include "fl/isr.h"
+#include "fl/stl/isr/handler.h"
 #include "fl/dbg.h"
 #include "fl/warn.h"
 #include "fl/compiler_control.h"

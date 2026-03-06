@@ -31,7 +31,7 @@
 
 #if defined(FL_IS_NRF52)
 
-#include "fl/isr.h"
+#include "fl/stl/isr/handler.h"
 #include "fl/compiler_control.h"
 #include "fl/stl/assert.h"
 #include "fl/stl/unique_ptr.h"

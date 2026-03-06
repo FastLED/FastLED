@@ -40,7 +40,7 @@
 
 #include "fl/compiler_control.h"
 
-#include "fl/isr.h"
+#include "fl/stl/isr/memcpy.h"
 #include "fl/unused.h"
 #include "platforms/memory_barrier.h"
 #include "fl/align.h"

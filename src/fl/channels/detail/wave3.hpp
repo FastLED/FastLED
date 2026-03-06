@@ -9,7 +9,7 @@
 #include "fl/channels/wave3.h"
 #include "fl/compiler_control.h"
 #include "fl/force_inline.h"
-#include "fl/isr.h"
+#include "fl/stl/isr/memcpy.h"
 
 namespace fl {
 
@@ -150,8 +150,8 @@ void wave3_transpose_8(const Wave3Byte lane_waves[8],
         }
 
         u32 x, y, t;
-        isr::memcpy32(&y, reinterpret_cast<const u32*>(lane_bytes), 1);       // ok reinterpret cast - lanes 0-3
-        isr::memcpy32(&x, reinterpret_cast<const u32*>(lane_bytes + 4), 1);   // ok reinterpret cast - lanes 4-7
+        isr::memcpy_32(&y, reinterpret_cast<const u32*>(lane_bytes), 1);       // ok reinterpret cast - lanes 0-3
+        isr::memcpy_32(&x, reinterpret_cast<const u32*>(lane_bytes + 4), 1);   // ok reinterpret cast - lanes 4-7
 
         t = (x ^ (x >> 7)) & 0x00AA00AA;  x = x ^ t ^ (t << 7);
         t = (x ^ (x >> 14)) & 0x0000CCCC;  x = x ^ t ^ (t << 14);
@@ -161,8 +161,8 @@ void wave3_transpose_8(const Wave3Byte lane_waves[8],
         y = ((x << 4) & 0xF0F0F0F0) | (y & 0x0F0F0F0F);
         x = t;
 
-        isr::memcpy32(reinterpret_cast<u32*>(output + symbol_idx * 8), &y, 1);     // ok reinterpret cast - output byte array to u32
-        isr::memcpy32(reinterpret_cast<u32*>(output + symbol_idx * 8 + 4), &x, 1); // ok reinterpret cast - output byte array to u32
+        isr::memcpy_32(reinterpret_cast<u32*>(output + symbol_idx * 8), &y, 1);     // ok reinterpret cast - output byte array to u32
+        isr::memcpy_32(reinterpret_cast<u32*>(output + symbol_idx * 8 + 4), &x, 1); // ok reinterpret cast - output byte array to u32
     }
 }
 

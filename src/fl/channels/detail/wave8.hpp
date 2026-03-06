@@ -9,7 +9,7 @@
 #include "fl/channels/wave8.h"
 #include "fl/compiler_control.h"
 #include "fl/force_inline.h"
-#include "fl/isr.h"
+#include "fl/stl/isr/memcpy.h"
 #include "fl/stl/bit_cast.h"
 
 namespace fl {
@@ -47,13 +47,13 @@ void wave8_convert_byte_to_wave8byte(u8 byte_value,
                                       Wave8Byte *output) {
     // ISR-optimized copy: Copy high nibble (4 bytes = 1 x uint32_t)
     const Wave8Bit *high_nibble_data = lut.lut[(byte_value >> 4) & 0xF];
-    isr::memcpy32(fl::bit_cast_ptr<u32>(&output->symbols[0]),
+    isr::memcpy_32(fl::bit_cast_ptr<u32>(&output->symbols[0]),
                   fl::bit_cast_ptr<const u32>(high_nibble_data),
                   1); // 4 bytes = 1 x uint32_t
 
     // ISR-optimized copy: Copy low nibble (4 bytes = 1 x uint32_t)
     const Wave8Bit *low_nibble_data = lut.lut[byte_value & 0xF];
-    isr::memcpy32(fl::bit_cast_ptr<u32>(&output->symbols[4]),
+    isr::memcpy_32(fl::bit_cast_ptr<u32>(&output->symbols[4]),
                   fl::bit_cast_ptr<const u32>(low_nibble_data),
                   1); // 4 bytes = 1 x uint32_t
 }
@@ -207,8 +207,8 @@ void wave8_transpose_8(const Wave8Byte lane_waves[8],
 
         // Load the array and pack it into x and y (little-endian)
         // Use ISR-safe memcpy32 for aligned 32-bit loads
-        isr::memcpy32(&y, fl::bit_cast_ptr<const u32>(lane_bytes), 1);      // lanes 0-3
-        isr::memcpy32(&x, fl::bit_cast_ptr<const u32>(lane_bytes + 4), 1);  // lanes 4-7
+        isr::memcpy_32(&y, fl::bit_cast_ptr<const u32>(lane_bytes), 1);      // lanes 0-3
+        isr::memcpy_32(&x, fl::bit_cast_ptr<const u32>(lane_bytes + 4), 1);  // lanes 4-7
 
         // Pre-transform x
         t = (x ^ (x >> 7)) & 0x00AA00AA;  x = x ^ t ^ (t << 7);
@@ -225,8 +225,8 @@ void wave8_transpose_8(const Wave8Byte lane_waves[8],
 
         // Store result directly to output (little-endian)
         // Use ISR-safe memcpy32 for aligned 32-bit stores
-        isr::memcpy32(fl::bit_cast_ptr<u32>(output + symbol_idx * 8), &y, 1);
-        isr::memcpy32(fl::bit_cast_ptr<u32>(output + symbol_idx * 8 + 4), &x, 1);
+        isr::memcpy_32(fl::bit_cast_ptr<u32>(output + symbol_idx * 8), &y, 1);
+        isr::memcpy_32(fl::bit_cast_ptr<u32>(output + symbol_idx * 8 + 4), &x, 1);
     }
 }
 
@@ -335,7 +335,7 @@ void wave8(u8 lane,
 
     // ISR-optimized 32-bit copy: Copy 8 bytes as 2 x uint32_t words
     // Wave8Byte is 8-byte aligned (FL_ALIGNAS(8)), guaranteeing 4-byte alignment
-    isr::memcpy32(fl::bit_cast_ptr<u32>(output),
+    isr::memcpy_32(fl::bit_cast_ptr<u32>(output),
                   fl::bit_cast_ptr<const u32>(&waveformSymbol.symbols[0].data),
                   2); // 8 bytes = 2 x uint32_t
 }

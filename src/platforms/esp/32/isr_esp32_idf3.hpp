@@ -19,7 +19,7 @@
 // This file should only be included from isr_esp32.hpp (which does the version check)
 // Do not include this file directly - use isr_esp32.hpp instead
 
-#include "fl/isr.h"
+#include "fl/stl/isr/handler.h"
 #include "fl/compiler_control.h"
 #include "fl/stl/unique_ptr.h"
 

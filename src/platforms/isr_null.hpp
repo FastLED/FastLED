@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "fl/isr.h"
+#include "fl/stl/isr/handler.h"
 #include "fl/compiler_control.h"
 
 namespace fl {

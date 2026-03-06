@@ -408,7 +408,7 @@ Why: Unified interrupt handling across ESP32, Teensy, AVR, STM32, and other plat
 Basic timer interrupt example:
 
 ```cpp
-#include "fl/isr.h"
+#include "fl/stl/isr.h"
 
 // Counter updated from ISR (use atomic or volatile for shared state)
 static volatile uint32_t tick_count = 0;
@@ -420,21 +420,21 @@ static void my_timer_isr(void* user_data) {
 
 void setup() {
     // Configure a 1 kHz (1000 Hz) timer interrupt
-    fl::isr::isr_config_t config;
+    fl::isr::config config;
     config.handler = my_timer_isr;
     config.user_data = nullptr;
     config.frequency_hz = 1000;  // 1 kHz
     config.priority = fl::isr::ISR_PRIORITY_MEDIUM;
     config.flags = fl::isr::ISR_FLAG_IRAM_SAFE;  // Required for ESP32
 
-    fl::isr::isr_handle_t handle;
-    int result = fl::isr::attachTimerHandler(config, &handle);
+    fl::isr::handle handle;
+    int result = fl::isr::attach_timer_handler(config, &handle);
 
     if (result == 0) {
         // ISR is now active
         FL_DBG("Timer ISR attached successfully");
     } else {
-        FL_WARN("Failed to attach ISR: " << fl::isr::getErrorString(result));
+        FL_WARN("Failed to attach ISR: " << fl::isr::get_error_string(result));
     }
 }
 ```
@@ -442,7 +442,7 @@ void setup() {
 Advanced example with user data and enable/disable:
 
 ```cpp
-#include "fl/isr.h"
+#include "fl/stl/isr.h"
 
 struct ISRContext {
     volatile uint32_t count;
@@ -460,32 +460,32 @@ void example_with_control() {
     ISRContext ctx = { 0, 1000 };
 
     // Configure 10 kHz timer with user context
-    fl::isr::isr_config_t config;
+    fl::isr::config config;
     config.handler = counting_isr;
     config.user_data = &ctx;
     config.frequency_hz = 10000;  // 10 kHz
     config.priority = fl::isr::ISR_PRIORITY_HIGH;
     config.flags = fl::isr::ISR_FLAG_IRAM_SAFE;
 
-    fl::isr::isr_handle_t handle;
-    if (fl::isr::attachTimerHandler(config, &handle) == 0) {
+    fl::isr::handle handle;
+    if (fl::isr::attach_timer_handler(config, &handle) == 0) {
         // Run for a while
         delay(100);
 
         // Temporarily disable ISR
-        fl::isr::disableHandler(handle);
+        fl::isr::disable_handler(handle);
         FL_DBG("ISR disabled, count: " << ctx.count);
 
         delay(100);
 
         // Re-enable ISR
-        fl::isr::enableHandler(handle);
+        fl::isr::enable_handler(handle);
         FL_DBG("ISR re-enabled");
 
         delay(100);
 
         // Clean up when done
-        fl::isr::detachHandler(handle);
+        fl::isr::detach_handler(handle);
         FL_DBG("Final count: " << ctx.count);
     }
 }
@@ -494,7 +494,7 @@ void example_with_control() {
 GPIO interrupt example:
 
 ```cpp
-#include "fl/isr.h"
+#include "fl/stl/isr.h"
 
 static void button_isr(void* user_data) {
     // Handle button press (keep this fast!)
@@ -502,16 +502,16 @@ static void button_isr(void* user_data) {
 }
 
 void setup_gpio_interrupt() {
-    fl::isr::isr_config_t config;
+    fl::isr::config config;
     config.handler = button_isr;
     config.user_data = nullptr;
     config.priority = fl::isr::ISR_PRIORITY_MEDIUM;
     config.flags = fl::isr::ISR_FLAG_EDGE_RISING;  // Trigger on rising edge
 
-    fl::isr::isr_handle_t handle;
+    fl::isr::handle handle;
     uint8_t button_pin = 2;  // GPIO pin number
 
-    if (fl::isr::attachExternalHandler(button_pin, config, &handle) == 0) {
+    if (fl::isr::attach_external_handler(button_pin, config, &handle) == 0) {
         FL_DBG("Button ISR attached to pin " << button_pin);
     }
 }
@@ -520,15 +520,15 @@ void setup_gpio_interrupt() {
 Platform capability queries:
 
 ```cpp
-#include "fl/isr.h"
+#include "fl/stl/isr.h"
 
 void print_platform_info() {
-    FL_DBG("Platform: " << fl::isr::getPlatformName());
-    FL_DBG("Max timer frequency: " << fl::isr::getMaxTimerFrequency() << " Hz");
-    FL_DBG("Min timer frequency: " << fl::isr::getMinTimerFrequency() << " Hz");
-    FL_DBG("Max priority: " << fl::isr::getMaxPriority());
+    FL_DBG("Platform: " << fl::isr::get_platform_name());
+    FL_DBG("Max timer frequency: " << fl::isr::get_max_timer_frequency() << " Hz");
+    FL_DBG("Min timer frequency: " << fl::isr::get_min_timer_frequency() << " Hz");
+    FL_DBG("Max priority: " << fl::isr::get_max_priority());
 
-    if (fl::isr::requiresAssemblyHandler(fl::isr::ISR_PRIORITY_MAX)) {
+    if (fl::isr::requires_assembly_handler(fl::isr::ISR_PRIORITY_MAX)) {
         FL_DBG("Maximum priority requires assembly handler");
     }
 }

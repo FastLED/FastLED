@@ -30,7 +30,7 @@
 #include "platforms/pin.h"
 
 // Additional includes for PWM implementation
-#include "fl/isr.h"
+#include "fl/stl/isr.h"
 #include "fl/log.h"
 #include "fl/compiler_control.h"
 #include "fl/singleton.h"
@@ -98,7 +98,7 @@ struct PwmPinState {
 // Singleton state container for PWM management
 struct PwmStateData {
     PwmPinState channels[MAX_PWM_CHANNELS];
-    fl::isr::isr_handle_t isr_handle;
+    fl::isr::handle isr_handle;
     bool isr_active;
 
     PwmStateData() : isr_active(false) {}
@@ -175,15 +175,15 @@ int ensureIsrActive() {
     PwmStateData& st = state();
     if (st.isr_active) return 0;
 
-    fl::isr::isr_config_t cfg;
+    fl::isr::config cfg;
     cfg.handler = pwm_isr_handler;
     cfg.frequency_hz = ISR_FREQUENCY_HZ;
     cfg.priority = fl::isr::ISR_PRIORITY_MEDIUM;
     cfg.flags = fl::isr::ISR_FLAG_IRAM_SAFE;
 
-    int result = fl::isr::attachTimerHandler(cfg, &st.isr_handle);
+    int result = fl::isr::attach_timer_handler(cfg, &st.isr_handle);
     if (result != 0) {
-        FL_WARN("PWM: ISR attach failed: " << fl::isr::getErrorString(result));
+        FL_WARN("PWM: ISR attach failed: " << fl::isr::get_error_string(result));
         return result;
     }
     st.isr_active = true;
@@ -196,7 +196,7 @@ void maybeShutdownIsr() {
     if (!st.isr_active) return;
     if (countIsrChannels() > 0) return;
 
-    fl::isr::detachHandler(st.isr_handle);
+    fl::isr::detach_handler(st.isr_handle);
     st.isr_active = false;
 }
 
@@ -207,7 +207,7 @@ void releaseChannel(PwmPinState* ch) {
     fl::digitalWrite(ch->pin, fl::PinValue::Low);
 
     {
-        fl::isr::CriticalSection cs;
+        fl::isr::critical_section cs;
         ch->pin = -1;
         ch->backend = PwmBackend::None;
         ch->frequency_hz = 0;
@@ -229,7 +229,7 @@ void analogWrite(int pin, u16 val) {
     if (ch && ch->backend == pwm_state::PwmBackend::IsrSoftware) {
         // Route to ISR duty cycle update (scale 8-bit val to duty)
         u8 duty = (val > 255) ? 255 : static_cast<u8>(val);
-        fl::isr::CriticalSection cs;
+        fl::isr::critical_section cs;
         ch->duty_cycle = duty;
         ch->high_ticks = (static_cast<u32>(ch->period_ticks) * duty) / 256;
         return;
@@ -251,7 +251,7 @@ void setPwm16(int pin, u16 val) {
     if (ch && ch->backend == pwm_state::PwmBackend::IsrSoftware) {
         // Route to ISR duty cycle update (scale 16-bit to 8-bit)
         u8 duty = static_cast<u8>(val >> 8);
-        fl::isr::CriticalSection cs;
+        fl::isr::critical_section cs;
         ch->duty_cycle = duty;
         ch->high_ticks = (static_cast<u32>(ch->period_ticks) * duty) / 256;
         return;
@@ -336,7 +336,7 @@ int setPwmFrequency(int pin, u32 frequency_hz) {
 
     // Initialize channel (atomic)
     {
-        fl::isr::CriticalSection cs;
+        fl::isr::critical_section cs;
         ch->pin = pin;
         ch->frequency_hz = frequency_hz;
         ch->backend = pwm_state::PwmBackend::IsrSoftware;

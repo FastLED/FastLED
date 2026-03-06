@@ -8,7 +8,7 @@
 
 #ifdef FL_IS_STM32
 
-#include "fl/isr.h"
+#include "fl/stl/isr/handler.h"
 #include "fl/dbg.h"
 #include "fl/warn.h"
 

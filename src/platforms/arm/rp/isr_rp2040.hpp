@@ -33,7 +33,7 @@
 
 #if defined(FL_IS_RP2040)
 
-#include "fl/isr.h"
+#include "fl/stl/isr/handler.h"
 #include "fl/compiler_control.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/dbg.h"
