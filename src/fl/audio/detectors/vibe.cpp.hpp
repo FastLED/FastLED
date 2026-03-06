@@ -5,6 +5,7 @@
 
 #include "fl/audio/detectors/vibe.h"
 #include "fl/audio/audio_context.h"
+#include "fl/filter.h"
 #include "fl/stl/math.h"
 
 namespace fl {
@@ -115,30 +116,26 @@ void VibeDetector::update(shared_ptr<AudioContext> context) {
         rate = adjustRateToFPS(rate, 30.0f, actualFps);
         mAvg[i] = mAvg[i] * rate + mImm[i] * (1.0f - rate);
 
-        // Long-term average: song-level adaptation
-        // Fast startup convergence (rate=0.9 for first 50 frames ≈ 1.7s at 30fps)
-        // Very slow adaptation afterward (rate=0.992, half-life ~2.9s)
-        if (mFrameCount < 50) {
-            rate = 0.9f;
-        } else {
-            rate = 0.992f;
-        }
-        rate = adjustRateToFPS(rate, 30.0f, actualFps);
-        mLongAvg[i] = mLongAvg[i] * rate + mImm[i] * (1.0f - rate);
+        // CORRECTED: Use AttackDecayFilter for running maximum (MilkDrop v2.25c algorithm)
+        // This tracks the peak energy over ~4 seconds with fast attack for responsive spikes.
+        // Key difference from previous implementation:
+        // - Old: mLongAvg[i] was a simple exponential moving average
+        // - New: mLongMaxFilter[i] is a running maximum (attack/decay filter)
+        // Result: Better dynamic range for self-normalizing levels
+        mLongMax[i] = mLongMaxFilter[i].update(mAvg[i], dt);
 
         // Self-normalizing relative levels
-        // Division by long-term average makes levels independent of volume/genre.
-        // Values hover around 1.0; >1 means louder than recent average.
-        if (fl::fabsf(mLongAvg[i]) < 0.001f) {
+        // Division by running maximum makes levels independent of volume/genre.
+        // Values hover around 1.0 for average intensity; >1 means louder than recent peak.
+        // Spike detection: immediate > smoothed indicates a beat is in progress.
+        if (mLongMax[i] < 0.001f) {
+            // When signal is effectively silent, return neutral level (1.0)
+            // This handles the case where both immediate and long-term max are near zero
             mImmRel[i] = 1.0f;
-        } else {
-            mImmRel[i] = mImm[i] / mLongAvg[i];
-        }
-
-        if (fl::fabsf(mLongAvg[i]) < 0.001f) {
             mAvgRel[i] = 1.0f;
         } else {
-            mAvgRel[i] = mAvg[i] / mLongAvg[i];
+            mImmRel[i] = mImm[i] / mLongMax[i];
+            mAvgRel[i] = mAvg[i] / mLongMax[i];
         }
     }
 
@@ -169,9 +166,9 @@ void VibeDetector::fireCallbacks() {
         levels.bassAvg = mAvg[0];
         levels.midAvg = mAvg[1];
         levels.trebAvg = mAvg[2];
-        levels.bassLongAvg = mLongAvg[0];
-        levels.midLongAvg = mLongAvg[1];
-        levels.trebLongAvg = mLongAvg[2];
+        levels.bassLongAvg = mLongMax[0];
+        levels.midLongAvg = mLongMax[1];
+        levels.trebLongAvg = mLongMax[2];
         onVibeLevels(levels);
     }
 
@@ -192,7 +189,8 @@ void VibeDetector::reset() {
     for (int i = 0; i < 3; i++) {
         mImm[i] = 0.0f;
         mAvg[i] = 0.0f;
-        mLongAvg[i] = 0.0f;
+        mLongMaxFilter[i].reset(0.0f);  // Reset running maximum filter
+        mLongMax[i] = 0.0f;
         mImmRel[i] = 1.0f;
         mAvgRel[i] = 1.0f;
     }

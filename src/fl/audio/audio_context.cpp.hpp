@@ -11,7 +11,7 @@ fl::size AudioContext::hashFFTArgs(const FFT_Args& args) {
     hash = (hash * 31) ^ static_cast<fl::size>(args.sample_rate);
 
     // For floats, use bit representation via memcpy (safer than reinterpret_cast)
-    unsigned int fmin_bits, fmax_bits;
+    u32 fmin_bits, fmax_bits;
     fl::memcpy(&fmin_bits, &args.fmin, sizeof(fmin_bits));
     fl::memcpy(&fmax_bits, &args.fmax, sizeof(fmax_bits));
     hash = (hash * 31) ^ static_cast<fl::size>(fmin_bits);
