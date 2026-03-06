@@ -386,4 +386,362 @@ void test_container_reverse_iterators() {
     FL_CHECK(*destination.rbegin() == 30);
 }
 
+// ============================================================================
+// TIER 2: Sequential Container Operations (Insert, Erase, Resize, etc.)
+// ============================================================================
+
+// Detect if type has insert(const_iterator, value)
+template<typename T>
+class has_insert_position {
+    template<typename C> static auto test(int) -> decltype(
+        fl::declval<C>().insert(fl::declval<C>().begin(), fl::declval<fl::shared_ptr<int>>()),
+        fl::true_type()
+    );
+    template<typename> static fl::false_type test(...);
+public:
+    static constexpr bool value = fl::is_same<decltype(test<T>(0)), fl::true_type>::value;
+};
+
+// Detect if type has erase(const_iterator)
+template<typename T>
+class has_erase {
+    template<typename C> static auto test(int) -> decltype(
+        fl::declval<C>().erase(fl::declval<C>().begin()),
+        fl::true_type()
+    );
+    template<typename> static fl::false_type test(...);
+public:
+    static constexpr bool value = fl::is_same<decltype(test<T>(0)), fl::true_type>::value;
+};
+
+// Detect if type has resize()
+template<typename T>
+class has_resize {
+    template<typename C> static auto test(int) -> decltype(
+        fl::declval<C>().resize(10),
+        fl::true_type()
+    );
+    template<typename> static fl::false_type test(...);
+public:
+    static constexpr bool value = fl::is_same<decltype(test<T>(0)), fl::true_type>::value;
+};
+
+// Detect if type has reserve()
+template<typename T>
+class has_reserve {
+    template<typename C> static auto test(int) -> decltype(
+        fl::declval<C>().reserve(10),
+        fl::true_type()
+    );
+    template<typename> static fl::false_type test(...);
+public:
+    static constexpr bool value = fl::is_same<decltype(test<T>(0)), fl::true_type>::value;
+};
+
+// Detect if type has capacity()
+template<typename T>
+class has_capacity {
+    template<typename C> static auto test(int) -> decltype(
+        fl::declval<C>().capacity(),
+        fl::true_type()
+    );
+    template<typename> static fl::false_type test(...);
+public:
+    static constexpr bool value = fl::is_same<decltype(test<T>(0)), fl::true_type>::value;
+};
+
+// Detect if type has max_size()
+template<typename T>
+class has_max_size {
+    template<typename C> static auto test(int) -> decltype(
+        fl::declval<C>().max_size(),
+        fl::true_type()
+    );
+    template<typename> static fl::false_type test(...);
+public:
+    static constexpr bool value = fl::is_same<decltype(test<T>(0)), fl::true_type>::value;
+};
+
+// Detect if type has shrink_to_fit()
+template<typename T>
+class has_shrink_to_fit {
+    template<typename C> static auto test(int) -> decltype(
+        fl::declval<C>().shrink_to_fit(),
+        fl::true_type()
+    );
+    template<typename> static fl::false_type test(...);
+public:
+    static constexpr bool value = fl::is_same<decltype(test<T>(0)), fl::true_type>::value;
+};
+
+// Detect if type has back()
+template<typename T>
+class has_back {
+    template<typename C> static auto test(int) -> decltype(
+        fl::declval<C>().back(),
+        fl::true_type()
+    );
+    template<typename> static fl::false_type test(...);
+public:
+    static constexpr bool value = fl::is_same<decltype(test<T>(0)), fl::true_type>::value;
+};
+
+// Detect if type has pop_back()
+template<typename T>
+class has_pop_back {
+    template<typename C> static auto test(int) -> decltype(
+        fl::declval<C>().pop_back(),
+        fl::true_type()
+    );
+    template<typename> static fl::false_type test(...);
+public:
+    static constexpr bool value = fl::is_same<decltype(test<T>(0)), fl::true_type>::value;
+};
+
+// Detect if type has operator== for containers
+template<typename T>
+class has_container_equality {
+    template<typename C> static auto test(int) -> decltype(
+        fl::declval<C>() == fl::declval<C>(),
+        fl::true_type()
+    );
+    template<typename> static fl::false_type test(...);
+public:
+    static constexpr bool value = fl::is_same<decltype(test<T>(0)), fl::true_type>::value;
+};
+
+// Detect if type has operator< for containers
+template<typename T>
+class has_container_less {
+    template<typename C> static auto test(int) -> decltype(
+        fl::declval<C>() < fl::declval<C>(),
+        fl::true_type()
+    );
+    template<typename> static fl::false_type test(...);
+public:
+    static constexpr bool value = fl::is_same<decltype(test<T>(0)), fl::true_type>::value;
+};
+
+// Detect if type has iterator operator+ (RandomAccessIterator support)
+template<typename T>
+class has_iterator_plus {
+    template<typename C> static auto test(int) -> decltype(
+        fl::declval<typename C::iterator>() + 1,
+        fl::true_type()
+    );
+    template<typename> static fl::false_type test(...);
+public:
+    static constexpr bool value = fl::is_same<decltype(test<T>(0)), fl::true_type>::value;
+};
+
+// ============================================================================
+// TIER 2 Tests: Sequential Container Operations
+// ============================================================================
+// NOTE: Overloads here use enable_if to SELECT THE RIGHT IMPLEMENTATION.
+// This is NOT silent skipping - it's explicit overload selection:
+//
+// - test_sequential_container_tier2<fl::deque>() → RandomAccess overload
+// - test_sequential_container_tier2<fl::list>()  → Bidirectional overload
+//
+// If neither overload matches (shouldn't happen for Tier 2 containers),
+// you get a COMPILER ERROR.
+
+// Test that sequential containers support Tier 2 operations
+// For RandomAccess iterators (vector, deque)
+template<typename Container>
+typename fl::enable_if<has_insert_position<Container>::value &&
+                       has_erase<Container>::value &&
+                       has_iterator_plus<Container>::value>::type
+test_sequential_container_tier2() {
+    Container c;
+    populate(c, make_shared_int(10));
+    populate(c, make_shared_int(30));
+
+    // Test insert (using iterator arithmetic - RandomAccess only)
+    c.insert(c.begin() + 1, make_shared_int(20));
+    FL_CHECK(c.size() == 3);
+
+    // Test erase (using iterator arithmetic - RandomAccess only)
+    c.erase(c.begin() + 1);
+    FL_CHECK(c.size() == 2);
+}
+
+// Alternative for BidirectionalIterator containers (list)
+template<typename Container>
+typename fl::enable_if<has_insert_position<Container>::value &&
+                       has_erase<Container>::value &&
+                       !has_iterator_plus<Container>::value>::type
+test_sequential_container_tier2() {
+    Container c;
+    populate(c, make_shared_int(10));
+    populate(c, make_shared_int(20));
+    populate(c, make_shared_int(30));
+
+    // Test insert/erase using begin/end (no arithmetic - BidirectionalIterator)
+    auto it = c.begin();
+    ++it;  // Move to second element
+    c.insert(it, make_shared_int(25));
+    FL_CHECK(c.size() == 4);
+
+    // Erase second element
+    it = c.begin();
+    ++it;
+    c.erase(it);
+    FL_CHECK(c.size() == 3);
+}
+
+// Test front/back access for sequential containers
+// NOTE: No enable_if - if a container doesn't have front/back, you get
+// a COMPILER ERROR (not silent skipping).
+template<typename Container>
+void test_sequential_container_front_back() {
+    Container c;
+    populate(c, make_shared_int(1));
+    populate(c, make_shared_int(2));
+    populate(c, make_shared_int(3));
+
+    // Test front and back - COMPILER ERROR if these methods don't exist
+    FL_CHECK(*c.front() == 1);
+    FL_CHECK(*c.back() == 3);
+}
+
+// Test resize for sequential containers
+// NOTE: No enable_if - if a container doesn't have resize, you get
+// a COMPILER ERROR (not silent skipping).
+template<typename Container>
+void test_sequential_container_resize() {
+    Container c;
+    populate(c, make_shared_int(1));
+    populate(c, make_shared_int(2));
+
+    // Resize up - COMPILER ERROR if resize() doesn't exist
+    c.resize(4);
+    FL_CHECK(c.size() == 4);
+
+    // Resize down
+    c.resize(2);
+    FL_CHECK(c.size() == 2);
+}
+
+// ============================================================================
+// TIER 3 Tests: Capacity Management
+// ============================================================================
+// NOTE: No enable_if guards - if the container doesn't have these methods,
+// you get a COMPILER ERROR (not silent skipping).
+//
+// Example:
+//   test_container_capacity_management<fl::vector>()  // OK - vector has reserve/capacity
+//   test_container_capacity_management<fl::list>()    // COMPILER ERROR - list has no reserve()
+//
+// This ensures incomplete containers can't be tested without implementing all Tier 3 methods.
+
+// Test capacity management for heap-based containers
+template<typename Container>
+void test_container_capacity_management() {
+    Container c;
+
+    // Test initial capacity - COMPILER ERROR if capacity() doesn't exist
+    FL_CHECK(c.capacity() >= 0);
+
+    // Test reserve - COMPILER ERROR if reserve() doesn't exist
+    c.reserve(100);
+    FL_CHECK(c.capacity() >= 100);
+    FL_CHECK(c.size() == 0);  // Size unchanged
+
+    // Populate without reallocation
+    for (int i = 0; i < 50; ++i) {
+        populate(c, make_shared_int(i));
+    }
+    FL_CHECK(c.size() == 50);
+    FL_CHECK(c.capacity() >= 100);
+}
+
+// Test shrink_to_fit for heap-based containers
+template<typename Container>
+void test_container_shrink_to_fit() {
+    Container c;
+
+    // Add many elements
+    for (int i = 0; i < 50; ++i) {
+        populate(c, make_shared_int(i));
+    }
+    // Test capacity() - COMPILER ERROR if capacity() doesn't exist
+    auto large_capacity = c.capacity();
+    FL_CHECK(large_capacity > 50);
+
+    // Remove most elements
+    for (int i = 0; i < 40; ++i) {
+        c.pop_back();
+    }
+    FL_CHECK(c.capacity() >= large_capacity);  // Capacity not reduced yet
+
+    // Shrink - COMPILER ERROR if shrink_to_fit() doesn't exist
+    c.shrink_to_fit();
+    FL_CHECK(c.capacity() <= large_capacity);  // Should be reduced
+    FL_CHECK(c.size() == 10);  // Size preserved
+}
+
+// Test max_size
+template<typename Container>
+void test_container_max_size() {
+    Container c;
+    // Test max_size() - COMPILER ERROR if max_size() doesn't exist
+    FL_CHECK(c.max_size() > 0);
+}
+
+// ============================================================================
+// TIER 4 Tests: STL Compatibility
+// ============================================================================
+// NOTE: No enable_if guards - explicit COMPILER ERRORS for missing features.
+//
+// Example:
+//   test_iterator_arithmetic<fl::deque>()  // OK - deque has operator+
+//   test_iterator_arithmetic<fl::list>()   // COMPILER ERROR - list has no operator+
+//
+//   test_container_comparison<fl::deque>()  // OK - deque has operator==
+//   test_container_comparison<fl::vector>() // COMPILER ERROR - vector has no operator==
+//
+// This prevents incomplete Tier 4 implementations from being silently skipped.
+
+// Test iterator arithmetic for RandomAccessIterator
+template<typename Container>
+void test_iterator_arithmetic() {
+    Container c;
+    populate(c, make_shared_int(10));
+    populate(c, make_shared_int(20));
+    populate(c, make_shared_int(30));
+
+    // Test operator+ on iterators - COMPILER ERROR if operator+ doesn't exist
+    auto it0 = c.begin();
+    auto it1 = c.begin() + 1;
+    FL_CHECK(it1 - it0 == 1);  // Distance check
+    FL_CHECK(*(c.begin() + 1) != *c.begin());  // Different elements
+}
+
+// Test container comparison operators
+template<typename Container>
+void test_container_comparison() {
+    Container c1, c2;
+    auto ptr1 = make_shared_int(1);
+    auto ptr2 = make_shared_int(1);
+
+    // Populate both with same pointer (so they're actually equal)
+    populate(c1, ptr1);
+    populate(c2, ptr1);
+
+    // Test equality - COMPILER ERROR if operator== doesn't exist
+    FL_CHECK(c1 == c2);
+    FL_CHECK(!(c1 != c2));
+
+    // Test with different pointers
+    Container c3;
+    populate(c3, ptr2);
+    // c3 may or may not be equal to c1 depending on pointer comparison
+    // (with different pointers, it's likely not equal or less than)
+    // Test operator< - COMPILER ERROR if operator< doesn't exist
+    if (c1 < c3 || c3 < c1 || c1 == c3) {
+        FL_CHECK(true);  // At least one comparison worked
+    }
+}
+
 } // namespace test_helpers

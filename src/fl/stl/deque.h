@@ -55,16 +55,19 @@ private:
     }
 
 public:
-    // Iterator implementation
+    // Iterator implementation (RandomAccessIterator)
     class iterator {
     public:
         typedef T value_type;
         typedef T& reference;
         typedef T* pointer;
+        typedef fl::size difference_type;
 
     private:
         deque* mDeque;
         fl::size mIndex;
+
+        friend class deque;
 
     public:
         iterator(deque* dq, fl::size index) : mDeque(dq), mIndex(index) {}
@@ -99,12 +102,56 @@ public:
             return temp;
         }
 
+        iterator& operator+=(fl::size n) {
+            mIndex += n;
+            return *this;
+        }
+
+        iterator operator+(fl::size n) const {
+            iterator temp = *this;
+            return temp += n;
+        }
+
+        iterator& operator-=(fl::size n) {
+            mIndex -= n;
+            return *this;
+        }
+
+        iterator operator-(fl::size n) const {
+            iterator temp = *this;
+            return temp -= n;
+        }
+
+        fl::size operator-(const iterator& other) const {
+            return mIndex - other.mIndex;
+        }
+
+        T& operator[](fl::size n) const {
+            return (*mDeque)[mIndex + n];
+        }
+
         bool operator==(const iterator& other) const {
             return mDeque == other.mDeque && mIndex == other.mIndex;
         }
 
         bool operator!=(const iterator& other) const {
             return !(*this == other);
+        }
+
+        bool operator<(const iterator& other) const {
+            return mIndex < other.mIndex;
+        }
+
+        bool operator<=(const iterator& other) const {
+            return mIndex <= other.mIndex;
+        }
+
+        bool operator>(const iterator& other) const {
+            return mIndex > other.mIndex;
+        }
+
+        bool operator>=(const iterator& other) const {
+            return mIndex >= other.mIndex;
         }
     };
 
@@ -113,13 +160,19 @@ public:
         typedef T value_type;
         typedef const T& reference;
         typedef const T* pointer;
+        typedef fl::size difference_type;
 
     private:
         const deque* mDeque;
         fl::size mIndex;
 
+        friend class deque;
+
     public:
         const_iterator(const deque* dq, fl::size index) : mDeque(dq), mIndex(index) {}
+
+        // Implicit conversion from iterator to const_iterator
+        const_iterator(const iterator& it) : mDeque(it.mDeque), mIndex(it.mIndex) {}
 
         const T& operator*() const {
             return (*mDeque)[mIndex];
@@ -151,12 +204,56 @@ public:
             return temp;
         }
 
+        const_iterator& operator+=(fl::size n) {
+            mIndex += n;
+            return *this;
+        }
+
+        const_iterator operator+(fl::size n) const {
+            const_iterator temp = *this;
+            return temp += n;
+        }
+
+        const_iterator& operator-=(fl::size n) {
+            mIndex -= n;
+            return *this;
+        }
+
+        const_iterator operator-(fl::size n) const {
+            const_iterator temp = *this;
+            return temp -= n;
+        }
+
+        fl::size operator-(const const_iterator& other) const {
+            return mIndex - other.mIndex;
+        }
+
+        const T& operator[](fl::size n) const {
+            return (*mDeque)[mIndex + n];
+        }
+
         bool operator==(const const_iterator& other) const {
             return mDeque == other.mDeque && mIndex == other.mIndex;
         }
 
         bool operator!=(const const_iterator& other) const {
             return !(*this == other);
+        }
+
+        bool operator<(const const_iterator& other) const {
+            return mIndex < other.mIndex;
+        }
+
+        bool operator<=(const const_iterator& other) const {
+            return mIndex <= other.mIndex;
+        }
+
+        bool operator>(const const_iterator& other) const {
+            return mIndex > other.mIndex;
+        }
+
+        bool operator>=(const const_iterator& other) const {
+            return mIndex >= other.mIndex;
         }
     };
 
@@ -303,6 +400,23 @@ public:
         return const_reverse_iterator(begin());
     }
 
+    // Explicit const iterator accessors
+    const_iterator cbegin() const {
+        return const_iterator(this, 0);
+    }
+
+    const_iterator cend() const {
+        return const_iterator(this, mSize);
+    }
+
+    const_reverse_iterator crbegin() const {
+        return const_reverse_iterator(cend());
+    }
+
+    const_reverse_iterator crend() const {
+        return const_reverse_iterator(cbegin());
+    }
+
     // Capacity
     bool empty() const {
         return mSize == 0;
@@ -314,6 +428,51 @@ public:
 
     fl::size capacity() const {
         return mCapacity;
+    }
+
+    fl::size max_size() const {
+        // Return a reasonable max size (limited by size_t or memory)
+        return static_cast<fl::size>(-1) / sizeof(T);
+    }
+
+    void reserve(fl::size new_capacity) {
+        if (new_capacity > mCapacity) {
+            ensure_capacity(new_capacity);
+        }
+    }
+
+    void shrink_to_fit() {
+        if (mSize < mCapacity) {
+            if (mSize == 0) {
+                if (mData) {
+                    mAlloc.deallocate(mData, mCapacity);
+                }
+                mData = nullptr;
+                mCapacity = 0;
+                mFront = 0;
+            } else {
+                // Reallocate to exact size
+                T* new_data = mAlloc.allocate(mSize);
+                if (!new_data) {
+                    return; // Allocation failed
+                }
+
+                // Copy elements to new buffer
+                for (fl::size i = 0; i < mSize; ++i) {
+                    fl::size old_idx = (mFront + i) % mCapacity;
+                    mAlloc.construct(&new_data[i], fl::move(mData[old_idx]));
+                    mAlloc.destroy(&mData[old_idx]);
+                }
+
+                if (mData) {
+                    mAlloc.deallocate(mData, mCapacity);
+                }
+
+                mData = new_data;
+                mCapacity = mSize;
+                mFront = 0;
+            }
+        }
     }
 
     allocator_type get_allocator() const {
@@ -411,6 +570,206 @@ public:
             other.mFront = temp_front;
             other.mAlloc = temp_alloc;
         }
+    }
+
+    // Insert operations
+    iterator insert(const_iterator pos, const T& value) {
+        fl::size index = pos.mIndex;
+        ensure_capacity(mSize + 1);
+
+        // Shift elements from pos to end one position to the right
+        for (fl::size i = mSize; i > index; --i) {
+            fl::size from_idx = get_index(i - 1);
+            fl::size to_idx = get_index(i);
+            mAlloc.construct(&mData[to_idx], fl::move(mData[from_idx]));
+            mAlloc.destroy(&mData[from_idx]);
+        }
+
+        // Insert new element
+        fl::size insert_idx = get_index(index);
+        mAlloc.construct(&mData[insert_idx], value);
+        ++mSize;
+
+        return iterator(this, index);
+    }
+
+    iterator insert(const_iterator pos, T&& value) {
+        fl::size index = pos.mIndex;
+        ensure_capacity(mSize + 1);
+
+        // Shift elements from pos to end one position to the right
+        for (fl::size i = mSize; i > index; --i) {
+            fl::size from_idx = get_index(i - 1);
+            fl::size to_idx = get_index(i);
+            mAlloc.construct(&mData[to_idx], fl::move(mData[from_idx]));
+            mAlloc.destroy(&mData[from_idx]);
+        }
+
+        // Insert new element
+        fl::size insert_idx = get_index(index);
+        mAlloc.construct(&mData[insert_idx], fl::move(value));
+        ++mSize;
+
+        return iterator(this, index);
+    }
+
+    iterator insert(const_iterator pos, fl::size count, const T& value) {
+        fl::size index = pos.mIndex;
+        ensure_capacity(mSize + count);
+
+        // Shift elements from pos to end 'count' positions to the right
+        for (fl::size i = mSize + count - 1; i >= index + count; --i) {
+            fl::size from_idx = get_index(i - count);
+            fl::size to_idx = get_index(i);
+            mAlloc.construct(&mData[to_idx], fl::move(mData[from_idx]));
+            mAlloc.destroy(&mData[from_idx]);
+        }
+
+        // Insert new elements
+        for (fl::size i = 0; i < count; ++i) {
+            fl::size insert_idx = get_index(index + i);
+            mAlloc.construct(&mData[insert_idx], value);
+        }
+        mSize += count;
+
+        return iterator(this, index);
+    }
+
+    // Erase operations
+    iterator erase(const_iterator pos) {
+        if (pos == end()) return end();
+
+        fl::size index = pos.mIndex;
+
+        // Destroy element at pos
+        fl::size erase_idx = get_index(index);
+        mAlloc.destroy(&mData[erase_idx]);
+
+        // Shift elements from pos+1 to end one position to the left
+        for (fl::size i = index; i < mSize - 1; ++i) {
+            fl::size from_idx = get_index(i + 1);
+            fl::size to_idx = get_index(i);
+            mAlloc.construct(&mData[to_idx], fl::move(mData[from_idx]));
+            mAlloc.destroy(&mData[from_idx]);
+        }
+
+        --mSize;
+        return iterator(this, index);
+    }
+
+    iterator erase(const_iterator first, const_iterator last) {
+        if (first == last) return iterator(this, first.mIndex);
+
+        fl::size start_idx = first.mIndex;
+        fl::size count = last.mIndex - first.mIndex;
+
+        // Destroy elements in range
+        for (fl::size i = 0; i < count; ++i) {
+            fl::size destroy_idx = get_index(start_idx + i);
+            mAlloc.destroy(&mData[destroy_idx]);
+        }
+
+        // Shift remaining elements left
+        for (fl::size i = start_idx; i < mSize - count; ++i) {
+            fl::size from_idx = get_index(i + count);
+            fl::size to_idx = get_index(i);
+            mAlloc.construct(&mData[to_idx], fl::move(mData[from_idx]));
+            mAlloc.destroy(&mData[from_idx]);
+        }
+
+        mSize -= count;
+        return iterator(this, start_idx);
+    }
+
+    // Emplace operations
+    template<typename... Args>
+    iterator emplace(const_iterator pos, Args&&... args) {
+        fl::size index = pos.mIndex;
+        ensure_capacity(mSize + 1);
+
+        // Shift elements from pos to end one position to the right
+        for (fl::size i = mSize; i > index; --i) {
+            fl::size from_idx = get_index(i - 1);
+            fl::size to_idx = get_index(i);
+            mAlloc.construct(&mData[to_idx], fl::move(mData[from_idx]));
+            mAlloc.destroy(&mData[from_idx]);
+        }
+
+        // Construct new element in place
+        fl::size emplace_idx = get_index(index);
+        mAlloc.construct(&mData[emplace_idx], fl::forward<Args>(args)...);
+        ++mSize;
+
+        return iterator(this, index);
+    }
+
+    template<typename... Args>
+    T& emplace_back(Args&&... args) {
+        ensure_capacity(mSize + 1);
+        fl::size back_index = get_index(mSize);
+        mAlloc.construct(&mData[back_index], fl::forward<Args>(args)...);
+        ++mSize;
+        return mData[back_index];
+    }
+
+    template<typename... Args>
+    T& emplace_front(Args&&... args) {
+        ensure_capacity(mSize + 1);
+        mFront = (mFront - 1 + mCapacity) % mCapacity;
+        mAlloc.construct(&mData[mFront], fl::forward<Args>(args)...);
+        ++mSize;
+        return mData[mFront];
+    }
+
+    // Assign operations
+    void assign(fl::size count, const T& value) {
+        clear();
+        ensure_capacity(count);
+        for (fl::size i = 0; i < count; ++i) {
+            push_back(value);
+        }
+    }
+
+    // Comparison operators
+    bool operator==(const deque& other) const {
+        if (mSize != other.mSize) {
+            return false;
+        }
+        for (fl::size i = 0; i < mSize; ++i) {
+            if ((*this)[i] != other[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool operator!=(const deque& other) const {
+        return !(*this == other);
+    }
+
+    bool operator<(const deque& other) const {
+        fl::size min_size = mSize < other.mSize ? mSize : other.mSize;
+        for (fl::size i = 0; i < min_size; ++i) {
+            if ((*this)[i] < other[i]) {
+                return true;
+            }
+            if ((*this)[i] > other[i]) {
+                return false;
+            }
+        }
+        return mSize < other.mSize;
+    }
+
+    bool operator<=(const deque& other) const {
+        return *this < other || *this == other;
+    }
+
+    bool operator>(const deque& other) const {
+        return other < *this;
+    }
+
+    bool operator>=(const deque& other) const {
+        return *this > other || *this == other;
     }
 };
 

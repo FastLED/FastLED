@@ -1379,4 +1379,61 @@ FL_TEST_CASE("Container move edge cases") {
     }
 }
 
+// ============================================================================
+// TIER 2-4: Sequential Container Operations Compliance Tests
+// ============================================================================
+
+FL_TEST_CASE("Tier 2-4: Sequential container comprehensive tests") {
+    // IMPORTANT: Test functions do NOT use enable_if guards.
+    // If a container doesn't have a required method, compilation FAILS.
+    // This is intentional - it prevents incomplete containers!
+    //
+    // Example:
+    //   test_sequential_container_tier2<fl::deque>()  // OK - deque has insert/erase
+    //   test_sequential_container_tier2<fl::set>()    // COMPILER ERROR - set has no insert(pos)
+    //
+    // We use the detection traits (has_insert_position, has_iterator_plus, etc.)
+    // to decide WHICH tests to call for each container.
+
+    FL_SUBCASE("fl::vector - Tier 2-4") {
+        // Tier 2: Insert/erase, front/back, resize (REQUIRED)
+        test_helpers::test_sequential_container_tier2<fl::vector<fl::shared_ptr<int>>>();
+        test_helpers::test_sequential_container_front_back<fl::vector<fl::shared_ptr<int>>>();
+        test_helpers::test_sequential_container_resize<fl::vector<fl::shared_ptr<int>>>();
+
+        // Tier 3: Capacity management (REQUIRED for heap containers)
+        test_helpers::test_container_capacity_management<fl::vector<fl::shared_ptr<int>>>();
+
+        // Tier 4: Iterator arithmetic (RandomAccess - REQUIRED for vector)
+        test_helpers::test_iterator_arithmetic<fl::vector<fl::shared_ptr<int>>>();
+        // Note: Comparison operators not yet implemented for fl::vector
+    }
+
+    FL_SUBCASE("fl::deque - Tier 2-4") {
+        // Tier 2: Insert/erase, front/back, resize (REQUIRED)
+        test_helpers::test_sequential_container_tier2<fl::deque<fl::shared_ptr<int>>>();
+        test_helpers::test_sequential_container_front_back<fl::deque<fl::shared_ptr<int>>>();
+        test_helpers::test_sequential_container_resize<fl::deque<fl::shared_ptr<int>>>();
+
+        // Tier 3: Capacity management (REQUIRED for heap containers)
+        test_helpers::test_container_capacity_management<fl::deque<fl::shared_ptr<int>>>();
+
+        // Tier 4: Iterator arithmetic and comparison (RandomAccess - REQUIRED for deque)
+        test_helpers::test_iterator_arithmetic<fl::deque<fl::shared_ptr<int>>>();
+        test_helpers::test_container_comparison<fl::deque<fl::shared_ptr<int>>>();
+    }
+
+    FL_SUBCASE("fl::list - Tier 2-3") {
+        // Tier 2: Insert/erase, front/back, resize (REQUIRED)
+        test_helpers::test_sequential_container_tier2<fl::list<fl::shared_ptr<int>>>();
+        test_helpers::test_sequential_container_front_back<fl::list<fl::shared_ptr<int>>>();
+        test_helpers::test_sequential_container_resize<fl::list<fl::shared_ptr<int>>>();
+
+        // NOTE: Tier 3 (capacity) and Tier 4 (arithmetic/comparison) are NOT called
+        // because list has BidirectionalIterators (no operator+) and no capacity()
+        // If we tried to call test_iterator_arithmetic<fl::list>() here,
+        // we would get a COMPILER ERROR - which is exactly what we want!
+    }
+}
+
 } // FL_TEST_FILE
