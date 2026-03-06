@@ -60,7 +60,7 @@ namespace fl {
 #if FASTLED_RP2040_CLOCKLESS_PIO
 static CMinWait<0> *dma_chan_waits[NUM_DMA_CHANNELS] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 static inline void __isr clockless_dma_complete_handler() {
-    for (unsigned int i = 0; i < NUM_DMA_CHANNELS; i++) {
+    for (u32 i = 0; i < NUM_DMA_CHANNELS; i++) {
         // if dma triggered for this channel and it's been used (has a CMinWait)
         if ((dma_hw->ints0 & (1 << i)) && dma_chan_waits[i]) {
             dma_hw->ints0 = (1 << i); // clear/ack IRQ
@@ -105,7 +105,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     
     // writes bits to an in-memory buffer (to DMA from)
     // pico has enough memory to not really care about using a buffer for DMA
-    template<int BITS> __attribute__ ((always_inline)) inline static int writeBitsToBuf(i32 *out_buf, unsigned int bitpos, u8 b)  {
+    template<int BITS> __attribute__ ((always_inline)) inline static int writeBitsToBuf(i32 *out_buf, u32 bitpos, u8 b)  {
         // not really optimised and I haven't checked output assembly, but this should take ~50 cycles worst case
         // (and on average substantially fewer -- LEDs without XTRA0 should never trigger the second half of the function)
         
@@ -181,7 +181,7 @@ public:
 		#error "Unsupported RP platform: expected FL_IS_RP2040 or FL_IS_RP2350"
 	#endif
         // iterate over PIO instances
-        for (unsigned int i = 0; i < NUM_PIOS; i++) {
+        for (u32 i = 0; i < NUM_PIOS; i++) {
             pio = pios[i];
             sm = pio_claim_unused_sm(pio, false); // claim a state machine
             if (sm == -1) continue; // skip this PIO if no unused sm
@@ -323,7 +323,7 @@ public:
             fl::memset(dma_buf, 0, dma_buf_size * 4);
         }
 
-        unsigned int bitpos = 0;
+        u32 bitpos = 0;
 
         // Separate loops for RGB vs RGBW to match ESP32 pattern
         if (is_rgbw) {

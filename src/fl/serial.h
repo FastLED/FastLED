@@ -109,7 +109,7 @@ public:
      * @param value Unsigned integer value to print
      * @return Number of bytes written
      */
-    size_t print(unsigned int value);
+    size_t print(u32 value);
 
     /**
      * @brief Print long integer to serial output
@@ -150,7 +150,7 @@ public:
      * @param value Unsigned integer value to print
      * @return Number of bytes written
      */
-    size_t println(unsigned int value);
+    size_t println(u32 value);
 
     /**
      * @brief Print long integer with newline to serial output

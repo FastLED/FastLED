@@ -286,7 +286,7 @@ bool SpiHw8RP2040::begin(const SpiHw8::Config& config) {
     mStateMachine = -1;
     mPIOOffset = -1;
 
-    for (unsigned int i = 0; i < NUM_PIOS; i++) {
+    for (u32 i = 0; i < NUM_PIOS; i++) {
         PIO pio = pios[i];
         int sm = pio_claim_unused_sm(pio, false);
         if (sm == -1) continue;

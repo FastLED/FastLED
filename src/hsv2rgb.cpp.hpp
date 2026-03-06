@@ -493,7 +493,7 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
 }
 
 void hsv2rgb_fullspectrum( const CHSV& hsv, CRGB& rgb) {
-  const auto f = [](const int n, const fl::u8 h) -> unsigned int {
+  const auto f = [](const int n, const fl::u8 h) -> fl::u32 {
     constexpr int kZero = 0 << 8;
     constexpr int kOne  = 1 << 8;
     constexpr int kFour = 4 << 8;
@@ -504,7 +504,7 @@ void hsv2rgb_fullspectrum( const CHSV& hsv, CRGB& rgb) {
     return fl::max(kZero, fl::min(kOne, fl::min(k, k2)));
   };
 
-  const unsigned int chroma = hsv.v * hsv.s / 255;
+  const fl::u32 chroma = hsv.v * hsv.s / 255;
   rgb.r = hsv.v - ((chroma * f(5, hsv.h)) >> 8);
   rgb.g = hsv.v - ((chroma * f(3, hsv.h)) >> 8);
   rgb.b = hsv.v - ((chroma * f(1, hsv.h)) >> 8);

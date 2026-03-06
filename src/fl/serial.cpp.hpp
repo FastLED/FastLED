@@ -60,7 +60,7 @@ size_t SerialPort::print(int value) {
     return print(buffer);
 }
 
-size_t SerialPort::print(unsigned int value) {
+size_t SerialPort::print(u32 value) {
     char buffer[11];  // Enough for "4294967295" + null
     fl::utoa32(value, buffer, 10);  // Base 10
     return print(buffer);
@@ -98,7 +98,7 @@ size_t SerialPort::println(int value) {
     return println(buffer);
 }
 
-size_t SerialPort::println(unsigned int value) {
+size_t SerialPort::println(u32 value) {
     char buffer[11];
     fl::utoa32(value, buffer, 10);
     return println(buffer);

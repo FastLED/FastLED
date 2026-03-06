@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
-"""Checker to ensure stdint types (uint8_t, uint16_t, uint32_t, uint64_t, etc.) are not used.
+"""Checker to ensure stdint types and bare integer types are not used.
+
+Flags:
+- stdint types: uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, int32_t, int64_t
+- bare types: unsigned int, signed int
 
 Use FastLED's own integer types (u8, u16, u32, u64, i8, i16, i32, i64) from fl/int.h
-instead of stdint types to maintain consistency across the codebase.
+instead of stdint or bare types to maintain consistency across the codebase.
 """
 
 from ci.util.check_files import FileContent, FileContentChecker
@@ -18,12 +22,13 @@ _EXCLUDED_DIRS = [
 _EXCLUDED_FILENAMES = {
     "stdint.h",  # fl/stl/stdint.h - defines uint8_t as typedef of fl::u8
     "cstdint.h",  # fl/stl/cstdint.h - C language type definitions
+    "int.h",  # fl/int.h - defines fl::uint as typedef of unsigned int (core type definition)
     "run_unit_test.hpp",  # Platform runners use std:: types to avoid FastLED dependencies
     "dual_isr_context.h",  # C header used from assembly - must use C types
     "mcpwm_timer.h",  # C header with extern "C" API - must use C types
 }
 
-# Mapping of stdint types to FastLED equivalents
+# Mapping of stdint types and bare integer types to FastLED equivalents
 STDINT_TO_FL: dict[str, str] = {
     "uint8_t": "u8",
     "uint16_t": "u16",
@@ -33,6 +38,8 @@ STDINT_TO_FL: dict[str, str] = {
     "int16_t": "i16",
     "int32_t": "i32",
     "int64_t": "i64",
+    "unsigned int": "u32",
+    "signed int": "i32",
 }
 
 # Word boundary characters for manual boundary checking
@@ -47,12 +54,14 @@ def _normalize_path(path: str) -> str:
 
 
 def _find_stdint_matches(code_part: str) -> list[str]:
-    """Find all stdint type matches in a code string using tree-match.
+    """Find all stdint type matches and bare integer types in a code string.
 
-    Uses a single str.find("int") scan and branches on the suffix character
-    to identify which of the 8 types matched (u8/u16/u32/u64/i8/i16/i32/i64).
-    ~10x faster than the original regex approach, ~13% faster than a combined
-    regex alternation.
+    Detects:
+    - stdint types: int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t
+    - bare types: unsigned int, signed int
+
+    Uses a single str.find("int") scan and branches on suffix/prefix to identify types.
+    ~10x faster than the original regex approach.
 
     Phase 1 (fast, false positives OK): str.find("int") locates candidates.
     Phase 2 (exact, no false positives): suffix check + word boundary verification.
@@ -67,7 +76,7 @@ def _find_stdint_matches(code_part: str) -> list[str]:
         if idx == -1:
             break
 
-        # Phase 1 found "int" at idx. Now check suffix for [u]int{8,16,32,64}_t
+        # Phase 1 found "int" at idx. Now check suffix for stdint types and prefix for bare types
         after = idx + 3  # position right after "int"
         matched_type = ""
         start = idx
@@ -127,6 +136,17 @@ def _find_stdint_matches(code_part: str) -> list[str]:
                 else:
                     end = idx + 7
                     matched_type = "int64_t"
+            elif c == " " or c in ("", "*", "&", ",", ")", "]"):
+                # Bare "int" with word boundary after (space, end, pointer, ref, comma, paren, bracket)
+                # Check for "unsigned int" or "signed int" patterns
+                if idx >= 9 and code_part[idx - 9 : idx] == "unsigned ":
+                    start = idx - 9
+                    end = idx + 3
+                    matched_type = "unsigned int"
+                elif idx >= 7 and code_part[idx - 7 : idx] == "signed ":
+                    start = idx - 7
+                    end = idx + 3
+                    matched_type = "signed int"
 
         if matched_type:
             # Phase 2: exact word boundary verification
@@ -168,6 +188,22 @@ class StdintTypeChecker(FileContentChecker):
         if any(d in normalized for d in _EXCLUDED_DIRS):
             return False
 
+        # Exclude stdlib compatibility headers (fl/stl/) - these need exact standard library signatures
+        if "/fl/stl/" in normalized:
+            return False
+
+        # Exclude platform type definition files that intentionally use unsigned int as base type
+        if "/platforms/" in normalized:
+            # Exclude int_*.h files (platform type definitions)
+            if filename.startswith("int_") and filename.endswith(".h"):
+                return False
+            # Exclude Arduino compatibility headers (must match Arduino API)
+            if filename in ("Arduino.h", "Arduino.cpp.hpp"):
+                return False
+            # Exclude stub/test implementations
+            if "/stub/" in normalized or "/test/" in normalized:
+                return False
+
         return True
 
     def check_file_content(self, file_content: FileContent) -> list[str]:
@@ -178,6 +214,7 @@ class StdintTypeChecker(FileContentChecker):
 
         violations: list[tuple[int, str]] = []
         in_multiline_comment = False
+        in_extern_c_block = False
 
         for line_number, line in enumerate(file_content.lines, 1):
             # Fast bail: all stdint types contain "int"
@@ -198,6 +235,24 @@ class StdintTypeChecker(FileContentChecker):
             is_line_comment = i + 1 < n and line[i] == "/" and line[i + 1] == "/"
 
             if is_line_comment and not in_multiline_comment:
+                continue
+
+            # Track extern "C" blocks - skip lines inside extern "C" { ... }
+            if 'extern "C"' in line:
+                # Check if it's a block (ends with {) or single function
+                if "{" in line:
+                    in_extern_c_block = True
+                elif ";" in line:
+                    # Single extern "C" function declaration, skip this line
+                    continue
+
+            # Close extern "C" block
+            if in_extern_c_block and "}" in line:
+                in_extern_c_block = False
+                continue
+
+            # Skip lines inside extern "C" blocks
+            if in_extern_c_block:
                 continue
 
             # Track multi-line comment state using only the code portion
@@ -223,6 +278,18 @@ class StdintTypeChecker(FileContentChecker):
 
             # Remove trailing comment before checking
             code_part = line.split("//", 1)[0]
+
+            # Also remove inline doc comments (/** ... */)
+            while "/*" in code_part:
+                open_pos = code_part.find("/*")
+                close_pos = code_part.find("*/", open_pos + 2)
+                if close_pos != -1:
+                    # Remove the inline comment
+                    code_part = code_part[:open_pos] + " " + code_part[close_pos + 2 :]
+                else:
+                    # Unclosed comment, remove rest of line
+                    code_part = code_part[:open_pos]
+                    break
 
             # Two-phase match: fast string find → exact boundary check
             matches = _find_stdint_matches(code_part)

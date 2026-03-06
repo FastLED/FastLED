@@ -18,7 +18,7 @@ void delay(fl::u32 ms) {
 }
 
 void delayMicroseconds(fl::u32 us) {
-    ::delayMicroseconds((unsigned int)us);
+    ::delayMicroseconds((u32)us);
 }
 
 fl::u32 millis() {

@@ -18,8 +18,8 @@ void FL_OPTIMIZE_FUNCTION FL_IRAM transpose8x1_noinline(unsigned char *A, unsign
     u32 x, y, t;
 
     // Load the array and pack it into x and y.
-    y = *(unsigned int*)(A);
-    x = *(unsigned int*)(A+4);
+    y = *(u32*)(A);
+    x = *(u32*)(A+4);
 
     // pre-transform x
     t = (x ^ (x >> 7)) & 0x00AA00AA;  x = x ^ t ^ (t << 7);

@@ -25,7 +25,7 @@ namespace fl {
 
 /// Add one byte to another, saturating at 0xFF (C implementation)
 FL_ALWAYS_INLINE u8 qadd8(u8 i, u8 j) {
-    unsigned int t = i + j;
+    u32 t = i + j;
     if (t > 255)
         t = 255;
     return static_cast<u8>(t);

@@ -104,7 +104,7 @@ namespace {
 inline int portValueToId(unsigned char v) { return v; }
 inline int portValueToId(unsigned short v) { return static_cast<int>(v); }
 inline int portValueToId(int v) { return v; }
-inline int portValueToId(unsigned int v) { return static_cast<int>(v); }
+inline int portValueToId(u32 v) { return static_cast<int>(v); }
 inline int portValueToId(long v) { return static_cast<int>(v); }
 inline int portValueToId(unsigned long v) { return static_cast<int>(v); }
 

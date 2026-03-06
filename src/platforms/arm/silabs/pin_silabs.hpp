@@ -105,7 +105,7 @@ inline void digitalWrite(int pin, PinValue val) {
 inline PinValue digitalRead(int pin) {
     SilabsPinMapping mapping = getSilabsPinMapping(pin);
 
-    unsigned int result = GPIO_PinInGet(mapping.port, mapping.pin);
+    u32 result = GPIO_PinInGet(mapping.port, mapping.pin);
     return result ? PinValue::High : PinValue::Low;
 }
 

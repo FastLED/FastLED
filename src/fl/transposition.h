@@ -115,8 +115,8 @@ FASTLED_FORCE_INLINE void transpose8x1(unsigned char *A, unsigned char *B) {
     fl::u32 x, y, t;
 
     // Load the array and pack it into x and y.
-    y = *(unsigned int*)(A);
-    x = *(unsigned int*)(A+4);
+    y = *(fl::u32*)(A);
+    x = *(fl::u32*)(A+4);
 
     // pre-transform x
     t = (x ^ (x >> 7)) & 0x00AA00AA;  x = x ^ t ^ (t << 7);
@@ -145,8 +145,8 @@ FASTLED_FORCE_INLINE void transpose8x1_MSB(unsigned char *A, unsigned char *B) {
     fl::u32 x, y, t;
 
     // Load the array and pack it into x and y.
-    y = *(unsigned int*)(A);
-    x = *(unsigned int*)(A+4);
+    y = *(fl::u32*)(A);
+    x = *(fl::u32*)(A+4);
 
     // pre-transform x
     t = (x ^ (x >> 7)) & 0x00AA00AA;  x = x ^ t ^ (t << 7);
@@ -186,8 +186,8 @@ FASTLED_FORCE_INLINE void transpose8(unsigned char *A, unsigned char *B) {
 
     // Load the array and pack it into x and y.
     if(m == 1) {
-        y = *(unsigned int*)(A);
-        x = *(unsigned int*)(A+4);
+        y = *(fl::u32*)(A);
+        x = *(fl::u32*)(A+4);
     } else {
         x = (fl::u32(A[0])<<24)   | (fl::u32(A[m])<<16)   | (fl::u32(A[2*m])<<8) | A[3*m];
         y = (fl::u32(A[4*m])<<24) | (fl::u32(A[5*m])<<16) | (fl::u32(A[6*m])<<8) | A[7*m];

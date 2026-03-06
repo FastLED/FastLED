@@ -52,7 +52,7 @@ FL_MAYBE_UNUSED static void test_strstream_integer_operators() {
     short s = 3; ss << s; fss << s;
     unsigned short us = 4; ss << us; fss << us;
     int i = 5; ss << i; fss << i;
-    unsigned int ui = 6; ss << ui; fss << ui;
+    u32 ui = 6; ss << ui; fss << ui;
     long l = 7; ss << l; fss << l;
     unsigned long ul = 8; ss << ul; fss << ul;
     long long ll = 9; ss << ll; fss << ll;

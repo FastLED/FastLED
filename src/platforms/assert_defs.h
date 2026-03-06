@@ -52,7 +52,7 @@ struct AssertSink {
     // Explicit overloads for common types to avoid template instantiation overhead
     AssertSink& operator<<(const char*) { return *this; }
     AssertSink& operator<<(int) { return *this; }
-    AssertSink& operator<<(unsigned int) { return *this; }
+    AssertSink& operator<<(u32) { return *this; }
     AssertSink& operator<<(long) { return *this; }
     AssertSink& operator<<(unsigned long) { return *this; }
 };
