@@ -5,6 +5,7 @@
 
 #include "fl/simd.h"
 #include "fl/stl/fixed_point/s16x16.h"
+#include "fl/sin32.h"
 #include "fl/force_inline.h"
 #include "fl/align.h"
 
@@ -42,44 +43,107 @@ struct s16x16x4 {
     }
 
     // ---- SIMD arithmetic (s16x16x4 OP s16x16x4 → s16x16x4) -----------------
-    // Note: Requires platform implementations of add_u32_4/sub_u32_4
-    // These are not yet in fl::simd::platforms, so we'll provide scalar fallback
 
     FASTLED_FORCE_INLINE s16x16x4 operator+(s16x16x4 b) const {
-        // Scalar fallback until platform add_u32_4 is implemented
-        FL_ALIGNAS(16) i32 a_arr[4];
-        FL_ALIGNAS(16) i32 b_arr[4];
-        FL_ALIGNAS(16) i32 result[4];
-
-        simd::platforms::store_u32_4(reinterpret_cast<u32*>(a_arr), raw); // ok reinterpret cast
-        simd::platforms::store_u32_4(reinterpret_cast<u32*>(b_arr), b.raw); // ok reinterpret cast
-
-        for (int i = 0; i < 4; i++) {
-            result[i] = a_arr[i] + b_arr[i];
-        }
-
-        return from_raw(simd::platforms::load_u32_4(reinterpret_cast<const u32*>(result))); // ok reinterpret cast
+        return from_raw(simd::add_i32_4(raw, b.raw));
     }
 
     FASTLED_FORCE_INLINE s16x16x4 operator-(s16x16x4 b) const {
-        // Scalar fallback until platform sub_u32_4 is implemented
-        FL_ALIGNAS(16) i32 a_arr[4];
-        FL_ALIGNAS(16) i32 b_arr[4];
-        FL_ALIGNAS(16) i32 result[4];
+        return from_raw(simd::sub_i32_4(raw, b.raw));
+    }
 
-        simd::platforms::store_u32_4(reinterpret_cast<u32*>(a_arr), raw); // ok reinterpret cast
-        simd::platforms::store_u32_4(reinterpret_cast<u32*>(b_arr), b.raw); // ok reinterpret cast
+    FASTLED_FORCE_INLINE s16x16x4 operator*(s16x16x4 b) const {
+        // Q16 × Q16 = Q32 → shift right 16 → Q16
+        return from_raw(simd::mulhi_i32_4(raw, b.raw));
+    }
 
-        for (int i = 0; i < 4; i++) {
-            result[i] = a_arr[i] - b_arr[i];
-        }
+    FASTLED_FORCE_INLINE s16x16x4 operator-() const {
+        // Unary negation: -x = 0 - x
+        auto zero = simd::set1_u32_4(0);
+        return from_raw(simd::sub_i32_4(zero, raw));
+    }
 
-        return from_raw(simd::platforms::load_u32_4(reinterpret_cast<const u32*>(result))); // ok reinterpret cast
+    FASTLED_FORCE_INLINE s16x16x4 operator>>(int shift) const {
+        return from_raw(simd::sra_i32_4(raw, shift));
+    }
+
+    FASTLED_FORCE_INLINE s16x16x4 operator<<(int shift) const {
+        return from_raw(simd::sll_u32_4(raw, shift));
     }
 
     // Cross-type multiply: s16x16x4 × s0x32x4 → s16x16x4 (commutative)
     // Implemented after s0x32x4 is defined
     FASTLED_FORCE_INLINE s16x16x4 operator*(s0x32x4 b) const;
+
+    // ---- Math functions -------------------------------------------------------
+
+    /// Absolute value: branchless via mask and xor
+    FASTLED_FORCE_INLINE s16x16x4 abs() const {
+        // mask = -1 if negative (sign extended), 0 if positive
+        auto mask = simd::sra_i32_4(raw, 31);
+        // flip bits if negative, then add 1 (two's complement)
+        auto flipped = simd::xor_u32_4(raw, mask);
+        return from_raw(simd::sub_i32_4(flipped, mask));
+    }
+
+    /// Element-wise minimum
+    FASTLED_FORCE_INLINE s16x16x4 min(s16x16x4 b) const {
+        return from_raw(simd::min_i32_4(raw, b.raw));
+    }
+
+    /// Element-wise maximum
+    FASTLED_FORCE_INLINE s16x16x4 max(s16x16x4 b) const {
+        return from_raw(simd::max_i32_4(raw, b.raw));
+    }
+
+    /// Clamp to [lo, hi]
+    FASTLED_FORCE_INLINE s16x16x4 clamp(s16x16x4 lo, s16x16x4 hi) const {
+        return max(lo).min(hi);
+    }
+
+    /// Linear interpolation: a + (b - a) * t (using Q16 multiply)
+    /// t: s16x16 interpolation factor in [0, 1]
+    FASTLED_FORCE_INLINE s16x16x4 lerp(s16x16x4 b, s16x16 t) const {
+        auto t_vec = s16x16x4::set1(t);
+        auto diff = b - (*this);
+        return (*this) + (diff * t_vec);
+    }
+
+    /// Compute sin and cos of 4 angles (in radians)
+    /// Results written to out_sin and out_cos
+    FASTLED_FORCE_INLINE void sincos(s16x16x4& out_sin, s16x16x4& out_cos) const {
+        // Convert radians to 24-bit angle units (same as scalar s16x16)
+        // RAD_TO_24 = 2^24 / (2π) in Q16
+        static constexpr i32 RAD_TO_24 = 2670177;  // from s16x16.h
+
+        // Convert 4 angles: mulhi_i32_4 does (i64*i64) >> 16
+        auto angles_u32 = simd::mulhi_su32_4(raw, simd::set1_u32_4(static_cast<u32>(RAD_TO_24)));
+
+        // Call vectorized sincos
+        auto sc = sincos32_simd(angles_u32);
+
+        // Shift results right by 15 to convert from raw sin32 output to Q16.16
+        out_sin = from_raw(simd::sra_i32_4(sc.sin_vals, 15));
+        out_cos = from_raw(simd::sra_i32_4(sc.cos_vals, 15));
+    }
+
+    /// Compute sine of 4 angles (in radians)
+    FASTLED_FORCE_INLINE s16x16x4 sin() const {
+        s16x16x4 sin_out, cos_out;
+        sincos(sin_out, cos_out);
+        return sin_out;
+    }
+
+    /// Compute cosine of 4 angles (in radians)
+    FASTLED_FORCE_INLINE s16x16x4 cos() const {
+        s16x16x4 sin_out, cos_out;
+        sincos(sin_out, cos_out);
+        return cos_out;
+    }
 };
+
+// Include simd_ops.h to implement cross-type operations
+// Must come after all types are defined
+#include "fl/stl/fixed_point/simd_ops.h"  // allow-include-after-namespace
 
 } // namespace fl

@@ -740,12 +740,6 @@ FL_TEST_CASE("SIMD type alignment") {
         FL_REQUIRE(reinterpret_cast<uintptr_t>(&vec) % 16 == 0);
     }
 
-    FL_SUBCASE("simd_f32x4 alignment") {
-        FL_REQUIRE(alignof(simd::simd_f32x4) == 16);
-        simd::simd_f32x4 vec;
-        FL_REQUIRE(reinterpret_cast<uintptr_t>(&vec) % 16 == 0);
-    }
-
     FL_SUBCASE("array of SIMD types alignment") {
         // Arrays should maintain alignment
         simd::simd_u32x4 arr[4];
@@ -960,6 +954,324 @@ FL_TEST_CASE("fixed-point SIMD type alignment") {
         FL_REQUIRE(reinterpret_cast<uintptr_t>(&s) % 16 == 0);
         FL_REQUIRE(reinterpret_cast<uintptr_t>(&s.a) % 16 == 0);
         FL_REQUIRE(reinterpret_cast<uintptr_t>(&s.b) % 16 == 0);
+    }
+}
+
+FL_TEST_CASE("s16x16x4 addition matches scalar") {
+    FL_SUBCASE("simple addition") {
+        s16x16 a_vals[4] = {s16x16::from_raw(100), s16x16::from_raw(200), s16x16::from_raw(300), s16x16::from_raw(400)};
+        s16x16 b_vals[4] = {s16x16::from_raw(50), s16x16::from_raw(60), s16x16::from_raw(70), s16x16::from_raw(80)};
+
+        auto a = s16x16x4::load(a_vals);
+        auto b = s16x16x4::load(b_vals);
+        auto result = a + b;
+
+        s16x16 result_vals[4];
+        result.store(result_vals);
+
+        for (int i = 0; i < 4; i++) {
+            FL_REQUIRE_EQ(result_vals[i].raw(), a_vals[i].raw() + b_vals[i].raw());
+        }
+    }
+}
+
+FL_TEST_CASE("s16x16x4 subtraction matches scalar") {
+    FL_SUBCASE("simple subtraction") {
+        s16x16 a_vals[4] = {s16x16::from_raw(500), s16x16::from_raw(400), s16x16::from_raw(300), s16x16::from_raw(200)};
+        s16x16 b_vals[4] = {s16x16::from_raw(100), s16x16::from_raw(50), s16x16::from_raw(75), s16x16::from_raw(25)};
+
+        auto a = s16x16x4::load(a_vals);
+        auto b = s16x16x4::load(b_vals);
+        auto result = a - b;
+
+        s16x16 result_vals[4];
+        result.store(result_vals);
+
+        for (int i = 0; i < 4; i++) {
+            FL_REQUIRE_EQ(result_vals[i].raw(), a_vals[i].raw() - b_vals[i].raw());
+        }
+    }
+}
+
+FL_TEST_CASE("s16x16x4 multiplication (Q16 × Q16)") {
+    FL_SUBCASE("multiply by 0.5") {
+        // Test: 1.5 * 0.5 = 0.75
+        s16x16 val = s16x16(1.5f);  // 1.5 in Q16.16
+        auto vec = s16x16x4::set1(val);
+        auto half = s16x16x4::set1(s16x16(0.5f));
+        auto result = vec * half;
+
+        s16x16 result_vals[4];
+        result.store(result_vals);
+
+        s16x16 expected = val * s16x16(0.5f);
+        for (int i = 0; i < 4; i++) {
+            // Allow 1 unit tolerance for rounding
+            FL_REQUIRE(fl::abs(result_vals[i].raw() - expected.raw()) <= 1);
+        }
+    }
+
+    FL_SUBCASE("multiply by -1") {
+        s16x16 val = s16x16(2.0f);
+        auto vec = s16x16x4::set1(val);
+        auto neg_one = s16x16x4::set1(s16x16(-1.0f));
+        auto result = vec * neg_one;
+
+        s16x16 result_vals[4];
+        result.store(result_vals);
+
+        s16x16 expected = val * s16x16(-1.0f);
+        for (int i = 0; i < 4; i++) {
+            FL_REQUIRE_EQ(result_vals[i].raw(), expected.raw());
+        }
+    }
+}
+
+FL_TEST_CASE("s16x16x4 unary negation") {
+    s16x16 a_vals[4] = {s16x16::from_raw(100), s16x16::from_raw(-200), s16x16::from_raw(300), s16x16::from_raw(0)};
+
+    auto a = s16x16x4::load(a_vals);
+    auto result = -a;
+
+    s16x16 result_vals[4];
+    result.store(result_vals);
+
+    for (int i = 0; i < 4; i++) {
+        FL_REQUIRE_EQ(result_vals[i].raw(), -a_vals[i].raw());
+    }
+}
+
+FL_TEST_CASE("s16x16x4 shift operations") {
+    FL_SUBCASE("right shift (arithmetic)") {
+        s16x16 a_vals[4] = {s16x16::from_raw(1000), s16x16::from_raw(-1000), s16x16::from_raw(500), s16x16::from_raw(0)};
+
+        auto a = s16x16x4::load(a_vals);
+        auto result = a >> 2;  // Shift right by 2
+
+        s16x16 result_vals[4];
+        result.store(result_vals);
+
+        for (int i = 0; i < 4; i++) {
+            FL_REQUIRE_EQ(result_vals[i].raw(), a_vals[i].raw() >> 2);
+        }
+    }
+
+    FL_SUBCASE("left shift (logical)") {
+        s16x16 a_vals[4] = {s16x16::from_raw(100), s16x16::from_raw(200), s16x16::from_raw(50), s16x16::from_raw(1)};
+
+        auto a = s16x16x4::load(a_vals);
+        auto result = a << 3;  // Shift left by 3
+
+        s16x16 result_vals[4];
+        result.store(result_vals);
+
+        for (int i = 0; i < 4; i++) {
+            FL_REQUIRE_EQ(result_vals[i].raw(), a_vals[i].raw() << 3);
+        }
+    }
+}
+
+FL_TEST_CASE("s16x16x4 abs") {
+    s16x16 a_vals[4] = {s16x16::from_raw(100), s16x16::from_raw(-200), s16x16::from_raw(300), s16x16::from_raw(-50)};
+
+    auto a = s16x16x4::load(a_vals);
+    auto result = a.abs();
+
+    s16x16 result_vals[4];
+    result.store(result_vals);
+
+    for (int i = 0; i < 4; i++) {
+        FL_REQUIRE_EQ(result_vals[i].raw(), fl::abs(a_vals[i].raw()));
+    }
+}
+
+FL_TEST_CASE("s16x16x4 min and max") {
+    FL_SUBCASE("min selects smaller values") {
+        s16x16 a_vals[4] = {s16x16::from_raw(100), s16x16::from_raw(300), s16x16::from_raw(50), s16x16::from_raw(200)};
+        s16x16 b_vals[4] = {s16x16::from_raw(150), s16x16::from_raw(250), s16x16::from_raw(100), s16x16::from_raw(200)};
+
+        auto a = s16x16x4::load(a_vals);
+        auto b = s16x16x4::load(b_vals);
+        auto result = a.min(b);
+
+        s16x16 result_vals[4];
+        result.store(result_vals);
+
+        for (int i = 0; i < 4; i++) {
+            FL_REQUIRE_EQ(result_vals[i].raw(), fl::min(a_vals[i].raw(), b_vals[i].raw()));
+        }
+    }
+
+    FL_SUBCASE("max selects larger values") {
+        s16x16 a_vals[4] = {s16x16::from_raw(100), s16x16::from_raw(300), s16x16::from_raw(50), s16x16::from_raw(200)};
+        s16x16 b_vals[4] = {s16x16::from_raw(150), s16x16::from_raw(250), s16x16::from_raw(100), s16x16::from_raw(200)};
+
+        auto a = s16x16x4::load(a_vals);
+        auto b = s16x16x4::load(b_vals);
+        auto result = a.max(b);
+
+        s16x16 result_vals[4];
+        result.store(result_vals);
+
+        for (int i = 0; i < 4; i++) {
+            FL_REQUIRE_EQ(result_vals[i].raw(), fl::max(a_vals[i].raw(), b_vals[i].raw()));
+        }
+    }
+}
+
+FL_TEST_CASE("s16x16x4 clamp") {
+    s16x16 a_vals[4] = {s16x16::from_raw(50), s16x16::from_raw(150), s16x16::from_raw(250), s16x16::from_raw(350)};
+    auto lo = s16x16::from_raw(100);
+    auto hi = s16x16::from_raw(300);
+
+    auto a = s16x16x4::load(a_vals);
+    auto result = a.clamp(s16x16x4::set1(lo), s16x16x4::set1(hi));
+
+    s16x16 result_vals[4];
+    result.store(result_vals);
+
+    for (int i = 0; i < 4; i++) {
+        i32 expected = fl::max(lo.raw(), fl::min(a_vals[i].raw(), hi.raw()));
+        FL_REQUIRE_EQ(result_vals[i].raw(), expected);
+    }
+}
+
+FL_TEST_CASE("s16x16x4 lerp") {
+    FL_SUBCASE("lerp with t=0 returns first") {
+        s16x16 a = s16x16::from_raw(100);
+        s16x16 b = s16x16::from_raw(200);
+        s16x16 t = s16x16(0.0f);
+
+        auto a_vec = s16x16x4::set1(a);
+        auto b_vec = s16x16x4::set1(b);
+        auto result = a_vec.lerp(b_vec, t);
+
+        s16x16 result_vals[4];
+        result.store(result_vals);
+
+        for (int i = 0; i < 4; i++) {
+            FL_REQUIRE_EQ(result_vals[i].raw(), a.raw());
+        }
+    }
+
+    FL_SUBCASE("lerp with t=1 returns second") {
+        s16x16 a = s16x16::from_raw(100);
+        s16x16 b = s16x16::from_raw(200);
+        s16x16 t = s16x16(1.0f);
+
+        auto a_vec = s16x16x4::set1(a);
+        auto b_vec = s16x16x4::set1(b);
+        auto result = a_vec.lerp(b_vec, t);
+
+        s16x16 result_vals[4];
+        result.store(result_vals);
+
+        for (int i = 0; i < 4; i++) {
+            // Should be b with small tolerance
+            FL_REQUIRE(fl::abs(result_vals[i].raw() - b.raw()) <= 1);
+        }
+    }
+
+    FL_SUBCASE("lerp with t=0.5 returns midpoint") {
+        s16x16 a = s16x16::from_raw(100);
+        s16x16 b = s16x16::from_raw(300);
+        s16x16 t = s16x16(0.5f);
+
+        auto a_vec = s16x16x4::set1(a);
+        auto b_vec = s16x16x4::set1(b);
+        auto result = a_vec.lerp(b_vec, t);
+
+        s16x16 result_vals[4];
+        result.store(result_vals);
+
+        s16x16 expected = a + (b - a) * t;
+        for (int i = 0; i < 4; i++) {
+            // Allow small tolerance for rounding
+            FL_REQUIRE(fl::abs(result_vals[i].raw() - expected.raw()) <= 1);
+        }
+    }
+}
+
+FL_TEST_CASE("s16x16x4 sin and cos") {
+    FL_SUBCASE("sin and cos of 0") {
+        s16x16 angle = s16x16(0.0f);
+        auto angle_vec = s16x16x4::set1(angle);
+        auto sin_result = angle_vec.sin();
+        auto cos_result = angle_vec.cos();
+
+        s16x16 sin_vals[4], cos_vals[4];
+        sin_result.store(sin_vals);
+        cos_result.store(cos_vals);
+
+        for (int i = 0; i < 4; i++) {
+            // sin(0) = 0, cos(0) = 1, allow tolerance for rounding
+            FL_REQUIRE(fl::abs(sin_vals[i].to_float() - 0.0f) < 0.01f);
+            FL_REQUIRE(fl::abs(cos_vals[i].to_float() - 1.0f) < 0.01f);
+        }
+    }
+
+    FL_SUBCASE("sin and cos consistency with scalar") {
+        s16x16 angles[4] = {
+            s16x16(0.0f),
+            s16x16(1.5708f),  // π/2
+            s16x16(3.14159f),  // π
+            s16x16(4.71239f)   // 3π/2
+        };
+
+        auto angle_vec = s16x16x4::load(angles);
+        auto sin_result = angle_vec.sin();
+        auto cos_result = angle_vec.cos();
+
+        s16x16 sin_vals[4], cos_vals[4];
+        sin_result.store(sin_vals);
+        cos_result.store(cos_vals);
+
+        for (int i = 0; i < 4; i++) {
+            auto scalar_sin = s16x16::sin(angles[i]);
+            auto scalar_cos = s16x16::cos(angles[i]);
+
+            // Allow tolerance for rounding and interpolation differences
+            FL_REQUIRE(fl::abs(sin_vals[i].to_float() - scalar_sin.to_float()) < 0.01f);
+            FL_REQUIRE(fl::abs(cos_vals[i].to_float() - scalar_cos.to_float()) < 0.01f);
+        }
+    }
+}
+
+FL_TEST_CASE("s0x32x4 × s16x16x4 multiply (Q31 × Q16)") {
+    FL_SUBCASE("multiply Q31 0.5 by Q16 2.0") {
+        s0x32 a = s0x32(0.5f);    // Q31: 0.5
+        s16x16 b = s16x16(2.0f);  // Q16.16: 2.0
+        // Expected: 0.5 * 2.0 = 1.0
+
+        auto a_vec = s0x32x4::set1(a);
+        auto b_vec = s16x16x4::set1(b);
+        auto result = a_vec * b_vec;
+
+        s16x16 result_vals[4];
+        result.store(result_vals);
+
+        for (int i = 0; i < 4; i++) {
+            // Should be approximately 1.0
+            FL_REQUIRE(fl::abs(result_vals[i].to_float() - 1.0f) < 0.001f);
+        }
+    }
+
+    FL_SUBCASE("multiply Q31 1.0 by Q16 0.5") {
+        s0x32 a = s0x32(1.0f);    // Q31: 1.0
+        s16x16 b = s16x16(0.5f);  // Q16.16: 0.5
+        // Expected: 1.0 * 0.5 = 0.5
+
+        auto a_vec = s0x32x4::set1(a);
+        auto b_vec = s16x16x4::set1(b);
+        auto result = a_vec * b_vec;
+
+        s16x16 result_vals[4];
+        result.store(result_vals);
+
+        for (int i = 0; i < 4; i++) {
+            // Should be approximately 0.5
+            FL_REQUIRE(fl::abs(result_vals[i].to_float() - 0.5f) < 0.001f);
+        }
     }
 }
 

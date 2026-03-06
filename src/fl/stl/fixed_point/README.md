@@ -436,18 +436,179 @@ auto noise = perlin_s16x16::pnoise2d(x, y, fade_lut, perm);
 
 ## SIMD Versions (4x Parallel Processing)
 
-For vectorized loops processing 4 values at once:
+Fixed-point SIMD types (`s0x32x4`, `s16x16x4`) are **fully implemented** with complete arithmetic and math operations. Float SIMD is not available on embedded targets.
+
+### What is SIMD?
+
+**SIMD** = "Single Instruction, Multiple Data" — process 4 values **simultaneously** with one CPU operation.
+
+Instead of:
+```
+Loop 4 times: value[0], value[1], value[2], value[3]  ← Serial
+```
+
+SIMD does:
+```
+[value0, value1, value2, value3]  ← One operation on 4 lanes!
+```
+
+### Available SIMD Types
+
+Currently implemented:
+- **`s0x32x4`** - Normalized values (Q31 format, for [-1, 1] range)
+- **`s16x16x4`** - General fixed-point (Q16.16 format, most common)
+
+Not yet available: `u8x8x4`, `s8x24x4`, etc. (scalar versions are recommended for other types)
+
+### When to Use SIMD
+
+- ✅ **Processing 4+ values with identical operations**
+- ✅ **Hot loops where arithmetic and math functions dominate**
+- ✅ **Load/store operations on aligned arrays** of fixed-point values
+- ✅ **Batch sin/cos/lerp/clamp on 4 angles or values simultaneously**
+- ❌ **Processing single values** (overhead not worth it)
+
+### SIMD Types and Creation
 
 ```cpp
-#include "fl/stl/fixed_point.h"
+#include "fl/stl/fixed_point/s16x16x4.h"
+#include "fl/stl/fixed_point/s0x32x4.h"
 
-// 4-wide SIMD versions (4x parallelism)
-// s16x16x4, u8x8x4, s8x24x4, etc.
+// Broadcast: all 4 lanes get same value
+s16x16 val(1.57f);  // π/2
+auto angles = s16x16x4::set1(val);
+// Result: [1.57, 1.57, 1.57, 1.57]
 
-auto angles = fl::sfixed_integer<16, 16>::x4(1.0f);  // Broadcast to 4 lanes
+// Load from memory (4 consecutive s16x16 values)
+s16x16 array[4] = {1.0f, 2.0f, 3.0f, 4.0f};
+auto vec = s16x16x4::load(&array[0]);
 
-fl::sin(angles);   // sin on all 4 lanes
-fl::cos(angles);   // cos on all 4 lanes
+// Store back to memory
+s16x16 output[4];
+vec.store(&output[0]);
+```
+
+### Currently Available Operations
+
+#### Arithmetic
+
+```cpp
+auto a = s16x16x4::set1(s16x16(2.0f));
+auto b = s16x16x4::set1(s16x16(0.5f));
+
+auto sum = a + b;       // [2.5, 2.5, 2.5, 2.5]
+auto diff = a - b;      // [1.5, 1.5, 1.5, 1.5]
+auto prod = a * b;      // [1.0, 1.0, 1.0, 1.0]
+auto neg = -a;          // [-2.0, -2.0, -2.0, -2.0]
+auto shifted = a >> 1;  // [1.0, 1.0, 1.0, 1.0]  (arithmetic shift right)
+
+// Multiply: s0x32x4 × s16x16x4 → s16x16x4 (Q31 × Q16)
+auto normalized = s0x32x4::set1(s0x32(0.5f));  // 0.5 normalized
+auto scaled = normalized * a;  // Cross-type multiply
+```
+
+#### Comparison and Selection
+
+```cpp
+auto min_val = a.min(b);    // Element-wise minimum
+auto max_val = a.max(b);    // Element-wise maximum
+auto clamped = a.clamp(s16x16x4::set1(s16x16(0.0f)),  // Clamp to [0, 2]
+                       s16x16x4::set1(s16x16(2.0f)));
+auto abs_val = a.abs();     // Absolute value (branchless)
+```
+
+#### Math Functions
+
+```cpp
+// Trigonometry
+auto sines = a.sin();       // sin() of 4 angles (in radians)
+auto cosines = a.cos();     // cos() of 4 angles (in radians)
+
+// For separate sin and cos (more efficient if you need both)
+s16x16x4 sin_out, cos_out;
+a.sincos(sin_out, cos_out);  // Returns both simultaneously
+
+// Linear interpolation
+auto t = s16x16x4::set1(s16x16(0.5f));
+auto interpolated = a.lerp(b, s16x16(0.5f));  // Midpoint between a and b
+```
+
+#### Load/Store
+
+```cpp
+// Load 4 values from array (unaligned access OK)
+s16x16 data[4] = {1.0f, 2.0f, 3.0f, 4.0f};
+auto vec = s16x16x4::load(&data[0]);
+
+// Store 4 values back
+s16x16 output[4];
+vec.store(&output[0]);
+```
+
+### Fixed-Point SIMD Operations (Fully Implemented)
+
+All operations for `s0x32x4` and `s16x16x4` are fully implemented:
+
+| Operation | Description |
+|-----------|-------------|
+| **load/store** | Transfer data to/from SIMD registers |
+| **set1** | Broadcast a scalar to all 4 lanes |
+| **+, -, */** | Element-wise arithmetic (add, subtract, multiply) |
+| **-** (unary) | Negate all lanes |
+| **>>/<<<<** | Arithmetic/logical shifts |
+| **abs** | Absolute value (branchless) |
+| **min/max** | Element-wise min/max |
+| **clamp** | Clamp to range |
+| **lerp** | Linear interpolation |
+| **sin/cos** | Trigonometric functions |
+| **sincos** | Combined sin/cos (more efficient) |
+
+See test file for comprehensive coverage: `tests/fl/simd.cpp` (30+ test cases)
+
+### Example: SIMD Array Processing
+
+```cpp
+// ✅ Good: Process array of coordinates with SIMD arithmetic
+struct Point {
+    s16x16 x, y;
+};
+
+Point scale_points_simd(const Point* points, s16x16 scale_factor) {
+    // Load 4 points' x coordinates
+    s16x16 x_coords[4] = {
+        points[0].x, points[1].x, points[2].x, points[3].x
+    };
+    auto x_vec = s16x16x4::load(&x_coords[0]);
+
+    // Scale all 4 at once (broadcast scalar to SIMD)
+    auto scale_simd = s16x16x4::set1(scale_factor);
+    auto scaled_x = x_vec * scale_simd;
+
+    // Store back
+    s16x16 result[4];
+    scaled_x.store(&result[0]);
+
+    // Result: all 4 x values scaled
+    return {result[0], result[1]};  // Example (incomplete)
+}
+```
+
+### When NOT to Use SIMD
+
+```cpp
+// ❌ Bad: Using fixed-point SIMD for single values (overhead)
+auto angle_simd = s16x16x4::set1(s16x16(1.57f));
+auto sine = angle_simd.sin();   // Wasteful! Process 4 values, use 1
+// Cost: 4-lane SIMD overhead for a single angle
+
+// ✅ Good: Use scalar fixed-point for single values
+auto angle = s16x16(1.57f);
+auto sine = fl::sin(angle);  // Direct, no overhead
+
+// ✅ Good: Use SIMD when processing 4+ values
+s16x16 angles[4] = {0.0f, 1.57f, 3.14f, 4.71f};
+auto angles_simd = s16x16x4::load(&angles[0]);
+auto sines = angles_simd.sin();  // Efficient batch processing
 ```
 
 ---

@@ -230,6 +230,84 @@ void validateHardware() {
 - For new files: Fix immediately by asking user to rename
 - For existing files: Create GitHub issue or ask user if they want to rename now
 
+### tests/** and **/*_mock.* changes - AVOID THREADING IN MOCKS
+
+**Core Principle**: Mock/test implementations MUST be synchronous and deterministic. Threading introduces flakiness.
+
+**Anti-Patterns to Flag** (❌ VIOLATIONS):
+1. **Background threads** in mock implementations
+   - ❌ `fl::thread`, `std::thread`
+   - ❌ Simulation/worker threads
+   - ❌ Background async processing loops
+2. **Synchronization primitives** (indicate attempted thread safety)
+   - ❌ `fl::mutex`, `std::mutex`
+   - ❌ `fl::condition_variable`, `std::condition_variable`
+   - ❌ `fl::lock_guard`, `std::lock_guard`
+   - ❌ `fl::atomic<bool>`, `std::atomic`
+3. **Timing-based behavior** in mocks
+   - ❌ `fl::micros()`, `fl::millis()` for completion detection
+   - ❌ `fl::sleep()`, `fl::delay()` in mock logic
+   - ❌ Time-based state transitions or callbacks
+   - ✅ **OK**: Simulated time via explicit time advancement (e.g., `mSimulatedTimeUs += ms`)
+4. **Sleep/poll loops** waiting for state changes
+   - ❌ `while (condition) fl::sleep(...);`
+   - ❌ Spin-loops checking timing
+   - ❌ `std::condition_variable::wait_for()`
+
+**Recommended Pattern** (✅ GOOD):
+- **Synchronous callbacks**: Fire immediately or defer until explicitly pumped
+- **Simulated time**: Track virtual time that advances only via explicit `delay()`/`advance()` calls
+- **Re-entrancy guard**: Use boolean flag to handle nested callback scenarios
+- **No threads**: Everything runs on calling thread, fully deterministic
+
+**Example Good Pattern**:
+```cpp
+class MockI2S {
+    u64 mSimulatedTimeUs = 0;
+    bool mFiringCallbacks = false;
+    size_t mDeferredCallbackCount = 0;
+
+    void transmit(const u8* data) {
+        // Queue callback (synchronous, no threading)
+        mDeferredCallbackCount++;
+        pumpDeferredCallbacks();
+    }
+
+    void pumpDeferredCallbacks() {
+        if (mFiringCallbacks) return;  // Re-entrancy guard
+        mFiringCallbacks = true;
+        while (mDeferredCallbackCount > 0) {
+            mDeferredCallbackCount--;
+            fireCallback();  // Fires synchronously
+        }
+        mFiringCallbacks = false;
+    }
+
+    void delay(u32 ms) {
+        mSimulatedTimeUs += static_cast<u64>(ms) * 1000;  // Advance virtual time
+    }
+};
+```
+
+**Check Process**:
+1. For each file matching `**/tests/**` or `**/*_mock.*`:
+   - Search for `fl::thread`, `std::thread`, `unique_ptr<thread>`
+   - Search for `fl::mutex`, `fl::condition_variable`, `fl::lock_guard`
+   - Search for `fl::atomic<`, `std::atomic<`
+   - Search for timing-based logic using `fl::micros()` or `fl::millis()`
+   - Search for `fl::sleep()` or `fl::delay()` in non-delay logic
+2. If found:
+   - **Violation**: Report with exact file, line number, and pattern type
+   - **Action**: Recommend refactoring to synchronous + simulated time approach
+   - **Reference**: Point to `src/platforms/esp/32/drivers/i2s/i2s_lcd_cam_peripheral_mock.cpp.hpp` as working example
+
+**Rationale**:
+- **Flakiness**: Timing-based completion detection fails in CI/testing environments
+- **Platform variance**: Thread scheduling differs across OS/hardware
+- **Race conditions**: Mutexes and atomics introduce subtle synchronization bugs
+- **Hard to debug**: Multi-threaded tests are non-deterministic and unreproducible
+- **Determinism**: Simulated time guarantees reproducible behavior
+
 ## Output Format
 
 ```
@@ -250,6 +328,7 @@ void validateHardware() {
   - Span usage / raw pointer pairs: N
   - Arduino String usage: N
   - Type annotation issues: N
+  - Threading in mocks/tests: N
   - Other: N
 - Violations fixed: N
 - User confirmations needed: N
