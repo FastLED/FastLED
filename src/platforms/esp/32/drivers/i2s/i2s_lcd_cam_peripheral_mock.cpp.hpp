@@ -110,21 +110,14 @@ private:
     // Pending transmit state
     size_t mPendingTransmits;
 
-    // Per-transmit tracking for simulation thread
-    struct PendingTransmit {
-        u64 completion_time_us;
-    };
-    fl::vector<PendingTransmit> mPendingQueue;
+    // Simulated time (advances only via delay calls)
+    u64 mSimulatedTimeUs;
+    bool mFiringCallbacks;  // Re-entrancy guard
+    size_t mDeferredCallbackCount;  // Count of pending callbacks to fire
 
-    // Thread synchronization
-    fl::mutex mMutex;
-    fl::condition_variable mCondVar;
-    fl::atomic<bool> mCallbackExecuting{false};
-
-    // Simulation thread
-    void simulationThreadFunc();
-    fl::unique_ptr<fl::thread> mSimulationThread;
-    fl::atomic<bool> mSimulationThreadShouldStop;
+    // Helper methods for synchronous callback firing
+    void pumpDeferredCallbacks();
+    void fireCallback();
 };
 
 //=============================================================================
@@ -152,23 +145,12 @@ I2sLcdCamPeripheralMockImpl::I2sLcdCamPeripheralMockImpl()
       mShouldFailTransmit(false),
       mHistory(),
       mPendingTransmits(0),
-      mPendingQueue(),
-      mMutex(),
-      mCondVar(),
-      mCallbackExecuting(false),
-      mSimulationThread(),
-      mSimulationThreadShouldStop(false) {
-    // Start simulation thread after all members initialized
-    mSimulationThread = fl::make_unique<fl::thread>([this]() { simulationThreadFunc(); });
+      mSimulatedTimeUs(0),
+      mFiringCallbacks(false),
+      mDeferredCallbackCount(0) {
 }
 
 I2sLcdCamPeripheralMockImpl::~I2sLcdCamPeripheralMockImpl() {
-    // Stop simulation thread
-    mSimulationThreadShouldStop = true;
-    mCondVar.notify_one();
-    if (mSimulationThread && mSimulationThread->joinable()) {
-        mSimulationThread->join();
-    }
 }
 
 //=============================================================================
@@ -189,12 +171,10 @@ bool I2sLcdCamPeripheralMockImpl::initialize(const I2sLcdCamConfig& config) {
 }
 
 void I2sLcdCamPeripheralMockImpl::deinitialize() {
-    fl::lock_guard<fl::mutex> lock(mMutex);
     mInitialized = false;
     mEnabled = false;
     mBusy = false;
     mPendingTransmits = 0;
-    mPendingQueue.clear();
 }
 
 bool I2sLcdCamPeripheralMockImpl::isInitialized() const {
@@ -247,47 +227,24 @@ bool I2sLcdCamPeripheralMockImpl::transmit(const u16* buffer, size_t size_bytes)
         return false;
     }
 
-    // Calculate transmit delay - use forced value if set, otherwise calculate from PCLK
-    u32 transmit_delay_us;
-    if (mTransmitDelayForced) {
-        transmit_delay_us = mTransmitDelayUs;
-    } else if (mConfig.pclk_hz > 0) {
-        // Pixels = size_bytes / 2 (16-bit pixels)
-        size_t pixels = size_bytes / 2;
-        // Time = pixels / pclk_hz (seconds) * 1000000 (microseconds)
-        u64 transmit_time_us = (static_cast<u64>(pixels) * 1000000ULL) / mConfig.pclk_hz;
-        transmit_delay_us = static_cast<u32>(transmit_time_us) + 10;
-        mTransmitDelayUs = transmit_delay_us;
-    } else {
-        transmit_delay_us = 100;  // Default fallback
-        mTransmitDelayUs = transmit_delay_us;
-    }
-
     // Capture transmit data
     TransmitRecord record;
     size_t word_count = size_bytes / 2;
     record.buffer_copy.resize(word_count);
     fl::memcpy(record.buffer_copy.data(), buffer, size_bytes);
     record.size_bytes = size_bytes;
-    record.timestamp_us = fl::micros();
+    record.timestamp_us = mSimulatedTimeUs;
 
     mHistory.push_back(fl::move(record));
 
-    // Update state with mutex protection
-    {
-        fl::lock_guard<fl::mutex> lock(mMutex);
-        mTransmitCount++;
-        mBusy = true;
-        mPendingTransmits++;
+    // Queue deferred callback - will be fired synchronously via pumpDeferredCallbacks
+    mTransmitCount++;
+    mBusy = true;
+    mPendingTransmits++;
+    mDeferredCallbackCount++;
 
-        // Enqueue for simulation thread
-        PendingTransmit pending;
-        pending.completion_time_us = fl::micros() + transmit_delay_us;
-        mPendingQueue.push_back(pending);
-    }
-
-    // Wake simulation thread
-    mCondVar.notify_one();
+    // If we're not already inside a callback chain, pump now
+    pumpDeferredCallbacks();
 
     return true;
 }
@@ -297,38 +254,15 @@ bool I2sLcdCamPeripheralMockImpl::waitTransmitDone(u32 timeout_ms) {
         return false;
     }
 
-    // Check if already complete
-    {
-        fl::lock_guard<fl::mutex> lock(mMutex);
-        if (mPendingTransmits == 0) {
-            mBusy = false;
-            return true;
-        }
+    // In the synchronous mock, everything completes immediately when transmit() is called.
+    // waitTransmitDone just returns the completion status.
+    (void)timeout_ms;  // timeout not used in synchronous mock
+    if (mPendingTransmits == 0) {
+        mBusy = false;
+        return true;
     }
 
-    if (timeout_ms == 0) {
-        return false;  // Non-blocking poll, still pending
-    }
-
-    // Wait for completion
-    u32 start_us = fl::micros();
-    u32 timeout_us = timeout_ms * 1000;
-
-    while (true) {
-        {
-            fl::lock_guard<fl::mutex> lock(mMutex);
-            if (mPendingTransmits == 0) {
-                mBusy = false;
-                return true;
-            }
-        }
-
-        if ((fl::micros() - start_us) >= timeout_us) {
-            return false;  // Timeout
-        }
-
-        fl::this_thread::sleep_for(fl::chrono::microseconds(10));  // ok sleep for
-    }
+    return false;
 }
 
 bool I2sLcdCamPeripheralMockImpl::isBusy() const {
@@ -344,7 +278,6 @@ bool I2sLcdCamPeripheralMockImpl::registerTransmitCallback(void* callback, void*
         return false;
     }
 
-    fl::lock_guard<fl::mutex> lock(mMutex);
     mCallback = callback;
     mUserCtx = user_ctx;
     return true;
@@ -359,11 +292,11 @@ const I2sLcdCamConfig& I2sLcdCamPeripheralMockImpl::getConfig() const {
 }
 
 u64 I2sLcdCamPeripheralMockImpl::getMicroseconds() {
-    return fl::micros();
+    return mSimulatedTimeUs;
 }
 
 void I2sLcdCamPeripheralMockImpl::delay(u32 ms) {
-    fl::delay(ms);
+    mSimulatedTimeUs += static_cast<u64>(ms) * 1000;
 }
 
 //=============================================================================
@@ -403,7 +336,6 @@ const fl::vector<I2sLcdCamPeripheralMock::TransmitRecord>& I2sLcdCamPeripheralMo
 }
 
 void I2sLcdCamPeripheralMockImpl::clearTransmitHistory() {
-    fl::lock_guard<fl::mutex> lock(mMutex);
     mHistory.clear();
     mPendingTransmits = 0;
     mBusy = false;
@@ -425,26 +357,7 @@ size_t I2sLcdCamPeripheralMockImpl::getTransmitCount() const {
 }
 
 void I2sLcdCamPeripheralMockImpl::reset() {
-    // Clear queue first
-    {
-        fl::lock_guard<fl::mutex> lock(mMutex);
-        mPendingQueue.clear();
-        mPendingTransmits = 0;
-        mBusy = false;
-    }
-
-    mCondVar.notify_one();
-
-    // Wait for callback to finish
-    while (mCallbackExecuting.load(fl::memory_order_acquire)) {
-        fl::this_thread::sleep_for(fl::chrono::microseconds(10));  // ok sleep for
-    }
-
-    fl::this_thread::sleep_for(fl::chrono::microseconds(100));  // ok sleep for
-
-    // Reset all state
-    fl::lock_guard<fl::mutex> lock(mMutex);
-
+    // Reset all state (synchronous mock, no threads)
     mInitialized = false;
     mEnabled = false;
     mBusy = false;
@@ -457,60 +370,51 @@ void I2sLcdCamPeripheralMockImpl::reset() {
     mShouldFailTransmit = false;
     mHistory.clear();
     mPendingTransmits = 0;
-    mPendingQueue.clear();
+    mSimulatedTimeUs = 0;
+    mFiringCallbacks = false;
+    mDeferredCallbackCount = 0;
 }
 
 //=============================================================================
 // Simulation Thread
 //=============================================================================
 
-void I2sLcdCamPeripheralMockImpl::simulationThreadFunc() {
-    while (!mSimulationThreadShouldStop) {
-        fl::unique_lock<fl::mutex> lock(mMutex);
+//=============================================================================
+// Synchronous Callback Pumping
+//=============================================================================
 
-        // Wait when queue is empty
-        if (mPendingQueue.empty()) {
-            mCondVar.wait_for(lock, std::chrono::milliseconds(10));  // okay std namespace (std::condition_variable requires std::chrono)
-            continue;
-        }
+void I2sLcdCamPeripheralMockImpl::pumpDeferredCallbacks() {
+    // Re-entrancy guard: if we're already firing callbacks (from within
+    // a callback that called transmit()), just let the outer loop handle it.
+    if (mFiringCallbacks) {
+        return;
+    }
+    mFiringCallbacks = true;
 
-        // Check if first transmit has completed
-        u64 now_us = fl::micros();
+    // Process all deferred callbacks. Each callback may trigger more
+    // transmit() calls which queue more callbacks, so loop until empty.
+    while (mDeferredCallbackCount > 0) {
+        mDeferredCallbackCount--;
+        fireCallback();
+    }
 
-        if (now_us >= mPendingQueue[0].completion_time_us) {
-            // Remove from queue
-            mPendingQueue.erase(mPendingQueue.begin());
+    mFiringCallbacks = false;
+}
 
-            if (mPendingTransmits > 0) {
-                mPendingTransmits--;
-            }
+void I2sLcdCamPeripheralMockImpl::fireCallback() {
+    if (mPendingTransmits > 0) {
+        mPendingTransmits--;
+    }
 
-            if (mPendingTransmits == 0) {
-                mBusy = false;
-            }
+    if (mPendingTransmits == 0) {
+        mBusy = false;
+    }
 
-            // Get callback info
-            auto callback = mCallback;
-            auto user_ctx = mUserCtx;
-
-            mCallbackExecuting.store(true, fl::memory_order_release);
-
-            lock.unlock();
-
-            // Call callback
-            if (callback) {
-                using CallbackType = bool (*)(void*, const void*, void*);
-                auto callback_fn = reinterpret_cast<CallbackType>(callback); // ok reinterpret cast
-                callback_fn(nullptr, nullptr, user_ctx);
-            }
-
-            lock.lock();
-            mCallbackExecuting.store(false, fl::memory_order_release);
-        } else {
-            // Wait until next completion time
-            u64 wait_us = mPendingQueue[0].completion_time_us - now_us;
-            mCondVar.wait_for(lock, std::chrono::microseconds(wait_us));  // okay std namespace (std::condition_variable requires std::chrono)
-        }
+    // Call the callback if registered
+    if (mCallback != nullptr) {
+        using CallbackType = bool (*)(void*, const void*, void*);
+        auto callback_fn = reinterpret_cast<CallbackType>(mCallback); // ok reinterpret cast
+        callback_fn(nullptr, nullptr, mUserCtx);
     }
 }
 
