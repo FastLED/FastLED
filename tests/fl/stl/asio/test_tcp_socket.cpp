@@ -102,9 +102,14 @@ FL_TEST_CASE("tcp::socket - Loopback connect and I/O") {
     FL_CHECK(ec.ok());
     FL_CHECK(client.is_open());
 
-    // Server accepts
+    // Server accepts (with retry loop for non-blocking socket)
     tcp::socket server_peer;
-    ec = acc.accept(server_peer);
+    for (int attempt = 0; attempt < 100; ++attempt) {
+        ec = acc.accept(server_peer);
+        if (ec.code != errc::would_block) {
+            break;
+        }
+    }
     FL_CHECK(ec.ok());
     FL_CHECK(server_peer.is_open());
 

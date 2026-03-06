@@ -371,6 +371,22 @@ public:
         insert(begin(), fl::move(value));
     }
 
+    template<typename... Args>
+    void emplace_back(Args&&... args) {
+        Node* node = mAlloc.allocate(1);
+        mAlloc.construct(node, fl::forward<Args>(args)...);
+        link_before(mHead, node);
+        ++mSize;
+    }
+
+    template<typename... Args>
+    void emplace_front(Args&&... args) {
+        Node* node = mAlloc.allocate(1);
+        mAlloc.construct(node, fl::forward<Args>(args)...);
+        link_before(mHead->next, node);
+        ++mSize;
+    }
+
     void pop_back() {
         if (!empty()) {
             erase(iterator(mHead->prev));
