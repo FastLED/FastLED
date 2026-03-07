@@ -351,11 +351,57 @@ class FL_ALIGN FixedVector {
 
     const T &back() const { return memory()[current_size - 1]; }
 
+    // Reverse iterator types (same as vector)
+    struct reverse_iterator {
+        iterator it;
+        reverse_iterator(iterator i) : it(i) {}
+        T &operator*() { return *(it - 1); }
+        T *operator->() { return (it - 1); }
+        reverse_iterator &operator++() {
+            --it;
+            return *this;
+        }
+        bool operator==(const reverse_iterator &other) const {
+            return it == other.it;
+        }
+        bool operator!=(const reverse_iterator &other) const {
+            return it != other.it;
+        }
+    };
+
+    struct const_reverse_iterator {
+        const_iterator it;
+        const_reverse_iterator(const_iterator i) : it(i) {}
+        const T &operator*() const { return *(it - 1); }
+        const T *operator->() const { return (it - 1); }
+        const_reverse_iterator &operator++() {
+            --it;
+            return *this;
+        }
+        bool operator==(const const_reverse_iterator &other) const {
+            return it == other.it;
+        }
+        bool operator!=(const const_reverse_iterator &other) const {
+            return it != other.it;
+        }
+    };
+
     // Iterator support
     iterator begin() { return &memory()[0]; }
     const_iterator begin() const { return &memory()[0]; }
     iterator end() { return &memory()[current_size]; }
     const_iterator end() const { return &memory()[current_size]; }
+
+    // Reverse iterator support
+    reverse_iterator rbegin() { return reverse_iterator(end()); }
+    const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
+    reverse_iterator rend() { return reverse_iterator(begin()); }
+    const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
+
+    // Capacity management (no-op for fixed-size vector)
+    void shrink_to_fit() {
+        // No-op for fixed-size vectors
+    }
 
     void swap(FixedVector<T, N> &other) {
         if (this != &other) {
@@ -1467,7 +1513,7 @@ class FL_ALIGN InlinedVector {
         // overflow: move inline data into heap
         mHeap.reserve(INLINED_SIZE * 2);
         for (auto &v : mFixed) {
-            mHeap.push_back(v);
+            mHeap.push_back(fl::move(v));
         }
         mFixed.clear();
         return mHeap.insert(mHeap.begin() + idx, value);
@@ -1491,7 +1537,7 @@ class FL_ALIGN InlinedVector {
         // overflow: move inline data into heap
         mHeap.reserve(INLINED_SIZE * 2);
         for (auto &v : mFixed) {
-            mHeap.push_back(v);
+            mHeap.push_back(fl::move(v));
         }
         mFixed.clear();
         return mHeap.insert(mHeap.begin() + idx, fl::move(value));
@@ -1505,6 +1551,29 @@ class FL_ALIGN InlinedVector {
     }
     const_iterator end() const {
         return mUsingHeap ? mHeap.end() : mFixed.end();
+    }
+
+    // Reverse iterators (delegate to heap or fixed storage)
+    typename vector<T>::reverse_iterator rbegin() {
+        return mUsingHeap ? mHeap.rbegin() : mFixed.rbegin();
+    }
+    typename vector<T>::reverse_iterator rend() {
+        return mUsingHeap ? mHeap.rend() : mFixed.rend();
+    }
+    typename vector<T>::const_reverse_iterator rbegin() const {
+        return mUsingHeap ? mHeap.rbegin() : mFixed.rbegin();
+    }
+    typename vector<T>::const_reverse_iterator rend() const {
+        return mUsingHeap ? mHeap.rend() : mFixed.rend();
+    }
+
+    // Capacity management
+    fl::size capacity() const { return mUsingHeap ? mHeap.capacity() : INLINED_SIZE; }
+
+    void shrink_to_fit() {
+        if (mUsingHeap) {
+            mHeap.shrink_to_fit();
+        }
     }
 
     // back, front

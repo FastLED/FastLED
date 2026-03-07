@@ -26,6 +26,15 @@ FL_TEST_FILE(FL_FILEPATH) {
 using namespace fl;
 
 // ============================================================================
+// Test Type and Helper Templates
+// ============================================================================
+
+// Template wrappers for vector variants with default size parameters
+template <typename T> using vector_fixed_test = FixedVector<T, 512>;
+template <typename T> using vector_inlined_test = InlinedVector<T, 64>;
+template <typename T> using circular_buffer_test = circular_buffer<T, 512>;
+
+// ============================================================================
 // Hybrid Move-Tracking Test Type
 // ============================================================================
 
@@ -261,7 +270,7 @@ void test_operator_greater() {
 }
 
 // ============================================================================
-// Iterator Contract Test Functions (Tier 0)
+// Iterator Contract Test Functions
 // ============================================================================
 
 template<typename Container>
@@ -318,7 +327,7 @@ void test_container_const_iterator_contract() {
 }
 
 // ============================================================================
-// Tier 2: Insert/Erase Contract Test Functions
+// Insert/Erase Contract Test Functions
 // ============================================================================
 
 template<typename Container>
@@ -345,7 +354,7 @@ void test_container_tier2_contract() {
 }
 
 // ============================================================================
-// Tier 3: Capacity Management Contract Test Functions
+// Capacity Management Contract Test Functions
 // ============================================================================
 
 template<typename Container>
@@ -368,7 +377,7 @@ void test_container_tier3_contract() {
 }
 
 // ============================================================================
-// Tier 4: Iterator Arithmetic Contract Test Functions
+// Iterator Arithmetic Contract Test Functions
 // ============================================================================
 
 template<typename Container>
@@ -449,48 +458,59 @@ struct CircularBufferIntFactory {
 // Test Cases - All organized at the end after helper declarations
 // ============================================================================
 
-// Iterator contracts (Tier 0)
-FL_TEST_CASE("Tier 0: Iterator contracts - begin/end/const") {
+// Iterator contracts
+FL_TEST_CASE("Iterator contracts - begin/end/const") {
     FL_SUBCASE("fl::vector") { test_container_iteration_contract<vector<int>>(); }
+    FL_SUBCASE("fl::vector_fixed") { test_container_iteration_contract<vector_fixed_test<int>>(); }
+    FL_SUBCASE("fl::vector_inlined") { test_container_iteration_contract<vector_inlined_test<int>>(); }
     FL_SUBCASE("fl::deque") { test_container_iteration_contract<deque<int>>(); }
     FL_SUBCASE("fl::list") { test_container_iteration_contract<list<int>>(); }
 }
 
-FL_TEST_CASE("Tier 0: Reverse iterator contracts - rbegin/rend") {
+FL_TEST_CASE("Reverse iterator contracts - rbegin/rend") {
     FL_SUBCASE("fl::vector") { test_container_reverse_iteration_contract<vector<int>>(); }
     FL_SUBCASE("fl::deque") { test_container_reverse_iteration_contract<deque<int>>(); }
     FL_SUBCASE("fl::list") { test_container_reverse_iteration_contract<list<int>>(); }
+    // NOTE: vector_fixed and vector_inlined do not support rbegin/rend
 }
 
-FL_TEST_CASE("Tier 0: Const iterator contracts - cbegin/cend") {
+FL_TEST_CASE("Const iterator contracts - cbegin/cend") {
     FL_SUBCASE("fl::vector") { test_container_const_iterator_contract<vector<int>>(); }
+    FL_SUBCASE("fl::vector_fixed") { test_container_const_iterator_contract<vector_fixed_test<int>>(); }
+    FL_SUBCASE("fl::vector_inlined") { test_container_const_iterator_contract<vector_inlined_test<int>>(); }
     FL_SUBCASE("fl::deque") { test_container_const_iterator_contract<deque<int>>(); }
     FL_SUBCASE("fl::list") { test_container_const_iterator_contract<list<int>>(); }
 }
 
-// Tier 2 contracts (Insert/Erase)
-FL_TEST_CASE("Tier 2: Insert/Erase contracts") {
+// Insert/Erase contracts
+FL_TEST_CASE("Insert/Erase contracts") {
     FL_SUBCASE("fl::vector") { test_container_tier2_contract<vector<int>>(); }
+    FL_SUBCASE("fl::vector_fixed") { test_container_tier2_contract<vector_fixed_test<int>>(); }
+    FL_SUBCASE("fl::vector_inlined") { test_container_tier2_contract<vector_inlined_test<int>>(); }
     FL_SUBCASE("fl::deque") { test_container_tier2_contract<deque<int>>(); }
     FL_SUBCASE("fl::list") { test_container_tier2_contract<list<int>>(); }
 }
 
-// Tier 3 contracts (Capacity Management)
-FL_TEST_CASE("Tier 3: Capacity management contracts") {
+// Capacity management contracts
+FL_TEST_CASE("Capacity management contracts") {
     FL_SUBCASE("fl::vector") { test_container_tier3_contract<vector<int>>(); }
     FL_SUBCASE("fl::deque") { test_container_tier3_contract<deque<int>>(); }
-    // NOTE: fl::list does not support capacity/reserve
+    // NOTE: fl::list, vector_fixed, and vector_inlined do not support capacity/reserve
 }
 
-// Tier 4 contracts (Iterator Arithmetic - RandomAccess only)
-FL_TEST_CASE("Tier 4: Iterator arithmetic contracts") {
+// Iterator arithmetic contracts (RandomAccess only)
+FL_TEST_CASE("Iterator arithmetic contracts") {
     FL_SUBCASE("fl::vector") { test_container_tier4_arithmetic<vector<int>>(); }
+    FL_SUBCASE("fl::vector_fixed") { test_container_tier4_arithmetic<vector_fixed_test<int>>(); }
+    FL_SUBCASE("fl::vector_inlined") { test_container_tier4_arithmetic<vector_inlined_test<int>>(); }
     FL_SUBCASE("fl::deque") { test_container_tier4_arithmetic<deque<int>>(); }
     // NOTE: fl::list is Bidirectional, does not support arithmetic
 }
 
-FL_TEST_CASE("Tier 4: Iterator comparison contracts") {
+FL_TEST_CASE("Iterator comparison contracts") {
     FL_SUBCASE("fl::vector") { test_container_tier4_comparison<vector<int>>(); }
+    FL_SUBCASE("fl::vector_fixed") { test_container_tier4_comparison<vector_fixed_test<int>>(); }
+    FL_SUBCASE("fl::vector_inlined") { test_container_tier4_comparison<vector_inlined_test<int>>(); }
     FL_SUBCASE("fl::deque") { test_container_tier4_comparison<deque<int>>(); }
     // NOTE: fl::list is Bidirectional, does not support arithmetic comparison
 }
@@ -498,30 +518,40 @@ FL_TEST_CASE("Tier 4: Iterator comparison contracts") {
 // Basic container operations
 FL_TEST_CASE("push_back - all container types (move semantics verified)") {
     FL_SUBCASE("fl::vector") { test_push_back<vector>(); }
+    FL_SUBCASE("fl::vector_fixed") { test_push_back<vector_fixed_test>(); }
+    FL_SUBCASE("fl::vector_inlined") { test_push_back<vector_inlined_test>(); }
     FL_SUBCASE("fl::deque") { test_push_back<deque>(); }
     FL_SUBCASE("fl::list") { test_push_back<list>(); }
 }
 
 FL_TEST_CASE("emplace_back - all container types") {
     FL_SUBCASE("fl::vector") { test_emplace_back<vector>(); }
+    FL_SUBCASE("fl::vector_fixed") { test_emplace_back<vector_fixed_test>(); }
+    FL_SUBCASE("fl::vector_inlined") { test_emplace_back<vector_inlined_test>(); }
     FL_SUBCASE("fl::deque") { test_emplace_back<deque>(); }
     FL_SUBCASE("fl::list") { test_emplace_back<list>(); }
 }
 
 FL_TEST_CASE("pop_back - all container types") {
     FL_SUBCASE("fl::vector") { test_pop_back<vector>(); }
+    FL_SUBCASE("fl::vector_fixed") { test_pop_back<vector_fixed_test>(); }
+    FL_SUBCASE("fl::vector_inlined") { test_pop_back<vector_inlined_test>(); }
     FL_SUBCASE("fl::deque") { test_pop_back<deque>(); }
     FL_SUBCASE("fl::list") { test_pop_back<list>(); }
 }
 
 FL_TEST_CASE("size and empty - all container types") {
     FL_SUBCASE("fl::vector") { test_size_and_empty<vector>(); }
+    FL_SUBCASE("fl::vector_fixed") { test_size_and_empty<vector_fixed_test>(); }
+    FL_SUBCASE("fl::vector_inlined") { test_size_and_empty<vector_inlined_test>(); }
     FL_SUBCASE("fl::deque") { test_size_and_empty<deque>(); }
     FL_SUBCASE("fl::list") { test_size_and_empty<list>(); }
 }
 
 FL_TEST_CASE("clear - all container types") {
     FL_SUBCASE("fl::vector") { test_clear<vector>(); }
+    FL_SUBCASE("fl::vector_fixed") { test_clear<vector_fixed_test>(); }
+    FL_SUBCASE("fl::vector_inlined") { test_clear<vector_inlined_test>(); }
     FL_SUBCASE("fl::deque") { test_clear<deque>(); }
     FL_SUBCASE("fl::list") { test_clear<list>(); }
 }
@@ -541,13 +571,17 @@ FL_TEST_CASE("pop_front - deque and list only") {
     FL_SUBCASE("fl::list") { test_pop_front<list>(); }
 }
 
-FL_TEST_CASE("operator[] - vector and deque only") {
+FL_TEST_CASE("operator[] - vector variants and deque") {
     FL_SUBCASE("fl::vector") { test_operator_subscript<vector>(); }
+    FL_SUBCASE("fl::vector_fixed") { test_operator_subscript<vector_fixed_test>(); }
+    FL_SUBCASE("fl::vector_inlined") { test_operator_subscript<vector_inlined_test>(); }
     FL_SUBCASE("fl::deque") { test_operator_subscript<deque>(); }
 }
 
 FL_TEST_CASE("insert and erase - all sequential containers") {
     FL_SUBCASE("fl::vector") { test_insert_and_erase<vector>(); }
+    FL_SUBCASE("fl::vector_fixed") { test_insert_and_erase<vector_fixed_test>(); }
+    FL_SUBCASE("fl::vector_inlined") { test_insert_and_erase<vector_inlined_test>(); }
     FL_SUBCASE("fl::deque") { test_insert_and_erase<deque>(); }
     FL_SUBCASE("fl::list") { test_insert_and_erase<list>(); }
 }
