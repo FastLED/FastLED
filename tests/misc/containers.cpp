@@ -17,6 +17,7 @@
 #include "fl/stl/priority_queue.h"
 #include "fl/stl/set.h"
 #include "fl/stl/unordered_set.h"
+#include "fl/stl/map.h"
 #include "fl/stl/unordered_map.h"
 #include "fl/stl/circular_buffer.h"
 #include "fl/stl/shared_ptr.h"
@@ -33,6 +34,34 @@ using namespace fl;
 template <typename T> using vector_fixed_test = FixedVector<T, 512>;
 template <typename T> using vector_inlined_test = InlinedVector<T, 64>;
 template <typename T> using circular_buffer_test = circular_buffer<T, 512>;
+
+// Template wrapper for FixedMap to normalize interface (provides pair-based insert)
+template <typename Key, typename Value, fl::size N = 512>
+class FixedMapNormalized : public FixedMap<Key, Value, N> {
+  public:
+    using Base = FixedMap<Key, Value, N>;
+    using iterator = typename Base::iterator;
+    using const_iterator = typename Base::const_iterator;
+
+    // Normalize insert to accept pair (like other maps)
+    fl::pair<iterator, bool> insert(const fl::pair<Key, Value>& p) {
+        auto result = Base::insert(p.first, p.second);
+        return {result.second, result.first};
+    }
+
+    // Normalize count to use has()
+    fl::size count(const Key& key) const {
+        return Base::has(key) ? 1 : 0;
+    }
+
+    // Erase is now properly implemented in FixedMap base class
+    // This just calls the base implementation which actually removes the element
+    using Base::erase;
+};
+
+// Template alias for normalized FixedMap
+template <typename Key, typename Value>
+using fixed_map_test = FixedMapNormalized<Key, Value, 512>;
 
 // ============================================================================
 // Hybrid Move-Tracking Test Type
@@ -222,6 +251,108 @@ void test_insert_and_erase() {
     ++it;
     container.erase(it);
     FL_CHECK(container.size() == 2);
+}
+
+// ============================================================================
+// Map Container Test Functions
+// ============================================================================
+
+// Insert/Find operations for map containers
+template<typename Map>
+void test_map_insert_find() {
+    Map m;
+    m.insert(fl::make_pair(1, 100));
+    m.insert(fl::make_pair(2, 200));
+    m.insert(fl::make_pair(3, 300));
+
+    FL_CHECK(m.size() == 3);
+
+    // Find existing keys
+    auto it = m.find(2);
+    FL_CHECK(it != m.end());
+    FL_CHECK(it->second == 200);
+
+    // Find non-existing key
+    auto it_not = m.find(99);
+    FL_CHECK(it_not == m.end());
+}
+
+// Operator[] access for map containers
+template<typename Map>
+void test_map_operator_subscript() {
+    Map m;
+    m[10] = 1000;
+    m[20] = 2000;
+    m[30] = 3000;
+
+    FL_CHECK(m.size() == 3);
+    FL_CHECK(m[10] == 1000);
+    FL_CHECK(m[20] == 2000);
+    FL_CHECK(m[30] == 3000);
+}
+
+// Erase operations for map containers
+template<typename Map>
+void test_map_erase() {
+    Map m;
+    m.insert(fl::make_pair(1, 100));
+    m.insert(fl::make_pair(2, 200));
+    m.insert(fl::make_pair(3, 300));
+
+    FL_CHECK(m.size() == 3);
+
+    // Erase by key
+    auto count = m.erase(2);
+    FL_CHECK(count == 1);
+    FL_CHECK(m.size() == 2);
+    FL_CHECK(m.find(2) == m.end());
+}
+
+// Iteration for map containers
+template<typename Map>
+void test_map_iteration() {
+    Map m;
+    m[1] = 100;
+    m[2] = 200;
+    m[3] = 300;
+
+    int sum = 0;
+    for (auto it = m.begin(); it != m.end(); ++it) {
+        sum += it->second;
+    }
+
+    FL_CHECK(sum == 600);
+}
+
+// Size and clear for map containers
+template<typename Map>
+void test_map_size_clear() {
+    Map m;
+    FL_CHECK(m.empty());
+    FL_CHECK(m.size() == 0);
+
+    m[1] = 100;
+    m[2] = 200;
+    FL_CHECK(!m.empty());
+    FL_CHECK(m.size() == 2);
+
+    m.clear();
+    FL_CHECK(m.empty());
+    FL_CHECK(m.size() == 0);
+}
+
+// Count method for map containers
+template<typename Map>
+void test_map_count() {
+    Map m;
+    m[1] = 100;
+    m[2] = 200;
+    m[3] = 300;
+
+    // count returns 0 or 1 for unique keys in map
+    FL_CHECK(m.count(1) > 0);
+    FL_CHECK(m.count(2) > 0);
+    FL_CHECK(m.count(99) == 0);
 }
 
 // ============================================================================
@@ -603,6 +734,52 @@ FL_TEST_CASE("operator> and operator>= - all containers with comparison") {
     FL_SUBCASE("fl::queue") { test_operator_greater<QueueIntFactory>(); }
     FL_SUBCASE("fl::set") { test_operator_greater<SetIntFactory>(); }
     FL_SUBCASE("fl::circular_buffer") { test_operator_greater<CircularBufferIntFactory>(); }
+}
+
+// ============================================================================
+// Map Container Tests
+// ============================================================================
+
+FL_TEST_CASE("map insert and find operations") {
+    FL_SUBCASE("fl::map") { test_map_insert_find<fl::map<int, int>>(); }
+    FL_SUBCASE("fl::unordered_map") { test_map_insert_find<fl::unordered_map<int, int>>(); }
+    FL_SUBCASE("fl::FixedMap") { test_map_insert_find<fixed_map_test<int, int>>(); }
+    FL_SUBCASE("fl::SortedHeapMap") { test_map_insert_find<SortedHeapMap<int, int>>(); }
+}
+
+FL_TEST_CASE("map operator[] access") {
+    FL_SUBCASE("fl::map") { test_map_operator_subscript<fl::map<int, int>>(); }
+    FL_SUBCASE("fl::unordered_map") { test_map_operator_subscript<fl::unordered_map<int, int>>(); }
+    FL_SUBCASE("fl::FixedMap") { test_map_operator_subscript<fixed_map_test<int, int>>(); }
+    FL_SUBCASE("fl::SortedHeapMap") { test_map_operator_subscript<SortedHeapMap<int, int>>(); }
+}
+
+FL_TEST_CASE("map erase operations") {
+    FL_SUBCASE("fl::map") { test_map_erase<fl::map<int, int>>(); }
+    FL_SUBCASE("fl::unordered_map") { test_map_erase<fl::unordered_map<int, int>>(); }
+    FL_SUBCASE("fl::FixedMap") { test_map_erase<fixed_map_test<int, int>>(); }
+    FL_SUBCASE("fl::SortedHeapMap") { test_map_erase<SortedHeapMap<int, int>>(); }
+}
+
+FL_TEST_CASE("map iteration") {
+    FL_SUBCASE("fl::map") { test_map_iteration<fl::map<int, int>>(); }
+    FL_SUBCASE("fl::unordered_map") { test_map_iteration<fl::unordered_map<int, int>>(); }
+    FL_SUBCASE("fl::FixedMap") { test_map_iteration<fixed_map_test<int, int>>(); }
+    FL_SUBCASE("fl::SortedHeapMap") { test_map_iteration<SortedHeapMap<int, int>>(); }
+}
+
+FL_TEST_CASE("map size and clear") {
+    FL_SUBCASE("fl::map") { test_map_size_clear<fl::map<int, int>>(); }
+    FL_SUBCASE("fl::unordered_map") { test_map_size_clear<fl::unordered_map<int, int>>(); }
+    FL_SUBCASE("fl::FixedMap") { test_map_size_clear<fixed_map_test<int, int>>(); }
+    FL_SUBCASE("fl::SortedHeapMap") { test_map_size_clear<SortedHeapMap<int, int>>(); }
+}
+
+FL_TEST_CASE("map count operations") {
+    FL_SUBCASE("fl::map") { test_map_count<fl::map<int, int>>(); }
+    FL_SUBCASE("fl::unordered_map") { test_map_count<fl::unordered_map<int, int>>(); }
+    FL_SUBCASE("fl::FixedMap") { test_map_count<fixed_map_test<int, int>>(); }
+    FL_SUBCASE("fl::SortedHeapMap") { test_map_count<SortedHeapMap<int, int>>(); }
 }
 
 } // FL_TEST_FILE

@@ -258,6 +258,16 @@ template <typename Key, typename Value, fl::size N> class FixedMap {
 
     bool contains(const Key &key) const { return has(key); }
 
+    // Erase element by key
+    fl::size erase(const Key &key) {
+        iterator it = find(key);
+        if (it != end()) {
+            data.erase(it);
+            return 1;
+        }
+        return 0;
+    }
+
   private:
     VectorType data;
 };
