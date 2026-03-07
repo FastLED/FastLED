@@ -180,15 +180,18 @@ example_compile_args = base_compile_args
 is_windows = build_machine.system() == 'windows'
 
 # ============================================================================
-# Detect if clang-tool-chain is being used
+# Detect if clang-tool-chain Python wrapper is being used
 # ============================================================================
-# clang-tool-chain provides special flags like --deploy-dependencies that
-# stock clang doesn't support. We detect this by checking the compiler command.
+# clang-tool-chain's Python wrapper commands (clang-tool-chain-cpp,
+# clang-tool-chain-sccache-cpp) support --deploy-dependencies which copies
+# runtime DLLs. Raw clang++ binaries (even from .clang-tool-chain/ directory)
+# don't support this flag. We check for the wrapper executable name, not the
+# directory path.
 cpp_cmd_array = cpp_compiler.cmd_array()
-is_clang_tool_chain = false
+is_clang_tool_chain_wrapper = false
 foreach cmd_part : cpp_cmd_array
-  if cmd_part.contains('clang-tool-chain')
-    is_clang_tool_chain = true
+  if cmd_part.contains('clang-tool-chain-cpp') or cmd_part.contains('clang-tool-chain-sccache-cpp') or cmd_part.contains('clang-tool-chain-c')
+    is_clang_tool_chain_wrapper = true
   endif
 endforeach
 
@@ -199,7 +202,7 @@ endforeach
 # required runtime libraries to the build directory. Stock clang doesn't
 # support this flag.
 core_link_args = ['-fuse-ld=lld']
-if is_clang_tool_chain
+if is_clang_tool_chain_wrapper
   core_link_args += ['--deploy-dependencies']
 endif
 if build_mode == 'release'
