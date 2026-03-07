@@ -8,10 +8,8 @@
 #include "fl/stl/chrono.h"
 #include "fl/stl/ostream.h"
 #include "fl/stl/function.h"
-#include "fl/singleton.h"
 #include "fl/log.h"
 #include "fl/stl/thread_local.h"
-#include "test_registry.h"
 
 /**
  * Custom test framework replacing doctest.
@@ -155,14 +153,11 @@ inline bool _fl_extract_skip(fl::test::SkipDecorator s, ...) {
 #define _FL_TC_IMPL(N, name, ...)                                              \
     static void _FL_CONCAT_EXPANDED(_fl_func_, N)();                           \
     namespace {                                                                \
-        static int _FL_CONCAT_EXPANDED(_fl_reg_, N) = (                        \
-            ::fl::Singleton<::TestRegistry>::instance()                        \
-                .registerTest(__FILE__, name),                                 \
+        static int _FL_CONCAT_EXPANDED(_fl_reg_, N) =                          \
             ::fl::test::register_test(                                         \
                 name, __FILE__, __LINE__,                                      \
                 ::fl::function<void()>(&_FL_CONCAT_EXPANDED(_fl_func_, N)),    \
-                _FL_HAS_SKIP(__VA_ARGS__)),                                    \
-            0);                                                                \
+                _FL_HAS_SKIP(__VA_ARGS__));                                    \
     }                                                                          \
     static void _FL_CONCAT_EXPANDED(_fl_func_, N)()
 

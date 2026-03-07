@@ -1,6 +1,5 @@
 #pragma once
 
-#include "shared/test_registry.h"
 #include "shared/fl_unittest.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/iostream.h"
@@ -72,7 +71,6 @@ namespace doctest {
 
 // FL_TEST_CASE macro is now fully defined in fl_unittest.h with:
 // - Full decorator support (skip, tags)
-// - Automatic registration to TestRegistry singleton
 // - Automatic registration to fl::test framework
 // - Native skip() decorator support (no #if 0 workarounds needed)
 
