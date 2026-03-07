@@ -307,3 +307,96 @@ FL_TEST_CASE("VibeDetector - null context is safe") {
     // Should not crash, state remains at defaults
     FL_CHECK_EQ(detector.getBass(), 1.0f);
 }
+
+// ============================================================================
+// Bug reproduction tests
+// ============================================================================
+
+FL_TEST_CASE("VibeDetector BUG - false spike on first frame of steady audio") {
+    // BUG: The very first frame of audio always triggers spike detection,
+    // even with a perfectly steady signal. This happens because mAvg starts
+    // at 0 while mImm immediately gets the full signal energy, so
+    // mImmRel >> mAvgRel on frame 1.
+    //
+    // Expected behavior: A single steady-state frame should NOT be detected
+    // as a spike/beat since there is no transient or energy increase.
+    VibeDetector detector;
+
+    auto sample = makeSample(440.0f, 0, 16000.0f);
+    auto ctx = fl::make_shared<AudioContext>(sample);
+    ctx->setSampleRate(44100);
+    detector.update(ctx);
+
+    // Verify that bass has real energy (not silence)
+    FL_CHECK_GT(detector.getBassRaw(), 0.0f);
+
+    // BUG: isBassSpike() returns true on the very first frame of steady audio.
+    // There is no prior baseline to compare against, yet the detector reports
+    // a spike because mImm/mLongMax (~2.3) > mAvg/mLongMax (~1.0).
+    FL_CHECK_TRUE(detector.isBassSpike());  // PASSES — demonstrates the bug
+}
+
+FL_TEST_CASE("VibeDetector BUG - spike persists for many frames with constant signal") {
+    // BUG: With a perfectly constant input signal, spike detection stays true
+    // for ~20 frames while mAvg converges toward mImm from below.
+    // A steady signal should produce spike=false after at most 1-2 frames.
+    VibeDetector detector;
+
+    // Feed 15 identical frames of steady audio
+    int spikeFrames = 0;
+    for (int i = 0; i < 15; ++i) {
+        auto sample = makeSample(440.0f, i * 12, 16000.0f);
+        auto ctx = fl::make_shared<AudioContext>(sample);
+        ctx->setSampleRate(44100);
+        detector.update(ctx);
+        if (detector.isBassSpike()) {
+            spikeFrames++;
+        }
+    }
+
+    // BUG: Spike detection is true for most of the 15 frames even though
+    // the signal is perfectly constant. The spike should clear after 1-2
+    // frames once the detector recognizes the signal is steady.
+    FL_CHECK_GT(spikeFrames, 10);  // PASSES — demonstrates the bug
+}
+
+FL_TEST_CASE("VibeDetector BUG - spike callback fires on first audio frame") {
+    // BUG: The onBassSpike callback fires on the very first frame of audio
+    // after construction. A visualizer connecting this callback would get
+    // a false beat trigger every time it starts up.
+    VibeDetector detector;
+    int spikeCallbackCount = 0;
+    detector.onBassSpike.add([&spikeCallbackCount]() { spikeCallbackCount++; });
+
+    // Feed a single frame of moderate, steady audio
+    auto sample = makeSample(440.0f, 0, 16000.0f);
+    auto ctx = fl::make_shared<AudioContext>(sample);
+    ctx->setSampleRate(44100);
+    detector.update(ctx);
+    detector.fireCallbacks();
+
+    // BUG: The callback fires because mBassSpike=true (false positive from
+    // startup transient) and mPrevBassSpike=false (initial state).
+    FL_CHECK_EQ(spikeCallbackCount, 1);  // PASSES — demonstrates the bug
+}
+
+FL_TEST_CASE("VibeDetector BUG - relative level exceeds 2x on first frame") {
+    // BUG: On the first frame, mImmRel = mImm/mLongMax where mLongMax
+    // tracks mAvg (which starts at 0 and jumps to ~0.43*mImm). This makes
+    // mImmRel ≈ 1/0.43 ≈ 2.33, meaning the detector reports the signal
+    // as 2.3x louder than "normal" — even though there's no baseline yet.
+    //
+    // Well-behaved self-normalization should produce values near 1.0 during
+    // the initial convergence period, not extreme values.
+    VibeDetector detector;
+
+    auto sample = makeSample(440.0f, 0, 16000.0f);
+    auto ctx = fl::make_shared<AudioContext>(sample);
+    ctx->setSampleRate(44100);
+    detector.update(ctx);
+
+    // BUG: Relative bass level is ~2.3x on the first frame.
+    // A visualizer using `zoom = 1.0 + 0.1 * (bass - 1.0)` would get
+    // zoom ≈ 1.13 on the first frame — a visible pop.
+    FL_CHECK_GT(detector.getBass(), 2.0f);  // PASSES — demonstrates the bug
+}
