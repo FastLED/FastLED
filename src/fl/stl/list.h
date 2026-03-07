@@ -629,6 +629,48 @@ public:
     bool has(const T& value) const {
         return find(value) != end();
     }
+
+    // Comparison operators
+    bool operator==(const list<T, Allocator>& other) const {
+        if (mSize != other.mSize) {
+            return false;
+        }
+        for (const_iterator it1 = begin(), it2 = other.begin(); it1 != end(); ++it1, ++it2) {
+            if (!(*it1 == *it2)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool operator!=(const list<T, Allocator>& other) const {
+        return !(*this == other);
+    }
+
+    bool operator<(const list<T, Allocator>& other) const {
+        for (const_iterator it1 = begin(), it2 = other.begin();
+             it1 != end() && it2 != other.end(); ++it1, ++it2) {
+            if (*it1 < *it2) {
+                return true;
+            }
+            if (*it1 > *it2) {
+                return false;
+            }
+        }
+        return mSize < other.mSize;
+    }
+
+    bool operator<=(const list<T, Allocator>& other) const {
+        return *this < other || *this == other;
+    }
+
+    bool operator>(const list<T, Allocator>& other) const {
+        return other < *this;
+    }
+
+    bool operator>=(const list<T, Allocator>& other) const {
+        return *this > other || *this == other;
+    }
 };
 
 // Swap function (non-member)

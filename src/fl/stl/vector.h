@@ -875,19 +875,35 @@ public:
 
     bool has(const T &value) const { return find(value) != end(); }
 
-    bool erase(iterator pos, T *out_value = nullptr) {
+    // Standard STL-compatible erase that returns iterator to next element
+    iterator erase(iterator pos) {
+        if (pos == end() || empty()) {
+            return end();
+        }
+        // Save the position of the element to erase
+        iterator erase_pos = pos;
+        // Shift all elements after pos to the left
+        while (pos != end() - 1) {
+            *pos = fl::move(*(pos + 1));
+            ++pos;
+        }
+        // Destroy the last element
+        back().~T();
+        --mSize;
+        // Return iterator to the element that was after the erased one
+        // (which is now at the erase position)
+        return erase_pos;
+    }
+
+    // Extended erase with optional output parameter
+    bool erase(iterator pos, T *out_value) {
         if (pos == end() || empty()) {
             return false;
         }
         if (out_value) {
             *out_value = fl::move(*pos);
         }
-        while (pos != end() - 1) {
-            *pos = fl::move(*(pos + 1));
-            ++pos;
-        }
-        back() = T();
-        --mSize;
+        erase(pos);
         return true;
     }
 
@@ -1020,6 +1036,31 @@ public:
 
     bool operator!=(const vector<T> &other) const {
         return !(*this == other);
+    }
+
+    bool operator<(const vector<T> &other) const {
+        fl::size min_size = mSize < other.mSize ? mSize : other.mSize;
+        for (fl::size i = 0; i < min_size; ++i) {
+            if ((*this)[i] < other[i]) {
+                return true;
+            }
+            if ((*this)[i] > other[i]) {
+                return false;
+            }
+        }
+        return mSize < other.mSize;
+    }
+
+    bool operator<=(const vector<T> &other) const {
+        return *this < other || *this == other;
+    }
+
+    bool operator>(const vector<T> &other) const {
+        return other < *this;
+    }
+
+    bool operator>=(const vector<T> &other) const {
+        return *this > other || *this == other;
     }
 };
 
@@ -1488,11 +1529,11 @@ class FL_ALIGN InlinedVector {
         return end();
     }
 
-    void erase(iterator pos) {
+    iterator erase(iterator pos) {
         if (mUsingHeap) {
-            mHeap.erase(pos);
+            return mHeap.erase(pos);
         } else {
-            mFixed.erase(pos);
+            return mFixed.erase(pos);
         }
     }
 

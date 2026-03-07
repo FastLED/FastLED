@@ -804,6 +804,83 @@ void test_iterator_comparison() {
 }
 
 // ============================================================================
+// Erase While Iterating Test Functions
+// ============================================================================
+
+// Erase while iterating for sequential containers (Pattern 1)
+template<template<typename> class ContainerTemplate>
+void test_erase_while_iterating() {
+    using Container = ContainerTemplate<int>;
+    Container c;
+    // Insert multiple elements
+    for (int i = 1; i <= 5; ++i) {
+        c.push_back(i);
+    }
+
+    FL_CHECK(c.size() == 5);
+
+    // Erase every other element while iterating
+    int erased_count = 0;
+    for (auto it = c.begin(); it != c.end(); ) {
+        if (*it % 2 == 0) {
+            it = c.erase(it);  // erase returns next iterator
+            erased_count++;
+        } else {
+            ++it;
+        }
+    }
+
+    FL_CHECK(erased_count == 2);  // Elements 2 and 4 were erased
+    FL_CHECK(c.size() == 3);      // Elements 1, 3, 5 remain
+
+    // Verify remaining elements
+    int count = 0;
+    for (auto it = c.begin(); it != c.end(); ++it) {
+        count++;
+        FL_CHECK(*it % 2 == 1);  // All remaining should be odd
+    }
+    FL_CHECK(count == 3);
+}
+
+// Erase while iterating for map containers (Pattern 2)
+template<typename Map>
+void test_map_erase_while_iterating() {
+    Map m;
+    // Insert multiple elements
+    for (int i = 1; i <= 5; ++i) {
+        m.insert(fl::make_pair(i, i * 10));
+    }
+
+    FL_CHECK(m.size() == 5);
+
+    // Erase every other element while iterating
+    int erased_count = 0;
+    for (auto it = m.begin(); it != m.end(); ) {
+        if (it->first % 2 == 0) {
+            it = m.erase(it);  // erase returns next iterator
+            erased_count++;
+        } else {
+            ++it;
+        }
+    }
+
+    FL_CHECK(erased_count == 2);  // Keys 2 and 4 were erased
+    FL_CHECK(m.size() == 3);      // Keys 1, 3, 5 remain
+
+    // Verify remaining elements
+    FL_CHECK(m.count(1) > 0);
+    FL_CHECK(m.count(3) > 0);
+    FL_CHECK(m.count(5) > 0);
+    FL_CHECK(m.count(2) == 0);
+    FL_CHECK(m.count(4) == 0);
+
+    // Verify values
+    auto it = m.find(1);
+    FL_CHECK(it != m.end());
+    FL_CHECK(it->second == 10);
+}
+
+// ============================================================================
 // PATTERN 3: CONTAINER FACTORY (Complex Initialization)
 // ============================================================================
 // For containers that don't expose constructors for testing (like queue, set),
@@ -840,6 +917,37 @@ void test_iterator_comparison() {
 // Container Factories for Comparison Operators
 // ============================================================================
 
+// Sequential Container Factories
+struct VectorIntFactory {
+    static vector<int> create(int a, int b, int c) {
+        vector<int> v;
+        v.push_back(a);
+        v.push_back(b);
+        v.push_back(c);
+        return v;
+    }
+};
+
+struct DequeIntFactory {
+    static deque<int> create(int a, int b, int c) {
+        deque<int> d;
+        d.push_back(a);
+        d.push_back(b);
+        d.push_back(c);
+        return d;
+    }
+};
+
+struct ListIntFactory {
+    static list<int> create(int a, int b, int c) {
+        list<int> l;
+        l.push_back(a);
+        l.push_back(b);
+        l.push_back(c);
+        return l;
+    }
+};
+
 // Queue factory
 struct QueueIntFactory {
     static queue<int> create(int a, int b, int c) {
@@ -848,6 +956,17 @@ struct QueueIntFactory {
         q.push(b);
         q.push(c);
         return q;
+    }
+};
+
+// Priority Queue factory
+struct PriorityQueueIntFactory {
+    static fl::PriorityQueue<int> create(int a, int b, int c) {
+        fl::PriorityQueue<int> pq;
+        pq.push(a);
+        pq.push(b);
+        pq.push(c);
+        return pq;
     }
 };
 
@@ -862,6 +981,17 @@ struct SetIntFactory {
     }
 };
 
+// Unordered Set factory
+struct UnorderedSetIntFactory {
+    static unordered_set<int> create(int a, int b, int c) {
+        unordered_set<int> us;
+        us.insert(a);
+        us.insert(b);
+        us.insert(c);
+        return us;
+    }
+};
+
 // Circular buffer factory
 struct CircularBufferIntFactory {
     static circular_buffer<int, 10> create(int a, int b, int c) {
@@ -870,6 +1000,37 @@ struct CircularBufferIntFactory {
         cb.push_back(b);
         cb.push_back(c);
         return cb;
+    }
+};
+
+// Map Factories
+struct MapIntFactory {
+    static fl::map<int, int> create(int a, int b, int c) {
+        fl::map<int, int> m;
+        m.insert(fl::make_pair(1, a));
+        m.insert(fl::make_pair(2, b));
+        m.insert(fl::make_pair(3, c));
+        return m;
+    }
+};
+
+struct UnorderedMapIntFactory {
+    static fl::unordered_map<int, int> create(int a, int b, int c) {
+        fl::unordered_map<int, int> m;
+        m.insert(fl::make_pair(1, a));
+        m.insert(fl::make_pair(2, b));
+        m.insert(fl::make_pair(3, c));
+        return m;
+    }
+};
+
+struct MultiMapIntFactory {
+    static fl::multi_map<int, int> create(int a, int b, int c) {
+        fl::multi_map<int, int> m;
+        m.insert(fl::make_pair(1, a));
+        m.insert(fl::make_pair(2, b));
+        m.insert(fl::make_pair(3, c));
+        return m;
     }
 };
 
@@ -1130,6 +1291,69 @@ FL_TEST_CASE("map count operations") {
     FL_SUBCASE("fl::multi_map") { test_map_count<fl::multi_map<int, int>>(); }
     FL_SUBCASE("fl::FixedMap") { test_map_count<fixed_map_test<int, int>>(); }
     FL_SUBCASE("fl::SortedHeapMap") { test_map_count<SortedHeapMap<int, int>>(); }
+}
+
+// ============================================================================
+// ADDITIONAL COMPARISON OPERATOR TESTS
+// ============================================================================
+// Tests for comparison operators (==, !=, <, <=, >, >=) across all container types
+// NOTE: Only containers with implemented comparison operators are tested here.
+//
+// Supported containers:
+//   - vector (==, !=)
+//   - deque (==, !=, <, <=, >, >=)
+//   - queue (all via adapter)
+//   - set (all via tree)
+//   - priority_queue (all implemented)
+//   - circular_buffer (all implemented)
+//
+// Not supported:
+//   - list (no comparison operators)
+//   - map, unordered_map, multi_map (no comparison operators)
+//   - unordered_set (unordered - no comparison operators)
+
+// Comparison operators for vector (== and != only)
+FL_TEST_CASE("operator== and operator!= - vector") {
+    FL_SUBCASE("fl::vector") { test_operator_equals<VectorIntFactory>(); }
+}
+
+// Comparison operators for deque (all)
+FL_TEST_CASE("operator== and operator!= - deque") {
+    FL_SUBCASE("fl::deque") { test_operator_equals<DequeIntFactory>(); }
+}
+
+FL_TEST_CASE("operator< and operator<= - deque") {
+    FL_SUBCASE("fl::deque") { test_operator_less<DequeIntFactory>(); }
+}
+
+FL_TEST_CASE("operator> and operator>= - deque") {
+    FL_SUBCASE("fl::deque") { test_operator_greater<DequeIntFactory>(); }
+}
+
+// NOTE: priority_queue is ordered by priority, not by element position
+// Ordering operators (<, >, <=, >=) don't have semantic meaning for priority_queue
+// Only equality operators (==, !=) are tested if implemented
+
+// ============================================================================
+// ERASE WHILE ITERATING TESTS
+// ============================================================================
+// Tests for iterator safety when erasing elements during iteration.
+// This is critical for containers that return valid iterators after erase.
+
+// Erase while iterating for sequential containers
+FL_TEST_CASE("erase while iterating - sequential containers") {
+    FL_SUBCASE("fl::vector") { test_erase_while_iterating<vector>(); }
+    FL_SUBCASE("fl::vector_fixed") { test_erase_while_iterating<vector_fixed_test>(); }
+    FL_SUBCASE("fl::vector_inlined") { test_erase_while_iterating<vector_inlined_test>(); }
+    FL_SUBCASE("fl::deque") { test_erase_while_iterating<deque>(); }
+    FL_SUBCASE("fl::list") { test_erase_while_iterating<list>(); }
+}
+
+// Erase while iterating for map containers
+FL_TEST_CASE("erase while iterating - map containers") {
+    FL_SUBCASE("fl::map") { test_map_erase_while_iterating<fl::map<int, int>>(); }
+    FL_SUBCASE("fl::unordered_map") { test_map_erase_while_iterating<fl::unordered_map<int, int>>(); }
+    FL_SUBCASE("fl::multi_map") { test_map_erase_while_iterating<fl::multi_map<int, int>>(); }
 }
 
 } // FL_TEST_FILE

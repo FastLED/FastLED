@@ -142,12 +142,29 @@ async def main() -> None:
     server_process = start_http_server(port=port, directory=directory)
 
     try:
-        # Give the server some time to start
-        time.sleep(2)
+        # Wait for server to be ready by attempting to connect
+        max_retries = 20
+        retry_delay = 0.5
+        server_ready = False
 
-        # Verify the server process is still alive (i.e. it bound successfully)
-        if not server_process.is_alive():
-            raise Exception(f"HTTP server failed to start on port {port}")
+        for attempt in range(max_retries):
+            if not server_process.is_alive():
+                raise Exception(f"HTTP server failed to start on port {port}")
+
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(1)
+                try:
+                    s.connect(("localhost", port))
+                    server_ready = True
+                    break
+                except (ConnectionRefusedError, socket.timeout):
+                    if attempt < max_retries - 1:
+                        time.sleep(retry_delay)
+
+        if not server_ready:
+            raise Exception(
+                f"HTTP server on port {port} did not become ready within {max_retries * retry_delay}s"
+            )
 
         # Use Playwright to test the server
         async with async_playwright() as p:
@@ -175,7 +192,7 @@ async def main() -> None:
 
                 page.on("pageerror", page_error_handler)
 
-                test_url = f"http://localhost:{port}?gfx={args.gfx}"
+                test_url = f"http://localhost:{port}/?gfx={args.gfx}"
                 console.print(f"[dim]Navigating to: {test_url}[/dim]")
                 await page.goto(
                     test_url,
