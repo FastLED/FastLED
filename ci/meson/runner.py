@@ -21,6 +21,7 @@ from ci.meson.build_config import (
     setup_meson_build,
 )
 from ci.meson.build_optimizer import make_build_optimizer
+from ci.meson.build_timer import BuildTimer
 from ci.meson.cache_utils import save_test_result_state
 from ci.meson.compile import (
     CompileResult,
@@ -31,13 +32,64 @@ from ci.meson.compile import (
 from ci.meson.compiler import check_meson_installed, get_meson_executable
 from ci.meson.output import print_banner, print_error, print_info, print_success
 from ci.meson.phase_tracker import PhaseTracker
-from ci.meson.streaming import stream_compile_and_run_tests
+from ci.meson.streaming import StreamingResult, stream_compile_and_run_tests
 from ci.meson.test_discovery import get_fuzzy_test_candidates
 from ci.meson.test_execution import MesonTestResult, run_meson_test
 from ci.util.build_lock import libfastled_build_lock
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.output_formatter import TimestampFormatter, create_filtering_echo_callback
 from ci.util.timestamp_print import ts_print as _ts_print
+
+
+def _apply_phase_timing(
+    result: MesonTestResult, build_timer: BuildTimer
+) -> MesonTestResult:
+    """Apply phase timing data from BuildTimer to MesonTestResult."""
+    build_timer.calculate_phases()
+    result.meson_setup_time = build_timer.meson_setup_time
+    result.ninja_maintenance_time = build_timer.ninja_maintenance_time
+    result.compile_time = build_timer.compile_time
+    result.test_execution_time = build_timer.test_execution_time
+    return result
+
+
+def _apply_compile_sub_phases(
+    result: MesonTestResult, sub_phases: dict[str, float]
+) -> None:
+    """Calculate compile sub-phase durations from timestamps and set on result."""
+    if not sub_phases:
+        return
+
+    compile_start = sub_phases.get("compile_start")
+    core_done = sub_phases.get("core_done")
+    example_link_start = sub_phases.get("example_link_start")
+    test_link_start = sub_phases.get("test_link_start")
+    compile_done = sub_phases.get("compile_done")
+
+    if compile_start and core_done:
+        result.compile_core_time = core_done - compile_start
+    if core_done and compile_done:
+        # Object compilation = time between core_done and whichever linking starts first
+        link_start = None
+        if example_link_start and test_link_start:
+            link_start = min(example_link_start, test_link_start)
+        elif example_link_start:
+            link_start = example_link_start
+        elif test_link_start:
+            link_start = test_link_start
+
+        if link_start:
+            result.compile_objects_time = link_start - core_done
+        else:
+            # No linking phases detected — all time after core is object compilation
+            result.compile_objects_time = compile_done - core_done
+
+    if example_link_start and compile_done:
+        # Example linking = from example_link_start to test_link_start (or compile_done)
+        end = test_link_start if test_link_start else compile_done
+        result.compile_example_link_time = end - example_link_start
+    if test_link_start and compile_done:
+        result.compile_test_link_time = compile_done - test_link_start
 
 
 def _recover_stale_build(
@@ -229,6 +281,10 @@ def run_meson_build_and_test(
     """
     start_time = time.time()
 
+    # Initialize build timer for phase tracking
+    build_timer = BuildTimer()
+    build_timer.start()
+
     # Determine build mode: explicit build_mode parameter takes precedence over debug flag
     if build_mode is None:
         build_mode = "debug" if debug else "quick"
@@ -316,6 +372,18 @@ def run_meson_build_and_test(
     phase_tracker = PhaseTracker(build_dir, build_mode)
     phase_tracker.set_phase("CONFIGURE")
 
+    # Determine if examples should be enabled in Meson build
+    # Disable examples if 'examples' is in exclude_suites (indicating unit-test-only mode)
+    enable_examples = True
+    if exclude_suites:
+        # Check for both "examples" and "fastled:examples" formats
+        for suite in exclude_suites:
+            if "examples" in suite:
+                enable_examples = False
+                break
+
+    _ts_print("[MESON] Configuring build (compiler probes may take 20-30s)...")
+
     if not setup_meson_build(
         source_dir,
         build_dir,
@@ -324,6 +392,7 @@ def run_meson_build_and_test(
         check=check,
         build_mode=build_mode,
         verbose=verbose,
+        enable_examples=enable_examples,
     ):
         return MesonTestResult(
             success=False,
@@ -333,9 +402,15 @@ def run_meson_build_and_test(
             num_tests_failed=0,
         )
 
+    # Checkpoint: Meson configuration complete
+    build_timer.checkpoint("meson_setup_done")
+
     # Perform periodic maintenance on Ninja dependency database (once per day)
     # This helps prevent .ninja_deps corruption and keeps builds fast
     perform_ninja_maintenance(build_dir)
+
+    # Checkpoint: Ninja maintenance complete
+    build_timer.checkpoint("ninja_maintenance_done")
 
     # Note: PCH dependency tracking is handled automatically by Ninja via depfiles.
     # The compile_pch.py wrapper ensures depfiles reference the .pch output correctly,
@@ -508,13 +583,7 @@ def run_meson_build_and_test(
                 compile_target = "all-with-examples" if include_examples else None
 
                 # Run streaming compilation and testing
-                (
-                    overall_success,
-                    num_passed,
-                    num_failed,
-                    compile_output,
-                    streaming_failed_names,
-                ) = stream_compile_and_run_tests(
+                sr = stream_compile_and_run_tests(
                     build_dir=build_dir,
                     test_callback=test_callback,
                     target=compile_target,
@@ -522,22 +591,17 @@ def run_meson_build_and_test(
                     compile_timeout=compile_timeout,
                     build_optimizer=build_optimizer,
                     test_file_filter=test_file_filter,
+                    build_timer=build_timer,
                 )
 
                 # SELF-HEALING: If compilation failed due to stale build state,
                 # recover and retry once
-                if not overall_success and is_stale_build_error(compile_output):
+                if not sr.success and is_stale_build_error(sr.compile_output):
                     if _recover_stale_build(
                         source_dir, build_dir, use_debug, check, build_mode, verbose
                     ):
                         # Retry compilation after recovery
-                        (
-                            overall_success,
-                            num_passed,
-                            num_failed,
-                            compile_output,
-                            streaming_failed_names,
-                        ) = stream_compile_and_run_tests(
+                        sr = stream_compile_and_run_tests(
                             build_dir=build_dir,
                             test_callback=test_callback,
                             target=compile_target,
@@ -549,20 +613,23 @@ def run_meson_build_and_test(
 
                 # Save binary fingerprints of libfastled.a and all DLLs after a
                 # successful build so future runs can suppress unnecessary relinking.
-                if overall_success and build_optimizer is not None:
+                if sr.success and build_optimizer is not None:
                     build_optimizer.save_fingerprints(build_dir)
 
                 duration = time.time() - start_time
-                num_tests_run = num_passed + num_failed
+                num_tests_run = sr.num_passed + sr.num_failed
 
                 # FALLBACK: If no tests were run during streaming (e.g., everything already compiled),
                 # fall back to running all tests via Meson test runner
                 # Show simplified message instead of detailed "0/0" breakdown
-                if num_tests_run == 0 and overall_success:
+                if num_tests_run == 0 and sr.success:
                     if verbose:
                         print_info(
                             "[MESON] Build up-to-date, running existing tests..."
                         )
+                    # Record compile_done before test fallback
+                    build_timer.checkpoint("compile_done")
+
                     # Note: run_meson_test already prints the RUNNING TESTS banner
                     result = run_meson_test(
                         build_dir,
@@ -570,31 +637,51 @@ def run_meson_build_and_test(
                         verbose=verbose,
                         exclude_suites=exclude_suites,
                     )
+
+                    # Propagate full timing into result so the summary table
+                    # shows setup/compile/test phases instead of just test duration
+                    build_timer.checkpoint("test_execution_done")
+                    build_timer.calculate_phases()
+                    test_only_duration = result.duration
+                    result.duration = time.time() - start_time
+                    result.meson_setup_time = build_timer.meson_setup_time
+                    result.ninja_maintenance_time = build_timer.ninja_maintenance_time
+                    result.compile_time = build_timer.compile_time
+                    result.test_execution_time = test_only_duration
+
+                    # Calculate compile sub-phase durations from timestamps
+                    _apply_compile_sub_phases(result, sr.compile_sub_phases)
                     return result
 
-                if not overall_success:
+                if not sr.success:
                     print_error(
-                        f"[MESON] ❌ Some tests failed ({num_passed}/{num_tests_run} tests in {duration:.2f}s)"
+                        f"[MESON] ❌ Some tests failed ({sr.num_passed}/{num_tests_run} tests in {duration:.2f}s)"
                     )
                     return MesonTestResult(
                         success=False,
                         duration=duration,
                         num_tests_run=num_tests_run,
-                        num_tests_passed=num_passed,
-                        num_tests_failed=num_failed,
-                        failed_test_names=streaming_failed_names,
+                        num_tests_passed=sr.num_passed,
+                        num_tests_failed=sr.num_failed,
+                        failed_test_names=sr.failed_names,
                     )
 
+                # Print timing breakdown
+                _ts_print(build_timer.format_table())
+
                 print_success(
-                    f"✅ All tests passed ({num_passed}/{num_tests_run} in {duration:.2f}s)"
+                    f"✅ All tests passed ({sr.num_passed}/{num_tests_run} in {duration:.2f}s)"
                 )
-                return MesonTestResult(
+                result = MesonTestResult(
                     success=True,
                     duration=duration,
                     num_tests_run=num_tests_run,
-                    num_tests_passed=num_passed,
-                    num_tests_failed=num_failed,
+                    num_tests_passed=sr.num_passed,
+                    num_tests_failed=sr.num_failed,
                 )
+                result = _apply_phase_timing(result, build_timer)
+                _apply_compile_sub_phases(result, sr.compile_sub_phases)
+                return result
 
             else:
                 # TRADITIONAL SEQUENTIAL PATH
@@ -695,6 +782,9 @@ def run_meson_build_and_test(
                     last_error_output = result.error_output
                     # Collect suppressed validation errors (capped at 5 per attempt)
                     all_suppressed_errors.extend(result.suppressed_errors)
+
+                # Checkpoint: Compilation complete (successful or not)
+                build_timer.checkpoint("compile_done")
 
                 # Show the final result after target resolution
                 if compilation_success and has_fallbacks:
@@ -957,6 +1047,9 @@ def run_meson_build_and_test(
             test_duration = time.time() - test_start
             duration = time.time() - start_time
 
+            # Checkpoint: Test execution complete
+            build_timer.checkpoint("test_execution_done")
+
             if returncode != 0:
                 # Phase-aware error message
                 phase_data = phase_tracker.get_phase()
@@ -1070,16 +1163,21 @@ def run_meson_build_and_test(
                     build_dir, meson_test_name, _artifact_path, passed=True
                 )
             build_duration = duration - test_duration
+
+            # Print timing breakdown
+            _ts_print(build_timer.format_table())
+
             print_success(
                 f"✅ All tests passed (1/1 in {test_duration:.2f}s, build: {build_duration:.1f}s)"
             )
-            return MesonTestResult(
+            result = MesonTestResult(
                 success=True,
                 duration=duration,
                 num_tests_run=1,
                 num_tests_passed=1,
                 num_tests_failed=0,
             )
+            return _apply_phase_timing(result, build_timer)
 
         except KeyboardInterrupt:
             handle_keyboard_interrupt_properly()

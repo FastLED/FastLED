@@ -1,11 +1,11 @@
 """Streaming compilation and test execution via Meson build system."""
 
 import os
-import queue
 import re
-import subprocess
 import sys
 import threading
+import time
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -14,46 +14,56 @@ from running_process import RunningProcess
 from ci.meson.build_optimizer import BuildOptimizer
 from ci.meson.compile import _create_error_context_filter, _is_compilation_error
 from ci.meson.compiler import get_meson_executable
-from ci.meson.output import print_banner, print_error, print_success
+from ci.meson.output import print_error, print_success
 from ci.meson.phase_tracker import PhaseTracker
-from ci.meson.test_execution import MesonTestResult
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
-from ci.util.output_formatter import TimestampFormatter
 from ci.util.tee import StreamTee
 from ci.util.timestamp_print import ts_print as _ts_print
 
 
-def stream_compile_and_run_tests(
+@dataclass
+class StreamingResult:
+    """Result from streaming compilation and optional test execution."""
+
+    success: bool
+    num_passed: int = 0
+    num_failed: int = 0
+    compile_output: str = ""
+    failed_names: list[str] = field(default_factory=list)
+    compile_sub_phases: dict[str, float] = field(default_factory=dict)
+
+
+@dataclass
+class CompileOnlyResult:
+    """Result from stream_compile_only."""
+
+    success: bool
+    compile_output: str = ""
+    compiled_tests: list[Path] = field(default_factory=list)
+    compile_sub_phases: dict[str, float] = field(default_factory=dict)
+
+
+def stream_compile_only(
     build_dir: Path,
-    test_callback: Callable[[Path], bool],
     target: Optional[str] = None,
     verbose: bool = False,
     compile_timeout: int = 600,
     build_optimizer: Optional[BuildOptimizer] = None,
-    test_file_filter: Optional[str] = None,
-) -> tuple[bool, int, int, str, list[str]]:
+    build_timer=None,
+) -> CompileOnlyResult:
     """
-    Stream test compilation and execution in parallel.
+    Stream compilation only - collect all compiled test paths without running them.
 
     Monitors Ninja output to detect when test executables finish linking,
-    then immediately queues them for execution via the callback.
+    collecting them for later execution.
 
     Args:
         build_dir: Meson build directory
-        test_callback: Function called with each completed test path.
-                      Returns True if test passed, False if failed.
         target: Specific target to build (None = all)
         verbose: Show detailed progress messages (default: False)
         compile_timeout: Timeout in seconds for compilation (default: 600)
         build_optimizer: Optional BuildOptimizer for DLL relink suppression.
-                        When provided, touches DLL files after libfastled.a is
-                        archived (if content unchanged) so ninja skips relinking.
-        test_file_filter: Optional .hpp filename to filter test execution (e.g., "backbeat.hpp")
-
-    Returns:
-        Tuple of (overall_success, num_passed, num_failed, compile_output, failed_names)
-        compile_output contains the compilation stdout/stderr for error analysis
-        failed_names contains the stem names of tests that failed
+        build_timer: Optional BuildTimer for recording compile_done checkpoint.
     """
     cmd = [get_meson_executable(), "compile", "-C", str(build_dir)]
 
@@ -79,11 +89,6 @@ def stream_compile_and_run_tests(
     error_log_path = compile_errors_dir / f"{test_name_slug}.log"
 
     # Show build stage banner
-    # WARNING: This build progress reporting is essential for user feedback!
-    #   Do NOT suppress these messages - they provide:
-    #   1. Build stage visibility (engine → libraries → PCH → tests)
-    #   2. Timing information (helps diagnose slow builds)
-    #   3. Cache status reporting (shows when artifacts are up-to-date)
     _ts_print(f"[BUILD] Building FastLED engine ({build_mode} mode)...")
 
     if target:
@@ -91,13 +96,10 @@ def stream_compile_and_run_tests(
         if verbose:
             _ts_print(f"[MESON] Streaming compilation of target: {target}")
     else:
-        # Build default targets (unit tests) - no target specified builds defaults
-        # Note: examples have build_by_default: false, so we need to build them separately
         if verbose:
             _ts_print(f"[MESON] Streaming compilation of all test targets...")
 
     # Pattern to detect test executable linking
-    # Example: "[142/143] Linking target tests/test_foo.exe"
     link_pattern = re.compile(
         r"^\[\d+/\d+\]\s+Linking (?:CXX executable|target)\s+(.+)$"
     )
@@ -106,44 +108,45 @@ def stream_compile_and_run_tests(
     archive_pattern = re.compile(r"^\[\d+/\d+\]\s+Linking static target\s+(.+)$")
 
     # Pattern to detect PCH compilation
-    # Example: "[1/1] Generating tests/test_pch with a custom command"
     pch_pattern = re.compile(r"^\[\d+/\d+\]\s+Generating\s+\S*test_pch\b")
 
-    # Track compilation success and test results
-    compilation_failed = False
-    compilation_output = ""  # Capture compilation output for error analysis
-    num_passed = 0
-    num_failed = 0
-    tests_run = 0
-    failed_names: list[str] = []
+    # Pattern to extract Ninja step numbers from any line (e.g., [35/1084])
+    ninja_step_pattern = re.compile(r"^\[(\d+)/(\d+)\]")
 
-    # Track build stages for progress reporting
-    shown_tests_stage = False  # Track if we've shown "Building tests..." message
+    # Track compilation success
+    compilation_failed = False
+    compilation_output = ""
+    compiled_tests: list[Path] = []
 
     # Track what we've seen during build for cache status reporting
+    shown_tests_stage = False
+    shown_examples_stage = False
     seen_libfastled = False
     seen_libcrash_handler = False
     seen_pch = False
     seen_any_test = False
 
-    # Queue for completed test executables
-    test_queue: queue.Queue[Optional[Path]] = queue.Queue()
-
-    # Sentinel value to signal end of compilation
-    COMPILATION_DONE = None
+    # Track compile sub-phase timestamps
+    compile_sub_phases: dict[str, float] = {}
 
     def producer_thread() -> None:
-        """Parse Ninja output and queue completed test executables"""
+        """Parse Ninja output and collect compiled test executables"""
         nonlocal compilation_failed, compilation_output, shown_tests_stage
+        nonlocal shown_examples_stage
         nonlocal seen_libfastled, seen_libcrash_handler, seen_pch, seen_any_test
 
-        # Create tee for error log capture (stdout + stderr merged)
+        # Create tee for error log capture
         stderr_tee = StreamTee(error_log_path, echo=False)
         last_error_lines: list[str] = []
 
+        # Track progress for periodic updates during long silent compilations
+        last_progress_time = time.time()
+        last_step = 0
+        total_steps = 0
+        progress_interval = 15  # seconds between progress updates
+
         try:
             # Use RunningProcess for streaming output
-            # Note: No formatter here - we need raw Ninja output for regex pattern matching
             proc = RunningProcess(
                 cmd,
                 timeout=compile_timeout,
@@ -155,7 +158,7 @@ def stream_compile_and_run_tests(
             # Stream output line by line
             with proc.line_iter(timeout=None) as it:
                 for line in it:
-                    # Write to error log (captures both stdout and stderr)
+                    # Write to error log
                     stderr_tee.write_line(line)
 
                     # Track errors for smart detection
@@ -164,22 +167,28 @@ def stream_compile_and_run_tests(
                         if len(last_error_lines) > 50:
                             last_error_lines.pop(0)
 
-                    # Filter out noisy Meson/Ninja INFO lines that clutter output
-                    # These provide no useful information for normal operation
+                    # Filter out noisy Meson/Ninja INFO lines
                     stripped = line.strip()
                     if stripped.startswith("INFO:"):
-                        continue  # Skip Meson INFO lines
+                        continue
                     if "Entering directory" in stripped:
-                        continue  # Skip Ninja directory change messages
+                        continue
 
-                    # Check for key build milestones (show even in non-verbose mode)
+                    # Extract Ninja step numbers for progress tracking (Fix 4)
+                    step_match = ninja_step_pattern.match(stripped)
+                    if step_match:
+                        last_step = int(step_match.group(1))
+                        total_steps = int(step_match.group(2))
+
                     is_key_milestone = False
+                    milestone_already_printed = False
 
-                    # Check for library archiving (static libraries like libcrash_handler.a)
+                    # Check for library archiving
                     archive_match = archive_pattern.match(stripped)
                     if archive_match:
                         if "libcrash_handler" in stripped:
                             is_key_milestone = True
+                            milestone_already_printed = True
                             rel_path = archive_match.group(1)
                             full_path = build_dir / rel_path
                             try:
@@ -188,20 +197,19 @@ def stream_compile_and_run_tests(
                                 display_path = full_path
                             _ts_print(f"[BUILD] ✓ Core library: {display_path}")
                             seen_libcrash_handler = True
+                            if "compile_start" not in compile_sub_phases:
+                                compile_sub_phases["compile_start"] = time.time()
 
                     # Check for PCH compilation
                     elif pch_pattern.match(stripped):
                         is_key_milestone = True
-                        seen_pch = True  # Track that we've seen PCH compilation
-                        # Extract PCH path from the line
-                        # Format: "[1/1] Generating tests/test_pch with a custom command"
+                        milestone_already_printed = True
+                        seen_pch = True
                         pch_match_result = re.search(
                             r"Generating\s+(\S+test_pch)\b", stripped
                         )
                         if pch_match_result:
-                            rel_path = (
-                                pch_match_result.group(1) + ".h.pch"
-                            )  # Add extension for display
+                            rel_path = pch_match_result.group(1) + ".h.pch"
                             full_path = build_dir / rel_path
                             try:
                                 display_path = full_path.relative_to(Path.cwd())
@@ -209,25 +217,19 @@ def stream_compile_and_run_tests(
                                 display_path = full_path
                             _ts_print(f"[BUILD] ✓ Precompiled header: {display_path}")
 
-                    # Rewrite Ninja paths to show full build-relative paths for clarity
-                    # Ninja outputs paths relative to build directory (e.g., "tests/fx_frame.exe")
-                    # Users expect to see full paths (e.g., ".build/meson-quick/tests/fx_frame.exe")
+                    # Rewrite Ninja paths for clarity
                     display_line = line
                     link_match = link_pattern.match(stripped)
                     if link_match:
                         rel_path = link_match.group(1)
-                        # Convert build-relative path to project-relative path
                         full_path = build_dir / rel_path
                         try:
-                            # Make path relative to project root for cleaner display
                             display_path = full_path.relative_to(Path.cwd())
-                            # Rewrite the line with full path
                             display_line = line.replace(rel_path, str(display_path))
                         except ValueError:
-                            # If path is outside project, show absolute path
                             display_line = line.replace(rel_path, str(full_path))
 
-                        # Detect fastled shared library linking (fastled.dll/fastled.so)
+                        # Detect fastled shared library linking (Fix 2)
                         link_stem = Path(rel_path).stem
                         if link_stem == "fastled" and Path(rel_path).suffix.lower() in (
                             ".dll",
@@ -235,16 +237,15 @@ def stream_compile_and_run_tests(
                             ".dylib",
                         ):
                             is_key_milestone = True
+                            milestone_already_printed = True
                             seen_libfastled = True
+                            compile_sub_phases["core_done"] = time.time()
                             _lib_display = full_path
                             try:
                                 _lib_display = full_path.relative_to(Path.cwd())
                             except ValueError:
                                 pass
                             _ts_print(f"[BUILD] ✓ Core library: {_lib_display}")
-                            # Binary fingerprint optimization: fastled shared lib just finished
-                            # linking. If its content matches saved fingerprint, touch
-                            # all DLLs now so ninja sees them as newer → skips relinking.
                             if build_optimizer is not None:
                                 _opt = build_optimizer
                                 _bdir = build_dir
@@ -263,74 +264,76 @@ def stream_compile_and_run_tests(
                                     name="DllTouch",
                                 ).start()
 
-                        # Test/example linking is also a key milestone
-                        if (
-                            "tests/" in rel_path
-                            or "tests\\" in rel_path
-                            or "examples/" in rel_path
-                            or "examples\\" in rel_path
-                        ):
-                            # Exclude test infrastructure (runner.exe is not a test)
+                        # Test/example linking (Fix 1: separate tracking)
+                        is_example = "examples/" in rel_path or "examples\\" in rel_path
+                        is_test = "tests/" in rel_path or "tests\\" in rel_path
+                        if is_test or is_example:
                             test_name = Path(rel_path).stem
                             if test_name not in (
                                 "runner",
                                 "test_runner",
                                 "example_runner",
                             ):
-                                seen_any_test = (
-                                    True  # Track that we've seen at least one test
-                                )
-                                # Show "Building tests..." stage message on first test
-                                if not shown_tests_stage:
-                                    _ts_print("[BUILD] Building tests...")
-                                    shown_tests_stage = True
+                                seen_any_test = True
                                 is_key_milestone = True
+                                if is_example and not shown_examples_stage:
+                                    _ts_print("[BUILD] Linking examples...")
+                                    shown_examples_stage = True
+                                    compile_sub_phases["example_link_start"] = (
+                                        time.time()
+                                    )
+                                elif is_test and not shown_tests_stage:
+                                    _ts_print("[BUILD] Linking tests...")
+                                    shown_tests_stage = True
+                                    compile_sub_phases["test_link_start"] = time.time()
 
-                    # Echo output for visibility (skip empty lines)
-                    # Show in verbose mode OR if it's a key milestone (but skip if we already printed a custom message)
+                    # Echo output for visibility (Fix 2: skip if already printed)
                     if (
                         stripped
                         and (verbose or is_key_milestone)
-                        and not archive_match
-                        and not pch_pattern.match(stripped)
+                        and not milestone_already_printed
                     ):
                         _ts_print(f"[BUILD] {display_line}")
 
-                    # Check for link completion
+                    # Periodic progress indicator during long compilations (Fix 4)
+                    if step_match and is_key_milestone:
+                        last_progress_time = time.time()
+                    elif (
+                        step_match
+                        and time.time() - last_progress_time > progress_interval
+                    ):
+                        _ts_print(f"[BUILD] Compiling... [{last_step}/{total_steps}]")
+                        last_progress_time = time.time()
+
+                    # Collect compiled test paths
                     match = (
                         link_match if link_match else link_pattern.match(line.strip())
                     )
                     if match:
-                        # Extract test executable path
                         rel_path = match.group(1)
                         test_path = build_dir / rel_path
 
-                        # Only queue if it's a test executable (in tests/ or examples/ directory)
+                        # Only collect if it's a test executable
                         if (
                             "tests/" in rel_path
                             or "tests\\" in rel_path
                             or "examples/" in rel_path
                             or "examples\\" in rel_path
                         ):
-                            # Exclude infrastructure executables that aren't actual tests
-                            test_name = test_path.stem  # Get filename without extension
+                            test_name = test_path.stem
                             if test_name in ("runner", "test_runner", "example_runner"):
-                                continue  # Skip these infrastructure executables
-
-                            # Skip profile tests (standalone benchmarking binaries)
+                                continue
                             if (
                                 "tests/profile/" in rel_path
                                 or "tests\\profile\\" in rel_path
                             ):
-                                continue  # Profile tests are run via 'bash profile <function>', not as unit tests
-
-                            # Skip DLL/shared library files
+                                continue
                             if test_path.suffix.lower() in (".dll", ".so", ".dylib"):
-                                continue  # Skip DLL/shared library files
+                                continue
 
                             if verbose:
-                                _ts_print(f"[MESON] Test ready: {test_path.name}")
-                            test_queue.put(test_path)
+                                _ts_print(f"[MESON] Test built: {test_path.name}")
+                            compiled_tests.append(test_path)
 
             # Check compilation result
             returncode = proc.wait()
@@ -352,16 +355,14 @@ def stream_compile_and_run_tests(
                     f.write("--- Error Context ---\n\n")
                     f.write("\n".join(last_error_lines))
 
-            compilation_output = proc.stdout  # Capture for error analysis
+            compilation_output = proc.stdout
             if returncode != 0:
-                # Track link phase failure
                 phase_tracker.set_phase("LINK", target=target, path="streaming")
                 _ts_print(
                     f"[MESON] Compilation failed with return code {returncode}",
                     file=sys.stderr,
                 )
 
-                # Show error context from compilation output
                 error_filter: Callable[[str], None] = _create_error_context_filter(
                     context_lines=20
                 )
@@ -371,18 +372,15 @@ def stream_compile_and_run_tests(
 
                 compilation_failed = True
             else:
-                # Track successful link phase
                 phase_tracker.set_phase("LINK", target=target, path="streaming")
 
-                # Report cached artifacts (things we didn't see being built)
-                # Only report if we saw at least one artifact being built (otherwise it's a no-op build)
+                # Report cached artifacts
                 if (
                     seen_libfastled
                     or seen_libcrash_handler
                     or seen_pch
                     or seen_any_test
                 ):
-                    # Report cached core libraries
                     cached_libs: list[str] = []
                     if not seen_libfastled:
                         cached_libs.append("fastled (shared)")
@@ -394,7 +392,6 @@ def stream_compile_and_run_tests(
                             f"[BUILD] ✓ Core libraries: up-to-date (cached: {', '.join(cached_libs)})"
                         )
 
-                    # Report cached PCH
                     if not seen_pch:
                         _ts_print(f"[BUILD] ✓ Precompiled header: up-to-date (cached)")
 
@@ -407,93 +404,139 @@ def stream_compile_and_run_tests(
         except Exception as e:
             _ts_print(f"[MESON] Producer thread error: {e}", file=sys.stderr)
             compilation_failed = True
-        finally:
-            # Signal end of compilation
-            test_queue.put(COMPILATION_DONE)
 
-    # Start producer thread
+    # Run producer thread to completion
     producer = threading.Thread(
-        target=producer_thread, name="NinjaProducer", daemon=True
+        target=producer_thread, name="NinjaProducer", daemon=False
     )
     producer.start()
+    # Use timed join loop so the main thread can receive KeyboardInterrupt (Ctrl+C).
+    # A bare thread.join() on Windows swallows SIGINT until the thread finishes.
+    while producer.is_alive():
+        producer.join(timeout=0.2)
 
-    # Consumer: Run tests as they become available
-    try:
-        while True:
-            try:
-                # Get next test from queue (blocking with timeout for responsiveness)
-                test_path = test_queue.get(timeout=1.0)
+    # Record compilation completion checkpoint and end time for sub-phases
+    compile_sub_phases["compile_done"] = time.time()
+    if build_timer is not None:
+        build_timer.checkpoint("compile_done")
 
-                if test_path is COMPILATION_DONE:
-                    # Compilation finished
-                    break
+    return CompileOnlyResult(
+        success=not compilation_failed,
+        compile_output=compilation_output,
+        compiled_tests=compiled_tests,
+        compile_sub_phases=compile_sub_phases,
+    )
 
-                # Type narrowing: test_path is now guaranteed to be Path (not None)
-                assert test_path is not None
 
-                # Track execution phase
-                phase_tracker.set_phase(
-                    "EXECUTE", test_name=test_path.stem, path="streaming"
-                )
+def stream_compile_and_run_tests(
+    build_dir: Path,
+    test_callback: Callable[[Path], bool],
+    target: Optional[str] = None,
+    verbose: bool = False,
+    compile_timeout: int = 600,
+    build_optimizer: Optional[BuildOptimizer] = None,
+    test_file_filter: Optional[str] = None,
+    build_timer=None,
+) -> StreamingResult:
+    """
+    Stream test compilation and then execution sequentially.
 
-                # Run the test
-                tests_run += 1
+    First compiles all tests, then runs them after compilation completes.
+    This provides clearer timing breakdown and prevents tests from running
+    during ongoing compilation.
+
+    Args:
+        build_dir: Meson build directory
+        test_callback: Function called with each completed test path.
+                      Returns True if test passed, False if failed.
+        target: Specific target to build (None = all)
+        verbose: Show detailed progress messages (default: False)
+        compile_timeout: Timeout in seconds for compilation (default: 600)
+        build_optimizer: Optional BuildOptimizer for DLL relink suppression.
+        test_file_filter: Optional .hpp filename to filter test execution (e.g., "backbeat.hpp")
+        build_timer: Optional BuildTimer for recording test_execution_done checkpoint.
+    """
+    # Phase 1: Compile only
+    cr = stream_compile_only(
+        build_dir=build_dir,
+        target=target,
+        verbose=verbose,
+        compile_timeout=compile_timeout,
+        build_optimizer=build_optimizer,
+    )
+
+    if not cr.success:
+        # Compilation failed, return immediately
+        return StreamingResult(
+            success=False,
+            compile_output=cr.compile_output,
+            compile_sub_phases=cr.compile_sub_phases,
+        )
+
+    # Phase 2: Run tests after compilation completes
+    # Only run tests if test_file_filter is set or all tests should be run
+    num_passed = 0
+    num_failed = 0
+    failed_names: list[str] = []
+
+    # Filter tests if test_file_filter is specified
+    if test_file_filter and cr.compiled_tests:
+        # Convert filter (e.g., "backbeat.hpp") to match test paths
+        filtered_tests = [
+            t
+            for t in cr.compiled_tests
+            if test_file_filter.replace(".hpp", "") in t.name.lower()
+        ]
+    else:
+        filtered_tests = cr.compiled_tests
+
+    if not filtered_tests:
+        # No directly-runnable tests found (e.g., all targets are DLLs on Windows).
+        # Return empty result - caller (runner.py) will fall back to Meson test runner.
+        return StreamingResult(
+            success=True,
+            compile_output=cr.compile_output,
+            compile_sub_phases=cr.compile_sub_phases,
+        )
+
+    _ts_print(f"[MESON] Running {len(filtered_tests)} tests...")
+
+    tests_run = 0
+    for test_path in filtered_tests:
+        tests_run += 1
+        if verbose:
+            _ts_print(f"[TEST {tests_run}] Running: {test_path.name}")
+
+        try:
+            # Set test file filter in environment if specified
+            if test_file_filter:
+                os.environ["FL_TEST_FILE_FILTER"] = test_file_filter
+
+            success = test_callback(test_path)
+
+            # Clean up environment variable
+            if test_file_filter and "FL_TEST_FILE_FILTER" in os.environ:
+                del os.environ["FL_TEST_FILE_FILTER"]
+
+            if success:
+                num_passed += 1
                 if verbose:
-                    _ts_print(f"[TEST {tests_run}] Running: {test_path.name}")
+                    _ts_print(f"[TEST {tests_run}] ✓ PASSED: {test_path.name}")
+            else:
+                num_failed += 1
+                failed_names.append(test_path.stem)
+                _ts_print(f"[TEST {tests_run}] ✗ FAILED: {test_path.name}")
+        except KeyboardInterrupt:
+            handle_keyboard_interrupt_properly()
+            raise
+        except Exception as e:
+            _ts_print(f"[TEST {tests_run}] ✗ ERROR: {test_path.name}: {e}")
+            num_failed += 1
+            failed_names.append(test_path.stem)
 
-                try:
-                    # Set test file filter in environment if specified (for .hpp file filtering)
-                    if test_file_filter:
-                        os.environ["FL_TEST_FILE_FILTER"] = test_file_filter
-
-                    success = test_callback(test_path)
-
-                    # Clean up environment variable
-                    if test_file_filter and "FL_TEST_FILE_FILTER" in os.environ:
-                        del os.environ["FL_TEST_FILE_FILTER"]
-                    if success:
-                        num_passed += 1
-                        if verbose:
-                            _ts_print(f"[TEST {tests_run}] ✓ PASSED: {test_path.name}")
-                    else:
-                        num_failed += 1
-                        failed_names.append(test_path.stem)
-                        # Always show failures even in non-verbose mode
-                        _ts_print(f"[TEST {tests_run}] ✗ FAILED: {test_path.name}")
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
-                    raise
-                except Exception as e:
-                    # Always show errors even in non-verbose mode
-                    _ts_print(f"[TEST {tests_run}] ✗ ERROR: {test_path.name}: {e}")
-                    num_failed += 1
-                    failed_names.append(test_path.stem)
-
-            except queue.Empty:
-                # No test available yet, check if producer is still alive
-                if not producer.is_alive() and test_queue.empty():
-                    # Producer died unexpectedly
-                    _ts_print(
-                        "[MESON] Producer thread died unexpectedly", file=sys.stderr
-                    )
-                    break
-                continue
-
-    except KeyboardInterrupt:
-        _ts_print("[MESON] Interrupted by user", file=sys.stderr)
-        handle_keyboard_interrupt_properly()
-        raise
-    finally:
-        # Wait for producer to finish
-        producer.join(timeout=10.0)
-
-    # Determine overall success
-    overall_success = not compilation_failed and num_failed == 0
-
-    # Only show streaming test summary if there were actual tests run
-    # Skip verbose "0/0" output when build was up-to-date
-    if tests_run > 0 or compilation_failed:
-        _ts_print(f"[MESON] Streaming test execution complete:")
+    # Show test summary
+    if tests_run > 0:
+        _ts_print(f"[MESON] Test execution complete:")
         _ts_print(f"  Tests run: {tests_run}")
         if num_passed > 0:
             print_success(f"  Passed: {num_passed}")
@@ -503,9 +546,16 @@ def stream_compile_and_run_tests(
             print_error(f"  Failed: {num_failed}")
         else:
             _ts_print(f"  Failed: {num_failed}")
-        if compilation_failed:
-            print_error(f"  Compilation: ✗ FAILED")
-        else:
-            print_success(f"  Compilation: ✓ OK")
 
-    return overall_success, num_passed, num_failed, compilation_output, failed_names
+    # Record test execution completion checkpoint
+    if build_timer is not None:
+        build_timer.checkpoint("test_execution_done")
+
+    return StreamingResult(
+        success=cr.success and num_failed == 0,
+        num_passed=num_passed,
+        num_failed=num_failed,
+        compile_output=cr.compile_output,
+        failed_names=failed_names,
+        compile_sub_phases=cr.compile_sub_phases,
+    )

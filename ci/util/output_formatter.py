@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import re
-import time
 from collections.abc import Callable
 
 from running_process import OutputFormatter
+
+from .timestamp_print import get_elapsed
 
 
 # Patterns to suppress in verbose mode (noise that adds no debugging value)
@@ -96,15 +97,15 @@ class TimestampFormatter:
     """Simple formatter that adds timestamps relative to program start."""
 
     def __init__(self) -> None:
-        self._start_time: float = 0.0
+        pass  # No per-instance start time needed, use global elapsed
 
     def begin(self) -> None:
-        self._start_time = time.time()
+        pass  # No per-instance setup needed
 
     def transform(self, line: str) -> str:
         if not line:
             return line
-        elapsed: float = time.time() - self._start_time
+        elapsed: float = get_elapsed()
         return f"{elapsed:.2f} {line}"
 
     def end(self) -> None:
@@ -120,10 +121,10 @@ class FilteringTimestampFormatter:
     """
 
     def __init__(self) -> None:
-        self._start_time: float = 0.0
+        pass  # No per-instance start time needed, use global elapsed
 
     def begin(self) -> None:
-        self._start_time = time.time()
+        pass  # No per-instance setup needed
 
     def transform(self, line: str) -> str | None:
         if not line:
@@ -131,7 +132,7 @@ class FilteringTimestampFormatter:
         # Check if this line should be suppressed
         if should_suppress_line(line):
             return None  # Signal to skip this line
-        elapsed: float = time.time() - self._start_time
+        elapsed: float = get_elapsed()
         return f"{elapsed:.2f} {line}"
 
     def end(self) -> None:
@@ -147,16 +148,15 @@ class _MultiPathSubstitutionFormatter:
         for needle, regex_pattern, replacement in substitutions:
             compiled_pattern = re.compile(regex_pattern)
             self._substitutions.append((needle, replacement, compiled_pattern))
-        self._start_time: float = 0.0
 
     def begin(self) -> None:
-        self._start_time = time.time()
+        pass  # No per-instance setup needed, use global elapsed
 
     def transform(self, line: str) -> str:
         if not line:
             return line
         formatted: str = self._format_paths(line)
-        elapsed: float = time.time() - self._start_time
+        elapsed: float = get_elapsed()
         return f"{elapsed:.2f} {formatted}"
 
     def end(self) -> None:

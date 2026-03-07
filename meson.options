@@ -14,3 +14,9 @@ option('build_mode', type: 'combo', choices: ['quick', 'debug', 'release', 'prof
 # Usage: meson setup -Dtest_wrapper=false build (to disable)
 option('test_wrapper', type: 'boolean', value: true,
        description: 'Enable test wrapper with deadlock detection and stack dumping for hung tests (enabled by default)')
+
+# Examples compilation: Set to false to skip example processing during Meson setup
+# This significantly speeds up Meson configuration when only running unit tests
+# Usage: meson setup -Denable_examples=false build (to disable)
+option('enable_examples', type: 'boolean', value: true,
+       description: 'Enable example compilation targets (set to false to speed up Meson setup for unit tests only)')

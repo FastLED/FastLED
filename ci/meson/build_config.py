@@ -405,6 +405,7 @@ def setup_meson_build(
     check: bool = False,
     build_mode: Optional[str] = None,
     verbose: bool = False,
+    enable_examples: bool = True,
 ) -> bool:
     """
     Set up Meson build directory.
@@ -417,6 +418,7 @@ def setup_meson_build(
         check: Enable IWYU static analysis (default: False)
         build_mode: Build mode ("quick", "debug", or "release"). If None, derived from debug flag.
         verbose: Show detailed output including toolchain info (default: False)
+        enable_examples: Enable example compilation targets (default: True)
 
     Returns:
         True if setup successful, False otherwise
@@ -1122,6 +1124,8 @@ def setup_meson_build(
         ]
         # Always pass explicit build_mode to ensure meson uses correct optimization flags
         cmd.extend([f"-Dbuild_mode={build_mode}"])
+        # Pass enable_examples option
+        cmd.extend([f"-Denable_examples={str(enable_examples).lower()}"])
     else:
         # Initial setup
         _ts_print(f"[MESON] Setting up build directory: {build_dir}")
@@ -1134,6 +1138,8 @@ def setup_meson_build(
         ]
         # Always pass explicit build_mode to ensure meson uses correct optimization flags
         cmd.extend([f"-Dbuild_mode={build_mode}"])
+        # Pass enable_examples option
+        cmd.extend([f"-Denable_examples={str(enable_examples).lower()}"])
 
     is_windows = sys.platform.startswith("win") or os.name == "nt"
 

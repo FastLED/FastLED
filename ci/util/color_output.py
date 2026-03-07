@@ -8,6 +8,8 @@ using the Rich library for consistent formatting across Windows, macOS, and Linu
 
 from typing import TYPE_CHECKING, Optional
 
+from .timestamp_print import get_elapsed_str
+
 
 if TYPE_CHECKING:
     from rich.console import Console
@@ -50,54 +52,62 @@ class ColorOutput:
 
     def print_green(self, message: str) -> None:
         """Print message in green color."""
+        msg = f"{get_elapsed_str()} {message}"
         if self.console:
-            self.console.print(message, style="green")
+            self.console.print(msg, style="green")
         else:
-            self._fallback_print(message, "✅ ")
+            self._fallback_print(msg, "✅ ")
 
     def print_yellow(self, message: str) -> None:
         """Print message in yellow color."""
+        msg = f"{get_elapsed_str()} {message}"
         if self.console:
-            self.console.print(message, style="yellow")
+            self.console.print(msg, style="yellow")
         else:
-            self._fallback_print(message, "⚠️  ")
+            self._fallback_print(msg, "⚠️  ")
 
     def print_red(self, message: str) -> None:
         """Print message in red color."""
+        msg = f"{get_elapsed_str()} {message}"
         if self.console:
-            self.console.print(message, style="red")
+            self.console.print(msg, style="red")
         else:
-            self._fallback_print(message, "❌ ")
+            self._fallback_print(msg, "❌ ")
 
     def print_blue(self, message: str) -> None:
         """Print message in blue color."""
+        msg = f"{get_elapsed_str()} {message}"
         if self.console:
-            self.console.print(message, style="blue")
+            self.console.print(msg, style="blue")
         else:
-            self._fallback_print(message, "ℹ️  ")
+            self._fallback_print(msg, "ℹ️  ")
 
     def print_cache_hit(self, message: str) -> None:
         """Print cache hit message in green with appropriate formatting."""
+        elapsed = get_elapsed_str()
         if self.console and Text is not None:
             # Use bright green with a checkmark for cache hits
             text = Text()
+            text.append(f"{elapsed} ", style="bright_green")
             text.append("✓ ", style="bright_green bold")
             text.append(message, style="green")
             # Disable word wrapping to keep the message on one line
             self.console.print(text, soft_wrap=True)
         else:
-            self._fallback_print(message, "✓ ")
+            self._fallback_print(f"{elapsed} {message}", "✓ ")
 
     def print_cache_miss(self, message: str) -> None:
         """Print cache miss/invalidation message in yellow with warning formatting."""
+        elapsed = get_elapsed_str()
         if self.console and Text is not None:
             # Use yellow with a warning symbol for cache misses/invalidations
             text = Text()
+            text.append(f"{elapsed} ", style="yellow")
             text.append("⚠️  ", style="yellow bold")
             text.append(message, style="yellow")
             self.console.print(text)
         else:
-            self._fallback_print(message, "⚠️  ")
+            self._fallback_print(f"{elapsed} {message}", "⚠️  ")
 
 
 # Global instance for easy access

@@ -32,6 +32,16 @@ class MesonTestResult:
         False  # True when result came from cache (no compilation)
     )
     failed_test_names: list[str] = field(default_factory=list)
+    # Phase timing breakdown (seconds) - for detailed performance analysis
+    meson_setup_time: float = 0.0
+    ninja_maintenance_time: float = 0.0
+    compile_time: float = 0.0
+    test_execution_time: float = 0.0
+    # Compilation sub-phase breakdown (seconds)
+    compile_core_time: float = 0.0  # Core libs + PCH + fastled.dll
+    compile_objects_time: float = 0.0  # .cpp object compilation
+    compile_example_link_time: float = 0.0  # Example DLL linking
+    compile_test_link_time: float = 0.0  # Test DLL linking
 
     @staticmethod
     def construct_build_error(duration: float) -> "MesonTestResult":

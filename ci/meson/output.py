@@ -1,6 +1,7 @@
 """Output formatting and colored printing utilities for Meson build system."""
 
 from ci.util.color_output import print_blue, print_green, print_red, print_yellow
+from ci.util.timestamp_print import get_elapsed_str
 
 
 def print_success(msg: str) -> None:
@@ -47,5 +48,5 @@ def print_banner(
         padding = 0
     separator = f"── {display_title} " + "─" * padding
 
-    # Print simple separator (no blank line before for compactness)
-    print(separator)
+    # Print simple separator with timestamp (no blank line before for compactness)
+    print(f"{get_elapsed_str()} {separator}")

@@ -92,7 +92,13 @@ if not is_wasm_build
   subdir('tests')
 
   # Build examples subdirectory (provides meson targets for example compilation)
-  subdir('examples')
+  # Can be disabled with -Denable_examples=false to speed up Meson setup for unit tests only
+  if get_option('enable_examples')
+    subdir('examples')
+  else
+    # Stub variables for when examples are disabled
+    example_executables = []
+  endif
 
   # Combined alias: builds all test DLLs + example DLLs + both runner executables
   # in a single Ninja invocation, sharing PCH and libfastled compilation.

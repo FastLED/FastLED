@@ -185,6 +185,16 @@ class ProcessTiming:
     duration: float
     command: str
     skipped: bool = False
+    # Phase timing breakdown for Meson tests (seconds) - None if not applicable
+    meson_setup_time: Optional[float] = None
+    ninja_maintenance_time: Optional[float] = None
+    compile_time: Optional[float] = None
+    test_execution_time: Optional[float] = None
+    # Compilation sub-phase breakdown (seconds) - None if not applicable
+    compile_core_time: Optional[float] = None
+    compile_objects_time: Optional[float] = None
+    compile_example_link_time: Optional[float] = None
+    compile_test_link_time: Optional[float] = None
 
 
 @dataclass
@@ -872,7 +882,7 @@ def _format_failure_summary(
 
 
 def _format_timing_summary(process_timings: list[ProcessTiming]) -> str:
-    """Format a summary of process execution times.
+    """Format a summary of process execution times with optional phase breakdown.
 
     Always returns a table format for consistent display.
     """
@@ -882,19 +892,92 @@ def _format_timing_summary(process_timings: list[ProcessTiming]) -> str:
     # Sort by skipped status first (non-skipped first), then by duration (longest first)
     sorted_timings = sorted(process_timings, key=lambda x: (x.skipped, -x.duration))
 
-    # Always use table format for consistent display
-    # Calculate column widths dynamically
-    max_name_width = max(len(timing.name) for timing in sorted_timings)
-    max_name_width = max(max_name_width, len("Test"))  # Use shorter header
+    # Check if any timing has phase data (for Meson tests)
+    has_phases = any(
+        t.meson_setup_time and t.meson_setup_time > 0 for t in sorted_timings
+    )
 
-    # Calculate max duration width for alignment
-    duration_values: list[str] = []
+    # Build timing rows (main tests + phases if available)
+    timing_rows: list[tuple[str, str]] = []
+
+    # First pass: add all main test entries
     for timing in sorted_timings:
         if timing.skipped:
-            duration_values.append("skipped")
+            duration_str = "skipped"
         else:
-            duration_values.append(f"{timing.duration:.2f}s")
-    max_duration_width = max(len(d) for d in duration_values)
+            duration_str = f"{timing.duration:.2f}s"
+        timing_rows.append((timing.name, duration_str))
+
+        # Second pass: add phase breakdown if available
+        if has_phases and not timing.skipped:
+            phases = []
+            if timing.meson_setup_time and timing.meson_setup_time > 0:
+                phases.append(("  ├─ Meson Setup", f"{timing.meson_setup_time:.2f}s"))
+            if timing.compile_time and timing.compile_time > 0:
+                # Check if we have compile sub-phases
+                has_sub_phases = any(
+                    [
+                        timing.compile_core_time and timing.compile_core_time > 0,
+                        timing.compile_objects_time and timing.compile_objects_time > 0,
+                        timing.compile_example_link_time
+                        and timing.compile_example_link_time > 0,
+                        timing.compile_test_link_time
+                        and timing.compile_test_link_time > 0,
+                    ]
+                )
+                phases.append(("  ├─ Compilation", f"{timing.compile_time:.2f}s"))
+                if has_sub_phases:
+                    sub = []
+                    if timing.compile_core_time and timing.compile_core_time > 0:
+                        sub.append(
+                            ("  │   ├─ Core + PCH", f"{timing.compile_core_time:.2f}s")
+                        )
+                    if timing.compile_objects_time and timing.compile_objects_time > 0:
+                        sub.append(
+                            (
+                                "  │   ├─ Object files",
+                                f"{timing.compile_objects_time:.2f}s",
+                            )
+                        )
+                    if (
+                        timing.compile_example_link_time
+                        and timing.compile_example_link_time > 0
+                    ):
+                        sub.append(
+                            (
+                                "  │   ├─ Example linking",
+                                f"{timing.compile_example_link_time:.2f}s",
+                            )
+                        )
+                    if (
+                        timing.compile_test_link_time
+                        and timing.compile_test_link_time > 0
+                    ):
+                        sub.append(
+                            (
+                                "  │   └─ Test linking",
+                                f"{timing.compile_test_link_time:.2f}s",
+                            )
+                        )
+                    # Fix last sub-phase connector
+                    if sub:
+                        name, dur = sub[-1]
+                        sub[-1] = (name.replace("  │   ├─", "  │   └─"), dur)
+                    phases.extend(sub)
+            if timing.test_execution_time and timing.test_execution_time > 0:
+                phases.append(
+                    ("  └─ Test Execution", f"{timing.test_execution_time:.2f}s")
+                )
+
+            # Add phase rows
+            for phase_name, phase_duration in phases:
+                timing_rows.append((phase_name, phase_duration))
+
+    # Calculate column widths
+    max_name_width = max(len(name) for name, _ in timing_rows)
+    max_name_width = max(max_name_width, len("Test"))
+
+    max_duration_width = max(len(duration) for _, duration in timing_rows)
     max_duration_width = max(max_duration_width, len("Duration"))
 
     # Create header with compact formatting
@@ -903,8 +986,8 @@ def _format_timing_summary(process_timings: list[ProcessTiming]) -> str:
 
     # Create rows with compact formatting
     rows: list[str] = []
-    for timing, duration_str in zip(sorted_timings, duration_values):
-        row = f"{timing.name:<{max_name_width}} | {duration_str:<{max_duration_width}}"
+    for name, duration_str in timing_rows:
+        row = f"{name:<{max_name_width}} | {duration_str:<{max_duration_width}}"
         rows.append(row)
 
     # Combine all parts (header before separator, no bottom border)
@@ -1387,6 +1470,14 @@ def runner(
                 duration=result.duration,
                 command="meson test",
                 skipped=False,
+                meson_setup_time=result.meson_setup_time,
+                ninja_maintenance_time=result.ninja_maintenance_time,
+                compile_time=result.compile_time,
+                test_execution_time=result.test_execution_time,
+                compile_core_time=result.compile_core_time,
+                compile_objects_time=result.compile_objects_time,
+                compile_example_link_time=result.compile_example_link_time,
+                compile_test_link_time=result.compile_test_link_time,
             )
             summary = _format_timing_summary([unit_timing])
             print(summary)
@@ -1438,6 +1529,14 @@ def runner(
                 duration=result.duration,
                 command="meson test",
                 skipped=False,
+                meson_setup_time=result.meson_setup_time,
+                ninja_maintenance_time=result.ninja_maintenance_time,
+                compile_time=result.compile_time,
+                test_execution_time=result.test_execution_time,
+                compile_core_time=result.compile_core_time,
+                compile_objects_time=result.compile_objects_time,
+                compile_example_link_time=result.compile_example_link_time,
+                compile_test_link_time=result.compile_test_link_time,
             )
 
             # Update fingerprint metadata for cache display on next run
