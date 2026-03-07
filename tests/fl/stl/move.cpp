@@ -4,6 +4,7 @@
 #include "fl/stl/type_traits.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/map.h"
+#include "fl/stl/flat_map.h"
 #include "fl/stl/set.h"
 #include "fl/stl/deque.h"
 #include "fl/stl/list.h"
@@ -656,6 +657,10 @@ FL_TEST_CASE("Container move semantics with shared_ptr") {
 
     FL_SUBCASE("fl::SortedHeapMap") {
         test_map_move_semantics<fl::SortedHeapMap<int, fl::shared_ptr<int>>>();
+    }
+
+    FL_SUBCASE("fl::flat_map") {
+        test_map_move_semantics<fl::flat_map<int, fl::shared_ptr<int>>>();
     }
 
     FL_SUBCASE("fl::FixedMap") {
@@ -1433,6 +1438,57 @@ FL_TEST_CASE("Tier 2-4: Sequential container comprehensive tests") {
         // because list has BidirectionalIterators (no operator+) and no capacity()
         // If we tried to call test_iterator_arithmetic<fl::list>() here,
         // we would get a COMPILER ERROR - which is exactly what we want!
+    }
+}
+
+// ============================================================================
+// ASSOCIATIVE CONTAINER ITERATOR & COMPLIANCE TESTS
+// ============================================================================
+
+FL_TEST_CASE("Tier 2-4: Associative container iterator compliance tests") {
+    // flat_map: RandomAccess iterators with all operations
+    FL_SUBCASE("fl::flat_map - Iterator basics") {
+        test_helpers::test_map_iterators_with_shared_ptr<fl::flat_map<int, fl::shared_ptr<int>>>();
+    }
+
+    FL_SUBCASE("fl::flat_map - Reverse iterators") {
+        test_helpers::test_map_reverse_iterators<fl::flat_map<int, fl::shared_ptr<int>>>();
+    }
+
+    FL_SUBCASE("fl::flat_map - Iterator arithmetic (RandomAccess)") {
+        test_helpers::test_map_iterator_arithmetic<fl::flat_map<int, fl::shared_ptr<int>>>();
+    }
+
+    FL_SUBCASE("fl::flat_map - Key-value iteration") {
+        test_helpers::test_map_iteration_key_value<fl::flat_map<int, fl::shared_ptr<int>>>();
+    }
+
+    FL_SUBCASE("fl::flat_map - Find and iterate") {
+        test_helpers::test_map_find_and_iterate<fl::flat_map<int, fl::shared_ptr<int>>>();
+    }
+
+    FL_SUBCASE("fl::flat_map - Const iterators") {
+        test_helpers::test_map_const_iterators<fl::flat_map<int, fl::shared_ptr<int>>>();
+    }
+
+    FL_SUBCASE("fl::flat_map - Bounds (lower_bound, upper_bound)") {
+        test_helpers::test_map_bounds<fl::flat_map<int, fl::shared_ptr<int>>>();
+    }
+
+    FL_SUBCASE("fl::flat_map - Insert and erase") {
+        test_helpers::test_map_insert_erase_iterators<fl::flat_map<int, fl::shared_ptr<int>>>();
+    }
+
+    FL_SUBCASE("fl::flat_map - Key lookup") {
+        test_helpers::test_map_key_lookup<fl::flat_map<int, fl::shared_ptr<int>>>();
+    }
+
+    FL_SUBCASE("fl::flat_map - Operator[] access") {
+        test_helpers::test_map_operator_bracket_access<fl::flat_map<int, fl::shared_ptr<int>>>();
+    }
+
+    FL_SUBCASE("fl::flat_map - Sorted iteration order") {
+        test_helpers::test_map_iteration_order<fl::flat_map<int, fl::shared_ptr<int>>>();
     }
 }
 

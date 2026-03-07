@@ -379,6 +379,11 @@ class flat_map {
     void reserve(size_type n) {
         mData.reserve(n);
     }
+
+    // Shrink capacity to fit size
+    void shrink_to_fit() {
+        mData.shrink_to_fit();
+    }
 };
 
 // Comparison operators
