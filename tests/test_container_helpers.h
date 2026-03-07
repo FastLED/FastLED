@@ -772,10 +772,12 @@ void test_container_comparison() {
 // MAP-SPECIFIC ITERATOR TESTS
 // ============================================================================
 
-// Test basic iterator support for associative containers with shared_ptr<int> values
+// Test basic iterator support for associative containers
 // Verifies: begin/end, forward iteration, const iteration
-template<typename MapContainer>
-void test_map_iterators_with_shared_ptr() {
+template<template<typename, typename> class MapTemplate>
+void test_map_iterators() {
+    using MapContainer = MapTemplate<int, fl::shared_ptr<int>>;
+
     auto ptr1 = make_shared_int(10);
     auto ptr2 = make_shared_int(20);
     auto ptr3 = make_shared_int(30);
@@ -809,8 +811,10 @@ void test_map_iterators_with_shared_ptr() {
 
 // Test reverse iterator support for map containers
 // Verifies: rbegin/rend work correctly
-template<typename MapContainer>
+template<template<typename, typename> class MapTemplate>
 void test_map_reverse_iterators() {
+    using MapContainer = MapTemplate<int, fl::shared_ptr<int>>;
+
     MapContainer source;
     populate_map(source, 1, make_shared_int(10));
     populate_map(source, 2, make_shared_int(20));
@@ -834,8 +838,10 @@ void test_map_reverse_iterators() {
 
 // Test iterator arithmetic for RandomAccessIterator maps (like flat_map)
 // Verifies: operator+, operator-, distance calculations
-template<typename MapContainer>
+template<template<typename, typename> class MapTemplate>
 void test_map_iterator_arithmetic() {
+    using MapContainer = MapTemplate<int, fl::shared_ptr<int>>;
+
     MapContainer c;
     populate_map(c, 1, make_shared_int(10));
     populate_map(c, 2, make_shared_int(20));
@@ -854,8 +860,10 @@ void test_map_iterator_arithmetic() {
 
 // Test map iteration with key-value access
 // Verifies: pair<Key, Value> dereferencing
-template<typename MapContainer>
+template<template<typename, typename> class MapTemplate>
 void test_map_iteration_key_value() {
+    using MapContainer = MapTemplate<int, fl::shared_ptr<int>>;
+
     MapContainer m;
     populate_map(m, 100, make_shared_int(1000));
     populate_map(m, 200, make_shared_int(2000));
@@ -874,8 +882,10 @@ void test_map_iteration_key_value() {
 
 // Test map lookup and iteration consistency
 // Verifies: find() returns valid iterator, dereferencing works
-template<typename MapContainer>
+template<template<typename, typename> class MapTemplate>
 void test_map_find_and_iterate() {
+    using MapContainer = MapTemplate<int, fl::shared_ptr<int>>;
+
     MapContainer m;
     auto ptr42 = make_shared_int(42);
     populate_map(m, 5, ptr42);
@@ -897,8 +907,10 @@ void test_map_find_and_iterate() {
 
 // Test const iterator functionality
 // Verifies: const_iterator works with find
-template<typename MapContainer>
+template<template<typename, typename> class MapTemplate>
 void test_map_const_iterators() {
+    using MapContainer = MapTemplate<int, fl::shared_ptr<int>>;
+
     MapContainer m;
     populate_map(m, 7, make_shared_int(77));
     populate_map(m, 8, make_shared_int(88));
@@ -921,8 +933,10 @@ void test_map_const_iterators() {
 
 // Test lower_bound and upper_bound
 // Verifies: binary search operations return valid iterators
-template<typename MapContainer>
+template<template<typename, typename> class MapTemplate>
 void test_map_bounds() {
+    using MapContainer = MapTemplate<int, fl::shared_ptr<int>>;
+
     MapContainer m;
     populate_map(m, 10, make_shared_int(100));
     populate_map(m, 20, make_shared_int(200));
@@ -946,8 +960,10 @@ void test_map_bounds() {
 
 // Test insert and erase with iterators
 // Verifies: insert returns valid iterator, erase returns next iterator
-template<typename MapContainer>
+template<template<typename, typename> class MapTemplate>
 void test_map_insert_erase_iterators() {
+    using MapContainer = MapTemplate<int, fl::shared_ptr<int>>;
+
     MapContainer m;
     populate_map(m, 5, make_shared_int(50));
     populate_map(m, 15, make_shared_int(150));
@@ -972,8 +988,10 @@ void test_map_insert_erase_iterators() {
 
 // Test count and contains
 // Verifies: key lookup operations work correctly
-template<typename MapContainer>
+template<template<typename, typename> class MapTemplate>
 void test_map_key_lookup() {
+    using MapContainer = MapTemplate<int, fl::shared_ptr<int>>;
+
     MapContainer m;
     populate_map(m, 42, make_shared_int(420));
     populate_map(m, 84, make_shared_int(840));
@@ -988,8 +1006,10 @@ void test_map_key_lookup() {
 
 // Test operator[] for mutable access
 // Verifies: operator[] allows modification through iterator dereferencing
-template<typename MapContainer>
+template<template<typename, typename> class MapTemplate>
 void test_map_operator_bracket_access() {
+    using MapContainer = MapTemplate<int, fl::shared_ptr<int>>;
+
     MapContainer m;
     auto original = make_shared_int(111);
     populate_map(m, 1, original);
@@ -1006,8 +1026,10 @@ void test_map_operator_bracket_access() {
 
 // Test iteration order (for sorted maps)
 // Verifies: elements are visited in key order
-template<typename MapContainer>
+template<template<typename, typename> class MapTemplate>
 void test_map_iteration_order() {
+    using MapContainer = MapTemplate<int, fl::shared_ptr<int>>;
+
     MapContainer m;
     populate_map(m, 30, make_shared_int(3));
     populate_map(m, 10, make_shared_int(1));

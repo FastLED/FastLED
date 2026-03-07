@@ -1445,50 +1445,162 @@ FL_TEST_CASE("Tier 2-4: Sequential container comprehensive tests") {
 // ASSOCIATIVE CONTAINER ITERATOR & COMPLIANCE TESTS
 // ============================================================================
 
+// Type alias for FixedMap to work with template template syntax
+template<typename Key, typename Value>
+using TestFixedMap = fl::FixedMap<Key, Value, 100>;
+
 FL_TEST_CASE("Tier 2-4: Associative container iterator compliance tests") {
+    // fl::map: BidirectionalIterators with all operations
+    FL_SUBCASE("fl::map - Iterator basics") {
+        test_helpers::test_map_iterators<fl::map>();
+    }
+
+    FL_SUBCASE("fl::map - Reverse iterators") {
+        test_helpers::test_map_reverse_iterators<fl::map>();
+    }
+
+    FL_SUBCASE("fl::map - Key-value iteration") {
+        test_helpers::test_map_iteration_key_value<fl::map>();
+    }
+
+    FL_SUBCASE("fl::map - Find and iterate") {
+        test_helpers::test_map_find_and_iterate<fl::map>();
+    }
+
+    FL_SUBCASE("fl::map - Const iterators") {
+        test_helpers::test_map_const_iterators<fl::map>();
+    }
+
+    FL_SUBCASE("fl::map - Bounds (lower_bound, upper_bound)") {
+        test_helpers::test_map_bounds<fl::map>();
+    }
+
+    FL_SUBCASE("fl::map - Insert and erase") {
+        test_helpers::test_map_insert_erase_iterators<fl::map>();
+    }
+
+    FL_SUBCASE("fl::map - Key lookup") {
+        test_helpers::test_map_key_lookup<fl::map>();
+    }
+
+    FL_SUBCASE("fl::map - Operator[] access") {
+        test_helpers::test_map_operator_bracket_access<fl::map>();
+    }
+
+    FL_SUBCASE("fl::map - Sorted iteration order") {
+        test_helpers::test_map_iteration_order<fl::map>();
+    }
+
     // flat_map: RandomAccess iterators with all operations
     FL_SUBCASE("fl::flat_map - Iterator basics") {
-        test_helpers::test_map_iterators_with_shared_ptr<fl::flat_map<int, fl::shared_ptr<int>>>();
+        test_helpers::test_map_iterators<fl::flat_map>();
     }
 
     FL_SUBCASE("fl::flat_map - Reverse iterators") {
-        test_helpers::test_map_reverse_iterators<fl::flat_map<int, fl::shared_ptr<int>>>();
+        test_helpers::test_map_reverse_iterators<fl::flat_map>();
     }
 
     FL_SUBCASE("fl::flat_map - Iterator arithmetic (RandomAccess)") {
-        test_helpers::test_map_iterator_arithmetic<fl::flat_map<int, fl::shared_ptr<int>>>();
+        test_helpers::test_map_iterator_arithmetic<fl::flat_map>();
     }
 
     FL_SUBCASE("fl::flat_map - Key-value iteration") {
-        test_helpers::test_map_iteration_key_value<fl::flat_map<int, fl::shared_ptr<int>>>();
+        test_helpers::test_map_iteration_key_value<fl::flat_map>();
     }
 
     FL_SUBCASE("fl::flat_map - Find and iterate") {
-        test_helpers::test_map_find_and_iterate<fl::flat_map<int, fl::shared_ptr<int>>>();
+        test_helpers::test_map_find_and_iterate<fl::flat_map>();
     }
 
     FL_SUBCASE("fl::flat_map - Const iterators") {
-        test_helpers::test_map_const_iterators<fl::flat_map<int, fl::shared_ptr<int>>>();
+        test_helpers::test_map_const_iterators<fl::flat_map>();
     }
 
     FL_SUBCASE("fl::flat_map - Bounds (lower_bound, upper_bound)") {
-        test_helpers::test_map_bounds<fl::flat_map<int, fl::shared_ptr<int>>>();
+        test_helpers::test_map_bounds<fl::flat_map>();
     }
 
     FL_SUBCASE("fl::flat_map - Insert and erase") {
-        test_helpers::test_map_insert_erase_iterators<fl::flat_map<int, fl::shared_ptr<int>>>();
+        test_helpers::test_map_insert_erase_iterators<fl::flat_map>();
     }
 
     FL_SUBCASE("fl::flat_map - Key lookup") {
-        test_helpers::test_map_key_lookup<fl::flat_map<int, fl::shared_ptr<int>>>();
+        test_helpers::test_map_key_lookup<fl::flat_map>();
     }
 
     FL_SUBCASE("fl::flat_map - Operator[] access") {
-        test_helpers::test_map_operator_bracket_access<fl::flat_map<int, fl::shared_ptr<int>>>();
+        test_helpers::test_map_operator_bracket_access<fl::flat_map>();
     }
 
     FL_SUBCASE("fl::flat_map - Sorted iteration order") {
-        test_helpers::test_map_iteration_order<fl::flat_map<int, fl::shared_ptr<int>>>();
+        test_helpers::test_map_iteration_order<fl::flat_map>();
+    }
+
+    // fl::SortedHeapMap: Similar to fl::flat_map but uses different internal structure
+    FL_SUBCASE("fl::SortedHeapMap - Iterator basics") {
+        test_helpers::test_map_iterators<fl::SortedHeapMap>();
+    }
+
+    FL_SUBCASE("fl::SortedHeapMap - Key-value iteration") {
+        test_helpers::test_map_iteration_key_value<fl::SortedHeapMap>();
+    }
+
+    FL_SUBCASE("fl::SortedHeapMap - Find and iterate") {
+        test_helpers::test_map_find_and_iterate<fl::SortedHeapMap>();
+    }
+
+    FL_SUBCASE("fl::SortedHeapMap - Bounds (lower_bound, upper_bound)") {
+        test_helpers::test_map_bounds<fl::SortedHeapMap>();
+    }
+
+    FL_SUBCASE("fl::SortedHeapMap - Key lookup") {
+        test_helpers::test_map_key_lookup<fl::SortedHeapMap>();
+    }
+
+    FL_SUBCASE("fl::SortedHeapMap - Operator[] access") {
+        test_helpers::test_map_operator_bracket_access<fl::SortedHeapMap>();
+    }
+
+    FL_SUBCASE("fl::SortedHeapMap - Sorted iteration order") {
+        test_helpers::test_map_iteration_order<fl::SortedHeapMap>();
+    }
+
+    // fl::unordered_map: Unordered hash-based map
+    FL_SUBCASE("fl::unordered_map - Iterator basics") {
+        test_helpers::test_map_iterators<fl::unordered_map>();
+    }
+
+    FL_SUBCASE("fl::unordered_map - Key-value iteration") {
+        test_helpers::test_map_iteration_key_value<fl::unordered_map>();
+    }
+
+    FL_SUBCASE("fl::unordered_map - Find and iterate") {
+        test_helpers::test_map_find_and_iterate<fl::unordered_map>();
+    }
+
+    FL_SUBCASE("fl::unordered_map - Key lookup") {
+        test_helpers::test_map_key_lookup<fl::unordered_map>();
+    }
+
+    FL_SUBCASE("fl::unordered_map - Operator[] access") {
+        test_helpers::test_map_operator_bracket_access<fl::unordered_map>();
+    }
+
+    // fl::FixedMap: Fixed-size map (wrapped with template alias for size parameter)
+    FL_SUBCASE("fl::FixedMap - Iterator basics") {
+        test_helpers::test_map_iterators<TestFixedMap>();
+    }
+
+    FL_SUBCASE("fl::FixedMap - Key-value iteration") {
+        test_helpers::test_map_iteration_key_value<TestFixedMap>();
+    }
+
+    FL_SUBCASE("fl::FixedMap - Find and iterate") {
+        test_helpers::test_map_find_and_iterate<TestFixedMap>();
+    }
+
+    FL_SUBCASE("fl::FixedMap - Operator[] access") {
+        test_helpers::test_map_operator_bracket_access<TestFixedMap>();
     }
 }
 
