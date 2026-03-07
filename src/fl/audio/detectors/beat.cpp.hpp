@@ -32,11 +32,14 @@ void BeatDetector::update(shared_ptr<AudioContext> context) {
     // Calculate spectral flux
     mSpectralFlux = calculateSpectralFlux(fft);
 
-    // Update adaptive threshold
-    updateAdaptiveThreshold();
-
-    // Detect beat
+    // Detect beat BEFORE updating adaptive threshold.
+    // If we update the threshold first, the current frame's (potentially
+    // high) spectral flux inflates the running average, raising the
+    // threshold at the exact moment we need it lowest (onset detection).
     mBeatDetected = detectBeat(timestamp);
+
+    // Update adaptive threshold AFTER beat detection
+    updateAdaptiveThreshold();
 
     if (mBeatDetected) {
         updateTempo(timestamp);
@@ -69,11 +72,14 @@ float BeatDetector::calculateSpectralFlux(const FFTBins& fft) {
     float flux = 0.0f;
     size numBins = fl::min(fft.raw().size(), mPreviousMagnitudes.size());
 
-    // Only consider the bass quarter of FFT bins for beat detection.
-    // Musical beats (kick drums) are characterized by bass/low-mid energy.
-    // With 16 CQ log-spaced bins from 30-4698 Hz, bins 0-3 cover ~30-200 Hz (bass).
-    // Treble transients (hi-hats, cymbals) in higher bins are excluded.
-    size bassBins = numBins / 4;
+    // Use the bass half of FFT bins for beat detection.
+    // Musical beats (kick drums) have energy at 60-200 Hz.
+    // With 16 CQ log-spaced bins from 30-4698 Hz:
+    //   bins 0-3 cover ~30-82 Hz (sub-bass)
+    //   bins 4-7 cover ~82-226 Hz (bass/low-mid, kick fundamentals)
+    // Using numBins/2 = 8 bins covers the full kick drum range (~30-226 Hz).
+    // Treble transients (hi-hats, cymbals) in bins 8-15 are excluded.
+    size bassBins = numBins / 2;
     if (bassBins < 1) bassBins = 1;
 
     for (size i = 0; i < bassBins; i++) {
@@ -152,9 +158,10 @@ void BeatDetector::updatePhase(u32 timestamp) {
     u32 timeSinceLastBeat = timestamp - mLastBeatTime;
     mPhase = static_cast<float>(timeSinceLastBeat) / static_cast<float>(mBeatInterval);
 
-    // Wrap phase to [0, 1)
+    // Wrap phase to [0, 1) using fmod for proper wrapping
+    // when beats are missed (phase exceeds 1.0)
     if (mPhase >= 1.0f) {
-        mPhase = 1.0f - 0.001f; // Keep slightly below 1.0
+        mPhase = fl::fmodf(mPhase, 1.0f);
     }
 }
 
