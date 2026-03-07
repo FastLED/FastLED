@@ -7,7 +7,7 @@
 ///
 /// Note: Inline helper functions are in detail/wave8.hpp
 
-#include "wave8.h"
+#include "fl/channels/wave8.h"
 #include "fl/channels/detail/wave8.hpp"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/isr/memcpy.h"

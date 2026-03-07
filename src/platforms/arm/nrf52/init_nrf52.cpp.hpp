@@ -7,7 +7,7 @@
 /// It initializes the SPI hardware controllers via weak linkage pattern.
 
 #include "fl/compiler_control.h"
-#include "is_nrf52.h"
+#include "platforms/arm/nrf52/is_nrf52.h"
 
 #ifdef FL_IS_NRF52
 

@@ -4,7 +4,7 @@
 // ok no namespace fl
 #ifdef FASTLED_STUB_IMPL  // Only use this if explicitly defined.
 
-#include "time_stub.h"
+#include "platforms/stub/time_stub.h"
 #include "fl/stl/function.h"
 
 #if defined(FASTLED_USE_PTHREAD_YIELD)

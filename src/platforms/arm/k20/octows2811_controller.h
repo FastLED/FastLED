@@ -5,7 +5,9 @@
 
 #ifdef USE_OCTOWS2811
 
-#include "OctoWS2811.h"
+// IWYU pragma: begin_keep
+#include <OctoWS2811.h>
+// IWYU pragma: end_keep
 #include "bitswap.h"
 #include "fl/stl/allocator.h"
 namespace fl {

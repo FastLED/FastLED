@@ -17,8 +17,10 @@
 FL_EXTERN_C_BEGIN
 // ESP8266 SDK peripheral register definitions
 extern "C" {
-    #include "esp8266_peri.h"
-    #include "osapi.h"
+    // IWYU pragma: begin_keep
+    #include <esp8266_peri.h>
+    #include <osapi.h>
+    // IWYU pragma: end_keep
     // ADC function from ESP8266 SDK (user_interface.h)
     fl::u16 system_adc_read(void);
 }

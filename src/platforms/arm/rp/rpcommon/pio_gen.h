@@ -4,7 +4,7 @@
 #ifndef _PIO_GEN_H
 #define _PIO_GEN_H
 
-#include "pio_asm.h"
+#include "platforms/arm/rp/rpcommon/pio_asm.h"
 // IWYU pragma: begin_keep
 #include "hardware/pio.h"
 

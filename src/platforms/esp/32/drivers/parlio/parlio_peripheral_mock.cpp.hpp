@@ -10,8 +10,8 @@
 #include "platforms/is_platform.h"
 #if defined(FASTLED_STUB_IMPL) || (!defined(ARDUINO) && (defined(FL_IS_LINUX) || defined(FL_IS_APPLE) || defined(FL_IS_WIN)))
 
-#include "parlio_peripheral_mock.h"
-#include "parlio_engine.h"
+#include "platforms/esp/32/drivers/parlio/parlio_peripheral_mock.h"
+#include "platforms/esp/32/drivers/parlio/parlio_engine.h"
 #include "fl/warn.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/cstring.h"

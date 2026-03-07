@@ -21,7 +21,7 @@
 //   Creates FastPin<> template specialization using unified _ARMPIN_STM32 template
 //   Macro is defined inside namespace fl, but can be used outside it
 
-#include "armpin_template.h"
+#include "platforms/arm/stm32/pins/core/armpin_template.h"
 
 namespace fl {
 

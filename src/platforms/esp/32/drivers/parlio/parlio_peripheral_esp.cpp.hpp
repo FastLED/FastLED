@@ -13,7 +13,7 @@
 
 #if FASTLED_ESP32_HAS_PARLIO
 
-#include "parlio_peripheral_esp.h"
+#include "platforms/esp/32/drivers/parlio/parlio_peripheral_esp.h"
 #include "fl/log.h"
 #include "fl/warn.h"
 #include "fl/error.h"

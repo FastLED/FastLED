@@ -2,7 +2,7 @@
 
 // IWYU pragma: private
 // ok no namespace fl
-#include "is_avr.h"
+#include "platforms/avr/is_avr.h"
 
 #ifdef FL_IS_AVR
 

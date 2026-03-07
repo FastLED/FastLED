@@ -3,7 +3,7 @@
 
 
 // ok no namespace fl
-#include "is_wasm.h"
+#include "platforms/wasm/is_wasm.h"
 
 #ifdef FL_IS_WASM
 

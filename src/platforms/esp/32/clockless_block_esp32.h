@@ -4,7 +4,7 @@
 #define __INC_CLOCKLESS_BLOCK_ESP8266_H
 
 #include "fl/stl/stdint.h"
-#include "clock_cycles.h"
+#include "platforms/esp/32/core/clock_cycles.h"
 #include "esp_intr_alloc.h"
 #include "eorder.h"
 #include "transpose8x1_noinline.h"

@@ -11,4 +11,4 @@
 ///
 /// IMPORTANT: All functions use fl::PinMode, fl::PinValue, fl::AdcRange enum classes.
 
-#include "pin_apollo3_native.hpp"
+#include "platforms/apollo3/pin_apollo3_native.hpp"

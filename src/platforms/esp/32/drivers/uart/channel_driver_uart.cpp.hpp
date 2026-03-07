@@ -7,7 +7,7 @@
 /// Supports multi-timing by reinitializing the UART peripheral when the
 /// baud rate changes between chipset groups.
 
-#include "channel_driver_uart.h"
+#include "platforms/esp/32/drivers/uart/channel_driver_uart.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/delay.h"
 #include "fl/error.h"

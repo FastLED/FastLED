@@ -3,12 +3,12 @@
 /// @file network_state_tracker.cpp
 /// @brief Singleton tracker for network state changes implementation
 
-#include "network_state_tracker.h"
+#include "platforms/esp/32/drivers/rmt/rmt_5/network_state_tracker.h"
 
 #include "platforms/is_platform.h"
 #if defined(FL_IS_ESP32) && FASTLED_RMT5
 
-#include "network_detector.h"
+#include "platforms/esp/32/drivers/rmt/rmt_5/network_detector.h"
 
 namespace fl {
 

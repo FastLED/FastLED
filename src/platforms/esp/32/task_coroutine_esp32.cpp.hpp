@@ -7,7 +7,7 @@
 
 #ifdef FL_IS_ESP32
 
-#include "task_coroutine_esp32.h"
+#include "platforms/esp/32/task_coroutine_esp32.h"
 #include "fl/warn.h"
 
 // Include FreeRTOS headers ONLY in .cpp file

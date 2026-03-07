@@ -4,7 +4,7 @@
 #ifndef __INC_LED_SYSDEFS_AVR_H
 #define __INC_LED_SYSDEFS_AVR_H
 
-#include "is_avr.h"
+#include "platforms/avr/is_avr.h"
 
 #define FASTLED_AVR
 

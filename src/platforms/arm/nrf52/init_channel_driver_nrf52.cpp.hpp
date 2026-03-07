@@ -11,7 +11,7 @@
 /// - SPI_UNIFIED (6-7): True SPI hardware (quad/dual-lane via Timer/PPI)
 
 #include "fl/compiler_control.h"
-#include "is_nrf52.h"
+#include "platforms/arm/nrf52/is_nrf52.h"
 
 #if defined(FL_IS_NRF52)
 

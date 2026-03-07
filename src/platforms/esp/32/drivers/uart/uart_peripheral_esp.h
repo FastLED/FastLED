@@ -36,7 +36,7 @@
 
 #ifdef FL_IS_ESP32
 
-#include "iuart_peripheral.h"
+#include "platforms/esp/32/drivers/uart/iuart_peripheral.h"
 
 namespace fl {
 

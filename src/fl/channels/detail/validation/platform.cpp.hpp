@@ -4,7 +4,7 @@
 // Queries ChannelManager for registered drivers instead of maintaining a
 // hardcoded list.
 
-#include "platform.h"
+#include "fl/channels/detail/validation/platform.h"
 #include "fl/channels/manager.h"
 #include "fl/log.h"
 

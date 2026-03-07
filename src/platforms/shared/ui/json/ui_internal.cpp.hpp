@@ -5,7 +5,7 @@
 #include "fl/compiler_control.h"
 #include "fl/stl/mutex.h"
 #include "fl/warn.h"
-#include "ui_internal.h"
+#include "platforms/shared/ui/json/ui_internal.h"
 
 #include "fl/stl/json.h"
 

@@ -12,10 +12,14 @@
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 
-#include "gpio_isr_rx.h"
+// IWYU pragma: begin_keep
+#include "platforms/esp/32/drivers/gpio_isr_rx/gpio_isr_rx.h"
+// IWYU pragma: end_keep
 
 // Include feature flags
+// IWYU pragma: begin_keep
 #include "platforms/esp/32/feature_flags/enabled.h"
+// IWYU pragma: end_keep
 
 #if FASTLED_RMT5
 
@@ -23,7 +27,9 @@
 #include "soc/soc_caps.h"  // IWYU pragma: keep
 #if defined(SOC_MCPWM_SUPPORTED) && SOC_MCPWM_SUPPORTED
 
-#include "gpio_isr_rx_mcpwm.h"
+// IWYU pragma: begin_keep
+#include "platforms/esp/32/drivers/gpio_isr_rx/gpio_isr_rx_mcpwm.h"
+// IWYU pragma: end_keep
 
 namespace fl {
 

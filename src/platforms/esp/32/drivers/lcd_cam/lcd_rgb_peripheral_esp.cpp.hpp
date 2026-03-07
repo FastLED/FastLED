@@ -11,7 +11,7 @@
 
 #if defined(FL_IS_ESP_32P4) && FL_HAS_INCLUDE("esp_lcd_panel_rgb.h")
 
-#include "lcd_rgb_peripheral_esp.h"
+#include "platforms/esp/32/drivers/lcd_cam/lcd_rgb_peripheral_esp.h"
 #include "fl/singleton.h"
 #include "fl/warn.h"
 

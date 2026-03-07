@@ -5,7 +5,7 @@
 #ifdef FASTLED_HAS_NETWORKING
 #ifdef FL_IS_WIN
 
-#include "socket_win.h"
+#include "platforms/win/socket_win.h"
 
 // Additional includes for platform functions
 #include "fl/stl/shared_ptr.h"

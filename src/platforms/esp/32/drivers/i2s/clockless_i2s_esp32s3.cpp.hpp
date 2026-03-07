@@ -37,7 +37,7 @@
 #include "fl/stl/vector.h"
 #include "pixel_iterator.h"
 
-#include "clockless_i2s_esp32s3.h"
+#include "platforms/esp/32/drivers/i2s/clockless_i2s_esp32s3.h"
 
 namespace { // anonymous namespace
 

@@ -33,8 +33,12 @@
 
 #if defined(ARDUINO) && !defined(FL_NO_ARDUINO)
     // Arduino framework build - use Arduino SPI implementation
-    #include "fastspi_esp32_arduino.h"
+    // IWYU pragma: begin_keep
+    #include "platforms/esp/32/core/fastspi_esp32_arduino.h"
+    // IWYU pragma: end_keep
 #else
     // Pure ESP-IDF build or NO_ARDUINO override - use native SPI
-    #include "fastspi_esp32_idf.h"
+    // IWYU pragma: begin_keep
+    #include "platforms/esp/32/core/fastspi_esp32_idf.h"
+    // IWYU pragma: end_keep
 #endif

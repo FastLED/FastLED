@@ -29,7 +29,7 @@
 #pragma once
 
 // IWYU pragma: private
-#include "is_rp.h"
+#include "platforms/arm/rp/is_rp.h"
 
 #if defined(FL_IS_RP2040)
 

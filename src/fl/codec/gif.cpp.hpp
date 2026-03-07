@@ -1,4 +1,4 @@
-#include "gif.h"
+#include "fl/codec/gif.h"
 // IWYU pragma: begin_keep
 #include "third_party/libnsgif/software_decoder.h"
 // IWYU pragma: end_keep

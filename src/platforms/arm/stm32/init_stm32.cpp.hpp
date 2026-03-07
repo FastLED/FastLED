@@ -7,7 +7,7 @@
 /// It initializes the SPI hardware controllers via weak linkage pattern.
 
 #include "fl/compiler_control.h"
-#include "is_stm32.h"
+#include "platforms/arm/stm32/is_stm32.h"
 
 #ifdef FL_IS_STM32
 

@@ -7,7 +7,7 @@
 #define FASTLED_INTERNAL
 #include "fl/fastled.h"
 
-#include "clockless_objectfled.h"
+#include "platforms/arm/teensy/teensy4_common/clockless_objectfled.h"
 // IWYU pragma: begin_keep
 #include "third_party/object_fled/src/ObjectFLED.h"
 // IWYU pragma: end_keep

@@ -4,8 +4,8 @@
 
 #if defined(FL_IS_TEENSY_4X)
 
-#include "flexio_driver.h"
-#include "iflexio_peripheral.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/flexio/flexio_driver.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/flexio/iflexio_peripheral.h"
 
 #include "fl/dbg.h"
 #include "fl/warn.h"

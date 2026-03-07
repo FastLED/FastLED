@@ -2,7 +2,7 @@
 
 // fs card arduino implementation.
 
-#include "fs.h"
+#include "platforms/fs.h"  // ok include path
 
 // IWYU pragma: begin_keep
 #include <SPI.h>

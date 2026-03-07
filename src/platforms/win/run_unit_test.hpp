@@ -29,10 +29,10 @@
 #include <cstdio>
 #include <windef.h>
 #include <libloaderapi.h>
+#include <errhandlingapi.h>
+#include <minwindef.h>
+#include <winbase.h>
 // IWYU pragma: end_keep
-#include "errhandlingapi.h"
-#include "minwindef.h"
-#include "winbase.h"
 #include <processthreadsapi.h>  // IWYU pragma: keep
 #include <synchapi.h>  // IWYU pragma: keep
 

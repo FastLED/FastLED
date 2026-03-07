@@ -1,7 +1,7 @@
 // IWYU pragma: private
 
 // ok no namespace fl
-#include "is_wasm.h"
+#include "platforms/wasm/is_wasm.h"
 
 #ifdef FL_IS_WASM
 
@@ -38,7 +38,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/warn.h"
 #include "fl/numeric_limits.h"
-#include "js.h"
+#include "platforms/wasm/js.h"
 // IWYU pragma: begin_keep
 // IWYU pragma: end_keep
 #include "fl/stl/thread.h"

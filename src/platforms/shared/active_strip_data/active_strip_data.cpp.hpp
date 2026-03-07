@@ -1,6 +1,6 @@
 // IWYU pragma: private
 
-#include "active_strip_data.h"
+#include "platforms/shared/active_strip_data/active_strip_data.h"
 
 #include "fl/stl/map.h"
 #include "fl/stl/string.h"

@@ -1,6 +1,6 @@
 // IWYU pragma: private
 
-#include "js_fetch.h"
+#include "platforms/wasm/js_fetch.h"
 #include "fl/stl/asio/fetch.h"  // Include for fl::response definition
 #include "fl/warn.h"
 #include "fl/stl/string.h"
@@ -10,7 +10,7 @@
 #include "fl/singleton.h"
 #include "fl/stl/optional.h"
 
-#include "is_wasm.h"
+#include "platforms/wasm/is_wasm.h"
 #ifdef FL_IS_WASM
 // IWYU pragma: begin_keep
 #include <emscripten.h>

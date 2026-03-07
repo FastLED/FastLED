@@ -168,7 +168,7 @@ public:
 #define HAS_HARDWARE_PIN_SUPPORT
 
 // Include variant-specific pin definitions
-#include "fastpin_arm_nrf52_variants.h" // allow-include-after-namespace
+#include "platforms/arm/nrf52/fastpin_arm_nrf52_variants.h" // allow-include-after-namespace
 #include "fl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH

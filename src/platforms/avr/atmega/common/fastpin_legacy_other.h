@@ -7,7 +7,7 @@
 //           ATmega32U2, ATmega16U2, ATmega8U2, AT90USB82, AT90USB162,
 //           ATmega128RFA1, ATmega256RFR2, ATmega128
 
-#include "avr_pin.h"
+#include "platforms/avr/atmega/common/avr_pin.h"
 #include "fl/fastpin_base.h"
 
 namespace fl {

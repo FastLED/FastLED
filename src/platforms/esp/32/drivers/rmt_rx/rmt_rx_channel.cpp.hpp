@@ -1,6 +1,6 @@
 // IWYU pragma: private
 
-#include "rmt_rx_channel.h"
+#include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h"
 
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32

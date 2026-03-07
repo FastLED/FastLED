@@ -15,7 +15,7 @@
 #endif
 
 #include "fastspi_types.h"
-#include "is_stm32.h"
+#include "platforms/arm/stm32/is_stm32.h"
 #include "fl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH

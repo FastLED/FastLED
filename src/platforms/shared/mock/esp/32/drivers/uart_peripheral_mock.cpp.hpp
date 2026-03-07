@@ -3,7 +3,7 @@
 /// @file uart_peripheral_mock.cpp
 /// @brief Mock UART peripheral implementation for unit testing
 
-#include "uart_peripheral_mock.h"
+#include "platforms/shared/mock/esp/32/drivers/uart_peripheral_mock.h"
 #include "platforms/is_platform.h"
 
 #if defined(ARDUINO) || defined(FL_IS_ESP32)

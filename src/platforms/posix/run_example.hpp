@@ -25,7 +25,7 @@
 // IWYU pragma: end_keep
 
 // Timeout watchdog for hung example detection
-#include "timeout_watchdog.h"  // IWYU pragma: keep
+#include "timeout_watchdog.h"  // ok include path - tests/timeout_watchdog.h needed by runner
 
 int main(int argc, char** argv) {
     // Setup crash handler BEFORE loading any shared libraries

@@ -1,7 +1,7 @@
 // IWYU pragma: private
 
 
-#include "is_wasm.h"
+#include "platforms/wasm/is_wasm.h"
 #ifdef FL_IS_WASM
 
 // ⚠️⚠️⚠️ CRITICAL WARNING: C++ ↔ JavaScript FILE SYSTEM BRIDGE - HANDLE WITH EXTREME CARE! ⚠️⚠️⚠️

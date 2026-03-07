@@ -406,6 +406,8 @@ def run_checker_standalone(
         # Sort files by relative path
         for file_path in sorted(results.violations.keys()):
             rel_path = file_path.replace(str(PROJECT_ROOT), "").lstrip("\\/")
+            # Normalize to forward slashes for consistent cross-platform output
+            rel_path = rel_path.replace("\\", "/")
             file_violations = results.violations[file_path]
 
             print(f"{rel_path}:")

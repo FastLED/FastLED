@@ -4,7 +4,7 @@
 // IWYU pragma: private
 
 #include "fl/compiler_control.h"
-#include "is_avr.h"
+#include "platforms/avr/is_avr.h"
 // Defines a timer_millis for led_sysdefs_avr.h
 
 // Please don't use this code, it's mostly to make certain platforms compile.

@@ -15,7 +15,7 @@
 
 #if FASTLED_RMT5
 
-#include "rmt5_controller_lowlevel.h"
+#include "platforms/esp/32/drivers/rmt/rmt_5/rmt5_controller_lowlevel.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/channels/manager.h"
 

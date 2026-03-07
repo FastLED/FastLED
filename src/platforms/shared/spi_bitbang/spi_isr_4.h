@@ -5,7 +5,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/bit_cast.h"
-#include "spi_isr_engine.h"
+#include "platforms/shared/spi_bitbang/spi_isr_engine.h"
 
 namespace fl {
 

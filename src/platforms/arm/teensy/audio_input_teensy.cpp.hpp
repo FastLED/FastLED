@@ -1,6 +1,6 @@
 // IWYU pragma: private
 
-#include "audio_input_teensy.h"
+#include "platforms/arm/teensy/audio_input_teensy.h"
 #include "platforms/arm/teensy/is_teensy.h"
 
 namespace fl {

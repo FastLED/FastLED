@@ -11,14 +11,14 @@
   License: MIT (FastLED)
 */
 
-#include "spi_platform.h"  // Defines FASTLED_SPI_HOST_SIMULATION when STUB_PLATFORM is set
+#include "platforms/shared/spi_bitbang/spi_platform.h"  // Defines FASTLED_SPI_HOST_SIMULATION when STUB_PLATFORM is set
 
 // Compile for host simulation OR stub platform (includes tests)
 // STUB_PLATFORM now always gets real ISR implementations instead of stubs
 #if defined(FASTLED_SPI_HOST_SIMULATION) || defined(STUB_PLATFORM)
 
-#include "spi_isr_engine.h"
-#include "host_sim.h"
+#include "platforms/shared/spi_bitbang/spi_isr_engine.h"
+#include "platforms/shared/spi_bitbang/host_sim.h"
 #include "fl/stl/stdint.h"
 
 // Thread-based mode: Use real-time ISR emulation

@@ -432,6 +432,8 @@ def format_and_print_results(results: dict[str, CheckerResults]) -> int:
 
         for file_path in sorted(checker_results.violations.keys()):
             rel_path = os.path.relpath(file_path, PROJECT_ROOT)
+            # Normalize to forward slashes for consistent cross-platform output
+            rel_path = rel_path.replace("\\", "/")
             file_violations = checker_results.violations[file_path]
 
             print(f"\n{rel_path}:")

@@ -19,13 +19,13 @@
 #include "fl/unused.h"
 #include "platforms/memory_barrier.h"  // For FL_MEMORY_BARRIER
 
-#include "parlio_engine.h"
+#include "platforms/esp/32/drivers/parlio/parlio_engine.h"
 #include "fl/channels/detail/wave3.hpp"
 #include "fl/channels/detail/wave8.hpp"
-#include "parlio_isr_context.h"
-#include "parlio_buffer_calc.h"
-#include "parlio_debug.h"
-#include "parlio_ring_buffer.h"
+#include "platforms/esp/32/drivers/parlio/parlio_isr_context.h"
+#include "platforms/esp/32/drivers/parlio/parlio_buffer_calc.h"
+#include "platforms/esp/32/drivers/parlio/parlio_debug.h"
+#include "platforms/esp/32/drivers/parlio/parlio_ring_buffer.h"
 #include "fl/delay.h"
 #include "fl/error.h"
 #include "fl/log.h"
@@ -35,9 +35,9 @@
 #include "fl/stl/chrono.h"
 
 #ifdef FASTLED_STUB_IMPL
-#include "parlio_peripheral_mock.h"
+#include "platforms/esp/32/drivers/parlio/parlio_peripheral_mock.h"
 #else
-#include "parlio_peripheral_esp.h"
+#include "platforms/esp/32/drivers/parlio/parlio_peripheral_esp.h"
 #endif
 
 // All ESP-IDF dependencies have been abstracted through IParlioPeripheral interface

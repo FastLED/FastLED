@@ -66,7 +66,7 @@
 #include "fl/stl/bit_cast.h"
 #include "crgb.h"
 #include "pixel_controller.h"
-#include "parallel_transpose.h"
+#include "platforms/arm/rp/rpcommon/parallel_transpose.h"
 #include "fastled_delay.h"
 #include "platforms/arm/rp/is_rp.h"
 

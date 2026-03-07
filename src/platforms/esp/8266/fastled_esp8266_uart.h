@@ -18,7 +18,7 @@
 #define FASTLED_ESP8266_UART_RESET_US 300    // WS2812 reset/latch; spec >= 50us. Use 300us to be safe.
 #endif
 
-#include "led_sysdefs_esp8266.h"
+#include "platforms/esp/8266/led_sysdefs_esp8266.h"
 #include "cpixel_ledcontroller.h"
 #include "pixel_controller.h"
 #include "eorder.h"

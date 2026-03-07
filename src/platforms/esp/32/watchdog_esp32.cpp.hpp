@@ -19,7 +19,7 @@
 
 // ok no namespace fl (trampoline dispatcher - namespace defined in included implementations)
 
-#include "watchdog_esp32.h"
+#include "platforms/esp/32/watchdog_esp32.h"
 
 #include "platforms/esp/is_esp.h"
 
@@ -29,9 +29,9 @@
 
 // Dispatch to IDF version-specific implementation
 #if ESP_IDF_VERSION_5_OR_HIGHER
-    #include "watchdog_esp32_idf5.hpp"
+    #include "platforms/esp/32/watchdog_esp32_idf5.hpp"
 #else
-    #include "watchdog_esp32_idf4.hpp"
+    #include "platforms/esp/32/watchdog_esp32_idf4.hpp"
 #endif
 
 #endif // FL_IS_ESP32

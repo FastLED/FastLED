@@ -1,8 +1,8 @@
 // IWYU pragma: private
 
-#include "description.h"
+#include "platforms/shared/ui/json/description.h"
 #include "platforms/shared/ui/json/ui.h"
-#include "ui_internal.h"
+#include "platforms/shared/ui/json/ui_internal.h"
 
 #include "fl/stl/json.h"
 #include "fl/unused.h"

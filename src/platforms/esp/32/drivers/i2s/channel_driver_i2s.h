@@ -65,7 +65,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/unique_ptr.h"
-#include "ii2s_lcd_cam_peripheral.h"
+#include "platforms/esp/32/drivers/i2s/ii2s_lcd_cam_peripheral.h"
 #include "crgb.h"
 
 namespace fl {

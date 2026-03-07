@@ -4,7 +4,7 @@
 #include "fl/stl/json.h"
 #include "fl/stl/map.h"
 #include "fl/stl/mutex.h"
-#include "ui_manager.h"
+#include "platforms/shared/ui/json/ui_manager.h"
 #include "fl/compiler_control.h"
 #include "fl/warn.h"
 #include "fl/error.h"

@@ -25,7 +25,7 @@
 // On stub platforms: Always allow compilation (no feature flag check)
 #if !defined(FL_IS_ESP32) || FASTLED_RMT5
 
-#include "channel_driver_rmt.h"
+#include "platforms/esp/32/drivers/rmt/rmt_5/channel_driver_rmt.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/dbg.h"
 #include "fl/delay.h"
@@ -45,7 +45,7 @@
 #include "platforms/memory_barrier.h" // For FL_MEMORY_BARRIER
 
 // Peripheral interface includes
-#include "irmt5_peripheral.h"
+#include "platforms/esp/32/drivers/rmt/rmt_5/irmt5_peripheral.h"
 
 // Platform-specific peripheral implementations
 // Note: These headers define the concrete peripheral classes (ESP32 or Mock)
@@ -58,12 +58,12 @@
     #include "driver/rmt_tx.h"  // For rmt_channel_handle_t, rmt_tx_done_event_data_t (callback signature)
     // IWYU pragma: end_keep
     FL_EXTERN_C_END
-    #include "rmt5_peripheral_esp.h"
-    #include "common.h"  // ESP32 constants (FASTLED_RMT5_CLOCK_HZ, IRAM_ATTR, etc.)
-    #include "rmt_memory_manager.h"  // RmtMemoryManager
-    #include "buffer_pool.h"  // RMTBufferPool
-    #include "network_detector.h"  // NetworkDetector
-    #include "network_state_tracker.h"  // NetworkStateTracker
+    #include "platforms/esp/32/drivers/rmt/rmt_5/rmt5_peripheral_esp.h"
+    #include "platforms/esp/32/drivers/rmt/rmt_5/common.h"  // ESP32 constants (FASTLED_RMT5_CLOCK_HZ, IRAM_ATTR, etc.)
+    #include "platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.h"  // RmtMemoryManager
+    #include "platforms/esp/32/drivers/rmt/rmt_5/buffer_pool.h"  // RMTBufferPool
+    #include "platforms/esp/32/drivers/rmt/rmt_5/network_detector.h"  // NetworkDetector
+    #include "platforms/esp/32/drivers/rmt/rmt_5/network_state_tracker.h"  // NetworkStateTracker
 #else
     // Stub platform: Mock implementations for testing
     #include "platforms/shared/mock/esp/32/drivers/rmt5_peripheral_mock.h"

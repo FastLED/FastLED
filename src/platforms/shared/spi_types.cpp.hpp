@@ -1,6 +1,6 @@
 // IWYU pragma: private
 
-#include "spi_types.h"
+#include "platforms/shared/spi_types.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/string.h"

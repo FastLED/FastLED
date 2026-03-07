@@ -4,7 +4,7 @@
 
 // ok no namespace fl
 
-#include "is_avr.h"
+#include "platforms/avr/is_avr.h"
 #include "platforms/math8_config.h"
 #include "lib8tion/lib8static.h"
 #include "lib8tion/intmap.h"

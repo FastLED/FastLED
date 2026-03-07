@@ -1,10 +1,10 @@
 // IWYU pragma: private
 
-#include "is_wasm.h"
+#include "platforms/wasm/is_wasm.h"
 
 #ifdef FL_IS_WASM
 
-#include "audio_input_wasm.hpp"
+#include "platforms/wasm/audio_input_wasm.hpp"
 #include "fl/dbg.h"
 #include "fl/warn.h"
 #include "fl/stl/stdio.h"

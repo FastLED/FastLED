@@ -2,7 +2,7 @@
 
 
 #include "fl/int.h"
-#include "force_inline.h"
+#include "fl/force_inline.h"
 #include "fastled_progmem.h"
 #include "fl/simd.h"  // Platform-dispatched SIMD (SSE2/NEON/scalar)
 #include "fl/align.h"

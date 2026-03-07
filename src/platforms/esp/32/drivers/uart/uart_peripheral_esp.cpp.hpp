@@ -9,7 +9,7 @@
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 
-#include "uart_peripheral_esp.h"
+#include "platforms/esp/32/drivers/uart/uart_peripheral_esp.h"
 #include "fl/log.h"
 #include "fl/warn.h"
 // IWYU pragma: begin_keep

@@ -7,7 +7,7 @@
 /// It initializes the driver listener system for JavaScript runtime integration.
 
 #include "fl/compiler_control.h"
-#include "is_wasm.h"
+#include "platforms/wasm/is_wasm.h"
 
 #ifdef FL_IS_WASM
 

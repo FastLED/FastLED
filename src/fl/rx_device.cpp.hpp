@@ -2,7 +2,7 @@
 /// @brief Implementation of RxDevice factory
 
 #include "platforms/is_platform.h"
-#include "rx_device.h"
+#include "fl/rx_device.h"
 // IWYU pragma: begin_keep
 #include "platforms/shared/rx_device_dummy.h"  // ok platform headers
 // IWYU pragma: end_keep // ok platform headers

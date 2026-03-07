@@ -47,7 +47,9 @@
 /// Falls back to bare metal interrupt disable/enable when FreeRTOS is not available.
 #ifdef FL_HAS_INCLUDE
   #if FL_HAS_INCLUDE("FreeRTOS.h")
-    #include "FreeRTOS.h"
+    // IWYU pragma: begin_keep
+    #include <FreeRTOS.h>
+    // IWYU pragma: end_keep
     /// Enter critical section (FreeRTOS task-safe)
     #define cli()  taskENTER_CRITICAL()
     /// Exit critical section (FreeRTOS task-safe)

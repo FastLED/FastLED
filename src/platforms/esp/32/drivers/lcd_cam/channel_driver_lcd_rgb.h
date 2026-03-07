@@ -70,7 +70,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/unique_ptr.h"
-#include "ilcd_rgb_peripheral.h"
+#include "platforms/esp/32/drivers/lcd_cam/ilcd_rgb_peripheral.h"
 #include "crgb.h"
 
 namespace fl {

@@ -6,7 +6,7 @@
 #include "platforms/is_platform.h"
 #if defined(FASTLED_STUB_IMPL) || (!defined(ARDUINO) && (defined(FL_IS_LINUX) || defined(FL_IS_APPLE) || defined(FL_IS_WIN)))
 
-#include "rmt5_peripheral_mock.h"
+#include "platforms/shared/mock/esp/32/drivers/rmt5_peripheral_mock.h"
 #include "fl/warn.h"
 #include "fl/dbg.h"
 #include "fl/stl/allocator.h"

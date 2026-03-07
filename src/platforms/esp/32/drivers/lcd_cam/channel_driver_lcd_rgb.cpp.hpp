@@ -16,13 +16,13 @@
     defined(FASTLED_STUB_IMPL) || \
     (!defined(ARDUINO) && (defined(__linux__) || defined(__APPLE__) || defined(_WIN32)))
 
-#include "channel_driver_lcd_rgb.h"
+#include "platforms/esp/32/drivers/lcd_cam/channel_driver_lcd_rgb.h"
 #include "fl/warn.h"
 #include "fl/stl/cstring.h"
 
 // Include ESP implementation only on real hardware
 #if defined(FL_IS_ESP_32P4) && FL_HAS_INCLUDE("esp_lcd_panel_rgb.h")
-#include "lcd_rgb_peripheral_esp.h"
+#include "platforms/esp/32/drivers/lcd_cam/lcd_rgb_peripheral_esp.h"
 #endif
 
 namespace fl {

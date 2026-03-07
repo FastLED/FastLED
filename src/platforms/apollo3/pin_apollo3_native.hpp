@@ -21,10 +21,12 @@
 #include "fl/compiler_control.h"
 
 FL_EXTERN_C_BEGIN
-#include "am_mcu_apollo.h"
-#include "am_hal_gpio.h"
-#include "am_hal_adc.h"
-#include "am_hal_ctimer.h"
+// IWYU pragma: begin_keep
+#include <am_mcu_apollo.h>
+#include <am_hal_gpio.h>
+#include <am_hal_adc.h>
+#include <am_hal_ctimer.h>
+// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 #include "fl/warn.h"

@@ -26,7 +26,7 @@
 
 #define FASTLED_INTERNAL
 #include "fl/fastled.h"
-#include "rx_flexpwm_channel.h"
+#include "platforms/arm/teensy/teensy4_common/rx_flexpwm_channel.h"
 
 #include "fl/stl/vector.h"
 #include "fl/warn.h"

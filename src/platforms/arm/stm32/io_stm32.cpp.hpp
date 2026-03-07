@@ -1,7 +1,7 @@
 #pragma once
 
 // IWYU pragma: private
-#include "is_stm32.h"
+#include "platforms/arm/stm32/is_stm32.h"
 
 // ok no namespace fl
 

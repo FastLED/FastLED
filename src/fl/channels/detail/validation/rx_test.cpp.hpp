@@ -2,7 +2,7 @@
 //
 // RX channel testing implementation
 
-#include "rx_test.h"
+#include "fl/channels/detail/validation/rx_test.h"
 #include "fl/rx_device.h"
 #include "fl/pin.h"
 #include "fl/log.h"

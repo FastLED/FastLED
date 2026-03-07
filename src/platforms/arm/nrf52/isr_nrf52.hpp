@@ -39,11 +39,10 @@
 
 // Include NRF52 SDK headers
 FL_EXTERN_C_BEGIN
-#include "nrf.h"
-#include "nrf_timer.h"
-#include "nrf_gpiote.h"
-#include "nrf_gpio.h"
-#include "is_nrf52.h"
+#include <nrf.h>           // IWYU pragma: keep
+#include <nrf_timer.h>     // IWYU pragma: keep
+#include <nrf_gpiote.h>    // IWYU pragma: keep
+#include <nrf_gpio.h>      // IWYU pragma: keep
 
 FL_EXTERN_C_END
 

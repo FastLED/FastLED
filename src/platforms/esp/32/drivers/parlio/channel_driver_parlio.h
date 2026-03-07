@@ -191,7 +191,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/vector.h"
-#include "parlio_engine.h"
+#include "platforms/esp/32/drivers/parlio/parlio_engine.h"
 
 // Forward declarations for PARLIO types (avoid including driver headers in .h)
 struct parlio_tx_unit_t;

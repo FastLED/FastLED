@@ -1,5 +1,4 @@
 // ok no namespace fl
-// ok relative include - timeout_watchdog.h in tests/ needed by runner
 #pragma once
 
 // IWYU pragma: private
@@ -23,7 +22,7 @@
 // IWYU pragma: end_keep
 
 // Timeout watchdog for hung example detection
-#include "timeout_watchdog.h"  // IWYU pragma: keep
+#include "timeout_watchdog.h"  // ok include path
 
 int main(int argc, char** argv) {
     // Setup crash handler BEFORE loading any shared libraries

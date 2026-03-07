@@ -8,7 +8,7 @@
 #include "platforms/is_platform.h"
 #if defined(FASTLED_STUB_IMPL) || (!defined(ARDUINO) && (defined(FL_IS_LINUX) || defined(FL_IS_APPLE) || defined(FL_IS_WIN)))
 
-#include "i2s_lcd_cam_peripheral_mock.h"
+#include "platforms/esp/32/drivers/i2s/i2s_lcd_cam_peripheral_mock.h"
 #include "fl/warn.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/cstring.h"

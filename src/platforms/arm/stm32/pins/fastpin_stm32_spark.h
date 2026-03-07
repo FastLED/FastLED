@@ -12,7 +12,7 @@
 // Spark Core/Photon pin definitions
 // Reference: https://docs.particle.io/reference/hardware/wifi/spark-core/
 
-#include "pin_def_stm32.h"
+#include "platforms/arm/stm32/pins/pin_def_stm32.h"
 
 namespace fl {
 

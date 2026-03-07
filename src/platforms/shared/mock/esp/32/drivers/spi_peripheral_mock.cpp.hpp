@@ -10,7 +10,7 @@
 #include "platforms/is_platform.h"
 #if defined(FASTLED_STUB_IMPL) || (!defined(ARDUINO) && (defined(FL_IS_LINUX) || defined(FL_IS_APPLE) || defined(FL_IS_WIN)))
 
-#include "spi_peripheral_mock.h"
+#include "platforms/shared/mock/esp/32/drivers/spi_peripheral_mock.h"
 #include "fl/warn.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/cstring.h"

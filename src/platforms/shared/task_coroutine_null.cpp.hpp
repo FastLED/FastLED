@@ -7,7 +7,7 @@
 #include "platforms/is_platform.h"
 #if !defined(FASTLED_STUB_IMPL) && !defined(FL_IS_ESP32)
 
-#include "task_coroutine_null.h"
+#include "platforms/shared/task_coroutine_null.h"
 
 namespace fl {
 namespace platforms {

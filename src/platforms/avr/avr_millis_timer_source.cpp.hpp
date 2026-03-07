@@ -5,12 +5,12 @@
 // missing feature, or else implement it ourselves.
 
 // ok no namespace fl
-#include "is_avr.h"
+#include "platforms/avr/is_avr.h"
 
 #ifdef FL_IS_AVR
 
 #ifdef FASTLED_DEFINE_AVR_MILLIS_TIMER0_IMPL
-#include "avr_millis_timer0_impl_source.hpp"
+#include "platforms/avr/avr_millis_timer0_impl_source.hpp"
 #else
 
 #ifndef FASTLED_DEFINE_TIMER_WEAK_SYMBOL
@@ -32,7 +32,7 @@
 
 
 #if FASTLED_DEFINE_TIMER_WEAK_SYMBOL
-#include "avr_millis_timer_null_counter.hpp"
+#include "platforms/avr/avr_millis_timer_null_counter.hpp"
 
 #endif  // FASTLED_DEFINE_TIMER_WEAK_SYMBOL
 #endif  // FASTLED_DEFINE_AVR_MILLIS_TIMER0_IMPL

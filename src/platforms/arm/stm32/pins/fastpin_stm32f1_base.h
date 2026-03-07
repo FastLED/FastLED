@@ -5,7 +5,7 @@
 // STM32F1 base definitions - F1-specific register mapping and GPIO initialization
 // Used by fastpin_stm32f1.h and other STM32F1 board-specific files
 
-#include "pin_def_stm32.h"
+#include "platforms/arm/stm32/pins/pin_def_stm32.h"
 
 namespace fl {
 

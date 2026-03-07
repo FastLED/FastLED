@@ -5,7 +5,7 @@
 
 #ifdef FASTLED_STUB_IMPL
 
-#include "coroutine_runner.h"
+#include "platforms/stub/coroutine_runner.h"
 #include "fl/singleton.h"
 #include "fl/stl/thread_local.h"
 #include "fl/stl/atomic.h"

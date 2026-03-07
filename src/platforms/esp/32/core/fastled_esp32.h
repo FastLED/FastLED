@@ -4,11 +4,15 @@
 #ifndef _FASTLED_ESP32_H
 #define _FASTLED_ESP32_H
 
-#include "fastpin_esp32.h"
+// IWYU pragma: begin_keep
+#include "platforms/esp/32/core/fastpin_esp32.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
+// IWYU pragma: end_keep
 
 // ESP32 always uses hardware SPI via GPIO matrix - no conditional needed
-#include "fastspi_esp32.h"
+// IWYU pragma: begin_keep
+#include "platforms/esp/32/core/fastspi_esp32.h"
+// IWYU pragma: end_keep
 
 
 // Include ALL available clockless drivers for ESP32

@@ -37,8 +37,8 @@
 #include "soc/soc_caps.h"  // IWYU pragma: keep
 #if defined(SOC_MCPWM_SUPPORTED) && SOC_MCPWM_SUPPORTED
 
-#include "mcpwm_timer.h"
-#include "dual_isr_context.h"
+#include "platforms/esp/32/drivers/gpio_isr_rx/mcpwm_timer.h"
+#include "platforms/esp/32/drivers/gpio_isr_rx/dual_isr_context.h"
 #include "fl/int.h"
 
 using fl::u32;

@@ -36,6 +36,6 @@
 
 #else
     // Remaining ATmega variants: ATmega1284P, ATmega644P, AT90USB, etc.
-    #include "fastpin_legacy_other.h"
+    #include "platforms/avr/atmega/common/fastpin_legacy_other.h"
 
 #endif

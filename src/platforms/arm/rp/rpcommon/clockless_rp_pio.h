@@ -30,7 +30,7 @@
 // IWYU pragma: end_keep
 #pragma GCC diagnostic pop
 
-#include "pio_gen.h"
+#include "platforms/arm/rp/rpcommon/pio_gen.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/cstring.h"
 #endif

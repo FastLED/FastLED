@@ -15,8 +15,8 @@
     defined(FASTLED_STUB_IMPL) || \
     (!defined(ARDUINO) && (defined(__linux__) || defined(__APPLE__) || defined(_WIN32)))
 
-#include "channel_driver_i2s.h"
-#include "wave8_encoder_i2s.h"
+#include "platforms/esp/32/drivers/i2s/channel_driver_i2s.h"
+#include "platforms/esp/32/drivers/i2s/wave8_encoder_i2s.h"
 #include "fl/warn.h"
 #include "fl/dbg.h"
 #include "fl/stl/cstring.h"
@@ -26,7 +26,7 @@
 
 // Include ESP implementation only on real hardware
 #if defined(FL_IS_ESP_32S3)
-#include "i2s_lcd_cam_peripheral_esp.h"
+#include "platforms/esp/32/drivers/i2s/i2s_lcd_cam_peripheral_esp.h"
 #endif
 
 namespace fl {

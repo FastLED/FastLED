@@ -10,7 +10,7 @@
 
 #ifdef FL_IS_NRF52
 
-#include "spi_hw_2_nrf52.h"
+#include "platforms/arm/nrf52/spi_hw_2_nrf52.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/cstring.h"
 #include "fl/numeric_limits.h"

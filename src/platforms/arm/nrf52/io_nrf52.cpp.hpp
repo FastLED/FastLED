@@ -1,7 +1,7 @@
 #pragma once
 
 // IWYU pragma: private
-#include "is_nrf52.h"
+#include "platforms/arm/nrf52/is_nrf52.h"
 
 // ok no namespace fl
 

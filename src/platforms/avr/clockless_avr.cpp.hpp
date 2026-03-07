@@ -10,7 +10,7 @@
 // This file should not be compiled for ATtiny to avoid template redefinition conflicts
 #if defined(FASTLED_AVR) && !defined(FL_IS_AVR_ATTINY)
 
-#include "clockless_avr.h"
+#include "platforms/avr/clockless_avr.h"
 
 namespace fl {
 

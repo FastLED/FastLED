@@ -26,7 +26,7 @@
 // Platform Detection Guard - Only include on STM32 platforms
 // ============================================================================
 
-#include "is_stm32.h"
+#include "platforms/arm/stm32/is_stm32.h"
 #include "fl/has_include.h"
 
 #ifndef FL_IS_STM32

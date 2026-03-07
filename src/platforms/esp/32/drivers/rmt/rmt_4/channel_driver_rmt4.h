@@ -35,7 +35,9 @@
 #include "fl/stl/vector.h"
 
 FL_EXTERN_C_BEGIN
-#include "esp32-hal.h"
+// IWYU pragma: begin_keep
+#include <esp32-hal.h>
+// IWYU pragma: end_keep
 #if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR > 3
 #include "esp_intr_alloc.h"
 #else

@@ -8,7 +8,7 @@
 
 #ifdef FL_IS_AVR_ATTINY
 
-#include "clockless_blocking.h"
+#include "platforms/avr/attiny/clockless_blocking.h"
 
 namespace fl {
 

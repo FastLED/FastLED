@@ -13,7 +13,7 @@
 /// @note If you need this functionality, see PixelIterator::writeWS2801()
 /// @note Or use: encodeWS2801(pixel_range.first, pixel_range.second, output_iterator)
 
-#include "ws2801.h"
+#include "fl/chipsets/ws2801.h"
 #include "fl/stl/stdint.h"
 
 // No namespace declaration - this file is included inside the fl namespace

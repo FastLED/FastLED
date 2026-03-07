@@ -9,7 +9,7 @@
 #include "fl/force_inline.h"
 
 // Include ATtiny-specific MUL-dependent functions (mul8, qmul8, blend8)
-#include "math8_attiny.h"
+#include "platforms/avr/attiny/math/math8_attiny.h"
 
 namespace fl {
 

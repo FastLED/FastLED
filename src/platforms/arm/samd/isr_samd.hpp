@@ -25,7 +25,9 @@
 
 // Include SAMD SDK headers
 FL_EXTERN_C_BEGIN
-#include "sam.h"
+// IWYU pragma: begin_keep
+#include <sam.h>
+// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 namespace fl {

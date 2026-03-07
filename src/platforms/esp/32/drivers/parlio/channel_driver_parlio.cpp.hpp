@@ -17,7 +17,7 @@
 
 #include "fl/compiler_control.h"
 
-#include "channel_driver_parlio.h"
+#include "platforms/esp/32/drivers/parlio/channel_driver_parlio.h"
 #include "fl/channels/config.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/delay.h"

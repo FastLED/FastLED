@@ -5,13 +5,13 @@
 
 #ifdef FASTLED_STUB_IMPL
 
-#include "task_coroutine_stub.h"
+#include "platforms/stub/task_coroutine_stub.h"
 #include "fl/stl/thread.h"  // stub platform only
 #include "fl/stl/chrono.h"  // stub platform only
 #include "fl/stl/unique_ptr.h"  // stub platform only
 #include "fl/stl/atomic.h"
 #include "fl/stl/mutex.h"
-#include "coroutine_runner.h"  // Global coordination for thread safety
+#include "platforms/stub/coroutine_runner.h"  // Global coordination for thread safety
 #include "fl/dbg.h"  // Debug output
 
 namespace fl {

@@ -15,7 +15,7 @@
 // Test if we have ESP-IDF GPIO driver available
 #if FL_HAS_INCLUDE("driver/gpio.h") && FL_HAS_INCLUDE("driver/ledc.h")
     // Real ESP-IDF environment detected - include full implementation
-    #include "pin_esp32_native_impl.hpp"
+    #include "platforms/esp/32/pin_esp32_native_impl.hpp"
 #else
     // ESP-IDF headers not available - provide stub implementation
     #ifndef FL_ESP32_IO_DISABLE_WARN

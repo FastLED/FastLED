@@ -6,7 +6,7 @@
 #ifdef FL_IS_ESP32
 
 // IWYU pragma: begin_keep
-#include "sound_util.h"
+#include "platforms/esp/32/audio/sound_util.h"
 #include "fl/stl/math.h"  // ok include
 // IWYU pragma: end_keep
 #include "fl/stl/assert.h"

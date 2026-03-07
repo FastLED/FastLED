@@ -1,6 +1,6 @@
 // IWYU pragma: private
 
-#include "is_wasm.h"
+#include "platforms/wasm/is_wasm.h"
 
 #ifdef FL_IS_WASM
 
@@ -34,8 +34,8 @@
 #include <emscripten/html5.h>
 // IWYU pragma: end_keep
 
-#include "active_strip_data.h"
-#include "engine_listener.h"
+#include "platforms/wasm/active_strip_data.h"
+#include "platforms/wasm/engine_listener.h"
 // #include "frame_buffer_manager.h"  // Temporarily commented for testing
 #include "fl/async.h"
 #include "fl/dbg.h"

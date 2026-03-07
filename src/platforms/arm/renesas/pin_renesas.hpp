@@ -1,7 +1,7 @@
 #pragma once
 
 // IWYU pragma: private
-#include "is_renesas.h"
+#include "platforms/arm/renesas/is_renesas.h"
 
 /// @file platforms/arm/renesas/pin_renesas.hpp
 /// Renesas (Arduino UNO R4, etc.) native pin implementation using FSP IOPORT API

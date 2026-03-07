@@ -7,7 +7,7 @@
 
 #if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
 
-#include "semaphore_samd.h"
+#include "platforms/arm/d21/semaphore_samd.h"
 #include "fl/warn.h"
 
 // IWYU pragma: begin_keep
@@ -17,7 +17,9 @@
 // Include CMSIS for interrupt control
 // CMSIS provides __disable_irq() and __enable_irq()
 FL_EXTERN_C_BEGIN
-#include "sam.h"
+// IWYU pragma: begin_keep
+#include <sam.h>
+// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 namespace fl {

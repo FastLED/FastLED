@@ -14,7 +14,7 @@
 /// IMPORTANT: All functions use enum class types (PinMode, PinValue, AdcRange).
 
 #ifndef ARDUINO
-#include "pin_sam_native.hpp"
+#include "platforms/arm/sam/pin_sam_native.hpp"
 #endif
 
 #ifdef ARDUINO

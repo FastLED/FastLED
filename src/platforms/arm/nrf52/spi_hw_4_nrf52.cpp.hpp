@@ -11,7 +11,7 @@
 // Only compile on nRF52840/52833 (requires SPIM3 for quad-lane operation)
 #if defined(FL_IS_NRF52840) || defined(FL_IS_NRF52833)
 
-#include "spi_hw_4_nrf52.h"
+#include "platforms/arm/nrf52/spi_hw_4_nrf52.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/cstring.h"
 #include "fl/numeric_limits.h"

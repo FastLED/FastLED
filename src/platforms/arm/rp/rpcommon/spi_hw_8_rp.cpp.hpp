@@ -24,7 +24,7 @@
 // IWYU pragma: begin_keep
 #include "hardware/pio.h"
 // IWYU pragma: end_keep
-#include "pio_asm.h"
+#include "platforms/arm/rp/rpcommon/pio_asm.h"
 #include "fl/warn.h"
 #include "fl/numeric_limits.h"
 // IWYU pragma: begin_keep

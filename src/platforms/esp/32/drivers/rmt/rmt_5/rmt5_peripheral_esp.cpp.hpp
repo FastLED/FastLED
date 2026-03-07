@@ -13,7 +13,7 @@
 
 #if FASTLED_RMT5
 
-#include "rmt5_peripheral_esp.h"
+#include "platforms/esp/32/drivers/rmt/rmt_5/rmt5_peripheral_esp.h"
 #include "platforms/memory_barrier.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/delay.h"

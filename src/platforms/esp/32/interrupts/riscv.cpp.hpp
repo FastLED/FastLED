@@ -15,7 +15,7 @@
 
 #if defined(FL_IS_ESP32) && (defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6))
 
-#include "riscv.hpp"
+#include "platforms/esp/32/interrupts/riscv.hpp"
 #include "esp_err.h"
 #include "esp_intr_alloc.h"
 #include "esp_log.h"

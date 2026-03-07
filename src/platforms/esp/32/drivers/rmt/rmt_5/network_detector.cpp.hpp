@@ -4,7 +4,7 @@
 // Uses weak symbol fallback pattern to gracefully handle builds without
 // network components (WiFi, Ethernet, Bluetooth)
 
-#include "network_detector.h"
+#include "platforms/esp/32/drivers/rmt/rmt_5/network_detector.h"
 
 #if FASTLED_RMT5
 

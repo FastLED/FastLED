@@ -36,8 +36,8 @@
 #include "fl/engine_events.h"
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
-#include "iuart_peripheral.h"
-#include "wave8_encoder_uart.h"
+#include "platforms/esp/32/drivers/uart/iuart_peripheral.h"
+#include "platforms/esp/32/drivers/uart/wave8_encoder_uart.h"
 
 namespace fl {
 

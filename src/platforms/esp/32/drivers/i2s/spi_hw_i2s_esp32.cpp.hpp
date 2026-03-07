@@ -6,7 +6,7 @@
 /// This file provides the implementation of SpiHwI2SESP32, which wraps
 /// Yves' I2SClockBasedLedDriver to provide FastLED's SpiHw16 interface.
 
-#include "spi_hw_i2s_esp32.h"
+#include "platforms/esp/32/drivers/i2s/spi_hw_i2s_esp32.h"
 #include "fl/dbg.h"
 #include "fl/numeric_limits.h"
 #include "platforms/esp/is_esp.h"

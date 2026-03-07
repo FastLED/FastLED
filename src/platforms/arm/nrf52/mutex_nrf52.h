@@ -30,7 +30,7 @@
 #pragma once
 
 // IWYU pragma: private
-#include "is_nrf52.h"
+#include "platforms/arm/nrf52/is_nrf52.h"
 #include "fl/has_include.h"
 
 #if defined(FL_IS_NRF52)
@@ -48,8 +48,10 @@
 
 // Include FreeRTOS headers
 FL_EXTERN_C_BEGIN
-#include "FreeRTOS.h"
-#include "semphr.h"
+// IWYU pragma: begin_keep
+#include <FreeRTOS.h>
+#include <semphr.h>
+// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 namespace fl {

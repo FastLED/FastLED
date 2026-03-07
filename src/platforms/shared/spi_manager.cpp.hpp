@@ -1,6 +1,6 @@
 // IWYU pragma: private
 
-#include "spi_manager.h"
+#include "platforms/shared/spi_manager.h"
 #include "platforms/is_platform.h"
 
 #include "fastled_config.h"  // For FASTLED_FORCE_SOFTWARE_SPI

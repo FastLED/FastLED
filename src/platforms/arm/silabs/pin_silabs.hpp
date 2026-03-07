@@ -19,8 +19,10 @@
 // ============================================================================
 
 #include "fl/pin.h"
-#include "em_gpio.h"
-#include "em_cmu.h"
+// IWYU pragma: begin_keep
+#include <em_gpio.h>
+#include <em_cmu.h>
+// IWYU pragma: end_keep
 
 namespace fl {
 namespace platforms {

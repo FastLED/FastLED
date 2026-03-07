@@ -3,7 +3,7 @@
 // This file implements the fl::ISynthOscillator interface and related APIs
 // that wrap the low-level stb_hexwave library.
 
-#include "synth.h"
+#include "fl/audio/synth.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/malloc.h"
 // IWYU pragma: begin_keep

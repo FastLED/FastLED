@@ -4,7 +4,7 @@
 #include "fl/stl/json.h"
 #include "fl/math_macros.h"
 #include "platforms/shared/ui/json/number_field.h"
-#include "ui_internal.h"
+#include "platforms/shared/ui/json/ui_internal.h"
 #include "platforms/shared/ui/json/ui.h"
 
 #if FASTLED_ENABLE_JSON

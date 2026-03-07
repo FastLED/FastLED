@@ -5,7 +5,7 @@
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 
-#include "uart_esp32.h"
+#include "platforms/esp/32/drivers/uart_esp32.h"
 #include "fl/stl/assert.h"
 #include "fl/singleton.h"
 #include "platforms/esp/esp_version.h"

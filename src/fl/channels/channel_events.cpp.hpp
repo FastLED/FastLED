@@ -1,4 +1,4 @@
-#include "channel_events.h"
+#include "fl/channels/channel_events.h"
 #include "fl/singleton.h"
 
 namespace fl {

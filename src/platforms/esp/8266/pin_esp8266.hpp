@@ -9,4 +9,4 @@
 /// Uses the same implementation for both Arduino and non-Arduino builds.
 
 // ok no namespace fl
-#include "pin_esp8266_native.hpp"
+#include "platforms/esp/8266/pin_esp8266_native.hpp"

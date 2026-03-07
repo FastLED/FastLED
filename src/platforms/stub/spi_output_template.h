@@ -12,7 +12,7 @@
 #include "platforms/wasm/is_wasm.h"
 
 #ifndef FL_IS_WASM
-#include "fastspi_stub_generic.h"
+#include "platforms/stub/fastspi_stub_generic.h"
 #else
 #include "platforms/wasm/fastspi_wasm.h"
 #endif

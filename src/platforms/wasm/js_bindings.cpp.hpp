@@ -1,6 +1,6 @@
 // IWYU pragma: private
 
-#include "is_wasm.h"
+#include "platforms/wasm/is_wasm.h"
 
 #ifdef FL_IS_WASM
 
@@ -35,7 +35,7 @@
 // IWYU pragma: end_keep
 #include "fl/numeric_limits.h"  // ok include - for FLT_MAX and other float limits
 
-#include "js_bindings.h"
+#include "platforms/wasm/js_bindings.h"
 
 #include "platforms/shared/active_strip_data/active_strip_data.h"
 #include "platforms/wasm/js.h"

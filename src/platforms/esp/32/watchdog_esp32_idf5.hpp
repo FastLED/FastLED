@@ -10,7 +10,7 @@
 
 // IWYU pragma: private
 
-#include "watchdog_esp32.h"
+#include "platforms/esp/32/watchdog_esp32.h"
 
 #include "platforms/esp/is_esp.h"
 

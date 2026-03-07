@@ -16,7 +16,7 @@
 #if defined(FL_IS_TEENSY_4X)  // Teensy 4.0/4.1
 
 // Include ObjectFLED-based proxy controller
-#include "clockless_objectfled.h"
+#include "platforms/arm/teensy/teensy4_common/clockless_objectfled.h"
 
 namespace fl {
 

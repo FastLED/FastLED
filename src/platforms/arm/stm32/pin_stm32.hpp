@@ -12,4 +12,4 @@
 /// IMPORTANT: All functions use fl::PinMode/fl::PinValue/fl::AdcRange enum classes.
 
 // ok no namespace fl - namespace provided by pin_stm32_native.hpp
-#include "pin_stm32_native.hpp"
+#include "platforms/arm/stm32/pin_stm32_native.hpp"

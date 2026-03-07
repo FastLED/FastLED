@@ -8,8 +8,8 @@
 // Channel engine compiles on all platforms (uses IFlexIOPeripheral abstraction)
 // Only the real peripheral implementation is Teensy-specific
 
-#include "channel_engine_flexio.h"
-#include "iflexio_peripheral.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/flexio/channel_engine_flexio.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/flexio/iflexio_peripheral.h"
 
 #include "fl/dbg.h"
 #include "fl/warn.h"

@@ -7,7 +7,7 @@
 
 #if defined(FL_IS_TEENSY_4X)
 
-#include "iobjectfled_peripheral.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/objectfled/iobjectfled_peripheral.h"
 
 #include "fl/stl/cstring.h"
 // IWYU pragma: begin_keep

@@ -3,7 +3,7 @@
 /// @file mutex_stm32.cpp
 /// @brief STM32 FreeRTOS mutex platform implementation
 
-#include "is_stm32.h"
+#include "platforms/arm/stm32/is_stm32.h"
 #include "fl/has_include.h"
 
 #if defined(FL_IS_STM32)
@@ -12,13 +12,15 @@
 // Maple/libmaple core doesn't have FreeRTOS support
 #if FL_HAS_INCLUDE("FreeRTOS.h") && !defined(FL_IS_STM32_LIBMAPLE)
 
-#include "mutex_stm32.h"
+#include "platforms/arm/stm32/mutex_stm32.h"
 #include "fl/warn.h"
 
 // Include FreeRTOS headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN
-#include "FreeRTOS.h"
-#include "semphr.h"
+// IWYU pragma: begin_keep
+#include <FreeRTOS.h>
+#include <semphr.h>
+// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 namespace fl {

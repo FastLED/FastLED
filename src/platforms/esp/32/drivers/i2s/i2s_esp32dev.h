@@ -58,7 +58,9 @@ FL_EXTERN_C_BEGIN
 FL_EXTERN_C_END
 
 // Arduino C++ header - must be outside extern C
-#include "esp32-hal.h"
+// IWYU pragma: begin_keep
+#include <esp32-hal.h>
+// IWYU pragma: end_keep
 
 #ifndef F_CPU_MHZ
 #define F_CPU_MHZ (F_CPU / 1000000L)

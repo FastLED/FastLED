@@ -1,6 +1,6 @@
 // IWYU pragma: private
 
-#include "buffer_pool.h"
+#include "platforms/esp/32/drivers/rmt/rmt_5/buffer_pool.h"
 
 #if FASTLED_RMT5
 

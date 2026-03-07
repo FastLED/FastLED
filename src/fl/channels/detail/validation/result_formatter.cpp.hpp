@@ -2,7 +2,7 @@
 //
 // Result formatting implementation
 
-#include "result_formatter.h"
+#include "fl/channels/detail/validation/result_formatter.h"
 #include "fl/stl/sstream.h"
 #include "fl/log.h"
 

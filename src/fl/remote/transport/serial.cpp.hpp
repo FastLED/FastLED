@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "serial.h"
+#include "fl/remote/transport/serial.h"
 
 #if FASTLED_ENABLE_JSON
 

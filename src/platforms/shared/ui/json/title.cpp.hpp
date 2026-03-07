@@ -1,6 +1,6 @@
 // IWYU pragma: private
 
-#include "title.h"
+#include "platforms/shared/ui/json/title.h"
 #include "fl/stl/json.h"
 #include "platforms/shared/ui/json/ui.h"
 

@@ -30,10 +30,14 @@
 #include "pins_arduino.h"    // Arduino pin mapping - provides digitalPinToPinName macro
 #endif
 #if FL_HAS_INCLUDE("PeripheralPins.h")
-#include "PeripheralPins.h"  // Pin mapping tables (PinMap_ADC, PinMap_TIM, etc.)
+// IWYU pragma: begin_keep
+#include <PeripheralPins.h>  // Pin mapping tables (PinMap_ADC, PinMap_TIM, etc.)
+// IWYU pragma: end_keep
 #endif
 #if FL_HAS_INCLUDE("pinmap.h")
-#include "pinmap.h"          // Pin mapping functions (digitalPinToPinName, pinmap_find_function, etc.)
+// IWYU pragma: begin_keep
+#include <pinmap.h>          // Pin mapping functions (digitalPinToPinName, pinmap_find_function, etc.)
+// IWYU pragma: end_keep
 #define FL_STM32_HAS_PINMAP 1  // Marker that pinmap functions are available
 #endif
 #endif  // FL_HAS_INCLUDE("stm32_def.h")

@@ -4,8 +4,8 @@
 // IWYU pragma: private
 
 #include "fl/stl/stdint.h"
-#include "spi_isr_engine.h"
-#include "spi_platform.h"
+#include "platforms/shared/spi_bitbang/spi_isr_engine.h"
+#include "platforms/shared/spi_bitbang/spi_platform.h"
 
 namespace fl {
 

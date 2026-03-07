@@ -26,13 +26,13 @@
 #include <cstddef>
 #include <windef.h>
 #include <libloaderapi.h>
-#include "errhandlingapi.h"
-#include "minwindef.h"
-#include "winbase.h"
+#include <errhandlingapi.h>
+#include <minwindef.h>
+#include <winbase.h>
 // IWYU pragma: end_keep
 
 // Timeout watchdog for hung example detection
-#include "timeout_watchdog.h"  // IWYU pragma: keep
+#include "timeout_watchdog.h"  // ok include path - tests/timeout_watchdog.h needed by runner
 
 // Crash handler setup (defined in crash_handler_main.cpp)
 extern "C" void runner_setup_crash_handler();

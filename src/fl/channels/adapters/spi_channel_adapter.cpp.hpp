@@ -1,7 +1,7 @@
 /// @file spi_channel_adapter.cpp
 /// @brief Adapter implementation for HW SPI controllers
 
-#include "spi_channel_adapter.h"
+#include "fl/channels/adapters/spi_channel_adapter.h"
 #include "fl/dbg.h"
 #include "fl/warn.h"
 #include "fl/stl/cstring.h"  // For memcpy

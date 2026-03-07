@@ -12,8 +12,8 @@
 /// if any RP platform is detected.
 
 // Include platform-specific detection headers
-#include "is_rp2040.h"
-#include "is_rp2350.h"
+#include "platforms/arm/rp/is_rp2040.h"
+#include "platforms/arm/rp/is_rp2350.h"
 
 // Define FL_IS_RP if any RP platform is detected
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)

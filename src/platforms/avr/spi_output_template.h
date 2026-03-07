@@ -11,7 +11,7 @@
 #include "fl/int.h"
 
 #if defined(AVR_HARDWARE_SPI)
-#include "fastspi_avr.h"
+#include "platforms/avr/fastspi_avr.h"
 #else
 #include "platforms/shared/spi_bitbang/generic_software_spi.h"
 #endif

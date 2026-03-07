@@ -9,7 +9,7 @@
 #if !defined(FL_IS_TEENSY_4X)
 
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/iobjectfled_peripheral.h"
-#include "objectfled_peripheral_mock.h"
+#include "platforms/shared/mock/arm/teensy4/drivers/objectfled/objectfled_peripheral_mock.h"
 
 namespace fl {
 

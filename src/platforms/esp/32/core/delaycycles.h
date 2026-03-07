@@ -14,7 +14,9 @@
 
 /// ESP32 Xtensa: Use CCOUNT register (cycle counter)
 /// Already included via platforms/esp/32/core/clock_cycles.h
-#include "clock_cycles.h"
+// IWYU pragma: begin_keep
+#include "platforms/esp/32/core/clock_cycles.h"
+// IWYU pragma: end_keep
 
 FASTLED_FORCE_INLINE fl::u32 get_ccount() {
   return __clock_cycles();

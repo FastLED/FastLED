@@ -8,7 +8,7 @@
 
 #if defined(FL_IS_NRF52)
 
-#include "led_sysdefs_arm_nrf52.h"
+#include "platforms/arm/nrf52/led_sysdefs_arm_nrf52.h"
 
 typedef void (*FASTLED_NRF52_PWM_INTERRUPT_HANDLER)();
 

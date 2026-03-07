@@ -6,7 +6,7 @@
 /// @brief Teensy LC SPIOutput template definition
 
 #include "fl/int.h"
-#include "fastspi_arm_kl26.h"
+#include "platforms/arm/teensy/teensy_lc/fastspi_arm_kl26.h"
 
 namespace fl {
 

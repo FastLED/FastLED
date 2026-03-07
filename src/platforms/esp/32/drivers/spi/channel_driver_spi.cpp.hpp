@@ -30,9 +30,9 @@
 
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
-#include "channel_driver_spi.h"
+#include "platforms/esp/32/drivers/spi/channel_driver_spi.h"
 #include "platforms/memory_barrier.h"
-#include "wave8_encoder_spi.h"
+#include "platforms/esp/32/drivers/spi/wave8_encoder_spi.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/dbg.h"
 #include "fl/delay.h"

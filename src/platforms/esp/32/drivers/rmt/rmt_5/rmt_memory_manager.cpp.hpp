@@ -3,13 +3,13 @@
 /// @file rmt_memory_manager.cpp
 /// @brief RMT memory allocation manager implementation
 
-#include "rmt_memory_manager.h"
+#include "platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.h"
 
 #include "platforms/is_platform.h"
 #if defined(FL_IS_ESP32) && FASTLED_RMT5
 
 #include "fl/dbg.h"
-#include "common.h"
+#include "platforms/esp/32/drivers/rmt/rmt_5/common.h"
 
 FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep

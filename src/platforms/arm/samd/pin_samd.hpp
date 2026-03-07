@@ -11,4 +11,4 @@
 /// Uses new fl/pin.h API with enum classes (PinMode, PinValue, AdcRange).
 
 // ok no namespace fl
-#include "pin_samd_native.hpp"
+#include "platforms/arm/samd/pin_samd_native.hpp"

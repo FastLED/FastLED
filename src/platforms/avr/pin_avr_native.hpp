@@ -16,7 +16,7 @@
 #include <avr/pgmspace.h>
 // IWYU pragma: end_keep
 #include "fl/stl/stdint.h"
-#include "is_avr.h"
+#include "platforms/avr/is_avr.h"
 
 namespace fl {
 namespace platforms {

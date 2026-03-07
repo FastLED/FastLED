@@ -13,7 +13,7 @@
 // For v4.0+, only compile when CONFIG_IDF_TARGET_ESP32 is defined (original ESP32 only)
 #if !ESP_IDF_VERSION_4_OR_HIGHER || defined(FL_IS_ESP_32DEV)
 
-#include "i2s_esp32dev.h"
+#include "platforms/esp/32/drivers/i2s/i2s_esp32dev.h"
 
 // IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"

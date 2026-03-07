@@ -6,7 +6,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/bit_cast.h"
-#include "spi_isr_engine.h"
+#include "platforms/shared/spi_bitbang/spi_isr_engine.h"
 
 #ifdef FL_SPI_ISR_VALIDATE
 // C++ wrapper types for GPIO events (provides type safety and convenience methods)

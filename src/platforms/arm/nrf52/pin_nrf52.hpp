@@ -19,13 +19,13 @@
 
 // Include Nordic SDK headers for native GPIO and peripheral access
 FL_EXTERN_C_BEGIN
-#include "nrf.h"
-#include "nrf_gpio.h"
+#include <nrf.h>           // IWYU pragma: keep
+#include <nrf_gpio.h>      // IWYU pragma: keep
 #ifdef NRF_SAADC
-#include "nrf_saadc.h"
+#include <nrf_saadc.h>     // IWYU pragma: keep
 #endif
 #ifdef NRF_PWM0
-#include "nrf_pwm.h"
+#include <nrf_pwm.h>       // IWYU pragma: keep
 #endif
 FL_EXTERN_C_END
 

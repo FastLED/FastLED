@@ -5,7 +5,7 @@
 
 #if defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
 
-#include "spi_1_stub.h"
+#include "platforms/stub/spi_1_stub.h"
 #include "platforms/shared/spi_manager.h"  // For DMABuffer, TransmitMode, SPIError
 #include "fl/log.h"
 

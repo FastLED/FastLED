@@ -31,7 +31,9 @@
 
 #if FASTLED_USE_NEOPIXEL_BUS
 
-#include "NeoPixelBus.h"
+// IWYU pragma: begin_keep
+#include <NeoPixelBus.h>
+// IWYU pragma: end_keep
 #include "fl/stl/memory.h"
 #include "controller.h"
 #include "pixel_controller.h"

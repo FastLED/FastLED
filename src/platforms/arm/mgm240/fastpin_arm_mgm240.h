@@ -17,8 +17,10 @@
 #include "fl/stl/stdint.h"
 
 // Include Silicon Labs EMLIB GPIO for direct register access
-#include "em_gpio.h"
-#include "em_cmu.h"
+// IWYU pragma: begin_keep
+#include <em_gpio.h>
+#include <em_cmu.h>
+// IWYU pragma: end_keep
 
 #include "led_sysdefs.h"
 #include "fl/force_inline.h"

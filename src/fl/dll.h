@@ -9,7 +9,7 @@
 
 #if FASTLED_BUILD_EXPORTS
 
-#include "export.h"
+#include "fl/export.h"
 
 FL_EXTERN_C_BEGIN
 

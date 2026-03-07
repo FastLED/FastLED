@@ -8,7 +8,7 @@
 /// - Public transposition functions (wave3Transpose_2/4/8/16)
 /// - Untranspose functions (for testing)
 
-#include "wave3.h"
+#include "fl/channels/wave3.h"
 #include "fl/channels/detail/wave3.hpp"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/isr/memcpy.h"

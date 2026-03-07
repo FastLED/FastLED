@@ -3,8 +3,8 @@
 #ifndef CHANNEL_ENGINE_OBJECTFLED_CPP_HPP_
 #define CHANNEL_ENGINE_OBJECTFLED_CPP_HPP_
 
-#include "channel_engine_objectfled.h"
-#include "iobjectfled_peripheral.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/objectfled/channel_engine_objectfled.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/objectfled/iobjectfled_peripheral.h"
 
 #include "fl/dbg.h"
 #include "fl/warn.h"

@@ -39,6 +39,7 @@ Exception mechanism:
 import re
 
 from ci.util.check_files import EXCLUDED_FILES, FileContent, FileContentChecker
+from ci.util.paths import PROJECT_ROOT
 
 
 # Valid top-level prefixes for include paths (relative to src/)
@@ -141,6 +142,10 @@ TYPO_PREFIXES = {
 
 # Pattern to extract include path from #include "..." statements
 INCLUDE_PATTERN = re.compile(r'#include\s+"([^"]+)"')
+
+# Maximum number of validation errors to report (prevents context overflow)
+# Note: This is bypassed when --json flag is used to export all violations
+MAX_VALIDATION_ERRORS = 10
 
 
 def is_top_level_include(include_path: str) -> bool:
@@ -264,6 +269,21 @@ def is_relative_path(include_path: str) -> bool:
     return include_path.startswith("./") or include_path.startswith("../")
 
 
+def header_exists(include_path: str) -> bool:
+    """Check if a quoted header file exists in src/.
+
+    Only checks headers that use full paths relative to src/ (not relative
+    paths like "./file.h" and not external SDK headers).
+    """
+    # Skip relative paths and external SDK headers
+    if is_relative_path(include_path) or is_external_sdk_header(include_path):
+        return True
+
+    # Check if the header exists in src/
+    header_file = PROJECT_ROOT / "src" / include_path
+    return header_file.exists()
+
+
 def get_typo_suggestion(include_path: str) -> str | None:
     """Check if the include path starts with a likely typo of a valid prefix.
 
@@ -278,8 +298,10 @@ def get_typo_suggestion(include_path: str) -> str | None:
 class IncludePathsChecker(FileContentChecker):
     """Checker for include path style enforcement."""
 
-    def __init__(self):
+    def __init__(self, max_errors: int | None = None):
         self.violations: dict[str, list[tuple[int, str]]] = {}
+        self.total_error_count = 0  # Track total errors to enforce limit
+        self.max_errors = max_errors  # None means unlimited, otherwise enforce limit
 
     def should_process_file(self, file_path: str) -> bool:
         """Only process files in src/fl/** and src/platforms/**."""
@@ -306,6 +328,13 @@ class IncludePathsChecker(FileContentChecker):
         in_multiline_comment = False
 
         for line_number, line in enumerate(file_content.lines, 1):
+            # Stop collecting errors if we've hit the limit
+            if (
+                self.max_errors is not None
+                and self.total_error_count >= self.max_errors
+            ):
+                break
+
             stripped = line.strip()
 
             # Track multi-line comment state
@@ -339,6 +368,19 @@ class IncludePathsChecker(FileContentChecker):
                 if include_path.startswith("<"):
                     continue
 
+                # First check if the header file exists (for paths that should be in src/)
+                if is_valid_include_path(include_path) and not header_exists(
+                    include_path
+                ):
+                    msg = (
+                        f'Header not found: #include "{include_path}"\n'
+                        f"  Expected: src/{include_path}\n"
+                        f""
+                    )
+                    violations.append((line_number, msg))
+                    self.total_error_count += 1
+                    continue
+
                 # Check if the include path is valid
                 if not is_valid_include_path(include_path):
                     if is_relative_path(include_path):
@@ -350,6 +392,7 @@ class IncludePathsChecker(FileContentChecker):
                             f"Add '// ok include path' comment to suppress."
                         )
                         violations.append((line_number, msg))
+                        self.total_error_count += 1
                     elif is_fastled_platform_relative(include_path):
                         # This is a FastLED platform include without "platforms/" prefix
                         msg = (
@@ -359,6 +402,7 @@ class IncludePathsChecker(FileContentChecker):
                             f"Add '// ok include path' comment to suppress."
                         )
                         violations.append((line_number, msg))
+                        self.total_error_count += 1
                     else:
                         # Check for likely typos of valid prefixes
                         typo_correction = get_typo_suggestion(include_path)
@@ -373,32 +417,306 @@ class IncludePathsChecker(FileContentChecker):
                                 f"Add '// ok include path' comment to suppress."
                             )
                             violations.append((line_number, msg))
+                            self.total_error_count += 1
                         # Note: If it's not a relative path, not a known FastLED platform dir,
                         # and not a known typo, we assume it's an external SDK header we don't
                         # know about, so we skip it
 
-        # Store violations if any found
+        # Store violations if any found (normalize path to forward slashes)
         if violations:
-            self.violations[file_content.path] = violations
+            normalized_path = file_content.path.replace("\\", "/")
+            self.violations[normalized_path] = violations
 
         return []  # MUST return empty list
 
 
+def is_known_sdk_header(header_name: str) -> bool:
+    """Check if a header is a known external SDK header that should use angle brackets."""
+    from pathlib import Path
+
+    # Windows SDK headers
+    windows_headers = {
+        "errhandlingapi.h",
+        "minwindef.h",
+        "winbase.h",
+        "processthreadsapi.h",
+    }
+    # ESP8266 SDK headers
+    esp8266_headers = {"esp8266_peri.h", "osapi.h", "user_interface.h"}
+    # External libraries
+    external_libs = {"NeoPixelBus.h"}
+
+    basename = Path(header_name).name
+    return basename in (windows_headers | esp8266_headers | external_libs)
+
+
+def apply_fixes(violations_dict: dict, file_contents: dict) -> tuple[int, int]:
+    """Apply safe fixes to files with violations.
+
+    Args:
+        violations_dict: Dictionary of violations from checker
+        file_contents: Dictionary mapping file paths to their contents
+
+    Returns:
+        Tuple of (files_fixed, violations_fixed)
+    """
+    from pathlib import Path
+
+    files_fixed = 0
+    violations_fixed = 0
+
+    for file_path, violations in violations_dict.items():
+        if file_path not in file_contents:
+            continue
+
+        lines = file_contents[file_path].lines.copy()
+        fixed_any = False
+
+        # Process violations in reverse line order to avoid line number shifts
+        for line_num, msg in sorted(violations, reverse=True, key=lambda x: x[0]):
+            # Extract the offending include path
+            match_include = re.search(r'#include "([^"]+)"', msg)
+            if not match_include:
+                continue
+
+            include_path = match_include.group(1)
+            corrected_path = None
+            use_angle_brackets = False
+
+            # Try to infer the correct path
+            if is_known_sdk_header(include_path):
+                # Convert to angle bracket syntax - check this first!
+                corrected_path = Path(include_path).name
+                use_angle_brackets = True
+            elif is_fastled_platform_relative(include_path):
+                # Bare platform name needs "platforms/" prefix
+                corrected_path = f"platforms/{include_path}"
+            elif is_relative_path(include_path):
+                # Relative paths are always wrong
+                continue  # Skip, need manual review
+            elif typo_suggestion := get_typo_suggestion(include_path):
+                # Apply typo correction
+                typo_prefix = include_path.split("/")[0] + "/"
+                rest_of_path = include_path[len(typo_prefix) :]
+                corrected_path = typo_suggestion + rest_of_path
+            elif "Header not found" in msg:
+                # Try to find the file in src/ - but only fix if exactly one match
+                from ci.util.paths import PROJECT_ROOT
+
+                basename = Path(include_path).name
+                # Search for the file in src/
+                matching_files = []
+                for potential_path in (PROJECT_ROOT / "src").rglob(basename):
+                    if potential_path.is_file():
+                        matching_files.append(potential_path)
+
+                # Only fix if there's exactly one matching file
+                if len(matching_files) == 1:
+                    rel_path = matching_files[0].relative_to(PROJECT_ROOT / "src")
+                    corrected_path = str(rel_path).replace("\\", "/")
+
+            if corrected_path and corrected_path != include_path:
+                # Apply the fix
+                old_include = f'#include "{include_path}"'
+                if use_angle_brackets:
+                    new_include = f"#include <{corrected_path}>"
+                else:
+                    new_include = f'#include "{corrected_path}"'
+                line_idx = line_num - 1  # Convert to 0-based index
+
+                if line_idx < len(lines):
+                    lines[line_idx] = lines[line_idx].replace(old_include, new_include)
+                    fixed_any = True
+                    violations_fixed += 1
+
+        if fixed_any:
+            # Write the fixed file back
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.writelines(lines)
+            files_fixed += 1
+
+    return files_fixed, violations_fixed
+
+
+def export_violations_json(checker: IncludePathsChecker, output_path: str) -> None:
+    """Export violations to a JSON file.
+
+    Args:
+        checker: The IncludePathsChecker instance with violations
+        output_path: Path to write the JSON file to
+    """
+    import json
+
+    violations_list = []
+    for file_path, violations in checker.violations.items():
+        for line_num, msg in violations:
+            # Extract the include path from the message
+            import re
+
+            match = re.search(r'#include "([^"]+)"', msg)
+            include_path = match.group(1) if match else "unknown"
+
+            # Extract if it's a header not found or other issue
+            is_not_found = "Header not found" in msg
+
+            violations_list.append(
+                {
+                    "file": file_path,
+                    "line": line_num,
+                    "offending_header": include_path,
+                    "type": "header_not_found" if is_not_found else "invalid_path",
+                    "message": msg,
+                    "note": "This might be a system header - consider using #include <header> instead"
+                    if is_not_found
+                    else None,
+                }
+            )
+
+    # Write to JSON file
+    with open(output_path, "w") as f:
+        json.dump(
+            {
+                "total_violations": len(violations_list),
+                "files_affected": len(checker.violations),
+                "violations": violations_list,
+            },
+            f,
+            indent=2,
+        )
+
+    print(f"✅ Violations exported to {output_path}")
+
+
 def main() -> None:
     """Run include paths checker standalone."""
-    from ci.util.check_files import run_checker_standalone
+    import sys
+
+    from ci.util.check_files import (
+        FileContent,
+        MultiCheckerFileProcessor,
+        collect_files_to_check,
+    )
     from ci.util.paths import PROJECT_ROOT
 
-    checker = IncludePathsChecker()
-    run_checker_standalone(
-        checker,
-        [
-            str(PROJECT_ROOT / "src" / "fl"),
-            str(PROJECT_ROOT / "src" / "platforms"),
-        ],
-        "Found invalid include paths",
-        extensions=[".cpp", ".h", ".hpp", ".c"],
+    # Check for --json and --fix flags
+    json_output = None
+    apply_fix = False
+
+    if "--fix" in sys.argv:
+        apply_fix = True
+        sys.argv.remove("--fix")
+
+    if "--json" in sys.argv:
+        json_idx = sys.argv.index("--json")
+        if json_idx + 1 < len(sys.argv):
+            json_output = sys.argv[json_idx + 1]
+        else:
+            json_output = "include_path_violations.json"
+        # Remove flags from argv before running checker
+        sys.argv.pop(json_idx)
+        if json_output != "include_path_violations.json":
+            sys.argv.pop(json_idx)
+
+    # Run checker - with unlimited errors if JSON export or fix is requested
+    checker = IncludePathsChecker(
+        max_errors=None if (json_output or apply_fix) else MAX_VALIDATION_ERRORS
     )
+    directories = [
+        str(PROJECT_ROOT / "src" / "fl"),
+        str(PROJECT_ROOT / "src" / "platforms"),
+    ]
+
+    files_to_check = collect_files_to_check(
+        directories, extensions=[".cpp", ".h", ".hpp", ".c"]
+    )
+
+    # Load file contents for fixing
+    file_contents: dict[str, FileContent] = {}
+    for file_path in files_to_check:
+        with open(file_path, "r", encoding="utf-8", errors="replace") as f:
+            content = f.read()
+            file_contents[file_path] = FileContent(
+                path=file_path, content=content, lines=content.splitlines(keepends=True)
+            )
+
+    processor = MultiCheckerFileProcessor()
+    processor.process_files_with_checkers(files_to_check, [checker])
+
+    # Apply fixes if requested
+    if apply_fix and checker.violations:
+        # Map normalized paths back to actual file paths for fixing
+        violations_by_actual_path = {}
+        for norm_path, violations in checker.violations.items():
+            # Find the actual file path that corresponds to this normalized path
+            for actual_path in file_contents.keys():
+                if actual_path.replace("\\", "/").endswith(
+                    norm_path.lstrip("C:/Users/niteris/dev/fastled7/")
+                ):
+                    violations_by_actual_path[actual_path] = violations
+                    break
+                # Also try direct match
+                if actual_path.replace(
+                    "\\", "/"
+                ) == norm_path or norm_path in actual_path.replace("\\", "/"):
+                    violations_by_actual_path[actual_path] = violations
+                    break
+
+        files_fixed, violations_fixed = apply_fixes(
+            violations_by_actual_path, file_contents
+        )
+        print(f"✅ Fixed {violations_fixed} violations in {files_fixed} files")
+        print("Re-running checker to verify...")
+
+        # Re-run checker to verify
+        checker = IncludePathsChecker(max_errors=MAX_VALIDATION_ERRORS)
+        file_contents.clear()
+        for file_path in files_to_check:
+            with open(file_path, "r", encoding="utf-8", errors="replace") as f:
+                content = f.read()
+                file_contents[file_path] = FileContent(
+                    path=file_path,
+                    content=content,
+                    lines=content.splitlines(keepends=True),
+                )
+        processor.process_files_with_checkers(files_to_check, [checker])
+
+        if not checker.violations:
+            print("✅ All violations fixed!")
+        else:
+            print(f"⚠️  {len(checker.violations)} files still have violations after fix")
+        sys.exit(0)
+
+    # Export to JSON if requested
+    if json_output:
+        export_violations_json(checker, json_output)
+        sys.exit(0)
+
+    # Print violations (only when NOT using JSON export)
+    if checker.violations:
+        total_violations = sum(len(v) for v in checker.violations.values())
+        file_count = len(checker.violations)
+
+        print(
+            f"❌ Found invalid include paths ({file_count} files, {total_violations} violations):"
+        )
+        print()
+
+        # Sort files by relative path
+        for file_path in sorted(checker.violations.keys()):
+            rel_path = file_path.replace(str(PROJECT_ROOT), "").lstrip("\\/")
+            # Normalize to forward slashes for consistent output
+            rel_path = rel_path.replace("\\", "/")
+            violations = checker.violations[file_path]
+
+            print(f"{rel_path}:")
+            for line_num, msg in violations:
+                print(f"  Line {line_num}: {msg}")
+            print()
+
+        sys.exit(1)
+    else:
+        print("✅ Found invalid include paths: No violations found.")
+        sys.exit(0)
 
 
 if __name__ == "__main__":

@@ -36,7 +36,7 @@
 #include "fl/sketch_macros.h"
 
 // Include platform header first to enable auto-detection of FASTLED_SPI_HOST_SIMULATION
-#include "spi_platform.h"
+#include "platforms/shared/spi_bitbang/spi_platform.h"
 
 // Compile for platforms with sufficient memory OR stub platform (includes tests)
 // STUB_PLATFORM now always gets real ISR implementations instead of stubs
@@ -44,7 +44,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/compiler_control.h"
-#include "spi_isr_engine.h"
+#include "platforms/shared/spi_bitbang/spi_isr_engine.h"
 #include "fl/stl/atomic.h"
 
 

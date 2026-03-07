@@ -74,13 +74,13 @@
 #include "fl/stl/unique_ptr.h"
 
 // Include extracted headers
-#include "parlio_isr_context.h"
-#include "parlio_buffer_calc.h"
-#include "parlio_debug.h"
-#include "parlio_ring_buffer.h"
+#include "platforms/esp/32/drivers/parlio/parlio_isr_context.h"
+#include "platforms/esp/32/drivers/parlio/parlio_buffer_calc.h"
+#include "platforms/esp/32/drivers/parlio/parlio_debug.h"
+#include "platforms/esp/32/drivers/parlio/parlio_ring_buffer.h"
 
 // Include peripheral interface
-#include "iparlio_peripheral.h"
+#include "platforms/esp/32/drivers/parlio/iparlio_peripheral.h"
 
 
 namespace fl {

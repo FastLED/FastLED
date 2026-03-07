@@ -128,17 +128,17 @@ _IO32(A); _IO32(B); _IO32(C); _IO32(D); _IO32(E);
 // Include board-specific pin mappings
 // Board detection based on ARDUINO_* macros defined by STM32duino
 #if defined(ARDUINO_BLACKPILL_F411CE)
-  #include "f411ce_blackpill.h"  // nolint
+  #include "platforms/arm/stm32/pins/boards/f4/f411ce_blackpill.h"  // nolint
 #elif defined(ARDUINO_NUCLEO_F411RE)
-  #include "f411re_nucleo.h"  // nolint
+  #include "platforms/arm/stm32/pins/boards/f4/f411re_nucleo.h"  // nolint
 #elif defined(ARDUINO_BLACKPILL_F401CC) || defined(ARDUINO_BLACKPILL_F401CE)
-  #include "f401cx_blackpill.h"  // nolint
+  #include "platforms/arm/stm32/pins/boards/f4/f401cx_blackpill.h"  // nolint
 #elif defined(ARDUINO_NUCLEO_F401RE)
-  #include "f401re_nucleo.h"  // nolint
+  #include "platforms/arm/stm32/pins/boards/f4/f401re_nucleo.h"  // nolint
 #elif defined(ARDUINO_DISCO_F407VG)
-  #include "f407vg_disco.h"  // nolint
+  #include "platforms/arm/stm32/pins/boards/f4/f407vg_disco.h"  // nolint
 #elif defined(ARDUINO_NUCLEO_F446RE)
-  #include "f446re_nucleo.h"  // nolint
+  #include "platforms/arm/stm32/pins/boards/f4/f446re_nucleo.h"  // nolint
 #include "fl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH

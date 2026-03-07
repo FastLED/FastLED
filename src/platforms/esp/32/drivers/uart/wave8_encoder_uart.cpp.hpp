@@ -7,7 +7,7 @@
 /// feasibility predicate. The wave10 model treats the 10-bit UART frame
 /// as two 5-pulse LED bit slots.
 
-#include "wave8_encoder_uart.h"
+#include "platforms/esp/32/drivers/uart/wave8_encoder_uart.h"
 
 namespace fl {
 

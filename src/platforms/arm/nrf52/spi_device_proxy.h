@@ -27,7 +27,7 @@
 /// - GPIOTE for GPIO control via tasks
 /// - PPI to route TIMER events to GPIOTE tasks (hardware-level sync)
 
-#include "is_nrf52.h"
+#include "platforms/arm/nrf52/is_nrf52.h"
 
 #if defined(FL_IS_NRF52)
 

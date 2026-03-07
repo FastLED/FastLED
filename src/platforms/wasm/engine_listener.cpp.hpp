@@ -1,6 +1,6 @@
 // IWYU pragma: private
 
-#include "is_wasm.h"
+#include "platforms/wasm/is_wasm.h"
 
 #ifdef FL_IS_WASM
 
@@ -15,7 +15,7 @@
 #include "fl/stl/map.h"  // ok include
 // IWYU pragma: end_keep
 
-#include "engine_listener.h"
+#include "platforms/wasm/engine_listener.h"
 #include "platforms/wasm/active_strip_data.h"
 #include "platforms/wasm/js.h"
 #include "platforms/wasm/js_bindings.h"

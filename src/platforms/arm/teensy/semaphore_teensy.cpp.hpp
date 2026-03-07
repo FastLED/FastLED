@@ -7,7 +7,7 @@
 
 #ifdef FL_IS_TEENSY
 
-#include "semaphore_teensy.h"
+#include "platforms/arm/teensy/semaphore_teensy.h"
 #include "fl/warn.h"
 
 // Include platform-specific CMSIS headers for interrupt control

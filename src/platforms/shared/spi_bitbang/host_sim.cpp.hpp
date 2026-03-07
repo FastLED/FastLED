@@ -11,8 +11,8 @@
   License: MIT (FastLED)
 */
 
-#include "spi_platform.h"
-#include "host_sim.h"
+#include "platforms/shared/spi_bitbang/spi_platform.h"
+#include "platforms/shared/spi_bitbang/host_sim.h"
 
 // Compile for host simulation OR stub platform (includes tests)
 // STUB_PLATFORM now always gets real ISR implementations instead of stubs

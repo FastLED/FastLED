@@ -7,7 +7,7 @@
 
 #if !defined(FL_IS_WIN) && !defined(FL_IS_WASM)
 
-#include "socket_posix.h"
+#include "platforms/posix/socket_posix.h"
 
 // Additional POSIX socket includes for implementation
 // IWYU pragma: begin_keep

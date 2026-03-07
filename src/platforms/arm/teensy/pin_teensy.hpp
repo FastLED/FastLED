@@ -16,7 +16,7 @@
 /// IMPORTANT: All functions use enum class types for type safety.
 
 #ifndef ARDUINO
-#include "pin_teensy_native.hpp"
+#include "platforms/arm/teensy/pin_teensy_native.hpp"
 #endif
 
 #ifdef ARDUINO

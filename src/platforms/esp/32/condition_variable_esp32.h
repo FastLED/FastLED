@@ -14,7 +14,9 @@
 
 // CRITICAL: Include mutex_esp32.h BEFORE opening namespace to avoid polluting std::
 // mutex_esp32.h includes <mutex> which defines types in global std:: namespace
-#include "mutex_esp32.h"
+// IWYU pragma: begin_keep
+#include "platforms/esp/32/mutex_esp32.h"
+// IWYU pragma: end_keep
 
 namespace fl {
 namespace platforms {

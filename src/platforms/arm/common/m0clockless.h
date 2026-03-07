@@ -72,11 +72,11 @@
 
 #if __USE_M0_C_VERSION__
     // Using C++ implementation
-    #include "m0clockless_c.h"
+    #include "platforms/arm/common/m0clockless_c.h"
 
 #else
     // Using assembly implementation
-    #include "m0clockless_asm.h"
+    #include "platforms/arm/common/m0clockless_asm.h"
 #endif
 
 // Clean up internal macro

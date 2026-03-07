@@ -12,7 +12,7 @@
 // IWYU pragma: begin_keep
 #include <sys/types.h>    // For ssize_t, socklen_t if available
 // IWYU pragma: end_keep
-#include "is_wasm.h"
+#include "platforms/wasm/is_wasm.h"
 #include "platforms/win/is_win.h"
 
 #ifdef FL_IS_WASM

@@ -40,7 +40,7 @@
 
 #if FASTLED_ESP32_HAS_PARLIO
 
-#include "iparlio_peripheral.h"
+#include "platforms/esp/32/drivers/parlio/iparlio_peripheral.h"
 #include "fl/singleton.h"
 
 namespace fl {

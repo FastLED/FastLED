@@ -40,7 +40,7 @@
 
 #if FASTLED_RMT5
 
-#include "irmt5_peripheral.h"
+#include "platforms/esp/32/drivers/rmt/rmt_5/irmt5_peripheral.h"
 #include "fl/singleton.h"
 
 namespace fl {

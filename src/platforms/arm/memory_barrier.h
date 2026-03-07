@@ -11,7 +11,7 @@
 #pragma once
 
 // IWYU pragma: private
-#include "is_arm.h"
+#include "platforms/arm/is_arm.h"
 
 #ifdef FL_IS_ARM
 

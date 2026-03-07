@@ -4,7 +4,7 @@
 
 #if defined(FL_IS_ESP8266)
 
-#include "fastled_esp8266_uart.h"
+#include "platforms/esp/8266/fastled_esp8266_uart.h"
 namespace fl {
 // ---- Explicit template instantiations for common orders --------------------
 // Template implementations are in the header file (fastled_esp8266_uart.h)

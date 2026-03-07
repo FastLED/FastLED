@@ -6,8 +6,10 @@
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 
-#include "condition_variable_esp32.h"
-#include "mutex_esp32.h"
+// IWYU pragma: begin_keep
+#include "platforms/esp/32/condition_variable_esp32.h"
+#include "platforms/esp/32/mutex_esp32.h"
+// IWYU pragma: end_keep
 #include "fl/warn.h"
 
 // Include FreeRTOS headers ONLY in .cpp file

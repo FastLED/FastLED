@@ -4,11 +4,11 @@
 /// @brief RP2040/RP2350 Pico SDK mutex platform implementation
 
 // Include platform detection BEFORE the guard
-#include "is_rp.h"
+#include "platforms/arm/rp/is_rp.h"
 
 #ifdef FL_IS_RP2040
 
-#include "mutex_rp.h"
+#include "platforms/arm/rp/mutex_rp.h"
 #include "fl/warn.h"
 
 // Include Pico SDK headers ONLY in .cpp file

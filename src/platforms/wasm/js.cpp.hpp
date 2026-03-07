@@ -1,6 +1,6 @@
 // IWYU pragma: private
 
-#include "is_wasm.h"
+#include "platforms/wasm/is_wasm.h"
 
 #ifdef FL_IS_WASM
 
@@ -25,13 +25,13 @@
 #include "fl/stl/unique_ptr.h"  // ok include
 #include "fl/stl/cstdio.h"  // ok include
 
-#include "active_strip_data.h"
-#include "engine_listener.h"
+#include "platforms/wasm/active_strip_data.h"
+#include "platforms/wasm/engine_listener.h"
 #include "fl/dbg.h"
 #include "fl/stl/map.h"
 #include "fl/screenmap.h"
 #include "fl/stl/string.h"
-#include "js.h"
+#include "platforms/wasm/js.h"
 #include "platforms/shared/ui/json/ui_internal.h"
 #include "fl/stl/chrono.h"
 

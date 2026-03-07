@@ -1,7 +1,7 @@
 
 #include "fl/time_alpha.h"
 #include "fl/warn.h"
-#include "math_macros.h"
+#include "fl/math_macros.h"
 
 namespace fl {
 

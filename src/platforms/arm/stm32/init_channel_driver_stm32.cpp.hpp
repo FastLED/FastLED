@@ -21,7 +21,7 @@
 
 #include "fl/compiler_control.h"
 
-#include "is_stm32.h"
+#include "platforms/arm/stm32/is_stm32.h"
 
 #if defined(FL_IS_STM32)
 
