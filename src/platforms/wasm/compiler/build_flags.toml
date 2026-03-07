@@ -191,11 +191,9 @@ link_flags = [
 # Optimized for fastest iteration during development. Prioritizes compilation and linking speed
 # over runtime performance. Uses ThinLTO with incremental cache for fast rebuilds.
 
-# Quick build compilation flags (shared by library and sketch unless sketch_flags overrides)
+# Quick build compilation flags — default for library (sketch uses sketch_flags below)
+# NOTE: library_flags below overrides BOTH [library].compiler_flags AND these flags.
 flags = [
-    # Link-Time Optimization - ThinLTO with incremental cache
-    "-flto=thin",                            # Enable ThinLTO (generates LLVM bitcode objects)
-
     # Optimization Control - Optimized for build speed
     "-O1",                                   # Light optimization (faster than O0 with better performance)
     "-g0",                                   # No debug info (fastest compilation, smallest size)
@@ -218,6 +216,32 @@ flags = [
     "-fno-rtti",                           # Explicitly disable RTTI (already in base but emphasize)
 ]
 
+# Library-specific quick mode flags — replaces [library].compiler_flags + flags above.
+# NO -flto=thin: library compiles to native wasm objects instead of LLVM bitcode.
+# Trade-off: library rebuild is slower (~10s more), but LINKING is much faster because
+# the linker does simple wasm merging instead of ThinLTO backend compilation each link.
+# This is a huge win for iterative sketch development (link runs on every sketch change).
+library_flags = [
+    # From [library] section — keep -Wall, drop -flto=thin
+    "-Wall",
+    # Optimization and debug
+    "-O1",
+    "-g0",
+    # Build speed optimizations
+    "-fno-inline-functions",
+    "-fno-vectorize",
+    "-fno-unroll-loops",
+    "-fno-strict-aliasing",
+    "-fno-delayed-template-parsing",
+    "-fmax-type-align=4",
+    # Code generation
+    "-ffast-math",
+    "-fno-finite-math-only",
+    "-fno-math-errno",
+    "-fno-exceptions",
+    "-fno-rtti",
+]
+
 # Sketch-specific quick mode flags — optimized for absolute fastest sketch compilation.
 # The sketch is a single translation unit; LTO/vectorization/unrolling are meaningless.
 # PCH handles header parsing; this just needs to emit code as fast as possible.
@@ -228,13 +252,9 @@ sketch_flags = [
     "-fno-rtti",                            # Disable RTTI (consistent with base)
 ]
 
-# Quick build linking flags - optimized for fastest linking with ThinLTO cache
+# Quick build linking flags - optimized for fastest linking without LTO
 link_flags = [
-    # ThinLTO Incremental Build Optimization (CRITICAL for fast rebuilds)
-    # Per LLVM docs: https://clang.llvm.org/docs/ThinLTO.html
-    # Cache directory stores optimized bitcode per module - unchanged modules skip re-optimization
-    "-Wl,--thinlto-cache-dir=build/wasm/lto_cache",  # Persistent LTO cache for incremental builds
-
+    # Note: No ThinLTO cache needed — library is compiled without -flto=thin in quick mode.
     # Note: --profiling-funcs and --emit-symbol-map removed for faster linking.
     # Use debug or fast_debug mode if you need function names in profiling.
 

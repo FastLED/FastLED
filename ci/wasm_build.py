@@ -13,6 +13,9 @@ orchestrator that delegates compilation to Meson/Ninja and only handles:
 All dependency tracking, parallel compilation, PCH management, and
 incremental builds are handled by Ninja automatically.
 
+Per-sketch artifacts are cached in .build/wasm/<SketchName>/ to enable
+fast switching between sketches without recompilation.
+
 Usage:
     uv run python ci/wasm_build.py --example Blink -o examples/Blink/fastled_js/fastled.js
     uv run python ci/wasm_build.py --example Blink -o output.js --mode debug
@@ -24,6 +27,7 @@ Usage:
 import argparse
 import hashlib
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -49,10 +53,90 @@ def get_build_dir(mode: str) -> Path:
     return BUILD_DIR_PREFIX / f"meson-wasm-{mode}"
 
 
+def get_sketch_cache_dir(example_name: str) -> Path:
+    """Get per-sketch cache directory next to the .ino file: <sketch_dir>/.build/wasm/."""
+    ino_file = PROJECT_ROOT / "examples" / example_name / f"{example_name}.ino"
+    if not ino_file.exists():
+        raise FileNotFoundError(f"Sketch not found: {ino_file}")
+    d = ino_file.parent / ".build" / "wasm"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
 def get_meson_executable() -> str:
     """Get the meson executable path."""
     # Use the same meson that the native build uses
     return "meson"
+
+
+# ============================================================================
+# Library fingerprint — skip meson/ninja when source tree hasn't changed
+# ============================================================================
+
+
+def _compute_src_fingerprint() -> str:
+    """Fast fingerprint of source tree based on file mtimes.
+
+    Walks src/ and key build config files, hashing their paths and mtimes.
+    This is much faster than running meson compile (~10ms vs ~1s).
+    """
+    h = hashlib.md5(usedforsecurity=False)
+    src_dir = PROJECT_ROOT / "src"
+
+    # Hash all source files
+    for root, dirs, files in os.walk(src_dir):
+        dirs.sort()
+        for f in sorted(files):
+            if f.endswith((".cpp", ".h", ".hpp", ".c")):
+                full = os.path.join(root, f)
+                try:
+                    h.update(f"{full}:{os.path.getmtime(full):.6f}".encode())
+                except OSError:
+                    h.update(f"{full}:MISSING".encode())
+
+    # Also hash build config files that affect the library
+    for config_file in [
+        PROJECT_ROOT / "src" / "platforms" / "wasm" / "compiler" / "build_flags.toml",
+        PROJECT_ROOT / "meson.build",
+        PROJECT_ROOT / "ci" / "meson" / "wasm" / "meson.build",
+        PROJECT_ROOT / "ci" / "meson" / "wasm_cross_file.ini",
+    ]:
+        try:
+            h.update(f"{config_file}:{config_file.stat().st_mtime:.6f}".encode())
+        except OSError:
+            h.update(f"{config_file}:MISSING".encode())
+
+    return h.hexdigest()
+
+
+def _library_is_fresh(build_dir: Path) -> bool:
+    """Check if libfastled.a is up-to-date based on source fingerprint."""
+    library_archive = build_dir / "ci" / "meson" / "wasm" / "libfastled.a"
+    fingerprint_file = build_dir / "library_src_fingerprint"
+
+    if not library_archive.exists() or not fingerprint_file.exists():
+        return False
+
+    try:
+        stored = fingerprint_file.read_text(encoding="utf-8").strip()
+        current = _compute_src_fingerprint()
+        return stored == current
+    except OSError:
+        return False
+
+
+def _save_library_fingerprint(build_dir: Path) -> None:
+    """Save source fingerprint after successful library build."""
+    fingerprint_file = build_dir / "library_src_fingerprint"
+    try:
+        fingerprint_file.write_text(_compute_src_fingerprint(), encoding="utf-8")
+    except OSError:
+        pass
+
+
+# ============================================================================
+# Build steps
+# ============================================================================
 
 
 def ensure_meson_configured(build_dir: Path, mode: str, force: bool = False) -> bool:
@@ -94,8 +178,17 @@ def build_library(build_dir: Path, verbose: bool = False) -> bool:
     """
     Build libfastled.a using ninja.
 
+    Skips the build entirely if the source fingerprint hasn't changed.
     Returns True if build succeeded.
     """
+    # Fast path: skip meson/ninja if source tree hasn't changed
+    if _library_is_fresh(build_dir):
+        if verbose:
+            print("[WASM] Library up-to-date (fingerprint match), skipping meson")
+        else:
+            print("[WASM] Library up-to-date")
+        return True
+
     # Check for stale PCH before invoking Ninja (Windows backslash path issue)
     from ci.compile_pch import invalidate_stale_pch
 
@@ -111,11 +204,12 @@ def build_library(build_dir: Path, verbose: bool = False) -> bool:
         print(f"[WASM] Library build failed with return code {result.returncode}")
         return False
 
+    _save_library_fingerprint(build_dir)
     print("[WASM] Library build successful")
     return True
 
 
-def create_wrapper(example_name: str, build_dir: Path) -> Path:
+def create_wrapper(example_name: str, sketch_cache_dir: Path) -> Path:
     """
     Create a wrapper .cpp that includes the sketch .ino file.
 
@@ -127,7 +221,7 @@ def create_wrapper(example_name: str, build_dir: Path) -> Path:
     if not ino_file.exists():
         raise FileNotFoundError(f"Example not found: {ino_file}")
 
-    wrapper_path = build_dir / f"{example_name}_wrapper.cpp"
+    wrapper_path = sketch_cache_dir / f"{example_name}_wrapper.cpp"
     wrapper_content = f"""// Auto-generated wrapper for {example_name}.ino
 // For WASM builds, we use the standard entry point from platforms/wasm/entry_point.cpp
 #include "{ino_file.as_posix()}"
@@ -210,20 +304,22 @@ def build_sketch_pch(
 def compile_sketch(
     wrapper_path: Path,
     build_dir: Path,
+    sketch_cache_dir: Path,
     mode: str,
     verbose: bool = False,
 ) -> Path | None:
     """
     Compile the sketch wrapper to an object file.
 
+    Sketch artifacts are cached per-sketch in sketch_cache_dir.
     Returns path to the object file, or None on failure.
     """
     emcc = get_emcc()
-    object_path = build_dir / "sketch.o"
+    object_path = sketch_cache_dir / "sketch.o"
 
     # Check if recompilation needed (mtime check against wrapper and library)
     library_archive = build_dir / "ci" / "meson" / "wasm" / "libfastled.a"
-    if object_path.exists() and not verbose:
+    if object_path.exists():
         object_mtime = object_path.stat().st_mtime
         wrapper_mtime = wrapper_path.stat().st_mtime
         lib_mtime = library_archive.stat().st_mtime if library_archive.exists() else 0
@@ -274,6 +370,7 @@ def compile_sketch(
 def link_wasm(
     sketch_object: Path,
     build_dir: Path,
+    sketch_cache_dir: Path,
     output_js: Path,
     mode: str,
     verbose: bool = False,
@@ -281,6 +378,7 @@ def link_wasm(
     """
     Link sketch.o + libfastled.a → fastled.js + fastled.wasm.
 
+    Links into sketch_cache_dir first, then copies to output_js.
     Returns True on success.
     """
     emcc = get_emcc()
@@ -290,16 +388,21 @@ def link_wasm(
         print(f"[WASM] Library not found: {library_archive}")
         return False
 
-    # Check if linking needed
-    wasm_output = output_js.with_suffix(".wasm")
-    if wasm_output.exists() and output_js.exists():
-        output_mtime = min(wasm_output.stat().st_mtime, output_js.stat().st_mtime)
+    # Intermediate linked output in per-sketch cache
+    cached_js = sketch_cache_dir / "fastled.js"
+    cached_wasm = sketch_cache_dir / "fastled.wasm"
+
+    # Check if linking needed (compare inputs vs cached output)
+    if cached_js.exists() and cached_wasm.exists():
+        output_mtime = min(cached_js.stat().st_mtime, cached_wasm.stat().st_mtime)
         inputs_newer = (
             sketch_object.stat().st_mtime > output_mtime
             or library_archive.stat().st_mtime > output_mtime
         )
         if not inputs_newer:
-            print("[WASM] Output is up-to-date, skipping linking")
+            # Cached link output is fresh — just copy to final location
+            _copy_linked_output(sketch_cache_dir, output_js)
+            print("[WASM] Link output up-to-date (cached)")
             return True
 
     link_flags = get_link_flags(mode)
@@ -313,7 +416,7 @@ def link_wasm(
     cmd = (
         [emcc, str(sketch_object), str(library_archive)]
         + includes
-        + ["-o", str(output_js)]
+        + ["-o", str(cached_js)]
         + link_flags
     )
 
@@ -326,8 +429,32 @@ def link_wasm(
         print(f"[WASM] Linking failed with return code {result.returncode}")
         return False
 
+    # Copy from cache to final output
+    _copy_linked_output(sketch_cache_dir, output_js)
     print(f"[WASM] Output: {output_js}")
     return True
+
+
+def _copy_linked_output(sketch_cache_dir: Path, output_js: Path) -> None:
+    """Copy linked .js and .wasm from sketch cache to final output directory."""
+    output_dir = output_js.parent
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    cached_js = sketch_cache_dir / "fastled.js"
+    cached_wasm = sketch_cache_dir / "fastled.wasm"
+
+    if cached_js.exists():
+        shutil.copy2(str(cached_js), str(output_js))
+    if cached_wasm.exists():
+        shutil.copy2(str(cached_wasm), str(output_js.with_suffix(".wasm")))
+
+    # Copy any other generated files (worker JS, etc.)
+    for f in sketch_cache_dir.iterdir():
+        if f.suffix in (".js", ".wasm") and f.name not in (
+            "fastled.js",
+            "fastled.wasm",
+        ):
+            shutil.copy2(str(f), str(output_dir / f.name))
 
 
 def _copy_from_dist(dist_dir: Path, output_dir: Path) -> None:
@@ -354,20 +481,6 @@ def _run_npx(args: list[str], cwd: Path) -> int:
     from nodejs_wheel import npx as npx_func  # type: ignore[import-untyped]
 
     return npx_func(args, cwd=str(cwd))
-
-
-def _copy_templates_legacy(output_dir: Path) -> None:  # noqa: ARG001
-    """Legacy direct copy — no longer supported after TypeScript migration.
-
-    Raises RuntimeError because raw .ts files cannot be executed by browsers.
-    Vite is required to transpile and bundle the TypeScript frontend.
-    """
-    raise RuntimeError(
-        "Legacy template copy is no longer supported. "
-        "The frontend source files are TypeScript and require Vite to build. "
-        "Run 'npm install' in src/platforms/wasm/compiler/ to install dependencies, "
-        "then re-run the build."
-    )
 
 
 def _get_vite_source_mtime(template_dir: Path) -> float:
@@ -465,6 +578,7 @@ def main() -> int:
     try:
         start_time = time.time()
         build_dir = get_build_dir(args.mode)
+        sketch_cache_dir = get_sketch_cache_dir(args.example)
         output_js = Path(args.output)
         output_dir = output_js.parent
 
@@ -474,7 +588,7 @@ def main() -> int:
         if not ensure_meson_configured(build_dir, args.mode, args.force):
             return 1
 
-        # Step 2: Build library via ninja
+        # Step 2: Build library via ninja (skipped if source fingerprint matches)
         lib_start = time.time()
         if not build_library(build_dir, args.verbose):
             return 1
@@ -485,18 +599,22 @@ def main() -> int:
             print("[WASM] WARNING: Sketch PCH build failed, continuing without PCH")
         lib_time = time.time() - lib_start
 
-        # Step 3: Create wrapper and compile sketch
+        # Step 3: Create wrapper and compile sketch (per-sketch cache)
         sketch_start = time.time()
-        wrapper = create_wrapper(args.example, build_dir)
-        sketch_obj = compile_sketch(wrapper, build_dir, args.mode, args.verbose)
+        wrapper = create_wrapper(args.example, sketch_cache_dir)
+        sketch_obj = compile_sketch(
+            wrapper, build_dir, sketch_cache_dir, args.mode, args.verbose
+        )
         if sketch_obj is None:
             return 1
         sketch_time = time.time() - sketch_start
 
-        # Step 4: Link
+        # Step 4: Link (per-sketch cache, copy to output)
         link_start = time.time()
         output_dir.mkdir(parents=True, exist_ok=True)
-        if not link_wasm(sketch_obj, build_dir, output_js, args.mode, args.verbose):
+        if not link_wasm(
+            sketch_obj, build_dir, sketch_cache_dir, output_js, args.mode, args.verbose
+        ):
             return 1
         link_time = time.time() - link_start
 

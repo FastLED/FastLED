@@ -41,6 +41,8 @@ def get_lib_compile_flags_dict(mode: str = "quick") -> dict[str, list[str]]:
     Get library compilation flags as a dict.
 
     Combines [all] + [library] + [build_modes.<mode>].
+    If library_flags exists in build mode, it replaces both [library].compiler_flags
+    and [build_modes].flags (allows per-mode library flag overrides, e.g. no LTO).
 
     Returns:
         {"defines": [...], "compiler_flags": [...]}
@@ -51,10 +53,16 @@ def get_lib_compile_flags_dict(mode: str = "quick") -> dict[str, list[str]]:
     compiler_flags = list(config.get("all", {}).get("compiler_flags", []))
 
     defines.extend(config.get("library", {}).get("defines", []))
-    compiler_flags.extend(config.get("library", {}).get("compiler_flags", []))
 
     build_mode_config = config.get("build_modes", {}).get(mode, {})
-    compiler_flags.extend(build_mode_config.get("flags", []))
+    # Use library-specific flags if available, otherwise fall back to
+    # [library].compiler_flags + build mode flags
+    library_mode_flags = build_mode_config.get("library_flags")
+    if library_mode_flags is not None:
+        compiler_flags.extend(library_mode_flags)
+    else:
+        compiler_flags.extend(config.get("library", {}).get("compiler_flags", []))
+        compiler_flags.extend(build_mode_config.get("flags", []))
 
     return {"defines": defines, "compiler_flags": compiler_flags}
 
