@@ -1,6 +1,6 @@
 #include "fl/audio/detectors/frequency_bands.h"
 #include "fl/audio/audio_context.h"
-#include "fl/fft.h"
+#include "fl/audio/fft/fft.h"
 #include "fl/stl/math.h"
 
 namespace fl {

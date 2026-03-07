@@ -1,7 +1,7 @@
 
-#include "fl/fft.h"
+#include "fl/audio/fft/fft.h"
 #include "fl/compiler_control.h"
-#include "fl/fft_impl.h"
+#include "fl/audio/fft/fft_impl.h"
 #include "fl/hash_map_lru.h"
 #include "fl/int.h"
 #include "fl/stl/shared_ptr.h"  // For shared_ptr

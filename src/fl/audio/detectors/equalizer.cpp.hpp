@@ -1,7 +1,7 @@
 #include "fl/audio/detectors/equalizer.h"
 #include "fl/audio/audio_context.h"
 #include "fl/audio/mic_response_data.h"
-#include "fl/fft.h"
+#include "fl/audio/fft/fft.h"
 #include "fl/stl/math.h"
 
 namespace fl {

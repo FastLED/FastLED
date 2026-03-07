@@ -26,7 +26,7 @@
 #include "fl/sensors/pir.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/assert.h"
-#include "fl/noise.h"
+#include "fl/gfx/noise.h"
 
 // Defines come after all includes
 #ifndef DATA_PIN

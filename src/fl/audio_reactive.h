@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/fft.h"
+#include "fl/audio/fft/fft.h"
 #include "fl/int.h"
 #include "fl/audio.h"  // IWYU pragma: keep
 #include "fl/audio/signal_conditioner.h"

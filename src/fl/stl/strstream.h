@@ -21,7 +21,7 @@ template <typename Key, typename Value, fl::size N> class unsorted_map_fixed;  /
 template <typename Key, typename Value, typename Less, typename Allocator> class flat_map;  // Forward declaration from fl/stl/flat_map.h
 template <typename T, fl::size Extent> class span;  // Forward declaration from fl/stl/span.h (no default arg to avoid redefinition)  // IWYU pragma: keep
 template <typename T1, typename T2> struct pair;  // Forward declaration from fl/stl/pair.h
-class FFTBins;  // Forward declaration from fl/fft.h
+class FFTBins;  // Forward declaration from fl/audio/fft/fft.h
 template <fl::u32 N> class bitset_fixed;
 class bitset_dynamic;  // IWYU pragma: keep
 template <fl::u32 N> class bitset_inlined;  // IWYU pragma: keep

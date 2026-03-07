@@ -12,8 +12,6 @@
 #include "fl/delay.cpp.hpp"
 #include "fl/engine_events.cpp.hpp"
 #include "fl/fastled_internal.cpp.hpp"
-#include "fl/fft.cpp.hpp"
-#include "fl/fft_impl.cpp.hpp"
 #include "fl/file_system.cpp.hpp"
 #include "fl/fltest.cpp.hpp"
 #include "fl/id_tracker.cpp.hpp"

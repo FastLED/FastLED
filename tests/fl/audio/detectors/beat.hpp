@@ -3,7 +3,7 @@
 #include "test.h"
 #include "fl/audio.h"
 #include "fl/audio/audio_context.h"
-#include "fl/fft.h"
+#include "fl/audio/fft/fft.h"
 #include "fl/audio/detectors/beat.h"
 #include "../test_helpers.h"
 #include "fl/stl/vector.h"

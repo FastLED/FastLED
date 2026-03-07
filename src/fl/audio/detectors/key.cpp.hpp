@@ -2,7 +2,7 @@
 
 #include "fl/audio/detectors/key.h"
 #include "fl/audio/audio_context.h"
-#include "fl/fft.h"
+#include "fl/audio/fft/fft.h"
 #include "fl/stl/math.h"
 #include "fl/dbg.h"
 #include "fl/stl/stdio.h"

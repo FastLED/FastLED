@@ -1,7 +1,7 @@
 #include "test.h"
 #include "fl/audio/frequency_bin_mapper.h"
 #include "fl/audio/spectral_equalizer.h"
-#include "fl/fft.h"
+#include "fl/audio/fft/fft.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/math.h"
 #include "test_helpers.h"

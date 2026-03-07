@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/audio/audio_detector.h"
-#include "fl/fft.h"
+#include "fl/audio/fft/fft.h"
 #include "fl/filter.h"
 #include "fl/stl/function.h"
 #include "fl/stl/shared_ptr.h"

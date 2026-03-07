@@ -656,7 +656,7 @@ For full control, use `AudioSample` and `FFT` directly. This is useful when you 
 #include "FastLED.h"
 #include "fl/audio/input.h"
 #include "fl/audio.h"
-#include "fl/fft.h"
+#include "fl/audio/fft/fft.h"
 
 using namespace fl;
 

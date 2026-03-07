@@ -2,7 +2,7 @@
 
 #include "fl/audio.h"
 #include "fl/audio/audio_context.h"
-#include "fl/fft.h"
+#include "fl/audio/fft/fft.h"
 #include "fl/int.h"
 #include "fl/math_macros.h"
 #include "fl/stl/math.h"

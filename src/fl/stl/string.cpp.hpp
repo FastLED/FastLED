@@ -4,7 +4,7 @@
 #include "fl/stl/type_traits.h"      // for swap
 #include "fl/stl/variant.h"          // for variant
 
-#include "fl/fft.h"
+#include "fl/audio/fft/fft.h"
 #include "fl/geometry.h"             // for vec2
 #include "fl/int.h"                  // for size, u16, u8
 #include "fl/stl/json.h"

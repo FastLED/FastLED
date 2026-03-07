@@ -1,7 +1,7 @@
 #include "fl/stl/strstream.h"
 #include "crgb.h"
 #include "fl/gfx/tile2x2.h"
-#include "fl/fft.h"
+#include "fl/audio/fft/fft.h"
 #include "fl/stl/string.h"
 #include "fl/stl/ios.h"
 #include "fl/stl/charconv.h"

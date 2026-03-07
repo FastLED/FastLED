@@ -18,6 +18,7 @@
 // Subdirectory implementations (alphabetical order)
 #include "fl/audio/_build.cpp.hpp"
 #include "fl/audio/detectors/_build.cpp.hpp"
+#include "fl/audio/fft/_build.cpp.hpp"
 #include "fl/channels/_build.cpp.hpp"
 #include "fl/font/_build.cpp.hpp"
 #include "fl/channels/adapters/_build.cpp.hpp"

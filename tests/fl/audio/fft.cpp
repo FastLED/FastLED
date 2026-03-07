@@ -6,8 +6,8 @@
 #include "third_party/cq_kernel/fft_precision.h"
 
 #include "test.h"
-#include "fl/fft.h"
-#include "fl/fft_impl.h"
+#include "fl/audio/fft/fft.h"
+#include "fl/audio/fft/fft_impl.h"
 #include "fl/int.h"
 #include "fl/log.h"
 #include "fl/stl/math.h"
