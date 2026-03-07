@@ -171,6 +171,28 @@ def _resolve_fast_native_entries(
         return None, None, None
 
 
+def _resolve_fast_compiler_binary() -> Optional[str]:
+    """
+    Resolve raw clang++ binary path, bypassing the Python entry point wrapper.
+
+    The Python wrapper (clang-tool-chain-cpp.EXE) has ~3.6 second startup
+    overhead. Using the raw binary directly saves this overhead for operations
+    like --version checks.
+
+    Returns:
+        Path to raw clang++ binary, or None if resolution fails.
+    """
+    try:
+        from clang_tool_chain.platform.paths import find_tool_binary
+
+        return str(find_tool_binary("clang++"))
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        return None  # unreachable, satisfies type checker
+    except Exception:
+        return None
+
+
 def is_ar_content_preserving_active(build_dir: Path) -> bool:
     """
     Check if the content-preserving archive optimization is active in build.ninja.
@@ -1383,7 +1405,11 @@ def setup_meson_build(
         except OSError:
             pass
     if not _version_from_cache:
-        current_compiler_version = get_compiler_version(clangxx_wrapper)
+        # PERFORMANCE: Use raw clang++ binary for version check (~60ms vs ~3600ms)
+        _fast_compiler = _resolve_fast_compiler_binary()
+        current_compiler_version = get_compiler_version(
+            _fast_compiler if _fast_compiler else clangxx_wrapper
+        )
 
     # Consolidated single-line toolchain summary (verbose mode only)
     # Before: 7 lines of compiler details
@@ -1518,9 +1544,29 @@ endian = 'little'
         _ts_print(f"[MESON] Warning: Could not write native file: {e}", file=sys.stderr)
 
     env = os.environ.copy()
-    env["CC"] = clang_wrapper
-    env["CXX"] = clangxx_wrapper
-    env["AR"] = llvm_ar_wrapper
+    # PERFORMANCE: Use raw compiler binaries for env vars when available.
+    # The native file takes precedence over env vars for meson, but these
+    # serve as fallback. Raw binaries avoid ~3.6s Python wrapper overhead.
+    _fast_compiler = _resolve_fast_compiler_binary()
+    if _fast_compiler:
+        try:
+            from clang_tool_chain.platform.paths import find_tool_binary
+
+            _fast_c = str(find_tool_binary("clang"))
+            _fast_ar = str(find_tool_binary("llvm-ar"))
+            env["CC"] = _fast_c
+            env["CXX"] = _fast_compiler
+            env["AR"] = _fast_ar
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+        except Exception:
+            env["CC"] = clang_wrapper
+            env["CXX"] = clangxx_wrapper
+            env["AR"] = llvm_ar_wrapper
+    else:
+        env["CC"] = clang_wrapper
+        env["CXX"] = clangxx_wrapper
+        env["AR"] = llvm_ar_wrapper
 
     # sccache status already shown in toolchain summary above
 
