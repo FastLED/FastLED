@@ -180,7 +180,7 @@ class FL_ALIGN unordered_map {
         using value_type = pair<const Key, T>;  // Keep const Key as per standard
         using pointer = value_type *;
         using reference = value_type &;
-        // using iterator_category = std::forward_iterator_tag;
+        using iterator_category = fl::forward_iterator_tag;
 
         iterator() : _map(nullptr), _idx(0) {}
         iterator(unordered_map *m, fl::size idx) : _map(m), _idx(idx) {
@@ -235,7 +235,7 @@ class FL_ALIGN unordered_map {
         using value_type = pair<const Key, T>;
         using pointer = const value_type *;
         using reference = const value_type &;
-        // using iterator_category = std::forward_iterator_tag;
+        using iterator_category = fl::forward_iterator_tag;
 
         const_iterator() : _map(nullptr), _idx(0) {}
         const_iterator(const unordered_map *m, fl::size idx) : _map(m), _idx(idx) {
@@ -1085,6 +1085,22 @@ class FL_ALIGN unordered_map {
     }
     FL_DISABLE_WARNING_POP
 
+    /// Equality comparison (map equality: same key-value pairs, order-independent)
+    bool operator==(const unordered_map& other) const {
+        if (size() != other.size()) return false;
+        for (const auto& kv : *this) {
+            auto it = other.find(kv.first);
+            if (it == other.end() || it->second != kv.second) return false;
+        }
+        return true;
+    }
+
+    /// Inequality comparison
+    bool operator!=(const unordered_map& other) const {
+        return !(*this == other);
+    }
+
+  private:
     fl::vector_inlined<Entry, INLINED_COUNT> _buckets;
     fl::size _size;
     fl::size _tombstones;

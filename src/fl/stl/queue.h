@@ -145,6 +145,48 @@ public:
     const Container& get_container() const {
         return mContainer;
     }
+
+    /// @brief Equality comparison
+    /// @param other Queue to compare with
+    /// @return true if both queues contain the same elements in the same order
+    bool operator==(const queue& other) const {
+        return mContainer == other.mContainer;
+    }
+
+    /// @brief Inequality comparison
+    /// @param other Queue to compare with
+    /// @return true if queues are not equal
+    bool operator!=(const queue& other) const {
+        return mContainer != other.mContainer;
+    }
+
+    /// @brief Less-than comparison (lexicographic)
+    /// @param other Queue to compare with
+    /// @return true if this queue is lexicographically less than other
+    bool operator<(const queue& other) const {
+        return mContainer < other.mContainer;
+    }
+
+    /// @brief Less-than-or-equal comparison
+    /// @param other Queue to compare with
+    /// @return true if this queue is lexicographically less than or equal to other
+    bool operator<=(const queue& other) const {
+        return mContainer <= other.mContainer;
+    }
+
+    /// @brief Greater-than comparison
+    /// @param other Queue to compare with
+    /// @return true if this queue is lexicographically greater than other
+    bool operator>(const queue& other) const {
+        return mContainer > other.mContainer;
+    }
+
+    /// @brief Greater-than-or-equal comparison
+    /// @param other Queue to compare with
+    /// @return true if this queue is lexicographically greater than or equal to other
+    bool operator>=(const queue& other) const {
+        return mContainer >= other.mContainer;
+    }
 };
 
 /// @brief Swap two queues
@@ -155,6 +197,42 @@ public:
 template <typename T, typename Container>
 void swap(queue<T, Container>& lhs, queue<T, Container>& rhs) {
     lhs.swap(rhs);
+}
+
+/// @brief Non-member equality comparison for queues
+template <typename T, typename Container>
+bool operator==(const queue<T, Container>& lhs, const queue<T, Container>& rhs) {
+    return lhs.get_container() == rhs.get_container();
+}
+
+/// @brief Non-member inequality comparison for queues
+template <typename T, typename Container>
+bool operator!=(const queue<T, Container>& lhs, const queue<T, Container>& rhs) {
+    return lhs.get_container() != rhs.get_container();
+}
+
+/// @brief Non-member less-than comparison for queues
+template <typename T, typename Container>
+bool operator<(const queue<T, Container>& lhs, const queue<T, Container>& rhs) {
+    return lhs.get_container() < rhs.get_container();
+}
+
+/// @brief Non-member less-than-or-equal comparison for queues
+template <typename T, typename Container>
+bool operator<=(const queue<T, Container>& lhs, const queue<T, Container>& rhs) {
+    return lhs.get_container() <= rhs.get_container();
+}
+
+/// @brief Non-member greater-than comparison for queues
+template <typename T, typename Container>
+bool operator>(const queue<T, Container>& lhs, const queue<T, Container>& rhs) {
+    return lhs.get_container() > rhs.get_container();
+}
+
+/// @brief Non-member greater-than-or-equal comparison for queues
+template <typename T, typename Container>
+bool operator>=(const queue<T, Container>& lhs, const queue<T, Container>& rhs) {
+    return lhs.get_container() >= rhs.get_container();
 }
 
 } // namespace fl 

@@ -286,4 +286,92 @@ FL_TEST_CASE("fl::bitset_fixed - type alias") {
     FL_CHECK_EQ(bs64.size(), 64);
 }
 
+FL_TEST_CASE("fl::bitset_fixed<8> - comparison operators") {
+    bitset_fixed<8> bs1;
+    bitset_fixed<8> bs2;
+    bitset_fixed<8> bs3;
+
+    bs1.set(0).set(2);
+    bs2.set(0).set(2);
+    bs3.set(0).set(2).set(4);
+
+    FL_SUBCASE("operator== equality") {
+        FL_CHECK(bs1 == bs2);
+        FL_CHECK_FALSE(bs1 == bs3);
+    }
+
+    FL_SUBCASE("operator!= inequality") {
+        FL_CHECK(bs1 != bs3);
+        FL_CHECK_FALSE(bs1 != bs2);
+    }
+
+    FL_SUBCASE("operator< less than") {
+        FL_CHECK(bs1 < bs3);
+        FL_CHECK_FALSE(bs3 < bs1);
+        FL_CHECK_FALSE(bs1 < bs2);
+    }
+
+    FL_SUBCASE("operator<= less than or equal") {
+        FL_CHECK(bs1 <= bs2);
+        FL_CHECK(bs1 <= bs3);
+        FL_CHECK_FALSE(bs3 <= bs1);
+    }
+
+    FL_SUBCASE("operator> greater than") {
+        FL_CHECK(bs3 > bs1);
+        FL_CHECK_FALSE(bs1 > bs3);
+        FL_CHECK_FALSE(bs1 > bs2);
+    }
+
+    FL_SUBCASE("operator>= greater than or equal") {
+        FL_CHECK(bs2 >= bs1);
+        FL_CHECK(bs3 >= bs1);
+        FL_CHECK_FALSE(bs1 >= bs3);
+    }
+}
+
+FL_TEST_CASE("fl::bitset_inlined<16> - comparison operators") {
+    bitset_inlined<16> bs1;
+    bitset_inlined<16> bs2;
+    bitset_inlined<16> bs3;
+
+    bs1.set(3).set(7);
+    bs2.set(3).set(7);
+    bs3.set(3).set(7).set(10);
+
+    FL_SUBCASE("operator== equality") {
+        FL_CHECK(bs1 == bs2);
+        FL_CHECK_FALSE(bs1 == bs3);
+    }
+
+    FL_SUBCASE("operator!= inequality") {
+        FL_CHECK(bs1 != bs3);
+        FL_CHECK_FALSE(bs1 != bs2);
+    }
+
+    FL_SUBCASE("operator< less than") {
+        FL_CHECK(bs1 < bs3);
+        FL_CHECK_FALSE(bs3 < bs1);
+        FL_CHECK_FALSE(bs1 < bs2);
+    }
+
+    FL_SUBCASE("operator<= less than or equal") {
+        FL_CHECK(bs1 <= bs2);
+        FL_CHECK(bs1 <= bs3);
+        FL_CHECK_FALSE(bs3 <= bs1);
+    }
+
+    FL_SUBCASE("operator> greater than") {
+        FL_CHECK(bs3 > bs1);
+        FL_CHECK_FALSE(bs1 > bs3);
+        FL_CHECK_FALSE(bs1 > bs2);
+    }
+
+    FL_SUBCASE("operator>= greater than or equal") {
+        FL_CHECK(bs2 >= bs1);
+        FL_CHECK(bs3 >= bs1);
+        FL_CHECK_FALSE(bs1 >= bs3);
+    }
+}
+
 } // FL_TEST_FILE

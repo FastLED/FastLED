@@ -62,6 +62,7 @@ public:
         typedef T& reference;
         typedef T* pointer;
         typedef fl::size difference_type;
+        typedef fl::random_access_iterator_tag iterator_category;
 
     private:
         deque* mDeque;
@@ -161,6 +162,7 @@ public:
         typedef const T& reference;
         typedef const T* pointer;
         typedef fl::size difference_type;
+        typedef fl::random_access_iterator_tag iterator_category;
 
     private:
         const deque* mDeque;

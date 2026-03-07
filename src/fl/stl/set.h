@@ -9,6 +9,7 @@
 #include "fl/stl/strstream.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/utility.h"
+#include "fl/stl/algorithm.h"
 #include "fl/int.h"
 
 namespace fl {
@@ -165,6 +166,36 @@ template <typename Key, size N> class VectorSetFixed {
     // Return the last element of the set
     const Key &back() const { return data.back(); }
 
+    /// Equality comparison
+    bool operator==(const VectorSetFixed& other) const {
+        return data == other.data;
+    }
+
+    /// Inequality comparison
+    bool operator!=(const VectorSetFixed& other) const {
+        return data != other.data;
+    }
+
+    /// Lexicographic comparison
+    bool operator<(const VectorSetFixed& other) const {
+        return data < other.data;
+    }
+
+    /// Less-than-or-equal comparison
+    bool operator<=(const VectorSetFixed& other) const {
+        return data <= other.data;
+    }
+
+    /// Greater-than comparison
+    bool operator>(const VectorSetFixed& other) const {
+        return data > other.data;
+    }
+
+    /// Greater-than-or-equal comparison
+    bool operator>=(const VectorSetFixed& other) const {
+        return data >= other.data;
+    }
+
   private:
     VectorType data;
 };
@@ -300,6 +331,36 @@ template <typename Key, typename Allocator = fl::allocator<Key>> class VectorSet
     // Return the last element of the set
     const Key &back() const { return data.back(); }
 
+    /// Equality comparison
+    bool operator==(const VectorSet& other) const {
+        return data == other.data;
+    }
+
+    /// Inequality comparison
+    bool operator!=(const VectorSet& other) const {
+        return data != other.data;
+    }
+
+    /// Lexicographic comparison
+    bool operator<(const VectorSet& other) const {
+        return data < other.data;
+    }
+
+    /// Less-than-or-equal comparison
+    bool operator<=(const VectorSet& other) const {
+        return data <= other.data;
+    }
+
+    /// Greater-than comparison
+    bool operator>(const VectorSet& other) const {
+        return data > other.data;
+    }
+
+    /// Greater-than-or-equal comparison
+    bool operator>=(const VectorSet& other) const {
+        return data >= other.data;
+    }
+
   private:
     VectorType data;
 };
@@ -424,6 +485,37 @@ template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set 
     
     const_iterator upper_bound(const Key& key) const {
         return mTree.upper_bound(key);
+    }
+
+    /// Equality comparison
+    bool operator==(const set& other) const {
+        if (size() != other.size()) return false;
+        return fl::equal(begin(), end(), other.begin());
+    }
+
+    /// Inequality comparison
+    bool operator!=(const set& other) const {
+        return !(*this == other);
+    }
+
+    /// Lexicographic comparison
+    bool operator<(const set& other) const {
+        return fl::lexicographical_compare(begin(), end(), other.begin(), other.end());
+    }
+
+    /// Less-than-or-equal comparison
+    bool operator<=(const set& other) const {
+        return *this < other || *this == other;
+    }
+
+    /// Greater-than comparison
+    bool operator>(const set& other) const {
+        return other < *this;
+    }
+
+    /// Greater-than-or-equal comparison
+    bool operator>=(const set& other) const {
+        return other <= *this;
     }
 };
 

@@ -4,6 +4,47 @@
 
 namespace fl {
 
+// Iterator category tags
+struct input_iterator_tag {};
+struct output_iterator_tag {};
+struct forward_iterator_tag : public input_iterator_tag {};
+struct bidirectional_iterator_tag : public forward_iterator_tag {};
+struct random_access_iterator_tag : public bidirectional_iterator_tag {};
+
+/// Iterator traits - provides standard typedefs for any iterator type
+/// Specializations provided for raw pointers
+/// Generic version - tries to extract nested typedefs, provides defaults if missing
+template<typename Iterator, typename = void>
+struct iterator_traits {
+    // Try to use nested typedefs if they exist, otherwise provide defaults
+    typedef typename Iterator::value_type value_type;
+    typedef typename Iterator::reference reference;
+    typedef typename Iterator::pointer pointer;
+    typedef typename Iterator::difference_type difference_type;
+    // iterator_category is optional - provide a default forward_iterator_tag if missing
+    typedef forward_iterator_tag iterator_category;
+};
+
+/// Specialization for raw pointers
+template<typename T>
+struct iterator_traits<T*> {
+    typedef T value_type;
+    typedef T& reference;
+    typedef T* pointer;
+    typedef ptrdiff_t difference_type;
+    typedef random_access_iterator_tag iterator_category;
+};
+
+/// Specialization for const raw pointers
+template<typename T>
+struct iterator_traits<const T*> {
+    typedef T value_type;
+    typedef const T& reference;
+    typedef const T* pointer;
+    typedef ptrdiff_t difference_type;
+    typedef random_access_iterator_tag iterator_category;
+};
+
 /// Back insert iterator - an output iterator that inserts elements at the end of a container
 ///
 /// This is similar to std::back_insert_iterator and provides a convenient way to insert elements
@@ -119,7 +160,7 @@ public:
     typedef typename Iterator::value_type value_type;
     typedef typename Iterator::reference reference;
     typedef typename Iterator::pointer pointer;
-    typedef fl::ptrdiff_t difference_type;
+    typedef typename Iterator::difference_type difference_type;
 
 protected:
     Iterator current;

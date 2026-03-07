@@ -106,6 +106,36 @@ class PriorityQueue {
 
     const Compare &compare() const { return _comp; }
 
+    /// Equality comparison
+    bool operator==(const PriorityQueue& other) const {
+        return _data == other._data;
+    }
+
+    /// Inequality comparison
+    bool operator!=(const PriorityQueue& other) const {
+        return _data != other._data;
+    }
+
+    /// Lexicographic comparison
+    bool operator<(const PriorityQueue& other) const {
+        return _data < other._data;
+    }
+
+    /// Less-than-or-equal comparison
+    bool operator<=(const PriorityQueue& other) const {
+        return _data <= other._data;
+    }
+
+    /// Greater-than comparison
+    bool operator>(const PriorityQueue& other) const {
+        return _data > other._data;
+    }
+
+    /// Greater-than-or-equal comparison
+    bool operator>=(const PriorityQueue& other) const {
+        return _data >= other._data;
+    }
+
   private:
     VectorT _data;
     Compare _comp;
@@ -222,6 +252,36 @@ public:
             pop();
         }
         mNextSequence = 0;
+    }
+
+    /// Equality comparison
+    bool operator==(const priority_queue_stable& other) const {
+        return mQueue == other.mQueue;
+    }
+
+    /// Inequality comparison
+    bool operator!=(const priority_queue_stable& other) const {
+        return mQueue != other.mQueue;
+    }
+
+    /// Lexicographic comparison
+    bool operator<(const priority_queue_stable& other) const {
+        return mQueue < other.mQueue;
+    }
+
+    /// Less-than-or-equal comparison
+    bool operator<=(const priority_queue_stable& other) const {
+        return mQueue <= other.mQueue;
+    }
+
+    /// Greater-than comparison
+    bool operator>(const priority_queue_stable& other) const {
+        return mQueue > other.mQueue;
+    }
+
+    /// Greater-than-or-equal comparison
+    bool operator>=(const priority_queue_stable& other) const {
+        return mQueue >= other.mQueue;
     }
 
 private:

@@ -307,6 +307,45 @@ template <fl::u32 N> class bitset_fixed {
         return -1; // No run found
     }
 
+    /// Equality comparison
+    bool operator==(const bitset_fixed &other) const noexcept {
+        for (fl::u32 i = 0; i < block_count; ++i) {
+            if (_blocks[i] != other._blocks[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool operator!=(const bitset_fixed &other) const noexcept {
+        return !(*this == other);
+    }
+
+    /// Lexicographic comparison
+    bool operator<(const bitset_fixed &other) const noexcept {
+        for (fl::i32 i = static_cast<fl::i32>(block_count) - 1; i >= 0; --i) {
+            if (_blocks[i] < other._blocks[i]) {
+                return true;
+            }
+            if (_blocks[i] > other._blocks[i]) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    bool operator<=(const bitset_fixed &other) const noexcept {
+        return *this < other || *this == other;
+    }
+
+    bool operator>(const bitset_fixed &other) const noexcept {
+        return other < *this;
+    }
+
+    bool operator>=(const bitset_fixed &other) const noexcept {
+        return other <= *this;
+    }
+
     /// Friend operators for convenience.
     friend bitset_fixed operator&(bitset_fixed lhs,
                                  const bitset_fixed &rhs) noexcept {
@@ -670,6 +709,49 @@ class bitset_inlined {
         }
 
         return result;
+    }
+
+    /// Equality comparison
+    bool operator==(const bitset_inlined &other) const noexcept {
+        if (size() != other.size()) {
+            return false;
+        }
+        for (fl::u32 i = 0; i < size(); ++i) {
+            if (test(i) != other.test(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool operator!=(const bitset_inlined &other) const noexcept {
+        return !(*this == other);
+    }
+
+    /// Lexicographic comparison
+    bool operator<(const bitset_inlined &other) const noexcept {
+        fl::u32 min_size = size() < other.size() ? size() : other.size();
+        for (fl::u32 i = min_size; i > 0; --i) {
+            bool this_bit = test(i - 1);
+            bool other_bit = other.test(i - 1);
+            if (this_bit != other_bit) {
+                return !this_bit;  // false < true
+            }
+        }
+        // All common bits are equal, shorter is less
+        return size() < other.size();
+    }
+
+    bool operator<=(const bitset_inlined &other) const noexcept {
+        return *this < other || *this == other;
+    }
+
+    bool operator>(const bitset_inlined &other) const noexcept {
+        return other < *this;
+    }
+
+    bool operator>=(const bitset_inlined &other) const noexcept {
+        return other <= *this;
     }
 };
 

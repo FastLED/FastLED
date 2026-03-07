@@ -1506,8 +1506,10 @@ struct json_value {
     class iterator {
     private:
         json_object::iterator m_iter;
-        
+
     public:
+        using iterator_category = fl::forward_iterator_tag;
+
         iterator() = default;
         iterator(json_object::iterator iter) : m_iter(iter) {}
         
@@ -1554,6 +1556,8 @@ struct json_value {
         json_object::const_iterator m_iter;
         
     public:
+        using iterator_category = fl::forward_iterator_tag;
+
         const_iterator() = default;
         const_iterator(json_object::const_iterator iter) : m_iter(iter) {}
         

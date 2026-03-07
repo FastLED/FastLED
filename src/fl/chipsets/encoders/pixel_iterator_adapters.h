@@ -15,11 +15,9 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/array.h"
 #include "fl/stl/pair.h"
+#include "fl/stl/iterator.h"
 
 namespace fl {
-
-// Iterator tag for input iterators (STL compatibility)
-struct input_iterator_tag {};
 
 class PixelIterator;  // Forward declaration
 

@@ -679,6 +679,22 @@ public:
         }
     }
 
+    void shrink_to_fit() {
+        if (mCapacity > mSize && mSize > 0) {
+            T* new_array = mAlloc.allocate(mSize);
+            for (fl::size i = 0; i < mSize; ++i) {
+                mAlloc.construct(&new_array[i], fl::move(mArray[i]));
+            }
+            mAlloc.deallocate(mArray, mCapacity);
+            mArray = new_array;
+            mCapacity = mSize;
+        } else if (mSize == 0 && mCapacity > 0) {
+            mAlloc.deallocate(mArray, mCapacity);
+            mArray = nullptr;
+            mCapacity = 0;
+        }
+    }
+
     template <typename InputIt,
               typename = fl::enable_if_t<!fl::is_integral<InputIt>::value>>
     void assign(InputIt begin, InputIt end) {
@@ -765,6 +781,14 @@ public:
 
     reverse_iterator rend() { return reverse_iterator(begin()); }
     const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
+
+    const_iterator cbegin() const {
+        return mArray ? &mArray[0] : nullptr;
+    }
+
+    const_iterator cend() const {
+        return mArray ? &mArray[mSize] : nullptr;
+    }
 
     // Element access
     T &front() { return mArray[0]; }

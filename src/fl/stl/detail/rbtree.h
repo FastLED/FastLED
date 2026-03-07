@@ -333,6 +333,7 @@ public:
         friend class const_iterator;
     public:
         using value_type = T;
+        using iterator_category = fl::bidirectional_iterator_tag;
     private:
         RBNode* mNode;
         const RedBlackTree* mTree;
@@ -447,6 +448,9 @@ public:
         }
 
     public:
+        using value_type = T;
+        using iterator_category = fl::bidirectional_iterator_tag;
+
         const_iterator() : mNode(nullptr), mTree(nullptr) {}
         const_iterator(const RBNode* n, const RedBlackTree* t) : mNode(n), mTree(t) {}
         const_iterator(const iterator& it) : mNode(it.mNode), mTree(it.mTree) {}
@@ -551,6 +555,9 @@ public:
         }
 
     public:
+        using value_type = T;
+        using iterator_category = fl::bidirectional_iterator_tag;
+
         reverse_iterator() : mNode(nullptr), mTree(nullptr) {}
         reverse_iterator(RBNode* n, const RedBlackTree* t) : mNode(n), mTree(t) {}
 
@@ -637,6 +644,9 @@ public:
         }
 
     public:
+        using value_type = T;
+        using iterator_category = fl::bidirectional_iterator_tag;
+
         const_reverse_iterator() : mNode(nullptr), mTree(nullptr) {}
         const_reverse_iterator(const RBNode* n, const RedBlackTree* t) : mNode(n), mTree(t) {}
         const_reverse_iterator(const reverse_iterator& it) : mNode(it.mNode), mTree(it.mTree) {}

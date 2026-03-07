@@ -90,6 +90,7 @@ class Corkscrew {
         using difference_type = fl::i32;
         using pointer = vec2f *;
         using reference = vec2f &;
+        using iterator_category = fl::bidirectional_iterator_tag;
 
         iterator(const Corkscrew *corkscrew, fl::size position)
             : mCorkscrew(corkscrew), mPosition(position) {}

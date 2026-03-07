@@ -28,7 +28,14 @@ template <typename T> class Optional {
     Optional(T &&value) : mValue(fl::move(value)) {}
     ~Optional() { mValue.reset(); }
 
+    /// Emplace with rvalue reference
     void emplace(T &&value) { mValue = fl::move(value); }
+
+    /// Emplace with variadic template arguments for in-place construction
+    template<typename... Args>
+    void emplace(Args&&... args) {
+        mValue = T(fl::forward<Args>(args)...);
+    }
 
     bool empty() const { return !mValue.template is<T>(); }
     bool has_value() const { return !empty(); }  // std::optional compatibility

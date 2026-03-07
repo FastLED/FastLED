@@ -262,6 +262,45 @@ class circular_buffer {
         }
     }
 
+    /// Equality comparison
+    bool operator==(const circular_buffer& other) const {
+        if (size() != other.size()) return false;
+        for (fl::size i = 0; i < size(); ++i) {
+            if (mCore[i] != other.mCore[i]) return false;
+        }
+        return true;
+    }
+
+    /// Inequality comparison
+    bool operator!=(const circular_buffer& other) const {
+        return !(*this == other);
+    }
+
+    /// Lexicographic comparison
+    bool operator<(const circular_buffer& other) const {
+        fl::size min_size = (size() < other.size()) ? size() : other.size();
+        for (fl::size i = 0; i < min_size; ++i) {
+            if (mCore[i] < other.mCore[i]) return true;
+            if (other.mCore[i] < mCore[i]) return false;
+        }
+        return size() < other.size();
+    }
+
+    /// Less-than-or-equal comparison
+    bool operator<=(const circular_buffer& other) const {
+        return *this < other || *this == other;
+    }
+
+    /// Greater-than comparison
+    bool operator>(const circular_buffer& other) const {
+        return other < *this;
+    }
+
+    /// Greater-than-or-equal comparison
+    bool operator>=(const circular_buffer& other) const {
+        return other <= *this;
+    }
+
   private:
     vector_inlined<T, (N > 0 ? N : 1)> mStorage;
     circular_buffer_core<T> mCore;

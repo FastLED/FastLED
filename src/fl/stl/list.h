@@ -87,6 +87,8 @@ public:
         typedef T value_type;
         typedef T& reference;
         typedef T* pointer;
+        typedef fl::ptrdiff_t difference_type;
+        typedef fl::bidirectional_iterator_tag iterator_category;
 
     private:
         Node* mNode;
@@ -139,6 +141,8 @@ public:
         typedef T value_type;
         typedef const T& reference;
         typedef const T* pointer;
+        typedef fl::ptrdiff_t difference_type;
+        typedef fl::bidirectional_iterator_tag iterator_category;
 
     private:
         const Node* mNode;
@@ -302,6 +306,14 @@ public:
         return const_reverse_iterator(begin());
     }
 
+    const_iterator cbegin() const {
+        return const_iterator(mHead->next);
+    }
+
+    const_iterator cend() const {
+        return const_iterator(mHead);
+    }
+
     // Capacity
     bool empty() const {
         return mSize == 0;
@@ -313,6 +325,10 @@ public:
 
     allocator_type get_allocator() const {
         return mAlloc;
+    }
+
+    void shrink_to_fit() {
+        // No-op for linked list - linked lists don't have allocated capacity
     }
 
     // Modifiers

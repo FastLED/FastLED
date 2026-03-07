@@ -726,6 +726,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         typedef char& reference;
         typedef char* pointer;
         typedef fl::ptrdiff_t difference_type;
+        typedef fl::random_access_iterator_tag iterator_category;
 
         iterator() : ptr(nullptr) {}
         explicit iterator(char* p) : ptr(p) {}
@@ -764,6 +765,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         typedef const char& reference;
         typedef const char* pointer;
         typedef fl::ptrdiff_t difference_type;
+        typedef fl::random_access_iterator_tag iterator_category;
 
         const_iterator() : ptr(nullptr) {}
         explicit const_iterator(const char* p) : ptr(p) {}

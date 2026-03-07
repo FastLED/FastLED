@@ -289,6 +289,38 @@ FL_TEST_CASE("fl::array - Comparison operators") {
         array<int, 3> arr2 = {1, 2, 3};
         FL_CHECK_FALSE(arr1 != arr2);
     }
+
+    FL_SUBCASE("operator< for arrays") {
+        array<int, 3> arr1 = {1, 2, 3};
+        array<int, 3> arr2 = {1, 2, 4};
+        FL_CHECK(arr1 < arr2);
+        FL_CHECK_FALSE(arr2 < arr1);
+    }
+
+    FL_SUBCASE("operator<= for arrays") {
+        array<int, 3> arr1 = {1, 2, 3};
+        array<int, 3> arr2 = {1, 2, 3};
+        array<int, 3> arr3 = {1, 2, 4};
+        FL_CHECK(arr1 <= arr2);
+        FL_CHECK(arr1 <= arr3);
+        FL_CHECK_FALSE(arr3 <= arr1);
+    }
+
+    FL_SUBCASE("operator> for arrays") {
+        array<int, 3> arr1 = {1, 2, 3};
+        array<int, 3> arr2 = {1, 2, 4};
+        FL_CHECK(arr2 > arr1);
+        FL_CHECK_FALSE(arr1 > arr2);
+    }
+
+    FL_SUBCASE("operator>= for arrays") {
+        array<int, 3> arr1 = {1, 2, 3};
+        array<int, 3> arr2 = {1, 2, 3};
+        array<int, 3> arr3 = {1, 2, 4};
+        FL_CHECK(arr1 >= arr2);
+        FL_CHECK(arr3 >= arr1);
+        FL_CHECK_FALSE(arr1 >= arr3);
+    }
 }
 
 FL_TEST_CASE("fl::array - Different types") {

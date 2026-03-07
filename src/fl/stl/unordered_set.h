@@ -19,11 +19,12 @@ class unordered_set {
     private:
         using map_iterator = typename fl::unordered_map<Key, bool, Hash, KeyEqual>::iterator;
         map_iterator mIt;
-    
+
     public:
         using value_type = Key;
         using reference = const Key&;
         using pointer = const Key*;
+        using iterator_category = fl::forward_iterator_tag;
         
         iterator() = default;
         explicit iterator(map_iterator it) : mIt(it) {}
@@ -44,11 +45,12 @@ class unordered_set {
     private:
         using map_const_iterator = typename fl::unordered_map<Key, bool, Hash, KeyEqual>::const_iterator;
         map_const_iterator mIt;
-    
+
     public:
         using value_type = Key;
         using reference = const Key&;
         using pointer = const Key*;
+        using iterator_category = fl::forward_iterator_tag;
         
         const_iterator() = default;
         explicit const_iterator(map_const_iterator it) : mIt(it) {}
@@ -144,6 +146,20 @@ class unordered_set {
     // Lookup operations
     bool has(const Key &key) const { return data.has(key); }
     bool contains(const Key &key) const { return has(key); } // C++20 style
+
+    /// Equality comparison (set equality: same elements, order-independent)
+    bool operator==(const unordered_set& other) const {
+        if (size() != other.size()) return false;
+        for (const auto& key : *this) {
+            if (!other.has(key)) return false;
+        }
+        return true;
+    }
+
+    /// Inequality comparison
+    bool operator!=(const unordered_set& other) const {
+        return !(*this == other);
+    }
 
   private:
     fl::unordered_map<Key, bool, Hash, KeyEqual> data;
