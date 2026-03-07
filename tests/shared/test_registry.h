@@ -27,24 +27,24 @@ public:
      * @param test_name  Test case name (from FL_TEST_CASE macro first arg)
      */
     TestCase(const char* file_path, const char* test_name)
-        : file_path_(file_path)
-        , test_name_(test_name)
+        : mFilePath(file_path)
+        , mTestName(test_name)
     {
     }
 
     /**
      * Get the source file path where this test was declared.
      */
-    const fl::string& get_file_path() const { return file_path_; }
+    const fl::string& get_file_path() const { return mFilePath; }
 
     /**
      * Get the test case name.
      */
-    const fl::string& get_test_name() const { return test_name_; }
+    const fl::string& get_test_name() const { return mTestName; }
 
 private:
-    fl::string file_path_;
-    fl::string test_name_;
+    fl::string mFilePath;
+    fl::string mTestName;
 };
 
 /**
@@ -72,7 +72,7 @@ public:
      */
     void registerTest(const char* file_path, const char* test_name) {
         auto test_case = fl::make_shared<TestCase>(file_path, test_name);
-        test_groups_[file_path].push_back(test_case);
+        mTestGroups[file_path].push_back(test_case);
     }
 
     /**
@@ -82,7 +82,7 @@ public:
      */
     const fl::map<fl::string, fl::vector<fl::shared_ptr<TestCase>>>&
     getTestGroups() const {
-        return test_groups_;
+        return mTestGroups;
     }
 
     /**
@@ -94,8 +94,8 @@ public:
      * @return Number of tests from this file (0 if not found)
      */
     size_t getTestCount(const char* file_path) const {
-        auto it = test_groups_.find(file_path);
-        if (it != test_groups_.end()) {
+        auto it = mTestGroups.find(file_path);
+        if (it != mTestGroups.end()) {
             return it->second.size();
         }
         return 0;
@@ -106,7 +106,7 @@ public:
      */
     size_t getTotalTestCount() const {
         size_t total = 0;
-        for (const auto& group : test_groups_) {
+        for (const auto& group : mTestGroups) {
             total += group.second.size();
         }
         return total;
@@ -123,5 +123,5 @@ private:
     TestRegistry& operator=(const TestRegistry&) = delete;
 
     // Test groups: file_path -> vector of test cases
-    fl::map<fl::string, fl::vector<fl::shared_ptr<TestCase>>> test_groups_;
+    fl::map<fl::string, fl::vector<fl::shared_ptr<TestCase>>> mTestGroups;
 };

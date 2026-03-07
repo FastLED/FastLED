@@ -2,6 +2,20 @@
 
 #include "shared/test_registry.h"
 #include "shared/fl_unittest.h"
+#include "fl/stl/stdint.h"
+#include "fl/stl/iostream.h"
+#include "fl/stl/cstring.h"
+#include "fl/stl/set.h"
+#include "fl/stl/string.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/stdio.h"
+#include "crgb.h"
+#include "fl/stl/unordered_set.h"
+#include "fl/lut.h"
+#include "fl/stl/optional.h"
+#include "fl/stl/strstream.h"
+#include "fl/tile2x2.h"
+#include "fl/xypath.h"
 
 // ============================================================================
 // Compatibility layer for doctest types and macros
@@ -61,23 +75,6 @@ namespace doctest {
 // - Automatic registration to TestRegistry singleton
 // - Automatic registration to fl::test framework
 // - Native skip() decorator support (no #if 0 workarounds needed)
-
-#include "fl/stl/stdint.h"
-#include "fl/stl/iostream.h"
-#include "fl/stl/cstring.h"
-#include "fl/stl/set.h"
-#include "fl/stl/string.h"
-#include "fl/stl/vector.h"
-#include "fl/stl/stdio.h"
-
-#include "crgb.h"
-#include "fl/stl/unordered_set.h"
-#include "fl/lut.h"
-#include "fl/stl/optional.h"
-#include "fl/stl/strstream.h"
-#include "fl/tile2x2.h"
-#include "fl/stl/vector.h"
-#include "fl/xypath.h"
 
 // Define an improved CHECK_CLOSE macro that provides better error messages
 #define CHECK_CLOSE(a, b, epsilon)                                             \

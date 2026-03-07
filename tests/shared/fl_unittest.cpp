@@ -165,6 +165,7 @@ int run_all(const RunOptions& opts) {
         bool test_passed = true;
         SubcaseCtx ctx;
         auto t_start = fl::chrono::steady_clock::now();
+        fl::vector<fl::string> all_failures;
 
         do {
             ctx.depth = 0;
@@ -185,6 +186,10 @@ int run_all(const RunOptions& opts) {
 
             if (test_state.checks_failed > 0 || test_state.requires_failed > 0) {
                 test_passed = false;
+                // Capture failures before test_state goes out of scope
+                for (const auto& failure : test_state.failures) {
+                    all_failures.push_back(failure);
+                }
             }
 
             _fl_get_test_state() = nullptr;
@@ -229,7 +234,10 @@ int run_all(const RunOptions& opts) {
         } else {
             failed++;
             fl::cout << "FAIL: " << entry.name << " at " << entry.file << ":" << entry.line << fl::endl;
-            // Note: failure details would be printed during test execution to cerr or similar
+            // Print all failure details
+            for (const auto& failure : all_failures) {
+                fl::cout << "  " << failure << fl::endl;
+            }
         }
     }
 

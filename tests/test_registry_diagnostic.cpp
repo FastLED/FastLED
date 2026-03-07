@@ -30,8 +30,8 @@ FL_TEST_CASE("TestRegistry - Diagnostic") {
     fl::printf("==============================\n\n");
 
     // Verify we actually registered something
-    CHECK_GT(groups.size(), 0);
-    CHECK_GT(total_tests, 0);
+    FL_CHECK_GT(groups.size(), 0);
+    FL_CHECK_GT(total_tests, 0);
 }
 
 FL_TEST_CASE("TestRegistry - Verify registry is working per-DLL") {
@@ -53,7 +53,7 @@ FL_TEST_CASE("TestRegistry - Verify registry is working per-DLL") {
         }
     }
 
-    CHECK(found_diagnostic_file);
+    FL_CHECK(found_diagnostic_file);
 }
 
 FL_TEST_CASE("TestRegistry - Query by file path") {
@@ -65,7 +65,7 @@ FL_TEST_CASE("TestRegistry - Query by file path") {
 
     // This file should have at least the tests defined in it (3 so far)
     fl::printf("Tests in %s: %zu\n", this_file, this_file_count);
-    CHECK_GE(this_file_count, 2);  // At least the first 2 tests
+    FL_CHECK_GE(this_file_count, 2);  // At least the first 2 tests
 }
 
 } // FL_TEST_FILE
