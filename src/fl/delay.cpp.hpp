@@ -19,7 +19,7 @@
 #include "platforms/time_platform.h"
 
 #if SKETCH_HAS_LOTS_OF_MEMORY
-#include "fl/async.h"
+#include "fl/stl/async.h"
 #endif
 
 // Include stub time header for delay override check (only on stub platform)

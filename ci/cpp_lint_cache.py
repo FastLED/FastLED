@@ -5,7 +5,7 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 """
 C++ Linting Cache Integration
 
-Monitors C++ source files (src/ and examples/) to determine if
+Monitors C++ source files (src/, examples/, and tests/) to determine if
 C++ linting (clang-format + custom linters) needs to be re-run.
 
 Uses the unified safe fingerprint cache system.
@@ -45,6 +45,8 @@ def get_cpp_files() -> list[Path]:
             "examples/**/*.cpp",
             "examples/**/*.h",
             "examples/**/*.hpp",
+            "tests/**/*.cpp",
+            "tests/**/*.hpp",
         ]
         excludes = []
 

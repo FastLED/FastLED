@@ -43,7 +43,7 @@
 // All ESP-IDF dependencies have been abstracted through IParlioPeripheral interface
 // - Timer operations: fl::isr::attachTimerHandler(), etc. (via fl/isr.h)
 // - Timestamp operations: getMicroseconds()
-// - Task management: TaskCoroutine (via fl/task.h)
+// - Task management: TaskCoroutine (via fl/stl/task.h)
 // - DMA memory: allocateDmaBuffer(), freeDmaBuffer()
 // - PARLIO operations: initialize(), enable(), transmit(), waitAllDone(), etc.
 

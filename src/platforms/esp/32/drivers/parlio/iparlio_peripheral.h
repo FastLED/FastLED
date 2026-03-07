@@ -49,7 +49,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstddef.h"
-#include "fl/task.h"  // For OS-level task management (fl::os_task namespace)
+#include "fl/stl/task.h"  // For OS-level task management (fl::os_task namespace)
 #include "fl/stl/vector.h"  // For fl::vector_fixed
 
 namespace fl {

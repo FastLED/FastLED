@@ -6,7 +6,7 @@
 ```cpp
 // IWYU pragma: begin_keep
 #include <fl/fastled.h>
-#include <fl/task.h>
+#include <fl/stl/task.h>
 // IWYU pragma: end_keep
 
 void setup() {
@@ -41,7 +41,7 @@ task scheduler above.
 ### TaskCoroutine Usage Example
 
 ```cpp
-#include "fl/task.h"
+#include "fl/stl/task.h"
 
 void myTaskFunction() {
     while (true) {
@@ -70,8 +70,8 @@ promises without busy-waiting. This provides zero-CPU-overhead asynchronous
 operations perfect for network requests, timers, or sensor readings.
 
 ```cpp
-#include "fl/task.h"
-#include "fl/async.h"
+#include "fl/stl/task.h"
+#include "fl/stl/async.h"
 
 // Create a coroutine that performs sequential async operations
 auto task = fl::task::coroutine({

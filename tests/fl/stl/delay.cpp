@@ -2,7 +2,7 @@
 /// Unit tests for fl/delay.h: nanosecond delays, runtime delays, and async pumping
 
 #include "fl/delay.h"
-#include "fl/async.h"
+#include "fl/stl/async.h"
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {

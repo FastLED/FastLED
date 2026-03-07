@@ -12,7 +12,7 @@
 #include "fl/stl/algorithm.h"
 #include "fl/stl/move.h"
 #include "fl/trace.h"
-#include "fl/async.h"
+#include "fl/stl/async.h"
 #include "platforms/init_channel_driver.h"
 
 namespace fl {

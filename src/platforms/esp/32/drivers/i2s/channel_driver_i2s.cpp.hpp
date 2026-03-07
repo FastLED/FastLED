@@ -20,7 +20,7 @@
 #include "fl/warn.h"
 #include "fl/dbg.h"
 #include "fl/stl/cstring.h"
-#include "fl/async.h"
+#include "fl/stl/async.h"
 #include "fl/channels/wave8.h"
 #include "fl/channels/detail/wave8.hpp"
 

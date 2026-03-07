@@ -13,7 +13,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/function.h"  // IWYU pragma: keep
 #include "fl/stl/vector.h"
-#include "fl/task.h"
+#include "fl/stl/task.h"
 
 class CFastLED;
 

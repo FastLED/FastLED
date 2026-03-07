@@ -2,8 +2,8 @@
 // @brief Example showing how to use the fl::task API
 
 #include "FastLED.h"
-#include "fl/task.h"
-#include "fl/async.h"
+#include "fl/stl/task.h"
+#include "fl/stl/async.h"
 
 #define NUM_LEDS 60
 #define DATA_PIN 5

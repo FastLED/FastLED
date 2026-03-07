@@ -11,8 +11,8 @@
 ///
 /// @section Usage
 /// @code
-/// #include "fl/async.h"
-/// 
+/// #include "fl/stl/async.h"
+///
 /// // Create a custom async runner
 /// class Myasync_runner : public fl::async_runner {
 /// public:
@@ -21,20 +21,20 @@
 ///         process_timers();
 ///         handle_network_events();
 ///     }
-///     
+///
 ///     bool has_active_tasks() const override {
 ///         return !mTimers.empty() || mNetworkActive;
 ///     }
-///     
+///
 ///     size_t active_task_count() const override {
 ///         return mTimers.size() + (mNetworkActive ? 1 : 0);
 ///     }
 /// };
-/// 
+///
 /// void setup() {
 ///     Myasync_runner* runner = new Myasync_runner();
 ///     fl::AsyncManager::instance().register_runner(runner);
-///     
+///
 ///     // Now your async tasks will be automatically updated during:
 ///     // - FastLED.show() calls (via engine events)
 ///     // - delay() calls on WASM platforms
@@ -45,7 +45,7 @@
 #include "fl/promise.h"
 #include "fl/promise_result.h"
 #include "fl/singleton.h"
-#include "fl/task.h"
+#include "fl/stl/task.h"
 #include "platforms/await.h"
 #include "fl/stl/atomic.h"      // for atomic
 #include "fl/stl/cstddef.h"     // for size_t

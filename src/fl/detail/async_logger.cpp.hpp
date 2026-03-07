@@ -6,8 +6,8 @@
 #include "fl/stl/isr/handler.h"
 #include "fl/math_macros.h"
 #include "fl/log.h"  // For FL_ERROR macro
-#include "fl/task.h"  // For fl::task and fl::Scheduler
-#include "fl/async.h"  // For fl::Scheduler::instance()
+#include "fl/stl/task.h"  // For fl::task and fl::Scheduler
+#include "fl/stl/async.h"  // For fl::Scheduler::instance()
 
 namespace fl {
 

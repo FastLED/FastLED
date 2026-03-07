@@ -13,8 +13,8 @@
 /// - Host/Stub: fl::condition_variable
 /// - Other: No await() support (use fl::await_top_level() instead)
 ///
-/// This header is included from fl/async.h. The public API fl::await() in
-/// fl/async.h acts as a trampoline that delegates to fl::platforms::await().
+/// This header is included from fl/stl/async.h. The public API fl::await() in
+/// fl/stl/async.h acts as a trampoline that delegates to fl::platforms::await().
 
 #include "fl/promise.h"
 #include "fl/promise_result.h"
@@ -50,7 +50,7 @@ namespace platforms {
 /// @return A result<T> containing either the resolved value or an error
 ///
 /// Implementation uses FreeRTOS task notifications for efficient suspension.
-/// This is called by fl::await() as a trampoline. See fl/async.h for full documentation.
+/// This is called by fl::await() as a trampoline. See fl/stl/async.h for full documentation.
 template<typename T>
 fl::result<T> await(fl::promise<T> promise) {
     // Validate promise
@@ -110,7 +110,7 @@ namespace platforms {
 /// @return A result<T> containing either the resolved value or an error
 ///
 /// Implementation uses fl::condition_variable for efficient suspension.
-/// This is called by fl::await() as a trampoline. See fl/async.h for full documentation.
+/// This is called by fl::await() as a trampoline. See fl/stl/async.h for full documentation.
 template<typename T>
 fl::result<T> await(fl::promise<T> promise) {
     // Validate promise

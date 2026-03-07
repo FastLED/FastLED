@@ -72,7 +72,7 @@
 
 #include "fl/stl/asio/fetch.h"     // FastLED HTTP fetch API
 #include "fl/warn.h"      // FastLED logging system  
-#include "fl/async.h"     // FastLED async utilities (await_top_level, etc.)
+#include "fl/stl/async.h"     // FastLED async utilities (await_top_level, etc.)
 #include <FastLED.h>      // FastLED core library
 
 // Use FastLED namespace for cleaner code

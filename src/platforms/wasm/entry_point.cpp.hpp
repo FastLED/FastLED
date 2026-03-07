@@ -37,7 +37,7 @@
 #include "platforms/wasm/active_strip_data.h"
 #include "platforms/wasm/engine_listener.h"
 // #include "frame_buffer_manager.h"  // Temporarily commented for testing
-#include "fl/async.h"
+#include "fl/stl/async.h"
 #include "fl/dbg.h"
 #include "fl/warn.h"
 // IWYU pragma: begin_keep

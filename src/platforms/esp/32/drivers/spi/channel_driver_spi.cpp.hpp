@@ -38,7 +38,7 @@
 #include "fl/delay.h"
 #include "fl/pin.h"
 #include "fl/math_macros.h"
-#include "fl/async.h"
+#include "fl/stl/async.h"
 #include "fl/warn.h"
 #include "fl/stl/chrono.h"
 #include "platforms/esp/32/drivers/spi/spi_hw_base.h" // SPI host definitions (SPI2_HOST, SPI3_HOST)
