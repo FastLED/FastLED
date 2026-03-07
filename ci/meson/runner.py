@@ -207,6 +207,7 @@ def run_meson_build_and_test(
     build_mode: Optional[str] = None,
     check: bool = False,
     exclude_suites: Optional[list[str]] = None,
+    test_file_filter: Optional[str] = None,
 ) -> MesonTestResult:
     """
     Complete Meson build and test workflow.
@@ -221,6 +222,7 @@ def run_meson_build_and_test(
         build_mode: Build mode override ("quick", "debug", "release"). If None, uses debug parameter.
         check: Enable IWYU static analysis (default: False)
         exclude_suites: Optional list of test suites to exclude (e.g., ['examples'])
+        test_file_filter: Optional .hpp filename to filter test execution (e.g., "backbeat.hpp")
 
     Returns:
         MesonTestResult with success status, duration, and test counts
@@ -519,6 +521,7 @@ def run_meson_build_and_test(
                     verbose=verbose,
                     compile_timeout=compile_timeout,
                     build_optimizer=build_optimizer,
+                    test_file_filter=test_file_filter,
                 )
 
                 # SELF-HEALING: If compilation failed due to stale build state,
@@ -541,6 +544,7 @@ def run_meson_build_and_test(
                             verbose=verbose,
                             compile_timeout=compile_timeout,
                             build_optimizer=build_optimizer,
+                            test_file_filter=test_file_filter,
                         )
 
                 # Save binary fingerprints of libfastled.a and all DLLs after a

@@ -1,4 +1,5 @@
 #include "fl_unittest.h"
+#include "fl/stl/cstdlib.h"
 
 namespace fl {
 namespace test {
@@ -147,6 +148,14 @@ int run_all(const RunOptions& opts) {
         // Skip if test doesn't match filter
         if (!opts.test_filter.empty()) {
             if (fl::string(entry.name).find(opts.test_filter) == fl::string::npos) {
+                continue;
+            }
+        }
+
+        // Skip if file doesn't match file filter (for .hpp detector files)
+        if (const char* file_filter = fl::getenv("FL_TEST_FILE_FILTER")) {
+            // Only run tests from the specified file (e.g., "backbeat.hpp")
+            if (fl::string(entry.file).find(file_filter) == fl::string::npos) {
                 continue;
             }
         }

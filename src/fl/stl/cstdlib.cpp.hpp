@@ -1,6 +1,12 @@
 #include "fl/stl/cstdlib.h"
 #include "fl/stl/cstring.h"
 
+#ifdef FL_IS_STUB
+    // IWYU pragma: begin_keep
+    #include <cstdlib>  // ok header
+    // IWYU pragma: end_keep
+#endif
+
 namespace fl {
 
 // Helper function to check if a character is a digit in the given base
@@ -396,6 +402,17 @@ void qsort(void* base, size_t nmemb, size_t size, qsort_compare_fn compar) {
 
     char* arr = static_cast<char*>(base);
     detail::qsort_impl(arr, nmemb, size, compar);
+}
+
+// Get the value of an environment variable
+// Only functional on FL_IS_STUB (stub platform), returns nullptr otherwise
+const char* getenv(const char* name) {
+#ifdef FL_IS_STUB
+    return ::getenv(name);
+#else
+    (void)name;  // Suppress unused parameter warning
+    return nullptr;
+#endif
 }
 
 } // namespace fl

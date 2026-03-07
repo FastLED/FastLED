@@ -34,4 +34,9 @@ typedef int (*qsort_compare_fn)(const void*, const void*);
 // Sorts an array of elements using the provided comparison function
 void qsort(void* base, size_t nmemb, size_t size, qsort_compare_fn compar);
 
+// Get the value of an environment variable
+// Only functional on FASTLED_TESTING (stub platform), returns nullptr otherwise
+// This avoids std:: namespace dependencies on embedded platforms
+const char* getenv(const char* name);
+
 } // namespace fl

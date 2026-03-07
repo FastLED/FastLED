@@ -30,6 +30,7 @@ def stream_compile_and_run_tests(
     verbose: bool = False,
     compile_timeout: int = 600,
     build_optimizer: Optional[BuildOptimizer] = None,
+    test_file_filter: Optional[str] = None,
 ) -> tuple[bool, int, int, str, list[str]]:
     """
     Stream test compilation and execution in parallel.
@@ -47,6 +48,7 @@ def stream_compile_and_run_tests(
         build_optimizer: Optional BuildOptimizer for DLL relink suppression.
                         When provided, touches DLL files after libfastled.a is
                         archived (if content unchanged) so ninja skips relinking.
+        test_file_filter: Optional .hpp filename to filter test execution (e.g., "backbeat.hpp")
 
     Returns:
         Tuple of (overall_success, num_passed, num_failed, compile_output, failed_names)
@@ -440,7 +442,15 @@ def stream_compile_and_run_tests(
                     _ts_print(f"[TEST {tests_run}] Running: {test_path.name}")
 
                 try:
+                    # Set test file filter in environment if specified (for .hpp file filtering)
+                    if test_file_filter:
+                        os.environ["FL_TEST_FILE_FILTER"] = test_file_filter
+
                     success = test_callback(test_path)
+
+                    # Clean up environment variable
+                    if test_file_filter and "FL_TEST_FILE_FILTER" in os.environ:
+                        del os.environ["FL_TEST_FILE_FILTER"]
                     if success:
                         num_passed += 1
                         if verbose:

@@ -354,6 +354,12 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
             "platforms/wasm/compiler/wasm_pch.h", "WASM precompiled header"
         ),
     ],
+    "cstdlib": [
+        HeaderException(
+            "fl/stl/cstdlib.cpp.hpp",
+            "C stdlib wrapper (template implementation requires standard header)",
+        ),
+    ],
 }
 
 

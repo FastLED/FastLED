@@ -1339,6 +1339,12 @@ def runner(
             build_dir = PROJECT_ROOT / ".build" / "meson"
             test_name = args.test if args.test else None
 
+            # Extract .hpp filename if user requested a specific detector file
+            test_file_filter = None
+            if args.raw_test_query and args.raw_test_query.endswith(".hpp"):
+                # Extract just the filename (e.g., "backbeat.hpp" from "tests/fl/audio/detectors/backbeat.hpp")
+                test_file_filter = args.raw_test_query.split("/")[-1]
+
             result = run_meson_build_and_test(
                 source_dir=PROJECT_ROOT,
                 build_dir=build_dir,
@@ -1351,6 +1357,7 @@ def runner(
                 exclude_suites=[
                     "fastled:examples"
                 ],  # Exclude examples in unit-test-only mode
+                test_file_filter=test_file_filter,
             )
 
             if not result.success:
@@ -1407,6 +1414,12 @@ def runner(
             build_dir = PROJECT_ROOT / ".build" / "meson"
             test_name = args.test if args.test else None
 
+            # Extract .hpp filename if user requested a specific detector file
+            test_file_filter = None
+            if args.raw_test_query and args.raw_test_query.endswith(".hpp"):
+                # Extract just the filename (e.g., "backbeat.hpp" from "tests/fl/audio/detectors/backbeat.hpp")
+                test_file_filter = args.raw_test_query.split("/")[-1]
+
             result = run_meson_build_and_test(
                 source_dir=PROJECT_ROOT,
                 build_dir=build_dir,
@@ -1416,6 +1429,7 @@ def runner(
                 debug=args.debug,
                 build_mode=args.build_mode,
                 check=args.check,
+                test_file_filter=test_file_filter,
             )
 
             # Create timing entry for summary

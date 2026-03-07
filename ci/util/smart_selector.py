@@ -11,6 +11,7 @@ user input with fuzzy matching capabilities. It can:
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional, cast
 
 
 @dataclass
@@ -22,6 +23,26 @@ class TestMatch:
     type: str  # "unit_test" or "example"
     score: float  # Match score (0.0-1.0, higher is better)
     length: int = 0  # Length for tie-breaking (shorter is better)
+    hpp_filter: Optional[str] = (
+        None  # Optional .hpp filename filter (e.g., "backbeat.hpp")
+    )
+
+
+def _apply_hpp_filter(
+    match_or_matches: "TestMatch | list[TestMatch]",
+    hpp_filter: Optional[str],
+) -> "TestMatch | list[TestMatch]":
+    """Apply hpp_filter to a single match or list of matches."""
+    if not hpp_filter:
+        return match_or_matches
+
+    if isinstance(match_or_matches, list):
+        for match in cast(list[TestMatch], match_or_matches):
+            match.hpp_filter = hpp_filter
+    else:
+        match_or_matches.hpp_filter = hpp_filter
+
+    return match_or_matches
 
 
 def _normalize_for_matching(s: str) -> str:
@@ -336,7 +357,14 @@ def _find_aggregator_matches(
                     if include_path
                     else ""
                 )
-                score, _ = _fuzzy_score(query, include_name)
+                # If query ends with .hpp, extract the full filename with extension for scoring
+                include_filename = (
+                    include_path.rsplit("/", 1)[-1] if include_path else ""
+                )
+                score_target = (
+                    include_filename if query_lower.endswith(".hpp") else include_name
+                )
+                score, _ = _fuzzy_score(query, score_target)
                 if score > 0:
                     results.append(
                         TestMatch(
@@ -353,8 +381,8 @@ def _find_aggregator_matches(
 
 
 def smart_select(
-    query: str, project_dir: Path | None = None, filter_type: str | None = None
-) -> TestMatch | list[TestMatch]:
+    query: str, project_dir: Optional[Path] = None, filter_type: Optional[str] = None
+) -> "TestMatch | list[TestMatch]":
     """Smart selector for unit tests and examples with fuzzy matching.
 
     Returns either:
@@ -371,6 +399,29 @@ def smart_select(
     """
     if project_dir is None:
         project_dir = Path.cwd()
+
+    # Handle explicit .hpp file queries (e.g., "tests/fl/audio/detectors/backbeat.hpp")
+    # Extract the .hpp filename for later filtering
+    hpp_filter = None
+    if query.endswith(".hpp"):
+        # Extract just the filename (e.g., "backbeat.hpp")
+        hpp_filter = query.split("/")[-1]
+        # For explicit .hpp file queries, find the aggregator that includes it
+        # and return it with the hpp_filter set
+        unit_tests = _find_unit_tests(project_dir)
+        examples = _find_examples(project_dir)
+        all_matches = unit_tests + examples
+
+        # Search for aggregators that include this .hpp file
+        # Search using the exact filename to avoid false matches (e.g., "beat.hpp" not "beat")
+        aggregator_matches = _find_aggregator_matches(
+            hpp_filter, all_matches, project_dir
+        )
+        if aggregator_matches:
+            # Return the first aggregator match with hpp_filter set
+            best_match = aggregator_matches[0]
+            best_match.hpp_filter = hpp_filter
+            return best_match
 
     # Find all available tests and examples
     unit_tests = _find_unit_tests(project_dir)
@@ -430,7 +481,7 @@ def smart_select(
             # We have near-exact matches of different types - needs disambiguation
             pass  # Fall through to return multiple matches
         else:
-            return scored_matches[0]  # Exact match wins
+            return _apply_hpp_filter(scored_matches[0], hpp_filter)  # Exact match wins
 
     # Case-insensitive exact match (score == 0.95) - check for conflicts
     if top_score == 0.95:
@@ -441,7 +492,7 @@ def smart_select(
             pass  # Fall through to return multiple matches
         else:
             # Single case-insensitive exact match
-            return scored_matches[0]
+            return _apply_hpp_filter(scored_matches[0], hpp_filter)
 
     # For high scores (>= 0.7), check for significant margin over second place
     # Lower threshold for multi-word queries since they're more specific
@@ -451,7 +502,7 @@ def smart_select(
     if top_score >= min_score_threshold:
         # Check for ties or close seconds
         if len(scored_matches) == 1:
-            return scored_matches[0]  # Clear winner
+            return _apply_hpp_filter(scored_matches[0], hpp_filter)  # Clear winner
 
         second_score = scored_matches[1].score
 
@@ -461,17 +512,28 @@ def smart_select(
             top_length = scored_matches[0].length
             second_length = scored_matches[1].length
             if top_length < second_length * 0.7:  # At least 30% shorter
-                return scored_matches[0]  # Shortest match wins the tie
+                return _apply_hpp_filter(
+                    scored_matches[0], hpp_filter
+                )  # Shortest match wins the tie
             # Otherwise, needs disambiguation
         else:
             # More aggressive margin for multi-word queries (0.1 vs 0.15)
             required_margin = 0.1 if has_separator else 0.15
 
             if top_score - second_score >= required_margin:
-                return scored_matches[0]  # Clear winner with significant margin
+                return _apply_hpp_filter(
+                    scored_matches[0], hpp_filter
+                )  # Clear winner with significant margin
 
     # Return top matches for disambiguation (up to 10 matches)
-    return scored_matches[:10]
+    result = scored_matches[:10]
+
+    # Apply hpp_filter to the returned match(es) if user specified a .hpp file
+    if hpp_filter:
+        for match in result:
+            match.hpp_filter = hpp_filter
+
+    return result
 
 
 def format_match_for_display(match: TestMatch) -> str:
@@ -488,8 +550,8 @@ def format_match_for_display(match: TestMatch) -> str:
 
 
 def get_best_match_or_prompt(
-    query: str, project_dir: Path | None = None, filter_type: str | None = None
-) -> TestMatch | None:
+    query: str, project_dir: Optional[Path] = None, filter_type: Optional[str] = None
+) -> Optional[TestMatch]:
     """Get the best match for a query, or return None if disambiguation is needed.
 
     This is a convenience function that handles the logic of selecting the best
@@ -565,8 +627,8 @@ def get_best_match_or_prompt(
 
 
 def discover_all_tests(
-    project_dir: Path | None = None,
-) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
+    project_dir: Optional[Path] = None,
+) -> "tuple[list[tuple[str, str]], list[tuple[str, str]]]":
     """Discover all available unit tests and examples.
 
     Args:
