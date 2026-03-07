@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -49,8 +49,8 @@ def validate_package(package_dir: Path) -> tuple[bool, str]:
         return False, f"Missing package.json in {package_dir.name}"
     except json.JSONDecodeError as e:
         return False, f"Corrupted package.json in {package_dir.name}: {e}"
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         return False, f"Cannot read package.json in {package_dir.name}: {e}"
@@ -145,8 +145,8 @@ def get_required_packages(project_dir: Path, environment: str) -> list[str]:
 
         return packages
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception:
         # If parsing fails, return empty list (fast-path check will trigger)
@@ -237,8 +237,8 @@ def main() -> int:
 if __name__ == "__main__":
     try:
         sys.exit(main())
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
         print("\nInterrupted by user")
         sys.exit(130)

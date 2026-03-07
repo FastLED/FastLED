@@ -24,7 +24,7 @@ from typing import Any, Optional, cast
 import serial
 from pydantic import BaseModel, ValidationError
 
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 class ParamInfo(BaseModel):
@@ -123,8 +123,8 @@ class RpcSchemaValidator:
                     f"Timeout waiting for schema response (read {lines_read} lines)"
                 )
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             raise RuntimeError(f"Failed to fetch RPC schema: {e}")
@@ -232,8 +232,8 @@ def main():
         except ValidationError as e:
             print(f"  ❌ Invalid request: {e}")
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         print("\n⚠️  Interrupted by user")
         sys.exit(130)
     except Exception as e:

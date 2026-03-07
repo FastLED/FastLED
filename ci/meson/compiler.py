@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.timestamp_print import ts_print as _ts_print
 
 
@@ -147,8 +147,8 @@ def check_meson_version_compatibility(build_dir: Path) -> tuple[bool, str]:
             f"Meson versions compatible ({current_version} vs {stored_version})",
         )
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         # If we can't check, assume compatible to avoid breaking builds
@@ -180,8 +180,8 @@ def get_compiler_version(compiler_path: str) -> str:
         )
         # Return first line which contains version info
         return result.stdout.split("\n")[0].strip()
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         _ts_print(f"[MESON] Warning: Could not get compiler version: {e}")

@@ -22,7 +22,7 @@ from typing import Any
 import psutil
 
 from ci.util.global_interrupt_handler import (  # noqa: F401
-    handle_keyboard_interrupt_properly,
+    handle_keyboard_interrupt,
 )
 
 
@@ -156,8 +156,8 @@ class PioProcessRegistry:
         except psutil.NoSuchProcess:
             logger.debug(f"Process {pid} already terminated")
             return 0
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
 
         # Get all children recursively
@@ -165,8 +165,8 @@ class PioProcessRegistry:
             children = parent.children(recursive=True)
         except psutil.NoSuchProcess:
             children = []
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
 
         # Build list of all processes to kill (children + parent)
@@ -174,8 +174,8 @@ class PioProcessRegistry:
         for child in reversed(children):  # Kill children first
             try:
                 processes_to_kill.append(child)
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception:
                 pass
@@ -190,8 +190,8 @@ class PioProcessRegistry:
                 logger.debug(f"Terminated process {proc.pid} ({proc.name()})")
             except psutil.NoSuchProcess:
                 pass
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 logger.warning(f"Failed to terminate process {proc.pid}: {e}")
@@ -207,8 +207,8 @@ class PioProcessRegistry:
                 logger.warning(f"Force killed process {proc.pid}")
             except psutil.NoSuchProcess:
                 pass
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 logger.warning(f"Failed to force kill process {proc.pid}: {e}")

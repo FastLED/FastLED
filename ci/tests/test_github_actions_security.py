@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 import yaml
 
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.paths import PROJECT_ROOT
 
 
@@ -118,9 +118,8 @@ class TestGitHubActionsSecurityTest(unittest.TestCase):
                 jobs=jobs_dict,
                 permissions=content.get("permissions"),
             )
-            handle_keyboard_interrupt_properly()
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             self.fail(f"Failed to parse workflow {workflow_path}: {e}")

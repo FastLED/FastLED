@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -262,8 +262,8 @@ def main() -> int:
 
         return 0
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
         print("\n✗ Interrupted by user")
         return 130

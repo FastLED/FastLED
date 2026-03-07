@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from queue import Queue
 
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 from .base_checker import BaseChecker
 from .result import CheckResult
@@ -80,10 +80,8 @@ class UnifiedFileScanner:
                     violations = checker.check_file(file_path, content)
                     for violation in violations:
                         self.result_queue.put(violation)
-
-            handle_keyboard_interrupt_properly()
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             # Report file read errors

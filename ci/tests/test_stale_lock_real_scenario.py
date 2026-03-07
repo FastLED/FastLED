@@ -22,7 +22,7 @@ import pytest
 
 from ci.util.build_lock import BuildLock
 from ci.util.file_lock_rw import FileLock, is_lock_stale, is_process_alive
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.lock_database import LockDatabase
 
 
@@ -273,8 +273,8 @@ with FileLock(lock_path, operation="real_test_scenario"):
                 try:
                     proc.kill()
                     proc.wait(timeout=2.0)
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
                 except Exception:
                     pass
 
@@ -396,8 +396,8 @@ else:
                 try:
                     proc.kill()
                     proc.wait(timeout=2.0)
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
                 except Exception:
                     pass
 
@@ -472,8 +472,8 @@ else:
                     try:
                         proc.kill()
                         proc.wait(timeout=2.0)
-                    except KeyboardInterrupt:
-                        handle_keyboard_interrupt_properly()
+                    except KeyboardInterrupt as ki:
+                        handle_keyboard_interrupt(ki)
                     except Exception:
                         pass
 

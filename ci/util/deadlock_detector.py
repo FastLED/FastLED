@@ -13,7 +13,7 @@ from typing import Optional
 
 from running_process import RunningProcess
 
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.timestamp_print import ts_print
 
 
@@ -76,8 +76,8 @@ def dump_stack_trace_lldb(pid: int, test_name: str) -> Optional[str]:
             return _dump_with_lldb(debugger, pid, test_name)
         else:  # gdb
             return _dump_with_gdb(debugger, pid, test_name)
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
     except Exception as e:
         ts_print(f"❌ Failed to attach debugger: {e}")
         return None
@@ -140,19 +140,19 @@ def _dump_with_lldb(lldb_path: str, pid: int, test_name: str) -> Optional[str]:
             ts_print(f"Debugger error: {e}")
         try:
             os.unlink(script_path)
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
         except:
             pass
         return "Debugger timed out"
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
     except Exception as e:
         ts_print(f"❌ Debugger failed: {e}")
         try:
             os.unlink(script_path)
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
         except:
             pass
         return None
@@ -212,19 +212,19 @@ def _dump_with_gdb(gdb_path: str, pid: int, test_name: str) -> Optional[str]:
             ts_print(f"Debugger error: {e}")
         try:
             os.unlink(script_path)
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
         except:
             pass
         return "Debugger timed out"
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
     except Exception as e:
         ts_print(f"❌ Debugger failed: {e}")
         try:
             os.unlink(script_path)
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
         except:
             pass
         return None
@@ -282,8 +282,8 @@ def handle_hung_test(pid: int, test_name: str, timeout_seconds: float) -> str:
                 ["kill", "-9", str(pid)], cwd=None, check=False, timeout=5
             )
         ts_print(f"🔪 Killed hung process (PID {pid})")
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
     except Exception as e:
         ts_print(f"⚠️  Failed to kill process: {e}")
 

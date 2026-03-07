@@ -8,7 +8,7 @@ from pathlib import Path
 
 from playwright.async_api import async_playwright
 
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 HERE = Path(__file__).parent
@@ -25,8 +25,8 @@ def install_playwright_browsers():
     try:
         os.system(f"{sys.executable} -m playwright install chromium")
         print("Playwright browsers installed successfully.")
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"Failed to install Playwright browsers: {e}", file=sys.stderr)
@@ -83,8 +83,8 @@ async def scrape_festival_stick_example():
                         print(f"Found element with selector: {selector}")
                         examples_selector = selector
                         break
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
                     raise
                 except Exception:
                     continue
@@ -95,8 +95,8 @@ async def scrape_festival_stick_example():
                 try:
                     await page.wait_for_selector("text=FestivalStick", timeout=5000)
                     print("Found FestivalStick text on page!")
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
                     raise
                 except Exception:
                     print(
@@ -127,8 +127,8 @@ async def scrape_festival_stick_example():
                         canvas_found = True
                         canvas = canvas_element
                         break
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
                     raise
                 except Exception:
                     continue
@@ -153,8 +153,8 @@ async def scrape_festival_stick_example():
                         print("FestivalStick.ino uploaded successfully!")
                     else:
                         print(f"FestivalStick.ino not found at {festival_stick_path}")
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 print(f"Could not upload file: {e}")
@@ -179,8 +179,8 @@ async def scrape_festival_stick_example():
                     )
                     await canvas.screenshot(path=str(canvas_screenshot_path))
                     print(f"Canvas screenshot saved to {canvas_screenshot_path}")
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
                     raise
                 except Exception as e:
                     print(f"Could not take canvas screenshot: {e}")
@@ -189,8 +189,8 @@ async def scrape_festival_stick_example():
             print("Keeping browser open for 10 seconds for inspection...")
             await page.wait_for_timeout(10000)
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"An error occurred during scraping: {e}", file=sys.stderr)
@@ -203,8 +203,8 @@ async def scrape_festival_stick_example():
             try:
                 await page.screenshot(path=str(error_screenshot_path), full_page=True)
                 print(f"Error screenshot saved to {error_screenshot_path}")
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception:
                 pass
@@ -220,9 +220,8 @@ async def main():
     try:
         await scrape_festival_stick_example()
         print("FastLED FestivalStick scraping completed successfully!")
-        handle_keyboard_interrupt_properly()
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"Scraping failed: {e}", file=sys.stderr)

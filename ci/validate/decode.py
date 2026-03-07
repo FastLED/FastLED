@@ -73,11 +73,11 @@ def _download_to_temp(url: str) -> tuple[str, str]:
     print(f"  Downloading {url} ...")
     try:
         urllib.request.urlretrieve(url, temp_path)  # noqa: S310
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         os.unlink(temp_path)
-        from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+        from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
     except Exception as e:
         os.unlink(temp_path)
         raise RuntimeError(f"Failed to download {url}: {e}") from e
@@ -145,7 +145,7 @@ async def run_device_decode_validation(
         Exit code (0 = success, 1 = failure).
     """
     from ci.rpc_client import RpcClient, RpcTimeoutError
-    from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+    from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
     print()
     print("=" * 60)
@@ -237,8 +237,8 @@ async def run_device_decode_validation(
     except RpcTimeoutError as e:
         print(f"{Fore.RED}RPC Timeout: {e}{Style.RESET_ALL}")
         return 1
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         return 1  # unreachable but keeps type checker happy
     except RuntimeError as e:
         print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")

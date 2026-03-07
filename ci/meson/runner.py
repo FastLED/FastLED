@@ -36,7 +36,7 @@ from ci.meson.streaming import StreamingResult, stream_compile_and_run_tests
 from ci.meson.test_discovery import get_fuzzy_test_candidates
 from ci.meson.test_execution import MesonTestResult, run_meson_test
 from ci.util.build_lock import libfastled_build_lock
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.output_formatter import TimestampFormatter, create_filtering_echo_callback
 from ci.util.timestamp_print import ts_print as _ts_print
 
@@ -141,8 +141,8 @@ def _recover_stale_build(
                 _ts_print(
                     f"[MESON] 🗑️  Cleaned stale Ninja outputs: {result.stdout.strip()}"
                 )
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             _ts_print(f"[MESON] Warning: ninja cleandead failed: {e}")
@@ -197,8 +197,8 @@ def _recover_stale_build(
 
         return success
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         _ts_print(f"[MESON] ❌ Self-healing failed with exception: {e}")
@@ -562,8 +562,8 @@ def run_meson_build_and_test(
 
                         return returncode == 0
 
-                    except KeyboardInterrupt:
-                        handle_keyboard_interrupt_properly()
+                    except KeyboardInterrupt as ki:
+                        handle_keyboard_interrupt(ki)
                         raise
                     except Exception as e:
                         _ts_print(f"[MESON] Test execution error: {e}", file=sys.stderr)
@@ -858,8 +858,8 @@ def run_meson_build_and_test(
                                         else:
                                             print_error(line)
                                     error_snippet_shown = True
-                        except KeyboardInterrupt:
-                            handle_keyboard_interrupt_properly()
+                        except KeyboardInterrupt as ki:
+                            handle_keyboard_interrupt(ki)
                             raise
                         except Exception as e:
                             print_error(f"[MESON] ⚠️  Could not read error log: {e}")
@@ -1179,8 +1179,8 @@ def run_meson_build_and_test(
             )
             return _apply_phase_timing(result, build_timer)
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             duration = time.time() - start_time

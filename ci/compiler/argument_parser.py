@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Optional
 
 from ci.boards import Board, create_board
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 class WorkflowType(Enum):
@@ -348,8 +348,8 @@ class CompilationArgumentParser:
             try:
                 board = create_board(name, no_project_options=False)
                 boards.append(board)
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 raise ValueError(f"Failed to create board '{name}': {e}")

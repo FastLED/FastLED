@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -62,8 +62,8 @@ def extract_toolchains_from_platformio_ini(
     """
     try:
         pio_ini = PlatformIOIni.parseFile(platformio_ini_path)
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         logger.error(f"Failed to parse {platformio_ini_path}: {e}")
@@ -87,8 +87,8 @@ def extract_toolchains_from_platformio_ini(
                     f"Found {len(resolution.packages)} packages for platform {platform_value}"
                 )
                 all_packages.extend(resolution.packages)
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             logger.warning(
@@ -118,8 +118,8 @@ def download_toolchain(
     # Get download URL from package
     try:
         download_url = package.get_download_url()
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         result.error_message = f"Failed to resolve download URL: {e}"
@@ -190,8 +190,8 @@ def download_toolchain(
     except TimeoutError as e:
         result.error_message = f"Lock timeout: {e}"
         logger.error(f"❌ Failed to acquire lock for {package.name}: {e}")
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         result.error_message = str(e)
@@ -262,8 +262,8 @@ def predownload_toolchains(
                 if result.needs_manual_install:
                     print(format_manual_install_warning(package.name, result.url))
 
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 logger.warning("Download interrupted by user")
                 raise
             except Exception as e:
@@ -358,8 +358,8 @@ def main() -> int:
         )
         return 1 if failed_count > 0 else 0
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
         logger.warning("\nInterrupted by user")
         return 130

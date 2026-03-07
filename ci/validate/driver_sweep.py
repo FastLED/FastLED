@@ -37,7 +37,7 @@ from pathlib import Path
 from typing import Any
 
 from ci.rpc_client import RpcClient, RpcCrashError, RpcTimeoutError
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.port_utils import auto_detect_upload_port
 from ci.util.serial_interface import create_serial_interface
 
@@ -229,8 +229,8 @@ async def run_sweep(
         try:
             ping_response = await client.send("ping", timeout=10.0)
             print(f"Device alive: {ping_response.data}")
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"WARNING: Ping failed: {e}")
@@ -399,8 +399,8 @@ async def run_sweep(
                 )
                 print(f"  TIMEOUT: No response within {timeout}s")
 
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
 
             except Exception as e:
@@ -414,8 +414,8 @@ async def run_sweep(
 
             results.append(result)
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     finally:
         await client.close()

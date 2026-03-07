@@ -6,7 +6,7 @@ import subprocess
 from pathlib import Path
 
 from ci.meson.compiler import get_meson_executable
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.timestamp_print import ts_print as _ts_print
 
 
@@ -237,8 +237,8 @@ def get_source_files_hash(source_dir: Path) -> tuple[str, list[str]]:
         test_files = _discover_files_in_dir(source_dir, "tests")
         all_files = sorted(src_files + test_files)
         return (_hash_file_list(all_files), all_files)
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         _ts_print(f"[MESON] Warning: Failed to get source file hash: {e}")
@@ -261,8 +261,8 @@ def get_split_source_hashes(source_dir: Path) -> tuple[str, str, list[str], list
             src_files,
             test_files,
         )
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         _ts_print(f"[MESON] Warning: Failed to get source file hashes: {e}")

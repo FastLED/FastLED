@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 """
@@ -460,8 +460,8 @@ class PackageIndexParser:
 
             return self.parse_package_index(json_str)
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             raise PackageParsingError(f"Error fetching package index from {url}: {e}")
@@ -477,8 +477,8 @@ class PackageIndexParser:
 
             return self.parse_package_index(json_str)
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             raise PackageParsingError(f"Error fetching package index from {url}: {e}")
@@ -571,8 +571,8 @@ def extract_archive(archive_path: Path, extract_to: Path) -> bool:
 
         return True
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"Error extracting archive {archive_path}: {e}")
@@ -678,8 +678,8 @@ def demo_esp32_parsing() -> Optional[PackageIndex]:
     except PackageParsingError as e:
         print(f"❌ Package parsing error: {e}")
         sys.exit(1)
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"❌ Unexpected error: {e}")
@@ -791,13 +791,13 @@ def main() -> None:
             else:
                 print("👋 Goodbye!")
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
             print("\n👋 Interrupted by user")
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
         print("\n👋 Interrupted by user")
         sys.exit(1)

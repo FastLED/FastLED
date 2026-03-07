@@ -13,7 +13,7 @@ import asyncio
 import sys
 
 from ci.rpc_client import RpcClient
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.serial_interface import create_serial_interface
 
 
@@ -43,8 +43,8 @@ async def main_async(port: str, baudrate: int, use_pyserial: bool) -> int:
                 "response.data should always be a dict"
             )
             print(f"   ✅ Void function handled correctly")
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"   ❌ Error: {e}")
@@ -63,8 +63,8 @@ async def main_async(port: str, baudrate: int, use_pyserial: bool) -> int:
             assert isinstance(response.data, dict), "response.data should be a dict"
             assert len(response.data) > 0, "ping should return data"
             print(f"   ✅ Non-void function handled correctly")
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"   ❌ Error: {e}")

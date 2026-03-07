@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -130,8 +130,8 @@ def generate_platformio_ini(platform_name: str, framework: Optional[str] = None)
     """
     try:
         board = create_board(platform_name)
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         raise ValueError(f"Failed to create board '{platform_name}': {e}") from e
@@ -314,8 +314,8 @@ def build_base_image(no_cache: bool = False, force_rebuild: bool = False) -> Non
         except subprocess.CalledProcessError as e:
             print(f"Error building base image: {e}", file=sys.stderr)
             raise
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             print("\n\nBuild interrupted by user (Ctrl+C)", file=sys.stderr)
             raise
 
@@ -401,8 +401,8 @@ def build_docker_image(
     except subprocess.CalledProcessError as e:
         print(f"Error building Docker image: {e}", file=sys.stderr)
         raise
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         print("\n\nBuild interrupted by user (Ctrl+C)", file=sys.stderr)
         raise
 
@@ -411,8 +411,8 @@ def main() -> int:
     """Main entry point for the script."""
     try:
         return _main_impl()
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         print("\n\nOperation cancelled by user (Ctrl+C)", file=sys.stderr)
         return 130  # Standard exit code for SIGINT
 
@@ -481,8 +481,8 @@ def _main_impl() -> int:
         # Mode B uses custom ini, so hash would be unstable
         try:
             config_hash = generate_config_hash(platform_name, args.framework)
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"Warning: Could not generate config hash: {e}", file=sys.stderr)
@@ -517,8 +517,8 @@ def _main_impl() -> int:
                 tag = args.tag if args.tag else generate_docker_tag(platform_name)
                 image_name = f"fastled-compiler-{arch}-{platform_name}:{tag}"
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             # Final fallback if all lookups fail
@@ -629,8 +629,8 @@ def _main_impl() -> int:
 if __name__ == "__main__":
     try:
         sys.exit(main())
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
         # Double interrupt or interrupt during shutdown
         print("\n\nForced exit", file=sys.stderr)

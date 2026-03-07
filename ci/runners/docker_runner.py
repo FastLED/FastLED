@@ -23,7 +23,7 @@ from ci.docker_utils.container_db import (
     docker_force_remove_container,
     garbage_collect_platform_containers,
 )
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.test_types import TestArgs
 from ci.util.timestamp_print import ts_print
 
@@ -89,8 +89,8 @@ def _check_docker_available() -> bool:
         return result.returncode == 0
     except (subprocess.TimeoutExpired, FileNotFoundError):
         return False
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
 
 
@@ -149,8 +149,8 @@ def _build_docker_image(project_root: Path, rebuild: bool = False) -> bool:
     except subprocess.TimeoutExpired:
         ts_print("Error: Docker build timed out")
         return False
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
 
 
@@ -235,8 +235,8 @@ def _run_garbage_collection() -> None:
             except concurrent.futures.TimeoutError:
                 ts_print("Warning: Garbage collection timed out (30s) - skipping")
                 future.cancel()
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         # Don't fail the build if garbage collection fails
@@ -447,7 +447,7 @@ def run_docker_tests(args: TestArgs) -> int:
     except subprocess.TimeoutExpired:
         ts_print("Error: Tests timed out")
         return 1
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         ts_print("\nTest run interrupted")
         raise

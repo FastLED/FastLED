@@ -148,8 +148,8 @@ except Exception:
         code = """\
 try:
     pass
-except KeyboardInterrupt:
-    handle_keyboard_interrupt_properly()
+except KeyboardInterrupt as ki:
+    handle_keyboard_interrupt(ki)
 except Exception:
     pass
 """

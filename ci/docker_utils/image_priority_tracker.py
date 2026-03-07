@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -126,8 +126,8 @@ def get_dockerhub_image_age(platform: str) -> float | None:
 
             return age
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(
@@ -342,8 +342,8 @@ def main() -> int:
 if __name__ == "__main__":
     try:
         sys.exit(main())
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
         print("\n\nOperation cancelled by user", file=sys.stderr)
         sys.exit(130)

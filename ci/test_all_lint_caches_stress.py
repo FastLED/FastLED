@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -71,8 +71,8 @@ class CacheLintStressTest:
             needs_update = result.returncode == 0
             output = result.stdout + result.stderr
             return needs_update, output
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             return False, str(e)
@@ -100,8 +100,8 @@ class CacheLintStressTest:
             )
             output = result.stdout + result.stderr
             return result.returncode == 0, output
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             return False, str(e)
@@ -312,8 +312,8 @@ def test_manifest_completeness(test: CacheLintStressTest) -> None:
         if len(found_ops) == len(required_ops):
             test.pass_test("All required operations present in manifest")
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         test.fail_test("Manifest validation", str(e))
@@ -368,8 +368,8 @@ def _concurrent_cache_check(
             timeout=10,
         )
         result_queue.put(("success", result.returncode))
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         result_queue.put(("error", str(e)))
@@ -427,8 +427,8 @@ def main() -> int:
         success = test.print_summary()
         return 0 if success else 1
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
         print("\n\n⚠️  Test suite interrupted by user")
         return 2

@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -92,8 +92,8 @@ def install_playwright_browsers():
     try:
         os.system(f"{sys.executable} -m playwright install chromium")
         console.print("[dim]Playwright browsers ready.[/dim]")
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         console.print(
@@ -184,8 +184,8 @@ async def check_worker_state(page: Page) -> dict[str, bool | None]:
         """
         )
         return state
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         console.print(f"[yellow]Warning: Could not check worker state: {e}[/yellow]")
@@ -216,8 +216,8 @@ async def check_record_button_state(page: Page) -> dict[str, bool | None]:
         """
         )
         return state
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         console.print(f"[yellow]Warning: Could not check button state: {e}[/yellow]")
@@ -312,8 +312,8 @@ async def test_record_button(page: Page, log_capture: ConsoleLogCapture) -> bool
     try:
         await page.click("#record-btn", timeout=5000)
         console.print("[green]✓ Button clicked successfully[/green]")
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         console.print(f"[bold red]✗ Failed to click button: {e}[/bold red]")
@@ -353,8 +353,8 @@ async def test_record_button(page: Page, log_capture: ConsoleLogCapture) -> bool
             worker_state_after = await check_worker_state(page)
             print_state_table(worker_state_after, button_state)
             return False
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         console.print(f"[yellow]Warning: Could not check recording state: {e}[/yellow]")
@@ -435,8 +435,8 @@ async def main() -> int:
                         timeout=args.timeout * 1000,
                     )
                     console.print("[green]✓ Worker initialized successfully[/green]")
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
                     raise
                 except Exception as e:
                     console.print(
@@ -475,8 +475,8 @@ async def main() -> int:
                     )
                     return 1
 
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 console.print("\n[yellow]Test interrupted by user[/yellow]")
                 raise
             except Exception as e:
@@ -487,8 +487,8 @@ async def main() -> int:
             finally:
                 await browser.close()
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         console.print("\n[yellow]Test interrupted by user[/yellow]")
         raise
     finally:
@@ -500,6 +500,6 @@ if __name__ == "__main__":
     try:
         exit_code = asyncio.run(main())
         sys.exit(exit_code)
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise

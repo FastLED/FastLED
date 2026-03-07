@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 """
@@ -149,19 +149,18 @@ class LockDatabase:
         except KeyboardInterrupt:
             try:
                 conn.rollback()
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception:
                 pass
-            handle_keyboard_interrupt_properly()
             raise
         except sqlite3.OperationalError as e:
             # Database is locked by another process
             try:
                 conn.rollback()
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception:
                 pass
@@ -170,8 +169,8 @@ class LockDatabase:
         except Exception:
             try:
                 conn.rollback()
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception:
                 pass

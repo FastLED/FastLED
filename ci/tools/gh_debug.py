@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -100,8 +100,8 @@ class GitHubDebugger:
             )
             data = json.loads(result.stdout)
             return data["nameWithOwner"]
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"Error getting repo info: {e}", file=sys.stderr)
@@ -125,8 +125,8 @@ class GitHubDebugger:
                 timeout=10,
             )
             return json.loads(result.stdout)
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"Error getting run info: {e}", file=sys.stderr)
@@ -156,8 +156,8 @@ class GitHubDebugger:
                 if job.get("conclusion") in ["failure", "cancelled"]
             ]
             return failed_jobs
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"Error getting failed jobs: {e}", file=sys.stderr)
@@ -206,8 +206,8 @@ class GitHubDebugger:
         except subprocess.TimeoutExpired:
             print("Error: Log download timed out", file=sys.stderr)
             return None
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"Error downloading logs: {e}", file=sys.stderr)
@@ -309,8 +309,8 @@ class GitHubDebugger:
             if error_buffer:
                 self._save_error_block(current_job, error_buffer, is_critical=False)
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"\nError analyzing logs: {e}", file=sys.stderr)
@@ -456,8 +456,8 @@ Examples:
 
     try:
         debugger.debug()
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
         print("\n\nInterrupted by user")
         sys.exit(1)

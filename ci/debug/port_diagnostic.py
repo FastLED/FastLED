@@ -18,7 +18,7 @@ from typing import Any, cast
 
 import psutil
 
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 def format_cmdline(cmdline: list[str] | None, max_length: int = 80) -> str:
@@ -337,8 +337,8 @@ def main() -> int:
     try:
         diagnose_port(args.port)
         return 0
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"❌ Error during diagnosis: {e}", file=sys.stderr)

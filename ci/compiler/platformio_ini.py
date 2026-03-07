@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -903,8 +903,8 @@ def _resolve_package_url_from_registry(
             logger.warning(
                 f"HTTP error querying registry for {owner}/{package_name}: {e}"
             )
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             logger.warning(f"Error resolving package {owner}/{package_name}: {e}")
@@ -1020,8 +1020,8 @@ class PlatformIOIni:
                 self.config.write(f)
             temp_file.replace(file_path)
             logger.debug(f"Successfully wrote platformio.ini: {file_path}")
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             if temp_file.exists():
@@ -1601,8 +1601,8 @@ class PlatformIOIni:
             logger.debug(f"Command output: {e.stdout}, Error: {e.stderr}")
         except FileNotFoundError:
             logger.error("PlatformIO CLI not found. Is it installed and in PATH?")
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             cmd_str = " ".join(["pio"] + args)
@@ -1620,8 +1620,8 @@ class PlatformIOIni:
         if raw_data and isinstance(raw_data, dict):
             try:
                 return PlatformShowResponse.from_dict(raw_data)
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 logger.error(
@@ -1652,15 +1652,15 @@ class PlatformIOIni:
                     try:
                         framework = FrameworkInfo.from_dict(fw_data)
                         frameworks_list.append(framework)
-                    except KeyboardInterrupt:
-                        handle_keyboard_interrupt_properly()
+                    except KeyboardInterrupt as ki:
+                        handle_keyboard_interrupt(ki)
                         raise
                     except Exception as e:
                         logger.warning(f"Failed to parse framework data: {e}")
                         continue
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             logger.error(f"Failed to parse frameworks list response: {e}")

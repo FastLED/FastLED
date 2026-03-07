@@ -16,7 +16,7 @@ from ci.meson.compile import _create_error_context_filter, _is_compilation_error
 from ci.meson.compiler import get_meson_executable
 from ci.meson.output import print_error, print_success
 from ci.meson.phase_tracker import PhaseTracker
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.tee import StreamTee
 from ci.util.timestamp_print import ts_print as _ts_print
 
@@ -398,8 +398,8 @@ def stream_compile_only(
                 if verbose:
                     _ts_print(f"[MESON] Compilation completed successfully")
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             _ts_print(f"[MESON] Producer thread error: {e}", file=sys.stderr)
@@ -526,8 +526,8 @@ def stream_compile_and_run_tests(
                 num_failed += 1
                 failed_names.append(test_path.stem)
                 _ts_print(f"[TEST {tests_run}] ✗ FAILED: {test_path.name}")
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             _ts_print(f"[TEST {tests_run}] ✗ ERROR: {test_path.name}: {e}")

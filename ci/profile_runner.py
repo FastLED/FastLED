@@ -21,7 +21,7 @@ from running_process.process_output_reader import EndOfStream
 
 from ci.util.deadlock_detector import handle_hung_test
 from ci.util.docker_helper import attempt_start_docker
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 class ProfileRunner:
@@ -158,8 +158,8 @@ class ProfileRunner:
                 print(f"Error: Build failed with exit code {exit_code}")
                 return False
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"Error building profiler: {e}")
@@ -530,8 +530,8 @@ ls -lh /fastled/callgrind.out
                     print("   Check output above for details")
                     return False
 
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 print(f"Error running callgrind in Docker: {e}")

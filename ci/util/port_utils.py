@@ -25,7 +25,7 @@ import serial.tools.list_ports
 from psutil import Process
 from serial.tools.list_ports_common import ListPortInfo
 
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 # Mapping from detected ESP chip type to PlatformIO environment
@@ -85,8 +85,8 @@ def auto_detect_upload_port() -> ComportResult:
     try:
         # Scan all available COM ports
         all_ports = list(serial.tools.list_ports.comports())
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         # Failed to scan ports - return error result
@@ -173,8 +173,8 @@ def log_port_cleanup(message: str, log_dir: Path | None = None) -> None:
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with open(log_file, "a", encoding="utf-8") as f:
             f.write(f"[{timestamp}] {message}\n")
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception:
         # Silently ignore logging errors - don't fail the operation
@@ -442,8 +442,8 @@ def detect_attached_chip(port: str, timeout: float = 10.0) -> ChipDetectionResul
             environment=None,
             error_message=f"esptool timed out after {timeout}s - device may not be in bootloader mode",
         )
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         return ChipDetectionResult(

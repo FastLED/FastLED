@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -124,16 +124,16 @@ exec "{config.sccache_path}" "{config.compiler_path}" "$@"
 
         return script_path_obj
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception:
         # Clean up on error
         try:
             os.close(script_fd)
             os.unlink(script_path)
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception:
             pass
@@ -174,8 +174,8 @@ def execute_direct(config: XCacheConfig, args: list[str]) -> int:
     except FileNotFoundError as e:
         print(f"XCACHE ERROR: Command not found: {e}")
         return 127
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"XCACHE ERROR: Execution failed: {e}")
@@ -209,8 +209,8 @@ def execute_with_wrapper(config: XCacheConfig, args: list[str]) -> int:
                 print("XCACHE: Wrapper script content:", file=sys.stderr)
                 for i, line in enumerate(content.split("\n"), 1):
                     print(f"XCACHE:   {i}: {line}", file=sys.stderr)
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 print(f"XCACHE: Could not read wrapper script: {e}", file=sys.stderr)
@@ -258,8 +258,8 @@ def execute_with_wrapper(config: XCacheConfig, args: list[str]) -> int:
         return_code = process.wait()
         return return_code
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"XCACHE ERROR: Wrapper execution failed: {e}", file=sys.stderr)
@@ -269,8 +269,8 @@ def execute_with_wrapper(config: XCacheConfig, args: list[str]) -> int:
         if wrapper_script and wrapper_script.exists():
             try:
                 wrapper_script.unlink()
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception:
                 pass

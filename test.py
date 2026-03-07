@@ -104,8 +104,8 @@ def make_watch_dog_thread(
         # Dump outstanding running processes (if any)
         try:
             RunningProcessManagerSingleton.dump_active()
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             ts_print(f"Failed to dump active processes: {e}")
@@ -501,14 +501,14 @@ def main() -> None:
 
         sys.exit(0)
 
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         # Only notify main thread if we're in a worker thread
         if threading.current_thread() != threading.main_thread():
             from ci.util.global_interrupt_handler import (
-                handle_keyboard_interrupt_properly,
+                handle_keyboard_interrupt,
             )
 
-            handle_keyboard_interrupt_properly()
+            handle_keyboard_interrupt(ki)
         signal_interrupt()
         wait_for_cleanup()
         sys.exit(130)
@@ -517,14 +517,14 @@ def main() -> None:
 if __name__ == "__main__":
     try:
         main()
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         # Only notify main thread if we're in a worker thread
         if threading.current_thread() != threading.main_thread():
             from ci.util.global_interrupt_handler import (
-                handle_keyboard_interrupt_properly,
+                handle_keyboard_interrupt,
             )
 
-            handle_keyboard_interrupt_properly()
+            handle_keyboard_interrupt(ki)
         signal_interrupt()
         wait_for_cleanup()
         sys.exit(130)

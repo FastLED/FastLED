@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -137,8 +137,8 @@ def _init_platformio_build(
 
         # Generate linker map in the board directory (file name is sufficient; PIO writes here)
         board_with_sketch_include.build_flags.append("-Wl,-Map,firmware.map")
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception:
         # Non-fatal: continue without optimization artifacts if path resolution fails
@@ -210,8 +210,8 @@ def _init_platformio_build(
             with open(sdkconfig_path, "r", encoding="utf-8", errors="ignore") as f:
                 for line in f:
                     print(line, end="")
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             warnings.warn(f"Failed to write sdkconfig: {e}")
@@ -383,12 +383,12 @@ class PioCompiler(Compiler):
                 )
                 future.add_done_callback(release_platform_lock)
                 futures.append(future)
-        except KeyboardInterrupt:
+        except KeyboardInterrupt as ki:
             print("KeyboardInterrupt: Cancelling all builds")
             cancelled.set()
             for future in futures:
                 future.cancel()
-            handle_keyboard_interrupt_properly()
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"Exception: {e}")
@@ -457,10 +457,10 @@ class PioCompiler(Compiler):
                         break
                     # Print the transformed line
                     print(line)
-            except KeyboardInterrupt:
+            except KeyboardInterrupt as ki:
                 print("KeyboardInterrupt: Cancelling build")
                 running_process.terminate()
-                handle_keyboard_interrupt_properly()
+                handle_keyboard_interrupt(ki)
                 raise
             except OSError as e:
                 # Handle output encoding issues on Windows
@@ -561,8 +561,8 @@ class PioCompiler(Compiler):
             else:
                 return f"Failed to get {cache_name.upper()} statistics: {result.stderr}"
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             return f"Error retrieving {cache_name.upper()} statistics: {e}"
@@ -642,10 +642,10 @@ class PioCompiler(Compiler):
 
             # No lock management - caller (build) handles locks
             return self._build_internal(example)
-        except KeyboardInterrupt:
+        except KeyboardInterrupt as ki:
             print("KeyboardInterrupt: Cancelling build")
             cancelled.set()
-            handle_keyboard_interrupt_properly()
+            handle_keyboard_interrupt(ki)
             return SketchResult(
                 success=False,
                 output="Build cancelled by user",
@@ -826,8 +826,8 @@ class PioCompiler(Compiler):
                         if isinstance(line, EndOfStream):
                             break
                         print(line)  # No timestamp for monitor output
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
                     raise
                     print("\n📡 Monitor stopped by user")
                     monitor_process.terminate()
@@ -908,8 +908,8 @@ class PioCompiler(Compiler):
             if result.returncode == 0:
                 return result.stdout.strip().split()
             return []
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception:
             return []
@@ -923,8 +923,8 @@ class PioCompiler(Compiler):
             if geteuid is not None:
                 return geteuid() == 0
             return False
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception:
             return False
@@ -996,8 +996,8 @@ class PioCompiler(Compiler):
 
             return True
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"ERROR: Failed to install udev rules: {e}")
@@ -1253,8 +1253,8 @@ def run_pio_build(
                             print("=" * 60)
                             print(stats)
                             print("=" * 60)
-                    except KeyboardInterrupt:
-                        handle_keyboard_interrupt_properly()
+                    except KeyboardInterrupt as ki:
+                        handle_keyboard_interrupt(ki)
                         raise
                     except Exception as e:
                         print(f"Warning: Could not retrieve compiler statistics: {e}")

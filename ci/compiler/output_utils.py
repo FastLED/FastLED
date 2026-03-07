@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 """Output management utilities for FastLED compilation.
@@ -106,8 +106,8 @@ def validate_esp32_flash_mode_for_qemu(build_dir: Path, board: Board) -> bool:
         print(f"ℹ️  Flash mode validation complete for {board.board_name}")
         return True
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"WARNING: Could not validate ESP32 flash mode: {e}")
@@ -189,8 +189,8 @@ def copy_build_artifact(
         shutil.copy2(source_artifact, output_path)
         print(f"✅ Build artifact saved to: {output_path}")
         return True
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"ERROR: Failed to copy build artifact: {e}")

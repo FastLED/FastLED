@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from ci.rpc_client import RpcResponse
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 @dataclass
@@ -291,8 +291,8 @@ def run_tests() -> tuple[int, int]:
             print(f"  ✅ PASS")
             passed += 1
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             if test.should_raise is not None and isinstance(e, test.should_raise):

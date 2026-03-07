@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 # pyright: reportUnknownMemberType=false
@@ -138,8 +138,8 @@ def concurrent_run(
                     locked_print(
                         f"SUCCESS: Finished initializing build_dir for board {board.board_name} ({completed_boards}/{len(projects)})"
                     )
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 locked_print(
@@ -224,8 +224,8 @@ def concurrent_run(
                     if result.stdout:
                         print(result.stdout)
 
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 error_msg = f"Exception during symbol analysis for board {board.board_name}: {e}"

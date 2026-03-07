@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -61,8 +61,8 @@ def register_build_process(
                     BUILD_REGISTRY_FILE, "r", encoding="utf-8", errors="replace"
                 ) as f:
                     registry = json.load(f)
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception:
                 pass  # Start with empty registry if corrupted
@@ -89,8 +89,8 @@ def register_build_process(
             f"Registered build process: client={client_pid}, root={root_pid}, example={example}"
         )
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         # Non-fatal: log but don't fail the build
@@ -126,8 +126,8 @@ def unregister_build_process() -> None:
 
             logging.debug(f"Unregistered build process for client={client_pid}")
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         # Non-fatal: log but don't fail

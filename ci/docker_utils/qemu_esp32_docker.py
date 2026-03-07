@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -179,8 +179,8 @@ class DockerQEMURunner:
             )
             returncode = proc.wait(timeout=5)
             return returncode == 0
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except (Exception, FileNotFoundError):
             return False
@@ -206,8 +206,8 @@ class DockerQEMURunner:
                     stdout_lines.append(line)
             result_stdout = "\n".join(stdout_lines)
             return bool(result_stdout.strip())
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception:
             return False
@@ -226,8 +226,8 @@ class DockerQEMURunner:
         try:
             config_hash = generate_config_hash(platform)
             return f"fastled-platformio-{platform}-{config_hash}"
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception:
             # Fallback if hash generation fails
@@ -316,8 +316,8 @@ class DockerQEMURunner:
             print()
             return True
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"❌ Error pulling from registry: {e}")
@@ -472,8 +472,8 @@ class DockerQEMURunner:
                     raise ValueError(f"Invalid firmware path: {firmware_path}")
 
             return temp_dir
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             # Clean up on error
@@ -680,8 +680,8 @@ class DockerQEMURunner:
                     output_file=output_file,
                 )
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"ERROR: {e}", file=sys.stderr)

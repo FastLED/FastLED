@@ -13,7 +13,7 @@ from typing import Optional
 
 from download import download  # type: ignore[import-untyped]
 
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 # Configs
@@ -168,8 +168,8 @@ def main() -> None:
     try:
         dot_version = run("dot -V", check=False)
         print(f"Graphviz detected: {dot_version}")
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception:
         warnings.warn(

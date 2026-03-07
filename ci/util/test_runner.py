@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -90,8 +90,8 @@ def get_test_counts() -> tuple[int, int, int]:
                 # pytest --collect-only -q outputs lines like "test_foo.py::test_bar"
                 lines = result.stdout.strip().split("\n")
                 python_count = sum(1 for line in lines if "::" in line)
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except (subprocess.SubprocessError, RuntimeError):
             # If counting fails, use 0 as fallback
@@ -99,8 +99,8 @@ def get_test_counts() -> tuple[int, int, int]:
 
         return (unit_count, example_count, python_count)
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception:
         # If discovery fails, return zeros
@@ -807,8 +807,8 @@ def _get_friendly_test_name(command: str | list[str]) -> str:
                     if example_parts:
                         return f"{script_name} {' '.join(example_parts)}"
                     return script_name
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception:
             # Fall back to generic extraction on any unexpected parsing issue
@@ -1040,8 +1040,8 @@ def _handle_process_completion(
                     ts_print("=== END OF OUTPUT ===")
                 else:
                     actual_output = "No output captured from failed process"
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 actual_output = f"Error capturing output: {e}"
@@ -1079,8 +1079,8 @@ def _handle_process_completion(
         if os.name != "nt":  # Only flush on non-Windows systems
             sys.stdout.flush()
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         test_name = _extract_test_name(cmd)
@@ -1096,8 +1096,8 @@ def _handle_process_completion(
                 ts_print("\n=== PROCESS OUTPUT BEFORE ERROR ===")
                 ts_print(actual_output)
                 ts_print("=== END OF OUTPUT ===")
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as output_error:
             ts_print(f"Could not capture process output: {output_error}")
@@ -1108,8 +1108,8 @@ def _handle_process_completion(
             # Try to capture output from this process too
             try:
                 process_output = p.stdout if hasattr(p, "stdout") else str(e)
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception:
                 process_output = str(e)
@@ -1319,8 +1319,8 @@ def run_test_processes(
                 )
             except ImportError:
                 pass  # Fall back to normal execution if display not available
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception:
                 pass  # Fall back to normal execution on any display error
@@ -1576,8 +1576,8 @@ def runner(
                         result.num_tests_run,
                         result.duration,
                     )
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
                 except Exception:
                     pass  # Non-critical
         else:
@@ -1770,8 +1770,8 @@ def runner(
                                     _saved_tr.get("num_tests", 0),
                                     _saved_tr.get("duration", 0.0),
                                 )
-                    except KeyboardInterrupt:
-                        handle_keyboard_interrupt_properly()
+                    except KeyboardInterrupt as ki:
+                        handle_keyboard_interrupt(ki)
                     except Exception:
                         pass  # Non-critical optimization; fail silently
             summary = _format_timing_summary(all_timings)

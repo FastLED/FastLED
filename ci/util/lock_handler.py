@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -70,8 +70,8 @@ def find_processes_locking_path(
         try:
             name = proc.info["name"].lower() if proc.info.get("name") else ""
             return 0 if name in priority_names else 1
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception:
             return 2
@@ -136,8 +136,8 @@ def find_processes_locking_path(
         ):
             # Skip processes we can't access
             continue
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception:
             # Skip any other errors (e.g., invalid paths)
@@ -194,8 +194,8 @@ def kill_processes(pids: set[int], force: bool = True) -> bool:
                 f"  ✗ Access denied killing process {pid} (may require admin privileges)"
             )
             all_killed = False
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"  ✗ Failed to kill process {pid}: {e}")
@@ -274,8 +274,8 @@ def force_remove_path(path: Path, max_retries: int = 3) -> bool:
                                 return True
                             else:
                                 print(f"  ✗ Windows command failed: {result.stderr}")
-                        except KeyboardInterrupt:
-                            handle_keyboard_interrupt_properly()
+                        except KeyboardInterrupt as ki:
+                            handle_keyboard_interrupt(ki)
                             raise
                         except Exception as cmd_error:
                             print(f"  ✗ Windows command error: {cmd_error}")

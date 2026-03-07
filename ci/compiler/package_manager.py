@@ -6,7 +6,7 @@ import subprocess
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 if TYPE_CHECKING:
@@ -81,8 +81,8 @@ def get_platform_required_packages(platform_path: Path) -> list[str]:
         packages = data.get("packages", {})
         # Return all package names from the platform
         return list(packages.keys())
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"Warning: Could not parse platform.json: {e}")
@@ -122,8 +122,8 @@ def get_installed_packages_from_pio() -> dict[str, str]:
                 packages[package_name] = version
 
         return packages
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"Warning: Could not get installed packages: {e}")
@@ -192,8 +192,8 @@ def aggressive_clean_pio_packages(paths: "FastLEDPaths", board_name: str) -> boo
                     cleaned = True
                 else:
                     print(f"    ✗ Failed to remove {package_name}")
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 print(f"    ✗ Error removing {package_name}: {e}")
@@ -317,9 +317,8 @@ def detect_and_fix_corrupted_packages_dynamic(
                 else:
                     print(f"    -> ERROR: Failed to remove after retries")
                     results[package_name] = False  # Still corrupted
-                handle_keyboard_interrupt_properly()
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 print(f"    -> ERROR: {e}")

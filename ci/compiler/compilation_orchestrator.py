@@ -17,7 +17,7 @@ from ci.boards import Board
 from ci.compiler.board_example_utils import get_filtered_examples
 from ci.compiler.compiler import CacheType, SketchResult
 from ci.compiler.pio import FastLEDPaths, PioCompiler
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 @typechecked
@@ -185,13 +185,13 @@ def compile_board_examples(
                             f.cancel()
                     break
 
-            except KeyboardInterrupt:
+            except KeyboardInterrupt as ki:
                 print("\n⏹️  Cancelling builds and cleaning up...")
                 compiler.cancel_all()
                 for f in futures:
                     f.cancel()
                 print("   ✓ Cleanup complete")
-                handle_keyboard_interrupt_properly()
+                handle_keyboard_interrupt(ki)
             except Exception as e:
                 # Represent unexpected exception as a failed SketchResult for consistency
                 from pathlib import Path as _Path
@@ -230,8 +230,8 @@ def compile_board_examples(
                 print("=" * 60)
                 print(stats)
                 print("=" * 60)
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"Warning: Could not retrieve compiler statistics: {e}")
@@ -243,11 +243,11 @@ def compile_board_examples(
             stopped_early=stopped_early,
             skipped_examples=skipped_examples,
         )
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         print("\n⏹️  Cancelling builds and cleaning up...")
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
         print("   ✓ Cleanup complete")
-        # Don't re-raise - handle_keyboard_interrupt_properly() already signaled the main thread
+        # Don't re-raise - handle_keyboard_interrupt(ki) already signaled the main thread
         return BoardCompilationResult(
             ok=False,
             sketch_results=[],

@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 """Docker image build utilities for FastLED PlatformIO compilation.
@@ -108,8 +108,8 @@ def extract_architecture(board_name: str) -> str:
         platform_name = platform_name.replace(".git", "").replace(".zip", "")
         return platform_name
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception:
         # Fallback if board creation fails - use board name
@@ -173,8 +173,8 @@ def generate_docker_tag(board_name: str) -> str:
         # Future: Can extract GCC version or other toolchain info
         return "latest"
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception:
         # Fallback if board creation fails
@@ -206,8 +206,8 @@ def generate_config_hash(board_name: str, framework: Optional[str] = None) -> st
     """
     try:
         board = create_board(board_name, no_project_options=True)
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         raise ValueError(f"Failed to create board '{board_name}': {e}") from e

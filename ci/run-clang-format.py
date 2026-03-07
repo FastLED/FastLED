@@ -26,7 +26,7 @@ import traceback
 from functools import partial
 from typing import Any, Generator, Optional
 
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 try:
@@ -130,8 +130,8 @@ def run_clang_format_diff_wrapper(args: Any, file: str) -> tuple[list[str], list
         return ret
     except DiffError:
         raise
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         raise UnexpectedError("{}: {}: {}".format(file, e.__class__.__name__, e), e)

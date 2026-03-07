@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -654,8 +654,8 @@ class RunningProcessGroup:
                             f"Process failed with exit code {exit_code}", [failure]
                         )
 
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
                     raise
                 except Exception as e:
                     print(f"Process failed: {process.get_command_str()} - {e}")
@@ -734,8 +734,8 @@ class RunningProcessGroup:
                             f"Process failed with exit code {exit_code}", [failure]
                         )
 
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
                     raise
                 except Exception as e:
                     print(f"Process failed: {process.get_command_str()} - {e}")

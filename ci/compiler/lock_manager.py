@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 """
@@ -55,8 +55,8 @@ class GlobalPackageLock:
                     print(f"Removed stale lock for {self.platform_name}")
                     return True
             return False
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"Warning: Could not check for stale lock: {e}")
@@ -104,8 +104,8 @@ class GlobalPackageLock:
                         f"Acquired global package lock for platform {self.platform_name}"
                     )
                     return
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception:
                 pass  # Continue the loop
@@ -137,8 +137,8 @@ class GlobalPackageLock:
             self._db.release(self._lock_name, os.getpid())
             self._is_acquired = False
             print(f"Released global package lock for platform {self.platform_name}")
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             warnings.warn(
@@ -167,8 +167,8 @@ class GlobalPackageLock:
         """Ensure lock is released when object is garbage collected."""
         try:
             self.release()
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception:
             pass
@@ -201,8 +201,8 @@ class PlatformLock:
                     print(f"Removed stale lock file: {self.lock_file_path}")
                     return True
             return False
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"Warning: Could not check for stale lock: {e}")
@@ -246,8 +246,8 @@ class PlatformLock:
                     self.is_locked = True
                     print(f"Acquired platform lock: {self.lock_file_path}")
                     return
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception:
                 pass  # Continue the loop
@@ -278,8 +278,8 @@ class PlatformLock:
                 self._db.release(self._lock_name, os.getpid())
                 self.is_locked = False
                 print(f"Released platform lock: {self.lock_file_path}")
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 print(f"Warning: Failed to release platform lock: {e}")
@@ -304,8 +304,8 @@ class PlatformLock:
             try:
                 self._db.release(self._lock_name, os.getpid())
                 self.is_locked = False
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception:
                 pass

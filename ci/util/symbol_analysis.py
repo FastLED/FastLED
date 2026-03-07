@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -130,12 +130,12 @@ def run_command(cmd: str) -> str:
             print(f"Exit code: {exit_code}")
             return ""
         return output
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         from ci.util.global_interrupt_handler import (
-            handle_keyboard_interrupt_properly,
+            handle_keyboard_interrupt,
         )
 
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"Error running command: {cmd}")
@@ -159,8 +159,8 @@ def demangle_symbol(mangled_name: str, cppfilt_path: str) -> str:
         demangled = output.strip()
         # If demangling failed, c++filt returns the original name
         return demangled if demangled and demangled != mangled_name else mangled_name
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"Error demangling symbol: {mangled_name}")
@@ -540,8 +540,8 @@ def analyze_map_file(map_file: Path) -> dict[str, list[str]]:
                             symbol = line[symbol_start:symbol_end]
                             dependencies[current_archive].append(symbol)
                     current_archive = None
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"Error reading map file: {e}")

@@ -88,7 +88,7 @@ from running_process.process_output_reader import EndOfStream
 from ci.compiler.build_utils import get_utf8_env
 from ci.util.crash_trace_decoder import CrashTraceDecoder
 from ci.util.global_interrupt_handler import (
-    handle_keyboard_interrupt_properly,
+    handle_keyboard_interrupt,
     is_interrupted,
 )
 from ci.util.json_rpc_handler import JsonRpcHandler
@@ -155,9 +155,9 @@ def run_cpp_lint() -> bool:
         print("✅ All C++ lint checks passed\n")
         return True
 
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         print("\nKeyboardInterrupt: Stopping linting")
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"❌ Error running C++ linting: {e}")
@@ -230,10 +230,10 @@ def run_compile(
             if isinstance(line, EndOfStream):
                 break
             print(line)
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         print("\nKeyboardInterrupt: Stopping compilation")
         proc.terminate()
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
         raise
 
     proc.wait()
@@ -306,10 +306,10 @@ def run_upload(
                 break
             print(line)
 
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         print("\nKeyboardInterrupt: Stopping upload")
         proc.terminate()
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
         raise
 
     proc.wait()
@@ -638,8 +638,8 @@ def run_monitor(
                             print(
                                 f"   ✓ Sent command {i}/{len(json_rpc_commands)}: {cmd['method']}()"
                             )
-                        except KeyboardInterrupt:
-                            handle_keyboard_interrupt_properly()
+                        except KeyboardInterrupt as ki:
+                            handle_keyboard_interrupt(ki)
                             raise
                         except Exception as e:
                             print(f"   ⚠️  Warning: Failed to send RPC command {i}: {e}")
@@ -749,8 +749,8 @@ def run_monitor(
                                         print(
                                             f"  → Trigger matched, sent '{trigger_text}'"
                                         )
-                                    except KeyboardInterrupt:
-                                        handle_keyboard_interrupt_properly()
+                                    except KeyboardInterrupt as ki:
+                                        handle_keyboard_interrupt(ki)
                                         raise
                                     except Exception as e:
                                         print(f"  ⚠ Failed to send trigger: {e}")
@@ -827,17 +827,17 @@ def run_monitor(
                         ):
                             break
 
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
                     raise
                 except Exception:
                     # SerialMonitor exceptions are simpler - just pass
                     # No need for device stuck detection with SerialMonitor
                     pass
 
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         print("\nKeyboardInterrupt: Stopping monitor")
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
         raise
     # SerialMonitor context manager handles cleanup automatically
 
@@ -1405,8 +1405,8 @@ def main() -> int:
         print(f"\n✅ All {phases_completed} phases completed successfully")
         return 0
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
         print("\n\n⚠️  Interrupted by user")
         return 130

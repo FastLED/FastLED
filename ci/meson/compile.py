@@ -17,7 +17,7 @@ from ci.meson.cache_utils import (
 )
 from ci.meson.compiler import get_meson_executable
 from ci.meson.output import print_banner
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.tee import StreamTee
 from ci.util.timestamp_print import ts_print as _ts_print
@@ -556,8 +556,8 @@ def compile_meson(
                         "[MESON] ⚠️  Repair failed, but continuing anyway",
                         file=sys.stderr,
                     )
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as repair_error:
                 _ts_print(
@@ -638,8 +638,8 @@ def compile_meson(
             error_log_file=None,  # Success - no error log needed
         )
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         _ts_print(f"[MESON] Compilation failed with exception: {e}", file=sys.stderr)

@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 """
@@ -77,8 +77,8 @@ class BuildLock:
                     return True
 
             return False
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception:
             return False
@@ -135,8 +135,8 @@ class BuildLock:
                 if success:
                     self._is_acquired = True
                     return True
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception:
                 pass  # Continue the loop
@@ -162,8 +162,8 @@ class BuildLock:
         try:
             self._db.release(self._lock_name, os.getpid())
             self._is_acquired = False
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception:
             pass

@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -70,15 +70,15 @@ def is_daemon_running() -> bool:
             print(f"Removing stale PID file: {PID_FILE}")
             PID_FILE.unlink()
             return False
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception:
         # Corrupted PID file - remove it
         try:
             PID_FILE.unlink(missing_ok=True)
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception:
             pass
@@ -129,8 +129,8 @@ def read_status_file() -> DaemonStatus:
             message="Status file corrupted (invalid JSON)",
             updated_at=time.time(),
         )
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception:
         return DaemonStatus(
@@ -209,8 +209,8 @@ def packages_already_installed(project_dir: Path, environment: str | None) -> bo
         # So we just check if the command runs successfully
         return result.returncode == 0
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception:
         # If check fails, assume packages need installation
@@ -500,8 +500,8 @@ def ensure_packages_installed(
             # Sleep before next poll
             time.sleep(1)
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             print("\n\n⚠️  Interrupted by user")
             print("Note: Daemon will continue installation in background")
             print("      Check progress: bash daemon logs-tail")
@@ -550,8 +550,8 @@ def get_daemon_status() -> dict[str, Any]:
         try:
             with open(PID_FILE, "r") as f:
                 status["pid"] = int(f.read().strip())
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception:
             status["pid"] = None
@@ -634,8 +634,8 @@ def main() -> int:
 if __name__ == "__main__":
     try:
         sys.exit(main())
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
         print("\nInterrupted by user")
         sys.exit(130)

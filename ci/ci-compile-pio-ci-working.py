@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -406,8 +406,8 @@ def compile_with_pio_ci(
             error_msg = f"Timeout building {example_path.name} for {board_name}"
             locked_print(f"ERROR: {error_msg}")
             errors.append(error_msg)
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             error_msg = f"Exception building {example_path.name} for {board_name}: {e}"
@@ -452,8 +452,8 @@ def run_symbol_analysis(boards: list[Board]) -> None:
                 if result.stdout:
                     print(result.stdout)
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             locked_print(
@@ -483,8 +483,8 @@ def main() -> int:
         try:
             board = create_board(board_name, no_project_options=False)
             boards.append(board)
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             locked_print(f"ERROR: Failed to get board '{board_name}': {e}")
@@ -587,8 +587,8 @@ def main() -> int:
 if __name__ == "__main__":
     try:
         sys.exit(main())
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
         locked_print("\nInterrupted by user")
         sys.exit(1)

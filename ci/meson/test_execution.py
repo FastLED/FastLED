@@ -14,7 +14,7 @@ from ci.meson.output import (
     print_error,
     print_success,
 )
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.output_formatter import TimestampFormatter, create_filtering_echo_callback
 from ci.util.timestamp_print import ts_print as _ts_print
 
@@ -245,8 +245,8 @@ def run_meson_test(
             num_tests_failed=0,  # Meson returned 0, so no failures
         )
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         duration = time.time() - start_time

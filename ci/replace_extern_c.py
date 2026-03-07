@@ -4,7 +4,7 @@
 import re
 from pathlib import Path
 
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 # Regex patterns for matching extern "C" blocks
@@ -45,8 +45,8 @@ def replace_extern_c_in_file(filepath: Path, dry_run: bool = False) -> tuple[boo
     """
     try:
         content = filepath.read_text(encoding="utf-8")
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"Error reading {filepath}: {e}")
@@ -111,9 +111,8 @@ def replace_extern_c_in_file(filepath: Path, dry_run: bool = False) -> tuple[boo
             try:
                 filepath.write_text(content, encoding="utf-8")
                 print(f"✓ Modified {filepath} ({total_replacements} replacements)")
-                handle_keyboard_interrupt_properly()
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 print(f"Error writing {filepath}: {e}")

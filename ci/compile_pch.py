@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -238,8 +238,8 @@ def invalidate_stale_pch(pch_file: Path) -> None:
             )
             pch_file.unlink(missing_ok=True)
             hash_file.unlink(missing_ok=True)
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"WARNING: PCH staleness check failed: {e}", file=sys.stderr)
@@ -284,8 +284,8 @@ def main() -> int:
                             file=sys.stderr,
                         )
                         return 0
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 print(f"WARNING: PCH input hash check failed: {e}", file=sys.stderr)
@@ -298,8 +298,8 @@ def main() -> int:
     if result.returncode == 0 and pch_output and depfile:
         try:
             fix_depfile(depfile, pch_output)
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"ERROR fixing PCH depfile: {e}", file=sys.stderr)
@@ -315,8 +315,8 @@ def main() -> int:
                 if input_files:
                     current_hash = hash_input_files(input_files)
                     hash_file.write_text(current_hash, encoding="utf-8")
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception:
                 pass  # Non-critical: cache will be rebuilt next time

@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -139,8 +139,8 @@ def parse_depfile(depfile_path: Path) -> list[Path]:
         # Convert to Path objects
         return [Path(d) for d in deps]
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"Warning: Could not parse dependency file {depfile_path}: {e}")
@@ -299,8 +299,8 @@ def compile_object(
 
         return True, source_path.name, ""
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         return False, source_path.name, f"Exception during compilation: {e}"
@@ -455,8 +455,8 @@ def load_metadata() -> dict[str, Any]:
     try:
         with open(LIBRARY_METADATA) as f:
             return json.load(f)
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"Warning: Could not load library metadata: {e}")
@@ -819,8 +819,8 @@ def build_library(
 
         return 0
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"✗ Library build failed with exception: {e}", file=sys.stderr)
@@ -883,8 +883,8 @@ def main() -> int:
             args.mode, args.force, args.verbose, args.parallel, args.unity_chunks
         )
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
         print("\n✗ Build interrupted by user")
         raise

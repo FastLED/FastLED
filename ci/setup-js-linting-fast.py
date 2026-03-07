@@ -1,5 +1,5 @@
 from ci.util.global_interrupt_handler import (
-    handle_keyboard_interrupt_properly,  # pyright: ignore[reportMissingImports]
+    handle_keyboard_interrupt,  # pyright: ignore[reportMissingImports]
 )
 
 
@@ -255,8 +255,8 @@ def main():
         print("  bash ci/lint-js-fast                 # Fast linting with ESLint")
         print("  For more info: ci/js/README.md")
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"Setup failed: {e}")

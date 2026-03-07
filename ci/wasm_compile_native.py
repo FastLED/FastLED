@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -374,8 +374,8 @@ def compile_wasm(
             print(f"✗ Linking failed with return code {result.returncode}")
             return result.returncode
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"✗ Build failed with exception: {e}", file=sys.stderr)
@@ -437,8 +437,8 @@ def main() -> int:
             args.force,
             args.unity_chunks,
         )
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
         print("\n✗ Build interrupted by user")
         return 130

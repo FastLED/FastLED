@@ -18,7 +18,7 @@ from colorama import Fore, Style
 
 from ci.rpc_client import RpcClient, RpcTimeoutError
 from ci.util.ble_interface import BLE_CHAR_TX_UUID, BleInterface
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 if TYPE_CHECKING:
@@ -102,8 +102,8 @@ async def run_ble_validation(
             status_response = await serial_client.send("bleStatus", timeout=10.0)
             ble_status = status_response.data
             print(f"  BLE status: {json.dumps(ble_status, indent=2)}")
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"  Warning: bleStatus query failed: {e}")
@@ -165,8 +165,8 @@ async def run_ble_validation(
                     )
                     tests_passed += 1
                     pong_received = True
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception:
                 pass
@@ -181,8 +181,8 @@ async def run_ble_validation(
         print("\n--- Step 6: Stop BLE on device ---")
         try:
             await ble_iface.close()
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception:
             pass
@@ -191,8 +191,8 @@ async def run_ble_validation(
         try:
             stop_response = await serial_client.send("stopBle", timeout=10.0)
             print(f"  stopBle response: {stop_response.data}")
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"  Warning: stopBle failed: {e}")
@@ -213,9 +213,9 @@ async def run_ble_validation(
             )
             return 1
 
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         print("\n\n  Interrupted by user")
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
         return 130
     except RpcTimeoutError:
         print(f"\n  {Fore.RED}Timeout waiting for BLE response{Style.RESET_ALL}")
@@ -231,15 +231,15 @@ async def run_ble_validation(
         if ble_iface:
             try:
                 await ble_iface.close()
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
             except Exception:
                 pass
         if serial_client:
             try:
                 await serial_client.send("stopBle", timeout=5.0)
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
             except Exception:
                 pass
             await serial_client.close()

@@ -107,11 +107,11 @@ def run_fbuild_compile(
 
         return success
 
-    except KeyboardInterrupt:
-        from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+    except KeyboardInterrupt as ki:
+        from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
         print("\nKeyboardInterrupt: Stopping compilation")
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"\n❌ Compilation error: {e}\n")
@@ -174,11 +174,11 @@ def run_fbuild_upload(
 
         return success
 
-    except KeyboardInterrupt:
-        from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+    except KeyboardInterrupt as ki:
+        from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
         print("\nKeyboardInterrupt: Stopping upload")
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"\n❌ Upload error: {e}\n")
@@ -257,11 +257,11 @@ def run_fbuild_deploy(
 
         return success
 
-    except KeyboardInterrupt:
-        from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+    except KeyboardInterrupt as ki:
+        from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
         print("\nKeyboardInterrupt: Stopping deploy")
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"\n❌ Deploy error: {e}\n")
@@ -323,11 +323,11 @@ def run_fbuild_monitor(
 
         return success
 
-    except KeyboardInterrupt:
-        from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+    except KeyboardInterrupt as ki:
+        from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
         print("\nKeyboardInterrupt: Stopping monitor")
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"\n❌ Monitor error: {e}\n")

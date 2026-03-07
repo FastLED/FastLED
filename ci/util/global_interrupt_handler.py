@@ -36,15 +36,25 @@ class GlobalInterruptHandler:
         return self.interrupted.is_set()
 
     def signal_interrupt(self, from_thread: Optional[str] = None) -> None:
+        now = time.time()
         if not self.interrupted.is_set():
-            self.interrupt_time = time.time()
+            self.interrupt_time = now
             self.interrupted.set()
+            self._interrupt_count = 1
             thread_info = f" from {from_thread}" if from_thread else ""
             print(
                 f"\n⚠️  Interrupt signal received{thread_info}, stopping all operations..."
             )
+        else:
+            # Only count as a new interrupt if enough time has passed since the
+            # first one.  A single Ctrl+C propagates through multiple except
+            # handlers that each call signal_interrupt(); those cascaded calls
+            # arrive within milliseconds and must not be mistaken for a second
+            # keypress.
+            _DEBOUNCE_SECONDS = 0.25
+            if self.interrupt_time and (now - self.interrupt_time) >= _DEBOUNCE_SECONDS:
+                self._interrupt_count += 1
 
-        self._interrupt_count += 1
         if self._interrupt_count >= 2:
             print("\n⚠️  Double Ctrl+C detected - forcing immediate exit")
             os._exit(2)
@@ -52,7 +62,12 @@ class GlobalInterruptHandler:
     def notify_main_thread(self) -> None:
         if not self.is_interrupted():
             self.signal_interrupt(from_thread=threading.current_thread().name)
-        _thread.interrupt_main()
+        # Only interrupt the main thread from a worker thread.  Calling
+        # _thread.interrupt_main() from the main thread schedules a *second*
+        # KeyboardInterrupt that fires later, causing false "double Ctrl+C"
+        # detection.
+        if threading.current_thread() is not threading.main_thread():
+            _thread.interrupt_main()
 
     def install_signal_handler(self) -> None:
         """Install SIGINT handler to catch Ctrl-C and set interrupt flag."""
@@ -116,9 +131,8 @@ def notify_main_thread() -> None:
     _handler.notify_main_thread()
 
 
-# Backward compatibility alias for old linter
-def handle_keyboard_interrupt_properly() -> None:
-    """Alias for notify_main_thread() for backward compatibility with old flake8 plugin."""
+def handle_keyboard_interrupt(_ki: KeyboardInterrupt) -> None:
+    """Signal the interrupt and (from a worker thread) wake the main thread."""
     notify_main_thread()
 
 

@@ -8,7 +8,7 @@ from rich.panel import Panel
 
 from ci.boards import WEBTARGET
 from ci.compiler.board_example_utils import should_skip_example_for_board
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 console = Console()
@@ -75,9 +75,8 @@ def main() -> int:
         console.print(
             f"[bold yellow]⚠️  WARNING:[/bold yellow] Error checking filters for '{example_name}': {e}"
         )
-        handle_keyboard_interrupt_properly()
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         # Unexpected error during filter check - log and continue

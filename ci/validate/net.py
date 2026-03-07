@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Any
 from colorama import Fore, Style
 
 from ci.rpc_client import RpcClient, RpcTimeoutError
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 if TYPE_CHECKING:
@@ -411,9 +411,9 @@ async def run_net_loopback_validation(
             )
             return 1
 
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         print("\n\n  Interrupted by user")
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
         return 130
     except RpcTimeoutError:
         print(
@@ -427,8 +427,8 @@ async def run_net_loopback_validation(
         if client:
             try:
                 await client.send("stopNet", timeout=10.0)
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
             except Exception:
                 pass
             await client.close()
@@ -484,9 +484,9 @@ async def run_net_validation(
         else:
             return await _run_net_client_validation(client, wifi)
 
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         print("\n\n  Interrupted by user")
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
         return 130
     except Exception as e:
         print(f"\n  {Fore.RED}Network validation error: {e}{Style.RESET_ALL}")
@@ -499,8 +499,8 @@ async def run_net_validation(
             # Send stopNet to clean up device resources
             try:
                 await client.send("stopNet", timeout=10.0)
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
             except Exception:
                 pass
             await client.close()

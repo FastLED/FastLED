@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.pio_runner import run_pio_command
 
 
@@ -133,8 +133,8 @@ def _run_pio_size(build_dir: Path) -> int | None:
             data = int(m.group(2))
             headers = int(m.group(3))
             return code + data + headers
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception:
         pass
@@ -179,9 +179,8 @@ def main(board: str, example: str | None = None):
         print(f"Error: {e}")
     except json.JSONDecodeError:
         print(f"Error: Unable to parse build_info.json for {board}")
-        handle_keyboard_interrupt_properly()
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"An unexpected error occurred: {e}")

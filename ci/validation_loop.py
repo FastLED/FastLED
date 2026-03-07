@@ -20,7 +20,7 @@ import json
 import sys
 from typing import Any, Callable
 
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.validation_agent import (
     TestConfig,
     ValidationAgent,
@@ -247,9 +247,9 @@ def run_validation_loop(
                         else:
                             total_failed += 1
 
-                    except KeyboardInterrupt:
+                    except KeyboardInterrupt as ki:
                         print("\n\nKeyboardInterrupt: Stopping validation loop")
-                        handle_keyboard_interrupt_properly()
+                        handle_keyboard_interrupt(ki)
                         raise
                     except Exception as e:
                         print(f"  Error: {e}")
@@ -285,9 +285,9 @@ def run_validation_loop(
             "results": all_results,
         }
 
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         print("\nKeyboardInterrupt: Cancelling validation loop")
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
         raise
     finally:
         agent.close()
@@ -389,7 +389,7 @@ Strip Size Presets (NEW - Phase 7):
 
         # Exit with error code if any tests failed
         sys.exit(0 if results["summary"]["failed"] == 0 else 1)
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         print("\nValidation cancelled by user")
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
         sys.exit(130)  # Standard exit code for SIGINT

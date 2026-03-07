@@ -11,7 +11,7 @@ from typing import Any
 
 from ci.util.bin_2_elf import bin_to_elf
 from ci.util.elf import dump_symbol_sizes
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.map_dump import map_dump
 from ci.util.symbol_analysis import SymbolInfo, analyze_symbols
 
@@ -287,8 +287,8 @@ def main() -> int:
         # Display per-function sizes prominently
         display_function_sizes(symbols, board, top_n=50)
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"\nWarning: Per-function analysis failed: {e}")
@@ -313,9 +313,8 @@ def main() -> int:
             print("LEGACY ANALYSIS (bin-to-elf conversion)")
             print("=" * 80)
             print(out)
-        handle_keyboard_interrupt_properly()
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(

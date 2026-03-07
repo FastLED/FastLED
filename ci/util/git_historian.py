@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 """
@@ -37,8 +37,8 @@ def _run(cmd: str, timeout: float = 3.0) -> str:
             return ""
         else:
             return ""
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception:
         return ""
@@ -55,8 +55,8 @@ def _have(cmd: str) -> bool:
             check=False,
         )
         return result.returncode == 0
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception:
         return False
@@ -259,14 +259,14 @@ def query(keywords: list[str], paths: list[Path]) -> list[str]:
             for fut in as_completed([fut_tree, fut_hist], timeout=5.0):
                 try:
                     results.extend(fut.result())
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
                     raise
                 except Exception:
                     # keep going even if one branch fails
                     pass
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception:
             # Timeout or other error - just use whatever results we have

@@ -73,7 +73,7 @@ from ci.debug_attached import (
 from ci.rpc_client import RpcClient, RpcCrashError, RpcTimeoutError
 from ci.util.crash_trace_decoder import CrashTraceDecoder
 from ci.util.global_interrupt_handler import (
-    handle_keyboard_interrupt_properly,
+    handle_keyboard_interrupt,
     install_signal_handler,
     is_interrupted,
 )
@@ -304,8 +304,8 @@ async def run_gpio_pretest(
             try:
                 ping_response = await client.send("ping", retries=3)
                 print(f"✅ Ping successful: {ping_response.data}")
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 print(f"❌ Ping failed: {e}")
@@ -367,8 +367,8 @@ async def run_gpio_pretest(
         print("   3. Serial communication issue")
         print()
         return False
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except (RuntimeError, OSError) as e:
         print()
@@ -440,8 +440,8 @@ async def run_pin_discovery(
         try:
             ping_response = await client.send("ping", timeout=30.0, retries=3)
             print(f"✅ Ping successful: {ping_response.data}")
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"❌ Ping failed: {e}")
@@ -497,10 +497,10 @@ async def run_pin_discovery(
         if client:
             await client.close()
         return (False, None, None, None)
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         if client:
             await client.close()
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
         raise
     except (RuntimeError, OSError) as e:
         print()
@@ -1791,8 +1791,8 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                 print(
                     f"✅ Detected {detected_chip_type} → using environment '{final_environment}'{cache_indicator}"
                 )
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 # fbuild ledger failed, fall back to esptool
@@ -1997,8 +1997,8 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                         elapsed = time.time() - start_time
                         print(f"✅ Serial port available after {elapsed:.1f}s")
                         break
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
                     raise
                 except Exception:
                     # Port not ready - use interruptible sleep for Windows Ctrl+C
@@ -2059,8 +2059,8 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
 
                     try:
                         validator.validate_request(method, args)
-                    except KeyboardInterrupt:
-                        handle_keyboard_interrupt_properly()
+                    except KeyboardInterrupt as ki:
+                        handle_keyboard_interrupt(ki)
                         raise
                     except Exception as e:
                         validation_errors.append(f"Command {i + 1} ({method}): {e}")
@@ -2075,8 +2075,8 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                 print(
                     f"✅ All {len(json_rpc_commands)} RPC commands validated against schema"
                 )
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
 
             except ImportError:
@@ -2356,8 +2356,8 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                 print(f"{Fore.RED}SIMD TEST TIMEOUT{Style.RESET_ALL}")
                 print("   No response from device within 30 seconds")
                 return 1
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 print()  # Newline after partial status line
@@ -2525,8 +2525,8 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                     stop_word_found = "ERROR"
                     break
 
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
                     raise
 
                 except Exception as e:
@@ -2535,9 +2535,9 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                     stop_word_found = "ERROR"
                     break
 
-        except KeyboardInterrupt:
+        except KeyboardInterrupt as ki:
             print("\n\n⚠️  Interrupted by user")
-            handle_keyboard_interrupt_properly()
+            handle_keyboard_interrupt(ki)
             return 130
         except Exception as e:
             print(f"\n{Fore.RED}❌ RPC client error: {e}{Style.RESET_ALL}")
@@ -2701,8 +2701,8 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                     )
                     # Fall through to default behavior
 
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
             except Exception as e:
                 print(
                     f"{Fore.YELLOW}⚠️  Error querying test summary: {e}{Style.RESET_ALL}"
@@ -2720,9 +2720,9 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
             )
             return 0
 
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         print("\n\n⚠️  Interrupted by user")
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
         return 130
 
 

@@ -19,7 +19,7 @@ import httpx
 from colorama import Fore, Style
 
 from ci.rpc_client import RpcClient, RpcTimeoutError
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.validate.net import create_wifi_manager
 
 
@@ -286,8 +286,8 @@ async def run_ota_validation(
                                 elapsed = time.time() - start_time
                                 print(f"    Serial port available after {elapsed:.1f}s")
                                 break
-                        except KeyboardInterrupt:
-                            handle_keyboard_interrupt_properly()
+                        except KeyboardInterrupt as ki:
+                            handle_keyboard_interrupt(ki)
                             raise
                         except Exception:
                             await asyncio.sleep(0.5)
@@ -321,8 +321,8 @@ async def run_ota_validation(
                             )
                             tests_failed += 1
 
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except httpx.HTTPError as e:
                 print(f"    {Fore.RED}FAIL{Style.RESET_ALL} - HTTP error: {e}")
@@ -349,9 +349,9 @@ async def run_ota_validation(
             )
             return 1
 
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         print("\n\n  Interrupted by user")
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
         return 130
     except RpcTimeoutError:
         print(f"\n  {Fore.RED}Timeout waiting for OTA response{Style.RESET_ALL}")
@@ -365,8 +365,8 @@ async def run_ota_validation(
         if client:
             try:
                 await client.send("stopOta", timeout=10.0)
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
             except Exception:
                 pass
             await client.close()

@@ -18,7 +18,7 @@ import time
 from pathlib import Path
 
 from ci.util.deadlock_detector import handle_hung_test
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 DEFAULT_TIMEOUT = 20.0  # 20 seconds per test
@@ -68,8 +68,8 @@ def run_test_with_deadlock_detection(
             text=True,
             bufsize=1,  # Line buffered
         )
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"Failed to start test: {e}", file=sys.stderr)
@@ -128,8 +128,8 @@ def run_test_with_deadlock_detection(
             # Sleep briefly before next poll
             time.sleep(0.1)
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         print("\nTest interrupted by user")
         proc.kill()
         proc.wait()

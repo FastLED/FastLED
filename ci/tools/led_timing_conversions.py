@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -555,8 +555,8 @@ def handle_interactive() -> None:
             print(f"Cycle '0': {ds.cycle_0}ns")
             print(f"Cycle '1': {ds.cycle_1}ns")
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except ValueError:
         print("\nERROR: Invalid input. Please enter integer values.")
@@ -729,8 +729,8 @@ def main() -> int:
 
         return 0
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"ERROR: {e}", file=sys.stderr)

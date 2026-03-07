@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -32,8 +32,8 @@ def run_symbol_analysis(board_name: str):
             print(f"❌ Symbol analysis failed for {board_name}")
             print(f"Error: {result.stderr}")
             return False
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"❌ Error running symbol analysis for {board_name}: {e}")
@@ -70,8 +70,8 @@ def load_and_summarize_results(board_name: str):
         for sym_type, stats in list(summary["type_breakdown"].items())[:5]:
             print(f"   {sym_type}: {stats['count']} symbols, {stats['size']} bytes")
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"❌ Error loading results for {board_name}: {e}")

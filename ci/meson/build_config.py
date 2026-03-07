@@ -28,7 +28,7 @@ from ci.meson.compiler import (
 from ci.meson.io_utils import atomic_write_text, write_if_different
 from ci.meson.output import print_banner, print_warning
 from ci.meson.test_discovery import get_source_files_hash, get_split_source_hashes
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.timestamp_print import ts_print as _ts_print
 
@@ -143,8 +143,8 @@ def _resolve_fast_native_entries(
         if use_sccache:
             try:
                 sccache_str = str(find_sccache_binary())
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
             except Exception:
                 pass
 
@@ -164,8 +164,8 @@ def _resolve_fast_native_entries(
 
         return c_entry, cpp_entry, ar_entry
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         return None, None, None  # unreachable, satisfies type checker
     except Exception:
         return None, None, None
@@ -1132,8 +1132,8 @@ def setup_meson_build(
                 except OSError:
                     pass  # Non-critical - fast-path just won't fire next run
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             _ts_print(f"[MESON] Warning: Could not check test file changes: {e}")
@@ -1192,8 +1192,8 @@ def setup_meson_build(
                             with open(example_cache_file, "r") as f:
                                 cache_data = json.load(f)
                             cached_example_hash = cache_data.get("hash", "")
-                        except KeyboardInterrupt:
-                            handle_keyboard_interrupt_properly()
+                        except KeyboardInterrupt as ki:
+                            handle_keyboard_interrupt(ki)
                         except Exception:
                             cached_example_hash = ""
 
@@ -1209,8 +1209,8 @@ def setup_meson_build(
                             except OSError:
                                 pass
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             _ts_print(f"[MESON] Warning: Could not check example file changes: {e}")
@@ -1685,8 +1685,8 @@ endian = 'little'
 
         return True
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         _ts_print(f"[MESON] Setup failed with exception: {e}", file=sys.stderr)
@@ -1758,8 +1758,8 @@ def perform_ninja_maintenance(build_dir: Path) -> bool:
             )
             return True  # Non-fatal, continue anyway
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         _ts_print(

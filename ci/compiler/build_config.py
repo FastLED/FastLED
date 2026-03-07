@@ -13,7 +13,7 @@ from running_process.process_output_reader import EndOfStream
 from ci.compiler.build_utils import get_utf8_env
 from ci.compiler.compiler import CacheType
 from ci.util.create_build_dir import insert_tool_aliases
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 if TYPE_CHECKING:
@@ -123,8 +123,8 @@ def generate_build_info_json_from_existing_build(
     except TimeoutError:
         print("Warning: Timeout generating build_info.json (no output for 900s)")
         return False
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"Warning: Exception generating build_info.json: {e}")
@@ -182,8 +182,8 @@ def apply_board_specific_config(
             f"Applied PlatformIO cache optimization using cache directory: {paths.global_platformio_cache_dir}"
         )
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         # Graceful fallback to original URLs on cache failures
@@ -416,8 +416,8 @@ def setup_sccache_environment(board_name: str) -> bool:
                     print(f"   {line}")
         else:
             print("SCCACHE stats not available (cache empty or first run)")
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"Could not retrieve SCCACHE stats: {e}")
@@ -489,9 +489,8 @@ def setup_ccache_environment(board_name: str) -> bool:
                     print(f"   {line}")
         else:
             print("CCACHE stats not available (cache empty or first run)")
-        handle_keyboard_interrupt_properly()
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"Could not retrieve CCACHE stats: {e}")

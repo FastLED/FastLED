@@ -66,12 +66,12 @@ def run_avr8js_tests(args: TestArgs) -> None:
             docker_runner.pull_image()
             ts_print(f"✅ Successfully pulled {avr8js_image}")
             ts_print()
-        except KeyboardInterrupt:
+        except KeyboardInterrupt as ki:
             from ci.util.global_interrupt_handler import (
-                handle_keyboard_interrupt_properly,
+                handle_keyboard_interrupt,
             )
 
-            handle_keyboard_interrupt_properly()
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             ts_print(f"❌ Failed to pull avr8js image: {e}")

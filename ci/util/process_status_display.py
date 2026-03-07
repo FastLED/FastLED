@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
 
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 if TYPE_CHECKING:
@@ -117,8 +117,8 @@ class ProcessStatusDisplay(ABC):
                 spinner_index = (spinner_index + 1) % 4
                 time.sleep(1.0)  # Check every second but only print every 5 seconds
 
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 logger.warning(f"Display update error: {e}")
@@ -245,8 +245,8 @@ class RichStatusDisplay(ProcessStatusDisplay):
 
         try:
             return self._format_rich_display(group_status, spinner_index)
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             logger.warning(f"Rich formatting failed, using ASCII fallback: {e}")
@@ -386,9 +386,8 @@ def create_status_display(
     if display_type == "rich":
         try:
             return RichStatusDisplay(group)
-            handle_keyboard_interrupt_properly()
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             logger.warning(f"Rich display creation failed, falling back to ASCII: {e}")

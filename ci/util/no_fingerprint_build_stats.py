@@ -22,7 +22,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 @dataclass
@@ -86,8 +86,8 @@ def fingerprint_directory(
                     for chunk in iter(lambda: fp.read(4096), b""):
                         total_bytes += len(chunk)
                         hasher.update(chunk)
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 hasher.update(f"ERROR:{e}".encode())

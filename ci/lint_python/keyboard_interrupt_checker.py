@@ -7,7 +7,9 @@ Replaces flake8 + custom plugin with a two-phase approach:
 Error Codes:
     KBI001: Try-except catches Exception/BaseException without KeyboardInterrupt handler
     KBI002: KeyboardInterrupt handler must call _thread.interrupt_main() or
-            handle_keyboard_interrupt_properly() or notify_main_thread()
+            handle_keyboard_interrupt(ki) or notify_main_thread()
+    KBI003: handle_keyboard_interrupt() called outside a KeyboardInterrupt handler
+            (e.g. in a try body or a non-KeyboardInterrupt except handler)
 """
 
 from __future__ import annotations
@@ -16,6 +18,7 @@ import argparse
 import ast
 import re
 import sys
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -98,7 +101,7 @@ class TryExceptVisitor(ast.NodeVisitor):
                     code="KBI001",
                     message=(
                         "Try-except catches Exception/BaseException without KeyboardInterrupt handler. "
-                        "Add: except KeyboardInterrupt as ke: handle_keyboard_interrupt_properly(ke)"
+                        "Add: except KeyboardInterrupt as ki: handle_keyboard_interrupt(ki)"
                     ),
                 )
             )
@@ -112,13 +115,75 @@ class TryExceptVisitor(ast.NodeVisitor):
                         code="KBI002",
                         message=(
                             "KeyboardInterrupt handler must call _thread.interrupt_main() "
-                            "or use handle_keyboard_interrupt_properly(). "
+                            "or use handle_keyboard_interrupt(ki). "
                             "Add: import _thread; _thread.interrupt_main()"
                         ),
                     )
                 )
 
+        # KBI003: handle_keyboard_interrupt() called outside a KeyboardInterrupt handler.
+        # Check try body for stray calls.
+        for call_node in _find_interrupt_handler_calls(node.body):
+            self.violations.append(
+                Violation(
+                    line=call_node.lineno,
+                    col=call_node.col_offset,
+                    code="KBI003",
+                    message=(
+                        "handle_keyboard_interrupt() called in try body, not in an except handler. "
+                        "Remove this call — it falsely signals an interrupt during normal execution."
+                    ),
+                )
+            )
+        # Check non-KeyboardInterrupt except handler bodies.
+        for handler in node.handlers:
+            if handler in keyboard_interrupt_handlers:
+                continue
+            for call_node in _find_interrupt_handler_calls(handler.body):
+                self.violations.append(
+                    Violation(
+                        line=call_node.lineno,
+                        col=call_node.col_offset,
+                        code="KBI003",
+                        message=(
+                            "handle_keyboard_interrupt() called in non-KeyboardInterrupt except handler. "
+                            "Remove this call — it falsely signals an interrupt during normal execution."
+                        ),
+                    )
+                )
+
         self.generic_visit(node)
+
+
+_INTERRUPT_HANDLER_NAMES = frozenset(
+    {
+        "handle_keyboard_interrupt",
+        "notify_main_thread",
+    }
+)
+
+
+def _find_interrupt_handler_calls(stmts: list[ast.stmt]) -> list[ast.Call]:
+    """Return calls to handle_keyboard_interrupt / notify_main_thread in *stmts*.
+
+    Walks recursively but stops at nested ``ast.Try`` nodes (those are
+    checked independently by their own ``visit_Try`` call).
+    """
+    calls: list[ast.Call] = []
+    _collect_calls(stmts, calls)
+    return calls
+
+
+def _collect_calls(nodes: Sequence[ast.AST], out: list[ast.Call]) -> None:
+    """Recursively collect interrupt-handler calls, skipping nested Try nodes."""
+    for node in nodes:
+        if isinstance(node, ast.Try):
+            # Don't descend — visit_Try handles nested try blocks separately
+            return
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+            if node.func.id in _INTERRUPT_HANDLER_NAMES:
+                out.append(node)
+        _collect_calls(list(ast.iter_child_nodes(node)), out)
 
 
 def _handler_calls_interrupt_main(handler: ast.ExceptHandler) -> bool:
@@ -133,10 +198,10 @@ def _handler_calls_interrupt_main(handler: ast.ExceptHandler) -> bool:
                     and node.func.attr == "interrupt_main"
                 ):
                     return True
-            # handle_keyboard_interrupt_properly() / notify_main_thread()
+            # handle_keyboard_interrupt(ki) / notify_main_thread()
             if isinstance(node.func, ast.Name):
                 if node.func.id in (
-                    "handle_keyboard_interrupt_properly",
+                    "handle_keyboard_interrupt",
                     "notify_main_thread",
                 ):
                     return True

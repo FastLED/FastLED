@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 """ESP32 artifact management for QEMU and flashing.
@@ -287,8 +287,8 @@ class ESP32ArtifactCopier:
             flash_path = output_dir / FILE_NAMES.FLASH
             if builder.create_merged_image(flash_path, self.flash_config.size_mb):
                 copied.append(FILE_NAMES.FLASH)
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"⚠️  Warning: Could not create flash.bin: {e}")

@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -40,8 +40,8 @@ def _setup_utf8_output():
 
             # Set console code page to UTF-8 if possible
             os.system("chcp 65001 > nul 2>&1")
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except:
             pass  # Ignore if we can't set up UTF-8 output
@@ -1579,8 +1579,8 @@ def main():
     for test_name in focused_tests:
         try:
             suite.addTest(TestPlatformIOUrlResolution(test_name))
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception:
             # debug_print(f"⚠️ Could not load test '{test_name}': {e}")

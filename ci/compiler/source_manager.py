@@ -9,7 +9,7 @@ from pathlib import Path
 
 from dirsync import sync  # type: ignore[import-untyped]
 
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 def generate_main_cpp(ino_files: list[str]) -> str:
@@ -224,8 +224,8 @@ def copy_boards_directory(project_root: Path, build_dir: Path) -> bool:
                     time.sleep(retry_delay)
                 else:
                     raise
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         warnings.warn(f"Failed to sync boards directory: {e}")
@@ -325,8 +325,8 @@ def copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
             print(f"Synced FastLED library to {lib_dir}")
             if library_json_src.exists():
                 print(f"Copied library.json to {lib_dir}")
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as sync_error:
         warnings.warn(f"Failed to sync FastLED library: {sync_error}")

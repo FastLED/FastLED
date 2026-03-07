@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 """
@@ -152,8 +152,8 @@ def cleanup_stale_locks(cache_dir: Path) -> int:
             if pid_file.exists():
                 if _break_stale_lock_legacy(lock_file):
                     cleaned_count += 1
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             logger.warning(f"Error checking lock {lock_file}: {e}")

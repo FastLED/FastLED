@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -33,8 +33,8 @@ def _get_memory_usage_mb() -> float | None:
         return process.memory_info().rss / (1024 * 1024)
     except ImportError:
         return None
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception:
         return None
@@ -180,9 +180,9 @@ def compile_examples(
         # The transition to "Running:" phase implies compilation succeeded
         return True
 
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         heartbeat.stop()
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         heartbeat.stop()
@@ -286,9 +286,9 @@ def run_examples(
             num_tests_failed=num_failed,
         )
 
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         heartbeat.stop()
-        handle_keyboard_interrupt_properly()
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         heartbeat.stop()

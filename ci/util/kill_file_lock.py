@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -63,8 +63,8 @@ def kill_process_holding_file(file_path: Path) -> bool:
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.TimeoutExpired):
             # Process may have exited or we don't have permission
             continue
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception:
             # Ignore other errors and continue
@@ -89,8 +89,8 @@ def kill_process_holding_file(file_path: Path) -> bool:
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.TimeoutExpired):
                 # Process may have exited or we don't have permission
                 continue
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception:
                 # Ignore other errors and continue

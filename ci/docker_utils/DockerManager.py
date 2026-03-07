@@ -6,7 +6,7 @@ from typing import Optional
 from running_process import RunningProcess
 
 from ci.util.docker_command import get_docker_command
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 class DockerManager:
@@ -57,8 +57,8 @@ class DockerManager:
             if output_file:
                 try:
                     output_handle = open(output_file, "w", encoding="utf-8")
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
                     raise
                 except Exception as e:
                     print(f"Warning: Could not open output file {output_file}: {e}")
@@ -95,8 +95,8 @@ class DockerManager:
                         if interrupt_pattern and re.search(interrupt_pattern, line):
                             print(f"Pattern detected: {line}")
 
-                    except KeyboardInterrupt:
-                        handle_keyboard_interrupt_properly()
+                    except KeyboardInterrupt as ki:
+                        handle_keyboard_interrupt(ki)
                         raise
                     except Exception:
                         # Timeout waiting for line or other error - check overall timeout
@@ -132,8 +132,8 @@ class DockerManager:
                             print(
                                 f"Warning: docker stop returned {stop_proc.returncode}"
                             )
-                    except KeyboardInterrupt:
-                        handle_keyboard_interrupt_properly()
+                    except KeyboardInterrupt as ki:
+                        handle_keyboard_interrupt(ki)
                         raise
                     except Exception as e:
                         print(f"Warning: Failed to stop container: {e}")
@@ -141,8 +141,8 @@ class DockerManager:
                 # Wait for process to complete (with short timeout if we stopped the container)
                 try:
                     returncode = proc.wait(timeout=10 if timeout_occurred else None)
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
                     raise
                 except Exception as e:
                     print(f"Warning: wait() failed: {e}")
@@ -161,8 +161,8 @@ class DockerManager:
                     args=full_command, returncode=final_returncode, stdout="", stderr=""
                 )
 
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 print(f"Error during streaming: {e}")
@@ -313,8 +313,8 @@ class DockerManager:
                 print(f"Warning: docker logs returned exit code {result.returncode}")
                 logs = result.stdout if result.stdout else result.stderr
                 return logs
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"Warning: Failed to get container logs: {e}")
@@ -401,8 +401,8 @@ if __name__ == "__main__":
         print(f"Stdout: {e.stdout}", file=sys.stderr)
         print(f"Stderr: {e.stderr}", file=sys.stderr)
         sys.exit(1)
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"An unexpected error occurred: {e}", file=sys.stderr)
@@ -417,9 +417,8 @@ if __name__ == "__main__":
             print(
                 f"Container {container_name} not found or already removed during cleanup."
             )
-            handle_keyboard_interrupt_properly()
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(f"Error during cleanup of {container_name}: {e}", file=sys.stderr)

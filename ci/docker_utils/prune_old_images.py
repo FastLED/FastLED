@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -216,8 +216,8 @@ def parse_docker_timestamp(timestamp: str) -> datetime:
         if len(parts) >= 2:
             date_str = f"{parts[0]} {parts[1]}"
             return datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception:
         pass

@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -101,8 +101,8 @@ class BuildProcessTracker:
                 }
 
             logging.info(f"Loaded {len(self._registry)} process trees from registry")
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             logging.warning(f"Failed to load process registry: {e}")
@@ -124,8 +124,8 @@ class BuildProcessTracker:
 
             temp_file.replace(self.registry_file)
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             logging.error(f"Failed to save process registry: {e}")
@@ -210,8 +210,8 @@ class BuildProcessTracker:
             info.child_pids = []
             info.last_updated = time.time()
             logging.debug(f"Root process {info.root_pid} no longer exists")
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             logging.warning(f"Failed to update child PIDs for client={client_pid}: {e}")
@@ -278,8 +278,8 @@ class BuildProcessTracker:
             root_proc = psutil.Process(info.root_pid)
             children = root_proc.children(recursive=True)
             all_pids = [child.pid for child in children] + [info.root_pid]
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception:
             pass  # Use cached PID list
@@ -292,8 +292,8 @@ class BuildProcessTracker:
                 processes_to_kill.append(proc)
             except psutil.NoSuchProcess:
                 pass  # Already dead
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 logging.warning(f"Failed to get process {pid}: {e}")
@@ -306,8 +306,8 @@ class BuildProcessTracker:
                 logging.debug(f"Terminated process {proc.pid} ({proc.name()})")
             except psutil.NoSuchProcess:
                 pass  # Already dead
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 logging.warning(f"Failed to terminate process {proc.pid}: {e}")
@@ -320,8 +320,8 @@ class BuildProcessTracker:
             try:
                 proc.kill()
                 logging.warning(f"Force killed stubborn process {proc.pid}")
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 logging.warning(f"Failed to force kill process {proc.pid}: {e}")

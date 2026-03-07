@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import Any
 
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.paths import PROJECT_ROOT
 
 
@@ -216,8 +216,8 @@ class MultiCheckerFileProcessor:
                         issues = checker.check_file_content(file_content)
                         results[checker_name].extend(issues)
 
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
                     raise
                 except Exception as e:
                     # Add error to all interested checkers
@@ -295,9 +295,8 @@ class GenericFileSearcher:
                 content = f.read()
             file_content = FileContent(path=file_path, content=content, lines=[])
             return callback.check_file_content(file_content)
-            handle_keyboard_interrupt_properly()
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             return [f"Error processing file {file_path}: {str(e)}"]

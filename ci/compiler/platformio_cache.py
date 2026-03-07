@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
@@ -115,8 +115,8 @@ def _get_remote_file_size(url: str) -> Optional[int]:
                 content_length = response.headers.get("Content-Length")
                 if content_length:
                     return int(content_length)
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         logger.debug(f"Failed to get file size for {url}: {e}")
@@ -332,8 +332,8 @@ def cleanup_stale_platformio_locks(max_age_minutes: float = 30) -> int:
                 except (OSError, PermissionError) as e:
                     logger.debug(f"Could not remove lock {lock_file}: {e}")
 
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             logger.warning(f"Error during lock cleanup in {cache_dir}: {e}")
@@ -478,8 +478,8 @@ class PlatformIOCache:
                 print(f"Successfully cached: {cached_path}")
                 return str(cached_path)
 
-            except KeyboardInterrupt:
-                handle_keyboard_interrupt_properly()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
                 logger.error(f"Download failed: {e}")
@@ -612,8 +612,8 @@ def unzip_and_install(
         except zipfile.BadZipFile:
             logger.error(f"Invalid zip file: {cached_zip_path_obj}")
             return False
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             logger.error(f"Extraction failed: {e}")
@@ -707,8 +707,8 @@ def install_with_platformio(
             )
             return False
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         if "No such file or directory" in str(e) or "not found" in str(e).lower():
@@ -845,8 +845,8 @@ def handle_zip_artifact(
         # Return the file URL for the extracted directory
         return get_proper_file_url(extracted_dir)
 
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         import traceback
@@ -870,8 +870,8 @@ def _process_artifact(
             env_section=env_section,
             resolved_path=resolved_path,
         )
-    except KeyboardInterrupt:
-        handle_keyboard_interrupt_properly()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         logger.error(f"Failed to process {artifact_url}: {e}", exc_info=e)
@@ -955,16 +955,16 @@ def _download_and_process_urls(
                         # Re-raise all exceptions - no downloads should fail silently
                         if result.exception:
                             raise result.exception
-                except KeyboardInterrupt:
-                    handle_keyboard_interrupt_properly()
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
                     raise
                 except Exception as e:
                     logger.error(
                         f"Future failed with unexpected error: {e}", exc_info=e
                     )
                     raise  # Re-raise unexpected exceptions
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
             logger.warning("Processing interrupted, cancelling remaining downloads...")
             _global_cancel_event.set()
@@ -1030,8 +1030,8 @@ def _apply_board_specific_config(
         try:
             pio_ini.dump(platformio_ini_path)
             print(f"Updated platformio.ini with {len(replacements)} resolved artifacts")
-        except KeyboardInterrupt:
-            handle_keyboard_interrupt_properly()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             logger.error(f"Failed to update platformio.ini: {e}")
