@@ -210,6 +210,18 @@ struct ChannelConfig {
     /// @brief Get clock pin (returns -1 for clockless chipsets)
     int getClockPin() const;
 
+    /// @brief Set screen map for JS canvas visualization
+    /// @param map ScreenMap with LED positions
+    void setScreenMap(const fl::ScreenMap& map) { mScreenMap = map; }
+
+    /// @brief Get screen map for JS canvas visualization
+    /// @return Reference to current screen map
+    const fl::ScreenMap& getScreenMap() const { return mScreenMap; }
+
+    /// @brief Check if screen map is configured
+    /// @return true if screen map has been set with LEDs
+    bool hasScreenMap() const { return mScreenMap.getLength() > 0; }
+
     // ========== Data Members ==========
 
     /// Chipset configuration (clockless or SPI)

@@ -23,6 +23,8 @@
 #include "fl/chipsets/ucs7604.h"
 #include "fl/ease.h"
 #include "fl/stl/iterator.h"
+#include "fl/engine_events.h"
+#include "fl/xymap.h"
 
 namespace fl {
 
@@ -461,6 +463,37 @@ fl::string Channel::getEngineName() const {
         return driver->getName();
     }
     return fl::string();  // Return empty string if no driver bound
+}
+
+Channel& Channel::setScreenMap(const fl::XYMap& map, float diameter) {
+    fl::ScreenMap screenmap = map.toScreenMap();
+    if (diameter <= 0.0f) {
+        screenmap.setDiameter(.15f);  // Default diameter for small matrices
+    } else {
+        screenmap.setDiameter(diameter);
+    }
+    mScreenMap = screenmap;
+    fl::EngineEvents::onCanvasUiSet(asController(), screenmap);
+    return *this;
+}
+
+Channel& Channel::setScreenMap(const fl::ScreenMap& map) {
+    mScreenMap = map;
+    fl::EngineEvents::onCanvasUiSet(asController(), map);
+    return *this;
+}
+
+Channel& Channel::setScreenMap(fl::u16 width, fl::u16 height, float diameter) {
+    fl::XYMap xymap = fl::XYMap::constructRectangularGrid(width, height);
+    return setScreenMap(xymap, diameter);
+}
+
+const fl::ScreenMap& Channel::getScreenMap() const {
+    return mScreenMap;
+}
+
+bool Channel::hasScreenMap() const {
+    return mScreenMap.getLength() > 0;
 }
 
 } // namespace fl

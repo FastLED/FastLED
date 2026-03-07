@@ -25,6 +25,10 @@
 #include "fl/stl/allocator.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/strstream.h"
+#include "fl/engine_events.h"
+#include "fl/xymap.h"
+#include "fl/screenmap.h"
+#include "fl/chipsets/spi.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -476,6 +480,214 @@ FL_TEST_CASE("Channel: Guard against double-encoding within single FastLED.show(
     FastLED.remove(channel);
     events.onChannelDataEncoded.remove(listenerId);
     manager.setDriverEnabled("DOUBLE_ENCODE_TEST", false);
+}
+
+// ============ Screen Map Broadcaster Tests ============
+// Tests for Channel::setScreenMap() broadcaster integration
+// Verifies that when a Channel's screen map is set, the EngineEvents
+// broadcaster correctly notifies all registered listeners (e.g., JS canvas).
+
+/// Mock listener that captures onCanvasUiSet() events
+class MockCanvasListener : public EngineEvents::Listener {
+public:
+    struct Event {
+        CLEDController* controller;
+        ScreenMap screenmap;
+
+        Event(CLEDController* ctl, const ScreenMap& map)
+            : controller(ctl), screenmap(map) {}
+    };
+
+    fl::vector<Event> events;
+    bool fired = false;
+
+    void onCanvasUiSet(CLEDController* strip, const ScreenMap& screenmap) override {
+        events.emplace_back(strip, screenmap);
+        fired = true;
+    }
+
+    void clear() {
+        events.clear();
+        fired = false;
+    }
+};
+
+FL_TEST_CASE("Channel::setScreenMap from XYMap broadcasts to EngineEvents listener") {
+    const int NUM_LEDS = 256;
+    CRGB leds[NUM_LEDS];
+
+    SpiEncoder encoder = SpiEncoder::apa102();
+    SpiChipsetConfig spiConfig{5, 6, encoder};
+    ChannelConfig config(spiConfig, fl::span<CRGB>(leds, NUM_LEDS), RGB);
+
+    auto channel = Channel::create(config);
+    FL_CHECK(channel != nullptr);
+
+    // Create and register mock listener
+    MockCanvasListener listener;
+    EngineEvents::addListener(&listener);
+
+    FL_CHECK_FALSE(listener.fired);
+    FL_CHECK_EQ(listener.events.size(), 0);
+
+    // Call setScreenMap with XYMap
+    fl::XYMap xymap = fl::XYMap::constructSerpentine(16, 16);
+    channel->setScreenMap(xymap, 0.5f);
+
+    // Verify listener received event
+    FL_CHECK(listener.fired);
+    FL_CHECK_EQ(listener.events.size(), 1);
+    FL_CHECK_EQ(listener.events[0].controller, channel->asController());
+    FL_CHECK_EQ(listener.events[0].screenmap.getLength(), 256);
+    FL_CHECK_EQ(listener.events[0].screenmap.getDiameter(), 0.5f);
+
+    EngineEvents::removeListener(&listener);
+}
+
+FL_TEST_CASE("Channel::setScreenMap from ScreenMap broadcasts to listener") {
+    const int NUM_LEDS = 100;
+    CRGB leds[NUM_LEDS];
+
+    SpiEncoder encoder = SpiEncoder::sk9822();
+    SpiChipsetConfig spiConfig{10, 11, encoder};
+    ChannelConfig config(spiConfig, fl::span<CRGB>(leds, NUM_LEDS), RGB);
+
+    auto channel = Channel::create(config);
+    FL_CHECK(channel != nullptr);
+
+    MockCanvasListener listener;
+    EngineEvents::addListener(&listener);
+    listener.clear();
+
+    // Create a ScreenMap directly
+    fl::ScreenMap screenmap(100, 0.3f);
+    channel->setScreenMap(screenmap);
+
+    // Verify listener received event
+    FL_CHECK(listener.fired);
+    FL_CHECK_EQ(listener.events.size(), 1);
+    FL_CHECK_EQ(listener.events[0].controller, channel->asController());
+    FL_CHECK_EQ(listener.events[0].screenmap.getLength(), 100);
+    FL_CHECK_EQ(listener.events[0].screenmap.getDiameter(), 0.3f);
+
+    EngineEvents::removeListener(&listener);
+}
+
+FL_TEST_CASE("Channel::setScreenMap from dimensions broadcasts event") {
+    const int NUM_LEDS = 64;
+    CRGB leds[NUM_LEDS];
+
+    SpiEncoder encoder = SpiEncoder::apa102();
+    SpiChipsetConfig spiConfig{7, 8, encoder};
+    ChannelConfig config(spiConfig, fl::span<CRGB>(leds, NUM_LEDS), RGB);
+
+    auto channel = Channel::create(config);
+    FL_CHECK(channel != nullptr);
+
+    MockCanvasListener listener;
+    EngineEvents::addListener(&listener);
+    listener.clear();
+
+    // Call setScreenMap with dimensions
+    channel->setScreenMap(8, 8, 0.25f);
+
+    // Verify listener received event
+    FL_CHECK(listener.fired);
+    FL_CHECK_EQ(listener.events.size(), 1);
+    FL_CHECK_EQ(listener.events[0].controller, channel->asController());
+    FL_CHECK_EQ(listener.events[0].screenmap.getLength(), 64);
+    FL_CHECK_EQ(listener.events[0].screenmap.getDiameter(), 0.25f);
+
+    EngineEvents::removeListener(&listener);
+}
+
+FL_TEST_CASE("Channel::setScreenMap with default diameter uses 0.15f") {
+    const int NUM_LEDS = 128;
+    CRGB leds[NUM_LEDS];
+
+    SpiEncoder encoder = SpiEncoder::apa102();
+    SpiChipsetConfig spiConfig{9, 10, encoder};
+    ChannelConfig config(spiConfig, fl::span<CRGB>(leds, NUM_LEDS), RGB);
+
+    auto channel = Channel::create(config);
+    FL_CHECK(channel != nullptr);
+
+    MockCanvasListener listener;
+    EngineEvents::addListener(&listener);
+    listener.clear();
+
+    // Call setScreenMap without diameter (defaults to -1.f)
+    fl::XYMap xymap = fl::XYMap::constructRectangularGrid(16, 8);
+    channel->setScreenMap(xymap);
+
+    // Verify default diameter was applied
+    FL_CHECK(listener.fired);
+    FL_CHECK_EQ(listener.events[0].screenmap.getDiameter(), 0.15f);
+
+    EngineEvents::removeListener(&listener);
+}
+
+FL_TEST_CASE("Channel::hasScreenMap and getScreenMap after setScreenMap") {
+    const int NUM_LEDS = 50;
+    CRGB leds[NUM_LEDS];
+
+    SpiEncoder encoder = SpiEncoder::sk9822();
+    SpiChipsetConfig spiConfig{3, 4, encoder};
+    ChannelConfig config(spiConfig, fl::span<CRGB>(leds, NUM_LEDS), RGB);
+
+    auto channel = Channel::create(config);
+    FL_CHECK(channel != nullptr);
+
+    // Initially no screenmap
+    FL_CHECK_FALSE(channel->hasScreenMap());
+    FL_CHECK_EQ(channel->getScreenMap().getLength(), 0);
+
+    MockCanvasListener listener;
+    EngineEvents::addListener(&listener);
+
+    // Set screenmap
+    fl::XYMap xymap = fl::XYMap::constructRectangularGrid(10, 5);
+    channel->setScreenMap(xymap, 0.2f);
+
+    // Now should have screenmap
+    FL_CHECK(channel->hasScreenMap());
+    const ScreenMap& retrieved = channel->getScreenMap();
+    FL_CHECK_EQ(retrieved.getLength(), 50);
+    FL_CHECK_EQ(retrieved.getDiameter(), 0.2f);
+
+    EngineEvents::removeListener(&listener);
+}
+
+FL_TEST_CASE("Multiple setScreenMap calls generate multiple broadcaster events") {
+    const int NUM_LEDS = 32;
+    CRGB leds[NUM_LEDS];
+
+    SpiEncoder encoder = SpiEncoder::apa102();
+    SpiChipsetConfig spiConfig{11, 12, encoder};
+    ChannelConfig config(spiConfig, fl::span<CRGB>(leds, NUM_LEDS), RGB);
+
+    auto channel = Channel::create(config);
+    FL_CHECK(channel != nullptr);
+
+    MockCanvasListener listener;
+    EngineEvents::addListener(&listener);
+
+    // Call setScreenMap three times with different inputs
+    fl::XYMap xymap1 = fl::XYMap::constructSerpentine(8, 4);
+    channel->setScreenMap(xymap1, 0.1f);
+
+    fl::ScreenMap screenmap2(32, 0.2f);
+    channel->setScreenMap(screenmap2);
+
+    channel->setScreenMap(4, 8, 0.3f);
+
+    // Verify all three events were received
+    FL_CHECK_EQ(listener.events.size(), 3);
+    FL_CHECK_EQ(listener.events[0].screenmap.getDiameter(), 0.1f);
+    FL_CHECK_EQ(listener.events[1].screenmap.getDiameter(), 0.2f);
+    FL_CHECK_EQ(listener.events[2].screenmap.getDiameter(), 0.3f);
+
+    EngineEvents::removeListener(&listener);
 }
 
 } // namespace channel_engine_test

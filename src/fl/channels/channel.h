@@ -137,6 +137,32 @@ public:
     /// @return Engine name, or empty string if no driver is bound or driver has expired
     fl::string getEngineName() const;
 
+    /// @brief Set screen map for JS canvas visualization from XYMap
+    /// @param map 2D addressing mode (serpentine, line-by-line, etc.)
+    /// @param diameter Optional LED diameter for canvas rendering
+    /// @return Reference to this channel for method chaining
+    Channel& setScreenMap(const fl::XYMap& map, float diameter = -1.f);
+
+    /// @brief Set screen map for JS canvas visualization
+    /// @param map ScreenMap with LED positions
+    /// @return Reference to this channel for method chaining
+    Channel& setScreenMap(const fl::ScreenMap& map);
+
+    /// @brief Set screen map for JS canvas visualization from dimensions
+    /// @param width Grid width in pixels
+    /// @param height Grid height in pixels
+    /// @param diameter Optional LED diameter for canvas rendering
+    /// @return Reference to this channel for method chaining
+    Channel& setScreenMap(fl::u16 width, fl::u16 height, float diameter = -1.f);
+
+    /// @brief Get the current screen map
+    /// @return Reference to current screen map
+    const fl::ScreenMap& getScreenMap() const;
+
+    /// @brief Check if screen map is configured
+    /// @return true if screen map has been set
+    bool hasScreenMap() const;
+
 private:
     /// @brief Friend declaration for make_shared to access private constructor
     template<typename T, typename... Args>
@@ -187,6 +213,7 @@ private:
     fl::string mName;               // User-specified or auto-generated name
     ChannelOptions mSettings;           // Per-channel settings (gamma, rgbw, etc.)
     ChannelDataPtr mChannelData;
+    fl::ScreenMap mScreenMap;        // Screen map for JS canvas visualization
 };
 
 /// @brief Get stub channel driver for testing or unsupported platforms
