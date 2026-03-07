@@ -191,7 +191,7 @@ link_flags = [
 # Optimized for fastest iteration during development. Prioritizes compilation and linking speed
 # over runtime performance. Uses ThinLTO with incremental cache for fast rebuilds.
 
-# Quick build compilation flags
+# Quick build compilation flags (shared by library and sketch unless sketch_flags overrides)
 flags = [
     # Link-Time Optimization - ThinLTO with incremental cache
     "-flto=thin",                            # Enable ThinLTO (generates LLVM bitcode objects)
@@ -218,6 +218,16 @@ flags = [
     "-fno-rtti",                           # Explicitly disable RTTI (already in base but emphasize)
 ]
 
+# Sketch-specific quick mode flags — optimized for absolute fastest sketch compilation.
+# The sketch is a single translation unit; LTO/vectorization/unrolling are meaningless.
+# PCH handles header parsing; this just needs to emit code as fast as possible.
+sketch_flags = [
+    "-O0",                                   # Zero optimization — fastest possible compilation
+    "-g0",                                   # No debug info
+    "-fno-exceptions",                       # Disable exceptions (consistent with base)
+    "-fno-rtti",                            # Disable RTTI (consistent with base)
+]
+
 # Quick build linking flags - optimized for fastest linking with ThinLTO cache
 link_flags = [
     # ThinLTO Incremental Build Optimization (CRITICAL for fast rebuilds)
@@ -225,9 +235,8 @@ link_flags = [
     # Cache directory stores optimized bitcode per module - unchanged modules skip re-optimization
     "-Wl,--thinlto-cache-dir=build/wasm/lto_cache",  # Persistent LTO cache for incremental builds
 
-    # Profiling Support
-    "--profiling-funcs",                     # Enable function profiling in quick builds
-    "--emit-symbol-map",                     # Generate symbol map file for function name debugging
+    # Note: --profiling-funcs and --emit-symbol-map removed for faster linking.
+    # Use debug or fast_debug mode if you need function names in profiling.
 
     # Reduce memory for faster startup (override base setting)
     "-sINITIAL_MEMORY=67108864",            # Reduce initial memory to 64MB (faster startup)

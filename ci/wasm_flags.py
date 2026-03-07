@@ -64,6 +64,7 @@ def get_sketch_compile_flags_dict(mode: str = "quick") -> dict[str, list[str]]:
     Get sketch compilation flags as a dict.
 
     Combines [all] + [sketch] + [build_modes.<mode>].
+    Uses sketch_flags from build mode if available, otherwise falls back to flags.
     Also includes link_flags from [linking.base] + [linking.sketch] + mode link_flags.
 
     Returns:
@@ -78,7 +79,12 @@ def get_sketch_compile_flags_dict(mode: str = "quick") -> dict[str, list[str]]:
     compiler_flags.extend(config.get("sketch", {}).get("compiler_flags", []))
 
     build_mode_config = config.get("build_modes", {}).get(mode, {})
-    compiler_flags.extend(build_mode_config.get("flags", []))
+    # Use sketch-specific flags if available, otherwise fall back to shared flags
+    sketch_mode_flags = build_mode_config.get("sketch_flags")
+    if sketch_mode_flags is not None:
+        compiler_flags.extend(sketch_mode_flags)
+    else:
+        compiler_flags.extend(build_mode_config.get("flags", []))
 
     link_flags = list(config.get("linking", {}).get("base", {}).get("flags", []))
     link_flags.extend(config.get("linking", {}).get("sketch", {}).get("flags", []))

@@ -22,6 +22,7 @@ Usage:
 # pyright: reportMissingImports=false
 
 import argparse
+import hashlib
 import json
 import shutil
 import subprocess
@@ -35,6 +36,9 @@ from ci.wasm_tools import get_emcc
 
 PROJECT_ROOT = Path(__file__).parent.parent
 CROSS_FILE = PROJECT_ROOT / "ci" / "meson" / "wasm_cross_file.ini"
+WASM_PCH_HEADER = (
+    PROJECT_ROOT / "src" / "platforms" / "wasm" / "compiler" / "wasm_pch.h"
+)
 
 # Build modes map to meson build directories
 BUILD_DIR_PREFIX = PROJECT_ROOT / ".build"
@@ -139,6 +143,70 @@ def create_wrapper(example_name: str, build_dir: Path) -> Path:
     return wrapper_path
 
 
+def build_sketch_pch(
+    build_dir: Path,
+    mode: str,
+    verbose: bool = False,
+) -> Path | None:
+    """
+    Build a sketch-specific PCH with sketch compile flags.
+
+    The library PCH uses library flags (e.g. -O1 -flto=thin) which are
+    incompatible with sketch flags (e.g. -O0). This builds a separate PCH
+    for sketch compilation so the sketch can use PCH despite different flags.
+
+    Returns path to the sketch PCH, or None if build fails.
+    """
+    emcc = get_emcc()
+    sketch_pch_path = build_dir / "sketch_pch.h.pch"
+    sketch_pch_flags_hash_path = build_dir / "sketch_pch.flags_hash"
+
+    sketch_flags = get_sketch_compile_flags(mode)
+    flags_hash = hashlib.sha256("\n".join(sketch_flags).encode()).hexdigest()
+
+    # Check if sketch PCH is up-to-date
+    if sketch_pch_path.exists() and sketch_pch_flags_hash_path.exists():
+        stored_hash = sketch_pch_flags_hash_path.read_text(encoding="utf-8").strip()
+        if stored_hash == flags_hash:
+            pch_mtime = sketch_pch_path.stat().st_mtime
+            header_mtime = WASM_PCH_HEADER.stat().st_mtime
+            if header_mtime <= pch_mtime:
+                if verbose:
+                    print("[WASM] Sketch PCH is up-to-date")
+                return sketch_pch_path
+
+    includes = [
+        f"-I{PROJECT_ROOT / 'src'}",
+        f"-I{PROJECT_ROOT / 'src' / 'platforms' / 'wasm' / 'compiler'}",
+    ]
+
+    # Meson-injected defaults that must match the compilation environment
+    meson_defaults = [
+        "-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_FAST",
+        "-D_FILE_OFFSET_BITS=64",
+    ]
+
+    cmd = (
+        [emcc, "-x", "c++-header", str(WASM_PCH_HEADER), "-o", str(sketch_pch_path)]
+        + meson_defaults
+        + sketch_flags
+        + includes
+    )
+
+    if verbose:
+        print(f"[WASM] Sketch PCH: {subprocess.list2cmdline(cmd)}")
+
+    print("[WASM] Building sketch PCH...")
+    result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+    if result.returncode != 0:
+        print("[WASM] Sketch PCH build failed")
+        return None
+
+    sketch_pch_flags_hash_path.write_text(flags_hash, encoding="utf-8")
+    print("[WASM] Sketch PCH built successfully")
+    return sketch_pch_path
+
+
 def compile_sketch(
     wrapper_path: Path,
     build_dir: Path,
@@ -170,8 +238,11 @@ def compile_sketch(
         f"-I{PROJECT_ROOT / 'src' / 'platforms' / 'wasm' / 'compiler'}",
     ]
 
-    # PCH usage (build-dir dependent)
-    pch_path = build_dir / "wasm_pch.h.pch"
+    # PCH usage: prefer sketch-specific PCH (compiled with sketch flags),
+    # fall back to library PCH (Meson places it under ci/meson/wasm/)
+    sketch_pch_path = build_dir / "sketch_pch.h.pch"
+    lib_pch_path = build_dir / "ci" / "meson" / "wasm" / "wasm_pch.h.pch"
+    pch_path = sketch_pch_path if sketch_pch_path.exists() else lib_pch_path
     pch_args = []
     if pch_path.exists():
         pch_args = [
@@ -299,10 +370,24 @@ def _copy_templates_legacy(output_dir: Path) -> None:  # noqa: ARG001
     )
 
 
+def _get_vite_source_mtime(template_dir: Path) -> float:
+    """Get the most recent mtime of any Vite frontend source file."""
+    max_mtime = 0.0
+    for ext in ("*.ts", "*.js", "*.html", "*.css", "*.json"):
+        for f in template_dir.rglob(ext):
+            # Skip node_modules and dist directories
+            parts = f.relative_to(template_dir).parts
+            if "node_modules" in parts or "dist" in parts:
+                continue
+            max_mtime = max(max_mtime, f.stat().st_mtime)
+    return max_mtime
+
+
 def copy_templates(output_dir: Path) -> None:
     """Copy template files to the output directory.
 
     Requires Vite to build the TypeScript frontend into browser-runnable JS.
+    Caches the Vite build output — skips rebuild if sources haven't changed.
     Raises RuntimeError if Vite build is not possible.
     """
     template_dir = PROJECT_ROOT / "src" / "platforms" / "wasm" / "compiler"
@@ -313,17 +398,31 @@ def copy_templates(output_dir: Path) -> None:
         if rc != 0:
             raise RuntimeError("npm install failed")
 
-    print("[WASM] Building frontend with Vite...")
-    rc = _run_npx(["vite", "build"], cwd=template_dir)
-    if rc != 0:
-        raise RuntimeError("Vite build failed")
-
     dist_dir = template_dir / "dist"
-    if not dist_dir.exists():
-        raise RuntimeError("Vite build succeeded but dist/ directory was not created.")
+    # Check if output_dir already has Vite assets and they're up-to-date
+    output_index = output_dir / "index.html"
+    needs_build = True
+    if dist_dir.exists() and output_index.exists():
+        source_mtime = _get_vite_source_mtime(template_dir)
+        output_mtime = output_index.stat().st_mtime
+        if source_mtime <= output_mtime:
+            needs_build = False
 
-    print("[WASM] Copying Vite build output...")
-    _copy_from_dist(dist_dir, output_dir)
+    if needs_build:
+        print("[WASM] Building frontend with Vite...")
+        rc = _run_npx(["vite", "build"], cwd=template_dir)
+        if rc != 0:
+            raise RuntimeError("Vite build failed")
+
+        if not dist_dir.exists():
+            raise RuntimeError(
+                "Vite build succeeded but dist/ directory was not created."
+            )
+
+        print("[WASM] Copying Vite build output...")
+        _copy_from_dist(dist_dir, output_dir)
+    else:
+        print("[WASM] Frontend assets up-to-date, skipping Vite build")
 
 
 def generate_manifest(example_name: str, output_dir: Path) -> None:
@@ -379,6 +478,11 @@ def main() -> int:
         lib_start = time.time()
         if not build_library(build_dir, args.verbose):
             return 1
+
+        # Step 2b: Build sketch-specific PCH (uses sketch flags, may differ from library PCH)
+        sketch_pch = build_sketch_pch(build_dir, args.mode, args.verbose)
+        if sketch_pch is None:
+            print("[WASM] WARNING: Sketch PCH build failed, continuing without PCH")
         lib_time = time.time() - lib_start
 
         # Step 3: Create wrapper and compile sketch
