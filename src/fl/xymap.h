@@ -9,6 +9,7 @@
 namespace fl {
 struct CRGB;  // Forward declaration
 class ScreenMap;
+class XMap;   // Forward declaration
 
 FASTLED_FORCE_INLINE u16 xy_serpentine(u16 x, u16 y,
                                             u16 width, u16 height) {
@@ -57,6 +58,11 @@ class XYMap {
 
     static XYMap constructSerpentine(u16 width, u16 height,
                                      u16 offset = 0);
+
+    /// @brief Create an XYMap from an XMap (treats 1D as 2D with height=1)
+    /// @param xmap 1D addressing map
+    /// @return XYMap with width=xmap.length and height=1
+    static XYMap fromXMap(const XMap& xmap);
 
     static XYMap identity(u16 width, u16 height) {
         return constructRectangularGrid(width, height);

@@ -3,6 +3,7 @@
 
 #include "fl/channels/channel.h"
 #include "fl/xymap.h"
+#include "fl/xmap.h"
 #include "fl/screenmap.h"
 #include "fl/stl/span.h"
 #include "fl/fltest.h"
@@ -242,6 +243,97 @@ FL_TEST_CASE("Serpentine 2x2 with WS2812 GRB encodes pixels in expected byte ord
             FL_CHECK_EQ(encodedBytes[9], 0x00);   // Green component
             FL_CHECK_EQ(encodedBytes[10], 0x00);  // Red component
             FL_CHECK_EQ(encodedBytes[11], 0xFF);  // Blue component
+        }
+    }
+}
+
+FL_TEST_CASE("XMap reverse addressing with APA102 encodes pixels in reverse order") {
+    const int NUM_LEDS = 4;
+
+    // Create a 4-LED strip with distinct colors
+    CRGB workspace[NUM_LEDS] = {
+        CRGB(255, 0, 0),      // Index 0: Red
+        CRGB(0, 255, 0),      // Index 1: Green
+        CRGB(0, 0, 255),      // Index 2: Blue
+        CRGB(255, 255, 0),    // Index 3: Yellow
+    };
+
+    // Create mock engine to capture encoded bytes
+    auto mockEngine = fl::make_shared<ByteCapturingMockEngine>("XMAP_CAPTURE_TEST");
+    ChannelManager& manager = ChannelManager::instance();
+    manager.addDriver(2001, mockEngine);
+
+    SpiEncoder encoder = SpiEncoder::apa102();
+    SpiChipsetConfig spiConfig{5, 6, encoder};
+    ChannelOptions options;
+    options.mAffinity = "XMAP_CAPTURE_TEST";
+
+    ChannelConfig config(spiConfig, fl::span<CRGB>(workspace, NUM_LEDS), RGB, options);
+    auto channel = Channel::create(config);
+    FL_CHECK(channel != nullptr);
+
+    // Set up automatic cleanup at scope exit
+    auto cleanup = fl::make_scope_exit([&]() {
+        channel->removeFromDrawList();
+        manager.removeDriver(mockEngine);
+    });
+
+    // Apply reverse addressing using XMap
+    fl::XMap reverse(NUM_LEDS, true);  // true = reverse order
+    channel->setScreenMap(reverse);
+
+    // Add channel to FastLED and trigger show (encodes pixels)
+    FastLED.add(channel);
+    mockEngine->mCapturedChannels.clear();
+    FastLED.show();
+
+    // Verify we captured the encoded data
+    FL_CHECK(mockEngine->mCapturedChannels.size() > 0);
+
+    if (!mockEngine->mCapturedChannels.empty()) {
+        const auto& channelData = mockEngine->mCapturedChannels[0];
+        const auto& encodedBytes = channelData->getData();
+
+        // APA102 format: 4-byte start frame, then [0xFF][B][G][R] per LED
+        // With reverse XMap, physical order should be [3,2,1,0]: Yellow, Blue, Green, Red
+        FL_CHECK(encodedBytes.size() >= 4 + (NUM_LEDS * 4));
+
+        // Verify start frame
+        if (encodedBytes.size() >= 4) {
+            FL_CHECK_EQ(encodedBytes[0], 0x00);
+            FL_CHECK_EQ(encodedBytes[1], 0x00);
+            FL_CHECK_EQ(encodedBytes[2], 0x00);
+            FL_CHECK_EQ(encodedBytes[3], 0x00);
+        }
+
+        size_t ledStart = 4;
+
+        // Physical LED 0 (maps to source 3 = Yellow): [0xFF][0x00][0xFF][0xFF]
+        if (encodedBytes.size() > ledStart + 3) {
+            FL_CHECK_EQ(encodedBytes[ledStart + 1], 0x00);  // Blue
+            FL_CHECK_EQ(encodedBytes[ledStart + 2], 0xFF);  // Green
+            FL_CHECK_EQ(encodedBytes[ledStart + 3], 0xFF);  // Red
+        }
+
+        // Physical LED 1 (maps to source 2 = Blue): [0xFF][0xFF][0x00][0x00]
+        if (encodedBytes.size() > ledStart + 7) {
+            FL_CHECK_EQ(encodedBytes[ledStart + 5], 0xFF);  // Blue
+            FL_CHECK_EQ(encodedBytes[ledStart + 6], 0x00);  // Green
+            FL_CHECK_EQ(encodedBytes[ledStart + 7], 0x00);  // Red
+        }
+
+        // Physical LED 2 (maps to source 1 = Green): [0xFF][0x00][0xFF][0x00]
+        if (encodedBytes.size() > ledStart + 11) {
+            FL_CHECK_EQ(encodedBytes[ledStart + 9], 0x00);   // Blue
+            FL_CHECK_EQ(encodedBytes[ledStart + 10], 0xFF);  // Green
+            FL_CHECK_EQ(encodedBytes[ledStart + 11], 0x00);  // Red
+        }
+
+        // Physical LED 3 (maps to source 0 = Red): [0xFF][0x00][0x00][0xFF]
+        if (encodedBytes.size() > ledStart + 15) {
+            FL_CHECK_EQ(encodedBytes[ledStart + 13], 0x00);  // Blue
+            FL_CHECK_EQ(encodedBytes[ledStart + 14], 0x00);  // Green
+            FL_CHECK_EQ(encodedBytes[ledStart + 15], 0xFF);  // Red
         }
     }
 }

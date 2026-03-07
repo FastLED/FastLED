@@ -563,6 +563,12 @@ Channel& Channel::setScreenMap(fl::u16 width, fl::u16 height, float diameter) {
     return setScreenMap(xymap, diameter);
 }
 
+Channel& Channel::setScreenMap(const fl::XMap& map) {
+    // Convert 1D XMap to 2D XYMap (width=length, height=1) and reuse existing logic
+    fl::XYMap xymap = fl::XYMap::fromXMap(map);
+    return setScreenMap(xymap, .15f);  // Use default diameter for 1D strips
+}
+
 const fl::ScreenMap& Channel::getScreenMap() const {
     return mScreenMap;
 }

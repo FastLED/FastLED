@@ -5,6 +5,7 @@
 #include "fl/force_inline.h"
 #include "fl/screenmap.h"
 #include "fl/xymap.h"
+#include "fl/xmap.h"
 
 namespace fl {
 
@@ -53,6 +54,26 @@ XYMap XYMap::constructSerpentine(u16 width, u16 height,
                                  u16 offset) {
     XYMap out(width, height, true);
     out.mOffset = offset;
+    return out;
+}
+
+XYMap XYMap::fromXMap(const XMap& xmap) {
+    // Create an XYMap with width=xmap.length and height=1
+    // This treats the 1D strip as a 2D grid with height 1
+    u16 length = xmap.getLength();
+
+    // Create a user function that dispatches to the XMap
+    // Since we can't capture xmap directly, we create a LUT and use that
+    auto out = XYMap::constructWithLookUpTable(length, 1, nullptr);
+    fl::shared_ptr<LUT16> lut = fl::make_shared<LUT16>(length);
+    u16* data = lut->getDataMutable();
+
+    // Fill the LUT with xmap's mappings
+    for (u16 i = 0; i < length; i++) {
+        data[i] = xmap.mapToIndex(i);
+    }
+
+    out.mLookUpTable = lut;
     return out;
 }
 

@@ -26,6 +26,7 @@ class IChannelDriver;
 class ChannelData;
 struct ChannelOptions;  // IWYU pragma: keep
 class Channel;
+class XMap;
 FASTLED_SHARED_PTR(Channel);
 FASTLED_SHARED_PTR(ChannelData);
 
@@ -154,6 +155,11 @@ public:
     /// @param diameter Optional LED diameter for canvas rendering
     /// @return Reference to this channel for method chaining
     Channel& setScreenMap(fl::u16 width, fl::u16 height, float diameter = -1.f);
+
+    /// @brief Set screen map for 1D strip remapping from XMap
+    /// @param map 1D addressing mode (linear, reverse, custom function, LUT)
+    /// @return Reference to this channel for method chaining
+    Channel& setScreenMap(const fl::XMap& map);
 
     /// @brief Get the current screen map
     /// @return Reference to current screen map
