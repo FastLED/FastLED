@@ -238,20 +238,16 @@ FL_TEST_CASE("VibeDetector - reset clears all state") {
     FL_CHECK_FALSE(detector.isTrebSpike());
 }
 
-FL_TEST_CASE("VibeDetector - startup convergence is faster than steady-state") {
-    // During the first 50 frames, long_avg uses rate=0.9 (fast convergence).
-    // After frame 50, rate=0.992 (slow adaptation).
-    // So long_avg should converge much faster in the startup phase.
-
+FL_TEST_CASE("VibeDetector - long-term average tracks signal") {
+    // With MilkDrop first-frame init, long_avg starts at the first frame's
+    // energy and slowly adapts via EMA (rate=0.992 at 30fps).
     VibeDetector detector;
 
-    // Feed 50 frames of constant signal (startup phase)
     feedFrames(detector, 50, 440.0f, 16000.0f);
-    float longAvgAtStartupEnd = detector.getBassLongAvg();
+    float longAvg = detector.getBassLongAvg();
 
-    // The long-term average should have converged significantly
-    // (not still near zero) because startup rate is fast
-    FL_CHECK_GT(longAvgAtStartupEnd, 0.0f);
+    // After 50 frames, long_avg should be non-zero (initialized on first frame)
+    FL_CHECK_GT(longAvg, 0.0f);
 }
 
 FL_TEST_CASE("VibeDetector - vol is average of three bands") {
@@ -309,17 +305,12 @@ FL_TEST_CASE("VibeDetector - null context is safe") {
 }
 
 // ============================================================================
-// Bug reproduction tests
+// Startup behavior tests (MilkDrop first-frame initialization)
 // ============================================================================
 
-FL_TEST_CASE("VibeDetector BUG - false spike on first frame of steady audio") {
-    // BUG: The very first frame of audio always triggers spike detection,
-    // even with a perfectly steady signal. This happens because mAvg starts
-    // at 0 while mImm immediately gets the full signal energy, so
-    // mImmRel >> mAvgRel on frame 1.
-    //
-    // Expected behavior: A single steady-state frame should NOT be detected
-    // as a spike/beat since there is no transient or energy increase.
+FL_TEST_CASE("VibeDetector - no false spike on first frame of steady audio") {
+    // MilkDrop first-frame init: avg=imm, long_avg=imm → all relative levels = 1.0
+    // No spike possible since imm_rel == avg_rel on the first frame.
     VibeDetector detector;
 
     auto sample = makeSample(440.0f, 0, 16000.0f);
@@ -327,22 +318,15 @@ FL_TEST_CASE("VibeDetector BUG - false spike on first frame of steady audio") {
     ctx->setSampleRate(44100);
     detector.update(ctx);
 
-    // Verify that bass has real energy (not silence)
     FL_CHECK_GT(detector.getBassRaw(), 0.0f);
-
-    // BUG: isBassSpike() returns true on the very first frame of steady audio.
-    // There is no prior baseline to compare against, yet the detector reports
-    // a spike because mImm/mLongMax (~2.3) > mAvg/mLongMax (~1.0).
-    FL_CHECK_TRUE(detector.isBassSpike());  // PASSES — demonstrates the bug
+    FL_CHECK_FALSE(detector.isBassSpike());
 }
 
-FL_TEST_CASE("VibeDetector BUG - spike persists for many frames with constant signal") {
-    // BUG: With a perfectly constant input signal, spike detection stays true
-    // for ~20 frames while mAvg converges toward mImm from below.
-    // A steady signal should produce spike=false after at most 1-2 frames.
+FL_TEST_CASE("VibeDetector - no spike with constant signal") {
+    // With first-frame init and constant signal, spike should never trigger.
+    // avg tracks imm perfectly, so imm_rel never exceeds avg_rel.
     VibeDetector detector;
 
-    // Feed 15 identical frames of steady audio
     int spikeFrames = 0;
     for (int i = 0; i < 15; ++i) {
         auto sample = makeSample(440.0f, i * 12, 16000.0f);
@@ -354,40 +338,27 @@ FL_TEST_CASE("VibeDetector BUG - spike persists for many frames with constant si
         }
     }
 
-    // BUG: Spike detection is true for most of the 15 frames even though
-    // the signal is perfectly constant. The spike should clear after 1-2
-    // frames once the detector recognizes the signal is steady.
-    FL_CHECK_GT(spikeFrames, 10);  // PASSES — demonstrates the bug
+    FL_CHECK_EQ(spikeFrames, 0);
 }
 
-FL_TEST_CASE("VibeDetector BUG - spike callback fires on first audio frame") {
-    // BUG: The onBassSpike callback fires on the very first frame of audio
-    // after construction. A visualizer connecting this callback would get
-    // a false beat trigger every time it starts up.
+FL_TEST_CASE("VibeDetector - no spike callback on first audio frame") {
+    // First frame should not fire spike callbacks because
+    // imm_rel == avg_rel == 1.0 (no rising edge).
     VibeDetector detector;
     int spikeCallbackCount = 0;
     detector.onBassSpike.add([&spikeCallbackCount]() { spikeCallbackCount++; });
 
-    // Feed a single frame of moderate, steady audio
     auto sample = makeSample(440.0f, 0, 16000.0f);
     auto ctx = fl::make_shared<AudioContext>(sample);
     ctx->setSampleRate(44100);
     detector.update(ctx);
     detector.fireCallbacks();
 
-    // BUG: The callback fires because mBassSpike=true (false positive from
-    // startup transient) and mPrevBassSpike=false (initial state).
-    FL_CHECK_EQ(spikeCallbackCount, 1);  // PASSES — demonstrates the bug
+    FL_CHECK_EQ(spikeCallbackCount, 0);
 }
 
-FL_TEST_CASE("VibeDetector BUG - relative level exceeds 2x on first frame") {
-    // BUG: On the first frame, mImmRel = mImm/mLongMax where mLongMax
-    // tracks mAvg (which starts at 0 and jumps to ~0.43*mImm). This makes
-    // mImmRel ≈ 1/0.43 ≈ 2.33, meaning the detector reports the signal
-    // as 2.3x louder than "normal" — even though there's no baseline yet.
-    //
-    // Well-behaved self-normalization should produce values near 1.0 during
-    // the initial convergence period, not extreme values.
+FL_TEST_CASE("VibeDetector - relative level is 1.0 on first frame") {
+    // MilkDrop first-frame init ensures imm/long_avg = imm/imm = 1.0
     VibeDetector detector;
 
     auto sample = makeSample(440.0f, 0, 16000.0f);
@@ -395,8 +366,59 @@ FL_TEST_CASE("VibeDetector BUG - relative level exceeds 2x on first frame") {
     ctx->setSampleRate(44100);
     detector.update(ctx);
 
-    // BUG: Relative bass level is ~2.3x on the first frame.
-    // A visualizer using `zoom = 1.0 + 0.1 * (bass - 1.0)` would get
-    // zoom ≈ 1.13 on the first frame — a visible pop.
-    FL_CHECK_GT(detector.getBass(), 2.0f);  // PASSES — demonstrates the bug
+    FL_CHECK_GT(detector.getBass(), 0.9f);
+    FL_CHECK_LT(detector.getBass(), 1.1f);
+}
+
+// ============================================================================
+// Synthetic wave tests: dynamic range and beat detection quality
+// ============================================================================
+
+FL_TEST_CASE("VibeDetector - beat produces relative level above 1.0") {
+    // After establishing a quiet baseline, a loud beat should produce
+    // relative level > 1.0. This validates that the slow EMA normalization
+    // (not running maximum) allows proper beat excursions above 1.0.
+    VibeDetector detector;
+
+    // Establish baseline with quiet signal (60 frames ≈ 2 seconds)
+    feedFrames(detector, 60, 440.0f, 3000.0f);
+
+    // Sudden loud beat
+    auto loudSample = makeSample(440.0f, 1000, 30000.0f);
+    auto ctx = fl::make_shared<AudioContext>(loudSample);
+    ctx->setSampleRate(44100);
+    detector.update(ctx);
+
+    // With slow EMA, long_avg is still close to the quiet level,
+    // so the loud frame should produce bass > 1.0
+    FL_CHECK_GT(detector.getBass(), 1.0f);
+    FL_CHECK_TRUE(detector.isBassSpike());
+}
+
+FL_TEST_CASE("VibeDetector - quiet after loud produces relative level below 1.0") {
+    // After a period of loud signal, going quiet should drop below 1.0.
+    // Validates that the slow EMA is symmetric (not a running max).
+    VibeDetector detector;
+
+    // Loud baseline (60 frames)
+    feedFrames(detector, 60, 440.0f, 25000.0f);
+
+    // Sudden quiet frame
+    auto quietSample = makeSample(440.0f, 1000, 2000.0f);
+    auto ctx = fl::make_shared<AudioContext>(quietSample);
+    ctx->setSampleRate(44100);
+    detector.update(ctx);
+
+    // long_avg still reflects loud level, so quiet imm/long_avg < 1.0
+    FL_CHECK_LT(detector.getBass(), 1.0f);
+}
+
+FL_TEST_CASE("VibeDetector - steady signal converges to 1.0 tightly") {
+    // After many frames of constant signal, the relative level should
+    // be very close to 1.0, not 0.5 or 1.5.
+    VibeDetector detector;
+    feedFrames(detector, 200, 440.0f, 16000.0f);
+
+    FL_CHECK_GT(detector.getBass(), 0.9f);
+    FL_CHECK_LT(detector.getBass(), 1.1f);
 }

@@ -4,18 +4,19 @@
 // asymmetric attack/decay smoothing. Algorithm ported from Ryan Geiss's
 // MilkDrop v2.25c visualizer's DoCustomSoundAnalysis() function.
 //
-// CORRECTED ALGORITHM (as of 2026-03-06):
-// Previously used an exponential moving average for long-term normalization.
-// Now correctly uses AttackDecayFilter (running maximum with slow decay) to
-// match the MilkDrop v2.25c algorithm, providing better dynamic range and
-// proper self-normalization for visualization use cases.
+// CORRECTED ALGORITHM (as of 2026-03-07):
+// Now uses slow symmetric EMA for long-term normalization, matching the
+// MilkDrop v2.25c algorithm: long_avg = long_avg*0.992 + avg*0.008 at 30fps.
+// First frame initializes all averages directly (no smoothing lag), preventing
+// false spikes and startup transients.
 //
 // Key properties:
-//   - Self-normalizing: relative levels center around 1.0 using running maximum
+//   - Self-normalizing: relative levels center around 1.0 using slow EMA
 //   - Asymmetric smoothing: fast attack (beats hit hard), slow decay (graceful fade)
-//   - Dual timescale: short-term smoothing for beat tracking, running max for normalization
+//   - Dual timescale: short-term smoothing for beat tracking, slow EMA for normalization
 //   - FPS-independent: identical behavior at 30fps, 60fps, or 144fps
 //   - Spike detection: bass > bassAtt indicates a beat is happening (energy rising)
+//   - First-frame init: no false spikes on startup (matches MilkDrop)
 //
 // Usage:
 //   VibeDetector vibe;
@@ -28,7 +29,6 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/fft.h"
-#include "fl/filter.h"
 #include "fl/stl/function.h"
 #include "fl/stl/shared_ptr.h"
 
@@ -108,9 +108,9 @@ public:
     float getMidAvg() const { return mAvg[1]; }
     float getTrebAvg() const { return mAvg[2]; }
 
-    float getBassLongAvg() const { return mLongMax[0]; }
-    float getMidLongAvg() const { return mLongMax[1]; }
-    float getTrebLongAvg() const { return mLongMax[2]; }
+    float getBassLongAvg() const { return mLongAvg[0]; }
+    float getMidLongAvg() const { return mLongAvg[1]; }
+    float getTrebLongAvg() const { return mLongAvg[2]; }
 
     // ---- Callbacks ----
 
@@ -139,14 +139,9 @@ private:
     // Band energy data
     float mImm[3] = {};       // Immediate band energy (absolute)
     float mAvg[3] = {};       // Short-term smoothed (absolute)
-    // CORRECTED: Use AttackDecayFilter for running maximum (not moving average)
-    // This matches the MilkDrop v2.25c algorithm for proper self-normalization
-    AttackDecayFilter<float> mLongMaxFilter[3] = {
-        AttackDecayFilter<float>(0.001f, 4.0f, 0.0f),  // Bass running max
-        AttackDecayFilter<float>(0.001f, 4.0f, 0.0f),  // Mid running max
-        AttackDecayFilter<float>(0.001f, 4.0f, 0.0f)   // Treble running max
-    };
-    float mLongMax[3] = {};   // Current running maximum values (for callback data & diagnostics)
+    // Long-term slow symmetric EMA (MilkDrop v2.25c algorithm)
+    // Rate = 0.992 at 30fps (tau ≈ 4.2 seconds), tracks average level for normalization
+    float mLongAvg[3] = {};   // Long-term average for self-normalization
     float mImmRel[3] = {1.0f, 1.0f, 1.0f};  // Immediate relative to song
     float mAvgRel[3] = {1.0f, 1.0f, 1.0f};  // Smoothed relative to song
 

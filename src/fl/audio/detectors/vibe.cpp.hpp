@@ -1,11 +1,10 @@
 // VibeDetector - Self-normalizing audio analysis
 //
-// Algorithm inspired by MilkDrop v2.25c by Ryan Geiss.
-// See MILK_DROP_AUDIO_REACTIVE.md for detailed documentation of the algorithm.
+// Algorithm ported from MilkDrop v2.25c by Ryan Geiss.
+// Three-stage processing: immediate FFT → asymmetric EMA → slow EMA normalization.
 
 #include "fl/audio/detectors/vibe.h"
 #include "fl/audio/audio_context.h"
-#include "fl/filter.h"
 #include "fl/stl/math.h"
 
 namespace fl {
@@ -98,48 +97,54 @@ void VibeDetector::update(shared_ptr<AudioContext> context) {
         mImm[band] = energy;
     }
 
-    // --- Step 3: Temporal blending (asymmetric attack/decay) ---
+    // --- Step 3: Temporal blending (MilkDrop v2.25c algorithm) ---
     // Compute effective FPS from audio buffer duration
     float dt = computeAudioDt(pcm.size(), mSampleRate);
     float actualFps = (dt > 0.0f) ? (1.0f / dt) : mTargetFps;
 
-    for (int i = 0; i < 3; i++) {
-        // Short-term average: asymmetric attack/decay
-        // Fast attack (rate=0.2 at 30fps → ~80% new signal on beats)
-        // Slow decay  (rate=0.5 at 30fps → graceful fadeout)
-        float rate;
-        if (mImm[i] > mAvg[i]) {
-            rate = 0.2f;   // fast attack
-        } else {
-            rate = 0.5f;   // slow decay
+    if (mFrameCount == 1) {
+        // MilkDrop first-frame initialization: set averages directly
+        // Prevents false spikes and startup transients
+        for (int i = 0; i < 3; i++) {
+            mAvg[i] = mImm[i];
+            mLongAvg[i] = mImm[i];
         }
-        rate = adjustRateToFPS(rate, 30.0f, actualFps);
-        mAvg[i] = mAvg[i] * rate + mImm[i] * (1.0f - rate);
+    } else {
+        // Pre-compute FPS-adjusted rates (avoids redundant powf in loop)
+        float attackRate = adjustRateToFPS(0.2f, 30.0f, actualFps);
+        float decayRate = adjustRateToFPS(0.5f, 30.0f, actualFps);
+        float longRate = adjustRateToFPS(0.992f, 30.0f, actualFps);
 
-        // CORRECTED: Use AttackDecayFilter for running maximum (MilkDrop v2.25c algorithm)
-        // This tracks the peak energy over ~4 seconds with fast attack for responsive spikes.
-        // Key difference from previous implementation:
-        // - Old: mLongAvg[i] was a simple exponential moving average
-        // - New: mLongMaxFilter[i] is a running maximum (attack/decay filter)
-        // Result: Better dynamic range for self-normalizing levels
-        mLongMax[i] = mLongMaxFilter[i].update(mAvg[i], dt);
+        for (int i = 0; i < 3; i++) {
+            // Short-term average: asymmetric attack/decay
+            // Fast attack (rate=0.2 at 30fps → ~80% new signal on beats)
+            // Slow decay  (rate=0.5 at 30fps → graceful fadeout)
+            float rate = (mImm[i] > mAvg[i]) ? attackRate : decayRate;
+            mAvg[i] = mAvg[i] * rate + mImm[i] * (1.0f - rate);
 
-        // Self-normalizing relative levels
-        // Division by running maximum makes levels independent of volume/genre.
-        // Values hover around 1.0 for average intensity; >1 means louder than recent peak.
-        // Spike detection: immediate > smoothed indicates a beat is in progress.
-        if (mLongMax[i] < 0.001f) {
-            // When signal is effectively silent, return neutral level (1.0)
-            // This handles the case where both immediate and long-term max are near zero
-            mImmRel[i] = 1.0f;
-            mAvgRel[i] = 1.0f;
-        } else {
-            mImmRel[i] = mImm[i] / mLongMax[i];
-            mAvgRel[i] = mAvg[i] / mLongMax[i];
+            // Long-term average: slow symmetric EMA (MilkDrop v2.25c algorithm)
+            // Rate = 0.992 at 30fps → tau ≈ 4.2 seconds
+            // Tracks the overall energy level for self-normalization.
+            // Unlike a running maximum, this centers relative levels around 1.0,
+            // giving beats proper excursions above 1.0 and quiet sections below 1.0.
+            mLongAvg[i] = mLongAvg[i] * longRate + mAvg[i] * (1.0f - longRate);
         }
     }
 
-    // --- Step 4: Spike detection ---
+    // --- Step 4: Self-normalizing relative levels ---
+    // Division by long-term average makes levels independent of volume/genre.
+    // Values hover around 1.0; >1 means louder than average, <1 means quieter.
+    for (int i = 0; i < 3; i++) {
+        if (mLongAvg[i] < 0.001f) {
+            mImmRel[i] = 1.0f;
+            mAvgRel[i] = 1.0f;
+        } else {
+            mImmRel[i] = mImm[i] / mLongAvg[i];
+            mAvgRel[i] = mAvg[i] / mLongAvg[i];
+        }
+    }
+
+    // --- Step 5: Spike detection ---
     // When immediate exceeds smoothed, energy is rising — a beat is in progress.
     mPrevBassSpike = mBassSpike;
     mPrevMidSpike = mMidSpike;
@@ -166,9 +171,9 @@ void VibeDetector::fireCallbacks() {
         levels.bassAvg = mAvg[0];
         levels.midAvg = mAvg[1];
         levels.trebAvg = mAvg[2];
-        levels.bassLongAvg = mLongMax[0];
-        levels.midLongAvg = mLongMax[1];
-        levels.trebLongAvg = mLongMax[2];
+        levels.bassLongAvg = mLongAvg[0];
+        levels.midLongAvg = mLongAvg[1];
+        levels.trebLongAvg = mLongAvg[2];
         onVibeLevels(levels);
     }
 
@@ -189,8 +194,7 @@ void VibeDetector::reset() {
     for (int i = 0; i < 3; i++) {
         mImm[i] = 0.0f;
         mAvg[i] = 0.0f;
-        mLongMaxFilter[i].reset(0.0f);  // Reset running maximum filter
-        mLongMax[i] = 0.0f;
+        mLongAvg[i] = 0.0f;
         mImmRel[i] = 1.0f;
         mAvgRel[i] = 1.0f;
     }
