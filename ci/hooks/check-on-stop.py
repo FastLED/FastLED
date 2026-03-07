@@ -2,17 +2,14 @@
 """
 Claude Code Stop hook that runs lint and C++ tests concurrently.
 
-Smart mode: Only runs if:
-1. Repo has actual changes (git status --porcelain not empty)
-2. Changes differ from last run (fingerprint mismatch)
-
-Both lint and tests run in parallel. If lint fails first, the test process
-is cancelled and only lint errors are shown. If lint passes, test results
-are reported.
+Smart mode: Only runs if files were actually changed during THIS session.
+Session fingerprint is captured at session start (check-on-start.py) and
+compared here. If nothing changed during the session, lint and tests are
+skipped.
 
 Usage: Receives JSON on stdin from Claude Code Stop hook.
 Exit codes:
-  0 - Both passed or skipped (no changes)
+  0 - Both passed or skipped (no changes during session)
   2 - Lint or test failures (stderr fed back to Claude)
 """
 
@@ -26,7 +23,7 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
 PROJECT_ROOT = SCRIPT_DIR.parent.parent
-FINGERPRINT_FILE = PROJECT_ROOT / ".cache" / "last_agent_changes_fingerprint"
+SESSION_FINGERPRINT_FILE = PROJECT_ROOT / ".cache" / "session_fingerprint.json"
 
 
 def run_cmd(cmd: list[str]) -> subprocess.CompletedProcess[str]:
@@ -48,12 +45,6 @@ def report_failure(label: str, result: subprocess.CompletedProcess[str]) -> None
         print(result.stderr.strip(), file=sys.stderr)
 
 
-def repo_is_clean() -> bool:
-    """Return True if the working tree has no staged, unstaged, or untracked changes."""
-    result = run_cmd(["git", "status", "--porcelain"])
-    return result.returncode == 0 and not result.stdout.strip()
-
-
 def get_current_fingerprint() -> str | None:
     """Get MD5 fingerprint of current git status."""
     result = run_cmd(["git", "status", "--porcelain"])
@@ -65,11 +56,11 @@ def get_current_fingerprint() -> str | None:
     return hashlib.md5(status_output.encode()).hexdigest()
 
 
-def get_last_fingerprint() -> str | None:
-    """Read stored fingerprint from .cache/."""
-    if FINGERPRINT_FILE.exists():
+def get_session_fingerprint() -> str | None:
+    """Read fingerprint captured at session start."""
+    if SESSION_FINGERPRINT_FILE.exists():
         try:
-            data = json.loads(FINGERPRINT_FILE.read_text())
+            data = json.loads(SESSION_FINGERPRINT_FILE.read_text())
             return data.get("fingerprint")
         except KeyboardInterrupt:
             import _thread
@@ -81,44 +72,37 @@ def get_last_fingerprint() -> str | None:
     return None
 
 
-def save_fingerprint(fingerprint: str) -> None:
-    """Save current fingerprint to .cache/."""
-    FINGERPRINT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    FINGERPRINT_FILE.write_text(json.dumps({"fingerprint": fingerprint}))
-
-
 def should_skip_hook() -> bool:
-    """Check if hook should skip based on fingerprints."""
+    """Check if hook should skip based on session fingerprints."""
     current_fp = get_current_fingerprint()
 
-    # No changes - skip
+    # No changes at all right now - skip
     if current_fp is None:
         return True
 
-    # First run - save and run
-    last_fp = get_last_fingerprint()
-    if last_fp is None:
-        save_fingerprint(current_fp)
+    # Check if we have a session fingerprint (captured at session start)
+    session_fp = get_session_fingerprint()
+    if session_fp is None:
+        # No session fingerprint means repo was clean when session started,
+        # and if we have changes now, they were made during this session
         return False
 
-    # Same fingerprint - skip
-    if current_fp == last_fp:
+    # Same fingerprint as session start - no changes this session - skip
+    if current_fp == session_fp:
         return True
 
-    # Different fingerprint - save and run
-    save_fingerprint(current_fp)
+    # Different fingerprint - changes made this session - run hook
     return False
 
 
 def main() -> int:
-    if repo_is_clean():
-        return 0
-
     if should_skip_hook():
-        print("⏭️  Skipping lint+tests (no new changes)", file=sys.stderr)
+        print(
+            "⏭️  Skipping lint+tests (no changes during this session)", file=sys.stderr
+        )
         return 0
 
-    print("🔧 Running lint and tests (new changes detected)", file=sys.stderr)
+    print("🔧 Running lint and tests (changes detected this session)", file=sys.stderr)
 
     lint_done = threading.Event()
     lint_results: list[subprocess.CompletedProcess[str]] = []
