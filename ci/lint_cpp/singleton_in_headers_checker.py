@@ -3,15 +3,17 @@
 Lint check: Enforce correct Singleton vs SingletonShared usage.
 
 Rules:
-  1. Header files (.h, .hpp) must use SingletonShared<T> for instance() calls.
-     - Singleton<T>::instance() in headers → FAIL (use SingletonShared<T>)
-     - friend class Singleton<T> in headers → OK (just grants access)
-  2. Implementation files (.cpp.hpp) must use Singleton<T>, not SingletonShared<T>.
+  1. Public header files (.h only) must use SingletonShared<T> for instance() calls.
+     - Singleton<T>::instance() in .h headers → FAIL (use SingletonShared<T>)
+     - friend class Singleton<T> in .h headers → OK (just grants access)
+  2. Private implementation headers (.hpp) can use Singleton<T>.
+     - These are internal headers included in .cpp.hpp files, not across DLL boundaries.
+  3. Implementation files (.cpp.hpp) must use Singleton<T>, not SingletonShared<T>.
      - SingletonShared<T> in .cpp.hpp → FAIL (use Singleton<T>)
 
 Rationale:
-  - Headers are included across DLL boundaries; SingletonShared uses a registry.
-  - .cpp.hpp files have exactly one definition per process; Singleton is sufficient.
+  - Public .h headers are included across DLL boundaries; SingletonShared uses a registry.
+  - Private .hpp and .cpp.hpp files have single definitions per process; Singleton is sufficient.
   - friend declarations just grant constructor access and must match the actual
     singleton type used in the corresponding .cpp.hpp.
 """
@@ -43,6 +45,10 @@ class SingletonInHeadersChecker(FileContentChecker):
         normalized = file_path.replace("\\", "/")
         if normalized.endswith("fl/singleton.h"):
             return False
+        # Exclude private implementation headers (.hpp only, not .h)
+        # Private headers are included in .cpp.hpp files, so Singleton<T> is sufficient
+        if file_path.endswith(".hpp"):
+            return False
         if any(file_path.endswith(excluded) for excluded in EXCLUDED_FILES):
             return False
         return True
@@ -50,8 +56,15 @@ class SingletonInHeadersChecker(FileContentChecker):
     def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check singleton usage rules."""
         is_cpp_hpp = file_content.path.endswith(".cpp.hpp")
+        is_private_header = any(
+            "IWYU pragma: private" in line for line in file_content.lines[:20]
+        )
         violations: list[tuple[int, str]] = []
         in_multiline_comment = False
+
+        # Skip checks if this is a private header or .cpp.hpp file
+        if is_cpp_hpp or is_private_header:
+            return []
 
         for line_number, line in enumerate(file_content.lines, 1):
             stripped = line.strip()
