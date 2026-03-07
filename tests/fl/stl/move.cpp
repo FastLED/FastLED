@@ -655,9 +655,6 @@ FL_TEST_CASE("Container move semantics with shared_ptr") {
         test_map_move_semantics<fl::unordered_map<int, fl::shared_ptr<int>>>();
     }
 
-    FL_SUBCASE("fl::SortedHeapMap") {
-        test_map_move_semantics<fl::SortedHeapMap<int, fl::shared_ptr<int>>>();
-    }
 
     FL_SUBCASE("fl::flat_map") {
         test_map_move_semantics<fl::flat_map<int, fl::shared_ptr<int>>>();
@@ -1285,27 +1282,7 @@ FL_TEST_CASE("Allocator propagation on move") {
         FL_CHECK(source.size() == 0);
     }
 
-    FL_SUBCASE("fl::SortedHeapMap - allocator propagation") {
-        IDAllocator<fl::pair<int, int>> alloc1(100);
-        IDAllocator<fl::pair<int, int>> alloc2(200);
-
-        fl::SortedHeapMap<int, int, fl::less<int>, IDAllocator<fl::pair<int, int>>> source(alloc1);
-        source.insert(1, 10);
-        source.insert(2, 20);
-
-        fl::SortedHeapMap<int, int, fl::less<int>, IDAllocator<fl::pair<int, int>>> destination(alloc2);
-
-        FL_REQUIRE(source.get_allocator().id == 100);
-        FL_REQUIRE(destination.get_allocator().id == 200);
-
-        destination = fl::move(source);
-
-        FL_CHECK(destination.get_allocator().id == 100);
-        FL_CHECK(destination.size() == 2);
-        FL_CHECK(source.size() == 0);
-    }
-
-    FL_SUBCASE("fl::SortedHeapVector - allocator propagation") {
+FL_SUBCASE("fl::SortedHeapVector - allocator propagation") {
         IDAllocator<int> alloc1(100);
         IDAllocator<int> alloc2(200);
 
@@ -1456,9 +1433,6 @@ FL_TEST_CASE("Associative container iterator basics") {
     FL_SUBCASE("fl::flat_map") {
         test_helpers::test_map_iterators<fl::flat_map>();
     }
-    FL_SUBCASE("fl::SortedHeapMap") {
-        test_helpers::test_map_iterators<fl::SortedHeapMap>();
-    }
     FL_SUBCASE("fl::unordered_map") {
         test_helpers::test_map_iterators<fl::unordered_map>();
     }
@@ -1489,9 +1463,6 @@ FL_TEST_CASE("Associative container key-value iteration") {
     FL_SUBCASE("fl::flat_map") {
         test_helpers::test_map_iteration_key_value<fl::flat_map>();
     }
-    FL_SUBCASE("fl::SortedHeapMap") {
-        test_helpers::test_map_iteration_key_value<fl::SortedHeapMap>();
-    }
     FL_SUBCASE("fl::unordered_map") {
         test_helpers::test_map_iteration_key_value<fl::unordered_map>();
     }
@@ -1506,9 +1477,6 @@ FL_TEST_CASE("Associative container find and iterate") {
     }
     FL_SUBCASE("fl::flat_map") {
         test_helpers::test_map_find_and_iterate<fl::flat_map>();
-    }
-    FL_SUBCASE("fl::SortedHeapMap") {
-        test_helpers::test_map_find_and_iterate<fl::SortedHeapMap>();
     }
     FL_SUBCASE("fl::unordered_map") {
         test_helpers::test_map_find_and_iterate<fl::unordered_map>();
@@ -1534,9 +1502,6 @@ FL_TEST_CASE("Associative container bounds (lower_bound, upper_bound)") {
     FL_SUBCASE("fl::flat_map") {
         test_helpers::test_map_bounds<fl::flat_map>();
     }
-    FL_SUBCASE("fl::SortedHeapMap") {
-        test_helpers::test_map_bounds<fl::SortedHeapMap>();
-    }
 }
 
 FL_TEST_CASE("Associative container insert and erase") {
@@ -1555,9 +1520,6 @@ FL_TEST_CASE("Associative container key lookup") {
     FL_SUBCASE("fl::flat_map") {
         test_helpers::test_map_key_lookup<fl::flat_map>();
     }
-    FL_SUBCASE("fl::SortedHeapMap") {
-        test_helpers::test_map_key_lookup<fl::SortedHeapMap>();
-    }
     FL_SUBCASE("fl::unordered_map") {
         test_helpers::test_map_key_lookup<fl::unordered_map>();
     }
@@ -1569,9 +1531,6 @@ FL_TEST_CASE("Associative container operator[] access") {
     }
     FL_SUBCASE("fl::flat_map") {
         test_helpers::test_map_operator_bracket_access<fl::flat_map>();
-    }
-    FL_SUBCASE("fl::SortedHeapMap") {
-        test_helpers::test_map_operator_bracket_access<fl::SortedHeapMap>();
     }
     FL_SUBCASE("fl::unordered_map") {
         test_helpers::test_map_operator_bracket_access<fl::unordered_map>();
@@ -1587,9 +1546,6 @@ FL_TEST_CASE("Associative container sorted iteration order") {
     }
     FL_SUBCASE("fl::flat_map") {
         test_helpers::test_map_iteration_order<fl::flat_map>();
-    }
-    FL_SUBCASE("fl::SortedHeapMap") {
-        test_helpers::test_map_iteration_order<fl::SortedHeapMap>();
     }
 }
 

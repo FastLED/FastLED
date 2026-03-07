@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/stl/map.h"
+#include "fl/stl/flat_map.h"
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/fx/detail/fx_compositor.h"
 #include "fl/fx/fx.h"
@@ -27,7 +27,7 @@ namespace fl {
  */
 class FxEngine {
   public:
-    typedef fl::SortedHeapMap<int, FxPtr> IntFxMap;
+    typedef fl::flat_map<int, FxPtr> IntFxMap;
     /**
      * @brief Constructs an FxEngine with the specified number of LEDs.
      * @param numLeds The number of LEDs in the strip.

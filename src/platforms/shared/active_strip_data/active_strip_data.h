@@ -3,7 +3,7 @@
 // IWYU pragma: private
 
 #include "fl/engine_events.h"
-#include "fl/stl/map.h"
+#include "fl/stl/flat_map.h"
 #include "fl/screenmap.h"
 #include "fl/singleton.h"
 #include "fl/stl/span.h"
@@ -20,8 +20,8 @@ typedef fl::span<const u8> SliceUint8;
 // Zero copy data transfer of strip information - platform-agnostic core logic
 class ActiveStripData : public fl::EngineEvents::Listener {
   public:
-    typedef fl::SortedHeapMap<int, SliceUint8> StripDataMap;
-    typedef fl::SortedHeapMap<int, ScreenMap> ScreenMapMap;
+    typedef fl::flat_map<int, SliceUint8> StripDataMap;
+    typedef fl::flat_map<int, ScreenMap> ScreenMapMap;
 
     static ActiveStripData &Instance();
     void update(int id, u32 now, fl::span<const u8> pixel_data);

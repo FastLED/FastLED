@@ -6,7 +6,7 @@ namespace fl {
 FxEngine::FxEngine(u16 numLeds, bool interpolate)
     : mTimeFunction(0), mCompositor(numLeds), mCurrId(0),
       mInterpolate(interpolate) {
-    mEffects.setMaxSize(FASTLED_FX_ENGINE_MAX_FX);
+    mEffects.reserve(FASTLED_FX_ENGINE_MAX_FX);
 }
 
 FxEngine::~FxEngine() {}

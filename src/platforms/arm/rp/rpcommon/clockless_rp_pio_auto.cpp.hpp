@@ -19,7 +19,7 @@
 #include "fl/stl/assert.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/allocator.h"
-#include "fl/stl/map.h"
+#include "fl/stl/flat_map.h"
 #include "fl/dbg.h"
 
 // Hardware headers for RP2040/RP2350
@@ -117,7 +117,7 @@ class RP2040ParallelGroup {
     fl::vector<fl::unique_ptr<PinGroup>> mPinGroups;
 
     // Map from pin number to group index
-    fl::SortedHeapMap<fl::u8, fl::u32> mPinToGroupIndex;
+    fl::flat_map<fl::u8, fl::u32> mPinToGroupIndex;
 
     static RP2040ParallelGroup& getInstance() {
         return fl::Singleton<RP2040ParallelGroup>::instance();

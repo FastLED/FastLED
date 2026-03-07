@@ -18,7 +18,7 @@ template <typename T> class Optional;  // Forward declaration from fl/stl/option
 template <typename Key, typename Hash, typename KeyEqual> class unordered_set;  // Forward declaration from fl/stl/unordered_set.h
 template <typename Key, typename T, typename Hash, typename KeyEqual, int INLINED_COUNT> class unordered_map;  // Forward declaration from fl/stl/unordered_map.h
 template <typename Key, typename Value, fl::size N> class FixedMap;  // Forward declaration from fl/stl/map.h
-template <typename Key, typename Value, typename Less, typename Allocator> class SortedHeapMap;  // Forward declaration from fl/stl/map.h
+template <typename Key, typename Value, typename Less, typename Allocator> class flat_map;  // Forward declaration from fl/stl/flat_map.h
 template <typename T, fl::size Extent> class span;  // Forward declaration from fl/stl/span.h (no default arg to avoid redefinition)  // IWYU pragma: keep
 template <typename T1, typename T2> struct pair;  // Forward declaration from fl/stl/pair.h
 class FFTBins;  // Forward declaration from fl/fft.h
@@ -158,9 +158,9 @@ class sstream {
         return *this;
     }
 
-    // SortedHeapMap<Key, Value, Less, Allocator> support - format as {key1: value1, key2: value2, ...}
+    // flat_map<Key, Value, Less, Allocator> support - format as {key1: value1, key2: value2, ...}
     template<typename Key, typename Value, typename Less, typename Allocator>
-    sstream &operator<<(const fl::SortedHeapMap<Key, Value, Less, Allocator> &map) {
+    sstream &operator<<(const fl::flat_map<Key, Value, Less, Allocator> &map) {
         mStr.append("{");
         bool first = true;
         for (auto it = map.begin(); it != map.end(); ++it) {
@@ -454,9 +454,9 @@ class sstream_noop {
     template<typename Key, typename Value, fl::size N>
     sstream_noop &operator<<(const fl::FixedMap<Key, Value, N> &) { return *this; }
 
-    // SortedHeapMap support
+    // flat_map support
     template<typename Key, typename Value, typename Less, typename Allocator>
-    sstream_noop &operator<<(const fl::SortedHeapMap<Key, Value, Less, Allocator> &) { return *this; }
+    sstream_noop &operator<<(const fl::flat_map<Key, Value, Less, Allocator> &) { return *this; }
 
     // span support
     template<typename T, fl::size Extent>

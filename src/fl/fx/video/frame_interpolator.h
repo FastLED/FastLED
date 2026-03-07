@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/stl/map.h"
+#include "fl/stl/flat_map.h"
 #include "fl/stl/span.h"
 #include "fl/fx/video/frame_tracker.h"
 
@@ -16,7 +16,7 @@ class FrameInterpolator {
     struct Less {
         bool operator()(fl::u32 a, fl::u32 b) const { return a < b; }
     };
-    typedef fl::SortedHeapMap<fl::u32, FramePtr, Less> FrameBuffer;
+    typedef fl::flat_map<fl::u32, FramePtr, Less> FrameBuffer;
     FrameInterpolator(size_t nframes, float fpsVideo);
 
     // Will search through the array, select the two frames that are closest to

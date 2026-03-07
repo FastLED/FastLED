@@ -16,7 +16,7 @@
 // for that pin.
 
 #include "fl/int.h"
-#include "fl/stl/map.h"
+#include "fl/stl/flat_map.h"
 #include "fl/scoped_array.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/strstream.h"
@@ -50,7 +50,7 @@ class RectangularDrawBuffer {
         , mDrawListChangedThisFrame(false)
         , mQueueState(IDLE)
     {
-        mPinToLedSegment.setMaxSize(50);
+        mPinToLedSegment.reserve(50);
     }
     ~RectangularDrawBuffer() = default;
 
@@ -80,7 +80,7 @@ class RectangularDrawBuffer {
     // Use PSRamDeleter to properly free memory allocated with PSRamAllocator.
     scoped_array<u8, PSRamDeleter<u8>> mAllLedsBufferUint8;
     u32 mAllLedsBufferUint8Size = 0;
-    fl::SortedHeapMap<u8, fl::span<u8>> mPinToLedSegment;
+    fl::flat_map<u8, fl::span<u8>> mPinToLedSegment;
     DrawList mDrawList;
     DrawList mPrevDrawList;
     bool mDrawListChangedThisFrame = false;

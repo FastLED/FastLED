@@ -3,7 +3,7 @@
 // IWYU pragma: private
 
 #include "fl/stl/span.h"
-#include "fl/stl/map.h"
+#include "fl/stl/flat_map.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/bit_cast.h"
 #include "crgb.h"
@@ -132,8 +132,8 @@ public:
 
 private:
     /// @brief Get the static tracker map (accessor for resetForTesting)
-    static fl::SortedHeapMap<uintptr_t, int>& getTrackerMap() {
-        static fl::SortedHeapMap<uintptr_t, int> sTrackerMap;
+    static fl::flat_map<uintptr_t, int>& getTrackerMap() {
+        static fl::flat_map<uintptr_t, int> sTrackerMap;
         return sTrackerMap;
     }
 

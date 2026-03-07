@@ -9,7 +9,8 @@
 #include "fl/stl/vector.h"  // For fl::vector
 #include "fl/stl/unordered_set.h"  // For fl::unordered_set
 #include "fl/stl/unordered_map.h"  // For fl::unordered_map
-#include "fl/stl/map.h"  // For fl::FixedMap and fl::SortedHeapMap
+#include "fl/stl/map.h"  // For fl::FixedMap
+#include "fl/stl/flat_map.h"  // For fl::flat_map
 
 FL_TEST_CASE("FL_CHECK basic assertions") {
     FL_CHECK(true);
@@ -570,11 +571,11 @@ FL_TEST_CASE("sstream FixedMap support") {
     FL_CHECK_STR_EQ(ss2.str(), "{}");
 }
 
-// Test fl::SortedHeapMap with sstream
-FL_TEST_CASE("sstream SortedHeapMap support") {
+// Test fl::flat_map with sstream
+FL_TEST_CASE("sstream flat_map support") {
     fl::sstream ss;
 
-    fl::SortedHeapMap<int, int> map;
+    fl::flat_map<int, int> map;
     map.insert(1, 100);
     map.insert(2, 200);
     ss << map;
@@ -588,7 +589,7 @@ FL_TEST_CASE("sstream SortedHeapMap support") {
 
     // Test empty map
     fl::sstream ss2;
-    fl::SortedHeapMap<int, int> emptyMap;
+    fl::flat_map<int, int> emptyMap;
     ss2 << emptyMap;
     FL_CHECK_STR_EQ(ss2.str(), "{}");
 }

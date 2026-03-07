@@ -385,26 +385,6 @@ FL_TEST_CASE("Iterator support - map containers") {
         FL_CHECK(destination.begin() != destination.end());
     }
 
-    FL_SUBCASE("fl::SortedHeapMap - iterators") {
-        fl::SortedHeapMap<int, int> source;
-        source.insert(3, 30);
-        source.insert(1, 10);
-        source.insert(2, 20);
-
-        // Should be sorted by key
-        auto it = source.begin();
-        FL_CHECK(it->first == 1);
-        ++it;
-        FL_CHECK(it->first == 2);
-        ++it;
-        FL_CHECK(it->first == 3);
-
-        // Move and check empty
-        fl::SortedHeapMap<int, int> destination = fl::move(source);
-        FL_CHECK(source.begin() == source.end());
-        FL_CHECK(destination.begin() != destination.end());
-    }
-
     FL_SUBCASE("fl::string - iterators") {
         fl::string source = "hello";
 
@@ -686,35 +666,6 @@ FL_TEST_CASE("Reverse iterator support - bidirectional containers") {
 
         // Move and verify
         fl::map<int, int> destination = fl::move(source);
-        FL_CHECK(source.rbegin() == source.rend());  // Empty
-        FL_CHECK(destination.rbegin() != destination.rend());
-        FL_CHECK(destination.rbegin()->first == 30);
-    }
-
-    FL_SUBCASE("fl::SortedHeapMap - reverse iterators") {
-        fl::SortedHeapMap<int, int> source;
-        source.insert(30, 300);
-        source.insert(10, 100);
-        source.insert(20, 200);
-
-        // Reverse iteration (sorted by key, descending: 30, 20, 10)
-        auto rit = source.rbegin();
-        FL_CHECK(rit->first == 30);
-        FL_CHECK(rit->second == 300);
-        ++rit;
-        FL_CHECK(rit->first == 20);
-        FL_CHECK(rit->second == 200);
-        ++rit;
-        FL_CHECK(rit->first == 10);
-        FL_CHECK(rit->second == 100);
-
-        // Const reverse iterators
-        const auto& const_source = source;
-        auto crit = const_source.rbegin();
-        FL_CHECK(crit->first == 30);
-
-        // Move and verify
-        fl::SortedHeapMap<int, int> destination = fl::move(source);
         FL_CHECK(source.rbegin() == source.rend());  // Empty
         FL_CHECK(destination.rbegin() != destination.rend());
         FL_CHECK(destination.rbegin()->first == 30);

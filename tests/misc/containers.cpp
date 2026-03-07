@@ -585,6 +585,26 @@ void test_map_count() {
     FL_CHECK(m.count(99) == 0);
 }
 
+// Front and back element access for map containers
+template<typename Map>
+void test_map_front_back() {
+    Map m;
+    m.insert(fl::make_pair(1, 100));
+    m.insert(fl::make_pair(2, 200));
+    m.insert(fl::make_pair(3, 300));
+
+    // For sorted maps (flat_map, map), elements are ordered by key
+    // front() should give the element with smallest key
+    // back() should give the element with largest key
+    auto front_pair = m.front();
+    auto back_pair = m.back();
+
+    FL_CHECK(front_pair.first == 1);
+    FL_CHECK(front_pair.second == 100);
+    FL_CHECK(back_pair.first == 3);
+    FL_CHECK(back_pair.second == 300);
+}
+
 // ============================================================================
 // PATTERN 2: CONCRETE CONTAINER TYPE (Specific Element Types)
 // ============================================================================
@@ -1265,14 +1285,12 @@ FL_TEST_CASE("map insert and find operations") {
     FL_SUBCASE("fl::unordered_map") { test_map_insert_find<fl::unordered_map<int, int>>(); }
     FL_SUBCASE("fl::multi_map") { test_map_insert_find<fl::multi_map<int, int>>(); }
     FL_SUBCASE("fl::FixedMap") { test_map_insert_find<fixed_map_test<int, int>>(); }
-    FL_SUBCASE("fl::SortedHeapMap") { test_map_insert_find<SortedHeapMap<int, int>>(); }
 }
 
 FL_TEST_CASE("map operator[] access") {
     FL_SUBCASE("fl::map") { test_map_operator_subscript<fl::map<int, int>>(); }
     FL_SUBCASE("fl::unordered_map") { test_map_operator_subscript<fl::unordered_map<int, int>>(); }
     FL_SUBCASE("fl::FixedMap") { test_map_operator_subscript<fixed_map_test<int, int>>(); }
-    FL_SUBCASE("fl::SortedHeapMap") { test_map_operator_subscript<SortedHeapMap<int, int>>(); }
     // NOTE: fl::multi_map doesn't support operator[] (ambiguous with duplicate keys)
 }
 
@@ -1281,7 +1299,6 @@ FL_TEST_CASE("map erase operations") {
     FL_SUBCASE("fl::unordered_map") { test_map_erase<fl::unordered_map<int, int>>(); }
     FL_SUBCASE("fl::multi_map") { test_map_erase<fl::multi_map<int, int>>(); }
     FL_SUBCASE("fl::FixedMap") { test_map_erase<fixed_map_test<int, int>>(); }
-    FL_SUBCASE("fl::SortedHeapMap") { test_map_erase<SortedHeapMap<int, int>>(); }
 }
 
 FL_TEST_CASE("map iteration") {
@@ -1289,7 +1306,6 @@ FL_TEST_CASE("map iteration") {
     FL_SUBCASE("fl::unordered_map") { test_map_iteration<fl::unordered_map<int, int>>(); }
     FL_SUBCASE("fl::multi_map") { test_map_iteration<fl::multi_map<int, int>>(); }
     FL_SUBCASE("fl::FixedMap") { test_map_iteration<fixed_map_test<int, int>>(); }
-    FL_SUBCASE("fl::SortedHeapMap") { test_map_iteration<SortedHeapMap<int, int>>(); }
 }
 
 FL_TEST_CASE("map size and clear") {
@@ -1297,7 +1313,6 @@ FL_TEST_CASE("map size and clear") {
     FL_SUBCASE("fl::unordered_map") { test_map_size_clear<fl::unordered_map<int, int>>(); }
     FL_SUBCASE("fl::multi_map") { test_map_size_clear<fl::multi_map<int, int>>(); }
     FL_SUBCASE("fl::FixedMap") { test_map_size_clear<fixed_map_test<int, int>>(); }
-    FL_SUBCASE("fl::SortedHeapMap") { test_map_size_clear<SortedHeapMap<int, int>>(); }
 }
 
 FL_TEST_CASE("map count operations") {
@@ -1305,7 +1320,12 @@ FL_TEST_CASE("map count operations") {
     FL_SUBCASE("fl::unordered_map") { test_map_count<fl::unordered_map<int, int>>(); }
     FL_SUBCASE("fl::multi_map") { test_map_count<fl::multi_map<int, int>>(); }
     FL_SUBCASE("fl::FixedMap") { test_map_count<fixed_map_test<int, int>>(); }
-    FL_SUBCASE("fl::SortedHeapMap") { test_map_count<SortedHeapMap<int, int>>(); }
+}
+
+FL_TEST_CASE("map front and back access") {
+    // Only flat_map (vector-based) supports front()/back()
+    // Tree-based maps (map, unordered_map, multi_map) and FixedMap do not support these
+    FL_SUBCASE("fl::flat_map") { test_map_front_back<fl::flat_map<int, int>>(); }
 }
 
 // ============================================================================

@@ -89,6 +89,7 @@ class flat_map {
     bool empty() const { return mData.empty(); }
     size_type capacity() const { return mData.capacity(); }
     size_type max_size() const { return mData.max_size(); }
+    bool full() const { return size() >= capacity(); }
 
     allocator_type get_allocator() const { return mData.get_allocator(); }
 
@@ -148,6 +149,11 @@ class flat_map {
 
     bool contains(const Key& key) const {
         return find(key) != end();
+    }
+
+    // Alias for contains (FastLED compatibility)
+    bool has(const Key& key) const {
+        return contains(key);
     }
 
     // Bounds - binary search using pointer arithmetic
@@ -275,6 +281,39 @@ class flat_map {
         return insert(fl::move(value)).first;
     }
 
+    // FastLED-style insert with InsertResult out parameter
+    bool insert(const Key& key, const Value& value, InsertResult* result = nullptr) {
+        auto it = lower_bound(key);
+        if (it != end() && !mLess(key, it->first) && !mLess(it->first, key)) {
+            if (result) *result = InsertResult::kExists;
+            return false;
+        }
+        bool success = mData.insert(it, value_type(key, value));
+        if (success) {
+            if (result) *result = InsertResult::kInserted;
+            return true;
+        }
+        if (result) *result = InsertResult::kMaxSize;
+        return false;
+    }
+
+    // Move version of insert with InsertResult out parameter
+    bool insert(Key&& key, Value&& value, InsertResult* result = nullptr) {
+        auto key_copy = key;
+        auto it = lower_bound(key_copy);
+        if (it != end() && !mLess(key_copy, it->first) && !mLess(it->first, key_copy)) {
+            if (result) *result = InsertResult::kExists;
+            return false;
+        }
+        bool success = mData.insert(it, value_type(fl::move(key), fl::move(value)));
+        if (success) {
+            if (result) *result = InsertResult::kInserted;
+            return true;
+        }
+        if (result) *result = InsertResult::kMaxSize;
+        return false;
+    }
+
     // Emplace
     template <typename... Args>
     fl::pair<iterator, bool> emplace(Args&&... args) {
@@ -344,6 +383,27 @@ class flat_map {
         return mLess;
     }
 
+    // Element access
+    value_type& front() {
+        FASTLED_ASSERT(!empty(), "flat_map::front() on empty map");
+        return mData.front();
+    }
+
+    const value_type& front() const {
+        FASTLED_ASSERT(!empty(), "flat_map::front() on empty map");
+        return mData.front();
+    }
+
+    value_type& back() {
+        FASTLED_ASSERT(!empty(), "flat_map::back() on empty map");
+        return mData.back();
+    }
+
+    const value_type& back() const {
+        FASTLED_ASSERT(!empty(), "flat_map::back() on empty map");
+        return mData.back();
+    }
+
     // FastLED-specific methods
 
     // Get value with default return if not found
@@ -375,7 +435,63 @@ class flat_map {
         return insert(value_type(key, value));
     }
 
-    // Allows pre-allocating space (FastLED style)
+    // FastLED-style update: insert if missing, update if exists
+    bool update(const Key& key, const Value& value) {
+        iterator it = find(key);
+        if (it != end()) {
+            it->second = value;
+            return true;  // Updated
+        }
+        // Key doesn't exist, insert it
+        auto result = insert(value_type(key, value));
+        return result.second;  // Return whether insertion succeeded
+    }
+
+    // Move version of update
+    bool update(const Key& key, Value&& value) {
+        iterator it = find(key);
+        if (it != end()) {
+            it->second = fl::move(value);
+            return true;  // Updated
+        }
+        // Key doesn't exist, insert it
+        auto result = insert(value_type(key, fl::move(value)));
+        return result.second;  // Return whether insertion succeeded
+    }
+
+    // Navigate to next element by key (FastLED compatibility)
+    bool next(const Key& key, Key* next_key, bool allow_rollover = false) const {
+        auto it = find(key);
+        if (it != end()) {
+            ++it;
+            if (it != end()) {
+                *next_key = it->first;
+                return true;
+            } else if (allow_rollover && !empty()) {
+                *next_key = begin()->first;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Navigate to previous element by key (FastLED compatibility)
+    bool prev(const Key& key, Key* prev_key, bool allow_rollover = false) const {
+        auto it = find(key);
+        if (it != end()) {
+            if (it != begin()) {
+                --it;
+                *prev_key = it->first;
+                return true;
+            } else if (allow_rollover && !empty()) {
+                *prev_key = mData.back().first;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Allows pre-allocating space
     void reserve(size_type n) {
         mData.reserve(n);
     }
