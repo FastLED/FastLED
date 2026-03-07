@@ -9,6 +9,15 @@
             "command": "cd \"$(git rev-parse --show-toplevel)\" && uv run python ci/hooks/check_forbidden_commands.py"
           }
         ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$(git rev-parse --show-toplevel)\" && uv run python ci/hooks/check_test_file_pairing.py"
+          }
+        ]
       }
     ],
     "PostToolUse": [
