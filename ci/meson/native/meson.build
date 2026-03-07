@@ -94,11 +94,12 @@ if build_mode == 'debug'
   ]
 elif build_mode == 'quick'
   # Quick mode: Default mode for fast development iteration
-  # Light optimization, minimal debug info, no sanitizers
-  # Preserves function names and stack frames for proper call stack translation
+  # No optimization, no debug symbols, no sanitizers
+  # Prioritizes fastest compilation for iteration cycles
+  # Frame pointers preserved for stack traces; function names available from symbol table
   base_optimization = base_common + stack_trace_flags + [
-    '-O1',                      # Light optimization (good balance of speed and debuggability)
-    '-g1',                      # Minimal debug info (function names + line numbers)
+    '-O0',                      # No optimization (fastest compilation)
+    '-g0',                      # No debug symbols (fastest compilation)
   ]
 elif build_mode == 'release'
   # Release mode: Optimized production build with thin LTO (no stack trace preservation)
