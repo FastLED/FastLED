@@ -16,7 +16,7 @@
 #include "fl/stl/thread.h"
 #endif
 
-// Global delay function override for fast testing (non-static for access from platform_time.cpp.hpp)
+// Global delay function override for fast testing (accessed from CoroutineRuntimeStub)
 fl::function<void(fl::u32)> g_delay_override;
 
 extern "C" {

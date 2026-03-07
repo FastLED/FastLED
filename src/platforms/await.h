@@ -109,8 +109,9 @@ namespace platforms {
 /// @param promise The promise to await
 /// @return A result<T> containing either the resolved value or an error
 ///
-/// Implementation uses fl::condition_variable for efficient suspension.
-/// This is called by fl::await() as a trampoline. See fl/stl/async.h for full documentation.
+/// Blocks on condition_variable until promise completes. Must be called from
+/// a coroutine thread, not the main thread. Use fl::await_top_level() for
+/// main thread code.
 template<typename T>
 fl::result<T> await(fl::promise<T> promise) {
     // Validate promise
@@ -125,15 +126,11 @@ fl::result<T> await(fl::promise<T> promise) {
             : fl::result<T>(promise.error());
     }
 
-    // Create synchronization primitives for local coordination
-    // Note: fl::mutex is MutexReal (inherits std::mutex) in multithreaded mode
-    // fl::unique_lock is aliased to std::unique_lock in multithreaded mode for
-    // compatibility with fl::condition_variable
+    // Block on condition_variable until promise completes
     fl::mutex mtx;
     fl::condition_variable cv;
     fl::atomic<bool> completed(false);
 
-    // Register completion callbacks
     promise.then([&](const T&) {
         completed.store(true);
         cv.notify_one();
@@ -142,25 +139,11 @@ fl::result<T> await(fl::promise<T> promise) {
         cv.notify_one();
     });
 
-    // Release global execution lock before waiting
-    // This allows other coroutines and main thread to run while we wait
-    fl::detail::global_execution_unlock();
-
-    // Signal next coroutine in executor queue to run while we wait
-    fl::detail::CoroutineRunner::instance().signal_next();
-
-    // Wait on local condition variable for promise completion
-    // fl::unique_lock<fl::mutex> is fully compatible with fl::condition_variable because:
-    // - In multithreaded mode: fl::unique_lock = std::unique_lock, fl::mutex = std::mutex
     fl::unique_lock<fl::mutex> local_lock(mtx);
     cv.wait(local_lock, [&]() { return completed.load(); });
-    local_lock.unlock();  // Release local lock
+    local_lock.unlock();
 
-    // Re-acquire global execution lock before returning to user code
-    // This ensures only one thread executes "user code" at a time
-    fl::detail::global_execution_lock();
-
-    // Promise completed and we now hold global lock again, return result
+    // Promise completed, return result
     return promise.is_resolved()
         ? fl::result<T>(promise.value())
         : fl::result<T>(promise.error());

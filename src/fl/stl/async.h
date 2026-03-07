@@ -99,26 +99,23 @@ private:
     fl::vector<async_runner*> mRunners;
 };
 
-/// @brief Platform-specific async yield function
-/// 
-/// This function pumps all async tasks and yields control appropriately for the platform:
-/// - WASM: calls async_run() then emscripten_sleep(1) to yield to browser
-/// - Other platforms: calls async_run() multiple times with simple yielding
-/// 
-/// This centralizes platform-specific async behavior instead of having #ifdef in generic code.
-void async_yield();
-
-
 /// @brief Run all registered async tasks once
-/// 
+///
 /// This function updates all registered async runners (fetch, timers, etc.)
-/// and is automatically called during:
+/// and the Scheduler, then yields to background threads/coroutines.
+///
+/// It is automatically called during:
 /// - FastLED engine events (onEndFrame)
-/// - delay() calls on WASM platforms (every 1ms)
+/// - delay() calls (every 1ms)
 /// - Manual calls for custom async pumping
 ///
-/// @note This replaces the old fetch_update() function with a generic approach
-void async_run();
+/// Usage:
+/// - `async_run()` — pure pump, no yield
+/// - `async_run(1)` — pump + yield for 1ms
+/// - `async_run(10)` — pump + yield for 10ms
+///
+/// @param ms Milliseconds to yield to background threads (default 0)
+void async_run(fl::u32 ms = 0);
 
 
 
@@ -137,7 +134,7 @@ bool async_has_tasks();
 ///
 /// This function blocks until the promise is either resolved or rejected,
 /// then returns a PromiseResult that can be checked with ok() for success/failure.
-/// While waiting, it continuously calls async_yield() to pump async tasks and yield appropriately.
+/// While waiting, it continuously calls async_run(1) to pump async tasks and yield appropriately.
 ///
 /// **PERFORMANCE NOTE**: This function busy-waits (high CPU usage) while the promise
 /// is pending. For coroutines on ESP32 or Host/Stub platforms, prefer fl::await()
@@ -214,7 +211,7 @@ fl::result<T> await_top_level(fl::promise<T> promise) {
         }
 
         // Platform-agnostic async pump and yield
-        async_yield();
+        async_run(1);
 
         ++pump_count;
     }
@@ -250,7 +247,7 @@ fl::result<T> await_top_level(fl::promise<T> promise) {
 //    - Example: See ESP32 and FASTLED_STUB_IMPL sections below
 //
 // 2. fl::await_top_level() - For main loop/top-level code (All platforms)
-//    - High CPU usage (busy-wait with async_yield())
+//    - High CPU usage (busy-wait with async_run(1))
 //    - Safe to call from Arduino loop() or main()
 //    - NOT safe in promise callbacks or nested async operations
 //    - Platform support: All platforms

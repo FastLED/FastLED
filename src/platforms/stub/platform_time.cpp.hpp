@@ -7,7 +7,6 @@
 
 #if defined(FASTLED_STUB_IMPL) && !defined(FL_IS_WASM)
 
-#include "platforms/time_platform.h"
 #include "fl/stl/thread.h"
 #include "fl/compiler_control.h"
 #include "fl/stl/function.h"
@@ -54,6 +53,7 @@ fl::u32 micros() {
         current - start_time);
     return static_cast<fl::u32>(elapsed.count());
 }
+
 
 }  // namespace platforms
 }  // namespace fl

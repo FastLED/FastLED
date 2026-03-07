@@ -114,8 +114,6 @@ EMSCRIPTEN_KEEPALIVE fl::u32 micros() {
     return result;
 }
 
-// NOTE: delay() and delayMicroseconds() are implemented in platform_time.cpp.hpp
-
 // Replacement for 'yield' in WebAssembly context
 EMSCRIPTEN_KEEPALIVE void yield() {
     // Use emscripten_yield to allow the browser to perform other tasks

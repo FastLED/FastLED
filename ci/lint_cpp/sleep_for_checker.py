@@ -1,12 +1,20 @@
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false
-"""Checker for sleep_for() usage - bypasses async runner.
+"""Checker for sleep_for() usage - DANGEROUS: blocks async/scheduler pumping.
 
-Detects usage of sleep_for() in any namespace (std::this_thread::sleep_for,
-fl::this_thread::sleep_for, or bare sleep_for). Code should use fl::yield()
-or fl::async_run() instead, which cooperate with the async runner.
+⚠️  CRITICAL: sleep_for() is a bare OS-level sleep that BLOCKS all task pumping.
+This causes:
+  - Async operations (HTTP, promises) to hang and not complete
+  - Background tasks (fl::task) to freeze and not run
+  - Unresponsive UI/effects during sleep periods
+  - Potential deadlocks if async code is waiting
 
-Suppression: add '// ok sleep for' or '// okay sleep for' to the line.
+ALWAYS use fl::delay(ms) instead, which keeps everything responsive.
+
+sleep_for() may ONLY be used in core infrastructure (threading, timing primitives)
+where you explicitly need a blocking sleep. Any other use is a BUG.
+
+Suppression: Requires '// ok sleep for' comment to explicitly acknowledge this risk.
 """
 
 import re
@@ -36,7 +44,7 @@ _SLEEP_FOR_RE = re.compile(r"\bsleep_for\s*\(")
 
 
 class SleepForChecker(FileContentChecker):
-    """Checker for sleep_for() usage that bypasses async runner."""
+    """Checker for sleep_for() usage - pure low-level OS sleep with no pumping."""
 
     def __init__(self) -> None:
         self.violations: dict[str, list[tuple[int, str]]] = {}
@@ -96,8 +104,10 @@ class SleepForChecker(FileContentChecker):
                 violations.append(
                     (
                         line_number,
-                        f"sleep_for() bypasses async runner — use fl::yield() or "
-                        f"fl::async_run() instead. Suppress with '// ok sleep for': "
+                        f"⚠️  CRITICAL: sleep_for() BLOCKS async/scheduler pumping! "
+                        f"Async operations HANG, tasks FREEZE, UI becomes UNRESPONSIVE. "
+                        f"USE fl::delay(ms) INSTEAD! "
+                        f"Only suppress with '// ok sleep for' in core infrastructure: "
                         f"{stripped}",
                     )
                 )
@@ -121,7 +131,7 @@ def main() -> None:
             str(PROJECT_ROOT / "tests"),
             str(PROJECT_ROOT / "examples"),
         ],
-        "Found sleep_for() usage (bypasses async runner — use fl::yield/fl::async_run)",
+        "⚠️  CRITICAL: Found sleep_for() usage that BLOCKS async/scheduler! Use fl::delay(ms) INSTEAD!",
     )
 
 

@@ -18,6 +18,8 @@
 #include "mutex_stub_stl.h"
 #include "thread_stub_stl.h"
 #include "fl/stl/vector.h"
+#include "platforms/stub/task_coroutine_stub.h"  // ok - for cleanup_coroutine_threads(), register_background_thread()
+#include "platforms/coroutine_runtime.h"  // for is_shutdown_requested()
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -227,7 +229,7 @@ FL_TEST_CASE("fl::async_has_tasks") {
     }
 }
 
-FL_TEST_CASE("fl::async_yield") {
+FL_TEST_CASE("fl::async_run with ms") {
     FL_SUBCASE("pumps async tasks") {
         AsyncManager& mgr = AsyncManager::instance();
         TestAsyncRunner runner;
@@ -235,8 +237,8 @@ FL_TEST_CASE("fl::async_yield") {
         mgr.register_runner(&runner);
 
         FL_CHECK_EQ(runner.update_count, 0);
-        async_yield();
-        // async_yield calls async_run at least once, plus additional pumps
+        async_run(1);
+        // async_run(1) calls pumps and yields 1ms
         FL_CHECK(runner.update_count >= 1);
 
         // Cleanup
@@ -557,60 +559,21 @@ FL_TEST_CASE("fl::async integration") {
 // Coroutine-based await tests (merged from await_coroutine.cpp)
 // ============================================================
 
-#ifdef FASTLED_STUB_IMPL
-#endif
-
-// Global thread registry for proper cleanup in DLL mode
-// When tests complete, we need to join all background threads before DLL unload
-namespace {
-    fl::vector<fl::thread> g_background_threads;
-    fl::atomic<bool> g_shutdown_requested(false);
-    fl::mutex g_threads_mutex;
-
-    void register_thread(fl::thread&& t) {
-        fl::unique_lock<fl::mutex> lock(g_threads_mutex);
-        g_background_threads.push_back(fl::move(t));
-    }
-
-    void cleanup_threads() {
-        g_shutdown_requested.store(true);
-        fl::unique_lock<fl::mutex> lock(g_threads_mutex);
-        for (auto& t : g_background_threads) {
-            if (t.joinable()) {
-                t.join();
-            }
-        }
-        g_background_threads.clear();
-        g_shutdown_requested.store(false);
-    }
-}
-
 // Helper: Create a promise that resolves after a delay
-// Note: The background thread does NOT acquire the global lock!
-// This simulates external events (ISR, network callbacks, etc.) that complete promises
-// Thread is registered for proper cleanup on test exit
+// Thread is registered via platform API for cleanup on exit
 template<typename T>
 promise<T> delayed_resolve(const T& value, uint32_t delay_ms) {
     auto p = promise<T>::create();
 
-    // Simulate async work in a background thread
-    // This thread does NOT participate in global coordination (like ISR)
     fl::thread t([p, value, delay_ms]() mutable {
-        // Sleep in small increments to allow early exit on shutdown
-        for (uint32_t elapsed = 0; elapsed < delay_ms && !g_shutdown_requested.load(); elapsed += 1) {
+        for (uint32_t elapsed = 0; elapsed < delay_ms && !fl::platforms::ICoroutineRuntime::instance().isShutdownRequested(); elapsed += 1) {
             uint32_t sleep_time = fl::min(1u, delay_ms - elapsed);
             fl::this_thread::sleep_for(fl::chrono::milliseconds(sleep_time));  // ok sleep for
         }
-
-        // Only complete if not shutting down
-        if (!g_shutdown_requested.load()) {
-            // Complete promise WITHOUT acquiring global lock
-            // The promise callbacks (cv.notify) can run from any thread
-            p.complete_with_value(value);
-        }
+        p.complete_with_value(value);
     });
 
-    register_thread(fl::move(t));
+    fl::platforms::register_background_thread(fl::move(t));
     return p;
 }
 
@@ -620,20 +583,14 @@ promise<T> delayed_reject(const Error& error, uint32_t delay_ms) {
     auto p = promise<T>::create();
 
     fl::thread t([p, error, delay_ms]() mutable {
-        // Sleep in small increments to allow early exit on shutdown
-        for (uint32_t elapsed = 0; elapsed < delay_ms && !g_shutdown_requested.load(); elapsed += 1) {
+        for (uint32_t elapsed = 0; elapsed < delay_ms && !fl::platforms::ICoroutineRuntime::instance().isShutdownRequested(); elapsed += 1) {
             uint32_t sleep_time = fl::min(1u, delay_ms - elapsed);
             fl::this_thread::sleep_for(fl::chrono::milliseconds(sleep_time));  // ok sleep for
         }
-
-        // Only complete if not shutting down
-        if (!g_shutdown_requested.load()) {
-            // Complete promise WITHOUT acquiring global lock
-            p.complete_with_error(error);
-        }
+        p.complete_with_error(error);
     });
 
-    register_thread(fl::move(t));
+    fl::platforms::register_background_thread(fl::move(t));
     return p;
 }
 
@@ -664,7 +621,7 @@ FL_TEST_CASE("await in coroutine - basic resolution") {
     // Wait for coroutine to complete (max 200ms to account for slow CI)
     int timeout = 0;
     while (!test_completed.load() && timeout < 200) {
-        async_yield();  // Release lock and pump async tasks
+        async_run(1);  // Release lock and pump async tasks
         delay(5);
         timeout += 5;
     }
@@ -673,7 +630,7 @@ FL_TEST_CASE("await in coroutine - basic resolution") {
     FL_CHECK(result_value.load() == 42);
 
     // Clean up background threads before test exits
-    cleanup_threads();
+    fl::platforms::cleanup_background_threads();
 }
 
 FL_TEST_CASE("await in coroutine - error handling") {
@@ -702,7 +659,7 @@ FL_TEST_CASE("await in coroutine - error handling") {
     // Wait for completion (max 200ms to account for slow CI)
     int timeout = 0;
     while (!test_completed.load() && timeout < 200) {
-        async_yield();
+        async_run(1);
         delay(5);
         timeout += 5;
     }
@@ -711,7 +668,7 @@ FL_TEST_CASE("await in coroutine - error handling") {
     FL_CHECK(got_error.load());
 
     // Clean up background threads before test exits
-    cleanup_threads();
+    fl::platforms::cleanup_background_threads();
 }
 
 FL_TEST_CASE("await in coroutine - already completed promise") {
@@ -739,7 +696,7 @@ FL_TEST_CASE("await in coroutine - already completed promise") {
     // Should complete quickly (within 200ms to account for slow CI)
     int timeout = 0;
     while (!test_completed.load() && timeout < 200) {
-        async_yield();
+        async_run(1);
         delay(5);
         timeout += 5;
     }
@@ -788,7 +745,7 @@ FL_TEST_CASE("await in coroutine - multiple concurrent coroutines") {
         if (timeout % 100 == 0) {
             printf("Test: timeout=%d, completed=%d, sum=%d\n", timeout, completed_count.load(), sum.load());
         }
-        async_yield();
+        async_run(1);
         delay(5);
         timeout += 5;
     }
@@ -798,7 +755,7 @@ FL_TEST_CASE("await in coroutine - multiple concurrent coroutines") {
     FL_CHECK(sum.load() == 0 + 10 + 20 + 30 + 40);  // Sum of 0, 10, 20, 30, 40
 
     // Clean up background threads before test exits
-    cleanup_threads();
+    fl::platforms::cleanup_background_threads();
 }
 
 FL_TEST_CASE("await in coroutine - invalid promise") {
@@ -826,7 +783,7 @@ FL_TEST_CASE("await in coroutine - invalid promise") {
     // Should complete quickly (within 200ms to account for slow CI)
     int timeout = 0;
     while (!test_completed.load() && timeout < 200) {
-        async_yield();
+        async_run(1);
         delay(5);
         timeout += 5;
     }
@@ -864,7 +821,7 @@ FL_TEST_CASE("await in coroutine - sequential awaits") {
     // Wait for completion (max 200ms to account for slow CI)
     int timeout = 0;
     while (!test_completed.load() && timeout < 200) {
-        async_yield();
+        async_run(1);
         delay(5);
         timeout += 5;
     }
@@ -873,7 +830,7 @@ FL_TEST_CASE("await in coroutine - sequential awaits") {
     FL_CHECK(total.load() == 60);  // 10 + 20 + 30
 
     // Clean up background threads before test exits
-    cleanup_threads();
+    fl::platforms::cleanup_background_threads();
 }
 
 FL_TEST_CASE("await vs await_top_level - CPU usage comparison") {
@@ -903,14 +860,14 @@ FL_TEST_CASE("await vs await_top_level - CPU usage comparison") {
     // Wait for coroutine to complete
     int timeout = 0;
     while (!await_completed.load() && timeout < 200) {
-        async_yield();
+        async_run(1);
         delay(5);
         timeout += 5;
     }
     FL_CHECK(await_completed.load());
 
     // Clean up background threads before test exits
-    cleanup_threads();
+    fl::platforms::cleanup_background_threads();
 
     // Note: await_top_level requires integration with the async system
     // which is not set up in this unit test environment. The above test
@@ -991,13 +948,13 @@ FL_TEST_CASE("global coordination - no concurrent execution") {
         active_threads.fetch_sub(1);
 
         // Yield to allow coroutine to run (releases global lock)
-        async_yield();
+        async_run(1);
     }
 
     // Wait for coroutine to complete
     int timeout = 0;
     while (!test_completed.load() && timeout < 500) {
-        async_yield();  // Keep yielding to let coroutine finish
+        async_run(1);  // Keep yielding to let coroutine finish
         delay(1);
         timeout += 1;
     }
@@ -1052,7 +1009,7 @@ FL_TEST_CASE("global coordination - await releases lock for other threads") {
     // This avoids race condition where one coroutine finishes before the other
     int timeout = 0;
     while ((coroutine1_progress.load() < 2 || coroutine2_progress.load() < 2) && timeout < 500) {
-        async_yield();
+        async_run(1);
         delay(1);
         timeout += 1;
     }
@@ -1061,7 +1018,7 @@ FL_TEST_CASE("global coordination - await releases lock for other threads") {
     FL_CHECK(coroutine2_progress.load() == 2);
 
     // Clean up background threads before test exits
-    cleanup_threads();
+    fl::platforms::cleanup_background_threads();
 }
 #endif // FASTLED_STUB_IMPL
 

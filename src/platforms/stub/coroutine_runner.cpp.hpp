@@ -6,262 +6,172 @@
 #ifdef FASTLED_STUB_IMPL
 
 #include "platforms/stub/coroutine_runner.h"
+#include "fl/stl/semaphore.h"
 #include "fl/singleton.h"
-#include "fl/stl/thread_local.h"
 #include "fl/stl/atomic.h"
-#include "fl/stl/mutex.h"  // Provides fl::mutex, fl::recursive_mutex, fl::unique_lock
-#include "fl/stl/condition_variable.h"  // Provides fl::condition_variable
+#include "fl/stl/mutex.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/weak_ptr.h"
 #include "fl/stl/queue.h"
-#include "fl/dbg.h"  // Debug output
 
 namespace fl {
 namespace detail {
 
-// ===== CoroutineContextImpl (concrete implementation) =====
+// ===== CoroutineContextImpl =====
 
 class CoroutineContextImpl : public CoroutineContext {
 public:
     CoroutineContextImpl()
-        : mReady(false), mShouldStop(false), mCompleted(false) {}
+        : mWakeupSema(0), mShouldStop(false), mCompleted(false), mThreadReady(false) {}
 
     void wait() override {
-        // FL_DBG("CoroutineContext " << fl::hex << reinterpret_cast<uintptr_t>(this) << ": Entering wait()");
-        fl::unique_lock<fl::mutex> lock(mMutex);
-        // FL_DBG("CoroutineContext " << fl::hex << reinterpret_cast<uintptr_t>(this) << ": Acquired lock, waiting on condition...");
-
-        // CRITICAL: Check if predicate is already true before waiting
-        // This avoids waiting if the condition was signaled before we acquired the lock
-        bool ready = mReady.load();
-        bool should_stop = mShouldStop.load();
-        if (!ready && !should_stop) {
-            // Need to wait - predicate is false
-            mCv.wait(lock, [this]() { return mReady.load() || mShouldStop.load(); });
-        }
-
-        // FL_DBG("CoroutineContext " << fl::hex << reinterpret_cast<uintptr_t>(this) << ": Woke from wait, ready=" << mReady.load() << " stop=" << mShouldStop.load());
-        mReady.store(false);  // Reset for next time
+        mWakeupSema.acquire();
     }
 
-    void signal() override {
-        // FL_DBG("CoroutineContext " << fl::hex << reinterpret_cast<uintptr_t>(this) << ": Signaling");
-        fl::unique_lock<fl::mutex> lock(mMutex);
-        mReady.store(true);
-        mCv.notify_one();
-        // FL_DBG("CoroutineContext " << fl::hex << reinterpret_cast<uintptr_t>(this) << ": Signal complete");
+    fl::binary_semaphore& wakeup_semaphore() override {
+        return mWakeupSema;
     }
 
-    bool should_stop() const override {
-        return mShouldStop.load();
-    }
-
-    void set_should_stop(bool value) override {
-        mShouldStop.store(value);
-    }
-
-    bool is_completed() const override {
-        return mCompleted.load();
-    }
-
-    void set_completed(bool value) override {
-        mCompleted.store(value);
-    }
+    bool should_stop() const override { return mShouldStop.load(); }
+    void set_should_stop(bool value) override { mShouldStop.store(value); }
+    bool is_completed() const override { return mCompleted.load(); }
+    void set_completed(bool value) override { mCompleted.store(value); }
+    bool is_thread_ready() const override { return mThreadReady.load(); }
+    void set_thread_ready(bool value) override { mThreadReady.store(value); }
 
 private:
-    fl::mutex mMutex;
-    fl::condition_variable mCv;
-    fl::atomic<bool> mReady;            // Signaled when this coroutine can run
-    fl::atomic<bool> mShouldStop;       // Signal for graceful shutdown
-    fl::atomic<bool> mCompleted;        // Set when coroutine finishes
+    fl::binary_semaphore mWakeupSema;
+    fl::atomic<bool> mShouldStop;
+    fl::atomic<bool> mCompleted;
+    fl::atomic<bool> mThreadReady;
 };
 
-// CoroutineContext factory method
 fl::shared_ptr<CoroutineContext> CoroutineContext::create() {
     return fl::make_shared<CoroutineContextImpl>();
 }
 
-// ===== CoroutineRunnerImpl (concrete implementation) =====
+// ===== CoroutineRunnerImpl =====
 
 class CoroutineRunnerImpl : public CoroutineRunner {
 public:
-    CoroutineRunnerImpl() = default;
+    CoroutineRunnerImpl() : mMainThreadSema(0) {}
+
+    fl::counting_semaphore<2>& get_main_thread_semaphore() override {
+        return mMainThreadSema;
+    }
 
     void enqueue(fl::shared_ptr<CoroutineContext> ctx) override {
         fl::unique_lock<fl::mutex> lock(mQueueMutex);
-        // FL_DBG("CoroutineRunner: Enqueuing context " << fl::hex << reinterpret_cast<uintptr_t>(ctx.get()) << ", queue size before: " << mQueue.size());
         mQueue.push(fl::weak_ptr<CoroutineContext>(ctx));
-        // FL_DBG("CoroutineRunner: Queue size after enqueue: " << mQueue.size());
-    }
-
-    void signal_next() override {
-        fl::unique_lock<fl::mutex> lock(mQueueMutex);
-        // FL_DBG("CoroutineRunner::signal_next: Called, queue size: " << mQueue.size());
-
-        // Remove expired/completed coroutines from front of queue
-        while (!mQueue.empty()) {
-            fl::shared_ptr<CoroutineContext> ctx = mQueue.front().lock();
-            // If expired (context deleted) or completed, remove from queue
-            if (!ctx || ctx->is_completed()) {
-                // if (!ctx) {
-                //     FL_DBG("CoroutineRunner::signal_next: Removing expired context (deleted)");
-                // } else {
-                //     FL_DBG("CoroutineRunner::signal_next: Removing completed context " << fl::hex << reinterpret_cast<uintptr_t>(ctx.get()));
-                // }
-                mQueue.pop();
-            } else {
-                break;  // Found live context, stop cleaning
-            }
-        }
-
-        // Signal next waiting coroutine
-        if (!mQueue.empty()) {
-            fl::shared_ptr<CoroutineContext> ctx = mQueue.front().lock();
-            if (ctx) {  // Context still alive
-                // FL_DBG("CoroutineRunner::signal_next: Signaling context " << fl::hex << reinterpret_cast<uintptr_t>(ctx.get()));
-                mQueue.pop();
-
-                // Re-enqueue at back for next execution cycle
-                mQueue.push(fl::weak_ptr<CoroutineContext>(ctx));
-                // FL_DBG("CoroutineRunner::signal_next: Re-enqueued context " << fl::hex << reinterpret_cast<uintptr_t>(ctx.get()));
-
-                // Signal this coroutine to run
-                // FIXED: Do NOT unlock early - keep lock held until signal() completes
-                // ctx->signal() acquires its own mutex (mMutex), not our mQueueMutex,
-                // so there's no deadlock risk. The lock will auto-release at scope exit.
-                // FL_DBG("CoroutineRunner::signal_next: Calling ctx->signal()");
-                ctx->signal();
-                // FL_DBG("CoroutineRunner::signal_next: ctx->signal() returned");
-            } else {
-                // FL_DBG("CoroutineRunner::signal_next: Front context expired, removing");
-                mQueue.pop();
-            }
-        } else {
-            // FL_DBG("CoroutineRunner::signal_next: Queue is empty, no context to signal");
-        }
     }
 
     void stop(fl::shared_ptr<CoroutineContext> ctx) override {
         if (ctx) {
             ctx->set_should_stop(true);
-            ctx->signal();  // Wake it up so it can exit
+            // Wake it so it can check should_stop and exit
+            ctx->wakeup_semaphore().release();
+        }
+    }
+
+    // Run the next coroutine using two-phase semaphore handoff.
+    // Returns true if a job ran, false if queue is empty.
+    bool run_next_job() {
+        fl::shared_ptr<CoroutineContext> ctx;
+
+        {
+            fl::unique_lock<fl::mutex> lock(mQueueMutex);
+
+            // Remove expired/completed coroutines from front
+            while (!mQueue.empty()) {
+                fl::shared_ptr<CoroutineContext> candidate = mQueue.front().lock();
+                if (!candidate || candidate->is_completed()) {
+                    mQueue.pop();
+                } else {
+                    break;
+                }
+            }
+
+            if (mQueue.empty()) {
+                return false;
+            }
+
+            ctx = mQueue.front().lock();
+            if (!ctx) {
+                mQueue.pop();
+                return false;
+            }
+            mQueue.pop();
+            // Re-enqueue at back for next cycle
+            mQueue.push(fl::weak_ptr<CoroutineContext>(ctx));
+        }
+
+        // Two-phase handoff:
+        // 1. Wake the coroutine
+        ctx->wakeup_semaphore().release();
+
+        // 2. Wait for "started" signal (first release from coroutine)
+        mMainThreadSema.acquire();
+
+        // 3. Wait for "done" signal (second release from coroutine)
+        mMainThreadSema.acquire();
+
+        return true;
+    }
+
+    void run(fl::u32 us) override {
+        u32 begin = fl::millis();
+        auto expired = [begin, us]() {
+            u32 diff = fl::millis() - begin;
+            return diff < us;
+        };
+
+        while(true) {
+            bool more = run_next_job();
+            if (!more || expired()) {
+                break;
+            }
         }
     }
 
     void remove(fl::shared_ptr<CoroutineContext> ctx) override {
-        fl::unique_lock<fl::mutex> lock(mQueueMutex);
-        // FL_DBG("CoroutineRunner::remove: Removing context " << fl::hex << reinterpret_cast<uintptr_t>(ctx.get()));
-
-        // Create a temporary queue and copy all contexts except the one to remove
         fl::queue<fl::weak_ptr<CoroutineContext>> temp;
+        fl::unique_lock<fl::mutex> lock(mQueueMutex);
         while (!mQueue.empty()) {
             fl::weak_ptr<CoroutineContext> weak_front = mQueue.front();
             mQueue.pop();
             fl::shared_ptr<CoroutineContext> front = weak_front.lock();
-            // Keep if: (1) still alive AND (2) not the one to remove
             if (front && front.get() != ctx.get()) {
                 temp.push(weak_front);
             }
-            // Expired contexts are silently dropped
         }
-
-        // Swap back
-        mQueue = temp;
+        mQueue = fl::move(temp);
     }
 
     void stop_all() override {
         fl::unique_lock<fl::mutex> lock(mQueueMutex);
-        // FL_DBG("CoroutineRunner::stop_all: Called, queue size: " << mQueue.size());
-
-        // Signal all coroutines to stop
         fl::queue<fl::weak_ptr<CoroutineContext>> temp = mQueue;
         while (!temp.empty()) {
             fl::weak_ptr<CoroutineContext> weak_ctx = temp.front();
             temp.pop();
             fl::shared_ptr<CoroutineContext> ctx = weak_ctx.lock();
             if (ctx) {
-                // FL_DBG("CoroutineRunner::stop_all: Stopping context " << fl::hex << reinterpret_cast<uintptr_t>(ctx.get()));
                 ctx->set_should_stop(true);
-                ctx->signal();
+                ctx->wakeup_semaphore().release();
             }
         }
-
-        // Clear the queue
         while (!mQueue.empty()) {
             mQueue.pop();
         }
-        // FL_DBG("CoroutineRunner::stop_all: Queue cleared");
     }
 
 private:
     fl::mutex mQueueMutex;
     fl::queue<fl::weak_ptr<CoroutineContext>> mQueue;
+    fl::counting_semaphore<2> mMainThreadSema;
 };
 
-// CoroutineRunner singleton accessor using fl::Singleton pattern.
-// Uses function-local fl::Singleton to guarantee construction on first use,
-// avoiding the static initialization order fiasco. This is critical because
-// fl::delay() may be called from global constructors (e.g., button debounce
-// delays). fl::Singleton also ensures the destructor is never called, avoiding
-// shutdown order issues.
 CoroutineRunner& CoroutineRunner::instance() {
     return fl::Singleton<CoroutineRunnerImpl>::instance();
-}
-
-// ===== Global execution lock for cooperative multitasking =====
-//
-// This lock ensures only one thread executes "user code" at a time.
-// It provides a single-threaded execution model on top of real threads.
-
-// Wrapper struct to use with fl::Singleton (which requires a class type).
-struct GlobalExecutionMutex {
-    fl::mutex mutex;
-};
-
-// Returns the global execution mutex using fl::Singleton pattern.
-// This avoids static initialization order fiasco when fl::delay() is called
-// from global constructors, and ensures the destructor is never called.
-static fl::mutex& get_global_execution_mutex() {
-    return fl::Singleton<GlobalExecutionMutex>::instance().mutex;
-}
-
-// Thread-local flag to track if current thread holds the global execution lock.
-// Each thread has its own copy, so coroutines and main thread track independently.
-// This prevents undefined behavior from unlocking a mutex we don't own.
-//
-// CRITICAL: Function-local fl::ThreadLocal ensures deterministic initialization
-// only when first accessed, avoiding undefined behavior during global static
-// initialization (before main() starts). File-scope thread_local variables may
-// not be fully initialized when accessed from global static constructors.
-static bool& get_holding_execution_lock() {
-    static fl::ThreadLocal<bool> holding(false);  // okay static in header
-    return holding.access();
-}
-
-void global_execution_lock() {
-    get_global_execution_mutex().lock();
-    get_holding_execution_lock() = true;
-}
-
-void global_execution_unlock() {
-    get_holding_execution_lock() = false;
-    get_global_execution_mutex().unlock();
-}
-
-bool global_execution_try_lock() {
-    bool acquired = get_global_execution_mutex().try_lock();
-    if (acquired) {
-        get_holding_execution_lock() = true;
-    }
-    return acquired;
-}
-
-bool global_execution_is_held() {
-    return get_holding_execution_lock();
-}
-
-void global_execution_set_held(bool held) {
-    get_holding_execution_lock() = held;
 }
 
 } // namespace detail

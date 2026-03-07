@@ -88,15 +88,28 @@ public:
 // Global cleanup function for DLL mode
 //=============================================================================
 
-/// @brief Clean up all coroutine threads before DLL unload
+/// @brief Clean up all coroutine and background threads before DLL unload
 ///
-/// This function must be called before the DLL unloads to ensure all
-/// coroutine threads are properly joined. Otherwise, detached threads
-/// will continue executing code from the unloaded DLL, causing access violations.
-///
-/// This is only necessary in DLL mode - in normal builds, threads can
-/// safely continue running as daemon threads.
+/// Joins all registered background threads and coroutine threads.
+/// Must be called before DLL unload to prevent access violations.
 void cleanup_coroutine_threads();
+
+/// @brief Register a background thread for cleanup on exit
+///
+/// Threads registered here will be joined by cleanup_background_threads()
+/// or cleanup_coroutine_threads().
+void register_background_thread(fl::thread&& t);
+
+/// @brief Join all registered background threads (not coroutine threads)
+///
+/// Safe to call between tests — does NOT touch coroutine state.
+void cleanup_background_threads();
+
+/// @brief Check if shutdown has been requested (stub platform)
+///
+/// Background threads should poll this and exit early when true.
+/// Backed by atomic flag in BackgroundThreadRegistry.
+bool is_shutdown_requested();
 
 } // namespace platforms
 } // namespace fl

@@ -2,10 +2,12 @@
 
 // IWYU pragma: private
 
-// Only compile for real Arduino platforms (not stub, not WASM)
+// Only compile for non-ESP32 Arduino platforms (not stub, not WASM)
+// ESP32 has its own platform_time in platforms/esp/32/platform_time_esp32.cpp.hpp
 #include "platforms/wasm/is_wasm.h"
+#include "platforms/esp/is_esp.h"
 
-#if defined(ARDUINO) && !defined(FASTLED_STUB_IMPL) && !defined(FL_IS_WASM)
+#if defined(ARDUINO) && !defined(FASTLED_STUB_IMPL) && !defined(FL_IS_WASM) && !defined(FL_IS_ESP32)
 
 #include "platforms/time_platform.h"
 #include "fl/arduino.h"
@@ -32,4 +34,4 @@ fl::u32 micros() {
 }  // namespace platforms
 }  // namespace fl
 
-#endif  // ARDUINO && !FASTLED_STUB_IMPL && !FL_IS_WASM
+#endif  // ARDUINO && !FASTLED_STUB_IMPL && !FL_IS_WASM && !FL_IS_ESP32

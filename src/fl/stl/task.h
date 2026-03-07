@@ -28,7 +28,7 @@ void loop() {
     fl::Scheduler::instance().update();
 
     // Yield for other operations
-    fl::async_yield();
+    fl::async_run(1);
 }
 ```
 

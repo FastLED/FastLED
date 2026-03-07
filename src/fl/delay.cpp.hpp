@@ -17,6 +17,7 @@
 
 #include "platforms/delay.h"
 #include "platforms/time_platform.h"
+#include "platforms/coroutine_runtime.h"
 
 #if SKETCH_HAS_LOTS_OF_MEMORY
 #include "fl/stl/async.h"
@@ -183,12 +184,7 @@ void delay(u32 ms, bool run_async) {
 #endif
 
   if (run_async && ms > 0) {
-    // Pump async tasks during delay (1ms granularity)
-    u32 start = fl::millis();
-    while (fl::millis() - start < ms) {
-      async_yield();
-      fl::platforms::delay(1);  // Use platform layer for raw 1ms delay
-    }
+    async_run(ms);
   } else {
     fl::platforms::delay(ms);  // Use platform layer for raw delay
   }

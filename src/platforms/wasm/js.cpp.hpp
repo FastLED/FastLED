@@ -48,7 +48,7 @@ namespace fl {
 // WASM-SPECIFIC UTILITY FUNCTIONS
 //////////////////////////////////////////////////////////////////////////
 
-// NOTE: All timing functions (millis, micros, delayMicroseconds) moved to platform_time.cpp.hpp
+// NOTE: All timing functions moved to CoroutineRuntimeWasm and timer.cpp.hpp
 // Timer implementation (millis, micros) is in timer.cpp.hpp with EMSCRIPTEN_KEEPALIVE
 
 namespace fl {

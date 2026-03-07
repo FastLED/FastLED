@@ -11,18 +11,7 @@
 
 #include "fl/stl/new.h"
 #include "fl/yield.h"
-
-// Platform-specific includes
-#ifdef FL_IS_WASM
-extern "C" void emscripten_sleep(unsigned int ms);
-#endif
-
-#ifdef FASTLED_STUB_IMPL
-// IWYU pragma: begin_keep
-#include "platforms/stub/coroutine_runner.h" // ok platform headers
-#include <thread>  // okay banned header (for std::this_thread::yield in stub impl)
-// IWYU pragma: end_keep
-#endif
+#include "platforms/coroutine_runtime.h"
 
 namespace fl {
 
@@ -84,52 +73,48 @@ size_t AsyncManager::total_active_tasks() const {
 
 // Public API functions
 
-void async_run() {
-    fl::Scheduler::instance().update();
-    AsyncManager::instance().update_all();
-    fl::yield(); // Let RTOS tasks (WiFi, BT, etc.) run on ESP32
-}
+void async_run(fl::u32 ms) {
+    // Calculate start time with rollover protection
+    fl::u32 begin_time = fl::millis();
 
-void async_yield() {
-    // FL_DBG("async_yield: Called from main thread");
-    // Always pump all async tasks first
-    async_run();
+    // Lambda to get elapsed time (rollover-safe)
+    auto elapsed = [begin_time]() {
+        return fl::millis() - begin_time;
+    };
 
-    // Platform-specific yielding behavior
-#ifdef FL_IS_WASM
-    // WASM worker thread mode (PROXY_TO_PTHREAD): No explicit sleep needed.
-    // The OS scheduler naturally handles thread yielding. Busy-waiting here
-    // doesn't block the browser UI since we're on a background thread.
-#endif
+    // Lambda to get remaining time until deadline expires
+    auto remaining = [elapsed, ms]() -> fl::u32 {
+        fl::u32 e = elapsed();
+        if (e >= ms) {
+            return 0;
+        }
+        return ms - e;
+    };
 
-#ifdef FASTLED_STUB_IMPL
-    // Only release lock if we actually hold it (prevents undefined behavior)
-    // This handles the case where main thread calls async_yield() for the first
-    // time before it has acquired the lock.
-    if (fl::detail::global_execution_is_held()) {
-        fl::detail::global_execution_unlock();
-    }
+    // Lambda to check if deadline has expired
+    auto expired = [remaining]() {
+        return remaining() == 0;
+    };
 
-    // Signal next coroutine in executor queue to run
-    auto& runner = fl::detail::CoroutineRunner::instance();
-    // FL_DBG("async_yield: Calling signal_next()");
-    runner.signal_next();
-    // FL_DBG("async_yield: signal_next() returned");
+    do  {
+        // Always pump all task systems
+        fl::Scheduler::instance().update();
+        AsyncManager::instance().update_all();
+        fl::yield();
 
-    // Yield CPU to allow coroutine threads to actually execute
-    std::this_thread::yield();  // okay std namespace
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));  // okay std namespace
+        auto time_left = remaining();
 
-    // Always re-acquire the global execution lock
-    // This ensures the caller holds the lock when we return
-    fl::detail::global_execution_lock();
-#endif
-
-    // Standard async pumping (no global lock management here)
-    for (int i = 0; i < 5; ++i) {
-        async_run(); // Give other async tasks a chance
-    }
-    // FL_DBG("async_yield: Returning");
+        // Yield to background threads/coroutines/scheduler as needed by platform
+        auto& bg = fl::platforms::ICoroutineRuntime::instance();
+        if (time_left && bg.hasPlatformBackgroundEvents()) {
+            // Cap sleep to 1ms per iteration for responsive pumping
+            fl::u32 sleep_ms = fl::min(1u, time_left);
+            // Sleep to yield to platform scheduler (FreeRTOS, coroutines, etc.)
+            // Convert ms back to microseconds for platform function
+            bg.pumpEventQueueWithSleep(sleep_ms * 1000);
+            // After sleep, loop back for more pumping
+        }
+    } while (!expired());
 }
 
 size_t async_active_tasks() {

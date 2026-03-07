@@ -52,6 +52,7 @@
 #include "platforms/esp/32/drivers/parlio/parlio_peripheral_mock.h"
 #include "fl/stl/cstdlib.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/engine_events.h"
 #include <iostream>
 
 // This file contains the main function for the custom test framework (fl_unittest)
@@ -65,6 +66,7 @@ namespace testing_detail {
 void fl_cleanup() {
     // Clean up all background threads before DLL unload to prevent access violations
     // This includes both coroutine threads and promise resolver threads
+    fl::EngineEvents::onExit();
     fl::platforms::cleanup_coroutine_threads();
 
     // Clean up PARLIO mock to prevent LSAN leak false positive reports.

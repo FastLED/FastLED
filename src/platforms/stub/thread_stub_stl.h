@@ -27,7 +27,7 @@
 // FASTLED_MULTITHREADED is defined by fl/stl/thread_config.h
 // This file provides the STL-based thread implementation for multithreaded platforms
 
-// Forward declare fl::yield() so sleep_for can pump events on the main thread.
+// Forward declare fl::yield() for this_thread::yield() (which calls it on main thread)
 namespace fl { void yield(); }
 
 namespace fl {
@@ -115,23 +115,11 @@ namespace this_thread {
     }
 
     // Sleep functions - fl::chrono::duration overloads
-    // On main thread: pumps events via fl::yield() between 1ms sleep chunks
-    // On worker threads: raw native sleep
+    // Pure low-level sleep with no task/scheduler pumping
+    // Consistent across all threads (main and worker)
     template<typename Rep, typename Period>
     inline void sleep_for(const fl::chrono::duration<Rep, Period>& sleep_duration) {
-        if (fl::platforms::detail::is_main_thread()) {
-            // Pump events while sleeping on the main thread
-            auto ms = fl::chrono::duration_cast<fl::chrono::milliseconds>(sleep_duration).count();
-            for (decltype(ms) i = 0; i < ms; ++i) {
-                fl::yield();
-                fl::platforms::detail::native_sleep_1ms();
-            }
-            if (ms <= 0) {
-                fl::yield();
-            }
-        } else {
-            fl::platforms::detail::native_sleep(sleep_duration);
-        }
+        fl::platforms::detail::native_sleep(sleep_duration);
     }
 
     // Sleep functions - fl::chrono::time_point overloads
