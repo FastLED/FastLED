@@ -1,4 +1,4 @@
-#include "fl/five_bit_hd_gamma.h"
+#include "fl/gfx/five_bit_hd_gamma.h"
 #include "fl/assume_aligned.h"
 #include "fl/gfx/ease.h"
 #include "fl/fastled.h"

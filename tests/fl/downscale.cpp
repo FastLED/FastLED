@@ -2,7 +2,7 @@
 // g++ --std=c++11 test.cpp
 
 
-#include "fl/downscale.h"
+#include "fl/gfx/downscale.h"
 #include "test.h"
 #include "fl/gfx/crgb.h"
 #include "fl/xymap.h"

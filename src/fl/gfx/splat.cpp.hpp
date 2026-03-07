@@ -1,6 +1,6 @@
 
 #include "fl/gfx/tile2x2.h"
-#include "fl/splat.h"
+#include "fl/gfx/splat.h"
 #include "fl/stl/math.h"
 
 namespace fl {

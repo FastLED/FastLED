@@ -841,8 +841,8 @@ FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, u8 d);
 ///
 /// **Example: Efficient LED initialization and effects**
 /// @code
-/// #include "fl/fill.h"
-/// #include "fl/colorutils.h"
+/// #include "fl/gfx/fill.h"
+/// #include "fl/gfx/colorutils.h"
 ///
 /// CRGB leds[NUM_LEDS];
 ///

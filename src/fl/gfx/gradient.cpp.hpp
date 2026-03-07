@@ -1,7 +1,7 @@
 
-#include "fl/gradient.h"
+#include "fl/gfx/gradient.h"
 #include "fl/stl/assert.h"
-#include "fl/colorutils.h"
+#include "fl/gfx/colorutils.h"
 
 namespace fl {
 

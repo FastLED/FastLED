@@ -14,7 +14,7 @@
 #include "platforms/is_platform.h"
 
 #include "rgbw.h"
-#include "fl/five_bit_hd_gamma.h"
+#include "fl/gfx/five_bit_hd_gamma.h"
 #include "fl/force_inline.h"
 #include "lib8tion/scale8.h"
 #include "eorder.h"

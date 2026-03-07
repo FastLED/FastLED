@@ -3,11 +3,11 @@
 
 #include "fl/force_inline.h"
 #include "fl/unused.h"
-#include "fl/colorutils.h"
+#include "fl/gfx/colorutils.h"
 #include "fl/math_macros.h"
 
-#include "fl/fill.h"
-#include "fl/blur.h"
+#include "fl/gfx/fill.h"
+#include "fl/gfx/blur.h"
 
 #include "fl/fastled.h"
 

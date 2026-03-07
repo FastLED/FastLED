@@ -4,7 +4,7 @@
 #include "fl/fastled.h"
 #include "fl/gfx/hsv16.h"
 #include "fl/stl/math.h"
-#include "fl/noise.h"
+#include "fl/gfx/noise.h"
 
 // Forward declarations from src/noise.cpp
 fl::u16 inoise16(fl::u32 x, fl::u32 y, fl::u32 z, fl::u32 t);

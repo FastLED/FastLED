@@ -2,7 +2,7 @@
 #include "fl/stl/algorithm.h"
 #include "fl/stl/assert.h"
 #include "fl/stl/math.h"
-#include "fl/splat.h"
+#include "fl/gfx/splat.h"
 #include "fl/warn.h"
 #include "fl/gfx/tile2x2.h"
 #include "fl/math_macros.h"

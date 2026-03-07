@@ -5,7 +5,7 @@
 #include "fl/stl/stdint.h"
 
 #include "crgb.h"
-#include "fl/upscale.h"
+#include "fl/gfx/upscale.h"
 #include "fl/xymap.h"
 
 namespace fl {

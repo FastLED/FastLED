@@ -2,7 +2,7 @@
 
 #include "fl/int.h"
 
-#include "fl/gradient.h"
+#include "fl/gfx/gradient.h"
 #include "fl/unused.h"
 #include "fl/xymap.h"
 #include "fl/stl/move.h"

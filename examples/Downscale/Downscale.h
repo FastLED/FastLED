@@ -16,7 +16,7 @@ all the UI elements you see below.
 #include <Arduino.h>
 #include <FastLED.h>
 
-#include "fl/downscale.h"
+#include "fl/gfx/downscale.h"
 #include "fl/gfx/draw_visitor.h"
 #include "fl/math_macros.h"
 #include "fl/gfx/raster.h"

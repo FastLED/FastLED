@@ -6,7 +6,7 @@
 
 // Includes needed for implementation
 #include "fl/fastled.h"
-#include "fl/blur.h"
+#include "fl/gfx/blur.h"
 #include "fl/stl/math.h"
 #include "fl/stl/math.h"
 #include "fl/xymap.h"

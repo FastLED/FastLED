@@ -131,7 +131,7 @@ fl::u16 snoise16(fl::u32 x, fl::u32 y, fl::u32 z, fl::u32 w);
 
 /// @} NoiseGeneration
 
-#include "fl/noise.h"
+#include "fl/gfx/noise.h"
 
 
 

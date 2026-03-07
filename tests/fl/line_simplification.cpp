@@ -2,7 +2,7 @@
 
 
 
-#include "fl/line_simplification.h"
+#include "fl/gfx/line_simplification.h"
 #include "fl/stl/new.h"
 #include "test.h"
 #include "fl/geometry.h"

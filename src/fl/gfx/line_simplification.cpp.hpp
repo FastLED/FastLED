@@ -3,7 +3,7 @@
 Douglas-Peucker line simplification algorithm.
 */
 
-#include "fl/line_simplification.h"
+#include "fl/gfx/line_simplification.h"
 
 namespace fl {
 

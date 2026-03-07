@@ -25,7 +25,7 @@ all the UI elements you see below.
 #include <FastLED.h>
 
 #include "fl/audio.h"
-#include "fl/downscale.h"
+#include "fl/gfx/downscale.h"
 #include "fl/gfx/draw_visitor.h"
 #include "fl/fft.h"
 #include "fl/stl/math.h"

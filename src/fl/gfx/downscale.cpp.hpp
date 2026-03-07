@@ -2,7 +2,7 @@
 // BETA - NOT TESTED!!!
 // VIBE CODED WITH AI
 
-#include "fl/downscale.h"
+#include "fl/gfx/downscale.h"
 #include "fl/int.h"
 
 #include "crgb.h"

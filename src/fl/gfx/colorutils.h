@@ -8,9 +8,9 @@
 #include "fl/int.h"
 #include "crgb.h"  // IWYU pragma: keep
 #include "fastled_progmem.h"
-#include "fl/blur.h"  // IWYU pragma: keep
-#include "fl/colorutils_misc.h"
-#include "fl/fill.h"
+#include "fl/gfx/blur.h"  // IWYU pragma: keep
+#include "fl/gfx/colorutils_misc.h"
+#include "fl/gfx/fill.h"
 #include "fl/xymap.h"  // IWYU pragma: keep
 #include "lib8tion/memmove.h"
 #include "fl/compiler_control.h"

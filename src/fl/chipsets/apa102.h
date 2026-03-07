@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/five_bit_hd_gamma.h"
+#include "fl/gfx/five_bit_hd_gamma.h"
 #include "fl/force_inline.h"
 #include "crgb.h"
 #include "eorder.h"

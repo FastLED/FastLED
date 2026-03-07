@@ -4,7 +4,7 @@
 // ok standalone
 
 #include "FastLED.h"
-#include "fl/five_bit_hd_gamma.h"
+#include "fl/gfx/five_bit_hd_gamma.h"
 #include "fl/int.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/stdio.h"

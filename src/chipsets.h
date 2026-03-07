@@ -6,7 +6,7 @@
 // allow-include-after-namespace
 
 #include "pixeltypes.h"
-#include "fl/five_bit_hd_gamma.h"
+#include "fl/gfx/five_bit_hd_gamma.h"
 #include "fl/force_inline.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/unique_ptr.h"

@@ -1,4 +1,4 @@
-#include "fl/noise_woryley.h"
+#include "fl/gfx/noise_woryley.h"
 #include "fl/numeric_limits.h"
 
 namespace fl {

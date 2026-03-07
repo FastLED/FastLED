@@ -6,8 +6,8 @@
 #include "fl/fastled.h"
 
 #include "crgb.h"
-#include "fl/blur.h"
-#include "fl/colorutils_misc.h"
+#include "fl/gfx/blur.h"
+#include "fl/gfx/colorutils_misc.h"
 #include "fl/compiler_control.h"
 #include "fl/error.h"
 #include "fl/unused.h"

@@ -9,7 +9,7 @@
 #include "fl/stl/stdint.h"
 
 #include "fl/stl/allocator.h"
-#include "fl/draw_mode.h"
+#include "fl/gfx/draw_mode.h"
 #include "fl/codec/pixel.h"
 
 namespace fl {

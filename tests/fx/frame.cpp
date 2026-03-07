@@ -7,7 +7,7 @@
 #include "fl/stl/allocator.h"
 #include "crgb.h"
 #include "test.h"
-#include "fl/draw_mode.h"
+#include "fl/gfx/draw_mode.h"
 #include "fl/gfx/crgb.h"
 #include "fl/stl/shared_ptr.h"
 

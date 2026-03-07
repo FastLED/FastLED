@@ -6,8 +6,8 @@
 #include "fl/fastled.h"
 #include "fl/xymap.h"
 
-#include "fl/upscale.h"
-#include "fl/downscale.h"
+#include "fl/gfx/upscale.h"
+#include "fl/gfx/downscale.h"
 #include "lib8tion/math8.h"
 
 #include "fl/int.h"

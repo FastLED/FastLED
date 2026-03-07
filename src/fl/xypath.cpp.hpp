@@ -11,7 +11,7 @@
 
 #include "fl/stl/assert.h"
 #include "fl/stl/function.h"
-#include "fl/gradient.h"
+#include "fl/gfx/gradient.h"
 #include "fl/lut.h"
 #include "fl/stl/math.h"
 #include "fl/math_macros.h"

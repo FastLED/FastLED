@@ -3,7 +3,7 @@
 
 #include "fl/lut.h"
 #include "fl/math_macros.h"
-#include "fl/transform.h"
+#include "fl/gfx/transform.h"
 #include "lib8tion/intmap.h"
 #include "lib8tion/trig8.h"
 #include "fl/compiler_control.h"

@@ -8,7 +8,7 @@
 
 #include "fl/stl/stdint.h"
 
-#include "fl/gradient.h"
+#include "fl/gfx/gradient.h"
 #include "fl/stl/shared_ptr.h"  // For FASTLED_SHARED_PTR macros and shared_ptr
 #include "fl/gfx/wave_simulation.h"
 #include "fl/xymap.h"

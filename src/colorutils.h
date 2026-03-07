@@ -3,7 +3,7 @@
 /*
 Legacy header. Prefer to use fl/colorutils.h instead since
 */
-#include "fl/colorutils.h"
+#include "fl/gfx/colorutils.h"
 
 using fl::fadeLightBy;
 using fl::fade_video;

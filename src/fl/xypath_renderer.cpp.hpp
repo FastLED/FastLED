@@ -6,7 +6,7 @@
 #include "fl/warn.h"
 #include "fl/xypath.h"
 #include "fl/xypath_renderer.h"
-#include "fl/splat.h"
+#include "fl/gfx/splat.h"
 
 namespace fl {
 

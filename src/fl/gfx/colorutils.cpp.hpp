@@ -12,7 +12,7 @@
 
 #include "fl/fastled.h"
 #include "fl/stl/assert.h"
-#include "fl/colorutils.h"
+#include "fl/gfx/colorutils.h"
 #include "fl/unused.h"
 #include "fl/xymap.h"
 

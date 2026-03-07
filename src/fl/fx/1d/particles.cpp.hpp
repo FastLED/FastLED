@@ -1,6 +1,6 @@
 #include "fl/fx/1d/particles.h"
 #include "fl/fastled.h"
-#include "fl/blur.h"
+#include "fl/gfx/blur.h"
 
 namespace fl {
 
