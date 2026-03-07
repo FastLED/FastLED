@@ -224,4 +224,4 @@ using ClocklessController_ObjectFLED_WS2812 = ClocklessController_ObjectFLED_Pro
     DATA_PIN,
     RGB_ORDER>;
 
-} // namespace fl
+}  // namespace fl

@@ -56,8 +56,9 @@ class SingletonInHeadersChecker(FileContentChecker):
     def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check singleton usage rules."""
         is_cpp_hpp = file_content.path.endswith(".cpp.hpp")
+        # Check first 50 lines for IWYU pragma (to catch pragmas after #pragma once)
         is_private_header = any(
-            "IWYU pragma: private" in line for line in file_content.lines[:20]
+            "IWYU pragma: private" in line for line in file_content.lines[:50]
         )
         violations: list[tuple[int, str]] = []
         in_multiline_comment = False

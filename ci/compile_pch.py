@@ -103,12 +103,21 @@ def fix_depfile(depfile_path: Path, pch_output_path: Path) -> None:
     # Parse individual dependency paths
     dep_paths = _tokenize_depfile_deps(deps_str)
 
-    # Normalize ALL paths to forward slashes for Ninja compatibility on Windows.
-    # Compilers (especially emscripten) emit absolute Windows backslash paths
-    # (e.g. C:\Users\...\rx_device.h) which Ninja may fail to match against
-    # its internal deps database, causing stale PCH errors.
+    # Normalize paths to absolute, then to forward slashes for Ninja compatibility.
+    # The depfile may contain relative paths from where the compiler was invoked
+    # (typically the project root), which need to be resolved to absolute paths before
+    # normalization. This ensures the hash checking code can find the files.
     pch_output_str = Path(pch_output_path).as_posix()
-    normalized_deps = [Path(p).as_posix() for p in dep_paths]
+    normalized_deps = []
+
+    for p in dep_paths:
+        path_obj = Path(p)
+        # If the path is relative, resolve it relative to the current working directory
+        # (which is the project root when Meson runs the compile_pch command)
+        if not path_obj.is_absolute():
+            path_obj = path_obj.resolve()
+        # Convert to forward slashes and use the string representation
+        normalized_deps.append(path_obj.as_posix())
 
     # Rebuild depfile in Make format
     # Escape spaces in paths for Make syntax
