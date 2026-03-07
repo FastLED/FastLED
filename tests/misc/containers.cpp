@@ -170,6 +170,7 @@
 #include "fl/stl/queue.h"
 #include "fl/stl/priority_queue.h"
 #include "fl/stl/set.h"
+#include "fl/stl/flat_set.h"
 #include "fl/stl/unordered_set.h"
 #include "fl/stl/map.h"
 #include "fl/stl/unordered_map.h"
@@ -981,6 +982,17 @@ struct SetIntFactory {
     }
 };
 
+// Flat Set factory
+struct FlatSetIntFactory {
+    static flat_set<int> create(int a, int b, int c) {
+        flat_set<int> s;
+        s.insert(a);
+        s.insert(b);
+        s.insert(c);
+        return s;
+    }
+};
+
 // Unordered Set factory
 struct UnorderedSetIntFactory {
     static unordered_set<int> create(int a, int b, int c) {
@@ -1226,18 +1238,21 @@ FL_TEST_CASE("insert and erase - all sequential containers") {
 FL_TEST_CASE("operator== and operator!= - all containers with comparison") {
     FL_SUBCASE("fl::queue") { test_operator_equals<QueueIntFactory>(); }
     FL_SUBCASE("fl::set") { test_operator_equals<SetIntFactory>(); }
+    FL_SUBCASE("fl::flat_set") { test_operator_equals<FlatSetIntFactory>(); }
     FL_SUBCASE("fl::circular_buffer") { test_operator_equals<CircularBufferIntFactory>(); }
 }
 
 FL_TEST_CASE("operator< and operator<= - all containers with comparison") {
     FL_SUBCASE("fl::queue") { test_operator_less<QueueIntFactory>(); }
     FL_SUBCASE("fl::set") { test_operator_less<SetIntFactory>(); }
+    FL_SUBCASE("fl::flat_set") { test_operator_less<FlatSetIntFactory>(); }
     FL_SUBCASE("fl::circular_buffer") { test_operator_less<CircularBufferIntFactory>(); }
 }
 
 FL_TEST_CASE("operator> and operator>= - all containers with comparison") {
     FL_SUBCASE("fl::queue") { test_operator_greater<QueueIntFactory>(); }
     FL_SUBCASE("fl::set") { test_operator_greater<SetIntFactory>(); }
+    FL_SUBCASE("fl::flat_set") { test_operator_greater<FlatSetIntFactory>(); }
     FL_SUBCASE("fl::circular_buffer") { test_operator_greater<CircularBufferIntFactory>(); }
 }
 
