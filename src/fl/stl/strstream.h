@@ -17,7 +17,7 @@ template <typename T, typename Alloc> class vector;  // Forward declaration from
 template <typename T> class Optional;  // Forward declaration from fl/stl/optional.h
 template <typename Key, typename Hash, typename KeyEqual> class unordered_set;  // Forward declaration from fl/stl/unordered_set.h
 template <typename Key, typename T, typename Hash, typename KeyEqual, int INLINED_COUNT> class unordered_map;  // Forward declaration from fl/stl/unordered_map.h
-template <typename Key, typename Value, fl::size N> class FixedMap;  // Forward declaration from fl/stl/map.h
+template <typename Key, typename Value, fl::size N> class unsorted_map_fixed;  // Forward declaration from fl/stl/map.h
 template <typename Key, typename Value, typename Less, typename Allocator> class flat_map;  // Forward declaration from fl/stl/flat_map.h
 template <typename T, fl::size Extent> class span;  // Forward declaration from fl/stl/span.h (no default arg to avoid redefinition)  // IWYU pragma: keep
 template <typename T1, typename T2> struct pair;  // Forward declaration from fl/stl/pair.h
@@ -140,9 +140,9 @@ class sstream {
         return *this;
     }
 
-    // FixedMap<Key, Value, N> support - format as {key1: value1, key2: value2, ...}
+    // unsorted_map_fixed<Key, Value, N> support - format as {key1: value1, key2: value2, ...}
     template<typename Key, typename Value, fl::size N>
-    sstream &operator<<(const fl::FixedMap<Key, Value, N> &map) {
+    sstream &operator<<(const fl::unsorted_map_fixed<Key, Value, N> &map) {
         mStr.append("{");
         bool first = true;
         for (auto it = map.begin(); it != map.end(); ++it) {
@@ -450,9 +450,9 @@ class sstream_noop {
     template<typename Key, typename T, typename Hash, typename KeyEqual, int INLINED_COUNT>
     sstream_noop &operator<<(const fl::unordered_map<Key, T, Hash, KeyEqual, INLINED_COUNT> &) { return *this; }
 
-    // FixedMap support
+    // unsorted_map_fixed support
     template<typename Key, typename Value, fl::size N>
-    sstream_noop &operator<<(const fl::FixedMap<Key, Value, N> &) { return *this; }
+    sstream_noop &operator<<(const fl::unsorted_map_fixed<Key, Value, N> &) { return *this; }
 
     // flat_map support
     template<typename Key, typename Value, typename Less, typename Allocator>

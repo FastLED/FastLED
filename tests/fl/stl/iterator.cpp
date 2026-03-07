@@ -469,8 +469,8 @@ FL_TEST_CASE("Iterator support - map containers") {
         FL_CHECK(destination.begin() != destination.end());
     }
 
-    FL_SUBCASE("fl::FixedMap - iterators") {
-        fl::FixedMap<int, int, 10> source;
+    FL_SUBCASE("fl::unsorted_map_fixed - iterators") {
+        fl::unsorted_map_fixed<int, int, 10> source;
         source.insert(10, 100);
         source.insert(20, 200);
         source.insert(30, 300);
@@ -492,7 +492,7 @@ FL_TEST_CASE("Iterator support - map containers") {
         FL_CHECK(found_20);
 
         // Move and check empty
-        fl::FixedMap<int, int, 10> destination = fl::move(source);
+        fl::unsorted_map_fixed<int, int, 10> destination = fl::move(source);
         FL_CHECK(source.begin() == source.end());
         FL_CHECK(destination.begin() != destination.end());
     }

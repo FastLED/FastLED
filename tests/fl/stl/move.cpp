@@ -660,8 +660,8 @@ FL_TEST_CASE("Container move semantics with shared_ptr") {
         test_map_move_semantics<fl::flat_map<int, fl::shared_ptr<int>>>();
     }
 
-    FL_SUBCASE("fl::FixedMap") {
-        test_map_move_semantics<fl::FixedMap<int, fl::shared_ptr<int>, 10>>();
+    FL_SUBCASE("fl::unsorted_map_fixed") {
+        test_map_move_semantics<fl::unsorted_map_fixed<int, fl::shared_ptr<int>, 10>>();
     }
 
     // Set types
@@ -1422,9 +1422,9 @@ FL_TEST_CASE("Tier 2-4: Sequential container comprehensive tests") {
 // ASSOCIATIVE CONTAINER ITERATOR & COMPLIANCE TESTS
 // ============================================================================
 
-// Type alias for FixedMap to work with template template syntax
+// Template wrapper for unsorted_map_fixed to work with template template syntax
 template<typename Key, typename Value>
-using TestFixedMap = fl::FixedMap<Key, Value, 100>;
+using UnsortedMapFixed100 = fl::unsorted_map_fixed<Key, Value, 100>;
 
 FL_TEST_CASE("Associative container iterator basics") {
     FL_SUBCASE("fl::map") {
@@ -1436,8 +1436,8 @@ FL_TEST_CASE("Associative container iterator basics") {
     FL_SUBCASE("fl::unordered_map") {
         test_helpers::test_map_iterators<fl::unordered_map>();
     }
-    FL_SUBCASE("fl::FixedMap") {
-        test_helpers::test_map_iterators<TestFixedMap>();
+    FL_SUBCASE("fl::unsorted_map_fixed") {
+        test_helpers::test_map_iterators<UnsortedMapFixed100>();
     }
 }
 
@@ -1466,8 +1466,8 @@ FL_TEST_CASE("Associative container key-value iteration") {
     FL_SUBCASE("fl::unordered_map") {
         test_helpers::test_map_iteration_key_value<fl::unordered_map>();
     }
-    FL_SUBCASE("fl::FixedMap") {
-        test_helpers::test_map_iteration_key_value<TestFixedMap>();
+    FL_SUBCASE("fl::unsorted_map_fixed") {
+        test_helpers::test_map_iteration_key_value<UnsortedMapFixed100>();
     }
 }
 
@@ -1481,8 +1481,8 @@ FL_TEST_CASE("Associative container find and iterate") {
     FL_SUBCASE("fl::unordered_map") {
         test_helpers::test_map_find_and_iterate<fl::unordered_map>();
     }
-    FL_SUBCASE("fl::FixedMap") {
-        test_helpers::test_map_find_and_iterate<TestFixedMap>();
+    FL_SUBCASE("fl::unsorted_map_fixed") {
+        test_helpers::test_map_find_and_iterate<UnsortedMapFixed100>();
     }
 }
 
@@ -1535,8 +1535,8 @@ FL_TEST_CASE("Associative container operator[] access") {
     FL_SUBCASE("fl::unordered_map") {
         test_helpers::test_map_operator_bracket_access<fl::unordered_map>();
     }
-    FL_SUBCASE("fl::FixedMap") {
-        test_helpers::test_map_operator_bracket_access<TestFixedMap>();
+    FL_SUBCASE("fl::unsorted_map_fixed") {
+        test_helpers::test_map_operator_bracket_access<UnsortedMapFixed100>();
     }
 }
 

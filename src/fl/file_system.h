@@ -36,7 +36,7 @@ namespace fl {
 class ScreenMap;
 FASTLED_SHARED_PTR(FileSystem);
 class Video;
-template <typename Key, typename Value, fl::size N> class FixedMap;
+template <typename Key, typename Value, fl::size N> class unsorted_map_fixed;
 
 namespace json2 {
 class json;

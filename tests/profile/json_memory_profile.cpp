@@ -8,7 +8,7 @@
 #include "fl/stl/json.h"         // for json
 #include "fl/stl/atomic.h"   // for atomic
 #include "fl/stl/cstdint.h"  // for size_t
-#include "fl/stl/map.h"      // for FixedMap
+#include "fl/stl/map.h"      // for unsorted_map_fixed
 #include "fl/stl/stdio.h"    // for printf
 #include "fl/stl/string.h"   // for string
 #include "fl/string_view.h"  // for string_view
@@ -45,8 +45,8 @@ struct AllocationStats {
     fl::atomic<int> free_count{0};
 
     // Active allocations: pointer -> size
-    // Using FixedMap with large capacity for stress testing
-    fl::FixedMap<const void*, u32, 64000> allocations;
+    // Using unsorted_map_fixed with large capacity for stress testing
+    fl::unsorted_map_fixed<const void*, u32, 64000> allocations;
 
     void reset() {
         current_bytes.store(0);
@@ -84,8 +84,8 @@ struct AllocationStats {
             size_t size = it->second;
             current_bytes.fetch_sub(size);
             free_count.fetch_add(1);
-            // FixedMap doesn't have erase(), so we'll just mark it as removed by setting size to 0
-            // This is acceptable for profiling as we track current_bytes separately
+            // unsorted_map_fixed has erase(), so we could remove the entry, but for simplicity
+            // we just mark it as removed by setting size to 0. current_bytes tracking is separate.
             allocations[ptr] = 0;
         }
     }

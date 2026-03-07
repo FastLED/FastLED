@@ -19,7 +19,7 @@ namespace fl {
 // do not exceed the capacity of the set, otherwise they will
 // fail. Because of this limitation, this set is not a drop in
 // replacement for std::map.
-template <typename Key, typename Value, fl::size N> class FixedMap {
+template <typename Key, typename Value, fl::size N> class unsorted_map_fixed {
   public:
     using PairKV = fl::pair<Key, Value>;
 
@@ -28,7 +28,7 @@ template <typename Key, typename Value, fl::size N> class FixedMap {
     typedef typename VectorType::const_iterator const_iterator;
 
     // Constructor
-    constexpr FixedMap() = default;
+    constexpr unsorted_map_fixed() = default;
 
     iterator begin() { return data.begin(); }
     iterator end() { return data.end(); }

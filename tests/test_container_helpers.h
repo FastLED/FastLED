@@ -208,7 +208,7 @@ populate(Container& c, fl::shared_ptr<int> ptr) {
     c.push(ptr);
 }
 
-// For containers with insert(key, value) (SortedHeapMap, FixedMap)
+// For containers with insert(key, value) (SortedHeapMap, unsorted_map_fixed)
 template<typename Container>
 typename fl::enable_if<has_insert_key_value<Container>::value, void>::type
 populate_map(Container& c, int key, fl::shared_ptr<int> ptr) {
@@ -312,7 +312,7 @@ void test_container_move_semantics() {
 }
 
 // Test map container move semantics with key-value pairs
-// Works for: map, unordered_map, SortedHeapMap, FixedMap, HashMapLru
+// Works for: map, unordered_map, SortedHeapMap, unsorted_map_fixed, HashMapLru
 template<typename MapContainer>
 void test_map_move_semantics() {
     auto ptr = make_shared_int(100);

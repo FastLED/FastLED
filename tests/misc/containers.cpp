@@ -159,7 +159,7 @@
 ///    Good: "push_back - all container types"
 ///    Bad:  "push_back on vector"
 /// 6. When containers have different interfaces, create wrapper classes
-///    to normalize them (see FixedMapNormalized example below)
+///    to normalize them (see unsorted_map_fixedNormalized example below)
 /// 7. Use TestItem's move tracking to verify semantics, not just behavior
 
 #include "test.h"
@@ -189,10 +189,10 @@ using namespace fl;
 // tests can be generic. This layer allows one test to work across multiple
 // container types by abstracting away their differences.
 //
-// EXAMPLE: FixedMapNormalized wraps FixedMap to match map's interface.
-// Before: FixedMap::insert(key, value)
-// After:  FixedMapNormalized::insert(pair<key, value>)
-// Result: One test works for both map and FixedMapNormalized
+// EXAMPLE: unsorted_map_fixedNormalized wraps unsorted_map_fixed to match map's interface.
+// Before: unsorted_map_fixed::insert(key, value)
+// After:  unsorted_map_fixedNormalized::insert(pair<key, value>)
+// Result: One test works for both map and unsorted_map_fixedNormalized
 //
 // ============================================================================
 
@@ -201,11 +201,11 @@ template <typename T> using vector_fixed_test = FixedVector<T, 512>;
 template <typename T> using vector_inlined_test = InlinedVector<T, 64>;
 template <typename T> using circular_buffer_test = circular_buffer<T, 512>;
 
-// Template wrapper for FixedMap to normalize interface (provides pair-based insert)
+// Template wrapper for unsorted_map_fixed to normalize interface (provides pair-based insert)
 template <typename Key, typename Value, fl::size N = 512>
-class FixedMapNormalized : public FixedMap<Key, Value, N> {
+class unsorted_map_fixedNormalized : public unsorted_map_fixed<Key, Value, N> {
   public:
-    using Base = FixedMap<Key, Value, N>;
+    using Base = unsorted_map_fixed<Key, Value, N>;
     using iterator = typename Base::iterator;
     using const_iterator = typename Base::const_iterator;
 
@@ -220,14 +220,14 @@ class FixedMapNormalized : public FixedMap<Key, Value, N> {
         return Base::has(key) ? 1 : 0;
     }
 
-    // Erase is now properly implemented in FixedMap base class
+    // Erase is now properly implemented in unsorted_map_fixed base class
     // This just calls the base implementation which actually removes the element
     using Base::erase;
 };
 
-// Template alias for normalized FixedMap
+// Template alias for normalized unsorted_map_fixed
 template <typename Key, typename Value>
-using fixed_map_test = FixedMapNormalized<Key, Value, 512>;
+using fixed_map_test = unsorted_map_fixedNormalized<Key, Value, 512>;
 
 // ============================================================================
 // COMPONENT 2: TEST ITEM TYPE
@@ -1284,13 +1284,13 @@ FL_TEST_CASE("map insert and find operations") {
     FL_SUBCASE("fl::map") { test_map_insert_find<fl::map<int, int>>(); }
     FL_SUBCASE("fl::unordered_map") { test_map_insert_find<fl::unordered_map<int, int>>(); }
     FL_SUBCASE("fl::multi_map") { test_map_insert_find<fl::multi_map<int, int>>(); }
-    FL_SUBCASE("fl::FixedMap") { test_map_insert_find<fixed_map_test<int, int>>(); }
+    FL_SUBCASE("fl::unsorted_map_fixed") { test_map_insert_find<fixed_map_test<int, int>>(); }
 }
 
 FL_TEST_CASE("map operator[] access") {
     FL_SUBCASE("fl::map") { test_map_operator_subscript<fl::map<int, int>>(); }
     FL_SUBCASE("fl::unordered_map") { test_map_operator_subscript<fl::unordered_map<int, int>>(); }
-    FL_SUBCASE("fl::FixedMap") { test_map_operator_subscript<fixed_map_test<int, int>>(); }
+    FL_SUBCASE("fl::unsorted_map_fixed") { test_map_operator_subscript<fixed_map_test<int, int>>(); }
     // NOTE: fl::multi_map doesn't support operator[] (ambiguous with duplicate keys)
 }
 
@@ -1298,33 +1298,33 @@ FL_TEST_CASE("map erase operations") {
     FL_SUBCASE("fl::map") { test_map_erase<fl::map<int, int>>(); }
     FL_SUBCASE("fl::unordered_map") { test_map_erase<fl::unordered_map<int, int>>(); }
     FL_SUBCASE("fl::multi_map") { test_map_erase<fl::multi_map<int, int>>(); }
-    FL_SUBCASE("fl::FixedMap") { test_map_erase<fixed_map_test<int, int>>(); }
+    FL_SUBCASE("fl::unsorted_map_fixed") { test_map_erase<fixed_map_test<int, int>>(); }
 }
 
 FL_TEST_CASE("map iteration") {
     FL_SUBCASE("fl::map") { test_map_iteration<fl::map<int, int>>(); }
     FL_SUBCASE("fl::unordered_map") { test_map_iteration<fl::unordered_map<int, int>>(); }
     FL_SUBCASE("fl::multi_map") { test_map_iteration<fl::multi_map<int, int>>(); }
-    FL_SUBCASE("fl::FixedMap") { test_map_iteration<fixed_map_test<int, int>>(); }
+    FL_SUBCASE("fl::unsorted_map_fixed") { test_map_iteration<fixed_map_test<int, int>>(); }
 }
 
 FL_TEST_CASE("map size and clear") {
     FL_SUBCASE("fl::map") { test_map_size_clear<fl::map<int, int>>(); }
     FL_SUBCASE("fl::unordered_map") { test_map_size_clear<fl::unordered_map<int, int>>(); }
     FL_SUBCASE("fl::multi_map") { test_map_size_clear<fl::multi_map<int, int>>(); }
-    FL_SUBCASE("fl::FixedMap") { test_map_size_clear<fixed_map_test<int, int>>(); }
+    FL_SUBCASE("fl::unsorted_map_fixed") { test_map_size_clear<fixed_map_test<int, int>>(); }
 }
 
 FL_TEST_CASE("map count operations") {
     FL_SUBCASE("fl::map") { test_map_count<fl::map<int, int>>(); }
     FL_SUBCASE("fl::unordered_map") { test_map_count<fl::unordered_map<int, int>>(); }
     FL_SUBCASE("fl::multi_map") { test_map_count<fl::multi_map<int, int>>(); }
-    FL_SUBCASE("fl::FixedMap") { test_map_count<fixed_map_test<int, int>>(); }
+    FL_SUBCASE("fl::unsorted_map_fixed") { test_map_count<fixed_map_test<int, int>>(); }
 }
 
 FL_TEST_CASE("map front and back access") {
     // Only flat_map (vector-based) supports front()/back()
-    // Tree-based maps (map, unordered_map, multi_map) and FixedMap do not support these
+    // Tree-based maps (map, unordered_map, multi_map) and unsorted_map_fixed do not support these
     FL_SUBCASE("fl::flat_map") { test_map_front_back<fl::flat_map<int, int>>(); }
 }
 
