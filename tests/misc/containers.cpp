@@ -7,6 +7,160 @@
 /// Uses hybrid move-tracking approach: tracks move/copy operations and prevents
 /// accidental copies with deleted copy constructor. This proves that operations
 /// use move semantics, not copy constructors.
+///
+/// ============================================================================
+/// CONTAINER TEST PATTERN DOCUMENTATION
+/// ============================================================================
+///
+/// This file demonstrates the "templated validator pattern" for testing
+/// containers across multiple types with maximum code reuse and test coverage.
+///
+/// ARCHITECTURE:
+/// =============
+/// The pattern has 4 main components:
+///
+/// 1. TEST TYPE SETUP (Container Normalization Layer)
+///    - Container template aliases with default parameters
+///    - Wrapper classes that normalize slightly different interfaces
+///    - Allows one test to work for multiple containers
+///
+/// 2. TEST ITEM TYPE (Behavior Verification)
+///    - TestItem struct tracks move/copy operations
+///    - Deleted copy constructor catches accidental copies (compiler error)
+///    - Enables verification that operations use move semantics
+///
+/// 3. TEMPLATED VALIDATORS (Generic Test Logic)
+///    - Template functions that implement test logic once
+///    - Three patterns: template template, concrete type, factory
+///    - Each validator tests ONE behavior/feature
+///
+/// 4. THIN TEST CASES (Test Harness)
+///    - FL_TEST_CASE with multiple FL_SUBCASE blocks
+///    - Each SUBCASE instantiates the validator for one container type
+///    - Clear relationship between validator and container coverage
+///
+/// HOW TO ADD A NEW TEST:
+/// ======================
+///
+/// Step 1: Write a Templated Validator
+/// ------------------------------------
+/// Choose the pattern that fits your container(s):
+///
+/// PATTERN 1: Template Template Parameter
+/// Use for: single-parameter containers (vector, deque, list)
+///
+///   template<template<typename> class ContainerTemplate>
+///   void test_my_feature() {
+///       using Container = ContainerTemplate<TestItem>;
+///       Container c;
+///       // Test logic here
+///       FL_CHECK(c.my_method() == expected);
+///   }
+///
+/// Usage: test_my_feature<vector>(), test_my_feature<deque>()
+///
+///
+/// PATTERN 2: Concrete Container Type
+/// Use for: multi-parameter containers or specific element types
+///
+///   template<typename Container>
+///   void test_my_feature() {
+///       Container c;
+///       // Test logic here
+///       FL_CHECK(c.capacity() >= c.size());
+///   }
+///
+/// Usage: test_my_feature<vector<int>>(), test_my_feature<deque<int>>()
+///
+///
+/// PATTERN 3: Container Factory
+/// Use for: complex initialization or containers without template parameters
+///
+///   struct MyContainerFactory {
+///       static my_container_type create(int a, int b, int c) {
+///           auto c = my_container_type();
+///           c.insert(a); c.insert(b); c.insert(c);
+///           return c;
+///       }
+///   };
+///
+///   template<typename ContainerFactory>
+///   void test_my_feature() {
+///       auto c = ContainerFactory::create(1, 2, 3);
+///       FL_CHECK(c.size() == 3);
+///   }
+///
+/// Usage: test_my_feature<QueueIntFactory>()
+///
+///
+/// Step 2: Create Test Case with FL_SUBCASEs
+/// ------------------------------------------
+/// Only add FL_SUBCASE for containers that SUPPORT the feature.
+/// Comment containers that DON'T and WHY.
+///
+///   FL_TEST_CASE("My feature description") {
+///       FL_SUBCASE("fl::vector") { test_my_feature<vector>(); }
+///       FL_SUBCASE("fl::deque") { test_my_feature<deque>(); }
+///       FL_SUBCASE("fl::list") { test_my_feature<list>(); }
+///       // NOTE: fl::queue doesn't have operator[]
+///   }
+///
+/// CONTAINER COVERAGE REFERENCE:
+/// ==============================
+///
+/// DYNAMIC SEQUENCE CONTAINERS (all support push_back/pop_back/etc):
+///   - vector, deque, list
+///
+/// VECTOR VARIANTS:
+///   - vector_fixed_test (FixedVector with capacity 512)
+///   - vector_inlined_test (InlinedVector with inline storage)
+///
+/// CONTAINERS WITH capacity()/reserve():
+///   - vector, deque
+///   - NOTE: list, vector_fixed, vector_inlined don't support capacity()
+///
+/// RANDOM-ACCESS ITERATORS (support arithmetic like it+1, end-begin):
+///   - vector, deque
+///   - NOTE: list only has bidirectional iterators
+///
+/// COMPARISON OPERATORS (==, !=, <, <=, >, >=):
+///   - queue, set, circular_buffer, and most sequential containers
+///   - NOTE: Some maps may not support comparison
+///
+/// ASSOCIATIVE CONTAINERS:
+///   - map, unordered_map, set, unordered_set
+///   - NOTE: Require factory pattern for complex initialization
+///
+/// ADAPTER CONTAINERS:
+///   - queue, priority_queue
+///   - NOTE: No random access, require factory pattern
+///
+/// VERIFYING MOVE SEMANTICS:
+/// ==========================
+/// TestItem tracks moves to prove containers use move semantics:
+///
+///   TestItem item(42);
+///   int initial_move_count = item.move_count;
+///
+///   container.push_back(fl::move(item));
+///
+///   // Verify move happened
+///   FL_CHECK(item.move_count > initial_move_count);
+///   // Verify NO copies (copy constructor is deleted)
+///   FL_CHECK(container.back().copy_count == 0);
+///
+/// BEST PRACTICES:
+/// ===============
+/// 1. Keep validators focused - test ONE behavior per function
+/// 2. Test ALL containers that support the feature
+/// 3. Comment containers that DON'T support it and WHY
+/// 4. Use appropriate pattern: template template for single-param containers
+/// 5. Test case names describe WHAT, not WHICH CONTAINERS
+///    Good: "push_back - all container types"
+///    Bad:  "push_back on vector"
+/// 6. When containers have different interfaces, create wrapper classes
+///    to normalize them (see FixedMapNormalized example below)
+/// 7. Use TestItem's move tracking to verify semantics, not just behavior
 
 #include "test.h"
 #include "test_container_helpers.h"
@@ -27,7 +181,17 @@ FL_TEST_FILE(FL_FILEPATH) {
 using namespace fl;
 
 // ============================================================================
-// Test Type and Helper Templates
+// COMPONENT 1: TYPE SETUP & NORMALIZATION
+// ============================================================================
+// Define container aliases and wrapper classes to normalize interfaces so
+// tests can be generic. This layer allows one test to work across multiple
+// container types by abstracting away their differences.
+//
+// EXAMPLE: FixedMapNormalized wraps FixedMap to match map's interface.
+// Before: FixedMap::insert(key, value)
+// After:  FixedMapNormalized::insert(pair<key, value>)
+// Result: One test works for both map and FixedMapNormalized
+//
 // ============================================================================
 
 // Template wrappers for vector variants with default size parameters
@@ -64,7 +228,24 @@ template <typename Key, typename Value>
 using fixed_map_test = FixedMapNormalized<Key, Value, 512>;
 
 // ============================================================================
-// Hybrid Move-Tracking Test Type
+// COMPONENT 2: TEST ITEM TYPE
+// ============================================================================
+// TestItem is the element type for all container tests. It tracks move/copy
+// operations to verify that containers use move semantics correctly.
+//
+// KEY FEATURES:
+// - move_count: Incremented on each move (proves move semantics)
+// - copy_count: Would be set if copy happened (but copy is DELETED)
+// - Deleted copy constructor: Compiler ERROR if any code tries to copy
+//   This catches bugs immediately rather than silently copying.
+//
+// USAGE IN TESTS:
+//   TestItem item(42);
+//   int initial = item.move_count;
+//   container.push_back(fl::move(item));
+//   FL_CHECK(item.move_count > initial);      // Move happened
+//   FL_CHECK(container.back().copy_count == 0); // No copies
+//
 // ============================================================================
 
 struct TestItem {
@@ -100,8 +281,38 @@ struct TestItem {
 };
 
 // ============================================================================
-// Basic Operation Test Functions - Generic Container Template Pattern
+// COMPONENT 3: TEMPLATED VALIDATORS
 // ============================================================================
+// Test functions that implement test logic generically. Each validator tests
+// ONE behavior/feature and works across multiple container types.
+//
+// PATTERN USED HERE (Pattern 1 - Template Template Parameter):
+// This section uses template template parameters: test_func<vector>()
+// This decouples container type from element type.
+//
+// EXAMPLE:
+//   template<template<typename> class ContainerTemplate>
+//   void test_push_back() {
+//       using Container = ContainerTemplate<TestItem>;
+//       Container container;
+//       container.push_back(fl::move(TestItem(42)));
+//       FL_CHECK(container.size() == 1);
+//   }
+//
+// USAGE:
+//   test_push_back<vector>();           // Tests fl::vector<TestItem>
+//   test_push_back<deque>();            // Tests fl::deque<TestItem>
+//   test_push_back<vector_fixed_test>(); // Tests FixedVector<TestItem, 512>
+//
+// ADDING A NEW TEST:
+// 1. Write template function with one test behavior
+// 2. Add FL_SUBCASE in test case section (at bottom) for each container
+// 3. Only add FL_SUBCASE for containers that SUPPORT the feature
+// 4. Comment containers that DON'T support it and WHY
+//
+// ============================================================================
+
+// Basic Operation Test Functions - Generic Container Template Pattern
 // Uses template template parameters: test_func<vector>() instead of test_func<vector<TestItem>>()
 // This decouples container type from element type.
 
@@ -254,7 +465,24 @@ void test_insert_and_erase() {
 }
 
 // ============================================================================
-// Map Container Test Functions
+// Map Container Test Functions (PATTERN 2: Concrete Container Type)
+// ============================================================================
+// Map containers require multi-parameter templates: map<Key, Value>
+// So we use Pattern 2 with concrete types instead of template template params.
+//
+// EXAMPLE:
+//   template<typename Map>
+//   void test_map_insert_find() {
+//       Map m;
+//       m.insert(fl::make_pair(1, 100));
+//       auto it = m.find(1);
+//       FL_CHECK(it->second == 100);
+//   }
+//
+// USAGE IN TEST CASE:
+//   FL_SUBCASE("fl::map") { test_map_insert_find<map<int, int>>(); }
+//   FL_SUBCASE("fl::unordered_map") { test_map_insert_find<unordered_map<int, int>>(); }
+//
 // ============================================================================
 
 // Insert/Find operations for map containers
@@ -356,6 +584,32 @@ void test_map_count() {
 }
 
 // ============================================================================
+// PATTERN 2: CONCRETE CONTAINER TYPE (Specific Element Types)
+// ============================================================================
+// When you need to test with specific element types (e.g., int), use concrete
+// container types instead of template template parameters.
+//
+// EXAMPLE:
+//   template<typename Container>
+//   void test_iterator_arithmetic() {
+//       Container c;
+//       c.push_back(10);
+//       auto it = c.begin();
+//       it = it + 1;
+//       FL_CHECK(*it == 20);
+//   }
+//
+// USAGE:
+//   test_iterator_arithmetic<vector<int>>();
+//   test_iterator_arithmetic<deque<int>>();
+//
+// WHEN TO USE THIS PATTERN:
+// - Testing with primitive types (int, float, etc.)
+// - Multi-parameter containers (map<K,V>, etc.)
+// - When element type must be explicit
+//
+// ============================================================================
+
 // Comparison Operator Test Functions
 // ============================================================================
 
@@ -462,7 +716,7 @@ void test_container_const_iterator_contract() {
 // ============================================================================
 
 template<typename Container>
-void test_container_tier2_contract() {
+void test_sequential_insert_erase() {
     Container c;
     c.push_back(10);
     c.push_back(30);
@@ -489,7 +743,7 @@ void test_container_tier2_contract() {
 // ============================================================================
 
 template<typename Container>
-void test_container_tier3_contract() {
+void test_capacity_management() {
     Container c;
 
     // Test capacity contract
@@ -512,7 +766,7 @@ void test_container_tier3_contract() {
 // ============================================================================
 
 template<typename Container>
-void test_container_tier4_arithmetic() {
+void test_iterator_arithmetic() {
     Container c;
     c.push_back(10);
     c.push_back(20);
@@ -530,7 +784,7 @@ void test_container_tier4_arithmetic() {
 }
 
 template<typename Container>
-void test_container_tier4_comparison() {
+void test_iterator_comparison() {
     Container c;
     c.push_back(10);
     c.push_back(20);
@@ -549,6 +803,39 @@ void test_container_tier4_comparison() {
 }
 
 // ============================================================================
+// PATTERN 3: CONTAINER FACTORY (Complex Initialization)
+// ============================================================================
+// For containers that don't expose constructors for testing (like queue, set),
+// use factory classes that wrap the initialization logic.
+//
+// EXAMPLE:
+//   struct QueueIntFactory {
+//       static queue<int> create(int a, int b, int c) {
+//           queue<int> q;
+//           q.push(a);
+//           q.push(b);
+//           q.push(c);
+//           return q;
+//       }
+//   };
+//
+//   template<typename ContainerFactory>
+//   void test_operator_equals() {
+//       auto c1 = ContainerFactory::create(1, 2, 3);
+//       auto c2 = ContainerFactory::create(1, 2, 3);
+//       FL_CHECK(c1 == c2);
+//   }
+//
+// USAGE:
+//   test_operator_equals<QueueIntFactory>();
+//
+// WHEN TO USE THIS PATTERN:
+// - queue, priority_queue (no templated constructor)
+// - set, unordered_set (require special initialization)
+// - Any container needing complex setup before testing
+//
+// ============================================================================
+
 // Container Factories for Comparison Operators
 // ============================================================================
 
@@ -586,7 +873,63 @@ struct CircularBufferIntFactory {
 };
 
 // ============================================================================
-// Test Cases - All organized at the end after helper declarations
+// COMPONENT 4: TEST CASES (Test Harness)
+// ============================================================================
+// FL_TEST_CASE blocks with FL_SUBCASE for each container type.
+// Each SUBCASE instantiates a validator with one specific container.
+//
+// STRUCTURE:
+// ----------
+//   FL_TEST_CASE("feature description") {
+//       FL_SUBCASE("container1") { validator<container1>(); }
+//       FL_SUBCASE("container2") { validator<container2>(); }
+//       // NOTE: Why certain containers are NOT tested here
+//   }
+//
+// NAMING:
+// -------
+// - Test case name: Describes WHAT feature is tested
+//   Good:  "push_back - all container types"
+//   Bad:   "push_back on vector"
+//
+// - SUBCASE name: Identifies which container is being tested
+//   Good:  "fl::vector"
+//   Bad:   "test vector push_back"
+//
+// COVERAGE:
+// ---------
+// - Add FL_SUBCASE for EVERY container that supports the feature
+// - Comment containers that DON'T support it and WHY
+// - Use this reference:
+//
+//   PATTERN 1 (Template Template): vector, deque, list, vector_fixed, vector_inlined
+//   PATTERN 2 (Concrete Type):
+//     - All types: vector<int>, deque<int>, list<int>
+//     - Maps: map<int,int>, unordered_map<int,int>, fixed_map_test<int,int>
+//     - Random access only: vector<int>, deque<int> (not list)
+//     - With capacity(): vector<int>, deque<int> (not list, fixed, inlined)
+//   PATTERN 3 (Factory): QueueIntFactory, SetIntFactory, CircularBufferIntFactory
+//
+// EXAMPLE - Random Access Only:
+//   FL_TEST_CASE("Iterator arithmetic contracts") {
+//       FL_SUBCASE("fl::vector") { test_iterator_arithmetic<vector<int>>(); }
+//       FL_SUBCASE("fl::deque") { test_iterator_arithmetic<deque<int>>(); }
+//       // NOTE: fl::list is Bidirectional, does not support arithmetic
+//   }
+//
+// EXAMPLE - With Capacity:
+//   FL_TEST_CASE("Capacity management contracts") {
+//       FL_SUBCASE("fl::vector") { test_capacity_management<vector<int>>(); }
+//       FL_SUBCASE("fl::deque") { test_capacity_management<deque<int>>(); }
+//       // NOTE: fl::list, vector_fixed, and vector_inlined don't support capacity()
+//   }
+//
+// EXAMPLE - Factory Pattern:
+//   FL_TEST_CASE("operator== and operator!= - all containers") {
+//       FL_SUBCASE("fl::queue") { test_operator_equals<QueueIntFactory>(); }
+//       FL_SUBCASE("fl::set") { test_operator_equals<SetIntFactory>(); }
+//   }
+//
 // ============================================================================
 
 // Iterator contracts
@@ -615,34 +958,34 @@ FL_TEST_CASE("Const iterator contracts - cbegin/cend") {
 
 // Insert/Erase contracts
 FL_TEST_CASE("Insert/Erase contracts") {
-    FL_SUBCASE("fl::vector") { test_container_tier2_contract<vector<int>>(); }
-    FL_SUBCASE("fl::vector_fixed") { test_container_tier2_contract<vector_fixed_test<int>>(); }
-    FL_SUBCASE("fl::vector_inlined") { test_container_tier2_contract<vector_inlined_test<int>>(); }
-    FL_SUBCASE("fl::deque") { test_container_tier2_contract<deque<int>>(); }
-    FL_SUBCASE("fl::list") { test_container_tier2_contract<list<int>>(); }
+    FL_SUBCASE("fl::vector") { test_sequential_insert_erase<vector<int>>(); }
+    FL_SUBCASE("fl::vector_fixed") { test_sequential_insert_erase<vector_fixed_test<int>>(); }
+    FL_SUBCASE("fl::vector_inlined") { test_sequential_insert_erase<vector_inlined_test<int>>(); }
+    FL_SUBCASE("fl::deque") { test_sequential_insert_erase<deque<int>>(); }
+    FL_SUBCASE("fl::list") { test_sequential_insert_erase<list<int>>(); }
 }
 
 // Capacity management contracts
 FL_TEST_CASE("Capacity management contracts") {
-    FL_SUBCASE("fl::vector") { test_container_tier3_contract<vector<int>>(); }
-    FL_SUBCASE("fl::deque") { test_container_tier3_contract<deque<int>>(); }
+    FL_SUBCASE("fl::vector") { test_capacity_management<vector<int>>(); }
+    FL_SUBCASE("fl::deque") { test_capacity_management<deque<int>>(); }
     // NOTE: fl::list, vector_fixed, and vector_inlined do not support capacity/reserve
 }
 
 // Iterator arithmetic contracts (RandomAccess only)
 FL_TEST_CASE("Iterator arithmetic contracts") {
-    FL_SUBCASE("fl::vector") { test_container_tier4_arithmetic<vector<int>>(); }
-    FL_SUBCASE("fl::vector_fixed") { test_container_tier4_arithmetic<vector_fixed_test<int>>(); }
-    FL_SUBCASE("fl::vector_inlined") { test_container_tier4_arithmetic<vector_inlined_test<int>>(); }
-    FL_SUBCASE("fl::deque") { test_container_tier4_arithmetic<deque<int>>(); }
+    FL_SUBCASE("fl::vector") { test_iterator_arithmetic<vector<int>>(); }
+    FL_SUBCASE("fl::vector_fixed") { test_iterator_arithmetic<vector_fixed_test<int>>(); }
+    FL_SUBCASE("fl::vector_inlined") { test_iterator_arithmetic<vector_inlined_test<int>>(); }
+    FL_SUBCASE("fl::deque") { test_iterator_arithmetic<deque<int>>(); }
     // NOTE: fl::list is Bidirectional, does not support arithmetic
 }
 
 FL_TEST_CASE("Iterator comparison contracts") {
-    FL_SUBCASE("fl::vector") { test_container_tier4_comparison<vector<int>>(); }
-    FL_SUBCASE("fl::vector_fixed") { test_container_tier4_comparison<vector_fixed_test<int>>(); }
-    FL_SUBCASE("fl::vector_inlined") { test_container_tier4_comparison<vector_inlined_test<int>>(); }
-    FL_SUBCASE("fl::deque") { test_container_tier4_comparison<deque<int>>(); }
+    FL_SUBCASE("fl::vector") { test_iterator_comparison<vector<int>>(); }
+    FL_SUBCASE("fl::vector_fixed") { test_iterator_comparison<vector_fixed_test<int>>(); }
+    FL_SUBCASE("fl::vector_inlined") { test_iterator_comparison<vector_inlined_test<int>>(); }
+    FL_SUBCASE("fl::deque") { test_iterator_comparison<deque<int>>(); }
     // NOTE: fl::list is Bidirectional, does not support arithmetic comparison
 }
 
