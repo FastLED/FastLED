@@ -99,6 +99,7 @@ def _recover_stale_build(
     check: bool,
     build_mode: str,
     verbose: bool,
+    enable_examples: bool = True,
 ) -> bool:
     """
     Attempt to recover from a stale build state.
@@ -187,6 +188,7 @@ def _recover_stale_build(
             check=check,
             build_mode=build_mode,
             verbose=verbose,
+            enable_examples=enable_examples,
             enable_unit_tests=True,
         )
 
@@ -584,6 +586,36 @@ def run_meson_build_and_test(
                 )
                 compile_target = "all-with-examples" if include_examples else None
 
+                # PROACTIVE CHECK: Verify the all-with-examples target exists
+                # in build.ninja before trying to compile it. The marker file
+                # (.enable_examples_config) can get desynchronized from the
+                # actual build configuration, causing "target not found" errors.
+                if compile_target == "all-with-examples":
+                    build_ninja = build_dir / "build.ninja"
+                    if build_ninja.exists():
+                        try:
+                            content = build_ninja.read_text(encoding="utf-8")
+                            if "all-with-examples" not in content:
+                                _ts_print(
+                                    "[MESON] ⚠️  Target 'all-with-examples' missing from build.ninja"
+                                )
+                                _ts_print(
+                                    "[MESON] 🔄 Forcing reconfiguration with enable_examples=true..."
+                                )
+                                setup_meson_build(
+                                    source_dir,
+                                    build_dir,
+                                    reconfigure=True,
+                                    debug=use_debug,
+                                    check=check,
+                                    build_mode=build_mode,
+                                    verbose=verbose,
+                                    enable_examples=True,
+                                    enable_unit_tests=True,
+                                )
+                        except (OSError, IOError):
+                            pass  # If we can't read it, let compilation try and fail
+
                 # Run streaming compilation and testing
                 sr = stream_compile_and_run_tests(
                     build_dir=build_dir,
@@ -600,7 +632,13 @@ def run_meson_build_and_test(
                 # recover and retry once
                 if not sr.success and is_stale_build_error(sr.compile_output):
                     if _recover_stale_build(
-                        source_dir, build_dir, use_debug, check, build_mode, verbose
+                        source_dir,
+                        build_dir,
+                        use_debug,
+                        check,
+                        build_mode,
+                        verbose,
+                        enable_examples=include_examples,
                     ):
                         # Retry compilation after recovery
                         sr = stream_compile_and_run_tests(

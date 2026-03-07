@@ -47,6 +47,7 @@ STALE_BUILD_PATTERNS = [
     "missing and no known rule to make it",
     "does not exist",
     "has been modified since the precompiled header",
+    "target not found",  # e.g., all-with-examples missing after enable_examples config change
 ]
 
 
