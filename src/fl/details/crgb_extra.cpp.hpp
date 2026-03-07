@@ -9,7 +9,7 @@
 #define FASTLED_INTERNAL
 #include "crgb.h"
 #include "hsv2rgb.h"
-#include "fl/hsv16.h"
+#include "fl/gfx/hsv16.h"
 
 // Implementations are in fl namespace since CRGB is defined there
 namespace fl {

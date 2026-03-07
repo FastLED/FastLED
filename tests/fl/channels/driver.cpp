@@ -20,7 +20,7 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/eorder.h"
 #include "fl/log.h"
-#include "fl/rgb8.h"
+#include "fl/gfx/crgb.h"
 #include "fl/stl/span.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/shared_ptr.h"

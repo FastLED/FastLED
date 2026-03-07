@@ -7,7 +7,7 @@
 /// - Padding: 0-2 zero bytes to ensure total size divisible by 3
 
 #include "fl/chipsets/ucs7604.h"
-#include "fl/ease.h"
+#include "fl/gfx/ease.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
@@ -26,7 +26,7 @@
 #include "fl/chipsets/encoders/ucs7604.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/eorder.h"
-#include "fl/rgb8.h"
+#include "fl/gfx/crgb.h"
 #include "fl/rgbw.h"
 #include "fl/stl/span.h"
 #include "pixel_controller.h"

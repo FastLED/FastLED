@@ -11,7 +11,7 @@
 #include "fl/stl/unique_ptr.h"
 #include "fl/sketch_macros.h"
 #include "fl/colorutils.h"  // IWYU pragma: keep
-#include "fl/rgb8.h"  // for CRGB  // IWYU pragma: keep
+#include "fl/gfx/crgb.h"  // for CRGB  // IWYU pragma: keep
 #include "fl/stl/vector.h"
 
 namespace fl {

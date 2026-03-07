@@ -6,7 +6,7 @@
 #include "fl/int.h"
 
 #include "fl/force_inline.h"
-#include "fl/ease.h"
+#include "fl/gfx/ease.h"
 // Include color.h for LEDColorCorrection and ColorTemperature enums
 // These are needed for constexpr constructors and can't be forward-declared
 #include "color.h"

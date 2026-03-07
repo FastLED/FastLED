@@ -10,7 +10,7 @@
 #include "fl/math_macros.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
-#include "fl/tile2x2.h"
+#include "fl/gfx/tile2x2.h"
 #include "fl/transform.h"
 #include "fl/xypath_impls.h"
 

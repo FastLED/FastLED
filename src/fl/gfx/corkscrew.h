@@ -32,7 +32,7 @@
 #include "fl/stl/allocator.h"
 #include "fl/geometry.h"
 #include "fl/stl/math.h"
-#include "fl/tile2x2.h"
+#include "fl/gfx/tile2x2.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/variant.h"

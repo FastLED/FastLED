@@ -13,7 +13,7 @@
 #include "fl/lut.h"  // IWYU pragma: keep
 #include "fl/math_macros.h"  // IWYU pragma: keep
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
-#include "fl/tile2x2.h"  // IWYU pragma: keep
+#include "fl/gfx/tile2x2.h"  // IWYU pragma: keep
 #include "fl/transform.h"
 #include "fl/unused.h"
 #include "fl/stl/vector.h"

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "fl/hsv.h"
-#include "fl/hsv16.h"
+#include "fl/gfx/hsv.h"
+#include "fl/gfx/hsv16.h"
 #include "chsv.h"
 #include "crgb.h"
 

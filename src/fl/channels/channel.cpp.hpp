@@ -21,7 +21,7 @@
 #include "fl/pin.h"
 #include "fl/chipsets/encoders/ucs7604.h"
 #include "fl/chipsets/ucs7604.h"
-#include "fl/ease.h"
+#include "fl/gfx/ease.h"
 #include "fl/stl/iterator.h"
 #include "fl/engine_events.h"
 #include "fl/xymap.h"

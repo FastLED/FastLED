@@ -18,7 +18,7 @@
 #include "fl/stl/new.h"
 #include "test.h"
 #include "fl/int.h"
-#include "fl/rgb8.h"
+#include "fl/gfx/crgb.h"
 #include "fl/stl/array.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/pair.h"

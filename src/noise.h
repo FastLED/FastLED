@@ -4,7 +4,7 @@
 
 #include "crgb.h"
 #include "chsv.h"
-#include "fl/hsv16.h"
+#include "fl/gfx/hsv16.h"
 #include "fl/stl/math.h"
 #include "lib8tion/qfx.h"
 #include "lib8tion/intmap.h"

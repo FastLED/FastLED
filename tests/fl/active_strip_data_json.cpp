@@ -12,7 +12,7 @@
 #include "fl/chipsets/encoders/pixel_iterator.h"
 #include "fl/eorder.h"
 #include "fl/log.h"
-#include "fl/rgb8.h"
+#include "fl/gfx/crgb.h"
 #include "fl/rgbw.h"
 #include "fl/stl/span.h"
 #include "fl/stl/allocator.h"

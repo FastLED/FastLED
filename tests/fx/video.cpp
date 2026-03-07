@@ -13,7 +13,7 @@
 #include "fl/stl/vector.h"
 #include "test.h"
 #include "fl/file_system.h"
-#include "fl/rgb8.h"
+#include "fl/gfx/crgb.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

@@ -14,7 +14,7 @@
 #include "fl/leds.h"  // IWYU pragma: keep
 #include "fl/stl/pair.h"
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
-#include "fl/tile2x2.h"  // IWYU pragma: keep
+#include "fl/gfx/tile2x2.h"  // IWYU pragma: keep
 #include "fl/transform.h"
 #include "fl/xypath_impls.h"
 

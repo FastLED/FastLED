@@ -194,7 +194,7 @@ FL_TEST_CASE("not_null - modify through smart pointer") {
 // Edge Case Tests: FastLED-specific types
 // ============================================================================
 
-#include "fl/rgb8.h"
+#include "fl/gfx/crgb.h"
 #include "fl/stl/move.h"
 #include "fl/stl/type_traits.h"
 

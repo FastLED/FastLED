@@ -1,9 +1,9 @@
 #include "fl/stl/stdint.h"
 
-#include "fl/draw_visitor.h"
+#include "fl/gfx/draw_visitor.h"
 #include "fl/leds.h"
-#include "fl/raster_sparse.h"
-#include "fl/tile2x2.h"
+#include "fl/gfx/raster_sparse.h"
+#include "fl/gfx/tile2x2.h"
 
 namespace fl {
 

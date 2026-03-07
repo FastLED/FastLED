@@ -9,7 +9,7 @@
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/chipsets/encoders/pixel_iterator.h"
-#include "fl/ease.h"
+#include "fl/gfx/ease.h"
 #include "pixel_controller.h"
 #include "color.h"
 #include "fl/stl/vector.h"

@@ -2,7 +2,7 @@
 /// Ring, sphere, and cylinder noise functions in the fl namespace
 
 #include "fl/fastled.h"
-#include "fl/hsv16.h"
+#include "fl/gfx/hsv16.h"
 #include "fl/stl/math.h"
 #include "fl/noise.h"
 

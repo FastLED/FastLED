@@ -6,11 +6,11 @@
 // #include "fl/lut.h"
 // #include "fl/map_range.h"
 // #include "fl/math_macros.h"
-// #include "fl/raster.h"
+// #include "fl/gfx/raster.h"
 // #include "fl/xypath.h"
 #include "fl/stl/function.h"  // IWYU pragma: keep
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
-#include "fl/tile2x2.h"  // IWYU pragma: keep
+#include "fl/gfx/tile2x2.h"  // IWYU pragma: keep
 #include "fl/transform.h"
 
 namespace fl {

@@ -19,7 +19,7 @@
 #include "lib8tion/qfx.h"
 #include "lib8tion/memmove.h"
 #include "platforms/math8_config.h"
-#include "fl/ease.h"
+#include "fl/gfx/ease.h"
 #include "fl/stl/chrono.h"
 
 

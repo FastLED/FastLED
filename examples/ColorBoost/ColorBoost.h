@@ -14,7 +14,7 @@
 // The demo involves animated, ever-changing rainbows (based on Pride2015 by Mark Kriegsman).
 
 #include "FastLED.h"
-#include "fl/ease.h"
+#include "fl/gfx/ease.h"
 
 fl::UITitle title("ColorBoost");
 fl::UIDescription description("CRGB::colorBoost() is a function that boosts the saturation of a color without decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component). Use the dropdown menus to select different easing functions for saturation and luminance. Use legacy gfx mode (?gfx=0) for best results.");

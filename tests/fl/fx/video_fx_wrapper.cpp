@@ -10,7 +10,7 @@
 #include "fl/stl/new.h"
 #include "crgb.h"
 #include "test.h"
-#include "fl/rgb8.h"
+#include "fl/gfx/crgb.h"
 #include "fl/stl/move.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string.h"

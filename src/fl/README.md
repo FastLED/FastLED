@@ -757,7 +757,7 @@ This section explains how the major graphics utilities fit together and how to u
 
     ```cpp
     #include <FastLED.h>
-    #include "fl/corkscrew.h"
+    #include "fl/gfx/corkscrew.h"
     #include "fl/grid.h"
     #include "fl/time.h"
 
@@ -837,7 +837,7 @@ This section explains how the major graphics utilities fit together and how to u
     #include <FastLED.h>
     #include "fl/task.h"
     #include "fl/async.h"
-    #include "fl/corkscrew.h"
+    #include "fl/gfx/corkscrew.h"
     #include "fl/grid.h"
 
     constexpr uint16_t NUM_LEDS = 144;

@@ -8,8 +8,8 @@
 #include "fl/geometry.h"             // for vec2
 #include "fl/int.h"                  // for size, u16, u8
 #include "fl/stl/json.h"
-#include "fl/rgb8.h"                 // for CRGB
-#include "fl/tile2x2.h"
+#include "fl/gfx/crgb.h"                 // for CRGB
+#include "fl/gfx/tile2x2.h"
 #include "fl/unused.h"
 #include "fl/xymap.h"
 // UI dependency moved to separate compilation unit to break dependency chain

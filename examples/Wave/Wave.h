@@ -17,7 +17,7 @@ all the UI elements you see below.
 
 #include "fl/math_macros.h"
 #include "fl/ui.h"
-#include "fl/wave_simulation.h"
+#include "fl/gfx/wave_simulation.h"
 #include <Arduino.h>
 #include <FastLED.h>
 

@@ -4,8 +4,8 @@
 #define __INC_HSV2RGB_H
 
 // Forward declarations
-#include "fl/rgb8.h"  // for fl::CRGB
-#include "fl/hsv.h"   // for fl::hsv8
+#include "fl/gfx/crgb.h"  // for fl::CRGB
+#include "fl/gfx/hsv.h"   // for fl::hsv8
 
 /// @file hsv2rgb.h
 /// Functions to convert from the HSV colorspace to the RGB colorspace

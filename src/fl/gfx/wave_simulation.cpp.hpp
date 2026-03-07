@@ -3,7 +3,7 @@
 #include "fl/stl/stdint.h"
 
 #include "fl/stl/math.h"
-#include "fl/wave_simulation.h"
+#include "fl/gfx/wave_simulation.h"
 #include "fl/int.h"
 
 namespace {

@@ -18,7 +18,7 @@
 /// @note This consolidates encoding logic previously in UCS7604ControllerT::showPixels
 
 #include "fl/stl/stdint.h"
-#include "fl/ease.h"
+#include "fl/gfx/ease.h"
 #include "fl/chipsets/encoders/pixel_iterator_adapters.h"
 
 namespace fl {

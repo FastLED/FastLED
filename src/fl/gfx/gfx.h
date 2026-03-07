@@ -31,7 +31,7 @@
 ///   fl::LineCap::SQUARE — rectangular extension by half-thickness
 
 #include "fl/force_inline.h"
-#include "crgb.h"
+#include "fl/gfx/crgb.h"
 
 // IWYU pragma: begin_keep
 #include "fl/gfx/canvas.h"

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "fl/raster_sparse.h"
+#include "fl/gfx/raster_sparse.h"
 
 namespace fl {
 

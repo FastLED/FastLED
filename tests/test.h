@@ -13,7 +13,7 @@
 #include "fl/lut.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/strstream.h"
-#include "fl/tile2x2.h"
+#include "fl/gfx/tile2x2.h"
 #include "fl/xypath.h"
 
 // ============================================================================

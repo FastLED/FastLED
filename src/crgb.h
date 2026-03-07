@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "fl/rgb8.h"
+#include "fl/gfx/crgb.h"
 #include "chsv.h"
 #include "platforms/is_platform.h"
 

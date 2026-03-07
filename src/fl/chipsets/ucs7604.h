@@ -10,7 +10,7 @@
 #include "fl/chipsets/encoders/ucs7604.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/vector.h"
-#include "fl/ease.h"
+#include "fl/gfx/ease.h"
 #include "fl/stl/iterator.h"
 
 /// @file fl/chipsets/ucs7604.h

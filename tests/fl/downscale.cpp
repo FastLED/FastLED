@@ -4,7 +4,7 @@
 
 #include "fl/downscale.h"
 #include "test.h"
-#include "fl/rgb8.h"
+#include "fl/gfx/crgb.h"
 #include "fl/xymap.h"
 #include "hsv2rgb.h"
 

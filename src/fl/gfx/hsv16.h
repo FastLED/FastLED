@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/int.h"
-#include "fl/ease.h"
+#include "fl/gfx/ease.h"
 
 namespace fl {
 

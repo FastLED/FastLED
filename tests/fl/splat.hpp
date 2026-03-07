@@ -5,7 +5,7 @@
 #include "fl/splat.h"
 #include "test.h"
 #include "fl/geometry.h"
-#include "fl/tile2x2.h"
+#include "fl/gfx/tile2x2.h"
 
 FL_TEST_CASE("splat simple test") {
     // Define a simple input coordinate

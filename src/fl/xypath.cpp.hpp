@@ -15,7 +15,7 @@
 #include "fl/lut.h"
 #include "fl/stl/math.h"
 #include "fl/math_macros.h"
-#include "fl/raster.h"
+#include "fl/gfx/raster.h"
 #include "fl/xypath.h"
 #include "fl/xypath_renderer.h"
 

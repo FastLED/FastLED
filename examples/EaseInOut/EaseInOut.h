@@ -9,7 +9,7 @@
 /// 4. When the compiler is done a web page will open.
 
 #include <FastLED.h>
-#include "fl/ease.h"
+#include "fl/gfx/ease.h"
 #include "fl/leds.h"
 
 // Matrix configuration

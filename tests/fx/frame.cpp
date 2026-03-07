@@ -8,7 +8,7 @@
 #include "crgb.h"
 #include "test.h"
 #include "fl/draw_mode.h"
-#include "fl/rgb8.h"
+#include "fl/gfx/crgb.h"
 #include "fl/stl/shared_ptr.h"
 
 FL_TEST_FILE(FL_FILEPATH) {

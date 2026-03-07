@@ -4,7 +4,7 @@
 
 #include "fl/fastled.h"
 
-#include "fl/ease.h"
+#include "fl/gfx/ease.h"
 #include "lib8tion.h" // This is the problematic header that's hard to include
 
 #include "fl/stl/math.h"

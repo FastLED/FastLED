@@ -12,7 +12,7 @@
 #include "crgb.h"
 #include "test.h"
 #include "fl/fx/fx2d.h"
-#include "fl/rgb8.h"
+#include "fl/gfx/crgb.h"
 #include "fl/stl/string.h"
 #include "fl/xymap.h"
 

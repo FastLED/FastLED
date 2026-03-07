@@ -5,7 +5,7 @@
 #include "crgb.h"
 #include "test.h"
 #include "fl/fx/wled/client.h"
-#include "fl/rgb8.h"
+#include "fl/gfx/crgb.h"
 #include "fl/stl/span.h"
 #include "fl/stl/shared_ptr.h"
 

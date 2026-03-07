@@ -5,7 +5,7 @@
 #include "fl/fx/2d/blend.h"
 #include "fl/fx/2d/wave.h"
 #include "fl/fx/fx2d.h"
-#include "fl/raster.h"
+#include "fl/gfx/raster.h"
 
 
 struct WaveEffect {
