@@ -9,6 +9,7 @@
 #include "fl/stl/cstddef.h"
 #include "fl/compiler_control.h"
 #include "fl/stl/stdio.h"  // for fl::snprintf
+#include "fl/stl/type_traits.h"  // for enable_if and is_multi_byte_integer
 
 namespace fl {
 
@@ -105,13 +106,6 @@ public:
     size_t print(int value);
 
     /**
-     * @brief Print unsigned integer to serial output
-     * @param value Unsigned integer value to print
-     * @return Number of bytes written
-     */
-    size_t print(u32 value);
-
-    /**
      * @brief Print long integer to serial output
      * @param value Long integer value to print
      * @return Number of bytes written
@@ -119,11 +113,16 @@ public:
     size_t print(long value);
 
     /**
-     * @brief Print unsigned long integer to serial output
-     * @param value Unsigned long integer value to print
-     * @return Number of bytes written
+     * @brief Print generic unsigned integer via SFINAE template
+     * Handles u32, unsigned long, and other unsigned multi-byte integers
+     * Uses enable_if to avoid duplicate overload issues on platforms where
+     * unsigned long == u32
      */
-    size_t print(unsigned long value);
+    template<typename T>
+    typename fl::enable_if<fl::is_multi_byte_integer<T>::value &&
+                          !fl::is_signed<T>::value,
+                          size_t>::type
+    print(T value);
 
     /**
      * @brief Print string with newline to serial output
@@ -146,13 +145,6 @@ public:
     size_t println(int value);
 
     /**
-     * @brief Print unsigned integer with newline to serial output
-     * @param value Unsigned integer value to print
-     * @return Number of bytes written
-     */
-    size_t println(u32 value);
-
-    /**
      * @brief Print long integer with newline to serial output
      * @param value Long integer value to print
      * @return Number of bytes written
@@ -160,11 +152,16 @@ public:
     size_t println(long value);
 
     /**
-     * @brief Print unsigned long integer with newline to serial output
-     * @param value Unsigned long integer value to print
-     * @return Number of bytes written
+     * @brief Print generic unsigned integer with newline via SFINAE template
+     * Handles u32, unsigned long, and other unsigned multi-byte integers
+     * Uses enable_if to avoid duplicate overload issues on platforms where
+     * unsigned long == u32
      */
-    size_t println(unsigned long value);
+    template<typename T>
+    typename fl::enable_if<fl::is_multi_byte_integer<T>::value &&
+                          !fl::is_signed<T>::value,
+                          size_t>::type
+    println(T value);
 
     /**
      * @brief Print formatted string to serial output (printf-style)

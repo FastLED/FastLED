@@ -60,21 +60,25 @@ size_t SerialPort::print(int value) {
     return print(buffer);
 }
 
-size_t SerialPort::print(u32 value) {
-    char buffer[11];  // Enough for "4294967295" + null
-    fl::utoa32(value, buffer, 10);  // Base 10
-    return print(buffer);
-}
-
 size_t SerialPort::print(long value) {
     char buffer[21];  // Enough for 64-bit values
     fl::itoa64(value, buffer, 10);  // Base 10
     return print(buffer);
 }
 
-size_t SerialPort::print(unsigned long value) {
+// Template implementation for unsigned multi-byte integers
+// Handles both u32 and unsigned long, avoiding duplicate overloads on platforms where they're the same type
+template<typename T>
+inline typename fl::enable_if<fl::is_multi_byte_integer<T>::value &&
+                          !fl::is_signed<T>::value,
+                          size_t>::type
+SerialPort::print(T value) {
     char buffer[21];  // Enough for 64-bit values
-    fl::utoa64(value, buffer, 10);  // Base 10
+
+    // Use utoa64 for all types - it handles both 32-bit and 64-bit values
+    // This avoids needing C++17 constexpr if
+    fl::utoa64(static_cast<fl::u64>(value), buffer, 10);
+
     return print(buffer);
 }
 
@@ -98,21 +102,25 @@ size_t SerialPort::println(int value) {
     return println(buffer);
 }
 
-size_t SerialPort::println(u32 value) {
-    char buffer[11];
-    fl::utoa32(value, buffer, 10);
-    return println(buffer);
-}
-
 size_t SerialPort::println(long value) {
     char buffer[21];
     fl::itoa64(value, buffer, 10);
     return println(buffer);
 }
 
-size_t SerialPort::println(unsigned long value) {
-    char buffer[21];
-    fl::utoa64(value, buffer, 10);
+// Template implementation for unsigned multi-byte integers
+// Handles both u32 and unsigned long, avoiding duplicate overloads on platforms where they're the same type
+template<typename T>
+inline typename fl::enable_if<fl::is_multi_byte_integer<T>::value &&
+                          !fl::is_signed<T>::value,
+                          size_t>::type
+SerialPort::println(T value) {
+    char buffer[21];  // Enough for 64-bit values
+
+    // Use utoa64 for all types - it handles both 32-bit and 64-bit values
+    // This avoids needing C++17 constexpr if
+    fl::utoa64(static_cast<fl::u64>(value), buffer, 10);
+
     return println(buffer);
 }
 

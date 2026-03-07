@@ -4,6 +4,7 @@
 #include "fl/pins.h"
 #include "fl/fastpin.h"
 #include "fl/log.h"
+#include "fl/stl/type_traits.h"
 
 namespace fl {
 
@@ -104,9 +105,17 @@ namespace {
 inline int portValueToId(unsigned char v) { return v; }
 inline int portValueToId(unsigned short v) { return static_cast<int>(v); }
 inline int portValueToId(int v) { return v; }
-inline int portValueToId(u32 v) { return static_cast<int>(v); }
 inline int portValueToId(long v) { return static_cast<int>(v); }
-inline int portValueToId(unsigned long v) { return static_cast<int>(v); }
+
+// Template overload for unsigned multi-byte integers (handles both u32 and unsigned long)
+// Uses enable_if to avoid duplicate overloads on platforms where they're the same type
+template<typename T>
+typename fl::enable_if<fl::is_multi_byte_integer<T>::value &&
+                      !fl::is_signed<T>::value,
+                      int>::type
+portValueToId(T v) {
+    return static_cast<int>(v);
+}
 
 // Pointer overload for SAM and similar platforms where digitalPinToPort
 // returns a peripheral struct pointer (e.g. Pio*).
