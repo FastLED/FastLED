@@ -74,6 +74,7 @@ endif
 # Format: EXAMPLE|<name>|<dir1>|..., SOURCES|<name>|<src1>|..., SKIP|<name>|<reason>
 # Note: Using | delimiter instead of : to avoid Windows path issues (C:\...)
 stub_incompatible_examples = []
+nopch_examples = []  # Examples with #define before #include FastLED (PCH-incompatible)
 example_includes = {}
 example_paths = {}  # Map example name to its root directory path
 example_sources = {}
@@ -119,6 +120,11 @@ foreach line : example_metadata_output.split('\n')
                 # Parse FILTER|<name>|<filter_string>
                 # Store the raw filter string for compile-time platform guard
                 example_filters += {example_name: parts[2]}
+
+            elif line_type == 'NOPCH' and parts.length() >= 3
+                # Parse NOPCH|<name>|<reason>
+                # Example has #define before #include FastLED — PCH-incompatible
+                nopch_examples += [example_name]
             endif
         endif
     endif
@@ -152,6 +158,25 @@ example_runner_exe = executable('example_runner',
   link_with: [crash_handler_lib],  # Shared crash handler from root meson.build
   install: false
 )
+
+# ============================================================================
+# FASTLED PCH ARGS FOR EXAMPLES
+# ============================================================================
+# Examples use the shared fastled_pch (FastLED.h only) to avoid re-parsing
+# ~986 transitive headers for every example DLL. Examples with #define before
+# #include FastLED are PCH-incompatible and skip this.
+#
+# Absolute include paths must match those used to compile fastled_pch so that
+# #pragma once recognises headers from both contexts as the same file.
+example_abs_include_args = [
+    '-I' + meson.project_source_root() / 'src',
+    '-I' + meson.project_source_root() / 'src/platforms/stub',
+]
+example_pch_usage_args = [
+    '-include-pch', fastled_pch_dir / 'FastLED.h.pch',
+    '-Werror=invalid-pch',
+    '-fpch-validate-input-files-content',
+]
 
 # List to store all example executables for the alias target
 example_executables = []
@@ -237,14 +262,23 @@ foreach example_name : example_paths.keys()
     # Collect all source files: wrapper + any additional .cpp files from subdirectories
     all_sources = [wrapper_cpp] + additional_sources
 
+    # Conditionally apply FastLED PCH for examples without pre-FastLED defines
+    this_example_pch_args = []
+    this_example_extra_sources = []
+    if not nopch_examples.contains(example_name)
+        # PCH-compatible: use shared fastled_pch + absolute include paths
+        this_example_pch_args = example_abs_include_args + example_pch_usage_args
+        this_example_extra_sources = [fastled_pch]  # Source dependency for build ordering
+    endif
+
     # Build example as a shared library (DLL)
     # NOTE: System dependencies moved to example_runner.exe
     example_dll = shared_library(
         'example-' + example_name,
-        all_sources,  # Wrapper + additional .cpp files
+        all_sources + this_example_extra_sources,  # Wrapper + additional .cpp files + PCH dep
         include_directories: all_includes,
         link_with: fastled_lib,
-        cpp_args: example_compile_args + debug_cpp_args + example_specific_cpp_args + ['-DEXAMPLE_DLL_MODE'],
+        cpp_args: example_compile_args + debug_cpp_args + example_specific_cpp_args + this_example_pch_args + ['-DEXAMPLE_DLL_MODE'],
         link_args: dll_link_args,  # Minimal linking (defined in root meson.build)
         name_prefix: '',  # Remove 'lib' prefix on Windows (produce 'example-Blink.dll' not 'libexample-Blink.dll')
         build_by_default: false,  # Only build when explicitly requested

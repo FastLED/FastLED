@@ -77,6 +77,32 @@ def should_skip_for_stub(filter_str: str) -> tuple[bool, str]:
     return True, f"Platform-specific (@filter:{filter_str})"
 
 
+def has_define_before_fastled_include(content: str) -> tuple[bool, str]:
+    """Check if any #define appears before the first #include of FastLED.h.
+
+    Any #define before the FastLED include makes the example PCH-incompatible,
+    since the define could alter how FastLED.h is parsed.
+
+    Args:
+        content: File content to scan
+
+    Returns:
+        Tuple of (has_define, first_define_line) — the first #define found
+    """
+    for line in content.split("\n"):
+        stripped = line.strip()
+        # Skip comments and empty lines
+        if stripped.startswith("//") or stripped == "":
+            continue
+        # If we hit the FastLED include first, no problematic defines exist
+        if re.match(r"#\s*include\s+[<\"]FastLED", stripped):
+            return False, ""
+        # Any #define before FastLED include triggers NOPCH
+        if re.match(r"#\s*define\s+", stripped):
+            return True, stripped
+    return False, ""
+
+
 def discover_examples_all(examples_dir: Path) -> None:
     """
     Discover all examples with includes, sources, and filter annotations.
@@ -143,12 +169,12 @@ def discover_examples_all(examples_dir: Path) -> None:
         sources_str: str = "|".join(cpp_sources) if cpp_sources else ""
         print(f"SOURCES|{example_name}|{sources_str}")
 
-        # Check for @filter annotation in .ino file
-        # @filter:<platform_list> or @filter-out:<platform> indicates platform-specific
+        # Check for @filter annotation and NOPCH detection in .ino file
         try:
             content = ino_file.read_text(encoding="utf-8")
 
             # Check for @filter annotation
+            # @filter:<platform_list> or @filter-out:<platform> indicates platform-specific
             if "@filter:" in content or "@filter-out:" in content:
                 # Parse the filter line to extract platforms
                 for line in content.split("\n"):
@@ -170,6 +196,11 @@ def discover_examples_all(examples_dir: Path) -> None:
                             )
                         print(f"FILTER|{example_name}|filter-out:{platforms}")
                         break
+
+            # Check for #define before #include FastLED (PCH-incompatible)
+            has_define, define_line = has_define_before_fastled_include(content)
+            if has_define:
+                print(f"NOPCH|{example_name}|{define_line}")
         except (UnicodeDecodeError, OSError):
             # If we can't read the file, skip silently
             pass

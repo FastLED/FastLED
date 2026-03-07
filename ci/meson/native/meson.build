@@ -36,6 +36,7 @@ base_defines = shared_defines + [
   '-DFASTLED_NO_ATEXIT=1',
   '-DENABLE_CRASH_HANDLER',
   '-DFASTLED_HAS_NETWORKING',    # Enable networking APIs (HTTP server, fetch client, sockets)
+  '-DFASTLED_DEBUG_STACK_TRACE',  # Enable stack tracing (must be in base for PCH compatibility)
 ]
 
 # Group 2: Warning and error flags (code quality enforcement)
@@ -140,7 +141,6 @@ test_specific_args = [
   '-DFASTLED_UNIT_TEST=1',
   '-DFASTLED_USE_JSON_UI=1',
   '-DDOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS',
-  '-DFASTLED_DEBUG_STACK_TRACE',
 ]
 
 # Profile test-specific compilation flags
@@ -423,3 +423,42 @@ fastled_lib = shared_library('fastled',
 
 # Export the directory containing fastled.dll for consumer DLLs to find at runtime
 fastled_lib_dir = meson.current_build_dir()
+
+# ============================================================================
+# FASTLED PRECOMPILED HEADER (shared by tests and examples)
+# ============================================================================
+# Build a PCH containing only FastLED.h, compiled with base_compile_args
+# (NOT test-specific args) for ABI compatibility with both tests and examples.
+# Tests chain their test_pch on top of this; examples use it directly.
+
+# Absolute include paths — must match between PCH and consumer compilation so
+# that #pragma once recognises headers from both contexts as the same file.
+fastled_pch_abs_include_args = [
+  '-I' + meson.project_source_root() / 'src',
+  '-I' + meson.project_source_root() / 'src/platforms/stub',
+]
+
+fastled_pch = custom_target('fastled_pch',
+  input: meson.project_source_root() / 'src' / 'FastLED.h',
+  output: 'FastLED.h.pch',
+  depfile: 'FastLED.h.d',
+  command: [
+    uv_prog, 'run', 'python',
+    meson.project_source_root() / 'ci/compile_pch.py',
+    cpp_compiler.cmd_array(),
+    '-x', 'c++-header',
+    '@INPUT@',
+    '-o', '@OUTPUT@',
+    '-MD', '-MF', '@DEPFILE@',
+    base_compile_args,
+    '-fPIC',
+    fastled_pch_abs_include_args,
+    '-Werror=invalid-pch',
+    '-verify-pch',
+    '-fpch-validate-input-files-content',
+    '-fpch-instantiate-templates',
+  ],
+  install: false
+)
+
+fastled_pch_dir = meson.current_build_dir()
