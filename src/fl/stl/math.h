@@ -426,11 +426,61 @@ pow(T base, T exponent) { return pow_impl_float(static_cast<float>(base), static
 
 // ===== Roots / distance ======================================================
 
+namespace sqrt_detail {
+// Type trait to detect if T has a static sqrt method
+template<typename T, typename = void>
+struct has_static_sqrt : false_type {};
+
+template<typename T>
+struct has_static_sqrt<T, decltype(static_cast<void>(T::sqrt(declval<T>())))> : true_type {};
+}
+
 // sqrt
 inline float sqrtf(float value) { return sqrt_impl_float(value); }
+inline float sqrt(float value) { return sqrt_impl_float(value); }
 inline double sqrt(double value) { return sqrt_impl_double(value); }
 template<typename T> inline typename enable_if<is_integral<T>::value, float>::type
 sqrt(T value) { return sqrt_impl_float(static_cast<float>(value)); }
+
+// Generic sqrt that auto-binds to types with static sqrt method
+// If T doesn't have a static sqrt, this overload is discarded (SFINAE)
+template<typename T>
+inline typename enable_if<sqrt_detail::has_static_sqrt<T>::value, decltype(T::sqrt(declval<T>()))>::type
+sqrt(T value) {
+    return T::sqrt(value);
+}
+
+namespace floor_detail {
+// Type trait to detect if T has a static floor method
+template<typename T, typename = void>
+struct has_static_floor : false_type {};
+
+template<typename T>
+struct has_static_floor<T, decltype(static_cast<void>(T::floor(declval<T>())))> : true_type {};
+}
+
+// Generic floor that auto-binds to types with static floor method
+template<typename T>
+inline typename enable_if<floor_detail::has_static_floor<T>::value, decltype(T::floor(declval<T>()))>::type
+floor(T value) {
+    return T::floor(value);
+}
+
+namespace ceil_detail {
+// Type trait to detect if T has a static ceil method
+template<typename T, typename = void>
+struct has_static_ceil : false_type {};
+
+template<typename T>
+struct has_static_ceil<T, decltype(static_cast<void>(T::ceil(declval<T>())))> : true_type {};
+}
+
+// Generic ceil that auto-binds to types with static ceil method
+template<typename T>
+inline typename enable_if<ceil_detail::has_static_ceil<T>::value, decltype(T::ceil(declval<T>()))>::type
+ceil(T value) {
+    return T::ceil(value);
+}
 
 // hypot
 inline float hypotf(float x, float y) { return hypot_impl_float(x, y); }

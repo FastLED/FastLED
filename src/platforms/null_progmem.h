@@ -2,7 +2,6 @@
 #pragma once
 
 #include "fl/int.h"  // for FastLED integer types
-#include "fl/stl/cstring.h"  // for memcopy (FastLED equivalent)
 #include "platforms/avr/is_avr.h"  // for FL_IS_AVR
 
 // Guard against PROGMEM redefinition on platforms that have their own definition
@@ -25,39 +24,19 @@
 #endif
 #endif
 
-// Private helper function for safe memory copying to avoid strict aliasing issues
-// This uses fl::memcpy (FastLED equivalent) instead of standard memcpy
-template<typename T>
-static inline T fl_progmem_safe_read(const void* addr) {
-    T result;
-    fl::memcpy(&result, addr, sizeof(T));
-    return result;
-}
-
-// Safe memory access macros to avoid strict aliasing issues
-// These use the private helper function which wraps memcpy safely
+// Safe PROGMEM read macros.
+// On non-AVR platforms, PROGMEM data lives in normal RAM — direct dereference
+// is correct and compiles to a single load instruction with zero overhead.
+// On AVR, pgm_read_*_near uses special LPM instructions to read from flash.
 #if !(defined(FL_IS_AVR))
-static inline fl::u8 fl_pgm_read_byte_near_safe(const void* addr) {
-    return fl_progmem_safe_read<fl::u8>(addr);
-}
-
-static inline fl::u16 fl_pgm_read_word_near_safe(const void* addr) {
-    return fl_progmem_safe_read<fl::u16>(addr);
-}
-
-static inline fl::u32 fl_pgm_read_dword_near_safe(const void* addr) {
-    return fl_progmem_safe_read<fl::u32>(addr);
-}
+#define FL_PGM_READ_BYTE_NEAR(x) (*((const fl::u8*)(x)))
+#define FL_PGM_READ_WORD_NEAR(x) (*((const fl::u16*)(x)))
+#define FL_PGM_READ_DWORD_NEAR(x) (*((const fl::u32*)(x)))
 #else
-// On AVR, we can directly use the standard pgm_read_* functions for PROGMEM data, which are designed to handle flash memory access correctly. The safe wrapper is not needed because AVR's pgm_read_* functions already handle the necessary memory access patterns for flash.
-#define fl_pgm_read_byte_near_safe(x) pgm_read_byte_near(x)
-#define fl_pgm_read_word_near_safe(x) pgm_read_word_near(x)
-#define fl_pgm_read_dword_near_safe(x) pgm_read_dword_near(x)
+#define FL_PGM_READ_BYTE_NEAR(x) (pgm_read_byte_near(x))
+#define FL_PGM_READ_WORD_NEAR(x) (pgm_read_word_near(x))
+#define FL_PGM_READ_DWORD_NEAR(x) (pgm_read_dword_near(x))
 #endif // !(defined(FL_IS_AVR))
-
-#define FL_PGM_READ_BYTE_NEAR(x) (fl_pgm_read_byte_near_safe(x))
-#define FL_PGM_READ_WORD_NEAR(x) (fl_pgm_read_word_near_safe(x))
-#define FL_PGM_READ_DWORD_NEAR(x) (fl_pgm_read_dword_near_safe(x))
 
 // On x86/WASM (platforms without PROGMEM), alignment is useful for cache-line optimization
 // Use alignas(N) in C++ or __attribute__((aligned(N))) for maximum compatibility

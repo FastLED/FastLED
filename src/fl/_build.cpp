@@ -33,6 +33,7 @@
 #include "fl/fx/detail/_build.cpp.hpp"
 #include "fl/fx/video/_build.cpp.hpp"
 #include "fl/fx/wled/_build.cpp.hpp"
+#include "fl/gfx/_build.cpp.hpp"
 #include "fl/sensors/_build.cpp.hpp"
 #include "fl/spi/_build.cpp.hpp"
 #include "fl/stl/_build.cpp.hpp"
