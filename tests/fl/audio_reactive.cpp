@@ -2032,4 +2032,16 @@ FL_TEST_CASE("AudioProcessor - configureEqualizer silence threshold") {
     FL_CHECK(isSilence == false);
 }
 
+// Diagnostic test: Verify TestRegistry integration
+FL_TEST_CASE("AudioReactive - Registry diagnostic") {
+    auto& registry = ::fl::Singleton<::TestRegistry>::instance();
+    size_t test_count = registry.getTestCount(__FILE__);
+
+    // This file should have registered multiple tests
+    FL_CHECK_GE(test_count, 81);
+
+    // Print for debugging
+    fl::printf("\n[Registry] audio_reactive.cpp registered %zu tests\n", test_count);
+}
+
 } // FL_TEST_FILE

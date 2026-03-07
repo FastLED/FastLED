@@ -134,8 +134,7 @@ DetectionMetrics runDetectorTest(DownbeatDetector& detector,
     if (groundTruth.size() >= 2) {
         beatInterval = groundTruth[1].timestamp - groundTruth[0].timestamp;
         if (enableLogging) {
-            FL_MESSAGE("Detected beat interval from ground truth: ", beatInterval, "ms (",
-                    60000.0f / beatInterval, " BPM)");
+            FL_MESSAGE("Detected beat interval from ground truth: " << beatInterval << "ms (" << (60000.0f / beatInterval) << " BPM)");
         }
     }
 
@@ -146,7 +145,7 @@ DetectionMetrics runDetectorTest(DownbeatDetector& detector,
         int warmupBeats = warmupMeasures * beatsPerMeasure;
 
         if (enableLogging) {
-            FL_MESSAGE("Warm-up phase: ", warmupBeats, " beats (", warmupMeasures, " measures)");
+            FL_MESSAGE("Warm-up phase: " << warmupBeats << " beats (" << warmupMeasures << " measures)");
         }
 
         for (int beat = 0; beat < warmupBeats; beat++) {
@@ -171,7 +170,7 @@ DetectionMetrics runDetectorTest(DownbeatDetector& detector,
         }
 
         if (enableLogging) {
-            FL_MESSAGE("Warm-up complete at t=", timestamp, ", starting metric collection");
+            FL_MESSAGE("Warm-up complete at t=" << timestamp << ", starting metric collection");
         }
     }
 
@@ -182,8 +181,8 @@ DetectionMetrics runDetectorTest(DownbeatDetector& detector,
     int totalBeats = static_cast<int>(groundTruth.size());
 
     if (enableLogging) {
-        FL_MESSAGE("After warm-up: currentBeat=", currentBeat, " beatsPerMeasure=", beatsPerMeasure);
-        FL_MESSAGE("Will verify ", totalBeats, " beats with downbeats every ", beatsPerMeasure, " beats");
+        FL_MESSAGE("After warm-up: currentBeat=" << currentBeat << " beatsPerMeasure=" << beatsPerMeasure);
+        FL_MESSAGE("Will verify " << totalBeats << " beats with downbeats every " << beatsPerMeasure << " beats");
     }
 
     // Track detections and beat count between them
@@ -222,17 +221,17 @@ DetectionMetrics runDetectorTest(DownbeatDetector& detector,
                 lastDownbeatBeatIndex = static_cast<int>(gtIdx);
 
                 if (enableLogging) {
-                    FL_MESSAGE("Downbeat detected at beat ", gtIdx, " t=", timestamp,
-                           " conf=", confidence,
-                           " detectorBeat=", detector.getCurrentBeat(),
-                           " spacing=", beatsSinceLastDownbeat, " beats");
+                    FL_MESSAGE("Downbeat detected at beat " << gtIdx << " t=" << timestamp
+                           << " conf=" << confidence
+                           << " detectorBeat=" << detector.getCurrentBeat()
+                           << " spacing=" << beatsSinceLastDownbeat << " beats");
                 }
 
                 // Check if spacing is correct (should be beatsPerMeasure or first detection)
                 if (beatsSinceLastDownbeat > 0 && beatsSinceLastDownbeat != beatsPerMeasure) {
                     metrics.falsePositives++;  // Wrong spacing = false positive
                     if (enableLogging) {
-                        FL_MESSAGE("  ERROR: Expected spacing of ", beatsPerMeasure, " beats, got ", beatsSinceLastDownbeat);
+                        FL_MESSAGE("  ERROR: Expected spacing of " << beatsPerMeasure << " beats, got " << beatsSinceLastDownbeat);
                     }
                 } else {
                     metrics.truePositives++;  // Correct spacing = true positive
@@ -263,8 +262,7 @@ DetectionMetrics runDetectorTest(DownbeatDetector& detector,
             sumConf += conf;
         }
         float avgConf = sumConf / static_cast<float>(confidenceValues.size());
-        FL_MESSAGE("Confidence range: [", minConf, ", ", maxConf,
-               "] avg=", avgConf);
+        FL_MESSAGE("Confidence range: [" << minConf << ", " << maxConf << "] avg=" << avgConf);
     }
 
     return metrics;
@@ -422,12 +420,12 @@ FL_TEST_CASE("DownbeatDetector - Strong accent strength (2x multiplier)") {
     DetectionMetrics metrics = runDetectorTest(detector, groundTruth, 2.0f);
 
     // Log metrics (using CHECK to show in test output)
-    FL_MESSAGE("Strong accents - TP:", metrics.truePositives,
-            " FP:", metrics.falsePositives,
-            " FN:", metrics.falseNegatives);
-    FL_MESSAGE("  Precision:", metrics.precision(),
-            " Recall:", metrics.recall(),
-            " F1:", metrics.f1Score());
+    FL_MESSAGE("Strong accents - TP:" << metrics.truePositives
+            << " FP:" << metrics.falsePositives
+            << " FN:" << metrics.falseNegatives);
+    FL_MESSAGE("  Precision:" << metrics.precision()
+            << " Recall:" << metrics.recall()
+            << " F1:" << metrics.f1Score());
 
     // Note: F1 is currently 0 due to lack of warm-up period (see LOOP.md Iteration 5)
     // This will be fixed in Phase 3 when warm-up is added to tests
@@ -454,12 +452,12 @@ FL_TEST_CASE("DownbeatDetector - Weak accent strength (0.6x multiplier)") {
 
     DetectionMetrics metrics = runDetectorTest(detector, groundTruth, 0.6f);
 
-    FL_MESSAGE("Weak accents - TP:", metrics.truePositives,
-            " FP:", metrics.falsePositives,
-            " FN:", metrics.falseNegatives);
-    FL_MESSAGE("  Precision:", metrics.precision(),
-            " Recall:", metrics.recall(),
-            " F1:", metrics.f1Score());
+    FL_MESSAGE("Weak accents - TP:" << metrics.truePositives
+            << " FP:" << metrics.falsePositives
+            << " FN:" << metrics.falseNegatives);
+    FL_MESSAGE("  Precision:" << metrics.precision()
+            << " Recall:" << metrics.recall()
+            << " F1:" << metrics.f1Score());
 
     // Weak accents may have lower recall but should maintain precision
     // Just verify metrics are calculable
@@ -487,12 +485,12 @@ FL_TEST_CASE("DownbeatDetector - Timing jitter tolerance") {
     // Test with ±50ms jitter (10% of beat interval)
     DetectionMetrics metrics = runDetectorTest(detector, groundTruth, 1.0f, 50);
 
-    FL_MESSAGE("Timing jitter - TP:", metrics.truePositives,
-            " FP:", metrics.falsePositives,
-            " FN:", metrics.falseNegatives);
-    FL_MESSAGE("  Precision:", metrics.precision(),
-            " Recall:", metrics.recall(),
-            " F1:", metrics.f1Score());
+    FL_MESSAGE("Timing jitter - TP:" << metrics.truePositives
+            << " FP:" << metrics.falsePositives
+            << " FN:" << metrics.falseNegatives);
+    FL_MESSAGE("  Precision:" << metrics.precision()
+            << " Recall:" << metrics.recall()
+            << " F1:" << metrics.f1Score());
 
     // Note: Currently failing due to lack of warm-up (see Iteration 5 analysis)
     // Metrics are valid even if F1=0
@@ -522,12 +520,12 @@ FL_TEST_CASE("DownbeatDetector - Confidence threshold impact") {
     detector2.setTimeSignature(4);
     DetectionMetrics metrics2 = runDetectorTest(detector2, groundTruth, 1.0f);
 
-    FL_MESSAGE("Threshold 0.3 - Precision:", metrics1.precision(),
-            " Recall:", metrics1.recall(),
-            " F1:", metrics1.f1Score());
-    FL_MESSAGE("Threshold 0.7 - Precision:", metrics2.precision(),
-            " Recall:", metrics2.recall(),
-            " F1:", metrics2.f1Score());
+    FL_MESSAGE("Threshold 0.3 - Precision:" << metrics1.precision()
+            << " Recall:" << metrics1.recall()
+            << " F1:" << metrics1.f1Score());
+    FL_MESSAGE("Threshold 0.7 - Precision:" << metrics2.precision()
+            << " Recall:" << metrics2.recall()
+            << " F1:" << metrics2.f1Score());
 
     // Lower threshold should have higher recall (catches more, may have false positives)
     // Higher threshold should have higher precision (fewer false positives, may miss some)
@@ -556,12 +554,12 @@ FL_TEST_CASE("DownbeatDetector - 3/4 waltz pattern") {
     // Enable logging to debug alignment issue
     DetectionMetrics metrics = runDetectorTest(detector, groundTruth, 1.0f, 0, true);
 
-    FL_MESSAGE("3/4 waltz - TP:", metrics.truePositives,
-            " FP:", metrics.falsePositives,
-            " FN:", metrics.falseNegatives);
-    FL_MESSAGE("  Precision:", metrics.precision(),
-            " Recall:", metrics.recall(),
-            " F1:", metrics.f1Score());
+    FL_MESSAGE("3/4 waltz - TP:" << metrics.truePositives
+            << " FP:" << metrics.falsePositives
+            << " FN:" << metrics.falseNegatives);
+    FL_MESSAGE("  Precision:" << metrics.precision()
+            << " Recall:" << metrics.recall()
+            << " F1:" << metrics.f1Score());
 
     // Target: F1 > 0.7 for clean synthetic data
     // With warm-up and proper alignment, should achieve good F1 score
@@ -589,7 +587,7 @@ FL_TEST_CASE("DownbeatDetector - Confidence analysis: strong vs weak accents") {
         }
 
         DetectionMetrics metrics = runDetectorTest(detector, groundTruth, 2.0f);
-        FL_MESSAGE("Strong accents - F1:", metrics.f1Score());
+        FL_MESSAGE("Strong accents - F1:" << metrics.f1Score());
     }
 
     FL_MESSAGE("\n=== WEAK ACCENTS (0.6x) ===");
@@ -607,7 +605,7 @@ FL_TEST_CASE("DownbeatDetector - Confidence analysis: strong vs weak accents") {
         }
 
         DetectionMetrics metrics = runDetectorTest(detector, groundTruth, 0.6f, 0, true);
-        FL_MESSAGE("Weak accents - F1:", metrics.f1Score());
+        FL_MESSAGE("Weak accents - F1:" << metrics.f1Score());
     }
 
     FL_MESSAGE("\n=== NORMAL ACCENTS (1.0x) ===");
@@ -625,7 +623,7 @@ FL_TEST_CASE("DownbeatDetector - Confidence analysis: strong vs weak accents") {
         }
 
         DetectionMetrics metrics = runDetectorTest(detector, groundTruth, 1.0f, 0, true);
-        FL_MESSAGE("Normal accents - F1:", metrics.f1Score());
+        FL_MESSAGE("Normal accents - F1:" << metrics.f1Score());
     }
 
     // This test is for diagnostics only - always passes
@@ -679,7 +677,7 @@ FL_TEST_CASE("DownbeatDetector - No time-skipping comparison") {
         confidenceValues.push_back(confidence);
 
         if (detector.isDownbeat()) {
-            FL_MESSAGE("Detection at t=", timestamp, " conf=", confidence);
+            FL_MESSAGE("Detection at t=" << timestamp << " conf=" << confidence);
 
             // Check if this matches any unmatched ground truth within tolerance
             bool matchedGT = false;
@@ -712,7 +710,7 @@ FL_TEST_CASE("DownbeatDetector - No time-skipping comparison") {
     for (size i = 0; i < groundTruth.size(); i++) {
         if (groundTruth[i].isDownbeat && !gtMatched[i]) {
             metrics.falseNegatives++;
-            FL_MESSAGE("MISSED downbeat at t=", groundTruth[i].timestamp);
+            FL_MESSAGE("MISSED downbeat at t=" << groundTruth[i].timestamp);
         }
     }
 
@@ -727,15 +725,15 @@ FL_TEST_CASE("DownbeatDetector - No time-skipping comparison") {
             sumConf += conf;
         }
         float avgConf = sumConf / static_cast<float>(confidenceValues.size());
-        FL_MESSAGE("Confidence range: [", minConf, ", ", maxConf, "] avg=", avgConf);
+        FL_MESSAGE("Confidence range: [" << minConf << ", " << maxConf << "] avg=" << avgConf);
     }
 
-    FL_MESSAGE("No time-skip - TP:", metrics.truePositives,
-            " FP:", metrics.falsePositives,
-            " FN:", metrics.falseNegatives);
-    FL_MESSAGE("  Precision:", metrics.precision(),
-            " Recall:", metrics.recall(),
-            " F1:", metrics.f1Score());
+    FL_MESSAGE("No time-skip - TP:" << metrics.truePositives
+            << " FP:" << metrics.falsePositives
+            << " FN:" << metrics.falseNegatives);
+    FL_MESSAGE("  Precision:" << metrics.precision()
+            << " Recall:" << metrics.recall()
+            << " F1:" << metrics.f1Score());
 
     // This test is for diagnostics only - always passes
     FL_CHECK(true);

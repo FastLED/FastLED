@@ -52,15 +52,8 @@ test_pch = custom_target('test_pch',
   install: false
 )
 
-# Doctest main for DLL mode - compiled separately without PCH to avoid namespace conflicts
-# This creates a static library that provides the run_tests() export function
-# NOTE: ENABLE_CRASH_HANDLER is removed - crash handler setup moved to runner.exe
-doctest_dll_main = static_library('doctest_dll_main',
-  'doctest_main.cpp',
-  include_directories: [tests_dir, src_dir, stub_dir],  # Add src and stub for platform headers
-  cpp_args: ['-DTEST_DLL_MODE', '-DFASTLED_STUB_IMPL'] + shared_no_exception_flags,  # Must match project ABI (-fno-rtti)
-  install: false
-)
+# NOTE: doctest_dll_main static library removed - sources now compiled directly into each test DLL
+# This ensures __declspec(dllexport) works properly on Windows for the run_tests() function
 
 # Build runner executable (static, generic DLL loader)
 # This executable loads a test DLL and calls its run_tests() function
@@ -162,7 +155,14 @@ foreach test_name : test_names
   test_file = test_file_paths.get(test_name, test_name + '.cpp')
 
   # Some tests need additional source files for ESP32 parallel SPI host simulation
-  test_sources = [test_file, test_pch]
+  # Compile DLL-mode test main directly into each test DLL (not via static library)
+  # This ensures __declspec(dllexport) works properly on Windows for the run_tests() export
+  test_sources = [
+    test_file,
+    test_pch,
+    'doctest_main.cpp',        # Include test main with run_tests() export and cleanup
+    'shared/fl_unittest.cpp',   # Include fl_unittest implementation
+  ]
   test_cpp_args = test_abs_include_args + unit_test_compile_args + [
     '-DTEST_DLL_MODE',                          # Define TEST_DLL_MODE for DLL builds
     '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
@@ -174,12 +174,20 @@ foreach test_name : test_names
   # No need to add it explicitly to individual tests anymore
 
   # Build test as a shared library (DLL)
-  # NOTE: No dependencies needed - libunwind moved to runner.exe
+  # Add system libraries needed by crash handler (dbghelp, psapi on Windows)
+  test_link_args = unit_test_link_args
+  test_link_with = [fastled_lib, crash_handler_lib]  # crash_handler_lib from root meson.build
+
+  if host_machine.system() == 'windows'
+    # Add Windows system libraries needed by crash handler
+    test_link_args += ['-ldbghelp', '-lpsapi']
+  endif
+
   test_dll = shared_library(test_name,
     test_sources,
     cpp_args: test_cpp_args,
-    link_args: unit_test_link_args,
-    link_with: [fastled_lib, doctest_dll_main],  # Use DLL-mode doctest main
+    link_args: test_link_args,
+    link_with: test_link_with,
     name_prefix: '',  # Remove 'lib' prefix on Windows (produce 'test.dll' not 'libtest.dll')
     install: false
   )

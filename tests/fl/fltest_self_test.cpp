@@ -4,7 +4,16 @@
 /// This test verifies that the fltest framework itself works correctly.
 /// It uses the FL_* macros to test basic functionality.
 
+// Suppress macro redefinition warnings from fl/fltest.h
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmacro-redefined"
 #include "fl/fltest.h"
+#pragma clang diagnostic pop
+
+// Include test.h to override fl/fltest.h macros with fl_unittest versions
+// This ensures tests register with fl_unittest's runner, not fltest's TestContext
+#include "test.h"
+
 #include "fl/geometry.h"  // For fl::rect
 #include "fl/stl/vector.h"  // For fl::vector
 #include "fl/stl/unordered_set.h"  // For fl::unordered_set

@@ -14,7 +14,7 @@ using namespace fl;
 FL_TEST_CASE("fl::tuple - empty tuple") {
     tuple<> t;
     (void)t; // Suppress unused variable warning
-    FL_CHECK_EQ(0u, tuple_size<tuple<>>::value);
+    FL_CHECK_EQ(0u, (unsigned int)tuple_size<tuple<>>::value);
 }
 
 FL_TEST_CASE("fl::tuple - basic construction") {
@@ -47,7 +47,7 @@ FL_TEST_CASE("fl::tuple - basic construction") {
 FL_TEST_CASE("fl::tuple - make_tuple") {
     FL_SUBCASE("empty tuple") {
         auto t = make_tuple();
-        FL_CHECK_EQ(0u, tuple_size<decltype(t)>::value);
+        FL_CHECK_EQ(0u, (unsigned int)tuple_size<decltype(t)>::value);
     }
 
     FL_SUBCASE("single element") {
@@ -99,11 +99,11 @@ FL_TEST_CASE("fl::tuple - get by index") {
 
 FL_TEST_CASE("fl::tuple - tuple_size") {
     FL_SUBCASE("empty") {
-        FL_CHECK_EQ(0u, tuple_size<tuple<>>::value);
+        FL_CHECK_EQ(0u, (unsigned int)tuple_size<tuple<>>::value);
     }
 
     FL_SUBCASE("one element") {
-        FL_CHECK_EQ(1u, tuple_size<tuple<int>>::value);
+        FL_CHECK_EQ(1u, (unsigned int)tuple_size<tuple<int>>::value);
     }
 
     FL_SUBCASE("multiple elements") {
@@ -117,9 +117,9 @@ FL_TEST_CASE("fl::tuple - tuple_size") {
         auto t2 = make_tuple();
         auto t3 = make_tuple(1, "test");
 
-        FL_CHECK_EQ(3u, tuple_size<decltype(t1)>::value);
-        FL_CHECK_EQ(0u, tuple_size<decltype(t2)>::value);
-        FL_CHECK_EQ(2u, tuple_size<decltype(t3)>::value);
+        FL_CHECK_EQ(3u, (unsigned int)tuple_size<decltype(t1)>::value);
+        FL_CHECK_EQ(0u, (unsigned int)tuple_size<decltype(t2)>::value);
+        FL_CHECK_EQ(2u, (unsigned int)tuple_size<decltype(t3)>::value);
     }
 }
 
@@ -248,7 +248,7 @@ FL_TEST_CASE("fl::tuple - edge cases") {
     FL_SUBCASE("single element tuple") {
         auto t = make_tuple(42);
         FL_CHECK_EQ(42, get<0>(t));
-        FL_CHECK_EQ(1u, tuple_size<decltype(t)>::value);
+        FL_CHECK_EQ(1u, (unsigned int)tuple_size<decltype(t)>::value);
     }
 
     FL_SUBCASE("large tuple") {
@@ -256,7 +256,7 @@ FL_TEST_CASE("fl::tuple - edge cases") {
         FL_CHECK_EQ(1, get<0>(t));
         FL_CHECK_EQ(5, get<4>(t));
         FL_CHECK_EQ(10, get<9>(t));
-        FL_CHECK_EQ(10u, tuple_size<decltype(t)>::value);
+        FL_CHECK_EQ(10u, (unsigned int)tuple_size<decltype(t)>::value);
     }
 
     FL_SUBCASE("tuple with same types") {

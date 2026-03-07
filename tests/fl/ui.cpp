@@ -514,9 +514,7 @@ FL_TEST_CASE("JsonConsole destructor cleanup") {
     FL_CHECK(true); // Test passed if no crashes occurred
 }
 
-FL_TEST_CASE("JsonConsole dump function" * doctest::skip()) {
-    // SKIPPED: Test crashes in destructor after handling invalid JSON
-    // This appears to be a race condition or memory corruption issue in fl::function cleanup
+FL_TEST_CASE("JsonConsole dump function", fl::test::skip()) {
     // Mock callback functions for testing
     fl::string capturedOutput;
     int availableCallCount = 0;
@@ -668,9 +666,8 @@ FL_TEST_CASE("JsonConsole dump function" * doctest::skip()) {
     FL_WARN("Test 6: After scope close");
 }
 
-// TEMPORARILY SKIP ALL REMAINING TESTS DUE TO JSON/UI CRASHES
-#if 0
-FL_TEST_CASE("JsonSlider step output behavior" * doctest::skip()) {
+// Use FL_TEST_CASE for remaining decorated tests
+FL_TEST_CASE("JsonSlider step output behavior", fl::test::skip()) {
     FL_WARN("JsonSlider step output behavior: TEST STARTING");
     // Test that step field is only output when explicitly set by user
 
@@ -736,14 +733,14 @@ FL_TEST_CASE("JsonSlider step output behavior" * doctest::skip()) {
 
 #endif // SKETCH_HAS_LOTS_OF_MEMORY
 
-FL_TEST_CASE("XYPath slider step serialization bug - C++ verification" * doctest::skip()) {
+FL_TEST_CASE("XYPath slider step serialization bug - C++ verification", fl::test::skip()) {
     // TEMP DISABLED: This test causes a segfault when extracting strings from JSON.
     // The bug appears to be in fl::json::as_string() or related optional/variant code.
     // See .agent_task/ITERATION_8.md for debugging details.
     // Test verifying that C++ JSON generation is correct for XYPath sliders
     // NOTE: This test confirms C++ is working correctly.
     // The actual bug is in browser/JavaScript JSON processing, not C++.
-    
+
     // Create sliders matching those in examples/XYPath/direct.h
     fl::JsonSliderImpl offset("Offset", 0.0f, 0.0f, 1.0f, 0.01f);
     fl::JsonSliderImpl steps("Steps", 100.0f, 1.0f, 200.0f, 1.0f);
@@ -1091,6 +1088,5 @@ FL_TEST_CASE("UI Bug - Memory Corruption") {
         fl::processJsonUiPendingUpdates();
     } // Components go out of scope here and should be properly destroyed
 }
-#endif
 
 } // FL_TEST_FILE
