@@ -36,7 +36,7 @@ template <typename T> class ThreadLocalReal {
     ThreadLocalReal() : mDefaultValue(), mHasDefault(false) {
         initializeKey();
     }
-    
+
     // With default: each thread's object is copy-constructed from defaultVal
     template <typename U>
     explicit ThreadLocalReal(const U &defaultVal) : mDefaultValue(defaultVal), mHasDefault(true) {
@@ -74,7 +74,7 @@ template <typename T> class ThreadLocalReal {
     }
 
     // Access the thread-local instance
-    T &access() { 
+    T &access() {
         ThreadStorage* storage = getStorage();
         if (!storage) {
             storage = createStorage();
@@ -83,10 +83,10 @@ template <typename T> class ThreadLocalReal {
             copyValue(storage->value, mDefaultValue);
             storage->initialized = true;
         }
-        return storage->value; 
+        return storage->value;
     }
-    
-    const T &access() const { 
+
+    const T &access() const {
         ThreadStorage* storage = getStorage();
         if (!storage) {
             storage = createStorage();
@@ -95,7 +95,7 @@ template <typename T> class ThreadLocalReal {
             copyValue(storage->value, mDefaultValue);
             storage->initialized = true;
         }
-        return storage->value; 
+        return storage->value;
     }
 
     // Set the value for this thread
@@ -106,7 +106,7 @@ template <typename T> class ThreadLocalReal {
     // Convenience operators
     operator T &() { return access(); }
     operator const T &() const { return access(); }
-    
+
     ThreadLocalReal &operator=(const T &v) {
         set(v);
         return *this;
@@ -132,13 +132,13 @@ template <typename T> class ThreadLocalReal {
         T value{};
         bool initialized = false;
     };
-    
+
     // POSIX thread key for this instance
     pthread_key_t mKey;
     bool mKeyInitialized = false;
     T mDefaultValue{};
     bool mHasDefault = false;
-    
+
     // Initialize the pthread key
     void initializeKey() {
         int result = pthread_key_create(&mKey, cleanupThreadStorage);
@@ -149,7 +149,7 @@ template <typename T> class ThreadLocalReal {
             mKeyInitialized = false;
         }
     }
-    
+
     // Get thread-specific storage
     ThreadStorage* getStorage() const {
         if (!mKeyInitialized) {
@@ -157,13 +157,13 @@ template <typename T> class ThreadLocalReal {
         }
         return static_cast<ThreadStorage*>(pthread_getspecific(mKey));
     }
-    
+
     // Create thread-specific storage
     ThreadStorage* createStorage() const {
         if (!mKeyInitialized) {
             return nullptr;
         }
-        
+
         ThreadStorage* storage = new ThreadStorage();  // ok bare allocation
         int result = pthread_setspecific(mKey, storage);
         if (result != 0) {
@@ -172,7 +172,7 @@ template <typename T> class ThreadLocalReal {
         }
         return storage;
     }
-    
+
     // Cleanup function called when thread exits
     static void cleanupThreadStorage(void* data) {
         if (data) {
@@ -206,7 +206,7 @@ template <typename T> class ThreadLocalFake {
     // Convenience operators for "ThreadLocal<T> = x;"
     operator T &() { return access(); }
     operator const T &() const { return access(); }
-    
+
     ThreadLocalFake &operator=(const T &v) {
         set(v);
         return *this;

@@ -5,7 +5,7 @@
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 
-#include "fl/thread_local.h"
+#include "fl/stl/thread_local.h"
 #include "fl/stl/vector.h"
 
 namespace fl {

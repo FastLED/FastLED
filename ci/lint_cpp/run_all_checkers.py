@@ -70,6 +70,7 @@ from ci.lint_cpp.test_unity_build import check as check_unity_build
 from ci.lint_cpp.test_unity_build import (
     check_single_file as check_unity_build_single_file,
 )
+from ci.lint_cpp.thread_local_keyword_checker import ThreadLocalKeywordChecker
 from ci.lint_cpp.unit_test_checker import UnitTestChecker
 from ci.lint_cpp.using_namespace_fl_in_examples_checker import (
     UsingNamespaceFlInExamplesChecker,
@@ -169,6 +170,7 @@ def create_checkers(
         SpanFromPointerChecker(),  # Checks for span<T>(container.data(), container.size()) → span<T>(container)
         BareAllocationChecker(),  # Checks for bare new/delete/malloc/free — use fl::unique_ptr/fl::shared_ptr
         SleepForChecker(),  # Checks for sleep_for() — bypasses async runner, use fl::yield/fl::async_run
+        ThreadLocalKeywordChecker(),  # Checks for thread_local keyword — use fl::ThreadLocal<T>
         # Note: Private libc++ headers checking is now integrated into BannedHeadersChecker
         # Note: _build.hpp hierarchy checking is now integrated into test_unity_build.py
     ]

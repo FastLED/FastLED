@@ -268,7 +268,7 @@
 
 #include "fl/stl/limits.h"     // For fl::numeric_limits (instead of limits.h)
 #include "fl/math_macros.h"    // For FL_PI
-#include "fl/thread_local.h"   // For ThreadLocal (thread-safe temp buffer)
+#include "fl/stl/thread_local.h"   // For ThreadLocal (thread-safe temp buffer)
 #include "fl/stl/vector.h"     // For fl::vector (heap temp buffer)
 
 // FastLED integration: use fl::FILE* for file I/O abstraction

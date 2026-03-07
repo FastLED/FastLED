@@ -225,7 +225,7 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
     ],
     # Threading and synchronization
     "pthread.h": [
-        HeaderException("fl/thread_local.h", "Platform threading abstraction"),
+        HeaderException("fl/stl/thread_local.h", "Platform threading abstraction"),
     ],
     "mutex": [
         HeaderException("fl/stl/mutex.h", "Wrapper for platform mutex"),
