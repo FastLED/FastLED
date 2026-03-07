@@ -109,6 +109,14 @@ public:
         mContainer.push_back(fl::move(value));
     }
 
+    /// @brief Construct and add an element to the back of the queue
+    /// @tparam Args Argument types for element construction
+    /// @param args Arguments to forward to element constructor
+    template<typename... Args>
+    void emplace(Args&&... args) {
+        mContainer.emplace_back(fl::forward<Args>(args)...);
+    }
+
     /// @brief Remove the front element from the queue
     /// @note Undefined behavior if queue is empty
     void pop() {

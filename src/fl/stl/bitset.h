@@ -486,6 +486,25 @@ class bitset_inlined {
         return *this;
     }
 
+    /// Add a bit to the end (initialized to 0)
+    void push_back() {
+        fl::u32 new_size = size() + 1;
+        resize(new_size);
+    }
+
+    /// Emplace back - for consistency with other containers
+    template<typename... Args>
+    void emplace_back(Args&&... args) {
+        push_back();  // bitset bits are bool, just expand
+    }
+
+    /// Remove the last bit
+    void pop_back() {
+        if (size() > 0) {
+            resize(size() - 1);
+        }
+    }
+
     /// Tests whether the bit at position pos is set.
     bool test(fl::u32 pos) const noexcept {
         if (_storage.template is<fixed_bitset>()) {

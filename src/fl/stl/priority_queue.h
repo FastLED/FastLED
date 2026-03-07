@@ -83,6 +83,17 @@ class PriorityQueue {
         push_heap(_data.begin(), _data.end(), _comp);
     }
 
+    void push(T &&value) {
+        _data.push_back(fl::move(value));
+        push_heap(_data.begin(), _data.end(), _comp);
+    }
+
+    template<typename... Args>
+    void emplace(Args&&... args) {
+        _data.emplace_back(fl::forward<Args>(args)...);
+        push_heap(_data.begin(), _data.end(), _comp);
+    }
+
     void pop() {
         pop_heap(_data.begin(), _data.end(), _comp);
         _data.pop_back();
@@ -161,6 +172,11 @@ public:
      */
     void push(const T& value) {
         mQueue.push({value, mNextSequence++});
+    }
+
+    template<typename... Args>
+    void emplace(Args&&... args) {
+        mQueue.push({T(fl::forward<Args>(args)...), mNextSequence++});
     }
 
     /**

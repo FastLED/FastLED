@@ -202,6 +202,16 @@ class FL_ALIGN FixedVector {
         }
     }
 
+    // Emplace back - construct in place
+    template<typename... Args>
+    void emplace_back(Args&&... args) {
+        if (current_size < N) {
+            void *mem = &memory()[current_size];
+            new (mem) T(fl::forward<Args>(args)...);
+            ++current_size;
+        }
+    }
+
     void reserve(fl::size n) {
         if (n > N) {
             // This is a no-op for fixed size vectors
@@ -1339,6 +1349,26 @@ class FL_ALIGN InlinedVector {
             mHeap.push_back(fl::move(value));
         } else {
             mFixed.push_back(fl::move(value));
+        }
+    }
+
+    // Emplace back - construct in place
+    template<typename... Args>
+    void emplace_back(Args&&... args) {
+        if (mUsingHeap || mFixed.size() == INLINED_SIZE) {
+            if (!mUsingHeap && mFixed.size() == INLINED_SIZE) {
+                // Spill to heap
+                mHeap.clear();
+                mHeap.reserve(INLINED_SIZE + 1);
+                for (auto &v : mFixed) {
+                    mHeap.push_back(fl::move(v));
+                }
+                mFixed.clear();
+                mUsingHeap = true;
+            }
+            mHeap.emplace_back(fl::forward<Args>(args)...);
+        } else {
+            mFixed.emplace_back(fl::forward<Args>(args)...);
         }
     }
 

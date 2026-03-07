@@ -152,6 +152,18 @@ class bitset_dynamic {
         _size = 0;
     }
 
+    // Add a bit to the end (initialized to 0)
+    void push_back() {
+        resize(_size + 1);
+    }
+
+    // Remove the last bit
+    void pop_back() {
+        if (_size > 0) {
+            resize(_size - 1);
+        }
+    }
+
     // Reset all bits to 0
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING_NULL_DEREFERENCE

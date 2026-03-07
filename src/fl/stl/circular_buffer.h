@@ -38,6 +38,21 @@ class circular_buffer_core {
         return true;
     }
 
+    template<typename... Args>
+    bool emplace_back(Args&&... args) {
+        if (mCapacity == 0) return false;
+        if (mFull) {
+            // Overwrite oldest: advance tail
+            mTail = increment(mTail);
+        }
+        mData[mHead] = T(fl::forward<Args>(args)...);
+        mHead = increment(mHead);
+        if (mHead == mTail) {
+            mFull = true;
+        }
+        return true;
+    }
+
     bool pop_front(T *dst = nullptr) {
         if (empty()) {
             return false;
@@ -59,6 +74,21 @@ class circular_buffer_core {
         }
         mTail = decrement(mTail);
         mData[mTail] = value;
+        if (mHead == mTail) {
+            mFull = true;
+        }
+        return true;
+    }
+
+    template<typename... Args>
+    bool emplace_front(Args&&... args) {
+        if (mCapacity == 0) return false;
+        if (mFull) {
+            // Overwrite newest: retreat head
+            mHead = decrement(mHead);
+        }
+        mTail = decrement(mTail);
+        mData[mTail] = T(fl::forward<Args>(args)...);
         if (mHead == mTail) {
             mFull = true;
         }
@@ -187,6 +217,12 @@ class circular_buffer {
     void push(const T &value) { mCore.push_back(value); }
     bool push_back(const T &value) { return mCore.push_back(value); }
     bool push_front(const T &value) { return mCore.push_front(value); }
+
+    template<typename... Args>
+    bool emplace_back(Args&&... args) { return mCore.emplace_back(fl::forward<Args>(args)...); }
+
+    template<typename... Args>
+    bool emplace_front(Args&&... args) { return mCore.emplace_front(fl::forward<Args>(args)...); }
 
     bool pop(T &value) { return mCore.pop_front(&value); }
     bool pop_front(T *dst = nullptr) { return mCore.pop_front(dst); }
