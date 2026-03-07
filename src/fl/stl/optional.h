@@ -31,8 +31,8 @@ template <typename T> class Optional {
     /// Emplace with rvalue reference
     void emplace(T &&value) { mValue = fl::move(value); }
 
-    /// Emplace with variadic template arguments for in-place construction
-    template<typename... Args>
+    /// @brief Construct value in-place with variadic arguments
+    template <typename... Args>
     void emplace(Args&&... args) {
         mValue = T(fl::forward<Args>(args)...);
     }

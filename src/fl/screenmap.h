@@ -21,11 +21,15 @@ template<typename Signature> class function;
 template<typename T> struct vec2;
 using vec2f = vec2<float>;
 
+// Forward declare XYMap for optional source storage
+class XYMap;
+
 // Forward declare LUT types and smart pointers
 template<typename T> class LUT;
 using LUTXYFLOAT = LUT<vec2f>;
 template<typename T> class shared_ptr;  // IWYU pragma: keep
 using LUTXYFLOATPtr = shared_ptr<LUTXYFLOAT>;
+using XYMapPtr = shared_ptr<XYMap>;
 
 // ScreenMap screen map maps strip indexes to x,y coordinates for a ui
 // canvas in float format.
@@ -98,11 +102,28 @@ class ScreenMap {
                           string *jsonBuffer);
     static void toJson(const fl::map<string, ScreenMap> &, fl::json *doc);
 
+    /// @brief Set the source XYMap (used for pixel transformation during encoding)
+    /// @param xymap Source XYMap that this ScreenMap was created from (can be nullptr)
+    void setSourceXYMap(const fl::shared_ptr<XYMap>& xymap);
+
+    /// @brief Get the source XYMap shared pointer if available
+    /// @return Shared pointer to source XYMap or nullptr if not set
+    const XYMapPtr& getSourceXYMapPtr() const;
+
+    /// @brief Get the source XYMap as a raw const pointer
+    /// @return Raw const pointer to source XYMap or nullptr if not set
+    const XYMap* getXYMap() const;
+
+    /// @brief Check if source XYMap is available
+    /// @return true if source XYMap was stored
+    bool hasSourceXYMap() const;
+
   private:
     static const vec2f &empty();
     u32 length = 0;
     float mDiameter = -1.0f; // Only serialized if it's not > 0.0f.
     LUTXYFLOATPtr mLookUpTable;
+    XYMapPtr mSourceXYMap;  // Optional: source XYMap for encoding pipeline
 };
 
 } // namespace fl

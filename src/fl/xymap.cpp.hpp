@@ -18,6 +18,8 @@ ScreenMap XYMap::toScreenMap() const {
             out.set(index, p);
         }
     }
+    // Store a shared_ptr to this XYMap so it can be used for encoding
+    out.setSourceXYMap(fl::make_shared<XYMap>(*this));
     return out;
 }
 

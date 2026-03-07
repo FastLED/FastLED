@@ -25,8 +25,83 @@
 #include "fl/stl/iterator.h"
 #include "fl/engine_events.h"
 #include "fl/xymap.h"
+#include "fl/stl/thread_local.h"
 
 namespace fl {
+
+namespace {
+
+/// @brief Encapsulates pixel iterator construction with optional XYMap reordering
+class ReorderingPixelIteratorAny {
+  private:
+    /// @brief Get thread-local buffer for addressing transformation
+    /// @return Reference to thread-local CRGB vector (reused across calls)
+    static fl::vector<CRGB>& getReorderBufferTLS() {
+        static fl::ThreadLocal<fl::vector<CRGB>> buffer;
+        return buffer.access();
+    }
+    fl::optional<PixelController<RGB, 1, 0xFFFFFFFF>> mAddressedController;
+    PixelIteratorAny mPixelIterator;
+
+  public:
+    /// @brief Construct pixel iterator with optional addressing transformation
+    /// @param pixels Source pixel controller
+    /// @param addressing Optional XYMap for transformation
+    /// @param rgbOrder RGB color order
+    /// @param rgbw RGBW settings
+    /// @param channelName Channel name for error messages
+    ReorderingPixelIteratorAny(
+        PixelController<RGB, 1, 0xFFFFFFFF>& pixels,
+        const XYMap* addressing,
+        EOrder rgbOrder,
+        Rgbw rgbw,
+        const fl::string& channelName)
+        : mPixelIterator(pixels, rgbOrder, rgbw) {
+
+        // Apply addressing transformation if configured
+        if (addressing) {
+            u16 numLeds = pixels.size();
+            u16 width = addressing->getWidth();
+            u16 height = addressing->getHeight();
+            u16 expectedLeds = width * height;
+
+            // Validate that XYMap dimensions match channel LED count
+            if (expectedLeds != numLeds) {
+                FL_ERROR("Channel '" << channelName << "': XYMap dimensions (" << width << "x" << height
+                        << "=" << expectedLeds << ") don't match LED count (" << numLeds
+                        << "). Addressing transformation may produce unexpected results.");
+            }
+
+            // Cast mData to CRGB array
+            const CRGB* pixelArray = (const CRGB*)pixels.mData;
+
+            // Get thread-local buffer (reuses allocation if size unchanged)
+            fl::vector<CRGB>& buffer = getReorderBufferTLS();
+            buffer.clear();
+            buffer.resize(numLeds);
+
+            // Fill buffer by mapping each physical index to its source
+            for (u16 physicalIdx = 0; physicalIdx < numLeds; physicalIdx++) {
+                u16 x = physicalIdx % width;
+                u16 y = physicalIdx / width;
+                u16 sourceIdx = addressing->mapToIndex(x, y);
+                buffer[physicalIdx] = (sourceIdx < numLeds) ? pixelArray[sourceIdx] : CRGB::Black;
+            }
+
+            // Construct PixelController with reordered buffer
+            mAddressedController.emplace(
+                buffer.data(), buffer.size(),
+                pixels.mColorAdjustment, DISABLE_DITHER);
+            mPixelIterator = PixelIteratorAny(mAddressedController.value(), rgbOrder, rgbw);
+        }
+    }
+
+    /// @brief Get the constructed pixel iterator
+    PixelIterator& get() { return mPixelIterator.get(); }
+    const PixelIterator& get() const { return mPixelIterator.get(); }
+};
+
+}  // anonymous namespace
 
 
 i32 Channel::nextId() {
@@ -242,9 +317,9 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
         return;
     }
 
-    // Create pixel iterator with color order and RGBW conversion
-    PixelIteratorAny any(pixels, mRgbOrder, mSettings.mRgbw);
-    PixelIterator& pixelIterator = any;
+    // Build pixel iterator with optional addressing transformation
+    ReorderingPixelIteratorAny iterator(pixels, mScreenMap.getXYMap(), mRgbOrder, mSettings.mRgbw, mName);
+    PixelIterator& pixelIterator = iterator.get();
 
     // Encode pixels based on chipset type
     auto& data = mChannelData->getData();

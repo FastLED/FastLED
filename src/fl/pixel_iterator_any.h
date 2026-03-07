@@ -7,9 +7,15 @@
 #include "pixel_controller.h"
 #include "fl/stl/variant.h"
 #include "fl/stl/optional.h"
+#include "fl/stl/vector.h"
 #include "rgbw.h"
 
 namespace fl {
+
+// Forward declarations
+class XYMap;
+
+
 
 /// @brief Adapter class that creates a PixelIterator from any color order
 ///
@@ -33,9 +39,16 @@ class PixelIteratorAny {
 
     /// @brief Get the type-erased PixelIterator
     PixelIterator& get() { return *mPixelIterator; }
+    const PixelIterator& get() const { return *mPixelIterator; }
 
     /// @brief Implicit conversion to PixelIterator reference
     operator PixelIterator&() { return *mPixelIterator; }
+
+    /// @brief Set XYMap for pixel addressing
+    /// @param xymap XYMap with embedded width/height (nullptr to disable)
+    void setXYMap(const fl::shared_ptr<const XYMap>& xymap) {
+        mXyMap = xymap;
+    }
 
     /// @brief Initialize the adapter with color order conversion
     void init(PixelController<RGB> &controller, EOrder newOrder) {
@@ -104,6 +117,9 @@ class PixelIteratorAny {
     fl::Optional<PixelIterator> mPixelIterator;
 
     Rgbw mRgbw;
+
+    // XYMap for pixel addressing (optional) - contains embedded width/height
+    fl::shared_ptr<const XYMap> mXyMap;
 };
 
 }  // namespace fl

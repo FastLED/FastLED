@@ -376,7 +376,7 @@ struct PixelController {
 
     /// Get the length of the LED strip
     /// @returns PixelController::mLen
-    FASTLED_FORCE_INLINE int size() { return mLen; }
+    FASTLED_FORCE_INLINE int size() const { return mLen; }
 
     /// Get the number of lanes of the Controller
     /// @returns LANES from template

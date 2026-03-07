@@ -359,13 +359,16 @@ ScreenMap::ScreenMap(const ScreenMap &other) {
     mDiameter = other.mDiameter;
     length = other.length;
     mLookUpTable = other.mLookUpTable;
+    mSourceXYMap = other.mSourceXYMap;
 }
 
 ScreenMap::ScreenMap(ScreenMap&& other) {
     mDiameter = other.mDiameter;
     length = other.length;
     fl::swap(mLookUpTable, other.mLookUpTable);
+    fl::swap(mSourceXYMap, other.mSourceXYMap);
     other.mLookUpTable.reset();
+    other.mSourceXYMap.reset();
 }
 
 void ScreenMap::set(u16 index, const vec2f &p) {
@@ -447,6 +450,7 @@ ScreenMap &ScreenMap::operator=(const ScreenMap &other) {
         mDiameter = other.mDiameter;
         length = other.length;
         mLookUpTable = other.mLookUpTable;
+        mSourceXYMap = other.mSourceXYMap;
     }
     return *this;
 }
@@ -456,10 +460,27 @@ ScreenMap &ScreenMap::operator=(ScreenMap &&other) {
         mDiameter = other.mDiameter;
         length = other.length;
         mLookUpTable = fl::move(other.mLookUpTable);
+        mSourceXYMap = fl::move(other.mSourceXYMap);
         other.length = 0;
         other.mDiameter = -1.0f;
     }
     return *this;
+}
+
+void ScreenMap::setSourceXYMap(const fl::shared_ptr<XYMap>& xymap) {
+    mSourceXYMap = xymap;
+}
+
+const XYMapPtr& ScreenMap::getSourceXYMapPtr() const {
+    return mSourceXYMap;
+}
+
+const XYMap* ScreenMap::getXYMap() const {
+    return mSourceXYMap.get();
+}
+
+bool ScreenMap::hasSourceXYMap() const {
+    return mSourceXYMap != nullptr;
 }
 
 void ScreenMap::addOffset(const vec2f &p) {
