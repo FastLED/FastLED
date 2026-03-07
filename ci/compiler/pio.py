@@ -541,13 +541,11 @@ class PioCompiler(Compiler):
             return f"{cache_name.upper()} not found in PATH"
 
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 [cache_path, "--show-stats"],
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
+                cwd=None,
                 check=False,
+                timeout=10,
             )
 
             if result.returncode == 0:
@@ -901,12 +899,11 @@ class PioCompiler(Compiler):
     def _get_user_groups(self) -> list[str]:
         """Get list of groups the current user belongs to."""
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 ["groups"],
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
+                cwd=None,
+                check=False,
+                timeout=10,
             )
             if result.returncode == 0:
                 return result.stdout.strip().split()
@@ -973,16 +970,15 @@ class PioCompiler(Compiler):
             print("💾 Installing udev rules (requires sudo)...")
 
             # Use sudo to copy to system location
-            result = subprocess.run(
+            result = RunningProcess.run(
                 ["sudo", "cp", temp_file, udev_rules_path],
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
+                cwd=None,
+                check=False,
+                timeout=10,
             )
 
             if result.returncode != 0:
-                print(f"ERROR: Failed to install udev rules: {result.stderr}")
+                print(f"ERROR: Failed to install udev rules: {result.stdout}")
                 return False
 
             # Clean up temp file
@@ -1141,32 +1137,44 @@ class PioCompiler(Compiler):
         print(f"Running esptool merge_bin: {' '.join(merge_cmd)}")
 
         try:
-            merge_proc = subprocess.run(
+            merge_proc = RunningProcess(
                 merge_cmd,
-                capture_output=True,
-                text=True,
-                timeout=300,
                 env=get_pio_execution_env(),
+                auto_run=True,
+                timeout=300,
             )
-        except subprocess.TimeoutExpired:
-            return SketchResult(
-                success=False,
-                output="esptool merge_bin timed out after 300 seconds",
-                build_dir=self.build_dir,
-                example=example,
-            )
+            output = ""
+            while line := merge_proc.get_next_line(timeout=300):
+                if isinstance(line, EndOfStream):
+                    break
+                output += line
+            exit_code = merge_proc.wait()
+            if exit_code != 0:
+                return SketchResult(
+                    success=False,
+                    output=f"esptool merge_bin failed: {output}",
+                    build_dir=self.build_dir,
+                    example=example,
+                )
+        except RuntimeError as e:
+            if "timeout" in str(e).lower():
+                return SketchResult(
+                    success=False,
+                    output="esptool merge_bin timed out after 300 seconds",
+                    build_dir=self.build_dir,
+                    example=example,
+                )
+            else:
+                return SketchResult(
+                    success=False,
+                    output=f"esptool failed: {e}",
+                    build_dir=self.build_dir,
+                    example=example,
+                )
         except FileNotFoundError:
             return SketchResult(
                 success=False,
                 output="esptool not found. Please install: uv pip install esptool",
-                build_dir=self.build_dir,
-                example=example,
-            )
-
-        if merge_proc.returncode != 0:
-            return SketchResult(
-                success=False,
-                output=f"esptool merge_bin failed: {merge_proc.stderr}\n{merge_proc.stdout}",
                 build_dir=self.build_dir,
                 example=example,
             )

@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from running_process import RunningProcess
+
 
 def run_command(command: list[str], show_output: bool = False) -> str:
     """
@@ -21,9 +23,9 @@ def run_command(command: list[str], show_output: bool = False) -> str:
     """
     if show_output:
         print(f"Running command: {' '.join(command)}")
-    result = subprocess.run(command, capture_output=True, text=True)
+    result = RunningProcess.run(command, cwd=None, check=False, timeout=60)
     if result.returncode != 0:
-        raise RuntimeError(f"Command failed: {' '.join(command)}\n{result.stderr}")
+        raise RuntimeError(f"Command failed: {' '.join(command)}\n{result.stdout}")
     if show_output and result.stdout:
         print(f"Command output: {result.stdout}")
     return result.stdout
@@ -81,7 +83,7 @@ def dump_symbol_sizes(nm_path: Path, cpp_filt_path: Path, elf_file: Path) -> str
     ]
     print(f"Listing symbols and sizes in ELF file: {elf_file}")
     print("Running command: ", " ".join(nm_command))
-    nm_result = subprocess.run(
+    nm_result = subprocess.run(  # noqa - stdin piping chain below (not a deadlock risk)
         nm_command,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

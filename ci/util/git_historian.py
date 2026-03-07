@@ -16,6 +16,8 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
+from running_process import RunningProcess
+
 
 # --- tiny helpers ------------------------------------------------------------
 
@@ -23,19 +25,18 @@ from pathlib import Path
 def _run(cmd: str, timeout: float = 3.0) -> str:
     """Run a command and return stdout (best-effort; never raises on nonzero)."""
     try:
-        out = subprocess.run(
+        out = RunningProcess.run(
             shlex.split(cmd),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
-            timeout=timeout,
+            cwd=None,
             check=False,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
+            timeout=int(timeout),
         )
         return out.stdout
-    except subprocess.TimeoutExpired:
-        return ""
+    except RuntimeError as e:
+        if "timeout" in str(e).lower():
+            return ""
+        else:
+            return ""
     except KeyboardInterrupt:
         handle_keyboard_interrupt_properly()
         raise

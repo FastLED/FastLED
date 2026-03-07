@@ -296,14 +296,13 @@ class ProfileRunner:
                         f"/fastled/.build/meson-{self.build_mode}/tests/profile/{self.test_name}",
                         "baseline",
                     ]
-                    result = subprocess.run(
+                    result = RunningProcess.run(
                         docker_cmd,
-                        capture_output=True,
-                        text=True,
-                        check=True,
+                        cwd=None,
+                        check=False,
                         timeout=120,
                     )
-                    output = result.stdout + result.stderr
+                    output = result.stdout
                 else:
                     # Local: Use custom timeout with debugger attachment
                     cmd = [str(binary_path), "baseline"]
@@ -480,6 +479,7 @@ ls -lh /fastled/callgrind.out
                     ],
                     capture_output=False,  # Show output in real-time
                     check=False,
+                    timeout=300,
                 )
 
                 # Cleanup temp script (keep on error for debugging)
@@ -492,7 +492,7 @@ ls -lh /fastled/callgrind.out
 
                     # Run callgrind_annotate to parse results
                     print("\n📊 Parsing callgrind results...")
-                    annotate_result = subprocess.run(
+                    annotate_result = RunningProcess.run(
                         [
                             "docker",
                             "run",
@@ -504,9 +504,9 @@ ls -lh /fastled/callgrind.out
                             "--auto=yes",
                             "/fastled/callgrind.out",
                         ],
-                        capture_output=True,
-                        text=True,
+                        cwd=None,
                         check=False,
+                        timeout=120,
                     )
 
                     if annotate_result.returncode == 0:
@@ -520,7 +520,7 @@ ls -lh /fastled/callgrind.out
                                 "   View full output: callgrind_annotate --auto=yes callgrind.out"
                             )
                     else:
-                        print(f"⚠️  callgrind_annotate failed: {annotate_result.stderr}")
+                        print(f"⚠️  callgrind_annotate failed: {annotate_result.stdout}")
                         print("   View manually with: callgrind_annotate callgrind.out")
 
                     return True

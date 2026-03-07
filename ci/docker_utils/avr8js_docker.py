@@ -15,6 +15,8 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+from running_process import RunningProcess
+
 
 class DockerAVR8jsRunner:
     """Run AVR firmware in avr8js Docker container"""
@@ -47,24 +49,24 @@ class DockerAVR8jsRunner:
     def check_docker_available(self) -> bool:
         """Check if Docker is available and running"""
         try:
-            result = subprocess.run(
-                ["docker", "version"], capture_output=True, timeout=5
+            result = RunningProcess.run(
+                ["docker", "version"], cwd=None, check=False, timeout=5
             )
             return result.returncode == 0
-        except (subprocess.TimeoutExpired, FileNotFoundError):
+        except (RuntimeError, FileNotFoundError):
             return False
 
     def check_image_exists(self, image_name: str) -> bool:
         """Check if Docker image exists locally"""
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 ["docker", "images", "-q", image_name],
-                capture_output=True,
-                text=True,
+                cwd=None,
+                check=False,
                 timeout=10,
             )
             return bool(result.stdout.strip())
-        except (subprocess.TimeoutExpired, FileNotFoundError):
+        except (RuntimeError, FileNotFoundError):
             return False
 
     def pull_image(self) -> None:
@@ -146,19 +148,15 @@ class DockerAVR8jsRunner:
 
         try:
             # Run Docker container and capture output
-            result = subprocess.run(
+            result = RunningProcess.run(
                 docker_cmd,
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
+                cwd=None,
+                check=False,
                 timeout=timeout + 10,  # Add buffer to Docker timeout
             )
 
-            # Combine stdout and stderr
+            # Combine stdout (stderr merged by RunningProcess.run)
             output = result.stdout or ""
-            if result.stderr:
-                output += "\n" + result.stderr
 
             print(f"{'-' * 70}")
             print("Emulator output:")
@@ -189,8 +187,11 @@ class DockerAVR8jsRunner:
         except KeyboardInterrupt:
             handle_keyboard_interrupt_properly()
             raise
-        except subprocess.TimeoutExpired:
-            print(f"\n❌ Docker timeout after {timeout}s")
+        except RuntimeError as e:
+            if "timeout" in str(e).lower():
+                print(f"\n❌ Docker timeout after {timeout}s")
+            else:
+                print(f"\n❌ Docker error: {e}")
             return 1
         except Exception as e:
             print(f"\n❌ Docker error: {e}")
@@ -200,7 +201,7 @@ class DockerAVR8jsRunner:
         """Check if Docker image exists, build if needed"""
         try:
             check_cmd = ["docker", "images", "-q", self.docker_image]
-            result = subprocess.run(check_cmd, capture_output=True, text=True)
+            result = RunningProcess.run(check_cmd, cwd=None, check=False, timeout=10)
 
             if not result.stdout.strip():
                 print(f"Docker image {self.docker_image} not found")
@@ -288,8 +289,6 @@ def main() -> None:
     except KeyboardInterrupt:
         handle_keyboard_interrupt_properly()
         raise
-        print("\n⚠️  Interrupted by user")
-        sys.exit(130)
     except Exception as e:
         print(f"❌ Error: {e}")
         sys.exit(1)

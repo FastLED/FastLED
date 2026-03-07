@@ -41,11 +41,12 @@ Options:
 
 import json
 import os
-import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
+
+from running_process import RunningProcess
 
 
 class CompilePerfAnalyzer:
@@ -581,11 +582,11 @@ def compile_with_trace(
     print(f"Compiling with: {' '.join(cmd)}", file=sys.stderr)
 
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+        result = RunningProcess.run(cmd, cwd=None, check=False, timeout=60)
 
         if result.returncode != 0:
             print("Compilation failed:", file=sys.stderr)
-            print(result.stderr, file=sys.stderr)
+            print(result.stdout, file=sys.stderr)
             sys.exit(1)
 
         if not trace_file.exists():
@@ -598,8 +599,9 @@ def compile_with_trace(
 
         return trace_file
 
-    except subprocess.TimeoutExpired:
-        print("Compilation timed out after 60 seconds", file=sys.stderr)
+    except RuntimeError as e:
+        if "timeout" in str(e).lower():
+            print("Compilation timed out after 60 seconds", file=sys.stderr)
         sys.exit(1)
     except FileNotFoundError:
         print(f"Error: Compiler '{compiler}' not found", file=sys.stderr)

@@ -79,12 +79,11 @@ def get_test_counts() -> tuple[int, int, int]:
         # Count Python tests by running pytest --collect-only
         python_count = 0
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 ["uv", "run", "pytest", "--collect-only", "-q", "ci/tests"],
-                capture_output=True,
-                text=True,
-                timeout=10,
+                cwd=None,
                 check=False,
+                timeout=10,
             )
             if result.returncode == 0:
                 # Parse output to count tests
@@ -94,7 +93,7 @@ def get_test_counts() -> tuple[int, int, int]:
         except KeyboardInterrupt:
             handle_keyboard_interrupt_properly()
             raise
-        except (subprocess.SubprocessError, subprocess.TimeoutExpired):
+        except (subprocess.SubprocessError, RuntimeError):
             # If counting fails, use 0 as fallback
             python_count = 0
 

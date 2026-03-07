@@ -3,6 +3,8 @@ import subprocess
 import sys
 from typing import Optional
 
+from running_process import RunningProcess
+
 from ci.util.docker_command import get_docker_command
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 
@@ -44,7 +46,6 @@ class DockerManager:
             import re
             import time
 
-            from running_process import RunningProcess
             from running_process.process_output_reader import EndOfStream
 
             proc = RunningProcess(full_command, env=env, auto_run=True)
@@ -114,11 +115,18 @@ class DockerManager:
                     try:
                         # Stop the container - this will cause the docker run command to exit
                         # Use --time=1 for faster shutdown (1 second grace period before SIGKILL)
-                        stop_proc = subprocess.run(
+                        stop_proc_obj = RunningProcess(
                             ["docker", "stop", "--time=1", container_name],
-                            capture_output=True,
-                            timeout=10,
                             env=env,
+                            auto_run=True,
+                            timeout=10,
+                        )
+                        stop_returncode = stop_proc_obj.wait()
+                        stop_proc = subprocess.CompletedProcess(
+                            args=["docker", "stop", "--time=1", container_name],
+                            returncode=stop_returncode,
+                            stdout=stop_proc_obj.stdout,
+                            stderr=None,
                         )
                         if stop_proc.returncode != 0:
                             print(
@@ -167,15 +175,19 @@ class DockerManager:
                 if output_handle:
                     output_handle.close()
         else:
-            # Use regular subprocess for non-streaming commands
-            result = subprocess.run(
+            # Use RunningProcess for non-streaming commands with env parameter
+            proc = RunningProcess(
                 full_command,
-                capture_output=True,
-                text=True,
-                check=check,
                 env=env,
-                encoding="utf-8",
-                errors="replace",
+                auto_run=True,
+                timeout=timeout,
+            )
+            returncode = proc.wait()
+            result = subprocess.CompletedProcess(
+                args=full_command,
+                returncode=returncode,
+                stdout=proc.stdout,
+                stderr=None,
             )
             if check and result.returncode != 0:
                 print(
@@ -183,7 +195,6 @@ class DockerManager:
                     file=sys.stderr,
                 )
                 print(f"Stdout: {result.stdout}", file=sys.stderr)
-                print(f"Stderr: {result.stderr}", file=sys.stderr)
             return result
 
     def pull_image(self, image_name: str, tag: str = "latest"):

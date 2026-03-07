@@ -6,6 +6,8 @@ import sys
 import time
 from pathlib import Path
 
+from running_process import RunningProcess
+
 from ci.cpp_lint_cache import (
     check_cpp_files_changed,
     invalidate_cpp_cache,
@@ -97,7 +99,7 @@ def run_clang_tidy(no_fingerprint: bool, run_tidy: bool) -> bool:
             compiler_args.extend(["-x", "c++-header"])
 
         # Run clang-tidy using clang-tool-chain wrapper via uv
-        result = subprocess.run(
+        result = RunningProcess.run(
             [
                 "uv",
                 "run",
@@ -106,8 +108,9 @@ def run_clang_tidy(no_fingerprint: bool, run_tidy: bool) -> bool:
                 "--",
             ]
             + compiler_args,
-            capture_output=True,
-            text=True,
+            cwd=None,
+            check=False,
+            timeout=30,
         )
 
         if result.returncode != 0:
@@ -637,11 +640,11 @@ def run_iwyu_pragma_check_single_file(file_path: str) -> bool:
     if not ENABLE_IWYU:
         return True
 
-    result = subprocess.run(
+    result = RunningProcess.run(
         ["uv", "run", "python", "ci/lint_cpp/iwyu_pragma_check.py", file_path],
-        capture_output=True,
-        encoding="utf-8",
-        errors="replace",
+        cwd=None,
+        check=False,
+        timeout=30,
     )
 
     if result.returncode != 0:
@@ -679,7 +682,7 @@ def run_iwyu_single_file(file_path: str) -> bool:
         return True
 
     project_root = Path(__file__).parent.parent.parent
-    result = subprocess.run(
+    result = RunningProcess.run(
         [
             sys.executable,
             str(project_root / "ci" / "ci-iwyu.py"),
@@ -687,15 +690,14 @@ def run_iwyu_single_file(file_path: str) -> bool:
             file_path,
             "--quiet",
         ],
-        capture_output=True,
-        text=True,
+        cwd=None,
+        check=False,
+        timeout=30,
     )
 
     if result.returncode != 0:
         if result.stdout:
             print(result.stdout, file=sys.stderr)
-        if result.stderr:
-            print(result.stderr, file=sys.stderr)
         return False
 
     return True

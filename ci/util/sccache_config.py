@@ -16,6 +16,8 @@ import subprocess
 from pathlib import Path
 from typing import Any, Protocol
 
+from running_process import RunningProcess
+
 from ci.util.timestamp_print import ts_print
 
 
@@ -75,13 +77,13 @@ def clear_sccache_stats() -> None:
 
     def _do_clear() -> None:
         try:
-            subprocess.run(
+            RunningProcess.run(
                 [sccache_path, "--zero-stats"],
-                capture_output=True,
+                cwd=None,
                 check=False,
                 timeout=5,
             )
-        except subprocess.TimeoutExpired:
+        except RuntimeError:
             pass
         except KeyboardInterrupt:
             handle_keyboard_interrupt_properly()
@@ -102,10 +104,9 @@ def show_sccache_stats() -> None:
         return
 
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             [sccache_path, "--show-stats"],
-            capture_output=True,
-            text=True,
+            cwd=None,
             check=False,
             timeout=10,
         )
@@ -158,8 +159,11 @@ def show_sccache_stats() -> None:
                 else:
                     # Fallback: show raw output if parsing fails
                     ts_print(result.stdout)
-    except subprocess.TimeoutExpired:
-        ts_print("Warning: sccache --show-stats timed out")
+    except RuntimeError as e:
+        if "timeout" in str(e).lower():
+            ts_print("Warning: sccache --show-stats timed out")
+        else:
+            ts_print(f"Warning: Failed to retrieve sccache stats: {e}")
     except KeyboardInterrupt:
         handle_keyboard_interrupt_properly()
         raise
@@ -224,8 +228,8 @@ def configure_sccache(env: PlatformIOEnv) -> None:
 
     # Show SCCACHE stats if available
     try:
-        result = subprocess.run(
-            [sccache_path, "--show-stats"], capture_output=True, text=True, check=False
+        result = RunningProcess.run(
+            [sccache_path, "--show-stats"], cwd=None, check=False, timeout=10
         )
         if result.returncode == 0:
             ts_print("SCCACHE Statistics:")

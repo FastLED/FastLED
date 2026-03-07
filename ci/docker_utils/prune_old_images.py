@@ -24,10 +24,11 @@ Usage:
 
 import argparse
 import re
-import subprocess
 import sys
 from datetime import datetime, timedelta
 from typing import Any, cast
+
+from running_process import RunningProcess
 
 from ci.util.docker_command import get_docker_command
 
@@ -89,7 +90,7 @@ def get_fastled_images() -> list[dict[str, Any]]:
         List of image dictionaries with 'name', 'tag', 'created', 'size' keys
     """
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             [
                 get_docker_command(),
                 "images",
@@ -97,9 +98,9 @@ def get_fastled_images() -> list[dict[str, Any]]:
                 "{{.Repository}}:{{.Tag}}\t{{.CreatedAt}}\t{{.Size}}",
                 "fastled-platformio-*",
             ],
-            capture_output=True,
-            text=True,
-            check=True,
+            cwd=None,
+            check=False,
+            timeout=10,
         )
 
         images: list[dict[str, Any]] = []
@@ -126,9 +127,6 @@ def get_fastled_images() -> list[dict[str, Any]]:
 
         return images
 
-    except subprocess.CalledProcessError as e:
-        print(f"Error: Failed to list Docker images: {e}", file=sys.stderr)
-        return []
     except FileNotFoundError:
         print("Error: Docker is not installed or not in PATH", file=sys.stderr)
         return []
@@ -271,15 +269,19 @@ def delete_image(image_name: str, tag: str, force: bool) -> bool:
         return True
 
     try:
-        subprocess.run(
+        result = RunningProcess.run(
             [get_docker_command(), "rmi", full_name],
-            capture_output=True,
-            text=True,
-            check=True,
+            cwd=None,
+            check=False,
+            timeout=10,
         )
-        print(f"  Deleted: {full_name}")
-        return True
-    except subprocess.CalledProcessError as e:
+        if result.returncode == 0:
+            print(f"  Deleted: {full_name}")
+            return True
+        else:
+            print(f"  Error deleting {full_name}: {result.stdout}", file=sys.stderr)
+            return False
+    except RuntimeError as e:
         print(f"  Error deleting {full_name}: {e}", file=sys.stderr)
         return False
 

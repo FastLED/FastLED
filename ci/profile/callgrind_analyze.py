@@ -7,10 +7,11 @@ Usage:
 """
 
 import platform
-import subprocess
 import sys
 from pathlib import Path
 from typing import Any
+
+from running_process import RunningProcess
 
 
 class CallgrindAnalyzer:
@@ -43,9 +44,13 @@ class CallgrindAnalyzer:
         ]
 
         try:
-            subprocess.run(cmd, check=True)
-            return True
-        except subprocess.CalledProcessError as e:
+            result = RunningProcess.run(cmd, cwd=None, check=False, timeout=300)
+            if result.returncode == 0:
+                return True
+            else:
+                print(f"Error running callgrind: exit code {result.returncode}")
+                return False
+        except RuntimeError as e:
             print(f"Error running callgrind: {e}")
             return False
         except FileNotFoundError:
@@ -59,8 +64,13 @@ class CallgrindAnalyzer:
         cmd = ["callgrind_annotate", str(self.callgrind_out)]
 
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-        except subprocess.CalledProcessError as e:
+            result = RunningProcess.run(cmd, cwd=None, check=False, timeout=30)
+            if result.returncode != 0:
+                print(
+                    f"Error running callgrind_annotate: exit code {result.returncode}"
+                )
+                return []
+        except RuntimeError as e:
             print(f"Error running callgrind_annotate: {e}")
             return []
         except FileNotFoundError:

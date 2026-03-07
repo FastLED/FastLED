@@ -10,6 +10,8 @@ import subprocess
 import sys
 from typing import Optional
 
+from running_process import RunningProcess
+
 
 # Cache for docker executable path
 _docker_executable_cache: Optional[str] = None
@@ -28,17 +30,16 @@ def find_docker_executable() -> Optional[str]:
 
     # Check if docker command is available
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             ["docker", "--version"],
-            capture_output=True,
-            text=True,
-            timeout=5,
+            cwd=None,
             check=False,
+            timeout=5,
         )
         if result.returncode == 0:
             _docker_executable_cache = "docker"
             return "docker"
-    except (FileNotFoundError, subprocess.TimeoutExpired):
+    except (FileNotFoundError, RuntimeError):
         pass
 
     # On Windows, try to find docker.exe in common locations
@@ -76,13 +77,12 @@ def is_docker_available() -> bool:
     docker_cmd = get_docker_command()
 
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             [docker_cmd, "--version"],
-            capture_output=True,
-            text=True,
-            timeout=5,
+            cwd=None,
             check=False,
+            timeout=5,
         )
         return result.returncode == 0
-    except (FileNotFoundError, subprocess.TimeoutExpired):
+    except (FileNotFoundError, RuntimeError):
         return False

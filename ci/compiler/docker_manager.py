@@ -16,6 +16,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional
 
+from running_process import RunningProcess
+
 from ci.docker_utils.container_db import (
     ContainerDatabase,
     prepare_container,
@@ -235,22 +237,22 @@ class DockerContainerManager:
         """Query current container state without side effects."""
         try:
             # Check if container exists
-            result = subprocess.run(
+            result = RunningProcess.run(
                 [
                     get_docker_command(),
                     "container",
                     "inspect",
                     self.config.container_name,
                 ],
-                capture_output=True,
-                text=True,
+                cwd=None,
+                check=False,
                 timeout=10,
             )
             if result.returncode != 0:
                 return ContainerState.NOT_EXISTS
 
             # Parse state from output
-            state_result = subprocess.run(
+            state_result = RunningProcess.run(
                 [
                     get_docker_command(),
                     "inspect",
@@ -258,8 +260,8 @@ class DockerContainerManager:
                     "{{.State.Running}} {{.State.Paused}}",
                     self.config.container_name,
                 ],
-                capture_output=True,
-                text=True,
+                cwd=None,
+                check=False,
                 timeout=10,
             )
             parts = state_result.stdout.strip().split()
@@ -272,7 +274,7 @@ class DockerContainerManager:
                 return ContainerState.RUNNING
             else:
                 return ContainerState.STOPPED
-        except (FileNotFoundError, subprocess.TimeoutExpired):
+        except (FileNotFoundError, RuntimeError):
             # If Docker is not available, we can't check state
             return ContainerState.NOT_EXISTS
 
@@ -318,18 +320,18 @@ class DockerContainerManager:
             ]
         )
 
-        result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+        result = RunningProcess.run(cmd, cwd=None, check=False, timeout=60)
         if result.returncode != 0:
-            raise RuntimeError(f"Failed to create container: {result.stderr}")
+            raise RuntimeError(f"Failed to create container: {result.stdout}")
 
         # Get the container ID from docker create output
         container_id = result.stdout.strip()
 
         # Start the container
-        start_result = subprocess.run(
+        start_result = RunningProcess.run(
             [get_docker_command(), "start", container_id],
-            capture_output=True,
-            text=True,
+            cwd=None,
+            check=False,
             timeout=30,
         )
         if start_result.returncode != 0:
@@ -387,10 +389,10 @@ class DockerContainerManager:
                         )
 
                         # Start the container if it's stopped
-                        start_result = subprocess.run(
+                        start_result = RunningProcess.run(
                             [get_docker_command(), "start", actual_container_id],
-                            capture_output=True,
-                            text=True,
+                            cwd=None,
+                            check=False,
                             timeout=30,
                         )
                         if start_result.returncode != 0:
@@ -814,10 +816,10 @@ class DockerCompilationOrchestrator:
                 return False
 
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 [get_docker_command(), "image", "inspect", self.config.image_name],
-                capture_output=True,
-                text=True,
+                cwd=None,
+                check=False,
                 timeout=10,
             )
 
@@ -829,10 +831,10 @@ class DockerCompilationOrchestrator:
             # Image not found - try without registry prefix (e.g., niteris/fastled-compiler-avr-uno -> fastled-compiler-avr-uno)
             if "/" in self.config.image_name:
                 image_without_registry = self.config.image_name.split("/", 1)[1]
-                result = subprocess.run(
+                result = RunningProcess.run(
                     [get_docker_command(), "image", "inspect", image_without_registry],
-                    capture_output=True,
-                    text=True,
+                    cwd=None,
+                    check=False,
                     timeout=10,
                 )
                 if result.returncode == 0:
@@ -904,7 +906,7 @@ class DockerCompilationOrchestrator:
 
             result = subprocess.run(build_cmd)
             return result.returncode == 0
-        except (FileNotFoundError, subprocess.TimeoutExpired):
+        except (FileNotFoundError, RuntimeError):
             # Docker command not found or timed out - likely Docker is not running
             return self._handle_docker_not_found()
         except KeyboardInterrupt:
@@ -973,7 +975,7 @@ class DockerCompilationOrchestrator:
             if stream_output:
                 return self._stream_execution(exec_cmd)
             else:
-                return subprocess.run(exec_cmd, capture_output=True, text=True)
+                return RunningProcess.run(exec_cmd, cwd=None, check=False, timeout=600)
         except RuntimeError as e:
             print(f"❌ {e}")
             raise
@@ -1016,13 +1018,13 @@ class DockerCompilationOrchestrator:
             str(host_path),
         ]
 
-        result = subprocess.run(copy_cmd, capture_output=True, text=True)
+        result = RunningProcess.run(copy_cmd, cwd=None, check=False, timeout=60)
 
         if result.returncode == 0:
             print(f"✅ Build artifacts copied to {host_path}")
             return True
         else:
             print("⚠️  Warning: Could not copy artifacts from container")
-            if result.stderr:
-                print(f"   Error: {result.stderr}")
+            if result.stdout:
+                print(f"   Error: {result.stdout}")
             return False

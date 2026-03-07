@@ -19,6 +19,8 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Optional
 
+from running_process import RunningProcess
+
 # Import board mapping system
 from ci.boards import create_board
 
@@ -114,13 +116,30 @@ class TypeStats:
 def run_command(cmd: str) -> str:
     """Run a command and return stdout"""
     try:
-        result = subprocess.run(
-            cmd, shell=True, capture_output=True, text=True, check=True
+        proc = RunningProcess(cmd, shell=True, auto_run=True, timeout=30)
+        output = ""
+        from running_process.process_output_reader import EndOfStream
+
+        while line := proc.get_next_line(timeout=30):
+            if isinstance(line, EndOfStream):
+                break
+            output += line
+        exit_code = proc.wait()
+        if exit_code != 0:
+            print(f"Error running command: {cmd}")
+            print(f"Exit code: {exit_code}")
+            return ""
+        return output
+    except KeyboardInterrupt:
+        from ci.util.global_interrupt_handler import (
+            handle_keyboard_interrupt_properly,
         )
-        return result.stdout
-    except subprocess.CalledProcessError as e:
+
+        handle_keyboard_interrupt_properly()
+        raise
+    except Exception as e:
         print(f"Error running command: {cmd}")
-        print(f"Error: {e.stderr}")
+        print(f"Error: {e}")
         return ""
 
 
@@ -128,12 +147,18 @@ def demangle_symbol(mangled_name: str, cppfilt_path: str) -> str:
     """Demangle a C++ symbol using c++filt"""
     try:
         cmd = f'echo "{mangled_name}" | "{cppfilt_path}"'
-        result = subprocess.run(
-            cmd, shell=True, capture_output=True, text=True, check=True
-        )
-        demangled = result.stdout.strip()
+        proc = RunningProcess(cmd, shell=True, auto_run=True, timeout=10)
+        output = ""
+        from running_process.process_output_reader import EndOfStream
+
+        while line := proc.get_next_line(timeout=10):
+            if isinstance(line, EndOfStream):
+                break
+            output += line
+        exit_code = proc.wait()
+        demangled = output.strip()
         # If demangling failed, c++filt returns the original name
-        return demangled if demangled != mangled_name else mangled_name
+        return demangled if demangled and demangled != mangled_name else mangled_name
     except KeyboardInterrupt:
         handle_keyboard_interrupt_properly()
         raise

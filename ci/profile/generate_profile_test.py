@@ -15,6 +15,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from running_process import RunningProcess
+
 from ci.util.global_interrupt_handler import notify_main_thread
 
 
@@ -50,11 +52,11 @@ class ProfileGenerator:
 
         # Search for function declaration using grep
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 ["git", "grep", "-n", f"\\b{func_name}\\b", "--", "*.h", "*.hpp"],
-                capture_output=True,
-                text=True,
+                cwd=None,
                 check=False,
+                timeout=30,
             )
 
             if result.returncode != 0:

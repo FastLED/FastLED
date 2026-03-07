@@ -11,6 +11,8 @@ import time
 from pathlib import Path
 from typing import Optional
 
+from running_process import RunningProcess
+
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt_properly
 from ci.util.timestamp_print import ts_print
 
@@ -114,14 +116,14 @@ def _dump_with_lldb(lldb_path: str, pid: int, test_name: str) -> Optional[str]:
 
         ts_print(f"Running: {' '.join(cmd)}")
 
-        result = subprocess.run(
+        result = RunningProcess.run(
             cmd,
-            capture_output=True,
-            text=True,
+            cwd=None,
+            check=False,
             timeout=30,  # 30 second timeout for debugger
         )
 
-        output = result.stdout + result.stderr
+        output = result.stdout
 
         # Clean up script
         os.unlink(script_path)
@@ -131,8 +133,11 @@ def _dump_with_lldb(lldb_path: str, pid: int, test_name: str) -> Optional[str]:
         else:
             return "Debugger attached but produced no output"
 
-    except subprocess.TimeoutExpired:
-        ts_print("⏱️  Debugger timed out after 30 seconds")
+    except RuntimeError as e:
+        if "timeout" in str(e).lower():
+            ts_print("⏱️  Debugger timed out after 30 seconds")
+        else:
+            ts_print(f"Debugger error: {e}")
         try:
             os.unlink(script_path)
         except KeyboardInterrupt:
@@ -183,14 +188,14 @@ def _dump_with_gdb(gdb_path: str, pid: int, test_name: str) -> Optional[str]:
 
         ts_print(f"Running: {' '.join(cmd)}")
 
-        result = subprocess.run(
+        result = RunningProcess.run(
             cmd,
-            capture_output=True,
-            text=True,
+            cwd=None,
+            check=False,
             timeout=30,  # 30 second timeout for debugger
         )
 
-        output = result.stdout + result.stderr
+        output = result.stdout
 
         # Clean up script
         os.unlink(script_path)
@@ -200,8 +205,11 @@ def _dump_with_gdb(gdb_path: str, pid: int, test_name: str) -> Optional[str]:
         else:
             return "Debugger attached but produced no output"
 
-    except subprocess.TimeoutExpired:
-        ts_print("⏱️  Debugger timed out after 30 seconds")
+    except RuntimeError as e:
+        if "timeout" in str(e).lower():
+            ts_print("⏱️  Debugger timed out after 30 seconds")
+        else:
+            ts_print(f"Debugger error: {e}")
         try:
             os.unlink(script_path)
         except KeyboardInterrupt:
@@ -266,11 +274,13 @@ def handle_hung_test(pid: int, test_name: str, timeout_seconds: float) -> str:
     # Kill the hung process
     try:
         if platform.system() == "Windows":
-            subprocess.run(
-                ["taskkill", "/F", "/PID", str(pid)], capture_output=True, timeout=5
+            RunningProcess.run(
+                ["taskkill", "/F", "/PID", str(pid)], cwd=None, check=False, timeout=5
             )
         else:
-            subprocess.run(["kill", "-9", str(pid)], capture_output=True, timeout=5)
+            RunningProcess.run(
+                ["kill", "-9", str(pid)], cwd=None, check=False, timeout=5
+            )
         ts_print(f"🔪 Killed hung process (PID {pid})")
     except KeyboardInterrupt:
         handle_keyboard_interrupt_properly()

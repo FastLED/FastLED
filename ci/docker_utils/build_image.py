@@ -10,9 +10,10 @@ PlatformIO dependencies for faster cross-platform compilation.
 import hashlib
 import json
 import re
-import subprocess
 import sys
 from typing import Optional
+
+from running_process import RunningProcess
 
 from ci.boards import create_board
 
@@ -24,18 +25,18 @@ def get_platformio_version() -> str:
         Version string (e.g., '6.1.15')
     """
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             ["pio", "--version"],
-            capture_output=True,
-            text=True,
-            check=True,
+            cwd=None,
+            check=False,
+            timeout=10,
         )
         # Output format: "PlatformIO Core, version 6.1.15"
         version_line = result.stdout.strip()
         if "version" in version_line:
             return version_line.split("version")[-1].strip()
         return version_line
-    except (subprocess.CalledProcessError, FileNotFoundError):
+    except (RuntimeError, FileNotFoundError):
         # If PlatformIO is not installed, return a default version
         return "unknown"
 
