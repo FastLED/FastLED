@@ -36,12 +36,19 @@ void VocalDetector::update(shared_ptr<AudioContext> context) {
     mSpectralFlux = calculateSpectralFlux(fft);
     mSpectralVariance = calculateSpectralVariance(fft);
 
+    // Calculate time-domain features from raw PCM
+    span<const i16> pcm = context->getPCM();
+    const float dt = computeAudioDt(pcm.size(), context->getSampleRate());
+    mEnvelopeJitter = mEnvelopeJitterSmoother.update(calculateEnvelopeJitter(pcm), dt);
+    mAutocorrelationIrregularity = mAcfIrregularitySmoother.update(
+        calculateAutocorrelationIrregularity(pcm), dt);
+    mZeroCrossingCV = mZcCVSmoother.update(calculateZeroCrossingCV(pcm), dt);
+
     // Calculate raw confidence and apply time-aware smoothing
     float rawConfidence = calculateRawConfidence(
         mSpectralCentroid, mSpectralRolloff, mFormantRatio,
         mSpectralFlatness, mHarmonicDensity, mVocalPresenceRatio,
         mSpectralFlux, mSpectralVariance);
-    const float dt = computeAudioDt(context->getPCM().size(), context->getSampleRate());
     float smoothedConfidence = mConfidenceSmoother.update(rawConfidence, dt);
 
     // Hysteresis: use separate on/off thresholds to prevent chattering
@@ -90,6 +97,12 @@ void VocalDetector::reset() {
     mVocalPresenceRatio = 0.0f;
     mSpectralFlux = 0.0f;
     mSpectralVariance = 0.0f;
+    mEnvelopeJitter = 0.0f;
+    mAutocorrelationIrregularity = 0.0f;
+    mZeroCrossingCV = 0.0f;
+    mEnvelopeJitterSmoother.reset();
+    mAcfIrregularitySmoother.reset();
+    mZcCVSmoother.reset();
     mPrevBins.clear();
     mSpectralVarianceFilter.reset();
     mFramesInState = 0;
@@ -325,6 +338,152 @@ float VocalDetector::calculateSpectralVariance(const FFTBins& fft) {
     return mSpectralVarianceFilter.update(fft.raw());
 }
 
+float VocalDetector::calculateEnvelopeJitter(span<const i16> pcm) {
+    const int n = static_cast<int>(pcm.size());
+    if (n < 44) return 0.0f;
+
+    const float normFactor = 1.0f / 32768.0f;
+    const int halfWin = fl::max(2, mSampleRate / 4000); // ~11 samples at 44100
+    const int winSize = 2 * halfWin + 1;
+    const float invWinSize = 1.0f / static_cast<float>(winSize);
+
+    // Single pass: envelope deviation (sliding window) + half-cycle shimmer
+    // Seed the sliding window sum
+    float windowSum = 0.0f;
+    for (int j = 0; j < winSize && j < n; ++j) {
+        windowSum += fl::abs(static_cast<float>(pcm[j])) * normFactor;
+    }
+
+    float sumEnv = 0.0f;
+    float sumDev = 0.0f;
+    int count = 0;
+    float sumPeaks = 0.0f;
+    float sumSqPeaks = 0.0f;
+    int numCycles = 0;
+    float currentPeak = 0.0f;
+    bool wasPositive = pcm[halfWin] >= 0;
+
+    for (int i = halfWin; i < n - halfWin; ++i) {
+        float absVal = fl::abs(static_cast<float>(pcm[i])) * normFactor;
+        float smoothed = windowSum * invWinSize;
+
+        sumEnv += smoothed;
+        sumDev += fl::abs(absVal - smoothed);
+        ++count;
+
+        // Shimmer: track peaks between zero crossings
+        currentPeak = fl::max(currentPeak, absVal);
+        bool isPositive = pcm[i] >= 0;
+        if (isPositive != wasPositive) {
+            if (currentPeak > 0.01f) {
+                sumPeaks += currentPeak;
+                sumSqPeaks += currentPeak * currentPeak;
+                ++numCycles;
+            }
+            currentPeak = 0.0f;
+        }
+        wasPositive = isPositive;
+
+        // Slide window
+        if (i + 1 < n - halfWin) {
+            windowSum -= fl::abs(static_cast<float>(pcm[i - halfWin])) * normFactor;
+            windowSum += fl::abs(static_cast<float>(pcm[i + halfWin + 1])) * normFactor;
+        }
+    }
+
+    if (sumEnv < 1e-6f || count == 0) return 0.0f;
+    float envelopeJitter = (sumDev / static_cast<float>(count))
+                         / (sumEnv / static_cast<float>(count));
+
+    float shimmer = 0.0f;
+    if (numCycles >= 3) {
+        float meanPeak = sumPeaks / static_cast<float>(numCycles);
+        if (meanPeak > 0.01f) {
+            float variance = sumSqPeaks / static_cast<float>(numCycles)
+                           - meanPeak * meanPeak;
+            if (variance < 0.0f) variance = 0.0f;
+            shimmer = fl::sqrtf(variance) / meanPeak;
+        }
+    }
+
+    return envelopeJitter + shimmer * 0.5f;
+}
+
+float VocalDetector::calculateAutocorrelationIrregularity(span<const i16> pcm) {
+    const int n = static_cast<int>(pcm.size());
+
+    // Vocal fundamental lag range at mSampleRate
+    const int minLag = fl::max(2, mSampleRate / 500);   // 500 Hz
+    const int maxLag = fl::min(n / 2, mSampleRate / 172); // 172 Hz
+
+    if (minLag >= maxLag || maxLag >= n) return 0.0f;
+
+    // Subsample by 4: safe since step(4) << minLag(88).
+    // normFactor² cancels in the ratio sum/acf0, so work in raw i16 space.
+    const int step = 4;
+
+    // ACF[0] = energy (subsampled)
+    float acf0 = 0.0f;
+    for (int i = 0; i < n; i += step) {
+        float s = static_cast<float>(pcm[i]);
+        acf0 += s * s;
+    }
+    if (acf0 < 1.0f) return 0.0f;
+
+    // Probe 16 evenly-spaced lags, each with subsampled inner loop.
+    // Total: ~16 × (n/4)/lag ≈ 1700 MACs (vs 34K without subsampling).
+    const int lagRange = maxLag - minLag;
+    const int maxProbes = 16;
+    const int lagStep = fl::max(1, lagRange / maxProbes);
+    float bestPeak = 0.0f;
+    for (int lag = minLag; lag <= maxLag; lag += lagStep) {
+        float sum = 0.0f;
+        for (int i = 0; i + lag < n; i += step) {
+            sum += static_cast<float>(pcm[i]) * static_cast<float>(pcm[i + lag]);
+        }
+        float normalized = sum / acf0;
+        bestPeak = fl::max(bestPeak, normalized);
+    }
+
+    return 1.0f - bestPeak; // 0 = perfectly periodic, 1 = no periodicity
+}
+
+float VocalDetector::calculateZeroCrossingCV(span<const i16> pcm) {
+    const int n = static_cast<int>(pcm.size());
+    if (n < 10) return 0.0f;
+
+    // Single-pass: compute zero-crossing interval statistics
+    int prevCrossing = -1;
+    int numIntervals = 0;
+    float sumIntervals = 0.0f;
+    float sumSqIntervals = 0.0f;
+
+    for (int i = 1; i < n; ++i) {
+        if ((pcm[i - 1] >= 0 && pcm[i] < 0) ||
+            (pcm[i - 1] < 0 && pcm[i] >= 0)) {
+            if (prevCrossing >= 0) {
+                float interval = static_cast<float>(i - prevCrossing);
+                sumIntervals += interval;
+                sumSqIntervals += interval * interval;
+                ++numIntervals;
+            }
+            prevCrossing = i;
+        }
+    }
+
+    if (numIntervals < 2) return 0.0f;
+
+    float mean = sumIntervals / static_cast<float>(numIntervals);
+    if (mean < 1e-6f) return 0.0f;
+
+    float variance = sumSqIntervals / static_cast<float>(numIntervals)
+                   - mean * mean;
+    if (variance < 0.0f) variance = 0.0f;
+    float stdev = fl::sqrtf(variance);
+
+    return stdev / mean; // coefficient of variation
+}
+
 float VocalDetector::calculateRawConfidence(float centroid, float rolloff, float formantRatio,
                                              float spectralFlatness, float harmonicDensity,
                                              float vocalPresenceRatio, float spectralFlux,
@@ -355,19 +514,19 @@ float VocalDetector::calculateRawConfidence(float centroid, float rolloff, float
     }
 
     // Spectral flatness score: KEY DISCRIMINATOR for real audio.
-    // Voice flatness ~0.458 vs guitar ~0.484 in CQ space.
-    // Very sharp peak at 0.46 exploits this difference.
+    // Real voice+guitar ~0.356 vs guitar-only ~0.617.
+    // Peak at 0.43, width 0.10 — covers both synthetic (~0.44) and real voice (~0.36).
     float flatnessScore;
     if (spectralFlatness < 0.20f) {
         // Too tonal (pure tones, sparse sines)
         flatnessScore = spectralFlatness / 0.20f * 0.3f;
     } else if (spectralFlatness <= 0.55f) {
-        // Voice range — sharp peak at 0.46 (centered on voice flatness)
-        float dist = fl::abs(spectralFlatness - 0.46f);
-        flatnessScore = fl::max(0.0f, 1.0f - dist / 0.05f);
+        // Voice range — peak at 0.43
+        float dist = fl::abs(spectralFlatness - 0.43f);
+        flatnessScore = fl::max(0.0f, 1.0f - dist / 0.10f);
     } else {
-        // Too flat — noise-like
-        flatnessScore = fl::max(0.0f, 1.0f - (spectralFlatness - 0.55f) / 0.10f);
+        // Too flat — noise-like (steep decay)
+        flatnessScore = fl::max(0.0f, 1.0f - (spectralFlatness - 0.55f) / 0.05f);
     }
 
     // Harmonic density score: with 128 CQ bins
@@ -417,6 +576,56 @@ float VocalDetector::calculateRawConfidence(float centroid, float rolloff, float
         float varianceBoost = 1.0f + 0.20f * (spectralVariance - 0.74f) / 0.76f;
         varianceBoost = fl::clamp(varianceBoost, 0.90f, 1.20f);
         weightedAvg *= varianceBoost;
+    }
+
+    // Time-domain boosts from PCM analysis.
+    // Tuned against real audio: guitar jitter=0.23, acfIrreg=0.40, zcCV=1.11
+    //                           voice  jitter=0.35, acfIrreg=0.82, zcCV=0.66
+    // Strategy: BOOST-ONLY for jitter and acfIrreg (no penalties) to avoid
+    // breaking synthetic vowels with F0 in the ACF range (acfIrreg ~0.30).
+    // zcCV is the only feature that penalizes guitar (high zcCV=1.11).
+
+    // Envelope jitter: boost only for high jitter (voice territory).
+    // No penalty for low jitter — protects synthetic clean vowels.
+    if (mEnvelopeJitter > 0.25f) {
+        float jitterBoost = 1.0f + 1.5f * (mEnvelopeJitter - 0.25f);
+        jitterBoost = fl::clamp(jitterBoost, 1.0f, 1.30f);
+        weightedAvg *= jitterBoost;
+    }
+
+    // Autocorrelation irregularity: boost only above 0.60 (real voice).
+    // Synthetic vowels with F0 in [172,500] Hz have acfIrreg ~0.30 (periodic).
+    // Real voice has vibrato/breath noise → acfIrreg ~0.82.
+    if (mAutocorrelationIrregularity > 0.60f) {
+        float acfBoost = 1.0f + 2.0f * (mAutocorrelationIrregularity - 0.60f);
+        acfBoost = fl::clamp(acfBoost, 1.0f, 1.50f);
+        weightedAvg *= acfBoost;
+    }
+
+    // Zero-crossing CV: peaked boost — moderate values (voice ~0.66) get boost,
+    // high values (guitar ~1.11) get strong penalty. Guitar has MORE ZC
+    // variation than voice in real audio (percussive transients, string noise).
+    if (mZeroCrossingCV > 0.02f) {
+        float zcBoost;
+        if (mZeroCrossingCV < 0.80f) {
+            zcBoost = 1.0f + 0.25f * (mZeroCrossingCV - 0.10f) / 0.70f;
+        } else {
+            // Steep penalty for guitar-like high ZC variation
+            zcBoost = 1.0f - 0.50f * (mZeroCrossingCV - 0.80f) / 0.50f;
+        }
+        zcBoost = fl::clamp(zcBoost, 0.60f, 1.20f);
+        weightedAvg *= zcBoost;
+    }
+
+    // Combined aperiodicity-jitter boost: when BOTH features indicate voice,
+    // apply additional amplification. This only activates for real voice audio
+    // where both temporal irregularity and amplitude jitter are elevated.
+    if (mAutocorrelationIrregularity > 0.60f && mEnvelopeJitter > 0.25f) {
+        float minExcess = fl::min(mAutocorrelationIrregularity - 0.60f,
+                                   mEnvelopeJitter - 0.25f);
+        float combinedBoost = 1.0f + 2.0f * minExcess;
+        combinedBoost = fl::clamp(combinedBoost, 1.0f, 1.30f);
+        weightedAvg *= combinedBoost;
     }
 
     // Soft formant gate: formant must show some structure (prevents pure tones/noise)

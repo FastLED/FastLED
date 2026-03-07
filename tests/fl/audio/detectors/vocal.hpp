@@ -12,11 +12,14 @@
 #include "fl/math_macros.h"
 
 using namespace fl;
+using Diag = fl::VocalDetectorDiagnostics;
 using fl::audio::test::makeSample;
 using fl::audio::test::makeMultiHarmonic;
 using fl::audio::test::makeSyntheticVowel;
 using fl::audio::test::makeWhiteNoise;
 using fl::audio::test::makeChirp;
+using fl::audio::test::makeJitteredVowel;
+using fl::audio::test::makeGuitarStringDecay;
 
 namespace test_vocal {
 
@@ -410,12 +413,12 @@ FL_TEST_CASE("VocalDetector - guitar-like broadband not detected as vocal") {
         ctx->getFFT(128);
         detector.update(ctx);
     }
-    float nc = detector.getSpectralCentroid() / static_cast<float>(detector.getNumBins());
+    float nc = Diag::getSpectralCentroid(detector) / static_cast<float>(Diag::getNumBins(detector));
     printf("guitar-like: centroid=%.3f rolloff=%.3f formant=%.3f "
            "flatness=%.3f density=%.1f variance=%.4f confidence=%.3f isVocal=%d\n",
-           nc, detector.getSpectralRolloff(), detector.getFormantRatio(),
-           detector.getSpectralFlatness(), detector.getHarmonicDensity(),
-           detector.getSpectralVariance(),
+           nc, Diag::getSpectralRolloff(detector), Diag::getFormantRatio(detector),
+           Diag::getSpectralFlatness(detector), Diag::getHarmonicDensity(detector),
+           Diag::getSpectralVariance(detector),
            detector.getConfidence(), detector.isVocal() ? 1 : 0);
 
     // Guitar-like broadband should NOT be detected as vocal
@@ -434,15 +437,120 @@ FL_TEST_CASE("VocalDetector - voice-in-mix harmonic structure") {
         ctx->getFFT(128);
         detector.update(ctx);
     }
-    float nc = detector.getSpectralCentroid() / static_cast<float>(detector.getNumBins());
+    float nc = Diag::getSpectralCentroid(detector) / static_cast<float>(Diag::getNumBins(detector));
     printf("voice-in-mix: centroid=%.3f rolloff=%.3f formant=%.3f "
            "flatness=%.3f density=%.1f variance=%.4f confidence=%.3f isVocal=%d\n",
-           nc, detector.getSpectralRolloff(), detector.getFormantRatio(),
-           detector.getSpectralFlatness(), detector.getHarmonicDensity(),
-           detector.getSpectralVariance(),
+           nc, Diag::getSpectralRolloff(detector), Diag::getFormantRatio(detector),
+           Diag::getSpectralFlatness(detector), Diag::getHarmonicDensity(detector),
+           Diag::getSpectralVariance(detector),
            detector.getConfidence(), detector.isVocal() ? 1 : 0);
 
     // Voice-in-mix has strong harmonics creating distinct spectral structure
     // Should have measurable harmonic density
-    FL_CHECK_GT(detector.getHarmonicDensity(), 50.0f);
+    FL_CHECK_GT(Diag::getHarmonicDensity(detector), 50.0f);
 }
+
+// ============================================================================
+// Time-domain feature tests
+// ============================================================================
+
+FL_TEST_CASE("VocalDetector - jittered vowel has measurable envelope jitter") {
+    VocalDetector detector;
+    detector.setSampleRate(44100);
+
+    for (int frame = 0; frame < 20; ++frame) {
+        auto sample = makeJitteredVowel(150.0f, 700.0f, 1200.0f, frame * 12);
+        auto ctx = fl::make_shared<AudioContext>(sample);
+        ctx->setSampleRate(44100);
+        ctx->getFFT(128);
+        detector.update(ctx);
+    }
+
+    printf("jittered vowel: jitter=%.4f acfIrreg=%.4f zcCV=%.4f conf=%.3f isVocal=%d\n",
+           Diag::getEnvelopeJitter(detector), Diag::getAutocorrelationIrregularity(detector),
+           Diag::getZeroCrossingCV(detector), detector.getConfidence(),
+           detector.isVocal() ? 1 : 0);
+
+    // Jittered vowel should have measurable envelope jitter
+    FL_CHECK_GT(Diag::getEnvelopeJitter(detector), 0.01f);
+    // Should still be detected as vocal
+    FL_CHECK_GE(detector.getConfidence(), 0.50f);
+}
+
+FL_TEST_CASE("VocalDetector - guitar string decay has low irregularity") {
+    VocalDetector detector;
+    detector.setSampleRate(44100);
+
+    for (int frame = 0; frame < 10; ++frame) {
+        auto sample = makeGuitarStringDecay(220.0f, frame * 23);
+        auto ctx = fl::make_shared<AudioContext>(sample);
+        ctx->setSampleRate(44100);
+        ctx->getFFT(128);
+        detector.update(ctx);
+    }
+
+    printf("guitar string: jitter=%.4f acfIrreg=%.4f zcCV=%.4f conf=%.3f isVocal=%d\n",
+           Diag::getEnvelopeJitter(detector), Diag::getAutocorrelationIrregularity(detector),
+           Diag::getZeroCrossingCV(detector), detector.getConfidence(),
+           detector.isVocal() ? 1 : 0);
+
+    // Guitar string should have low autocorrelation irregularity (high periodicity)
+    FL_CHECK_LT(Diag::getAutocorrelationIrregularity(detector), 0.40f);
+    // Should not be detected as vocal
+    FL_CHECK_FALSE(detector.isVocal());
+}
+
+FL_TEST_CASE("VocalDetector - time-domain features print diagnostics") {
+    // Diagnostic test: print all feature values for key signal types
+    struct TestSignal {
+        const char* name;
+        AudioSample (*gen)(fl::u32);
+    };
+
+    auto genPureSine = [](fl::u32 ts) { return makeSample(440.0f, ts); };
+    auto genVowelAh = [](fl::u32 ts) {
+        return makeSyntheticVowel(150.0f, 700.0f, 1200.0f, ts);
+    };
+    auto genJitteredVowel = [](fl::u32 ts) {
+        return makeJitteredVowel(150.0f, 700.0f, 1200.0f, ts);
+    };
+    auto genGuitar = [](fl::u32 ts) {
+        return makeGuitarStringDecay(220.0f, ts);
+    };
+
+    struct Entry {
+        const char* name;
+        AudioSample (*gen)(fl::u32);
+    };
+    Entry signals[] = {
+        {"pure_sine", genPureSine},
+        {"vowel_ah", genVowelAh},
+        {"jittered_vowel", genJitteredVowel},
+        {"guitar_string", genGuitar},
+    };
+
+    printf("\n--- Time-domain feature diagnostics ---\n");
+    printf("%-16s  jitter  acfIrreg  zcCV    conf  isVocal\n", "signal");
+
+    for (const auto& sig : signals) {
+        VocalDetector det;
+        det.setSampleRate(44100);
+        for (int frame = 0; frame < 15; ++frame) {
+            auto sample = sig.gen(frame * 12);
+            auto ctx = fl::make_shared<AudioContext>(sample);
+            ctx->setSampleRate(44100);
+            ctx->getFFT(128);
+            det.update(ctx);
+        }
+        printf("%-16s  %.4f  %.4f    %.4f  %.3f  %d\n",
+               sig.name, Diag::getEnvelopeJitter(det),
+               Diag::getAutocorrelationIrregularity(det),
+               Diag::getZeroCrossingCV(det), det.getConfidence(),
+               det.isVocal() ? 1 : 0);
+    }
+    printf("--- end diagnostics ---\n");
+
+    // This test always passes — it's for calibration output
+    FL_CHECK(true);
+}
+

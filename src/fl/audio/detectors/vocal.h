@@ -36,25 +36,18 @@ public:
     // State access
     bool isVocal() const { return mVocalActive; }
     float getConfidence() const { return mConfidenceSmoother.value(); }
-    void setThreshold(float threshold) { mOnThreshold = threshold; mOffThreshold = fl::max(0.0f, threshold - 0.2f); }
+    void setThreshold(float threshold) { mOnThreshold = threshold; mOffThreshold = fl::max(0.0f, threshold - 0.13f); }
     void setSmoothingAlpha(float tau) { mConfidenceSmoother.setTau(tau); }
-    int getNumBins() const { return mNumBins; }
-    float getSpectralFlatness() const { return mSpectralFlatness; }
-    float getHarmonicDensity() const { return mHarmonicDensity; }
-    float getSpectralCentroid() const { return mSpectralCentroid; }
-    float getSpectralRolloff() const { return mSpectralRolloff; }
-    float getFormantRatio() const { return mFormantRatio; }
-    float getVocalPresenceRatio() const { return mVocalPresenceRatio; }
-    float getSpectralFlux() const { return mSpectralFlux; }
-    float getSpectralVariance() const { return mSpectralVariance; }
+
+    friend struct VocalDetectorDiagnostics;
 
 private:
     bool mVocalActive;
     bool mPreviousVocalActive;
     bool mStateChanged = false;
     float mConfidence;
-    float mOnThreshold = 0.49f;
-    float mOffThreshold = 0.33f;
+    float mOnThreshold = 0.65f;
+    float mOffThreshold = 0.52f;
     // Time-aware confidence smoothing (tau=0.05s ≈ old alpha=0.7 at 43fps)
     ExponentialSmoother<float> mConfidenceSmoother{0.05f};
     int mFramesInState = 0; // Debounce counter
@@ -67,6 +60,12 @@ private:
     float mVocalPresenceRatio = 0.0f;
     float mSpectralFlux = 0.0f;
     float mSpectralVariance = 0.0f;
+    float mEnvelopeJitter = 0.0f;
+    float mAutocorrelationIrregularity = 0.0f;
+    float mZeroCrossingCV = 0.0f;
+    ExponentialSmoother<float> mEnvelopeJitterSmoother{0.08f};
+    ExponentialSmoother<float> mAcfIrregularitySmoother{0.08f};
+    ExponentialSmoother<float> mZcCVSmoother{0.08f};
     fl::vector<float> mPrevBins;
     SpectralVariance<float> mSpectralVarianceFilter{0.2f};
     int mSampleRate = 44100;
@@ -83,10 +82,29 @@ private:
     float calculateVocalPresenceRatio(const FFTBins& fft);
     float calculateSpectralFlux(const FFTBins& fft);
     float calculateSpectralVariance(const FFTBins& fft);
+    float calculateEnvelopeJitter(span<const i16> pcm);
+    float calculateAutocorrelationIrregularity(span<const i16> pcm);
+    float calculateZeroCrossingCV(span<const i16> pcm);
     float calculateRawConfidence(float centroid, float rolloff, float formantRatio,
                                  float spectralFlatness, float harmonicDensity,
                                  float vocalPresenceRatio, float spectralFlux,
                                  float spectralVariance);
+};
+
+// Test-only accessor for internal diagnostic state
+struct VocalDetectorDiagnostics {
+    static int getNumBins(const VocalDetector& d) { return d.mNumBins; }
+    static float getSpectralFlatness(const VocalDetector& d) { return d.mSpectralFlatness; }
+    static float getHarmonicDensity(const VocalDetector& d) { return d.mHarmonicDensity; }
+    static float getSpectralCentroid(const VocalDetector& d) { return d.mSpectralCentroid; }
+    static float getSpectralRolloff(const VocalDetector& d) { return d.mSpectralRolloff; }
+    static float getFormantRatio(const VocalDetector& d) { return d.mFormantRatio; }
+    static float getVocalPresenceRatio(const VocalDetector& d) { return d.mVocalPresenceRatio; }
+    static float getSpectralFlux(const VocalDetector& d) { return d.mSpectralFlux; }
+    static float getSpectralVariance(const VocalDetector& d) { return d.mSpectralVariance; }
+    static float getEnvelopeJitter(const VocalDetector& d) { return d.mEnvelopeJitter; }
+    static float getAutocorrelationIrregularity(const VocalDetector& d) { return d.mAutocorrelationIrregularity; }
+    static float getZeroCrossingCV(const VocalDetector& d) { return d.mZeroCrossingCV; }
 };
 
 } // namespace fl

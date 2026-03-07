@@ -29,6 +29,7 @@
 FL_TEST_FILE(FL_FILEPATH) {
 
 using namespace fl;
+using Diag = fl::VocalDetectorDiagnostics;
 using fl::audio::test::makeSample;
 using fl::audio::test::generateDC;
 using fl::audio::test::generateSine;
@@ -209,7 +210,7 @@ FL_TEST_CASE("Audio fix - VocalDetector F1 formant spans multiple FFT bins") {
     //   Span should be >= 3 bins (sufficient)
 
     VocalDetector detector;
-    const int numBins = detector.getNumBins();
+    const int numBins = Diag::getNumBins(detector);
 
     // Run FFT with silence to populate bins for freqToBin to use
     fl::vector<fl::i16> silence(512, 0);

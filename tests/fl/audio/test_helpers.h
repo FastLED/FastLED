@@ -248,6 +248,75 @@ inline AudioSample makeSyntheticVowel(float f0, float f1Freq, float f2Freq,
     return AudioSample(data, timestamp);
 }
 
+/// Generate a jittered vowel: synthetic vowel with per-period amplitude and timing jitter
+/// Simulates real vocal cord irregularity — higher envelope jitter and lower autocorrelation
+/// than clean synthetic vowels
+inline AudioSample makeJitteredVowel(float f0, float f1Freq, float f2Freq,
+                                      u32 timestamp, float amplitude = 16000.0f,
+                                      int count = 512, float sampleRate = 44100.0f) {
+    fl::vector<fl::i16> data(count, 0);
+    fl::fl_random rng(123);
+    const float f1Bw = 150.0f;
+    const float f2Bw = 200.0f;
+    const float maxFreq = fl::min(4000.0f, sampleRate / 2.0f);
+
+    // Generate clean vowel base
+    for (int h = 1; h * f0 < maxFreq; ++h) {
+        float freq = f0 * h;
+        float naturalAmp = 1.0f / static_cast<float>(h);
+        float f1Gain = fl::expf(-0.5f * (freq - f1Freq) * (freq - f1Freq) / (f1Bw * f1Bw));
+        float f2Gain = fl::expf(-0.5f * (freq - f2Freq) * (freq - f2Freq) / (f2Bw * f2Bw));
+        float formantGain = fl::max(f1Gain, f2Gain);
+        float harmonicAmp = amplitude * naturalAmp * fl::max(0.05f, formantGain);
+
+        for (int i = 0; i < count; ++i) {
+            float phase = 2.0f * FL_M_PI * freq * i / sampleRate;
+            data[i] += static_cast<fl::i16>(harmonicAmp * fl::sinf(phase));
+        }
+    }
+
+    // Apply per-period amplitude jitter (simulates vocal cord irregularity)
+    float periodSamples = sampleRate / f0;
+    float pos = 0.0f;
+    float currentJitter = 1.0f;
+    for (int i = 0; i < count; ++i) {
+        pos += 1.0f;
+        if (pos >= periodSamples) {
+            pos -= periodSamples;
+            // Random amplitude jitter: +/- 20%
+            currentJitter = 0.80f + 0.40f * (static_cast<float>(rng.random16()) / 65535.0f);
+        }
+        float sample = static_cast<float>(data[i]) * currentJitter;
+        data[i] = static_cast<fl::i16>(fl::clamp(sample, -32768.0f, 32767.0f));
+    }
+    return AudioSample(data, timestamp);
+}
+
+/// Generate a guitar string decay: harmonic series with 1/h^2 rolloff and exponential decay
+/// Very periodic waveform — low envelope jitter, high autocorrelation, low ZC CV
+inline AudioSample makeGuitarStringDecay(float f0, u32 timestamp,
+                                          float amplitude = 16000.0f,
+                                          int count = 512, float sampleRate = 44100.0f) {
+    fl::vector<fl::i16> data(count, 0);
+    const float maxFreq = fl::min(8000.0f, sampleRate / 2.0f);
+    const float decayTime = 0.5f; // 500ms decay
+
+    for (int h = 1; h * f0 < maxFreq; ++h) {
+        float freq = f0 * h;
+        float harmonicAmp = amplitude / static_cast<float>(h * h);
+        float harmonicDecay = decayTime / static_cast<float>(h); // Higher harmonics decay faster
+
+        for (int i = 0; i < count; ++i) {
+            float t = static_cast<float>(i) / sampleRate;
+            float decay = fl::expf(-t / harmonicDecay);
+            float phase = 2.0f * FL_M_PI * freq * t;
+            float sample = harmonicAmp * decay * fl::sinf(phase);
+            data[i] += static_cast<fl::i16>(fl::clamp(sample, -32768.0f, 32767.0f));
+        }
+    }
+    return AudioSample(data, timestamp);
+}
+
 /// Generate deterministic white noise using fl::fl_random with fixed seed
 inline AudioSample makeWhiteNoise(u32 timestamp, float amplitude = 16000.0f,
                                    int count = 512) {
