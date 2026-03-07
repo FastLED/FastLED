@@ -16,6 +16,9 @@
 #include <emscripten.h>
 #include <emscripten/val.h>
 // IWYU pragma: end_keep
+
+// Implemented in js_library.js (--js-library side file)
+extern "C" void js_fetch_async(unsigned int request_id, const char* url);
 #endif
 
 namespace fl {
@@ -101,32 +104,6 @@ extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_error_callback(u32 request_id, con
         FL_WARN("Warning: No pending callback found for fetch error request " << request_id);
     }
 }
-
-// JavaScript function that performs the actual fetch and calls back to C++
-EM_JS(void, js_fetch_async, (u32 request_id, const char* url), {
-    var urlString = UTF8ToString(url);
-    console.log('🌐 JavaScript fetch starting for request', request_id, 'URL:', urlString);
-    
-    // Use native JavaScript fetch API
-    fetch(urlString)
-        .then(response => {
-            console.log('🌐 Fetch response received for request', request_id, 'status:', response.status);
-            if (!response.ok) {
-                throw new Error('HTTP ' + response.status + ': ' + response.statusText);  // ok bare allocation
-            }
-            return response.text();
-        })
-        .then(text => {
-            console.log('🌐 Fetch text received for request', request_id, 'length:', text.length);
-            // Call back into C++ success callback with request ID
-            Module._js_fetch_success_callback(request_id, stringToUTF8OnStack(text));
-        })
-        .catch(error => {
-            console.error('🌐 Fetch error for request', request_id, ':', error.message);
-            // Call back into C++ error callback with request ID
-            Module._js_fetch_error_callback(request_id, stringToUTF8OnStack(error.message));
-        });
-});
 
 void WasmFetchRequest::response(const FetchResponseCallback& callback) {
     FL_WARN("Starting JavaScript-based fetch request to: " << mUrl);

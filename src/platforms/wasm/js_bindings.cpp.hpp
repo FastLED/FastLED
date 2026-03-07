@@ -47,24 +47,6 @@
 #include "fl/stl/json.h"
 #include "fl/stl/stdio.h"
 
-// EM_JS function to push screenmap updates to JavaScript
-// This allows C++ to notify JavaScript when screenmap data changes
-// JavaScript can then cache the data and avoid per-frame polling
-EM_JS(void, js_notify_screenmap_update, (const char* jsonData), {
-    if (typeof self !== 'undefined' && self.postMessage) {
-        const data = UTF8ToString(jsonData);
-        const parsedData = JSON.parse(data);
-        self.postMessage({
-            type: 'screenmap_update',
-            payload: {
-                screenMapData: parsedData
-            }
-        });
-    } else if (typeof window !== 'undefined') {
-        console.log('[C++] Screenmap update:', UTF8ToString(jsonData));
-    }
-});
-
 // Forward declarations for functions used in this file
 namespace fl {
 void jsUpdateUiComponents(const char* jsonStr);

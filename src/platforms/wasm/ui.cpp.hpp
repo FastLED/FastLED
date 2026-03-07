@@ -45,6 +45,9 @@
 #include "fl/warn.h"
 #include "fl/compiler_control.h"
 
+// Implemented in js_library.js (--js-library side file)
+extern "C" void js_post_ui_elements(const char*);
+
 using fl::JsonUiUpdateOutput;
 
 namespace fl {
@@ -143,23 +146,7 @@ void ensureWasmUiSystemInitialized() {
 
             // Post message to main thread with UI JSON
             // Main thread will call uiManager.addUiElements()
-            EM_ASM({
-                try {
-                    const jsonStr = UTF8ToString($0);
-                    const uiElements = JSON.parse(jsonStr);
-
-                    // Post message to main thread for UI processing
-                    // Worker context: postMessage sends to main thread
-                    postMessage({
-                        type: 'ui_elements_add',
-                        payload: {
-                            elements: uiElements
-                        }
-                    });
-                } catch (error) {
-                    console.error('Error posting UI message from worker:', error);
-                }
-            }, jsonStr);
+            js_post_ui_elements(jsonStr);
         };
         
         // Initialize with error checking via early return

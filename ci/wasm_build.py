@@ -35,7 +35,7 @@ import time
 from pathlib import Path
 
 from ci.wasm_flags import get_link_flags, get_sketch_compile_flags
-from ci.wasm_tools import get_emcc
+from ci.wasm_tools import run_emcc
 
 
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -74,12 +74,21 @@ def get_meson_executable() -> str:
 # ============================================================================
 
 
+_cached_fingerprint: str | None = None
+_cached_fingerprint_time: float = 0.0
+
+
 def _compute_src_fingerprint() -> str:
     """Fast fingerprint of source tree based on file mtimes.
 
     Walks src/ and key build config files, hashing their paths and mtimes.
-    This is much faster than running meson compile (~10ms vs ~1s).
+    Caches the result within the same process invocation (cleared after 0.5s).
     """
+    global _cached_fingerprint, _cached_fingerprint_time
+    now = time.monotonic()
+    if _cached_fingerprint is not None and (now - _cached_fingerprint_time) < 0.5:
+        return _cached_fingerprint
+
     h = hashlib.md5(usedforsecurity=False)
     src_dir = PROJECT_ROOT / "src"
 
@@ -106,7 +115,9 @@ def _compute_src_fingerprint() -> str:
         except OSError:
             h.update(f"{config_file}:MISSING".encode())
 
-    return h.hexdigest()
+    _cached_fingerprint = h.hexdigest()
+    _cached_fingerprint_time = now
+    return _cached_fingerprint
 
 
 def _library_is_fresh(build_dir: Path) -> bool:
@@ -174,12 +185,12 @@ def ensure_meson_configured(build_dir: Path, mode: str, force: bool = False) -> 
     return True
 
 
-def build_library(build_dir: Path, verbose: bool = False) -> bool:
+def build_library(build_dir: Path, verbose: bool = False) -> tuple[bool, bool]:
     """
     Build libfastled.a using ninja.
 
     Skips the build entirely if the source fingerprint hasn't changed.
-    Returns True if build succeeded.
+    Returns (success, was_rebuilt) — was_rebuilt is True if sources changed.
     """
     # Fast path: skip meson/ninja if source tree hasn't changed
     if _library_is_fresh(build_dir):
@@ -187,7 +198,7 @@ def build_library(build_dir: Path, verbose: bool = False) -> bool:
             print("[WASM] Library up-to-date (fingerprint match), skipping meson")
         else:
             print("[WASM] Library up-to-date")
-        return True
+        return True, False
 
     # Check for stale PCH before invoking Ninja (Windows backslash path issue)
     from ci.compile_pch import invalidate_stale_pch
@@ -202,11 +213,11 @@ def build_library(build_dir: Path, verbose: bool = False) -> bool:
     result = subprocess.run(cmd, cwd=PROJECT_ROOT)
     if result.returncode != 0:
         print(f"[WASM] Library build failed with return code {result.returncode}")
-        return False
+        return False, False
 
     _save_library_fingerprint(build_dir)
     print("[WASM] Library build successful")
-    return True
+    return True, True
 
 
 def create_wrapper(example_name: str, sketch_cache_dir: Path) -> Path:
@@ -240,34 +251,41 @@ def create_wrapper(example_name: str, sketch_cache_dir: Path) -> Path:
 def build_sketch_pch(
     build_dir: Path,
     mode: str,
+    lib_was_rebuilt: bool = False,
     verbose: bool = False,
 ) -> Path | None:
     """
     Build a sketch-specific PCH with sketch compile flags.
 
-    The library PCH uses library flags (e.g. -O1 -flto=thin) which are
-    incompatible with sketch flags (e.g. -O0). This builds a separate PCH
-    for sketch compilation so the sketch can use PCH despite different flags.
+    The library PCH uses library flags (e.g. -O1) which are incompatible with
+    sketch flags (e.g. -O0). This builds a separate PCH for sketch compilation.
+
+    Args:
+        lib_was_rebuilt: If True, library sources changed — invalidate sketch PCH
+            since included headers may have changed.
 
     Returns path to the sketch PCH, or None if build fails.
     """
-    emcc = get_emcc()
     sketch_pch_path = build_dir / "sketch_pch.h.pch"
-    sketch_pch_flags_hash_path = build_dir / "sketch_pch.flags_hash"
+    sketch_pch_hash_path = build_dir / "sketch_pch.hash"
 
     sketch_flags = get_sketch_compile_flags(mode)
-    flags_hash = hashlib.sha256("\n".join(sketch_flags).encode()).hexdigest()
+    # Combine flags + source fingerprint to detect both flag and header changes
+    src_fp = _compute_src_fingerprint()
+    combined = "\n".join(sketch_flags) + "\n" + src_fp
+    current_hash = hashlib.sha256(combined.encode()).hexdigest()
 
     # Check if sketch PCH is up-to-date
-    if sketch_pch_path.exists() and sketch_pch_flags_hash_path.exists():
-        stored_hash = sketch_pch_flags_hash_path.read_text(encoding="utf-8").strip()
-        if stored_hash == flags_hash:
-            pch_mtime = sketch_pch_path.stat().st_mtime
-            header_mtime = WASM_PCH_HEADER.stat().st_mtime
-            if header_mtime <= pch_mtime:
-                if verbose:
-                    print("[WASM] Sketch PCH is up-to-date")
-                return sketch_pch_path
+    if (
+        not lib_was_rebuilt
+        and sketch_pch_path.exists()
+        and sketch_pch_hash_path.exists()
+    ):
+        stored_hash = sketch_pch_hash_path.read_text(encoding="utf-8").strip()
+        if stored_hash == current_hash:
+            if verbose:
+                print("[WASM] Sketch PCH is up-to-date")
+            return sketch_pch_path
 
     includes = [
         f"-I{PROJECT_ROOT / 'src'}",
@@ -280,23 +298,23 @@ def build_sketch_pch(
         "-D_FILE_OFFSET_BITS=64",
     ]
 
-    cmd = (
-        [emcc, "-x", "c++-header", str(WASM_PCH_HEADER), "-o", str(sketch_pch_path)]
+    emcc_args = (
+        ["-x", "c++-header", str(WASM_PCH_HEADER), "-o", str(sketch_pch_path)]
         + meson_defaults
         + sketch_flags
         + includes
     )
 
     if verbose:
-        print(f"[WASM] Sketch PCH: {subprocess.list2cmdline(cmd)}")
+        print(f"[WASM] Sketch PCH args: {emcc_args}")
 
     print("[WASM] Building sketch PCH...")
-    result = subprocess.run(cmd, cwd=PROJECT_ROOT)
-    if result.returncode != 0:
+    rc = run_emcc(emcc_args, cwd=str(PROJECT_ROOT))
+    if rc != 0:
         print("[WASM] Sketch PCH build failed")
         return None
 
-    sketch_pch_flags_hash_path.write_text(flags_hash, encoding="utf-8")
+    sketch_pch_hash_path.write_text(current_hash, encoding="utf-8")
     print("[WASM] Sketch PCH built successfully")
     return sketch_pch_path
 
@@ -314,16 +332,23 @@ def compile_sketch(
     Sketch artifacts are cached per-sketch in sketch_cache_dir.
     Returns path to the object file, or None on failure.
     """
-    emcc = get_emcc()
     object_path = sketch_cache_dir / "sketch.o"
 
-    # Check if recompilation needed (mtime check against wrapper and library)
+    # Check if recompilation needed (mtime check against wrapper, .ino, and library)
     library_archive = build_dir / "ci" / "meson" / "wasm" / "libfastled.a"
+    # Find the .ino file that the wrapper #includes
+    example_name = wrapper_path.stem.replace("_wrapper", "")
+    ino_file = PROJECT_ROOT / "examples" / example_name / f"{example_name}.ino"
     if object_path.exists():
         object_mtime = object_path.stat().st_mtime
         wrapper_mtime = wrapper_path.stat().st_mtime
+        ino_mtime = ino_file.stat().st_mtime if ino_file.exists() else 0
         lib_mtime = library_archive.stat().st_mtime if library_archive.exists() else 0
-        if wrapper_mtime <= object_mtime and lib_mtime <= object_mtime:
+        if (
+            wrapper_mtime <= object_mtime
+            and ino_mtime <= object_mtime
+            and lib_mtime <= object_mtime
+        ):
             print("[WASM] Sketch is up-to-date")
             return object_path
 
@@ -348,23 +373,175 @@ def compile_sketch(
             "-fpch-validate-input-files-content",
         ]
 
-    cmd = (
-        [emcc, "-c", str(wrapper_path), "-o", str(object_path)]
+    emcc_args = (
+        ["-c", str(wrapper_path), "-o", str(object_path)]
         + sketch_flags
         + includes
         + pch_args
     )
 
     if verbose:
-        print(f"[WASM] Compile: {subprocess.list2cmdline(cmd)}")
+        print(f"[WASM] Compile args: {emcc_args}")
 
     print(f"[WASM] Compiling sketch: {wrapper_path.name}")
-    result = subprocess.run(cmd, cwd=PROJECT_ROOT)
-    if result.returncode != 0:
-        print(f"[WASM] Sketch compilation failed with return code {result.returncode}")
+    rc = run_emcc(emcc_args, cwd=str(PROJECT_ROOT))
+    if rc != 0:
+        print(f"[WASM] Sketch compilation failed with return code {rc}")
         return None
 
     return object_path
+
+
+def _parse_wasm_ld_from_verbose(stderr_text: str) -> list[str] | None:
+    """Parse the wasm-ld command from emcc verbose stderr output.
+
+    emcc with EMCC_VERBOSE=1 prints subprocess commands as:
+      /path/to/wasm-ld.exe arg1 arg2 ...
+    """
+    import shlex
+
+    for line in stderr_text.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        # emcc verbose output prefixes commands with a space
+        if "wasm-ld" in stripped.split()[0] if stripped.split() else False:
+            try:
+                return shlex.split(stripped)
+            except ValueError:
+                continue
+    return None
+
+
+def _intercept_emcc_link(
+    emcc_args: list[str],
+    sketch_object: Path,
+    cached_wasm: Path,
+    build_dir: Path,
+    cwd: str,
+) -> int:
+    """Run emcc link as subprocess with verbose output to capture wasm-ld command.
+
+    Uses EMCC_VERBOSE=1 to make emcc print the wasm-ld command to stderr,
+    then saves it (with placeholders) for future fast re-linking via _fast_link().
+
+    This is a one-time operation per build directory — subsequent links use
+    _fast_link() which runs wasm-ld directly (~0.2s vs ~1.1s).
+    """
+    from ci.wasm_tools import get_emcc
+
+    emcc = get_emcc()
+
+    # Set up env to capture wasm-ld command and preserve temp files
+    emcc_tmp = build_dir / "emcc_tmp"
+    emcc_tmp.mkdir(parents=True, exist_ok=True)
+    env = os.environ.copy()
+    env["EMCC_VERBOSE"] = "1"
+    env["EMCC_DEBUG"] = "1"  # preserves temp files (js_symbols stub)
+    env["EMCC_TEMP_DIR"] = str(emcc_tmp)
+    env["EM_FORCE_RESPONSE_FILES"] = "0"  # ensure full command, no @file
+
+    result = subprocess.run(
+        [emcc] + emcc_args,
+        cwd=cwd,
+        stderr=subprocess.PIPE,
+        text=True,
+        env=env,
+    )
+
+    if result.returncode != 0:
+        # Print captured stderr so user sees the error
+        if result.stderr:
+            print(result.stderr, file=sys.stderr, end="")
+        return result.returncode
+
+    # Parse wasm-ld command from verbose output
+    wasm_ld_cmd = _parse_wasm_ld_from_verbose(result.stderr)
+    if wasm_ld_cmd is None:
+        print("[WASM] Warning: could not capture wasm-ld command from verbose output")
+        return 0  # link succeeded, just can't cache the fast path
+
+    # Copy js_symbols stub from temp dir to build_dir for persistence
+    emcc_temp_dir = emcc_tmp / "emscripten_temp"
+    cached_stub = build_dir / "libemscripten_js_symbols.so"
+    for i, arg in enumerate(wasm_ld_cmd):
+        if "js_symbols" in arg:
+            stub_src = Path(arg)
+            if stub_src.exists():
+                shutil.copy2(str(stub_src), str(cached_stub))
+                wasm_ld_cmd[i] = str(cached_stub)
+            break
+
+    # Save wasm-ld command template with placeholders
+    sketch_o_str = str(sketch_object)
+    wasm_str = str(cached_wasm)
+    template: list[str] = []
+    for arg in wasm_ld_cmd:
+        arg = arg.replace(sketch_o_str, "{sketch_o}")
+        arg = arg.replace(wasm_str, "{output_wasm}")
+        template.append(arg)
+    cache_file = build_dir / "wasm_ld_args.json"
+    cache_file.write_text(json.dumps(template), encoding="utf-8")
+
+    # Clean up emcc temp dir (we've saved what we need)
+    try:
+        shutil.rmtree(str(emcc_temp_dir), ignore_errors=True)
+    except OSError:
+        pass
+
+    return 0
+
+
+def _fast_link(
+    sketch_object: Path,
+    cached_wasm: Path,
+    build_dir: Path,
+    verbose: bool = False,
+) -> bool:
+    """Fast link using cached wasm-ld args + cached JS glue.
+
+    Bypasses emcc entirely (~0.2s vs ~1.1s).
+    Returns True on success, False to fall back to full emcc link.
+    """
+    cached_js_glue = build_dir / "fastled_glue.js"
+    if not cached_js_glue.exists():
+        return False
+
+    cache_file = build_dir / "wasm_ld_args.json"
+    if not cache_file.exists():
+        return False
+
+    # Check that the js_symbols stub exists
+    cached_stub = build_dir / "libemscripten_js_symbols.so"
+    if not cached_stub.exists():
+        return False
+
+    try:
+        template_args: list[str] = json.loads(cache_file.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return False
+
+    # Substitute placeholders
+    cmd: list[str] = []
+    for arg in template_args:
+        arg = arg.replace("{sketch_o}", str(sketch_object))
+        arg = arg.replace("{output_wasm}", str(cached_wasm))
+        cmd.append(arg)
+
+    if verbose:
+        print(f"[WASM] Fast link cmd: {cmd}")
+
+    print("[WASM] Fast linking (wasm-ld only)...")
+    result = subprocess.run(cmd, cwd=str(PROJECT_ROOT))
+    if result.returncode != 0:
+        print("[WASM] Fast link failed, falling back to full emcc link")
+        return False
+
+    # Copy cached JS glue to sketch cache dir (use copy, not copy2,
+    # so mtime is current — prevents stale mtime from triggering re-links)
+    js_dest = cached_wasm.parent / "fastled.js"
+    shutil.copy(str(cached_js_glue), str(js_dest))
+    return True
 
 
 def link_wasm(
@@ -378,10 +555,15 @@ def link_wasm(
     """
     Link sketch.o + libfastled.a → fastled.js + fastled.wasm.
 
-    Links into sketch_cache_dir first, then copies to output_js.
+    Two-tier linking strategy:
+    1. Fast path: reuse cached JS glue + run wasm-ld directly (~0.2s)
+    2. Full path: run emcc to generate JS glue + wasm (~1.1s), then cache
+
+    The JS glue is identical across all sketches (no EM_ASM/EM_JS), so after
+    one full link the JS is cached and subsequent links skip emcc entirely.
+
     Returns True on success.
     """
-    emcc = get_emcc()
     library_archive = build_dir / "ci" / "meson" / "wasm" / "libfastled.a"
 
     if not library_archive.exists():
@@ -400,12 +582,22 @@ def link_wasm(
             or library_archive.stat().st_mtime > output_mtime
         )
         if not inputs_newer:
-            # Cached link output is fresh — just copy to final location
             _copy_linked_output(sketch_cache_dir, output_js)
             print("[WASM] Link output up-to-date (cached)")
             return True
 
+    # Fast path: reuse cached JS glue + run wasm-ld directly
+    if _fast_link(sketch_object, cached_wasm, build_dir, verbose):
+        _copy_linked_output(sketch_cache_dir, output_js)
+        print(f"[WASM] Output: {output_js}")
+        return True
+
+    # Full emcc link — generates JS glue + wasm, captures wasm-ld command
     link_flags = get_link_flags(mode)
+
+    js_library = (
+        PROJECT_ROOT / "src" / "platforms" / "wasm" / "compiler" / "js_library.js"
+    )
 
     includes = [
         f"-I{PROJECT_ROOT / 'src'}",
@@ -413,23 +605,29 @@ def link_wasm(
         f"-I{PROJECT_ROOT / 'src' / 'platforms' / 'wasm' / 'compiler'}",
     ]
 
-    cmd = (
-        [emcc, str(sketch_object), str(library_archive)]
+    emcc_args = (
+        [str(sketch_object), str(library_archive)]
         + includes
+        + [f"--js-library={js_library}"]
         + ["-o", str(cached_js)]
         + link_flags
     )
 
     if verbose:
-        print(f"[WASM] Link: {subprocess.list2cmdline(cmd)}")
+        print(f"[WASM] Link args: {emcc_args}")
 
     print("[WASM] Linking final WASM module...")
-    result = subprocess.run(cmd, cwd=PROJECT_ROOT)
-    if result.returncode != 0:
-        print(f"[WASM] Linking failed with return code {result.returncode}")
+    rc = _intercept_emcc_link(
+        emcc_args, sketch_object, cached_wasm, build_dir, str(PROJECT_ROOT)
+    )
+    if rc != 0:
+        print(f"[WASM] Linking failed with return code {rc}")
         return False
 
-    # Copy from cache to final output
+    # Cache JS glue for fast re-linking (identical across all sketches)
+    cached_js_glue = build_dir / "fastled_glue.js"
+    shutil.copy2(str(cached_js), str(cached_js_glue))
+
     _copy_linked_output(sketch_cache_dir, output_js)
     print(f"[WASM] Output: {output_js}")
     return True
@@ -572,6 +770,9 @@ def main() -> int:
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     parser.add_argument("--force", action="store_true", help="Force rebuild")
+    parser.add_argument(
+        "--just-compile", action="store_true", help="Ignored (kept for compatibility)"
+    )
 
     args = parser.parse_args()
 
@@ -590,11 +791,14 @@ def main() -> int:
 
         # Step 2: Build library via ninja (skipped if source fingerprint matches)
         lib_start = time.time()
-        if not build_library(build_dir, args.verbose):
+        lib_ok, lib_was_rebuilt = build_library(build_dir, args.verbose)
+        if not lib_ok:
             return 1
 
-        # Step 2b: Build sketch-specific PCH (uses sketch flags, may differ from library PCH)
-        sketch_pch = build_sketch_pch(build_dir, args.mode, args.verbose)
+        # Step 2b: Build sketch-specific PCH (invalidated when library sources change)
+        sketch_pch = build_sketch_pch(
+            build_dir, args.mode, lib_was_rebuilt=lib_was_rebuilt, verbose=args.verbose
+        )
         if sketch_pch is None:
             print("[WASM] WARNING: Sketch PCH build failed, continuing without PCH")
         lib_time = time.time() - lib_start

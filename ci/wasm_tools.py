@@ -10,15 +10,21 @@ On first call, setup_emscripten_env() configures EMSCRIPTEN, EM_CONFIG, and
 PATH in os.environ. Subsequent get_emcc()/get_emar()/get_wasm_ld() calls
 return direct paths to the tools, bypassing the Python wrapper entirely.
 
+For maximum speed, run_emcc() calls emcc.py in-process via importlib,
+eliminating subprocess + Python startup overhead entirely (~0.5s per call).
+
 Benchmarks (Windows, per invocation):
   - clang-tool-chain-emcc wrapper:  ~5000ms
   - Direct emcc.bat:                ~1400ms  (3.7x faster)
+  - In-process emcc.main():          ~400ms  (12x faster)
   - clang-tool-chain-wasm-ld:       ~5400ms
   - Direct wasm-ld.exe:               ~60ms  (90x faster)
 """
 
+import importlib.util
 import os
 import platform
+import subprocess
 import sys
 from pathlib import Path
 from typing import Optional
@@ -28,6 +34,8 @@ _env_setup_done = False
 _fast_emcc: Optional[str] = None
 _fast_emar: Optional[str] = None
 _fast_wasm_ld: Optional[str] = None
+_emscripten_dir: Optional[Path] = None
+_emcc_module: Optional[object] = None
 
 
 def _get_platform_info() -> tuple[str, str]:
@@ -105,6 +113,10 @@ def setup_emscripten_env() -> bool:
         # Ensure emscripten uses the same Python as us
         os.environ["EMSDK_PYTHON"] = sys.executable
 
+        # Skip emscripten sanity checks — we already validated tool existence above.
+        # Saves ~0.3s per emcc invocation (sanity check probes LLVM, node, etc.).
+        os.environ["EMCC_SKIP_SANITY_CHECK"] = "1"
+
         # Add emscripten bin directory to PATH (for clang, node, etc.)
         current_path = os.environ.get("PATH", "")
         bin_dir_str = str(bin_dir)
@@ -124,6 +136,7 @@ def setup_emscripten_env() -> bool:
 
         _fast_emcc = str(emcc_path)
         _fast_emar = str(emar_path)
+        _emscripten_dir = emscripten_dir
         if wasm_ld_path.exists():
             _fast_wasm_ld = str(wasm_ld_path)
 
@@ -170,3 +183,63 @@ def get_emar() -> str:
     if _fast_emar is not None:
         return _fast_emar
     return "clang-tool-chain-emar"
+
+
+def _load_emcc_module():
+    """Lazily load emcc.py as a Python module for in-process invocation."""
+    global _emcc_module
+    if _emcc_module is not None:
+        return _emcc_module
+
+    setup_emscripten_env()
+    if _emscripten_dir is None:
+        return None
+
+    emcc_py = _emscripten_dir / "emcc.py"
+    if not emcc_py.exists():
+        return None
+
+    # Add emscripten dir to sys.path so emcc.py can import its 'tools' package
+    emscripten_str = str(_emscripten_dir)
+    if emscripten_str not in sys.path:
+        sys.path.insert(0, emscripten_str)
+
+    spec = importlib.util.spec_from_file_location("emcc", str(emcc_py))
+    if spec is None or spec.loader is None:
+        return None
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    _emcc_module = mod
+    return _emcc_module
+
+
+def run_emcc(args: list[str], cwd: Optional[str] = None) -> int:
+    """Run emcc with the given args, trying in-process first, falling back to subprocess.
+
+    Args:
+        args: Command-line arguments (WITHOUT the 'emcc' prefix — just flags and files).
+        cwd: Working directory for the invocation.
+
+    Returns:
+        Process return code (0 = success).
+    """
+    mod = _load_emcc_module()
+    if mod is not None:
+        # In-process invocation — save/restore global state
+        old_argv = sys.argv
+        old_cwd = os.getcwd()
+        try:
+            sys.argv = ["emcc"] + args
+            if cwd:
+                os.chdir(cwd)
+            return mod.main(sys.argv)  # type: ignore[union-attr]
+        except SystemExit as e:
+            return e.code if isinstance(e.code, int) else 1
+        finally:
+            sys.argv = old_argv
+            os.chdir(old_cwd)
+
+    # Fallback: subprocess
+    emcc = get_emcc()
+    result = subprocess.run([emcc] + args, cwd=cwd)
+    return result.returncode

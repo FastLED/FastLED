@@ -70,9 +70,6 @@ compiler_flags = [
     "-fno-exceptions",                         # Disable C++ exceptions for all targets (size/performance)
     "-fno-rtti",                              # Disable RTTI for all targets (size/performance, consistent)
     
-    # Threading Support
-    "-pthread",                               # Enable POSIX threads support
-    
     # Thin PCH Support (Emscripten/Clang feature)
     "-fpch-instantiate-templates",            # Required for proper Thin PCH template handling
 ]
@@ -258,8 +255,8 @@ link_flags = [
     # Note: --profiling-funcs and --emit-symbol-map removed for faster linking.
     # Use debug or fast_debug mode if you need function names in profiling.
 
-    # Reduce memory for faster startup (override base setting)
-    "-sINITIAL_MEMORY=67108864",            # Reduce initial memory to 64MB (faster startup)
+    # Skip binaryen/wasm-opt — saves ~0.3s per link in quick mode
+    "-O0",
 
     # Disable Non-Essential Runtime Features for Speed
     "-sASSERTIONS=0",                       # Disable runtime assertions
@@ -305,10 +302,7 @@ flags = [
     # Linker Performance Optimization
     "-fuse-ld=wasm-ld",                      # Explicitly use wasm-ld (default, but explicit for clarity)
 
-    # Threading Support
-    "-pthread",                               # Enable POSIX threads support
-    "-sUSE_PTHREADS=1",                       # Use Emscripten's pthread implementation
-    "-sPROXY_TO_PTHREAD",                     # Run main() on a pthread
+    # Note: No pthreads — WASM runs on a Web Worker, so blocking is fine.
 ]
 
 [linking.sketch]
@@ -325,9 +319,10 @@ flags = [
     "-sMODULARIZE=1",                        # Create a factory function (not global)
     "-sEXPORT_NAME=fastled",                 # Name of the exported factory function
     
-    # Memory Management
-    "-sALLOW_MEMORY_GROWTH=1",               # Allow WASM memory to grow dynamically
-    "-sINITIAL_MEMORY=134217728",            # Start with 128 MB memory (134,217,728 bytes)
+    # Memory Management — fixed 250MB, no dynamic growth.
+    # Removes ALLOW_MEMORY_GROWTH which required an expensive acorn JS rewrite
+    # pass (apply_wasm_memory_growth) on every link (~0.3s).
+    "-sINITIAL_MEMORY=262144000",            # Fixed 250 MB (250 * 1024 * 1024, page-aligned)
     "-sAUTO_NATIVE_LIBRARIES=0",             # Disable automatic native library inclusion
     
     # JavaScript Interop - Runtime Methods
