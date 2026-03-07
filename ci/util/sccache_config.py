@@ -34,14 +34,21 @@ class PlatformIOEnv(Protocol):
 
 
 def get_sccache_wrapper_path() -> str | None:
-    """Get the full path to clang-tool-chain sccache wrapper executable.
+    """Get the path to sccache binary.
 
-    IMPORTANT: Only uses clang-tool-chain-sccache wrapper.
-    The wrapper provides:
-    - Platform-specific ABI handling
-    - Automatic SCCACHE_IDLE_TIMEOUT=5 (prevents file locking)
-    - Graceful degradation to iso-env on failure
+    Prefers raw sccache binary (~40ms) over clang-tool-chain-sccache Python
+    wrapper (~828ms) for stats/clear operations.
+    Falls back to wrapper if raw binary is not found.
     """
+    try:
+        from clang_tool_chain.platform.paths import find_sccache_binary
+
+        return str(find_sccache_binary())
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        return None
+    except Exception:
+        pass
     return shutil.which("clang-tool-chain-sccache")
 
 
@@ -109,6 +116,7 @@ def show_sccache_stats() -> None:
             cwd=None,
             check=False,
             timeout=10,
+            capture_output=True,
         )
         if result.returncode == 0:
             # Parse and display key metrics only
@@ -229,7 +237,11 @@ def configure_sccache(env: PlatformIOEnv) -> None:
     # Show SCCACHE stats if available
     try:
         result = RunningProcess.run(
-            [sccache_path, "--show-stats"], cwd=None, check=False, timeout=10
+            [sccache_path, "--show-stats"],
+            cwd=None,
+            check=False,
+            timeout=10,
+            capture_output=True,
         )
         if result.returncode == 0:
             ts_print("SCCACHE Statistics:")

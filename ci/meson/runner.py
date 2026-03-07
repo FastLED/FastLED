@@ -187,6 +187,7 @@ def _recover_stale_build(
             check=check,
             build_mode=build_mode,
             verbose=verbose,
+            enable_unit_tests=True,
         )
 
         if success:
@@ -393,6 +394,7 @@ def run_meson_build_and_test(
         build_mode=build_mode,
         verbose=verbose,
         enable_examples=enable_examples,
+        enable_unit_tests=True,
     ):
         return MesonTestResult(
             success=False,

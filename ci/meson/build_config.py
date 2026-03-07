@@ -263,6 +263,10 @@ def _write_configuration_markers(
     current_test_hash: str,
     compiler_version_marker: Path,
     current_compiler_version: str,
+    enable_examples_marker: Optional[Path] = None,
+    enable_examples: Optional[bool] = None,
+    enable_unit_tests_marker: Optional[Path] = None,
+    enable_unit_tests: Optional[bool] = None,
     only_missing: bool = False,
     verb: str = "Saved",
 ) -> None:
@@ -288,6 +292,24 @@ def _write_configuration_markers(
             f"compiler version: {current_compiler_version}",
         ),
     ]
+
+    # Add optional enable_examples/enable_unit_tests markers
+    if enable_examples_marker is not None and enable_examples is not None:
+        markers.append(
+            (
+                enable_examples_marker,
+                str(enable_examples),
+                f"enable_examples: {enable_examples}",
+            )
+        )
+    if enable_unit_tests_marker is not None and enable_unit_tests is not None:
+        markers.append(
+            (
+                enable_unit_tests_marker,
+                str(enable_unit_tests),
+                f"enable_unit_tests: {enable_unit_tests}",
+            )
+        )
 
     for marker_path, value, description in markers:
         if only_missing and marker_path.exists():
@@ -557,6 +579,7 @@ def setup_meson_build(
     build_mode: Optional[str] = None,
     verbose: bool = False,
     enable_examples: bool = True,
+    enable_unit_tests: bool = True,
 ) -> bool:
     """
     Set up Meson build directory.
@@ -570,6 +593,7 @@ def setup_meson_build(
         build_mode: Build mode ("quick", "debug", or "release"). If None, derived from debug flag.
         verbose: Show detailed output including toolchain info (default: False)
         enable_examples: Enable example compilation targets (default: True)
+        enable_unit_tests: Enable unit test compilation targets (default: True)
 
     Returns:
         True if setup successful, False otherwise
@@ -701,6 +725,8 @@ def setup_meson_build(
     check_marker = build_dir / ".check_config"
     build_mode_marker = build_dir / ".build_mode_config"
     compiler_version_marker = build_dir / ".compiler_version_config"
+    enable_examples_marker = build_dir / ".enable_examples_config"
+    enable_unit_tests_marker = build_dir / ".enable_unit_tests_config"
 
     # Pre-compute directory max-mtimes once for all fast-path checks below.
     # The tests/ directory is needed by BOTH:
@@ -942,6 +968,32 @@ def setup_meson_build(
                 reconfigure_reasons.append("build_mode marker unreadable")
         else:
             reconfigure_reasons.append("build_mode marker missing")
+
+        # Check if enable_examples setting has changed since last configure
+        if enable_examples_marker.exists():
+            try:
+                last_enable_examples = (
+                    enable_examples_marker.read_text().strip() == "True"
+                )
+                if last_enable_examples != enable_examples:
+                    reconfigure_reasons.append(
+                        f"enable_examples changed: {last_enable_examples} → {enable_examples}"
+                    )
+            except (OSError, IOError):
+                reconfigure_reasons.append("enable_examples marker unreadable")
+
+        # Check if enable_unit_tests setting has changed since last configure
+        if enable_unit_tests_marker.exists():
+            try:
+                last_enable_unit_tests = (
+                    enable_unit_tests_marker.read_text().strip() == "True"
+                )
+                if last_enable_unit_tests != enable_unit_tests:
+                    reconfigure_reasons.append(
+                        f"enable_unit_tests changed: {last_enable_unit_tests} → {enable_unit_tests}"
+                    )
+            except (OSError, IOError):
+                reconfigure_reasons.append("enable_unit_tests marker unreadable")
 
         # Print consolidated reconfigure message if there are any reasons
         if reconfigure_reasons:
@@ -1275,8 +1327,9 @@ def setup_meson_build(
         ]
         # Always pass explicit build_mode to ensure meson uses correct optimization flags
         cmd.extend([f"-Dbuild_mode={build_mode}"])
-        # Pass enable_examples option
+        # Pass enable_examples and enable_unit_tests options
         cmd.extend([f"-Denable_examples={str(enable_examples).lower()}"])
+        cmd.extend([f"-Denable_unit_tests={str(enable_unit_tests).lower()}"])
     else:
         # Initial setup
         _ts_print(f"[MESON] Setting up build directory: {build_dir}")
@@ -1289,8 +1342,9 @@ def setup_meson_build(
         ]
         # Always pass explicit build_mode to ensure meson uses correct optimization flags
         cmd.extend([f"-Dbuild_mode={build_mode}"])
-        # Pass enable_examples option
+        # Pass enable_examples and enable_unit_tests options
         cmd.extend([f"-Denable_examples={str(enable_examples).lower()}"])
+        cmd.extend([f"-Denable_unit_tests={str(enable_unit_tests).lower()}"])
 
     is_windows = sys.platform.startswith("win") or os.name == "nt"
 
@@ -1463,6 +1517,8 @@ def setup_meson_build(
                 str(build_dir),
             ]
             cmd.extend([f"-Dbuild_mode={build_mode}"])
+            cmd.extend([f"-Denable_examples={str(enable_examples).lower()}"])
+            cmd.extend([f"-Denable_unit_tests={str(enable_unit_tests).lower()}"])
 
     # Generate native file for Meson that persists tool configuration across regenerations
     # When Meson regenerates (e.g., when ninja detects meson.build changes),
@@ -1623,6 +1679,10 @@ endian = 'little'
             current_test_hash=current_test_hash,
             compiler_version_marker=compiler_version_marker,
             current_compiler_version=current_compiler_version,
+            enable_examples_marker=enable_examples_marker,
+            enable_examples=enable_examples,
+            enable_unit_tests_marker=enable_unit_tests_marker,
+            enable_unit_tests=enable_unit_tests,
             only_missing=True,
             verb="Created",
         )
@@ -1719,6 +1779,10 @@ endian = 'little'
             current_test_hash=current_test_hash,
             compiler_version_marker=compiler_version_marker,
             current_compiler_version=current_compiler_version,
+            enable_examples_marker=enable_examples_marker,
+            enable_examples=enable_examples,
+            enable_unit_tests_marker=enable_unit_tests_marker,
+            enable_unit_tests=enable_unit_tests,
             only_missing=False,
             verb="Saved",
         )

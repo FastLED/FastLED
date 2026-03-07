@@ -269,13 +269,21 @@ def get_sccache_build_flags(board_name: str) -> dict[str, str]:
     """Get build flags for SCCACHE configuration with xcache wrapper support."""
     from ci.compiler.path_manager import FastLEDPaths
 
-    # Use clang-tool-chain sccache wrapper (guaranteed to be available)
-    sccache_path = shutil.which("clang-tool-chain-sccache")
+    # Prefer raw sccache binary (~40ms) over Python wrapper (~828ms)
+    sccache_path: str | None = None
+    try:
+        from clang_tool_chain.platform.paths import find_sccache_binary
+
+        sccache_path = str(find_sccache_binary())
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+    except Exception:
+        pass
+    if not sccache_path:
+        sccache_path = shutil.which("clang-tool-chain-sccache")
 
     if not sccache_path:
-        print(
-            "clang-tool-chain-sccache not found in PATH, compilation will proceed without caching"
-        )
+        print("sccache not found, compilation will proceed without caching")
         return {}
 
     print(f"Setting up SCCACHE build flags: {sccache_path}")
@@ -351,13 +359,21 @@ def setup_sccache_environment(board_name: str) -> bool:
     """Set up sccache environment variables for the current process."""
     from ci.compiler.path_manager import FastLEDPaths
 
-    # Use clang-tool-chain sccache wrapper (guaranteed to be available)
-    sccache_path = shutil.which("clang-tool-chain-sccache")
+    # Prefer raw sccache binary (~40ms) over Python wrapper (~828ms)
+    sccache_path: str | None = None
+    try:
+        from clang_tool_chain.platform.paths import find_sccache_binary
+
+        sccache_path = str(find_sccache_binary())
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+    except Exception:
+        pass
+    if not sccache_path:
+        sccache_path = shutil.which("clang-tool-chain-sccache")
 
     if not sccache_path:
-        print(
-            "clang-tool-chain-sccache not found in PATH, compilation will proceed without caching"
-        )
+        print("sccache not found in PATH, compilation will proceed without caching")
         return False
 
     print(f"Setting up SCCACHE environment: {sccache_path}")

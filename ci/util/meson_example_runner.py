@@ -433,6 +433,7 @@ def run_meson_examples(
         reconfigure=force_reconfigure,
         build_mode=build_mode,
         verbose=verbose,
+        enable_unit_tests=False,
     ):
         return MesonTestResult(
             success=False,

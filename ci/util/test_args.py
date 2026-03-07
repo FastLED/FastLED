@@ -5,8 +5,6 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from typeguard import typechecked
-
 from ci.util.smart_selector import TestMatch, get_best_match_or_prompt
 from ci.util.test_types import TestArgs
 from ci.util.timestamp_print import ts_print
