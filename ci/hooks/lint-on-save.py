@@ -89,6 +89,11 @@ def main() -> int:
                     rel_norm = rel_path.replace("\\", "/")
                     if rel_norm == sub_path or rel_norm.startswith(sub_path + "/"):
                         return 0
+    except KeyboardInterrupt as ke:
+        import _thread
+
+        _thread.interrupt_main()
+        raise
     except Exception:
         pass
 

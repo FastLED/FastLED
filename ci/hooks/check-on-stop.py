@@ -2,15 +2,22 @@
 """
 Claude Code Stop hook that runs lint and C++ tests concurrently.
 
-Both run in parallel. If lint fails first, the test process is cancelled
-and only lint errors are shown. If lint passes, test results are reported.
+Smart mode: Only runs if:
+1. Repo has actual changes (git status --porcelain not empty)
+2. Changes differ from last run (fingerprint mismatch)
+
+Both lint and tests run in parallel. If lint fails first, the test process
+is cancelled and only lint errors are shown. If lint passes, test results
+are reported.
 
 Usage: Receives JSON on stdin from Claude Code Stop hook.
 Exit codes:
-  0 - Both passed
+  0 - Both passed or skipped (no changes)
   2 - Lint or test failures (stderr fed back to Claude)
 """
 
+import hashlib
+import json
 import subprocess
 import sys
 import threading
@@ -19,6 +26,7 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
 PROJECT_ROOT = SCRIPT_DIR.parent.parent
+FINGERPRINT_FILE = PROJECT_ROOT / ".cache" / "last_agent_changes_fingerprint"
 
 
 def run_cmd(cmd: list[str]) -> subprocess.CompletedProcess[str]:
@@ -46,9 +54,71 @@ def repo_is_clean() -> bool:
     return result.returncode == 0 and not result.stdout.strip()
 
 
+def get_current_fingerprint() -> str | None:
+    """Get MD5 fingerprint of current git status."""
+    result = run_cmd(["git", "status", "--porcelain"])
+    if result.returncode != 0:
+        return None
+    status_output = result.stdout
+    if not status_output.strip():
+        return None
+    return hashlib.md5(status_output.encode()).hexdigest()
+
+
+def get_last_fingerprint() -> str | None:
+    """Read stored fingerprint from .cache/."""
+    if FINGERPRINT_FILE.exists():
+        try:
+            data = json.loads(FINGERPRINT_FILE.read_text())
+            return data.get("fingerprint")
+        except KeyboardInterrupt:
+            import _thread
+
+            _thread.interrupt_main()
+            return None
+        except Exception:
+            return None
+    return None
+
+
+def save_fingerprint(fingerprint: str) -> None:
+    """Save current fingerprint to .cache/."""
+    FINGERPRINT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    FINGERPRINT_FILE.write_text(json.dumps({"fingerprint": fingerprint}))
+
+
+def should_skip_hook() -> bool:
+    """Check if hook should skip based on fingerprints."""
+    current_fp = get_current_fingerprint()
+
+    # No changes - skip
+    if current_fp is None:
+        return True
+
+    # First run - save and run
+    last_fp = get_last_fingerprint()
+    if last_fp is None:
+        save_fingerprint(current_fp)
+        return False
+
+    # Same fingerprint - skip
+    if current_fp == last_fp:
+        return True
+
+    # Different fingerprint - save and run
+    save_fingerprint(current_fp)
+    return False
+
+
 def main() -> int:
     if repo_is_clean():
         return 0
+
+    if should_skip_hook():
+        print("⏭️  Skipping lint+tests (no new changes)", file=sys.stderr)
+        return 0
+
+    print("🔧 Running lint and tests (new changes detected)", file=sys.stderr)
 
     lint_done = threading.Event()
     lint_results: list[subprocess.CompletedProcess[str]] = []
