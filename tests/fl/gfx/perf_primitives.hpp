@@ -1,7 +1,7 @@
 #pragma once
 
 #include "test.h"
-#include "fl/gfx.h"
+#include "fl/gfx/gfx.h"
 #include "fl/stl/chrono.h"
 #include "fl/stl/cstdio.h"
 
@@ -12,16 +12,16 @@ FL_TEST_FILE(FL_FILEPATH) {
 
 FL_TEST_CASE("Graphics performance - drawDisc") {
     CRGB buffer[1024] = {};
-    fl::gfx::Canvas<CRGB> canvas(buffer, 32, 32);
+    fl::CanvasRGB canvas(buffer, 32, 32);
 
     // Warm up
-    canvas.drawDisc(16.0f, 16.0f, 8.0f, CRGB(255, 0, 0));
+    canvas.drawDisc(CRGB(255, 0, 0), 16.0f, 16.0f, 8.0f);
 
     // Benchmark: 100 circles of varying sizes
     auto start = fl::chrono::steady_clock::now();
     for (int i = 0; i < 100; ++i) {
         float radius = 2.0f + (i % 10) * 0.5f;
-        canvas.drawDisc(16.0f, 16.0f, radius, CRGB(255, 0, 0));
+        canvas.drawDisc(CRGB(255, 0, 0), 16.0f, 16.0f, radius);
     }
     auto end = fl::chrono::steady_clock::now();
     auto duration = fl::chrono::duration_cast<fl::chrono::microseconds>(end - start);
@@ -34,17 +34,17 @@ FL_TEST_CASE("Graphics performance - drawDisc") {
 
 FL_TEST_CASE("Graphics performance - drawRing") {
     CRGB buffer[1024] = {};
-    fl::gfx::Canvas<CRGB> canvas(buffer, 32, 32);
+    fl::CanvasRGB canvas(buffer, 32, 32);
 
     // Warm up
-    canvas.drawRing(16.0f, 16.0f, 6.0f, 2.0f, CRGB(0, 255, 0));
+    canvas.drawRing(CRGB(0, 255, 0), 16.0f, 16.0f, 6.0f, 2.0f);
 
     // Benchmark: 100 rings with varying radii/thickness
     auto start = fl::chrono::steady_clock::now();
     for (int i = 0; i < 100; ++i) {
         float radius = 2.0f + (i % 8) * 0.5f;
         float thickness = 1.0f + (i % 4) * 0.25f;
-        canvas.drawRing(16.0f, 16.0f, radius, thickness, CRGB(0, 255, 0));
+        canvas.drawRing(CRGB(0, 255, 0), 16.0f, 16.0f, radius, thickness);
     }
     auto end = fl::chrono::steady_clock::now();
     auto duration = fl::chrono::duration_cast<fl::chrono::microseconds>(end - start);
@@ -57,17 +57,17 @@ FL_TEST_CASE("Graphics performance - drawRing") {
 
 FL_TEST_CASE("Graphics performance - drawLine") {
     CRGB buffer[1024] = {};
-    fl::gfx::Canvas<CRGB> canvas(buffer, 32, 32);
+    fl::CanvasRGB canvas(buffer, 32, 32);
 
     // Warm up
-    canvas.drawLine(0.0f, 0.0f, 31.0f, 31.0f, CRGB(0, 0, 255));
+    canvas.drawLine(CRGB(0, 0, 255), 0.0f, 0.0f, 31.0f, 31.0f);
 
     // Benchmark: 100 lines with varying slopes
     auto start = fl::chrono::steady_clock::now();
     for (int i = 0; i < 100; ++i) {
         float x_end = (i % 32);
         float y_end = ((i * 7) % 32);
-        canvas.drawLine(0.0f, 0.0f, x_end, y_end, CRGB(0, 0, 255));
+        canvas.drawLine(CRGB(0, 0, 255), 0.0f, 0.0f, x_end, y_end);
     }
     auto end = fl::chrono::steady_clock::now();
     auto duration = fl::chrono::duration_cast<fl::chrono::microseconds>(end - start);
@@ -80,10 +80,10 @@ FL_TEST_CASE("Graphics performance - drawLine") {
 
 FL_TEST_CASE("Graphics performance - drawStrokeLine") {
     CRGB buffer[1024] = {};
-    fl::gfx::Canvas<CRGB> canvas(buffer, 32, 32);
+    fl::CanvasRGB canvas(buffer, 32, 32);
 
     // Warm up
-    canvas.drawStrokeLine(0.0f, 0.0f, 31.0f, 31.0f, 2.0f, CRGB(255, 255, 0));
+    canvas.drawStrokeLine(CRGB(255, 255, 0), 0.0f, 0.0f, 31.0f, 31.0f, 2.0f);
 
     // Benchmark: 100 stroked lines
     auto start = fl::chrono::steady_clock::now();
@@ -91,7 +91,7 @@ FL_TEST_CASE("Graphics performance - drawStrokeLine") {
         float x_end = (i % 32);
         float y_end = ((i * 7) % 32);
         float thickness = 1.0f + (i % 4);
-        canvas.drawStrokeLine(0.0f, 0.0f, x_end, y_end, thickness, CRGB(255, 255, 0));
+        canvas.drawStrokeLine(CRGB(255, 255, 0), 0.0f, 0.0f, x_end, y_end, thickness);
     }
     auto end = fl::chrono::steady_clock::now();
     auto duration = fl::chrono::duration_cast<fl::chrono::microseconds>(end - start);

@@ -35,6 +35,7 @@ namespace fl {
 /// - **See also**: fill_rainbow(), fill_gradient<>(), nscale8_video(), fadeLightBy(),
 ///   fadeToBlackBy(), blur1d(), blur2d() for high-performance batch operations
 struct CRGB {
+    typedef u8 fp;
     union {
         struct {
             union {
@@ -288,6 +289,9 @@ struct CRGB {
     /// levels may dim all the way to 100% black.
     /// @see nscale8x3
     CRGB& nscale8 (u8 scaledown );
+
+    /// Generic scale — delegates to nscale8 for CRGB.
+    FASTLED_FORCE_INLINE CRGB& nscale(u8 scaledown) { return nscale8(scaledown); }
 
     /// Scale down a RGB to N/256ths of its current brightness, using
     /// "plain math" dimming rules. "Plain math" dimming rules means that the low light

@@ -1,6 +1,7 @@
 #include "canvas.hpp"
 #include "draw_line.hpp"
 #include "draw_disc.hpp"
+#include "draw_disc_16.hpp"
 #include "draw_ring.hpp"
 #include "draw_thick_line.hpp"
 #include "perf_primitives.hpp"
