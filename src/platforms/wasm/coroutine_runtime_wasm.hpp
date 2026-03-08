@@ -11,6 +11,7 @@
 #include "platforms/coroutine_runtime.h"
 #include "fl/singleton.h"
 #include <emscripten.h>
+#include <emscripten/threading.h>
 // IWYU pragma: end_keep
 
 // Forward declare WASM timer functions (defined in timer.cpp.hpp)

@@ -319,6 +319,125 @@ def build_sketch_pch(
     return sketch_pch_path
 
 
+def _parse_clang_from_verbose(stderr_text: str) -> list[str] | None:
+    """Parse the clang command from emcc verbose stderr output.
+
+    emcc with EMCC_VERBOSE=1 prints subprocess commands to stderr.
+    We look for the clang invocation that has -c (compile mode).
+    """
+    import shlex
+
+    # On Windows, use posix=False so backslash paths aren't mangled.
+    posix = sys.platform != "win32"
+
+    for line in stderr_text.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        parts = stripped.split()
+        if parts and "clang" in parts[0].lower() and "-c" in parts:
+            try:
+                return shlex.split(stripped, posix=posix)
+            except ValueError:
+                continue
+    return None
+
+
+def _fast_compile(
+    wrapper_path: Path,
+    object_path: Path,
+    build_dir: Path,
+    verbose: bool = False,
+) -> bool:
+    """Fast compile using cached clang args, bypassing emcc Python overhead.
+
+    On first compile, emcc is run with EMCC_VERBOSE=1 to capture the clang
+    command it invokes internally. The command is saved as a template with
+    {input_cpp} and {output_o} placeholders. Subsequent compiles call clang
+    directly (~0.45s vs ~0.9s with emcc).
+
+    Returns True on success, False to fall back to full emcc compile.
+    """
+    cache_file = build_dir / "clang_compile_args.json"
+    if not cache_file.exists():
+        return False
+
+    try:
+        template_args: list[str] = json.loads(cache_file.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return False
+
+    cmd: list[str] = []
+    for arg in template_args:
+        arg = arg.replace("{input_cpp}", str(wrapper_path))
+        arg = arg.replace("{output_o}", str(object_path))
+        cmd.append(arg)
+
+    if verbose:
+        print(f"[WASM] Fast compile cmd: {cmd[:3]}...({len(cmd)} args)")
+
+    result = subprocess.run(cmd, cwd=str(PROJECT_ROOT))
+    if result.returncode != 0:
+        # Cache might be stale — delete it so next run recaptures
+        cache_file.unlink(missing_ok=True)
+        return False
+    return True
+
+
+def _intercept_emcc_compile(
+    emcc_args: list[str],
+    wrapper_path: Path,
+    object_path: Path,
+    build_dir: Path,
+) -> int:
+    """Run emcc compile with verbose output to capture clang command.
+
+    Runs emcc normally but with EMCC_VERBOSE=1 and EM_FORCE_RESPONSE_FILES=0
+    so the full clang subprocess command is printed to stderr. We parse it
+    and save a template for future fast compiles via _fast_compile().
+
+    Returns the emcc exit code.
+    """
+    from ci.wasm_tools import get_emcc
+
+    emcc = get_emcc()
+
+    env = os.environ.copy()
+    env["EMCC_VERBOSE"] = "1"
+    env["EM_FORCE_RESPONSE_FILES"] = "0"
+
+    result = subprocess.run(
+        [emcc] + emcc_args,
+        cwd=str(PROJECT_ROOT),
+        stderr=subprocess.PIPE,
+        text=True,
+        env=env,
+    )
+
+    if result.returncode != 0:
+        if result.stderr:
+            print(result.stderr, file=sys.stderr, end="")
+        return result.returncode
+
+    # Parse and cache the clang command for future fast compiles
+    clang_cmd = _parse_clang_from_verbose(result.stderr)
+    if clang_cmd is None:
+        return 0  # compile succeeded, just can't cache
+
+    wrapper_str = str(wrapper_path)
+    object_str = str(object_path)
+    template: list[str] = []
+    for arg in clang_cmd:
+        arg = arg.replace(wrapper_str, "{input_cpp}")
+        arg = arg.replace(object_str, "{output_o}")
+        template.append(arg)
+
+    cache_file = build_dir / "clang_compile_args.json"
+    cache_file.write_text(json.dumps(template), encoding="utf-8")
+
+    return 0
+
+
 def compile_sketch(
     wrapper_path: Path,
     build_dir: Path,
@@ -328,6 +447,10 @@ def compile_sketch(
 ) -> Path | None:
     """
     Compile the sketch wrapper to an object file.
+
+    Two-tier compilation strategy:
+    1. Fast path: run clang directly (~0.45s), bypassing emcc Python overhead
+    2. Full path: run emcc with verbose capture (~0.9s), saves clang cmd for next time
 
     Sketch artifacts are cached per-sketch in sketch_cache_dir.
     Returns path to the object file, or None on failure.
@@ -373,6 +496,13 @@ def compile_sketch(
             "-fpch-validate-input-files-content",
         ]
 
+    print(f"[WASM] Compiling sketch: {wrapper_path.name}")
+
+    # Fast path: call clang directly, bypassing emcc Python overhead
+    if _fast_compile(wrapper_path, object_path, build_dir, verbose):
+        return object_path
+
+    # Full path: run emcc with verbose capture to learn clang command
     emcc_args = (
         ["-c", str(wrapper_path), "-o", str(object_path)]
         + sketch_flags
@@ -383,8 +513,7 @@ def compile_sketch(
     if verbose:
         print(f"[WASM] Compile args: {emcc_args}")
 
-    print(f"[WASM] Compiling sketch: {wrapper_path.name}")
-    rc = run_emcc(emcc_args, cwd=str(PROJECT_ROOT))
+    rc = _intercept_emcc_compile(emcc_args, wrapper_path, object_path, build_dir)
     if rc != 0:
         print(f"[WASM] Sketch compilation failed with return code {rc}")
         return None
