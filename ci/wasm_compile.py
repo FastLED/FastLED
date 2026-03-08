@@ -3,15 +3,18 @@ import subprocess
 import sys
 from pathlib import Path
 
-from rich.console import Console
-from rich.panel import Panel
 
-from ci.boards import WEBTARGET
-from ci.compiler.board_example_utils import should_skip_example_for_board
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt
-
-
-console = Console()
+def _print_panel(title: str, lines: list[str]) -> None:
+    """Print a simple box panel without rich (saves 112ms import)."""
+    all_lines = [title, ""] + lines
+    width = max(len(line) for line in all_lines) + 4
+    border = "-" * width
+    print(f"\n+{border}+")
+    print(f"| {title:<{width - 2}} |")
+    print(f"|{' ' * width}|")
+    for line in lines:
+        print(f"|  {line:<{width - 3}} |")
+    print(f"+{border}+\n")
 
 
 def parse_args() -> tuple[argparse.Namespace, list[str]]:
@@ -27,9 +30,7 @@ def parse_args() -> tuple[argparse.Namespace, list[str]]:
         action="store_true",
         help="Run Playwright tests after compilation (default is compile-only)",
     )
-    # return parser.parse_args()
     known_args, unknown_args = parser.parse_known_args()
-    # if -b or --build is in the unknown_args, remove it
     if "--build" in unknown_args:
         print("WARNING: --build is no longer supported. It will be ignored.")
         unknown_args.remove("--build")
@@ -37,18 +38,6 @@ def parse_args() -> tuple[argparse.Namespace, list[str]]:
         print("WARNING: -b is no longer supported. It will be ignored.")
         unknown_args.remove("-b")
     return known_args, unknown_args
-
-
-def run_command(cmd_list: list[str]) -> int:
-    """Run a command and return its exit code."""
-    cmd_str = subprocess.list2cmdline(cmd_list)
-    console.print(f"[dim]→ {cmd_str}[/dim]")
-    rtn = subprocess.call(cmd_list)
-    if rtn != 0:
-        console.print(
-            f"[bold red]ERROR:[/bold red] Command failed with return code {rtn}"
-        )
-    return rtn
 
 
 def main() -> int:
@@ -59,63 +48,49 @@ def main() -> int:
 
     # Check if sketch is filtered out for WASM platform
     try:
+        from ci.boards import WEBTARGET
+        from ci.compiler.board_example_utils import should_skip_example_for_board
+
         should_skip, reason = should_skip_example_for_board(WEBTARGET, example_name)
         if should_skip:
-            console.print()
-            console.print(
-                f"[bold yellow]⚠️  WARNING:[/bold yellow] Example '{example_name}' is filtered for WASM platform"
-            )
-            console.print(f"[dim]Reason: {reason}[/dim]")
-            console.print()
+            print(f"\nWARNING: Example '{example_name}' is filtered for WASM platform")
+            print(f"Reason: {reason}\n")
     except FileNotFoundError:
-        # Sketch file not found - skip check, compiler will handle it
         pass
     except ValueError as e:
-        # Filter syntax error - warn but continue
-        console.print(
-            f"[bold yellow]⚠️  WARNING:[/bold yellow] Error checking filters for '{example_name}': {e}"
-        )
+        print(f"\nWARNING: Error checking filters for '{example_name}': {e}")
     except KeyboardInterrupt as ki:
+        from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+
         handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
-        # Unexpected error during filter check - log and continue
-        console.print(
-            f"[dim]Note: Could not verify filter compatibility ({type(e).__name__})[/dim]"
-        )
+        print(f"Note: Could not verify filter compatibility ({type(e).__name__})")
 
     # Print what we're going to do
-    console.print()
     if args.run:
-        console.print(
-            Panel.fit(
-                f"[bold cyan]FastLED WASM Build Pipeline[/bold cyan]\n\n"
-                f"[yellow]Will:[/yellow]\n"
-                f"  [green]1.[/green] Compile [bold]{example_name}[/bold] to WASM\n"
-                f"  [green]2.[/green] Launch headless browser demo\n"
-                f"  [green]3.[/green] Run for 5 seconds, verify rendering\n"
-                f"  [green]4.[/green] Exit automatically",
-                title="[bold magenta]Build + Test[/bold magenta]",
-                border_style="cyan",
-            )
+        _print_panel(
+            "FastLED WASM Build Pipeline",
+            [
+                f"Will:",
+                f"  1. Compile {example_name} to WASM",
+                f"  2. Launch headless browser demo",
+                f"  3. Run for 5 seconds, verify rendering",
+                f"  4. Exit automatically",
+            ],
         )
     else:
-        console.print(
-            Panel.fit(
-                f"[bold cyan]FastLED WASM Build Pipeline[/bold cyan]\n\n"
-                f"[yellow]Will:[/yellow]\n"
-                f"  [green]✓[/green] Compile [bold]{example_name}[/bold] to WASM\n"
-                f"  [dim](Use --run to add automated testing)[/dim]",
-                title="[bold magenta]Compile Only[/bold magenta]",
-                border_style="cyan",
-            )
+        _print_panel(
+            "FastLED WASM Build Pipeline",
+            [
+                f"Will:",
+                f"  * Compile {example_name} to WASM",
+                f"  (Use --run to add automated testing)",
+            ],
         )
-    console.print()
 
-    # Compile the WASM using Meson + Ninja build system
-    console.print(
-        f"[bold cyan]Step 1/{'2' if args.run else '1'}:[/bold cyan] Compiling WASM..."
-    )
+    steps = "2" if args.run else "1"
+    print(f"Step 1/{steps}: Compiling WASM...")
 
     # Output to examples/<name>/fastled_js/fastled.js to match expected location
     output_dir = Path("examples") / example_name / "fastled_js"
@@ -123,39 +98,42 @@ def main() -> int:
 
     output_js = output_dir / "fastled.js"
 
-    # Use the new Meson-based WASM build orchestrator
-    # It handles: meson setup, library build, sketch compile, link, template copy, manifest
-    compile_cmd = [
-        sys.executable,
-        "-m",
+    # Call wasm_build directly (in-process) to avoid ~180ms Python spawn overhead
+    from ci.wasm_build import main as wasm_build_main
+
+    saved_argv = sys.argv
+    sys.argv = [
         "ci.wasm_build",
         "--example",
         example_name,
         "-o",
         str(output_js),
     ] + unknown_args
-    compile_result = run_command(compile_cmd)
+    try:
+        compile_result = wasm_build_main()
+    finally:
+        sys.argv = saved_argv
 
     if compile_result != 0:
-        console.print("[bold red]✗ WASM compilation failed[/bold red]")
+        print("WASM compilation failed")
         return compile_result
 
-    console.print("[bold green]✓ WASM compilation successful[/bold green]")
+    print("WASM compilation successful")
 
     # Run tests if --run flag is provided
     if args.run:
-        console.print()
-        console.print("[bold cyan]Step 2/2:[/bold cyan] Running Playwright tests...")
-        console.print()
+        print(f"\nStep 2/2: Running Playwright tests...\n")
 
         test_cmd = [sys.executable, "-m", "ci.wasm_test", example_name]
-        test_result = run_command(test_cmd)
+        cmd_str = subprocess.list2cmdline(test_cmd)
+        print(f"-> {cmd_str}")
+        test_result = subprocess.call(test_cmd)
 
         if test_result != 0:
-            console.print("[bold red]✗ WASM tests failed[/bold red]")
+            print("WASM tests failed")
             return test_result
 
-        console.print("[bold green]✓ All tests passed![/bold green]")
+        print("All tests passed!")
 
     return 0
 

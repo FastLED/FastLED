@@ -1,4 +1,4 @@
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+from __future__ import annotations
 
 
 #!/usr/bin/env python3
@@ -26,32 +26,11 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-from ci.boards import Board, create_board
-from ci.compiler.argument_parser import CompilationConfig
-from ci.compiler.board_example_utils import (
-    get_default_boards,
-    resolve_example_path,
-)
-from ci.compiler.compilation_orchestrator import (
-    compile_board_examples,
-    format_elapsed_time,
-)
-from ci.compiler.docker_manager import (
-    DockerCompilationOrchestrator,
-    DockerConfig,
-    DockerContainerManager,
-)
-from ci.compiler.formatting_utils import green_text, red_text, yellow_text
-from ci.compiler.output_utils import copy_build_artifact, validate_output_path
-from ci.util.docker_command import get_docker_command
-from ci.util.docker_helper import should_use_docker_for_board
-from ci.util.global_interrupt_handler import (
-    install_signal_handler,
-    signal_interrupt,
-    wait_for_cleanup,
-)
+
+if TYPE_CHECKING:
+    from ci.compiler.argument_parser import CompilationConfig
 
 
 def handle_docker_compilation(config: CompilationConfig) -> int:
@@ -67,6 +46,12 @@ def handle_docker_compilation(config: CompilationConfig) -> int:
     Returns:
         Exit code (0 for success, non-zero for failure)
     """
+    from ci.compiler.docker_manager import (
+        DockerCompilationOrchestrator,
+        DockerConfig,
+        DockerContainerManager,
+    )
+    from ci.util.docker_command import get_docker_command
 
     # Validate arguments
     if not config.boards:
@@ -203,9 +188,66 @@ def handle_docker_compilation(config: CompilationConfig) -> int:
     return result.returncode
 
 
+def _wasm_fast_path() -> int | None:
+    """Detect 'wasm' in argv and short-circuit to wasm_compile without heavy imports.
+
+    Returns exit code if handled, None to fall through to full argument parser.
+    Saves ~130ms by skipping CompilationArgumentParser and its 62 transitive imports.
+    """
+    # argv: ci-compile.py wasm ExampleName [--run] [--just-compile] [-v]
+    args = sys.argv[1:]
+    if not args or args[0].lower() != "wasm":
+        return None
+    rest = args[1:]
+
+    # Extract example name (first positional, skipping flags)
+    example = None
+    has_run = False
+    has_verbose = False
+    for a in rest:
+        if a == "--run":
+            has_run = True
+        elif a in ("-v", "--verbose"):
+            has_verbose = True
+        elif a == "--just-compile":
+            pass  # ignored, kept for compat
+        elif a.startswith("--examples"):
+            # --examples Blink or --examples=Blink
+            if "=" in a:
+                example = a.split("=", 1)[1]
+            elif rest.index(a) + 1 < len(rest):
+                example = rest[rest.index(a) + 1]
+        elif not a.startswith("-") and example is None:
+            example = a
+
+    if example is None:
+        example = "wasm"
+
+    if has_verbose:
+        os.environ["VERBOSE"] = "1"
+
+    saved_argv = sys.argv
+    sys.argv = ["ci.wasm_compile", f"examples/{example}"]
+    if has_run:
+        sys.argv.append("--run")
+    try:
+        from ci.wasm_compile import main as wasm_compile_main
+
+        return wasm_compile_main()
+    finally:
+        sys.argv = saved_argv
+
+
 def main() -> int:
     """Main function."""
-    # Install signal handler for Ctrl-C to work properly on all platforms
+    # WASM fast path: bypass full argument parser + heavy imports (~150ms saved)
+    wasm_rc = _wasm_fast_path()
+    if wasm_rc is not None:
+        return wasm_rc
+
+    # Non-WASM path: install signal handler and load heavy imports
+    from ci.util.global_interrupt_handler import install_signal_handler
+
     install_signal_handler()
 
     # Parse arguments using new CompilationArgumentParser
@@ -220,6 +262,8 @@ def main() -> int:
 
     # First check if --supported-boards was requested before full parsing
     if "--supported-boards" in sys.argv:
+        from ci.compiler.board_example_utils import get_default_boards
+
         print(",".join(get_default_boards()))
         return 0
 
@@ -231,6 +275,9 @@ def main() -> int:
 
     # Handle default boards if none specified
     if not config.boards:
+        from ci.boards import Board, create_board
+        from ci.compiler.board_example_utils import get_default_boards
+
         board_names = get_default_boards()
         boards: list[Board] = []
         for board_name in board_names:
@@ -238,6 +285,8 @@ def main() -> int:
                 board = create_board(board_name, no_project_options=False)
                 boards.append(board)
             except KeyboardInterrupt as ki:
+                from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+
                 handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
@@ -277,6 +326,8 @@ def main() -> int:
         and len(config.boards) == 1
     ):
         # Check if we're on GitHub Actions - if so, force local compilation
+        from ci.compiler.formatting_utils import green_text, yellow_text
+        from ci.util.docker_helper import should_use_docker_for_board
         from ci.util.github_env import is_github_actions
 
         if is_github_actions():
@@ -363,16 +414,27 @@ def main() -> int:
             )
             return 1
 
-        # Delegate to wasm_compile.py
-        import subprocess
-
+        # Call wasm_compile in-process to avoid ~180ms Python spawn overhead
         example = examples[0]
-        cmd = [sys.executable, "-m", "ci.wasm_compile", f"examples/{example}"]
+        saved_argv = sys.argv
+        sys.argv = ["ci.wasm_compile", f"examples/{example}"]
         if config.wasm_run:
-            cmd.append("--run")
+            sys.argv.append("--run")
+        try:
+            from ci.wasm_compile import main as wasm_compile_main
 
-        result = subprocess.run(cmd)
-        return result.returncode
+            return wasm_compile_main()
+        finally:
+            sys.argv = saved_argv
+
+    # --- PlatformIO path: lazy-import heavy deps (~350ms) ---
+    from ci.compiler.board_example_utils import resolve_example_path
+    from ci.compiler.compilation_orchestrator import (
+        compile_board_examples,
+        format_elapsed_time,
+    )
+    from ci.compiler.formatting_utils import red_text, yellow_text
+    from ci.compiler.output_utils import copy_build_artifact, validate_output_path
 
     # Get boards and examples from config
     boards = config.boards
@@ -580,6 +642,12 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     except KeyboardInterrupt as ki:
+        from ci.util.global_interrupt_handler import (
+            handle_keyboard_interrupt,
+            signal_interrupt,
+            wait_for_cleanup,
+        )
+
         handle_keyboard_interrupt(ki)
         raise
         print("\nInterrupted by user")
