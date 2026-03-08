@@ -2355,7 +2355,20 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
                         print(f"     - {name}")
 
                 print()
-                if response.get("passed", False):
+                simd_passed = response.get("passed", False)
+
+                # Run multiply benchmark
+                print("   Sending testSimdBenchmark RPC...", end="", flush=True)
+                bench = await client.send_and_match(
+                    "testSimdBenchmark", match_key="success", retries=2
+                )
+                print(f" {Fore.GREEN}ok{Style.RESET_ALL}")
+                print()
+
+                print(json.dumps(bench.data, indent=2))
+                print()
+
+                if simd_passed:
                     print(
                         f"{Fore.GREEN}SIMD TEST PASSED ({total} tests){Style.RESET_ALL}"
                     )

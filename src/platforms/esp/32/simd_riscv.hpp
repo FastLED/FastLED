@@ -348,12 +348,25 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sub_i32_4(simd_u32x4 a, simd_u32x4 b) no
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
     // RVV-ready: This loop can be replaced with vmulh.vv (signed multiply high)
     simd_u32x4 result;
+#if __riscv_xlen == 32
+    // RV32: Use mul+mulh inline asm to avoid 64-bit widening multiply.
+    // Extracts bits [47:16] of each 64-bit product for Q16.16 fixed-point.
+    for (int i = 0; i < 4; ++i) {
+        i32 lo, hi;
+        asm("mul  %0, %2, %3\n\t"
+            "mulh %1, %2, %3"
+            : "=&r"(lo), "=&r"(hi)
+            : "r"(a.data[i]), "r"(b.data[i]));
+        result.data[i] = (static_cast<u32>(lo) >> 16) | (static_cast<u32>(hi) << 16);
+    }
+#else
     for (int i = 0; i < 4; ++i) {
         i32 a_i = static_cast<i32>(a.data[i]);
         i32 b_i = static_cast<i32>(b.data[i]);
         i64 prod = static_cast<i64>(a_i) * static_cast<i64>(b_i);
         result.data[i] = static_cast<u32>(static_cast<i32>(prod >> 16));
     }
+#endif
     return result;
 }
 

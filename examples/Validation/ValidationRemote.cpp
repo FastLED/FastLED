@@ -1486,8 +1486,16 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         testSimd_fn.set("phase", "Phase 4: Utility");
         testSimd_fn.set("args", "[]");
         testSimd_fn.set("returns", "{success, passed, totalTests, passedTests, failedTests, failures:[string]}");
-        testSimd_fn.set("description", "Run comprehensive SIMD test suite (60 tests)");
+        testSimd_fn.set("description", "Run comprehensive SIMD test suite (85 tests)");
         functions.push_back(testSimd_fn);
+
+        fl::json testSimdBenchmark_fn = fl::json::object();
+        testSimdBenchmark_fn.set("name", "testSimdBenchmark");
+        testSimdBenchmark_fn.set("phase", "Phase 4: Utility");
+        testSimdBenchmark_fn.set("args", "[{iterations}] (optional, default 10000)");
+        testSimdBenchmark_fn.set("returns", "{success, iterations, float_us, s16x16_us, simd_us}");
+        testSimdBenchmark_fn.set("description", "Benchmark multiply speed: float vs s16x16 vs s16x16x4 SIMD");
+        functions.push_back(testSimdBenchmark_fn);
 
         fl::json response = fl::json::object();
         response.set("success", true);
@@ -1528,6 +1536,54 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         if (failed_count > 0) {
             response.set("failures", failures);
         }
+        return response;
+    });
+
+    // Register "testSimdBenchmark" - multiply speed benchmark
+    mRemote->bind("testSimdBenchmark", [](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+
+        int iters = 10000;
+        fl::json config;
+        if (args.is_object()) {
+            config = args;
+        } else if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
+            config = args[0];
+        }
+        if (!config.is_null() && config.contains("iterations") && config["iterations"].is_int()) {
+            iters = static_cast<int>(config["iterations"].as_int().value());
+            if (iters < 1) iters = 1;
+            if (iters > 1000000) iters = 1000000;
+        }
+
+        auto result = validation::simd_check::runMultiplyBenchmark(iters);
+
+        response.set("success", true);
+        response.set("iterations", result.iterations);
+
+        fl::json add = fl::json::object();
+        add.set("float_us", result.add_float_us);
+        add.set("s16x16_us", result.add_s16x16_us);
+        add.set("simd_us", result.add_simd_us);
+        response.set("add", add);
+
+        fl::json sub = fl::json::object();
+        sub.set("float_us", result.sub_float_us);
+        sub.set("s16x16_us", result.sub_s16x16_us);
+        sub.set("simd_us", result.sub_simd_us);
+        response.set("sub", sub);
+
+        fl::json mul = fl::json::object();
+        mul.set("float_us", result.mul_float_us);
+        mul.set("s16x16_us", result.mul_s16x16_us);
+        mul.set("simd_us", result.mul_simd_us);
+        response.set("mul", mul);
+
+        fl::json div = fl::json::object();
+        div.set("float_us", result.div_float_us);
+        div.set("s16x16_us", result.div_s16x16_us);
+        response.set("div", div);
+
         return response;
     });
 

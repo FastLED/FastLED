@@ -10,6 +10,9 @@
 #include <FastLED.h>
 #include "fl/simd.h"
 #include "fl/stl/sstream.h"
+#include "fl/stl/fixed_point/s16x16.h"
+#include "fl/stl/fixed_point/s0x32x4.h"
+#include "fl/stl/fixed_point/s16x16x4.h"
 
 namespace validation {
 namespace simd_check {
@@ -1096,6 +1099,122 @@ inline bool test_f32_pipeline_mul_add_clamp() {
     store_f32_4(output, v);
     float expected[4] = {0.6f, 1.0f, 1.0f, 1.0f};
     return compare_f32(expected, output, 4);
+}
+
+// ============================================================================
+// Arithmetic Benchmark: add / sub / mul / div across float, s16x16, s16x16x4
+// ============================================================================
+//
+// Each test runs 4-wide unrolled loops with feedback to prevent elimination.
+// s16x16x4 has no division operator, so that cell is skipped.
+
+static volatile uint32_t g_bench_sink;
+
+struct BenchmarkResult {
+    int64_t iterations;
+    // [op][type]: op={add,sub,mul,div}, type={float,s16x16,simd}
+    int64_t add_float_us,  add_s16x16_us,  add_simd_us;
+    int64_t sub_float_us,  sub_s16x16_us,  sub_simd_us;
+    int64_t mul_float_us,  mul_s16x16_us,  mul_simd_us;
+    int64_t div_float_us,  div_s16x16_us;  // no simd div
+};
+
+// Helper: time 4-wide scalar float with a binary op
+template <typename Op>
+inline int64_t benchFloat4(int iters, Op op) {
+    float a0 = 1.5f, a1 = 2.3f, a2 = 0.7f, a3 = 3.1f;
+    float b0 = 0.5f, b1 = 1.2f, b2 = 2.0f, b3 = 0.9f;
+    uint32_t t0 = micros();
+    for (int i = 0; i < iters; i++) {
+        a0 = op(a0, b0); a1 = op(a1, b1);
+        a2 = op(a2, b2); a3 = op(a3, b3);
+        b0 = a0 + 0.001f; b1 = a1 + 0.001f;
+        b2 = a2 + 0.001f; b3 = a3 + 0.001f;
+    }
+    uint32_t t1 = micros();
+    uint32_t tmp; memcpy(&tmp, &a0, sizeof(tmp));
+    g_bench_sink = tmp;
+    return static_cast<int64_t>(t1 - t0);
+}
+
+// Helper: time 4-wide scalar s16x16 with a binary op
+template <typename Op>
+inline int64_t benchS16x16_4(int iters, Op op) {
+    fl::s16x16 a0(1.5f), a1(2.3f), a2(0.7f), a3(3.1f);
+    fl::s16x16 b0(0.5f), b1(1.2f), b2(2.0f), b3(0.9f);
+    fl::s16x16 bump = fl::s16x16::from_raw(1);
+    uint32_t t0 = micros();
+    for (int i = 0; i < iters; i++) {
+        a0 = op(a0, b0); a1 = op(a1, b1);
+        a2 = op(a2, b2); a3 = op(a3, b3);
+        b0 = a0 + bump; b1 = a1 + bump;
+        b2 = a2 + bump; b3 = a3 + bump;
+    }
+    uint32_t t1 = micros();
+    g_bench_sink = static_cast<uint32_t>(a0.raw());
+    return static_cast<int64_t>(t1 - t0);
+}
+
+// Helper: time s16x16x4 SIMD with a binary op
+template <typename Op>
+inline int64_t benchSimd4(int iters, Op op) {
+    fl::s16x16x4 a = fl::s16x16x4::from_raw(
+        set_u32_4(as_u32(fl::s16x16(1.5f).raw()), as_u32(fl::s16x16(2.3f).raw()),
+                  as_u32(fl::s16x16(0.7f).raw()), as_u32(fl::s16x16(3.1f).raw())));
+    fl::s16x16x4 b = fl::s16x16x4::from_raw(
+        set_u32_4(as_u32(fl::s16x16(0.5f).raw()), as_u32(fl::s16x16(1.2f).raw()),
+                  as_u32(fl::s16x16(2.0f).raw()), as_u32(fl::s16x16(0.9f).raw())));
+    fl::s16x16x4 bump = fl::s16x16x4::set1(fl::s16x16::from_raw(1));
+    uint32_t t0 = micros();
+    for (int i = 0; i < iters; i++) {
+        a = op(a, b);
+        b = a + bump;
+    }
+    uint32_t t1 = micros();
+    g_bench_sink = extract_u32_4(a.raw, 0);
+    return static_cast<int64_t>(t1 - t0);
+}
+
+struct OpAdd {
+    template<typename T> T operator()(T a, T b) const { return a + b; }
+};
+struct OpSub {
+    template<typename T> T operator()(T a, T b) const { return a - b; }
+};
+struct OpMul {
+    template<typename T> T operator()(T a, T b) const { return a * b; }
+};
+struct OpDivFloat {
+    float operator()(float a, float b) const { return a / b; }
+};
+struct OpDivS16x16 {
+    fl::s16x16 operator()(fl::s16x16 a, fl::s16x16 b) const { return a / b; }
+};
+
+inline BenchmarkResult runMultiplyBenchmark(int iters = 10000) {
+    BenchmarkResult r;
+    r.iterations = iters;
+
+    // Add
+    r.add_float_us   = benchFloat4(iters, OpAdd());
+    r.add_s16x16_us  = benchS16x16_4(iters, OpAdd());
+    r.add_simd_us    = benchSimd4(iters, OpAdd());
+
+    // Sub
+    r.sub_float_us   = benchFloat4(iters, OpSub());
+    r.sub_s16x16_us  = benchS16x16_4(iters, OpSub());
+    r.sub_simd_us    = benchSimd4(iters, OpSub());
+
+    // Mul
+    r.mul_float_us   = benchFloat4(iters, OpMul());
+    r.mul_s16x16_us  = benchS16x16_4(iters, OpMul());
+    r.mul_simd_us    = benchSimd4(iters, OpMul());
+
+    // Div (no SIMD div for s16x16x4)
+    r.div_float_us   = benchFloat4(iters, OpDivFloat());
+    r.div_s16x16_us  = benchS16x16_4(iters, OpDivS16x16());
+
+    return r;
 }
 
 // ============================================================================
