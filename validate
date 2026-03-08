@@ -37,6 +37,7 @@ Driver Selection (optional - omit for GPIO-only mode):
   --lcd-rgb           Test LCD RGB driver (ESP32-P4 only)
   --all               Test all drivers (equivalent to --parlio --rmt --spi --uart --i2s --lcd-rgb)
   --simd              Test SIMD operations only (no LED drivers needed)
+  --coroutine         Test coroutine/task creation, stop, await (no LED drivers needed)
   --parallel          Test multiple drivers simultaneously (requires 2+ drivers)
 
 Network Validation (ESP32 HTTP):

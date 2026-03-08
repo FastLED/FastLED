@@ -24,6 +24,10 @@
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/json.h"
+#include "fl/stl/task.h"
+#include "fl/stl/async.h"
+#include "fl/stl/atomic.h"
+#include "fl/promise.h"
 #include "fl/simd.h"
 #include "ValidationSimd.h"
 #include "fl/memory.h"
@@ -1847,6 +1851,250 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         response.set("error", "BLE not supported on this platform");
 #endif
         return response;
+    });
+
+    // ========================================================================
+    // Coroutine Tests - fl::task::coroutine() and fl::await()
+    // ========================================================================
+
+    // Test: Basic coroutine creation and completion
+    mRemote->bind("testCoroutineBasic", [](const fl::json& args) -> fl::json {
+        (void)args;
+        fl::json r = fl::json::object();
+
+        fl::atomic<bool> task_ran(false);
+        fl::atomic<bool> task_completed(false);
+
+        fl::CoroutineConfig cfg;
+        cfg.function = [&task_ran, &task_completed]() {
+            task_ran.store(true);
+            delay(50);
+            task_completed.store(true);
+        };
+        cfg.name = "test_basic";
+        auto t = fl::task::coroutine(cfg);
+
+        uint32_t start = millis();
+        while (t.isRunning() && (millis() - start) < 2000) {
+            delay(10);
+        }
+
+        bool passed = task_ran.load() && task_completed.load() && !t.isRunning();
+        r.set("success", passed);
+        r.set("taskRan", task_ran.load());
+        r.set("taskCompleted", task_completed.load());
+        r.set("isRunning", t.isRunning());
+        r.set("durationMs", static_cast<int64_t>(millis() - start));
+        return r;
+    });
+
+    // Test: Task stop() while running
+    mRemote->bind("testCoroutineStop", [](const fl::json& args) -> fl::json {
+        (void)args;
+        fl::json r = fl::json::object();
+
+        fl::atomic<bool> task_started(false);
+
+        fl::CoroutineConfig cfg;
+        cfg.function = [&task_started]() {
+            task_started.store(true);
+            while (true) {
+                delay(10);
+            }
+        };
+        cfg.name = "test_stop";
+        auto t = fl::task::coroutine(cfg);
+
+        uint32_t start = millis();
+        while (!task_started.load() && (millis() - start) < 2000) {
+            delay(10);
+        }
+
+        bool was_running = t.isRunning();
+        t.stop();
+        bool stopped = !t.isRunning();
+
+        bool passed = task_started.load() && was_running && stopped;
+        r.set("success", passed);
+        r.set("taskStarted", task_started.load());
+        r.set("wasRunning", was_running);
+        r.set("stopped", stopped);
+        r.set("durationMs", static_cast<int64_t>(millis() - start));
+        return r;
+    });
+
+    // Test: Multiple concurrent coroutines
+    mRemote->bind("testCoroutineConcurrent", [](const fl::json& args) -> fl::json {
+        (void)args;
+        fl::json r = fl::json::object();
+
+        const int NUM_TASKS = 3;
+        fl::atomic<int> completed_count(0);
+        fl::atomic<bool> task_flags[NUM_TASKS];
+        for (int i = 0; i < NUM_TASKS; i++) {
+            task_flags[i].store(false);
+        }
+
+        fl::task tasks[NUM_TASKS];
+        for (int i = 0; i < NUM_TASKS; i++) {
+            fl::CoroutineConfig cfg;
+            cfg.function = [i, &task_flags, &completed_count]() {
+                delay(20 + i * 20);
+                task_flags[i].store(true);
+                completed_count.fetch_add(1);
+            };
+            cfg.name = "test_concurrent";
+            tasks[i] = fl::task::coroutine(cfg);
+        }
+
+        uint32_t start = millis();
+        while (completed_count.load() < NUM_TASKS && (millis() - start) < 3000) {
+            delay(10);
+        }
+
+        bool all_completed = true;
+        bool all_stopped = true;
+        for (int i = 0; i < NUM_TASKS; i++) {
+            if (!task_flags[i].load()) all_completed = false;
+            if (tasks[i].isRunning()) all_stopped = false;
+        }
+
+        bool passed = all_completed && all_stopped && (completed_count.load() == NUM_TASKS);
+        r.set("success", passed);
+        r.set("completedCount", static_cast<int64_t>(completed_count.load()));
+        r.set("allCompleted", all_completed);
+        r.set("allStopped", all_stopped);
+        r.set("durationMs", static_cast<int64_t>(millis() - start));
+        return r;
+    });
+
+    // Test: fl::await() with promise resolved from main thread
+    mRemote->bind("testCoroutineAwait", [](const fl::json& args) -> fl::json {
+        (void)args;
+        fl::json r = fl::json::object();
+
+        auto promise = fl::promise<int>::create();
+        fl::atomic<bool> await_completed(false);
+        fl::atomic<int> await_value(0);
+        fl::atomic<bool> await_ok(false);
+
+        fl::CoroutineConfig cfg;
+        cfg.function = [promise, &await_completed, &await_value, &await_ok]() {
+            auto result = fl::await(promise);
+            if (result.ok()) {
+                await_ok.store(true);
+                await_value.store(result.value());
+            }
+            await_completed.store(true);
+        };
+        cfg.name = "test_await";
+        auto waiter = fl::task::coroutine(cfg);
+
+        delay(100);
+        promise.complete_with_value(42);
+
+        uint32_t start = millis();
+        while (!await_completed.load() && (millis() - start) < 3000) {
+            delay(10);
+        }
+
+        bool passed = await_completed.load() && await_ok.load() && (await_value.load() == 42);
+        r.set("success", passed);
+        r.set("awaitCompleted", await_completed.load());
+        r.set("awaitOk", await_ok.load());
+        r.set("awaitValue", static_cast<int64_t>(await_value.load()));
+        r.set("durationMs", static_cast<int64_t>(millis() - start));
+        return r;
+    });
+
+    // Test: fl::await() with promise rejected with error
+    mRemote->bind("testCoroutineAwaitError", [](const fl::json& args) -> fl::json {
+        (void)args;
+        fl::json r = fl::json::object();
+
+        auto promise = fl::promise<int>::create();
+        fl::atomic<bool> await_completed(false);
+        fl::atomic<bool> got_error(false);
+
+        fl::CoroutineConfig cfg;
+        cfg.function = [promise, &await_completed, &got_error]() {
+            auto result = fl::await(promise);
+            if (!result.ok()) {
+                got_error.store(true);
+            }
+            await_completed.store(true);
+        };
+        cfg.name = "test_await_err";
+        auto waiter = fl::task::coroutine(cfg);
+
+        delay(100);
+        promise.complete_with_error(fl::Error("test error"));
+
+        uint32_t start = millis();
+        while (!await_completed.load() && (millis() - start) < 3000) {
+            delay(10);
+        }
+
+        bool passed = await_completed.load() && got_error.load();
+        r.set("success", passed);
+        r.set("awaitCompleted", await_completed.load());
+        r.set("gotError", got_error.load());
+        r.set("durationMs", static_cast<int64_t>(millis() - start));
+        return r;
+    });
+
+    // Run all coroutine tests sequentially
+    mRemote->bind("testCoroutineAll", [this](const fl::json& args) -> fl::json {
+        (void)args;
+        fl::json r = fl::json::object();
+
+        const char* test_names[] = {
+            "testCoroutineBasic",
+            "testCoroutineStop",
+            "testCoroutineConcurrent",
+            "testCoroutineAwait",
+            "testCoroutineAwaitError"
+        };
+        const int num_tests = 5;
+
+        int passed = 0;
+        int failed = 0;
+        fl::json results = fl::json::object();
+
+        for (int i = 0; i < num_tests; i++) {
+            fl::json empty_args = fl::json::object();
+            auto bound = mRemote->get<fl::json(const fl::json&)>(test_names[i]);
+            if (bound.ok()) {
+                fl::json test_result = bound.value()(empty_args);
+                bool success = false;
+                if (test_result.contains("success")) {
+                    auto val = test_result["success"].as_bool();
+                    success = val.has_value() && val.value();
+                }
+                if (success) {
+                    passed++;
+                    FL_PRINT("[COROUTINE] PASS: " << test_names[i]);
+                } else {
+                    failed++;
+                    FL_PRINT("[COROUTINE] FAIL: " << test_names[i]);
+                }
+                results.set(test_names[i], test_result);
+            } else {
+                failed++;
+                fl::json err = fl::json::object();
+                err.set("success", false);
+                err.set("error", "Method not found");
+                results.set(test_names[i], err);
+                FL_PRINT("[COROUTINE] FAIL: " << test_names[i] << " (not found)");
+            }
+        }
+
+        r.set("success", failed == 0);
+        r.set("passed", static_cast<int64_t>(passed));
+        r.set("failed", static_cast<int64_t>(failed));
+        r.set("total", static_cast<int64_t>(num_tests));
+        r.set("results", results);
+        return r;
     });
 }
 

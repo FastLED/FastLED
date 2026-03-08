@@ -32,7 +32,7 @@ public:
 private:
     void* mHandle;
     fl::string mName;
-    TaskFunction mFunction;
+    void* mContext;  // TaskWrapperContext* (defined in .cpp.hpp)
 };
 
 } // namespace platforms

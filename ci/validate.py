@@ -544,6 +544,7 @@ class Args:
     object_fled: bool
     all: bool
     simd: bool
+    coroutine: bool
 
     # Standard options
     environment: str | None
@@ -739,6 +740,11 @@ See Also:
             "--simd",
             action="store_true",
             help="Test SIMD operations only (no LED drivers)",
+        )
+        driver_group.add_argument(
+            "--coroutine",
+            action="store_true",
+            help="Test coroutine/task creation, stop, and await (no LED drivers needed)",
         )
         driver_group.add_argument(
             "--parallel",
@@ -987,6 +993,7 @@ See Also:
             object_fled=parsed.object_fled,
             all=parsed.all,
             simd=parsed.simd,
+            coroutine=parsed.coroutine,
             environment=parsed.environment,
             verbose=parsed.verbose,
             skip_lint=parsed.skip_lint,
@@ -1224,6 +1231,9 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
     # SIMD test mode - special case, no drivers needed
     simd_test_mode = args.simd
 
+    # Coroutine test mode - special case, no drivers needed
+    coroutine_test_mode = args.coroutine
+
     # Check if any driver flags were specified
     if args.all:
         drivers = ["PARLIO", "RMT", "SPI", "UART", "I2S", "LCD_RGB", "OBJECTFLED"]
@@ -1274,6 +1284,7 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
         any_incompatible_mode = (
             bool(drivers)
             or simd_test_mode
+            or coroutine_test_mode
             or net_server_mode
             or net_client_mode
             or net_loopback_mode
@@ -1282,7 +1293,7 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
         )
         if any_incompatible_mode:
             print(
-                f"{Fore.RED}❌ Error: --decode cannot be combined with driver flags, --simd, --net, --ota, or --ble{Style.RESET_ALL}"
+                f"{Fore.RED}❌ Error: --decode cannot be combined with driver flags, --simd, --coroutine, --net, --ota, or --ble{Style.RESET_ALL}"
             )
             return 1
         assert args.decode is not None  # narrowed by decode_mode check
@@ -1307,9 +1318,9 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
     # Validate mutual exclusivity of net/ota/ble modes with driver modes
     if (
         net_server_mode or net_client_mode or net_loopback_mode or ota_mode or ble_mode
-    ) and (drivers or simd_test_mode):
+    ) and (drivers or simd_test_mode or coroutine_test_mode):
         print(
-            f"{Fore.RED}❌ Error: --net/--net-server/--net-client/--ota/--ble cannot be combined with driver flags or --simd{Style.RESET_ALL}"
+            f"{Fore.RED}❌ Error: --net/--net-server/--net-client/--ota/--ble cannot be combined with driver flags, --simd, or --coroutine{Style.RESET_ALL}"
         )
         return 1
     net_mode_count = sum([net_server_mode, net_client_mode, net_loopback_mode])
@@ -1329,10 +1340,11 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
         )
         return 1
 
-    # GPIO-only mode: no drivers, not SIMD, not net, not OTA, not BLE — just run GPIO pre-test
+    # GPIO-only mode: no drivers, not SIMD, not coroutine, not net, not OTA, not BLE — just run GPIO pre-test
     gpio_only_mode = (
         not drivers
         and not simd_test_mode
+        and not coroutine_test_mode
         and not net_server_mode
         and not net_client_mode
         and not net_loopback_mode
@@ -2113,9 +2125,11 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
         # Store discovery client for reuse (keep connection open!)
         discovery_client: RpcClient | None = None
 
-        # Skip pin discovery and GPIO pre-test for SIMD, network, and OTA modes
+        # Skip pin discovery and GPIO pre-test for SIMD, coroutine, network, and OTA modes
         if simd_test_mode:
             print("\n📌 SIMD mode: skipping pin discovery and GPIO pre-test")
+        elif coroutine_test_mode:
+            print("\n📌 Coroutine mode: skipping pin discovery and GPIO pre-test")
         elif net_server_mode or net_client_mode or net_loopback_mode:
             print("\n📌 Network mode: skipping pin discovery and GPIO pre-test")
         elif ota_mode:
@@ -2179,6 +2193,8 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
         # ============================================================
         # Skip GPIO pre-test if pins were just discovered (already verified), SIMD, net, or OTA mode
         if simd_test_mode:
+            pass  # Already printed skip message above
+        elif coroutine_test_mode:
             pass  # Already printed skip message above
         elif net_server_mode or net_client_mode or net_loopback_mode:
             pass  # Already printed skip message above
@@ -2362,6 +2378,85 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
             except Exception as e:
                 print()  # Newline after partial status line
                 print(f"{Fore.RED}SIMD TEST ERROR: {e}{Style.RESET_ALL}")
+                return 1
+            finally:
+                if client is not None:
+                    await client.close()
+
+        # Coroutine test mode - run coroutine/task/await test suite via RPC
+        if coroutine_test_mode:
+            print()
+            print("=" * 60)
+            print("COROUTINE TEST MODE - Task Creation, Stop, Await")
+            print("=" * 60)
+            print()
+
+            client: RpcClient | None = None
+            try:
+                print("   Connecting to device...", end="", flush=True)
+                client = RpcClient(
+                    upload_port, timeout=60.0, serial_interface=serial_iface
+                )
+                await client.connect(boot_wait=1.0)
+                print(f" {Fore.GREEN}ok{Style.RESET_ALL}")
+
+                print("   Sending testCoroutineAll RPC...", end="", flush=True)
+                response = await client.send_and_match(
+                    "testCoroutineAll", match_key="passed", retries=3
+                )
+                print(f" {Fore.GREEN}ok{Style.RESET_ALL}")
+                print()
+
+                total = response.get("total", 0)
+                passed_count = response.get("passed", 0)
+                failed_count = response.get("failed", 0)
+                results = response.get("results", {})
+
+                print(f"   Results: {passed_count}/{total} passed", end="")
+                if failed_count > 0:
+                    print(f", {failed_count} FAILED")
+                else:
+                    print()
+
+                # Show individual test results
+                if isinstance(results, dict):
+                    for test_name, test_result in results.items():
+                        if isinstance(test_result, dict):
+                            success = test_result.get("success", False)
+                            duration = test_result.get("durationMs", "?")
+                            status = (
+                                f"{Fore.GREEN}PASS{Style.RESET_ALL}"
+                                if success
+                                else f"{Fore.RED}FAIL{Style.RESET_ALL}"
+                            )
+                            print(f"     {status} {test_name} ({duration}ms)")
+                            if not success and "error" in test_result:
+                                print(f"          {test_result['error']}")
+
+                print()
+                if response.get("success", False):
+                    print(
+                        f"{Fore.GREEN}COROUTINE TEST PASSED ({total} tests){Style.RESET_ALL}"
+                    )
+                    return 0
+                else:
+                    print(
+                        f"{Fore.RED}COROUTINE TEST FAILED"
+                        f" ({failed_count}/{total} failures){Style.RESET_ALL}"
+                    )
+                    return 1
+
+            except RpcTimeoutError:
+                print()
+                print(f"{Fore.RED}COROUTINE TEST TIMEOUT{Style.RESET_ALL}")
+                print("   No response from device within 60 seconds")
+                return 1
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
+                raise
+            except Exception as e:
+                print()
+                print(f"{Fore.RED}COROUTINE TEST ERROR: {e}{Style.RESET_ALL}")
                 return 1
             finally:
                 if client is not None:
