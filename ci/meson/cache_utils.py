@@ -62,6 +62,9 @@ def get_max_dir_mtime(root: Path) -> float:
     always updates the PARENT directory's mtime on NTFS, ext4, and APFS, so this
     gives an O(#dirs) change proxy vs O(#files) for a full rglob.
 
+    Uses os.scandir for efficiency — on Windows, DirEntry.stat() reuses
+    FindFirstFile data (no extra syscall per directory entry).
+
     Excludes non-source directories (``__pycache__``, ``.git``, etc.) that are
     updated by tools (Python bytecode caching, version control) without representing
     developer code changes.  Pruning them prevents false-positive cache invalidation.
@@ -69,23 +72,26 @@ def get_max_dir_mtime(root: Path) -> float:
     Returns 0.0 when root does not exist or any OS error occurs.
     """
     max_mtime = 0.0
-    try:
-        for dirpath, dirnames, _ in os.walk(root):
-            # Prune non-source directories in-place so os.walk doesn't descend
-            dirnames[:] = [
-                d
-                for d in dirnames
-                if d not in _SKIP_DIR_NAMES
-                and not any(d.startswith(p) for p in _SKIP_DIR_PREFIXES)
-            ]
-            try:
-                mtime = os.stat(dirpath).st_mtime
-                if mtime > max_mtime:
-                    max_mtime = mtime
-            except OSError:
-                pass
-    except OSError:
-        pass
+    stack = [str(root)]
+    while stack:
+        current = stack.pop()
+        try:
+            mtime = os.stat(current).st_mtime
+            if mtime > max_mtime:
+                max_mtime = mtime
+        except OSError:
+            continue
+        try:
+            with os.scandir(current) as it:
+                for entry in it:
+                    try:
+                        if entry.is_dir(follow_symlinks=False):
+                            if not _should_skip_scan_dir(entry.name):
+                                stack.append(entry.path)
+                    except OSError:
+                        pass
+        except OSError:
+            pass
     return max_mtime
 
 

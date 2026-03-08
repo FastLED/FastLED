@@ -1,5 +1,6 @@
 """Source and example management for FastLED PlatformIO builds."""
 
+import filecmp
 import os
 import shutil
 import sys
@@ -7,9 +8,122 @@ import time
 import warnings
 from pathlib import Path
 
-from dirsync import sync  # type: ignore[import-untyped]
-
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+
+
+def _scandir_sync(
+    source: str, dest: str, purge: bool = True, content: bool = False
+) -> None:
+    """Fast directory sync using os.scandir instead of dirsync/os.walk.
+
+    On Windows, DirEntry.stat() reuses FindFirstFile data (no extra syscall
+    per file), making this significantly faster than dirsync which uses
+    os.walk + os.stat per entry.
+
+    Args:
+        source: Source directory path
+        dest: Destination directory path
+        purge: If True, delete files in dest that don't exist in source
+        content: If True, compare file contents (for Docker); otherwise use size+mtime
+    """
+    # Collect source entries: {relative_path: absolute_path}
+    src_files: dict[str, str] = {}
+    src_dirs: set[str] = set()
+    src_len = len(source)
+    if not source.endswith(os.sep):
+        src_len += 1
+
+    stack = [source]
+    while stack:
+        current = stack.pop()
+        try:
+            with os.scandir(current) as it:
+                for entry in it:
+                    try:
+                        rel = entry.path[src_len:]
+                        if entry.is_dir(follow_symlinks=False):
+                            src_dirs.add(rel)
+                            stack.append(entry.path)
+                        elif entry.is_file(follow_symlinks=False):
+                            src_files[rel] = entry.path
+                    except OSError:
+                        pass
+        except OSError:
+            pass
+
+    # Ensure dest directory exists
+    os.makedirs(dest, exist_ok=True)
+
+    # Ensure subdirectories exist in dest
+    for rel_dir in sorted(src_dirs):
+        dest_dir = os.path.join(dest, rel_dir)
+        os.makedirs(dest_dir, exist_ok=True)
+
+    # Copy new/changed files
+    for rel_path, src_abs in src_files.items():
+        dest_abs = os.path.join(dest, rel_path)
+        os.makedirs(os.path.dirname(dest_abs), exist_ok=True)
+
+        if os.path.isfile(dest_abs):
+            if content:
+                # Content comparison (Docker mode) — use filecmp for speed
+                if filecmp.cmp(src_abs, dest_abs, shallow=False):
+                    continue
+            else:
+                # Size + mtime comparison
+                try:
+                    src_st = os.stat(src_abs)
+                    dst_st = os.stat(dest_abs)
+                    if (
+                        src_st.st_size == dst_st.st_size
+                        and abs(src_st.st_mtime - dst_st.st_mtime) < 0.001
+                    ):
+                        continue
+                except OSError:
+                    pass
+
+        shutil.copy2(src_abs, dest_abs)
+
+    # Purge files/dirs in dest that don't exist in source
+    if purge:
+        dest_len = len(dest)
+        if not dest.endswith(os.sep):
+            dest_len += 1
+        # Collect dest entries
+        dest_files_to_remove: list[str] = []
+        dest_dirs_to_remove: list[str] = []
+        d_stack = [dest]
+        while d_stack:
+            current = d_stack.pop()
+            try:
+                with os.scandir(current) as it:
+                    for entry in it:
+                        try:
+                            rel = entry.path[dest_len:]
+                            if entry.is_dir(follow_symlinks=False):
+                                if rel not in src_dirs:
+                                    dest_dirs_to_remove.append(entry.path)
+                                else:
+                                    d_stack.append(entry.path)
+                            elif entry.is_file(follow_symlinks=False):
+                                if rel not in src_files:
+                                    dest_files_to_remove.append(entry.path)
+                        except OSError:
+                            pass
+            except OSError:
+                pass
+
+        for f in dest_files_to_remove:
+            try:
+                os.remove(f)
+            except OSError:
+                pass
+        # Remove dirs deepest-first
+        for d in sorted(dest_dirs_to_remove, reverse=True):
+            try:
+                shutil.rmtree(d)
+            except OSError:
+                pass
 
 
 def generate_main_cpp(ino_files: list[str]) -> str:
@@ -134,16 +248,13 @@ def copy_example_source(project_root: Path, build_dir: Path, example: str) -> bo
 
             for attempt in range(max_retries):
                 try:
-                    if os.environ.get("DOCKER_CONTAINER", "") != "":
-                        sync(
-                            str(file_path),
-                            str(dest_subdir),
-                            "sync",
-                            purge=True,
-                            content=True,
-                        )
-                    else:
-                        sync(str(file_path), str(dest_subdir), "sync", purge=True)
+                    _is_docker = os.environ.get("DOCKER_CONTAINER", "") != ""
+                    _scandir_sync(
+                        str(file_path),
+                        str(dest_subdir),
+                        purge=True,
+                        content=_is_docker,
+                    )
                     break  # Success, exit retry loop
                 except OSError as e:
                     # Handle Windows file locking errors (WinError 32)
@@ -204,16 +315,13 @@ def copy_boards_directory(project_root: Path, build_dir: Path) -> bool:
 
         for attempt in range(max_retries):
             try:
-                if os.environ.get("DOCKER_CONTAINER", "") != "":
-                    sync(
-                        str(boards_src),
-                        str(boards_dst),
-                        "sync",
-                        purge=True,
-                        content=True,
-                    )
-                else:
-                    sync(str(boards_src), str(boards_dst), "sync", purge=True)
+                _is_docker = os.environ.get("DOCKER_CONTAINER", "") != ""
+                _scandir_sync(
+                    str(boards_src),
+                    str(boards_dst),
+                    purge=True,
+                    content=_is_docker,
+                )
                 break  # Success, exit retry loop
             except OSError as e:
                 # Handle Windows file locking errors (WinError 32)
@@ -286,16 +394,13 @@ def copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
 
         for attempt in range(max_retries):
             try:
-                if os.environ.get("DOCKER_CONTAINER", "") != "":
-                    sync(
-                        str(fastled_src_path),
-                        str(lib_dir),
-                        "sync",
-                        purge=True,
-                        content=True,
-                    )
-                else:
-                    sync(str(fastled_src_path), str(lib_dir), "sync", purge=True)
+                _is_docker = os.environ.get("DOCKER_CONTAINER", "") != ""
+                _scandir_sync(
+                    str(fastled_src_path),
+                    str(lib_dir),
+                    purge=True,
+                    content=_is_docker,
+                )
                 break  # Success, exit retry loop
             except OSError as e:
                 # Handle Windows file locking errors (WinError 32)

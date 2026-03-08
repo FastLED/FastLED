@@ -877,21 +877,33 @@ def _run_npx(args: list[str], cwd: Path) -> int:
 def _get_vite_source_mtime(template_dir: Path) -> float:
     """Get the most recent mtime of any Vite frontend source file.
 
-    Uses os.walk with directory-level pruning instead of rglob to avoid
-    walking node_modules (2626 files, 420ms → 4ms).
+    Uses os.scandir with directory-level pruning instead of rglob to avoid
+    walking node_modules (2626 files, 420ms → 4ms). On Windows, DirEntry.stat()
+    reuses FindFirstFile data (no extra syscall per file).
     """
     max_mtime = 0.0
-    _EXTS = (".ts", ".js", ".html", ".css", ".json")
-    template_str = str(template_dir)
-    for root, dirs, files in os.walk(template_str):
-        # Prune at directory level — avoids entering node_modules entirely
-        dirs[:] = [d for d in dirs if d not in ("node_modules", "dist")]
-        for f in files:
-            if f.endswith(_EXTS):
-                try:
-                    max_mtime = max(max_mtime, os.path.getmtime(os.path.join(root, f)))
-                except OSError:
-                    pass
+    _EXTS = frozenset((".ts", ".js", ".html", ".css", ".json"))
+    _SKIP = frozenset(("node_modules", "dist"))
+    stack = [str(template_dir)]
+    while stack:
+        current = stack.pop()
+        try:
+            with os.scandir(current) as it:
+                for entry in it:
+                    try:
+                        if entry.is_dir(follow_symlinks=False):
+                            if entry.name not in _SKIP:
+                                stack.append(entry.path)
+                        elif entry.is_file(follow_symlinks=False):
+                            _, ext = os.path.splitext(entry.name)
+                            if ext in _EXTS:
+                                mtime = entry.stat(follow_symlinks=False).st_mtime
+                                if mtime > max_mtime:
+                                    max_mtime = mtime
+                    except OSError:
+                        pass
+        except OSError:
+            pass
     return max_mtime
 
 
@@ -940,19 +952,38 @@ def copy_templates(output_dir: Path) -> None:
 def generate_manifest(example_name: str, output_dir: Path) -> None:
     """Generate files.json manifest for data files."""
     example_dir = PROJECT_ROOT / "examples" / example_name
-    data_extensions = {".json", ".csv", ".txt", ".cfg", ".bin", ".dat", ".mp3", ".wav"}
+    data_extensions = frozenset(
+        (".json", ".csv", ".txt", ".cfg", ".bin", ".dat", ".mp3", ".wav")
+    )
     data_files: list[dict[str, str | int]] = []
+    _SKIP = frozenset(("fastled_js", ".build"))
 
-    # Use os.walk with directory pruning — avoids walking fastled_js/ and .build/
+    # Use os.scandir with directory pruning — avoids walking fastled_js/ and .build/
+    # On Windows, DirEntry.stat() reuses FindFirstFile data (no extra syscall)
     example_str = str(example_dir)
-    for root, dirs, files in os.walk(example_str):
-        dirs[:] = [d for d in dirs if d not in ("fastled_js", ".build")]
-        for f in files:
-            ext = os.path.splitext(f)[1].lower()
-            if ext in data_extensions:
-                full = os.path.join(root, f)
-                rel_path = os.path.relpath(full, example_str)
-                data_files.append({"path": rel_path, "size": os.path.getsize(full)})
+    example_len = len(example_str)
+    if not example_str.endswith(os.sep):
+        example_len += 1
+    stack = [example_str]
+    while stack:
+        current = stack.pop()
+        try:
+            with os.scandir(current) as it:
+                for entry in it:
+                    try:
+                        if entry.is_dir(follow_symlinks=False):
+                            if entry.name not in _SKIP:
+                                stack.append(entry.path)
+                        elif entry.is_file(follow_symlinks=False):
+                            _, ext = os.path.splitext(entry.name)
+                            if ext.lower() in data_extensions:
+                                rel_path = entry.path[example_len:]
+                                size = entry.stat(follow_symlinks=False).st_size
+                                data_files.append({"path": rel_path, "size": size})
+                    except OSError:
+                        pass
+        except OSError:
+            pass
 
     files_json = output_dir / "files.json"
     with open(files_json, "w", encoding="utf-8") as f:

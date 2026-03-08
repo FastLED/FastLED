@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import functools
 import hashlib
+import os
 import threading
 import time
 from dataclasses import dataclass
@@ -288,6 +289,44 @@ def determine_test_categories(args: TestArgs) -> TestCategories:
 # C++ file extensions where whitespace-only changes don't affect compiled output.
 # Normalizing whitespace in these files prevents spurious fingerprint cache misses
 # when a developer adds/removes blank lines or trailing spaces in headers.
+def _scandir_collect_files(
+    root_path: str, exts: frozenset[str]
+) -> list[tuple[str, str]]:
+    """Collect files matching extensions using os.scandir (faster than Path.glob).
+
+    On Windows, DirEntry.stat() reuses FindFirstFile data — no extra syscall
+    per file. Avoids Path object creation overhead from Path.glob().
+
+    Returns list of (relative_path, absolute_path) tuples sorted to match
+    Path sort order (case-insensitive on Windows via os.path.normcase).
+    """
+    results: list[tuple[str, str]] = []
+    root_len = len(root_path)
+    if not root_path.endswith(os.sep):
+        root_len += 1
+    stack = [root_path]
+    while stack:
+        current = stack.pop()
+        try:
+            with os.scandir(current) as it:
+                for entry in it:
+                    try:
+                        if entry.is_dir(follow_symlinks=False):
+                            stack.append(entry.path)
+                        elif entry.is_file(follow_symlinks=False):
+                            _, ext = os.path.splitext(entry.name)
+                            if ext in exts:
+                                rel = entry.path[root_len:]
+                                results.append((rel, entry.path))
+                    except OSError:
+                        pass
+        except OSError:
+            pass
+    # Sort using normcase to match Path.__lt__ (case-insensitive on Windows)
+    results.sort(key=lambda x: os.path.normcase(x[0]))
+    return results
+
+
 @functools.lru_cache(maxsize=32)
 def _hash_directory(start_directory: Path, glob: str) -> str:
     """
@@ -295,39 +334,36 @@ def _hash_directory(start_directory: Path, glob: str) -> str:
     avoid redundant file I/O when multiple fingerprint checks scan the same directory
     (e.g., src/ is read by check_all, check_cpp, check_examples, and check_wasm).
 
+    Uses os.scandir for fast traversal — on Windows, DirEntry metadata is free
+    (from FindFirstFile), avoiding per-file stat syscalls that Path.glob incurs.
+
     Raises exceptions on failure so lru_cache does not cache error results.
     """
     hasher = hashlib.sha256()
-    patterns = glob.split(",")
 
-    # Get all matching files
-    all_files: list[Path] = []
-    for pattern in patterns:
-        all_files.extend(sorted(start_directory.glob(pattern.strip())))
+    # Extract extensions from glob patterns (e.g., "**/*.h,**/*.cpp" -> {".h", ".cpp"})
+    exts = frozenset(os.path.splitext(p.strip())[1] for p in glob.split(","))
 
-    # Sort files for consistent ordering
-    all_files.sort()
+    # Collect files using scandir (faster than Path.glob)
+    files = _scandir_collect_files(str(start_directory), exts)
 
-    # Process each file
-    for file_path in all_files:
-        if file_path.is_file():
-            # Add the relative path to the hash
-            rel_path = file_path.relative_to(start_directory)
-            hasher.update(str(rel_path).encode("utf-8"))
+    for rel_path, abs_path in files:
+        # Add the relative path to the hash
+        hasher.update(rel_path.encode("utf-8"))
 
-            # Add the file content to the hash (raw bytes, no normalization)
-            try:
-                with open(file_path, "rb") as f:
-                    for chunk in iter(lambda: f.read(4096), b""):
-                        hasher.update(chunk)
-            except KeyboardInterrupt as ki:
-                # Only notify main thread if we're in a worker thread
-                if threading.current_thread() != threading.main_thread():
-                    handle_keyboard_interrupt(ki)
-                raise
-            except Exception as e:
-                # If we can't read the file, include the error in the hash
-                hasher.update(f"ERROR:{str(e)}".encode("utf-8"))
+        # Add the file content to the hash (raw bytes, no normalization)
+        try:
+            with open(abs_path, "rb") as f:
+                for chunk in iter(lambda: f.read(4096), b""):
+                    hasher.update(chunk)
+        except KeyboardInterrupt as ki:
+            # Only notify main thread if we're in a worker thread
+            if threading.current_thread() != threading.main_thread():
+                handle_keyboard_interrupt(ki)
+            raise
+        except Exception as e:
+            # If we can't read the file, include the error in the hash
+            hasher.update(f"ERROR:{str(e)}".encode("utf-8"))
 
     return hasher.hexdigest()
 
