@@ -17,6 +17,7 @@
 #include "fl/gfx/noise.cpp.hpp"
 #include "fl/gfx/noise_woryley.cpp.hpp"
 #include "fl/gfx/raster_sparse.cpp.hpp"
+#include "fl/gfx/sample.cpp.hpp"
 #include "fl/gfx/splat.cpp.hpp"
 #include "fl/gfx/tile2x2.cpp.hpp"
 #include "fl/gfx/transform.cpp.hpp"

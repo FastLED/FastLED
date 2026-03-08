@@ -2,6 +2,7 @@
 
 #include "fl/stl/stdint.h"
 
+#include "fl/gfx/sample.h"
 #include "fl/screenmap.h"
 #include "fl/fx/fx1d.h"
 #include "fl/fx/fx2d.h"
@@ -35,8 +36,8 @@ class Fx2dTo1d : public Fx1d {
   public:
     /// Interpolation mode for sampling the 2D grid
     enum InterpolationMode {
-        NEAREST,  ///< Nearest neighbor (fast, pixelated)
-        BILINEAR, ///< Bilinear interpolation (smooth)
+        NEAREST = SAMPLE_NEAREST,   ///< Nearest neighbor (fast, pixelated)
+        BILINEAR = SAMPLE_BILINEAR, ///< Bilinear interpolation (smooth)
     };
 
     /// @brief Construct a 2D-to-1D sampling effect
@@ -78,14 +79,6 @@ class Fx2dTo1d : public Fx1d {
 
     // Working buffer for 2D effect rendering
     fl::scoped_array<CRGB> mGrid;
-
-    /// Bilinear interpolation sampling
-    CRGB sampleBilinear(const CRGB *grid, const XYMap &xyMap, float x,
-                        float y) const;
-
-    /// Nearest neighbor sampling
-    CRGB sampleNearest(const CRGB *grid, const XYMap &xyMap, float x,
-                       float y) const;
 };
 
 } // namespace fl
