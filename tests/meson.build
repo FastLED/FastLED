@@ -54,8 +54,9 @@ test_pch = custom_target('test_pch',
   install: false
 )
 
-# NOTE: doctest_dll_main static library removed - sources now compiled directly into each test DLL
-# This ensures __declspec(dllexport) works properly on Windows for the run_tests() function
+# NOTE: doctest_main.cpp and fl_unittest.cpp are compiled ONCE into test_shared_objs
+# and linked into each test DLL via extract_all_objects(). This eliminates ~410 redundant
+# compiler invocations. __declspec(dllexport) works correctly from pre-compiled objects.
 
 # Build runner executable (static, generic DLL loader)
 # This executable loads a test DLL and calls its run_tests() function
@@ -151,26 +152,40 @@ test_env.prepend('PATH', fastled_lib_dir)
 # Find python once for test wrapper (avoid 245 find_program calls inside loop)
 python_exe = find_program('python')
 
+# ============================================================================
+# SHARED TEST OBJECTS (compiled once, reused by all test DLLs)
+# ============================================================================
+# doctest_main.cpp and fl_unittest.cpp have identical compilation flags across
+# all test DLLs. Compiling them once eliminates ~410 redundant compiler
+# invocations. Objects are linked into each DLL via extract_all_objects()
+# which preserves __declspec(dllexport) directives from doctest_main.cpp.
+shared_test_cpp_args = test_abs_include_args + unit_test_compile_args + [
+    '-DTEST_DLL_MODE',
+    '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
+    '-Werror=invalid-pch',
+    '-fpch-validate-input-files-content',
+]
+
+test_shared_objs_lib = static_library('test_shared_objs',
+  ['doctest_main.cpp', 'shared/fl_unittest.cpp', test_pch],
+  cpp_args: shared_test_cpp_args,
+  pic: true,
+  install: false
+)
+shared_test_objects = test_shared_objs_lib.extract_all_objects(recursive: false)
+
 # Build each test as a DLL with shared PCH
 foreach test_name : test_names
   # Get test file path from dynamic map (for subdirectories) or default to test_name.cpp
   test_file = test_file_paths.get(test_name, test_name + '.cpp')
 
-  # Some tests need additional source files for ESP32 parallel SPI host simulation
-  # Compile DLL-mode test main directly into each test DLL (not via static library)
-  # This ensures __declspec(dllexport) works properly on Windows for the run_tests() export
+  # Test sources: only the unique test file + PCH dependency
+  # doctest_main.cpp and fl_unittest.cpp are pre-compiled in shared_test_objects
   test_sources = [
     test_file,
     test_pch,
-    'doctest_main.cpp',        # Include test main with run_tests() export and cleanup
-    'shared/fl_unittest.cpp',   # Include fl_unittest implementation
   ]
-  test_cpp_args = test_abs_include_args + unit_test_compile_args + [
-    '-DTEST_DLL_MODE',                          # Define TEST_DLL_MODE for DLL builds
-    '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
-    '-Werror=invalid-pch',                      # Treat invalid PCH as hard error
-    '-fpch-validate-input-files-content',       # Validate based on content, not mtime
-  ]
+  test_cpp_args = shared_test_cpp_args
 
   # host_sim.cpp is now compiled as part of libfastled.a when STUB_PLATFORM is defined
   # No need to add it explicitly to individual tests anymore
@@ -187,6 +202,7 @@ foreach test_name : test_names
 
   test_dll = shared_library(test_name,
     test_sources,
+    objects: shared_test_objects,
     cpp_args: test_cpp_args,
     link_args: test_link_args,
     link_with: test_link_with,
