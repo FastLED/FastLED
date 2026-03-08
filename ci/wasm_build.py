@@ -327,9 +327,6 @@ def _parse_clang_from_verbose(stderr_text: str) -> list[str] | None:
     """
     import shlex
 
-    # On Windows, use posix=False so backslash paths aren't mangled.
-    posix = sys.platform != "win32"
-
     for line in stderr_text.splitlines():
         stripped = line.strip()
         if not stripped:
@@ -337,16 +334,24 @@ def _parse_clang_from_verbose(stderr_text: str) -> list[str] | None:
         parts = stripped.split()
         if parts and "clang" in parts[0].lower() and "-c" in parts:
             try:
-                return shlex.split(stripped, posix=posix)
+                # Always use posix=True for consistent parsing.
+                # emcc verbose output uses shell-escaped paths on all platforms.
+                return shlex.split(stripped)
             except ValueError:
                 continue
     return None
+
+
+def _compile_cache_key(emcc_args: list[str]) -> str:
+    """Hash the emcc args to detect when flags change and cache needs refresh."""
+    return hashlib.sha256(json.dumps(emcc_args).encode()).hexdigest()[:16]
 
 
 def _fast_compile(
     wrapper_path: Path,
     object_path: Path,
     build_dir: Path,
+    emcc_args: list[str],
     verbose: bool = False,
 ) -> bool:
     """Fast compile using cached clang args, bypassing emcc Python overhead.
@@ -359,8 +364,18 @@ def _fast_compile(
     Returns True on success, False to fall back to full emcc compile.
     """
     cache_file = build_dir / "clang_compile_args.json"
+    cache_key_file = build_dir / "clang_compile_args.key"
     if not cache_file.exists():
         return False
+
+    # Invalidate cache if emcc args changed (new defines, flags, etc.)
+    current_key = _compile_cache_key(emcc_args)
+    if cache_key_file.exists():
+        stored_key = cache_key_file.read_text(encoding="utf-8").strip()
+        if stored_key != current_key:
+            cache_file.unlink(missing_ok=True)
+            cache_key_file.unlink(missing_ok=True)
+            return False
 
     try:
         template_args: list[str] = json.loads(cache_file.read_text(encoding="utf-8"))
@@ -380,6 +395,7 @@ def _fast_compile(
     if result.returncode != 0:
         # Cache might be stale — delete it so next run recaptures
         cache_file.unlink(missing_ok=True)
+        cache_key_file.unlink(missing_ok=True)
         return False
     return True
 
@@ -434,6 +450,10 @@ def _intercept_emcc_compile(
 
     cache_file = build_dir / "clang_compile_args.json"
     cache_file.write_text(json.dumps(template), encoding="utf-8")
+
+    # Save the key so _fast_compile can detect flag changes
+    cache_key_file = build_dir / "clang_compile_args.key"
+    cache_key_file.write_text(_compile_cache_key(emcc_args), encoding="utf-8")
 
     return 0
 
@@ -496,13 +516,6 @@ def compile_sketch(
             "-fpch-validate-input-files-content",
         ]
 
-    print(f"[WASM] Compiling sketch: {wrapper_path.name}")
-
-    # Fast path: call clang directly, bypassing emcc Python overhead
-    if _fast_compile(wrapper_path, object_path, build_dir, verbose):
-        return object_path
-
-    # Full path: run emcc with verbose capture to learn clang command
     emcc_args = (
         ["-c", str(wrapper_path), "-o", str(object_path)]
         + sketch_flags
@@ -510,6 +523,13 @@ def compile_sketch(
         + pch_args
     )
 
+    print(f"[WASM] Compiling sketch: {wrapper_path.name}")
+
+    # Fast path: call clang directly, bypassing emcc Python overhead
+    if _fast_compile(wrapper_path, object_path, build_dir, emcc_args, verbose):
+        return object_path
+
+    # Full path: run emcc with verbose capture to learn clang command
     if verbose:
         print(f"[WASM] Compile args: {emcc_args}")
 
@@ -528,11 +548,6 @@ def _parse_wasm_ld_from_verbose(stderr_text: str) -> list[str] | None:
       /path/to/wasm-ld.exe arg1 arg2 ...
     """
     import shlex
-    import sys
-
-    # On Windows, use posix=False so backslash paths aren't treated as
-    # escape sequences (shlex defaults to POSIX shell parsing).
-    posix = sys.platform != "win32"
 
     for line in stderr_text.splitlines():
         stripped = line.strip()
@@ -541,7 +556,9 @@ def _parse_wasm_ld_from_verbose(stderr_text: str) -> list[str] | None:
         # emcc verbose output prefixes commands with a space
         if "wasm-ld" in stripped.split()[0] if stripped.split() else False:
             try:
-                return shlex.split(stripped, posix=posix)
+                # Always use posix=True for consistent parsing.
+                # emcc verbose output uses shell-escaped paths on all platforms.
+                return shlex.split(stripped)
             except ValueError:
                 continue
     return None
