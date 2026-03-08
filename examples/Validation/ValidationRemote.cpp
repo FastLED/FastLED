@@ -1968,78 +1968,345 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         return r;
     });
 
-    // Test: fl::await() with promise resolved from main thread
+    // Test: Consumer coroutine awaits promise, producer coroutine fulfills it.
+    // Verifies fl::await() truly blocks until the producer resolves the promise.
+    // Main thread does NOT touch the promise — only the producer coroutine does.
     mRemote->bind("testCoroutineAwait", [](const fl::json& args) -> fl::json {
         (void)args;
         fl::json r = fl::json::object();
 
-        auto promise = fl::promise<int>::create();
-        fl::atomic<bool> await_completed(false);
-        fl::atomic<int> await_value(0);
-        fl::atomic<bool> await_ok(false);
+        auto promise_ptr = fl::make_shared<fl::promise<int>>(fl::promise<int>::create());
+        fl::atomic<bool> consumer_started(false);
+        fl::atomic<bool> consumer_finished(false);
+        fl::atomic<int> consumer_value(0);
+        fl::atomic<bool> consumer_ok(false);
+        fl::atomic<bool> producer_started(false);
+        fl::atomic<bool> producer_finished(false);
 
-        fl::CoroutineConfig cfg;
-        cfg.function = [promise, &await_completed, &await_value, &await_ok]() {
-            auto result = fl::await(promise);
+        // Consumer coroutine: starts first, calls fl::await() which should block
+        // until the producer coroutine resolves the promise
+        fl::CoroutineConfig consumer_cfg;
+        consumer_cfg.function = [promise_ptr, &consumer_started, &consumer_finished,
+                                 &consumer_value, &consumer_ok]() {
+            consumer_started.store(true);
+            // This should block the coroutine until producer fulfills the promise
+            auto result = fl::await(*promise_ptr);
             if (result.ok()) {
-                await_ok.store(true);
-                await_value.store(result.value());
+                consumer_ok.store(true);
+                consumer_value.store(result.value());
             }
-            await_completed.store(true);
+            consumer_finished.store(true);
         };
-        cfg.name = "test_await";
-        auto waiter = fl::task::coroutine(cfg);
+        consumer_cfg.name = "await_consumer";
+        auto consumer = fl::task::coroutine(consumer_cfg);
 
-        delay(100);
-        promise.complete_with_value(42);
+        // Small delay so consumer enters fl::await() before producer starts
+        delay(50);
 
+        // Producer coroutine: simulates async work, then resolves the promise
+        fl::CoroutineConfig producer_cfg;
+        producer_cfg.function = [promise_ptr, &producer_started, &producer_finished]() {
+            producer_started.store(true);
+            delay(200);  // simulate real async work (e.g. sensor read, network I/O)
+            promise_ptr->complete_with_value(42);
+            producer_finished.store(true);
+        };
+        producer_cfg.name = "await_producer";
+        auto producer = fl::task::coroutine(producer_cfg);
+
+        // Main thread waits for both coroutines to finish (polling only)
         uint32_t start = millis();
-        while (!await_completed.load() && (millis() - start) < 3000) {
+        while ((!consumer_finished.load() || producer.isRunning()) && (millis() - start) < 5000) {
             delay(10);
         }
 
-        bool passed = await_completed.load() && await_ok.load() && (await_value.load() == 42);
+        // Verify: consumer was truly blocked — it should not finish before producer
+        bool passed = consumer_started.load() && consumer_finished.load()
+                    && consumer_ok.load() && (consumer_value.load() == 42)
+                    && producer_started.load() && producer_finished.load();
         r.set("success", passed);
-        r.set("awaitCompleted", await_completed.load());
-        r.set("awaitOk", await_ok.load());
-        r.set("awaitValue", static_cast<int64_t>(await_value.load()));
+        r.set("consumerStarted", consumer_started.load());
+        r.set("consumerFinished", consumer_finished.load());
+        r.set("consumerOk", consumer_ok.load());
+        r.set("consumerValue", static_cast<int64_t>(consumer_value.load()));
+        r.set("producerStarted", producer_started.load());
+        r.set("producerFinished", producer_finished.load());
         r.set("durationMs", static_cast<int64_t>(millis() - start));
         return r;
     });
 
-    // Test: fl::await() with promise rejected with error
+    // Test: Consumer coroutine awaits promise, producer coroutine rejects it.
+    // Verifies that fl::await() properly propagates errors from producer.
     mRemote->bind("testCoroutineAwaitError", [](const fl::json& args) -> fl::json {
         (void)args;
         fl::json r = fl::json::object();
 
-        auto promise = fl::promise<int>::create();
-        fl::atomic<bool> await_completed(false);
+        auto promise_ptr = fl::make_shared<fl::promise<int>>(fl::promise<int>::create());
+        fl::atomic<bool> consumer_finished(false);
         fl::atomic<bool> got_error(false);
+        fl::atomic<bool> producer_finished(false);
 
-        fl::CoroutineConfig cfg;
-        cfg.function = [promise, &await_completed, &got_error]() {
-            auto result = fl::await(promise);
+        // Consumer coroutine: awaits promise, expects error
+        fl::CoroutineConfig consumer_cfg;
+        consumer_cfg.function = [promise_ptr, &consumer_finished, &got_error]() {
+            auto result = fl::await(*promise_ptr);
             if (!result.ok()) {
                 got_error.store(true);
             }
-            await_completed.store(true);
+            consumer_finished.store(true);
         };
-        cfg.name = "test_await_err";
-        auto waiter = fl::task::coroutine(cfg);
+        consumer_cfg.name = "await_err_consumer";
+        auto consumer = fl::task::coroutine(consumer_cfg);
 
-        delay(100);
-        promise.complete_with_error(fl::Error("test error"));
+        delay(50);  // let consumer enter await
+
+        // Producer coroutine: rejects the promise with error
+        fl::CoroutineConfig producer_cfg;
+        producer_cfg.function = [promise_ptr, &producer_finished]() {
+            delay(100);
+            promise_ptr->complete_with_error(fl::Error("test error"));
+            producer_finished.store(true);
+        };
+        producer_cfg.name = "await_err_producer";
+        auto producer = fl::task::coroutine(producer_cfg);
 
         uint32_t start = millis();
-        while (!await_completed.load() && (millis() - start) < 3000) {
+        while ((!consumer_finished.load() || producer.isRunning()) && (millis() - start) < 5000) {
             delay(10);
         }
 
-        bool passed = await_completed.load() && got_error.load();
+        bool passed = consumer_finished.load() && got_error.load() && producer_finished.load();
         r.set("success", passed);
-        r.set("awaitCompleted", await_completed.load());
+        r.set("consumerFinished", consumer_finished.load());
         r.set("gotError", got_error.load());
+        r.set("producerFinished", producer_finished.load());
         r.set("durationMs", static_cast<int64_t>(millis() - start));
+        return r;
+    });
+
+    // Test: Promise then/catch_ callbacks fire correctly when fulfilled by a coroutine.
+    // The promise is created with .then() and .catch_() callbacks attached BEFORE
+    // the producer coroutine fulfills it, verifying callback dispatch works.
+    mRemote->bind("testCoroutinePromiseCallbacks", [](const fl::json& args) -> fl::json {
+        (void)args;
+        fl::json r = fl::json::object();
+
+        auto promise_ptr = fl::make_shared<fl::promise<int>>(fl::promise<int>::create());
+        fl::atomic<bool> then_called(false);
+        fl::atomic<int> then_value(0);
+        fl::atomic<bool> catch_called(false);
+        fl::atomic<bool> producer_finished(false);
+
+        // Attach callbacks to the promise BEFORE producer runs
+        promise_ptr->then([&then_called, &then_value](const int& val) {
+            then_called.store(true);
+            then_value.store(val);
+        });
+        promise_ptr->catch_([&catch_called](const fl::Error&) {
+            catch_called.store(true);
+        });
+
+        // Producer coroutine fulfills the promise
+        fl::CoroutineConfig producer_cfg;
+        producer_cfg.function = [promise_ptr, &producer_finished]() {
+            delay(100);
+            promise_ptr->complete_with_value(99);
+            producer_finished.store(true);
+        };
+        producer_cfg.name = "cb_producer";
+        auto producer = fl::task::coroutine(producer_cfg);
+
+        uint32_t start = millis();
+        while (producer.isRunning() && (millis() - start) < 5000) {
+            delay(10);
+            promise_ptr->update();  // pump callbacks
+        }
+        promise_ptr->update();  // final pump
+
+        // then() should fire, catch_() should NOT
+        bool passed = then_called.load() && (then_value.load() == 99)
+                    && !catch_called.load() && producer_finished.load();
+        r.set("success", passed);
+        r.set("thenCalled", then_called.load());
+        r.set("thenValue", static_cast<int64_t>(then_value.load()));
+        r.set("catchCalled", catch_called.load());
+        r.set("producerFinished", producer_finished.load());
+        r.set("durationMs", static_cast<int64_t>(millis() - start));
+        return r;
+    });
+
+    // Test: Promise catch_ callback fires on rejection by a coroutine.
+    mRemote->bind("testCoroutinePromiseCatchCallback", [](const fl::json& args) -> fl::json {
+        (void)args;
+        fl::json r = fl::json::object();
+
+        auto promise_ptr = fl::make_shared<fl::promise<int>>(fl::promise<int>::create());
+        fl::atomic<bool> then_called(false);
+        fl::atomic<bool> catch_called(false);
+        fl::atomic<bool> producer_finished(false);
+
+        promise_ptr->then([&then_called](const int&) {
+            then_called.store(true);
+        });
+        promise_ptr->catch_([&catch_called](const fl::Error&) {
+            catch_called.store(true);
+        });
+
+        // Producer coroutine rejects the promise
+        fl::CoroutineConfig producer_cfg;
+        producer_cfg.function = [promise_ptr, &producer_finished]() {
+            delay(100);
+            promise_ptr->complete_with_error(fl::Error("rejection test"));
+            producer_finished.store(true);
+        };
+        producer_cfg.name = "catch_producer";
+        auto producer = fl::task::coroutine(producer_cfg);
+
+        uint32_t start = millis();
+        while (producer.isRunning() && (millis() - start) < 5000) {
+            delay(10);
+            promise_ptr->update();
+        }
+        promise_ptr->update();
+
+        // catch_() should fire, then() should NOT
+        bool passed = !then_called.load() && catch_called.load() && producer_finished.load();
+        r.set("success", passed);
+        r.set("thenCalled", then_called.load());
+        r.set("catchCalled", catch_called.load());
+        r.set("producerFinished", producer_finished.load());
+        r.set("durationMs", static_cast<int64_t>(millis() - start));
+        return r;
+    });
+
+    // Test: Pipeline of 3 coroutines passing data through promises.
+    // coroutine A produces value -> promise1 -> coroutine B transforms -> promise2 -> coroutine C consumes
+    mRemote->bind("testCoroutineChainedAwait", [](const fl::json& args) -> fl::json {
+        (void)args;
+        fl::json r = fl::json::object();
+
+        auto p1 = fl::make_shared<fl::promise<int>>(fl::promise<int>::create());
+        auto p2 = fl::make_shared<fl::promise<int>>(fl::promise<int>::create());
+        fl::atomic<int> final_value(0);
+        fl::atomic<bool> chain_complete(false);
+        fl::atomic<bool> a_done(false);
+        fl::atomic<bool> b_done(false);
+        fl::atomic<bool> c_done(false);
+
+        // Coroutine C: end of chain, awaits p2
+        fl::CoroutineConfig cfg_c;
+        cfg_c.function = [p2, &final_value, &chain_complete, &c_done]() {
+            auto result = fl::await(*p2);
+            if (result.ok()) {
+                final_value.store(result.value());
+            }
+            c_done.store(true);
+            chain_complete.store(true);
+        };
+        cfg_c.name = "chain_c";
+        auto tc = fl::task::coroutine(cfg_c);
+
+        // Coroutine B: middle of chain, awaits p1, transforms, fulfills p2
+        fl::CoroutineConfig cfg_b;
+        cfg_b.function = [p1, p2, &b_done]() {
+            auto result = fl::await(*p1);
+            if (result.ok()) {
+                // Transform: multiply by 10
+                p2->complete_with_value(result.value() * 10);
+            } else {
+                p2->complete_with_error(result.error());
+            }
+            b_done.store(true);
+        };
+        cfg_b.name = "chain_b";
+        auto tb = fl::task::coroutine(cfg_b);
+
+        // Coroutine A: head of chain, produces the initial value into p1
+        fl::CoroutineConfig cfg_a;
+        cfg_a.function = [p1, &a_done]() {
+            delay(100);  // simulate work
+            p1->complete_with_value(7);
+            a_done.store(true);
+        };
+        cfg_a.name = "chain_a";
+        auto ta = fl::task::coroutine(cfg_a);
+
+        uint32_t start = millis();
+        while (!chain_complete.load() && (millis() - start) < 5000) {
+            delay(10);
+        }
+
+        // 7 * 10 = 70
+        bool passed = chain_complete.load() && (final_value.load() == 70)
+                    && a_done.load() && b_done.load() && c_done.load();
+        r.set("success", passed);
+        r.set("finalValue", static_cast<int64_t>(final_value.load()));
+        r.set("aDone", a_done.load());
+        r.set("bDone", b_done.load());
+        r.set("cDone", c_done.load());
+        r.set("durationMs", static_cast<int64_t>(millis() - start));
+        return r;
+    });
+
+    // Test: Main thread calls await_top_level() on a promise that a coroutine fulfills.
+    // The main thread does NOT push the coroutine — the ESP32 task system runs it.
+    mRemote->bind("testCoroutineAwaitTopLevel", [](const fl::json& args) -> fl::json {
+        (void)args;
+        fl::json r = fl::json::object();
+
+        auto promise = fl::promise<int>::create();
+        fl::atomic<bool> coroutine_ran(false);
+
+        // Spawn coroutine — FreeRTOS schedules and runs it
+        fl::CoroutineConfig cfg;
+        cfg.function = [promise, &coroutine_ran]() mutable {
+            delay(100);  // simulate async work
+            coroutine_ran.store(true);
+            promise.complete_with_value(42);
+        };
+        cfg.name = "toplevel_producer";
+        auto t = fl::task::coroutine(cfg);
+
+        // Main thread blocks here until the coroutine fulfills the promise
+        uint32_t start = millis();
+        auto result = fl::await_top_level(promise);
+        uint32_t elapsed = millis() - start;
+
+        bool passed = result.ok() && (result.value() == 42) && coroutine_ran.load();
+        r.set("success", passed);
+        r.set("resultOk", result.ok());
+        r.set("resultValue", static_cast<int64_t>(result.ok() ? result.value() : -1));
+        r.set("coroutineRan", coroutine_ran.load());
+        r.set("durationMs", static_cast<int64_t>(elapsed));
+        return r;
+    });
+
+    // Test: Main thread await_top_level() on a promise that a coroutine rejects.
+    mRemote->bind("testCoroutineAwaitTopLevelError", [](const fl::json& args) -> fl::json {
+        (void)args;
+        fl::json r = fl::json::object();
+
+        auto promise = fl::promise<int>::create();
+        fl::atomic<bool> coroutine_ran(false);
+
+        fl::CoroutineConfig cfg;
+        cfg.function = [promise, &coroutine_ran]() mutable {
+            delay(100);
+            coroutine_ran.store(true);
+            promise.complete_with_error(fl::Error("intentional failure"));
+        };
+        cfg.name = "toplevel_err_producer";
+        auto t = fl::task::coroutine(cfg);
+
+        uint32_t start = millis();
+        auto result = fl::await_top_level(promise);
+        uint32_t elapsed = millis() - start;
+
+        bool passed = !result.ok() && coroutine_ran.load();
+        r.set("success", passed);
+        r.set("resultOk", result.ok());
+        r.set("coroutineRan", coroutine_ran.load());
+        r.set("durationMs", static_cast<int64_t>(elapsed));
         return r;
     });
 
@@ -2053,9 +2320,14 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
             "testCoroutineStop",
             "testCoroutineConcurrent",
             "testCoroutineAwait",
-            "testCoroutineAwaitError"
+            "testCoroutineAwaitError",
+            "testCoroutinePromiseCallbacks",
+            "testCoroutinePromiseCatchCallback",
+            "testCoroutineChainedAwait",
+            "testCoroutineAwaitTopLevel",
+            "testCoroutineAwaitTopLevelError"
         };
-        const int num_tests = 5;
+        const int num_tests = 10;
 
         int passed = 0;
         int failed = 0;

@@ -9,6 +9,7 @@
 #include "fl/stl/assert.h"  // IWYU pragma: keep
 #include "fl/stl/comparators.h"  // IWYU pragma: keep
 #include "fl/stl/initializer_list.h"  // IWYU pragma: keep
+#include "fl/stl/iterator.h"
 #include "fl/stl/pair.h"
 #include "fl/stl/type_traits.h"
 

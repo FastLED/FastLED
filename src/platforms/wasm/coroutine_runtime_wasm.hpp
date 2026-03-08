@@ -26,10 +26,11 @@ namespace platforms {
 class CoroutineRuntimeWasm : public ICoroutineRuntime {
 public:
     void pumpEventQueueWithSleep(fl::u32 us) override {
-        // WASM with PROXY_TO_PTHREAD runs on a real pthread, so we can use
-        // real OS sleep to yield CPU instead of busy-waiting
+        // WASM: use emscripten_sleep which yields to the browser event loop
         if (us == 0) return;
-        emscripten_thread_sleep(us / 1000.0);  // Takes milliseconds (double)
+        fl::u32 sleep_ms = us / 1000;
+        if (sleep_ms == 0) sleep_ms = 1;  // Minimum 1ms granularity
+        emscripten_sleep(sleep_ms);
     }
 
     bool hasPlatformBackgroundEvents() override {
@@ -38,12 +39,14 @@ public:
 
     void platformDelay(fl::u32 ms) override {
         if (ms == 0) return;
-        emscripten_thread_sleep(ms);
+        emscripten_sleep(ms);
     }
 
     void platformDelayMicroseconds(fl::u32 us) override {
         if (us == 0) return;
-        emscripten_thread_sleep(us / 1000.0);
+        fl::u32 sleep_ms = us / 1000;
+        if (sleep_ms == 0) sleep_ms = 1;  // Minimum 1ms granularity
+        emscripten_sleep(sleep_ms);
     }
 
     fl::u32 platformMillis() override {
