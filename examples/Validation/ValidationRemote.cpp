@@ -1563,25 +1563,33 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
 
         fl::json add = fl::json::object();
         add.set("float_us", result.add_float_us);
+        add.set("s8x8_us", result.add_s8x8_us);
         add.set("s16x16_us", result.add_s16x16_us);
+        add.set("u16x16_us", result.add_u16x16_us);
         add.set("simd_us", result.add_simd_us);
         response.set("add", add);
 
         fl::json sub = fl::json::object();
         sub.set("float_us", result.sub_float_us);
+        sub.set("s8x8_us", result.sub_s8x8_us);
         sub.set("s16x16_us", result.sub_s16x16_us);
+        sub.set("u16x16_us", result.sub_u16x16_us);
         sub.set("simd_us", result.sub_simd_us);
         response.set("sub", sub);
 
         fl::json mul = fl::json::object();
         mul.set("float_us", result.mul_float_us);
+        mul.set("s8x8_us", result.mul_s8x8_us);
         mul.set("s16x16_us", result.mul_s16x16_us);
+        mul.set("u16x16_us", result.mul_u16x16_us);
         mul.set("simd_us", result.mul_simd_us);
         response.set("mul", mul);
 
         fl::json div = fl::json::object();
         div.set("float_us", result.div_float_us);
+        div.set("s8x8_us", result.div_s8x8_us);
         div.set("s16x16_us", result.div_s16x16_us);
+        div.set("u16x16_us", result.div_u16x16_us);
         response.set("div", div);
 
         return response;

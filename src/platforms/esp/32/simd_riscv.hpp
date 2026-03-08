@@ -440,10 +440,22 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sra_i32_4(simd_u32x4 vec, int shift) noe
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi_u32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
     simd_u32x4 result;
+#if __riscv_xlen == 32
+    // RV32: Use mul+mulhu inline asm to avoid 64-bit widening multiply.
+    for (int i = 0; i < 4; ++i) {
+        u32 lo, hi;
+        asm("mul   %0, %2, %3\n\t"
+            "mulhu %1, %2, %3"
+            : "=&r"(lo), "=&r"(hi)
+            : "r"(a.data[i]), "r"(b.data[i]));
+        result.data[i] = (lo >> 16) | (hi << 16);
+    }
+#else
     for (int i = 0; i < 4; ++i) {
         u64 prod = static_cast<u64>(a.data[i]) * static_cast<u64>(b.data[i]);
         result.data[i] = static_cast<u32>(prod >> 16);
     }
+#endif
     return result;
 }
 
@@ -453,12 +465,23 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi_su32_4(simd_u32x4 a, simd_u32x4 b)
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi32_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
     simd_u32x4 result;
+#if __riscv_xlen == 32
+    // RV32: >> 32 means we only need the high word — single mulh instruction.
+    for (int i = 0; i < 4; ++i) {
+        i32 hi;
+        asm("mulh %0, %1, %2"
+            : "=r"(hi)
+            : "r"(a.data[i]), "r"(b.data[i]));
+        result.data[i] = static_cast<u32>(hi);
+    }
+#else
     for (int i = 0; i < 4; ++i) {
         i32 ai = static_cast<i32>(a.data[i]);
         i32 bi = static_cast<i32>(b.data[i]);
         i64 prod = static_cast<i64>(ai) * static_cast<i64>(bi);
         result.data[i] = static_cast<u32>(static_cast<i32>(prod >> 32));
     }
+#endif
     return result;
 }
 

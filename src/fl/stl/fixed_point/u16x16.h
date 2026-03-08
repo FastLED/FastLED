@@ -54,10 +54,23 @@ class u16x16 {
 
     // ---- Fixed-point arithmetic --------------------------------------------
 
+#if defined(__riscv) && (__riscv_xlen == 32)
+    // RV32: Use mul+mulhu inline asm to avoid expensive 64-bit widening multiply.
+    // Extracts bits [47:16] of the 64-bit product for Q16.16 unsigned fixed-point.
+    FASTLED_FORCE_INLINE u16x16 operator*(u16x16 b) const {
+        u32 lo, hi;
+        asm("mul   %0, %2, %3\n\t"
+            "mulhu %1, %2, %3"
+            : "=&r"(lo), "=&r"(hi)
+            : "r"(mValue), "r"(b.mValue));
+        return from_raw((lo >> 16) | (hi << 16));
+    }
+#else
     constexpr FASTLED_FORCE_INLINE u16x16 operator*(u16x16 b) const {
         return from_raw(static_cast<u32>(
             (static_cast<u64>(mValue) * b.mValue) >> FRAC_BITS));
     }
+#endif
 
     constexpr FASTLED_FORCE_INLINE u16x16 operator/(u16x16 b) const {
         return from_raw(static_cast<u32>(
@@ -130,7 +143,11 @@ class u16x16 {
         return x < lo ? lo : (x > hi ? hi : x);
     }
 
+#if defined(__riscv) && (__riscv_xlen == 32)
+    static FASTLED_FORCE_INLINE u16x16 lerp(u16x16 a, u16x16 b, u16x16 t) {
+#else
     static constexpr FASTLED_FORCE_INLINE u16x16 lerp(u16x16 a, u16x16 b, u16x16 t) {
+#endif
         return a + (b - a) * t;
     }
 
