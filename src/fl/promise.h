@@ -45,6 +45,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/move.h"
+#include "fl/stl/atomic.h"
 
 namespace fl {
 
@@ -257,22 +258,22 @@ enum class PromiseState_t {
 template<typename T>
 class PromiseImpl {
 public:
-    PromiseImpl() : mState(PromiseState_t::PENDING), mCallbacksProcessed(false) {}
+    PromiseImpl() : mState(static_cast<int>(PromiseState_t::PENDING)), mCallbacksProcessed(false) {}
     
     /// Set success callback
     void set_then_callback(fl::function<void(const T&)> callback) {
         mThenCallback = fl::move(callback);
         // If already resolved, process callback immediately
-        if (mState == PromiseState_t::RESOLVED && !mCallbacksProcessed) {
+        if (state() == PromiseState_t::RESOLVED && !mCallbacksProcessed) {
             process_callbacks();
         }
     }
-    
+
     /// Set error callback
     void set_catch_callback(fl::function<void(const Error&)> callback) {
         mCatchCallback = fl::move(callback);
         // If already rejected, process callback immediately
-        if (mState == PromiseState_t::REJECTED && !mCallbacksProcessed) {
+        if (state() == PromiseState_t::REJECTED && !mCallbacksProcessed) {
             process_callbacks();
         }
     }
@@ -287,61 +288,62 @@ public:
     
     /// Resolve promise with value
     bool resolve(const T& value) {
-        if (mState != PromiseState_t::PENDING) return false;
-        
+        if (state() != PromiseState_t::PENDING) return false;
+
+        // Write value BEFORE setting state — the atomic store provides
+        // a release fence so the reader sees the value after observing
+        // the state transition.
         mValue = value;
-        mState = PromiseState_t::RESOLVED;
-        
+        set_state(PromiseState_t::RESOLVED);
+
         // Process callback immediately if we have one
         if (mThenCallback && !mCallbacksProcessed) {
             process_callbacks();
         }
-        
+
         return true;
     }
-    
+
     bool resolve(T&& value) {
-        if (mState != PromiseState_t::PENDING) return false;
-        
+        if (state() != PromiseState_t::PENDING) return false;
+
         mValue = fl::move(value);
-        mState = PromiseState_t::RESOLVED;
-        
-        // Process callback immediately if we have one
+        set_state(PromiseState_t::RESOLVED);
+
         if (mThenCallback && !mCallbacksProcessed) {
             process_callbacks();
         }
-        
+
         return true;
     }
-    
+
     /// Reject promise with error
     bool reject(const Error& error) {
-        if (mState != PromiseState_t::PENDING) return false;
-        
+        if (state() != PromiseState_t::PENDING) return false;
+
         mError = error;
-        mState = PromiseState_t::REJECTED;
-        
-        // Process callback immediately if we have one
+        set_state(PromiseState_t::REJECTED);
+
         if (mCatchCallback && !mCallbacksProcessed) {
             process_callbacks();
         }
-        
+
         return true;
     }
     
     /// Check if promise is completed
     bool is_completed() const {
-        return mState != PromiseState_t::PENDING;
+        return state() != PromiseState_t::PENDING;
     }
-    
+
     /// Check if promise is resolved
     bool is_resolved() const {
-        return mState == PromiseState_t::RESOLVED;
+        return state() == PromiseState_t::RESOLVED;
     }
-    
+
     /// Check if promise is rejected
     bool is_rejected() const {
-        return mState == PromiseState_t::REJECTED;
+        return state() == PromiseState_t::REJECTED;
     }
     
     /// Get value (only valid if resolved)
@@ -355,7 +357,7 @@ public:
     }
 
 private:
-    PromiseState_t mState;
+    fl::atomic<int> mState;  // stores PromiseState_t as int (atomics require integer type)
     T mValue;
     Error mError;
     
@@ -364,16 +366,27 @@ private:
     
     bool mCallbacksProcessed;
     
+    /// Read the state atomically
+    PromiseState_t state() const {
+        return static_cast<PromiseState_t>(mState.load());
+    }
+
+    /// Write the state atomically
+    void set_state(PromiseState_t s) {
+        mState.store(static_cast<int>(s));
+    }
+
     /// Process pending callbacks
     void process_callbacks() {
         if (mCallbacksProcessed) return;
-        
-        if (mState == PromiseState_t::RESOLVED && mThenCallback) {
+
+        PromiseState_t s = state();
+        if (s == PromiseState_t::RESOLVED && mThenCallback) {
             mThenCallback(mValue);
-        } else if (mState == PromiseState_t::REJECTED && mCatchCallback) {
+        } else if (s == PromiseState_t::REJECTED && mCatchCallback) {
             mCatchCallback(mError);
         }
-        
+
         mCallbacksProcessed = true;
     }
 };

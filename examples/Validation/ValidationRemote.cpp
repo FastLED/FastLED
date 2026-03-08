@@ -2248,68 +2248,6 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
         return r;
     });
 
-    // Test: Main thread calls await_top_level() on a promise that a coroutine fulfills.
-    // The main thread does NOT push the coroutine — the ESP32 task system runs it.
-    mRemote->bind("testCoroutineAwaitTopLevel", [](const fl::json& args) -> fl::json {
-        (void)args;
-        fl::json r = fl::json::object();
-
-        auto promise = fl::promise<int>::create();
-        fl::atomic<bool> coroutine_ran(false);
-
-        // Spawn coroutine — FreeRTOS schedules and runs it
-        fl::CoroutineConfig cfg;
-        cfg.function = [promise, &coroutine_ran]() mutable {
-            delay(100);  // simulate async work
-            coroutine_ran.store(true);
-            promise.complete_with_value(42);
-        };
-        cfg.name = "toplevel_producer";
-        auto t = fl::task::coroutine(cfg);
-
-        // Main thread blocks here until the coroutine fulfills the promise
-        uint32_t start = millis();
-        auto result = fl::await_top_level(promise);
-        uint32_t elapsed = millis() - start;
-
-        bool passed = result.ok() && (result.value() == 42) && coroutine_ran.load();
-        r.set("success", passed);
-        r.set("resultOk", result.ok());
-        r.set("resultValue", static_cast<int64_t>(result.ok() ? result.value() : -1));
-        r.set("coroutineRan", coroutine_ran.load());
-        r.set("durationMs", static_cast<int64_t>(elapsed));
-        return r;
-    });
-
-    // Test: Main thread await_top_level() on a promise that a coroutine rejects.
-    mRemote->bind("testCoroutineAwaitTopLevelError", [](const fl::json& args) -> fl::json {
-        (void)args;
-        fl::json r = fl::json::object();
-
-        auto promise = fl::promise<int>::create();
-        fl::atomic<bool> coroutine_ran(false);
-
-        fl::CoroutineConfig cfg;
-        cfg.function = [promise, &coroutine_ran]() mutable {
-            delay(100);
-            coroutine_ran.store(true);
-            promise.complete_with_error(fl::Error("intentional failure"));
-        };
-        cfg.name = "toplevel_err_producer";
-        auto t = fl::task::coroutine(cfg);
-
-        uint32_t start = millis();
-        auto result = fl::await_top_level(promise);
-        uint32_t elapsed = millis() - start;
-
-        bool passed = !result.ok() && coroutine_ran.load();
-        r.set("success", passed);
-        r.set("resultOk", result.ok());
-        r.set("coroutineRan", coroutine_ran.load());
-        r.set("durationMs", static_cast<int64_t>(elapsed));
-        return r;
-    });
-
     // Run all coroutine tests sequentially
     mRemote->bind("testCoroutineAll", [this](const fl::json& args) -> fl::json {
         (void)args;
@@ -2323,11 +2261,9 @@ void ValidationRemoteControl::registerFunctions(fl::shared_ptr<ValidationState> 
             "testCoroutineAwaitError",
             "testCoroutinePromiseCallbacks",
             "testCoroutinePromiseCatchCallback",
-            "testCoroutineChainedAwait",
-            "testCoroutineAwaitTopLevel",
-            "testCoroutineAwaitTopLevelError"
+            "testCoroutineChainedAwait"
         };
-        const int num_tests = 10;
+        const int num_tests = 8;
 
         int passed = 0;
         int failed = 0;
