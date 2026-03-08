@@ -220,18 +220,16 @@ All coordinates in a single call must be the same type — you can't mix
 
 ## 6. Fixed-Point Coordinates (`s16x16`, `s8x8`)
 
+On 8-bit MCUs (AVR, ATtiny) there is no FPU — every `float` operation
+compiles to a slow software routine. `fl::s16x16` is a signed 16.16
+fixed-point type that does all math with integer shifts and multiplies,
+giving deterministic, FPU-free rendering at full subpixel precision.
+
 *Blazing fast fixed integer drawing - Courtesy of https://www.reddit.com/user/sutaburosu/*
 
 [Reddit Video https://www.reddit.com/r/FastLED/comments/1rlzrob/antialiased_subpixel_positioned_2d_graphics](https://www.reddit.com/r/FastLED/comments/1rlzrob/antialiased_subpixel_positioned_2d_graphics)
 
 <img width="1107" height="1062" alt="image" src="https://github.com/user-attachments/assets/0cc67dad-d47e-428c-8c93-ab465823ac85" />
-
-
-
-On 8-bit MCUs (AVR, ATtiny) there is no FPU — every `float` operation
-compiles to a slow software routine. `fl::s16x16` is a signed 16.16
-fixed-point type that does all math with integer shifts and multiplies,
-giving deterministic, FPU-free rendering at full subpixel precision.
 
 ### Quick start
 
