@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/audio_input.h"  // For AudioConfig  // IWYU pragma: keep
+#include "fl/audio/audio_input.h"  // For AudioConfig  // IWYU pragma: keep
 #include "fl/stl/string.h"
 #include "fl/stl/url.h"
 #include "fl/unused.h"

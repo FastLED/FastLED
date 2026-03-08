@@ -11,7 +11,7 @@
 // IWYU pragma: end_keep
 #include "fl/alloca.h"
 #include "fl/stl/array.h"
-#include "fl/audio.h"
+#include "fl/audio/audio.h"
 #include "fl/audio/fft/fft.h"
 #include "fl/audio/fft/fft_impl.h"
 #include "fl/stl/string.h"

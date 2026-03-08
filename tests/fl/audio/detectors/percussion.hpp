@@ -1,7 +1,7 @@
 // Unit tests for PercussionDetector - multi-feature spectral classification
 
 #include "test.h"
-#include "fl/audio.h"
+#include "fl/audio/audio.h"
 #include "fl/audio/audio_context.h"
 #include "fl/audio/detectors/percussion.h"
 #include "../test_helpers.h"

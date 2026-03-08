@@ -3,7 +3,7 @@
 #ifndef FL_AUDIO_AUDIO_PROCESSOR_H
 #define FL_AUDIO_AUDIO_PROCESSOR_H
 
-#include "fl/audio.h"  // IWYU pragma: keep
+#include "fl/audio/audio.h"  // IWYU pragma: keep
 #include "fl/audio/audio_context.h"  // IWYU pragma: keep
 #include "fl/audio/audio_detector.h"  // IWYU pragma: keep
 #include "fl/audio/detectors/vibe.h"  // IWYU pragma: keep - VibeLevels used in public callback API

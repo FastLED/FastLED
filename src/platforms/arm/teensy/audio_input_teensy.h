@@ -2,7 +2,7 @@
 
 // IWYU pragma: private
 
-#include "fl/audio_input.h"
+#include "fl/audio/audio_input.h"
 #include "fl/warn.h"
 #include "fl/has_include.h"
 #include "fl/stl/assert.h"

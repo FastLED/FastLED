@@ -1,7 +1,7 @@
 // Unit tests for VocalDetector
 
 #include "test.h"
-#include "fl/audio.h"
+#include "fl/audio/audio.h"
 #include "fl/audio/audio_context.h"
 #include "fl/audio/detectors/vocal.h"
 #include "../test_helpers.h"

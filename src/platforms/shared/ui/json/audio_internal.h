@@ -8,7 +8,7 @@
 #include "platforms/shared/ui/json/ui_internal.h"
 #include "platforms/shared/ui/json/audio_buffer.h"
 #include "fl/stl/vector.h"
-#include "fl/audio.h"
+#include "fl/audio/audio.h"
 
 namespace fl {
 

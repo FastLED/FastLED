@@ -1,7 +1,7 @@
 // examples/Validation/ValidationNet.cpp
 //
 // Network validation implementation for ESP32.
-// Uses fl::net::http::Server (unified HTTP API) for the HTTP server.
+// Uses fl::asio::http::Server (unified HTTP API) for the HTTP server.
 // Uses ESP-IDF native APIs for WiFi Soft AP and HTTP client.
 // Guarded with FL_IS_ESP32 - no-op stubs on other platforms.
 
@@ -40,7 +40,7 @@ ValidationNetState& getNetState() {
 // IWYU pragma: end_keep
 
 // Static handles
-static fl::unique_ptr<fl::net::http::Server> s_http_server;
+static fl::unique_ptr<fl::asio::http::Server> s_http_server;
 static esp_netif_t* s_netif_ap = nullptr;
 static bool s_event_loop_initialized = false;
 static bool s_wifi_initialized = false;
@@ -124,7 +124,7 @@ static bool initWifiAP() {
 }
 
 // ============================================================================
-// HTTP Server Setup (using unified fl::net::http::Server)
+// HTTP Server Setup (using unified fl::asio::http::Server)
 // ============================================================================
 
 static bool startHttpServer() {
@@ -132,14 +132,14 @@ static bool startHttpServer() {
         return true;  // Already running
     }
 
-    s_http_server = fl::make_unique<fl::net::http::Server>();
+    s_http_server = fl::make_unique<fl::asio::http::Server>();
 
     // Register routes using the unified API
-    s_http_server->get("/ping", [](const fl::net::http::Request&) {
-        return fl::net::http::Response::ok("pong");
+    s_http_server->get("/ping", [](const fl::asio::http::Request&) {
+        return fl::asio::http::Response::ok("pong");
     });
 
-    s_http_server->get("/status", [](const fl::net::http::Request&) {
+    s_http_server->get("/status", [](const fl::asio::http::Request&) {
         fl::json json = fl::json::object();
         json.set("uptime_ms", static_cast<int64_t>(millis()));
         json.set("free_heap", static_cast<int64_t>(ESP.getFreeHeap()));
@@ -152,23 +152,23 @@ static bool startHttpServer() {
 #else
         json.set("chip", "esp32");
 #endif
-        fl::net::http::Response resp;
+        fl::asio::http::Response resp;
         resp.json(json);
         return resp;
     });
 
-    s_http_server->post("/echo", [](const fl::net::http::Request& req) {
+    s_http_server->post("/echo", [](const fl::asio::http::Request& req) {
         if (!req.has_body()) {
-            return fl::net::http::Response::bad_request("No body");
+            return fl::asio::http::Response::bad_request("No body");
         }
-        return fl::net::http::Response::ok(req.body());
+        return fl::asio::http::Response::ok(req.body());
     });
 
-    s_http_server->get("/leds", [](const fl::net::http::Request&) {
+    s_http_server->get("/leds", [](const fl::asio::http::Request&) {
         fl::json json = fl::json::object();
         json.set("num_leds", static_cast<int64_t>(10));
         json.set("brightness", static_cast<int64_t>(64));
-        fl::net::http::Response resp;
+        fl::asio::http::Response resp;
         resp.json(json);
         return resp;
     });

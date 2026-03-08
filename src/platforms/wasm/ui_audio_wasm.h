@@ -7,8 +7,8 @@
 
 #include "fl/stl/string.h"
 #include "fl/stl/url.h"
-#include "fl/audio.h"
-#include "fl/audio_input.h"  // For AudioConfig
+#include "fl/audio/audio.h"
+#include "fl/audio/audio_input.h"  // For AudioConfig
 #include "fl/stl/shared_ptr.h"
 
 namespace fl {

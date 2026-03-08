@@ -1,7 +1,7 @@
 // Unit tests for EnergyAnalyzer
 
 #include "test.h"
-#include "fl/audio.h"
+#include "fl/audio/audio.h"
 #include "fl/audio/audio_context.h"
 #include "fl/audio/detectors/energy_analyzer.h"
 #include "../test_helpers.h"

@@ -655,7 +655,7 @@ For full control, use `AudioSample` and `FFT` directly. This is useful when you 
 ```cpp
 #include "FastLED.h"
 #include "fl/audio/input.h"
-#include "fl/audio.h"
+#include "fl/audio/audio.h"
 #include "fl/audio/fft/fft.h"
 
 using namespace fl;
@@ -703,7 +703,7 @@ For the simplest audio reactivity without FFT, use `AudioSample` properties dire
 ```cpp
 #include "FastLED.h"
 #include "fl/audio/input.h"
-#include "fl/audio.h"
+#include "fl/audio/audio.h"
 
 using namespace fl;
 

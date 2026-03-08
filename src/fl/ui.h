@@ -6,8 +6,8 @@
 #include "fl/stl/string.h"
 #include "fl/stl/url.h"
 #include "fl/int.h"  // IWYU pragma: keep
-#include "fl/audio.h"
-#include "fl/audio_input.h"  // For AudioConfig  // IWYU pragma: keep
+#include "fl/audio/audio.h"
+#include "fl/audio/audio_input.h"  // For AudioConfig  // IWYU pragma: keep
 #include "fl/engine_events.h"
 #include "fl/stl/function.h"
 #include "fl/math_macros.h"

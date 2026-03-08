@@ -4,8 +4,8 @@
 
 #include "fl/stl/stdint.h"
 
-#include "fl/audio.h"
-#include "fl/audio_input.h"
+#include "fl/audio/audio.h"
+#include "fl/audio/audio_input.h"
 #include "fl/engine_events.h"
 #include "fl/stl/string.h"
 #include "fl/stl/url.h"

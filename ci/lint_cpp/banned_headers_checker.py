@@ -322,7 +322,9 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
         HeaderException(
             "fl/stl/math.cpp.hpp", "Platform math wrapper (header-only implementation)"
         ),
-        HeaderException("fl/audio_reactive.cpp", "Audio FFT and signal processing"),
+        HeaderException(
+            "fl/audio/audio_reactive.cpp", "Audio FFT and signal processing"
+        ),
         HeaderException(
             "fl/colorutils.cpp", "Color interpolation and gamma correction"
         ),

@@ -5,7 +5,7 @@
 #include "fl/audio/detectors/downbeat.h"
 #include "fl/stl/new.h"
 #include "test.h"
-#include "fl/audio.h"
+#include "fl/audio/audio.h"
 #include "fl/math_macros.h"
 #include "fl/stl/span.h"
 #include "fl/stl/math.h"

@@ -2,8 +2,11 @@
 /// @brief Unity build header for fl/audio/ directory
 /// Includes all implementation files in alphabetical order
 
+#include "fl/audio/audio.cpp.hpp"
 #include "fl/audio/audio_context.cpp.hpp"
+#include "fl/audio/audio_input.cpp.hpp"
 #include "fl/audio/audio_processor.cpp.hpp"
+#include "fl/audio/audio_reactive.cpp.hpp"
 #include "fl/audio/auto_gain.cpp.hpp"
 #include "fl/audio/frequency_bin_mapper.cpp.hpp"
 #include "fl/audio/noise_floor_tracker.cpp.hpp"

@@ -6,7 +6,7 @@
 #include "platforms/esp/is_esp.h"
 
 #include "fl/warn.h"
-#include "fl/audio_input.h"
+#include "fl/audio/audio_input.h"
 
 
 #include "platforms/esp/esp_version.h"

@@ -24,7 +24,7 @@ all the UI elements you see below.
 #include <Arduino.h>
 #include <FastLED.h>
 
-#include "fl/audio.h"
+#include "fl/audio/audio.h"
 #include "fl/gfx/downscale.h"
 #include "fl/gfx/draw_visitor.h"
 #include "fl/fft.h"

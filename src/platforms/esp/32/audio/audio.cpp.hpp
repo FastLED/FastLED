@@ -13,6 +13,6 @@
 
 
 // This file is kept for potential future ESP32-specific audio implementations
-// The main audio creation logic is handled in src/fl/audio_input.cpp
+// The main audio creation logic is handled in src/fl/audio/audio_input.cpp
 
 #endif  // 

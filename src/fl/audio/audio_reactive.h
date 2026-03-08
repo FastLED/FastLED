@@ -2,7 +2,7 @@
 
 #include "fl/audio/fft/fft.h"
 #include "fl/int.h"
-#include "fl/audio.h"  // IWYU pragma: keep
+#include "fl/audio/audio.h"  // IWYU pragma: keep
 #include "fl/audio/signal_conditioner.h"
 #include "fl/audio/noise_floor_tracker.h"
 #include "fl/audio/frequency_bin_mapper.h"

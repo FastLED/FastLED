@@ -6,9 +6,6 @@
 // which includes is_teensy.h before this header.
 
 #include "fl/async.cpp.hpp"
-#include "fl/audio.cpp.hpp"
-#include "fl/audio_input.cpp.hpp"
-#include "fl/audio_reactive.cpp.hpp"
 #include "fl/delay.cpp.hpp"
 #include "fl/engine_events.cpp.hpp"
 #include "fl/fastled_internal.cpp.hpp"

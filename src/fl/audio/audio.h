@@ -9,6 +9,7 @@
 
 namespace fl {
 class FFTBins;  // Forward declaration
+class AudioProcessor;  // Forward declaration
 
 class AudioSampleImpl;
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/codec/common.h"  // IWYU pragma: keep
-#include "fl/audio.h"  // IWYU pragma: keep
+#include "fl/audio/audio.h"  // IWYU pragma: keep
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/stdint.h"

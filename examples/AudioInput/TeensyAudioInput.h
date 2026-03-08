@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "fl/audio_input.h"
+#include "fl/audio/audio_input.h"
 
 // ============================================================================
 // TEENSY CONFIGURATION

@@ -6,7 +6,7 @@
 #include "fl/stl/detail/file_handle.h"  // For fl::filebuf
 #include "fl/stl/shared_ptr.h"  // IWYU pragma: keep
 #include "fl/stl/function.h"
-#include "fl/audio.h"
+#include "fl/audio/audio.h"
 #include "fl/fx/frame.h"
 
 namespace fl {

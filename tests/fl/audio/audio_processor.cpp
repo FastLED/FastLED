@@ -2,7 +2,7 @@
 
 #include "test.h"
 #include "test_helpers.h"
-#include "fl/audio.h"
+#include "fl/audio/audio.h"
 #include "fl/audio/audio_processor.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/math.h"

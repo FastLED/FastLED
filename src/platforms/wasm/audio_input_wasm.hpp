@@ -5,8 +5,8 @@
 #include "platforms/wasm/is_wasm.h"
 #ifdef FL_IS_WASM
 
-#include "fl/audio_input.h"
-#include "fl/audio.h"
+#include "fl/audio/audio_input.h"
+#include "fl/audio/audio.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string.h"

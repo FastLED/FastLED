@@ -2,7 +2,7 @@
 // ok standalone
 
 #include "test.h"
-#include "fl/audio.h"
+#include "fl/audio/audio.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/math.h"
 

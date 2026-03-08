@@ -7,7 +7,7 @@
 // FastLED.h must be included first to trigger precompiled headers for FastLED's build system
 #include "FastLED.h"
 
-#include "fl/audio_input.h"
+#include "fl/audio/audio_input.h"
 #include "fl/stl/sstream.h"
 
 

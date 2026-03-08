@@ -1,7 +1,7 @@
 // Unit tests for BeatDetector
 
 #include "test.h"
-#include "fl/audio.h"
+#include "fl/audio/audio.h"
 #include "fl/audio/audio_context.h"
 #include "fl/audio/fft/fft.h"
 #include "fl/audio/detectors/beat.h"

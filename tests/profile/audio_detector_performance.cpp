@@ -11,7 +11,7 @@
 //   bash profile audio_detector_performance --iterations 50 --docker
 
 #include "fl/audio/audio_processor.h"
-#include "fl/audio.h"
+#include "fl/audio/audio.h"
 #include "fl/int.h"
 #include "fl/stl/stdio.h"
 #include "fl/stl/vector.h"

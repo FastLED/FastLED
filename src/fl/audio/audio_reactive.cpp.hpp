@@ -1,4 +1,4 @@
-#include "fl/audio_reactive.h"
+#include "fl/audio/audio_reactive.h"
 #include "fl/audio/audio_processor.h"
 #include "fl/audio/detectors/musical_beat_detector.h"
 #include "fl/audio/detectors/multiband_beat_detector.h"
