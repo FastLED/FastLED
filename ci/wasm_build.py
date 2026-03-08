@@ -234,7 +234,9 @@ def create_wrapper(example_name: str, sketch_cache_dir: Path) -> Path:
 
     wrapper_path = sketch_cache_dir / f"{example_name}_wrapper.cpp"
     wrapper_content = f"""// Auto-generated wrapper for {example_name}.ino
-// For WASM builds, we use the standard entry point from platforms/wasm/entry_point.cpp
+// C++20 header unit import — ~2x faster than PCH for sketch compilation.
+// The .ino's #include "FastLED.h" is a harmless no-op after this import.
+import "wasm_pch.h";
 #include "{ino_file.as_posix()}"
 """
 
@@ -255,18 +257,19 @@ def build_sketch_pch(
     verbose: bool = False,
 ) -> Path | None:
     """
-    Build a sketch-specific PCH with sketch compile flags.
+    Build a C++20 header unit (.pcm) from wasm_pch.h for sketch compilation.
 
-    The library PCH uses library flags (e.g. -O1) which are incompatible with
-    sketch flags (e.g. -O0). This builds a separate PCH for sketch compilation.
+    Header units are ~2x faster than traditional PCH for sketch imports.
+    The BMI encodes semantic info (types, templates) in compact binary form,
+    so importing is faster than PCH token-stream replay.
 
     Args:
-        lib_was_rebuilt: If True, library sources changed — invalidate sketch PCH
+        lib_was_rebuilt: If True, library sources changed — invalidate header unit
             since included headers may have changed.
 
-    Returns path to the sketch PCH, or None if build fails.
+    Returns path to the header unit BMI (.pcm), or None if build fails.
     """
-    sketch_pch_path = build_dir / "sketch_pch.h.pch"
+    sketch_pcm_path = build_dir / "wasm_pch.h.pcm"
     sketch_pch_hash_path = build_dir / "sketch_pch.hash"
 
     sketch_flags = get_sketch_compile_flags(mode)
@@ -275,17 +278,17 @@ def build_sketch_pch(
     combined = "\n".join(sketch_flags) + "\n" + src_fp
     current_hash = hashlib.sha256(combined.encode()).hexdigest()
 
-    # Check if sketch PCH is up-to-date
+    # Check if header unit BMI is up-to-date
     if (
         not lib_was_rebuilt
-        and sketch_pch_path.exists()
+        and sketch_pcm_path.exists()
         and sketch_pch_hash_path.exists()
     ):
         stored_hash = sketch_pch_hash_path.read_text(encoding="utf-8").strip()
         if stored_hash == current_hash:
             if verbose:
-                print("[WASM] Sketch PCH is up-to-date")
-            return sketch_pch_path
+                print("[WASM] Sketch header unit is up-to-date")
+            return sketch_pcm_path
 
     includes = [
         f"-I{PROJECT_ROOT / 'src'}",
@@ -299,49 +302,24 @@ def build_sketch_pch(
     ]
 
     emcc_args = (
-        ["-x", "c++-header", str(WASM_PCH_HEADER), "-o", str(sketch_pch_path)]
+        ["-fmodule-header=user", str(WASM_PCH_HEADER), "-o", str(sketch_pcm_path)]
         + meson_defaults
         + sketch_flags
         + includes
-        + ["-fpch-codegen"]  # Generate shared code in separate .o
     )
 
     if verbose:
-        print(f"[WASM] Sketch PCH args: {emcc_args}")
+        print(f"[WASM] Header unit args: {emcc_args}")
 
-    print("[WASM] Building sketch PCH...")
+    print("[WASM] Building sketch header unit (.pcm)...")
     rc = run_emcc(emcc_args, cwd=str(PROJECT_ROOT))
     if rc != 0:
-        print("[WASM] Sketch PCH build failed")
+        print("[WASM] Header unit build failed")
         return None
 
-    # Compile PCH to shared object (contains codegen from PCH headers)
-    pch_shared_o = build_dir / "pch_shared.o"
-    rc = run_emcc(
-        ["-c", str(sketch_pch_path), "-o", str(pch_shared_o), "-O0", "-g0"],
-        cwd=str(PROJECT_ROOT),
-    )
-    if rc != 0:
-        print("[WASM] PCH shared object build failed, continuing without -fpch-codegen")
-        pch_shared_o.unlink(missing_ok=True)
-    else:
-        # Add pch_shared.o into libfastled.a so linker picks up symbols naturally.
-        # No need to modify link commands — linker pulls codegen symbols from archive.
-        library_archive = build_dir / "ci" / "meson" / "wasm" / "libfastled.a"
-        if library_archive.exists():
-            from ci.wasm_tools import _fast_emar, setup_emscripten_env
-
-            setup_emscripten_env()
-            if _fast_emar:
-                subprocess.run(
-                    [_fast_emar, "r", str(library_archive), str(pch_shared_o)],
-                    cwd=str(PROJECT_ROOT),
-                    check=False,
-                )
-
     sketch_pch_hash_path.write_text(current_hash, encoding="utf-8")
-    print("[WASM] Sketch PCH built successfully")
-    return sketch_pch_path
+    print("[WASM] Sketch header unit built successfully")
+    return sketch_pcm_path
 
 
 def _parse_clang_from_verbose(stderr_text: str) -> list[str] | None:
@@ -527,18 +505,12 @@ def compile_sketch(
         f"-I{PROJECT_ROOT / 'src' / 'platforms' / 'wasm' / 'compiler'}",
     ]
 
-    # PCH usage: prefer sketch-specific PCH (compiled with sketch flags),
-    # fall back to library PCH (Meson places it under ci/meson/wasm/)
-    sketch_pch_path = build_dir / "sketch_pch.h.pch"
-    lib_pch_path = build_dir / "ci" / "meson" / "wasm" / "wasm_pch.h.pch"
-    pch_path = sketch_pch_path if sketch_pch_path.exists() else lib_pch_path
+    # Header unit usage: use the .pcm BMI built by build_sketch_pch()
+    sketch_pcm_path = build_dir / "wasm_pch.h.pcm"
     pch_args = []
-    if pch_path.exists():
+    if sketch_pcm_path.exists():
         pch_args = [
-            "-include-pch",
-            str(pch_path),
-            "-Werror=invalid-pch",
-            "-fpch-validate-input-files-content",
+            f"-fmodule-file={sketch_pcm_path}",
         ]
 
     emcc_args = (

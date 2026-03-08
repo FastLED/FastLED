@@ -54,7 +54,7 @@ defines = [
 # Core compiler flags that control compilation behavior
 compiler_flags = [
     # Language Standard and Compatibility
-    "-std=gnu++17",                             # Use GNU C++17 standard with extensions
+    "-std=c++20",                               # Use C++20 standard (enables header unit imports)
     "-fpermissive",                             # Allow some non-conforming code patterns
     
     # Warning Configuration
@@ -70,8 +70,8 @@ compiler_flags = [
     "-fno-exceptions",                         # Disable C++ exceptions for all targets (size/performance)
     "-fno-rtti",                              # Disable RTTI for all targets (size/performance, consistent)
     
-    # Thin PCH Support (Emscripten/Clang feature)
-    "-fpch-instantiate-templates",            # Required for proper Thin PCH template handling
+    # C++20 Header Unit Support
+    "-Wno-experimental-header-units",         # Suppress experimental header unit warning
 ]
 
 # Include directory flags (paths added dynamically by build system)

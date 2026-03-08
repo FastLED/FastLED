@@ -5,28 +5,25 @@
 // ok no namespace fl
 
 // ============================================================================
-// PRECOMPILED HEADER FOR WASM BUILDS
+// HEADER UNIT SOURCE FOR WASM BUILDS (C++20)
 // ============================================================================
-// This file is compiled once and shared across all WASM compilation units
-// (library and sketches) to significantly speed up compilation. It includes
-// commonly used headers that rarely change.
+// This file is compiled as a C++20 header unit (.pcm BMI) and shared across
+// all WASM sketch compilations. Header units are ~2x faster than traditional
+// PCH because the BMI encodes semantic info (types, templates) in compact
+// binary form instead of replaying a token stream.
 //
-// Key Design Principles:
-// - Include only headers used by >80% of compilation units
-// - Keep PCH size reasonable (target < 50MB)
-// - Avoid platform-specific headers except WASM itself
-// - Must be compatible with all build modes (debug, release, etc.)
+// Usage:
+//   Build:  emcc -fmodule-header=user wasm_pch.h -o wasm_pch.h.pcm
+//   Sketch: import "wasm_pch.h";  // in wrapper, before #include "sketch.ino"
 //
-// PCH Invalidation:
-// This PCH is automatically rebuilt when:
+// The library build (Meson) still uses this as a traditional PCH.
+// Only sketch compilation uses the header unit path.
+//
+// Invalidation:
+// The header unit BMI is automatically rebuilt when:
 // - This header file content changes
 // - Compiler flags change (from build_flags.toml)
-// - Emscripten version changes
-//
-// Performance Impact:
-// - PCH build time: ~3 seconds (one-time cost)
-// - Incremental build speedup: 80%+ for sketch-only changes
-// - Saves ~986 header dependencies from being reparsed each build
+// - Source fingerprint changes
 // ============================================================================
 
 // ============================================================================
@@ -74,9 +71,8 @@
 // ============================================================================
 // FX HEADERS
 // ============================================================================
-// With -fpch-codegen, the codegen cost of these headers is paid once (in
-// pch_shared.o) rather than in every sketch. This eliminates the previous
-// penalty where adding headers bloated every sketch's backend time.
+// With C++20 header units, these headers are parsed once into the BMI.
+// Sketches that import this header unit get fx types without re-parsing.
 #include "fl/fx/fx2d.h"
 #include "fl/fx/fx2d_to_1d.h"
 #include "fl/fx/fx_engine.h"
