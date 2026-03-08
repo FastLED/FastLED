@@ -72,6 +72,18 @@
 #include "fl/warn.h"         // FL_WARN macro for warnings
 
 // ============================================================================
+// FX HEADERS
+// ============================================================================
+// With -fpch-codegen, the codegen cost of these headers is paid once (in
+// pch_shared.o) rather than in every sketch. This eliminates the previous
+// penalty where adding headers bloated every sketch's backend time.
+#include "fl/fx/fx2d.h"
+#include "fl/fx/fx2d_to_1d.h"
+#include "fl/fx/fx_engine.h"
+#include "fl/screenmap.h"
+#include "fl/fx/2d/animartrix.hpp"
+
+// ============================================================================
 // NOTES
 // ============================================================================
 //

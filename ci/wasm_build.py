@@ -303,6 +303,7 @@ def build_sketch_pch(
         + meson_defaults
         + sketch_flags
         + includes
+        + ["-fpch-codegen"]  # Generate shared code in separate .o
     )
 
     if verbose:
@@ -313,6 +314,16 @@ def build_sketch_pch(
     if rc != 0:
         print("[WASM] Sketch PCH build failed")
         return None
+
+    # Compile PCH to shared object (contains codegen from PCH headers)
+    pch_shared_o = build_dir / "pch_shared.o"
+    rc = run_emcc(
+        ["-c", str(sketch_pch_path), "-o", str(pch_shared_o), "-O0", "-g0"],
+        cwd=str(PROJECT_ROOT),
+    )
+    if rc != 0:
+        print("[WASM] PCH shared object build failed, continuing without -fpch-codegen")
+        pch_shared_o.unlink(missing_ok=True)
 
     sketch_pch_hash_path.write_text(current_hash, encoding="utf-8")
     print("[WASM] Sketch PCH built successfully")
@@ -679,6 +690,16 @@ def _fast_link(
         arg = arg.replace("{output_wasm}", str(cached_wasm))
         cmd.append(arg)
 
+    # Insert pch_shared.o right after sketch_object (for -fpch-codegen)
+    pch_shared_o = build_dir / "pch_shared.o"
+    if pch_shared_o.exists():
+        # Find sketch_object in cmd and insert pch_shared.o after it
+        sketch_str = str(sketch_object)
+        for i, arg in enumerate(cmd):
+            if arg == sketch_str:
+                cmd.insert(i + 1, str(pch_shared_o))
+                break
+
     if verbose:
         print(f"[WASM] Fast link cmd: {cmd}")
 
@@ -756,8 +777,14 @@ def link_wasm(
         f"-I{PROJECT_ROOT / 'src' / 'platforms' / 'wasm' / 'compiler'}",
     ]
 
+    # Include pch_shared.o for -fpch-codegen if it exists
+    pch_shared_o = build_dir / "pch_shared.o"
+    pch_objects = [str(pch_shared_o)] if pch_shared_o.exists() else []
+
     emcc_args = (
-        [str(sketch_object), str(library_archive)]
+        [str(sketch_object)]
+        + pch_objects
+        + [str(library_archive)]
         + includes
         + [f"--js-library={js_library}"]
         + ["-o", str(cached_js)]
