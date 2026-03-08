@@ -371,6 +371,11 @@ def _parse_clang_from_verbose(stderr_text: str) -> list[str] | None:
     We look for the clang invocation that has -c (compile mode).
     """
     import shlex
+    import sys
+
+    # On Windows, use posix=False so backslash paths aren't treated as escape chars.
+    # posix=False preserves literal quotes in tokens — strip them afterwards.
+    posix = sys.platform != "win32"
 
     for line in stderr_text.splitlines():
         stripped = line.strip()
@@ -379,9 +384,11 @@ def _parse_clang_from_verbose(stderr_text: str) -> list[str] | None:
         parts = stripped.split()
         if parts and "clang" in parts[0].lower() and "-c" in parts:
             try:
-                # Always use posix=True for consistent parsing.
-                # emcc verbose output uses shell-escaped paths on all platforms.
-                return shlex.split(stripped)
+                tokens = shlex.split(stripped, posix=posix)
+                if not posix:
+                    # posix=False keeps outer quotes on tokens — strip them
+                    tokens = [t.strip("'\"") for t in tokens]
+                return tokens
             except ValueError:
                 continue
     return None
@@ -436,7 +443,13 @@ def _fast_compile(
     if verbose:
         print(f"[WASM] Fast compile cmd: {cmd[:3]}...({len(cmd)} args)")
 
-    result = subprocess.run(cmd, cwd=str(PROJECT_ROOT))
+    try:
+        result = subprocess.run(cmd, cwd=str(PROJECT_ROOT))
+    except OSError:
+        # Executable not found (e.g. stale cache with bad path) — fall back
+        cache_file.unlink(missing_ok=True)
+        cache_key_file.unlink(missing_ok=True)
+        return False
     if result.returncode != 0:
         # Cache might be stale — delete it so next run recaptures
         cache_file.unlink(missing_ok=True)
@@ -587,6 +600,11 @@ def _parse_wasm_ld_from_verbose(stderr_text: str) -> list[str] | None:
       /path/to/wasm-ld.exe arg1 arg2 ...
     """
     import shlex
+    import sys
+
+    # On Windows, use posix=False so backslash paths aren't treated as escape chars.
+    # posix=False preserves literal quotes in tokens — strip them afterwards.
+    posix = sys.platform != "win32"
 
     for line in stderr_text.splitlines():
         stripped = line.strip()
@@ -595,9 +613,11 @@ def _parse_wasm_ld_from_verbose(stderr_text: str) -> list[str] | None:
         # emcc verbose output prefixes commands with a space
         if "wasm-ld" in stripped.split()[0] if stripped.split() else False:
             try:
-                # Always use posix=True for consistent parsing.
-                # emcc verbose output uses shell-escaped paths on all platforms.
-                return shlex.split(stripped)
+                tokens = shlex.split(stripped, posix=posix)
+                if not posix:
+                    # posix=False keeps outer quotes on tokens — strip them
+                    tokens = [t.strip("'\"") for t in tokens]
+                return tokens
             except ValueError:
                 continue
     return None
@@ -725,7 +745,12 @@ def _fast_link(
         print(f"[WASM] Fast link cmd: {cmd}")
 
     print("[WASM] Fast linking (wasm-ld only)...")
-    result = subprocess.run(cmd, cwd=str(PROJECT_ROOT))
+    try:
+        result = subprocess.run(cmd, cwd=str(PROJECT_ROOT))
+    except OSError:
+        # Executable not found (e.g. stale cache with bad path) — fall back
+        cache_file.unlink(missing_ok=True)
+        return False
     if result.returncode != 0:
         print("[WASM] Fast link failed, falling back to full emcc link")
         return False

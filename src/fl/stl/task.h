@@ -134,11 +134,12 @@ class TaskCoroutine;  // IWYU pragma: keep
 
 /// @brief Configuration for OS-level coroutine tasks
 struct CoroutineConfig {
+    fl::optional<TracePoint> trace;  // where this object was created, optional.
     fl::function<void()> function;
     fl::string name = "task";
     size_t stack_size = 4096;
     u8 priority = 5;
-    fl::optional<TracePoint> trace;
+    fl::optional<int> core_id;  ///< Pin task to specific CPU core (ESP32 and other dual cores in the future)
 };
 
 /// @brief Task handle with fluent API

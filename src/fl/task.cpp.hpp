@@ -35,8 +35,8 @@ class TaskCoroutine {
 public:
     using TaskFunction = fl::function<void()>;
 
-    TaskCoroutine(fl::string name, TaskFunction function, size_t stack_size = 4096, u8 priority = 5)
-        : mImpl(platforms::createTaskCoroutine(fl::move(name), fl::move(function), stack_size, priority)) {
+    TaskCoroutine(fl::string name, TaskFunction function, size_t stack_size = 4096, u8 priority = 5, int core_id = -1)
+        : mImpl(platforms::createTaskCoroutine(fl::move(name), fl::move(function), stack_size, priority, core_id)) {
     }
 
     ~TaskCoroutine() = default;
@@ -206,7 +206,8 @@ public:
     CoroutineTask(const CoroutineConfig& config)
         : mTaskId(next_task_id())
         , mTraceLabel(config.trace ? make_unique<string>(make_trace_label(*config.trace)) : nullptr)
-        , mCoroutine(make_unique<TaskCoroutine>(config.name, config.function, config.stack_size, config.priority)) {}
+        , mCoroutine(make_unique<TaskCoroutine>(config.name, config.function, config.stack_size, config.priority,
+                                                 config.core_id.has_value() ? config.core_id.value() : -1)) {}
 
     void set_then(function<void()>) override { /* Coroutine tasks don't use then */ }
     void set_catch(function<void(const Error&)>) override { /* Coroutine tasks don't use catch */ }

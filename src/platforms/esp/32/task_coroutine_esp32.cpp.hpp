@@ -58,7 +58,8 @@ static void taskWrapperFunction(void* arg) {
 TaskCoroutineESP32::TaskCoroutineESP32(fl::string name,
                                        TaskFunction function,
                                        size_t stack_size,
-                                       u8 priority)
+                                       u8 priority,
+                                       int core_id)
     : mHandle(nullptr)
     , mName(fl::move(name))
     , mContext(nullptr) {
@@ -73,13 +74,27 @@ TaskCoroutineESP32::TaskCoroutineESP32(fl::string name,
     // ESP32 uses 32-bit words (4 bytes per word)
     const size_t stack_words = stack_size / sizeof(u32);
 
-    BaseType_t result = xTaskCreate(
-        taskWrapperFunction,
-        mName.c_str(),
-        stack_words,
-        ctx,       // Pass context as user_data
-        priority,
-        &handle);
+    BaseType_t result;
+    if (core_id >= 0) {
+        // Pin task to specific CPU core
+        result = xTaskCreatePinnedToCore(
+            taskWrapperFunction,
+            mName.c_str(),
+            stack_words,
+            ctx,       // Pass context as user_data
+            priority,
+            &handle,
+            core_id);
+    } else {
+        // No core affinity - let FreeRTOS scheduler decide
+        result = xTaskCreate(
+            taskWrapperFunction,
+            mName.c_str(),
+            stack_words,
+            ctx,       // Pass context as user_data
+            priority,
+            &handle);
+    }
 
     if (result != pdPASS) {
         FL_WARN("TaskCoroutineESP32: Failed to create task '" << mName << "'");
@@ -133,8 +148,9 @@ bool TaskCoroutineESP32::isRunning() const {
 ITaskCoroutine* createTaskCoroutine(fl::string name,
                                      ITaskCoroutine::TaskFunction function,
                                      size_t stack_size,
-                                     u8 priority) {
-    return new TaskCoroutineESP32(fl::move(name), fl::move(function), stack_size, priority);  // ok bare allocation
+                                     u8 priority,
+                                     int core_id) {
+    return new TaskCoroutineESP32(fl::move(name), fl::move(function), stack_size, priority, core_id);  // ok bare allocation
 }
 
 //=============================================================================
