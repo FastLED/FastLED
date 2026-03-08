@@ -399,6 +399,11 @@ def _parse_wasm_ld_from_verbose(stderr_text: str) -> list[str] | None:
       /path/to/wasm-ld.exe arg1 arg2 ...
     """
     import shlex
+    import sys
+
+    # On Windows, use posix=False so backslash paths aren't treated as
+    # escape sequences (shlex defaults to POSIX shell parsing).
+    posix = sys.platform != "win32"
 
     for line in stderr_text.splitlines():
         stripped = line.strip()
@@ -407,7 +412,7 @@ def _parse_wasm_ld_from_verbose(stderr_text: str) -> list[str] | None:
         # emcc verbose output prefixes commands with a space
         if "wasm-ld" in stripped.split()[0] if stripped.split() else False:
             try:
-                return shlex.split(stripped)
+                return shlex.split(stripped, posix=posix)
             except ValueError:
                 continue
     return None
