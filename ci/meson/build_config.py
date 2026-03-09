@@ -42,101 +42,64 @@ class CleanupResult:
     failed_files: list[str]
 
 
+def _ensure_native_launcher(project_root: Path) -> tuple[Optional[str], Optional[str]]:
+    """
+    Ensure ctc-clang/ctc-clang++ native launchers are compiled.
+
+    The native launcher is a compiled C++ binary that replaces the Python
+    clang-tool-chain wrapper with near-zero startup overhead (~34ms vs ~1200ms).
+    It auto-detects the platform, finds the clang installation, and adds all
+    necessary flags (--target, --sysroot, -stdlib, includes, etc.) automatically.
+
+    Returns:
+        Tuple of (ctc_clang_path, ctc_clangpp_path), or (None, None) on failure.
+    """
+    output_dir = project_root / ".cached" / "clang-native"
+    exe_suffix = ".exe" if sys.platform == "win32" else ""
+    ctc_clang = output_dir / f"ctc-clang{exe_suffix}"
+    ctc_clangpp = output_dir / f"ctc-clang++{exe_suffix}"
+
+    if ctc_clang.exists() and ctc_clangpp.exists():
+        return str(ctc_clang), str(ctc_clangpp)
+
+    try:
+        from clang_tool_chain.commands.compile_native import compile_native
+
+        output_dir.mkdir(parents=True, exist_ok=True)
+        rc = compile_native(str(output_dir))
+        if rc == 0 and ctc_clang.exists() and ctc_clangpp.exists():
+            return str(ctc_clang), str(ctc_clangpp)
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+    except Exception:
+        pass
+    return None, None
+
+
 def _resolve_fast_native_entries(
     use_sccache: bool,
-    is_windows: bool,
 ) -> tuple[Optional[str], Optional[str], Optional[str]]:
     """
-    Resolve raw compiler binaries + flags for the Meson native file.
+    Resolve native launcher binaries for the Meson native file.
 
-    Instead of using Python entry point wrappers (clang-tool-chain-cpp.EXE)
-    which have ~828ms Python startup overhead per invocation, this resolves
-    the raw binary paths and constructs the necessary flags directly.
-
-    During Meson setup, the compiler is invoked ~10 times for probes.
-    Using raw binaries saves ~8-20 seconds on Windows.
+    Uses ctc-clang/ctc-clang++ native launchers which handle all platform-
+    specific flags automatically (--target, --sysroot, -stdlib, includes, etc.)
+    with near-zero startup overhead (~34ms vs ~1200ms for Python wrappers).
 
     Returns:
         Tuple of (c_entry, cpp_entry, ar_entry) for the native file,
         or (None, None, None) if resolution fails (falls back to wrappers).
     """
     try:
-        from clang_tool_chain.platform.detection import get_platform_info
         from clang_tool_chain.platform.paths import (
             find_sccache_binary,
             find_tool_binary,
-            get_platform_binary_dir,
         )
     except ImportError:
         return None, None, None
 
     try:
-        platform_name, arch = get_platform_info()  # noqa: F841
-        clang_path = str(find_tool_binary("clang"))
-        clangxx_path = str(find_tool_binary("clang++"))
         ar_path = str(find_tool_binary("llvm-ar"))
-
-        # Build platform-specific flags
-        flags: list[str] = []
-
-        if is_windows:
-            # Windows needs GNU ABI flags (same as clang-tool-chain wrapper)
-            clang_bin_dir = get_platform_binary_dir()
-            clang_root = clang_bin_dir.parent
-
-            if arch == "x86_64":
-                target = "x86_64-w64-windows-gnu"
-                sysroot_name = "x86_64-w64-mingw32"
-            elif arch in ("arm64", "aarch64"):
-                target = "aarch64-w64-windows-gnu"
-                sysroot_name = "aarch64-w64-mingw32"
-            else:
-                return None, None, None
-
-            sysroot_path = clang_root / sysroot_name
-            if not sysroot_path.exists():
-                return None, None, None
-
-            cxx_include_path = clang_root / "include" / "c++" / "v1"
-            mingw_include_path = clang_root / "include"
-
-            # Find resource directory (lib/clang/<version>)
-            resource_dir = None
-            resource_include_path = None
-            clang_lib_dir = clang_root / "lib" / "clang"
-            if clang_lib_dir.exists():
-                version_dirs = [d for d in clang_lib_dir.iterdir() if d.is_dir()]
-                if version_dirs:
-                    resource_dir = version_dirs[0]
-                    ri = resource_dir / "include"
-                    if ri.exists():
-                        resource_include_path = ri
-
-            flags.extend(
-                [
-                    f"--target={target}",
-                    f"--sysroot={sysroot_path}",
-                    "-stdlib=libc++",
-                    f"-I{cxx_include_path}",
-                ]
-            )
-            if resource_include_path:
-                flags.append(f"-I{resource_include_path}")
-            if resource_dir:
-                flags.append(f"-resource-dir={resource_dir}")
-            flags.append(f"-isystem{mingw_include_path}")
-
-            # Link-time flags (clang ignores these for -c compile-only operations)
-            flags.extend(
-                [
-                    "-rtlib=compiler-rt",
-                    "-fuse-ld=lld",
-                    "--unwindlib=libunwind",
-                    "-static-libgcc",
-                    "-static-libstdc++",
-                    "-lpthread",
-                ]
-            )
 
         # Resolve sccache binary
         sccache_str: Optional[str] = None
@@ -148,21 +111,19 @@ def _resolve_fast_native_entries(
             except Exception:
                 pass
 
-        # Build native file entries as Meson array strings
-        def _make_entry(binary: str, extra_flags: list[str]) -> str:
+        project_root = Path(__file__).resolve().parent.parent.parent
+        ctc_c, ctc_cpp = _ensure_native_launcher(project_root)
+        if ctc_c is None or ctc_cpp is None:
+            return None, None, None
+
+        def _make_entry(binary: str) -> str:
             parts: list[str] = []
             if sccache_str:
                 parts.append(f"'{sccache_str}'")
             parts.append(f"'{binary}'")
-            for f in extra_flags:
-                parts.append(f"'{f}'")
             return "[" + ", ".join(parts) + "]"
 
-        c_entry = _make_entry(clang_path, flags)
-        cpp_entry = _make_entry(clangxx_path, flags)
-        ar_entry = f"['{ar_path}']"
-
-        return c_entry, cpp_entry, ar_entry
+        return _make_entry(ctc_c), _make_entry(ctc_cpp), f"['{ar_path}']"
 
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
@@ -1524,19 +1485,10 @@ def setup_meson_build(
     # When Meson regenerates (e.g., when ninja detects meson.build changes),
     # environment variables are lost. Native file ensures tools are configured.
     try:
-        # PERFORMANCE OPTIMIZATION: Use raw compiler binaries + flags in native file
-        # instead of Python entry point wrappers (clang-tool-chain-cpp.EXE).
-        #
-        # Python wrappers have ~828ms startup overhead per invocation on Windows.
-        # Meson invokes the compiler ~10 times during setup (host + build detection).
-        # Using raw binaries saves ~8-20 seconds during Meson setup.
-        #
-        # The native file embeds: ['sccache', 'clang++', '--target=...', flags...]
-        # Meson natively recognizes sccache as a compiler wrapper and handles it
-        # correctly during probes (skipping sccache for --version checks).
-        fast_c, fast_cpp, fast_ar = _resolve_fast_native_entries(
-            use_sccache, is_windows
-        )
+        # Use ctc-clang/ctc-clang++ native launchers instead of Python wrappers.
+        # Native launchers handle all platform flags automatically with ~34ms
+        # startup vs ~1200ms for Python wrappers.
+        fast_c, fast_cpp, fast_ar = _resolve_fast_native_entries(use_sccache)
         if fast_c is not None:
             c_compiler = fast_c
             cpp_compiler = fast_cpp

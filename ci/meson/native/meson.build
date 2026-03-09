@@ -190,7 +190,7 @@ is_windows = build_machine.system() == 'windows'
 cpp_cmd_array = cpp_compiler.cmd_array()
 is_clang_tool_chain_wrapper = false
 foreach cmd_part : cpp_cmd_array
-  if cmd_part.contains('clang-tool-chain-cpp') or cmd_part.contains('clang-tool-chain-sccache-cpp') or cmd_part.contains('clang-tool-chain-c')
+  if cmd_part.contains('clang-tool-chain-cpp') or cmd_part.contains('clang-tool-chain-sccache-cpp') or cmd_part.contains('clang-tool-chain-c') or cmd_part.contains('ctc-clang')
     is_clang_tool_chain_wrapper = true
   endif
 endforeach

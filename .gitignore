@@ -6,6 +6,7 @@ components/
 
 # Build outputs
 .build/
+.cached/
 .profile-results/
 build/
 out/
