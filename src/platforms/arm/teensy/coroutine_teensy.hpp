@@ -7,6 +7,7 @@
 ///
 /// Contains ARM Cortex-M7 context switching, cooperative coroutine platform/runtime,
 /// task coroutine, and factory functions.
+/// This file must only be included from a single aggregate (.cpp.hpp).
 
 #include "platforms/arm/teensy/is_teensy.h"
 
@@ -24,10 +25,6 @@
 #include "fl/singleton.h"
 #include "fl/warn.h"
 #include "fl/arduino.h"
-// IWYU pragma: end_keep
-
-// IWYU pragma: begin_keep
-#include <imxrt.h>  // __get_IPSR() — detect handler mode
 // IWYU pragma: end_keep
 
 // IWYU pragma: begin_keep
@@ -246,7 +243,9 @@ void CoroutinePlatformTeensy::contextSwitch(void* from_ctx, void* to_ctx) {
 }
 
 bool CoroutinePlatformTeensy::inInterruptContext() const {
-    return __get_IPSR() != 0;
+    fl::u32 ipsr;
+    __asm__ volatile("MRS %0, ipsr" : "=r"(ipsr));
+    return ipsr != 0;
 }
 
 bool CoroutinePlatformTeensy::checkStackHealth(void* ctx) const {

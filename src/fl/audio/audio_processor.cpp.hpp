@@ -1,4 +1,5 @@
 #include "fl/audio/audio_processor.h"
+#include "fl/stl/weak_ptr.h"
 #include "fl/audio/input.h"
 #include "fl/audio/detectors/beat.h"
 #include "fl/audio/detectors/frequency_bands.h"
