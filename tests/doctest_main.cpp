@@ -47,7 +47,7 @@
 #include "timeout_watchdog.h"
 #endif
 
-#include "platforms/coroutine.h"
+#include "platforms/stub/coroutine_stub.h"  // for cleanup_coroutine_threads(), CoroutineRunner
 #include "platforms/esp/32/drivers/parlio/parlio_peripheral_mock.h"
 #include "fl/stl/cstdlib.h"
 #include "fl/stl/shared_ptr.h"

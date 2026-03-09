@@ -21,6 +21,9 @@ TESTS_DIR: Path = Path(__file__).parent.resolve()
 EXCLUDED_TEST_FILES: set[Path] = {
     TESTS_DIR / "doctest_main.cpp",
     TESTS_DIR
+    / "misc"
+    / "coroutine_impl.cpp",  # Compiled into test_shared_objs, not a test
+    TESTS_DIR
     / "fx"
     / "profile_chasing_spirals.cpp",  # Standalone profiling binary, not a test
     TESTS_DIR

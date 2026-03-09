@@ -19,6 +19,7 @@
 #include "fl/stl/weak_ptr.h"
 #include "fl/stl/queue.h"
 #include "fl/stl/unique_ptr.h"
+#include "fl/stl/thread_local.h"
 // IWYU pragma: end_keep
 
 namespace fl {
@@ -276,6 +277,15 @@ bool is_shutdown_requested() {
 }
 
 //=============================================================================
+// Thread-local coroutine context — lets exitCurrent() find its context
+//=============================================================================
+
+fl::detail::CoroutineContext*& runningStubCoroutineContext() {
+    static fl::ThreadLocal<fl::detail::CoroutineContext*> tl(nullptr);  // okay static in header
+    return tl.access();
+}
+
+//=============================================================================
 // TaskCoroutineStubImpl
 //=============================================================================
 
@@ -312,12 +322,21 @@ public:
             // Phase 1: signal "started"
             main_sema.release();
 
+            // Set thread-local so exitCurrent() can find this context
+            runningStubCoroutineContext() = ctx_shared.get();
+
             // Execute user function
             func();
 
+            // Clear thread-local
+            runningStubCoroutineContext() = nullptr;
+
             // Mark completed and signal "done"
-            ctx_shared->set_completed(true);
-            main_sema.release();
+            // (skipped if exitCurrent() already did this)
+            if (!ctx_shared->is_completed()) {
+                ctx_shared->set_completed(true);
+                main_sema.release();
+            }
         });
 
 #ifdef TEST_DLL_MODE
@@ -367,15 +386,24 @@ TaskCoroutinePtr TaskCoroutineStub::create(fl::string name,
 }
 
 TaskCoroutinePtr createTaskCoroutine(fl::string name,
-                                      ITaskCoroutine::TaskFunction function,
+                                      ICoroutineTask::TaskFunction function,
                                       size_t stack_size,
                                       u8 priority,
                                       int /*core_id*/) {
     return TaskCoroutineStub::create(fl::move(name), fl::move(function), stack_size, priority);
 }
 
-void ITaskCoroutine::exitCurrent() {
-    // On host, just return to end the thread function
+void ICoroutineTask::exitCurrent() {
+    auto* ctx = runningStubCoroutineContext();
+    if (ctx) {
+        ctx->set_completed(true);
+        // Signal "done" to unblock the main thread's second acquire()
+        fl::detail::CoroutineRunner::instance().get_main_thread_semaphore().release();
+    }
+    // Block forever — thread will be joined during cleanup
+    while (true) {
+        fl::this_thread::sleep_for(fl::chrono::seconds(1)); // ok sleep for
+    }
 }
 
 } // namespace platforms

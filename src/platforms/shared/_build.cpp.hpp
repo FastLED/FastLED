@@ -15,7 +15,6 @@
 #include "platforms/shared/spi_hw_8.cpp.hpp"
 #include "platforms/shared/spi_transposer.cpp.hpp"
 #include "platforms/shared/spi_types.cpp.hpp"
-#include "platforms/shared/task_coroutine_null.cpp.hpp"
 
 // Subdirectory implementations (alphabetical order)
 #include "platforms/shared/active_strip_data/_build.cpp.hpp"

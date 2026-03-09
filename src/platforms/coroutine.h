@@ -2,29 +2,43 @@
 #pragma once
 
 /// @file platforms/coroutine.h
-/// @brief Platform dispatch for OS-level coroutine/task support
+/// @brief Coroutine system interfaces — all declarations, no implementations
 ///
-/// This header provides a unified interface to platform-specific OS task/thread
-/// management. It dispatches to the appropriate platform implementation based
-/// on compile-time platform detection.
-///
-/// Supported platforms:
-/// - ESP32: FreeRTOS tasks via coroutine_esp32.hpp
-/// - Host/Stub: std::thread implementation via coroutine_stub.h (for testing)
-/// - Teensy: Cooperative context switching via coroutine_teensy.hpp (aggregate only)
-/// - Other: Null implementation (no-op) via itask_coroutine.h
-///
-/// Platform implementations are compiled via coroutine_runtime.cpp.hpp (aggregate).
-/// This header only provides the interface declarations needed by callers.
+/// This is the single entry point for coroutine interfaces.
+/// Consumers include this header; implementations are in coroutine.cpp.hpp.
 
-#if defined(ESP32)
-    // ESP32: FreeRTOS task implementation
-    #include "platforms/esp/32/coroutine_esp32.hpp"
-#elif defined(FASTLED_STUB_IMPL)
-    // Host/Stub: std::thread implementation for testing
-    #include "platforms/stub/coroutine_stub.h"
-#else
-    // All other platforms (including Teensy): interface-only
-    // Implementations are compiled via the aggregate (coroutine_runtime.cpp.hpp)
-    #include "platforms/itask_coroutine.h"
-#endif
+#include "fl/stl/string.h"
+#include "fl/stl/function.h"
+#include "fl/stl/unique_ptr.h"
+
+#include "platforms/coroutine_runtime.h"
+
+namespace fl {
+namespace platforms {
+
+//=============================================================================
+// ICoroutineTask - Interface for platform-specific task implementations
+//=============================================================================
+
+class ICoroutineTask {
+public:
+    using TaskFunction = fl::function<void()>;
+
+    virtual ~ICoroutineTask() = default;
+    virtual void stop() = 0;
+    virtual bool isRunning() const = 0;
+    static void exitCurrent();  // Platform-specific static method
+};
+
+/// @brief Owning smart pointer for task coroutines
+using TaskCoroutinePtr = fl::unique_ptr<ICoroutineTask>;
+
+// Factory function provided by each platform implementation
+TaskCoroutinePtr createTaskCoroutine(fl::string name,
+                                      ICoroutineTask::TaskFunction function,
+                                      size_t stack_size,
+                                      u8 priority,
+                                      int core_id = -1);
+
+} // namespace platforms
+} // namespace fl

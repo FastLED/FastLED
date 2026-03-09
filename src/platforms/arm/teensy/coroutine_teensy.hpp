@@ -15,7 +15,7 @@
 
 // IWYU pragma: begin_keep
 #include "platforms/coroutine_runtime.h"
-#include "platforms/itask_coroutine.h"
+#include "platforms/coroutine.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/string.h"
@@ -103,7 +103,7 @@ using CoroutineRunnerTeensy = CoroutineRunner;
 // Task Coroutine
 //=============================================================================
 
-class TaskCoroutineTeensy : public ITaskCoroutine {
+class TaskCoroutineTeensy : public ICoroutineTask {
 public:
     static TaskCoroutinePtr create(fl::string name,
                                     TaskFunction function,
@@ -322,13 +322,14 @@ bool TaskCoroutineTeensy::isRunning() const {
 }
 
 //=============================================================================
-// Factory function — wired into platforms/coroutine.h dispatch
+// Factory function — wired into platforms/coroutine.cpp.hpp dispatch
 //=============================================================================
 
 TaskCoroutinePtr createTaskCoroutine(fl::string name,
-                                      ITaskCoroutine::TaskFunction function,
+                                      ICoroutineTask::TaskFunction function,
                                       size_t stack_size,
-                                      u8 priority) {
+                                      u8 priority,
+                                      int /*core_id*/) {
     return TaskCoroutineTeensy::create(fl::move(name), fl::move(function), stack_size, priority);
 }
 
@@ -336,7 +337,7 @@ TaskCoroutinePtr createTaskCoroutine(fl::string name,
 // Static exitCurrent — suspend back to runner and mark completed
 //=============================================================================
 
-void ITaskCoroutine::exitCurrent() {
+void ICoroutineTask::exitCurrent() {
     CoroutineContext* ctx = CoroutineContext::runningCoroutine();
     if (ctx) {
         ctx->set_should_stop(true);

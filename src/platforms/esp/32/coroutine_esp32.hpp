@@ -14,7 +14,7 @@
 
 // IWYU pragma: begin_keep
 #include "platforms/coroutine_runtime.h"
-#include "platforms/itask_coroutine.h"
+#include "platforms/coroutine.h"
 #include "fl/stl/string.h"
 #include "fl/stl/functional.h"
 #include "fl/stl/atomic.h"
@@ -73,7 +73,7 @@ using UniqueStackBuf = fl::unique_ptr<StackType_t[], HeapCapsDeleter>;
 using UniqueTcb = fl::unique_ptr<StaticTask_t, HeapCapsDeleter>;
 
 /// @brief ESP32 task coroutine using direct FreeRTOS tasks
-class TaskCoroutineESP32 : public ITaskCoroutine {
+class TaskCoroutineESP32 : public ICoroutineTask {
 public:
     static TaskCoroutinePtr create(fl::string name,
                                     TaskFunction function,
@@ -195,13 +195,14 @@ bool TaskCoroutineESP32::isRunning() const {
 }
 
 //=============================================================================
-// Factory function — wired into platforms/coroutine.h dispatch
+// Factory function — wired into platforms/coroutine.cpp.hpp dispatch
 //=============================================================================
 
 TaskCoroutinePtr createTaskCoroutine(fl::string name,
-                                      ITaskCoroutine::TaskFunction function,
+                                      ICoroutineTask::TaskFunction function,
                                       size_t stack_size,
-                                      u8 priority) {
+                                      u8 priority,
+                                      int /*core_id*/) {
     return TaskCoroutineESP32::create(fl::move(name), fl::move(function),
                                       stack_size, priority);
 }
@@ -210,7 +211,7 @@ TaskCoroutinePtr createTaskCoroutine(fl::string name,
 // Static exitCurrent — delete current FreeRTOS task
 //=============================================================================
 
-void ITaskCoroutine::exitCurrent() {
+void ICoroutineTask::exitCurrent() {
     vTaskDelete(nullptr);  // Delete the calling task
     while (true) {}        // Should never reach here
 }

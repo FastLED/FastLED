@@ -303,6 +303,18 @@ flags = [
     "-fuse-ld=wasm-ld",                      # Explicitly use wasm-ld (default, but explicit for clarity)
 
     # Note: No pthreads — WASM runs on a Web Worker, so blocking is fine.
+
+    # JSPI (JavaScript Promise Integration) — enables cooperative coroutines
+    # via engine-level stack management. Unlike asyncify, JSPI requires NO code
+    # transformation and NO function whitelist — zero WASM size overhead.
+    # The engine creates/suspends/resumes stacks natively via WebAssembly.promising.
+    # Supported in Chrome 123+, Firefox (behind flag).
+    #
+    # JSPI_EXPORTS: WASM exports that can transitively call a suspending import
+    # (EM_ASYNC_JS). Any export that reaches contextSwitch → _jspi_context_switch
+    # must be listed. EM_ASYNC_JS imports are handled automatically.
+    "-sJSPI",
+    "-sJSPI_EXPORTS=['main','extern_loop','extern_setup','jspi_run_entry']",
 ]
 
 [linking.sketch]

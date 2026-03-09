@@ -4,7 +4,7 @@
 #include "fl/stl/sstream.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/atomic.h"
-#include "platforms/itask_coroutine.h"
+#include "platforms/coroutine.h"
 
 namespace fl {
 
@@ -57,7 +57,7 @@ public:
     }
 
     static void exitCurrent() {
-        platforms::ITaskCoroutine::exitCurrent();
+        platforms::ICoroutineTask::exitCurrent();
     }
 
 private:
@@ -65,9 +65,6 @@ private:
 };
 
 } // namespace fl
-
-// Platform dispatch for TaskCoroutine inline implementations (outside fl namespace)
-#include "platforms/coroutine.h"  // allow-include-after-namespace
 
 namespace fl {
 

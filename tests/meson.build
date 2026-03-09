@@ -167,7 +167,7 @@ shared_test_cpp_args = test_abs_include_args + unit_test_compile_args + [
 ]
 
 test_shared_objs_lib = static_library('test_shared_objs',
-  ['doctest_main.cpp', 'shared/fl_unittest.cpp', test_pch],
+  ['doctest_main.cpp', 'shared/fl_unittest.cpp', 'misc' / 'coroutine_impl.cpp', test_pch],
   cpp_args: shared_test_cpp_args,
   pic: true,
   install: false

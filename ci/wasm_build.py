@@ -820,14 +820,16 @@ def link_wasm(
             print("[WASM] Link output up-to-date (cached)")
             return True
 
-    # Fast path: reuse cached JS glue + run wasm-ld directly
-    if _fast_link(sketch_object, cached_wasm, build_dir, verbose):
-        _copy_linked_output(sketch_cache_dir, output_js)
-        print(f"[WASM] Output: {output_js}")
-        return True
-
-    # Full emcc link — generates JS glue + wasm, captures wasm-ld command
+    # Fast path: reuse cached JS glue + run wasm-ld directly.
+    # Disabled when asyncify is active — asyncify is a Binaryen pass that
+    # only runs through emcc, not wasm-ld.
     link_flags = get_link_flags(mode)
+    uses_asyncify = any("ASYNCIFY" in f for f in link_flags)
+    if not uses_asyncify:
+        if _fast_link(sketch_object, cached_wasm, build_dir, verbose):
+            _copy_linked_output(sketch_cache_dir, output_js)
+            print(f"[WASM] Output: {output_js}")
+            return True
 
     js_library = (
         PROJECT_ROOT / "src" / "platforms" / "wasm" / "compiler" / "js_library.js"

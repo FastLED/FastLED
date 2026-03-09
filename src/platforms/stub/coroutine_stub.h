@@ -24,7 +24,7 @@
 
 // IWYU pragma: begin_keep
 #include "platforms/coroutine_runtime.h"
-#include "platforms/itask_coroutine.h"
+#include "platforms/coroutine.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/semaphore.h"
 #include "fl/stl/thread.h"
@@ -147,7 +147,7 @@ public:
 /// **Embedded Behavior**: Like embedded systems (ESP32/Arduino), coroutine threads
 /// are "daemon" threads that don't block process exit. Threads are detached but
 /// contexts are tracked via shared_ptr for optional cleanup.
-class TaskCoroutineStub : public ITaskCoroutine {
+class TaskCoroutineStub : public ICoroutineTask {
 public:
     static TaskCoroutinePtr create(fl::string name,
                                     TaskFunction function,
