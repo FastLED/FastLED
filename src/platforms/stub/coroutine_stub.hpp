@@ -369,7 +369,8 @@ TaskCoroutinePtr TaskCoroutineStub::create(fl::string name,
 TaskCoroutinePtr createTaskCoroutine(fl::string name,
                                       ITaskCoroutine::TaskFunction function,
                                       size_t stack_size,
-                                      u8 priority) {
+                                      u8 priority,
+                                      int /*core_id*/) {
     return TaskCoroutineStub::create(fl::move(name), fl::move(function), stack_size, priority);
 }
 
