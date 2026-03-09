@@ -41,3 +41,6 @@
 
 * Header-only neural network library in C++11
   * https://www.reddit.com/r/Cplusplus/comments/1rckwyr/headeronly_neural_network_library_written_in_c11/
+
+* PolarShader - Polar coordinate shader effects
+  * https://github.com/pthomain/PolarShader
