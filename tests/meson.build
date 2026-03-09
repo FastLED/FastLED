@@ -272,7 +272,7 @@ foreach test_name : test_names
     'fl_stl_asio_http_stream_client',    # HTTP stream client test (network I/O)
     'fl_stl_asio_http_stream_server',    # HTTP stream server test
     'fl_stl_asio_http_stream_transport', # HTTP stream transport test
-    'fl_stl_asio_http_test_utils_mock_http' # HTTP mock test utilities
+    'fl_stl_asio_http_test_utils_mock_http', # HTTP mock test utilities
   ]
 
   if test_name in slow_tests

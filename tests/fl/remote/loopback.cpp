@@ -30,30 +30,12 @@ FL_TEST_FILE(FL_FILEPATH) {
 
 using namespace fl;
 
-// Pick a random ephemeral port seeded with the current time to avoid
-// collisions with other test processes or TIME_WAIT sockets.
-static uint16_t randomPort() {
-    uint32_t seed = static_cast<uint32_t>(fl::millis());
-    // Simple LCG — only need a reasonable spread, not crypto quality.
-    seed = seed * 1103515245u + 12345u;
-    // Ephemeral range 49152-65535 (IANA dynamic/private ports)
-    return static_cast<uint16_t>(49152 + (seed % (65535 - 49152 + 1)));
-}
-
 FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
-    // Try random ports seeded with current time until one binds.
-    uint16_t PORT = 0;
-    fl::shared_ptr<HttpStreamServer> server_transport;
-    for (int attempt = 0; attempt < 20; ++attempt) {
-        uint16_t candidate = randomPort();
-        auto st = fl::make_shared<HttpStreamServer>(candidate);
-        if (st->connect()) {
-            PORT = st->port();
-            server_transport = st;
-            break;
-        }
-    }
-    FL_REQUIRE(server_transport);
+    // Use port 0 to let the OS assign an available ephemeral port.
+    // This eliminates port collisions entirely.
+    auto server_transport = fl::make_shared<HttpStreamServer>(0);
+    FL_REQUIRE(server_transport->connect());
+    uint16_t PORT = server_transport->port();
     FL_REQUIRE(PORT != 0);
 
     fl::Remote server_remote(
@@ -73,7 +55,7 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
             server_transport->acceptClients();
             server_transport->update(now);
             server_remote.update(now);
-            fl::this_thread::sleep_for(fl::chrono::milliseconds(1));  // ok sleep for
+            fl::this_thread::sleep_for(fl::chrono::milliseconds(1));  // ok sleep for - inside thread
         }
     });
 
@@ -89,7 +71,7 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
                 connected = true;
                 break;
             }
-            fl::this_thread::sleep_for(fl::chrono::milliseconds(10));  // ok sleep for
+            fl::delay(10);
         }
         FL_REQUIRE(connected);
     }
@@ -124,7 +106,8 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
             break;
         }
 
-        fl::this_thread::sleep_for(fl::chrono::milliseconds(1));  // ok sleep for
+        // Yield enough CPU time for the server thread to process under load
+        fl::delay(5);
     }
 
     // Stop server thread
