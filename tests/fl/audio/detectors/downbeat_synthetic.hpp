@@ -108,7 +108,7 @@ shared_ptr<AudioContext> createMockAudioContext(u32 timestamp, bool isDownbeat,
     auto context = make_shared<AudioContext>(sample);
 
     // Pre-compute FFT so it's available during update
-    context->getFFT(16);
+    context->getFFT16();
 
     return context;
 }

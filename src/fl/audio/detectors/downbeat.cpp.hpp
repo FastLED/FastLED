@@ -48,7 +48,7 @@ void DownbeatDetector::update(shared_ptr<AudioContext> context) {
     // If beat detected, analyze for downbeat
     if (beatDetected) {
         // Get FFT for accent analysis
-        mRetainedFFT = context->getFFT(16);
+        mRetainedFFT = context->getFFT16();
         const FFTBins& fft = *mRetainedFFT;
 
         // Calculate current energy (bass-weighted for accent detection)

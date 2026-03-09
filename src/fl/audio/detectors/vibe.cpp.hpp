@@ -2,6 +2,10 @@
 //
 // Algorithm ported from MilkDrop v2.25c by Ryan Geiss.
 // Three-stage processing: immediate FFT → asymmetric EMA → slow EMA normalization.
+//
+// Uses 3 LINEAR FFT bins that map directly to bass/mid/treb bands.
+// Linear bins at 20-11025 Hz with 3 bins gives ~3668 Hz per bin:
+//   bin 0: 20-3688 Hz (bass), bin 1: 3688-7356 Hz (mid), bin 2: 7356-11025 Hz (treb)
 
 #include "fl/audio/detectors/vibe.h"
 #include "fl/audio/audio_context.h"
@@ -13,23 +17,6 @@ static int sVibeFFTCount = 0;
 int VibeDetector::getPrivateFFTCount() { return sVibeFFTCount; }
 void VibeDetector::resetPrivateFFTCount() { sVibeFFTCount = 0; }
 
-namespace {
-
-// FFT configuration: 64 CQ bins from 20-11025 Hz for good resolution
-// across all 3 bands. The lower half of the spectrum (0-11025 Hz) is
-// divided into 3 equal bands of ~85 linear bins each.
-const int kVibeNumBins = 64;
-const float kVibeFFTMinFreq = 20.0f;
-const float kVibeFFTMaxFreq = 11025.0f;
-
-// Band boundaries (Hz), derived from dividing the lower 256 linear bins
-// (of 512 total) into thirds:
-//   bass: 0 to ~3650 Hz
-//   mid:  ~3650 to ~7350 Hz
-//   treb: ~7350 to ~11025 Hz
-const float kVibeBandBounds[4] = {20.0f, 3650.0f, 7350.0f, 11025.0f};
-
-} // namespace
 
 VibeDetector::VibeDetector()
 {}
@@ -44,58 +31,16 @@ void VibeDetector::update(shared_ptr<AudioContext> context) {
     mFrameCount++;
     mSampleRate = context->getSampleRate();
 
-    // --- Step 1: Get FFT from shared context (downsampled from master) ---
-    mRetainedFFT = context->getFFT(kVibeNumBins, kVibeFFTMinFreq, kVibeFFTMaxFreq);
-    const FFTBins& fftBins = *mRetainedFFT;
-    sVibeFFTCount++;  // Diagnostic counter (no private FFT anymore)
+    // --- Step 1: Get 3-band energy from shared context ---
+    BandEnergy energy = context->getBandEnergy();
+    sVibeFFTCount++;
 
     span<const i16> pcm = context->getPCM();
 
-    const int numBins = static_cast<int>(fftBins.raw().size());
-    if (numBins == 0) {
-        return;
-    }
-
-    // --- Step 2: Sum spectrum into 3 bands ---
-    // Sum CQ bins that fall within each frequency range using fractional
-    // overlap, producing a sum (total energy) rather than a weighted average.
-    for (int band = 0; band < 3; band++) {
-        float bandMin = kVibeBandBounds[band];
-        float bandMax = kVibeBandBounds[band + 1];
-        float energy = 0.0f;
-
-        for (int i = 0; i < numBins; i++) {
-            // Compute frequency range for this CQ bin
-            float binLow;
-            float binHigh;
-            if (i == 0) {
-                binLow = kVibeFFTMinFreq;
-            } else {
-                binLow = fftBins.binBoundary(i - 1);
-            }
-            if (i == numBins - 1) {
-                binHigh = kVibeFFTMaxFreq;
-            } else {
-                binHigh = fftBins.binBoundary(i);
-            }
-
-            // Fractional overlap with target band
-            float overlapMin = fl::max(binLow, bandMin);
-            float overlapMax = fl::min(binHigh, bandMax);
-            if (overlapMax <= overlapMin) {
-                continue;
-            }
-
-            float binWidth = binHigh - binLow;
-            if (binWidth <= 0.0f) {
-                continue;
-            }
-            float fraction = (overlapMax - overlapMin) / binWidth;
-            energy += fftBins.raw()[i] * fraction;
-        }
-
-        mImm[band] = energy;
-    }
+    // --- Step 2: Read bass/mid/treb directly ---
+    mImm[0] = energy.bass;
+    mImm[1] = energy.mid;
+    mImm[2] = energy.treb;
 
     // --- Step 3: Temporal blending (MilkDrop v2.25c algorithm) ---
     // Compute effective FPS from audio buffer duration

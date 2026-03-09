@@ -25,7 +25,12 @@ BeatDetector::~BeatDetector() = default;
 void BeatDetector::update(shared_ptr<AudioContext> context) {
     // Use 30 Hz min frequency so bass bins actually cover bass (20-250 Hz).
     // Default fmin (174.6 Hz) misses bass entirely.
-    mRetainedFFT = context->getFFT(16, 30.0f);
+    // CQ_OCTAVE is required here: beat detection relies on bass/treble
+    // discrimination, and LOG_REBIN's rectangular window leaks treble
+    // energy into bass bins (no sidelobe suppression).
+    mRetainedFFT = context->getFFT(16, 30.0f,
+                                   FFT_Args::DefaultMaxFrequency(),
+                                   FFTMode::CQ_OCTAVE);
     const FFTBins& fft = *mRetainedFFT;
     u32 timestamp = context->getTimestamp();
 

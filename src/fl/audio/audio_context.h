@@ -9,6 +9,12 @@
 
 namespace fl {
 
+struct BandEnergy {
+    float bass = 0.0f;
+    float mid = 0.0f;
+    float treb = 0.0f;
+};
+
 class AudioContext {
 public:
     explicit AudioContext(const AudioSample& sample);
@@ -25,9 +31,18 @@ public:
     shared_ptr<const FFTBins> getFFT(
         int bands = 16,
         float fmin = FFT_Args::DefaultMinFrequency(),
-        float fmax = FFT_Args::DefaultMaxFrequency()
+        float fmax = FFT_Args::DefaultMaxFrequency(),
+        FFTMode mode = FFTMode::AUTO
     );
     bool hasFFT() const { return !mFFTCache.empty(); }
+
+    // 3-band energy from 3 linear bins (20-11025 Hz).
+    // bass: 20-3688 Hz, mid: 3688-7356 Hz, treb: 7356-11025 Hz.
+    BandEnergy getBandEnergy();
+
+    // Standard 16-bin FFT (174.6-4698.3 Hz).
+    // Detectors that need 16 bins should use this to share a single cached FFT.
+    shared_ptr<const FFTBins> getFFT16(FFTMode mode = FFTMode::LOG_REBIN);
 
     // ----- FFT History (for temporal analysis) -----
     void setFFTHistoryDepth(int depth);

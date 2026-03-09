@@ -28,6 +28,10 @@
 void _generate_guassian(kiss_fft_scalar window[], int N);
 
 void _generate_center_freqs(float freq[], int bands, float fmin, float fmax){
+    if (bands <= 1) {
+        if (bands == 1) freq[0] = fmin;
+        return;
+    }
     fft_float_t m = FFT_LOG(fmax/fmin);
     for(int i = 0; i < bands; i++) freq[i] = fmin*FFT_EXP(m*i/(bands-1));
 }

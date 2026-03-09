@@ -17,6 +17,8 @@ template <> struct Hash<FFT_Args> {
         h ^= MurmurHash3_x86_32(&key.fmin, sizeof(key.fmin)) * 2246822519u;
         h ^= MurmurHash3_x86_32(&key.fmax, sizeof(key.fmax)) * 3266489917u;
         h ^= MurmurHash3_x86_32(&key.sample_rate, sizeof(key.sample_rate)) * 668265263u;
+        int mode_int = static_cast<int>(key.mode);
+        h ^= MurmurHash3_x86_32(&mode_int, sizeof(mode_int)) * 374761393u;
         return h;
     }
 };
@@ -71,7 +73,7 @@ bool FFT_Args::operator==(const FFT_Args &other) const {
 
     return samples == other.samples && bands == other.bands &&
            fmin == other.fmin && fmax == other.fmax &&
-           sample_rate == other.sample_rate;
+           sample_rate == other.sample_rate && mode == other.mode;
 
     FL_DISABLE_WARNING_POP
 }

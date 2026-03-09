@@ -10,6 +10,16 @@ namespace fl {
 class FFTImpl;
 class AudioSample;  // IWYU pragma: keep
 
+// Controls which algorithm produces the log-spaced (CQ) output bins.
+//   AUTO      — LOG_REBIN for <= 32 bins, CQ_OCTAVE for > 32 bins
+//   LOG_REBIN — Single FFT + geometric bin grouping (~0.15ms on ESP32-S3)
+//   CQ_OCTAVE — Octave-wise Constant-Q Transform (~1-5ms on ESP32-S3)
+enum class FFTMode {
+    AUTO,
+    LOG_REBIN,
+    CQ_OCTAVE
+};
+
 class FFTBins {
     friend class FFTContext;
     friend class AudioContext;
@@ -119,12 +129,15 @@ struct FFT_Args {
     float fmin = DefaultMinFrequency();
     float fmax = DefaultMaxFrequency();
     int sample_rate = DefaultSampleRate();
+    FFTMode mode = FFTMode::AUTO;
 
     FFT_Args(int samples = DefaultSamples(), int bands = DefaultBands(),
              float fmin = DefaultMinFrequency(),
              float fmax = DefaultMaxFrequency(),
-             int sample_rate = DefaultSampleRate())
-        : samples(samples), bands(bands), fmin(fmin), fmax(fmax), sample_rate(sample_rate) {}
+             int sample_rate = DefaultSampleRate(),
+             FFTMode mode = FFTMode::AUTO)
+        : samples(samples), bands(bands), fmin(fmin), fmax(fmax),
+          sample_rate(sample_rate), mode(mode) {}
 
     bool operator==(const FFT_Args &other) const ;
     bool operator!=(const FFT_Args &other) const { return !(*this == other); }

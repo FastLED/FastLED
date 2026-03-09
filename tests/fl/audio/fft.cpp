@@ -38,9 +38,12 @@ FL_TEST_CASE("fft tester 512") {
         buffer[i] = int16_t(32767 * sin_x);
     }
     fl::FFTBins out(16);
-    // fft_unit_test(buffer, &out);
+    // Explicitly use CQ_OCTAVE to match golden values (AUTO would select LOG_REBIN for 16 bins)
     const int samples = n;
-    fl::FFTImpl fft(samples);
+    fl::FFT_Args args(samples, 16, fl::FFT_Args::DefaultMinFrequency(),
+                      fl::FFT_Args::DefaultMaxFrequency(),
+                      fl::FFT_Args::DefaultSampleRate(), fl::FFTMode::CQ_OCTAVE);
+    fl::FFTImpl fft(args);
     fft.run(buffer, &out);
 
     // Test expectations for different precision modes
@@ -93,9 +96,12 @@ FL_TEST_CASE("fft tester 256") {
         buffer.push_back(v);
     }
     fl::FFTBins out(16);
-    // fft_unit_test(buffer, &out);
+    // Explicitly use CQ_OCTAVE to match golden values (AUTO would select LOG_REBIN for 16 bins)
     const int samples = n;
-    fl::FFTImpl fft(samples);
+    fl::FFT_Args args(samples, 16, fl::FFT_Args::DefaultMinFrequency(),
+                      fl::FFT_Args::DefaultMaxFrequency(),
+                      fl::FFT_Args::DefaultSampleRate(), fl::FFTMode::CQ_OCTAVE);
+    fl::FFTImpl fft(args);
     fft.run(buffer, &out);
 
     // Test expectations for different precision modes

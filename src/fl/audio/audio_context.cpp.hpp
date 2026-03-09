@@ -16,6 +16,7 @@ fl::size AudioContext::hashFFTArgs(const FFT_Args& args) {
     fl::memcpy(&fmax_bits, &args.fmax, sizeof(fmax_bits));
     hash = (hash * 31) ^ static_cast<fl::size>(fmin_bits);
     hash = (hash * 31) ^ static_cast<fl::size>(fmax_bits);
+    hash = (hash * 31) ^ static_cast<fl::size>(args.mode);
     return hash;
 }
 
@@ -29,8 +30,8 @@ AudioContext::AudioContext(const AudioSample& sample)
 
 AudioContext::~AudioContext() = default;
 
-shared_ptr<const FFTBins> AudioContext::getFFT(int bands, float fmin, float fmax) {
-    FFT_Args args(mSample.size(), bands, fmin, fmax, mSampleRate);
+shared_ptr<const FFTBins> AudioContext::getFFT(int bands, float fmin, float fmax, FFTMode mode) {
+    FFT_Args args(mSample.size(), bands, fmin, fmax, mSampleRate, mode);
 
     // O(1) cache lookup using hash map
     fl::size argsHash = hashFFTArgs(args);
@@ -86,6 +87,23 @@ shared_ptr<const FFTBins> AudioContext::getFFT(int bands, float fmin, float fmax
     mFFTCacheMap[argsHash] = newIndex;
 
     return bins;
+}
+
+BandEnergy AudioContext::getBandEnergy() {
+    auto fft = getFFT(3, 20.0f, 11025.0f);
+    BandEnergy out;
+    span<const float> lin = fft->linear();
+    if (lin.size() >= 3) {
+        out.bass = lin[0];
+        out.mid = lin[1];
+        out.treb = lin[2];
+    }
+    return out;
+}
+
+shared_ptr<const FFTBins> AudioContext::getFFT16(FFTMode mode) {
+    return getFFT(16, FFT_Args::DefaultMinFrequency(),
+                  FFT_Args::DefaultMaxFrequency(), mode);
 }
 
 void AudioContext::setFFTHistoryDepth(int depth) {

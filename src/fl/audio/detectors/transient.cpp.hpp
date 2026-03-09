@@ -22,7 +22,7 @@ TransientDetector::TransientDetector()
 TransientDetector::~TransientDetector() = default;
 
 void TransientDetector::update(shared_ptr<AudioContext> context) {
-    mRetainedFFT = context->getFFT(16);
+    mRetainedFFT = context->getFFT16();
     const FFTBins& fft = *mRetainedFFT;
     u32 timestamp = context->getTimestamp();
 

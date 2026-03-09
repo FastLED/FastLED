@@ -24,7 +24,7 @@ TempoAnalyzer::TempoAnalyzer()
 TempoAnalyzer::~TempoAnalyzer() = default;
 
 void TempoAnalyzer::update(shared_ptr<AudioContext> context) {
-    mRetainedFFT = context->getFFT(16);
+    mRetainedFFT = context->getFFT16();
     const FFTBins& fft = *mRetainedFFT;
     u32 timestamp = context->getTimestamp();
 

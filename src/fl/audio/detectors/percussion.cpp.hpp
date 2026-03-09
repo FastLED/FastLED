@@ -37,14 +37,14 @@ PercussionDetector::PercussionDetector()
 PercussionDetector::~PercussionDetector() = default;
 
 void PercussionDetector::update(shared_ptr<AudioContext> context) {
-    mRetainedFFT = context->getFFT(16);
+    mRetainedFFT = context->getFFT16(FFTMode::CQ_OCTAVE);
     const FFTBins& fft = *mRetainedFFT;
     u32 timestamp = context->getTimestamp();
 
     // Step 0: Get zero-crossing factor from raw audio sample
     mZeroCrossingFactor = context->getZCF();
 
-    // Step 1: Compute spectral features from 16-bin CQ FFT
+    // Step 1: Compute spectral features from 16-bin FFT
     computeFeatures(fft);
 
     // Step 2: Compute total energy and onset sharpness via envelope

@@ -153,9 +153,6 @@ private:
     bool mPrevMidSpike = false;
     bool mPrevTrebSpike = false;
 
-    // Retained FFT from context (keeps shared_ptr alive during update)
-    shared_ptr<const FFTBins> mRetainedFFT;
-
     // FPS-independent rate adjustment
     static float adjustRateToFPS(float rateAtFps1, float fps1, float actualFps);
 };

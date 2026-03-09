@@ -74,7 +74,7 @@ void BackbeatDetector::update(shared_ptr<AudioContext> context) {
     // Process beat if detected
     if (beatDetected) {
         // Get FFT for multi-band analysis
-        mRetainedFFT = context->getFFT(16);
+        mRetainedFFT = context->getFFT16();
         const FFTBins& fft = *mRetainedFFT;
 
         // Calculate multi-band accent
