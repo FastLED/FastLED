@@ -47,7 +47,7 @@ template<>
 inline fl::u8 coordToU8<fl::s16x16>(fl::s16x16 alpha) {
     constexpr fl::s16x16 c255 = fl::s16x16::from_raw(255 * fl::s16x16::SCALE);
     constexpr fl::s16x16 half = fl::s16x16::from_raw(1 << 15);
-    return (fl::u8)fl::clamp((alpha * c255 + half).to_int(), 0, 255);
+    return (fl::u8)fl::clamp((alpha * c255 + half).to_int(), (fl::i32)0, (fl::i32)255);
 }
 
 /// Convert an integer to Coord without float intermediate.
@@ -178,81 +178,141 @@ inline fl::i32 toFixed8<fl::s16x16>(fl::s16x16 val) {
     return static_cast<fl::i32>(val.raw() >> 8);
 }
 
+/// Precompute right-shift and reciprocal multiplier for AA division.
+/// Converts 32-bit AA division: (diff * 255u) / band  (~60 cycles on AVR)
+/// into a multiply-by-reciprocal: ((diff >> shift) * inv) >> 8  (~14 cycles on AVR)
+/// where inv = round(255 * 256 / scaled).
+inline void computeBandShift(fl::i32 band, fl::u8 &shift_out, fl::u16 &inv_out) {
+    fl::u8 sh = 0;
+    fl::u32 tmp = static_cast<fl::u32>(band);
+    while (tmp > 255u) { tmp >>= 1; ++sh; }
+    shift_out = sh;
+    // Reciprocal: (255 * 256 + scaled/2) / scaled — rounds to nearest
+    fl::u8 scaled = static_cast<fl::u8>(tmp);
+    inv_out = static_cast<fl::u16>((65280u + (scaled >> 1)) / scaled);
+}
+
+/// Disc context: bundles per-circle constants into a struct passed by reference.
+/// This reduces function-call overhead on register-poor architectures (AVR: 12 params
+/// → 1 pointer), matching the struct-based approach used in hand-optimized code.
+template<typename PixelT>
+struct DiscCtx {
+    fl::i32 xdelta0;
+    int xmin, xmax;
+    fl::i32 rin2, rout2;
+    fl::u8 band_shift;
+    fl::u16 band_inv;      // reciprocal: (255 * 256 + scaled/2) / scaled
+    PixelT color;
+};
+
+/// Ring context: bundles all per-circle constants into a struct passed by reference.
+/// This reduces function-call overhead on register-poor architectures (AVR: 16 params
+/// → 1 pointer), matching the struct-based approach used in hand-optimized code.
+template<typename PixelT>
+struct RingCtx {
+    fl::i32 xdelta0;
+    int xmin, xmax;
+    fl::i32 ii2, io2, oi2, oo2;
+    fl::u8 inner_shift, outer_shift;
+    fl::u16 inner_inv, outer_inv;  // reciprocals: (255 * 256 + scaled/2) / scaled
+    PixelT color;
+};
+
 /// Render one scanline of a disc using incremental d².
 /// Uses (n+1)² = n² + 2n + 1 identity — zero multiplies in the inner loop.
 /// Phase-based while loops: outside → AA fringe → solid → AA fringe → outside.
+/// AA fringe uses precomputed shift+scaled divisor for cheap 16÷8 division.
 template<typename PixelT>
-inline void renderDiscRow(PixelT* buf, int w, int xmin, int xmax, int py,
-                          fl::i32 d2_row, fl::i32 xdelta0,
-                          fl::i32 rin2, fl::i32 rout2, fl::i32 band,
-                          const PixelT& color) {
-    PixelT* ptr = &buf[py * w + xmin];
+inline void renderDiscRow(PixelT* buf, int w, int py,
+                          fl::i32 d2_row,
+                          const DiscCtx<PixelT>& f) {
+    PixelT* ptr = &buf[py * w + f.xmin];
     fl::i32 d2 = d2_row;
-    fl::i32 xd = xdelta0;
-    int px = xmin;
+    fl::i32 xd = f.xdelta0;
+    int px = f.xmin;
     // Phase 1: Skip outside pixels (left, d2 decreasing)
-    while (px <= xmax && d2 >= rout2) {
+    while (px <= f.xmax && d2 >= f.rout2) {
         d2 += xd; xd += 131072; ++ptr; ++px;
     }
     // Phase 2: Outer AA fringe (left)
-    while (px <= xmax && d2 >= rin2 && d2 < rout2) {
-        fl::u8 br = static_cast<fl::u8>(
-            static_cast<fl::u32>(rout2 - d2) * 255u / static_cast<fl::u32>(band));
-        PixelT c = color; c.nscale8(br); *ptr += c;
+    while (px <= f.xmax && d2 >= f.rin2 && d2 < f.rout2) {
+        fl::u16 diff = static_cast<fl::u16>(static_cast<fl::u32>(f.rout2 - d2) >> f.band_shift);
+        fl::u8 br = static_cast<fl::u8>((diff * f.band_inv) >> 8);
+        PixelT c = f.color; c.nscale8(br); *ptr += c;
         d2 += xd; xd += 131072; ++ptr; ++px;
     }
     // Phase 3: Full brightness interior (d2 hits minimum, then increases)
-    while (px <= xmax && d2 < rin2) {
-        *ptr += color;
+    while (px <= f.xmax && d2 < f.rin2) {
+        *ptr += f.color;
         d2 += xd; xd += 131072; ++ptr; ++px;
     }
     // Phase 4: Outer AA fringe (right, d2 increasing)
-    while (px <= xmax && d2 < rout2) {
-        fl::u8 br = static_cast<fl::u8>(
-            static_cast<fl::u32>(rout2 - d2) * 255u / static_cast<fl::u32>(band));
-        PixelT c = color; c.nscale8(br); *ptr += c;
+    while (px <= f.xmax && d2 < f.rout2) {
+        fl::u16 diff = static_cast<fl::u16>(static_cast<fl::u32>(f.rout2 - d2) >> f.band_shift);
+        fl::u8 br = static_cast<fl::u8>((diff * f.band_inv) >> 8);
+        PixelT c = f.color; c.nscale8(br); *ptr += c;
         d2 += xd; xd += 131072; ++ptr; ++px;
     }
 }
 
-/// Render one scanline of a ring using incremental d² with per-pixel branching.
-/// Classifies each pixel into: outside, outer-AA, solid-band, inner-AA, or hole.
-/// Zero multiplies in the inner loop; only additions and comparisons.
+/// Render one scanline of a ring using incremental d² with phase-based scanning.
+/// Seven sequential while-loops classify pixels into zones without per-pixel branching.
+/// AA fringe uses precomputed shift+scaled divisor for cheap 16÷8 division.
+/// Zones (left to right): outside → outer-AA → solid → inner-AA → hole →
+///                         inner-AA → solid → outer-AA → outside.
 template<typename PixelT>
-inline void renderRingRow(PixelT* buf, int w, int xmin, int xmax, int py,
-                          fl::i32 d2_row, fl::i32 xdelta0,
-                          fl::i32 ii2, fl::i32 io2, fl::i32 oi2, fl::i32 oo2,
-                          fl::i32 inner_band, fl::i32 outer_band,
-                          const PixelT& color) {
-    PixelT* ptr = &buf[py * w + xmin];
+inline void renderRingRow(PixelT* buf, int w, int py,
+                          fl::i32 d2_row,
+                          const RingCtx<PixelT>& g) {
+    PixelT* ptr = &buf[py * w + g.xmin];
     fl::i32 d2 = d2_row;
-    fl::i32 xd = xdelta0;
-    for (int px = xmin; px <= xmax; ++px) {
-        if (d2 < oo2) {
-            if (d2 < ii2) {
-                // Hole — transparent
-            } else if (d2 < io2) {
-                // Inner AA fringe (fading in from hole)
-                if (inner_band > 0) {
-                    fl::u8 br = static_cast<fl::u8>(
-                        static_cast<fl::u32>(d2 - ii2) * 255u /
-                        static_cast<fl::u32>(inner_band));
-                    PixelT c = color; c.nscale8(br); *ptr += c;
-                }
-            } else if (d2 < oi2) {
-                // Full brightness band
-                *ptr += color;
-            } else {
-                // Outer AA fringe (fading out)
-                if (outer_band > 0) {
-                    fl::u8 br = static_cast<fl::u8>(
-                        static_cast<fl::u32>(oo2 - d2) * 255u /
-                        static_cast<fl::u32>(outer_band));
-                    PixelT c = color; c.nscale8(br); *ptr += c;
-                }
-            }
-        }
-        d2 += xd; xd += 131072; ++ptr;
+    fl::i32 xd = g.xdelta0;
+    int px = g.xmin;
+    // Preamble: left exterior (d2 >= oo2)
+    while (px <= g.xmax && d2 >= g.oo2) {
+        d2 += xd; xd += 131072; ++ptr; ++px;
+    }
+    // Phase 1: outer-left AA fringe (oi2 <= d2 < oo2)
+    while (px <= g.xmax && d2 >= g.oi2 && d2 < g.oo2) {
+        fl::u16 diff = static_cast<fl::u16>(static_cast<fl::u32>(g.oo2 - d2) >> g.outer_shift);
+        fl::u8 br = static_cast<fl::u8>((diff * g.outer_inv) >> 8);
+        PixelT c = g.color; c.nscale8(br); *ptr += c;
+        d2 += xd; xd += 131072; ++ptr; ++px;
+    }
+    // Phase 2: full-brightness band left (io2 <= d2 < oi2)
+    while (px <= g.xmax && d2 >= g.io2 && d2 < g.oi2) {
+        *ptr += g.color;
+        d2 += xd; xd += 131072; ++ptr; ++px;
+    }
+    // Phase 3: inner-left AA fringe (ii2 <= d2 < io2)
+    while (px <= g.xmax && d2 >= g.ii2 && d2 < g.io2) {
+        fl::u16 diff = static_cast<fl::u16>(static_cast<fl::u32>(d2 - g.ii2) >> g.inner_shift);
+        fl::u8 br = static_cast<fl::u8>((diff * g.inner_inv) >> 8);
+        PixelT c = g.color; c.nscale8(br); *ptr += c;
+        d2 += xd; xd += 131072; ++ptr; ++px;
+    }
+    // Phase 4: transparent hole (d2 < ii2)
+    while (px <= g.xmax && d2 < g.ii2) {
+        d2 += xd; xd += 131072; ++ptr; ++px;
+    }
+    // Phase 5: inner-right AA fringe (ii2 <= d2 < io2)
+    while (px <= g.xmax && d2 >= g.ii2 && d2 < g.io2) {
+        fl::u16 diff = static_cast<fl::u16>(static_cast<fl::u32>(d2 - g.ii2) >> g.inner_shift);
+        fl::u8 br = static_cast<fl::u8>((diff * g.inner_inv) >> 8);
+        PixelT c = g.color; c.nscale8(br); *ptr += c;
+        d2 += xd; xd += 131072; ++ptr; ++px;
+    }
+    // Phase 6: full-brightness band right (io2 <= d2 < oi2)
+    while (px <= g.xmax && d2 >= g.io2 && d2 < g.oi2) {
+        *ptr += g.color;
+        d2 += xd; xd += 131072; ++ptr; ++px;
+    }
+    // Phase 7: outer-right AA fringe (oi2 <= d2 < oo2)
+    while (px <= g.xmax && d2 >= g.oi2 && d2 < g.oo2) {
+        fl::u16 diff = static_cast<fl::u16>(static_cast<fl::u32>(g.oo2 - d2) >> g.outer_shift);
+        fl::u8 br = static_cast<fl::u8>((diff * g.outer_inv) >> 8);
+        PixelT c = g.color; c.nscale8(br); *ptr += c;
+        d2 += xd; xd += 131072; ++ptr; ++px;
     }
 }
 
@@ -432,15 +492,21 @@ inline void drawDisc(Canvas<PixelT>& canvas, const PixelT& color,
     // Seed x-axis recurrence (only multiplies in the function)
     fl::i32 dx8 = (static_cast<fl::i32>(xmin) << 8) - cx8;
     fl::i32 dx2 = dx8 * dx8;
-    fl::i32 xdelta0 = 512 * dx8 + 65536;
+
+    // Bundle per-circle constants into struct (reduces parameter passing on AVR)
+    detail::DiscCtx<PixelT> fc;
+    fc.xdelta0 = 512 * dx8 + 65536;
+    fc.xmin = xmin; fc.xmax = xmax;
+    fc.rin2 = rin2; fc.rout2 = rout2;
+    detail::computeBandShift(band, fc.band_shift, fc.band_inv);
+    fc.color = color;
 
     fl::i32 cyfrac = (static_cast<fl::i32>(cyi) << 8) - cy8;
     fl::i32 d2c = dx2 + cyfrac * cyfrac;
 
     // Render center row
     if (cyi >= 0 && cyi < height)
-        detail::renderDiscRow(pixels, width, xmin, xmax, cyi,
-                              d2c, xdelta0, rin2, rout2, band, color);
+        detail::renderDiscRow(pixels, width, cyi, d2c, fc);
 
     // Top/bottom rows via separate y recurrences
     fl::i32 botd2 = d2c, botdelta = 512 * cyfrac + 65536;
@@ -454,11 +520,9 @@ inline void drawDisc(Canvas<PixelT>& canvas, const PixelT& color,
         if (!cbot && !ctop) break;
         int pyb = cyi + dy, pyt = cyi - dy;
         if (cbot && pyb >= 0 && pyb < height)
-            detail::renderDiscRow(pixels, width, xmin, xmax, pyb,
-                                  botd2, xdelta0, rin2, rout2, band, color);
+            detail::renderDiscRow(pixels, width, pyb, botd2, fc);
         if (ctop && pyt >= 0 && pyt < height)
-            detail::renderDiscRow(pixels, width, xmin, xmax, pyt,
-                                  topd2, xdelta0, rin2, rout2, band, color);
+            detail::renderDiscRow(pixels, width, pyt, topd2, fc);
         botd2 += botdelta; botdelta += 131072;
         topd2 += topdelta; topdelta += 131072;
     }
@@ -509,15 +573,23 @@ inline void drawRing(Canvas<PixelT>& canvas, const PixelT& color,
 
     fl::i32 dx8 = (static_cast<fl::i32>(xmin) << 8) - cx8;
     fl::i32 dx2 = dx8 * dx8;
-    fl::i32 xdelta0 = 512 * dx8 + 65536;
+
+    // Bundle per-circle constants into struct (reduces parameter passing on AVR)
+    detail::RingCtx<PixelT> gc;
+    gc.xdelta0 = 512 * dx8 + 65536;
+    gc.xmin = xmin; gc.xmax = xmax;
+    gc.ii2 = ii2; gc.io2 = io2; gc.oi2 = oi2; gc.oo2 = oo2;
+    if (inner_band > 0) detail::computeBandShift(inner_band, gc.inner_shift, gc.inner_inv);
+    else { gc.inner_shift = 0; gc.inner_inv = 65280u; }
+    if (outer_band > 0) detail::computeBandShift(outer_band, gc.outer_shift, gc.outer_inv);
+    else { gc.outer_shift = 0; gc.outer_inv = 65280u; }
+    gc.color = color;
 
     fl::i32 cyfrac = (static_cast<fl::i32>(cyi) << 8) - cy8;
     fl::i32 d2c = dx2 + cyfrac * cyfrac;
 
     if (cyi >= 0 && cyi < height)
-        detail::renderRingRow(pixels, width, xmin, xmax, cyi,
-                              d2c, xdelta0, ii2, io2, oi2, oo2,
-                              inner_band, outer_band, color);
+        detail::renderRingRow(pixels, width, cyi, d2c, gc);
 
     fl::i32 botd2 = d2c, botdelta = 512 * cyfrac + 65536;
     fl::i32 topd2 = d2c, topdelta = -512 * cyfrac + 65536;
@@ -530,13 +602,9 @@ inline void drawRing(Canvas<PixelT>& canvas, const PixelT& color,
         if (!cbot && !ctop) break;
         int pyb = cyi + dy, pyt = cyi - dy;
         if (cbot && pyb >= 0 && pyb < height)
-            detail::renderRingRow(pixels, width, xmin, xmax, pyb,
-                                  botd2, xdelta0, ii2, io2, oi2, oo2,
-                                  inner_band, outer_band, color);
+            detail::renderRingRow(pixels, width, pyb, botd2, gc);
         if (ctop && pyt >= 0 && pyt < height)
-            detail::renderRingRow(pixels, width, xmin, xmax, pyt,
-                                  topd2, xdelta0, ii2, io2, oi2, oo2,
-                                  inner_band, outer_band, color);
+            detail::renderRingRow(pixels, width, pyt, topd2, gc);
         botd2 += botdelta; botdelta += 131072;
         topd2 += topdelta; topdelta += 131072;
     }
