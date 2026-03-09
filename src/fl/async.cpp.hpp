@@ -104,15 +104,11 @@ void async_run(fl::u32 ms) {
 
         auto time_left = remaining();
 
-        // Yield to background threads/coroutines/scheduler as needed by platform
-        auto& bg = fl::platforms::ICoroutineRuntime::instance();
-        if (time_left && bg.hasPlatformBackgroundEvents()) {
-            // Cap sleep to 1ms per iteration for responsive pumping
+        // Give CPU time to background coroutines/tasks.
+        // No-op on platforms without background coroutines (Arduino, WASM).
+        if (time_left) {
             fl::u32 sleep_ms = fl::min(1u, time_left);
-            // Sleep to yield to platform scheduler (FreeRTOS, coroutines, etc.)
-            // Convert ms back to microseconds for platform function
-            bg.pumpEventQueueWithSleep(sleep_ms * 1000);
-            // After sleep, loop back for more pumping
+            fl::platforms::ICoroutineRuntime::instance().pumpCoroutines(sleep_ms * 1000);
         }
     } while (!expired());
 }

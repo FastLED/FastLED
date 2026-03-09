@@ -3,54 +3,33 @@
 #pragma once
 
 /// @file platforms/await.h
-/// @brief Platform dispatch for coroutine-based await() implementations
+/// @brief Platform-independent await() implementation for coroutines
 ///
-/// This header provides platform-specific implementations in fl::platforms::await()
-/// for platforms that support true OS-level blocking (ESP32, Host/Stub).
-///
-/// Supported platforms:
-/// - ESP32: FreeRTOS task notifications
-/// - Host/Stub: fl::condition_variable
-/// - Other: No await() support (use fl::await_top_level() instead)
+/// Uses ICoroutineRuntime::suspendMainthread() to yield in a platform-agnostic way.
+/// Each platform's runtime handles the appropriate yielding mechanism:
+///   - ESP32: vTaskDelay to yield to FreeRTOS scheduler
+///   - Teensy: Cooperative yield or pump coroutine runner
+///   - Host/Stub: Thread sleep (safe from worker threads)
+///   - Arduino: delayMicroseconds
 ///
 /// This header is included from fl/stl/async.h. The public API fl::await() in
 /// fl/stl/async.h acts as a trampoline that delegates to fl::platforms::await().
 
 #include "fl/promise.h"
 #include "fl/promise_result.h"
+#include "platforms/coroutine_runtime.h"
 
 namespace fl {
 namespace platforms {
 
-// ============================================================================
-// ESP32: True Blocking Await in Coroutines (FreeRTOS Task Notifications)
-// ============================================================================
-
-#ifdef ESP32
-
-} // namespace platforms
-} // namespace fl
-
-// FreeRTOS includes must be included OUTSIDE namespaces
-FL_EXTERN_C_BEGIN
-// IWYU pragma: begin_keep
-#include "freertos/FreeRTOS.h"  // ok include
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
-#include "freertos/task.h"       // ok include
-// IWYU pragma: end_keep
-FL_EXTERN_C_END
-
-namespace fl {
-namespace platforms {
-
-/// @brief Await promise completion in a coroutine (ESP32 only, true blocking)
+/// @brief Await promise completion using platform-agnostic polling
 /// @tparam T The type of value the promise resolves to
 /// @param promise The promise to await
 /// @return A result<T> containing either the resolved value or an error
 ///
-/// Implementation uses FreeRTOS task notifications for efficient suspension.
-/// This is called by fl::await() as a trampoline. See fl/stl/async.h for full documentation.
+/// Polls the promise in a loop, yielding to the platform scheduler between
+/// checks via ICoroutineRuntime::suspendMainthread(). This method is safe to call
+/// from any execution context (main thread, coroutine, worker thread).
 template<typename T>
 fl::result<T> await(fl::promise<T> promise) {
     // Validate promise
@@ -65,116 +44,20 @@ fl::result<T> await(fl::promise<T> promise) {
             : fl::result<T>(promise.error());
     }
 
-    // Get current FreeRTOS task handle
-    TaskHandle_t current_task = xTaskGetCurrentTaskHandle();
+    auto& runtime = ICoroutineRuntime::instance();
 
-    // Register completion callbacks to wake this task
-    promise.then([current_task](const T&) {
-        xTaskNotifyGive(current_task);  // Wake the blocked task
-    }).catch_([current_task](const Error&) {
-        xTaskNotifyGive(current_task);  // Wake on error too
-    });
-
-    // Block this coroutine until promise completes
-    // The OS scheduler will run other tasks (zero CPU waste)
-    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+    // Poll until promise completes, yielding to platform scheduler
+    while (!promise.is_completed()) {
+        promise.update();
+        if (promise.is_completed()) break;
+        runtime.suspendMainthread(1000);  // Yield ~1ms
+    }
 
     // Promise completed, return result
     return promise.is_resolved()
         ? fl::result<T>(promise.value())
         : fl::result<T>(promise.error());
 }
-
-#endif // FL_IS_ESP32
-
-// ============================================================================
-// Host/Stub: True Blocking Await using fl::condition_variable
-// ============================================================================
-
-#ifdef FASTLED_STUB_IMPL
-
-} // namespace platforms
-} // namespace fl
-
-// Host-platform includes must be OUTSIDE namespaces
-#include "fl/stl/condition_variable.h"  // fl::condition_variable
-#include "fl/stl/mutex.h"  // fl::mutex and fl::unique_lock (aliases std::mutex/std::unique_lock in multithreaded mode)
-#include "platforms/stub/coroutine_runner.h"  // Global coordination
-
-namespace fl {
-namespace platforms {
-
-/// @brief Await promise completion in a coroutine (Host platform using std::thread)
-/// @tparam T The type of value the promise resolves to
-/// @param promise The promise to await
-/// @return A result<T> containing either the resolved value or an error
-///
-/// Blocks on condition_variable until promise completes. Must be called from
-/// a coroutine thread, not the main thread. Use fl::await_top_level() for
-/// main thread code.
-template<typename T>
-fl::result<T> await(fl::promise<T> promise) {
-    // Validate promise
-    if (!promise.valid()) {
-        return fl::result<T>(Error("Invalid promise"));
-    }
-
-    // If already completed, return immediately
-    if (promise.is_completed()) {
-        return promise.is_resolved()
-            ? fl::result<T>(promise.value())
-            : fl::result<T>(promise.error());
-    }
-
-    // Block on condition_variable until promise completes
-    fl::mutex mtx;
-    fl::condition_variable cv;
-    fl::atomic<bool> completed(false);
-
-    promise.then([&](const T&) {
-        completed.store(true);
-        cv.notify_one();
-    }).catch_([&](const Error&) {
-        completed.store(true);
-        cv.notify_one();
-    });
-
-    fl::unique_lock<fl::mutex> local_lock(mtx);
-    cv.wait(local_lock, [&]() { return completed.load(); });
-    local_lock.unlock();
-
-    // Promise completed, return result
-    return promise.is_resolved()
-        ? fl::result<T>(promise.value())
-        : fl::result<T>(promise.error());
-}
-
-#endif // FASTLED_STUB_IMPL
-
-// ============================================================================
-// Unsupported Platforms: Static Assert on Instantiation
-// ============================================================================
-
-#if !defined(ESP32) && !defined(FASTLED_STUB_IMPL)
-
-/// @brief No-op await() for platforms without coroutine support
-/// @tparam T The type of value the promise resolves to
-/// @param promise The promise to await (unused)
-/// @return Never returns - triggers static_assert on instantiation
-///
-/// This version provides a clear compile-time error when await() is used
-/// on platforms that don't support true OS-level blocking.
-template<typename T>
-fl::result<T> await(fl::promise<T> promise) {
-    static_assert(sizeof(T) == 0,
-        "fl::await() is not supported on this platform. "
-        "Use fl::await_top_level() instead, or enable coroutine support "
-        "(available on ESP32 with FreeRTOS, or Host/Stub platforms).");
-    (void)promise;  // Suppress unused parameter warning
-    return fl::result<T>(Error("Unsupported platform"));
-}
-
-#endif // !ESP32 && !FASTLED_STUB_IMPL
 
 } // namespace platforms
 } // namespace fl

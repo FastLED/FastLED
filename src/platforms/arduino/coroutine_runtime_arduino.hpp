@@ -10,7 +10,6 @@
 
 // IWYU pragma: begin_keep
 #include "platforms/coroutine_runtime.h"
-#include "fl/arduino.h"
 #include "fl/singleton.h"
 // IWYU pragma: end_keep
 
@@ -19,32 +18,9 @@ namespace platforms {
 
 class CoroutineRuntimeArduino : public ICoroutineRuntime {
 public:
-    void pumpEventQueueWithSleep(fl::u32 us) override {
-        ::delayMicroseconds(us);
-    }
-
-    bool hasPlatformBackgroundEvents() override {
-        return false;
-    }
-
-    void platformDelay(fl::u32 ms) override {
-        ::delay((unsigned long)ms);
-    }
-
-    void platformDelayMicroseconds(fl::u32 us) override {
-        ::delayMicroseconds((fl::u32)us);
-    }
-
-    fl::u32 platformMillis() override {
-        return static_cast<fl::u32>(::millis());
-    }
-
-    fl::u32 platformMicros() override {
-        return static_cast<fl::u32>(::micros());
-    }
-
-    void osYield() override {
-        // Non-RTOS Arduino: no-op
+    void pumpCoroutines(fl::u32 us) override {
+        // Generic Arduino: no background coroutines, nothing to pump.
+        (void)us;
     }
 };
 

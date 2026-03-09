@@ -5,6 +5,7 @@
 /// Includes all implementation files in alphabetical order
 
 // Root directory implementations (alphabetical order)
+#include "platforms/shared/coroutine_context.cpp.hpp"
 #include "platforms/shared/rx_device_native.cpp.hpp"
 #include "platforms/shared/spi_manager.cpp.hpp"
 #include "platforms/shared/spi_hw_1.cpp.hpp"

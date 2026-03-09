@@ -3,11 +3,12 @@
 /// @file task_coroutine_null.cpp
 /// @brief Concrete no-op implementation of TaskCoroutineNull
 
-// Only compile this file when not using stub or ESP32 implementation
+// Only compile this file when not using stub, ESP32, or Teensy implementation
 #include "platforms/is_platform.h"
-#if !defined(FASTLED_STUB_IMPL) && !defined(FL_IS_ESP32)
+#include "platforms/arm/teensy/is_teensy.h"
+#if !defined(FASTLED_STUB_IMPL) && !defined(FL_IS_ESP32) && !defined(FL_IS_TEENSY_4X)
 
-#include "platforms/shared/task_coroutine_null.h"
+#include "platforms/itask_coroutine.h"
 
 namespace fl {
 namespace platforms {
@@ -52,22 +53,23 @@ private:
 // Static factory method
 //=============================================================================
 
-TaskCoroutineNull* TaskCoroutineNull::create(fl::string name,
-                                              TaskFunction function,
-                                              size_t stack_size,
-                                              u8 priority) {
-    return new TaskCoroutineNullImpl(fl::move(name), fl::move(function), stack_size, priority);  // ok bare allocation
+TaskCoroutinePtr TaskCoroutineNull::create(fl::string name,
+                                            TaskFunction function,
+                                            size_t stack_size,
+                                            u8 priority) {
+    return TaskCoroutinePtr(
+        new TaskCoroutineNullImpl(fl::move(name), fl::move(function), stack_size, priority));  // ok bare allocation
 }
 
 //=============================================================================
 // Factory function - creates platform-specific implementation
 //=============================================================================
 
-ITaskCoroutine* createTaskCoroutine(fl::string name,
-                                     ITaskCoroutine::TaskFunction function,
-                                     size_t stack_size,
-                                     u8 priority,
-                                     int /*core_id*/) {
+TaskCoroutinePtr createTaskCoroutine(fl::string name,
+                                      ITaskCoroutine::TaskFunction function,
+                                      size_t stack_size,
+                                      u8 priority,
+                                      int /*core_id*/) {
     return TaskCoroutineNull::create(fl::move(name), fl::move(function), stack_size, priority);
 }
 
@@ -82,4 +84,4 @@ void ITaskCoroutine::exitCurrent() {
 } // namespace platforms
 } // namespace fl
 
-#endif // !defined(FASTLED_STUB_IMPL) && !defined(FL_IS_ESP32)
+#endif // !defined(FASTLED_STUB_IMPL) && !defined(FL_IS_ESP32) && !defined(FL_IS_TEENSY_4X)

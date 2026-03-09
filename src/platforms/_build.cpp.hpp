@@ -27,4 +27,5 @@
 // Coroutine runtime must come AFTER platform subdirectory builds because
 // it dispatches to platform-specific implementations that require macros
 // like FASTLED_STUB_IMPL (defined in stub/led_sysdefs_stub_generic.h)
-#include "platforms/coroutine_runtime.cpp.hpp"
+// NOTE: probably not needed now after refactor.
+#include "platforms/coroutine_runtime.cpp.hpp" // ok include cpp.hpp

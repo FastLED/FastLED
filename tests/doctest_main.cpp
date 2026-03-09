@@ -47,8 +47,7 @@
 #include "timeout_watchdog.h"
 #endif
 
-#include "platforms/stub/task_coroutine_stub.h"
-#include "platforms/stub/coroutine_runner.h"
+#include "platforms/coroutine.h"
 #include "platforms/esp/32/drivers/parlio/parlio_peripheral_mock.h"
 #include "fl/stl/cstdlib.h"
 #include "fl/stl/shared_ptr.h"

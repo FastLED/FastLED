@@ -304,6 +304,13 @@ uv run test.py profile_sincos16 --cpp --build-mode release --build
 - **Rationale**: Branching on intermediate states in the "wait for previous frame" path splits logic across multiple places and makes the code harder to reason about. The only place DRAINING is acceptable is `onEndFrame()`, which doesn't need to block until DMA fully completes.
 - **Reference**: See `src/fl/channels/README.md` → "DMA Wait Pattern" section
 
+### Hook Error Policy
+- **ALWAYS stop and fix Write/Edit hook errors immediately**: When a PostToolUse hook (e.g., lint-on-save) reports errors after a Write or Edit, you MUST stop, investigate the violations, and fix them before writing the next file
+- **Do NOT ignore hook errors**: Hook errors are actionable feedback, not noise. Plowing ahead and creating more files with violations creates compounding debt
+- **Do NOT bypass hooks unless absolutely necessary**: Suppression comments (e.g., `// ok bare allocation`) are acceptable when the flagged pattern is intentional and correct. Disabling or skipping hooks is not
+- **IWYU errors may be deferred** when laying down multiple new files in a batch, since IWYU requires full compilation context that may not be available until all files exist
+- **Workflow**: Write file → hook fires → if error, fix immediately → re-lint to confirm → proceed to next file
+
 ### Error Fixing Policy
 - **ALWAYS fix encountered errors immediately**: When running tests or linting, fix ALL errors you encounter, even if they are pre-existing issues unrelated to your current task
 - **Rationale**: Leaving broken tests or linting errors creates technical debt and makes the codebase less maintainable

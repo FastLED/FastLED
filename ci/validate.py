@@ -136,6 +136,48 @@ EXIT_ON_ERROR_PATTERNS = [
     "register dump",  # ESP32 panic/crash with register state dump
 ]
 
+# Crash patterns checked against ALL stdout output (catches crashes in any phase)
+import re as _re
+
+
+_STDOUT_CRASH_PATTERNS: list[_re.Pattern[str]] = [
+    _re.compile(r"register dump", _re.IGNORECASE),
+    _re.compile(r"Guru Meditation", _re.IGNORECASE),
+    _re.compile(r"abort\(\) was called", _re.IGNORECASE),
+    _re.compile(r"Panic cause:", _re.IGNORECASE),
+    _re.compile(r"assert failed", _re.IGNORECASE),
+]
+
+
+class CrashPatternInterceptor:
+    """Wraps sys.stdout to detect crash patterns in ALL output.
+
+    Any line matching a crash pattern is recorded. The caller checks
+    ``crash_detected`` after the run completes.
+    """
+
+    def __init__(self, inner: Any) -> None:
+        self._inner = inner
+        self.crash_detected: bool = False
+        self.crash_lines: list[str] = []
+
+    def write(self, s: str) -> int:
+        # Check each line for crash patterns
+        for line in s.splitlines():
+            for pattern in _STDOUT_CRASH_PATTERNS:
+                if pattern.search(line):
+                    self.crash_detected = True
+                    self.crash_lines.append(line.strip())
+                    break
+        return self._inner.write(s)
+
+    def flush(self) -> None:
+        self._inner.flush()
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._inner, name)
+
+
 # Input-on-trigger configuration
 # Wait for VALIDATION_READY pattern before proceeding
 # NOTE: Tests are triggered via runSingleTest RPC commands (in json_rpc_commands)
@@ -2835,7 +2877,19 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
 
 
 def main() -> int:
-    return asyncio.run(run())
+    interceptor = CrashPatternInterceptor(sys.stdout)
+    sys.stdout = interceptor  # type: ignore[assignment]
+    try:
+        rc = asyncio.run(run())
+        if rc == 0 and interceptor.crash_detected:
+            print()
+            print(f"{Fore.RED}🚨 CRASH DETECTED in device output:{Style.RESET_ALL}")
+            for line in interceptor.crash_lines:
+                print(f"  {line}")
+            return 1
+        return rc
+    finally:
+        sys.stdout = interceptor._inner
 
 
 if __name__ == "__main__":

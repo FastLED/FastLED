@@ -2,10 +2,9 @@
 /// @file coroutine.cpp
 /// @brief Unit tests for stub platform coroutine runner (independent of async)
 ///
-/// Tests the coroutine system at multiple levels:
+/// Tests the coroutine system:
 /// 1. Binary semaphore (lowest level primitive)
-/// 2. CoroutineContext + CoroutineRunner (mid-level coordination)
-/// 3. task::coroutine (high-level API)
+/// 2. task::coroutine (high-level API)
 
 #include "test.h"
 #include "fl/stl/task.h"
@@ -18,8 +17,7 @@
 #include "fl/stl/semaphore.h"
 #include "fl/delay.h"
 #include "fl/stl/async.h"
-#include "platforms/stub/task_coroutine_stub.h"
-#include "platforms/stub/coroutine_runner.h"
+#include "platforms/coroutine.h"
 #include "fl/engine_events.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
@@ -80,91 +78,7 @@ FL_TEST_CASE("coroutine - counting semaphore two-phase handoff") {
 }
 
 // ============================================================
-// Level 2: CoroutineContext tests
-// ============================================================
-
-FL_TEST_CASE("coroutine - context creation and flags") {
-    auto ctx = fl::detail::CoroutineContext::create();
-    FL_CHECK(ctx != nullptr);
-    FL_CHECK_FALSE(ctx->is_completed());
-    FL_CHECK_FALSE(ctx->should_stop());
-    FL_CHECK_FALSE(ctx->is_thread_ready());
-
-    ctx->set_completed(true);
-    FL_CHECK(ctx->is_completed());
-    ctx->set_should_stop(true);
-    FL_CHECK(ctx->should_stop());
-    ctx->set_thread_ready(true);
-    FL_CHECK(ctx->is_thread_ready());
-}
-
-FL_TEST_CASE("coroutine - context wakeup semaphore wakes thread") {
-    auto ctx = fl::detail::CoroutineContext::create();
-    fl::atomic<bool> thread_woke(false);
-
-    fl::thread t([&]() {
-        ctx->set_thread_ready(true);
-        ctx->wait();  // Blocks on wakeup semaphore
-        thread_woke.store(true);
-    });
-
-    while (!ctx->is_thread_ready()) {
-        fl::this_thread::sleep_for(fl::chrono::milliseconds(1)); // ok sleep for
-    }
-
-    ctx->wakeup_semaphore().release();
-    t.join();
-    FL_CHECK(thread_woke.load());
-}
-
-// ============================================================
-// Level 3: CoroutineRunner + manual thread (two-phase protocol)
-// ============================================================
-
-FL_TEST_CASE("coroutine - runner enqueue and run") {
-    auto& runner = fl::detail::CoroutineRunner::instance();
-    auto& main_sema = runner.get_main_thread_semaphore();
-
-    auto ctx = fl::detail::CoroutineContext::create();
-    fl::atomic<bool> func_executed(false);
-
-    // Simulate a coroutine thread using the two-phase protocol
-    fl::thread t([&]() {
-        ctx->set_thread_ready(true);
-        ctx->wait();  // Block until runner wakes us
-
-        if (ctx->should_stop()) {
-            ctx->set_completed(true);
-            return;
-        }
-
-        // Phase 1: signal "started"
-        main_sema.release();
-
-        // Execute user function
-        func_executed.store(true);
-
-        // Phase 2: signal "done"
-        ctx->set_completed(true);
-        main_sema.release();
-    });
-
-    while (!ctx->is_thread_ready()) {
-        fl::this_thread::sleep_for(fl::chrono::milliseconds(1)); // ok sleep for
-    }
-
-    runner.enqueue(ctx);
-    runner.run(1000);
-
-    t.join();
-    FL_CHECK(func_executed.load());
-    FL_CHECK(ctx->is_completed());
-
-    runner.remove(ctx);
-}
-
-// ============================================================
-// Level 4: task::coroutine high-level API
+// Level 2: task::coroutine high-level API
 // ============================================================
 
 FL_TEST_CASE("coroutine - task::coroutine runs function") {

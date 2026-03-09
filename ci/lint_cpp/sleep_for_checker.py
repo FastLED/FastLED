@@ -36,7 +36,7 @@ _WHITELISTED_SUFFIXES: tuple[str, ...] = (
     # Host timer (needs precise std:: sleep for SPI bitbang timing)
     "platforms/shared/spi_bitbang/host_timer.cpp.hpp",
     # Task coroutine stub (cooperative scheduling infrastructure)
-    "platforms/stub/task_coroutine_stub.cpp.hpp",
+    "platforms/stub/coroutine_stub.hpp",
 )
 
 # Match sleep_for with any prefix (std::this_thread::, fl::this_thread::, or bare)

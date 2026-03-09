@@ -61,7 +61,7 @@ public:
     }
 
 private:
-    fl::unique_ptr<platforms::ITaskCoroutine> mImpl;
+    platforms::TaskCoroutinePtr mImpl;
 };
 
 } // namespace fl

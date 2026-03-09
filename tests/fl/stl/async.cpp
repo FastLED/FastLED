@@ -18,7 +18,7 @@
 #include "mutex_stub_stl.h"
 #include "thread_stub_stl.h"
 #include "fl/stl/vector.h"
-#include "platforms/stub/task_coroutine_stub.h"  // ok - for cleanup_coroutine_threads(), register_background_thread()
+#include "platforms/coroutine.h"  // ok - for cleanup_coroutine_threads(), register_background_thread()
 #include "platforms/coroutine_runtime.h"  // for is_shutdown_requested()
 
 FL_TEST_FILE(FL_FILEPATH) {
