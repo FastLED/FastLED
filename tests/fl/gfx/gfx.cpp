@@ -5,4 +5,3 @@
 #include "draw_ring.hpp"
 #include "draw_thick_line.hpp"
 #include "perf_primitives.hpp"
-#include "perf_disc_comparison.hpp"

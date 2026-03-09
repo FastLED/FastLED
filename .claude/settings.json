@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-toplevel)\" && uv run python ci/hooks/check_forbidden_commands.py"
+            "command": "ROOT=$(git rev-parse --show-superproject-working-tree 2>/dev/null); cd \"${ROOT:-$(git rev-parse --show-toplevel)}\" && uv run python ci/hooks/check_forbidden_commands.py"
           }
         ]
       },
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-toplevel)\" && uv run python ci/hooks/check_test_file_pairing.py"
+            "command": "ROOT=$(git rev-parse --show-superproject-working-tree 2>/dev/null); cd \"${ROOT:-$(git rev-parse --show-toplevel)}\" && uv run python ci/hooks/check_test_file_pairing.py"
           }
         ]
       }
@@ -26,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-toplevel)\" && uv run python ci/hooks/lint-on-save.py",
+            "command": "ROOT=$(git rev-parse --show-superproject-working-tree 2>/dev/null); cd \"${ROOT:-$(git rev-parse --show-toplevel)}\" && uv run python ci/hooks/lint-on-save.py",
             "timeout": 30
           }
         ]
@@ -37,7 +37,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-toplevel)\" && uv run python ci/hooks/check-on-start.py",
+            "command": "ROOT=$(git rev-parse --show-superproject-working-tree 2>/dev/null); cd \"${ROOT:-$(git rev-parse --show-toplevel)}\" && uv run python ci/hooks/check-on-start.py",
             "timeout": 10
           }
         ]
@@ -48,7 +48,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-toplevel)\" && uv run python ci/hooks/check-on-stop.py",
+            "command": "ROOT=$(git rev-parse --show-superproject-working-tree 2>/dev/null); cd \"${ROOT:-$(git rev-parse --show-toplevel)}\" && uv run python ci/hooks/check-on-stop.py",
             "timeout": 600
           }
         ]
