@@ -262,6 +262,7 @@ class DockerContainerManager:
                 ],
                 cwd=None,
                 check=False,
+                capture_output=True,
                 timeout=10,
             )
             parts = state_result.stdout.strip().split()
@@ -320,7 +321,9 @@ class DockerContainerManager:
             ]
         )
 
-        result = RunningProcess.run(cmd, cwd=None, check=False, timeout=60)
+        result = RunningProcess.run(
+            cmd, cwd=None, check=False, capture_output=True, env=env, timeout=60
+        )
         if result.returncode != 0:
             raise RuntimeError(f"Failed to create container: {result.stdout}")
 

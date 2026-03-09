@@ -30,7 +30,6 @@
 #include "fl/rgbw.h"
 #include "fl/stl/span.h"
 #include "pixel_controller.h"
-#include "pixeltypes.h"
 #include "rgbw.h"
 #include "fl/stl/vector.h"
 #include "hsv2rgb.h"

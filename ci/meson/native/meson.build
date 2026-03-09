@@ -397,10 +397,19 @@ base_defines += ['-DUSE_LIBUNWIND']
 # Build crash handler library once - provides crash handler setup that runs
 # BEFORE any DLL is loaded. Links to dbghelp/psapi on Windows.
 # On Unix, libunwind is explicitly linked via -lunwind in runner_link_args.
+# Absolute include args for crash handler — use cpp_args instead of
+# include_directories to prevent Meson from propagating backslash
+# relative -I paths to consumer targets (tests, examples), which breaks
+# #pragma once across PCH boundaries on Windows.
+crash_handler_abs_include_args = [
+  '-I' + meson.project_source_root() / 'tests',
+  '-I' + meson.project_source_root() / 'src',
+  '-I' + meson.project_source_root() / 'src/platforms/stub',
+]
+
 crash_handler_lib = static_library('crash_handler',
   files(meson.project_source_root() / 'tests' / 'shared' / 'crash_handler_main.cpp'),
-  include_directories: [tests_dir, src_dir, stub_dir],
-  cpp_args: ['-DENABLE_CRASH_HANDLER', '-DFASTLED_STUB_IMPL', '-DUSE_LIBUNWIND'],
+  cpp_args: ['-DENABLE_CRASH_HANDLER', '-DFASTLED_STUB_IMPL', '-DUSE_LIBUNWIND'] + crash_handler_abs_include_args,
   install: false
 )
 
@@ -415,10 +424,17 @@ crash_handler_lib = static_library('crash_handler',
 # dramatically reducing disk usage and link times (~17x reduction).
 # platforms_shared_files are merged directly into the shared library to avoid
 # -fPIC issues with link_whole: on static→shared boundaries.
+# Use absolute -I paths in cpp_args instead of include_directories to prevent
+# Meson from propagating backslash relative -I paths to consumer targets,
+# which breaks #pragma once across PCH boundaries on Windows.
+fastled_lib_abs_include_args = [
+  '-I' + meson.project_source_root() / 'src',
+  '-I' + meson.project_source_root() / 'src/platforms/stub',
+]
+
 fastled_lib = shared_library('fastled',
   fastled_sources + platforms_shared_files,
-  include_directories: [src_dir, stub_dir],
-  cpp_args: base_compile_args + ['-DFASTLED_BUILDING_DLL'],
+  cpp_args: base_compile_args + ['-DFASTLED_BUILDING_DLL'] + fastled_lib_abs_include_args,
   link_args: fastled_shared_link_args,
   name_prefix: '',  # Produce 'fastled.dll' not 'libfastled.dll'
   install: false
