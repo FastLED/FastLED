@@ -144,6 +144,120 @@ inline Coord aaRatio(Coord num, Coord denom, Coord inv_denom) {
         typename detail::needs_division<Coord>::type());
 }
 
+// ============================================================================
+// Integer-optimized helpers for disc/ring/line drawing
+// ============================================================================
+
+namespace detail {
+
+/// Convert any Coord type to 8.8 fixed-point (fl::i32).
+/// Generic fallback: use to_float() conversion.
+template<typename Coord>
+inline fl::i32 toFixed8(Coord val) {
+    return static_cast<fl::i32>(val.to_float() * 256.0f);
+}
+
+template<>
+inline fl::i32 toFixed8<float>(float val) {
+    return static_cast<fl::i32>(val * 256.0f);
+}
+
+template<>
+inline fl::i32 toFixed8<double>(double val) {
+    return static_cast<fl::i32>(val * 256.0);
+}
+
+template<>
+inline fl::i32 toFixed8<int>(int val) {
+    return static_cast<fl::i32>(val) << 8;
+}
+
+template<>
+inline fl::i32 toFixed8<fl::s16x16>(fl::s16x16 val) {
+    // Q16.16 → Q8.8: shift right by 8
+    return static_cast<fl::i32>(val.raw() >> 8);
+}
+
+/// Render one scanline of a disc using incremental d².
+/// Uses (n+1)² = n² + 2n + 1 identity — zero multiplies in the inner loop.
+/// Phase-based while loops: outside → AA fringe → solid → AA fringe → outside.
+template<typename PixelT>
+inline void renderDiscRow(PixelT* buf, int w, int xmin, int xmax, int py,
+                          fl::i32 d2_row, fl::i32 xdelta0,
+                          fl::i32 rin2, fl::i32 rout2, fl::i32 band,
+                          const PixelT& color) {
+    PixelT* ptr = &buf[py * w + xmin];
+    fl::i32 d2 = d2_row;
+    fl::i32 xd = xdelta0;
+    int px = xmin;
+    // Phase 1: Skip outside pixels (left, d2 decreasing)
+    while (px <= xmax && d2 >= rout2) {
+        d2 += xd; xd += 131072; ++ptr; ++px;
+    }
+    // Phase 2: Outer AA fringe (left)
+    while (px <= xmax && d2 >= rin2 && d2 < rout2) {
+        fl::u8 br = static_cast<fl::u8>(
+            static_cast<fl::u32>(rout2 - d2) * 255u / static_cast<fl::u32>(band));
+        PixelT c = color; c.nscale8(br); *ptr += c;
+        d2 += xd; xd += 131072; ++ptr; ++px;
+    }
+    // Phase 3: Full brightness interior (d2 hits minimum, then increases)
+    while (px <= xmax && d2 < rin2) {
+        *ptr += color;
+        d2 += xd; xd += 131072; ++ptr; ++px;
+    }
+    // Phase 4: Outer AA fringe (right, d2 increasing)
+    while (px <= xmax && d2 < rout2) {
+        fl::u8 br = static_cast<fl::u8>(
+            static_cast<fl::u32>(rout2 - d2) * 255u / static_cast<fl::u32>(band));
+        PixelT c = color; c.nscale8(br); *ptr += c;
+        d2 += xd; xd += 131072; ++ptr; ++px;
+    }
+}
+
+/// Render one scanline of a ring using incremental d² with per-pixel branching.
+/// Classifies each pixel into: outside, outer-AA, solid-band, inner-AA, or hole.
+/// Zero multiplies in the inner loop; only additions and comparisons.
+template<typename PixelT>
+inline void renderRingRow(PixelT* buf, int w, int xmin, int xmax, int py,
+                          fl::i32 d2_row, fl::i32 xdelta0,
+                          fl::i32 ii2, fl::i32 io2, fl::i32 oi2, fl::i32 oo2,
+                          fl::i32 inner_band, fl::i32 outer_band,
+                          const PixelT& color) {
+    PixelT* ptr = &buf[py * w + xmin];
+    fl::i32 d2 = d2_row;
+    fl::i32 xd = xdelta0;
+    for (int px = xmin; px <= xmax; ++px) {
+        if (d2 < oo2) {
+            if (d2 < ii2) {
+                // Hole — transparent
+            } else if (d2 < io2) {
+                // Inner AA fringe (fading in from hole)
+                if (inner_band > 0) {
+                    fl::u8 br = static_cast<fl::u8>(
+                        static_cast<fl::u32>(d2 - ii2) * 255u /
+                        static_cast<fl::u32>(inner_band));
+                    PixelT c = color; c.nscale8(br); *ptr += c;
+                }
+            } else if (d2 < oi2) {
+                // Full brightness band
+                *ptr += color;
+            } else {
+                // Outer AA fringe (fading out)
+                if (outer_band > 0) {
+                    fl::u8 br = static_cast<fl::u8>(
+                        static_cast<fl::u32>(oo2 - d2) * 255u /
+                        static_cast<fl::u32>(outer_band));
+                    PixelT c = color; c.nscale8(br); *ptr += c;
+                }
+            }
+        }
+        d2 += xd; xd += 131072; ++ptr;
+    }
+}
+
+}  // namespace detail
+
 /// ============================================================================
 /// CANVAS API (Primary - Cache Optimal)
 /// ============================================================================
@@ -179,375 +293,368 @@ void drawStrokeLine(Canvas<PixelT>& canvas, const PixelT& color,
 /// CANVAS IMPLEMENTATIONS
 /// ============================================================================
 
+// ---------------------------------------------------------------------------
+// drawLine: Integer Wu antialiased line (8.8 fixed-point internally)
+// Uses int loop counter and bit-shift for AA — no Coord ops in inner loop.
+// ---------------------------------------------------------------------------
 template<typename PixelT, typename Coord>
 inline void drawLine(Canvas<PixelT>& canvas, const PixelT& color,
                      Coord x0, Coord y0, Coord x1, Coord y1) {
     PixelT* pixels = canvas.pixels;
     int width = canvas.width;
     int height = canvas.height;
-    Coord fx0 = x0, fy0 = y0, fx1 = x1, fy1 = y1;
+
+    // Convert to 8.8 fixed-point
+    fl::i32 fx0 = detail::toFixed8(x0);
+    fl::i32 fy0 = detail::toFixed8(y0);
+    fl::i32 fx1 = detail::toFixed8(x1);
+    fl::i32 fy1 = detail::toFixed8(y1);
 
     bool steep = fl::abs(fy1 - fy0) > fl::abs(fx1 - fx0);
-    if (steep) {
-        fl::swap(fx0, fy0);
-        fl::swap(fx1, fy1);
-    }
-    if (fx0 > fx1) {
-        fl::swap(fx0, fx1);
-        fl::swap(fy0, fy1);
-    }
+    if (steep) { fl::swap(fx0, fy0); fl::swap(fx1, fy1); }
+    if (fx0 > fx1) { fl::swap(fx0, fx1); fl::swap(fy0, fy1); }
 
-    Coord dx = fx1 - fx0;
-    Coord dy = fy1 - fy0;
-    Coord zero = fromFrac<Coord>(0, 1);
-    Coord gradient = (dx == zero) ? zero : dy / dx;
+    fl::i32 dx8 = fx1 - fx0;
+    fl::i32 dy8 = fy1 - fy0;
 
-    // First endpoint
-    Coord half = fromFrac<Coord>(1, 2);
-    Coord xend_intermediate = fl::floor(fx0 + half);
-    Coord yend = fy0 + gradient * (xend_intermediate - fx0);
-    Coord yend_intermediate = fl::floor(yend);
-    Coord xgap = fromInt<Coord>(1) - (fx0 + half - fl::floor(fx0 + half));
-    Coord xpxl1 = xend_intermediate;
-    Coord ypxl1 = yend_intermediate;
+    // Gradient per pixel step in 8.8: (dy * 256) / dx
+    fl::i32 gradient = (dx8 == 0) ? 0 : ((dy8 << 8) / dx8);
+
+    // First endpoint: round x to nearest pixel boundary
+    fl::i32 xend = (fx0 + 128) & ~0xFF;
+    fl::i32 yend = fy0 + ((gradient * (xend - fx0)) >> 8);
+    fl::i32 xgap = 256 - ((fx0 + 128) & 0xFF);  // rfpart(x0 + 0.5)
+    int xpxl1 = xend >> 8;
+    int ypxl1 = yend >> 8;
+    fl::u8 yfrac1 = static_cast<fl::u8>(yend & 0xFF);
 
     // Second endpoint
-    Coord xend2_intermediate = fl::floor(fx1 + half);
-    Coord yend2 = fy1 + gradient * (xend2_intermediate - fx1);
-    Coord yend2_intermediate = fl::floor(yend2);
-    Coord xgap2 = (fx1 + half) - fl::floor(fx1 + half);
-    Coord xpxl2 = xend2_intermediate;
-    Coord ypxl2 = yend2_intermediate;
+    fl::i32 xend2 = (fx1 + 128) & ~0xFF;
+    fl::i32 yend2 = fy1 + ((gradient * (xend2 - fx1)) >> 8);
+    fl::i32 xgap2 = (fx1 + 128) & 0xFF;  // fpart(x1 + 0.5)
+    int xpxl2 = xend2 >> 8;
+    int ypxl2 = yend2 >> 8;
+    fl::u8 yfrac2 = static_cast<fl::u8>(yend2 & 0xFF);
 
-    Coord loopStart = xpxl1 + fromInt<Coord>(1);
-    Coord loopEnd = xpxl2;
+    // Draw first endpoint
+    {
+        fl::u8 b1 = static_cast<fl::u8>(((255 - yfrac1) * xgap) >> 8);
+        fl::u8 b2 = static_cast<fl::u8>((yfrac1 * xgap) >> 8);
+        if (steep) {
+            PixelT c = color; c.nscale8(b1);
+            addPixelToBuffer(pixels, width, height, ypxl1, xpxl1, c);
+            c = color; c.nscale8(b2);
+            addPixelToBuffer(pixels, width, height, ypxl1 + 1, xpxl1, c);
+        } else {
+            PixelT c = color; c.nscale8(b1);
+            addPixelToBuffer(pixels, width, height, xpxl1, ypxl1, c);
+            c = color; c.nscale8(b2);
+            addPixelToBuffer(pixels, width, height, xpxl1, ypxl1 + 1, c);
+        }
+    }
 
-    Coord one = fromInt<Coord>(1);
+    // Draw second endpoint
+    {
+        fl::u8 b1 = static_cast<fl::u8>(((255 - yfrac2) * xgap2) >> 8);
+        fl::u8 b2 = static_cast<fl::u8>((yfrac2 * xgap2) >> 8);
+        if (steep) {
+            PixelT c = color; c.nscale8(b1);
+            addPixelToBuffer(pixels, width, height, ypxl2, xpxl2, c);
+            c = color; c.nscale8(b2);
+            addPixelToBuffer(pixels, width, height, ypxl2 + 1, xpxl2, c);
+        } else {
+            PixelT c = color; c.nscale8(b1);
+            addPixelToBuffer(pixels, width, height, xpxl2, ypxl2, c);
+            c = color; c.nscale8(b2);
+            addPixelToBuffer(pixels, width, height, xpxl2, ypxl2 + 1, c);
+        }
+    }
+
+    // Main loop: integer counter, 8.8 intery accumulation
+    fl::i32 intery = yend + gradient;
     if (steep) {
-        // STEEP path: x and y coordinates swapped in pixel writes
-        {
-            Coord yend_floor = fl::floor(yend);
-            Coord yf = yend - yend_floor;
-            Coord b1 = (one - yf) * xgap;
-            Coord b2 = yf * xgap;
-            PixelT c = color;
-            c.nscale8(coordToU8(b1));
-            addPixelToBuffer(pixels, width, height, toInt(ypxl1),     toInt(xpxl1), c);
-            c = color;
-            c.nscale8(coordToU8(b2));
-            addPixelToBuffer(pixels, width, height, toInt(ypxl1+one), toInt(xpxl1), c);
-        }
-        Coord intery = yend + gradient;
-        for (Coord x = loopStart; x < loopEnd; x = x + one) {
-            Coord intery_floor = fl::floor(intery);
-            Coord yint = intery_floor;
-            Coord yf = intery - intery_floor;
-            PixelT c = color;
-            c.nscale8(coordToU8(one - yf));
-            addPixelToBuffer(pixels, width, height, toInt(yint),     toInt(x), c);
-            c = color;
-            c.nscale8(coordToU8(yf));
-            addPixelToBuffer(pixels, width, height, toInt(yint+one), toInt(x), c);
-            intery = intery + gradient;
-        }
-        {
-            Coord yend2_floor = fl::floor(yend2);
-            Coord yf = yend2 - yend2_floor;
-            Coord b1 = (one - yf) * xgap2;
-            Coord b2 = yf * xgap2;
-            PixelT c = color;
-            c.nscale8(coordToU8(b1));
-            addPixelToBuffer(pixels, width, height, toInt(ypxl2),     toInt(xpxl2), c);
-            c = color;
-            c.nscale8(coordToU8(b2));
-            addPixelToBuffer(pixels, width, height, toInt(ypxl2+one), toInt(xpxl2), c);
+        for (int x = xpxl1 + 1; x < xpxl2; ++x) {
+            int y = intery >> 8;
+            fl::u8 frac = static_cast<fl::u8>(intery & 0xFF);
+            PixelT c = color; c.nscale8(255 - frac);
+            addPixelToBuffer(pixels, width, height, y, x, c);
+            c = color; c.nscale8(frac);
+            addPixelToBuffer(pixels, width, height, y + 1, x, c);
+            intery += gradient;
         }
     } else {
-        // FLAT path: normal coordinate order
-        {
-            Coord yend_floor = fl::floor(yend);
-            Coord yf = yend - yend_floor;
-            Coord b1 = (one - yf) * xgap;
-            Coord b2 = yf * xgap;
-            PixelT c = color;
-            c.nscale8(coordToU8(b1));
-            addPixelToBuffer(pixels, width, height, toInt(xpxl1), toInt(ypxl1),     c);
-            c = color;
-            c.nscale8(coordToU8(b2));
-            addPixelToBuffer(pixels, width, height, toInt(xpxl1), toInt(ypxl1+one), c);
-        }
-        Coord intery = yend + gradient;
-        for (Coord x = loopStart; x < loopEnd; x = x + one) {
-            Coord intery_floor = fl::floor(intery);
-            Coord yint = intery_floor;
-            Coord yf = intery - intery_floor;
-            PixelT c = color;
-            c.nscale8(coordToU8(one - yf));
-            addPixelToBuffer(pixels, width, height, toInt(x), toInt(yint),     c);
-            c = color;
-            c.nscale8(coordToU8(yf));
-            addPixelToBuffer(pixels, width, height, toInt(x), toInt(yint+one), c);
-            intery = intery + gradient;
-        }
-        {
-            Coord yend2_floor = fl::floor(yend2);
-            Coord yf = yend2 - yend2_floor;
-            Coord b1 = (one - yf) * xgap2;
-            Coord b2 = yf * xgap2;
-            PixelT c = color;
-            c.nscale8(coordToU8(b1));
-            addPixelToBuffer(pixels, width, height, toInt(xpxl2), toInt(ypxl2),     c);
-            c = color;
-            c.nscale8(coordToU8(b2));
-            addPixelToBuffer(pixels, width, height, toInt(xpxl2), toInt(ypxl2+one), c);
+        for (int x = xpxl1 + 1; x < xpxl2; ++x) {
+            int y = intery >> 8;
+            fl::u8 frac = static_cast<fl::u8>(intery & 0xFF);
+            PixelT c = color; c.nscale8(255 - frac);
+            addPixelToBuffer(pixels, width, height, x, y, c);
+            c = color; c.nscale8(frac);
+            addPixelToBuffer(pixels, width, height, x, y + 1, c);
+            intery += gradient;
         }
     }
 }
 
+// ---------------------------------------------------------------------------
+// drawDisc: Incremental d² scanline approach
+// Converts to 8.8 fixed-point, uses (n+1)² = n² + 2n + 1 identity.
+// Only 4 multiplies to seed recurrences; inner loops are pure addition.
+// ---------------------------------------------------------------------------
 template<typename PixelT, typename Coord>
 inline void drawDisc(Canvas<PixelT>& canvas, const PixelT& color,
                      Coord cx, Coord cy, Coord r) {
     PixelT* pixels = canvas.pixels;
     int width = canvas.width;
     int height = canvas.height;
-    Coord soft = fromFrac<Coord>(1, 2);
-    Coord r_outer = r + soft;
-    Coord r_inner = r - soft;
 
-    Coord r_outer_ceil = fl::ceil(r_outer);
-    Coord cx_floor = fl::floor(cx);
-    Coord cy_floor = fl::floor(cy);
+    fl::i32 cx8 = detail::toFixed8(cx);
+    fl::i32 cy8 = detail::toFixed8(cy);
+    fl::i32 r8 = detail::toFixed8(r);
 
-    Coord ri = r_outer_ceil + fromInt<Coord>(1);
+    fl::i32 rin8 = r8 - 128;   // r - 0.5 in 8.8
+    fl::i32 rout8 = r8 + 128;  // r + 0.5 in 8.8
+    // Do NOT clamp rin8 — negative rin8 squares correctly for band computation
 
-    Coord zero = fromFrac<Coord>(0, 1);
-    Coord w = fromInt<Coord>(width);
-    Coord h = fromInt<Coord>(height);
-    Coord one = fromInt<Coord>(1);
+    fl::i32 rin2 = rin8 * rin8;
+    fl::i32 rout2 = rout8 * rout8;
+    fl::i32 band = rout2 - rin2;
+    if (band <= 0) return;
 
-    Coord xmin = cx_floor - ri;
-    Coord xmax = cx_floor + ri;
-    if (xmin < zero) xmin = zero;
-    if (xmax >= w) xmax = w - one;
+    int ri = (rout8 >> 8) + 1;
+    int cxi = cx8 >> 8;
+    int cyi = cy8 >> 8;
 
-    Coord ymin = cy_floor - ri;
-    Coord ymax = cy_floor + ri;
-    if (ymin < zero) ymin = zero;
-    if (ymax >= h) ymax = h - one;
+    int xmin = cxi - ri; if (xmin < 0) xmin = 0;
+    int xmax = cxi + ri; if (xmax >= width) xmax = width - 1;
+    if (xmin > xmax) return;
+    if (cyi + ri < 0 || cyi - ri >= height) return;
 
-    if (xmin > xmax || ymin > ymax) return;
+    // Seed x-axis recurrence (only multiplies in the function)
+    fl::i32 dx8 = (static_cast<fl::i32>(xmin) << 8) - cx8;
+    fl::i32 dx2 = dx8 * dx8;
+    fl::i32 xdelta0 = 512 * dx8 + 65536;
 
-    Coord r_inner2 = r_inner * r_inner;
-    Coord r_outer2 = r_outer * r_outer;
-    Coord band = r_outer2 - r_inner2;
+    fl::i32 cyfrac = (static_cast<fl::i32>(cyi) << 8) - cy8;
+    fl::i32 d2c = dx2 + cyfrac * cyfrac;
 
-    if (band <= zero) return;
+    // Render center row
+    if (cyi >= 0 && cyi < height)
+        detail::renderDiscRow(pixels, width, xmin, xmax, cyi,
+                              d2c, xdelta0, rin2, rout2, band, color);
 
-    Coord inv_band = one / band;
+    // Top/bottom rows via separate y recurrences
+    fl::i32 botd2 = d2c, botdelta = 512 * cyfrac + 65536;
+    fl::i32 topd2 = d2c, topdelta = -512 * cyfrac + 65536;
+    botd2 += botdelta; botdelta += 131072;
+    topd2 += topdelta; topdelta += 131072;
 
-    for (Coord py = ymin; py <= ymax; py = py + one) {
-        for (Coord px = xmin; px <= xmax; px = px + one) {
-            Coord dx = px - cx;
-            Coord dy = py - cy;
-            Coord d2 = dx * dx + dy * dy;
-
-            if (d2 < r_outer2) {
-                if (d2 < r_inner2) {
-                    addPixelToBuffer(pixels, width, height, toInt(px), toInt(py), color);
-                } else {
-                    Coord alpha = aaRatio(r_outer2 - d2, band, inv_band);
-                    PixelT c = color;
-                    c.nscale8(coordToU8(alpha));
-                    addPixelToBuffer(pixels, width, height, toInt(px), toInt(py), c);
-                }
-            }
-        }
+    for (int dy = 1; dy <= ri; ++dy) {
+        bool cbot = (botd2 - dx2 <= rout2);
+        bool ctop = (topd2 - dx2 <= rout2);
+        if (!cbot && !ctop) break;
+        int pyb = cyi + dy, pyt = cyi - dy;
+        if (cbot && pyb >= 0 && pyb < height)
+            detail::renderDiscRow(pixels, width, xmin, xmax, pyb,
+                                  botd2, xdelta0, rin2, rout2, band, color);
+        if (ctop && pyt >= 0 && pyt < height)
+            detail::renderDiscRow(pixels, width, xmin, xmax, pyt,
+                                  topd2, xdelta0, rin2, rout2, band, color);
+        botd2 += botdelta; botdelta += 131072;
+        topd2 += topdelta; topdelta += 131072;
     }
 }
 
+// ---------------------------------------------------------------------------
+// drawRing: Incremental d² with per-pixel zone classification
+// Same recurrence as drawDisc but classifies pixels into 5 ring zones.
+// Zero multiplies in inner loop; only additions, comparisons, and branches.
+// ---------------------------------------------------------------------------
 template<typename PixelT, typename Coord>
 inline void drawRing(Canvas<PixelT>& canvas, const PixelT& color,
                      Coord cx, Coord cy, Coord r, Coord thickness) {
     PixelT* pixels = canvas.pixels;
     int width = canvas.width;
     int height = canvas.height;
-    Coord soft = fromFrac<Coord>(1, 2);
-    Coord zero = fromFrac<Coord>(0, 1);
-    Coord one = fromInt<Coord>(1);
 
-    Coord r_ii = r - soft;
-    Coord r_io = r + soft;
-    if (r_ii < zero) r_ii = zero;
-    if (r_io < zero) r_io = zero;
-    Coord r_oi = r + thickness - soft;
-    Coord r_oo = r + thickness + soft;
+    fl::i32 cx8 = detail::toFixed8(cx);
+    fl::i32 cy8 = detail::toFixed8(cy);
+    fl::i32 r8 = detail::toFixed8(r);
+    fl::i32 t8 = detail::toFixed8(thickness);
 
-    Coord ii2 = r_ii * r_ii;
-    Coord io2 = r_io * r_io;
-    Coord oi2 = r_oi * r_oi;
-    Coord oo2 = r_oo * r_oo;
+    fl::i32 r_ii8 = r8 - 128;            // inner-inner: r - 0.5
+    fl::i32 r_io8 = r8 + 128;            // inner-outer: r + 0.5
+    fl::i32 r_oi8 = r8 + t8 - 128;       // outer-inner: r + thickness - 0.5
+    fl::i32 r_oo8 = r8 + t8 + 128;       // outer-outer: r + thickness + 0.5
 
-    Coord inner_band = io2 - ii2;
-    Coord outer_band = oo2 - oi2;
+    // Clamp inner radii (match original behavior for small r)
+    if (r_ii8 < 0) r_ii8 = 0;
+    if (r_io8 < 0) r_io8 = 0;
 
-    Coord r_oo_ceil = fl::ceil(r_oo);
-    Coord cx_floor = fl::floor(cx);
-    Coord cy_floor = fl::floor(cy);
+    fl::i32 ii2 = r_ii8 * r_ii8;
+    fl::i32 io2 = r_io8 * r_io8;
+    fl::i32 oi2 = r_oi8 * r_oi8;
+    fl::i32 oo2 = r_oo8 * r_oo8;
 
-    Coord ri = r_oo_ceil + one;
+    fl::i32 inner_band = io2 - ii2;
+    fl::i32 outer_band = oo2 - oi2;
 
-    Coord w = fromInt<Coord>(width);
-    Coord h = fromInt<Coord>(height);
+    int ri = (r_oo8 >> 8) + 1;
+    int cxi = cx8 >> 8;
+    int cyi = cy8 >> 8;
 
-    Coord xmin = cx_floor - ri;
-    Coord xmax = cx_floor + ri;
-    Coord ymin = cy_floor - ri;
-    Coord ymax = cy_floor + ri;
+    int xmin = cxi - ri; if (xmin < 0) xmin = 0;
+    int xmax = cxi + ri; if (xmax >= width) xmax = width - 1;
+    if (xmin > xmax) return;
+    if (cyi + ri < 0 || cyi - ri >= height) return;
 
-    if (xmin < zero) xmin = zero;
-    if (xmax >= w) xmax = w - one;
-    if (ymin < zero) ymin = zero;
-    if (ymax >= h) ymax = h - one;
+    fl::i32 dx8 = (static_cast<fl::i32>(xmin) << 8) - cx8;
+    fl::i32 dx2 = dx8 * dx8;
+    fl::i32 xdelta0 = 512 * dx8 + 65536;
 
-    if (xmin > xmax || ymin > ymax) return;
+    fl::i32 cyfrac = (static_cast<fl::i32>(cyi) << 8) - cy8;
+    fl::i32 d2c = dx2 + cyfrac * cyfrac;
 
-    Coord inv_inner_band = (inner_band > zero) ? one / inner_band : zero;
-    Coord inv_outer_band = (outer_band > zero) ? one / outer_band : zero;
+    if (cyi >= 0 && cyi < height)
+        detail::renderRingRow(pixels, width, xmin, xmax, cyi,
+                              d2c, xdelta0, ii2, io2, oi2, oo2,
+                              inner_band, outer_band, color);
 
-    for (Coord py = ymin; py <= ymax; py = py + one) {
-        for (Coord px = xmin; px <= xmax; px = px + one) {
-            Coord dx = px - cx;
-            Coord dy = py - cy;
-            Coord d2 = dx * dx + dy * dy;
+    fl::i32 botd2 = d2c, botdelta = 512 * cyfrac + 65536;
+    fl::i32 topd2 = d2c, topdelta = -512 * cyfrac + 65536;
+    botd2 += botdelta; botdelta += 131072;
+    topd2 += topdelta; topdelta += 131072;
 
-            if (d2 < oo2) {
-                if (d2 < ii2) {
-                    // Inside hole - transparent
-                } else if (d2 < io2) {
-                    // Inner AA fringe
-                    if (inner_band > zero) {
-                        Coord alpha = aaRatio(d2 - ii2, inner_band, inv_inner_band);
-                        PixelT c = color;
-                        c.nscale8(coordToU8(alpha));
-                        addPixelToBuffer(pixels, width, height, toInt(px), toInt(py), c);
-                    }
-                } else if (d2 < oi2) {
-                    // Full brightness band
-                    addPixelToBuffer(pixels, width, height, toInt(px), toInt(py), color);
-                } else {
-                    // Outer AA fringe
-                    if (outer_band > zero) {
-                        Coord alpha = aaRatio(oo2 - d2, outer_band, inv_outer_band);
-                        PixelT c = color;
-                        c.nscale8(coordToU8(alpha));
-                        addPixelToBuffer(pixels, width, height, toInt(px), toInt(py), c);
-                    }
-                }
-            }
-        }
+    for (int dy = 1; dy <= ri; ++dy) {
+        bool cbot = (botd2 - dx2 <= oo2);
+        bool ctop = (topd2 - dx2 <= oo2);
+        if (!cbot && !ctop) break;
+        int pyb = cyi + dy, pyt = cyi - dy;
+        if (cbot && pyb >= 0 && pyb < height)
+            detail::renderRingRow(pixels, width, xmin, xmax, pyb,
+                                  botd2, xdelta0, ii2, io2, oi2, oo2,
+                                  inner_band, outer_band, color);
+        if (ctop && pyt >= 0 && pyt < height)
+            detail::renderRingRow(pixels, width, xmin, xmax, pyt,
+                                  topd2, xdelta0, ii2, io2, oi2, oo2,
+                                  inner_band, outer_band, color);
+        botd2 += botdelta; botdelta += 131072;
+        topd2 += topdelta; topdelta += 131072;
     }
 }
 
+// ---------------------------------------------------------------------------
+// drawStrokeLine: Cross-product approach with incremental updates
+// Perpendicular distance via cross-product; along-axis check via dot-product.
+// Only 4 Coord multiplies to seed, then pure Coord additions in inner loop.
+// Division replaced by multiply-by-reciprocal for AA computation.
+// ---------------------------------------------------------------------------
 template<typename PixelT, typename Coord>
 inline void drawStrokeLine(Canvas<PixelT>& canvas, const PixelT& color,
                            Coord x0, Coord y0, Coord x1, Coord y1, Coord thickness,
                            LineCap cap) {
-    // Keep all computations in the coordinate type domain
-    // This preserves full precision for the input type (e.g., s16x16 maintains 16-bit fractional precision)
     PixelT* pixels = canvas.pixels;
     int width = canvas.width;
     int height = canvas.height;
 
     Coord dx = x1 - x0;
     Coord dy = y1 - y0;
-
-    // Check for zero-length line using zero-constructed value
     Coord zero = fromFrac<Coord>(0, 1);
     if (dx == zero && dy == zero) return;
 
-    Coord len2 = dx * dx + dy * dy;
-    Coord r_max = thickness / fromInt<Coord>(2);  // Half thickness = radius
-
-    // Floor pixel coordinates (keep in Coord type for precision)
-    Coord x0_floored = fl::floor(x0);
-    Coord y0_floored = fl::floor(y0);
-    Coord x1_floored = fl::floor(x1);
-    Coord y1_floored = fl::floor(y1);
-    Coord margin = r_max + fromFrac<Coord>(3, 2);
-
-    // Compute bounds in Coord type
-    Coord xmin_coord = (x0_floored < x1_floored ? x0_floored : x1_floored) - margin;
-    Coord xmax_coord = (x0_floored > x1_floored ? x0_floored : x1_floored) + margin;
-    Coord ymin_coord = (y0_floored < y1_floored ? y0_floored : y1_floored) - margin;
-    Coord ymax_coord = (y0_floored > y1_floored ? y0_floored : y1_floored) + margin;
-
-    // Clamp bounds to canvas dimensions
-    Coord width_coord = fromInt<Coord>(width);
-    Coord height_coord = fromInt<Coord>(height);
-    if (xmin_coord < zero) xmin_coord = zero;
-    if (xmax_coord >= width_coord) xmax_coord = width_coord - fromInt<Coord>(1);
-    if (ymin_coord < zero) ymin_coord = zero;
-    if (ymax_coord >= height_coord) ymax_coord = height_coord - fromInt<Coord>(1);
-
-    if (xmin_coord > xmax_coord || ymin_coord > ymax_coord) return;
-
-    Coord r_max2 = r_max * r_max;
     Coord one = fromInt<Coord>(1);
+    Coord len2 = dx * dx + dy * dy;
+    using fl::sqrt;
+    Coord len = sqrt(len2);
+    Coord r_max = thickness / fromInt<Coord>(2);
+    Coord threshold = r_max * len;  // |cross| < threshold ↔ within stroke width
+
+    if (threshold <= zero) return;
+
+    Coord inv_threshold = one / threshold;
+
+    // Bounding box
+    int x0i = toInt(fl::floor(x0)), y0i = toInt(fl::floor(y0));
+    int x1i = toInt(fl::floor(x1)), y1i = toInt(fl::floor(y1));
+    int margin = toInt(fl::ceil(r_max)) + 2;
+    int xmin = (x0i < x1i ? x0i : x1i) - margin;
+    int xmax = (x0i > x1i ? x0i : x1i) + margin;
+    int ymin = (y0i < y1i ? y0i : y1i) - margin;
+    int ymax = (y0i > y1i ? y0i : y1i) + margin;
+
+    if (xmin < 0) xmin = 0;
+    if (xmax >= width) xmax = width - 1;
+    if (ymin < 0) ymin = 0;
+    if (ymax >= height) ymax = height - 1;
+    if (xmin > xmax || ymin > ymax) return;
+
+    // Precompute for caps
+    Coord r_max2 = r_max * r_max;
     Coord inv_r_max2 = one / r_max2;
+    Coord dot_ext = (cap == LineCap::SQUARE) ? threshold : zero;
 
-    for (Coord py = ymin_coord; py <= ymax_coord; py = py + one) {
-        for (Coord px = xmin_coord; px <= xmax_coord; px = px + one) {
-            // Perpendicular distance from (px, py) to the line
-            Coord px_rel = px - x0;
-            Coord py_rel = py - y0;
+    // Seed row-start cross and dot (4 Coord multiplies total, done once)
+    Coord rx_base = fromInt<Coord>(xmin) - x0;
+    Coord ry_row = fromInt<Coord>(ymin) - y0;
+    Coord cross_row = rx_base * dy - ry_row * dx;
+    Coord dot_row = rx_base * dx + ry_row * dy;
 
-            // Project point onto line: t = dot(point-start, direction) / len2
-            Coord dot_prod = px_rel * dx + py_rel * dy;
-            Coord t = dot_prod / len2;
+    for (int py = ymin; py <= ymax; ++py) {
+        Coord cross = cross_row;
+        Coord dot = dot_row;
+        PixelT* ptr = &pixels[py * width + xmin];
 
-            // Project onto line
-            Coord proj_x = x0 + t * dx;
-            Coord proj_y = y0 + t * dy;
+        for (int px = xmin; px <= xmax; ++px) {
+            Coord abs_cross = (cross < zero) ? (zero - cross) : cross;
 
-            // Distance from point to projection
-            Coord dist_x = px - proj_x;
-            Coord dist_y = py - proj_y;
-            Coord dist2 = dist_x * dist_x + dist_y * dist_y;
+            if (abs_cross < threshold) {
+                bool on_segment = (dot >= zero && dot <= len2);
 
-            if (dist2 < r_max2) {
-                int px_int = toInt(px);
-                int py_int = toInt(py);
-                if (t >= zero && t <= one) {
-                    // On segment — LUT-based sqrt falloff
-                    fl::u8 idx = coordToU8(aaRatio(dist2, r_max2, inv_r_max2));
+                if (on_segment) {
+                    // AA based on perpendicular distance
+                    Coord ratio = abs_cross * inv_threshold;
+                    fl::u8 linear_idx = coordToU8(ratio);
+                    fl::u8 sq_idx = static_cast<fl::u8>(
+                        static_cast<fl::u16>(linear_idx) * linear_idx / 255u);
                     PixelT c = color;
-                    c.nscale8(FL_PGM_READ_BYTE_NEAR(&detail::distanceAA_LUT[idx]));
-                    addPixelToBuffer(pixels, width, height, px_int, py_int, c);
+                    c.nscale8(FL_PGM_READ_BYTE_NEAR(&detail::distanceAA_LUT[sq_idx]));
+                    *ptr += c;
                 } else if (cap == LineCap::ROUND) {
-                    // Hemispherical cap: distance from nearest endpoint
-                    Coord ex = (t < zero) ? (px - x0) : (px - x1);
-                    Coord ey = (t < zero) ? (py - y0) : (py - y1);
-                    Coord ed2 = ex*ex + ey*ey;
+                    // Hemispherical cap: distance to nearest endpoint
+                    Coord ex = (dot < zero) ? (fromInt<Coord>(px) - x0)
+                                            : (fromInt<Coord>(px) - x1);
+                    Coord ey = (dot < zero) ? (fromInt<Coord>(py) - y0)
+                                            : (fromInt<Coord>(py) - y1);
+                    Coord ed2 = ex * ex + ey * ey;
                     if (ed2 < r_max2) {
                         fl::u8 idx = coordToU8(aaRatio(ed2, r_max2, inv_r_max2));
                         PixelT c = color;
                         c.nscale8(FL_PGM_READ_BYTE_NEAR(&detail::distanceAA_LUT[idx]));
-                        addPixelToBuffer(pixels, width, height, px_int, py_int, c);
+                        *ptr += c;
                     }
                 } else if (cap == LineCap::SQUARE) {
-                    // Rectangular extension: extend t range by r_max/len
-                    Coord len = sqrt(len2);  // Uses gfx::sqrt for s16x16, std::sqrt for float
-                    Coord t_ext = r_max / len;
-                    if (t >= -t_ext && t <= one + t_ext) {
-                        fl::u8 idx = coordToU8(aaRatio(dist2, r_max2, inv_r_max2));
+                    // Rectangular extension
+                    if (dot >= zero - dot_ext && dot <= len2 + dot_ext) {
+                        Coord ratio = abs_cross * inv_threshold;
+                        fl::u8 linear_idx = coordToU8(ratio);
+                        fl::u8 sq_idx = static_cast<fl::u8>(
+                            static_cast<fl::u16>(linear_idx) * linear_idx / 255u);
                         PixelT c = color;
-                        c.nscale8(FL_PGM_READ_BYTE_NEAR(&detail::distanceAA_LUT[idx]));
-                        addPixelToBuffer(pixels, width, height, px_int, py_int, c);
+                        c.nscale8(FL_PGM_READ_BYTE_NEAR(&detail::distanceAA_LUT[sq_idx]));
+                        *ptr += c;
                     }
                 }
-                // FLAT: pixels outside [0,1] are silently dropped (current behavior)
+                // FLAT: pixels outside [0,1] are silently dropped
             }
+
+            // Incremental update: only Coord additions per pixel
+            cross = cross + dy;
+            dot = dot + dx;
+            ++ptr;
         }
+
+        // Incremental row update: only Coord additions
+        cross_row = cross_row - dx;
+        dot_row = dot_row + dy;
     }
 }
 
