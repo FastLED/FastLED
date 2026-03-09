@@ -46,13 +46,15 @@ namespace platforms {
 class CoroutineRuntimeEsp32 : public ICoroutineRuntime {
 public:
     void pumpCoroutines(fl::u32 us) override {
-        fl::u32 ms = us / 1000;
-        fl::u32 remainder_us = us % 1000;
-        if (ms > 0) {
-            vTaskDelay(pdMS_TO_TICKS(ms));
-        }
-        if (remainder_us > 0) {
-            ::delayMicroseconds(remainder_us);
+        // Convert microseconds to ticks. On a 1 kHz tick rate 1 tick ≈ 1 ms;
+        // on 100 Hz it's 10 ms.
+        const fl::u32 tick_period_us = 1000000u / configTICK_RATE_HZ;
+        fl::u32 ticks = us / tick_period_us;
+
+        if (ticks > 0) {
+            vTaskDelay(ticks);
+        } else {
+            taskYIELD();
         }
     }
 };

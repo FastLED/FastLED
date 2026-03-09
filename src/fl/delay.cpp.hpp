@@ -184,7 +184,7 @@ void delay(u32 ms, bool run_async) {
 #endif
 
   if (run_async && ms > 0) {
-    async_run(ms);
+    async_run(ms * 1000);
   } else {
     fl::platforms::delay(ms);  // Use platform layer for raw delay
   }

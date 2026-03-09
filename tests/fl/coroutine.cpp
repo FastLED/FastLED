@@ -96,7 +96,7 @@ FL_TEST_CASE("coroutine - task::coroutine runs function") {
     FL_CHECK(coro.isCoroutine());
 
     for (int elapsed = 0; elapsed < 500 && !completed.load(); elapsed += 5) {
-        async_run(1);
+        async_run(1000);
         delay(5);
     }
 
@@ -122,7 +122,7 @@ FL_TEST_CASE("coroutine - two coroutines both complete") {
     auto coro2 = task::coroutine(config2);
 
     for (int elapsed = 0; elapsed < 500 && completed_count.load() < 2; elapsed += 5) {
-        async_run(1);
+        async_run(1000);
         delay(5);
     }
 

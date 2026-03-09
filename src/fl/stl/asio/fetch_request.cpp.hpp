@@ -114,7 +114,7 @@ void FetchRequest::update() {
 
 void FetchRequest::handle_dns_lookup() {
     // Pump async system before DNS to keep server responsive
-    fl::async_run();
+    fl::async_run(1000);
 
     FL_WARN("[FETCH] Resolving hostname: " << hostname);
 
@@ -123,7 +123,7 @@ void FetchRequest::handle_dns_lookup() {
     dns_result = gethostbyname(hostname.c_str());
 
     // Pump async system after DNS to resume server pumping
-    fl::async_run();
+    fl::async_run(1000);
 
     if (!dns_result) {
         complete_error("DNS lookup failed");

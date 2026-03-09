@@ -187,7 +187,7 @@ response perform_http_request(const fl::string& url, const fetch_options& reques
                 return resp;
             }
             // Timeout or no data yet - pump async system to allow server to process
-            async_run();
+            async_run(0);
         }
     }
 
@@ -247,7 +247,7 @@ response perform_http_request(const fl::string& url, const fetch_options& reques
 #endif
             if (err == SOCKET_ERROR_WOULD_BLOCK) {
                 // No data available yet - pump async system to allow server to process
-                async_run();
+                async_run(0);
                 retries++;
 
                 // Small delay to avoid busy-waiting
@@ -431,7 +431,7 @@ public:
 
     void onEndFrame() override {
         // Update all async tasks (fetch, timers, etc.) at the end of each frame
-        fl::async_run();
+        fl::async_run(0);
     }
 };
 
@@ -633,7 +633,7 @@ fl::promise<response> fetch_request(const fl::string& url, const RequestOptions&
 void fetch_update() {
     // Legacy function - use fl::async_run() for new code
     // This provides backwards compatibility for existing code
-    fl::async_run();
+    fl::async_run(0);
 }
 
 fl::size fetch_active_requests() {

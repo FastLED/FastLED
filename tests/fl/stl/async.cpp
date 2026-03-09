@@ -181,12 +181,52 @@ FL_TEST_CASE("fl::async_run") {
         mgr.register_runner(&runner);
 
         FL_CHECK_EQ(runner.update_count, 0);
-        async_run();
+        async_run(0);
         FL_CHECK_EQ(runner.update_count, 1);
-        async_run();
+        async_run(0);
         FL_CHECK_EQ(runner.update_count, 2);
 
         // Cleanup
+        mgr.unregister_runner(&runner);
+    }
+}
+
+FL_TEST_CASE("fl::async_run reentrancy guard") {
+    FL_SUBCASE("nested async_run is skipped") {
+        AsyncManager& mgr = AsyncManager::instance();
+
+        // Runner that calls async_run from within its update() — re-entrant
+        struct ReentrantRunner : public async_runner {
+            size_t update_count = 0;
+            size_t nested_update_count = 0;
+            bool tried_reentry = false;
+
+            void update() override {
+                update_count++;
+                if (!tried_reentry) {
+                    tried_reentry = true;
+                    size_t before = update_count;
+                    // This should be detected as re-entrancy and skipped
+                    async_run(0);
+                    // update_count should NOT have increased from the nested call
+                    nested_update_count = update_count - before;
+                }
+            }
+            bool has_active_tasks() const override { return false; }
+            size_t active_task_count() const override { return 0; }
+        };
+
+        ReentrantRunner runner;
+        mgr.register_runner(&runner);
+
+        async_run(0);
+
+        FL_CHECK(runner.tried_reentry);
+        // The nested async_run should have been skipped, so the runner
+        // should NOT have been updated again from within the nested call
+        FL_CHECK_EQ(runner.nested_update_count, 0);
+        FL_CHECK_EQ(runner.update_count, 1);
+
         mgr.unregister_runner(&runner);
     }
 }
@@ -237,8 +277,8 @@ FL_TEST_CASE("fl::async_run with ms") {
         mgr.register_runner(&runner);
 
         FL_CHECK_EQ(runner.update_count, 0);
-        async_run(1);
-        // async_run(1) calls pumps and yields 1ms
+        async_run(1000);
+        // async_run(1000) pumps and yields for 1000us (1ms)
         FL_CHECK(runner.update_count >= 1);
 
         // Cleanup
@@ -621,7 +661,7 @@ FL_TEST_CASE("await in coroutine - basic resolution") {
     // Wait for coroutine to complete (max 200ms to account for slow CI)
     int timeout = 0;
     while (!test_completed.load() && timeout < 200) {
-        async_run(1);  // Release lock and pump async tasks
+        async_run(1000);  // Release lock and pump async tasks
         delay(5);
         timeout += 5;
     }
@@ -659,7 +699,7 @@ FL_TEST_CASE("await in coroutine - error handling") {
     // Wait for completion (max 200ms to account for slow CI)
     int timeout = 0;
     while (!test_completed.load() && timeout < 200) {
-        async_run(1);
+        async_run(1000);
         delay(5);
         timeout += 5;
     }
@@ -696,7 +736,7 @@ FL_TEST_CASE("await in coroutine - already completed promise") {
     // Should complete quickly (within 200ms to account for slow CI)
     int timeout = 0;
     while (!test_completed.load() && timeout < 200) {
-        async_run(1);
+        async_run(1000);
         delay(5);
         timeout += 5;
     }
@@ -745,7 +785,7 @@ FL_TEST_CASE("await in coroutine - multiple concurrent coroutines") {
         if (timeout % 100 == 0) {
             printf("Test: timeout=%d, completed=%d, sum=%d\n", timeout, completed_count.load(), sum.load());
         }
-        async_run(1);
+        async_run(1000);
         delay(5);
         timeout += 5;
     }
@@ -783,7 +823,7 @@ FL_TEST_CASE("await in coroutine - invalid promise") {
     // Should complete quickly (within 200ms to account for slow CI)
     int timeout = 0;
     while (!test_completed.load() && timeout < 200) {
-        async_run(1);
+        async_run(1000);
         delay(5);
         timeout += 5;
     }
@@ -821,7 +861,7 @@ FL_TEST_CASE("await in coroutine - sequential awaits") {
     // Wait for completion (max 200ms to account for slow CI)
     int timeout = 0;
     while (!test_completed.load() && timeout < 200) {
-        async_run(1);
+        async_run(1000);
         delay(5);
         timeout += 5;
     }
@@ -860,7 +900,7 @@ FL_TEST_CASE("await vs await_top_level - CPU usage comparison") {
     // Wait for coroutine to complete
     int timeout = 0;
     while (!await_completed.load() && timeout < 200) {
-        async_run(1);
+        async_run(1000);
         delay(5);
         timeout += 5;
     }
@@ -948,13 +988,13 @@ FL_TEST_CASE("global coordination - no concurrent execution") {
         active_threads.fetch_sub(1);
 
         // Yield to allow coroutine to run (releases global lock)
-        async_run(1);
+        async_run(1000);
     }
 
     // Wait for coroutine to complete
     int timeout = 0;
     while (!test_completed.load() && timeout < 500) {
-        async_run(1);  // Keep yielding to let coroutine finish
+        async_run(1000);  // Keep yielding to let coroutine finish
         delay(1);
         timeout += 1;
     }
@@ -1009,7 +1049,7 @@ FL_TEST_CASE("global coordination - await releases lock for other threads") {
     // This avoids race condition where one coroutine finishes before the other
     int timeout = 0;
     while ((coroutine1_progress.load() < 2 || coroutine2_progress.load() < 2) && timeout < 500) {
-        async_run(1);
+        async_run(1000);
         delay(1);
         timeout += 1;
     }

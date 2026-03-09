@@ -1,6 +1,7 @@
 #include "fl/stl/async.h"
 #include "fl/stl/functional.h"
 #include "fl/singleton.h"
+#include "fl/scope_exit.h"
 #include "fl/stl/thread_local.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/task.h"
@@ -73,22 +74,32 @@ size_t AsyncManager::total_active_tasks() const {
 
 // Public API functions
 
-void async_run(fl::u32 ms) {
+void async_run(fl::u32 microseconds) {
+    // Re-entrancy guard: detect if async_run is called from within async_run
+    static fl::ThreadLocal<bool> s_running(false); // okay static in header
+    bool& running = s_running.access();
+    if (running) {
+        FL_WARN_ONCE("async_run re-entrancy detected, skipping nested call");
+        return;
+    }
+    running = true;
+    auto guard = fl::make_scope_exit([&running]() { running = false; });
+
     // Calculate start time with rollover protection
-    fl::u32 begin_time = fl::millis();
+    fl::u32 begin_time = fl::micros();
 
     // Lambda to get elapsed time (rollover-safe)
     auto elapsed = [begin_time]() {
-        return fl::millis() - begin_time;
+        return fl::micros() - begin_time;
     };
 
     // Lambda to get remaining time until deadline expires
-    auto remaining = [elapsed, ms]() -> fl::u32 {
+    auto remaining = [elapsed, microseconds]() -> fl::u32 {
         fl::u32 e = elapsed();
-        if (e >= ms) {
+        if (e >= microseconds) {
             return 0;
         }
-        return ms - e;
+        return microseconds - e;
     };
 
     // Lambda to check if deadline has expired
@@ -107,8 +118,8 @@ void async_run(fl::u32 ms) {
         // Give CPU time to background coroutines/tasks.
         // No-op on platforms without background coroutines (Arduino, WASM).
         if (time_left) {
-            fl::u32 sleep_ms = fl::min(1u, time_left);
-            fl::platforms::ICoroutineRuntime::instance().pumpCoroutines(sleep_ms * 1000);
+            fl::u32 sleep_us = fl::min(1000u, time_left);
+            fl::platforms::ICoroutineRuntime::instance().pumpCoroutines(sleep_us);
         }
     } while (!expired());
 }
