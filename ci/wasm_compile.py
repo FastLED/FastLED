@@ -1,7 +1,4 @@
-import argparse
-import subprocess
 import sys
-from pathlib import Path
 
 
 def _print_panel(title: str, lines: list[str]) -> None:
@@ -17,7 +14,9 @@ def _print_panel(title: str, lines: list[str]) -> None:
     print(f"+{border}+\n")
 
 
-def parse_args() -> tuple[argparse.Namespace, list[str]]:
+def parse_args() -> tuple:
+    import argparse
+
     parser = argparse.ArgumentParser(description="Compile wasm")
     parser.add_argument(
         "sketch_dir",
@@ -93,6 +92,8 @@ def main() -> int:
     print(f"Step 1/{steps}: Compiling WASM...")
 
     # Output to examples/<name>/fastled_js/fastled.js to match expected location
+    from pathlib import Path
+
     output_dir = Path("examples") / example_name / "fastled_js"
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -122,6 +123,8 @@ def main() -> int:
 
     # Run tests if --run flag is provided
     if args.run:
+        import subprocess
+
         print(f"\nStep 2/2: Running Playwright tests...\n")
 
         test_cmd = [sys.executable, "-m", "ci.wasm_test", example_name]

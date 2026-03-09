@@ -37,6 +37,11 @@ _fast_wasm_ld: Optional[str] = None
 _emscripten_dir: Optional[Path] = None
 _emcc_module: Optional[object] = None
 
+# Native launcher paths (ctc-emcc, ctc-wasm-ld)
+_native_tools_dir: Optional[Path] = None
+_native_emcc: Optional[str] = None
+_native_wasm_ld: Optional[str] = None
+
 
 def _get_platform_info() -> tuple[str, str]:
     """Detect platform and architecture without importing clang_tool_chain."""
@@ -183,6 +188,63 @@ def get_emar() -> str:
     if _fast_emar is not None:
         return _fast_emar
     return "clang-tool-chain-emar"
+
+
+def ensure_native_tools() -> bool:
+    """Compile ctc-emcc and ctc-wasm-ld native launchers if not already present.
+
+    Uses clang-tool-chain's compile-native command to build native C++ wrappers
+    that bypass Python/Node startup overhead for emcc and wasm-ld invocations.
+    The binaries are cached in .build/native-tools/ and reused across builds.
+
+    Returns True if native tools are available.
+    """
+    global _native_tools_dir, _native_emcc, _native_wasm_ld
+
+    if _native_emcc is not None:
+        return True
+
+    project_root = Path(__file__).parent.parent
+    tools_dir = project_root / ".build" / "native-tools"
+    _native_tools_dir = tools_dir
+
+    is_windows = platform.system().lower() == "windows"
+    exe_suffix = ".exe" if is_windows else ""
+
+    emcc_bin = tools_dir / f"ctc-emcc{exe_suffix}"
+    wasm_ld_bin = tools_dir / f"ctc-wasm-ld{exe_suffix}"
+
+    if emcc_bin.exists() and wasm_ld_bin.exists():
+        _native_emcc = str(emcc_bin)
+        _native_wasm_ld = str(wasm_ld_bin)
+        return True
+
+    # Compile native tools using clang-tool-chain
+    try:
+        from clang_tool_chain.commands.compile_native import compile_native
+
+        print("[WASM] Compiling native WASM launchers (one-time)...")
+        rc = compile_native(str(tools_dir))
+        if rc == 0 and emcc_bin.exists() and wasm_ld_bin.exists():
+            _native_emcc = str(emcc_bin)
+            _native_wasm_ld = str(wasm_ld_bin)
+            return True
+    except Exception as e:
+        print(f"[WASM] Native tool compilation failed: {e}")
+
+    return False
+
+
+def get_native_emcc() -> Optional[str]:
+    """Get path to native ctc-emcc launcher, or None if not available."""
+    ensure_native_tools()
+    return _native_emcc
+
+
+def get_native_wasm_ld() -> Optional[str]:
+    """Get path to native ctc-wasm-ld launcher, or None if not available."""
+    ensure_native_tools()
+    return _native_wasm_ld
 
 
 def _load_emcc_module():

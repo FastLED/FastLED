@@ -22,11 +22,8 @@ Uses esptool.py when available, falls back to manual binary merge if not install
 """
 
 import os
-import subprocess
 import sys
-import time
-from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 
 if TYPE_CHECKING:
@@ -46,6 +43,9 @@ def handle_docker_compilation(config: CompilationConfig) -> int:
     Returns:
         Exit code (0 for success, non-zero for failure)
     """
+    import subprocess
+    from pathlib import Path
+
     from ci.compiler.docker_manager import (
         DockerCompilationOrchestrator,
         DockerConfig,
@@ -226,16 +226,34 @@ def _wasm_fast_path() -> int | None:
     if has_verbose:
         os.environ["VERBOSE"] = "1"
 
-    saved_argv = sys.argv
-    sys.argv = ["ci.wasm_compile", f"examples/{example}"]
     if has_run:
+        # --run needs wasm_compile for Playwright test orchestration
+        saved_argv = sys.argv
+        sys.argv = ["ci.wasm_compile", f"examples/{example}"]
         sys.argv.append("--run")
-    try:
-        from ci.wasm_compile import main as wasm_compile_main
+        try:
+            from ci.wasm_compile import main as wasm_compile_main
 
-        return wasm_compile_main()
-    finally:
-        sys.argv = saved_argv
+            return wasm_compile_main()
+        finally:
+            sys.argv = saved_argv
+
+    # Compile-only fast path: call wasm_build.build() directly,
+    # skipping both wasm_compile and argparse (~47ms saved)
+    from pathlib import Path
+
+    output_dir = Path("examples") / example / "fastled_js"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_js = output_dir / "fastled.js"
+
+    from ci.wasm_build import build as wasm_build
+
+    rc = wasm_build(example=example, output=str(output_js), verbose=has_verbose)
+    if rc == 0:
+        print("WASM compilation successful")
+    else:
+        print("WASM compilation failed")
+    return rc
 
 
 def main() -> int:
@@ -245,7 +263,11 @@ def main() -> int:
     if wasm_rc is not None:
         return wasm_rc
 
-    # Non-WASM path: install signal handler and load heavy imports
+    # Non-WASM path: load stdlib + heavy imports (~25ms + ~350ms)
+    import time
+    from pathlib import Path
+    from typing import Optional
+
     from ci.util.global_interrupt_handler import install_signal_handler
 
     install_signal_handler()

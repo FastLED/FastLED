@@ -577,11 +577,27 @@ def compile_sketch(
 
     print(f"[WASM] Compiling sketch: {wrapper_path.name}")
 
-    # Fast path: call clang directly, bypassing emcc Python overhead
+    # Native path: ctc-emcc handles command capture + caching internally.
+    # Only one command capture ever happens (inside ctc-emcc's auto-cache).
+    from ci.wasm_tools import get_native_emcc
+
+    native_emcc = get_native_emcc()
+    if native_emcc is not None:
+        if verbose:
+            print(f"[WASM] Using native emcc: {native_emcc}")
+        result = subprocess.run(
+            [native_emcc] + emcc_args,
+            cwd=str(PROJECT_ROOT),
+        )
+        if result.returncode == 0:
+            return object_path
+        print(f"[WASM] Sketch compilation failed with return code {result.returncode}")
+        return None
+
+    # Python fallback (no native tools): two-tier intercept
     if _fast_compile(wrapper_path, object_path, build_dir, emcc_args, verbose):
         return object_path
 
-    # Full path: run emcc with verbose capture to learn clang command
     if verbose:
         print(f"[WASM] Compile args: {emcc_args}")
 
@@ -1015,48 +1031,36 @@ def generate_manifest(example_name: str, output_dir: Path) -> None:
         json.dump(data_files, f, indent=2)
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Build FastLED sketch to WASM using Meson + Ninja"
-    )
-    parser.add_argument("--example", required=True, help="Example name (e.g., Blink)")
-    parser.add_argument("-o", "--output", required=True, help="Output .js file path")
-    parser.add_argument(
-        "--mode",
-        default="quick",
-        choices=["debug", "quick", "release"],
-        help="Build mode (default: quick)",
-    )
-    parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
-    parser.add_argument("--force", action="store_true", help="Force rebuild")
-    parser.add_argument(
-        "--just-compile", action="store_true", help="Ignored (kept for compatibility)"
-    )
-
-    args = parser.parse_args()
-
+def build(
+    example: str,
+    output: str,
+    mode: str = "quick",
+    verbose: bool = False,
+    force: bool = False,
+) -> int:
+    """Core build function — callable directly without argparse overhead."""
     try:
         start_time = time.time()
-        build_dir = get_build_dir(args.mode)
-        sketch_cache_dir = get_sketch_cache_dir(args.example)
-        output_js = Path(args.output)
+        build_dir = get_build_dir(mode)
+        sketch_cache_dir = get_sketch_cache_dir(example)
+        output_js = Path(output)
         output_dir = output_js.parent
 
-        print(f"[WASM] Building {args.example} (mode: {args.mode})")
+        print(f"[WASM] Building {example} (mode: {mode})")
 
         # Step 1: Configure meson
-        if not ensure_meson_configured(build_dir, args.mode, args.force):
+        if not ensure_meson_configured(build_dir, mode, force):
             return 1
 
         # Step 2: Build library via ninja (skipped if source fingerprint matches)
         lib_start = time.time()
-        lib_ok, lib_was_rebuilt = build_library(build_dir, args.verbose)
+        lib_ok, lib_was_rebuilt = build_library(build_dir, verbose)
         if not lib_ok:
             return 1
 
         # Step 2b: Build sketch-specific PCH (invalidated when library sources change)
         sketch_pch = build_sketch_pch(
-            build_dir, args.mode, lib_was_rebuilt=lib_was_rebuilt, verbose=args.verbose
+            build_dir, mode, lib_was_rebuilt=lib_was_rebuilt, verbose=verbose
         )
         if sketch_pch is None:
             print("[WASM] WARNING: Sketch PCH build failed, continuing without PCH")
@@ -1064,10 +1068,8 @@ def main() -> int:
 
         # Step 3: Create wrapper and compile sketch (per-sketch cache)
         sketch_start = time.time()
-        wrapper = create_wrapper(args.example, sketch_cache_dir)
-        sketch_obj = compile_sketch(
-            wrapper, build_dir, sketch_cache_dir, args.mode, args.verbose
-        )
+        wrapper = create_wrapper(example, sketch_cache_dir)
+        sketch_obj = compile_sketch(wrapper, build_dir, sketch_cache_dir, mode, verbose)
         if sketch_obj is None:
             return 1
         sketch_time = time.time() - sketch_start
@@ -1076,14 +1078,14 @@ def main() -> int:
         link_start = time.time()
         output_dir.mkdir(parents=True, exist_ok=True)
         if not link_wasm(
-            sketch_obj, build_dir, sketch_cache_dir, output_js, args.mode, args.verbose
+            sketch_obj, build_dir, sketch_cache_dir, output_js, mode, verbose
         ):
             return 1
         link_time = time.time() - link_start
 
         # Step 5: Copy templates and generate manifest
         copy_templates(output_dir)
-        generate_manifest(args.example, output_dir)
+        generate_manifest(example, output_dir)
 
         total_time = time.time() - start_time
         print(f"\n[WASM] Build successful!")
@@ -1102,6 +1104,25 @@ def main() -> int:
 
         traceback.print_exc()
         return 1
+
+
+def main() -> int:
+    """CLI entry point — parses args and delegates to build()."""
+    parser = argparse.ArgumentParser(description="Build WASM example")
+    parser.add_argument("--example", required=True, help="Example name (e.g., Blink)")
+    parser.add_argument("-o", "--output", required=True, help="Output JS file path")
+    parser.add_argument(
+        "--mode",
+        default="quick",
+        choices=["quick", "debug", "release"],
+        help="Build mode",
+    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
+    parser.add_argument(
+        "--force", action="store_true", help="Force meson reconfiguration"
+    )
+    args = parser.parse_args()
+    return build(args.example, args.output, args.mode, args.verbose, args.force)
 
 
 if __name__ == "__main__":
