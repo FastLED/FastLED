@@ -321,7 +321,6 @@ fl::shared_ptr<IChannelDriver> ChannelManager::selectDriverForChannel(const Chan
 
 template<typename Condition>
 bool ChannelManager::waitForCondition(Condition condition, u32 timeoutMs) {
-    const u32 POLL_INTERVAL_US = 100;  // Target 100µs between polls
     const u32 startTime = timeoutMs > 0 ? millis() : 0;
 
     while (!condition()) {
@@ -331,19 +330,12 @@ bool ChannelManager::waitForCondition(Condition condition, u32 timeoutMs) {
             return false;  // Timeout occurred
         }
 
-        u32 loopStart = micros();
-
-        // Run async tasks first (allows HTTP requests, timers, etc. to process)
-        async_run();
-
-        // Calculate elapsed time
-        u32 elapsed = micros() - loopStart;
-
-        // If we have time remaining in the 100µs interval, delay for the remainder
-        if (elapsed < POLL_INTERVAL_US) {
-            delayMicroseconds(POLL_INTERVAL_US - elapsed);
-        }
-        // Otherwise skip delay and go straight to next poll iteration
+        // Yield for 1ms with async task pumping. This allows WiFi, HTTP,
+        // coroutines, and other system tasks to run between polls.
+        // Previous approach used delayMicroseconds() which is a busy spin
+        // loop on ESP32, starving WiFi/lwIP and causing ~1fps WebSocket
+        // throughput when LEDs are active.
+        delay(1, /*run_async=*/true);
     }
 
     return true;  // Condition met
