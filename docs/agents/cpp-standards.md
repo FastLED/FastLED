@@ -5,6 +5,30 @@
 - **If you want to use a stdlib header like <type_traits>, look check for equivalent in `fl/type_traits.h`
 - **Vector type usage**: Use `fl::vector<T>` for dynamic arrays. The implementation is in `src/fl/stl/vector.h`.
 
+## API Object Pattern
+
+An **API object** is a public-facing wrapper header that lives alongside a directory of the same name containing implementation details. Users only ever `#include` the API header.
+
+**File layout:**
+```
+src/fl/stl/fixed_point.h        ← API object (public interface)
+src/fl/stl/fixed_point/          ← implementation directory
+    s16x16.h                     ← concrete type
+    base.h                       ← shared internals
+    ...
+```
+
+**Rules:**
+1. **One header, one directory, same name.** `foo.h` is the public API; `foo/` holds everything behind it.
+2. **The API object wraps, it doesn't implement.** It inherits from or delegates to concrete types in the directory. It adds uniformity (common interface, operator forwarding) and convenience (type promotion, free functions) but contains no core logic itself.
+3. **Concrete types are self-contained.** Each file in the directory is independently functional. The API object composes them — it doesn't modify them.
+4. **A trait maps parameters to concrete types.** A dispatch mechanism (e.g. `fixed_point_impl<IntBits, FracBits, Sign>`) selects the right concrete type at compile time. Invalid combinations fail via an undefined primary template.
+5. **The API object re-exposes everything through a uniform interface.** Operators, math functions, conversions — all forwarded. The wrapper adds no new logic, just type-safe forwarding.
+6. **Free functions live in the API header.** ADL-enabled free functions (e.g. `fl::sin()`, `fl::floor()`) are SFINAE-gated to the wrapper type, giving users a natural calling convention.
+7. **Cross-type interactions live in the API header.** Operations spanning multiple concrete types (e.g. `s0x32 * s16x16 → s16x16`) are defined at the bottom, after all types are visible.
+
+**Exemplar:** `src/fl/stl/fixed_point.h` wrapping `src/fl/stl/fixed_point/`
+
 ## Platform Dispatch Headers
 - FastLED uses dispatch headers in `src/platforms/` (e.g., `int.h`, `io_arduino.h`) that route to platform-specific implementations via coarse-to-fine detection. See `src/platforms/README.md` for details.
 - **Platform-specific headers (`src/platforms/**`)**: Header files typically do NOT need platform guards (e.g., `#ifdef ESP32`). Only the `.cpp` implementation files require guards. When the `.cpp` file is guarded from compilation, the header won't be included. This approach provides better IDE code assistance and IntelliSense support.
@@ -12,6 +36,50 @@
     - `header.h`: No platform guards (clean interface)
     - `header.cpp`: Has platform guards (e.g., `#ifdef ESP32 ... #endif`)
   - Avoid: Adding `#ifdef ESP32` to both header and implementation files (degrades IDE experience)
+
+## Sparse Platform Dispatch Pattern (`.cpp.hpp` files)
+
+A `.cpp.hpp` file is a **compile-time component router** that assembles a complete feature from sparse, per-platform fragments with null/no-op fallbacks.
+
+**Key properties:**
+1. **Sparse** — No platform implements everything. Each platform contributes only the pieces it supports (e.g., ESP32 provides FreeRTOS tasks but not cooperative coroutines; Teensy provides cooperative context switching but not OS tasks).
+2. **Fallback** — Missing pieces get a null/no-op implementation automatically. If a platform doesn't provide a component, the system still works — those features are simply inert.
+3. **Component routing** — The `.cpp.hpp` file examines platform defines and `#include`s the right fragments. It composes a complete system from whatever pieces the current platform offers.
+
+**Why `.cpp.hpp` instead of `.cpp` or `.h`?**
+- Contains **function definitions** (like `.cpp`) — so it can't be a normal `.h` (would cause multiple-definition linker errors).
+- Designed to be **`#include`d from exactly one translation unit** (like `.hpp`) — not compiled on its own.
+- Marked `// IWYU pragma: private` to enforce single inclusion.
+- The extension signals: "I contain implementations, I'm meant to be included, and I must only be included once."
+
+**Naming convention (future standard):**
+- **`component.impl.cpp.hpp`** — The router file. Contains the `#if`/`#elif` dispatch logic that selects which platform fragment to include. Included from exactly one translation unit.
+- **`component_<platform>.impl.hpp`** — Platform-specific implementation fragments that the router includes (e.g., `coroutine_esp32.impl.hpp`, `coroutine_wasm.impl.hpp`).
+
+The names make roles explicit: `.impl.cpp.hpp` = "implementation router, include me once." `_<platform>.impl.hpp` = "platform fragment, the router includes me."
+
+**Structure of a `.impl.cpp.hpp` router:**
+```cpp
+// IWYU pragma: private
+
+// Platform detection
+#include "platforms/arm/is_arm.h"
+#include "platforms/esp/is_esp.h"
+#include "platforms/wasm/is_wasm.h"
+
+#if defined(FL_IS_WASM)
+#include "platforms/wasm/feature_wasm.impl.hpp"
+#elif defined(FASTLED_STUB_IMPL)
+#include "platforms/stub/feature_stub.impl.hpp"
+#elif defined(FL_IS_ESP32)
+#include "platforms/esp/32/feature_esp32.impl.hpp"
+#else
+// Fallback: null/no-op implementation
+#include "platforms/shared/feature_null.impl.hpp"
+#endif
+```
+
+**Current exemplar:** `src/platforms/coroutine.cpp.hpp` (uses legacy naming, will migrate to `.impl.cpp.hpp`).
 
 ## Span Usage
 - **Automatic span conversion**: `fl::span<T>` has implicit conversion constructors - you don't need explicit `fl::span<T>(...)` wrapping in function calls. Example:

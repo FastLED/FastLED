@@ -7,6 +7,7 @@
 | Task | Read |
 |------|------|
 | Writing/editing C++ code | `docs/agents/cpp-standards.md` |
+| Creating an API wrapper type | `docs/agents/cpp-standards.md` → "API Object Pattern" |
 | Writing/editing Python code | `docs/agents/python-standards.md` |
 | Editing meson.build files | `docs/agents/build-system.md` |
 | Running tests, Docker, WASM, QEMU | `docs/agents/testing-commands.md` |
