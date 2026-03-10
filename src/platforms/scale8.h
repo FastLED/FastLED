@@ -1,7 +1,7 @@
 #pragma once
 
 #include "platforms/math8_config.h"
-#include "crgb.h"
+#include "fl/gfx/crgb.h"
 #include "fastled_config.h"
 #include "lib8tion/lib8static.h"
 #include "fl/compiler_control.h"

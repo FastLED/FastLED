@@ -177,37 +177,41 @@ FASTLED_FORCE_INLINE CRGB CRGB::lerp16( const CRGB& other, fract16 frac) const
 }
 
 
+namespace fl {
+
 /// @copydoc CRGB::operator+=
 FASTLED_FORCE_INLINE CRGB operator+( const CRGB& p1, const CRGB& p2)
 {
-    return CRGB( fl::qadd8( p1.r, p2.r),
-                 fl::qadd8( p1.g, p2.g),
-                 fl::qadd8( p1.b, p2.b));
+    return CRGB( qadd8( p1.r, p2.r),
+                 qadd8( p1.g, p2.g),
+                 qadd8( p1.b, p2.b));
 }
 
 /// @copydoc CRGB::operator-=
 FASTLED_FORCE_INLINE CRGB operator-( const CRGB& p1, const CRGB& p2)
 {
-    return CRGB( fl::qsub8( p1.r, p2.r),
-                 fl::qsub8( p1.g, p2.g),
-                 fl::qsub8( p1.b, p2.b));
+    return CRGB( qsub8( p1.r, p2.r),
+                 qsub8( p1.g, p2.g),
+                 qsub8( p1.b, p2.b));
 }
 
 /// @copydoc CRGB::operator*=
-FASTLED_FORCE_INLINE CRGB operator*( const CRGB& p1, fl::u8 d)
+FASTLED_FORCE_INLINE CRGB operator*( const CRGB& p1, u8 d)
 {
-    return CRGB( fl::qmul8( p1.r, d),
-                 fl::qmul8( p1.g, d),
-                 fl::qmul8( p1.b, d));
+    return CRGB( qmul8( p1.r, d),
+                 qmul8( p1.g, d),
+                 qmul8( p1.b, d));
 }
 
 /// Scale using CRGB::nscale8_video()
-FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, fl::u8 d)
+FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, u8 d)
 {
     CRGB retval( p1);
     retval.nscale8_video( d);
     return retval;
 }
+
+}  // namespace fl
 
 
 #undef FUNCTION_SCALE8
