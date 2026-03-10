@@ -5,7 +5,7 @@
 /// @brief Coroutine system interfaces — all declarations, no implementations
 ///
 /// This is the single entry point for coroutine interfaces.
-/// Consumers include this header; implementations are in coroutine.cpp.hpp.
+/// Consumers include this header; implementations are in coroutine.impl.cpp.hpp.
 
 #include "fl/stl/string.h"
 #include "fl/stl/function.h"

@@ -79,7 +79,7 @@ The names make roles explicit: `.impl.cpp.hpp` = "implementation router, include
 #endif
 ```
 
-**Current exemplar:** `src/platforms/coroutine.cpp.hpp` (uses legacy naming, will migrate to `.impl.cpp.hpp`).
+**Current exemplar:** `src/platforms/coroutine.impl.cpp.hpp`.
 
 ## Span Usage
 - **Automatic span conversion**: `fl::span<T>` has implicit conversion constructors - you don't need explicit `fl::span<T>(...)` wrapping in function calls. Example:

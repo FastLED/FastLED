@@ -2,7 +2,7 @@
 
 // IWYU pragma: private
 
-/// @file coroutine_runtime_wasm.hpp
+/// @file coroutine_runtime_wasm.impl.hpp
 /// @brief WASM coroutine runtime — pumps cooperative coroutine runner
 ///
 /// Uses JSPI-based context switching (via CoroutinePlatformWasm) to provide

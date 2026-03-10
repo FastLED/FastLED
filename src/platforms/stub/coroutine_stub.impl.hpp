@@ -2,7 +2,7 @@
 
 // IWYU pragma: private
 
-/// @file coroutine_stub.hpp
+/// @file coroutine_stub.impl.hpp
 /// @brief Host/Stub coroutine infrastructure — all implementations
 ///
 /// Contains the semaphore-based coroutine runner, thread-based task

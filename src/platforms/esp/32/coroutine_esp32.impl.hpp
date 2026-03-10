@@ -2,7 +2,7 @@
 
 // IWYU pragma: private
 
-/// @file coroutine_esp32.hpp
+/// @file coroutine_esp32.impl.hpp
 /// @brief ESP32 coroutine infrastructure — declarations and implementations
 ///
 /// Contains FreeRTOS-based coroutine runtime, task coroutine class,
@@ -197,7 +197,7 @@ bool TaskCoroutineESP32::isRunning() const {
 }
 
 //=============================================================================
-// Factory function — wired into platforms/coroutine.cpp.hpp dispatch
+// Factory function — wired into platforms/coroutine.impl.cpp.hpp dispatch
 //=============================================================================
 
 TaskCoroutinePtr createTaskCoroutine(fl::string name,

@@ -27,4 +27,4 @@
 // Coroutine implementations must come AFTER platform subdirectory builds because
 // they dispatch to platform-specific implementations that require macros
 // like FASTLED_STUB_IMPL (defined in stub/led_sysdefs_stub_generic.h)
-#include "platforms/coroutine.cpp.hpp" // ok include cpp.hpp
+#include "platforms/coroutine.impl.cpp.hpp" // ok include cpp.hpp

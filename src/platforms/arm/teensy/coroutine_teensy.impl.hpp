@@ -2,7 +2,7 @@
 
 // IWYU pragma: private
 
-/// @file coroutine_teensy.hpp
+/// @file coroutine_teensy.impl.hpp
 /// @brief Teensy 4.x coroutine infrastructure — declarations and implementations
 ///
 /// Contains ARM Cortex-M7 context switching, cooperative coroutine platform/runtime,
@@ -322,7 +322,7 @@ bool TaskCoroutineTeensy::isRunning() const {
 }
 
 //=============================================================================
-// Factory function — wired into platforms/coroutine.cpp.hpp dispatch
+// Factory function — wired into platforms/coroutine.impl.cpp.hpp dispatch
 //=============================================================================
 
 TaskCoroutinePtr createTaskCoroutine(fl::string name,

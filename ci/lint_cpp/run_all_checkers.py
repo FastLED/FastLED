@@ -37,6 +37,7 @@ from ci.lint_cpp.fastled_header_usage_checker import FastLEDHeaderUsageChecker
 from ci.lint_cpp.fl_is_defined_checker import FlIsDefinedChecker
 from ci.lint_cpp.google_member_style_checker import GoogleMemberStyleChecker
 from ci.lint_cpp.headers_exist_checker import HeadersExistChecker
+from ci.lint_cpp.impl_hpp_includes_checker import ImplHppIncludesChecker
 from ci.lint_cpp.include_after_namespace_checker import IncludeAfterNamespaceChecker
 from ci.lint_cpp.include_paths_checker import IncludePathsChecker
 from ci.lint_cpp.is_header_include_checker import IsHeaderIncludeChecker
@@ -154,6 +155,7 @@ def create_checkers(
     checkers_by_scope["global"] = [
         CppIncludeChecker(),
         CppHppIncludesChecker(),
+        ImplHppIncludesChecker(),
         IncludeAfterNamespaceChecker(),
         GoogleMemberStyleChecker(),
         NumericLimitMacroChecker(),

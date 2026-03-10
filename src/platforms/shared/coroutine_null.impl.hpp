@@ -1,6 +1,6 @@
 // IWYU pragma: private
 
-/// @file coroutine_null.hpp
+/// @file coroutine_null.impl.hpp
 /// @brief Null (no-op) coroutine implementations for platforms without OS support
 
 #include "platforms/coroutine.h"
