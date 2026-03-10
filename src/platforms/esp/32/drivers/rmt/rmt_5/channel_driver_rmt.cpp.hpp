@@ -29,6 +29,7 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/dbg.h"
 #include "fl/delay.h"
+#include "fl/stl/async.h"
 #include "fl/error.h"
 #include "fl/log.h"
 #include "fl/pin.h"
@@ -144,7 +145,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         int timeout_iterations = 100000; // 10 seconds at 100us per iteration
         DriverState state = poll();
         while (state.state != DriverState::READY && state.state != DriverState::ERROR && timeout_iterations > 0) {
-            fl::delayMicroseconds(100);
+            async_run(250, AsyncFlags::SYSTEM);
             timeout_iterations--;
             state = poll();
         }
@@ -206,11 +207,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         if (mEnqueuedChannels.empty()) {
             return;
         }
-        FL_ASSERT(mTransmittingChannels.empty(),
-                  "ChannelEngineRMT: Cannot show() while channels are still "
-                  "transmitting");
-        FL_ASSERT(poll() == DriverState::READY,
-                  "ChannelEngineRMT: Cannot show() while hardware is busy");
+        // Wait for previous transmission to complete
+        waitForReady();
 
         // Mark all channels as in use before transmission
         for (auto &channel : mEnqueuedChannels) {

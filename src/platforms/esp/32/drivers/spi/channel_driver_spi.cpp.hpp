@@ -342,10 +342,7 @@ void ChannelEngineSpi::show() {
     }
 
     // Wait for any previous pipeline to complete before starting new frame
-    while (mPipeline.mPhase != DmaPipelineState::IDLE) {
-        advancePipeline();
-        fl::delayMicroseconds(100);
-    }
+    waitForReady();
 
     // Release any channels from previous frame
     for (auto &channel : mChannels) {
@@ -550,9 +547,8 @@ void ChannelEngineSpi::beginBatchedTransmission(
                     FL_WARN_EVERY(10, "ChannelEngineSpi: Error during batch transmission");
                     break;
                 }
-                // Run async tasks and yield CPU while waiting
-                async_run();
-                taskYIELD();
+                // OS yield only while waiting for DMA
+                async_run(250, AsyncFlags::SYSTEM);
             }
 
             // Insert reset delay between batches (critical for LED protocol compliance)

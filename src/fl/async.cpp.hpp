@@ -74,7 +74,7 @@ size_t AsyncManager::total_active_tasks() const {
 
 // Public API functions
 
-void async_run(fl::u32 microseconds) {
+void async_run(fl::u32 microseconds, AsyncFlags flags) {
     // Re-entrancy guard: detect if async_run is called from within async_run
     static fl::ThreadLocal<bool> s_running(false); // okay static in header
     bool& running = s_running.access();
@@ -84,6 +84,10 @@ void async_run(fl::u32 microseconds) {
     }
     running = true;
     auto guard = fl::make_scope_exit([&running]() { running = false; });
+
+    const bool do_tasks = flags & AsyncFlags::TASKS;
+    const bool do_coroutines = flags & AsyncFlags::COROUTINES;
+    const bool do_system = flags & AsyncFlags::SYSTEM;
 
     // Calculate start time with rollover protection
     fl::u32 begin_time = fl::micros();
@@ -108,18 +112,24 @@ void async_run(fl::u32 microseconds) {
     };
 
     do  {
-        // Always pump all task systems
-        fl::Scheduler::instance().update();
-        AsyncManager::instance().update_all();
-        fl::yield();
+        // TASKS: Scheduler (fl::task timers) + AsyncManager (fetch, HTTP server, audio)
+        if (do_tasks) {
+            fl::Scheduler::instance().update();
+            AsyncManager::instance().update_all();
+        }
 
-        auto time_left = remaining();
+        // SYSTEM: Pure OS-level yield (vTaskDelay(0), thread yield, etc.)
+        if (do_system) {
+            fl::yield();
+        }
 
-        // Give CPU time to background coroutines/tasks.
-        // No-op on platforms without background coroutines (Arduino, WASM).
-        if (time_left) {
-            fl::u32 sleep_us = fl::min(1000u, time_left);
-            fl::platforms::ICoroutineRuntime::instance().pumpCoroutines(sleep_us);
+        // COROUTINES: Platform cooperative coroutines (pumpCoroutines)
+        if (do_coroutines) {
+            auto time_left = remaining();
+            if (time_left) {
+                fl::u32 sleep_us = fl::min(1000u, time_left);
+                fl::platforms::ICoroutineRuntime::instance().pumpCoroutines(sleep_us);
+            }
         }
     } while (!expired());
 }

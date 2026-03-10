@@ -96,9 +96,7 @@ void ChannelEngineLcdRgb::show() {
     }
 
     // Wait for previous transmission to complete
-    while (poll() != DriverState::READY) {
-        // Busy wait - poll() handles state transitions
-    }
+    waitForReady();
 
     // Group channels by timing configuration
     mChipsetGroups.clear();

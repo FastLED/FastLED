@@ -49,10 +49,33 @@
 #include "platforms/await.h"
 #include "fl/stl/atomic.h"      // for atomic
 #include "fl/stl/cstddef.h"     // for size_t
+#include "fl/stl/stdint.h"      // for uint8_t
 #include "fl/stl/vector.h"
 
 namespace fl {
 class string;  // Forward declaration
+
+/// @brief Flags controlling which subsystems async_run() pumps
+///
+/// - TASKS:      Scheduler (fl::task timers) + AsyncManager (fetch, HTTP server)
+/// - COROUTINES: Platform coroutines (pumpCoroutines — ESP32: vTaskDelay,
+///               Teensy: cooperative context switch, Stub: thread run)
+/// - SYSTEM:     Pure OS-level yield (vTaskDelay(0) on ESP32, thread yield on host)
+/// - ALL:        All subsystems (default)
+enum class AsyncFlags : uint8_t {
+    TASKS      = 1 << 0,
+    COROUTINES = 1 << 1,
+    SYSTEM     = 1 << 2,
+    ALL        = (1 << 0) | (1 << 1) | (1 << 2)
+};
+
+inline AsyncFlags operator|(AsyncFlags a, AsyncFlags b) {
+    return static_cast<AsyncFlags>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
+}
+
+inline bool operator&(AsyncFlags a, AsyncFlags b) {
+    return (static_cast<uint8_t>(a) & static_cast<uint8_t>(b)) != 0;
+}
 
 namespace detail {
 /// @brief Get reference to thread-local await recursion depth
@@ -99,23 +122,19 @@ private:
     fl::vector<async_runner*> mRunners;
 };
 
-/// @brief Run all registered async tasks once
+/// @brief Run selected async subsystems
 ///
-/// This function updates all registered async runners (fetch, timers, etc.)
-/// and the Scheduler, then yields to background threads/coroutines.
-///
-/// It is automatically called during:
-/// - FastLED engine events (onEndFrame)
-/// - delay() calls (every 1ms)
-/// - Manual calls for custom async pumping
+/// Pumps the requested subsystems and yields for up to `microseconds`.
 ///
 /// Usage:
-/// - `async_run()` — pump + yield for 1000us (1ms, default)
-/// - `async_run(0)` — pure pump, no yield
-/// - `async_run(10000)` — pump + yield for 10000us (10ms)
+/// - `async_run()` — pump ALL + yield for 1ms (default)
+/// - `async_run(0)` — pump ALL, no yield
+/// - `async_run(250, AsyncFlags::SYSTEM)` — OS yield only (for DMA wait loops)
+/// - `async_run(1000, AsyncFlags::TASKS | AsyncFlags::COROUTINES)` — skip OS yield
 ///
-/// @param microseconds Microseconds to yield to background threads (default 1000 = 1ms)
-void async_run(fl::u32 microseconds = 1000);
+/// @param microseconds  Budget in microseconds (default 1000 = 1ms)
+/// @param flags         Which subsystems to pump (default ALL)
+void async_run(fl::u32 microseconds = 1000, AsyncFlags flags = AsyncFlags::ALL);
 
 
 

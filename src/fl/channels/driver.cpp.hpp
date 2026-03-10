@@ -2,14 +2,12 @@
 #include "fl/channels/driver.h"
 #include "fl/log.h"
 #include "fl/stl/chrono.h"
-#include "fl/delay.h"
 #include "fl/stl/async.h"
 
 namespace fl {
 
 template<typename Condition>
 bool IChannelDriver::waitForCondition(Condition condition, u32 timeoutMs) {
-    const u32 POLL_INTERVAL_US = 100;  // Target 100µs between polls
     const u32 startTime = timeoutMs > 0 ? millis() : 0;
 
     while (!condition()) {
@@ -19,19 +17,9 @@ bool IChannelDriver::waitForCondition(Condition condition, u32 timeoutMs) {
             return false;  // Timeout occurred
         }
 
-        u32 loopStart = micros();
-
-        // Run async tasks first (allows HTTP requests, timers, etc. to process)
-        async_run();
-
-        // Calculate elapsed time
-        u32 elapsed = micros() - loopStart;
-
-        // If we have time remaining in the 100µs interval, delay for the remainder
-        if (elapsed < POLL_INTERVAL_US) {
-            delayMicroseconds(POLL_INTERVAL_US - elapsed);
-        }
-        // Otherwise skip delay and go straight to next poll iteration
+        // OS yield only — keeps WiFi/lwIP alive without pumping
+        // tasks or coroutines in the driver polling loop.
+        async_run(250, AsyncFlags::SYSTEM);
     }
 
     return true;  // Condition met

@@ -108,7 +108,8 @@ void ChannelDriverPARLIOImpl::setReversedPinOrder(bool reversed_pin_order) {
 void ChannelDriverPARLIOImpl::show() {
     FL_SCOPED_TRACE;
     if (!mEnqueuedChannels.empty()) {
-        FL_ASSERT(mTransmittingChannels.empty(), "ChannelDriverPARLIOImpl::show() - enqueue while mTransmittingChannels is not empty, indicating transmission is in progress");
+        // Wait for previous transmission to complete
+        waitForReady();
 
         // Mark all channels as in use before transmission
         for (auto& channel : mEnqueuedChannels) {

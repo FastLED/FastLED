@@ -7,7 +7,6 @@
 #include "fl/warn.h"
 #include "fl/log.h"
 #include "fl/engine_events.h"
-#include "fl/delay.h"
 #include "fl/stl/chrono.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/move.h"
@@ -330,12 +329,9 @@ bool ChannelManager::waitForCondition(Condition condition, u32 timeoutMs) {
             return false;  // Timeout occurred
         }
 
-        // Yield for 1ms with async task pumping. This allows WiFi, HTTP,
-        // coroutines, and other system tasks to run between polls.
-        // Previous approach used delayMicroseconds() which is a busy spin
-        // loop on ESP32, starving WiFi/lwIP and causing ~1fps WebSocket
-        // throughput when LEDs are active.
-        delay(1, /*run_async=*/true);
+        // OS yield only — keeps WiFi/lwIP alive without pumping
+        // tasks or coroutines during frame transitions (re-entrancy risk).
+        async_run(250, AsyncFlags::SYSTEM);
     }
 
     return true;  // Condition met
