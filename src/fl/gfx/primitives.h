@@ -70,6 +70,25 @@ inline fl::s16x16 fromFrac<fl::s16x16>(int p, int q) {
     return fl::s16x16::from_raw((p * fl::s16x16::SCALE) / q);
 }
 
+/// Divide Coord by 2 using shift (avoids expensive division on embedded).
+/// s16x16: raw right-shift (1 instruction). float: multiply by 0.5.
+template<typename T>
+inline T halfOf(T val) { return val / fromInt<T>(2); }
+
+template<>
+inline fl::s16x16 halfOf<fl::s16x16>(fl::s16x16 val) {
+    return fl::s16x16::from_raw(val.raw() >> 1);
+}
+
+template<>
+inline float halfOf<float>(float val) { return val * 0.5f; }
+
+template<>
+inline double halfOf<double>(double val) { return val * 0.5; }
+
+template<>
+inline int halfOf<int>(int val) { return val >> 1; }
+
 /// Helper to convert any coordinate type to int
 /// Supports: s16x16 (via to_int()), float, int, and other arithmetic types
 template<typename T>
@@ -190,6 +209,34 @@ inline void computeBandShift(fl::i32 band, fl::u8 &shift_out, fl::u16 &inv_out) 
     // Reciprocal: (255 * 256 + scaled/2) / scaled — rounds to nearest
     fl::u8 scaled = static_cast<fl::u8>(tmp);
     inv_out = static_cast<fl::u16>((65280u + (scaled >> 1)) / scaled);
+}
+
+/// Convert any Coord type to Q16.16 raw i32 for integer inner loops.
+/// s16x16: direct raw access (already Q16.16, zero overhead).
+/// float/double: multiply by 65536. int: shift left by 16.
+template<typename Coord>
+inline fl::i32 toQ16(Coord val) {
+    return static_cast<fl::i32>(val.to_float() * 65536.0f);
+}
+
+template<>
+inline fl::i32 toQ16<float>(float val) {
+    return static_cast<fl::i32>(val * 65536.0f);
+}
+
+template<>
+inline fl::i32 toQ16<double>(double val) {
+    return static_cast<fl::i32>(val * 65536.0);
+}
+
+template<>
+inline fl::i32 toQ16<int>(int val) {
+    return static_cast<fl::i32>(val) << 16;
+}
+
+template<>
+inline fl::i32 toQ16<fl::s16x16>(fl::s16x16 val) {
+    return val.raw();
 }
 
 /// Disc context: bundles per-circle constants into a struct passed by reference.
@@ -314,6 +361,115 @@ inline void renderRingRow(PixelT* buf, int w, int py,
         PixelT c = g.color; c.nscale8(br); *ptr += c;
         d2 += xd; xd += 131072; ++ptr; ++px;
     }
+}
+
+/// Stroke line context: bundles per-line constants into a struct passed by
+/// reference. This reduces function-call overhead on register-poor architectures
+/// (AVR: many i32 params → 1 pointer), matching the struct-based approach used
+/// in drawDisc/drawRing.
+template<typename PixelT>
+struct StrokeCtx {
+    fl::i32 threshold_q;
+    fl::i32 len2_q;
+    fl::i32 dx_q, dy_q;
+    fl::u8 aa_shift;
+    fl::u16 aa_inv;
+    fl::i32 x0_8, y0_8, x1_8, y1_8;
+    fl::i32 r_max2_8;
+    fl::u8 cap_shift;
+    fl::u16 cap_inv;
+    fl::i32 dot_ext_q;
+    LineCap cap;
+    PixelT color;
+    int xmin, xmax;
+};
+
+/// Render one scanline of a stroke line using phase-based scanning.
+/// Phase 1: Skip pixels outside the band (|cross| >= threshold).
+/// Phase 2: Process visible pixels (|cross| < threshold).
+/// Phase 3: Remaining pixels are outside — no iteration needed.
+/// AA uses precomputed shift+reciprocal — zero Coord multiplies.
+template<typename PixelT>
+inline void renderStrokeRow(PixelT* buf, int w, int py,
+                            fl::i32 cross_start, fl::i32 dot_start,
+                            const StrokeCtx<PixelT>& sc) {
+    PixelT* ptr = &buf[py * w + sc.xmin];
+    fl::i32 cross = cross_start;
+    fl::i32 dot = dot_start;
+    int px = sc.xmin;
+    const fl::i32 thr = sc.threshold_q;
+    const fl::i32 neg_thr = -thr;
+
+    // Phase 1: Skip pixels outside the band
+    while (px <= sc.xmax && (cross >= thr || cross < neg_thr)) {
+        cross += sc.dy_q;
+        dot += sc.dx_q;
+        ++ptr; ++px;
+    }
+
+    // Hoist per-row endcap ey values (py is constant within a row)
+    fl::i32 py8 = static_cast<fl::i32>(py) << 8;
+    fl::i32 ey8_y0 = py8 - sc.y0_8;
+    fl::i32 ey8_y1 = py8 - sc.y1_8;
+
+    // Phase 2: Process visible pixels (|cross| < threshold)
+    while (px <= sc.xmax && cross < thr && cross >= neg_thr) {
+        fl::i32 abs_cross = (cross < 0) ? -cross : cross;
+        bool on_segment = (dot >= 0 && dot <= sc.len2_q);
+
+        if (on_segment) {
+            // Integer AA: shift+multiply (no Coord multiply)
+            fl::u16 shifted = static_cast<fl::u16>(
+                static_cast<fl::u32>(abs_cross) >> sc.aa_shift);
+            fl::u8 linear_idx = static_cast<fl::u8>((shifted * sc.aa_inv) >> 8);
+            // Fast approximate x/255 ≈ (x + 1 + (x >> 8)) >> 8
+            fl::u16 sq = static_cast<fl::u16>(linear_idx) * linear_idx;
+            fl::u8 sq_idx = static_cast<fl::u8>((sq + 1 + (sq >> 8)) >> 8);
+            PixelT c = sc.color;
+            c.nscale8(FL_PGM_READ_BYTE_NEAR(&distanceAA_LUT[sq_idx]));
+            *ptr += c;
+        } else if (sc.cap == LineCap::ROUND) {
+            // Endpoint distance in 8.8 fixed-point
+            fl::i32 ex8;
+            fl::i16 ey_s;
+            if (dot < 0) {
+                ex8 = (static_cast<fl::i32>(px) << 8) - sc.x0_8;
+                ey_s = static_cast<fl::i16>(ey8_y0);
+            } else {
+                ex8 = (static_cast<fl::i32>(px) << 8) - sc.x1_8;
+                ey_s = static_cast<fl::i16>(ey8_y1);
+            }
+            fl::i16 ex_s = static_cast<fl::i16>(ex8);
+            // 16×16→32 multiply (4 MUL on AVR vs ~70 for 32×32)
+            fl::i32 ed2 = static_cast<fl::i32>(ex_s) * ex_s +
+                          static_cast<fl::i32>(ey_s) * ey_s;
+            if (ed2 < sc.r_max2_8) {
+                fl::u16 shifted = static_cast<fl::u16>(
+                    static_cast<fl::u32>(ed2) >> sc.cap_shift);
+                fl::u8 idx = static_cast<fl::u8>((shifted * sc.cap_inv) >> 8);
+                PixelT c = sc.color;
+                c.nscale8(FL_PGM_READ_BYTE_NEAR(&distanceAA_LUT[idx]));
+                *ptr += c;
+            }
+        } else if (sc.cap == LineCap::SQUARE) {
+            if (dot >= -sc.dot_ext_q && dot <= sc.len2_q + sc.dot_ext_q) {
+                fl::u16 shifted = static_cast<fl::u16>(
+                    static_cast<fl::u32>(abs_cross) >> sc.aa_shift);
+                fl::u8 linear_idx = static_cast<fl::u8>((shifted * sc.aa_inv) >> 8);
+                fl::u16 sq = static_cast<fl::u16>(linear_idx) * linear_idx;
+                fl::u8 sq_idx = static_cast<fl::u8>((sq + 1 + (sq >> 8)) >> 8);
+                PixelT c = sc.color;
+                c.nscale8(FL_PGM_READ_BYTE_NEAR(&distanceAA_LUT[sq_idx]));
+                *ptr += c;
+            }
+        }
+        // FLAT: pixels outside [0, len2] are silently dropped
+
+        cross += sc.dy_q;
+        dot += sc.dx_q;
+        ++ptr; ++px;
+    }
+    // Phase 3: remaining pixels are outside the band — nothing to do
 }
 
 }  // namespace detail
@@ -613,8 +769,9 @@ inline void drawRing(Canvas<PixelT>& canvas, const PixelT& color,
 // ---------------------------------------------------------------------------
 // drawStrokeLine: Cross-product approach with incremental updates
 // Perpendicular distance via cross-product; along-axis check via dot-product.
-// Only 4 Coord multiplies to seed, then pure Coord additions in inner loop.
-// Division replaced by multiply-by-reciprocal for AA computation.
+// Only 4 Coord multiplies to seed, then pure i32 additions in inner loop.
+// AA uses integer shift+reciprocal (same as drawDisc/drawRing) — no Coord
+// multiplies per pixel. Phase-based row scanning skips non-visible pixels.
 // ---------------------------------------------------------------------------
 template<typename PixelT, typename Coord>
 inline void drawStrokeLine(Canvas<PixelT>& canvas, const PixelT& color,
@@ -624,26 +781,28 @@ inline void drawStrokeLine(Canvas<PixelT>& canvas, const PixelT& color,
     int width = canvas.width;
     int height = canvas.height;
 
-    Coord dx = x1 - x0;
-    Coord dy = y1 - y0;
-    Coord zero = fromFrac<Coord>(0, 1);
-    if (dx == zero && dy == zero) return;
+    // Convert to Q8.8 fixed-point for all-integer setup
+    fl::i32 x0_8 = detail::toFixed8(x0), y0_8 = detail::toFixed8(y0);
+    fl::i32 x1_8 = detail::toFixed8(x1), y1_8 = detail::toFixed8(y1);
+    fl::i32 dx_8 = x1_8 - x0_8;
+    fl::i32 dy_8 = y1_8 - y0_8;
+    if (dx_8 == 0 && dy_8 == 0) return;
 
-    Coord one = fromInt<Coord>(1);
-    Coord len2 = dx * dx + dy * dy;
-    using fl::sqrt;
-    Coord len = sqrt(len2);
-    Coord r_max = thickness / fromInt<Coord>(2);
-    Coord threshold = r_max * len;  // |cross| < threshold ↔ within stroke width
+    // All-integer setup: i32 multiplies instead of Coord multiplies
+    fl::i32 len2_16 = dx_8 * dx_8 + dy_8 * dy_8;  // Q16.16
+    // isqrt of Q16.16 gives Q8.8 (sqrt halves fractional bits)
+    fl::i32 len_8 = static_cast<fl::i32>(
+        fl::isqrt32(static_cast<fl::u32>(len2_16)));
+    fl::i32 thickness_8 = detail::toFixed8(thickness);
+    fl::i32 r_max_8 = thickness_8 >> 1;  // shift instead of division
+    fl::i32 threshold_q = r_max_8 * len_8;  // Q16.16
 
-    if (threshold <= zero) return;
+    if (threshold_q <= 0) return;
 
-    Coord inv_threshold = one / threshold;
-
-    // Bounding box
-    int x0i = toInt(fl::floor(x0)), y0i = toInt(fl::floor(y0));
-    int x1i = toInt(fl::floor(x1)), y1i = toInt(fl::floor(y1));
-    int margin = toInt(fl::ceil(r_max)) + 2;
+    // Bounding box (all integer)
+    int x0i = x0_8 >> 8, y0i = y0_8 >> 8;
+    int x1i = x1_8 >> 8, y1i = y1_8 >> 8;
+    int margin = ((r_max_8 + 255) >> 8) + 2;  // ceil(r_max) + 2
     int xmin = (x0i < x1i ? x0i : x1i) - margin;
     int xmax = (x0i > x1i ? x0i : x1i) + margin;
     int ymin = (y0i < y1i ? y0i : y1i) - margin;
@@ -655,74 +814,45 @@ inline void drawStrokeLine(Canvas<PixelT>& canvas, const PixelT& color,
     if (ymax >= height) ymax = height - 1;
     if (xmin > xmax || ymin > ymax) return;
 
-    // Precompute for caps
-    Coord r_max2 = r_max * r_max;
-    Coord inv_r_max2 = one / r_max2;
-    Coord dot_ext = (cap == LineCap::SQUARE) ? threshold : zero;
+    // Q16.16 increments per pixel step
+    fl::i32 dx_q = dx_8 << 8;  // Q8.8 → Q16.16 (lower 8 bits zero)
+    fl::i32 dy_q = dy_8 << 8;
 
-    // Seed row-start cross and dot (4 Coord multiplies total, done once)
-    Coord rx_base = fromInt<Coord>(xmin) - x0;
-    Coord ry_row = fromInt<Coord>(ymin) - y0;
-    Coord cross_row = rx_base * dy - ry_row * dx;
-    Coord dot_row = rx_base * dx + ry_row * dy;
+    // Seed cross/dot in Q16.16 using i32 multiply (cheaper than Coord multiply)
+    fl::i32 rx_base_8 = (static_cast<fl::i32>(xmin) << 8) - x0_8;
+    fl::i32 ry_row_8 = (static_cast<fl::i32>(ymin) << 8) - y0_8;
+    fl::i32 cross_row_q = rx_base_8 * dy_8 - ry_row_8 * dx_8;  // Q16.16
+    fl::i32 dot_row_q = rx_base_8 * dx_8 + ry_row_8 * dy_8;    // Q16.16
+
+    fl::i32 len2_q = len_8 * len_8;  // Q16.16 (for dot comparison)
+    fl::i32 dot_ext_q = (cap == LineCap::SQUARE) ? threshold_q : 0;
+
+    // Bundle all constants into struct (reduces register pressure on AVR)
+    detail::StrokeCtx<PixelT> sc;
+    sc.threshold_q = threshold_q;
+    sc.len2_q = len2_q;
+    sc.dx_q = dx_q;
+    sc.dy_q = dy_q;
+    sc.dot_ext_q = dot_ext_q;
+    detail::computeBandShift(threshold_q, sc.aa_shift, sc.aa_inv);
+    sc.x0_8 = x0_8; sc.y0_8 = y0_8;
+    sc.x1_8 = x1_8; sc.y1_8 = y1_8;
+    sc.r_max2_8 = r_max_8 * r_max_8;
+    sc.cap_shift = 0; sc.cap_inv = 0;
+    if (cap == LineCap::ROUND && sc.r_max2_8 > 0) {
+        detail::computeBandShift(sc.r_max2_8, sc.cap_shift, sc.cap_inv);
+    }
+    sc.cap = cap;
+    sc.color = color;
+    sc.xmin = xmin; sc.xmax = xmax;
 
     for (int py = ymin; py <= ymax; ++py) {
-        Coord cross = cross_row;
-        Coord dot = dot_row;
-        PixelT* ptr = &pixels[py * width + xmin];
-
-        for (int px = xmin; px <= xmax; ++px) {
-            Coord abs_cross = (cross < zero) ? (zero - cross) : cross;
-
-            if (abs_cross < threshold) {
-                bool on_segment = (dot >= zero && dot <= len2);
-
-                if (on_segment) {
-                    // AA based on perpendicular distance
-                    Coord ratio = abs_cross * inv_threshold;
-                    fl::u8 linear_idx = coordToU8(ratio);
-                    fl::u8 sq_idx = static_cast<fl::u8>(
-                        static_cast<fl::u16>(linear_idx) * linear_idx / 255u);
-                    PixelT c = color;
-                    c.nscale8(FL_PGM_READ_BYTE_NEAR(&detail::distanceAA_LUT[sq_idx]));
-                    *ptr += c;
-                } else if (cap == LineCap::ROUND) {
-                    // Hemispherical cap: distance to nearest endpoint
-                    Coord ex = (dot < zero) ? (fromInt<Coord>(px) - x0)
-                                            : (fromInt<Coord>(px) - x1);
-                    Coord ey = (dot < zero) ? (fromInt<Coord>(py) - y0)
-                                            : (fromInt<Coord>(py) - y1);
-                    Coord ed2 = ex * ex + ey * ey;
-                    if (ed2 < r_max2) {
-                        fl::u8 idx = coordToU8(aaRatio(ed2, r_max2, inv_r_max2));
-                        PixelT c = color;
-                        c.nscale8(FL_PGM_READ_BYTE_NEAR(&detail::distanceAA_LUT[idx]));
-                        *ptr += c;
-                    }
-                } else if (cap == LineCap::SQUARE) {
-                    // Rectangular extension
-                    if (dot >= zero - dot_ext && dot <= len2 + dot_ext) {
-                        Coord ratio = abs_cross * inv_threshold;
-                        fl::u8 linear_idx = coordToU8(ratio);
-                        fl::u8 sq_idx = static_cast<fl::u8>(
-                            static_cast<fl::u16>(linear_idx) * linear_idx / 255u);
-                        PixelT c = color;
-                        c.nscale8(FL_PGM_READ_BYTE_NEAR(&detail::distanceAA_LUT[sq_idx]));
-                        *ptr += c;
-                    }
-                }
-                // FLAT: pixels outside [0,1] are silently dropped
-            }
-
-            // Incremental update: only Coord additions per pixel
-            cross = cross + dy;
-            dot = dot + dx;
-            ++ptr;
+        if (py >= 0 && py < height) {
+            detail::renderStrokeRow(pixels, width, py,
+                                    cross_row_q, dot_row_q, sc);
         }
-
-        // Incremental row update: only Coord additions
-        cross_row = cross_row - dx;
-        dot_row = dot_row + dy;
+        cross_row_q -= sc.dx_q;
+        dot_row_q += sc.dy_q;
     }
 }
 
