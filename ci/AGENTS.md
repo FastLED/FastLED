@@ -30,8 +30,8 @@
 ```python
 # tmp.py (created in project root)
 from ci.ci.clang_compiler import Compiler  # CORRECT import path
-import subprocess
-result = subprocess.run(['git', 'status'], capture_output=True, text=True)
+from running_process import RunningProcess  # NEVER use bare subprocess
+result = RunningProcess.run(['git', 'status'], check=False, timeout=10, capture_output=True, text=True)
 print(result.stdout)
 ```
 Then run: `uv run python tmp.py`

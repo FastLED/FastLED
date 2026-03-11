@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/gfx/canvas.h"  // IWYU pragma: keep
+#include "fl/gfx/draw_mode.h"
 #include "fl/gfx/detail/distance_lut.h"  // IWYU pragma: keep
 #include "fl/gfx/detail/integer_math.h"  // IWYU pragma: keep
 #include "fl/stl/fixed_point/s16x16.h"
@@ -114,13 +115,17 @@ inline int toInt<double>(const double& val) {
     return static_cast<int>(val);
 }
 
-/// Internal helper: add pixel to rectangular buffer with bounds checking
+/// Internal helper: add or set pixel to rectangular buffer with bounds checking
 /// Direct row-major indexing: pixels[y * width + x]
-template<typename PixelT>
+/// Templated on Overwrite for compile-time dispatch (no per-pixel branch).
+template<typename PixelT, bool Overwrite>
 inline void addPixelToBuffer(PixelT* pixels, int width, int height,
                               int x, int y, const PixelT& color) {
     if (x >= 0 && x < width && y >= 0 && y < height) {
-        pixels[y * width + x] += color;
+        if (Overwrite)
+            pixels[y * width + x] = color;
+        else
+            pixels[y * width + x] += color;
     }
 }
 
@@ -239,6 +244,27 @@ inline fl::i32 toQ16<fl::s16x16>(fl::s16x16 val) {
     return val.raw();
 }
 
+/// Fast iterative integer square root for runtime use.
+/// ~16 iterations (loop, no recursion) vs ~31 recursive calls in fl::isqrt32.
+/// Produces identical results to fl::isqrt32 — floor(sqrt(x)).
+inline fl::u16 fastIsqrt32(fl::u32 x) {
+    if (x == 0) return 0;
+    fl::u32 result = 0;
+    fl::u32 bit = fl::u32(1) << 30;
+    while (bit > x) bit >>= 2;
+    while (bit != 0) {
+        fl::u32 rb = result + bit;
+        if (x >= rb) {
+            x -= rb;
+            result = (result >> 1) + bit;
+        } else {
+            result >>= 1;
+        }
+        bit >>= 2;
+    }
+    return static_cast<fl::u16>(result);
+}
+
 /// Disc context: bundles per-circle constants into a struct passed by reference.
 /// This reduces function-call overhead on register-poor architectures (AVR: 12 params
 /// → 1 pointer), matching the struct-based approach used in hand-optimized code.
@@ -266,10 +292,9 @@ struct RingCtx {
 };
 
 /// Render one scanline of a disc using incremental d².
+/// Templated on Overwrite for compile-time dispatch (no per-pixel branch).
 /// Uses (n+1)² = n² + 2n + 1 identity — zero multiplies in the inner loop.
-/// Phase-based while loops: outside → AA fringe → solid → AA fringe → outside.
-/// AA fringe uses precomputed shift+scaled divisor for cheap 16÷8 division.
-template<typename PixelT>
+template<typename PixelT, bool Overwrite>
 inline void renderDiscRow(PixelT* buf, int w, int py,
                           fl::i32 d2_row,
                           const DiscCtx<PixelT>& f) {
@@ -285,29 +310,30 @@ inline void renderDiscRow(PixelT* buf, int w, int py,
     while (px <= f.xmax && d2 >= f.rin2 && d2 < f.rout2) {
         fl::u16 diff = static_cast<fl::u16>(static_cast<fl::u32>(f.rout2 - d2) >> f.band_shift);
         fl::u8 br = static_cast<fl::u8>((diff * f.band_inv) >> 8);
-        PixelT c = f.color; c.nscale8(br); *ptr += c;
+        PixelT c = f.color; c.nscale8(br);
+        if (Overwrite) *ptr = c; else *ptr += c;
         d2 += xd; xd += 131072; ++ptr; ++px;
     }
     // Phase 3: Full brightness interior (d2 hits minimum, then increases)
     while (px <= f.xmax && d2 < f.rin2) {
-        *ptr += f.color;
+        if (Overwrite) *ptr = f.color; else *ptr += f.color;
         d2 += xd; xd += 131072; ++ptr; ++px;
     }
     // Phase 4: Outer AA fringe (right, d2 increasing)
     while (px <= f.xmax && d2 < f.rout2) {
         fl::u16 diff = static_cast<fl::u16>(static_cast<fl::u32>(f.rout2 - d2) >> f.band_shift);
         fl::u8 br = static_cast<fl::u8>((diff * f.band_inv) >> 8);
-        PixelT c = f.color; c.nscale8(br); *ptr += c;
+        PixelT c = f.color; c.nscale8(br);
+        if (Overwrite) *ptr = c; else *ptr += c;
         d2 += xd; xd += 131072; ++ptr; ++px;
     }
 }
 
 /// Render one scanline of a ring using incremental d² with phase-based scanning.
-/// Seven sequential while-loops classify pixels into zones without per-pixel branching.
-/// AA fringe uses precomputed shift+scaled divisor for cheap 16÷8 division.
+/// Templated on Overwrite for compile-time dispatch (no per-pixel branch).
 /// Zones (left to right): outside → outer-AA → solid → inner-AA → hole →
 ///                         inner-AA → solid → outer-AA → outside.
-template<typename PixelT>
+template<typename PixelT, bool Overwrite>
 inline void renderRingRow(PixelT* buf, int w, int py,
                           fl::i32 d2_row,
                           const RingCtx<PixelT>& g) {
@@ -323,19 +349,21 @@ inline void renderRingRow(PixelT* buf, int w, int py,
     while (px <= g.xmax && d2 >= g.oi2 && d2 < g.oo2) {
         fl::u16 diff = static_cast<fl::u16>(static_cast<fl::u32>(g.oo2 - d2) >> g.outer_shift);
         fl::u8 br = static_cast<fl::u8>((diff * g.outer_inv) >> 8);
-        PixelT c = g.color; c.nscale8(br); *ptr += c;
+        PixelT c = g.color; c.nscale8(br);
+        if (Overwrite) *ptr = c; else *ptr += c;
         d2 += xd; xd += 131072; ++ptr; ++px;
     }
     // Phase 2: full-brightness band left (io2 <= d2 < oi2)
     while (px <= g.xmax && d2 >= g.io2 && d2 < g.oi2) {
-        *ptr += g.color;
+        if (Overwrite) *ptr = g.color; else *ptr += g.color;
         d2 += xd; xd += 131072; ++ptr; ++px;
     }
     // Phase 3: inner-left AA fringe (ii2 <= d2 < io2)
     while (px <= g.xmax && d2 >= g.ii2 && d2 < g.io2) {
         fl::u16 diff = static_cast<fl::u16>(static_cast<fl::u32>(d2 - g.ii2) >> g.inner_shift);
         fl::u8 br = static_cast<fl::u8>((diff * g.inner_inv) >> 8);
-        PixelT c = g.color; c.nscale8(br); *ptr += c;
+        PixelT c = g.color; c.nscale8(br);
+        if (Overwrite) *ptr = c; else *ptr += c;
         d2 += xd; xd += 131072; ++ptr; ++px;
     }
     // Phase 4: transparent hole (d2 < ii2)
@@ -346,19 +374,21 @@ inline void renderRingRow(PixelT* buf, int w, int py,
     while (px <= g.xmax && d2 >= g.ii2 && d2 < g.io2) {
         fl::u16 diff = static_cast<fl::u16>(static_cast<fl::u32>(d2 - g.ii2) >> g.inner_shift);
         fl::u8 br = static_cast<fl::u8>((diff * g.inner_inv) >> 8);
-        PixelT c = g.color; c.nscale8(br); *ptr += c;
+        PixelT c = g.color; c.nscale8(br);
+        if (Overwrite) *ptr = c; else *ptr += c;
         d2 += xd; xd += 131072; ++ptr; ++px;
     }
     // Phase 6: full-brightness band right (io2 <= d2 < oi2)
     while (px <= g.xmax && d2 >= g.io2 && d2 < g.oi2) {
-        *ptr += g.color;
+        if (Overwrite) *ptr = g.color; else *ptr += g.color;
         d2 += xd; xd += 131072; ++ptr; ++px;
     }
     // Phase 7: outer-right AA fringe (oi2 <= d2 < oo2)
     while (px <= g.xmax && d2 >= g.oi2 && d2 < g.oo2) {
         fl::u16 diff = static_cast<fl::u16>(static_cast<fl::u32>(g.oo2 - d2) >> g.outer_shift);
         fl::u8 br = static_cast<fl::u8>((diff * g.outer_inv) >> 8);
-        PixelT c = g.color; c.nscale8(br); *ptr += c;
+        PixelT c = g.color; c.nscale8(br);
+        if (Overwrite) *ptr = c; else *ptr += c;
         d2 += xd; xd += 131072; ++ptr; ++px;
     }
 }
@@ -385,11 +415,9 @@ struct StrokeCtx {
 };
 
 /// Render one scanline of a stroke line using phase-based scanning.
-/// Phase 1: Skip pixels outside the band (|cross| >= threshold).
-/// Phase 2: Process visible pixels (|cross| < threshold).
-/// Phase 3: Remaining pixels are outside — no iteration needed.
+/// Templated on Overwrite for compile-time dispatch (no per-pixel branch).
 /// AA uses precomputed shift+reciprocal — zero Coord multiplies.
-template<typename PixelT>
+template<typename PixelT, bool Overwrite>
 inline void renderStrokeRow(PixelT* buf, int w, int py,
                             fl::i32 cross_start, fl::i32 dot_start,
                             const StrokeCtx<PixelT>& sc) {
@@ -427,7 +455,7 @@ inline void renderStrokeRow(PixelT* buf, int w, int py,
             fl::u8 sq_idx = static_cast<fl::u8>((sq + 1 + (sq >> 8)) >> 8);
             PixelT c = sc.color;
             c.nscale8(FL_PGM_READ_BYTE_NEAR(&distanceAA_LUT[sq_idx]));
-            *ptr += c;
+            if (Overwrite) *ptr = c; else *ptr += c;
         } else if (sc.cap == LineCap::ROUND) {
             // Endpoint distance in 8.8 fixed-point
             fl::i32 ex8;
@@ -449,7 +477,7 @@ inline void renderStrokeRow(PixelT* buf, int w, int py,
                 fl::u8 idx = static_cast<fl::u8>((shifted * sc.cap_inv) >> 8);
                 PixelT c = sc.color;
                 c.nscale8(FL_PGM_READ_BYTE_NEAR(&distanceAA_LUT[idx]));
-                *ptr += c;
+                if (Overwrite) *ptr = c; else *ptr += c;
             }
         } else if (sc.cap == LineCap::SQUARE) {
             if (dot >= -sc.dot_ext_q && dot <= sc.len2_q + sc.dot_ext_q) {
@@ -460,7 +488,7 @@ inline void renderStrokeRow(PixelT* buf, int w, int py,
                 fl::u8 sq_idx = static_cast<fl::u8>((sq + 1 + (sq >> 8)) >> 8);
                 PixelT c = sc.color;
                 c.nscale8(FL_PGM_READ_BYTE_NEAR(&distanceAA_LUT[sq_idx]));
-                *ptr += c;
+                if (Overwrite) *ptr = c; else *ptr += c;
             }
         }
         // FLAT: pixels outside [0, len2] are silently dropped
@@ -486,20 +514,23 @@ inline void renderStrokeRow(PixelT* buf, int w, int py,
 /// @param color Pixel color
 template<typename PixelT, typename Coord>
 void drawLine(Canvas<PixelT>& canvas, const PixelT& color,
-              Coord x0, Coord y0, Coord x1, Coord y1);
+              Coord x0, Coord y0, Coord x1, Coord y1,
+              fl::DrawMode mode);
 
 template<typename PixelT, typename Coord>
 void drawDisc(Canvas<PixelT>& canvas, const PixelT& color,
-              Coord cx, Coord cy, Coord r);
+              Coord cx, Coord cy, Coord r,
+              fl::DrawMode mode);
 
 template<typename PixelT, typename Coord>
 void drawRing(Canvas<PixelT>& canvas, const PixelT& color,
-              Coord cx, Coord cy, Coord r, Coord thickness);
+              Coord cx, Coord cy, Coord r, Coord thickness,
+              fl::DrawMode mode);
 
 template<typename PixelT, typename Coord>
 void drawStrokeLine(Canvas<PixelT>& canvas, const PixelT& color,
                     Coord x0, Coord y0, Coord x1, Coord y1, Coord thickness,
-                    LineCap cap);
+                    LineCap cap, fl::DrawMode mode);
 
 /// ============================================================================
 /// LEGACY RASTERTARGET API (Deprecated - for backward compatibility)
@@ -513,9 +544,11 @@ void drawStrokeLine(Canvas<PixelT>& canvas, const PixelT& color,
 // drawLine: Integer Wu antialiased line (8.8 fixed-point internally)
 // Uses int loop counter and bit-shift for AA — no Coord ops in inner loop.
 // ---------------------------------------------------------------------------
-template<typename PixelT, typename Coord>
-inline void drawLine(Canvas<PixelT>& canvas, const PixelT& color,
-                     Coord x0, Coord y0, Coord x1, Coord y1) {
+namespace detail {
+
+template<typename PixelT, typename Coord, bool Overwrite>
+inline void drawLineCore(Canvas<PixelT>& canvas, const PixelT& color,
+                         Coord x0, Coord y0, Coord x1, Coord y1) {
     PixelT* pixels = canvas.pixels;
     int width = canvas.width;
     int height = canvas.height;
@@ -558,14 +591,14 @@ inline void drawLine(Canvas<PixelT>& canvas, const PixelT& color,
         fl::u8 b2 = static_cast<fl::u8>((yfrac1 * xgap) >> 8);
         if (steep) {
             PixelT c = color; c.nscale8(b1);
-            addPixelToBuffer(pixels, width, height, ypxl1, xpxl1, c);
+            addPixelToBuffer<PixelT, Overwrite>(pixels, width, height, ypxl1, xpxl1, c);
             c = color; c.nscale8(b2);
-            addPixelToBuffer(pixels, width, height, ypxl1 + 1, xpxl1, c);
+            addPixelToBuffer<PixelT, Overwrite>(pixels, width, height, ypxl1 + 1, xpxl1, c);
         } else {
             PixelT c = color; c.nscale8(b1);
-            addPixelToBuffer(pixels, width, height, xpxl1, ypxl1, c);
+            addPixelToBuffer<PixelT, Overwrite>(pixels, width, height, xpxl1, ypxl1, c);
             c = color; c.nscale8(b2);
-            addPixelToBuffer(pixels, width, height, xpxl1, ypxl1 + 1, c);
+            addPixelToBuffer<PixelT, Overwrite>(pixels, width, height, xpxl1, ypxl1 + 1, c);
         }
     }
 
@@ -575,14 +608,14 @@ inline void drawLine(Canvas<PixelT>& canvas, const PixelT& color,
         fl::u8 b2 = static_cast<fl::u8>((yfrac2 * xgap2) >> 8);
         if (steep) {
             PixelT c = color; c.nscale8(b1);
-            addPixelToBuffer(pixels, width, height, ypxl2, xpxl2, c);
+            addPixelToBuffer<PixelT, Overwrite>(pixels, width, height, ypxl2, xpxl2, c);
             c = color; c.nscale8(b2);
-            addPixelToBuffer(pixels, width, height, ypxl2 + 1, xpxl2, c);
+            addPixelToBuffer<PixelT, Overwrite>(pixels, width, height, ypxl2 + 1, xpxl2, c);
         } else {
             PixelT c = color; c.nscale8(b1);
-            addPixelToBuffer(pixels, width, height, xpxl2, ypxl2, c);
+            addPixelToBuffer<PixelT, Overwrite>(pixels, width, height, xpxl2, ypxl2, c);
             c = color; c.nscale8(b2);
-            addPixelToBuffer(pixels, width, height, xpxl2, ypxl2 + 1, c);
+            addPixelToBuffer<PixelT, Overwrite>(pixels, width, height, xpxl2, ypxl2 + 1, c);
         }
     }
 
@@ -593,9 +626,9 @@ inline void drawLine(Canvas<PixelT>& canvas, const PixelT& color,
             int y = intery >> 8;
             fl::u8 frac = static_cast<fl::u8>(intery & 0xFF);
             PixelT c = color; c.nscale8(255 - frac);
-            addPixelToBuffer(pixels, width, height, y, x, c);
+            addPixelToBuffer<PixelT, Overwrite>(pixels, width, height, y, x, c);
             c = color; c.nscale8(frac);
-            addPixelToBuffer(pixels, width, height, y + 1, x, c);
+            addPixelToBuffer<PixelT, Overwrite>(pixels, width, height, y + 1, x, c);
             intery += gradient;
         }
     } else {
@@ -603,22 +636,45 @@ inline void drawLine(Canvas<PixelT>& canvas, const PixelT& color,
             int y = intery >> 8;
             fl::u8 frac = static_cast<fl::u8>(intery & 0xFF);
             PixelT c = color; c.nscale8(255 - frac);
-            addPixelToBuffer(pixels, width, height, x, y, c);
+            addPixelToBuffer<PixelT, Overwrite>(pixels, width, height, x, y, c);
             c = color; c.nscale8(frac);
-            addPixelToBuffer(pixels, width, height, x, y + 1, c);
+            addPixelToBuffer<PixelT, Overwrite>(pixels, width, height, x, y + 1, c);
             intery += gradient;
         }
     }
 }
 
-// ---------------------------------------------------------------------------
-// drawDisc: Incremental d² scanline approach
-// Converts to 8.8 fixed-point, uses (n+1)² = n² + 2n + 1 identity.
-// Only 4 multiplies to seed recurrences; inner loops are pure addition.
-// ---------------------------------------------------------------------------
+template<typename PixelT, typename Coord, bool Overwrite>
+inline void drawDiscCore(Canvas<PixelT>& canvas, const PixelT& color,
+                         Coord cx, Coord cy, Coord r);
+
+template<typename PixelT, typename Coord, bool Overwrite>
+inline void drawRingCore(Canvas<PixelT>& canvas, const PixelT& color,
+                         Coord cx, Coord cy, Coord r, Coord thickness);
+
+template<typename PixelT, typename Coord, bool Overwrite>
+inline void drawStrokeLineCore(Canvas<PixelT>& canvas, const PixelT& color,
+                               Coord x0, Coord y0, Coord x1, Coord y1,
+                               Coord thickness, LineCap cap);
+
+}  // namespace detail
+
 template<typename PixelT, typename Coord>
-inline void drawDisc(Canvas<PixelT>& canvas, const PixelT& color,
-                     Coord cx, Coord cy, Coord r) {
+inline void drawLine(Canvas<PixelT>& canvas, const PixelT& color,
+                     Coord x0, Coord y0, Coord x1, Coord y1,
+                     fl::DrawMode mode) {
+    if (mode == fl::DRAW_MODE_OVERWRITE)
+        detail::drawLineCore<PixelT, Coord, true>(canvas, color, x0, y0, x1, y1);
+    else
+        detail::drawLineCore<PixelT, Coord, false>(canvas, color, x0, y0, x1, y1);
+}
+
+// ---------------------------------------------------------------------------
+// drawDiscCore: Templated on Overwrite for compile-time dispatch.
+// ---------------------------------------------------------------------------
+template<typename PixelT, typename Coord, bool Overwrite>
+inline void detail::drawDiscCore(Canvas<PixelT>& canvas, const PixelT& color,
+                                 Coord cx, Coord cy, Coord r) {
     PixelT* pixels = canvas.pixels;
     int width = canvas.width;
     int height = canvas.height;
@@ -629,7 +685,6 @@ inline void drawDisc(Canvas<PixelT>& canvas, const PixelT& color,
 
     fl::i32 rin8 = r8 - 128;   // r - 0.5 in 8.8
     fl::i32 rout8 = r8 + 128;  // r + 0.5 in 8.8
-    // Do NOT clamp rin8 — negative rin8 squares correctly for band computation
 
     fl::i32 rin2 = rin8 * rin8;
     fl::i32 rout2 = rout8 * rout8;
@@ -645,11 +700,9 @@ inline void drawDisc(Canvas<PixelT>& canvas, const PixelT& color,
     if (xmin > xmax) return;
     if (cyi + ri < 0 || cyi - ri >= height) return;
 
-    // Seed x-axis recurrence (only multiplies in the function)
     fl::i32 dx8 = (static_cast<fl::i32>(xmin) << 8) - cx8;
     fl::i32 dx2 = dx8 * dx8;
 
-    // Bundle per-circle constants into struct (reduces parameter passing on AVR)
     detail::DiscCtx<PixelT> fc;
     fc.xdelta0 = 512 * dx8 + 65536;
     fc.xmin = xmin; fc.xmax = xmax;
@@ -660,11 +713,9 @@ inline void drawDisc(Canvas<PixelT>& canvas, const PixelT& color,
     fl::i32 cyfrac = (static_cast<fl::i32>(cyi) << 8) - cy8;
     fl::i32 d2c = dx2 + cyfrac * cyfrac;
 
-    // Render center row
     if (cyi >= 0 && cyi < height)
-        detail::renderDiscRow(pixels, width, cyi, d2c, fc);
+        detail::renderDiscRow<PixelT, Overwrite>(pixels, width, cyi, d2c, fc);
 
-    // Top/bottom rows via separate y recurrences
     fl::i32 botd2 = d2c, botdelta = 512 * cyfrac + 65536;
     fl::i32 topd2 = d2c, topdelta = -512 * cyfrac + 65536;
     botd2 += botdelta; botdelta += 131072;
@@ -676,22 +727,30 @@ inline void drawDisc(Canvas<PixelT>& canvas, const PixelT& color,
         if (!cbot && !ctop) break;
         int pyb = cyi + dy, pyt = cyi - dy;
         if (cbot && pyb >= 0 && pyb < height)
-            detail::renderDiscRow(pixels, width, pyb, botd2, fc);
+            detail::renderDiscRow<PixelT, Overwrite>(pixels, width, pyb, botd2, fc);
         if (ctop && pyt >= 0 && pyt < height)
-            detail::renderDiscRow(pixels, width, pyt, topd2, fc);
+            detail::renderDiscRow<PixelT, Overwrite>(pixels, width, pyt, topd2, fc);
         botd2 += botdelta; botdelta += 131072;
         topd2 += topdelta; topdelta += 131072;
     }
 }
 
-// ---------------------------------------------------------------------------
-// drawRing: Incremental d² with per-pixel zone classification
-// Same recurrence as drawDisc but classifies pixels into 5 ring zones.
-// Zero multiplies in inner loop; only additions, comparisons, and branches.
-// ---------------------------------------------------------------------------
 template<typename PixelT, typename Coord>
-inline void drawRing(Canvas<PixelT>& canvas, const PixelT& color,
-                     Coord cx, Coord cy, Coord r, Coord thickness) {
+inline void drawDisc(Canvas<PixelT>& canvas, const PixelT& color,
+                     Coord cx, Coord cy, Coord r,
+                     fl::DrawMode mode) {
+    if (mode == fl::DRAW_MODE_OVERWRITE)
+        detail::drawDiscCore<PixelT, Coord, true>(canvas, color, cx, cy, r);
+    else
+        detail::drawDiscCore<PixelT, Coord, false>(canvas, color, cx, cy, r);
+}
+
+// ---------------------------------------------------------------------------
+// drawRingCore: Templated on Overwrite for compile-time dispatch.
+// ---------------------------------------------------------------------------
+template<typename PixelT, typename Coord, bool Overwrite>
+inline void detail::drawRingCore(Canvas<PixelT>& canvas, const PixelT& color,
+                                 Coord cx, Coord cy, Coord r, Coord thickness) {
     PixelT* pixels = canvas.pixels;
     int width = canvas.width;
     int height = canvas.height;
@@ -701,12 +760,11 @@ inline void drawRing(Canvas<PixelT>& canvas, const PixelT& color,
     fl::i32 r8 = detail::toFixed8(r);
     fl::i32 t8 = detail::toFixed8(thickness);
 
-    fl::i32 r_ii8 = r8 - 128;            // inner-inner: r - 0.5
-    fl::i32 r_io8 = r8 + 128;            // inner-outer: r + 0.5
-    fl::i32 r_oi8 = r8 + t8 - 128;       // outer-inner: r + thickness - 0.5
-    fl::i32 r_oo8 = r8 + t8 + 128;       // outer-outer: r + thickness + 0.5
+    fl::i32 r_ii8 = r8 - 128;
+    fl::i32 r_io8 = r8 + 128;
+    fl::i32 r_oi8 = r8 + t8 - 128;
+    fl::i32 r_oo8 = r8 + t8 + 128;
 
-    // Clamp inner radii (match original behavior for small r)
     if (r_ii8 < 0) r_ii8 = 0;
     if (r_io8 < 0) r_io8 = 0;
 
@@ -730,7 +788,6 @@ inline void drawRing(Canvas<PixelT>& canvas, const PixelT& color,
     fl::i32 dx8 = (static_cast<fl::i32>(xmin) << 8) - cx8;
     fl::i32 dx2 = dx8 * dx8;
 
-    // Bundle per-circle constants into struct (reduces parameter passing on AVR)
     detail::RingCtx<PixelT> gc;
     gc.xdelta0 = 512 * dx8 + 65536;
     gc.xmin = xmin; gc.xmax = xmax;
@@ -745,7 +802,7 @@ inline void drawRing(Canvas<PixelT>& canvas, const PixelT& color,
     fl::i32 d2c = dx2 + cyfrac * cyfrac;
 
     if (cyi >= 0 && cyi < height)
-        detail::renderRingRow(pixels, width, cyi, d2c, gc);
+        detail::renderRingRow<PixelT, Overwrite>(pixels, width, cyi, d2c, gc);
 
     fl::i32 botd2 = d2c, botdelta = 512 * cyfrac + 65536;
     fl::i32 topd2 = d2c, topdelta = -512 * cyfrac + 65536;
@@ -758,51 +815,53 @@ inline void drawRing(Canvas<PixelT>& canvas, const PixelT& color,
         if (!cbot && !ctop) break;
         int pyb = cyi + dy, pyt = cyi - dy;
         if (cbot && pyb >= 0 && pyb < height)
-            detail::renderRingRow(pixels, width, pyb, botd2, gc);
+            detail::renderRingRow<PixelT, Overwrite>(pixels, width, pyb, botd2, gc);
         if (ctop && pyt >= 0 && pyt < height)
-            detail::renderRingRow(pixels, width, pyt, topd2, gc);
+            detail::renderRingRow<PixelT, Overwrite>(pixels, width, pyt, topd2, gc);
         botd2 += botdelta; botdelta += 131072;
         topd2 += topdelta; topdelta += 131072;
     }
 }
 
-// ---------------------------------------------------------------------------
-// drawStrokeLine: Cross-product approach with incremental updates
-// Perpendicular distance via cross-product; along-axis check via dot-product.
-// Only 4 Coord multiplies to seed, then pure i32 additions in inner loop.
-// AA uses integer shift+reciprocal (same as drawDisc/drawRing) — no Coord
-// multiplies per pixel. Phase-based row scanning skips non-visible pixels.
-// ---------------------------------------------------------------------------
 template<typename PixelT, typename Coord>
-inline void drawStrokeLine(Canvas<PixelT>& canvas, const PixelT& color,
-                           Coord x0, Coord y0, Coord x1, Coord y1, Coord thickness,
-                           LineCap cap) {
+inline void drawRing(Canvas<PixelT>& canvas, const PixelT& color,
+                     Coord cx, Coord cy, Coord r, Coord thickness,
+                     fl::DrawMode mode) {
+    if (mode == fl::DRAW_MODE_OVERWRITE)
+        detail::drawRingCore<PixelT, Coord, true>(canvas, color, cx, cy, r, thickness);
+    else
+        detail::drawRingCore<PixelT, Coord, false>(canvas, color, cx, cy, r, thickness);
+}
+
+// ---------------------------------------------------------------------------
+// drawStrokeLineCore: Templated on Overwrite for compile-time dispatch.
+// ---------------------------------------------------------------------------
+template<typename PixelT, typename Coord, bool Overwrite>
+inline void detail::drawStrokeLineCore(Canvas<PixelT>& canvas, const PixelT& color,
+                                       Coord x0, Coord y0, Coord x1, Coord y1,
+                                       Coord thickness, LineCap cap) {
     PixelT* pixels = canvas.pixels;
     int width = canvas.width;
     int height = canvas.height;
 
-    // Convert to Q8.8 fixed-point for all-integer setup
     fl::i32 x0_8 = detail::toFixed8(x0), y0_8 = detail::toFixed8(y0);
     fl::i32 x1_8 = detail::toFixed8(x1), y1_8 = detail::toFixed8(y1);
     fl::i32 dx_8 = x1_8 - x0_8;
     fl::i32 dy_8 = y1_8 - y0_8;
     if (dx_8 == 0 && dy_8 == 0) return;
 
-    // All-integer setup: i32 multiplies instead of Coord multiplies
-    fl::i32 len2_16 = dx_8 * dx_8 + dy_8 * dy_8;  // Q16.16
-    // isqrt of Q16.16 gives Q8.8 (sqrt halves fractional bits)
+    fl::i32 len2_16 = dx_8 * dx_8 + dy_8 * dy_8;
     fl::i32 len_8 = static_cast<fl::i32>(
-        fl::isqrt32(static_cast<fl::u32>(len2_16)));
+        detail::fastIsqrt32(static_cast<fl::u32>(len2_16)));
     fl::i32 thickness_8 = detail::toFixed8(thickness);
-    fl::i32 r_max_8 = thickness_8 >> 1;  // shift instead of division
-    fl::i32 threshold_q = r_max_8 * len_8;  // Q16.16
+    fl::i32 r_max_8 = thickness_8 >> 1;
+    fl::i32 threshold_q = r_max_8 * len_8;
 
     if (threshold_q <= 0) return;
 
-    // Bounding box (all integer)
     int x0i = x0_8 >> 8, y0i = y0_8 >> 8;
     int x1i = x1_8 >> 8, y1i = y1_8 >> 8;
-    int margin = ((r_max_8 + 255) >> 8) + 2;  // ceil(r_max) + 2
+    int margin = ((r_max_8 + 255) >> 8) + 2;
     int xmin = (x0i < x1i ? x0i : x1i) - margin;
     int xmax = (x0i > x1i ? x0i : x1i) + margin;
     int ymin = (y0i < y1i ? y0i : y1i) - margin;
@@ -814,20 +873,17 @@ inline void drawStrokeLine(Canvas<PixelT>& canvas, const PixelT& color,
     if (ymax >= height) ymax = height - 1;
     if (xmin > xmax || ymin > ymax) return;
 
-    // Q16.16 increments per pixel step
-    fl::i32 dx_q = dx_8 << 8;  // Q8.8 → Q16.16 (lower 8 bits zero)
+    fl::i32 dx_q = dx_8 << 8;
     fl::i32 dy_q = dy_8 << 8;
 
-    // Seed cross/dot in Q16.16 using i32 multiply (cheaper than Coord multiply)
     fl::i32 rx_base_8 = (static_cast<fl::i32>(xmin) << 8) - x0_8;
     fl::i32 ry_row_8 = (static_cast<fl::i32>(ymin) << 8) - y0_8;
-    fl::i32 cross_row_q = rx_base_8 * dy_8 - ry_row_8 * dx_8;  // Q16.16
-    fl::i32 dot_row_q = rx_base_8 * dx_8 + ry_row_8 * dy_8;    // Q16.16
+    fl::i32 cross_row_q = rx_base_8 * dy_8 - ry_row_8 * dx_8;
+    fl::i32 dot_row_q = rx_base_8 * dx_8 + ry_row_8 * dy_8;
 
-    fl::i32 len2_q = len_8 * len_8;  // Q16.16 (for dot comparison)
+    fl::i32 len2_q = len_8 * len_8;
     fl::i32 dot_ext_q = (cap == LineCap::SQUARE) ? threshold_q : 0;
 
-    // Bundle all constants into struct (reduces register pressure on AVR)
     detail::StrokeCtx<PixelT> sc;
     sc.threshold_q = threshold_q;
     sc.len2_q = len2_q;
@@ -848,12 +904,22 @@ inline void drawStrokeLine(Canvas<PixelT>& canvas, const PixelT& color,
 
     for (int py = ymin; py <= ymax; ++py) {
         if (py >= 0 && py < height) {
-            detail::renderStrokeRow(pixels, width, py,
-                                    cross_row_q, dot_row_q, sc);
+            detail::renderStrokeRow<PixelT, Overwrite>(pixels, width, py,
+                                                       cross_row_q, dot_row_q, sc);
         }
         cross_row_q -= sc.dx_q;
         dot_row_q += sc.dy_q;
     }
+}
+
+template<typename PixelT, typename Coord>
+inline void drawStrokeLine(Canvas<PixelT>& canvas, const PixelT& color,
+                           Coord x0, Coord y0, Coord x1, Coord y1, Coord thickness,
+                           LineCap cap, fl::DrawMode mode) {
+    if (mode == fl::DRAW_MODE_OVERWRITE)
+        detail::drawStrokeLineCore<PixelT, Coord, true>(canvas, color, x0, y0, x1, y1, thickness, cap);
+    else
+        detail::drawStrokeLineCore<PixelT, Coord, false>(canvas, color, x0, y0, x1, y1, thickness, cap);
 }
 
 }  // namespace gfx

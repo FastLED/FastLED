@@ -32,7 +32,7 @@ void loop() {
     // Blend mode — radius 6 (spans ~12px)
     unsigned long t0 = micros();
     for (int i = 0; i < ITERS; i++) {
-        canvas.drawDisc(CRGB::Blue, 16, 4, 6);
+        canvas.drawDisc(CRGB::Blue, 16, 4, 6, fl::DRAW_MODE_BLEND);
     }
     unsigned long t1 = micros();
     unsigned long bl_r6 = (t1 - t0) / ITERS;
@@ -40,7 +40,7 @@ void loop() {
     // Blend mode — radius 10 (spans ~20px)
     t0 = micros();
     for (int i = 0; i < ITERS; i++) {
-        canvas.drawDisc(CRGB(255, 255, 255), 16, 4, 10);
+        canvas.drawDisc(CRGB(255, 255, 255), 16, 4, 10, fl::DRAW_MODE_BLEND);
     }
     t1 = micros();
     unsigned long bl_r10 = (t1 - t0) / ITERS;

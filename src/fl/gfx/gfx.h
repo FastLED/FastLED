@@ -23,7 +23,8 @@
 ///                         fl::LineCap::ROUND);
 ///
 /// Coordinates can be float, int, or fixed-point (fl::s16x16, etc.).
-/// All drawing is additive — overlapping shapes blend naturally.
+/// Default draw mode is additive (DRAW_MODE_BLEND) — overlapping shapes blend naturally.
+/// Use DRAW_MODE_OVERWRITE to replace pixels instead of blending.
 ///
 /// Line cap styles:
 ///   fl::LineCap::FLAT   — no extension beyond endpoints (default)
@@ -32,6 +33,7 @@
 
 #include "fl/force_inline.h"
 #include "fl/gfx/crgb.h"
+#include "fl/gfx/draw_mode.h"
 
 // IWYU pragma: begin_keep
 #include "fl/gfx/canvas.h"
@@ -59,24 +61,28 @@ class Canvas {
     FASTLED_FORCE_INLINE bool has(int x, int y) const { return mImpl.has(x, y); }
 
     template<typename Coord>
-    FASTLED_FORCE_INLINE void drawLine(const RGB_T& color, Coord x0, Coord y0, Coord x1, Coord y1) {
-        mImpl.drawLine(color, x0, y0, x1, y1);
+    FASTLED_FORCE_INLINE void drawLine(const RGB_T& color, Coord x0, Coord y0, Coord x1, Coord y1,
+                                       DrawMode mode = DRAW_MODE_BLEND) {
+        mImpl.drawLine(color, x0, y0, x1, y1, mode);
     }
 
     template<typename Coord>
-    FASTLED_FORCE_INLINE void drawDisc(const RGB_T& color, Coord cx, Coord cy, Coord r) {
-        mImpl.drawDisc(color, cx, cy, r);
+    FASTLED_FORCE_INLINE void drawDisc(const RGB_T& color, Coord cx, Coord cy, Coord r,
+                                       DrawMode mode = DRAW_MODE_BLEND) {
+        mImpl.drawDisc(color, cx, cy, r, mode);
     }
 
     template<typename Coord>
-    FASTLED_FORCE_INLINE void drawRing(const RGB_T& color, Coord cx, Coord cy, Coord r, Coord thickness) {
-        mImpl.drawRing(color, cx, cy, r, thickness);
+    FASTLED_FORCE_INLINE void drawRing(const RGB_T& color, Coord cx, Coord cy, Coord r, Coord thickness,
+                                       DrawMode mode = DRAW_MODE_BLEND) {
+        mImpl.drawRing(color, cx, cy, r, thickness, mode);
     }
 
     template<typename Coord>
     FASTLED_FORCE_INLINE void drawStrokeLine(const RGB_T& color, Coord x0, Coord y0, Coord x1, Coord y1,
-                                             Coord thickness, LineCap cap = LineCap::FLAT) {
-        mImpl.drawStrokeLine(color, x0, y0, x1, y1, thickness, cap);
+                                             Coord thickness, LineCap cap = LineCap::FLAT,
+                                             DrawMode mode = DRAW_MODE_BLEND) {
+        mImpl.drawStrokeLine(color, x0, y0, x1, y1, thickness, cap, mode);
     }
 };
 

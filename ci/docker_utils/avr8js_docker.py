@@ -61,9 +61,10 @@ class DockerAVR8jsRunner:
         try:
             result = RunningProcess.run(
                 ["docker", "images", "-q", image_name],
-                cwd=None,
                 check=False,
                 timeout=10,
+                capture_output=True,
+                text=True,
             )
             return bool(result.stdout.strip())
         except (RuntimeError, FileNotFoundError):

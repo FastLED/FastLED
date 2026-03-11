@@ -43,3 +43,19 @@ Prefer `@dataclass` over tuples and dicts for function return types:
 - This applies to ALL exception handlers, including hook handlers, cleanup code, and background tasks
 - Ruff's **BLE001** (blind-except) rule can detect this but is NOT active by default
 - Consider enabling BLE001 with `--select BLE001` for automatic detection
+
+## Process Execution - No bare subprocess
+- **NEVER use `subprocess.run()` or `subprocess.Popen()` directly** — use `RunningProcess.run()` instead
+- `RunningProcess` (from the `running_process` package) wraps subprocess with proper timeout handling, streaming, and interrupt propagation
+- `subprocess` is problematic: missing real-time output streaming, inconsistent timeout behavior, and no integration with the project's interrupt handling
+- **Correct:**
+  ```python
+  from running_process import RunningProcess
+  result = RunningProcess.run(["git", "status"], check=False, timeout=10, capture_output=True, text=True)
+  print(result.stdout)
+  ```
+- **Wrong:**
+  ```python
+  import subprocess
+  result = subprocess.run(["git", "status"], capture_output=True, text=True)
+  ```
