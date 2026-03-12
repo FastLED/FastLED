@@ -29,7 +29,7 @@ FL_TEST_CASE("Graphics performance - drawDisc") {
     }
     auto end = fl::chrono::steady_clock::now();
     fl::u32 us = (fl::u32)fl::chrono::duration_cast<fl::chrono::microseconds>(end - start).count();
-    printf("  drawDisc: %u us total, %u ns/call\n", (unsigned)us, (unsigned)nsPerCall(us));
+    fl::printf("  drawDisc: %u us total, %u ns/call\n", (unsigned)us, (unsigned)nsPerCall(us));
     FL_CHECK(us < 100000);
 }
 
@@ -46,7 +46,7 @@ FL_TEST_CASE("Graphics performance - drawDisc large") {
     }
     auto end = fl::chrono::steady_clock::now();
     fl::u32 us = (fl::u32)fl::chrono::duration_cast<fl::chrono::microseconds>(end - start).count();
-    printf("  drawDisc(large): %u us total, %u ns/call\n", (unsigned)us, (unsigned)nsPerCall(us));
+    fl::printf("  drawDisc(large): %u us total, %u ns/call\n", (unsigned)us, (unsigned)nsPerCall(us));
     FL_CHECK(us < 200000);
 }
 
@@ -64,7 +64,7 @@ FL_TEST_CASE("Graphics performance - drawRing") {
     }
     auto end = fl::chrono::steady_clock::now();
     fl::u32 us = (fl::u32)fl::chrono::duration_cast<fl::chrono::microseconds>(end - start).count();
-    printf("  drawRing: %u us total, %u ns/call\n", (unsigned)us, (unsigned)nsPerCall(us));
+    fl::printf("  drawRing: %u us total, %u ns/call\n", (unsigned)us, (unsigned)nsPerCall(us));
     FL_CHECK(us < 150000);
 }
 
@@ -81,7 +81,7 @@ FL_TEST_CASE("Graphics performance - drawLine") {
     }
     auto end = fl::chrono::steady_clock::now();
     fl::u32 us = (fl::u32)fl::chrono::duration_cast<fl::chrono::microseconds>(end - start).count();
-    printf("  drawLine: %u us total, %u ns/call\n", (unsigned)us, (unsigned)nsPerCall(us));
+    fl::printf("  drawLine: %u us total, %u ns/call\n", (unsigned)us, (unsigned)nsPerCall(us));
     FL_CHECK(us < 80000);
 }
 
@@ -100,7 +100,7 @@ FL_TEST_CASE("Graphics performance - drawStrokeLine") {
     }
     auto end = fl::chrono::steady_clock::now();
     fl::u32 us = (fl::u32)fl::chrono::duration_cast<fl::chrono::microseconds>(end - start).count();
-    printf("  drawStrokeLine: %u us total, %u ns/call\n", (unsigned)us, (unsigned)nsPerCall(us));
+    fl::printf("  drawStrokeLine: %u us total, %u ns/call\n", (unsigned)us, (unsigned)nsPerCall(us));
 }
 
 // === OVERWRITE MODE benchmarks (same workloads, DRAW_MODE_OVERWRITE) ===
@@ -118,7 +118,7 @@ FL_TEST_CASE("Graphics performance - drawDisc OVERWRITE") {
     }
     auto end = fl::chrono::steady_clock::now();
     fl::u32 us = (fl::u32)fl::chrono::duration_cast<fl::chrono::microseconds>(end - start).count();
-    printf("  drawDisc(OW): %u us total, %u ns/call\n", (unsigned)us, (unsigned)nsPerCall(us));
+    fl::printf("  drawDisc(OW): %u us total, %u ns/call\n", (unsigned)us, (unsigned)nsPerCall(us));
     FL_CHECK(us < 100000);
 }
 
@@ -135,7 +135,7 @@ FL_TEST_CASE("Graphics performance - drawDisc large OVERWRITE") {
     }
     auto end = fl::chrono::steady_clock::now();
     fl::u32 us = (fl::u32)fl::chrono::duration_cast<fl::chrono::microseconds>(end - start).count();
-    printf("  drawDisc(large,OW): %u us total, %u ns/call\n", (unsigned)us, (unsigned)nsPerCall(us));
+    fl::printf("  drawDisc(large,OW): %u us total, %u ns/call\n", (unsigned)us, (unsigned)nsPerCall(us));
     FL_CHECK(us < 200000);
 }
 
@@ -153,7 +153,7 @@ FL_TEST_CASE("Graphics performance - drawRing OVERWRITE") {
     }
     auto end = fl::chrono::steady_clock::now();
     fl::u32 us = (fl::u32)fl::chrono::duration_cast<fl::chrono::microseconds>(end - start).count();
-    printf("  drawRing(OW): %u us total, %u ns/call\n", (unsigned)us, (unsigned)nsPerCall(us));
+    fl::printf("  drawRing(OW): %u us total, %u ns/call\n", (unsigned)us, (unsigned)nsPerCall(us));
     FL_CHECK(us < 150000);
 }
 
@@ -171,7 +171,7 @@ FL_TEST_CASE("Graphics performance - drawLine OVERWRITE") {
     }
     auto end = fl::chrono::steady_clock::now();
     fl::u32 us = (fl::u32)fl::chrono::duration_cast<fl::chrono::microseconds>(end - start).count();
-    printf("  drawLine(OW): %u us total, %u ns/call\n", (unsigned)us, (unsigned)nsPerCall(us));
+    fl::printf("  drawLine(OW): %u us total, %u ns/call\n", (unsigned)us, (unsigned)nsPerCall(us));
     FL_CHECK(us < 80000);
 }
 
@@ -192,7 +192,7 @@ FL_TEST_CASE("Graphics performance - drawStrokeLine OVERWRITE") {
     }
     auto end = fl::chrono::steady_clock::now();
     fl::u32 us = (fl::u32)fl::chrono::duration_cast<fl::chrono::microseconds>(end - start).count();
-    printf("  drawStrokeLine(OW): %u us total, %u ns/call\n", (unsigned)us, (unsigned)nsPerCall(us));
+    fl::printf("  drawStrokeLine(OW): %u us total, %u ns/call\n", (unsigned)us, (unsigned)nsPerCall(us));
 }
 
 }  // FL_TEST_FILE

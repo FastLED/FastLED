@@ -106,7 +106,7 @@ FL_TEST_CASE("drawDisc pixel-exact reference") {
             energies[t] = sum;
         }
         // Print energies for baseline capture (first run only)
-        printf("  disc energy r=3: %u, r=5: %u, r=7: %u, r=10: %u, r=12: %u\n",
+        fl::printf("  disc energy r=3: %u, r=5: %u, r=7: %u, r=10: %u, r=12: %u\n",
                energies[0], energies[1], energies[2], energies[3], energies[4]);
         // Exact energy values (pixel-exact regression gate)
         FL_CHECK_EQ(energies[0], 2856u);
@@ -147,7 +147,7 @@ FL_TEST_CASE("drawDisc pixel-exact reference") {
         // Compute total energy
         uint32_t total = 0;
         for (int i = 0; i < 1024; ++i) total += buffer[i].r;
-        printf("  off-center disc energy: %u\n", total);
+        fl::printf("  off-center disc energy: %u\n", total);
         FL_CHECK_EQ(total, 20198u);
     }
 }
