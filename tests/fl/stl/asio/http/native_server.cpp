@@ -192,11 +192,11 @@ FL_TEST_CASE("NativeHttpServer - Client ID tracking") {
         fl::delay(10);
     }
 
-    FL_CHECK(server.getClientCount() == 1);
+    FL_REQUIRE(server.getClientCount() == 1);
 
     // Get client IDs
     fl::vector<uint32_t> ids = server.getClientIds();
-    FL_CHECK(ids.size() == 1);
+    FL_REQUIRE(ids.size() == 1);
     uint32_t clientId1 = ids[0];
     FL_CHECK(server.hasClient(clientId1));
 
@@ -213,11 +213,11 @@ FL_TEST_CASE("NativeHttpServer - Client ID tracking") {
         fl::delay(10);
     }
 
-    FL_CHECK(server.getClientCount() == 2);
+    FL_REQUIRE(server.getClientCount() == 2);
 
     // Get updated client IDs
     ids = server.getClientIds();
-    FL_CHECK(ids.size() == 2);
+    FL_REQUIRE(ids.size() == 2);
 
     // Both clients should have unique IDs
     FL_CHECK(ids[0] != ids[1]);
@@ -245,7 +245,7 @@ FL_TEST_CASE("NativeHttpServer - Send and recv with real client") {
         fl::delay(10);
     }
 
-    FL_CHECK(server.getClientCount() == 1);
+    FL_REQUIRE(server.getClientCount() == 1);
     uint32_t clientId = server.getClientIds()[0];
 
     // Send data from server to client
@@ -373,11 +373,11 @@ FL_TEST_CASE("NativeHttpServer - Disconnect specific client") {
         fl::delay(10);
     }
 
-    FL_CHECK(server.getClientCount() == 2);
+    FL_REQUIRE(server.getClientCount() == 2);
 
     // Get client IDs
     fl::vector<uint32_t> ids = server.getClientIds();
-    FL_CHECK(ids.size() == 2);
+    FL_REQUIRE(ids.size() == 2);
 
     // Disconnect first client
     server.disconnectClient(ids[0]);
