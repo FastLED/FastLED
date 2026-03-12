@@ -543,6 +543,8 @@ def create_examples_test_process(
     # Auto-enable full mode for examples to include execution
     if args.full or args.examples is not None:
         cmd.append("--full")
+    if args.log_failures is not None:
+        cmd.extend(["--log-failures", str(args.log_failures)])
 
     # Use longer timeout for no-parallel mode since sequential compilation takes much longer
     timeout = (

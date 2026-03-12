@@ -112,6 +112,7 @@ def compile_examples(
     verbose: bool = False,
     parallel: bool = True,
     build_mode: str = "quick",
+    log_failures: Path | None = None,
 ) -> bool:
     """
     Compile FastLED examples using Meson.
@@ -181,6 +182,56 @@ def compile_examples(
                 _ts_print("Compilation output:", file=sys.stderr)
                 _ts_print(proc.stdout, file=sys.stderr)
 
+            # Write per-example compile failure logs
+            if log_failures is not None:
+                import re
+
+                log_failures.mkdir(parents=True, exist_ok=True)
+                # Parse ninja FAILED lines to identify per-example failures
+                # Note: proc.stdout may have timestamps (e.g., "7.59 FAILED: ...")
+                # and [code=N] prefixes, so use "FAILED:" in line, not startswith
+                failures: dict[str, list[str]] = {}
+                lines = proc.stdout.splitlines()
+                current_target: str | None = None
+                current_lines: list[str] = []
+                for line in lines:
+                    if "FAILED:" in line:
+                        if current_target and current_lines:
+                            failures.setdefault(current_target, []).extend(
+                                current_lines
+                            )
+                        target = line.split("FAILED:", 1)[1].strip()
+                        # Strip optional [code=N] prefix
+                        target = re.sub(r"^\[code=\d+\]\s*", "", target)
+                        m = re.match(r"examples[/\\]example-([^.]+)\.", target)
+                        current_target = m.group(1) if m else "unknown"
+                        current_lines = [line]
+                    elif current_target is not None:
+                        if "ninja:" in line and "build stopped" in line:
+                            if current_target and current_lines:
+                                failures.setdefault(current_target, []).extend(
+                                    current_lines
+                                )
+                            current_target = None
+                            current_lines = []
+                        else:
+                            current_lines.append(line)
+                if current_target and current_lines:
+                    failures.setdefault(current_target, []).extend(current_lines)
+
+                if failures:
+                    for name, err_lines in failures.items():
+                        log_path = log_failures / f"{name}_compile.log"
+                        with open(
+                            log_path, "w", encoding="utf-8", errors="replace"
+                        ) as f:
+                            f.write("\n".join(err_lines))
+                else:
+                    # Couldn't parse per-target; write full output
+                    log_path = log_failures / "compile_compile.log"
+                    with open(log_path, "w", encoding="utf-8", errors="replace") as f:
+                        f.write(proc.stdout)
+
             return False
 
         # Note: Don't print "Compilation successful" - it's redundant
@@ -203,6 +254,7 @@ def run_examples(
     verbose: bool = False,
     timeout: int = 30,
     build_mode: str = "quick",
+    log_failures: Path | None = None,
 ) -> MesonTestResult:
     """
     Run compiled FastLED examples using Meson test runner.
@@ -276,6 +328,27 @@ def run_examples(
                 f"Examples failed (return code {returncode})",
                 file=sys.stderr,
             )
+            # Write per-example run failure logs from testlog.txt
+            if log_failures is not None:
+                from ci.meson.testlog_parser import parse_testlog
+
+                testlog = build_dir / "meson-logs" / "testlog.txt"
+                entries = parse_testlog(testlog)
+                for entry in entries:
+                    if "exit status 0" in entry.result:
+                        continue
+                    content = f"# Test: {entry.test_name}\n"
+                    content += f"# Result: {entry.result}\n"
+                    content += f"# Duration: {entry.duration}\n\n"
+                    if entry.stdout:
+                        content += "--- stdout ---\n" + entry.stdout + "\n\n"
+                    if entry.stderr:
+                        content += "--- stderr ---\n" + entry.stderr + "\n"
+                    safe_name = entry.test_name.replace(":", "_").replace("/", "_")
+                    log_failures.mkdir(parents=True, exist_ok=True)
+                    log_path = log_failures / f"{safe_name}_run.log"
+                    with open(log_path, "w", encoding="utf-8", errors="replace") as fh:
+                        fh.write(content)
             return MesonTestResult(
                 success=False,
                 duration=time.time() - start_time,
@@ -321,6 +394,7 @@ def run_meson_examples(
     no_pch: bool = False,
     parallel: bool = True,
     full: bool = False,
+    log_failures: Path | None = None,
 ) -> MesonTestResult:
     """
     Complete Meson example build and execution workflow.
@@ -462,6 +536,7 @@ def run_meson_examples(
                 verbose=verbose,
                 parallel=parallel,
                 build_mode=build_mode,
+                log_failures=log_failures,
             ):
                 duration = time.time() - start_time
                 out: MesonTestResult = MesonTestResult.construct_build_error(
@@ -482,6 +557,7 @@ def run_meson_examples(
             verbose=verbose,
             timeout=60,
             build_mode=build_mode,
+            log_failures=log_failures,
         )
         return result
     else:
@@ -531,6 +607,12 @@ if __name__ == "__main__":
         "--full", action="store_true", help="Execute examples after compilation"
     )
     parser.add_argument("--build-dir", default=".build/meson", help="Build directory")
+    parser.add_argument(
+        "--log-failures",
+        type=str,
+        default=None,
+        help="Directory to write per-example failure logs",
+    )
 
     args = parser.parse_args()
 
@@ -550,6 +632,7 @@ if __name__ == "__main__":
         no_pch=args.no_pch,
         parallel=not args.no_parallel,
         full=args.full,
+        log_failures=Path(args.log_failures) if args.log_failures else None,
     )
 
     sys.exit(0 if result.success else 1)

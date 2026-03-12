@@ -277,7 +277,8 @@ def _extract_compile_failures(compile_output: str) -> dict[str, str]:
     """Extract per-target compilation failures from ninja output.
 
     Parses FAILED: lines to identify which targets had errors and collects
-    the associated error output.
+    the associated error output. Handles timestamped output (e.g., "7.59 FAILED: ...")
+    and [code=N] prefixes.
 
     Returns:
         Dict mapping target name to error output text.
@@ -287,9 +288,11 @@ def _extract_compile_failures(compile_output: str) -> dict[str, str]:
     i = 0
     while i < len(lines):
         line = lines[i]
-        if line.startswith("FAILED:"):
+        if "FAILED:" in line:
             # Extract target name from path like "tests/fl_async.dll.p/fl/async.cpp.o"
             target = line.split("FAILED:", 1)[1].strip()
+            # Strip optional [code=N] prefix
+            target = re.sub(r"^\[code=\d+\]\s*", "", target)
             m = re.match(r"tests[/\\]([^.]+)\.", target)
             test_name = m.group(1) if m else "unknown"
 
@@ -297,7 +300,9 @@ def _extract_compile_failures(compile_output: str) -> dict[str, str]:
             error_lines = [line]
             i += 1
             while i < len(lines):
-                if lines[i].startswith("FAILED:") or lines[i].startswith("ninja:"):
+                if "FAILED:" in lines[i] or (
+                    "ninja:" in lines[i] and "build stopped" in lines[i]
+                ):
                     break
                 error_lines.append(lines[i])
                 i += 1
