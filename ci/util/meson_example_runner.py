@@ -6,6 +6,13 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 import os
 import sys
+
+
+# Force UTF-8 with replace error handler for child processes (including Meson) on Windows.
+# Without this, Meson's mtest.py crashes with UnicodeEncodeError when test output
+# contains non-ASCII characters (e.g., ✓) and the console uses cp1252.
+if sys.platform == "win32":
+    os.environ.setdefault("PYTHONIOENCODING", "utf-8:replace")
 import threading
 import time
 from pathlib import Path

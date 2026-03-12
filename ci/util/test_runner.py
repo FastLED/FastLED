@@ -10,6 +10,14 @@ while maintaining real-time output visibility on Unix systems.
 
 import _thread
 import os
+
+
+# Force UTF-8 with replace error handler for child processes (including Meson) on Windows.
+# Without this, Meson's mtest.py crashes with UnicodeEncodeError when test output
+# contains non-ASCII characters (e.g., ✓) and the console uses cp1252.
+if os.name == "nt":
+    os.environ.setdefault("PYTHONIOENCODING", "utf-8:replace")
+
 import queue
 import re
 import subprocess
