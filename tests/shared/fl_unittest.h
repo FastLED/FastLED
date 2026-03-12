@@ -11,6 +11,7 @@
 #include "fl/log.h"
 #include "fl/stl/thread_local.h"
 #include "fl/stl/cstring.h"
+#include "fl/stl/type_traits.h"
 
 /**
  * Custom test framework replacing doctest.
@@ -264,13 +265,44 @@ void record_assertion(
 #define FL_CHECK_FALSE(expr) FL_CHECK(!(expr))
 #define FL_CHECK_TRUE(expr) FL_CHECK(expr)
 
-// Comparison helpers for const char* (string comparison instead of pointer comparison)
+// Comparison helpers that handle mixed signed/unsigned without warnings.
+// Uses partial specialization + tag dispatch for safe cross-sign comparison.
+namespace detail {
+
+template<typename A, typename B,
+         bool MixedSign = (fl::is_integral<A>::value &&
+                           fl::is_integral<B>::value &&
+                           fl::is_signed<A>::value != fl::is_signed<B>::value)>
+struct SafeCompare {
+    static bool eq(const A& a, const B& b) { return a == b; }
+    static bool ne(const A& a, const B& b) { return a != b; }
+};
+
+template<typename A, typename B>
+struct SafeCompare<A, B, true> {
+    static bool eq(const A& a, const B& b) {
+        return eq_dispatch(a, b, fl::integral_constant<bool, fl::is_signed<A>::value>{});
+    }
+    static bool ne(const A& a, const B& b) { return !eq(a, b); }
+private:
+    // A signed, B unsigned
+    static bool eq_dispatch(const A& a, const B& b, fl::true_type) {
+        return a >= 0 && static_cast<typename fl::make_unsigned<A>::type>(a) == b;
+    }
+    // A unsigned, B signed
+    static bool eq_dispatch(const A& a, const B& b, fl::false_type) {
+        return b >= 0 && a == static_cast<typename fl::make_unsigned<B>::type>(b);
+    }
+};
+
+} // namespace detail
+
 // Note: already inside namespace fl::test
 template<typename A, typename B>
-inline bool check_eq(const A& a, const B& b) { return a == b; }
+inline bool check_eq(const A& a, const B& b) { return detail::SafeCompare<A, B>::eq(a, b); }
 inline bool check_eq(const char* a, const char* b) { return ::fl::strcmp(a, b) == 0; }
 template<typename A, typename B>
-inline bool check_ne(const A& a, const B& b) { return a != b; }
+inline bool check_ne(const A& a, const B& b) { return detail::SafeCompare<A, B>::ne(a, b); }
 inline bool check_ne(const char* a, const char* b) { return ::fl::strcmp(a, b) != 0; }
 
 #define FL_CHECK_EQ(a, b) FL_CHECK(fl::test::check_eq((a), (b)))

@@ -316,9 +316,7 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 xor_u32_4(simd_u32x4 a, simd_u32x4 b) no
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 add_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
     simd_u32x4 result;
     for (int i = 0; i < 4; ++i) {
-        i32 a_i = static_cast<i32>(a.data[i]);
-        i32 b_i = static_cast<i32>(b.data[i]);
-        result.data[i] = static_cast<u32>(a_i + b_i);
+        result.data[i] = a.data[i] + b.data[i];
     }
     return result;
 }
@@ -326,9 +324,7 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 add_i32_4(simd_u32x4 a, simd_u32x4 b) no
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sub_i32_4(simd_u32x4 a, simd_u32x4 b) noexcept {
     simd_u32x4 result;
     for (int i = 0; i < 4; ++i) {
-        i32 a_i = static_cast<i32>(a.data[i]);
-        i32 b_i = static_cast<i32>(b.data[i]);
-        result.data[i] = static_cast<u32>(a_i - b_i);
+        result.data[i] = a.data[i] - b.data[i];
     }
     return result;
 }

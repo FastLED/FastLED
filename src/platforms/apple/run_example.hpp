@@ -14,6 +14,9 @@
 ///
 /// NOTE: Uses std:: types to avoid FastLED dependencies in the runner.
 
+#include "platforms/posix/is_posix.h"  // For FL_IS_APPLE
+#include "fl/int.h"  // For fl::u32
+
 #ifdef FL_IS_APPLE
 
 // IWYU pragma: begin_keep

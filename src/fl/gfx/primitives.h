@@ -193,7 +193,7 @@ inline fl::i32 toFixed8<double>(double val) {
 
 template<>
 inline fl::i32 toFixed8<int>(int val) {
-    return static_cast<fl::i32>(val) << 8;
+    return static_cast<fl::i32>(static_cast<fl::u32>(val) << 8);
 }
 
 template<>

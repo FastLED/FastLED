@@ -76,8 +76,11 @@ FL_TEST_CASE("ClocklessController - Basic LED capture with single strip") {
         }
     }
 
-    // Cleanup before leds[] goes out of scope
-    FastLED.clear(true);
+    // Detach LED pointers before leds[] goes out of scope to prevent
+    // stack-use-after-scope when next test calls FastLED.clear()
+    for (auto* p = CLEDController::head(); p; p = p->next()) {
+        p->setLeds(nullptr, 0);
+    }
     ActiveStripTracker::resetForTesting();
 }
 
@@ -115,8 +118,10 @@ FL_TEST_CASE("ClocklessController - LED capture updates on each show") {
     FL_CHECK_GT(data[1], 100); // Green should be high
     FL_CHECK_LT(data[2], 50);  // Blue should be low
 
-    // Cleanup before leds[] goes out of scope
-    FastLED.clear(true);
+    // Detach LED pointers before leds[] goes out of scope
+    for (auto* p = CLEDController::head(); p; p = p->next()) {
+        p->setLeds(nullptr, 0);
+    }
     ActiveStripTracker::resetForTesting();
 }
 
@@ -159,7 +164,9 @@ FL_TEST_CASE("ClocklessController - Multiple strips captured independently") {
         FL_CHECK_GT(data2[2], 100); // B should be high
     }
 
-    // Cleanup before leds[] goes out of scope
-    FastLED.clear(true);
+    // Detach LED pointers before leds[] goes out of scope
+    for (auto* p = CLEDController::head(); p; p = p->next()) {
+        p->setLeds(nullptr, 0);
+    }
     ActiveStripTracker::resetForTesting();
 }
