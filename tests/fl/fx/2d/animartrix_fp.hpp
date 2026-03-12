@@ -185,13 +185,11 @@ FL_TEST_CASE("animartrix_fp - float vs fixed-point all vizs") {
 
     fl::printf("\nSummary: %d OK, %d WARN, %d FAIL out of %d vizs\n",
             kEntryCount - warn_count - catastrophic, warn_count, catastrophic, kEntryCount);
-    fflush(stderr);
 
     if (catastrophic > 0) {
         fl::printf("FAIL: %d vizs exceeded catastrophic threshold "
                 "(max_error>%d or avg_error>%.0f)\n",
                 catastrophic, MAX_ERROR_LIMIT, AVG_ERROR_LIMIT);
-        fflush(stderr);
-    }
+        }
     FL_ASSERT(catastrophic == 0, "Some vizs have catastrophically wrong FP output");
 }

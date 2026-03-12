@@ -53,14 +53,12 @@ FL_TEST_CASE("perlin_s16x16 - scalar vs SIMD single point") {
     fl::printf("Scalar result: %d\n", scalar_result);
     fl::printf("SIMD result:   %d\n", simd_result);
     fl::printf("Difference:    %d\n", simd_result - scalar_result);
-    fflush(stderr);
 
     // They should match exactly
     if (scalar_result != simd_result) {
         fl::printf("❌ FAILURE: SIMD result does not match scalar! Scalar=%d, SIMD=%d, diff=%d\n",
                 scalar_result, simd_result, simd_result - scalar_result);
-        fflush(stderr);
-        FL_ASSERT(false, "SIMD result does not match scalar");
+            FL_ASSERT(false, "SIMD result does not match scalar");
     }
 }
 
@@ -94,22 +92,19 @@ FL_TEST_CASE("perlin_s16x16 - scalar vs SIMD batch") {
         fl::printf("  Scalar: %d (expected: %d)\n", scalar_result, expected[i]);
         fl::printf("  SIMD:   %d\n", simd_result);
         fl::printf("  Diff:   %d\n", simd_result - scalar_result);
-        fflush(stderr);
-
+    
         // Verify scalar matches expected
         if (scalar_result != expected[i]) {
             fl::printf("❌ Point %d: Scalar result %d does not match expected %d\n",
                     i, scalar_result, expected[i]);
-            fflush(stderr);
-            FL_ASSERT(false, "Scalar result does not match expected");
+                    FL_ASSERT(false, "Scalar result does not match expected");
         }
 
         // Verify SIMD matches scalar
         if (scalar_result != simd_result) {
             fl::printf("❌ Point %d: SIMD result %d does not match scalar %d (diff=%d)\n",
                     i, simd_result, scalar_result, simd_result - scalar_result);
-            fflush(stderr);
-            FL_ASSERT(false, "SIMD result does not match scalar");
+                    FL_ASSERT(false, "SIMD result does not match scalar");
         }
     }
 }
@@ -162,13 +157,11 @@ FL_TEST_CASE("perlin_s16x16 - various coordinates") {
         } else {
             fl::printf("  ✓ Match\n");
         }
-        fflush(stderr);
-
+    
         if (scalar_result != simd_result) {
             fl::printf("❌ Test %zu (%s): SIMD result %d does not match scalar %d\n",
                     i, tests[i].desc, simd_result, scalar_result);
-            fflush(stderr);
-            FL_ASSERT(false, "SIMD result does not match scalar");
+                    FL_ASSERT(false, "SIMD result does not match scalar");
         }
     }
 }

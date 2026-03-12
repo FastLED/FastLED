@@ -108,7 +108,6 @@ void print_error_stats(const ErrorStats &stats, const char *test_name) {
                     100.0 * stats.histogram[i] / stats.total_pixels);
         }
     }
-    fflush(stderr);
 }
 
 FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000)") {
@@ -167,21 +166,18 @@ FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000)") {
     // ========================
     if (stats.max_error > 10) {
         fl::printf("FAIL: Max error %d exceeds threshold of 10\n", stats.max_error);
-        fflush(stderr);
-    }
+        }
     FL_ASSERT(stats.max_error <= 10, "Max error exceeded threshold");
 
     if (stats.avg_error > 3.0) {
         fl::printf("FAIL: Avg error %.2f exceeds threshold of 3.0\n", stats.avg_error);
-        fflush(stderr);
-    }
+        }
     FL_ASSERT(stats.avg_error <= 3.0, "Average error exceeded threshold");
 
     if (stats.pixels_over_4bit >= N / 10) {
         fl::printf("FAIL: %.1f%% of pixels have >4 LSB error (threshold: 10%%)\n",
                 100.0 * stats.pixels_over_4bit / N);
-        fflush(stderr);
-    }
+        }
     FL_ASSERT(stats.pixels_over_4bit < N / 10, "Too many pixels with >4 LSB error");
 }
 
@@ -241,14 +237,12 @@ FL_TEST_CASE("chasing_spirals - float vs q31 accuracy (t=1000000)") {
     // ========================
     if (stats.max_error > 20) {
         fl::printf("FAIL: Max error %d exceeds threshold of 20\n", stats.max_error);
-        fflush(stderr);
-    }
+        }
     FL_ASSERT(stats.max_error <= 20, "Max error exceeded threshold");
 
     if (stats.avg_error > 5.0) {
         fl::printf("FAIL: Avg error %.2f exceeds threshold of 5.0\n", stats.avg_error);
-        fflush(stderr);
-    }
+        }
     FL_ASSERT(stats.avg_error <= 5.0, "Average error exceeded threshold");
 }
 
@@ -311,5 +305,4 @@ FL_TEST_CASE("chasing_spirals - float vs q31 sample pixels") {
         fl::printf("(%2d,%2d) (%3d,%3d,%3d) -> (%3d,%3d,%3d)  Err:(%+4d,%+4d,%+4d)\n",
                 x, y, f.r, f.g, f.b, q.r, q.g, q.b, r_err, g_err, b_err);
     }
-    fflush(stderr);
 }
