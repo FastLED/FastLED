@@ -1134,7 +1134,7 @@ inline int64_t benchFloat4(int iters, Op op) {
         b2 = a2 + 0.001f; b3 = a3 + 0.001f;
     }
     uint32_t t1 = micros();
-    uint32_t tmp; memcpy(&tmp, &a0, sizeof(tmp));
+    uint32_t tmp; fl::memcpy(&tmp, &a0, sizeof(tmp));
     g_bench_sink = tmp;
     return static_cast<int64_t>(t1 - t0);
 }

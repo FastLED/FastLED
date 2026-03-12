@@ -548,6 +548,10 @@ template <typename T> struct is_arithmetic<T &> {
 template <typename T> struct is_signed {
     enum : bool { value = false };
 };
+template <> struct is_signed<char> {
+    // char signedness is implementation-defined; detect at compile time.
+    enum : bool { value = (char(-1) < char(0)) };
+};
 template <> struct is_signed<signed char> {
     enum : bool { value = true };
 };
@@ -571,6 +575,16 @@ template <> struct is_signed<double> {
 };
 template <> struct is_signed<long double> {
     enum : bool { value = true };
+};
+// cv-qualified and reference forwarding
+template <typename T> struct is_signed<const T> {
+    enum : bool { value = is_signed<T>::value };
+};
+template <typename T> struct is_signed<volatile T> {
+    enum : bool { value = is_signed<T>::value };
+};
+template <typename T> struct is_signed<const volatile T> {
+    enum : bool { value = is_signed<T>::value };
 };
 // Note: sized integer types (i8, i16, i32, i64) are typedefs
 // for the basic types above, so they automatically inherit these specializations

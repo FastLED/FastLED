@@ -266,33 +266,67 @@ void record_assertion(
 #define FL_CHECK_TRUE(expr) FL_CHECK(expr)
 
 // Comparison helpers that handle mixed signed/unsigned without warnings.
-// Uses partial specialization + tag dispatch for safe cross-sign comparison.
+// Uses SFINAE (enable_if) to select the correct comparison strategy:
+//   - Non-integral types: direct ==
+//   - Same-sign integrals: direct ==
+//   - Mixed-sign integrals: cast both to unsigned after range check
+// cv-qualifiers are stripped so volatile/const types dispatch correctly.
 namespace detail {
 
-template<typename A, typename B,
-         bool MixedSign = (fl::is_integral<A>::value &&
-                           fl::is_integral<B>::value &&
-                           fl::is_signed<A>::value != fl::is_signed<B>::value)>
+// Strip cv-qualifiers for trait queries.
+template<typename T>
+using bare_t = typename fl::remove_cv<T>::type;
+
+// EqImpl: sign-aware integer equality.
+// Primary: both same sign — direct compare.
+template<typename A, typename B, bool A_signed, bool B_signed>
+struct EqImpl {
+    static bool eq(const A& a, const B& b) { return a == b; }
+};
+
+// A signed, B unsigned
+template<typename A, typename B>
+struct EqImpl<A, B, true, false> {
+    static bool eq(const A& a, const B& b) {
+        using UA = typename fl::make_unsigned<bare_t<A>>::type;
+        using UB = typename fl::make_unsigned<bare_t<B>>::type;
+        return a >= 0 && static_cast<UA>(a) == static_cast<UB>(b);
+    }
+};
+
+// A unsigned, B signed
+template<typename A, typename B>
+struct EqImpl<A, B, false, true> {
+    static bool eq(const A& a, const B& b) {
+        using UA = typename fl::make_unsigned<bare_t<A>>::type;
+        using UB = typename fl::make_unsigned<bare_t<B>>::type;
+        return b >= 0 && static_cast<UA>(a) == static_cast<UB>(b);
+    }
+};
+
+// SafeCompare: SFINAE dispatches integral vs non-integral types.
+
+// Primary: non-integral — plain ==.
+template<typename A, typename B, typename Enable = void>
 struct SafeCompare {
     static bool eq(const A& a, const B& b) { return a == b; }
     static bool ne(const A& a, const B& b) { return a != b; }
 };
 
+// Specialization: both integral — route through EqImpl.
 template<typename A, typename B>
-struct SafeCompare<A, B, true> {
+struct SafeCompare<A, B,
+    typename fl::enable_if<
+        fl::is_integral<bare_t<A>>::value &&
+        fl::is_integral<bare_t<B>>::value
+    >::type>
+{
     static bool eq(const A& a, const B& b) {
-        return eq_dispatch(a, b, fl::integral_constant<bool, fl::is_signed<A>::value>{});
+        return EqImpl<A, B,
+                      fl::is_signed<bare_t<A>>::value,
+                      fl::is_signed<bare_t<B>>::value>::eq(a, b);
     }
     static bool ne(const A& a, const B& b) { return !eq(a, b); }
-private:
-    // A signed, B unsigned
-    static bool eq_dispatch(const A& a, const B& b, fl::true_type) {
-        return a >= 0 && static_cast<typename fl::make_unsigned<A>::type>(a) == b;
-    }
-    // A unsigned, B signed
-    static bool eq_dispatch(const A& a, const B& b, fl::false_type) {
-        return b >= 0 && a == static_cast<typename fl::make_unsigned<B>::type>(b);
-    }
 };
 
 } // namespace detail
