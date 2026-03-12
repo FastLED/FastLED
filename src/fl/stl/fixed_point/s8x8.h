@@ -328,7 +328,8 @@ class s8x8 {
         i32 frac_part = static_cast<i32>((static_cast<i64>(acc) * t16) >> IFRAC);
         // Convert from 16 frac bits back to 8.
         i16 frac8 = static_cast<i16>(frac_part >> (IFRAC - FRAC_BITS));
-        return from_raw(static_cast<i16>((int_part << FRAC_BITS) + frac8));
+        // Use multiplication instead of shift to avoid UB with negative int_part
+        return from_raw(static_cast<i16>(int_part * SCALE + frac8));
     }
 
     // Fixed-point 2^x. Uses 4-term minimax polynomial for 2^t, t in [0,1).

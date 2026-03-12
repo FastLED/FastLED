@@ -48,7 +48,14 @@ def parse_testlog(testlog_path: Path) -> list[TestLogEntry]:
             continue
 
         # Extract test name
-        test_match = re.search(r"test:\s+(\S+)", section)
+        # Meson testlog uses two formats:
+        #   Unit tests:   "test:  fastled:test_name"
+        #   Example tests: "test:  examples - fastled:example-Name"
+        # We need the qualified name (e.g., "fastled:example-Name")
+        test_match = re.search(r"test:\s+(?:\S+\s+-\s+)?(\S+:\S+)", section)
+        if not test_match:
+            # Fallback: capture first word (for non-suite tests)
+            test_match = re.search(r"test:\s+(\S+)", section)
         if not test_match:
             continue
 

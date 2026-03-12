@@ -54,6 +54,17 @@ fl::Remote* clientRemote = nullptr;
 std::thread serverThread;
 std::atomic<bool> serverRunning(false);
 
+// RAII cleanup to join the server thread before static destruction
+struct ServerCleanup {
+    ~ServerCleanup() {
+        serverRunning.store(false);
+        if (serverThread.joinable()) {
+            serverThread.join();
+        }
+    }
+};
+static ServerCleanup serverCleanup;
+
 // Run server in background thread so client can connect without deadlock
 void serverThreadFunc() {
     while (serverRunning.load()) {

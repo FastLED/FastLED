@@ -180,7 +180,8 @@ FL_TEST_SUITE("ClocklessBlockGeneric") {
         };
 
         // Create pixel data for 100 LEDs
-        CRGB pixels[100];
+        // Must be static because the controller persists and retains a pointer
+        static CRGB pixels[100];
         for (int i = 0; i < 100; ++i) {
             pixels[i] = CRGB(0xFF, 0x00, 0xFF);  // Magenta LEDs (tests 1s and 0s)
         }
@@ -247,7 +248,8 @@ FL_TEST_SUITE("ClocklessBlockGeneric") {
             }
         };
 
-        CRGB pixels[100];
+        // Must be static because the controller persists and retains a pointer
+        static CRGB pixels[100];
         for (int i = 0; i < 100; ++i) {
             pixels[i] = CRGB(0x00, 0xFF, 0x00);  // Green
         }
