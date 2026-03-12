@@ -19,6 +19,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -32,7 +35,7 @@ jobs:
       - name: Run compilation performance analysis
         id: perf
         run: |
-          python ci/perf/compile_perf.py \
+          uv run ci/perf/compile_perf.py \
             --compiler=clang++-17 \
             --output=text \
             --save-trace \
@@ -50,7 +53,7 @@ jobs:
       - name: Extract metrics for PR comment
         if: github.event_name == 'pull_request'
         run: |
-          python ci/perf/compile_perf.py \
+          uv run ci/perf/compile_perf.py \
             --compiler=clang++-17 \
             --output=json > perf-metrics.json
 
@@ -94,4 +97,4 @@ jobs:
       - name: Check performance thresholds
         run: |
           # Exit with error if any header exceeds threshold
-          python ci/perf/compile_perf.py --compiler=clang++-17 --check-thresholds
+          uv run ci/perf/compile_perf.py --compiler=clang++-17 --check-thresholds
