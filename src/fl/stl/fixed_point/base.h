@@ -75,15 +75,18 @@ class fixed_point_base {
     }
 
     constexpr FASTLED_FORCE_INLINE Derived operator+(Derived b) const {
-        return Derived::from_raw(mValue + b.mValue);
+        return Derived::from_raw(static_cast<raw_type>(
+            static_cast<unsigned_raw_type>(mValue) + static_cast<unsigned_raw_type>(b.mValue)));
     }
 
     constexpr FASTLED_FORCE_INLINE Derived operator-(Derived b) const {
-        return Derived::from_raw(mValue - b.mValue);
+        return Derived::from_raw(static_cast<raw_type>(
+            static_cast<unsigned_raw_type>(mValue) - static_cast<unsigned_raw_type>(b.mValue)));
     }
 
     constexpr FASTLED_FORCE_INLINE Derived operator-() const {
-        return Derived::from_raw(-mValue);
+        return Derived::from_raw(static_cast<raw_type>(
+            0u - static_cast<unsigned_raw_type>(mValue)));
     }
 
     constexpr FASTLED_FORCE_INLINE Derived operator>>(int shift) const {

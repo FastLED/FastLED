@@ -64,15 +64,18 @@ class s4x12 {
     }
 
     constexpr FASTLED_FORCE_INLINE s4x12 operator+(s4x12 b) const {
-        return from_raw(mValue + b.mValue);
+        return from_raw(static_cast<i16>(
+            static_cast<u16>(mValue) + static_cast<u16>(b.mValue)));
     }
 
     constexpr FASTLED_FORCE_INLINE s4x12 operator-(s4x12 b) const {
-        return from_raw(mValue - b.mValue);
+        return from_raw(static_cast<i16>(
+            static_cast<u16>(mValue) - static_cast<u16>(b.mValue)));
     }
 
     constexpr FASTLED_FORCE_INLINE s4x12 operator-() const {
-        return from_raw(-mValue);
+        return from_raw(static_cast<i16>(
+            static_cast<u16>(0) - static_cast<u16>(mValue)));
     }
 
     constexpr FASTLED_FORCE_INLINE s4x12 operator>>(int shift) const {

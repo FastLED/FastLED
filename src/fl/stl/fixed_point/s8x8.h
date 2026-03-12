@@ -64,15 +64,18 @@ class s8x8 {
     }
 
     constexpr FASTLED_FORCE_INLINE s8x8 operator+(s8x8 b) const {
-        return from_raw(mValue + b.mValue);
+        return from_raw(static_cast<i16>(
+            static_cast<u16>(mValue) + static_cast<u16>(b.mValue)));
     }
 
     constexpr FASTLED_FORCE_INLINE s8x8 operator-(s8x8 b) const {
-        return from_raw(mValue - b.mValue);
+        return from_raw(static_cast<i16>(
+            static_cast<u16>(mValue) - static_cast<u16>(b.mValue)));
     }
 
     constexpr FASTLED_FORCE_INLINE s8x8 operator-() const {
-        return from_raw(-mValue);
+        return from_raw(static_cast<i16>(
+            static_cast<u16>(0) - static_cast<u16>(mValue)));
     }
 
     constexpr FASTLED_FORCE_INLINE s8x8 operator>>(int shift) const {

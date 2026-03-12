@@ -79,15 +79,17 @@ class s16x16 {
     }
 
     constexpr FASTLED_FORCE_INLINE s16x16 operator+(s16x16 b) const {
-        return from_raw(mValue + b.mValue);
+        return from_raw(static_cast<i32>(
+            static_cast<u32>(mValue) + static_cast<u32>(b.mValue)));
     }
 
     constexpr FASTLED_FORCE_INLINE s16x16 operator-(s16x16 b) const {
-        return from_raw(mValue - b.mValue);
+        return from_raw(static_cast<i32>(
+            static_cast<u32>(mValue) - static_cast<u32>(b.mValue)));
     }
 
     constexpr FASTLED_FORCE_INLINE s16x16 operator-() const {
-        return from_raw(-mValue);
+        return from_raw(static_cast<i32>(0u - static_cast<u32>(mValue)));
     }
 
     constexpr FASTLED_FORCE_INLINE s16x16 operator>>(int shift) const {

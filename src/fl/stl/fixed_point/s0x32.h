@@ -79,15 +79,17 @@ class s0x32 {
     // ---- Same-type arithmetic (s0x32 OP s0x32 → s0x32) --------------------
 
     constexpr FASTLED_FORCE_INLINE s0x32 operator+(s0x32 b) const {
-        return from_raw(mValue + b.mValue);
+        return from_raw(static_cast<i32>(
+            static_cast<u32>(mValue) + static_cast<u32>(b.mValue)));
     }
 
     constexpr FASTLED_FORCE_INLINE s0x32 operator-(s0x32 b) const {
-        return from_raw(mValue - b.mValue);
+        return from_raw(static_cast<i32>(
+            static_cast<u32>(mValue) - static_cast<u32>(b.mValue)));
     }
 
     constexpr FASTLED_FORCE_INLINE s0x32 operator-() const {
-        return from_raw(-mValue);
+        return from_raw(static_cast<i32>(0u - static_cast<u32>(mValue)));
     }
 
     // Multiply two normalized values: s0x32 × s0x32 → s0x32
