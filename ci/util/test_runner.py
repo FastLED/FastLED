@@ -115,72 +115,122 @@ def get_test_counts() -> tuple[int, int, int]:
         return (0, 0, 0)
 
 
+# Pre-compiled patterns for detecting real error lines (not compiler flags).
+# These are module-level to avoid re-compilation on every call.
+_REAL_ERROR_PATTERNS: list[re.Pattern[str]] = [
+    re.compile(
+        r"(?<![/-])error\s*:", re.IGNORECASE
+    ),  # "error:" not preceded by -W or /
+    re.compile(
+        r"(?<![/-])fatal\s*:", re.IGNORECASE
+    ),  # "fatal:" not preceded by flag chars
+    re.compile(r"\bFAILED\s*:", re.IGNORECASE),  # ninja "FAILED:" lines
+    re.compile(r"\bundefined reference\b", re.IGNORECASE),  # linker errors
+    re.compile(r"\bcannot find\b", re.IGNORECASE),  # missing file/symbol errors
+    re.compile(r"\bno such file\b", re.IGNORECASE),  # missing file errors
+    re.compile(r"^\s*FAIL\b"),  # test failure lines (start of line)
+    re.compile(r"\bninja:\s.*\bfailed\b", re.IGNORECASE),  # ninja summary failures
+    re.compile(r"\bSegmentation fault\b", re.IGNORECASE),  # crashes
+    re.compile(r"\bAborted\b"),  # ASAN/assertion aborts
+    re.compile(r"==\d+==.*\bAddressSanitizer\b"),  # ASAN error reports
+    re.compile(r"==\d+==.*\bLeakSanitizer\b"),  # LSAN error reports
+    re.compile(r"==\d+==.*\bUndefinedBehaviorSanitizer\b"),  # UBSAN error reports
+    re.compile(r"\bERROR SUMMARY:\s*[1-9]"),  # valgrind/sanitizer summary with errors
+]
+
+
+def _is_real_error_line(line: str) -> bool:
+    """Check if a line contains a real error indicator, not just compiler flags.
+
+    Returns True for actual error messages like:
+      - "error: undeclared identifier 'foo'"
+      - "FAILED: examples/example-Blink.so"
+      - "fatal error: file not found"
+      - "undefined reference to 'bar'"
+
+    Returns False for compiler flag noise like:
+      - "-Werror=unused-variable"
+      - "--print-errorlogs"
+    """
+    for pattern in _REAL_ERROR_PATTERNS:
+        if pattern.search(line):
+            return True
+    return False
+
+
 def extract_error_snippet(accumulated_output: list[str], context_lines: int = 5) -> str:
     """
     Extract relevant error snippets from process output.
 
-    Searches for lines containing "error" (case insensitive) and extracts
-    a small context window around the first few error occurrences.
+    Searches for lines containing actual error messages (not compiler flags
+    like -Werror) and extracts context around the first few occurrences.
+    Always includes the tail of the output to ensure failure summaries are
+    visible.
 
     Args:
         accumulated_output: List of output lines from the process
         context_lines: Number of lines to capture before/after each error line (default: 5)
 
     Returns:
-        Formatted string containing error snippets with minimal context
+        Formatted string containing error snippets with tail context
     """
     if not accumulated_output:
         return "No output captured"
 
     error_snippets: list[str] = []
-    error_pattern = re.compile(r"error", re.IGNORECASE)
 
-    # Find all lines that contain "error" (case insensitive)
+    # Find all lines that contain real error indicators
     error_line_indices: list[int] = []
     for i, line in enumerate(accumulated_output):
-        if error_pattern.search(line):
+        if _is_real_error_line(line):
             error_line_indices.append(i)
 
+    # Always capture tail of output (last 30 lines) for failure summaries
+    tail_count = 30
+    tail_start = max(0, len(accumulated_output) - tail_count)
+
     if not error_line_indices:
-        # No specific errors found, return last 10 lines which might contain useful info
-        max_lines = min(10, len(accumulated_output))
+        # No specific errors found, return tail which often has useful info
+        max_lines = min(tail_count, len(accumulated_output))
         return (
-            "No 'error' keyword found. Last "
+            "No specific error lines found. Last "
             + str(max_lines)
             + " lines:\n"
             + "\n".join(accumulated_output[-max_lines:])
         )
 
-    # Extract context around first 5 errors (increased from 2 for better visibility)
-    max_errors_to_show = 5
-    for i, error_idx in enumerate(error_line_indices[:max_errors_to_show]):
-        # Calculate context window (5 lines before to 5 lines after the error)
+    # Extract context around first 10 errors
+    max_errors_to_show = 10
+    shown_lines: set[int] = set()
+
+    for error_idx in error_line_indices[:max_errors_to_show]:
         start_idx = max(0, error_idx - context_lines)
         end_idx = min(len(accumulated_output), error_idx + context_lines + 1)
 
         snippet_lines: list[str] = []
-
         for j in range(start_idx, end_idx):
-            line_marker = "➤ " if j == error_idx else "  "  # Mark the actual error line
-            snippet_lines.append(f"{line_marker}{accumulated_output[j]}")
+            if j not in shown_lines:
+                line_marker = "➤ " if j == error_idx else "  "
+                snippet_lines.append(f"{line_marker}{accumulated_output[j]}")
+                shown_lines.add(j)
 
-        error_snippets.append("\n".join(snippet_lines))
+        if snippet_lines:
+            error_snippets.append("\n".join(snippet_lines))
 
-    # Add summary if there are more errors - but show the actual error lines
+    # Summary of remaining errors
     if len(error_line_indices) > max_errors_to_show:
-        remaining_errors = error_line_indices[max_errors_to_show:]
-        additional_error_lines: list[str] = []
-        for error_idx in remaining_errors[:3]:  # Show up to 3 more error lines
-            additional_error_lines.append(f"➤ {accumulated_output[error_idx]}")
+        remaining_count = len(error_line_indices) - max_errors_to_show
+        error_snippets.append(f"... and {remaining_count} more error(s) found")
 
-        if additional_error_lines:
-            error_snippets.append("Additional errors found:")
-            error_snippets.append("\n".join(additional_error_lines))
-
-        if len(remaining_errors) > 3:
-            error_snippets.append(
-                f"... and {len(remaining_errors) - 3} more error(s) found"
-            )
+    # Always append tail of output for context (skip lines already shown)
+    tail_lines: list[str] = []
+    for j in range(tail_start, len(accumulated_output)):
+        if j not in shown_lines:
+            tail_lines.append(f"  {accumulated_output[j]}")
+    if tail_lines:
+        error_snippets.append(
+            f"--- Last {len(tail_lines)} lines of output ---\n" + "\n".join(tail_lines)
+        )
 
     return "\n\n".join(error_snippets)
 
