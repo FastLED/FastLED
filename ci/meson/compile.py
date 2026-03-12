@@ -311,8 +311,29 @@ def compile_meson(
         # Stream output line by line to rewrite Ninja paths
         # In quiet mode or non-verbose mode, suppress all output (errors shown via error filter)
         # In verbose mode, show full compilation output for detailed debugging
+        import time as _time
+
+        last_line_time = _time.time()
         with proc.line_iter(timeout=None) as it:
             for line in it:
+                now = _time.time()
+                silence_duration = now - last_line_time
+                last_line_time = now
+
+                # Dump stacks if compilation produced no output for >60s
+                if silence_duration > 60.0:
+                    try:
+                        from ci.util.test_env import dump_thread_stacks
+
+                        _ts_print(
+                            f"[BUILD] WARNING: No output for {silence_duration:.0f}s - dumping stacks"
+                        )
+                        dump_thread_stacks()
+                    except KeyboardInterrupt as ki:
+                        handle_keyboard_interrupt(ki)
+                        raise
+                    except Exception:
+                        pass
                 # Write to error log (captures both stdout and stderr)
                 stderr_tee.write_line(line)
 

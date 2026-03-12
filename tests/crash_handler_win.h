@@ -652,6 +652,15 @@ inline void setup_crash_handler() {
         return;
     }
 
+    // Skip crash handler when ASAN is active - ASAN uses EXCEPTION_ACCESS_VIOLATION
+    // internally for shadow memory, which our vectored handler treats as fatal.
+    // ASAN provides its own superior crash reporting.
+    if (GetModuleHandleA("clang_rt.asan_dynamic-x86_64.dll") != NULL ||
+        GetModuleHandleA("libclang_rt.asan_dynamic-x86_64.dll") != NULL) {
+        printf("Crash handler disabled (AddressSanitizer detected)\n");
+        return;
+    }
+
     printf("Setting up Windows crash handler...\n");
 
     // Add vectored exception handler (first chance) to catch heap corruption

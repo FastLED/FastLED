@@ -1070,6 +1070,10 @@ def run_meson_build_and_test(
             # Set runner watchdog timeout to match meson slow test timeout (60s)
             if "FASTLED_TEST_TIMEOUT" not in test_env:
                 test_env["FASTLED_TEST_TIMEOUT"] = "60"
+            # Disable crash handler in debug mode on Windows - ASAN's vectored
+            # exception handler conflicts with our crash handler (causes deadlock)
+            if build_mode == "debug" and os.name == "nt":
+                test_env["FASTLED_DISABLE_CRASH_HANDLER"] = "1"
             proc = RunningProcess(
                 test_cmd,
                 cwd=source_dir,  # Run from project root

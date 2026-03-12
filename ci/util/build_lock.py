@@ -23,6 +23,26 @@ from typing import Generator, Optional
 from ci.util.lock_database import LockDatabase
 
 
+def _dump_blocking_stacks(lock_name: str, elapsed: float) -> None:
+    """Dump thread stacks when blocked on lock acquisition."""
+    try:
+        from ci.util.test_env import dump_thread_stacks
+
+        yellow = "\033[33m"
+        reset = "\033[0m"
+        print(
+            f"{yellow}[LOCK] Blocked on '{lock_name}' for {elapsed:.0f}s - dumping stacks:{reset}"
+        )
+        dump_thread_stacks()
+    except KeyboardInterrupt as ki:
+        from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception:
+        pass  # Best-effort diagnostic
+
+
 class BuildLock:
     """
     SQLite-backed lock for coordinating operations with PID tracking.
@@ -109,6 +129,7 @@ class BuildLock:
         start_time = time.time()
         warning_shown = False
         last_stale_check = 0.0
+        last_stack_dump = 0.0
 
         while True:
             if is_interrupted():
@@ -147,6 +168,11 @@ class BuildLock:
                 reset = "\033[0m"
                 print(f"{yellow}Waiting to acquire lock '{self._lock_name}'...{reset}")
                 warning_shown = True
+
+            # Dump stacks periodically while blocked (every 10s)
+            if warning_shown and elapsed - last_stack_dump >= 10.0:
+                last_stack_dump = elapsed
+                _dump_blocking_stacks(self._lock_name, elapsed)
 
             # Check for timeout
             if elapsed >= timeout:
