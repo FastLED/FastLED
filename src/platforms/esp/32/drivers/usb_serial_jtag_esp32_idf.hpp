@@ -354,7 +354,11 @@ bool UsbSerialJtagEsp32::isConnected() const {
         return false;  // Driver not installed, cannot check connection
     }
 
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
     return usb_serial_jtag_is_connected();
+#else
+    return true;  // Fallback for older IDF versions
+#endif
 #else
     return false;
 #endif
