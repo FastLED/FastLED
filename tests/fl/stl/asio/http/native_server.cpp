@@ -152,11 +152,11 @@ FL_TEST_CASE("NativeHttpServer - Update loop with no clients") {
 
 FL_TEST_CASE("NativeHttpServer - Accept real client connection") {
     NativeHttpServer server(kSocketPort1);  // Use different port to avoid conflicts
-    server.start();
+    FL_REQUIRE(server.start());
 
     // Create client and connect
     NativeHttpClient client("localhost", kSocketPort1);
-    client.connect();
+    FL_REQUIRE(client.connect());
 
     // Give connection time to establish (blocking wait, but should be fast)
     for (int i = 0; i < 10; ++i) {
@@ -177,11 +177,11 @@ FL_TEST_CASE("NativeHttpServer - Accept real client connection") {
 
 FL_TEST_CASE("NativeHttpServer - Client ID tracking") {
     NativeHttpServer server(kSocketPort2);
-    server.start();
+    FL_REQUIRE(server.start());
 
     // Connect first client
     NativeHttpClient client1("localhost", kSocketPort2);
-    client1.connect();
+    FL_REQUIRE(client1.connect());
 
     // Accept client
     for (int i = 0; i < 10; ++i) {
@@ -202,7 +202,7 @@ FL_TEST_CASE("NativeHttpServer - Client ID tracking") {
 
     // Connect second client
     NativeHttpClient client2("localhost", kSocketPort2);
-    client2.connect();
+    FL_REQUIRE(client2.connect());
 
     // Accept second client
     for (int i = 0; i < 10; ++i) {
@@ -230,11 +230,11 @@ FL_TEST_CASE("NativeHttpServer - Client ID tracking") {
 
 FL_TEST_CASE("NativeHttpServer - Send and recv with real client") {
     NativeHttpServer server(kSocketPort3);
-    server.start();
+    FL_REQUIRE(server.start());
 
     // Connect client
     NativeHttpClient client("localhost", kSocketPort3);
-    client.connect();
+    FL_REQUIRE(client.connect());
 
     // Accept client
     for (int i = 0; i < 10; ++i) {
@@ -301,13 +301,13 @@ FL_TEST_CASE("NativeHttpServer - Send and recv with real client") {
 
 FL_TEST_CASE("NativeHttpServer - Broadcast to multiple clients") {
     NativeHttpServer server(kSocketPort4);
-    server.start();
+    FL_REQUIRE(server.start());
 
     // Connect two clients
     NativeHttpClient client1("localhost", kSocketPort4);
     NativeHttpClient client2("localhost", kSocketPort4);
-    client1.connect();
-    client2.connect();
+    FL_REQUIRE(client1.connect());
+    FL_REQUIRE(client2.connect());
 
     // Accept both clients
     for (int i = 0; i < 20; ++i) {
@@ -356,13 +356,13 @@ FL_TEST_CASE("NativeHttpServer - Broadcast to multiple clients") {
 
 FL_TEST_CASE("NativeHttpServer - Disconnect specific client") {
     NativeHttpServer server(kSocketPort5);
-    server.start();
+    FL_REQUIRE(server.start());
 
     // Connect two clients
     NativeHttpClient client1("localhost", kSocketPort5);
     NativeHttpClient client2("localhost", kSocketPort5);
-    client1.connect();
-    client2.connect();
+    FL_REQUIRE(client1.connect());
+    FL_REQUIRE(client2.connect());
 
     // Accept both clients
     for (int i = 0; i < 20; ++i) {
@@ -395,13 +395,13 @@ FL_TEST_CASE("NativeHttpServer - Disconnect specific client") {
 
 FL_TEST_CASE("NativeHttpServer - Disconnect all clients") {
     NativeHttpServer server(kSocketPort6);
-    server.start();
+    FL_REQUIRE(server.start());
 
     // Connect two clients
     NativeHttpClient client1("localhost", kSocketPort6);
     NativeHttpClient client2("localhost", kSocketPort6);
-    client1.connect();
-    client2.connect();
+    FL_REQUIRE(client1.connect());
+    FL_REQUIRE(client2.connect());
 
     // Accept both clients
     for (int i = 0; i < 20; ++i) {
@@ -426,11 +426,11 @@ FL_TEST_CASE("NativeHttpServer - Disconnect all clients") {
 
 FL_TEST_CASE("NativeHttpServer - Update removes disconnected clients") {
     NativeHttpServer server(kSocketPort7);
-    server.start();
+    FL_REQUIRE(server.start());
 
     // Connect client
     NativeHttpClient client("localhost", kSocketPort7);
-    client.connect();
+    FL_REQUIRE(client.connect());
 
     // Accept client
     for (int i = 0; i < 10; ++i) {
@@ -472,10 +472,10 @@ FL_TEST_CASE("NativeHttpServer - Update removes disconnected clients") {
 
 FL_TEST_CASE("NativeHttpServer - HTTP-like request/response exchange") {
     NativeHttpServer server(kSocketPort8);
-    server.start();
+    FL_REQUIRE(server.start());
 
     NativeHttpClient client("localhost", kSocketPort8);
-    client.connect();
+    FL_REQUIRE(client.connect());
 
     // Accept client
     for (int i = 0; i < 10; ++i) {
@@ -548,12 +548,12 @@ FL_TEST_CASE("NativeHttpServer - Server restart on same port (SO_REUSEADDR)") {
     // First server instance
     {
         NativeHttpServer server(kSocketPort9);
-        FL_CHECK(server.start());
-        FL_CHECK(server.isListening());
+        FL_REQUIRE(server.start());
+        FL_REQUIRE(server.isListening());
 
         // Connect a client to prove it works
         NativeHttpClient client("localhost", kSocketPort9);
-        client.connect();
+        FL_REQUIRE(client.connect());
 
         for (int i = 0; i < 10; ++i) {
             server.acceptClients();
@@ -570,12 +570,12 @@ FL_TEST_CASE("NativeHttpServer - Server restart on same port (SO_REUSEADDR)") {
     {
         NativeHttpServer server(kSocketPort9);
         bool started = server.start();
-        FL_CHECK(started);
-        FL_CHECK(server.isListening());
+        FL_REQUIRE(started);
+        FL_REQUIRE(server.isListening());
 
         // Connect a new client to prove it works after restart
         NativeHttpClient client("localhost", kSocketPort9);
-        client.connect();
+        FL_REQUIRE(client.connect());
 
         for (int i = 0; i < 10; ++i) {
             server.acceptClients();
@@ -591,10 +591,10 @@ FL_TEST_CASE("NativeHttpServer - Server restart on same port (SO_REUSEADDR)") {
 
 FL_TEST_CASE("NativeHttpServer - Large server-to-client transfer") {
     NativeHttpServer server(kSocketPort10);
-    server.start();
+    FL_REQUIRE(server.start());
 
     NativeHttpClient client("localhost", kSocketPort10);
-    client.connect();
+    FL_REQUIRE(client.connect());
 
     // Accept client
     for (int i = 0; i < 10; ++i) {
@@ -659,10 +659,10 @@ FL_TEST_CASE("NativeHttpServer - Large server-to-client transfer") {
 
 FL_TEST_CASE("NativeHttpServer - Multiple sequential requests on same connection") {
     NativeHttpServer server(kSocketPort11);
-    server.start();
+    FL_REQUIRE(server.start());
 
     NativeHttpClient client("localhost", kSocketPort11);
-    client.connect();
+    FL_REQUIRE(client.connect());
 
     // Accept client
     for (int i = 0; i < 10; ++i) {
