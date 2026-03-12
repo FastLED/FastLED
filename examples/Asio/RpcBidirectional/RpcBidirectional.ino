@@ -38,7 +38,7 @@
 
 #define NUM_LEDS 10
 #define DATA_PIN 3
-#define SERVER_PORT 8080
+#define SERVER_PORT 0  // OS auto-assigns available port
 
 CRGB leds[NUM_LEDS];
 
@@ -228,7 +228,11 @@ void setup() {
         Serial.println("ERROR: Failed to start server!");
         return;
     }
-    Serial.println("✓ Server started successfully\n");
+    Serial.println("✓ Server started successfully");
+    fl::u16 actualPort = serverTransport->port();
+    Serial.print("  Listening on port: ");
+    Serial.println(actualPort);
+    Serial.println();
 
     // Start server in background thread so client can connect without deadlock
     serverRunning.store(true);
@@ -239,7 +243,7 @@ void setup() {
 
     Serial.println("Connecting client to server...");
 
-    clientTransport = new fl::HttpStreamClient("localhost", SERVER_PORT);  // ok bare allocation
+    clientTransport = new fl::HttpStreamClient("localhost", actualPort);  // ok bare allocation
     clientTransport->setHeartbeatInterval(30000);
     clientTransport->setTimeout(60000);
 

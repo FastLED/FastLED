@@ -185,7 +185,7 @@ void Fire2023(uint32_t now) {
 
   // draw lowest line - seed the fire where it is brightest and hottest
   for (uint8_t x = 0; x < WIDTH; x++) {
-    heat[XY(x, HEIGHT-1)] =  noise[FIRENOISE][WIDTH - x][CentreX];
+    heat[XY(x, HEIGHT-1)] =  noise[FIRENOISE][WIDTH - 1 - x][CentreX];
     //if (heat[XY(x, HEIGHT-1)] < 200) heat[XY(x, HEIGHT-1)] = 150; 
   }
 

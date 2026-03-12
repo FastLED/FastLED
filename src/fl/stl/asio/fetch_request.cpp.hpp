@@ -250,35 +250,72 @@ void FetchRequest::handle_receiving() {
 }
 
 response FetchRequest::parse_http_response(const fl::string& raw) {
+    const char* data = raw.c_str();
+    const size_t len = raw.size();
+
     // Find end of headers (double CRLF)
     size_t header_end = raw.find("\r\n\r\n");
     if (header_end == fl::string::npos) {
         return response(500, "Internal Server Error");
     }
 
-    fl::string headers = raw.substr(0, header_end);
-    fl::string body = raw.substr(header_end + 4);
-
-    // Parse status line (e.g., "HTTP/1.1 200 OK")
-    size_t first_space = headers.find(' ');
-    size_t second_space = headers.find(' ', first_space + 1);
-
-    if (first_space == fl::string::npos || second_space == fl::string::npos) {
+    // Parse status line: "HTTP/1.1 200 OK\r\n"
+    size_t first_space = raw.find(' ');
+    size_t second_space = raw.find(' ', first_space + 1);
+    if (first_space == fl::string::npos || second_space == fl::string::npos ||
+        first_space >= header_end || second_space >= header_end) {
         return response(500, "Internal Server Error");
     }
 
-    fl::string status_str = headers.substr(first_space + 1, second_space - first_space - 1);
-    int status_code = atoi(status_str.c_str());
-
-    // Extract status text (e.g., "OK" from "HTTP/1.1 200 OK")
-    fl::string status_text = headers.substr(second_space + 1);
-    size_t status_text_end = status_text.find("\r\n");
-    if (status_text_end != fl::string::npos) {
-        status_text = status_text.substr(0, status_text_end);
+    // Parse status code from digits without allocating
+    int status_code = 0;
+    for (size_t i = first_space + 1; i < second_space; ++i) {
+        status_code = status_code * 10 + (data[i] - '0');
     }
 
-    response resp(status_code, status_text);
-    resp.set_body(body);
+    // Status text ends at first \r\n
+    size_t status_line_end = raw.find("\r\n");
+    size_t st_len = (status_line_end != fl::string::npos ? status_line_end : header_end) - (second_space + 1);
+
+    response resp(status_code, fl::string(data + second_space + 1, st_len));
+    resp.set_body(fl::string(data + header_end + 4, len - header_end - 4));
+
+    // Parse response headers using indices into raw
+    size_t pos = status_line_end + 2;  // Skip past status line CRLF
+    while (pos < header_end) {
+        size_t line_end = raw.find("\r\n", pos);
+        if (line_end == fl::string::npos || line_end > header_end) {
+            line_end = header_end;
+        }
+
+        // Find colon separator
+        size_t colon = fl::string::npos;
+        for (size_t i = pos; i < line_end; ++i) {
+            if (data[i] == ':') {
+                colon = i;
+                break;
+            }
+        }
+
+        if (colon != fl::string::npos) {
+            // Build lowercase header name
+            fl::string name(data + pos, colon - pos);
+            for (size_t i = 0; i < name.size(); ++i) {
+                if (name[i] >= 'A' && name[i] <= 'Z') {
+                    name[i] += ('a' - 'A');
+                }
+            }
+
+            // Value: skip colon and optional leading space
+            size_t val_start = colon + 1;
+            if (val_start < line_end && data[val_start] == ' ') {
+                ++val_start;
+            }
+            resp.set_header(name, fl::string(data + val_start, line_end - val_start));
+        }
+
+        pos = line_end + 2;
+    }
 
     return resp;
 }
