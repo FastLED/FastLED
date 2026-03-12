@@ -174,6 +174,12 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         action="store_true",
         help="List all available tests without running them",
     )
+    parser.add_argument(
+        "--log-failures",
+        type=str,
+        default=None,
+        help="Directory to write per-test failure logs (<name>_compile.log, <name>_run.log)",
+    )
 
     parsed_args = parser.parse_args(args)
 
@@ -217,6 +223,9 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         no_unity=parsed_args.no_unity,
         docker=parsed_args.docker,
         list_tests=parsed_args.list_tests,
+        log_failures=Path(parsed_args.log_failures)
+        if parsed_args.log_failures
+        else None,
     )
 
     # Handle --docker flag: implies --debug unless --quick or --release is specified

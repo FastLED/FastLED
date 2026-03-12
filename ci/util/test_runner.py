@@ -1449,6 +1449,7 @@ def runner(
                     "fastled:examples"
                 ],  # Exclude examples in unit-test-only mode
                 test_file_filter=test_file_filter,
+                log_failures=args.log_failures,
             )
 
             if not result.success:
@@ -1529,6 +1530,7 @@ def runner(
                 build_mode=args.build_mode,
                 check=args.check,
                 test_file_filter=test_file_filter,
+                log_failures=args.log_failures,
             )
 
             # Create timing entry for summary

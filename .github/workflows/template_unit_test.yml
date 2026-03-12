@@ -95,7 +95,40 @@ jobs:
           uv run python ci/lint_cpp/no_using_namespace_fl_in_headers.py
 
       - name: Run All Unit Tests
+        id: run_tests
         working-directory: trusted
         run: |
-          ./test --clang --no-parallel --unit --verbose --debug
+          set -o pipefail
+          ./test --clang --no-parallel --unit --verbose --debug --log-failures failures 2>&1 | tee test.log
+        shell: bash
+
+      - name: Test summary and failure logs
+        if: always()
+        working-directory: trusted
+        run: |
+          echo "############################################"
+          echo "Last 100 lines of test.log (most recent output)"
+          echo "############################################"
+          tail -n 100 test.log || true
+
+          echo ""
+          echo "############################################"
+          echo "Failure logs (if any)"
+          echo "############################################"
+          fail_dir="failures"
+          if [ -d "$fail_dir" ] && ls "$fail_dir"/*.log >/dev/null 2>&1; then
+            # Failures exist - print them and exit with error
+            for f in "$fail_dir"/*.log; do
+              echo "----------------------"
+              echo "$(basename "$f")"
+              echo "----------------------"
+              # Print the failure log content
+              cat "$f"
+              echo ""
+            done
+            echo "TESTS FAILED: See failure logs above"
+            exit 1
+          else
+            echo "ALL UNIT TESTS PASSED"
+          fi
         shell: bash

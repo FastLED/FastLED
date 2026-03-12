@@ -4,6 +4,7 @@
 import argparse
 import glob
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -252,6 +253,88 @@ def _safe_rmtree(build_dir: Path) -> None:
             _ts_print(f"[MESON] ⚠️  Some locked files moved to {trash_dir}")
 
 
+def _write_failure_log(
+    log_dir: Optional[Path], name: str, suffix: str, content: str
+) -> None:
+    """Write a failure log file to the log_failures directory.
+
+    Args:
+        log_dir: Directory to write to (None = no-op)
+        name: Test name (will be sanitized for filename)
+        suffix: 'compile' or 'run'
+        content: Log content
+    """
+    if log_dir is None:
+        return
+    log_dir.mkdir(parents=True, exist_ok=True)
+    safe_name = name.replace(":", "_").replace("/", "_").replace("\\", "_")
+    log_path = log_dir / f"{safe_name}_{suffix}.log"
+    with open(log_path, "w", encoding="utf-8", errors="replace") as f:
+        f.write(content)
+
+
+def _extract_compile_failures(compile_output: str) -> dict[str, str]:
+    """Extract per-target compilation failures from ninja output.
+
+    Parses FAILED: lines to identify which targets had errors and collects
+    the associated error output.
+
+    Returns:
+        Dict mapping target name to error output text.
+    """
+    failures: dict[str, str] = {}
+    lines = compile_output.splitlines()
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        if line.startswith("FAILED:"):
+            # Extract target name from path like "tests/fl_async.dll.p/fl/async.cpp.o"
+            target = line.split("FAILED:", 1)[1].strip()
+            m = re.match(r"tests[/\\]([^.]+)\.", target)
+            test_name = m.group(1) if m else "unknown"
+
+            # Collect error lines until next FAILED or ninja stop
+            error_lines = [line]
+            i += 1
+            while i < len(lines):
+                if lines[i].startswith("FAILED:") or lines[i].startswith("ninja:"):
+                    break
+                error_lines.append(lines[i])
+                i += 1
+
+            existing = failures.get(test_name, "")
+            failures[test_name] = existing + "\n".join(error_lines) + "\n"
+        else:
+            i += 1
+
+    return failures
+
+
+def _write_testlog_failures(build_dir: Path, log_dir: Path) -> None:
+    """Parse testlog.txt and write per-test failure logs.
+
+    Args:
+        build_dir: Meson build directory (contains meson-logs/testlog.txt)
+        log_dir: Directory to write failure logs to
+    """
+    from ci.meson.testlog_parser import parse_testlog
+
+    testlog = build_dir / "meson-logs" / "testlog.txt"
+    entries = parse_testlog(testlog)
+    for entry in entries:
+        if "exit status 0" in entry.result:
+            continue
+        content = f"# Test: {entry.test_name}\n"
+        content += f"# Result: {entry.result}\n"
+        content += f"# Duration: {entry.duration}\n\n"
+        if entry.stdout:
+            content += "--- stdout ---\n" + entry.stdout + "\n\n"
+        if entry.stderr:
+            content += "--- stderr ---\n" + entry.stderr + "\n"
+        safe_name = entry.test_name.replace(":", "_").replace("/", "_")
+        _write_failure_log(log_dir, safe_name, "run", content)
+
+
 def run_meson_build_and_test(
     source_dir: Path,
     build_dir: Path,
@@ -263,6 +346,7 @@ def run_meson_build_and_test(
     check: bool = False,
     exclude_suites: Optional[list[str]] = None,
     test_file_filter: Optional[str] = None,
+    log_failures: Optional[Path] = None,
 ) -> MesonTestResult:
     """
     Complete Meson build and test workflow.
@@ -278,6 +362,7 @@ def run_meson_build_and_test(
         check: Enable IWYU static analysis (default: False)
         exclude_suites: Optional list of test suites to exclude (e.g., ['examples'])
         test_file_filter: Optional .hpp filename to filter test execution (e.g., "backbeat.hpp")
+        log_failures: Optional directory to write per-test failure logs (<name>_compile.log, <name>_run.log)
 
     Returns:
         MesonTestResult with success status, duration, and test counts
@@ -480,6 +565,9 @@ def run_meson_build_and_test(
                         "[MESON] Using streaming execution (compile + test in parallel)"
                     )
 
+                # Dict to capture per-test output for failure logging
+                _failed_test_outputs: dict[str, str] = {}
+
                 # Create test callback for streaming execution
                 # Prepare environment with fastled shared lib dir on PATH
                 _streaming_env = os.environ.copy()
@@ -517,6 +605,8 @@ def run_meson_build_and_test(
 
                         # Enhanced error detection for streaming tests
                         if returncode != 0:
+                            # Capture output for failure logging
+                            _failed_test_outputs[test_path.stem] = proc.stdout
                             stdout_lower = proc.stdout.lower()
                             has_doctest_output = any(
                                 pattern in stdout_lower
@@ -691,12 +781,37 @@ def run_meson_build_and_test(
 
                     # Calculate compile sub-phase durations from timestamps
                     _apply_compile_sub_phases(result, sr.compile_sub_phases)
+                    # Write per-test failure logs from testlog.txt
+                    if not result.success and log_failures is not None:
+                        _write_testlog_failures(build_dir, log_failures)
                     return result
 
                 if not sr.success:
                     print_error(
                         f"[MESON] ❌ Some tests failed ({sr.num_passed}/{num_tests_run} tests in {duration:.2f}s)"
                     )
+                    # Write failure logs
+                    if log_failures is not None:
+                        if num_tests_run == 0:
+                            # Compilation failed (no tests ran) — write per-target compile logs
+                            per_target = _extract_compile_failures(sr.compile_output)
+                            if per_target:
+                                for tname, output in per_target.items():
+                                    _write_failure_log(
+                                        log_failures, tname, "compile", output
+                                    )
+                            else:
+                                # Couldn't parse per-target; write full output
+                                _write_failure_log(
+                                    log_failures,
+                                    "compile",
+                                    "compile",
+                                    sr.compile_output,
+                                )
+                        else:
+                            # Tests ran and some failed — write per-test run logs
+                            for tname, output in _failed_test_outputs.items():
+                                _write_failure_log(log_failures, tname, "run", output)
                     return MesonTestResult(
                         success=False,
                         duration=duration,
@@ -933,6 +1048,27 @@ def run_meson_build_and_test(
                                     print_error(f"[MESON] {line.strip()}")
                                     break
                         print_error("=" * 80)
+
+                    # Write compilation failure log
+                    if log_failures is not None:
+                        compile_content = last_error_output
+                        if (
+                            last_result
+                            and last_result.error_log_file
+                            and last_result.error_log_file.exists()
+                        ):
+                            try:
+                                compile_content = last_result.error_log_file.read_text(
+                                    encoding="utf-8", errors="replace"
+                                )
+                            except OSError:
+                                pass
+                        _write_failure_log(
+                            log_failures,
+                            test_name or "unknown",
+                            "compile",
+                            compile_content,
+                        )
 
                     return MesonTestResult(
                         success=False,
@@ -1189,6 +1325,11 @@ def run_meson_build_and_test(
                 if _artifact_path is not None:
                     save_test_result_state(
                         build_dir, meson_test_name, _artifact_path, passed=False
+                    )
+                # Write test run failure log
+                if log_failures is not None and meson_test_name:
+                    _write_failure_log(
+                        log_failures, meson_test_name, "run", proc.stdout
                     )
                 return MesonTestResult(
                     success=False,
