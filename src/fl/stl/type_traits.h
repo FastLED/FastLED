@@ -858,7 +858,13 @@ template <typename T> struct swap_impl<T, true> {
 };
 
 // single entry‑point
+#ifndef FASTLED_NO_ADL_SWAP
 template <typename T> void swap(T &a, T &b) {
+    fl_swap(a, b);
+}
+#endif
+
+template <typename T> void fl_swap(T &a, T &b) {
     // if T is a POD, use use a simple data copy swap.
     // if T is not a POD, use the T::Swap method.
     swap_impl<T>::apply(a, b);

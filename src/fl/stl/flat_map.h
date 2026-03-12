@@ -373,9 +373,9 @@ class flat_map {
     }
 
     // Swap
-    void swap(flat_map& other) noexcept {
+    void swap(flat_map& other) {
         mData.swap(other.mData);
-        fl::swap(mLess, other.mLess);
+        fl::fl_swap(mLess, other.mLess);
     }
 
     // Comparison

@@ -675,7 +675,7 @@ public:
 
 // Swap function (non-member)
 template <typename T, typename Allocator>
-void swap(list<T, Allocator>& lhs, list<T, Allocator>& rhs) {
+void fl_swap(list<T, Allocator>& lhs, list<T, Allocator>& rhs) {
     lhs.swap(rhs);
 }
 

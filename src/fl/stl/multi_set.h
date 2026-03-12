@@ -275,7 +275,7 @@ public:
 
     void swap(MultiSetTree& other) {
         mTree.swap(other.mTree);
-        fl::swap(mNextId, other.mNextId);
+        fl::fl_swap(mNextId, other.mNextId);
     }
 
     // Lookup
@@ -399,4 +399,8 @@ namespace fl {
 template <typename Key, typename Compare = fl::less<Key>>
 using multi_set = MultiSetTree<Key, Compare, fl::allocator_slab<char>>;
 
+template <typename Key, typename Compare, typename Allocator>
+void fl_swap(MultiSetTree<Key, Compare, Allocator>& lhs, MultiSetTree<Key, Compare, Allocator>& rhs) {
+    lhs.swap(rhs);
+}
 } // namespace fl

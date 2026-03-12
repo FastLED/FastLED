@@ -3095,4 +3095,8 @@ fl::string to_hex(T value, bool uppercase, bool pad_to_width) {
     return detail::hex(unsigned_value, width, is_negative, uppercase, pad_to_width);
 }
 
+inline void fl_swap(string& lhs, string& rhs) {
+    lhs.swap(rhs);
+}
+
 } // namespace fl

@@ -117,9 +117,8 @@ public:
     }
     
     void swap(unique_ptr& u) noexcept {
-        using fl::swap;
-        swap(mPtr, u.mPtr);
-        swap(mDeleter, u.mDeleter);
+        fl::fl_swap(mPtr, u.mPtr);
+        fl::fl_swap(mDeleter, u.mDeleter);
     }
 };
 
@@ -210,15 +209,14 @@ public:
     }
     
     void swap(unique_ptr& u) noexcept {
-        using fl::swap;
-        swap(mPtr, u.mPtr);
-        swap(mDeleter, u.mDeleter);
+        fl::fl_swap(mPtr, u.mPtr);
+        fl::fl_swap(mDeleter, u.mDeleter);
     }
 };
 
 // Non-member functions using FL equivalents
 template<typename T, typename Deleter>
-void swap(unique_ptr<T, Deleter>& lhs, unique_ptr<T, Deleter>& rhs) noexcept {
+void fl_swap(unique_ptr<T, Deleter>& lhs, unique_ptr<T, Deleter>& rhs) noexcept {
     lhs.swap(rhs);
 }
 

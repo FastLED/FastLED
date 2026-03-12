@@ -99,7 +99,7 @@ template <typename T, fl::size N> class array {
 
     void swap(array &other) {
         for (fl::size i = 0; i < N; ++i) {
-            fl::swap(mData[i], other.mData[i]);
+            fl::fl_swap(mData[i], other.mData[i]);
         }
     }
 
@@ -156,8 +156,8 @@ bool operator>=(const array<T, N> &lhs, const array<T, N> &rhs) {
 }
 
 template <typename T, fl::size N>
-void swap(array<T, N> &lhs,
-          array<T, N> &rhs) noexcept(noexcept(lhs.swap(rhs))) {
+void fl_swap(array<T, N> &lhs,
+             array<T, N> &rhs) noexcept(noexcept(lhs.swap(rhs))) {
     lhs.swap(rhs);
 }
 

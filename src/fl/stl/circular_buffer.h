@@ -144,6 +144,14 @@ class circular_buffer_core {
     void setTail(fl::size t) { mTail = t; }
     void setFull(bool f) { mFull = f; }
 
+    void swap(circular_buffer_core& other) {
+        fl_swap(mData, other.mData);
+        fl_swap(mCapacity, other.mCapacity);
+        fl_swap(mHead, other.mHead);
+        fl_swap(mTail, other.mTail);
+        fl_swap(mFull, other.mFull);
+    }
+
   private:
     fl::size increment(fl::size index) const { return (index + 1) % mCapacity; }
     fl::size decrement(fl::size index) const {
@@ -301,9 +309,19 @@ class circular_buffer {
         return other <= *this;
     }
 
+    void swap(circular_buffer& other) {
+        fl_swap(mStorage, other.mStorage);
+        fl_swap(mCore, other.mCore);
+    }
+
   private:
     vector_inlined<T, (N > 0 ? N : 1)> mStorage;
     circular_buffer_core<T> mCore;
 };
+
+template <typename T, fl::size N>
+void fl_swap(circular_buffer<T, N>& lhs, circular_buffer<T, N>& rhs) {
+    lhs.swap(rhs);
+}
 
 } // namespace fl

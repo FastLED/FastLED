@@ -136,10 +136,16 @@ class PriorityQueue {
         return _data >= other._data;
     }
 
+    void swap(PriorityQueue& other) {
+        fl_swap(_data, other._data);
+        fl_swap(_comp, other._comp);
+    }
+
   private:
     VectorT _data;
     Compare _comp;
 };
+
 
 /**
  * @brief Stable priority queue that maintains FIFO ordering for equal-priority elements
@@ -284,9 +290,24 @@ public:
         return mQueue >= other.mQueue;
     }
 
+    void swap(priority_queue_stable& other) {
+        fl_swap(mQueue, other.mQueue);
+        fl_swap(mNextSequence, other.mNextSequence);
+    }
+
 private:
     fl::PriorityQueue<StableElement> mQueue;
     u64 mNextSequence;
 };
+
+template <typename T, typename Compare, typename VectorT>
+void fl_swap(PriorityQueue<T, Compare, VectorT>& lhs, PriorityQueue<T, Compare, VectorT>& rhs) {
+    lhs.swap(rhs);
+}
+
+template <typename T, typename Compare>
+void fl_swap(priority_queue_stable<T, Compare>& lhs, priority_queue_stable<T, Compare>& rhs) {
+    lhs.swap(rhs);
+}
 
 } // namespace fl

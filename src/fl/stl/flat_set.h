@@ -302,7 +302,7 @@ class flat_set {
     // Swap
     void swap(flat_set& other) noexcept {
         mData.swap(other.mData);
-        fl::swap(mLess, other.mLess);
+        fl::fl_swap(mLess, other.mLess);
     }
 
     // Comparison
@@ -360,10 +360,10 @@ bool operator>=(const flat_set<Key, Less, Allocator>& lhs,
 }
 
 // Swap
-template <typename Key, typename Less, typename Allocator>
-void swap(flat_set<Key, Less, Allocator>& lhs,
-          flat_set<Key, Less, Allocator>& rhs) noexcept {
+template <typename Key, typename Compare, typename Allocator>
+void fl_swap(flat_set<Key, Compare, Allocator>& lhs, flat_set<Key, Compare, Allocator>& rhs) {
     lhs.swap(rhs);
 }
 
 }  // namespace fl
+```

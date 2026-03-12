@@ -281,9 +281,13 @@ namespace fl {
 // Default map uses slab allocator for better performance
 // In fl:: namespace, "map" refers to the container (map data structure)
 // The Arduino map() function exists only in global namespace (not in fl::)
-template <typename Key, typename T, typename Compare = fl::less<Key>>
-using map = MapRedBlackTree<Key, T, Compare, fl::allocator_slab<char>>;
+template <typename Key, typename T, typename Compare = fl::less<Key>, typename Allocator = fl::allocator_slab<char>>
+using map = MapRedBlackTree<Key, T, Compare, Allocator>;
 
+template <typename Key, typename T, typename Compare, typename Allocator>
+void fl_swap(map<Key, T, Compare, Allocator>& lhs, map<Key, T, Compare, Allocator>& rhs) {
+    lhs.swap(rhs);
+}
 // Legacy alias for backward compatibility
 template <typename Key, typename T, typename Compare = fl::less<Key>>
 using fl_map = map<Key, T, Compare>;

@@ -594,13 +594,13 @@ class FL_ALIGN unordered_map {
     void swap(unordered_map& other) {
         // Swap all member variables
         _buckets.swap(other._buckets);
-        fl::swap(_size, other._size);
-        fl::swap(_tombstones, other._tombstones);
-        fl::swap(mLoadFactor, other.mLoadFactor);
-        fl::swap(_occupied, other._occupied);
-        fl::swap(_deleted, other._deleted);
-        fl::swap(_hash, other._hash);
-        fl::swap(_equal, other._equal);
+        fl::fl_swap(_size, other._size);
+        fl::fl_swap(_tombstones, other._tombstones);
+        fl::fl_swap(mLoadFactor, other.mLoadFactor);
+        fl::fl_swap(_occupied, other._occupied);
+        fl::fl_swap(_deleted, other._deleted);
+        fl::fl_swap(_hash, other._hash);
+        fl::fl_swap(_equal, other._equal);
     }
 
     // find pointer to value or nullptr
@@ -824,8 +824,8 @@ class FL_ALIGN unordered_map {
         Key key;
         T value;
         void swap(Entry &other) {
-            fl::swap(key, other.key);
-            fl::swap(value, other.value);
+            fl::fl_swap(key, other.key);
+            fl::fl_swap(value, other.value);
         }
     };
 
@@ -1119,6 +1119,11 @@ template <typename Key, typename T, typename Hash = Hash<Key>,
           typename KeyEqual = equal_to<Key>>
 using hash_map = unordered_map<Key, T, Hash, KeyEqual>;
 // end using declarations for stl compatibility
+
+template <typename Key, typename T, typename Hash, typename KeyEqual, int INLINED_COUNT>
+void fl_swap(unordered_map<Key, T, Hash, KeyEqual, INLINED_COUNT>& lhs, unordered_map<Key, T, Hash, KeyEqual, INLINED_COUNT>& rhs) {
+    lhs.swap(rhs);
+}
 
 } // namespace fl
 

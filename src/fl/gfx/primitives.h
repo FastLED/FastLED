@@ -527,8 +527,8 @@ inline void drawLine(Canvas<PixelT>& canvas, const PixelT& color,
     fl::i32 fy1 = detail::toFixed8(y1);
 
     bool steep = fl::abs(fy1 - fy0) > fl::abs(fx1 - fx0);
-    if (steep) { fl::swap(fx0, fy0); fl::swap(fx1, fy1); }
-    if (fx0 > fx1) { fl::swap(fx0, fx1); fl::swap(fy0, fy1); }
+    if (steep) { fl::fl_swap(fx0, fy0); fl::fl_swap(fx1, fy1); }
+    if (fx0 > fx1) { fl::fl_swap(fx0, fx1); fl::fl_swap(fy0, fy1); }
 
     fl::i32 dx8 = fx1 - fx0;
     fl::i32 dy8 = fy1 - fy0;

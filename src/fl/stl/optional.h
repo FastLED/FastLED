@@ -240,4 +240,9 @@ optional<T> make_optional(T&& value) {
     return optional<T>(fl::move(value));
 }
 
+template <typename T>
+void fl_swap(Optional<T>& lhs, Optional<T>& rhs) {
+    lhs.swap(rhs);
+}
+
 } // namespace fl

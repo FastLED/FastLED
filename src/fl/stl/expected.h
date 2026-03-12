@@ -129,6 +129,12 @@ public:
     /// @brief Destructor (defaulted - variant handles cleanup)
     ~expected() = default;
 
+    void swap(expected& other) {
+        if (this != &other) {
+            mData.swap(other.mData);
+        }
+    }
+
 private:
     fl::variant<T, ErrorInfo<E>> mData;
 
@@ -136,6 +142,11 @@ private:
     expected(const expected&) = delete;
     expected& operator=(const expected&) = delete;
 };
+
+template <typename T, typename E>
+void fl_swap(expected<T, E>& lhs, expected<T, E>& rhs) {
+    lhs.swap(rhs);
+}
 
 /// @brief Dummy type for void expected success state
 struct VoidSuccess {};
@@ -211,8 +222,19 @@ public:
     /// @brief Destructor (defaulted - variant handles cleanup)
     ~expected() = default;
 
+    void swap(expected& other) {
+        if (this != &other) {
+            mData.swap(other.mData);
+        }
+    }
+
 private:
     fl::variant<VoidSuccess, ErrorInfo<E>> mData;
 };
+
+template <typename E>
+void fl_swap(expected<void, E>& lhs, expected<void, E>& rhs) {
+    lhs.swap(rhs);
+}
 
 } // namespace fl

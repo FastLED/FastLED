@@ -8,6 +8,7 @@
 
 namespace fl {
 
+
 template <typename T, typename Allocator = fl::allocator<T>>
 class deque {
 private:
@@ -779,5 +780,10 @@ public:
 typedef deque<int> deque_int;
 typedef deque<float> deque_float;
 typedef deque<double> deque_double;
+
+template <typename T, typename Allocator>
+void fl_swap(deque<T, Allocator>& lhs, deque<T, Allocator>& rhs) {
+    lhs.swap(rhs);
+}
 
 } // namespace fl

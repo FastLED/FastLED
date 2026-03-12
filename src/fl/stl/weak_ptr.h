@@ -123,8 +123,8 @@ public:
     }
     
     void swap(weak_ptr& other) noexcept {
-        fl::swap(mPtr, other.mPtr);
-        fl::swap(mControlBlock, other.mControlBlock);
+        fl::fl_swap(mPtr, other.mPtr);
+        fl::fl_swap(mControlBlock, other.mControlBlock);
     }
     
     // Observers
@@ -194,7 +194,7 @@ private:
 
 // Utility functions
 template<typename T>
-void swap(weak_ptr<T>& lhs, weak_ptr<T>& rhs) noexcept {
+void fl_swap(weak_ptr<T>& lhs, weak_ptr<T>& rhs) noexcept {
     lhs.swap(rhs);
 }
 

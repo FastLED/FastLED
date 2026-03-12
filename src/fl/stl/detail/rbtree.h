@@ -901,10 +901,10 @@ public:
     }
 
     void swap(RedBlackTree& other) {
-        fl::swap(root_, other.root_);
-        fl::swap(mSize, other.mSize);
-        fl::swap(mComp, other.mComp);
-        fl::swap(mAlloc, other.mAlloc);
+        fl::fl_swap(root_, other.root_);
+        fl::fl_swap(mSize, other.mSize);
+        fl::fl_swap(mComp, other.mComp);
+        fl::fl_swap(mAlloc, other.mAlloc);
     }
 
     // Lookup

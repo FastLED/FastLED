@@ -292,14 +292,14 @@ public:
         other.reset();
     }
 
-    void swap(shared_ptr& other) noexcept {
-        fl::swap(mPtr, other.mPtr);
-        fl::swap(mControlBlock, other.mControlBlock);
+    void swap(shared_ptr& other) {
+        fl::fl_swap(mPtr, other.mPtr);
+        fl::fl_swap(mControlBlock, other.mControlBlock);
     }
 
-    void swap(shared_ptr&& other) noexcept {
-        fl::swap(mPtr, other.mPtr);
-        fl::swap(mControlBlock, other.mControlBlock);
+    void swap(shared_ptr&& other) {
+        fl::fl_swap(mPtr, other.mPtr);
+        fl::fl_swap(mControlBlock, other.mControlBlock);
     }
 
 
@@ -491,7 +491,7 @@ bool operator!=(fl::nullptr_t, const shared_ptr<T>& rhs) noexcept {
 
 // Utility functions
 template<typename T>
-void swap(shared_ptr<T>& lhs, shared_ptr<T>& rhs) noexcept {
+void fl_swap(shared_ptr<T>& lhs, shared_ptr<T>& rhs) noexcept {
     lhs.swap(rhs);
 }
 

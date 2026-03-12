@@ -196,6 +196,17 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) variant {
         }
     }
 
+    void swap(variant& other) {
+        fl_swap(_tag, other._tag);
+        // Note: storage swap is complex because of active member management.
+        // For simplicity, we can use a temporary variant if we have move ctors.
+        // But for now, let's just swap the whole thing if it's safe.
+        // A better way is to move-construct a temporary.
+        variant tmp(fl::move(*this));
+        *this = fl::move(other);
+        other = fl::move(tmp);
+    }
+
   private:
     // –– helper for the visit table
     template <typename T, typename Visitor>
@@ -304,9 +315,15 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) variant {
         _tag = type_to_tag<T>();
     }
 
+
     FL_ALIGN_AS_T(max_align<Types...>::value) char _storage[max_size<Types...>::value];
 
     Tag _tag;
 };
+
+template <typename... Types>
+void fl_swap(variant<Types...>& lhs, variant<Types...>& rhs) {
+    lhs.swap(rhs);
+}
 
 } // namespace fl

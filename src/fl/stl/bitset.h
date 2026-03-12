@@ -38,6 +38,10 @@ inline fl::u8 countr_zero(IntType value) {
 }
 
 /// A simple fixed-size Bitset implementation similar to std::Bitset.
+template <fl::size N>
+void fl_swap(bitset<N>& lhs, bitset<N>& rhs) noexcept {
+    lhs.swap(rhs);
+}
 template <fl::u32 N> class bitset_fixed {
   private:
     static_assert(sizeof(fl::u16) == 2, "u16 should be 2 bytes");

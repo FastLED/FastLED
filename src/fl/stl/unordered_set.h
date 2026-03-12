@@ -165,4 +165,9 @@ class unordered_set {
     fl::unordered_map<Key, bool, Hash, KeyEqual> data;
 };
 
+template <typename Key, typename Hash, typename KeyEqual, typename Allocator>
+void fl_swap(unordered_set<Key, Hash, KeyEqual, Allocator>& lhs, unordered_set<Key, Hash, KeyEqual, Allocator>& rhs) {
+    lhs.swap(rhs);
+}
+
 } // namespace fl

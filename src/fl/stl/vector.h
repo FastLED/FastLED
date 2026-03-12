@@ -100,7 +100,7 @@ class FL_ALIGN FixedVector {
     }
 
     FixedVector(FixedVector &&other) : current_size(0) {
-        fl::swap(*this, other);
+        fl::fl_swap(*this, other);
         other.clear();
     }
 
@@ -146,7 +146,7 @@ class FL_ALIGN FixedVector {
 
     FixedVector &operator=(FixedVector &&other) { // cppcheck-suppress operatorEqVarError
         if (this != &other) {
-            fl::swap(*this, other);
+            fl::fl_swap(*this, other);
             other.clear();
         }
         return *this;
@@ -407,7 +407,7 @@ class FL_ALIGN FixedVector {
         if (this != &other) {
             const fl::size max_size = fl::max(current_size, other.current_size);
             for (fl::size i = 0; i < max_size; ++i) {
-                fl::swap(memory()[i], other.memory()[i]);
+                fl::fl_swap(memory()[i], other.memory()[i]);
             }
             // swap the sizes
             fl::size temp_size = current_size;
@@ -931,21 +931,21 @@ public:
     }
 
     void swap(vector<T> &other) {
-        fl::swap(mArray, other.mArray);
-        fl::swap(mSize, other.mSize);
-        fl::swap(mCapacity, other.mCapacity);
-        fl::swap(mAlloc, other.mAlloc);
+        fl::fl_swap(mArray, other.mArray);
+        fl::fl_swap(mSize, other.mSize);
+        fl::fl_swap(mCapacity, other.mCapacity);
+        fl::fl_swap(mAlloc, other.mAlloc);
     }
 
     void swap(vector<T> &&other) {
-        fl::swap(mArray, other.mArray);
-        fl::swap(mSize, other.mSize);
-        fl::swap(mCapacity, other.mCapacity);
-        fl::swap(mAlloc, other.mAlloc);
+        fl::fl_swap(mArray, other.mArray);
+        fl::fl_swap(mSize, other.mSize);
+        fl::fl_swap(mCapacity, other.mCapacity);
+        fl::fl_swap(mAlloc, other.mAlloc);
     }
 
     void swap(iterator a, iterator b) {
-        fl::swap(*a, *b);
+        fl::fl_swap(*a, *b);
     }
 
     bool full() const { return mSize >= mCapacity; }
@@ -1000,7 +1000,7 @@ public:
         // Rotate by swapping
         for (fl::size i = 0; i < count; ++i) {
             for (fl::size j = src_start + i; j > target_idx + i; --j) {
-                swap(begin() + j - 1, begin() + j);
+                fl::fl_swap(*(begin() + j - 1), *(begin() + j));
             }
         }
         return begin() + target_idx;
@@ -1264,7 +1264,7 @@ class FL_ALIGN InlinedVector {
     }
     InlinedVector(InlinedVector &&other) {
         // swap(*this, other);
-        fl::swap(*this, other);
+        fl::fl_swap(*this, other);
         other.clear();
     }
     InlinedVector(fl::size size) : mUsingHeap(false) {
@@ -1628,9 +1628,9 @@ class FL_ALIGN InlinedVector {
 
     void swap(InlinedVector &other) {
         if (this != &other) {
-            fl::swap(mUsingHeap, other.mUsingHeap);
-            fl::swap(mFixed, other.mFixed);
-            fl::swap(mHeap, other.mHeap);
+            fl::fl_swap(mUsingHeap, other.mUsingHeap);
+            fl::fl_swap(mFixed, other.mFixed);
+            fl::fl_swap(mHeap, other.mHeap);
         }
     }
 
@@ -1646,6 +1646,22 @@ using vector_fixed = FixedVector<T, INLINED_SIZE>;
 template <typename T, fl::size INLINED_SIZE = 64>
 using vector_inlined = InlinedVector<T, INLINED_SIZE>;
 
-template <typename T> using vector_psram = vector<T, fl::allocator_psram<T>>;
+template <typename T, fl::size INLINED_SIZE>
+void fl_swap(FixedVector<T, INLINED_SIZE>& lhs, FixedVector<T, INLINED_SIZE>& rhs) {
+    lhs.swap(rhs);
+}
+
+template <typename T, fl::size INLINED_SIZE>
+void fl_swap(InlinedVector<T, INLINED_SIZE>& lhs, InlinedVector<T, INLINED_SIZE>& rhs) {
+    lhs.swap(rhs);
+}
+
+template <typename T>
+void fl_swap(vector<T>& lhs, vector<T>& rhs) {
+    lhs.swap(rhs);
+}
+
+template <typename T>
+using vector_psram = vector<T, allocator_psram<T>>;
 
 } // namespace fl

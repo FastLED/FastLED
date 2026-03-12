@@ -365,8 +365,8 @@ ScreenMap::ScreenMap(const ScreenMap &other) {
 ScreenMap::ScreenMap(ScreenMap&& other) {
     mDiameter = other.mDiameter;
     length = other.length;
-    fl::swap(mLookUpTable, other.mLookUpTable);
-    fl::swap(mSourceXYMap, other.mSourceXYMap);
+    fl::fl_swap(mLookUpTable, other.mLookUpTable);
+    fl::fl_swap(mSourceXYMap, other.mSourceXYMap);
     other.mLookUpTable.reset();
     other.mSourceXYMap.reset();
 }

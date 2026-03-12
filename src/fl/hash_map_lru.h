@@ -45,9 +45,9 @@ class HashMapLru {
     }
 
     void swap(HashMapLru &other) {
-        fl::swap(mMap, other.mMap);
-        fl::swap(mMaxSize, other.mMaxSize);
-        fl::swap(mCurrentTime, other.mCurrentTime);
+        fl_swap(mMap, other.mMap);
+        fl_swap(mMaxSize, other.mMaxSize);
+        fl_swap(mCurrentTime, other.mCurrentTime);
     }
 
     // Insert or update a key-value pair

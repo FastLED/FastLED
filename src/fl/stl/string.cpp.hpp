@@ -80,8 +80,8 @@ string &string::append(const Tile2x2_u8_wrap &tile) {
 
 void string::swap(string &other) {
     if (this != &other) {
-        fl::swap(mLength, other.mLength);
-        fl::swap(mStorage, other.mStorage);
+        fl::fl_swap(mLength, other.mLength);
+        fl::fl_swap(mStorage, other.mStorage);
     }
 }
 

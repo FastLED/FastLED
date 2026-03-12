@@ -378,14 +378,12 @@ public:
             result = erase(first);  // erase(const_iterator pos) returns iterator to next element
             // Update first to point to the next element (which is now at the erased position)
             first = ConstIteratorWrapper(result.mTreeIt);
-        }
-
         return result;
     }
 
     void swap(MultiMapTree& other) {
         mTree.swap(other.mTree);
-        fl::swap(mNextId, other.mNextId);
+        fl::fl_swap(mNextId, other.mNextId);
     }
 
     // Lookup
@@ -512,4 +510,8 @@ namespace fl {
 template <typename Key, typename T, typename Compare = fl::less<Key>>
 using multi_map = MultiMapTree<Key, T, Compare, fl::allocator_slab<char>>;
 
+template <typename Key, typename Value, typename Compare, typename Allocator>
+void fl_swap(MultiMapTree<Key, Value, Compare, Allocator>& lhs, MultiMapTree<Key, Value, Compare, Allocator>& rhs) {
+    lhs.swap(rhs);
+}
 } // namespace fl

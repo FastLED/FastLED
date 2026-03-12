@@ -452,6 +452,15 @@ class bitset_dynamic {
 
         return result;
     }
+    void swap(bitset_dynamic& other) {
+        _blocks.swap(other._blocks);
+        fl::fl_swap(_block_count, other._block_count);
+        fl::fl_swap(_size, other._size);
+    }
 };
+
+inline void fl_swap(bitset_dynamic& lhs, bitset_dynamic& rhs) {
+    lhs.swap(rhs);
+}
 
 } // namespace fl

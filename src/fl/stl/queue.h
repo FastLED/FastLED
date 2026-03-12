@@ -195,7 +195,7 @@ public:
 /// @param lhs First queue
 /// @param rhs Second queue
 template <typename T, typename Container>
-void swap(queue<T, Container>& lhs, queue<T, Container>& rhs) {
+void fl_swap(queue<T, Container>& lhs, queue<T, Container>& rhs) {
     lhs.swap(rhs);
 }
 

@@ -336,21 +336,21 @@ Iterator median_of_three(Iterator first, Iterator middle, Iterator last, Compare
 template <typename Iterator, typename Compare>
 Iterator partition(Iterator first, Iterator last, Compare comp) {
     Iterator middle = first + (last - first) / 2;
-    Iterator pivot_iter = median_of_three(first, middle, last - 1, comp);
+    Iterator pivot_iter_original = median_of_three(first, middle, last - 1, comp);
     
     // Move pivot to end
-    swap(*pivot_iter, *(last - 1));
-    Iterator pivot = last - 1;
+    fl::fl_swap(*pivot_iter_original, *(last - 1));
+    Iterator pivot_it = last - 1; // Renamed to avoid conflict with value 'pivot'
     
     Iterator i = first;
-    for (Iterator j = first; j != pivot; ++j) {
-        if (comp(*j, *pivot)) {
-            swap(*i, *j);
+    for (Iterator j = first; j != pivot_it; ++j) {
+        if (comp(*j, *pivot_it)) {
+            fl::fl_swap(*i, *j);
             ++i;
         }
     }
     
-    swap(*i, *pivot);
+    fl::fl_swap(*i, *pivot_it);
     return i;
 }
 
@@ -374,7 +374,7 @@ void sift_down(Iterator first, Iterator start, Iterator end, Compare comp) {
         if (swap_iter == root) {
             return;
         } else {
-            swap(*root, *swap_iter);
+            fl::fl_swap(*root, *swap_iter);
             root = swap_iter;
         }
     }
@@ -399,7 +399,7 @@ void heap_sort(Iterator first, Iterator last, Compare comp) {
     
     Iterator end = last - 1;
     while (end > first) {
-        swap(*end, *first);
+        fl::fl_swap(*end, *first);
         sift_down(first, first, end - 1, comp);
         --end;
     }
@@ -427,7 +427,7 @@ void rotate_impl(Iterator first, Iterator middle, Iterator last) {
     
     Iterator next = middle;
     while (first != next) {
-        swap(*first++, *next++);
+        fl::fl_swap(*first++, *next++);
         if (next == last) {
             next = middle;
         } else if (first == middle) {

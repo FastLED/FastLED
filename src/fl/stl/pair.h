@@ -46,8 +46,8 @@ template <typename T1, typename T2> struct pair {
     
     // Swap member function
     void swap(pair &other) noexcept {
-        fl::swap(first, other.first);
-        fl::swap(second, other.second);
+        fl::fl_swap(first, other.first);
+        fl::fl_swap(second, other.second);
     }
 };
 
@@ -84,7 +84,7 @@ bool operator>=(const pair<T1, T2> &lhs, const pair<U1, U2> &rhs) {
 
 // Non-member swap function
 template <typename T1, typename T2>
-void swap(pair<T1, T2> &lhs, pair<T1, T2> &rhs) noexcept {
+void fl_swap(pair<T1, T2> &lhs, pair<T1, T2> &rhs) noexcept {
     lhs.swap(rhs);
 }
 
