@@ -69,13 +69,13 @@ int itoa(i32 value, char *sp, int radix) {
     char tmp[16]; // be careful with the length of the buffer
     char *tp = tmp;
     int i;
-    unsigned v;
+    u32 v;
 
     int sign = (radix == 10 && value < 0);
     if (sign)
-        v = -value;
+        v = -static_cast<u32>(value);
     else
-        v = (unsigned)value;
+        v = static_cast<u32>(value);
 
     while (v || tp == tmp) {
         i = v % radix;
@@ -108,9 +108,9 @@ int itoa64(i64 value, char *sp, int radix) {
 
     int sign = (radix == 10 && value < 0);
     if (sign)
-        v = -value;
+        v = -static_cast<u64>(value);
     else
-        v = (u64)value;
+        v = static_cast<u64>(value);
 
     while (v || tp == tmp) {
         i = v % radix;
