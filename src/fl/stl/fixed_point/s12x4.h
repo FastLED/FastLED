@@ -317,7 +317,7 @@ class s12x4 {
         i32 frac_part = (acc * t12) >> IFRAC;
         // Convert from 12 frac bits back to 4.
         i16 frac4 = static_cast<i16>(frac_part >> (IFRAC - FRAC_BITS));
-        return from_raw(static_cast<i16>((int_part << FRAC_BITS) + frac4));
+        return from_raw(static_cast<i16>((static_cast<i32>(static_cast<u32>(int_part) << FRAC_BITS)) + frac4));
     }
 
     // Fixed-point 2^x. Uses 4-term minimax polynomial for 2^t, t in [0,1).

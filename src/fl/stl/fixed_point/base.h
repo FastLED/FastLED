@@ -370,7 +370,7 @@ class fixed_point_base {
         acc = c0 + static_cast<PolyType>((static_cast<i64>(acc) * t_ifrac) >> IFRAC);
         PolyType frac_part = static_cast<PolyType>((static_cast<i64>(acc) * t_ifrac) >> IFRAC);
         raw_type frac_result = static_cast<raw_type>(frac_part >> (IFRAC - FRAC_BITS));
-        return Derived::from_raw((int_part << FRAC_BITS) + frac_result);
+        return Derived::from_raw(static_cast<raw_type>(static_cast<unsigned_raw_type>(int_part) << FRAC_BITS) + frac_result);
     }
 
     // log2 Horner evaluation for i64 intermediates (IFRAC > 16)
@@ -385,7 +385,7 @@ class fixed_point_base {
         acc = c0 + ((acc * t_ifrac) >> IFRAC);
         PolyType frac_part = (acc * t_ifrac) >> IFRAC;
         raw_type frac_result = static_cast<raw_type>(frac_part >> (IFRAC - FRAC_BITS));
-        return Derived::from_raw((int_part << FRAC_BITS) + frac_result);
+        return Derived::from_raw(static_cast<raw_type>(static_cast<unsigned_raw_type>(int_part) << FRAC_BITS) + frac_result);
     }
 
     // Fixed-point 2^x. Uses 4-term minimax polynomial for 2^t, t in [0,1).

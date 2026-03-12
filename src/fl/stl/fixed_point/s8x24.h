@@ -327,7 +327,7 @@ class s8x24 {
         acc = c0 + ((acc * t24) >> IFRAC);
         i64 frac_part = (acc * t24) >> IFRAC;
         i32 frac24 = static_cast<i32>(frac_part);
-        return from_raw((int_part << FRAC_BITS) + frac24);
+        return from_raw(static_cast<i32>(static_cast<u32>(int_part) << FRAC_BITS) + frac24);
     }
 
     // Fixed-point 2^x. Uses 4-term minimax polynomial for 2^t, t in [0,1).

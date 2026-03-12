@@ -224,7 +224,7 @@ class u8x8 {
         // Convert from 16 frac bits back to 8.
         i16 frac8 = static_cast<i16>(frac_part >> (IFRAC - FRAC_BITS));
         // Combine integer and fractional parts (handle negative integer part)
-        i32 result_raw = (int_part << FRAC_BITS) + frac8;
+        i32 result_raw = static_cast<i32>(static_cast<u32>(int_part) << FRAC_BITS) + frac8;
         // Clamp to valid unsigned range
         if (result_raw < 0) return u8x8();
         return from_raw(static_cast<u16>(result_raw));
