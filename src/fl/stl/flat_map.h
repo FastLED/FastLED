@@ -272,12 +272,11 @@ class flat_map {
     }
 
     // Insert with hint (optimization hint, may be ignored)
-    iterator insert(const_iterator hint, const value_type& value) {
-        // TODO: use hint for performance if it's valid
+    iterator insert(const_iterator, const value_type& value) {
         return insert(value).first;
     }
 
-    iterator insert(const_iterator hint, value_type&& value) {
+    iterator insert(const_iterator, value_type&& value) {
         return insert(fl::move(value)).first;
     }
 

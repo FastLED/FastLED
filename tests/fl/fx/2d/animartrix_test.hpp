@@ -31,10 +31,10 @@ FL_TEST_CASE("Animartrix determinism") {
     for (uint16_t i = 0; i < N; i++) {
         if (leds1[i] != leds2[i]) {
             if (mismatch_count < 10) {
-                FL_MESSAGE("Mismatch at index ", i,
-                        ": (", int(leds1[i].r), ",", int(leds1[i].g), ",", int(leds1[i].b), ")"
+                FL_MESSAGE("Mismatch at index " << i
+                        << ": (" << int(leds1[i].r) << "," << int(leds1[i].g) << "," << int(leds1[i].b) << ")"
                         " vs "
-                        "(", int(leds2[i].r), ",", int(leds2[i].g), ",", int(leds2[i].b), ")");
+                        "(" << int(leds2[i].r) << "," << int(leds2[i].g) << "," << int(leds2[i].b) << ")");
             }
             mismatch_count++;
         }
@@ -44,7 +44,7 @@ FL_TEST_CASE("Animartrix determinism") {
         total_diff += dr + dg + db;
     }
     double mismatch_pct = (double)total_diff / (double)(N * 3 * 255) * 100.0;
-    FL_MESSAGE("Mismatch percentage: ", mismatch_pct, "%");
-    FL_MESSAGE("Mismatched pixels: ", mismatch_count, " / ", N);
+    FL_MESSAGE("Mismatch percentage: " << mismatch_pct << "%");
+    FL_MESSAGE("Mismatched pixels: " << mismatch_count << " / " << N);
     FL_CHECK(mismatch_count == 0);
 }

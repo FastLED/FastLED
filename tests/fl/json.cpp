@@ -1429,13 +1429,13 @@ FL_TEST_CASE("json set() with various integer types") {
         // The value is stored as i64 (1000), which doesn't fit in i8 (-128 to 127)
         auto val8 = obj["large_val"].as<i8>();
         FL_REQUIRE(val8.has_value()); // Still returns a value (truncated)
-        FL_CHECK_NE(*val8, 1000); // Not the original value (truncated)
+        FL_CHECK_NE(static_cast<int>(*val8), 1000); // Not the original value (truncated)
 
         // Similarly for i16 with values outside its range
         obj.set("huge_val", i64(100000));
         auto val16 = obj["huge_val"].as<i16>();
         FL_REQUIRE(val16.has_value()); // Still returns a value (truncated)
-        FL_CHECK_NE(*val16, 100000); // Not the original value (truncated)
+        FL_CHECK_NE(static_cast<int>(*val16), 100000); // Not the original value (truncated)
 
         // Test values that DO fit (no overflow, no error)
         obj.set("small_val", i64(100));

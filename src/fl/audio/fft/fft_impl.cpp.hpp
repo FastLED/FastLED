@@ -60,8 +60,8 @@ class FFTContext {
   public:
     FFTContext(int samples, int bands, float fmin, float fmax, int sample_rate,
               FFTMode mode)
-        : m_fftr_cfg(nullptr), m_kernels(nullptr),
-          m_input_samples(samples), m_octaveWise(false),
+        : m_fftr_cfg(nullptr), m_input_samples(samples),
+          m_kernels(nullptr), m_octaveWise(false),
           m_mode(resolveMode(mode, samples, fmin, fmax, bands)),
           m_totalBands(bands), m_fmin(fmin), m_fmax(fmax),
           m_sampleRate(sample_rate) {

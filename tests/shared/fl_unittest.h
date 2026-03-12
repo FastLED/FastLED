@@ -10,6 +10,7 @@
 #include "fl/stl/function.h"
 #include "fl/log.h"
 #include "fl/stl/thread_local.h"
+#include "fl/stl/cstring.h"
 
 /**
  * Custom test framework replacing doctest.
@@ -263,8 +264,17 @@ void record_assertion(
 #define FL_CHECK_FALSE(expr) FL_CHECK(!(expr))
 #define FL_CHECK_TRUE(expr) FL_CHECK(expr)
 
-#define FL_CHECK_EQ(a, b) FL_CHECK((bool)((a) == (b)))
-#define FL_CHECK_NE(a, b) FL_CHECK((bool)((a) != (b)))
+// Comparison helpers for const char* (string comparison instead of pointer comparison)
+// Note: already inside namespace fl::test
+template<typename A, typename B>
+inline bool check_eq(const A& a, const B& b) { return a == b; }
+inline bool check_eq(const char* a, const char* b) { return ::fl::strcmp(a, b) == 0; }
+template<typename A, typename B>
+inline bool check_ne(const A& a, const B& b) { return a != b; }
+inline bool check_ne(const char* a, const char* b) { return ::fl::strcmp(a, b) != 0; }
+
+#define FL_CHECK_EQ(a, b) FL_CHECK(fl::test::check_eq((a), (b)))
+#define FL_CHECK_NE(a, b) FL_CHECK(fl::test::check_ne((a), (b)))
 #define FL_CHECK_LT(a, b) FL_CHECK((bool)((a) < (b)))
 #define FL_CHECK_LE(a, b) FL_CHECK((bool)((a) <= (b)))
 #define FL_CHECK_GT(a, b) FL_CHECK((bool)((a) > (b)))

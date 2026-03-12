@@ -25,7 +25,7 @@ FL_TEST_CASE("perlin_s8x8 - basic functionality") {
     FL_CHECK(result >= -(1 << 16));
     FL_CHECK(result <= (1 << 16));
 
-    FL_MESSAGE("perlin_s8x8 basic test passed - result at (1.5, 2.3) = ", result);
+    FL_MESSAGE("perlin_s8x8 basic test passed - result at (1.5, 2.3) = " << result);
 }
 
 FL_TEST_CASE("perlin_s8x8 vs perlin_s16x16 - consistency check") {
@@ -58,8 +58,8 @@ FL_TEST_CASE("perlin_s8x8 vs perlin_s16x16 - consistency check") {
         }
     }
 
-    FL_MESSAGE("perlin_s8x8 vs perlin_s16x16 max difference: ", max_diff);
-    FL_MESSAGE("  (", static_cast<float>(max_diff) / 655.36f, "% of full range)");
+    FL_MESSAGE("perlin_s8x8 vs perlin_s16x16 max difference: " << max_diff);
+    FL_MESSAGE("  (" << static_cast<float>(max_diff) / 655.36f << "% of full range)");
 
     // Q8 should be reasonably close to Q24 (within 10% of range)
     FL_CHECK_MESSAGE(max_diff < 6554,  // ~10% of 65536

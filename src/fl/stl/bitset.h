@@ -533,7 +533,7 @@ class bitset_inlined {
 
     /// Emplace back - for consistency with other containers
     template<typename... Args>
-    void emplace_back(Args&&... args) {
+    void emplace_back(Args&&...) {
         push_back();  // bitset bits are bool, just expand
     }
 

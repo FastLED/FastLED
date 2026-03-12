@@ -232,7 +232,7 @@ FL_TEST_CASE("fl::strstr") {
     FL_SUBCASE("find substring at beginning") {
         const char* result = fl::strstr("hello world", "hello");
         FL_CHECK(result != nullptr);
-        FL_CHECK_EQ(result, static_cast<const char*>("hello world"));
+        FL_CHECK_EQ(result, "hello world");
     }
 
     FL_SUBCASE("find substring in middle") {

@@ -2123,7 +2123,7 @@ FL_TEST_CASE("String find_last_not_of operations") {
     FL_SUBCASE("at() sequential access") {
         fl::string s = "0123456789";
         for (fl::size i = 0; i < 10; ++i) {
-            FL_CHECK(s.at(i) == '0' + i);
+            FL_CHECK(s.at(i) == static_cast<char>('0' + i));
         }
     }
 
@@ -2147,7 +2147,7 @@ FL_TEST_CASE("String find_last_not_of operations") {
     FL_SUBCASE("at() with numbers") {
         fl::string s = "0123456789";
         for (fl::size i = 0; i < 10; ++i) {
-            FL_CHECK(s.at(i) == ('0' + i));
+            FL_CHECK(s.at(i) == static_cast<char>('0' + i));
         }
     }
 
