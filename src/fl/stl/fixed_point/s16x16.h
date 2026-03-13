@@ -28,7 +28,7 @@ class s16x16 {
         : mValue(static_cast<i32>(n) * SCALE) {}
 
     // Construct from float (may pull in soft-float helpers if used at runtime).
-    constexpr s16x16(float f)
+    constexpr explicit s16x16(float f)
         : mValue(static_cast<i32>(f * (SCALE))) {}
 
     // Auto-promotion from other fixed-point types
