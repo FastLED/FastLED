@@ -153,6 +153,16 @@ class FFTContext {
                 expf(logRatio * static_cast<float>(i) /
                      static_cast<float>(bands));
         }
+
+        // Pre-compute Hanning window to reduce spectral leakage
+        const int N = m_input_samples;
+        m_hanningWindow.resize(N);
+        const float invNm1 = 1.0f / static_cast<float>(N - 1);
+        for (int n = 0; n < N; ++n) {
+            float phase = 2.0f * static_cast<float>(FL_M_PI) *
+                          static_cast<float>(n) * invNm1;
+            m_hanningWindow[n] = 0.5f * (1.0f - fl::cosf(phase));
+        }
     }
 
     void runLogRebin(span<const i16> buffer, FFTBins *out) {
@@ -160,8 +170,15 @@ class FFTContext {
         const int N = m_input_samples;
         const int bands = m_totalBands;
 
+        // Apply Hanning window to reduce spectral leakage
+        FASTLED_STACK_ARRAY(kiss_fft_scalar, windowed, N);
+        for (int i = 0; i < N; ++i) {
+            windowed[i] = static_cast<kiss_fft_scalar>(
+                static_cast<float>(buffer[i]) * m_hanningWindow[i]);
+        }
+
         FASTLED_STACK_ARRAY(kiss_fft_cpx, fft, N);
-        kiss_fftr(m_fftr_cfg, buffer.data(), fft);
+        kiss_fftr(m_fftr_cfg, windowed, fft);
 
         // Linear bins (same as other paths)
         computeLinearBins(fft, N, out);
@@ -178,10 +195,13 @@ class FFTContext {
         const float fs = static_cast<float>(m_sampleRate);
         const float rawBinHz = fs / static_cast<float>(N);
         const int numRawBins = N / 2 + 1;
+        const float halfBin = rawBinHz * 0.5f;
 
         for (int k = 0; k < numRawBins; ++k) {
             float freq = static_cast<float>(k) * rawBinHz;
-            if (freq < m_fmin || freq >= m_fmax)
+            // Each FFT bin covers [freq - halfBin, freq + halfBin].
+            // Include it if any part of that range overlaps [fmin, fmax].
+            if (freq + halfBin < m_fmin || freq - halfBin >= m_fmax)
                 continue;
 
             float re = static_cast<float>(fft[k].r);
@@ -190,6 +210,7 @@ class FFTContext {
 
             // Binary search for the output bin this frequency falls into.
             // m_logBinEdges is sorted, so find largest i where edge[i] <= freq.
+            // Clamp: FFT bins below fmin map to bin 0, above fmax to last bin.
             int lo = 0, hi = bands - 1;
             while (lo < hi) {
                 int mid = (lo + hi + 1) / 2;
@@ -436,9 +457,12 @@ class FFTContext {
         }
         out->setLinearParams(m_fmin, m_fmax);
 
+        const float halfBin = rawBinHz * 0.5f;
         for (int k = 0; k < numRawBins; ++k) {
             float freq = static_cast<float>(k) * rawBinHz;
-            if (freq < m_fmin || freq >= m_fmax)
+            // Each FFT bin covers [freq - halfBin, freq + halfBin].
+            // Include it if any part of that range overlaps [fmin, fmax].
+            if (freq + halfBin < m_fmin || freq - halfBin >= m_fmax)
                 continue;
 
             float re = static_cast<float>(fft[k].r);
@@ -446,6 +470,8 @@ class FFTContext {
             float mag = sqrt(re * re + im * im);
 
             int linIdx = static_cast<int>((freq - m_fmin) / linearBinHz);
+            if (linIdx < 0)
+                linIdx = 0;
             if (linIdx >= numLinearBins)
                 linIdx = numLinearBins - 1;
             linBins[linIdx] += mag;
@@ -478,6 +504,7 @@ class FFTContext {
 
     // Log-rebin path only
     fl::vector<float> m_logBinEdges; // bands+1 geometric bin edges
+    fl::vector<float> m_hanningWindow; // N pre-computed Hanning coefficients
 
     // Octave-wise CQ path
     bool m_octaveWise;

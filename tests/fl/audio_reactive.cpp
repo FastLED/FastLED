@@ -832,8 +832,8 @@ FL_TEST_CASE("AudioReactive - Multiple frequency ranges") {
     float bassEnergy1 = bassData.bassEnergy;
     FL_CHECK(bassEnergy1 > 0.0f);
 
-    // Process mid frequency (1000 Hz)
-    vector<i16> midSamples = generateSineWave(512, 1000.0f, 22050.0f, 10000);
+    // Process mid frequency (700 Hz — falls in log-rebin bins 6-7)
+    vector<i16> midSamples = generateSineWave(512, 700.0f, 22050.0f, 10000);
     AudioSample midAudio = createSample(midSamples, 9000);
     audio.processSample(midAudio);
 

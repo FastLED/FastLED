@@ -85,7 +85,7 @@ FL_TEST_CASE("Adversarial - FFT with alternating max samples") {
 FL_TEST_CASE("Adversarial - FFT with single impulse") {
     FFT fft;
     fl::vector<fl::i16> impulse(512, 0);
-    impulse[0] = 32767;
+    impulse[256] = 32767; // Center of buffer (Hanning window = 1.0 here)
     FFTBins bins(16);
     fft.run(impulse, &bins);
 
