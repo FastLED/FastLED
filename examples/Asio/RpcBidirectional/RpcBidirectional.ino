@@ -54,13 +54,22 @@ fl::Remote* clientRemote = nullptr;
 std::thread serverThread;
 std::atomic<bool> serverRunning(false);
 
-// RAII cleanup to join the server thread before static destruction
+// RAII cleanup to join the server thread and free allocations before static destruction
 struct ServerCleanup {
     ~ServerCleanup() {
         serverRunning.store(false);
         if (serverThread.joinable()) {
             serverThread.join();
         }
+        // Free allocations to prevent LSAN leaks (thread is joined, safe to delete)
+        delete clientRemote;  // ok bare allocation
+        clientRemote = nullptr;
+        delete clientTransport;  // ok bare allocation
+        clientTransport = nullptr;
+        delete serverRemote;  // ok bare allocation
+        serverRemote = nullptr;
+        delete serverTransport;  // ok bare allocation
+        serverTransport = nullptr;
     }
 };
 static ServerCleanup serverCleanup;

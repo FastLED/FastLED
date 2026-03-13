@@ -311,6 +311,10 @@ void Server::stop() {
         mListenSocket = -1;
     }
 
+    // Free route handlers to prevent leaks when server lives in a shared library
+    // (LSAN runs before shared library static destructors)
+    mRoutes.clear();
+
     mRunning = false;
 }
 
@@ -880,6 +884,9 @@ void Server::stop() {
 
     // Clean up route contexts (unique_ptr auto-deletes on clear)
     s_esp_route_contexts.clear();
+
+    // Free route handlers
+    mRoutes.clear();
 
     mRunning = false;
     FL_WARN("[HTTP] Server stopped");
