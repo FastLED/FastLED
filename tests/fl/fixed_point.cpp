@@ -5081,6 +5081,49 @@ FL_TEST_CASE("Integer constructor - boundary values at INT_BITS limits") {
     // constexpr s8x24 way_too_big(64000); // error: 64000 > 127
 }
 
+FL_TEST_CASE("Integer constructor - fixed_point<> wrapper delegation") {
+    // sfixed_integer / ufixed_integer are aliases for fixed_point<I,F,Sign>
+    // which inherits from the concrete type. Verify integer constructors
+    // forward correctly through the wrapper.
+    using SFP16 = fl::sfixed_integer<16, 16>;
+    using SFP24 = fl::sfixed_integer<24, 8>;
+    using UFP16 = fl::ufixed_integer<16, 16>;
+    using UFP8  = fl::ufixed_integer<8, 8>;
+
+    constexpr SFP16 a(5);
+    FL_CHECK_EQ(a.to_int(), 5);
+    FL_CHECK_EQ(a.raw(), 5 * 65536);
+
+    constexpr SFP16 b(-3);
+    FL_CHECK_EQ(b.to_int(), -3);
+
+    constexpr SFP24 c(42);
+    FL_CHECK_EQ(c.to_int(), 42);
+
+    constexpr UFP16 d(100u);
+    FL_CHECK_EQ(d.to_int(), 100);
+
+    constexpr UFP8 e(7u);
+    FL_CHECK_EQ(e.to_int(), 7u);
+
+    // Signed int to unsigned wrapper
+    constexpr int ten = 10;
+    constexpr UFP16 f(ten);
+    FL_CHECK_EQ(f.to_int(), 10u);
+
+    // Equivalence: wrapper integer constructor == wrapper float constructor
+    constexpr SFP16 from_int(5);
+    constexpr SFP16 from_float(5.0f);
+    FL_CHECK_EQ(from_int.raw(), from_float.raw());
+
+    // Boundary: sfixed_integer<8,24> max = 127
+    using SFP8x24 = fl::sfixed_integer<8, 24>;
+    constexpr SFP8x24 max_val(127);
+    FL_CHECK_EQ(max_val.to_int(), 127);
+
+    // constexpr SFP8x24 overflow(128);  // error: exceeds INT_BITS range
+}
+
 } // anonymous namespace
 
 } // FL_TEST_FILE

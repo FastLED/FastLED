@@ -160,6 +160,14 @@ class fixed_point : protected fixed_point_impl<IntBits, FracBits, S>::type {
     //   FP y(-0.5f);   // y = -0.5
     FASTLED_FORCE_INLINE explicit constexpr fixed_point(float f) : Base(f) {}
 
+    // Construct from any integer type. Delegates to Base's template integer
+    // constructor which handles int-width portability (AVR 16-bit int vs
+    // 32-bit platforms) and constexpr range checking.
+    //   FP x(5);      // x == 5.0
+    //   FP y(-3);     // y == -3.0
+    template <typename IntT, detail::enable_if_integer_t<IntT> = 0>
+    FASTLED_FORCE_INLINE explicit constexpr fixed_point(IntT n) : Base(n) {}
+
     // Construct from a raw integer value (used internally by from_raw).
     //   FP x(0x00028000, FP::Base::RawTag());  // prefer from_raw() instead
     constexpr explicit fixed_point(RawType raw, typename Base::RawTag tag) : Base(raw, tag) {}
