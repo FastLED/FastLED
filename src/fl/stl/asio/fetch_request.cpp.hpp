@@ -150,7 +150,11 @@ void FetchRequest::handle_dns_lookup() {
     sockaddr_in server_addr{};
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(static_cast<u16>(port));
-    fl::memcpy(&server_addr.sin_addr, dns_result->h_addr, dns_result->h_length);
+    // Use memcpy to extract address pointer — h_addr_list[0] may be misaligned
+    // on some platforms (macOS arm64 UBSan flags this)
+    char *addr_ptr = nullptr;
+    fl::memcpy(&addr_ptr, dns_result->h_addr_list, sizeof(addr_ptr));
+    fl::memcpy(&server_addr.sin_addr, addr_ptr, dns_result->h_length);
 
     FL_WARN("[FETCH] Waiting for connection to " << hostname << ":" << port);
 

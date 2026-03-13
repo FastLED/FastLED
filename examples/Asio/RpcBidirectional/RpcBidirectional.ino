@@ -243,6 +243,11 @@ void setup() {
     serverRunning.store(true);
     serverThread = std::thread(serverThreadFunc);
 
+    // Register cleanup listener now — must happen after thread starts so the
+    // thread is always joined during onExit(), even if setup() returns early.
+    // Without this, std::thread destructor calls std::terminate() on a joinable thread.
+    fl::EngineEvents::addListener(&serverCleanup);
+
     // ========== CLIENT SETUP ==========
     delay(500); // Give server time to start and begin accepting connections
 
@@ -280,9 +285,6 @@ void setup() {
 
     Serial.println("✓ Client connected successfully\n");
     Serial.println("Starting test sequence...\n");
-
-    // Register cleanup listener - onExit() runs before static destruction
-    fl::EngineEvents::addListener(&serverCleanup);
 }
 
 void sendSyncRequest() {
