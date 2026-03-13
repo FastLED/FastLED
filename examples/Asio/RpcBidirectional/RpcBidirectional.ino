@@ -54,14 +54,14 @@ fl::unique_ptr<fl::Remote> clientRemote;
 std::thread serverThread;
 std::atomic<bool> serverRunning(false);
 
-// RAII cleanup to join the server thread and free allocations before static destruction
-struct ServerCleanup {
-    ~ServerCleanup() {
+// EngineEvents listener for cleanup - runs during onExit() BEFORE static destruction
+// (static destructors happen too late - thread_local storage in fastled.so is already gone)
+struct ServerCleanup : public fl::EngineEvents::Listener {
+    void onExit() override {
         serverRunning.store(false);
         if (serverThread.joinable()) {
             serverThread.join();
         }
-        // Free allocations to prevent LSAN leaks (thread is joined, safe to reset)
         clientRemote.reset();
         clientTransport.reset();
         serverRemote.reset();
@@ -280,6 +280,9 @@ void setup() {
 
     Serial.println("✓ Client connected successfully\n");
     Serial.println("Starting test sequence...\n");
+
+    // Register cleanup listener - onExit() runs before static destruction
+    fl::EngineEvents::addListener(&serverCleanup);
 }
 
 void sendSyncRequest() {

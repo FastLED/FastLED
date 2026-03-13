@@ -125,7 +125,16 @@ public:
         mHasCatch = true;
     }
 
-    void set_canceled() override { mCanceled = true; }
+    void set_canceled() override {
+        mCanceled = true;
+        // Release callbacks immediately to free captured variables (e.g. promises
+        // holding response objects). Without this, captures survive until the
+        // scheduler erases the task on its next update pass.
+        mThenCallback = {};
+        mCatchCallback = {};
+        mHasThen = false;
+        mHasCatch = false;
+    }
 
     int id() const override { return mTaskId; }
     void set_id(int id) override { mTaskId = id; }
