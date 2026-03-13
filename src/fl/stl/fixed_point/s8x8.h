@@ -23,6 +23,10 @@ class s8x8 {
 
     constexpr s8x8() = default;
 
+    // Construct from an integer (exact, avoids float math / soft-float helpers).
+    constexpr s8x8(int n)
+        : mValue(static_cast<i16>(n) * SCALE) {}
+
     explicit constexpr s8x8(float f)
         : mValue(static_cast<i16>(f * (static_cast<i16>(1) << FRAC_BITS))) {}
 

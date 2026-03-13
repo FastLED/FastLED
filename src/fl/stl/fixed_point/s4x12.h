@@ -23,6 +23,10 @@ class s4x12 {
 
     constexpr s4x12() = default;
 
+    // Construct from an integer (exact, avoids float math / soft-float helpers).
+    constexpr s4x12(int n)
+        : mValue(static_cast<i16>(n) * SCALE) {}
+
     explicit constexpr s4x12(float f)
         : mValue(static_cast<i16>(f * (static_cast<i16>(1) << FRAC_BITS))) {}
 

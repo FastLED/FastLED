@@ -23,6 +23,10 @@ class s8x24 {
 
     constexpr s8x24() = default;
 
+    // Construct from an integer (exact, avoids float math / soft-float helpers).
+    constexpr s8x24(int n)
+        : mValue(static_cast<i32>(n) * SCALE) {}
+
     explicit constexpr s8x24(float f)
         : mValue(static_cast<i32>(f * (SCALE))) {}
 

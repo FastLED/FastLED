@@ -23,6 +23,10 @@ class u4x12 {
 
     constexpr u4x12() = default;
 
+    // Construct from an integer (exact, avoids float math / soft-float helpers).
+    constexpr u4x12(unsigned n)
+        : mValue(static_cast<u16>(n) * SCALE) {}
+
     explicit constexpr u4x12(float f)
         : mValue(static_cast<u16>(f * (SCALE))) {}
 

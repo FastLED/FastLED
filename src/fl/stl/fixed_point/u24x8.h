@@ -23,6 +23,10 @@ class u24x8 {
 
     constexpr u24x8() = default;
 
+    // Construct from an integer (exact, avoids float math / soft-float helpers).
+    constexpr u24x8(unsigned n)
+        : mValue(static_cast<u32>(n) * SCALE) {}
+
     explicit constexpr u24x8(float f)
         : mValue(static_cast<u32>(f * (SCALE))) {}
 

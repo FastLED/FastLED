@@ -23,6 +23,10 @@ class u16x16 {
 
     constexpr u16x16() = default;
 
+    // Construct from an integer (exact, avoids float math / soft-float helpers).
+    constexpr u16x16(unsigned n)
+        : mValue(static_cast<u32>(n) * SCALE) {}
+
     explicit constexpr u16x16(float f)
         : mValue(static_cast<u32>(f * (SCALE))) {}
 
