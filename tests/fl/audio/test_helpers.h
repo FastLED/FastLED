@@ -471,6 +471,214 @@ inline AudioSample makeCrashCymbal(fl::u32 timestamp, float amplitude = 16000.0f
     return AudioSample(data, timestamp);
 }
 
+// ============================================================================
+// Realistic Instrument Generators (calibrated to match real audio features)
+//
+// These generators produce feature distributions that match real MP3 audio
+// recordings within ~30%. They serve as permanent synthetic substitutes for
+// real-audio calibration files, enabling weight-locking tests that catch
+// scoring parameter drift without requiring MP3 fixtures.
+//
+// Target feature distributions (from 3-way MP3 calibration):
+//   Real backing (guitar+drums):  flat=0.63 form=0.67 pres=0.13 zcCV=1.12
+//   Real voice+all (0dB):         flat=0.61 form=0.38 pres=0.03 zcCV=1.46
+// ============================================================================
+
+/// Acoustic guitar with body resonances.
+/// Unlike makeGuitarStringDecay (smooth 1/h^2 rolloff), this models the guitar
+/// body as three Gaussian resonances at ~300Hz, ~800Hz, ~1500Hz. These create
+/// energy peaks in both F1 (250-900Hz) and F2 (1000-3000Hz) vocal formant bands,
+/// producing formant ratio ~0.5-0.7 (matching real guitar recordings).
+inline AudioSample makeAcousticGuitar(float f0, fl::u32 timestamp,
+                                       float amplitude = 16000.0f,
+                                       int count = 512, float sampleRate = 44100.0f) {
+    fl::vector<fl::i16> data(count, 0);
+    const float maxFreq = fl::min(6000.0f, sampleRate / 2.0f);
+
+    // Body resonance frequencies and bandwidths (Hz)
+    const float bodyFreqs[] = {300.0f, 800.0f, 1500.0f};
+    const float bodyBws[] = {120.0f, 200.0f, 300.0f};
+    const float bodyGains[] = {1.0f, 0.6f, 0.3f};
+
+    for (int h = 1; h * f0 < maxFreq; ++h) {
+        float freq = f0 * static_cast<float>(h);
+        // Base amplitude: 1/h^1.3 rolloff (gentler than string decay)
+        float baseAmp = amplitude * 0.15f / fl::powf(static_cast<float>(h), 1.3f);
+
+        // Apply body resonance envelope: sum of Gaussian peaks
+        float bodyEnvelope = 0.05f; // Minimum floor so all harmonics are present
+        for (int r = 0; r < 3; ++r) {
+            float dist = freq - bodyFreqs[r];
+            bodyEnvelope += bodyGains[r] * fl::expf(-0.5f * dist * dist
+                                                     / (bodyBws[r] * bodyBws[r]));
+        }
+
+        float harmonicAmp = baseAmp * bodyEnvelope;
+        for (int i = 0; i < count; ++i) {
+            float phase = 2.0f * FL_M_PI * freq * static_cast<float>(i) / sampleRate;
+            data[i] += static_cast<fl::i16>(harmonicAmp * fl::sinf(phase));
+        }
+    }
+    return AudioSample(data, timestamp);
+}
+
+/// Full-band music mix: acoustic guitar + kick + snare + hi-hat + optional voice.
+/// Produces feature distributions matching real 3-way MP3 recordings:
+///   backing: flat~0.5-0.7 form~0.4-0.8 pres~0.05-0.2 zcCV~0.8-1.5
+///   vocal:   flat~0.5-0.7 form~0.3-0.6 pres~0.01-0.05 zcCV~1.0-2.0
+///
+/// The guitar body resonances create realistic formant-band energy, and the
+/// drum pattern produces realistic time-domain features (jitter, ACF, zcCV).
+///
+/// @param vocalRatio 0.0 = backing only, 1.0 = voice at equal level
+inline AudioSample makeFullBandMix(float vocalRatio, fl::u32 timestamp,
+                                    float amplitude = 16000.0f,
+                                    int count = 512, float sampleRate = 44100.0f) {
+    fl::vector<fl::i16> mixed(count, 0);
+
+    // 1. Acoustic guitar (dominant — provides harmonic/formant structure)
+    auto guitar = makeAcousticGuitar(196.0f, timestamp, amplitude * 0.7f,
+                                      count, sampleRate);
+    const auto& guitarPcm = guitar.pcm();
+    for (int i = 0; i < count; ++i) {
+        mixed[i] += guitarPcm[i];
+    }
+
+    // 2. Kick drum (low-frequency body)
+    auto kick = makeKickDrum(timestamp, amplitude * 0.25f, count, sampleRate);
+    const auto& kickPcm = kick.pcm();
+    for (int i = 0; i < count; ++i) {
+        mixed[i] = static_cast<fl::i16>(fl::clamp(
+            static_cast<float>(mixed[i]) + static_cast<float>(kickPcm[i]),
+            -32768.0f, 32767.0f));
+    }
+
+    // 3. Snare (mid-frequency body + noise rattle)
+    auto snare = makeSnare(timestamp, amplitude * 0.15f, count, sampleRate);
+    const auto& snarePcm = snare.pcm();
+    for (int i = 0; i < count; ++i) {
+        mixed[i] = static_cast<fl::i16>(fl::clamp(
+            static_cast<float>(mixed[i]) + static_cast<float>(snarePcm[i]),
+            -32768.0f, 32767.0f));
+    }
+
+    // 4. Hi-hat (high-frequency noise — reduced amplitude to avoid
+    //    inflating zcCV beyond real-audio levels)
+    auto hat = makeHiHat(timestamp, false, amplitude * 0.08f, count, sampleRate);
+    const auto& hatPcm = hat.pcm();
+    for (int i = 0; i < count; ++i) {
+        mixed[i] = static_cast<fl::i16>(fl::clamp(
+            static_cast<float>(mixed[i]) + static_cast<float>(hatPcm[i]),
+            -32768.0f, 32767.0f));
+    }
+
+    // 5. Voice (jittered vowel if ratio > 0)
+    if (vocalRatio > 0.001f) {
+        auto vocal = makeJitteredVowel(150.0f, 700.0f, 1200.0f, timestamp,
+                                        amplitude * vocalRatio, count, sampleRate);
+        const auto& vocalPcm = vocal.pcm();
+        for (int i = 0; i < count; ++i) {
+            mixed[i] = static_cast<fl::i16>(fl::clamp(
+                static_cast<float>(mixed[i]) + static_cast<float>(vocalPcm[i]),
+                -32768.0f, 32767.0f));
+        }
+    }
+
+    return AudioSample(mixed, timestamp);
+}
+
+// ============================================================================
+// Degenerate-Case Signal Generators (for false-positive testing)
+// ============================================================================
+
+/// Generate a sawtooth wave using Fourier series: sum((-1)^(h+1) * sin(2*pi*h*f*t) / h)
+/// Rich harmonics at 1/h amplitude but NO formant peaks (smooth spectral envelope).
+/// Tests that a spectrally rich but structurally non-vocal signal is rejected.
+inline AudioSample makeSawtoothWave(float freq, fl::u32 timestamp,
+                                     float amplitude = 16000.0f, int count = 512,
+                                     float sampleRate = 44100.0f) {
+    fl::vector<fl::i16> data(count, 0);
+    const float nyquist = sampleRate / 2.0f;
+    const int maxH = static_cast<int>(nyquist / freq);
+    for (int h = 1; h <= maxH; ++h) {
+        float sign = ((h % 2) == 0) ? -1.0f : 1.0f;
+        float hAmp = amplitude * sign / static_cast<float>(h);
+        float hFreq = freq * static_cast<float>(h);
+        for (int i = 0; i < count; ++i) {
+            float phase = 2.0f * FL_M_PI * hFreq * static_cast<float>(i) / sampleRate;
+            float sample = static_cast<float>(data[i]) + hAmp * fl::sinf(phase);
+            data[i] = static_cast<fl::i16>(fl::clamp(sample, -32768.0f, 32767.0f));
+        }
+    }
+    return AudioSample(data, timestamp);
+}
+
+/// Generate an AM-modulated sine (tremolo tone):
+///   amp * (1 - depth + depth*sin(2*pi*modRate*t)) * sin(2*pi*freq*t)
+/// Creates envelope jitter without formant structure. Tests jitter boost false positives.
+inline AudioSample makeTremoloTone(float freq, float modRate, float modDepth,
+                                    fl::u32 timestamp, float amplitude = 16000.0f,
+                                    int count = 512, float sampleRate = 44100.0f) {
+    fl::vector<fl::i16> data;
+    data.reserve(count);
+    for (int i = 0; i < count; ++i) {
+        float t = static_cast<float>(i) / sampleRate;
+        float envelope = 1.0f - modDepth + modDepth * fl::sinf(2.0f * FL_M_PI * modRate * t);
+        float sample = amplitude * envelope * fl::sinf(2.0f * FL_M_PI * freq * t);
+        data.push_back(static_cast<fl::i16>(fl::clamp(sample, -32768.0f, 32767.0f)));
+    }
+    return AudioSample(data, timestamp);
+}
+
+/// Generate bandpass-filtered noise: ~40 random-phase sinusoids between lowFreq-highFreq.
+/// Use makeFilteredNoise(200, 4000, ts) = speech-band noise.
+inline AudioSample makeFilteredNoise(float lowFreq, float highFreq, fl::u32 timestamp,
+                                      float amplitude = 16000.0f, int count = 512,
+                                      float sampleRate = 44100.0f) {
+    fl::vector<fl::i16> data(count, 0);
+    fl::fl_random rng(54321);
+    const int numComponents = 40;
+    for (int c = 0; c < numComponents; ++c) {
+        float t = static_cast<float>(rng.random16()) / 65535.0f;
+        float freq = lowFreq + (highFreq - lowFreq) * t;
+        float phase0 = static_cast<float>(rng.random16()) / 65535.0f * 2.0f * FL_M_PI;
+        float compAmp = amplitude / static_cast<float>(numComponents);
+        for (int i = 0; i < count; ++i) {
+            float phase = phase0 + 2.0f * FL_M_PI * freq * static_cast<float>(i) / sampleRate;
+            float sample = static_cast<float>(data[i]) + compAmp * fl::sinf(phase);
+            data[i] = static_cast<fl::i16>(fl::clamp(sample, -32768.0f, 32767.0f));
+        }
+    }
+    return AudioSample(data, timestamp);
+}
+
+/// Generate a pitched tom drum: 3 harmonics at tuningHz/2x/3x with 60ms decay + noise attack.
+/// Sits at male vocal F0 frequency (~150Hz) but lacks formant structure.
+inline AudioSample makePitchedTom(float tuningHz, fl::u32 timestamp,
+                                   float amplitude = 16000.0f, int count = 512,
+                                   float sampleRate = 44100.0f) {
+    fl::fl_random rng(9876);
+    fl::vector<fl::i16> data(count, 0);
+    for (int i = 0; i < count; ++i) {
+        float t = static_cast<float>(i) / sampleRate;
+        float bodyDecay = fl::expf(-t / 0.060f);
+        // 3 harmonics
+        float body = 0.0f;
+        for (int h = 1; h <= 3; ++h) {
+            float hFreq = tuningHz * static_cast<float>(h);
+            body += amplitude * 0.5f / static_cast<float>(h) * bodyDecay
+                    * fl::sinf(2.0f * FL_M_PI * hFreq * t);
+        }
+        // Noise attack burst (3ms decay)
+        float attackDecay = fl::expf(-t / 0.003f);
+        float noise = (static_cast<float>(rng.random16()) / 32767.5f) - 1.0f;
+        float attack = amplitude * 0.4f * attackDecay * noise;
+        float sample = body + attack;
+        data[i] = static_cast<fl::i16>(fl::clamp(sample, -32768.0f, 32767.0f));
+    }
+    return AudioSample(data, timestamp);
+}
+
 } // namespace test
 } // namespace audio
 } // namespace fl

@@ -503,30 +503,30 @@ float VocalDetector::calculateRawConfidence(float centroid, float rolloff, float
     float rolloffScore = fl::max(0.0f, 1.0f - fl::abs(rolloff - 0.40f) / 0.45f);
 
     // Formant score: voice has F2/F1 ratio; real audio ratio ~0.14, synthetic ~0.7
-    // Lower threshold to 0.05 to accept real audio formant ratios
+    // Low-formant ramp zone + narrower peak for better guitar rejection.
     float formantScore;
-    if (formantRatio < 0.05f) {
-        formantScore = 0.0f;  // No formants detected (flat noise or pure tone)
+    if (formantRatio < 0.10f) {
+        formantScore = formantRatio / 0.10f * 0.30f;  // Ramp: guitar (0.075) → 0.225
     } else {
-        // Wide acceptance: peaks at 0.5, range 0.05-2.0+
+        // Narrower peak at 0.5, floor 0.30 — vocal stays high, guitar drops
         float dist = fl::abs(formantRatio - 0.5f);
-        formantScore = fl::max(0.0f, 1.0f - dist / 1.5f);
+        formantScore = fl::max(0.30f, 1.0f - dist / 0.80f);
     }
 
-    // Spectral flatness score: KEY DISCRIMINATOR for real audio.
-    // Real voice+guitar ~0.356 vs guitar-only ~0.617.
-    // Peak at 0.43, width 0.10 — covers both synthetic (~0.44) and real voice (~0.36).
+    // Spectral flatness score: wider window to survive mix contamination.
+    // Isolated vocal ~0.44, vocal-in-mix ~0.60, backing ~0.57.
+    // Peak at 0.43, width ±0.22 — mix vocal (0.60) still scores ~0.22.
     float flatnessScore;
     if (spectralFlatness < 0.20f) {
         // Too tonal (pure tones, sparse sines)
         flatnessScore = spectralFlatness / 0.20f * 0.3f;
-    } else if (spectralFlatness <= 0.55f) {
-        // Voice range — peak at 0.43
+    } else if (spectralFlatness <= 0.65f) {
+        // Voice range — peak at 0.43, wide window
         float dist = fl::abs(spectralFlatness - 0.43f);
-        flatnessScore = fl::max(0.0f, 1.0f - dist / 0.10f);
+        flatnessScore = fl::max(0.0f, 1.0f - dist / 0.22f);
     } else {
         // Too flat — noise-like (steep decay)
-        flatnessScore = fl::max(0.0f, 1.0f - (spectralFlatness - 0.55f) / 0.05f);
+        flatnessScore = fl::max(0.0f, 1.0f - (spectralFlatness - 0.65f) / 0.10f);
     }
 
     // Harmonic density score: with 128 CQ bins
@@ -543,94 +543,98 @@ float VocalDetector::calculateRawConfidence(float centroid, float rolloff, float
         densityScore = fl::max(0.0f, 1.0f - (harmonicDensity - 100.0f) / 28.0f);
     }
 
-    // Vocal presence ratio score: voice adds energy in 2-4 kHz vs bass
-    // Computed from LINEAR bins. Small but measurable difference:
-    // guitar ~0.015, voice ~0.025, tail ~0.005
-    float presenceScore;
-    if (vocalPresenceRatio < 0.005f) {
-        presenceScore = 0.0f;
-    } else if (vocalPresenceRatio < 0.05f) {
-        presenceScore = (vocalPresenceRatio - 0.005f) / 0.045f * 0.5f;
+    // Spectral flux score: voice has higher frame-to-frame spectral change
+    // than sustained instruments (phoneme transitions, formant shifts).
+    // spectralFlux is already computed but was previously unused in scoring.
+    float spectralFluxScore;
+    if (spectralFlux < 0.02f) {
+        spectralFluxScore = 0.0f;
+    } else if (spectralFlux < 0.30f) {
+        spectralFluxScore = (spectralFlux - 0.02f) / 0.28f;
     } else {
-        presenceScore = fl::min(1.0f, 0.5f + (vocalPresenceRatio - 0.05f) / 0.10f * 0.5f);
+        spectralFluxScore = 1.0f;
     }
 
-    // Weighted average — flatness is the key discriminator for real audio
-    // (voice ~0.458 vs guitar ~0.484, sharp scoring amplifies this difference)
-    float weightedAvg = 0.08f * centroidScore
-                      + 0.07f * rolloffScore
-                      + 0.15f * formantScore
-                      + 0.40f * flatnessScore
-                      + 0.10f * densityScore
-                      + 0.10f * presenceScore;
+    // Weighted average — presence removed (actively hurts in 3-way mixes:
+    // drums inflate 2-4kHz, making backing score HIGHER than voice).
+    // Centroid/rolloff minimized (0-5% separation between voice and guitar).
+    // Freed budget redistributed to formant/flatness (best discriminators)
+    // and spectral flux (new: voice has higher frame-to-frame change).
+    float weightedAvg = 0.02f * centroidScore
+                      + 0.02f * rolloffScore
+                      + 0.31f * formantScore
+                      + 0.33f * flatnessScore
+                      + 0.12f * densityScore
+                      + 0.10f * spectralFluxScore;
 
-    // Temporal spectral variance: applied as a multiplier BOOST (not base score).
-    // Voice has higher variance (~1.01) than guitar (~0.74) because vocal cords
-    // modulate the spectrum frame-to-frame. Applied only when variance > 0
-    // (i.e., real multi-frame audio, not synthetic single-frame tests).
-    // Boost range: 1.0x (no variance data) to 1.15x (high variance).
+    // Accumulate all multiplicative boosts into totalBoost, then cap.
+    // This prevents the theoretical 3.2x runaway when all boosts fire
+    // simultaneously. Cap at 1.60x allows two boosts to stack but
+    // prevents pathological cases. Synthetic signals trigger zero boosts
+    // (jitter <0.15, acfIrreg <0.30), so existing tests are unaffected.
+    float totalBoost = 1.0f;
+
+    // Temporal spectral variance boost (not base score).
+    // Voice has higher variance (~1.01/~0.84 in 3-way) than guitar (~0.74).
+    // Applied only when variance > 0 (real multi-frame audio).
     if (spectralVariance > 0.01f) {
-        // Map variance 0.5-1.5 → boost 0.95-1.15
-        // Guitar at 0.74 → boost 1.0 (neutral)
-        // Voice at 1.01 → boost 1.06
-        float varianceBoost = 1.0f + 0.20f * (spectralVariance - 0.74f) / 0.76f;
-        varianceBoost = fl::clamp(varianceBoost, 0.90f, 1.20f);
-        weightedAvg *= varianceBoost;
+        float varianceBoost = 1.0f + 0.40f * (spectralVariance - 0.74f) / 0.76f;
+        varianceBoost = fl::clamp(varianceBoost, 0.90f, 1.25f);
+        totalBoost *= varianceBoost;
     }
 
-    // Time-domain boosts from PCM analysis.
-    // Tuned against real audio: guitar jitter=0.23, acfIrreg=0.40, zcCV=1.11
-    //                           voice  jitter=0.35, acfIrreg=0.82, zcCV=0.66
-    // Strategy: BOOST-ONLY for jitter and acfIrreg (no penalties) to avoid
-    // breaking synthetic vowels with F0 in the ACF range (acfIrreg ~0.30).
-    // zcCV is the only feature that penalizes guitar (high zcCV=1.11).
-
-    // Envelope jitter: boost only for high jitter (voice territory).
-    // No penalty for low jitter — protects synthetic clean vowels.
-    if (mEnvelopeJitter > 0.25f) {
-        float jitterBoost = 1.0f + 1.5f * (mEnvelopeJitter - 0.25f);
-        jitterBoost = fl::clamp(jitterBoost, 1.0f, 1.30f);
-        weightedAvg *= jitterBoost;
+    // Envelope jitter boost: only for very high jitter (>0.55).
+    // Drums alone reach 0.61, so only extreme jitter gets a small boost.
+    if (mEnvelopeJitter > 0.55f) {
+        float jitterBoost = 1.0f + 0.8f * (mEnvelopeJitter - 0.55f);
+        jitterBoost = fl::clamp(jitterBoost, 1.0f, 1.15f);
+        totalBoost *= jitterBoost;
     }
 
-    // Autocorrelation irregularity: boost only above 0.60 (real voice).
-    // Synthetic vowels with F0 in [172,500] Hz have acfIrreg ~0.30 (periodic).
-    // Real voice has vibrato/breath noise → acfIrreg ~0.82.
-    if (mAutocorrelationIrregularity > 0.60f) {
-        float acfBoost = 1.0f + 2.0f * (mAutocorrelationIrregularity - 0.60f);
-        acfBoost = fl::clamp(acfBoost, 1.0f, 1.50f);
-        weightedAvg *= acfBoost;
+    // Autocorrelation irregularity boost: only above 0.75 (above drum baseline).
+    if (mAutocorrelationIrregularity > 0.75f) {
+        float acfBoost = 1.0f + 1.0f * (mAutocorrelationIrregularity - 0.75f);
+        acfBoost = fl::clamp(acfBoost, 1.0f, 1.25f);
+        totalBoost *= acfBoost;
     }
 
-    // Zero-crossing CV: peaked boost — moderate values (voice ~0.66) get boost,
-    // high values (guitar ~1.11) get strong penalty. Guitar has MORE ZC
-    // variation than voice in real audio (percussive transients, string noise).
+    // Zero-crossing CV: peaked boost for moderate values, penalty for high.
     if (mZeroCrossingCV > 0.02f) {
         float zcBoost;
         if (mZeroCrossingCV < 0.80f) {
             zcBoost = 1.0f + 0.25f * (mZeroCrossingCV - 0.10f) / 0.70f;
+        } else if (mZeroCrossingCV < 1.50f) {
+            zcBoost = 1.0f;
         } else {
-            // Steep penalty for guitar-like high ZC variation
-            zcBoost = 1.0f - 0.50f * (mZeroCrossingCV - 0.80f) / 0.50f;
+            zcBoost = 1.0f - 0.15f * (mZeroCrossingCV - 1.50f) / 1.00f;
         }
-        zcBoost = fl::clamp(zcBoost, 0.60f, 1.20f);
-        weightedAvg *= zcBoost;
+        zcBoost = fl::clamp(zcBoost, 0.80f, 1.20f);
+        totalBoost *= zcBoost;
     }
 
-    // Combined aperiodicity-jitter boost: when BOTH features indicate voice,
-    // apply additional amplification. This only activates for real voice audio
-    // where both temporal irregularity and amplitude jitter are elevated.
-    if (mAutocorrelationIrregularity > 0.60f && mEnvelopeJitter > 0.25f) {
-        float minExcess = fl::min(mAutocorrelationIrregularity - 0.60f,
-                                   mEnvelopeJitter - 0.25f);
-        float combinedBoost = 1.0f + 2.0f * minExcess;
-        combinedBoost = fl::clamp(combinedBoost, 1.0f, 1.30f);
-        weightedAvg *= combinedBoost;
+    // Combined aperiodicity-jitter boost: when BOTH indicate voice.
+    if (mAutocorrelationIrregularity > 0.75f && mEnvelopeJitter > 0.55f) {
+        float minExcess = fl::min(mAutocorrelationIrregularity - 0.75f,
+                                   mEnvelopeJitter - 0.55f);
+        float combinedBoost = 1.0f + 1.5f * minExcess;
+        combinedBoost = fl::clamp(combinedBoost, 1.0f, 1.20f);
+        totalBoost *= combinedBoost;
     }
 
-    // Soft formant gate: formant must show some structure (prevents pure tones/noise)
-    float formantGate = fl::min(1.0f, formantScore * 2.5f);  // ~0.4+ maps to 1.0
-    mConfidence = weightedAvg * formantGate;
+    // Cap total boost chain to prevent runaway
+    totalBoost = fl::clamp(totalBoost, 0.50f, 1.60f);
+    weightedAvg *= totalBoost;
+
+    // Formant gate/boost: weak formant → gate down, strong formant → mild boost.
+    float formantMultiplier;
+    if (formantScore < 0.40f) {
+        formantMultiplier = formantScore * 2.5f;  // gate (0.0 to 1.0)
+    } else {
+        formantMultiplier = 1.0f + 0.40f * (formantScore - 0.40f);  // boost (1.0 to 1.24)
+    }
+
+    // Clamp final confidence to [0, 1]
+    mConfidence = fl::clamp(weightedAvg * formantMultiplier, 0.0f, 1.0f);
     return mConfidence;
 }
 

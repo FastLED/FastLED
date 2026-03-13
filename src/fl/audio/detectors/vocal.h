@@ -105,6 +105,7 @@ struct VocalDetectorDiagnostics {
     static float getEnvelopeJitter(const VocalDetector& d) { return d.mEnvelopeJitter; }
     static float getAutocorrelationIrregularity(const VocalDetector& d) { return d.mAutocorrelationIrregularity; }
     static float getZeroCrossingCV(const VocalDetector& d) { return d.mZeroCrossingCV; }
+    static float getRawConfidence(const VocalDetector& d) { return d.mConfidence; }
 };
 
 } // namespace fl

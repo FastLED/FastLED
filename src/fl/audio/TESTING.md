@@ -359,6 +359,52 @@ tail (16+s) (n=156):
   flux=0.0593+/-0.0378  variance=6.6077+/-48.6560
 ```
 
+### Feature Distribution in Real Audio (3-Way Voice+Guitar+Drums Mix)
+
+3-way calibration uses guitar + jazz drums (looped 4s `jazzy_percussion.mp3`) + voice.
+Drums dramatically alter feature distributions: jitter, ACF irregularity, and zcCV are all
+elevated even without voice. Key finding: **loud voice (+10dB) has LOWER detection than
+quiet voice (-10dB)** because loud voice adds periodicity that reduces ACF irregularity.
+
+```
+3-way backing (guitar+drums, 0-4s) (n=77, stride-2):
+  flatness=0.633  formant=0.665  presence=0.126
+  jitter=0.598    acfIrr=0.673   zcCV=1.121
+  variance=0.932  confidence=0.464
+
+3-way voice+all +10dB (6-14s) (n=153, stride-2):
+  flatness=0.576  formant=0.356  presence=0.026
+  jitter=0.571    acfIrr=0.653   zcCV=1.321
+  variance=0.844  confidence=0.525
+
+3-way voice+all 0dB (6-14s) (n=153, stride-2):
+  flatness=0.610  formant=0.375  presence=0.029
+  jitter=0.587    acfIrr=0.756   zcCV=1.458
+  variance=0.738  confidence=0.543
+
+3-way voice+all -10dB (6-14s) (n=153, stride-2):
+  flatness=0.632  formant=0.422  presence=0.036
+  jitter=0.586    acfIrr=0.844   zcCV=1.584
+  variance=0.722  confidence=0.575
+```
+
+Detection rates (3-way, stride-2 sampling):
+
+| Variant | Detection | FP Rate | Target |
+|---------|-----------|---------|--------|
+| +10dB | 27.5% | 0% | >=25%, <=15% |
+| 0dB | 25.5% | 0% | >=10%, <=20% |
+| -10dB | 56.2% | 0% | >=5%, <=20% |
+| -20dB | 35.3% | 0% | FP<=20% |
+
+Key differences from 2-way (voice+guitar only):
+- **Drums inflate time-domain features**: jitter 0.60+ (was 0.23-0.35), ACF irreg 0.67+ (was 0.40-0.82)
+- **Presence ratio inverts**: drums add 2-4kHz energy → backing presence (0.126) > voice presence (0.026)
+- **Formant ratio inverts**: voice F1 energy dilutes F2/F1 ratio → backing formant (0.665) > voice formant (0.356)
+- **ACF boost threshold raised**: 0.60 → 0.75 (above drum baseline 0.69)
+- **Jitter boost threshold raised**: 0.25 → 0.55 (drums push jitter to 0.60)
+- **zcCV neutral zone widened**: penalty start 0.80 → 1.50 (voice region zcCV 1.3-1.6)
+
 ## How the Test Audio Was Created
 
 This section documents the exact procedure for recreating MP3 calibration fixtures if re-tuning is needed in the future.
@@ -367,8 +413,9 @@ This section documents the exact procedure for recreating MP3 calibration fixtur
 
 Open-source recordings from archive.org:
 
-- **Guitar**: Acoustic guitar recording from `archive.org/details/AcousticGuitarSound` (Rob Angelitis, CC BY-NC-SA 3.0) -- 20+ seconds of clean fingerpicking
-- **Voice**: Vocal recording from `archive.org/details/vocal-pearls_20220524` (track 30) -- singing with natural phrasing and gaps
+- **Guitar**: Acoustic guitar recording from `archive.org/details/AcousticGuitarSound` (Rob Angelitis, CC BY-NC-SA 3.0) -- track 03, 20+ seconds of clean fingerpicking
+- **Voice**: Vocal recording from `archive.org/details/vocal-pearls_20220524` (track 30, "Love from Sweet Gina") -- singing with natural phrasing and gaps
+- **Drums**: Jazz percussion (`tests/data/codec/jazzy_percussion.mp3`) -- 4-second complex jazz beat, looped to 20s for 3-way mixes
 
 ### 2. Trim and Normalize
 
@@ -407,6 +454,23 @@ Key ffmpeg flags:
 - `adelay=5000|5000`: Delay voice by 5 seconds (both channels, though output is mono)
 - `amix=inputs=2:normalize=0`: Mix without amplitude normalization (preserves levels)
 - `-ac 1`: Force mono output
+
+### 3b. 3-Way Mix (Voice+Guitar+Drums)
+
+For 3-way calibration, drums are looped and mixed with guitar as the backing track:
+
+```bash
+# Loop drums to 20s, trim, normalize
+ffmpeg -stream_loop 4 -i drums_raw.mp3 -t 20 -ar 44100 -ac 1 drums_loop.wav
+static_sox drums_loop.wav drums_norm.wav gain -n -10
+
+# 3-way mix: guitar+drums backing, voice delayed 5s
+ffmpeg -i guitar_norm.wav -i drums_norm.wav -i voice_norm.wav \
+  -filter_complex "[0][1]amix=inputs=2:normalize=0[back];[2]adelay=5000|5000,volume=0dB[v];[back][v]amix=inputs=2:normalize=0" \
+  -ac 1 mix_3way_0dB.wav
+```
+
+**Critical**: Both `amix` filters must use `normalize=0` to prevent amplitude halving.
 
 ### 4. Level Variants
 
