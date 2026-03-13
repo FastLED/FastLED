@@ -7,6 +7,7 @@
 #include "fl/sin32.h"
 #include "fl/stl/fixed_point/isqrt.h"
 #include "fl/compiler_control.h"
+#include "fl/stl/fixed_point/traits.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
@@ -25,6 +26,12 @@ class s4x12 {
 
     explicit constexpr s4x12(float f)
         : mValue(static_cast<i16>(f * (static_cast<i16>(1) << FRAC_BITS))) {}
+
+    // Integer constructor — any integer width (portable: AVR 16-bit int, ARM/x86 32-bit).
+    // Compile error if constexpr value exceeds INT_BITS range.
+    template <typename IntT, detail::enable_if_integer_t<IntT> = 0>
+    explicit constexpr s4x12(IntT n)
+        : mValue(detail::int_to_fixed<INT_BITS, FRAC_BITS>::from_signed(n)) {}
 
     // Auto-promotion from other fixed-point types
     template <typename OtherFP>

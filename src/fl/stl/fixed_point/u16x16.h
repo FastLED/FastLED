@@ -6,7 +6,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/fixed_point/isqrt.h"
 #include "fl/compiler_control.h"
-#include "fl/stl/type_traits.h"
+#include "fl/stl/fixed_point/traits.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
@@ -25,6 +25,12 @@ class u16x16 {
 
     explicit constexpr u16x16(float f)
         : mValue(static_cast<u32>(f * (SCALE))) {}
+
+    // Integer constructor — any integer width (portable: AVR 16-bit int, ARM/x86 32-bit).
+    // Compile error if constexpr value exceeds INT_BITS range.
+    template <typename IntT, detail::enable_if_integer_t<IntT> = 0>
+    explicit constexpr u16x16(IntT n)
+        : mValue(detail::int_to_fixed<INT_BITS, FRAC_BITS>::from_unsigned(n)) {}
 
     // Auto-promotion from other fixed-point types
     // Enabled only when both INT_BITS and FRAC_BITS can be promoted (no demotion)

@@ -8,6 +8,93 @@
 
 namespace fl {
 
+namespace detail {
+
+// True when T is a non-bool integer type.  Used by every fixed-point
+// integer constructor so they bind to any width (portable across AVR
+// 16-bit int and 32-bit platforms).
+template <typename T>
+struct is_non_bool_integer {
+    static constexpr bool value =
+        fl::is_integral<T>::value &&
+        !fl::is_same<typename fl::remove_cv<T>::type, bool>::value;
+};
+
+// SFINAE helper — drop into a template parameter list:
+//   template <typename IntT, detail::enable_if_integer_t<IntT> = 0>
+template <typename T>
+using enable_if_integer_t =
+    typename fl::enable_if<is_non_bool_integer<T>::value, int>::type;
+
+// Not constexpr: calling from a constexpr context triggers a compile error.
+// This is the C++11 "constexpr assert" pattern.
+inline void integer_out_of_range_for_fixed_point_type() {}
+
+// Range check: is n in [0, MAX_U]?  Works for both signed and unsigned IntT.
+// For signed IntT, explicitly rejects negative values via i32 comparison.
+// For unsigned IntT, the negativity check is always true (optimized away).
+template <typename IntT>
+constexpr bool in_unsigned_range(IntT n, u32 max_u) {
+    return static_cast<i32>(fl::is_signed<IntT>::value ? (n >= IntT(0)) : 1) &&
+           static_cast<u32>(n) <= max_u;
+}
+
+// Checked integer-to-raw conversion for fixed-point constructors.
+// Verifies n fits in INT_BITS at constexpr time; fires a compile error if not.
+// Two specializations: 16-bit storage (i16/u16) and 32-bit storage (i32/u32).
+template <int IntBits, int FracBits, bool TotalLE16 = (IntBits + FracBits <= 16)>
+struct int_to_fixed;
+
+// 16-bit storage types (s12x4, s8x8, s4x12, u12x4, u8x8, u4x12).
+// Intermediate multiply in i32/u32 (one step wider).
+template <int IntBits, int FracBits>
+struct int_to_fixed<IntBits, FracBits, true> {
+    static constexpr i32 SCALE = static_cast<i32>(1) << FracBits;
+    static constexpr i32 MAX_S = (static_cast<i32>(1) << (IntBits - 1)) - 1;
+    static constexpr i32 MIN_S = -(static_cast<i32>(1) << (IntBits - 1));
+    static constexpr u32 MAX_U = (static_cast<u32>(1) << IntBits) - 1;
+
+    template <typename IntT>
+    static constexpr i16 from_signed(IntT n) {
+        return (static_cast<i32>(n) >= MIN_S && static_cast<i32>(n) <= MAX_S)
+            ? static_cast<i16>(static_cast<i32>(n) * SCALE)
+            : (integer_out_of_range_for_fixed_point_type(), i16(0));
+    }
+
+    template <typename IntT>
+    static constexpr u16 from_unsigned(IntT n) {
+        return in_unsigned_range(n, MAX_U)
+            ? static_cast<u16>(static_cast<u32>(n) * SCALE)
+            : (integer_out_of_range_for_fixed_point_type(), u16(0));
+    }
+};
+
+// 32-bit storage types (s16x16, s24x8, s8x24, u16x16, u24x8, u8x24).
+// Signed uses unsigned multiply to avoid signed overflow UB.
+template <int IntBits, int FracBits>
+struct int_to_fixed<IntBits, FracBits, false> {
+    static constexpr u32 USCALE = static_cast<u32>(static_cast<i32>(1) << FracBits);
+    static constexpr i32 MAX_S = (static_cast<i32>(1) << (IntBits - 1)) - 1;
+    static constexpr i32 MIN_S = -(static_cast<i32>(1) << (IntBits - 1));
+    static constexpr u32 MAX_U = (static_cast<u32>(1) << IntBits) - 1;
+
+    template <typename IntT>
+    static constexpr i32 from_signed(IntT n) {
+        return (static_cast<i32>(n) >= MIN_S && static_cast<i32>(n) <= MAX_S)
+            ? static_cast<i32>(static_cast<u32>(n) * USCALE)
+            : (integer_out_of_range_for_fixed_point_type(), i32(0));
+    }
+
+    template <typename IntT>
+    static constexpr u32 from_unsigned(IntT n) {
+        return in_unsigned_range(n, MAX_U)
+            ? static_cast<u32>(n) * USCALE
+            : (integer_out_of_range_for_fixed_point_type(), u32(0));
+    }
+};
+
+} // namespace detail
+
 template <int IntBits, int FracBits>
 struct fixed_point_traits {
     // Total bits required
