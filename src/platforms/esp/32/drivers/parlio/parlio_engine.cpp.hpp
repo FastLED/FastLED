@@ -16,7 +16,6 @@
 #if (defined(FL_IS_ESP32) && FASTLED_ESP32_HAS_PARLIO) || defined(FASTLED_STUB_IMPL)
 
 #include "fl/stl/compiler_control.h"
-#include "fl/unused.h"
 #include "platforms/memory_barrier.h"  // For FL_MEMORY_BARRIER
 
 #include "platforms/esp/32/drivers/parlio/parlio_engine.h"
@@ -26,7 +25,7 @@
 #include "platforms/esp/32/drivers/parlio/parlio_buffer_calc.h"
 #include "platforms/esp/32/drivers/parlio/parlio_debug.h"
 #include "platforms/esp/32/drivers/parlio/parlio_ring_buffer.h"
-#include "fl/delay.h"
+#include "fl/system/delay.h"
 #include "fl/error.h"
 #include "fl/log.h"
 #include "fl/warn.h"

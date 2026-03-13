@@ -6,7 +6,7 @@
 #define __INC_FASTLED_PLATFORMS_AVR_DELAY_H
 
 #include "platforms/cycle_type.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 
 /// @file platforms/avr/delay.h
 /// AVR platform-specific nanosecond-precision delay utilities

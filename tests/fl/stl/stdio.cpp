@@ -7,7 +7,6 @@
 #include "fl/stl/ostream.h"
 #include "fl/stl/stdio.h"
 #include "fl/stl/string.h"
-#include "fl/unused.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

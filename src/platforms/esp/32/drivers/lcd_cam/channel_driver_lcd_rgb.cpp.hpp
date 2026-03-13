@@ -8,7 +8,7 @@
 // 2. Stub/host platform testing (FASTLED_STUB_IMPL or host OS)
 #include "platforms/is_platform.h"
 #if defined(FL_IS_ESP32)
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 #include "sdkconfig.h"
 #endif
 

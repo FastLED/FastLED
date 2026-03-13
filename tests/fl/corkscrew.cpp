@@ -16,7 +16,7 @@
 #include "fl/gfx/crgb.h"
 #include "fl/stl/span.h"
 #include "fl/stl/strstream.h"
-#include "fl/unused.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/int.h"
 #include "fl/stl/vector.h"
 #include "hsv2rgb.h"

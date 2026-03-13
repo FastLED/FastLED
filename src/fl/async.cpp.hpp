@@ -11,7 +11,7 @@
 #include "fl/stl/thread_local.h"
 
 #include "fl/stl/new.h"
-#include "fl/yield.h"
+#include "fl/system/yield.h"
 #include "platforms/coroutine_runtime.h"
 
 namespace fl {

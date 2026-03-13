@@ -165,7 +165,7 @@ bool serial_ready();
 // Timing Functions
 // =============================================================================
 // Note: fl::millis() is provided by fl/stl/chrono.h
-// Note: fl::delay() is provided by fl/delay.h
+// Note: fl::delay() is provided by fl/system/delay.h
 
 #ifdef FASTLED_TESTING
 

@@ -21,7 +21,7 @@
 #include "fl/promise.h" // For Error type
 #include "fl/stl/string_view.h"
 
-#include "fl/sketch_macros.h"
+#include "fl/system/sketch_macros.h"
 
 #ifndef FASTLED_ENABLE_JSON
 // FASTLED_ENABLE_JSON enables JSON UI components (always enabled on platforms with memory)

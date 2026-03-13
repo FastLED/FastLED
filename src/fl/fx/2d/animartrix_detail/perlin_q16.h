@@ -7,7 +7,7 @@
 // Trades internal precision for speed: i32 ops instead of i64, smaller LUT.
 
 #include "fl/stl/fixed_point/s16x16.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 
 namespace fl {
 

@@ -5,10 +5,10 @@
 #define FL_DELAY_CPP_SPECIALIZATIONS
 
 #include "fl/stl/stdint.h"
-#include "fl/delay.h"
+#include "fl/system/delay.h"
 #include "platforms/cycle_type.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/sketch_macros.h"
+#include "fl/system/sketch_macros.h"
 #include "fl/stl/chrono.h"
 
 // ============================================================================

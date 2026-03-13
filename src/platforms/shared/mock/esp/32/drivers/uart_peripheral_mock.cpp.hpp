@@ -8,7 +8,7 @@
 
 #if defined(ARDUINO) || defined(FL_IS_ESP32)
 // IWYU pragma: begin_keep
-#include "fl/arduino.h"
+#include "fl/system/arduino.h"
 // IWYU pragma: end_keep
 #else
 #include "platforms/stub/time_stub.h"  // For fl::micros() on host tests

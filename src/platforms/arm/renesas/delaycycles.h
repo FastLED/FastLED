@@ -7,7 +7,7 @@
 #define __INC_FASTLED_PLATFORMS_RENESAS_DELAYCYCLES_H
 
 #include "platforms/cycle_type.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 
 /// @file platforms/arm/renesas/delaycycles.h
 /// Renesas RA platform-specific cycle-accurate delay utilities

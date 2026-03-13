@@ -11,7 +11,7 @@
 #if defined(FL_IS_ESP32) && defined(ARDUINO) && !defined(FASTLED_STUB_IMPL)
 
 #include "platforms/time_platform.h"
-#include "fl/arduino.h"
+#include "fl/system/arduino.h"
 
 // IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"

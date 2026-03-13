@@ -3,12 +3,12 @@
 #ifndef __INC_FL_DELAY_H
 #define __INC_FL_DELAY_H
 
-/// @file fl/delay.h
+/// @file fl/system/delay.h
 /// Delay utilities for FastLED
 /// Includes nanosecond-precision delays, cycle counting, and microsecond delays
 
 #include "platforms/cycle_type.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/int.h"
 #include "fl/stl/type_traits.h"
 // ============================================================================

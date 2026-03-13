@@ -3,7 +3,7 @@
 #include "fl/audio/audio_input.h"  // For AudioConfig  // IWYU pragma: keep
 #include "fl/stl/string.h"
 #include "fl/stl/url.h"
-#include "fl/unused.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/ui_defs.h"
 
 #ifndef FASTLED_HAS_UI_SLIDER

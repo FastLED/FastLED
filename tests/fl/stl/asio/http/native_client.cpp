@@ -11,7 +11,7 @@
 #include "fl/stl/chrono.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/mutex.h"
-#include "fl/delay.h"
+#include "fl/system/delay.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

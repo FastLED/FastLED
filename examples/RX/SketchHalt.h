@@ -2,7 +2,7 @@
 
 #include "fl/stl/ostream.h"
 #include "fl/stl/chrono.h"
-#include "fl/delay.h"
+#include "fl/system/delay.h"
 #include "fl/stl/string.h"
 
 /// @brief Sketch halting mechanism that prevents watchdog timer resets

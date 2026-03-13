@@ -726,3 +726,57 @@ FL_DISABLE_WARNING_POP
 #ifndef FL_HAS_SANITIZER_LSAN
 #  define FL_HAS_SANITIZER_LSAN 0
 #endif
+
+// ============================================================================
+// Force inline macros (formerly fl/force_inline.h)
+// ============================================================================
+
+// Force inline for member functions (no static keyword)
+#ifdef FASTLED_NO_FORCE_INLINE
+#define FASTLED_FORCE_INLINE inline
+#else
+#define FASTLED_FORCE_INLINE __attribute__((always_inline)) inline
+#endif
+
+// Force inline for static free functions (with static keyword)
+// Replacement for LIB8STATIC_ALWAYS_INLINE
+#ifdef FASTLED_NO_FORCE_INLINE
+#define FL_ALWAYS_INLINE static inline
+#else
+#define FL_ALWAYS_INLINE __attribute__((always_inline)) static inline
+#endif
+
+// ============================================================================
+// Unused macros (formerly fl/unused.h)
+// ============================================================================
+
+#ifndef FASTLED_UNUSED
+#define FASTLED_UNUSED(x) (void)(x)
+#endif
+
+#ifndef FL_UNUSED
+#define FL_UNUSED(x) (void)(x)
+#endif
+
+#ifndef FL_UNUSED_FUNCTION
+#define FL_UNUSED_FUNCTION __attribute__((unused))
+#endif
+
+// ============================================================================
+// AVR platform macros (formerly fl/virtual_if_not_avr.h, fl/avr_disallowed.h)
+// ============================================================================
+
+#ifdef FL_IS_AVR
+#define VIRTUAL_IF_NOT_AVR
+#define OVERRIDE_IF_NOT_AVR
+#else
+#define VIRTUAL_IF_NOT_AVR virtual
+#define OVERRIDE_IF_NOT_AVR override
+#endif
+
+#ifdef FL_IS_AVR
+#define AVR_DISALLOWED                                                         \
+    [[deprecated("This function or class is deprecated on AVR.")]]
+#else
+#define AVR_DISALLOWED
+#endif

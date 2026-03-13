@@ -22,7 +22,7 @@
 #endif
 
 #ifdef ARDUINO
-#include "fl/arduino.h"
+#include "fl/system/arduino.h"
 #else
 #include "platforms/stub/time_stub.h"  // For fl::micros() on host tests
 #endif

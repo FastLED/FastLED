@@ -10,7 +10,7 @@
 /// This header provides real semaphore implementations for multithreaded stub platforms,
 /// routing to either C++20 std::semaphore or a mutex/cv-based implementation.
 
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 #include "fl/stl/cstddef.h"
 
 // Check for C++20 semaphore support

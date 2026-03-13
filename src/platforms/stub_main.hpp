@@ -15,7 +15,7 @@
 // Include function.h and time_stub.h at file scope
 #include "fl/stl/compiler_control.h"  // For FL_MAYBE_UNUSED
 #include "fl/stl/function.h"
-#include "fl/delay.h"  // For delay() function
+#include "fl/system/delay.h"  // For delay() function
 #include "fl/engine_events.h"  // For onExit() event
 #if !defined(ARDUINO) || defined(FASTLED_USE_STUB_ARDUINO)
 #include "platforms/stub/time_stub.h"

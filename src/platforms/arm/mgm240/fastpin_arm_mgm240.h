@@ -23,8 +23,7 @@
 // IWYU pragma: end_keep
 
 #include "led_sysdefs.h"
-#include "fl/force_inline.h"
-#include "fl/unused.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/fastpin_base.h"
 namespace fl {
 /// Forward declaration of base FastPin template

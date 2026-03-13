@@ -11,7 +11,7 @@
 
 // Include platform detection header for FL_IS_STM32
 #include "platforms/arm/stm32/is_stm32.h"
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 
 // Platform guard using standardized FL_IS_STM32 macro
 #if defined(FL_IS_STM32)

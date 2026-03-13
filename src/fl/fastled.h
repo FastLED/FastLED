@@ -25,7 +25,7 @@
 
 /// Version and configuration
 #include "fl/system/dll.h"  // IWYU pragma: keep
-#include "fl/force_inline.h"  // IWYU pragma: keep
+#include "fl/stl/compiler_control.h"  // IWYU pragma: keep
 
 // ============================================================================
 // CONFIGURATION AND SYSTEM DEFINITIONS
@@ -41,7 +41,6 @@
 // ============================================================================
 
 /// Compiler and language features
-#include "fl/stl/compiler_control.h"  // IWYU pragma: keep
 #include "fl/math_macros.h"  // IWYU pragma: keep
 
 /// Memory and type utilities

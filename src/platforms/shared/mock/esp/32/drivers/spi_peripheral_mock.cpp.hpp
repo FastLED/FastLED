@@ -28,7 +28,7 @@
 
 #ifdef ARDUINO
 // IWYU pragma: begin_keep
-#include "fl/arduino.h"
+#include "fl/system/arduino.h"
 // IWYU pragma: end_keep
 #else
 #include "platforms/stub/time_stub.h"  // For fl::micros() and delay() on host tests

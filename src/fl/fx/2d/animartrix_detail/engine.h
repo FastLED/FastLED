@@ -4,7 +4,7 @@
 // Extracted from animartrix_detail.hpp so it can be forward-declared
 // and included independently by chasing_spirals implementations.
 
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/fx/2d/animartrix_detail/context.h"
 #include "fl/fx/2d/animartrix_detail/core_types.h"
 #include "fl/fx/2d/animartrix_detail/engine_core.h"

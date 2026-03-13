@@ -2,7 +2,7 @@
 /// @brief Comprehensive tests for function_list class
 
 #include "fl/stl/function.h"
-#include "fl/unused.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "test.h"

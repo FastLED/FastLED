@@ -14,12 +14,12 @@
 // IWYU pragma: begin_keep
 #include "hardware/sync.h"
 
-// Explicitly include fl/arduino.h (trampoline) here so any framework-specific defines take
+// Explicitly include fl/system/arduino.h (trampoline) here so any framework-specific defines take
 // priority, then are immediately cleaned up.
 // IWYU pragma: end_keep
 #ifdef ARDUINO
 // IWYU pragma: begin_keep
-#include "fl/arduino.h"
+#include "fl/system/arduino.h"
 // IWYU pragma: end_keep
 #include "platforms/arm/is_arm.h"
 

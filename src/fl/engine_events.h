@@ -6,7 +6,7 @@
 #include "fl/xymap.h"  // IWYU pragma: keep
 #include "fl/stl/string.h"  // IWYU pragma: keep
 #include "fl/stl/int.h"
-#include "fl/sketch_macros.h"
+#include "fl/system/sketch_macros.h"
 
 #ifndef FASTLED_HAS_ENGINE_EVENTS
 #define FASTLED_HAS_ENGINE_EVENTS SKETCH_HAS_LOTS_OF_MEMORY

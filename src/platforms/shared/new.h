@@ -7,7 +7,7 @@
 // Shared/default placement new operator - in global namespace
 // For desktop/generic platforms with standard library support
 
-#include "fl/has_include.h"  // IWYU pragma: keep
+#include "fl/stl/has_include.h"  // IWYU pragma: keep
 
 #if FL_HAS_INCLUDE(<new>)
     // Modern platforms with standard library support

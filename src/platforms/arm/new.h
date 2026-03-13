@@ -14,7 +14,7 @@
     #include <new.h>  // ok include // IWYU pragma: export // IWYU pragma: keep
 #endif
 
-#include "fl/has_include.h"  // IWYU pragma: keep
+#include "fl/stl/has_include.h"  // IWYU pragma: keep
 
 #if FL_HAS_INCLUDE(<new>)
     // Modern ARM platforms with standard library support (includes STM32F1 with modern toolchains)

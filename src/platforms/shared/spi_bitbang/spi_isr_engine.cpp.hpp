@@ -33,7 +33,7 @@
   License: MIT (FastLED)
 */
 
-#include "fl/sketch_macros.h"
+#include "fl/system/sketch_macros.h"
 
 // Include platform header first to enable auto-detection of FASTLED_SPI_HOST_SIMULATION
 #include "platforms/shared/spi_bitbang/spi_platform.h"

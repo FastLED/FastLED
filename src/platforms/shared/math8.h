@@ -7,8 +7,7 @@
 #include "lib8tion/lib8static.h"
 #include "lib8tion/intmap.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/force_inline.h"
-#include "fl/sketch_macros.h"
+#include "fl/system/sketch_macros.h"
 
 namespace fl {
 

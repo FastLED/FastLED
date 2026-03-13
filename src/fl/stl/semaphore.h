@@ -1,6 +1,6 @@
 #pragma once
 
-// IWYU pragma: no_include "fl/has_include.h"
+// IWYU pragma: no_include "fl/stl/compiler_control.h"
 // IWYU pragma: no_include "platforms/is_platform.h"
 // IWYU pragma: no_include "platforms/stub/semaphore_stub.h"
 

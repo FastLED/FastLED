@@ -13,7 +13,7 @@
 #include "fl/log.h"
 #include "fl/warn.h"
 // IWYU pragma: begin_keep
-#include "fl/arduino.h"
+#include "fl/system/arduino.h"
 // IWYU pragma: end_keep
 
 // Include ESP-IDF headers ONLY in .cpp file

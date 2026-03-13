@@ -3,11 +3,11 @@
 #ifndef __FASTSPI_ARM_NRF52_H
 #define __FASTSPI_ARM_NRF52_H
 
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/fastpin_base.h"
 #include "fastspi_types.h"
 #include "fl/eorder.h"
-#include "fl/delay.h"
+#include "fl/system/delay.h"
 // IWYU pragma: begin_keep
 #include <nrf_spim.h>
 // IWYU pragma: end_keep

@@ -1,4 +1,4 @@
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {

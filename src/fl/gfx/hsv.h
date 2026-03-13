@@ -4,7 +4,7 @@
 #pragma once
 
 #include "fl/stl/int.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 
 namespace fl {
 

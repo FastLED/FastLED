@@ -16,7 +16,7 @@
 #include "platforms/esp/32/drivers/rmt/rmt_5/rmt5_peripheral_esp.h"
 #include "platforms/memory_barrier.h"
 #include "fl/chipsets/led_timing.h"
-#include "fl/delay.h"
+#include "fl/system/delay.h"
 #include "fl/log.h"
 #include "fl/warn.h"
 #include "fl/error.h"

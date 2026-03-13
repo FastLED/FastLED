@@ -9,7 +9,7 @@
 #include "fl/audio/spectral_equalizer.h"
 #include "fl/stl/array.h"
 #include "fl/stl/unique_ptr.h"
-#include "fl/sketch_macros.h"
+#include "fl/system/sketch_macros.h"
 #include "fl/gfx/colorutils.h"  // IWYU pragma: keep
 #include "fl/gfx/crgb.h"  // for CRGB  // IWYU pragma: keep
 #include "fl/stl/vector.h"

@@ -9,7 +9,6 @@
 /// NEON is available on most ARM Cortex-A processors and newer Cortex-M processors.
 
 #include "fl/stl/stdint.h"
-#include "fl/force_inline.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/math.h"  // for sqrtf
 #include "fl/stl/align.h"

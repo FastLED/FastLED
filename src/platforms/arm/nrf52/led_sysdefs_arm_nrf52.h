@@ -4,7 +4,7 @@
 #ifndef __LED_SYSDEFS_ARM_NRF52
 #define __LED_SYSDEFS_ARM_NRF52
 
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 
 #include "platforms/arm/is_arm.h"
 #include "platforms/arm/nrf52/is_nrf52.h"

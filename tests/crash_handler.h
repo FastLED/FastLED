@@ -1,7 +1,7 @@
 #ifndef CRASH_HANDLER_H
 #define CRASH_HANDLER_H
 
-#include "fl/has_include.h"  // IWYU pragma: keep
+#include "fl/stl/has_include.h"  // IWYU pragma: keep
 
 // Phase 1: Include the appropriate implementation at the top (before namespace declarations)
 #ifdef _WIN32

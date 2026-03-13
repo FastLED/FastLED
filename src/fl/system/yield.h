@@ -1,6 +1,6 @@
 #pragma once
 
-/// @file fl/yield.h
+/// @file fl/system/yield.h
 /// @brief Platform-aware cooperative yield for FastLED
 ///
 /// fl::yield() gives other tasks/threads a chance to run:

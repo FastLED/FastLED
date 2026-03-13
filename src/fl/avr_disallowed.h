@@ -1,8 +1,0 @@
-#pragma once
-
-#ifdef FL_IS_AVR
-#define AVR_DISALLOWED                                                         \
-    [[deprecated("This function or class is deprecated on AVR.")]]
-#else
-#define AVR_DISALLOWED
-#endif

@@ -22,7 +22,6 @@
 /// - Used by RP2040/RP2350 PIO-based parallel output
 
 #include "fl/stl/compiler_control.h"
-#include "fl/force_inline.h"
 #include "fl/stl/int.h"
 #include "fl/stl/span.h"
 #include "fl/stl/optional.h"

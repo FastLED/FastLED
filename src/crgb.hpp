@@ -7,10 +7,9 @@
 #include "chsv.h"
 #include "crgb.h"
 #include "lib8tion.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/scale8.h"
 
-#include "fl/stl/compiler_control.h"
 
 // Define namespace-aware scale8 macro
 #define FUNCTION_SCALE8(a,b) fl::scale8(a,b)

@@ -10,13 +10,13 @@
 #include "fl/stl/json.h"
 #include "fl/gfx/crgb.h"                 // for CRGB
 #include "fl/gfx/tile2x2.h"
-#include "fl/unused.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/xymap.h"
 // UI dependency moved to separate compilation unit to break dependency chain
 
 #if FL_STRING_NEEDS_ARDUINO_CONVERSION
 // IWYU pragma: begin_keep
-#include "fl/arduino.h"
+#include "fl/system/arduino.h"
 // IWYU pragma: end_keep  // ok header
 #endif
 

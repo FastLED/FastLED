@@ -8,9 +8,9 @@
 #include "platforms/is_platform.h"
 #if defined(FL_IS_ESP32)
 
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 // IWYU pragma: begin_keep
-#include "fl/arduino.h"
+#include "fl/system/arduino.h"
 // IWYU pragma: end_keep
 
 #if FL_HAS_INCLUDE("driver/ledc.h")

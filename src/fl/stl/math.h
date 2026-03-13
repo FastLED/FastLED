@@ -15,7 +15,6 @@
 // and forward here.
 
 #include "fl/stl/compiler_control.h"
-#include "fl/force_inline.h"
 #include "fl/stl/int.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/undef.h"  // IWYU pragma: keep

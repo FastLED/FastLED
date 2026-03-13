@@ -4,9 +4,8 @@
 #ifndef __FASTPIN_ARM_NRF51_H
 #define __FASTPIN_ARM_NRF51_H
 
-#include "fl/force_inline.h"
-#include "fl/fastpin_base.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/fastpin_base.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER

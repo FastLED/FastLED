@@ -26,7 +26,7 @@
 #ifndef FASTLED_ESP_VERSION_CACHED
 #define FASTLED_ESP_VERSION_CACHED
 
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 
 // Prefer official version header when available (Arduino-ESP32 / ESP-IDF 4+)
 #if FL_HAS_INCLUDE(<esp_idf_version.h>)

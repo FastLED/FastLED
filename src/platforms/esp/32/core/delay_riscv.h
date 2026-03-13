@@ -6,7 +6,7 @@
 #define __INC_FASTLED_PLATFORMS_ESP32_DELAY_RISCV_H
 
 #include "platforms/cycle_type.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 
 /// @file platforms/esp/32/delay_riscv.h
 /// ESP32-C3/C6 (RISC-V) platform-specific nanosecond-precision delay utilities

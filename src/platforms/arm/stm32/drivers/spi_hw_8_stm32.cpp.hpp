@@ -51,7 +51,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/limits.h"
 // IWYU pragma: begin_keep
-#include "fl/arduino.h"
+#include "fl/system/arduino.h"
 // IWYU pragma: end_keep
 
 #include "platforms/shared/spi_hw_8.h"

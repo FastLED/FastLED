@@ -9,7 +9,7 @@
 // IWYU pragma: private
 
 #include "platforms/esp/is_esp.h"
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 
 // Only compile for ESP32-S3 with LCD I80 support
 #if defined(FL_IS_ESP_32S3) && FL_HAS_INCLUDE("esp_lcd_panel_io.h")

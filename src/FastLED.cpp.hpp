@@ -10,7 +10,7 @@
 #include "fl/channels/manager.h"
 #include "fl/trace.h"
 #include "fl/channels/driver.h"  // for IChannelDriver
-#include "fl/delay.h"  // for delayMicroseconds
+#include "fl/system/delay.h"  // for delayMicroseconds
 #include "fl/log.h"  // for FL_WARN
 #include "fl/audio/input.h"  // for IAudioInput
 #include "fl/ui.h"  // for UIAudio

@@ -2,7 +2,7 @@
 
 // IWYU pragma: private
 
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/arm/stm32/armpin.h"
 
 namespace fl {

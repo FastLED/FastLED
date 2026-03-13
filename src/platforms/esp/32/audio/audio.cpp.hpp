@@ -5,7 +5,7 @@
 #ifdef FL_IS_ESP32
 
 #include "platforms/esp/esp_version.h"
-#include "fl/sketch_macros.h"
+#include "fl/system/sketch_macros.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/memory.h"
 #include "fl/stl/string.h"

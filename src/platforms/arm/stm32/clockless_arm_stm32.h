@@ -4,7 +4,7 @@
 
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/vector.h"
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 #include "fastled_delay.h"
 #include "platforms/arm/stm32/interrupts_stm32_inline.h"
 #include "platforms/arm/stm32/core_detection.h"
@@ -19,7 +19,6 @@
 #else
     // Libmaple or other cores without CMSIS - use our definitions
     #include "platforms/arm/stm32/cm3_regs.h"
-#include "fl/stl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER

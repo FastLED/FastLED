@@ -11,7 +11,7 @@
 ///
 /// IMPORTANT: This file requires STM32 HAL to be available via STM32duino core headers.
 
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 #include "platforms/arm/stm32/is_stm32.h"
 
 // STM32duino core headers - provides HAL includes and pin mapping functions

@@ -14,7 +14,7 @@
 /// - NeoPixelBus library must be included before FastLED
 /// - The controller is only available when NeoPixelBus.h is detected
 
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 
 #ifndef FASTLED_USE_NEOPIXEL_BUS
 #ifdef FASTLED_DOXYGEN

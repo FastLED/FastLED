@@ -27,7 +27,7 @@
 // ============================================================================
 
 #include "platforms/arm/stm32/is_stm32.h"
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 
 #ifndef FL_IS_STM32
     #error "stm32_capabilities.h included on non-STM32 platform"

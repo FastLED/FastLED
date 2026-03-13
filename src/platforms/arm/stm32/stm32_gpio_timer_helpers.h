@@ -23,7 +23,7 @@
 // IWYU pragma: private
 
 #include "fl/stl/stdint.h"
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 
 // STM32duino core headers - provides HAL includes and pin mapping functions
 // These headers provide: PinName, NC, digitalPinToPinName(), STM_PORT(), STM_GPIO_PIN(),

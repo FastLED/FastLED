@@ -2,9 +2,9 @@
 
 // IWYU pragma: private
 
-// fl/arduino.h trampoline ensures Arduino.h + macro cleanup
+// fl/system/arduino.h trampoline ensures Arduino.h + macro cleanup
 // IWYU pragma: begin_keep
-#include "fl/arduino.h"
+#include "fl/system/arduino.h"
 // IWYU pragma: end_keep
 
 namespace fl {

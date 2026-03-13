@@ -3,7 +3,7 @@
 #if defined(FL_IS_TEENSY_4X)  // Teensy 4.0/4.1 only
 
 #include "ObjectFLEDDmaManager.h"
-#include "fl/delay.h"
+#include "fl/system/delay.h"
 
 namespace fl {
 

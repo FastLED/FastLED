@@ -7,7 +7,7 @@
 #define __INC_FASTLED_PLATFORMS_RP2040_DELAYCYCLES_H
 
 #include "platforms/cycle_type.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 
 /// @file platforms/arm/rp/rp2040/delaycycles.h
 /// RP2040 platform-specific cycle-accurate delay utilities

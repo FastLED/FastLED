@@ -4,7 +4,7 @@
 #include "./color_mapper.h"
 #include "./Keyboard.h"
 #include "./dprint.h"
-#include "fl/unused.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/math.h"
 
 Key::Key() : mOn(false), mSustained(false), mSustainPedalOn(false),

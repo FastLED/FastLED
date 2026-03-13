@@ -10,7 +10,7 @@
 ///
 /// Define FL_ESP32_IO_DISABLE_WARN to silence the warning when using stubs.
 
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 
 // Test if we have ESP-IDF GPIO driver available
 #if FL_HAS_INCLUDE("driver/gpio.h") && FL_HAS_INCLUDE("driver/ledc.h")

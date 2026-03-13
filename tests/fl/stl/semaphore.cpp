@@ -2,7 +2,7 @@
 /// @brief Tests for fl::counting_semaphore and fl::binary_semaphore
 
 #include "fl/stl/semaphore.h"
-#include "fl/delay.h"
+#include "fl/system/delay.h"
 #include "fl/stl/atomic.h"
 #include "test.h"
 #include "fl/stl/thread.h"

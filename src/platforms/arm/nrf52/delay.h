@@ -6,7 +6,7 @@
 #define __INC_FASTLED_PLATFORMS_NRF52_DELAY_H
 
 #include "platforms/cycle_type.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 
 /// @file platforms/arm/nrf52/delay.h
 /// nRF52 platform-specific nanosecond-precision delay utilities

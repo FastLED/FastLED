@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Script to find files using FL_HAS_INCLUDE macro and ensure they include fl/has_include.h
+Script to find files using FL_HAS_INCLUDE macro and ensure they include fl/stl/has_include.h
 
 This script:
 1. Finds all files using FL_HAS_INCLUDE
-2. Checks if they include "fl/has_include.h"
+2. Checks if they include "fl/stl/has_include.h"
 3. Reports missing includes
 4. Optionally fixes them by adding the include
 """
@@ -34,7 +34,7 @@ EXCLUDE_DIRS = {
 
 # Files to exclude (these define FL_HAS_INCLUDE itself)
 EXCLUDE_FILES = {
-    "src/fl/has_include.h",  # This file DEFINES FL_HAS_INCLUDE
+    "src/fl/stl/has_include.h",  # This file DEFINES FL_HAS_INCLUDE
 }
 
 
@@ -101,7 +101,7 @@ def check_has_include(file_path: Path, include_path: str) -> bool:
     """Check if file includes the specified header."""
     try:
         content = file_path.read_text(encoding="utf-8", errors="ignore")
-        # Match #include "fl/has_include.h" or #include <fl/has_include.h>
+        # Match #include "fl/stl/has_include.h" or #include <fl/stl/compiler_control.h>
         pattern = rf'^\s*#\s*include\s+[<"].*{re.escape(include_path)}[">]'
         return bool(re.search(pattern, content, re.MULTILINE))
     except KeyboardInterrupt:
@@ -210,7 +210,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Find and fix files using FL_HAS_INCLUDE without including fl/has_include.h"
+        description="Find and fix files using FL_HAS_INCLUDE without including fl/stl/has_include.h"
     )
     parser.add_argument(
         "--fix",
@@ -224,8 +224,8 @@ def main():
     )
     parser.add_argument(
         "--include",
-        default="fl/has_include.h",
-        help="Include path to check/add (default: fl/has_include.h)",
+        default="fl/stl/has_include.h",
+        help="Include path to check/add (default: fl/stl/has_include.h)",
     )
 
     args = parser.parse_args()

@@ -12,13 +12,13 @@
 // Include Arduino.h early and immediately normalize its math macros (min, max, abs,
 // round, radians, degrees, map). On Arduino platforms the IDE injects Arduino.h
 // before the sketch, so those macros are already active by the time FastLED.h is
-// processed. Pulling fl/arduino.h in here — before any internal FastLED headers —
+// processed. Pulling fl/system/arduino.h in here — before any internal FastLED headers —
 // ensures all subsequent headers see a clean, macro-free environment.
-// fl/stl/undef.h (included by fl/arduino.h) is intentionally re-includable, so a
+// fl/stl/undef.h (included by fl/system/arduino.h) is intentionally re-includable, so a
 // second cleanup in fl/stl/math.h (included later, after platform headers) will
 // catch any macros re-introduced by those platform headers.
 #if defined(ARDUINO)
-#include "fl/arduino.h"
+#include "fl/system/arduino.h"
 #endif
 
 /// @file FastLED.h
@@ -115,7 +115,7 @@
 
 // Convenience includes for sketch inclusion
 #include "fl/stl/async.h"
-#include "fl/sketch_macros.h"
+#include "fl/system/sketch_macros.h"
 #include "fl/rx_device.h"
 #include "fl/stl/array.h"
 #include "fl/stl/vector.h"
@@ -123,7 +123,7 @@
 #include "fl/pin.h"
 
 
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 #include "cpp_compat.h"
 
 #include "fastled_config.h"
@@ -162,7 +162,7 @@
 // ============================================================================
 
 // Arduino macros (min, max, abs, etc.) are cleaned up in two passes:
-//   Pass 1 — top of FastLED.h (above): fl/arduino.h cleans up before internal headers.
+//   Pass 1 — top of FastLED.h (above): fl/system/arduino.h cleans up before internal headers.
 //   Pass 2 — fl/stl/math.h (below): cleans up any macros re-introduced by platform headers.
 // fl/stl/undef.h is intentionally re-includable to support both passes.
 
@@ -1475,7 +1475,6 @@ extern CFastLED FastLED;
 #include "fl/log.h"  // FL_PRINT("message" << value), FL_LOG_*() category-specific logging
 #include "fl/serial.h"  // Arduino-compatible Serial API: fl::Serial.print(), fl::Serial.read(), etc.
 #include "fl/stl/assert.h"  // FASTLED_ASSERT(condition, "message");
-#include "fl/unused.h"  // FASTLED_UNUSED(variable), for strict compiler settings.
 #include "fl/stl/sstream.h"  // fl::sstream for string stream operations
 #include "fl/remote/remote.h"  // Remote RPC system for JSON-based function calls (requires FASTLED_ENABLE_JSON)
 

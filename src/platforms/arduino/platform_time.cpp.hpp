@@ -10,7 +10,7 @@
 #if defined(ARDUINO) && !defined(FASTLED_STUB_IMPL) && !defined(FL_IS_WASM) && !defined(FL_IS_ESP32)
 
 #include "platforms/time_platform.h"
-#include "fl/arduino.h"
+#include "fl/system/arduino.h"
 
 namespace fl {
 namespace platforms {

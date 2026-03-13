@@ -22,7 +22,7 @@
 /// and fl::platforms::binary_semaphore.
 
 #include "platforms/is_platform.h"
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 
 // Platform dispatch
 #ifdef FL_IS_STUB

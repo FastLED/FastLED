@@ -4,7 +4,6 @@
 #ifdef FASTLED_STUB_IMPL  // Only use this if explicitly defined.
 
 #include "platforms/stub/led_sysdefs_stub.h"
-#include "fl/unused.h"
 #include "fl/stl/compiler_control.h"
 
 

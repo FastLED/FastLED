@@ -13,10 +13,9 @@
 #include "fl/math_macros.h"
 #include "fl/stl/type_traits.h"
 #include "fl/ui_impl.h"
-#include "fl/unused.h"  // IWYU pragma: keep
+#include "fl/stl/compiler_control.h"  // IWYU pragma: keep
 #include "platforms/ui_defs.h"
 #include "fl/sensors/button.h"  // IWYU pragma: keep
-#include "fl/virtual_if_not_avr.h"
 #include "fl/stl/int.h"  // IWYU pragma: keep
 
 #define FL_NO_COPY(CLASS)                                                      \

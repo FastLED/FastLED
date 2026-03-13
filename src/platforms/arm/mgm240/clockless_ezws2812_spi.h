@@ -14,7 +14,7 @@
 #include "controller.h"
 #include "pixel_controller.h"
 #include "eorder.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 
 // Check if we're on the right platform
 #include "platforms/arm/silabs/is_silabs.h"

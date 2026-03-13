@@ -3,12 +3,11 @@
 #ifndef __FASTPIN_ARM_MXRT1062_H
 #define __FASTPIN_ARM_MXRT1062_H
 
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 // Include fastpin_base.h for reg32_t and ptr_reg32_t typedefs
 // This reopens namespace fl but typedefs will still be in scope
 #include "fl/fastpin_base.h"
 #include "fl/pin.h"  // For PinMode enum and pinMode function
-#include "fl/stl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER

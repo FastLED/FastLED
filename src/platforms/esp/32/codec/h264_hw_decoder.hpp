@@ -9,7 +9,7 @@
 #include "fl/stl/memory.h"
 #include "fl/stl/vector.h"
 #include "fl/fx/frame.h"
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 
 // Check if the esp_h264 component is available.
 // Install via: idf.py add-dependency "espressif/esp_h264^1.2.0"

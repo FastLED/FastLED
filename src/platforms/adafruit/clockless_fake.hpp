@@ -8,7 +8,7 @@
 
 
 #include "platforms/adafruit/driver.h"
-#include "fl/unused.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/warn.h"
 
 namespace fl {

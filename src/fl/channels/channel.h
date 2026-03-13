@@ -17,7 +17,7 @@
 #include "fl/stl/weak_ptr.h"
 #include "fl/stl/stdint.h"
 #include "fl/channels/config.h"
-#include "fl/virtual_if_not_avr.h"
+#include "fl/stl/compiler_control.h"
 
 namespace fl {
 

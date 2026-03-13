@@ -7,7 +7,7 @@
 /// It does NOT include any threading implementation to avoid circular dependencies.
 /// Use this header when you only need to check if multithreading is enabled.
 
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 
 // Platform-specific FASTLED_MULTITHREADED detection
 // Each platform defines this based on its threading capabilities

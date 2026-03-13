@@ -4,7 +4,7 @@
 #define __INC_FASTSPI_AVR_H
 
 #include "fastspi_types.h"
-#include "fl/delay.h"
+#include "fl/system/delay.h"
 #include "fl/stl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH

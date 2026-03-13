@@ -8,12 +8,11 @@
 
 // IWYU pragma: private
 
-#include "fl/unused.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/register.h"
 
 // Include base class definitions (includes Selectable)
 #include "fl/fastpin_base.h"
-#include "fl/stl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER

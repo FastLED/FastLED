@@ -277,8 +277,7 @@
 #endif
 
 // FastLED: Use FL_ALWAYS_INLINE instead of platform-specific __forceinline
-#include "fl/force_inline.h"
-#include "fl/unused.h"
+#include "fl/stl/compiler_control.h"
 
 #if FL_STB_VORBIS_MAX_CHANNELS > 256
 #error "Value of FL_STB_VORBIS_MAX_CHANNELS outside of allowed range"

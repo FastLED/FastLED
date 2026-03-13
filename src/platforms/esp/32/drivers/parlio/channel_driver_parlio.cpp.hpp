@@ -20,7 +20,7 @@
 #include "platforms/esp/32/drivers/parlio/channel_driver_parlio.h"
 #include "fl/channels/config.h"
 #include "fl/chipsets/chipset_timing_config.h"
-#include "fl/delay.h"
+#include "fl/system/delay.h"
 #include "fl/warn.h"
 #include "fl/error.h"
 #include "fl/log.h"

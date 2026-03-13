@@ -5,7 +5,7 @@
 // IWYU pragma: private
 
 #include "fl/stl/stdint.h"
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 
 #include "fl/stl/stdint.h"
 #include "platforms/esp/esp_version.h"

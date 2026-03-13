@@ -5,7 +5,7 @@
 // All media files embedded as PROGMEM data
 
 #include <FastLED.h>
-#include "fl/sketch_macros.h"
+#include "fl/system/sketch_macros.h"
 #include "fl/ui.h"
 #include "fl/stl/string.h"
 

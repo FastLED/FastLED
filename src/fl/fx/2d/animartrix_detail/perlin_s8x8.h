@@ -7,7 +7,7 @@
 // Uses 8 fractional bits throughout. Trades accuracy for speed (4x faster multiplies vs i32).
 
 #include "fl/stl/fixed_point/s16x16.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 
 namespace fl {
 

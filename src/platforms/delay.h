@@ -10,7 +10,7 @@
 
 #include "platforms/cycle_type.h"
 #include "platforms/cpu_frequency.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/is_platform.h"
 
 // ============================================================================

@@ -5,7 +5,7 @@
 #define FASTLED_CLOCKLESS_STUB_DEFINED
 
 #include "eorder.h"
-#include "fl/unused.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/singleton.h"
 #include "fl/chipsets/timing_traits.h"

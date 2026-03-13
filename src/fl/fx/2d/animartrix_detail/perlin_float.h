@@ -10,7 +10,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/math.h"
 #include "fl/math_macros.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 
 namespace fl {
 

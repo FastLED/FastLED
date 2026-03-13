@@ -3,7 +3,7 @@
 /// @brief Tests for logging, debug, and warning macros (fl/log.h)
 
 #include "fl/log.h"
-#include "fl/sketch_macros.h"
+#include "fl/system/sketch_macros.h"
 #include "test.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/strstream.h"

@@ -14,7 +14,6 @@
 
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || defined(_M_IX86)
 
-#include "fl/force_inline.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/math.h"  // IWYU pragma: keep (sqrtf used in #else scalar fallback)
 

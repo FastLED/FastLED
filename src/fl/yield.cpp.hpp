@@ -1,8 +1,8 @@
 /// @file fl/yield.cpp.hpp
 /// @brief Implementation of fl::yield()
 
-#include "fl/yield.h"
-#include "fl/sketch_macros.h"
+#include "fl/system/yield.h"
+#include "fl/system/sketch_macros.h"
 #include "fl/stl/thread.h"
 
 #if SKETCH_HAS_LOTS_OF_MEMORY

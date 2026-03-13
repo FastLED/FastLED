@@ -4,7 +4,7 @@
 /// @brief STM32 FreeRTOS mutex platform implementation
 
 #include "platforms/arm/stm32/is_stm32.h"
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 
 #if defined(FL_IS_STM32)
 

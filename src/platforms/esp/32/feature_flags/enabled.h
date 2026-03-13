@@ -5,14 +5,13 @@
 
 #include "platforms/is_platform.h"
 #if defined(FL_IS_ESP32)
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 #include "sdkconfig.h"
 #include "platforms/esp/esp_version.h"
 
 // Include ESP-IDF SoC capability macros for hardware feature detection
 // Note: soc/soc_caps.h only exists in ESP-IDF 4.0+
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0)
-#include "fl/stl/compiler_control.h"
 FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep
 #include "soc/soc_caps.h"

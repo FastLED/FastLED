@@ -8,7 +8,7 @@
 #define FL_CLOCKLESS_SPI_CHANNEL_ENGINE_DEFINED 1
 
 #include "eorder.h"
-#include "fl/unused.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"

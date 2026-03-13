@@ -17,10 +17,8 @@
     defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32C6) || \
     defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32P4)
 
-#include "fl/force_inline.h"
-#include "fl/stl/compiler_control.h"
+#include "fl/stl/has_include.h"
 #include "fl/stl/align.h"
-#include "fl/has_include.h"
 #include "fl/stl/math.h"  // for sqrtf
 
 // RISC-V vector extensions (RVV) support detection

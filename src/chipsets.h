@@ -7,14 +7,13 @@
 
 #include "pixeltypes.h"
 #include "fl/gfx/five_bit_hd_gamma.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/unique_ptr.h"
 #include "pixel_iterator.h"
 #include "crgb.h"
 #include "eorder.h"
 #include "fl/math_macros.h"
-#include "fl/stl/compiler_control.h"
 #include "platforms/is_platform.h"
 
 // Include centralized LED chipset timing definitions

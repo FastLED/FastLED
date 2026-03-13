@@ -11,7 +11,7 @@
 /// pthread availability. Routes to either STL-based threading (when pthread
 /// is available) or a fake no-op implementation (for single-threaded platforms).
 
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 
 // Detect pthread availability for multithreading support
 

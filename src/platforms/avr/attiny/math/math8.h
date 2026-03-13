@@ -6,7 +6,6 @@
 #include "lib8tion/lib8static.h"
 #include "lib8tion/intmap.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/force_inline.h"
 
 // Include ATtiny-specific MUL-dependent functions (mul8, qmul8, blend8)
 #include "platforms/avr/attiny/math/math8_attiny.h"

@@ -15,7 +15,7 @@
 #if defined(FL_IS_ESP32)
 
 // Include ESP-IDF headers first to detect what's already defined
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 #if FL_HAS_INCLUDE(<soc/soc_caps.h>)
   // IWYU pragma: begin_keep
   #include <soc/soc_caps.h>

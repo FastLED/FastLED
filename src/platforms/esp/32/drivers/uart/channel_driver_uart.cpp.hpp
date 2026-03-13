@@ -9,7 +9,7 @@
 
 #include "platforms/esp/32/drivers/uart/channel_driver_uart.h"
 #include "fl/chipsets/chipset_timing_config.h"
-#include "fl/delay.h"
+#include "fl/system/delay.h"
 #include "fl/error.h"
 #include "fl/stl/async.h"
 #include "fl/log.h"

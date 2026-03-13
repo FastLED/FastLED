@@ -5,7 +5,7 @@
 #define __INC_FASTLED_PLATFORMS_DELAYCYCLES_GENERIC_H
 
 #include "platforms/cycle_type.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 
 /// @file platforms/delaycycles_generic.h
 /// Generic fallback cycle-accurate delay utilities for delay_cycles functions

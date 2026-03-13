@@ -15,13 +15,12 @@
 
 #include "rgbw.h"
 #include "fl/gfx/five_bit_hd_gamma.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 #include "lib8tion/scale8.h"
 #include "eorder.h"
 #include "dither_mode.h"
 #include "pixel_iterator.h"
 #include "crgb.h"
-#include "fl/stl/compiler_control.h"
 #include "fl/stl/variant.h"  // for PixelControllerAny.
 
 FL_DISABLE_WARNING_PUSH

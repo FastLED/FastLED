@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/lut.h"
 #include "fl/stl/int.h"
 

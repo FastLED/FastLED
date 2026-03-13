@@ -8,7 +8,7 @@
 
 #if FASTLED_ENABLE_JSON
 
-#include "fl/delay.h"
+#include "fl/system/delay.h"
 #include "fl/stl/int.h"
 #include "fl/stl/cctype.h"
 #include "fl/stl/chrono.h"

@@ -7,7 +7,7 @@
 #define __INC_FASTLED_PLATFORMS_ESP32_DELAYCYCLES_H
 
 #include "platforms/cycle_type.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 
 /// @file platforms/esp/32/delaycycles.h
 /// ESP32 (Xtensa) platform-specific cycle-accurate delay utilities

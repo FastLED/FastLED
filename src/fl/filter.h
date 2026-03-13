@@ -131,7 +131,7 @@
 //   LeakyIntegrator<int, K> — one right-shift and one add. No division,
 //     no multiplication, no buffer. K=2 (alpha=1/4) or K=3 (alpha=1/8).
 
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/span.h"
 
 // Detail impl headers — IIR

@@ -28,7 +28,7 @@
 #include "platforms/esp/32/drivers/rmt/rmt_5/channel_driver_rmt.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/dbg.h"
-#include "fl/delay.h"
+#include "fl/system/delay.h"
 #include "fl/stl/async.h"
 #include "fl/error.h"
 #include "fl/log.h"
@@ -42,7 +42,6 @@
 #include "fl/stl/chrono.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/trace.h"
-#include "fl/stl/compiler_control.h"
 #include "platforms/memory_barrier.h" // For FL_MEMORY_BARRIER
 
 // Peripheral interface includes

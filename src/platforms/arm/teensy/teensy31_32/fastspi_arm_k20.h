@@ -4,7 +4,7 @@
 #define __INC_FASTSPI_ARM_H
 
 #include "fastspi_types.h"
-#include "fl/delay.h"
+#include "fl/system/delay.h"
 #include "platforms/arm/teensy/is_teensy.h"
 #include "fl/stl/compiler_control.h"
 

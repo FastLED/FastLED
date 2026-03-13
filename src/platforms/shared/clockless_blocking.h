@@ -17,7 +17,7 @@
 /// - Full interrupt support (can block entire MCU)
 
 #include "fl/fastpin.h"
-#include "fl/delay.h"
+#include "fl/system/delay.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/chipsets/timing_traits.h"

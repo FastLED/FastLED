@@ -8,7 +8,7 @@
 #include "platforms/arm/rp/is_rp.h"
 
 #ifdef FL_IS_RP2040
-#include "fl/arduino.h"
+#include "fl/system/arduino.h"
 
 /// RP2040: Pico SDK provides busy_wait_at_least_cycles as a static inline in pico/platform.h
 /// This function wraps it for use in delay operations

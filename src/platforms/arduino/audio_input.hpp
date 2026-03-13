@@ -8,8 +8,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/span.h"
 #include "fl/stl/shared_ptr.h"
-#include "fl/has_include.h"
-#include "fl/unused.h"
+#include "fl/stl/has_include.h"
 
 #if !FL_HAS_INCLUDE(<Arduino.h>)
   #error "This implementation requires Arduino.h - compile with Arduino framework"
@@ -17,7 +16,7 @@
 
 
 // IWYU pragma: begin_keep
-#include "fl/arduino.h"
+#include "fl/system/arduino.h"
 // IWYU pragma: end_keep
 #include "platforms/is_platform.h"
 

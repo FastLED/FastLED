@@ -24,7 +24,7 @@
 #include "fl/stl/int.h"
 #include "fl/stl/singleton.h"
 #include "fl/warn.h"
-#include "fl/arduino.h"
+#include "fl/system/arduino.h"
 // IWYU pragma: end_keep
 
 // IWYU pragma: begin_keep

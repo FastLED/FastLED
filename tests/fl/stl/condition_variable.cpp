@@ -2,7 +2,7 @@
 /// @brief Tests for fl::condition_variable wrapper
 
 #include "fl/stl/condition_variable.h"
-#include "fl/delay.h"
+#include "fl/system/delay.h"
 #include "fl/stl/mutex.h"
 #include "fl/stl/atomic.h"
 #include "test.h"

@@ -6,7 +6,7 @@
 #include "fl/warn.h"
 #include "fl/gfx/tile2x2.h"
 #include "fl/math_macros.h"
-#include "fl/unused.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/math.h"
 #include "fl/leds.h"
 #include "fl/grid.h"

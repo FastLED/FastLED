@@ -21,7 +21,7 @@
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/singleton.h"
 #include "fl/warn.h"
-#include "fl/arduino.h"
+#include "fl/system/arduino.h"
 // IWYU pragma: end_keep
 
 FL_EXTERN_C_BEGIN

@@ -4,7 +4,7 @@
 // IWYU pragma: private
 
 #include "platforms/cycle_type.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 
 /// @file platforms/arm/stm32/delaycycles.h
 /// ARM Cortex-M3/M4 (STM32) platform-specific cycle-accurate delay utilities

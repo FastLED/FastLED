@@ -6,11 +6,9 @@
 #ifndef __INC_FASTSPI_TYPES_H
 #define __INC_FASTSPI_TYPES_H
 
-#include "fl/force_inline.h"
-#include "fl/unused.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/register.h"
 #include "fl/stl/stdint.h"
-#include "fl/stl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER

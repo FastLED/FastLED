@@ -3,7 +3,7 @@
 #ifndef __INC_FASTPIN_ARM_RENESAS_H
 #define __INC_FASTPIN_ARM_RENESAS_H
 
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 // Include fastpin_base.h for template definitions
 // This reopens namespace fl but template will still be in scope
 #include "fl/fastpin_base.h"
@@ -11,7 +11,6 @@
 #if !defined(FASTLED_FORCE_SOFTWARE_PINS)
 #include "bsp_api.h"
 #include "fl/pin.h"  // For PinMode, PinValue enums
-#include "fl/stl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER

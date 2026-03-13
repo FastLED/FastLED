@@ -2,7 +2,7 @@
 
 ## Problem
 
-Files that use the `FL_HAS_INCLUDE()` macro need to include `"fl/has_include.h"`, otherwise the macro evaluates to 0 (undefined), causing incorrect behavior.
+Files that use the `FL_HAS_INCLUDE()` macro need to include `"fl/stl/has_include.h"`, otherwise the macro evaluates to 0 (undefined), causing incorrect behavior.
 
 **Example Bug:** `tests/crash_handler.h` was using `FL_HAS_INCLUDE(<execinfo.h>)` without the include, causing it to select the wrong crash handler implementation and resulting in test failures.
 
@@ -12,7 +12,7 @@ Two scripts have been created to prevent this issue:
 
 ### 1. `ci/fix_has_include.py` - Auto-Fixer (Manual Tool)
 
-**Purpose:** Find and fix files missing the `fl/has_include.h` include.
+**Purpose:** Find and fix files missing the `fl/stl/has_include.h` include.
 
 **Usage:**
 ```bash
@@ -29,7 +29,7 @@ uv run python ci/fix_has_include.py --help
 **Options:**
 - `--fix` - Automatically add missing includes (default: dry-run)
 - `--macro NAME` - Search for different macro (default: FL_HAS_INCLUDE)
-- `--include PATH` - Check for different include (default: fl/has_include.h)
+- `--include PATH` - Check for different include (default: fl/stl/has_include.h)
 
 **Features:**
 - Scans all C++ files (`.h`, `.hpp`, `.cpp`, `.ino`)
@@ -61,11 +61,11 @@ uv run python ci/lint_cpp/has_include_checker.py
    - Search for pattern `FL_HAS_INCLUDE\s*\(`
    - Exclude `#define FL_HAS_INCLUDE` lines (macro definition)
    - Exclude files in `.git`, `.build`, `.venv`, etc.
-   - Exclude `src/fl/has_include.h` itself (defines the macro)
+   - Exclude `src/fl/stl/has_include.h` itself (defines the macro)
 
 2. **Check for include:**
-   - Search for `#include "fl/has_include.h"` or `#include <fl/has_include.h>`
-   - Pattern: `^\s*#\s*include\s+[<"].*fl/has_include.h[">]`
+   - Search for `#include "fl/stl/has_include.h"` or `#include <fl/stl/compiler_control.h>`
+   - Pattern: `^\s*#\s*include\s+[<"].*fl/stl/has_include.h[">]`
 
 3. **Report difference:**
    - Files using macro but missing include = **FILES TO FIX**
@@ -79,14 +79,14 @@ When adding the include, the script uses this priority order:
    #ifndef MYHEADER_H
    #define MYHEADER_H
 
-   #include "fl/has_include.h"  // IWYU pragma: keep  <-- INSERTED HERE
+   #include "fl/stl/has_include.h"  // IWYU pragma: keep  <-- INSERTED HERE
    ```
 
 2. **Before first #include**
    ```cpp
    #pragma once
 
-   #include "fl/has_include.h"  // IWYU pragma: keep  <-- INSERTED HERE
+   #include "fl/stl/has_include.h"  // IWYU pragma: keep  <-- INSERTED HERE
    #include "other_header.h"
    ```
 
@@ -100,7 +100,7 @@ When adding the include, the script uses this priority order:
 
 **Current Status (2026-02-14):**
 - **48 files** use `FL_HAS_INCLUDE`
-- **48 files** include `fl/has_include.h` ✅
+- **48 files** include `fl/stl/has_include.h` ✅
 - **0 files** missing the include ✅
 
 **Files Fixed:**
@@ -113,7 +113,7 @@ When adding the include, the script uses this priority order:
 The script adds `// IWYU pragma: keep` to prevent Include-What-You-Use from removing the include:
 
 ```cpp
-#include "fl/has_include.h"  // IWYU pragma: keep
+#include "fl/stl/has_include.h"  // IWYU pragma: keep
 ```
 
 This is necessary because IWYU doesn't understand that preprocessor macros need their defining headers.
@@ -127,7 +127,7 @@ This is necessary because IWYU doesn't understand that preprocessor macros need 
 
 ## Related Files
 
-- `src/fl/has_include.h` - Defines `FL_HAS_INCLUDE` macro
+- `src/fl/stl/has_include.h` - Defines `FL_HAS_INCLUDE` macro
 - `ci/lint_cpp/banned_macros_checker.py` - Bans raw `__has_include` usage
 - `ci/lint_cpp/attribute_checker.py` - Similar pattern checker for attributes
 

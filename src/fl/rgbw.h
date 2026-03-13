@@ -6,7 +6,7 @@
 #include "fl/stl/stdint.h"
 
 #include "eorder.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 
 namespace fl {
 

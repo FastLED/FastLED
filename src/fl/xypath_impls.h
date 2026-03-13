@@ -15,7 +15,7 @@
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/gfx/tile2x2.h"  // IWYU pragma: keep
 #include "fl/gfx/transform.h"
-#include "fl/unused.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/vector.h"
 #include "fl/warn.h"  // IWYU pragma: keep
 

@@ -9,7 +9,7 @@
 #include "platforms/new.h"
 
 // IWYU pragma: begin_keep
-#include "fl/arduino.h"  // Trampoline that includes Arduino.h + cleans up macros
+#include "fl/system/arduino.h"  // Trampoline that includes Arduino.h + cleans up macros
 // IWYU pragma: end_keep
 
 // Root directory implementations

@@ -17,7 +17,7 @@
 #include "fl/stl/new.h"  // IWYU pragma: keep
 #include "fl/stl/move.h"
 #include "fl/stl/align.h"
-#include "fl/unused.h"
+#include "fl/stl/compiler_control.h"
 
 namespace fl {
 

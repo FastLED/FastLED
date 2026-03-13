@@ -1,7 +1,7 @@
 /// @file delay.cpp
-/// Unit tests for fl/delay.h: nanosecond delays, runtime delays, and async pumping
+/// Unit tests for fl/system/delay.h: nanosecond delays, runtime delays, and async pumping
 
-#include "fl/delay.h"
+#include "fl/system/delay.h"
 #include "fl/stl/async.h"
 #include "test.h"
 

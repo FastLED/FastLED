@@ -25,7 +25,7 @@
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
 
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
@@ -35,7 +35,7 @@
 #include "platforms/esp/32/drivers/spi/wave8_encoder_spi.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/dbg.h"
-#include "fl/delay.h"
+#include "fl/system/delay.h"
 #include "fl/pin.h"
 #include "fl/math_macros.h"
 #include "fl/stl/async.h"
@@ -43,7 +43,6 @@
 #include "fl/stl/chrono.h"
 #include "platforms/esp/32/drivers/spi/spi_hw_base.h" // SPI host definitions (SPI2_HOST, SPI3_HOST)
 #include "platforms/esp/is_esp.h" // Platform detection (FL_IS_ESP_32C6, etc.)
-#include "fl/stl/compiler_control.h" // FL_MEMORY_BARRIER for cache coherence
 
 FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep

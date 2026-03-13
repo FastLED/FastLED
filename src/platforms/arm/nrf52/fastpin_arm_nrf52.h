@@ -3,7 +3,7 @@
 #ifndef __FASTPIN_ARM_NRF52_H
 #define __FASTPIN_ARM_NRF52_H
 
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 // Include fastpin_base.h to get FastPin base template
 // This reopens namespace fl but typedefs will still be in scope
 #include "fl/fastpin_base.h"
@@ -169,7 +169,6 @@ public:
 
 // Include variant-specific pin definitions
 #include "platforms/arm/nrf52/fastpin_arm_nrf52_variants.h" // allow-include-after-namespace
-#include "fl/stl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER

@@ -13,9 +13,7 @@
 
 #if defined(__XTENSA__)
 
-#include "fl/force_inline.h"
-#include "fl/stl/compiler_control.h"
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 #include "fl/stl/math.h"  // for sqrtf
 
 // Xtensa PIE intrinsics (available on ESP32, ESP32-S2, ESP32-S3)

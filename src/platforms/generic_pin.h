@@ -10,9 +10,8 @@
 // Include base class definitions (includes Selectable and register.h)
 // Note: This must be included before using Selectable as a base class
 #include "fl/fastpin_base.h"
-#include "fl/unused.h"
-#include "fl/pin.h"  // For PinMode, PinValue enums and pinMode/digitalWrite/digitalRead functions
 #include "fl/stl/compiler_control.h"
+#include "fl/pin.h"  // For PinMode, PinValue enums and pinMode/digitalWrite/digitalRead functions
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER

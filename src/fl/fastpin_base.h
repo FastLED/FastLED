@@ -8,7 +8,6 @@
 
 #include "platforms/is_platform.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/unused.h"
 #include "fl/register.h"
 
 FL_DISABLE_WARNING_PUSH

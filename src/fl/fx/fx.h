@@ -7,7 +7,7 @@
 #include "fl/fx/detail/transition.h"  // IWYU pragma: keep
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/stl/string.h"  // IWYU pragma: keep
-#include "fl/unused.h"
+#include "fl/stl/compiler_control.h"
 
 namespace fl {
 

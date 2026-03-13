@@ -5,7 +5,7 @@
 
 #include "fl/simd.h"
 #include "fl/stl/fixed_point/s0x32.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 
 namespace fl {
 

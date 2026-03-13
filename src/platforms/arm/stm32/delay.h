@@ -3,7 +3,7 @@
 // IWYU pragma: private
 
 #include "platforms/cycle_type.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/arm/stm32/core_detection.h"
 #include "platforms/cpu_frequency.h"
 

@@ -90,7 +90,7 @@ BANNED_HEADERS_PLATFORMS = BANNED_HEADERS_COMMON
 # Suggestions for which fl/ alternative to use for each banned header
 
 HEADER_RECOMMENDATIONS = {
-    "Arduino.h": "fl/arduino.h (trampoline that includes Arduino.h + cleans up macros)",
+    "Arduino.h": "fl/system/arduino.h (trampoline that includes Arduino.h + cleans up macros)",
     "pthread.h": "fl/stl/thread.h or fl/stl/mutex.h (depending on what you need)",
     "assert.h": "FL_CHECK or FL_ASSERT macros (check fl/stl/compiler_control.h)",
     "iostream": "fl/stl/iostream.h or fl/str.h",
@@ -210,7 +210,7 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
     ],
     # Sole gateway to Arduino.h - includes Arduino.h + cleans up macros atomically
     "Arduino.h": [
-        HeaderException("fl/arduino.h", "Sole gateway trampoline for Arduino.h"),
+        HeaderException("fl/system/arduino.h", "Sole gateway trampoline for Arduino.h"),
         # Third-party exemptions (cannot modify):
         HeaderException(
             "third_party/ezws2812/ezWS2812.h", "Third-party SPI driver library"

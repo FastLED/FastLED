@@ -31,7 +31,7 @@
 
 // IWYU pragma: private
 #include "platforms/arm/nrf52/is_nrf52.h"
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 
 #if defined(FL_IS_NRF52)
 
@@ -44,7 +44,6 @@
 #ifdef FASTLED_NRF52_HAS_FREERTOS
 
 #include "fl/stl/assert.h"
-#include "fl/stl/compiler_control.h"
 
 // Include FreeRTOS headers
 FL_EXTERN_C_BEGIN

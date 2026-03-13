@@ -8,7 +8,6 @@
 
 #include "fl/channels/wave3.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/force_inline.h"
 #include "fl/stl/isr/memcpy.h"
 
 namespace fl {

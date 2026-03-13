@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Linter to ensure all files using FL_HAS_INCLUDE include fl/has_include.h
+Linter to ensure all files using FL_HAS_INCLUDE include fl/stl/has_include.h
 
 This prevents compilation errors when FL_HAS_INCLUDE is used without the proper header.
 """
@@ -15,14 +15,14 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent.resolve()
 
 
 def main() -> int:
-    """Check that all files using FL_HAS_INCLUDE include fl/has_include.h."""
+    """Check that all files using FL_HAS_INCLUDE include fl/stl/has_include.h."""
 
     # Find files using the macro
     files_with_macro = find_files_using_macro("FL_HAS_INCLUDE")
 
     # Check which files have the include
     files_missing_include = {
-        f for f in files_with_macro if not check_has_include(f, "fl/has_include.h")
+        f for f in files_with_macro if not check_has_include(f, "fl/stl/has_include.h")
     }
 
     if not files_missing_include:
@@ -30,7 +30,7 @@ def main() -> int:
 
     # Report errors
     print(
-        f"❌ {len(files_missing_include)} files use FL_HAS_INCLUDE without including fl/has_include.h:\n",
+        f"❌ {len(files_missing_include)} files use FL_HAS_INCLUDE without including fl/stl/has_include.h:\n",
         file=sys.stderr,
     )
 

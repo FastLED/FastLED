@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/gfx/five_bit_hd_gamma.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 #include "crgb.h"
 #include "eorder.h"
 #include "cpixel_ledcontroller.h"

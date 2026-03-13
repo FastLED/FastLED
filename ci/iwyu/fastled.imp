@@ -59,7 +59,7 @@
   { include: ['"fl/vector.h"', 'public', '"fl/vector.h"', 'public'] },
   { include: ['"fl/allocator.h"', 'public', '"fl/allocator.h"', 'public'] },
   { include: ['"fl/math.h"', 'public', '"fl/math.h"', 'public'] },
-  { include: ['"fl/force_inline.h"', 'public', '"fl/force_inline.h"', 'public'] },
+  { include: ['"fl/stl/compiler_control.h"', 'public', '"fl/stl/compiler_control.h"', 'public'] },
   
   # FX headers - effects system
   { include: ['"fl/fx/fx.h"', 'public', '"fl/fx/fx.h"', 'public'] },
@@ -130,9 +130,9 @@
   # doesn't suggest them, but allows them when behind #ifdef guards.
 
   # Arduino Core Headers
-  # Arduino.h is now accessed through fl/arduino.h trampoline (includes Arduino.h + cleans up macros)
-  # IWYU will suggest fl/arduino.h instead of <Arduino.h>
-  { include: ['<Arduino.h>', 'private', '"fl/arduino.h"', 'public'] },
+  # Arduino.h is now accessed through fl/system/arduino.h trampoline (includes Arduino.h + cleans up macros)
+  # IWYU will suggest fl/system/arduino.h instead of <Arduino.h>
+  { include: ['<Arduino.h>', 'private', '"fl/system/arduino.h"', 'public'] },
 
   # AVR Platform Headers
   # These don't exist on stub - map to FastLED's progmem abstraction
@@ -216,7 +216,7 @@
   # IWYU resolves platform #ifdef chains and reports the final resolved path.
   # These don't exist as literal #include lines in our source.
   { include: ['"platforms/arm/is_arm.h"', 'private', '"fl/stl/int.h"', 'public'] },
-  { include: ['"platforms/delay.h"', 'private', '"fl/delay.h"', 'public'] },
+  { include: ['"platforms/delay.h"', 'private', '"fl/system/delay.h"', 'public'] },
   { include: ['"platforms/trig8.h"', 'private', '"fl/trig8.h"', 'public'] },
   { include: ['"platforms/fastpin.h"', 'private', '"fl/fastpin.h"', 'public'] },
   { include: ['"platforms/is_platform.h"', 'private', '"fl/stl/int.h"', 'public'] },

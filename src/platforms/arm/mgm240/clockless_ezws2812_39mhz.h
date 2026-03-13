@@ -12,7 +12,7 @@
 #include "controller.h"
 #include "pixel_controller.h"
 #include "eorder.h"
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/fastpin.h"
 
 // Check if we're on the right platform

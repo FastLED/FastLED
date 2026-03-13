@@ -3,7 +3,7 @@
 #ifndef __FASTPIN_ARM_GIGA_H
 #define __FASTPIN_ARM_GIGA_H
 
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/arm/giga/armpin.h"
 namespace fl {
 #if defined(ARDUINO_GIGA) || defined(ARDUINO_GIGA_M7) || defined(STM32H7)

@@ -31,7 +31,7 @@
 ///   fl::LineCap::ROUND  — hemispherical caps at each end
 ///   fl::LineCap::SQUARE — rectangular extension by half-thickness
 
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/gfx/crgb.h"
 #include "fl/gfx/draw_mode.h"
 

@@ -8,7 +8,7 @@
 #include "color.h"
 #include "eorder.h"
 
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/int.h"
 #include "pixel_controller.h"
 #include "cled_controller.h"

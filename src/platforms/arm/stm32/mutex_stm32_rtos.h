@@ -26,7 +26,7 @@
 /// - FreeRTOS or compatible RTOS configured via STM32CubeMX
 /// - ARM Cortex-M3/M4/M7 or newer (for DMB memory barrier support)
 
-#include "fl/has_include.h"
+#include "fl/stl/has_include.h"
 #include "fl/stl/assert.h"
 
 // ============================================================================

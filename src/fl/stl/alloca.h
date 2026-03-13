@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/has_include.h"  // IWYU pragma: keep
+#include "fl/stl/has_include.h"  // IWYU pragma: keep
 
 // Conditional stack array support includes - must be before namespace
 #ifndef FASTLED_VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION

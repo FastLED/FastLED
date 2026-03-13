@@ -43,8 +43,10 @@ class BannedMacrosChecker(FileContentChecker):
         if not file_path.endswith((".cpp", ".h", ".hpp", ".ino", ".cpp.hpp")):
             return False
 
-        # Skip the file that defines FL_HAS_INCLUDE
-        if file_path.endswith("has_include.h"):
+        # Skip files that define FL_HAS_INCLUDE
+        if file_path.endswith("has_include.h") or file_path.endswith(
+            "compiler_control.h"
+        ):
             return False
 
         # Skip third-party libraries (they define their own macros)
@@ -108,7 +110,7 @@ class BannedMacrosChecker(FileContentChecker):
                         f"Use FL_HAS_INCLUDE instead of __has_include: {stripped}\n"
                         f"      Rationale: __has_include is not universally supported. "
                         f"FL_HAS_INCLUDE provides a portable wrapper with fallback for older compilers.\n"
-                        f"      Include 'fl/has_include.h' and replace __has_include(...) with FL_HAS_INCLUDE(...)",
+                        f"      Include 'fl/stl/has_include.h' and replace __has_include(...) with FL_HAS_INCLUDE(...)",
                     )
                 )
 

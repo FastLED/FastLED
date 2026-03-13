@@ -25,7 +25,7 @@
 /// fl::recursive_mutex in fl/stl/mutex.h bind to fl::platforms::mutex and
 /// fl::platforms::recursive_mutex.
 
-#include "fl/has_include.h"  // IWYU pragma: keep
+#include "fl/stl/has_include.h"  // IWYU pragma: keep
 #include "fl/stl/thread_config.h"  // IWYU pragma: keep
 #include "platforms/is_platform.h"  // IWYU pragma: keep
 

@@ -4,8 +4,8 @@
 #define __INC_FASTLED_DELAY_H
 
 #include "platforms/cycle_type.h"
-#include "fl/force_inline.h"
-#include "fl/delay.h"
+#include "fl/stl/compiler_control.h"
+#include "fl/system/delay.h"
 #include "platforms/cpu_frequency.h"
 
 // Note: micros() is used in inline templates below but not declared here.
@@ -14,7 +14,7 @@
 
 /// @file fastled_delay.h
 /// Utility functions and classes for managing delay cycles
-/// @deprecated Use fl/delay.h for new code
+/// @deprecated Use fl/system/delay.h for new code
 
 
 
@@ -61,11 +61,11 @@ public:
 /// @name Clock cycle counted delay loop (DEPRECATED - use fl:: namespace)
 ///
 /// @{
-/// @deprecated Use fl::delaycycles() from fl/delay.h instead
+/// @deprecated Use fl::delaycycles() from fl/system/delay.h instead
 ///
-/// For backwards compatibility, delaycycles is available through fl/delay.h
+/// For backwards compatibility, delaycycles is available through fl/system/delay.h
 /// which is included at the top of this file. New code should use
-/// fl::delaycycles<CYCLES>() from fl/delay.h.
+/// fl::delaycycles<CYCLES>() from fl/system/delay.h.
 ///
 /// Note: The using declarations below are commented out to avoid conflicts
 /// with the generic delaycycles template implementation that gets included

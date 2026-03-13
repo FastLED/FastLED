@@ -8,13 +8,12 @@
 // IWYU pragma: begin_keep
 #include <avr/interrupt.h> // for cli/se definitions
 // IWYU pragma: end_keep
-#include "fl/force_inline.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fastled_delay.h"
 #include "platforms/shared/clockless_blocking.h"
 #include "platforms/is_platform.h"
-#include "fl/stl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER

@@ -5,7 +5,7 @@
 #include "platforms/shared/ui/json/ui_internal.h"
 
 #include "fl/stl/json.h"
-#include "fl/unused.h"
+#include "fl/stl/compiler_control.h"
 
 #if FASTLED_ENABLE_JSON
 

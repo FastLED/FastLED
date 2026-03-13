@@ -15,7 +15,7 @@
 #include "fl/audio/fft/fft.h"
 #include "fl/audio/fft/fft_impl.h"
 #include "fl/stl/string.h"
-#include "fl/unused.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/vector.h"
 #include "fl/warn.h"
 
