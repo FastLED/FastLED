@@ -127,8 +127,19 @@ FL_TEST_CASE("tcp::socket - Loopback connect and I/O") {
         if (ec.code == errc::would_block) {
             continue;
         }
+        if (!ec.ok()) {
+            FL_WARN("read_some failed: errc=" << static_cast<int>(ec.code)
+                    << " msg=" << ec.message
+                    << " n=" << n
+                    << " attempt=" << attempt
+                    << " total_read=" << total_read);
+        }
         FL_CHECK(ec.ok());
         total_read += n;
+    }
+    if (total_read != 5) {
+        FL_WARN("Loopback read incomplete: total_read=" << total_read
+                << " (expected 5)");
     }
     FL_CHECK_EQ(total_read, 5u);
     FL_CHECK_EQ(buf[0], 'h');

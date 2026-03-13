@@ -339,12 +339,37 @@ template<typename A, typename B>
 inline bool check_ne(const A& a, const B& b) { return detail::SafeCompare<A, B>::ne(a, b); }
 inline bool check_ne(const char* a, const char* b) { return ::fl::strcmp(a, b) != 0; }
 
-#define FL_CHECK_EQ(a, b) FL_CHECK(fl::test::check_eq((a), (b)))
-#define FL_CHECK_NE(a, b) FL_CHECK(fl::test::check_ne((a), (b)))
-#define FL_CHECK_LT(a, b) FL_CHECK((bool)((a) < (b)))
-#define FL_CHECK_LE(a, b) FL_CHECK((bool)((a) <= (b)))
-#define FL_CHECK_GT(a, b) FL_CHECK((bool)((a) > (b)))
-#define FL_CHECK_GE(a, b) FL_CHECK((bool)((a) >= (b)))
+// SFINAE helper: stringify a value via sstream if possible, else "<?>".
+namespace detail {
+template<typename T>
+auto stringify(const T& v, int) -> decltype(fl::declval<fl::sstream&>() << v, fl::string()) {
+    fl::sstream ss; ss << v; return ss.str();
+}
+template<typename T>
+fl::string stringify(const T&, ...) { return "<?>"; }
+} // namespace detail
+
+// Binary comparison macro helper — records actual values on failure.
+// On success only the pass count is incremented (no string formatting).
+#define _FL_CHECK_CMP(a, op, b, cmp_expr, is_require) do { \
+    auto _fl_a = (a); \
+    auto _fl_b = (b); \
+    fl::test::AssertionResult _fl_res; \
+    _fl_res.passed = (cmp_expr); \
+    if (!_fl_res.passed) { \
+        _fl_res.lhs_str = fl::test::detail::stringify(_fl_a, 0); \
+        _fl_res.op_str = #op; \
+        _fl_res.rhs_str = fl::test::detail::stringify(_fl_b, 0); \
+    } \
+    fl::test::record_assertion(_fl_res, #a " " #op " " #b, __FILE__, __LINE__, is_require); \
+} while(0)
+
+#define FL_CHECK_EQ(a, b) _FL_CHECK_CMP(a, ==, b, fl::test::check_eq(_fl_a, _fl_b), false)
+#define FL_CHECK_NE(a, b) _FL_CHECK_CMP(a, !=, b, fl::test::check_ne(_fl_a, _fl_b), false)
+#define FL_CHECK_LT(a, b) _FL_CHECK_CMP(a, <, b, (_fl_a < _fl_b), false)
+#define FL_CHECK_LE(a, b) _FL_CHECK_CMP(a, <=, b, (_fl_a <= _fl_b), false)
+#define FL_CHECK_GT(a, b) _FL_CHECK_CMP(a, >, b, (_fl_a > _fl_b), false)
+#define FL_CHECK_GE(a, b) _FL_CHECK_CMP(a, >=, b, (_fl_a >= _fl_b), false)
 
 #define FL_REQUIRE(expr) do { \
     fl::test::AssertionResult _res = (fl::test::ExprDecomposer{} << (expr)); \
@@ -356,12 +381,12 @@ inline bool check_ne(const char* a, const char* b) { return ::fl::strcmp(a, b) !
 #define FL_REQUIRE_FALSE(expr) FL_REQUIRE(!(expr))
 #define FL_REQUIRE_TRUE(expr) FL_REQUIRE(expr)
 
-#define FL_REQUIRE_EQ(a, b) FL_REQUIRE((a) == (b))
-#define FL_REQUIRE_NE(a, b) FL_REQUIRE((a) != (b))
-#define FL_REQUIRE_LT(a, b) FL_REQUIRE((a) < (b))
-#define FL_REQUIRE_LE(a, b) FL_REQUIRE((a) <= (b))
-#define FL_REQUIRE_GT(a, b) FL_REQUIRE((a) > (b))
-#define FL_REQUIRE_GE(a, b) FL_REQUIRE((a) >= (b))
+#define FL_REQUIRE_EQ(a, b) _FL_CHECK_CMP(a, ==, b, fl::test::check_eq(_fl_a, _fl_b), true)
+#define FL_REQUIRE_NE(a, b) _FL_CHECK_CMP(a, !=, b, fl::test::check_ne(_fl_a, _fl_b), true)
+#define FL_REQUIRE_LT(a, b) _FL_CHECK_CMP(a, <, b, (_fl_a < _fl_b), true)
+#define FL_REQUIRE_LE(a, b) _FL_CHECK_CMP(a, <=, b, (_fl_a <= _fl_b), true)
+#define FL_REQUIRE_GT(a, b) _FL_CHECK_CMP(a, >, b, (_fl_a > _fl_b), true)
+#define FL_REQUIRE_GE(a, b) _FL_CHECK_CMP(a, >=, b, (_fl_a >= _fl_b), true)
 
 // Other macros (compatibility with doctest)
 #define FL_CHECK_UNARY(expr) FL_CHECK(expr)
