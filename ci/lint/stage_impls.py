@@ -482,6 +482,26 @@ def run_ruff() -> bool:
     if result.returncode != 0:
         return False
 
+    print("Running dict type annotation checks")
+
+    # Run dict type checker
+    result = subprocess.run(
+        [
+            "uv",
+            "run",
+            "python",
+            "ci/lint_python/dict_type_checker.py",
+            "test.py",
+            "ci",
+            "--exclude",
+            "ci/tmp",
+            ".pio",
+        ],
+        capture_output=False,
+    )
+    if result.returncode != 0:
+        return False
+
     print("✅ ruff passed")
     return True
 
@@ -746,6 +766,21 @@ def run_python_lint_single_file(file_path: str, strict: bool = False) -> bool:
     )
     if result.returncode != 0:
         print("  ❌ KeyboardInterrupt handler check failed")
+        return False
+
+    # Run dict type annotation checker
+    result = subprocess.run(
+        [
+            "uv",
+            "run",
+            "python",
+            "ci/lint_python/dict_type_checker.py",
+            file_path,
+        ],
+        capture_output=False,
+    )
+    if result.returncode != 0:
+        print("  ❌ Dict type annotation check failed")
         return False
 
     # Run pyright strict type checking (optional)

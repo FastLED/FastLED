@@ -17,7 +17,7 @@ import hashlib
 import json
 import os
 import time
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Optional, cast
 
@@ -29,7 +29,7 @@ from ci.util.file_lock_rw import FileLock
 # ==============================================================================
 
 
-@dataclass
+@dataclass(slots=True)
 class CacheEntry:
     """Cache entry storing file modification time and content hash."""
 
@@ -37,7 +37,7 @@ class CacheEntry:
     md5_hash: str
 
 
-@dataclass
+@dataclass(slots=True)
 class FingerprintCacheConfig:
     """Configuration for fingerprint cache behavior."""
 
@@ -295,6 +295,15 @@ class FingerprintCache:
             self.cache_file.unlink()
 
 
+@dataclass(slots=True)
+class PendingFingerprint:
+    """Pre-computed fingerprint data stored before processing starts."""
+
+    timestamp: float
+    file_count: int
+    files: dict[str, dict[str, float | str]]
+
+
 # ==============================================================================
 # TwoLayerFingerprintCache (from ci/util/two_layer_fingerprint_cache.py)
 # ==============================================================================
@@ -332,9 +341,7 @@ class TwoLayerFingerprintCache:
         self.lock_file = self.fingerprint_dir / f"{subpath}.lock"
 
         # Pending fingerprint data (stored before linting starts)
-        self._pending_fingerprint: (
-            dict[str, float | int | dict[str, dict[str, float | str]]] | None
-        ) = None
+        self._pending_fingerprint: PendingFingerprint | None = None
 
     def _compute_md5(self, file_path: Path) -> str:
         """
@@ -399,21 +406,17 @@ class TwoLayerFingerprintCache:
                 f"Failed to write cache file {self.cache_file}: {e}"
             ) from e
 
-    def _save_pending_fingerprint(
-        self, fingerprint: dict[str, float | int | dict[str, dict[str, float | str]]]
-    ) -> None:
+    def _save_pending_fingerprint(self, fingerprint: PendingFingerprint) -> None:
         """Save pending fingerprint to file for cross-process access."""
         pending_file = self.cache_file.with_suffix(".pending")
         try:
             with open(pending_file, "w") as f:
-                json.dump(fingerprint, f, indent=2)
+                json.dump(asdict(fingerprint), f, indent=2)
         except OSError:
             # Non-fatal - will fall back to in-memory if needed
             pass
 
-    def _load_pending_fingerprint(
-        self,
-    ) -> dict[str, float | int | dict[str, dict[str, float | str]]] | None:
+    def _load_pending_fingerprint(self) -> PendingFingerprint | None:
         """Load pending fingerprint from file."""
         pending_file = self.cache_file.with_suffix(".pending")
         if not pending_file.exists():
@@ -422,10 +425,12 @@ class TwoLayerFingerprintCache:
         try:
             with open(pending_file, "r") as f:
                 data: Any = json.load(f)
-                return cast(
-                    dict[str, float | int | dict[str, dict[str, float | str]]], data
+                return PendingFingerprint(
+                    timestamp=data["timestamp"],
+                    file_count=data["file_count"],
+                    files=data["files"],
                 )
-        except (json.JSONDecodeError, OSError):
+        except (json.JSONDecodeError, OSError, KeyError):
             return None
 
     def _clear_pending_fingerprint(self) -> None:
@@ -522,11 +527,11 @@ class TwoLayerFingerprintCache:
                         del updated_cache[file_key]
 
             # Store pending fingerprint for mark_success()
-            self._pending_fingerprint = {
-                "timestamp": time.time(),
-                "file_count": len(file_paths),
-                "files": updated_cache,
-            }
+            self._pending_fingerprint = PendingFingerprint(
+                timestamp=time.time(),
+                file_count=len(file_paths),
+                files=updated_cache,
+            )
 
             # Save pending fingerprint to file for cross-process access
             self._save_pending_fingerprint(self._pending_fingerprint)
@@ -562,10 +567,7 @@ class TwoLayerFingerprintCache:
             timeout=30.0,
             operation=f"fingerprint:{self.subpath}:mark_success",
         ):
-            files_data_raw: Any = fingerprint_data.get("files", {})
-            # Type-safe extraction - ensure it's the right type
-            if isinstance(files_data_raw, dict):
-                self._write_cache_data(files_data_raw)  # type: ignore[arg-type]
+            self._write_cache_data(fingerprint_data.files)
 
         # Clear pending data (both file and memory)
         self._clear_pending_fingerprint()

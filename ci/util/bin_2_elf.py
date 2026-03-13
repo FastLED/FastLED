@@ -6,6 +6,7 @@ Handles platform-specific binary formats for ESP32, Uno, and other platforms.
 
 import json
 import subprocess
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 
@@ -60,7 +61,28 @@ def _detect_platform_from_paths(as_path: Path, ld_path: Path):
         return "unknown"
 
 
-def _analyze_binary_structure(bin_file: Path, platform: str):
+@dataclass(slots=True)
+class Esp32Header:
+    """ESP32 image header fields."""
+
+    magic: str
+    segments: int
+    flash_mode: int
+    flash_size_freq: int
+
+
+@dataclass(slots=True)
+class BinaryAnalysis:
+    """Result of binary structure analysis."""
+
+    platform: str
+    size: int
+    header: bytes
+    esp32: Esp32Header | None = None
+    format: str | None = None
+
+
+def _analyze_binary_structure(bin_file: Path, platform: str) -> BinaryAnalysis:
     """
     Analyze binary structure based on platform.
 
@@ -69,7 +91,7 @@ def _analyze_binary_structure(bin_file: Path, platform: str):
         platform (str): Target platform
 
     Returns:
-        dict: Binary analysis information
+        BinaryAnalysis: Binary analysis information
     """
     print(f"Analyzing {platform} binary: {bin_file}")
 
@@ -79,11 +101,11 @@ def _analyze_binary_structure(bin_file: Path, platform: str):
     with open(bin_file, "rb") as f:
         data = f.read()
 
-    analysis: dict[str, str | int | bytes | dict[str, str | int]] = {
-        "platform": platform,
-        "size": len(data),
-        "header": data[:32] if len(data) >= 32 else data,
-    }
+    analysis = BinaryAnalysis(
+        platform=platform,
+        size=len(data),
+        header=data[:32] if len(data) >= 32 else data,
+    )
 
     if platform == "esp32":
         # ESP32 binary format analysis
@@ -94,12 +116,12 @@ def _analyze_binary_structure(bin_file: Path, platform: str):
             segments = data[1]
             flash_mode = data[2]
             flash_size_freq = data[3]
-            analysis["esp32"] = {
-                "magic": hex(magic),
-                "segments": segments,
-                "flash_mode": flash_mode,
-                "flash_size_freq": flash_size_freq,
-            }
+            analysis.esp32 = Esp32Header(
+                magic=hex(magic),
+                segments=segments,
+                flash_mode=flash_mode,
+                flash_size_freq=flash_size_freq,
+            )
             print(f"ESP32 image - Magic: {hex(magic)}, Segments: {segments}")
 
     elif platform == "avr":
@@ -107,9 +129,9 @@ def _analyze_binary_structure(bin_file: Path, platform: str):
         print(f"AVR binary size: {len(data)} bytes")
         if bin_file.suffix.lower() == ".hex":
             print("Intel HEX format detected")
-            analysis["format"] = "intel_hex"
+            analysis.format = "intel_hex"
         else:
-            analysis["format"] = "binary"
+            analysis.format = "binary"
 
     # Print hex dump of first 64 bytes for analysis
     print(f"\nFirst 64 bytes of {platform} binary (hex):")
@@ -414,7 +436,7 @@ def bin_to_elf(
     # Save analysis results
     analysis_file = output_elf.with_suffix(".analysis.json")
     with open(analysis_file, "w") as f:
-        json.dump(binary_analysis, f, indent=2, default=str)
+        json.dump(asdict(binary_analysis), f, indent=2, default=str)
     print(f"📊 Binary analysis saved to: {analysis_file}")
 
     return output_elf
