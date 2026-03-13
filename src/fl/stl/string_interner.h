@@ -12,7 +12,7 @@
 // Copying interned strings is cheap (shared_ptr increment).
 // Outstanding strings survive interner.clear() due to reference counting.
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/unordered_map.h"
 #include "fl/stl/shared_ptr.h"
 

@@ -14,7 +14,7 @@
 
 // FastLED headers only - NO stdlib headers
 #include "fl/stl/string.h"
-#include "fl/stddef.h"
+#include "fl/stl/stddef.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/ostream.h"
 #include "fl/stl/stdio.h"

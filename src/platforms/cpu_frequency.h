@@ -7,7 +7,7 @@
 /// Platform-specific CPU frequency detection
 /// Provides GET_CPU_FREQUENCY() macro for compile-time frequency determination
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 // ============================================================================
 // CPU frequency macro for compile-time frequency determination

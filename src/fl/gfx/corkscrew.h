@@ -37,7 +37,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/variant.h"
 #include "fl/stl/span.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 namespace fl {
 

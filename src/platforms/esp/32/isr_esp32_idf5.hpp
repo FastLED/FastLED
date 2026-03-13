@@ -19,7 +19,7 @@
 // Do not include this file directly - use isr_esp32.hpp instead
 
 #include "fl/stl/isr/handler.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/unique_ptr.h"
 
 FL_EXTERN_C_BEGIN

@@ -21,9 +21,9 @@
 /// - Optimized for 2/4/8 strip configurations
 /// - Used by RP2040/RP2350 PIO-based parallel output
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/force_inline.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/span.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/cstring.h"

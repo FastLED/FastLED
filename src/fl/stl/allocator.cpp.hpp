@@ -1,12 +1,12 @@
 #include "platforms/is_platform.h"
 #include "fl/stl/allocator.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/thread_local.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/cstdlib.h"
 #include "fl/stl/string.h"
 #include "fl/stl/cstring.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 #ifdef FL_IS_ESP32
 #include "esp_heap_caps.h"

@@ -1,8 +1,8 @@
 // Performance comparison: sincos32 (scalar) vs sincos32_simd (SIMD)
 // ok standalone
 #include "FastLED.h"
-#include "fl/align.h"
-#include "fl/int.h"
+#include "fl/stl/align.h"
+#include "fl/stl/int.h"
 #include "fl/stl/json.h"
 #include "fl/simd.h"
 #include "fl/sin32.h"

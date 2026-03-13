@@ -88,7 +88,7 @@
 //
 
 // FastLED integration: use fl::numeric_limits instead of UINT_MAX
-#include "fl/numeric_limits.h"
+#include "fl/stl/limits.h"
 #include "fl/stl/stdint.h"
 
 // FastLED integration: use fl::FILE* for file I/O abstraction

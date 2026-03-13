@@ -4,13 +4,13 @@
 // fl::string has inlined memory and copy on write semantics.
 
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/detail/string_holder.h"
 #include "fl/stl/cctype.h"
 #include "fl/stl/charconv.h"
 #include "fl/stl/not_null.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/is_platform.h"  // IWYU pragma: keep (for FL_IS_WASM)
 
 #ifdef FL_IS_WASM
@@ -26,7 +26,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"  // IWYU pragma: keep
 #include "fl/stl/variant.h"
-#include "fl/string_view.h"
+#include "fl/stl/string_view.h"
 #include "fl/stl/iterator.h"
 #include "fl/stl/bitset_dynamic.h"
 #include "fl/stl/bitset.h"

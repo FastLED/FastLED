@@ -11,7 +11,7 @@
 
 #if defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C2) || defined(ARDUINO_ESP32C3_DEV) || defined(ARDUINO_ESP32C2_DEV)
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/isr.h"
 
 FL_EXTERN_C_BEGIN

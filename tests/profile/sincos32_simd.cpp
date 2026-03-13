@@ -1,7 +1,7 @@
 // ok standalone
 #include "FastLED.h"
-#include "fl/align.h"
-#include "fl/int.h"
+#include "fl/stl/align.h"
+#include "fl/stl/int.h"
 #include "fl/simd.h"  // Platform-dispatched SIMD (gets correct impl automatically)
 #include "fl/sin32.h"
 #include "fl/stl/cstdint.h"

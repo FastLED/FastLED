@@ -8,7 +8,7 @@
 
 // IWYU pragma: private
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 
@@ -16,7 +16,7 @@
 
 #if FASTLED_RMT5
 
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 
 namespace fl {
 

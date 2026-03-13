@@ -5,7 +5,7 @@
 
 // #include "FastLED.h"
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "crgb.h"  // IWYU pragma: keep
 #include "fastled_progmem.h"
 #include "fl/gfx/blur.h"  // IWYU pragma: keep
@@ -13,7 +13,7 @@
 #include "fl/gfx/fill.h"
 #include "fl/xymap.h"  // IWYU pragma: keep
 #include "lib8tion/memmove.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/warn.h"  // IWYU pragma: keep
 #include "platforms/is_platform.h"  // IWYU pragma: keep
 

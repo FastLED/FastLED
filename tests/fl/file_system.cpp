@@ -29,7 +29,7 @@
 #include "fl/stl/vector.h"
 #include "test.h"
 #include "fl/stl/shared_ptr.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 #endif

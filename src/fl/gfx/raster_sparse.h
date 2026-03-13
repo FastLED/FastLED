@@ -7,7 +7,7 @@ not allocate memory for the entire grid. This is useful for large grids where
 only a small number of pixels are set.
 */
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/geometry.h"
 #include "fl/stl/unordered_map.h"
 #include "fl/stl/span.h"

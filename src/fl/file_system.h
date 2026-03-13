@@ -2,16 +2,16 @@
 
 // Note, fs.h breaks ESPAsyncWebServer so we use file_system.h instead.
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/stl/fstream.h"            // For fl::ifstream (STL-like file I/O)
 #include "fl/stl/map.h"               // For fl::map
-#include "fl/str_fwd.h"     // Lightweight forward declarations for string
+#include "fl/stl/string.h"  // For fl::string
 #include "fl/fx/video.h"
 #include "fl/codec/jpeg.h"
 #include "fl/codec/mp3.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 namespace fl {
 

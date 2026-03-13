@@ -3,7 +3,7 @@
 
 #include "fl/stl/map.h"      // Required: fl_map is a template alias, cannot be forward declared
 #include "fl/stl/shared_ptr.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 /* Screenmap maps strip indexes to x,y coordinates. This is used for FastLED Web
  * to map the 1D strip to a 2D screen. Note that the strip can have arbitrary
  * size. this was first motivated by the effort to port theChromancer project to

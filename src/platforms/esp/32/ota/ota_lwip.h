@@ -20,7 +20,7 @@
 #if defined(FL_IS_ESP32)
 
 // Provide socklen_t before lwip uses it
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #ifndef SOCKLEN_T_DEFINED
 #define SOCKLEN_T_DEFINED
 typedef fl::u32 socklen_t;

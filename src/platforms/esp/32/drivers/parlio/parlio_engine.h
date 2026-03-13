@@ -61,9 +61,9 @@
 
 // IWYU pragma: private
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/isr.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 
 #include "fl/channels/wave3.h"
 #include "fl/channels/wave8.h"

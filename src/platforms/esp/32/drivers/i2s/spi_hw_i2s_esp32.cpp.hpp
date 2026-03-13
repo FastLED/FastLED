@@ -8,7 +8,7 @@
 
 #include "platforms/esp/32/drivers/i2s/spi_hw_i2s_esp32.h"
 #include "fl/dbg.h"
-#include "fl/numeric_limits.h"
+#include "fl/stl/limits.h"
 #include "platforms/esp/is_esp.h"
 
 // The I2S parallel mode driver only works on ESP32 and ESP32-S2

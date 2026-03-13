@@ -25,7 +25,7 @@
 // IWYU pragma: end_keep
 
 #include "platforms/coroutine_runtime.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 namespace fl {
 namespace platforms {

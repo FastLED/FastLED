@@ -5,7 +5,7 @@
 /// Misc utility functions for palettes, blending, and more. This file is being
 /// refactored.
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "platforms/is_platform.h"
 #include "fl/stl/math.h"
 #include "fl/stl/stdint.h"

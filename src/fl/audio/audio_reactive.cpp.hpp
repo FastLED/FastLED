@@ -5,7 +5,7 @@
 #include "fl/audio/mic_response_data.h"
 #include "fl/stl/math.h"
 #include "fl/stl/span.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/unique_ptr.h"  // For unique_ptr
 
 namespace fl {

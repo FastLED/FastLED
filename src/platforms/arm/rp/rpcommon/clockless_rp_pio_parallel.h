@@ -61,8 +61,8 @@
 /// - Valid: GPIO 2-5 (4 strips), GPIO 10-17 (8 strips)
 /// - Invalid: GPIO 2,4,6,8 (non-consecutive)
 
-#include "fl/compiler_control.h"
-#include "fl/int.h"
+#include "fl/stl/compiler_control.h"
+#include "fl/stl/int.h"
 #include "fl/stl/bit_cast.h"
 #include "crgb.h"
 #include "pixel_controller.h"

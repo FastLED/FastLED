@@ -2,7 +2,7 @@
 #include "platforms/cycle_type.h"
 #include "test.h"
 #include "fl/stl/type_traits.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 using namespace fl;
 

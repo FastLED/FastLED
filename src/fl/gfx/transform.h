@@ -11,7 +11,7 @@ expensive trig functions are needed. Same with scale and offset.
 #include "fl/geometry.h"
 #include "fl/math_macros.h"
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 namespace fl {
 

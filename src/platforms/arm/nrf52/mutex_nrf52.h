@@ -44,7 +44,7 @@
 #ifdef FASTLED_NRF52_HAS_FREERTOS
 
 #include "fl/stl/assert.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 // Include FreeRTOS headers
 FL_EXTERN_C_BEGIN

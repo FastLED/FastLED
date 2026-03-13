@@ -5,7 +5,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/fixed_point/s0x32x4.h"
 #include "fl/stl/fixed_point/s16x16x4.h"
-#include "fl/numeric_limits.h"
+#include "fl/stl/limits.h"
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {

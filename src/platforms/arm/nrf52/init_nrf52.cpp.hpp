@@ -6,7 +6,7 @@
 /// This file provides the implementation of platform initialization for nRF52.
 /// It initializes the SPI hardware controllers via weak linkage pattern.
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/arm/nrf52/is_nrf52.h"
 
 #ifdef FL_IS_NRF52

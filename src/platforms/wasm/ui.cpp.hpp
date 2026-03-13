@@ -43,7 +43,7 @@
 #include "platforms/wasm/js_bindings.h"
 #include "platforms/shared/ui/json/ui.h"
 #include "fl/warn.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 // Implemented in js_library.js (--js-library side file)
 extern "C" void js_post_ui_elements(const char*);

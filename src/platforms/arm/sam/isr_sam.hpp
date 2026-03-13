@@ -14,7 +14,7 @@
 // IWYU pragma: private
 
 #include "fl/stl/isr/handler.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/arm/sam/is_sam.h"
 
 // Platform guard - only compile for SAM platforms

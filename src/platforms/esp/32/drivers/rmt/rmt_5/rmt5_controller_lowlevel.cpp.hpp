@@ -8,7 +8,7 @@
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 #include "platforms/esp/32/feature_flags/enabled.h"
 #include "fl/stl/cstring.h"

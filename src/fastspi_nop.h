@@ -10,7 +10,7 @@
 #if FASTLED_DOXYGEN // Guard against the arduino ide idiotically including every header file
 
 #include "fl/fastled.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 
 /// A nop/stub class, mostly to show the SPI methods that are needed/used by the various SPI chipset implementations.  Should

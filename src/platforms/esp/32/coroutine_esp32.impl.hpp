@@ -19,7 +19,7 @@
 #include "fl/stl/functional.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/unique_ptr.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 #include "fl/warn.h"
 #include "fl/arduino.h"
 // IWYU pragma: end_keep

@@ -14,7 +14,7 @@
 #include "fl/stl/math.h"
 #include "fl/math_macros.h"
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 // This is used by fastled because we have extremely strict compiler settings.
 // Stock Arduino/Platformio does not need these.

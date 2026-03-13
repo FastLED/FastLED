@@ -1,10 +1,10 @@
 /// @file string_view.cpp
 /// @brief Test for fl::string_view - non-owning string view
 
-#include "fl/string_view.h"
+#include "fl/stl/string_view.h"
 #include "test.h"
 #include "fl/stl/string.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

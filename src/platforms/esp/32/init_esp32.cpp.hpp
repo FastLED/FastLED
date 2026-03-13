@@ -6,7 +6,7 @@
 /// This file provides the implementation of platform initialization for ESP32.
 /// It initializes the channel bus manager and SPI system on first call.
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 

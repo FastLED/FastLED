@@ -1,7 +1,7 @@
 // ok no namespace fl
 #pragma once
 
-#include "fl/int.h"  // for FastLED integer types
+#include "fl/stl/int.h"  // for FastLED integer types
 #include "platforms/avr/is_avr.h"  // for FL_IS_AVR
 
 // Guard against PROGMEM redefinition on platforms that have their own definition

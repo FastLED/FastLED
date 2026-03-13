@@ -3,11 +3,11 @@
 Lint check: Prevent deep platform-specific header includes in platform-agnostic code.
 
 FastLED uses a platform trampoline architecture where platform-agnostic code should
-use trampoline headers (like fl/int.h) instead of directly including deep platform-specific
+use trampoline headers (like fl/stl/int.h) instead of directly including deep platform-specific
 headers (like platforms/shared/int_windows.h or platforms/esp/32/some_driver.h).
 
 Architecture:
-    User Code → fl/int.h → platforms/int.h → platforms/{platform}/int*.h
+    User Code → fl/stl/int.h → platforms/int.h → platforms/{platform}/int*.h
 
 Rules:
     1. Code in src/fl/** MUST NOT include deep platform headers (more than one layer deep)
@@ -27,7 +27,7 @@ Allowed includes:
     #include "platforms/io.h"
 
     // ✅ PASS: fl/ headers (use these in fl/ code)
-    #include "fl/int.h"
+    #include "fl/stl/int.h"
     #include "fl/io.h"
 
 Exception mechanism:
@@ -35,7 +35,7 @@ Exception mechanism:
     #include "platforms/esp/32/some_driver.h"  // ok platform headers
 
 For more details, see:
-    - src/fl/int.h (platform-agnostic interface)
+    - src/fl/stl/int.h (platform-agnostic interface)
     - src/platforms/README.md (platform architecture documentation)
     - src/platforms/int.h (platform dispatcher)
 """

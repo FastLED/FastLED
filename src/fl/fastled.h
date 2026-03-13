@@ -21,10 +21,10 @@
 
 /// Platform-agnostic integer types
 #include "fl/stl/stdint.h"  // IWYU pragma: keep
-#include "fl/int.h"  // IWYU pragma: keep
+#include "fl/stl/int.h"  // IWYU pragma: keep
 
 /// Version and configuration
-#include "fl/dll.h"  // IWYU pragma: keep
+#include "fl/system/dll.h"  // IWYU pragma: keep
 #include "fl/force_inline.h"  // IWYU pragma: keep
 
 // ============================================================================
@@ -41,7 +41,7 @@
 // ============================================================================
 
 /// Compiler and language features
-#include "fl/compiler_control.h"  // IWYU pragma: keep
+#include "fl/stl/compiler_control.h"  // IWYU pragma: keep
 #include "fl/math_macros.h"  // IWYU pragma: keep
 
 /// Memory and type utilities

@@ -19,8 +19,8 @@
   { include: ['<cstdlib>', 'public', '"fl/stl/cstdlib.h"', 'public'] },
   { include: ['<cmath>', 'public', '"fl/math.h"', 'public'] },
   { include: ['<cassert>', 'public', '"fl/stl/assert.h"', 'public'] },
-  { include: ['<climits>', 'public', '"fl/numeric_limits.h"', 'public'] },
-  { include: ['<cfloat>', 'public', '"fl/numeric_limits.h"', 'public'] },
+  { include: ['<climits>', 'public', '"fl/stl/limits.h"', 'public'] },
+  { include: ['<cfloat>', 'public', '"fl/stl/limits.h"', 'public'] },
   
   # C++ containers and algorithms
   { include: ['<vector>', 'public', '"fl/stl/vector.h"', 'public'] },
@@ -28,6 +28,8 @@
   { include: ['<string>', 'public', '"fl/stl/string.h"', 'public'] },
   { include: ['<unordered_map>', 'public', '"fl/stl/unordered_map.h"', 'public'] },
   { include: ['<unordered_set>', 'public', '"fl/stl/unordered_set.h"', 'public'] },
+  { include: ['<multimap>', 'public', '"fl/stl/multi_map.h"', 'public'] },
+  { include: ['<multiset>', 'public', '"fl/stl/multi_set.h"', 'public'] },
   { include: ['<deque>', 'public', '"fl/stl/deque.h"', 'public'] },
   { include: ['<list>', 'public', '"fl/stl/list.h"', 'public'] },
   { include: ['<map>', 'public', '"fl/stl/map.h"', 'public'] },
@@ -82,9 +84,9 @@
   { include: ['<string.h>', 'public', '"fl/stl/string.h"', 'public'] },
   { include: ['<stdlib.h>', 'public', '"fl/stl/cstdlib.h"', 'public'] },
   { include: ['<math.h>', 'public', '"fl/math.h"', 'public'] },
-  { include: ['<assert.h>', 'public', '"fl/compiler_control.h"', 'public'] },
-  { include: ['<limits.h>', 'public', '"fl/numeric_limits.h"', 'public'] },
-  { include: ['<float.h>', 'public', '"fl/numeric_limits.h"', 'public'] },
+  { include: ['<assert.h>', 'public', '"fl/stl/compiler_control.h"', 'public'] },
+  { include: ['<limits.h>', 'public', '"fl/stl/limits.h"', 'public'] },
+  { include: ['<float.h>', 'public', '"fl/stl/limits.h"', 'public'] },
   
   # Platform-specific but common headers
   { include: ['<sys/types.h>', 'public', '<sys/types.h>', 'public'] },

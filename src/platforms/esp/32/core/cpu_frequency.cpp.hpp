@@ -5,7 +5,7 @@
 
 // IWYU pragma: private
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "platforms/esp/is_esp.h"
 
 #if defined(FL_IS_ESP32)

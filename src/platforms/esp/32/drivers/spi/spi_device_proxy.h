@@ -22,7 +22,7 @@
 #include "platforms/shared/spi_manager.h"
 #include "platforms/esp/32/core/fastspi_esp32.h"
 #include "fl/stl/stdint.h"
-#include "fl/stddef.h"
+#include "fl/stl/stddef.h"
 #include "fl/log.h"
 
 namespace fl {

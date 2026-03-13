@@ -13,7 +13,7 @@
 #include "crgb.h"
 #include "eorder.h"
 #include "fl/map.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
 #include "fl/math_macros.h"

@@ -10,6 +10,6 @@ Platform: $1
 Use the 'fix-int-agent' sub-agent to research the correct primitive type mappings for the target platform and apply fixes to platform-specific int header files.
 
 IMPORTANT:
-- Do NOT modify fl/int.h or fl/stdint.h
+- Do NOT modify fl/stl/int.h or fl/stdint.h
 - Only modify files in src/platforms/**/int*.h
 - If the task requires modifying protected files, halt and report

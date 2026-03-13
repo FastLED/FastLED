@@ -6,7 +6,7 @@
 
 #include "fl/audio/fft/fft.h"
 #include "fl/geometry.h"             // for vec2
-#include "fl/int.h"                  // for size, u16, u8
+#include "fl/stl/int.h"                  // for size, u16, u8
 #include "fl/stl/json.h"
 #include "fl/gfx/crgb.h"                 // for CRGB
 #include "fl/gfx/tile2x2.h"

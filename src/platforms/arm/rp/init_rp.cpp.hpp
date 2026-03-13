@@ -9,7 +9,7 @@
 // Include platform detection BEFORE the guard
 #include "platforms/arm/rp/is_rp.h"
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #ifdef FL_IS_RP
 
 #include "platforms/arm/rp/init_rp.h"

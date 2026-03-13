@@ -12,7 +12,7 @@
 #if defined(FL_IS_ESP_32S3) && FL_HAS_INCLUDE("esp_lcd_panel_io.h")
 
 #include "platforms/esp/32/drivers/i2s/i2s_lcd_cam_peripheral_esp.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 #include "fl/warn.h"
 
 // IWYU pragma: begin_keep

@@ -8,7 +8,7 @@
 //
 // ⚠️  CRITICAL: When integer type conflicts occur (typedef redefinition errors),
 //              the fix MUST go in src/platforms/**/int*.h files.
-//              DO NOT modify this file (fl/int.h) or fl/stdint.h!  // IWYU pragma: keep
+//              DO NOT modify this file (fl/stl/int.h) or fl/stdint.h!  // IWYU pragma: keep
 //
 // ============================================================================
 // WHAT THIS FILE DOES
@@ -38,7 +38,7 @@
 // HOW TO FIX TYPEDEF CONFLICTS
 // ============================================================================
 //
-// ❌ DO NOT modify fl/int.h (this file)
+// ❌ DO NOT modify fl/stl/int.h (this file)
 // ❌ DO NOT modify fl/stdint.h
 // ❌ DO NOT add #ifdef guards around typedefs
 // ✅ DO modify the platform-specific file in src/platforms/**/int.h
@@ -147,7 +147,7 @@
 //
 // User code or FastLED.h
 //   └─> fl/stdint.h (standard type compatibility layer)
-//       ├─> fl/int.h (this file - platform-agnostic interface)
+//       ├─> fl/stl/int.h (this file - platform-agnostic interface)
 //       │   ├─> platforms/int.h (platform dispatcher)
 //       │   │   └─> platforms/{platform}/int.h (actual type definitions)
 //       │   └─> Defines i8, u8, fractional types
@@ -175,7 +175,7 @@ namespace fl {
     typedef signed char i8;
     typedef unsigned char u8;
     typedef unsigned int uint;
-    
+
     // Pointer and size types are defined per-platform in platforms/int.h
     // uptr (pointer type) and size (size type) are defined per-platform
 
@@ -192,8 +192,8 @@ typedef unsigned int uint;
 namespace fl {
     ///////////////////////////////////////////////////////////////////////
     ///
-    /// Fixed-Point Fractional Types. 
-    /// Types for storing fractional data. 
+    /// Fixed-Point Fractional Types.
+    /// Types for storing fractional data.
     ///
     /// * ::sfract7 should be interpreted as signed 128ths.
     /// * ::fract8 should be interpreted as unsigned 256ths.
@@ -204,22 +204,22 @@ namespace fl {
     ///          as 64/256ths, or one-quarter.
     ///
     /// accumXY types should be interpreted as X bits of integer,
-    ///         and Y bits of fraction.  
+    ///         and Y bits of fraction.
     /// E.g., ::accum88 has 8 bits of int, 8 bits of fraction
     ///
 
-    /// ANSI: unsigned short _Fract. 
-    /// Range is 0 to 0.99609375 in steps of 0.00390625.  
+    /// ANSI: unsigned short _Fract.
+    /// Range is 0 to 0.99609375 in steps of 0.00390625.
     /// Should be interpreted as unsigned 256ths.
     typedef u8   fract8;
 
-    /// ANSI: signed short _Fract. 
-    /// Range is -0.9921875 to 0.9921875 in steps of 0.0078125.  
+    /// ANSI: signed short _Fract.
+    /// Range is -0.9921875 to 0.9921875 in steps of 0.0078125.
     /// Should be interpreted as signed 128ths.
     typedef i8    sfract7;
 
     /// ANSI: unsigned _Fract.
-    /// Range is 0 to 0.99998474121 in steps of 0.00001525878.  
+    /// Range is 0 to 0.99998474121 in steps of 0.00001525878.
     /// Should be interpreted as unsigned 65536ths.
     typedef u16  fract16;
 
@@ -228,7 +228,7 @@ namespace fl {
     typedef u32  fract32;   ///< ANSI: unsigned long _Fract. 32 bits int, 32 bits fraction
 
     /// ANSI: signed _Fract.
-    /// Range is -0.99996948242 to 0.99996948242 in steps of 0.00003051757.  
+    /// Range is -0.99996948242 to 0.99996948242 in steps of 0.00003051757.
     /// Should be interpreted as signed 32768ths.
     typedef i16   sfract15;
 

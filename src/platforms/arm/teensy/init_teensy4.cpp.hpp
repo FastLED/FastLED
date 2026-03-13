@@ -6,7 +6,7 @@
 /// This file provides the implementation of platform initialization for Teensy 4.0/4.1.
 /// It initializes the ObjectFLED registry for parallel LED output support.
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/arm/teensy/is_teensy.h"
 
 #ifdef FL_IS_TEENSY_4X

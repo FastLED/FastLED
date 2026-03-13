@@ -8,7 +8,7 @@
 #if defined(FASTLED_STUB_IMPL) && !defined(FL_IS_WASM)
 
 #include "fl/stl/thread.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/function.h"
 #include "fl/stl/chrono.h"  // platform-specific time implementation
 

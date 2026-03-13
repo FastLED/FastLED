@@ -6,7 +6,7 @@
 /// This file provides the implementation of platform initialization for SAMD51.
 /// It initializes the SPI hardware controllers via weak linkage pattern.
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/arm/samd/is_samd.h"
 
 #ifdef FL_IS_SAMD51

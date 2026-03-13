@@ -1,7 +1,7 @@
 /// @file string_view.cpp
 /// @brief Out-of-class definitions for fl::string_view
 
-#include "fl/string_view.h"
+#include "fl/stl/string_view.h"
 
 namespace fl {
 

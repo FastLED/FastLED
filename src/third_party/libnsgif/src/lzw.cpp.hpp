@@ -9,7 +9,7 @@
 
 #include "fl/stl/cstddef.h"
 #include "fl/stl/assert.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/allocator.h"
 
 #include "lzw.h"

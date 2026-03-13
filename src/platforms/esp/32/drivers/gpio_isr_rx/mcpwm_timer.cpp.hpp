@@ -39,7 +39,7 @@
 
 #include "platforms/esp/32/drivers/gpio_isr_rx/mcpwm_timer.h"
 #include "platforms/esp/32/drivers/gpio_isr_rx/dual_isr_context.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 using fl::u32;
 

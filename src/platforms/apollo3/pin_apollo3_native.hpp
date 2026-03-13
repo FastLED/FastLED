@@ -18,7 +18,7 @@
 /// The fastgpio functions used here provide high-speed GPIO access.
 
 // External C headers from Ambiq HAL
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep

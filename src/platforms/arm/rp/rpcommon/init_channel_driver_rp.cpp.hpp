@@ -16,7 +16,7 @@
 /// 2. Wrap them in SpiChannelEngineAdapter
 /// 3. Register unified adapter with ChannelManager
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/arm/rp/is_rp.h"
 
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)

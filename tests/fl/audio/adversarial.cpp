@@ -13,7 +13,7 @@
 #include "fl/audio/detectors/tempo_analyzer.h"
 #include "fl/audio/detectors/frequency_bands.h"
 #include "fl/audio/detectors/vocal.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/function.h"
 #include "fl/stl/span.h"
 #include "fl/stl/strstream.h"

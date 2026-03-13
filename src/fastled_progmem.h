@@ -1,7 +1,7 @@
 #pragma once
 
 #include "platforms/is_platform.h"  // ok platform headers
-#include "fl/int.h"  // ok platform headers
+#include "fl/stl/int.h"  // ok platform headers
 
 #if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
 #include "platforms/null_progmem.h"  // ok platform headers

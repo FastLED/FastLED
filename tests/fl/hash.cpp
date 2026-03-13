@@ -1,10 +1,10 @@
 // ok cpp include
-#include "fl/hash.h"
+#include "fl/stl/hash.h"
 #include "fl/stl/string.h"
 #include "fl/stl/cstddef.h"
 #include "test.h"
 #include "fl/geometry.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 using namespace fl;
 

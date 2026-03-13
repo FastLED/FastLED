@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 /// @def FASTLED_REGISTER
 /// Helper macro to replace the deprecated 'register' keyword if we're

@@ -5,7 +5,7 @@
 #include "test.h"
 #include "fl/log.h"
 #include "fl/stl/strstream.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 // Stack tracing is controlled by FASTLED_DEBUG_STACK_TRACE at build time.
 // When enabled, full tests run. When disabled, only macro no-op tests run.

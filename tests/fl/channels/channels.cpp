@@ -14,7 +14,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/gfx/fill.h"
 #include "fl/chipsets/chipset_timing_config.h"
-#include "fl/scope_exit.h"
+#include "fl/stl/scope_exit.h"
 
 using namespace fl;
 

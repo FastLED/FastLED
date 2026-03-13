@@ -7,7 +7,7 @@
 #include "eorder.h"
 #include "fl/unused.h"
 #include "fl/stl/vector.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 #include "fl/chipsets/timing_traits.h"
 #include "pixel_iterator.h"
 #include "platforms/shared/active_strip_data/active_strip_data.h"

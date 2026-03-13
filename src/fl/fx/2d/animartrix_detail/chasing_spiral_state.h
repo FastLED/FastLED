@@ -8,7 +8,7 @@
 // Future: convert to a class with private instance data when multiple
 // concurrent animation instances are needed.
 
-#include "fl/align.h"
+#include "fl/stl/align.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/vector.h"
 

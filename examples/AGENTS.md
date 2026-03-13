@@ -212,11 +212,11 @@ void processData(const uint8_t* data, size_t len) {
 
 ## Compiler Warning Suppression
 
-**ALWAYS use the FastLED compiler control macros from `fl/compiler_control.h` for warning suppression.** This ensures consistent cross-compiler support and proper handling of platform differences.
+**ALWAYS use the FastLED compiler control macros from `fl/stl/compiler_control.h` for warning suppression.** This ensures consistent cross-compiler support and proper handling of platform differences.
 
 **Correct Warning Suppression Pattern:**
 ```cpp
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 // Suppress specific warning around problematic code
 FL_DISABLE_WARNING_PUSH

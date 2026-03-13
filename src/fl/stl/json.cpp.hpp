@@ -7,7 +7,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/charconv.h"
 #include "fl/stl/math.h" // For floor function
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/unordered_map.h"
@@ -20,7 +20,7 @@
 #include "fl/stl/strstream.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string_interner.h"
-#include "fl/string_view.h"
+#include "fl/stl/string_view.h"
 
 // fl::numeric_limits<i16>::min(), fl::numeric_limits<i16>::max(), and fl::numeric_limits<u8>::max() should come from the platform's
 // <stdint.h> or <cstdint> headers (via fl/stl/stdint.h).

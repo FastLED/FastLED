@@ -2,7 +2,7 @@
 /// @brief Implementation of unified channel bus manager
 
 #include "fl/channels/manager.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 #include "fl/dbg.h"
 #include "fl/warn.h"
 #include "fl/log.h"

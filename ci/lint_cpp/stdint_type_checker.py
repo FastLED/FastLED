@@ -5,7 +5,7 @@ Flags:
 - stdint types: uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, int32_t, int64_t
 - bare types: unsigned int, signed int
 
-Use FastLED's own integer types (u8, u16, u32, u64, i8, i16, i32, i64) from fl/int.h
+Use FastLED's own integer types (u8, u16, u32, u64, i8, i16, i32, i64) from fl/stl/int.h
 instead of stdint or bare types to maintain consistency across the codebase.
 """
 
@@ -22,7 +22,7 @@ _EXCLUDED_DIRS = [
 _EXCLUDED_FILENAMES = {
     "stdint.h",  # fl/stl/stdint.h - defines uint8_t as typedef of fl::u8
     "cstdint.h",  # fl/stl/cstdint.h - C language type definitions
-    "int.h",  # fl/int.h - defines fl::uint as typedef of unsigned int (core type definition)
+    "int.h",  # fl/stl/int.h - defines fl::uint as typedef of unsigned int (core type definition)
     "run_unit_test.hpp",  # Platform runners use std:: types to avoid FastLED dependencies
     "dual_isr_context.h",  # C header used from assembly - must use C types
     "mcpwm_timer.h",  # C header with extern "C" API - must use C types
@@ -300,7 +300,7 @@ class StdintTypeChecker(FileContentChecker):
                     violations.append(
                         (
                             line_number,
-                            f"Use '{fl_type}' from fl/int.h instead of '{match}': {stripped}",
+                            f"Use '{fl_type}' from fl/stl/int.h instead of '{match}': {stripped}",
                         )
                     )
 
@@ -320,7 +320,7 @@ def main() -> None:
     run_checker_standalone(
         checker,
         target_dirs,
-        "Found stdint types in checked files (use u8/u16/u32/u64/i8/i16/i32/i64 from fl/int.h instead)",
+        "Found stdint types in checked files (use u8/u16/u32/u64/i8/i16/i32/i64 from fl/stl/int.h instead)",
     )
 
 

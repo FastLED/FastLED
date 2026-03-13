@@ -1,7 +1,7 @@
 #include "fl/stl/assert.h"
 #include "fl/stl/stdint.h"
 #include "test.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

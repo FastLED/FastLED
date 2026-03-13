@@ -10,7 +10,7 @@
 
 #include "fl/stl/fixed_point/s0x32x4.h"
 #include "fl/stl/fixed_point/s16x16x4.h"
-#include "fl/align.h"
+#include "fl/stl/align.h"
 
 // Implementation of s0x32x4 × s16x16x4 (after s16x16x4 is defined)
 FASTLED_FORCE_INLINE s16x16x4 s0x32x4::operator*(s16x16x4 b) const {

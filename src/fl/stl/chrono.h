@@ -7,7 +7,7 @@
 /// allowing FastLED to use duration types without directly depending on <chrono>.
 /// The implementation is intentionally compatible with std::chrono for interoperability.
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/ratio.h"
 
 #ifdef FASTLED_TESTING

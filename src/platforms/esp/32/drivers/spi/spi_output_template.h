@@ -5,7 +5,7 @@
 /// @file spi_output_template.h
 /// @brief ESP32 SPIOutput template definition
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "platforms/esp/32/drivers/spi/spi_device_proxy.h"
 
 namespace fl {

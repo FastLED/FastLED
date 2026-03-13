@@ -1,8 +1,8 @@
 #pragma once
 
 #include "fl/stl/type_traits.h"
-#include "fl/int.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/int.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/string.h"
 

@@ -12,7 +12,7 @@
 
 // IWYU pragma: begin_keep
 #include "platforms/stub/coroutine_stub.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/mutex.h"
 #include "fl/stl/shared_ptr.h"

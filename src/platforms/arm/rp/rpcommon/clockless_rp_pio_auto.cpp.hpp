@@ -11,7 +11,7 @@
 #include "platforms/arm/rp/rpcommon/clockless_rp_pio_auto.h"
 #include "platforms/arm/rp/rpcommon/parallel_transpose.h"
 #include "fl/rectangular_draw_buffer.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 #include "fl/stl/vector.h"
 #include "fl/warn.h"
 #include "fl/math_macros.h"

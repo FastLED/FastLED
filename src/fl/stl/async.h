@@ -44,7 +44,7 @@
 
 #include "fl/promise.h"
 #include "fl/promise_result.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 #include "fl/stl/task.h"
 #include "platforms/await.h"
 #include "fl/stl/atomic.h"      // for atomic

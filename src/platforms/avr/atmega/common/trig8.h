@@ -5,7 +5,7 @@
 #include "platforms/avr/is_avr.h"
 #include "fl/stl/stdint.h"
 #include "lib8tion/lib8static.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 namespace fl {
 

@@ -2,7 +2,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/filter.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/function.h"
 
 namespace fl {

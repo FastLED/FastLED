@@ -121,7 +121,7 @@ The names make roles explicit: `.impl.cpp.hpp` = "implementation router, include
 - Wrong: `#define FASTLED_USE_PROGMEM` (missing value - ambiguous default behavior)
 
 ## Warning and Debug Output
-- **Use proper warning macros** from `fl/compiler_control.h`
+- **Use proper warning macros** from `fl/stl/compiler_control.h`
 - **Use `FL_DBG("message" << var)`** for debug prints (easily stripped in release builds)
 - **Use `FL_WARN("message" << var)`** for warnings (persist into release builds)
 - **Avoid `fl::printf`, `fl::print`, `fl::println`** - prefer FL_DBG/FL_WARN macros instead

@@ -7,7 +7,7 @@
 #include "fl/stl/function.h"
 #include "fl/stl/unordered_map.h"
 #include "fl/stl/mutex.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 #include "fl/stl/optional.h"
 
 #include "platforms/wasm/is_wasm.h"

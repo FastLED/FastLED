@@ -10,7 +10,7 @@
 // IWYU pragma: end_keep
 
 #include "fl/stl/assert.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/vector.h"
 #include "fl/warn.h"

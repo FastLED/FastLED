@@ -6,7 +6,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/sin32.h"
 #include "fl/stl/fixed_point/isqrt.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/fixed_point/traits.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN

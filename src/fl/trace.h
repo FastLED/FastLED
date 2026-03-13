@@ -41,7 +41,7 @@ void helper() {
 #include "fl/stl/stdint.h"
 #include "fl/stl/string.h"  // IWYU pragma: keep
 #include "fl/stl/vector.h"
-#include "fl/compiler_control.h"  // For FL_FUNCTION  // IWYU pragma: keep
+#include "fl/stl/compiler_control.h"  // For FL_FUNCTION  // IWYU pragma: keep
 
 namespace fl {
 

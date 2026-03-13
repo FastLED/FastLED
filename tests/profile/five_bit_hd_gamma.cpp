@@ -5,7 +5,7 @@
 
 #include "FastLED.h"
 #include "fl/gfx/five_bit_hd_gamma.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/stdio.h"
 #include "profile_result.h"

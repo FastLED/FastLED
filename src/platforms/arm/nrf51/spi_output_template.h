@@ -5,7 +5,7 @@
 /// @file spi_output_template.h
 /// @brief NRF51 SPIOutput template definition
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 namespace fl {
 

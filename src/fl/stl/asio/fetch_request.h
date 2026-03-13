@@ -4,7 +4,7 @@
 #include "fl/stl/asio/fetch.h"  // Includes response class  // IWYU pragma: keep
 #include "fl/stl/string.h"
 #include "fl/stl/url.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 // Forward declaration for hostent (platform-specific type)
 struct hostent;

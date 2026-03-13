@@ -5,7 +5,7 @@
 
 // IWYU pragma: private
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 // Allow compilation on both ESP32 hardware and stub platforms (for testing)
 #include "platforms/is_platform.h"

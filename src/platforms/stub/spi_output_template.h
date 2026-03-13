@@ -8,7 +8,7 @@
 #ifndef __INC_PLATFORMS_STUB_SPI_OUTPUT_TEMPLATE_H
 #define __INC_PLATFORMS_STUB_SPI_OUTPUT_TEMPLATE_H
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "platforms/wasm/is_wasm.h"
 
 #ifndef FL_IS_WASM

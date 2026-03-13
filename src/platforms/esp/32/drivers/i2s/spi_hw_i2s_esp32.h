@@ -68,7 +68,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
-#include "fl/numeric_limits.h"
+#include "fl/stl/limits.h"
 #include "platforms/shared/spi_hw_16.h"
 #include "platforms/shared/spi_types.h"
 

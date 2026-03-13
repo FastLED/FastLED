@@ -3,7 +3,7 @@
 // allow-include-after-namespace
 
 #include "fl/stl/stdint.h"  // IWYU pragma: keep
-#include "fl/int.h"  // IWYU pragma: keep
+#include "fl/stl/int.h"  // IWYU pragma: keep
 
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/functional.h"  // IWYU pragma: keep
@@ -16,7 +16,7 @@
 #include "fl/stl/type_traits.h"
 #include "fl/stl/new.h"  // IWYU pragma: keep
 #include "fl/stl/move.h"
-#include "fl/align.h"
+#include "fl/stl/align.h"
 #include "fl/unused.h"
 
 namespace fl {

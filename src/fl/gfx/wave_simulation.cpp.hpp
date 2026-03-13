@@ -4,7 +4,7 @@
 
 #include "fl/stl/math.h"
 #include "fl/gfx/wave_simulation.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 namespace {
 

@@ -20,6 +20,6 @@
 #else
     // Fallback to manual definition
     #include "fl/stl/stdint.h"
-    #include "fl/int.h"
+    #include "fl/stl/int.h"
     inline void *operator new(fl::size, void *ptr) noexcept { return ptr; }
 #endif

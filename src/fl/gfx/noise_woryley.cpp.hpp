@@ -1,5 +1,5 @@
 #include "fl/gfx/noise_woryley.h"
-#include "fl/numeric_limits.h"
+#include "fl/stl/limits.h"
 
 namespace fl {
 namespace {

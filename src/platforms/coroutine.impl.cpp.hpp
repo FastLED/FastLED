@@ -44,7 +44,7 @@
 #include "platforms/shared/coroutine_null.impl.hpp"
 #else
 // Unknown platform: null everything
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 #include "platforms/coroutine_runtime.h"
 #include "platforms/shared/coroutine_null.impl.hpp"
 

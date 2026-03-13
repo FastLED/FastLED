@@ -7,7 +7,7 @@
 
 #include "platforms/esp/32/drivers/uart_esp32.h"
 #include "fl/stl/assert.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 #include "platforms/esp/esp_version.h"
 
 // ESP-IDF headers (only in .cpp.hpp, not in .h)

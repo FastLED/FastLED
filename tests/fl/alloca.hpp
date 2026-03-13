@@ -1,7 +1,7 @@
-#include "fl/alloca.h"
+#include "fl/stl/alloca.h"
 #include "fl/stl/stdint.h"
 #include "test.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 using namespace fl;
 

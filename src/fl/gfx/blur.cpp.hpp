@@ -8,12 +8,12 @@
 #include "crgb.h"
 #include "fl/gfx/blur.h"
 #include "fl/gfx/colorutils_misc.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/error.h"
 #include "fl/unused.h"
 #include "fl/xymap.h"
 #include "lib8tion/scale8.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 // Legacy XY function. This is a weak symbol that can be overridden by the user.
 // IMPORTANT: This MUST be in the global namespace (not fl::) for backward compatibility

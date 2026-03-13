@@ -4,7 +4,7 @@
 // 2D Perlin noise i16-optimized implementation
 // Implementation file - included from perlin_i16_optimized.h
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/fx/2d/animartrix_detail/perlin_i16_optimized.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN

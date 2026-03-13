@@ -10,7 +10,7 @@
 
 // IWYU pragma: begin_keep
 #include "platforms/coroutine_runtime.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 // IWYU pragma: end_keep
 
 namespace fl {

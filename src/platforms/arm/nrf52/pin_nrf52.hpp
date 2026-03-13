@@ -15,7 +15,7 @@
 // Native nRF52 Path: Direct Nordic SDK register manipulation
 // ============================================================================
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 // Include Nordic SDK headers for native GPIO and peripheral access
 FL_EXTERN_C_BEGIN

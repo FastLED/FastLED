@@ -7,7 +7,7 @@
 #include "fl/stl/allocator.h"  // IWYU pragma: keep
 
 #include "fl/stl/initializer_list.h"  // IWYU pragma: keep
-#include "fl/alloca.h"  // IWYU pragma: keep
+#include "fl/stl/alloca.h"  // IWYU pragma: keep
 
 namespace fl {
 

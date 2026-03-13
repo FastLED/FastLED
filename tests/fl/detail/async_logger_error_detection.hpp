@@ -14,7 +14,7 @@
 
 #include "test.h"
 #include "fl/detail/async_logger.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 using namespace fl;
 

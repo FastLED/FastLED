@@ -4,8 +4,8 @@
 
 // allow-include-after-namespace
 
-#include "fl/align.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/align.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/stdint.h"
 
 namespace fl {

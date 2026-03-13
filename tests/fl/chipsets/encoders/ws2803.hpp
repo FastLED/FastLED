@@ -26,7 +26,7 @@
 #include "fl/stl/cstddef.h"
 #include "fl/stl/new.h"
 #include "test.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "initializer_list"
 #include "fl/stl/vector.h"
 

@@ -10,7 +10,7 @@
 /// Priority Order:
 /// - SPI_UNIFIED (6): True SPI hardware (dual-lane via SERCOM)
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 #if defined(ARDUINO_SAMD_ZERO) || defined(ADAFRUIT_FEATHER_M0) || \
     defined(ARDUINO_SAMD_FEATHER_M0) || defined(ARDUINO_SAM_ZERO) || \

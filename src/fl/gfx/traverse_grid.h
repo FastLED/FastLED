@@ -10,7 +10,7 @@ intersecting the line and calls a visitor function for each cell.
 #include "fl/geometry.h"
 #include "fl/math_macros.h"
 #include "fl/stl/limits.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 namespace fl {
 

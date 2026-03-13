@@ -53,7 +53,7 @@ FL_EXTERN_C_END
 #endif
 
 // FL_MEMORY_BARRIER for ISR synchronization
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 namespace fl {
 namespace detail {

@@ -31,8 +31,8 @@ _WHITELISTED_SUFFIXES: tuple[str, ...] = (
     # String holder (uses malloc/realloc/free internally)
     "fl/stl/detail/string_holder.cpp.hpp",
     # Memory introspection
-    "fl/memory.h",
-    "fl/memory.cpp.hpp",
+    "fl/system/heap.h",
+    "fl/system/heap.cpp.hpp",
 )
 
 _SUPPRESSION_OK = "// ok bare allocation"

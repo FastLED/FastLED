@@ -1,11 +1,11 @@
 #pragma once
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/variant.h"
 #include "fl/audio/audio.h"
 #include "fl/audio/mic_profiles.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/audio.h"
 
 #ifndef FASTLED_HAS_AUDIO_INPUT

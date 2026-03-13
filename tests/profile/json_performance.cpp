@@ -9,7 +9,7 @@
 //   ./json_performance all          # Run all benchmarks
 
 #include "fl/file_system.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/json.h"
 #include "fl/stl/chrono.h"
 #include "fl/stl/cstdint.h"

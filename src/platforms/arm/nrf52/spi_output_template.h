@@ -5,7 +5,7 @@
 /// @file spi_output_template.h
 /// @brief NRF52 SPIOutput template definition
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "platforms/arm/nrf52/fastspi_arm_nrf52.h"
 
 namespace fl {

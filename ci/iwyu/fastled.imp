@@ -112,14 +112,14 @@
   # Platform Integer Type Headers (Internal Implementation)
   # ========================================================================
   # Platform-specific integer type headers are internal implementation details.
-  # All code should use the public API: fl/int.h or fl/stl/stdint.h
+  # All code should use the public API: fl/stl/int.h or fl/stl/stdint.h
   #
-  { include: ['"platforms/shared/int_windows.h"', 'private', '"fl/int.h"', 'public'] },
-  { include: ['"platforms/shared/int.h"', 'private', '"fl/int.h"', 'public'] },
-  { include: ['"platforms/int.h"', 'private', '"fl/int.h"', 'public'] },
-  { include: ['@"platforms/.*/int.*\\.h"', 'private', '"fl/int.h"', 'public'] },
-  # fl/stl/stdint.h re-exports fl/int.h (via IWYU pragma: export in source).
-  # This means files including fl/stl/stdint.h don't need fl/int.h separately.
+  { include: ['"platforms/shared/int_windows.h"', 'private', '"fl/stl/int.h"', 'public'] },
+  { include: ['"platforms/shared/int.h"', 'private', '"fl/stl/int.h"', 'public'] },
+  { include: ['"platforms/int.h"', 'private', '"fl/stl/int.h"', 'public'] },
+  { include: ['@"platforms/.*/int.*\\.h"', 'private', '"fl/stl/int.h"', 'public'] },
+  # fl/stl/stdint.h re-exports fl/stl/int.h (via IWYU pragma: export in source).
+  # This means files including fl/stl/stdint.h don't need fl/stl/int.h separately.
 
   # ========================================================================
   # Platform-Specific Headers (Not Available on Host Platform)
@@ -215,11 +215,11 @@
   # ========================================================================
   # IWYU resolves platform #ifdef chains and reports the final resolved path.
   # These don't exist as literal #include lines in our source.
-  { include: ['"platforms/arm/is_arm.h"', 'private', '"fl/int.h"', 'public'] },
+  { include: ['"platforms/arm/is_arm.h"', 'private', '"fl/stl/int.h"', 'public'] },
   { include: ['"platforms/delay.h"', 'private', '"fl/delay.h"', 'public'] },
   { include: ['"platforms/trig8.h"', 'private', '"fl/trig8.h"', 'public'] },
   { include: ['"platforms/fastpin.h"', 'private', '"fl/fastpin.h"', 'public'] },
-  { include: ['"platforms/is_platform.h"', 'private', '"fl/int.h"', 'public'] },
+  { include: ['"platforms/is_platform.h"', 'private', '"fl/stl/int.h"', 'public'] },
   { include: ['"platforms/stub/semaphore_stub.h"', 'private', '"fl/stl/semaphore.h"', 'public'] },
   { include: ['"native_client.h"', 'private', '"fl/stl/asio/http/stream_client.h"', 'public'] },
   { include: ['"native_server.h"', 'private', '"fl/stl/asio/http/stream_server.h"', 'public'] },

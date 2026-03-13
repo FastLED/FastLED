@@ -17,7 +17,7 @@
 #include "platforms/shared/spi_manager.h"  // For DMABuffer, TransmitMode, SPIError
 #include "platforms/esp/32/drivers/spi/spi_hw_base.h"  // Common ESP32 SPI definitions
 #include "fl/stl/cstring.h"
-#include "fl/numeric_limits.h"
+#include "fl/stl/limits.h"
 // IWYU pragma: begin_keep
 #include <driver/spi_master.h>
 #include <esp_heap_caps.h>

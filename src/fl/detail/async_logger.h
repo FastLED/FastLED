@@ -4,8 +4,8 @@
 /// @brief ISR-safe async logger using SPSC queue backend (zero heap allocation)
 
 #include "fl/detail/async_log_queue.h"
-#include "fl/int.h"
-#include "fl/singleton.h"
+#include "fl/stl/int.h"
+#include "fl/stl/singleton.h"
 #include "fl/stl/task.h"
 
 namespace fl {

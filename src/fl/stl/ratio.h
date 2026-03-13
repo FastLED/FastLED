@@ -6,7 +6,7 @@
 /// This header provides ratio types for representing compile-time rational numbers,
 /// used primarily for duration period types in fl::chrono.
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 namespace fl {
 

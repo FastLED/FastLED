@@ -16,7 +16,7 @@
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/warn.h"
 #include "fl/log.h"
-#include "fl/numeric_limits.h"
+#include "fl/stl/limits.h"
 // IWYU pragma: begin_keep
 #include <SPI.h>
 #include <imxrt.h>

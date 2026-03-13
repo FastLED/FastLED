@@ -5,7 +5,7 @@
 #include "fl/stl/json.h"  // IWYU pragma: keep
 #include "fl/stl/string.h"
 #include "fl/stl/url.h"
-#include "fl/int.h"  // IWYU pragma: keep
+#include "fl/stl/int.h"  // IWYU pragma: keep
 #include "fl/audio/audio.h"
 #include "fl/audio/audio_input.h"  // For AudioConfig  // IWYU pragma: keep
 #include "fl/engine_events.h"
@@ -17,7 +17,7 @@
 #include "platforms/ui_defs.h"
 #include "fl/sensors/button.h"  // IWYU pragma: keep
 #include "fl/virtual_if_not_avr.h"
-#include "fl/int.h"  // IWYU pragma: keep
+#include "fl/stl/int.h"  // IWYU pragma: keep
 
 #define FL_NO_COPY(CLASS)                                                      \
     CLASS(const CLASS &) = delete;                                             \

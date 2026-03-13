@@ -4,7 +4,7 @@
 // IWYU pragma: end_keep  // for u8, u32, u16
 #include "FastLED.h"
 #include "fl/engine_events.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/channels/channel.h"
 #include "fl/channels/channel_events.h"
 #include "fl/channels/manager.h"
@@ -16,7 +16,7 @@
 #include "fl/ui.h"  // for UIAudio
 #include "fl/stl/assert.h"  // for FL_ASSERT
 #include "hsv2rgb.h"  // for CRGB
-#include "fl/int.h"  // for u32, u16
+#include "fl/stl/int.h"  // for u32, u16
 #include "platforms/init.h"  // IWYU pragma: keep
 #include "fl/channels/config.h"  // for ChannelConfig
 #include "platforms/is_platform.h"

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "platforms/is_platform.h"  // IWYU pragma: keep
-#include "fl/assume_aligned.h"
+#include "fl/stl/align.h"
 
 // Stringify helper for pragma arguments
 #define FL_STRINGIFY2(x) #x

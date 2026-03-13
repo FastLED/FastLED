@@ -37,7 +37,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/warn.h"
-#include "fl/numeric_limits.h"
+#include "fl/stl/limits.h"
 #include "platforms/wasm/js.h"
 // IWYU pragma: begin_keep
 // IWYU pragma: end_keep

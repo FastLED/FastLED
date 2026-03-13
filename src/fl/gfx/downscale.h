@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 /*
 Experimental bilinearn downscaling algorithm. Not tested yet and completely

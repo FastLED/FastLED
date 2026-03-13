@@ -13,14 +13,14 @@ Research the correct primitive type mappings for `fl::i8`, `fl::u8`, `fl::i16`, 
 ## Critical Constraints
 
 **🚨 ABSOLUTELY FORBIDDEN:**
-- **NEVER modify `fl/int.h`** - This file defines the core type system
+- **NEVER modify `fl/stl/int.h`** - This file defines the core type system
 - **NEVER modify `fl/stdint.h`** - This file provides standard type compatibility
 - **If the task requires modifying these files, HALT IMMEDIATELY and report:**
   ```
   ❌ TASK IMPOSSIBLE
 
   The requested changes require modifying protected files:
-  - fl/int.h
+  - fl/stl/int.h
   - fl/stdint.h
 
   These files must not be changed. The task cannot be completed under current constraints.
@@ -121,7 +121,7 @@ Pointer and size types should match platform word size:
 - **Document your reasoning** in comments
 - **Use TodoWrite** to track progress
 - **Check existing patterns** in other platform files for consistency
-- **Halt if constrained** - don't try to work around the fl/int.h constraint
+- **Halt if constrained** - don't try to work around the fl/stl/int.h constraint
 
 ## Example Research Process
 

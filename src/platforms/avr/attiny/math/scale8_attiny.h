@@ -6,7 +6,7 @@
 #include "crgb.h"
 #include "fastled_config.h"
 #include "lib8tion/lib8static.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/force_inline.h"
 
 namespace fl {

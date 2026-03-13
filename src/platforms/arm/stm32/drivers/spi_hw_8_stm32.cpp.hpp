@@ -49,7 +49,7 @@
 // - U5 (GPDMA architecture - not yet implemented)
 
 #include "fl/stl/stdint.h"
-#include "fl/numeric_limits.h"
+#include "fl/stl/limits.h"
 // IWYU pragma: begin_keep
 #include "fl/arduino.h"
 // IWYU pragma: end_keep

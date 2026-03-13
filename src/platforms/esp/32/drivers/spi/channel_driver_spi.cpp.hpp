@@ -43,7 +43,7 @@
 #include "fl/stl/chrono.h"
 #include "platforms/esp/32/drivers/spi/spi_hw_base.h" // SPI host definitions (SPI2_HOST, SPI3_HOST)
 #include "platforms/esp/is_esp.h" // Platform detection (FL_IS_ESP_32C6, etc.)
-#include "fl/compiler_control.h" // FL_MEMORY_BARRIER for cache coherence
+#include "fl/stl/compiler_control.h" // FL_MEMORY_BARRIER for cache coherence
 
 FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep

@@ -12,7 +12,7 @@
 #include "fl/warn.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/cstring.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 #include "fl/stl/atomic.h"
 
 // IWYU pragma: begin_keep

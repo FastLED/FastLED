@@ -3,7 +3,7 @@
 /// @brief Tests for fl::scope_exit (P0052-style scope guard)
 
 #include "test.h"
-#include "fl/scope_exit.h"
+#include "fl/stl/scope_exit.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

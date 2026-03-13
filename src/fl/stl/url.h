@@ -5,9 +5,9 @@
 /// Parses once on construction; accessors return fl::string_view into the
 /// owned fl::string — zero-copy, trivially cheap.
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/string.h"
-#include "fl/string_view.h"
+#include "fl/stl/string_view.h"
 
 namespace fl {
 

@@ -1,5 +1,5 @@
 #include "fl/stl/asio/fetch.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 #include "fl/engine_events.h"
 #include "fl/stl/async.h"
 #include "fl/stl/unique_ptr.h"  // For make_unique
@@ -21,7 +21,7 @@
 // Native networking includes
 #if defined(FASTLED_HAS_NETWORKING) && !defined(FL_IS_WASM)
 #include "fl/stl/cstdlib.h"  // for atoi
-#include "fl/int.h"  // for u16
+#include "fl/stl/int.h"  // for u16
 
 #ifdef FL_IS_WIN
     #include "platforms/win/socket_win.h"  // ok platform headers  // IWYU pragma: keep

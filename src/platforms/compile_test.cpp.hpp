@@ -1,7 +1,7 @@
 
 #define FASTLED_INTERNAL  
 #include "fl/fastled.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/type_traits.h"
 
@@ -17,7 +17,7 @@
 
 #if FASTLED_USE_COMPILE_TESTS
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH
 

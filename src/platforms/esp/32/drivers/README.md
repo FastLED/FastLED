@@ -116,7 +116,7 @@ When adding a new driver (SPI, I2C, Timer, etc.):
 
 3. **Include proper headers:**
    - Use `FL_EXTERN_C_BEGIN/END` for ESP-IDF C headers
-   - Include `fl/compiler_control.h` for macros
+   - Include `fl/stl/compiler_control.h` for macros
    - Include `platforms/esp/esp_version.h` for version detection
 
 4. **Document:**

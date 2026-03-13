@@ -38,12 +38,12 @@
 
 // IWYU pragma: private
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 #include "fl/stl/isr/memcpy.h"
 #include "fl/unused.h"
 #include "platforms/memory_barrier.h"
-#include "fl/align.h"
+#include "fl/stl/align.h"
 
 namespace fl {
 namespace detail {

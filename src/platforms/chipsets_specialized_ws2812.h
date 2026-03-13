@@ -11,7 +11,7 @@
 // If FASTLED_WS2812_HAS_SPECIAL_DRIVER is 0, then a default driver
 // will be used, otherwise the platform provides a special driver.
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "eorder.h"
 
 #ifndef FASTLED_OVERCLOCK

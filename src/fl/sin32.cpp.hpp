@@ -1,6 +1,6 @@
 
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/sin32.h"
 #include "fastled_progmem.h"
 

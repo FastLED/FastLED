@@ -19,7 +19,7 @@
 /// Unlike ESP32, STM32 currently has no clockless drivers, so only
 /// true SPI hardware is registered.
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 #include "platforms/arm/stm32/is_stm32.h"
 

@@ -19,7 +19,7 @@
 #else
     // Libmaple or other cores without CMSIS - use our definitions
     #include "platforms/arm/stm32/cm3_regs.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER

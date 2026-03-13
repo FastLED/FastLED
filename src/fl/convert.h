@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 // Conversion from FastLED timings to the type found in datasheets.
 inline void convert_fastled_timings_to_timedeltas(fl::u16 T1, fl::u16 T2,

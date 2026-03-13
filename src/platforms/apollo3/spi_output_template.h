@@ -5,7 +5,7 @@
 /// @file spi_output_template.h
 /// @brief Apollo3 SPIOutput template definition
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "platforms/apollo3/fastspi_apollo3.h"
 
 namespace fl {

@@ -9,7 +9,7 @@
 #if FASTLED_ENABLE_JSON
 
 #include "fl/delay.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/cctype.h"
 #include "fl/stl/chrono.h"
 #include "fl/stl/cstdio.h"
@@ -19,7 +19,7 @@
 #include "fl/stl/pair.h"
 #include "fl/stl/string.h"
 #include "fl/stl/strstream.h"
-#include "fl/string_view.h"
+#include "fl/stl/string_view.h"
 
 namespace fl {
 

@@ -15,7 +15,7 @@
 /// This file now contains only channel management logic. All hardware-specific
 /// operations have been moved to parlio_engine.{h,cpp}.
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 #include "platforms/esp/32/drivers/parlio/channel_driver_parlio.h"
 #include "fl/channels/config.h"

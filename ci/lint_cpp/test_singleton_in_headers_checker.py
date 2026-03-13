@@ -70,7 +70,7 @@ class TestSingletonInHeadersChecker(unittest.TestCase):
     def test_singleton_h_itself_excluded(self):
         violations = _get_violations(
             "template <typename T> class Singleton {",
-            path="src/fl/singleton.h",
+            path="src/fl/stl/singleton.h",
         )
         self.assertEqual(len(violations), 0)
 

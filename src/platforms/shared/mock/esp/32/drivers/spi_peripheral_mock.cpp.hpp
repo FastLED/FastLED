@@ -14,7 +14,7 @@
 #include "fl/warn.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/cstring.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 
 #ifdef FL_IS_WIN
 // IWYU pragma: begin_keep

@@ -4,7 +4,7 @@
 // License: CC BY 4.0 - https://heraldod.itch.io/bitmap-fonts
 
 #include "fl/font/ttf_covenant5x5.h"
-#include "fl/align.h"
+#include "fl/stl/align.h"
 
 namespace fl {
 namespace ttf {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/stl/stdint.h"  // IWYU pragma: keep
-#include "fl/int.h"  // IWYU pragma: keep
+#include "fl/stl/int.h"  // IWYU pragma: keep
 
 // TODO: Figure out how to namespace these.
 typedef fl::u32 TProgmemRGBPalette16[16]; ///< CRGBPalette16 entries stored in

@@ -15,7 +15,7 @@
 /// - SPI (0): Deprioritized due to reliability issues (ESP32-S3, others)
 /// - UART (-1): Lowest priority, broken (all ESP32 variants, not recommended)
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 

@@ -11,15 +11,15 @@
 /// Currently uses scalar fallback - RISC-V vector extensions (RVV) could be added in the future.
 
 #include "fl/stl/stdint.h"  // IWYU pragma: keep
-#include "fl/align.h"  // IWYU pragma: keep
+#include "fl/stl/align.h"  // IWYU pragma: keep
 
 #if defined(FL_IS_ESP_32C2) || defined(FL_IS_ESP_32C3) || \
     defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32C6) || \
     defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32P4)
 
 #include "fl/force_inline.h"
-#include "fl/compiler_control.h"
-#include "fl/assume_aligned.h"
+#include "fl/stl/compiler_control.h"
+#include "fl/stl/align.h"
 #include "fl/has_include.h"
 #include "fl/stl/math.h"  // for sqrtf
 

@@ -2,7 +2,7 @@
 
 #include "fl/file_system.h"
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
-#include "fl/int.h"
+#include "fl/stl/int.h"
 namespace fl {
 class filebuf;
 using filebuf_ptr = fl::shared_ptr<filebuf>;

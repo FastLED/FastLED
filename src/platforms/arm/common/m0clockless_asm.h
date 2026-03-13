@@ -31,7 +31,7 @@
  * - M0+: 2-cycle branches, different timing compensation needed
  ******************************************************************************/
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 #include "fl/stl/stdint.h"
 

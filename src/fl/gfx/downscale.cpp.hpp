@@ -3,7 +3,7 @@
 // VIBE CODED WITH AI
 
 #include "fl/gfx/downscale.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 #include "crgb.h"
 #include "fl/stl/assert.h"

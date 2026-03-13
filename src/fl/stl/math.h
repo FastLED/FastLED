@@ -14,9 +14,9 @@
 // Backward-compatible headers fl/math_macros.h and fl/clamp.h still exist
 // and forward here.
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/force_inline.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/undef.h"  // IWYU pragma: keep
 

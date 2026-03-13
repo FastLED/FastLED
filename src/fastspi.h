@@ -33,7 +33,7 @@
 #include "lib8tion.h"
 #include "fastspi_types.h"
 #include "platforms/shared/spi_bitbang/generic_software_spi.h"  // ok platform headers
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "platforms/cpu_frequency.h"
 
 // Include platform-specific SPI device proxy implementations BEFORE FastLED.h

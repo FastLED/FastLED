@@ -11,8 +11,8 @@
 //              SoA loads → sincos32_simd → Perlin → clamp/scale → scatter).
 //              Perlin exits to scalar per-lane (SSE2 has no integer gather).
 
-#include "fl/align.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/align.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/fx/2d/animartrix_detail/engine.h"
 #include "fl/fx/2d/animartrix_detail/chasing_spiral_state.h"
 #include "fl/fx/2d/animartrix_detail/perlin_s16x16.h"

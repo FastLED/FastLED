@@ -3,7 +3,7 @@
 // JSON implementation types and helpers
 // Internal header - do not include directly, use fl/stl/json.h instead
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/unordered_map.h"
@@ -19,7 +19,7 @@
 #include "fl/stl/type_traits.h"
 #include "fl/log.h"
 #include "fl/promise.h" // For Error type
-#include "fl/string_view.h"
+#include "fl/stl/string_view.h"
 
 #include "fl/sketch_macros.h"
 

@@ -27,7 +27,7 @@
 #include "platforms/shared/spi_manager.h"
 #include "platforms/arm/mxrt1062/fastspi_arm_mxrt1062.h"
 #include "fl/stl/stdint.h"
-#include "fl/stddef.h"
+#include "fl/stl/stddef.h"
 #include "fl/log.h"
 // IWYU pragma: begin_keep
 #include <SPI.h>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/type_traits.h"
 #include "fl/gfx/crgb.h"  // IWYU pragma: keep
 #include "fl/stl/move.h"  // IWYU pragma: keep

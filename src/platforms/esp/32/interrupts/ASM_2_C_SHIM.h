@@ -3,7 +3,7 @@
 
 // IWYU pragma: private
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 /*
  * ESP32 NMI (Level 7) Assembly-to-C Shim Macros

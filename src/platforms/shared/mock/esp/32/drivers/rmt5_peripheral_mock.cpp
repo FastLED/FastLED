@@ -12,7 +12,7 @@
 #include "fl/stl/allocator.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/cstring.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 #include "fl/stl/unordered_map.h"
 
 #ifdef FL_IS_WIN

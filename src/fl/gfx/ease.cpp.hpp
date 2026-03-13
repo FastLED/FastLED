@@ -10,13 +10,13 @@
 #include "fl/stl/math.h"
 #include "lib8tion/intmap.h"
 #include "fl/sin32.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/math.h"
 #include "fl/stl/weak_ptr.h"
 #include "fl/stl/unordered_map.h"
-#include "fl/align.h"
+#include "fl/stl/align.h"
 #include "fl/stl/fixed_point.h"
-#include "fl/hash.h"
+#include "fl/stl/hash.h"
 
 namespace fl {
 

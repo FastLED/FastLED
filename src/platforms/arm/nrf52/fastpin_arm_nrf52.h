@@ -169,7 +169,7 @@ public:
 
 // Include variant-specific pin definitions
 #include "platforms/arm/nrf52/fastpin_arm_nrf52_variants.h" // allow-include-after-namespace
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER

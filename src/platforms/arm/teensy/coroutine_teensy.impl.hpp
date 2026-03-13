@@ -21,8 +21,8 @@
 #include "fl/stl/string.h"
 #include "fl/stl/functional.h"
 #include "fl/stl/unique_ptr.h"
-#include "fl/int.h"
-#include "fl/singleton.h"
+#include "fl/stl/int.h"
+#include "fl/stl/singleton.h"
 #include "fl/warn.h"
 #include "fl/arduino.h"
 // IWYU pragma: end_keep

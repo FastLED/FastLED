@@ -10,7 +10,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/math.h"
 #include "fl/stl/shared_ptr.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/strstream.h"
 

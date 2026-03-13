@@ -9,15 +9,15 @@
 #include "fl/stl/map.h"
 #include "fl/stl/vector.h"
 #include "test.h"
-#include "fl/compiler_control.h"
-#include "fl/hash.h"
+#include "fl/stl/compiler_control.h"
+#include "fl/stl/hash.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/move.h"
 #include "fl/stl/pair.h"
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
 #include "initializer_list"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

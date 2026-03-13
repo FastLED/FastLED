@@ -6,7 +6,7 @@
 /// This file provides the implementation of platform initialization for WASM.
 /// It initializes the driver listener system for JavaScript runtime integration.
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/wasm/is_wasm.h"
 
 #ifdef FL_IS_WASM

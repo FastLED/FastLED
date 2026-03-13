@@ -10,7 +10,7 @@
 #pragma once
 
 #include "fl/vector.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 
 namespace fl {
 

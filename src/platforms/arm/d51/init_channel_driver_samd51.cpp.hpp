@@ -10,7 +10,7 @@
 /// Priority Order:
 /// - SPI_UNIFIED (6-7): True SPI hardware (quad/dual-lane via SERCOM)
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/arm/samd/is_samd.h"
 
 #if defined(FL_IS_SAMD51)

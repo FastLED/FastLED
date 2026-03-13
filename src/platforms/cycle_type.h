@@ -7,7 +7,7 @@
 /// Platform-specific typedef for CPU clock cycle counts
 /// Used as template parameter for delaycycles<cycle_t CYCLES>()
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 namespace fl {
 

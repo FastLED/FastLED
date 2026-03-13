@@ -8,13 +8,13 @@
 
 #if FL_BLE_AVAILABLE
 
-#include "fl/int.h"
-#include "fl/memory.h"
+#include "fl/stl/int.h"
+#include "fl/system/heap.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/string.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/cctype.h"
-#include "fl/string_view.h"
+#include "fl/stl/string_view.h"
 #include "fl/warn.h"
 #include "fl/remote/transport/serial.h" // for formatJsonResponse
 

@@ -16,7 +16,7 @@
 #include "ValidationNet.h"
 #include "ValidationOta.h"
 #include "fl/remote/transport/serial.h"
-#include "fl/memory.h"
+#include "fl/system/heap.h"
 #include "Common.h"
 #include "ValidationTest.h"
 #include "ValidationHelpers.h"
@@ -30,7 +30,7 @@
 #include "fl/promise.h"
 #include "fl/simd.h"
 #include "ValidationSimd.h"
-#include "fl/memory.h"
+#include "fl/system/heap.h"
 #include <Arduino.h>
 
 #include "fl/stl/asio/ble.h"

@@ -16,7 +16,7 @@
 
 #include "fastspi_types.h"
 #include "platforms/arm/stm32/is_stm32.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER

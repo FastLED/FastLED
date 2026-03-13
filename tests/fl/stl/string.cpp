@@ -2,8 +2,8 @@
 // Combines tests from: str.cpp, string_comprehensive.cpp, string_memory_bugs.cpp, string_optimization.cpp
 // This tests the fl::string implementation in fl/stl/string.h and fl/stl/string.cpp
 
-#include "fl/compiler_control.h"
-#include "fl/int.h"
+#include "fl/stl/compiler_control.h"
+#include "fl/stl/int.h"
 #include "fl/stl/cstdint.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/iterator.h"

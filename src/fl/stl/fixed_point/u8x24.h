@@ -4,9 +4,9 @@
 // All operations are integer-only in the hot path.
 // Range: [0, 256) with 24 fractional bits.
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/fixed_point/isqrt.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/fixed_point/traits.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN

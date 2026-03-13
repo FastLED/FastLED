@@ -17,7 +17,7 @@
 // to test::fl:: inside the test namespace.
 #include "test.h"
 #include "fl/audio/fft/fft.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/log.h"
 #include "fl/stl/math.h"
 #include "fl/stl/span.h"

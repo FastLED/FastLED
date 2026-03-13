@@ -3,7 +3,7 @@
 
 // IWYU pragma: private
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 // Assembly Shims for High-Priority Interrupts on ESP32-S3 (Xtensa LX7)
 //
 // This file provides assembly interrupt service routine (ISR) shims for

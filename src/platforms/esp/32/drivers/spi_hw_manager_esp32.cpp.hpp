@@ -11,7 +11,7 @@
 /// - SpiHw16 (9): Highest priority, 16-lane I2S parallel mode (ESP32, ESP32-S2 only)
 /// - SpiHw1 (5): Standard single-lane SPI (all ESP32 variants)
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/esp/is_esp.h"
 
 #ifdef FL_IS_ESP32

@@ -18,7 +18,7 @@ Based on works and code by Shawn Silverman.
 #include "fl/grid.h"
 #include "fl/stl/unique_ptr.h"  // For unique_ptr
 #include "fl/gfx/supersample.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 namespace fl {
 

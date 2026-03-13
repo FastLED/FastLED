@@ -38,7 +38,7 @@
 #include "fl/warn.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/chrono.h"
-#include "fl/numeric_limits.h"
+#include "fl/stl/limits.h"
 // IWYU pragma: begin_keep
 #include "fl/arduino.h"
 #include <wiring_private.h>

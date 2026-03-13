@@ -4,7 +4,7 @@
 // 2D Perlin noise Q16 implementation
 // Implementation file - included from perlin_q16.h
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/fx/2d/animartrix_detail/perlin_q16.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN

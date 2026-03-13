@@ -5,7 +5,7 @@
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 namespace fl {
 class FFTBins;  // Forward declaration

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/stl/thread_config.h"  // For FASTLED_MULTITHREADED (no circular deps)
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 // Determine if we need real atomics:
 // 1. Multi-threaded mode (pthread support)

@@ -37,7 +37,7 @@
 #include "crgb.h"
 #include "test.h"
 #include "fl/stl/fixed_point.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/ios.h"
 #include "fl/stl/string.h"

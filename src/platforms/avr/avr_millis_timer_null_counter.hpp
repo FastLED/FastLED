@@ -3,7 +3,7 @@
 
 // IWYU pragma: private
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 // Defines a weak (or strong for some attiny x/y parts) symbol for timer_millis
 // to allow linking with boards whose core does not provide this variable.

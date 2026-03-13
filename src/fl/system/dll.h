@@ -9,7 +9,7 @@
 
 #if FASTLED_BUILD_EXPORTS
 
-#include "fl/export.h"
+#include "fl/system/export.h"
 
 FL_EXTERN_C_BEGIN
 
@@ -17,7 +17,7 @@ FL_EXTERN_C_BEGIN
 /// @note This is the C ABI export for external sketch runners
 FASTLED_EXPORT void sketch_setup(void);
 
-/// Call the sketch's loop() function  
+/// Call the sketch's loop() function
 /// @note This is the C ABI export for external sketch runners
 FASTLED_EXPORT void sketch_loop(void);
 
@@ -35,12 +35,12 @@ extern void setup();
 extern void loop();
 
 // Provide implementations for the exported functions
-FASTLED_EXPORT void sketch_setup() { 
-    setup(); 
+FASTLED_EXPORT void sketch_setup() {
+    setup();
 }
 
-FASTLED_EXPORT void sketch_loop() { 
-    loop(); 
+FASTLED_EXPORT void sketch_loop() {
+    loop();
 }
 #endif // __cplusplus
 

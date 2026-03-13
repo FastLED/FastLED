@@ -6,7 +6,7 @@
 #include "pixeltypes.h"       // CRGB
 #include "controller.h"       // CLEDController
 #include "fastpin.h"          // Pin
-#include "fl/int.h"           // fl::u32, fl::u8
+#include "fl/stl/int.h"           // fl::u32, fl::u8
 #include "power_mgt.h"        // Function declarations (to avoid redefinition errors)
 // POWER MANAGEMENT
 

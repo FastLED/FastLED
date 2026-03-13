@@ -8,7 +8,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/bitset.h"
 #include "fl/stl/malloc.h"
-#include "fl/align.h"
+#include "fl/stl/align.h"
 
 #ifndef FASTLED_DEFAULT_SLAB_SIZE
 #define FASTLED_DEFAULT_SLAB_SIZE 8

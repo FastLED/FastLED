@@ -5,7 +5,7 @@ Provides eanble_if and is_derived for compilers before C++14.
 */
 
 #include "fl/stl/move.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 namespace fl { // mandatory namespace to prevent name collision with
                // std::enable_if.

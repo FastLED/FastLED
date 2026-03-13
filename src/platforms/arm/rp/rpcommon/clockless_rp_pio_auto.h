@@ -64,8 +64,8 @@
 ///
 /// This is a **hardware limitation** of the PIO `out pins, N` instruction.
 
-#include "fl/compiler_control.h"
-#include "fl/int.h"
+#include "fl/stl/compiler_control.h"
+#include "fl/stl/int.h"
 #include "crgb.h"
 #include "cpixel_ledcontroller.h"
 #include "pixel_controller.h"

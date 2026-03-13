@@ -4,7 +4,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/function.h"
 #include "test.h"
-#include "fl/hash.h"
+#include "fl/stl/hash.h"
 #include "fl/log.h"
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"

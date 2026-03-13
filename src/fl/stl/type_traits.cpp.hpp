@@ -1,7 +1,7 @@
 
 #include "fl/stl/type_traits.h"
-#include "fl/int.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/int.h"
+#include "fl/stl/compiler_control.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"

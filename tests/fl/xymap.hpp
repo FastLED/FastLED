@@ -3,7 +3,7 @@
 #include "FastLED.h"
 #include "test.h"
 #include "fl/xymap.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 
 namespace xymap_test {

@@ -4,7 +4,7 @@
 // Bit-by-bit algorithm — no float, no division.
 // Uses recursive helpers for C++11 constexpr compatibility.
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 namespace fl {
 

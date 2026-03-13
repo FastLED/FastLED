@@ -10,7 +10,7 @@ LUT - Look up table implementation for various types.
 #include "fl/stl/unique_ptr.h"
 // IWYU pragma: end_keep  // For fl::unique_ptr<T>
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/geometry.h"
 namespace fl {
 

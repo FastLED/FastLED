@@ -8,7 +8,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/string.h"
 #include "fl/stl/optional.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 // Forward declarations for detail modules
 namespace fl {

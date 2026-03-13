@@ -4,8 +4,8 @@
 #include "fl/stl/cstddef.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/functional.h"
-#include "fl/int.h"
-#include "fl/singleton.h"
+#include "fl/stl/int.h"
+#include "fl/stl/singleton.h"
 #include "fl/engine_events.h"
 
 namespace fl {

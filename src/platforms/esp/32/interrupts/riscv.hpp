@@ -5,7 +5,7 @@
 
 #include "platforms/esp/is_esp.h"
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 // Assembly Shims for High-Priority Interrupts on ESP32-C3/C6 (RISC-V)
 //
 // This file provides interrupt service routine (ISR) shims for high-priority

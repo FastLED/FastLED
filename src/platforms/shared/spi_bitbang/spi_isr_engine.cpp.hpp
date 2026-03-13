@@ -43,7 +43,7 @@
 #if SKETCH_HAS_LOTS_OF_MEMORY || defined(STUB_PLATFORM)
 
 #include "fl/stl/stdint.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/shared/spi_bitbang/spi_isr_engine.h"
 #include "fl/stl/atomic.h"
 

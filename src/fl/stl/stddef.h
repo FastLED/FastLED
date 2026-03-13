@@ -18,7 +18,7 @@
 #endif
 
 #else
-// C language support: delegate to fl/cstddef.h
+// C language support: delegate to fl/stl/cstddef.h
 #include "fl/stl/cstddef.h"
 
 #endif  // __cplusplus

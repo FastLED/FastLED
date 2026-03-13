@@ -5,7 +5,7 @@
 /// @file spi_output_template.h
 /// @brief SAM SPIOutput template definition
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "platforms/arm/sam/fastspi_arm_sam.h"
 #include "platforms/arm/sam/is_sam.h"
 #include "platforms/arm/samd/is_samd.h"

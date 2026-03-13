@@ -15,7 +15,7 @@
 // Compile on ESP32 with PARLIO support OR on stub platform for testing
 #if (defined(FL_IS_ESP32) && FASTLED_ESP32_HAS_PARLIO) || defined(FASTLED_STUB_IMPL)
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/unused.h"
 #include "platforms/memory_barrier.h"  // For FL_MEMORY_BARRIER
 

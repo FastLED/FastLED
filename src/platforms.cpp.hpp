@@ -3,7 +3,7 @@
 
 /// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/is_platform.h"
 
 // Removed duplicate weak definition of timer_millis for ATtiny1604.

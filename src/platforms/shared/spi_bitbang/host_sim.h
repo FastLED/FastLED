@@ -22,7 +22,7 @@
 #ifdef FASTLED_SPI_HOST_SIMULATION
 
 #include "fl/stl/stdint.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 FL_EXTERN_C_BEGIN
 

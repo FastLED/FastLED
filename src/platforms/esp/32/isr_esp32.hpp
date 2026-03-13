@@ -22,7 +22,7 @@
 
 #if defined(FL_IS_ESP32)
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 // Use FastLED's ESP-IDF version detection header (handles IDF 3.3+)
 #include "platforms/esp/esp_version.h"

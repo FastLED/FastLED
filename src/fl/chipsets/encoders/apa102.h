@@ -21,7 +21,7 @@
 #include "fl/stl/array.h"
 #include "fl/chipsets/encoders/encoder_utils.h"
 #include "fl/chipsets/encoders/encoder_constants.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 namespace fl {
 

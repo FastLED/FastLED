@@ -9,7 +9,7 @@
 /// Platforms register via ICoroutinePlatform::setInstance().
 
 #include "platforms/coroutine_runtime.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 #include "fl/warn.h"
 
 namespace fl {

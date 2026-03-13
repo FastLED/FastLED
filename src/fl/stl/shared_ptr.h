@@ -4,8 +4,8 @@
 #include "fl/stl/cstddef.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/atomic.h"
-#include "fl/int.h"
-#include "fl/align.h"
+#include "fl/stl/int.h"
+#include "fl/stl/align.h"
 
 
 namespace fl {

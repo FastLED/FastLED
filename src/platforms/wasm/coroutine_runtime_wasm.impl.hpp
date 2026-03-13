@@ -17,7 +17,7 @@
 #include "platforms/wasm/coroutine_platform_wasm.hpp"
 #include "platforms/coroutine_runtime.h"
 #include "platforms/coroutine.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 #include "fl/stl/string.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/warn.h"

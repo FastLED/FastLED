@@ -9,12 +9,12 @@
 /// Currently uses scalar fallback - PIE intrinsics to be added later.
 
 #include "fl/stl/stdint.h"  // IWYU pragma: keep
-#include "fl/align.h"  // IWYU pragma: keep
+#include "fl/stl/align.h"  // IWYU pragma: keep
 
 #if defined(__XTENSA__)
 
 #include "fl/force_inline.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/has_include.h"
 #include "fl/stl/math.h"  // for sqrtf
 

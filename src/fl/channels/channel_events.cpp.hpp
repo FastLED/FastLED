@@ -1,5 +1,5 @@
 #include "fl/channels/channel_events.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 
 namespace fl {
 

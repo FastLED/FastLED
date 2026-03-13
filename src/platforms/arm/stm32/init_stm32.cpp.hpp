@@ -6,7 +6,7 @@
 /// This file provides the implementation of platform initialization for STM32.
 /// It initializes the SPI hardware controllers via weak linkage pattern.
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/arm/stm32/is_stm32.h"
 
 #ifdef FL_IS_STM32

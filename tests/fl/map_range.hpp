@@ -1,7 +1,7 @@
 #include "fl/stl/math.h"
 #include "fl/geometry.h"
 #include "test.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 using namespace fl;
 

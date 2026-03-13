@@ -15,7 +15,7 @@
 #include "platforms/is_platform.h"
 #if defined(FL_IS_ESP32) || defined(FASTLED_STUB_IMPL)
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 #ifdef FL_IS_ESP32
 #include "platforms/esp/32/feature_flags/enabled.h"
@@ -42,7 +42,7 @@
 #include "fl/stl/chrono.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/trace.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/memory_barrier.h" // For FL_MEMORY_BARRIER
 
 // Peripheral interface includes

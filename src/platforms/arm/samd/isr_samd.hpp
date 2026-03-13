@@ -18,7 +18,7 @@
 #if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
 
 #include "fl/stl/isr/handler.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/assert.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/dbg.h"

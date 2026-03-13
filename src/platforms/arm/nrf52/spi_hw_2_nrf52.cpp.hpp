@@ -13,7 +13,7 @@
 #include "platforms/arm/nrf52/spi_hw_2_nrf52.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/cstring.h"
-#include "fl/numeric_limits.h"
+#include "fl/stl/limits.h"
 #include "platforms/shared/spi_manager.h"  // For DMABuffer, TransmitMode, SPIError
 
 namespace fl {

@@ -2,7 +2,7 @@
 /// @file memory.cpp
 /// @brief Tests for fl/memory.h platform abstraction
 
-#include "fl/memory.h"
+#include "fl/system/heap.h"
 #include "test.h"
 #include "platforms/is_platform.h"
 

@@ -1,8 +1,8 @@
 // ok cpp include
-#include "fl/align.h"
+#include "fl/stl/align.h"
 #include "fl/stl/cstddef.h"
 #include "test.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 using namespace fl;
 

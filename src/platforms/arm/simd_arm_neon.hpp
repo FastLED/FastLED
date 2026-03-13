@@ -10,9 +10,9 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/force_inline.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/math.h"  // for sqrtf
-#include "fl/align.h"
+#include "fl/stl/align.h"
 
 #if defined(__ARM_NEON) || defined(__ARM_NEON__)
 

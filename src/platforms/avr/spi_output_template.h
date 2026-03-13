@@ -8,7 +8,7 @@
 /// Provides hardware SPI when AVR_HARDWARE_SPI is defined (chips with true SPI),
 /// otherwise falls back to software bit-banging (e.g., ATtiny4313 with only USI).
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 #if defined(AVR_HARDWARE_SPI)
 #include "platforms/avr/fastspi_avr.h"

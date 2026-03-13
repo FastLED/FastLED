@@ -1,4 +1,4 @@
-#include "fl/memory.h"
+#include "fl/system/heap.h"
 
 // Platform-specific headers
 #include "platforms/is_platform.h"  // IWYU pragma: keep (needed for FL_IS_* macros)

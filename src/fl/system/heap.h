@@ -1,9 +1,9 @@
 #pragma once
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
-/// @file memory.h
-/// Platform-abstracted memory query functions
+/// @file heap.h
+/// Platform-abstracted heap memory query functions
 ///
 /// This header provides cross-platform memory introspection capabilities.
 /// Each platform implements its own version of these functions based on

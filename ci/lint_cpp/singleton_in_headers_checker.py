@@ -43,7 +43,7 @@ class SingletonInHeadersChecker(FileContentChecker):
             return False
         # Exclude the singleton.h definition file itself
         normalized = file_path.replace("\\", "/")
-        if normalized.endswith("fl/singleton.h"):
+        if normalized.endswith("fl/stl/singleton.h"):
             return False
         # Exclude private implementation headers (.hpp only, not .h)
         # Private headers are included in .cpp.hpp files, so Singleton<T> is sufficient

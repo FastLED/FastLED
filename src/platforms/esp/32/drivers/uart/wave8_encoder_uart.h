@@ -38,7 +38,7 @@
 // IWYU pragma: private
 
 #include "fl/chipsets/chipset_timing_config.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/force_inline.h"
 #include "fl/stl/isr/memcpy.h"
 #include "fl/stl/cstddef.h"

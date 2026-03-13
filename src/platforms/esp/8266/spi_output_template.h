@@ -5,7 +5,7 @@
 /// @file spi_output_template.h
 /// @brief ESP8266 SPIOutput template definition
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "platforms/esp/8266/fastspi_esp8266.h"
 
 namespace fl {

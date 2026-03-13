@@ -40,7 +40,7 @@
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
 #include "platforms/esp/32/drivers/spi/ispi_peripheral.h"
-#include "fl/singleton.h"
+#include "fl/stl/singleton.h"
 
 namespace fl {
 namespace detail {

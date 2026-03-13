@@ -3,7 +3,7 @@
 /// @file wave8_encoder_i2s.cpp
 /// @brief Implementation of wave8 encoding for ESP32-S3 I2S LCD_CAM
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/esp/32/drivers/i2s/wave8_encoder_i2s.h"
 #include "fl/channels/detail/wave8.hpp"
 #include "fl/stl/algorithm.h"

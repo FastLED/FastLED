@@ -15,7 +15,7 @@
 // Data access is achieved through a span<u8> representing the pixel data
 // for that pin.
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/flat_map.h"
 #include "fl/scoped_array.h"
 #include "fl/stl/vector.h"

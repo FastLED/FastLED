@@ -92,7 +92,7 @@ def replace_extern_c_in_file(filepath: Path, dry_run: bool = False) -> tuple[boo
                 insert_pos = pragma_match.end()
                 content = (
                     content[:insert_pos]
-                    + '#include "fl/compiler_control.h"\n'
+                    + '#include "fl/stl/compiler_control.h"\n'
                     + content[insert_pos:]
                 )
             else:
@@ -102,7 +102,7 @@ def replace_extern_c_in_file(filepath: Path, dry_run: bool = False) -> tuple[boo
                     insert_pos = first_include.start()
                     content = (
                         content[:insert_pos]
-                        + '#include "fl/compiler_control.h"\n\n'
+                        + '#include "fl/stl/compiler_control.h"\n\n'
                         + content[insert_pos:]
                     )
 

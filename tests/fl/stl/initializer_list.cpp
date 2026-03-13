@@ -1,6 +1,6 @@
 #include "test.h"
 #include "fl/stl/initializer_list.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

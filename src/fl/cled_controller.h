@@ -10,7 +10,7 @@
 #include "fl/engine_events.h"
 #include "fl/screenmap.h"
 #include "fl/virtual_if_not_avr.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/channels/options.h"
 #include "fl/stl/span.h"

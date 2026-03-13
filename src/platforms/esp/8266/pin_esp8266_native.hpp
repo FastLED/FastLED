@@ -11,7 +11,7 @@
 /// Implementation based on ESP8266 Arduino core's wiring_digital.cpp:
 /// https://github.com/esp8266/Arduino/blob/master/cores/esp8266/core_esp8266_wiring_digital.cpp
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/pin.h"
 
 FL_EXTERN_C_BEGIN

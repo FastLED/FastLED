@@ -7,7 +7,7 @@
 #include "fl/stl/vector.h"
 #include "fastled_delay.h"
 #include "platforms/arm/teensy/is_teensy.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER

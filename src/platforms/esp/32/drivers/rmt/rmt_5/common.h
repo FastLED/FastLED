@@ -10,7 +10,7 @@
 
 #if FASTLED_RMT5
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/stdint.h"
 #include "sdkconfig.h"
 

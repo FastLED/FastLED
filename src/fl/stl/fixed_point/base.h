@@ -6,7 +6,7 @@
 // Derived classes inherit via protected inheritance and re-expose methods
 // via using declarations for explicit API control.
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/fixed_point/traits.h"
 #include "fl/stl/fixed_point/isqrt.h"
 #include "fl/force_inline.h"

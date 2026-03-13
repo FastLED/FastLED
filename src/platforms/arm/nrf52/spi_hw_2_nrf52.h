@@ -25,7 +25,7 @@
 #ifdef FL_IS_NRF52
 
 #include "platforms/shared/spi_hw_2.h"
-#include "fl/numeric_limits.h"
+#include "fl/stl/limits.h"
 // IWYU pragma: begin_keep
 #include <nrf_spim.h>
 #include <nrf_gpio.h>
@@ -48,7 +48,7 @@
 #endif
 
 #include "fl/warn.h"
-#include "fl/stddef.h"
+#include "fl/stl/stddef.h"
 #include "fl/stl/string.h"
 
 namespace fl {

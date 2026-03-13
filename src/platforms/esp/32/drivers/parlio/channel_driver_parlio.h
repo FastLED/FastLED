@@ -178,9 +178,9 @@
 
 // IWYU pragma: private
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
-#include "fl/align.h"
+#include "fl/stl/align.h"
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
 #include "fl/channels/wave8.h"

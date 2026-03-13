@@ -70,7 +70,7 @@ class TestPlatformIncludesChecker(unittest.TestCase):
     def test_deep_platform_header_violation(self):
         """Test that deep platform headers are detected as violations."""
         lines = [
-            '#include "fl/int.h"',
+            '#include "fl/stl/int.h"',
             '#include "platforms/shared/int_windows.h"',  # VIOLATION
             '#include "platforms/esp/32/driver.h"',  # VIOLATION
         ]
@@ -140,7 +140,7 @@ class TestPlatformIncludesChecker(unittest.TestCase):
     def test_fl_header_includes_allowed(self):
         """Test that fl/ headers are always allowed."""
         lines = [
-            '#include "fl/int.h"',
+            '#include "fl/stl/int.h"',
             '#include "fl/stl/vector.h"',
             '#include "fl/stl/math.h"',
         ]

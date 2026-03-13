@@ -9,7 +9,7 @@
 #include "fl/stl/cstring.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/span.h"
-#include "fl/string_view.h"
+#include "fl/stl/string_view.h"
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {

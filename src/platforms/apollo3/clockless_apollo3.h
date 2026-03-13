@@ -9,7 +9,7 @@
 // Include Arduino core to get Apollo3 HAL function declarations
 #ifdef ARDUINO
 #include "fl/arduino.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER

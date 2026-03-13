@@ -2,9 +2,9 @@
 /// @brief Tests for fl::assume_aligned<N>(ptr) and FL_ASSUME_ALIGNED macro
 
 #include "test.h"
-#include "fl/assume_aligned.h"
-#include "fl/align.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/align.h"
+#include "fl/stl/align.h"
+#include "fl/stl/compiler_control.h"
 
 using namespace fl;
 

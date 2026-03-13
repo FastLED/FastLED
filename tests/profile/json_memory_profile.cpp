@@ -4,14 +4,14 @@
 // Uses global allocation overrides to track ALL memory usage
 
 #include "fl/file_system.h"  // for filebuf, FileSystem, make_sdcard_filesystem
-#include "fl/int.h"          // for size, u32, u8
+#include "fl/stl/int.h"          // for size, u32, u8
 #include "fl/stl/json.h"         // for json
 #include "fl/stl/atomic.h"   // for atomic
 #include "fl/stl/cstdint.h"  // for size_t
 #include "fl/stl/map.h"      // for unsorted_map_fixed
 #include "fl/stl/stdio.h"    // for printf
 #include "fl/stl/string.h"   // for string
-#include "fl/string_view.h"  // for string_view
+#include "fl/stl/string_view.h"  // for string_view
 #include "stdio.h"           // for printf // ok include
 #include "stdlib.h"          // for abort, calloc, free, malloc, realloc
 #include "string.h"          // for strlen // ok include

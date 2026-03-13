@@ -23,7 +23,7 @@
 // IWYU pragma: begin_keep
 #include <kinetis.h>
 // IWYU pragma: end_keep
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER

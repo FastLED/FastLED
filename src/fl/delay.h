@@ -9,7 +9,7 @@
 
 #include "platforms/cycle_type.h"
 #include "fl/force_inline.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/stl/type_traits.h"
 // ============================================================================
 // Platform-specific includes via trampoline header

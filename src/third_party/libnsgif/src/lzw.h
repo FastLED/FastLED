@@ -10,7 +10,7 @@
 #ifndef LZW_H_
 #define LZW_H_
 
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 namespace fl {
 namespace third_party {

@@ -1,6 +1,6 @@
 #include "test.h"
-#include "fl/compiler_control.h"
-#include "fl/int.h"
+#include "fl/stl/compiler_control.h"
+#include "fl/stl/int.h"
 #include "fl/stl/cstdio.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/function.h"

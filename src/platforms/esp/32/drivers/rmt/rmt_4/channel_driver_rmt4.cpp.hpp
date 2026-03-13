@@ -6,7 +6,7 @@
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
 
 // Skip entirely if platform has no RMT hardware (ESP32-C2)

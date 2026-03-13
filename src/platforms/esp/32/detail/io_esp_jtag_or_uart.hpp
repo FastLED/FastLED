@@ -8,8 +8,8 @@
 
 #include "platforms/esp/is_esp.h"
 
-#include "fl/compiler_control.h"
-#include "fl/singleton.h"
+#include "fl/stl/compiler_control.h"
+#include "fl/stl/singleton.h"
 #include "platforms/esp/32/drivers/uart_esp32.h"
 #include "platforms/esp/32/drivers/usb_serial_jtag_esp32.h"
 // Note: Implementation files are included via _build.hpp, not here

@@ -23,7 +23,7 @@
 #include "platforms/shared/spi_manager.h"
 #include "platforms/arm/stm32/fastspi_arm_stm32.h"
 #include "fl/stl/stdint.h"
-#include "fl/stddef.h"
+#include "fl/stl/stddef.h"
 
 namespace fl {
 

@@ -14,7 +14,7 @@
 #include "crgb.h"
 #include "eorder.h"
 #include "fl/math_macros.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/is_platform.h"
 
 // Include centralized LED chipset timing definitions

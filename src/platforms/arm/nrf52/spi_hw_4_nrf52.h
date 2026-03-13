@@ -30,7 +30,7 @@
 #if defined(FL_IS_NRF52840) || defined(FL_IS_NRF52833)
 
 #include "platforms/shared/spi_hw_4.h"
-#include "fl/numeric_limits.h"
+#include "fl/stl/limits.h"
 // IWYU pragma: begin_keep
 #include <nrf_spim.h>
 #include <nrf_gpio.h>
@@ -43,7 +43,7 @@
 // IWYU pragma: end_keep
 
 #include "fl/warn.h"
-#include "fl/stddef.h"
+#include "fl/stl/stddef.h"
 #include "fl/stl/string.h"
 
 namespace fl {

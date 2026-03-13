@@ -26,7 +26,7 @@
 // IWYU pragma: end_keep
 #include "platforms/arm/rp/rpcommon/pio_asm.h"
 #include "fl/warn.h"
-#include "fl/numeric_limits.h"
+#include "fl/stl/limits.h"
 // IWYU pragma: begin_keep
 #include "fl/stl/allocator.h"
 #include "fl/stl/cstring.h"

@@ -17,7 +17,7 @@
 #include "fl/stl/iterator.h"
 #include "fl/stl/new.h"
 #include "test.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 #include "fl/gfx/crgb.h"
 #include "fl/stl/array.h"
 #include "fl/stl/vector.h"

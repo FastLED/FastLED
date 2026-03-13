@@ -3,8 +3,8 @@
 // Unsigned 0.32 fixed-point arithmetic.
 // Represents normalized values in range [0.0, 1.0).
 
-#include "fl/int.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/int.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/type_traits.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN

@@ -9,11 +9,11 @@ This will keep the memory from growing during multiple inserts
 and removals.
 */
 
-#include "fl/align.h"
-#include "fl/compiler_control.h"
+#include "fl/stl/align.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/detail/private.h"  // IWYU pragma: keep
-#include "fl/hash.h"
-#include "fl/int.h"
+#include "fl/stl/hash.h"
+#include "fl/stl/int.h"
 #include "fl/stl/math.h"
 #include "fl/stl/assert.h"  // IWYU pragma: keep
 #include "fl/stl/bit_cast.h"

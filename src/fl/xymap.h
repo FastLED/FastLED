@@ -4,7 +4,7 @@
 #include "fl/stl/math.h"
 #include "fl/lut.h"
 #include "fl/stl/type_traits.h"
-#include "fl/int.h"
+#include "fl/stl/int.h"
 
 namespace fl {
 struct CRGB;  // Forward declaration
