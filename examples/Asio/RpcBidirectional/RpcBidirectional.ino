@@ -43,12 +43,12 @@
 CRGB leds[NUM_LEDS];
 
 // Server-side components
-fl::HttpStreamServer* serverTransport = nullptr;
-fl::Remote* serverRemote = nullptr;
+fl::unique_ptr<fl::HttpStreamServer> serverTransport;
+fl::unique_ptr<fl::Remote> serverRemote;
 
 // Client-side components
-fl::HttpStreamClient* clientTransport = nullptr;
-fl::Remote* clientRemote = nullptr;
+fl::unique_ptr<fl::HttpStreamClient> clientTransport;
+fl::unique_ptr<fl::Remote> clientRemote;
 
 // Server background thread (needed for same-process client+server)
 std::thread serverThread;
@@ -61,15 +61,11 @@ struct ServerCleanup {
         if (serverThread.joinable()) {
             serverThread.join();
         }
-        // Free allocations to prevent LSAN leaks (thread is joined, safe to delete)
-        delete clientRemote;  // ok bare allocation
-        clientRemote = nullptr;
-        delete clientTransport;  // ok bare allocation
-        clientTransport = nullptr;
-        delete serverRemote;  // ok bare allocation
-        serverRemote = nullptr;
-        delete serverTransport;  // ok bare allocation
-        serverTransport = nullptr;
+        // Free allocations to prevent LSAN leaks (thread is joined, safe to reset)
+        clientRemote.reset();
+        clientTransport.reset();
+        serverRemote.reset();
+        serverTransport.reset();
     }
 };
 static ServerCleanup serverCleanup;
@@ -123,7 +119,7 @@ void setup() {
     // ========== SERVER SETUP ==========
     Serial.println("Starting HTTP server on port 8080...");
 
-    serverTransport = new fl::HttpStreamServer(SERVER_PORT);  // ok bare allocation
+    serverTransport = fl::make_unique<fl::HttpStreamServer>(SERVER_PORT);
     serverTransport->setHeartbeatInterval(30000);
     serverTransport->setTimeout(60000);
 
@@ -141,7 +137,7 @@ void setup() {
     });
 
     // Create server Remote
-    serverRemote = new fl::Remote(  // ok bare allocation
+    serverRemote = fl::make_unique<fl::Remote>(
         []() { return serverTransport->readRequest(); },
         [](const fl::json& response) { serverTransport->writeResponse(response); }
     );
@@ -252,7 +248,7 @@ void setup() {
 
     Serial.println("Connecting client to server...");
 
-    clientTransport = new fl::HttpStreamClient("localhost", actualPort);  // ok bare allocation
+    clientTransport = fl::make_unique<fl::HttpStreamClient>("localhost", actualPort);
     clientTransport->setHeartbeatInterval(30000);
     clientTransport->setTimeout(60000);
 
@@ -271,7 +267,7 @@ void setup() {
     });
 
     // Create client Remote
-    clientRemote = new fl::Remote(  // ok bare allocation
+    clientRemote = fl::make_unique<fl::Remote>(
         []() { return clientTransport->readRequest(); },
         [](const fl::json& response) { clientTransport->writeResponse(response); }
     );
