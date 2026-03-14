@@ -393,6 +393,8 @@ class sstream_noop {
     sstream_noop &operator<<(char) { return *this; }
     sstream_noop &operator<<(signed char) { return *this; }
     sstream_noop &operator<<(unsigned char) { return *this; }
+    sstream_noop &operator<<(short) { return *this; }
+    sstream_noop &operator<<(unsigned short) { return *this; }
 
     // bool support to match sstream interface
     sstream_noop &operator<<(bool) { return *this; }

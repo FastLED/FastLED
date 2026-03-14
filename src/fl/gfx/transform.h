@@ -8,6 +8,7 @@ expensive trig functions are needed. Same with scale and offset.
 
 */
 
+#include "fl/gfx/alpha.h"
 #include "fl/gfx/geometry.h"
 #include "fl/stl/math.h"
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
@@ -17,8 +18,7 @@ namespace fl {
 
 FASTLED_SHARED_PTR(TransformFloatImpl);
 
-using alpha16 =
-    u16; // fixed point representation of 0->1 in the range [0, 65535]
+// alpha16 is now defined in fl/int.h as a UNORM16 type [0, 65535] → [0.0, 1.0].
 
 // This transform assumes the coordinates are in the range [0,65535].
 struct Transform16 {

@@ -3,7 +3,9 @@
 /// @file fl/gfx/canvas.h
 /// @brief Canvas types for gfx primitives (implementation)
 
+#include "fl/gfx/alpha.h"
 #include "fl/gfx/draw_mode.h"
+#include "fl/stl/int.h"
 #include "fl/stl/span.h"
 #include "fl/stl/variant.h"
 #include "fl/stl/shared_ptr.h"
@@ -18,6 +20,15 @@ enum class LineCap { FLAT, ROUND, SQUARE };
 template<typename RGB_T> struct Canvas;
 
 // Free function forward declarations
+template<int hRadius, int vRadius, typename RGB_T>
+void blurGaussian(Canvas<RGB_T>& canvas, fl::alpha8 dimFactor);
+
+template<int hRadius, int vRadius, typename RGB_T>
+void blurGaussian(Canvas<RGB_T>& canvas, fl::alpha16 dimFactor);
+
+template<int hRadius, int vRadius, typename RGB_T>
+void blurGaussian(Canvas<RGB_T>& canvas);
+
 template<typename PixelT, typename Coord>
 void drawLine(Canvas<PixelT>& canvas, const PixelT& color, Coord x0, Coord y0, Coord x1, Coord y1,
               fl::DrawMode mode = fl::DRAW_MODE_BLEND);
@@ -56,6 +67,21 @@ struct Canvas {
     RGB_T& at(int x, int y) { return pixels[y * width + x]; }
     const RGB_T& at(int x, int y) const { return pixels[y * width + x]; }
     bool has(int x, int y) const { return x >= 0 && x < width && y >= 0 && y < height; }
+
+    template<int hRadius, int vRadius>
+    inline void blurGaussian(fl::alpha8 dimFactor) {
+        gfx::blurGaussian<hRadius, vRadius>(*this, dimFactor);
+    }
+
+    template<int hRadius, int vRadius>
+    inline void blurGaussian(fl::alpha16 dimFactor) {
+        gfx::blurGaussian<hRadius, vRadius>(*this, dimFactor);
+    }
+
+    template<int hRadius, int vRadius>
+    inline void blurGaussian() {
+        gfx::blurGaussian<hRadius, vRadius>(*this);
+    }
 
     template<typename Coord>
     inline void drawLine(const RGB_T& color, Coord x0, Coord y0, Coord x1, Coord y1,

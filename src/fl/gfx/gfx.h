@@ -60,6 +60,21 @@ class Canvas {
     FASTLED_FORCE_INLINE const RGB_T& at(int x, int y) const { return mImpl.at(x, y); }
     FASTLED_FORCE_INLINE bool has(int x, int y) const { return mImpl.has(x, y); }
 
+    template<int hRadius, int vRadius>
+    FASTLED_FORCE_INLINE void blurGaussian(alpha8 dimFactor) {
+        mImpl.template blurGaussian<hRadius, vRadius>(dimFactor);
+    }
+
+    template<int hRadius, int vRadius>
+    FASTLED_FORCE_INLINE void blurGaussian(alpha16 dimFactor) {
+        mImpl.template blurGaussian<hRadius, vRadius>(dimFactor);
+    }
+
+    template<int hRadius, int vRadius>
+    FASTLED_FORCE_INLINE void blurGaussian() {
+        mImpl.template blurGaussian<hRadius, vRadius>();
+    }
+
     template<typename Coord>
     FASTLED_FORCE_INLINE void drawLine(const RGB_T& color, Coord x0, Coord y0, Coord x1, Coord y1,
                                        DrawMode mode = DRAW_MODE_BLEND) {
@@ -93,6 +108,7 @@ class CanvasRGB : protected Canvas<CRGB> {
     using Canvas<CRGB>::size;
     using Canvas<CRGB>::at;
     using Canvas<CRGB>::has;
+    using Canvas<CRGB>::blurGaussian;
     using Canvas<CRGB>::drawLine;
     using Canvas<CRGB>::drawDisc;
     using Canvas<CRGB>::drawRing;
