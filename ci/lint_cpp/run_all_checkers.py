@@ -50,6 +50,7 @@ from ci.lint_cpp.no_cpp_in_fl_checker import NoCppInFlChecker
 from ci.lint_cpp.no_namespace_fl_declaration import NamespaceFlDeclarationChecker
 from ci.lint_cpp.no_using_namespace_fl_in_headers import UsingNamespaceFlChecker
 from ci.lint_cpp.numeric_limit_macros_checker import NumericLimitMacroChecker
+from ci.lint_cpp.pch_file_checker import check as check_pch_files
 from ci.lint_cpp.platform_includes_checker import PlatformIncludesChecker
 from ci.lint_cpp.reinterpret_cast_checker import ReinterpretCastChecker
 from ci.lint_cpp.relative_include_checker import RelativeIncludeChecker
@@ -759,6 +760,14 @@ def main() -> int:
             for violation in agg_violations:
                 agg_results.add_violation("test_aggregation", 0, violation)
             results["TestAggregationChecker"] = agg_results
+
+        # Run .pch file check (precompiled headers should not be in the repo)
+        pch_success, pch_violations = check_pch_files()
+        if not pch_success:
+            pch_results = CheckerResults()
+            for violation in pch_violations:
+                pch_results.add_violation("pch_files", 0, violation)
+            results["PchFileChecker"] = pch_results
 
         # Format and print results
         exit_code = format_and_print_results(results)
