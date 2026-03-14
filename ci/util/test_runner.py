@@ -1280,17 +1280,15 @@ class ProcessStuckMonitor:
                 # Sleep briefly before next check
                 time.sleep(1.0)  # Check every second
 
-        except KeyboardInterrupt:
-            ts_print(f"🛑 Thread {thread_id} ({thread_name}) caught KeyboardInterrupt")
-            ts_print(f"📍 Stack trace for thread {thread_id}:")
-            traceback.print_exc()
-            _thread.interrupt_main()
-            raise
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
         except Exception as e:
+            # Monitor thread hit an unexpected error (e.g., race with process
+            # cleanup). Log it but do NOT interrupt the main thread — this is a
+            # monitoring thread, not a critical path. Interrupting main here
+            # causes spurious "Interrupt signal received" on normal exits.
             ts_print(f"❌ Thread {thread_id} ({thread_name}) unexpected error: {e}")
             traceback.print_exc()
-            _thread.interrupt_main()
-            raise
 
 
 def _handle_stuck_processes(

@@ -104,6 +104,7 @@ class TestArgs:
     list_tests: bool = False  # List available tests without running them
     raw_test_query: Optional[str] = None  # Original test query before disambiguation
     log_failures: Optional[Path] = None  # Directory to write per-test failure logs
+    debug_test: bool = False  # Enable debug tracing for KeyboardInterrupt handlers
 
 
 @typechecked

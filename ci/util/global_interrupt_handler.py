@@ -3,9 +3,45 @@
 import _thread
 import os
 import signal
+import sys
 import threading
 import time
+import traceback
 from typing import Optional
+
+
+_debug_test = False
+
+
+def set_debug_test(enabled: bool = True) -> None:
+    """Enable/disable debug tracing for interrupt handler calls."""
+    global _debug_test  # noqa: PLW0603
+    _debug_test = enabled
+
+
+def _print_caller(label: str) -> None:
+    """When --debug-test is active, print the caller location and short stack."""
+    if not _debug_test:
+        return
+    # extract_stack() includes this function and the public wrapper;
+    # skip the last 2 frames to show the actual caller.
+    stack = traceback.extract_stack()
+    # Remove _print_caller and the calling function frame
+    caller_stack = stack[:-2]
+    if caller_stack:
+        caller = caller_stack[-1]
+        print(
+            f"  [DEBUG-KBI] {label} called from "
+            f"{caller.filename}:{caller.lineno} in {caller.name}()",
+            file=sys.stderr,
+        )
+        # Print abbreviated stack (last 5 frames)
+        print("  [DEBUG-KBI] Stack:", file=sys.stderr)
+        for frame in caller_stack[-5:]:
+            print(
+                f"    {frame.filename}:{frame.lineno} in {frame.name}()",
+                file=sys.stderr,
+            )
 
 
 class GlobalInterruptHandler:
@@ -36,6 +72,7 @@ class GlobalInterruptHandler:
         return self.interrupted.is_set()
 
     def signal_interrupt(self, from_thread: Optional[str] = None) -> None:
+        _print_caller("signal_interrupt")
         now = time.time()
         if not self.interrupted.is_set():
             self.interrupt_time = now
@@ -60,6 +97,7 @@ class GlobalInterruptHandler:
             os._exit(2)
 
     def notify_main_thread(self) -> None:
+        _print_caller("notify_main_thread")
         is_worker = threading.current_thread() is not threading.main_thread()
         if not self.is_interrupted():
             # Only include thread name when reporting from a worker thread;
@@ -80,14 +118,18 @@ class GlobalInterruptHandler:
 
         def sigint_handler(signum: int, frame: object) -> None:
             """Handle SIGINT (Ctrl-C) by setting the interrupt flag."""
+            _print_caller("sigint_handler (SIGINT received)")
             self.signal_interrupt()
-            # Raise KeyboardInterrupt to allow exception handlers to run
-            raise KeyboardInterrupt()
+            # Raise KeyboardInterrupt to allow exception handlers to run.
+            # Use ``from`` to preserve the causal chain so tracebacks show
+            # the original exception context.
+            raise KeyboardInterrupt() from KeyboardInterrupt("SIGINT")
 
         signal.signal(signal.SIGINT, sigint_handler)
         self._signal_handler_installed = True
 
     def wait_for_cleanup(self) -> None:
+        _print_caller("wait_for_cleanup")
         if self._in_cleanup:
             return
 
@@ -138,12 +180,13 @@ def notify_main_thread() -> None:
 def handle_keyboard_interrupt(ki: KeyboardInterrupt) -> None:
     """Signal the interrupt and (from a worker thread) wake the main thread.
 
-    On the main thread: re-raises immediately so the exception propagates
-    to the top-level handler in test.py which calls signal_interrupt().
+    On the main thread: re-raises with ``from ki`` so the exception chain
+    is preserved in tracebacks.
     On a worker thread: sets the global interrupt flag and wakes the main thread.
     """
+    _print_caller("handle_keyboard_interrupt")
     if threading.current_thread() is threading.main_thread():
-        raise ki
+        raise KeyboardInterrupt() from ki
     notify_main_thread()
 
 

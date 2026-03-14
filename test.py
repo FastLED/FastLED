@@ -39,6 +39,7 @@ argv_ultra_early_exit(_START_TIME)
 
 # --- Heavy imports: only reached if no early exit fired above ---
 from ci.util.global_interrupt_handler import (
+    handle_keyboard_interrupt,
     signal_interrupt,
     wait_for_cleanup,
 )
@@ -131,6 +132,11 @@ def main() -> None:
 
         # Parse and process arguments
         args = parse_args()
+
+        if args.debug_test:
+            from ci.util.global_interrupt_handler import set_debug_test
+
+            set_debug_test(True)
 
         # Handle --list-tests flag: list available tests and exit
         if args.list_tests:
@@ -521,14 +527,11 @@ def main() -> None:
 if __name__ == "__main__":
     try:
         main()
-    except KeyboardInterrupt as ki:
-        # Only notify main thread if we're in a worker thread
-        if threading.current_thread() != threading.main_thread():
-            from ci.util.global_interrupt_handler import (
-                handle_keyboard_interrupt,
-            )
+    except KeyboardInterrupt as ki:  # noqa: KBI002
+        # Top-level safety net: main() already handles cleanup.
+        # Print the full exception chain then exit without propagating
+        # KeyboardInterrupt to parent processes (e.g. os.system() callers).
+        import traceback  # noqa: PLC0415
 
-            handle_keyboard_interrupt(ki)
-        signal_interrupt()
-        wait_for_cleanup()
-        sys.exit(130)
+        traceback.print_exception(ki)
+        sys.exit(1)

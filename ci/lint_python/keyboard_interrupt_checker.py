@@ -63,11 +63,29 @@ class Violation:
         return f"{self.code} {self.message}"
 
 
+_NOQA_RE = re.compile(r"#\s*noqa\b(?::\s*([\w,\s]+))?")
+
+
+def _is_suppressed(source_lines: list[str], lineno: int, code: str) -> bool:
+    """Return True if *lineno* (1-based) has a ``# noqa`` comment covering *code*."""
+    if lineno < 1 or lineno > len(source_lines):
+        return False
+    line = source_lines[lineno - 1]
+    m = _NOQA_RE.search(line)
+    if m is None:
+        return False
+    codes = m.group(1)
+    if codes is None:
+        return True  # bare ``# noqa`` suppresses everything
+    return code in {c.strip() for c in codes.split(",")}
+
+
 class TryExceptVisitor(ast.NodeVisitor):
     """AST visitor to check try-except blocks for KeyboardInterrupt handling."""
 
-    def __init__(self) -> None:
+    def __init__(self, source_lines: list[str] | None = None) -> None:
         self.violations: list[Violation] = []
+        self._source_lines: list[str] = source_lines or []
 
     def visit_Try(self, node: ast.Try) -> None:  # noqa: N802
         catches_broad_exception = False
@@ -94,63 +112,67 @@ class TryExceptVisitor(ast.NodeVisitor):
                             keyboard_interrupt_handlers.append(handler)
 
         if catches_broad_exception and not has_keyboard_interrupt_handler:
-            self.violations.append(
-                Violation(
-                    line=node.lineno,
-                    col=node.col_offset,
-                    code="KBI001",
-                    message=(
-                        "Try-except catches Exception/BaseException without KeyboardInterrupt handler. "
-                        "Add: except KeyboardInterrupt as ki: handle_keyboard_interrupt(ki)"
-                    ),
-                )
-            )
-
-        for kbi_handler in keyboard_interrupt_handlers:
-            if not _handler_calls_interrupt_main(kbi_handler):
+            if not _is_suppressed(self._source_lines, node.lineno, "KBI001"):
                 self.violations.append(
                     Violation(
-                        line=kbi_handler.lineno,
-                        col=kbi_handler.col_offset,
-                        code="KBI002",
+                        line=node.lineno,
+                        col=node.col_offset,
+                        code="KBI001",
                         message=(
-                            "KeyboardInterrupt handler must call _thread.interrupt_main() "
-                            "or use handle_keyboard_interrupt(ki). "
-                            "Add: import _thread; _thread.interrupt_main()"
+                            "Try-except catches Exception/BaseException without KeyboardInterrupt handler. "
+                            "Add: except KeyboardInterrupt as ki: handle_keyboard_interrupt(ki)"
                         ),
                     )
                 )
 
+        for kbi_handler in keyboard_interrupt_handlers:
+            if not _handler_calls_interrupt_main(kbi_handler):
+                if not _is_suppressed(self._source_lines, kbi_handler.lineno, "KBI002"):
+                    self.violations.append(
+                        Violation(
+                            line=kbi_handler.lineno,
+                            col=kbi_handler.col_offset,
+                            code="KBI002",
+                            message=(
+                                "KeyboardInterrupt handler must call _thread.interrupt_main() "
+                                "or use handle_keyboard_interrupt(ki). "
+                                "Add: import _thread; _thread.interrupt_main()"
+                            ),
+                        )
+                    )
+
         # KBI003: handle_keyboard_interrupt() called outside a KeyboardInterrupt handler.
         # Check try body for stray calls.
         for call_node in _find_interrupt_handler_calls(node.body):
-            self.violations.append(
-                Violation(
-                    line=call_node.lineno,
-                    col=call_node.col_offset,
-                    code="KBI003",
-                    message=(
-                        "handle_keyboard_interrupt() called in try body, not in an except handler. "
-                        "Remove this call — it falsely signals an interrupt during normal execution."
-                    ),
-                )
-            )
-        # Check non-KeyboardInterrupt except handler bodies.
-        for handler in node.handlers:
-            if handler in keyboard_interrupt_handlers:
-                continue
-            for call_node in _find_interrupt_handler_calls(handler.body):
+            if not _is_suppressed(self._source_lines, call_node.lineno, "KBI003"):
                 self.violations.append(
                     Violation(
                         line=call_node.lineno,
                         col=call_node.col_offset,
                         code="KBI003",
                         message=(
-                            "handle_keyboard_interrupt() called in non-KeyboardInterrupt except handler. "
+                            "handle_keyboard_interrupt() called in try body, not in an except handler. "
                             "Remove this call — it falsely signals an interrupt during normal execution."
                         ),
                     )
                 )
+        # Check non-KeyboardInterrupt except handler bodies.
+        for handler in node.handlers:
+            if handler in keyboard_interrupt_handlers:
+                continue
+            for call_node in _find_interrupt_handler_calls(handler.body):
+                if not _is_suppressed(self._source_lines, call_node.lineno, "KBI003"):
+                    self.violations.append(
+                        Violation(
+                            line=call_node.lineno,
+                            col=call_node.col_offset,
+                            code="KBI003",
+                            message=(
+                                "handle_keyboard_interrupt() called in non-KeyboardInterrupt except handler. "
+                                "Remove this call — it falsely signals an interrupt during normal execution."
+                            ),
+                        )
+                    )
 
         self.generic_visit(node)
 
@@ -219,7 +241,7 @@ def check_file(path: str, source: str) -> list[Violation]:
         tree = ast.parse(source, filename=path)
     except SyntaxError:
         return []
-    visitor = TryExceptVisitor()
+    visitor = TryExceptVisitor(source_lines=source.splitlines())
     visitor.visit(tree)
     return visitor.violations
 

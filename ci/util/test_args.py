@@ -180,6 +180,11 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         default=None,
         help="Directory to write per-test failure logs (<name>_compile.log, <name>_run.log)",
     )
+    parser.add_argument(
+        "--debug-test",
+        action="store_true",
+        help="Enable debug tracing for KeyboardInterrupt handler calls (prints caller location and stack)",
+    )
 
     parsed_args = parser.parse_args(args)
 
