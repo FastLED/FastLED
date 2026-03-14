@@ -474,11 +474,11 @@ def main() -> int:
     if config.output_path:
         sketch_name = examples[0]
         board = boards[0]
-        is_valid, resolved_output_path, error_msg = validate_output_path(
+        validate_result = validate_output_path(
             str(config.output_path), sketch_name, board
         )
-        if not is_valid:
-            print(f"ERROR: {error_msg}")
+        if not validate_result.is_valid:
+            print(f"ERROR: {validate_result.error_message}")
             return 1
 
     # Set up defines (make a mutable copy)
@@ -574,16 +574,19 @@ def main() -> int:
             # Compilation succeeded - handle -o/--out option if specified
             if config.output_path:
                 sketch_name = examples[0]  # We already validated there's exactly one
-                is_valid, resolved_output_path, _ = validate_output_path(
+                copy_validate_result = validate_output_path(
                     str(config.output_path), sketch_name, board
                 )
-                if is_valid:
+                if copy_validate_result.is_valid:
                     # Find the build directory for this board
                     project_root = Path(__file__).parent.parent.resolve()
                     build_dir = project_root / ".build" / "pio" / board.board_name
 
                     if not copy_build_artifact(
-                        build_dir, board, sketch_name, resolved_output_path
+                        build_dir,
+                        board,
+                        sketch_name,
+                        copy_validate_result.resolved_path,
                     ):
                         compilation_errors.append(
                             f"Failed to copy artifact for {board.board_name}"

@@ -431,13 +431,23 @@ async def run_gpio_pretest(
 # ============================================================
 
 
+@dataclass(slots=True)
+class PinDiscoveryResult:
+    """Result of auto-discovering connected pin pairs."""
+
+    success: bool
+    tx_pin: int | None
+    rx_pin: int | None
+    client: "RpcClient | None"
+
+
 async def run_pin_discovery(
     port: str,
     start_pin: int = 0,
     end_pin: int = 8,
     timeout: float = 15.0,
     serial_interface: "SerialInterface | None" = None,
-) -> tuple[bool, int | None, int | None, "RpcClient | None"]:
+) -> PinDiscoveryResult:
     """Auto-discover connected pin pairs by probing adjacent GPIO pins (async).
 
     This function calls the findConnectedPins RPC to search for a jumper wire
@@ -490,7 +500,9 @@ async def run_pin_discovery(
             print("   RPC communication is not working - device may not be responding")
             if client:
                 await client.close()
-            return (False, None, None, None)
+            return PinDiscoveryResult(
+                success=False, tx_pin=None, rx_pin=None, client=None
+            )
 
         print()
         print("=" * 60)
@@ -517,7 +529,9 @@ async def run_pin_discovery(
                 print(f"   {Fore.CYAN}Pins auto-applied to firmware{Style.RESET_ALL}")
             print()
             # Return client along with pins - keep connection open!
-            return (True, tx_pin, rx_pin, client)
+            return PinDiscoveryResult(
+                success=True, tx_pin=tx_pin, rx_pin=rx_pin, client=client
+            )
         else:
             print()
             print(
@@ -529,7 +543,9 @@ async def run_pin_discovery(
             print(f"   {Fore.YELLOW}Falling back to default pins{Style.RESET_ALL}")
             print()
             # Return client even on failure - keep connection open!
-            return (False, None, None, client)
+            return PinDiscoveryResult(
+                success=False, tx_pin=None, rx_pin=None, client=client
+            )
 
     except RpcTimeoutError:
         print()
@@ -538,7 +554,7 @@ async def run_pin_discovery(
         print()
         if client:
             await client.close()
-        return (False, None, None, None)
+        return PinDiscoveryResult(success=False, tx_pin=None, rx_pin=None, client=None)
     except KeyboardInterrupt as ki:
         if client:
             await client.close()
@@ -552,7 +568,7 @@ async def run_pin_discovery(
         print()
         if client:
             await client.close()
-        return (False, None, None, None)
+        return PinDiscoveryResult(success=False, tx_pin=None, rx_pin=None, client=None)
     except Exception as e:
         print()
         print(f"{Fore.YELLOW}⚠️  PIN DISCOVERY ERROR{Style.RESET_ALL}")
@@ -561,7 +577,7 @@ async def run_pin_discovery(
         print()
         if client:
             await client.close()
-        return (False, None, None, None)
+        return PinDiscoveryResult(success=False, tx_pin=None, rx_pin=None, client=None)
 
 
 # ============================================================
@@ -2195,16 +2211,18 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
         # Auto-discover pins if enabled and no CLI override
         elif args.auto_discover_pins:
             print("\n🔍 Auto-discovery enabled - searching for connected pins...")
-            (
-                success,
-                discovered_tx,
-                discovered_rx,
-                discovery_client,
-            ) = await run_pin_discovery(upload_port, serial_interface=serial_iface)
+            pin_discovery = await run_pin_discovery(
+                upload_port, serial_interface=serial_iface
+            )
+            discovery_client = pin_discovery.client
 
-            if success and discovered_tx is not None and discovered_rx is not None:
-                effective_tx_pin = discovered_tx
-                effective_rx_pin = discovered_rx
+            if (
+                pin_discovery.success
+                and pin_discovery.tx_pin is not None
+                and pin_discovery.rx_pin is not None
+            ):
+                effective_tx_pin = pin_discovery.tx_pin
+                effective_rx_pin = pin_discovery.rx_pin
                 pins_discovered = True
                 print(
                     f"📌 Using discovered pins: TX={effective_tx_pin}, RX={effective_rx_pin}"

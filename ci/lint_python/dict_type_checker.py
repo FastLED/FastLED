@@ -1,12 +1,14 @@
-"""Checker that flags complex dict type annotations and suggests @dataclass(slots=True).
+"""Checker that flags complex dict/tuple type annotations and suggests @dataclass(slots=True).
 
-Complex dict types like `dict[str, str | int | float]` are hard to read and
-lack semantic meaning. Named @dataclass(slots=True) types are self-documenting,
-provide attribute access, are validated by type checkers, and have faster
-attribute access with lower memory usage than regular dataclasses.
+Complex dict types like `dict[str, str | int | float]` and long tuple types like
+`tuple[int, str, float]` are hard to read and lack semantic meaning. Named
+@dataclass(slots=True) types are self-documenting, provide attribute access,
+are validated by type checkers, and have faster attribute access with lower
+memory usage than regular dataclasses.
 
 Error Codes:
     DCT001: Complex dict type annotation — use a named @dataclass(slots=True) instead
+    DCT002: Complex tuple type annotation — use a named @dataclass(slots=True) instead
 """
 
 from __future__ import annotations
@@ -18,15 +20,21 @@ import sys
 from pathlib import Path
 
 
-# Regex pre-filter: quickly skip files with no dict type hints
+# Regex pre-filter: quickly skip files with no relevant type hints
 _DICT_TYPE_RE = re.compile(r"dict\s*\[")
+_TUPLE_TYPE_RE = re.compile(r"tuple\s*\[")
 
-# Matches noqa: DCT001 suppression comment
-_NOQA_RE = re.compile(r"#\s*noqa:\s*DCT001\b")
+# Matches noqa: DCT001 or DCT002 suppression comment
+_NOQA_DCT001_RE = re.compile(r"#\s*noqa:\s*DCT001\b")
+_NOQA_DCT002_RE = re.compile(r"#\s*noqa:\s*DCT002\b")
 
 # Minimum union size to flag: dict[str, X | Y | Z] where the value type
 # has >= this many union members is considered "complex"
 _MIN_UNION_MEMBERS = 3
+
+# Minimum tuple elements to flag: tuple[X, Y, Z] with >= this many
+# positional elements is considered "complex"
+_MIN_TUPLE_ELEMENTS = 3
 
 
 def _count_union_members(node: ast.expr) -> int:
@@ -70,8 +78,46 @@ def _is_complex_dict(node: ast.expr) -> bool:
     return False
 
 
+def _is_complex_tuple(node: ast.expr) -> bool:
+    """Check if a type annotation is a complex tuple type.
+
+    Flags tuple[X, Y, Z] with >= _MIN_TUPLE_ELEMENTS positional elements.
+    Skips variable-length tuples like tuple[int, ...] (2 elements, one is Ellipsis).
+    """
+    if not isinstance(node, ast.Subscript):
+        return False
+
+    # Check the base is "tuple"
+    if isinstance(node.value, ast.Name) and node.value.id == "tuple":
+        pass
+    elif isinstance(node.value, ast.Attribute) and node.value.attr == "Tuple":
+        pass  # typing.Tuple
+    else:
+        return False
+
+    slc = node.slice
+
+    # tuple[X] — single element, not complex
+    if not isinstance(slc, ast.Tuple):
+        return False
+
+    elts = slc.elts
+
+    # Skip variable-length tuple: tuple[X, ...] has Ellipsis as last element
+    if len(elts) == 2 and isinstance(elts[1], ast.Constant) and elts[1].value is ...:
+        return False
+
+    return len(elts) >= _MIN_TUPLE_ELEMENTS
+
+
+_NOQA_BY_CODE = {
+    "DCT001": _NOQA_DCT001_RE,
+    "DCT002": _NOQA_DCT002_RE,
+}
+
+
 class DictTypeVisitor(ast.NodeVisitor):
-    """AST visitor that finds complex dict type annotations."""
+    """AST visitor that finds complex dict and tuple type annotations."""
 
     def __init__(self) -> None:
         self.violations: list[tuple[int, str]] = []
@@ -85,6 +131,16 @@ class DictTypeVisitor(ast.NodeVisitor):
                     "Use a named @dataclass(slots=True) instead of dict[K, V1 | V2 | V3] "
                     "for better readability, type safety, and performance. "
                     "Suppress with: # noqa: DCT001",
+                )
+            )
+        if _is_complex_tuple(node):
+            self.violations.append(
+                (
+                    node.lineno,
+                    "DCT002 Complex tuple type annotation detected. "
+                    "Use a named @dataclass(slots=True) instead of tuple[X, Y, Z, ...] "
+                    "for better readability and named attribute access. "
+                    "Suppress with: # noqa: DCT002",
                 )
             )
 
@@ -115,7 +171,7 @@ class DictTypeVisitor(ast.NodeVisitor):
 
 
 def check_file(path: str, source: str) -> list[tuple[int, str]]:
-    """Parse source and return DCT001 violations not suppressed by noqa."""
+    """Parse source and return DCT001/DCT002 violations not suppressed by noqa."""
     try:
         tree = ast.parse(source, filename=path)
     except SyntaxError:
@@ -124,11 +180,14 @@ def check_file(path: str, source: str) -> list[tuple[int, str]]:
     visitor = DictTypeVisitor()
     visitor.visit(tree)
 
-    # Filter out violations on lines with noqa DCT001 suppression
+    # Filter out violations on lines with matching noqa suppression
     lines = source.splitlines()
     result: list[tuple[int, str]] = []
     for line_no, message in visitor.violations:
-        if line_no <= len(lines) and _NOQA_RE.search(lines[line_no - 1]):
+        # Extract error code (e.g. "DCT001") from start of message
+        code = message.split()[0]
+        noqa_re = _NOQA_BY_CODE.get(code)
+        if noqa_re and line_no <= len(lines) and noqa_re.search(lines[line_no - 1]):
             continue
         result.append((line_no, message))
     return result
@@ -165,7 +224,7 @@ def _is_excluded(path: Path, exclude_parts: list[str]) -> bool:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Check Python files for complex dict type annotations.",
+        description="Check Python files for complex dict/tuple type annotations.",
     )
     parser.add_argument(
         "paths",
@@ -188,7 +247,7 @@ def main(argv: list[str] | None = None) -> int:
             source = path.read_text(encoding="utf-8", errors="replace")
         except OSError:
             continue
-        if not _DICT_TYPE_RE.search(source):
+        if not _DICT_TYPE_RE.search(source) and not _TUPLE_TYPE_RE.search(source):
             continue
         violations = check_file(str(path), source)
         for line_no, message in violations:

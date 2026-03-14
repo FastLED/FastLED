@@ -43,6 +43,7 @@ import json
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -206,6 +207,15 @@ def needs_rebuild(
     return False, "object is up to date"
 
 
+@dataclass(slots=True)
+class CompileObjectResult:
+    """Result of compile_object."""
+
+    success: bool
+    source_name: str
+    error_message: str
+
+
 def compile_object(
     emcc: str,
     source_path: Path,
@@ -214,7 +224,7 @@ def compile_object(
     pch_path: Path,
     flags: dict[str, list[str]],
     verbose: bool = False,
-) -> tuple[bool, str, str]:
+) -> CompileObjectResult:
     """
     Compile a single source file to an object file.
 
@@ -228,7 +238,7 @@ def compile_object(
         verbose: Enable verbose output
 
     Returns:
-        (success, source_name, error_message) tuple
+        CompileObjectResult with success, source_name, and error_message fields
     """
     try:
         # Ensure output directories exist
@@ -287,23 +297,27 @@ def compile_object(
 
         if result.returncode != 0:
             error_msg = result.stderr if result.stderr else result.stdout
-            return False, source_path.name, f"Compilation failed:\n{error_msg}"
+            return CompileObjectResult(
+                False, source_path.name, f"Compilation failed:\n{error_msg}"
+            )
 
         # Verify object was created
         if not object_path.exists():
-            return (
+            return CompileObjectResult(
                 False,
                 source_path.name,
                 f"Compilation reported success but object file not found: {object_path}",
             )
 
-        return True, source_path.name, ""
+        return CompileObjectResult(True, source_path.name, "")
 
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
-        return False, source_path.name, f"Exception during compilation: {e}"
+        return CompileObjectResult(
+            False, source_path.name, f"Exception during compilation: {e}"
+        )
 
 
 def ensure_pch_built(build_mode: str, verbose: bool = False) -> int:
@@ -699,20 +713,20 @@ def build_library(
                 # Collect results as they complete
                 completed = 0
                 for future in as_completed(futures):
-                    success, source_name, error_msg = future.result()
+                    compile_result = future.result()
                     completed += 1
 
-                    if success:
+                    if compile_result.success:
                         if not verbose:
                             # Show progress without verbose spam
                             print(
-                                f"  [{completed}/{len(sources_to_compile)}] {source_name}"
+                                f"  [{completed}/{len(sources_to_compile)}] {compile_result.source_name}"
                             )
                     else:
-                        print(f"✗ Failed: {source_name}")
-                        if error_msg:
-                            print(f"  {error_msg}")
-                        failed_compilations.append(source_name)
+                        print(f"✗ Failed: {compile_result.source_name}")
+                        if compile_result.error_message:
+                            print(f"  {compile_result.error_message}")
+                        failed_compilations.append(compile_result.source_name)
 
             if failed_compilations:
                 print(f"\n✗ {len(failed_compilations)} compilation(s) failed:")

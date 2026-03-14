@@ -42,6 +42,13 @@ class CleanupResult:
     failed_files: list[str]
 
 
+@dataclass(slots=True)
+class FastNativeEntries:
+    cc: Optional[str]
+    cxx: Optional[str]
+    ar: Optional[str]
+
+
 def _ensure_native_launcher(project_root: Path) -> tuple[Optional[str], Optional[str]]:
     """
     Ensure ctc-clang/ctc-clang++ native launchers are compiled.
@@ -78,7 +85,7 @@ def _ensure_native_launcher(project_root: Path) -> tuple[Optional[str], Optional
 
 def _resolve_fast_native_entries(
     use_sccache: bool,
-) -> tuple[Optional[str], Optional[str], Optional[str]]:
+) -> FastNativeEntries:
     """
     Resolve native launcher binaries for the Meson native file.
 
@@ -87,16 +94,17 @@ def _resolve_fast_native_entries(
     with near-zero startup overhead (~34ms vs ~1200ms for Python wrappers).
 
     Returns:
-        Tuple of (c_entry, cpp_entry, ar_entry) for the native file,
-        or (None, None, None) if resolution fails (falls back to wrappers).
+        FastNativeEntries with cc, cxx, and ar entries for the native file,
+        or all-None fields if resolution fails (falls back to wrappers).
     """
+    _none = FastNativeEntries(cc=None, cxx=None, ar=None)
     try:
         from clang_tool_chain.platform.paths import (
             find_sccache_binary,
             find_tool_binary,
         )
     except ImportError:
-        return None, None, None
+        return _none
 
     try:
         ar_path = str(find_tool_binary("llvm-ar"))
@@ -114,7 +122,7 @@ def _resolve_fast_native_entries(
         project_root = Path(__file__).resolve().parent.parent.parent
         ctc_c, ctc_cpp = _ensure_native_launcher(project_root)
         if ctc_c is None or ctc_cpp is None:
-            return None, None, None
+            return _none
 
         def _make_entry(binary: str) -> str:
             parts: list[str] = []
@@ -123,13 +131,17 @@ def _resolve_fast_native_entries(
             parts.append(f"'{binary}'")
             return "[" + ", ".join(parts) + "]"
 
-        return _make_entry(ctc_c), _make_entry(ctc_cpp), f"['{ar_path}']"
+        return FastNativeEntries(
+            cc=_make_entry(ctc_c),
+            cxx=_make_entry(ctc_cpp),
+            ar=f"['{ar_path}']",
+        )
 
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
-        return None, None, None  # unreachable, satisfies type checker
+        return _none  # unreachable, satisfies type checker
     except Exception:
-        return None, None, None
+        return _none
 
 
 def _resolve_fast_compiler_binary() -> Optional[str]:
@@ -741,12 +753,12 @@ def setup_meson_build(
     # Fall back to combined hash for backward-compat marker (.source_files_hash)
     # Also populates split hashes if fast-path missed either one
     if not current_src_hash or not current_test_hash:
-        _src_h, _test_h, _src_files, _test_files = get_split_source_hashes(source_dir)
+        _split = get_split_source_hashes(source_dir)
         if not current_src_hash:
-            current_src_hash = _src_h
+            current_src_hash = _split.src_hash
         if not current_test_hash:
-            current_test_hash = _test_h
-        current_source_files = sorted(_src_files + _test_files)
+            current_test_hash = _split.tests_hash
+        current_source_files = sorted(_split.src_files + _split.test_files)
 
     # Compute combined hash for the legacy .source_files_hash marker
     if source_files_marker.exists():
@@ -1488,11 +1500,11 @@ def setup_meson_build(
         # Use ctc-clang/ctc-clang++ native launchers instead of Python wrappers.
         # Native launchers handle all platform flags automatically with ~34ms
         # startup vs ~1200ms for Python wrappers.
-        fast_c, fast_cpp, fast_ar = _resolve_fast_native_entries(use_sccache)
-        if fast_c is not None:
-            c_compiler = fast_c
-            cpp_compiler = fast_cpp
-            ar_tool = fast_ar
+        _fast = _resolve_fast_native_entries(use_sccache)
+        if _fast.cc is not None:
+            c_compiler = _fast.cc
+            cpp_compiler = _fast.cxx
+            ar_tool = _fast.ar
         else:
             # Fallback to Python wrappers if raw binary resolution fails
             c_compiler = f"['{clang_wrapper}']"

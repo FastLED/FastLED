@@ -1775,18 +1775,23 @@ async def build_info_analysis(
 
     # Handle board comparison
     if compare_with:
-        success, comparison, error = analyzer.compare_defines(board, compare_with)  # type: ignore
-        if not success:
+        compare_result = analyzer.compare_defines(board, compare_with)
+        if not compare_result.ok:
             return CallToolResult(
-                content=[TextContent(type="text", text=f"[ERROR] Error: {error}")],
+                content=[
+                    TextContent(
+                        type="text", text=f"[ERROR] Error: {compare_result.error}"
+                    )
+                ],
                 isError=True,
             )
 
         if output_json:
             import json
 
-            result_text = json.dumps(comparison, indent=2)
+            result_text = json.dumps(compare_result.comparison, indent=2)
         else:
+            comparison = compare_result.comparison
             board1 = comparison["board1"]
             board2 = comparison["board2"]
 
@@ -1818,12 +1823,13 @@ async def build_info_analysis(
     result_parts: list[str] = []
 
     if show_defines or show_all:
-        success, defines, error = analyzer.get_platform_defines(board)
-        if not success:
+        defines_result = analyzer.get_platform_defines(board)
+        if not defines_result.ok:
             return CallToolResult(
                 content=[
                     TextContent(
-                        type="text", text=f"[ERROR] Error getting defines: {error}"
+                        type="text",
+                        text=f"[ERROR] Error getting defines: {defines_result.error}",
                     )
                 ],
                 isError=True,
@@ -1832,22 +1838,24 @@ async def build_info_analysis(
         if output_json:
             import json
 
-            result_parts.append(json.dumps({"defines": defines}, indent=2))
+            result_parts.append(
+                json.dumps({"defines": defines_result.defines}, indent=2)
+            )
         else:
             result_parts.append(f"📋 Platform Defines for {board.upper()}:")
             result_parts.append("=" * 50)
-            for define in defines:
+            for define in defines_result.defines:
                 result_parts.append(f"  {define}")
-            result_parts.append(f"\nTotal: {len(defines)} defines")
+            result_parts.append(f"\nTotal: {len(defines_result.defines)} defines")
 
     if show_compiler or show_all:
-        success, compiler_info, error = analyzer.get_compiler_info(board)
-        if not success:
+        compiler_result = analyzer.get_compiler_info(board)
+        if not compiler_result.ok:
             return CallToolResult(
                 content=[
                     TextContent(
                         type="text",
-                        text=f"[ERROR] Error getting compiler info: {error}",
+                        text=f"[ERROR] Error getting compiler info: {compiler_result.error}",
                     )
                 ],
                 isError=True,
@@ -1858,9 +1866,12 @@ async def build_info_analysis(
             from dataclasses import asdict
 
             result_parts.append(
-                json.dumps({"compiler": asdict(compiler_info)}, indent=2)
+                json.dumps(
+                    {"compiler": asdict(compiler_result.compiler_info)}, indent=2
+                )
             )
         else:
+            compiler_info = compiler_result.compiler_info
             result_parts.append(f"\n🔧 Compiler Information for {board.upper()}:")
             result_parts.append("=" * 50)
             result_parts.append(
@@ -1883,13 +1894,13 @@ async def build_info_analysis(
                     result_parts.append(f"  {flag}")
 
     if show_toolchain or show_all:
-        success, aliases, error = analyzer.get_toolchain_aliases(board)
-        if not success:
+        aliases_result = analyzer.get_toolchain_aliases(board)
+        if not aliases_result.ok:
             return CallToolResult(
                 content=[
                     TextContent(
                         type="text",
-                        text=f"[ERROR] Error getting toolchain aliases: {error}",
+                        text=f"[ERROR] Error getting toolchain aliases: {aliases_result.error}",
                     )
                 ],
                 isError=True,
@@ -1898,11 +1909,13 @@ async def build_info_analysis(
         if output_json:
             import json
 
-            result_parts.append(json.dumps({"toolchain": aliases}, indent=2))
+            result_parts.append(
+                json.dumps({"toolchain": aliases_result.aliases}, indent=2)
+            )
         else:
             result_parts.append(f"\n⚙️  Toolchain Aliases for {board.upper()}:")
             result_parts.append("=" * 50)
-            for tool, path in aliases.items():
+            for tool, path in aliases_result.aliases.items():
                 if path:
                     # Show just the tool name from the path for readability
                     from pathlib import Path as PathLib

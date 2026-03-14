@@ -14,6 +14,7 @@ Optimized for fast incremental builds:
 
 import hashlib
 import subprocess
+from dataclasses import dataclass
 from pathlib import Path
 
 from ci.docker_utils.container_db import (
@@ -26,6 +27,13 @@ from ci.docker_utils.container_db import (
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.test_types import TestArgs
 from ci.util.timestamp_print import ts_print
+
+
+@dataclass(slots=True)
+class VolumeNames:
+    venv_volume: str
+    build_volume: str
+    cache_volume: str
 
 
 # Maximum containers to keep per project path (for garbage collection)
@@ -60,20 +68,20 @@ def _get_container_name(project_root: Path) -> str:
     return f"fastled-unit-tests-{path_hash}"
 
 
-def _get_volume_names(project_root: Path) -> tuple[str, str, str]:
+def _get_volume_names(project_root: Path) -> VolumeNames:
     """Get unique volume names based on project path.
 
     Args:
         project_root: Path to the project root
 
     Returns:
-        Tuple of (venv_volume_name, build_volume_name, cache_volume_name)
+        VolumeNames with venv_volume, build_volume, and cache_volume names
     """
     path_hash = _get_path_hash(project_root)
-    return (
-        f"fastled-docker-venv-{path_hash}",
-        f"fastled-docker-build-{path_hash}",
-        f"fastled-docker-cache-{path_hash}",
+    return VolumeNames(
+        venv_volume=f"fastled-docker-venv-{path_hash}",
+        build_volume=f"fastled-docker-build-{path_hash}",
+        cache_volume=f"fastled-docker-cache-{path_hash}",
     )
 
 
@@ -355,12 +363,14 @@ def run_docker_tests(args: TestArgs) -> int:
 
     # Get unique container and volume names based on project path
     container_name = _get_container_name(project_root)
-    venv_volume, build_volume, cache_volume = _get_volume_names(project_root)
+    volumes = _get_volume_names(project_root)
     path_hash = _get_path_hash(project_root)
 
     ts_print(f"Project path hash: {path_hash}")
     ts_print(f"Container: {container_name}")
-    ts_print(f"Volumes: {venv_volume}, {build_volume}, {cache_volume}")
+    ts_print(
+        f"Volumes: {volumes.venv_volume}, {volumes.build_volume}, {volumes.cache_volume}"
+    )
 
     # Run garbage collection (non-blocking, best-effort)
     _run_garbage_collection()
@@ -396,11 +406,11 @@ def run_docker_tests(args: TestArgs) -> int:
         f"{project_root}:/host:ro",
         # Use named volumes unique to this project path (persistent across runs)
         "-v",
-        f"{venv_volume}:/fastled/.venv",
+        f"{volumes.venv_volume}:/fastled/.venv",
         "-v",
-        f"{build_volume}:/fastled/.build",
+        f"{volumes.build_volume}:/fastled/.build",
         "-v",
-        f"{cache_volume}:/root/.cache",  # Persist compiler/tool caches (uv, sccache, clang modules)
+        f"{volumes.cache_volume}:/root/.cache",  # Persist compiler/tool caches (uv, sccache, clang modules)
         "-w",
         "/fastled",
         # No -t flag: TTY allocation causes output buffering/loss when piped

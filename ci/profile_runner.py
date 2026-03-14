@@ -13,6 +13,7 @@ import json
 import subprocess
 import sys
 import time
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -22,6 +23,13 @@ from running_process.process_output_reader import EndOfStream
 from ci.util.deadlock_detector import handle_hung_test
 from ci.util.docker_helper import attempt_start_docker
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+
+
+@dataclass(slots=True)
+class RunWithTimeoutResult:
+    success: bool
+    output: str
+    pid_if_timeout: int | None
 
 
 class ProfileRunner:
@@ -186,7 +194,7 @@ class ProfileRunner:
 
     def _run_with_timeout(
         self, cmd: list[str], timeout_seconds: int = 120
-    ) -> tuple[bool, str, int | None]:
+    ) -> RunWithTimeoutResult:
         """
         Run command with timeout and deadlock detection.
 
@@ -213,9 +221,13 @@ class ProfileRunner:
                 output = stdout + stderr
 
                 if retcode == 0:
-                    return (True, output, None)
+                    return RunWithTimeoutResult(
+                        success=True, output=output, pid_if_timeout=None
+                    )
                 else:
-                    return (False, output, None)
+                    return RunWithTimeoutResult(
+                        success=False, output=output, pid_if_timeout=None
+                    )
 
             # Check timeout
             elapsed = time.time() - start_time
@@ -232,7 +244,9 @@ class ProfileRunner:
                 proc.kill()
                 proc.wait()
 
-                return (False, "TIMEOUT", pid)
+                return RunWithTimeoutResult(
+                    success=False, output="TIMEOUT", pid_if_timeout=pid
+                )
 
             # Sleep briefly before next check
             time.sleep(0.1)
@@ -306,9 +320,10 @@ class ProfileRunner:
                 else:
                     # Local: Use custom timeout with debugger attachment
                     cmd = [str(binary_path), "baseline"]
-                    success, output, pid = self._run_with_timeout(
-                        cmd, timeout_seconds=120
-                    )
+                    result = self._run_with_timeout(cmd, timeout_seconds=120)
+                    success = result.success
+                    output = result.output
+                    pid = result.pid_if_timeout
 
                     if not success:
                         if pid is not None:

@@ -57,6 +57,13 @@ from ci.util.test_types import (
 from ci.util.timestamp_print import ts_print
 
 
+@dataclass(slots=True)
+class TestCounts:
+    unit_test_count: int
+    example_count: int
+    python_test_count: int
+
+
 _IS_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 _TIMEOUT = 600 if _IS_GITHUB_ACTIONS else 240
 _GLOBAL_TIMEOUT = (
@@ -67,12 +74,12 @@ _GLOBAL_TIMEOUT = (
 MAX_FAILURES_BEFORE_ABORT = 3
 
 
-def get_test_counts() -> tuple[int, int, int]:
+def get_test_counts() -> TestCounts:
     """
     Get accurate counts of unit tests, examples, and Python tests.
 
     Returns:
-        Tuple of (unit_test_count, example_count, python_test_count)
+        TestCounts with unit_test_count, example_count, and python_test_count.
     """
     try:
         from pathlib import Path
@@ -105,14 +112,18 @@ def get_test_counts() -> tuple[int, int, int]:
             # If counting fails, use 0 as fallback
             python_count = 0
 
-        return (unit_count, example_count, python_count)
+        return TestCounts(
+            unit_test_count=unit_count,
+            example_count=example_count,
+            python_test_count=python_count,
+        )
 
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise
     except Exception:
         # If discovery fails, return zeros
-        return (0, 0, 0)
+        return TestCounts(unit_test_count=0, example_count=0, python_test_count=0)
 
 
 # Pre-compiled patterns for detecting real error lines (not compiler flags).

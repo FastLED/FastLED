@@ -6,6 +6,7 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 This module handles validation and copying of build artifacts to output locations.
 """
 
+from dataclasses import dataclass
 from pathlib import Path
 
 from ci.boards import Board
@@ -13,10 +14,19 @@ from ci.compiler.board_example_utils import get_board_artifact_extension
 from ci.compiler.esp32_artifacts import ESP32ArtifactManager
 
 
+@dataclass(slots=True)
+class ValidateOutputPathResult:
+    """Result of validate_output_path."""
+
+    is_valid: bool
+    resolved_path: str
+    error_message: str
+
+
 def validate_output_path(
     output_path: str, sketch_name: str, board: Board
-) -> tuple[bool, str, str]:
-    """Validate output path and return (is_valid, resolved_path, error_message).
+) -> ValidateOutputPathResult:
+    """Validate output path and return a result with is_valid, resolved_path, error_message.
 
     Args:
         output_path: The user-specified output path
@@ -24,7 +34,7 @@ def validate_output_path(
         board: Board configuration
 
     Returns:
-        Tuple of (is_valid, resolved_output_path, error_message)
+        ValidateOutputPathResult with is_valid, resolved_path, and error_message fields
     """
     import os
 
@@ -33,27 +43,27 @@ def validate_output_path(
     # Handle special case: -o .
     if output_path == ".":
         resolved_path = f"{sketch_name}{expected_ext}"
-        return True, resolved_path, ""
+        return ValidateOutputPathResult(True, resolved_path, "")
 
     # If path ends with /, it's a directory
     if output_path.endswith("/") or output_path.endswith("\\"):
         resolved_path = os.path.join(output_path, f"{sketch_name}{expected_ext}")
-        return True, resolved_path, ""
+        return ValidateOutputPathResult(True, resolved_path, "")
 
     # If path has an extension, it's a file - validate the extension
     if "." in os.path.basename(output_path):
         _, ext = os.path.splitext(output_path)
         if ext != expected_ext:
-            return (
+            return ValidateOutputPathResult(
                 False,
                 "",
                 f"Output file extension '{ext}' doesn't match expected '{expected_ext}' for board '{board.board_name}'",
             )
-        return True, output_path, ""
+        return ValidateOutputPathResult(True, output_path, "")
 
     # Path doesn't end with / and has no extension - treat as directory
     resolved_path = os.path.join(output_path, f"{sketch_name}{expected_ext}")
-    return True, resolved_path, ""
+    return ValidateOutputPathResult(True, resolved_path, "")
 
 
 def validate_esp32_flash_mode_for_qemu(build_dir: Path, board: Board) -> bool:

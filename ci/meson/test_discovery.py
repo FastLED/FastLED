@@ -3,11 +3,20 @@
 import hashlib
 import json
 import subprocess
+from dataclasses import dataclass
 from pathlib import Path
 
 from ci.meson.compiler import get_meson_executable
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.timestamp_print import ts_print as _ts_print
+
+
+@dataclass(slots=True)
+class SplitSourceHashes:
+    src_hash: str
+    tests_hash: str
+    src_files: list[str]
+    test_files: list[str]
 
 
 def _load_introspect_tests_cache(build_dir: Path) -> list[str] | None:
@@ -245,28 +254,30 @@ def get_source_files_hash(source_dir: Path) -> tuple[str, list[str]]:
         return ("", [])
 
 
-def get_split_source_hashes(source_dir: Path) -> tuple[str, str, list[str], list[str]]:
+def get_split_source_hashes(source_dir: Path) -> SplitSourceHashes:
     """
     Get separate hashes for src/ and tests/ directories.
 
     Returns:
-        Tuple of (src_hash, tests_hash, src_files, test_files)
+        SplitSourceHashes with src_hash, tests_hash, src_files, and test_files.
     """
     try:
         src_files = _discover_files_in_dir(source_dir, "src")
         test_files = _discover_files_in_dir(source_dir, "tests")
-        return (
-            _hash_file_list(src_files),
-            _hash_file_list(test_files),
-            src_files,
-            test_files,
+        return SplitSourceHashes(
+            src_hash=_hash_file_list(src_files),
+            tests_hash=_hash_file_list(test_files),
+            src_files=src_files,
+            test_files=test_files,
         )
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         _ts_print(f"[MESON] Warning: Failed to get source file hashes: {e}")
-        return ("", "", [], [])
+        return SplitSourceHashes(
+            src_hash="", tests_hash="", src_files=[], test_files=[]
+        )
 
 
 def list_all_tests(

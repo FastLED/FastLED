@@ -344,10 +344,14 @@ def main() -> None:
 
                 # Get and display test counts before starting
                 ts_print("Discovering tests...")
-                unit_count, example_count, python_count = get_test_counts()
-                total_tests = unit_count + example_count + python_count
+                counts = get_test_counts()
+                total_tests = (
+                    counts.unit_test_count
+                    + counts.example_count
+                    + counts.python_test_count
+                )
                 ts_print(
-                    f"Found {total_tests} tests: {unit_count} unit tests, {example_count} examples, {python_count} Python tests"
+                    f"Found {total_tests} tests: {counts.unit_test_count} unit tests, {counts.example_count} examples, {counts.python_test_count} Python tests"
                 )
 
                 # Create Python test process (runs first)

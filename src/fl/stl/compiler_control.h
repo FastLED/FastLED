@@ -747,6 +747,14 @@ FL_DISABLE_WARNING_POP
 #endif
 
 // ============================================================================
+// Compiler intrinsic memcpy
+// ============================================================================
+// Optimization: __builtin_memcpy is a compiler intrinsic that always lowers to
+// optimal load/store instructions at the call site. Unlike fl::memcpy (a
+// cross-TU call requiring LTO to inline), this guarantees zero call overhead.
+#define FL_BUILTIN_MEMCPY(dest, src, n) __builtin_memcpy(dest, src, n)
+
+// ============================================================================
 // Unused macros (formerly fl/unused.h)
 // ============================================================================
 

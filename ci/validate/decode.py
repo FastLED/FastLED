@@ -20,6 +20,7 @@ import shutil
 import subprocess
 import tempfile
 import urllib.request
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -106,8 +107,17 @@ def _build_jsonrpc_payload(file_bytes: bytes, extension: str) -> str:
     return json.dumps(payload)
 
 
-def _resolve_file(decode_path: str) -> tuple[str, str, str | None]:
-    """Resolve decode_path to (file_path, extension, temp_download_path_or_None)."""
+@dataclass(slots=True)
+class ResolvedFile:
+    """Result of resolving a decode path to a local file."""
+
+    file_path: str
+    extension: str
+    temp_download_path: str | None
+
+
+def _resolve_file(decode_path: str) -> ResolvedFile:
+    """Resolve decode_path to a ResolvedFile with file_path, extension, and optional temp path."""
     temp_download: str | None = None
     if _is_url(decode_path):
         file_path, ext = _download_to_temp(decode_path)
@@ -115,7 +125,9 @@ def _resolve_file(decode_path: str) -> tuple[str, str, str | None]:
     else:
         file_path = str(Path(decode_path).resolve())
         ext = _get_extension(file_path)
-    return file_path, ext, temp_download
+    return ResolvedFile(
+        file_path=file_path, extension=ext, temp_download_path=temp_download
+    )
 
 
 def _print_pixel_table(pixels: list[list[int]]) -> None:
@@ -157,7 +169,10 @@ async def run_device_decode_validation(
     client: RpcClient | None = None
 
     try:
-        file_path, ext, temp_download = _resolve_file(decode_path)
+        resolved = _resolve_file(decode_path)
+        file_path = resolved.file_path
+        ext = resolved.extension
+        temp_download = resolved.temp_download_path
 
         if ext not in SUPPORTED_EXTENSIONS:
             supported = ", ".join(sorted(SUPPORTED_EXTENSIONS.keys()))
@@ -269,7 +284,10 @@ async def run_decode_validation(decode_path: str) -> int:
 
     try:
         # Resolve the file
-        file_path, ext, temp_download = _resolve_file(decode_path)
+        resolved = _resolve_file(decode_path)
+        file_path = resolved.file_path
+        ext = resolved.extension
+        temp_download = resolved.temp_download_path
 
         # Validate extension
         if ext not in SUPPORTED_EXTENSIONS:

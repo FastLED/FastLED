@@ -9,6 +9,7 @@
 /// rather than hardcoded.
 
 #include "fl/audio/mic_profiles.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/math.h"
 #include "fastled_progmem.h"
 
@@ -23,7 +24,7 @@ namespace fl {
 inline float fl_progmem_read_float(const float* addr) {
     u32 raw = FL_PGM_READ_DWORD_ALIGNED(addr);
     float result;
-    __builtin_memcpy(&result, &raw, sizeof(float));
+    FL_BUILTIN_MEMCPY(&result, &raw, sizeof(float));
     return result;
 }
 

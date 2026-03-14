@@ -78,6 +78,7 @@ import re
 import subprocess
 import sys
 import time
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -374,6 +375,15 @@ def format_test_summary(result_events: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
+@dataclass(slots=True)
+class MonitorResult:
+    """Result of running the serial monitor."""
+
+    success: bool
+    output_lines: list[str]
+    rpc_handler: JsonRpcHandler
+
+
 def run_monitor(
     build_dir: Path,
     environment: str | None = None,
@@ -388,7 +398,7 @@ def run_monitor(
     stop_keyword: str | None = None,
     json_rpc_commands: list[dict[str, Any]] | None = None,
     use_pyserial: bool = False,
-) -> tuple[bool, list[str], JsonRpcHandler]:
+) -> MonitorResult:
     """Attach to serial monitor and capture output.
 
     Keyword Behavior:
@@ -553,7 +563,9 @@ def run_monitor(
         ports = list(list_ports.comports())
         if not ports:
             print("❌ No serial ports found")
-            return False, [], JsonRpcHandler()
+            return MonitorResult(
+                success=False, output_lines=[], rpc_handler=JsonRpcHandler()
+            )
         monitor_port = ports[0].device
         print(f"📡 Auto-detected serial port: {monitor_port}")
 
@@ -976,7 +988,9 @@ def run_monitor(
     else:
         print("❌ Monitor failed")
 
-    return success, output_lines, rpc_handler
+    return MonitorResult(
+        success=success, output_lines=output_lines, rpc_handler=rpc_handler
+    )
 
 
 def parse_args() -> argparse.Namespace:
@@ -1383,7 +1397,7 @@ def main() -> int:
                 return 1
 
         # Phase 4: Monitor serial output
-        success, output, rpc_handler = run_monitor(
+        monitor_result = run_monitor(
             build_dir,
             args.environment,
             upload_port,  # Use same port for monitoring
@@ -1398,7 +1412,7 @@ def main() -> int:
             json_rpc_commands,
         )
 
-        if not success:
+        if not monitor_result.success:
             return 1
 
         phases_completed = "three" if args.skip_lint else "four"

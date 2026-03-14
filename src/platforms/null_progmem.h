@@ -1,6 +1,7 @@
 // ok no namespace fl
 #pragma once
 
+#include "fl/stl/compiler_control.h"  // for FL_BUILTIN_MEMCPY
 #include "fl/stl/int.h"  // for FastLED integer types
 #include "platforms/avr/is_avr.h"  // for FL_IS_AVR
 
@@ -43,18 +44,18 @@
 #define FL_ALIGN_PROGMEM(N) __attribute__((aligned(N)))
 
 // Aligned PROGMEM reads. On non-AVR/non-flash platforms, data lives in
-// normal memory. Uses __builtin_memcpy (compiler intrinsic) which always lowers
-// to a single load instruction — unlike fl::memcpy which is a cross-TU call
-// that the compiler cannot inline without LTO.
+// normal memory. Uses FL_BUILTIN_MEMCPY (compiler intrinsic) which always
+// lowers to a single load instruction — unlike fl::memcpy which is a
+// cross-TU call that the compiler cannot inline without LTO.
 #if !(defined(FL_IS_AVR))
 static inline fl::u16 _fl_progmem_aligned_read_2(const void* addr) {
     fl::u16 result;
-    __builtin_memcpy(&result, addr, 2);
+    FL_BUILTIN_MEMCPY(&result, addr, 2);
     return result;
 }
 static inline fl::u32 _fl_progmem_aligned_read_4(const void* addr) {
     fl::u32 result;
-    __builtin_memcpy(&result, addr, 4);
+    FL_BUILTIN_MEMCPY(&result, addr, 4);
     return result;
 }
 #define FL_PGM_READ_WORD_ALIGNED(addr) (_fl_progmem_aligned_read_2(addr))

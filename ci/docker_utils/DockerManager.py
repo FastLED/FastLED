@@ -1,12 +1,20 @@
 import os
 import subprocess
 import sys
+from dataclasses import dataclass
 from typing import Optional
 
 from running_process import RunningProcess
 
 from ci.util.docker_command import get_docker_command
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+
+
+@dataclass(slots=True)
+class ContainerCommandResult:
+    exit_code: int
+    stdout: str
+    stderr: str
 
 
 class DockerManager:
@@ -334,7 +342,7 @@ class DockerManager:
 
     def execute_command_in_container(
         self, container_id_or_name: str, command: list[str]
-    ) -> tuple[int, str, str]:
+    ) -> ContainerCommandResult:
         """Executes a command inside a running container and returns exit code, stdout, and stderr."""
         print(
             f"Executing command '{' '.join(command)}' in container: {container_id_or_name}"
@@ -347,7 +355,11 @@ class DockerManager:
         print(
             f"Command executed in {container_id_or_name}. Exit code: {result.returncode}"
         )
-        return result.returncode, stdout, stderr
+        return ContainerCommandResult(
+            exit_code=result.returncode,
+            stdout=stdout,
+            stderr=stderr,
+        )
 
 
 if __name__ == "__main__":
@@ -385,13 +397,13 @@ if __name__ == "__main__":
 
         # Example: Execute a command inside a running container
         print("\n--- Executing command inside container ---")
-        exit_code, stdout, stderr = manager.execute_command_in_container(
+        exec_result = manager.execute_command_in_container(
             container_id, ["sh", "-c", "echo 'Executed inside!'; exit 42"]
         )
-        print(f"Exec command stdout: {stdout}")
-        print(f"Exec command stderr: {stderr}")
-        print(f"Exec command exit code: {exit_code}")
-        if exit_code == 42 and "Executed inside!" in stdout:
+        print(f"Exec command stdout: {exec_result.stdout}")
+        print(f"Exec command stderr: {exec_result.stderr}")
+        print(f"Exec command exit code: {exec_result.exit_code}")
+        if exec_result.exit_code == 42 and "Executed inside!" in exec_result.stdout:
             print("SUCCESS: Command executed inside container as expected.")
         else:
             print("FAILURE: Command execution inside container failed.")
