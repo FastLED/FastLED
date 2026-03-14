@@ -21,7 +21,7 @@
 
 // IWYU pragma: private
 
-#include "fl/stl/cstdint.h"
+#include "fl/stl/stdint.h"
 
 namespace fl {
 

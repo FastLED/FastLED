@@ -3,12 +3,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // FastLED Standard Definition Types (stddef.h equivalents)
 //
-// Provides size_t, ptrdiff_t, max_align_t, and offsetof macro for both C and C++.
-// C code should generally use fl/cstdint.h which includes the C versions of
-// these types.
+// Provides size_t, ptrdiff_t, max_align_t, and offsetof macro.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef __cplusplus
 namespace fl {
 
 // FastLED equivalent of std::nullptr_t
@@ -64,23 +61,6 @@ typedef typename max_align_selector<(sizeof(long double) > sizeof(double))>::typ
 typedef fl::size_t size_t;
 typedef fl::ptrdiff_t ptrdiff_t;
 
-#else
-// C language support: define types directly in global namespace
-#ifndef FL_SIZE_T_DEFINED
-#define FL_SIZE_T_DEFINED
-typedef __SIZE_TYPE__ size_t;
-#endif
-
-#ifndef FL_PTRDIFF_T_DEFINED
-#define FL_PTRDIFF_T_DEFINED
-#ifdef __PTRDIFF_TYPE__
-typedef __PTRDIFF_TYPE__ ptrdiff_t;
-#else
-// Fallback for compilers that don't define __PTRDIFF_TYPE__ (like older AVR-GCC)
-typedef long ptrdiff_t;
-#endif
-#endif
-#endif  // __cplusplus
 
 // FastLED equivalent of offsetof macro (stddef.h)
 // Computes byte offset of a member within a struct/class at compile time

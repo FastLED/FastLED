@@ -131,7 +131,7 @@ HEADER_RECOMMENDATIONS = {
     "cstring": "fl/str.h or fl/stl/cstring.h",
     "cwchar": "Wide character support (implement if needed)",
     "cuchar": "Character support (implement if needed)",
-    "cstdint": "fl/stl/stdint.h or fl/stl/cstdint.h",
+    "cstdint": "fl/stl/stdint.h",
     "stdint.h": "fl/stl/stdint.h",
     "stddef.h": "fl/stl/stddef.h or fl/stl/cstddef.h",
     "cstddef": "fl/stl/cstddef.h",
@@ -277,7 +277,7 @@ EXCEPTION_RULES: dict[str, list[HeaderException]] = {
     ],
     # Integer types
     "stdint.h": [
-        HeaderException("fl/stl/cstdint.h", "Limit macros: INT8_MAX, UINT64_MAX, etc."),
+        HeaderException("fl/stl/stdint.h", "Limit macros: INT8_MAX, UINT64_MAX, etc."),
         HeaderException("fl/stl/time.cpp", "Platform-specific time implementation"),
         HeaderException(
             "fl/stl/time.cpp.hpp", "Platform-specific time implementation (header-only)"

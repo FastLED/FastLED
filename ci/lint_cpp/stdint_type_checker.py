@@ -21,7 +21,6 @@ _EXCLUDED_DIRS = [
 # Files excluded from checking (type definition files that intentionally use stdint types)
 _EXCLUDED_FILENAMES = {
     "stdint.h",  # fl/stl/stdint.h - defines uint8_t as typedef of fl::u8
-    "cstdint.h",  # fl/stl/cstdint.h - C language type definitions
     "int.h",  # fl/stl/int.h - defines fl::uint as typedef of unsigned int (core type definition)
     "run_unit_test.hpp",  # Platform runners use std:: types to avoid FastLED dependencies
     "dual_isr_context.h",  # C header used from assembly - must use C types

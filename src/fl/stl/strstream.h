@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/stl/cstdint.h"  // IWYU pragma: keep
+#include "fl/stl/stdint.h"  // IWYU pragma: keep
 #include "fl/stl/string.h"
 #include "crgb.h"  // IWYU pragma: keep
 #include "fl/stl/ios.h"  // IWYU pragma: keep

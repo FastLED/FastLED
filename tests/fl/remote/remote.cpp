@@ -5,7 +5,7 @@
 #if FASTLED_ENABLE_JSON
 
 #include "fl/stl/cctype.h"
-#include "fl/stl/cstdint.h"
+#include "fl/stl/stdint.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/span.h"
