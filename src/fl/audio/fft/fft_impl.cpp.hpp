@@ -142,16 +142,36 @@ class FFTContext {
     // Cost: ~0.15ms on ESP32-S3. No kernel memory.
 
     void initLogRebin() {
-        // Pre-compute bin edges: m_logBinEdges[i] = lower frequency of bin i
-        // m_logBinEdges[bands] = upper frequency of last bin
+        // Pre-compute bin edges aligned with CQ center frequencies.
+        // CQ center[i] = fmin * exp(logRatio * i / (bands-1)), so
+        // binToFreq(i) returns these centers for both modes.
+        //
+        // Edges are placed at the geometric mean of adjacent centers:
+        //   edge[i] = sqrt(center[i-1] * center[i])
+        //           = fmin * exp(logRatio * (2*i - 1) / (2*(bands-1)))
+        //
+        // edge[0] and edge[bands] extend half a bin beyond fmin/fmax.
         const int bands = m_totalBands;
         m_logBinEdges.resize(bands + 1);
         float logRatio = logf(m_fmax / m_fmin);
-        for (int i = 0; i <= bands; i++) {
-            m_logBinEdges[i] =
-                m_fmin *
-                expf(logRatio * static_cast<float>(i) /
-                     static_cast<float>(bands));
+        if (bands <= 1) {
+            m_logBinEdges[0] = m_fmin;
+            m_logBinEdges[1] = m_fmax;
+        } else {
+            float denom = 2.0f * static_cast<float>(bands - 1);
+            // Edge below first center (half-bin below fmin)
+            m_logBinEdges[0] =
+                m_fmin * expf(-logRatio / denom);
+            // Intermediate edges: geometric mean of adjacent CQ centers
+            for (int i = 1; i < bands; i++) {
+                m_logBinEdges[i] =
+                    m_fmin *
+                    expf(logRatio * (2.0f * static_cast<float>(i) - 1.0f) /
+                         denom);
+            }
+            // Edge above last center (half-bin above fmax)
+            m_logBinEdges[bands] =
+                m_fmax * expf(logRatio / denom);
         }
 
         // Pre-compute Hanning window to reduce spectral leakage
