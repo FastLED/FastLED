@@ -11,8 +11,8 @@ ZCCACHE is faster and more reliable than ccache, especially for CI/CD environmen
 
 import os
 import platform
+import re
 import shutil
-import subprocess
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -55,39 +55,12 @@ def is_zccache_available() -> bool:
 
 
 def clear_zccache_stats() -> None:
-    """Clear zccache statistics asynchronously (fire and forget).
+    """Clear zccache statistics (no-op).
 
-    Runs zccache --zero-stats in a background daemon thread so it does not
-    block the build pipeline (~426ms saved on Windows). The subprocess is
-    guaranteed to finish before or during the first ninja compilation step
-    (which takes several seconds), so stats are clean by the time we care.
+    zccache 1.0.3 does not support --zero-stats.
+    Stats are per-daemon-uptime and reset automatically on daemon restart.
     """
-    if not is_zccache_available():
-        return
-
-    zccache_path = get_zccache_wrapper_path()
-    if not zccache_path:
-        return
-
-    import threading
-
-    def _do_clear() -> None:
-        try:
-            RunningProcess.run(
-                [zccache_path, "--zero-stats"],
-                cwd=None,
-                check=False,
-                timeout=5,
-            )
-        except RuntimeError:
-            pass
-        except KeyboardInterrupt as ki:
-            handle_keyboard_interrupt(ki)
-        except Exception:
-            pass
-
-    t = threading.Thread(target=_do_clear, daemon=True)
-    t.start()
+    pass
 
 
 def show_zccache_stats() -> None:
@@ -101,47 +74,44 @@ def show_zccache_stats() -> None:
 
     try:
         result = RunningProcess.run(
-            [zccache_path, "--show-stats"],
+            [zccache_path, "status"],
             cwd=None,
             check=False,
             timeout=10,
             capture_output=True,
         )
         if result.returncode == 0:
-            # Parse and display key metrics only
+            # Parse zccache status output format:
+            #   Compilations:  N total (X cached, Y cold, Z non-cacheable)
+            #   Hit rate:      XX.X%
             lines = result.stdout.strip().split("\n")
             key_metrics: dict[str, str] = {}
 
-            # Extract only the most important metrics
             for line in lines:
                 line_stripped = line.strip()
                 if not line_stripped:
                     continue
 
-                # Split on whitespace with max 1 split to get key and value
-                if "Compile requests" in line and "executed" not in line.lower():
-                    # Get last token which is the number
-                    key_metrics["requests"] = line_stripped.split()[-1]
-                elif "Cache hits (C/C++)" in line:
-                    key_metrics["hits"] = line_stripped.split()[-1]
-                elif "Cache misses (C/C++)" in line:
-                    key_metrics["misses"] = line_stripped.split()[-1]
-                elif "Cache hits rate (C/C++)" in line:
-                    # Get the percentage (last 2 tokens: "32.88 %")
-                    tokens = line_stripped.split()
-                    key_metrics["hit_rate"] = f"{tokens[-2]} {tokens[-1]}"
-                elif "Average compiler" in line:
-                    # Get the time value (last 2 tokens: "5.438 s")
-                    tokens = line_stripped.split()
-                    key_metrics["avg_compile"] = f"{tokens[-2]} {tokens[-1]}"
+                if "Compilations:" in line:
+                    # Parse: "Compilations:  N total (X cached, Y cold, Z non-cacheable)"
+                    key_metrics["requests"] = line_stripped.split()[1]
+                    # Extract cached count from parenthetical
+                    cached_match = re.search(r"\((\d+)\s+cached", line_stripped)
+                    cold_match = re.search(r"(\d+)\s+cold", line_stripped)
+                    if cached_match:
+                        key_metrics["hits"] = cached_match.group(1)
+                    if cold_match:
+                        key_metrics["misses"] = cold_match.group(1)
+                elif "Hit rate:" in line:
+                    # Parse: "Hit rate:      XX.X%" or "Hit rate:      n/a"
+                    parts = line_stripped.split(":", 1)
+                    if len(parts) > 1:
+                        key_metrics["hit_rate"] = parts[1].strip()
 
             # Display compact summary only if there's meaningful data
-            # Skip displaying ZCCACHE stats if no compilation occurred (all N/A values)
-            has_hits = key_metrics.get("hits") not in (None, "N/A", "0")
-            has_misses = key_metrics.get("misses") not in (None, "N/A", "0")
+            has_hits = key_metrics.get("hits") not in (None, "N/A", "n/a", "0")
+            has_misses = key_metrics.get("misses") not in (None, "N/A", "n/a", "0")
 
-            # Only show ZCCACHE stats if there was actual compilation activity
-            # Require actual hits/misses, not just requests count
             if has_hits or has_misses:
                 ts_print("\nZCCACHE (this build):")
                 if key_metrics:
@@ -151,14 +121,11 @@ def show_zccache_stats() -> None:
                         f"Misses: {key_metrics.get('misses', 'N/A')} | "
                         f"Hit Rate: {key_metrics.get('hit_rate', 'N/A')}"
                     )
-                    if "avg_compile" in key_metrics:
-                        ts_print(f"  Avg: {key_metrics['avg_compile']}")
                 else:
-                    # Fallback: show raw output if parsing fails
                     ts_print(result.stdout)
     except RuntimeError as e:
         if "timeout" in str(e).lower():
-            ts_print("Warning: zccache --show-stats timed out")
+            ts_print("Warning: zccache status timed out")
         else:
             ts_print(f"Warning: Failed to retrieve zccache stats: {e}")
     except KeyboardInterrupt as ki:
@@ -226,7 +193,7 @@ def configure_zccache(env: PlatformIOEnv) -> None:
     # Show ZCCACHE stats if available
     try:
         result = RunningProcess.run(
-            [zccache_path, "--show-stats"],
+            [zccache_path, "status"],
             cwd=None,
             check=False,
             timeout=10,

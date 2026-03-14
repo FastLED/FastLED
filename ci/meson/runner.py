@@ -229,6 +229,8 @@ def _safe_rmtree(build_dir: Path) -> None:
     # Purge any previously trashed files that are now unlocked
     _purge_trash(trash_dir)
 
+    locked_files: list[str] = []
+
     def _on_exc(func, path, exc):  # noqa: ARG001
         """Handle locked files by renaming them into .trash/."""
         p = Path(path)
@@ -237,8 +239,9 @@ def _safe_rmtree(build_dir: Path) -> None:
         trash_path = trash_dir / trash_name
         try:
             p.rename(trash_path)
+            locked_files.append(p.name)
         except (PermissionError, OSError):
-            pass  # Can't even rename - leave it and continue
+            locked_files.append(f"{p.name} (unmovable)")
 
     if sys.version_info >= (3, 12):
         shutil.rmtree(build_dir, onexc=_on_exc)
@@ -251,6 +254,8 @@ def _safe_rmtree(build_dir: Path) -> None:
             shutil.rmtree(build_dir)
         except OSError:
             _ts_print(f"[MESON] ⚠️  Some locked files moved to {trash_dir}")
+            for name in locked_files:
+                _ts_print(f"  - {name}")
 
 
 def _write_failure_log(

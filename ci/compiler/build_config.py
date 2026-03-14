@@ -398,7 +398,7 @@ def setup_zccache_environment(board_name: str) -> bool:
     # Show zccache statistics if available
     try:
         result = subprocess.run(
-            [zccache_path, "--show-stats"],
+            [zccache_path, "status"],
             capture_output=True,
             text=True,
             encoding="utf-8",

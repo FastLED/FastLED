@@ -541,8 +541,11 @@ class PioCompiler(Compiler):
             return f"{cache_name.upper()} not found in PATH"
 
         try:
+            stats_arg = (
+                "status" if self.cache_type == CacheType.ZCCACHE else "--show-stats"
+            )
             result = RunningProcess.run(
-                [cache_path, "--show-stats"],
+                [cache_path, stats_arg],
                 cwd=None,
                 check=False,
                 timeout=10,
