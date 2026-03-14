@@ -596,9 +596,30 @@ def run_meson_build_and_test(
                 def test_callback(test_path: Path) -> bool:
                     """Run a single test executable and return success status"""
                     try:
+                        # Handle shared library tests (.dll/.so/.dylib): use runner to load them
+                        if test_path.suffix.lower() in (".dll", ".so", ".dylib"):
+                            runner_suffix = ".exe" if os.name == "nt" else ""
+                            if test_path.parent.name == "tests":
+                                runner = build_dir / "tests" / f"runner{runner_suffix}"
+                            else:
+                                runner = (
+                                    build_dir
+                                    / "examples"
+                                    / f"example_runner{runner_suffix}"
+                                )
+                            if not runner.exists():
+                                _ts_print(
+                                    f"[MESON] ⚠️  Runner not found: {runner}",
+                                    file=sys.stderr,
+                                )
+                                return False
+                            cmd = [str(runner), str(test_path)]
+                        else:
+                            cmd = [str(test_path)]
+
                         # Use environment with fastled shared lib dir and ASAN_OPTIONS
                         proc = RunningProcess(
-                            [str(test_path)],
+                            cmd,
                             cwd=source_dir,  # Run from project root
                             timeout=600,  # 10 minute timeout per test
                             auto_run=True,
@@ -800,6 +821,18 @@ def run_meson_build_and_test(
                     print_error(
                         f"[MESON] ❌ Some tests failed ({sr.num_passed}/{num_tests_run} tests in {duration:.2f}s)"
                     )
+                    # Print captured error outputs to console
+                    if _failed_test_outputs:
+                        print_error(f"\n{'=' * 80}")
+                        print_error(
+                            f"[MESON] Test failure details ({len(_failed_test_outputs)} tests):"
+                        )
+                        print_error(f"{'=' * 80}")
+                        for tname, output in _failed_test_outputs.items():
+                            print_error(f"\n--- {tname} ---")
+                            for line in output.splitlines()[-30:]:
+                                print_error(f"  {line}")
+                        print_error(f"{'=' * 80}")
                     # Write failure logs
                     if log_failures is not None:
                         if num_tests_run == 0:
@@ -1158,12 +1191,12 @@ def run_meson_build_and_test(
                 test_cmd = [str(test_exe_unix)]
                 _artifact_path = test_exe_unix
             else:
-                # Try DLL-based test architecture: runner + test.dll/.so
+                # Try DLL-based test architecture: runner + test.dll/.so/.dylib
                 # On Windows: runner.exe + test.dll
                 # On Linux: runner + test.so
+                # On macOS: runner + test.dylib
                 runner_name = "runner.exe" if os.name == "nt" else "runner"
                 runner_exe = build_dir / "tests" / runner_name
-                test_dll = build_dir / "tests" / f"{meson_test_name}.dll"
 
                 if not runner_exe.exists():
                     # Try compiling the runner target
@@ -1171,15 +1204,14 @@ def run_meson_build_and_test(
                         build_dir, target="runner", quiet=True, verbose=verbose
                     )
 
-                if runner_exe.exists() and test_dll.exists():
-                    test_cmd = [str(runner_exe), str(test_dll)]
-                    _artifact_path = test_dll
-                elif runner_exe.exists() and not test_dll.exists():
-                    # Try .so for Linux
-                    test_so = build_dir / "tests" / f"{meson_test_name}.so"
-                    if test_so.exists():
-                        test_cmd = [str(runner_exe), str(test_so)]
-                        _artifact_path = test_so
+                if runner_exe.exists():
+                    # Try each shared library extension
+                    for ext in (".dll", ".so", ".dylib"):
+                        candidate = build_dir / "tests" / f"{meson_test_name}{ext}"
+                        if candidate.exists():
+                            test_cmd = [str(runner_exe), str(candidate)]
+                            _artifact_path = candidate
+                            break
 
         if not test_cmd:
             _ts_print(

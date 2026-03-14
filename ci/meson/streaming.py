@@ -328,8 +328,7 @@ def stream_compile_only(
                                 or "tests\\profile\\" in rel_path
                             ):
                                 continue
-                            if test_path.suffix.lower() in (".dll", ".so", ".dylib"):
-                                continue
+                            # DLLs/.so/.dylib are handled by runner in test_callback
 
                             if verbose:
                                 _ts_print(f"[MESON] Test built: {test_path.name}")
@@ -437,6 +436,7 @@ def stream_compile_and_run_tests(
     build_optimizer: Optional[BuildOptimizer] = None,
     test_file_filter: Optional[str] = None,
     build_timer=None,
+    max_failures: int = 10,
 ) -> StreamingResult:
     """
     Stream test compilation and then execution sequentially.
@@ -491,48 +491,60 @@ def stream_compile_and_run_tests(
         filtered_tests = cr.compiled_tests
 
     if not filtered_tests:
-        # No directly-runnable tests found (e.g., all targets are DLLs on Windows).
-        # Return empty result - caller (runner.py) will fall back to Meson test runner.
+        # No tests found during compilation (build was fully cached).
+        # Return empty result - caller will fall back to Meson test runner.
         return StreamingResult(
             success=True,
             compile_output=cr.compile_output,
             compile_sub_phases=cr.compile_sub_phases,
         )
 
-    _ts_print(f"[MESON] Running {len(filtered_tests)} tests...")
+    total = len(filtered_tests)
+    _ts_print(f"[MESON] Running {total} tests...")
 
     tests_run = 0
     for test_path in filtered_tests:
         tests_run += 1
         if verbose:
-            _ts_print(f"[TEST {tests_run}] Running: {test_path.name}")
+            _ts_print(f"[TEST {tests_run}/{total}] Running: {test_path.name}")
 
         try:
             # Set test file filter in environment if specified
-            if test_file_filter:
-                os.environ["FL_TEST_FILE_FILTER"] = test_file_filter
-
-            success = test_callback(test_path)
-
-            # Clean up environment variable
-            if test_file_filter and "FL_TEST_FILE_FILTER" in os.environ:
-                del os.environ["FL_TEST_FILE_FILTER"]
+            try:
+                if test_file_filter:
+                    os.environ["FL_TEST_FILE_FILTER"] = test_file_filter
+                success = test_callback(test_path)
+            finally:
+                if test_file_filter and "FL_TEST_FILE_FILTER" in os.environ:
+                    del os.environ["FL_TEST_FILE_FILTER"]
 
             if success:
                 num_passed += 1
-                if verbose:
-                    _ts_print(f"[TEST {tests_run}] ✓ PASSED: {test_path.name}")
+                if not verbose:
+                    print_success(f"  [{tests_run}/{total}] ✓ {test_path.stem}")
+                else:
+                    _ts_print(f"[TEST {tests_run}/{total}] ✓ PASSED: {test_path.name}")
             else:
                 num_failed += 1
                 failed_names.append(test_path.stem)
-                _ts_print(f"[TEST {tests_run}] ✗ FAILED: {test_path.name}")
+                print_error(f"  [{tests_run}/{total}] ✗ {test_path.stem} FAILED")
+                if max_failures > 0 and num_failed >= max_failures:
+                    print_error(
+                        f"\n[MESON] ⚠️  {num_failed} test failures detected — halting early"
+                    )
+                    break
         except KeyboardInterrupt as ki:
             handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
-            _ts_print(f"[TEST {tests_run}] ✗ ERROR: {test_path.name}: {e}")
+            _ts_print(f"  [{tests_run}/{total}] ✗ {test_path.stem} ERROR: {e}")
             num_failed += 1
             failed_names.append(test_path.stem)
+            if max_failures > 0 and num_failed >= max_failures:
+                print_error(
+                    f"\n[MESON] ⚠️  {num_failed} test failures detected — halting early"
+                )
+                break
 
     # Show test summary
     if tests_run > 0:

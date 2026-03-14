@@ -166,14 +166,30 @@ def run_meson_test(
                             )
                         elif status == "FAIL":
                             num_failed += 1
+                            failed_test_names.add(test_name_match)
                             print_error(
                                 f"  [{current}/{total}] ✗ {test_name_match} FAILED ({duration_str}s)"
                             )
+                            # Early halt after 10 failures
+                            if num_failed >= 10:
+                                print_error(
+                                    f"\n[MESON] ⚠️  {num_failed} test failures detected — halting early"
+                                )
+                                proc.kill()
+                                break
                         elif status == "TIMEOUT":
                             num_failed += 1
+                            failed_test_names.add(test_name_match)
                             print_error(
                                 f"  [{current}/{total}] ⏱ {test_name_match} TIMEOUT ({duration_str}s)"
                             )
+                            # Early halt after 10 failures
+                            if num_failed >= 10:
+                                print_error(
+                                    f"\n[MESON] ⚠️  {num_failed} test failures detected — halting early"
+                                )
+                                proc.kill()
+                                break
                     elif verbose or "FAILED" in line or "ERROR" in line:
                         # Show error/important lines
                         _ts_print(f"  {line}")
