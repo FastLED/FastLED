@@ -178,21 +178,19 @@ def parse_depfile_inputs(depfile_path: Path) -> list[Path]:
     return [Path(t) for t in _tokenize_depfile_deps(deps_str) if t]
 
 
-def hash_input_files(files: list[Path], compiler_args: list[str] | None = None) -> str:
+def hash_input_files(files: list[Path]) -> str:
     """Hash the content of all input files to detect changes.
 
     Always includes each file path in the hash so that different sets of
     missing files produce distinct digests (avoiding false cache hits).
 
-    When compiler_args is provided, include them in the hash so that changes
-    to -I paths (which affect #pragma once path resolution across PCH
-    boundaries) invalidate the cache.
+    Note: compiler args are NOT included in this hash. Meson/Ninja already
+    tracks compiler flag changes via build.ninja regeneration. Including
+    args here caused a mismatch between compile_pch.py (which has args)
+    and invalidate_stale_pch (which doesn't), making the staleness check
+    always delete freshly-built PCH files.
     """
     h = hashlib.sha256()
-    if compiler_args:
-        for arg in compiler_args:
-            h.update(arg.encode("utf-8"))
-        h.update(b"\xff")  # sentinel: end of compiler args
     for f in sorted(str(p) for p in files):
         p = Path(f)
         h.update(f.encode("utf-8"))  # Always include path in hash
@@ -284,7 +282,7 @@ def main() -> int:
             try:
                 input_files = parse_depfile_inputs(saved_depfile)
                 if input_files:
-                    current_hash = hash_input_files(input_files, args)
+                    current_hash = hash_input_files(input_files)
                     stored_hash = hash_file.read_text(encoding="utf-8").strip()
                     if current_hash == stored_hash:
                         print(
@@ -321,7 +319,7 @@ def main() -> int:
                 shutil.copy2(str(depfile), str(saved_depfile))
                 input_files = parse_depfile_inputs(saved_depfile)
                 if input_files:
-                    current_hash = hash_input_files(input_files, args)
+                    current_hash = hash_input_files(input_files)
                     hash_file.write_text(current_hash, encoding="utf-8")
             except KeyboardInterrupt as ki:
                 handle_keyboard_interrupt(ki)

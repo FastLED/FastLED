@@ -60,13 +60,17 @@ class GlobalInterruptHandler:
             os._exit(2)
 
     def notify_main_thread(self) -> None:
+        is_worker = threading.current_thread() is not threading.main_thread()
         if not self.is_interrupted():
-            self.signal_interrupt(from_thread=threading.current_thread().name)
+            # Only include thread name when reporting from a worker thread;
+            # "from MainThread" is redundant and confusing.
+            from_thread = threading.current_thread().name if is_worker else None
+            self.signal_interrupt(from_thread=from_thread)
         # Only interrupt the main thread from a worker thread.  Calling
         # _thread.interrupt_main() from the main thread schedules a *second*
         # KeyboardInterrupt that fires later, causing false "double Ctrl+C"
         # detection.
-        if threading.current_thread() is not threading.main_thread():
+        if is_worker:
             _thread.interrupt_main()
 
     def install_signal_handler(self) -> None:
@@ -131,8 +135,15 @@ def notify_main_thread() -> None:
     _handler.notify_main_thread()
 
 
-def handle_keyboard_interrupt(_ki: KeyboardInterrupt) -> None:
-    """Signal the interrupt and (from a worker thread) wake the main thread."""
+def handle_keyboard_interrupt(ki: KeyboardInterrupt) -> None:
+    """Signal the interrupt and (from a worker thread) wake the main thread.
+
+    On the main thread: re-raises immediately so the exception propagates
+    to the top-level handler in test.py which calls signal_interrupt().
+    On a worker thread: sets the global interrupt flag and wakes the main thread.
+    """
+    if threading.current_thread() is threading.main_thread():
+        raise ki
     notify_main_thread()
 
 

@@ -38,6 +38,9 @@ def _is_process_alive_psutil(pid: int) -> bool:
         import psutil
 
         return psutil.pid_exists(pid)
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
     except Exception:
         # Fallback to the existing kernel32/os.kill checker
         from ci.util.file_lock_rw_util import is_process_alive
@@ -59,6 +62,9 @@ def _get_process_info(pid: int) -> str:
             cwd = "<access denied>"
         cmdline = " ".join(proc.cmdline()[:4])
         return f"name={name}, exe={exe}, cwd={cwd}, cmd={cmdline}"
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
     except Exception as e:
         return f"<unable to query process: {e}>"
 
@@ -231,6 +237,9 @@ class BuildLock:
                             f"{yellow}  Held by PID {h['owner_pid']} "
                             f"(held {held_secs:.0f}s, {proc_info}){reset}"
                         )
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
+                    raise
                 except Exception:
                     pass
                 _dump_blocking_stacks(self._lock_name, elapsed)
@@ -318,6 +327,9 @@ def libfastled_build_lock(
                         f"PID {h['owner_pid']} (held {held_secs:.0f}s, {proc_info})"
                     )
                 holder_info = f". Held by: {', '.join(parts)}"
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
         except Exception:
             pass
         raise TimeoutError(
