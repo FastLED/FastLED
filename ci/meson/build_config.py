@@ -120,6 +120,42 @@ def _find_zccache_binary() -> Optional[str]:
     return None
 
 
+def get_zccache_version(zccache_path: Optional[str] = None) -> str:
+    """
+    Get zccache version string for cache invalidation.
+
+    When the zccache version changes, cached compilation artifacts may be
+    incompatible and require a full rebuild.
+
+    Args:
+        zccache_path: Path to zccache binary. If None, auto-detected.
+
+    Returns:
+        Version string (e.g., "zccache 1.0.3") or "" if not available.
+    """
+    if zccache_path is None:
+        zccache_path = _find_zccache_binary()
+    if not zccache_path:
+        return ""
+    try:
+        result = subprocess.run(
+            [zccache_path, "--version"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=10,
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+        return ""
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception:
+        return ""
+
+
 def _resolve_fast_native_entries(
     cache_binary: Optional[str],
 ) -> FastNativeEntries:
@@ -266,6 +302,8 @@ def _write_configuration_markers(
     current_test_hash: str,
     compiler_version_marker: Path,
     current_compiler_version: str,
+    zccache_version_marker: Optional[Path] = None,
+    current_zccache_version: Optional[str] = None,
     enable_examples_marker: Optional[Path] = None,
     enable_examples: Optional[bool] = None,
     enable_unit_tests_marker: Optional[Path] = None,
@@ -295,6 +333,16 @@ def _write_configuration_markers(
             f"compiler version: {current_compiler_version}",
         ),
     ]
+
+    # Add optional zccache version marker
+    if zccache_version_marker is not None and current_zccache_version is not None:
+        markers.append(
+            (
+                zccache_version_marker,
+                current_zccache_version,
+                f"zccache version: {current_zccache_version}",
+            )
+        )
 
     # Add optional enable_examples/enable_unit_tests markers
     if enable_examples_marker is not None and enable_examples is not None:
@@ -728,6 +776,7 @@ def setup_meson_build(
     check_marker = build_dir / ".check_config"
     build_mode_marker = build_dir / ".build_mode_config"
     compiler_version_marker = build_dir / ".compiler_version_config"
+    zccache_version_marker = build_dir / ".zccache_version_config"
     enable_examples_marker = build_dir / ".enable_examples_config"
     enable_unit_tests_marker = build_dir / ".enable_unit_tests_config"
 
@@ -1465,6 +1514,29 @@ def setup_meson_build(
             _fast_compiler if _fast_compiler else clangxx_wrapper
         )
 
+    # Get zccache version for cache invalidation.
+    # Optimization: Skip subprocess if the zccache binary hasn't changed since we
+    # last recorded its version.
+    current_zccache_version: str = ""
+    if cache_binary:
+        _zccache_version_from_cache = False
+        _zccache_path = Path(cache_binary)
+        if zccache_version_marker.exists() and _zccache_path.exists():
+            try:
+                _zccache_mtime = _zccache_path.stat().st_mtime
+                _zc_marker_mtime = zccache_version_marker.stat().st_mtime
+                if _zccache_mtime < _zc_marker_mtime:
+                    _cached_zc_ver = zccache_version_marker.read_text(
+                        encoding="utf-8"
+                    ).strip()
+                    if _cached_zc_ver:
+                        current_zccache_version = _cached_zc_ver
+                        _zccache_version_from_cache = True
+            except OSError:
+                pass
+        if not _zccache_version_from_cache:
+            current_zccache_version = get_zccache_version(cache_binary)
+
     # Consolidated single-line toolchain summary (verbose mode only)
     # Before: 7 lines of compiler details
     # After: "Toolchain: clang 21.1.5 + zccache"
@@ -1503,6 +1575,30 @@ def setup_meson_build(
         # Objects compiled with a different compiler version can have incompatible ABI
         if compiler_version_changed:
             cleanup_build_artifacts(build_dir, "Compiler version changed")
+
+        # Late-stage zccache version check (requires cache binary detection above)
+        # When zccache version changes, cached artifacts may be incompatible
+        if current_zccache_version:
+            zccache_version_reason: Optional[str] = None
+            if zccache_version_marker.exists():
+                try:
+                    last_zccache_version = zccache_version_marker.read_text().strip()
+                    if last_zccache_version != current_zccache_version:
+                        zccache_version_reason = f"zccache version changed: {last_zccache_version} → {current_zccache_version}"
+                except (OSError, IOError):
+                    zccache_version_reason = "zccache version marker unreadable"
+            else:
+                zccache_version_reason = "zccache version marker missing"
+
+            if zccache_version_reason:
+                if not force_reconfigure:
+                    _ts_print(
+                        f"[MESON] 🔄 Reconfiguration required: {zccache_version_reason}"
+                    )
+                force_reconfigure = True
+                force_reconfigure_reason = zccache_version_reason
+                skip_meson_setup = False
+                cleanup_build_artifacts(build_dir, "zccache version changed")
 
         # CRITICAL: If compiler version forced a reconfigure, we need to update cmd
         # The original cmd assignment was based on pre-compiler-check values
@@ -1670,6 +1766,8 @@ endian = 'little'
             current_test_hash=current_test_hash,
             compiler_version_marker=compiler_version_marker,
             current_compiler_version=current_compiler_version,
+            zccache_version_marker=zccache_version_marker,
+            current_zccache_version=current_zccache_version or None,
             enable_examples_marker=enable_examples_marker,
             enable_examples=enable_examples,
             enable_unit_tests_marker=enable_unit_tests_marker,
@@ -1770,6 +1868,8 @@ endian = 'little'
             current_test_hash=current_test_hash,
             compiler_version_marker=compiler_version_marker,
             current_compiler_version=current_compiler_version,
+            zccache_version_marker=zccache_version_marker,
+            current_zccache_version=current_zccache_version or None,
             enable_examples_marker=enable_examples_marker,
             enable_examples=enable_examples,
             enable_unit_tests_marker=enable_unit_tests_marker,
