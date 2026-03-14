@@ -18,7 +18,7 @@ dependencies = [
     "fpvgcc",
     "uv",
     "clang-tool-chain>=1.2.4",
-    "zccache>=1.0.9",
+    "zccache>=1.0.10",
     "ninja",
     "meson>=1.10.0",
     "download",
