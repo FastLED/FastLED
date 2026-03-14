@@ -39,6 +39,7 @@ dependencies = [
     "docker>=7.0.0",
     "pillow>=11.3.0",
     "ffmpeg-python>=0.2.0",
+    "static-ffmpeg>=2.7",
     "fastled>=1.4.50",
     "running-process>=1.1.4",
     "nodejs-wheel>=22.0.0",
@@ -70,6 +71,8 @@ select = [
     "UP006",  # Use PEP 585 annotation (list[T] instead of List[T])
     "UP007",  # Use PEP 604 union syntax (X | Y instead of Union[X, Y], T | None instead of Optional[T])
 ]
+# Register custom checker codes so ruff accepts # noqa: DCT001 etc.
+external = ["DCT001", "DCT002"]
 
 [tool.ruff.lint.isort]
 # Configure import sorting to match isort's black profile

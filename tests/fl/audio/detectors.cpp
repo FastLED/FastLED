@@ -8,3 +8,4 @@
 #include "detectors/percussion.hpp"
 #include "detectors/tempo_analyzer.hpp"
 #include "detectors/vocal.hpp"
+#include "detectors/vocal_real_audio.hpp"

@@ -495,6 +495,7 @@ def run_ruff() -> bool:
             "ci",
             "--exclude",
             "ci/tmp",
+            "ci/wasm",
             ".pio",
         ],
         capture_output=False,

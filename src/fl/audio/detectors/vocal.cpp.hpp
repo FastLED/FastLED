@@ -503,14 +503,16 @@ float VocalDetector::calculateRawConfidence(float centroid, float rolloff, float
     float rolloffScore = fl::max(0.0f, 1.0f - fl::abs(rolloff - 0.40f) / 0.45f);
 
     // Formant score: voice has F2/F1 ratio; real audio ratio ~0.14, synthetic ~0.7
-    // Low-formant ramp zone + narrower peak for better guitar rejection.
+    // Ramp zone 0-0.12 catches very low ratios (pure tone, sparse sines).
+    // /i/ vowel (form~0.15) and guitar (form~0.17) overlap in formant ratio,
+    // so guitar rejection relies on time-domain penalties (jitter, zcCV) instead.
     float formantScore;
-    if (formantRatio < 0.10f) {
-        formantScore = formantRatio / 0.10f * 0.30f;  // Ramp: guitar (0.075) → 0.225
+    if (formantRatio < 0.12f) {
+        formantScore = formantRatio / 0.12f * 0.30f;  // Ramp: very low → 0..0.30
     } else {
-        // Narrower peak at 0.5, floor 0.30 — vocal stays high, guitar drops
+        // Peak at 0.5, floor 0.30, width 0.70 (accommodates /i/ vowel)
         float dist = fl::abs(formantRatio - 0.5f);
-        formantScore = fl::max(0.30f, 1.0f - dist / 0.80f);
+        formantScore = fl::max(0.30f, 1.0f - dist / 0.70f);
     }
 
     // Spectral flatness score: wider window to survive mix contamination.
@@ -583,6 +585,13 @@ float VocalDetector::calculateRawConfidence(float centroid, float rolloff, float
         totalBoost *= varianceBoost;
     }
 
+    // Low-jitter penalty: very periodic signals (guitar jit=0.10) get penalized.
+    // Voice jitter is always >0.50, so this only penalizes instruments.
+    if (mEnvelopeJitter < 0.15f && mEnvelopeJitter > 0.001f) {
+        float periodicPenalty = 1.0f - 0.25f * (0.15f - mEnvelopeJitter) / 0.15f;
+        totalBoost *= periodicPenalty;
+    }
+
     // Envelope jitter boost: only for very high jitter (>0.55).
     // Drums alone reach 0.61, so only extreme jitter gets a small boost.
     if (mEnvelopeJitter > 0.55f) {
@@ -596,6 +605,13 @@ float VocalDetector::calculateRawConfidence(float centroid, float rolloff, float
         float acfBoost = 1.0f + 1.0f * (mAutocorrelationIrregularity - 0.75f);
         acfBoost = fl::clamp(acfBoost, 1.0f, 1.25f);
         totalBoost *= acfBoost;
+    }
+
+    // Low-zcCV penalty: very regular zero-crossings (guitar zcCV=0.05) penalized.
+    // Voice zcCV is always >0.30, so this only hits periodic instruments.
+    if (mZeroCrossingCV < 0.10f && mZeroCrossingCV > 0.001f) {
+        float zcPenalty = 1.0f - 0.20f * (0.10f - mZeroCrossingCV) / 0.10f;
+        totalBoost *= zcPenalty;
     }
 
     // Zero-crossing CV: peaked boost for moderate values, penalty for high.
