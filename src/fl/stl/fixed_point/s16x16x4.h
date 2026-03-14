@@ -5,7 +5,7 @@
 
 #include "fl/stl/simd.h"
 #include "fl/stl/fixed_point/s16x16.h"
-#include "fl/sin32.h"
+#include "fl/math/sin32.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/align.h"
 

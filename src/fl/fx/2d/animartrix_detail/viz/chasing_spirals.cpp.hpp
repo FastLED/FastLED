@@ -19,7 +19,7 @@
 #include "fl/fx/2d/animartrix_detail/perlin_s16x16_simd.h"
 #include "fl/fx/2d/animartrix_detail/perlin_float.h"
 #include "fl/stl/simd.h"
-#include "fl/sin32.h"
+#include "fl/math/sin32.h"
 #include "fl/fx/2d/animartrix_detail/viz/chasing_spirals.h"
 
 FL_FAST_MATH_BEGIN

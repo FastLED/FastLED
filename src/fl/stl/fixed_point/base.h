@@ -9,7 +9,7 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/fixed_point/traits.h"
 #include "fl/stl/fixed_point/isqrt.h"
-#include "fl/sin32.h"
+#include "fl/math/sin32.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/type_traits.h"
 

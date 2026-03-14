@@ -223,7 +223,7 @@ Per‑header quick descriptions:
 Color models, gradients, gamma, math helpers, random, noise, mapping, and basic DSP.
 
 - Color and palettes: `colorutils.h`, `colorutils_misc.h`, `hsv.h`, `hsv16.h`, `gradient.h`, `fill.h`, `five_bit_hd_gamma.h`, `gamma.h`
-- Math and mapping: `math.h`, `math_macros.h`, `sin32.h`, `map_range.h`, `random.h`, `lut.h`, `clamp.h`, `clear.h`, `splat.h`, `transform.h`
+- Math and mapping: `math.h`, `math_macros.h`, `math/sin32.h`, `map_range.h`, `random.h`, `lut.h`, `clamp.h`, `clear.h`, `splat.h`, `transform.h`
 - Noise and waves: `noise_woryley.h`, `wave_simulation.h`, `wave_simulation_real.h`
 - DSP and audio: `fft.h`, `fft_impl.h`, `audio.h`, `audio_reactive.h`
 - Time utilities: `time.h`, `time_alpha.h`
@@ -238,7 +238,7 @@ Per‑header quick descriptions:
 - `five_bit_hd_gamma.h`: Gamma correction tables tuned for high‑definition 5‑bit channels.
 - `gamma.h`: Gamma correction functions and LUT helpers.
 - `math.h` / `math_macros.h`: Core math primitives/macros for consistent numerics.
-- `sin32.h`: Fast fixed‑point sine approximations for animations.
+- `math/sin32.h`: Fast fixed‑point sine approximations for animations.
 - `map_range.h`: Linear mapping and clamping between numeric ranges.
 - `random.h`: Pseudorandom utilities for effects and dithering.
 - `lut.h`: Lookup table helpers for precomputed transforms.
@@ -631,7 +631,7 @@ void myCustomDriver::transmit(fl::span<const uint8_t> data) {
 
 ### Math, Random, and DSP
 
-- Core math and helpers: `math.h`, `math_macros.h`, `sin32.h`, `random.h`, `map_range.h`
+- Core math and helpers: `math.h`, `math_macros.h`, `math/sin32.h`, `random.h`, `map_range.h`
 - Color math: `gamma.h`, `gradient.h`, `colorutils.h`, `colorutils_misc.h`, `hsv.h`, `hsv16.h`, `fill.h`
 - FFT and analysis: `fft.h`, `fft_impl.h`
 

@@ -3,7 +3,7 @@
 #include "fl/stl/align.h"
 #include "fl/stl/int.h"
 #include "fl/stl/simd.h"  // Platform-dispatched SIMD (gets correct impl automatically)
-#include "fl/sin32.h"
+#include "fl/math/sin32.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/stdio.h"

@@ -5,7 +5,7 @@
 #include "fl/stl/int.h"
 #include "fl/stl/json.h"
 #include "fl/stl/simd.h"
-#include "fl/sin32.h"
+#include "fl/math/sin32.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/stdio.h"
 #include "profile_result.h"

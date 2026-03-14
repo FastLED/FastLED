@@ -7,7 +7,7 @@
 
 // Platform-specific includes (before namespace declaration for include-order)
 #if defined(USE_SIN_32)
-#include "fl/sin32.h"
+#include "fl/math/sin32.h"
 #elif defined(__AVR__)
 #include "platforms/avr/atmega/common/trig8.h"
 #else

@@ -16,7 +16,7 @@
 #include "fl/rx_device.cpp.hpp"
 #include "fl/serial.cpp.hpp"
 #include "fl/system/_build.cpp.hpp"
-#include "fl/sin32.cpp.hpp"
+#include "fl/math/_build.cpp.hpp"
 #include "fl/spi.cpp.hpp"
 #include "fl/static_constexpr_defs.cpp.hpp"
 #include "fl/str.cpp.hpp"

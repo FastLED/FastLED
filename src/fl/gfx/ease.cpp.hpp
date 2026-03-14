@@ -9,7 +9,7 @@
 
 #include "fl/stl/math.h"
 #include "lib8tion/intmap.h"
-#include "fl/sin32.h"
+#include "fl/math/sin32.h"
 #include "fl/stl/int.h"
 #include "fl/stl/math.h"
 #include "fl/stl/weak_ptr.h"
