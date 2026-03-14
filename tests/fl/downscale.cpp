@@ -5,7 +5,7 @@
 #include "fl/gfx/downscale.h"
 #include "test.h"
 #include "fl/gfx/crgb.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 #include "hsv2rgb.h"
 
 

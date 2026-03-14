@@ -8,7 +8,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "test.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/promise.h"
 #include "fl/result.h"
 #include "fl/stl/span.h"

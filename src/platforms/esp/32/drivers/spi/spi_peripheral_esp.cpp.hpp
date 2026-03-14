@@ -14,7 +14,7 @@
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
 #include "platforms/esp/32/drivers/spi/spi_peripheral_esp.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/warn.h"
 #include "fl/error.h"
 

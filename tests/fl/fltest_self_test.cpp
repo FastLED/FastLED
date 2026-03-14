@@ -14,7 +14,7 @@
 // This ensures tests register with fl_unittest's runner, not fltest's TestContext
 #include "test.h"
 
-#include "fl/geometry.h"  // For fl::rect
+#include "fl/gfx/geometry.h"  // For fl::rect
 #include "fl/stl/vector.h"  // For fl::vector
 #include "fl/stl/unordered_set.h"  // For fl::unordered_set
 #include "fl/stl/unordered_map.h"  // For fl::unordered_map

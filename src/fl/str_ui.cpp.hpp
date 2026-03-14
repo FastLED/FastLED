@@ -1,3 +1,4 @@
+// ok no header
 // UI-specific string functionality
 // This file is only compiled/linked when UI features are actually used
 // Breaking the dependency chain from core string functionality to UI system

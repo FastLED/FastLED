@@ -24,7 +24,7 @@
 #include "eorder.h"
 #include "fl/chipsets/hd108.h"
 #include "fl/engine_events.h"
-#include "fl/eorder.h"
+#include "fl/gfx/eorder.h"
 #include "fl/stl/int.h"
 #include "fl/stl/span.h"
 #include "fl/stl/utility.h"

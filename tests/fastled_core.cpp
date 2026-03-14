@@ -36,7 +36,7 @@
 #include "test.h"
 #include "eorder.h"
 #include "fl/gfx/colorutils_misc.h"
-#include "fl/eorder.h"
+#include "fl/gfx/eorder.h"
 #include "fl/gfx/fill.h"
 #include "hsv2rgb.h"
 #include "fl/channels/channel.h"

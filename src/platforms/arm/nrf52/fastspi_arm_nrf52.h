@@ -6,7 +6,7 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/fastpin_base.h"
 #include "fastspi_types.h"
-#include "fl/eorder.h"
+#include "fl/gfx/eorder.h"
 #include "fl/system/delay.h"
 // IWYU pragma: begin_keep
 #include <nrf_spim.h>

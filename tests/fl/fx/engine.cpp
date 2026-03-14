@@ -19,7 +19,7 @@
 #include "fl/stl/stdio.h"
 #include "fl/stl/string.h"
 #include "fl/stl/utility.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

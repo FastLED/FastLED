@@ -10,7 +10,7 @@
 #include "fl/stl/string.h"
 #include "fl/codec/pixel.h"
 #include "fl/fx/frame.h"
-#include "fl/file_system.h"
+#include "fl/system/file_system.h"
 #include "src/tjpgd.h"
 
 namespace fl {

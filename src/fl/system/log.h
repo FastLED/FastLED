@@ -233,7 +233,7 @@ const char *fastled_file_offset(const char *file);
 ///
 /// Example:
 ///   #define FASTLED_LOG_SPI_ENABLED
-///   #include "fl/log.h"
+///   #include "fl/system/log.h"
 ///
 ///   FL_LOG_SPI("Initializing SPI bus " << bus_id);
 

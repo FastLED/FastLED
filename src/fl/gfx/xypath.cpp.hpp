@@ -16,8 +16,8 @@
 #include "fl/stl/math.h"
 #include "fl/math_macros.h"
 #include "fl/gfx/raster.h"
-#include "fl/xypath.h"
-#include "fl/xypath_renderer.h"
+#include "fl/gfx/xypath.h"
+#include "fl/gfx/xypath_renderer.h"
 
 #include "fl/stl/atomic.h"
 #include "fl/stl/thread_local.h"

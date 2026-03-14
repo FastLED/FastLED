@@ -4,7 +4,7 @@
 
 #include "fl/gfx/splat.h"
 #include "test.h"
-#include "fl/geometry.h"
+#include "fl/gfx/geometry.h"
 #include "fl/gfx/tile2x2.h"
 
 FL_TEST_CASE("splat simple test") {

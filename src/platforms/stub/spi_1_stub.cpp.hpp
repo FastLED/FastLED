@@ -7,7 +7,7 @@
 
 #include "platforms/stub/spi_1_stub.h"
 #include "platforms/shared/spi_manager.h"  // For DMABuffer, TransmitMode, SPIError
-#include "fl/log.h"
+#include "fl/system/log.h"
 
 namespace fl {
 

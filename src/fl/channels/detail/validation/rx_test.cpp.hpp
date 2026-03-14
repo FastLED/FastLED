@@ -5,7 +5,7 @@
 #include "fl/channels/detail/validation/rx_test.h"
 #include "fl/rx_device.h"
 #include "fl/pin.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/system/delay.h"
 #include "fl/stl/vector.h"
 

@@ -5,7 +5,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/gfx/upscale.h"
 #include "fl/stl/memory.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/allocator.h"
 #include "fl/fx/fx2d.h"

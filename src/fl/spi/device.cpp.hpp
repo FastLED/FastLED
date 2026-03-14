@@ -1,6 +1,6 @@
 #include "fl/spi.h"
 #include "fl/spi/impl.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/warn.h"
 #include "fl/stl/chrono.h"
 // IWYU pragma: begin_keep

@@ -10,7 +10,7 @@
 #include "fl/ui.h"
 #include "fl/audio/audio.h"
 #include "fl/fft.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 #include "fl/stl/math.h"
 #include "fl/math_macros.h"
 

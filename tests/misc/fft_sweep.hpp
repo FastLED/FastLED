@@ -18,7 +18,7 @@
 #include "test.h"
 #include "fl/audio/fft/fft.h"
 #include "fl/stl/int.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/stl/math.h"
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"

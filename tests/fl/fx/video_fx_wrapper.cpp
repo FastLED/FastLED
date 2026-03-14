@@ -14,7 +14,7 @@
 #include "fl/stl/move.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

@@ -4,7 +4,7 @@
 #include "fl/codec/gif.h"
 #include "fl/codec/mpeg1.h"
 #include "fl/stl/detail/memory_file_handle.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/function.h"
 

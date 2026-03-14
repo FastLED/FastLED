@@ -1,4 +1,4 @@
-#include "fl/file_system.h"
+#include "fl/system/file_system.h"
 #include "fl/codec/idecoder.h"
 #include "fl/stl/has_include.h"
 #include "fl/warn.h"
@@ -28,7 +28,7 @@
 #endif
 
 #include "fl/stl/json.h"
-#include "fl/screenmap.h"
+#include "fl/gfx/screenmap.h"
 #include "fl/codec/mpeg1.h"
 #include "fl/math_macros.h" // for min
 #include "fl/stl/cstring.h"

@@ -3,7 +3,7 @@
 #ifndef __INC_FL_CLOCKLESS_CONTROLLER_IMPL_H
 #define __INC_FL_CLOCKLESS_CONTROLLER_IMPL_H
 
-#include "fl/eorder.h"
+#include "fl/gfx/eorder.h"
 
 namespace fl {
   // ClocklessControllerImpl is the official API used by all chipset controllers.

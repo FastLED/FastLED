@@ -2,17 +2,17 @@
 // g++ --std=c++11 test.cpp
 
 
-#include "fl/xypath.h"
+#include "fl/gfx/xypath.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "test.h"
-#include "fl/geometry.h"
+#include "fl/gfx/geometry.h"
 #include "fl/math_macros.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/gfx/tile2x2.h"
 #include "fl/gfx/transform.h"
-#include "fl/xypath_impls.h"
+#include "fl/gfx/xypath_impls.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

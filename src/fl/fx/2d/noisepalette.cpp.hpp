@@ -6,7 +6,7 @@
 
 #include "fl/fastled.h"
 #include "fl/stl/memory.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 #include "fl/fx/fx2d.h"
 #include "lib8tion/random8.h"
 #include "noise.h"

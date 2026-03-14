@@ -1,7 +1,7 @@
 /// @file log.cpp
 /// @brief Logging infrastructure - background flush service and helper functions
 
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/detail/async_logger.h"
 
 namespace fl {

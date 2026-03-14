@@ -4,15 +4,15 @@
 
 
 #include "fl/gfx/corkscrew.h"
-#include "fl/grid.h"
-#include "fl/screenmap.h"
+#include "fl/gfx/grid.h"
+#include "fl/gfx/screenmap.h"
 #include "fl/gfx/tile2x2.h" // Ensure this header is included for Tile2x2_u8
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "test.h"
-#include "fl/geometry.h"
-#include "fl/log.h"
+#include "fl/gfx/geometry.h"
+#include "fl/system/log.h"
 #include "fl/gfx/crgb.h"
 #include "fl/stl/span.h"
 #include "fl/stl/strstream.h"

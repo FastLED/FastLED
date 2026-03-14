@@ -5,7 +5,7 @@
 #include "fl/stl/assert.h"
 #include "fl/math_macros.h"
 #include "fl/warn.h"
-#include "fl/file_system.h"
+#include "fl/system/file_system.h"
 #include "fl/fx/video/frame_interpolator.h"
 #include "fl/fx/video/pixel_stream.h"
 #include "crgb.h"

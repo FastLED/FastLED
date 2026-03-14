@@ -27,7 +27,7 @@
 #include "platforms/esp/32/drivers/parlio/parlio_ring_buffer.h"
 #include "fl/system/delay.h"
 #include "fl/error.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/warn.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/assert.h"

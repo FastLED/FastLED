@@ -24,7 +24,7 @@
 // Commented out to enable precompiled headers for faster compilation
 // #define FASTLED_ALLOW_INTERRUPTS 0
 #include "fl/fx/1d/pacifica.h"
-#include "fl/screenmap.h"
+#include "fl/gfx/screenmap.h"
 
 
 #define DATA_PIN            3

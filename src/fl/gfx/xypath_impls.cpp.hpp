@@ -1,5 +1,5 @@
 
-#include "fl/xypath_impls.h"
+#include "fl/gfx/xypath_impls.h"
 
 #include "fl/stl/math.h"
 
@@ -10,7 +10,7 @@
 #include "fl/math_macros.h"
 #include "fl/gfx/raster.h"
 
-#include "fl/xypath_renderer.h"
+#include "fl/gfx/xypath_renderer.h"
 
 namespace fl {
 

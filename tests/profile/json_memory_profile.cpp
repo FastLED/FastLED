@@ -3,7 +3,7 @@
 // Compares parse() (Legacy) vs parse2() (custom parser)
 // Uses global allocation overrides to track ALL memory usage
 
-#include "fl/file_system.h"  // for filebuf, FileSystem, make_sdcard_filesystem
+#include "fl/system/file_system.h"  // for filebuf, FileSystem, make_sdcard_filesystem
 #include "fl/stl/int.h"          // for size, u32, u8
 #include "fl/stl/json.h"         // for json
 #include "fl/stl/atomic.h"   // for atomic

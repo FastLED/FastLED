@@ -10,7 +10,7 @@
 #ifdef FL_IS_ESP32
 
 #include "platforms/esp/32/drivers/uart/uart_peripheral_esp.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/warn.h"
 // IWYU pragma: begin_keep
 #include "fl/system/arduino.h"

@@ -8,7 +8,7 @@
 #include "platforms/shared/spi_manager.h"  // ok platform headers
 #include "platforms/shared/spi_types.h"  // ok platform headers
 #include "platforms/shared/spi_hw_base.h"  // ok platform headers
-#include "fl/log.h"
+#include "fl/system/log.h"
 // IWYU pragma: end_keep
 
 namespace fl {

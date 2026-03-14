@@ -1,7 +1,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/array.h"
 #include "test.h"
-#include "fl/geometry.h"
+#include "fl/gfx/geometry.h"
 #include "fl/stl/int.h"
 
 FL_TEST_FILE(FL_FILEPATH) {

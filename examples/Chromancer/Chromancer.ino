@@ -31,7 +31,7 @@
 
 #include <FastLED.h>
 
-#include "fl/screenmap.h"
+#include "fl/gfx/screenmap.h"
 #include "fl/math_macros.h"
 #include "fl/stl/json.h"
 #include "fl/ui.h"

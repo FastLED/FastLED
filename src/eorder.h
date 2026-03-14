@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "fl/eorder.h"
+#include "fl/gfx/eorder.h"
 
 // Global aliases for backward compatibility
 using EOrder = fl::EOrder;

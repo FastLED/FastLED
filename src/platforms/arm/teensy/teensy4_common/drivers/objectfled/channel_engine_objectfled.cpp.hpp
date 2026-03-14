@@ -9,7 +9,7 @@
 #include "fl/dbg.h"
 #include "fl/warn.h"
 #include "fl/stl/cstring.h"
-#include "fl/rectangular_draw_buffer.h"
+#include "fl/gfx/rectangular_draw_buffer.h"
 
 namespace fl {
 

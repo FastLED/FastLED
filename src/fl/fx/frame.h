@@ -4,7 +4,7 @@
 #include "crgb.h"  // IWYU pragma: keep
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/stl/span.h"
-#include "fl/xymap.h"  // IWYU pragma: keep
+#include "fl/gfx/xymap.h"  // IWYU pragma: keep
 #include "fl/stl/vector.h"
 #include "fl/stl/stdint.h"
 

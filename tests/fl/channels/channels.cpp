@@ -2,9 +2,9 @@
 /// @brief Test suite for Channel API with addressing and color order
 
 #include "fl/channels/channel.h"
-#include "fl/xymap.h"
-#include "fl/xmap.h"
-#include "fl/screenmap.h"
+#include "fl/gfx/xymap.h"
+#include "fl/gfx/xmap.h"
+#include "fl/gfx/screenmap.h"
 #include "fl/stl/span.h"
 #include "fl/fltest.h"
 #include "fl/channels/driver.h"

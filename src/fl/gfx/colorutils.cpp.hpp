@@ -14,7 +14,7 @@
 #include "fl/stl/assert.h"
 #include "fl/gfx/colorutils.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 
 namespace fl {
 

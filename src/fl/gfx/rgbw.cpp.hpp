@@ -6,7 +6,7 @@
 #define FASTLED_INTERNAL
 #include "fl/fastled.h"
 
-#include "rgbw.h"
+#include "fl/gfx/rgbw.h"
 
 
 namespace fl {

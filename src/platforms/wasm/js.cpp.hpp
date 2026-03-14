@@ -29,7 +29,7 @@
 #include "platforms/wasm/engine_listener.h"
 #include "fl/dbg.h"
 #include "fl/stl/map.h"
-#include "fl/screenmap.h"
+#include "fl/gfx/screenmap.h"
 #include "fl/stl/string.h"
 #include "platforms/wasm/js.h"
 #include "platforms/shared/ui/json/ui_internal.h"

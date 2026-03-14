@@ -1,7 +1,7 @@
 
-#include "fl/rectangular_draw_buffer.h"
+#include "fl/gfx/rectangular_draw_buffer.h"
 #include "fl/stl/allocator.h"
-#include "rgbw.h"
+#include "fl/gfx/rgbw.h"
 #include "fl/stl/string.h"
 #include "fl/stl/cstring.h"  // for fl::memset()
 

@@ -31,7 +31,7 @@
 #include "fl/system/delay.h"
 #include "fl/stl/async.h"
 #include "fl/error.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/pin.h"
 #include "fl/warn.h"
 #include "fl/stl/algorithm.h"

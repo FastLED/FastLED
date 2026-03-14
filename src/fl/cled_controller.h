@@ -8,7 +8,7 @@
 #include "fl/stl/compiler_control.h"
 #include "dither_mode.h"
 #include "fl/engine_events.h"
-#include "fl/screenmap.h"
+#include "fl/gfx/screenmap.h"
 #include "fl/stl/int.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/channels/options.h"

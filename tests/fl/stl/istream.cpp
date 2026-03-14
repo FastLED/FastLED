@@ -2,7 +2,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "test.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/function.h"
 #include "fl/stl/move.h"

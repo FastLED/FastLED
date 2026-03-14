@@ -11,7 +11,7 @@ most portion being the bottom.
 
 
 #include "fl/stl/assert.h"
-#include "fl/screenmap.h"
+#include "fl/gfx/screenmap.h"
 #include "fl/warn.h"
 #include "noise.h"
 #include <FastLED.h>

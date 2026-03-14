@@ -17,7 +17,7 @@ threshold. The first version is much faster and should be used in most cases.
 #include "fl/stl/math.h"
 #include "fl/math_macros.h"
 #include "fl/stl/pair.h"
-#include "fl/geometry.h"
+#include "fl/gfx/geometry.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/int.h"
 

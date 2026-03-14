@@ -9,7 +9,7 @@
 #include "test.h"
 #include "fl/fx/2d/animartrix.hpp"
 #include "fl/fx/2d/animartrix_detail/viz/chasing_spirals.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 #include "fl/stl/stdio.h"
 
 using namespace fl;

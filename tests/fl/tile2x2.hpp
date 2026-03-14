@@ -2,10 +2,10 @@
 // g++ --std=c++11 test.cpp
 
 #include "fl/gfx/tile2x2.h"
-#include "fl/xypath.h"
+#include "fl/gfx/xypath.h"
 #include "fl/stl/stdint.h"
 #include "test.h"
-#include "fl/geometry.h"
+#include "fl/gfx/geometry.h"
 #include "fl/gfx/raster_sparse.h"
 #include "fl/stl/span.h"
 

@@ -4,7 +4,7 @@
 
 #include "fl/gfx/gradient.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 #include "fl/stl/move.h"
 
 namespace fl {

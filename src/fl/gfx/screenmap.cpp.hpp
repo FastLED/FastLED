@@ -4,7 +4,7 @@
  * the Chromancer project to FastLED Web.
  */
 
-#include "fl/screenmap.h"
+#include "fl/gfx/screenmap.h"
 
 // Heavy includes moved from header to reduce compilation time
 #include "fl/lut.h"       // Full LUT definitions needed for implementation

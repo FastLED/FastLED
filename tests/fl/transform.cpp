@@ -6,7 +6,7 @@
 #include "fl/gfx/transform.h"
 #include "fl/stl/stdint.h"
 #include "test.h"
-#include "fl/geometry.h"
+#include "fl/gfx/geometry.h"
 #include "fl/math_macros.h"
 
 FL_TEST_FILE(FL_FILEPATH) {

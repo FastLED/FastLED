@@ -7,7 +7,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/iterator.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/rgbw.h"
+#include "fl/gfx/rgbw.h"
 #include "crgb.h"
 #include "lib8tion/intmap.h"
 #include "fl/chipsets/encoders/ws2801.h"

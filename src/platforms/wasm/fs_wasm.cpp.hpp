@@ -49,7 +49,7 @@
 // IWYU pragma: end_keep
 
 #include "fl/dbg.h"
-#include "fl/file_system.h"
+#include "fl/system/file_system.h"
 #include "fl/stl/json.h"
 #include "fl/math_macros.h"
 #include "fl/stl/memory.h"

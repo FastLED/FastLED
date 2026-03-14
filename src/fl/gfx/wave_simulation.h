@@ -15,7 +15,7 @@ Based on works and code by Shawn Silverman.
 #include "fl/math_macros.h" // for fl::min, fl::max
 #include "fl/gfx/wave_simulation_real.h"
 
-#include "fl/grid.h"
+#include "fl/gfx/grid.h"
 #include "fl/stl/unique_ptr.h"  // For unique_ptr
 #include "fl/gfx/supersample.h"
 #include "fl/stl/int.h"

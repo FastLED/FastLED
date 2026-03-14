@@ -2,10 +2,10 @@
 
 #include "fl/stl/stdint.h"
 
-#include "fl/geometry.h"
+#include "fl/gfx/geometry.h"
 #include "fl/stl/pair.h"
 #include "fl/stl/span.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 #include "fl/stl/vector.h"
 
 namespace fl {

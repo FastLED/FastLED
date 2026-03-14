@@ -13,7 +13,7 @@
 #include <FastLED.h>
 
 #include "fl/fx/1d/particles.h"
-#include "fl/screenmap.h"
+#include "fl/gfx/screenmap.h"
 #include "fl/ui.h"
 
 

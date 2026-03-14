@@ -3,7 +3,7 @@
 #include "fl/stl/stdint.h"
 
 #include "fl/gfx/sample.h"
-#include "fl/screenmap.h"
+#include "fl/gfx/screenmap.h"
 #include "fl/fx/fx1d.h"
 #include "fl/fx/fx2d.h"
 

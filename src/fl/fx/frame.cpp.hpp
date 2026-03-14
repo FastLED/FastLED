@@ -4,7 +4,7 @@
 #include "fl/stl/bit_cast.h"
 #include "fl/dbg.h"
 #include "fl/warn.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 #include "fl/fx/frame.h"
 
 #include "fl/stl/cstring.h"

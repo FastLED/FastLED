@@ -14,7 +14,7 @@
 
 #include <FastLED.h>
 #include "Arduino.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 
 
 #define WIDTH 32

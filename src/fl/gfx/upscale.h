@@ -6,7 +6,7 @@
 
 #include "fl/stl/stdint.h"
 
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 
 namespace fl {
 

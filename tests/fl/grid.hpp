@@ -2,11 +2,11 @@
 // g++ --std=c++11 test.cpp
 
 
-#include "fl/grid.h"
+#include "fl/gfx/grid.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/new.h"
 #include "test.h"
-#include "fl/geometry.h"
+#include "fl/gfx/geometry.h"
 
 
 

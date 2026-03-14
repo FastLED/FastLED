@@ -14,7 +14,7 @@
 #include "fl/warn.h"
 #include "fl/error.h"
 #include "fl/channels/options.h"
-#include "fl/pixel_iterator_any.h"
+#include "fl/gfx/pixel_iterator_any.h"
 #include "pixel_controller.h"
 #include "fl/trace.h"
 
@@ -24,7 +24,7 @@
 #include "fl/gfx/ease.h"
 #include "fl/stl/iterator.h"
 #include "fl/engine_events.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 #include "fl/stl/thread_local.h"
 
 namespace fl {

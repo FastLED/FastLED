@@ -8,7 +8,7 @@
 #include "fl/warn.h"
 #include "fl/stl/strstream.h"  // Required for FL_WARN_FMT
 #include "fl/dbg.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 
 #include "fl/stl/limits.h"
 #include "fl/fastpin.h"

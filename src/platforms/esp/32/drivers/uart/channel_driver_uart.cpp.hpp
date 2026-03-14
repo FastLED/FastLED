@@ -12,7 +12,7 @@
 #include "fl/system/delay.h"
 #include "fl/error.h"
 #include "fl/stl/async.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/charconv.h"
 #include "fl/trace.h"

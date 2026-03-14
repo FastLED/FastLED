@@ -43,7 +43,7 @@
 #include "fl/stl/math.h"
 #include "fl/stl/malloc.h"
 #include "fl/stl/cstring.h"
-#include "fl/screenmap.h"
+#include "fl/gfx/screenmap.h"
 #include "fl/stl/json.h"
 #include "fl/stl/stdio.h"
 

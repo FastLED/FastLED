@@ -8,7 +8,7 @@
 #include "test.h"
 #include "fl/fx/2d/animartrix.hpp"
 #include "fl/stl/unique_ptr.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 #include "fl/stl/stdio.h"
 
 using namespace fl;

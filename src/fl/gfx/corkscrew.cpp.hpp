@@ -9,8 +9,8 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/math.h"
 #include "fl/leds.h"
-#include "fl/grid.h"
-#include "fl/screenmap.h"
+#include "fl/gfx/grid.h"
+#include "fl/gfx/screenmap.h"
 #include "fl/stl/shared_ptr.h"  // For shared_ptr
 #include "fl/stl/int.h"
 

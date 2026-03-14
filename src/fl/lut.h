@@ -11,7 +11,7 @@ LUT - Look up table implementation for various types.
 // IWYU pragma: end_keep  // For fl::unique_ptr<T>
 
 #include "fl/stl/int.h"
-#include "fl/geometry.h"
+#include "fl/gfx/geometry.h"
 namespace fl {
 
 // LUT holds a look up table to map data from one

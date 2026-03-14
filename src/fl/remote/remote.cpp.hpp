@@ -4,7 +4,7 @@
 
 #include "fl/stl/int.h"
 #include "fl/stl/json.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/remote/rpc/rpc.h"
 #include "fl/remote/rpc/server.h"
 #include "fl/remote/types.h"

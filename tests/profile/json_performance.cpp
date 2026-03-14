@@ -8,7 +8,7 @@
 //   ./json_performance large        # Run large JSON benchmark (requires benchmark_1mb.json)
 //   ./json_performance all          # Run all benchmarks
 
-#include "fl/file_system.h"
+#include "fl/system/file_system.h"
 #include "fl/stl/int.h"
 #include "fl/stl/json.h"
 #include "fl/stl/chrono.h"

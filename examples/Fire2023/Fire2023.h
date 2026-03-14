@@ -29,8 +29,8 @@ Demo: https://www.youtube.com/shorts/a_Wr0q9YQs4
 
 
 #include "FastLED.h"
-#include "fl/xymap.h"
-#include "fl/screenmap.h"
+#include "fl/gfx/xymap.h"
+#include "fl/gfx/screenmap.h"
 #include "fl/stl/vector.h"
 
 

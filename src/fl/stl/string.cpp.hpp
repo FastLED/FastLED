@@ -5,13 +5,13 @@
 #include "fl/stl/variant.h"          // for variant
 
 #include "fl/audio/fft/fft.h"
-#include "fl/geometry.h"             // for vec2
+#include "fl/gfx/geometry.h"             // for vec2
 #include "fl/stl/int.h"                  // for size, u16, u8
 #include "fl/stl/json.h"
 #include "fl/gfx/crgb.h"                 // for CRGB
 #include "fl/gfx/tile2x2.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 // UI dependency moved to separate compilation unit to break dependency chain
 
 #if FL_STRING_NEEDS_ARDUINO_CONVERSION

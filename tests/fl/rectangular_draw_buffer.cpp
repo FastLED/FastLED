@@ -1,12 +1,12 @@
 
 // g++ --std=c++11 test.cpp
 
-#include "fl/rectangular_draw_buffer.h"
+#include "fl/gfx/rectangular_draw_buffer.h"
 #include "rgbw.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
 #include "test.h"
-#include "fl/rgbw.h"
+#include "fl/gfx/rgbw.h"
 #include "fl/stl/span.h"
 
 FL_TEST_FILE(FL_FILEPATH) {

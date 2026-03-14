@@ -3,7 +3,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/cstddef.h"
 #include "test.h"
-#include "fl/geometry.h"
+#include "fl/gfx/geometry.h"
 #include "fl/stl/int.h"
 
 using namespace fl;

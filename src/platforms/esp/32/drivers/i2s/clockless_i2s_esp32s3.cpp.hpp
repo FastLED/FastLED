@@ -27,7 +27,7 @@
 #include "crgb.h"
 #include "eorder.h"
 #include "fl/math_macros.h"
-#include "fl/rectangular_draw_buffer.h"
+#include "fl/gfx/rectangular_draw_buffer.h"
 #include "fl/stl/singleton.h"
 #include "fl/warn.h"
 #include "fl/stl/allocator.h"

@@ -4,7 +4,7 @@
 #include "fl/stl/new.h"
 #include "fl/stl/utility.h"
 #include "test.h"
-#include "fl/geometry.h"
+#include "fl/gfx/geometry.h"
 
 
 struct CollectingVisitor {

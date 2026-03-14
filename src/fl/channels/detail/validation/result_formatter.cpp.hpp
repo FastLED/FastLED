@@ -4,7 +4,7 @@
 
 #include "fl/channels/detail/validation/result_formatter.h"
 #include "fl/stl/sstream.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 
 // DriverTestResult is now defined in fl/channels/validation.h
 

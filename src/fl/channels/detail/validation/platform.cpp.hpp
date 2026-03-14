@@ -6,7 +6,7 @@
 
 #include "fl/channels/detail/validation/platform.h"
 #include "fl/channels/manager.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 
 namespace fl {
 namespace validation {

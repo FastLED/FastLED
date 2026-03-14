@@ -22,7 +22,7 @@ all the UI elements you see below.
 #include "fl/gfx/raster.h"
 #include "fl/time_alpha.h"
 #include "fl/ui.h"
-#include "fl/xypath.h"
+#include "fl/gfx/xypath.h"
 #include "fl/fx/time.h"
 
 // Sketch.

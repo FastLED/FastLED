@@ -10,7 +10,7 @@
 
 #include <FastLED.h>
 #include "fl/fx/1d/cylon.h"
-#include "fl/screenmap.h"
+#include "fl/gfx/screenmap.h"
 
 // How many leds in your strip?
 #define NUM_LEDS 64 

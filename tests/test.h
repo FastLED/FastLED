@@ -14,7 +14,7 @@
 #include "fl/stl/optional.h"
 #include "fl/stl/strstream.h"
 #include "fl/gfx/tile2x2.h"
-#include "fl/xypath.h"
+#include "fl/gfx/xypath.h"
 
 // ============================================================================
 // Compatibility layer for doctest types and macros

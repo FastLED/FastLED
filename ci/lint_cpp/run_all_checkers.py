@@ -30,6 +30,7 @@ from ci.lint_cpp.check_namespace_includes import NamespaceIncludesChecker
 from ci.lint_cpp.check_platform_includes import PlatformTrampolineChecker
 from ci.lint_cpp.check_platforms_fl_namespace import PlatformsFlNamespaceChecker
 from ci.lint_cpp.check_using_namespace import UsingNamespaceChecker
+from ci.lint_cpp.cpp_hpp_header_pair_checker import CppHppHeaderPairChecker
 from ci.lint_cpp.cpp_hpp_includes_checker import CppHppIncludesChecker
 from ci.lint_cpp.cpp_include_checker import CppIncludeChecker
 from ci.lint_cpp.ctype_global_checker import CtypeGlobalChecker
@@ -226,6 +227,7 @@ def create_checkers(
     checkers_by_scope["fl"] = [
         BannedHeadersChecker(banned_headers_list=BANNED_HEADERS_CORE, strict_mode=True),
         NoCppInFlChecker(),
+        CppHppHeaderPairChecker(),  # Checks that *.cpp.hpp files have corresponding *.h headers
         IwyuPragmaBlockChecker(all_headers=all_headers),
         BareUsingChecker(),  # Checks for bare using declarations in headers (unity build safety)
     ]

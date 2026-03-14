@@ -8,7 +8,7 @@
 #include "crgb.h"
 #include "fl/stl/assert.h"
 #include "fl/math_macros.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshift-count-overflow"

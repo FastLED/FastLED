@@ -15,7 +15,7 @@
 
 #include "cpixel_ledcontroller.h"
 #include "eorder.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/stl/vector.h"
 #include "pixel_iterator.h"
 

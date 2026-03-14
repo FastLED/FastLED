@@ -4,7 +4,7 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/stdint.h"
 #include "fl/chipsets/led_timing.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 
 // FastLED headers - must be outside extern C (contain C++ code/macros)
 #include "platforms/esp/esp_version.h"

@@ -5,7 +5,7 @@
 
 #include "platforms/shared/bitbang/bitbang_channel_driver.h"
 #include "fl/system/delay.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/pin.h"
 #include "fl/stl/algorithm.h"
 #include "platforms/avr/is_avr.h"

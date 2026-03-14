@@ -23,7 +23,7 @@
 #include "fl/system/delay.h"
 #include "fl/warn.h"
 #include "fl/error.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/stl/algorithm.h"
 #include "fl/trace.h"
 #include "fl/stl/assert.h"

@@ -1,3 +1,4 @@
+// ok no header
 #define FASTLED_INTERNAL
 #include "fl/fastled.h"
 #include "cled_controller.h"

@@ -4,7 +4,7 @@
 
 #include "fl/engine_events.h"
 #include "fl/stl/flat_map.h"
-#include "fl/screenmap.h"
+#include "fl/gfx/screenmap.h"
 #include "fl/stl/singleton.h"
 #include "fl/stl/span.h"
 #include "fl/id_tracker.h"

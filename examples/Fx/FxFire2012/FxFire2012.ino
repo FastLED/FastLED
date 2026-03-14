@@ -48,7 +48,7 @@
 
 #include <FastLED.h>
 #include "fl/fx/1d/fire2012.h"
-#include "fl/screenmap.h"
+#include "fl/gfx/screenmap.h"
 
 #define LED_PIN     5
 #define COLOR_ORDER GRB

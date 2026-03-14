@@ -1,3 +1,4 @@
+// ok no header
 // Static constexpr member definitions for C++11 compatibility
 // In C++11, static constexpr members that are ODR-used need out-of-class definitions
 // in a single translation unit to avoid duplicate symbol errors.

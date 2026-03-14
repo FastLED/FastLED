@@ -17,7 +17,7 @@
 #include "platforms/memory_barrier.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/system/delay.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/warn.h"
 #include "fl/error.h"
 #include "fl/stl/bit_cast.h"

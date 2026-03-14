@@ -7,7 +7,7 @@
 #include <string>
 // IWYU pragma: end_keep
 
-#include "fl/file_system.h"
+#include "fl/system/file_system.h"
 #include "fl/stl/memory.h"
 #include "fl/stl/span.h"
 

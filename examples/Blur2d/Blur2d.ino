@@ -16,7 +16,7 @@
 #include <FastLED.h>
 
 #include "fl/ui.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 
 
 #define WIDTH 22

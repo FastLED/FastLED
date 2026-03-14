@@ -76,7 +76,7 @@
 #include "fl/fx/fx2d.h"
 #include "fl/fx/fx2d_to_1d.h"
 #include "fl/fx/fx_engine.h"
-#include "fl/screenmap.h"
+#include "fl/gfx/screenmap.h"
 #include "fl/fx/2d/animartrix.hpp"
 
 // ============================================================================

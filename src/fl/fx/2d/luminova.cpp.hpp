@@ -9,7 +9,7 @@
 #include "fl/gfx/blur.h"
 #include "fl/stl/math.h"
 #include "fl/stl/math.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 #include "fl/stl/vector.h"
 #include "crgb.h"
 #include "noise.h"

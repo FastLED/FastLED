@@ -1,7 +1,7 @@
 #include "test.h"
 #include "fl/codec/h264.h"
 #include "fl/codec/mp4_parser.h"
-#include "fl/file_system.h"
+#include "fl/system/file_system.h"
 #include "platforms/stub/fs_stub.hpp" // ok platform headers
 
 static fl::FileSystem setupCodecFilesystem_h264() {

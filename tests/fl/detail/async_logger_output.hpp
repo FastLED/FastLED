@@ -11,7 +11,7 @@
 /// Manual verification via Serial.println should be done for end-to-end testing.
 
 
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/stl/sstream.h"
 #include "test.h"
 #include "fl/detail/async_logger.h"

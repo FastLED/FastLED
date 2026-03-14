@@ -21,7 +21,7 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/chipsets/timing_traits.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "controller.h"
 #include "pixel_iterator.h"
 #include "crgb.h"

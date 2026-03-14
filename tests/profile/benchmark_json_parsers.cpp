@@ -7,7 +7,7 @@
 //   ./benchmark_json_parsers small        # Run small JSON benchmark only
 //   ./benchmark_json_parsers large        # Run large JSON benchmark only
 
-#include "fl/file_system.h"
+#include "fl/system/file_system.h"
 #include "fl/stl/int.h"
 #include "fl/stl/json.h"
 #include "fl/stl/chrono.h"

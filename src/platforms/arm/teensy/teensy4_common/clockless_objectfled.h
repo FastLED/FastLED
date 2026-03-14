@@ -27,7 +27,7 @@
 
 #include "cpixel_ledcontroller.h"
 #include "pixel_iterator.h"
-#include "fl/rectangular_draw_buffer.h"
+#include "fl/gfx/rectangular_draw_buffer.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/singleton.h"
 #include "fl/stl/map.h"

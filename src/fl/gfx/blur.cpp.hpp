@@ -10,7 +10,7 @@
 #include "fl/gfx/colorutils_misc.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/error.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 #include "lib8tion/scale8.h"
 #include "fl/stl/int.h"
 

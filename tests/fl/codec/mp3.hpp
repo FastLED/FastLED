@@ -1,6 +1,6 @@
 #include "test.h"
 #include "fl/codec/mp3.h"
-#include "fl/file_system.h"
+#include "fl/system/file_system.h"
 #ifdef FASTLED_TESTING
 #include "platforms/stub/fs_stub.hpp" // ok platform headers
 #endif

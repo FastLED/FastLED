@@ -26,7 +26,7 @@
 #include "soc/soc.h"
 // IWYU pragma: end_keep
 #include "fl/dbg.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 
 //=============================================================================
 // INTERRUPT INSTALLATION HELPERS

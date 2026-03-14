@@ -28,7 +28,7 @@
 #include "platforms/arm/mxrt1062/fastspi_arm_mxrt1062.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/stddef.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 // IWYU pragma: begin_keep
 #include <SPI.h>
 // IWYU pragma: end_keep

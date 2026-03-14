@@ -2,7 +2,7 @@
 /// @brief Implementation of the portable test framework
 
 #include "fl/fltest.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/stl/stdio.h"
 
 namespace fl {

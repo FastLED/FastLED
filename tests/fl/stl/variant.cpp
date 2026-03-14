@@ -5,7 +5,7 @@
 #include "fl/stl/function.h"
 #include "test.h"
 #include "fl/stl/hash.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
 #include "fl/stl/unordered_map.h"

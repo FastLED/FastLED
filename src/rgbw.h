@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "fl/rgbw.h"
+#include "fl/gfx/rgbw.h"
 
 // Since FastLED 3.10.3  the RGBW functions are in the fl namespace.
 // This file is a compatibility layer to allow the old functions to be used.

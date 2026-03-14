@@ -11,7 +11,7 @@
 #include "fl/gfx/blur.h"  // IWYU pragma: keep
 #include "fl/gfx/colorutils_misc.h"
 #include "fl/gfx/fill.h"
-#include "fl/xymap.h"  // IWYU pragma: keep
+#include "fl/gfx/xymap.h"  // IWYU pragma: keep
 #include "lib8tion/memmove.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/warn.h"  // IWYU pragma: keep

@@ -23,7 +23,7 @@
 #include "platforms/esp/32/core/fastspi_esp32.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/stddef.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 
 namespace fl {
 

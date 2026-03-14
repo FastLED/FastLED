@@ -3,7 +3,7 @@
 
 #include "fl/pins.h"
 #include "fl/fastpin.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/stl/type_traits.h"
 
 namespace fl {

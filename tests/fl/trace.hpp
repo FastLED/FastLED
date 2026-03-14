@@ -3,7 +3,7 @@
 
 #include "fl/trace.h"
 #include "test.h"
-#include "fl/log.h"
+#include "fl/system/log.h"
 #include "fl/stl/strstream.h"
 #include "fl/stl/int.h"
 

@@ -17,10 +17,10 @@
 // #include "fl/fx/2d/animartrix.hpp"
 #include "fl/fx/fx_engine.h"
 #include "fl/fx/video.h"
-#include "fl/file_system.h"
+#include "fl/system/file_system.h"
 #include "fl/ui.h"
-#include "fl/screenmap.h"
-#include "fl/file_system.h"
+#include "fl/gfx/screenmap.h"
+#include "fl/system/file_system.h"
 
 
 

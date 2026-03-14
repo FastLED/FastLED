@@ -6,7 +6,7 @@
 
 #include "crgb.h"
 #include "fl/gfx/upscale.h"
-#include "fl/xymap.h"
+#include "fl/gfx/xymap.h"
 
 namespace fl {
 

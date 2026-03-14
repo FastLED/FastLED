@@ -19,7 +19,7 @@
 
 #include "test.h"
 
-#include "fl/file_system.h"
+#include "fl/system/file_system.h"
 #ifdef FASTLED_TESTING
 #include "platforms/stub/fs_stub.hpp"
 #include "fl/stl/stdint.h"

@@ -3,9 +3,9 @@
 #include "fl/stl/cstring.h"
 #include "fl/stl/math.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/screenmap.h"
-#include "fl/xymap.h"
-#include "fl/xmap.h"
+#include "fl/gfx/screenmap.h"
+#include "fl/gfx/xymap.h"
+#include "fl/gfx/xmap.h"
 
 namespace fl {
 
