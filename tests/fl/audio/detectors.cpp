@@ -4,6 +4,7 @@
 #include "detectors/beat.hpp"
 #include "detectors/downbeat_synthetic.hpp"
 #include "detectors/energy_analyzer.hpp"
+#include "detectors/frequency_bands.hpp"
 #include "detectors/vibe.hpp"
 #include "detectors/percussion.hpp"
 #include "detectors/tempo_analyzer.hpp"

@@ -439,3 +439,115 @@ FL_TEST_CASE("SpectralEqualizer - A-weighting unsupported band count") {
         FL_CHECK_EQ(gains[i], 1.0f);
     }
 }
+
+// ============================================================================
+// Tone sweep tests: verify gain curve shape via swept peak
+// ============================================================================
+
+FL_TEST_CASE("SpectralEqualizer - swept peak follows A-weighting curve") {
+    // Sweep a single-bin peak across all 16 bins and verify that the
+    // A-weighting output matches the expected gain curve: low at bass,
+    // peak at mid (~bins 6-7), rolloff at treble.
+    SpectralEqualizerConfig config;
+    config.curve = EqualizationCurve::AWeighting;
+    config.numBands = 16;
+    SpectralEqualizer eq(config);
+
+    float outputPeaks[16];
+    for (int peakBin = 0; peakBin < 16; ++peakBin) {
+        // Input: single peak at one bin
+        vector<float> inputBins(16, 0.0f);
+        inputBins[peakBin] = 100.0f;
+
+        vector<float> outputBins(16);
+        eq.apply(inputBins, outputBins);
+
+        outputPeaks[peakBin] = outputBins[peakBin];
+    }
+
+    // --- Check 1: Mid bins (6-7) should have the highest output ---
+    float midPeak = fl::max(outputPeaks[6], outputPeaks[7]);
+    FL_CHECK_GT(midPeak, outputPeaks[0]);   // Higher than bass
+    FL_CHECK_GT(midPeak, outputPeaks[1]);
+    FL_CHECK_GT(midPeak, outputPeaks[14]);  // Higher than treble
+    FL_CHECK_GT(midPeak, outputPeaks[15]);
+
+    // --- Check 2: Bass rolloff — bins should generally increase from 0 to 6 ---
+    FL_CHECK_LT(outputPeaks[0], outputPeaks[3]);
+    FL_CHECK_LT(outputPeaks[3], outputPeaks[6]);
+
+    // --- Check 3: Treble rolloff — bins should generally decrease from 7 to 15 ---
+    FL_CHECK_GT(outputPeaks[7], outputPeaks[10]);
+    FL_CHECK_GT(outputPeaks[10], outputPeaks[15]);
+
+    // --- Check 4: Smooth gain curve — no jitter between adjacent bins ---
+    float maxDelta = 0.0f;
+    for (int i = 1; i < 16; ++i) {
+        float delta = fl::abs(outputPeaks[i] - outputPeaks[i - 1]);
+        if (delta > maxDelta) maxDelta = delta;
+    }
+
+    FASTLED_WARN("SpectralEQ swept peak A-weighting: max_delta=" << maxDelta
+                 << " bass=" << outputPeaks[0] << " mid=" << outputPeaks[6]
+                 << " treble=" << outputPeaks[15]);
+
+    // Adjacent bin gains shouldn't differ by more than 30% of input (30.0)
+    FL_CHECK_LT(maxDelta, 30.0f);
+}
+
+FL_TEST_CASE("SpectralEqualizer - flat curve swept peak has no jitter") {
+    // With flat EQ, all output peaks should be identical (gain = 1.0).
+    SpectralEqualizerConfig config;
+    config.curve = EqualizationCurve::Flat;
+    config.numBands = 16;
+    SpectralEqualizer eq(config);
+
+    for (int peakBin = 0; peakBin < 16; ++peakBin) {
+        vector<float> inputBins(16, 0.0f);
+        inputBins[peakBin] = 100.0f;
+
+        vector<float> outputBins(16);
+        eq.apply(inputBins, outputBins);
+
+        // Flat EQ: output == input
+        FL_CHECK_EQ(outputBins[peakBin], 100.0f);
+    }
+}
+
+FL_TEST_CASE("SpectralEqualizer - A-weighting 32-band swept peak is smooth") {
+    // Same sweep test but with 32 bands — gain curve should be even smoother
+    SpectralEqualizerConfig config;
+    config.curve = EqualizationCurve::AWeighting;
+    config.numBands = 32;
+    SpectralEqualizer eq(config);
+
+    float outputPeaks[32];
+    for (int peakBin = 0; peakBin < 32; ++peakBin) {
+        vector<float> inputBins(32, 0.0f);
+        inputBins[peakBin] = 100.0f;
+
+        vector<float> outputBins(32);
+        eq.apply(inputBins, outputBins);
+
+        outputPeaks[peakBin] = outputBins[peakBin];
+    }
+
+    // Max adjacent-bin delta for smoothness check
+    float maxDelta = 0.0f;
+    for (int i = 1; i < 32; ++i) {
+        float delta = fl::abs(outputPeaks[i] - outputPeaks[i - 1]);
+        if (delta > maxDelta) maxDelta = delta;
+    }
+
+    FASTLED_WARN("SpectralEQ 32-band swept peak: max_delta=" << maxDelta);
+
+    // 32-band curve should be smoother than 16-band (smaller steps)
+    FL_CHECK_LT(maxDelta, 20.0f);
+
+    // Mid bins (12-14) should peak over bass (0-2) and treble (28-31)
+    float midMax = fl::max(outputPeaks[12], fl::max(outputPeaks[13], outputPeaks[14]));
+    float bassAvg = (outputPeaks[0] + outputPeaks[1] + outputPeaks[2]) / 3.0f;
+    float trebAvg = (outputPeaks[29] + outputPeaks[30] + outputPeaks[31]) / 3.0f;
+    FL_CHECK_GT(midMax, bassAvg);
+    FL_CHECK_GT(midMax, trebAvg);
+}

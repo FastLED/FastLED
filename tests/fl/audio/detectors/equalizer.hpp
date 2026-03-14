@@ -647,3 +647,168 @@ FL_TEST_CASE("ADVERSARIAL - reset clears P2 fields") {
     FL_CHECK_EQ(eq->getDominantMagnitude(), 0.0f);
     FL_CHECK_EQ(eq->getVolumeDb(), -100.0f);
 }
+
+// ============================================================================
+// Tone sweep tests: continuous bin motion and jitter detection
+// ============================================================================
+
+FL_TEST_CASE("EqualizerDetector - tone sweep moves dominant bin upward") {
+    // Sweep a tone from 60 Hz to 5120 Hz (the equalizer's full range).
+    // The dominant frequency should increase monotonically with the sweep.
+    auto eq = make_shared<EqualizerDetector>();
+
+    const int numFrames = 200;
+    const float startFreq = 80.0f;
+    const float endFreq = 4500.0f;
+
+    float prevDomFreq = 0.0f;
+    int monotonicViolations = 0;
+
+    for (int frame = 0; frame < numFrames; ++frame) {
+        float t = static_cast<float>(frame) / static_cast<float>(numFrames - 1);
+        float freq = startFreq + (endFreq - startFreq) * t;
+
+        auto sample = makeSample(freq, frame * 12, 16000.0f, 512);
+        auto context = make_shared<AudioContext>(sample);
+        context->setSampleRate(44100);
+        eq->update(context);
+
+        float domFreq = eq->getDominantFreqHz();
+        // After warm-up (first 10 frames), dominant freq should generally increase
+        if (frame > 10 && domFreq < prevDomFreq - 50.0f) {
+            monotonicViolations++;
+        }
+        prevDomFreq = domFreq;
+    }
+
+    FASTLED_WARN("Equalizer tone sweep: monotonic violations="
+                 << monotonicViolations << " / " << (numFrames - 10));
+
+    // Allow a few violations due to FFT bin quantization, but should be rare
+    FL_CHECK_LT(monotonicViolations, numFrames / 10);
+}
+
+FL_TEST_CASE("EqualizerDetector - tone sweep activates bass then mid then treble") {
+    // Sweep through the EQ range and verify band dominance transitions correctly.
+    // Bass: bins 0-3 (~60-320 Hz), Mid: bins 4-10 (~320-2560 Hz),
+    // Treble: bins 11-15 (~2560-5120 Hz)
+    auto eq = make_shared<EqualizerDetector>();
+
+    // Warm up with broadband signal
+    for (int i = 0; i < 30; ++i) {
+        auto sample = fl::audio::test::makeWhiteNoise(i * 12, 16000.0f, 512);
+        auto context = make_shared<AudioContext>(sample);
+        context->setSampleRate(44100);
+        eq->update(context);
+    }
+
+    // Sweep and track where peak energy is at key frequencies
+    auto feedAndGetPeakBin = [&](float freq, int numIter) -> int {
+        for (int i = 0; i < numIter; ++i) {
+            auto sample = makeSample(freq, (30 + i) * 12, 16000.0f, 512);
+            auto context = make_shared<AudioContext>(sample);
+            context->setSampleRate(44100);
+            eq->update(context);
+        }
+        // Find which bin has the highest value
+        int peakBin = 0;
+        float peakVal = 0.0f;
+        for (int b = 0; b < EqualizerDetector::kNumBins; ++b) {
+            if (eq->getBin(b) > peakVal) {
+                peakVal = eq->getBin(b);
+                peakBin = b;
+            }
+        }
+        return peakBin;
+    };
+
+    // 100 Hz should activate a bass bin (0-3)
+    int bassBin = feedAndGetPeakBin(100.0f, 30);
+    FL_CHECK_LE(bassBin, 3);
+
+    // 1000 Hz should activate a mid bin (4-10)
+    eq->reset();
+    for (int i = 0; i < 30; ++i) {
+        auto sample = fl::audio::test::makeWhiteNoise(i * 12, 16000.0f, 512);
+        auto context = make_shared<AudioContext>(sample);
+        context->setSampleRate(44100);
+        eq->update(context);
+    }
+    int midBin = feedAndGetPeakBin(1000.0f, 30);
+    FL_CHECK_GE(midBin, 4);
+    FL_CHECK_LE(midBin, 10);
+
+    // 4000 Hz should activate a treble bin (11-15)
+    eq->reset();
+    for (int i = 0; i < 30; ++i) {
+        auto sample = fl::audio::test::makeWhiteNoise(i * 12, 16000.0f, 512);
+        auto context = make_shared<AudioContext>(sample);
+        context->setSampleRate(44100);
+        eq->update(context);
+    }
+    int trebleBin = feedAndGetPeakBin(4000.0f, 30);
+    FL_CHECK_GE(trebleBin, 11);
+
+    FASTLED_WARN("Equalizer band test: bass_bin=" << bassBin
+                 << " mid_bin=" << midBin << " treble_bin=" << trebleBin);
+}
+
+FL_TEST_CASE("EqualizerDetector - tone sweep bins have no jitter") {
+    // Sweep a tone smoothly and measure frame-to-frame jitter in each bin.
+    // Normalized bins (0-1) should change smoothly, not jump erratically.
+    auto eq = make_shared<EqualizerDetector>();
+
+    const int numFrames = 200;
+    const float startFreq = 80.0f;
+    const float endFreq = 4500.0f;
+
+    // Record all 16 bins per frame
+    float binHistory[200][16];
+
+    for (int frame = 0; frame < numFrames; ++frame) {
+        float t = static_cast<float>(frame) / static_cast<float>(numFrames - 1);
+        float freq = startFreq + (endFreq - startFreq) * t;
+
+        auto sample = makeSample(freq, frame * 12, 16000.0f, 512);
+        auto context = make_shared<AudioContext>(sample);
+        context->setSampleRate(44100);
+        eq->update(context);
+
+        for (int b = 0; b < 16; ++b) {
+            binHistory[frame][b] = eq->getBin(b);
+        }
+    }
+
+    // Jitter metric: max normalized 2nd derivative across all bins
+    float worstJitter = 0.0f;
+    int worstBin = 0;
+
+    for (int b = 0; b < 16; ++b) {
+        float minVal = binHistory[0][b], maxVal = binHistory[0][b];
+        for (int f = 1; f < numFrames; ++f) {
+            if (binHistory[f][b] < minVal) minVal = binHistory[f][b];
+            if (binHistory[f][b] > maxVal) maxVal = binHistory[f][b];
+        }
+        float range = maxVal - minVal;
+        if (range < 0.01f) continue; // Skip bins with no activity
+
+        for (int f = 1; f < numFrames - 1; ++f) {
+            float accel = fl::abs(
+                binHistory[f + 1][b] - 2.0f * binHistory[f][b] + binHistory[f - 1][b]);
+            float normalized = accel / range;
+            if (normalized > worstJitter) {
+                worstJitter = normalized;
+                worstBin = b;
+            }
+        }
+    }
+
+    FASTLED_WARN("Equalizer tone sweep jitter: worst=" << worstJitter
+                 << " in bin " << worstBin);
+
+    // Normalized 2nd derivative should be bounded.
+    // The equalizer uses per-bin running-max normalization which amplifies
+    // transitions when a tone enters/exits a narrow log-spaced bin (the bin
+    // swings 0→1→0), so we allow a higher threshold than the VibeDetector.
+    FL_CHECK_LT(worstJitter, 1.5f);
+}
