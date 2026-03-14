@@ -3,10 +3,10 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 #!/usr/bin/env python3
 """
-xcache.py - Enhanced sccache wrapper with response file support
+xcache.py - Enhanced zccache wrapper with response file support
 
-This trampoline wrapper handles the ESP32S3 sccache problem where long command lines
-use response files (@tmpfile.tmp) that sccache doesn't understand. It creates
+This trampoline wrapper handles the ESP32S3 zccache problem where long command lines
+use response files (@tmpfile.tmp) that zccache doesn't understand. It creates
 temporary wrapper scripts that act as compiler aliases.
 
 WARNING: Never use sys.stdout.flush() in this file!
@@ -18,7 +18,7 @@ Usage:
 
 When xcache detects response file arguments (@file.tmp), it:
 1. Creates a temporary wrapper script that acts as the compiler
-2. The wrapper script internally calls: sccache <actual_compiler> "$@"
+2. The wrapper script internally calls: zccache <actual_compiler> "$@"
 3. Executes the original command with response files intact
 4. The system handles response file expansion normally
 
@@ -44,22 +44,18 @@ from typing import Optional
 class XCacheConfig:
     """Configuration for xcache wrapper."""
 
-    sccache_path: str
+    zccache_path: str
     compiler_path: str
     temp_dir: Path
     debug: bool = False
 
 
-def find_sccache() -> Optional[str]:
-    """Find clang-tool-chain sccache wrapper executable in PATH.
+def find_zccache() -> Optional[str]:
+    """Find zccache executable in PATH.
 
-    IMPORTANT: Only uses clang-tool-chain-sccache wrapper.
-    The wrapper provides:
-    - Platform-specific ABI handling
-    - Automatic SCCACHE_IDLE_TIMEOUT=5 (prevents file locking)
-    - Graceful degradation to iso-env on failure
+    Uses shutil.which to locate the zccache binary.
     """
-    return shutil.which("clang-tool-chain-sccache")
+    return shutil.which("zccache")
 
 
 def detect_response_files(args: list[str]) -> list[str]:
@@ -90,27 +86,27 @@ def create_compiler_wrapper_script(config: XCacheConfig) -> Path:
             # Create Windows batch file
             wrapper_content = f"""@echo off
 REM Temporary xcache compiler wrapper script
-REM Acts as alias for: sccache <actual_compiler>
+REM Acts as alias for: zccache <actual_compiler>
 
 if /i "{config.debug}"=="true" (
-    echo XCACHE: Wrapper executing: "{config.sccache_path}" "{config.compiler_path}" %* >&2
+    echo XCACHE: Wrapper executing: "{config.zccache_path}" "{config.compiler_path}" %* >&2
 )
 
-REM Execute sccache with the actual compiler and all arguments (including response files)
-"{config.sccache_path}" "{config.compiler_path}" %*
+REM Execute zccache with the actual compiler and all arguments (including response files)
+"{config.zccache_path}" "{config.compiler_path}" %*
 """
         else:
             # Create Unix shell script
             wrapper_content = f"""#!/bin/bash
 # Temporary xcache compiler wrapper script
-# Acts as alias for: sccache <actual_compiler>
+# Acts as alias for: zccache <actual_compiler>
 
 if [ "{config.debug}" = "true" ]; then
-    echo "XCACHE: Wrapper executing: {config.sccache_path} {config.compiler_path} $@" >&2
+    echo "XCACHE: Wrapper executing: {config.zccache_path} {config.compiler_path} $@" >&2
 fi
 
-# Execute sccache with the actual compiler and all arguments (including response files)
-exec "{config.sccache_path}" "{config.compiler_path}" "$@"
+# Execute zccache with the actual compiler and all arguments (including response files)
+exec "{config.zccache_path}" "{config.compiler_path}" "$@"
 """
 
         # Write wrapper script
@@ -141,8 +137,8 @@ exec "{config.sccache_path}" "{config.compiler_path}" "$@"
 
 
 def execute_direct(config: XCacheConfig, args: list[str]) -> int:
-    """Execute sccache directly without response file handling."""
-    command = [config.sccache_path, config.compiler_path] + args
+    """Execute zccache directly without response file handling."""
+    command = [config.zccache_path, config.compiler_path] + args
 
     if config.debug:
         print(f"XCACHE: Direct execution: {' '.join(command)}", file=sys.stderr)
@@ -193,7 +189,7 @@ def execute_with_wrapper(config: XCacheConfig, args: list[str]) -> int:
     if config.debug:
         print(f"XCACHE: Detected response files: {response_files}", file=sys.stderr)
 
-    # Create compiler wrapper script (acts as alias for sccache + compiler)
+    # Create compiler wrapper script (acts as alias for zccache + compiler)
     wrapper_script = None
     try:
         wrapper_script = create_compiler_wrapper_script(config)
@@ -216,7 +212,7 @@ def execute_with_wrapper(config: XCacheConfig, args: list[str]) -> int:
                 print(f"XCACHE: Could not read wrapper script: {e}", file=sys.stderr)
 
         # Execute the original command but replace the compiler with our wrapper
-        # The wrapper script will handle: sccache <actual_compiler> "$@"
+        # The wrapper script will handle: zccache <actual_compiler> "$@"
         # Response files are passed through and handled normally by the system
         command = [str(wrapper_script)] + args
 
@@ -284,7 +280,7 @@ def main() -> int:
         print(f"Usage: {sys.argv[0]} <compiler> [args...]", file=sys.stderr)
         print("", file=sys.stderr)
         print(
-            "xcache is an enhanced sccache wrapper with response file support.",
+            "xcache is an enhanced zccache wrapper with response file support.",
             file=sys.stderr,
         )
         print(
@@ -301,17 +297,17 @@ def main() -> int:
 
     # Some ESP-IDF build steps (e.g., linker script generation) invoke the
     # compiler purely as a preprocessor (e.g. `-E -P`) on linker scripts.
-    # These operations are not real compilations and often confuse sccache,
+    # These operations are not real compilations and often confuse zccache,
     # so bypass the cache entirely in this situation.
     if "-E" in compiler_args and "-P" in compiler_args:
         cmd = [compiler_path] + compiler_args
         return subprocess.call(cmd)
 
-    # Find sccache
-    sccache_path = find_sccache()
-    if not sccache_path:
-        print("XCACHE ERROR: sccache not found in PATH", file=sys.stderr)
-        print("Please install sccache or ensure it's in your PATH", file=sys.stderr)
+    # Find zccache
+    zccache_path = find_zccache()
+    if not zccache_path:
+        print("XCACHE ERROR: zccache not found in PATH", file=sys.stderr)
+        print("Please install zccache or ensure it's in your PATH", file=sys.stderr)
         return 1
 
     # Set up temporary directory
@@ -320,14 +316,14 @@ def main() -> int:
 
     # Configure xcache
     config = XCacheConfig(
-        sccache_path=sccache_path,
+        zccache_path=zccache_path,
         compiler_path=compiler_path,
         temp_dir=temp_dir,
         debug=debug,
     )
 
     if debug:
-        print(f"XCACHE: sccache={sccache_path}", file=sys.stderr)
+        print(f"XCACHE: zccache={zccache_path}", file=sys.stderr)
         print(f"XCACHE: compiler={compiler_path}", file=sys.stderr)
         print(f"XCACHE: args={compiler_args}", file=sys.stderr)
         print(f"XCACHE: temp_dir={temp_dir}", file=sys.stderr)

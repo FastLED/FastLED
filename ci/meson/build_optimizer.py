@@ -2,7 +2,7 @@
 Build Optimizer: Binary fingerprint caching to suppress unnecessary DLL relinks.
 
 Problem:
-    When sccache returns cached .obj files on a cache hit, it updates the output file
+    When zccache returns cached .obj files on a cache hit, it updates the output file
     mtime to NOW. This causes ninja to see .obj files as newer than fastled shared library,
     triggering a re-archive of fastled shared library (same content, new mtime). Ninja then
     sees fastled shared library as newer than all 328 DLLs, triggering relinking of all DLLs

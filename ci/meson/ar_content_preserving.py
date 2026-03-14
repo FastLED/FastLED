@@ -3,7 +3,7 @@
 Content-Preserving Archive Wrapper for llvm-ar.
 
 Problem:
-    When sccache returns cached .obj files on a cache hit, it updates the output
+    When zccache returns cached .obj files on a cache hit, it updates the output
     file mtime to NOW. This causes ninja to see .obj files as newer than
     libfastled.a, triggering a re-archive of libfastled.a (same content, new
     mtime). Ninja then sees libfastled.a as newer than all 327 DLLs, triggering

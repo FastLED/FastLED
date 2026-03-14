@@ -89,43 +89,43 @@ if has_projenv and projenv is not None:
 # Read cache configuration from environment variables
 cache_type = os.environ.get("FASTLED_CACHE_TYPE", "no_cache")
 cache_executable = os.environ.get("FASTLED_CACHE_EXECUTABLE", "")
-sccache_path = os.environ.get("FASTLED_SCCACHE_PATH", "")
-sccache_dir = os.environ.get("FASTLED_SCCACHE_DIR", "")
-sccache_cache_size = os.environ.get("FASTLED_SCCACHE_CACHE_SIZE", "2G")
+zccache_path = os.environ.get("FASTLED_ZCCACHE_PATH", "")
+zccache_dir = os.environ.get("FASTLED_ZCCACHE_DIR", "")
+zccache_cache_size = os.environ.get("FASTLED_ZCCACHE_CACHE_SIZE", "2G")
 xcache_path = os.environ.get("FASTLED_XCACHE_PATH", "")
 debug_enabled = os.environ.get("FASTLED_CACHE_DEBUG", "0") == "1"
 
 print("Cache configuration from environment:")
 print("  Cache type: " + cache_type)
 print("  Cache executable: " + cache_executable)
-print("  SCCACHE path: " + sccache_path)
-print("  SCCACHE dir: " + sccache_dir)
+print("  ZCCACHE path: " + zccache_path)
+print("  ZCCACHE dir: " + zccache_dir)
 print("  Debug enabled: " + str(debug_enabled))
 
 # Set up cache environment variables for subprocess execution
 try:
     if env is not None and hasattr(env, "Append"):  # type: ignore[has-type]
-        if sccache_dir:
-            env.Append(ENV={"SCCACHE_DIR": sccache_dir})  # type: ignore[union-attr]
-            os.environ["SCCACHE_DIR"] = sccache_dir
+        if zccache_dir:
+            env.Append(ENV={"ZCCACHE_DIR": zccache_dir})  # type: ignore[union-attr]
+            os.environ["ZCCACHE_DIR"] = zccache_dir
 
-        if sccache_cache_size:
-            env.Append(ENV={"SCCACHE_CACHE_SIZE": sccache_cache_size})  # type: ignore[union-attr]
-            os.environ["SCCACHE_CACHE_SIZE"] = sccache_cache_size
+        if zccache_cache_size:
+            env.Append(ENV={"ZCCACHE_CACHE_SIZE": zccache_cache_size})  # type: ignore[union-attr]
+            os.environ["ZCCACHE_CACHE_SIZE"] = zccache_cache_size
 
-        # Ensure sccache binary directory is on PATH so xcache can find it even
+        # Ensure zccache binary directory is on PATH so xcache can find it even
         # inside ESP-IDF's virtual environments where PATH is heavily modified.
-        if sccache_path:
-            sccache_dir_path = str(Path(sccache_path).parent)
-            env.PrependENVPath("PATH", sccache_dir_path)  # type: ignore[union-attr]
+        if zccache_path:
+            zccache_dir_path = str(Path(zccache_path).parent)
+            env.PrependENVPath("PATH", zccache_dir_path)  # type: ignore[union-attr]
             if has_projenv and projenv is not None and hasattr(projenv, "PrependENVPath"):
-                projenv.PrependENVPath("PATH", sccache_dir_path)  # type: ignore[union-attr]
-            os.environ["PATH"] = sccache_dir_path + os.pathsep + os.environ.get("PATH", "")
+                projenv.PrependENVPath("PATH", zccache_dir_path)  # type: ignore[union-attr]
+            os.environ["PATH"] = zccache_dir_path + os.pathsep + os.environ.get("PATH", "")
 
         if debug_enabled:
-            env.Append(ENV={"XCACHE_DEBUG": "1", "SCCACHE_DEBUG": "1"})  # type: ignore[union-attr]
+            env.Append(ENV={"XCACHE_DEBUG": "1", "ZCCACHE_DEBUG": "1"})  # type: ignore[union-attr]
             if has_projenv and projenv is not None and hasattr(projenv, "Append"):
-                projenv.Append(ENV={"XCACHE_DEBUG": "1", "SCCACHE_DEBUG": "1"})  # type: ignore[union-attr]
+                projenv.Append(ENV={"XCACHE_DEBUG": "1", "ZCCACHE_DEBUG": "1"})  # type: ignore[union-attr]
 except Exception as e:
     print(f"Warning: Failed to set up cache environment: {e}")
 
@@ -134,13 +134,13 @@ USE_CACHE = False
 
 if cached_compiler_available and cache_executable:
     if cache_type == "xcache":
-        # For xcache, check if the Python script exists and sccache is available
+        # For xcache, check if the Python script exists and zccache is available
         USE_CACHE = (
             cache_executable
             and xcache_path
             and Path(xcache_path).exists()
-            and sccache_path
-            and shutil.which(sccache_path)
+            and zccache_path
+            and shutil.which(zccache_path)
         )
 
         if USE_CACHE:
@@ -148,7 +148,7 @@ if cached_compiler_available and cache_executable:
             print("  xcache path: " + str(xcache_path))
             print("  cache executable: " + str(cache_executable))
     else:
-        # For sccache/ccache, check if executable is in PATH
+        # For zccache/ccache, check if executable is in PATH
         USE_CACHE = shutil.which(cache_executable) is not None
 
         if USE_CACHE:
@@ -210,8 +210,8 @@ if USE_CACHE and env is not None and hasattr(env, "get"):  # type: ignore[has-ty
     cache_config: Dict[str, str] = {
         "CACHE_TYPE": cache_type,
         "CACHE_EXECUTABLE": cache_executable,
-        "SCCACHE_PATH": sccache_path,
-        "SCCACHE_DIR": sccache_dir,
+        "ZCCACHE_PATH": zccache_path,
+        "ZCCACHE_DIR": zccache_dir,
         "XCACHE_PATH": xcache_path,
     }
 
@@ -276,7 +276,7 @@ if USE_CACHE and env is not None and hasattr(env, "get"):  # type: ignore[has-ty
                                 out_dir = p.parent
                                 created = create_cached_compiler_script(
                                     compiler_name=p.stem.split("cached_")[-1],
-                                    cache_executable=cache_config.get("CACHE_EXECUTABLE", "sccache"),
+                                    cache_executable=cache_config.get("CACHE_EXECUTABLE", "zccache"),
                                     real_compiler_path=real_path,
                                     output_dir=out_dir,
                                     debug=debug_enabled,
@@ -321,7 +321,7 @@ if USE_CACHE and env is not None and hasattr(env, "get"):  # type: ignore[has-ty
 
                     from ci.util.cached_compiler import create_cached_compiler_script
 
-                    cache_executable = cache_config.get("CACHE_EXECUTABLE", "sccache")
+                    cache_executable = cache_config.get("CACHE_EXECUTABLE", "zccache")
 
                     # Create cached CC script using cached real path
                     cached_cc_script = create_cached_compiler_script(
@@ -398,7 +398,7 @@ if USE_CACHE and env is not None and hasattr(env, "get"):  # type: ignore[has-ty
 
                     from ci.util.cached_compiler import create_cached_compiler_script
 
-                    cache_executable = cache_config.get("CACHE_EXECUTABLE", "sccache")
+                    cache_executable = cache_config.get("CACHE_EXECUTABLE", "zccache")
 
                     # Create cached CC script
                     cached_cc_script = create_cached_compiler_script(

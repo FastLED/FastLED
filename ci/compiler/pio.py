@@ -105,10 +105,10 @@ def _init_platformio_build(
         print(f"Applied cache configuration: {list(cache_config.keys())}")
 
         # Add compiler launcher build flags directly
-        sccache_path = cache_config.get("SCCACHE_PATH")
-        if sccache_path:
-            # Add build flags to use sccache as compiler launcher
-            launcher_flags = [f'-DCACHE_LAUNCHER="{sccache_path}"']
+        zccache_path = cache_config.get("ZCCACHE_PATH")
+        if zccache_path:
+            # Add build flags to use zccache as compiler launcher
+            launcher_flags = [f'-DCACHE_LAUNCHER="{zccache_path}"']
             board_with_sketch_include.build_flags.extend(launcher_flags)
             print(f"Added cache launcher flags: {launcher_flags}")
 
@@ -529,12 +529,12 @@ class PioCompiler(Compiler):
     def get_cache_stats(self) -> str:
         """Get compiler statistics as a formatted string.
 
-        For PIO compiler, this includes cache statistics (sccache/ccache).
+        For PIO compiler, this includes cache statistics (zccache/ccache).
         """
         if self.cache_type == CacheType.NO_CACHE:
             return ""
 
-        cache_name = "sccache" if self.cache_type == CacheType.SCCACHE else "ccache"
+        cache_name = "zccache" if self.cache_type == CacheType.ZCCACHE else "ccache"
         cache_path = shutil.which(cache_name)
 
         if not cache_path:

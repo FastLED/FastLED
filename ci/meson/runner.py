@@ -556,7 +556,7 @@ def run_meson_build_and_test(
 
     # Create build optimizer for DLL relink suppression via binary fingerprinting.
     # Only used in streaming mode (all-tests run), where the 328-DLL relink cascade
-    # from sccache mtime updates causes the biggest performance penalty.
+    # from zccache mtime updates causes the biggest performance penalty.
     build_optimizer = make_build_optimizer(build_dir) if use_streaming else None
 
     try:

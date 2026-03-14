@@ -79,7 +79,7 @@ def _scan_one_header(file_path_str: str) -> tuple[str, list[str]]:
         "-Xiwyu",
         "--error",
         "--",
-        "clang-tool-chain-sccache-cpp",
+        "clang-tool-chain-cpp",
         "-std=gnu++11",
         "-DSTUB_PLATFORM",
         "-DARDUINO=10808",
@@ -150,7 +150,7 @@ def scan_single_file(file_path: str) -> tuple[str, list[str]]:
         pass
 
     compiler_args = [
-        "clang-tool-chain-sccache-cpp",
+        "clang-tool-chain-cpp",
         "-std=gnu++11",
         "-DSTUB_PLATFORM",
         "-DARDUINO=10808",

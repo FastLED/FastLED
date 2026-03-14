@@ -3,7 +3,7 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 #!/usr/bin/env python3
 """
-Python-based cached compiler system for sccache integration.
+Python-based cached compiler system for zccache integration.
 
 This module provides Python scripts that act as cached compilers, wrapping the real
 toolchain with cache support. Unlike batch scripts, Python wrappers can:
@@ -80,7 +80,7 @@ def create_cached_compiler_script(
 
     Args:
         compiler_name: Name for the cached compiler (e.g., 'gcc', 'g++')
-        cache_executable: Path to cache tool (sccache, ccache, etc.)
+        cache_executable: Path to cache tool (zccache, ccache, etc.)
         real_compiler_path: Path to the real compiler to wrap
         output_dir: Directory to create the cached compiler script
         debug: Enable debug output
@@ -94,7 +94,7 @@ def create_cached_compiler_script(
     script_content = f'''#!/usr/bin/env python3
 """
 Cached compiler wrapper for {compiler_name}
-Generated automatically for sccache integration.
+Generated automatically for zccache integration.
 
 This script acts as a cached compiler that wraps the real {compiler_name}
 with cache support. It resolves the real compiler path and forwards
@@ -133,11 +133,11 @@ def main() -> int:
 
         # Build command: cache_tool real_compiler args...
         if " " in cache_path:
-            # Handle "python xcache.py" style commands
+            # Handle "python xcache.py" style commands (zccache)
             cache_parts = cache_path.split()
             command = cache_parts + [REAL_COMPILER_PATH] + sys.argv[1:]
         else:
-            # Handle simple "sccache" style commands
+            # Handle simple "zccache" style commands
             command = [cache_path, REAL_COMPILER_PATH] + sys.argv[1:]
 
         debug_print(f"Executing: {{' '.join(command)}}")
@@ -206,7 +206,7 @@ def create_cached_toolchain(
     """
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    cache_executable = cache_config.get("CACHE_EXECUTABLE", "sccache")
+    cache_executable = cache_config.get("CACHE_EXECUTABLE", "zccache")
     cached_tools: dict[str, str] = {}
 
     # Standard compiler tools that should be wrapped with cache
@@ -324,7 +324,7 @@ if __name__ == "__main__":
     try:
         cached_tools = create_cached_toolchain(
             toolchain_info={"CC": "gcc", "CXX": "g++"},
-            cache_config={"CACHE_EXECUTABLE": "sccache"},
+            cache_config={"CACHE_EXECUTABLE": "zccache"},
             platform_packages_paths=packages,
             output_dir=test_dir,
             debug=True,

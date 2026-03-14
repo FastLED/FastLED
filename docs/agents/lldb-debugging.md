@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `clang-tool-chain[sccache]` package includes LLDB debugger support for interactive debugging and crash analysis. However, **the existing crash handler already provides excellent stack traces** that are often sufficient for debugging.
+The `clang-tool-chain` package includes LLDB debugger support for interactive debugging and crash analysis. However, **the existing crash handler already provides excellent stack traces** that are often sufficient for debugging.
 
 ## Available Tools
 

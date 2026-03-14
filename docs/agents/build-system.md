@@ -54,10 +54,10 @@ CXX=... meson setup builddir         # WRONG - use bash scripts
 
 - **Consistency**: FastLED build system handles configuration, caching, dependencies
 - **Safety**: Direct meson/ninja calls bypass critical setup and validation
-- **Complexity**: Build system manages sccache, compiler selection, platform-specific flags
+- **Complexity**: Build system manages zccache, compiler selection, platform-specific flags
 - **Reliability**: test.py/compile scripts ensure correct build environment
 
-**If you see example commands like `CXX=clang-tool-chain-sccache-cpp meson setup builddir` in documentation, these are for REFERENCE ONLY showing what the build system does internally - do NOT execute them directly.**
+**If you see example commands like `CXX=clang-tool-chain-cpp meson setup builddir` in documentation, these are for REFERENCE ONLY showing what the build system does internally - do NOT execute them directly.**
 
 ## 🚨 CRITICAL: Never Manually Delete Build Caches
 
@@ -95,7 +95,7 @@ bash test tests/fl/stl/move                # Build system revalidates automatica
 1. **Self-Healing**: The build system automatically detects stale builds and revalidates
 2. **Special Code**: We have dedicated cache invalidation logic that handles edge cases
 3. **Safety**: Manual deletion can corrupt build state or remove important artifacts
-4. **Performance**: The `--clean` flag selectively cleans only what's needed, preserving sccache
+4. **Performance**: The `--clean` flag selectively cleans only what's needed, preserving zccache
 5. **Correctness**: `--clean` ensures proper cleanup order and dependency tracking
 
 **The build system is designed to be robust. Trust it to self-heal. Only use `--clean` if you specifically need a guaranteed clean rebuild.**
@@ -159,11 +159,11 @@ The project uses clang-tool-chain for all builds. The build system internally co
 ```bash
 # REFERENCE ONLY - DO NOT RUN THIS DIRECTLY
 # The build system (test.py/compile) handles this automatically
-CXX=clang-tool-chain-sccache-cpp CC=clang-tool-chain-sccache-c meson setup builddir
+CXX=clang-tool-chain-cpp CC=clang-tool-chain-c meson setup builddir
 ```
 - Clang 21.1.5 provides proper MSVC compatibility layer and cross-platform support
 - test.py automatically uses clang-tool-chain (no alternative compilers supported)
-- The clang-tool-chain wrappers include sccache integration for fast builds
+- The clang-tool-chain wrappers include zccache integration for fast builds
 
 ## Unified GNU Build (Windows = Linux)
 clang-tool-chain provides a uniform GNU-style build environment across all platforms:
@@ -173,11 +173,11 @@ clang-tool-chain provides a uniform GNU-style build environment across all platf
 - **Platform differences are minimal**: Only `dbghelp`/`psapi` (Windows debug libs) and macOS static linking restrictions require platform checks
 - **Benefits**: Write platform-agnostic build logic; avoid `if is_windows` conditionals for most cases
 
-## sccache
-- **NEVER disable sccache**: Do NOT set `SCCACHE_DISABLE=1` or disable sccache in any way
-  - If sccache fails: Investigate and fix the root cause (e.g., `sccache --stop-server` to reset)
-  - Never use: `SCCACHE_DISABLE=1` as a workaround for sccache errors
-  - Rationale: sccache provides critical compilation performance optimization - disabling it dramatically slows down builds
+## zccache
+- **NEVER disable zccache**: Do NOT set `ZCCACHE_DISABLE=1` or disable zccache in any way
+  - If zccache fails: Investigate and fix the root cause (e.g., `zccache --stop-server` to reset)
+  - Never use: `ZCCACHE_DISABLE=1` as a workaround for zccache errors
+  - Rationale: zccache provides critical compilation performance optimization - disabling it dramatically slows down builds
 
 ## Meson Build System Standards
 **Critical Information for Working with meson.build Files**:

@@ -83,8 +83,45 @@ def _ensure_native_launcher(project_root: Path) -> tuple[Optional[str], Optional
     return None, None
 
 
+def _find_zccache_binary() -> Optional[str]:
+    """
+    Find the zccache binary for compiler caching.
+
+    zccache is a blazing-fast local compiler cache daemon (43x faster than
+    other caches on warm hits). It works as a drop-in compiler launcher prefix.
+
+    Search order:
+    1. PATH (via shutil.which)
+    2. Common cargo install locations
+
+    Returns:
+        Path to zccache binary, or None if not found.
+    """
+    # Check PATH first
+    path_result = shutil.which("zccache")
+    if path_result:
+        return path_result
+
+    # Check common cargo bin locations
+    for candidate_home in [
+        os.environ.get("CARGO_HOME", ""),
+        os.path.join(os.path.expanduser("~"), ".cargo"),
+    ]:
+        if candidate_home:
+            suffix = (
+                ".exe"
+                if os.name == "nt" or sys.platform.startswith(("win", "msys", "cygwin"))
+                else ""
+            )
+            candidate = os.path.join(candidate_home, "bin", f"zccache{suffix}")
+            if os.path.isfile(candidate):
+                return candidate
+
+    return None
+
+
 def _resolve_fast_native_entries(
-    use_sccache: bool,
+    cache_binary: Optional[str],
 ) -> FastNativeEntries:
     """
     Resolve native launcher binaries for the Meson native file.
@@ -93,6 +130,10 @@ def _resolve_fast_native_entries(
     specific flags automatically (--target, --sysroot, -stdlib, includes, etc.)
     with near-zero startup overhead (~34ms vs ~1200ms for Python wrappers).
 
+    Args:
+        cache_binary: Path to compiler cache binary (zccache),
+            or None to disable caching.
+
     Returns:
         FastNativeEntries with cc, cxx, and ar entries for the native file,
         or all-None fields if resolution fails (falls back to wrappers).
@@ -100,7 +141,6 @@ def _resolve_fast_native_entries(
     _none = FastNativeEntries(cc=None, cxx=None, ar=None)
     try:
         from clang_tool_chain.platform.paths import (
-            find_sccache_binary,
             find_tool_binary,
         )
     except ImportError:
@@ -109,16 +149,6 @@ def _resolve_fast_native_entries(
     try:
         ar_path = str(find_tool_binary("llvm-ar"))
 
-        # Resolve sccache binary
-        sccache_str: Optional[str] = None
-        if use_sccache:
-            try:
-                sccache_str = str(find_sccache_binary())
-            except KeyboardInterrupt as ki:
-                handle_keyboard_interrupt(ki)
-            except Exception:
-                pass
-
         project_root = Path(__file__).resolve().parent.parent.parent
         ctc_c, ctc_cpp = _ensure_native_launcher(project_root)
         if ctc_c is None or ctc_cpp is None:
@@ -126,8 +156,8 @@ def _resolve_fast_native_entries(
 
         def _make_entry(binary: str) -> str:
             parts: list[str] = []
-            if sccache_str:
-                parts.append(f"'{sccache_str}'")
+            if cache_binary:
+                parts.append(f"'{cache_binary}'")
             parts.append(f"'{binary}'")
             return "[" + ", ".join(parts) + "]"
 
@@ -1367,29 +1397,28 @@ def setup_meson_build(
     # Get clang-tool-chain wrapper commands
     # Use the wrapper commands (clang-tool-chain-c/cpp) instead of raw clang binaries
     # The wrappers automatically handle GNU ABI setup on Windows
-    # For sccache integration, use clang-tool-chain's built-in sccache wrappers
 
-    # Check if sccache-enabled wrappers are available
-    # Skip sccache in Docker to avoid 80+ second toolchain download + daemon startup delay
-    # The FASTLED_DOCKER environment variable is set by docker_runner.py
+    # Compiler cache detection: zccache or none
+    # zccache is a blazing-fast local compiler cache daemon.
+    # It works as a drop-in compiler launcher prefix.
+    # Skip compiler caching in Docker to avoid daemon startup delay.
     in_docker = os.environ.get("FASTLED_DOCKER", "0") == "1"
-    sccache_c_wrapper = shutil.which("clang-tool-chain-sccache-c")
-    sccache_cpp_wrapper = shutil.which("clang-tool-chain-sccache-cpp")
-    sccache_available = (
-        sccache_c_wrapper is not None and sccache_cpp_wrapper is not None
-    )
-    # Disable sccache in Docker - the startup time is too long for fresh containers
-    use_sccache = sccache_available and not in_docker
-    if in_docker and sccache_available:
-        _ts_print("[MESON] Skipping sccache in Docker (startup delay too long)")
 
-    # Use sccache wrappers if available, otherwise fall back to plain wrappers
-    if use_sccache:
-        clang_wrapper = sccache_c_wrapper
-        clangxx_wrapper = sccache_cpp_wrapper
+    # Resolve compiler cache binary
+    cache_binary: Optional[str] = None
+    cache_name: Optional[str] = None
+    if not in_docker:
+        zccache_binary = _find_zccache_binary()
+        if zccache_binary:
+            cache_binary = zccache_binary
+            cache_name = "zccache"
     else:
-        clang_wrapper = shutil.which("clang-tool-chain-c")
-        clangxx_wrapper = shutil.which("clang-tool-chain-cpp")
+        _ts_print("[MESON] Skipping compiler cache in Docker (startup delay too long)")
+
+    # Always use plain clang-tool-chain wrappers for compiler detection
+    # The cache binary is applied separately in the native file as a launcher prefix
+    clang_wrapper = shutil.which("clang-tool-chain-c")
+    clangxx_wrapper = shutil.which("clang-tool-chain-cpp")
 
     llvm_ar_wrapper = shutil.which("clang-tool-chain-ar")
 
@@ -1400,11 +1429,9 @@ def setup_meson_build(
         )
         _ts_print("[MESON] Missing commands:")
         if not clang_wrapper:
-            _ts_print("[MESON]   - clang-tool-chain-c (or clang-tool-chain-sccache-c)")
+            _ts_print("[MESON]   - clang-tool-chain-c")
         if not clangxx_wrapper:
-            _ts_print(
-                "[MESON]   - clang-tool-chain-cpp (or clang-tool-chain-sccache-cpp)"
-            )
+            _ts_print("[MESON]   - clang-tool-chain-cpp")
         if not llvm_ar_wrapper:
             _ts_print("[MESON]   - clang-tool-chain-ar")
         raise RuntimeError("clang-tool-chain wrapper commands not available")
@@ -1440,10 +1467,10 @@ def setup_meson_build(
 
     # Consolidated single-line toolchain summary (verbose mode only)
     # Before: 7 lines of compiler details
-    # After: "Toolchain: clang 21.1.5 + sccache"
+    # After: "Toolchain: clang 21.1.5 + zccache"
     if verbose:
-        if use_sccache:
-            print(f"Toolchain: {current_compiler_version} + sccache")
+        if cache_name:
+            print(f"Toolchain: {current_compiler_version} + {cache_name}")
         else:
             print(f"Toolchain: {current_compiler_version}")
 
@@ -1500,7 +1527,7 @@ def setup_meson_build(
         # Use ctc-clang/ctc-clang++ native launchers instead of Python wrappers.
         # Native launchers handle all platform flags automatically with ~34ms
         # startup vs ~1200ms for Python wrappers.
-        _fast = _resolve_fast_native_entries(use_sccache)
+        _fast = _resolve_fast_native_entries(cache_binary)
         if _fast.cc is not None:
             c_compiler = _fast.cc
             cpp_compiler = _fast.cxx
@@ -1588,7 +1615,7 @@ endian = 'little'
         env["CXX"] = clangxx_wrapper
         env["AR"] = llvm_ar_wrapper
 
-    # sccache status already shown in toolchain summary above
+    # Compiler cache status already shown in toolchain summary above
 
     # If we're skipping meson setup (already configured), check for thin archive conflicts
     if skip_meson_setup:
@@ -1665,11 +1692,11 @@ endian = 'little'
 
     def _run_meson_setup() -> tuple[int, str]:
         """Run meson setup and return (returncode, stdout)."""
-        # Disable sccache during Meson setup phase to avoid probe command conflicts
-        # sccache tries to detect compilers with -E flag which confuses Zig's command structure
+        # Disable zccache during Meson setup phase to avoid probe command conflicts
+        # zccache tries to detect compilers with -E flag which confuses Zig's command structure
         # This will be unset for the actual ninja build phase
         setup_env = env.copy()
-        setup_env["FASTLED_DISABLE_SCCACHE"] = "1"
+        setup_env["FASTLED_DISABLE_ZCCACHE"] = "1"
 
         proc = RunningProcess(
             meson_cmd,

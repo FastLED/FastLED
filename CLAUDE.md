@@ -369,7 +369,7 @@ uv run test.py profile_sincos16 --cpp --build-mode release --build
   - When user requests it, use override: `FL_AGENT_ALLOW_ALL_CMDS=1 bash test --no-fingerprint`
   - See: `docs/agents/build-system.md` for details
 - **Platform compilation timeout**: Use minimum 15 minute timeout for platform builds (e.g., `bash compile --docker esp32s3`)
-- **NEVER disable sccache**: Do NOT set `SCCACHE_DISABLE=1` or disable sccache in any way (see `docs/agents/build-system.md`)
+- **NEVER disable zccache**: Do NOT set `ZCCACHE_DISABLE=1` or disable zccache in any way (see `docs/agents/build-system.md`)
 
 ### Override Mechanism for Forbidden Commands
 

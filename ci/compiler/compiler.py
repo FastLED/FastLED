@@ -17,7 +17,8 @@ class CacheType(Enum):
     """Compiler cache type options."""
 
     NO_CACHE = "no_cache"
-    SCCACHE = "sccache"
+    ZCCACHE = "zccache"
+    CCACHE = "ccache"
 
 
 @dataclass

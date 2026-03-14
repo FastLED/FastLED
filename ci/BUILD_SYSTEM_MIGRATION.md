@@ -48,7 +48,7 @@ FastLED Python Build System
 
 #### 4. **Intelligent Caching**
 - Content-addressable build cache
-- sccache integration for compiler-level caching
+- zccache integration for compiler-level caching
 - Automatic cleanup of stale entries
 
 #### 5. **Parallel Compilation**
@@ -160,7 +160,7 @@ python test_example_compilation.py Blink DemoReel100  # Python system
 Shows:
 - Compiler information and availability
 - Cache statistics and hit rates
-- sccache integration status
+- zccache integration status
 - File change detection stats
 
 ## Integration with Existing Workflow

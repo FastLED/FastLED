@@ -109,7 +109,7 @@ def compile_board_examples(
         frameworks = [f.strip().lower() for f in (board.framework or "").split(",")]
         mixed_frameworks = "arduino" in frameworks and "espidf" in frameworks
         cache_type = (
-            CacheType.SCCACHE
+            CacheType.ZCCACHE
             if enable_cache and not mixed_frameworks
             else CacheType.NO_CACHE
         )

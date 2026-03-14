@@ -40,7 +40,6 @@ from ci.util.color_output import print_cache_hit
 if TYPE_CHECKING:
     from ci.util.fingerprint import FingerprintManager
 from ci.util.output_formatter import TimestampFormatter
-from ci.util.sccache_config import show_sccache_stats
 from ci.util.test_exceptions import (
     TestExecutionFailedException,
     TestFailureInfo,
@@ -55,6 +54,7 @@ from ci.util.test_types import (
     determine_test_categories,
 )
 from ci.util.timestamp_print import ts_print
+from ci.util.zccache_config import show_zccache_stats
 
 
 @dataclass(slots=True)
@@ -1474,10 +1474,10 @@ def runner(
         if active_flags:
             ts_print(f"Active flags: {', '.join(active_flags)}")
 
-    # Clear sccache stats at start to show only metrics from this build
-    from ci.util.sccache_config import clear_sccache_stats
+    # Clear zccache stats at start to show only metrics from this build
+    from ci.util.zccache_config import clear_zccache_stats
 
-    clear_sccache_stats()
+    clear_zccache_stats()
 
     # Determine test categories first to check if we should use meson
     test_categories = determine_test_categories(args)
@@ -1534,9 +1534,9 @@ def runner(
                 )
 
             # Print timing summary table for unit-only mode
-            # Skip sccache stats when test result came from cache (no compilation occurred)
+            # Skip zccache stats when test result came from cache (no compilation occurred)
             if not result.compilation_skipped:
-                show_sccache_stats()
+                show_zccache_stats()
             unit_timing = ProcessTiming(
                 name=f"cpp_unit_tests ({result.num_tests_passed}/{result.num_tests_run} passed)",
                 duration=result.duration,
@@ -1803,7 +1803,7 @@ def runner(
         if meson_test_timing:
             all_timings.insert(0, meson_test_timing)  # Put unit tests first
         if all_timings:
-            # Show sccache statistics only when actual compilation occurred.
+            # Show zccache statistics only when actual compilation occurred.
             # Skip when all tests were fingerprint-cached (no subprocess compilation ran).
             # timings is non-empty when at least one process (examples, python, wasm) ran.
             # meson_test_timing.skipped=False when meson tests actually compiled+ran.
@@ -1811,7 +1811,7 @@ def runner(
                 meson_test_timing is not None and not meson_test_timing.skipped
             )
             if _did_compile:
-                show_sccache_stats()
+                show_zccache_stats()
             else:
                 # All tests were fingerprint-cached — refresh the full run cache so
                 # the next invocation's CASE 2 ultra-early exit can fire even if

@@ -2,9 +2,9 @@ import os
 import sys
 from pathlib import Path
 
-from ci.util.sccache_config import show_sccache_stats
 from ci.util.test_types import TestArgs
 from ci.util.timestamp_print import ts_print
+from ci.util.zccache_config import show_zccache_stats
 
 
 def run_qemu_tests(args: TestArgs) -> None:
@@ -250,8 +250,8 @@ def run_qemu_tests(args: TestArgs) -> None:
     ts_print(f"Successful: {success_count}")
     ts_print(f"Failed: {failure_count}")
 
-    # Show sccache statistics
-    show_sccache_stats()
+    # Show zccache statistics
+    show_zccache_stats()
 
     if failure_count > 0:
         ts_print("Some tests failed. See output above for details.")

@@ -410,7 +410,7 @@ def run_docker_tests(args: TestArgs) -> int:
         "-v",
         f"{volumes.build_volume}:/fastled/.build",
         "-v",
-        f"{volumes.cache_volume}:/root/.cache",  # Persist compiler/tool caches (uv, sccache, clang modules)
+        f"{volumes.cache_volume}:/root/.cache",  # Persist compiler/tool caches (uv, zccache, clang modules)
         "-w",
         "/fastled",
         # No -t flag: TTY allocation causes output buffering/loss when piped

@@ -225,12 +225,12 @@ def copy_cache_build_script(build_dir: Path, cache_config: dict[str, str]) -> No
 
     # Set environment variables for cache configuration
     # These will be read by the cache_setup.scons script
-    cache_type = cache_config.get("CACHE_TYPE", "sccache")
+    cache_type = cache_config.get("CACHE_TYPE", "zccache")
 
     os.environ["FASTLED_CACHE_TYPE"] = cache_type
-    os.environ["FASTLED_SCCACHE_DIR"] = cache_config.get("SCCACHE_DIR", "")
-    os.environ["FASTLED_SCCACHE_CACHE_SIZE"] = cache_config.get(
-        "SCCACHE_CACHE_SIZE", "2G"
+    os.environ["FASTLED_ZCCACHE_DIR"] = cache_config.get("ZCCACHE_DIR", "")
+    os.environ["FASTLED_ZCCACHE_CACHE_SIZE"] = cache_config.get(
+        "ZCCACHE_CACHE_SIZE", "2G"
     )
     os.environ["FASTLED_CACHE_DEBUG"] = (
         "1" if os.environ.get("XCACHE_DEBUG") == "1" else "0"
@@ -240,11 +240,11 @@ def copy_cache_build_script(build_dir: Path, cache_config: dict[str, str]) -> No
         os.environ["FASTLED_CACHE_EXECUTABLE"] = cache_config.get(
             "CACHE_EXECUTABLE", ""
         )
-        os.environ["FASTLED_SCCACHE_PATH"] = cache_config.get("SCCACHE_PATH", "")
+        os.environ["FASTLED_ZCCACHE_PATH"] = cache_config.get("ZCCACHE_PATH", "")
         os.environ["FASTLED_XCACHE_PATH"] = cache_config.get("XCACHE_PATH", "")
-    elif cache_type == "sccache":
-        os.environ["FASTLED_CACHE_EXECUTABLE"] = cache_config.get("SCCACHE_PATH", "")
-        os.environ["FASTLED_SCCACHE_PATH"] = cache_config.get("SCCACHE_PATH", "")
+    elif cache_type == "zccache":
+        os.environ["FASTLED_CACHE_EXECUTABLE"] = cache_config.get("ZCCACHE_PATH", "")
+        os.environ["FASTLED_ZCCACHE_PATH"] = cache_config.get("ZCCACHE_PATH", "")
     else:
         os.environ["FASTLED_CACHE_EXECUTABLE"] = cache_config.get("CCACHE_PATH", "")
 
@@ -256,8 +256,8 @@ def get_cache_build_flags(board_name: str, cache_type: CacheType) -> dict[str, s
     if cache_type == CacheType.NO_CACHE:
         print("No compiler cache configured")
         return {}
-    elif cache_type == CacheType.SCCACHE:
-        return get_sccache_build_flags(board_name)
+    elif cache_type == CacheType.ZCCACHE:
+        return get_zccache_build_flags(board_name)
     elif cache_type == CacheType.CCACHE:
         return get_ccache_build_flags(board_name)
     else:
@@ -265,37 +265,27 @@ def get_cache_build_flags(board_name: str, cache_type: CacheType) -> dict[str, s
         return {}
 
 
-def get_sccache_build_flags(board_name: str) -> dict[str, str]:
-    """Get build flags for SCCACHE configuration with xcache wrapper support."""
+def get_zccache_build_flags(board_name: str) -> dict[str, str]:
+    """Get build flags for ZCCACHE configuration with xcache wrapper support."""
     from ci.compiler.path_manager import FastLEDPaths
 
-    # Prefer raw sccache binary (~40ms) over Python wrapper (~828ms)
-    sccache_path: str | None = None
-    try:
-        from clang_tool_chain.platform.paths import find_sccache_binary
+    # Find zccache binary
+    zccache_path: str | None = shutil.which("zccache")
 
-        sccache_path = str(find_sccache_binary())
-    except KeyboardInterrupt as ki:
-        handle_keyboard_interrupt(ki)
-    except Exception:
-        pass
-    if not sccache_path:
-        sccache_path = shutil.which("clang-tool-chain-sccache")
-
-    if not sccache_path:
-        print("sccache not found, compilation will proceed without caching")
+    if not zccache_path:
+        print("zccache not found, compilation will proceed without caching")
         return {}
 
-    print(f"Setting up SCCACHE build flags: {sccache_path}")
+    print(f"Setting up ZCCACHE build flags: {zccache_path}")
 
-    # Set up sccache directory in the global .fastled directory
+    # Set up zccache directory in the global .fastled directory
     # Shared across all boards for maximum cache efficiency
     paths = FastLEDPaths(board_name)
-    sccache_dir = paths.fastled_root / "sccache"
-    sccache_dir.mkdir(parents=True, exist_ok=True)
+    zccache_dir = paths.fastled_root / "zccache"
+    zccache_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"SCCACHE cache directory: {sccache_dir}")
-    print("SCCACHE cache size limit: 2G")
+    print(f"ZCCACHE cache directory: {zccache_dir}")
+    print("ZCCACHE cache size limit: 2G")
 
     # Get xcache wrapper path
     project_root = _get_project_root()
@@ -306,16 +296,16 @@ def get_sccache_build_flags(board_name: str) -> dict[str, str]:
         cache_type = "xcache"
         cache_executable_path = f"python {xcache_path}"
     else:
-        print(f"xcache not found at {xcache_path}, using direct sccache")
-        cache_type = "sccache"
-        cache_executable_path = sccache_path
+        print(f"xcache not found at {xcache_path}, using direct zccache")
+        cache_type = "zccache"
+        cache_executable_path = zccache_path
 
     # Return the cache configuration
     config = {
         "CACHE_TYPE": cache_type,
-        "SCCACHE_DIR": str(sccache_dir),
-        "SCCACHE_CACHE_SIZE": "2G",
-        "SCCACHE_PATH": sccache_path,
+        "ZCCACHE_DIR": str(zccache_dir),
+        "ZCCACHE_CACHE_SIZE": "2G",
+        "ZCCACHE_PATH": zccache_path,
         "XCACHE_PATH": str(xcache_path) if xcache_path.exists() else "",
         "CACHE_EXECUTABLE": cache_executable_path,
     }
@@ -355,40 +345,30 @@ def get_ccache_build_flags(board_name: str) -> dict[str, str]:
     return env_vars
 
 
-def setup_sccache_environment(board_name: str) -> bool:
-    """Set up sccache environment variables for the current process."""
+def setup_zccache_environment(board_name: str) -> bool:
+    """Set up zccache environment variables for the current process."""
     from ci.compiler.path_manager import FastLEDPaths
 
-    # Prefer raw sccache binary (~40ms) over Python wrapper (~828ms)
-    sccache_path: str | None = None
-    try:
-        from clang_tool_chain.platform.paths import find_sccache_binary
+    # Find zccache binary
+    zccache_path: str | None = shutil.which("zccache")
 
-        sccache_path = str(find_sccache_binary())
-    except KeyboardInterrupt as ki:
-        handle_keyboard_interrupt(ki)
-    except Exception:
-        pass
-    if not sccache_path:
-        sccache_path = shutil.which("clang-tool-chain-sccache")
-
-    if not sccache_path:
-        print("sccache not found in PATH, compilation will proceed without caching")
+    if not zccache_path:
+        print("zccache not found in PATH, compilation will proceed without caching")
         return False
 
-    print(f"Setting up SCCACHE environment: {sccache_path}")
+    print(f"Setting up ZCCACHE environment: {zccache_path}")
 
-    # Set up sccache directory in the global .fastled directory
+    # Set up zccache directory in the global .fastled directory
     # Shared across all boards for maximum cache efficiency
     paths = FastLEDPaths(board_name)
-    sccache_dir = paths.fastled_root / "sccache"
-    sccache_dir.mkdir(parents=True, exist_ok=True)
+    zccache_dir = paths.fastled_root / "zccache"
+    zccache_dir.mkdir(parents=True, exist_ok=True)
 
-    # Configure sccache environment variables
-    os.environ["SCCACHE_DIR"] = str(sccache_dir)
-    os.environ["SCCACHE_CACHE_SIZE"] = "2G"
+    # Configure zccache environment variables
+    os.environ["ZCCACHE_DIR"] = str(zccache_dir)
+    os.environ["ZCCACHE_CACHE_SIZE"] = "2G"
 
-    print(f"SCCACHE cache directory: {sccache_dir}")
+    print(f"ZCCACHE cache directory: {zccache_dir}")
 
     # Set compiler wrapper environment variables that PlatformIO will use
     # PlatformIO respects these environment variables for compiler selection
@@ -396,29 +376,29 @@ def setup_sccache_environment(board_name: str) -> bool:
     original_cxx = os.environ.get("CXX", "")
 
     # Only wrap if not already wrapped
-    if "sccache" not in original_cc:
+    if "zccache" not in original_cc:
         # Set environment variables that PlatformIO/SCons will use
         os.environ["CC"] = (
-            f'"{sccache_path}" {original_cc}'
+            f'"{zccache_path}" {original_cc}'
             if original_cc
-            else f'"{sccache_path}" gcc'
+            else f'"{zccache_path}" gcc'
         )
         os.environ["CXX"] = (
-            f'"{sccache_path}" {original_cxx}'
+            f'"{zccache_path}" {original_cxx}'
             if original_cxx
-            else f'"{sccache_path}" g++'
+            else f'"{zccache_path}" g++'
         )
 
         print(f"Set CC environment variable: {os.environ['CC']}")
         print(f"Set CXX environment variable: {os.environ['CXX']}")
 
-    print(f"SCCACHE cache directory: {sccache_dir}")
-    print("SCCACHE cache size limit: 2G")
+    print(f"ZCCACHE cache directory: {zccache_dir}")
+    print("ZCCACHE cache size limit: 2G")
 
-    # Show sccache statistics if available
+    # Show zccache statistics if available
     try:
         result = subprocess.run(
-            [sccache_path, "--show-stats"],
+            [zccache_path, "--show-stats"],
             capture_output=True,
             text=True,
             encoding="utf-8",
@@ -426,17 +406,17 @@ def setup_sccache_environment(board_name: str) -> bool:
             check=False,
         )
         if result.returncode == 0:
-            print("SCCACHE Statistics:")
+            print("ZCCACHE Statistics:")
             for line in result.stdout.strip().split("\n"):
                 if line.strip():
                     print(f"   {line}")
         else:
-            print("SCCACHE stats not available (cache empty or first run)")
+            print("ZCCACHE stats not available (cache empty or first run)")
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
-        print(f"Could not retrieve SCCACHE stats: {e}")
+        print(f"Could not retrieve ZCCACHE stats: {e}")
 
     return True
 

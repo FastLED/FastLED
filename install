@@ -51,7 +51,7 @@ fi
 # Note: We use test.py to handle Meson setup because it properly:
 # 1. Generates meson_native.txt with correct compiler wrapper paths
 # 2. Handles platform-specific configuration automatically
-# 3. Sets up sccache integration correctly
+# 3. Sets up zccache integration correctly
 echo "Configuring Meson and building FastLED..."
 
 # Use test.py to configure Meson and generate compile_commands.json

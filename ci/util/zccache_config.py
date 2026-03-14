@@ -3,10 +3,10 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 #!/usr/bin/env python3
 """
-SCCACHE Configuration for FastLED Builds
+ZCCACHE Configuration for FastLED Builds
 
-Provides sccache (distributed compiler cache) support for faster compilation.
-SCCACHE is faster and more reliable than ccache, especially for CI/CD environments.
+Provides zccache (distributed compiler cache) support for faster compilation.
+ZCCACHE is faster and more reliable than ccache, especially for CI/CD environments.
 """
 
 import os
@@ -33,51 +33,40 @@ class PlatformIOEnv(Protocol):
         ...
 
 
-def get_sccache_wrapper_path() -> str | None:
-    """Get the path to sccache binary.
+def get_zccache_wrapper_path() -> str | None:
+    """Get the path to zccache binary.
 
-    Prefers raw sccache binary (~40ms) over clang-tool-chain-sccache Python
-    wrapper (~828ms) for stats/clear operations.
-    Falls back to wrapper if raw binary is not found.
+    Uses shutil.which to find zccache in PATH.
     """
-    try:
-        from clang_tool_chain.platform.paths import find_sccache_binary
-
-        return str(find_sccache_binary())
-    except KeyboardInterrupt as ki:
-        handle_keyboard_interrupt(ki)
-        return None
-    except Exception:
-        pass
-    return shutil.which("clang-tool-chain-sccache")
+    return shutil.which("zccache")
 
 
-def get_sccache_path() -> str | None:
-    """DEPRECATED: Use get_sccache_wrapper_path() instead.
+def get_zccache_path() -> str | None:
+    """DEPRECATED: Use get_zccache_wrapper_path() instead.
 
     Kept for API compatibility.
     """
-    return get_sccache_wrapper_path()
+    return get_zccache_wrapper_path()
 
 
-def is_sccache_available() -> bool:
-    """Check if clang-tool-chain sccache wrapper is available."""
-    return get_sccache_wrapper_path() is not None
+def is_zccache_available() -> bool:
+    """Check if zccache is available."""
+    return get_zccache_wrapper_path() is not None
 
 
-def clear_sccache_stats() -> None:
-    """Clear sccache statistics asynchronously (fire and forget).
+def clear_zccache_stats() -> None:
+    """Clear zccache statistics asynchronously (fire and forget).
 
-    Runs sccache --zero-stats in a background daemon thread so it does not
+    Runs zccache --zero-stats in a background daemon thread so it does not
     block the build pipeline (~426ms saved on Windows). The subprocess is
     guaranteed to finish before or during the first ninja compilation step
     (which takes several seconds), so stats are clean by the time we care.
     """
-    if not is_sccache_available():
+    if not is_zccache_available():
         return
 
-    sccache_path = get_sccache_wrapper_path()
-    if not sccache_path:
+    zccache_path = get_zccache_wrapper_path()
+    if not zccache_path:
         return
 
     import threading
@@ -85,7 +74,7 @@ def clear_sccache_stats() -> None:
     def _do_clear() -> None:
         try:
             RunningProcess.run(
-                [sccache_path, "--zero-stats"],
+                [zccache_path, "--zero-stats"],
                 cwd=None,
                 check=False,
                 timeout=5,
@@ -101,18 +90,18 @@ def clear_sccache_stats() -> None:
     t.start()
 
 
-def show_sccache_stats() -> None:
-    """Display sccache statistics if sccache is available."""
-    if not is_sccache_available():
+def show_zccache_stats() -> None:
+    """Display zccache statistics if zccache is available."""
+    if not is_zccache_available():
         return
 
-    sccache_path = get_sccache_wrapper_path()
-    if not sccache_path:
+    zccache_path = get_zccache_wrapper_path()
+    if not zccache_path:
         return
 
     try:
         result = RunningProcess.run(
-            [sccache_path, "--show-stats"],
+            [zccache_path, "--show-stats"],
             cwd=None,
             check=False,
             timeout=10,
@@ -147,14 +136,14 @@ def show_sccache_stats() -> None:
                     key_metrics["avg_compile"] = f"{tokens[-2]} {tokens[-1]}"
 
             # Display compact summary only if there's meaningful data
-            # Skip displaying SCCACHE stats if no compilation occurred (all N/A values)
+            # Skip displaying ZCCACHE stats if no compilation occurred (all N/A values)
             has_hits = key_metrics.get("hits") not in (None, "N/A", "0")
             has_misses = key_metrics.get("misses") not in (None, "N/A", "0")
 
-            # Only show SCCACHE stats if there was actual compilation activity
+            # Only show ZCCACHE stats if there was actual compilation activity
             # Require actual hits/misses, not just requests count
             if has_hits or has_misses:
-                ts_print("\nSCCACHE (this build):")
+                ts_print("\nZCCACHE (this build):")
                 if key_metrics:
                     ts_print(
                         f"  Requests: {key_metrics.get('requests', 'N/A')} | "
@@ -169,58 +158,58 @@ def show_sccache_stats() -> None:
                     ts_print(result.stdout)
     except RuntimeError as e:
         if "timeout" in str(e).lower():
-            ts_print("Warning: sccache --show-stats timed out")
+            ts_print("Warning: zccache --show-stats timed out")
         else:
-            ts_print(f"Warning: Failed to retrieve sccache stats: {e}")
+            ts_print(f"Warning: Failed to retrieve zccache stats: {e}")
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
-        ts_print(f"Warning: Failed to retrieve sccache stats: {e}")
+        ts_print(f"Warning: Failed to retrieve zccache stats: {e}")
 
 
-def configure_sccache(env: PlatformIOEnv) -> None:
-    """Configure SCCACHE for the build environment."""
-    if not is_sccache_available():
-        ts_print("SCCACHE is not available. Skipping SCCACHE configuration.")
+def configure_zccache(env: PlatformIOEnv) -> None:
+    """Configure ZCCACHE for the build environment."""
+    if not is_zccache_available():
+        ts_print("ZCCACHE is not available. Skipping ZCCACHE configuration.")
         return
 
-    sccache_path = get_sccache_wrapper_path()
-    if not sccache_path:
-        ts_print("Could not find SCCACHE executable. Skipping SCCACHE configuration.")
+    zccache_path = get_zccache_wrapper_path()
+    if not zccache_path:
+        ts_print("Could not find ZCCACHE executable. Skipping ZCCACHE configuration.")
         return
 
-    ts_print(f"Found SCCACHE at: {sccache_path}")
+    ts_print(f"Found ZCCACHE at: {zccache_path}")
 
-    # Set up SCCACHE environment variables
+    # Set up ZCCACHE environment variables
     project_dir = env.get("PROJECT_DIR")
     if project_dir is None:
         project_dir = os.getcwd()
 
-    # Use board-specific sccache directory if PIOENV (board environment) is available
+    # Use board-specific zccache directory if PIOENV (board environment) is available
     board_name = env.get("PIOENV")
     if board_name:
-        sccache_dir = os.path.join(project_dir, ".sccache", board_name)
+        zccache_dir = os.path.join(project_dir, ".zccache", board_name)
     else:
-        sccache_dir = os.path.join(project_dir, ".sccache", "default")
+        zccache_dir = os.path.join(project_dir, ".zccache", "default")
 
-    # Create sccache directory
-    Path(sccache_dir).mkdir(parents=True, exist_ok=True)
-    ts_print(f"Using board-specific SCCACHE directory: {sccache_dir}")
+    # Create zccache directory
+    Path(zccache_dir).mkdir(parents=True, exist_ok=True)
+    ts_print(f"Using board-specific ZCCACHE directory: {zccache_dir}")
 
-    # Configure SCCACHE environment variables
-    os.environ["SCCACHE_DIR"] = sccache_dir
-    os.environ["SCCACHE_CACHE_SIZE"] = "2G"  # Larger cache for better hit rates
+    # Configure ZCCACHE environment variables
+    os.environ["ZCCACHE_DIR"] = zccache_dir
+    os.environ["ZCCACHE_CACHE_SIZE"] = "2G"  # Larger cache for better hit rates
 
     # Optional: Configure distributed caching (Redis/Memcached) if available
     # This can be enabled by setting environment variables before build:
-    # export SCCACHE_REDIS=redis://localhost:6379
-    # export SCCACHE_MEMCACHED=localhost:11211
+    # export ZCCACHE_REDIS=redis://localhost:6379
+    # export ZCCACHE_MEMCACHED=localhost:11211
 
     # Configure compression for better storage efficiency
     if platform.system() != "Windows":
         # Only set on Unix-like systems where it's more reliable
-        os.environ["SCCACHE_LOG"] = "info"
+        os.environ["ZCCACHE_LOG"] = "info"
 
     # Get current compiler paths
     env.get("CC")
@@ -230,21 +219,21 @@ def configure_sccache(env: PlatformIOEnv) -> None:
     # Instead, we'll use build_flags to wrap the compiler commands
     # This is handled in the Board configuration via extra_scripts
 
-    ts_print("SCCACHE configuration completed")
-    ts_print(f"Cache directory: {sccache_dir}")
+    ts_print("ZCCACHE configuration completed")
+    ts_print(f"Cache directory: {zccache_dir}")
     ts_print("Cache size limit: 2G")
 
-    # Show SCCACHE stats if available
+    # Show ZCCACHE stats if available
     try:
         result = RunningProcess.run(
-            [sccache_path, "--show-stats"],
+            [zccache_path, "--show-stats"],
             cwd=None,
             check=False,
             timeout=10,
             capture_output=True,
         )
         if result.returncode == 0:
-            ts_print("SCCACHE Statistics:")
+            ts_print("ZCCACHE Statistics:")
             ts_print(result.stdout)
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
@@ -253,11 +242,11 @@ def configure_sccache(env: PlatformIOEnv) -> None:
         pass  # Don't fail build if stats aren't available
 
 
-def get_sccache_wrapper_script_content() -> str:
-    """Generate content for sccache wrapper script for PlatformIO extra_scripts."""
+def get_zccache_wrapper_script_content() -> str:
+    """Generate content for zccache wrapper script for PlatformIO extra_scripts."""
     return '''
-# SCCACHE wrapper script for PlatformIO builds
-# This script automatically wraps compiler commands with sccache
+# ZCCACHE wrapper script for PlatformIO builds
+# This script automatically wraps compiler commands with zccache
 
 Import("env")
 
@@ -266,45 +255,45 @@ import shutil
 from pathlib import Path
 from ci.util.timestamp_print import ts_print
 
-def setup_sccache_wrapper():
-    """Setup clang-tool-chain sccache wrapper for compiler commands."""
+def setup_zccache_wrapper():
+    """Setup zccache wrapper for compiler commands."""
 
-    # Use clang-tool-chain sccache wrapper (guaranteed to be available)
-    sccache_path = shutil.which("clang-tool-chain-sccache")
+    # Use zccache (guaranteed to be available)
+    zccache_path = shutil.which("zccache")
 
-    if not sccache_path:
-        ts_print("clang-tool-chain-sccache not found, compilation will proceed without caching")
+    if not zccache_path:
+        ts_print("zccache not found, compilation will proceed without caching")
         return
 
-    ts_print(f"Setting up SCCACHE wrapper: {sccache_path}")
+    ts_print(f"Setting up ZCCACHE wrapper: {zccache_path}")
 
     # Get current build environment
     project_dir = env.get("PROJECT_DIR", os.getcwd())
     board_name = env.get("PIOENV", "default")
 
-    # Setup sccache directory
-    sccache_dir = os.path.join(project_dir, ".sccache", board_name)
-    Path(sccache_dir).mkdir(parents=True, exist_ok=True)
+    # Setup zccache directory
+    zccache_dir = os.path.join(project_dir, ".zccache", board_name)
+    Path(zccache_dir).mkdir(parents=True, exist_ok=True)
 
-    # Configure sccache environment
-    os.environ["SCCACHE_DIR"] = sccache_dir
-    os.environ["SCCACHE_CACHE_SIZE"] = "2G"
+    # Configure zccache environment
+    os.environ["ZCCACHE_DIR"] = zccache_dir
+    os.environ["ZCCACHE_CACHE_SIZE"] = "2G"
 
     # Wrap compiler commands
     current_cc = env.get("CC", "gcc")
     current_cxx = env.get("CXX", "g++")
 
     # Only wrap if not already wrapped
-    if "sccache" not in current_cc:
+    if "zccache" not in current_cc:
         env.Replace(
-            CC=f'"{sccache_path}" {current_cc}',
-            CXX=f'"{sccache_path}" {current_cxx}',
+            CC=f\'"{zccache_path}" {current_cc}\',
+            CXX=f\'"{zccache_path}" {current_cxx}\',
         )
-        ts_print(f"Wrapped CC with SCCACHE: {env.get('CC')}")
-        ts_print(f"Wrapped CXX with SCCACHE: {env.get('CXX')}")
+        ts_print(f"Wrapped CC with ZCCACHE: {env.get(\'CC\')}")
+        ts_print(f"Wrapped CXX with ZCCACHE: {env.get(\'CXX\')}")
 
-# Setup sccache wrapper
-setup_sccache_wrapper()
+# Setup zccache wrapper
+setup_zccache_wrapper()
 '''
 
 

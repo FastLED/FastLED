@@ -182,15 +182,15 @@ is_windows = build_machine.system() == 'windows'
 # ============================================================================
 # Detect if clang-tool-chain Python wrapper is being used
 # ============================================================================
-# clang-tool-chain's Python wrapper commands (clang-tool-chain-cpp,
-# clang-tool-chain-sccache-cpp) support --deploy-dependencies which copies
+# clang-tool-chain's Python wrapper commands (clang-tool-chain-cpp)
+# support --deploy-dependencies which copies
 # runtime DLLs. Raw clang++ binaries (even from .clang-tool-chain/ directory)
 # don't support this flag. We check for the wrapper executable name, not the
 # directory path.
 cpp_cmd_array = cpp_compiler.cmd_array()
 is_clang_tool_chain_wrapper = false
 foreach cmd_part : cpp_cmd_array
-  if cmd_part.contains('clang-tool-chain-cpp') or cmd_part.contains('clang-tool-chain-sccache-cpp') or cmd_part.contains('clang-tool-chain-c') or cmd_part.contains('ctc-clang')
+  if cmd_part.contains('clang-tool-chain-cpp') or cmd_part.contains('clang-tool-chain-c') or cmd_part.contains('ctc-clang')
     is_clang_tool_chain_wrapper = true
   endif
 endforeach

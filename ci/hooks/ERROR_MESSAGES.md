@@ -35,7 +35,7 @@ All error messages now include three parts:
 
 | Environment Variable | Error Message |
 |---------------------|--------------|
-| `SCCACHE_DISABLE=1` | Setting SCCACHE_DISABLE is forbidden (disables critical performance optimization). To override this check, use: FL_AGENT_ALLOW_ALL_CMDS=1 SCCACHE_DISABLE=1 ... |
+| `ZCCACHE_DISABLE=1` | Setting ZCCACHE_DISABLE is forbidden (disables critical performance optimization). To override this check, use: FL_AGENT_ALLOW_ALL_CMDS=1 ZCCACHE_DISABLE=1 ... |
 
 ## Quick Reference by Category
 
@@ -65,7 +65,7 @@ All error messages now include three parts:
 
 ### Performance → Never disable
 - `--no-fingerprint` → Use `bash test --clean` (fingerprint cache is reliable)
-- `SCCACHE_DISABLE=1` → Never disable sccache (critical performance optimization)
+- `ZCCACHE_DISABLE=1` → Never disable zccache (critical performance optimization)
 
 ## Override Mechanism
 
