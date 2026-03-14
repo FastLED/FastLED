@@ -221,12 +221,11 @@ class BuildLock:
             except Exception:
                 pass  # Continue the loop
 
-            # After grace period, print diagnostics and fail immediately
+            # After grace period, print diagnostics and keep waiting
             if not warning_shown and elapsed >= _LOCK_GRACE_S:
                 yellow = "\033[33m"
-                red = "\033[31m"
                 reset = "\033[0m"
-                print(f"{red}Failed to acquire lock '{self._lock_name}'{reset}")
+                print(f"{yellow}Waiting for lock '{self._lock_name}'{reset}")
                 # Show who holds the lock with psutil process info
                 try:
                     holders = self._db.get_lock_info(self._lock_name)
@@ -243,7 +242,7 @@ class BuildLock:
                 except Exception:
                     pass
                 _dump_blocking_stacks(self._lock_name, elapsed)
-                return False
+                warning_shown = True
 
             # Check for timeout
             if elapsed >= timeout:
@@ -332,8 +331,9 @@ def libfastled_build_lock(
             raise
         except Exception:
             pass
+        actual_elapsed = _time.time() - lock_start
         raise TimeoutError(
-            f"Failed to acquire libfastled build lock after {timeout:.0f}s{holder_info}"
+            f"Failed to acquire libfastled build lock after {actual_elapsed:.0f}s (timeout={timeout:.0f}s){holder_info}"
         )
     lock_duration = _time.time() - lock_start
 
