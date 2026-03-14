@@ -560,7 +560,7 @@ def run_meson_build_and_test(
     build_optimizer = make_build_optimizer(build_dir) if use_streaming else None
 
     try:
-        with libfastled_build_lock(timeout=600):  # 10 minute timeout
+        with libfastled_build_lock():  # uses LOCK_TIMEOUT_S default
             if use_streaming:
                 # STREAMING EXECUTION PATH
                 # Compile and run tests in parallel - as soon as a test finishes linking,

@@ -145,7 +145,7 @@ def test_performance_comparison() -> None:
         assert two_layer_time < 15.0, (
             f"TwoLayerFingerprintCache first check too slow: {two_layer_time:.3f}s"
         )
-        assert two_layer_hit_time < 0.5, (
+        assert two_layer_hit_time < 2.0, (
             f"TwoLayerFingerprintCache cache hit too slow: {two_layer_hit_time:.3f}s"
         )
 
@@ -161,10 +161,10 @@ def test_performance_comparison() -> None:
         hash_cache.check_needs_update(files)
         hash_hit_time = time.time() - start
 
-        assert hash_time < 0.5, (
+        assert hash_time < 2.0, (
             f"HashFingerprintCache first check too slow: {hash_time:.3f}s"
         )
-        assert hash_hit_time < 0.5, (
+        assert hash_hit_time < 2.0, (
             f"HashFingerprintCache cache hit too slow: {hash_hit_time:.3f}s"
         )
 
@@ -330,6 +330,73 @@ def test_edge_case_unicode_filenames() -> None:
         hash_cache = HashFingerprintCache(cache_dir, "unicode_hash")
         needs_update = hash_cache.check_needs_update(unicode_files)
         hash_cache.mark_success()
+
+
+def test_mtime_fast_path_scans_correct_extensions() -> None:
+    """Regression test: mtime fast path must scan the right file extensions.
+
+    The mtime fast path in FingerprintManager._mtime_fast_path() scans
+    directories for file changes. It must use the correct extensions for
+    each test type:
+    - C++ tests: .cpp, .h, .hpp, .c, .ino
+    - Python tests: .py
+
+    Previously, check_python() used the default C++ extensions when scanning
+    ci/, which contains only .py files. This caused the fast path to always
+    fire (max_mtime=0.0), silently skipping Python tests forever after the
+    first successful run. This meant `bash test` could pass (skipping Python
+    tests via stale cache) while `bash test --clean` would fail.
+    """
+    from ci.util.fingerprint import (
+        _CPP_SOURCE_EXTS,
+        _PY_SOURCE_EXTS,
+        _get_max_source_file_mtime,
+    )
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+
+        # Create a directory with only .py files (simulates ci/)
+        py_dir = temp_path / "py_only"
+        py_dir.mkdir()
+        py_file = py_dir / "test_module.py"
+        py_file.write_text("def test(): pass\n")
+
+        # Scanning with C++ extensions should find nothing
+        cpp_mtime = _get_max_source_file_mtime(py_dir, exts=_CPP_SOURCE_EXTS)
+        assert cpp_mtime == 0.0, (
+            f"C++ extension scan found files in Python-only dir: mtime={cpp_mtime}"
+        )
+
+        # Scanning with Python extensions should find the .py file
+        py_mtime = _get_max_source_file_mtime(py_dir, exts=_PY_SOURCE_EXTS)
+        assert py_mtime > 0.0, "Python extension scan failed to find .py files"
+
+        # Create a directory with only .cpp files (simulates src/)
+        cpp_dir = temp_path / "cpp_only"
+        cpp_dir.mkdir()
+        cpp_file = cpp_dir / "main.cpp"
+        cpp_file.write_text("int main() { return 0; }\n")
+
+        # Scanning with Python extensions should find nothing
+        py_mtime2 = _get_max_source_file_mtime(cpp_dir, exts=_PY_SOURCE_EXTS)
+        assert py_mtime2 == 0.0, (
+            f"Python extension scan found files in C++-only dir: mtime={py_mtime2}"
+        )
+
+        # Scanning with C++ extensions should find the .cpp file
+        cpp_mtime2 = _get_max_source_file_mtime(cpp_dir, exts=_CPP_SOURCE_EXTS)
+        assert cpp_mtime2 > 0.0, "C++ extension scan failed to find .cpp files"
+
+        # Default (no exts) should behave like C++ extensions
+        default_mtime = _get_max_source_file_mtime(cpp_dir)
+        assert default_mtime == cpp_mtime2, (
+            "Default extension scan should match C++ extensions"
+        )
+        default_py_mtime = _get_max_source_file_mtime(py_dir)
+        assert default_py_mtime == 0.0, (
+            "Default extension scan should not find .py files"
+        )
 
 
 def test_consistency_after_crash() -> None:

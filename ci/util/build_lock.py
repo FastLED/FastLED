@@ -23,6 +23,46 @@ from typing import Generator, Optional
 from ci.util.lock_database import LockDatabase
 
 
+# Default timeout for lock acquisition (seconds).
+# After this period of failing to acquire, diagnostics are printed and the caller exits.
+LOCK_TIMEOUT_S: float = 120.0
+
+# Grace period (seconds) before printing diagnostics and failing.
+# Allows brief lock contention (e.g., concurrent build finishing) to resolve.
+_LOCK_GRACE_S: float = 2.0
+
+
+def _is_process_alive_psutil(pid: int) -> bool:
+    """Check if a process is alive using psutil (more reliable than kernel32 on Windows)."""
+    try:
+        import psutil
+
+        return psutil.pid_exists(pid)
+    except Exception:
+        # Fallback to the existing kernel32/os.kill checker
+        from ci.util.file_lock_rw_util import is_process_alive
+
+        return is_process_alive(pid)
+
+
+def _get_process_info(pid: int) -> str:
+    """Get process name, exe path, and cwd via psutil. Returns descriptive string."""
+    try:
+        import psutil
+
+        proc = psutil.Process(pid)
+        name = proc.name()
+        exe = proc.exe()
+        try:
+            cwd = proc.cwd()
+        except (psutil.AccessDenied, OSError):
+            cwd = "<access denied>"
+        cmdline = " ".join(proc.cmdline()[:4])
+        return f"name={name}, exe={exe}, cwd={cwd}, cmd={cmdline}"
+    except Exception as e:
+        return f"<unable to query process: {e}>"
+
+
 def _dump_blocking_stacks(lock_name: str, elapsed: float) -> None:
     """Dump thread stacks when blocked on lock acquisition."""
     try:
@@ -80,21 +120,35 @@ class BuildLock:
     def _check_stale_lock(self) -> bool:
         """Check if lock is stale (dead process) and remove if stale.
 
+        Uses psutil for process liveness checks (more reliable than kernel32 on Windows).
+
         Returns:
             True if lock was stale and removed, False otherwise
         """
         try:
-            if self._db.is_lock_stale(self._lock_name):
-                if not BuildLock._stale_lock_warned:
-                    BuildLock._stale_lock_warned = True
-                    print(
-                        f"Detected stale lock '{self._lock_name}' (process dead). Attempting removal..."
-                    )
+            holders = self._db.get_lock_info(self._lock_name)
+            if not holders:
+                return False
 
-                if self._db.break_stale_lock(self._lock_name):
-                    print(f"Removed stale lock: {self._lock_name}")
-                    BuildLock._stale_lock_warned = False
-                    return True
+            # Check all holders with psutil (more reliable than kernel32)
+            all_dead = all(
+                not _is_process_alive_psutil(h["owner_pid"]) for h in holders
+            )
+            if not all_dead:
+                return False
+
+            if not BuildLock._stale_lock_warned:
+                BuildLock._stale_lock_warned = True
+                dead_pids = [h["owner_pid"] for h in holders]
+                print(
+                    f"Detected stale lock '{self._lock_name}' (dead PIDs: {dead_pids}). Removing..."
+                )
+
+            # Force-break since we already verified all holders are dead
+            if self._db.force_break(self._lock_name):
+                print(f"Removed stale lock: {self._lock_name}")
+                BuildLock._stale_lock_warned = False
+                return True
 
             return False
         except KeyboardInterrupt as ki:
@@ -103,7 +157,7 @@ class BuildLock:
         except Exception:
             return False
 
-    def acquire(self, timeout: float = 300.0) -> bool:
+    def acquire(self, timeout: float = LOCK_TIMEOUT_S) -> bool:
         """
         Acquire the lock, waiting up to timeout seconds.
 
@@ -129,7 +183,6 @@ class BuildLock:
         start_time = time.time()
         warning_shown = False
         last_stale_check = 0.0
-        last_stack_dump = 0.0
 
         while True:
             if is_interrupted():
@@ -162,17 +215,26 @@ class BuildLock:
             except Exception:
                 pass  # Continue the loop
 
-            # Show warning after 2 seconds
-            if not warning_shown and elapsed >= 2.0:
+            # After grace period, print diagnostics and fail immediately
+            if not warning_shown and elapsed >= _LOCK_GRACE_S:
                 yellow = "\033[33m"
+                red = "\033[31m"
                 reset = "\033[0m"
-                print(f"{yellow}Waiting to acquire lock '{self._lock_name}'...{reset}")
-                warning_shown = True
-
-            # Dump stacks periodically while blocked (every 10s)
-            if warning_shown and elapsed - last_stack_dump >= 10.0:
-                last_stack_dump = elapsed
+                print(f"{red}Failed to acquire lock '{self._lock_name}'{reset}")
+                # Show who holds the lock with psutil process info
+                try:
+                    holders = self._db.get_lock_info(self._lock_name)
+                    for h in holders:
+                        held_secs = time.time() - h["acquired_at"]
+                        proc_info = _get_process_info(h["owner_pid"])
+                        print(
+                            f"{yellow}  Held by PID {h['owner_pid']} "
+                            f"(held {held_secs:.0f}s, {proc_info}){reset}"
+                        )
+                except Exception:
+                    pass
                 _dump_blocking_stacks(self._lock_name, elapsed)
+                return False
 
             # Check for timeout
             if elapsed >= timeout:
@@ -215,7 +277,9 @@ class BuildLock:
 
 
 @contextmanager
-def libfastled_build_lock(timeout: float = 300.0) -> Generator[BuildLock, None, None]:
+def libfastled_build_lock(
+    timeout: float = LOCK_TIMEOUT_S,
+) -> Generator[BuildLock, None, None]:
     """
     Context manager for acquiring libfastled build lock.
 
@@ -241,8 +305,23 @@ def libfastled_build_lock(timeout: float = 300.0) -> Generator[BuildLock, None, 
 
     lock_start = _time.time()
     if not lock.acquire(timeout=timeout):
+        # Include holder info with psutil process details in error message
+        holder_info = ""
+        try:
+            holders = lock._db.get_lock_info(lock._lock_name)
+            if holders:
+                parts: list[str] = []
+                for h in holders:
+                    held_secs = _time.time() - h["acquired_at"]
+                    proc_info = _get_process_info(h["owner_pid"])
+                    parts.append(
+                        f"PID {h['owner_pid']} (held {held_secs:.0f}s, {proc_info})"
+                    )
+                holder_info = f". Held by: {', '.join(parts)}"
+        except Exception:
+            pass
         raise TimeoutError(
-            f"Failed to acquire libfastled build lock after {timeout} seconds"
+            f"Failed to acquire libfastled build lock after {timeout:.0f}s{holder_info}"
         )
     lock_duration = _time.time() - lock_start
 

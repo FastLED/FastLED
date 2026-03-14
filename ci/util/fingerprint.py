@@ -20,17 +20,26 @@ from ci.util.test_types import (
 from ci.util.timestamp_print import ts_print
 
 
-def _get_max_source_file_mtime(root: Path) -> float:
+_CPP_SOURCE_EXTS = frozenset([".cpp", ".h", ".hpp", ".c", ".ino"])
+_PY_SOURCE_EXTS = frozenset([".py"])
+
+
+def _get_max_source_file_mtime(root: Path, exts: frozenset[str] | None = None) -> float:
     """Return max mtime of any source file under root, skipping build directories.
 
     Uses os.scandir() for efficiency. Detects BOTH structural changes (file
     add/remove) AND content modifications (file writes), unlike
     get_max_dir_mtime() which only detects structural changes.
 
-    Scans C++ source files (.cpp, .h, .hpp, .c, .ino) by default.
+    Args:
+        root: Root directory to scan
+        exts: Set of file extensions to check (default: _CPP_SOURCE_EXTS).
+              Pass _PY_SOURCE_EXTS to scan Python files instead.
+
     Returns 0.0 on missing root or any OS error.
     """
-    _SOURCE_EXTS = frozenset([".cpp", ".h", ".hpp", ".c", ".ino"])
+    if exts is None:
+        exts = _CPP_SOURCE_EXTS
     max_mtime = 0.0
     stack = [str(root)]
     while stack:
@@ -47,7 +56,7 @@ def _get_max_source_file_mtime(root: Path) -> float:
                                 stack.append(entry.path)
                         elif entry.is_file(follow_symlinks=False):
                             _, ext = os.path.splitext(name)
-                            if ext.lower() in _SOURCE_EXTS:
+                            if ext.lower() in exts:
                                 mtime = entry.stat(follow_symlinks=False).st_mtime
                                 if mtime > max_mtime:
                                     max_mtime = mtime
@@ -157,7 +166,12 @@ class FingerprintManager:
         """Get the previous fingerprint data (from last run) for display"""
         return self._prev_fingerprints.get(name)
 
-    def _mtime_fast_path(self, name: str, *dirs: Path) -> bool:
+    def _mtime_fast_path(
+        self,
+        name: str,
+        *dirs: Path,
+        exts: frozenset[str] | None = None,
+    ) -> bool:
         """
         Mtime-based fast-path for fingerprint checks.
 
@@ -176,6 +190,12 @@ class FingerprintManager:
         when a file's content changes (only on file create/delete), so the previous
         directory-only approach could produce false "no change" results.
 
+        Args:
+            name: Fingerprint cache name
+            *dirs: Directories to scan for source file changes
+            exts: File extensions to scan (default: _CPP_SOURCE_EXTS).
+                  Pass _PY_SOURCE_EXTS for Python test fingerprinting.
+
         Overhead: ~20-70ms per call (file-level scanning of source files).
         Savings: ~200-400ms vs full SHA-256 computation when no changes detected.
         """
@@ -185,7 +205,7 @@ class FingerprintManager:
         try:
             fp_mtime = fp_file.stat().st_mtime
             max_file_mtime = max(
-                (_get_max_source_file_mtime(d) for d in dirs), default=0.0
+                (_get_max_source_file_mtime(d, exts=exts) for d in dirs), default=0.0
             )
             if max_file_mtime > fp_mtime:
                 return False  # a source file was modified after fingerprint write
@@ -213,10 +233,12 @@ class FingerprintManager:
 
     def check_python(self) -> bool:
         cwd = Path.cwd()
-        # Fast-path: if ci/ has no structural changes since last write, skip 135ms hash.
+        # Fast-path: if ci/ has no .py file changes since last write, skip 135ms hash.
         # Python tests depend on ci/ Python modules and ci/tests/ test files.
-        # Limitation: in-place file content edits (no add/remove) are not detected.
-        if self._mtime_fast_path("python_test", cwd / "ci"):
+        # IMPORTANT: Must use _PY_SOURCE_EXTS here since ci/ contains Python files,
+        # not C++ files. Using the default C++ extensions would cause the fast path
+        # to always fire (finding no .py changes), silently skipping Python tests.
+        if self._mtime_fast_path("python_test", cwd / "ci", exts=_PY_SOURCE_EXTS):
             return False  # no change detected via mtime fast-path
         return self.check("python_test", calculate_python_test_fingerprint)
 

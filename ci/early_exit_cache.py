@@ -476,14 +476,17 @@ def argv_ultra_early_exit(start_time: float) -> None:
                 Path(".cache/fingerprint/python_test.json"),
             ]
             _mtimes_c0: list[float] = []
+            _fp_data_c0: list[dict] = []
             for _fp_c0 in _fps_c0:
                 try:
                     _st_c0 = _fp_c0.stat()
                 except FileNotFoundError:
                     return
                 with open(_fp_c0) as _f_c0:
-                    if json.load(_f_c0).get("status") != "success":
+                    _data_c0 = json.load(_f_c0)
+                    if _data_c0.get("status") != "success":
                         return
+                    _fp_data_c0.append(_data_c0)
                 _mtimes_c0.append(_st_c0.st_mtime)
             _mt_all_c0, _mt_cpp_c0, _mt_ex_c0, _mt_py_c0 = _mtimes_c0
             # src/ is used by all, cpp_test, and examples fingerprints
@@ -531,11 +534,39 @@ def argv_ultra_early_exit(start_time: float) -> None:
                 return  # examples/ source file modified after examples fingerprint write
             if _max_ci_c0 > _mt_py_c0:
                 return  # ci/ Python file modified after python fingerprint write
+
+            import time  # noqa: PLC0415 - lazy import
+
+            # Build summary table matching normal cached output.
+            # _fp_data_c0 order: [all, cpp_test_quick, examples_quick, python_test]
+            _cpp_fp = _fp_data_c0[1]
+            _cpp_label = "cpp_unit_tests"
+            _np = _cpp_fp.get("num_tests_passed")
+            _nt = _cpp_fp.get("num_tests_run")
+            _dur = _cpp_fp.get("duration_seconds")
+            if _np is not None and _nt is not None and _dur is not None:
+                _cpp_label = f"cpp_unit_tests ({_np}/{_nt} passed in {_dur:.2f}s)"
+
+            _rows = [
+                (_cpp_label, "skipped"),
+                ("python_tests", "skipped"),
+                ("wasm", "skipped"),
+                ("examples", "skipped"),
+            ]
+            _max_name = max(len(n) for n, _ in _rows)
+            _max_name = max(_max_name, len("Test"))
+            _max_dur = max(len(d) for _, d in _rows)
+            _max_dur = max(_max_dur, len("Duration"))
+
             print(
                 "✓ Fingerprint cache valid - skipping all tests (no changes detected)"
             )
-            import time  # noqa: PLC0415 - lazy import
-
+            print()
+            print("Results:")
+            print(f"{'Test':<{_max_name}} | {'Duration':<{_max_dur}}")
+            print(f"{'-' * _max_name}-+-{'-' * _max_dur}")
+            for _name, _duration in _rows:
+                print(f"{_name:<{_max_name}} | {_duration:<{_max_dur}}")
             print(f"Total: {time.time() - start_time:.2f}s")
             sys.exit(0)
         except KeyboardInterrupt:

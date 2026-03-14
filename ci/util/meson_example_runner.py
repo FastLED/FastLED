@@ -529,7 +529,7 @@ def run_meson_examples(
 
     # Compile examples with build lock to prevent conflicts
     try:
-        with libfastled_build_lock(timeout=600):  # 10 minute timeout
+        with libfastled_build_lock():  # uses LOCK_TIMEOUT_S default
             if not compile_examples(
                 build_dir,
                 examples=examples,
