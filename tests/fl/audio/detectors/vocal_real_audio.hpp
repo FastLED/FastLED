@@ -9,6 +9,7 @@
 #include "fl/stl/detail/file_handle.h"
 #include "fl/stl/detail/file_io.h"
 #include "fl/stl/math.h"
+#include "fl/stl/scope_exit.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/vector.h"
 
@@ -16,6 +17,38 @@ using namespace fl;
 using Diag = fl::VocalDetectorDiagnostics;
 
 namespace test_vocal_real_audio {
+
+// Singleton AudioContext reused across all test cases. The FFT kernel cache
+// (128-band CQ kernels = 128 FFT operations) is expensive to generate.
+// Sharing one AudioContext avoids regenerating kernels for every test case.
+static fl::shared_ptr<AudioContext>& sharedAudioContext() {
+    static fl::shared_ptr<AudioContext> ctx;
+    return ctx;
+}
+
+static fl::shared_ptr<AudioContext> getOrCreateContext(const AudioSample& sample, int sampleRate) {
+    auto& ctx = sharedAudioContext();
+    if (!ctx) {
+        ctx = fl::make_shared<AudioContext>(sample);
+        ctx->setSampleRate(sampleRate);
+    } else {
+        ctx->setSample(sample);
+        ctx->setSampleRate(sampleRate);
+    }
+    return ctx;
+}
+
+// Scope guard that clears AudioContext history on test exit,
+// preventing state leakage between test cases while preserving
+// the expensive FFT kernel cache.
+static void cleanupSharedContext() {
+    auto& ctx = sharedAudioContext();
+    if (ctx) {
+        ctx->clearCache();
+    }
+}
+
+#define VOCAL_TEST_CLEANUP auto cleanup = fl::make_scope_exit(cleanupSharedContext)
 
 // --- Utility: Load OGG file bytes from disk ---
 static fl::vector<fl::u8> loadOggFile(const char* path) {
@@ -119,8 +152,7 @@ static RealAudioResult runDetectorOnPcm(fl::span<const fl::i16> pcm, int sampleR
     for (fl::size offset = 0; offset + FRAME_SIZE <= maxSamples; offset += FRAME_SIZE) {
         fl::span<const fl::i16> frame(pcm.data() + offset, FRAME_SIZE);
         AudioSample sample(frame, timestamp);
-        auto ctx = fl::make_shared<AudioContext>(sample);
-        ctx->setSampleRate(sampleRate);
+        auto ctx = getOrCreateContext(sample, sampleRate);
         detector.update(ctx);
         detector.fireCallbacks();
 
@@ -176,6 +208,7 @@ using namespace test_vocal_real_audio;
 // ============================================================================
 
 FL_TEST_CASE("VocalDetector real-audio - vocal_solo detected") {
+    VOCAL_TEST_CLEANUP;
     if (!fixturesAvailable()) {
         FL_MESSAGE("Skipping: OGG fixtures not found. Run: uv run python ci/tools/generate_audio_fixtures.py");
         return;
@@ -195,6 +228,7 @@ FL_TEST_CASE("VocalDetector real-audio - vocal_solo detected") {
 }
 
 FL_TEST_CASE("VocalDetector real-audio - mix_vocal_loud higher than backing") {
+    VOCAL_TEST_CLEANUP;
     if (!fixturesAvailable()) {
         FL_MESSAGE("Skipping: OGG fixtures not found.");
         return;
@@ -220,6 +254,7 @@ FL_TEST_CASE("VocalDetector real-audio - mix_vocal_loud higher than backing") {
 // ============================================================================
 
 FL_TEST_CASE("VocalDetector real-audio - guitar_solo not vocal") {
+    VOCAL_TEST_CLEANUP;
     if (!fixturesAvailable()) {
         FL_MESSAGE("Skipping: OGG fixtures not found.");
         return;
@@ -236,6 +271,7 @@ FL_TEST_CASE("VocalDetector real-audio - guitar_solo not vocal") {
 }
 
 FL_TEST_CASE("VocalDetector real-audio - drums_solo not vocal") {
+    VOCAL_TEST_CLEANUP;
     if (!fixturesAvailable()) {
         FL_MESSAGE("Skipping: OGG fixtures not found.");
         return;
@@ -251,6 +287,7 @@ FL_TEST_CASE("VocalDetector real-audio - drums_solo not vocal") {
 }
 
 FL_TEST_CASE("VocalDetector real-audio - backing_only not vocal") {
+    VOCAL_TEST_CLEANUP;
     if (!fixturesAvailable()) {
         FL_MESSAGE("Skipping: OGG fixtures not found.");
         return;
@@ -270,6 +307,7 @@ FL_TEST_CASE("VocalDetector real-audio - backing_only not vocal") {
 // ============================================================================
 
 FL_TEST_CASE("VocalDetector real-audio - mix gradient") {
+    VOCAL_TEST_CLEANUP;
     if (!fixturesAvailable()) {
         FL_MESSAGE("Skipping: OGG fixtures not found.");
         return;
@@ -300,6 +338,7 @@ FL_TEST_CASE("VocalDetector real-audio - mix gradient") {
 // ============================================================================
 
 FL_TEST_CASE("VocalDetector real-audio - cpp-side stem mixing") {
+    VOCAL_TEST_CLEANUP;
     if (!fixturesAvailable()) {
         FL_MESSAGE("Skipping: OGG fixtures not found.");
         return;
@@ -331,6 +370,7 @@ FL_TEST_CASE("VocalDetector real-audio - cpp-side stem mixing") {
 // ============================================================================
 
 FL_TEST_CASE("VocalDetector real-audio - feature diagnostics") {
+    VOCAL_TEST_CLEANUP;
     if (!fixturesAvailable()) {
         FL_MESSAGE("Skipping: OGG fixtures not found.");
         return;
@@ -364,11 +404,11 @@ FL_TEST_CASE("VocalDetector real-audio - feature diagnostics") {
         constexpr int FRAME_SIZE = 512;
         constexpr fl::size MAX_DIAG_SAMPLES = 44100 * 2; // 2 seconds
         int frameCount = 0;
+
         for (fl::size offset = 0; offset + FRAME_SIZE <= pcm.size() && offset + FRAME_SIZE <= MAX_DIAG_SAMPLES; offset += FRAME_SIZE) {
             fl::span<const fl::i16> frame(pcm.data() + offset, FRAME_SIZE);
             AudioSample sample(frame, static_cast<fl::u32>(frameCount * 12));
-            auto ctx = fl::make_shared<AudioContext>(sample);
-            ctx->setSampleRate(44100);
+            auto ctx = getOrCreateContext(sample, 44100);
             detector.update(ctx);
             frameCount++;
         }
