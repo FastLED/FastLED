@@ -190,16 +190,20 @@ void blur2d(Canvas<CRGB> &canvas, alpha8 blur_amount) {
 } // namespace gfx
 } // namespace fl
 
-// ── SKIPSM Gaussian blur — template implementation with alpha integration ────
+// ── SKIPSM Gaussian blur — FSM-based single-pass implementation ──────────
 //
-// Separable two-pass (horizontal then vertical) blur using binomial
-// coefficients from Pascal's triangle. Normalization is pure bit-shift
-// since weights sum to 2^(2*radius).
+// Based on: "An efficient algorithm for Gaussian blur using finite-state
+// machines" (Waltz & Miller, SPIE 1998).
 //
-// Alpha (dim factor) is applied directly in the blur element functions
-// via pixel_ops::make() overloads, fusing blur and dim into one pass.
+// Processes the image in a single raster scan using cascaded [1 1] additions
+// that naturally build Pascal's triangle (binomial) coefficients:
+//   [1] -> [1 1] -> [1 2 1] -> [1 3 3 1] -> [1 4 6 4 1] -> ...
 //
-// Original implementation by sutaburosu, adapted for fl::gfx::Canvas.
+// For radius R: 2R row state registers + 2R column state buffers.
+// Only additions, no multiplications. Each pixel fetched exactly once.
+// Normalization by right-shift of 4R bits (sum of weights = 2^(4R)).
+//
+// Virtual zero-padded pixels flush the pipeline to cover all output positions.
 
 namespace fl {
 namespace gfx {
@@ -211,22 +215,7 @@ template <typename AlphaT> constexpr AlphaT alpha_identity();
 template <> constexpr alpha8 alpha_identity<alpha8>() { return alpha8(255); }
 template <> constexpr alpha16 alpha_identity<alpha16>() { return alpha16(65535); }
 
-// Thread-local temp buffer for blur passes (one per RGB_T).
-// Grows to fit the largest dimension seen, never shrinks.
-template <typename RGB_T>
-inline RGB_T* get_temp_buffer(int minSize) {
-    static fl::ThreadLocal<fl::vector<RGB_T>> tl_temp;
-    fl::vector<RGB_T> &buf = tl_temp.access();
-    if (static_cast<int>(buf.size()) < minSize) {
-        buf.resize(minSize);
-    }
-    return buf.data();
-}
-
 // Channel extraction and alpha-scaled pixel construction.
-// make(r, g, b) — no dim.
-// make(r, g, b, alpha8) — 8-bit UNORM dim.
-// make(r, g, b, alpha16) — 16-bit UNORM dim (true precision for wide pixels).
 template <typename RGB_T>
 struct pixel_ops;
 
@@ -279,449 +268,137 @@ struct pixel_ops<CRGB16> {
     }
 };
 
-// Generic edge-pixel helper for horizontal pass with bounds checking.
-template <typename acc_t, typename AlphaT, typename RGB_T>
-inline RGB_T hPassGeneric(const RGB_T *row, int x, int w,
-                          const int *weights, int radius, int shift,
-                          AlphaT alpha) {
-    using P = pixel_ops<RGB_T>;
-    acc_t rsum = 0, gsum = 0, bsum = 0;
-    for (int k = -radius; k <= radius; ++k) {
-        int xx = x + k;
-        if (xx >= 0 && xx < w) {
-            const RGB_T &p = row[xx];
-            int wt = weights[k + radius];
-            rsum += P::ch(p.r) * wt;
-            gsum += P::ch(p.g) * wt;
-            bsum += P::ch(p.b) * wt;
-        }
+// Thread-local column state buffer for the FSM.
+template <typename acc_t>
+static acc_t *get_colbuf(int minSize) {
+    static fl::ThreadLocal<fl::vector<acc_t>> tl_colbuf;
+    fl::vector<acc_t> &buf = tl_colbuf.access();
+    if (static_cast<int>(buf.size()) < minSize) {
+        buf.resize(minSize);
     }
-    return P::make(rsum >> shift, gsum >> shift, bsum >> shift, alpha);
+    return buf.data();
 }
-
-// Generic edge-pixel helper for vertical pass with bounds checking.
-template <typename acc_t, typename AlphaT, typename RGB_T>
-inline RGB_T vPassGeneric(const RGB_T *colBase, int y, int h, int stride,
-                          const int *weights, int radius, int shift,
-                          AlphaT alpha) {
-    using P = pixel_ops<RGB_T>;
-    acc_t rsum = 0, gsum = 0, bsum = 0;
-    for (int k = -radius; k <= radius; ++k) {
-        int yy = y + k;
-        if (yy >= 0 && yy < h) {
-            const RGB_T &p = colBase[yy * stride];
-            int wt = weights[k + radius];
-            rsum += P::ch(p.r) * wt;
-            gsum += P::ch(p.g) * wt;
-            bsum += P::ch(p.b) * wt;
-        }
-    }
-    return P::make(rsum >> shift, gsum >> shift, bsum >> shift, alpha);
-}
-
-// ── Horizontal pass dispatch ─────────────────────────────────────────────
-
-// Primary template — radius 0 = copy with alpha.
-template <int Radius, typename acc_t, typename RGB_T>
-struct HPass {
-    template <typename AlphaT>
-    static void run(const RGB_T *row, RGB_T *out, int w, AlphaT alpha) {
-        using P = pixel_ops<RGB_T>;
-        for (int x = 0; x < w; ++x) {
-            out[x] = P::make(P::ch(row[x].r), P::ch(row[x].g),
-                             P::ch(row[x].b), alpha);
-        }
-    }
-};
-
-// Radius 1: kernel [1 2 1], shift=2
-template <typename acc_t, typename RGB_T>
-struct HPass<1, acc_t, RGB_T> {
-    template <typename AlphaT>
-    static void run(const RGB_T *row, RGB_T *out, int w, AlphaT alpha) {
-        using P = pixel_ops<RGB_T>;
-        enum { SHIFT = 2 };
-        // First pixel
-        {
-            acc_t r0 = P::ch(row[0].r) * 2 +
-                       ((w > 1) ? P::ch(row[1].r) : P::ch(row[0].r));
-            acc_t g0 = P::ch(row[0].g) * 2 +
-                       ((w > 1) ? P::ch(row[1].g) : P::ch(row[0].g));
-            acc_t b0 = P::ch(row[0].b) * 2 +
-                       ((w > 1) ? P::ch(row[1].b) : P::ch(row[0].b));
-            out[0] = P::make(r0 >> SHIFT, g0 >> SHIFT, b0 >> SHIFT, alpha);
-        }
-        // Interior
-        for (int x = 1; x + 1 < w; ++x) {
-            acc_t rsum = P::ch(row[x - 1].r) + P::ch(row[x].r) * 2 +
-                         P::ch(row[x + 1].r);
-            acc_t gsum = P::ch(row[x - 1].g) + P::ch(row[x].g) * 2 +
-                         P::ch(row[x + 1].g);
-            acc_t bsum = P::ch(row[x - 1].b) + P::ch(row[x].b) * 2 +
-                         P::ch(row[x + 1].b);
-            out[x] = P::make(rsum >> SHIFT, gsum >> SHIFT, bsum >> SHIFT, alpha);
-        }
-        // Last pixel
-        if (w > 1) {
-            int x = w - 1;
-            acc_t r1 = P::ch(row[x].r) * 2 + P::ch(row[x - 1].r);
-            acc_t g1 = P::ch(row[x].g) * 2 + P::ch(row[x - 1].g);
-            acc_t b1 = P::ch(row[x].b) * 2 + P::ch(row[x - 1].b);
-            out[x] = P::make(r1 >> SHIFT, g1 >> SHIFT, b1 >> SHIFT, alpha);
-        }
-    }
-};
-
-// Radius 2: kernel [1 4 6 4 1], shift=4
-template <typename acc_t, typename RGB_T>
-struct HPass<2, acc_t, RGB_T> {
-    template <typename AlphaT>
-    static void run(const RGB_T *row, RGB_T *out, int w, AlphaT alpha) {
-        using P = pixel_ops<RGB_T>;
-        enum { SHIFT = 4, R = 2 };
-        static const int wts[] = {1, 4, 6, 4, 1};
-        // Edge pixels (first 2)
-        for (int x = 0; x < w && x < R; ++x) {
-            out[x] = hPassGeneric<acc_t>(row, x, w, wts, R, SHIFT, alpha);
-        }
-        // Interior (no bounds check)
-        for (int x = R; x + R < w; ++x) {
-            acc_t rsum = P::ch(row[x - 2].r) + P::ch(row[x - 1].r) * 4 +
-                         P::ch(row[x].r) * 6 + P::ch(row[x + 1].r) * 4 +
-                         P::ch(row[x + 2].r);
-            acc_t gsum = P::ch(row[x - 2].g) + P::ch(row[x - 1].g) * 4 +
-                         P::ch(row[x].g) * 6 + P::ch(row[x + 1].g) * 4 +
-                         P::ch(row[x + 2].g);
-            acc_t bsum = P::ch(row[x - 2].b) + P::ch(row[x - 1].b) * 4 +
-                         P::ch(row[x].b) * 6 + P::ch(row[x + 1].b) * 4 +
-                         P::ch(row[x + 2].b);
-            out[x] = P::make(rsum >> SHIFT, gsum >> SHIFT, bsum >> SHIFT, alpha);
-        }
-        // Edge pixels (last 2)
-        int start = w - R;
-        if (start < R) start = R;
-        for (int x = start; x < w; ++x) {
-            out[x] = hPassGeneric<acc_t>(row, x, w, wts, R, SHIFT, alpha);
-        }
-    }
-};
-
-// Radius 3: kernel [1 6 15 20 15 6 1], shift=6
-template <typename acc_t, typename RGB_T>
-struct HPass<3, acc_t, RGB_T> {
-    template <typename AlphaT>
-    static void run(const RGB_T *row, RGB_T *out, int w, AlphaT alpha) {
-        using P = pixel_ops<RGB_T>;
-        enum { SHIFT = 6, R = 3 };
-        static const int wts[] = {1, 6, 15, 20, 15, 6, 1};
-        for (int x = 0; x < w && x < R; ++x) {
-            out[x] = hPassGeneric<acc_t>(row, x, w, wts, R, SHIFT, alpha);
-        }
-        for (int x = R; x + R < w; ++x) {
-            acc_t rsum = P::ch(row[x - 3].r) + P::ch(row[x - 2].r) * 6 +
-                         P::ch(row[x - 1].r) * 15 + P::ch(row[x].r) * 20 +
-                         P::ch(row[x + 1].r) * 15 + P::ch(row[x + 2].r) * 6 +
-                         P::ch(row[x + 3].r);
-            acc_t gsum = P::ch(row[x - 3].g) + P::ch(row[x - 2].g) * 6 +
-                         P::ch(row[x - 1].g) * 15 + P::ch(row[x].g) * 20 +
-                         P::ch(row[x + 1].g) * 15 + P::ch(row[x + 2].g) * 6 +
-                         P::ch(row[x + 3].g);
-            acc_t bsum = P::ch(row[x - 3].b) + P::ch(row[x - 2].b) * 6 +
-                         P::ch(row[x - 1].b) * 15 + P::ch(row[x].b) * 20 +
-                         P::ch(row[x + 1].b) * 15 + P::ch(row[x + 2].b) * 6 +
-                         P::ch(row[x + 3].b);
-            out[x] = P::make(rsum >> SHIFT, gsum >> SHIFT, bsum >> SHIFT, alpha);
-        }
-        int start = w - R;
-        if (start < R) start = R;
-        for (int x = start; x < w; ++x) {
-            out[x] = hPassGeneric<acc_t>(row, x, w, wts, R, SHIFT, alpha);
-        }
-    }
-};
-
-// Radius 4: kernel [1 8 28 56 70 56 28 8 1], shift=8
-template <typename acc_t, typename RGB_T>
-struct HPass<4, acc_t, RGB_T> {
-    template <typename AlphaT>
-    static void run(const RGB_T *row, RGB_T *out, int w, AlphaT alpha) {
-        using P = pixel_ops<RGB_T>;
-        enum { SHIFT = 8, R = 4 };
-        static const int wts[] = {1, 8, 28, 56, 70, 56, 28, 8, 1};
-        for (int x = 0; x < w && x < R; ++x) {
-            out[x] = hPassGeneric<acc_t>(row, x, w, wts, R, SHIFT, alpha);
-        }
-        for (int x = R; x + R < w; ++x) {
-            acc_t rsum = P::ch(row[x - 4].r) + P::ch(row[x - 3].r) * 8 +
-                         P::ch(row[x - 2].r) * 28 + P::ch(row[x - 1].r) * 56 +
-                         P::ch(row[x].r) * 70 + P::ch(row[x + 1].r) * 56 +
-                         P::ch(row[x + 2].r) * 28 + P::ch(row[x + 3].r) * 8 +
-                         P::ch(row[x + 4].r);
-            acc_t gsum = P::ch(row[x - 4].g) + P::ch(row[x - 3].g) * 8 +
-                         P::ch(row[x - 2].g) * 28 + P::ch(row[x - 1].g) * 56 +
-                         P::ch(row[x].g) * 70 + P::ch(row[x + 1].g) * 56 +
-                         P::ch(row[x + 2].g) * 28 + P::ch(row[x + 3].g) * 8 +
-                         P::ch(row[x + 4].g);
-            acc_t bsum = P::ch(row[x - 4].b) + P::ch(row[x - 3].b) * 8 +
-                         P::ch(row[x - 2].b) * 28 + P::ch(row[x - 1].b) * 56 +
-                         P::ch(row[x].b) * 70 + P::ch(row[x + 1].b) * 56 +
-                         P::ch(row[x + 2].b) * 28 + P::ch(row[x + 3].b) * 8 +
-                         P::ch(row[x + 4].b);
-            out[x] = P::make(rsum >> SHIFT, gsum >> SHIFT, bsum >> SHIFT, alpha);
-        }
-        int start = w - R;
-        if (start < R) start = R;
-        for (int x = start; x < w; ++x) {
-            out[x] = hPassGeneric<acc_t>(row, x, w, wts, R, SHIFT, alpha);
-        }
-    }
-};
-
-// ── Vertical pass dispatch ───────────────────────────────────────────────
-
-// Primary template — radius 0 = copy with alpha.
-template <int Radius, typename acc_t, typename RGB_T>
-struct VPass {
-    template <typename AlphaT>
-    static void run(const RGB_T *colBase, RGB_T *out, int h, int stride,
-                    AlphaT alpha) {
-        using P = pixel_ops<RGB_T>;
-        for (int y = 0; y < h; ++y) {
-            const RGB_T &p = colBase[y * stride];
-            out[y] = P::make(P::ch(p.r), P::ch(p.g), P::ch(p.b), alpha);
-        }
-    }
-};
-
-template <typename acc_t, typename RGB_T>
-struct VPass<1, acc_t, RGB_T> {
-    template <typename AlphaT>
-    static void run(const RGB_T *colBase, RGB_T *out, int h, int w,
-                    AlphaT alpha) {
-        using P = pixel_ops<RGB_T>;
-        enum { SHIFT = 2 };
-        {
-            acc_t r0 = P::ch(colBase[0].r) * 2 +
-                       ((h > 1) ? P::ch(colBase[w].r) : P::ch(colBase[0].r));
-            acc_t g0 = P::ch(colBase[0].g) * 2 +
-                       ((h > 1) ? P::ch(colBase[w].g) : P::ch(colBase[0].g));
-            acc_t b0 = P::ch(colBase[0].b) * 2 +
-                       ((h > 1) ? P::ch(colBase[w].b) : P::ch(colBase[0].b));
-            out[0] = P::make(r0 >> SHIFT, g0 >> SHIFT, b0 >> SHIFT, alpha);
-        }
-        for (int y = 1; y + 1 < h; ++y) {
-            acc_t rsum = P::ch(colBase[(y - 1) * w].r) +
-                         P::ch(colBase[y * w].r) * 2 +
-                         P::ch(colBase[(y + 1) * w].r);
-            acc_t gsum = P::ch(colBase[(y - 1) * w].g) +
-                         P::ch(colBase[y * w].g) * 2 +
-                         P::ch(colBase[(y + 1) * w].g);
-            acc_t bsum = P::ch(colBase[(y - 1) * w].b) +
-                         P::ch(colBase[y * w].b) * 2 +
-                         P::ch(colBase[(y + 1) * w].b);
-            out[y] = P::make(rsum >> SHIFT, gsum >> SHIFT, bsum >> SHIFT, alpha);
-        }
-        if (h > 1) {
-            int y = h - 1;
-            acc_t r1 = P::ch(colBase[y * w].r) * 2 +
-                       P::ch(colBase[(y - 1) * w].r);
-            acc_t g1 = P::ch(colBase[y * w].g) * 2 +
-                       P::ch(colBase[(y - 1) * w].g);
-            acc_t b1 = P::ch(colBase[y * w].b) * 2 +
-                       P::ch(colBase[(y - 1) * w].b);
-            out[y] = P::make(r1 >> SHIFT, g1 >> SHIFT, b1 >> SHIFT, alpha);
-        }
-    }
-};
-
-template <typename acc_t, typename RGB_T>
-struct VPass<2, acc_t, RGB_T> {
-    template <typename AlphaT>
-    static void run(const RGB_T *colBase, RGB_T *out, int h, int w,
-                    AlphaT alpha) {
-        using P = pixel_ops<RGB_T>;
-        enum { SHIFT = 4, R = 2 };
-        static const int wts[] = {1, 4, 6, 4, 1};
-        for (int y = 0; y < h && y < R; ++y) {
-            out[y] = vPassGeneric<acc_t>(colBase, y, h, w, wts, R, SHIFT, alpha);
-        }
-        for (int y = R; y + R < h; ++y) {
-            acc_t rsum = P::ch(colBase[(y - 2) * w].r) +
-                         P::ch(colBase[(y - 1) * w].r) * 4 +
-                         P::ch(colBase[y * w].r) * 6 +
-                         P::ch(colBase[(y + 1) * w].r) * 4 +
-                         P::ch(colBase[(y + 2) * w].r);
-            acc_t gsum = P::ch(colBase[(y - 2) * w].g) +
-                         P::ch(colBase[(y - 1) * w].g) * 4 +
-                         P::ch(colBase[y * w].g) * 6 +
-                         P::ch(colBase[(y + 1) * w].g) * 4 +
-                         P::ch(colBase[(y + 2) * w].g);
-            acc_t bsum = P::ch(colBase[(y - 2) * w].b) +
-                         P::ch(colBase[(y - 1) * w].b) * 4 +
-                         P::ch(colBase[y * w].b) * 6 +
-                         P::ch(colBase[(y + 1) * w].b) * 4 +
-                         P::ch(colBase[(y + 2) * w].b);
-            out[y] = P::make(rsum >> SHIFT, gsum >> SHIFT, bsum >> SHIFT, alpha);
-        }
-        int start = h - R;
-        if (start < R) start = R;
-        for (int y = start; y < h; ++y) {
-            out[y] = vPassGeneric<acc_t>(colBase, y, h, w, wts, R, SHIFT, alpha);
-        }
-    }
-};
-
-template <typename acc_t, typename RGB_T>
-struct VPass<3, acc_t, RGB_T> {
-    template <typename AlphaT>
-    static void run(const RGB_T *colBase, RGB_T *out, int h, int w,
-                    AlphaT alpha) {
-        using P = pixel_ops<RGB_T>;
-        enum { SHIFT = 6, R = 3 };
-        static const int wts[] = {1, 6, 15, 20, 15, 6, 1};
-        for (int y = 0; y < h && y < R; ++y) {
-            out[y] = vPassGeneric<acc_t>(colBase, y, h, w, wts, R, SHIFT, alpha);
-        }
-        for (int y = R; y + R < h; ++y) {
-            acc_t rsum = P::ch(colBase[(y - 3) * w].r) +
-                         P::ch(colBase[(y - 2) * w].r) * 6 +
-                         P::ch(colBase[(y - 1) * w].r) * 15 +
-                         P::ch(colBase[y * w].r) * 20 +
-                         P::ch(colBase[(y + 1) * w].r) * 15 +
-                         P::ch(colBase[(y + 2) * w].r) * 6 +
-                         P::ch(colBase[(y + 3) * w].r);
-            acc_t gsum = P::ch(colBase[(y - 3) * w].g) +
-                         P::ch(colBase[(y - 2) * w].g) * 6 +
-                         P::ch(colBase[(y - 1) * w].g) * 15 +
-                         P::ch(colBase[y * w].g) * 20 +
-                         P::ch(colBase[(y + 1) * w].g) * 15 +
-                         P::ch(colBase[(y + 2) * w].g) * 6 +
-                         P::ch(colBase[(y + 3) * w].g);
-            acc_t bsum = P::ch(colBase[(y - 3) * w].b) +
-                         P::ch(colBase[(y - 2) * w].b) * 6 +
-                         P::ch(colBase[(y - 1) * w].b) * 15 +
-                         P::ch(colBase[y * w].b) * 20 +
-                         P::ch(colBase[(y + 1) * w].b) * 15 +
-                         P::ch(colBase[(y + 2) * w].b) * 6 +
-                         P::ch(colBase[(y + 3) * w].b);
-            out[y] = P::make(rsum >> SHIFT, gsum >> SHIFT, bsum >> SHIFT, alpha);
-        }
-        int start = h - R;
-        if (start < R) start = R;
-        for (int y = start; y < h; ++y) {
-            out[y] = vPassGeneric<acc_t>(colBase, y, h, w, wts, R, SHIFT, alpha);
-        }
-    }
-};
-
-template <typename acc_t, typename RGB_T>
-struct VPass<4, acc_t, RGB_T> {
-    template <typename AlphaT>
-    static void run(const RGB_T *colBase, RGB_T *out, int h, int w,
-                    AlphaT alpha) {
-        using P = pixel_ops<RGB_T>;
-        enum { SHIFT = 8, R = 4 };
-        static const int wts[] = {1, 8, 28, 56, 70, 56, 28, 8, 1};
-        for (int y = 0; y < h && y < R; ++y) {
-            out[y] = vPassGeneric<acc_t>(colBase, y, h, w, wts, R, SHIFT, alpha);
-        }
-        for (int y = R; y + R < h; ++y) {
-            acc_t rsum = P::ch(colBase[(y - 4) * w].r) +
-                         P::ch(colBase[(y - 3) * w].r) * 8 +
-                         P::ch(colBase[(y - 2) * w].r) * 28 +
-                         P::ch(colBase[(y - 1) * w].r) * 56 +
-                         P::ch(colBase[y * w].r) * 70 +
-                         P::ch(colBase[(y + 1) * w].r) * 56 +
-                         P::ch(colBase[(y + 2) * w].r) * 28 +
-                         P::ch(colBase[(y + 3) * w].r) * 8 +
-                         P::ch(colBase[(y + 4) * w].r);
-            acc_t gsum = P::ch(colBase[(y - 4) * w].g) +
-                         P::ch(colBase[(y - 3) * w].g) * 8 +
-                         P::ch(colBase[(y - 2) * w].g) * 28 +
-                         P::ch(colBase[(y - 1) * w].g) * 56 +
-                         P::ch(colBase[y * w].g) * 70 +
-                         P::ch(colBase[(y + 1) * w].g) * 56 +
-                         P::ch(colBase[(y + 2) * w].g) * 28 +
-                         P::ch(colBase[(y + 3) * w].g) * 8 +
-                         P::ch(colBase[(y + 4) * w].g);
-            acc_t bsum = P::ch(colBase[(y - 4) * w].b) +
-                         P::ch(colBase[(y - 3) * w].b) * 8 +
-                         P::ch(colBase[(y - 2) * w].b) * 28 +
-                         P::ch(colBase[(y - 1) * w].b) * 56 +
-                         P::ch(colBase[y * w].b) * 70 +
-                         P::ch(colBase[(y + 1) * w].b) * 56 +
-                         P::ch(colBase[(y + 2) * w].b) * 28 +
-                         P::ch(colBase[(y + 3) * w].b) * 8 +
-                         P::ch(colBase[(y + 4) * w].b);
-            out[y] = P::make(rsum >> SHIFT, gsum >> SHIFT, bsum >> SHIFT, alpha);
-        }
-        int start = h - R;
-        if (start < R) start = R;
-        for (int y = start; y < h; ++y) {
-            out[y] = vPassGeneric<acc_t>(colBase, y, h, w, wts, R, SHIFT, alpha);
-        }
-    }
-};
 
 } // namespace blur_detail
 
-// Internal blur implementation with alpha integrated into element functions.
-// Alpha is applied in exactly one pass (H or V) to avoid double-dimming:
-//   - If hRadius > 0: alpha applied in horizontal pass, vertical gets identity.
-//   - If hRadius == 0: alpha applied in vertical pass.
+// FSM-based Gaussian blur: single-pass raster scan with cascaded [1 1]
+// state machines.  Alpha is applied once at the output.
 template <int hRadius, int vRadius, typename RGB_T, typename AlphaT>
 void blurGaussianImpl(Canvas<RGB_T> &canvas, AlphaT alpha) {
     const int w = canvas.width;
     const int h = canvas.height;
-    if (w <= 0 || h <= 0) {
+    if (w <= 0 || h <= 0)
+        return;
+
+    using P = blur_detail::pixel_ops<RGB_T>;
+
+    // Handle no-blur case (radius 0 in both dimensions).
+    if (hRadius == 0 && vRadius == 0) {
+        if (!(alpha == blur_detail::alpha_identity<AlphaT>())) {
+            RGB_T *pixels = canvas.pixels;
+            for (int i = 0; i < w * h; ++i) {
+                RGB_T &p = pixels[i];
+                p = P::make(P::ch(p.r), P::ch(p.g), P::ch(p.b), alpha);
+            }
+        }
         return;
     }
 
-    // Use u32 accumulators for wide channels (CRGB16) to avoid overflow.
-    using acc_t = fl::conditional_t<
-        (sizeof(typename RGB_T::fp) == 1) && (hRadius < 5 && vRadius < 5),
-        u16, u32>;
+    // State counts per dimension.
+    enum {
+        HR = 2 * hRadius, // row state register count
+        VR = 2 * vRadius, // column state buffer count
+        SHIFT = HR + VR   // total normalization shift
+    };
 
-    // Thread-local temp buffer sized to the larger dimension.
-    const int maxDim = (w > h) ? w : h;
-    RGB_T *tempRow = blur_detail::get_temp_buffer<RGB_T>(maxDim);
+    // Accumulator type: u16 when max intermediate (255 * 2^SHIFT) fits,
+    // u32 otherwise. For 8-bit pixels, u16 works when SHIFT <= 8.
+    using acc_t = fl::conditional_t<
+        (sizeof(typename RGB_T::fp) == 1) && (SHIFT <= 8), u16, u32>;
+
+    const acc_t ROUND =
+        (SHIFT > 0) ? (acc_t(1) << (SHIFT - 1)) : acc_t(0);
+
+    // Virtual pixels for pipeline flush.
+    const int totalCols = w + hRadius;
+    const int totalRows = h + vRadius;
+
+    // Column state buffers: VR stages x totalCols, per channel.
+    const int colBufStride = totalCols;
+    const int colBufElems = (VR > 0 ? VR : 1) * colBufStride;
+    const int totalBufSize = colBufElems * 3; // R, G, B
+
+    acc_t *buf = blur_detail::get_colbuf<acc_t>(totalBufSize);
+    for (int i = 0; i < totalBufSize; ++i)
+        buf[i] = 0;
+
+    acc_t *const sc_r = buf;
+    acc_t *const sc_g = buf + colBufElems;
+    acc_t *const sc_b = buf + colBufElems * 2;
 
     RGB_T *pixels = canvas.pixels;
 
-    // Determine which pass applies alpha (avoid double-dimming).
-    // hRadius > 0 is compile-time constant — dead branch is optimized out.
-    const AlphaT hAlpha = (hRadius > 0)
-        ? alpha
-        : blur_detail::alpha_identity<AlphaT>();
-    const AlphaT vAlpha = (hRadius > 0)
-        ? blur_detail::alpha_identity<AlphaT>()
-        : alpha;
-
-    // ── Horizontal pass ──────────────────────────────────────────────────
-
-    for (int y = 0; y < h; ++y) {
-        RGB_T *row = pixels + y * w;
-
-        blur_detail::HPass<hRadius, acc_t, RGB_T>::run(
-            row, tempRow, w, hAlpha);
-
-        // Write back.
-        for (int x = 0; x < w; ++x) {
-            row[x] = tempRow[x];
+    for (int j = 0; j < totalRows; ++j) {
+        // Row state registers — reset at each row start.
+        acc_t sr_r[HR > 0 ? HR : 1];
+        acc_t sr_g[HR > 0 ? HR : 1];
+        acc_t sr_b[HR > 0 ? HR : 1];
+        for (int s = 0; s < (HR > 0 ? HR : 1); ++s) {
+            sr_r[s] = 0;
+            sr_g[s] = 0;
+            sr_b[s] = 0;
         }
-    }
 
-    // ── Vertical pass ────────────────────────────────────────────────────
+        for (int i = 0; i < totalCols; ++i) {
+            // Fetch input (zero for virtual padding pixels).
+            acc_t in_r, in_g, in_b;
+            if (j < h && i < w) {
+                const RGB_T &p = pixels[j * w + i];
+                in_r = P::ch(p.r);
+                in_g = P::ch(p.g);
+                in_b = P::ch(p.b);
+            } else {
+                in_r = 0;
+                in_g = 0;
+                in_b = 0;
+            }
 
-    for (int x = 0; x < w; ++x) {
-        RGB_T *colBase = pixels + x;
+            // ── Row FSM: HR cascaded [1 1] addition stages ──────────
+            acc_t tr = in_r, tg = in_g, tb = in_b;
+            for (int s = 0; s < HR; ++s) {
+                acc_t nr = sr_r[s] + tr;
+                acc_t ng = sr_g[s] + tg;
+                acc_t nb = sr_b[s] + tb;
+                sr_r[s] = tr;
+                sr_g[s] = tg;
+                sr_b[s] = tb;
+                tr = nr;
+                tg = ng;
+                tb = nb;
+            }
 
-        blur_detail::VPass<vRadius, acc_t, RGB_T>::run(
-            colBase, tempRow, h, w, vAlpha);
+            // ── Column FSM: VR cascaded [1 1] addition stages ──────
+            for (int s = 0; s < VR; ++s) {
+                int idx = s * colBufStride + i;
+                acc_t nr = sc_r[idx] + tr;
+                acc_t ng = sc_g[idx] + tg;
+                acc_t nb = sc_b[idx] + tb;
+                sc_r[idx] = tr;
+                sc_g[idx] = tg;
+                sc_b[idx] = tb;
+                tr = nr;
+                tg = ng;
+                tb = nb;
+            }
 
-        // Write back.
-        for (int y = 0; y < h; ++y) {
-            pixels[y * w + x] = tempRow[y];
+            // ── Write output at (j - vRadius, i - hRadius) ─────────
+            int oy = j - vRadius;
+            int ox = i - hRadius;
+            if (oy >= 0 && oy < h && ox >= 0 && ox < w) {
+                pixels[oy * w + ox] =
+                    P::make((ROUND + tr) >> SHIFT, (ROUND + tg) >> SHIFT,
+                            (ROUND + tb) >> SHIFT, alpha);
+            }
         }
     }
 }

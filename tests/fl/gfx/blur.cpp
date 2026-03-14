@@ -1,11 +1,14 @@
 // ok cpp include
-/// @file blur_gaussian.cpp
+/// @file blur.cpp
 /// @brief Tests for SKIPSM Gaussian blur
 
 #include "test.h"
 #include "fl/gfx/blur.h"
 #include "fl/gfx/crgb.h"
 #include "fl/gfx/crgb16.h"
+#include "fl/stl/chrono.h"
+#include "fl/stl/cstdio.h"
+#include "fl/stl/stdio.h"
 
 using namespace fl;
 
@@ -242,6 +245,75 @@ FL_TEST_CASE("blurGaussian CRGB16 5x5 kernel - interior unchanged") {
             FL_CHECK_EQ(pixels[y * W + x].b.raw(), bv.raw());
         }
     }
+}
+
+// ── Benchmark ────────────────────────────────────────────────────────────
+
+static void fill_test_data(CRGB *pixels, int n) {
+    for (int i = 0; i < n; ++i) {
+        pixels[i] = CRGB(static_cast<uint8_t>(i * 37 + 17),
+                         static_cast<uint8_t>(i * 59 + 31),
+                         static_cast<uint8_t>(i * 83 + 47));
+    }
+}
+
+template <typename Func>
+static double bench(Func fn, int iterations, int warmup = 200) {
+    for (int i = 0; i < warmup; ++i)
+        fn();
+    fl::u32 t0 = fl::micros();
+    for (int i = 0; i < iterations; ++i)
+        fn();
+    fl::u32 t1 = fl::micros();
+    return static_cast<double>(t1 - t0) * 1000.0 /
+           static_cast<double>(iterations); // ns per iteration
+}
+
+template <int R, int W, int H>
+static void run_benchmark(const char *label, int iters) {
+    constexpr int N = W * H;
+    CRGB px[N];
+
+    auto t = bench(
+        [&]() {
+            fill_test_data(px, N);
+            gfx::Canvas<CRGB> c(fl::span<CRGB>(px, N), W, H);
+            gfx::blurGaussian<R, R>(c);
+        },
+        iters);
+
+    char buf[80];
+    fl::snprintf(buf, sizeof(buf), "  %s: %d ns/iter", label,
+             static_cast<int>(t));
+    fl::println(buf);
+}
+
+FL_TEST_CASE("blur benchmark") {
+    const int ITERS = 5000;
+
+    fl::println("\n── Gaussian Blur Benchmark (SKIPSM) ──");
+    fl::println("  (each iteration includes fill + blur)\n");
+
+    run_benchmark<1, 16, 16>("16x16 R1", ITERS);
+    run_benchmark<2, 16, 16>("16x16 R2", ITERS);
+    run_benchmark<3, 16, 16>("16x16 R3", ITERS);
+    run_benchmark<4, 16, 16>("16x16 R4", ITERS);
+
+    fl::println("");
+
+    run_benchmark<1, 32, 32>("32x32 R1", ITERS);
+    run_benchmark<2, 32, 32>("32x32 R2", ITERS);
+    run_benchmark<3, 32, 32>("32x32 R3", ITERS);
+    run_benchmark<4, 32, 32>("32x32 R4", ITERS);
+
+    fl::println("");
+
+    run_benchmark<1, 64, 64>("64x64 R1", ITERS / 2);
+    run_benchmark<2, 64, 64>("64x64 R2", ITERS / 2);
+    run_benchmark<3, 64, 64>("64x64 R3", ITERS / 2);
+    run_benchmark<4, 64, 64>("64x64 R4", ITERS / 2);
+
+    fl::println("");
 }
 
 FL_TEST_FILE(FL_FILEPATH) {
