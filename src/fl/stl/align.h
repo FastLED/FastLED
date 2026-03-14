@@ -145,4 +145,23 @@ inline const T *assume_aligned(const T *ptr) {
 #endif
 }
 
+// ============================================================================
+// aligned_ptr<T, N> - Pointer wrapper encoding alignment in the type system
+// ============================================================================
+// Carries alignment as a template parameter so it propagates through call
+// chains via type checking. Functions that require aligned pointers should
+// accept aligned_ptr<T, N> instead of T* to prevent silent alignment loss.
+template <typename T, fl::size_t N>
+class aligned_ptr {
+    T *mPtr;
+
+  public:
+    aligned_ptr() : mPtr(nullptr) {}
+    explicit aligned_ptr(T *p) : mPtr(assume_aligned<N>(p)) {}
+
+    T *get() const { return assume_aligned<N>(mPtr); }
+    T &operator[](fl::size_t i) const { return get()[i]; }
+    explicit operator bool() const { return mPtr != nullptr; }
+};
+
 } // namespace fl

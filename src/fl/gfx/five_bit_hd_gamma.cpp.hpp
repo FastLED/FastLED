@@ -16,9 +16,9 @@ FL_ALIGN_PROGMEM(4) static constexpr u32 BRIGHT_SCALE[32] FL_PROGMEM = {
     126480, 119040,  112427,  106509, 101184, 96366,  91985,  87986,
     84320,  80947,   77834,   74951,  72274,  69782,  67456,  65280};
 
-// Inlined gamma lookup using assume_aligned on the shared GAMMA_2_8_LUT.
+// Inlined gamma lookup with alignment enforced by aligned_ptr type.
 // Avoids cross-TU function call overhead of gamma_2_8() in hot span loops.
-FL_ALWAYS_INLINE u16 gamma_lut_read(const u16 *lut, u8 idx) {
+FL_ALWAYS_INLINE u16 gamma_lut_read(aligned_ptr<const u16, 64> lut, u8 idx) {
     return FL_PGM_READ_WORD_ALIGNED(&lut[idx]);
 }
 
@@ -95,7 +95,7 @@ void five_bit_hd_gamma_bitshift(
         return;
     }
 
-    const u16 *glut = assume_aligned<64>(GAMMA_2_8_LUT);
+    const aligned_ptr<const u16, 64> glut(GAMMA_2_8_LUT);
 
     // Precompute color-scale multipliers once (avoid per-pixel branches).
     const bool apply_r_scale = (colors_scale.r != 0xff);
@@ -144,7 +144,7 @@ void five_bit_hd_gamma_bitshift(
         return;
     }
 
-    const u16 *glut = assume_aligned<64>(GAMMA_2_8_LUT);
+    const aligned_ptr<const u16, 64> glut(GAMMA_2_8_LUT);
 
     // Precompute color-scale multipliers once (avoid per-pixel branches).
     const bool apply_r_scale = (colors_scale.r != 0xff);

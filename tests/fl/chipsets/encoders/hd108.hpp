@@ -71,9 +71,9 @@ static void verifyHeaderBytes(const fl::vector<u8>& data, size_t offset, u8 expe
 /// Helper to verify LED RGB16 values with gamma correction
 static void verifyLEDData(const fl::vector<u8>& data, size_t offset, u8 r8, u8 g8, u8 b8) {
     // HD108 uses RGB order: R, G, B
-    u16 expected_r16 = gamma_2_8(r8);
-    u16 expected_g16 = gamma_2_8(g8);
-    u16 expected_b16 = gamma_2_8(b8);
+    u16 expected_r16 = Gamma28LUT16::read(r8);
+    u16 expected_g16 = Gamma28LUT16::read(g8);
+    u16 expected_b16 = Gamma28LUT16::read(b8);
 
     FL_CHECK_EQ(getBigEndian16(data, offset), expected_r16);
     FL_CHECK_EQ(getBigEndian16(data, offset + 2), expected_g16);
@@ -257,9 +257,9 @@ FL_TEST_CASE("encodeHD108() - gamma correction verification") {
     u16 b16 = getBigEndian16(output, 14);
 
     // Verify they match gamma_2_8 output
-    FL_CHECK_EQ(r16, gamma_2_8(255));
-    FL_CHECK_EQ(g16, gamma_2_8(128));
-    FL_CHECK_EQ(b16, gamma_2_8(64));
+    FL_CHECK_EQ(r16, Gamma28LUT16::read(255));
+    FL_CHECK_EQ(g16, Gamma28LUT16::read(128));
+    FL_CHECK_EQ(b16, Gamma28LUT16::read(64));
 
     // Gamma 2.8 should produce non-linear values
     FL_CHECK_GT(r16, g16 * 2);  // 255 gamma'd should be > 2x 128 gamma'd
@@ -273,9 +273,9 @@ FL_TEST_CASE("encodeHD108() - RGB color order") {
     encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), 255);
 
     // RGB order: R first (offset 10), G second (12), B third (14)
-    FL_CHECK_EQ(getBigEndian16(output, 10), gamma_2_8(200));  // Red
-    FL_CHECK_EQ(getBigEndian16(output, 12), gamma_2_8(100));  // Green
-    FL_CHECK_EQ(getBigEndian16(output, 14), gamma_2_8(50));   // Blue
+    FL_CHECK_EQ(getBigEndian16(output, 10), Gamma28LUT16::read(200));  // Red
+    FL_CHECK_EQ(getBigEndian16(output, 12), Gamma28LUT16::read(100));  // Green
+    FL_CHECK_EQ(getBigEndian16(output, 14), Gamma28LUT16::read(50));   // Blue
 }
 
 //-----------------------------------------------------------------------------
@@ -473,11 +473,11 @@ FL_TEST_CASE("hd108BrightnessHeader() - max gain encoding") {
 FL_TEST_CASE("hd108GammaCorrect() - gamma 2.8 correction") {
     // Test gamma correction function directly
 
-    FL_CHECK_EQ(hd108GammaCorrect(0), gamma_2_8(0));
-    FL_CHECK_EQ(hd108GammaCorrect(64), gamma_2_8(64));
-    FL_CHECK_EQ(hd108GammaCorrect(128), gamma_2_8(128));
-    FL_CHECK_EQ(hd108GammaCorrect(192), gamma_2_8(192));
-    FL_CHECK_EQ(hd108GammaCorrect(255), gamma_2_8(255));
+    FL_CHECK_EQ(hd108GammaCorrect(0), Gamma28LUT16::read(0));
+    FL_CHECK_EQ(hd108GammaCorrect(64), Gamma28LUT16::read(64));
+    FL_CHECK_EQ(hd108GammaCorrect(128), Gamma28LUT16::read(128));
+    FL_CHECK_EQ(hd108GammaCorrect(192), Gamma28LUT16::read(192));
+    FL_CHECK_EQ(hd108GammaCorrect(255), Gamma28LUT16::read(255));
 
     // Verify non-linearity (gamma > 1.0 means output grows faster than input)
     u16 v64 = hd108GammaCorrect(64);

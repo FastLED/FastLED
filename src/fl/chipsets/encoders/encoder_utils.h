@@ -7,6 +7,7 @@
 /// brightness mapping, checksum generation, and color scaling.
 
 #include "fl/stl/stdint.h"
+#include "fl/gfx/gamma_lut.h"
 
 namespace fl {
 
@@ -60,12 +61,11 @@ inline u8 lpd8806Encode(u8 value) {
     return 0x80 | ((value >> 1) | ((value && (value < 254)) & 0x01));
 }
 
-/// @brief Convert 8-bit color to HD108 16-bit gamma-corrected value
+/// @brief Convert 8-bit color to HD108 16-bit gamma-corrected value (gamma 2.8)
 /// @param value 8-bit color value (0-255)
 /// @return 16-bit gamma-corrected value
-/// @note Uses gamma 2.8 correction
 inline u16 hd108GammaCorrect(u8 value) {
-    return gamma_2_8(value);
+    return Gamma28LUT16::read(value);
 }
 
 /// @brief Generate HD108 per-channel gain header bytes
