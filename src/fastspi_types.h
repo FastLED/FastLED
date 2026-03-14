@@ -7,7 +7,7 @@
 #define __INC_FASTSPI_TYPES_H
 
 #include "fl/stl/compiler_control.h"
-#include "fl/register.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/stdint.h"
 
 FL_DISABLE_WARNING_PUSH

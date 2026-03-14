@@ -10,7 +10,7 @@
 // TODO: add alternative pins for SPI1
 // TODO: add SPI2 output
 //
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fastspi_types.h"
 #include "platforms/arm/teensy/is_teensy.h"
 #include "fl/stl/compiler_control.h"

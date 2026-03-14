@@ -22,7 +22,7 @@
 #include "fl/stl/json.h"
 #include "fl/stl/span.h"
 #include "fl/gfx/screenmap.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 
 using fl::vec2f;
 using fl::vector;

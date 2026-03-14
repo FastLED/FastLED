@@ -4,9 +4,9 @@
     
 #include "fl/fastled.h"
 
-#include "fl/fastpin.h"
+#include "fl/system/fastpin.h"
 #include "fl/stl/strstream.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 #include "fl/stl/assert.h"
 #include "fl/sensors/pir.h"
 

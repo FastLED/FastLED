@@ -12,7 +12,7 @@
 #include "platforms/avr/atmega/common/avr_pin.h"
 
 #warning "Untested platform. Please report any issues to the https://github.com/fastled/fastled/issues"
-#include "fl/fastpin_base.h"
+#include "fl/system/fastpin_base.h"
 namespace fl {
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be slightly slower."

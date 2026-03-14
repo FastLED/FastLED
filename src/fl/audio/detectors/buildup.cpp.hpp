@@ -3,8 +3,8 @@
 #include "fl/audio/detectors/buildup.h"
 #include "fl/audio/audio_context.h"
 #include "fl/stl/math.h"
-#include "fl/dbg.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
 
 namespace fl {
 

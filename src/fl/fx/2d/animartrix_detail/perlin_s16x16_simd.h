@@ -7,7 +7,7 @@
 // Uses FastLED SIMD abstraction layer for vectorizable operations
 
 #include "fl/fx/2d/animartrix_detail/perlin_s16x16.h"
-#include "fl/simd.h"
+#include "fl/stl/simd.h"
 
 namespace fl {
 

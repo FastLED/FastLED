@@ -21,6 +21,6 @@
 // things that we can turn on if we're in a C++11 environment
 #endif
 
-#include "fl/register.h"
+#include "fl/stl/compiler_control.h"
 
 #endif

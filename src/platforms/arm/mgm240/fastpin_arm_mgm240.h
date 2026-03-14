@@ -24,7 +24,7 @@
 
 #include "led_sysdefs.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/fastpin_base.h"
+#include "fl/system/fastpin_base.h"
 namespace fl {
 /// Forward declaration of base FastPin template
 template<u8 PIN> class FastPin;

@@ -3,9 +3,9 @@
 /// and digitalMultiWrite bulk pin API
 /// Implementation is in src/fl/pin.cpp.hpp
 
-#include "fl/pin.h"
+#include "fl/system/pin.h"
 #include "test.h"
-#include "fl/pins.h"
+#include "fl/system/pins.h"
 #include "fl/fltest.h"
 
 FL_TEST_FILE(FL_FILEPATH) {

@@ -9,7 +9,7 @@
 #include "esp_log.h"
 #include "esp_lcd_panel_rgb.h"
 #include "platforms/assert_defs.h"
-#include "fl/cstring.h"
+#include "fl/stl/cstring.h"
 
 #define LCD_P4_TAG "FastLED_LCD_P4"
 

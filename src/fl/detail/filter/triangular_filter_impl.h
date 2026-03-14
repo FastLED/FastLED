@@ -2,7 +2,7 @@
 
 #include "fl/stl/circular_buffer.h"
 #include "fl/system/log.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/stl/span.h"
 
 namespace fl {

@@ -13,7 +13,7 @@
 #if FL_HAS_INCLUDE("FreeRTOS.h") && !defined(FL_IS_STM32_LIBMAPLE)
 
 #include "platforms/arm/stm32/semaphore_stm32.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 
 // Include FreeRTOS headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN

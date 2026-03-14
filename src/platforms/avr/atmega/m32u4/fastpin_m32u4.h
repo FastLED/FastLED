@@ -7,7 +7,7 @@
 // Used in: Arduino Leonardo, Arduino Pro Micro, Teensy 2.0
 
 #include "platforms/avr/atmega/common/avr_pin.h"
-#include "fl/fastpin_base.h"
+#include "fl/system/fastpin_base.h"
 
 namespace fl {
 

@@ -42,7 +42,7 @@
 #include "platforms/wasm/ui.h"
 #include "platforms/wasm/js_bindings.h"
 #include "platforms/shared/ui/json/ui.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 #include "fl/stl/compiler_control.h"
 
 // Implemented in js_library.js (--js-library side file)

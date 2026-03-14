@@ -8,7 +8,7 @@ intersecting the line and calls a visitor function for each cell.
 
 #include "fl/stl/math.h"
 #include "fl/gfx/geometry.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/stl/limits.h"
 #include "fl/stl/int.h"
 

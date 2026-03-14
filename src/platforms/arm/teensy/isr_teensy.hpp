@@ -22,7 +22,7 @@
 #if defined(FL_IS_TEENSY)
 
 #include "fl/stl/isr/handler.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 #include "fl/stl/unique_ptr.h"
 // IWYU pragma: begin_keep
 #include <IntervalTimer.h>

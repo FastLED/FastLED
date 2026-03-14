@@ -12,7 +12,7 @@
 #include "fl/fft.h"
 #include "fl/gfx/xymap.h"
 #include "fl/stl/math.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 
 #include "fl/stl/compiler_control.h"
 

@@ -8,7 +8,7 @@
 #include "platforms/is_platform.h"
 #if defined(FL_IS_ESP32) && FASTLED_RMT5
 
-#include "fl/dbg.h"
+#include "fl/system/log.h"
 #include "platforms/esp/32/drivers/rmt/rmt_5/common.h"
 
 FL_EXTERN_C_BEGIN

@@ -13,7 +13,7 @@
 
 #include "fl/channels/driver.h"
 #include "fl/channels/data.h"
-#include "fl/string.h"
+#include "fl/stl/string.h"
 #include "platforms/stub/stub_gpio.h"
 
 namespace fl {

@@ -7,8 +7,8 @@
 #include "platforms/arm/teensy/teensy4_common/drivers/flexio/flexio_driver.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/flexio/iflexio_peripheral.h"
 
-#include "fl/dbg.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
 #include "fl/stl/cstring.h"
 
 // IWYU pragma: begin_keep

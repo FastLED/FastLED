@@ -1,8 +1,8 @@
 /// @file fl/pins.cpp.hpp
 /// Implementation of DigitalMultiWrite8 (nibble LUT bulk pin writes).
 
-#include "fl/pins.h"
-#include "fl/fastpin.h"
+#include "fl/system/pins.h"
+#include "fl/system/fastpin.h"
 #include "fl/system/log.h"
 #include "fl/stl/type_traits.h"
 

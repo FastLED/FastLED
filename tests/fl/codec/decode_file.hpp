@@ -18,7 +18,7 @@
 
 #include "fl/remote/rpc/base64.h"
 #include "fl/stl/json.h"
-#include "fl/string.h"
+#include "fl/stl/string.h"
 #include "fl/stl/vector.h"
 
 // Codec headers

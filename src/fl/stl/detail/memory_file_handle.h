@@ -3,7 +3,7 @@
 #include "fl/stl/detail/file_handle.h"
 #include "fl/stl/circular_buffer.h"
 #include "fl/stl/span.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 
 namespace fl {
 namespace detail {

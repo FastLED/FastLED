@@ -27,7 +27,7 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/span.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 #include "platforms/esp/is_esp.h"
 
 // ESP32-specific: check feature flag for clockless SPI support

@@ -18,7 +18,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/shared_ptr.h"
-#include "fl/string.h"
+#include "fl/stl/string.h"
 
 namespace fl {
 

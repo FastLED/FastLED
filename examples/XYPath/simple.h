@@ -17,7 +17,7 @@ all the UI elements you see below.
 #include <FastLED.h>
 
 #include "fl/gfx/draw_visitor.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/gfx/raster.h"
 #include "fl/time_alpha.h"
 #include "fl/ui.h"

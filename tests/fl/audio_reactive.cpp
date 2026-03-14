@@ -5,7 +5,7 @@
 #include "audio/test_helpers.hpp"
 #include "fl/audio/audio.h"
 #include "fl/stl/circular_buffer.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/stl/math.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/span.h"

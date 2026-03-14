@@ -11,7 +11,7 @@
 #include "fastspi_types.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/cstring.h"  // For fl::memset
-#include "fl/warn.h"  // For FL_WARN macro
+#include "fl/system/log.h"  // For FL_WARN macro
 
 FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep

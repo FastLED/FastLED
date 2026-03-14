@@ -4,7 +4,7 @@
 
 #include "fl/stl/stdint.h"
 #include "eorder.h"
-#include "fl/register.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fastled_delay.h"
 #include "fl/stl/compiler_control.h"

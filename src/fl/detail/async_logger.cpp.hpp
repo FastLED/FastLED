@@ -4,7 +4,7 @@
 #include "fl/detail/async_logger.h"
 #include "fl/stl/cstdio.h"
 #include "fl/stl/isr/handler.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/system/log.h"  // For FL_ERROR macro
 #include "fl/stl/task.h"  // For fl::task and fl::Scheduler
 #include "fl/stl/async.h"  // For fl::Scheduler::instance()

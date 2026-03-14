@@ -18,7 +18,7 @@
 // Native Silicon Labs EMLIB GPIO Implementation
 // ============================================================================
 
-#include "fl/pin.h"
+#include "fl/system/pin.h"
 // IWYU pragma: begin_keep
 #include <em_gpio.h>
 #include <em_cmu.h>

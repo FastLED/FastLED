@@ -4,8 +4,8 @@
 #define __FASTPIN_ARM_K66_H
 
 #include "fl/stl/compiler_control.h"
-#include "fl/fastpin_base.h"
-#include "fl/pin.h"  // For PinMode, PinValue enums
+#include "fl/system/fastpin_base.h"
+#include "fl/system/pin.h"  // For PinMode, PinValue enums
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER

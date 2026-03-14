@@ -7,8 +7,8 @@
 #include "platforms/esp/32/drivers/i2s/wave8_encoder_i2s.h"
 #include "fl/channels/detail/wave8.hpp"
 #include "fl/stl/algorithm.h"
-#include "fl/dbg.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
 
 namespace fl {
 

@@ -24,8 +24,8 @@
 #include "platforms/shared/spi_hw_2.h"
 #include "platforms/shared/spi_hw_4.h"
 #include "platforms/shared/spi_hw_8.h"
-#include "fl/dbg.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
 
 // SPI implementation files are included by drivers/_build.hpp
 // to satisfy the linting rule that only _build.hpp files can include *.cpp.hpp files

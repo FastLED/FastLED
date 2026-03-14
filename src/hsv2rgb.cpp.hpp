@@ -8,7 +8,7 @@
 #include "fl/stl/stdint.h"
 
 #include "fl/fastled.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 
 #include "hsv2rgb.h"
 

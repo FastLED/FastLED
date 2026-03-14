@@ -4,12 +4,12 @@
 #define __INC_FASTPIN_APOLLO3_H
 
 #include "fl/stl/stdint.h"
-#include "fl/fastpin_base.h"
+#include "fl/system/fastpin_base.h"
 
 // Include Arduino core to get Apollo3 HAL function declarations
 #ifdef ARDUINO
 #include "fl/system/arduino.h"
-#include "fl/pin.h"  // For PinMode, PinValue enums
+#include "fl/system/pin.h"  // For PinMode, PinValue enums
 #include "fl/stl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH

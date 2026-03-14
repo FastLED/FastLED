@@ -13,8 +13,8 @@
 #include <avr/interrupt.h> // for cli/sei definitions
 // IWYU pragma: end_keep
 #include "fl/stl/compiler_control.h"
-#include "fl/register.h"
-#include "fl/fastpin.h"
+#include "fl/stl/compiler_control.h"
+#include "fl/system/fastpin.h"
 #include "platforms/avr/is_avr.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/chipsets/timing_traits.h"

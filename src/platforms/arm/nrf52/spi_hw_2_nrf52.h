@@ -47,7 +47,7 @@
     // IWYU pragma: end_keep
 #endif
 
-#include "fl/warn.h"
+#include "fl/system/log.h"
 #include "fl/stl/stddef.h"
 #include "fl/stl/string.h"
 

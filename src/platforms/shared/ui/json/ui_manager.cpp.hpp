@@ -6,8 +6,8 @@
 #include "fl/stl/mutex.h"
 #include "platforms/shared/ui/json/ui_manager.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/warn.h"
-#include "fl/error.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
 #include "fl/stl/assert.h"
 #include "fl/stl/string.h"
 

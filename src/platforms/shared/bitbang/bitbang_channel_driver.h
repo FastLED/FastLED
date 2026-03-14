@@ -18,8 +18,8 @@
 
 #include "fl/channels/driver.h"
 #include "fl/channels/data.h"
-#include "fl/pins.h"
-#include "fl/string.h"
+#include "fl/system/pins.h"
+#include "fl/stl/string.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/span.h"
 #include "fl/stl/stdint.h"

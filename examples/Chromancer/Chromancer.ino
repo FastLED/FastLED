@@ -26,13 +26,13 @@
 #include "FastLED.h"
 
 #include "fl/system/sketch_macros.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 #include "fl/stl/stdio.h"
 
 #include <FastLED.h>
 
 #include "fl/gfx/screenmap.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/stl/json.h"
 #include "fl/ui.h"
 #include "fl/stl/map.h"

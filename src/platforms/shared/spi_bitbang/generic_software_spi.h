@@ -19,7 +19,7 @@
 #include "fastled_delay.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/int.h"
-#include "fl/fastpin.h"
+#include "fl/system/fastpin.h"
 #include "pixel_controller.h"
 #include "fastspi_types.h"
 

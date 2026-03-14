@@ -1,6 +1,6 @@
 #pragma once
 #include "fl/time_alpha.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 
 /// Tracks a smoothed peak with attack, decay, and output-inertia time-constants.
 class MaxFadeTracker {

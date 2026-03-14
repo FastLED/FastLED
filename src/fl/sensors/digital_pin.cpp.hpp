@@ -7,7 +7,7 @@
 #include "fl/sensors/digital_pin.h"
 
 // Include fl/pin.h for pin API (includes platform implementations)
-#include "fl/pin.h"
+#include "fl/system/pin.h"
 
 namespace fl {
 

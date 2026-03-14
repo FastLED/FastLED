@@ -30,7 +30,7 @@
 #include "fl/channels/driver.h"
 #include "fl/channels/data.h"
 #include "fl/stl/span.h"
-#include "fl/register.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/esp/32/core/clock_cycles.h"
 #include "fl/stl/vector.h"
 

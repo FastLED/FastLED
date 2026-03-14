@@ -9,7 +9,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/thread.h"
 #include "fl/stl/mutex.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/utility.h"

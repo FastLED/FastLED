@@ -11,7 +11,7 @@
 #include "fl/audio/detectors/vibe.h"
 #include "fl/stl/int.h"
 #include "fl/system/log.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/stl/math.h"
 #include "fl/stl/random.h"
 #include "fl/stl/shared_ptr.h"

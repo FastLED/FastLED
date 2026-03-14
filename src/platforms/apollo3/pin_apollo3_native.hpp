@@ -29,9 +29,9 @@ FL_EXTERN_C_BEGIN
 // IWYU pragma: end_keep
 FL_EXTERN_C_END
 
-#include "fl/warn.h"
-#include "fl/dbg.h"
-#include "fl/pin.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
+#include "fl/system/pin.h"
 
 namespace fl {
 namespace platforms {

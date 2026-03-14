@@ -9,7 +9,7 @@
 //           Special boards: Digispark, Digispark Pro, LightBlue Bean
 
 #include "platforms/avr/atmega/common/avr_pin.h"
-#include "fl/fastpin_base.h"
+#include "fl/system/fastpin_base.h"
 
 namespace fl {
 

@@ -5,7 +5,7 @@
 #include "color.h"
 #include "dither_mode.h"
 #include "rgbw.h"  // IWYU pragma: keep
-#include "fl/string.h"  // IWYU pragma: keep
+#include "fl/stl/string.h"  // IWYU pragma: keep
 #include "fl/stl/optional.h"
 
 namespace fl {

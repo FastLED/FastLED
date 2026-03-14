@@ -9,7 +9,7 @@
 // Used in: Arduino UNO, Arduino Nano, Arduino Pro Mini
 
 #include "platforms/avr/atmega/common/avr_pin.h"
-#include "fl/fastpin_base.h"
+#include "fl/system/fastpin_base.h"
 
 namespace fl {
 

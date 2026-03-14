@@ -4,7 +4,7 @@
 #define __FASTSPI_ARM_NRF52_H
 
 #include "fl/stl/compiler_control.h"
-#include "fl/fastpin_base.h"
+#include "fl/system/fastpin_base.h"
 #include "fastspi_types.h"
 #include "fl/gfx/eorder.h"
 #include "fl/system/delay.h"

@@ -9,7 +9,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/filter.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/stl/function.h"
 #include "fl/stl/shared_ptr.h"
 

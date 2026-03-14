@@ -3,8 +3,8 @@
 #include "fl/ui.h"
 #include "fl/stl/assert.h"
 #include "fl/sensors/potentiometer.h"
-#include "fl/pin.h"
-#include "fl/math_macros.h"
+#include "fl/system/pin.h"
+#include "fl/stl/math.h"
 
 namespace fl {
 

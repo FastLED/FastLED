@@ -41,7 +41,7 @@
 // ============================================================================
 
 /// Compiler and language features
-#include "fl/math_macros.h"  // IWYU pragma: keep
+#include "fl/stl/math.h"  // IWYU pragma: keep
 
 /// Memory and type utilities
 #include "fl/stl/bit_cast.h"  // IWYU pragma: keep
@@ -98,7 +98,7 @@
 #include "fastled_progmem.h"  // IWYU pragma: keep
 
 /// Hardware pin definitions
-#include "fastpin.h"  // IWYU pragma: keep
+#include "fl/system/fastpin.h"  // IWYU pragma: keep
 
 /// Color utilities and palettes
 #include "colorutils.h"  // IWYU pragma: keep

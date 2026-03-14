@@ -6,8 +6,8 @@
 // IWYU pragma: private
 
 #include "fl/rx_device.h"
-#include "fl/warn.h"
-#include "fl/error.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
 #include "fl/stl/assert.h"
 #include "fl/stl/vector.h"
 

@@ -9,8 +9,8 @@
 #ifdef FL_IS_STM32
 
 #include "fl/stl/isr/handler.h"
-#include "fl/dbg.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
 
 // Global Interrupt Control (interruptsDisable/interruptsEnable)
 #include "platforms/arm/stm32/interrupts_stm32_inline.h"

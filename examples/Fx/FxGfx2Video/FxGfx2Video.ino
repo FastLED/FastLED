@@ -18,7 +18,7 @@
 #include "fl/fx/fx_engine.h"
 #include "fl/stl/memory.h"
 #include "fl/fx/video.h"
-#include "fl/dbg.h"
+#include "fl/system/log.h"
 
 #define LED_PIN 2
 #define BRIGHTNESS 96

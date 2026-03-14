@@ -21,7 +21,7 @@
 #endif
 
 #include "platforms/esp/32/feature_flags/enabled.h"
-#include "fl/dbg.h"
+#include "fl/system/log.h"
 
 namespace fl {
 namespace esp32 {

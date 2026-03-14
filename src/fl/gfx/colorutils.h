@@ -14,7 +14,7 @@
 #include "fl/gfx/xymap.h"  // IWYU pragma: keep
 #include "lib8tion/memmove.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/warn.h"  // IWYU pragma: keep
+#include "fl/system/log.h"  // IWYU pragma: keep
 #include "platforms/is_platform.h"  // IWYU pragma: keep
 
 // #include "pixeltypes.h"  // pulls in FastLED.h, beware.

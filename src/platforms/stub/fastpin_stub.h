@@ -9,10 +9,10 @@
 // IWYU pragma: private
 
 #include "fl/stl/compiler_control.h"
-#include "fl/register.h"
+#include "fl/stl/compiler_control.h"
 
 // Include base class definitions (includes Selectable)
-#include "fl/fastpin_base.h"
+#include "fl/system/fastpin_base.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER

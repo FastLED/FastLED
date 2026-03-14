@@ -3,7 +3,7 @@
 
 #include "fl/audio/frequency_bin_mapper.h"
 #include "fl/stl/math.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/stl/compiler_control.h"
 
 namespace fl {

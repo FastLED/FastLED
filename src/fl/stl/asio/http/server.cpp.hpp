@@ -10,7 +10,7 @@
 #include "fl/stl/cctype.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/malloc.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 
 // ESP32 HTTP server header (must be before namespace declarations)
 #if defined(FL_IS_ESP32) && !defined(FASTLED_HAS_NETWORKING)

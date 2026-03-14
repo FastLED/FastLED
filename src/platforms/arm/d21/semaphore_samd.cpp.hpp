@@ -8,7 +8,7 @@
 #if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
 
 #include "platforms/arm/d21/semaphore_samd.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 
 // IWYU pragma: begin_keep
 #include "fl/stl/chrono.h"  // ok include - for timing

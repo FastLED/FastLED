@@ -3,7 +3,7 @@
 
 #include "fl/detail/async_log_queue.h"
 #include "fl/stl/isr/critical_section.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 
 namespace fl {
 

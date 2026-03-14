@@ -22,7 +22,7 @@
 
 #include "platforms/shared/spi_hw_2.h"
 #include "platforms/shared/spi_hw_4.h"
-#include "fl/dbg.h"
+#include "fl/system/log.h"
 
 namespace fl {
 namespace detail {

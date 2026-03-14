@@ -36,9 +36,9 @@
 #include "platforms/esp/32/drivers/gpio_isr_rx/dual_isr_context.h"
 #include "platforms/esp/32/drivers/gpio_isr_rx/mcpwm_timer.h"
 
-#include "fl/dbg.h"
-#include "fl/warn.h"
-#include "fl/error.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
 // IWYU pragma: begin_keep
 #include "fl/stl/vector.h"
 // IWYU pragma: end_keep

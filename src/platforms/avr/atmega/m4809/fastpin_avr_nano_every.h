@@ -6,7 +6,7 @@
 #include <avr/io.h>
 // IWYU pragma: end_keep
 #include "platforms/avr/atmega/common/avr_pin.h"
-#include "fl/fastpin_base.h"
+#include "fl/system/fastpin_base.h"
 
 #warning "Untested platform. Please report any issues to the https://github.com/fastled/fastled/issues"
 namespace fl {

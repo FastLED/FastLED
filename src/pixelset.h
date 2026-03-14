@@ -3,7 +3,7 @@
 
 #include "fl/stl/compiler_control.h"
 #include "fl/gfx/colorutils.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 
 #include "fl/gfx/fill.h"
 #include "fl/gfx/blur.h"

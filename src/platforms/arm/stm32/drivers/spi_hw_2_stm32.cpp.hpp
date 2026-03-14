@@ -48,8 +48,8 @@
 // IWYU pragma: end_keep
 
 #include "platforms/shared/spi_hw_2.h"
-#include "fl/warn.h"
-#include "fl/dbg.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/cstring.h"
 

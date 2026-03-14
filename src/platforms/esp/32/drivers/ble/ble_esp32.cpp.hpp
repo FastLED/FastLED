@@ -15,7 +15,7 @@
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/cctype.h"
 #include "fl/stl/string_view.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 #include "fl/remote/transport/serial.h" // for formatJsonResponse
 
 // NimBLE C headers (all ESP-IDF, no Arduino dependency)

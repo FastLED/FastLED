@@ -5,7 +5,7 @@
 #define __FASTPIN_ARM_NRF51_H
 
 #include "fl/stl/compiler_control.h"
-#include "fl/fastpin_base.h"
+#include "fl/system/fastpin_base.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER

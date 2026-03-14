@@ -6,9 +6,9 @@
 
 #include "fl/stl/stdint.h"
 
-#include "fl/register.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/esp/esp_version.h"
-#include "fl/fastpin.h"
+#include "fl/system/fastpin.h"
 #include "fl/stl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH

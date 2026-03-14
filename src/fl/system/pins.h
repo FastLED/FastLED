@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "fl/pin.h"  // IWYU pragma: keep
+#include "fl/system/pin.h"  // IWYU pragma: keep
 #include "fl/stl/span.h"
 
 namespace fl {

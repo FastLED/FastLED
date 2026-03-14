@@ -12,7 +12,7 @@
 /// https://github.com/esp8266/Arduino/blob/master/cores/esp8266/core_esp8266_wiring_digital.cpp
 
 #include "fl/stl/compiler_control.h"
-#include "fl/pin.h"
+#include "fl/system/pin.h"
 
 FL_EXTERN_C_BEGIN
 // ESP8266 SDK peripheral register definitions

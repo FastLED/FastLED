@@ -30,7 +30,7 @@
 #include "arduino/LedRopeTCL.h"
 #include "arduino/ui_state.h"
 #include "shared/dprint.h"
-#include "fl/dbg.h"
+#include "fl/system/log.h"
 #include "fl/ui.h"
 #include "fl/stl/compiler_control.h"
 

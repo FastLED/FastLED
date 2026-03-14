@@ -1,6 +1,6 @@
 // g++ --std=c++11 test.cpp
 
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 
 
 #include "fl/gfx/corkscrew.h"

@@ -3,7 +3,7 @@
 
 #include "fl/audio/detectors/musical_beat_detector.h"
 #include "fl/stl/math.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 
 using namespace fl;
 

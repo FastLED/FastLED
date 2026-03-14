@@ -13,7 +13,7 @@
 #include "pixel_iterator.h"
 #include "crgb.h"
 #include "eorder.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "platforms/is_platform.h"
 
 // Include centralized LED chipset timing definitions

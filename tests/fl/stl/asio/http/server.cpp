@@ -3,7 +3,7 @@
 #define FASTLED_STUB_IMPL
 
 #include "fl/stl/asio/http/server.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 
 int main() {
 #ifdef FASTLED_HAS_NETWORKING

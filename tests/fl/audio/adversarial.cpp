@@ -20,7 +20,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/math.h"
 #include "fl/stl/shared_ptr.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

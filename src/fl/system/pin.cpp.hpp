@@ -20,11 +20,11 @@
 ///   → Split into Arduino path (#ifdef ARDUINO) and non-Arduino path
 ///
 /// Why this matters:
-/// - Users can safely `#include "fl/pin.h"` without pulling in Arduino.h
+/// - Users can safely `#include "fl/system/pin.h"` without pulling in Arduino.h
 /// - Platform detection and implementation selection happens at this boundary
 /// - Clean separation between interface and implementation
 
-#include "fl/pin.h"
+#include "fl/system/pin.h"
 
 // Include platform-specific implementations (must come after fl/pin.h for proper type resolution)
 #include "platforms/pin.h"

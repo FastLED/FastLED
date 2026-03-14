@@ -16,8 +16,8 @@
 #include "platforms/esp/32/drivers/parlio/parlio_peripheral_esp.h"
 #include "fl/system/log.h"
 #include "fl/stl/async.h"
-#include "fl/warn.h"
-#include "fl/error.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/charconv.h"  // For fl::to_hex
 

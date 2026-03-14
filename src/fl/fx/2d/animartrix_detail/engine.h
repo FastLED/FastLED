@@ -8,7 +8,7 @@
 #include "fl/fx/2d/animartrix_detail/context.h"
 #include "fl/fx/2d/animartrix_detail/core_types.h"
 #include "fl/fx/2d/animartrix_detail/engine_core.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/vector.h"

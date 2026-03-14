@@ -11,13 +11,13 @@
 // your animations.
 
 #include "fl/lut.h"  // IWYU pragma: keep
-#include "fl/math_macros.h"  // IWYU pragma: keep
+#include "fl/stl/math.h"  // IWYU pragma: keep
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/gfx/tile2x2.h"  // IWYU pragma: keep
 #include "fl/gfx/transform.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/vector.h"
-#include "fl/warn.h"  // IWYU pragma: keep
+#include "fl/system/log.h"  // IWYU pragma: keep
 
 namespace fl {
 

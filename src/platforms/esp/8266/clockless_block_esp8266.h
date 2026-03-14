@@ -4,9 +4,9 @@
 #define __INC_CLOCKLESS_BLOCK_ESP8266_H
 
 #include "fl/stl/stdint.h"
-#include "fl/register.h"
-#include "fl/math_macros.h"
-#include "fl/fastpin.h"
+#include "fl/stl/compiler_control.h"
+#include "fl/stl/math.h"
+#include "fl/system/fastpin.h"
 #include "eorder.h"
 #include "transpose8x1_noinline.h"
 #include "fl/chipsets/timing_traits.h"

@@ -24,7 +24,7 @@
 
 #include "fl/stl/assert.h"
 #include "fl/stl/cstddef.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 
 // Forward declare std::chrono types to avoid including <chrono> in header
 namespace std {

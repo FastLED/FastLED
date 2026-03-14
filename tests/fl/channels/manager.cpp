@@ -20,7 +20,7 @@
 #include "fl/channels/data.h"
 #include "fl/channels/manager.h"
 #include "fl/stl/shared_ptr.h"
-#include "fl/string.h"
+#include "fl/stl/string.h"
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {

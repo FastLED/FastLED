@@ -13,7 +13,7 @@
 #ifdef FL_IS_RP
 
 #include "platforms/arm/rp/init_rp.h"
-#include "fl/dbg.h"
+#include "fl/system/log.h"
 
 namespace fl {
 namespace platforms {

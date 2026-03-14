@@ -11,7 +11,7 @@
 // build system
 #include "FastLED.h"
 
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/gfx/screenmap.h"
 #include "fl/ui.h"
 #include "fl/stl/math.h"

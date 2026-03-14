@@ -6,7 +6,7 @@
 
 
 #include "platforms/shared/ui/json/json_console.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 #include "fl/stl/json.h"
 #include "fl/stl/json.h"
 #include "fl/stl/algorithm.h"

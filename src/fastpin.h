@@ -8,7 +8,7 @@
 #ifndef __INC_FASTPIN_H
 #define __INC_FASTPIN_H
 
-#include "fl/fastpin.h"
+#include "fl/system/fastpin.h"
 
 // Backward compatibility: bring fl:: fastpin classes into global namespace
 using fl::Selectable;

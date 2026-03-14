@@ -19,7 +19,7 @@
 #include "fl/stl/ostream.h"
 #include "fl/stl/stdio.h"
 #include "platforms/stub/time_stub.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 
 // Math functions from fl:: namespace
 // On stub platform, min/max/abs/radians/degrees are provided by

@@ -12,7 +12,7 @@
 #include "fl/stl/optional.h"
 #include "fl/stl/unordered_map.h"
 #include "fl/system/log.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/limits.h"

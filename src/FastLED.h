@@ -120,7 +120,7 @@
 #include "fl/stl/array.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/cstring.h"
-#include "fl/pin.h"
+#include "fl/system/pin.h"
 
 
 #include "fl/stl/compiler_control.h"
@@ -1470,8 +1470,8 @@ extern CFastLED FastLED;
 
 #include "fl/stl/math.h"  // fl::clamp, fl::map_range, fl::min, fl::max, etc.
 
-#include "fl/error.h"
-#include "fl/warn.h"  // FASTLED_WARN("time now: " << millis()), FASTLED_WARN_IF(condition, "time now: " << millis());"
+#include "fl/system/log.h"
+#include "fl/system/log.h"  // FASTLED_WARN("time now: " << millis()), FASTLED_WARN_IF(condition, "time now: " << millis());"
 #include "fl/system/log.h"  // FL_PRINT("message" << value), FL_LOG_*() category-specific logging
 #include "fl/serial.h"  // Arduino-compatible Serial API: fl::Serial.print(), fl::Serial.read(), etc.
 #include "fl/stl/assert.h"  // FASTLED_ASSERT(condition, "message");

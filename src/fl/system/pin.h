@@ -23,7 +23,7 @@
 ///   → Translates fl::PinMode/fl::PinValue/fl::AdcRange to platform-specific constants
 ///
 /// Why this matters:
-/// - Users can safely `#include "fl/pin.h"` without pulling in Arduino.h
+/// - Users can safely `#include "fl/system/pin.h"` without pulling in Arduino.h
 /// - Type-safe enum classes prevent accidental int misuse
 /// - Platform detection and implementation selection happens at the compilation boundary
 /// - Clean separation between interface and implementation

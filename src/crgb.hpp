@@ -8,7 +8,7 @@
 #include "crgb.h"
 #include "lib8tion.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/scale8.h"
+#include "lib8tion/scale8.h"
 
 
 // Define namespace-aware scale8 macro

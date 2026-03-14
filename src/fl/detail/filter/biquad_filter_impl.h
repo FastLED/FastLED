@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 
 namespace fl {
 namespace detail {

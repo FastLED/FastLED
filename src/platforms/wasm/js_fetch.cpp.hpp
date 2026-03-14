@@ -2,7 +2,7 @@
 
 #include "platforms/wasm/js_fetch.h"
 #include "fl/stl/asio/fetch.h"  // Include for fl::response definition
-#include "fl/warn.h"
+#include "fl/system/log.h"
 #include "fl/stl/string.h"
 #include "fl/stl/function.h"
 #include "fl/stl/unordered_map.h"

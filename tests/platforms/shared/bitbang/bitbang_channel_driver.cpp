@@ -14,7 +14,7 @@
 #include "platforms/shared/bitbang/bitbang_channel_driver.h"
 #include "fl/channels/data.h"
 #include "fl/channels/config.h"
-#include "fl/pin.h"
+#include "fl/system/pin.h"
 
 using namespace fl;
 

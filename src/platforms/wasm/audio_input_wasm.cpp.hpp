@@ -5,8 +5,8 @@
 #ifdef FL_IS_WASM
 
 #include "platforms/wasm/audio_input_wasm.hpp"
-#include "fl/dbg.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
 #include "fl/stl/stdio.h"
 #include "fl/stl/string.h"
 // IWYU pragma: begin_keep

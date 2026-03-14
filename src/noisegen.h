@@ -6,7 +6,7 @@
 #include "fl/stl/stdint.h"
 #include "noise.h"
 
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 // Simple noise generator for 1-d waves. Default values will give good results
 // for most cases.
 struct NoiseGenerator {

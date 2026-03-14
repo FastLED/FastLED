@@ -8,7 +8,7 @@
 #ifdef FL_IS_ESP32
 
 #include "platforms/esp/32/semaphore_esp32.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 
 // Include FreeRTOS headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN

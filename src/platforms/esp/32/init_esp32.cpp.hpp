@@ -13,7 +13,7 @@
 #include "platforms/esp/32/init_esp32.h"
 #include "platforms/esp/32/init_channel_driver.h"
 #include "platforms/shared/spi_manager.h"
-#include "fl/dbg.h"
+#include "fl/system/log.h"
 
 namespace fl {
 namespace platforms {

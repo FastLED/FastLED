@@ -3,7 +3,7 @@
 // Helper function implementations for SIMD testing
 
 #include "test_helpers.h"
-#include "fl/dbg.h"
+#include "fl/system/log.h"
 
 namespace simd_test {
 

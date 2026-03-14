@@ -26,7 +26,7 @@
 #include "fl/stl/function.h"
 #include "fl/stl/circular_buffer.h"
 #include "fl/hash_map_lru.h"
-#include "fl/bitset_dynamic.h"
+#include "fl/stl/bitset_dynamic.h"
 #include "fl/stl/bitset.h"
 
 FL_TEST_FILE(FL_FILEPATH) {

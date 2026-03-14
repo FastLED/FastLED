@@ -6,7 +6,7 @@
 #include "fl/gfx/detail/integer_math.h"  // IWYU pragma: keep
 #include "fl/stl/fixed_point/s16x16.h"
 #include "fl/stl/math.h"
-#include "fl/scale8.h"
+#include "lib8tion/scale8.h"
 
 namespace fl {
 namespace gfx {

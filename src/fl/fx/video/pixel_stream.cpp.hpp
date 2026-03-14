@@ -1,6 +1,6 @@
 
 #include "fl/fx/video/pixel_stream.h"
-#include "fl/dbg.h"
+#include "fl/system/log.h"
 #include "fl/stl/limits.h"
 
 #define DBG FASTLED_DBG

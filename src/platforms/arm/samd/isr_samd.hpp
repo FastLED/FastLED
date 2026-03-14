@@ -21,7 +21,7 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/assert.h"
 #include "fl/stl/unique_ptr.h"
-#include "fl/dbg.h"
+#include "fl/system/log.h"
 
 // Include SAMD SDK headers
 FL_EXTERN_C_BEGIN

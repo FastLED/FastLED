@@ -39,8 +39,8 @@
 
 // FastLED headers
 #include "fl/stl/string.h"
-#include "fl/warn.h"
-#include "fl/dbg.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
 
 namespace fl {
 namespace platforms {

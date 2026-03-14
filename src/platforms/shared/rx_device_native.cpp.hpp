@@ -10,8 +10,8 @@
 
 #include "platforms/stub/stub_gpio.h"
 #include "fl/rx_device.h"
-#include "fl/warn.h"
-#include "fl/error.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
 #include "fl/system/log.h"
 #include "fl/stl/vector.h"
 

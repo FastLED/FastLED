@@ -32,8 +32,8 @@
 // - https://community.st.com/t5/stm32-mcus-products/rm0385-has-references-to-nonexistent-gpiox-brr-register/td-p/138531
 
 #include "fl/stl/stdint.h"
-#include "fl/fastpin_base.h"
-#include "fl/pin.h"  // For PinMode, PinValue enums
+#include "fl/system/fastpin_base.h"
+#include "fl/system/pin.h"  // For PinMode, PinValue enums
 
 namespace fl {
 

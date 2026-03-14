@@ -4,7 +4,7 @@
 
 #include "./color.h"
 #include "./util.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 
 
 ///////////////////////////////////////////////////////////////////////////////

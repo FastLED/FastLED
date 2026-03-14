@@ -6,7 +6,7 @@
 
 #include "fl/stl/compiler_control.h"
 #include "fl/fx/2d/animartrix_detail/perlin_s16x16_simd.h"
-#include "fl/simd.h"
+#include "fl/stl/simd.h"
 #include "fl/fx/2d/animartrix_detail/perlin_s16x16.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN

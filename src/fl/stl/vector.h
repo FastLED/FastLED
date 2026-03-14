@@ -9,7 +9,7 @@
 #include "fl/stl/functional.h"  // IWYU pragma: keep
 #include "fl/stl/initializer_list.h"  // IWYU pragma: keep
 #include "fl/insert_result.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/scoped_ptr.h"  // IWYU pragma: keep

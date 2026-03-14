@@ -7,7 +7,7 @@
 #include "fl/stl/stdint.h"
 #include "test.h"
 #include "fl/gfx/geometry.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

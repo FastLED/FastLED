@@ -21,7 +21,7 @@
 #define NO_PIN 255
 
 // Include base class definitions (Selectable, FastPin<>, FastPinBB, __FL_PORT_INFO, etc.)
-#include "fl/fastpin_base.h"  // IWYU pragma: keep
+#include "fl/system/fastpin_base.h"  // IWYU pragma: keep
 
 // Platform-specific implementations:
 // This include handles platform detection and provides:

@@ -16,7 +16,7 @@
 /// - Supports compile-time and runtime timing values
 /// - Full interrupt support (can block entire MCU)
 
-#include "fl/fastpin.h"
+#include "fl/system/fastpin.h"
 #include "fl/system/delay.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/compiler_control.h"

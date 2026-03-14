@@ -6,9 +6,9 @@
 #include "./led_layout_array.h"
 #include "./dprint.h"
 #include "./Keyboard.h"
-#include "fl/math_macros.h"
 #include "fl/stl/math.h"
-#include "fl/warn.h"
+#include "fl/stl/math.h"
+#include "fl/system/log.h"
 #include "fl/stl/cstring.h"
 
 namespace {

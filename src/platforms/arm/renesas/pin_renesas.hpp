@@ -18,7 +18,7 @@
 
 #if defined(FL_IS_RENESAS)
 
-#include "fl/pin.h"
+#include "fl/system/pin.h"
 
 // Include Arduino.h to get all Renesas FSP headers and type definitions
 // This provides:

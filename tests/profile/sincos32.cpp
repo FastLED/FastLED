@@ -3,7 +3,7 @@
 
 #include "FastLED.h"
 #include "fl/sin32.h"
-#include "fl/simd.h"
+#include "fl/stl/simd.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/stdio.h"
 

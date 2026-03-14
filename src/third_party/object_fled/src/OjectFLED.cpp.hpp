@@ -65,7 +65,7 @@ GOIO9List = { 2, 3, 4, 5, 29, 33, 48, 49, 50, 51, 52, 53, 54 }  //6 top, 7 botto
 #include "ObjectFLED.h"
 #include "ObjectFLEDDmaManager.h"
 #include "ObjectFLEDPinValidation.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 
 #ifndef MIN
 #define MIN(a,b) ((a)<(b)?(a):(b))

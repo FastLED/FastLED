@@ -1,5 +1,5 @@
 #include "fl/fx/wled/json_helpers.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 #include "fl/stl/cstdlib.h"  // For strtol
 
 namespace fl {

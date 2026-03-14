@@ -2,7 +2,7 @@
 
 #include "fl/stl/asio/fetch_request.h"
 #include "fl/stl/async.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 #include "fl/stl/int.h"
 
 #ifdef FASTLED_HAS_NETWORKING

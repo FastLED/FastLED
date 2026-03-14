@@ -14,7 +14,7 @@
 // IWYU pragma: begin_keep
 #include "third_party/object_fled/src/ObjectFLEDPinValidation.h"
 // IWYU pragma: end_keep
-#include "fl/warn.h"
+#include "fl/system/log.h"
 #include "fl/stl/cstring.h"  // for fl::memset()
 
 namespace {

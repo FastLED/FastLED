@@ -25,7 +25,7 @@
 #include "platforms/shared/spi_hw_2.h"
 #include "platforms/shared/spi_hw_4.h"
 #include "platforms/shared/spi_hw_8.h"
-#include "fl/dbg.h"
+#include "fl/system/log.h"
 
 // Note: SPIDualRP2040, SPIQuadRP2040, and SpiHw8RP2040 classes are defined in:
 // - spi_hw_2_rp.cpp.hpp

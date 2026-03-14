@@ -14,7 +14,7 @@
 #include "eorder.h"
 #include "fl/map.h"
 #include "fl/stl/singleton.h"
-#include "fl/vector.h"
+#include "fl/stl/vector.h"
 #include "fl/warn.h"
 #include "fl/math_macros.h"
 #include "pixel_iterator.h"

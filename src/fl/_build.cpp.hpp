@@ -12,8 +12,6 @@
 #include "fl/leds.cpp.hpp"
 #include "fl/memfill.cpp.hpp"
 #include "fl/ota.cpp.hpp"
-#include "fl/pin.cpp.hpp"
-#include "fl/pins.cpp.hpp"
 #include "fl/remote/_build.cpp.hpp"
 #include "fl/rx_device.cpp.hpp"
 #include "fl/serial.cpp.hpp"

@@ -6,7 +6,7 @@
 
 #include "platforms/wasm/ui_audio_wasm.h"
 #include "platforms/wasm/audio_input_wasm.hpp"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 #include "platforms/shared/ui/json/audio_internal.h"
 #include "platforms/shared/ui/json/ui.h"
 

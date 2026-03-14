@@ -20,7 +20,7 @@
 #ifdef FL_IS_ESP32
 
 #include "fl/channels/manager.h"
-#include "fl/dbg.h"
+#include "fl/system/log.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
 #include "fl/stl/shared_ptr.h"
 #include "platforms/shared/spi_hw_1.h"

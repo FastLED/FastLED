@@ -8,7 +8,7 @@
 //           ATmega128RFA1, ATmega256RFR2, ATmega128
 
 #include "platforms/avr/atmega/common/avr_pin.h"
-#include "fl/fastpin_base.h"
+#include "fl/system/fastpin_base.h"
 
 namespace fl {
 

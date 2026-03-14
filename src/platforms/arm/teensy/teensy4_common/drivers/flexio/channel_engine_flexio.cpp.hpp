@@ -11,8 +11,8 @@
 #include "platforms/arm/teensy/teensy4_common/drivers/flexio/channel_engine_flexio.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/flexio/iflexio_peripheral.h"
 
-#include "fl/dbg.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
 
 namespace fl {
 

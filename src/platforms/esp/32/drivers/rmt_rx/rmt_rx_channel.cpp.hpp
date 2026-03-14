@@ -9,12 +9,12 @@
 #include "platforms/esp/32/feature_flags/enabled.h"
 
 // Include FL_WARN for both RMT5 and RMT4 paths
-#include "fl/warn.h"
-#include "fl/error.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
 
 #if FASTLED_RMT5
 
-#include "fl/dbg.h"
+#include "fl/system/log.h"
 #include "fl/stl/iterator.h"
 
 // RX device logging: Disabled by default to reduce noise

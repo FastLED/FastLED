@@ -19,7 +19,7 @@
 // IWYU pragma: end_keep
 #endif
 
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macro
 #include "fl/stl/optional.h"
 #include "fl/stl/type_traits.h"

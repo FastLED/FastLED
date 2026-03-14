@@ -10,13 +10,13 @@
 #include "platforms/esp/32/drivers/uart/channel_driver_uart.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/system/delay.h"
-#include "fl/error.h"
+#include "fl/system/log.h"
 #include "fl/stl/async.h"
 #include "fl/system/log.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/charconv.h"
 #include "fl/trace.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 
 namespace fl {
 

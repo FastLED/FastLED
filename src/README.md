@@ -53,7 +53,7 @@ If you are writing Arduino‑style sketches, include `FastLED.h`. For advanced/h
 ### Include policy
 
 - Sketches: `#include <FastLED.h>` for the canonical API
-- Advanced C++ (host, tests, platforms): include targeted headers (e.g., `"fl/vector.h"`, `"fl/downscale.h"`, `"fx/frame.h"`)
+- Advanced C++ (host, tests, platforms): include targeted headers (e.g., `"fl/stl/vector.h"`, `"fl/downscale.h"`, `"fx/frame.h"`)
 - Prefer `fl::` facilities to keep portability across compilers and embedded targets. See `src/fl/README.md` for the full `fl::` guide.
 
 ---

@@ -14,7 +14,7 @@
 #if defined(FL_IS_TEENSY_4X)
 
 #include "platforms/shared/spi_hw_2.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 #include "fl/system/log.h"
 #include "fl/stl/limits.h"
 // IWYU pragma: begin_keep

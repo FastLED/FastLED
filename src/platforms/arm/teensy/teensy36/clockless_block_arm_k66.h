@@ -4,7 +4,7 @@
 #define __INC_BLOCK_CLOCKLESS_ARM_K66_H
 
 #include "fl/chipsets/timing_traits.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/transposition.h"
 #include "fastled_delay.h"
 

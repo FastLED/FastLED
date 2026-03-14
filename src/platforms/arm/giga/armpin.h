@@ -2,8 +2,8 @@
 
 // IWYU pragma: private
 #include "fl/stl/stdint.h"
-#include "fl/fastpin_base.h"
-#include "fl/pin.h"  // For PinMode, PinValue enums
+#include "fl/system/fastpin_base.h"
+#include "fl/system/pin.h"  // For PinMode, PinValue enums
 #include "fl/stl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH

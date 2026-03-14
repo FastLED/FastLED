@@ -5,7 +5,7 @@
 #include "platforms/ota.h"
 #include "platforms/esp/is_esp.h"
 #include "platforms/esp/esp_version.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 
 // Skip null stub when the real ESP32 OTA implementation will be compiled.
 // In unity builds both files end up in the same TU, so FL_LINK_WEAK cannot

@@ -7,7 +7,7 @@
 
 #include "ValidationNet.h"
 #include "fl/stl/json.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 
 // Global net state
 static ValidationNetState s_net_state;

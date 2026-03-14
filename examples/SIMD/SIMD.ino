@@ -53,8 +53,8 @@
 // ============================================================================
 
 #include <FastLED.h>
-#include "fl/simd.h"
-#include "fl/dbg.h"
+#include "fl/stl/simd.h"
+#include "fl/system/log.h"
 
 // Test framework headers
 #include "test_result.h"

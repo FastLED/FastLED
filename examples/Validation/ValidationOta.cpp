@@ -7,7 +7,7 @@
 
 #include "ValidationOta.h"
 #include "fl/stl/json.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 
 // Global OTA state
 static ValidationOtaState s_ota_state;

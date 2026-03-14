@@ -28,7 +28,7 @@
 #include "fl/stl/async.h"
 #include "fl/stl/atomic.h"
 #include "fl/promise.h"
-#include "fl/simd.h"
+#include "fl/stl/simd.h"
 #include "ValidationSimd.h"
 #include "fl/system/heap.h"
 #include <Arduino.h>

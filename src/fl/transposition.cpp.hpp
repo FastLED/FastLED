@@ -2,7 +2,7 @@
 /// @brief Implementation of bit transposition functions
 
 #include "fl/transposition.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/stl/vector.h"
 
 namespace fl {

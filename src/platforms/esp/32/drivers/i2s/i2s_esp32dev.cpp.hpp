@@ -35,7 +35,7 @@
 // IWYU pragma: begin_keep
 #include "soc/gpio_periph.h"
 // IWYU pragma: end_keep
-#include "fl/pin.h"  // For PinMode, PinValue enums
+#include "fl/system/pin.h"  // For PinMode, PinValue enums
 #define gpio_matrix_out esp_rom_gpio_connect_out_signal
 #endif
 namespace fl {

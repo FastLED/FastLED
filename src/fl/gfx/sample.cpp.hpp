@@ -1,6 +1,6 @@
 #include "fl/gfx/sample.h"
 
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/gfx/xymap.h"
 #include "crgb.h"
 

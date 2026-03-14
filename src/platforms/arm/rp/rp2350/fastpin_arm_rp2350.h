@@ -12,7 +12,7 @@
 // IWYU pragma: begin_keep
 #include "hardware/structs/sio.h"
 // IWYU pragma: end_keep
-#include "fl/fastpin_base.h"
+#include "fl/system/fastpin_base.h"
 #include "fl/stl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH

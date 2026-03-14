@@ -9,7 +9,7 @@
 #if defined(FASTLED_STUB_IMPL) || (!defined(ARDUINO) && (defined(FL_IS_LINUX) || defined(FL_IS_APPLE) || defined(FL_IS_WIN)))
 
 #include "platforms/esp/32/drivers/lcd_cam/lcd_rgb_peripheral_mock.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/singleton.h"

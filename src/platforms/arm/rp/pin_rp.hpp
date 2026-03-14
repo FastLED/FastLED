@@ -19,7 +19,7 @@
 // IWYU pragma: begin_keep
 #include "hardware/pwm.h"
 // IWYU pragma: end_keep
-#include "fl/pin.h"
+#include "fl/system/pin.h"
 
 namespace fl {
 namespace platforms {

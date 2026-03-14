@@ -6,8 +6,8 @@
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/channel_engine_objectfled.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/iobjectfled_peripheral.h"
 
-#include "fl/dbg.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
 #include "fl/stl/cstring.h"
 #include "fl/gfx/rectangular_draw_buffer.h"
 

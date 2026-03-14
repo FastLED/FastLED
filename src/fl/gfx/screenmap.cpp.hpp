@@ -17,9 +17,9 @@
 
 // Other implementation dependencies
 #include "fl/stl/math.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/stl/vector.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 
 
 namespace fl {

@@ -1,6 +1,6 @@
 #include "fl/fx/wled.h"
-#include "fl/warn.h"
-#include "fl/dbg.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
 
 #if FASTLED_ENABLE_JSON
 

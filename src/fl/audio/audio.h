@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/stl/math.h"
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/stl/span.h"

@@ -13,7 +13,7 @@
 #include "pixel_controller.h"
 #include "eorder.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/fastpin.h"
+#include "fl/system/fastpin.h"
 
 // Check if we're on the right platform
 #include "platforms/arm/silabs/is_silabs.h"

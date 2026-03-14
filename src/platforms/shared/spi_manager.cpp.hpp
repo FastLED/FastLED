@@ -5,13 +5,13 @@
 
 #include "fastled_config.h"  // For FASTLED_FORCE_SOFTWARE_SPI
 #include "fl/stl/vector.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 #include "fl/stl/strstream.h"  // Required for FL_WARN_FMT
-#include "fl/dbg.h"
+#include "fl/system/log.h"
 #include "fl/system/log.h"
 
 #include "fl/stl/limits.h"
-#include "fl/fastpin.h"
+#include "fl/system/fastpin.h"
 #include "fl/stl/math.h"
 
 // Arduino defines max/min as macros, which conflicts with fl::numeric_limits<T>::max()

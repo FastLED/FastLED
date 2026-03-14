@@ -8,7 +8,7 @@
 #if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
 
 #include "platforms/arm/d21/mutex_samd.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 
 // Include CMSIS for interrupt control
 // CMSIS provides __disable_irq() and __enable_irq()

@@ -18,7 +18,7 @@
 #define NULL 0
 #endif
 
-#include "fl/warn.h"
+#include "fl/system/log.h"
 #include "fl/stl/malloc.h"
 #include "fl/system/exit.h"
 

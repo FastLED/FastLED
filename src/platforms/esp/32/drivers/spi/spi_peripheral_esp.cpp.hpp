@@ -15,8 +15,8 @@
 
 #include "platforms/esp/32/drivers/spi/spi_peripheral_esp.h"
 #include "fl/system/log.h"
-#include "fl/warn.h"
-#include "fl/error.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
 
 // Include ESP-IDF headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN

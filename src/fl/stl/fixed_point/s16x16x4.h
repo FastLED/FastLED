@@ -3,7 +3,7 @@
 /// @file s16x16x4.h
 /// SIMD 4-wide s16x16 fixed-point vector type
 
-#include "fl/simd.h"
+#include "fl/stl/simd.h"
 #include "fl/stl/fixed_point/s16x16.h"
 #include "fl/sin32.h"
 #include "fl/stl/compiler_control.h"

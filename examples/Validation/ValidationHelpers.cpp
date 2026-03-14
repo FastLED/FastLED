@@ -2,7 +2,7 @@
 
 #include "ValidationHelpers.h"
 #include "fl/stl/sstream.h"
-#include "fl/pin.h"  // Platform-independent pin API
+#include "fl/system/pin.h"  // Platform-independent pin API
 #include "fl/channels/detail/validation/rx_test.h"
 #include "fl/channels/detail/validation/rx_test.cpp.hpp"
 #include "fl/channels/detail/validation/platform.h"

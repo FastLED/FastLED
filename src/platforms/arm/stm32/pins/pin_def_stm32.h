@@ -12,8 +12,8 @@
 // Used by fastpin_stm32f1.h, fastpin_stm32_spark.h, and other STM32 board-specific files
 
 #include "fl/stl/stdint.h"
-#include "fl/fastpin_base.h"
-#include "fl/pin.h"  // For PinMode, PinValue enums
+#include "fl/system/fastpin_base.h"
+#include "fl/system/pin.h"  // For PinMode, PinValue enums
 #include "fl/stl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH

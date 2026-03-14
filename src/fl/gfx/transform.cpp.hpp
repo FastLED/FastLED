@@ -2,7 +2,7 @@
 #include "fl/stl/math.h"
 
 #include "fl/lut.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/gfx/transform.h"
 #include "lib8tion/intmap.h"
 #include "lib8tion/trig8.h"

@@ -2,7 +2,7 @@
 #include "fl/audio/audio.h"
 #include "fl/audio/fft/fft.h"
 #include "fl/stl/thread_local.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/stl/math.h"
 #include "fl/stl/move.h"
 #include "fl/stl/mutex.h"

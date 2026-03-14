@@ -156,7 +156,7 @@ See below for detailed the API documentation.
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/math.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 #include "fl/stl/string.h"
 #include "fl/stl/cstring.h"  // for fl::memset(), fl::memcpy(), fl::memmove()
 

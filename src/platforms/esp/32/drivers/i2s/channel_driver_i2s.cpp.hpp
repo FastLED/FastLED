@@ -17,8 +17,8 @@
 
 #include "platforms/esp/32/drivers/i2s/channel_driver_i2s.h"
 #include "platforms/esp/32/drivers/i2s/wave8_encoder_i2s.h"
-#include "fl/warn.h"
-#include "fl/dbg.h"
+#include "fl/system/log.h"
+#include "fl/system/log.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/async.h"
 #include "fl/channels/wave8.h"

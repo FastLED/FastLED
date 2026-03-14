@@ -6,7 +6,7 @@
 #include "fl/stl/compiler_control.h"
 // Include fastpin_base.h to get FastPin base template
 // This reopens namespace fl but typedefs will still be in scope
-#include "fl/fastpin_base.h"
+#include "fl/system/fastpin_base.h"
 
 
 /*

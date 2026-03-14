@@ -6,9 +6,9 @@
 //#include "./tcl.h"
 #include <Arduino.h>
 #include "FastLED.h"
-#include "fl/dbg.h"
+#include "fl/system/log.h"
 #include "fl/ui.h"
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 
 #include "../shared/color.h"
 #include "../shared/framebuffer.h"

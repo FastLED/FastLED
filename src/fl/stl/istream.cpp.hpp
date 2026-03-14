@@ -5,7 +5,7 @@
 // <cstdlib> not available on AVR platforms like Arduino UNO
 // We implement custom integer parsing functions instead
 
-#include "fl/math_macros.h"
+#include "fl/stl/math.h"
 
 namespace fl {
 

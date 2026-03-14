@@ -11,7 +11,7 @@
 
 #include "platforms/esp/32/drivers/uart/uart_peripheral_esp.h"
 #include "fl/system/log.h"
-#include "fl/warn.h"
+#include "fl/system/log.h"
 // IWYU pragma: begin_keep
 #include "fl/system/arduino.h"
 // IWYU pragma: end_keep

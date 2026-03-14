@@ -12,7 +12,7 @@
 #ifdef FL_IS_WASM
 
 #include "platforms/wasm/init_wasm.h"
-#include "fl/dbg.h"
+#include "fl/system/log.h"
 
 // Include driver listener header
 #include "platforms/wasm/engine_listener.h"
