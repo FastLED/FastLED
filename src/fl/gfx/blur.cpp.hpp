@@ -363,10 +363,126 @@ struct interior_row<4, RGB_T, acc_t> {
     }
 };
 
+// ── AVR per-channel convolution kernels ──────────────────────────────
+// On AVR, processing one color channel at a time cuts live accumulator
+// registers from 6 (r,g,b as u16 pairs) to 2, dramatically reducing
+// register spilling in the 32-register AVR architecture.
+//
+// conv1ch<R>::apply(center): computes the 1D binomial kernel for a
+// single u8 channel, where `center` points to the center pixel's
+// channel byte and the pixel stride is sizeof(CRGB) = 3 (compile-time
+// constant).
+#if defined(FL_IS_AVR)
+
+template <int R> struct conv1ch;
+
+// All conv1ch specializations use positive-only offsets from the window
+// start (p = center - R*S). This maps cleanly to AVR's LDD instruction
+// which supports displacement 0-63.  Max offset = 2*R*S = 24 for R4.
+template <> struct conv1ch<0> {
+    static inline u16 __attribute__((always_inline)) apply(const u8 *c) {
+        return (u16)c[0];
+    }
+};
+
+template <> struct conv1ch<1> {
+    static inline u16 __attribute__((always_inline)) apply(const u8 *c) {
+        constexpr int S = sizeof(CRGB); // 3
+        const u8 *p = c - S;
+        // [1, 2, 1]
+        return (u16)p[0] + ((u16)p[S] << 1) + (u16)p[2*S];
+    }
+};
+
+template <> struct conv1ch<2> {
+    static inline u16 __attribute__((always_inline)) apply(const u8 *c) {
+        constexpr int S = sizeof(CRGB);
+        const u8 *p = c - 2*S;
+        // [1, 4, 6, 4, 1]
+        return (u16)p[0] + (u16)p[S] * 4 + (u16)p[2*S] * 6
+             + (u16)p[3*S] * 4 + (u16)p[4*S];
+    }
+};
+
+template <> struct conv1ch<3> {
+    static inline u16 __attribute__((always_inline)) apply(const u8 *c) {
+        constexpr int S = sizeof(CRGB);
+        const u8 *p = c - 3*S;
+        // [1, 6, 15, 20, 15, 6, 1]
+        return (u16)p[0] + (u16)p[S] * 6  + (u16)p[2*S] * 15
+             + (u16)p[3*S] * 20 + (u16)p[4*S] * 15 + (u16)p[5*S] * 6
+             + (u16)p[6*S];
+    }
+};
+
+template <> struct conv1ch<4> {
+    static inline u16 __attribute__((always_inline)) apply(const u8 *c) {
+        constexpr int S = sizeof(CRGB);
+        const u8 *p = c - 4*S;
+        // [1, 8, 28, 56, 70, 56, 28, 8, 1]
+        return (u16)p[0] + (u16)p[S] * 8  + (u16)p[2*S] * 28
+             + (u16)p[3*S] * 56 + (u16)p[4*S] * 70 + (u16)p[5*S] * 56
+             + (u16)p[6*S] * 28 + (u16)p[7*S] * 8 + (u16)p[8*S];
+    }
+};
+
+// AVR noinline per-channel pass for CRGB (no alpha).
+template <int R>
+__attribute__((noinline))
+static void apply_pass_1ch(const CRGB *pad, CRGB *out, int count, int stride) {
+    constexpr int shift = 2 * R;
+    for (int i = 0; i < count; ++i) {
+        const u8 *base = pad[R + i].raw;
+        out->r = static_cast<u8>(conv1ch<R>::apply(base + 0) >> shift);
+        out->g = static_cast<u8>(conv1ch<R>::apply(base + 1) >> shift);
+        out->b = static_cast<u8>(conv1ch<R>::apply(base + 2) >> shift);
+        out += stride;
+    }
+}
+
+// AVR noinline per-channel pass for CRGB with alpha8 dim.
+template <int R>
+__attribute__((noinline))
+static void apply_pass_alpha_1ch(const CRGB *pad, CRGB *out, int count,
+                                  int stride, alpha8 alpha) {
+    constexpr int shift = 2 * R;
+    u16 a1 = static_cast<u16>(alpha.value) + 1;
+    for (int i = 0; i < count; ++i) {
+        const u8 *base = pad[R + i].raw;
+        u16 r = conv1ch<R>::apply(base + 0) >> shift;
+        u16 g = conv1ch<R>::apply(base + 1) >> shift;
+        u16 b = conv1ch<R>::apply(base + 2) >> shift;
+        out->r = static_cast<u8>((r * a1) >> 8);
+        out->g = static_cast<u8>((g * a1) >> 8);
+        out->b = static_cast<u8>((b * a1) >> 8);
+        out += stride;
+    }
+}
+
+// AVR noinline per-channel pass for CRGB with alpha16 dim.
+template <int R>
+__attribute__((noinline))
+static void apply_pass_alpha_1ch(const CRGB *pad, CRGB *out, int count,
+                                  int stride, alpha16 alpha) {
+    constexpr int shift = 2 * R;
+    u32 a1 = static_cast<u32>(alpha.value) + 1;
+    for (int i = 0; i < count; ++i) {
+        const u8 *base = pad[R + i].raw;
+        u16 r = conv1ch<R>::apply(base + 0) >> shift;
+        u16 g = conv1ch<R>::apply(base + 1) >> shift;
+        u16 b = conv1ch<R>::apply(base + 2) >> shift;
+        out->r = static_cast<u8>((r * a1) >> 16);
+        out->g = static_cast<u8>((g * a1) >> 16);
+        out->b = static_cast<u8>((b * a1) >> 16);
+        out += stride;
+    }
+}
+
+#endif // FL_IS_AVR
+
 // Row-level kernel application — noinline on AVR to isolate register pressure.
-// Used for R >= 2 only. R0/R1 kernels are tiny enough that the function call
-// overhead (~17 us for R1 3x3) exceeds the register pressure benefit; those
-// loops stay inline in blurGaussianImpl to match the baseline codegen.
+// On non-AVR platforms (or CRGB16 on AVR), processes all 3 channels
+// simultaneously using the interior_row kernel.
 template <int R, typename RGB_T, typename acc_t>
 FL_NO_INLINE_IF_AVR
 static void apply_pass(const RGB_T *pad, RGB_T *out, int count, int stride) {
@@ -480,12 +596,26 @@ void blurGaussianImpl(Canvas<RGB_T> &canvas, AlphaT alpha) {
                     }
                 }
             } else {
-                if (vRadius == 0 && applyAlpha) {
-                    blur_detail::apply_pass_alpha<hRadius, RGB_T, acc_t>(
-                        pad, row, w, 1, alpha);
-                } else {
-                    blur_detail::apply_pass<hRadius, RGB_T, acc_t>(
-                        pad, row, w, 1);
+#if defined(FL_IS_AVR)
+                // AVR R >= 4: per-channel noinline cuts register pressure
+                // from 6 to 2 accumulators, a big win for the 9-tap kernel.
+                if (hRadius >= 4) {
+                    if (vRadius == 0 && applyAlpha)
+                        blur_detail::apply_pass_alpha_1ch<hRadius>(
+                            pad, row, w, 1, alpha);
+                    else
+                        blur_detail::apply_pass_1ch<hRadius>(
+                            pad, row, w, 1);
+                } else
+#endif
+                {
+                    if (vRadius == 0 && applyAlpha) {
+                        blur_detail::apply_pass_alpha<hRadius, RGB_T, acc_t>(
+                            pad, row, w, 1, alpha);
+                    } else {
+                        blur_detail::apply_pass<hRadius, RGB_T, acc_t>(
+                            pad, row, w, 1);
+                    }
                 }
             }
         }
@@ -538,13 +668,26 @@ void blurGaussianImpl(Canvas<RGB_T> &canvas, AlphaT alpha) {
                     }
                 }
             } else {
-                // Noinline call for large kernels (register pressure relief).
-                if (applyAlpha) {
-                    blur_detail::apply_pass_alpha<vRadius, RGB_T, acc_t>(
-                        pad, pixels + x, h, w, alpha);
-                } else {
-                    blur_detail::apply_pass<vRadius, RGB_T, acc_t>(
-                        pad, pixels + x, h, w);
+#if defined(FL_IS_AVR)
+                // AVR R >= 4: per-channel noinline for severe register pressure.
+                if (vRadius >= 4) {
+                    if (applyAlpha)
+                        blur_detail::apply_pass_alpha_1ch<vRadius>(
+                            pad, pixels + x, h, w, alpha);
+                    else
+                        blur_detail::apply_pass_1ch<vRadius>(
+                            pad, pixels + x, h, w);
+                } else
+#endif
+                {
+                    // Noinline call for large kernels (register pressure relief).
+                    if (applyAlpha) {
+                        blur_detail::apply_pass_alpha<vRadius, RGB_T, acc_t>(
+                            pad, pixels + x, h, w, alpha);
+                    } else {
+                        blur_detail::apply_pass<vRadius, RGB_T, acc_t>(
+                            pad, pixels + x, h, w);
+                    }
                 }
             }
         }
@@ -579,7 +722,8 @@ BLUR_INST_F8(0, 1, CRGB)  BLUR_INST_F8(0, 2, CRGB)
 BLUR_INST_F8(0, 3, CRGB)  BLUR_INST_F8(0, 4, CRGB)
 BLUR_INST_F8(1, 2, CRGB)  BLUR_INST_F8(2, 1, CRGB)
 
-// CRGB16 — same combos.
+// CRGB16 — same combos (not available on AVR due to RAM constraints).
+#if !defined(FL_IS_AVR)
 BLUR_INST_F8(0, 0, CRGB16)  BLUR_INST_F8(1, 1, CRGB16)
 BLUR_INST_F8(2, 2, CRGB16)  BLUR_INST_F8(3, 3, CRGB16)  BLUR_INST_F8(4, 4, CRGB16)
 BLUR_INST_F8(1, 0, CRGB16)  BLUR_INST_F8(2, 0, CRGB16)
@@ -587,6 +731,7 @@ BLUR_INST_F8(3, 0, CRGB16)  BLUR_INST_F8(4, 0, CRGB16)
 BLUR_INST_F8(0, 1, CRGB16)  BLUR_INST_F8(0, 2, CRGB16)
 BLUR_INST_F8(0, 3, CRGB16)  BLUR_INST_F8(0, 4, CRGB16)
 BLUR_INST_F8(1, 2, CRGB16)  BLUR_INST_F8(2, 1, CRGB16)
+#endif
 
 #undef BLUR_INST_F8
 
@@ -605,6 +750,7 @@ BLUR_INST_F16(0, 3, CRGB)  BLUR_INST_F16(0, 4, CRGB)
 BLUR_INST_F16(1, 2, CRGB)  BLUR_INST_F16(2, 1, CRGB)
 
 // CRGB16
+#if !defined(FL_IS_AVR)
 BLUR_INST_F16(0, 0, CRGB16)  BLUR_INST_F16(1, 1, CRGB16)
 BLUR_INST_F16(2, 2, CRGB16)  BLUR_INST_F16(3, 3, CRGB16)  BLUR_INST_F16(4, 4, CRGB16)
 BLUR_INST_F16(1, 0, CRGB16)  BLUR_INST_F16(2, 0, CRGB16)
@@ -612,6 +758,7 @@ BLUR_INST_F16(3, 0, CRGB16)  BLUR_INST_F16(4, 0, CRGB16)
 BLUR_INST_F16(0, 1, CRGB16)  BLUR_INST_F16(0, 2, CRGB16)
 BLUR_INST_F16(0, 3, CRGB16)  BLUR_INST_F16(0, 4, CRGB16)
 BLUR_INST_F16(1, 2, CRGB16)  BLUR_INST_F16(2, 1, CRGB16)
+#endif
 
 #undef BLUR_INST_F16
 
