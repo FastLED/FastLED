@@ -42,6 +42,9 @@ public:
     ~ScopedEngineCleanup() {
         if (!exit_called) {
             exit_called = true;
+            // Clear delay override before DLL unload to avoid dangling
+            // lambda pointers in fastled.dll's global g_delay_override.
+            clearDelayFunction();
             fl::EngineEvents::onExit();
         }
     }

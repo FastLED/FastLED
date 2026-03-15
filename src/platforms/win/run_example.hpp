@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 #include <cstddef>
+#include <cstdlib>
 #include <windef.h>
 #include <libloaderapi.h>
 #include <errhandlingapi.h>
@@ -77,6 +78,38 @@ int main(int argc, char** argv) {
         // Construct DLL path
         std::string dll_name = exe_name + ".dll";
         dll_path = exe_dir + "\\" + dll_name;
+    }
+
+    // Pre-load fastled.dll so that transitive dependencies resolve correctly.
+    // Windows LoadLibraryA doesn't use PATH for resolving DLL dependencies,
+    // so we pre-load fastled.dll into the process first. Once loaded, the
+    // Windows loader will find it when resolving example DLL imports.
+    {
+        std::string fastled_dll_path;
+        const char* env_dir = getenv("FASTLED_LIB_DIR");
+        if (env_dir && env_dir[0] != '\0') {
+            fastled_dll_path = std::string(env_dir) + "\\fastled.dll";
+        } else {
+            // Derive from example DLL path: go up one level into ci/meson/native/
+            size_t slash = dll_path.find_last_of("\\/");
+            if (slash != std::string::npos) {
+                std::string dll_dir = dll_path.substr(0, slash);
+                size_t parent_slash = dll_dir.find_last_of("\\/");
+                if (parent_slash != std::string::npos) {
+                    fastled_dll_path = dll_dir.substr(0, parent_slash) + "\\ci\\meson\\native\\fastled.dll";
+                }
+            }
+        }
+        if (!fastled_dll_path.empty()) {
+            HMODULE fastled = LoadLibraryA(fastled_dll_path.c_str());
+            if (!fastled) {
+                // Also try SetDllDirectoryA as fallback
+                size_t last_slash = fastled_dll_path.find_last_of("\\/");
+                if (last_slash != std::string::npos) {
+                    SetDllDirectoryA(fastled_dll_path.substr(0, last_slash).c_str());
+                }
+            }
+        }
     }
 
     // Load DLL

@@ -21,6 +21,39 @@ if TYPE_CHECKING:
     from ci.compiler.path_manager import FastLEDPaths
 
 
+def _find_zccache() -> str | None:
+    """Find zccache: .venv first, then sibling repo dev build, then PATH."""
+    suffix = ".exe" if os.name == "nt" else ""
+    repo_root = Path(__file__).resolve().parent.parent.parent
+
+    # Check project .venv first (installed release version)
+    venv_candidate = (
+        repo_root
+        / ".venv"
+        / ("Scripts" if os.name == "nt" else "bin")
+        / f"zccache{suffix}"
+    )
+    if venv_candidate.is_file():
+        return str(venv_candidate)
+
+    # Check sibling zccache repo (pick most recently built binary)
+    sibling = repo_root.parent / "zccache"
+    best: str | None = None
+    best_mtime: float = 0
+    for profile in ("release", "debug"):
+        candidate = sibling / "target" / profile / f"zccache{suffix}"
+        if candidate.is_file():
+            mtime = candidate.stat().st_mtime
+            if mtime > best_mtime:
+                best = str(candidate)
+                best_mtime = mtime
+    if best is not None:
+        return best
+
+    # Check PATH
+    return shutil.which("zccache")
+
+
 # Module-level constants
 _PROJECT_ROOT: Optional[Path] = None
 
@@ -269,11 +302,13 @@ def get_zccache_build_flags(board_name: str) -> dict[str, str]:
     """Get build flags for ZCCACHE configuration with xcache wrapper support."""
     from ci.compiler.path_manager import FastLEDPaths
 
-    # Find zccache binary
-    zccache_path: str | None = shutil.which("zccache")
+    # Find zccache binary (prefer sibling repo dev build over global install)
+    zccache_path: str | None = _find_zccache()
 
     if not zccache_path:
-        print("zccache not found, compilation will proceed without caching")
+        print(
+            "zccache not found, compilation will proceed without caching. To install, run: bash ./install"
+        )
         return {}
 
     print(f"Setting up ZCCACHE build flags: {zccache_path}")
@@ -349,11 +384,13 @@ def setup_zccache_environment(board_name: str) -> bool:
     """Set up zccache environment variables for the current process."""
     from ci.compiler.path_manager import FastLEDPaths
 
-    # Find zccache binary
-    zccache_path: str | None = shutil.which("zccache")
+    # Find zccache binary (prefer sibling repo dev build over global install)
+    zccache_path: str | None = _find_zccache()
 
     if not zccache_path:
-        print("zccache not found in PATH, compilation will proceed without caching")
+        print(
+            "zccache not found, compilation will proceed without caching. To install, run: bash ./install"
+        )
         return False
 
     print(f"Setting up ZCCACHE environment: {zccache_path}")

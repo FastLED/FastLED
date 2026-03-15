@@ -91,13 +91,45 @@ def _find_zccache_binary() -> Optional[str]:
     other caches on warm hits). It works as a drop-in compiler launcher prefix.
 
     Search order:
-    1. PATH (via shutil.which)
-    2. Common cargo install locations
+    1. Sibling zccache repo (../zccache/target/{release,debug}) — dev builds
+    2. PATH (via shutil.which)
+    3. Common cargo install locations
 
     Returns:
         Path to zccache binary, or None if not found.
     """
-    # Check PATH first
+    suffix = (
+        ".exe"
+        if os.name == "nt" or sys.platform.startswith(("win", "msys", "cygwin"))
+        else ""
+    )
+
+    # Check project .venv first (installed release version)
+    repo_root = Path(__file__).resolve().parent.parent.parent  # ci/meson/ -> repo root
+    venv_candidate = (
+        repo_root
+        / ".venv"
+        / ("Scripts" if os.name == "nt" else "bin")
+        / f"zccache{suffix}"
+    )
+    if venv_candidate.is_file():
+        return str(venv_candidate)
+
+    # Check sibling zccache repo (pick most recently built binary)
+    sibling_zccache = repo_root.parent / "zccache"
+    best: Optional[Path] = None
+    best_mtime: float = 0
+    for profile in ("release", "debug"):
+        candidate = sibling_zccache / "target" / profile / f"zccache{suffix}"
+        if candidate.is_file():
+            mtime = candidate.stat().st_mtime
+            if mtime > best_mtime:
+                best = candidate
+                best_mtime = mtime
+    if best is not None:
+        return str(best)
+
+    # Check PATH
     path_result = shutil.which("zccache")
     if path_result:
         return path_result
@@ -108,14 +140,9 @@ def _find_zccache_binary() -> Optional[str]:
         os.path.join(os.path.expanduser("~"), ".cargo"),
     ]:
         if candidate_home:
-            suffix = (
-                ".exe"
-                if os.name == "nt" or sys.platform.startswith(("win", "msys", "cygwin"))
-                else ""
-            )
-            candidate = os.path.join(candidate_home, "bin", f"zccache{suffix}")
-            if os.path.isfile(candidate):
-                return candidate
+            candidate_path = os.path.join(candidate_home, "bin", f"zccache{suffix}")
+            if os.path.isfile(candidate_path):
+                return candidate_path
 
     return None
 
@@ -1461,6 +1488,10 @@ def setup_meson_build(
         if zccache_binary:
             cache_binary = zccache_binary
             cache_name = "zccache"
+        else:
+            _ts_print(
+                "[MESON] zccache not found, compilation will proceed without caching. To install, run: bash ./install"
+            )
     else:
         _ts_print("[MESON] Skipping compiler cache in Docker (startup delay too long)")
 

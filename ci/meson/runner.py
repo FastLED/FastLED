@@ -17,6 +17,7 @@ from clang_tool_chain import prepare_sanitizer_environment
 from running_process import RunningProcess
 
 from ci.meson.build_config import (
+    _find_zccache_binary,
     cleanup_build_artifacts,
     perform_ninja_maintenance,
     setup_meson_build,
@@ -345,6 +346,53 @@ def _write_testlog_failures(build_dir: Path, log_dir: Path) -> None:
         _write_failure_log(log_dir, safe_name, "run", content)
 
 
+def _start_zccache_session(build_dir: Path) -> None:
+    """Start a zccache session with logging to the build directory.
+
+    Sets ZCCACHE_SESSION_ID in os.environ so all subsequent compiler
+    invocations through zccache use this session and get logged.
+    The session auto-cleans up via PID monitoring when the process exits.
+    """
+    zccache_bin = _find_zccache_binary()
+    if not zccache_bin:
+        return
+
+    # Log file goes in the build directory
+    build_dir.mkdir(parents=True, exist_ok=True)
+    log_path = build_dir / "zccache-session.log"
+
+    try:
+        result = subprocess.run(
+            [
+                zccache_bin,
+                "session-start",
+                "--stats",
+                "--log",
+                str(log_path),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if result.returncode == 0:
+            import json
+
+            output = result.stdout.strip()
+            try:
+                data = json.loads(output)
+                session_id = str(data["session_id"])
+            except (json.JSONDecodeError, KeyError):
+                # Fallback: output might be just the session ID number
+                session_id = output
+            os.environ["ZCCACHE_SESSION_ID"] = session_id
+            _ts_print(f"[ZCCACHE] Session {session_id} started, log: {log_path}")
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception:
+        pass  # Non-fatal — build proceeds without session logging
+
+
 def run_meson_build_and_test(
     source_dir: Path,
     build_dir: Path,
@@ -466,6 +514,9 @@ def run_meson_build_and_test(
 
     _ts_print(f"Preparing build ({build_mode} mode)...")
 
+    # Start a zccache session so all compiler invocations are logged
+    _start_zccache_session(build_dir)
+
     # Initialize phase tracker for error diagnostics
     phase_tracker = PhaseTracker(build_dir, build_mode)
     phase_tracker.set_phase("CONFIGURE")
@@ -583,8 +634,15 @@ def run_meson_build_and_test(
                 _streaming_env = os.environ.copy()
                 _fastled_lib_dir = str(build_dir / "ci" / "meson" / "native")
                 if os.name == "nt":
+                    # Add fastled.dll dir + clang toolchain runtime dirs
+                    # (libwinpthread-1.dll etc.) so DLLs load without MSYS2
+                    from clang_tool_chain import get_runtime_dll_paths
+
+                    _extra_dirs = os.pathsep.join(
+                        [_fastled_lib_dir] + get_runtime_dll_paths()
+                    )
                     _streaming_env["PATH"] = (
-                        _fastled_lib_dir + os.pathsep + _streaming_env.get("PATH", "")
+                        _extra_dirs + os.pathsep + _streaming_env.get("PATH", "")
                     )
                 else:
                     _streaming_env["LD_LIBRARY_PATH"] = (
@@ -1238,9 +1296,10 @@ def run_meson_build_and_test(
             test_env = os.environ.copy()
             fastled_lib_dir = str(build_dir / "ci" / "meson" / "native")
             if os.name == "nt":
-                test_env["PATH"] = (
-                    fastled_lib_dir + os.pathsep + test_env.get("PATH", "")
-                )
+                from clang_tool_chain import get_runtime_dll_paths
+
+                _extra = os.pathsep.join([fastled_lib_dir] + get_runtime_dll_paths())
+                test_env["PATH"] = _extra + os.pathsep + test_env.get("PATH", "")
             else:
                 test_env["LD_LIBRARY_PATH"] = (
                     fastled_lib_dir + os.pathsep + test_env.get("LD_LIBRARY_PATH", "")

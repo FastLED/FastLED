@@ -22,6 +22,9 @@ extern "C" {
 // C++ function to override delay behavior for fast testing
 void setDelayFunction(const fl::function<void(fl::u32)>& delayFunc);
 
+// Clear the delay override (must be called before unloading DLLs that set it)
+void clearDelayFunction();
+
 // Check if delay override is active (for fast testing)
 bool isDelayOverrideActive(void);
 #endif  // !ARDUINO || FASTLED_USE_STUB_ARDUINO

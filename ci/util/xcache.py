@@ -51,10 +51,41 @@ class XCacheConfig:
 
 
 def find_zccache() -> Optional[str]:
-    """Find zccache executable in PATH.
+    """Find zccache executable.
 
-    Uses shutil.which to locate the zccache binary.
+    Search order:
+    1. Project .venv (installed via uv sync / ./install)
+    2. Sibling zccache repo (../zccache/target/{release,debug}) — dev builds
+    3. PATH (via shutil.which)
     """
+    suffix = ".exe" if os.name == "nt" else ""
+    repo_root = Path(__file__).resolve().parent.parent.parent  # ci/util/ -> repo root
+
+    # Check project .venv first (installed release version)
+    venv_candidate = (
+        repo_root
+        / ".venv"
+        / ("Scripts" if os.name == "nt" else "bin")
+        / f"zccache{suffix}"
+    )
+    if venv_candidate.is_file():
+        return str(venv_candidate)
+
+    # Check sibling zccache repo (pick most recently built binary)
+    sibling_zccache = repo_root.parent / "zccache"
+    best: Optional[str] = None
+    best_mtime: float = 0
+    for profile in ("release", "debug"):
+        candidate = sibling_zccache / "target" / profile / f"zccache{suffix}"
+        if candidate.is_file():
+            mtime = candidate.stat().st_mtime
+            if mtime > best_mtime:
+                best = str(candidate)
+                best_mtime = mtime
+    if best is not None:
+        return best
+
+    # Check PATH
     return shutil.which("zccache")
 
 
@@ -306,8 +337,8 @@ def main() -> int:
     # Find zccache
     zccache_path = find_zccache()
     if not zccache_path:
-        print("XCACHE ERROR: zccache not found in PATH", file=sys.stderr)
-        print("Please install zccache or ensure it's in your PATH", file=sys.stderr)
+        print("XCACHE ERROR: zccache not found", file=sys.stderr)
+        print("To install, run: bash ./install", file=sys.stderr)
         return 1
 
     # Set up temporary directory

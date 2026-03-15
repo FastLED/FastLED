@@ -36,9 +36,46 @@ class PlatformIOEnv(Protocol):
 def get_zccache_wrapper_path() -> str | None:
     """Get the path to zccache binary.
 
-    Uses shutil.which to find zccache in PATH.
+    Search order:
+    1. Project .venv (installed via uv sync / ./install)
+    2. Sibling zccache repo (../zccache/target/{release,debug}) — dev builds
+    3. PATH (via shutil.which)
+
+    If not found, prints a message suggesting the user run ./install.
     """
-    return shutil.which("zccache")
+    suffix = ".exe" if os.name == "nt" else ""
+    repo_root = Path(__file__).resolve().parent.parent.parent  # ci/util/ -> repo root
+
+    # Check project .venv first (installed release version)
+    venv_candidate = (
+        repo_root
+        / ".venv"
+        / ("Scripts" if os.name == "nt" else "bin")
+        / f"zccache{suffix}"
+    )
+    if venv_candidate.is_file():
+        return str(venv_candidate)
+
+    # Check sibling zccache repo (pick most recently built binary)
+    sibling_zccache = repo_root.parent / "zccache"
+    best: str | None = None
+    best_mtime: float = 0
+    for profile in ("release", "debug"):
+        candidate = sibling_zccache / "target" / profile / f"zccache{suffix}"
+        if candidate.is_file():
+            mtime = candidate.stat().st_mtime
+            if mtime > best_mtime:
+                best = str(candidate)
+                best_mtime = mtime
+    if best is not None:
+        return best
+
+    # Check PATH
+    path_result = shutil.which("zccache")
+    if path_result:
+        return path_result
+
+    return None
 
 
 def get_zccache_path() -> str | None:
@@ -71,6 +108,45 @@ def show_zccache_stats() -> None:
     zccache_path = get_zccache_wrapper_path()
     if not zccache_path:
         return
+
+    # Query per-session stats then end the session
+    session_id = os.environ.get("ZCCACHE_SESSION_ID", "")
+    if session_id and zccache_path:
+        try:
+            stats_result = RunningProcess.run(
+                [zccache_path, "session-stats", session_id],
+                cwd=None,
+                check=False,
+                timeout=10,
+                capture_output=True,
+                text=True,
+            )
+            # session-stats may print to stdout or stderr
+            output = (stats_result.stderr or "").strip() or (
+                stats_result.stdout or ""
+            ).strip()
+            if stats_result.returncode == 0 and output:
+                ts_print("\nZCCACHE session stats:")
+                for line in output.split("\n"):
+                    ts_print(f"  {line.strip()}")
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception:
+            pass  # Non-fatal
+        try:
+            RunningProcess.run(
+                [zccache_path, "session-end", session_id],
+                cwd=None,
+                check=False,
+                timeout=10,
+                capture_output=True,
+            )
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception:
+            pass  # Non-fatal
 
     try:
         result = RunningProcess.run(
@@ -139,6 +215,7 @@ def configure_zccache(env: PlatformIOEnv) -> None:
     """Configure ZCCACHE for the build environment."""
     if not is_zccache_available():
         ts_print("ZCCACHE is not available. Skipping ZCCACHE configuration.")
+        ts_print("To install zccache, run: bash ./install")
         return
 
     zccache_path = get_zccache_wrapper_path()
@@ -230,6 +307,7 @@ def setup_zccache_wrapper():
 
     if not zccache_path:
         ts_print("zccache not found, compilation will proceed without caching")
+        ts_print("To install, run: bash ./install")
         return
 
     ts_print(f"Setting up ZCCACHE wrapper: {zccache_path}")

@@ -53,6 +53,11 @@ void setDelayFunction(const fl::function<void(fl::u32)>& delayFunc) {
     g_delay_override = delayFunc;
 }
 
+// Clear the delay override (must be called before unloading DLLs that set it)
+void clearDelayFunction() {
+    g_delay_override.clear();
+}
+
 // Check if delay override is active
 bool isDelayOverrideActive(void) {
     return static_cast<bool>(g_delay_override);
