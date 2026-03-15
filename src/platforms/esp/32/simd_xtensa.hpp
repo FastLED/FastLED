@@ -6,7 +6,8 @@
 /// Xtensa-specific SIMD implementations for ESP32 variants (ESP32, S2, S3)
 ///
 /// Provides atomic SIMD operations for Xtensa processors using PIE (Processor Interface Extension).
-/// Currently uses scalar fallback - PIE intrinsics to be added later.
+/// When FL_XTENSA_HAS_PIE=1 (ESP32-S3), uses PIE inline assembly for 128-bit vector operations.
+/// Operations without PIE equivalents (i32 arithmetic, float, shifts) use scalar fallback.
 
 #include "fl/stl/stdint.h"  // IWYU pragma: keep
 #include "fl/stl/align.h"  // IWYU pragma: keep
@@ -105,6 +106,27 @@ FASTLED_FORCE_INLINE FL_IRAM void store_f32_4(float* ptr, simd_f32x4 vec) noexce
 // Atomic Arithmetic Operations
 //==============================================================================
 
+#if FL_XTENSA_HAS_PIE
+
+FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 add_sat_u8_16(simd_u8x16 a, simd_u8x16 b) noexcept {
+    simd_u8x16 result;
+    const u8* pa = a.data;
+    const u8* pb = b.data;
+    u8* pr = result.data;
+    asm volatile(
+        "ee.vld.128.ip q0, %[pa], 0\n"
+        "ee.vld.128.ip q1, %[pb], 0\n"
+        "ee.vadds.u8 q2, q0, q1\n"
+        "ee.vst.128.ip q2, %[pr], 0\n"
+        : [pa] "+r"(pa), [pb] "+r"(pb), [pr] "+r"(pr)
+        :
+        : "memory"
+    );
+    return result;
+}
+
+#else
+
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 add_sat_u8_16(simd_u8x16 a, simd_u8x16 b) noexcept {
     simd_u8x16 result;
     for (int i = 0; i < 16; ++i) {
@@ -114,6 +136,34 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 add_sat_u8_16(simd_u8x16 a, simd_u8x16 b
     return result;
 }
 
+#endif  // FL_XTENSA_HAS_PIE
+
+#if FL_XTENSA_HAS_PIE
+
+FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 scale_u8_16(simd_u8x16 vec, u8 scale) noexcept {
+    simd_u8x16 result;
+    FL_ALIGNAS(4) u8 scale_tmp = scale;
+    const u8* pv = vec.data;
+    const u8* ps = &scale_tmp;
+    u8* pr = result.data;
+    asm volatile(
+        "ee.zero.qacc\n"                  // Clear 320-bit QACC accumulator
+        "ee.vld.128.ip q0, %[pv], 0\n"   // q0 = vec (16 x u8)
+        "ee.vldbc.8 q1, %[ps]\n"         // q1 = broadcast(scale) to 16 lanes
+        "ee.vmulas.u8.qacc q0, q1\n"     // QACC[i] += vec[i] * scale (16-bit per lane)
+        "movi a2, 8\n"                    // shift amount
+        "wsr.sar a2\n"                    // SAR = 8 (controls srcmb shift)
+        "ee.srcmb.s8.qacc q2, q0, 0\n"   // q2 = (QACC >> SAR) packed to 8-bit
+        "ee.vst.128.ip q2, %[pr], 0\n"   // store result
+        : [pv] "+r"(pv), [ps] "+r"(ps), [pr] "+r"(pr)
+        :
+        : "memory", "a2"
+    );
+    return result;
+}
+
+#else
+
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 scale_u8_16(simd_u8x16 vec, u8 scale) noexcept {
     simd_u8x16 result;
     for (int i = 0; i < 16; ++i) {
@@ -121,6 +171,8 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 scale_u8_16(simd_u8x16 vec, u8 scale) no
     }
     return result;
 }
+
+#endif  // FL_XTENSA_HAS_PIE
 
 #if FL_XTENSA_HAS_PIE
 
@@ -277,6 +329,27 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 andnot_u8_16(simd_u8x16 a, simd_u8x16 b)
 #endif  // FL_XTENSA_HAS_PIE
 
 
+#if FL_XTENSA_HAS_PIE
+
+FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 sub_sat_u8_16(simd_u8x16 a, simd_u8x16 b) noexcept {
+    simd_u8x16 result;
+    const u8* pa = a.data;
+    const u8* pb = b.data;
+    u8* pr = result.data;
+    asm volatile(
+        "ee.vld.128.ip q0, %[pa], 0\n"
+        "ee.vld.128.ip q1, %[pb], 0\n"
+        "ee.vsubs.u8 q2, q0, q1\n"
+        "ee.vst.128.ip q2, %[pr], 0\n"
+        : [pa] "+r"(pa), [pb] "+r"(pb), [pr] "+r"(pr)
+        :
+        : "memory"
+    );
+    return result;
+}
+
+#else
+
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 sub_sat_u8_16(simd_u8x16 a, simd_u8x16 b) noexcept {
     simd_u8x16 result;
     for (int i = 0; i < 16; ++i) {
@@ -284,6 +357,8 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 sub_sat_u8_16(simd_u8x16 a, simd_u8x16 b
     }
     return result;
 }
+
+#endif  // FL_XTENSA_HAS_PIE
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 avg_u8_16(simd_u8x16 a, simd_u8x16 b) noexcept {
     simd_u8x16 result;
@@ -303,9 +378,46 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 avg_round_u8_16(simd_u8x16 a, simd_u8x16
     return result;
 }
 
+#if FL_XTENSA_HAS_PIE
+
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 min_u8_16(simd_u8x16 a, simd_u8x16 b) noexcept {
     simd_u8x16 result;
-    // PIE-ready: This loop can be replaced with ee.vmin.u8
+    const u8* pa = a.data;
+    const u8* pb = b.data;
+    u8* pr = result.data;
+    asm volatile(
+        "ee.vld.128.ip q0, %[pa], 0\n"
+        "ee.vld.128.ip q1, %[pb], 0\n"
+        "ee.vmin.u8 q2, q0, q1\n"
+        "ee.vst.128.ip q2, %[pr], 0\n"
+        : [pa] "+r"(pa), [pb] "+r"(pb), [pr] "+r"(pr)
+        :
+        : "memory"
+    );
+    return result;
+}
+
+FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 max_u8_16(simd_u8x16 a, simd_u8x16 b) noexcept {
+    simd_u8x16 result;
+    const u8* pa = a.data;
+    const u8* pb = b.data;
+    u8* pr = result.data;
+    asm volatile(
+        "ee.vld.128.ip q0, %[pa], 0\n"
+        "ee.vld.128.ip q1, %[pb], 0\n"
+        "ee.vmax.u8 q2, q0, q1\n"
+        "ee.vst.128.ip q2, %[pr], 0\n"
+        : [pa] "+r"(pa), [pb] "+r"(pb), [pr] "+r"(pr)
+        :
+        : "memory"
+    );
+    return result;
+}
+
+#else
+
+FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 min_u8_16(simd_u8x16 a, simd_u8x16 b) noexcept {
+    simd_u8x16 result;
     for (int i = 0; i < 16; ++i) {
         result.data[i] = (a.data[i] < b.data[i]) ? a.data[i] : b.data[i];
     }
@@ -314,25 +426,46 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 min_u8_16(simd_u8x16 a, simd_u8x16 b) no
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 max_u8_16(simd_u8x16 a, simd_u8x16 b) noexcept {
     simd_u8x16 result;
-    // PIE-ready: This loop can be replaced with ee.vmax.u8
     for (int i = 0; i < 16; ++i) {
         result.data[i] = (a.data[i] > b.data[i]) ? a.data[i] : b.data[i];
     }
     return result;
 }
 
+#endif  // FL_XTENSA_HAS_PIE
+
 //==============================================================================
 // Float32 SIMD Operations (Xtensa/PIE-ready)
 //==============================================================================
 
+#if FL_XTENSA_HAS_PIE
+
 FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 set1_f32_4(float value) noexcept {
-    // PIE-ready: Can be replaced with ee.vldbc.32 (broadcast load)
+    simd_f32x4 result;
+    FL_ALIGNAS(4) float tmp = value;
+    const float* p = &tmp;
+    float* pr = result.data;
+    asm volatile(
+        "ee.vldbc.32 q0, %[p]\n"
+        "ee.vst.128.ip q0, %[pr], 0\n"
+        : [p] "+r"(p), [pr] "+r"(pr)
+        :
+        : "memory"
+    );
+    return result;
+}
+
+#else
+
+FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 set1_f32_4(float value) noexcept {
     simd_f32x4 result;
     for (int i = 0; i < 4; ++i) {
         result.data[i] = value;
     }
     return result;
 }
+
+#endif  // FL_XTENSA_HAS_PIE
 
 FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 add_f32_4(simd_f32x4 a, simd_f32x4 b) noexcept {
     // PIE-ready: Can be replaced with PIE vector add operation

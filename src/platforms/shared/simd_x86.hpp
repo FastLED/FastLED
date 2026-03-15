@@ -116,17 +116,23 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 scale_u8_16(simd_u8x16 vec, u8 scale) no
         return _mm_setzero_si128();
     }
 
-    // SSE2 approach: unpack bytes to 16-bit, multiply, shift, pack
-    // For simplicity in initial implementation, use scalar loop
-    // TODO: Optimize with proper SSE2 unpack/multiply/pack sequence
-    FL_ALIGNAS(16) u8 data[16];
-    _mm_store_si128(reinterpret_cast<__m128i*>(data), vec); // ok reinterpret cast
+    __m128i zero = _mm_setzero_si128();
+    __m128i scale_16 = _mm_set1_epi16(static_cast<i16>(scale));
 
-    for (int i = 0; i < 16; ++i) {
-        data[i] = static_cast<u8>((static_cast<u16>(data[i]) * scale) >> 8);
-    }
+    // Unpack low/high 8 bytes to 16-bit
+    __m128i lo = _mm_unpacklo_epi8(vec, zero);
+    __m128i hi = _mm_unpackhi_epi8(vec, zero);
 
-    return _mm_load_si128(reinterpret_cast<const __m128i*>(data)); // ok reinterpret cast
+    // Multiply 16-bit * 16-bit -> 16-bit (low word)
+    lo = _mm_mullo_epi16(lo, scale_16);
+    hi = _mm_mullo_epi16(hi, scale_16);
+
+    // Shift right by 8
+    lo = _mm_srli_epi16(lo, 8);
+    hi = _mm_srli_epi16(hi, 8);
+
+    // Pack back to u8 with unsigned saturation
+    return _mm_packus_epi16(lo, hi);
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 set1_u32_4(u32 value) noexcept {
