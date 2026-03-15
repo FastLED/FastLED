@@ -5,6 +5,7 @@
 
 #include "platforms/is_platform.h"
 #if defined(FL_IS_ESP32)
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/has_include.h"
 #include "sdkconfig.h"
 #include "platforms/esp/esp_version.h"
