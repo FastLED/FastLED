@@ -24,6 +24,7 @@ from ci.lint_cpp.banned_macros_checker import BannedMacrosChecker
 from ci.lint_cpp.banned_namespace_checker import BannedNamespaceChecker
 from ci.lint_cpp.bare_allocation_checker import BareAllocationChecker
 from ci.lint_cpp.bare_using_checker import BareUsingChecker
+from ci.lint_cpp.builtin_memcpy_checker import BuiltinMemcpyChecker
 
 # Import all checker classes
 from ci.lint_cpp.check_namespace_includes import NamespaceIncludesChecker
@@ -168,6 +169,7 @@ def create_checkers(
         WeakAttributeChecker(),
         AttributeChecker(),  # Checks all C++ standard attributes (replaces MaybeUnusedChecker)
         BannedMacrosChecker(),  # Checks for banned preprocessor macros like __has_include
+        BuiltinMemcpyChecker(),  # Checks for raw __builtin_memcpy — use FL_BUILTIN_MEMCPY
         FlIsDefinedChecker(),
         BannedNamespaceChecker(),  # Checks for banned namespace patterns like fl::fl
         SingletonInHeadersChecker(),  # Checks for Singleton<T> in headers (must use SingletonShared<T>)
