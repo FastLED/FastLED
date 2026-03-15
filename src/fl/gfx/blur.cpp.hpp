@@ -428,7 +428,7 @@ template <> struct conv1ch<4> {
 
 // AVR noinline per-channel pass for CRGB (no alpha).
 template <int R>
-__attribute__((noinline))
+__attribute__((noinline)) FL_OPTIMIZE_FUNCTION
 static void apply_pass_1ch(const CRGB *pad, CRGB *out, int count, int stride) {
     constexpr int shift = 2 * R;
     for (int i = 0; i < count; ++i) {
@@ -440,9 +440,9 @@ static void apply_pass_1ch(const CRGB *pad, CRGB *out, int count, int stride) {
     }
 }
 
-// AVR noinline per-channel pass for CRGB with alpha8 dim.
+// AVR noinline per-channel pass for CRGB with alpha dim.
 template <int R>
-__attribute__((noinline))
+__attribute__((noinline)) FL_OPTIMIZE_FUNCTION
 static void apply_pass_alpha_1ch(const CRGB *pad, CRGB *out, int count,
                                   int stride, alpha8 alpha) {
     constexpr int shift = 2 * R;
@@ -461,7 +461,7 @@ static void apply_pass_alpha_1ch(const CRGB *pad, CRGB *out, int count,
 
 // AVR noinline per-channel pass for CRGB with alpha16 dim.
 template <int R>
-__attribute__((noinline))
+__attribute__((noinline)) FL_OPTIMIZE_FUNCTION
 static void apply_pass_alpha_1ch(const CRGB *pad, CRGB *out, int count,
                                   int stride, alpha16 alpha) {
     constexpr int shift = 2 * R;
@@ -484,7 +484,7 @@ static void apply_pass_alpha_1ch(const CRGB *pad, CRGB *out, int count,
 // On non-AVR platforms (or CRGB16 on AVR), processes all 3 channels
 // simultaneously using the interior_row kernel.
 template <int R, typename RGB_T, typename acc_t>
-FL_NO_INLINE_IF_AVR
+FL_NO_INLINE_IF_AVR FL_OPTIMIZE_FUNCTION
 static void apply_pass(const RGB_T *pad, RGB_T *out, int count, int stride) {
     constexpr int shift = 2 * R;
     using P = pixel_ops<RGB_T>;
@@ -499,7 +499,7 @@ static void apply_pass(const RGB_T *pad, RGB_T *out, int count, int stride) {
 }
 
 template <int R, typename RGB_T, typename acc_t, typename AlphaT>
-FL_NO_INLINE_IF_AVR
+FL_NO_INLINE_IF_AVR FL_OPTIMIZE_FUNCTION
 static void apply_pass_alpha(const RGB_T *pad, RGB_T *out, int count,
                              int stride, AlphaT alpha) {
     constexpr int shift = 2 * R;
@@ -523,6 +523,7 @@ static void apply_pass_alpha(const RGB_T *pad, RGB_T *out, int count,
 // This eliminates slow edge handling and reuses interior_row for both passes.
 // Dim (alpha) is applied once at the final output.
 template <int hRadius, int vRadius, typename RGB_T, typename AlphaT>
+FL_OPTIMIZE_FUNCTION
 void blurGaussianImpl(Canvas<RGB_T> &canvas, AlphaT alpha) {
     const int w = canvas.width;
     const int h = canvas.height;
@@ -572,9 +573,19 @@ void blurGaussianImpl(Canvas<RGB_T> &canvas, AlphaT alpha) {
             FL_BUILTIN_MEMCPY(pad + hRadius, row, w * sizeof(RGB_T));
 
             // Apply interior kernel to ALL positions (zero-padding handles edges).
-            // R <= 1: inline loop (small kernels; extracting to a function adds
-            //         ~17 us call overhead that exceeds the register benefit).
-            // R >= 2: noinline call on AVR (register pressure relief saves 47-125 us).
+#if defined(FL_IS_AVR)
+            // AVR: per-channel noinline + O3 for all radii.
+            // conv1ch processes one color channel at a time, cutting live
+            // accumulator registers from 6 (r,g,b as u16 pairs) to 2.
+            // FL_OPTIMIZE_FUNCTION on the pass functions overrides -Os with
+            // -O3 for better register allocation in the kernel loop.
+            if (vRadius == 0 && applyAlpha)
+                blur_detail::apply_pass_alpha_1ch<hRadius>(
+                    pad, row, w, 1, alpha);
+            else
+                blur_detail::apply_pass_1ch<hRadius>(
+                    pad, row, w, 1);
+#else
             if (hRadius <= 1) {
                 if (vRadius == 0 && applyAlpha) {
                     for (int x = 0; x < w; ++x) {
@@ -596,28 +607,15 @@ void blurGaussianImpl(Canvas<RGB_T> &canvas, AlphaT alpha) {
                     }
                 }
             } else {
-#if defined(FL_IS_AVR)
-                // AVR R >= 4: per-channel noinline cuts register pressure
-                // from 6 to 2 accumulators, a big win for the 9-tap kernel.
-                if (hRadius >= 4) {
-                    if (vRadius == 0 && applyAlpha)
-                        blur_detail::apply_pass_alpha_1ch<hRadius>(
-                            pad, row, w, 1, alpha);
-                    else
-                        blur_detail::apply_pass_1ch<hRadius>(
-                            pad, row, w, 1);
-                } else
-#endif
-                {
-                    if (vRadius == 0 && applyAlpha) {
-                        blur_detail::apply_pass_alpha<hRadius, RGB_T, acc_t>(
-                            pad, row, w, 1, alpha);
-                    } else {
-                        blur_detail::apply_pass<hRadius, RGB_T, acc_t>(
-                            pad, row, w, 1);
-                    }
+                if (vRadius == 0 && applyAlpha) {
+                    blur_detail::apply_pass_alpha<hRadius, RGB_T, acc_t>(
+                        pad, row, w, 1, alpha);
+                } else {
+                    blur_detail::apply_pass<hRadius, RGB_T, acc_t>(
+                        pad, row, w, 1);
                 }
             }
+#endif
         }
     }
 
@@ -643,6 +641,15 @@ void blurGaussianImpl(Canvas<RGB_T> &canvas, AlphaT alpha) {
 
             // Apply interior_row kernel (reused for columns via linearization).
             // Write back with stride=w to scatter back to column positions.
+#if defined(FL_IS_AVR)
+            // AVR: per-channel noinline + O3 for all radii.
+            if (applyAlpha)
+                blur_detail::apply_pass_alpha_1ch<vRadius>(
+                    pad, pixels + x, h, w, alpha);
+            else
+                blur_detail::apply_pass_1ch<vRadius>(
+                    pad, pixels + x, h, w);
+#else
             if (vRadius <= 1) {
                 // Inline loop for small kernels (pointer increment avoids multiply).
                 RGB_T *dst = pixels + x;
@@ -668,28 +675,16 @@ void blurGaussianImpl(Canvas<RGB_T> &canvas, AlphaT alpha) {
                     }
                 }
             } else {
-#if defined(FL_IS_AVR)
-                // AVR R >= 4: per-channel noinline for severe register pressure.
-                if (vRadius >= 4) {
-                    if (applyAlpha)
-                        blur_detail::apply_pass_alpha_1ch<vRadius>(
-                            pad, pixels + x, h, w, alpha);
-                    else
-                        blur_detail::apply_pass_1ch<vRadius>(
-                            pad, pixels + x, h, w);
-                } else
-#endif
-                {
-                    // Noinline call for large kernels (register pressure relief).
-                    if (applyAlpha) {
-                        blur_detail::apply_pass_alpha<vRadius, RGB_T, acc_t>(
-                            pad, pixels + x, h, w, alpha);
-                    } else {
-                        blur_detail::apply_pass<vRadius, RGB_T, acc_t>(
-                            pad, pixels + x, h, w);
-                    }
+                // Noinline call for large kernels (register pressure relief).
+                if (applyAlpha) {
+                    blur_detail::apply_pass_alpha<vRadius, RGB_T, acc_t>(
+                        pad, pixels + x, h, w, alpha);
+                } else {
+                    blur_detail::apply_pass<vRadius, RGB_T, acc_t>(
+                        pad, pixels + x, h, w);
                 }
             }
+#endif
         }
     }
 }
