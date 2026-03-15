@@ -190,20 +190,23 @@ void blur2d(Canvas<CRGB> &canvas, alpha8 blur_amount) {
 } // namespace gfx
 } // namespace fl
 
-// ── SKIPSM Gaussian blur — FSM-based single-pass implementation ──────────
+// ── Separable Gaussian blur — two-pass binomial convolution ──────────
 //
-// Based on: "An efficient algorithm for Gaussian blur using finite-state
-// machines" (Waltz & Miller, SPIE 1998).
+// Based on sutaburosu's SKIPSM Gaussian blur implementation.
+// Uses binomial coefficient weights (Pascal's triangle) for a fast and
+// flexible Gaussian blur approximation, optimized for kernel sizes up to 9×9.
+// https://people.videolan.org/~tmatth/papers/Gaussian%20blur%20using%20finite-state%20machines.pdf
 //
-// Processes the image in a single raster scan using cascaded [1 1] additions
-// that naturally build Pascal's triangle (binomial) coefficients:
-//   [1] -> [1 1] -> [1 2 1] -> [1 3 3 1] -> [1 4 6 4 1] -> ...
+// Two separable passes (horizontal then vertical), each applying the 1D
+// binomial kernel for the given radius:
+//   radius 0: [1]                                    sum = 1    shift = 0
+//   radius 1: [1, 2, 1]                              sum = 4    shift = 2
+//   radius 2: [1, 4, 6, 4, 1]                        sum = 16   shift = 4
+//   radius 3: [1, 6, 15, 20, 15, 6, 1]               sum = 64   shift = 6
+//   radius 4: [1, 8, 28, 56, 70, 56, 28, 8, 1]       sum = 256  shift = 8
 //
-// For radius R: 2R row state registers + 2R column state buffers.
-// Only additions, no multiplications. Each pixel fetched exactly once.
-// Normalization by right-shift of 4R bits (sum of weights = 2^(4R)).
-//
-// Virtual zero-padded pixels flush the pipeline to cover all output positions.
+// Out-of-bounds pixels are treated as zero (zero-padding).
+// Normalization by right-shift of 2*radius bits per pass.
 
 namespace fl {
 namespace gfx {
@@ -221,22 +224,23 @@ struct pixel_ops;
 
 template <>
 struct pixel_ops<CRGB> {
-    static inline u32 ch(u8 v) { return v; }
+    FL_ALWAYS_INLINE u16 ch(u8 v) { return v; }
+    FL_ALWAYS_INLINE CRGB zero() { return CRGB(0, 0, 0); }
 
-    static inline CRGB make(u32 r, u32 g, u32 b) {
+    FL_ALWAYS_INLINE CRGB make(u16 r, u16 g, u16 b) {
         return CRGB(static_cast<u8>(r), static_cast<u8>(g),
                     static_cast<u8>(b));
     }
 
-    static inline CRGB make(u32 r, u32 g, u32 b, alpha8 a) {
+    FL_ALWAYS_INLINE CRGB make(u16 r, u16 g, u16 b, alpha8 a) {
         if (a.value == 255) return make(r, g, b);
-        u32 a1 = static_cast<u32>(a.value) + 1;
+        u16 a1 = static_cast<u16>(a.value) + 1;
         return CRGB(static_cast<u8>((r * a1) >> 8),
                     static_cast<u8>((g * a1) >> 8),
                     static_cast<u8>((b * a1) >> 8));
     }
 
-    static inline CRGB make(u32 r, u32 g, u32 b, alpha16 a) {
+    FL_ALWAYS_INLINE CRGB make(u16 r, u16 g, u16 b, alpha16 a) {
         if (a.value >= 65535) return make(r, g, b);
         u32 a1 = static_cast<u32>(a.value) + 1;
         return CRGB(static_cast<u8>((r * a1) >> 16),
@@ -247,42 +251,161 @@ struct pixel_ops<CRGB> {
 
 template <>
 struct pixel_ops<CRGB16> {
-    static inline u32 ch(u8x8 v) { return v.raw(); }
+    FL_ALWAYS_INLINE u32 ch(u8x8 v) { return v.raw(); }
+    FL_ALWAYS_INLINE CRGB16 zero() { return CRGB16(u8x8(0), u8x8(0), u8x8(0)); }
 
-    static inline CRGB16 make(u32 r, u32 g, u32 b) {
+    FL_ALWAYS_INLINE CRGB16 make(u32 r, u32 g, u32 b) {
         return CRGB16(u8x8::from_raw(static_cast<u16>(r)),
                       u8x8::from_raw(static_cast<u16>(g)),
                       u8x8::from_raw(static_cast<u16>(b)));
     }
 
-    static inline CRGB16 make(u32 r, u32 g, u32 b, alpha8 a) {
+    FL_ALWAYS_INLINE CRGB16 make(u32 r, u32 g, u32 b, alpha8 a) {
         if (a.value == 255) return make(r, g, b);
         u32 a1 = static_cast<u32>(a.value) + 1;
         return make((r * a1) >> 8, (g * a1) >> 8, (b * a1) >> 8);
     }
 
-    static inline CRGB16 make(u32 r, u32 g, u32 b, alpha16 a) {
+    FL_ALWAYS_INLINE CRGB16 make(u32 r, u32 g, u32 b, alpha16 a) {
         if (a.value >= 65535) return make(r, g, b);
         u32 a1 = static_cast<u32>(a.value) + 1;
         return make((r * a1) >> 16, (g * a1) >> 16, (b * a1) >> 16);
     }
 };
 
-// Thread-local column state buffer for the FSM.
-template <typename acc_t>
-static acc_t *get_colbuf(int minSize) {
-    static fl::ThreadLocal<fl::vector<acc_t>> tl_colbuf;
-    fl::vector<acc_t> &buf = tl_colbuf.access();
+// Thread-local padded pixel buffer for zero-padding approach.
+template <typename RGB_T>
+static RGB_T *get_padbuf(int minSize) {
+    static fl::ThreadLocal<fl::vector<RGB_T>> tl_padbuf;
+    fl::vector<RGB_T> &buf = tl_padbuf.access();
     if (static_cast<int>(buf.size()) < minSize) {
         buf.resize(minSize);
     }
     return buf.data();
 }
 
+// Interior row pixel — fully-unrolled, no bounds checks.
+// Also reused for vertical pass via linearized column data.
+// Template-specialized per radius for direct hardcoded weights.
+template <int R, typename RGB_T, typename acc_t>
+struct interior_row;
+
+template <typename RGB_T, typename acc_t>
+struct interior_row<0, RGB_T, acc_t> {
+    FL_ALWAYS_INLINE void apply(const RGB_T *row, int x,
+                             acc_t &r, acc_t &g, acc_t &b) {
+        using P = pixel_ops<RGB_T>;
+        r = P::ch(row[x].r); g = P::ch(row[x].g); b = P::ch(row[x].b);
+    }
+};
+
+template <typename RGB_T, typename acc_t>
+struct interior_row<1, RGB_T, acc_t> {
+    FL_ALWAYS_INLINE void apply(const RGB_T *row, int x,
+                             acc_t &r, acc_t &g, acc_t &b) {
+        using P = pixel_ops<RGB_T>;
+        P p;
+        r = 0; g = 0; b = 0;
+        { const RGB_T &px = row[x-1]; r += p.ch(px.r);     g += p.ch(px.g);     b += p.ch(px.b); }
+        { const RGB_T &px = row[x];   r += p.ch(px.r) * 2; g += p.ch(px.g) * 2; b += p.ch(px.b) * 2; }
+        { const RGB_T &px = row[x+1]; r += p.ch(px.r);     g += p.ch(px.g);     b += p.ch(px.b); }
+    }
+};
+
+template <typename RGB_T, typename acc_t>
+struct interior_row<2, RGB_T, acc_t> {
+    FL_ALWAYS_INLINE void apply(const RGB_T *row, int x,
+                             acc_t &r, acc_t &g, acc_t &b) {
+        using P = pixel_ops<RGB_T>;
+        P p;
+        r = 0; g = 0; b = 0;
+        { const RGB_T &px = row[x-2]; r += p.ch(px.r);     g += p.ch(px.g);     b += p.ch(px.b); }
+        { const RGB_T &px = row[x-1]; r += p.ch(px.r) * 4; g += p.ch(px.g) * 4; b += p.ch(px.b) * 4; }
+        { const RGB_T &px = row[x];   r += p.ch(px.r) * 6; g += p.ch(px.g) * 6; b += p.ch(px.b) * 6; }
+        { const RGB_T &px = row[x+1]; r += p.ch(px.r) * 4; g += p.ch(px.g) * 4; b += p.ch(px.b) * 4; }
+        { const RGB_T &px = row[x+2]; r += p.ch(px.r);     g += p.ch(px.g);     b += p.ch(px.b); }
+    }
+};
+
+template <typename RGB_T, typename acc_t>
+struct interior_row<3, RGB_T, acc_t> {
+    FL_ALWAYS_INLINE void apply(const RGB_T *row, int x,
+                             acc_t &r, acc_t &g, acc_t &b) {
+        using P = pixel_ops<RGB_T>;
+        P p;
+        r = 0; g = 0; b = 0;
+        { const RGB_T &px = row[x-3]; r += p.ch(px.r);      g += p.ch(px.g);      b += p.ch(px.b); }
+        { const RGB_T &px = row[x-2]; r += p.ch(px.r) * 6;  g += p.ch(px.g) * 6;  b += p.ch(px.b) * 6; }
+        { const RGB_T &px = row[x-1]; r += p.ch(px.r) * 15; g += p.ch(px.g) * 15; b += p.ch(px.b) * 15; }
+        { const RGB_T &px = row[x];   r += p.ch(px.r) * 20; g += p.ch(px.g) * 20; b += p.ch(px.b) * 20; }
+        { const RGB_T &px = row[x+1]; r += p.ch(px.r) * 15; g += p.ch(px.g) * 15; b += p.ch(px.b) * 15; }
+        { const RGB_T &px = row[x+2]; r += p.ch(px.r) * 6;  g += p.ch(px.g) * 6;  b += p.ch(px.b) * 6; }
+        { const RGB_T &px = row[x+3]; r += p.ch(px.r);      g += p.ch(px.g);      b += p.ch(px.b); }
+    }
+};
+
+template <typename RGB_T, typename acc_t>
+struct interior_row<4, RGB_T, acc_t> {
+    FL_ALWAYS_INLINE void apply(const RGB_T *row, int x,
+                             acc_t &r, acc_t &g, acc_t &b) {
+        using P = pixel_ops<RGB_T>;
+        P p;
+        r = 0; g = 0; b = 0;
+        { const RGB_T &px = row[x-4]; r += p.ch(px.r);      g += p.ch(px.g);      b += p.ch(px.b); }
+        { const RGB_T &px = row[x-3]; r += p.ch(px.r) * 8;  g += p.ch(px.g) * 8;  b += p.ch(px.b) * 8; }
+        { const RGB_T &px = row[x-2]; r += p.ch(px.r) * 28; g += p.ch(px.g) * 28; b += p.ch(px.b) * 28; }
+        { const RGB_T &px = row[x-1]; r += p.ch(px.r) * 56; g += p.ch(px.g) * 56; b += p.ch(px.b) * 56; }
+        { const RGB_T &px = row[x];   r += p.ch(px.r) * 70; g += p.ch(px.g) * 70; b += p.ch(px.b) * 70; }
+        { const RGB_T &px = row[x+1]; r += p.ch(px.r) * 56; g += p.ch(px.g) * 56; b += p.ch(px.b) * 56; }
+        { const RGB_T &px = row[x+2]; r += p.ch(px.r) * 28; g += p.ch(px.g) * 28; b += p.ch(px.b) * 28; }
+        { const RGB_T &px = row[x+3]; r += p.ch(px.r) * 8;  g += p.ch(px.g) * 8;  b += p.ch(px.b) * 8; }
+        { const RGB_T &px = row[x+4]; r += p.ch(px.r);      g += p.ch(px.g);      b += p.ch(px.b); }
+    }
+};
+
+// Row-level kernel application — noinline on AVR to isolate register pressure.
+// Used for R >= 2 only. R0/R1 kernels are tiny enough that the function call
+// overhead (~17 us for R1 3x3) exceeds the register pressure benefit; those
+// loops stay inline in blurGaussianImpl to match the baseline codegen.
+template <int R, typename RGB_T, typename acc_t>
+FL_NO_INLINE_IF_AVR
+static void apply_pass(const RGB_T *pad, RGB_T *out, int count, int stride) {
+    constexpr int shift = 2 * R;
+    using P = pixel_ops<RGB_T>;
+    for (int i = 0; i < count; ++i) {
+        acc_t r, g, b;
+        interior_row<R, RGB_T, acc_t>::apply(pad, R + i, r, g, b);
+        *out = P::make(static_cast<acc_t>(r >> shift),
+                       static_cast<acc_t>(g >> shift),
+                       static_cast<acc_t>(b >> shift));
+        out += stride;
+    }
+}
+
+template <int R, typename RGB_T, typename acc_t, typename AlphaT>
+FL_NO_INLINE_IF_AVR
+static void apply_pass_alpha(const RGB_T *pad, RGB_T *out, int count,
+                             int stride, AlphaT alpha) {
+    constexpr int shift = 2 * R;
+    using P = pixel_ops<RGB_T>;
+    for (int i = 0; i < count; ++i) {
+        acc_t r, g, b;
+        interior_row<R, RGB_T, acc_t>::apply(pad, R + i, r, g, b);
+        *out = P::make(static_cast<acc_t>(r >> shift),
+                       static_cast<acc_t>(g >> shift),
+                       static_cast<acc_t>(b >> shift), alpha);
+        out += stride;
+    }
+}
+
+
 } // namespace blur_detail
 
-// FSM-based Gaussian blur: single-pass raster scan with cascaded [1 1]
-// state machines.  Alpha is applied once at the output.
+// Separable Gaussian blur: horizontal pass then vertical pass.
+// Zero-padding approach: copy row/column to a padded buffer with zeros,
+// then apply the fast unrolled interior_row kernel to ALL positions.
+// This eliminates slow edge handling and reuses interior_row for both passes.
+// Dim (alpha) is applied once at the final output.
 template <int hRadius, int vRadius, typename RGB_T, typename AlphaT>
 void blurGaussianImpl(Canvas<RGB_T> &canvas, AlphaT alpha) {
     const int w = canvas.width;
@@ -292,9 +415,15 @@ void blurGaussianImpl(Canvas<RGB_T> &canvas, AlphaT alpha) {
 
     using P = blur_detail::pixel_ops<RGB_T>;
 
+    // Accumulator: u16 for 8-bit channels (max per-pass sum: 255*256=65280),
+    // u32 for wider channels.
+    using acc_t = fl::conditional_t<sizeof(typename RGB_T::fp) == 1, u16, u32>;
+
+    const bool applyAlpha = !(alpha == blur_detail::alpha_identity<AlphaT>());
+
     // Handle no-blur case (radius 0 in both dimensions).
     if (hRadius == 0 && vRadius == 0) {
-        if (!(alpha == blur_detail::alpha_identity<AlphaT>())) {
+        if (applyAlpha) {
             RGB_T *pixels = canvas.pixels;
             for (int i = 0; i < w * h; ++i) {
                 RGB_T &p = pixels[i];
@@ -304,100 +433,119 @@ void blurGaussianImpl(Canvas<RGB_T> &canvas, AlphaT alpha) {
         return;
     }
 
-    // State counts per dimension.
-    enum {
-        HR = 2 * hRadius, // row state register count
-        VR = 2 * vRadius, // column state buffer count
-        SHIFT = HR + VR   // total normalization shift
-    };
-
-    // Accumulator type: u16 when max intermediate (255 * 2^SHIFT) fits,
-    // u32 otherwise. For 8-bit pixels, u16 works when SHIFT <= 8.
-    using acc_t = fl::conditional_t<
-        (sizeof(typename RGB_T::fp) == 1) && (SHIFT <= 8), u16, u32>;
-
-    const acc_t ROUND =
-        (SHIFT > 0) ? (acc_t(1) << (SHIFT - 1)) : acc_t(0);
-
-    // Virtual pixels for pipeline flush.
-    const int totalCols = w + hRadius;
-    const int totalRows = h + vRadius;
-
-    // Column state buffers: VR stages x totalCols, per channel.
-    const int colBufStride = totalCols;
-    const int colBufElems = (VR > 0 ? VR : 1) * colBufStride;
-    const int totalBufSize = colBufElems * 3; // R, G, B
-
-    acc_t *buf = blur_detail::get_colbuf<acc_t>(totalBufSize);
-    for (int i = 0; i < totalBufSize; ++i)
-        buf[i] = 0;
-
-    acc_t *const sc_r = buf;
-    acc_t *const sc_g = buf + colBufElems;
-    acc_t *const sc_b = buf + colBufElems * 2;
+    // Padded pixel buffer: max(2*hRadius + w, 2*vRadius + h).
+    const int hPadSize = 2 * hRadius + w;
+    const int vPadSize = 2 * vRadius + h;
+    const int padSize = hPadSize > vPadSize ? hPadSize : vPadSize;
+    RGB_T *pad = blur_detail::get_padbuf<RGB_T>(padSize);
 
     RGB_T *pixels = canvas.pixels;
 
-    for (int j = 0; j < totalRows; ++j) {
-        // Row state registers — reset at each row start.
-        acc_t sr_r[HR > 0 ? HR : 1];
-        acc_t sr_g[HR > 0 ? HR : 1];
-        acc_t sr_b[HR > 0 ? HR : 1];
-        for (int s = 0; s < (HR > 0 ? HR : 1); ++s) {
-            sr_r[s] = 0;
-            sr_g[s] = 0;
-            sr_b[s] = 0;
-        }
+    // ── Horizontal pass ──────────────────────────────────────────────
+    if (hRadius > 0) {
+        constexpr int hShift = 2 * hRadius;
 
-        for (int i = 0; i < totalCols; ++i) {
-            // Fetch input (zero for virtual padding pixels).
-            acc_t in_r, in_g, in_b;
-            if (j < h && i < w) {
-                const RGB_T &p = pixels[j * w + i];
-                in_r = P::ch(p.r);
-                in_g = P::ch(p.g);
-                in_b = P::ch(p.b);
+        // Zero the fixed padding regions once (reused for every row).
+        __builtin_memset(pad, 0, hRadius * sizeof(RGB_T));
+        __builtin_memset(pad + hRadius + w, 0, hRadius * sizeof(RGB_T));
+
+        for (int y = 0; y < h; ++y) {
+            RGB_T *row = pixels + y * w;
+
+            // Copy row data into padded region.
+            FL_BUILTIN_MEMCPY(pad + hRadius, row, w * sizeof(RGB_T));
+
+            // Apply interior kernel to ALL positions (zero-padding handles edges).
+            // R <= 1: inline loop (small kernels; extracting to a function adds
+            //         ~17 us call overhead that exceeds the register benefit).
+            // R >= 2: noinline call on AVR (register pressure relief saves 47-125 us).
+            if (hRadius <= 1) {
+                if (vRadius == 0 && applyAlpha) {
+                    for (int x = 0; x < w; ++x) {
+                        acc_t r, g, b;
+                        blur_detail::interior_row<hRadius, RGB_T, acc_t>::apply(
+                            pad, hRadius + x, r, g, b);
+                        row[x] = P::make(static_cast<acc_t>(r >> hShift),
+                                         static_cast<acc_t>(g >> hShift),
+                                         static_cast<acc_t>(b >> hShift), alpha);
+                    }
+                } else {
+                    for (int x = 0; x < w; ++x) {
+                        acc_t r, g, b;
+                        blur_detail::interior_row<hRadius, RGB_T, acc_t>::apply(
+                            pad, hRadius + x, r, g, b);
+                        row[x] = P::make(static_cast<acc_t>(r >> hShift),
+                                         static_cast<acc_t>(g >> hShift),
+                                         static_cast<acc_t>(b >> hShift));
+                    }
+                }
             } else {
-                in_r = 0;
-                in_g = 0;
-                in_b = 0;
+                if (vRadius == 0 && applyAlpha) {
+                    blur_detail::apply_pass_alpha<hRadius, RGB_T, acc_t>(
+                        pad, row, w, 1, alpha);
+                } else {
+                    blur_detail::apply_pass<hRadius, RGB_T, acc_t>(
+                        pad, row, w, 1);
+                }
+            }
+        }
+    }
+
+    // ── Vertical pass (linearized column → reuse interior_row kernel) ──
+    if (vRadius > 0) {
+        constexpr int vShift = 2 * vRadius;
+
+        // Zero the fixed padding regions once (reused for every column).
+        __builtin_memset(pad, 0, vRadius * sizeof(RGB_T));
+        __builtin_memset(pad + vRadius + h, 0, vRadius * sizeof(RGB_T));
+
+        for (int x = 0; x < w; ++x) {
+
+            // Linearize column into padded region (pointer increment avoids multiply).
+            {
+                const RGB_T *src = pixels + x;
+                RGB_T *dst = pad + vRadius;
+                for (int i = 0; i < h; ++i) {
+                    *dst++ = *src;
+                    src += w;
+                }
             }
 
-            // ── Row FSM: HR cascaded [1 1] addition stages ──────────
-            acc_t tr = in_r, tg = in_g, tb = in_b;
-            for (int s = 0; s < HR; ++s) {
-                acc_t nr = sr_r[s] + tr;
-                acc_t ng = sr_g[s] + tg;
-                acc_t nb = sr_b[s] + tb;
-                sr_r[s] = tr;
-                sr_g[s] = tg;
-                sr_b[s] = tb;
-                tr = nr;
-                tg = ng;
-                tb = nb;
-            }
-
-            // ── Column FSM: VR cascaded [1 1] addition stages ──────
-            for (int s = 0; s < VR; ++s) {
-                int idx = s * colBufStride + i;
-                acc_t nr = sc_r[idx] + tr;
-                acc_t ng = sc_g[idx] + tg;
-                acc_t nb = sc_b[idx] + tb;
-                sc_r[idx] = tr;
-                sc_g[idx] = tg;
-                sc_b[idx] = tb;
-                tr = nr;
-                tg = ng;
-                tb = nb;
-            }
-
-            // ── Write output at (j - vRadius, i - hRadius) ─────────
-            int oy = j - vRadius;
-            int ox = i - hRadius;
-            if (oy >= 0 && oy < h && ox >= 0 && ox < w) {
-                pixels[oy * w + ox] =
-                    P::make((ROUND + tr) >> SHIFT, (ROUND + tg) >> SHIFT,
-                            (ROUND + tb) >> SHIFT, alpha);
+            // Apply interior_row kernel (reused for columns via linearization).
+            // Write back with stride=w to scatter back to column positions.
+            if (vRadius <= 1) {
+                // Inline loop for small kernels (pointer increment avoids multiply).
+                RGB_T *dst = pixels + x;
+                if (applyAlpha) {
+                    for (int y = 0; y < h; ++y) {
+                        acc_t r, g, b;
+                        blur_detail::interior_row<vRadius, RGB_T, acc_t>::apply(
+                            pad, vRadius + y, r, g, b);
+                        *dst = P::make(static_cast<acc_t>(r >> vShift),
+                                       static_cast<acc_t>(g >> vShift),
+                                       static_cast<acc_t>(b >> vShift), alpha);
+                        dst += w;
+                    }
+                } else {
+                    for (int y = 0; y < h; ++y) {
+                        acc_t r, g, b;
+                        blur_detail::interior_row<vRadius, RGB_T, acc_t>::apply(
+                            pad, vRadius + y, r, g, b);
+                        *dst = P::make(static_cast<acc_t>(r >> vShift),
+                                       static_cast<acc_t>(g >> vShift),
+                                       static_cast<acc_t>(b >> vShift));
+                        dst += w;
+                    }
+                }
+            } else {
+                // Noinline call for large kernels (register pressure relief).
+                if (applyAlpha) {
+                    blur_detail::apply_pass_alpha<vRadius, RGB_T, acc_t>(
+                        pad, pixels + x, h, w, alpha);
+                } else {
+                    blur_detail::apply_pass<vRadius, RGB_T, acc_t>(
+                        pad, pixels + x, h, w);
+                }
             }
         }
     }

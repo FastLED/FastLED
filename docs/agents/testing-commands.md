@@ -220,6 +220,42 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 **Requirements:**
 - Install live-server: `npm install -g live-server`
 
+## AVR8JS Emulator (Local, No Docker)
+
+Run AVR firmware in the avr8js emulator locally using Node.js — no Docker needed.
+
+**One-time setup:**
+```bash
+cd ci/docker_utils/avr8js && npm install && cd -
+```
+
+**Workflow: Compile → Run**
+```bash
+# 1. Compile sketch for UNO (uses PlatformIO, may use Docker for compilation)
+bash compile uno --examples Blink --local
+
+# 2. Run hex in avr8js emulator (pure Node.js, no Docker)
+npx --prefix ci/docker_utils/avr8js tsx ci/docker_utils/avr8js/main.ts \
+  .build/pio/uno/.pio/build/uno/firmware.hex --timeout 5 --verbose
+```
+
+**Options:**
+- `--timeout <seconds>` — Simulated time limit (default: 30)
+- `--verbose` — Show execution stats (wall time, cycles, performance %)
+
+**Performance:** avr8js runs at ~140-180% of real 16MHz clock speed.
+
+**Output:** Serial (UART) output prints to stdout. The emulator checks for "Test loop" in output by default (exit code 1 if missing — safe to ignore for non-test sketches).
+
+**Supported boards:** uno (ATmega328P), nano_every (ATmega4809). ATtiny85/88 lack hardware UART so serial output won't work.
+
+**Hex file location:** `.build/pio/<board>/.pio/build/<board>/firmware.hex`
+
+**Files:**
+- `ci/docker_utils/avr8js/main.ts` — Entry point
+- `ci/docker_utils/avr8js/execute.ts` — AVR CPU emulator wrapper
+- `ci/docker_utils/avr8js/package.json` — Node dependencies (avr8js, tsx)
+
 ## QEMU Commands
 - `uv run ci/install-qemu.py` - Install QEMU for ESP32 emulation (standalone)
 - `uv run test.py --qemu esp32s3` - Run QEMU tests (installs QEMU automatically)

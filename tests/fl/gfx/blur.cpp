@@ -294,6 +294,13 @@ FL_TEST_CASE("blur benchmark") {
     fl::println("\n── Gaussian Blur Benchmark (SKIPSM) ──");
     fl::println("  (each iteration includes fill + blur)\n");
 
+    run_benchmark<1, 8, 8>("8x8 R1", ITERS);
+    run_benchmark<2, 8, 8>("8x8 R2", ITERS);
+    run_benchmark<3, 8, 8>("8x8 R3", ITERS);
+    run_benchmark<4, 8, 8>("8x8 R4", ITERS);
+
+    fl::println("");
+
     run_benchmark<1, 16, 16>("16x16 R1", ITERS);
     run_benchmark<2, 16, 16>("16x16 R2", ITERS);
     run_benchmark<3, 16, 16>("16x16 R3", ITERS);
