@@ -36,7 +36,7 @@ namespace fl {
 /// This controller uses the Silicon Labs ezWS2812 SPI driver to provide
 /// hardware-accelerated WS2812 control. It consumes one SPI peripheral.
 ///
-/// Each WS2812 bit is encoded as 8 SPI bits at 3.2MHz:
+/// Each WS2812 bit is encoded as 8 SPI bits at ~6.4MHz:
 /// - '1' bit: 0xFC (11111100) - long high pulse
 /// - '0' bit: 0x80 (10000000) - short high pulse
 ///
@@ -53,13 +53,13 @@ private:
     /// @brief Convert WS2812 bit to SPI signal for '1' bit
     /// @return SPI byte pattern for logical '1'
     FASTLED_FORCE_INLINE u8 spi_one() const {
-        return 0xFC; // 11111100 - long high pulse for '1'
+        return 0xF8; // 11111000 - ~0.78us high at 6.4MHz
     }
 
     /// @brief Convert WS2812 bit to SPI signal for '0' bit
     /// @return SPI byte pattern for logical '0'
     FASTLED_FORCE_INLINE u8 spi_zero() const {
-        return 0x80; // 10000000 - short high pulse for '0'
+        return 0xC0; // 11000000 - ~0.31us high at 6.4MHz
     }
 
     /// @brief Convert 8-bit color value to SPI bit pattern array
@@ -114,16 +114,20 @@ protected:
         // Pre-allocate SPI buffer for one pixel (3 colors × 8 bits = 24 SPI bytes)
         u8 spi_buffer[24];
 
+        // WS2812 requires a continuous stream; prevent long ISR gaps mid-frame.
+        noInterrupts();
+
         // Process all pixels directly via SPI
         while (pixels.has(1)) {
-            u8 r = pixels.loadAndScale0();
-            u8 g = pixels.loadAndScale1();
-            u8 b = pixels.loadAndScale2();
+            // loadAndScale* returns bytes in the RGB_ORDER output order
+            u8 c0 = pixels.loadAndScale0();
+            u8 c1 = pixels.loadAndScale1();
+            u8 c2 = pixels.loadAndScale2();
 
-            // Convert to SPI bit patterns (GRB order for WS2812)
-            colorToSPI(g, &spi_buffer[0]);  // Green first (8 SPI bytes)
-            colorToSPI(r, &spi_buffer[8]);  // Red second (8 SPI bytes)
-            colorToSPI(b, &spi_buffer[16]); // Blue third (8 SPI bytes)
+            // Convert to SPI bit patterns in output order
+            colorToSPI(c0, &spi_buffer[0]);  // Byte 0
+            colorToSPI(c1, &spi_buffer[8]);  // Byte 1
+            colorToSPI(c2, &spi_buffer[16]); // Byte 2
 
             // Send pixel data via SPI
             for (int j = 0; j < 24; j++) {
@@ -136,6 +140,8 @@ protected:
 
         // Complete transfer with reset pulse
         mDriver->end_transfer();
+
+        interrupts();
     }
 };
 

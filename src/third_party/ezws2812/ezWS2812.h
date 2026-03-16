@@ -58,17 +58,23 @@ private:
     uint16_t num_leds_;
     uint8_t brightness_;
     SPIClass* spi_;
+    // 8 SPI bits encode 1 WS2812 bit -> 8 * 1.25us = 10us at 0.125us per bit
+    // To hit ~1.25us per WS2812 bit, SPI should be ~6.4MHz (1/6.4MHz = 0.15625us)
+    static constexpr uint32_t kSpiClockHz = 6400000;
+    static constexpr uint16_t kResetTimeUs = 80;
+    static constexpr uint8_t kResetByte = 0x00;
+    static constexpr uint8_t kResetBytes = 32;
 
     /// @brief Convert color bit to SPI signal for '1' bit
     /// @return SPI byte pattern for logical '1'
     inline uint8_t one() const {
-        return 0xFC; // 11111100 - long high pulse for '1'
+        return 0xF8; // 11111000 - ~0.78us high at 6.4MHz
     }
 
     /// @brief Convert color bit to SPI signal for '0' bit
     /// @return SPI byte pattern for logical '0'
     inline uint8_t zero() const {
-        return 0x80; // 10000000 - short high pulse for '0'
+        return 0xC0; // 11000000 - ~0.31us high at 6.4MHz
     }
 
     /// @brief Convert color byte to SPI bit pattern
@@ -88,7 +94,7 @@ public:
     /// @brief Initialize SPI communication
     void begin() {
         spi_->begin();
-        spi_->beginTransaction(SPISettings(3200000, MSBFIRST, SPI_MODE0));
+        spi_->beginTransaction(SPISettings(kSpiClockHz, MSBFIRST, SPI_MODE0));
     }
 
     /// @brief End SPI communication
@@ -138,8 +144,12 @@ public:
     /// @brief Complete LED data transfer
     /// Sends reset signal to latch data into LEDs
     void end_transfer() {
-        // WS2812 reset time (>50µs low)
-        delayMicroseconds(300);
+        // Force MOSI low long enough to guarantee WS2812 reset/latch.
+        // Sending zero bytes ensures low even if the last data bit was high.
+        for (uint8_t i = 0; i < kResetBytes; i++) {
+            spi_->transfer(kResetByte);
+        }
+        delayMicroseconds(kResetTimeUs);
     }
 };
 
