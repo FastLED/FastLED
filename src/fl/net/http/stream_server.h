@@ -1,12 +1,16 @@
 #pragma once
 
 #include "fl/net/http/stream_transport.h"
-#include "fl/stl/asio/http/native_server.h"  // IWYU pragma: keep
-#include "fl/stl/asio/http/http_parser.h"
 #include "fl/stl/string.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/map.h"
 #include "fl/stl/vector.h"
+
+// NativeHttpServer requires native socket APIs (not available on embedded)
+#ifdef FASTLED_HAS_NETWORKING
+
+#include "fl/stl/asio/http/native_server.h"  // IWYU pragma: keep
+#include "fl/stl/asio/http/http_parser.h"
 
 namespace fl {
 namespace net {
@@ -151,3 +155,5 @@ private:
 }  // namespace http
 }  // namespace net
 }  // namespace fl
+
+#endif  // FASTLED_HAS_NETWORKING

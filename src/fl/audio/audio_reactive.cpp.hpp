@@ -59,14 +59,15 @@ void AudioReactive::begin(const AudioReactiveConfig& config) {
     mFrequencyBinMapper.configure(fbmConfig);
 
     // Compute pink noise compensation gains from bin centers.
-    // CQ bins span linearly from fmin to fmax (default: 90-14080 Hz).
+    // CQ bins are log-spaced from fmin to fmax (default: 90-14080 Hz).
     {
         const float fmin = FFT_Args::DefaultMinFrequency();
         const float fmax = FFT_Args::DefaultMaxFrequency();
+        const float logRatio = logf(fmax / fmin);
         float binCenters[16];
         for (int i = 0; i < 16; ++i) {
             float t = static_cast<float>(i) / 15.0f;
-            binCenters[i] = fmin + (fmax - fmin) * t;
+            binCenters[i] = fmin * expf(logRatio * t);
         }
         computePinkNoiseGains(binCenters, 16, mPinkNoiseGains);
         mPinkNoiseComputed = true;
@@ -256,12 +257,9 @@ void AudioReactive::mapFFTBinsToFrequencyChannels() {
         }
     }
 
-    // CQ bins span linearly from fmin to fmax (default: 90-14080 Hz)
-    const float fmin = FFT_Args::DefaultMinFrequency();
-    const float fmax = FFT_Args::DefaultMaxFrequency();
-    const float deltaF = (fmax - fmin) / 16.0f;
-    float dominantFreqStart = fmin + static_cast<float>(maxBin) * deltaF;
-    mCurrentData.dominantFrequency = dominantFreqStart + deltaF * 0.5f;
+    // CQ bins are log-spaced from fmin to fmax (default: 90-14080 Hz).
+    // Use the same log-spaced formula to find the dominant bin center frequency.
+    mCurrentData.dominantFrequency = mFFTBins.binToFreq(maxBin);
     mCurrentData.magnitude = maxMagnitude;
 }
 

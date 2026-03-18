@@ -10,7 +10,14 @@
       "SlashCommand(/git-historian wasm function names debug source-map --paths ci examples)",
       "SlashCommand(/git-historian emscripten -g profiling ASSERTIONS --paths ci examples)",
       "SlashCommand(/git-historian DWARF symbols demangle --paths ci)",
-      "Bash(gh issue view:*)"
+      "Bash(gh issue view:*)",
+      "Bash(grep:*)",
+      "Bash(bash test:*)",
+      "Bash(bash lint:*)",
+      "Bash(FL_AGENT_ALLOW_ALL_CMDS=1 grep -r \"fl_remote_loopback\\\\|remote/loopback\" .build/meson-quick/)",
+      "Bash(for i:*)",
+      "Bash(do bash:*)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []

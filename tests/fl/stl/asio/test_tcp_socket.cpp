@@ -3,6 +3,8 @@
 #include "fl/stl/asio/error_code.cpp.hpp"
 #include "fl/stl/asio/ip/tcp.h"
 #include "fl/stl/asio/ip/tcp.cpp.hpp"
+#include "fl/stl/thread.h"
+#include "fl/stl/chrono.h"
 
 #include "test.h"
 
@@ -103,12 +105,14 @@ FL_TEST_CASE("tcp::socket - Loopback connect and I/O") {
     FL_CHECK(client.is_open());
 
     // Server accepts (with retry loop for non-blocking socket)
+    // Sleep between retries to give the kernel time to complete the TCP handshake
     tcp::socket server_peer;
     for (int attempt = 0; attempt < 100; ++attempt) {
         ec = acc.accept(server_peer);
         if (ec.code != errc::would_block) {
             break;
         }
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(1));  // ok sleep for - blocking retry in test
     }
     FL_CHECK(ec.ok());
     FL_CHECK(server_peer.is_open());

@@ -1,6 +1,9 @@
 #pragma once
 
 #include "fl/net/http/stream_server.h"
+
+#ifdef FASTLED_HAS_NETWORKING
+
 #include "fl/stl/string.h"
 #include "fl/stl/stdint.h"
 #include "fl/system/log.h"
@@ -303,3 +306,5 @@ void HttpStreamServer::removeClientState(u32 clientId) {
 }  // namespace http
 }  // namespace net
 }  // namespace fl
+
+#endif  // FASTLED_HAS_NETWORKING

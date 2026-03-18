@@ -168,10 +168,15 @@ inline void blur2d(CRGB *leds, u8 width, u8 height, fract8 blur_amount,
                    const XYMap &xymap) {
     gfx::blur2d(leds, width, height, blur_amount, xymap);
 }
+// Suppress deprecated-declarations: this wrapper itself is deprecated, so
+// calling the deprecated gfx::blur2d below should not generate an extra warning.
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(deprecated-declarations)
 FASTLED_DEPRECATED("Use blur2d(..., const XYMap& xymap) instead")
 inline void blur2d(CRGB *leds, u8 width, u8 height, fract8 blur_amount) {
     gfx::blur2d(leds, width, height, blur_amount);
 }
+FL_DISABLE_WARNING_POP
 inline void blurRows(CRGB *leds, u8 width, u8 height, fract8 blur_amount,
                      const XYMap &xymap) {
     gfx::blurRows(leds, width, height, blur_amount, xymap);

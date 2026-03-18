@@ -3,6 +3,8 @@
 #include "fl/stl/asio/error_code.cpp.hpp"
 #include "fl/stl/asio/ip/tcp.h"
 #include "fl/stl/asio/ip/tcp.cpp.hpp"
+#include "fl/stl/thread.h"
+#include "fl/stl/chrono.h"
 
 #include "test.h"
 
@@ -94,6 +96,10 @@ FL_TEST_CASE("tcp::acceptor - Multiple clients") {
             if (ec.ok()) {
                 accepted2 = true;
             }
+        }
+        // Give the kernel time to complete the TCP handshake on loopback
+        if (!accepted1 || !accepted2) {
+            fl::this_thread::sleep_for(fl::chrono::milliseconds(1));  // ok sleep for - blocking retry in test
         }
     }
 

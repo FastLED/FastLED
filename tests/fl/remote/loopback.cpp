@@ -116,8 +116,10 @@ FL_TEST_CASE("Loopback: connect and sync RPC round-trip") {
     server_thread.join();
 
     FL_REQUIRE(got_response);
-    FL_CHECK_EQ(response["result"].as_int().value(), 12); // 5 + 7
-    FL_CHECK_EQ(response["id"].as_int().value(), 1);
+    if (got_response) {
+        FL_CHECK_EQ(response["result"].as_int().value(), 12); // 5 + 7
+        FL_CHECK_EQ(response["id"].as_int().value(), 1);
+    }
 
     // Cleanup
     client_transport->disconnect();
