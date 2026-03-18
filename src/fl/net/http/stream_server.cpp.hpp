@@ -3,6 +3,9 @@
 #include "fl/net/http/stream_server.h"
 #include "fl/stl/string.h"
 #include "fl/stl/stdint.h"
+
+#ifdef FASTLED_HAS_NETWORKING
+
 #include "fl/system/log.h"
 #include "fl/stl/cstdio.h"
 namespace fl {
@@ -303,3 +306,93 @@ void HttpStreamServer::removeClientState(u32 clientId) {
 }  // namespace http
 }  // namespace net
 }  // namespace fl
+
+#else  // !FASTLED_HAS_NETWORKING
+
+namespace fl {
+namespace net {
+namespace http {
+
+HttpStreamServer::HttpStreamServer(u16 port, u32 heartbeatIntervalMs)
+    : HttpStreamTransport("0.0.0.0", port, heartbeatIntervalMs)
+    , mPort(port)
+    , mLastProcessedClientId(0) {
+    mRecvBuffer.reserve(16384);
+}
+
+HttpStreamServer::~HttpStreamServer() {
+    disconnect();
+}
+
+bool HttpStreamServer::connect() {
+    return false;
+}
+
+void HttpStreamServer::disconnect() {
+    mClientStates.clear();
+    mConnection.onDisconnected();
+}
+
+bool HttpStreamServer::isConnected() const {
+    return false;
+}
+
+u16 HttpStreamServer::port() const {
+    return mPort;
+}
+
+void HttpStreamServer::acceptClients() {}
+
+size_t HttpStreamServer::getClientCount() const {
+    return 0;
+}
+
+void HttpStreamServer::disconnectClient(u32 clientId) {
+    (void)clientId;
+}
+
+fl::vector<u32> HttpStreamServer::getClientIds() const {
+    return fl::vector<u32>();
+}
+
+int HttpStreamServer::sendData(fl::span<const u8> data) {
+    (void)data;
+    return -1;
+}
+
+int HttpStreamServer::recvData(fl::span<u8> buffer) {
+    (void)buffer;
+    return -1;
+}
+
+void HttpStreamServer::triggerReconnect() {}
+
+bool HttpStreamServer::readHttpRequestHeader(u32 clientId) {
+    (void)clientId;
+    return false;
+}
+
+bool HttpStreamServer::sendHttpResponseHeader(u32 clientId) {
+    (void)clientId;
+    return false;
+}
+
+bool HttpStreamServer::processClientData(u32 clientId) {
+    (void)clientId;
+    return false;
+}
+
+HttpStreamServer::ClientState* HttpStreamServer::getOrCreateClientState(u32 clientId) {
+    (void)clientId;
+    return nullptr;
+}
+
+void HttpStreamServer::removeClientState(u32 clientId) {
+    (void)clientId;
+}
+
+}  // namespace http
+}  // namespace net
+}  // namespace fl
+
+#endif  // FASTLED_HAS_NETWORKING

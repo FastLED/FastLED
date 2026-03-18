@@ -66,7 +66,9 @@ private:
     bool readHttpResponseHeader();
 
     /// Native socket client
+#ifdef FASTLED_HAS_NETWORKING
     fl::unique_ptr<NativeHttpClient> mNativeClient;
+#endif
 
     /// Connection state
     bool mHttpHeaderSent;

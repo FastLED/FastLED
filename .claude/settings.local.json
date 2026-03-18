@@ -10,7 +10,11 @@
       "SlashCommand(/git-historian wasm function names debug source-map --paths ci examples)",
       "SlashCommand(/git-historian emscripten -g profiling ASSERTIONS --paths ci examples)",
       "SlashCommand(/git-historian DWARF symbols demangle --paths ci)",
-      "Bash(gh issue view:*)"
+      "Bash(gh issue view:*)",
+      "Bash(bash lint:*)",
+      "Bash(bash ci/lint-js-fast)",
+      "Bash(uv run:*)",
+      "Bash(ls .cache/js-tools/node_modules/.bin/eslint*)"
     ],
     "deny": [],
     "ask": []

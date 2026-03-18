@@ -17,8 +17,8 @@ trap 'if [ $? -ne 0 ]; then cd "$PROJECT_ROOT" && uv run python ci/js_lint_cache
 
 echo -e "${BLUE}FAST FastLED TypeScript Linting (ESLint + TypeScript Type Checking - FAST!)${NC}"
 
-# Check if ESLint is installed
-if [ ! -f ".cache/js-tools/node_modules/.bin/eslint.cmd" ]; then
+# Check if ESLint is installed (eslint on Unix, eslint.cmd on Windows)
+if [ ! -f ".cache/js-tools/node_modules/.bin/eslint" ] && [ ! -f ".cache/js-tools/node_modules/.bin/eslint.cmd" ]; then
     echo -e "${RED}ERROR: ESLint not found. Run: uv run ci/setup-js-linting-fast.py${NC}"
     exit 1
 fi
@@ -92,7 +92,11 @@ fi
 # (ESLint resolves parser modules relative to the config file location)
 cp "../../src/platforms/wasm/compiler/.eslintrc.cjs" ".eslintrc.cjs" 2>/dev/null || true
 
-if "./node_modules/.bin/eslint.cmd" --no-eslintrc --no-inline-config -c .eslintrc.cjs "${LINT_TARGETS[@]}"; then
+ESLINT_BIN="./node_modules/.bin/eslint"
+if [ -f "./node_modules/.bin/eslint.cmd" ]; then
+    ESLINT_BIN="./node_modules/.bin/eslint.cmd"
+fi
+if "$ESLINT_BIN" --no-eslintrc --no-inline-config -c .eslintrc.cjs "${LINT_TARGETS[@]}"; then
     echo -e "${GREEN}ESLint completed successfully${NC}"
 else
     echo -e "${RED}ERROR: ESLint failed${NC}"

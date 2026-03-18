@@ -133,7 +133,9 @@ private:
     void removeClientState(u32 clientId);
 
     /// Native socket server
+#ifdef FASTLED_HAS_NETWORKING
     fl::unique_ptr<NativeHttpServer> mNativeServer;
+#endif
 
     /// Server port
     u16 mPort;

@@ -3,6 +3,9 @@
 #include "fl/net/http/stream_client.h"
 #include "fl/stl/string.h"
 #include "fl/stl/stdint.h"
+
+#ifdef FASTLED_HAS_NETWORKING
+
 #include "fl/stl/chrono.h"
 #include "fl/stl/cstdio.h"
 #include "fl/stl/thread.h"
@@ -208,3 +211,61 @@ bool HttpStreamClient::readHttpResponseHeader() {
 }  // namespace http
 }  // namespace net
 }  // namespace fl
+
+#else  // !FASTLED_HAS_NETWORKING
+
+namespace fl {
+namespace net {
+namespace http {
+
+HttpStreamClient::HttpStreamClient(const fl::string& host, u16 port, u32 heartbeatIntervalMs)
+    : HttpStreamTransport(host, port, heartbeatIntervalMs)
+    , mHttpHeaderSent(false)
+    , mHttpHeaderReceived(false)
+    , mHost(host)
+    , mPort(port) {
+}
+
+HttpStreamClient::~HttpStreamClient() {
+    disconnect();
+}
+
+bool HttpStreamClient::connect() {
+    return false;
+}
+
+void HttpStreamClient::disconnect() {
+    mHttpHeaderSent = false;
+    mHttpHeaderReceived = false;
+    mConnection.onDisconnected();
+}
+
+bool HttpStreamClient::isConnected() const {
+    return false;
+}
+
+int HttpStreamClient::sendData(fl::span<const u8> data) {
+    (void)data;
+    return -1;
+}
+
+int HttpStreamClient::recvData(fl::span<u8> buffer) {
+    (void)buffer;
+    return -1;
+}
+
+void HttpStreamClient::triggerReconnect() {}
+
+bool HttpStreamClient::sendHttpRequestHeader() {
+    return false;
+}
+
+bool HttpStreamClient::readHttpResponseHeader() {
+    return false;
+}
+
+}  // namespace http
+}  // namespace net
+}  // namespace fl
+
+#endif  // FASTLED_HAS_NETWORKING
